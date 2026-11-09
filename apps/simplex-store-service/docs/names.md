@@ -83,7 +83,7 @@ How a request flows:
 7. Every transaction is sent through the sender: dry run, nonce, fees, EIP-1559 signature with the registrar key, a saved row, then broadcast. Receipts are followed every 4 s to the confirmation depth ([`Names/Sender.hs:107-131`](../src/StoreService/Names/Sender.hs#L107-L131), [`Names/Sender.hs:151-226`](../src/StoreService/Names/Sender.hs#L151-L226)).
 8. A link edit is submitted to the sender on its request's thread, and pending edits are settled by the record edits lane every 4 s ([`Names/Records.hs:156-263`](../src/StoreService/Names/Records.hs#L156-L263), [`Names/Records.hs:265-302`](../src/StoreService/Names/Records.hs#L265-L302)).
 9. Link profiles are read through the chat core's connect plan, and the link data through SMP servers ([`Names/Profiles.hs:269-274`](../src/StoreService/Names/Profiles.hs#L269-L274), [`Chat/Library/Internal.hs:1723-1726`](../../../src/Simplex/Chat/Library/Internal.hs#L1723-L1726)).
-10. Operators issue and revoke codes in the managed group while the service runs. In the console, a separate run of the same binary while the service is stopped, they issue and revoke codes and record refunds ([`Group.hs:263-300`](../src/StoreService/Group.hs#L263-L300), [`Main.hs:25-28`](../Main.hs#L25-L28), [`Service.hs:412-430`](../src/StoreService/Service.hs#L412-L430)).
+10. Operators issue and revoke codes in the managed group while the service runs. In the console, a separate run of the same binary while the service is stopped, they issue and revoke codes and record refunds ([`Group.hs:263-300`](../src/StoreService/Group.hs#L263-L300), [`Main.hs:25-28`](../Main.hs#L25-L28), [`Service.hs:419-437`](../src/StoreService/Service.hs#L419-L437)).
 11. One process runs per database: a PostgreSQL advisory lock is held on a connection of its own for the whole run ([`Store/Migrate.hs:46-58`](../src/StoreService/Store/Migrate.hs#L46-L58)).
 
 ---
@@ -92,7 +92,7 @@ How a request flows:
 
 | Part | Role | Source |
 |---|---|---|
-| Startup | `store_service.ini` is parsed, the database lock taken, and the node's chain id and the issuer key checked; then the chat core is started. In its callback the providers, the names environment and the web environment are built, the sites exported, the managed group resolved, and all lanes started together. Without `--service-config` only the chat side and the badge request lanes run. | [`Main.hs:15-28`](../Main.hs#L15-L28), [`Service.hs:280-370`](../src/StoreService/Service.hs#L280-L370) |
+| Startup | `store_service.ini` is parsed, the database lock taken, and the node's chain id and the issuer key checked; then the chat core is started. In its callback the providers, the names environment and the web environment are built, the managed group resolved, and all lanes started together. Without `--service-config` only the chat side and the badge request lanes run. | [`Main.hs:15-28`](../Main.hs#L15-L28), [`Service.hs:281-370`](../src/StoreService/Service.hs#L281-L370) |
 | Web API | Warp listeners on `[listener] host`: `badges_port` (8080) always, `names_port` (8081) with `[names]` and `serve_webapp = on`. `/api/*` and both webhooks are answered on every port. Per-client limits a minute: read 60, search 30, preview 20, code 10, records 10, create 5, find 5. At most 500 long polls are held at once, each up to 30 s. | [`Web/Server.hs:121-151`](../src/StoreService/Web/Server.hs#L121-L151), [`Web/Server.hs:562-585`](../src/StoreService/Web/Server.hs#L562-L585), [`Config.hs:505-514`](../src/StoreService/Config.hs#L505-L514), [`Web/Names.hs:28-51`](../src/StoreService/Web/Names.hs#L28-L51), [`Web/Http.hs:109-154`](../src/StoreService/Web/Http.hs#L109-L154) |
 | Order handlers | An order is placed in one of three ways: a paid invoice, a prepaid code, a spend of another order's balance. The owner's signature, the timestamp, the duration, the terms and an available name are checked, then the chain price for a paid or spent order and the balance for a spend. The order is written in one transaction, in which the same wallet's overdue orders for that name are closed. | [`Web/Names/Orders.hs:86-306`](../src/StoreService/Web/Names/Orders.hs#L86-L306), [`Names/Orders.hs:201-310`](../src/StoreService/Names/Orders.hs#L201-L310), [`Names/Balances.hs:79-106`](../src/StoreService/Names/Balances.hs#L79-L106) |
 | Registration and owner handlers | The registration view, held on its version; the reveal; Try again; find by the owner's signature; a move to another name. | [`Web/Names/Registration.hs:45-140`](../src/StoreService/Web/Names/Registration.hs#L45-L140), [`Web/Names/Owner.hs:44-152`](../src/StoreService/Web/Names/Owner.hs#L44-L152), [`Names/Reveal.hs:103-145`](../src/StoreService/Names/Reveal.hs#L103-L145), [`Names/View.hs:52-112`](../src/StoreService/Names/View.hs#L52-L112) |
@@ -103,10 +103,11 @@ How a request flows:
 | Record edits relay and lane | Owner-signed link edits, each relayed as one resolver transaction through the sender, within `record_edits_per_year` and 10 an hour per name. Pending edits are settled by the lane every 4 s. | [`Names/Records.hs:112-366`](../src/StoreService/Names/Records.hs#L112-L366), [`Web/Names/Records.hs:34-86`](../src/StoreService/Web/Names/Records.hs#L34-L86) |
 | Contracts reader and chain client | One JSON-RPC client to `[chain] rpc_url`, 10 s per call, redirects refused. Typed `eth_call` reads; the name policy address, the registrar constants and the commitment ages kept once read; terms texts fetched once per hash. | [`Names/Contracts.hs:137-379`](../src/StoreService/Names/Contracts.hs#L137-L379), [`Names/Chain.hs:112-305`](../src/StoreService/Names/Chain.hs#L112-L305) |
 | In-memory coordination | Waiters: invoice status and payments. Phases: registration versions. Locks: one writer at a time per label hash, prepaid code and balance. Read hints: up to 256 webhook reads queued for the poller. | [`Waiters.hs:14-91`](../src/StoreService/Waiters.hs#L14-L91), [`Names/Phases.hs:15-65`](../src/StoreService/Names/Phases.hs#L15-L65), [`Names/Turns.hs:3-69`](../src/StoreService/Names/Turns.hs#L3-L69), [`Poller.hs:88-108`](../src/StoreService/Poller.hs#L88-L108) |
-| Chat core | The SimpleX chat controller with the bot user: the bot address for badge requests, the managed group's messages, and connect plans for link profiles. Every chat event is read from `outputQ` by one reader. | [`Service.hs:293-313`](../src/StoreService/Service.hs#L293-L313), [`Service.hs:636-645`](../src/StoreService/Service.hs#L636-L645), [`Names/Profiles.hs:269-274`](../src/StoreService/Names/Profiles.hs#L269-L274) |
-| Badge request lanes | Badge requests on the bot address, present before this PR: three lanes, each answer sent as `APISendServiceResponse`. | [`Service.hs:572-657`](../src/StoreService/Service.hs#L572-L657) |
+| Chat core | The SimpleX chat controller with the bot user: the bot address for badge requests, the managed group's messages, and connect plans for link profiles. Every chat event is read from `outputQ` by one reader. | [`Service.hs:294-314`](../src/StoreService/Service.hs#L294-L314), [`Service.hs:643-652`](../src/StoreService/Service.hs#L643-L652), [`Names/Profiles.hs:269-274`](../src/StoreService/Names/Profiles.hs#L269-L274) |
+| Badge request lanes | Badge requests on the bot address, present before this PR: three lanes, each answer sent as `APISendServiceResponse`. | [`Service.hs:579-664`](../src/StoreService/Service.hs#L579-L664) |
 | Group lane | With `[group]`: one managed group. `/issue` and `/bulk` are taken from moderators, `/revoke` and name codes from admins. A name code command is refused once the name codes created in the last 24 hours, console ones included, would pass 100. | [`Group.hs:87-304`](../src/StoreService/Group.hs#L87-L304), [`Group/Command.hs:59-73`](../src/StoreService/Group/Command.hs#L59-L73), [`Group/Command.hs:216-220`](../src/StoreService/Group/Command.hs#L216-L220) |
-| Console | The same binary under `--run-cli`, while the service is stopped: the terminal chat and the badge request lanes only, with `//issue`, `//issue name`, `//revoke` and `//refund`. | [`Main.hs:25-28`](../Main.hs#L25-L28), [`Service.hs:381-506`](../src/StoreService/Service.hs#L381-L506) |
+| Console | The same binary under `--run-cli`, while the service is stopped: the terminal chat and the badge request lanes only, with `//issue`, `//issue name`, `//revoke` and `//refund`. | [`Main.hs:25-28`](../Main.hs#L25-L28), [`Service.hs:381-513`](../src/StoreService/Service.hs#L381-L513) |
+| Export run | The same binary under `--export-webapp`, before the service: the sites are written to `badges_export_dir` and `names_export_dir` and the process exits, without the chat core or the database. Compose runs it as `store-service-export`, the only service that mounts the exported folders, writable. | [`Main.hs:25-28`](../Main.hs#L25-L28), [`Service.hs:406-411`](../src/StoreService/Service.hs#L406-L411), [`compose.yml:29-44`](../../../scripts/store-service/compose.yml#L29-L44) |
 | PostgreSQL | One database (`BADGE_DB_CONN`) with the chat core's schema and the `sx_badge_service_` tables. Names tables: prepaid codes, registrations, balances, name invoices, late credits, record edits and their changes, transactions. Partial unique indexes admit one active order (`live = 1`) per commitment and per owner and label hash. | [`Store/Postgres/Migrations.hs:276-473`](../src/StoreService/Store/Postgres/Migrations.hs#L276-L473), [`compose.yml:16`](../../../scripts/store-service/compose.yml#L16) |
 | Names page | simplex.domains, in the submodule `apps/simplex-domains`, outside this checkout. `/api/*` is called on its own origin, and the owner's EIP-191 and EIP-712 signatures are sent from it. | [`.gitmodules:4-7`](../../../.gitmodules#L4-L7), [`Web/Names.hs:28-44`](../src/StoreService/Web/Names.hs#L28-L44) |
 | BTCPay | Bitcoin and Monero invoices through Greenfield: create, read, list, cancel (status `Invalid`), store rates; webhooks signed with `BTCPay-Sig`. | [`Providers/BTCPay.hs:267-367`](../src/StoreService/Providers/BTCPay.hs#L267-L367), [`Providers/BTCPay.hs:524-538`](../src/StoreService/Providers/BTCPay.hs#L524-L538), [`Providers/BTCPay.hs:555-578`](../src/StoreService/Providers/BTCPay.hs#L555-L578) |
@@ -145,7 +146,7 @@ Terms used in the diagrams:
 
 - A lock is held in the process: one request or lane at a time per name (its label hash), prepaid code or balance ([`Names/Turns.hs:3-69`](../src/StoreService/Names/Turns.hs#L3-L69)).
 - A read hint asks the poller to read one invoice at the provider before its next pass ([`Poller.hs:88-108`](../src/StoreService/Poller.hs#L88-L108)).
-- A lane is a thread that runs for the whole life of the process ([`Service.hs:301-313`](../src/StoreService/Service.hs#L301-L313), [`Service.hs:366-370`](../src/StoreService/Service.hs#L366-L370)).
+- A lane is a thread that runs for the whole life of the process ([`Service.hs:302-314`](../src/StoreService/Service.hs#L302-L314), [`Service.hs:366-370`](../src/StoreService/Service.hs#L366-L370)).
 - `ID` is a registration or invoice id, `SOURCE` the registration id of the order whose balance pays, `LABELHASH` the keccak256 of the label, `REFERENCE` an invoice id or a registration id. A signed order is `owner`, `labelHash`, `length`, `duration`, `commitment`, `sealed`, `terms`, `timestamp` and `signature` ([`Names/Orders.hs:150-169`](../src/StoreService/Names/Orders.hs#L150-L169)).
 
 ---
@@ -277,8 +278,8 @@ sequenceDiagram
 
 Notes:
 
-- Only the code's SHA-256 is stored, so a code not copied when shown cannot be recovered ([`Names/Codes.hs:147-159`](../src/StoreService/Names/Codes.hs#L147-L159)). `unpaid` name codes are refused in the console ([`Service.hs:535-543`](../src/StoreService/Service.hs#L535-L543)).
-- In the group, `/issue` is taken from moderators and above, a name code from admins. A name code command is refused once the name codes created in the last 24 hours, console ones included, would pass 100; the console has no cap ([`Group/Command.hs:59-73`](../src/StoreService/Group/Command.hs#L59-L73), [`Group.hs:289-294`](../src/StoreService/Group.hs#L289-L294), [`Service.hs:421-422`](../src/StoreService/Service.hs#L421-L422)).
+- Only the code's SHA-256 is stored, so a code not copied when shown cannot be recovered ([`Names/Codes.hs:147-159`](../src/StoreService/Names/Codes.hs#L147-L159)). `unpaid` name codes are refused in the console ([`Service.hs:542-550`](../src/StoreService/Service.hs#L542-L550)).
+- In the group, `/issue` is taken from moderators and above, a name code from admins. A name code command is refused once the name codes created in the last 24 hours, console ones included, would pass 100; the console has no cap ([`Group/Command.hs:59-73`](../src/StoreService/Group/Command.hs#L59-L73), [`Group.hs:289-294`](../src/StoreService/Group.hs#L289-L294), [`Service.hs:428-429`](../src/StoreService/Service.hs#L428-L429)).
 - A code order is checked for the timestamp, the duration, the terms and an available name; its years are the code's, 2 for a community name ([`Web/Names/Orders.hs:216-222`](../src/StoreService/Web/Names/Orders.hs#L216-L222), [`Names/Community.hs:54-59`](../src/StoreService/Names/Community.hs#L54-L59)).
 - The code is spent when the name is registered, released when the order is set `taken`, and kept for 30 days with a failed order for Try again, then released by the daily sweep ([`Names/Orders.hs:397-400`](../src/StoreService/Names/Orders.hs#L397-L400), [`Names/Worker.hs:361-365`](../src/StoreService/Names/Worker.hs#L361-L365), [`Names/Worker.hs:503-522`](../src/StoreService/Names/Worker.hs#L503-L522)).
 - A name code is withdrawn by `//revoke` unless it is spent; a code an order already holds stays usable by that order ([`Names/Codes.hs:162-173`](../src/StoreService/Names/Codes.hs#L162-L173), [`Names/Codes.hs:78-88`](../src/StoreService/Names/Codes.hs#L78-L88)).
@@ -513,7 +514,7 @@ sequenceDiagram
 
 Notes:
 
-- The refund must equal the whole balance, and a held balance is refused, overdue or not. `//refund` closes no holder: its answer asks support to start the service, whose poller closes an overdue holder 10 minutes after its expiry, then to run `//refund` again ([`Names/Balances.hs:40-65`](../src/StoreService/Names/Balances.hs#L40-L65), [`Names/Store.hs:1046-1056`](../src/StoreService/Names/Store.hs#L1046-L1056), [`Service.hs:498-506`](../src/StoreService/Service.hs#L498-L506)).
+- The refund must equal the whole balance, and a held balance is refused, overdue or not. `//refund` closes no holder: its answer asks support to start the service, whose poller closes an overdue holder 10 minutes after its expiry, then to run `//refund` again ([`Names/Balances.hs:40-65`](../src/StoreService/Names/Balances.hs#L40-L65), [`Names/Store.hs:1046-1056`](../src/StoreService/Names/Store.hs#L1046-L1056), [`Service.hs:505-513`](../src/StoreService/Service.hs#L505-L513)).
 - The provider interface offers create, read, cancel, list, rate and webhook verification, so the money is paid back by hand ([`Providers.hs:120-130`](../src/StoreService/Providers.hs#L120-L130)). The buyer's email to chat@simplex.chat is described in the README; the page code is in the submodule ([`README.md:1371-1411`](../README.md#L1371-L1411)).
 - The console starts only while the service is stopped, as the database lock is held by one process ([`Store/Migrate.hs:46-54`](../src/StoreService/Store/Migrate.hs#L46-L54)).
 
@@ -557,17 +558,20 @@ Notes:
 
 ### 3.12 Service start
 
-The production container starts one process, which checks its configuration, the database lock and the node, starts the chat core, then starts all lanes.
+Compose first runs the export container, which writes the sites and exits. The production container then starts one process, which checks its configuration, the database lock and the node, starts the chat core, then starts all lanes.
 
 ```mermaid
 sequenceDiagram
   participant O as Operator
+  participant X as Export run
   participant U as Startup
   participant D as PostgreSQL
   participant E as Ethereum node
   participant C as Chat core
   participant V as BTCPay
-  O->>U: docker compose up -d --build
+  O->>X: docker compose up -d --build
+  X->>X: store_service.ini parsed, sites written to the export folders, exit 0
+  X->>U: store-service started after the export run's exit 0
   U->>U: store_service.ini parsed in full
   U->>D: pg_try_advisory_lock, held for the run
   U->>E: eth_chainId equal to [chain] chain_id
@@ -578,14 +582,15 @@ sequenceDiagram
   U->>V: store payment methods read and logged
   U->>D: sender loads saved transactions without an outcome
   U->>E: name policy, community names and terms links read and logged
-  U->>U: sites exported, managed group found or created
+  U->>U: managed group found or created
   U->>U: all lanes run together: requests, group, web, poller, names
 ```
 
 Notes:
 
 - The container runs `simplex-store-service -d BADGE_DB_CONN --create-schema --yes-migrate --service-config /etc/simplex-store-service/store_service.ini` ([`compose.yml:14-20`](../../../scripts/store-service/compose.yml#L14-L20)).
-- The process exits on a config error, a held lock, a chain id mismatch, an issuer key mismatch, a failed migration or a missing site build; compose restarts it on failure up to 5 times ([`Main.hs:22-28`](../Main.hs#L22-L28), [`Service.hs:280-285`](../src/StoreService/Service.hs#L280-L285), [`compose.yml:10`](../../../scripts/store-service/compose.yml#L10)). A node that does not answer `eth_chainId` is only warned of, unless `dev_keys` are set ([`Service.hs:169-181`](../src/StoreService/Service.hs#L169-L181)).
-- The lanes are started in the chat core's callback, after `postStartHook`, so after the bot address exists, unless `--no-address` is passed ([`Chat/Core.hs:97-106`](../../../src/Simplex/Chat/Core.hs#L97-L106), [`Service.hs:301-313`](../src/StoreService/Service.hs#L301-L313), [`Service.hs:636-645`](../src/StoreService/Service.hs#L636-L645)).
+- The process exits on a config error, a held lock, a chain id mismatch, an issuer key mismatch, a failed migration or a missing site build; compose restarts it on failure up to 5 times ([`Main.hs:22-28`](../Main.hs#L22-L28), [`Service.hs:281-286`](../src/StoreService/Service.hs#L281-L286), [`compose.yml:10`](../../../scripts/store-service/compose.yml#L10)). A node that does not answer `eth_chainId` is only warned of, unless `dev_keys` are set ([`Service.hs:170-182`](../src/StoreService/Service.hs#L170-L182)).
+- The lanes are started in the chat core's callback, after `postStartHook`, so after the bot address exists, unless `--no-address` is passed ([`Chat/Core.hs:97-106`](../../../src/Simplex/Chat/Core.hs#L97-L106), [`Service.hs:302-314`](../src/StoreService/Service.hs#L302-L314), [`Service.hs:643-652`](../src/StoreService/Service.hs#L643-L652)).
 - The names lanes are the sender, the record edits lane, the names worker and the code sweep; all lanes are started together with `raceAny_` from simplexmq ([`Service.hs:366-370`](../src/StoreService/Service.hs#L366-L370)).
 - Under `--run-cli` the binary runs the terminal chat and the badge request lanes only ([`Service.hs:381-404`](../src/StoreService/Service.hs#L381-L404)).
+- Under `--export-webapp` the binary checks the builds, writes the sites and exits, before the database lock; `store-service` waits for its exit 0 ([`Service.hs:406-411`](../src/StoreService/Service.hs#L406-L411), [`compose.yml:29-30`](../../../scripts/store-service/compose.yml#L29-L30)).

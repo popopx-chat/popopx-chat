@@ -1,6 +1,8 @@
 # Store service deployment
 
-- `compose.yml`: the service, built from `Dockerfile`, with `./config` mounted read-only.
+- `compose.yml`: the service, built from `Dockerfile`, with `./config` mounted read-only, and
+  `store-service-export`, which writes the sites to `./badges` and `./names` and exits before the
+  service starts.
 - `compose.dev.yml`: adds a local chain and database to `compose.yml`, for development.
 - `Dockerfile`, `Dockerfile.dockerignore`: the image, built from the repository root.
 - `store_service.ini.example`: the template of `config/store_service.ini`.

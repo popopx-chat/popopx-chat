@@ -19,6 +19,7 @@ module StoreService.Service
     readConfigOrExit,
     storeService,
     storeServiceCLI,
+    storeServiceExport,
     storeServiceResponse,
     RequestLane (..),
     requestLane,
@@ -322,7 +323,6 @@ storeService opts serviceCfg baseCfg env = do
       hints <- newReadHints
       namesEnv <- forM (names sc) (startNames cc turns ws providers)
       webEnv <- newWebEnv chatStore sc ws hints providers namesEnv
-      exportWebapp sc
       pollerEnv <- newPollerEnv chatStore ws (nePhases <$> namesEnv) hints providers (poll sc)
       nameLanes <- maybe (pure []) namesLanes namesEnv
       pure $ [runWebListeners webEnv, runPoller pollerEnv] <> nameLanes
@@ -402,6 +402,13 @@ storeServiceCLI opts serviceCfg = do
     [ simplexChatCLI' cfg {chatHooks} (mkChatOpts opts) Nothing,
       processQueuedRequests key Nothing env
     ]
+
+storeServiceExport :: Maybe ServiceConfig -> IO ()
+storeServiceExport = \case
+  Nothing -> orExit $ Left "--export-webapp needs --service-config"
+  Just sc -> do
+    checkSiteDirs (listener sc) >>= orExit
+    exportWebapp sc
 
 -- | The terminal prints each request, and requests carry codes and store receipts, which are bearer secrets.
 shownServiceRequest :: J.Object -> J.Object

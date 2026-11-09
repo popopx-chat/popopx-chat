@@ -42,11 +42,13 @@ where
 
 import StoreService.Catalog (catalogCurrency, defaultCatalog)
 import StoreService.Config (BTCPayConfig (..), ListenerConfig (..), NamesConfig, PollConfig (..), ServiceConfig (..), SpeedPolicy (..), StripeConfig (..), defaultLogLevel)
+import StoreService.Options (RunMode (..), StoreServiceOpts (runMode), storeServiceOpts)
 import StoreService.Orders (cancelOpenInvoice, codeLifetime, expireOverdue, settleOrder)
 import StoreService.Poller
 import StoreService.Providers
 import StoreService.Providers.BTCPay (btcpayProvider, listPageSize, maxListPages)
 import StoreService.Providers.Stripe (stripeProvider)
+import StoreService.Service (storeServiceExport)
 import StoreService.Store (CreditedPurchase (..), FundingCredit (..), KeyPurchase (..), KeyRedemption (..), ManagedGroup (..), NewCodePurchase (..), NewStorePurchase (..), PaymentRebind (..), PurchaseSubscription (..), RevokeResult (..), appendLedgerPlan, createCodePurchase, createStorePurchase, getCodePurchaseForKey, getLedgerEntries, getLedgerTip, getManagedGroup, getMovedFromExpiry, getPurchaseByKey, getPurchaseSubscription, getStorePaymentCredit, insertBadgeCode, insertManagedGroup, insertSubscriptionCharge, markOwnerBootstrapped, rebindStorePayment, revokeCode)
 import StoreService.StoreReceipts (StoreCharge (..))
 import StoreService.Store.Invoices
@@ -99,6 +101,7 @@ import Network.HTTP.Types (Header, HeaderName, hCacheControl, hContentType)
 import Network.HTTP.Types.Status (statusCode)
 import Network.Wai (Application)
 import qualified Network.Wai.Handler.Warp as Warp
+import qualified Options.Applicative as O
 import Simplex.Chat.Badges (BadgeCredential (..), BadgeInfo (..), BadgeMasterKey (..), BadgeType (..))
 import Simplex.Chat.Badges.Ledger (addMonths, debitEntry, emptyEntry, grantEntry, issueEntry)
 import Simplex.Chat.StoreService (BadgeOffer (..), BadgePrice (..), StatementCreditType (..), StatementDebitType (..), StatementEntry (..), SubscriptionState (..))
@@ -112,7 +115,8 @@ import qualified Simplex.Messaging.Crypto as C
 import Simplex.Messaging.Crypto.BBS (BBSSignature (..))
 import Simplex.Messaging.Encoding.String (textDecode, textEncode)
 import Simplex.Messaging.Util (safeDecodeUtf8, tshow)
-import System.Directory (createDirectoryIfMissing, createFileLink, doesFileExist, listDirectory)
+import System.Directory (createDirectoryIfMissing, createFileLink, doesDirectoryExist, doesFileExist, listDirectory)
+import System.Exit (ExitCode (..))
 import System.FilePath ((</>))
 import System.IO (IOMode (..), hFlush, stderr, withFile)
 import System.IO.Unsafe (unsafePerformIO)
@@ -236,6 +240,8 @@ badgeWebTests = do
     it "serves the built web app, exactly as it is shipped" testServesBuiltWebApp
     it "serves no static routes when serve_webapp is off, and still answers the API" testServeWebappOff
     it "exports the injected webapp to a folder for a proxy to serve" testExportWebapp
+    it "parses --export-webapp as a run of its own, refused beside --run-cli" testRunModes
+    it "exports from the run of --export-webapp only with --service-config and an exported build that is there" testExportRun
     it "refuses every traversal spelling, by canonicalisation" testTraversalRefused
     it "answers the read fields, with cryptoCurrency lowercase" testInvoiceView
     it "names the confirmations settlement needs, from the speed policy" testViewNamesTheConfirmationsSettlementNeeds
@@ -1280,6 +1286,29 @@ testExportWebapp = do
     idx <- LB.readFile (outDir </> "index.html")
     LB.toStrict idx `shouldSatisfy` BC.isInfixOf "content=\"pk_test_injected\""
     LB.readFile (outDir </> "sw.js") >>= (`shouldBe` workerJs)
+    LB.readFile (outDir </> "assets" </> buildHash </> "main.js") >>= (`shouldBe` assetJs)
+
+testRunModes :: IO ()
+testRunModes = do
+  let parsed args = runMode <$> O.getParseResult (O.execParserPure O.defaultPrefs (O.info (storeServiceOpts "tests/tmp" "store_service") mempty) args)
+  parsed [] `shouldBe` Just RunService
+  parsed ["--run-cli"] `shouldBe` Just RunCLI
+  parsed ["--export-webapp", "--service-config", "store_service.ini"] `shouldBe` Just ExportWebapp
+  parsed ["--run-cli", "--export-webapp"] `shouldBe` Nothing
+
+testExportRun :: IO ()
+testExportRun = do
+  storeServiceExport Nothing `shouldThrow` (== ExitFailure 1)
+  createDirectoryIfMissing True "tests/tmp"
+  withTempDirectory "tests/tmp" "badge-export-run" $ \root -> do
+    staticDir <- prepareStaticDir root
+    let outDir = root </> "out"
+        base = testServiceConfig staticDir False
+        exportedFrom dir = base {listener = (listener base) {lServeWebapp = False, lBadgesStaticDir = dir, lBadgesExportDir = Just outDir}}
+    storeServiceExport (Just $ exportedFrom (root </> "absent")) `shouldThrow` (== ExitFailure 1)
+    doesDirectoryExist outDir `shouldReturn` False
+    storeServiceExport (Just $ exportedFrom staticDir)
+    LB.readFile (outDir </> "index.html") >>= (`shouldBe` shellHtml)
     LB.readFile (outDir </> "assets" </> buildHash </> "main.js") >>= (`shouldBe` assetJs)
 
 -- | The names shell with its publishable key and its mode.
