@@ -23,6 +23,6 @@ main = do
     serviceCfg <- traverse readConfigOrExit serviceConfigFile
     mapM_ (setLogLevel . serviceLogLevel) serviceCfg
     case runMode of
-      RunService -> withInstanceLock opts $ newServiceState >>= storeService opts serviceCfg terminalChatConfig
-      RunCLI -> withInstanceLock opts $ storeServiceCLI opts serviceCfg
+      RunService -> welcomeChat opts >> withInstanceLock opts (newServiceState >>= storeService opts serviceCfg terminalChatConfig)
+      RunCLI -> welcomeChat opts >> withInstanceLock opts (storeServiceCLI opts serviceCfg)
       ExportWebapp -> storeServiceExport serviceCfg

@@ -9,6 +9,7 @@ module StoreService.Service
     newServiceState,
     configureStoreVerifier,
     welcomeGetOpts,
+    welcomeChat,
     trustDevKeys,
     checkNodeChain,
     redactPassword,
@@ -146,13 +147,15 @@ newServiceState = do
 welcomeGetOpts :: IO StoreServiceOpts
 welcomeGetOpts = do
   appDir <- getAppUserDataDirectory "simplex"
-  opts@StoreServiceOpts {coreOptions, testing, serviceName, runMode} <- getStoreServiceOpts appDir "simplex_badge_service"
-  unless testing $ do
-    putStrLn $ "SimpleX Store Service v" ++ versionNumber
-    unless (runMode == ExportWebapp) $ do
-      putStrLn $ "db: " <> redactPassword (dbString $ dbOptions coreOptions)
-      putStrLn $ "Service name: " ++ T.unpack serviceName
+  opts@StoreServiceOpts {testing} <- getStoreServiceOpts appDir "simplex_badge_service"
+  unless testing $ putStrLn $ "SimpleX Store Service v" ++ versionNumber
   pure opts
+
+welcomeChat :: StoreServiceOpts -> IO ()
+welcomeChat StoreServiceOpts {coreOptions, testing, serviceName} =
+  unless testing $ do
+    putStrLn $ "db: " <> redactPassword (dbString $ dbOptions coreOptions)
+    putStrLn $ "Service name: " ++ T.unpack serviceName
 
 -- | The ini's dev_keys, trusted beside the clients' keys; the config accepts them only on the local chain.
 trustDevKeys :: Maybe ServiceConfig -> ChatConfig -> IO (Either String ChatConfig)
