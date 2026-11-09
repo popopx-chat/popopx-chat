@@ -53,7 +53,7 @@ import StoreService.Names.Abi (hex)
 import StoreService.Names.Balances (RefundRecord (..), RefundRefusal (..), recordRefund)
 import StoreService.Names.Chain (newChainClient, nodeChainId)
 import StoreService.Names.Codes (issueNameCode, revokeNameCode)
-import StoreService.Names.Contracts (Contracts, Terms (..), communityName, namePolicy, termsLinkAllowed, termsLinks, termsOf)
+import StoreService.Names.Contracts (Contracts, Terms (..), communityName, namePolicy, newContracts, termsLinkAllowed, termsLinks, termsOf)
 import StoreService.Names.Env (NamesEnv (..), newNamesEnv)
 import StoreService.Names.Orders (ordersEnv)
 import StoreService.Names.Phases (RegistrationId (..))
@@ -62,7 +62,7 @@ import StoreService.Names.Sender (runSender)
 import StoreService.Names.Store (Balance (..), BalanceHold (..), BalanceLink (..), LateCredit (..), RegistrationPayment (..), balanceByReference, balanceChain, methodText)
 import StoreService.Names.Turns (Turns, newTurns)
 import StoreService.Names.View (addressText)
-import StoreService.Names.Worker (newWorker, runCodeSweep, runWorkers)
+import StoreService.Names.Worker (CloseRefusal (..), Closed (..), closeRegistration, newWorker, runCodeSweep, runWorkers)
 import StoreService.Options
 import StoreService.Poller (expiryGrace, newPollerEnv, newReadHints, runPoller)
 import StoreService.Providers (Provider)
@@ -286,6 +286,7 @@ storeService opts serviceCfg baseCfg env = do
   waiters <- newWaiters
   -- The hooks' //revoke takes a prepaid code's turn, so the turns exist before the chat starts.
   turns <- newTurns
+  consoleContracts <- mapM newConsoleContracts (serviceCfg >>= names)
   requestEnv <- configureStoreVerifier serviceCfg env
   let groupCfg = serviceCfg >>= \ServiceConfig {group} -> group
       trackerQ_ = groupEventQ env <$ groupCfg
@@ -307,7 +308,7 @@ storeService opts serviceCfg baseCfg env = do
         defaultChatHooks
           { preStartHook = Just $ badgePreStartHook opts,
             postStartHook = Just $ badgePostStartHook opts env,
-            preCmdHook = Just $ badgeCmdHook turns
+            preCmdHook = Just $ badgeCmdHook turns consoleContracts
           }
   -- The reader runs from the start and must not block, since outputQ carries every chat event and a full queue stalls the core.
   simplexChatCore cfg {chatHooks} (mkChatOpts opts) $ \_ cc -> raceAny_ [readEvents cc, startLanes cc]
@@ -386,6 +387,7 @@ storeServiceCLI opts serviceCfg = do
   env <- newServiceState >>= configureStoreVerifier serviceCfg
   -- This mode runs no names lanes, so only its own //revoke takes these turns.
   turns <- newTurns
+  consoleContracts <- mapM newConsoleContracts (serviceCfg >>= names)
   let eventHook _cc = \case
         Right (CEvtServiceRequest u reqId sigKey reqData) -> do
           atomically $ writeTQueue (serviceRequestQ env) (u, reqId, sigKey, reqData)
@@ -395,7 +397,7 @@ storeServiceCLI opts serviceCfg = do
         defaultChatHooks
           { preStartHook = Just $ badgePreStartHook opts,
             postStartHook = Just $ badgePostStartHook opts env,
-            preCmdHook = Just $ badgeCmdHook turns,
+            preCmdHook = Just $ badgeCmdHook turns consoleContracts,
             eventHook = Just eventHook
           }
   raceAny_
@@ -409,13 +411,13 @@ shownServiceRequest reqData = case KM.lookup "request" reqData of
   Just (J.Object cmd) | Just t <- KM.lookup "type" cmd -> KM.singleton "request" $ J.object ["type" J..= t]
   _ -> KM.empty
 
-badgeCmdHook :: Turns -> ChatController -> ChatCommand -> IO (Either (Either ChatError ChatResponse) ChatCommand)
-badgeCmdHook turns cc = \case
-  CustomChatCommand cmd -> Left <$> runBadgeCmd turns cc cmd
+badgeCmdHook :: Turns -> Maybe Contracts -> ChatController -> ChatCommand -> IO (Either (Either ChatError ChatResponse) ChatCommand)
+badgeCmdHook turns contracts_ cc = \case
+  CustomChatCommand cmd -> Left <$> runBadgeCmd turns contracts_ cc cmd
   cmd -> pure $ Right cmd
 
-runBadgeCmd :: Turns -> ChatController -> ByteString -> IO (Either ChatError ChatResponse)
-runBadgeCmd turns cc cmd
+runBadgeCmd :: Turns -> Maybe Contracts -> ChatController -> ByteString -> IO (Either ChatError ChatResponse)
+runBadgeCmd turns contracts_ cc cmd
   | Right issueOpts <- A.parseOnly issueCmdP cmd =
       issuedReply formatBadgeCode <$> issueBadgeCode cc issueOpts
   | Right (len, years, paymentStatus) <- A.parseOnly issueNameCmdP cmd =
@@ -423,11 +425,12 @@ runBadgeCmd turns cc cmd
   | Right code <- A.parseOnly revokeCmdP cmd = textReply <$> revokeWithTracker cc code
   | Right code <- A.parseOnly revokeNameCmdP cmd = textReply <$> revokeNameCode turns cc code
   | Right (ref, cents_) <- A.parseOnly refundCmdP cmd = textReply <$> maybe (showRefund cc ref) (refundBalanceCmd turns cc ref) cents_
+  | Right ref <- A.parseOnly closeCmdP cmd = textReply <$> maybe (pure $ Left "Names are not enabled on this service.") (\ct -> closeOrderCmd turns ct cc ref) contracts_
   | otherwise =
       pure $ chatCmdError $
         "Usage: //issue supporter|legend|investor [months 1-" <> show maxMonths <> "] [paid|unpaid|free], //issue name <length "
           <> show minNameLength <> "-" <> show maxNameLength <> "> [years " <> show minNameYears <> "-" <> show maxNameYears
-          <> "] [paid|free], //revoke <code>, or //refund <reference> [<cents>]"
+          <> "] [paid|free], //revoke <code>, //refund <reference> [<cents>], or //close <reference>"
   where
     issuedReply :: (c -> T.Text) -> Either String c -> Either ChatError ChatResponse
     issuedReply format = \case
@@ -495,9 +498,38 @@ refundBalanceCmd turns ChatController {chatStore} ref cents = do
       RefundAmount amount -> "the balance is " <> dollars amount <> " now, not " <> dollars cents
       RefundHeld hold -> heldText hold
 
+closeCmdP :: A.Parser T.Text
+closeCmdP = "close " *> (safeDecodeUtf8 <$> A.takeWhile1 (not . isSpace)) <* (A.skipSpace *> A.endOfInput)
+
+newConsoleContracts :: NamesConfig -> IO Contracts
+newConsoleContracts NamesConfig {nTLD, nChain} = C.newRandom >>= (`newChainClient` nChain) >>= newContracts nTLD
+
+closeOrderCmd :: Turns -> Contracts -> ChatController -> T.Text -> IO (Either T.Text T.Text)
+closeOrderCmd turns ct ChatController {chatStore} ref =
+  ((Right <$> closeRegistration chatStore ct turns getCurrentTime ref) `catchOwn` (pure . Left)) >>= \case
+    Right (CLRefunded failedAt RefundRecord {rdRegistration = RegistrationId rid, rdCents, rdChain}) -> do
+      logNote $ "names: closed order " <> rid <> " and recorded a refund of " <> tshow rdCents <> " cents"
+      pure $ Right $
+        "Closed order " <> rid <> maybe "" (\t -> ", failed at " <> fmtTime t <> ",") failedAt <> " as taken and recorded a refund of " <> dollars rdCents
+          <> ". Check at the provider that it was not refunded by hand before; if not, refund it now, by: " <> chainText rdChain <> "."
+    Right (CLRegistered (RegistrationId rid)) -> do
+      logNote $ "names: order " <> rid <> " set registered by //close, as its register went through"
+      pure $ Left $ "Nothing refunded: the register of order " <> rid <> " went through, so the order is registered now."
+    Right (CLRefused refusal) -> pure $ Left $ "Nothing recorded: " <> refusalText refusal <> "."
+    Left e -> Left "The order could not be closed." <$ logError ("names: closing an order failed: " <> tshow e)
+  where
+    refusalText = \case
+      CFNoOrder -> "no order has the reference " <> ref
+      CFNotFailedPaid -> "the order of " <> ref <> " is not a failed order paid by invoice or balance"
+      CFUnread -> "the chain could not be read; run //close again"
+      CFChanged -> "the order of " <> ref <> " changed meanwhile; run //close again"
+      CFWriteRefused _ -> "the order of " <> ref <> " could not be set taken; run //close again"
+      CFHeld hold -> heldText hold
+      CFBalanceChanged -> "the balance of the order of " <> ref <> " changed meanwhile; run //close again"
+
 heldText :: BalanceHold -> T.Text
 heldText BalanceHold {bhHolder = RegistrationId holder, bhUntil, bhOverdue, bhFunded}
-  | bhOverdue = heldBy <> "its invoice expired at " <> fmtTime bhUntil <> "; start the service so the poller closes that order, " <> tshow graceMinutes <> " minutes after the expiry at the earliest, then stop it and run //refund again"
+  | bhOverdue = heldBy <> "its invoice expired at " <> fmtTime bhUntil <> "; start the service so the poller closes that order, " <> tshow graceMinutes <> " minutes after the expiry at the earliest, then stop it and run the command again"
   | bhFunded = heldBy <> "whose invoice holds money; it holds until that payment settles or the invoice closes; run the command again then"
   | otherwise = heldBy <> "its invoice open until " <> fmtTime bhUntil <> "; run the command again then"
   where
