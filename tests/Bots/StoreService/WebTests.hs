@@ -281,7 +281,7 @@ badgeWebTests = do
     it "listens on the badges port alone without the names site" testOneListenerWithoutTheNamesSite
     it "serves a names asset with its type" testServesANamesAsset
     it "keeps every traversal spelling on the names port inside the names build" testNamesTraversalRefused
-    it "refuses a build folder that is not there, only where it is served or exported" testSiteDirsMustExist
+    it "refuses a build folder that is not there, in the service only where it is served and in the export run only where it is exported" testSiteDirsMustExist
   describe "store service settlement" $ do
     it "settles an open invoice: paid, a settled payment row, and the code" testSettlesAnOpenInvoice
     it "settles an expired invoice, because late settlement is routine" testLateSettlementIsLegal
@@ -1499,15 +1499,22 @@ testSiteDirsMustExist = do
     let absent = root </> "absent"
         lc = listener (testServiceConfig staticDir False)
         missing site dir = Left ("listener." <> site <> "_static_dir = " <> dir <> " is not a directory; set it to the " <> site <> " build, since the default is the Docker image's path")
-    checkSiteDirs lc `shouldReturn` Right ()
-    checkSiteDirs lc {lNamesStaticDir = Just namesDir, lNamesPort = Just 8081} `shouldReturn` Right ()
-    checkSiteDirs lc {lBadgesStaticDir = absent} `shouldReturn` missing "badges" absent
-    checkSiteDirs lc {lBadgesStaticDir = absent, lServeWebapp = False} `shouldReturn` Right ()
-    checkSiteDirs lc {lBadgesStaticDir = absent, lServeWebapp = False, lBadgesExportDir = Just (root </> "out")} `shouldReturn` missing "badges" absent
-    checkSiteDirs lc {lNamesStaticDir = Just absent, lNamesPort = Just 8081} `shouldReturn` missing "names" absent
-    checkSiteDirs lc {lServeWebapp = False, lNamesStaticDir = Just absent} `shouldReturn` Right ()
-    checkSiteDirs lc {lServeWebapp = False, lNamesStaticDir = Just absent, lNamesExportDir = Just (root </> "names-out")} `shouldReturn` missing "names" absent
-    checkSiteDirs lc {lBadgesStaticDir = root </> "secret.txt"} `shouldReturn` missing "badges" (root </> "secret.txt")
+        served = checkSiteDirs . servedSites
+        exported = checkSiteDirs . exportedSites
+        badgesExported = lc {lBadgesStaticDir = absent, lServeWebapp = False, lBadgesExportDir = Just (root </> "out")}
+        namesExported = lc {lServeWebapp = False, lNamesStaticDir = Just absent, lNamesExportDir = Just (root </> "names-out")}
+    served lc `shouldReturn` Right ()
+    served lc {lNamesStaticDir = Just namesDir, lNamesPort = Just 8081} `shouldReturn` Right ()
+    served lc {lBadgesStaticDir = absent} `shouldReturn` missing "badges" absent
+    exported lc {lBadgesStaticDir = absent} `shouldReturn` Right ()
+    served badgesExported `shouldReturn` Right ()
+    exported badgesExported `shouldReturn` missing "badges" absent
+    served lc {lNamesStaticDir = Just absent, lNamesPort = Just 8081} `shouldReturn` missing "names" absent
+    exported lc {lNamesStaticDir = Just absent, lNamesPort = Just 8081} `shouldReturn` Right ()
+    served lc {lServeWebapp = False, lNamesStaticDir = Just absent} `shouldReturn` Right ()
+    served namesExported `shouldReturn` Right ()
+    exported namesExported `shouldReturn` missing "names" absent
+    served lc {lBadgesStaticDir = root </> "secret.txt"} `shouldReturn` missing "badges" (root </> "secret.txt")
 
 type WebClient = (Manager, String)
 

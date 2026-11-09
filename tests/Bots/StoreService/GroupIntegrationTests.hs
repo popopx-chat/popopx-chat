@@ -108,7 +108,7 @@ badgeGroupIntegrationTests = do
   it "drops the old group's trackers when it creates a new group" testReplacedGroupDropsTrackers
   it "stops rather than create a second group when the group lookup fails" testGroupLookupFailureStops
   it "stops the service's lanes when its runner is cancelled" testCancelStopsLanes
-  it "writes nothing to badges_export_dir, which only --export-webapp writes" testServiceExportsNothing
+  it "writes nothing to badges_export_dir, which only --export-webapp writes, and says so at start" testServiceExportsNothing
   it "issues on a privileged member's command, ignores a plain member's" testRoleGatedIssue
   it "ignores a command from a privileged member blocked for all" testBlockedMemberCommandIgnored
   it "ignores a command sent in a member support scope" testSupportScopeIgnored
@@ -843,10 +843,12 @@ testServiceExportsNothing :: HasCallStack => TestParams -> IO ()
 testServiceExportsNothing ps@TestParams {tmpPath} = do
   svc <- prepareGroupService ps
   let exportDir = tmpPath </> "badges_export"
-  (t, cc, _, port) <- startGroupService svc {gsListener = ["badges_export_dir = " <> T.pack exportDir]} Nothing
-  flip finally (stopGroupService t cc) $ do
-    pollUntilTrue (listening port)
-    doesDirectoryExist exportDir `shouldReturn` False
+  logs <- capturingStderr $ do
+    (t, cc, _, port) <- startGroupService svc {gsListener = ["badges_export_dir = " <> T.pack exportDir]} Nothing
+    flip finally (stopGroupService t cc) $ do
+      pollUntilTrue (listening port)
+      doesDirectoryExist exportDir `shouldReturn` False
+  logs `shouldSatisfy` T.isInfixOf "this run writes no site to badges_export_dir or names_export_dir; --export-webapp writes them"
 
 listening :: Int -> IO Bool
 listening port =

@@ -78,7 +78,7 @@ import StoreService.StoreReceipts.Google (PlayVerifier (..), playStoreVerifier)
 import StoreService.StoreReceipts.Mock (newMockStoreVerifier)
 import StoreService.Waiters (Waiters, newWaiters)
 import StoreService.Web.Http (Bucket, takeFrom)
-import StoreService.Web.Server (checkSiteDirs, exportWebapp, newWebEnv, runWebListeners)
+import StoreService.Web.Server (checkSiteDirs, exportWebapp, exportedSites, newWebEnv, runWebListeners, servedSites)
 import Control.Applicative (optional)
 import Control.Concurrent.STM
 import Control.Logger.Simple (logError, logNote, logWarn)
@@ -146,11 +146,12 @@ newServiceState = do
 welcomeGetOpts :: IO StoreServiceOpts
 welcomeGetOpts = do
   appDir <- getAppUserDataDirectory "simplex"
-  opts@StoreServiceOpts {coreOptions, testing, serviceName} <- getStoreServiceOpts appDir "simplex_badge_service"
+  opts@StoreServiceOpts {coreOptions, testing, serviceName, runMode} <- getStoreServiceOpts appDir "simplex_badge_service"
   unless testing $ do
     putStrLn $ "SimpleX Store Service v" ++ versionNumber
-    putStrLn $ "db: " <> redactPassword (dbString $ dbOptions coreOptions)
-    putStrLn $ "Service name: " ++ T.unpack serviceName
+    unless (runMode == ExportWebapp) $ do
+      putStrLn $ "db: " <> redactPassword (dbString $ dbOptions coreOptions)
+      putStrLn $ "Service name: " ++ T.unpack serviceName
   pure opts
 
 -- | The ini's dev_keys, trusted beside the clients' keys; the config accepts them only on the local chain.
@@ -280,7 +281,10 @@ configureStoreVerifier serviceCfg env@ServiceState {serviceCC, storeVerifier = v
 
 storeService :: StoreServiceOpts -> Maybe ServiceConfig -> ChatConfig -> ServiceState -> IO ()
 storeService opts serviceCfg baseCfg env = do
-  forM_ serviceCfg $ \sc -> checkSiteDirs (listener sc) >>= orExit
+  forM_ (listener <$> serviceCfg) $ \lc -> do
+    checkSiteDirs (servedSites lc) >>= orExit
+    unless (null $ exportedSites lc) $
+      logNote "store service: this run writes no site to badges_export_dir or names_export_dir; --export-webapp writes them"
   cfg <- requireDevKeys serviceCfg baseCfg
   key <- requireIssuerKey opts serviceCfg cfg
   orExit $ checkUnverifiedReceipts serviceCfg baseCfg key
@@ -407,7 +411,7 @@ storeServiceExport :: Maybe ServiceConfig -> IO ()
 storeServiceExport = \case
   Nothing -> orExit $ Left "--export-webapp needs --service-config"
   Just sc -> do
-    checkSiteDirs (listener sc) >>= orExit
+    checkSiteDirs (exportedSites $ listener sc) >>= orExit
     exportWebapp sc
 
 -- | The terminal prints each request, and requests carry codes and store receipts, which are bearer secrets.
