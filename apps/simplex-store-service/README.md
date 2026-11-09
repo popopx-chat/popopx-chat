@@ -550,14 +550,26 @@ The export run, compose's `store-service-export`, is the image with `--export-we
 network. It alone mounts `./badges` and `./names`, writable: it empties them, writes the sites and
 exits. `store-service` mounts neither folder and starts once the export run exits with 0.
 
-Each run reads the ini when it starts, so after any edit of the ini run
-`docker compose up -d --force-recreate`. It stops the service, runs the export again, and starts
-the service only once the export exits with 0, leaving it stopped otherwise. Other commands leave
-the pages and the service on different versions of the ini:
+Each run reads the ini when it starts. So where the ini sets `badges_export_dir` or
+`names_export_dir`, apply any edit of the ini with:
+
+```
+docker compose stop store-service
+docker compose start
+```
+
+The start runs the export again and starts the service only once the export exits with 0, leaving
+it stopped otherwise; both containers and their logs are kept.
+`docker compose up -d --force-recreate` orders them the same way, but replaces both containers, and
+their logs with them. Other commands leave the pages and the service on different versions of the
+ini:
 
 - `docker compose up -d` runs the export again and keeps the running service;
 - `docker compose restart store-service` restarts the service alone;
 - `docker compose restart` restarts both at once, so the service starts even when the export fails.
+
+Where the ini sets neither, as in the dev setup, the service serves the sites itself and
+`docker compose restart store-service` applies an edit.
 
 Each `docker compose up -d` and `docker compose start` runs the export again, which empties the
 served folders for a moment. Outside compose, run the binary with `--export-webapp` and the same
@@ -931,8 +943,8 @@ who hold them before anyone can pay. It is `off` by default. While it is on:
   view, `find`, the reveal, Try again, another name and record edits work as before. Webhooks and the
   poller still settle the invoices already open, and badges sell as before.
 
-The setting is read at startup and by the export run, so switching it is an edit of the ini and
-`docker compose up -d --force-recreate`, with the same build (see [Deployment](#deployment)). Codes
+The setting is read at startup and by the export run, so switching it is an edit of the ini, applied
+as [Deployment](#deployment) says, with the same build. Codes
 for investors come from the group (needs `[group]`, see
 [From the group](#from-the-group)) or from `//issue name` in `--run-cli` (see
 [From the command line](#from-the-command-line)).
