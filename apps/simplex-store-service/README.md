@@ -547,11 +547,21 @@ service account key when `[apple]` and `[google]` are configured. The folder mus
 `docker compose up`: compose refuses to start rather than create it empty.
 
 The export run, compose's `store-service-export`, is the image with `--export-webapp` and no
-network. It alone mounts `./badges` and `./names`, writable, and exits; `store-service` starts once
-it exits with 0 and mounts neither folder. The sites are written only by that run, so after an edit
-of the ini run `docker compose restart`, which runs the export again and restarts the service;
-`docker compose restart store-service` restarts the service alone. Outside compose, run the binary
-with `--export-webapp` and the same `--service-config` before the service.
+network. It alone mounts `./badges` and `./names`, writable: it empties them, writes the sites and
+exits. `store-service` mounts neither folder and starts once the export run exits with 0.
+
+Each run reads the ini when it starts, so after any edit of the ini run
+`docker compose up -d --force-recreate`. It stops the service, runs the export again, and starts
+the service only once the export exits with 0, leaving it stopped otherwise. Other commands leave
+the pages and the service on different versions of the ini:
+
+- `docker compose up -d` runs the export again and keeps the running service;
+- `docker compose restart store-service` restarts the service alone;
+- `docker compose restart` restarts both at once, so the service starts even when the export fails.
+
+Each `docker compose up -d` and `docker compose start` runs the export again, which empties the
+served folders for a moment. Outside compose, run the binary with `--export-webapp` and the same
+`--service-config` before the service.
 
 On PostgreSQL the service holds an advisory lock on its database for as long as it runs, so a second
 process on the same database, `--run-cli` included, stops at start with `another store service holds
@@ -639,8 +649,10 @@ The names site is on when, and only when, the ini has `[names]`. Its `[listener]
   beside `badges_port` (by default 8080), which serves the badges site. The two must differ.
 
 The service refuses to start with any of these keys but no `[names]`, and with `names_port` and
-`serve_webapp = off`. It and `--export-webapp` also refuse to start when a build the ini serves or
-exports is not a directory, naming the setting, so a local run that keeps a default path stops there.
+`serve_webapp = off`. It also refuses to start when a build it serves is not a directory, and
+`--export-webapp` when a build it exports is not, naming the setting, so a local run that keeps a
+default path stops there. With `badges_export_dir` or `names_export_dir` set, the service logs at
+start that it writes neither folder.
 
 With `serve_webapp = on` (all in one), the service listens on both ports, and each serves only its
 own site: every path outside `/api/` and `/webhooks/` is a file of that site, `/` and `/index.html`
@@ -683,7 +695,7 @@ service and run its console against the dev database:
 
 ```
 docker compose stop store-service
-docker compose run --rm store-service -d postgresql://simplex@127.0.0.1:5433/store_service --run-cli --service-config /etc/simplex-store-service/store_service.ini
+docker compose run --rm --no-deps store-service -d postgresql://simplex@127.0.0.1:5433/store_service --run-cli --service-config /etc/simplex-store-service/store_service.ini
 ```
 
 There, `//issue name 6` prints a code for one name of 6 letters or more (see
@@ -921,7 +933,8 @@ who hold them before anyone can pay. It is `off` by default. While it is on:
   poller still settle the invoices already open, and badges sell as before.
 
 The setting is read at startup and by the export run, so switching it is an edit of the ini and
-`docker compose restart`, with the same build (see [Deployment](#deployment)). Codes for investors come from the group (needs `[group]`, see
+`docker compose up -d --force-recreate`, with the same build (see [Deployment](#deployment)). Codes
+for investors come from the group (needs `[group]`, see
 [From the group](#from-the-group)) or from `//issue name` in `--run-cli` (see
 [From the command line](#from-the-command-line)).
 

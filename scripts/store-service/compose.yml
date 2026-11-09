@@ -32,6 +32,7 @@ services:
 
   store-service-export:
     image: simplex-store-service:latest
+    pull_policy: never
     user: "${USER_UID:-1000}:${USER_GID:-1000}"
     network_mode: none
     command:
