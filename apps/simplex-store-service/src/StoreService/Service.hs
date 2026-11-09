@@ -281,10 +281,7 @@ configureStoreVerifier serviceCfg env@ServiceState {serviceCC, storeVerifier = v
 
 storeService :: StoreServiceOpts -> Maybe ServiceConfig -> ChatConfig -> ServiceState -> IO ()
 storeService opts serviceCfg baseCfg env = do
-  forM_ (listener <$> serviceCfg) $ \lc -> do
-    checkSiteDirs (servedSites lc) >>= orExit
-    unless (null $ exportedSites lc) $
-      logNote "store service: this run writes no site to badges_export_dir or names_export_dir; --export-webapp writes them"
+  forM_ serviceCfg $ \sc -> checkSiteDirs (servedSites $ listener sc) >>= orExit
   cfg <- requireDevKeys serviceCfg baseCfg
   key <- requireIssuerKey opts serviceCfg cfg
   orExit $ checkUnverifiedReceipts serviceCfg baseCfg key
