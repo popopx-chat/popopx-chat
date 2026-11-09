@@ -9,11 +9,11 @@ badges_port = 8080
 ; Set to on for an all-in-one deployment where this service serves the sites itself, the names
 ; site on names_port (default 8081), which also answers the API and the webhooks.
 serve_webapp = off
-; the badges site is written here at boot with the publishable key injected; compose bind-mounts it
-; to a host path Caddy serves. Unset it when serve_webapp = on.
+; the badges site is written here by --export-webapp with the publishable key injected; compose's
+; store-service-export bind-mounts it to ./badges, which Caddy serves. Unset it when serve_webapp = on.
 badges_export_dir = /srv/badges-export
-; the names site (simplex.domains), with [names] only: the folder it is exported to, which compose
-; bind-mounts to ./names for Caddy
+; the names site (simplex.domains), with [names] only: the folder --export-webapp writes it to, which
+; compose's store-service-export bind-mounts to ./names for Caddy
 ;names_export_dir = /srv/names-export
 ; on because Caddy proxies /api and /webhooks to this service; without it the rate limiter keys on
 ; Caddy's address and shares one bucket across all callers

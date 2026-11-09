@@ -14,6 +14,8 @@ module StoreService.Web.Server
     webSettings,
     runWebListeners,
     checkSiteDirs,
+    servedSites,
+    exportedSites,
   )
 where
 
@@ -584,16 +586,20 @@ runWebListeners env = do
   where
     lc = listenerConfig env
 
--- | Each build that is served or exported must be a directory, or the service would serve nothing or fail its export.
-checkSiteDirs :: ListenerConfig -> IO (Either String ())
-checkSiteDirs ListenerConfig {lServeWebapp, lBadgesStaticDir, lBadgesExportDir, lNamesStaticDir, lNamesExportDir, lNamesPort} =
-  filterM (fmap not . doesDirectoryExist . snd) used <&> \case
+-- | Each site's build must be a directory, or the service would serve nothing or the export run would fail.
+checkSiteDirs :: [(String, FilePath)] -> IO (Either String ())
+checkSiteDirs sites =
+  filterM (fmap not . doesDirectoryExist . snd) sites <&> \case
     (site, dir) : _ -> Left ("listener." <> site <> "_static_dir = " <> dir <> " is not a directory; set it to the " <> site <> " build, since the default is the Docker image's path")
     [] -> Right ()
-  where
-    used =
-      [("badges", lBadgesStaticDir) | lServeWebapp || isJust lBadgesExportDir]
-        <> [("names", dir) | Just dir <- [lNamesStaticDir], isJust lNamesPort || isJust lNamesExportDir]
+
+servedSites :: ListenerConfig -> [(String, FilePath)]
+servedSites ListenerConfig {lServeWebapp, lBadgesStaticDir, lNamesStaticDir, lNamesPort} =
+  [("badges", lBadgesStaticDir) | lServeWebapp] <> [("names", dir) | Just dir <- [lNamesStaticDir], isJust lNamesPort]
+
+exportedSites :: ListenerConfig -> [(String, FilePath)]
+exportedSites ListenerConfig {lBadgesStaticDir, lBadgesExportDir, lNamesStaticDir, lNamesExportDir} =
+  [("badges", lBadgesStaticDir) | isJust lBadgesExportDir] <> [("names", dir) | Just dir <- [lNamesStaticDir], isJust lNamesExportDir]
 
 warnIfHeaderTrustIsExposed :: ListenerConfig -> IO ()
 warnIfHeaderTrustIsExposed ListenerConfig {lHost, lTrustForwardedFor} =

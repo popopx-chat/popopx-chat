@@ -19,12 +19,27 @@ services:
       - "--service-config"
       - "/etc/simplex-store-service/store_service.ini"
     volumes:
-      - type: bind
+      - &config
+        type: bind
         source: ./config
         target: /etc/simplex-store-service
         read_only: true
         bind:
           create_host_path: false
+    depends_on:
+      store-service-export: { condition: service_completed_successfully }
+    stop_grace_period: 10s
+
+  store-service-export:
+    image: simplex-store-service:latest
+    pull_policy: never
+    user: "${USER_UID:-1000}:${USER_GID:-1000}"
+    network_mode: none
+    command:
+      - "--export-webapp"
+      - "--service-config"
+      - "/etc/simplex-store-service/store_service.ini"
+    volumes:
+      - *config
       - ./badges:/srv/badges-export
       - ./names:/srv/names-export
-    stop_grace_period: 10s

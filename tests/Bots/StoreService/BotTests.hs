@@ -345,7 +345,7 @@ mkStoreServiceOpts ps secretKey =
       serviceName = badgeBotName,
       clientService = True,
       noAddress = False,
-      runCLI = False,
+      runMode = RunService,
       serviceConfigFile = Nothing,
       issuerKey = Right (Just BadgeIssuerKey {keyIdx = testIssuerKeyIdx, secretKey}),
       testing = True

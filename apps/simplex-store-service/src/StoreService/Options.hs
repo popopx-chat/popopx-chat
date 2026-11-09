@@ -5,6 +5,7 @@
 
 module StoreService.Options
   ( StoreServiceOpts (..),
+    RunMode (..),
     getStoreServiceOpts,
     storeServiceOpts,
     mkChatOpts,
@@ -24,11 +25,14 @@ data StoreServiceOpts = StoreServiceOpts
     serviceName :: T.Text,
     clientService :: Bool,
     noAddress :: Bool,
-    runCLI :: Bool,
+    runMode :: RunMode,
     serviceConfigFile :: Maybe FilePath,
     issuerKey :: Either String (Maybe BadgeIssuerKey),
     testing :: Bool
   }
+
+data RunMode = RunService | RunCLI | ExportWebapp
+  deriving (Eq, Show)
 
 storeServiceOpts :: FilePath -> FilePath -> Parser StoreServiceOpts
 storeServiceOpts appDir defaultDbName = do
@@ -50,11 +54,10 @@ storeServiceOpts appDir defaultDbName = do
       ( long "no-address"
           <> help "skip checking and creating service address"
       )
-  runCLI <-
-    switch
-      ( long "run-cli"
-          <> help "Run store service as CLI"
-      )
+  runMode <-
+    flag' RunCLI (long "run-cli" <> help "Run store service as CLI")
+      <|> flag' ExportWebapp (long "export-webapp" <> help "Write the sites to badges_export_dir and names_export_dir of --service-config, then exit")
+      <|> pure RunService
   serviceConfigFile <-
     optional
       ( strOption
@@ -85,7 +88,7 @@ storeServiceOpts appDir defaultDbName = do
         serviceName = T.pack serviceName,
         clientService,
         noAddress,
-        runCLI,
+        runMode,
         serviceConfigFile,
         issuerKey = case (issuerKeyIdx, issuerSecret) of
           (Just idx, Just secret) -> Right (Just (BadgeIssuerKey idx secret))

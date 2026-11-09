@@ -9,6 +9,7 @@ module StoreService.Service
     newServiceState,
     configureStoreVerifier,
     welcomeGetOpts,
+    welcomeChat,
     trustDevKeys,
     checkNodeChain,
     redactPassword,
@@ -19,6 +20,7 @@ module StoreService.Service
     readConfigOrExit,
     storeService,
     storeServiceCLI,
+    storeServiceExport,
     storeServiceResponse,
     RequestLane (..),
     requestLane,
@@ -77,7 +79,7 @@ import StoreService.StoreReceipts.Google (PlayVerifier (..), playStoreVerifier)
 import StoreService.StoreReceipts.Mock (newMockStoreVerifier)
 import StoreService.Waiters (Waiters, newWaiters)
 import StoreService.Web.Http (Bucket, takeFrom)
-import StoreService.Web.Server (checkSiteDirs, exportWebapp, newWebEnv, runWebListeners)
+import StoreService.Web.Server (checkSiteDirs, exportWebapp, exportedSites, newWebEnv, runWebListeners, servedSites)
 import Control.Applicative (optional)
 import Control.Concurrent.STM
 import Control.Logger.Simple (logError, logNote, logWarn)
@@ -145,12 +147,15 @@ newServiceState = do
 welcomeGetOpts :: IO StoreServiceOpts
 welcomeGetOpts = do
   appDir <- getAppUserDataDirectory "simplex"
-  opts@StoreServiceOpts {coreOptions, testing, serviceName} <- getStoreServiceOpts appDir "simplex_badge_service"
+  opts@StoreServiceOpts {testing} <- getStoreServiceOpts appDir "simplex_badge_service"
+  unless testing $ putStrLn $ "SimpleX Store Service v" ++ versionNumber
+  pure opts
+
+welcomeChat :: StoreServiceOpts -> IO ()
+welcomeChat StoreServiceOpts {coreOptions, testing, serviceName} =
   unless testing $ do
-    putStrLn $ "SimpleX Store Service v" ++ versionNumber
     putStrLn $ "db: " <> redactPassword (dbString $ dbOptions coreOptions)
     putStrLn $ "Service name: " ++ T.unpack serviceName
-  pure opts
 
 -- | The ini's dev_keys, trusted beside the clients' keys; the config accepts them only on the local chain.
 trustDevKeys :: Maybe ServiceConfig -> ChatConfig -> IO (Either String ChatConfig)
@@ -279,7 +284,7 @@ configureStoreVerifier serviceCfg env@ServiceState {serviceCC, storeVerifier = v
 
 storeService :: StoreServiceOpts -> Maybe ServiceConfig -> ChatConfig -> ServiceState -> IO ()
 storeService opts serviceCfg baseCfg env = do
-  forM_ serviceCfg $ \sc -> checkSiteDirs (listener sc) >>= orExit
+  forM_ serviceCfg $ \sc -> checkSiteDirs (servedSites $ listener sc) >>= orExit
   cfg <- requireDevKeys serviceCfg baseCfg
   key <- requireIssuerKey opts serviceCfg cfg
   orExit $ checkUnverifiedReceipts serviceCfg baseCfg key
@@ -322,7 +327,6 @@ storeService opts serviceCfg baseCfg env = do
       hints <- newReadHints
       namesEnv <- forM (names sc) (startNames cc turns ws providers)
       webEnv <- newWebEnv chatStore sc ws hints providers namesEnv
-      exportWebapp sc
       pollerEnv <- newPollerEnv chatStore ws (nePhases <$> namesEnv) hints providers (poll sc)
       nameLanes <- maybe (pure []) namesLanes namesEnv
       pure $ [runWebListeners webEnv, runPoller pollerEnv] <> nameLanes
@@ -402,6 +406,13 @@ storeServiceCLI opts serviceCfg = do
     [ simplexChatCLI' cfg {chatHooks} (mkChatOpts opts) Nothing,
       processQueuedRequests key Nothing env
     ]
+
+storeServiceExport :: Maybe ServiceConfig -> IO ()
+storeServiceExport = \case
+  Nothing -> orExit $ Left "--export-webapp needs --service-config"
+  Just sc -> do
+    checkSiteDirs (exportedSites $ listener sc) >>= orExit
+    exportWebapp sc
 
 -- | The terminal prints each request, and requests carry codes and store receipts, which are bearer secrets.
 shownServiceRequest :: J.Object -> J.Object

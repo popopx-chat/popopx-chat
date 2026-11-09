@@ -42,11 +42,13 @@ where
 
 import StoreService.Catalog (catalogCurrency, defaultCatalog)
 import StoreService.Config (BTCPayConfig (..), ListenerConfig (..), NamesConfig, PollConfig (..), ServiceConfig (..), SpeedPolicy (..), StripeConfig (..), defaultLogLevel)
+import StoreService.Options (RunMode (..), StoreServiceOpts (runMode), storeServiceOpts)
 import StoreService.Orders (cancelOpenInvoice, codeLifetime, expireOverdue, settleOrder)
 import StoreService.Poller
 import StoreService.Providers
 import StoreService.Providers.BTCPay (btcpayProvider, listPageSize, maxListPages)
 import StoreService.Providers.Stripe (stripeProvider)
+import StoreService.Service (storeServiceExport)
 import StoreService.Store (CreditedPurchase (..), FundingCredit (..), KeyPurchase (..), KeyRedemption (..), ManagedGroup (..), NewCodePurchase (..), NewStorePurchase (..), PaymentRebind (..), PurchaseSubscription (..), RevokeResult (..), appendLedgerPlan, createCodePurchase, createStorePurchase, getCodePurchaseForKey, getLedgerEntries, getLedgerTip, getManagedGroup, getMovedFromExpiry, getPurchaseByKey, getPurchaseSubscription, getStorePaymentCredit, insertBadgeCode, insertManagedGroup, insertSubscriptionCharge, markOwnerBootstrapped, rebindStorePayment, revokeCode)
 import StoreService.StoreReceipts (StoreCharge (..))
 import StoreService.Store.Invoices
@@ -99,6 +101,7 @@ import Network.HTTP.Types (Header, HeaderName, hCacheControl, hContentType)
 import Network.HTTP.Types.Status (statusCode)
 import Network.Wai (Application)
 import qualified Network.Wai.Handler.Warp as Warp
+import qualified Options.Applicative as O
 import Simplex.Chat.Badges (BadgeCredential (..), BadgeInfo (..), BadgeMasterKey (..), BadgeType (..))
 import Simplex.Chat.Badges.Ledger (addMonths, debitEntry, emptyEntry, grantEntry, issueEntry)
 import Simplex.Chat.StoreService (BadgeOffer (..), BadgePrice (..), StatementCreditType (..), StatementDebitType (..), StatementEntry (..), SubscriptionState (..))
@@ -112,7 +115,8 @@ import qualified Simplex.Messaging.Crypto as C
 import Simplex.Messaging.Crypto.BBS (BBSSignature (..))
 import Simplex.Messaging.Encoding.String (textDecode, textEncode)
 import Simplex.Messaging.Util (safeDecodeUtf8, tshow)
-import System.Directory (createDirectoryIfMissing, createFileLink, doesFileExist, listDirectory)
+import System.Directory (createDirectoryIfMissing, createFileLink, doesDirectoryExist, doesFileExist, listDirectory)
+import System.Exit (ExitCode (..))
 import System.FilePath ((</>))
 import System.IO (IOMode (..), hFlush, stderr, withFile)
 import System.IO.Unsafe (unsafePerformIO)
@@ -236,6 +240,8 @@ badgeWebTests = do
     it "serves the built web app, exactly as it is shipped" testServesBuiltWebApp
     it "serves no static routes when serve_webapp is off, and still answers the API" testServeWebappOff
     it "exports the injected webapp to a folder for a proxy to serve" testExportWebapp
+    it "parses --export-webapp as a run of its own, refused beside --run-cli" testRunModes
+    it "exports from the run of --export-webapp only with --service-config and an exported build that is there" testExportRun
     it "refuses every traversal spelling, by canonicalisation" testTraversalRefused
     it "answers the read fields, with cryptoCurrency lowercase" testInvoiceView
     it "names the confirmations settlement needs, from the speed policy" testViewNamesTheConfirmationsSettlementNeeds
@@ -275,7 +281,7 @@ badgeWebTests = do
     it "listens on the badges port alone without the names site" testOneListenerWithoutTheNamesSite
     it "serves a names asset with its type" testServesANamesAsset
     it "keeps every traversal spelling on the names port inside the names build" testNamesTraversalRefused
-    it "refuses a build folder that is not there, only where it is served or exported" testSiteDirsMustExist
+    it "refuses a build folder that is not there, in the service only where it is served and in the export run only where it is exported" testSiteDirsMustExist
   describe "store service settlement" $ do
     it "settles an open invoice: paid, a settled payment row, and the code" testSettlesAnOpenInvoice
     it "settles an expired invoice, because late settlement is routine" testLateSettlementIsLegal
@@ -1282,6 +1288,29 @@ testExportWebapp = do
     LB.readFile (outDir </> "sw.js") >>= (`shouldBe` workerJs)
     LB.readFile (outDir </> "assets" </> buildHash </> "main.js") >>= (`shouldBe` assetJs)
 
+testRunModes :: IO ()
+testRunModes = do
+  let parsed args = runMode <$> O.getParseResult (O.execParserPure O.defaultPrefs (O.info (storeServiceOpts "tests/tmp" "store_service") mempty) args)
+  parsed [] `shouldBe` Just RunService
+  parsed ["--run-cli"] `shouldBe` Just RunCLI
+  parsed ["--export-webapp", "--service-config", "store_service.ini"] `shouldBe` Just ExportWebapp
+  parsed ["--run-cli", "--export-webapp"] `shouldBe` Nothing
+
+testExportRun :: IO ()
+testExportRun = do
+  storeServiceExport Nothing `shouldThrow` (== ExitFailure 1)
+  createDirectoryIfMissing True "tests/tmp"
+  withTempDirectory "tests/tmp" "badge-export-run" $ \root -> do
+    staticDir <- prepareStaticDir root
+    let outDir = root </> "out"
+        base = testServiceConfig staticDir False
+        exportedFrom dir = base {listener = (listener base) {lServeWebapp = False, lBadgesStaticDir = dir, lBadgesExportDir = Just outDir}}
+    storeServiceExport (Just $ exportedFrom (root </> "absent")) `shouldThrow` (== ExitFailure 1)
+    doesDirectoryExist outDir `shouldReturn` False
+    storeServiceExport (Just $ exportedFrom staticDir)
+    LB.readFile (outDir </> "index.html") >>= (`shouldBe` shellHtml)
+    LB.readFile (outDir </> "assets" </> buildHash </> "main.js") >>= (`shouldBe` assetJs)
+
 -- | The names shell with its publishable key and its mode.
 namesShellAs :: LB.ByteString -> LB.ByteString -> LB.ByteString
 namesShellAs key mode = "<!doctype html><title>simplex.domains</title><meta name=\"stripe-publishable-key\" content=\"" <> key <> "\">" <> namesModeMeta mode
@@ -1470,15 +1499,22 @@ testSiteDirsMustExist = do
     let absent = root </> "absent"
         lc = listener (testServiceConfig staticDir False)
         missing site dir = Left ("listener." <> site <> "_static_dir = " <> dir <> " is not a directory; set it to the " <> site <> " build, since the default is the Docker image's path")
-    checkSiteDirs lc `shouldReturn` Right ()
-    checkSiteDirs lc {lNamesStaticDir = Just namesDir, lNamesPort = Just 8081} `shouldReturn` Right ()
-    checkSiteDirs lc {lBadgesStaticDir = absent} `shouldReturn` missing "badges" absent
-    checkSiteDirs lc {lBadgesStaticDir = absent, lServeWebapp = False} `shouldReturn` Right ()
-    checkSiteDirs lc {lBadgesStaticDir = absent, lServeWebapp = False, lBadgesExportDir = Just (root </> "out")} `shouldReturn` missing "badges" absent
-    checkSiteDirs lc {lNamesStaticDir = Just absent, lNamesPort = Just 8081} `shouldReturn` missing "names" absent
-    checkSiteDirs lc {lServeWebapp = False, lNamesStaticDir = Just absent} `shouldReturn` Right ()
-    checkSiteDirs lc {lServeWebapp = False, lNamesStaticDir = Just absent, lNamesExportDir = Just (root </> "names-out")} `shouldReturn` missing "names" absent
-    checkSiteDirs lc {lBadgesStaticDir = root </> "secret.txt"} `shouldReturn` missing "badges" (root </> "secret.txt")
+        served = checkSiteDirs . servedSites
+        exported = checkSiteDirs . exportedSites
+        badgesExported = lc {lBadgesStaticDir = absent, lServeWebapp = False, lBadgesExportDir = Just (root </> "out")}
+        namesExported = lc {lServeWebapp = False, lNamesStaticDir = Just absent, lNamesExportDir = Just (root </> "names-out")}
+    served lc `shouldReturn` Right ()
+    served lc {lNamesStaticDir = Just namesDir, lNamesPort = Just 8081} `shouldReturn` Right ()
+    served lc {lBadgesStaticDir = absent} `shouldReturn` missing "badges" absent
+    exported lc {lBadgesStaticDir = absent} `shouldReturn` Right ()
+    served badgesExported `shouldReturn` Right ()
+    exported badgesExported `shouldReturn` missing "badges" absent
+    served lc {lNamesStaticDir = Just absent, lNamesPort = Just 8081} `shouldReturn` missing "names" absent
+    exported lc {lNamesStaticDir = Just absent, lNamesPort = Just 8081} `shouldReturn` Right ()
+    served lc {lServeWebapp = False, lNamesStaticDir = Just absent} `shouldReturn` Right ()
+    served namesExported `shouldReturn` Right ()
+    exported namesExported `shouldReturn` missing "names" absent
+    served lc {lBadgesStaticDir = root </> "secret.txt"} `shouldReturn` missing "badges" (root </> "secret.txt")
 
 type WebClient = (Manager, String)
 

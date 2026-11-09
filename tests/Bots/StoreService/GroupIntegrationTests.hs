@@ -80,7 +80,7 @@ import qualified Simplex.Messaging.Crypto as C
 import Simplex.Messaging.Crypto.BBS (bbsKeyGen)
 import Simplex.Messaging.Encoding.String (strDecode)
 import Simplex.Messaging.Util (tshow)
-import System.Directory (createDirectoryIfMissing)
+import System.Directory (createDirectoryIfMissing, doesDirectoryExist)
 import System.Exit (ExitCode (..))
 import System.FilePath ((</>))
 import System.Timeout (timeout)
@@ -108,6 +108,7 @@ badgeGroupIntegrationTests = do
   it "drops the old group's trackers when it creates a new group" testReplacedGroupDropsTrackers
   it "stops rather than create a second group when the group lookup fails" testGroupLookupFailureStops
   it "stops the service's lanes when its runner is cancelled" testCancelStopsLanes
+  it "writes nothing to badges_export_dir, which only --export-webapp writes" testServiceExportsNothing
   it "issues on a privileged member's command, ignores a plain member's" testRoleGatedIssue
   it "ignores a command from a privileged member blocked for all" testBlockedMemberCommandIgnored
   it "ignores a command sent in a member support scope" testSupportScopeIgnored
@@ -837,6 +838,15 @@ testCancelStopsLanes ps = do
   svc <- prepareGroupService ps
   (t, cc, _, port) <- startGroupService svc (Just testGroupConfig)
   (pollUntilTrue (listening port) >> cancel t >> pollUntilTrue (not <$> listening port)) `finally` (cancel t >> stopChat cc)
+
+testServiceExportsNothing :: HasCallStack => TestParams -> IO ()
+testServiceExportsNothing ps@TestParams {tmpPath} = do
+  svc <- prepareGroupService ps
+  let exportDir = tmpPath </> "badges_export"
+  (t, cc, _, port) <- startGroupService svc {gsListener = ["badges_export_dir = " <> T.pack exportDir]} Nothing
+  flip finally (stopGroupService t cc) $ do
+    pollUntilTrue (listening port)
+    doesDirectoryExist exportDir `shouldReturn` False
 
 listening :: Int -> IO Bool
 listening port =

@@ -65,3 +65,9 @@ services:
     depends_on:
       chain: { condition: service_healthy }
       postgres: { condition: service_healthy }
+
+  store-service-export:
+    volumes:
+      - ./config:/etc/simplex-store-service:ro
+    depends_on:
+      chain: { condition: service_healthy }

@@ -10,8 +10,8 @@ badges_static_dir = ./apps/simplex-store-service/web/dist
 ; serve the sites over HTTP. On (default) is the all-in-one deployment. Off is a split deployment
 ; where a reverse proxy serves the exported folders and this service is only the API and webhooks.
 serve_webapp = on
-; when set, the badges site is written here at boot with the publishable key injected, copied from
-; badges_static_dir, for a reverse proxy to serve. Leave unset in the all-in-one deployment.
+; when set, --export-webapp writes the badges site here with the publishable key injected, copied
+; from badges_static_dir, for a reverse proxy to serve. Leave unset in the all-in-one deployment.
 ; badges_export_dir = /srv/badges-export
 ; on behind the reverse proxy above: without it every request keys the rate limiter on the
 ; proxy's own address, so one bucket is shared by everyone. Set it off only where this

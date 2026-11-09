@@ -3,7 +3,7 @@
 module Main where
 
 import StoreService.Config (ServiceConfig (..), defaultLogLevel)
-import StoreService.Options (StoreServiceOpts (..))
+import StoreService.Options (RunMode (..), StoreServiceOpts (..))
 import StoreService.Service
 import StoreService.Store.Migrate (withInstanceLock)
 import Control.Logger.Simple (LogConfig (..), setLogLevel, withGlobalLogging)
@@ -19,10 +19,10 @@ main = do
   mapM_ (`hSetEncoding` utf8) [stdout, stderr]
   withGlobalLogging LogConfig {lc_file = Nothing, lc_stderr = True} $ do
     setLogLevel defaultLogLevel
-    opts@StoreServiceOpts {runCLI, serviceConfigFile} <- welcomeGetOpts
+    opts@StoreServiceOpts {runMode, serviceConfigFile} <- welcomeGetOpts
     serviceCfg <- traverse readConfigOrExit serviceConfigFile
     mapM_ (setLogLevel . serviceLogLevel) serviceCfg
-    withInstanceLock opts $
-      if runCLI
-        then storeServiceCLI opts serviceCfg
-        else newServiceState >>= storeService opts serviceCfg terminalChatConfig
+    case runMode of
+      RunService -> welcomeChat opts >> withInstanceLock opts (newServiceState >>= storeService opts serviceCfg terminalChatConfig)
+      RunCLI -> welcomeChat opts >> withInstanceLock opts (storeServiceCLI opts serviceCfg)
+      ExportWebapp -> storeServiceExport serviceCfg

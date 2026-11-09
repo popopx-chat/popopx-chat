@@ -54,6 +54,9 @@ simplex-store-service --help
   below: it starts no web listener and no poller, and serves no group commands, whatever
   `--service-config` says. It still updates a code's group message when the code is redeemed or
   revoked. `[apple]`, `[google]`, `[dev]` and `[log]` apply to it.
+- `--export-webapp`: writes the sites to `badges_export_dir` and `names_export_dir` of
+  `--service-config`, which it requires, and exits. It starts no chat and opens no database, so it
+  runs beside the service too. It exports nothing when neither folder is set.
 - `--no-address`: skip address creation on start-up (for operators who provision the address themselves).
 The service cannot sign credentials without an issuer key and refuses to start without one:
 
@@ -273,7 +276,8 @@ Dashboard too, such as blocking a card fingerprint or IP address that has failed
 The service fills `publishable_key` into the shell at boot: the built `index.html` ships
 with an empty `<meta id="stripe-publishable-key" name="stripe-publishable-key" content="">`
 (`web/public/index.html`), and the listener serves a copy with the configured key
-substituted in, so the ini is the only place the key is set. The names site's shell carries the
+substituted in, and `--export-webapp` writes the same copy, so the ini is the only place the key
+is set. The names site's shell carries the
 same meta without the `id`, and is filled the same way. With no `[stripe]` section the
 pristine (empty) shell is served and the page shows its development stand-in card form. The
 dev mock (`web/mock/server.py`) does the same substitution from `$STRIPE_PUBLISHABLE_KEY`,
@@ -535,12 +539,41 @@ badge without paying.
 the repository root), `compose.yml` and the ini template `store_service.ini.example`; `dev/` holds
 the scripts of the dev setup and the webapp's cases. The service
 runs with `+client_postgres` and host networking; one Caddy serves both sites from the folders the
-service exports at boot and proxies the API to it.
+export run writes and proxies the API to the service.
 
 `compose.yml` mounts the folder `scripts/store-service/config/` read-only at
 `/etc/simplex-store-service`. It holds `store_service.ini`, and the App Store root and the Play
 service account key when `[apple]` and `[google]` are configured. The folder must exist before
 `docker compose up`: compose refuses to start rather than create it empty.
+
+The export run, compose's `store-service-export`, is the image with `--export-webapp` and no
+network. It alone mounts `./badges` and `./names`, writable: it empties them, writes the sites and
+exits. `store-service` mounts neither folder and starts once the export run exits with 0.
+
+Each run reads the ini when it starts. So where the ini sets `badges_export_dir` or
+`names_export_dir`, apply any edit of the ini with:
+
+```
+docker compose stop store-service
+docker compose start
+```
+
+The start runs the export again and starts the service only once the export exits with 0, leaving
+it stopped otherwise; both containers and their logs are kept.
+`docker compose up -d --force-recreate` orders them the same way, but replaces both containers, and
+their logs with them. Other commands leave the pages and the service on different versions of the
+ini:
+
+- `docker compose up -d` runs the export again and keeps the running service;
+- `docker compose restart store-service` restarts the service alone;
+- `docker compose restart` restarts both at once, so the service starts even when the export fails.
+
+Where the ini sets neither, as in the dev setup, the service serves the sites itself and
+`docker compose restart store-service` applies an edit.
+
+Each `docker compose up -d` and `docker compose start` runs the export again, which empties the
+served folders for a moment. Outside compose, run the binary with `--export-webapp` and the same
+`--service-config` before the service.
 
 On PostgreSQL the service holds an advisory lock on its database for as long as it runs, so a second
 process on the same database, `--run-cli` included, stops at start with `another store service holds
@@ -572,7 +605,7 @@ to `store_service.ini`, and change its keys and paths as the table says, the
 same machine, also set `[listener] host = 127.0.0.1`: an ini copied from the earlier template binds
 `0.0.0.0` with `trust_forwarded_for = on`, so a caller reaching the port past Caddy picks its own rate
 limit bucket. Point Caddy's badges root at
-`scripts/store-service/badges`, which the service fills at boot. Compose names a project after its
+`scripts/store-service/badges`, which the export run fills. Compose names a project after its
 folder, so the new `store-service` project does not see the old `badge-service` container, which
 would keep running on the same port and database: stop it first, from `scripts/badge-service/` or
 anywhere with `-p`. The image builds the names site from the `apps/simplex-domains` submodule, a
@@ -620,15 +653,17 @@ that pull request merges. The commit committed here is what builds.
 The names site is on when, and only when, the ini has `[names]`. Its `[listener]` keys:
 
 - `names_static_dir`: the names build, by default `/srv/names`, the image's;
-- `names_export_dir`: where the service writes the names site at boot, with the Stripe
+- `names_export_dir`: where `--export-webapp` writes the names site, with the Stripe
   publishable key in its shell, as `badges_export_dir` is for the badges site. `compose.yml`
-  bind-mounts `./names` there (`/srv/names-export`), and `./badges` at `/srv/badges-export`;
+  bind-mounts `./names` there (`/srv/names-export`), and `./badges` at `/srv/badges-export`, in
+  `store-service-export` only;
 - `names_port`: the port the names site is served on when `serve_webapp = on`, by default 8081,
   beside `badges_port` (by default 8080), which serves the badges site. The two must differ.
 
 The service refuses to start with any of these keys but no `[names]`, and with `names_port` and
-`serve_webapp = off`. It also refuses to start when a build it serves or exports is not a
-directory, naming the setting, so a local run that keeps a default path stops there.
+`serve_webapp = off`. It also refuses to start when a build it serves is not a directory, and
+`--export-webapp` when a build it exports is not, naming the setting, so a local run that keeps a
+default path stops there.
 
 With `serve_webapp = on` (all in one), the service listens on both ports, and each serves only its
 own site: every path outside `/api/` and `/webhooks/` is a file of that site, `/` and `/index.html`
@@ -671,7 +706,7 @@ service and run its console against the dev database:
 
 ```
 docker compose stop store-service
-docker compose run --rm store-service -d postgresql://simplex@127.0.0.1:5433/store_service --run-cli --service-config /etc/simplex-store-service/store_service.ini
+docker compose run --rm --no-deps store-service -d postgresql://simplex@127.0.0.1:5433/store_service --run-cli --service-config /etc/simplex-store-service/store_service.ini
 ```
 
 There, `//issue name 6` prints a code for one name of 6 letters or more (see
@@ -908,8 +943,9 @@ who hold them before anyone can pay. It is `off` by default. While it is on:
   view, `find`, the reveal, Try again, another name and record edits work as before. Webhooks and the
   poller still settle the invoices already open, and badges sell as before.
 
-The setting is read at startup, and the export is written then, so switching it is an edit of the
-ini and a restart, with the same build. Codes for investors come from the group (needs `[group]`, see
+The setting is read at startup and by the export run, so switching it is an edit of the ini, applied
+as [Deployment](#deployment) says, with the same build. Codes
+for investors come from the group (needs `[group]`, see
 [From the group](#from-the-group)) or from `//issue name` in `--run-cli` (see
 [From the command line](#from-the-command-line)).
 
