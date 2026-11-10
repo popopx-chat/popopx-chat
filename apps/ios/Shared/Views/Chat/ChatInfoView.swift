@@ -354,6 +354,16 @@ struct ChatInfoView: View {
                 $0.content
             }
         }
+        .onChange(of: chat.chatInfo.contact?.mergedPreferences) { _ in
+            if let ct = chat.chatInfo.contact {
+                contact = ct
+                let allowed = contactUserPrefsToFeaturesAllowed(ct.mergedPreferences)
+                if allowed != currentFeaturesAllowed {
+                    featuresAllowed = allowed
+                    currentFeaturesAllowed = allowed
+                }
+            }
+        }
         .onDisappear {
             if currentFeaturesAllowed != featuresAllowed {
                 showAlert(
