@@ -1,0 +1,12 @@
+{
+  "name": "simplex-chat",
+  "description": "Plugins for using SimpleX Chat with coding agents.",
+  "owner": {"name": "SimpleX Chat", "url": "https://simplex.chat"},
+  "plugins": [
+    {
+      "name": "simplex",
+      "description": "Run each Claude Code session from its own SimpleX group: prompt it, approve its actions and tool use, and get its answers in the SimpleX app.",
+      "source": {"source": "npm", "package": "@simplex-chat/mcp"}
+    }
+  ]
+}

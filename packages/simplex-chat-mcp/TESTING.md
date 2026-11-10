@@ -1,4 +1,4 @@
-# Testing @simplex-chat/mcp v0.2
+# Testing @simplex-chat/mcp v0.3
 
 Node.js 22. Claude Code runs on the same computer as `serve`: the server listens on 127.0.0.1 only.
 
@@ -19,11 +19,25 @@ SMP_SERVER=/code/steward/node_modules/.cache/smp-server/smp-server-v7.1.0-beta.3
 ### On your own machine
 
 1. Check out simplex-chat master; the package is `packages/simplex-chat-mcp`.
-2. In that folder: `npm install`, then `npx tsc`. `tsc` leaves the output of deleted sources in `dist`; `npm pack` and `npm publish` delete `dist` first and build it again (script `prepack`).
+2. In that folder: `npm install`, then `npx tsc`. `tsc` leaves the output of deleted sources in `dist`; `npm pack` and `npm publish` delete `dist` first and build it again, and pack `package.json` and `npm-shrinkwrap.json` without the development dependencies (scripts `prepack` and `postpack`, [`scripts/strip-dev.js`](scripts/strip-dev.js)). The files in the folder are restored after the pack; after a pack that failed, the next pack restores them first.
 3. `node dist/cli.js serve my-agent --display-name "My Agent"`. At the first start, `simplex-chat` downloads libsimplex and its Node.js add-on, with a `Downloading ...` line each on stderr.
 4. Tests: `npx jest test/unit`; `npx jest test/e2e` downloads smp-server and xftp-server v7.1.0-beta.3 on Linux, and elsewhere takes `SMP_SERVER=/path/to/smp-server XFTP_SERVER=/path/to/xftp-server`.
 
 Until the package is published, the printed hint `npx -y @simplex-chat/mcp register my-agent` stands for `node dist/cli.js register my-agent`.
+
+### The tests of 0.2
+
+`serve` keeps the behaviour of 0.2: the 274 unit tests of 0.2 and its 13 end-to-end tests in `scenarios` and `mcp`, from commit be668564d, pass unchanged on this source. Run them in a copy of the package whose `test` folder is that of 0.2, from the repository's root, with `SMP_SERVER` and `XFTP_SERVER` as above:
+
+```
+mkdir -p /tmp/v02
+git archive HEAD packages/simplex-chat-mcp | tar -x -C /tmp/v02
+rm -rf /tmp/v02/packages/simplex-chat-mcp/test
+git archive be668564d packages/simplex-chat-mcp/test | tar -x -C /tmp/v02
+ln -s "$PWD/packages/simplex-chat-mcp/node_modules" /tmp/v02/packages/simplex-chat-mcp/node_modules
+cd /tmp/v02/packages/simplex-chat-mcp
+node node_modules/jest/bin/jest.js test/unit test/e2e/scenarios.test.ts test/e2e/mcp.test.ts
+```
 
 ## Start, join, register
 
@@ -104,3 +118,76 @@ Stop and restart:
 4. C5, register again: `node dist/cli.js register my-agent` prints `Added to Claude Code: scope user, server simplex-my-agent.`; `claude mcp list` shows one `simplex-my-agent`.
 5. C6, Esc: ask for a send, and press Esc while its card waits; `List your pending actions.` shows the action with `open: false`; the same request again attaches to it, and `/approve` returns the result to that call.
 6. Host mode: restart with `node dist/cli.js serve my-agent --approve host`, then `/mcp reconnect all`. `Send /help to the directory.` makes Claude Code prompt, despite the allow rule; so does `leave`. After you allow it, the agent control chat gets `I sent a message to bot SimpleX Directory:`, `` `/help` `` and `Performed without approval (mode host).` A `connect` to a link not yet joined gets the same prompt and an outcome card; a target already joined returns `status: known`, with no card.
+
+## Claude Code plugin
+
+### Install the plugin before it is published
+
+The plugin's server and hooks run `node ${CLAUDE_PLUGIN_ROOT}/dist/cli.js`, with the modules that Claude Code installs into the plugin's folder from `npm-shrinkwrap.json`, except the PreToolUse hook, which runs `node ${CLAUDE_PLUGIN_ROOT}/plugin/allow.js`. Step 1 lays out a packed build the same way; `test/e2e/launch.test.ts` checks that layout.
+
+1. In `packages/simplex-chat-mcp`, pack the build, unpack it into a new folder, and install its modules from the shrinkwrap with the command of Claude Code 2.1.319, which stops it after 60 seconds:
+
+   ```
+   npm pack --pack-destination /tmp
+   mkdir /tmp/simplex-plugin
+   tar -xzf /tmp/simplex-chat-mcp-0.3.0.tgz -C /tmp/simplex-plugin --strip-components 1
+   cd /tmp/simplex-plugin
+   npm ci --ignore-scripts --workspaces=false --no-audit --no-fund
+   ```
+
+2. Start Claude Code in any project folder, with the plugin and its channel, and with its own data folder:
+
+   ```
+   SIMPLEX_MCP_HOME=/tmp/simplex-mcp-test claude --plugin-dir /tmp/simplex-plugin --dangerously-load-development-channels plugin:simplex@inline
+   ```
+
+   `--plugin-dir` loads the plugin for that session only, as `simplex@inline`.
+
+3. After a change in `src/`, delete `/tmp/simplex-plugin`, repeat step 1, and stop the service, which a service of the same version doesn't replace: `kill $(cat /tmp/simplex-mcp-test/service.lock)`.
+
+### Automated tests
+
+- `npm test`: unit tests of the plugin's parts: the session server and its channel, the service, the hub with its Main group, sessions' groups and tool-use cards, the hooks and the plugin files. The hooks, the session server and the service are tested with the environments of a `claude -p` run with the entrypoint `claude-vscode` of a VS Code session and of a plain `claude -p` run, recorded with Claude Code 2.1.319 in `test/unit/claude-p-runs.jsonl`. The session server must answer `server/discover` with `Method not found` and negotiate the revision 2025-11-25: Claude Code 2.1.319 registers no channel for a server in the modern MCP era, 2026-07-28, so an SDK upgrade that turns that era on fails this test.
+- `npm run test:e2e`, file `test/e2e/launch.test.ts`: the packed `package.json` has no development dependencies, its shrinkwrap has no development entry and lists the dependencies of `package.json`, and the folder's files are restored after the pack; the packed build, installed with the command of Claude Code within 60 seconds, runs a hook and the session server with the commands of `hooks/hooks.json` and `.mcp.json`; installed into a project, `simplex-mcp` runs.
+- `npm run test:e2e`, file `test/e2e/service.test.ts`, with a local smp-server and xftp-server:
+  - an owner joins the Main group and the groups of two sessions, and approves `connect`, `send`, `download` and `leave` there; chats belong to their sessions, `/give` moves one, and `/list` works after a service restart; the short description and welcome message the owner set in the Main group stay after the restart;
+  - while files and media are off in a session's group, the card of a `send` of an image is text, the image message, with its caption and its file, reaches the bot after the owner's approval, and the card is edited as text;
+  - while SimpleX links are off in a session's group, a `send` card with the local server's SimpleX link at the end of its code span is posted, since the core does not detect a link whose query is followed by the closing backtick, and for a terminal prompt and an answer with a SimpleX link Claude posts `User's prompt was not posted: SimpleX links are not allowed for User in the group of this session; its owners can allow them in the group's preferences.` and `Claude's answer was not posted: SimpleX links are off in the group of this session; its owners can turn them on in the group's preferences.`;
+  - while SimpleX links are off in a session's group, a `send` with a preset server's SimpleX link under a standing approval reaches the bot and returns `done`, and Claude posts `Action 2 was performed; its card was not posted: SimpleX links are off in the group of this session; its owners can turn them on in the group's preferences.` in place of its card;
+  - while SimpleX links are on for admins only in a session's group, Claude's answer with a SimpleX link is posted, and for the terminal prompt with it, which `User`, a member, can't post, Claude posts `User's prompt was not posted: SimpleX links are not allowed for User in the group of this session; its owners can allow them in the group's preferences.`;
+  - while SimpleX links are off in a session's group, the `connect` card of a bot whose welcome message has a preset server's SimpleX link, which has no query, and a `send` card with that link are not posted: Claude posts `Action 2: SimpleX links are off in the group of this session; its owners can turn them on in the group's preferences.` and `Action 3: ...`, and both calls return `failed` with the text after `Action N: `;
+  - the hooks post a terminal prompt as `User` and the answer as Claude; an owner's message to a session without Claude Code gets `Session 1 is not running.`, without the quote for a message as long as the member's core sends; with the session attached, it reaches the session's channel stream, it is not posted again by `User`, raw or in the channel tag, and the answer quotes it;
+  - hooks with a new session ID from the process of an attached session post in its group; a tool-use card approved by the owner reaches the session's stream as `allow`; a contact and a group that accept after `connect` returned `connected: false` are in the session's `list`; mode `host` applies after the owner approves its card, and session.json holds no mode; after a service restart, a prompt sent before the session attached again reaches it, without `Session 1 is not running.`;
+  - a member who joins the Main group by an owner's link sees its short description and welcome message of trust, and Claude posts the join there; the member joins a session's group by `/join` as an admin, where Claude posts the rights of an admin, with the `/observer` command, and prompts and approves a tool-use card there, also after removal from the Main group, and gets `Unknown command.` for `//compact`, which reaches no session; a member added by a group link as a member gets the post of a member's rights, prompts, and gets one refusal, the same text, for `/pending` and for `/!ls`; a file of `reply` reaches the group at once, and after the owner turns off the group's files the next one fails with `Files and media are off in the group of this session; its owners can turn them on in the group's preferences.`; each join is posted once, in the Main group and in the session's group; the owner makes the added member an admin in the app, Claude posts the admin's rights, and the member's `/pending` then works; the command of a join post makes that member an observer, Claude replies with the observer's rights, and the member's app then refuses to send; a change of the model keeps the group's files off, as Claude updates the group's profile from its current state; `reset-owners` while the owner is in the Main group replaces it at once, without the owner's approval: run without a terminal, it says to run `link` in a terminal, and run in a terminal, it prints the new link with its QR code; both members from the Main group keep their roles in the session's group, and prompt and approve there;
+  - an admin from the Main group approves all messages to a chat; after the owner's `/observer` of that admin, `/list` shows the chat without the approval; `/observer` of a member who has sent `/join 1` and not joined yet gets `No member ID in this group.`, and the member then joins as an admin;
+  - a new session has no chats;
+  - a stdio session starts the service, recovers after the service is killed during a call, and starts it again and attaches without a call.
+
+### Checks in a real session
+
+In a session started as in step 2 above:
+
+1. The session start shows `SimpleX MCP: scan this QR code with the SimpleX app and tap Join to supervise your agents in "SimpleX MCP":`, a QR code and the link. Ask Claude which link the session start showed: Claude doesn't know it. If the development flag refuses `plugin:simplex@inline`, checks 3, 5, 6 and 7 wait for the published plugin and `plugin:simplex@simplex-chat`.
+2. Scan the QR code in the SimpleX app and tap Join. In "SimpleX MCP", tap the invitation to "1 · <folder>" and join it.
+3. Send `Reply with the word ready.` in "1 · <folder>". The answer comes from Claude, as a reply to your message.
+4. Type a prompt in the terminal. It appears in the group from `User`, and the answer from Claude. Record whether a prompt from the group also appears from `User`: the UserPromptSubmit hook of a channel prompt is not documented.
+5. Send `Count from 1 to 300, one number per line.` in the group and, at once, `Reply with the word two.`: the second prompt waits in Claude Code's queue. The answer with the numbers quotes the first message and `two` quotes the second; neither prompt appears from `User`. The answers quote their prompts by the start times of the Stop and UserPromptSubmit hooks, which this check confirms.
+6. Send `//help` in the group: one-line messages that start with `/` are the group's commands, so Claude replies `Unknown command.`, and the session gets nothing. Send `!git status`: the session gets it as a prompt, and Claude answers it. Channel prompts never run commands: Claude Code 2.1.319, checked on 2026-11-08 with a test channel, runs neither a command nor a shell command from a channel prompt that starts with `/` or `!`, and passes the text to Claude in the `<channel>` tag; `/model sonnet` left the model unchanged, and `!echo` wrote no file. In the code of Claude Code 2.1.322, a channel message is queued as a prompt with `skipSlashCommands` set. Claude may act on such a text with its tools, as with Bash, under the tool-use approval of check 7.
+7. Send `Run ls with Bash.` in the group. The terminal shows the permission dialog, and the group gets the card ``I want to use `Bash`: ...`` with `/approve N or /reject N`. Tap `/approve N`: `ls` runs. Ask again and tap `/reject N`: Claude reports the refusal. Answer a third request in the terminal: its card ends with `Ended.` when the turn ends.
+8. The short description of the group shows `MODEL · effort LEVEL` after the first answer. `/model` in the terminal changes it; a change of the effort level shows after the next answer.
+9. Run `/clear`, then send `Reply with the word cleared.` in the group: the answer comes in the same group, and no group "2 · <folder>" appears.
+10. Stop the service: `kill $(cat /tmp/simplex-mcp-test/service.lock)`. Without a tool call, send `Reply with the word back.` in the group after 30 seconds: the answer comes in the group.
+11. Exit Claude Code, and send a message in the group within 10 minutes, while the service runs: Claude replies `Session 1 is not running.`
+12. Start Claude Code again as in step 2, with `--continue`: the session start opens no new group, and a prompt from "1 · <folder>" reaches the session.
+13. In a second terminal, start Claude Code as in step 2 in another folder, and exit it: the group "2 · <other folder>" appears. In the first session, `/resume` that session, and send `Reply with the word resumed.` in "1 · <folder>": the answer comes there. Exit, and start Claude Code with `--resume` of that session: a prompt from "2 · <other folder>" reaches it.
+14. In another folder, run `SIMPLEX_MCP_HOME=/tmp/simplex-mcp-test claude -p "Call the list tool of the simplex server." --plugin-dir /tmp/simplex-plugin`: no new group appears, and the answer quotes `This Claude Code run is not interactive, so it has no SimpleX group`.
+15. Record which values of `CLAUDE_CODE_SESSION_ATTENDED` the hooks and the MCP servers of a run get. Write the MCP config and the hook settings:
+
+    ```
+    echo '{"mcpServers": {"dump": {"command": "node", "args": ["-e", "require(\"fs\").writeFileSync(\"/tmp/env-mcp.json\", JSON.stringify(process.env))"]}}}' > /tmp/env-mcp-config.json
+    echo '{"hooks": {"SessionStart": [{"hooks": [{"type": "command", "command": "node -e \"require(\\\"fs\\\").writeFileSync(\\\"/tmp/env-hook.json\\\", JSON.stringify(process.env))\""}]}]}}' > /tmp/env-settings.json
+    ```
+
+    Run `claude -p "Reply with ok." --strict-mcp-config --mcp-config /tmp/env-mcp-config.json --settings /tmp/env-settings.json` once in a terminal, and once from the Bash tool of the session of step 2 with `CLAUDE_CODE_ENTRYPOINT=claude-vscode` before it. After each run, `grep -o '"CLAUDE_CODE_SESSION_ATTENDED":"[01]"' /tmp/env-hook.json /tmp/env-mcp.json` shows the values. With Claude Code 2.1.319, 2026-11-08: in a terminal, the hook got `0` and the MCP server none; from the Bash tool, the hook got `0` and the MCP server `1`, the value of the session whose Bash tool ran it, and the hook's `CLAUDE_PID` is the parent process of the MCP server. For the second run, the plugin's SessionStart hook marks that process in the service, and the service refuses its session server.
+16. From the Bash tool of the session of step 2, run `CLAUDE_CODE_ENTRYPOINT=claude-vscode SIMPLEX_MCP_HOME=/tmp/simplex-mcp-test claude -p "Call the list tool of the simplex server." --plugin-dir /tmp/simplex-plugin` in another folder: no new group appears, and the answer quotes `This Claude Code run is not interactive, so it has no SimpleX group`.
+17. Stop the service: `kill $(cat /tmp/simplex-mcp-test/service.lock)`.
