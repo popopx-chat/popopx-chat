@@ -47,7 +47,7 @@ where
 import StoreService.Catalog (StoreProduct (..), defaultCatalog, storeProduct)
 import StoreService.Codes (issueFailedText, issueOneCode, singleUse)
 import StoreService.Config (AppleStoreConfig (..), BadgeIssuerKey (..), ChainConfig (..), NamesConfig (..), PlayStoreConfig (..), ServiceConfig (..), minNameYears, readServiceConfig)
-import StoreService.Group (GroupEvent, ensureManagedGroup, fmtTime, groupEvent, hasTracker, refreshTracker, revokeWithTracker, runGroupLane)
+import StoreService.Group (GroupEvent, ensureManagedGroup, fmtTime, groupEvent, hasTracker, joinerAcceptance, refreshTracker, revokeWithTracker, runGroupLane)
 import StoreService.Group.Command (badgeTypeP, codeP, maxMonths, maxNameYears, nameCodeP, prepaidCodeP, textTokenP)
 import StoreService.Names.Abi (hex)
 import StoreService.Names.Balances (RefundRecord (..), RefundRefusal (..), recordRefund)
@@ -59,7 +59,7 @@ import StoreService.Names.Orders (ordersEnv)
 import StoreService.Names.Phases (RegistrationId (..))
 import StoreService.Names.Records (runRecordEdits)
 import StoreService.Names.Sender (runSender)
-import StoreService.Names.Store (Balance (..), BalanceHold (..), BalanceLink (..), LateCredit (..), RegistrationPayment (..), balanceByReference, balanceChain, methodText)
+import StoreService.Names.Store (Balance (..), BalanceHold (..), BalanceLink (..), CodeIssuer (..), LateCredit (..), RegistrationPayment (..), balanceByReference, balanceChain, methodText)
 import StoreService.Names.Turns (Turns, newTurns)
 import StoreService.Names.View (addressText)
 import StoreService.Names.Worker (newWorker, runCodeSweep, runWorkers)
@@ -286,6 +286,7 @@ storeService opts serviceCfg baseCfg env = do
   waiters <- newWaiters
   -- The hooks' //revoke takes a prepaid code's turn, so the turns exist before the chat starts.
   turns <- newTurns
+  startedCC <- newEmptyTMVarIO
   requestEnv <- configureStoreVerifier serviceCfg env
   let groupCfg = serviceCfg >>= \ServiceConfig {group} -> group
       trackerQ_ = groupEventQ env <$ groupCfg
@@ -305,9 +306,10 @@ storeService opts serviceCfg baseCfg env = do
         raceAny_ $ processQueuedRequests key trackerQ_ requestEnv : maybeToList groupLane_ <> lanes
       chatHooks =
         defaultChatHooks
-          { preStartHook = Just $ badgePreStartHook opts,
+          { preStartHook = Just $ badgePreStartHook opts startedCC,
             postStartHook = Just $ badgePostStartHook opts env,
-            preCmdHook = Just $ badgeCmdHook turns
+            preCmdHook = Just $ badgeCmdHook turns,
+            acceptMember = Just $ joinerAcceptance startedCC
           }
   -- The reader runs from the start and must not block, since outputQ carries every chat event and a full queue stalls the core.
   simplexChatCore cfg {chatHooks} (mkChatOpts opts) $ \_ cc -> raceAny_ [readEvents cc, startLanes cc]
@@ -386,6 +388,7 @@ storeServiceCLI opts serviceCfg = do
   env <- newServiceState >>= configureStoreVerifier serviceCfg
   -- This mode runs no names lanes, so only its own //revoke takes these turns.
   turns <- newTurns
+  startedCC <- newEmptyTMVarIO
   let eventHook _cc = \case
         Right (CEvtServiceRequest u reqId sigKey reqData) -> do
           atomically $ writeTQueue (serviceRequestQ env) (u, reqId, sigKey, reqData)
@@ -393,10 +396,11 @@ storeServiceCLI opts serviceCfg = do
         ev -> pure ev
       chatHooks =
         defaultChatHooks
-          { preStartHook = Just $ badgePreStartHook opts,
+          { preStartHook = Just $ badgePreStartHook opts startedCC,
             postStartHook = Just $ badgePostStartHook opts env,
             preCmdHook = Just $ badgeCmdHook turns,
-            eventHook = Just eventHook
+            eventHook = Just eventHook,
+            acceptMember = Just $ joinerAcceptance startedCC
           }
   raceAny_
     [ simplexChatCLI' cfg {chatHooks} (mkChatOpts opts) Nothing,
@@ -419,7 +423,7 @@ runBadgeCmd turns cc cmd
   | Right issueOpts <- A.parseOnly issueCmdP cmd =
       issuedReply formatBadgeCode <$> issueBadgeCode cc issueOpts
   | Right (len, years, paymentStatus) <- A.parseOnly issueNameCmdP cmd =
-      issuedReply (formatNameCode . NCPrepaid) <$> issueNameCode cc len years paymentStatus
+      issuedReply (formatNameCode . NCPrepaid) <$> issueNameCode cc IssuedInConsole len years paymentStatus
   | Right code <- A.parseOnly revokeCmdP cmd = textReply <$> revokeWithTracker cc code
   | Right code <- A.parseOnly revokeNameCmdP cmd = textReply <$> revokeNameCode turns cc code
   | Right (ref, cents_) <- A.parseOnly refundCmdP cmd = textReply <$> maybe (showRefund cc ref) (refundBalanceCmd turns cc ref) cents_
@@ -629,9 +633,10 @@ routeLookahead = 60
 survive :: T.Text -> IO () -> IO ()
 survive what action = action `catchOwn'` \_ -> logError $ "store service: " <> what <> " failed; the next one will be handled"
 
-badgePreStartHook :: StoreServiceOpts -> ChatController -> IO ()
-badgePreStartHook opts ChatController {config, chatStore} =
+badgePreStartHook :: StoreServiceOpts -> TMVar ChatController -> ChatController -> IO ()
+badgePreStartHook opts startedCC cc@ChatController {config, chatStore} = do
   runStoreServiceMigrations opts config chatStore
+  void $ atomically $ tryPutTMVar startedCC cc
 
 badgePostStartHook :: StoreServiceOpts -> ServiceState -> ChatController -> IO ()
 badgePostStartHook StoreServiceOpts {noAddress, testing} env cc = do
