@@ -187,7 +187,8 @@ class ChatTagsModel: ObservableObject {
 }
 ```
 
-- `presetTags` counts are updated whenever `chats` changes via [`updateChatTags()`](../../Shared/Model/ChatModel.swift#L197) (L197)
+- `presetTags` counts are incremented by `addChat`, decremented by `removeChat`, changed for favorites by `updateChatFavorite` and for reports by `changeGroupReportsTag`, and recomputed by [`updateChatTags()`](../../Shared/Model/ChatModel.swift#L197) (L197) after a full load of `chats`
+- [GAP] Counts aren't updated for a chat changed in place (a deleted conversation shown again after a new message, a contact card whose connection is started) until the next full load
 - Tags with zero matching chats are auto-hidden
 - Active filter is auto-cleared when its tag has no matching chats
 
