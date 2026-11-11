@@ -127,7 +127,7 @@ popopxmqCommitQ = do
   where
     commitHashP :: A.Parser ByteString
     commitHashP =
-      A.manyTill' A.anyChar "location: https://github.com/simplex-chat/simplexmq.git"
+      A.manyTill' A.anyChar "location: https://github.com/popopx-chat/popopxmq.git"
         *> A.takeWhile (== ' ')
         *> A.endOfLine
         *> A.takeWhile (== ' ')

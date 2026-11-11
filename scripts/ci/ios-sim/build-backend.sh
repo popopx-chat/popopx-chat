@@ -31,7 +31,7 @@ cabal build -j $targets
 
 # popopxmq's sdist leaves out apps/common/Web/static/.well-known, which smp-server embeds, so it is built from a clone
 popopxmq=$(mktemp -d)/popopxmq
-git clone --quiet --filter=blob:none https://github.com/simplex-chat/simplexmq.git "$popopxmq"
+git clone --quiet --filter=blob:none https://github.com/popopx-chat/popopxmq.git "$popopxmq"
 git -C "$popopxmq" checkout --quiet "$(awk '/popopxmq.git/ {getline; print $2; exit}' cabal.project)"
 git -C "$popopxmq" submodule update --init --quiet
 git -C "$popopxmq" log -1 --format='popopxmq %H %s'

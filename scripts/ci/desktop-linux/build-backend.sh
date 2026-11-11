@@ -24,10 +24,10 @@ EOF
 
 cabal build exe:simplex-chat exe:simplex-directory-service
 
-popopxmq_tag=$(sed -n '/simplex-chat\/popopxmq.git/{n;s/^ *tag: *//p}' cabal.project)
+popopxmq_tag=$(sed -n '/popopx-chat\/popopxmq.git/{n;s/^ *tag: *//p}' cabal.project)
 smq=$(mktemp -d)
 git -C "$smq" init -q
-git -C "$smq" fetch -q --depth 1 https://github.com/simplex-chat/simplexmq.git "$popopxmq_tag"
+git -C "$smq" fetch -q --depth 1 https://github.com/popopx-chat/popopxmq.git "$popopxmq_tag"
 git -C "$smq" checkout -q FETCH_HEAD
 git -C "$smq" submodule update -q --init --recursive
 cp cabal.project.local "$smq"
