@@ -6,7 +6,7 @@ module Directory.Store.Postgres.Migrations where
 import Data.List (sortOn)
 import Data.Text (Text)
 import qualified Data.Text as T
-import Simplex.Messaging.Agent.Store.Shared (Migration (..))
+import Popopx.Messaging.Agent.Store.Shared (Migration (..))
 import Text.RawString.QQ (r)
 
 directorySchemaMigrations :: [Migration]

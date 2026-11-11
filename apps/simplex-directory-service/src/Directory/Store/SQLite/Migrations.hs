@@ -6,7 +6,7 @@ module Directory.Store.SQLite.Migrations (directorySchemaMigrations) where
 import Data.List (sortOn)
 import Database.SQLite.Simple (Query (..))
 import Database.SQLite.Simple.QQ (sql)
-import Simplex.Messaging.Agent.Store.Shared (Migration (..))
+import Popopx.Messaging.Agent.Store.Shared (Migration (..))
 
 directorySchemaMigrations :: [Migration]
 directorySchemaMigrations = sortOn name $ map migration schemaMigrations

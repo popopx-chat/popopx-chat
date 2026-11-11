@@ -11,15 +11,15 @@ import Control.Concurrent.STM
 import Control.Monad
 import Data.Text (Text)
 import qualified Data.Text as T
-import Simplex.Chat.Bot
-import Simplex.Chat.Controller
-import Simplex.Chat.Core
-import Simplex.Chat.Messages
-import Simplex.Chat.Messages.CIContent
-import Simplex.Chat.Options
-import Simplex.Chat.Terminal (terminalChatConfig)
-import Simplex.Chat.Types
-import Simplex.Messaging.Util (tshow)
+import Popopx.Chat.Bot
+import Popopx.Chat.Controller
+import Popopx.Chat.Core
+import Popopx.Chat.Messages
+import Popopx.Chat.Messages.CIContent
+import Popopx.Chat.Options
+import Popopx.Chat.Terminal (terminalChatConfig)
+import Popopx.Chat.Types
+import Popopx.Messaging.Util (tshow)
 import System.Directory (getAppUserDataDirectory)
 import Text.Read
 

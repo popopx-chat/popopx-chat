@@ -18,8 +18,8 @@ import Data.String
 import Data.List (find)
 import Data.Text (Text)
 import GHC.Generics
-import Simplex.Chat.Controller
-import Simplex.Messaging.Parsers (dropPrefix, fstToLower)
+import Popopx.Chat.Controller
+import Popopx.Messaging.Parsers (dropPrefix, fstToLower)
 
 chatCommandsDocs :: [CCCategory]
 chatCommandsDocs = map toCategory chatCommandsDocsData

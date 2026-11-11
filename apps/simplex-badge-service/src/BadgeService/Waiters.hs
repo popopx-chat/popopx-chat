@@ -9,7 +9,7 @@ import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe, isNothing)
 import Data.Text (Text)
-import Simplex.Chat.PaymentService.Types (InvoiceId (..), InvoiceStatus)
+import Popopx.Chat.PaymentService.Types (InvoiceId (..), InvoiceStatus)
 
 -- | wStatus stays Nothing until a publish or a read fills it, so a publish mid-read is not overwritten by the older answer.
 data Watch = Watch {wStatus :: TVar (Maybe InvoiceStatus), wPayments :: TVar Int, wRefs :: TVar Int}

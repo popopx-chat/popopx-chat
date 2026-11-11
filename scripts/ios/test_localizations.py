@@ -100,7 +100,7 @@ class PlaceholderTest(unittest.TestCase):
             ("%lld%% off", "%lld%% Rabatt"),
             ("Battery at 100%", "Akku bei 100 %"),
             ("No placeholders", "Keine Platzhalter"),
-            ("Join [group](simplex:/g#a%3Db%2F) by %@", "%@ tritt [Gruppe](simplex:/g#a%3Db%2F) bei"),
+            ("Join [group](popopx:/g#a%3Db%2F) by %@", "%@ tritt [Gruppe](popopx:/g#a%3Db%2F) bei"),
         ]
         for source, target in cases:
             with self.subTest(target=target):
@@ -112,26 +112,26 @@ class PlaceholderTest(unittest.TestCase):
 
 
 class LinkTest(unittest.TestCase):
-    SOURCE = "Improved [directory bot](simplex:/contact#/?v=1-4%26dh%3DMCow) and https://simplex.chat/docs."
+    SOURCE = "Improved [directory bot](popopx:/contact#/?v=1-4%26dh%3DMCow) and https://simplex.chat/docs."
 
     def test_links_and_masking(self) -> None:
-        self.assertEqual(l10n.links(self.SOURCE), (("simplex:/contact#/?v=1-4%26dh%3DMCow",), ("https://simplex.chat/docs.",)))
+        self.assertEqual(l10n.links(self.SOURCE), (("popopx:/contact#/?v=1-4%26dh%3DMCow",), ("https://simplex.chat/docs.",)))
         self.assertEqual(l10n.links("见 https://github.com/simplex-chat）！"), ((), ("https://github.com/simplex-chat",)))
         self.assertEqual(l10n.mask_links(self.SOURCE), "Improved [directory bot](<link>) and <link>")
 
     def test_link_problems(self) -> None:
-        intact = "Подобрен [бот](simplex:/contact#/?v=1-4%26dh%3DMCow) и https://simplex.chat/docs."
-        broken = "Подобрен [бот](simplex:/contact#/?v=1-4% 26dh%3DMCow) и https://simplex.chat/docs."
+        intact = "Подобрен [бот](popopx:/contact#/?v=1-4%26dh%3DMCow) и https://simplex.chat/docs."
+        broken = "Подобрен [бот](popopx:/contact#/?v=1-4% 26dh%3DMCow) и https://simplex.chat/docs."
         self.assertIsNone(l10n.link_problem(self.SOURCE, intact))
-        self.assertEqual(l10n.link_problem(self.SOURCE, broken), "markdown link changed or missing: 'simplex:/contact#/?v=1-4%26dh%3DMCow'")
+        self.assertEqual(l10n.link_problem(self.SOURCE, broken), "markdown link changed or missing: 'popopx:/contact#/?v=1-4%26dh%3DMCow'")
         self.assertEqual(l10n.link_problem("No link", "See https://evil.example"), "URL not in the source: 'https://evil.example'")
-        full_width = "Подобрен [бот]（simplex:/contact#/?v=1-4%26dh%3DMCow） и https://simplex.chat/docs."
-        self.assertEqual(l10n.link_problem(self.SOURCE, full_width), "markdown link changed or missing: 'simplex:/contact#/?v=1-4%26dh%3DMCow'")
+        full_width = "Подобрен [бот]（popopx:/contact#/?v=1-4%26dh%3DMCow） и https://simplex.chat/docs."
+        self.assertEqual(l10n.link_problem(self.SOURCE, full_width), "markdown link changed or missing: 'popopx:/contact#/?v=1-4%26dh%3DMCow'")
         self.assertEqual(l10n.link_problem("[a](https://x.example) [b](https://x.example)", "[a](https://x.example)"), "markdown link not in the source: 'https://x.example'")
         self.assertIsNone(l10n.link_problem("No link", "Kein Link"))
 
     def test_broken_link_is_not_reported_as_placeholder(self) -> None:
-        broken = "Подобрен [бот](simplex:/contact#/?v=1-4% 26dh%3DMCow) и https://simplex.chat/docs."
+        broken = "Подобрен [бот](popopx:/contact#/?v=1-4% 26dh%3DMCow) и https://simplex.chat/docs."
         self.assertIsNone(l10n.placeholder_problem(self.SOURCE, broken))
         problems = l10n.translation_problems(Path("bg.xliff"), "key", self.SOURCE, broken)
         self.assertEqual([p.kind for p in problems], [l10n.LINK])

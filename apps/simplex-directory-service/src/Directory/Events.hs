@@ -32,18 +32,18 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Text.Encoding (encodeUtf8)
 import Directory.Store
-import Simplex.Chat.Controller
-import Simplex.Chat.Markdown (MarkdownList, displayNameTextP)
-import Simplex.Chat.Messages
-import Simplex.Chat.Messages.CIContent
-import Simplex.Chat.Protocol (LinkOwnerSig, MsgChatLink, MsgContent (..))
-import Simplex.Chat.Types
-import Simplex.Chat.Types.Preferences (GroupFeature)
-import Simplex.Chat.Types.Shared
-import Simplex.Messaging.Agent.Protocol (AgentErrorType (..))
-import Simplex.Messaging.Encoding.String
-import Simplex.Messaging.Protocol (BrokerErrorType (..))
-import Simplex.Messaging.Util (tshow, (<$?>))
+import Popopx.Chat.Controller
+import Popopx.Chat.Markdown (MarkdownList, displayNameTextP)
+import Popopx.Chat.Messages
+import Popopx.Chat.Messages.CIContent
+import Popopx.Chat.Protocol (LinkOwnerSig, MsgChatLink, MsgContent (..))
+import Popopx.Chat.Types
+import Popopx.Chat.Types.Preferences (GroupFeature)
+import Popopx.Chat.Types.Shared
+import Popopx.Messaging.Agent.Protocol (AgentErrorType (..))
+import Popopx.Messaging.Encoding.String
+import Popopx.Messaging.Protocol (BrokerErrorType (..))
+import Popopx.Messaging.Util (tshow, (<$?>))
 
 data DirectoryEvent
   = DEContactConnected Contact

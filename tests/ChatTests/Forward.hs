@@ -12,8 +12,8 @@ import Control.Concurrent.Async (concurrently_)
 import qualified Data.ByteString.Char8 as B
 import Data.List (intercalate)
 import qualified Data.Text as T
-import Simplex.Chat.Library.Commands (fixedImagePreview)
-import Simplex.Chat.Types (ImageData (..))
+import Popopx.Chat.Library.Commands (fixedImagePreview)
+import Popopx.Chat.Types (ImageData (..))
 import System.Directory (copyFile, doesFileExist, removeFile)
 import System.FilePath ((</>))
 import Test.Hspec hiding (it)

@@ -2,7 +2,7 @@ module Directory.Search where
 
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime)
-import Simplex.Chat.Types
+import Popopx.Chat.Types
 
 data SearchRequest = SearchRequest
   { searchType :: SearchType,

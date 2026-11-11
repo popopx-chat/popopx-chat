@@ -2789,7 +2789,7 @@ data class SimplexDomainClaim(
   val domain: String,
   val proof: SimplexDomainProof? = null
 ) {
-  val shortName: String get() = domain.removeSuffix(".simplex")
+  val shortName: String get() = domain.removeSuffix(".popopx")
 }
 
 @Serializable
@@ -5479,7 +5479,7 @@ data class SimplexNameInfo(
 ) {
   // mirrors backend shortNameInfoStr: "#name" for a simplex public group, else prefix + full domain
   val shortStr: String get() = when {
-    nameType == SimplexNameType.publicGroup && nameDomain.nameTLD == SimplexTLD.simplex && nameDomain.subDomain.isEmpty() -> "#" + nameDomain.domain
+    nameType == SimplexNameType.publicGroup && nameDomain.nameTLD == SimplexTLD.popopx && nameDomain.subDomain.isEmpty() -> "#" + nameDomain.domain
     else -> (if (nameType == SimplexNameType.publicGroup) "#" else "@") + nameDomain.fullDomainName
   }
 }
@@ -5493,7 +5493,7 @@ data class SimplexDomain(
   // mirrors backend fullDomainName: reverse(subDomain) + [domain] + tld
   val fullDomainName: String get() {
     val tld = when (nameTLD) {
-      SimplexTLD.simplex -> listOf("simplex")
+      SimplexTLD.popopx -> listOf("popopx")
       SimplexTLD.testing -> listOf("testing")
       SimplexTLD.web -> emptyList()
     }
@@ -5505,7 +5505,7 @@ data class SimplexDomain(
 
 @Serializable
 enum class SimplexTLD {
-  @SerialName("simplex") simplex,
+  @SerialName("popopx") popopx,
   @SerialName("testing") testing,
   @SerialName("web") web
 }

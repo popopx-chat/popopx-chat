@@ -3,7 +3,7 @@
 # The name resolver that the test smp-server's [NAMES] section points at, as popopxmq's Server/Names/HttpResolver.hs
 # calls it: GET /v2/resolve/<query> answers a NameResponse for the query "[<keccak-256 of the lowercased label, hex>]<.tld>"
 # (or the plain name, which older clients send), GET /health answers {}. Registered names come from a JSON file, read on every request, so names can be added while it runs:
-#   {"cinews.testing": {"simplexChannel": ["https://..."], "simplexContact": []}, ...}
+#   {"cinews.testing": {"popopxChannel": ["https://..."], "popopxContact": []}, ...}
 # Every other name is answered as available.
 # Usage: names-resolver.py <port> <names json>
 
@@ -71,8 +71,8 @@ def name_response(names_file, query):
                 "nickname": "",
                 "website": "",
                 "location": "",
-                "simplexContact": links.get("simplexContact", []),
-                "simplexChannel": links.get("simplexChannel", []),
+                "popopxContact": links.get("popopxContact", []),
+                "popopxChannel": links.get("popopxChannel", []),
                 "eth": None,
                 "btc": None,
                 "xmr": None,

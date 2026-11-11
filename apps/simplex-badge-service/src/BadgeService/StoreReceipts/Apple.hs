@@ -48,10 +48,10 @@ import Data.X509.Validation (SignatureFailure (..), SignatureVerification (..), 
 import Network.HTTP.Client (Manager, Request (..))
 import Network.HTTP.Client.TLS (newTlsManager)
 import Network.HTTP.Types (hAuthorization)
-import Simplex.Chat.Badges.Service (SubscriptionState (..))
-import Simplex.Chat.PaymentService (applePayloadRef)
-import Simplex.Chat.PaymentService.Types (CurrencyAmount (..))
-import Simplex.Messaging.Util (catchOwn', eitherToMaybe, tshow)
+import Popopx.Chat.Badges.Service (SubscriptionState (..))
+import Popopx.Chat.PaymentService (applePayloadRef)
+import Popopx.Chat.PaymentService.Types (CurrencyAmount (..))
+import Popopx.Messaging.Util (catchOwn', eitherToMaybe, tshow)
 
 verifyAppleTransaction :: NonEmpty SignedCertificate -> Text -> Text -> Either StoreRefusal VerifiedStoreTransaction
 verifyAppleTransaction roots ourBundleId jws = do

@@ -57,14 +57,14 @@ import Network.HTTP.Client
   )
 import Network.HTTP.Client.TLS (newTlsManager)
 import Network.HTTP.Types (Header, HeaderName, Method, Query, Status (..), methodGet, methodPost, renderQuery, renderSimpleQuery)
-import Simplex.Chat.PaymentService.Types
+import Popopx.Chat.PaymentService.Types
   ( CardProvider (..),
     CurrencyAmount (..),
     PaymentProvider (..),
     ServicePaymentDestination (..),
     ServicePaymentMethod (..),
   )
-import Simplex.Messaging.Util (safeDecodeUtf8, tshow)
+import Popopx.Messaging.Util (safeDecodeUtf8, tshow)
 
 maxErrorBytes :: Int64
 maxErrorBytes = 4000

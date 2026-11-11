@@ -14,10 +14,10 @@ import qualified Data.ByteString.Lazy.Char8 as LB
 import GHC.Generics (Generic)
 import Generic.Random (genericArbitraryU)
 import JSONFixtures
-import Simplex.Chat.Markdown (Format (Bold), MarkdownBlock (UnknownBlock), ParsedMarkdown (..), parsedMarkdown)
-import Simplex.Chat.Remote.Protocol (owsf2tagged)
-import Simplex.Chat.Types (BoolDef (..))
-import Simplex.Messaging.Parsers
+import Popopx.Chat.Markdown (Format (Bold), MarkdownBlock (UnknownBlock), ParsedMarkdown (..), parsedMarkdown)
+import Popopx.Chat.Remote.Protocol (owsf2tagged)
+import Popopx.Chat.Types (BoolDef (..))
+import Popopx.Messaging.Parsers
 import Test.Hspec
 import Test.Hspec.QuickCheck (modifyMaxSuccess)
 import Test.QuickCheck (Arbitrary (..), property)

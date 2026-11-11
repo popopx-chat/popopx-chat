@@ -49,35 +49,35 @@ import Directory.Options
 import Directory.Search
 import Directory.Store
 import Directory.Store.Migrate
-import Simplex.Chat.Bot
-import Simplex.Chat.Bot.KnownContacts
-import Simplex.Chat.Bot.Store
-import Simplex.Chat.Controller
-import Simplex.Chat.Core
-import Simplex.Chat.Library.Internal (setGroupLinkData)
-import Simplex.Chat.Markdown (Format (..), FormattedText (..), SimplexLinkType (..), parseMaybeMarkdownList, viewName)
-import Simplex.Chat.Messages
-import Simplex.Chat.Options
-import Simplex.Chat.Protocol (GroupShortLinkData (..), LinkOwnerSig (..), MsgChatLink (..), MsgContent (..), memberSupportVoiceVersion)
-import Simplex.Chat.Store.Direct (getContact)
-import Simplex.Chat.Store.Groups (getGroupLink, getGroupMember, getGroupMemberByMemberId, setGroupCustomData) -- TODO remove setGroupCustomData
-import Simplex.Chat.Store.Profiles (GroupLinkInfo (..), getGroupLinkInfo)
-import Simplex.Chat.Store.Shared (StoreError (..))
-import Simplex.Chat.Terminal (terminalChatConfig)
-import Simplex.Chat.Terminal.Main (simplexChatCLI')
-import Simplex.Chat.Types
-import Simplex.Chat.Types.Preferences
-import Simplex.Chat.Types.Shared
-import Simplex.Chat.View (groupSimplexDomain, serializeChatError, serializeChatResponse, simplexChatContact, viewContactName, viewGroupName)
-import Simplex.Messaging.Agent.Protocol (AConnectionLink (..), ACreatedConnLink (..), AgentErrorType (..), ConnectionLink (..), CreatedConnLink (..), SConnectionMode (..), SimplexDomain)
-import Simplex.Messaging.Client (NetworkRequestMode (..))
-import qualified Simplex.Messaging.Crypto.File as CF
-import Simplex.Messaging.Encoding.String
-import Simplex.Messaging.Protocol (ErrorType (..))
-import Simplex.Messaging.SimplexName (SimplexNameInfo (..), SimplexNameType (..), shortNameInfoStr)
-import Simplex.Messaging.TMap (TMap)
-import qualified Simplex.Messaging.TMap as TM
-import Simplex.Messaging.Util (eitherToMaybe, raceAny_, safeDecodeUtf8, tshow, unlessM, (<$$>))
+import Popopx.Chat.Bot
+import Popopx.Chat.Bot.KnownContacts
+import Popopx.Chat.Bot.Store
+import Popopx.Chat.Controller
+import Popopx.Chat.Core
+import Popopx.Chat.Library.Internal (setGroupLinkData)
+import Popopx.Chat.Markdown (Format (..), FormattedText (..), SimplexLinkType (..), parseMaybeMarkdownList, viewName)
+import Popopx.Chat.Messages
+import Popopx.Chat.Options
+import Popopx.Chat.Protocol (GroupShortLinkData (..), LinkOwnerSig (..), MsgChatLink (..), MsgContent (..), memberSupportVoiceVersion)
+import Popopx.Chat.Store.Direct (getContact)
+import Popopx.Chat.Store.Groups (getGroupLink, getGroupMember, getGroupMemberByMemberId, setGroupCustomData) -- TODO remove setGroupCustomData
+import Popopx.Chat.Store.Profiles (GroupLinkInfo (..), getGroupLinkInfo)
+import Popopx.Chat.Store.Shared (StoreError (..))
+import Popopx.Chat.Terminal (terminalChatConfig)
+import Popopx.Chat.Terminal.Main (simplexChatCLI')
+import Popopx.Chat.Types
+import Popopx.Chat.Types.Preferences
+import Popopx.Chat.Types.Shared
+import Popopx.Chat.View (groupSimplexDomain, serializeChatError, serializeChatResponse, simplexChatContact, viewContactName, viewGroupName)
+import Popopx.Messaging.Agent.Protocol (AConnectionLink (..), ACreatedConnLink (..), AgentErrorType (..), ConnectionLink (..), CreatedConnLink (..), SConnectionMode (..), PopopxDomain)
+import Popopx.Messaging.Client (NetworkRequestMode (..))
+import qualified Popopx.Messaging.Crypto.File as CF
+import Popopx.Messaging.Encoding.String
+import Popopx.Messaging.Protocol (ErrorType (..))
+import Popopx.Messaging.PopopxName (PopopxNameInfo (..), PopopxNameType (..), shortNameInfoStr)
+import Popopx.Messaging.TMap (TMap)
+import qualified Popopx.Messaging.TMap as TM
+import Popopx.Messaging.Util (eitherToMaybe, raceAny_, safeDecodeUtf8, tshow, unlessM, (<$$>))
 import System.Directory (getAppUserDataDirectory, removeFile)
 import System.Exit (exitFailure)
 import System.Process (readProcess)
@@ -1575,5 +1575,5 @@ unexpectedError err = "Unexpected error: " <> err <> ", please notify the develo
 strEncodeTxt :: StrEncoding a => a -> Text
 strEncodeTxt = safeDecodeUtf8 . strEncode
 
-simplexNameStr :: SimplexDomain -> Text
-simplexNameStr = shortNameInfoStr . SimplexNameInfo NTPublicGroup
+simplexNameStr :: PopopxDomain -> Text
+simplexNameStr = shortNameInfoStr . PopopxNameInfo NTPublicGroup

@@ -39,7 +39,7 @@ import Data.Word (Word8)
 import Network.HTTP.Types (Status, badRequest400, hAuthorization, hContentType, methodGet, methodPost, mkStatus, notFound404, ok200, parseSimpleQuery, unauthorized401)
 import Network.Wai (Application, Response, pathInfo, requestHeaders, requestMethod, responseLBS, strictRequestBody)
 import qualified Network.Wai.Handler.Warp as Warp
-import Simplex.Messaging.Util (stateTVar')
+import Popopx.Messaging.Util (stateTVar')
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((</>))
 import UnliftIO.Temporary (withTempDirectory)

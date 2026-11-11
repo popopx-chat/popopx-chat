@@ -9,12 +9,12 @@ module BadgeService.Store.Migrate
 where
 
 import BadgeService.Options
-import Simplex.Chat.Controller (ChatConfig (..))
-import Simplex.Chat.Options (CoreChatOpts (..))
-import Simplex.Chat.Options.DB
-import Simplex.Messaging.Agent.Store.Common
-import Simplex.Messaging.Agent.Store.Interface (migrateDBSchema)
-import Simplex.Messaging.Agent.Store.Shared (MigrationConfig (..), MigrationConfirmation (..))
+import Popopx.Chat.Controller (ChatConfig (..))
+import Popopx.Chat.Options (CoreChatOpts (..))
+import Popopx.Chat.Options.DB
+import Popopx.Messaging.Agent.Store.Common
+import Popopx.Messaging.Agent.Store.Interface (migrateDBSchema)
+import Popopx.Messaging.Agent.Store.Shared (MigrationConfig (..), MigrationConfirmation (..))
 import System.Exit (exitFailure)
 
 #if defined(dbPostgres)

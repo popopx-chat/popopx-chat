@@ -1438,9 +1438,9 @@ describe("Direct Message Handling", () => {
   beforeEach(() => setup())
 
   test("regular DM → bot replies with business address link", async () => {
-    bot.businessAddress = "simplex:/contact#abc123"
+    bot.businessAddress = "popopx:/contact#abc123"
     await bot.onNewChatItems(directMessage("Hi there", 99))
-    expectDmSent(99, "simplex:/contact#abc123")
+    expectDmSent(99, "popopx:/contact#abc123")
   })
 
   test("DM without business address set → no reply", async () => {
@@ -1450,7 +1450,7 @@ describe("Direct Message Handling", () => {
   })
 
   test("non-message DM event (e.g. contactConnected) → no reply", async () => {
-    bot.businessAddress = "simplex:/contact#abc123"
+    bot.businessAddress = "popopx:/contact#abc123"
     const ci = {
       chatDir: {type: "directRcv"},
       content: {type: "rcvDirectEvent"},

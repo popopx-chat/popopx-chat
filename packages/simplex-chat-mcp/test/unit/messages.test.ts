@@ -800,7 +800,7 @@ describe("connect", () => {
       } as unknown as T.ChatError)
     }
     const {tools} = connectTools(chat)
-    expect(textOf(await tools.call("connect", {target: "@nobody.simplex"}, signal().call))).toBe("Name not found: This SimpleX name is not registered. Please check the name.")
+    expect(textOf(await tools.call("connect", {target: "@nobody.popopx"}, signal().call))).toBe("Name not found: This SimpleX name is not registered. Please check the name.")
   })
 
   it("connects a known prepared contact, and deletes it when the connection fails", async () => {
@@ -1000,17 +1000,17 @@ describe("connect", () => {
     const linkData = {profile: {displayName: "SimpleX Directory", fullName: "", peerType: "bot"}, business: false}
     const joining = {...contact(9, "SimpleX Directory"), activeConn: {connId: 209, connStatus: {type: "joined"}}} as unknown as T.Contact
     const ready = {...contact(9, "SimpleX Directory"), activeConn: {connId: 209, connStatus: {type: "ready"}}} as unknown as T.Contact
-    const prepare = `/_prepare contact 1 ${link} domain=directory.simplex ${JSON.stringify(linkData)}`
-    const name = {nameType: "contact", nameDomain: {nameTLD: "simplex", domain: "directory", subDomain: []}}
+    const prepare = `/_prepare contact 1 ${link} domain=directory.popopx ${JSON.stringify(linkData)}`
+    const name = {nameType: "contact", nameDomain: {nameTLD: "popopx", domain: "directory", subDomain: []}}
     chat.chats.set("@9", {chatInfo: direct(joining), items: []})
-    chat.responses.set("/_connect plan 1 @directory.simplex", {...plan({type: "contactAddress", contactAddressPlan: {type: "ok", contactSLinkData_: linkData}}), planSimplexName: name})
+    chat.responses.set("/_connect plan 1 @directory.popopx", {...plan({type: "contactAddress", contactAddressPlan: {type: "ok", contactSLinkData_: linkData}}), planSimplexName: name})
     chat.responses.set(prepare, {type: "newPreparedChat", chat: {chatInfo: direct(joining), chatItems: []}})
     chat.responses.set("/_connect contact @9", {type: "startedConnectionToContact", contact: joining})
     const {tools, actions} = connectTools(chat)
-    const connecting = tools.call("connect", {target: "@directory.simplex"}, signal().call)
+    const connecting = tools.call("connect", {target: "@directory.popopx"}, signal().call)
     await jest.advanceTimersByTimeAsync(0)
     const action = actions.get(1)!
-    expect(action.subject).toEqual({kind: "bot", name: "SimpleX Directory", simplexName: "@directory.simplex", incognito: false})
+    expect(action.subject).toEqual({kind: "bot", name: "SimpleX Directory", simplexName: "@directory.popopx", incognito: false})
     actions.approve(action, "Alice")
     await jest.advanceTimersByTimeAsync(0)
     expect(chat.commands.filter(cmd => /^\/_(prepare|connect contact)/.test(cmd))).toEqual([prepare, "/_connect contact @9"])

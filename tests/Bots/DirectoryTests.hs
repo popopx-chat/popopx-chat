@@ -22,17 +22,17 @@ import Directory.Listing
 import Directory.Options
 import Directory.Service
 import System.Directory (emptyPermissions, setOwnerExecutable, setOwnerReadable, setOwnerWritable, setPermissions)
-import Simplex.Chat.Bot.KnownContacts
-import Simplex.Chat.Controller (ChatConfig (..), ChatController (smpAgent))
-import qualified Simplex.Chat.Markdown as MD
-import Simplex.Chat.Options (ChatOpts (..), CoreChatOpts (..))
-import Simplex.Chat.Options.DB
-import Simplex.Chat.Protocol (memberSupportVoiceVersion)
-import Simplex.Chat.Types (ChatPeerType (..), Profile (..))
-import Simplex.Chat.Types.Shared (GroupMemberRole (..))
-import Simplex.Messaging.Agent (disposeAgentClient)
-import Simplex.Messaging.SimplexName (SimplexDomain (..), SimplexNameInfo (..), SimplexNameType (..), SimplexTLD (..))
-import Simplex.Messaging.Version
+import Popopx.Chat.Bot.KnownContacts
+import Popopx.Chat.Controller (ChatConfig (..), ChatController (smpAgent))
+import qualified Popopx.Chat.Markdown as MD
+import Popopx.Chat.Options (ChatOpts (..), CoreChatOpts (..))
+import Popopx.Chat.Options.DB
+import Popopx.Chat.Protocol (memberSupportVoiceVersion)
+import Popopx.Chat.Types (ChatPeerType (..), Profile (..))
+import Popopx.Chat.Types.Shared (GroupMemberRole (..))
+import Popopx.Messaging.Agent (disposeAgentClient)
+import Popopx.Messaging.PopopxName (PopopxDomain (..), PopopxNameInfo (..), PopopxNameType (..), PopopxTLD (..))
+import Popopx.Messaging.Version
 import NameResolver
 import System.FilePath ((</>))
 import System.Timeout (timeout)
@@ -2247,11 +2247,11 @@ testDirectoryChannelName ps = withSmpServerAndNames ps $ \reg ->
         enableNamesRole bob
         bob `connectVia` dsLink
         (shortLink, _fullLink) <- prepareChannel1Relay "news" bob relay
-        registerName reg newsName (channelNameRecord "news.simplex" (T.pack shortLink))
-        bob ##> "/public group access #news domain=news.simplex"
-        bob <## "updated public group access: domain=news.simplex"
+        registerName reg newsName (channelNameRecord "news.popopx" (T.pack shortLink))
+        bob ##> "/public group access #news domain=news.popopx"
+        bob <## "updated public group access: domain=news.popopx"
         relay <## "bob updated group #news: (signed)"
-        relay <## "updated public group access: domain=news.simplex"
+        relay <## "updated public group access: domain=news.popopx"
         bob ##> "/share chat #news @'SimpleX Directory'"
         bob <# "@'SimpleX Directory' link to join channel #news (signed):"
         _ <- getTermLine bob -- short link
@@ -2268,7 +2268,7 @@ testDirectoryChannelName ps = withSmpServerAndNames ps $ \reg ->
         superUser <## "To approve send:"
         superUser <# "'SimpleX Directory'> /approve 1:news 1"
   where
-    newsName = SimplexNameInfo NTPublicGroup (SimplexDomain TLDSimplex "news" [])
+    newsName = PopopxNameInfo NTPublicGroup (PopopxDomain TLDPopopx "news" [])
 
 -- registry re-pointed to a different link after the owner set the name: directory verification fails
 testDirectoryChannelNameNotVerified :: HasCallStack => TestParams -> IO ()
@@ -2279,13 +2279,13 @@ testDirectoryChannelNameNotVerified ps = withSmpServerAndNames ps $ \reg ->
         enableNamesRole bob
         bob `connectVia` dsLink
         (shortLink, _fullLink) <- prepareChannel1Relay "news" bob relay
-        registerName reg newsName (channelNameRecord "news.simplex" (T.pack shortLink))
-        bob ##> "/public group access #news domain=news.simplex"
-        bob <## "updated public group access: domain=news.simplex"
+        registerName reg newsName (channelNameRecord "news.popopx" (T.pack shortLink))
+        bob ##> "/public group access #news domain=news.popopx"
+        bob <## "updated public group access: domain=news.popopx"
         relay <## "bob updated group #news: (signed)"
-        relay <## "updated public group access: domain=news.simplex"
+        relay <## "updated public group access: domain=news.popopx"
         -- the name is re-pointed to a different link after the owner set it
-        registerName reg newsName (channelNameRecord "news.simplex" "https://simplex.chat/other")
+        registerName reg newsName (channelNameRecord "news.popopx" "https://simplex.chat/other")
         bob ##> "/share chat #news @'SimpleX Directory'"
         bob <# "@'SimpleX Directory' link to join channel #news (signed):"
         _ <- getTermLine bob -- short link
@@ -2301,7 +2301,7 @@ testDirectoryChannelNameNotVerified ps = withSmpServerAndNames ps $ \reg ->
         superUser <## "To approve send:"
         superUser <# "'SimpleX Directory'> /approve 1:news 1"
   where
-    newsName = SimplexNameInfo NTPublicGroup (SimplexDomain TLDSimplex "news" [])
+    newsName = PopopxNameInfo NTPublicGroup (PopopxDomain TLDPopopx "news" [])
 
 testLinkAsTextSearch :: HasCallStack => TestParams -> IO ()
 testLinkAsTextSearch ps =

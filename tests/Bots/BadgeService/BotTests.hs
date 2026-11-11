@@ -26,8 +26,8 @@ import BadgeService.Store (IssuedCode (..), getBadgeCode)
 import BadgeService.Store.Invoices (markCodePaid, truncateToSecond)
 import BadgeService.StoreReceipts (StoreCharge (..), StoreChecks (..), StoreRefusal (..), StoreVerifier (..), SubscriptionCheck (..), SubscriptionRef (..), checkStoreSubscription, noStoreVerifier)
 import BadgeService.StoreReceipts.Mock (newMockStoreVerifier)
-import Simplex.Messaging.Agent.Store.DB (Binary (..))
-import qualified Simplex.Messaging.Agent.Store.DB as DB
+import Popopx.Messaging.Agent.Store.DB (Binary (..))
+import qualified Popopx.Messaging.Agent.Store.DB as DB
 import ChatClient
 import ChatTests.DBUtils
 import ChatTests.Utils
@@ -58,33 +58,33 @@ import Data.Time.Clock (NominalDiffTime, UTCTime (..), addUTCTime, diffUTCTime, 
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime, utcTimeToPOSIXSeconds)
 import Data.Time.Format (defaultTimeLocale, formatTime)
 import Data.Word (Word32)
-import Simplex.Chat.Badges (BadgeCredential (..), BadgeInfo (..), BadgeMasterKey, BadgeType (..), badgeGraceInterval, generateMasterKey)
-import Simplex.Chat.Badges.Code (BadgeCode, badgeCodeHash, badgeCodeText, formatBadgeCode, parseBadgeCode, randomBadgeCode)
-import Simplex.Chat.Badges.Ledger (addMonths, balanceChecked, creditTypeTag, debitTypeTag, emptyEntry, endOfMondayAfter)
-import qualified Simplex.Chat.Badges.Ledger as L
-import Simplex.Chat.Badges.Service
-import Simplex.Chat.Badges.Types (BadgeCodePaymentStatus (..))
-import qualified Simplex.Chat.Badges.Types as BT
-import Simplex.Chat.Bot.Store (withDB')
-import Simplex.Chat.Controller (ChatConfig (..), ChatController (..), ChatError (..), ChatErrorType (..), ChatResponse (CRBadgeState, CRCustomChatResponse))
-import Simplex.Chat.Core (sendChatCmdStr)
-import Simplex.Chat.Library.Commands (heldChargeAttempts, resumeHoldLimit, subscriptionRecoveryWindow)
-import Simplex.Chat.Options (ChatOpts (..), CoreChatOpts (..))
-import Simplex.Chat.Options.DB
-import Simplex.Chat.PaymentService (ServicePayment (..), googlePurchaseRef)
-import Simplex.Chat.PaymentService.Types (InvoiceId (..), PaymentProvider (PPGoogle), StoreTransactionRef (StoreTransactionRef))
-import Simplex.Chat.Store.Badges (StoreHoldKind (..), clearShownBadge, getLatestIssuedCredential, getNextHeldStoreReceipt, holdStoreReceipt, holdStoreTransfer, reholdStoreReceipt, storeReceiptHeldFor)
-import Simplex.Chat.Store.Profiles (getUser, setUserBadge)
-import Simplex.Messaging.Agent (disposeAgentClient)
-import Simplex.Messaging.Agent.Env.SQLite (AgentConfig (..))
-import Simplex.Messaging.Agent.RetryInterval (RetryInterval (..))
-import Simplex.Messaging.Agent.Store.Common (DBStore, withTransaction)
-import Simplex.Messaging.Agent.Store.DB (BoolInt (..))
-import Simplex.Chat.Types (ChatPeerType (..), Profile (..))
-import qualified Simplex.Messaging.Crypto as C
-import Simplex.Messaging.Crypto.BBS (BBSSecretKey, bbsKeyGen)
-import Simplex.Messaging.Encoding.String (strDecode, strEncode, textEncode)
-import Simplex.Messaging.Util (safeDecodeUtf8, tshow)
+import Popopx.Chat.Badges (BadgeCredential (..), BadgeInfo (..), BadgeMasterKey, BadgeType (..), badgeGraceInterval, generateMasterKey)
+import Popopx.Chat.Badges.Code (BadgeCode, badgeCodeHash, badgeCodeText, formatBadgeCode, parseBadgeCode, randomBadgeCode)
+import Popopx.Chat.Badges.Ledger (addMonths, balanceChecked, creditTypeTag, debitTypeTag, emptyEntry, endOfMondayAfter)
+import qualified Popopx.Chat.Badges.Ledger as L
+import Popopx.Chat.Badges.Service
+import Popopx.Chat.Badges.Types (BadgeCodePaymentStatus (..))
+import qualified Popopx.Chat.Badges.Types as BT
+import Popopx.Chat.Bot.Store (withDB')
+import Popopx.Chat.Controller (ChatConfig (..), ChatController (..), ChatError (..), ChatErrorType (..), ChatResponse (CRBadgeState, CRCustomChatResponse))
+import Popopx.Chat.Core (sendChatCmdStr)
+import Popopx.Chat.Library.Commands (heldChargeAttempts, resumeHoldLimit, subscriptionRecoveryWindow)
+import Popopx.Chat.Options (ChatOpts (..), CoreChatOpts (..))
+import Popopx.Chat.Options.DB
+import Popopx.Chat.PaymentService (ServicePayment (..), googlePurchaseRef)
+import Popopx.Chat.PaymentService.Types (InvoiceId (..), PaymentProvider (PPGoogle), StoreTransactionRef (StoreTransactionRef))
+import Popopx.Chat.Store.Badges (StoreHoldKind (..), clearShownBadge, getLatestIssuedCredential, getNextHeldStoreReceipt, holdStoreReceipt, holdStoreTransfer, reholdStoreReceipt, storeReceiptHeldFor)
+import Popopx.Chat.Store.Profiles (getUser, setUserBadge)
+import Popopx.Messaging.Agent (disposeAgentClient)
+import Popopx.Messaging.Agent.Env.SQLite (AgentConfig (..))
+import Popopx.Messaging.Agent.RetryInterval (RetryInterval (..))
+import Popopx.Messaging.Agent.Store.Common (DBStore, withTransaction)
+import Popopx.Messaging.Agent.Store.DB (BoolInt (..))
+import Popopx.Chat.Types (ChatPeerType (..), Profile (..))
+import qualified Popopx.Messaging.Crypto as C
+import Popopx.Messaging.Crypto.BBS (BBSSecretKey, bbsKeyGen)
+import Popopx.Messaging.Encoding.String (strDecode, strEncode, textEncode)
+import Popopx.Messaging.Util (safeDecodeUtf8, tshow)
 import Data.X509 (encodeSignedObject)
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath (takeDirectory, (</>))

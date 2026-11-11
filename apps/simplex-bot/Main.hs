@@ -2,11 +2,11 @@
 
 module Main where
 
-import Simplex.Chat.Bot
-import Simplex.Chat.Controller (versionNumber)
-import Simplex.Chat.Core
-import Simplex.Chat.Options
-import Simplex.Chat.Terminal (terminalChatConfig)
+import Popopx.Chat.Bot
+import Popopx.Chat.Controller (versionNumber)
+import Popopx.Chat.Core
+import Popopx.Chat.Options
+import Popopx.Chat.Terminal (terminalChatConfig)
 import System.Directory (getAppUserDataDirectory)
 import Text.Read
 

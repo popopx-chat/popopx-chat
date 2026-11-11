@@ -239,7 +239,7 @@ const chatFieldSchemas: Schema = {
 const connectSchema: Schema = {
   type: "object",
   properties: {
-    target: {type: "string", minLength: 1, description: "A SimpleX link (https://..., simplex:/...), a contact name such as @directory.simplex, or a channel name such as #name.simplex."},
+    target: {type: "string", minLength: 1, description: "A SimpleX link (https://..., popopx:/...), a contact name such as @directory.popopx, or a channel name such as #name.simplex."},
     incognito: {type: "boolean", description: "true: connect with a new random profile for this chat only, so peers of different chats can't link them. Pass true unless your user asked you to connect as your profile; omitted, it is false."},
     message: {type: "string", minLength: 1, maxLength: 2000, description: "A first message sent with the contact request; only for contact and business addresses that carry a profile in the link. Include one only when your user asked for it."},
     wait: {type: "number", minimum: 0, maximum: 86400, description: "Seconds from the approval to wait for the other side to accept and, with message, for its first reply; the call returns when they end at the latest. Default 60. Keep it below the host's tool-call time limit."},
@@ -1259,7 +1259,7 @@ function connRef(response: JoinResponse): ConnRef {
 
 export function classifyPlan(r: ConnectionPlan, {target, message}: ConnectInput): Plan {
   const [plan, connLink, planSimplexName] = r
-  const named = target.startsWith("@") || target.startsWith("#") || target.startsWith("simplex:/name")
+  const named = target.startsWith("@") || target.startsWith("#") || target.startsWith("popopx:/name")
   const simplexName = named ? target : undefined
   const domain = planSimplexName === undefined ? undefined : fullDomainName(planSimplexName.nameDomain)
   const connect: JoinMethod = {type: "connect", connLink}

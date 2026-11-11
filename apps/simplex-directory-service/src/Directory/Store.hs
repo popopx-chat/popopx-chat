@@ -68,21 +68,21 @@ import qualified Data.Text as T
 import Data.Text.Encoding (encodeUtf8)
 import Data.Time.Clock (UTCTime (..), getCurrentTime)
 import Directory.Search
-import Simplex.Chat.Bot.Store
-import Simplex.Chat.Controller
-import Simplex.Chat.Names (claimDomain)
-import Simplex.Chat.Options.DB (FromField (..), ToField (..))
-import Simplex.Chat.Store
-import Simplex.Chat.Store.Groups
-import Simplex.Chat.Store.Shared (GroupKeysRow, groupInfoQueryFields, groupInfoQueryFrom, mkGroupInfoKeys, toGroupInfo_)
-import Simplex.Chat.Types
-import Simplex.Chat.Types.Shared (GroupMemberRole (..))
-import Simplex.Messaging.Agent.Protocol (CreatedConnLink (..), SimplexDomain)
-import Simplex.Messaging.Agent.Store.DB (BoolInt (..), fromTextField_)
-import qualified Simplex.Messaging.Agent.Store.DB as DB
-import Simplex.Messaging.Encoding.String
-import Simplex.Messaging.Parsers (defaultJSON, dropPrefix, enumJSON)
-import Simplex.Messaging.Util (eitherToMaybe, firstRow, maybeFirstRow', safeDecodeUtf8)
+import Popopx.Chat.Bot.Store
+import Popopx.Chat.Controller
+import Popopx.Chat.Names (claimDomain)
+import Popopx.Chat.Options.DB (FromField (..), ToField (..))
+import Popopx.Chat.Store
+import Popopx.Chat.Store.Groups
+import Popopx.Chat.Store.Shared (GroupKeysRow, groupInfoQueryFields, groupInfoQueryFrom, mkGroupInfoKeys, toGroupInfo_)
+import Popopx.Chat.Types
+import Popopx.Chat.Types.Shared (GroupMemberRole (..))
+import Popopx.Messaging.Agent.Protocol (CreatedConnLink (..), PopopxDomain)
+import Popopx.Messaging.Agent.Store.DB (BoolInt (..), fromTextField_)
+import qualified Popopx.Messaging.Agent.Store.DB as DB
+import Popopx.Messaging.Encoding.String
+import Popopx.Messaging.Parsers (defaultJSON, dropPrefix, enumJSON)
+import Popopx.Messaging.Util (eitherToMaybe, firstRow, maybeFirstRow', safeDecodeUtf8)
 
 #if defined(dbPostgres)
 import Database.PostgreSQL.Simple (Only (..), Query, (:.) (..))
@@ -204,7 +204,7 @@ grDirectoryStatus = \case
   GRSRemoved -> DSRemoved
   _ -> DSRegistered
 
-verifiedGroupDomain :: GroupInfo -> Maybe SimplexDomain
+verifiedGroupDomain :: GroupInfo -> Maybe PopopxDomain
 verifiedGroupDomain GroupInfo {groupProfile = GroupProfile {publicGroup}, groupDomainVerified}
   | groupDomainVerified == Just True = claimDomain <$> (publicGroup >>= publicGroupAccess >>= groupDomainClaim)
   | otherwise = Nothing

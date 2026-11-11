@@ -41,9 +41,9 @@ import Data.IORef (IORef, atomicModifyIORef', modifyIORef', newIORef, readIORef,
 import qualified Data.Map.Strict as M
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
-import Simplex.Chat.PaymentService (ServicePayment (..), appleTransactionRef, googlePurchaseRef)
-import Simplex.Chat.PaymentService.Types (CurrencyAmount (..))
-import Simplex.Messaging.Util (safeDecodeUtf8)
+import Popopx.Chat.PaymentService (ServicePayment (..), appleTransactionRef, googlePurchaseRef)
+import Popopx.Chat.PaymentService.Types (CurrencyAmount (..))
+import Popopx.Messaging.Util (safeDecodeUtf8)
 import System.FilePath ((</>))
 
 fixtureDir :: FilePath

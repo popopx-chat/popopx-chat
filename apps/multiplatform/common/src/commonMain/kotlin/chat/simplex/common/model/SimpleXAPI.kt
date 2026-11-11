@@ -2011,7 +2011,7 @@ object ChatController {
     }
   }
 
-  // name is the encoded SimplexName (e.g. "@alice.simplex"); null clears it. Throws on rejection.
+  // name is the encoded SimplexName (e.g. "@alice.popopx"); null clears it. Throws on rejection.
   suspend fun apiSetUserDomain(rh: Long?, simplexDomain: String?): User {
     val userId = currentUserId("apiSetUserDomain")
     val r = sendCmd(rh, CC.ApiSetUserDomain(userId, simplexDomain))
@@ -7484,7 +7484,7 @@ data class CreatedConnLink(val connFullLink: String, val connShortLink: String?)
 }
 
 fun simplexChatLink(uri: String): String =
-  if (uri.startsWith("simplex:/")) uri.replace("simplex:/", "https://simplex.chat/")
+  if (uri.startsWith("popopx:/")) uri.replace("popopx:/", "https://simplex.chat/")
   else uri
 
 @Serializable

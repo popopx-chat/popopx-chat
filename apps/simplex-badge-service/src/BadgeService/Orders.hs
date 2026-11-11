@@ -13,9 +13,9 @@ import Data.ByteString (ByteString)
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import Data.Time.Clock (NominalDiffTime, UTCTime, addUTCTime)
-import Simplex.Chat.PaymentService.Types (CurrencyAmount (..), InvoiceId, InvoiceStatus (..), PaymentStatus (..))
-import Simplex.Messaging.Agent.Store.Common (DBStore, withTransaction)
-import qualified Simplex.Messaging.Agent.Store.DB as DB
+import Popopx.Chat.PaymentService.Types (CurrencyAmount (..), InvoiceId, InvoiceStatus (..), PaymentStatus (..))
+import Popopx.Messaging.Agent.Store.Common (DBStore, withTransaction)
+import qualified Popopx.Messaging.Agent.Store.DB as DB
 
 -- | Written onto the row at settlement and read back, so changing it moves only codes sold afterwards.
 codeLifetime :: NominalDiffTime

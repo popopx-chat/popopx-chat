@@ -51,9 +51,9 @@ import Data.Time.Calendar (fromGregorian)
 import Data.Time.Clock (UTCTime (..))
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import Data.X509
-import Simplex.Chat.Badges.Service (SubscriptionState (..))
-import Simplex.Chat.PaymentService (ServicePayment (..), appleTransactionRef, googlePurchaseRef)
-import Simplex.Chat.PaymentService.Types (CurrencyAmount (..))
+import Popopx.Chat.Badges.Service (SubscriptionState (..))
+import Popopx.Chat.PaymentService (ServicePayment (..), appleTransactionRef, googlePurchaseRef)
+import Popopx.Chat.PaymentService.Types (CurrencyAmount (..))
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath (takeDirectory, (</>))
 import Test.Hspec

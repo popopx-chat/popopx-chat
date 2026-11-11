@@ -16,12 +16,12 @@ import qualified Data.ByteString.Lazy.Char8 as LB
 import Data.Either (isLeft, isRight)
 import qualified Data.Text as T
 import Data.Word (Word32)
-import Simplex.Chat.Image
-import Simplex.Chat.Library.Commands (fixedImagePreview, imagePreview)
-import Simplex.Chat.Types (ImageData (..))
-import qualified Simplex.Messaging.Crypto as C
-import Simplex.Messaging.Crypto.File (CryptoFile (..))
-import qualified Simplex.Messaging.Crypto.File as CF
+import Popopx.Chat.Image
+import Popopx.Chat.Library.Commands (fixedImagePreview, imagePreview)
+import Popopx.Chat.Types (ImageData (..))
+import qualified Popopx.Messaging.Crypto as C
+import Popopx.Messaging.Crypto.File (CryptoFile (..))
+import qualified Popopx.Messaging.Crypto.File as CF
 import System.FilePath ((</>))
 import Test.Hspec
 import UnliftIO.STM (atomically)
@@ -446,7 +446,7 @@ transparentGradient :: Image PixelRGBA8
 transparentGradient = generateImage (\x y -> PixelRGBA8 (fromIntegral $ x * 4) (fromIntegral $ y * 5) 128 (fromIntegral $ 255 - x)) 64 48
 
 displayP3File :: FilePath
-displayP3File = "src/Simplex/Chat/Image/DisplayP3-v4.icc"
+displayP3File = "src/Popopx/Chat/Image/DisplayP3-v4.icc"
 
 p3Profile :: B.ByteString
 p3Profile = iccProfile "RGB " p3Primaries

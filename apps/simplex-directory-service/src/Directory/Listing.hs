@@ -34,12 +34,12 @@ import Data.Time.Clock
 import Data.Time.Clock.System
 import Data.Time.Format.ISO8601 (iso8601Show)
 import Directory.Store
-import Simplex.Chat.Markdown
-import Simplex.Chat.Types
-import Simplex.Chat.View (simplexChatContact)
-import Simplex.Messaging.Agent.Protocol
-import Simplex.Messaging.Encoding.String
-import Simplex.Messaging.Parsers (defaultJSON, dropPrefix, taggedObjectJSON)
+import Popopx.Chat.Markdown
+import Popopx.Chat.Types
+import Popopx.Chat.View (simplexChatContact)
+import Popopx.Messaging.Agent.Protocol
+import Popopx.Messaging.Encoding.String
+import Popopx.Messaging.Parsers (defaultJSON, dropPrefix, taggedObjectJSON)
 import System.Directory
 import System.FilePath
 
@@ -143,7 +143,7 @@ groupDirectoryEntry now g@GroupInfo {groupProfile, chatTs, createdAt, groupSumma
               DirectoryEntry
                 { entryType,
                   displayName,
-                  simplexName = shortNameInfoStr . SimplexNameInfo NTPublicGroup <$> verifiedGroupDomain g,
+                  simplexName = shortNameInfoStr . PopopxNameInfo NTPublicGroup <$> verifiedGroupDomain g,
                   groupLink,
                   shortDescr = fst <$> shortDescr',
                   shortDescrBlocks = snd =<< shortDescr',

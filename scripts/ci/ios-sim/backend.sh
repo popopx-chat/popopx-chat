@@ -283,7 +283,7 @@ start_names() {
 register_name() {
   local name=$1 contact=$2 channel=$3
   jq --arg n "$name" --arg ct "$contact" --arg ch "$channel" \
-    '.[$n] = {simplexContact: ([$ct] | map(select(. != ""))), simplexChannel: ([$ch] | map(select(. != "")))}' \
+    '.[$n] = {popopxContact: ([$ct] | map(select(. != ""))), popopxChannel: ([$ch] | map(select(. != "")))}' \
     "$work/names.json" > "$work/names.json.new"
   mv "$work/names.json.new" "$work/names.json"
 }

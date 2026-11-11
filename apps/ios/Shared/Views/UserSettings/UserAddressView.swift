@@ -1005,7 +1005,7 @@ struct SetSimplexDomainView: View {
     }
 
     private func addSimplexTLD(_ d: String) -> String {
-        if d.contains(".") { d } else { "\(d).simplex" }
+        if d.contains(".") { d } else { "\(d).popopx" }
     }
 
     private func isValidSimplexDomain(_ s: String) -> Bool {

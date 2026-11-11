@@ -6,7 +6,7 @@ import BadgeService.Options (BadgeServiceOpts (..))
 import BadgeService.Service
 import Control.Logger.Simple (LogConfig (..), LogLevel (..), setLogLevel, withGlobalLogging)
 import GHC.IO.Encoding (setLocaleEncoding)
-import Simplex.Chat.Terminal (terminalChatConfig)
+import Popopx.Chat.Terminal (terminalChatConfig)
 import System.IO (hSetEncoding, stderr, stdout, utf8)
 
 -- | withGlobalLogging installs the SMP agent's log sinks, which the chat core otherwise installs only under --log-agent.

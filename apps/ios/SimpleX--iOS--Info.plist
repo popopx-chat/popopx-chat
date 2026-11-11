@@ -39,7 +39,7 @@
 			<string>com.popopxchat.popopx</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>simplex</string>
+				<string>popopx</string>
 			</array>
 		</dict>
 		<dict>

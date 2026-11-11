@@ -4782,7 +4782,7 @@ export enum SimplexNameType {
 }
 
 export enum SimplexTLD {
-  Simplex = "simplex",
+  Popopx = "popopx",
   Testing = "testing",
   Web = "web",
 }

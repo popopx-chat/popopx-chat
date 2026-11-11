@@ -57,7 +57,7 @@ describe("APIPrepareContact.cmdString", () => {
   const contactSLinkData = {profile: {displayName: "bob", fullName: ""}, business: false}
 
   it("renders the verified domain", () => {
-    expect(CC.APIPrepareContact.cmdString({userId: 1, connLink, verifiedDomain: "biz.simplex", contactSLinkData})).toBe(`/_prepare contact 1 F S domain=biz.simplex ${JSON.stringify(contactSLinkData)}`)
+    expect(CC.APIPrepareContact.cmdString({userId: 1, connLink, verifiedDomain: "biz.popopx", contactSLinkData})).toBe(`/_prepare contact 1 F S domain=biz.popopx ${JSON.stringify(contactSLinkData)}`)
   })
 
   it("omits the domain", () => {
@@ -70,7 +70,7 @@ describe("APIPrepareGroup.cmdString", () => {
   const groupSLinkData = {groupProfile: {displayName: "team", fullName: ""}}
 
   it("renders direct=off for a channel", () => {
-    expect(CC.APIPrepareGroup.cmdString({userId: 1, connLinkContact, direct: false, verifiedDomain: "news.simplex", groupSLinkData})).toBe(`/_prepare group 1 F S direct=off domain=news.simplex ${JSON.stringify(groupSLinkData)}`)
+    expect(CC.APIPrepareGroup.cmdString({userId: 1, connLinkContact, direct: false, verifiedDomain: "news.popopx", groupSLinkData})).toBe(`/_prepare group 1 F S direct=off domain=news.popopx ${JSON.stringify(groupSLinkData)}`)
   })
 
   it("omits direct for a group", () => {

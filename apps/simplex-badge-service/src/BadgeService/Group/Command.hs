@@ -25,12 +25,12 @@ import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Text.Encoding (encodeUtf8)
-import Simplex.Chat.Badges (BadgeType (..))
-import Simplex.Chat.Badges.Code (BadgeCode, parseBadgeCode)
-import Simplex.Chat.Types.Preferences (ChatBotCommand (..))
-import Simplex.Chat.Types.Shared (GroupMemberRole (..))
-import Simplex.Messaging.Encoding.String (TextEncoding (..))
-import Simplex.Messaging.Util (safeDecodeUtf8)
+import Popopx.Chat.Badges (BadgeType (..))
+import Popopx.Chat.Badges.Code (BadgeCode, parseBadgeCode)
+import Popopx.Chat.Types.Preferences (ChatBotCommand (..))
+import Popopx.Chat.Types.Shared (GroupMemberRole (..))
+import Popopx.Messaging.Encoding.String (TextEncoding (..))
+import Popopx.Messaging.Util (safeDecodeUtf8)
 
 maxBulk, maxUses, maxMonths :: Int
 maxBulk = 100

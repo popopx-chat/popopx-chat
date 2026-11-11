@@ -641,7 +641,7 @@ struct MigrateToDevice: View {
     }
 
     private func strHasSimplexFileLink(_ text: String) -> Bool {
-        text.starts(with: "simplex:/file") || text.starts(with: "https://simplex.chat/file")
+        text.starts(with: "popopx:/file") || text.starts(with: "https://simplex.chat/file")
     }
 
     private static func urlForTemporaryDatabase() -> URL {

@@ -30,27 +30,27 @@ import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import qualified Data.Aeson as J
 import qualified Data.Aeson.KeyMap as KM
 import Data.Maybe (fromMaybe, isJust, isNothing, maybeToList)
-import qualified Simplex.Messaging.Crypto as C
-import Simplex.Chat.Badges
-import Simplex.Chat.Badges.Code
-import Simplex.Chat.Badges.Ledger
-import Simplex.Chat.Badges.Service
-import Simplex.Chat.Badges.Types (BadgeAlertKind (..), BadgeIssueError (..), BadgeIssueFailure (..), BadgeSubscription (..))
-import qualified Simplex.Chat.Badges.Types as BT
-import Simplex.Chat (defaultChatConfig)
-import Simplex.Chat.Controller (BadgeRedeemError (..), ChatError (..), ChatErrorType (..), badgeRetryInterval, chatErrorAgent)
-import Simplex.Chat.Library.Commands (badgeErrorRetry, badgeFailureTransient, badgeIssueFailure, badgeRenewal, badgeRetryAfter, badgeServiceErrorText, badgeStalledInterval, boundedSubscriptionState, derivedBadgeAlert, resumableCharge, resumeHoldEnded, storeTransactionRef)
-import Simplex.Chat.PaymentService (AppleTransactionFacts (..), ServicePayment (..), appleTransactionFacts, appleTransactionRef)
-import Simplex.Chat.PaymentService.Types (InvoiceId (..), PaymentProvider (..), StoreTransactionRef (..))
-import qualified Simplex.Chat.Store.Badges as SB
-import Simplex.Chat.Types (BoolDef (..))
-import Simplex.Messaging.Agent.Protocol (AgentErrorType (..), AgentServiceError (..), SMPAgentError (..))
-import Simplex.Messaging.Agent.RetryInterval (RetryInterval (..), nextRetryDelay)
-import Simplex.Messaging.Crypto.BBS
-import Simplex.Messaging.Encoding.String
-import Simplex.Messaging.Protocol (BrokerErrorType (..), ErrorType (AUTH), NetworkError (..))
-import Simplex.Messaging.Util (safeDecodeUtf8, tshow)
-import Simplex.Messaging.Version.Internal (Version (..))
+import qualified Popopx.Messaging.Crypto as C
+import Popopx.Chat.Badges
+import Popopx.Chat.Badges.Code
+import Popopx.Chat.Badges.Ledger
+import Popopx.Chat.Badges.Service
+import Popopx.Chat.Badges.Types (BadgeAlertKind (..), BadgeIssueError (..), BadgeIssueFailure (..), BadgeSubscription (..))
+import qualified Popopx.Chat.Badges.Types as BT
+import Popopx.Chat (defaultChatConfig)
+import Popopx.Chat.Controller (BadgeRedeemError (..), ChatError (..), ChatErrorType (..), badgeRetryInterval, chatErrorAgent)
+import Popopx.Chat.Library.Commands (badgeErrorRetry, badgeFailureTransient, badgeIssueFailure, badgeRenewal, badgeRetryAfter, badgeServiceErrorText, badgeStalledInterval, boundedSubscriptionState, derivedBadgeAlert, resumableCharge, resumeHoldEnded, storeTransactionRef)
+import Popopx.Chat.PaymentService (AppleTransactionFacts (..), ServicePayment (..), appleTransactionFacts, appleTransactionRef)
+import Popopx.Chat.PaymentService.Types (InvoiceId (..), PaymentProvider (..), StoreTransactionRef (..))
+import qualified Popopx.Chat.Store.Badges as SB
+import Popopx.Chat.Types (BoolDef (..))
+import Popopx.Messaging.Agent.Protocol (AgentErrorType (..), AgentServiceError (..), SMPAgentError (..))
+import Popopx.Messaging.Agent.RetryInterval (RetryInterval (..), nextRetryDelay)
+import Popopx.Messaging.Crypto.BBS
+import Popopx.Messaging.Encoding.String
+import Popopx.Messaging.Protocol (BrokerErrorType (..), ErrorType (AUTH), NetworkError (..))
+import Popopx.Messaging.Util (safeDecodeUtf8, tshow)
+import Popopx.Messaging.Version.Internal (Version (..))
 import Test.Hspec
 
 badgeTests :: Spec

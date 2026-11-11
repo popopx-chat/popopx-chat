@@ -70,29 +70,29 @@ import Data.Maybe (fromMaybe, isJust, isNothing, maybeToList)
 import qualified Data.Text as T
 import Data.Time.Clock (NominalDiffTime, UTCTime, addUTCTime, diffUTCTime, getCurrentTime)
 import Data.Word (Word32)
-import Simplex.Chat.Badges
-import Simplex.Chat.Badges.Code
-import Simplex.Chat.Badges.Ledger
-import Simplex.Chat.Badges.Service
-import Simplex.Chat.Badges.StorePlan (storePlan)
-import Simplex.Chat.Badges.Types (BadgeCodePaymentStatus (..))
-import Simplex.Chat.Bot (initializeBotAddress')
-import Simplex.Chat.Bot.Store (withDB, withDB')
-import Simplex.Chat.Controller
-import Simplex.Chat.Core (sendChatCmd, simplexChatCore)
-import Simplex.Chat.Options (printDbOpts)
-import Simplex.Chat.PaymentService (AppleTransactionFacts (..), ServicePayment (..), appleTransactionFacts)
-import Simplex.Chat.PaymentService.Types (PaymentProvider (..), StoreTransactionRef (..))
-import Simplex.Chat.Terminal (terminalChatConfig)
-import Simplex.Chat.Terminal.Main (simplexChatCLI')
-import Simplex.Chat.Types (AgentInvId (..), User (..))
-import Simplex.Messaging.Agent.Store.Common (DBStore)
-import qualified Simplex.Messaging.Agent.Store.DB as DB
-import qualified Simplex.Messaging.Crypto as C
-import Simplex.Messaging.Crypto.BBS (bbsPublicKey)
-import Simplex.Messaging.Encoding.String (strEncode)
-import Simplex.Messaging.Util (catchOwn', raceAny_, safeDecodeUtf8, stateTVar', tshow)
-import Simplex.Messaging.Version (isCompatible)
+import Popopx.Chat.Badges
+import Popopx.Chat.Badges.Code
+import Popopx.Chat.Badges.Ledger
+import Popopx.Chat.Badges.Service
+import Popopx.Chat.Badges.StorePlan (storePlan)
+import Popopx.Chat.Badges.Types (BadgeCodePaymentStatus (..))
+import Popopx.Chat.Bot (initializeBotAddress')
+import Popopx.Chat.Bot.Store (withDB, withDB')
+import Popopx.Chat.Controller
+import Popopx.Chat.Core (sendChatCmd, simplexChatCore)
+import Popopx.Chat.Options (printDbOpts)
+import Popopx.Chat.PaymentService (AppleTransactionFacts (..), ServicePayment (..), appleTransactionFacts)
+import Popopx.Chat.PaymentService.Types (PaymentProvider (..), StoreTransactionRef (..))
+import Popopx.Chat.Terminal (terminalChatConfig)
+import Popopx.Chat.Terminal.Main (simplexChatCLI')
+import Popopx.Chat.Types (AgentInvId (..), User (..))
+import Popopx.Messaging.Agent.Store.Common (DBStore)
+import qualified Popopx.Messaging.Agent.Store.DB as DB
+import qualified Popopx.Messaging.Crypto as C
+import Popopx.Messaging.Crypto.BBS (bbsPublicKey)
+import Popopx.Messaging.Encoding.String (strEncode)
+import Popopx.Messaging.Util (catchOwn', raceAny_, safeDecodeUtf8, stateTVar', tshow)
+import Popopx.Messaging.Version (isCompatible)
 import System.Directory (getAppUserDataDirectory)
 import System.Exit (exitFailure)
 

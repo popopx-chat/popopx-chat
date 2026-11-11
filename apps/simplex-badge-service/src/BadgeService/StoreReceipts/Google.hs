@@ -35,11 +35,11 @@ import Data.X509.Memory (readKeyFileFromMemory)
 import Network.HTTP.Client (Manager, Request (..), RequestBody (..))
 import Network.HTTP.Client.TLS (newTlsManager)
 import Network.HTTP.Types (hAuthorization, hContentType, methodPost, renderSimpleQuery)
-import Simplex.Chat.Badges.Ledger (addMonths)
-import Simplex.Chat.Badges.Service (SubscriptionState (..))
-import Simplex.Chat.Badges.StorePlan (playBasePlan)
-import Simplex.Chat.PaymentService (googlePurchaseRef)
-import Simplex.Messaging.Util (tshow)
+import Popopx.Chat.Badges.Ledger (addMonths)
+import Popopx.Chat.Badges.Service (SubscriptionState (..))
+import Popopx.Chat.Badges.StorePlan (playBasePlan)
+import Popopx.Chat.PaymentService (googlePurchaseRef)
+import Popopx.Messaging.Util (tshow)
 
 data ServiceAccount = ServiceAccount {clientEmail :: Text, privateKey :: RSA.PrivateKey}
 

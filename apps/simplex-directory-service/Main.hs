@@ -5,7 +5,7 @@ module Main where
 
 import Directory.Options
 import Directory.Service
-import Simplex.Chat.Terminal (terminalChatConfig)
+import Popopx.Chat.Terminal (terminalChatConfig)
 
 main :: IO ()
 main = do

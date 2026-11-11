@@ -478,7 +478,7 @@ class ChangesTest(GitRepoTest):
         self.assertEqual(self.builds("apps/ios/Shared/View.swift", "apps/multiplatform/common/Model.kt"), {"ios", "kotlin"})
 
     def test_core_change_builds_only_the_core(self):
-        self.assertEqual(self.builds("src/Simplex/Chat.hs"), {"haskell"})
+        self.assertEqual(self.builds("src/Popopx/Chat.hs"), {"haskell"})
 
     def test_ios_stub_script_builds_only_ios(self):
         self.assertEqual(self.builds("scripts/ci/ios-stub-libs.sh"), {"ios"})

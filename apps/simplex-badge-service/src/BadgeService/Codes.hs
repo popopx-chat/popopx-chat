@@ -14,11 +14,11 @@ import BadgeService.Store.Invoices (truncateToSecond)
 import Data.Int (Int64)
 import Data.Text (Text)
 import Data.Time.Clock (getCurrentTime)
-import Simplex.Chat.Badges (BadgeType)
-import Simplex.Chat.Badges.Code (BadgeCode, badgeCodeHash, randomBadgeCode)
-import Simplex.Chat.Badges.Types (BadgeCodePaymentStatus)
-import Simplex.Chat.Bot.Store (withDB')
-import Simplex.Chat.Controller (ChatController (..))
+import Popopx.Chat.Badges (BadgeType)
+import Popopx.Chat.Badges.Code (BadgeCode, badgeCodeHash, randomBadgeCode)
+import Popopx.Chat.Badges.Types (BadgeCodePaymentStatus)
+import Popopx.Chat.Bot.Store (withDB')
+import Popopx.Chat.Controller (ChatController (..))
 
 singleUse :: Int
 singleUse = 1

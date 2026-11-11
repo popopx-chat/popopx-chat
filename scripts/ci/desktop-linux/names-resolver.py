@@ -2,7 +2,7 @@
 
 # A SimpleX name resolver for the test SMP server's [NAMES] section, as popopxmq's test resolver answers:
 # GET /v2/resolve/<query> with a NameResponse for every name, registered or not, and GET /health.
-# Names are read from the registry file on each request: {"<label>": {"simplexContact": [...], "simplexChannel": [...]}},
+# Names are read from the registry file on each request: {"<label>": {"popopxContact": [...], "popopxChannel": [...]}},
 # all under .testing. A v22 router asks by label hash, "[<keccak-256 hex>].testing", so names are matched by hash.
 # Usage: names-resolver.py <port> <registry .json>
 
@@ -71,8 +71,8 @@ def record(label, links):
         "nickname": "",
         "website": "",
         "location": "",
-        "simplexContact": links.get("simplexContact", []),
-        "simplexChannel": links.get("simplexChannel", []),
+        "popopxContact": links.get("popopxContact", []),
+        "popopxChannel": links.get("popopxChannel", []),
         "eth": None,
         "btc": None,
         "xmr": None,

@@ -26,25 +26,25 @@ import qualified Data.Map.Strict as M
 import Data.Maybe (isJust, isNothing)
 import qualified Data.Text as T
 import GHC.Conc (ThreadStatus (..), threadStatus)
-import Simplex.Chat.AppSettings (defaultAppSettings)
-import qualified Simplex.Chat.AppSettings as AS
-import Simplex.Chat.Call
-import Simplex.Chat.Controller (ChatConfig (..), ChatController (..), PresetServers (..))
-import Simplex.Chat.Messages (ChatItemId)
-import Simplex.Chat.Options
-import Simplex.Chat.Protocol (supportedChatVRange)
-import Simplex.Chat.Types (ContactId, VersionRangeChat, authErrDisableCount, sameVerificationCode, verificationCode, pattern VersionChat)
-import Simplex.Messaging.Agent.Env.SQLite
-import Simplex.Messaging.Agent.RetryInterval
-import qualified Simplex.Messaging.Agent.Store.DB as DB
-import Simplex.Messaging.Client (NetworkTimeout (..))
+import Popopx.Chat.AppSettings (defaultAppSettings)
+import qualified Popopx.Chat.AppSettings as AS
+import Popopx.Chat.Call
+import Popopx.Chat.Controller (ChatConfig (..), ChatController (..), PresetServers (..))
+import Popopx.Chat.Messages (ChatItemId)
+import Popopx.Chat.Options
+import Popopx.Chat.Protocol (supportedChatVRange)
+import Popopx.Chat.Types (ContactId, VersionRangeChat, authErrDisableCount, sameVerificationCode, verificationCode, pattern VersionChat)
+import Popopx.Messaging.Agent.Env.SQLite
+import Popopx.Messaging.Agent.RetryInterval
+import qualified Popopx.Messaging.Agent.Store.DB as DB
+import Popopx.Messaging.Client (NetworkTimeout (..))
 import Control.Concurrent.STM (atomically, readTVarIO)
-import qualified Simplex.Messaging.Crypto as C
-import Simplex.Messaging.Encoding.String (strEncode)
-import Simplex.Messaging.Server.Env.STM hiding (subscriptions)
-import Simplex.Messaging.Transport
-import Simplex.Messaging.Util (safeDecodeUtf8)
-import Simplex.Messaging.Version
+import qualified Popopx.Messaging.Crypto as C
+import Popopx.Messaging.Encoding.String (strEncode)
+import Popopx.Messaging.Server.Env.STM hiding (subscriptions)
+import Popopx.Messaging.Transport
+import Popopx.Messaging.Util (safeDecodeUtf8)
+import Popopx.Messaging.Version
 import System.Directory (copyFile, doesDirectoryExist, doesFileExist)
 import System.Mem.Weak (deRefWeak)
 import System.FilePath ((</>))
@@ -53,7 +53,7 @@ import Test.Hspec hiding (it)
 import Database.PostgreSQL.Simple (Only (..))
 #else
 import Database.SQLite.Simple (Only (..))
-import Simplex.Chat.Options.DB
+import Popopx.Chat.Options.DB
 #endif
 
 chatDirectTests :: SpecWith TestParams

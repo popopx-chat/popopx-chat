@@ -62,19 +62,19 @@ import Network.HTTP.Client (Manager, Request (..), RequestBody (..), Response, d
 import Network.HTTP.Types (Header, HeaderName, hCacheControl, hContentType)
 import Network.HTTP.Types.Status (statusCode)
 import qualified Network.Wai.Handler.Warp as Warp
-import Simplex.Chat.Badges (BadgeCredential (..), BadgeInfo (..), BadgeMasterKey (..), BadgeType (..))
-import Simplex.Chat.Badges.Ledger (addMonths, debitEntry, emptyEntry, grantEntry, issueEntry)
-import Simplex.Chat.Badges.Service (BadgeOffer (..), BadgePrice (..), StatementCreditType (..), StatementDebitType (..), StatementEntry (..), SubscriptionState (..))
-import Simplex.Chat.Badges.Types (BadgeCodePaymentStatus (..), BadgeItemStatus (..), BadgeOfferId (..), BadgePriceId (..), OfferDiscount (..))
-import Simplex.Chat.PaymentService.Types (CryptoCurrency (..), CurrencyAmount (..), InvoiceId (..), InvoiceStatus (..), PaymentProvider (..), PaymentStatus (..), ServicePaymentDestination (..), ServicePaymentMethod (..))
-import Simplex.Messaging.Agent.Store.Common (DBStore (..), withConnection, withTransaction)
-import qualified Simplex.Messaging.Agent.Store.DB as DB
-import Simplex.Messaging.Agent.Store.Interface
-import Simplex.Messaging.Agent.Store.Shared (Migration (..), MigrationConfig (..), MigrationConfirmation (..), MigrationsToRun (..), toDownMigration)
-import qualified Simplex.Messaging.Crypto as C
-import Simplex.Messaging.Crypto.BBS (BBSSignature (..))
-import Simplex.Messaging.Encoding.String (textDecode, textEncode)
-import Simplex.Messaging.Util (safeDecodeUtf8, tshow)
+import Popopx.Chat.Badges (BadgeCredential (..), BadgeInfo (..), BadgeMasterKey (..), BadgeType (..))
+import Popopx.Chat.Badges.Ledger (addMonths, debitEntry, emptyEntry, grantEntry, issueEntry)
+import Popopx.Chat.Badges.Service (BadgeOffer (..), BadgePrice (..), StatementCreditType (..), StatementDebitType (..), StatementEntry (..), SubscriptionState (..))
+import Popopx.Chat.Badges.Types (BadgeCodePaymentStatus (..), BadgeItemStatus (..), BadgeOfferId (..), BadgePriceId (..), OfferDiscount (..))
+import Popopx.Chat.PaymentService.Types (CryptoCurrency (..), CurrencyAmount (..), InvoiceId (..), InvoiceStatus (..), PaymentProvider (..), PaymentStatus (..), ServicePaymentDestination (..), ServicePaymentMethod (..))
+import Popopx.Messaging.Agent.Store.Common (DBStore (..), withConnection, withTransaction)
+import qualified Popopx.Messaging.Agent.Store.DB as DB
+import Popopx.Messaging.Agent.Store.Interface
+import Popopx.Messaging.Agent.Store.Shared (Migration (..), MigrationConfig (..), MigrationConfirmation (..), MigrationsToRun (..), toDownMigration)
+import qualified Popopx.Messaging.Crypto as C
+import Popopx.Messaging.Crypto.BBS (BBSSignature (..))
+import Popopx.Messaging.Encoding.String (textDecode, textEncode)
+import Popopx.Messaging.Util (safeDecodeUtf8, tshow)
 import System.Directory (createDirectoryIfMissing, createFileLink, doesFileExist, listDirectory)
 import System.FilePath ((</>))
 import System.IO (IOMode (..), hFlush, stderr, withFile)
@@ -88,14 +88,14 @@ import UnliftIO.Temporary (withTempDirectory)
 import BadgeService.Store.Postgres.Migrations (badgeServiceSchemaMigrations)
 import ChatClient (testDBConnstr)
 import Database.PostgreSQL.Simple (Only (..))
-import qualified Simplex.Messaging.Agent.Store.Postgres.Migrations as Migrations
+import qualified Popopx.Messaging.Agent.Store.Postgres.Migrations as Migrations
 #else
 import BadgeService.Store.SQLite.Migrations (badgeServiceSchemaMigrations)
 import Data.String (fromString)
 import Database.SQLite.Simple (Only (..))
 import qualified Database.SQLite.Simple as SQL
-import Simplex.Messaging.Agent.Store.DB (TrackQueries (..))
-import qualified Simplex.Messaging.Agent.Store.SQLite.Migrations as Migrations
+import Popopx.Messaging.Agent.Store.DB (TrackQueries (..))
+import qualified Popopx.Messaging.Agent.Store.SQLite.Migrations as Migrations
 #endif
 
 #if defined(dbPostgres)

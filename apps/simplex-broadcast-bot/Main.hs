@@ -2,8 +2,8 @@ module Main where
 
 import Broadcast.Bot
 import Broadcast.Options
-import Simplex.Chat.Core
-import Simplex.Chat.Terminal (terminalChatConfig)
+import Popopx.Chat.Core
+import Popopx.Chat.Terminal (terminalChatConfig)
 
 main :: IO ()
 main = do

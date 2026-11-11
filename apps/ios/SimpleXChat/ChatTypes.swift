@@ -3171,7 +3171,7 @@ public struct SimplexDomainClaim: Codable, Hashable {
     public var proof: SimplexDomainProof?
 
     public var shortName: String {
-        domain.hasSuffix(".simplex") ? String(domain.dropLast(".simplex".count)) : domain
+        domain.hasSuffix(".popopx") ? String(domain.dropLast(".popopx".count)) : domain
     }
 }
 
@@ -6045,7 +6045,7 @@ public struct SimplexNameInfo: Codable, Equatable, Hashable {
 
     // mirrors backend shortNameInfoStr: "#name" for a simplex public group, else prefix + full domain
     public var shortStr: String {
-        if nameType == .publicGroup && nameDomain.nameTLD == .simplex && nameDomain.subDomain.isEmpty {
+        if nameType == .publicGroup && nameDomain.nameTLD == .popopx && nameDomain.subDomain.isEmpty {
             return "#" + nameDomain.domain
         } else {
             return (nameType == .publicGroup ? "#" : "@") + nameDomain.fullDomainName
@@ -6067,7 +6067,7 @@ public struct SimplexDomain: Codable, Equatable, Hashable {
     public var fullDomainName: String {
         let tld: [String]
         switch nameTLD {
-        case .simplex: tld = ["simplex"]
+        case .popopx: tld = ["popopx"]
         case .testing: tld = ["testing"]
         case .web: tld = []
         }
@@ -6086,7 +6086,7 @@ public struct SimplexDomain: Codable, Equatable, Hashable {
 }
 
 public enum SimplexTLD: String, Codable, Hashable {
-    case simplex
+    case popopx
     case testing
     case web
 }

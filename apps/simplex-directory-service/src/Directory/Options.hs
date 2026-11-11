@@ -16,9 +16,9 @@ where
 
 import qualified Data.Text as T
 import Options.Applicative
-import Simplex.Chat.Bot.KnownContacts
-import Simplex.Chat.Controller (updateStr, versionNumber, versionString)
-import Simplex.Chat.Options (ChatCmdLog (..), ChatOpts (..), CoreChatOpts, CreateBotOpts (..), coreChatOptsP)
+import Popopx.Chat.Bot.KnownContacts
+import Popopx.Chat.Controller (updateStr, versionNumber, versionString)
+import Popopx.Chat.Options (ChatCmdLog (..), ChatOpts (..), CoreChatOpts, CreateBotOpts (..), coreChatOptsP)
 
 data DirectoryOpts = DirectoryOpts
   { coreOptions :: CoreChatOpts,

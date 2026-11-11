@@ -23,13 +23,13 @@ import GHC.Generics (Generic)
 import Network.Socket
 import qualified Network.WebSockets as WS
 import Numeric.Natural (Natural)
-import Simplex.Chat.Controller
-import Simplex.Chat.Core
-import Simplex.Chat.Library.Commands
-import Simplex.Chat.Options
-import Simplex.Messaging.Parsers (defaultJSON, dropPrefix, taggedObjectJSON)
-import Simplex.Messaging.Transport.Server (runLocalTCPServer)
-import Simplex.Messaging.Util (raceAny_)
+import Popopx.Chat.Controller
+import Popopx.Chat.Core
+import Popopx.Chat.Library.Commands
+import Popopx.Chat.Options
+import Popopx.Messaging.Parsers (defaultJSON, dropPrefix, taggedObjectJSON)
+import Popopx.Messaging.Transport.Server (runLocalTCPServer)
+import Popopx.Messaging.Util (raceAny_)
 import UnliftIO.Exception
 import UnliftIO.STM
 

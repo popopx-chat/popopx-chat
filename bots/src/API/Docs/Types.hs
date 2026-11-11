@@ -24,36 +24,36 @@ import Data.Maybe (fromMaybe, mapMaybe)
 import qualified Data.Set as S
 import Data.Text (Text)
 import GHC.Generics
-import Simplex.Chat.Controller
-import Simplex.Chat.Markdown
-import Simplex.Chat.Messages
-import Simplex.Chat.Messages.CIContent
-import Simplex.Chat.Messages.CIContent.Events
-import Simplex.Chat.Protocol
-import Simplex.Chat.Store.Profiles
-import Simplex.Chat.Store.Shared
-import Simplex.Chat.Operators
-import Simplex.Messaging.Agent.Store.Entity (DBStored (..))
-import Simplex.Chat.Badges
-import Simplex.Chat.Badges.Service
-import Simplex.Chat.Names
-import Simplex.Chat.Types
-import Simplex.Chat.Types.Preferences
-import Simplex.Chat.Types.Shared
-import Simplex.Chat.Types.UITheme
-import Simplex.FileTransfer.Transport
-import Simplex.FileTransfer.Types hiding (RcvFileStatus) -- the type with the same name is used in simplex-chat.
-import Simplex.Messaging.Agent.Env.SQLite (ServerRoles (..))
-import Simplex.Messaging.Agent.Protocol
-import Simplex.Messaging.Client
-import Simplex.Messaging.Crypto.File
-import Simplex.Messaging.Parsers (dropPrefix, fstToLower)
-import Simplex.Messaging.Protocol (BlockingInfo (..), BlockingReason (..), CommandError (..), ErrorType (..), NameErrorType (..), NetworkError (..), ProtocolType (..), ProxyError (..))
-import Simplex.Messaging.Protocol.Types (ClientNotice (..))
-import Simplex.Messaging.Transport
-import Simplex.Messaging.Transport.KeepAlive (KeepAliveOpts (..))
-import Simplex.Chat.Remote.Types (CtrlAppInfo (..))
-import Simplex.RemoteControl.Types
+import Popopx.Chat.Controller
+import Popopx.Chat.Markdown
+import Popopx.Chat.Messages
+import Popopx.Chat.Messages.CIContent
+import Popopx.Chat.Messages.CIContent.Events
+import Popopx.Chat.Protocol
+import Popopx.Chat.Store.Profiles
+import Popopx.Chat.Store.Shared
+import Popopx.Chat.Operators
+import Popopx.Messaging.Agent.Store.Entity (DBStored (..))
+import Popopx.Chat.Badges
+import Popopx.Chat.Badges.Service
+import Popopx.Chat.Names
+import Popopx.Chat.Types
+import Popopx.Chat.Types.Preferences
+import Popopx.Chat.Types.Shared
+import Popopx.Chat.Types.UITheme
+import Popopx.FileTransfer.Transport
+import Popopx.FileTransfer.Types hiding (RcvFileStatus) -- the type with the same name is used in simplex-chat.
+import Popopx.Messaging.Agent.Env.SQLite (ServerRoles (..))
+import Popopx.Messaging.Agent.Protocol
+import Popopx.Messaging.Client
+import Popopx.Messaging.Crypto.File
+import Popopx.Messaging.Parsers (dropPrefix, fstToLower)
+import Popopx.Messaging.Protocol (BlockingInfo (..), BlockingReason (..), CommandError (..), ErrorType (..), NameErrorType (..), NetworkError (..), ProtocolType (..), ProxyError (..))
+import Popopx.Messaging.Protocol.Types (ClientNotice (..))
+import Popopx.Messaging.Transport
+import Popopx.Messaging.Transport.KeepAlive (KeepAliveOpts (..))
+import Popopx.Chat.Remote.Types (CtrlAppInfo (..))
+import Popopx.RemoteControl.Types
 import System.Console.ANSI.Types (Color (..))
 
 data CTDoc = CTDoc
@@ -393,14 +393,14 @@ chatTypesDocsData =
     (sti @ServerRoles, STRecord, "", [], "", ""),
     (sti @ServerRolesOverride, STRecord, "", [], "", ""),
     (sti @SimplePreference, STRecord, "", [], "", ""),
-    (sti @SimplexDomain, STRecord, "", [], "", ""),
+    (sti @PopopxDomain, STRecord, "", [], "", ""),
     (sti @SimplexDomainClaim, STRecord, "", [], "", ""),
     (sti @SimplexDomainError, STUnion, "SDE", [], "", ""),
     (sti @SimplexDomainProof, STRecord, "", [], "", ""),
     (sti @SimplexLinkType, STEnum, "XL", [], "", ""),
-    (sti @SimplexNameInfo, STRecord, "", [], "", ""),
-    (sti @SimplexNameType, STEnum, "NT", [], "", ""),
-    (sti @SimplexTLD, STEnum, "TLD", [], "", ""),
+    (sti @PopopxNameInfo, STRecord, "", [], "", ""),
+    (sti @PopopxNameType, STEnum, "NT", [], "", ""),
+    (sti @PopopxTLD, STEnum, "TLD", [], "", ""),
     (sti @SMPAgentError, STUnion, "", [], "", ""),
     (sti @SMPProxyFallback, STEnum, "SPF", [], "", ""),
     (sti @SMPProxyMode, STEnum, "SPM", [], "", ""),
@@ -453,7 +453,7 @@ chatTypesDocsData =
     (sti @NavigationInfo, STRecord, "", [], "", ""),
     -- PTAfter / PTBefore are hidden — bots only need "tail last N chats".
     -- The wire format is parsed by paginationByTimeP in
-    -- src/Simplex/Chat/Library/Commands.hs.
+    -- src/Popopx/Chat/Library/Commands.hs.
     (sti @PaginationByTime, STUnion1, "PT", ["PTAfter", "PTBefore"], "count=" <> Param "count", ""),
     (sti @RcvQueueInfo, STRecord, "", [], "", ""),
     (sti @RcvSwitchStatus, STEnum' (consSnake "RS"), "", [], "", ""),
@@ -655,14 +655,14 @@ deriving instance Generic SegmentRange
 deriving instance Generic (ServerOperator' 'DBStored)
 deriving instance Generic ServerRoles
 deriving instance Generic ServerRolesOverride
-deriving instance Generic SimplexDomain
+deriving instance Generic PopopxDomain
 deriving instance Generic SimplexDomainClaim
 deriving instance Generic SimplexDomainError
 deriving instance Generic SimplexDomainProof
 deriving instance Generic SimplexLinkType
-deriving instance Generic SimplexNameInfo
-deriving instance Generic SimplexNameType
-deriving instance Generic SimplexTLD
+deriving instance Generic PopopxNameInfo
+deriving instance Generic PopopxNameType
+deriving instance Generic PopopxTLD
 deriving instance Generic SMPAgentError
 deriving instance Generic SMPProxyFallback
 deriving instance Generic SMPProxyMode

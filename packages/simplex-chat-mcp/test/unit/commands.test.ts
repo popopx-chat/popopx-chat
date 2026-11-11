@@ -100,7 +100,7 @@ describe("owner commands", () => {
 
   it("approves and rejects an action named with its chat", async () => {
     const {control, actions, action} = await setup()
-    const connect = actions.create("c", {tool: "connect", input: {target: "@directory.simplex"}, subject: {kind: "bot", name: "SimpleX Directory", incognito: false}, plan: {cardKind: "bot", type: "contact", takesMessage: true}, messages: new Collected()})
+    const connect = actions.create("c", {tool: "connect", input: {target: "@directory.popopx"}, subject: {kind: "bot", name: "SimpleX Directory", incognito: false}, plan: {cardKind: "bot", type: "contact", takesMessage: true}, messages: new Collected()})
     await settled()
     expect(await control.ownerCommand(alice, {keyword: "reject", params: "#2 5"})).toBe("Action 5 is not for #2.")
     expect(await control.ownerCommand(alice, {keyword: "approve", params: "@4 6"})).toBe("Action 6 is not for @4.")
@@ -126,7 +126,7 @@ describe("owner commands", () => {
 
   it("lists pending actions", async () => {
     const {control, action, actions} = await setup()
-    const connect = actions.create("c", {tool: "connect", input: {target: "@directory.simplex"}, subject: {kind: "bot", name: "SimpleX Directory", incognito: true}, plan: {cardKind: "bot", type: "contact", takesMessage: true}, messages: new Collected()})
+    const connect = actions.create("c", {tool: "connect", input: {target: "@directory.popopx"}, subject: {kind: "bot", name: "SimpleX Directory", incognito: true}, plan: {cardKind: "bot", type: "contact", takesMessage: true}, messages: new Collected()})
     const leave = actions.create("l", {tool: "leave", input: {chat: "#2"}, subject: {kind: "business", name: "ep", incognito: false}, chat: "#2"})
     const remove = actions.create("d", {tool: "leave", input: {chat: "@4"}, subject: {kind: "bot", name: "SimpleX Directory", incognito: false}, chat: "@4"})
     await settled()

@@ -52,9 +52,9 @@ describe("documented success responses", () => {
 
   it("apiSetUserDomain sets and removes the name", async () => {
     const chat = await chatWithResponse({type: "userProfileNoChange", user})
-    await expect(chat.apiSetUserDomain(1, "calc.simplex")).resolves.toEqual(user)
+    await expect(chat.apiSetUserDomain(1, "calc.popopx")).resolves.toEqual(user)
     await expect(chat.apiSetUserDomain(1)).resolves.toEqual(user)
-    expect(sentCommands()).toEqual(["/_set domain 1 calc.simplex", "/_set domain 1"])
+    expect(sentCommands()).toEqual(["/_set domain 1 calc.popopx", "/_set domain 1"])
   })
 
   it("apiReceiveFile reports a file cancelled by sender", async () => {
@@ -102,7 +102,7 @@ describe("documented success responses", () => {
     const aChat = {chatInfo: {type: "direct"}, chatItems: [], chatStats: {}}
     const chat = await chatWithResponse({type: "newPreparedChat", user, chat: aChat})
     const connLink = {connFullLink: "F", connShortLink: "S"}
-    await expect(chat.apiPrepareContact(1, connLink, {profile: {displayName: "bob", fullName: ""}, business: false}, "biz.simplex")).resolves.toEqual(aChat)
+    await expect(chat.apiPrepareContact(1, connLink, {profile: {displayName: "bob", fullName: ""}, business: false}, "biz.popopx")).resolves.toEqual(aChat)
     await expect(chat.apiPrepareGroup(1, connLink, false, {groupProfile: {displayName: "team", fullName: ""}})).resolves.toEqual(aChat)
   })
 
@@ -143,10 +143,10 @@ describe("documented success responses", () => {
   it("apiConnectPlan returns the SimpleX names", async () => {
     const connectionPlan = {type: "contactAddress", contactAddressPlan: {type: "ok"}}
     const connLink = {connFullLink: "L"}
-    const planSimplexName = {nameType: "contact", nameDomain: {nameTLD: "simplex", domain: "biz", subDomain: []}}
-    const otherSimplexName = {nameType: "publicGroup", nameDomain: {nameTLD: "simplex", domain: "news", subDomain: []}}
+    const planSimplexName = {nameType: "contact", nameDomain: {nameTLD: "popopx", domain: "biz", subDomain: []}}
+    const otherSimplexName = {nameType: "publicGroup", nameDomain: {nameTLD: "popopx", domain: "news", subDomain: []}}
     const chat = await chatWithResponse({type: "connectionPlan", user, connLink, planSimplexName, otherSimplexName, connectionPlan})
-    await expect(chat.apiConnectPlan(1, "@biz.simplex")).resolves.toEqual([connectionPlan, connLink, planSimplexName, otherSimplexName])
+    await expect(chat.apiConnectPlan(1, "@biz.popopx")).resolves.toEqual([connectionPlan, connLink, planSimplexName, otherSimplexName])
   })
 
   it("apiGetNetworkConfig returns the config, apiSetNetworkConfig accepts cmdOk", async () => {

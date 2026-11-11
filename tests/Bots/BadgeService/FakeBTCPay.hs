@@ -70,7 +70,7 @@ import Network.HTTP.Types
 import Network.HTTP.Types.Header (Header)
 import Network.Wai (Application, Response, pathInfo, queryString, requestHeaders, requestMethod, responseLBS, strictRequestBody)
 import qualified Network.Wai.Handler.Warp as Warp
-import Simplex.Messaging.Util (tshow)
+import Popopx.Messaging.Util (tshow)
 import System.FilePath ((</>))
 import Text.Read (readMaybe)
 

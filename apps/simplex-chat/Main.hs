@@ -1,9 +1,9 @@
 module Main where
 
 import Server (simplexChatServer)
-import Simplex.Chat.Badges.CLI (runBadgeCommand)
-import Simplex.Chat.Terminal (terminalChatConfig)
-import Simplex.Chat.Terminal.Main (simplexChatCLI)
+import Popopx.Chat.Badges.CLI (runBadgeCommand)
+import Popopx.Chat.Terminal (terminalChatConfig)
+import Popopx.Chat.Terminal.Main (simplexChatCLI)
 import System.Environment (getArgs)
 
 main :: IO ()

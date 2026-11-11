@@ -45,10 +45,10 @@ import qualified Data.Set as S
 import Data.Text (Text)
 import Data.Time.Clock (NominalDiffTime, UTCTime, addUTCTime, diffUTCTime, getCurrentTime)
 import Numeric.Natural (Natural)
-import Simplex.Chat.PaymentService.Types (InvoiceStatus (..), PaymentProvider (..))
-import Simplex.Messaging.Agent.Store.Common (DBStore)
-import Simplex.Messaging.Encoding.String (textEncode)
-import Simplex.Messaging.Util (stateTVar', tshow)
+import Popopx.Chat.PaymentService.Types (InvoiceStatus (..), PaymentProvider (..))
+import Popopx.Messaging.Agent.Store.Common (DBStore)
+import Popopx.Messaging.Encoding.String (textEncode)
+import Popopx.Messaging.Util (stateTVar', tshow)
 
 -- | Allows for our clock running ahead of the provider's; an expired invoice can still be marked paid.
 expiryGrace :: NominalDiffTime

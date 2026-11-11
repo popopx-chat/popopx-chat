@@ -12,7 +12,7 @@ import Data.Ini (readIniFile)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
-import Simplex.Messaging.Encoding.String (strDecode)
+import Popopx.Messaging.Encoding.String (strDecode)
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((</>))
 import Test.Hspec

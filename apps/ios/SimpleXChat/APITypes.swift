@@ -191,8 +191,8 @@ public struct CreatedConnLink: Decodable, Hashable {
 }
 
 public func simplexChatLink(_ uri: String) -> String {
-    uri.starts(with: "simplex:/")
-    ? uri.replacingOccurrences(of: "simplex:/", with: "https://simplex.chat/")
+    uri.starts(with: "popopx:/")
+    ? uri.replacingOccurrences(of: "popopx:/", with: "https://simplex.chat/")
     : uri
 }
 

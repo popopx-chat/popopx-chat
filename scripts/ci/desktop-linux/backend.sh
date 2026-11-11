@@ -263,7 +263,7 @@ seed_name() {
       return 1
       ;;
   esac
-  jq -n --arg n "$name_label" --arg l "$link" '{($n): {simplexContact: [$l]}}' > "$work/names.json"
+  jq -n --arg n "$name_label" --arg l "$link" '{($n): {popopxContact: [$l]}}' > "$work/names.json"
   names_client ci_contact 5 "/_set domain 1 $name_label.testing"
   # what the app does on the Search key, from a client that knows nothing but the names server; it finds the
   # address only if ci_contact's claim is in the address data

@@ -1424,7 +1424,7 @@ private func deleteNotReadyContact(
         }
     } else if let claim = groupInfo.businessChat?.businessDomain,
               groupInfo.groupDomainVerified != nil || claim.proof != nil {
-        // A business presents as a contact, so the name retains its .simplex suffix; it cannot be re-verified.
+        // A business presents as a contact, so the name retains its .popopx suffix; it cannot be re-verified.
         SimplexNameView(
             simplexName: "@\(claim.domain)",
             verified: groupInfo.groupDomainVerified,

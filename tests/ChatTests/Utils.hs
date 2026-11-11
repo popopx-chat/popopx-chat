@@ -23,30 +23,30 @@ import Data.List (isPrefixOf, isSuffixOf)
 import Data.Maybe (fromMaybe)
 import Data.String
 import qualified Data.Text as T
-import Simplex.Chat.Badges (BadgeProof (..), BadgeStatus, LocalBadge (..), ProofPresHeader (..))
-import Simplex.Chat.Controller (ChatConfig (..), ChatController (..), storeCxt)
-import Simplex.Chat.Library.Commands (maxProfileImageSize)
-import Simplex.Chat.Markdown (viewName)
-import Simplex.Chat.Messages.CIContent (e2eInfoNoPQText, e2eInfoPQText)
-import Simplex.Chat.Protocol
-import Simplex.Chat.Store.Direct (getContact, getContactIdByName, getContactRequest, getContactRequestIdByName)
-import Simplex.Chat.Store.Groups (getGroupIdByName, getGroupMember, getGroupMemberIdByName)
-import Simplex.Chat.Store.NoteFolders (createNoteFolder)
-import Simplex.Chat.Store.Profiles (getUserContactProfiles)
-import Simplex.Chat.Store.Shared (getGroupInfo)
-import Simplex.Chat.Types
-import Simplex.Chat.Types.Preferences
-import Simplex.Chat.Types.Shared
-import Simplex.Chat.Types.UITheme (ChatLayout)
-import Simplex.FileTransfer.Description (FileSize (..))
-import Simplex.Messaging.Agent.Client (agentClientStore)
-import Simplex.Messaging.Agent.Store.AgentStore (maybeFirstRow, withTransaction)
-import qualified Simplex.Messaging.Agent.Store.DB as DB
-import qualified Simplex.Messaging.Crypto as C
-import Simplex.Messaging.Crypto.BBS (BBSPresHeader (..))
-import Simplex.Messaging.Crypto.Ratchet (PQEncryption (..), PQSupport, pattern PQEncOff, pattern PQEncOn, pattern PQSupportOff)
-import Simplex.Messaging.Encoding.String
-import Simplex.Messaging.Version
+import Popopx.Chat.Badges (BadgeProof (..), BadgeStatus, LocalBadge (..), ProofPresHeader (..))
+import Popopx.Chat.Controller (ChatConfig (..), ChatController (..), storeCxt)
+import Popopx.Chat.Library.Commands (maxProfileImageSize)
+import Popopx.Chat.Markdown (viewName)
+import Popopx.Chat.Messages.CIContent (e2eInfoNoPQText, e2eInfoPQText)
+import Popopx.Chat.Protocol
+import Popopx.Chat.Store.Direct (getContact, getContactIdByName, getContactRequest, getContactRequestIdByName)
+import Popopx.Chat.Store.Groups (getGroupIdByName, getGroupMember, getGroupMemberIdByName)
+import Popopx.Chat.Store.NoteFolders (createNoteFolder)
+import Popopx.Chat.Store.Profiles (getUserContactProfiles)
+import Popopx.Chat.Store.Shared (getGroupInfo)
+import Popopx.Chat.Types
+import Popopx.Chat.Types.Preferences
+import Popopx.Chat.Types.Shared
+import Popopx.Chat.Types.UITheme (ChatLayout)
+import Popopx.FileTransfer.Description (FileSize (..))
+import Popopx.Messaging.Agent.Client (agentClientStore)
+import Popopx.Messaging.Agent.Store.AgentStore (maybeFirstRow, withTransaction)
+import qualified Popopx.Messaging.Agent.Store.DB as DB
+import qualified Popopx.Messaging.Crypto as C
+import Popopx.Messaging.Crypto.BBS (BBSPresHeader (..))
+import Popopx.Messaging.Crypto.Ratchet (PQEncryption (..), PQSupport, pattern PQEncOff, pattern PQEncOn, pattern PQSupportOff)
+import Popopx.Messaging.Encoding.String
+import Popopx.Messaging.Version
 import System.Directory (doesFileExist)
 import System.Environment (lookupEnv)
 import System.Info (os)
@@ -961,10 +961,10 @@ vRangeStr (VersionRange minVer maxVer) = "(" <> show minVer <> ", " <> show maxV
 linkAnotherSchema :: String -> String
 linkAnotherSchema link
   | "https://simplex.chat/" `isPrefixOf` link =
-      T.unpack $ T.replace "https://simplex.chat/" "simplex:/" $ T.pack link
-  | "simplex:/" `isPrefixOf` link =
-      T.unpack $ T.replace "simplex:/" "https://simplex.chat/" $ T.pack link
-  | otherwise = error "link starts with neither https://simplex.chat/ nor simplex:/"
+      T.unpack $ T.replace "https://simplex.chat/" "popopx:/" $ T.pack link
+  | "popopx:/" `isPrefixOf` link =
+      T.unpack $ T.replace "popopx:/" "https://simplex.chat/" $ T.pack link
+  | otherwise = error "link starts with neither https://simplex.chat/ nor popopx:/"
 
 xftpCLI :: [String] -> IO [String]
 xftpCLI = \case

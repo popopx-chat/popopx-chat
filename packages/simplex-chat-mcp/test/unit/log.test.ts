@@ -7,7 +7,7 @@ const agentError = (error: object): T.ChatError => ({type: "errorAgent", agentEr
 const broker = (brokerErr: object): object => ({type: "BROKER", brokerAddress: server, brokerErr})
 const forwarding = (brokerErr: object): object => ({type: "SMP", serverAddress: server, smpErr: {type: "PROXY", proxyErr: {type: "BROKER", brokerErr}}})
 const destination = (proxyErr: object): object => ({type: "PROXY", proxyServer: server, relayServer: relay, proxyErr: {type: "protocolError", protocolErr: {type: "PROXY", proxyErr}}})
-const domain = {nameTLD: T.SimplexTLD.Simplex, domain: "ridgeline", subDomain: []}
+const domain = {nameTLD: T.SimplexTLD.Popopx, domain: "ridgeline", subDomain: []}
 
 describe("SimpleX errors", () => {
   const cases: [string, T.ChatError, string][] = [
@@ -16,12 +16,12 @@ describe("SimpleX errors", () => {
     [
       "name without a valid link",
       {type: "error", errorType: {type: "simplexDomainNotReady", simplexDomain: domain, simplexDomainError: {type: "noValidLink"}}},
-      "No valid link: The SimpleX name ridgeline.simplex is registered, but it has no valid link.",
+      "No valid link: The SimpleX name ridgeline.popopx is registered, but it has no valid link.",
     ],
     [
       "name not in a profile",
       {type: "error", errorType: {type: "simplexDomainNotReady", simplexDomain: domain, simplexDomainError: {type: "unknownDomain"}}},
-      "Unconfirmed name: The SimpleX name ridgeline.simplex is registered, but not added to profile. Please add it to your address or channel profile, if you are the owner.",
+      "Unconfirmed name: The SimpleX name ridgeline.popopx is registered, but not added to profile. Please add it to your address or channel profile, if you are the owner.",
     ],
     [
       "file servers not approved",

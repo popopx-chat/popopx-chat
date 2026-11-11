@@ -26,29 +26,29 @@ import Data.Time.Clock (UTCTime, addUTCTime, getCurrentTime, nominalDay)
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime, utcTimeToPOSIXSeconds)
 import Data.Time.Format (defaultTimeLocale, formatTime)
 import qualified Data.Map.Strict as M
-import Simplex.Chat.Badges (BadgeCredential, BadgeInfo (..), BadgeProof, BadgePurchase (..), BadgeRequest (..), BadgeStatus (..), BadgeType (..), LocalBadge (..), ProofPresHeader (..), badgeProof, generateMasterKey, issueBadge, verifyPayment)
-import Simplex.Chat.Controller (ChatConfig (..), ChatController (ChatController, smpAgent), ChatHooks (..), defaultChatHooks, storeCxt)
-import Simplex.Chat.Library.Internal (encodeShortLinkData, groupMemberKey, redactedMemberProfile, sendDirectContactMessage, sendGroupMessage')
-import Simplex.Chat.Options (ChatOpts (..), CoreChatOpts (..))
-import Simplex.Chat.Protocol (ChatBinding (..), ChatMsgEvent (XInfo), ContactShortLinkData (ContactShortLinkData), LinkOwnerSig, MsgChatLink (..), MsgContent (..), encodeChatBinding)
-import Simplex.Chat.Store.Groups (getGroupMembers)
-import Simplex.Chat.Store.Shared (createContact, getGroupInfoKeys)
-import Simplex.Chat.Types (AgentConnId (..), ChatPeerType (..), ConnStatus (..), GroupId, GroupInfo (..), GroupInfoKeys (..), GroupMember (..), ImageData (..), Profile (..), GroupRejectionReason (..), User (..), fromLocalProfile, profileFromName, userProfileDirect, pattern VersionChat)
-import qualified Simplex.Messaging.Crypto as C
-import Simplex.Messaging.Crypto.BBS (BBSPublicKey, BBSSecretKey, bbsKeyGen)
-import Simplex.Chat.Types.Shared (GroupMemberRole (..))
-import Simplex.Chat.Types.UITheme
-import Simplex.Messaging.Agent (setConnShortLink)
-import Simplex.Messaging.Agent.Env.SQLite
-import Simplex.Messaging.Agent.Protocol (SConnectionMode (..), UserConnLinkData (..))
-import Simplex.Messaging.Agent.RetryInterval
-import qualified Simplex.Messaging.Agent.Store.DB as DB
-import Simplex.Messaging.Client (pattern NRMInteractive)
-import Simplex.Messaging.Encoding.String (StrEncoding (..))
-import Simplex.Messaging.Server.Env.STM hiding (subscriptions)
-import Simplex.Messaging.Transport
-import Simplex.Messaging.Util (decodeJSON, encodeJSON)
-import Simplex.Messaging.Version (mkVersionRange)
+import Popopx.Chat.Badges (BadgeCredential, BadgeInfo (..), BadgeProof, BadgePurchase (..), BadgeRequest (..), BadgeStatus (..), BadgeType (..), LocalBadge (..), ProofPresHeader (..), badgeProof, generateMasterKey, issueBadge, verifyPayment)
+import Popopx.Chat.Controller (ChatConfig (..), ChatController (ChatController, smpAgent), ChatHooks (..), defaultChatHooks, storeCxt)
+import Popopx.Chat.Library.Internal (encodeShortLinkData, groupMemberKey, redactedMemberProfile, sendDirectContactMessage, sendGroupMessage')
+import Popopx.Chat.Options (ChatOpts (..), CoreChatOpts (..))
+import Popopx.Chat.Protocol (ChatBinding (..), ChatMsgEvent (XInfo), ContactShortLinkData (ContactShortLinkData), LinkOwnerSig, MsgChatLink (..), MsgContent (..), encodeChatBinding)
+import Popopx.Chat.Store.Groups (getGroupMembers)
+import Popopx.Chat.Store.Shared (createContact, getGroupInfoKeys)
+import Popopx.Chat.Types (AgentConnId (..), ChatPeerType (..), ConnStatus (..), GroupId, GroupInfo (..), GroupInfoKeys (..), GroupMember (..), ImageData (..), Profile (..), GroupRejectionReason (..), User (..), fromLocalProfile, profileFromName, userProfileDirect, pattern VersionChat)
+import qualified Popopx.Messaging.Crypto as C
+import Popopx.Messaging.Crypto.BBS (BBSPublicKey, BBSSecretKey, bbsKeyGen)
+import Popopx.Chat.Types.Shared (GroupMemberRole (..))
+import Popopx.Chat.Types.UITheme
+import Popopx.Messaging.Agent (setConnShortLink)
+import Popopx.Messaging.Agent.Env.SQLite
+import Popopx.Messaging.Agent.Protocol (SConnectionMode (..), UserConnLinkData (..))
+import Popopx.Messaging.Agent.RetryInterval
+import qualified Popopx.Messaging.Agent.Store.DB as DB
+import Popopx.Messaging.Client (pattern NRMInteractive)
+import Popopx.Messaging.Encoding.String (StrEncoding (..))
+import Popopx.Messaging.Server.Env.STM hiding (subscriptions)
+import Popopx.Messaging.Transport
+import Popopx.Messaging.Util (decodeJSON, encodeJSON)
+import Popopx.Messaging.Version (mkVersionRange)
 import System.Directory (copyFile, createDirectoryIfMissing)
 import Test.Hspec hiding (it)
 #if defined(dbPostgres)
@@ -4072,7 +4072,7 @@ testPlanShortLinkInvitation =
     alice <##. "error: connection authorization failed" -- short_link_inv and conn_req_inv are removed after connection
 
 slSimplexScheme :: String -> String
-slSimplexScheme sl = T.unpack $ T.replace "https://localhost/" "simplex:/" (T.pack sl) <> "?h=localhost"
+slSimplexScheme sl = T.unpack $ T.replace "https://localhost/" "popopx:/" (T.pack sl) <> "?h=localhost"
 
 testShareAddressViaChat :: HasCallStack => TestParams -> IO ()
 testShareAddressViaChat =

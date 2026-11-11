@@ -17,12 +17,12 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Text.Encoding (encodeUtf8)
 import Data.Time.Clock (UTCTime, addUTCTime)
-import Simplex.Chat.Badges.Ledger (addMonths)
-import Simplex.Chat.Badges.Service (SubscriptionState (..))
-import Simplex.Chat.Badges.StorePlan (playBasePlan, storePlan)
-import Simplex.Chat.PaymentService (appleTransactionRef, googlePurchaseRef)
-import Simplex.Chat.PaymentService.Types (PaymentProvider (..))
-import Simplex.Messaging.Util (eitherToMaybe, tshow)
+import Popopx.Chat.Badges.Ledger (addMonths)
+import Popopx.Chat.Badges.Service (SubscriptionState (..))
+import Popopx.Chat.Badges.StorePlan (playBasePlan, storePlan)
+import Popopx.Chat.PaymentService (appleTransactionRef, googlePurchaseRef)
+import Popopx.Chat.PaymentService.Types (PaymentProvider (..))
+import Popopx.Messaging.Util (eitherToMaybe, tshow)
 
 -- | Vouches for any well-formed receipt without verifying anything. Each transaction is named by
 -- the same function its claim is named by, so the two cannot differ. A subscription is charged for

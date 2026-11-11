@@ -65,14 +65,14 @@ import Network.HTTP.Client
   )
 import Network.HTTP.Client.TLS (newTlsManager)
 import Network.HTTP.Types (Header, HeaderName, Method, Query, Status (..), methodGet, methodPost, renderQuery, urlEncode)
-import Simplex.Chat.PaymentService.Types
+import Popopx.Chat.PaymentService.Types
   ( CryptoCurrency (..),
     CurrencyAmount (..),
     PaymentProvider (..),
     ServicePaymentDestination (..),
     ServicePaymentMethod (..),
   )
-import Simplex.Messaging.Util (safeDecodeUtf8, tshow)
+import Popopx.Messaging.Util (safeDecodeUtf8, tshow)
 
 btcMethodId, xmrMethodId :: Text
 btcMethodId = "BTC-CHAIN"

@@ -56,7 +56,7 @@ fun SetSimplexDomainView(
   val clipboard = LocalClipboardManager.current
 
   fun addSimplexTLD(s: String): String {
-    return if (s.contains(".")) s else "$s.simplex"
+    return if (s.contains(".")) s else "$s.popopx"
   }
 
   fun normalized(s: String): String? {

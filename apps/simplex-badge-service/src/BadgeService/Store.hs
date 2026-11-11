@@ -62,17 +62,17 @@ import Data.Int (Int64)
 import Data.Maybe (isJust)
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime)
-import Simplex.Chat.Badges (BadgeCredential, BadgeMasterKey (..), BadgeType)
-import Simplex.Chat.Badges.Ledger
-import Simplex.Chat.Badges.Service (StatementCreditType (..), StatementDebitType (..), StatementEntry (..), StatementEntryType (..), SubscriptionState)
-import Simplex.Chat.Badges.Types (BadgeCodePaymentStatus, BadgePurchaseStatus (..))
-import Simplex.Chat.PaymentService.Types (CurrencyAmount (..), InvoiceId (..), PaymentProvider (..), PaymentStatus (..))
-import Simplex.Chat.Store.Shared (insertedRowId)
-import Simplex.Messaging.Agent.Store.DB (Binary (..), BoolInt (..))
-import qualified Simplex.Messaging.Agent.Store.DB as DB
-import qualified Simplex.Messaging.Crypto as C
-import Simplex.Messaging.Encoding.String (textDecode, textEncode)
-import Simplex.Messaging.Util (maybeFirstRow, maybeFirstRow')
+import Popopx.Chat.Badges (BadgeCredential, BadgeMasterKey (..), BadgeType)
+import Popopx.Chat.Badges.Ledger
+import Popopx.Chat.Badges.Service (StatementCreditType (..), StatementDebitType (..), StatementEntry (..), StatementEntryType (..), SubscriptionState)
+import Popopx.Chat.Badges.Types (BadgeCodePaymentStatus, BadgePurchaseStatus (..))
+import Popopx.Chat.PaymentService.Types (CurrencyAmount (..), InvoiceId (..), PaymentProvider (..), PaymentStatus (..))
+import Popopx.Chat.Store.Shared (insertedRowId)
+import Popopx.Messaging.Agent.Store.DB (Binary (..), BoolInt (..))
+import qualified Popopx.Messaging.Agent.Store.DB as DB
+import qualified Popopx.Messaging.Crypto as C
+import Popopx.Messaging.Encoding.String (textDecode, textEncode)
+import Popopx.Messaging.Util (maybeFirstRow, maybeFirstRow')
 
 #if defined(dbPostgres)
 import Database.PostgreSQL.Simple (Only (..), (:.) (..))

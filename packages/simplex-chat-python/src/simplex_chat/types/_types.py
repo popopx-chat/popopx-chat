@@ -3326,7 +3326,7 @@ class SimplexNameInfo(TypedDict):
 
 SimplexNameType = Literal["publicGroup", "contact"]
 
-SimplexTLD = Literal["simplex", "testing", "web"]
+SimplexTLD = Literal["popopx", "testing", "web"]
 
 SndCIStatusProgress = Literal["partial", "complete"]
 

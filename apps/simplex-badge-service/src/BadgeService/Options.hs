@@ -15,9 +15,9 @@ import BadgeService.Config (BadgeIssuerKey (..))
 import qualified Data.ByteString.Char8 as B
 import qualified Data.Text as T
 import Options.Applicative
-import Simplex.Chat.Controller (updateStr, versionNumber, versionString)
-import Simplex.Chat.Options (ChatCmdLog (..), ChatOpts (..), CoreChatOpts, CreateBotOpts (..), coreChatOptsP)
-import Simplex.Messaging.Encoding.String (strDecode)
+import Popopx.Chat.Controller (updateStr, versionNumber, versionString)
+import Popopx.Chat.Options (ChatCmdLog (..), ChatOpts (..), CoreChatOpts, CreateBotOpts (..), coreChatOptsP)
+import Popopx.Messaging.Encoding.String (strDecode)
 
 data BadgeServiceOpts = BadgeServiceOpts
   { coreOptions :: CoreChatOpts,

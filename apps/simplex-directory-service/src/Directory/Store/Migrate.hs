@@ -14,19 +14,19 @@ import Data.List (find)
 import qualified Data.Text as T
 import Directory.Options
 import Directory.Store
-import Simplex.Chat (createChatDatabase)
-import Simplex.Chat.Controller (ChatConfig (..), ChatDatabase (..))
-import Simplex.Chat.Options (CoreChatOpts (..))
-import Simplex.Chat.Options.DB
-import Simplex.Chat.Store.Groups (getHostMember)
-import Simplex.Chat.Store.Profiles (getUsers)
-import Simplex.Chat.Store.Shared (getGroupInfo)
-import Simplex.Chat.Types
-import Simplex.Messaging.Agent.Store.Common
-import qualified Simplex.Messaging.Agent.Store.DB as DB
-import Simplex.Messaging.Agent.Store.Interface (closeDBStore, migrateDBSchema)
-import Simplex.Messaging.Agent.Store.Shared (MigrationConfig (..), MigrationConfirmation (..))
-import Simplex.Messaging.Encoding.String
+import Popopx.Chat (createChatDatabase)
+import Popopx.Chat.Controller (ChatConfig (..), ChatDatabase (..))
+import Popopx.Chat.Options (CoreChatOpts (..))
+import Popopx.Chat.Options.DB
+import Popopx.Chat.Store.Groups (getHostMember)
+import Popopx.Chat.Store.Profiles (getUsers)
+import Popopx.Chat.Store.Shared (getGroupInfo)
+import Popopx.Chat.Types
+import Popopx.Messaging.Agent.Store.Common
+import qualified Popopx.Messaging.Agent.Store.DB as DB
+import Popopx.Messaging.Agent.Store.Interface (closeDBStore, migrateDBSchema)
+import Popopx.Messaging.Agent.Store.Shared (MigrationConfig (..), MigrationConfirmation (..))
+import Popopx.Messaging.Encoding.String
 import System.Exit (exitFailure)
 
 #if defined(dbPostgres)

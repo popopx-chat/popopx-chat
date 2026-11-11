@@ -157,7 +157,7 @@ fun GroupSimplexNameView(groupInfo: GroupInfo, verifiable: Boolean = true) {
   } else {
     val businessClaim = groupInfo.businessChat?.businessDomain
     if (businessClaim != null && (groupInfo.groupDomainVerified != null || businessClaim.proof != null)) {
-      // A business presents as a contact, so the name retains its .simplex suffix; it cannot be re-verified.
+      // A business presents as a contact, so the name retains its .popopx suffix; it cannot be re-verified.
       SimplexNameView(
         simplexName = "@${businessClaim.domain}",
         verified = groupInfo.groupDomainVerified,

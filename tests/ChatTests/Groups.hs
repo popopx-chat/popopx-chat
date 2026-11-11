@@ -31,34 +31,34 @@ import Data.Int (Int64)
 import Data.List (intercalate, isInfixOf, isSubsequenceOf, isSuffixOf)
 import qualified Data.Map.Strict as M
 import qualified Data.Text as T
-import Simplex.Chat.Badges (FileSizeLimits (..))
-import Simplex.Chat.Controller (ChatController (ChatController, smpAgent, subscriptionMode), ChatConfig (..), ChatEvent (CEvtDuplicateGroupMessage), ChatHooks (..), ChatLogLevel (..), defaultChatHooks, withAgent)
-import Simplex.Chat.Library.Internal (encodeConnInfo, getShortLinkConnReq, sendDirectMemberMessage, uniqueMsgMentions, updatedMentionNames)
-import Simplex.Chat.Markdown (parseMaybeMarkdownList)
-import Simplex.Chat.Messages (CIMention (..), CIMentionMember (..), ChatItemId)
-import Simplex.Chat.Messages.Batch (encodeBinaryBatch, encodeFwdElement)
-import Simplex.Chat.Messages.CIContent (publicGroupNoE2EText)
-import Simplex.Chat.Options
-import Simplex.Chat.Protocol (ChatMessage (ChatMessage), ChatMsgEvent (BFileChunk, XFile, XGrpMemFwd, XGrpMemIntro, XGrpMemNew, XGrpRelayInv, XInfo, XMember, XMsgUpdate, XMsgNew, XMsgDel), FileChunk (..), FwdSender (FwdMember, FwdChannel), GrpMsgForward (GrpMsgForward), MsgContainer (..), MsgMention (..), MsgContent (..), VerifiedMsg (VMUnsigned), chatMsgToBody, mcSimple, msgContentText, supportedChatVRange)
-import Simplex.Chat.Types
-import Simplex.Chat.Types.MemberRelations (MemberRelation (..), getRelation, setRelation)
-import Simplex.Chat.Types.Shared (GroupMemberRole (..), GroupAcceptance (..))
-import Simplex.Chat.Types.UITheme (ChatLayout (..))
-import Simplex.Messaging.Agent (createConnection, joinConnection, prepareConnectionToJoin, sendMessages, vrValue)
-import Simplex.Messaging.Agent.Env.SQLite
-import Simplex.Messaging.Agent.Protocol (CreatedConnLink (..), SConnectionMode (..))
-import Simplex.Messaging.Agent.RetryInterval
-import qualified Simplex.Messaging.Agent.Store.DB as DB
-import Simplex.Messaging.Agent.Store.DB (Binary (..), BoolInt (..))
-import qualified Simplex.Messaging.Crypto as C
-import Simplex.Messaging.Crypto.BBS (bbsKeyGen)
-import Simplex.Messaging.Client (pattern NRMInteractive)
-import Simplex.Messaging.Crypto.Ratchet (pattern IKPQOff, pattern PQEncOff, pattern PQSupportOff)
-import Simplex.Messaging.Encoding.String (strDecode)
-import Simplex.Messaging.Protocol (MsgFlags (..), SubscriptionMode (..))
-import Simplex.Messaging.Server.Env.STM hiding (subscriptions)
-import Simplex.Messaging.Transport
-import Simplex.Messaging.Version
+import Popopx.Chat.Badges (FileSizeLimits (..))
+import Popopx.Chat.Controller (ChatController (ChatController, smpAgent, subscriptionMode), ChatConfig (..), ChatEvent (CEvtDuplicateGroupMessage), ChatHooks (..), ChatLogLevel (..), defaultChatHooks, withAgent)
+import Popopx.Chat.Library.Internal (encodeConnInfo, getShortLinkConnReq, sendDirectMemberMessage, uniqueMsgMentions, updatedMentionNames)
+import Popopx.Chat.Markdown (parseMaybeMarkdownList)
+import Popopx.Chat.Messages (CIMention (..), CIMentionMember (..), ChatItemId)
+import Popopx.Chat.Messages.Batch (encodeBinaryBatch, encodeFwdElement)
+import Popopx.Chat.Messages.CIContent (publicGroupNoE2EText)
+import Popopx.Chat.Options
+import Popopx.Chat.Protocol (ChatMessage (ChatMessage), ChatMsgEvent (BFileChunk, XFile, XGrpMemFwd, XGrpMemIntro, XGrpMemNew, XGrpRelayInv, XInfo, XMember, XMsgUpdate, XMsgNew, XMsgDel), FileChunk (..), FwdSender (FwdMember, FwdChannel), GrpMsgForward (GrpMsgForward), MsgContainer (..), MsgMention (..), MsgContent (..), VerifiedMsg (VMUnsigned), chatMsgToBody, mcSimple, msgContentText, supportedChatVRange)
+import Popopx.Chat.Types
+import Popopx.Chat.Types.MemberRelations (MemberRelation (..), getRelation, setRelation)
+import Popopx.Chat.Types.Shared (GroupMemberRole (..), GroupAcceptance (..))
+import Popopx.Chat.Types.UITheme (ChatLayout (..))
+import Popopx.Messaging.Agent (createConnection, joinConnection, prepareConnectionToJoin, sendMessages, vrValue)
+import Popopx.Messaging.Agent.Env.SQLite
+import Popopx.Messaging.Agent.Protocol (CreatedConnLink (..), SConnectionMode (..))
+import Popopx.Messaging.Agent.RetryInterval
+import qualified Popopx.Messaging.Agent.Store.DB as DB
+import Popopx.Messaging.Agent.Store.DB (Binary (..), BoolInt (..))
+import qualified Popopx.Messaging.Crypto as C
+import Popopx.Messaging.Crypto.BBS (bbsKeyGen)
+import Popopx.Messaging.Client (pattern NRMInteractive)
+import Popopx.Messaging.Crypto.Ratchet (pattern IKPQOff, pattern PQEncOff, pattern PQSupportOff)
+import Popopx.Messaging.Encoding.String (strDecode)
+import Popopx.Messaging.Protocol (MsgFlags (..), SubscriptionMode (..))
+import Popopx.Messaging.Server.Env.STM hiding (subscriptions)
+import Popopx.Messaging.Transport
+import Popopx.Messaging.Version
 import System.Directory (copyFile, doesFileExist)
 import System.FilePath ((</>))
 import Test.Hspec hiding (it)
@@ -68,7 +68,7 @@ import Database.PostgreSQL.Simple.SqlQQ (sql)
 #else
 import Database.SQLite.Simple (Only (..))
 import Database.SQLite.Simple.QQ (sql)
-import Simplex.Chat.Options.DB
+import Popopx.Chat.Options.DB
 #endif
 
 chatGroupTests :: SpecWith TestParams

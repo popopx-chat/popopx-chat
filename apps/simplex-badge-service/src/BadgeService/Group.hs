@@ -46,24 +46,24 @@ import qualified Data.Text as T
 import Data.Time.Clock (NominalDiffTime, UTCTime, addUTCTime, diffUTCTime, getCurrentTime, nominalDay)
 import Data.Time.Format (defaultTimeLocale, formatTime)
 import GHC.Stack (HasCallStack, withFrozenCallStack)
-import Simplex.Chat.Badges.Code (BadgeCode, formatBadgeCode, parseBadgeCode)
-import Simplex.Chat.Badges.Types (BadgeCodePaymentStatus (..))
-import Simplex.Chat.Bot.Store (withDB')
-import Simplex.Chat.Controller
-import Simplex.Chat.Core (sendChatCmd)
-import Simplex.Chat.Markdown (viewName)
-import Simplex.Chat.Messages
-import Simplex.Chat.Messages.CIContent (CIContent (..), ciContentToText)
-import Simplex.Chat.Protocol (MsgContent (..))
-import Simplex.Chat.Store.Messages (getGroupChatItem)
-import Simplex.Chat.Store.Shared (StoreError (..))
-import Simplex.Chat.Types
-import Simplex.Chat.Types.Preferences (GroupPreferences (..), commands_, emptyGroupPrefs)
-import Simplex.Chat.Types.Shared (GroupMemberRole (..))
-import Simplex.Chat.View (simplexChatContact)
-import Simplex.Messaging.Agent.Protocol (CreatedConnLink (..), UserId)
-import Simplex.Messaging.Encoding.String (StrEncoding, strEncode)
-import Simplex.Messaging.Util (catchOwn', safeDecodeUtf8, tshow, ($>>=))
+import Popopx.Chat.Badges.Code (BadgeCode, formatBadgeCode, parseBadgeCode)
+import Popopx.Chat.Badges.Types (BadgeCodePaymentStatus (..))
+import Popopx.Chat.Bot.Store (withDB')
+import Popopx.Chat.Controller
+import Popopx.Chat.Core (sendChatCmd)
+import Popopx.Chat.Markdown (viewName)
+import Popopx.Chat.Messages
+import Popopx.Chat.Messages.CIContent (CIContent (..), ciContentToText)
+import Popopx.Chat.Protocol (MsgContent (..))
+import Popopx.Chat.Store.Messages (getGroupChatItem)
+import Popopx.Chat.Store.Shared (StoreError (..))
+import Popopx.Chat.Types
+import Popopx.Chat.Types.Preferences (GroupPreferences (..), commands_, emptyGroupPrefs)
+import Popopx.Chat.Types.Shared (GroupMemberRole (..))
+import Popopx.Chat.View (simplexChatContact)
+import Popopx.Messaging.Agent.Protocol (CreatedConnLink (..), UserId)
+import Popopx.Messaging.Encoding.String (StrEncoding, strEncode)
+import Popopx.Messaging.Util (catchOwn', safeDecodeUtf8, tshow, ($>>=))
 import System.Exit (exitFailure)
 
 buildGroupProfile :: GroupConfig -> GroupProfile

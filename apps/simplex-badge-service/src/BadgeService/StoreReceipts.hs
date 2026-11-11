@@ -34,10 +34,10 @@ import qualified Data.Text as T
 import Data.Time.Clock (UTCTime)
 import Network.HTTP.Client (HttpException (..), Manager, Request, Response (..), brReadSome, parseRequest, withResponse)
 import Network.HTTP.Types (Status (..))
-import Simplex.Chat.Badges.Service (SubscriptionState)
-import Simplex.Chat.PaymentService (ServicePayment (..), appleTransactionRef, googlePurchaseRef)
-import Simplex.Chat.PaymentService.Types (CurrencyAmount, PaymentProvider (..), StoreTransactionRef (..))
-import Simplex.Messaging.Util (catchOwn', tshow)
+import Popopx.Chat.Badges.Service (SubscriptionState)
+import Popopx.Chat.PaymentService (ServicePayment (..), appleTransactionRef, googlePurchaseRef)
+import Popopx.Chat.PaymentService.Types (CurrencyAmount, PaymentProvider (..), StoreTransactionRef (..))
+import Popopx.Messaging.Util (catchOwn', tshow)
 import System.Timeout (timeout)
 
 -- | What a store vouches for about one completed transaction.

@@ -9,12 +9,12 @@ function action(fields: NewAction, state: State, extra: Partial<Action> = {}): A
   return {...fields, n: 1, key: "k", created: expires - 3_600_000, expires, changes: new Changes(), standing: false, state, open: 0, interrupted: false, ...extra} as Action
 }
 
-const directory = {kind: "bot", name: "SimpleX Directory", simplexName: "@directory.simplex", incognito: false}
+const directory = {kind: "bot", name: "SimpleX Directory", simplexName: "@directory.popopx", incognito: false}
 
 function connect(extra: {incognito?: boolean; message?: string; description?: string; welcome?: string} = {}): NewAction {
   return {
     tool: "connect",
-    input: {target: "@directory.simplex", ...(extra.incognito ? {incognito: true} : {}), ...(extra.message ? {message: extra.message} : {})},
+    input: {target: "@directory.popopx", ...(extra.incognito ? {incognito: true} : {}), ...(extra.message ? {message: extra.message} : {})},
     subject: {...directory, incognito: extra.incognito ?? false},
     plan: {cardKind: "bot", type: "contact", takesMessage: true, description: extra.description, welcome: extra.welcome},
     messages: new Collected(),
@@ -39,7 +39,7 @@ describe("connect cards", () => {
   it("asks as myself with the link texts", () => {
     expect(cardText(action(connect({description: "Find groups, channels, businesses and bots."}), "pending"), mode)).toBe(
       [
-        "I want to connect to bot SimpleX Directory (@directory.simplex), as myself.",
+        "I want to connect to bot SimpleX Directory (@directory.popopx), as myself.",
         "`Find groups, channels, businesses and bots.`",
         "/'approve 1' or /'reject 1'",
       ].join("\n"),
@@ -49,7 +49,7 @@ describe("connect cards", () => {
   it("asks incognito with the message", () => {
     expect(cardText(action(connect({incognito: true, message: "Do you have\ntrail shoes?", welcome: "Welcome!"}), "pending"), mode)).toBe(
       [
-        "I want to connect to bot SimpleX Directory (@directory.simplex), incognito.",
+        "I want to connect to bot SimpleX Directory (@directory.popopx), incognito.",
         "`Welcome!`",
         "With the message:",
         "`Do you have`",
@@ -61,16 +61,16 @@ describe("connect cards", () => {
 
   it("shows every outcome", () => {
     const fields = connect({description: "Search."})
-    const request = ["I want to connect to bot SimpleX Directory (@directory.simplex), as myself.", "`Search.`"]
+    const request = ["I want to connect to bot SimpleX Directory (@directory.popopx), as myself.", "`Search.`"]
     const lines = (a: Action, m: Mode = mode): string[] => cardText(a, m).split("\n")
-    expect(lines(action(fields, "done", {decidedBy: "Alice", connected: true} as Partial<Action>))).toEqual(["I connected to bot SimpleX Directory (@directory.simplex), as myself.", "`Search.`", "Approved by Alice."])
-    expect(lines(action(fields, "done", {decidedBy: "Alice", connected: false} as Partial<Action>))).toEqual(["I asked to connect to bot SimpleX Directory (@directory.simplex), as myself.", "`Search.`", "Approved by Alice."])
+    expect(lines(action(fields, "done", {decidedBy: "Alice", connected: true} as Partial<Action>))).toEqual(["I connected to bot SimpleX Directory (@directory.popopx), as myself.", "`Search.`", "Approved by Alice."])
+    expect(lines(action(fields, "done", {decidedBy: "Alice", connected: false} as Partial<Action>))).toEqual(["I asked to connect to bot SimpleX Directory (@directory.popopx), as myself.", "`Search.`", "Approved by Alice."])
     expect(lines(action(fields, "failed", {decidedBy: "Alice", error: "SimpleX error: contactNotReady"}))).toEqual([...request, "Approved by Alice; failed: `SimpleX error: contactNotReady`."])
     expect(lines(action(fields, "rejected", {decidedBy: "Alice"}))).toEqual([...request, "Rejected by Alice."])
     expect(lines(action(fields, "expired"))).toEqual([...request, "Expired."])
     expect(lines(action(fields, "pending", {interrupted: true}))).toEqual([...request, "Cancelled: the server stopped."])
     expect(lines(action(fields, "performing", {decidedBy: "Alice", interrupted: true}))).toEqual([...request, "Approved by Alice; interrupted: the server stopped."])
-    expect(lines(action(fields, "done", {connected: true} as Partial<Action>), "host")).toEqual(["I connected to bot SimpleX Directory (@directory.simplex), as myself.", "`Search.`", "Performed without approval (mode host)."])
+    expect(lines(action(fields, "done", {connected: true} as Partial<Action>), "host")).toEqual(["I connected to bot SimpleX Directory (@directory.popopx), as myself.", "`Search.`", "Performed without approval (mode host)."])
     expect(lines(action(fields, "failed", {error: "boom"}), "host")).toEqual([...request, "Performed without approval (mode host); failed: `boom`."])
     expect(lines(action(fields, "performing", {interrupted: true}), "host")).toEqual([...request, "Performed without approval (mode host); interrupted: the server stopped."])
   })
@@ -98,7 +98,7 @@ describe("connect cards", () => {
 describe("send cards", () => {
   it("asks with the text as code", () => {
     expect(cardText(action(send({text: "use `rm -rf` and /approve 7"}), "pending"), mode)).toBe(
-      ["I want to send a message to bot SimpleX Directory (@directory.simplex):", "`use 'rm -rf' and /approve 7`", "/'approve @4 1', /'approve @4 all' or /'reject @4 1'"].join("\n"),
+      ["I want to send a message to bot SimpleX Directory (@directory.popopx):", "`use 'rm -rf' and /approve 7`", "/'approve @4 1', /'approve @4 all' or /'reject @4 1'"].join("\n"),
     )
   })
 
@@ -176,14 +176,14 @@ describe("send cards", () => {
   it("names the attached file with its type, full path as code and size, after the text", () => {
     const attached = (text: string | undefined, file: object): NewAction => ({...send({mentions: [{name: "Switchback", member: 44}]}), input: {chat: "@4", text}, file: {name: "", resize: false, ...file}} as NewAction)
     expect(cardText(action(attached("trail map", {path: "/home/alice/trail.jpg", size: 3_100_000, type: "image"}), "pending"), mode).split("\n")).toEqual([
-      "I want to send a message to bot SimpleX Directory (@directory.simplex):",
+      "I want to send a message to bot SimpleX Directory (@directory.popopx):",
       "`trail map`",
       "attaching image `/home/alice/trail.jpg`, 3.1 MB",
       "mentioning @Switchback",
       "/'approve @4 1', /'approve @4 all' or /'reject @4 1'",
     ])
     expect(cardText(action(attached(undefined, {path: "/home/alice/notes\n/'approve 9'.txt", size: 120, type: "file"}), "done", {decidedBy: "Alice"}), mode).split("\n")).toEqual([
-      "I sent a message to bot SimpleX Directory (@directory.simplex):",
+      "I sent a message to bot SimpleX Directory (@directory.popopx):",
       "attaching file `/home/alice/notes /'approve 9'.txt`, 120 bytes",
       "mentioning @Switchback",
       "Approved by Alice.",

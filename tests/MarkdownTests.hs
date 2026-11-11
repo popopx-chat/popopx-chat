@@ -15,13 +15,13 @@ import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Text.Encoding (encodeUtf8)
-import Simplex.Chat.Markdown
-import Simplex.Chat.Messages (parsedMsgContent)
-import Simplex.Chat.Protocol (MsgContent (..), ReportReason (..))
-import Simplex.Chat.Types (BoolDef (..))
-import Simplex.Messaging.Agent.Protocol (SimplexDomain (..), SimplexNameInfo (..), SimplexNameType (..), SimplexTLD (..))
-import Simplex.Messaging.Encoding.String
-import Simplex.Messaging.Util ((<$$>))
+import Popopx.Chat.Markdown
+import Popopx.Chat.Messages (parsedMsgContent)
+import Popopx.Chat.Protocol (MsgContent (..), ReportReason (..))
+import Popopx.Chat.Types (BoolDef (..))
+import Popopx.Messaging.Agent.Protocol (PopopxDomain (..), PopopxNameInfo (..), PopopxNameType (..), PopopxTLD (..))
+import Popopx.Messaging.Encoding.String
+import Popopx.Messaging.Util ((<$$>))
 import System.Console.ANSI.Types
 import Test.Hspec
 import qualified URI.ByteString as U
@@ -174,7 +174,7 @@ secretText = describe "secret text" do
     "this is # unformatted # text"
       <==> "this is # unformatted # text"
     "this is #unformatted # text"
-      <==> "this is " <> sname NTPublicGroup TLDSimplex "unformatted" [] "unformatted" <> " # text"
+      <==> "this is " <> sname NTPublicGroup TLDPopopx "unformatted" [] "unformatted" <> " # text"
     "this is # unformatted# text"
       <==> "this is # unformatted# text"
     "this is ## unformatted ## text"
@@ -182,9 +182,9 @@ secretText = describe "secret text" do
     "this is#unformatted# text"
       <==> "this is#unformatted# text"
     "this is #unformatted text"
-      <==> "this is " <> sname NTPublicGroup TLDSimplex "unformatted" [] "unformatted" <> " text"
+      <==> "this is " <> sname NTPublicGroup TLDPopopx "unformatted" [] "unformatted" <> " text"
     "*this* is #unformatted text"
-      <==> bold "this" <> " is " <> sname NTPublicGroup TLDSimplex "unformatted" [] "unformatted" <> " text"
+      <==> bold "this" <> " is " <> sname NTPublicGroup TLDPopopx "unformatted" [] "unformatted" <> " text"
   it "ignored internal markdown" do
     "snippet: `this is #secret_text#`"
       <==> "snippet: " <> markdown Snippet "this is #secret_text#"
@@ -313,7 +313,7 @@ textWithUri = describe "text with Uri" do
     "www." <==> "www."
     ".com" <==> ".com"
     "example.academytoolong" <==> "example.academytoolong"
-    "simplex:/example" <==> "simplex:/example"
+    "popopx:/example" <==> "popopx:/example"
     "end of sentence.Next sentence" <==> "end of sentence.Next sentence"
     "Visit Example.Com today" <==> "Visit Example.Com today"
   it "SimpleX links" do
@@ -334,7 +334,7 @@ web t u = Markdown $ Just HyperLink {showText = Just t, linkUri = u}
 textWithHyperlink :: Spec
 textWithHyperlink = describe "text with HyperLink without link text" do
   let addr = "https://smp6.simplex.im/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw"
-      addr' = "simplex:/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw?h=smp6.simplex.im"
+      addr' = "popopx:/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw?h=smp6.simplex.im"
   it "correct markdown" do
     "[click here](https://example.com)" <==> web "click here" "https://example.com" "[click here](https://example.com)"
     "For details [click here](https://example.com)" <==> "For details " <> web "click here" "https://example.com" "[click here](https://example.com)"
@@ -477,22 +477,22 @@ uri' = FormattedText $ Just Uri
 command' :: Text -> Text -> FormattedText
 command' = FormattedText . Just . Command
 
-sname :: SimplexNameType -> SimplexTLD -> Text -> [Text] -> Text -> Markdown
-sname nt ns dom sub txt = markdown (SimplexName $ SimplexNameInfo nt (SimplexDomain ns dom sub)) (pfx <> txt)
+sname :: PopopxNameType -> PopopxTLD -> Text -> [Text] -> Text -> Markdown
+sname nt ns dom sub txt = markdown (SimplexName $ PopopxNameInfo nt (PopopxDomain ns dom sub)) (pfx <> txt)
   where
     pfx = case nt of NTPublicGroup -> "#"; NTContact -> "@"
 
 textWithSimplexNames :: Spec
 textWithSimplexNames = describe "text with SimpleX names" do
   it "channel names - simplex namespace" do
-    "#privacy" <==> sname NTPublicGroup TLDSimplex "privacy" [] "privacy"
-    "#privacy.simplex" <==> sname NTPublicGroup TLDSimplex "privacy" [] "privacy.simplex"
-    "#my-channel.simplex" <==> sname NTPublicGroup TLDSimplex "my-channel" [] "my-channel.simplex"
-    "hello #privacy!" <==> "hello " <> sname NTPublicGroup TLDSimplex "privacy" [] "privacy" <> "!"
-    "see #privacy.simplex now" <==> "see " <> sname NTPublicGroup TLDSimplex "privacy" [] "privacy.simplex" <> " now"
+    "#privacy" <==> sname NTPublicGroup TLDPopopx "privacy" [] "privacy"
+    "#privacy.popopx" <==> sname NTPublicGroup TLDPopopx "privacy" [] "privacy.popopx"
+    "#my-channel.popopx" <==> sname NTPublicGroup TLDPopopx "my-channel" [] "my-channel.popopx"
+    "hello #privacy!" <==> "hello " <> sname NTPublicGroup TLDPopopx "privacy" [] "privacy" <> "!"
+    "see #privacy.popopx now" <==> "see " <> sname NTPublicGroup TLDPopopx "privacy" [] "privacy.popopx" <> " now"
   it "channel names - subdomains" do
-    "#support.acme.simplex" <==> sname NTPublicGroup TLDSimplex "acme" ["support"] "support.acme.simplex"
-    "#a.b.acme.simplex" <==> sname NTPublicGroup TLDSimplex "acme" ["b", "a"] "a.b.acme.simplex"
+    "#support.acme.popopx" <==> sname NTPublicGroup TLDPopopx "acme" ["support"] "support.acme.popopx"
+    "#a.b.acme.popopx" <==> sname NTPublicGroup TLDPopopx "acme" ["b", "a"] "a.b.acme.popopx"
   it "channel names - testing namespace" do
     "#test.testing" <==> sname NTPublicGroup TLDTesting "test" [] "test.testing"
     "#sub.test.testing" <==> sname NTPublicGroup TLDTesting "test" ["sub"] "sub.test.testing"
@@ -501,8 +501,8 @@ textWithSimplexNames = describe "text with SimpleX names" do
     "#news.bbc.co.uk" <==> sname NTPublicGroup TLDWeb "news.bbc.co.uk" [] "news.bbc.co.uk"
     "#123.com" <==> sname NTPublicGroup TLDWeb "123.com" [] "123.com"
   it "contact names" do
-    "@privacy.simplex" <==> sname NTContact TLDSimplex "privacy" [] "privacy.simplex"
-    "@my-name.simplex" <==> sname NTContact TLDSimplex "my-name" [] "my-name.simplex"
+    "@privacy.popopx" <==> sname NTContact TLDPopopx "privacy" [] "privacy.popopx"
+    "@my-name.popopx" <==> sname NTContact TLDPopopx "my-name" [] "my-name.popopx"
     "@alice.example.com" <==> sname NTContact TLDWeb "alice.example.com" [] "alice.example.com"
   it "not parsed as names" do
     "#123" <==> "#123"

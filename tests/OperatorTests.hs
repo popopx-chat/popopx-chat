@@ -16,17 +16,17 @@ module OperatorTests (operatorTests) where
 
 import Data.Bifunctor (second)
 import qualified Data.List.NonEmpty as L
-import Simplex.Chat
-import Simplex.Chat.Controller (ChatConfig (..), PresetServers (..))
-import Simplex.Chat.Operators
-import Simplex.Chat.Operators.Presets
-import Simplex.Chat.Protocol (RelayProfile (..), mkRelayProfile)
-import Simplex.Chat.Types
-import Simplex.FileTransfer.Client.Presets (defaultXFTPServers)
-import Simplex.Messaging.Agent.Env.SQLite (ServerCfg (..), ServerRoles (..), allRoles)
-import Simplex.Messaging.Agent.Store.Entity
-import Simplex.Messaging.Encoding.String
-import Simplex.Messaging.Protocol
+import Popopx.Chat
+import Popopx.Chat.Controller (ChatConfig (..), PresetServers (..))
+import Popopx.Chat.Operators
+import Popopx.Chat.Operators.Presets
+import Popopx.Chat.Protocol (RelayProfile (..), mkRelayProfile)
+import Popopx.Chat.Types
+import Popopx.FileTransfer.Client.Presets (defaultXFTPServers)
+import Popopx.Messaging.Agent.Env.SQLite (ServerCfg (..), ServerRoles (..), allRoles)
+import Popopx.Messaging.Agent.Store.Entity
+import Popopx.Messaging.Encoding.String
+import Popopx.Messaging.Protocol
 import Test.Hspec
 
 operatorTests :: Spec

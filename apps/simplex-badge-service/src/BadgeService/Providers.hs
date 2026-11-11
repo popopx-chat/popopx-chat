@@ -20,7 +20,7 @@ import Data.ByteString (ByteString)
 import Data.Text (Text)
 import Data.Time.Clock (NominalDiffTime, UTCTime)
 import Network.HTTP.Types.Header (Header)
-import Simplex.Chat.PaymentService.Types (CurrencyAmount, PaymentProvider (..), ServicePaymentDestination, ServicePaymentMethod)
+import Popopx.Chat.PaymentService.Types (CurrencyAmount, PaymentProvider (..), ServicePaymentDestination, ServicePaymentMethod)
 
 newtype ProviderError = ProviderError Text deriving (Eq, Show)
 

@@ -1,4 +1,4 @@
-// Every rule here mirrors src/Simplex/Chat/Badges/Code.hs; any divergence makes a code sold here unredeemable.
+// Every rule here mirrors src/Popopx/Chat/Badges/Code.hs; any divergence makes a code sold here unredeemable.
 
 // Crockford base32: the digits and the upper-case letters except I, L, O and U.
 export const ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";

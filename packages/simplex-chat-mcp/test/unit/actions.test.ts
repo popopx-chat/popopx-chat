@@ -18,7 +18,7 @@ function sendFields(text = "trail running shoes"): NewAction {
   return {
     tool: "send",
     input: {chat: "@4", text},
-    subject: {kind: "bot", name: "SimpleX Directory", simplexName: "@directory.simplex", incognito: false},
+    subject: {kind: "bot", name: "SimpleX Directory", simplexName: "@directory.popopx", incognito: false},
     chat: "@4",
     mentions: [],
     responses: new Collected(),
@@ -28,8 +28,8 @@ function sendFields(text = "trail running shoes"): NewAction {
 function connectFields(): NewAction {
   return {
     tool: "connect",
-    input: {target: "@directory.simplex"},
-    subject: {kind: "bot", name: "SimpleX Directory", simplexName: "@directory.simplex", incognito: false},
+    input: {target: "@directory.popopx"},
+    subject: {kind: "bot", name: "SimpleX Directory", simplexName: "@directory.popopx", incognito: false},
     plan: {cardKind: "bot", type: "contact", takesMessage: true},
     messages: new Collected(),
   }
@@ -381,7 +381,7 @@ describe("actions in mode requests", () => {
   it("logs leave actions", async () => {
     const fake = fakeHooks()
     const actions = actionsWith("requests", fake)
-    const subject = {kind: "bot", name: "SimpleX Directory", simplexName: "@directory.simplex", incognito: false}
+    const subject = {kind: "bot", name: "SimpleX Directory", simplexName: "@directory.popopx", incognito: false}
     const contact = actions.create("a", {tool: "leave", input: {chat: "@4"}, subject, chat: "@4"})
     const group = actions.create("b", {tool: "leave", input: {chat: "#2"}, subject: {kind: "business", name: "ep", incognito: false}, chat: "#2"})
     await settled()

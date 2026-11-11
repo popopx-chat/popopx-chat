@@ -35,9 +35,9 @@ import Data.Maybe (fromMaybe, isJust)
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
-import Simplex.Chat.Library.Commands (mkValidName)
-import Simplex.Messaging.Crypto.BBS (BBSSecretKey)
-import Simplex.Messaging.Encoding.String (strDecode)
+import Popopx.Chat.Library.Commands (mkValidName)
+import Popopx.Messaging.Crypto.BBS (BBSSecretKey)
+import Popopx.Messaging.Encoding.String (strDecode)
 import System.IO.Error (ioeGetErrorString)
 import Text.Read (readMaybe)
 

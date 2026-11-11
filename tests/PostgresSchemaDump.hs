@@ -11,11 +11,11 @@ import Control.Monad (unless, void)
 import qualified Data.ByteString.Char8 as B
 import Data.List (dropWhileEnd)
 import Data.Maybe (fromJust, isJust)
-import Simplex.Messaging.Agent.Store.Postgres (closeDBStore, createDBStore)
-import Simplex.Messaging.Agent.Store.Postgres.Common (DBOpts (..))
-import qualified Simplex.Messaging.Agent.Store.Postgres.Migrations as Migrations
-import Simplex.Messaging.Agent.Store.Shared (Migration (..), MigrationConfig (..), MigrationConfirmation (..), MigrationsToRun (..), toDownMigration)
-import Simplex.Messaging.Util (ifM, whenM)
+import Popopx.Messaging.Agent.Store.Postgres (closeDBStore, createDBStore)
+import Popopx.Messaging.Agent.Store.Postgres.Common (DBOpts (..))
+import qualified Popopx.Messaging.Agent.Store.Postgres.Migrations as Migrations
+import Popopx.Messaging.Agent.Store.Shared (Migration (..), MigrationConfig (..), MigrationConfirmation (..), MigrationsToRun (..), toDownMigration)
+import Popopx.Messaging.Util (ifM, whenM)
 import System.Directory (doesFileExist, removeFile)
 import System.Process (readCreateProcess, shell)
 import Test.Hspec
