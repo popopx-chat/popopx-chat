@@ -1051,7 +1051,7 @@ public enum CommandErrorType: Decodable, Hashable {
 public enum ConnectionErrorType: Decodable, Hashable {
     case NOT_FOUND
     case DUPLICATE
-    case SIMPLEX
+    case POPOPX
     case NOT_ACCEPTED
     case NOT_AVAILABLE
 }

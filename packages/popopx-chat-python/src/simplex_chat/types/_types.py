@@ -1601,8 +1601,8 @@ class ConnectionErrorType_NOT_FOUND(TypedDict):
 class ConnectionErrorType_DUPLICATE(TypedDict):
     type: Literal["DUPLICATE"]
 
-class ConnectionErrorType_SIMPLEX(TypedDict):
-    type: Literal["SIMPLEX"]
+class ConnectionErrorType_POPOPX(TypedDict):
+    type: Literal["POPOPX"]
 
 class ConnectionErrorType_NOT_ACCEPTED(TypedDict):
     type: Literal["NOT_ACCEPTED"]
@@ -1613,12 +1613,12 @@ class ConnectionErrorType_NOT_AVAILABLE(TypedDict):
 ConnectionErrorType = (
     ConnectionErrorType_NOT_FOUND
     | ConnectionErrorType_DUPLICATE
-    | ConnectionErrorType_SIMPLEX
+    | ConnectionErrorType_POPOPX
     | ConnectionErrorType_NOT_ACCEPTED
     | ConnectionErrorType_NOT_AVAILABLE
 )
 
-ConnectionErrorType_Tag = Literal["NOT_FOUND", "DUPLICATE", "SIMPLEX", "NOT_ACCEPTED", "NOT_AVAILABLE"]
+ConnectionErrorType_Tag = Literal["NOT_FOUND", "DUPLICATE", "POPOPX", "NOT_ACCEPTED", "NOT_AVAILABLE"]
 
 ConnectionMode = Literal["INV", "CON"]
 

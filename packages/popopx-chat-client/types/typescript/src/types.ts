@@ -2293,12 +2293,12 @@ export namespace ConnectionEntity {
 export type ConnectionErrorType = 
   | ConnectionErrorType.NOT_FOUND
   | ConnectionErrorType.DUPLICATE
-  | ConnectionErrorType.SIMPLEX
+  | ConnectionErrorType.POPOPX
   | ConnectionErrorType.NOT_ACCEPTED
   | ConnectionErrorType.NOT_AVAILABLE
 
 export namespace ConnectionErrorType {
-  export type Tag = "NOT_FOUND" | "DUPLICATE" | "SIMPLEX" | "NOT_ACCEPTED" | "NOT_AVAILABLE"
+  export type Tag = "NOT_FOUND" | "DUPLICATE" | "POPOPX" | "NOT_ACCEPTED" | "NOT_AVAILABLE"
 
   interface Interface {
     type: Tag
@@ -2312,8 +2312,8 @@ export namespace ConnectionErrorType {
     type: "DUPLICATE"
   }
 
-  export interface SIMPLEX extends Interface {
-    type: "SIMPLEX"
+  export interface POPOPX extends Interface {
+    type: "POPOPX"
   }
 
   export interface NOT_ACCEPTED extends Interface {
