@@ -356,7 +356,7 @@ Enum: `Mic`, `Camera`, `ScreenAudio`, `ScreenVideo`. Used in `WCallCommand.Media
 ### Android: SimplexService
 A foreground `Service` that keeps the chat backend running in the background. Uses a `WakeLock` and displays a persistent notification ("SimpleX Chat service" channel). Started with `START_STICKY` for automatic restart. Manages the `chatRecvMsg` loop indirectly by keeping the process alive.
 
-Notification channel: `chat.simplex.app.SIMPLEX_SERVICE_NOTIFICATION` ("SimpleX Chat service")
+Notification channel: `com.popopxchat.popopx.SIMPLEX_SERVICE_NOTIFICATION` ("SimpleX Chat service")
 
 *See:* `android/src/main/java/chat/simplex/app/SimplexService.kt`
 
@@ -375,10 +375,10 @@ Enum controlling background message fetching:
 
 ### Android: Notification Channels
 Android notification channels registered by the app:
-- **Messages:** `chat.simplex.app.MESSAGE_NOTIFICATION` -- high importance, for incoming messages
-- **Calls:** `chat.simplex.app.CALL_NOTIFICATION_2` -- high importance, for incoming call alerts with custom sound
-- **Service:** `chat.simplex.app.SIMPLEX_SERVICE_NOTIFICATION` -- low importance, persistent foreground service indicator
-- **Call Service:** `chat.simplex.app.CALL_SERVICE_NOTIFICATION` -- default importance, ongoing call indicator
+- **Messages:** `com.popopxchat.popopx.MESSAGE_NOTIFICATION` -- high importance, for incoming messages
+- **Calls:** `com.popopxchat.popopx.CALL_NOTIFICATION_2` -- high importance, for incoming call alerts with custom sound
+- **Service:** `com.popopxchat.popopx.SIMPLEX_SERVICE_NOTIFICATION` -- low importance, persistent foreground service indicator
+- **Call Service:** `com.popopxchat.popopx.CALL_SERVICE_NOTIFICATION` -- default importance, ongoing call indicator
 
 *See:* `android/src/main/java/chat/simplex/app/model/NtfManager.android.kt`, `SimplexService.kt`, `CallService.kt`
 
@@ -468,7 +468,7 @@ Utility functions for launching coroutines on background threads. Used throughou
 
 ### AppPreferences (Storage)
 All preferences are accessed through `ChatController.appPrefs`, which is a lazy-initialized `AppPreferences` instance. The underlying storage is:
-- **Android:** `SharedPreferences` with ID `chat.simplex.app.SIMPLEX_APP_PREFS`
+- **Android:** `SharedPreferences` with ID `com.popopxchat.popopx.SIMPLEX_APP_PREFS`
 - **Desktop:** Java `Properties` files via `com.russhwolf.settings`
 
 Theme overrides have separate storage (`SHARED_PREFS_THEMES_ID`).

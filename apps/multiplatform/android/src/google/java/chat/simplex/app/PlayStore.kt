@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import android.content.ActivityNotFoundException
 import android.content.Intent

@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ImageComposeScene

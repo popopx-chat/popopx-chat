@@ -80,8 +80,8 @@ Implemented as a Kotlin `object` (singleton) in the Android module.
 
 | Channel | Constant | Importance | Purpose |
 |---|---|---|---|
-| Messages | `MessageChannel` (`chat.simplex.app.MESSAGE_NOTIFICATION`) | HIGH | All chat message notifications |
-| Calls | `CallChannel` (`chat.simplex.app.CALL_NOTIFICATION_2`) | HIGH | Incoming call alerts with custom ringtone and vibration |
+| Messages | `MessageChannel` (`com.popopxchat.popopx.MESSAGE_NOTIFICATION`) | HIGH | All chat message notifications |
+| Calls | `CallChannel` (`com.popopxchat.popopx.CALL_NOTIFICATION_2`) | HIGH | Incoming call alerts with custom ringtone and vibration |
 
 Channel creation happens in `createNtfChannelsMaybeShowAlert()` ([line 298](../../android/src/main/java/chat/simplex/app/model/NtfManager.android.kt#L298)). Old channel IDs (`CALL_NOTIFICATION`, `CALL_NOTIFICATION_1`, `LOCK_SCREEN_CALL_NOTIFICATION`) are explicitly deleted.
 

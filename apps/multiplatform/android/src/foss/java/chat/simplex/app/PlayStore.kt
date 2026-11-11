@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import chat.simplex.common.platform.Log
 import chat.simplex.common.views.badges.BadgeProduct

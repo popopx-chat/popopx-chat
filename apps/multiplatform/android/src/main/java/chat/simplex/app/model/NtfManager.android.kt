@@ -1,4 +1,4 @@
-package chat.simplex.app.model
+package com.popopxchat.popopx.model
 
 import android.app.*
 import android.app.TaskStackBuilder
@@ -12,10 +12,10 @@ import android.net.Uri
 import android.view.Display
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.core.app.*
-import chat.simplex.app.*
-import chat.simplex.app.TAG
-import chat.simplex.app.views.call.CallActivity
-import chat.simplex.app.views.call.getKeyguardManager
+import com.popopxchat.popopx.*
+import com.popopxchat.popopx.TAG
+import com.popopxchat.popopx.views.call.CallActivity
+import com.popopxchat.popopx.views.call.getKeyguardManager
 import chat.simplex.common.views.helpers.*
 import chat.simplex.common.model.*
 import chat.simplex.common.platform.*
@@ -25,16 +25,16 @@ import kotlinx.datetime.Clock
 import chat.simplex.res.*
 
 object NtfManager {
-  const val MessageChannel: String = "chat.simplex.app.MESSAGE_NOTIFICATION"
-  const val MessageGroup: String = "chat.simplex.app.MESSAGE_NOTIFICATION"
-  const val OpenChatAction: String = "chat.simplex.app.OPEN_CHAT"
-  const val ShowChatsAction: String = "chat.simplex.app.SHOW_CHATS"
+  const val MessageChannel: String = "com.popopxchat.popopx.MESSAGE_NOTIFICATION"
+  const val MessageGroup: String = "com.popopxchat.popopx.MESSAGE_NOTIFICATION"
+  const val OpenChatAction: String = "com.popopxchat.popopx.OPEN_CHAT"
+  const val ShowChatsAction: String = "com.popopxchat.popopx.SHOW_CHATS"
 
   // DO NOT change notification channel settings / names
-  const val CallChannel: String = "chat.simplex.app.CALL_NOTIFICATION_2"
-  const val AcceptCallAction: String = "chat.simplex.app.ACCEPT_CALL"
-  const val RejectCallAction: String = "chat.simplex.app.REJECT_CALL"
-  const val EndCallAction: String = "chat.simplex.app.END_CALL"
+  const val CallChannel: String = "com.popopxchat.popopx.CALL_NOTIFICATION_2"
+  const val AcceptCallAction: String = "com.popopxchat.popopx.ACCEPT_CALL"
+  const val RejectCallAction: String = "com.popopxchat.popopx.REJECT_CALL"
+  const val EndCallAction: String = "com.popopxchat.popopx.END_CALL"
   const val CallNotificationId: Int = -1
   private const val UserIdKey: String = "userId"
   private const val ChatIdKey: String = "chatId"
@@ -298,9 +298,9 @@ object NtfManager {
     manager.createNotificationChannel(NotificationChannel(MessageChannel, generalGetString(MR.strings.ntf_channel_messages), NotificationManager.IMPORTANCE_HIGH))
     manager.createNotificationChannel(callNotificationChannel(CallChannel, generalGetString(MR.strings.ntf_channel_calls)))
     // Remove old channels since they can't be edited
-    manager.deleteNotificationChannel("chat.simplex.app.CALL_NOTIFICATION")
-    manager.deleteNotificationChannel("chat.simplex.app.CALL_NOTIFICATION_1")
-    manager.deleteNotificationChannel("chat.simplex.app.LOCK_SCREEN_CALL_NOTIFICATION")
+    manager.deleteNotificationChannel("com.popopxchat.popopx.CALL_NOTIFICATION")
+    manager.deleteNotificationChannel("com.popopxchat.popopx.CALL_NOTIFICATION_1")
+    manager.deleteNotificationChannel("com.popopxchat.popopx.LOCK_SCREEN_CALL_NOTIFICATION")
   }
 
   /**

@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import chat.simplex.common.platform.MAX_SLOW_FRAME_DEBT
 import chat.simplex.common.platform.frameWait

@@ -3,7 +3,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const { setTimeout: sleep } = require('timers/promises');
 
-const PACKAGE_NAME = 'chat.simplex.app';
+const PACKAGE_NAME = 'com.popopxchat.popopx';
 const API = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${PACKAGE_NAME}`;
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const CSV_FILE = 'play-prices.csv';

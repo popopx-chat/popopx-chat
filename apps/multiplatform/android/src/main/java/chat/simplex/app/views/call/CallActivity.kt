@@ -1,4 +1,4 @@
-package chat.simplex.app.views.call
+package com.popopxchat.popopx.views.call
 
 import android.Manifest
 import android.app.*
@@ -31,11 +31,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
-import chat.simplex.app.*
-import chat.simplex.app.R
-import chat.simplex.app.TAG
-import chat.simplex.app.model.NtfManager
-import chat.simplex.app.model.NtfManager.AcceptCallAction
+import com.popopxchat.popopx.*
+import com.popopxchat.popopx.R
+import com.popopxchat.popopx.TAG
+import com.popopxchat.popopx.model.NtfManager
+import com.popopxchat.popopx.model.NtfManager.AcceptCallAction
 import chat.simplex.common.AppLock
 import chat.simplex.common.helpers.applyAppLocale
 import chat.simplex.common.model.*

@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import android.app.*
 import android.content.*
@@ -11,8 +11,8 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
-import chat.simplex.app.model.NtfManager.EndCallAction
-import chat.simplex.app.views.call.CallActivity
+import com.popopxchat.popopx.model.NtfManager.EndCallAction
+import com.popopxchat.popopx.views.call.CallActivity
 import chat.simplex.common.model.NotificationPreviewMode
 import chat.simplex.common.platform.*
 import chat.simplex.common.views.helpers.*
@@ -187,7 +187,7 @@ class CallService: Service() {
 
 companion object {
     const val TAG = "CALL_SERVICE"
-    const val CALL_NOTIFICATION_CHANNEL_ID = "chat.simplex.app.CALL_SERVICE_NOTIFICATION"
+    const val CALL_NOTIFICATION_CHANNEL_ID = "com.popopxchat.popopx.CALL_SERVICE_NOTIFICATION"
     const val CALL_NOTIFICATION_CHANNEL_NAME = "SimpleX Chat call service"
     const val CALL_SERVICE_ID = 6788
     const val WAKE_LOCK_TAG = "CallService::lock"

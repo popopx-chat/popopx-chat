@@ -11,7 +11,7 @@ import UIKit
 import SimpleXChat
 import SwiftUI
 
-private let suspendLockQueue = DispatchQueue(label: "chat.simplex.app.suspend.lock")
+private let suspendLockQueue = DispatchQueue(label: "com.popopxchat.popopx.suspend.lock")
 
 let bgSuspendTimeout: Int = 5 // seconds
 

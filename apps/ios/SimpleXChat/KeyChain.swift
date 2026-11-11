@@ -10,7 +10,7 @@ import Foundation
 import Security
 
 private let ACCESS_POLICY: CFString = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-private let ACCESS_GROUP: String = "5NN7GUYB6T.chat.simplex.app"
+private let ACCESS_GROUP: String = "PDBA6XRBQT.com.popopxchat.popopx"
 private let DATABASE_PASSWORD_ITEM: String = "databasePassword"
 private let APP_PASSWORD_ITEM: String = "appPassword"
 private let SELF_DESTRUCT_PASSWORD_ITEM: String = "selfDestructPassword"
@@ -112,8 +112,8 @@ private func baseItemQuery(forKey key: String) -> [NSString : AnyObject] {
     var query = [NSString : AnyObject]()
     query[kSecClass] = kSecClassGenericPassword
     query[kSecAttrAccount] = key as AnyObject?
-    #if TARGET_OS_IOS && !TARGET_OS_SIMULATOR
-        query[kSecAttrAccessGroup] = ACCESS_GROUP
+    #if os(iOS) && !targetEnvironment(simulator)
+        query[kSecAttrAccessGroup] = ACCESS_GROUP as AnyObject
     #endif
     return query
 }

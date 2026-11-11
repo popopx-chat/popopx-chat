@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import chat.simplex.common.ui.theme.*
 import kotlin.test.Test

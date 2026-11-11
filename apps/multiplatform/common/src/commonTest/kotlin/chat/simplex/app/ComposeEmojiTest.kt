@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import androidx.compose.ui.text.TextRange
 import chat.simplex.common.views.chat.ComposeMessage

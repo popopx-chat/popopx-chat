@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import chat.simplex.common.MAX_LINK_BYTES
 import chat.simplex.common.linkFromArgs

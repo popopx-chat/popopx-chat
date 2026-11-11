@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import chat.simplex.common.views.helpers.decodeBoundedBufferedImage
 import chat.simplex.common.views.helpers.imageSampleSize

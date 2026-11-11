@@ -1,9 +1,9 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import android.content.Context
 import android.util.Log
 import androidx.work.*
-import chat.simplex.app.SimplexService.Companion.showPassphraseNotification
+import com.popopxchat.popopx.SimplexService.Companion.showPassphraseNotification
 import chat.simplex.common.model.ChatController
 import chat.simplex.common.platform.*
 import chat.simplex.common.views.helpers.DBMigrationResult

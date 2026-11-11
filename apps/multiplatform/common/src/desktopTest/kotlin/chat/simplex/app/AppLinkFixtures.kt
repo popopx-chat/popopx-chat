@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 internal const val BADGE_LINK_PREFIX = "simplexchat:/badge/code/"
 internal const val BADGE_LINK = "${BADGE_LINK_PREFIX}SB0000000000000000000"

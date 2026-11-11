@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import androidx.compose.ui.unit.sp
 import chat.simplex.common.model.*

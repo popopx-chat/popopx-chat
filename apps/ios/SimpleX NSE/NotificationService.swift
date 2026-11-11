@@ -91,7 +91,7 @@ public enum NSENotificationData {
 // Spec: spec/services/notifications.md#NSEThreads
 class NSEThreads {
     static let shared = NSEThreads()
-    private let queue = DispatchQueue(label: "chat.simplex.app.SimpleX-NSE.notification-threads.lock")
+    private let queue = DispatchQueue(label: "com.popopxchat.popopx.SimpleX-NSE.notification-threads.lock")
     private var allThreads: Set<UUID> = []
     private var activeThreads: [(threadId: UUID, nse: NotificationService)] = []
     private var droppedNotifications: [(entityId: ChatId, ntf: NSENotificationData)] = []

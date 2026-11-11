@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

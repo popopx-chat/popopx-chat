@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import chat.simplex.common.model.*
 import chat.simplex.common.views.chat.item.MAX_EMPTY_LINES

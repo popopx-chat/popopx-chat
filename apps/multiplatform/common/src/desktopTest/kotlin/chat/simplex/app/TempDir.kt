@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import java.io.IOException
 import java.nio.file.Files

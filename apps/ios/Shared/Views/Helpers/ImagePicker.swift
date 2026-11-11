@@ -39,7 +39,7 @@ struct LibraryMediaListPicker: UIViewControllerRepresentable {
 
     class Coordinator: PHPickerViewControllerDelegate {
         let parent: LibraryMediaListPicker
-        let dispatchQueue = DispatchQueue(label: "chat.simplex.app.LibraryMediaListPicker")
+        let dispatchQueue = DispatchQueue(label: "com.popopxchat.popopx.LibraryMediaListPicker")
 
         init(_ parent: LibraryMediaListPicker) {
             self.parent = parent

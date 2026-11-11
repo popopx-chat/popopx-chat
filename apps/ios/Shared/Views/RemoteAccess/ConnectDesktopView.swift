@@ -14,7 +14,7 @@ struct ConnectDesktopView: View {
     @EnvironmentObject var m: ChatModel
     @EnvironmentObject var theme: AppTheme
     @Environment(\.dismiss) var dismiss: DismissAction
-    @AppStorage(DEFAULT_DEVICE_NAME_FOR_REMOTE_ACCESS) private var deviceName = UIDevice.current.name
+    @AppStorage(DEFAULT_DEVICE_NAME_FOR_REMOTE_ACCESS) private var deviceName = remoteAccessDeviceName()
     @AppStorage(DEFAULT_CONFIRM_REMOTE_SESSIONS) private var confirmRemoteSessions = false
     @AppStorage(DEFAULT_CONNECT_REMOTE_VIA_MULTICAST) private var connectRemoteViaMulticast = true
     @AppStorage(DEFAULT_CONNECT_REMOTE_VIA_MULTICAST_AUTO) private var connectRemoteViaMulticastAuto = true
@@ -537,6 +537,20 @@ struct ConnectDesktopView: View {
     private func errorAlert(_ error: Error) {
         showErrorAlert(error, NSLocalizedString("Error", comment: ""))
     }
+}
+
+// The @AppStorage default is re-evaluated on every init of this view, so the generated name
+// must be stored before it is returned, otherwise it changes each time the screen opens.
+private func remoteAccessDeviceName() -> String {
+    if UserDefaults.standard.object(forKey: DEFAULT_DEVICE_NAME_FOR_REMOTE_ACCESS) == nil {
+        UserDefaults.standard.set(randomDeviceName(), forKey: DEFAULT_DEVICE_NAME_FOR_REMOTE_ACCESS)
+    }
+    return UserDefaults.standard.string(forKey: DEFAULT_DEVICE_NAME_FOR_REMOTE_ACCESS) ?? ""
+}
+
+private func randomDeviceName() -> String {
+    let alphabet = Array("abcdefghjkmnpqrstuvwxyz23456789")
+    return String((0 ..< 6).map { _ in alphabet[Int.random(in: 0 ..< alphabet.count)] })
 }
 
 struct ConnectDesktopView_Previews: PreviewProvider {

@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import chat.simplex.common.platform.ImageFileType
 import chat.simplex.common.platform.isImageFile

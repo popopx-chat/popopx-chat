@@ -52,7 +52,7 @@ struct ChatView: View {
     @Environment(\.dynamicTypeSize) private var userFont
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.scenePhase) var scenePhase
-    @State @ObservedObject var chat: Chat
+    @State var chat: Chat
     @ObservedObject var im: ItemsModel
     @State var mergedItems: BoxedValue<MergedItems>
     @State var floatingButtonModel: FloatingButtonModel
@@ -299,15 +299,7 @@ struct ChatView: View {
                 )
             }
         }
-        .sheet(isPresented: Binding(
-            get: { !forwardedChatItems.isEmpty },
-            set: { isPresented in
-                if !isPresented {
-                    forwardedChatItems = []
-                    selectedChatItems = nil
-                }
-            }
-        )) {
+        .sheet(isPresented: forwardingItemsSheet) {
             if #available(iOS 16.0, *) {
                 ChatItemForwardingView(chatItems: forwardedChatItems, fromChatInfo: chat.chatInfo, composeState: $composeState)
                     .presentationDetents([.fraction(0.8)])
@@ -363,42 +355,7 @@ struct ChatView: View {
             }
         }
         .onChange(of: chatModel.chatId) { cId in
-            ConnectProgressManager.shared.cancelConnectProgress()
-            showChatInfoSheet = false
-            selectedChatItems = nil
-            revealedItems = Set()
-            stopAudioPlayer()
-            if let cId {
-                if let c = chatModel.getChat(cId) {
-                    chat = c
-                }
-                scrollView.listState.onUpdateListener = onChatItemsUpdated
-                initChatView()
-                theme = buildTheme()
-                closeSearch()
-                mergedItems.boxedValue = MergedItems.create(im, revealedItems)
-                scrollView.updateItems(mergedItems.boxedValue.items)
-
-                if let openAround = chatModel.openAroundItemId, let index = mergedItems.boxedValue.indexInParentItems[openAround] {
-                    scrollView.scrollToItem(index)
-                } else if let viewedIdx = mergedItems.boxedValue.items.firstIndex(where: { !$0.hasUnread() }) {
-                    // scroll to first unread after last viewed item (items reversed: 0 = newest)
-                    if viewedIdx > 0 {
-                        scrollView.scrollToItem(viewedIdx - 1)
-                    } else {
-                        scrollView.scrollToBottom()
-                    }
-                } else if let unreadIndex = mergedItems.boxedValue.items.lastIndex(where: { $0.hasUnread() }) {
-                    scrollView.scrollToItem(unreadIndex)
-                } else {
-                    scrollView.scrollToBottom()
-                }
-                if chatModel.openAroundItemId != nil {
-                    chatModel.openAroundItemId = nil
-                }
-            } else {
-                dismiss()
-            }
+            handleChatIdChange(cId)
         }
         .onChange(of: chatModel.secondaryPendingInviteeChatOpened) { opened in
             if im.secondaryIMFilter != nil && !opened {
@@ -429,23 +386,7 @@ struct ChatView: View {
             }
         }
         .onDisappear {
-            ConnectProgressManager.shared.cancelConnectProgress()
-            VideoPlayerView.players.removeAll()
-            stopAudioPlayer()
-            if chatModel.chatId == cInfo.id && !presentationMode.wrappedValue.isPresented {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                    if chatModel.chatId == nil {
-                        chatModel.chatAgentConnId = nil
-                        chatModel.chatSubStatus = nil
-                        im.reversedChatItems = []
-                        im.chatState.clear()
-                        chatModel.groupMembers = []
-                        chatModel.groupMembersIndexes.removeAll()
-                        chatModel.membersLoaded = false
-                        ChannelRelaysModel.shared.reset()
-                    }
-                }
-            }
+            handleChatDisappear()
         }
         .onChange(of: colorScheme) { _ in
             theme = buildTheme()
@@ -739,6 +680,77 @@ struct ChatView: View {
         .frame(width: 220)
     }
 
+    private func handleChatIdChange(_ cId: ChatId?) {
+        ConnectProgressManager.shared.cancelConnectProgress()
+        showChatInfoSheet = false
+        selectedChatItems = nil
+        revealedItems = Set()
+        stopAudioPlayer()
+        if let cId {
+            if let c = chatModel.getChat(cId) {
+                chat = c
+            }
+            scrollView.listState.onUpdateListener = onChatItemsUpdated
+            initChatView()
+            theme = buildTheme()
+            closeSearch()
+            mergedItems.boxedValue = MergedItems.create(im, revealedItems)
+            scrollView.updateItems(mergedItems.boxedValue.items)
+
+            if let openAround = chatModel.openAroundItemId, let index = mergedItems.boxedValue.indexInParentItems[openAround] {
+                scrollView.scrollToItem(index)
+            } else if let viewedIdx = mergedItems.boxedValue.items.firstIndex(where: { !$0.hasUnread() }) {
+                // scroll to first unread after last viewed item (items reversed: 0 = newest)
+                if viewedIdx > 0 {
+                    scrollView.scrollToItem(viewedIdx - 1)
+                } else {
+                    scrollView.scrollToBottom()
+                }
+            } else if let unreadIndex = mergedItems.boxedValue.items.lastIndex(where: { $0.hasUnread() }) {
+                scrollView.scrollToItem(unreadIndex)
+            } else {
+                scrollView.scrollToBottom()
+            }
+            if chatModel.openAroundItemId != nil {
+                chatModel.openAroundItemId = nil
+            }
+        } else {
+            dismiss()
+        }
+    }
+
+    private var forwardingItemsSheet: Binding<Bool> {
+        Binding(
+            get: { !forwardedChatItems.isEmpty },
+            set: { isPresented in
+                if !isPresented {
+                    forwardedChatItems = []
+                    selectedChatItems = nil
+                }
+            }
+        )
+    }
+
+    private func handleChatDisappear() {
+        ConnectProgressManager.shared.cancelConnectProgress()
+        VideoPlayerView.players.removeAll()
+        stopAudioPlayer()
+        if chatModel.chatId == chat.chatInfo.id && !presentationMode.wrappedValue.isPresented {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                if chatModel.chatId == nil {
+                    chatModel.chatAgentConnId = nil
+                    chatModel.chatSubStatus = nil
+                    im.reversedChatItems = []
+                    im.chatState.clear()
+                    chatModel.groupMembers = []
+                    chatModel.groupMembersIndexes.removeAll()
+                    chatModel.membersLoaded = false
+                    ChannelRelaysModel.shared.reset()
+                }
+            }
+        }
+    }
+
     // Spec: spec/client/chat-view.md#initChatView
     private func initChatView() {
         let cInfo = chat.chatInfo
@@ -917,7 +929,7 @@ struct ChatView: View {
                 return Group {
                     if case .chatBanner = ci.content {
                         VStack {
-                            ChatBannerView(chat: $chat)
+                            ChatBannerView(chat: chat)
                                 .padding(.bottom, 90)
                                 .padding(.top, 8)
 
@@ -945,7 +957,7 @@ struct ChatView: View {
                         : (g.size.width - 32) * 0.84
                         ChatItemWithMenu(
                             im: im,
-                            chat: $chat,
+                            chat: chat,
                             index: index,
                             isLastItem: index == mergedItems.boxedValue.items.count - 1,
                             chatItem: ci,
@@ -1021,7 +1033,7 @@ struct ChatView: View {
     struct ChatBannerView: View {
         @EnvironmentObject var theme: AppTheme
         @AppStorage(DEFAULT_CHAT_ITEM_ROUNDNESS) private var roundness = defaultChatItemRoundness
-        @Binding @ObservedObject var chat: Chat
+        @ObservedObject var chat: Chat
 
         var body: some View {
             let v = VStack(spacing: 8) {
@@ -1716,7 +1728,7 @@ struct ChatView: View {
         @Environment(\.terminalLayout) private var terminal
         @Environment(\.dynamicTypeSize) private var userFont
         @AppStorage(DEFAULT_PROFILE_IMAGE_CORNER_RADIUS) private var profileRadius = defaultProfileImageCorner
-        @Binding @ObservedObject var chat: Chat
+        @ObservedObject var chat: Chat
         @ObservedObject var dummyModel: ChatItemDummyModel = .shared
         let index: Int
         let isLastItem: Bool

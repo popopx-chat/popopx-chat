@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import android.content.Intent
 import android.net.Uri
@@ -8,8 +8,8 @@ import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.fragment.app.FragmentActivity
-import chat.simplex.app.model.NtfManager
-import chat.simplex.app.model.NtfManager.getUserIdFromIntent
+import com.popopxchat.popopx.model.NtfManager
+import com.popopxchat.popopx.model.NtfManager.getUserIdFromIntent
 import chat.simplex.common.*
 import chat.simplex.common.helpers.*
 import chat.simplex.common.model.*

@@ -9,8 +9,8 @@
 #ifndef SimpleX_h
 #define SimpleX_h
 
-#include "hs_init.h"
-#include "objc.h"
+#include <SimpleXChat/hs_init.h>
+#include <SimpleXChat/objc.h>
 
 extern void hs_init(int argc, char **argv[]);
 

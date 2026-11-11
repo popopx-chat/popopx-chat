@@ -62,7 +62,7 @@ final class WebRTCClient: NSObject, RTCVideoViewDelegate, RTCFrameEncryptorDeleg
     }
 
     private let rtcAudioSession =  RTCAudioSession.sharedInstance()
-    private let audioQueue = DispatchQueue(label: "chat.simplex.app.audio")
+    private let audioQueue = DispatchQueue(label: "com.popopxchat.popopx.audio")
     private let endCallLock = NSLock()
     private var sendCallResponse: (WVAPIMessage) async -> Void
     var activeCall: Call?

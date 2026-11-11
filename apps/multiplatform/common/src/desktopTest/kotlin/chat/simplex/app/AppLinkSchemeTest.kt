@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import chat.simplex.common.platform.APPIMAGE_ENTRY_NAME
 import chat.simplex.common.platform.DesktopInstallation

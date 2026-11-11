@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import android.annotation.SuppressLint
 import android.app.*
@@ -17,10 +17,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.*
 import androidx.work.*
-import chat.simplex.app.MainActivity.Companion.OLD_ANDROID_UI_FLAGS
-import chat.simplex.app.model.NtfManager
-import chat.simplex.app.model.NtfManager.AcceptCallAction
-import chat.simplex.app.views.call.CallActivity
+import com.popopxchat.popopx.MainActivity.Companion.OLD_ANDROID_UI_FLAGS
+import com.popopxchat.popopx.model.NtfManager
+import com.popopxchat.popopx.model.NtfManager.AcceptCallAction
+import com.popopxchat.popopx.views.call.CallActivity
 import chat.simplex.common.helpers.*
 import chat.simplex.common.model.*
 import chat.simplex.common.model.ChatController.appPrefs

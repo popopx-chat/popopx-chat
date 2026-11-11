@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import android.annotation.SuppressLint
 import android.app.*
@@ -21,7 +21,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import androidx.work.*
-import chat.simplex.app.model.NtfManager
+import com.popopxchat.popopx.model.NtfManager
 import chat.simplex.common.AppLock
 import chat.simplex.common.helpers.requiresIgnoringBattery
 import chat.simplex.common.model.ChatController
@@ -137,7 +137,7 @@ class SimplexService: Service() {
         Log.w(TAG, "Starting foreground service")
         val chatDbStatus = chatController.chatModel.chatDbStatus.value
         if (chatDbStatus != DBMigrationResult.OK) {
-          Log.w(chat.simplex.app.TAG, "SimplexService: problem with the database: $chatDbStatus")
+          Log.w(com.popopxchat.popopx.TAG, "SimplexService: problem with the database: $chatDbStatus")
           showPassphraseNotification(chatDbStatus)
           androidAppContext.getWorkManagerInstance().cancelUniqueWork(SimplexService.SERVICE_START_WORKER_WORK_NAME_PERIODIC)
           safeStopService()
@@ -306,7 +306,7 @@ class SimplexService: Service() {
 
   companion object {
     const val TAG = "SIMPLEX_SERVICE"
-    const val NOTIFICATION_CHANNEL_ID = "chat.simplex.app.SIMPLEX_SERVICE_NOTIFICATION"
+    const val NOTIFICATION_CHANNEL_ID = "com.popopxchat.popopx.SIMPLEX_SERVICE_NOTIFICATION"
     const val NOTIFICATION_CHANNEL_NAME = "SimpleX Chat service"
     const val SIMPLEX_SERVICE_ID = 6789
     const val SERVICE_START_WORKER_VERSION = BuildConfig.VERSION_CODE
@@ -316,7 +316,7 @@ class SimplexService: Service() {
     private const val PASSPHRASE_NOTIFICATION_ID = 1535
 
     private const val WAKE_LOCK_TAG = "SimplexService::lock"
-    private const val SHARED_PREFS_ID = "chat.simplex.app.SIMPLEX_SERVICE_PREFS"
+    private const val SHARED_PREFS_ID = "com.popopxchat.popopx.SIMPLEX_SERVICE_PREFS"
     private const val SHARED_PREFS_SERVICE_STATE = "SIMPLEX_SERVICE_STATE"
     private const val WORK_NAME_ONCE = "ServiceStartWorkerOnce"
 

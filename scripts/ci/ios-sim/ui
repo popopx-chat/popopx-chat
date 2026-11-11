@@ -32,8 +32,8 @@ unset CLAUDE_CODE_OAUTH_TOKEN
 
 : "${SIM_UDID:?SIM_UDID must be the simulator UDID}"
 
-bundle_id=chat.simplex.app
-app_group=group.chat.simplex.app
+bundle_id=com.popopxchat.popopx
+app_group=group.com.popopxchat.popopx
 # the toolbar's new chat button: shown with and without conversations, unlike the search field
 toolbar_button=Compose
 

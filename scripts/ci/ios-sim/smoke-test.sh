@@ -15,7 +15,8 @@ set -euo pipefail
 app=$1
 export UI_OUT=$2
 cases=${3:-}
-bundle_id=chat.simplex.app
+bundle_id=com.popopxchat.popopx
+app_group=group.com.popopxchat.popopx
 ui=$(dirname "$0")/ui
 fixtures=$(cd "$(dirname "$0")/../../../tests/fixtures" && pwd)
 test_card_x=66
@@ -105,7 +106,7 @@ tap_element() {
 }
 
 sent_files() {
-  find "$(xcrun simctl get_app_container "$SIM_UDID" "$bundle_id" group.chat.simplex.app)" "$(xcrun simctl get_app_container "$SIM_UDID" "$bundle_id" data)" -name "IMG_*.$1" 2> /dev/null | wc -l
+  find "$(xcrun simctl get_app_container "$SIM_UDID" "$bundle_id" "$app_group")" "$(xcrun simctl get_app_container "$SIM_UDID" "$bundle_id" data)" -name "IMG_*.$1" 2> /dev/null | wc -l
 }
 
 sent_file() {
@@ -118,13 +119,13 @@ sent_file() {
 
 sent_size() {
   local file
-  file=$(find "$(xcrun simctl get_app_container "$SIM_UDID" "$bundle_id" group.chat.simplex.app)" "$(xcrun simctl get_app_container "$SIM_UDID" "$bundle_id" data)" -name "IMG_*.$1" -exec ls -t {} + 2> /dev/null | sed -n 1p)
+  file=$(find "$(xcrun simctl get_app_container "$SIM_UDID" "$bundle_id" "$app_group")" "$(xcrun simctl get_app_container "$SIM_UDID" "$bundle_id" data)" -name "IMG_*.$1" -exec ls -t {} + 2> /dev/null | sed -n 1p)
   sips -g pixelWidth -g pixelHeight "$file" | awk '/pixelWidth/ {w = $2} /pixelHeight/ {h = $2} END {print w "x" h}'
 }
 
 disable_file_encryption() {
   xcrun simctl terminate "$SIM_UDID" "$bundle_id" 2> /dev/null || true
-  xcrun simctl spawn "$SIM_UDID" defaults write "$(xcrun simctl get_app_container "$SIM_UDID" "$bundle_id" group.chat.simplex.app)/Library/Preferences/group.chat.simplex.app" privacyEncryptLocalFiles -bool false
+  xcrun simctl spawn "$SIM_UDID" defaults write "$(xcrun simctl get_app_container "$SIM_UDID" "$bundle_id" "$app_group")/Library/Preferences/$app_group" privacyEncryptLocalFiles -bool false
   "$ui" relaunch
 }
 

@@ -9,7 +9,7 @@ The iOS app is a SwiftUI application that interfaces with the Haskell core libra
 ## Build & Development
 
 Open `SimpleX.xcodeproj` in Xcode. The project has five targets:
-- **SimpleX (iOS)** - Main app (Bundle ID: `chat.simplex.app`)
+- **SimpleX (iOS)** - Main app (Bundle ID: `com.popopxchat.popopx`)
 - **SimpleXChat** - Framework containing FFI bridge and shared types
 - **SimpleX NSE** - Notification Service Extension
 - **SimpleX SE** - Share Extension
@@ -65,7 +65,7 @@ Key directories in `Shared/`:
 
 ### Shared Data Between Targets
 
-All three targets share data via App Group (`group.chat.simplex.app`):
+All three targets share data via App Group (`group.com.popopxchat.popopx`):
 - `SimpleXChat/AppGroup.swift` - GroupDefaults wrapper for typed shared preferences
 - Keychain for sensitive data: `kcDatabasePassword`, `kcAppPassword`, `kcSelfDestructPassword`
 
@@ -111,4 +111,4 @@ cd path/to/assets && ./resize.sh
 Configured in Info.plist:
 - Background modes: audio, fetch, remote-notification, voip
 - URL scheme: `simplex://` for deep linking
-- BGTaskScheduler: `chat.simplex.app.receive`
+- BGTaskScheduler: `com.popopxchat.popopx.receive`

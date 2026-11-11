@@ -119,7 +119,7 @@ private final class LargeStackRunner: NSObject {
         super.init()
         let t = Thread(target: self, selector: #selector(loop), object: nil)
         t.stackSize = stackSizeLimit
-        t.name = "chat.simplex.decoding"
+        t.name = "com.popopxchat.popopx.decoding"
         t.qualityOfService = .default
         t.start()
         thread = t

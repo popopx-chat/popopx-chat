@@ -1,4 +1,4 @@
-package chat.simplex.app
+package com.popopxchat.popopx
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
