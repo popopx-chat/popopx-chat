@@ -304,7 +304,7 @@ private struct InviteView: View {
     }
 
     private var sectionHeader: some View {
-        #if SIMPLEX_ASSETS
+        #if POPOPX_ASSETS || SIMPLEX_ASSETS
         VStack(alignment: .leading, spacing: 0) {
             Image(colorScheme == .light
                 ? (onboarding ? "one-time-link" : "one-time-link-small")
@@ -703,7 +703,7 @@ private struct ConnectView: View {
     }
 
     private var connectSectionHeader: some View {
-        #if SIMPLEX_ASSETS
+        #if POPOPX_ASSETS || SIMPLEX_ASSETS
         VStack(alignment: .leading, spacing: 0) {
             Image(colorScheme == .light
                 ? (onboarding ? "connect-via-link" : "connect-via-link-small")

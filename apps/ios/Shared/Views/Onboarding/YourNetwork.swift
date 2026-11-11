@@ -36,7 +36,7 @@ struct YourNetworkView: View {
             VStack(alignment: .center, spacing: 10) {
                 Spacer(minLength: 0)
 
-                #if SIMPLEX_ASSETS
+                #if POPOPX_ASSETS || SIMPLEX_ASSETS
                 Image(colorScheme == .light ? "your-network" : "your-network-light")
                     .resizable()
                     .scaledToFit()

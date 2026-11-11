@@ -1144,7 +1144,7 @@ private fun InvestInSimpleXChatView(modalManager: ModalManager) {
       fontWeight = FontWeight.Medium,
       modifier = Modifier.padding(bottom = 6.dp)
     )
-    if (BuildConfigCommon.SIMPLEX_ASSETS) {
+    if (BuildConfigCommon.POPOPX_ASSETS) {
       Image(
         painterResource(MR.images.crowdfunding_1),
         contentDescription = null,
@@ -1224,7 +1224,7 @@ fun GetStakeView(showFirstImage: Boolean, inCenterOfWindow: Boolean = false, clo
 
   @Composable
   fun slideImage(slide: CrowdfundingSlide) {
-    if (BuildConfigCommon.SIMPLEX_ASSETS) {
+    if (BuildConfigCommon.POPOPX_ASSETS) {
       Image(
         painterResource(slide.image),
         contentDescription = null,

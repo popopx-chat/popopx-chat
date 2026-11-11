@@ -63,7 +63,7 @@ struct ConnectBannerCard: View {
     private func bannerHalf(imageName: String, icon: String, title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 0) {
-                #if SIMPLEX_ASSETS
+                #if POPOPX_ASSETS || SIMPLEX_ASSETS
                 Image(colorScheme == .light ? imageName : "\(imageName)-light")
                     .resizable()
                     .scaledToFit()
@@ -72,7 +72,7 @@ struct ConnectBannerCard: View {
                 gradientFallback(icon: icon)
                 #endif
                 HStack(spacing: 8) {
-                    #if SIMPLEX_ASSETS
+                    #if POPOPX_ASSETS || SIMPLEX_ASSETS
                     Image(systemName: icon)
                         .font(.system(size: 18))
                         .foregroundColor(theme.colors.primary)

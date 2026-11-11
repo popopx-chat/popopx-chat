@@ -33,10 +33,10 @@ _PLATFORM_MAP = {
 
 # Two spellings of the same library, in load order.  libpopopx.* is what this fork's own
 # build scripts produce (scripts/desktop/build-lib-*, flake.nix, the Dockerfiles), and a
-# local build reaches it through SIMPLEX_LIBS_DIR.  libsimplex.* is what the pinned
-# release asset in _libs_asset() still contains, because LIBS_RELEASE points at
-# simplex-chat/simplex-chat-libs -- until POPOPX publishes its own libs repository the
-# download can only serve the old name, so the lookup keeps both.
+# local build reaches it through POPOPX_LIBS_DIR (SIMPLEX_LIBS_DIR still works).
+# libsimplex.* is what the pinned release asset in _libs_asset() still contains, because
+# LIBS_RELEASE points at simplex-chat/simplex-chat-libs -- until POPOPX publishes its own
+# libs repository the download can only serve the old name, so the lookup keeps both.
 _LIBNAMES = {
     "linux": ("libpopopx.so", "libsimplex.so"),
     "darwin": ("libpopopx.dylib", "libsimplex.dylib"),
@@ -105,8 +105,9 @@ def _cache_root() -> Path:
 
 
 def _resolve_libs_dir(backend: Backend) -> Path:
-    if override := os.environ.get("SIMPLEX_LIBS_DIR"):
-        return Path(override)
+    for name in ("POPOPX_LIBS_DIR", "SIMPLEX_LIBS_DIR"):
+        if override := os.environ.get(name):
+            return Path(override)
     if backend == "postgres" and _platform_tag() != "linux-x86_64":
         raise RuntimeError(
             "postgres backend is only supported on linux-x86_64; "

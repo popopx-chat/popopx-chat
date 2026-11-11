@@ -67,8 +67,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --from=libpopopx /libs /opt/simplex/libs
 # The library loads libpopopx and the add-on built below instead of downloading the released ones.
-ENV SIMPLEX_LIBS_DIR=/opt/simplex/libs \
-    SIMPLEX_ADDON_PATH=/src/packages/popopx-chat-nodejs/build/Release/popopx.node
+ENV POPOPX_LIBS_DIR=/opt/simplex/libs \
+    POPOPX_ADDON_PATH=/src/packages/popopx-chat-nodejs/build/Release/popopx.node
 
 WORKDIR /src
 COPY packages/popopx-chat-client/types/typescript packages/popopx-chat-client/types/typescript
@@ -109,8 +109,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --from=build /opt/simplex/libs /opt/simplex/libs
 COPY --from=build --chown=node:node /src /src
-ENV SIMPLEX_LIBS_DIR=/opt/simplex/libs \
-    SIMPLEX_ADDON_PATH=/src/packages/popopx-chat-nodejs/build/Release/popopx.node
+ENV POPOPX_LIBS_DIR=/opt/simplex/libs \
+    POPOPX_ADDON_PATH=/src/packages/popopx-chat-nodejs/build/Release/popopx.node
 
 # A named volume takes this ownership; a bind mount must be owned by uid 1000.
 RUN mkdir -p /src/apps/popopx-calculator-bot/data && \

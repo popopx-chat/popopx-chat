@@ -173,7 +173,7 @@ struct UserAddressView: View {
             }
             addressSettingsButton(userAddress)
         } header: {
-            #if SIMPLEX_ASSETS
+            #if POPOPX_ASSETS || SIMPLEX_ASSETS
             VStack(alignment: .leading, spacing: 0) {
                 Image(colorScheme == .light ? "popopx-address-small" : "popopx-address-small-light")
                     .resizable()
@@ -257,7 +257,7 @@ struct UserAddressView: View {
             }
             .frame(maxWidth: .infinity)
         } header: {
-            #if SIMPLEX_ASSETS
+            #if POPOPX_ASSETS || SIMPLEX_ASSETS
             VStack(alignment: .leading) {
                 Image(colorScheme == .light ? "popopx-address" : "popopx-address-light")
                     .resizable()

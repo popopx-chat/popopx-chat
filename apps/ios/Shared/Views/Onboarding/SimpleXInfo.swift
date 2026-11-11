@@ -28,7 +28,7 @@ struct POPOPXInfo: View {
                     .padding(.leading, 4)
                     .frame(maxWidth: .infinity, minHeight: 48, alignment: .top)
 
-                #if SIMPLEX_ASSETS
+                #if POPOPX_ASSETS || SIMPLEX_ASSETS
                 Image(colorScheme == .light ? "intro" : "intro-light")
                     .resizable()
                     .scaledToFit()

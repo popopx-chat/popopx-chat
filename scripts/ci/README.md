@@ -88,7 +88,7 @@ The reduced build runs one Linux job, build-linux (ubuntu-22.04 x86_64), for eve
   - Node 22 and Python 3.12 (steps "Setup Node.js" and "Setup Python");
   - libsimplex, when `CORE_SOURCES` of packages_release.py also changed (step "Build library");
   - `package-tests.sh build linux-x86_64` and `package-tests.sh test` (step "Package tests (pull request)").
-- With libsimplex built, SIMPLEX_LIBS_DIR is set to it for the nodejs tests; the python tests run with it unset (package-tests.sh). Without SIMPLEX_LIBS_DIR, the pinned release libraries are downloaded (packages/popopx-chat-nodejs/src/libs.ts).
+- With libsimplex built, POPOPX_LIBS_DIR is set to it for the nodejs tests; the python tests run with both spellings unset (package-tests.sh). Without POPOPX_LIBS_DIR, the pinned release libraries are downloaded (packages/popopx-chat-nodejs/src/libs.ts).
 - Local:
   ```sh
   scripts/ci/package-tests.sh build linux-x86_64

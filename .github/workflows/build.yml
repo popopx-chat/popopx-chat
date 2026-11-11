@@ -695,7 +695,7 @@ jobs:
         timeout-minutes: 30
         shell: bash
         env:
-          SIMPLEX_LIBS_DIR: ${{ steps.build-lib.outcome == 'success' && format('{0}/release-libs/simplex-chat-libs-linux-{1}/libs', github.workspace, matrix.arch) || '' }}
+          POPOPX_LIBS_DIR: ${{ steps.build-lib.outcome == 'success' && format('{0}/release-libs/simplex-chat-libs-linux-{1}/libs', github.workspace, matrix.arch) || '' }}
         run: |
           scripts/ci/package-tests.sh build linux-${{ matrix.arch }}
           scripts/ci/package-tests.sh test

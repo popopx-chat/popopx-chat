@@ -169,7 +169,7 @@ private fun BuyInBrowserButton(modalManager: ModalManager, unwindToDepth: Int) {
 @Composable
 fun PhoneSupporterHero(modifier: Modifier = Modifier) {
   val isDark = isInDarkTheme()
-  if (BuildConfigCommon.SIMPLEX_ASSETS) {
+  if (BuildConfigCommon.POPOPX_ASSETS) {
     Image(
       painterResource(if (isDark) MR.images.phone_supporter_light else MR.images.phone_supporter),
       contentDescription = null,

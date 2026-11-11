@@ -65,7 +65,7 @@ struct SupportPOPOPXBanner: View {
 
     @ViewBuilder
     private func heroThumbnail() -> some View {
-        #if SIMPLEX_ASSETS
+        #if POPOPX_ASSETS || SIMPLEX_ASSETS
         // draws at natural aspect, top-aligned in a shorter slot; .clipped() cuts the overflow at card bottom
         Image(colorScheme == .light ? "phone-supporter" : "phone-supporter-light")
             .resizable()

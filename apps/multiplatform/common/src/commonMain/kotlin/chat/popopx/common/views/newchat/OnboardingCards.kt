@@ -179,7 +179,7 @@ fun OnboardingCardView(
           .background(brush)
           .onSizeChanged { imageAreaSize = it }
       ) {
-        if (BuildConfigCommon.SIMPLEX_ASSETS) {
+        if (BuildConfigCommon.POPOPX_ASSETS) {
           Image(
             painterResource(if (isDark) imageNameLight else imageName),
             contentDescription = null,
@@ -207,7 +207,7 @@ fun OnboardingCardView(
           verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
           Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (BuildConfigCommon.SIMPLEX_ASSETS) {
+            if (BuildConfigCommon.POPOPX_ASSETS) {
               Icon(
                 painterResource(icon),
                 contentDescription = null,

@@ -12,12 +12,12 @@ import {ADDON_RELEASE, LIBS_RELEASE, SHA256} from "./release"
 const GITHUB_REPO = "simplex-chat/simplex-chat-libs"
 const REQUEST_TIMEOUT_MS = 60_000
 export const MAX_REDIRECTS = 5
-// Two spellings of the same library, in load order.  libpopopx.* is what this fork's own
-// build scripts produce (scripts/desktop/build-lib-*, flake.nix, the Dockerfiles) and what
-// SIMPLEX_LIBS_DIR points at after a local build.  libsimplex.* is what the pinned release
-// asset still contains, because GITHUB_REPO is upstream's simplex-chat-libs -- until POPOPX
-// publishes its own libs repository the download can only serve the old name, so every
-// lookup keeps both.
+// Two spellings of the same library, in load order.  libpopopx.* is what this fork's own build
+// scripts produce (scripts/desktop/build-lib-*, flake.nix, the Dockerfiles) and what
+// POPOPX_LIBS_DIR/SIMPLEX_LIBS_DIR points at after a local build.  libsimplex.* is what the
+// pinned release asset still contains, because GITHUB_REPO is upstream's simplex-chat-libs --
+// until POPOPX publishes its own libs repository the download can only serve the old name, so
+// every lookup keeps both.
 const PLATFORMS: {[platform: string]: {name: string, libs: string[]} | undefined} = {
   linux: {name: "linux", libs: ["libpopopx.so", "libsimplex.so"]},
   darwin: {name: "macos", libs: ["libpopopx.dylib", "libsimplex.dylib"]},
@@ -87,6 +87,13 @@ export function libPath(dir: string): string {
   return path.join(dir, presentLib(dir))
 }
 
+// Two spellings of the same override: POPOPX_* is current, SIMPLEX_* keeps an existing CI job,
+// Dockerfile or Local.xcconfig working. The error names whichever one the caller actually set.
+function envOverride(env: NodeJS.ProcessEnv, current: string, legacy: string): {name: string, value: string} | undefined {
+  if (env[current]) return {name: current, value: env[current] as string}
+  if (env[legacy]) return {name: legacy, value: env[legacy] as string}
+}
+
 export async function resolveLibsDir(
   backend: Backend,
   env: NodeJS.ProcessEnv = process.env,
@@ -94,10 +101,11 @@ export async function resolveLibsDir(
   arch: string = process.arch
 ): Promise<string> {
   const libs = libNames(platform, arch)
-  if (env.SIMPLEX_LIBS_DIR) {
-    const dir = path.resolve(env.SIMPLEX_LIBS_DIR)
+  const override = envOverride(env, "POPOPX_LIBS_DIR", "SIMPLEX_LIBS_DIR")
+  if (override) {
+    const dir = path.resolve(override.value)
     if (!libs.some(lib => fs.existsSync(path.join(dir, lib)))) {
-      throw new Error(`SIMPLEX_LIBS_DIR has none of ${libs.join(", ")}: ${dir}`)
+      throw new Error(`${override.name} has none of ${libs.join(", ")}: ${dir}`)
     }
     return dir
   }
@@ -118,12 +126,13 @@ export async function resolveAddonPath(
   platform: string = process.platform,
   arch: string = process.arch
 ): Promise<string> {
-  if (env.SIMPLEX_ADDON_PATH) {
-    const file = path.resolve(env.SIMPLEX_ADDON_PATH)
-    if (!fs.existsSync(file)) throw new Error(`SIMPLEX_ADDON_PATH does not exist: ${file}`)
+  const override = envOverride(env, "POPOPX_ADDON_PATH", "SIMPLEX_ADDON_PATH")
+  if (override) {
+    const file = path.resolve(override.value)
+    if (!fs.existsSync(file)) throw new Error(`${override.name} does not exist: ${file}`)
     return file
   }
-  if (!ADDON_RELEASE) throw new Error("no prebuilt Node.js add-on is pinned in this version; set SIMPLEX_ADDON_PATH")
+  if (!ADDON_RELEASE) throw new Error("no prebuilt Node.js add-on is pinned in this version; set POPOPX_ADDON_PATH")
   const asset = addonAsset(platformTag(platform, arch))
   const target = path.resolve(cacheRoot(platform, env), ADDON_RELEASE, asset)
   if (!fs.existsSync(target)) await installAddon(releaseUrl(ADDON_RELEASE, asset), pinnedSha256(asset), target)

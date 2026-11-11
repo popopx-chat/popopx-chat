@@ -53,7 +53,7 @@ uv run support-bot-light --config config.toml
 ```
 
 The library is installed from this repository, since the APIs the bot uses are
-unreleased. `libsimplex` is downloaded on first use unless `SIMPLEX_LIBS_DIR`
+unreleased. `libsimplex` is downloaded on first use unless `POPOPX_LIBS_DIR`
 points at a local build.
 
 `--config` defaults to `config.toml` in the working directory. `Ctrl+C` stops

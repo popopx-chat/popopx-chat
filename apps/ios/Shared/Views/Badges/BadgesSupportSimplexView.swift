@@ -204,7 +204,7 @@ struct PhoneSupporterHero: View {
     @Environment(\.colorScheme) var colorScheme: ColorScheme
 
     var body: some View {
-        #if SIMPLEX_ASSETS
+        #if POPOPX_ASSETS || SIMPLEX_ASSETS
         Image(colorScheme == .light ? "phone-supporter" : "phone-supporter-light")
             .resizable()
             .scaledToFit()

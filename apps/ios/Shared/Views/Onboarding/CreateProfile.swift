@@ -67,7 +67,7 @@ struct CreateProfile: View {
                     }
                     .padding(.horizontal, 10) // Offsets transparent space built into 3D asset
                     Spacer(minLength: 0)
-                    #if SIMPLEX_ASSETS
+                    #if POPOPX_ASSETS || SIMPLEX_ASSETS
                     Image(colorScheme == .light ? "create-profile" : "create-profile-light")
                         .resizable()
                         .scaledToFit()
@@ -207,7 +207,7 @@ struct CreateFirstProfile: View {
         GeometryReader { g in
             let v = ScrollView {
                 VStack(alignment: .center, spacing: spacing) {
-                    #if SIMPLEX_ASSETS
+                    #if POPOPX_ASSETS || SIMPLEX_ASSETS
                     Image(colorScheme == .light ? "your-profile" : "your-profile-light")
                         .resizable()
                         .scaledToFit()

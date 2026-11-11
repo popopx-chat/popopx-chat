@@ -123,7 +123,7 @@ struct OnboardingConditionsView: View {
 
     @ViewBuilder
     private func heroImage() -> some View {
-        #if SIMPLEX_ASSETS
+        #if POPOPX_ASSETS || SIMPLEX_ASSETS
         Image(colorScheme == .light ? "network-commitments" : "network-commitments-light")
             .resizable()
             .scaledToFit()

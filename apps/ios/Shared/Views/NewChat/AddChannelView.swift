@@ -66,7 +66,7 @@ struct AddChannelView: View {
                             .buttonStyle(BorderlessButtonStyle())
                     }
                     .padding(.horizontal, 10) // Offsets transparent space built into 3D asset
-                    #if SIMPLEX_ASSETS
+                    #if POPOPX_ASSETS || SIMPLEX_ASSETS
                     Spacer(minLength: 0)
                     Image(colorScheme == .light ? "create-channel" : "create-channel-light")
                         .resizable()

@@ -103,7 +103,7 @@ RUN mkdir -p /data && chown supportbot:supportbot /data && chmod 0700 /data
 # Read by simplex_chat._native instead of downloading a release, which is what
 # makes the bot run against the core built above rather than the published one.
 COPY --from=libpopopx /libs /opt/simplex/libs
-ENV SIMPLEX_LIBS_DIR=/opt/simplex/libs
+ENV POPOPX_LIBS_DIR=/opt/simplex/libs
 
 USER supportbot
 WORKDIR /home/supportbot

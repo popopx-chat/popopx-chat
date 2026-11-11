@@ -18,5 +18,5 @@ venv/
 # Lazy-downloaded native libs (handled at runtime by _native._resolve_libs_dir)
 libs/
 
-# Local override for SIMPLEX_LIBS_DIR work, etc.
+# Local override for POPOPX_LIBS_DIR work, etc.
 .env

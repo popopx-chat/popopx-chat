@@ -24,7 +24,22 @@ def test_cache_root_macos(tmp_path, monkeypatch):
 def test_override_via_env(tmp_path, monkeypatch):
     # _resolve_libs_dir intentionally does not validate the override directory —
     # it returns it verbatim; the eventual ctypes.CDLL call surfaces any mistake.
+    monkeypatch.delenv("POPOPX_LIBS_DIR", raising=False)
     monkeypatch.setenv("SIMPLEX_LIBS_DIR", str(tmp_path))
+    monkeypatch.setattr("sys.platform", "linux")
+    assert _resolve_libs_dir("sqlite") == tmp_path
+
+
+def test_override_via_current_env_name(tmp_path, monkeypatch):
+    monkeypatch.delenv("SIMPLEX_LIBS_DIR", raising=False)
+    monkeypatch.setenv("POPOPX_LIBS_DIR", str(tmp_path))
+    monkeypatch.setattr("sys.platform", "linux")
+    assert _resolve_libs_dir("sqlite") == tmp_path
+
+
+def test_prefers_current_env_name(tmp_path, monkeypatch):
+    monkeypatch.setenv("SIMPLEX_LIBS_DIR", "/legacy")
+    monkeypatch.setenv("POPOPX_LIBS_DIR", str(tmp_path))
     monkeypatch.setattr("sys.platform", "linux")
     assert _resolve_libs_dir("sqlite") == tmp_path
 

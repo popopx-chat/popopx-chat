@@ -63,8 +63,8 @@ Run `npm start -- --help` for the auto-generated reference. Summary:
 | Var | Purpose |
 |---|---|
 | `GROK_API_KEY` | xAI API key; enables Grok replies |
-| `SIMPLEX_LIBS_DIR` | directory with a local libsimplex build for the `--db` backend, instead of the downloaded one |
-| `SIMPLEX_ADDON_PATH` | locally built Node.js add-on (`simplex.node`), instead of the downloaded one |
+| `POPOPX_LIBS_DIR` | directory with a local libsimplex build for the `--db` backend, instead of the downloaded one |
+| `POPOPX_ADDON_PATH` | locally built Node.js add-on (`simplex.node`), instead of the downloaded one |
 
 ## Local development against unreleased lib changes
 
@@ -77,7 +77,7 @@ npm link
 
 # In apps/popopx-support-bot
 npm link simplex-chat
-export SIMPLEX_ADDON_PATH=../../packages/popopx-chat-nodejs/build/Release/simplex.node
+export POPOPX_ADDON_PATH=../../packages/popopx-chat-nodejs/build/Release/simplex.node
 ```
 
 `npm unlink simplex-chat && npm install` reverts to the registry version.

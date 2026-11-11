@@ -844,7 +844,7 @@ fileprivate struct InvestInPOPOPXChat: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Own a part of POPOPX Chat! 🚀").font(.title3).bold()
-            #if SIMPLEX_ASSETS
+            #if POPOPX_ASSETS || SIMPLEX_ASSETS
             Image("crowdfunding_1")
                 .resizable()
                 .scaledToFit()
@@ -953,7 +953,7 @@ struct GetStakeView: View {
 
     @ViewBuilder
     func slideImage(_ slide: (image: String, heading: String, info: String?, text: String?)) -> some View {
-        #if SIMPLEX_ASSETS
+        #if POPOPX_ASSETS || SIMPLEX_ASSETS
         Image(slide.image)
             .resizable()
             .scaledToFit()

@@ -87,17 +87,17 @@ Workflow:
 
 ## SimpleX Assets
 
-The app includes optional assets behind the `SIMPLEX_ASSETS` Swift compilation flag. Without setup, the app builds normally without them.
+The app includes optional assets behind the `POPOPX_ASSETS` Swift compilation flag. Without setup, the app builds normally without them.
 
 ### Setup
 
 Create `Local.xcconfig` (gitignored) in the `apps/ios/` directory:
 ```
-SIMPLEX_ASSETS_DIR = /path/to/assets
-SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) SIMPLEX_ASSETS
+POPOPX_ASSETS_DIR = /path/to/assets
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) POPOPX_ASSETS
 ```
 
-The copy script (`scripts/ios/copy-assets.sh`) runs as a build phase on each build but exits immediately if `SIMPLEX_ASSETS` is not set.
+The copy script (`scripts/ios/copy-assets.sh`) runs as a build phase on each build but exits immediately if `POPOPX_ASSETS` is not set.
 
 ### Updating assets
 

@@ -78,7 +78,7 @@ struct OnboardingCardView: View {
                             startPoint: gp.start,
                             endPoint: gp.end
                         )
-                        #if SIMPLEX_ASSETS
+                        #if POPOPX_ASSETS || SIMPLEX_ASSETS
                         Image(colorScheme == .light ? imageName : "\(imageName)-light")
                             .resizable()
                             .scaledToFit()
@@ -103,7 +103,7 @@ struct OnboardingCardView: View {
     private func labelRow(height: CGFloat) -> some View {
         VStack {
             HStack {
-                #if SIMPLEX_ASSETS
+                #if POPOPX_ASSETS || SIMPLEX_ASSETS
                 Image(systemName: icon)
                     .font(.system(size: 24))
                     .foregroundColor(theme.colors.primary)

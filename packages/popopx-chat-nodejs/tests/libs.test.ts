@@ -21,7 +21,7 @@ function sha256(data: Buffer): string {
   return crypto.createHash("sha256").update(data).digest("hex")
 }
 const LINUX_LIB = "libsimplex.so"
-const {XDG_CACHE_HOME, LOCALAPPDATA, SIMPLEX_LIBS_DIR, SIMPLEX_ADDON_PATH} = process.env
+const {XDG_CACHE_HOME, LOCALAPPDATA, SIMPLEX_LIBS_DIR, SIMPLEX_ADDON_PATH, POPOPX_LIBS_DIR, POPOPX_ADDON_PATH} = process.env
 
 function setEnv(name: string, value: string | undefined): void {
   if (value === undefined) delete process.env[name]
@@ -30,6 +30,8 @@ function setEnv(name: string, value: string | undefined): void {
 
 // A path resolution regression must neither download nor write into the real user cache.
 let home: string
+// The env names are read in preference order, so an ambient POPOPX_* from the shell would outrank
+// the SIMPLEX_* these tests set; every case has to start from a cleared pair.
 beforeEach(() => {
   home = fs.mkdtempSync(path.join(os.tmpdir(), "libs-home-"))
   jest.spyOn(os, "homedir").mockReturnValue(home)
@@ -38,6 +40,8 @@ beforeEach(() => {
   setEnv("LOCALAPPDATA", home)
   setEnv("SIMPLEX_LIBS_DIR", undefined)
   setEnv("SIMPLEX_ADDON_PATH", undefined)
+  setEnv("POPOPX_LIBS_DIR", undefined)
+  setEnv("POPOPX_ADDON_PATH", undefined)
 })
 afterEach(() => {
   jest.restoreAllMocks()
@@ -45,6 +49,8 @@ afterEach(() => {
   setEnv("LOCALAPPDATA", LOCALAPPDATA)
   setEnv("SIMPLEX_LIBS_DIR", SIMPLEX_LIBS_DIR)
   setEnv("SIMPLEX_ADDON_PATH", SIMPLEX_ADDON_PATH)
+  setEnv("POPOPX_LIBS_DIR", POPOPX_LIBS_DIR)
+  setEnv("POPOPX_ADDON_PATH", POPOPX_ADDON_PATH)
   fs.rmSync(home, {recursive: true, force: true})
 })
 
@@ -94,6 +100,20 @@ describe("paths", () => {
     await expect(resolveLibsDir("postgres", {SIMPLEX_LIBS_DIR: libsDir})).resolves.toBe(libsDir)
   })
 
+  it("resolves an absolute POPOPX_LIBS_DIR", async () => {
+    await expect(resolveLibsDir("postgres", {POPOPX_LIBS_DIR: libsDir})).resolves.toBe(libsDir)
+  })
+
+  it("prefers POPOPX_LIBS_DIR over SIMPLEX_LIBS_DIR", async () => {
+    await expect(resolveLibsDir("postgres", {POPOPX_LIBS_DIR: libsDir, SIMPLEX_LIBS_DIR: "/other"})).resolves.toBe(libsDir)
+  })
+
+  it("names the variable that was set when the directory has no library", async () => {
+    fs.rmSync(libPath(libsDir))
+    await expect(resolveLibsDir("sqlite", {POPOPX_LIBS_DIR: libsDir}))
+      .rejects.toThrow(`POPOPX_LIBS_DIR has none of ${path.basename(libPath(libsDir))}, libsimplex.so: ${libsDir}`)
+  })
+
   it("uses SIMPLEX_LIBS_DIR on an unsupported CPU", async () => {
     fs.writeFileSync(path.join(libsDir, LINUX_LIB), "lib")
     await expect(resolveLibsDir("sqlite", {SIMPLEX_LIBS_DIR: libsDir}, "linux", "arm")).resolves.toBe(libsDir)
@@ -126,6 +146,18 @@ describe("paths", () => {
   it("rejects a missing SIMPLEX_ADDON_PATH", async () => {
     const addon = path.join(libsDir, "simplex.node")
     await expect(resolveAddonPath({SIMPLEX_ADDON_PATH: addon})).rejects.toThrow(`SIMPLEX_ADDON_PATH does not exist: ${addon}`)
+  })
+
+  it("returns a relative POPOPX_ADDON_PATH as absolute", async () => {
+    const addon = path.join(libsDir, "simplex.node")
+    fs.writeFileSync(addon, "addon")
+    await expect(resolveAddonPath({POPOPX_ADDON_PATH: path.relative(process.cwd(), addon)})).resolves.toBe(addon)
+  })
+
+  it("prefers POPOPX_ADDON_PATH over SIMPLEX_ADDON_PATH", async () => {
+    const addon = path.join(libsDir, "simplex.node")
+    fs.writeFileSync(addon, "addon")
+    await expect(resolveAddonPath({POPOPX_ADDON_PATH: addon, SIMPLEX_ADDON_PATH: path.join(libsDir, "other.node")})).resolves.toBe(addon)
   })
 
   it("rejects a SIMPLEX_LIBS_DIR that has neither library name", async () => {
@@ -343,10 +375,10 @@ describe("installLibs", () => {
       .rejects.toThrow("no SHA-256 is pinned for simplex-chat-libs-macos-x86_64.zip")
   })
 
-  it("requires SIMPLEX_ADDON_PATH without a pinned add-on release", async () => {
+  it("requires POPOPX_ADDON_PATH without a pinned add-on release", async () => {
     jest.replaceProperty(release, "ADDON_RELEASE", undefined)
     await expect(resolveAddonPath({XDG_CACHE_HOME: tmp}, "linux", "x64"))
-      .rejects.toThrow("no prebuilt Node.js add-on is pinned in this version; set SIMPLEX_ADDON_PATH")
+      .rejects.toThrow("no prebuilt Node.js add-on is pinned in this version; set POPOPX_ADDON_PATH")
   })
 
   it("rejects a missing add-on and cleans up", async () => {

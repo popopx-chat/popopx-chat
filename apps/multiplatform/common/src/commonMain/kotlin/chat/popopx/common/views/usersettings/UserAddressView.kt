@@ -287,7 +287,7 @@ private fun UserAddressLayout(
     if (!onboarding) {
       AppBarTitle(stringResource(MR.strings.popopx_address), hostDevice(user?.remoteHostId))
     }
-    if (BuildConfigCommon.SIMPLEX_ASSETS && userAddress != null) {
+    if (BuildConfigCommon.POPOPX_ASSETS && userAddress != null) {
       Image(
         painterResource(if (isInDarkTheme()) {
           if (onboarding) MR.images.popopx_address_light else MR.images.popopx_address_small_light
