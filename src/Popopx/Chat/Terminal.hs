@@ -15,7 +15,7 @@ import Popopx.Chat.Core
 import Popopx.Chat.Help (chatWelcome)
 import Popopx.Chat.Library.Commands (_defaultNtfServers)
 import Popopx.Chat.Operators
-import Popopx.Chat.Operators.Presets (operatorPOPOPXChat, simplexChatRelays)
+import Popopx.Chat.Operators.Presets (operatorSimpleXChat, simplexChatRelays)
 import Popopx.Chat.Options
 import Popopx.Chat.Terminal.Input
 import Popopx.Chat.Terminal.Output
@@ -40,7 +40,7 @@ terminalChatConfig =
         PresetServers
           { operators =
               [ PresetOperator
-                  { operator = Just operatorPOPOPXChat,
+                  { operator = Just operatorSimpleXChat,
                     smp =
                       map
                         (presetServer True)

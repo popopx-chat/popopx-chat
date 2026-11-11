@@ -84,7 +84,7 @@ defaultChatConfig =
         PresetServers
           { operators =
               [ PresetOperator
-                  { operator = Just operatorPOPOPXChat,
+                  { operator = Just operatorSimpleXChat,
                     smp = simplexChatSMPServers,
                     useSMP = 4,
                     xftp = map (presetServer True) $ L.toList defaultXFTPServers,

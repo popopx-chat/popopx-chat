@@ -53,8 +53,8 @@ chatWelcome user =
       "Connect to SimpleX Chat developers for any questions - just type " <> highlight "/simplex",
       "",
       "Follow our updates:",
-      "> Reddit: https://www.reddit.com/r/POPOPXChat/",
-      "> Twitter: https://twitter.com/POPOPXChat",
+      "> Reddit: https://www.reddit.com/r/SimpleXChat/",
+      "> Twitter: https://twitter.com/SimpleXChat",
       "",
       "Type " <> highlight "/help" <> " for usage info, " <> highlight "/welcome" <> " to show this message"
     ]
