@@ -1732,7 +1732,7 @@ object ChatController {
         )
       }
       r is API.Error && r.err is ChatError.ChatErrorChat
-          && r.err.errorType is ChatErrorType.PopopxDomainNotReady -> {
+          && r.err.errorType is ChatErrorType.SimplexDomainNotReady -> {
         val domain = r.err.errorType.simplexDomain.fullDomainName
         if (r.err.errorType.simplexDomainError is SimplexDomainError.NoValidLink) {
           AlertManager.shared.showAlertMsg(
@@ -1813,7 +1813,7 @@ object ChatController {
 
   // owner-specific wording for setting one's own/channel name; null for other errors (handled by apiConnectResponseAlert)
   fun popopxNameOwnerError(err: ChatError, isChannel: Boolean): String? =
-    if (err is ChatError.ChatErrorChat && err.errorType is ChatErrorType.PopopxDomainNotReady && err.errorType.simplexDomainError is SimplexDomainError.NoValidLink) {
+    if (err is ChatError.ChatErrorChat && err.errorType is ChatErrorType.SimplexDomainNotReady && err.errorType.simplexDomainError is SimplexDomainError.NoValidLink) {
       val domain = err.errorType.simplexDomain.fullDomainName
       if (isChannel) generalGetString(MR.strings.popopx_name_owner_no_channel_link).format(domain)
       else generalGetString(MR.strings.popopx_name_owner_no_address).format(domain)
@@ -1824,7 +1824,7 @@ object ChatController {
       generalGetString(MR.strings.invalid_connection_link)
     e is ChatError.ChatErrorChat && e.errorType is ChatErrorType.UnsupportedConnReq ->
       generalGetString(MR.strings.unsupported_connection_link)
-    e is ChatError.ChatErrorChat && e.errorType is ChatErrorType.PopopxDomainNotReady ->
+    e is ChatError.ChatErrorChat && e.errorType is ChatErrorType.SimplexDomainNotReady ->
       if (e.errorType.simplexDomainError is SimplexDomainError.NoValidLink)
         generalGetString(MR.strings.popopx_name_no_valid_link)
       else generalGetString(MR.strings.popopx_name_unconfirmed)
@@ -7978,7 +7978,7 @@ sealed class ChatErrorType {
       is ChatStoreChanged -> "chatStoreChanged"
       is ConnectionPlanChatError -> "connectionPlan"
       is InvalidConnReq -> "invalidConnReq"
-      is PopopxDomainNotReady -> "popopxDomainNotReady"
+      is SimplexDomainNotReady -> "simplexDomainNotReady"
       is NotResolvedLocally -> "notResolvedLocally"
       is UnsupportedConnReq -> "unsupportedConnReq"
       is InvalidChatMessage -> "invalidChatMessage"
@@ -8063,7 +8063,7 @@ sealed class ChatErrorType {
   @Serializable @SerialName("chatStoreChanged") object ChatStoreChanged: ChatErrorType()
   @Serializable @SerialName("connectionPlan") class ConnectionPlanChatError(val connectionPlan: ConnectionPlan): ChatErrorType()
   @Serializable @SerialName("invalidConnReq") object InvalidConnReq: ChatErrorType()
-  @Serializable @SerialName("popopxDomainNotReady") class PopopxDomainNotReady(val simplexDomain: SimplexDomain, val simplexDomainError: SimplexDomainError): ChatErrorType()
+  @Serializable @SerialName("simplexDomainNotReady") class SimplexDomainNotReady(val simplexDomain: SimplexDomain, val simplexDomainError: SimplexDomainError): ChatErrorType()
   @Serializable @SerialName("notResolvedLocally") object NotResolvedLocally: ChatErrorType()
   @Serializable @SerialName("unsupportedConnReq") object UnsupportedConnReq: ChatErrorType()
   @Serializable @SerialName("invalidChatMessage") class InvalidChatMessage(val connection: Connection, val message: String): ChatErrorType()

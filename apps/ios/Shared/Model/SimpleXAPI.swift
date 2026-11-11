@@ -1093,7 +1093,7 @@ private func apiConnectResponseAlert<R>(_ r: APIResult<R>) async {
                 NSLocalizedString("Unsupported connection link", comment: ""),
                 message: NSLocalizedString("This link requires a newer app version. Please upgrade the app or ask your contact to send a compatible link.", comment: "")
             )
-        case let .error(.popopxDomainNotReady(domain, err)):
+        case let .error(.simplexDomainNotReady(domain, err)):
             switch err {
             case .noValidLink:
                 showAlert(
@@ -1385,7 +1385,7 @@ func apiSetProfileAddress(on: Bool) async throws -> User? {
 }
 
 func showSetPopopxNameError<R>(_ r: APIResult<R>, isChannel: Bool) async {
-    if case let .error(.popopxDomainNotReady(domain, .noValidLink)) = r.unexpected {
+    if case let .error(.simplexDomainNotReady(domain, .noValidLink)) = r.unexpected {
         let format = isChannel
             ? NSLocalizedString("The POPOPX name #%@ is registered without channel link. Add channel link to the name via the registration page.", comment: "alert message")
             : NSLocalizedString("The POPOPX name @%@ is registered without POPOPX address. Add your POPOPX address to the name via the registration page.", comment: "alert message")
