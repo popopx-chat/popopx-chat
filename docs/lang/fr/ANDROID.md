@@ -29,7 +29,7 @@ cd /tmp  # juste un exemple
 ```
 Exécutez ensuite la méthode suivante :
 ```bash
-adb -d backup -f chat.ab -noapk chat.simplex.app && 
+adb -d backup -f chat.ab -noapk com.popopxchat.popopx && 
 tail -n +5 chat.ab > chat.dat && 
 printf "\x1f\x8b\x08\x00\x00\x00\x00\x00" | cat - chat.dat > chat.gz && 
 tar -xvzf chat.gz
@@ -39,7 +39,7 @@ Déverrouillez maintenant l'appareil et confirmez une opération de sauvegarde s
 
 Ensuite, la sauvegarde doit être terminée. Si vous voyez une erreur disant `tar : Error is not recoverable : exiting now` mais qu'avant cela vous avez enregistré quelques noms de fichiers, ne vous inquiétez pas, tout va bien.
 
-Maintenant les fichiers sauvegardés seront dans `./apps/chat.simplex.app/`.
+Maintenant les fichiers sauvegardés seront dans `./apps/com.popopxchat.popopx/`.
 
 Veuillez noter que si vous utilisez une version récente de SimpleX, les bases de données seront chiffrées, et vous ne pourrez pas en voir le contenu sans utiliser l'application `sqlcipher` et sans connaître la phrase secrète de déchiffrement (vous devez d'abord la changer pour la vôtre à partir de celle qui est générée aléatoirement dans l'application).
 

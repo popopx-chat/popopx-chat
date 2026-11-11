@@ -38,7 +38,7 @@ mkdir -p usr/share/{icons,metainfo,applications}
 cp usr/lib/simplex.png usr/share/icons
 
 ln -s usr/bin/*imple* AppRun
-cp $multiplatform_dir/desktop/src/jvmMain/resources/distribute/*imple*.desktop chat.simplex.app.desktop
+cp $multiplatform_dir/desktop/src/jvmMain/resources/distribute/*imple*.desktop com.popopxchat.popopx.desktop
 sed -i 's|^Exec=[^ ]*|Exec=simplex|' *imple*.desktop
 sed -i 's|Icon=.*|Icon=simplex|g' *imple*.desktop
 cp *imple*.desktop usr/share/applications/

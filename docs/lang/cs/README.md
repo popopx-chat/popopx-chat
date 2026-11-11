@@ -12,7 +12,7 @@
 
 [<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/apple_store.svg" alt="Aplikace pro iOS" height="42">](https://apps.apple.com/us/app/simplex-chat/id1605771084)
 &nbsp;
-[![Aplikace pro Android](https://github.com/simplex-chat/.github/blob/master/profile/images/google_play.svg)](https://play.google.com/store/apps/details?id=chat.simplex.app)
+[![Aplikace pro Android](https://github.com/simplex-chat/.github/blob/master/profile/images/google_play.svg)](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)
 &nbsp;
 [<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/f_droid.svg" alt="F-Droid" height="41">](https://app.simplex.chat)
 &nbsp;
@@ -22,7 +22,7 @@
 
 - 🖲 Chrání vaše zprávy a metadata - s kým a kdy mluvíte.
 - 🔐 Koncové šifrování s další vrstvou šifrování.
-- 📱 Mobilní aplikace pro Android ([Google Play](https://play.google.com/store/apps/details?id=chat.simplex.app), [APK](https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-aarch64.apk)) a [iOS](https://apps.apple.com/us/app/simplex-chat/id1605771084).
+- 📱 Mobilní aplikace pro Android ([Google Play](https://play.google.com/store/apps/details?id=com.popopxchat.popopx), [APK](https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-aarch64.apk)) a [iOS](https://apps.apple.com/us/app/simplex-chat/id1605771084).
 - 🚀 [TestFlight preview for iOS](https://testflight.apple.com/join/DWuT2LQu) s novými funkcemi o 1-2 týdny dříve - **omezeno na 10 000 uživatelů**!
 - 🖥 K dispozici jako terminálová (konzolová) [aplikace / CLI](#zap-quick-installation-of-a-terminal-app) v systémech Linux, MacOS, Windows.
 
@@ -318,7 +318,7 @@ Jakákoli zjištění možných útoků korelace provozu umožňujících korelo
 
 [<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/apple_store.svg" alt="Aplikace iOS" height="42">](https://apps.apple.com/us/app/simplex-chat/id1605771084)
 &nbsp;
-[![Aplikace pro Android](https://github.com/simplex-chat/.github/blob/master/profile/images/google_play.svg)](https://play.google.com/store/apps/details?id=chat.simplex.app)
+[![Aplikace pro Android](https://github.com/simplex-chat/.github/blob/master/profile/images/google_play.svg)](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)
 &nbsp;
 [<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/f_droid.svg" alt="F-Droid" height="41">](https://app.simplex.chat)
 &nbsp;

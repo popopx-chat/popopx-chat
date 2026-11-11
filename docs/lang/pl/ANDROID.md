@@ -31,7 +31,7 @@ cd /tmp  # to tylko przykład
 ```
 Następne uruchom:
 ```bash
-adb -d backup -f chat.ab -noapk chat.simplex.app && 
+adb -d backup -f chat.ab -noapk com.popopxchat.popopx && 
 tail -n +5 chat.ab > chat.dat && 
 printf "\x1f\x8b\x08\x00\x00\x00\x00\x00" | cat - chat.dat > chat.gz && 
 tar -xvzf chat.gz
@@ -41,7 +41,7 @@ Teraz odblokuj urządzenie i potwierdź operację tworzenia kopii zapasowej bez 
 
 Po tym kopia zapasowa powinna zostać zrobiona. Jeśli pojawi się błąd `tar: Error is not recoverable: exiting now`, ale wcześniej pojawiło się kilka nazw plików, nie martw się, wszystko jest w porządku.
 
-Teraz zapisane pliki będą w `./apps/chat.simplex.app/`.
+Teraz zapisane pliki będą w `./apps/com.popopxchat.popopx/`.
 
 Pamiętaj, że jeśli korzystasz z nowej wersji SimpleX, bazy danych będą zaszyfrowane i nie będziesz w stanie przeglądać ich zawartości bez użycia aplikacji `sqlcipher` oraz gdy nie znasz hasła deszyfrującego (musisz najpierw zmienić je na swoje z losowo wygenerowanego w aplikacji).
 

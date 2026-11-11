@@ -30,7 +30,7 @@ Invest in SimpleX Chat. [Learn more on Wefunder](https://wefunder.com/simplex.ch
 
 [<img src="https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/apple_store.svg" alt="iOS app" height="42">](https://apps.apple.com/us/app/simplex-chat/id1605771084)
 &nbsp;
-[![Android app](https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/google_play.svg)](https://play.google.com/store/apps/details?id=chat.simplex.app)
+[![Android app](https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/google_play.svg)](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)
 &nbsp;
 [<img src="https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/f_droid.svg" alt="F-Droid" height="41">](https://app.simplex.chat)
 &nbsp;
@@ -40,7 +40,7 @@ Invest in SimpleX Chat. [Learn more on Wefunder](https://wefunder.com/simplex.ch
 
 - 🖲 Protects your messages and metadata - who you talk to and when.
 - 🔐 Double ratchet end-to-end encryption, with additional encryption layer.
-- 📱 Mobile apps for Android ([Google Play](https://play.google.com/store/apps/details?id=chat.simplex.app), [APK](https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-aarch64.apk)) and [iOS](https://apps.apple.com/us/app/simplex-chat/id1605771084).
+- 📱 Mobile apps for Android ([Google Play](https://play.google.com/store/apps/details?id=com.popopxchat.popopx), [APK](https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-aarch64.apk)) and [iOS](https://apps.apple.com/us/app/simplex-chat/id1605771084).
 - 🚀 [TestFlight preview for iOS](https://testflight.apple.com/join/DWuT2LQu) with the new features 1-2 weeks earlier - **limited to 10,000 users**!
 - 🖥 Available as a terminal (console) [app / CLI](#zap-quick-installation-of-a-terminal-app) on Linux, MacOS, Windows.
 
@@ -110,7 +110,7 @@ Thanks to our users and [Weblate](https://hosted.weblate.org/engage/simplex-chat
 
 Join our translators to help SimpleX grow!
 
-|locale|language |contributor|[Android](https://play.google.com/store/apps/details?id=chat.simplex.app) and [iOS](https://apps.apple.com/us/app/simplex-chat/id1605771084)|[website](https://simplex.chat)|Github docs|
+|locale|language |contributor|[Android](https://play.google.com/store/apps/details?id=com.popopxchat.popopx) and [iOS](https://apps.apple.com/us/app/simplex-chat/id1605771084)|[website](https://simplex.chat)|Github docs|
 |:----:|:-------:|:---------:|:---------:|:---------:|:---------:|
 |🇬🇧 en|English   | |✓|✓|✓|✓|
 |ar|العربية   |[jermanuts](https://github.com/jermanuts)|[![android app](https://hosted.weblate.org/widgets/simplex-chat/ar/android/svg-badge.svg)](https://hosted.weblate.org/projects/simplex-chat/android/ar/)<br>-|[![website](https://hosted.weblate.org/widgets/simplex-chat/ar/website/svg-badge.svg)](https://hosted.weblate.org/projects/simplex-chat/website/ar/)||
@@ -448,7 +448,7 @@ If you want to use any graphic assets in your publications, please ask for permi
 
 [<img src="https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/apple_store.svg" alt="iOS app" height="42">](https://apps.apple.com/us/app/simplex-chat/id1605771084)
 &nbsp;
-[![Android app](https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/google_play.svg)](https://play.google.com/store/apps/details?id=chat.simplex.app)
+[![Android app](https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/google_play.svg)](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)
 &nbsp;
 [<img src="https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/f_droid.svg" alt="F-Droid" height="41">](https://app.simplex.chat)
 &nbsp;

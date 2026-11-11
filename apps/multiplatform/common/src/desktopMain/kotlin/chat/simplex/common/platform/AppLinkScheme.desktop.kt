@@ -23,7 +23,7 @@ internal const val APP_LINK_MIME_TYPE = "x-scheme-handler/$appLinkScheme"
 internal const val CONNECTION_LINK_MIME_TYPE = "x-scheme-handler/$connectionLinkScheme"
 private const val WINDOWS_CLASSES_KEY = "Software\\Classes"
 private const val WINDOWS_PROG_ID_PREFIX = "SimpleX."
-private const val WINDOWS_CAPABILITIES_KEY = "Software\\chat.simplex.app\\Capabilities"
+private const val WINDOWS_CAPABILITIES_KEY = "Software\\com.popopxchat.popopx\\Capabilities"
 private const val WINDOWS_REGISTERED_APPLICATIONS_KEY = "Software\\RegisteredApplications"
 private const val APP_DESCRIPTION = "Private and secure open-source messenger - no user IDs (not even random numbers)"
 private const val WINDOWS_FIRST_ICON_INDEX = 0
@@ -36,7 +36,7 @@ private const val SHCNE_ASSOCCHANGED = 0x08000000
 private const val SHCNF_IDLIST = 0
 // the Win32 name of a key's default value
 private const val REGISTRY_DEFAULT_VALUE = ""
-internal const val APPIMAGE_ENTRY_NAME = "chat.simplex.app-links.desktop"
+internal const val APPIMAGE_ENTRY_NAME = "com.popopxchat.popopx-links.desktop"
 private const val APPLICATIONS_DIR = "applications"
 // the XDG Base Directory default when XDG_DATA_DIRS is unset
 private const val DEFAULT_XDG_DATA_DIRS = "/usr/local/share:/usr/share"

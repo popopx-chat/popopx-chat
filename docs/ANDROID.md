@@ -30,7 +30,7 @@ cd /tmp  # just an example
 ```
 Then run the following:
 ```bash
-adb -d backup -f chat.ab -noapk chat.simplex.app && 
+adb -d backup -f chat.ab -noapk com.popopxchat.popopx && 
 tail -n +5 chat.ab > chat.dat && 
 printf "\x1f\x8b\x08\x00\x00\x00\x00\x00" | cat - chat.dat > chat.gz && 
 tar -xvzf chat.gz
@@ -40,7 +40,7 @@ Now unlock the device and confirm a backup operation without using a password fo
 
 After that the backup should be ended. If you see an error saying `tar: Error is not recoverable: exiting now` but before that you have printed some file names, don't worry, it's ok.
 
-Now the backed-up files will be inside `./apps/chat.simplex.app/`.
+Now the backed-up files will be inside `./apps/com.popopxchat.popopx/`.
 
 Please, note, that if you use a modern version of SimpleX, the databases will be encrypted, and you'll not be able to view contents of them without using `sqlcipher` application and without knowing decryption passphrase (you need to change it to yours from randomly generated in the app firstly).
 

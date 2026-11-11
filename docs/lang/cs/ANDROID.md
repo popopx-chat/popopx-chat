@@ -29,7 +29,7 @@ cd /tmp # jen příklad
 ```
 Poté spusťte následující příkaz:
 ```bash
-adb -d backup -f chat.ab -noapk chat.simplex.app && 
+adb -d backup -f chat.ab -noapk com.popopxchat.popopx && 
 tail -n +5 chat.ab > chat.dat && 
 printf "\x1f\x8b\x08\x00\x00\x00\x00\x00" | cat - chat.dat > chat.gz && 
 tar -xvzf chat.gz
@@ -39,7 +39,7 @@ Nyní odemkněte zařízení a potvrďte operaci zálohování bez použití hes
 
 Poté by mělo být zálohování ukončeno. Pokud se zobrazí chybové hlášení `tar: Error is not recoverable: exiting now`, ale předtím jste vypsali názvy některých souborů, nebojte se, je to v pořádku.
 
-Nyní budou zálohované soubory uvnitř `./apps/chat.simplex.app/`.
+Nyní budou zálohované soubory uvnitř `./apps/com.popopxchat.popopx/`.
 
 Upozorňujeme, že pokud používáte moderní verzi SimpleX, budou databáze zašifrované a jejich obsah nebudete moci zobrazit bez použití aplikace `sqlcipher` a bez znalosti dešifrovací fráze (musíte ji nejprve změnit na svou z náhodně vygenerovaných v aplikaci).
 

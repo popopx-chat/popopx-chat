@@ -161,7 +161,7 @@ active_file: true
      <div class="flex items-center justify-center gap-4 flex-wrap">
        <!-- Same 5 store buttons as join_simplex.html -->
        <a href="https://apps.apple.com/us/app/simplex-chat/id1605771084" target="_blank"><img class="h-[40px] w-auto" src="/img/new/apple_store.svg" /></a>
-       <a href="https://play.google.com/store/apps/details?id=chat.simplex.app" target="_blank"><img class="h-[40px] w-auto" src="/img/new/google_play.svg" /></a>
+       <a href="https://play.google.com/store/apps/details?id=com.popopxchat.popopx" target="_blank"><img class="h-[40px] w-auto" src="/img/new/google_play.svg" /></a>
        <a href="{{ '' if lang == 'en' else '/' ~ lang }}/fdroid"><img class="h-[40px] w-auto" src="/img/new/f_droid.svg" /></a>
        <a href="https://testflight.apple.com/join/DWuT2LQu" target="_blank"><img class="h-[40px] w-auto" src="/img/new/testflight.png" /></a>
        <a href="https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-aarch64.apk" target="_blank"><img class="h-[40px] w-auto" src="/img/new/apk_icon.png" /></a>

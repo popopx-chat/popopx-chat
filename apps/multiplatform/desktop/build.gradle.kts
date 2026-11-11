@@ -81,7 +81,7 @@ compose {
           packageName = "SimpleX"
           iconFile.set(project.file("src/jvmMain/resources/distribute/simplex.icns"))
           appCategory = "public.app-category.social-networking"
-          bundleID = "chat.simplex.app"
+          bundleID = "com.popopxchat.popopx"
           infoPlist {
             extraKeysRawXml = """
               <key>NSMicrophoneUsageDescription</key>

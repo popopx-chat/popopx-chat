@@ -75,7 +75,7 @@ class AppLinkSchemeTest {
         RegistryValue(key = "Software\\Classes\\simplexchat", name = "URL Protocol", value = ""),
         RegistryValue(key = "Software\\Classes\\simplexchat\\DefaultIcon", name = "", value = "\"$windowsExe\",0"),
         RegistryValue(key = appLinkCommandKey, name = "", value = "\"$windowsExe\" \"%1\""),
-        RegistryValue(key = "Software\\chat.simplex.app\\Capabilities\\URLAssociations", name = "simplexchat", value = "SimpleX.simplexchat"),
+        RegistryValue(key = "Software\\com.popopxchat.popopx\\Capabilities\\URLAssociations", name = "simplexchat", value = "SimpleX.simplexchat"),
       ),
       windowsSchemeValues("simplexchat", windowsExe),
       "app link scheme"
@@ -86,7 +86,7 @@ class AppLinkSchemeTest {
         RegistryValue(key = "Software\\Classes\\simplex", name = "URL Protocol", value = ""),
         RegistryValue(key = "Software\\Classes\\simplex\\DefaultIcon", name = "", value = "\"$windowsExe\",0"),
         RegistryValue(key = connectionCommandKey, name = "", value = "\"$windowsExe\" \"%1\""),
-        RegistryValue(key = "Software\\chat.simplex.app\\Capabilities\\URLAssociations", name = "simplex", value = "SimpleX.simplex"),
+        RegistryValue(key = "Software\\com.popopxchat.popopx\\Capabilities\\URLAssociations", name = "simplex", value = "SimpleX.simplex"),
       ),
       windowsSchemeValues("simplex", windowsExe),
       "connection link scheme"
@@ -109,13 +109,13 @@ class AppLinkSchemeTest {
   fun windowsApplicationIsListedInDefaultAppsAfterItsCapabilities() {
     assertEquals(
       listOf(
-        RegistryValue(key = "Software\\chat.simplex.app\\Capabilities", name = "ApplicationName", value = "SimpleX Chat"),
+        RegistryValue(key = "Software\\com.popopxchat.popopx\\Capabilities", name = "ApplicationName", value = "SimpleX Chat"),
         RegistryValue(
-          key = "Software\\chat.simplex.app\\Capabilities",
+          key = "Software\\com.popopxchat.popopx\\Capabilities",
           name = "ApplicationDescription",
           value = "Private and secure open-source messenger - no user IDs (not even random numbers)"
         ),
-        RegistryValue(key = "Software\\RegisteredApplications", name = "SimpleX Chat", value = "Software\\chat.simplex.app\\Capabilities"),
+        RegistryValue(key = "Software\\RegisteredApplications", name = "SimpleX Chat", value = "Software\\com.popopxchat.popopx\\Capabilities"),
       ),
       windowsApplicationValues
     )
