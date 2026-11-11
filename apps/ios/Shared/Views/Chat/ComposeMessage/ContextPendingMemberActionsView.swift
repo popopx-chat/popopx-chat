@@ -1,13 +1,13 @@
 //
 //  ContextPendingMemberActionsView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 02.05.2025.
 //  Copyright © 2025 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct ContextPendingMemberActionsView: View {
     @EnvironmentObject var theme: AppTheme

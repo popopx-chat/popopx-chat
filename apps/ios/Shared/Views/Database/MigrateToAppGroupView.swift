@@ -1,6 +1,6 @@
 //
 //  MigrateToGroupView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 20/06/2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 // Spec: spec/database.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 enum V3DBMigrationState: String {
     case offer

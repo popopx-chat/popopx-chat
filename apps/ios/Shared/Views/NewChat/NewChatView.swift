@@ -1,6 +1,6 @@
 //
 //  NewChatView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 28.11.2023.
 //  Copyright © 2023 SimpleX Chat. All rights reserved.
@@ -8,10 +8,10 @@
 // Spec: spec/client/navigation.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 import CodeScanner
 import AVFoundation
-import SimpleXChat
+import POPOPXChat
 
 struct SomeAlert: Identifiable {
     var alert: Alert

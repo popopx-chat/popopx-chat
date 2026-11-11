@@ -10,7 +10,7 @@ for lang in "${langs[@]}"; do
   echo "***"
   echo "*** Importing $lang"
   xcodebuild -importLocalizations \
-            -project ./apps/ios/SimpleX.xcodeproj \
+            -project ./apps/ios/POPOPX.xcodeproj \
             -localizationPath ./apps/ios/SimpleX\ Localizations/$lang.xcloc \
             -skipPackageUpdates
   sleep 10

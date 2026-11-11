@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 typealias DynamicSizes = (
     rowHeight: CGFloat,

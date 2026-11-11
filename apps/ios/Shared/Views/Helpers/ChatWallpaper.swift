@@ -1,6 +1,6 @@
 //
 //  ChatWallpaper.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Avently on 14.06.2024.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 
 import Foundation
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct ChatViewBackground: ViewModifier {
     @Environment(\.colorScheme) var colorScheme

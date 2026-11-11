@@ -1,5 +1,5 @@
 //import UIKit
-import SimpleXChat
+import POPOPXChat
 
 let s =
 """

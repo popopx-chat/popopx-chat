@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 private let liveMsgInterval: UInt64 = 3000_000000
 

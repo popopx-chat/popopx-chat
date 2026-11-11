@@ -1,6 +1,6 @@
 //
 //  GroupMemberInfoView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by JRoberts on 25.07.2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 // Spec: spec/client/chat-view.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct GroupMemberInfoView: View {
     @EnvironmentObject var chatModel: ChatModel

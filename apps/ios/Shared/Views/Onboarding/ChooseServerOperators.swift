@@ -1,6 +1,6 @@
 //
 //  ChooseServerOperators.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 31.10.2024.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 // Spec: spec/client/navigation.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 let conditionsURL = URL(string: "https://github.com/simplex-chat/simplex-chat/blob/stable/PRIVACY.md")!
 

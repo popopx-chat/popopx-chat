@@ -1,13 +1,13 @@
 //
 //  CommandsMenuView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by EP on 03/08/2025.
 //  Copyright © 2025 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 let COMMAND_ROW_SIZE: CGFloat = 48
 let MAX_VISIBLE_COMMAND_ROWS: CGFloat = 5.8

@@ -4,7 +4,7 @@
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 // Spec: spec/client/chat-list.md#UserPicker
 struct UserPicker: View {

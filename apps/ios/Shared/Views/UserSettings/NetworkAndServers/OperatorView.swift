@@ -1,6 +1,6 @@
 //
 //  OperatorView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 28.10.2024.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 // Spec: spec/architecture.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 import Ink
 
 struct OperatorView: View {

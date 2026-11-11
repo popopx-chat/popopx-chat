@@ -1,6 +1,6 @@
 //
 //  NewServerView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 13.11.2024.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 // Spec: spec/architecture.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct NewServerView: View {
     @Environment(\.dismiss) var dismiss: DismissAction

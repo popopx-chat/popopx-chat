@@ -1,6 +1,6 @@
 //
 //  SoundPlayer.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 24/05/2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.

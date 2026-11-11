@@ -1,6 +1,6 @@
 //
 //  MPVolumeView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Avently on 24.04.2024.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.

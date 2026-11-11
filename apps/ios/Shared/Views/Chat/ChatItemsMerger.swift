@@ -1,13 +1,13 @@
 //
 //  ChatItemsMerger.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Stanislav Dmitrenko on 02.12.2024.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct MergedItems: Hashable, Equatable {
     let im: ItemsModel

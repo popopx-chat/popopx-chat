@@ -1,13 +1,13 @@
 //
 //  ContactConnectionInfo.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 06/10/2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct ContactConnectionInfo: View {
     @EnvironmentObject var m: ChatModel

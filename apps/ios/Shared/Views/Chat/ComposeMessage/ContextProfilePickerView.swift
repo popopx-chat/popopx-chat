@@ -1,13 +1,13 @@
 //
 //  ContextProfilePickerView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 13.06.2025.
 //  Copyright © 2025 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 let USER_ROW_SIZE: CGFloat = 60
 let MAX_VISIBLE_USER_ROWS: CGFloat = 4.8

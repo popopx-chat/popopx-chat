@@ -1,13 +1,13 @@
 //
 //  NSESubscriber.swift
-//  SimpleXChat
+//  POPOPXChat
 //
 //  Created by Evgeny on 09/12/2023.
 //  Copyright © 2023 SimpleX Chat. All rights reserved.
 //
 
 import Foundation
-import SimpleXChat
+import POPOPXChat
 
 private var nseSubscribers: [UUID:NSESubscriber] = [:]
 

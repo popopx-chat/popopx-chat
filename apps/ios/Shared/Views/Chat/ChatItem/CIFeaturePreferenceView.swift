@@ -1,6 +1,6 @@
 //
 //  CIFeaturePreferenceView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 21/12/2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 // Spec: spec/client/chat-view.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 // Spec: spec/client/chat-view.md#CIFeaturePreferenceView
 struct CIFeaturePreferenceView: View {

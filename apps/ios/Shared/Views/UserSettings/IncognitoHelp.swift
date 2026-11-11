@@ -1,6 +1,6 @@
 //
 //  IncognitoHelp.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by JRoberts on 22.08.2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.

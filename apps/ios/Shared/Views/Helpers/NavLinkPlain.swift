@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct NavLinkPlain<Label: View>: View {
     let chatId: ChatId

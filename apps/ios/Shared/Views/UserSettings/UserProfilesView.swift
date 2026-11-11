@@ -5,7 +5,7 @@
 // Spec: spec/client/navigation.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct UserProfilesView: View {
     @EnvironmentObject private var m: ChatModel

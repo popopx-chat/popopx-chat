@@ -1376,7 +1376,7 @@ jobs:
 
       - name: Check the previews listed in the snapshot tests
         shell: bash
-        run: python3 "apps/ios/SimpleX Snapshots/check-previews.py"
+        run: python3 "apps/ios/POPOPX Snapshots/check-previews.py"
 
       - name: Build iOS app
         timeout-minutes: 60
@@ -1384,8 +1384,8 @@ jobs:
         run: |
           scripts/ci/ios-stub-libs.sh
           xcodebuild build -quiet \
-            -project apps/ios/SimpleX.xcodeproj \
-            -scheme "SimpleX (iOS)" \
+            -project apps/ios/POPOPX.xcodeproj \
+            -scheme "POPOPX (iOS)" \
             -configuration Debug \
             -destination "generic/platform=iOS Simulator" \
             -onlyUsePackageVersionsFromResolvedFile \

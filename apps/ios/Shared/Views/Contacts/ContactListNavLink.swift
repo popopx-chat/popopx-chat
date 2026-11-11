@@ -1,13 +1,13 @@
 //
 //  ContactListNavLink.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Diogo Cunha on 01/08/2024.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct ContactListNavLink: View {
     @EnvironmentObject var theme: AppTheme

@@ -1,6 +1,6 @@
 //
 //  UserAddressView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 26.04.2023.
 //  Copyright © 2023 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 
 import SwiftUI
 import MessageUI
-@preconcurrency import SimpleXChat
+@preconcurrency import POPOPXChat
 
 struct UserAddressView: View {
     @Environment(\.colorScheme) var colorScheme

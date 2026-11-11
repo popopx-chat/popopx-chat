@@ -8,7 +8,7 @@
 
 import SwiftUI
 import Intents
-import SimpleXChat
+import POPOPXChat
 
 private enum NoticesSheet: Identifiable {
     case whatsNew(updatedConditions: Bool)

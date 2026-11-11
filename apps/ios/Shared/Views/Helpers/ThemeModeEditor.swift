@@ -1,6 +1,6 @@
 //
 //  ThemeModeEditor.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Avently on 20.06.2024.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 
 import Foundation
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct UserWallpaperEditor: View {
     @EnvironmentObject var theme: AppTheme

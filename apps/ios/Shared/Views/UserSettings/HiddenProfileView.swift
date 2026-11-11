@@ -1,13 +1,13 @@
 //
 //  ProfilePrivacyView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 17/03/2023.
 //  Copyright © 2023 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct HiddenProfileView: View {
     @State var user: User

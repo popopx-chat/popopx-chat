@@ -2061,7 +2061,7 @@ This is your own SimpleX address!</source>
       </trans-unit>
     </body>
   </file>
-  <file original="en.lproj/SimpleX--iOS--InfoPlist.strings" source-language="en" target-language="ko" datatype="plaintext">
+  <file original="en.lproj/POPOPX--iOS--InfoPlist.strings" source-language="en" target-language="ko" datatype="plaintext">
     <header>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.2" build-num="14C18"/>
     </header>
@@ -2073,31 +2073,31 @@ This is your own SimpleX address!</source>
       </trans-unit>
     </body>
   </file>
-  <file original="SimpleX NSE/en.lproj/InfoPlist.strings" source-language="en" target-language="ko" datatype="plaintext">
+  <file original="POPOPX NSE/en.lproj/InfoPlist.strings" source-language="en" target-language="ko" datatype="plaintext">
     <header>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.2" build-num="14C18"/>
     </header>
     <body>
       <trans-unit id="CFBundleName" xml:space="preserve" approved="no">
-        <source>SimpleX NSE</source>
-        <target state="translated">SimpleX NSE</target>
+        <source>POPOPX NSE</source>
+        <target state="translated">POPOPX NSE</target>
         <note>Bundle name</note>
       </trans-unit>
     </body>
   </file>
-  <file original="SimpleX SE/en.lproj/Localizable.strings" source-language="en" target-language="ko" datatype="plaintext">
+  <file original="POPOPX SE/en.lproj/Localizable.strings" source-language="en" target-language="ko" datatype="plaintext">
     <body>
     </body>
   </file>
-  <file original="en.lproj/SimpleXChat-InfoPlist.strings" source-language="en" target-language="ko" datatype="plaintext">
+  <file original="en.lproj/POPOPXChat-InfoPlist.strings" source-language="en" target-language="ko" datatype="plaintext">
     <body>
     </body>
   </file>
-  <file original="SimpleX NSE/en.lproj/Localizable.strings" source-language="en" target-language="ko" datatype="plaintext">
+  <file original="POPOPX NSE/en.lproj/Localizable.strings" source-language="en" target-language="ko" datatype="plaintext">
     <body>
     </body>
   </file>
-  <file original="SimpleX SE/en.lproj/InfoPlist.strings" source-language="en" target-language="ko" datatype="plaintext">
+  <file original="POPOPX SE/en.lproj/InfoPlist.strings" source-language="en" target-language="ko" datatype="plaintext">
     <body>
     </body>
   </file>

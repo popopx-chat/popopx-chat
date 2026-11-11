@@ -1,0 +1,9 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "POPOPX NSE";
+
+/* Bundle name */
+"CFBundleName" = "POPOPX NSE";
+
+/* Copyright (human-readable) */
+"NSHumanReadableCopyright" = "版权所有 © 2022 SimpleX Chat。保留所有权利。";
+

@@ -1,6 +1,6 @@
 //
 //  WebRTC.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 03/05/2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 
 import Foundation
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 import WebRTC
 
 class Call: ObservableObject, Equatable {

@@ -1,5 +1,5 @@
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct CIChatLinkHeader: View {
     @EnvironmentObject var theme: AppTheme

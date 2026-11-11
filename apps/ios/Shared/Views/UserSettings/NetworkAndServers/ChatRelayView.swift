@@ -1,6 +1,6 @@
 //
 //  ChatRelayView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 23.02.2026.
 //  Copyright © 2026 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 // Spec: spec/architecture.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 @ViewBuilder func showRelayTestStatus(relay: UserChatRelay) -> some View {
     switch relay.tested {

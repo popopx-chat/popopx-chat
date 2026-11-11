@@ -9,7 +9,7 @@
 
 import SwiftUI
 import CoreImage.CIFilterBuiltins
-import SimpleXChat
+import POPOPXChat
 
 struct MutableQRCode: View {
     @Binding var uri: String

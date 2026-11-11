@@ -1,13 +1,13 @@
 //
 //  ChatItemForwardingView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 12.04.2024.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct ChatItemForwardingView: View {
     @EnvironmentObject var chatModel: ChatModel

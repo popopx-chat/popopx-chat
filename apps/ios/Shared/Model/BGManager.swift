@@ -9,7 +9,7 @@
 
 import Foundation
 import BackgroundTasks
-import SimpleXChat
+import POPOPXChat
 
 private let receiveTaskId = "com.popopxchat.popopx.receive"
 

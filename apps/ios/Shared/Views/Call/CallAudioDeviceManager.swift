@@ -1,6 +1,6 @@
 //
 //  CallAudioDeviceManager.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Avently on 23.04.2024.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 
 import Foundation
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 import AVKit
 import WebRTC
 

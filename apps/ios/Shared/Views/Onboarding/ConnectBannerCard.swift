@@ -1,12 +1,12 @@
 //
 //  ConnectBannerCard.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Copyright © 2026 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 private let bannerImageRatio: CGFloat = 800 / 505
 

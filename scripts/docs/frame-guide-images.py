@@ -21,7 +21,7 @@ PIXEL_SCREEN_TOP = 58
 PIXEL_SCALE = 2
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-REFERENCES = os.path.join(REPO, "apps/ios/SimpleX Snapshots/References")
+REFERENCES = os.path.join(REPO, "apps/ios/POPOPX Snapshots/References")
 GUIDE_IMAGES = os.path.join(REPO, "docs/guide/images")
 
 FRAMED = {

@@ -1,6 +1,6 @@
 //
 //  UserDefault.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by user on 14/10/2024.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.

@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct ChatInfoToolbar: View {
     @Environment(\.colorScheme) var colorScheme

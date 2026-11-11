@@ -13328,7 +13328,7 @@ last received msg: %2$@</source>
       </trans-unit>
     </body>
   </file>
-  <file original="en.lproj/SimpleX--iOS--InfoPlist.strings" source-language="en" target-language="es" datatype="plaintext">
+  <file original="en.lproj/POPOPX--iOS--InfoPlist.strings" source-language="en" target-language="es" datatype="plaintext">
     <header>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="26.6" build-num="17F113"/>
     </header>
@@ -13365,26 +13365,26 @@ last received msg: %2$@</source>
       </trans-unit>
     </body>
   </file>
-  <file original="en.lproj/SimpleXChat-InfoPlist.strings" datatype="plaintext" source-language="en" target-language="es">
+  <file original="en.lproj/POPOPXChat-InfoPlist.strings" datatype="plaintext" source-language="en" target-language="es">
     <header>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="26.6" build-num="17F113"/>
     </header>
     <body>
     </body>
   </file>
-  <file original="SimpleX NSE/en.lproj/InfoPlist.strings" source-language="en" target-language="es" datatype="plaintext">
+  <file original="POPOPX NSE/en.lproj/InfoPlist.strings" source-language="en" target-language="es" datatype="plaintext">
     <header>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="26.6" build-num="17F113"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
-        <source>SimpleX NSE</source>
-        <target>SimpleX NSE</target>
+        <source>POPOPX NSE</source>
+        <target>POPOPX NSE</target>
         <note>Bundle display name</note>
       </trans-unit>
       <trans-unit id="CFBundleName" xml:space="preserve">
-        <source>SimpleX NSE</source>
-        <target>SimpleX NSE</target>
+        <source>POPOPX NSE</source>
+        <target>POPOPX NSE</target>
         <note>Bundle name</note>
       </trans-unit>
       <trans-unit id="NSHumanReadableCopyright" xml:space="preserve">
@@ -13394,7 +13394,7 @@ last received msg: %2$@</source>
       </trans-unit>
     </body>
   </file>
-  <file original="SimpleX NSE/en.lproj/Localizable.strings" source-language="en" target-language="es" datatype="plaintext">
+  <file original="POPOPX NSE/en.lproj/Localizable.strings" source-language="en" target-language="es" datatype="plaintext">
     <header>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="26.6" build-num="17F113"/>
     </header>
@@ -13426,19 +13426,19 @@ last received msg: %2$@</source>
       </trans-unit>
     </body>
   </file>
-  <file original="SimpleX SE/en.lproj/InfoPlist.strings" source-language="en" target-language="es" datatype="plaintext">
+  <file original="POPOPX SE/en.lproj/InfoPlist.strings" source-language="en" target-language="es" datatype="plaintext">
     <header>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="26.6" build-num="17F113"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
-        <source>SimpleX SE</source>
-        <target>SimpleX SE</target>
+        <source>POPOPX SE</source>
+        <target>POPOPX SE</target>
         <note>Bundle display name</note>
       </trans-unit>
       <trans-unit id="CFBundleName" xml:space="preserve">
-        <source>SimpleX SE</source>
-        <target>SimpleX SE</target>
+        <source>POPOPX SE</source>
+        <target>POPOPX SE</target>
         <note>Bundle name</note>
       </trans-unit>
       <trans-unit id="NSHumanReadableCopyright" xml:space="preserve">
@@ -13448,7 +13448,7 @@ last received msg: %2$@</source>
       </trans-unit>
     </body>
   </file>
-  <file original="SimpleX SE/en.lproj/Localizable.strings" source-language="en" target-language="es" datatype="plaintext">
+  <file original="POPOPX SE/en.lproj/Localizable.strings" source-language="en" target-language="es" datatype="plaintext">
     <header>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="26.6" build-num="17F113"/>
     </header>

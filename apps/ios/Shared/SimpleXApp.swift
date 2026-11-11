@@ -8,7 +8,7 @@
 
 import SwiftUI
 import OSLog
-import SimpleXChat
+import POPOPXChat
 
 let logger = Logger()
 

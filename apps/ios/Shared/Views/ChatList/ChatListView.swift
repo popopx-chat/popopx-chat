@@ -8,7 +8,7 @@
 // Spec: spec/client/chat-list.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 enum UserPickerSheet: Identifiable {
     case address

@@ -1,6 +1,6 @@
 //
 //  GroupChatInfoView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by JRoberts on 14.07.2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 // Spec: spec/client/chat-view.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 let SMALL_GROUPS_RCPS_MEM_LIMIT: Int = 20
 

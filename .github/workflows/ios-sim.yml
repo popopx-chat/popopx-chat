@@ -191,8 +191,8 @@ jobs:
       - name: Build app
         run: |
           xcodebuild build -quiet \
-            -project apps/ios/SimpleX.xcodeproj \
-            -scheme "SimpleX (iOS)" \
+            -project apps/ios/POPOPX.xcodeproj \
+            -scheme "POPOPX (iOS)" \
             -configuration Debug \
             -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath "$RUNNER_TEMP/DerivedData" \
@@ -207,13 +207,13 @@ jobs:
 
       # a tarball keeps the app's file modes, which an artifact drops
       - name: Pack app
-        run: tar -czf "$RUNNER_TEMP/SimpleX.app.tar.gz" -C "$RUNNER_TEMP/DerivedData/Build/Products/Debug-iphonesimulator" SimpleX.app
+        run: tar -czf "$RUNNER_TEMP/POPOPX.app.tar.gz" -C "$RUNNER_TEMP/DerivedData/Build/Products/Debug-iphonesimulator" POPOPX.app
 
       - name: Upload app
         uses: actions/upload-artifact@v7
         with:
           name: ios-sim-app
-          path: ${{ runner.temp }}/SimpleX.app.tar.gz
+          path: ${{ runner.temp }}/POPOPX.app.tar.gz
           compression-level: 0
           retention-days: 14
           if-no-files-found: error
@@ -222,7 +222,7 @@ jobs:
         run: scripts/ci/ios-sim/install-axe.sh
 
       - name: Run smoke test
-        run: scripts/ci/ios-sim/smoke-test.sh "$RUNNER_TEMP/DerivedData/Build/Products/Debug-iphonesimulator/SimpleX.app" "$RUNNER_TEMP/smoke-test" images
+        run: scripts/ci/ios-sim/smoke-test.sh "$RUNNER_TEMP/DerivedData/Build/Products/Debug-iphonesimulator/POPOPX.app" "$RUNNER_TEMP/smoke-test" images
 
       - name: Stop test backend
         if: ${{ !cancelled() && env.START_BACKEND == 'true' }}
@@ -287,7 +287,7 @@ jobs:
           path: ${{ runner.temp }}
 
       - name: Unpack app
-        run: tar -xzf "$RUNNER_TEMP/SimpleX.app.tar.gz" -C "$RUNNER_TEMP"
+        run: tar -xzf "$RUNNER_TEMP/POPOPX.app.tar.gz" -C "$RUNNER_TEMP"
 
       - name: Download backend
         if: needs.plan.outputs.claude-backend == 'yes'
@@ -308,7 +308,7 @@ jobs:
         run: scripts/ci/ios-sim/install-axe.sh
 
       - name: Run smoke test
-        run: scripts/ci/ios-sim/smoke-test.sh "$RUNNER_TEMP/SimpleX.app" "$RUNNER_TEMP/claude-test/smoke-test"
+        run: scripts/ci/ios-sim/smoke-test.sh "$RUNNER_TEMP/POPOPX.app" "$RUNNER_TEMP/claude-test/smoke-test"
 
       - name: Add test images
         run: |

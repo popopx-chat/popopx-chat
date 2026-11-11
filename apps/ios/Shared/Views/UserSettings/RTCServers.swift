@@ -1,6 +1,6 @@
 //
 //  RTCServers.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 20/09/2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.

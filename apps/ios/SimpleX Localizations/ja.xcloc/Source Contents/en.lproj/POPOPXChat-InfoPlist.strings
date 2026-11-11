@@ -1,0 +1,6 @@
+/* Bundle name */
+"CFBundleName" = "POPOPXChat";
+
+/* Copyright (human-readable) */
+"NSHumanReadableCopyright" = "Copyright © 2022 SimpleX Chat. All rights reserved.";
+

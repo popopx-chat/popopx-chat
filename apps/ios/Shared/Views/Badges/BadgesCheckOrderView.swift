@@ -1,6 +1,6 @@
 //
 //  BadgesCheckOrderView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 29.09.2026.
 //  Copyright © 2026 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 
 import SwiftUI
 import StoreKit
-import SimpleXChat
+import POPOPXChat
 
 struct BadgesCheckOrderView: View {
     let level: BadgeLevel

@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 extension EnvironmentValues {
     struct ShowTimestamp: EnvironmentKey {

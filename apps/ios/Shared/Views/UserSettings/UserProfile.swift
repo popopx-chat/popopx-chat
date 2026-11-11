@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct UserProfile: View {
     @EnvironmentObject var chatModel: ChatModel

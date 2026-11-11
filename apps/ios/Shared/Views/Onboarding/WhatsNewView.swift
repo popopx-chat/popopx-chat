@@ -1,6 +1,6 @@
 //
 //  WhatsNewView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 24/12/2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
@@ -9,7 +9,7 @@
 
 import SwiftUI
 import StoreKit
-import SimpleXChat
+import POPOPXChat
 
 private struct VersionDescription {
     var version: String
@@ -678,7 +678,7 @@ private let versionDescriptions: [VersionDescription] = [
             .view(FeatureView(
                 icon: nil,
                 title: "Own a part of SimpleX Chat",
-                view: { InvestInSimpleXChat() }
+                view: { InvestInPOPOPXChat() }
             ))
         ] : []) + [
             .feature(Description(
@@ -706,7 +706,7 @@ private let versionDescriptions: [VersionDescription] = [
             .view(FeatureView(
                 icon: nil,
                 title: "Own a part of SimpleX Chat",
-                view: { InvestInSimpleXChat() }
+                view: { InvestInPOPOPXChat() }
             ))
         ] : []) + [
             .view(FeatureView(
@@ -837,7 +837,7 @@ fileprivate struct CreateUpdateAddressShortLink: View {
     }
 }
 
-fileprivate struct InvestInSimpleXChat: View {
+fileprivate struct InvestInPOPOPXChat: View {
     @EnvironmentObject var theme: AppTheme
     @State private var showGetStakeSheet = false
 

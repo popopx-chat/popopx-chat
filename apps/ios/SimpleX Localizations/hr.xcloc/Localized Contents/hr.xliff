@@ -451,33 +451,33 @@
       </trans-unit>
     </body>
   </file>
-  <file original="en.lproj/SimpleX--iOS--InfoPlist.strings" source-language="en" target-language="hr" datatype="plaintext">
+  <file original="en.lproj/POPOPX--iOS--InfoPlist.strings" source-language="en" target-language="hr" datatype="plaintext">
     <header>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.0" build-num="14A309"/>
     </header>
     <body>
     </body>
   </file>
-  <file original="SimpleX NSE/en.lproj/InfoPlist.strings" source-language="en" target-language="hr" datatype="plaintext">
+  <file original="POPOPX NSE/en.lproj/InfoPlist.strings" source-language="en" target-language="hr" datatype="plaintext">
     <header>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.0" build-num="14A309"/>
     </header>
     <body>
     </body>
   </file>
-  <file original="SimpleX SE/en.lproj/Localizable.strings" source-language="en" target-language="hr" datatype="plaintext">
+  <file original="POPOPX SE/en.lproj/Localizable.strings" source-language="en" target-language="hr" datatype="plaintext">
     <body>
     </body>
   </file>
-  <file original="en.lproj/SimpleXChat-InfoPlist.strings" source-language="en" target-language="hr" datatype="plaintext">
+  <file original="en.lproj/POPOPXChat-InfoPlist.strings" source-language="en" target-language="hr" datatype="plaintext">
     <body>
     </body>
   </file>
-  <file original="SimpleX NSE/en.lproj/Localizable.strings" source-language="en" target-language="hr" datatype="plaintext">
+  <file original="POPOPX NSE/en.lproj/Localizable.strings" source-language="en" target-language="hr" datatype="plaintext">
     <body>
     </body>
   </file>
-  <file original="SimpleX SE/en.lproj/InfoPlist.strings" source-language="en" target-language="hr" datatype="plaintext">
+  <file original="POPOPX SE/en.lproj/InfoPlist.strings" source-language="en" target-language="hr" datatype="plaintext">
     <body>
     </body>
   </file>

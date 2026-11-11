@@ -1,13 +1,13 @@
 //
 //  CustomTimePicker.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 11.05.2023.
 //  Copyright © 2023 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct CustomTimePicker: View {
     @Binding var selection: Int?

@@ -1,13 +1,13 @@
 //
 //  SelectableChatItemToolbars.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Stanislav Dmitrenko on 30.07.2024.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct SelectedItemsTopToolbar: View {
     @Environment(\.colorScheme) var colorScheme

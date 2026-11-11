@@ -971,7 +971,7 @@ private val versionDescriptions: List<VersionDescription> = listOf(
       VersionFeature.FeatureView(
         icon = null,
         titleId = MR.strings.v7_1_invest,
-        view = { modalManager -> InvestInSimpleXChatView(modalManager) }
+        view = { modalManager -> InvestInPOPOPXChatView(modalManager) }
       ),
       VersionFeature.FeatureDescription(
         icon = MR.images.ic_alternate_email,
@@ -998,7 +998,7 @@ private val versionDescriptions: List<VersionDescription> = listOf(
       VersionFeature.FeatureView(
         icon = null,
         titleId = MR.strings.v7_1_invest,
-        view = { modalManager -> InvestInSimpleXChatView(modalManager) }
+        view = { modalManager -> InvestInPOPOPXChatView(modalManager) }
       ),
       VersionFeature.FeatureView(
         icon = null,
@@ -1134,7 +1134,7 @@ fun isInUs(): Boolean =
       || androidPlayStoreCountry.value == null
 
 @Composable
-private fun InvestInSimpleXChatView(modalManager: ModalManager) {
+private fun InvestInPOPOPXChatView(modalManager: ModalManager) {
   if (!crowdfundingAvailable()) return
   val showGetStake = { modalManager.showModalCloseable(cardScreen = true) { close -> GetStakeView(showFirstImage = false, inCenterOfWindow = crowdfundingLayout.inCenterOfWindow(modalManager), close = close) } }
   Column(modifier = Modifier.padding(bottom = 12.dp)) {

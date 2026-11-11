@@ -7,7 +7,7 @@
 set -eu
 
 IOS_DIR=apps/ios
-PBXPROJ=$IOS_DIR/SimpleX.xcodeproj/project.pbxproj
+PBXPROJ=$IOS_DIR/POPOPX.xcodeproj/project.pbxproj
 OUT_DIR=$IOS_DIR/Libraries/sim
 ARCH=arm64
 MIN_IOS=15.0
@@ -16,7 +16,7 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
 # The linker resolves symbols by name only, so the stub signatures are not checked.
-sed -n 's/^extern [^(]*[ *]\([a-z_]*\)(.*/\1/p' "$IOS_DIR/SimpleXChat/SimpleX.h" "$IOS_DIR/SimpleXChat/hs_init.c" \
+sed -n 's/^extern [^(]*[ *]\([a-z_]*\)(.*/\1/p' "$IOS_DIR/POPOPXChat/SimpleX.h" "$IOS_DIR/POPOPXChat/hs_init.c" \
     | sort -u | sed 's/.*/void &(void) {}/' > "$tmp/stubs.c"
 
 if [ ! -s "$tmp/stubs.c" ]; then

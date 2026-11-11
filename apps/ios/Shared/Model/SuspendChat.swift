@@ -1,6 +1,6 @@
 //
 //  SuspendChat.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 26/06/2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 
 import Foundation
 import UIKit
-import SimpleXChat
+import POPOPXChat
 import SwiftUI
 
 private let suspendLockQueue = DispatchQueue(label: "com.popopxchat.popopx.suspend.lock")

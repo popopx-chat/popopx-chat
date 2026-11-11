@@ -1,13 +1,13 @@
 //
 //  PrivacySettings.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 29/05/2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct PrivacySettings: View {
     @EnvironmentObject var m: ChatModel

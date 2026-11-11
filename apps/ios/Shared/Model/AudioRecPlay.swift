@@ -1,6 +1,6 @@
 //
 //  AudioRecPlay.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 19/11/2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
@@ -9,7 +9,7 @@
 import Foundation
 import AVFoundation
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 class AudioRecorder {
     var onTimer: ((TimeInterval) -> Void)?

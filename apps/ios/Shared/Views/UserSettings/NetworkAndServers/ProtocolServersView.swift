@@ -1,6 +1,6 @@
 //
 //  ProtocolServersView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 15/11/2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 // Spec: spec/architecture.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 private let howToUrl = URL(string: "https://simplex.chat/docs/server.html")!
 

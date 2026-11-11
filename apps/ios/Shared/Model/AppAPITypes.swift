@@ -7,7 +7,7 @@
 //
 // Spec: spec/api.md
 
-import SimpleXChat
+import POPOPXChat
 import SwiftUI
 
 // some constructors are used in SEChatCommand or NSEChatCommand types as well - they must be syncronised
@@ -1059,7 +1059,7 @@ enum ChatResponse2: Decodable, ChatAPIResult {
     case userAcceptedGroupSent(user: UserRef, groupInfo: GroupInfo, hostContact: Contact?)
     case userDeletedMembers(user: UserRef, groupInfo: GroupInfo, members: [GroupMember], withMessages: Bool)
     case leftMemberUser(user: UserRef, groupInfo: GroupInfo)
-    case groupMembers(user: UserRef, group: SimpleXChat.Group)
+    case groupMembers(user: UserRef, group: POPOPXChat.Group)
     case memberAccepted(user: UserRef, groupInfo: GroupInfo, member: GroupMember)
     case memberSupportChatRead(user: UserRef, groupInfo: GroupInfo, member: GroupMember)
     case memberSupportChatDeleted(user: UserRef, groupInfo: GroupInfo, member: GroupMember)

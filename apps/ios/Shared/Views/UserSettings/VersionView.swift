@@ -1,13 +1,13 @@
 //
 //  VersionView.swift
-//  SimpleXChat
+//  POPOPXChat
 //
 //  Created by Evgeny on 22/01/2023.
 //  Copyright © 2023 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct VersionView: View {
     @State var versionInfo: CoreVersionInfo?

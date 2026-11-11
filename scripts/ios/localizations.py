@@ -36,7 +36,7 @@ from pathlib import Path
 from typing import Union
 
 IOS_DIR = Path("apps/ios")
-PROJECT = IOS_DIR / "SimpleX.xcodeproj"
+PROJECT = IOS_DIR / "POPOPX.xcodeproj"
 PBXPROJ = PROJECT / "project.pbxproj"
 LOCALIZATIONS_DIR = IOS_DIR / "SimpleX Localizations"
 UPDATE_PBXPROJ = Path("scripts/ios/update-pbxproj.sh")

@@ -1,6 +1,6 @@
 //
 //  MigrateToDevice.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Avently on 23.02.2024.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 // Spec: spec/database.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 enum MigrationToDeviceState: Codable, Equatable {
     case downloadProgress(link: String, archiveName: String)

@@ -15,8 +15,8 @@ import Popopx.Messaging.Agent.Store.Entity
 import Popopx.Messaging.Encoding.String
 import Popopx.Messaging.Protocol (ProtocolType (..), SMPServer)
 
-operatorSimpleXChat :: NewServerOperator
-operatorSimpleXChat =
+operatorPOPOPXChat :: NewServerOperator
+operatorPOPOPXChat =
   ServerOperator
     { operatorId = DBNewEntity,
       operatorTag = Just OTSimplex,

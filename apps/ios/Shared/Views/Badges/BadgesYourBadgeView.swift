@@ -1,13 +1,13 @@
 //
 //  BadgesYourBadgeView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 11.09.2026.
 //  Copyright © 2026 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct BadgesYourBadgeView: View {
     @EnvironmentObject var theme: AppTheme

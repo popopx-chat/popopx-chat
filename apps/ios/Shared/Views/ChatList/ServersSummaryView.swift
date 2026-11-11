@@ -1,13 +1,13 @@
 //
 //  ServersSummaryView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 25.06.2024.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct ServersSummaryView: View {
     @EnvironmentObject var m: ChatModel

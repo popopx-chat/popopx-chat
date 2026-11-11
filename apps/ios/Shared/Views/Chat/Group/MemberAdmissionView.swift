@@ -1,13 +1,13 @@
 //
 //  MemberAdmissionView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 28.04.2025.
 //  Copyright © 2025 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 private let memberCriterias: [(criteria: MemberCriteria?, text: LocalizedStringKey)] = [
     (nil, "off"),

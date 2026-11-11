@@ -9,7 +9,7 @@
 
 import SwiftUI
 import AVKit
-import SimpleXChat
+import POPOPXChat
 import Combine
 
 // Spec: spec/client/chat-view.md#CIVideoView

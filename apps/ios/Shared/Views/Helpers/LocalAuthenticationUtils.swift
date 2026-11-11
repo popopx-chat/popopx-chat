@@ -1,6 +1,6 @@
 //
 //  LocalAuthenticationUtils.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Efim Poberezkin on 26.05.2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 
 import SwiftUI
 import LocalAuthentication
-import SimpleXChat
+import POPOPXChat
 
 enum LAResult {
     case success

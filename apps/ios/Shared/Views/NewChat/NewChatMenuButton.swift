@@ -1,13 +1,13 @@
 //
 //  NewChatMenuButton.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 28.11.2023.
 //  Copyright © 2023 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct NewChatMenuButton: View {
     // do not use chatModel here because it prevents showing AddGroupMembersView after group creation and QR code after link creation on iOS 16

@@ -1,13 +1,13 @@
 //
 //  ChatItemInfoView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 09.05.2023.
 //  Copyright © 2023 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 // Spec: spec/client/chat-view.md#ChatItemInfoView
 struct ChatItemInfoView: View {

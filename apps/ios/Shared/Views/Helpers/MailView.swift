@@ -1,6 +1,6 @@
 //
 //  MailView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 01.05.2023.
 //  Copyright © 2023 SimpleX Chat. All rights reserved.

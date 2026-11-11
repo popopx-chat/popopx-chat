@@ -1,13 +1,13 @@
 //
 //  ContactPreferencesView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 13/11/2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct ContactPreferencesView: View {
     @Environment(\.dismiss) var dismiss: DismissAction

@@ -8,7 +8,7 @@
 // Spec: spec/client/chat-view.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 let uiLinkColor = UIColor(red: 0, green: 0.533, blue: 1, alpha: 1)
 

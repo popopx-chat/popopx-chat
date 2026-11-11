@@ -1,13 +1,13 @@
 //
 //  OnboardingCards.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by simplex-chat on 06.04.2026.
 //  Copyright © 2026 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 // MARK: - Card component
 

@@ -1,6 +1,6 @@
 //
 //  SwipeLabel.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Levitating Pineapple on 06/08/2024.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.

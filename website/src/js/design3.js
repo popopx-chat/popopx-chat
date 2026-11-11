@@ -115,8 +115,8 @@ async function showPromotedGroups() {
 SimpleX directory: https://simplex.chat/directory
 Ask SimpleX team: https://smp6.simplex.im/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw
 GitHub: https://github.com/simplex-chat/simplex-chat
-Reddit: https://www.reddit.com/r/SimpleXChat
-X/Twitter: https://x.com/SimpleXChat
+Reddit: https://www.reddit.com/r/POPOPXChat
+X/Twitter: https://x.com/POPOPXChat
 
 Docs
 ----
@@ -285,7 +285,7 @@ Donations: https://github.com/simplex-chat/simplex-chat#please-support-us-with-y
                 imageFile: "images/B3xza7zUzYi3dHiRsg6Afg.jpg"
             },
             {
-                displayName: "RetoSwap – Official SimpleXChat Group",
+                displayName: "RetoSwap – Official POPOPXChat Group",
                 groupLink: {
                     connShortLink: "https://smp5.simplex.im/g#-_h6fBWisca6RKhteZtVuXol1a49vFH1Jo-n74fnRK0"
                 },

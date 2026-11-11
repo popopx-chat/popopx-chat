@@ -1,7 +1,7 @@
 // Spec: spec/client/compose.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 import SwiftyGif
 import PhotosUI
 

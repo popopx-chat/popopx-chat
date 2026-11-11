@@ -1,6 +1,6 @@
 //
 //  CreateSimpleXAddress.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 28.04.2023.
 //  Copyright © 2023 SimpleX Chat. All rights reserved.
@@ -11,7 +11,7 @@ import SwiftUI
 import Contacts
 import ContactsUI
 import MessageUI
-import SimpleXChat
+import POPOPXChat
 
 struct CreateSimpleXAddress: View {
     @EnvironmentObject var m: ChatModel

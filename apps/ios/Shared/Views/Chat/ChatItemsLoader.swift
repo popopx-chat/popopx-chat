@@ -1,12 +1,12 @@
 //
 //  ChatItemsLoader.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Stanislav Dmitrenko on 17.12.2024.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.
 //
 
-import SimpleXChat
+import POPOPXChat
 import SwiftUI
 
 let TRIM_KEEP_COUNT = 200

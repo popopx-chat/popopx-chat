@@ -211,7 +211,7 @@ class FilesTest(RepositoryTestCase):
         self.assertEqual(l10n.app_languages(), ["en", "de", "uk"])
 
     def test_language_of(self) -> None:
-        self.assertEqual(l10n.language_of(Path("apps/ios/SimpleX SE/zh-Hans.lproj/Localizable.strings")), "zh-Hans")
+        self.assertEqual(l10n.language_of(Path("apps/ios/POPOPX SE/zh-Hans.lproj/Localizable.strings")), "zh-Hans")
         self.assertEqual(l10n.language_of(l10n.xliff_path("pt-BR")), "pt-BR")
 
     def test_check_files_reports_each_kind(self) -> None:
@@ -679,7 +679,7 @@ class CrossPlatformRulesTest(unittest.TestCase):
             (LOCALIZABLE, "Hello"): l10n.Unit("Hello", "Bonjour"),
             (LOCALIZABLE, "Same %@"): l10n.Unit("Same %@", "Même %@"),
             (LOCALIZABLE, "Menu"): l10n.Unit("Menu", "Menu principal"),
-            ("SimpleX SE/en.lproj/Localizable.strings", "Menu"): l10n.Unit("Menu", "Carte"),
+            ("POPOPX SE/en.lproj/Localizable.strings", "Menu"): l10n.Unit("Menu", "Carte"),
         }
         found = l10n.mismatched_translations(english, android_now, android_then, ios_now, ios_then)
         return [(m.android_key, m.ios_text) for m in found]

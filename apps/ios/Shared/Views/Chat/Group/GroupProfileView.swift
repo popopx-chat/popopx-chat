@@ -1,13 +1,13 @@
 //
 //  GroupProfileView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 29/07/2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 enum GroupProfileAlert: Identifiable {
     case saveError(err: String)

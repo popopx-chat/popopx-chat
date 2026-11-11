@@ -16,7 +16,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 APPS = {
-    "ios": ("ios-sim.yml", "ios-sim-smoke-test", "apps/ios/SimpleX Snapshots/References"),
+    "ios": ("ios-sim.yml", "ios-sim-smoke-test", "apps/ios/POPOPX Snapshots/References"),
     "desktop": ("desktop-linux.yml", "desktop-snapshots", "apps/multiplatform/common/src/desktopTest/snapshots"),
 }
 

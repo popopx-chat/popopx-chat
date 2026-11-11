@@ -1,6 +1,6 @@
 //
 //  AppearanceSettings.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 03/08/2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 // Spec: spec/services/theme.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 import Yams
 
 let colorModesLocalized: [LocalizedStringKey] = ["System", "Light", "Dark"]

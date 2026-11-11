@@ -1,6 +1,6 @@
 //
 //  CallController.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 21/05/2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
@@ -12,7 +12,7 @@ import CallKit
 import StoreKit
 import PushKit
 import AVFoundation
-import SimpleXChat
+import POPOPXChat
 import WebRTC
 
 // Spec: spec/services/calls.md#CallController

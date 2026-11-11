@@ -9,7 +9,7 @@
 
 import SwiftUI
 import StoreKit
-import SimpleXChat
+import POPOPXChat
 
 let simplexTeamURL = URL(string: "popopx:/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw?h=smp6.simplex.im")!
 

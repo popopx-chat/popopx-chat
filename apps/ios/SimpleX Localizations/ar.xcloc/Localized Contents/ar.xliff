@@ -3470,21 +3470,21 @@ This is your own one-time link!</source>
       </trans-unit>
     </body>
   </file>
-  <file original="en.lproj/SimpleX--iOS--InfoPlist.strings" source-language="en" target-language="ar" datatype="plaintext">
+  <file original="en.lproj/POPOPX--iOS--InfoPlist.strings" source-language="en" target-language="ar" datatype="plaintext">
     <header>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.0" build-num="14A309"/>
     </header>
     <body>
     </body>
   </file>
-  <file original="SimpleX NSE/en.lproj/InfoPlist.strings" source-language="en" target-language="ar" datatype="plaintext">
+  <file original="POPOPX NSE/en.lproj/InfoPlist.strings" source-language="en" target-language="ar" datatype="plaintext">
     <header>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.0" build-num="14A309"/>
     </header>
     <body>
     </body>
   </file>
-  <file original="SimpleX SE/en.lproj/Localizable.strings" source-language="en" target-language="ar" datatype="plaintext">
+  <file original="POPOPX SE/en.lproj/Localizable.strings" source-language="en" target-language="ar" datatype="plaintext">
     <body>
       <trans-unit id="You can allow sharing in Privacy &amp; Security / SimpleX Lock settings." xml:space="preserve" approved="no">
         <source>You can allow sharing in Privacy &amp; Security / SimpleX Lock settings.</source>
@@ -3552,7 +3552,7 @@ This is your own one-time link!</source>
       </trans-unit>
     </body>
   </file>
-  <file original="SimpleX NSE/en.lproj/Localizable.strings" source-language="en" target-language="ar" datatype="plaintext">
+  <file original="POPOPX NSE/en.lproj/Localizable.strings" source-language="en" target-language="ar" datatype="plaintext">
     <body>
       <trans-unit id="From: %@" xml:space="preserve" approved="no">
         <source>From: %@</source>
@@ -3560,11 +3560,11 @@ This is your own one-time link!</source>
       </trans-unit>
     </body>
   </file>
-  <file original="en.lproj/SimpleXChat-InfoPlist.strings" source-language="en" target-language="ar" datatype="plaintext">
+  <file original="en.lproj/POPOPXChat-InfoPlist.strings" source-language="en" target-language="ar" datatype="plaintext">
     <body>
     </body>
   </file>
-  <file original="SimpleX SE/en.lproj/InfoPlist.strings" source-language="en" target-language="ar" datatype="plaintext">
+  <file original="POPOPX SE/en.lproj/InfoPlist.strings" source-language="en" target-language="ar" datatype="plaintext">
     <body>
     </body>
   </file>

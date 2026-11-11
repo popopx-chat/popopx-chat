@@ -1,13 +1,13 @@
 //
 //  ChatItemClipShape.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Levitating Pineapple on 04/07/2024.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 /// Modifier, which provides clipping mask for ``ChatItemWithMenu`` view 
 /// and it's previews: (drag interaction, context menu, etc.)

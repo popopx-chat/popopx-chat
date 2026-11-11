@@ -1,6 +1,6 @@
 //
 //  BadgeStore.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 14.08.2026.
 //  Copyright © 2026 SimpleX Chat. All rights reserved.
@@ -10,7 +10,7 @@ import Foundation
 import Combine
 import StoreKit
 import UIKit
-import SimpleXChat
+import POPOPXChat
 
 // TODO [badges] product ids will come from app config and prices from the badge service catalog;
 // hardcoded here so the App Store integration can be tested before the purchase API lands.

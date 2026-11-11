@@ -1,6 +1,6 @@
 //
 //  IntegrityErrorItemView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 28/05/2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 // Spec: spec/client/chat-view.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 // Spec: spec/client/chat-view.md#IntegrityErrorItemView
 struct IntegrityErrorItemView: View {

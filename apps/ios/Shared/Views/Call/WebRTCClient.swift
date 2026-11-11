@@ -7,7 +7,7 @@
 import WebRTC
 import LZString
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 // Spec: spec/services/calls.md#WebRTCClient
 final class WebRTCClient: NSObject, RTCVideoViewDelegate, RTCFrameEncryptorDelegate, RTCFrameDecryptorDelegate {

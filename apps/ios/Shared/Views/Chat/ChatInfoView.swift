@@ -8,7 +8,7 @@
 // Spec: spec/client/chat-view.md
 
 import SwiftUI
-@preconcurrency import SimpleXChat
+@preconcurrency import POPOPXChat
 
 func infoRow(_ title: LocalizedStringKey, _ value: String) -> some View {
     HStack {

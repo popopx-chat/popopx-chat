@@ -8,7 +8,7 @@
 // Spec: spec/client/chat-view.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 // Spec: spec/client/chat-view.md#CIFileView
 struct CIFileView: View {

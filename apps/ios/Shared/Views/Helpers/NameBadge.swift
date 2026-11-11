@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 // The badge is sized to a fraction of the font size (em), NOT the font's cap-height metric: the metric
 // underestimates the rendered capital letters, so a cap-height-tall badge looks too small. These ratios

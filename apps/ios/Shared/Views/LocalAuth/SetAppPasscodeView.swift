@@ -1,6 +1,6 @@
 //
 //  SetAppPaswordView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 10/04/2023.
 //  Copyright © 2023 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 // Spec: spec/architecture.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct SetAppPasscodeView: View {
     var passcodeKeychain: KeyChainItem = kcAppPassword

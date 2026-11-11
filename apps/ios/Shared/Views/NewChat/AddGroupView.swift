@@ -1,13 +1,13 @@
 //
 //  AddGroupView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by JRoberts on 13.07.2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct AddGroupView: View {
     @Environment(\.colorScheme) var colorScheme

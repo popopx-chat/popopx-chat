@@ -1,13 +1,13 @@
 //
 //  GetStakeBanner.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 21.09.2026.
 //  Copyright © 2026 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 // Spec: spec/client/chat-list.md#GetStakeBanner
 struct GetStakeBanner: View {

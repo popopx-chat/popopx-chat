@@ -1,13 +1,13 @@
 //
 //  ChannelMembersView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 20.02.2026.
 //  Copyright © 2026 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct ChannelMembersView: View {
     @ObservedObject var chat: Chat

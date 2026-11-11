@@ -7,15 +7,15 @@ out=$2
 mkdir -p "$out"
 
 xcode=(
-  -project apps/ios/SimpleX.xcodeproj
-  -scheme "SimpleX (iOS)"
+  -project apps/ios/POPOPX.xcodeproj
+  -scheme "POPOPX (iOS)"
   -configuration Debug
   -destination "id=$SIM_UDID"
   -derivedDataPath "$derived"
   -onlyUsePackageVersionsFromResolvedFile
   -skipPackagePluginValidation
   -skipMacroValidation
-  -only-testing:"SimpleX Snapshots"
+  -only-testing:"POPOPX Snapshots"
   ARCHS=arm64
   CODE_SIGN_STYLE=Manual
   CODE_SIGN_IDENTITY=-
@@ -33,7 +33,7 @@ xcrun simctl ui "$SIM_UDID" content_size large
 
 ls -l "$out"
 
-references="apps/ios/SimpleX Snapshots/References"
+references="apps/ios/POPOPX Snapshots/References"
 if [ -d "$references" ]; then
   python3 "$(dirname "$0")/../snapshots-compare.py" "$references" "$out" "$(dirname "$out")/snapshots-diff"
 fi

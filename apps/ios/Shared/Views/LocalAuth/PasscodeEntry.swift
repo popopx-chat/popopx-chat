@@ -1,6 +1,6 @@
 //
 //  PasscodeEntry.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 10/04/2023.
 //  Copyright © 2023 SimpleX Chat. All rights reserved.

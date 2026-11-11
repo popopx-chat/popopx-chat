@@ -9,7 +9,7 @@
 import SwiftUI
 import PhotosUI
 import SwiftyGif
-import SimpleXChat
+import POPOPXChat
 
 struct LibraryImagePicker: View {
     @Binding var image: UIImage?

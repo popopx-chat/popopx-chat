@@ -1,5 +1,5 @@
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 import Ink
 
 private let MAX_MARKDOWN_VIEW_SIZE: Int64 = 1_048_576

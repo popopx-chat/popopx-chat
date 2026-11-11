@@ -1,6 +1,6 @@
 //
 //  NetworkObserver.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Avently on 05.04.2024.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 
 import Foundation
 import Network
-import SimpleXChat
+import POPOPXChat
 
 class NetworkObserver {
     static let shared = NetworkObserver()

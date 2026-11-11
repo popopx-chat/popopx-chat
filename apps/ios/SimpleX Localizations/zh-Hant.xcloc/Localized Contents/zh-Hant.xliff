@@ -12605,7 +12605,7 @@ If you cancel, the channel will be deleted - you can create it again.</source>
       </trans-unit>
     </body>
   </file>
-  <file original="en.lproj/SimpleX--iOS--InfoPlist.strings" source-language="en" target-language="zh-Hant" datatype="plaintext">
+  <file original="en.lproj/POPOPX--iOS--InfoPlist.strings" source-language="en" target-language="zh-Hant" datatype="plaintext">
     <header>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.0" build-num="14A309"/>
     </header>
@@ -12641,19 +12641,19 @@ If you cancel, the channel will be deleted - you can create it again.</source>
       </trans-unit>
     </body>
   </file>
-  <file original="SimpleX NSE/en.lproj/InfoPlist.strings" source-language="en" target-language="zh-Hant" datatype="plaintext">
+  <file original="POPOPX NSE/en.lproj/InfoPlist.strings" source-language="en" target-language="zh-Hant" datatype="plaintext">
     <header>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.0" build-num="14A309"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve" approved="no">
-        <source>SimpleX NSE</source>
-        <target state="translated">SimpleX NSE</target>
+        <source>POPOPX NSE</source>
+        <target state="translated">POPOPX NSE</target>
         <note>Bundle display name</note>
       </trans-unit>
       <trans-unit id="CFBundleName" xml:space="preserve" approved="no">
-        <source>SimpleX NSE</source>
-        <target state="translated">SimpleX NSE</target>
+        <source>POPOPX NSE</source>
+        <target state="translated">POPOPX NSE</target>
         <note>Bundle name</note>
       </trans-unit>
       <trans-unit id="NSHumanReadableCopyright" xml:space="preserve" approved="no">
@@ -12663,7 +12663,7 @@ If you cancel, the channel will be deleted - you can create it again.</source>
       </trans-unit>
     </body>
   </file>
-  <file original="SimpleX NSE/en.lproj/Localizable.strings" source-language="en" target-language="zh-Hant" datatype="plaintext">
+  <file original="POPOPX NSE/en.lproj/Localizable.strings" source-language="en" target-language="zh-Hant" datatype="plaintext">
     <body>
       <trans-unit id="%d new events" xml:space="preserve" approved="no">
         <source>%d new events</source>
@@ -12687,23 +12687,23 @@ If you cancel, the channel will be deleted - you can create it again.</source>
       </trans-unit>
     </body>
   </file>
-  <file original="SimpleX SE/en.lproj/InfoPlist.strings" source-language="en" target-language="zh-Hant" datatype="plaintext">
+  <file original="POPOPX SE/en.lproj/InfoPlist.strings" source-language="en" target-language="zh-Hant" datatype="plaintext">
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve" approved="no">
-        <source>SimpleX SE</source>
-        <target state="translated">SimpleX SE</target>
+        <source>POPOPX SE</source>
+        <target state="translated">POPOPX SE</target>
       </trans-unit>
       <trans-unit id="NSHumanReadableCopyright" xml:space="preserve" approved="no">
         <source>Copyright © 2024 SimpleX Chat. All rights reserved.</source>
         <target state="translated">版權所有© 2024 SimpleX Chat。保留所有權利。</target>
       </trans-unit>
       <trans-unit id="CFBundleName" xml:space="preserve" approved="no">
-        <source>SimpleX SE</source>
-        <target state="translated">SimpleX SE</target>
+        <source>POPOPX SE</source>
+        <target state="translated">POPOPX SE</target>
       </trans-unit>
     </body>
   </file>
-  <file original="SimpleX SE/en.lproj/Localizable.strings" source-language="en" target-language="zh-Hant" datatype="plaintext">
+  <file original="POPOPX SE/en.lproj/Localizable.strings" source-language="en" target-language="zh-Hant" datatype="plaintext">
     <body>
       <trans-unit id="App is locked!" xml:space="preserve" approved="no">
         <source>App is locked!</source>
@@ -12855,7 +12855,7 @@ If you cancel, the channel will be deleted - you can create it again.</source>
       </trans-unit>
     </body>
   </file>
-  <file original="en.lproj/SimpleXChat-InfoPlist.strings" source-language="en" target-language="zh-Hant" datatype="plaintext">
+  <file original="en.lproj/POPOPXChat-InfoPlist.strings" source-language="en" target-language="zh-Hant" datatype="plaintext">
     <body>
     </body>
   </file>

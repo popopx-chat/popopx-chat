@@ -1,13 +1,13 @@
 //
 //  SecondaryChatView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 29.04.2025.
 //  Copyright © 2025 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct SecondaryChatView: View {
     @Environment(\.dismiss) var dismiss

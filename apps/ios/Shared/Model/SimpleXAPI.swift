@@ -13,7 +13,7 @@ import Dispatch
 import BackgroundTasks
 import SwiftUI
 import StoreKit
-@preconcurrency import SimpleXChat
+@preconcurrency import POPOPXChat
 
 private var chatController: chat_ctrl?
 

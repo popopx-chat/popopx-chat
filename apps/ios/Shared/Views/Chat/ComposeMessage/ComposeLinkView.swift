@@ -8,7 +8,7 @@
 
 import SwiftUI
 import LinkPresentation
-import SimpleXChat
+import POPOPXChat
 
 struct ComposeLinkView: View {
     @EnvironmentObject var theme: AppTheme

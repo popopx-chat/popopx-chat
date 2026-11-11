@@ -1,13 +1,13 @@
 //
 //  GroupPreferencesView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by JRoberts on 16.11.2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 private let featureRoles: [(role: GroupMemberRole?, text: LocalizedStringKey)] = [
     (nil, "all members"),

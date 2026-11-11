@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct ProfileImage: View {
     @EnvironmentObject var theme: AppTheme

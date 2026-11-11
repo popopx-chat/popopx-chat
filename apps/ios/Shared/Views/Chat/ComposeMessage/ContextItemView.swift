@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 struct ContextItemView: View {
     @EnvironmentObject var theme: AppTheme

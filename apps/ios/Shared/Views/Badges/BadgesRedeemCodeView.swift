@@ -1,13 +1,13 @@
 //
 //  BadgesRedeemCodeView.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 28.07.2026.
 //  Copyright © 2026 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 import CodeScanner
 
 private let badgeCodePrefix = "SB"

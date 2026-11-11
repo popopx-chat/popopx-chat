@@ -1,6 +1,6 @@
 //
 //  ScrollViewCells.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Stanislav Dmitrenko on 27.01.2025.
 //  Copyright © 2024 SimpleX Chat. All rights reserved.

@@ -1,13 +1,13 @@
 //
 //  GroupMentions.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Diogo Cunha on 30/01/2025.
 //  Copyright © 2025 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 let MENTION_START: Character = "@"
 let QUOTE: Character = "'"

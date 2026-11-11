@@ -1,6 +1,6 @@
 //
 //  CIRcvDecryptionError.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 15/04/2023.
 //  Copyright © 2023 SimpleX Chat. All rights reserved.
@@ -8,7 +8,7 @@
 // Spec: spec/client/chat-view.md
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 let decryptErrorReason: LocalizedStringKey = "It can happen when you or your connection used the old database backup."
 

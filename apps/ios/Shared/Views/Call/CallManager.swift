@@ -1,13 +1,13 @@
 //
 //  CallManager.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 22/05/2022.
 //  Copyright © 2022 SimpleX Chat. All rights reserved.
 //
 
 import Foundation
-import SimpleXChat
+import POPOPXChat
 
 class CallManager {
     func newOutgoingCall(_ contact: Contact, _ media: CallMediaType) -> String {

@@ -9,7 +9,7 @@
 
 import Foundation
 import UIKit
-import SimpleXChat
+import POPOPXChat
 import SwiftUI
 
 class AppDelegate: NSObject, UIApplicationDelegate {

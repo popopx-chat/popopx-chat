@@ -1,13 +1,13 @@
 //
 //  YourNetwork.swift
-//  SimpleX (iOS)
+//  POPOPX (iOS)
 //
 //  Created by Evgeny on 22/04/2026.
 //  Copyright © 2026 SimpleX Chat. All rights reserved.
 //
 
 import SwiftUI
-import SimpleXChat
+import POPOPXChat
 
 private enum YourNetworkSheet: Identifiable {
     case configureOperators
