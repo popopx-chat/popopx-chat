@@ -6,7 +6,7 @@
   - a SwiftUI environment value, which SwiftUI requires as a property of EnvironmentValues;
   - a conformance, required by an API, of a type declared in another module.
 - Members of a type declared in this project are declared in the body of that type, not in an extension.
-- A member of a SimpleXChat type is declared in that type; a value it needs from the app is passed as a parameter.
+- A member of a POPOPXChat type is declared in that type; a value it needs from the app is passed as a parameter.
 - A view modifier is a ViewModifier type applied with `.modifier(_:)`.
 - A custom alignment is a static constant of a non-generic type that uses it.
 - Functions and constants at file scope are kept at file scope.

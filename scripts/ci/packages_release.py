@@ -41,11 +41,11 @@ from typing import Any
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-NODEJS_DIR = "packages/simplex-chat-nodejs"
-TYPES_DIR = "packages/simplex-chat-client/types/typescript"
-MCP_DIR = "packages/simplex-chat-mcp"
+NODEJS_DIR = "packages/popopx-chat-nodejs"
+TYPES_DIR = "packages/popopx-chat-client/types/typescript"
+MCP_DIR = "packages/popopx-chat-mcp"
 MCP_PINNED = ["simplex-chat", "@simplex-chat/types"]
-PYTHON_DIR = "packages/simplex-chat-python"
+PYTHON_DIR = "packages/popopx-chat-python"
 RELEASE_FILE = f"{NODEJS_DIR}/src/release.ts"
 PYTHON_VERSION_FILE = f"{PYTHON_DIR}/src/simplex_chat/_version.py"
 ADDON_SOURCES = [f"{NODEJS_DIR}/binding.gyp", f"{NODEJS_DIR}/cpp"]
@@ -54,12 +54,12 @@ CORE_SOURCES = ["src", "simplex-chat.cabal", "cabal.project"]
 BUILD_CHANGES = {
     "haskell": [
         "src/**",
-        "apps/simplex-chat/**",
-        "apps/simplex-bot/**",
-        "apps/simplex-bot-advanced/**",
-        "apps/simplex-badge-service/**",
-        "apps/simplex-broadcast-bot/**",
-        "apps/simplex-directory-service/**",
+        "apps/popopx-chat/**",
+        "apps/popopx-bot/**",
+        "apps/popopx-bot-advanced/**",
+        "apps/popopx-badge-service/**",
+        "apps/popopx-broadcast-bot/**",
+        "apps/popopx-directory-service/**",
         "tests/**",
         "bots/src/**",
         "simplex-chat.cabal",
@@ -75,20 +75,20 @@ BUILD_CHANGES = {
     "kotlin": ["apps/multiplatform/**", "Dockerfile*", ".github/workflows/build.yml", ".github/actions/**"],
     "ios": ["apps/ios/**", "scripts/ci/ios-stub-libs.sh"],
     "packages": [
-        "packages/simplex-chat-nodejs/**",
-        "packages/simplex-chat-client/types/typescript/**",
-        "packages/simplex-chat-python/**",
+        "packages/popopx-chat-nodejs/**",
+        "packages/popopx-chat-client/types/typescript/**",
+        "packages/popopx-chat-python/**",
         "scripts/ci/package-tests.sh",
     ],
 }
 SCOPE_CHANGES = {
-    "badge-web": ["apps/simplex-badge-service/web/**"],
+    "badge-web": ["apps/popopx-badge-service/web/**"],
     "ci-scripts": ["scripts/ci/packages_release.py", "scripts/ci/test_packages_release.py"],
     "website": ["website/src/js/simplex-lib.jsc", "website/test/**", "website/package.json"],
     "mcp": [
-        "packages/simplex-chat-mcp/**",
-        "packages/simplex-chat-nodejs/**",
-        "packages/simplex-chat-client/types/typescript/**",
+        "packages/popopx-chat-mcp/**",
+        "packages/popopx-chat-nodejs/**",
+        "packages/popopx-chat-client/types/typescript/**",
     ],
 }
 CABAL_FILE = "simplex-chat.cabal"

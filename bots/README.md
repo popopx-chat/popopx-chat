@@ -17,7 +17,7 @@ You can implement SimpleX Chat for these and many other scenarios:
 - customer support - both as a single- and a multi-agent support chat (using SimpleX Chat [business address](https://simplex.chat/docs/business.html) feature),
 - information search and retrieval bots, with or without LLM integration,
 - moderation bots, to moderate your group and communities.
-- broadcast bot, when messages from your trusted users are forwarded to all connected contacts - e.g., see our SimpleX Status bot in the app ([source code](../apps/simplex-broadcast-bot/)),
+- broadcast bot, when messages from your trusted users are forwarded to all connected contacts - e.g., see our SimpleX Status bot in the app ([source code](../apps/popopx-broadcast-bot/)),
 - feedback bot, when messages from connected contacts are forwarded to a preset list of your trusted users,
 - P2P trading bots, connecting buyers and sellers,
 - etc.
@@ -152,7 +152,7 @@ When command is processed, CLI will send a response as a WebSockets message in t
 }
 ```
 
-`corrId` will be the same as you used in commands. Your bot must maintain the map of pending commands responses, and can implement an internal callback or async API for convenience. See our [TypeScript bot library](../packages/simplex-chat-client/typescript/README.md) for an example. TypeScript library sends commands sequentially, via a queue, but your bot can send commands concurrently.
+`corrId` will be the same as you used in commands. Your bot must maintain the map of pending commands responses, and can implement an internal callback or async API for convenience. See our [TypeScript bot library](../packages/popopx-chat-client/typescript/README.md) for an example. TypeScript library sends commands sequentially, via a queue, but your bot can send commands concurrently.
 
 `resp` field is a command-specific response in JSON format. All command responses form a discriminated union with `type` field as a tag.
 
@@ -201,7 +201,7 @@ If you have to run your bot on another machine, you need to secure access to bot
 
 ## Useful bots
 
-- [Broadcast bot](../apps/simplex-broadcast-bot/) (Haskell) - we use it to send [status and release updates](https://status.simplex.chat/status/public).
+- [Broadcast bot](../apps/popopx-broadcast-bot/) (Haskell) - we use it to send [status and release updates](https://status.simplex.chat/status/public).
 - [Moderation bot](https://github.com/NCalex42/simplex-bot) (Java)
 - [Matterbridge bot](https://github.com/UnkwUsr/matterbridge-simplex) (JavaScript)
 - [Nodify](https://nodify.ie) (Low-Code)

@@ -164,8 +164,8 @@ Plánujeme brzy přidat:
 Můžete:
 
 - použít knihovnu SimpleX Chat k integraci funkcí chatu do svých mobilních aplikací.
-- vytvářet chatovací boty a služby v jazyce Haskell - viz [simple](./apps/simplex-bot/) a více [advanced chat bot example](./apps/simplex-bot-advanced/).
-- vytvářet chatovací boty a služby v libovolném jazyce se spuštěným terminálem SimpleX Chat CLI jako lokálním serverem WebSocket. Viz [TypeScript SimpleX Chat client](./packages/simplex-chat-client/) a [JavaScript chat bot example](./packages/simplex-chat-client/typescript/examples/squaring-bot.js).
+- vytvářet chatovací boty a služby v jazyce Haskell - viz [simple](./apps/popopx-bot/) a více [advanced chat bot example](./apps/popopx-bot-advanced/).
+- vytvářet chatovací boty a služby v libovolném jazyce se spuštěným terminálem SimpleX Chat CLI jako lokálním serverem WebSocket. Viz [TypeScript SimpleX Chat client](./packages/popopx-chat-client/) a [JavaScript chat bot example](./packages/popopx-chat-client/typescript/examples/squaring-bot.js).
 - spustit [simplex-chat terminal CLI](./CLI.md) pro provádění jednotlivých příkazů chatu, např. pro odesílání zpráv v rámci provádění shellových skriptů.
 
 Pokud uvažujete o vývoji s platformou SimpleX, obraťte se na nás pro případné rady a podporu.

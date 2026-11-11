@@ -685,7 +685,7 @@ testSeedNeverResurrectsAWithdrawnRow = withServiceStore $ \st -> do
 
 testSeedMatchesWebCatalog :: IO ()
 testSeedMatchesWebCatalog = withServiceStore $ \st -> do
-  src <- T.readFile "apps/simplex-badge-service/web/src/catalog.ts"
+  src <- T.readFile "apps/popopx-badge-service/web/src/catalog.ts"
   (webPrices, webOffers) <- case parseCatalogSource src of
     Nothing -> failWith "could not parse CATALOG out of web/src/catalog.ts -- its shape has changed"
     Just parsed -> pure parsed
@@ -1370,7 +1370,7 @@ testServesBuiltWebApp :: IO ()
 testServesBuiltWebApp = bounded "built web app" $ withServiceStore $ \st -> do
   built <- doesFileExist (builtSiteDir </> "index.html")
   if not built
-    then pendingWith ("no web build at " <> builtSiteDir <> ": run `npm run build` in apps/simplex-badge-service/web")
+    then pendingWith ("no web build at " <> builtSiteDir <> ": run `npm run build` in apps/popopx-badge-service/web")
     else withListener [] True holdMicros st (testServiceConfig builtSiteDir False) $ \_ client -> do
       shell <- webGet client "/"
       statusOf shell `shouldBe` 200

@@ -12,9 +12,9 @@ ARG NODE=24
 FROM node:${NODE}-bookworm-slim AS web
 
 WORKDIR /web
-COPY apps/simplex-badge-service/web/package.json apps/simplex-badge-service/web/package-lock.json ./
+COPY apps/popopx-badge-service/web/package.json apps/popopx-badge-service/web/package-lock.json ./
 RUN npm ci
-COPY apps/simplex-badge-service/web ./
+COPY apps/popopx-badge-service/web ./
 RUN npm run build
 
 FROM ubuntu:${UBUNTU} AS build
@@ -44,7 +44,7 @@ COPY scripts/cabal.project.local.linux ./cabal.project.local
 COPY src ./src
 # Excluding web/ keeps a webapp edit from invalidating this layer and re-running the cabal build,
 # and the binary does not depend on it.
-COPY --exclude=web apps/simplex-badge-service ./apps/simplex-badge-service
+COPY --exclude=web apps/popopx-badge-service ./apps/popopx-badge-service
 
 # The store and build tree are cache mounts rather than layers, so the binary is copied out inside
 # the same RUN because dist-newstyle does not exist in the resulting layer.

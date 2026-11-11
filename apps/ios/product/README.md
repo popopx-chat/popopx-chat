@@ -71,7 +71,7 @@ Establishing, managing, and verifying contacts.
 | Contact verification | Compare security codes out-of-band | `Shared/Views/Chat/VerifyCodeView.swift` |
 | Blocking | Block contacts from sending messages | `Shared/Views/Chat/ChatInfoView.swift` |
 | Incognito mode | Per-contact random profile generation | `Shared/Views/UserSettings/IncognitoHelp.swift` |
-| Bot detection | Identify automated/bot contacts | `SimpleXChat/ChatTypes.swift` |
+| Bot detection | Identify automated/bot contacts | `POPOPXChat/ChatTypes.swift` |
 
 ### 3. Groups
 
@@ -81,7 +81,7 @@ Multi-party encrypted conversations with role-based management.
 |---------|-------------|--------------------|
 | Create groups | Create new group with initial members | `Shared/Views/NewChat/AddGroupView.swift` |
 | Invite members | Invite by individual contact or link | `Shared/Views/Chat/Group/AddGroupMembersView.swift` |
-| Member roles | Owner, admin, moderator, member, observer | `SimpleXChat/ChatTypes.swift` |
+| Member roles | Owner, admin, moderator, member, observer | `POPOPXChat/ChatTypes.swift` |
 | Member admission | Queue-based admission with review workflow | `Shared/Views/Chat/Group/MemberAdmissionView.swift` |
 | Group links | Shareable invite links for groups | `Shared/Views/Chat/Group/GroupLinkView.swift` |
 | Business chat mode | Structured business communication groups | `Shared/Views/Chat/Group/GroupChatInfoView.swift` |
@@ -107,13 +107,13 @@ Encryption, authentication, and privacy controls.
 
 | Feature | Description | Key Source (Swift) |
 |---------|-------------|--------------------|
-| E2E encryption | Double-ratchet encryption for all messages | `SimpleXChat/API.swift` |
-| Post-quantum encryption | Optional PQ key exchange for direct chats | `SimpleXChat/ChatTypes.swift` |
+| E2E encryption | Double-ratchet encryption for all messages | `POPOPXChat/API.swift` |
+| Post-quantum encryption | Optional PQ key exchange for direct chats | `POPOPXChat/ChatTypes.swift` |
 | Local authentication | Face ID, Touch ID, or app passcode lock | `Shared/Views/LocalAuth/LocalAuthView.swift` |
 | Hidden profiles | Password-protected profiles invisible in UI | `Shared/Views/UserSettings/HiddenProfileView.swift` |
 | Database encryption | AES encryption of local SQLite database | `Shared/Views/Database/DatabaseEncryptionView.swift` |
 | Screen privacy | Blur app content when in app switcher | `Shared/Views/UserSettings/PrivacySettings.swift` |
-| Encrypted file storage | Local files encrypted at rest | `SimpleXChat/CryptoFile.swift` |
+| Encrypted file storage | Local files encrypted at rest | `POPOPXChat/CryptoFile.swift` |
 | Delivery receipts control | Toggle delivery/read receipts per contact/group | `Shared/Views/UserSettings/SetDeliveryReceiptsView.swift` |
 
 ### 6. User Management
@@ -149,7 +149,7 @@ Visual appearance and UI preferences.
 |---------|-------------|--------------------|
 | Themes | Light, dark, SimpleX, black, and custom themes | `Shared/Theme/ThemeManager.swift` |
 | Wallpapers | Preset and custom chat wallpapers | `Shared/Views/Helpers/ChatWallpaper.swift` |
-| Chat bubble styling | Customize message bubble appearance | `SimpleXChat/Theme/ThemeTypes.swift` |
+| Chat bubble styling | Customize message bubble appearance | `POPOPXChat/Theme/ThemeTypes.swift` |
 | One-handed UI mode | Compact layout for single-hand use | `Shared/Views/ChatList/OneHandUICard.swift` |
 | Language selection | In-app language override | `Shared/Views/UserSettings/AppearanceSettings.swift` |
 
@@ -161,7 +161,7 @@ Import, export, encryption, and storage management.
 |---------|-------------|--------------------|
 | Export/import profiles | Full database export and import | `Shared/Views/Database/DatabaseView.swift` |
 | Database encryption | Encrypt/decrypt local database with passphrase | `Shared/Views/Database/DatabaseEncryptionView.swift` |
-| Local file encryption | Encrypt stored media and attachments | `SimpleXChat/CryptoFile.swift` |
+| Local file encryption | Encrypt stored media and attachments | `POPOPXChat/CryptoFile.swift` |
 | Storage breakdown | View storage usage by category | `Shared/Views/UserSettings/StorageView.swift` |
 | Device-to-device migration | Migrate full profile between iOS devices | `Shared/Views/Migration/MigrateFromDevice.swift` |
 
@@ -254,5 +254,5 @@ UserPicker
 - [spec/README.md](../spec/README.md) -- Technical specification overview
 - [spec/architecture.md](../spec/architecture.md) -- Architecture specification
 - Haskell core: `../../src/Simplex/Chat/Controller.hs`, `../../src/Simplex/Chat/Types.hs`
-- Swift model: `Shared/Model/ChatModel.swift`, `SimpleXChat/ChatTypes.swift`
-- Swift API bridge: `SimpleXChat/API.swift`, `Shared/Model/SimpleXAPI.swift`
+- Swift model: `Shared/Model/ChatModel.swift`, `POPOPXChat/ChatTypes.swift`
+- Swift API bridge: `POPOPXChat/API.swift`, `Shared/Model/SimpleXAPI.swift`

@@ -317,8 +317,8 @@ Planujemy dodać:
 Możesz:
 
 - korzystać z biblioteki SimpleX Chat w celu zintegrowania funkcji czatu z aplikacjami mobilnymi.
-- tworzyć boty i usługi czatu w języku Haskell - zobacz [prosty](./apps/simplex-bot/) i bardziej [zaawansowany przykład bota czatu](./apps/simplex-bot-advanced/).
-- tworzenie chat botów i usług w dowolnym języku z wykorzystaniem terminala CLI SimpleX Chat jako lokalnego serwera WebSocket. Zobacz [TypeScript SimpleX Chat client](./packages/simplex-chat-client/) i [JavaScript chat bot example](./packages/simplex-chat-client/typescript/examples/squaring-bot.js).
+- tworzyć boty i usługi czatu w języku Haskell - zobacz [prosty](./apps/popopx-bot/) i bardziej [zaawansowany przykład bota czatu](./apps/popopx-bot-advanced/).
+- tworzenie chat botów i usług w dowolnym języku z wykorzystaniem terminala CLI SimpleX Chat jako lokalnego serwera WebSocket. Zobacz [TypeScript SimpleX Chat client](./packages/popopx-chat-client/) i [JavaScript chat bot example](./packages/popopx-chat-client/typescript/examples/squaring-bot.js).
 - uruchomić [simplex-chat w terminal ](./CLI.md), aby wykonywać poszczególne polecenia czatu, np. wysyłać wiadomości w ramach wykonywania skryptu powłoki.
 
 Jeśli chcesz rozwijać platformę SimpleX, skontaktuj się z nami, aby uzyskać porady i wsparcie.

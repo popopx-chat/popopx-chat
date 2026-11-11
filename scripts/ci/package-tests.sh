@@ -3,8 +3,8 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/../.."
-nodejs=packages/simplex-chat-nodejs
-python_package=packages/simplex-chat-python
+nodejs=packages/popopx-chat-nodejs
+python_package=packages/popopx-chat-python
 python=$(command -v python3 || command -v python)
 temp=${RUNNER_TEMP:-$(mktemp -d)}
 
@@ -14,7 +14,7 @@ usage() {
 }
 
 build_package() {
-  (cd packages/simplex-chat-client/types/typescript && npm install --no-audit --no-fund && npx tsc)
+  (cd packages/popopx-chat-client/types/typescript && npm install --no-audit --no-fund && npx tsc)
   (cd "$nodejs" && npm install --ignore-scripts --no-save --no-audit --no-fund ../simplex-chat-client/types/typescript)
   if [ -n "${1:-}" ]; then
     (cd "$nodejs" && npx --yes node-gyp rebuild)

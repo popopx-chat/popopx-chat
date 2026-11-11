@@ -16,7 +16,7 @@ The `product/`, `spec/`, and source layers form a persistent, structured represe
 |-------|----------|-------------------|
 | `product/` | Capabilities, user flows, views, business rules, glossary | **What** does the system do and why? |
 | `spec/` | Technical design, API contracts, database schema, service internals | **How** is it organized technically? |
-| `Shared/`, `SimpleXChat/`, `SimpleX NSE/` | Executable Swift code (iOS app) | What does it **execute**? |
+| `Shared/`, `POPOPXChat/`, `POPOPX NSE/` | Executable Swift code (iOS app) | What does it **execute**? |
 | `../../src/Simplex/Chat/` | Haskell core (chat logic, protocol, database) | What does the **core** execute? |
 
 Each layer links to the next:
@@ -196,14 +196,14 @@ After completing all changes (code + documentation), you MUST run an adversarial
 | Shared/Model/NtfManager.swift | spec/services/notifications.md | product/flows/messaging.md |
 | Shared/Model/BGManager.swift | spec/services/notifications.md | product/flows/messaging.md |
 | Shared/Theme/ThemeManager.swift | spec/services/theme.md | product/views/settings.md |
-| SimpleXChat/ChatTypes.swift | spec/state.md, spec/api.md | product/glossary.md |
-| SimpleXChat/APITypes.swift | spec/api.md | product/concepts.md |
-| SimpleXChat/CallTypes.swift | spec/services/calls.md | product/flows/calling.md |
-| SimpleXChat/FileUtils.swift | spec/services/files.md | product/flows/file-transfer.md |
-| SimpleXChat/Notifications.swift | spec/services/notifications.md | product/flows/messaging.md |
-| SimpleX NSE/NotificationService.swift | spec/services/notifications.md | product/flows/messaging.md |
+| POPOPXChat/ChatTypes.swift | spec/state.md, spec/api.md | product/glossary.md |
+| POPOPXChat/APITypes.swift | spec/api.md | product/concepts.md |
+| POPOPXChat/CallTypes.swift | spec/services/calls.md | product/flows/calling.md |
+| POPOPXChat/FileUtils.swift | spec/services/files.md | product/flows/file-transfer.md |
+| POPOPXChat/Notifications.swift | spec/services/notifications.md | product/flows/messaging.md |
+| POPOPX NSE/NotificationService.swift | spec/services/notifications.md | product/flows/messaging.md |
 | Shared/Views/Chat/ChatItemsMerger.swift | spec/client/chat-view.md | product/views/chat.md |
-| SimpleX SE/ShareAPI.swift | spec/api.md | product/flows/messaging.md |
+| POPOPX SE/ShareAPI.swift | spec/api.md | product/flows/messaging.md |
 
 ### Haskell Core Sources (at `../../src/Simplex/Chat/` relative to `apps/ios/`)
 

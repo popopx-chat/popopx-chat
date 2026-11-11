@@ -80,15 +80,15 @@ The reduced build runs one Linux job, build-linux (ubuntu-22.04 x86_64), for eve
 #### packages
 
 - Globs:
-  - packages/simplex-chat-nodejs/**
-  - packages/simplex-chat-client/types/typescript/**
-  - packages/simplex-chat-python/**
+  - packages/popopx-chat-nodejs/**
+  - packages/popopx-chat-client/types/typescript/**
+  - packages/popopx-chat-python/**
   - scripts/ci/package-tests.sh
 - CI, in build-linux:
   - Node 22 and Python 3.12 (steps "Setup Node.js" and "Setup Python");
   - libsimplex, when `CORE_SOURCES` of packages_release.py also changed (step "Build library");
   - `package-tests.sh build linux-x86_64` and `package-tests.sh test` (step "Package tests (pull request)").
-- With libsimplex built, SIMPLEX_LIBS_DIR is set to it for the nodejs tests; the python tests run with it unset (package-tests.sh). Without SIMPLEX_LIBS_DIR, the pinned release libraries are downloaded (packages/simplex-chat-nodejs/src/libs.ts).
+- With libsimplex built, SIMPLEX_LIBS_DIR is set to it for the nodejs tests; the python tests run with it unset (package-tests.sh). Without SIMPLEX_LIBS_DIR, the pinned release libraries are downloaded (packages/popopx-chat-nodejs/src/libs.ts).
 - Local:
   ```sh
   scripts/ci/package-tests.sh build linux-x86_64
@@ -97,12 +97,12 @@ The reduced build runs one Linux job, build-linux (ubuntu-22.04 x86_64), for eve
 
 #### badge-web
 
-- Globs: apps/simplex-badge-service/web/**. These paths are also in the core globs (apps/simplex-badge-service/**), and web/src/catalog.ts is read by core tests (tests/Bots/BadgeService/CatalogTests.hs, WebTests.hs).
+- Globs: apps/popopx-badge-service/web/**. These paths are also in the core globs (apps/popopx-badge-service/**), and web/src/catalog.ts is read by core tests (tests/Bots/BadgeService/CatalogTests.hs, WebTests.hs).
 - CI, in build-linux: core build and tests, then `scope-tests.sh badge-web` (step "Test changed scopes").
 - Selected core tests: `/SimpleX badge service/` and `/SimpleX badge service e2e/`.
 - Local:
   ```sh
-  cd apps/simplex-badge-service/web
+  cd apps/popopx-badge-service/web
   npm ci
   npm test
   ```
@@ -133,16 +133,16 @@ The reduced build runs one Linux job, build-linux (ubuntu-22.04 x86_64), for eve
 #### mcp
 
 - Globs:
-  - packages/simplex-chat-mcp/**
-  - packages/simplex-chat-nodejs/**
-  - packages/simplex-chat-client/types/typescript/**
+  - packages/popopx-chat-mcp/**
+  - packages/popopx-chat-nodejs/**
+  - packages/popopx-chat-client/types/typescript/**
 - CI:
   - in build-linux: `scope-tests.sh mcp` (step "Test changed scopes"):
     - the types package and the Node.js library built from the branch without the add-on, as package-tests.sh builds them;
     - `npm ci`, then both installed into the MCP package with `npm install --no-save`;
     - `npx tsc` and `npx tsc -p test/tsconfig.json --noEmit`;
     - `npm test`, the unit tests;
-    - `npm run test:e2e`, the end-to-end tests. They download libsimplex and the add-on pinned in packages/simplex-chat-nodejs/src/release.ts, and smp-server and xftp-server of the simplexmq release in test/e2e/smpServer.ts;
+    - `npm run test:e2e`, the end-to-end tests. They download libsimplex and the add-on pinned in packages/popopx-chat-nodejs/src/release.ts, and smp-server and xftp-server of the simplexmq release in test/e2e/smpServer.ts;
   - before a publication: the package with its published dependencies, type-checked and unit tested in job `publish` of build.yml (docs/contributing/RELEASES.md, "MCP server release").
 - Local: `scripts/ci/scope-tests.sh mcp`.
 
@@ -151,12 +151,12 @@ The reduced build runs one Linux job, build-linux (ubuntu-22.04 x86_64), for eve
 | Scope | Paths | CI |
 |---|---|---|
 | ios | apps/ios/** | compile only |
-| types package | packages/simplex-chat-client/types/typescript/** | compile only |
-| ts-client | packages/simplex-chat-client/typescript/** | - |
-| webrtc | packages/simplex-chat-webrtc/** | - |
-| calculator-bot | apps/simplex-calculator-bot/** | - |
-| support-bot | apps/simplex-support-bot/** | - |
-| support-bot-light | apps/simplex-support-bot-light/** | - |
+| types package | packages/popopx-chat-client/types/typescript/** | compile only |
+| ts-client | packages/popopx-chat-client/typescript/** | - |
+| webrtc | packages/popopx-chat-webrtc/** | - |
+| calculator-bot | apps/popopx-calculator-bot/** | - |
+| support-bot | apps/popopx-support-bot/** | - |
+| support-bot-light | apps/popopx-support-bot-light/** | - |
 | prices | scripts/prices/** | - |
 | nft | eth/nft/** | - |
 

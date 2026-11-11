@@ -182,13 +182,13 @@ Complete group management in SimpleX Chat iOS: creating groups, inviting members
 
 | Type | Location | Description |
 |------|----------|-------------|
-| `GroupInfo` | `SimpleXChat/ChatTypes.swift` | Full group model: ID, profile, membership, preferences, business chat info |
-| `GroupProfile` | `SimpleXChat/ChatTypes.swift` | Name, full name, image, description, preferences |
-| `GroupMember` | `SimpleXChat/ChatTypes.swift` | Member model: role, status, profile, connection info |
-| `GroupMemberRole` | `SimpleXChat/ChatTypes.swift` | `.owner`, `.admin`, `.moderator`, `.member`, `.observer`, `.relay` |
-| `GroupMemberStatus` | `SimpleXChat/ChatTypes.swift` | Member lifecycle: `.invited`, `.accepted`, `.connected`, `.complete`, etc. |
+| `GroupInfo` | `POPOPXChat/ChatTypes.swift` | Full group model: ID, profile, membership, preferences, business chat info |
+| `GroupProfile` | `POPOPXChat/ChatTypes.swift` | Name, full name, image, description, preferences |
+| `GroupMember` | `POPOPXChat/ChatTypes.swift` | Member model: role, status, profile, connection info |
+| `GroupMemberRole` | `POPOPXChat/ChatTypes.swift` | `.owner`, `.admin`, `.moderator`, `.member`, `.observer`, `.relay` |
+| `GroupMemberStatus` | `POPOPXChat/ChatTypes.swift` | Member lifecycle: `.invited`, `.accepted`, `.connected`, `.complete`, etc. |
 | `GroupLink` | `Shared/Model/AppAPITypes.swift` | Group link with URI, member role, and short link data |
-| `BusinessChatInfo` | `SimpleXChat/ChatTypes.swift` | Business chat metadata for commercial group chats |
+| `BusinessChatInfo` | `POPOPXChat/ChatTypes.swift` | Business chat metadata for commercial group chats |
 | `JoinGroupResult` | `Shared/Model/SimpleXAPI.swift` | `.joined(groupInfo)`, `.invitationRemoved`, `.groupNotFound` |
 | `GMember` | `Shared/Views/Chat/Group/` | View-layer wrapper around `GroupMember` for list display |
 
@@ -219,7 +219,7 @@ Complete group management in SimpleX Chat iOS: creating groups, inviting members
 | `Shared/Views/Chat/Group/SecondaryChatView.swift` | Secondary chat view for member support |
 | `Shared/Model/SimpleXAPI.swift` | All group API functions |
 | `Shared/Model/AppAPITypes.swift` | `GroupLink`, `ConnectionPlan` |
-| `SimpleXChat/ChatTypes.swift` | `GroupInfo`, `GroupProfile`, `GroupMember`, `GroupMemberRole` |
+| `POPOPXChat/ChatTypes.swift` | `GroupInfo`, `GroupProfile`, `GroupMember`, `GroupMemberRole` |
 
 ## Related Specifications
 

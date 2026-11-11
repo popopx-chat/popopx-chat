@@ -1,6 +1,6 @@
 # SimpleX Chat iOS -- Database & Storage
 
-**Source:** [`FileUtils.swift`](../SimpleXChat/FileUtils.swift)
+**Source:** [`FileUtils.swift`](../POPOPXChat/FileUtils.swift)
 
 > Technical specification for the database architecture, encryption, file storage, and export/import functionality.
 >
@@ -37,7 +37,7 @@ Both databases are initialized and migrated via the C FFI function `chat_migrate
 
 ## 2. Database Files & Paths
 
-### [Path Resolution](../SimpleXChat/FileUtils.swift#L63-L73) (FileUtils.swift)
+### [Path Resolution](../POPOPXChat/FileUtils.swift#L63-L73) (FileUtils.swift)
 
 ```swift
 let DB_FILE_PREFIX = "simplex_v1"
@@ -54,7 +54,7 @@ func getAppDatabasePath() -> URL {
 // Agent: {container}/simplex_v1_agent.db
 ```
 
-### [File Constants](../SimpleXChat/FileUtils.swift#L38-L44)
+### [File Constants](../POPOPXChat/FileUtils.swift#L38-L44)
 
 ```swift
 let CHAT_DB: String = "_chat.db"
@@ -65,7 +65,7 @@ private let AGENT_DB_BAK: String = "_agent.db.bak"
 
 ### Container Locations
 
-See [`getDocumentsDirectory()`](../SimpleXChat/FileUtils.swift#L47) and [`getGroupContainerDirectory()`](../SimpleXChat/FileUtils.swift#L52).
+See [`getDocumentsDirectory()`](../POPOPXChat/FileUtils.swift#L47) and [`getGroupContainerDirectory()`](../POPOPXChat/FileUtils.swift#L52).
 
 | Container | Path | Used When |
 |-----------|------|-----------|
@@ -76,7 +76,7 @@ The container choice is stored in `dbContainerGroupDefault` (`GroupDefaults`).
 
 ### Backup Exclusion
 
-`isExcludedFromBackup` is set on both containers by [`excludeAppDataFromBackup()`](../SimpleXChat/FileUtils.swift#L69-L79), which is called from [`prepareForLaunch()`](../Shared/AppDelegate.swift#L124-L127) on each app launch. Files that the app, NSE and SE create or replace in these directories later are excluded as well.
+`isExcludedFromBackup` is set on both containers by [`excludeAppDataFromBackup()`](../POPOPXChat/FileUtils.swift#L69-L79), which is called from [`prepareForLaunch()`](../Shared/AppDelegate.swift#L124-L127) on each app launch. Files that the app, NSE and SE create or replace in these directories later are excluded as well.
 
 ---
 
@@ -187,7 +187,7 @@ The encryption key is stored in the iOS Keychain via `kcDatabasePassword`:
 │   └── ...
 ```
 
-### [File Size Constants](../SimpleXChat/FileUtils.swift#L18-L36) (FileUtils.swift)
+### [File Size Constants](../POPOPXChat/FileUtils.swift#L18-L36) (FileUtils.swift)
 
 ```swift
 public let MAX_IMAGE_SIZE: Int64 = 261_120        // 255 KB -- inline image compression target
@@ -208,7 +208,7 @@ When `apiSetEncryptLocalFiles(enable: true)` is set, files stored on device are 
 - Each file gets a unique key and nonce stored alongside the file reference
 - The `CryptoFile` type wraps `(filePath: String, cryptoArgs: CryptoFileArgs?)` where `CryptoFileArgs` contains `(fileKey: String, fileNonce: String)`
 
-### [File Path Helpers](../SimpleXChat/FileUtils.swift#L219-L221)
+### [File Path Helpers](../POPOPXChat/FileUtils.swift#L219-L221)
 
 ```swift
 public func getDocumentsDirectory() -> URL      // Standard documents dir
@@ -218,14 +218,14 @@ func getTempFilesDirectory() -> URL             // {appDir}/temp_files/
 func getWallpaperDirectory() -> URL             // {appDir}/assets/wallpapers/
 ```
 
-See also [`saveFile()`](../SimpleXChat/FileUtils.swift#L226), [`removeFile()`](../SimpleXChat/FileUtils.swift#L243), and [`getMaxFileSize()`](../SimpleXChat/FileUtils.swift#L276).
+See also [`saveFile()`](../POPOPXChat/FileUtils.swift#L226), [`removeFile()`](../POPOPXChat/FileUtils.swift#L243), and [`getMaxFileSize()`](../POPOPXChat/FileUtils.swift#L276).
 
-### [Cleanup](../SimpleXChat/FileUtils.swift#L86-L116)
+### [Cleanup](../POPOPXChat/FileUtils.swift#L86-L116)
 
-- Files are deleted when their associated `ChatItem` is deleted. See [`cleanupFile()`](../SimpleXChat/FileUtils.swift#L267) and [`cleanupDirectFile()`](../SimpleXChat/FileUtils.swift#L260).
+- Files are deleted when their associated `ChatItem` is deleted. See [`cleanupFile()`](../POPOPXChat/FileUtils.swift#L267) and [`cleanupDirectFile()`](../POPOPXChat/FileUtils.swift#L260).
 - Timed message expiry triggers file deletion
-- [`deleteAppDatabaseAndFiles()`](../SimpleXChat/FileUtils.swift#L86) removes all databases, files, temp files, and wallpapers
-- [`deleteAppFiles()`](../SimpleXChat/FileUtils.swift#L108) removes only the files directory (preserving databases)
+- [`deleteAppDatabaseAndFiles()`](../POPOPXChat/FileUtils.swift#L86) removes all databases, files, temp files, and wallpapers
+- [`deleteAppFiles()`](../POPOPXChat/FileUtils.swift#L108) removes only the files directory (preserving databases)
 
 ---
 
@@ -295,9 +295,9 @@ The NSE checks this flag to determine whether to process notifications (it avoid
 
 | File | Path |
 |------|------|
-| File utilities & constants | [`SimpleXChat/FileUtils.swift`](../SimpleXChat/FileUtils.swift) |
+| File utilities & constants | [`POPOPXChat/FileUtils.swift`](../POPOPXChat/FileUtils.swift) |
 | Database management UI | [`Shared/Views/Database/DatabaseView.swift`](../Shared/Views/Database/DatabaseView.swift) |
 | Encryption settings UI | [`Shared/Views/Database/DatabaseEncryptionView.swift`](../Shared/Views/Database/DatabaseEncryptionView.swift) |
-| C FFI (migration, file ops) | `SimpleXChat/SimpleX.h` |
+| C FFI (migration, file ops) | `POPOPXChat/POPOPX.h` |
 | Haskell store root | `../../src/Simplex/Chat/Store/` |
 | Haskell migrations | `../../src/Simplex/Chat/Store/SQLite/Migrations/` |

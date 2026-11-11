@@ -353,7 +353,7 @@ When `chat.chatInfo.groupInfo?.useRelays == true` (channel mode), compose behave
 - Share Extension ([`ShareAPI.swift`](../../SimpleX%20SE/ShareAPI.swift#L71)) uses the same `sendAsGroup` expression
 
 ### Subscriber Compose
-- [`userCantSendReason`](../../SimpleXChat/ChatTypes.swift#L1566) returns `("you are subscriber", nil)` when `useRelays && memberRole == .observer`
+- [`userCantSendReason`](../../POPOPXChat/ChatTypes.swift#L1566) returns `("you are subscriber", nil)` when `useRelays && memberRole == .observer`
 - This check is evaluated after `memberPending` (which takes priority) but replaces the `observer` message
 - Compose field is disabled; tapping shows "You can't send messages!" alert with no body text
 

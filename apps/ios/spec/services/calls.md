@@ -5,7 +5,7 @@
 > Related specs: [Architecture](../architecture.md) | [API Reference](../api.md) | [Notifications](notifications.md) | [README](../README.md)
 > Related product: [Chat View](../../product/views/chat.md)
 
-**Source:** [`CallController.swift`](../../Shared/Views/Call/CallController.swift) | [`WebRTCClient.swift`](../../Shared/Views/Call/WebRTCClient.swift) | [`ActiveCallView.swift`](../../Shared/Views/Call/ActiveCallView.swift) | [`CallTypes.swift`](../../SimpleXChat/CallTypes.swift)
+**Source:** [`CallController.swift`](../../Shared/Views/Call/CallController.swift) | [`WebRTCClient.swift`](../../Shared/Views/Call/WebRTCClient.swift) | [`ActiveCallView.swift`](../../Shared/Views/Call/ActiveCallView.swift) | [`CallTypes.swift`](../../POPOPXChat/CallTypes.swift)
 
 ---
 
@@ -281,9 +281,9 @@ The `WebRTCClient` observes `AVAudioSession.routeChangeNotification` to handle:
 
 ---
 
-## [8. Key Types](../../SimpleXChat/CallTypes.swift#L1-L115)
+## [8. Key Types](../../POPOPXChat/CallTypes.swift#L1-L115)
 
-### [RcvCallInvitation](../../SimpleXChat/CallTypes.swift#L45-L71)
+### [RcvCallInvitation](../../POPOPXChat/CallTypes.swift#L45-L71)
 
 ```swift
 struct RcvCallInvitation {
@@ -296,7 +296,7 @@ struct RcvCallInvitation {
 }
 ```
 
-### [CallType](../../SimpleXChat/CallTypes.swift#L74-L82)
+### [CallType](../../POPOPXChat/CallTypes.swift#L74-L82)
 
 ```swift
 struct CallType {
@@ -310,7 +310,7 @@ enum CallMediaType: String {
 }
 ```
 
-### [WebRTCCallOffer](../../SimpleXChat/CallTypes.swift#L14-L22) / [WebRTCSession](../../SimpleXChat/CallTypes.swift#L25-L33)
+### [WebRTCCallOffer](../../POPOPXChat/CallTypes.swift#L14-L22) / [WebRTCSession](../../POPOPXChat/CallTypes.swift#L25-L33)
 
 ```swift
 struct WebRTCCallOffer {
@@ -324,7 +324,7 @@ struct WebRTCSession {
 }
 ```
 
-### [WebRTCExtraInfo](../../SimpleXChat/CallTypes.swift#L36-L45)
+### [WebRTCExtraInfo](../../POPOPXChat/CallTypes.swift#L36-L45)
 
 ```swift
 struct WebRTCExtraInfo {
@@ -387,5 +387,5 @@ When `ChatModel.activeCallViewIsCollapsed == true`:
 | [WebRTC client](../../Shared/Views/Call/WebRTCClient.swift) | `Shared/Views/Call/WebRTCClient.swift` | 1139 |
 | [Active call UI](../../Shared/Views/Call/ActiveCallView.swift) | `Shared/Views/Call/ActiveCallView.swift` | 528 |
 | WebRTC helpers | `Shared/Views/Call/WebRTC.swift` | |
-| [Call types (Swift)](../../SimpleXChat/CallTypes.swift) | `SimpleXChat/CallTypes.swift` | 115 |
+| [Call types (Swift)](../../POPOPXChat/CallTypes.swift) | `POPOPXChat/CallTypes.swift` | 115 |
 | Call types (Haskell) | `../../src/Simplex/Chat/Call.hs` | |

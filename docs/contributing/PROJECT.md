@@ -11,7 +11,7 @@ SimpleX Chat is a decentralized, privacy-focused messaging platform with **no us
 - **Terminal CLI**: `src/Simplex/Chat/Terminal/`
 - **Mobile apps**: `apps/multiplatform/` (Kotlin Compose Multiplatform for Android/Desktop)
 - **iOS app**: `apps/ios/` (SwiftUI)
-- **Bot framework**: `bots/`, `packages/simplex-chat-nodejs/`
+- **Bot framework**: `bots/`, `packages/popopx-chat-nodejs/`
 - **Website**: `website/` (11ty + Tailwind CSS)
 
 ## Specifications

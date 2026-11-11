@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-# Copies generated iOS assets into SimpleXAssets.xcassets.
+# Copies generated iOS assets into POPOPXAssets.xcassets.
 # Intended to run as an Xcode Run Script build phase.
 # Skips silently if SIMPLEX_ASSETS is not in SWIFT_ACTIVE_COMPILATION_CONDITIONS
 # or if the source directory is not found.
@@ -22,7 +22,7 @@ if [ -n "${SWIFT_ACTIVE_COMPILATION_CONDITIONS:-}" ]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-IOS_DIR="$SCRIPT_DIR/../../apps/ios/Shared/SimpleXAssets.xcassets"
+IOS_DIR="$SCRIPT_DIR/../../apps/ios/Shared/POPOPXAssets.xcassets"
 
 ASSETS_ROOT="${1:-${SIMPLEX_ASSETS_DIR:-}}"
 if [ -z "$ASSETS_ROOT" ]; then

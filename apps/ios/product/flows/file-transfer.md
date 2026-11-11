@@ -160,14 +160,14 @@ File and media sharing in SimpleX Chat iOS. Small files are sent inline within S
 
 | Type | Location | Description |
 |------|----------|-------------|
-| `CryptoFile` | `SimpleXChat/CryptoFile.swift` | File path with optional encryption key and nonce for local AES encryption |
-| `MsgContent.image` | `SimpleXChat/ChatTypes.swift` | `.image(text: String, image: String)` -- text caption + base64 thumbnail |
-| `MsgContent.video` | `SimpleXChat/ChatTypes.swift` | `.video(text: String, image: String, duration: Int)` -- caption + thumbnail + duration |
-| `MsgContent.voice` | `SimpleXChat/ChatTypes.swift` | `.voice(text: String, duration: Int)` -- empty text + duration in seconds |
-| `MsgContent.file` | `SimpleXChat/ChatTypes.swift` | `.file(String)` -- file name |
-| `ComposedMessage` | `SimpleXChat/APITypes.swift` | Outgoing message with fileSource, quotedItemId, msgContent, mentions |
-| `FileTransferMeta` | `SimpleXChat/ChatTypes.swift` | Metadata for an ongoing file transfer |
-| `RcvFileTransfer` | `SimpleXChat/ChatTypes.swift` | State of a file being received |
+| `CryptoFile` | `POPOPXChat/CryptoFile.swift` | File path with optional encryption key and nonce for local AES encryption |
+| `MsgContent.image` | `POPOPXChat/ChatTypes.swift` | `.image(text: String, image: String)` -- text caption + base64 thumbnail |
+| `MsgContent.video` | `POPOPXChat/ChatTypes.swift` | `.video(text: String, image: String, duration: Int)` -- caption + thumbnail + duration |
+| `MsgContent.voice` | `POPOPXChat/ChatTypes.swift` | `.voice(text: String, duration: Int)` -- empty text + duration in seconds |
+| `MsgContent.file` | `POPOPXChat/ChatTypes.swift` | `.file(String)` -- file name |
+| `ComposedMessage` | `POPOPXChat/APITypes.swift` | Outgoing message with fileSource, quotedItemId, msgContent, mentions |
+| `FileTransferMeta` | `POPOPXChat/ChatTypes.swift` | Metadata for an ongoing file transfer |
+| `RcvFileTransfer` | `POPOPXChat/ChatTypes.swift` | State of a file being received |
 | `MigrationFileLinkData` | Used for standalone file transfers during database migration |
 
 ## Error Cases
@@ -186,9 +186,9 @@ File and media sharing in SimpleX Chat iOS. Small files are sent inline within S
 
 | File | Purpose |
 |------|---------|
-| `SimpleXChat/FileUtils.swift` | File size constants, path utilities, database file management |
-| `SimpleXChat/CryptoFile.swift` | Local file encryption/decryption with AES |
-| `SimpleXChat/ImageUtils.swift` | Image compression and thumbnail generation |
+| `POPOPXChat/FileUtils.swift` | File size constants, path utilities, database file management |
+| `POPOPXChat/CryptoFile.swift` | Local file encryption/decryption with AES |
+| `POPOPXChat/ImageUtils.swift` | Image compression and thumbnail generation |
 | `Shared/Views/Chat/ComposeMessage/ComposeView.swift` | File/media attachment selection and composition |
 | `Shared/Views/Chat/ComposeMessage/ComposeImageView.swift` | Image preview in compose area |
 | `Shared/Views/Chat/ComposeMessage/ComposeFileView.swift` | File preview in compose area |

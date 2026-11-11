@@ -107,11 +107,11 @@ The full walkthrough is in
 [`web/README.md`](web/README.md#running-the-real-service-against-this-build). Short version:
 
 ```
-cd apps/simplex-badge-service/web && npm install && npm run build && cd ../../..
-cp apps/simplex-badge-service/badge_service.ini.example apps/simplex-badge-service/badge_service.ini
+cd apps/popopx-badge-service/web && npm install && npm run build && cd ../../..
+cp apps/popopx-badge-service/badge_service.ini.example apps/popopx-badge-service/badge_service.ini
 cabal run simplex-badge-service -- \
   --issuer-key-idx IDX --issuer-secret SECRET \
-  --service-config apps/simplex-badge-service/badge_service.ini
+  --service-config apps/popopx-badge-service/badge_service.ini
 ```
 
 `IDX` and `SECRET` must be one of the issuer keys clients already ship, not a fresh

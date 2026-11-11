@@ -16,11 +16,11 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
 # The linker resolves symbols by name only, so the stub signatures are not checked.
-sed -n 's/^extern [^(]*[ *]\([a-z_]*\)(.*/\1/p' "$IOS_DIR/POPOPXChat/SimpleX.h" "$IOS_DIR/POPOPXChat/hs_init.c" \
+sed -n 's/^extern [^(]*[ *]\([a-z_]*\)(.*/\1/p' "$IOS_DIR/POPOPXChat/POPOPX.h" "$IOS_DIR/POPOPXChat/hs_init.c" \
     | sort -u | sed 's/.*/void &(void) {}/' > "$tmp/stubs.c"
 
 if [ ! -s "$tmp/stubs.c" ]; then
-    echo "Error: no extern functions found in SimpleX.h and hs_init.c" >&2
+    echo "Error: no extern functions found in POPOPX.h and hs_init.c" >&2
     exit 1
 fi
 

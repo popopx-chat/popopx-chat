@@ -1,6 +1,6 @@
 # SimpleX Chat iOS -- State Management
 
-**Source:** [`ChatModel.swift`](../Shared/Model/ChatModel.swift#L1-L1404) | [`ChatTypes.swift`](../SimpleXChat/ChatTypes.swift#L1-L5377)
+**Source:** [`ChatModel.swift`](../Shared/Model/ChatModel.swift#L1-L1404) | [`ChatTypes.swift`](../POPOPXChat/ChatTypes.swift#L1-L5377)
 
 > Technical specification for the app's state architecture: ChatModel, ItemsModel, Chat, ChatInfo, and preference storage.
 >
@@ -311,7 +311,7 @@ Represents a single conversation in the chat list. Each `Chat` is an independent
 | `chatStats` | `ChatStats` | Unread counts and min unread item ID | [L1304](../Shared/Model/ChatModel.swift#L1304) |
 | `created` | `Date` | Creation timestamp | [L1305](../Shared/Model/ChatModel.swift#L1305) |
 
-### [ChatStats](../SimpleXChat/ChatTypes.swift#L1881-L1903)
+### [ChatStats](../POPOPXChat/ChatTypes.swift#L1881-L1903)
 
 ```swift
 struct ChatStats: Decodable, Hashable {
@@ -334,10 +334,10 @@ struct ChatStats: Decodable, Hashable {
 
 ---
 
-## 7. [ChatInfo](../SimpleXChat/ChatTypes.swift#L1374-L1856)
+## 7. [ChatInfo](../POPOPXChat/ChatTypes.swift#L1374-L1856)
 
 **Enum**: `public enum ChatInfo: Identifiable, Decodable, NamedChat, Hashable`
-**Source**: [`SimpleXChat/ChatTypes.swift`](../SimpleXChat/ChatTypes.swift#L1374)
+**Source**: [`POPOPXChat/ChatTypes.swift`](../POPOPXChat/ChatTypes.swift#L1374)
 
 Represents the type and metadata of a conversation:
 
@@ -382,26 +382,26 @@ A **channel** is a group with `groupInfo.useRelays == true`. These types support
 
 | Type | Field | Type | Description | Line |
 |------|-------|------|-------------|------|
-| `User` | `userChatRelay` | `Bool` | Whether user acts as a chat relay | [L46](../SimpleXChat/ChatTypes.swift#L46) |
-| `GroupInfo` | `useRelays` | `Bool` | Whether group uses relay infrastructure (channel mode) | [L2343](../SimpleXChat/ChatTypes.swift#L2343) |
-| `GroupInfo` | `relayOwnStatus` | `RelayStatus?` | Current user's relay status in this group | [L2344](../SimpleXChat/ChatTypes.swift#L2344) |
-| `GroupProfile` | `publicGroup` | `PublicGroupProfile?` | Channel-specific profile data (type, link, ID) | [L2472](../SimpleXChat/ChatTypes.swift#L2472) |
+| `User` | `userChatRelay` | `Bool` | Whether user acts as a chat relay | [L46](../POPOPXChat/ChatTypes.swift#L46) |
+| `GroupInfo` | `useRelays` | `Bool` | Whether group uses relay infrastructure (channel mode) | [L2343](../POPOPXChat/ChatTypes.swift#L2343) |
+| `GroupInfo` | `relayOwnStatus` | `RelayStatus?` | Current user's relay status in this group | [L2344](../POPOPXChat/ChatTypes.swift#L2344) |
+| `GroupProfile` | `publicGroup` | `PublicGroupProfile?` | Channel-specific profile data (type, link, ID) | [L2472](../POPOPXChat/ChatTypes.swift#L2472) |
 
 #### New Types
 
 | Type | Kind | Description | Line |
 |------|------|-------------|------|
-| `RelayStatus` | `enum` | Relay lifecycle: `.rsNew`, `.rsInvited`, `.rsAccepted`, `.rsActive`, `.rsInactive`, `.rsRejected` | [L2506](../SimpleXChat/ChatTypes.swift#L2506) |
-| `RelayStatus.text` | `extension` | Localized display text: New/Invited/Accepted/Active/Inactive/Rejected | [L2565](../SimpleXChat/ChatTypes.swift#L2565) |
-| `GroupRelay` | `struct` | Relay instance for a group (ID, member ID, relay status). Fetched at runtime via `apiGetGroupRelays` (owner only) | [L2555](../SimpleXChat/ChatTypes.swift#L2555) |
-| `UserChatRelay` | `struct` | User's chat relay configuration (ID, SMP address, name, domains, preset/tested/enabled/deleted flags) | [L2513](../SimpleXChat/ChatTypes.swift#L2513) |
+| `RelayStatus` | `enum` | Relay lifecycle: `.rsNew`, `.rsInvited`, `.rsAccepted`, `.rsActive`, `.rsInactive`, `.rsRejected` | [L2506](../POPOPXChat/ChatTypes.swift#L2506) |
+| `RelayStatus.text` | `extension` | Localized display text: New/Invited/Accepted/Active/Inactive/Rejected | [L2565](../POPOPXChat/ChatTypes.swift#L2565) |
+| `GroupRelay` | `struct` | Relay instance for a group (ID, member ID, relay status). Fetched at runtime via `apiGetGroupRelays` (owner only) | [L2555](../POPOPXChat/ChatTypes.swift#L2555) |
+| `UserChatRelay` | `struct` | User's chat relay configuration (ID, SMP address, name, domains, preset/tested/enabled/deleted flags) | [L2513](../POPOPXChat/ChatTypes.swift#L2513) |
 
 #### New Enum Cases
 
 | Enum | Case | Description | Line |
 |------|------|-------------|------|
-| `GroupMemberRole` | `.relay` | Role for relay members (below `.observer`) | [L2807](../SimpleXChat/ChatTypes.swift#L2807) |
-| `CIDirection` | `.channelRcv` | Message direction for channel-received messages (via relay) | [L3529](../SimpleXChat/ChatTypes.swift#L3529) |
+| `GroupMemberRole` | `.relay` | Role for relay members (below `.observer`) | [L2807](../POPOPXChat/ChatTypes.swift#L2807) |
+| `CIDirection` | `.channelRcv` | Message direction for channel-received messages (via relay) | [L3529](../POPOPXChat/ChatTypes.swift#L3529) |
 
 ---
 
@@ -513,6 +513,6 @@ Chat-level preferences stored in the SQLite database (managed by Haskell core):
 | File | Path |
 |------|------|
 | ChatModel, ItemsModel, Chat, ChatTagsModel, ChannelRelaysModel | [`Shared/Model/ChatModel.swift`](../Shared/Model/ChatModel.swift) |
-| ChatInfo, User, Contact, GroupInfo, ChatItem | [`SimpleXChat/ChatTypes.swift`](../SimpleXChat/ChatTypes.swift) |
+| ChatInfo, User, Contact, GroupInfo, ChatItem | [`POPOPXChat/ChatTypes.swift`](../POPOPXChat/ChatTypes.swift) |
 | ActiveFilter | [`Shared/Views/ChatList/ChatListView.swift`](../Shared/Views/ChatList/ChatListView.swift#L52) |
-| Preference defaults | [`Shared/Model/ChatModel.swift`](../Shared/Model/ChatModel.swift), [`SimpleXChat/FileUtils.swift`](../SimpleXChat/FileUtils.swift) |
+| Preference defaults | [`Shared/Model/ChatModel.swift`](../Shared/Model/ChatModel.swift), [`POPOPXChat/FileUtils.swift`](../POPOPXChat/FileUtils.swift) |

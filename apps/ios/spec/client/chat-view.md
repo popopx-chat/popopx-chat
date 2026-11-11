@@ -161,7 +161,7 @@ Key differences from `.groupRcv`:
 - [`shouldShowAvatar()`](../../Shared/Views/Chat/ChatView.swift#L1670) treats consecutive `.channelRcv` items as same sender
 - [`getItemSeparation()`](../../Shared/Views/Chat/ChatView.swift#L1649) treats consecutive `.channelRcv` items as `sameMemberAndDirection`
 - [`showMemberImage()`](../../Shared/Views/Chat/ChatView.swift#L2116) returns `true` when previous item is `.channelRcv` (different sender type)
-- [`memberToModerate()`](../../SimpleXChat/ChatTypes.swift#L3297) returns `nil` for `.channelRcv` (no per-member moderation)
+- [`memberToModerate()`](../../POPOPXChat/ChatTypes.swift#L3297) returns `nil` for `.channelRcv` (no per-member moderation)
 
 ---
 
@@ -341,7 +341,7 @@ background                   wallpaper background colour; image omitted
 
 `EnvironmentValues.terminalLayout` is false outside the chat cells and the theme screens: chat item info and the chat list are drawn classic.
 
-Layout resolution, in [`ChatTypes.swift`](../../SimpleXChat/ChatTypes.swift) and [`ChatModel.swift`](../../Shared/Model/ChatModel.swift):
+Layout resolution, in [`ChatTypes.swift`](../../POPOPXChat/ChatTypes.swift) and [`ChatModel.swift`](../../Shared/Model/ChatModel.swift):
 
 ```
 ChatInfo.activeChatLayout(profileLayout)    chat uiThemes.chatLayout, else defaultChatLayout(profileLayout)

@@ -82,14 +82,14 @@
 | Shared/Model/NtfManager.swift | PC18 | High | Notification delivery |
 | Shared/Model/BGManager.swift | PC18 | Medium | Background fetch scheduling |
 | Shared/Theme/ThemeManager.swift | PC24 | Medium | Theme resolution engine |
-| SimpleXChat/ChatTypes.swift | PC1 through PC31 | High | Core data types — all features use them |
-| SimpleXChat/APITypes.swift | PC1 through PC31 | High | API result types and error handling |
-| SimpleXChat/CallTypes.swift | PC17 | Medium | Call-specific data types |
-| SimpleXChat/FileUtils.swift | PC10, PC23, PC26 | Medium | File paths and encryption utilities |
-| SimpleXChat/Notifications.swift | PC18 | Medium | Notification type definitions |
-| SimpleX NSE/NotificationService.swift | PC18 | High | Push notification decryption and display |
+| POPOPXChat/ChatTypes.swift | PC1 through PC31 | High | Core data types — all features use them |
+| POPOPXChat/APITypes.swift | PC1 through PC31 | High | API result types and error handling |
+| POPOPXChat/CallTypes.swift | PC17 | Medium | Call-specific data types |
+| POPOPXChat/FileUtils.swift | PC10, PC23, PC26 | Medium | File paths and encryption utilities |
+| POPOPXChat/Notifications.swift | PC18 | Medium | Notification type definitions |
+| POPOPX NSE/NotificationService.swift | PC18 | High | Push notification decryption and display |
 | Shared/Views/Chat/ChatItemsMerger.swift | PC2, PC3, PC31 | Low | Chat item merge categories — added channelRcv hash |
-| SimpleX SE/ShareAPI.swift | PC4, PC31 | Medium | Share extension API — sendAsGroup support |
+| POPOPX SE/ShareAPI.swift | PC4, PC31 | Medium | Share extension API — sendAsGroup support |
 
 ---
 

@@ -5,7 +5,7 @@
 > Related specs: [Architecture](../architecture.md) | [API Reference](../api.md) | [Navigation](../client/navigation.md) | [README](../README.md)
 > Related product: [Product Overview](../../product/README.md)
 
-**Source:** [`NtfManager.swift`](../../Shared/Model/NtfManager.swift) | [`BGManager.swift`](../../Shared/Model/BGManager.swift) | [`Notifications.swift`](../../SimpleXChat/Notifications.swift) | [`NotificationService.swift`](../../SimpleX NSE/NotificationService.swift)
+**Source:** [`NtfManager.swift`](../../Shared/Model/NtfManager.swift) | [`BGManager.swift`](../../Shared/Model/BGManager.swift) | [`Notifications.swift`](../../POPOPXChat/Notifications.swift) | [`NotificationService.swift`](../../POPOPX NSE/NotificationService.swift)
 
 ---
 
@@ -110,7 +110,7 @@ When user taps a notification:
 
 ## 4. Notification Service Extension (NSE)
 
-**File**: [`SimpleX NSE/NotificationService.swift`](../../SimpleX NSE/NotificationService.swift)
+**File**: [`POPOPX NSE/NotificationService.swift`](../../POPOPX NSE/NotificationService.swift)
 
 ### Architecture
 
@@ -120,7 +120,7 @@ The NSE is a separate process that iOS launches when a push notification arrives
 - ~30 second execution window per notification
 - No access to main app's in-memory state
 
-### [Processing Flow](../../SimpleX NSE/NotificationService.swift#L300)
+### [Processing Flow](../../POPOPX NSE/NotificationService.swift#L300)
 
 ```
 1. didReceive(request:, withContentHandler:)                          L300
@@ -143,8 +143,8 @@ The NSE uses a subset of the chat API:
 
 | Command | Purpose | Line |
 |---------|---------|------|
-| [`apiGetNtfConns(nonce:, encNtfInfo:)`](../../SimpleX NSE/NotificationService.swift#L1123) | Decrypt notification connection info | [1123](../../SimpleX NSE/NotificationService.swift#L1123) |
-| [`apiGetConnNtfMessages(connMsgReqs:)`](../../SimpleX NSE/NotificationService.swift#L1140) | Fetch messages for notification connections | [1140](../../SimpleX NSE/NotificationService.swift#L1140) |
+| [`apiGetNtfConns(nonce:, encNtfInfo:)`](../../POPOPX NSE/NotificationService.swift#L1123) | Decrypt notification connection info | [1123](../../POPOPX NSE/NotificationService.swift#L1123) |
+| [`apiGetConnNtfMessages(connMsgReqs:)`](../../POPOPX NSE/NotificationService.swift#L1140) | Fetch messages for notification connections | [1140](../../POPOPX NSE/NotificationService.swift#L1140) |
 
 ### Database Coordination
 
@@ -152,7 +152,7 @@ The NSE uses a subset of the chat API:
 - If main app is `.active`, NSE may skip processing (main app handles notifications directly)
 - NSE uses `chat_close_store` / `chat_reopen_store` for safe concurrent access
 
-### [Preview Modes](../../SimpleXChat/APITypes.swift#L664)
+### [Preview Modes](../../POPOPXChat/APITypes.swift#L664)
 
 `NotificationPreviewMode` controls what the NSE shows:
 
@@ -166,24 +166,24 @@ The NSE uses a subset of the chat API:
 
 | Type | Purpose | Line |
 |------|---------|------|
-| [`NSENotificationData`](../../SimpleX NSE/NotificationService.swift#L27) | Enum of possible notification payloads | [27](../../SimpleX NSE/NotificationService.swift#L27) |
-| [`NSEThreads`](../../SimpleX NSE/NotificationService.swift#L82) | Concurrency coordinator for multiple NSE instances | [82](../../SimpleX NSE/NotificationService.swift#L82) |
-| [`NotificationEntity`](../../SimpleX NSE/NotificationService.swift#L245) | Per-connection processing state | [245](../../SimpleX NSE/NotificationService.swift#L245) |
-| [`NotificationService`](../../SimpleX NSE/NotificationService.swift#L287) | Main NSE class (`UNNotificationServiceExtension`) | [287](../../SimpleX NSE/NotificationService.swift#L287) |
-| [`NSEChatState`](../../SimpleX NSE/NotificationService.swift#L781) | Singleton managing NSE lifecycle state | [781](../../SimpleX NSE/NotificationService.swift#L781) |
+| [`NSENotificationData`](../../POPOPX NSE/NotificationService.swift#L27) | Enum of possible notification payloads | [27](../../POPOPX NSE/NotificationService.swift#L27) |
+| [`NSEThreads`](../../POPOPX NSE/NotificationService.swift#L82) | Concurrency coordinator for multiple NSE instances | [82](../../POPOPX NSE/NotificationService.swift#L82) |
+| [`NotificationEntity`](../../POPOPX NSE/NotificationService.swift#L245) | Per-connection processing state | [245](../../POPOPX NSE/NotificationService.swift#L245) |
+| [`NotificationService`](../../POPOPX NSE/NotificationService.swift#L287) | Main NSE class (`UNNotificationServiceExtension`) | [287](../../POPOPX NSE/NotificationService.swift#L287) |
+| [`NSEChatState`](../../POPOPX NSE/NotificationService.swift#L781) | Singleton managing NSE lifecycle state | [781](../../POPOPX NSE/NotificationService.swift#L781) |
 
 ### Key Internal Functions
 
 | Function | Purpose | Line |
 |----------|---------|------|
-| [`startChat()`](../../SimpleX NSE/NotificationService.swift#L836) | Initializes Haskell core for NSE | [836](../../SimpleX NSE/NotificationService.swift#L836) |
-| [`doStartChat()`](../../SimpleX NSE/NotificationService.swift#L861) | Performs actual chat initialization (migration, config) | [861](../../SimpleX NSE/NotificationService.swift#L861) |
-| [`activateChat()`](../../SimpleX NSE/NotificationService.swift#L907) | Reactivates suspended chat controller | [907](../../SimpleX NSE/NotificationService.swift#L907) |
-| [`suspendChat(_:)`](../../SimpleX NSE/NotificationService.swift#L921) | Suspends chat controller with timeout | [921](../../SimpleX NSE/NotificationService.swift#L921) |
-| [`receiveMessages()`](../../SimpleX NSE/NotificationService.swift#L954) | Main message-receive loop | [954](../../SimpleX NSE/NotificationService.swift#L954) |
-| [`receivedMsgNtf(_:)`](../../SimpleX NSE/NotificationService.swift#L1003) | Maps chat events to notification data | [1003](../../SimpleX NSE/NotificationService.swift#L1003) |
-| [`receiveNtfMessages(_:)`](../../SimpleX NSE/NotificationService.swift#L403) | Orchestrates notification message fetch and delivery | [403](../../SimpleX NSE/NotificationService.swift#L403) |
-| [`deliverBestAttemptNtf()`](../../SimpleX NSE/NotificationService.swift#L604) | Delivers the best available notification content | [604](../../SimpleX NSE/NotificationService.swift#L604) |
+| [`startChat()`](../../POPOPX NSE/NotificationService.swift#L836) | Initializes Haskell core for NSE | [836](../../POPOPX NSE/NotificationService.swift#L836) |
+| [`doStartChat()`](../../POPOPX NSE/NotificationService.swift#L861) | Performs actual chat initialization (migration, config) | [861](../../POPOPX NSE/NotificationService.swift#L861) |
+| [`activateChat()`](../../POPOPX NSE/NotificationService.swift#L907) | Reactivates suspended chat controller | [907](../../POPOPX NSE/NotificationService.swift#L907) |
+| [`suspendChat(_:)`](../../POPOPX NSE/NotificationService.swift#L921) | Suspends chat controller with timeout | [921](../../POPOPX NSE/NotificationService.swift#L921) |
+| [`receiveMessages()`](../../POPOPX NSE/NotificationService.swift#L954) | Main message-receive loop | [954](../../POPOPX NSE/NotificationService.swift#L954) |
+| [`receivedMsgNtf(_:)`](../../POPOPX NSE/NotificationService.swift#L1003) | Maps chat events to notification data | [1003](../../POPOPX NSE/NotificationService.swift#L1003) |
+| [`receiveNtfMessages(_:)`](../../POPOPX NSE/NotificationService.swift#L403) | Orchestrates notification message fetch and delivery | [403](../../POPOPX NSE/NotificationService.swift#L403) |
+| [`deliverBestAttemptNtf()`](../../POPOPX NSE/NotificationService.swift#L604) | Delivers the best available notification content | [604](../../POPOPX NSE/NotificationService.swift#L604) |
 | [`didReceive(_:withContentHandler:)`](../../SimpleX%20NSE/NotificationService.swift#L300) | Main NSE entry point -- processes incoming notification | [300](../../SimpleX%20NSE/NotificationService.swift#L300) |
 
 ---
@@ -301,7 +301,7 @@ NtfManager.shared.setNtfBadgeCount(chatModel.totalUnreadCountForAllUsers())
 
 | Method | Purpose | Line |
 |--------|---------|------|
-| [`setBadgeCount()`](../../SimpleX NSE/NotificationService.swift#L592) | Increments badge via `ntfBadgeCountGroupDefault` | [592](../../SimpleX NSE/NotificationService.swift#L592) |
+| [`setBadgeCount()`](../../POPOPX NSE/NotificationService.swift#L592) | Increments badge via `ntfBadgeCountGroupDefault` | [592](../../POPOPX NSE/NotificationService.swift#L592) |
 | [`setNtfBadgeCount(_:)`](../../Shared/Model/NtfManager.swift#L264) | Sets badge on `UIApplication` | [264](../../Shared/Model/NtfManager.swift#L264) |
 | [`changeNtfBadgeCount(by:)`](../../Shared/Model/NtfManager.swift#L270) | Adjusts badge by delta | [270](../../Shared/Model/NtfManager.swift#L270) |
 
@@ -362,19 +362,19 @@ Maximum task duration: `maxTaskDuration = 15` seconds.
 
 ## Notification Content Builders
 
-**File**: [`SimpleXChat/Notifications.swift`](../../SimpleXChat/Notifications.swift)
+**File**: [`POPOPXChat/Notifications.swift`](../../POPOPXChat/Notifications.swift)
 
 | Function | Purpose | Line |
 |----------|---------|------|
-| [`createContactRequestNtf()`](../../SimpleXChat/Notifications.swift#L27) | Builds notification for incoming contact request | [L27](../../SimpleXChat/Notifications.swift#L27) |
-| [`createContactConnectedNtf()`](../../SimpleXChat/Notifications.swift#L46) | Builds notification for contact connected event | [L46](../../SimpleXChat/Notifications.swift#L46) |
-| [`createMessageReceivedNtf()`](../../SimpleXChat/Notifications.swift#L66) | Builds notification for received message | [L66](../../SimpleXChat/Notifications.swift#L66) |
-| [`createCallInvitationNtf()`](../../SimpleXChat/Notifications.swift#L86) | Builds notification for incoming call | [L86](../../SimpleXChat/Notifications.swift#L86) |
-| [`createConnectionEventNtf()`](../../SimpleXChat/Notifications.swift#L102) | Builds notification for connection events | [L102](../../SimpleXChat/Notifications.swift#L102) |
-| [`createErrorNtf()`](../../SimpleXChat/Notifications.swift#L134) | Builds notification for database/encryption errors | [L134](../../SimpleXChat/Notifications.swift#L134) |
-| [`createAppStoppedNtf()`](../../SimpleXChat/Notifications.swift#L160) | Builds notification when app is stopped | [L160](../../SimpleXChat/Notifications.swift#L160) |
-| [`createNotification()`](../../SimpleXChat/Notifications.swift#L175) | Generic notification builder (used by all above) | [L175](../../SimpleXChat/Notifications.swift#L175) |
-| [`hideSecrets()`](../../SimpleXChat/Notifications.swift#L200) | Redacts secret-formatted text in previews | [L200](../../SimpleXChat/Notifications.swift#L200) |
+| [`createContactRequestNtf()`](../../POPOPXChat/Notifications.swift#L27) | Builds notification for incoming contact request | [L27](../../POPOPXChat/Notifications.swift#L27) |
+| [`createContactConnectedNtf()`](../../POPOPXChat/Notifications.swift#L46) | Builds notification for contact connected event | [L46](../../POPOPXChat/Notifications.swift#L46) |
+| [`createMessageReceivedNtf()`](../../POPOPXChat/Notifications.swift#L66) | Builds notification for received message | [L66](../../POPOPXChat/Notifications.swift#L66) |
+| [`createCallInvitationNtf()`](../../POPOPXChat/Notifications.swift#L86) | Builds notification for incoming call | [L86](../../POPOPXChat/Notifications.swift#L86) |
+| [`createConnectionEventNtf()`](../../POPOPXChat/Notifications.swift#L102) | Builds notification for connection events | [L102](../../POPOPXChat/Notifications.swift#L102) |
+| [`createErrorNtf()`](../../POPOPXChat/Notifications.swift#L134) | Builds notification for database/encryption errors | [L134](../../POPOPXChat/Notifications.swift#L134) |
+| [`createAppStoppedNtf()`](../../POPOPXChat/Notifications.swift#L160) | Builds notification when app is stopped | [L160](../../POPOPXChat/Notifications.swift#L160) |
+| [`createNotification()`](../../POPOPXChat/Notifications.swift#L175) | Generic notification builder (used by all above) | [L175](../../POPOPXChat/Notifications.swift#L175) |
+| [`hideSecrets()`](../../POPOPXChat/Notifications.swift#L200) | Redacts secret-formatted text in previews | [L200](../../POPOPXChat/Notifications.swift#L200) |
 
 ---
 
@@ -384,7 +384,7 @@ Maximum task duration: `maxTaskDuration = 15` seconds.
 |------|------|
 | Notification manager | [`Shared/Model/NtfManager.swift`](../../Shared/Model/NtfManager.swift) |
 | Background manager | [`Shared/Model/BGManager.swift`](../../Shared/Model/BGManager.swift) |
-| Notification types | [`SimpleXChat/Notifications.swift`](../../SimpleXChat/Notifications.swift) |
-| NSE service | [`SimpleX NSE/NotificationService.swift`](../../SimpleX NSE/NotificationService.swift) |
+| Notification types | [`POPOPXChat/Notifications.swift`](../../POPOPXChat/Notifications.swift) |
+| NSE service | [`POPOPX NSE/NotificationService.swift`](../../POPOPX NSE/NotificationService.swift) |
 | App delegate (token) | `Shared/AppDelegate.swift` |
 | Notification settings UI | `Shared/Views/UserSettings/NotificationsView.swift` |

@@ -9,7 +9,7 @@ themselves, from a command menu in a separate roster group.
 
 ## Docker
 
-From `apps/simplex-support-bot-light`:
+From `apps/popopx-support-bot-light`:
 
 ```bash
 cp bot-config/config.toml.example bot-config/config.toml   # required; edit before starting
@@ -47,7 +47,7 @@ the databases hold the bot's identity keys.
 ## Manual installation
 
 ```bash
-uv venv && uv pip install -e ../../packages/simplex-chat-python && uv pip install -e '.[dev]'
+uv venv && uv pip install -e ../../packages/popopx-chat-python && uv pip install -e '.[dev]'
 cp config.toml.example config.toml
 uv run support-bot-light --config config.toml
 ```

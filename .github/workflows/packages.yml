@@ -3,9 +3,9 @@ name: packages
 on:
   pull_request:
     paths:
-      - "packages/simplex-chat-nodejs/**"
-      - "packages/simplex-chat-client/types/typescript/**"
-      - "packages/simplex-chat-python/**"
+      - "packages/popopx-chat-nodejs/**"
+      - "packages/popopx-chat-client/types/typescript/**"
+      - "packages/popopx-chat-python/**"
       - ".github/workflows/packages.yml"
     types: [opened, synchronize, reopened, ready_for_review]
 

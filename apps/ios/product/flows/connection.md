@@ -131,13 +131,13 @@ Establishing contact between two SimpleX Chat users. SimpleX uses no user identi
 
 | Type | Location | Description |
 |------|----------|-------------|
-| `CreatedConnLink` | `SimpleXChat/APITypes.swift` | Contains `connFullLink` (URI) and optional `connShortLink` |
-| `PendingContactConnection` | `SimpleXChat/ChatTypes.swift` | Represents an in-progress connection before contact is established |
+| `CreatedConnLink` | `POPOPXChat/APITypes.swift` | Contains `connFullLink` (URI) and optional `connShortLink` |
+| `PendingContactConnection` | `POPOPXChat/ChatTypes.swift` | Represents an in-progress connection before contact is established |
 | `ConnectionPlan` | `Shared/Model/AppAPITypes.swift` | Enum describing what a link will do: connect contact, join group, already connected, etc. |
 | `ConnReqType` | `Shared/Views/NewChat/NewChatView.swift` | `.invitation`, `.contact`, or `.groupLink` -- type of connection request |
-| `Contact` | `SimpleXChat/ChatTypes.swift` | Full contact model with profile, connection status, preferences |
-| `UserContactRequest` | `SimpleXChat/ChatTypes.swift` | Incoming contact request awaiting acceptance |
-| `ChatType` | `SimpleXChat/ChatTypes.swift` | `.direct`, `.group`, `.local`, `.contactRequest`, `.contactConnection` |
+| `Contact` | `POPOPXChat/ChatTypes.swift` | Full contact model with profile, connection status, preferences |
+| `UserContactRequest` | `POPOPXChat/ChatTypes.swift` | Incoming contact request awaiting acceptance |
+| `ChatType` | `POPOPXChat/ChatTypes.swift` | `.direct`, `.group`, `.local`, `.contactRequest`, `.contactConnection` |
 | `GroupShortLinkInfo` | `Shared/Model/AppAPITypes.swift` | Contains `direct: Bool`, `groupRelays: [String]`, `publicGroupId: String?`; transient data returned by prepare |
 | `RelayConnectionResult` | `Shared/Model/AppAPITypes.swift` | Contains `relayMember: GroupMember`, `relayError: ChatError?`; per-relay join outcome |
 
@@ -170,8 +170,8 @@ Establishing contact between two SimpleX Chat users. SimpleX uses no user identi
 | `Shared/Views/ChatList/ContactConnectionInfo.swift` | Connection details sheet |
 | `Shared/Model/SimpleXAPI.swift` | API functions: `apiAddContact`, `apiConnect`, `apiConnectPlan`, `apiAcceptContactRequest`, `apiCreateUserAddress` |
 | `Shared/Model/AppAPITypes.swift` | `ConnectionPlan` enum, `GroupLink` struct |
-| `SimpleXChat/APITypes.swift` | `CreatedConnLink`, `ComposedMessage`, command/response types |
-| `SimpleXChat/ChatTypes.swift` | `Contact`, `PendingContactConnection`, `UserContactRequest` |
+| `POPOPXChat/APITypes.swift` | `CreatedConnLink`, `ComposedMessage`, command/response types |
+| `POPOPXChat/ChatTypes.swift` | `Contact`, `PendingContactConnection`, `UserContactRequest` |
 
 ## Related Specifications
 

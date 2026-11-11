@@ -4,13 +4,13 @@ This file provides guidance when working with code in this repository.
 
 ## iOS App Overview
 
-The iOS app is a SwiftUI application that interfaces with the Haskell core library via FFI. It shares the SimpleXChat framework with two extensions: Notification Service Extension (NSE) for push notifications and Share Extension (SE) for sharing content from other apps.
+The iOS app is a SwiftUI application that interfaces with the Haskell core library via FFI. It shares the POPOPXChat framework with two extensions: Notification Service Extension (NSE) for push notifications and Share Extension (SE) for sharing content from other apps.
 
 ## Build & Development
 
 Open `SimpleX.xcodeproj` in Xcode. The project has five targets:
 - **SimpleX (iOS)** - Main app (Bundle ID: `com.popopxchat.popopx`)
-- **SimpleXChat** - Framework containing FFI bridge and shared types
+- **POPOPXChat** - Framework containing FFI bridge and shared types
 - **SimpleX NSE** - Notification Service Extension
 - **SimpleX SE** - Share Extension
 - **Tests iOS** - UI tests
@@ -26,17 +26,17 @@ Deployment target: iOS 15.0+, Swift 5.0.
 
 ### Haskell Core Integration
 
-The app calls the Haskell core library through C FFI defined in `SimpleXChat/SimpleX.h`:
+The app calls the Haskell core library through C FFI defined in `POPOPXChat/POPOPX.h`:
 - `chat_migrate_init_key()` - Initialize/migrate database
 - `chat_send_cmd_retry()` - Send command to chat controller
 - `chat_recv_msg_wait()` - Receive messages from controller
 
-Swift wrappers in `SimpleXChat/API.swift`:
+Swift wrappers in `POPOPXChat/API.swift`:
 - `chatMigrateInit()` - Initialize chat controller
 - `sendSimpleXCmd<R>()` - Send typed commands and parse responses
 - `recvSimpleXMsg<R>()` - Receive typed messages
 
-Haskell runtime initialization (`SimpleXChat/hs_init.c`) uses different memory configurations:
+Haskell runtime initialization (`POPOPXChat/hs_init.c`) uses different memory configurations:
 - Main app: 64MB heap
 - NSE: 512KB heap (minimal footprint for background processing)
 - SE: 1MB heap
@@ -66,12 +66,12 @@ Key directories in `Shared/`:
 ### Shared Data Between Targets
 
 All three targets share data via App Group (`group.com.popopxchat.popopx`):
-- `SimpleXChat/AppGroup.swift` - GroupDefaults wrapper for typed shared preferences
+- `POPOPXChat/AppGroup.swift` - GroupDefaults wrapper for typed shared preferences
 - Keychain for sensitive data: `kcDatabasePassword`, `kcAppPassword`, `kcSelfDestructPassword`
 
 ### Key Types
 
-Types are defined in `SimpleXChat/`:
+Types are defined in `POPOPXChat/`:
 - `ChatTypes.swift` - User, Chat, Message, Group types
 - `APITypes.swift` - API request/response types
 

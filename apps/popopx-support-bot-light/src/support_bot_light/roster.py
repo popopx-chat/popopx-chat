@@ -19,7 +19,7 @@ RosterState = Literal["active", "pending"]
 
 READY_STATUSES = frozenset({"ready", "sndReady"})
 
-# Mirrors isInGroup in apps/simplex-support-bot/src/bot.ts.
+# Mirrors isInGroup in apps/popopx-support-bot/src/bot.ts.
 TERMINAL_STATUSES = frozenset({"rejected", "removed", "left", "deleted", "unknown"})
 
 # The connection is gone; nothing about it is still in progress.

@@ -10,7 +10,7 @@ services:
     #   - "--domain"
     #   - "yourname.simplex"
     volumes:
-      - calculator-bot-data:/src/apps/simplex-calculator-bot/data
+      - calculator-bot-data:/src/apps/popopx-calculator-bot/data
 
 volumes:
   calculator-bot-data:

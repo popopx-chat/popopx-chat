@@ -250,8 +250,8 @@ Nous prévoyons d'ajouter bientôt :
 Vous pouvez :
 
 - utiliser la bibliothèque SimpleX Chat pour intégrer des fonctionnalités de chat dans vos applications mobiles.
-- créer des bots et services de chat en Haskell - voir un exemple de chat bot [simple](/apps/simplex-bot/) et un plus [avancé](/apps/simplex-bot-advanced/).
-- créer des bots et des services de chat dans n'importe quelle langue en utilisant la CLI du terminal SimpleX Chat comme un serveur WebSocket local. Voir [TypeScript SimpleX Chat client](/packages/simplex-chat-client/) et un [exemple de chat bot en JavaScript](/packages/simplex-chat-client/typescript/examples/squaring-bot.js).
+- créer des bots et services de chat en Haskell - voir un exemple de chat bot [simple](/apps/popopx-bot/) et un plus [avancé](/apps/popopx-bot-advanced/).
+- créer des bots et des services de chat dans n'importe quelle langue en utilisant la CLI du terminal SimpleX Chat comme un serveur WebSocket local. Voir [TypeScript SimpleX Chat client](/packages/popopx-chat-client/) et un [exemple de chat bot en JavaScript](/packages/popopx-chat-client/typescript/examples/squaring-bot.js).
 - exécuter [simplex-chat terminal CLI](/docs/lang/fr/CLI.md) pour exécuter des commandes de chat individuelles, par exemple pour envoyer des messages dans le cadre de l'exécution d'un script shell.
 
 Si vous envisagez de développer avec la plateforme SimpleX, n'hésitez pas à nous contacter pour obtenir des conseils et de l'aide.

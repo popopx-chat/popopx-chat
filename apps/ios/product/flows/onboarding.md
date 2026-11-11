@@ -104,7 +104,7 @@ func startChat(refreshInvitations: Bool = true, onboarding: Bool = false) throws
 - Agent database: `simplex_v1_agent.db` (SMP connections, encryption keys, queues)
 
 **Initialization:**
-- `chatMigrateInit(useKey:confirmMigrations:backgroundMode:)` in `SimpleXChat/API.swift`.
+- `chatMigrateInit(useKey:confirmMigrations:backgroundMode:)` in `POPOPXChat/API.swift`.
 - Creates databases if they do not exist.
 - Runs pending migrations with confirmation mode.
 - Handles database encryption:
@@ -179,16 +179,16 @@ If migration is interrupted:
 | Type | Location | Description |
 |------|----------|-------------|
 | `OnboardingStage` | `Shared/Views/Onboarding/OnboardingView.swift` | Enum: `step1_SimpleXInfo`, `step2_CreateProfile`, `step3_ChooseServerOperators`, `step4_SetNotificationsMode`, `onboardingComplete` |
-| `Profile` | `SimpleXChat/ChatTypes.swift` | `displayName`, `fullName`, `image`, `shortDescr` |
-| `User` | `SimpleXChat/ChatTypes.swift` | Full user model with profile, userId, and settings |
-| `ArchiveConfig` | `SimpleXChat/APITypes.swift` | Configuration for database export/import |
-| `DBMigrationResult` | `SimpleXChat/API.swift` | Result of database migration: `.ok`, `.errorNotADatabase`, `.errorKeychain`, etc. |
-| `MigrationConfirmation` | `SimpleXChat/API.swift` | Migration confirmation mode: `.error`, `.yesUp`, `.yesUpDown` |
-| `DeviceToken` | `SimpleXChat/ChatTypes.swift` | Apple push notification device token |
-| `NtfTknStatus` | `SimpleXChat/ChatTypes.swift` | Notification token status: registered, active, expired, etc. |
-| `NotificationsMode` | `SimpleXChat/ChatTypes.swift` | `.off`, `.periodic`, `.instant` |
+| `Profile` | `POPOPXChat/ChatTypes.swift` | `displayName`, `fullName`, `image`, `shortDescr` |
+| `User` | `POPOPXChat/ChatTypes.swift` | Full user model with profile, userId, and settings |
+| `ArchiveConfig` | `POPOPXChat/APITypes.swift` | Configuration for database export/import |
+| `DBMigrationResult` | `POPOPXChat/API.swift` | Result of database migration: `.ok`, `.errorNotADatabase`, `.errorKeychain`, etc. |
+| `MigrationConfirmation` | `POPOPXChat/API.swift` | Migration confirmation mode: `.error`, `.yesUp`, `.yesUpDown` |
+| `DeviceToken` | `POPOPXChat/ChatTypes.swift` | Apple push notification device token |
+| `NtfTknStatus` | `POPOPXChat/ChatTypes.swift` | Notification token status: registered, active, expired, etc. |
+| `NotificationsMode` | `POPOPXChat/ChatTypes.swift` | `.off`, `.periodic`, `.instant` |
 | `MigrationFileLinkData` | Used in standalone file transfers for device migration |
-| `AppChatState` | `SimpleXChat/` | Shared state: `.active`, `.stopped`, `.suspended` |
+| `AppChatState` | `POPOPXChat/` | Shared state: `.active`, `.stopped`, `.suspended` |
 
 ## Error Cases
 
@@ -225,10 +225,10 @@ If migration is interrupted:
 | `Shared/Views/Database/DatabaseErrorView.swift` | Database error recovery UI |
 | `Shared/Views/Database/MigrateToAppGroupView.swift` | Legacy migration from Documents to App Group container |
 | `Shared/Model/SimpleXAPI.swift` | `startChat`, `apiCreateActiveUser`, `apiExportArchive`, `apiImportArchive`, `apiRegisterToken` |
-| `SimpleXChat/API.swift` | `chatMigrateInit`, `chatInitTemporaryDatabase`, low-level DB initialization |
-| `SimpleXChat/FileUtils.swift` | DB file paths, constants (`DB_FILE_PREFIX`, `CHAT_DB`, `AGENT_DB`) |
-| `SimpleXChat/AppGroup.swift` | App group container configuration |
-| `SimpleXChat/KeyChain.swift` | Keychain access for DB passphrase and app passwords |
+| `POPOPXChat/API.swift` | `chatMigrateInit`, `chatInitTemporaryDatabase`, low-level DB initialization |
+| `POPOPXChat/FileUtils.swift` | DB file paths, constants (`DB_FILE_PREFIX`, `CHAT_DB`, `AGENT_DB`) |
+| `POPOPXChat/AppGroup.swift` | App group container configuration |
+| `POPOPXChat/KeyChain.swift` | Keychain access for DB passphrase and app passwords |
 | `Shared/Model/BGManager.swift` | Background task registration and scheduling |
 | `Shared/Model/NtfManager.swift` | Notification management and badge counts |
 

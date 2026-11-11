@@ -69,6 +69,6 @@ SimpleXApp (root entry point)
 | `Shared/Model/ChatModel.swift` | Primary observable state (ChatModel, ItemsModel, Chat) |
 | `Shared/Model/SimpleXAPI.swift` | FFI bridge -- chatSendCmd, chatApiSendCmd, sendSimpleXCmd |
 | `Shared/Model/AppAPITypes.swift` | ChatCommand, ChatResponse, ChatEvent enums (iOS app layer) |
-| `SimpleXChat/APITypes.swift` | APIResult, ChatError, ChatCmdProtocol (shared framework) |
-| `SimpleXChat/ChatTypes.swift` | User, ChatInfo, Contact, GroupInfo, ChatItem data types |
-| `SimpleXChat/SimpleX.h` | C header for Haskell FFI functions |
+| `POPOPXChat/APITypes.swift` | APIResult, ChatError, ChatCmdProtocol (shared framework) |
+| `POPOPXChat/ChatTypes.swift` | User, ChatInfo, Contact, GroupInfo, ChatItem data types |
+| `POPOPXChat/POPOPX.h` | C header for Haskell FFI functions |

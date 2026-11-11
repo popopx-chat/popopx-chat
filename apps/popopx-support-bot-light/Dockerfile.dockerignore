@@ -14,11 +14,11 @@ scripts/*
 
 !packages
 packages/*
-!packages/simplex-chat-python
+!packages/popopx-chat-python
 
 !apps
 apps/*
-!apps/simplex-support-bot-light
+!apps/popopx-support-bot-light
 
 # Build output, caches, and anything holding an identity or a secret.
 **/__pycache__
@@ -33,8 +33,8 @@ apps/*
 **/dist
 **/*.db
 **/*.db-*
-apps/simplex-support-bot-light/plans
-apps/simplex-support-bot-light/state
-apps/simplex-support-bot-light/bot-config
-apps/simplex-support-bot-light/config.toml
-apps/simplex-support-bot-light/.env
+apps/popopx-support-bot-light/plans
+apps/popopx-support-bot-light/state
+apps/popopx-support-bot-light/bot-config
+apps/popopx-support-bot-light/config.toml
+apps/popopx-support-bot-light/.env

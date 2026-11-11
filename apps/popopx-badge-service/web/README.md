@@ -68,23 +68,23 @@ is plain TypeScript, tested directly in Node.
 ## Running the real service against this build
 
 **`mock/server.py` is not the service.** The service is the Haskell
-executable `simplex-badge-service`, in `apps/simplex-badge-service/`, and
+executable `simplex-badge-service`, in `apps/popopx-badge-service/`, and
 `dist/` is the directory its listener serves. Nothing about the page changes
 between the two — the service matches this build, never the reverse.
 
 ```
 # 1. build the page. dist/ is the deploy tree: index.html, sw.js, assets/<hash>/
-cd apps/simplex-badge-service/web
+cd apps/popopx-badge-service/web
 npm install && npm run build
 cd ../../..
 
 # 2. configuration, from the committed example. Copy it IN
 #    PLACE, beside the example: that path is the one .gitignore covers, and this
 #    file is about to hold a real api_key and webhook_secret.
-cd apps/simplex-badge-service
+cd apps/popopx-badge-service
 cp badge_service.ini.example badge_service.ini
 cd ../..
-#   static_dir = ./apps/simplex-badge-service/web/dist   <- the build above
+#   static_dir = ./apps/popopx-badge-service/web/dist   <- the build above
 #   [btcpay]   = a real store's host, api_key, store_id and webhook_secret,
 #                or delete the whole section to disable BTC and XMR (the provider-unavailable screen)
 #   [issuer]   = uncomment the section and put a real issuer secret in private_key,
@@ -99,7 +99,7 @@ cd ../..
 #    section, or pass --issuer-key-idx and --issuer-secret, which override it.
 #    `simplex-chat badge keygen` prints a pair.
 cabal run simplex-badge-service -- \
-  --service-config apps/simplex-badge-service/badge_service.ini
+  --service-config apps/popopx-badge-service/badge_service.ini
 ```
 
 Then open the `[listener]` host and port — `http://127.0.0.1:8080/` as the

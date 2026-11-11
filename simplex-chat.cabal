@@ -446,8 +446,8 @@ executable simplex-badge-service
       buildable: False
   main-is: Main.hs
   hs-source-dirs:
-      apps/simplex-badge-service
-      apps/simplex-badge-service/src
+      apps/popopx-badge-service
+      apps/popopx-badge-service/src
   default-extensions:
       StrictData
   other-modules:
@@ -532,7 +532,7 @@ executable simplex-bot
   other-modules:
       Paths_simplex_chat
   hs-source-dirs:
-      apps/simplex-bot
+      apps/popopx-bot
   default-extensions:
       StrictData
   ghc-options: -O2 -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-kind-signatures -Wno-missing-deriving-strategies -Wno-monomorphism-restriction -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-implicit-prelude -Wno-missing-safe-haskell-mode -Wno-missing-export-lists -Wno-partial-fields -Wcompat -Werror=incomplete-record-updates -Werror=incomplete-patterns -Werror=missing-methods -Werror=incomplete-uni-patterns -Werror=tabs -Wredundant-constraints -Wincomplete-record-updates -Wunused-type-patterns -Werror=name-shadowing -threaded
@@ -551,7 +551,7 @@ executable simplex-bot-advanced
   other-modules:
       Paths_simplex_chat
   hs-source-dirs:
-      apps/simplex-bot-advanced
+      apps/popopx-bot-advanced
   default-extensions:
       StrictData
   ghc-options: -O2 -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-kind-signatures -Wno-missing-deriving-strategies -Wno-monomorphism-restriction -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-implicit-prelude -Wno-missing-safe-haskell-mode -Wno-missing-export-lists -Wno-partial-fields -Wcompat -Werror=incomplete-record-updates -Werror=incomplete-patterns -Werror=missing-methods -Werror=incomplete-uni-patterns -Werror=tabs -Wredundant-constraints -Wincomplete-record-updates -Wunused-type-patterns -Werror=name-shadowing -threaded
@@ -577,8 +577,8 @@ executable simplex-broadcast-bot
       buildable: False
   main-is: Main.hs
   hs-source-dirs:
-      apps/simplex-broadcast-bot
-      apps/simplex-broadcast-bot/src
+      apps/popopx-broadcast-bot
+      apps/popopx-broadcast-bot/src
   default-extensions:
       StrictData
   other-modules:
@@ -612,7 +612,7 @@ executable simplex-chat
       Server
       Paths_simplex_chat
   hs-source-dirs:
-      apps/simplex-chat
+      apps/popopx-chat
   default-extensions:
       StrictData
   ghc-options: -O2 -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-kind-signatures -Wno-missing-deriving-strategies -Wno-monomorphism-restriction -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-implicit-prelude -Wno-missing-safe-haskell-mode -Wno-missing-export-lists -Wno-partial-fields -Wcompat -Werror=incomplete-record-updates -Werror=incomplete-patterns -Werror=missing-methods -Werror=incomplete-uni-patterns -Werror=tabs -Wredundant-constraints -Wincomplete-record-updates -Wunused-type-patterns -Werror=name-shadowing -threaded -rtsopts
@@ -642,8 +642,8 @@ executable simplex-directory-service
       buildable: False
   main-is: Main.hs
   hs-source-dirs:
-      apps/simplex-directory-service
-      apps/simplex-directory-service/src
+      apps/popopx-directory-service
+      apps/popopx-directory-service/src
   default-extensions:
       StrictData
   other-modules:
@@ -812,9 +812,9 @@ test-suite simplex-chat-test
   hs-source-dirs:
       bots/src
       tests
-      apps/simplex-badge-service/src
-      apps/simplex-broadcast-bot/src
-      apps/simplex-directory-service/src
+      apps/popopx-badge-service/src
+      apps/popopx-broadcast-bot/src
+      apps/popopx-directory-service/src
   default-extensions:
       StrictData
   -- add -fhpc to ghc-options below to run tests with coverage

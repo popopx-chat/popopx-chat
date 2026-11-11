@@ -52,7 +52,7 @@ If you run it on Mac, the first time it will take 20-30 seconds for MacOS to ver
 If you cloned this repository, you can:
 
 ```
-cd ./packages/simplex-chat-nodejs
+cd ./packages/popopx-chat-nodejs
 npm install
 npm run build
 SIMPLEX_ADDON_PATH=build/Release/simplex.node node ./examples/squaring-bot-readme.js
@@ -64,7 +64,7 @@ There is an example with more options in [./examples/squaring-bot.ts](./examples
 
 You can run it with: `npx ts-node ./examples/squaring-bot.ts`
 
-A larger example, with a business address and commands as keys: [SimpleX Calculator](../../apps/simplex-calculator-bot/).
+A larger example, with a business address and commands as keys: [SimpleX Calculator](../../apps/popopx-calculator-bot/).
 
 ## Live messages
 

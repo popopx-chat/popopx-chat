@@ -326,7 +326,7 @@ You can:
 - [create chat bots and services](#develop-a-chat-bot).
 - run [simplex-chat terminal CLI](./docs/CLI.md) to execute individual chat commands, e.g. to send messages as part of shell script execution.
 - use SimpleX Chat library to integrate chat functionality into your mobile apps.
-- create chat bots and services in Haskell - see [simple](./apps/simplex-bot/) and more [advanced chat bot example](./apps/simplex-bot-advanced/).
+- create chat bots and services in Haskell - see [simple](./apps/popopx-bot/) and more [advanced chat bot example](./apps/popopx-bot-advanced/).
 
 If you are considering developing with SimpleX platform please get in touch for any advice and support.
 
@@ -338,15 +338,15 @@ You can create a chat bot or any chat-based service in any language running Simp
 
 See [our new bot API reference](./bots/README.md). Most of it is automatically generated from core library types, so it stays up to date.
 
-Also see [TypeScript SimpleX Chat client](./packages/simplex-chat-client/) and [JavaScript chat bot example](./packages/simplex-chat-client/typescript/examples/squaring-bot.js).
+Also see [TypeScript SimpleX Chat client](./packages/popopx-chat-client/) and [JavaScript chat bot example](./packages/popopx-chat-client/typescript/examples/squaring-bot.js).
 
 ## Agents
 
 - For AI assistants: [simplex.chat/llms.txt](https://simplex.chat/llms.txt), an index of the documentation in Markdown, and [SimpleX for AI agents and developers](https://simplex.chat/llms/agents.md).
 - Every page of simplex.chat is also available as Markdown: replace `.html` with `.md` ([simplex.chat/docs/simplex.md](https://simplex.chat/docs/simplex.md)), or add `.md` to the path ([simplex.chat/why.md](https://simplex.chat/why.md)).
-- Libraries: [Node.js](./packages/simplex-chat-nodejs/) ([npm](https://www.npmjs.com/package/simplex-chat)) and [Python](./packages/simplex-chat-python/) ([PyPI](https://pypi.org/project/simplex-chat/)).
+- Libraries: [Node.js](./packages/popopx-chat-nodejs/) ([npm](https://www.npmjs.com/package/simplex-chat)) and [Python](./packages/popopx-chat-python/) ([PyPI](https://pypi.org/project/simplex-chat/)).
 - [Bot API guide](./bots/README.md) and [API reference](./bots/api/README.md): commands, events and types.
-- Example bots: [support bot](./apps/simplex-support-bot/) and [calculator](./apps/simplex-calculator-bot/) in TypeScript, [support bot light](./apps/simplex-support-bot-light/) in Python, [directory service](./apps/simplex-directory-service/) and [broadcast bot](./apps/simplex-broadcast-bot/) in Haskell.
+- Example bots: [support bot](./apps/popopx-support-bot/) and [calculator](./apps/popopx-calculator-bot/) in TypeScript, [support bot light](./apps/popopx-support-bot-light/) in Python, [directory service](./apps/popopx-directory-service/) and [broadcast bot](./apps/popopx-broadcast-bot/) in Haskell.
 - [Terminal client](./docs/CLI.md): installation, building from source and usage.
 - Servers: [SMP](./docs/SERVER.md), [XFTP](./docs/XFTP-SERVER.md) and [chat relay](./docs/CHAT-RELAY.md).
 - Protocols: [SimpleX network](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/overview-tjr.md), [chat](./docs/protocol/simplex-chat.md), [channels](./docs/protocol/channels-overview.md) and [public names](./docs/protocol/names-overview.md).

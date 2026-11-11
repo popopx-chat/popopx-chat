@@ -3,8 +3,8 @@
 # Built from the repository root, not this directory: the image is made from the
 # Haskell core and the Python library in this tree, neither of them released.
 #
-#   docker compose build          # from apps/simplex-support-bot-light
-#   docker build -f apps/simplex-support-bot-light/Dockerfile .
+#   docker compose build          # from apps/popopx-support-bot-light
+#   docker build -f apps/popopx-support-bot-light/Dockerfile .
 #
 # The first stage compiles libpopopx from src/. That is a full GHC build of
 # popopxmq and simplex-chat: hours on a cold cache, and it needs ~15 GB.
@@ -113,11 +113,11 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # The library is installed from this tree: the APIs the bot uses
 # (install_signal_handlers, sync_profile, api_merge_*_custom_data) are unreleased.
-COPY --chown=supportbot:supportbot packages/simplex-chat-python /home/supportbot/simplex-chat-python
+COPY --chown=supportbot:supportbot packages/popopx-chat-python /home/supportbot/simplex-chat-python
 RUN uv venv --python 3.12 "$VIRTUAL_ENV" && \
     uv pip install /home/supportbot/simplex-chat-python
 
-COPY --chown=supportbot:supportbot apps/simplex-support-bot-light /home/supportbot/app
+COPY --chown=supportbot:supportbot apps/popopx-support-bot-light /home/supportbot/app
 RUN uv pip install -e /home/supportbot/app
 
 ENV PYTHONUNBUFFERED=1

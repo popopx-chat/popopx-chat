@@ -68,32 +68,32 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=libpopopx /libs /opt/simplex/libs
 # The library loads libpopopx and the add-on built below instead of downloading the released ones.
 ENV SIMPLEX_LIBS_DIR=/opt/simplex/libs \
-    SIMPLEX_ADDON_PATH=/src/packages/simplex-chat-nodejs/build/Release/popopx.node
+    SIMPLEX_ADDON_PATH=/src/packages/popopx-chat-nodejs/build/Release/popopx.node
 
 WORKDIR /src
-COPY packages/simplex-chat-client/types/typescript packages/simplex-chat-client/types/typescript
-RUN cd packages/simplex-chat-client/types/typescript && \
+COPY packages/popopx-chat-client/types/typescript packages/popopx-chat-client/types/typescript
+RUN cd packages/popopx-chat-client/types/typescript && \
     npm install --no-audit --no-fund && \
     npx tsc
 
-COPY packages/simplex-chat-nodejs packages/simplex-chat-nodejs
-RUN cd packages/simplex-chat-nodejs && \
+COPY packages/popopx-chat-nodejs packages/popopx-chat-nodejs
+RUN cd packages/popopx-chat-nodejs && \
     npm install --no-audit --no-fund && \
     npm install --no-save --no-audit --no-fund ../simplex-chat-client/types/typescript && \
     npx node-gyp rebuild && \
     npx tsc && \
     cp src/simplex.* dist/
 
-WORKDIR /src/apps/simplex-calculator-bot
+WORKDIR /src/apps/popopx-calculator-bot
 # No package-lock.json, so no npm ci.
-COPY apps/simplex-calculator-bot/package.json ./
+COPY apps/popopx-calculator-bot/package.json ./
 RUN npm install --no-audit --no-fund
 RUN npm install --no-save --no-audit --no-fund \
-      /src/packages/simplex-chat-nodejs \
-      /src/packages/simplex-chat-client/types/typescript
+      /src/packages/popopx-chat-nodejs \
+      /src/packages/popopx-chat-client/types/typescript
 
 # calculatorBot.test.ts needs network and tests/fixtures/tls.
-COPY apps/simplex-calculator-bot ./
+COPY apps/popopx-calculator-bot ./
 RUN npm run build && npx vitest run calculator.test.ts
 
 # --------------------------------------------------------------------------- #
@@ -110,15 +110,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=build /opt/simplex/libs /opt/simplex/libs
 COPY --from=build --chown=node:node /src /src
 ENV SIMPLEX_LIBS_DIR=/opt/simplex/libs \
-    SIMPLEX_ADDON_PATH=/src/packages/simplex-chat-nodejs/build/Release/popopx.node
+    SIMPLEX_ADDON_PATH=/src/packages/popopx-chat-nodejs/build/Release/popopx.node
 
 # A named volume takes this ownership; a bind mount must be owned by uid 1000.
-RUN mkdir -p /src/apps/simplex-calculator-bot/data && \
-    chown node:node /src/apps/simplex-calculator-bot/data && \
-    chmod 0700 /src/apps/simplex-calculator-bot/data
+RUN mkdir -p /src/apps/popopx-calculator-bot/data && \
+    chown node:node /src/apps/popopx-calculator-bot/data && \
+    chmod 0700 /src/apps/popopx-calculator-bot/data
 
 USER node
-WORKDIR /src/apps/simplex-calculator-bot
+WORKDIR /src/apps/popopx-calculator-bot
 
 ENV NODE_ENV=production
 

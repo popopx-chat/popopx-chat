@@ -6,7 +6,7 @@ cd "$(dirname "$0")/../.."
 
 case "${1:-}" in
   badge-web)
-    (cd apps/simplex-badge-service/web && npm ci && npm test)
+    (cd apps/popopx-badge-service/web && npm ci && npm test)
     ;;
   ci-scripts)
     python3 scripts/ci/test_packages_release.py
@@ -15,9 +15,9 @@ case "${1:-}" in
     (cd website && npm test)
     ;;
   mcp)
-    (cd packages/simplex-chat-client/types/typescript && npm install --no-audit --no-fund && npx tsc)
-    (cd packages/simplex-chat-nodejs && npm install --ignore-scripts --no-save --no-audit --no-fund ../simplex-chat-client/types/typescript && npx tsc && cp src/simplex.* dist)
-    cd packages/simplex-chat-mcp
+    (cd packages/popopx-chat-client/types/typescript && npm install --no-audit --no-fund && npx tsc)
+    (cd packages/popopx-chat-nodejs && npm install --ignore-scripts --no-save --no-audit --no-fund ../simplex-chat-client/types/typescript && npx tsc && cp src/simplex.* dist)
+    cd packages/popopx-chat-mcp
     npm ci --no-audit --no-fund
     npm install --no-save --no-audit --no-fund ../simplex-chat-nodejs ../simplex-chat-client/types/typescript
     npx tsc

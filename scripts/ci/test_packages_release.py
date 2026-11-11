@@ -505,10 +505,10 @@ class ChangesTest(GitRepoTest):
         self.assertEqual(self.builds("docs/guide.md", "packages/pkg/src.txt"), set())
 
     def test_package_change_builds_only_packages(self):
-        self.assertEqual(self.builds("packages/simplex-chat-python/src/simplex_chat/client.py"), {"packages"})
+        self.assertEqual(self.builds("packages/popopx-chat-python/src/simplex_chat/client.py"), {"packages"})
 
     def test_badge_web_change_builds_the_core_and_tests_its_scope(self):
-        self.assertEqual(self.builds("apps/simplex-badge-service/web/src/catalog.ts"), {"haskell"})
+        self.assertEqual(self.builds("apps/popopx-badge-service/web/src/catalog.ts"), {"haskell"})
         self.assertEqual(self.values["scopes"], "badge-web")
 
     def test_release_script_change_tests_the_ci_scripts(self):
@@ -520,11 +520,11 @@ class ChangesTest(GitRepoTest):
         self.assertEqual(self.values["scopes"], "website")
 
     def test_mcp_change_tests_its_scope(self):
-        self.assertEqual(self.builds("packages/simplex-chat-mcp/src/tools.ts"), set())
+        self.assertEqual(self.builds("packages/popopx-chat-mcp/src/tools.ts"), set())
         self.assertEqual(self.values["scopes"], "mcp")
 
     def test_library_change_builds_packages_and_tests_the_mcp_scope(self):
-        self.assertEqual(self.builds("packages/simplex-chat-nodejs/src/api.ts"), {"packages"})
+        self.assertEqual(self.builds("packages/popopx-chat-nodejs/src/api.ts"), {"packages"})
         self.assertEqual(self.values["scopes"], "mcp")
 
 

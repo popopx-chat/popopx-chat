@@ -11,7 +11,7 @@ A business-address bot that triages incoming support chats, optionally runs them
 ## Install & build
 
 ```bash
-cd apps/simplex-support-bot
+cd apps/popopx-support-bot
 npm install
 npm run build    # tsc
 ```
@@ -71,13 +71,13 @@ Run `npm start -- --help` for the auto-generated reference. Summary:
 This package depends on `simplex-chat` from npm. To test against an in-tree version:
 
 ```bash
-# In packages/simplex-chat-nodejs
+# In packages/popopx-chat-nodejs
 npm install && npm run build
 npm link
 
-# In apps/simplex-support-bot
+# In apps/popopx-support-bot
 npm link simplex-chat
-export SIMPLEX_ADDON_PATH=../../packages/simplex-chat-nodejs/build/Release/simplex.node
+export SIMPLEX_ADDON_PATH=../../packages/popopx-chat-nodejs/build/Release/simplex.node
 ```
 
 `npm unlink simplex-chat && npm install` reverts to the registry version.

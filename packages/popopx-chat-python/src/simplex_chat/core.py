@@ -86,7 +86,7 @@ class CryptoArgs(TypedDict):  # wire-format JSON; camelCase fields
 def _read_and_free(ptr: int | None) -> str:
     """Copy a Haskell-allocated null-terminated UTF-8 string and free its buffer.
 
-    Mirrors HandleCResult in packages/simplex-chat-nodejs/cpp/simplex.cc:157-165.
+    Mirrors HandleCResult in packages/popopx-chat-nodejs/cpp/simplex.cc:157-165.
     """
     if not ptr:
         raise RuntimeError("null pointer returned from libpopopx")

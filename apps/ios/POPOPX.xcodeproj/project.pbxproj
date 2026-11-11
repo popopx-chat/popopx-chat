@@ -127,7 +127,7 @@
 		5CE2BA922845340900EC33A6 /* FileUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64DAE1502809D9F5000DA960 /* FileUtils.swift */; };
 		5CE2BA93284534B000EC33A6 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CDCAD5E28187D4A00503DA2 /* libiconv.tbd */; };
 		5CE2BA94284534BB00EC33A6 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CDCAD6028187D7900503DA2 /* libz.tbd */; };
-		5CE2BA952845354B00EC33A6 /* SimpleX.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CE2BA8A2845332200EC33A6 /* SimpleX.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5CE2BA952845354B00EC33A6 /* POPOPX.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CE2BA8A2845332200EC33A6 /* POPOPX.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5CE2BA97284537A800EC33A6 /* dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 5CE2BA96284537A800EC33A6 /* dummy.m */; };
 		5CE2BA9D284555F500EC33A6 /* POPOPX NSE.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5CDCAD452818589900503DA2 /* POPOPX NSE.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		5CE2BAA62845617C00EC33A6 /* POPOPXChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CE2BA682845308900EC33A6 /* POPOPXChat.framework */; platformFilter = ios; };
@@ -271,8 +271,8 @@
 		E5AEC0AF2F91A73500270665 /* ComposeChatLinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5AEC0AE2F91A73500270665 /* ComposeChatLinkView.swift */; };
 		E5AEC0B22F9C000100270665 /* TerminalItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5AEC0B12F9C000100270665 /* TerminalItemView.swift */; };
 		E5AEC0C22F9C000100270665 /* SnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5AEC0C12F9C000100270665 /* SnapshotTests.swift */; };
-		E5C0BBE82F82B45500EA7527 /* SimpleXAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E5C0BBE72F82B45500EA7527 /* SimpleXAssets.xcassets */; };
-		E5C0BBE92F82B45500EA7527 /* SimpleXAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E5C0BBE72F82B45500EA7527 /* SimpleXAssets.xcassets */; };
+		E5C0BBE82F82B45500EA7527 /* POPOPXAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E5C0BBE72F82B45500EA7527 /* POPOPXAssets.xcassets */; };
+		E5C0BBE92F82B45500EA7527 /* POPOPXAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E5C0BBE72F82B45500EA7527 /* POPOPXAssets.xcassets */; };
 		E5C0BBEB2F82B45500EA7527 /* SharedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E5C0BBEA2F82B45500EA7527 /* SharedAssets.xcassets */; };
 		E5C0BBEC2F82B45500EA7527 /* SharedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E5C0BBEA2F82B45500EA7527 /* SharedAssets.xcassets */; };
 		E5DBF1932F88169800E1D7FD /* ConnectBannerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5DBF1922F88169800E1D7FD /* ConnectBannerCard.swift */; };
@@ -533,7 +533,7 @@
 		5CE2BA682845308900EC33A6 /* POPOPXChat.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = POPOPXChat.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5CE2BA76284530BF00EC33A6 /* POPOPXChat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = POPOPXChat.h; sourceTree = "<group>"; };
 		5CE2BA78284530CC00EC33A6 /* POPOPXChat.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = POPOPXChat.docc; sourceTree = "<group>"; };
-		5CE2BA8A2845332200EC33A6 /* SimpleX.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SimpleX.h; sourceTree = "<group>"; };
+		5CE2BA8A2845332200EC33A6 /* POPOPX.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = POPOPX.h; sourceTree = "<group>"; };
 		5CE2BA96284537A800EC33A6 /* dummy.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = dummy.m; sourceTree = "<group>"; };
 		5CE4407127ADB1D0007B033A /* Emoji.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Emoji.swift; sourceTree = "<group>"; };
 		5CE4407827ADB701007B033A /* EmojiItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiItemView.swift; sourceTree = "<group>"; };
@@ -675,7 +675,7 @@
 		E5AEC0B12F9C000100270665 /* TerminalItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalItemView.swift; sourceTree = "<group>"; };
 		E5AEC0C12F9C000100270665 /* SnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotTests.swift; sourceTree = "<group>"; };
 		E5AEC0C32F9C000100270665 /* POPOPX Snapshots.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "POPOPX Snapshots.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		E5C0BBE72F82B45500EA7527 /* SimpleXAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = SimpleXAssets.xcassets; sourceTree = "<group>"; };
+		E5C0BBE72F82B45500EA7527 /* POPOPXAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = POPOPXAssets.xcassets; sourceTree = "<group>"; };
 		E5C0BBEA2F82B45500EA7527 /* SharedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = SharedAssets.xcassets; sourceTree = "<group>"; };
 		E5C0BBFD2F82BBC000EA7527 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		E5C0BBFE2F82BBC900EA7527 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
@@ -975,7 +975,7 @@
 				5C764E87279CBC8E000C6508 /* Model */,
 				5C2E260D27A30E2400F70299 /* Views */,
 				5CA059C5279559F40002BEB4 /* Assets.xcassets */,
-				E5C0BBE72F82B45500EA7527 /* SimpleXAssets.xcassets */,
+				E5C0BBE72F82B45500EA7527 /* POPOPXAssets.xcassets */,
 				E5C0BBEA2F82B45500EA7527 /* SharedAssets.xcassets */,
 				D7AA2C3429A936B400737B40 /* MediaEncryption.playground */,
 				5C13730C2815740A00F43030 /* DebugJSON.playground */,
@@ -1133,7 +1133,7 @@
 				5C00168028C4FE760094D739 /* KeyChain.swift */,
 				5CF9371F2B24DE8C00E1D781 /* SharedFileSubscriber.swift */,
 				5CE2BA76284530BF00EC33A6 /* POPOPXChat.h */,
-				5CE2BA8A2845332200EC33A6 /* SimpleX.h */,
+				5CE2BA8A2845332200EC33A6 /* POPOPX.h */,
 				5CE2BA78284530CC00EC33A6 /* POPOPXChat.docc */,
 				5CE2BA96284537A800EC33A6 /* dummy.m */,
 				5CD67B8D2B0E858A00C510B1 /* hs_init.h */,
@@ -1337,7 +1337,7 @@
 				5CE2BA77284530BF00EC33A6 /* POPOPXChat.h in Headers */,
 				5CD67B8F2B0E858A00C510B1 /* hs_init.h in Headers */,
 				8C01E9C22C8EFF8F008A4B0A /* objc.h in Headers */,
-				5CE2BA952845354B00EC33A6 /* SimpleX.h in Headers */,
+				5CE2BA952845354B00EC33A6 /* POPOPX.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1562,7 +1562,7 @@
 				5CA059EF279559F40002BEB4 /* Assets.xcassets in Resources */,
 				5CC2C0FC2809BF11000C35E3 /* Localizable.strings in Resources */,
 				5CC2C0FF2809BF11000C35E3 /* POPOPX--iOS--InfoPlist.strings in Resources */,
-				E5C0BBE82F82B45500EA7527 /* SimpleXAssets.xcassets in Resources */,
+				E5C0BBE82F82B45500EA7527 /* POPOPXAssets.xcassets in Resources */,
 				E5C0BBEB2F82B45500EA7527 /* SharedAssets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1595,7 +1595,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E5DCF9712C590272007928CC /* Localizable.strings in Resources */,
-				E5C0BBE92F82B45500EA7527 /* SimpleXAssets.xcassets in Resources */,
+				E5C0BBE92F82B45500EA7527 /* POPOPXAssets.xcassets in Resources */,
 				E5C0BBEC2F82B45500EA7527 /* SharedAssets.xcassets in Resources */,
 				E5DCF9982C5906FF007928CC /* InfoPlist.strings in Resources */,
 			);
@@ -2475,7 +2475,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INCLUDE_PATHS = "";
-				SWIFT_OBJC_BRIDGING_HEADER = ./POPOPXChat/SimpleX.h;
+				SWIFT_OBJC_BRIDGING_HEADER = ./POPOPXChat/POPOPX.h;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -2532,7 +2532,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INCLUDE_PATHS = "";
-				SWIFT_OBJC_BRIDGING_HEADER = ./POPOPXChat/SimpleX.h;
+				SWIFT_OBJC_BRIDGING_HEADER = ./POPOPXChat/POPOPX.h;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

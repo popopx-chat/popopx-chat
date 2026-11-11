@@ -12,12 +12,12 @@ on:
   pull_request:
     paths:
       - "src/**"
-      - "apps/simplex-chat/**"
-      - "apps/simplex-bot/**"
-      - "apps/simplex-bot-advanced/**"
-      - "apps/simplex-badge-service/**"
-      - "apps/simplex-broadcast-bot/**"
-      - "apps/simplex-directory-service/**"
+      - "apps/popopx-chat/**"
+      - "apps/popopx-bot/**"
+      - "apps/popopx-bot-advanced/**"
+      - "apps/popopx-badge-service/**"
+      - "apps/popopx-broadcast-bot/**"
+      - "apps/popopx-directory-service/**"
       - "apps/multiplatform/**"
       - "apps/ios/**"
       - "tests/**"
@@ -31,17 +31,17 @@ on:
       - ".github/workflows/build.yml"
       - ".github/actions/**"
       - ".github/changelog_conf.json"
-      - "packages/simplex-chat-nodejs/**"
-      - "packages/simplex-chat-client/types/typescript/**"
-      - "packages/simplex-chat-python/**"
+      - "packages/popopx-chat-nodejs/**"
+      - "packages/popopx-chat-client/types/typescript/**"
+      - "packages/popopx-chat-python/**"
       - "scripts/ci/package-tests.sh"
-      - "apps/simplex-badge-service/web/**"
+      - "apps/popopx-badge-service/web/**"
       - "scripts/ci/packages_release.py"
       - "scripts/ci/test_packages_release.py"
       - "website/src/js/simplex-lib.jsc"
       - "website/test/**"
       - "website/package.json"
-      - "packages/simplex-chat-mcp/**"
+      - "packages/popopx-chat-mcp/**"
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
     inputs:
@@ -1795,7 +1795,7 @@ jobs:
       # Before the test names: the build installs @simplex-chat/types from this repository.
       - name: Build and test simplex-chat (npm)
         if: steps.plan.outputs.nodejs_version
-        working-directory: packages/simplex-chat-nodejs
+        working-directory: packages/popopx-chat-nodejs
         run: |
           (cd ../simplex-chat-client/types/typescript && npm install --no-audit --no-fund && npx tsc)
           npm install --ignore-scripts --no-save --no-audit --no-fund ../simplex-chat-client/types/typescript
@@ -1809,7 +1809,7 @@ jobs:
       - name: Publish @simplex-chat/types
         id: types
         if: steps.plan.outputs.types_version && needs.maybe-release.outputs.publish_types && needs.releases.result == 'success'
-        working-directory: packages/simplex-chat-client/types/typescript
+        working-directory: packages/popopx-chat-client/types/typescript
         env:
           VERSION: ${{ steps.plan.outputs.types_version }}
           DIST_TAG: ${{ steps.plan.outputs.types_dist_tag }}
@@ -1821,7 +1821,7 @@ jobs:
       - name: Publish simplex-chat (npm)
         id: nodejs
         if: steps.plan.outputs.nodejs_version
-        working-directory: packages/simplex-chat-nodejs
+        working-directory: packages/popopx-chat-nodejs
         env:
           VERSION: ${{ steps.plan.outputs.nodejs_version }}
           DIST_TAG: ${{ steps.plan.outputs.nodejs_dist_tag }}
@@ -1831,7 +1831,7 @@ jobs:
 
       - name: Build and test simplex-chat (PyPI)
         if: steps.plan.outputs.python_version
-        working-directory: packages/simplex-chat-python
+        working-directory: packages/popopx-chat-python
         run: |
           python -m pip install build -e ".[test]"
           python -m pytest -q
@@ -1841,7 +1841,7 @@ jobs:
         if: steps.plan.outputs.python_version
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: packages/simplex-chat-python/dist
+          packages-dir: packages/popopx-chat-python/dist
           repository-url: ${{ vars.PYPI_UPLOAD_URL || 'https://upload.pypi.org/legacy/' }}
           password: ${{ secrets.PYPI_API_TOKEN }}
 
@@ -1854,7 +1854,7 @@ jobs:
 
       - name: Build and test @simplex-chat/mcp
         if: steps.plan.outputs.mcp_version
-        working-directory: packages/simplex-chat-mcp
+        working-directory: packages/popopx-chat-mcp
         run: |
           npm ci --no-audit --no-fund
           npx tsc
@@ -1864,7 +1864,7 @@ jobs:
       - name: Publish @simplex-chat/mcp
         id: mcp
         if: steps.plan.outputs.mcp_version
-        working-directory: packages/simplex-chat-mcp
+        working-directory: packages/popopx-chat-mcp
         env:
           VERSION: ${{ steps.plan.outputs.mcp_version }}
           DIST_TAG: ${{ steps.plan.outputs.mcp_dist_tag }}

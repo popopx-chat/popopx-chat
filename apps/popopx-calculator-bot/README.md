@@ -1,6 +1,6 @@
 # SimpleX Calculator
 
-A calculator bot built with the [SimpleX Chat Node.js library](../../packages/simplex-chat-nodejs/).
+A calculator bot built with the [SimpleX Chat Node.js library](../../packages/popopx-chat-nodejs/).
 
 Each user who connects via the bot's business address receives a calculator message with keys as commands. The bot replaces this message after each input.
 
@@ -25,7 +25,7 @@ The bot prints its address and keeps its data in `./data`.
 
 To add a SimpleX name to the address, register the name with the address short link, and run `npm start -- --domain yourname.simplex`. The name is kept when the bot starts without `--domain`.
 
-To use the library from this repository, build it and run `npm install --no-save ../../packages/simplex-chat-nodejs` instead of `npm install`, then start the bot with `SIMPLEX_ADDON_PATH=../../packages/simplex-chat-nodejs/build/Release/simplex.node`.
+To use the library from this repository, build it and run `npm install --no-save ../../packages/popopx-chat-nodejs` instead of `npm install`, then start the bot with `SIMPLEX_ADDON_PATH=../../packages/popopx-chat-nodejs/build/Release/simplex.node`.
 
 ## Test
 

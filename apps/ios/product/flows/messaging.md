@@ -132,16 +132,16 @@ Complete message lifecycle in SimpleX Chat iOS: composing, sending, receiving, e
 
 | Type | Location | Description |
 |------|----------|-------------|
-| `ComposedMessage` | `SimpleXChat/APITypes.swift` | Outgoing message: fileSource, quotedItemId, msgContent, mentions |
-| `MsgContent` | `SimpleXChat/ChatTypes.swift` | Enum: `.text`, `.link`, `.image`, `.video`, `.voice`, `.file` |
-| `CIContent` | `SimpleXChat/ChatTypes.swift` | Chat item content wrapper with sent/received variants |
-| `CIStatus` | `SimpleXChat/ChatTypes.swift` | Delivery status: sndNew, sndSent, sndError, rcvNew, rcvRead |
-| `CIDirection` | `SimpleXChat/ChatTypes.swift` | `.directSnd`, `.directRcv`, `.groupSnd`, `.groupRcv(groupMember)`, `.channelRcv` |
-| `ChatItem` | `SimpleXChat/ChatTypes.swift` | Full message model: content, meta, status, direction, quotedItem |
-| `ChatItemDeletion` | `SimpleXChat/ChatTypes.swift` | Deleted item info with old/new item pairs |
-| `CIDeleteMode` | `SimpleXChat/ChatTypes.swift` | `.cidmInternal` (local) or `.cidmBroadcast` (for everyone) |
-| `MsgReaction` | `SimpleXChat/ChatTypes.swift` | Reaction type (emoji-based) |
-| `UpdatedMessage` | `SimpleXChat/APITypes.swift` | Edited message content for update API |
+| `ComposedMessage` | `POPOPXChat/APITypes.swift` | Outgoing message: fileSource, quotedItemId, msgContent, mentions |
+| `MsgContent` | `POPOPXChat/ChatTypes.swift` | Enum: `.text`, `.link`, `.image`, `.video`, `.voice`, `.file` |
+| `CIContent` | `POPOPXChat/ChatTypes.swift` | Chat item content wrapper with sent/received variants |
+| `CIStatus` | `POPOPXChat/ChatTypes.swift` | Delivery status: sndNew, sndSent, sndError, rcvNew, rcvRead |
+| `CIDirection` | `POPOPXChat/ChatTypes.swift` | `.directSnd`, `.directRcv`, `.groupSnd`, `.groupRcv(groupMember)`, `.channelRcv` |
+| `ChatItem` | `POPOPXChat/ChatTypes.swift` | Full message model: content, meta, status, direction, quotedItem |
+| `ChatItemDeletion` | `POPOPXChat/ChatTypes.swift` | Deleted item info with old/new item pairs |
+| `CIDeleteMode` | `POPOPXChat/ChatTypes.swift` | `.cidmInternal` (local) or `.cidmBroadcast` (for everyone) |
+| `MsgReaction` | `POPOPXChat/ChatTypes.swift` | Reaction type (emoji-based) |
+| `UpdatedMessage` | `POPOPXChat/APITypes.swift` | Edited message content for update API |
 
 ## Error Cases
 
@@ -168,8 +168,8 @@ Complete message lifecycle in SimpleX Chat iOS: composing, sending, receiving, e
 | `Shared/Views/Chat/ChatItemForwardingView.swift` | Forward destination picker |
 | `Shared/Views/Chat/ChatItemInfoView.swift` | Message info (delivery details, timestamps) |
 | `Shared/Model/SimpleXAPI.swift` | API functions: `apiSendMessages`, `apiUpdateChatItem`, `apiDeleteChatItems`, `apiChatItemReaction`, `apiForwardChatItems` |
-| `SimpleXChat/APITypes.swift` | `ComposedMessage`, `ChatCommand` enum, response types |
-| `SimpleXChat/ChatTypes.swift` | `MsgContent`, `CIContent`, `CIStatus`, `CIDirection`, `ChatItem` |
+| `POPOPXChat/APITypes.swift` | `ComposedMessage`, `ChatCommand` enum, response types |
+| `POPOPXChat/ChatTypes.swift` | `MsgContent`, `CIContent`, `CIStatus`, `CIDirection`, `ChatItem` |
 | `Shared/Model/AudioRecPlay.swift` | Voice message recording/playback engine |
 
 ## Related Specifications

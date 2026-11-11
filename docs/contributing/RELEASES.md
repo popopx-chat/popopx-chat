@@ -6,15 +6,15 @@
 |---|---|---|---|
 | libsimplex | simplex-chat-libs release `core-<version>` | `version` of `simplex-chat.cabal` | push to master or stable with a new core version |
 | Node.js add-on | simplex-chat-libs release `nodejs-addon-<7 characters of the commit>` | | push to master or stable with unreleased add-on sources |
-| `@simplex-chat/types` | npm | `version` of `packages/simplex-chat-client/types/typescript/package.json` | library release with an unpublished types version |
-| `simplex-chat` | npm | `version` of `packages/simplex-chat-nodejs/package.json` | push to master or stable with an unpublished version |
-| `@simplex-chat/mcp` | npm | `version` of `packages/simplex-chat-mcp/package.json` | push to master or stable with an unpublished version, when the versions it pins for `simplex-chat` and `@simplex-chat/types` are on npm |
-| `simplex-chat` | PyPI | `__version__` of `packages/simplex-chat-python/src/simplex_chat/_version.py` | push to master or stable with an unpublished version |
+| `@simplex-chat/types` | npm | `version` of `packages/popopx-chat-client/types/typescript/package.json` | library release with an unpublished types version |
+| `simplex-chat` | npm | `version` of `packages/popopx-chat-nodejs/package.json` | push to master or stable with an unpublished version |
+| `@simplex-chat/mcp` | npm | `version` of `packages/popopx-chat-mcp/package.json` | push to master or stable with an unpublished version, when the versions it pins for `simplex-chat` and `@simplex-chat/types` are on npm |
+| `simplex-chat` | PyPI | `__version__` of `packages/popopx-chat-python/src/simplex_chat/_version.py` | push to master or stable with an unpublished version |
 
 Add-on sources:
-- `packages/simplex-chat-nodejs/binding.gyp`
-- `packages/simplex-chat-nodejs/cpp/`
-- `node-addon-api` version in `devDependencies` of `packages/simplex-chat-nodejs/package.json`
+- `packages/popopx-chat-nodejs/binding.gyp`
+- `packages/popopx-chat-nodejs/cpp/`
+- `node-addon-api` version in `devDependencies` of `packages/popopx-chat-nodejs/package.json`
 
 Release states in simplex-chat-libs:
 
@@ -97,7 +97,7 @@ Incomplete draft: completed by a re-run or by the next push with the same add-on
    - every pinned asset downloaded with a matching SHA-256
 
    Written:
-   - pins in `packages/simplex-chat-nodejs/src/release.ts` and `_version.py`: latest library release of the branch, add-on release of the current sources (Node.js), SHA-256 of every asset
+   - pins in `packages/popopx-chat-nodejs/src/release.ts` and `_version.py`: latest library release of the branch, add-on release of the current sources (Node.js), SHA-256 of every asset
    - `@simplex-chat/types` dependency: `^<types version>` (Node.js)
    - package versions: a published version bumped when the pins or the package files changed
 
@@ -114,7 +114,7 @@ Versions unpublished after a failure: published by the next push to the branch.
 
 ## MCP server release
 
-1. On master or stable, in `packages/simplex-chat-mcp`: `version` in `package.json` set, the pins of `simplex-chat` and `@simplex-chat/types` updated when needed, then:
+1. On master or stable, in `packages/popopx-chat-mcp`: `version` in `package.json` set, the pins of `simplex-chat` and `@simplex-chat/types` updated when needed, then:
 
    ```
    npm install --package-lock-only
@@ -140,13 +140,13 @@ A version pinned in the same commit that bumps `simplex-chat` or `@simplex-chat/
    scripts/ci/package-tests.sh publish <platform> nodejs python
    ```
 
-3. In `packages/simplex-chat-nodejs`, with the npm tag of the version:
+3. In `packages/popopx-chat-nodejs`, with the npm tag of the version:
 
    ```
    npm publish --access public --tag beta
    ```
 
-4. In `packages/simplex-chat-python`:
+4. In `packages/popopx-chat-python`:
 
    ```
    python -m pip install build twine

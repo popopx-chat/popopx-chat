@@ -5,7 +5,7 @@
 > Related specs: [README](README.md) | [API Reference](api.md) | [State Management](state.md) | [Database](database.md)
 > Related product: [Product Overview](../product/README.md)
 
-**Source:** [`SimpleXApp.swift`](../Shared/SimpleXApp.swift#L1-L183) | [`AppDelegate.swift`](../Shared/AppDelegate.swift#L1-L209) | [`ContentView.swift`](../Shared/ContentView.swift#L1-L513) | [`ChatModel.swift`](../Shared/Model/ChatModel.swift#L1-L1373) | [`SimpleXAPI.swift`](../Shared/Model/SimpleXAPI.swift#L1-L2915) | [`AppAPITypes.swift`](../Shared/Model/AppAPITypes.swift#L1-L2357) | [`APITypes.swift`](../SimpleXChat/APITypes.swift#L1-L1071) | [`API.swift`](../SimpleXChat/API.swift#L1-L388)
+**Source:** [`SimpleXApp.swift`](../Shared/SimpleXApp.swift#L1-L183) | [`AppDelegate.swift`](../Shared/AppDelegate.swift#L1-L209) | [`ContentView.swift`](../Shared/ContentView.swift#L1-L513) | [`ChatModel.swift`](../Shared/Model/ChatModel.swift#L1-L1373) | [`SimpleXAPI.swift`](../Shared/Model/SimpleXAPI.swift#L1-L2915) | [`AppAPITypes.swift`](../Shared/Model/AppAPITypes.swift#L1-L2357) | [`APITypes.swift`](../POPOPXChat/APITypes.swift#L1-L1071) | [`API.swift`](../POPOPXChat/API.swift#L1-L388)
 
 ---
 
@@ -37,7 +37,7 @@ The app follows a strict layered model where each layer communicates only with i
 │  AppAPITypes (ChatCommand/Response)     │  JSON serialization/deserialization
 ├─────────────────────────────────────────┤
 │  C FFI Layer                            │  chat_send_cmd_retry, chat_recv_msg_wait
-│  (SimpleX.h, libsimplex.a)             │  Compiled Haskell via GHC cross-compiler
+│  (POPOPX.h, libsimplex.a)             │  Compiled Haskell via GHC cross-compiler
 ├─────────────────────────────────────────┤
 │  Haskell Core (chat_ctrl)               │  Chat logic, chat protocol (x-events),
 │  (Simplex.Chat.Controller)              │  database operations, file management
@@ -58,17 +58,17 @@ The app follows a strict layered model where each layer communicates only with i
 | State | [`Shared/Model/ChatModel.swift`](../Shared/Model/ChatModel.swift#L337) | `ChatModel`, `ItemsModel`, `Chat` classes | L337, L74, L1271 |
 | API | [`Shared/Model/SimpleXAPI.swift`](../Shared/Model/SimpleXAPI.swift#L93) | FFI bridge functions | L93 |
 | API | [`Shared/Model/AppAPITypes.swift`](../Shared/Model/AppAPITypes.swift#L15) | `ChatCommand`, `ChatResponse`, `ChatEvent` enums | L15, L649, L1055 |
-| FFI | [`SimpleXChat/SimpleX.h`](../SimpleXChat/SimpleX.h#L1-L63) | C header declaring Haskell exports | |
-| FFI | [`SimpleXChat/APITypes.swift`](../SimpleXChat/APITypes.swift#L27) | `APIResult<R>`, `ChatError`, `ChatCmdProtocol` | L27, L699, L17 |
+| FFI | [`POPOPXChat/POPOPX.h`](../POPOPXChat/POPOPX.h#L1-L63) | C header declaring Haskell exports | |
+| FFI | [`POPOPXChat/APITypes.swift`](../POPOPXChat/APITypes.swift#L27) | `APIResult<R>`, `ChatError`, `ChatCmdProtocol` | L27, L699, L17 |
 | Core | `../../src/Simplex/Chat/Controller.hs` | Haskell command processor — see `processCommand` in `Controller.hs` | |
 
 ---
 
-## [2. FFI Bridge](../SimpleXChat/SimpleX.h#L1-L63)
+## [2. FFI Bridge](../POPOPXChat/POPOPX.h#L1-L63)
 
-### [C Functions (SimpleX.h)](../SimpleXChat/SimpleX.h#L1-L63)
+### [C Functions (POPOPX.h)](../POPOPXChat/POPOPX.h#L1-L63)
 
-The Haskell core exposes these C functions, declared in `SimpleXChat/SimpleX.h`:
+The Haskell core exposes these C functions, declared in `POPOPXChat/POPOPX.h`:
 
 ```c
 typedef void* chat_ctrl;
@@ -118,16 +118,16 @@ func chatApiSendCmd<R: ChatAPIResult>(_ cmd: ChatCommand, bgTask: Bool = true,
 
 // Low-level FFI call -- serializes command to string, calls chat_send_cmd_retry, decodes JSON
 func sendSimpleXCmd<R: ChatAPIResult>(_ cmd: ChatCmdProtocol, _ ctrl: chat_ctrl?,
-    retryNum: Int32 = 0) -> APIResult<R>                                              // SimpleXChat/API.swift L114
+    retryNum: Int32 = 0) -> APIResult<R>                                              // POPOPXChat/API.swift L114
 ```
 
 ### Data Flow
 
 1. Swift constructs a `ChatCommand` enum value (e.g., `.apiSendMessages(type:id:scope:live:ttl:composedMessages:)`)
 2. [`ChatCommand.cmdString`](../Shared/Model/AppAPITypes.swift#L15) serializes it to a command string (e.g., `"/_send @1 json {...}"`)
-3. [`sendSimpleXCmd`](../SimpleXChat/API.swift#L115) passes the string to `chat_send_cmd_retry` via C FFI
+3. [`sendSimpleXCmd`](../POPOPXChat/API.swift#L115) passes the string to `chat_send_cmd_retry` via C FFI
 4. Haskell core processes the command, returns JSON response string
-5. Swift decodes JSON into [`APIResult<R>`](../SimpleXChat/APITypes.swift#L27) where `R: ChatAPIResult`
+5. Swift decodes JSON into [`APIResult<R>`](../POPOPXChat/APITypes.swift#L27) where `R: ChatAPIResult`
 6. Result is either `.result(R)`, `.error(ChatError)`, or `.invalid(type, json)`
 
 ### [Background Task Protection](../Shared/Model/SimpleXAPI.swift#L54-L79)
@@ -169,7 +169,7 @@ Events are decoded as [`ChatEvent`](../Shared/Model/AppAPITypes.swift#L1055) enu
 
 ---
 
-## [4. Database Architecture](../SimpleXChat/FileUtils.swift#L70-L294)
+## [4. Database Architecture](../POPOPXChat/FileUtils.swift#L70-L294)
 
 Two SQLite databases in the app group container (shared with NSE):
 
@@ -178,7 +178,7 @@ Two SQLite databases in the app group container (shared with NSE):
 | Chat DB | `simplex_v1_chat.db` | Messages, contacts, groups, profiles, files, tags, preferences |
 | Agent DB | `simplex_v1_agent.db` | SMP connections, keys, queues, server info |
 
-Both databases use the `DB_FILE_PREFIX = "simplex_v1"` prefix. The database path is resolved via [`getAppDatabasePath()`](../SimpleXChat/FileUtils.swift#L70) in `SimpleXChat/FileUtils.swift`, which checks `dbContainerGroupDefault` to determine whether to use the app group container or legacy documents directory.
+Both databases use the `DB_FILE_PREFIX = "simplex_v1"` prefix. The database path is resolved via [`getAppDatabasePath()`](../POPOPXChat/FileUtils.swift#L70) in `POPOPXChat/FileUtils.swift`, which checks `dbContainerGroupDefault` to determine whether to use the app group container or legacy documents directory.
 
 See [Database & Storage specification](database.md) for full details.
 
@@ -242,7 +242,7 @@ When a CallKit call is active during backgrounding, chat suspension is deferred 
 
 ### [Notification Service Extension (NSE)](../SimpleX%20NSE/NotificationService.swift#L1-L1228)
 
-The NSE ([`SimpleX NSE/NotificationService.swift`](../SimpleX%20NSE/NotificationService.swift#L1-L1228)) is a separate process that:
+The NSE ([`POPOPX NSE/NotificationService.swift`](../SimpleX%20NSE/NotificationService.swift#L1-L1228)) is a separate process that:
 
 1. Receives encrypted push notification payload from APNs
 2. Initializes its own Haskell core instance (`chat_ctrl`) with shared database access
@@ -256,7 +256,7 @@ The NSE ([`SimpleX NSE/NotificationService.swift`](../SimpleX%20NSE/Notification
 
 ### Share Extension (SE)
 
-The Share Extension (`SimpleX SE/`) allows sharing content (text, images, files) from other apps into SimpleX conversations.
+The Share Extension (`POPOPX SE/`) allows sharing content (text, images, files) from other apps into SimpleX conversations.
 
 ---
 
@@ -329,12 +329,12 @@ Chat relays are SMP servers that forward messages to channel subscribers. They a
 | App delegate | [`Shared/AppDelegate.swift`](../Shared/AppDelegate.swift#L15) | L15 |
 | Root view | [`Shared/ContentView.swift`](../Shared/ContentView.swift#L24) | L24 |
 | FFI bridge | [`Shared/Model/SimpleXAPI.swift`](../Shared/Model/SimpleXAPI.swift#L93) | L93 |
-| Low-level FFI | [`SimpleXChat/API.swift`](../SimpleXChat/API.swift#L115) | L115 |
+| Low-level FFI | [`POPOPXChat/API.swift`](../POPOPXChat/API.swift#L115) | L115 |
 | App state | [`Shared/Model/ChatModel.swift`](../Shared/Model/ChatModel.swift#L337) | L337 |
 | API types | [`Shared/Model/AppAPITypes.swift`](../Shared/Model/AppAPITypes.swift#L15) | L15 |
-| Shared types | [`SimpleXChat/APITypes.swift`](../SimpleXChat/APITypes.swift#L27) | L27 |
-| C header | [`SimpleXChat/SimpleX.h`](../SimpleXChat/SimpleX.h#L1-L63) | |
-| NSE | [`SimpleX NSE/NotificationService.swift`](../SimpleX%20NSE/NotificationService.swift#L1-L1228) | |
+| Shared types | [`POPOPXChat/APITypes.swift`](../POPOPXChat/APITypes.swift#L27) | L27 |
+| C header | [`POPOPXChat/POPOPX.h`](../POPOPXChat/POPOPX.h#L1-L63) | |
+| NSE | [`POPOPX NSE/NotificationService.swift`](../SimpleX%20NSE/NotificationService.swift#L1-L1228) | |
 | Haskell core | `../../src/Simplex/Chat/Controller.hs` — see `processCommand` in `Controller.hs` | |
 | Chat protocol (x-events, message envelopes) | `../../src/Simplex/Chat/Protocol.hs` | |
 
