@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
+  <file original="en.lproj/Localizable.strings" source-language="en" target-language="bn" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.2" build-num="14C18"/>
+    </header>
+    <body>
+      <trans-unit id="&#10;" xml:space="preserve" approved="no">
+        <source>
+</source>
+        <target state="needs-translation">
+</target>
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
+      <trans-unit id=" " xml:space="preserve" approved="no">
+        <source> </source>
+        <target state="needs-translation"> </target>
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
+      <trans-unit id="  " xml:space="preserve" approved="no">
+        <source>  </source>
+        <target state="needs-translation">  </target>
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
+      <trans-unit id="   " xml:space="preserve" approved="no">
+        <source>   </source>
+        <target state="needs-translation">   </target>
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
+      <trans-unit id=" (" xml:space="preserve" approved="no">
+        <source> (</source>
+        <target state="needs-translation"> (</target>
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
+      <trans-unit id="!1 colored!" xml:space="preserve" approved="no">
+        <source>!1 colored!</source>
+        <target state="translated">!1 রঙিন!</target>
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="en.lproj/SimpleX--iOS--InfoPlist.strings" source-language="en" target-language="bn" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.2" build-num="14C18"/>
+    </header>
+    <body>
+    </body>
+  </file>
+  <file original="SimpleX NSE/en.lproj/InfoPlist.strings" source-language="en" target-language="bn" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.2" build-num="14C18"/>
+    </header>
+    <body>
+    </body>
+  </file>
+  <file original="SimpleX SE/en.lproj/Localizable.strings" source-language="en" target-language="bn" datatype="plaintext">
+    <body>
+    </body>
+  </file>
+  <file original="en.lproj/SimpleXChat-InfoPlist.strings" source-language="en" target-language="bn" datatype="plaintext">
+    <body>
+    </body>
+  </file>
+  <file original="SimpleX NSE/en.lproj/Localizable.strings" source-language="en" target-language="bn" datatype="plaintext">
+    <body>
+    </body>
+  </file>
+  <file original="SimpleX SE/en.lproj/InfoPlist.strings" source-language="en" target-language="bn" datatype="plaintext">
+    <body>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,50 @@
+{
+    "items": [
+        {
+            "menu": "Guide",
+            "data": [
+                "README.md",
+                "making-connections.md",
+                "send-messages.md",
+                "secret-groups.md",
+                "channels.md",
+                "channel-webpage.md",
+                "chat-profiles.md",
+                "register-simplex-name.md",
+                "managing-data.md",
+                "linked-devices.md",
+                "audio-video-calls.md",
+                "notifications.md",
+                "privacy-security.md",
+                "app-settings.md",
+                "supporter-badges.md"
+            ]
+        },
+        {
+            "menu": "Reference",
+            "data": [
+                "SIMPLEX.md",
+                "BUSINESS.md",
+                "DIRECTORY.md",
+                "ANDROID.md",
+                "CLI.md",
+                "CONTRIBUTING.md",
+                "SERVER.md",
+                "TRANSLATIONS.md",
+                "WEBRTC.md",
+                "XFTP-SERVER.md",
+                "CHAT-RELAY.md",
+                "REPRODUCE.md",
+                "TRANSPARENCY.md",
+                "SECURITY.md",
+                "FAQ.md"
+            ]
+        },
+        {
+            "menu": "Protocol",
+            "data": [
+                "simplex-chat.md"
+            ]
+        }
+    ]
+}

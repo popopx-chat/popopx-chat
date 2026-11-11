@@ -1,0 +1,54 @@
+[**simplex-chat**](README.md)
+
+***
+
+[simplex-chat](README.md) / core
+
+# core
+
+A low level API to the core library - the same that is used in desktop clients.
+You are unlikely to ever need to use this module directly, except for image resizing.
+
+## Namespaces
+
+- [DBMigrationError](core.Namespace.DBMigrationError.md)
+- [MigrationError](core.Namespace.MigrationError.md)
+- [MTRError](core.Namespace.MTRError.md)
+
+## Enumerations
+
+- [ImageSize](core.Enumeration.ImageSize.md)
+- [MigrationConfirmation](core.Enumeration.MigrationConfirmation.md)
+
+## Classes
+
+- [ChatAPIError](core.Class.ChatAPIError.md)
+- [ChatInitError](core.Class.ChatInitError.md)
+
+## Interfaces
+
+- [APIResult](core.Interface.APIResult.md)
+- [CryptoArgs](core.Interface.CryptoArgs.md)
+- [UpMigration](core.Interface.UpMigration.md)
+
+## Type Aliases
+
+- [Backend](core.TypeAlias.Backend.md)
+- [DBMigrationError](core.TypeAlias.DBMigrationError.md)
+- [MigrationError](core.TypeAlias.MigrationError.md)
+- [MTRError](core.TypeAlias.MTRError.md)
+
+## Functions
+
+- [chatCloseStore](core.Function.chatCloseStore.md)
+- [chatDecryptFile](core.Function.chatDecryptFile.md)
+- [chatEncryptFile](core.Function.chatEncryptFile.md)
+- [chatMigrateInit](core.Function.chatMigrateInit.md)
+- [chatReadFile](core.Function.chatReadFile.md)
+- [chatRecvMsgWait](core.Function.chatRecvMsgWait.md)
+- [chatResizeImage](core.Function.chatResizeImage.md)
+- [chatResizeImageUri](core.Function.chatResizeImageUri.md)
+- [chatSendCmd](core.Function.chatSendCmd.md)
+- [chatWriteFile](core.Function.chatWriteFile.md)
+- [loadLibrary](core.Function.loadLibrary.md)
+- [resizeImage](core.Function.resizeImage.md)
