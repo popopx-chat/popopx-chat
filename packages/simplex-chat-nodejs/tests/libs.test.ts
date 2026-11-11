@@ -109,12 +109,12 @@ describe("paths", () => {
   })
 
   it.each([
-    ["linux", "x64", "libsimplex.so"],
-    ["darwin", "arm64", "libsimplex.dylib"],
-    ["win32", "x64", "libsimplex.dll"],
-  ])("looks for the %s library name", async (platform, arch, lib) => {
+    ["linux", "x64", "libpopopx.so, libsimplex.so"],
+    ["darwin", "arm64", "libpopopx.dylib, libsimplex.dylib"],
+    ["win32", "x64", "libpopopx.dll, libsimplex.dll"],
+  ])("looks for the %s library names", async (platform, arch, libs) => {
     fs.rmSync(libPath(libsDir))
-    await expect(resolveLibsDir("sqlite", {SIMPLEX_LIBS_DIR: libsDir}, platform, arch)).rejects.toThrow(`SIMPLEX_LIBS_DIR has no ${lib}: `)
+    await expect(resolveLibsDir("sqlite", {SIMPLEX_LIBS_DIR: libsDir}, platform, arch)).rejects.toThrow(`SIMPLEX_LIBS_DIR has none of ${libs}: `)
   })
 
   it("returns a relative SIMPLEX_ADDON_PATH as absolute", async () => {
@@ -128,9 +128,9 @@ describe("paths", () => {
     await expect(resolveAddonPath({SIMPLEX_ADDON_PATH: addon})).rejects.toThrow(`SIMPLEX_ADDON_PATH does not exist: ${addon}`)
   })
 
-  it("rejects a SIMPLEX_LIBS_DIR without libsimplex", async () => {
+  it("rejects a SIMPLEX_LIBS_DIR that has neither library name", async () => {
     fs.rmSync(libPath(libsDir))
-    await expect(resolveLibsDir("sqlite", {SIMPLEX_LIBS_DIR: libsDir})).rejects.toThrow(`SIMPLEX_LIBS_DIR has no ${path.basename(libPath(libsDir))}: ${libsDir}`)
+    await expect(resolveLibsDir("sqlite", {SIMPLEX_LIBS_DIR: libsDir})).rejects.toThrow(`SIMPLEX_LIBS_DIR has none of ${path.basename(libPath(libsDir))}, libsimplex.so: ${libsDir}`)
   })
 })
 
@@ -440,7 +440,7 @@ describe("cli", () => {
     const log = jest.spyOn(console, "log").mockImplementation(() => {})
     try {
       await expect(installWith(dir, addon)).resolves.toBe(0)
-      expect(log.mock.calls).toEqual([[`libsimplex installed at: ${dir}`], [`Node.js add-on installed at: ${addon}`]])
+      expect(log.mock.calls).toEqual([[`libpopopx installed at: ${dir}`], [`Node.js add-on installed at: ${addon}`]])
     } finally {
       fs.rmSync(dir, {recursive: true, force: true})
     }

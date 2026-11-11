@@ -368,7 +368,7 @@ def plan(state: State) -> Plan:
     nodejs_pins, nodejs_version, nodejs_changed, types_dependency = state.nodejs_pins, state.nodejs.version, False, None
     if "nodejs" in state.packages:
         nodejs_pins, nodejs_libs = pin(
-            state.nodejs_pins, "libs_release", state.libs_tag, state.libs_digests, "Node.js libsimplex"
+            state.nodejs_pins, "libs_release", state.libs_tag, state.libs_digests, "Node.js libpopopx"
         )
         nodejs_pins, addon = pin(nodejs_pins, "addon_release", state.addon_tag, state.addon_digests, "Node.js add-on")
         if state.types_dependency != state.nodejs_types_dependency:
@@ -379,7 +379,7 @@ def plan(state: State) -> Plan:
     python_pins, python_version, python_changed = state.python_pins, state.python.version, False
     if "python" in state.packages:
         python_pins, python_libs = pin(
-            state.python_pins, "libs_release", state.libs_tag, state.libs_digests, "Python libsimplex"
+            state.python_pins, "libs_release", state.libs_tag, state.libs_digests, "Python libpopopx"
         )
         python_changed = python_libs or state.python.changed
         python_version = next_version(state.python, python_changed, state.python_version, bump_python_version)

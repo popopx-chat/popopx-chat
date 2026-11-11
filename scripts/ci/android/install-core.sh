@@ -9,4 +9,4 @@ libs_dir=apps/multiplatform/common/src/commonMain/cpp/android/libs/arm64-v8a
 mkdir -p "$libs_dir"
 tar -C "$libs_dir" -xzf "$1"
 ls -la "$libs_dir"
-readelf -d "$libs_dir/libsimplex.so" | grep -E 'NEEDED|SONAME'
+readelf -d "$libs_dir/libpopopx.so" | grep -E 'NEEDED|SONAME'

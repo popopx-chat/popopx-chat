@@ -340,7 +340,7 @@ class Client:
     # ------------------------------------------------------------------ #
 
     async def __aenter__(self) -> Self:
-        # Order matters: libsimplex `/_start` requires an active user, so
+        # Order matters: libpopopx `/_start` requires an active user, so
         # ensure (or create) the user first, THEN start the chat, THEN
         # do post-start setup (profile sync; Bot adds address sync).
         # `_stop_event` is never cleared: a stop requested during startup has

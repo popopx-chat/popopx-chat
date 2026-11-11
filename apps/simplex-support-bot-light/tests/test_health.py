@@ -1,4 +1,4 @@
-"""The monitoring endpoint: real sockets, no libsimplex."""
+"""The monitoring endpoint: real sockets, no libpopopx."""
 
 import asyncio
 

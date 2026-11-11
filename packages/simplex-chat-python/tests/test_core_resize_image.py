@@ -106,7 +106,7 @@ def test_empty_result_raises(fake_lib, resize):
 )
 def test_old_lib_raises_clear_error(monkeypatch, name, resize):
     monkeypatch.setattr(core._native, "lib", lambda: object())
-    message = f"loaded libsimplex does not export {name}; image resizing needs a newer libsimplex"
+    message = f"loaded libpopopx does not export {name}; image resizing needs a newer libpopopx"
     with pytest.raises(RuntimeError, match=message):
         asyncio.run(resize())
 

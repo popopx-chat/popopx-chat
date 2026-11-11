@@ -1,4 +1,4 @@
-LIBRARY libsimplex
+LIBRARY libpopopx
 EXPORTS
     hs_init
     hs_init_with_rtsopts

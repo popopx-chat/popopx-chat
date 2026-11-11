@@ -61,7 +61,7 @@ static jstring decode_and_free(JNIEnv *env, char *string) {
 
 /*
    When you start using any new function from Haskell libraries,
-   you have to add the function name to the file libsimplex.dll.def in the root directory.
+   you have to add the function name to the file libpopopx.dll.def in the root directory.
    And do the same by adding it into flake.nix file in the root directory,
    Otherwise, Windows and Android libraries cannot be built.
 */

@@ -7,9 +7,9 @@ ARG CABAL=3.10.2.0
 ARG NODE=24
 
 # --------------------------------------------------------------------------- #
-# libsimplex
+# libpopopx
 # --------------------------------------------------------------------------- #
-FROM ubuntu:${UBUNTU_LIBS} AS libsimplex
+FROM ubuntu:${UBUNTU_LIBS} AS libpopopx
 
 ARG GHC
 ARG CABAL
@@ -33,7 +33,7 @@ WORKDIR /src
 COPY cabal.project simplex-chat.cabal README.md PRIVACY.md ./
 COPY scripts/cabal.project.local.linux ./cabal.project.local
 # The build script checks the export lists in these.
-COPY libsimplex.dll.def flake.nix ./
+COPY libpopopx.dll.def flake.nix ./
 COPY scripts/desktop ./scripts/desktop
 COPY src ./src
 
@@ -52,7 +52,7 @@ RUN --mount=type=cache,target=/root/.cabal \
     cabal update; \
     scripts/desktop/build-lib-linux.sh sqlite; \
     mkdir -p /libs; \
-    cp "$build_dir"/libsimplex.so "$build_dir"/deps/* /libs/
+    cp "$build_dir"/libpopopx.so "$build_dir"/deps/* /libs/
 
 # --------------------------------------------------------------------------- #
 # build
@@ -65,10 +65,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential python3 && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=libsimplex /libs /opt/simplex/libs
-# The library loads libsimplex and the add-on built below instead of downloading the released ones.
+COPY --from=libpopopx /libs /opt/simplex/libs
+# The library loads libpopopx and the add-on built below instead of downloading the released ones.
 ENV SIMPLEX_LIBS_DIR=/opt/simplex/libs \
-    SIMPLEX_ADDON_PATH=/src/packages/simplex-chat-nodejs/build/Release/simplex.node
+    SIMPLEX_ADDON_PATH=/src/packages/simplex-chat-nodejs/build/Release/popopx.node
 
 WORKDIR /src
 COPY packages/simplex-chat-client/types/typescript packages/simplex-chat-client/types/typescript
@@ -110,7 +110,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=build /opt/simplex/libs /opt/simplex/libs
 COPY --from=build --chown=node:node /src /src
 ENV SIMPLEX_LIBS_DIR=/opt/simplex/libs \
-    SIMPLEX_ADDON_PATH=/src/packages/simplex-chat-nodejs/build/Release/simplex.node
+    SIMPLEX_ADDON_PATH=/src/packages/simplex-chat-nodejs/build/Release/popopx.node
 
 # A named volume takes this ownership; a bind mount must be owned by uid 1000.
 RUN mkdir -p /src/apps/simplex-calculator-bot/data && \

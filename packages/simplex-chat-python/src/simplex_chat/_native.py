@@ -1,4 +1,4 @@
-"""Native libsimplex loader: platform detection, lazy download, ctypes setup.
+"""Native library loader: platform detection, lazy download, ctypes setup.
 
 Internal — users interact with `Bot` / `ChatApi`, never with this module.
 """
@@ -31,7 +31,17 @@ _PLATFORM_MAP = {
     "win32": ("windows", {"AMD64": "x86_64", "x86_64": "x86_64"}),
 }
 
-_LIBNAME = {"linux": "libsimplex.so", "darwin": "libsimplex.dylib", "win32": "libsimplex.dll"}
+# Two spellings of the same library, in load order.  libpopopx.* is what this fork's own
+# build scripts produce (scripts/desktop/build-lib-*, flake.nix, the Dockerfiles), and a
+# local build reaches it through SIMPLEX_LIBS_DIR.  libsimplex.* is what the pinned
+# release asset in _libs_asset() still contains, because LIBS_RELEASE points at
+# simplex-chat/simplex-chat-libs -- until POPOPX publishes its own libs repository the
+# download can only serve the old name, so the lookup keeps both.
+_LIBNAMES = {
+    "linux": ("libpopopx.so", "libsimplex.so"),
+    "darwin": ("libpopopx.dylib", "libsimplex.dylib"),
+    "win32": ("libpopopx.dll", "libsimplex.dll"),
+}
 
 SUPPORTED = (
     "linux-x86_64",
@@ -56,8 +66,22 @@ def _platform_tag() -> str:
     return tag
 
 
-def _libname() -> str:
-    return _LIBNAME[sys.platform]
+def _libname(libs_dir: Path | None = None) -> str:
+    """Which file to load from this platform's libs directory.
+
+    Ours first; if only the upstream-named library is there, that one.  With no directory
+    to look at, the name this fork builds is the answer.
+    """
+    names = _LIBNAMES[sys.platform]
+    if libs_dir is not None:
+        for name in names:
+            if (libs_dir / name).exists():
+                return name
+    return names[0]
+
+
+def _has_lib(libs_dir: Path) -> bool:
+    return any((libs_dir / name).exists() for name in _LIBNAMES[sys.platform])
 
 
 def _libs_asset(backend: Backend) -> str:
@@ -89,7 +113,7 @@ def _resolve_libs_dir(backend: Backend) -> Path:
             f"current platform is {_platform_tag()}"
         )
     target = _cache_root() / LIBS_RELEASE / backend
-    if not (target / _libname()).exists():
+    if not _has_lib(target):
         _download(target, backend)
     return target
 
@@ -136,7 +160,7 @@ def _download(target: Path, backend: Backend) -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
     url = _libs_url(backend)
     print(
-        f"Downloading libsimplex ({_platform_tag()}, {backend}) {LIBS_RELEASE} from {url} ...",
+        f"Downloading the native libs ({_platform_tag()}, {backend}) {LIBS_RELEASE} from {url} ...",
         file=sys.stderr,
         flush=True,
     )
@@ -146,7 +170,7 @@ def _download(target: Path, backend: Backend) -> None:
         _verify_sha256(zip_path, sha256, url)
         with zipfile.ZipFile(zip_path) as zf:
             zf.extractall(tmp)
-        # zip layout: <tmp>/libs/libsimplex.* + libHS*.*
+        # zip layout: <tmp>/libs/<libpopopx or libsimplex>.* + libHS*.*
         extracted_libs = Path(tmp) / "libs"
         if not extracted_libs.is_dir():
             raise RuntimeError(f"libs/ missing from {_libs_url(backend)}")
@@ -154,16 +178,16 @@ def _download(target: Path, backend: Backend) -> None:
             os.rename(extracted_libs, target)
         except OSError as e:
             # EEXIST / ENOTEMPTY mean another process won the race — fall through
-            # and check that the winner left a usable libsimplex behind. Anything
+            # and check that the winner left a usable library behind. Anything
             # else (ENOSPC, EACCES, EROFS, Windows codes mapped to None) is a real
             # failure and must propagate. Same VERSION cached → same content →
             # safe to proceed once we've confirmed the file is there.
             if e.errno not in (errno.EEXIST, errno.ENOTEMPTY):
                 raise
-            if not (target / _libname()).exists():
+            if not _has_lib(target):
                 raise RuntimeError(
-                    f"another process partially populated {target} but libsimplex "
-                    f"is missing; remove the directory manually and retry"
+                    f"another process partially populated {target} but the native "
+                    f"library is missing; remove the directory manually and retry"
                 ) from e
 
 
@@ -185,13 +209,13 @@ _backend: Backend | None = None
 
 def _load_libc() -> ctypes.CDLL:
     if sys.platform == "win32":
-        # libsimplex.dll allocates results with UCRT malloc; msvcrt free would corrupt the heap.
+        # The Windows library allocates results with UCRT malloc; msvcrt free would corrupt the heap.
         return ctypes.CDLL("ucrtbase")
     return ctypes.CDLL(None)  # libc on POSIX is the process's own symbol table
 
 
 def _setup_signatures(lib: ctypes.CDLL) -> None:
-    """Declare argtypes/restype for the 8 chat_* functions exported by libsimplex.
+    """Declare argtypes/restype for the 8 chat_* functions exported by the native library.
 
     All result strings come back as raw c_void_p so the caller can free them
     after copying — matches HandleCResult in cpp/simplex.cc:157-165.
@@ -204,7 +228,7 @@ def _setup_signatures(lib: ctypes.CDLL) -> None:
     lib.chat_send_cmd.restype = c_void_p
     lib.chat_recv_msg_wait.argtypes = [c_void_p, c_int]
     lib.chat_recv_msg_wait.restype = c_void_p
-    # chat_write_file's payload is treated read-only by libsimplex; passing
+    # chat_write_file's payload is treated read-only by the native library; passing
     # `bytes` via c_char_p avoids the from_buffer_copy doubling. ctypes pins
     # the bytes buffer for the duration of the call.
     lib.chat_write_file.argtypes = [c_void_p, c_char_p, c_char_p, c_int]
@@ -239,7 +263,7 @@ def _hs_init(lib: ctypes.CDLL) -> None:
 
 
 def lib_for(backend: Backend) -> ctypes.CDLL:
-    """Resolve, load, and initialize libsimplex for the given backend.
+    """Resolve, load, and initialize the native library for the given backend.
 
     Idempotent for the same backend; raises if called with a different backend.
     Concurrent calls serialize on the module-level lock.
@@ -249,12 +273,12 @@ def lib_for(backend: Backend) -> ctypes.CDLL:
         if _lib is not None:
             if _backend != backend:
                 raise RuntimeError(
-                    f"libsimplex already loaded with backend={_backend}; "
+                    f"libpopopx already loaded with backend={_backend}; "
                     f"cannot switch to {backend} in the same process"
                 )
             return _lib
         libs_dir = _resolve_libs_dir(backend)
-        lib = ctypes.CDLL(str(libs_dir / _libname()))
+        lib = ctypes.CDLL(str(libs_dir / _libname(libs_dir)))
         _setup_signatures(lib)
         _hs_init(lib)
         _libc = _load_libc()
@@ -271,7 +295,7 @@ def libc() -> ctypes.CDLL:
 
 
 def lib() -> ctypes.CDLL:
-    """Loaded libsimplex handle. Raises if `lib_for()` has not been called."""
+    """Loaded native library handle. Raises if `lib_for()` has not been called."""
     if _lib is None:
         raise RuntimeError("lib_for() must be called before lib()")
     return _lib
@@ -282,7 +306,7 @@ def _optional_export(name: str, feature: str, argtypes: list[Any]) -> Any:
         fn = getattr(lib(), name)
     except AttributeError as e:
         raise RuntimeError(
-            f"loaded libsimplex does not export {name}; {feature} needs a newer libsimplex"
+            f"loaded libpopopx does not export {name}; {feature} needs a newer libpopopx"
         ) from e
     fn.argtypes = argtypes
     fn.restype = c_void_p
@@ -290,7 +314,7 @@ def _optional_export(name: str, feature: str, argtypes: list[Any]) -> Any:
 
 
 def migrate_init_queue() -> Any:
-    """`chat_migrate_init_queue`, which older libsimplex releases do not export."""
+    """`chat_migrate_init_queue`, which older releases of the native library do not export."""
     return _optional_export(
         "chat_migrate_init_queue",
         "queue size",

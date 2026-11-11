@@ -60,7 +60,7 @@ interface EventSubscriber<K extends CEvt.Tag> {
 }
 
 /**
- * Database configuration. `type` selects the libsimplex backend loaded by
+ * Database configuration. `type` selects the libpopopx backend loaded by
  * `ChatApi.init`; one backend per process.
  */
 export type DbConfig =
@@ -109,7 +109,7 @@ export class ChatApi {
   private constructor(protected ctrl_: bigint | undefined) {}
 
   /**
-   * Initializes the ChatApi, loading libsimplex for `db.type` (downloaded on first use).
+   * Initializes the ChatApi, loading libpopopx for `db.type` (downloaded on first use).
    * @param {DbConfig} db - Database configuration (sqlite or postgres).
    * @param {core.MigrationConfirmation} [confirm=core.MigrationConfirmation.YesUp] - Migration confirmation mode.
    * @param {number} [queueSize] - Size of internal queues, the core default is used when omitted.

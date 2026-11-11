@@ -21,7 +21,7 @@ build_package() {
   fi
   (cd "$nodejs" && npx tsc && cp src/simplex.* dist)
   if [ -n "${1:-}" ]; then
-    cp "$nodejs/build/Release/simplex.node" "$nodejs/build/simplex-chat-nodejs-$1.node"
+    cp "$nodejs/build/Release/popopx.node" "$nodejs/build/simplex-chat-nodejs-$1.node"
   fi
 }
 
@@ -63,7 +63,7 @@ case "${1:-}" in
           addon=simplex-chat-nodejs-$platform.node
           "$python" scripts/ci/packages_release.py download-pinned "$addon" "$temp/addon"
           mkdir -p "$nodejs/build/Release"
-          cp "$temp/addon/$addon" "$nodejs/build/Release/simplex.node"
+          cp "$temp/addon/$addon" "$nodejs/build/Release/popopx.node"
           test_nodejs
           ;;
         python)

@@ -45,9 +45,9 @@ find_library( # Sets the name of the path variable.
     NAMES libc.so
     REQUIRED)
 
-add_library( simplex SHARED IMPORTED )
-set_target_properties( simplex PROPERTIES IMPORTED_LOCATION
-    ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libsimplex.so)
+add_library( popopx SHARED IMPORTED )
+set_target_properties( popopx PROPERTIES IMPORTED_LOCATION
+    ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libpopopx.so)
 
 add_library( support SHARED IMPORTED )
 set_target_properties( support PROPERTIES IMPORTED_LOCATION
@@ -70,7 +70,7 @@ target_link_options(app-lib PRIVATE
 target_link_libraries( # Specifies the target library.
     app-lib
 
-    simplex support
+    popopx support
 
     # Links the target library to the log library
     # included in the NDK.

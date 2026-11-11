@@ -1,4 +1,4 @@
-"""Typed async wrapper around libsimplex's C ABI functions.
+"""Typed async wrapper around libpopopx's C ABI functions.
 
 Users interact with `Bot` / `ChatApi`. This module is exposed as
 `simplex_chat.core` for tests, the api.ChatApi class and image resizing
@@ -89,7 +89,7 @@ def _read_and_free(ptr: int | None) -> str:
     Mirrors HandleCResult in packages/simplex-chat-nodejs/cpp/simplex.cc:157-165.
     """
     if not ptr:
-        raise RuntimeError("null pointer returned from libsimplex")
+        raise RuntimeError("null pointer returned from libpopopx")
     try:
         return ctypes.string_at(ptr).decode("utf-8")
     finally:
@@ -171,7 +171,7 @@ async def chat_migrate_init(
     if parsed.get("type") == "ok":
         if not ctrl_val:
             # ABI invariant: type=="ok" → out-param written. Defensive guard so a
-            # broken libsimplex doesn't hand us a NULL controller that would only
+            # broken libpopopx doesn't hand us a NULL controller that would only
             # crash on first use much later.
             raise RuntimeError("chat_migrate_init returned ok but did not set ctrl pointer")
         return ctrl_val

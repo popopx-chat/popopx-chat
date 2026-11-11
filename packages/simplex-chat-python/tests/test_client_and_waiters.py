@@ -1,7 +1,7 @@
 """Tests for Client class + connect_to / send_and_wait / events plumbing.
 
 Stubs out ChatApi so we exercise the dispatch and waiter logic without
-spinning up the native libsimplex controller.
+spinning up the native libpopopx controller.
 """
 
 from __future__ import annotations

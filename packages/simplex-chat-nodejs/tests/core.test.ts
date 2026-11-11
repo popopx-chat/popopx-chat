@@ -10,7 +10,7 @@ import * as simplex from "../src/simplex";
 describe("Core tests", () => {
   let libPath: string;
   let addonPath: string;
-  // the first run downloads libsimplex
+  // the first run downloads libpopopx
   beforeAll(async () => {
     const libsDir = await libs.resolveLibsDir("sqlite");
     libPath = libs.libPath(libsDir);
@@ -149,7 +149,7 @@ describe("Core tests", () => {
   describe("image resizing", () => {
     const notImage = Buffer.from("not an image");
     const resizeError = "image cannot be decoded or does not fit maxSize";
-    const oldLibraryError = (name: string) => `loaded libsimplex does not export ${name}; image resizing needs a newer libsimplex`;
+    const oldLibraryError = (name: string) => `loaded libpopopx does not export ${name}; image resizing needs a newer libpopopx`;
     let imageResizing = false;
 
     beforeAll(async () => {
@@ -313,15 +313,15 @@ describe("Core tests", () => {
     expect(await receives).toEqual([{event: undefined}, {error: "chat receiver stopped"}]);
   });
 
-  it("should accept loading libsimplex again from the same path", () => {
+  it("should accept loading libpopopx again from the same path", () => {
     expect(() => simplex.load(addonPath, libPath)).not.toThrow();
   });
 
-  it("should refuse to load libsimplex from another path", () => {
-    expect(() => simplex.load(addonPath, path.resolve("other", "libsimplex.so"))).toThrow(`libsimplex already loaded from ${libPath}`);
+  it("should refuse to load libpopopx from another path", () => {
+    expect(() => simplex.load(addonPath, path.resolve("other", "libpopopx.so"))).toThrow(`libpopopx already loaded from ${libPath}`);
   });
 
-  it("should load libsimplex after a failed load and in several workers", () => {
+  it("should load libpopopx after a failed load and in several workers", () => {
     const addon = path.resolve(__dirname, "..", "build", "Release", "simplex.node");
     const childDbPath = path.resolve(tmpDir, "simplex_workers");
     const script = `

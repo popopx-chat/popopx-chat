@@ -4,7 +4,7 @@
 !simplex-chat.cabal
 !README.md
 !PRIVACY.md
-!libsimplex.dll.def
+!libpopopx.dll.def
 !flake.nix
 !src
 !scripts/cabal.project.local.linux

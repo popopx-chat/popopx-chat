@@ -1,7 +1,7 @@
 {
   "targets": [
     {
-      "target_name": "simplex",
+      "target_name": "popopx",
       "sources": [ "cpp/simplex.cc" ],
       "include_dirs": [
         "<!@(node -p \"require('node-addon-api').include\")"

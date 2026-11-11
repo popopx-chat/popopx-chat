@@ -6,7 +6,7 @@
 #   docker compose build          # from apps/simplex-support-bot-light
 #   docker build -f apps/simplex-support-bot-light/Dockerfile .
 #
-# The first stage compiles libsimplex from src/. That is a full GHC build of
+# The first stage compiles libpopopx from src/. That is a full GHC build of
 # popopxmq and simplex-chat: hours on a cold cache, and it needs ~15 GB.
 
 ARG UBUNTU=24.04
@@ -17,10 +17,10 @@ ARG GHC=9.6.3
 ARG CABAL=3.10.2.0
 
 # --------------------------------------------------------------------------- #
-# libsimplex — the cabal invocation of scripts/desktop/build-lib-linux.sh, which
+# libpopopx — the cabal invocation of scripts/desktop/build-lib-linux.sh, which
 # is what produces the .so the published libs archive is repackaged from.
 # --------------------------------------------------------------------------- #
-FROM ubuntu:${UBUNTU_LIBS} AS libsimplex
+FROM ubuntu:${UBUNTU_LIBS} AS libpopopx
 
 ARG GHC
 ARG CABAL
@@ -48,26 +48,26 @@ COPY src ./src
 
 # Cache mounts, not layers: the Haskell store and the build tree survive a
 # source change, which is the difference between minutes and hours. The RTS and
-# package libraries are copied next to libsimplex.so because its rpath is $ORIGIN.
+# package libraries are copied next to libpopopx.so because its rpath is $ORIGIN.
 RUN --mount=type=cache,target=/root/.cabal \
     --mount=type=cache,target=/src/dist-newstyle \
     set -eu; \
     cabal update; \
     cabal build lib:simplex-chat \
-      --ghc-options='-optl-Wl,-rpath,$ORIGIN -optl-Wl,-soname,libsimplex.so -flink-rts -threaded' \
+      --ghc-options='-optl-Wl,-rpath,$ORIGIN -optl-Wl,-soname,libpopopx.so -flink-rts -threaded' \
       --constraint 'popopxmq +client_library' \
       --constraint 'simplex-chat +client_library'; \
     lib=$(ls -t /src/dist-newstyle/build/*/ghc-${GHC}/simplex-chat-*/build/libHSsimplex-chat-*-inplace-ghc${GHC}.so | head -1); \
     build_dir=$(dirname "$lib"); \
-    mv "$lib" "$build_dir/libsimplex.so"; \
+    mv "$lib" "$build_dir/libpopopx.so"; \
     mkdir -p /libs; \
-    ldd "$build_dir/libsimplex.so" | grep ghc | cut -d' ' -f 3 | xargs -I {} cp {} /libs/; \
-    cp "$build_dir/libsimplex.so" /libs/
+    ldd "$build_dir/libpopopx.so" | grep ghc | cut -d' ' -f 3 | xargs -I {} cp {} /libs/; \
+    cp "$build_dir/libpopopx.so" /libs/
 
 # --------------------------------------------------------------------------- #
 # the bot
 # --------------------------------------------------------------------------- #
-# libsimplex is a glibc build and will not load on musl, and it is compiled
+# libpopopx is a glibc build and will not load on musl, and it is compiled
 # against this image's libraries in the stage above.
 FROM ubuntu:${UBUNTU}
 
@@ -102,7 +102,7 @@ RUN mkdir -p /data && chown supportbot:supportbot /data && chmod 0700 /data
 
 # Read by simplex_chat._native instead of downloading a release, which is what
 # makes the bot run against the core built above rather than the published one.
-COPY --from=libsimplex /libs /opt/simplex/libs
+COPY --from=libpopopx /libs /opt/simplex/libs
 ENV SIMPLEX_LIBS_DIR=/opt/simplex/libs
 
 USER supportbot

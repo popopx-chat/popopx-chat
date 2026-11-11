@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Builds the aarch64 or armv7a Android core (libsimplex.so with the libraries it needs, and libsupport.so) with Nix, as
+# Builds the aarch64 or armv7a Android core (libpopopx.so with the libraries it needs, and libsupport.so) with Nix, as
 # scripts/android/build-android.sh does, and packs them as scripts/android/download-libs.sh lays them out.
 # Usage: scripts/ci/android/build-core.sh <output .tar.gz> [aarch64|armv7a]
 # Installs the Nix version that build-android.sh pins, in single-user mode, with the zw3rk Hydra's cache, which

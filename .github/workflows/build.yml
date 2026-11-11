@@ -663,7 +663,7 @@ jobs:
         run: scripts/ci/run-tests.sh timeout 35m ./simplex-chat-test
 
       # Compiling the desktop and Android targets of :common in parallel exceeds the 2 GB Kotlin daemon heap.
-      # cmakeBuildAndCopy links the JNI library against libsimplex, which this job does not build.
+      # cmakeBuildAndCopy links the JNI library against libpopopx, which this job does not build.
       - name: Build and test Kotlin apps
         if: ${{ !cancelled() && matrix.kotlin == true }}
         timeout-minutes: 90
@@ -978,7 +978,7 @@ jobs:
           GHC_VER=${{ needs.variables.outputs.GHC_VER }}
           BUILD_DIR=$(echo dist-newstyle/build/${ARCH}-linux/ghc-${GHC_VER}/simplex-chat-*)
           mkdir -p postgres-libs/libs
-          cp ${BUILD_DIR}/build/libsimplex.so postgres-libs/libs/
+          cp ${BUILD_DIR}/build/libpopopx.so postgres-libs/libs/
           cp ${BUILD_DIR}/build/deps/* postgres-libs/libs/
           (cd postgres-libs && zip -r simplex-chat-libs-linux-x86_64-postgres.zip libs)
 
@@ -1564,11 +1564,11 @@ jobs:
         run: |
           export PATH=$PATH:/c/ghcup/bin:$(echo /c/tools/ghc-*/bin || echo)
           SKIP_VLC=1 scripts/desktop/build-lib-windows.sh
-          dlltool -d libsimplex.dll.def -l libsimplex.lib -D libsimplex.dll
+          dlltool -d libpopopx.dll.def -l libpopopx.lib -D libpopopx.dll
           name=simplex-chat-libs-windows-x86_64
           mkdir -p release-libs/$name/libs
           find apps/multiplatform/common/src/commonMain/cpp/desktop/libs/windows-x86_64 -maxdepth 1 -type f -exec cp {} release-libs/$name/libs/ \;
-          cp libsimplex.lib release-libs/$name/libs/
+          cp libpopopx.lib release-libs/$name/libs/
           (cd release-libs/$name && zip -r ../$name.zip libs)
 
       - name: Upload library

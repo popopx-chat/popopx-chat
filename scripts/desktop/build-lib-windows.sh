@@ -18,7 +18,7 @@ fi
 BUILD_DIR=dist-newstyle/build/$ARCH-$OS/ghc-*/simplex-chat-*
 
 exports=( $(sed 's/foreign export ccall "chat_migrate_init_key"//' src/Popopx/Chat/Mobile.hs | sed 's/foreign export ccall "chat_reopen_store"//' |grep "foreign export ccall" | cut -d '"' -f2) )
-for elem in "${exports[@]}"; do count=$(grep -R "$elem$" libsimplex.dll.def | wc -l); if [ $count -ne 1 ]; then echo Wrong exports in libsimplex.dll.def. Add \"$elem\" to that file; exit 1; fi ; done
+for elem in "${exports[@]}"; do count=$(grep -R "$elem$" libpopopx.dll.def | wc -l); if [ $count -ne 1 ]; then echo Wrong exports in libpopopx.dll.def. Add \"$elem\" to that file; exit 1; fi ; done
 for elem in "${exports[@]}"; do count=$(grep -R "\"$elem\"" flake.nix | wc -l); if [ $count -ne 1 ]; then echo Wrong exports in flake.nix. Add \"$elem\" to aarch64-android:lib:simplex-chat; exit 1; fi ; done
 
 # IMPORTANT: in order to get a working build you should use x86_64 MinGW with make, cmake, gcc.
@@ -48,7 +48,7 @@ echo "    flags: +openssl" >> cabal.project.local
 echo "    extra-include-dirs: $openssl_windows_style_path\include" >> cabal.project.local
 echo "    extra-lib-dirs: $openssl_windows_style_path" >> cabal.project.local
 echo "package simplex-chat" >> cabal.project.local
-echo "    ghc-options: -shared -threaded -optl-L$openssl_windows_style_path -optl-lcrypto-3-x64 -o libsimplex.dll libsimplex.dll.def" >> cabal.project.local
+echo "    ghc-options: -shared -threaded -optl-L$openssl_windows_style_path -optl-lcrypto-3-x64 -o libpopopx.dll libpopopx.dll.def" >> cabal.project.local
 # Very important! Without it the build fails on linking step since the linker can't find exported symbols.
 # It looks like GHC bug because with such random path the build ends successfully
 sed -i "s/ld.lld.exe/abracadabra.exe/" `ghc --print-libdir`/settings
@@ -59,7 +59,7 @@ rm -rf apps/multiplatform/desktop/build/cmake
 
 mkdir -p apps/multiplatform/common/src/commonMain/cpp/desktop/libs/$OS-$ARCH/
 cp dist-newstyle/openssl-3.0.15/libcrypto-3-x64.dll apps/multiplatform/common/src/commonMain/cpp/desktop/libs/$OS-$ARCH/
-cp libsimplex.dll apps/multiplatform/common/src/commonMain/cpp/desktop/libs/$OS-$ARCH/
+cp libpopopx.dll apps/multiplatform/common/src/commonMain/cpp/desktop/libs/$OS-$ARCH/
 
 [ -n "$SKIP_VLC" ] || scripts/desktop/prepare-vlc-windows.sh
 

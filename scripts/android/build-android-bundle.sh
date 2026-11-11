@@ -4,7 +4,7 @@
 set -eu
 
 tmp=$(mktemp -d -t)
-libsim=$(cat "$1" | grep libsimplex)
+libsim=$(cat "$1" | grep libpopopx)
 libsup=$(cat "$1" | grep libsupport)
 commit="${2:-nix-android}"
 
@@ -17,8 +17,8 @@ git -C "$tmp/simplex-chat" checkout "$commit"
 # Create missing folders
 mkdir -p "$tmp/simplex-chat/apps/multiplatform/common/src/commonMain/cpp/android/libs/arm64-v8a"
 
-curl -sSf "$libsim" -o "$tmp/libsimplex.zip"
-unzip -o "$tmp/libsimplex.zip" -d "$tmp/simplex-chat/apps/multiplatform/common/src/commonMain/cpp/android/libs/arm64-v8a"
+curl -sSf "$libsim" -o "$tmp/libpopopx.zip"
+unzip -o "$tmp/libpopopx.zip" -d "$tmp/simplex-chat/apps/multiplatform/common/src/commonMain/cpp/android/libs/arm64-v8a"
 
 curl -sSf "$libsup" -o "$tmp/libsupport.zip"
 unzip -o "$tmp/libsupport.zip" -d "$tmp/simplex-chat/apps/multiplatform/common/src/commonMain/cpp/android/libs/arm64-v8a"

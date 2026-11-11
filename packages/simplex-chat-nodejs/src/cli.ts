@@ -28,7 +28,7 @@ export async function main(argv: string[]): Promise<number> {
   }
   try {
     const [dir, addon] = await Promise.all([resolveLibsDir(backend), resolveAddonPath()])
-    console.log(`libsimplex installed at: ${dir}`)
+    console.log(`libpopopx installed at: ${dir}`)
     console.log(`Node.js add-on installed at: ${addon}`)
     return 0
   } catch (e) {

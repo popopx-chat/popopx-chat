@@ -11,12 +11,12 @@ from . import _native
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="simplex_chat")
     sub = p.add_subparsers(dest="command", required=True)
-    install = sub.add_parser("install", help="Pre-fetch libsimplex into the user cache")
+    install = sub.add_parser("install", help="Pre-fetch libpopopx into the user cache")
     install.add_argument(
         "--backend",
         choices=["sqlite", "postgres"],
         default="sqlite",
-        help="which libsimplex variant to download (default: sqlite)",
+        help="which libpopopx variant to download (default: sqlite)",
     )
     args = p.parse_args(argv)
     # `args.command` is always set: `add_subparsers(required=True)` makes
@@ -24,7 +24,7 @@ def main(argv: list[str] | None = None) -> int:
     assert args.command == "install"
     try:
         path = _native._resolve_libs_dir(args.backend)
-        print(f"libsimplex installed at: {path}")
+        print(f"libpopopx installed at: {path}")
         return 0
     except Exception as e:  # noqa: BLE001 - a CLI: report any failure, don't traceback
         print(f"install failed: {e}", file=sys.stderr)

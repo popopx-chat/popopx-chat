@@ -32,12 +32,24 @@ def test_platform_unsupported(_):
 
 
 def test_libname_per_platform():
+    # With no directory to inspect the loader answers with the name this fork builds.
     with patch("sys.platform", "linux"):
-        assert _libname() == "libsimplex.so"
+        assert _libname() == "libpopopx.so"
     with patch("sys.platform", "darwin"):
-        assert _libname() == "libsimplex.dylib"
+        assert _libname() == "libpopopx.dylib"
     with patch("sys.platform", "win32"):
-        assert _libname() == "libsimplex.dll"
+        assert _libname() == "libpopopx.dll"
+
+
+def test_libname_prefers_ours_and_falls_back(tmp_path):
+    # The pinned upstream libs asset is still called libsimplex.*, so a directory that
+    # only holds that file has to resolve to it rather than fail.
+    with patch("sys.platform", "linux"):
+        assert _libname(tmp_path) == "libpopopx.so"  # nothing there yet: the name we build
+        (tmp_path / "libsimplex.so").touch()
+        assert _libname(tmp_path) == "libsimplex.so"
+        (tmp_path / "libpopopx.so").touch()
+        assert _libname(tmp_path) == "libpopopx.so"
 
 
 @patch("simplex_chat._native._platform_tag", return_value="linux-x86_64")

@@ -1,6 +1,6 @@
 """ChatApi receives run on a dedicated per-instance thread, not the default pool.
 
-Uses a fake libsimplex (see tests/test_core_migrate_init.py for the pattern):
+Uses a fake libpopopx (see tests/test_core_migrate_init.py for the pattern):
 `core._native.lib` and `core._read_and_free` are monkeypatched so `chat_recv_msg_wait`
 sleeps for a controlled time and returns a scripted result.
 """

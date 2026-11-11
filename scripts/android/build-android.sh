@@ -108,7 +108,7 @@ build() {
     android_simplex_lib="${folder}#hydraJobs.x86_64-linux.${arch}-android:lib:simplex-chat"
     android_support_lib="${folder}#hydraJobs.x86_64-linux.${arch}-android:lib:support"
 
-    android_simplex_lib_output="${PWD}/result/pkg-${arch}-android-libsimplex.zip"
+    android_simplex_lib_output="${PWD}/result/pkg-${arch}-android-libpopopx.zip"
     android_support_lib_output="${PWD}/result/pkg-${arch}-android-libsupport.zip"
 
     arch_map "$arch"

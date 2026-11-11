@@ -1,4 +1,4 @@
-"""core.chat_migrate_init picks the FFI export by queue_size, with a fake libsimplex."""
+"""core.chat_migrate_init picks the FFI export by queue_size, with a fake libpopopx."""
 
 from __future__ import annotations
 
@@ -45,7 +45,7 @@ class FakeLib:
 
 
 class OldLib(FakeLib):
-    """A libsimplex released before chat_migrate_init_queue existed."""
+    """A libpopopx released before chat_migrate_init_queue existed."""
 
     def __getattribute__(self, name: str) -> Any:
         if name == "chat_migrate_init_queue":

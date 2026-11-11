@@ -8,7 +8,7 @@ const PACKAGE_DIR = path.join(__dirname, "..")
 const ADDON = path.join(PACKAGE_DIR, "build", "Release", "simplex.node")
 const CHILD_TIMEOUT_MS = 10000
 const LIBS_DIR = path.resolve("libs")
-const SWITCH_ERROR = "libsimplex already loaded with backend=sqlite; cannot switch to postgres in the same process"
+const SWITCH_ERROR = "libpopopx already loaded with backend=sqlite; cannot switch to postgres in the same process"
 const ADDON_PATH = path.resolve("simplex.node")
 const {libPath} = jest.requireActual<typeof import("../src/libs")>("../src/libs")
 
@@ -39,13 +39,13 @@ describe("native load", () => {
       }`)
     const bindings = ["chat_close_store", "chat_decrypt_file", "chat_encrypt_file", "chat_migrate_init", "chat_migrate_init_queue",
       "chat_read_file", "chat_recv_msg_wait", "chat_resize_image", "chat_resize_image_uri", "chat_send_cmd", "chat_write_file"]
-    const expected = bindings.map(name => `${name}: libsimplex is not loaded, call core.loadLibrary(backend) first\n`).join("")
+    const expected = bindings.map(name => `${name}: libpopopx is not loaded, call core.loadLibrary(backend) first\n`).join("")
     expect(out).toBe(`${expected}status=0 signal=null`)
   })
 
   it("reports the path of a library that cannot be opened", () => {
-    const out = runAddon(`try { simplex.load("/nonexistent/libsimplex.so") } catch (e) { console.log(e.message) }`)
-    expect(out).toContain("cannot load /nonexistent/libsimplex.so")
+    const out = runAddon(`try { simplex.load("/nonexistent/libpopopx.so") } catch (e) { console.log(e.message) }`)
+    expect(out).toContain("cannot load /nonexistent/libpopopx.so")
   })
 
   it("rejects a non-string library path", () => {
@@ -62,7 +62,7 @@ describe("native load", () => {
 describe("add-on module", () => {
   it("rejects FFI calls before the add-on is loaded", () => {
     const simplex = jest.requireActual<typeof import("../src/simplex")>("../src/simplex")
-    expect(() => simplex.chat_send_cmd(BigInt(1), "/v")).toThrow("libsimplex is not loaded, call core.loadLibrary(backend) first")
+    expect(() => simplex.chat_send_cmd(BigInt(1), "/v")).toThrow("libpopopx is not loaded, call core.loadLibrary(backend) first")
   })
 })
 

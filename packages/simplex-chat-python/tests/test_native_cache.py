@@ -134,5 +134,5 @@ def test_lib_for_rejects_backend_switch(monkeypatch):
     with pytest.raises(RuntimeError) as exc:
         lib_for("postgres")
     assert str(exc.value) == (
-        "libsimplex already loaded with backend=sqlite; cannot switch to postgres in the same process"
+        "libpopopx already loaded with backend=sqlite; cannot switch to postgres in the same process"
     )

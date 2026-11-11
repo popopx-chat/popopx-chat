@@ -242,13 +242,13 @@
                 setupBuildFlags = p.component.setupBuildFlags ++ map (x: "--ghc-option=${x}") [
                   "-shared"
                   "-threaded"
-                  "-o" "libsimplex.dll"
+                  "-o" "libpopopx.dll"
                   # "-optl-lHSrts_thr"
                   "-optl-lffi"
                   # "-optl-static-libgcc"
                   # We can't do -optl-static-libstdc++ with gcc. g++ might
                   # but then we are chaning the compiler altogether.
-                  "${./libsimplex.dll.def}"
+                  "${./libpopopx.dll.def}"
                 ];
                 postInstall = ''
                   set -x
@@ -257,8 +257,8 @@
                   }
                   ${pkgs.tree}/bin/tree $out
                   mkdir -p $out/_pkg
-                  cp libsimplex.dll $out/_pkg
-                  cp libsimplex.dll.a $out/_pkg
+                  cp libpopopx.dll $out/_pkg
+                  cp libpopopx.dll.a $out/_pkg
                   mkdir $out/libs
                   find ${pkgs.lib.getBin pkgs.pkgsCross.mingwW64.openssl}             -name "*.dll" -exec cp {} $out/libs \;
                   find ${pkgs.lib.getBin pkgs.pkgsCross.mingwW64.libffi}              -name "*.dll" -exec cp {} $out/libs \;
@@ -279,10 +279,10 @@
                       fi
                     done
                   }
-                  copyDeps libsimplex.dll
+                  copyDeps libpopopx.dll
                   popd
                   ${pkgs.tree}/bin/tree $out/_pkg
-                  (cd $out/_pkg; ${pkgs.zip}/bin/zip -r -9 $out/pkg-${pkgs.pkgsCross.mingwW64.hostPlatform.system}-libsimplex.zip *)
+                  (cd $out/_pkg; ${pkgs.zip}/bin/zip -r -9 $out/pkg-${pkgs.pkgsCross.mingwW64.hostPlatform.system}-libpopopx.zip *)
                   rm -fR $out/_pkg
                   mkdir -p $out/nix-support
                   echo "file binary-dist \"$(echo $out/*.zip)\"" \
@@ -365,7 +365,7 @@
                 # template haskell cross compilation. Thus we just pass them as linker options (-optl).
                 # 32-bit ARM only: processAgentMessageConn is too large for ARM's PC-relative constant-pool
                 # range at -O2; -O1 is appended after the cabal -O2 here, so it wins (aarch64 stays -O2).
-                setupBuildFlags = map (x: "--ghc-option=${x}") [ "-shared" "-o" "libsimplex.so" "-optl-lHSrts_thr" "-optl-lffi" "-j1" "-O1"];
+                setupBuildFlags = map (x: "--ghc-option=${x}") [ "-shared" "-o" "libpopopx.so" "-optl-lHSrts_thr" "-optl-lffi" "-j1" "-O1"];
                 postInstall = ''
                   set -x
                   ${pkgs8107.tree}/bin/tree $out
@@ -374,7 +374,7 @@
                   # cp -r $out/lib/*/*/include $out/_pkg/
                   # find the libHS...ghc-X.Y.Z.a static library; this is the
                   # rolled up one with all dependencies included.
-                  cp libsimplex.so $out/_pkg
+                  cp libpopopx.so $out/_pkg
                   # find ./dist -name "lib*.so" -exec cp {} $out/_pkg \;
                   # find ./dist -name "libHS*-ghc*.a" -exec cp {} $out/_pkg \;
                   # find ${android32FFI}/lib -name "*.a" -exec cp {} $out/_pkg \;
@@ -399,7 +399,7 @@
                   for lib in $out/_pkg/*.so; do
                     chmod +w "$lib"
                     ${pkgs8107.patchelf}/bin/patchelf --remove-needed libunwind.so "$lib"
-                    [[ "$lib" != *libsimplex.so ]] && ${pkgs8107.patchelf}/bin/patchelf --set-soname "$(basename -a $lib)" "$lib"
+                    [[ "$lib" != *libpopopx.so ]] && ${pkgs8107.patchelf}/bin/patchelf --set-soname "$(basename -a $lib)" "$lib"
                   done
 
                   ${pkgs8107.tree}/bin/tree $out/_pkg
@@ -412,7 +412,7 @@
                   find "$out/_pkg" -type d -exec chmod 755 {} +
                   find "$out/_pkg" -exec touch -h -d '@1764547200' {} +
 
-                  (cd $out/_pkg; ${pkgs8107.zip}/bin/zip -r -9 -X $out/pkg-armv7a-android-libsimplex.zip *)
+                  (cd $out/_pkg; ${pkgs8107.zip}/bin/zip -r -9 -X $out/pkg-armv7a-android-libpopopx.zip *)
                   rm -fR $out/_pkg
                   mkdir -p $out/nix-support
                   echo "file binary-dist \"$(echo $out/*.zip)\"" \
@@ -451,7 +451,7 @@
                 # flags to tell GHC we want to produce a -shared object, and we want to also link
                 # - the ffi library (ffi)
                 ++ map (x: "--ghc-option=${x}") [
-                  "-shared" "-o" "libsimplex.so"
+                  "-shared" "-o" "libpopopx.so"
                   "-threaded"
                   # "-debug"
                   "-optl-lffi"
@@ -503,7 +503,7 @@
                   # cp -r $out/lib/*/*/include $out/_pkg/
                   # find the libHS...ghc-X.Y.Z.a static library; this is the
                   # rolled up one with all dependencies included.
-                  cp libsimplex.so $out/_pkg
+                  cp libpopopx.so $out/_pkg
                   # find ./dist -name "lib*.so" -exec cp {} $out/_pkg \;
                   # find ./dist -name "libHS*-ghc*.a" -exec cp {} $out/_pkg \;
                   # find ${androidFFI}/lib -name "*.a" -exec cp {} $out/_pkg \;
@@ -528,7 +528,7 @@
                   for lib in $out/_pkg/*.so; do
                     chmod +w "$lib"
                     ${pkgs.patchelf}/bin/patchelf --remove-needed libunwind.so "$lib"
-                    [[ "$lib" != *libsimplex.so ]] && ${pkgs.patchelf}/bin/patchelf --set-soname "$(basename -a $lib)" "$lib"
+                    [[ "$lib" != *libpopopx.so ]] && ${pkgs.patchelf}/bin/patchelf --set-soname "$(basename -a $lib)" "$lib"
                   done
 
                   ${pkgs.tree}/bin/tree $out/_pkg
@@ -541,7 +541,7 @@
                   find "$out/_pkg" -type d -exec chmod 755 {} +
                   find "$out/_pkg" -exec touch -h -d '@1764547200' {} +
 
-                  (cd $out/_pkg; ${pkgs.zip}/bin/zip -r -9 -X $out/pkg-aarch64-android-libsimplex.zip *)
+                  (cd $out/_pkg; ${pkgs.zip}/bin/zip -r -9 -X $out/pkg-aarch64-android-libpopopx.zip *)
                   rm -fR $out/_pkg
                   mkdir -p $out/nix-support
                   echo "file binary-dist \"$(echo $out/*.zip)\"" \

@@ -1,7 +1,7 @@
 const path = require("path")
 
 // Tests load the locally built add-on instead of downloading the released one.
-process.env.SIMPLEX_ADDON_PATH ??= path.join(__dirname, "build", "Release", "simplex.node")
+process.env.SIMPLEX_ADDON_PATH ??= path.join(__dirname, "build", "Release", "popopx.node")
 
 module.exports = {
   preset: "ts-jest",

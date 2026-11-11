@@ -1,4 +1,4 @@
-"""Fake ChatApi and wire-object factories. No libsimplex, no I/O."""
+"""Fake ChatApi and wire-object factories. No libpopopx, no I/O."""
 
 from __future__ import annotations
 

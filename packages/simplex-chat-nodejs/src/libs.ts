@@ -12,10 +12,16 @@ import {ADDON_RELEASE, LIBS_RELEASE, SHA256} from "./release"
 const GITHUB_REPO = "simplex-chat/simplex-chat-libs"
 const REQUEST_TIMEOUT_MS = 60_000
 export const MAX_REDIRECTS = 5
-const PLATFORMS: {[platform: string]: {name: string, lib: string} | undefined} = {
-  linux: {name: "linux", lib: "libsimplex.so"},
-  darwin: {name: "macos", lib: "libsimplex.dylib"},
-  win32: {name: "windows", lib: "libsimplex.dll"},
+// Two spellings of the same library, in load order.  libpopopx.* is what this fork's own
+// build scripts produce (scripts/desktop/build-lib-*, flake.nix, the Dockerfiles) and what
+// SIMPLEX_LIBS_DIR points at after a local build.  libsimplex.* is what the pinned release
+// asset still contains, because GITHUB_REPO is upstream's simplex-chat-libs -- until POPOPX
+// publishes its own libs repository the download can only serve the old name, so every
+// lookup keeps both.
+const PLATFORMS: {[platform: string]: {name: string, libs: string[]} | undefined} = {
+  linux: {name: "linux", libs: ["libpopopx.so", "libsimplex.so"]},
+  darwin: {name: "macos", libs: ["libpopopx.dylib", "libsimplex.dylib"]},
+  win32: {name: "windows", libs: ["libpopopx.dll", "libsimplex.dll"]},
 }
 const ARCHS: {[arch: string]: string | undefined} = {x64: "x86_64", arm64: "aarch64"}
 const SUPPORTED = ["linux-x86_64", "linux-aarch64", "macos-x86_64", "macos-aarch64", "windows-x86_64"]
@@ -32,10 +38,21 @@ export function platformTag(platform: string, arch: string): string {
   return tag
 }
 
+export function libNames(platform: string = process.platform, arch: string = process.arch): string[] {
+  const libs = PLATFORMS[platform]?.libs
+  if (!libs) throw unsupported(platform, arch)
+  return libs
+}
+
 function libName(platform: string = process.platform, arch: string = process.arch): string {
-  const lib = PLATFORMS[platform]?.lib
-  if (!lib) throw unsupported(platform, arch)
-  return lib
+  return libNames(platform, arch)[0]
+}
+
+// The name that is actually in `dir`, preferring ours.  Falls back to the first name when
+// the directory is empty, so callers that are about to create the file still work.
+function presentLib(dir: string, platform: string = process.platform, arch: string = process.arch): string {
+  for (const name of libNames(platform, arch)) if (fs.existsSync(path.join(dir, name))) return name
+  return libName(platform, arch)
 }
 
 export function cacheRoot(platform: string, env: NodeJS.ProcessEnv, home: string = os.homedir()): string {
@@ -67,7 +84,7 @@ function pinnedSha256(asset: string): string {
 }
 
 export function libPath(dir: string): string {
-  return path.join(dir, libName())
+  return path.join(dir, presentLib(dir))
 }
 
 export async function resolveLibsDir(
@@ -76,10 +93,12 @@ export async function resolveLibsDir(
   platform: string = process.platform,
   arch: string = process.arch
 ): Promise<string> {
-  const lib = libName(platform, arch)
+  const libs = libNames(platform, arch)
   if (env.SIMPLEX_LIBS_DIR) {
     const dir = path.resolve(env.SIMPLEX_LIBS_DIR)
-    if (!fs.existsSync(path.join(dir, lib))) throw new Error(`SIMPLEX_LIBS_DIR has no ${lib}: ${dir}`)
+    if (!libs.some(lib => fs.existsSync(path.join(dir, lib)))) {
+      throw new Error(`SIMPLEX_LIBS_DIR has none of ${libs.join(", ")}: ${dir}`)
+    }
     return dir
   }
   const tag = platformTag(platform, arch)
@@ -87,9 +106,9 @@ export async function resolveLibsDir(
     throw new Error(`postgres backend is only supported on linux-x86_64; current platform is ${tag}`)
   }
   const target = path.resolve(cacheRoot(platform, env), LIBS_RELEASE, backend)
-  if (!fs.existsSync(path.join(target, lib))) {
+  if (!libs.some(lib => fs.existsSync(path.join(target, lib)))) {
     const asset = libsAsset(backend, tag)
-    await installLibs(releaseUrl(LIBS_RELEASE, asset), pinnedSha256(asset), target, lib)
+    await installLibs(releaseUrl(LIBS_RELEASE, asset), pinnedSha256(asset), target, libs)
   }
   return target
 }
@@ -111,16 +130,18 @@ export async function resolveAddonPath(
   return target
 }
 
-export function installLibs(url: string, sha256: string, target: string, lib: string, timeoutMs: number = REQUEST_TIMEOUT_MS): Promise<void> {
+export function installLibs(url: string, sha256: string, target: string, lib: string | string[], timeoutMs: number = REQUEST_TIMEOUT_MS): Promise<void> {
+  const libs = Array.isArray(lib) ? lib : [lib]
   return inTempDir(target, async tmp => {
-    process.stderr.write(`Downloading libsimplex from ${url} ...\n`)
+    process.stderr.write(`Downloading the native libs from ${url} ...\n`)
     const zipPath = path.join(tmp, "libs.zip")
     await download(url, zipPath, timeoutMs)
     await verifySha256(zipPath, sha256, url)
     await unzip(zipPath, tmp)
     const extracted = path.join(tmp, "libs")
-    if (!fs.existsSync(path.join(extracted, lib))) throw new Error(`libs/${lib} missing from ${url}`)
-    await renameInto(extracted, target, path.join(target, lib))
+    const name = libs.find(n => fs.existsSync(path.join(extracted, n)))
+    if (!name) throw new Error(`libs/${libs.join(" or ")} missing from ${url}`)
+    await renameInto(extracted, target, path.join(target, name))
   })
 }
 

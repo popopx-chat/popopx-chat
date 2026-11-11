@@ -51,7 +51,7 @@ static LibHandle OpenLibrary(const std::string& path) {
   int n = MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, nullptr, 0);
   std::wstring wpath(n, L'\0');
   MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, &wpath[0], n);
-  // dependencies resolve from the libsimplex.dll, application and system dirs, not the cwd or PATH
+  // dependencies resolve from the libpopopx.dll, application and system dirs, not the cwd or PATH
   return LoadLibraryExW(wpath.c_str(), nullptr, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
 }
 
@@ -134,14 +134,14 @@ void haskell_init() {
 
 static bool RequireLoaded(Env env) {
   if (loaded) return true;
-  Error::New(env, "libsimplex is not loaded, call core.loadLibrary(backend) first").ThrowAsJavaScriptException();
+  Error::New(env, "libpopopx is not loaded, call core.loadLibrary(backend) first").ThrowAsJavaScriptException();
   return false;
 }
 
 template <typename F>
 static bool RequireExport(Env env, F fn, const std::string& name, const std::string& feature) {
   if (fn != nullptr) return true;
-  Error::New(env, "loaded libsimplex does not export " + name + "; " + feature + " needs a newer libsimplex").ThrowAsJavaScriptException();
+  Error::New(env, "loaded libpopopx does not export " + name + "; " + feature + " needs a newer libpopopx").ThrowAsJavaScriptException();
   return false;
 }
 
@@ -187,7 +187,7 @@ Value Load(const CallbackInfo& args) {
   // worker_threads may load concurrently; the Haskell runtime must be initialized once per process
   std::lock_guard<std::mutex> lock(load_mutex);
   if (loaded) {
-    if (path != lib.path) Error::New(env, "libsimplex already loaded from " + lib.path).ThrowAsJavaScriptException();
+    if (path != lib.path) Error::New(env, "libpopopx already loaded from " + lib.path).ThrowAsJavaScriptException();
     return env.Undefined();
   }
   LibHandle h = OpenLibrary(path);
@@ -892,6 +892,6 @@ Object Init(Env env, Object exports) {
   return exports;
 }
 
-NODE_API_MODULE(simplex, Init)
+NODE_API_MODULE(popopx, Init)
 
 }

@@ -15,13 +15,13 @@ else
 fi
 
 LIB_EXT=dylib
-LIB=libsimplex.$LIB_EXT
+LIB=libpopopx.$LIB_EXT
 GHC_LIBS_DIR=$(ghc --print-libdir)
 
 BUILD_DIR=dist-newstyle/build/$ARCH-*/ghc-*/simplex-chat-*
 
 exports=( $(sed 's/foreign export ccall "chat_migrate_init_key"//' src/Popopx/Chat/Mobile.hs | sed 's/foreign export ccall "chat_reopen_store"//' |grep "foreign export ccall" | cut -d '"' -f2) )
-for elem in "${exports[@]}"; do count=$(grep -R "$elem$" libsimplex.dll.def | wc -l); if [ $count -ne 1 ]; then echo Wrong exports in libsimplex.dll.def. Add \"$elem\" to that file; exit 1; fi ; done
+for elem in "${exports[@]}"; do count=$(grep -R "$elem$" libpopopx.dll.def | wc -l); if [ $count -ne 1 ]; then echo Wrong exports in libpopopx.dll.def. Add \"$elem\" to that file; exit 1; fi ; done
 for elem in "${exports[@]}"; do count=$(grep -R "\"$elem\"" flake.nix | wc -l); if [ $count -ne 1 ]; then echo Wrong exports in flake.nix. Add \"$elem\" to aarch64-android:lib:simplex-chat; exit 1; fi ; done
 
 rm -rf $BUILD_DIR
@@ -35,7 +35,7 @@ else
 fi
 
 cd $BUILD_DIR/build
-mv libHSsimplex-chat-*-inplace-ghc*.$LIB_EXT libsimplex.dylib 2> /dev/null || true
+mv libHSsimplex-chat-*-inplace-ghc*.$LIB_EXT libpopopx.dylib 2> /dev/null || true
 mkdir deps 2> /dev/null || true
 
 # It's not included by default for some reason. Compiled lib tries to find system one but it's not always available

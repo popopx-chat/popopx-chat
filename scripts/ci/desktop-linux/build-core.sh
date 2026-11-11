@@ -24,9 +24,9 @@ EOF
 SKIP_VLC=1 scripts/desktop/build-lib-linux.sh
 
 ls -la "$libs_dir"
-readelf -d "$libs_dir/libsimplex.so" | grep -E 'SONAME|RUNPATH|NEEDED'
-echo "Selected symbols defined in libsimplex.so:"
-nm -D --defined-only "$libs_dir/libsimplex.so" | awk '$NF ~ /^(chat_migrate_init_key|chat_send_cmd_retry|chat_recv_msg_wait)$/ {print "  " $NF}'
+readelf -d "$libs_dir/libpopopx.so" | grep -E 'SONAME|RUNPATH|NEEDED'
+echo "Selected symbols defined in libpopopx.so:"
+nm -D --defined-only "$libs_dir/libpopopx.so" | awk '$NF ~ /^(chat_migrate_init_key|chat_send_cmd_retry|chat_recv_msg_wait)$/ {print "  " $NF}'
 du -sh "$libs_dir"
 
 tar -C "$libs_dir" -czf "$out" .
