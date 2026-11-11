@@ -7,7 +7,7 @@ const { parse } = require('csv-parse/sync');
 const { stringify } = require('csv-stringify/sync');
 
 // ============ HARDCODE THIS ============
-const APP_ID = '1605771084'; // your numeric app ID
+const APP_ID = '6799146157'; // your numeric app ID
 // =======================================
 const CSV_FILE = 'apple-prices.csv';
 const POINTS_FILE = 'apple-price-points.csv';

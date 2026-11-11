@@ -10,7 +10,7 @@
 [![Přidejte se na Reddit](https://img.shields.io/reddit/subreddit-subscribers/SimpleXChat?style=social)](https://www.reddit.com/r/SimpleXChat)
 [![Sledovat na Mastodonu](https://img.shields.io/mastodon/follow/108619463746856738?domain=https%3A%2F%2Fmastodon.social&style=social)](https://mastodon.social/@simplex)
 
-[<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/apple_store.svg" alt="Aplikace pro iOS" height="42">](https://apps.apple.com/us/app/simplex-chat/id1605771084)
+[<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/apple_store.svg" alt="Aplikace pro iOS" height="42">](https://apps.apple.com/us/app/popopx-chat/id6799146157)
 &nbsp;
 [![Aplikace pro Android](https://github.com/simplex-chat/.github/blob/master/profile/images/google_play.svg)](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)
 &nbsp;
@@ -22,7 +22,7 @@
 
 - 🖲 Chrání vaše zprávy a metadata - s kým a kdy mluvíte.
 - 🔐 Koncové šifrování s další vrstvou šifrování.
-- 📱 Mobilní aplikace pro Android ([Google Play](https://play.google.com/store/apps/details?id=com.popopxchat.popopx), [APK](https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-aarch64.apk)) a [iOS](https://apps.apple.com/us/app/simplex-chat/id1605771084).
+- 📱 Mobilní aplikace pro Android ([Google Play](https://play.google.com/store/apps/details?id=com.popopxchat.popopx), [APK](https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-aarch64.apk)) a [iOS](https://apps.apple.com/us/app/popopx-chat/id6799146157).
 - 🚀 [TestFlight preview for iOS](https://testflight.apple.com/join/DWuT2LQu) s novými funkcemi o 1-2 týdny dříve - **omezeno na 10 000 uživatelů**!
 - 🖥 K dispozici jako terminálová (konzolová) [aplikace / CLI](#zap-quick-installation-of-a-terminal-app) v systémech Linux, MacOS, Windows.
 
@@ -316,7 +316,7 @@ Jakákoli zjištění možných útoků korelace provozu umožňujících korelo
 
 [AGPL v3](./LICENSE)
 
-[<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/apple_store.svg" alt="Aplikace iOS" height="42">](https://apps.apple.com/us/app/simplex-chat/id1605771084)
+[<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/apple_store.svg" alt="Aplikace iOS" height="42">](https://apps.apple.com/us/app/popopx-chat/id6799146157)
 &nbsp;
 [![Aplikace pro Android](https://github.com/simplex-chat/.github/blob/master/profile/images/google_play.svg)](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)
 &nbsp;

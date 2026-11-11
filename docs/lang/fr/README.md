@@ -24,7 +24,7 @@
 
 ## Installer l'app
 
-[<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/apple_store.svg" alt="iOS app" height="42">](https://apps.apple.com/us/app/simplex-chat/id1605771084)
+[<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/apple_store.svg" alt="iOS app" height="42">](https://apps.apple.com/us/app/popopx-chat/id6799146157)
 &nbsp;
 [![Android app](https://github.com/simplex-chat/.github/blob/master/profile/images/google_play.svg)](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)
 &nbsp;
@@ -36,7 +36,7 @@
 
 - 🖲 Protégez vos messages et vos métadonnées - avec qui vous parlez et quand.
 - 🔐 Chiffrement de bout en bout à double ratchet, avec couche de chiffrement supplémentaire.
-- 📱 Apps mobiles pour Android ([Google Play](https://play.google.com/store/apps/details?id=com.popopxchat.popopx), [APK](https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-aarch64.apk)) et [iOS](https://apps.apple.com/us/app/simplex-chat/id1605771084).
+- 📱 Apps mobiles pour Android ([Google Play](https://play.google.com/store/apps/details?id=com.popopxchat.popopx), [APK](https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-aarch64.apk)) et [iOS](https://apps.apple.com/us/app/popopx-chat/id6799146157).
 - 🚀 [Bêta TestFlight pour iOS](https://testflight.apple.com/join/DWuT2LQu) avec les nouvelles fonctionnalités 1 à 2 semaines plus tôt - **limitée à 10 000 utilisateurs** !
 - 🖥 Disponible en tant que [terminal (console) / CLI](#⚡-installation-rapide-dune-application-pour-terminal) sur Linux, MacOS, Windows.
 
@@ -76,7 +76,7 @@ Merci à nos utilisateurs et à [Weblate](https://hosted.weblate.org/engage/simp
 
 Rejoignez nos traducteurs pour aider SimpleX à se développer !
 
-|région|langue |contributeur|[Android](https://play.google.com/store/apps/details?id=com.popopxchat.popopx) et [iOS](https://apps.apple.com/us/app/simplex-chat/id1605771084)|[site web](https://simplex.chat)|Docs Github|
+|région|langue |contributeur|[Android](https://play.google.com/store/apps/details?id=com.popopxchat.popopx) et [iOS](https://apps.apple.com/us/app/popopx-chat/id6799146157)|[site web](https://simplex.chat)|Docs Github|
 |:----:|:-------:|:---------:|:---------:|:---------:|:---------:|
 |🇬🇧 en|English   | |✓|✓|✓|✓|
 |🇨🇿 cs|Čeština   |[zen0bit](https://github.com/zen0bit)|[![android app](https://hosted.weblate.org/widgets/simplex-chat/cs/android/svg-badge.svg)](https://hosted.weblate.org/projects/simplex-chat/android/cs/)<br>[![ios app](https://hosted.weblate.org/widgets/simplex-chat/cs/ios/svg-badge.svg)](https://hosted.weblate.org/projects/simplex-chat/ios/cs/)|[![website](https://hosted.weblate.org/widgets/simplex-chat/cs/website/svg-badge.svg)](https://hosted.weblate.org/projects/simplex-chat/website/cs/)|[✓](https://github.com/simplex-chat/simplex-chat/tree/master/docs/lang/cs)|
@@ -343,7 +343,7 @@ Veuillez traiter toute découverte d'une éventuelle attaque par corrélation de
 
 [AGPL v3](/LICENSE)
 
-[<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/apple_store.svg" alt="iOS app" height="42">](https://apps.apple.com/us/app/simplex-chat/id1605771084)
+[<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/apple_store.svg" alt="iOS app" height="42">](https://apps.apple.com/us/app/popopx-chat/id6799146157)
 &nbsp;
 [![Android app](https://github.com/simplex-chat/.github/blob/master/profile/images/google_play.svg)](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)
 &nbsp;
