@@ -11,7 +11,7 @@
 
 ## Executive Summary
 
-This document provides a structured mapping between product-level concepts, their documentation, and their implementation in both the Kotlin multiplatform layer and the Haskell core library. All Kotlin source paths are relative to `apps/multiplatform/`. Haskell paths use `../../src/` prefix (relative to `apps/multiplatform/`). The common source root abbreviation used below is `common/src/commonMain/kotlin/chat/simplex/common/`.
+This document provides a structured mapping between product-level concepts, their documentation, and their implementation in both the Kotlin multiplatform layer and the Haskell core library. All Kotlin source paths are relative to `apps/multiplatform/`. Haskell paths use `../../src/` prefix (relative to `apps/multiplatform/`). The common source root abbreviation used below is `common/src/commonMain/kotlin/chat/popopx/common/`.
 
 ---
 
@@ -50,11 +50,11 @@ This document provides a structured mapping between product-level concepts, thei
 | PC29 | User Address | [README.md](README.md) (Contacts, User Management) | [spec/api.md](../spec/api.md) | `common/.../views/usersettings/UserAddressView.kt`, `UserAddressLearnMore.kt` | `Controller.hs` (`APICreateMyAddress`) |
 | PC30 | Member Support Chat | [README.md](README.md) (Groups) | [spec/api.md](../spec/api.md) | `common/.../views/chat/group/MemberSupportView.kt`, `MemberSupportChatView.kt`, `MemberAdmission.kt` | `Messages.hs` (`GroupChatScope`), `Controller.hs` |
 | PC31 | Channels (Relays) | [views/group-info.md](views/group-info.md) | [spec/client/chat-view.md](../spec/client/chat-view.md), [spec/state.md](../spec/state.md) | `common/.../model/ChatModel.kt` (`RelayStatus` incl. `RsRejected`, `GroupRelay`, `GroupMemberRole.Relay`, `GroupMemberStatus.MemRejected`), `common/.../views/chat/group/ChannelRelaysView.kt`, `GroupMemberInfoView.kt` (rejected-status row), `common/.../views/newchat/AddChannelView.kt` (`RelayStatusIndicator` rejected branch), `common/.../views/chat/group/AddGroupRelayView.kt` | `Controller.hs` (`APIAddGroupRelays`, `APIAllowRelayGroup`, `XGrpRelayReject` CONF handler) |
-| PC32 | Terminal Chat Layout | [views/chat.md](views/chat.md) (Terminal Layout) | [spec/client/chat-view.md](../spec/client/chat-view.md#TerminalLayout), [spec/state.md](../spec/state.md), [spec/services/theme.md](../spec/services/theme.md#ThemeModeOverrides) | `common/.../views/chat/item/TerminalItemView.kt`, `common/.../views/chat/ChatView.kt` (`LocalTerminalLayout` provider, terminal row branch), `common/.../views/chat/item/ChatItemView.kt` (`alignEnd`, `chatItemTailEnabled`), `FramedItemView.kt` (text edge, meta), `CIEventView.kt` (`chatEventPadding`, `chatEventTextStyle`, `ChatEventWithMeta`), `CIMetaView.kt` (`metaReserveCopy`), `MarkdownBlocks.kt` (terminal block gaps, `headingBox`), `TextItemView.kt` (copy of the meta), `common/.../model/ChatModel.kt` (`ChatLayoutMode`, `activeChatLayout`), `common/.../ui/theme/Theme.kt` (`ThemeModeOverrides.chatLayout`), `common/.../views/usersettings/Appearance.kt` (`ChatLayoutRow`, theme previews), `common/.../views/chat/ChatInfoView.kt` (`ChatLayoutSection`); tests: `common/src/commonTest/kotlin/chat/simplex/app/TerminalItemViewTest.kt`, `common/src/desktopTest/kotlin/chat/simplex/app/TerminalMetaCopyTest.kt`, `common/src/desktopTest/kotlin/chat/simplex/app/TerminalMetaLayoutTest.kt`, `common/src/desktopTest/kotlin/chat/simplex/app/TerminalChatItemRowTest.kt`, `common/src/desktopTest/kotlin/chat/simplex/app/TerminalMarkdownGapsTest.kt`, `common/src/desktopTest/kotlin/chat/simplex/app/PriorityLayoutTest.kt`, `common/src/desktopTest/kotlin/chat/simplex/app/ChatEventTextTest.kt` | `Types/UITheme.hs` (`ChatLayout`, `UIThemeEntityOverrides`), `Types.hs` (`GroupProfile`), `Controller.hs` (`SetGroupChatLayout`, `SetAddressSettings`) |
+| PC32 | Terminal Chat Layout | [views/chat.md](views/chat.md) (Terminal Layout) | [spec/client/chat-view.md](../spec/client/chat-view.md#TerminalLayout), [spec/state.md](../spec/state.md), [spec/services/theme.md](../spec/services/theme.md#ThemeModeOverrides) | `common/.../views/chat/item/TerminalItemView.kt`, `common/.../views/chat/ChatView.kt` (`LocalTerminalLayout` provider, terminal row branch), `common/.../views/chat/item/ChatItemView.kt` (`alignEnd`, `chatItemTailEnabled`), `FramedItemView.kt` (text edge, meta), `CIEventView.kt` (`chatEventPadding`, `chatEventTextStyle`, `ChatEventWithMeta`), `CIMetaView.kt` (`metaReserveCopy`), `MarkdownBlocks.kt` (terminal block gaps, `headingBox`), `TextItemView.kt` (copy of the meta), `common/.../model/ChatModel.kt` (`ChatLayoutMode`, `activeChatLayout`), `common/.../ui/theme/Theme.kt` (`ThemeModeOverrides.chatLayout`), `common/.../views/usersettings/Appearance.kt` (`ChatLayoutRow`, theme previews), `common/.../views/chat/ChatInfoView.kt` (`ChatLayoutSection`); tests: `common/src/commonTest/kotlin/chat/popopx/app/TerminalItemViewTest.kt`, `common/src/desktopTest/kotlin/chat/popopx/app/TerminalMetaCopyTest.kt`, `common/src/desktopTest/kotlin/chat/popopx/app/TerminalMetaLayoutTest.kt`, `common/src/desktopTest/kotlin/chat/popopx/app/TerminalChatItemRowTest.kt`, `common/src/desktopTest/kotlin/chat/popopx/app/TerminalMarkdownGapsTest.kt`, `common/src/desktopTest/kotlin/chat/popopx/app/PriorityLayoutTest.kt`, `common/src/desktopTest/kotlin/chat/popopx/app/ChatEventTextTest.kt` | `Types/UITheme.hs` (`ChatLayout`, `UIThemeEntityOverrides`), `Types.hs` (`GroupProfile`), `Controller.hs` (`SetGroupChatLayout`, `SetAddressSettings`) |
 
 **Legend for abbreviated paths:**
-- `common/.../` expands to `common/src/commonMain/kotlin/chat/simplex/common/`
-- `android/.../` expands to `android/src/main/java/chat/simplex/app/`
+- `common/.../` expands to `common/src/commonMain/kotlin/chat/popopx/common/`
+- `android/.../` expands to `android/src/main/java/chat/popopx/app/`
 - Haskell files are in `../../src/Simplex/Chat/` (relative to `apps/multiplatform/`)
 
 ---
@@ -86,28 +86,28 @@ Key files that exist only on one platform, grouped by concern.
 
 | File | Purpose |
 |------|---------|
-| `android/src/main/java/chat/simplex/app/SimplexApp.kt` | Application subclass, PlatformInterface setup, Haskell init |
-| `android/src/main/java/chat/simplex/app/MainActivity.kt` | Main Activity, deep link handling, lifecycle |
-| `android/src/main/java/chat/simplex/app/SimplexService.kt` | Foreground service for persistent messaging |
-| `android/src/main/java/chat/simplex/app/MessagesFetcherWorker.kt` | WorkManager periodic message fetch |
-| `android/src/main/java/chat/simplex/app/CallService.kt` | Foreground service for active calls |
-| `android/src/main/java/chat/simplex/app/views/call/CallActivity.kt` | Dedicated Activity for call UI |
-| `android/src/main/java/chat/simplex/app/model/NtfManager.android.kt` | Android notification channels and manager |
-| `common/src/androidMain/kotlin/chat/simplex/common/platform/*.android.kt` | All `actual` implementations for Android |
+| `android/src/main/java/chat/popopx/app/SimplexApp.kt` | Application subclass, PlatformInterface setup, Haskell init |
+| `android/src/main/java/chat/popopx/app/MainActivity.kt` | Main Activity, deep link handling, lifecycle |
+| `android/src/main/java/chat/popopx/app/SimplexService.kt` | Foreground service for persistent messaging |
+| `android/src/main/java/chat/popopx/app/MessagesFetcherWorker.kt` | WorkManager periodic message fetch |
+| `android/src/main/java/chat/popopx/app/CallService.kt` | Foreground service for active calls |
+| `android/src/main/java/chat/popopx/app/views/call/CallActivity.kt` | Dedicated Activity for call UI |
+| `android/src/main/java/chat/popopx/app/model/NtfManager.android.kt` | Android notification channels and manager |
+| `common/src/androidMain/kotlin/chat/popopx/common/platform/*.android.kt` | All `actual` implementations for Android |
 
 ### Desktop-Only
 
 | File | Purpose |
 |------|---------|
-| `desktop/src/jvmMain/kotlin/chat/simplex/desktop/Main.kt` | JVM entry point, Haskell/VLC init, PlatformInterface setup |
-| `common/src/desktopMain/kotlin/chat/simplex/common/DesktopApp.kt` | Compose Desktop window creation and lifecycle |
-| `common/src/desktopMain/kotlin/chat/simplex/common/StoreWindowState.kt` | Window position/size persistence |
-| `common/src/desktopMain/kotlin/chat/simplex/common/AppLinks.kt` | Deep link handling from launch arguments and macOS |
-| `common/src/desktopMain/kotlin/chat/simplex/common/views/helpers/AppUpdater.kt` | In-app update checker |
-| `common/src/desktopMain/kotlin/chat/simplex/common/platform/Videos.desktop.kt` | VLC-based video detection |
-| `common/src/desktopMain/kotlin/chat/simplex/common/platform/VideoPlayer.desktop.kt` | VLC video player implementation |
-| `common/src/desktopMain/kotlin/chat/simplex/common/platform/Platform.desktop.kt` | Desktop platform detection (Linux/macOS/Windows) |
-| `common/src/desktopMain/kotlin/chat/simplex/common/platform/*.desktop.kt` | All `actual` implementations for Desktop |
+| `desktop/src/jvmMain/kotlin/chat/popopx/desktop/Main.kt` | JVM entry point, Haskell/VLC init, PlatformInterface setup |
+| `common/src/desktopMain/kotlin/chat/popopx/common/DesktopApp.kt` | Compose Desktop window creation and lifecycle |
+| `common/src/desktopMain/kotlin/chat/popopx/common/StoreWindowState.kt` | Window position/size persistence |
+| `common/src/desktopMain/kotlin/chat/popopx/common/AppLinks.kt` | Deep link handling from launch arguments and macOS |
+| `common/src/desktopMain/kotlin/chat/popopx/common/views/helpers/AppUpdater.kt` | In-app update checker |
+| `common/src/desktopMain/kotlin/chat/popopx/common/platform/Videos.desktop.kt` | VLC-based video detection |
+| `common/src/desktopMain/kotlin/chat/popopx/common/platform/VideoPlayer.desktop.kt` | VLC video player implementation |
+| `common/src/desktopMain/kotlin/chat/popopx/common/platform/Platform.desktop.kt` | Desktop platform detection (Linux/macOS/Windows) |
+| `common/src/desktopMain/kotlin/chat/popopx/common/platform/*.desktop.kt` | All `actual` implementations for Desktop |
 
 ---
 
@@ -117,7 +117,7 @@ Key files that exist only on one platform, grouped by concern.
 - Haskell core controller: `../../src/Simplex/Chat/Controller.hs`
 - Haskell core types: `../../src/Simplex/Chat/Types.hs`
 - Haskell store layer: `../../src/Simplex/Chat/Store/` (`Direct.hs`, `Groups.hs`, `Messages.hs`, `Files.hs`, `Profiles.hs`, `Connections.hs`)
-- Kotlin model: `common/src/commonMain/kotlin/chat/simplex/common/model/ChatModel.kt`
-- Kotlin API bridge: `common/src/commonMain/kotlin/chat/simplex/common/model/SimpleXAPI.kt`
-- Kotlin FFI layer: `common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt`
-- Platform abstraction: `common/src/commonMain/kotlin/chat/simplex/common/platform/Platform.kt` (`PlatformInterface`)
+- Kotlin model: `common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt`
+- Kotlin API bridge: `common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt`
+- Kotlin FFI layer: `common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt`
+- Platform abstraction: `common/src/commonMain/kotlin/chat/popopx/common/platform/Platform.kt` (`PlatformInterface`)

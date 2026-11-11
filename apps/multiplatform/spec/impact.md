@@ -47,7 +47,7 @@
 
 ## 1. Common Sources (commonMain)
 
-Path prefix: `common/src/commonMain/kotlin/chat/simplex/common/`
+Path prefix: `common/src/commonMain/kotlin/chat/popopx/common/`
 
 ### 1.1 Core Model & Platform
 
@@ -325,7 +325,7 @@ Path prefix: `common/src/commonMain/kotlin/chat/simplex/common/`
 
 ### 2.1 Android App Module
 
-Path prefix: `android/src/main/java/chat/simplex/app/`
+Path prefix: `android/src/main/java/chat/popopx/app/`
 
 | Source File | Product Concepts Affected | Risk Level | Notes |
 |-------------|--------------------------|------------|-------|
@@ -340,7 +340,7 @@ Path prefix: `android/src/main/java/chat/simplex/app/`
 
 ### 2.2 Android Platform Implementations (androidMain)
 
-Path prefix: `common/src/androidMain/kotlin/chat/simplex/common/`
+Path prefix: `common/src/androidMain/kotlin/chat/popopx/common/`
 
 | Source File | Product Concepts Affected | Risk Level | Notes |
 |-------------|--------------------------|------------|-------|
@@ -407,7 +407,7 @@ Path prefix: `common/src/androidMain/kotlin/chat/simplex/common/`
 
 ### 3.1 Desktop App Module
 
-Path prefix: `desktop/src/jvmMain/kotlin/chat/simplex/desktop/`
+Path prefix: `desktop/src/jvmMain/kotlin/chat/popopx/desktop/`
 
 | Source File | Product Concepts Affected | Risk Level | Notes |
 |-------------|--------------------------|------------|-------|
@@ -415,7 +415,7 @@ Path prefix: `desktop/src/jvmMain/kotlin/chat/simplex/desktop/`
 
 ### 3.2 Desktop Platform Implementations (desktopMain)
 
-Path prefix: `common/src/desktopMain/kotlin/chat/simplex/common/`
+Path prefix: `common/src/desktopMain/kotlin/chat/popopx/common/`
 
 | Source File | Product Concepts Affected | Risk Level | Notes |
 |-------------|--------------------------|------------|-------|

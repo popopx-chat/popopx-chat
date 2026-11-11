@@ -8,7 +8,7 @@ plugins {
   id("com.github.gmazzo.buildconfig") version "5.3.5"
 }
 
-group = "chat.simplex"
+group = "chat.popopx"
 version = extra["android.version_name"] as String
 
 val popopxAssetsDir = rootProject.findProperty("popopx.assets.dir") as String?
@@ -155,7 +155,7 @@ kotlin {
 }
 
 android {
-  namespace = "chat.simplex.common"
+  namespace = "chat.popopx.common"
   compileSdk = 36
   sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
   defaultConfig {
@@ -166,7 +166,7 @@ android {
 }
 
 multiplatformResources {
-  resourcesPackage.set("chat.simplex.res")
+  resourcesPackage.set("chat.popopx.res")
   resourcesSourceSets {
     getByName("commonMain").srcDirs(if (hasPopopxAssets) popopxAssetsLocal.resolve("MR") else file("src/commonMain/resources/assets/default/MR"))
   }

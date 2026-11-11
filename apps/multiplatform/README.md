@@ -59,7 +59,7 @@ git submodule update --init --recursive
 - **`android/`** - Android app container
 - **`desktop/`** - Desktop JVM app container
 
-### Key Components (`common/src/commonMain/kotlin/chat/simplex/common/`)
+### Key Components (`common/src/commonMain/kotlin/chat/popopx/common/`)
 
 - **`model/ChatModel.kt`** - Main state container with reactive properties (MutableState, MutableStateFlow)
 - **`model/SimpleXAPI.kt`** - API bindings to Haskell core library via FFI

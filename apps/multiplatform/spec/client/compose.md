@@ -1,6 +1,6 @@
 # Message Composition Specification
 
-Source: `common/src/commonMain/kotlin/chat/simplex/common/views/chat/ComposeView.kt`, `SendMsgView.kt`
+Source: `common/src/commonMain/kotlin/chat/popopx/common/views/chat/ComposeView.kt`, `SendMsgView.kt`
 
 ---
 
@@ -62,7 +62,7 @@ ComposeView
 
 ## 2. ComposeState Data Class
 
-**Location:** [`ComposeView.kt#L98`](../../common/src/commonMain/kotlin/chat/simplex/common/views/chat/ComposeView.kt#L98)
+**Location:** [`ComposeView.kt#L98`](../../common/src/commonMain/kotlin/chat/popopx/common/views/chat/ComposeView.kt#L98)
 
 ```kotlin
 @Serializable
@@ -144,7 +144,7 @@ Tracks a live (streaming) message: the associated `ChatItem`, the currently type
 
 ## 3. ComposePreview Sealed Class
 
-**Location:** [`ComposeView.kt#L52`](../../common/src/commonMain/kotlin/chat/simplex/common/views/chat/ComposeView.kt#L52)
+**Location:** [`ComposeView.kt#L52`](../../common/src/commonMain/kotlin/chat/popopx/common/views/chat/ComposeView.kt#L52)
 
 ```kotlin
 sealed class ComposePreview {
@@ -176,7 +176,7 @@ Used within `MediaPreview` to track the source type:
 
 ## 4. ComposeContextItem Sealed Class
 
-**Location:** [`ComposeView.kt#L61`](../../common/src/commonMain/kotlin/chat/simplex/common/views/chat/ComposeView.kt#L61)
+**Location:** [`ComposeView.kt#L61`](../../common/src/commonMain/kotlin/chat/popopx/common/views/chat/ComposeView.kt#L61)
 
 ```kotlin
 sealed class ComposeContextItem {
@@ -210,7 +210,7 @@ sealed class ComposeContextItem {
 
 ## 5. SendMsgView
 
-**Location:** [`SendMsgView.kt#L36`](../../common/src/commonMain/kotlin/chat/simplex/common/views/chat/SendMsgView.kt#L36)
+**Location:** [`SendMsgView.kt#L36`](../../common/src/commonMain/kotlin/chat/popopx/common/views/chat/SendMsgView.kt#L36)
 
 ```kotlin
 fun SendMsgView(
@@ -350,7 +350,7 @@ When `privacyLinkPreviews` is enabled and the message contains a URL:
 
 ## 7. Draft Persistence
 
-**Location:** [`ComposeView.kt#L1394`](../../common/src/commonMain/kotlin/chat/simplex/common/views/chat/ComposeView.kt#L1394) (`KeyChangeEffect(chatModel.chatId.value)`)
+**Location:** [`ComposeView.kt#L1394`](../../common/src/commonMain/kotlin/chat/popopx/common/views/chat/ComposeView.kt#L1394) (`KeyChangeEffect(chatModel.chatId.value)`)
 
 Controlled by the `privacySaveLastDraft` preference.
 
@@ -407,19 +407,19 @@ When a draft exists for a chat, `ChatPreviewView` shows a pencil icon with the d
 
 ## 9. Emoji Picker
 
-**Source:** [`ComposeEmojiPicker.kt`](../../common/src/commonMain/kotlin/chat/simplex/common/views/chat/ComposeEmojiPicker.kt), [`ComposeEmojiPicker.desktop.kt`](../../common/src/desktopMain/kotlin/chat/simplex/common/views/chat/ComposeEmojiPicker.desktop.kt)
+**Source:** [`ComposeEmojiPicker.kt`](../../common/src/commonMain/kotlin/chat/popopx/common/views/chat/ComposeEmojiPicker.kt), [`ComposeEmojiPicker.desktop.kt`](../../common/src/desktopMain/kotlin/chat/popopx/common/views/chat/ComposeEmojiPicker.desktop.kt)
 
-Desktop only; on Android the [`ComposeEmojiButton()`](../../common/src/androidMain/kotlin/chat/simplex/common/views/chat/ComposeEmojiPicker.android.kt) actual is empty, as keyboards have their own emoji panel.
+Desktop only; on Android the [`ComposeEmojiButton()`](../../common/src/androidMain/kotlin/chat/popopx/common/views/chat/ComposeEmojiPicker.android.kt) actual is empty, as keyboards have their own emoji panel.
 
-An emoji button in [`ComposeActionButtons()`](../../common/src/commonMain/kotlin/chat/simplex/common/views/chat/ComposeView.kt#L1346-L1363) toggles `emojiPickerShown`, owned by `ComposeView`. A picked emoji goes through [`onEmoji()`](../../common/src/commonMain/kotlin/chat/simplex/common/views/chat/ComposeView.kt#L1290-L1292): [`insertingEmoji()`](../../common/src/commonMain/kotlin/chat/simplex/common/views/chat/ComposeEmojiPicker.kt#L10-L14) replaces the selection (clamped to the text) and moves the cursor after the emoji, then `onMessageChange` applies markdown parsing, link sanitizing and the large-emoji font. Emoji are ignored while a message is in progress. The picker stays open after picking. The text field collapses its selection to the end when the popup takes focus, so the emoji goes after selected text.
+An emoji button in [`ComposeActionButtons()`](../../common/src/commonMain/kotlin/chat/popopx/common/views/chat/ComposeView.kt#L1346-L1363) toggles `emojiPickerShown`, owned by `ComposeView`. A picked emoji goes through [`onEmoji()`](../../common/src/commonMain/kotlin/chat/popopx/common/views/chat/ComposeView.kt#L1290-L1292): [`insertingEmoji()`](../../common/src/commonMain/kotlin/chat/popopx/common/views/chat/ComposeEmojiPicker.kt#L10-L14) replaces the selection (clamped to the text) and moves the cursor after the emoji, then `onMessageChange` applies markdown parsing, link sanitizing and the large-emoji font. Emoji are ignored while a message is in progress. The picker stays open after picking. The text field collapses its selection to the end when the popup takes focus, so the emoji goes after selected text.
 
-[`emojiEnabled`](../../common/src/commonMain/kotlin/chat/simplex/common/views/chat/ComposeView.kt#L1282-L1288) is false when sending is not allowed or a voice message is previewed; the picker closes then. When the picker closes, the text field gets focus through `focusRequester`.
+[`emojiEnabled`](../../common/src/commonMain/kotlin/chat/popopx/common/views/chat/ComposeView.kt#L1282-L1288) is false when sending is not allowed or a voice message is previewed; the picker closes then. When the picker closes, the text field gets focus through `focusRequester`.
 
 | Function | Behavior |
 |---|---|
-| [`ComposeEmojiButton()`](../../common/src/desktopMain/kotlin/chat/simplex/common/views/chat/ComposeEmojiPicker.desktop.kt#L89-L115) | Button 4 dp after the attachment button (`EMOJI_BUTTON_START_PADDING`, against the row's -8 dp overlap). Focusable `Popup` above the button; closes on Esc (on key release, so the window does not also close its top modal), outside click or the button; its height is capped to the space above the button |
-| [`EmojiPicker()`](../../common/src/desktopMain/kotlin/chat/simplex/common/views/chat/ComposeEmojiPicker.desktop.kt#L127-L178) | Search field, category tabs, `LazyVerticalGrid` with one section per `EmojiCategory`; tabs and cells are not focusable, so typing after a click goes to search. Picked emoji are not stored, so nothing about what the user typed is kept in preferences |
+| [`ComposeEmojiButton()`](../../common/src/desktopMain/kotlin/chat/popopx/common/views/chat/ComposeEmojiPicker.desktop.kt#L89-L115) | Button 4 dp after the attachment button (`EMOJI_BUTTON_START_PADDING`, against the row's -8 dp overlap). Focusable `Popup` above the button; closes on Esc (on key release, so the window does not also close its top modal), outside click or the button; its height is capped to the space above the button |
+| [`EmojiPicker()`](../../common/src/desktopMain/kotlin/chat/popopx/common/views/chat/ComposeEmojiPicker.desktop.kt#L127-L178) | Search field, category tabs, `LazyVerticalGrid` with one section per `EmojiCategory`; tabs and cells are not focusable, so typing after a click goes to search. Picked emoji are not stored, so nothing about what the user typed is kept in preferences |
 
-Data: `desktopMain/resources/emoji/emoji.txt` is generated by `scripts/desktop/generate-emoji-data.py` from Unicode `emoji-test.txt` 15.0 (the version covered by the bundled NotoColorEmoji): fully-qualified emoji without skin tone variants, `@<group>` lines followed by `<emoji>\t<name>` lines. [`parseEmojiData()`](../../common/src/desktopMain/kotlin/chat/simplex/common/views/chat/ComposeEmojiPicker.desktop.kt#L59-L76) maps groups to `EmojiCategory` and fails on an unknown group; [`emojiSections`](../../common/src/desktopMain/kotlin/chat/simplex/common/views/chat/ComposeEmojiPicker.desktop.kt#L78-L82) loads it lazily. [`searchEmoji()`](../../common/src/desktopMain/kotlin/chat/simplex/common/views/chat/ComposeEmojiPicker.desktop.kt#L84-L87) matches the English name case-insensitively.
+Data: `desktopMain/resources/emoji/emoji.txt` is generated by `scripts/desktop/generate-emoji-data.py` from Unicode `emoji-test.txt` 15.0 (the version covered by the bundled NotoColorEmoji): fully-qualified emoji without skin tone variants, `@<group>` lines followed by `<emoji>\t<name>` lines. [`parseEmojiData()`](../../common/src/desktopMain/kotlin/chat/popopx/common/views/chat/ComposeEmojiPicker.desktop.kt#L59-L76) maps groups to `EmojiCategory` and fails on an unknown group; [`emojiSections`](../../common/src/desktopMain/kotlin/chat/popopx/common/views/chat/ComposeEmojiPicker.desktop.kt#L78-L82) loads it lazily. [`searchEmoji()`](../../common/src/desktopMain/kotlin/chat/popopx/common/views/chat/ComposeEmojiPicker.desktop.kt#L84-L87) matches the English name case-insensitively.
 
 [GAP] No skin tone selection, and search uses English emoji names only.

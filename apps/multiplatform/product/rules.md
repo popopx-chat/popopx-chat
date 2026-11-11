@@ -23,7 +23,7 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 
 **Enforcement:** The Haskell core library handles all encryption. The Kotlin layer never constructs raw SMP messages. All communication flows through `ChatController.sendCmd()` which delegates to the FFI, ensuring the encryption layer cannot be bypassed.
 
-**Location:** `common/src/commonMain/kotlin/chat/simplex/common/model/SimpleXAPI.kt` -- `ChatController.sendCmd()`, `chatSendCmd()` FFI call
+**Location:** `common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt` -- `ChatController.sendCmd()`, `chatSendCmd()` FFI call
 
 ---
 
@@ -36,10 +36,10 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 **Caveat:** The user is not forced to set a custom passphrase -- the random passphrase is stored in app-accessible encrypted preferences. See GAP: "Database passphrase not enforced."
 
 **Location:**
-- `common/src/commonMain/kotlin/chat/simplex/common/views/helpers/DatabaseUtils.kt`
-- `common/src/commonMain/kotlin/chat/simplex/common/platform/Cryptor.kt` -- `CryptorInterface`
-- Android: `common/src/androidMain/kotlin/chat/simplex/common/platform/Cryptor.android.kt` -- Android Keystore
-- Desktop: `common/src/desktopMain/kotlin/chat/simplex/common/platform/Cryptor.desktop.kt` -- **placeholder, not implemented**
+- `common/src/commonMain/kotlin/chat/popopx/common/views/helpers/DatabaseUtils.kt`
+- `common/src/commonMain/kotlin/chat/popopx/common/platform/Cryptor.kt` -- `CryptorInterface`
+- Android: `common/src/androidMain/kotlin/chat/popopx/common/platform/Cryptor.android.kt` -- Android Keystore
+- Desktop: `common/src/desktopMain/kotlin/chat/popopx/common/platform/Cryptor.desktop.kt` -- **placeholder, not implemented**
 
 ---
 
@@ -50,7 +50,7 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 **Enforcement:** `AppLock.setPerformLA` controls the lock state. The lock delay is configurable via `AppPreferences.laLockDelay` (default 30 seconds). Authentication mode is set via `AppPreferences.laMode` (system biometric or passcode).
 
 **Location:**
-- `common/src/commonMain/kotlin/chat/simplex/common/AppLock.kt`
+- `common/src/commonMain/kotlin/chat/popopx/common/AppLock.kt`
 - `SimpleXAPI.kt` -- `AppPreferences.performLA`, `AppPreferences.laMode`, `AppPreferences.laLockDelay`
 
 ---
@@ -63,7 +63,7 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 
 **Location:**
 - `SimpleXAPI.kt` -- `AppPreferences.selfDestruct`, `AppPreferences.selfDestructDisplayName`
-- `android/src/main/java/chat/simplex/app/SimplexService.kt` -- initialization check
+- `android/src/main/java/chat/popopx/app/SimplexService.kt` -- initialization check
 
 ---
 
@@ -204,8 +204,8 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 - The mode is stored in `AppPreferences.notificationsMode` and checked at app startup.
 
 **Location:**
-- `android/src/main/java/chat/simplex/app/SimplexService.kt`
-- `android/src/main/java/chat/simplex/app/MessagesFetcherWorker.kt`
+- `android/src/main/java/chat/popopx/app/SimplexService.kt`
+- `android/src/main/java/chat/popopx/app/MessagesFetcherWorker.kt`
 - `SimpleXAPI.kt:7739` -- `enum class NotificationsMode`
 
 ---
@@ -220,8 +220,8 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 **Enforcement:** `NtfManager` (Android) reads the preview mode from `AppPreferences.notificationPreviewMode` and constructs notifications accordingly. The `CallService` also respects this mode for call notifications (showing or hiding caller identity).
 
 **Location:**
-- `android/src/main/java/chat/simplex/app/model/NtfManager.android.kt` -- `displayNotification()`, `notifyCallInvitation()`
-- `android/src/main/java/chat/simplex/app/CallService.kt` -- `updateNotification()`
+- `android/src/main/java/chat/popopx/app/model/NtfManager.android.kt` -- `displayNotification()`, `notifyCallInvitation()`
+- `android/src/main/java/chat/popopx/app/CallService.kt` -- `updateNotification()`
 - `SimpleXAPI.kt` -- `AppPreferences.notificationPreviewMode`
 
 ---
@@ -247,7 +247,7 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 - On dispose, `WCallCommand.End` is sent and the server is stopped.
 
 **Location:**
-- `common/src/commonMain/kotlin/chat/simplex/common/views/call/CallManager.kt`
-- `common/src/commonMain/kotlin/chat/simplex/common/views/call/WebRTC.kt`
-- Android: `android/src/main/java/chat/simplex/app/CallService.kt`, `android/src/main/java/chat/simplex/app/views/call/CallActivity.kt`
-- Desktop: `common/src/desktopMain/kotlin/chat/simplex/common/views/call/CallView.desktop.kt`
+- `common/src/commonMain/kotlin/chat/popopx/common/views/call/CallManager.kt`
+- `common/src/commonMain/kotlin/chat/popopx/common/views/call/WebRTC.kt`
+- Android: `android/src/main/java/chat/popopx/app/CallService.kt`, `android/src/main/java/chat/popopx/app/views/call/CallActivity.kt`
+- Desktop: `common/src/desktopMain/kotlin/chat/popopx/common/views/call/CallView.desktop.kt`

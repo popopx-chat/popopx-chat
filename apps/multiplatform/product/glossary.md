@@ -23,12 +23,12 @@ This glossary is self-contained and covers the Android and Desktop (Kotlin/Compo
 ### SMP (SimpleX Messaging Protocol)
 The core message-relay protocol. Clients send and receive messages through SMP relay servers without exposing sender/receiver identity correlation. The protocol uses unidirectional queues -- each contact pair maintains separate send and receive queues on potentially different servers.
 
-*See:* `common/src/commonMain/kotlin/chat/simplex/common/model/SimpleXAPI.kt` -- `SMPErrorType`, `SMPProxyMode`, `SMPProxyFallback`, `SMPWebPortServers`
+*See:* `common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt` -- `SMPErrorType`, `SMPProxyMode`, `SMPProxyFallback`, `SMPWebPortServers`
 
 ### XFTP (SimpleX File Transfer Protocol)
 Protocol for transferring files through relay servers. Files are chunked, encrypted, and uploaded to XFTP relays. Recipients download chunks and reassemble locally. Supports inline transfer for small files.
 
-*See:* `common/src/commonMain/kotlin/chat/simplex/common/model/SimpleXAPI.kt` -- `CC.ApiUploadStandaloneFile`, `CC.ApiDownloadStandaloneFile`, `CC.ApiStandaloneFileInfo`
+*See:* `common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt` -- `CC.ApiUploadStandaloneFile`, `CC.ApiDownloadStandaloneFile`, `CC.ApiStandaloneFileInfo`
 
 ### E2E Encryption (End-to-End Encryption)
 All messages are encrypted end-to-end. The app never transmits plaintext to relay servers. Encryption keys are negotiated during connection establishment using X3DH-like key agreement and then maintained via the double-ratchet algorithm.
@@ -308,7 +308,7 @@ The real-time communication framework used for audio and video calls. The app us
 ### Call (data class)
 Represents an active call session. Fields: `remoteHostId`, `userProfile`, `contact`, `callUUID`, `callState` (CallState enum), `initialCallType` (Audio/Video), `localMediaSources`, `localCapabilities`, `peerMediaSources`, `hasSharedKey` (whether an E2E call encryption key was agreed), `connectionInfo`, `connectedAt`.
 
-*See:* `common/src/commonMain/kotlin/chat/simplex/common/views/call/WebRTC.kt:14`
+*See:* `common/src/commonMain/kotlin/chat/popopx/common/views/call/WebRTC.kt:14`
 
 ### CallState
 Enum tracking call progression: `WaitCapabilities` -> `InvitationSent` / `InvitationAccepted` -> `OfferSent` / `OfferReceived` -> `Negotiated` -> `Connected` -> `Ended`.
@@ -323,22 +323,22 @@ The command/response protocol between the Kotlin app and the WebRTC JavaScript l
 ### CallManager
 Manages incoming call invitations and the active call lifecycle. Handles reporting new incoming calls, accepting calls, switching between calls, and ending calls. Interacts with `ChatModel.callInvitations`, `ChatModel.activeCall`, and the platform notification manager.
 
-*See:* `common/src/commonMain/kotlin/chat/simplex/common/views/call/CallManager.kt`
+*See:* `common/src/commonMain/kotlin/chat/popopx/common/views/call/CallManager.kt`
 
 ### Android: CallActivity
 A dedicated Android `Activity` that displays the call UI. Launched when accepting an incoming call or initiating an outgoing call. Uses an Android `WebView` to host the WebRTC JavaScript.
 
-*See:* `android/src/main/java/chat/simplex/app/views/call/CallActivity.kt`
+*See:* `android/src/main/java/chat/popopx/app/views/call/CallActivity.kt`
 
 ### Android: CallService
 An Android foreground `Service` that keeps the call alive when the app is in the background. Holds a `WakeLock`, displays an ongoing call notification, and manages the call lifecycle. Uses notification channel `CALL_SERVICE_NOTIFICATION`.
 
-*See:* `android/src/main/java/chat/simplex/app/CallService.kt`
+*See:* `android/src/main/java/chat/popopx/app/CallService.kt`
 
 ### Desktop: Browser-based WebRTC via NanoWSD
 On Desktop, calls are implemented by opening the system browser to a locally-hosted WebSocket server. A `NanoHTTPD`/`NanoWSD` server runs on `localhost:50395`, serving the WebRTC call page and communicating with the Kotlin app via WebSocket messages. Commands are sent as JSON-serialized `WVAPICall` objects; responses are parsed as `WVAPIMessage` objects.
 
-*See:* `common/src/desktopMain/kotlin/chat/simplex/common/views/call/CallView.desktop.kt`
+*See:* `common/src/desktopMain/kotlin/chat/popopx/common/views/call/CallView.desktop.kt`
 
 ### ICE Servers
 STUN/TURN servers used for WebRTC NAT traversal. Configurable via `AppPreferences.webrtcIceServers`. The relay policy (`AppPreferences.webrtcPolicyRelay`) controls whether calls must use TURN relays (for IP privacy) or can attempt direct connections.
@@ -358,12 +358,12 @@ A foreground `Service` that keeps the chat backend running in the background. Us
 
 Notification channel: `com.popopxchat.popopx.SIMPLEX_SERVICE_NOTIFICATION` ("SimpleX Chat service")
 
-*See:* `android/src/main/java/chat/simplex/app/SimplexService.kt`
+*See:* `android/src/main/java/chat/popopx/app/SimplexService.kt`
 
 ### Android: MessagesFetcherWorker
 A `WorkManager` periodic worker that wakes the app to fetch new messages when the foreground service is not running (i.e., when `NotificationsMode` is `PERIODIC`). Provides a battery-friendly alternative to the always-on service.
 
-*See:* `android/src/main/java/chat/simplex/app/MessagesFetcherWorker.kt`
+*See:* `android/src/main/java/chat/popopx/app/MessagesFetcherWorker.kt`
 
 ### Android: NotificationsMode
 Enum controlling background message fetching:
@@ -380,12 +380,12 @@ Android notification channels registered by the app:
 - **Service:** `com.popopxchat.popopx.SIMPLEX_SERVICE_NOTIFICATION` -- low importance, persistent foreground service indicator
 - **Call Service:** `com.popopxchat.popopx.CALL_SERVICE_NOTIFICATION` -- default importance, ongoing call indicator
 
-*See:* `android/src/main/java/chat/simplex/app/model/NtfManager.android.kt`, `SimplexService.kt`, `CallService.kt`
+*See:* `android/src/main/java/chat/popopx/app/model/NtfManager.android.kt`, `SimplexService.kt`, `CallService.kt`
 
 ### Android: NtfManager
 The Android-specific notification manager. Handles creating notification channels, displaying message notifications (with grouping via `MessageGroup`), displaying incoming call notifications (with full-screen intent for lock-screen calls), and managing notification actions (accept/reject call, open chat).
 
-*See:* `android/src/main/java/chat/simplex/app/model/NtfManager.android.kt`
+*See:* `android/src/main/java/chat/popopx/app/model/NtfManager.android.kt`
 
 ### Desktop: System Notifications
 On Desktop, notifications use the system notification mechanism (typically via the JVM's `SystemTray` or platform-specific notification APIs). The notification manager interface is shared (`ntfManager`) but the implementation is platform-specific.
@@ -441,12 +441,12 @@ A class wrapping platform-specific key-value storage (`Settings` from `com.russh
 ### ComposeState
 Data class holding the state of the message composition area. Fields: `message` (ComposeMessage), `parsedMessage` (formatted text), `liveMessage`, `preview` (ComposePreview), `contextItem` (ComposeContextItem -- reply/edit context), `inProgress`, `progressByTimeout`, `useLinkPreviews`, `mentions`.
 
-*See:* `common/src/commonMain/kotlin/chat/simplex/common/views/chat/ComposeView.kt:98`
+*See:* `common/src/commonMain/kotlin/chat/popopx/common/views/chat/ComposeView.kt:98`
 
 ### ModalManager
 Manages the modal/sheet presentation stack. Supports multiple placements (default, center, fullscreen, end). Holds an ordered list of `ModalViewHolder` items and exposes `showModal`, `showCustomModal`, `showModalCloseable`, `closeModal`. Uses Compose state (`modalCount`) to trigger recomposition.
 
-*See:* `common/src/commonMain/kotlin/chat/simplex/common/views/helpers/ModalView.kt:92`
+*See:* `common/src/commonMain/kotlin/chat/popopx/common/views/helpers/ModalView.kt:92`
 
 ### AlertManager
 Singleton for displaying alert dialogs. Provides `showAlertMsg`, `showAlertDialog`, `showAlertDialogButtons`, etc. Works with `AlertManager.shared` for the default instance.

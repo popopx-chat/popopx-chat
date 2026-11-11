@@ -9,7 +9,7 @@ plugins {
   id("io.github.tomtzook.gradle-cmake") version "1.2.2"
 }
 
-group = "chat.simplex"
+group = "chat.popopx"
 version = extra["desktop.version_name"] as String
 
 
@@ -39,7 +39,7 @@ compose {
           "-Dcom.sun.management.jmxremote.authenticate=false"
         )
       }
-      mainClass = "chat.simplex.desktop.MainKt"
+      mainClass = "chat.popopx.desktop.MainKt"
       nativeDistributions {
         copyright = "(c) 2020-2026 POPOPX Chat"
         // For debugging via VisualVM

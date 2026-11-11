@@ -103,8 +103,8 @@ On Android, the encrypted passphrase is stored via the Android Keystore, which p
 ### Affected Locations
 
 - `SimpleXAPI.kt` -- `AppPreferences.storeDBPassphrase`, `AppPreferences.initialRandomDBPassphrase`, `AppPreferences.encryptedDBPassphrase`
-- `common/src/commonMain/kotlin/chat/simplex/common/views/helpers/DatabaseUtils.kt`
-- `common/src/commonMain/kotlin/chat/simplex/common/views/onboarding/SetupDatabasePassphrase.kt`
+- `common/src/commonMain/kotlin/chat/popopx/common/views/helpers/DatabaseUtils.kt`
+- `common/src/commonMain/kotlin/chat/popopx/common/views/onboarding/SetupDatabasePassphrase.kt`
 
 ### Impact
 
@@ -190,7 +190,7 @@ The Kotlin client communicates with the Haskell core via a text-based command pr
 The `RecorderNative` class on Desktop is a placeholder. Both `start()` and `stop()` are stubbed with `/*LALAL*/` comments and return dummy values (empty string and 0, respectively). Users cannot record voice messages on Desktop.
 
 ```kotlin
-// common/src/desktopMain/kotlin/chat/simplex/common/platform/RecAndPlay.desktop.kt
+// common/src/desktopMain/kotlin/chat/popopx/common/platform/RecAndPlay.desktop.kt
 actual class RecorderNative: RecorderInterface {
   override fun start(onProgressUpdate: (position: Int?, finished: Boolean) -> Unit): String {
     /*LALAL*/
@@ -208,8 +208,8 @@ Audio playback IS implemented on Desktop (via VLC/`vlcj` library), so received v
 
 ### Affected Locations
 
-- `common/src/desktopMain/kotlin/chat/simplex/common/platform/RecAndPlay.desktop.kt:15-25`
-- `common/src/commonMain/kotlin/chat/simplex/common/platform/RecAndPlay.kt` -- `RecorderInterface`
+- `common/src/desktopMain/kotlin/chat/popopx/common/platform/RecAndPlay.desktop.kt:15-25`
+- `common/src/commonMain/kotlin/chat/popopx/common/platform/RecAndPlay.kt` -- `RecorderInterface`
 
 ### Impact
 
@@ -243,7 +243,7 @@ Desktop cannot decode WebP in chat: `decodeBoundedBufferedImage` (`Utils.desktop
 The `CryptorInterface` implementation on Desktop is a non-functional placeholder. All three methods are stubbed:
 
 ```kotlin
-// common/src/desktopMain/kotlin/chat/simplex/common/platform/Cryptor.desktop.kt
+// common/src/desktopMain/kotlin/chat/popopx/common/platform/Cryptor.desktop.kt
 actual val cryptor: CryptorInterface = object : CryptorInterface {
   override fun decryptData(data: ByteArray, iv: ByteArray, alias: String): String? {
     return String(data) // LALAL
@@ -265,9 +265,9 @@ actual val cryptor: CryptorInterface = object : CryptorInterface {
 
 ### Affected Locations
 
-- `common/src/desktopMain/kotlin/chat/simplex/common/platform/Cryptor.desktop.kt`
-- `common/src/commonMain/kotlin/chat/simplex/common/platform/Cryptor.kt` -- `CryptorInterface`
-- `common/src/commonMain/kotlin/chat/simplex/common/views/helpers/DatabaseUtils.kt` -- uses `cryptor` for passphrase encryption
+- `common/src/desktopMain/kotlin/chat/popopx/common/platform/Cryptor.desktop.kt`
+- `common/src/commonMain/kotlin/chat/popopx/common/platform/Cryptor.kt` -- `CryptorInterface`
+- `common/src/commonMain/kotlin/chat/popopx/common/views/helpers/DatabaseUtils.kt` -- uses `cryptor` for passphrase encryption
 
 ### Impact
 
@@ -313,8 +313,8 @@ Desktop registers the `simplexchat:` scheme so the badge page can return to the 
 
 ### Affected Locations
 
-- `common/src/desktopMain/kotlin/chat/simplex/common/platform/AppLinkScheme.desktop.kt` -- registration and its result for the badge page
-- `common/src/desktopMain/kotlin/chat/simplex/common/SingleInstance.kt` -- forwarding to a running instance
+- `common/src/desktopMain/kotlin/chat/popopx/common/platform/AppLinkScheme.desktop.kt` -- registration and its result for the badge page
+- `common/src/desktopMain/kotlin/chat/popopx/common/SingleInstance.kt` -- forwarding to a running instance
 
 ### Impact
 
@@ -339,7 +339,7 @@ The desktop compose emoji picker lists emoji without skin tone variants, and its
 
 ### Affected Locations
 
-- `common/src/desktopMain/kotlin/chat/simplex/common/views/chat/ComposeEmojiPicker.desktop.kt`
+- `common/src/desktopMain/kotlin/chat/popopx/common/views/chat/ComposeEmojiPicker.desktop.kt`
 - `scripts/desktop/generate-emoji-data.py` (`../../scripts/desktop/` relative to `apps/multiplatform/`) -- drops skin tone variants
 
 ### Impact
@@ -365,7 +365,7 @@ Play gives a resubscription a new purchase token, so subscribing again on the sa
 
 ### Affected Locations
 
-- `common/src/commonMain/kotlin/chat/simplex/common/views/badges/BadgeStore.kt` -- `restorePurchases()`
+- `common/src/commonMain/kotlin/chat/popopx/common/views/badges/BadgeStore.kt` -- `restorePurchases()`
 - `../../apps/simplex-badge-service/src/BadgeService/Service.hs` -- the move limit
 
 ### Impact

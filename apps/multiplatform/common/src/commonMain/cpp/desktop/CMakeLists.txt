@@ -51,7 +51,7 @@ add_library( # Sets the name of the library.
     SHARED
 
     # Provides a relative path to your source file(s).
-    simplex-api.c)
+    popopx-api.c)
 
 add_library( popopx SHARED IMPORTED )
 FILE(GLOB POPOPXLIB ${CMAKE_SOURCE_DIR}/libs/${OS_LIB_PATH}-${OS_LIB_ARCH}/libpopopx.${OS_LIB_EXT})

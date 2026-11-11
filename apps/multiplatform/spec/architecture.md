@@ -117,7 +117,7 @@ Contains:
 
 ## 3. JNI Bridge
 
-All JNI declarations reside in [`Core.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt).
+All JNI declarations reside in [`Core.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt).
 
 <a id="initHS"></a>
 <a id="chatMigrateInit"></a>
@@ -126,33 +126,33 @@ All JNI declarations reside in [`Core.kt`](../common/src/commonMain/kotlin/chat/
 
 | # | Function | Signature | Line | Purpose |
 |---|---|---|---|---|
-| 1 | [`initHS()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L18) | `external fun initHS()` | 18 | Initialize GHC runtime system |
-| 2 | [`pipeStdOutToSocket()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L20) | `external fun pipeStdOutToSocket(socketName: String): Int` | 20 | Redirect Haskell stdout to Android local socket for logging |
-| 3 | [`chatMigrateInit()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L25) | `external fun chatMigrateInit(dbPath: String, dbKey: String, confirm: String): Array<Any>` | 25 | Initialize database with migration; returns `[jsonResult, chatCtrl]` |
-| 4 | [`chatCloseStore()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L26) | `external fun chatCloseStore(ctrl: ChatCtrl): String` | 26 | Close database store |
-| 5 | [`chatSendCmdRetry()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L27) | `external fun chatSendCmdRetry(ctrl: ChatCtrl, msg: String, retryNum: Int): String` | 27 | Send command to core with retry count |
-| 6 | [`chatSendRemoteCmdRetry()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L28) | `external fun chatSendRemoteCmdRetry(ctrl: ChatCtrl, rhId: Int, msg: String, retryNum: Int): String` | 28 | Send command to remote host |
-| 7 | [`chatRecvMsg()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L29) | `external fun chatRecvMsg(ctrl: ChatCtrl): String` | 29 | Receive message (non-blocking) |
-| 8 | [`chatRecvMsgWait()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L30) | `external fun chatRecvMsgWait(ctrl: ChatCtrl, timeout: Int): String` | 30 | Receive message with timeout (blocking up to `timeout` microseconds) |
-| 9 | [`chatParseMarkdown()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L31) | `external fun chatParseMarkdown(str: String): String` | 31 | Parse markdown formatting |
-| 10 | [`chatParseServer()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L32) | `external fun chatParseServer(str: String): String` | 32 | Parse SMP/XFTP server address |
-| 11 | [`chatParseUri()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L33) | `external fun chatParseUri(str: String, safe: Int): String` | 33 | Parse SimpleX connection URI |
-| 12 | [`chatPasswordHash()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L34) | `external fun chatPasswordHash(pwd: String, salt: String): String` | 34 | Hash password with salt |
-| 13 | [`chatValidName()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L35) | `external fun chatValidName(name: String): String` | 35 | Validate/sanitize display name |
-| 14 | [`chatParseBadgeCode()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L36) | `external fun chatParseBadgeCode(code: String): String` | 36 | Canonical form of a badge code, or an empty string |
-| 15 | [`chatJsonLength()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L37) | `external fun chatJsonLength(str: String): Int` | 37 | Get JSON-encoded string length |
-| 16 | [`chatWriteFile()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L38) | `external fun chatWriteFile(ctrl: ChatCtrl, path: String, buffer: ByteBuffer): String` | 38 | Write encrypted file via core |
-| 17 | [`chatReadFile()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L39) | `external fun chatReadFile(path: String, key: String, nonce: String): Array<Any>` | 39 | Read and decrypt file |
-| 18 | [`chatEncryptFile()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L40) | `external fun chatEncryptFile(ctrl: ChatCtrl, fromPath: String, toPath: String): String` | 40 | Encrypt file on disk |
-| 19 | [`chatDecryptFile()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L41) | `external fun chatDecryptFile(fromPath: String, key: String, nonce: String, toPath: String): String` | 41 | Decrypt file on disk |
-| 20 | [`chatResizeImageUri()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L42) | `external fun chatResizeImageUri(buffer: ByteBuffer, maxSize: Int): String` | 42 | Resize encoded image to a data URI of at most `maxSize` characters |
-| 21 | [`chatResizeImage()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L43) | `external fun chatResizeImage(buffer: ByteBuffer, maxSize: Int, png: Int): String` | 43 | Resize encoded image to base64 of PNG or JPEG data of at most `maxSize` bytes |
-| 22 | [`chatResizeImageFileUri()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L44) | `external fun chatResizeImageFileUri(path: String, maxSize: Int): String` | 44 | Desktop: as `chatResizeImageUri`, from the file at `path` |
-| 23 | [`chatResizeImageFile()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L45) | `external fun chatResizeImageFile(path: String, maxSize: Int, png: Int): String` | 45 | Desktop: as `chatResizeImage`, from the file at `path`; `png` −1 selects the format by transparency |
-| 24 | [`chatResizeImageFdUri()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L46) | `external fun chatResizeImageFdUri(fd: Int, maxSize: Int): String` | 46 | Android: as `chatResizeImageUri`, from the file descriptor `fd`, which core closes |
-| 25 | [`chatResizeImageFd()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L47) | `external fun chatResizeImageFd(fd: Int, maxSize: Int, png: Int): String` | 47 | Android: as `chatResizeImage`, from the file descriptor `fd`, which core closes |
+| 1 | [`initHS()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L18) | `external fun initHS()` | 18 | Initialize GHC runtime system |
+| 2 | [`pipeStdOutToSocket()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L20) | `external fun pipeStdOutToSocket(socketName: String): Int` | 20 | Redirect Haskell stdout to Android local socket for logging |
+| 3 | [`chatMigrateInit()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L25) | `external fun chatMigrateInit(dbPath: String, dbKey: String, confirm: String): Array<Any>` | 25 | Initialize database with migration; returns `[jsonResult, chatCtrl]` |
+| 4 | [`chatCloseStore()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L26) | `external fun chatCloseStore(ctrl: ChatCtrl): String` | 26 | Close database store |
+| 5 | [`chatSendCmdRetry()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L27) | `external fun chatSendCmdRetry(ctrl: ChatCtrl, msg: String, retryNum: Int): String` | 27 | Send command to core with retry count |
+| 6 | [`chatSendRemoteCmdRetry()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L28) | `external fun chatSendRemoteCmdRetry(ctrl: ChatCtrl, rhId: Int, msg: String, retryNum: Int): String` | 28 | Send command to remote host |
+| 7 | [`chatRecvMsg()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L29) | `external fun chatRecvMsg(ctrl: ChatCtrl): String` | 29 | Receive message (non-blocking) |
+| 8 | [`chatRecvMsgWait()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L30) | `external fun chatRecvMsgWait(ctrl: ChatCtrl, timeout: Int): String` | 30 | Receive message with timeout (blocking up to `timeout` microseconds) |
+| 9 | [`chatParseMarkdown()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L31) | `external fun chatParseMarkdown(str: String): String` | 31 | Parse markdown formatting |
+| 10 | [`chatParseServer()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L32) | `external fun chatParseServer(str: String): String` | 32 | Parse SMP/XFTP server address |
+| 11 | [`chatParseUri()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L33) | `external fun chatParseUri(str: String, safe: Int): String` | 33 | Parse SimpleX connection URI |
+| 12 | [`chatPasswordHash()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L34) | `external fun chatPasswordHash(pwd: String, salt: String): String` | 34 | Hash password with salt |
+| 13 | [`chatValidName()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L35) | `external fun chatValidName(name: String): String` | 35 | Validate/sanitize display name |
+| 14 | [`chatParseBadgeCode()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L36) | `external fun chatParseBadgeCode(code: String): String` | 36 | Canonical form of a badge code, or an empty string |
+| 15 | [`chatJsonLength()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L37) | `external fun chatJsonLength(str: String): Int` | 37 | Get JSON-encoded string length |
+| 16 | [`chatWriteFile()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L38) | `external fun chatWriteFile(ctrl: ChatCtrl, path: String, buffer: ByteBuffer): String` | 38 | Write encrypted file via core |
+| 17 | [`chatReadFile()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L39) | `external fun chatReadFile(path: String, key: String, nonce: String): Array<Any>` | 39 | Read and decrypt file |
+| 18 | [`chatEncryptFile()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L40) | `external fun chatEncryptFile(ctrl: ChatCtrl, fromPath: String, toPath: String): String` | 40 | Encrypt file on disk |
+| 19 | [`chatDecryptFile()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L41) | `external fun chatDecryptFile(fromPath: String, key: String, nonce: String, toPath: String): String` | 41 | Decrypt file on disk |
+| 20 | [`chatResizeImageUri()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L42) | `external fun chatResizeImageUri(buffer: ByteBuffer, maxSize: Int): String` | 42 | Resize encoded image to a data URI of at most `maxSize` characters |
+| 21 | [`chatResizeImage()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L43) | `external fun chatResizeImage(buffer: ByteBuffer, maxSize: Int, png: Int): String` | 43 | Resize encoded image to base64 of PNG or JPEG data of at most `maxSize` bytes |
+| 22 | [`chatResizeImageFileUri()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L44) | `external fun chatResizeImageFileUri(path: String, maxSize: Int): String` | 44 | Desktop: as `chatResizeImageUri`, from the file at `path` |
+| 23 | [`chatResizeImageFile()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L45) | `external fun chatResizeImageFile(path: String, maxSize: Int, png: Int): String` | 45 | Desktop: as `chatResizeImage`, from the file at `path`; `png` −1 selects the format by transparency |
+| 24 | [`chatResizeImageFdUri()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L46) | `external fun chatResizeImageFdUri(fd: Int, maxSize: Int): String` | 46 | Android: as `chatResizeImageUri`, from the file descriptor `fd`, which core closes |
+| 25 | [`chatResizeImageFd()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L47) | `external fun chatResizeImageFd(fd: Int, maxSize: Int, png: Int): String` | 47 | Android: as `chatResizeImage`, from the file descriptor `fd`, which core closes |
 
-**Total: 25 external native functions** (the `ChatCtrl` type alias at [line 23](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L23) is `Long`, representing the Haskell-side controller pointer).
+**Total: 25 external native functions** (the `ChatCtrl` type alias at [line 23](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L23) is `Long`, representing the Haskell-side controller pointer).
 
 <a id="initChatControllerOnStart"></a>
 <a id="chatInitTemporaryDatabase"></a>
@@ -162,11 +162,11 @@ All JNI declarations reside in [`Core.kt`](../common/src/commonMain/kotlin/chat/
 
 | Function | Line | Purpose |
 |---|---|---|
-| [`initChatControllerOnStart()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L51) | 51 | Entry point called during app startup; launches `initChatController` in a long-running coroutine |
-| [`initChatController()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L62) | 62 | Main initialization: DB migration via `chatMigrateInit`, error recovery (incomplete DB removal), sets file paths, loads active user, starts chat |
-| [`chatInitTemporaryDatabase()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L190) | 190 | Creates a temporary database for migration scenarios |
-| [`chatInitControllerRemovingDatabases()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L202) | 202 | Removes existing DBs and creates fresh controller (used during re-initialization) |
-| [`showStartChatAfterRestartAlert()`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt#L222) | 222 | Shows confirmation dialog when chat was stopped and DB passphrase is stored |
+| [`initChatControllerOnStart()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L51) | 51 | Entry point called during app startup; launches `initChatController` in a long-running coroutine |
+| [`initChatController()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L62) | 62 | Main initialization: DB migration via `chatMigrateInit`, error recovery (incomplete DB removal), sets file paths, loads active user, starts chat |
+| [`chatInitTemporaryDatabase()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L190) | 190 | Creates a temporary database for migration scenarios |
+| [`chatInitControllerRemovingDatabases()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L202) | 202 | Removes existing DBs and creates fresh controller (used during re-initialization) |
+| [`showStartChatAfterRestartAlert()`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L222) | 222 | Shows confirmation dialog when chat was stopped and DB passphrase is stored |
 
 <a id="initChatController"></a>
 
@@ -199,7 +199,7 @@ initChatController(useKey, confirmMigrations, startChat)
 
 ### Android
 
-Entry: [`SimplexApp.onCreate()`](../android/src/main/java/chat/simplex/app/SimplexApp.kt#L47)
+Entry: [`SimplexApp.onCreate()`](../android/src/main/java/chat/popopx/app/SimplexApp.kt#L47)
 
 ```
 SimplexApp.onCreate()
@@ -213,7 +213,7 @@ SimplexApp.onCreate()
   +-- initChatControllerOnStart()        // -> initChatController() -> chatMigrateInit -> startChat
 ```
 
-Activity: [`MainActivity.onCreate()`](../android/src/main/java/chat/simplex/app/MainActivity.kt#L32)
+Activity: [`MainActivity.onCreate()`](../android/src/main/java/chat/popopx/app/MainActivity.kt#L32)
 
 ```
 MainActivity.onCreate()
@@ -229,7 +229,7 @@ Lifecycle callbacks in `SimplexApp` (implements `LifecycleEventObserver`):
 
 ### Desktop
 
-Entry: [`main()`](../desktop/src/jvmMain/kotlin/chat/simplex/desktop/Main.kt#L26)
+Entry: [`main()`](../desktop/src/jvmMain/kotlin/chat/popopx/desktop/Main.kt#L26)
 
 ```
 main(args)
@@ -248,11 +248,11 @@ main(args)
   +-- showApp()                          // Compose window with AppScreen()
 ```
 
-[`showApp()`](../common/src/desktopMain/kotlin/chat/simplex/common/DesktopApp.kt#L33) creates a Compose `Window` with error recovery -- if a crash occurs, it closes the offending modal/view and re-opens the window.
+[`showApp()`](../common/src/desktopMain/kotlin/chat/popopx/common/DesktopApp.kt#L33) creates a Compose `Window` with error recovery -- if a crash occurs, it closes the offending modal/view and re-opens the window.
 
-[`showWindow()`](../common/src/desktopMain/kotlin/chat/simplex/common/DesktopApp.kt#L258) un-minimizes and raises the window when a second launch or a link reaches the running app. On Linux it also sends `_NET_ACTIVE_WINDOW` through [`requestX11Activation()`](../common/src/desktopMain/kotlin/chat/simplex/common/WindowActivation.kt#L17), because wlroots compositors such as Sway ignore the raise that AWT's `toFront()` sends under XWayland. On Windows the second process, which the browser left holding the foreground right, calls `AllowSetForegroundWindow` before it signals so that the running instance may raise its window. During a crash restart `showWindow()` skips the disposed window, so it does not come back; the new window opens visible.
+[`showWindow()`](../common/src/desktopMain/kotlin/chat/popopx/common/DesktopApp.kt#L258) un-minimizes and raises the window when a second launch or a link reaches the running app. On Linux it also sends `_NET_ACTIVE_WINDOW` through [`requestX11Activation()`](../common/src/desktopMain/kotlin/chat/popopx/common/WindowActivation.kt#L17), because wlroots compositors such as Sway ignore the raise that AWT's `toFront()` sends under XWayland. On Windows the second process, which the browser left holding the foreground right, calls `AllowSetForegroundWindow` before it signals so that the running instance may raise its window. During a crash restart `showWindow()` skips the disposed window, so it does not come back; the new window opens visible.
 
-[`initApp()`](../common/src/desktopMain/kotlin/chat/simplex/common/platform/AppCommon.desktop.kt#L21) sets the `ntfManager` implementation (desktop notifications via `NtfManager` in `common/model/`) and calls `initChatControllerOnStart()`.
+[`initApp()`](../common/src/desktopMain/kotlin/chat/popopx/common/platform/AppCommon.desktop.kt#L21) sets the `ntfManager` implementation (desktop notifications via `NtfManager` in `common/model/`) and calls `initChatControllerOnStart()`.
 
 ---
 
@@ -260,7 +260,7 @@ main(args)
 
 ### Receiver Coroutine
 
-[`ChatController.startReceiver()`](../common/src/commonMain/kotlin/chat/simplex/common/model/SimpleXAPI.kt#L660) launches a coroutine on `Dispatchers.IO` that continuously polls for events from the Haskell core:
+[`ChatController.startReceiver()`](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L660) launches a coroutine on `Dispatchers.IO` that continuously polls for events from the Haskell core:
 
 ```kotlin
 // SimpleXAPI.kt line 660
@@ -297,15 +297,15 @@ private fun startReceiver() {
 
 ### Message Reception
 
-[`recvMsg()`](../common/src/commonMain/kotlin/chat/simplex/common/model/SimpleXAPI.kt#L829) calls `chatRecvMsgWait(ctrl, MESSAGE_TIMEOUT)` where `MESSAGE_TIMEOUT = 300_000_000` microseconds (300 seconds). Returns `null` on timeout (empty string from Haskell), otherwise deserializes the JSON response to an `API` instance.
+[`recvMsg()`](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L829) calls `chatRecvMsgWait(ctrl, MESSAGE_TIMEOUT)` where `MESSAGE_TIMEOUT = 300_000_000` microseconds (300 seconds). Returns `null` on timeout (empty string from Haskell), otherwise deserializes the JSON response to an `API` instance.
 
 ### Command Sending
 
-[`sendCmd()`](../common/src/commonMain/kotlin/chat/simplex/common/model/SimpleXAPI.kt#L804) runs on `Dispatchers.IO`, serializes the command via `CC.cmdString`, calls `chatSendCmdRetry()` (or `chatSendRemoteCmdRetry()` for remote hosts), deserializes the response, and logs terminal items.
+[`sendCmd()`](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L804) runs on `Dispatchers.IO`, serializes the command via `CC.cmdString`, calls `chatSendCmdRetry()` (or `chatSendRemoteCmdRetry()` for remote hosts), deserializes the response, and logs terminal items.
 
 ### Event Processing
 
-[`processReceivedMsg()`](../common/src/commonMain/kotlin/chat/simplex/common/model/SimpleXAPI.kt#L2568) is a large `when` block that dispatches on the `CR` (ChatResponse) type:
+[`processReceivedMsg()`](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L2568) is a large `when` block that dispatches on the `CR` (ChatResponse) type:
 
 - `CR.ContactConnected` -- update contact in `ChatModel`
 - `CR.NewChatItems` -- add items to chat, trigger notifications
@@ -316,7 +316,7 @@ private fun startReceiver() {
 
 ### Wake Lock
 
-On Android, the receiver acquires a wake lock via [`getWakeLock(timeout)`](../common/src/commonMain/kotlin/chat/simplex/common/platform/SimplexService.kt#L3) (expect function) after each received message with a 60-second timeout. The previous iteration's wake lock is released after a 30-second delay, ensuring overlap so the CPU does not sleep between messages.
+On Android, the receiver acquires a wake lock via [`getWakeLock(timeout)`](../common/src/commonMain/kotlin/chat/popopx/common/platform/SimplexService.kt#L3) (expect function) after each received message with a 60-second timeout. The previous iteration's wake lock is released after a 30-second delay, ensuring overlap so the CPU does not sleep between messages.
 
 ---
 
@@ -330,36 +330,36 @@ Examples from platform files:
 
 | expect Declaration | File | Line |
 |---|---|---|
-| `expect val appPlatform: AppPlatform` | [`AppCommon.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/AppCommon.kt#L20) | 20 |
-| `expect val deviceName: String` | [`AppCommon.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/AppCommon.kt#L22) | 22 |
-| `expect fun isAppVisibleAndFocused(): Boolean` | [`AppCommon.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/AppCommon.kt#L24) | 24 |
-| `expect val dataDir: File` | [`Files.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Files.kt#L18) | 18 |
-| `expect val tmpDir: File` | [`Files.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Files.kt#L19) | 19 |
-| `expect val filesDir: File` | [`Files.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Files.kt#L20) | 20 |
-| `expect val appFilesDir: File` | [`Files.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Files.kt#L21) | 21 |
-| `expect val dbAbsolutePrefixPath: String` | [`Files.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Files.kt#L24) | 24 |
-| `expect fun showToast(text: String, timeout: Long)` | [`UI.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/UI.kt#L6) | 6 |
-| `expect fun hideKeyboard(view: Any?, clearFocus: Boolean)` | [`UI.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/UI.kt#L16) | 16 |
-| `expect fun getKeyboardState(): State<KeyboardState>` | [`UI.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/UI.kt#L15) | 15 |
-| `expect fun allowedToShowNotification(): Boolean` | [`Notifications.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Notifications.kt#L3) | 3 |
-| `expect class VideoPlayer` | [`VideoPlayer.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/VideoPlayer.kt#L25) | 25 |
-| `expect class RecorderNative` | [`RecAndPlay.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/RecAndPlay.kt#L17) | 17 |
-| `expect val cryptor: CryptorInterface` | [`Cryptor.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Cryptor.kt#L9) | 9 |
-| `expect fun base64ToBitmap(base64ImageString: String): ImageBitmap` | [`Images.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Images.kt#L18) | 18 |
-| `expect fun getWakeLock(timeout: Long): (() -> Unit)` | [`SimplexService.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/SimplexService.kt#L3) | 3 |
-| `expect class GlobalExceptionsHandler` | [`UI.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/UI.kt#L24) | 24 |
-| `expect fun UriHandler.sendEmail(subject: String, body: CharSequence)` | [`Share.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Share.kt#L7) | 7 |
-| `expect fun ClipboardManager.shareText(text: String)` | [`Share.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Share.kt#L9) | 9 |
-| `expect fun shareFile(text: String, fileSource: CryptoFile)` | [`Share.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Share.kt#L10) | 10 |
+| `expect val appPlatform: AppPlatform` | [`AppCommon.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/AppCommon.kt#L20) | 20 |
+| `expect val deviceName: String` | [`AppCommon.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/AppCommon.kt#L22) | 22 |
+| `expect fun isAppVisibleAndFocused(): Boolean` | [`AppCommon.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/AppCommon.kt#L24) | 24 |
+| `expect val dataDir: File` | [`Files.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Files.kt#L18) | 18 |
+| `expect val tmpDir: File` | [`Files.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Files.kt#L19) | 19 |
+| `expect val filesDir: File` | [`Files.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Files.kt#L20) | 20 |
+| `expect val appFilesDir: File` | [`Files.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Files.kt#L21) | 21 |
+| `expect val dbAbsolutePrefixPath: String` | [`Files.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Files.kt#L24) | 24 |
+| `expect fun showToast(text: String, timeout: Long)` | [`UI.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/UI.kt#L6) | 6 |
+| `expect fun hideKeyboard(view: Any?, clearFocus: Boolean)` | [`UI.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/UI.kt#L16) | 16 |
+| `expect fun getKeyboardState(): State<KeyboardState>` | [`UI.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/UI.kt#L15) | 15 |
+| `expect fun allowedToShowNotification(): Boolean` | [`Notifications.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Notifications.kt#L3) | 3 |
+| `expect class VideoPlayer` | [`VideoPlayer.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/VideoPlayer.kt#L25) | 25 |
+| `expect class RecorderNative` | [`RecAndPlay.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/RecAndPlay.kt#L17) | 17 |
+| `expect val cryptor: CryptorInterface` | [`Cryptor.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Cryptor.kt#L9) | 9 |
+| `expect fun base64ToBitmap(base64ImageString: String): ImageBitmap` | [`Images.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Images.kt#L18) | 18 |
+| `expect fun getWakeLock(timeout: Long): (() -> Unit)` | [`SimplexService.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/SimplexService.kt#L3) | 3 |
+| `expect class GlobalExceptionsHandler` | [`UI.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/UI.kt#L24) | 24 |
+| `expect fun UriHandler.sendEmail(subject: String, body: CharSequence)` | [`Share.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Share.kt#L7) | 7 |
+| `expect fun ClipboardManager.shareText(text: String)` | [`Share.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Share.kt#L9) | 9 |
+| `expect fun shareFile(text: String, fileSource: CryptoFile)` | [`Share.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Share.kt#L10) | 10 |
 
 ### PlatformInterface Callback Object
 
-[`PlatformInterface`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Platform.kt#L15) is an interface with default no-op implementations. It is assigned at runtime by each platform entry point:
+[`PlatformInterface`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Platform.kt#L15) is an interface with default no-op implementations. It is assigned at runtime by each platform entry point:
 
-- **Android**: assigned in [`SimplexApp.initMultiplatform()`](../android/src/main/java/chat/simplex/app/SimplexApp.kt#L193)
-- **Desktop**: assigned in [`Main.kt initHaskell()`](../desktop/src/jvmMain/kotlin/chat/simplex/desktop/Main.kt#L59)
+- **Android**: assigned in [`SimplexApp.initMultiplatform()`](../android/src/main/java/chat/popopx/app/SimplexApp.kt#L193)
+- **Desktop**: assigned in [`Main.kt initHaskell()`](../desktop/src/jvmMain/kotlin/chat/popopx/desktop/Main.kt#L59)
 
-The global variable is declared at [`Platform.kt line 50`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Platform.kt#L50):
+The global variable is declared at [`Platform.kt line 50`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Platform.kt#L50):
 ```kotlin
 var platform: PlatformInterface = object : PlatformInterface {}
 ```
@@ -399,44 +399,44 @@ var platform: PlatformInterface = object : PlatformInterface {}
 
 | File | Path | Key Contents |
 |---|---|---|
-| Core.kt | [`common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Core.kt) | JNI externals, `initChatController`, `chatInitTemporaryDatabase` |
-| SimpleXAPI.kt | [`common/src/commonMain/kotlin/chat/simplex/common/model/SimpleXAPI.kt`](../common/src/commonMain/kotlin/chat/simplex/common/model/SimpleXAPI.kt) | `ChatController`, `AppPreferences`, `startReceiver`, `sendCmd`, `recvMsg`, `processReceivedMsg`, all `api*` functions |
-| ChatModel.kt | [`common/src/commonMain/kotlin/chat/simplex/common/model/ChatModel.kt`](../common/src/commonMain/kotlin/chat/simplex/common/model/ChatModel.kt) | `ChatModel` singleton, `ChatsContext`, `Chat`, `ChatInfo`, `ChatItem` and all domain types |
-| App.kt | [`common/src/commonMain/kotlin/chat/simplex/common/App.kt`](../common/src/commonMain/kotlin/chat/simplex/common/App.kt) | `AppScreen()`, `MainScreen()` |
+| Core.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt) | JNI externals, `initChatController`, `chatInitTemporaryDatabase` |
+| SimpleXAPI.kt | [`common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt`](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt) | `ChatController`, `AppPreferences`, `startReceiver`, `sendCmd`, `recvMsg`, `processReceivedMsg`, all `api*` functions |
+| ChatModel.kt | [`common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt`](../common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt) | `ChatModel` singleton, `ChatsContext`, `Chat`, `ChatInfo`, `ChatItem` and all domain types |
+| App.kt | [`common/src/commonMain/kotlin/chat/popopx/common/App.kt`](../common/src/commonMain/kotlin/chat/popopx/common/App.kt) | `AppScreen()`, `MainScreen()` |
 
 ### Platform Layer
 
 | File | Path | Key Contents |
 |---|---|---|
-| Platform.kt | [`common/src/commonMain/kotlin/chat/simplex/common/platform/Platform.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Platform.kt) | `PlatformInterface`, global `platform` var |
-| AppCommon.kt | [`common/src/commonMain/kotlin/chat/simplex/common/platform/AppCommon.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/AppCommon.kt) | `AppPlatform`, `runMigrations()` |
-| AppCommon.android.kt | [`common/src/androidMain/kotlin/chat/simplex/common/platform/AppCommon.android.kt`](../common/src/androidMain/kotlin/chat/simplex/common/platform/AppCommon.android.kt) | `initHaskell()`, `androidAppContext` |
-| AppCommon.desktop.kt | [`common/src/desktopMain/kotlin/chat/simplex/common/platform/AppCommon.desktop.kt`](../common/src/desktopMain/kotlin/chat/simplex/common/platform/AppCommon.desktop.kt) | `initApp()`, desktop NtfManager setup |
-| Files.kt | [`common/src/commonMain/kotlin/chat/simplex/common/platform/Files.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Files.kt) | `expect val dataDir/tmpDir/filesDir/dbAbsolutePrefixPath` |
-| NtfManager.kt | [`common/src/commonMain/kotlin/chat/simplex/common/platform/NtfManager.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/NtfManager.kt) | `abstract class NtfManager` |
-| Notifications.kt | [`common/src/commonMain/kotlin/chat/simplex/common/platform/Notifications.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Notifications.kt) | `expect fun allowedToShowNotification()` |
-| UI.kt | [`common/src/commonMain/kotlin/chat/simplex/common/platform/UI.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/UI.kt) | `showToast`, `hideKeyboard`, `GlobalExceptionsHandler` |
-| Share.kt | [`common/src/commonMain/kotlin/chat/simplex/common/platform/Share.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Share.kt) | `shareText`, `shareFile`, `openFile` |
-| VideoPlayer.kt | [`common/src/commonMain/kotlin/chat/simplex/common/platform/VideoPlayer.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/VideoPlayer.kt) | `VideoPlayerInterface`, `expect class VideoPlayer` |
-| RecAndPlay.kt | [`common/src/commonMain/kotlin/chat/simplex/common/platform/RecAndPlay.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/RecAndPlay.kt) | `RecorderInterface`, `AudioPlayerInterface` |
-| Cryptor.kt | [`common/src/commonMain/kotlin/chat/simplex/common/platform/Cryptor.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Cryptor.kt) | `CryptorInterface` |
-| Images.kt | [`common/src/commonMain/kotlin/chat/simplex/common/platform/Images.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/Images.kt) | `base64ToBitmap`, `resizeImageToStrSize` |
-| SimplexService.kt | [`common/src/commonMain/kotlin/chat/simplex/common/platform/SimplexService.kt`](../common/src/commonMain/kotlin/chat/simplex/common/platform/SimplexService.kt) | `expect fun getWakeLock()` |
+| Platform.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/Platform.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Platform.kt) | `PlatformInterface`, global `platform` var |
+| AppCommon.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/AppCommon.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/AppCommon.kt) | `AppPlatform`, `runMigrations()` |
+| AppCommon.android.kt | [`common/src/androidMain/kotlin/chat/popopx/common/platform/AppCommon.android.kt`](../common/src/androidMain/kotlin/chat/popopx/common/platform/AppCommon.android.kt) | `initHaskell()`, `androidAppContext` |
+| AppCommon.desktop.kt | [`common/src/desktopMain/kotlin/chat/popopx/common/platform/AppCommon.desktop.kt`](../common/src/desktopMain/kotlin/chat/popopx/common/platform/AppCommon.desktop.kt) | `initApp()`, desktop NtfManager setup |
+| Files.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/Files.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Files.kt) | `expect val dataDir/tmpDir/filesDir/dbAbsolutePrefixPath` |
+| NtfManager.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/NtfManager.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/NtfManager.kt) | `abstract class NtfManager` |
+| Notifications.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/Notifications.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Notifications.kt) | `expect fun allowedToShowNotification()` |
+| UI.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/UI.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/UI.kt) | `showToast`, `hideKeyboard`, `GlobalExceptionsHandler` |
+| Share.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/Share.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Share.kt) | `shareText`, `shareFile`, `openFile` |
+| VideoPlayer.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/VideoPlayer.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/VideoPlayer.kt) | `VideoPlayerInterface`, `expect class VideoPlayer` |
+| RecAndPlay.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/RecAndPlay.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/RecAndPlay.kt) | `RecorderInterface`, `AudioPlayerInterface` |
+| Cryptor.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/Cryptor.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Cryptor.kt) | `CryptorInterface` |
+| Images.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/Images.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Images.kt) | `base64ToBitmap`, `resizeImageToStrSize` |
+| SimplexService.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/SimplexService.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/SimplexService.kt) | `expect fun getWakeLock()` |
 
 ### Entry Points
 
 | File | Path | Key Contents |
 |---|---|---|
-| SimplexApp.kt | [`android/src/main/java/chat/simplex/app/SimplexApp.kt`](../android/src/main/java/chat/simplex/app/SimplexApp.kt) | Android Application class, lifecycle observer |
-| MainActivity.kt | [`android/src/main/java/chat/simplex/app/MainActivity.kt`](../android/src/main/java/chat/simplex/app/MainActivity.kt) | Android main activity |
-| SimplexService.kt | [`android/src/main/java/chat/simplex/app/SimplexService.kt`](../android/src/main/java/chat/simplex/app/SimplexService.kt) | Android foreground service |
-| Main.kt | [`desktop/src/jvmMain/kotlin/chat/simplex/desktop/Main.kt`](../desktop/src/jvmMain/kotlin/chat/simplex/desktop/Main.kt) | Desktop `main()` |
-| DesktopApp.kt | [`common/src/desktopMain/kotlin/chat/simplex/common/DesktopApp.kt`](../common/src/desktopMain/kotlin/chat/simplex/common/DesktopApp.kt) | `showApp()`, `SimplexWindowState` |
-| SingleInstance.kt | [`common/src/desktopMain/kotlin/chat/simplex/common/SingleInstance.kt`](../common/src/desktopMain/kotlin/chat/simplex/common/SingleInstance.kt) | `acquireSingleInstance()`, `startShowFileWatcher()`, signal file hand-over |
-| WindowActivation.kt | [`common/src/desktopMain/kotlin/chat/simplex/common/WindowActivation.kt`](../common/src/desktopMain/kotlin/chat/simplex/common/WindowActivation.kt) | `requestX11Activation()`, `sendActivation()`, `activationEvent()` |
+| SimplexApp.kt | [`android/src/main/java/chat/popopx/app/SimplexApp.kt`](../android/src/main/java/chat/popopx/app/SimplexApp.kt) | Android Application class, lifecycle observer |
+| MainActivity.kt | [`android/src/main/java/chat/popopx/app/MainActivity.kt`](../android/src/main/java/chat/popopx/app/MainActivity.kt) | Android main activity |
+| SimplexService.kt | [`android/src/main/java/chat/popopx/app/SimplexService.kt`](../android/src/main/java/chat/popopx/app/SimplexService.kt) | Android foreground service |
+| Main.kt | [`desktop/src/jvmMain/kotlin/chat/popopx/desktop/Main.kt`](../desktop/src/jvmMain/kotlin/chat/popopx/desktop/Main.kt) | Desktop `main()` |
+| DesktopApp.kt | [`common/src/desktopMain/kotlin/chat/popopx/common/DesktopApp.kt`](../common/src/desktopMain/kotlin/chat/popopx/common/DesktopApp.kt) | `showApp()`, `SimplexWindowState` |
+| SingleInstance.kt | [`common/src/desktopMain/kotlin/chat/popopx/common/SingleInstance.kt`](../common/src/desktopMain/kotlin/chat/popopx/common/SingleInstance.kt) | `acquireSingleInstance()`, `startShowFileWatcher()`, signal file hand-over |
+| WindowActivation.kt | [`common/src/desktopMain/kotlin/chat/popopx/common/WindowActivation.kt`](../common/src/desktopMain/kotlin/chat/popopx/common/WindowActivation.kt) | `requestX11Activation()`, `sendActivation()`, `activationEvent()` |
 
 ### Theme
 
 | File | Path | Key Contents |
 |---|---|---|
-| ThemeManager.kt | [`common/src/commonMain/kotlin/chat/simplex/common/ui/theme/ThemeManager.kt`](../common/src/commonMain/kotlin/chat/simplex/common/ui/theme/ThemeManager.kt) | Theme resolution, system/light/dark/custom, per-user overrides |
+| ThemeManager.kt | [`common/src/commonMain/kotlin/chat/popopx/common/ui/theme/ThemeManager.kt`](../common/src/commonMain/kotlin/chat/popopx/common/ui/theme/ThemeManager.kt) | Theme resolution, system/light/dark/custom, per-user overrides |

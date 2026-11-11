@@ -27,7 +27,7 @@ Each layer links to the next:
 - `product/concepts.md` links every concept to its spec docs, source files, and tests in a single table — this is the primary navigation entry point
 - `product/views/*.md` and `product/flows/*.md` each have a **Related spec:** line linking to their most relevant spec documents
 - `product/glossary.md` uses *See: [spec/...]* references and `product/rules.md` uses **Spec:** [spec/...] references to link individual terms and rules down to spec
-- `spec/` documents contain **Source:** headers and inline function links pointing down to source. Line references MUST be clickable by embedding the `#Lxx-Lyy` fragment in the link URL: [`functionName()`](common/src/commonMain/kotlin/chat/simplex/common/model/SimpleXAPI.kt#Lxx-Lyy). You MUST NOT duplicate line numbers in the display text — the URL fragment is sufficient. Why: redundant line numbers in display text create maintenance burden on every line shift.
+- `spec/` documents contain **Source:** headers and inline function links pointing down to source. Line references MUST be clickable by embedding the `#Lxx-Lyy` fragment in the link URL: [`functionName()`](common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#Lxx-Lyy). You MUST NOT duplicate line numbers in the display text — the URL fragment is sufficient. Why: redundant line numbers in display text create maintenance burden on every line shift.
 - Reverse direction: the Document Map (end of this file) maps source → spec → product
 
 ### Navigation workflow
@@ -183,19 +183,19 @@ When modifying platform abstractions, you MUST update both `actual` implementati
 
 ```
 common/src/
-├── commonMain/kotlin/chat/simplex/common/    -- Shared code (195 files)
+├── commonMain/kotlin/chat/popopx/common/    -- Shared code (195 files)
 │   ├── model/          -- ChatModel, SimpleXAPI, CryptoFile
 │   ├── platform/       -- expect/actual platform abstractions
 │   ├── ui/theme/       -- Theme system (ThemeManager, colors, types)
 │   └── views/          -- Compose UI (chat, chatlist, call, settings, etc.)
-├── androidMain/kotlin/chat/simplex/common/   -- Android actuals (55 files)
+├── androidMain/kotlin/chat/popopx/common/   -- Android actuals (55 files)
 │   ├── platform/       -- actual implementations
 │   └── views/          -- Android-specific view variants
-├── desktopMain/kotlin/chat/simplex/common/   -- Desktop actuals (56 files)
+├── desktopMain/kotlin/chat/popopx/common/   -- Desktop actuals (56 files)
 │   ├── platform/       -- actual implementations
 │   └── views/          -- Desktop-specific view variants
-android/src/main/java/chat/simplex/app/       -- Android app (8 files)
-desktop/src/jvmMain/kotlin/chat/simplex/desktop/ -- Desktop app (1 file)
+android/src/main/java/chat/popopx/app/       -- Android app (8 files)
+desktop/src/jvmMain/kotlin/chat/popopx/desktop/ -- Desktop app (1 file)
 ```
 
 ### Platform Differences
