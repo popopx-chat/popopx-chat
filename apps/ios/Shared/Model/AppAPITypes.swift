@@ -1,9 +1,9 @@
 //
 //  APITypes.swift
-//  SimpleX
+//  POPOPX
 //
 //  Created by EP on 01/05/2025.
-//  Copyright © 2025 SimpleX Chat. All rights reserved.
+//  Copyright © 2025 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/api.md
 
@@ -908,7 +908,7 @@ enum ChatResponse1: Decodable, ChatAPIResult {
     case invitation(user: UserRef, connLinkInvitation: CreatedConnLink, connection: PendingContactConnection)
     case connectionIncognitoUpdated(user: UserRef, toConnection: PendingContactConnection)
     case connectionUserChanged(user: UserRef, fromConnection: PendingContactConnection, toConnection: PendingContactConnection, newUser: UserRef)
-    case connectionPlan(user: UserRef, connLink: CreatedConnLink, planSimplexName: SimplexNameInfo?, otherSimplexName: SimplexNameInfo?, connectionPlan: ConnectionPlan)
+    case connectionPlan(user: UserRef, connLink: CreatedConnLink, planSimplexName: PopopxNameInfo?, otherSimplexName: PopopxNameInfo?, connectionPlan: ConnectionPlan)
     case newPreparedChat(user: UserRef, chat: ChatData)
     case contactUserChanged(user: UserRef, fromContact: Contact, newUser: UserRef, toContact: Contact)
     case groupUserChanged(user: UserRef, fromGroup: GroupInfo, newUser: UserRef, toGroup: GroupInfo)
@@ -1515,8 +1515,8 @@ enum OwnerVerification: Decodable, Hashable {
 
 struct ConnectionPlanResult {
     var connLink: CreatedConnLink
-    var planSimplexName: SimplexNameInfo?
-    var otherSimplexName: SimplexNameInfo?
+    var planSimplexName: PopopxNameInfo?
+    var otherSimplexName: PopopxNameInfo?
     var connectionPlan: ConnectionPlan
 }
 
@@ -1613,23 +1613,23 @@ struct UserMsgReceiptSettings: Codable {
     var clearOverrides: Bool
 }
 
-protocol SimplexAddress {
+protocol PopopxAddress {
     var connLinkContact: CreatedConnLink { get }
     var shortLinkDataSet: Bool { get }
     var shortLinkLargeDataSet: Bool { get }
 }
 
-extension SimplexAddress {
+extension PopopxAddress {
     var shouldBeUpgraded: Bool {
         connLinkContact.connShortLink == nil || !shortLinkDataSet || !shortLinkLargeDataSet
     }
 
     func shareAddress(short: Bool) {
-        showShareSheet(items: [simplexChatLink(connLinkContact.simplexChatUri(short: short))])
+        showShareSheet(items: [popopxChatLink(connLinkContact.popopxChatUri(short: short))])
     }
 }
 
-struct UserContactLink: Decodable, Hashable, SimplexAddress {
+struct UserContactLink: Decodable, Hashable, PopopxAddress {
     var connLinkContact: CreatedConnLink
     var shortLinkDataSet: Bool
     var shortLinkLargeDataSet: Bool
@@ -1655,7 +1655,7 @@ struct AutoAccept: Codable, Hashable {
     var acceptIncognito: Bool
 }
 
-struct GroupLink: Decodable, Hashable, SimplexAddress {
+struct GroupLink: Decodable, Hashable, PopopxAddress {
     var userContactLinkId: Int64
     var connLinkContact: CreatedConnLink
     var shortLinkDataSet: Bool
@@ -1770,7 +1770,7 @@ struct DBEncryptionConfig: Codable {
 }
 
 enum OperatorTag: String, Codable {
-    case simplex = "simplex"
+    case popopx = "popopx"
     case flux = "flux"
 }
 
@@ -1785,10 +1785,10 @@ struct ServerOperatorInfo {
 }
 
 let operatorsInfo: Dictionary<OperatorTag, ServerOperatorInfo> = [
-    .simplex: ServerOperatorInfo(
+    .popopx: ServerOperatorInfo(
         description: [
-            "SimpleX Chat is the first communication network that has no user profile IDs of any kind, not even random numbers or identity keys.",
-            "SimpleX Chat Ltd develops the communication software for SimpleX network."
+            "POPOPX Chat is the first communication network that has no user profile IDs of any kind, not even random numbers or identity keys.",
+            "POPOPX Chat Ltd develops the communication software for POPOPX network."
         ],
         website: URL(string: "https://simplex.chat")!,
         logo: "decentralized",
@@ -1800,10 +1800,10 @@ let operatorsInfo: Dictionary<OperatorTag, ServerOperatorInfo> = [
         description: [
             "Flux is the largest decentralized cloud, based on a global network of user-operated nodes.",
             "Flux offers a powerful, scalable, and affordable cutting edge technology platform for all.",
-            "Flux operates servers in SimpleX network to improve its privacy and decentralization."
+            "Flux operates servers in POPOPX network to improve its privacy and decentralization."
         ],
         website: URL(string: "https://runonflux.com")!,
-        selfhost: (text: "Self-host SimpleX servers on Flux", link: URL(string: "https://home.runonflux.io/apps/marketplace?q=simplex")!),
+        selfhost: (text: "Self-host POPOPX servers on Flux", link: URL(string: "https://home.runonflux.io/apps/marketplace?q=simplex")!),
         logo: "flux_logo_symbol",
         largeLogo: "flux_logo",
         logoDarkMode: "flux_logo_symbol",
@@ -1920,9 +1920,9 @@ struct ServerOperator: Identifiable, Equatable, Codable {
 
     static var sampleData1 = ServerOperator(
         operatorId: 1,
-        operatorTag: .simplex,
-        tradeName: "SimpleX Chat",
-        legalName: "SimpleX Chat Ltd",
+        operatorTag: .popopx,
+        tradeName: "POPOPX Chat",
+        legalName: "POPOPX Chat Ltd",
         serverDomains: ["simplex.im"],
         conditionsAcceptance: .accepted(acceptedAt: nil, autoAccepted: false),
         enabled: true,

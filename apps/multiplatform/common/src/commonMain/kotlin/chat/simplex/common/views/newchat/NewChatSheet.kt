@@ -135,8 +135,8 @@ private fun ModalData.NewChatSheetLayout(
       }
   }
   val searchText = rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue("")) }
-  val searchShowingSimplexLink = remember { mutableStateOf(false) }
-  val searchChatFilteredBySimplexLink = remember { mutableStateOf<Set<String>>(emptySet()) }
+  val searchShowingPopopxLink = remember { mutableStateOf(false) }
+  val searchChatFilteredByPopopxLink = remember { mutableStateOf<Set<String>>(emptySet()) }
   val connectNameCandidate = remember { mutableStateOf<String?>(null) }
   val showUnreadAndFavorites = remember { ChatController.appPrefs.showUnreadAndFavorites.state }.value
   val baseContactTypes = remember { listOf(ContactType.CARD, ContactType.CONTACT_WITH_REQUEST, ContactType.REQUEST, ContactType.RECENT) }
@@ -171,8 +171,8 @@ private fun ModalData.NewChatSheetLayout(
 
   val filteredContactChats = filteredContactChats(
     showUnreadAndFavorites = showUnreadAndFavorites,
-    searchChatFilteredBySimplexLink = searchChatFilteredBySimplexLink,
-    searchShowingSimplexLink = searchShowingSimplexLink,
+    searchChatFilteredByPopopxLink = searchChatFilteredByPopopxLink,
+    searchShowingPopopxLink = searchShowingPopopxLink,
     searchText = searchText.value.text,
     contactChats = allChats
   )
@@ -298,7 +298,7 @@ private fun ModalData.NewChatSheetLayout(
               IntOffset(0, y)
             }
             // show background when something is scrolled because otherwise the bar is transparent.
-            // not using background always because of gradient in SimpleX theme
+            // not using background always because of gradient in POPOPX theme
             .background(
               if (scrolledSomething && (keyboardState == KeyboardState.Opened || searchText.value.text.isNotEmpty())) {
                 MaterialTheme.colors.background
@@ -312,8 +312,8 @@ private fun ModalData.NewChatSheetLayout(
             ContactsSearchBar(
               listState = listState,
               searchText = searchText,
-              searchShowingSimplexLink = searchShowingSimplexLink,
-              searchChatFilteredBySimplexLink = searchChatFilteredBySimplexLink,
+              searchShowingPopopxLink = searchShowingPopopxLink,
+              searchChatFilteredByPopopxLink = searchChatFilteredByPopopxLink,
               connectNameCandidate = connectNameCandidate,
               close = close,
             )
@@ -390,7 +390,7 @@ private fun ModalData.NewChatSheetLayout(
               IntOffset(0, y)
             }
             // show background when something is scrolled because otherwise the bar is transparent.
-            // not using background always because of gradient in SimpleX theme
+            // not using background always because of gradient in POPOPX theme
             .background(
               if (scrolledSomething && (keyboardState == KeyboardState.Opened || searchText.value.text.isNotEmpty())) {
                 MaterialTheme.colors.background
@@ -403,8 +403,8 @@ private fun ModalData.NewChatSheetLayout(
           ContactsSearchBar(
             listState = listState,
             searchText = searchText,
-            searchShowingSimplexLink = searchShowingSimplexLink,
-            searchChatFilteredBySimplexLink = searchChatFilteredBySimplexLink,
+            searchShowingPopopxLink = searchShowingPopopxLink,
+            searchChatFilteredByPopopxLink = searchChatFilteredByPopopxLink,
             connectNameCandidate = connectNameCandidate,
             close = close,
           )
@@ -476,8 +476,8 @@ private fun NewChatButton(
 private fun ContactsSearchBar(
   listState: LazyListState,
   searchText: MutableState<TextFieldValue>,
-  searchShowingSimplexLink: MutableState<Boolean>,
-  searchChatFilteredBySimplexLink: MutableState<Set<String>>,
+  searchShowingPopopxLink: MutableState<Boolean>,
+  searchChatFilteredByPopopxLink: MutableState<Set<String>>,
   connectNameCandidate: MutableState<String?>,
   close: () -> Unit,
 ) {
@@ -493,7 +493,7 @@ private fun ContactsSearchBar(
     )
     SearchTextField(
       Modifier.weight(1f).onFocusChanged { focused = it.hasFocus }.focusRequester(focusRequester),
-      placeholder = stringResource(MR.strings.search_or_paste_simplex_link),
+      placeholder = stringResource(MR.strings.search_or_paste_popopx_link),
       alwaysVisible = true,
       searchText = searchText,
       trailingContent = null,
@@ -541,22 +541,22 @@ private fun ContactsSearchBar(
           if (target is ConnectTarget.Link) {
             hideKeyboard(view)
             searchText.value = searchText.value.copy(target.linkText, selection = TextRange.Zero)
-            searchShowingSimplexLink.value = true
-            searchChatFilteredBySimplexLink.value = emptySet()
+            searchShowingPopopxLink.value = true
+            searchChatFilteredByPopopxLink.value = emptySet()
             connectNameCandidate.value = null
             connect(
               link = target.text,
-              searchChatFilteredBySimplexLink = searchChatFilteredBySimplexLink,
+              searchChatFilteredByPopopxLink = searchChatFilteredByPopopxLink,
               close = close,
               cleanup = { searchText.value = TextFieldValue() }
             )
           } else {
             // A name is resolved only when its "Connect to …" row is tapped, not on every keystroke. The
-            // simplex-name filter is chat-list only: this contacts/deleted view is a scoped subset, so a
+            // popopx-name filter is chat-list only: this contacts/deleted view is a scoped subset, so a
             // resolved chat id (channel, business, unlisted or active-only contact) may not be present in it.
             val candidate = nameSearchCandidate(it.trim())
             connectNameCandidate.value = candidate
-            if (candidate == null && (!searchShowingSimplexLink.value || it.isEmpty())) {
+            if (candidate == null && (!searchShowingPopopxLink.value || it.isEmpty())) {
               if (it.isNotEmpty()) {
                 focusRequester.requestFocus()
               } else {
@@ -565,8 +565,8 @@ private fun ContactsSearchBar(
                   listState.scrollToItem(0)
                 }
               }
-              searchShowingSimplexLink.value = false
-              searchChatFilteredBySimplexLink.value = emptySet()
+              searchShowingPopopxLink.value = false
+              searchChatFilteredByPopopxLink.value = emptySet()
             }
           }
         }
@@ -593,12 +593,12 @@ private fun ToggleFilterButton() {
   }
 }
 
-private fun connect(link: String, searchChatFilteredBySimplexLink: MutableState<Set<String>>, close: () -> Unit, cleanup: (() -> Unit)?) {
+private fun connect(link: String, searchChatFilteredByPopopxLink: MutableState<Set<String>>, close: () -> Unit, cleanup: (() -> Unit)?) {
   withBGApi {
     planAndConnect(
       chatModel.remoteHostId(),
       link,
-      filterKnownContact = { searchChatFilteredBySimplexLink.value = setOf(it.id) },
+      filterKnownContact = { searchChatFilteredByPopopxLink.value = setOf(it.id) },
       close = close,
       cleanup = cleanup,
     )
@@ -607,13 +607,13 @@ private fun connect(link: String, searchChatFilteredBySimplexLink: MutableState<
 
 private fun filteredContactChats(
   showUnreadAndFavorites: Boolean,
-  searchShowingSimplexLink: State<Boolean>,
-  searchChatFilteredBySimplexLink: State<Set<String>>,
+  searchShowingPopopxLink: State<Boolean>,
+  searchChatFilteredByPopopxLink: State<Set<String>>,
   searchText: String,
   contactChats: List<Chat>
 ): List<Chat> {
-  val linkChatIds = searchChatFilteredBySimplexLink.value
-  val s = if (searchShowingSimplexLink.value) "" else searchText.trim().lowercase()
+  val linkChatIds = searchChatFilteredByPopopxLink.value
+  val s = if (searchShowingPopopxLink.value) "" else searchText.trim().lowercase()
 
   return if (linkChatIds.isNotEmpty()) {
     contactChats.filter { it.id in linkChatIds }
@@ -671,8 +671,8 @@ private fun ModalData.DeletedContactsView(rh: RemoteHostInfo?, closeDeletedChats
   Box {
     val listState = remember { appBarHandler.listState }
     val searchText = rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue("")) }
-    val searchShowingSimplexLink = remember { mutableStateOf(false) }
-    val searchChatFilteredBySimplexLink = remember { mutableStateOf<Set<String>>(emptySet()) }
+    val searchShowingPopopxLink = remember { mutableStateOf(false) }
+    val searchChatFilteredByPopopxLink = remember { mutableStateOf<Set<String>>(emptySet()) }
     // deleted contacts are not connected to by name, so this candidate only stops per-keystroke resolution
     val connectNameCandidate = remember { mutableStateOf<String?>(null) }
     val showUnreadAndFavorites = remember { appPrefs.showUnreadAndFavorites.state }.value
@@ -681,8 +681,8 @@ private fun ModalData.DeletedContactsView(rh: RemoteHostInfo?, closeDeletedChats
     }
     val filteredContactChats = filteredContactChats(
       showUnreadAndFavorites = showUnreadAndFavorites,
-      searchChatFilteredBySimplexLink = searchChatFilteredBySimplexLink,
-      searchShowingSimplexLink = searchShowingSimplexLink,
+      searchChatFilteredByPopopxLink = searchChatFilteredByPopopxLink,
+      searchShowingPopopxLink = searchShowingPopopxLink,
       searchText = searchText.value.text,
       contactChats = allChats
     )
@@ -715,8 +715,8 @@ private fun ModalData.DeletedContactsView(rh: RemoteHostInfo?, closeDeletedChats
             ContactsSearchBar(
               listState = listState,
               searchText = searchText,
-              searchShowingSimplexLink = searchShowingSimplexLink,
-              searchChatFilteredBySimplexLink = searchChatFilteredBySimplexLink,
+              searchShowingPopopxLink = searchShowingPopopxLink,
+              searchChatFilteredByPopopxLink = searchChatFilteredByPopopxLink,
               connectNameCandidate = connectNameCandidate,
               close = close,
             )
@@ -725,8 +725,8 @@ private fun ModalData.DeletedContactsView(rh: RemoteHostInfo?, closeDeletedChats
               ContactsSearchBar(
                 listState = listState,
                 searchText = searchText,
-                searchShowingSimplexLink = searchShowingSimplexLink,
-                searchChatFilteredBySimplexLink = searchChatFilteredBySimplexLink,
+                searchShowingPopopxLink = searchShowingPopopxLink,
+                searchChatFilteredByPopopxLink = searchChatFilteredByPopopxLink,
                 connectNameCandidate = connectNameCandidate,
                 close = close,
               )
@@ -873,7 +873,7 @@ fun ActionButton(
 @Preview
 @Composable
 internal fun PreviewNewChatSheet() {
-  SimpleXTheme {
+  POPOPXTheme {
     ModalData().NewChatSheet(rh = null, close = {})
   }
 }

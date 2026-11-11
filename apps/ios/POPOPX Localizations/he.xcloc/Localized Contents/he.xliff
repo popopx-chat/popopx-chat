@@ -219,12 +219,12 @@
       </trans-unit>
       <trans-unit id="**More private**: check new messages every 20 minutes. Only device token is shared with our push server. It doesn't see how many contacts you have, or any message metadata." xml:space="preserve" approved="no">
         <source>**More private**: check new messages every 20 minutes. Only device token is shared with our push server. It doesn't see how many contacts you have, or any message metadata.</source>
-        <target state="translated">**יותר פרטי**: בדוק הודעות חדשות כל 20 דקות. אסימון המכשיר משותף עם שרת SimpleX Chat, אך לא כמה אנשי קשר או הודעות יש לך.</target>
+        <target state="translated">**יותר פרטי**: בדוק הודעות חדשות כל 20 דקות. אסימון המכשיר משותף עם שרת POPOPX Chat, אך לא כמה אנשי קשר או הודעות יש לך.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="**Most private**: do not use SimpleX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app." xml:space="preserve" approved="no">
-        <source>**Most private**: do not use SimpleX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app.</source>
-        <target state="translated">**הכי פרטי**: אל תשתמש בשרת ההתראות של SimpleX Chat, בדוק הודעות מעת לעת ברקע (תלוי בתדירות השימוש באפליקציה).</target>
+      <trans-unit id="**Most private**: do not use POPOPX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app." xml:space="preserve" approved="no">
+        <source>**Most private**: do not use POPOPX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app.</source>
+        <target state="translated">**הכי פרטי**: אל תשתמש בשרת ההתראות של POPOPX Chat, בדוק הודעות מעת לעת ברקע (תלוי בתדירות השימוש באפליקציה).</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="**Paste received link** or open it in the browser and tap **Open in mobile app**." xml:space="preserve" approved="no">
@@ -237,9 +237,9 @@
         <target state="translated">**שימו לב**: לא ניתן יהיה לשחזר או לשנות את הסיסמה אם תאבדו אותה.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="**Recommended**: device token and end-to-end encrypted notifications are sent to SimpleX Chat push server, but it does not see the message content, size or who it is from." xml:space="preserve" approved="no">
-        <source>**Recommended**: device token and end-to-end encrypted notifications are sent to SimpleX Chat push server, but it does not see the message content, size or who it is from.</source>
-        <target state="translated">**מומלץ**: אסימון מכשיר והתראות נשלחים לשרת ההתראות של SimpleX Chat, אך לא תוכן ההודעה, גודלה או ממי היא.</target>
+      <trans-unit id="**Recommended**: device token and end-to-end encrypted notifications are sent to POPOPX Chat push server, but it does not see the message content, size or who it is from." xml:space="preserve" approved="no">
+        <source>**Recommended**: device token and end-to-end encrypted notifications are sent to POPOPX Chat push server, but it does not see the message content, size or who it is from.</source>
+        <target state="translated">**מומלץ**: אסימון מכשיר והתראות נשלחים לשרת ההתראות של POPOPX Chat, אך לא תוכן ההודעה, גודלה או ממי היא.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="**Scan QR code**: to connect to your contact in person or via video call." xml:space="preserve" approved="no">
@@ -334,14 +334,14 @@
 **שימו לב**: אם יש לך חיבורים רבים, צריכת הסוללה ותעבורת האינטרנט שלך עשויה להיות גבוהה משמעותית וחיבורים מסוימים עלולים להיכשל.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="About SimpleX" xml:space="preserve" approved="no">
-        <source>About SimpleX</source>
-        <target state="translated">אודות SimpleX</target>
+      <trans-unit id="About POPOPX" xml:space="preserve" approved="no">
+        <source>About POPOPX</source>
+        <target state="translated">אודות POPOPX</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="About SimpleX Chat" xml:space="preserve" approved="no">
-        <source>About SimpleX Chat</source>
-        <target state="translated">אודות SimpleX Chat</target>
+      <trans-unit id="About POPOPX Chat" xml:space="preserve" approved="no">
+        <source>About POPOPX Chat</source>
+        <target state="translated">אודות POPOPX Chat</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Accent color" xml:space="preserve" approved="no">
@@ -1333,14 +1333,14 @@
         <target state="translated">מכשיר</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Device authentication is disabled. Turning off SimpleX Lock." xml:space="preserve" approved="no">
-        <source>Device authentication is disabled. Turning off SimpleX Lock.</source>
-        <target state="translated">אימות המכשיר מושבת. מכבה נעילת SimpleX.</target>
+      <trans-unit id="Device authentication is disabled. Turning off POPOPX Lock." xml:space="preserve" approved="no">
+        <source>Device authentication is disabled. Turning off POPOPX Lock.</source>
+        <target state="translated">אימות המכשיר מושבת. מכבה נעילת POPOPX.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Device authentication is not enabled. You can turn on SimpleX Lock via Settings, once you enable device authentication." xml:space="preserve" approved="no">
-        <source>Device authentication is not enabled. You can turn on SimpleX Lock via Settings, once you enable device authentication.</source>
-        <target state="translated">אימות מכשיר אינו מופעל. ניתן להפעיל את נעילת SimpleX דרך ההגדרות, לאחר שתפעיל את אימות המכשיר.</target>
+      <trans-unit id="Device authentication is not enabled. You can turn on POPOPX Lock via Settings, once you enable device authentication." xml:space="preserve" approved="no">
+        <source>Device authentication is not enabled. You can turn on POPOPX Lock via Settings, once you enable device authentication.</source>
+        <target state="translated">אימות מכשיר אינו מופעל. ניתן להפעיל את נעילת POPOPX דרך ההגדרות, לאחר שתפעיל את אימות המכשיר.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Different names, avatars and transport isolation." xml:space="preserve" approved="no">
@@ -1358,9 +1358,9 @@
         <target state="translated">הודעות ישירות בין חברי קבוצה אסורות בקבוצה זו.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Disable SimpleX Lock" xml:space="preserve" approved="no">
-        <source>Disable SimpleX Lock</source>
-        <target state="translated">השבתת נעילת SimpleX</target>
+      <trans-unit id="Disable POPOPX Lock" xml:space="preserve" approved="no">
+        <source>Disable POPOPX Lock</source>
+        <target state="translated">השבתת נעילת POPOPX</target>
         <note>authentication reason</note>
       </trans-unit>
       <trans-unit id="Disappearing messages" xml:space="preserve" approved="no">
@@ -1393,9 +1393,9 @@
         <target state="translated">שם תצוגה:</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Do NOT use SimpleX for emergency calls." xml:space="preserve" approved="no">
-        <source>Do NOT use SimpleX for emergency calls.</source>
-        <target state="translated">אל תשתמש ב- SimpleX לשיחות חירום.</target>
+      <trans-unit id="Do NOT use POPOPX for emergency calls." xml:space="preserve" approved="no">
+        <source>Do NOT use POPOPX for emergency calls.</source>
+        <target state="translated">אל תשתמש ב- POPOPX לשיחות חירום.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Do it later" xml:space="preserve" approved="no">
@@ -1438,9 +1438,9 @@
         <target state="translated">הפעל</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Enable SimpleX Lock" xml:space="preserve" approved="no">
-        <source>Enable SimpleX Lock</source>
-        <target state="translated">הפעלת נעילת SimpleX</target>
+      <trans-unit id="Enable POPOPX Lock" xml:space="preserve" approved="no">
+        <source>Enable POPOPX Lock</source>
+        <target state="translated">הפעלת נעילת POPOPX</target>
         <note>authentication reason</note>
       </trans-unit>
       <trans-unit id="Enable TCP keep-alive" xml:space="preserve" approved="no">
@@ -2013,9 +2013,9 @@
         <target state="translated">מוסתר:</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="How SimpleX works" xml:space="preserve" approved="no">
-        <source>How SimpleX works</source>
-        <target state="translated">איך SimpleX עובדת</target>
+      <trans-unit id="How POPOPX works" xml:space="preserve" approved="no">
+        <source>How POPOPX works</source>
+        <target state="translated">איך POPOPX עובדת</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="How it works" xml:space="preserve" approved="no">
@@ -2158,9 +2158,9 @@
         <target state="translated">תפקיד ראשוני</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Install [SimpleX Chat for terminal](https://github.com/simplex-chat/simplex-chat)" xml:space="preserve" approved="no">
-        <source>Install [SimpleX Chat for terminal](https://github.com/simplex-chat/simplex-chat)</source>
-        <target state="translated">התקן את [SimpleX Chat עבור מסוף הפקודה](https://github.com/simplex-chat/simplex-chat)</target>
+      <trans-unit id="Install [POPOPX Chat for terminal](https://github.com/simplex-chat/simplex-chat)" xml:space="preserve" approved="no">
+        <source>Install [POPOPX Chat for terminal](https://github.com/simplex-chat/simplex-chat)</source>
+        <target state="translated">התקן את [POPOPX Chat עבור מסוף הפקודה](https://github.com/simplex-chat/simplex-chat)</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Instant push notifications will be hidden!&#10;" xml:space="preserve" approved="no">
@@ -2366,9 +2366,9 @@
         <target state="translated">ודאו שכתובות שרתי ה־WebRTC ICE הן בפורמט הנכון, מופרדות בשורה ולא משוכפלות.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Many people asked: *if SimpleX has no user identifiers, how can it deliver messages?*" xml:space="preserve" approved="no">
-        <source>Many people asked: *if SimpleX has no user identifiers, how can it deliver messages?*</source>
-        <target state="translated">אנשים רבים שאלו: *אם ל-SimpleX אין מזהי משתמש, איך הוא יכול לשלוח הודעות?*</target>
+      <trans-unit id="Many people asked: *if POPOPX has no user identifiers, how can it deliver messages?*" xml:space="preserve" approved="no">
+        <source>Many people asked: *if POPOPX has no user identifiers, how can it deliver messages?*</source>
+        <target state="translated">אנשים רבים שאלו: *אם ל-POPOPX אין מזהי משתמש, איך הוא יכול לשלוח הודעות?*</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Mark deleted for everyone" xml:space="preserve" approved="no">
@@ -2741,9 +2741,9 @@
         <target state="translated">לבטל את שינוי הכתובת?</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="About SimpleX address" xml:space="preserve" approved="no">
-        <source>About SimpleX address</source>
-        <target state="translated">אודות כתובת SimpleX</target>
+      <trans-unit id="About POPOPX address" xml:space="preserve" approved="no">
+        <source>About POPOPX address</source>
+        <target state="translated">אודות כתובת POPOPX</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Add address to your profile, so that your contacts can share it with other people. Profile update will be sent to your contacts." xml:space="preserve" approved="no">
@@ -2801,11 +2801,11 @@
         <target state="translated">שינוי מצב השמדה עצמית</target>
         <note>authentication reason</note>
       </trans-unit>
-      <trans-unit id="&lt;p&gt;Hi!&lt;/p&gt;&#10;&lt;p&gt;&lt;a href=&quot;%@&quot;&gt;Connect to me via SimpleX Chat&lt;/a&gt;&lt;/p&gt;" xml:space="preserve" approved="no">
+      <trans-unit id="&lt;p&gt;Hi!&lt;/p&gt;&#10;&lt;p&gt;&lt;a href=&quot;%@&quot;&gt;Connect to me via POPOPX Chat&lt;/a&gt;&lt;/p&gt;" xml:space="preserve" approved="no">
         <source>&lt;p&gt;Hi!&lt;/p&gt;
-&lt;p&gt;&lt;a href="%@"&gt;Connect to me via SimpleX Chat&lt;/a&gt;&lt;/p&gt;</source>
+&lt;p&gt;&lt;a href="%@"&gt;Connect to me via POPOPX Chat&lt;/a&gt;&lt;/p&gt;</source>
         <target state="translated">&lt;p&gt;היי!&lt;/p&gt;
-&lt;p&gt;&lt;a href="%@"&gt;התחבר אליי באמצעות SimpleX Chat&lt;/a&gt;&lt;/p&gt;</target>
+&lt;p&gt;&lt;a href="%@"&gt;התחבר אליי באמצעות POPOPX Chat&lt;/a&gt;&lt;/p&gt;</target>
         <note>email text</note>
       </trans-unit>
       <trans-unit id="All data is erased when it is entered." xml:space="preserve" approved="no">
@@ -2883,9 +2883,9 @@
         <target state="translated">ייעלם</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Create SimpleX address" xml:space="preserve" approved="no">
-        <source>Create SimpleX address</source>
-        <target state="translated">צור כתובת SimpleX</target>
+      <trans-unit id="Create POPOPX address" xml:space="preserve" approved="no">
+        <source>Create POPOPX address</source>
+        <target state="translated">צור כתובת POPOPX</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Create an address to let people connect with you." xml:space="preserve" approved="no">
@@ -2972,9 +2972,9 @@
         <target state="translated">אם לא ניתן להיפגש פנים אל פנים, הציגו את קוד ה־QR בשיחת וידאו, או שתפו את הקישור.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Let's talk in SimpleX Chat" xml:space="preserve" approved="no">
-        <source>Let's talk in SimpleX Chat</source>
-        <target state="translated">בואו נדבר ב־Simplex Chat</target>
+      <trans-unit id="Let's talk in POPOPX Chat" xml:space="preserve" approved="no">
+        <source>Let's talk in POPOPX Chat</source>
+        <target state="translated">בואו נדבר ב־Popopx Chat</target>
         <note>email subject</note>
       </trans-unit>
       <trans-unit id="Invite friends" xml:space="preserve" approved="no">
@@ -3427,11 +3427,11 @@
         <source>Good morning!</source>
         <target state="translated">בוקר טוב!</target>
       </trans-unit>
-      <trans-unit id="Connect to yourself?&#10;This is your own SimpleX address!" xml:space="preserve" approved="no">
+      <trans-unit id="Connect to yourself?&#10;This is your own POPOPX address!" xml:space="preserve" approved="no">
         <source>Connect to yourself?
-This is your own SimpleX address!</source>
+This is your own POPOPX address!</source>
         <target state="translated">להתחבר אליך?
-זו כתובת הSimpleX שלך!</target>
+זו כתובת הPOPOPX שלך!</target>
       </trans-unit>
       <trans-unit id="Connect to yourself?" xml:space="preserve" approved="no">
         <source>Connect to yourself?</source>

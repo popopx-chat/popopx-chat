@@ -33,7 +33,7 @@ fun UserAddressLearnMore(showCreateAddressButton: Boolean = false) {
       Spacer(Modifier.width(DEFAULT_PADDING_HALF))
       ReadableText(MR.strings.share_address_publicly, style = MaterialTheme.typography.h3.copy(fontWeight = FontWeight.Bold))
     }
-    ReadableText(MR.strings.share_simplex_address_on_social_media)
+    ReadableText(MR.strings.share_popopx_address_on_social_media)
     ReadableText(MR.strings.you_wont_lose_your_contacts_if_delete_address)
 
     Row(Modifier.padding(top = DEFAULT_PADDING_HALF)) {
@@ -50,7 +50,7 @@ fun UserAddressLearnMore(showCreateAddressButton: Boolean = false) {
         Spacer(Modifier.width(DEFAULT_PADDING_HALF))
         ReadableText(MR.strings.connection_security, style = MaterialTheme.typography.h3.copy(fontWeight = FontWeight.Bold))
       }
-      ReadableText(MR.strings.simplex_address_and_1_time_links_are_safe_to_share)
+      ReadableText(MR.strings.popopx_address_and_1_time_links_are_safe_to_share)
       ReadableText(MR.strings.to_protect_against_your_link_replaced_compare_codes)
       ReadableTextWithLink(MR.strings.read_more_in_user_guide_with_link, "https://simplex.chat/docs/guide/making-connections.html#comparison-of-1-time-invitation-links-and-simplex-contact-addresses")
     }
@@ -68,7 +68,7 @@ fun UserAddressLearnMore(showCreateAddressButton: Boolean = false) {
           contentPadding = PaddingValues(horizontal =  DEFAULT_PADDING * 2, vertical = DEFAULT_PADDING),
           colors = ButtonDefaults.buttonColors(MaterialTheme.colors.primary, disabledBackgroundColor = MaterialTheme.colors.secondary)
         ) {
-          Text(stringResource(MR.strings.create_simplex_address), style = MaterialTheme.typography.h2, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Medium)
+          Text(stringResource(MR.strings.create_popopx_address), style = MaterialTheme.typography.h2, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Medium)
         }
 
         val closeAll = { ModalManager.start.closeModals() }

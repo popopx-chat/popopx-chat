@@ -226,7 +226,7 @@ private fun RowScope.MigrateButton(refocusTrigger: MutableState<Int>) {
 
 private fun onboardingBackAction(chatModel: ChatModel, close: () -> Unit) {
   if (chatModel.users.none { !it.user.hidden }) {
-    appPrefs.onboardingStage.set(OnboardingStage.Step1_SimpleXInfo)
+    appPrefs.onboardingStage.set(OnboardingStage.Step1_POPOPXInfo)
   } else {
     close()
   }

@@ -140,7 +140,7 @@ fun UserAddressView(
       sendEmail = { userAddress ->
         uriHandler.sendEmail(
           generalGetString(MR.strings.email_invite_subject),
-          generalGetString(MR.strings.email_invite_body).format(simplexChatLink(userAddress.connLinkContact.connFullLink)) // TODO [short links] replace with short link
+          generalGetString(MR.strings.email_invite_body).format(popopxChatLink(userAddress.connLinkContact.connFullLink)) // TODO [short links] replace with short link
         )
       },
       setProfileAddress = ::setProfileAddress,
@@ -210,7 +210,7 @@ private fun addShortLink(
     if (userAddress != null) {
       chatModel.userAddress.value = userAddress
       if (shareOnCompletion) {
-        share(userAddress.connLinkContact.simplexChatUri(short = true))
+        share(userAddress.connLinkContact.popopxChatUri(short = true))
       }
     }
     progressIndicator.value = false
@@ -285,14 +285,14 @@ private fun UserAddressLayout(
 ) {
   ColumnWithScrollBar {
     if (!onboarding) {
-      AppBarTitle(stringResource(MR.strings.simplex_address), hostDevice(user?.remoteHostId))
+      AppBarTitle(stringResource(MR.strings.popopx_address), hostDevice(user?.remoteHostId))
     }
     if (BuildConfigCommon.SIMPLEX_ASSETS && userAddress != null) {
       Image(
         painterResource(if (isInDarkTheme()) {
-          if (onboarding) MR.images.simplex_address_light else MR.images.simplex_address_small_light
+          if (onboarding) MR.images.popopx_address_light else MR.images.popopx_address_small_light
         } else {
-          if (onboarding) MR.images.simplex_address else MR.images.simplex_address_small
+          if (onboarding) MR.images.popopx_address else MR.images.popopx_address_small
         }),
         contentDescription = null,
         contentScale = ContentScale.Fit,
@@ -329,13 +329,13 @@ private fun UserAddressLayout(
             Modifier.fillMaxWidth().padding(horizontal = DEFAULT_PADDING, vertical = DEFAULT_PADDING_HALF),
             style = MaterialTheme.typography.body1
           )
-          LinkTextView(userAddress.connLinkContact.simplexChatUri(short = showShortLink.value), true)
+          LinkTextView(userAddress.connLinkContact.popopxChatUri(short = showShortLink.value), true)
           Text(
             stringResource(MR.strings.onboarding_or_use_qr_code),
             Modifier.fillMaxWidth().padding(horizontal = DEFAULT_PADDING, vertical = DEFAULT_PADDING_HALF),
             style = MaterialTheme.typography.body1
           )
-          SimpleXCreatedLinkQRCode(userAddress.connLinkContact, short = showShortLink.value)
+          POPOPXCreatedLinkQRCode(userAddress.connLinkContact, short = showShortLink.value)
         } else {
           val addressSettingsState = remember { mutableStateOf(AddressSettingsState(settings = userAddress.addressSettings)) }
           val savedAddressSettingsState = remember { mutableStateOf(addressSettingsState.value) }
@@ -344,15 +344,15 @@ private fun UserAddressLayout(
             stringResource(MR.strings.for_social_media),
             titleButton = if (userAddress.connLinkContact.connShortLink != null) {{ ToggleShortLinkButton(showShortLink) }} else null
           ) {
-            SimpleXCreatedLinkQRCode(userAddress.connLinkContact, short = showShortLink.value)
+            POPOPXCreatedLinkQRCode(userAddress.connLinkContact, short = showShortLink.value)
             if (userAddress.shouldBeUpgraded) {
               AddShortLinkButton(text = stringResource(MR.strings.add_short_link)) { showAddShortLinkAlert(null) }
             }
             ShareAddressButton {
               if (userAddress.shouldBeUpgraded) {
-                showAddShortLinkAlert { share(userAddress.connLinkContact.simplexChatUri(short = showShortLink.value)) }
+                showAddShortLinkAlert { share(userAddress.connLinkContact.popopxChatUri(short = showShortLink.value)) }
               } else {
-                share(userAddress.connLinkContact.simplexChatUri(short = showShortLink.value))
+                share(userAddress.connLinkContact.popopxChatUri(short = showShortLink.value))
               }
             }
             ShareViaChatButton {
@@ -373,15 +373,15 @@ private fun UserAddressLayout(
 
           SectionDividerSpaced()
           val domain = user?.profile?.contactDomain?.domain
-          SectionView(title = if (domain != null) generalGetString(MR.strings.your_simplex_name) else null) {
+          SectionView(title = if (domain != null) generalGetString(MR.strings.your_popopx_name) else null) {
             SettingsActionItem(
               painterResource(MR.images.ic_at),
-              if (domain != null) "$domain" else generalGetString(MR.strings.get_simplex_name_beta),
+              if (domain != null) "$domain" else generalGetString(MR.strings.get_popopx_name_beta),
               click = {
                 ModalManager.start.showCustomModal { close ->
-                  SetSimplexDomainView(
-                    title = generalGetString(MR.strings.set_simplex_name),
-                    footer = generalGetString(MR.strings.set_user_simplex_name_footer),
+                  SetPopopxDomainView(
+                    title = generalGetString(MR.strings.set_popopx_name),
+                    footer = generalGetString(MR.strings.set_user_popopx_name_footer),
                     placeholder = "@yourname.testing",
                     simplexName = if (domain == null) "" else "@$domain",
                     registerBackgroundClose = true,
@@ -429,7 +429,7 @@ private fun UserAddressLayout(
 private fun CreateAddressButton(onClick: () -> Unit) {
   SettingsActionItem(
     painterResource(MR.images.ic_qr_code),
-    stringResource(MR.strings.create_simplex_address),
+    stringResource(MR.strings.create_popopx_address),
     onClick,
     iconColor = MaterialTheme.colors.primary,
     textColor = MaterialTheme.colors.primary,
@@ -478,7 +478,7 @@ private fun CreateOneTimeLinkButton() {
 private fun LearnMoreButton(onClick: () -> Unit) {
   SettingsActionItem(
     painterResource(MR.images.ic_info),
-    stringResource(MR.strings.simplex_address_or_1_time_link),
+    stringResource(MR.strings.popopx_address_or_1_time_link),
     onClick,
   )
 }
@@ -801,7 +801,7 @@ private fun saveAddressSettingsButton(disabled: Boolean, onClick: () -> Unit) {
 )*/
 @Composable
 fun PreviewUserAddressLayoutNoAddress() {
-  SimpleXTheme {
+  POPOPXTheme {
     UserAddressLayout(
       user = User.sampleData,
       userAddress = null,
@@ -835,7 +835,7 @@ private fun showUnsavedChangesAlert(save: () -> Unit, revert: () -> Unit) {
 )*/
 @Composable
 fun PreviewUserAddressLayoutAddressCreated() {
-  SimpleXTheme {
+  POPOPXTheme {
     UserAddressLayout(
       user = User.sampleData,
       userAddress = UserContactLinkRec(

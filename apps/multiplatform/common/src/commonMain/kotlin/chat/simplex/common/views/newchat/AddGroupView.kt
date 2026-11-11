@@ -196,7 +196,7 @@ fun canCreateProfile(displayName: String): Boolean = displayName.trim().isNotEmp
 @Preview
 @Composable
 fun PreviewAddGroupLayout() {
-  SimpleXTheme {
+  POPOPXTheme {
     AddGroupLayout(
       createGroup = { _, _ -> },
       incognitoPref = SharedPreference({ false }, {}),

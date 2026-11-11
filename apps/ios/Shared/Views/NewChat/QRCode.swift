@@ -1,9 +1,9 @@
 //
 //  QRCode.swift
-//  SimpleX
+//  POPOPX
 //
 //  Created by Evgeny Poberezkin on 30/01/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/client/navigation.md
 
@@ -19,28 +19,28 @@ struct MutableQRCode: View {
 
     var body: some View {
         QRCode(uri: uri, small: small, withLogo: withLogo, tintColor: tintColor)
-            .id("simplex-qrcode-view-for-\(uri)")
+            .id("popopx-qrcode-view-for-\(uri)")
     }
 }
 
-struct SimpleXCreatedLinkQRCode: View {
+struct POPOPXCreatedLinkQRCode: View {
     let link: CreatedConnLink
     @Binding var short: Bool
     var onShare: (() -> Void)? = nil
 
     var body: some View {
-        QRCode(uri: link.simplexChatUri(short: short), small: short && link.connShortLink != nil, onShare: onShare)
+        QRCode(uri: link.popopxChatUri(short: short), small: short && link.connShortLink != nil, onShare: onShare)
     }
 }
 
-struct SimpleXLinkQRCode: View {
+struct POPOPXLinkQRCode: View {
     let uri: String
     var withLogo: Bool = true
     var tintColor = UIColor(red: 0.023, green: 0.176, blue: 0.337, alpha: 1)
     var onShare: (() -> Void)? = nil
 
     var body: some View {
-        QRCode(uri: simplexChatLink(uri), small: uri.count < 200, withLogo: withLogo, tintColor: tintColor, onShare: onShare)
+        QRCode(uri: popopxChatLink(uri), small: uri.count < 200, withLogo: withLogo, tintColor: tintColor, onShare: onShare)
     }
 }
 

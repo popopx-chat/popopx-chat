@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by Evgeny on 26/06/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -246,9 +246,9 @@ struct NotificationsView: View {
 
 func ntfModeDescription(_ mode: NotificationsMode) -> LocalizedStringKey {
     switch mode {
-    case .off: return "**Most private**: do not use SimpleX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app."
+    case .off: return "**Most private**: do not use POPOPX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app."
     case .periodic: return "**More private**: check new messages every 20 minutes. Only device token is shared with our push server. It doesn't see how many contacts you have, or any message metadata."
-    case .instant: return "**Recommended**: device token and end-to-end encrypted notifications are sent to SimpleX Chat push server, but it does not see the message content, size or who it is from."
+    case .instant: return "**Recommended**: device token and end-to-end encrypted notifications are sent to POPOPX Chat push server, but it does not see the message content, size or who it is from."
     }
 }
 

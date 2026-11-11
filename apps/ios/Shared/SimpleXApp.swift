@@ -1,5 +1,5 @@
 //
-//  SimpleXApp.swift
+//  POPOPXApp.swift
 //  Shared
 //
 //  Created by Evgeny Poberezkin on 17/01/2022.
@@ -13,8 +13,8 @@ import POPOPXChat
 let logger = Logger()
 
 @main
-// Spec: spec/architecture.md#SimpleXApp
-struct SimpleXApp: App {
+// Spec: spec/architecture.md#POPOPXApp
+struct POPOPXApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var chatModel = ChatModel.shared
     @ObservedObject var alertManager = AlertManager.shared
@@ -55,7 +55,7 @@ struct SimpleXApp: App {
                     // Present screen for continue migration if it wasn't finished yet
                     if chatModel.migrationState != nil {
                         // It's important, otherwise, user may be locked in undefined state
-                        onboardingStageDefault.set(.step1_SimpleXInfo)
+                        onboardingStageDefault.set(.step1_POPOPXInfo)
                         chatModel.onboardingStage = onboardingStageDefault.get()
                     } else if kcAppPassword.get() == nil || kcSelfDestructPassword.get() == nil {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
@@ -133,12 +133,12 @@ struct SimpleXApp: App {
         if legacyDatabase, case .documents = dbContainerGroupDefault.get() {
             dbContainerGroupDefault.set(.documents)
             setMigrationState(.offer)
-            logger.debug("SimpleXApp init: using legacy DB in documents folder: \(getAppDatabasePath())*.db")
+            logger.debug("POPOPXApp init: using legacy DB in documents folder: \(getAppDatabasePath())*.db")
         } else {
             dbContainerGroupDefault.set(.group)
             setMigrationState(.ready)
-            logger.debug("SimpleXApp init: using DB in app group container: \(getAppDatabasePath())*.db")
-            logger.debug("SimpleXApp init: legacy DB\(legacyDatabase ? "" : " not") present")
+            logger.debug("POPOPXApp init: using DB in app group container: \(getAppDatabasePath())*.db")
+            logger.debug("POPOPXApp init: legacy DB\(legacyDatabase ? "" : " not") present")
         }
     }
 

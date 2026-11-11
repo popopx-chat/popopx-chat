@@ -51,18 +51,18 @@ private const val APPIMAGE_FILE_NAME = "SimpleX.AppImage"
 private const val XDG_MIME = "xdg-mime"
 
 class AppLinkSchemeTest {
-  private val windowsExe = "C:\\Program Files\\SimpleX\\SimpleX.exe"
+  private val windowsExe = "C:\\Program Files\\POPOPX\\POPOPX.exe"
   private val appLinkCommandKey = "Software\\Classes\\simplexchat\\shell\\open\\command"
   private val connectionCommandKey = "Software\\Classes\\popopx\\shell\\open\\command"
   private val appLinkCommand = appLinkCommandKey to ""
   private val connectionCommand = connectionCommandKey to ""
-  private val olderWindowsCommand = "\"C:\\Old\\SimpleX.exe\" \"%1\""
+  private val olderWindowsCommand = "\"C:\\Old\\POPOPX.exe\" \"%1\""
   private val appImagePath = "/home/user/$APPIMAGE_FILE_NAME"
 
   @Test
   fun windowsCommandQuotesTheAppAndTheLink() {
     assertEquals(
-      "\"C:\\Program Files\\SimpleX\\SimpleX.exe\" \"%1\"",
+      "\"C:\\Program Files\\POPOPX\\POPOPX.exe\" \"%1\"",
       windowsOpenCommand(windowsExe)
     )
   }
@@ -71,7 +71,7 @@ class AppLinkSchemeTest {
   fun windowsSchemeIsAUrlProtocolNamingItsProgId() {
     assertEquals(
       listOf(
-        RegistryValue(key = "Software\\Classes\\simplexchat", name = "", value = "URL:SimpleX Chat"),
+        RegistryValue(key = "Software\\Classes\\simplexchat", name = "", value = "URL:POPOPX Chat"),
         RegistryValue(key = "Software\\Classes\\simplexchat", name = "URL Protocol", value = ""),
         RegistryValue(key = "Software\\Classes\\simplexchat\\DefaultIcon", name = "", value = "\"$windowsExe\",0"),
         RegistryValue(key = appLinkCommandKey, name = "", value = "\"$windowsExe\" \"%1\""),
@@ -82,11 +82,11 @@ class AppLinkSchemeTest {
     )
     assertEquals(
       listOf(
-        RegistryValue(key = "Software\\Classes\\popopx", name = "", value = "URL:SimpleX Chat"),
+        RegistryValue(key = "Software\\Classes\\popopx", name = "", value = "URL:POPOPX Chat"),
         RegistryValue(key = "Software\\Classes\\popopx", name = "URL Protocol", value = ""),
         RegistryValue(key = "Software\\Classes\\popopx\\DefaultIcon", name = "", value = "\"$windowsExe\",0"),
         RegistryValue(key = connectionCommandKey, name = "", value = "\"$windowsExe\" \"%1\""),
-        RegistryValue(key = "Software\\com.popopxchat.popopx\\Capabilities\\URLAssociations", name = "popopx", value = "SimpleX.popopx"),
+        RegistryValue(key = "Software\\com.popopxchat.popopx\\Capabilities\\URLAssociations", name = "popopx", value = "POPOPX.popopx"),
       ),
       windowsSchemeValues(\"popopx\", windowsExe),
       "connection link scheme"
@@ -97,7 +97,7 @@ class AppLinkSchemeTest {
   fun windowsProgIdOpensTheExe() {
     assertEquals(
       listOf(
-        RegistryValue(key = "Software\\Classes\\SimpleX.simplexchat", name = "", value = "URL:SimpleX Chat"),
+        RegistryValue(key = "Software\\Classes\\SimpleX.simplexchat", name = "", value = "URL:POPOPX Chat"),
         RegistryValue(key = "Software\\Classes\\SimpleX.simplexchat\\DefaultIcon", name = "", value = "\"$windowsExe\",0"),
         RegistryValue(key = "Software\\Classes\\SimpleX.simplexchat\\shell\\open\\command", name = "", value = "\"$windowsExe\" \"%1\""),
       ),
@@ -109,13 +109,13 @@ class AppLinkSchemeTest {
   fun windowsApplicationIsListedInDefaultAppsAfterItsCapabilities() {
     assertEquals(
       listOf(
-        RegistryValue(key = "Software\\com.popopxchat.popopx\\Capabilities", name = "ApplicationName", value = "SimpleX Chat"),
+        RegistryValue(key = "Software\\com.popopxchat.popopx\\Capabilities", name = "ApplicationName", value = "POPOPX Chat"),
         RegistryValue(
           key = "Software\\com.popopxchat.popopx\\Capabilities",
           name = "ApplicationDescription",
           value = "Private and secure open-source messenger - no user IDs (not even random numbers)"
         ),
-        RegistryValue(key = "Software\\RegisteredApplications", name = "SimpleX Chat", value = "Software\\com.popopxchat.popopx\\Capabilities"),
+        RegistryValue(key = "Software\\RegisteredApplications", name = "POPOPX Chat", value = "Software\\com.popopxchat.popopx\\Capabilities"),
       ),
       windowsApplicationValues
     )
@@ -153,7 +153,7 @@ class AppLinkSchemeTest {
 
   @Test
   fun windowsRegistrationAnnouncesARepairedApplicationListing() {
-    val shell = FakeWindowsShell(user = registered().apply { remove("Software\\RegisteredApplications" to "SimpleX Chat") })
+    val shell = FakeWindowsShell(user = registered().apply { remove("Software\\RegisteredApplications" to "POPOPX Chat") })
     registerWindowsSchemes(windowsExe, shell)
     assertEquals(windowsApplicationValues, shell.writes, "only the application listing is rewritten")
     assertTrue(shell.notified, "Windows is told that associations changed")
@@ -183,7 +183,7 @@ class AppLinkSchemeTest {
   @Test
   fun windowsRegistrationRepairsItsProgIdWhileAnotherProgramHoldsTheScheme() = withTempDir { dir ->
     val otherCommand = "\"${Files.createFile(dir.resolve("Other.exe"))}\" \"%1\""
-    val staleProgId = windowsProgIdValues("simplexchat", "C:\\Old\\SimpleX.exe").associate { (it.key to it.name) to it.value }
+    val staleProgId = windowsProgIdValues("simplexchat", "C:\\Old\\POPOPX.exe").associate { (it.key to it.name) to it.value }
     val shell = FakeWindowsShell(user = (staleProgId + (appLinkCommand to otherCommand)).toMutableMap())
     registerWindowsSchemes(windowsExe, shell)
     assertEquals(windowsProgIdValues("simplexchat", windowsExe), shell.writes.take(3), "the ProgId points at this exe again")
@@ -233,7 +233,7 @@ class AppLinkSchemeTest {
 
   @Test
   fun windowsRegistrationKeepsAnotherInstalledCopysProgId() = withTempDir { dir ->
-    val otherCopy = Files.createFile(dir.resolve("SimpleX.exe")).toString()
+    val otherCopy = Files.createFile(dir.resolve("POPOPX.exe")).toString()
     val otherProgId = windowsProgIdValues("simplexchat", otherCopy).associate { (it.key to it.name) to it.value }
     val shell = FakeWindowsShell(user = otherProgId.toMutableMap())
     registerWindowsSchemes(windowsExe, shell)
@@ -242,7 +242,7 @@ class AppLinkSchemeTest {
 
   @Test
   fun windowsRegistrationTreatsItsOwnProgramAsItsOwnHandler() = withTempDir { dir ->
-    val exe = Files.createFile(dir.resolve("SimpleX.exe")).toString()
+    val exe = Files.createFile(dir.resolve("POPOPX.exe")).toString()
     val otherExe = Files.createFile(dir.resolve("Other.exe")).toString()
     val shell = FakeWindowsShell(
       user = mutableMapOf(appLinkCommand to "\"$exe\" %1"),
@@ -298,7 +298,7 @@ class AppLinkSchemeTest {
 
   @Test
   fun execArgumentOfAPlainPathIsLeftBare() {
-    assertEquals("/home/user/Downloads/simplex-desktop-x86_64.AppImage", desktopExecArgument("/home/user/Downloads/simplex-desktop-x86_64.AppImage"))
+    assertEquals("/home/user/Downloads/popopx-desktop-x86_64.AppImage", desktopExecArgument("/home/user/Downloads/popopx-desktop-x86_64.AppImage"))
   }
 
   @Test
@@ -332,7 +332,7 @@ class AppLinkSchemeTest {
       """
       |[Desktop Entry]
       |Type=Application
-      |Name=SimpleX Chat
+      |Name=POPOPX Chat
       |NoDisplay=true
       |Exec="/home/user/My Apps/simplex.AppImage" %u
       |MimeType=x-scheme-handler/simplexchat;x-scheme-handler/popopx;
@@ -349,7 +349,7 @@ class AppLinkSchemeTest {
   }
 
   private val linux = DesktopPlatform.LINUX_X86_64
-  private val linuxAppPath = "/opt/simplex/bin/simplex"
+  private val linuxAppPath = "/opt/popopx/bin/popopx"
 
   @Test
   fun unpackagedRunHasNoInstallation() {
@@ -367,7 +367,7 @@ class AppLinkSchemeTest {
   @Test
   fun flatpakWinsWhenTheAppImageCheckWouldAlsoMatch() {
     val env = mapOf("container" to "flatpak", "APPIMAGE" to "/home/user/a.AppImage", "APPDIR" to "/tmp/.mount_a")
-    assertEquals(DesktopInstallation.Flatpak, desktopInstallation(linux, "/tmp/.mount_a/usr/bin/simplex", env))
+    assertEquals(DesktopInstallation.Flatpak, desktopInstallation(linux, "/tmp/.mount_a/usr/bin/popopx", env))
   }
 
   @Test
@@ -375,7 +375,7 @@ class AppLinkSchemeTest {
     val env = mapOf("APPIMAGE" to appImagePath, "APPDIR" to "/tmp/.mount_Simple")
     assertEquals(
       DesktopInstallation.AppImage(appImagePath),
-      desktopInstallation(linux, "/tmp/.mount_Simple/usr/bin/simplex", env)
+      desktopInstallation(linux, "/tmp/.mount_Simple/usr/bin/popopx", env)
     )
   }
 
@@ -391,7 +391,7 @@ class AppLinkSchemeTest {
     val env = mapOf("APPIMAGE" to appImagePath, "APPDIR" to linkedTmp.resolve(".mount_Simple").toString())
     assertEquals(
       DesktopInstallation.AppImage(appImagePath),
-      desktopInstallation(linux, mount.toRealPath().resolve("simplex").toString(), env)
+      desktopInstallation(linux, mount.toRealPath().resolve("popopx").toString(), env)
     )
   }
 
@@ -401,7 +401,7 @@ class AppLinkSchemeTest {
     assertEquals(DesktopInstallation.LinuxPackage, desktopInstallation(linux, linuxAppPath, inherited), "another AppImage's mount")
     assertEquals(DesktopInstallation.LinuxPackage, desktopInstallation(linux, linuxAppPath, mapOf("APPIMAGE" to "/home/user/a.AppImage")), "no APPDIR")
     val prefix = mapOf("APPIMAGE" to "/home/user/a.AppImage", "APPDIR" to "/tmp/.mount_ab")
-    assertEquals(DesktopInstallation.LinuxPackage, desktopInstallation(linux, "/tmp/.mount_abc/usr/bin/simplex", prefix), "mount path that only shares a prefix")
+    assertEquals(DesktopInstallation.LinuxPackage, desktopInstallation(linux, "/tmp/.mount_abc/usr/bin/popopx", prefix), "mount path that only shares a prefix")
   }
 
   @Test
@@ -643,11 +643,11 @@ class AppLinkSchemeTest {
 
   @Test
   fun linuxPackageCountsAsRegisteredOnlyWhenItsEntryIsTheDefault() {
-    assertTrue(linuxPackageRegistered(FakeXdgMime(default = "simplex-simplex.desktop")::run), "the deb's own entry")
+    assertTrue(linuxPackageRegistered(FakeXdgMime(default = "popopx-popopx.desktop")::run), "the deb's own entry")
     assertFalse(linuxPackageRegistered(FakeXdgMime(default = "other.desktop")::run), "another handler")
     assertFalse(linuxPackageRegistered(FakeXdgMime(default = null)::run), "no handler")
     assertFalse(
-      linuxPackageRegistered(FakeXdgMime(default = "other.desktop", connectionDefault = "simplex-simplex.desktop")::run),
+      linuxPackageRegistered(FakeXdgMime(default = "other.desktop", connectionDefault = "popopx-popopx.desktop")::run),
       "only the connection link handler"
     )
   }

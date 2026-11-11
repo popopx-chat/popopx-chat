@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 26.04.2023.
-//  Copyright © 2023 SimpleX Chat. All rights reserved.
+//  Copyright © 2023 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -136,8 +136,8 @@ struct UserAddressView: View {
                 )
             case .shareOnCreate:
                 return Alert(
-                    title: Text("Share address with SimpleX contacts?"),
-                    message: Text("Add address to your profile, so that your SimpleX contacts can share it with other people. Profile update will be sent to your SimpleX contacts."),
+                    title: Text("Share address with POPOPX contacts?"),
+                    message: Text("Add address to your profile, so that your POPOPX contacts can share it with other people. Profile update will be sent to your POPOPX contacts."),
                     primaryButton: .default(Text("Share")) {
                         setProfileAddress($progressIndicator, true) { shareViaProfile = false }
                         shareViaProfile = true
@@ -151,8 +151,8 @@ struct UserAddressView: View {
 
     @ViewBuilder private func existingAddressView(_ userAddress: UserContactLink) -> some View {
         Section {
-            SimpleXCreatedLinkQRCode(link: userAddress.connLinkContact, short: $showShortLink)
-                .id("simplex-contact-address-qrcode-\(userAddress.connLinkContact.simplexChatUri(short: showShortLink))")
+            POPOPXCreatedLinkQRCode(link: userAddress.connLinkContact, short: $showShortLink)
+                .id("popopx-contact-address-qrcode-\(userAddress.connLinkContact.popopxChatUri(short: showShortLink))")
             if userAddress.shouldBeUpgraded {
                 upgradeAddressButton()
             }
@@ -175,7 +175,7 @@ struct UserAddressView: View {
         } header: {
             #if SIMPLEX_ASSETS
             VStack(alignment: .leading, spacing: 0) {
-                Image(colorScheme == .light ? "simplex-address-small" : "simplex-address-small-light")
+                Image(colorScheme == .light ? "popopx-address-small" : "popopx-address-small-light")
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
@@ -196,12 +196,12 @@ struct UserAddressView: View {
         Section {
             NavigationLink {
                 let simplexName = if let d = chatModel.currentUser?.profile.contactDomain?.domain { "@\(d)" } else { "" }
-                SetSimplexDomainView(
-                    title: "Your SimpleX name",
-                    footer: "Let people connect to you via name registered with your SimpleX address.",
+                SetPopopxDomainView(
+                    title: "Your POPOPX name",
+                    footer: "Let people connect to you via name registered with your POPOPX address.",
                     prompt: "@yourname.testing",
                     simplexName: simplexName,
-                    broadcastWarning: NSLocalizedString("Profile update will be sent to your SimpleX contacts.", comment: "alert title"),
+                    broadcastWarning: NSLocalizedString("Profile update will be sent to your POPOPX contacts.", comment: "alert title"),
                     save: { simplexDomain in
                         do {
                             let u = try await apiSetUserDomain(simplexDomain)
@@ -216,12 +216,12 @@ struct UserAddressView: View {
                 if let d = chatModel.currentUser?.profile.contactDomain?.domain {
                     Label("\(d)", systemImage: "at")
                 } else {
-                    Label("Get SimpleX name (BETA)", systemImage: "at")
+                    Label("Get POPOPX name (BETA)", systemImage: "at")
                 }
             }
         } header: {
             if chatModel.currentUser?.profile.contactDomain?.domain != nil {
-                Text("Your SimpleX name").foregroundColor(theme.colors.secondary)
+                Text("Your POPOPX name").foregroundColor(theme.colors.secondary)
             }
         }
 
@@ -247,7 +247,7 @@ struct UserAddressView: View {
     @ViewBuilder private func onboardingAddressView(_ userAddress: UserContactLink) -> some View {
         Section {
             HStack(spacing: 8) {
-                let link = userAddress.connLinkContact.simplexChatUri(short: showShortLink)
+                let link = userAddress.connLinkContact.popopxChatUri(short: showShortLink)
                 linkTextView(link)
                 Button { showShareSheet(items: [link]) } label: {
                     Image(systemName: "square.and.arrow.up")
@@ -259,7 +259,7 @@ struct UserAddressView: View {
         } header: {
             #if SIMPLEX_ASSETS
             VStack(alignment: .leading) {
-                Image(colorScheme == .light ? "simplex-address" : "simplex-address-light")
+                Image(colorScheme == .light ? "popopx-address" : "popopx-address-light")
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
@@ -276,8 +276,8 @@ struct UserAddressView: View {
         .listRowInsets(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 10))
 
         Section {
-            SimpleXCreatedLinkQRCode(link: userAddress.connLinkContact, short: $showShortLink)
-                .id("simplex-contact-address-qrcode-\(userAddress.connLinkContact.simplexChatUri(short: showShortLink))")
+            POPOPXCreatedLinkQRCode(link: userAddress.connLinkContact, short: $showShortLink)
+                .id("popopx-contact-address-qrcode-\(userAddress.connLinkContact.popopxChatUri(short: showShortLink))")
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -296,7 +296,7 @@ struct UserAddressView: View {
         Button {
             createAddress()
         } label: {
-            Label("Create SimpleX address", systemImage: "qrcode")
+            Label("Create POPOPX address", systemImage: "qrcode")
         }
     }
 
@@ -454,7 +454,7 @@ struct UserAddressView: View {
                 .navigationBarTitleDisplayMode(.inline)
         } label: {
             settingsRow("info.circle", color: theme.colors.secondary) {
-                Text("SimpleX address or 1-time link?")
+                Text("POPOPX address or 1-time link?")
             }
         }
     }
@@ -483,7 +483,7 @@ func upgradeAndShareAddressAlert(progressIndicator: Binding<Bool>, shareAddress:
 func shareAddressPicker(composeState: Binding<ComposeState>? = nil) -> some View {
     let v = ChatItemForwardingView(
         title: "Share address",
-        isProhibited: { $0.prohibitedByPref(hasSimplexLink: true, isMediaOrFileAttachment: false, isVoice: false) },
+        isProhibited: { $0.prohibitedByPref(hasPopopxLink: true, isMediaOrFileAttachment: false, isVoice: false) },
         onSelectChat: { chat in shareMyAddress(chat, composeState: composeState) },
         includeLocal: false
     )
@@ -651,7 +651,7 @@ struct UserAddressSettingsView: View {
                     .onDisappear {
                         if savedSettings != settings {
                             showAlert(
-                                title: NSLocalizedString("SimpleX address settings", comment: "alert title"),
+                                title: NSLocalizedString("POPOPX address settings", comment: "alert title"),
                                 message: NSLocalizedString("Settings were changed.", comment: "alert message"),
                                 buttonTitle: NSLocalizedString("Save", comment: "alert button"),
                                 buttonAction: { saveAddressSettings(settings, $savedSettings) },
@@ -694,15 +694,15 @@ struct UserAddressSettingsView: View {
 
     private func shareWithContactsButton() -> some View {
         settingsRow("person", color: theme.colors.secondary) {
-            Toggle("Share with SimpleX contacts", isOn: $shareViaProfile)
+            Toggle("Share with POPOPX contacts", isOn: $shareViaProfile)
                 .onChange(of: shareViaProfile) { on in
                     if ignoreShareViaProfileChange {
                         ignoreShareViaProfileChange = false
                     } else {
                         if on {
                             showAlert(
-                                NSLocalizedString("Share address with SimpleX contacts?", comment: "alert title"),
-                                message: NSLocalizedString("Profile update will be sent to your SimpleX contacts.", comment: "alert message"),
+                                NSLocalizedString("Share address with POPOPX contacts?", comment: "alert title"),
+                                message: NSLocalizedString("Profile update will be sent to your POPOPX contacts.", comment: "alert message"),
                                 actions: {[
                                     UIAlertAction(
                                         title: NSLocalizedString("Cancel", comment: "alert action"),
@@ -727,7 +727,7 @@ struct UserAddressSettingsView: View {
                         } else {
                             showAlert(
                                 NSLocalizedString("Stop sharing address?", comment: "alert title"),
-                                message: NSLocalizedString("Profile update will be sent to your SimpleX contacts.", comment: "alert message"),
+                                message: NSLocalizedString("Profile update will be sent to your POPOPX contacts.", comment: "alert message"),
                                 actions: {[
                                     UIAlertAction(
                                         title: NSLocalizedString("Cancel", comment: "alert action"),
@@ -815,9 +815,9 @@ private func saveAddressSettings(_ settings: AddressSettingsState, _ savedSettin
     }
 }
 
-private let simplexNameSaleStart = Calendar(identifier: .gregorian).date(from: DateComponents(timeZone: TimeZone(identifier: "UTC"), year: 2026, month: 12, day: 12, hour: 18))!
+private let popopxNameSaleStart = Calendar(identifier: .gregorian).date(from: DateComponents(timeZone: TimeZone(identifier: "UTC"), year: 2026, month: 12, day: 12, hour: 18))!
 
-struct SetSimplexDomainView: View {
+struct SetPopopxDomainView: View {
     let title: LocalizedStringKey
     let footer: LocalizedStringKey
     let prompt: String
@@ -830,7 +830,7 @@ struct SetSimplexDomainView: View {
     @State private var original = ""
     @State private var didSave = false
     @State private var editing = false
-    @State private var timeToSaleStart = simplexNameSaleStart.timeIntervalSinceNow
+    @State private var timeToSaleStart = popopxNameSaleStart.timeIntervalSinceNow
     @State private var saleTimer: Timer? = nil
     @FocusState private var nameFocused: Bool
 
@@ -851,7 +851,7 @@ struct SetSimplexDomainView: View {
 
     private var isValid: Bool {
         guard let d = normalized(simplexName) else { return true }
-        return isValidSimplexDomain(d)
+        return isValidPopopxDomain(d)
     }
 
     var body: some View {
@@ -921,12 +921,12 @@ struct SetSimplexDomainView: View {
             Section {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(verbatim: saleCountdown(timeToSaleStart))
-                    Text(timeToSaleStart > 0 ? "until you can register a SimpleX domain" : "Update the app to register a SimpleX domain")
+                    Text(timeToSaleStart > 0 ? "until you can register a POPOPX domain" : "Update the app to register a POPOPX domain")
                         .font(.caption)
                         .foregroundColor(theme.colors.secondary)
                 }
             } header: {
-                Text("SimpleX name sale starts in")
+                Text("POPOPX name sale starts in")
                     .foregroundColor(theme.colors.secondary)
             } footer: {
                 Text("Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)")
@@ -943,7 +943,7 @@ struct SetSimplexDomainView: View {
             }
             if timeToSaleStart > 0 {
                 saleTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
-                    timeToSaleStart = simplexNameSaleStart.timeIntervalSinceNow
+                    timeToSaleStart = popopxNameSaleStart.timeIntervalSinceNow
                     if timeToSaleStart <= 0 { t.invalidate() }
                 }
             }
@@ -955,7 +955,7 @@ struct SetSimplexDomainView: View {
                 let domain = normalized(simplexName)
                 let saveName = save
                 showAlert(
-                    NSLocalizedString("Save SimpleX name?", comment: "alert title"),
+                    NSLocalizedString("Save POPOPX name?", comment: "alert title"),
                     message: broadcastWarning,
                     actions: {[
                         UIAlertAction(title: NSLocalizedString("Save", comment: "alert action"), style: .default) { _ in
@@ -986,7 +986,7 @@ struct SetSimplexDomainView: View {
         let t = s.trimmingCharacters(in: .whitespacesAndNewlines)
         return t.isEmpty
                 ? nil
-                : addSimplexTLD((t.hasPrefix("@") || t.hasPrefix("#") ? String(t.dropFirst()) : t).lowercased())
+                : addPopopxTLD((t.hasPrefix("@") || t.hasPrefix("#") ? String(t.dropFirst()) : t).lowercased())
     }
 
     private func saleCountdown(_ remaining: TimeInterval) -> String {
@@ -1004,11 +1004,11 @@ struct SetSimplexDomainView: View {
         )
     }
 
-    private func addSimplexTLD(_ d: String) -> String {
+    private func addPopopxTLD(_ d: String) -> String {
         if d.contains(".") { d } else { "\(d).popopx" }
     }
 
-    private func isValidSimplexDomain(_ s: String) -> Bool {
+    private func isValidPopopxDomain(_ s: String) -> Bool {
         if s.utf8.count > 253 { return false }
         let labels = s.split(separator: ".", omittingEmptySubsequences: false)
         if labels.count < 2 { return false }

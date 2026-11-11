@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 21.09.2026.
-//  Copyright © 2026 SimpleX Chat. All rights reserved.
+//  Copyright © 2026 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -22,7 +22,7 @@ struct GetStakeBanner: View {
             Button(action: onTap) {
                 HStack(spacing: 0) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Invest in SimpleX Chat!")
+                        Text("Invest in POPOPX Chat!")
                             .font(.headline)
                             .foregroundColor(theme.colors.primary)
                             .lineLimit(2)

@@ -58,7 +58,7 @@ fun ItemTextCard(ci: ChatItem, firstLineFontSize: TextUnit, inlineMeta: (@Compos
 )*/
 @Composable
 fun PreviewDeletedItemView() = BubblePreview {
-  SimpleXTheme {
+  POPOPXTheme {
     val ci = ChatItem.getDeletedContentSampleData(ts = previewDate)
     Box(Modifier.clipChatItem(ci)) {
       DeletedItemView(

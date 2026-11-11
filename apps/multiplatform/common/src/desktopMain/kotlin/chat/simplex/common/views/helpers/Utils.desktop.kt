@@ -235,7 +235,7 @@ internal fun imageSampleSize(width: Int, height: Int, maxDimension: Int): Int {
 actual fun getDrawableFromUri(uri: URI, withAlertOnException: Boolean): Any? = null
 
 actual suspend fun saveTempImageUncompressed(image: ImageBitmap, asPng: Boolean): File? {
-  val file = simplexWindowState.saveDialog.awaitResult()
+  val file = popopxWindowState.saveDialog.awaitResult()
   return if (file != null) {
     try {
       val ext = if (asPng) "png" else "jpg"

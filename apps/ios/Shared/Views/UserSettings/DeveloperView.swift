@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by Evgeny on 26/03/2023.
-//  Copyright © 2023 SimpleX Chat. All rights reserved.
+//  Copyright © 2023 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -14,7 +14,7 @@ struct DeveloperView: View {
     @AppStorage(DEFAULT_DEVELOPER_TOOLS) private var developerTools = false
     @AppStorage(GROUP_DEFAULT_CONFIRM_DB_UPGRADES, store: groupDefaults) private var confirmDatabaseUpgrades = false
     @State private var hintsUnchanged = hintDefaultsUnchanged()
-    @State private var simplexLinkMode = privacySimplexLinkModeDefault.get()
+    @State private var popopxLinkMode = privacyPopopxLinkModeDefault.get()
 
     @Environment(\.colorScheme) var colorScheme
 
@@ -29,7 +29,7 @@ struct DeveloperView: View {
                                 .frame(width: 24, height: 24)
                                 .opacity(0.5)
                                 .colorMultiply(theme.colors.secondary)
-                            Text("Install SimpleX Chat for terminal")
+                            Text("Install POPOPX Chat for terminal")
                                 .padding(.leading, 36)
                         }
                     }
@@ -70,17 +70,17 @@ struct DeveloperView: View {
                 }
                 Section("Deprecated options") {
                     settingsRow("link", color: theme.colors.secondary) {
-                        Picker("SimpleX links", selection: $simplexLinkMode) {
+                        Picker("POPOPX links", selection: $popopxLinkMode) {
                             ForEach(
-                                SimpleXLinkMode.values + (SimpleXLinkMode.values.contains(simplexLinkMode) ? [] : [simplexLinkMode])
+                                POPOPXLinkMode.values + (POPOPXLinkMode.values.contains(popopxLinkMode) ? [] : [popopxLinkMode])
                             ) { mode in
                                 Text(mode.text)
                             }
                         }
                     }
                     .frame(height: 36)
-                    .onChange(of: simplexLinkMode) { mode in
-                        privacySimplexLinkModeDefault.set(mode)
+                    .onChange(of: popopxLinkMode) { mode in
+                        privacyPopopxLinkModeDefault.set(mode)
                     }
                 }
             }

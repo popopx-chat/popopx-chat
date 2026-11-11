@@ -1,6 +1,6 @@
 //
 // Created by Avently on 17.01.2023.
-// Copyright (c) 2023 SimpleX Chat. All rights reserved.
+// Copyright (c) 2023 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/client/navigation.md
 
@@ -309,8 +309,8 @@ struct UserProfilesView: View {
                     try await changeActiveUserAsync_(nil, viewPwd: nil)
                     try? await stopChatAsync()
                     await MainActor.run {
-                        onboardingStageDefault.set(.step1_SimpleXInfo)
-                        m.onboardingStage = .step1_SimpleXInfo
+                        onboardingStageDefault.set(.step1_POPOPXInfo)
+                        m.onboardingStage = .step1_POPOPXInfo
                         dismissAllSheets()
                     }
                 }

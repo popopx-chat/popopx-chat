@@ -28,7 +28,7 @@ import java.awt.event.WindowFocusListener
 import java.io.File
 import kotlin.system.exitProcess
 
-val simplexWindowState = SimplexWindowState()
+val popopxWindowState = PopopxWindowState()
 
 fun showApp() {
   // Probe SystemTray off the EDT — the lazy's first read would otherwise block the
@@ -77,7 +77,7 @@ fun showApp() {
           }
         }
       ) {
-        SimplexTray()
+        PopopxTray()
         AppWindow(closedByError)
       }
     }
@@ -118,53 +118,53 @@ private fun ApplicationScope.AppWindow(closedByError: MutableState<Boolean>) {
     }
   }
 
-  simplexWindowState.windowState = windowState
+  popopxWindowState.windowState = windowState
   // Reload all strings in all @Composable's after language change at runtime
   if (remember { ChatController.appPrefs.appLanguage.state }.value != "") {
-    Window(state = windowState, visible = simplexWindowState.windowVisible.value, icon = painterResource(MR.images.ic_simplex), onCloseRequest = { handleCloseRequest(closedByError) }, onKeyEvent = {
+    Window(state = windowState, visible = popopxWindowState.windowVisible.value, icon = painterResource(MR.images.ic_popopx), onCloseRequest = { handleCloseRequest(closedByError) }, onKeyEvent = {
       if (it.key == Key.Escape && it.type == KeyEventType.KeyUp) {
-        simplexWindowState.backstack.lastOrNull()?.invoke() != null
+        popopxWindowState.backstack.lastOrNull()?.invoke() != null
       } else {
         false
       }
-    }, title = "SimpleX") {
+    }, title = "POPOPX") {
 //      val hardwareAccelerationDisabled = remember { listOf(GraphicsApi.SOFTWARE_FAST, GraphicsApi.SOFTWARE_COMPAT, GraphicsApi.UNKNOWN).contains(window.renderApi) }
-      simplexWindowState.window = window
+      popopxWindowState.window = window
       AppScreen()
-      if (simplexWindowState.openDialog.isAwaiting) {
+      if (popopxWindowState.openDialog.isAwaiting) {
         FileDialogChooser(
-          title = "SimpleX",
+          title = "POPOPX",
           isLoad = true,
-          params = simplexWindowState.openDialog.params,
+          params = popopxWindowState.openDialog.params,
           onResult = {
-            simplexWindowState.openDialog.onResult(it.firstOrNull())
+            popopxWindowState.openDialog.onResult(it.firstOrNull())
           }
         )
       }
 
-      if (simplexWindowState.openMultipleDialog.isAwaiting) {
+      if (popopxWindowState.openMultipleDialog.isAwaiting) {
         FileDialogChooser(
-          title = "SimpleX",
+          title = "POPOPX",
           isLoad = true,
-          params = simplexWindowState.openMultipleDialog.params,
+          params = popopxWindowState.openMultipleDialog.params,
           onResult = {
-            simplexWindowState.openMultipleDialog.onResult(it)
+            popopxWindowState.openMultipleDialog.onResult(it)
           }
         )
       }
 
-      if (simplexWindowState.saveDialog.isAwaiting) {
+      if (popopxWindowState.saveDialog.isAwaiting) {
         FileDialogChooser(
-          title = "SimpleX",
+          title = "POPOPX",
           isLoad = false,
-          params = simplexWindowState.saveDialog.params,
-          onResult = { simplexWindowState.saveDialog.onResult(it.firstOrNull()) }
+          params = popopxWindowState.saveDialog.params,
+          onResult = { popopxWindowState.saveDialog.onResult(it.firstOrNull()) }
         )
       }
-      val toasts = remember { simplexWindowState.toasts }
+      val toasts = remember { popopxWindowState.toasts }
       val toast = toasts.firstOrNull()
       if (toast != null) {
-        SimpleXTheme {
+        POPOPXTheme {
           Box(Modifier.fillMaxSize().padding(bottom = 20.dp), contentAlignment = Alignment.BottomCenter) {
             Text(
               escapedHtmlToAnnotatedString(toast.first, LocalDensity.current),
@@ -177,10 +177,10 @@ private fun ApplicationScope.AppWindow(closedByError: MutableState<Boolean>) {
         // Shows toast in insertion order with preferred delay per toast. New one will be shown once previous one expires
         LaunchedEffect(toast, toasts.size) {
           delay(toast.second)
-          simplexWindowState.toasts.removeFirstOrNull()
+          popopxWindowState.toasts.removeFirstOrNull()
         }
       }
-      var windowFocused by remember { simplexWindowState.windowFocused }
+      var windowFocused by remember { popopxWindowState.windowFocused }
       val showCallView = ChatModel.showCallView.value
       LaunchedEffect(windowFocused, showCallView) {
         val delay = ChatController.appPrefs.laLockDelay.get()
@@ -213,7 +213,7 @@ private fun ApplicationScope.AppWindow(closedByError: MutableState<Boolean>) {
       768.dp)
       Window(state = cWindowState, onCloseRequest = { hiddenUntilRestart = true }, title = stringResource(MR.strings.chat_console)) {
         val data = remember { ModalData() }
-        SimpleXTheme {
+        POPOPXTheme {
           CompositionLocalProvider(LocalAppBarHandler provides data.appBarHandler) {
             ModalView({ hiddenUntilRestart = true }) {
               TerminalView(true)
@@ -243,7 +243,7 @@ private fun ApplicationScope.handleCloseRequest(closedByError: MutableState<Bool
   when (pref.get()) {
     CloseBehavior.Quit -> exitApplication()
     CloseBehavior.MinimizeToTray -> if (trayIsAvailable && singleInstanceLock) {
-      simplexWindowState.windowVisible.value = false
+      popopxWindowState.windowVisible.value = false
     } else exitApplication()
     CloseBehavior.Ask -> if (trayIsAvailable && singleInstanceLock) {
       requestCloseBehavior()
@@ -256,8 +256,8 @@ private fun ApplicationScope.handleCloseRequest(closedByError: MutableState<Bool
 }
 
 fun showWindow() {
-  simplexWindowState.windowVisible.value = true
-  simplexWindowState.window?.apply {
+  popopxWindowState.windowVisible.value = true
+  popopxWindowState.window?.apply {
     // During a crash restart this is the disposed window, and showing it would bring it back.
     if (!isDisplayable) return
     // Clear ICONIFIED so a minimized window un-minimizes; preserves MAXIMIZED_BOTH
@@ -271,7 +271,7 @@ fun showWindow() {
   }
 }
 
-class SimplexWindowState {
+class PopopxWindowState {
   lateinit var windowState: WindowState
   val backstack = mutableStateListOf<() -> Unit>()
   val openDialog = DialogState<File?>()

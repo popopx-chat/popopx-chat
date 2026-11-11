@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by Evgeny on 08/05/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/client/navigation.md
 
@@ -17,14 +17,14 @@ struct OldHowItWorks: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text("How SimpleX works")
+            Text("How POPOPX works")
                 .font(.largeTitle)
                 .bold()
                 .padding(.vertical)
             ScrollView {
                 VStack(alignment: .leading) {
                     Group {
-                        Text("To protect your privacy, SimpleX uses separate IDs for each of your contacts.")
+                        Text("To protect your privacy, POPOPX uses separate IDs for each of your contacts.")
                         Text("Only client devices store user profiles, contacts, groups, and messages.")
                         Text("All messages and files are sent **end-to-end encrypted**, with post-quantum security in direct messages.")
                         if !onboarding {
@@ -61,7 +61,7 @@ struct OldHowItWorks: View {
     }
 }
 
-struct WhySimpleX: View {
+struct WhyPOPOPX: View {
     @Environment(\.dismiss) var dismiss: DismissAction
     @EnvironmentObject var m: ChatModel
     var onboarding: Bool
@@ -111,9 +111,9 @@ struct WhySimpleX: View {
     }
 }
 
-struct WhySimpleX_Previews: PreviewProvider {
+struct WhyPOPOPX_Previews: PreviewProvider {
     static var previews: some View {
-        WhySimpleX(
+        WhyPOPOPX(
             onboarding: true,
             createProfileNavLinkActive: Binding.constant(false)
         )

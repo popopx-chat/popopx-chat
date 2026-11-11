@@ -229,7 +229,7 @@ private fun showUnsavedChangesAlert(isChannel: Boolean, save: () -> Unit, revert
 )*/
 @Composable
 fun PreviewGroupProfileLayout() {
-  SimpleXTheme {
+  POPOPXTheme {
     GroupProfileLayout(
       close = {},
       groupInfo = GroupInfo.sampleData,

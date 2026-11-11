@@ -56,7 +56,7 @@ actual fun ActiveCallInteractiveArea(call: Call) {
       Modifier
         .offset(y = CALL_BOTTOM_ICON_OFFSET)
         .size(CALL_BOTTOM_ICON_HEIGHT)
-        .background(SimplexGreen, CircleShape)
+        .background(PopopxGreen, CircleShape)
         .clip(CircleShape)
         .clickable(onClick = onClick, indication = ripple, interactionSource = source)
         .align(Alignment.BottomCenter),
@@ -76,7 +76,7 @@ private fun GreenLine(statusBarHeight: Dp, call: Call) {
   Row(
     Modifier
       .fillMaxSize()
-      .background(SimplexGreen)
+      .background(PopopxGreen)
       .padding(top = -CALL_TOP_OFFSET + statusBarHeight)
       .padding(horizontal = DEFAULT_PADDING),
     verticalAlignment = Alignment.CenterVertically,

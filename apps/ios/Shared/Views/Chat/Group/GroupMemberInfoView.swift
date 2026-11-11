@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by JRoberts on 25.07.2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/client/chat-view.md
 
@@ -151,9 +151,9 @@ struct GroupMemberInfoView: View {
 
                     if let contactLink = member.contactLink {
                         Section {
-                            SimpleXLinkQRCode(uri: contactLink)
+                            POPOPXLinkQRCode(uri: contactLink)
                             Button {
-                                showShareSheet(items: [simplexChatLink(contactLink)])
+                                showShareSheet(items: [popopxChatLink(contactLink)])
                             } label: {
                                 Label("Share address", systemImage: "square.and.arrow.up")
                             }
@@ -193,7 +193,7 @@ struct GroupMemberInfoView: View {
                         if let address = groupRelay?.userChatRelay.address {
                             infoRow("Relay address", String.localizedStringWithFormat(NSLocalizedString("via %@", comment: "relay hostname"), hostFromRelayLink(address)))
                             Button {
-                                showShareSheet(items: [simplexChatLink(address)])
+                                showShareSheet(items: [popopxChatLink(address)])
                             } label: {
                                 Label("Share relay address", systemImage: "square.and.arrow.up")
                             }

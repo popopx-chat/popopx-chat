@@ -1,6 +1,6 @@
 //
 // Created by Avently on 19.12.2022.
-// Copyright (c) 2022 SimpleX Chat. All rights reserved.
+// Copyright (c) 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/client/chat-view.md
 

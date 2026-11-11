@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by Evgeny on 03/08/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/services/theme.md
 
@@ -14,10 +14,10 @@ import Yams
 let colorModesLocalized: [LocalizedStringKey] = ["System", "Light", "Dark"]
 let colorModesNames: [DefaultThemeMode?] = [nil, DefaultThemeMode.light, DefaultThemeMode.dark]
 
-let darkThemesLocalized: [LocalizedStringKey] = ["Dark", "SimpleX", "Black"]
+let darkThemesLocalized: [LocalizedStringKey] = ["Dark", "POPOPX", "Black"]
 let darkThemesNames: [String] = [DefaultTheme.DARK.themeName, DefaultTheme.SIMPLEX.themeName, DefaultTheme.BLACK.themeName]
 
-let darkThemesWithoutBlackLocalized: [LocalizedStringKey] = ["Dark", "SimpleX"]
+let darkThemesWithoutBlackLocalized: [LocalizedStringKey] = ["Dark", "POPOPX"]
 let darkThemesWithoutBlackNames: [String] = [DefaultTheme.DARK.themeName, DefaultTheme.SIMPLEX.themeName]
 
 let appSettingsURL = URL(string: UIApplication.openSettingsURLString)!
@@ -643,7 +643,7 @@ struct ImportExportThemeSection: View {
                     // Removing theme id without using custom serializer or data class
                     lines.remove(at: 0)
                     let theme = lines.joined(separator: "\n")
-                    let tempUrl = getTempFilesDirectory().appendingPathComponent("simplex.theme")
+                    let tempUrl = getTempFilesDirectory().appendingPathComponent("popopx.theme")
                     try? FileManager.default.removeItem(at: tempUrl)
                     if FileManager.default.createFile(atPath: tempUrl.path, contents: theme.data(using: .utf8)) {
                         showShareSheet(items: [tempUrl])

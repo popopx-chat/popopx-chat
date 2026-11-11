@@ -212,9 +212,9 @@
         <target state="translated">**Mais privado**: verificar novas mensagens a cada 20 minutos. Apenas o token do dispositivo é partilhado com o nosso servidor de notificações. Este não consegue ver quantos contactos tem, nem quaisquer metadados de mensagens.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="**Most private**: do not use SimpleX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app." xml:space="preserve" approved="no">
-        <source>**Most private**: do not use SimpleX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app.</source>
-        <target state="translated">**Totalmente privado**: não utilizar o servidor de notificações do SimpleX Chat. A aplicação verificará as mensagens em segundo plano, quando o sistema o permitir, consoante a frequência com que utiliza a aplicação.</target>
+      <trans-unit id="**Most private**: do not use POPOPX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app." xml:space="preserve" approved="no">
+        <source>**Most private**: do not use POPOPX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app.</source>
+        <target state="translated">**Totalmente privado**: não utilizar o servidor de notificações do POPOPX Chat. A aplicação verificará as mensagens em segundo plano, quando o sistema o permitir, consoante a frequência com que utiliza a aplicação.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="**Please note**: you will NOT be able to recover or change passphrase if you lose it." xml:space="preserve" approved="no">
@@ -222,9 +222,9 @@
         <target state="translated">**Atenção**: NÃO conseguirá recuperar ou alterar a frase-chave se a perder.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="**Recommended**: device token and end-to-end encrypted notifications are sent to SimpleX Chat push server, but it does not see the message content, size or who it is from." xml:space="preserve" approved="no">
-        <source>**Recommended**: device token and end-to-end encrypted notifications are sent to SimpleX Chat push server, but it does not see the message content, size or who it is from.</source>
-        <target state="translated">**Recomendado**: o token do dispositivo e as notificações encriptadas de ponta a ponta são enviados para o servidor de notificações do SimpleX Chat, mas este não consegue ver o conteúdo da mensagem, o tamanho ou quem a enviou.</target>
+      <trans-unit id="**Recommended**: device token and end-to-end encrypted notifications are sent to POPOPX Chat push server, but it does not see the message content, size or who it is from." xml:space="preserve" approved="no">
+        <source>**Recommended**: device token and end-to-end encrypted notifications are sent to POPOPX Chat push server, but it does not see the message content, size or who it is from.</source>
+        <target state="translated">**Recomendado**: o token do dispositivo e as notificações encriptadas de ponta a ponta são enviados para o servidor de notificações do POPOPX Chat, mas este não consegue ver o conteúdo da mensagem, o tamanho ou quem a enviou.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="**Warning**: Instant push notifications require passphrase saved in Keychain." xml:space="preserve" approved="no">
@@ -893,9 +893,9 @@
         <target state="translated">%@ (atual):</target>
         <note>copied message info</note>
       </trans-unit>
-      <trans-unit id="%1$@ supported SimpleX Chat. The badge expired on %2$@." xml:space="preserve" approved="no">
-        <source>%1$@ supported SimpleX Chat. The badge expired on %2$@.</source>
-        <target state="translated">%1$@ apoiou o SimpleX Chat. O distintivo expirou em %2$@.</target>
+      <trans-unit id="%1$@ supported POPOPX Chat. The badge expired on %2$@." xml:space="preserve" approved="no">
+        <source>%1$@ supported POPOPX Chat. The badge expired on %2$@.</source>
+        <target state="translated">%1$@ apoiou o POPOPX Chat. O distintivo expirou em %2$@.</target>
       </trans-unit>
       <trans-unit id="%02d hrs %02d min %02d sec" xml:space="preserve" approved="no">
         <source>%1$02d hrs %2$02d min %3$02d sec</source>
@@ -905,17 +905,17 @@
         <source>%@ accepted the call without end-to-end encryption.</source>
         <target state="translated">%@ aceitou a chamada sem cifragem ponta-a-ponta.</target>
       </trans-unit>
-      <trans-unit id="%@ invested in SimpleX Chat crowdfunding." xml:space="preserve" approved="no">
-        <source>%@ invested in SimpleX Chat crowdfunding.</source>
-        <target state="translated">%@ investiu no SimpleX Chat através do financiamento coletivo.</target>
+      <trans-unit id="%@ invested in POPOPX Chat crowdfunding." xml:space="preserve" approved="no">
+        <source>%@ invested in POPOPX Chat crowdfunding.</source>
+        <target state="translated">%@ investiu no POPOPX Chat através do financiamento coletivo.</target>
       </trans-unit>
       <trans-unit id="%@ server" xml:space="preserve" approved="no">
         <source>%@ server</source>
         <target state="translated">Servidor %@</target>
       </trans-unit>
-      <trans-unit id="%@ supports SimpleX Chat." xml:space="preserve" approved="no">
-        <source>%@ supports SimpleX Chat.</source>
-        <target state="translated">%@ apoia o SimpleX Chat.</target>
+      <trans-unit id="%@ supports POPOPX Chat." xml:space="preserve" approved="no">
+        <source>%@ supports POPOPX Chat.</source>
+        <target state="translated">%@ apoia o POPOPX Chat.</target>
       </trans-unit>
       <trans-unit id="%@, %@" xml:space="preserve" approved="no">
         <source>%1$@, %2$@</source>
@@ -1153,11 +1153,11 @@
         <source>30 seconds</source>
         <target state="translated">30 segundos</target>
       </trans-unit>
-      <trans-unit id="&lt;p&gt;Hi!&lt;/p&gt;&#10;&lt;p&gt;&lt;a href=&quot;%@&quot;&gt;Connect to me via SimpleX Chat&lt;/a&gt;&lt;/p&gt;" xml:space="preserve" approved="no">
+      <trans-unit id="&lt;p&gt;Hi!&lt;/p&gt;&#10;&lt;p&gt;&lt;a href=&quot;%@&quot;&gt;Connect to me via POPOPX Chat&lt;/a&gt;&lt;/p&gt;" xml:space="preserve" approved="no">
         <source>&lt;p&gt;Hi!&lt;/p&gt;
-&lt;p&gt;&lt;a href="%@"&gt;Connect to me via SimpleX Chat&lt;/a&gt;&lt;/p&gt;</source>
+&lt;p&gt;&lt;a href="%@"&gt;Connect to me via POPOPX Chat&lt;/a&gt;&lt;/p&gt;</source>
         <target state="translated">&lt;p&gt;Olá!&lt;/p&gt;
-&lt;p&gt;&lt;a href="%@"&gt;Ligue-se a mim através do SimpleX Chat&lt;/a&gt;&lt;/p&gt;</target>
+&lt;p&gt;&lt;a href="%@"&gt;Ligue-se a mim através do POPOPX Chat&lt;/a&gt;&lt;/p&gt;</target>
       </trans-unit>
       <trans-unit id="A badge can be added to another profile, or here once this badge ends." xml:space="preserve" approved="no">
         <source>A badge can be added to another profile, or here once this badge ends.</source>
@@ -1213,9 +1213,9 @@
         <source>Abort changing address?</source>
         <target state="translated">Cancelar alteração de endereço?</target>
       </trans-unit>
-      <trans-unit id="About SimpleX Chat" xml:space="preserve" approved="no">
-        <source>About SimpleX Chat</source>
-        <target state="translated">Sobre o SimpleX Chat</target>
+      <trans-unit id="About POPOPX Chat" xml:space="preserve" approved="no">
+        <source>About POPOPX Chat</source>
+        <target state="translated">Sobre o POPOPX Chat</target>
       </trans-unit>
       <trans-unit id="About operators" xml:space="preserve" approved="no">
         <source>About operators</source>

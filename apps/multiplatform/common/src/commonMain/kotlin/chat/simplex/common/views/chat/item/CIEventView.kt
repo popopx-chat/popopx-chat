@@ -46,7 +46,7 @@ fun ChatEventWithMeta(ci: ChatItem, content: @Composable (separator: AnnotatedSt
 )*/
 @Composable
 fun CIEventViewPreview() = BubblePreview {
-  SimpleXTheme {
+  POPOPXTheme {
     CIEventView(buildAnnotatedString { append("event happened") })
   }
 }

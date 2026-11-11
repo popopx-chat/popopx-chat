@@ -175,7 +175,7 @@ private fun embedCode(groupRelays: List<GroupRelay>, groupInfo: GroupInfo): Stri
   val relayDomains = groupRelays.mapNotNull { it.relayCap.webDomain }
   if (relayDomains.isEmpty()) return null
   val domains = relayDomains.joinToString(",")
-  return """<div data-simplex-channel-preview
+  return """<div data-popopx-channel-preview
   data-channel-link="${pg.groupLink}"
   data-channel-id="${pg.publicGroupId}"
   data-relay-domains="$domains"

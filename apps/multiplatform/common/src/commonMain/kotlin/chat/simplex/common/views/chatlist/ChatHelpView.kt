@@ -27,8 +27,8 @@ fun ChatHelpView(addContact: (() -> Unit)? = null) {
   Column(
     verticalArrangement = Arrangement.spacedBy(10.dp)
   ) {
-    Text(stringResource(MR.strings.thank_you_for_installing_simplex), lineHeight = 22.sp)
-    ReadableTextWithLink(MR.strings.you_can_connect_to_simplex_chat_founder, simplexTeamUri, simplexLink = true)
+    Text(stringResource(MR.strings.thank_you_for_installing_popopx), lineHeight = 22.sp)
+    ReadableTextWithLink(MR.strings.you_can_connect_to_popopx_chat_founder, popopxTeamUri, simplexLink = true)
     Column(
       Modifier.padding(top = 24.dp),
       verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -59,7 +59,7 @@ fun ChatHelpView(addContact: (() -> Unit)? = null) {
       verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
       Text(stringResource(MR.strings.to_connect_via_link_title), style = MaterialTheme.typography.h2)
-      Text(stringResource(MR.strings.if_you_received_simplex_invitation_link_you_can_open_in_browser), lineHeight = 22.sp)
+      Text(stringResource(MR.strings.if_you_received_popopx_invitation_link_you_can_open_in_browser), lineHeight = 22.sp)
       Text(annotatedStringResource(MR.strings.desktop_scan_QR_code_from_app_via_scan_QR_code), lineHeight = 22.sp)
       Text(annotatedStringResource(MR.strings.mobile_tap_open_in_mobile_app_then_tap_connect_in_app), lineHeight = 22.sp)
     }
@@ -81,7 +81,7 @@ fun ChatHelpView(addContact: (() -> Unit)? = null) {
 )*/
 @Composable
 fun PreviewChatHelpLayout() {
-  SimpleXTheme {
+  POPOPXTheme {
     ChatHelpView {}
   }
 }

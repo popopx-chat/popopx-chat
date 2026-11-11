@@ -116,7 +116,7 @@ struct ContentView: View {
             }
         }
         .alert(isPresented: $alertManager.presentAlert) { alertManager.alertView! }
-        .confirmationDialog("SimpleX Lock mode", isPresented: $showChooseLAMode, titleVisibility: .visible) {
+        .confirmationDialog("POPOPX Lock mode", isPresented: $showChooseLAMode, titleVisibility: .visible) {
             Button("System authentication") { initialEnableLA() }
             Button("Passcode entry") { showSetPasscode = true }
         }
@@ -124,7 +124,7 @@ struct ContentView: View {
             logger.debug("scenePhase was \(String(describing: scenePhase)), now \(String(describing: phase))")
             switch (phase) {
             case .background:
-                // also see .onChange(of: scenePhase) in SimpleXApp: on entering background
+                // also see .onChange(of: scenePhase) in POPOPXApp: on entering background
                 // it remembers enteredBackgroundAuthenticated and sets chatModel.contentViewAccessAuthenticated to false
                 automaticAuthenticationAttempted = false
                 canConnectViewCall = false
@@ -413,8 +413,8 @@ struct ContentView: View {
 
     func laNoticeAlert() -> Alert {
         Alert(
-            title: Text("SimpleX Lock"),
-            message: Text("To protect your information, turn on SimpleX Lock.\nYou will be prompted to complete authentication before this feature is enabled."),
+            title: Text("POPOPX Lock"),
+            message: Text("To protect your information, turn on POPOPX Lock.\nYou will be prompted to complete authentication before this feature is enabled."),
             primaryButton: .default(Text("Turn on")) { showChooseLAMode = true },
             secondaryButton: .cancel()
          )
@@ -422,7 +422,7 @@ struct ContentView: View {
 
     private func initialEnableLA () {
         privacyLocalAuthModeDefault.set(.system)
-        authenticate(reason: NSLocalizedString("Enable SimpleX Lock", comment: "authentication reason")) { laResult in
+        authenticate(reason: NSLocalizedString("Enable POPOPX Lock", comment: "authentication reason")) { laResult in
             switch laResult {
             case .success:
                 chatModel.contentViewAccessAuthenticated = true
@@ -453,7 +453,7 @@ struct ContentView: View {
 
     // Spec: spec/client/navigation.md#connectViaUrl
     // a URL opened via link that is ready to be connected now (appOpenUrl immediately, or
-    // appOpenUrlLater once the app is active — see .onChange(of: scenePhase) in SimpleXApp)
+    // appOpenUrlLater once the app is active — see .onChange(of: scenePhase) in POPOPXApp)
     private var pendingConnectUrl: URL? {
         let m = ChatModel.shared
         if let url = m.appOpenUrl { return url }
@@ -511,7 +511,7 @@ struct ContentView: View {
     }
 }
 
-// the app's own scheme, for every link that is not a connection link, which stays on simplex:
+// the app's own scheme, for every link that is not a connection link, which stays on popopx:
 private let appLinkScheme = "simplexchat"
 private let badgeLinkPath = "/badge/code/"
 

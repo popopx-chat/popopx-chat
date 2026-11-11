@@ -47,10 +47,10 @@
 "**e2e encrypted** video call" = "**e2e encrypted** відеодзвінок";
 
 /* No comment provided by engineer. */
-"**More private**: check new messages every 20 minutes. Only device token is shared with our push server. It doesn't see how many contacts you have, or any message metadata." = "**Більш приватний**: перевіряти нові повідомлення кожні 20 хвилин. Серверу SimpleX Chat передається токен пристрою, але не кількість контактів або повідомлень, які ви маєте.";
+"**More private**: check new messages every 20 minutes. Only device token is shared with our push server. It doesn't see how many contacts you have, or any message metadata." = "**Більш приватний**: перевіряти нові повідомлення кожні 20 хвилин. Серверу POPOPX Chat передається токен пристрою, але не кількість контактів або повідомлень, які ви маєте.";
 
 /* No comment provided by engineer. */
-"**Most private**: do not use SimpleX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app." = "**Найбільш приватний**: не використовуйте сервер сповіщень SimpleX Chat, періодично перевіряйте повідомлення у фоновому режимі (залежить від того, як часто ви користуєтесь додатком).";
+"**Most private**: do not use POPOPX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app." = "**Найбільш приватний**: не використовуйте сервер сповіщень POPOPX Chat, періодично перевіряйте повідомлення у фоновому режимі (залежить від того, як часто ви користуєтесь додатком).";
 
 /* No comment provided by engineer. */
 "**Please note**: using the same database on two devices will break the decryption of messages from your connections, as a security protection." = "**Зверніть увагу**: використання однієї і тієї ж бази даних на двох пристроях порушить розшифровку повідомлень з ваших з'єднань, як захист безпеки.";
@@ -59,7 +59,7 @@
 "**Please note**: you will NOT be able to recover or change passphrase if you lose it." = "**Зверніть увагу: ви НЕ зможете відновити або змінити пароль, якщо втратите його.";
 
 /* No comment provided by engineer. */
-"**Recommended**: device token and end-to-end encrypted notifications are sent to SimpleX Chat push server, but it does not see the message content, size or who it is from." = "**Рекомендується**: токен пристрою та сповіщення надсилаються на сервер сповіщень SimpleX Chat, але не вміст повідомлення, його розмір або від кого воно надійшло.";
+"**Recommended**: device token and end-to-end encrypted notifications are sent to POPOPX Chat push server, but it does not see the message content, size or who it is from." = "**Рекомендується**: токен пристрою та сповіщення надсилаються на сервер сповіщень POPOPX Chat, але не вміст повідомлення, його розмір або від кого воно надійшло.";
 
 /* No comment provided by engineer. */
 "**Scan / Paste link**: to connect via a link you received." = "**Відсканувати / Вставити посилання**: підключитися за отриманим посиланням.";
@@ -119,7 +119,7 @@
 "%@ downloaded" = "%@ встановлено";
 
 /* badge alert */
-"%@ invested in SimpleX Chat crowdfunding." = "%@ інвестував(ла) у краудфандинг SimpleX Chat.";
+"%@ invested in POPOPX Chat crowdfunding." = "%@ інвестував(ла) у краудфандинг POPOPX Chat.";
 
 /* notification title */
 "%@ is connected!" = "%@ підключено!";
@@ -137,7 +137,7 @@
 "%@ servers" = "%@ сервери";
 
 /* badge alert */
-"%@ supports SimpleX Chat." = "%@ підтримує SimpleX Chat.";
+"%@ supports POPOPX Chat." = "%@ підтримує POPOPX Chat.";
 
 /* No comment provided by engineer. */
 "%@ uploaded" = "%@ завантажено";
@@ -164,7 +164,7 @@
 "%@/year" = "%@/рік";
 
 /* badge alert */
-"%1$@ supported SimpleX Chat. The badge expired on %2$@." = "%1$@ підтримував SimpleX Chat. Термін дії значка вичерпався %2$@.";
+"%1$@ supported POPOPX Chat. The badge expired on %2$@." = "%1$@ підтримував POPOPX Chat. Термін дії значка вичерпався %2$@.";
 
 /* time interval */
 "%d day" = "%d день";
@@ -328,7 +328,7 @@ channel relay bar */
 "`a + b`" = "\\`a + b`";
 
 /* email text */
-"<p>Hi!</p>\n<p><a href=\"%@\">Connect to me via SimpleX Chat</a></p>" = "<p>Привіт!</p>\n<p><a href=\"%@\">Зв'яжіться зі мною через SimpleX Chat</a></p>";
+"<p>Hi!</p>\n<p><a href=\"%@\">Connect to me via POPOPX Chat</a></p>" = "<p>Привіт!</p>\n<p><a href=\"%@\">Зв'яжіться зі мною через POPOPX Chat</a></p>";
 
 /* No comment provided by engineer. */
 "~strike~" = "\\~закреслити~";
@@ -418,7 +418,7 @@ time interval */
 "About operators" = "Про операторів";
 
 /* No comment provided by engineer. */
-"About SimpleX Chat" = "Про чат SimpleX";
+"About POPOPX Chat" = "Про чат POPOPX";
 
 /* No comment provided by engineer. */
 "above, then choose:" = "вище, а потім обирайте:";
@@ -488,7 +488,7 @@ swipe action */
 "Add" = "Додати";
 
 /* No comment provided by engineer. */
-"Add address to your profile, so that your SimpleX contacts can share it with other people. Profile update will be sent to your SimpleX contacts." = "Додайте адресу до свого профілю, щоб ваші контакти в SimpleX могли поділитися нею з іншими людьми. Інформація про оновлення профілю буде надіслана вашим контактам у SimpleX.";
+"Add address to your profile, so that your POPOPX contacts can share it with other people. Profile update will be sent to your POPOPX contacts." = "Додайте адресу до свого профілю, щоб ваші контакти в POPOPX могли поділитися нею з іншими людьми. Інформація про оновлення профілю буде надіслана вашим контактам у POPOPX.";
 
 /* No comment provided by engineer. */
 "Add badge" = "Додати значок";
@@ -722,7 +722,7 @@ swipe action */
 "Allow to send files and media." = "Дозволяє надсилати файли та медіа.";
 
 /* No comment provided by engineer. */
-"Allow to send SimpleX links." = "Дозволити надсилати посилання SimpleX.";
+"Allow to send POPOPX links." = "Дозволити надсилати посилання POPOPX.";
 
 /* No comment provided by engineer. */
 "Allow to send voice messages." = "Дозволити надсилати голосові повідомлення.";
@@ -1209,7 +1209,7 @@ set passcode view */
 "changing address…" = "змінює адресу…";
 
 /* No comment provided by engineer. */
-"Channel SimpleX name" = "Ім'я SimpleX каналу";
+"Channel POPOPX name" = "Ім'я POPOPX каналу";
 
 /* ledger entry field */
 "Charge ID" = "ID платежу";
@@ -1448,7 +1448,7 @@ server test step */
 "Connect to desktop" = "Підключення до комп'ютера";
 
 /* No comment provided by engineer. */
-"connect to SimpleX Chat developers." = "зв'язатися з розробниками SimpleX Chat.";
+"connect to POPOPX Chat developers." = "зв'язатися з розробниками POPOPX Chat.";
 
 /* No comment provided by engineer. */
 "Connect to your friends faster." = "Швидше спілкуйтеся з друзями.";
@@ -1457,7 +1457,7 @@ server test step */
 "Connect to yourself?\nThis is your own one-time link!" = "Підключитися до себе?\nЦе ваше власне одноразове посилання!";
 
 /* new chat sheet title */
-"Connect to yourself?\nThis is your own SimpleX address!" = "З'єднатися з самим собою?\nЦе ваша власна SimpleX-адреса!";
+"Connect to yourself?\nThis is your own POPOPX address!" = "З'єднатися з самим собою?\nЦе ваша власна POPOPX-адреса!";
 
 /* new chat sheet title */
 "Connect via contact address" = "Підключіться за контактною адресою";
@@ -1619,7 +1619,7 @@ server test step */
 "contact should accept…" = "контакт повинен прийняти…";
 
 /* No comment provided by engineer. */
-"Contact SimpleX team" = "Зв'язатися з командою SimpleX";
+"Contact POPOPX team" = "Зв'язатися з командою POPOPX";
 
 /* No comment provided by engineer. */
 "Contact will be deleted - this cannot be undone!" = "Контакт буде видалено - це неможливо скасувати!";
@@ -1697,7 +1697,7 @@ server test step */
 "Create queue" = "Створити чергу";
 
 /* No comment provided by engineer. */
-"Create SimpleX address" = "Створіть адресу SimpleX";
+"Create POPOPX address" = "Створіть адресу POPOPX";
 
 /* No comment provided by engineer. */
 "Create your address" = "Створіть свою адресу";
@@ -2051,10 +2051,10 @@ alert button */
 "Device" = "Пристрій";
 
 /* No comment provided by engineer. */
-"Device authentication is disabled. Turning off SimpleX Lock." = "Автентифікацію пристрою вимкнено. Вимкнення SimpleX Lock.";
+"Device authentication is disabled. Turning off POPOPX Lock." = "Автентифікацію пристрою вимкнено. Вимкнення POPOPX Lock.";
 
 /* No comment provided by engineer. */
-"Device authentication is not enabled. You can turn on SimpleX Lock via Settings, once you enable device authentication." = "Автентифікація пристрою не ввімкнена. Ви можете увімкнути SimpleX Lock у Налаштуваннях, коли увімкнете автентифікацію пристрою.";
+"Device authentication is not enabled. You can turn on POPOPX Lock via Settings, once you enable device authentication." = "Автентифікація пристрою не ввімкнена. Ви можете увімкнути POPOPX Lock у Налаштуваннях, коли увімкнете автентифікацію пристрою.";
 
 /* No comment provided by engineer. */
 "different migration in the app/database: %@ / %@" = "різна міграція в додатку/базі даних: %@ / %@";
@@ -2087,7 +2087,7 @@ alert button */
 "Disable for all" = "Вимкнути для всіх";
 
 /* authentication reason */
-"Disable SimpleX Lock" = "Вимкнути SimpleX Lock";
+"Disable POPOPX Lock" = "Вимкнути POPOPX Lock";
 
 /* No comment provided by engineer. */
 "disabled" = "вимкнено";
@@ -2144,7 +2144,7 @@ alert button */
 "Do NOT use private routing." = "НЕ використовуйте приватну маршрутизацію.";
 
 /* No comment provided by engineer. */
-"Do NOT use SimpleX for emergency calls." = "НЕ використовуйте SimpleX для екстрених викликів.";
+"Do NOT use POPOPX for emergency calls." = "НЕ використовуйте POPOPX для екстрених викликів.";
 
 /* No comment provided by engineer. */
 "Documents:" = "Документи:";
@@ -2265,7 +2265,7 @@ chat item action */
 "Enable self-destruct passcode" = "Увімкнути пароль самознищення";
 
 /* authentication reason */
-"Enable SimpleX Lock" = "Увімкнути SimpleX Lock";
+"Enable POPOPX Lock" = "Увімкнути POPOPX Lock";
 
 /* No comment provided by engineer. */
 "Enable TCP keep-alive" = "Увімкнути TCP keep-alive";
@@ -2840,7 +2840,7 @@ servers warning */
 "For console" = "Для консолі";
 
 /* No comment provided by engineer. */
-"For example, if your contact receives messages via a SimpleX Chat server, your app will deliver them via a Flux server." = "Наприклад, якщо ваш контакт отримує повідомлення через сервер SimpleX Chat, ваш додаток доставлятиме їх через сервер Flux.";
+"For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server." = "Наприклад, якщо ваш контакт отримує повідомлення через сервер POPOPX Chat, ваш додаток доставлятиме їх через сервер Flux.";
 
 /* No comment provided by engineer. */
 "For me" = "Для мене";
@@ -2930,7 +2930,7 @@ servers warning */
 "Get notified when mentioned." = "Отримуйте сповіщення, коли вас згадують.";
 
 /* No comment provided by engineer. */
-"Get SimpleX name (BETA)" = "Отримати ім'я SimpleX (BETA)";
+"Get POPOPX name (BETA)" = "Отримати ім'я POPOPX (BETA)";
 
 /* No comment provided by engineer. */
 "GIFs and stickers" = "GIF-файли та наклейки";
@@ -3068,7 +3068,7 @@ servers warning */
 "How long?" = "На який термін?";
 
 /* No comment provided by engineer. */
-"How SimpleX works" = "Як працює SimpleX";
+"How POPOPX works" = "Як працює POPOPX";
 
 /* No comment provided by engineer. */
 "How to" = "Як зробити";
@@ -3212,7 +3212,7 @@ servers warning */
 "Initial role" = "Початкова роль";
 
 /* No comment provided by engineer. */
-"Install SimpleX Chat for terminal" = "Встановіть SimpleX Chat для терміналу";
+"Install POPOPX Chat for terminal" = "Встановіть POPOPX Chat для терміналу";
 
 /* No comment provided by engineer. */
 "Instant" = "Миттєво";
@@ -3467,13 +3467,13 @@ servers warning */
 "Less traffic on mobile networks." = "Менше трафіку в мобільних мережах.";
 
 /* No comment provided by engineer. */
-"Let people connect to you via name registered with your SimpleX address." = "Дозвольте людям підключатися до вас через ім'я, зареєстроване з вашою адресою SimpleX.";
+"Let people connect to you via name registered with your POPOPX address." = "Дозвольте людям підключатися до вас через ім'я, зареєстроване з вашою адресою POPOPX.";
 
 /* No comment provided by engineer. */
 "Let people join via name registered with this channel link." = "Дозвольте людям приєднуватися через ім'я, зареєстроване з цим посиланням на канал.";
 
 /* email subject */
-"Let's talk in SimpleX Chat" = "Поговоримо в чаті SimpleX";
+"Let's talk in POPOPX Chat" = "Поговоримо в чаті POPOPX";
 
 /* No comment provided by engineer. */
 "Light" = "Світлий";
@@ -3620,7 +3620,7 @@ servers warning */
 "Members can send files and media." = "Учасники групи можуть надсилати файли та медіа.";
 
 /* No comment provided by engineer. */
-"Members can send SimpleX links." = "Учасники групи можуть надсилати посилання SimpleX.";
+"Members can send POPOPX links." = "Учасники групи можуть надсилати посилання POPOPX.";
 
 /* No comment provided by engineer. */
 "Members can send voice messages." = "Учасники групи можуть надсилати голосові повідомлення.";
@@ -4040,7 +4040,7 @@ servers warning */
 "Nobody can link two different proofs to each other or to the purchase." = "Ніхто не може пов'язати два різні докази між собою або з покупкою.";
 
 /* No comment provided by engineer. */
-"None of your servers are set to resolve SimpleX names. Configure servers, or use a connection link." = "Жоден із ваших серверів не налаштований для розпізнавання імен SimpleX. Налаштуйте сервери або скористайтеся посиланням для підключення.";
+"None of your servers are set to resolve POPOPX names. Configure servers, or use a connection link." = "Жоден із ваших серверів не налаштований для розпізнавання імен POPOPX. Налаштуйте сервери або скористайтеся посиланням для підключення.";
 
 /* No comment provided by engineer. */
 "Not available" = "Недоступно";
@@ -4265,10 +4265,10 @@ alert button */
 "Other file errors:\n%@" = "Інші помилки файлів:\n%@";
 
 /* No comment provided by engineer. */
-"Own a part of SimpleX Chat" = "Станьте співвласником SimpleX Chat";
+"Own a part of POPOPX Chat" = "Станьте співвласником POPOPX Chat";
 
 /* No comment provided by engineer. */
-"Own a part of SimpleX Chat! 🚀" = "Станьте співвласником SimpleX Chat! 🚀";
+"Own a part of POPOPX Chat! 🚀" = "Станьте співвласником POPOPX Chat! 🚀";
 
 /* member role */
 "owner" = "власник";
@@ -4520,7 +4520,7 @@ alert button */
 "Prohibit sending files and media." = "Заборонити надсилання файлів і медіа.";
 
 /* No comment provided by engineer. */
-"Prohibit sending SimpleX links." = "Заборонити надсилання посилань SimpleX.";
+"Prohibit sending POPOPX links." = "Заборонити надсилання посилань POPOPX.";
 
 /* No comment provided by engineer. */
 "Prohibit sending voice messages." = "Заборонити надсилання голосових повідомлень.";
@@ -5028,7 +5028,7 @@ chat item action */
 "Save servers?" = "Зберегти сервери?";
 
 /* alert title */
-"Save SimpleX name?" = "Зберегти ім'я SimpleX?";
+"Save POPOPX name?" = "Зберегти ім'я POPOPX?";
 
 /* No comment provided by engineer. */
 "Save welcome message?" = "Зберегти вітальне повідомлення?";
@@ -5088,7 +5088,7 @@ chat item action */
 "Search bar accepts invitation links." = "Рядок пошуку приймає посилання-запрошення.";
 
 /* No comment provided by engineer. */
-"Search or paste SimpleX link" = "Знайдіть або вставте посилання SimpleX";
+"Search or paste POPOPX link" = "Знайдіть або вставте посилання POPOPX";
 
 /* network option */
 "sec" = "сек";
@@ -5407,13 +5407,13 @@ chat item action */
 "Share profile" = "Поділіться профілем";
 
 /* No comment provided by engineer. */
-"Share SimpleX address on social media." = "Поділіться адресою SimpleX у соціальних мережах.";
+"Share POPOPX address on social media." = "Поділіться адресою POPOPX у соціальних мережах.";
 
 /* No comment provided by engineer. */
 "Share this 1-time invite link" = "Поділіться цим одноразовим посиланням-запрошенням";
 
 /* No comment provided by engineer. */
-"Share to SimpleX" = "Поділіться з SimpleX";
+"Share to POPOPX" = "Поділіться з POPOPX";
 
 /* No comment provided by engineer. */
 "Share your address" = "Поділіться своєю адресою";
@@ -5425,7 +5425,7 @@ chat item action */
 "Short link" = "Коротке посилання";
 
 /* No comment provided by engineer. */
-"Short SimpleX address" = "Коротка адреса SimpleX";
+"Short POPOPX address" = "Коротка адреса POPOPX";
 
 /* No comment provided by engineer. */
 "Show → on messages sent via private routing." = "Показувати → у повідомленнях, надісланих через приватну маршрутизацію.";
@@ -5458,82 +5458,82 @@ chat item action */
 "shown on your profile" = "показується у вашому профілі";
 
 /* No comment provided by engineer. */
-"SimpleX" = "SimpleX";
+"POPOPX" = "POPOPX";
 
 /* No comment provided by engineer. */
-"SimpleX address" = "Адреса SimpleX";
+"POPOPX address" = "Адреса POPOPX";
 
 /* No comment provided by engineer. */
-"SimpleX Address" = "Адреса SimpleX";
+"POPOPX Address" = "Адреса POPOPX";
 
 /* No comment provided by engineer. */
-"SimpleX address and 1-time links are safe to share via any messenger." = "SimpleX-адреси та одноразові посилання можна безпечно ділитися через будь-який месенджер.";
+"POPOPX address and 1-time links are safe to share via any messenger." = "POPOPX-адреси та одноразові посилання можна безпечно ділитися через будь-який месенджер.";
 
 /* No comment provided by engineer. */
-"SimpleX address or 1-time link?" = "SimpleX адреса або одноразове посилання?";
+"POPOPX address or 1-time link?" = "POPOPX адреса або одноразове посилання?";
 
 /* alert title */
-"SimpleX address settings" = "Автоприйняття налаштувань";
+"POPOPX address settings" = "Автоприйняття налаштувань";
 
-/* simplex link type */
-"SimpleX channel link" = "Посилання на канал SimpleX";
-
-/* No comment provided by engineer. */
-"SimpleX Chat and Flux made an agreement to include Flux-operated servers into the app." = "SimpleX Chat і Flux уклали угоду про включення серверів, керованих Flux, у додаток.";
+/* popopx link type */
+"POPOPX channel link" = "Посилання на канал POPOPX";
 
 /* No comment provided by engineer. */
-"SimpleX Chat security was audited by Trail of Bits." = "Безпека SimpleX Chat була перевірена компанією Trail of Bits.";
+"POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app." = "POPOPX Chat і Flux уклали угоду про включення серверів, керованих Flux, у додаток.";
 
-/* simplex link type */
-"SimpleX contact address" = "Контактна адреса SimpleX";
+/* No comment provided by engineer. */
+"POPOPX Chat security was audited by Trail of Bits." = "Безпека POPOPX Chat була перевірена компанією Trail of Bits.";
+
+/* popopx link type */
+"POPOPX contact address" = "Контактна адреса POPOPX";
 
 /* notification */
-"SimpleX encrypted message or connection event" = "Зашифроване повідомлення SimpleX або подія підключення";
+"POPOPX encrypted message or connection event" = "Зашифроване повідомлення POPOPX або подія підключення";
 
-/* simplex link type */
-"SimpleX group link" = "Посилання на групу SimpleX";
+/* popopx link type */
+"POPOPX group link" = "Посилання на групу POPOPX";
 
 /* chat feature */
-"SimpleX links" = "Посилання SimpleX";
+"POPOPX links" = "Посилання POPOPX";
 
 /* No comment provided by engineer. */
-"SimpleX links are prohibited." = "У цій групі заборонені посилання на SimpleX.";
+"POPOPX links are prohibited." = "У цій групі заборонені посилання на POPOPX.";
 
 /* No comment provided by engineer. */
-"SimpleX links not allowed" = "Посилання SimpleX заборонені";
+"POPOPX links not allowed" = "Посилання POPOPX заборонені";
 
 /* No comment provided by engineer. */
-"SimpleX Lock" = "SimpleX Lock";
+"POPOPX Lock" = "POPOPX Lock";
 
 /* No comment provided by engineer. */
-"SimpleX Lock mode" = "Режим SimpleX Lock";
+"POPOPX Lock mode" = "Режим POPOPX Lock";
 
 /* No comment provided by engineer. */
-"SimpleX Lock not enabled!" = "SimpleX Lock не ввімкнено!";
+"POPOPX Lock not enabled!" = "POPOPX Lock не ввімкнено!";
 
 /* No comment provided by engineer. */
-"SimpleX Lock turned on" = "SimpleX Lock увімкнено";
+"POPOPX Lock turned on" = "POPOPX Lock увімкнено";
 
 /* No comment provided by engineer. */
-"SimpleX name" = "Ім'я SimpleX";
+"POPOPX name" = "Ім'я POPOPX";
 
 /* No comment provided by engineer. */
-"SimpleX name error" = "Помилка імені SimpleX";
+"POPOPX name error" = "Помилка імені POPOPX";
 
 /* alert title */
-"SimpleX name not verified" = "Ім'я SimpleX не перевірено";
+"POPOPX name not verified" = "Ім'я POPOPX не перевірено";
 
 /* No comment provided by engineer. */
-"SimpleX name sale starts in" = "Продаж імен SimpleX почнеться через";
+"POPOPX name sale starts in" = "Продаж імен POPOPX почнеться через";
 
-/* simplex link type */
-"SimpleX one-time invitation" = "Одноразове запрошення SimpleX";
-
-/* No comment provided by engineer. */
-"SimpleX protocols reviewed by Trail of Bits." = "Протоколи SimpleX, розглянуті Trail of Bits.";
+/* popopx link type */
+"POPOPX one-time invitation" = "Одноразове запрошення POPOPX";
 
 /* No comment provided by engineer. */
-"SimpleX public names" = "Публічні імена SimpleX";
+"POPOPX protocols reviewed by Trail of Bits." = "Протоколи POPOPX, розглянуті Trail of Bits.";
+
+/* No comment provided by engineer. */
+"POPOPX public names" = "Публічні імена POPOPX";
 
 /* No comment provided by engineer. */
 "Simplified incognito mode" = "Спрощений режим інкогніто";
@@ -5642,7 +5642,7 @@ report reason */
 "Stop sharing address?" = "Припинити ділитися адресою?";
 
 /* authentication reason */
-"Stop SimpleX" = "Зупинити SimpleX";
+"Stop POPOPX" = "Зупинити POPOPX";
 
 /* No comment provided by engineer. */
 "Stopping chat" = "Зупинка чату";
@@ -5688,13 +5688,13 @@ report reason */
 
 /* alert button
 alert title */
-"Support SimpleX" = "Підтримайте SimpleX";
+"Support POPOPX" = "Підтримайте POPOPX";
 
 /* No comment provided by engineer. */
-"Support SimpleX and get a badge." = "Підтримайте SimpleX і отримайте значок.";
+"Support POPOPX and get a badge." = "Підтримайте POPOPX і отримайте значок.";
 
 /* No comment provided by engineer. */
-"Support SimpleX to send larger files that stay available longer" = "Підтримайте SimpleX, щоб надсилати більші файли, які доступні довше";
+"Support POPOPX to send larger files that stay available longer" = "Підтримайте POPOPX, щоб надсилати більші файли, які доступні довше";
 
 /* badge type */
 "Supporter" = "Прихильник";
@@ -5797,7 +5797,7 @@ server test failure */
 "Tests failed!" = "Тести не пройшли!";
 
 /* No comment provided by engineer. */
-"Thank you for installing SimpleX Chat!" = "Дякуємо, що встановили SimpleX Chat!";
+"Thank you for installing POPOPX Chat!" = "Дякуємо, що встановили POPOPX Chat!";
 
 /* No comment provided by engineer. */
 "Thanks to the users – [contribute via Weblate](https://github.com/simplex-chat/simplex-chat/tree/stable#help-translating-simplex-chat)!" = "Дякуємо користувачам - [внесок через Weblate](https://github.com/simplex-chat/simplex-chat/tree/stable#help-translating-simplex-chat)!";
@@ -5863,7 +5863,7 @@ server test failure */
 "The code you scanned is not a badge code." = "Відсканований код не є кодом значка.";
 
 /* No comment provided by engineer. */
-"The code you scanned is not a SimpleX link QR code." = "Відсканований вами код не є QR-кодом посилання SimpleX.";
+"The code you scanned is not a POPOPX link QR code." = "Відсканований вами код не є QR-кодом посилання POPOPX.";
 
 /* No comment provided by engineer. */
 "The connection reached the limit of undelivered messages, your contact may be offline." = "З'єднання досягло ліміту недоставлених повідомлень, ваш контакт може бути офлайн.";
@@ -5929,16 +5929,16 @@ server test failure */
 "The servers for new files of your current chat profile **%@**." = "Сервери для нових файлів вашого поточного профілю чату **%@**.";
 
 /* alert message */
-"The SimpleX name @%@ is registered without SimpleX address. Add your SimpleX address to the name via the registration page." = "Ім'я SimpleX @%@ зареєстроване без адреси SimpleX. Додайте свою адресу SimpleX до імені на сторінці реєстрації.";
+"The POPOPX name @%@ is registered without POPOPX address. Add your POPOPX address to the name via the registration page." = "Ім'я POPOPX @%@ зареєстроване без адреси POPOPX. Додайте свою адресу POPOPX до імені на сторінці реєстрації.";
 
 /* alert message */
-"The SimpleX name #%@ is registered without channel link. Add channel link to the name via the registration page." = "Ім'я SimpleX #%@ зареєстроване без посилання на канал. Додайте посилання на канал до імені на сторінці реєстрації.";
+"The POPOPX name #%@ is registered without channel link. Add channel link to the name via the registration page." = "Ім'я POPOPX #%@ зареєстроване без посилання на канал. Додайте посилання на канал до імені на сторінці реєстрації.";
 
 /* No comment provided by engineer. */
-"The SimpleX name %@ is registered, but it has no valid link." = "Ім'я SimpleX %@ зареєстроване, але не має дійсного посилання.";
+"The POPOPX name %@ is registered, but it has no valid link." = "Ім'я POPOPX %@ зареєстроване, але не має дійсного посилання.";
 
 /* No comment provided by engineer. */
-"The SimpleX name %@ is registered, but not added to profile. Please add it to your address or channel profile, if you are the owner." = "Ім'я SimpleX %@ зареєстроване, але не додане до профілю. Будь ласка, додайте його до профілю вашої адреси або каналу, якщо ви власник.";
+"The POPOPX name %@ is registered, but not added to profile. Please add it to your address or channel profile, if you are the owner." = "Ім'я POPOPX %@ зареєстроване, але не додане до профілю. Будь ласка, додайте його до профілю вашої адреси або каналу, якщо ви власник.";
 
 /* alert message */
 "The store could not be reached." = "Не вдалося зв'язатися з магазином.";
@@ -5950,7 +5950,7 @@ server test failure */
 "The store did not confirm this purchase." = "Магазин не підтвердив цю покупку.";
 
 /* No comment provided by engineer. */
-"The text you pasted is not a SimpleX link." = "Текст, який ви вставили, не є посиланням SimpleX.";
+"The text you pasted is not a POPOPX link." = "Текст, який ви вставили, не є посиланням POPOPX.";
 
 /* No comment provided by engineer. */
 "The uploaded database archive will be permanently removed from the servers." = "Завантажений архів бази даних буде назавжди видалено з серверів.";
@@ -6049,7 +6049,7 @@ server test failure */
 "This setting applies to messages in your current chat profile **%@**." = "Це налаштування застосовується до повідомлень у вашому поточному профілі чату **%@**.";
 
 /* No comment provided by engineer. */
-"This SimpleX name is not registered. Please check the name." = "Це ім'я SimpleX не зареєстроване. Будь ласка, перевірте ім'я.";
+"This POPOPX name is not registered. Please check the name." = "Це ім'я POPOPX не зареєстроване. Будь ласка, перевірте ім'я.";
 
 /* No comment provided by engineer. */
 "Time to disappear is set only for new contacts." = "Час зникнення встановлюється тільки для нових контактів.";
@@ -6076,13 +6076,13 @@ server test failure */
 "To protect timezone, image/voice files use UTC." = "Для захисту часового поясу у файлах зображень/голосу використовується UTC.";
 
 /* No comment provided by engineer. */
-"To protect your information, turn on SimpleX Lock.\nYou will be prompted to complete authentication before this feature is enabled." = "Щоб захистити вашу інформацію, увімкніть SimpleX Lock.\nПеред увімкненням цієї функції вам буде запропоновано пройти автентифікацію.";
+"To protect your information, turn on POPOPX Lock.\nYou will be prompted to complete authentication before this feature is enabled." = "Щоб захистити вашу інформацію, увімкніть POPOPX Lock.\nПеред увімкненням цієї функції вам буде запропоновано пройти автентифікацію.";
 
 /* No comment provided by engineer. */
 "To protect your IP address, private routing uses your SMP servers to deliver messages." = "Щоб захистити вашу IP-адресу, приватна маршрутизація використовує ваші SMP-сервери для доставки повідомлень.";
 
 /* No comment provided by engineer. */
-"To protect your privacy, SimpleX uses separate IDs for each of your contacts." = "Щоб захистити конфіденційність, замість ідентифікаторів користувачів, які використовуються на всіх інших платформах, SimpleX має ідентифікатори для черг повідомлень, окремі для кожного з ваших контактів.";
+"To protect your privacy, POPOPX uses separate IDs for each of your contacts." = "Щоб захистити конфіденційність, замість ідентифікаторів користувачів, які використовуються на всіх інших платформах, POPOPX має ідентифікатори для черг повідомлень, окремі для кожного з ваших контактів.";
 
 /* No comment provided by engineer. */
 "To prove to a contact or a server that you have a badge, the app generates a new proof that reveals only the badge type and the expiry date, rounded to a week." = "Щоб довести контакту або серверу, що у вас є значок, додаток створює новий доказ, який розкриває лише тип значка та дату закінчення дії, округлену до тижня.";
@@ -6250,7 +6250,7 @@ server test failure */
 "Unsupported connection link" = "Несумісне посилання для підключення";
 
 /* No comment provided by engineer. */
-"until you can register a SimpleX domain" = "до відкриття реєстрації доменів SimpleX";
+"until you can register a POPOPX domain" = "до відкриття реєстрації доменів POPOPX";
 
 /* badge alert title */
 "Unverified badge" = "Неперевірений значок";
@@ -6271,7 +6271,7 @@ server test failure */
 "Update settings?" = "Оновити налаштування?";
 
 /* No comment provided by engineer. */
-"Update the app to register a SimpleX domain" = "Оновіть додаток, щоб зареєструвати домен SimpleX";
+"Update the app to register a POPOPX domain" = "Оновіть додаток, щоб зареєструвати домен POPOPX";
 
 /* alert message */
 "Update the app to use badges." = "Оновіть додаток, щоб використовувати значки.";
@@ -6374,7 +6374,7 @@ alert title */
 "Use servers" = "Використовуйте сервери";
 
 /* No comment provided by engineer. */
-"Use SimpleX Chat servers?" = "Використовувати сервери SimpleX Chat?";
+"Use POPOPX Chat servers?" = "Використовувати сервери POPOPX Chat?";
 
 /* No comment provided by engineer. */
 "Use SOCKS proxy" = "Використовуйте SOCKS проксі";
@@ -6401,7 +6401,7 @@ alert title */
 "Username" = "Ім'я користувача";
 
 /* No comment provided by engineer. */
-"Using SimpleX Chat servers." = "Використання серверів SimpleX Chat.";
+"Using POPOPX Chat servers." = "Використання серверів POPOPX Chat.";
 
 /* No comment provided by engineer. */
 "v%@" = "v%@";
@@ -6431,7 +6431,7 @@ alert title */
 "Verify security code" = "Підтвердіть код безпеки";
 
 /* No comment provided by engineer. */
-"Verify SimpleX names" = "Перевіряти імена SimpleX";
+"Verify POPOPX names" = "Перевіряти імена POPOPX";
 
 /* No comment provided by engineer. */
 "Via browser" = "Через браузер";
@@ -6575,7 +6575,7 @@ alert title */
 "When you share an incognito profile with somebody, this profile will be used for the groups they invite you to." = "Коли ви ділитеся з кимось своїм профілем інкогніто, цей профіль буде використовуватися для груп, до яких вас запрошують.";
 
 /* No comment provided by engineer. */
-"Why SimpleX is built." = "Навіщо створено SimpleX.";
+"Why POPOPX is built." = "Навіщо створено POPOPX.";
 
 /* No comment provided by engineer. */
 "WiFi" = "WiFi";
@@ -6713,7 +6713,7 @@ alert title */
 "You can hide or mute a user profile - swipe it to the right." = "Ви можете приховати або вимкнути звук профілю користувача - проведіть по ньому вправо.";
 
 /* No comment provided by engineer. */
-"You can make it visible to your SimpleX contacts via Settings." = "Ви можете зробити його видимим для ваших контактів у SimpleX за допомогою налаштувань.";
+"You can make it visible to your POPOPX contacts via Settings." = "Ви можете зробити його видимим для ваших контактів у POPOPX за допомогою налаштувань.";
 
 /* notification body */
 "You can now chat with %@" = "Тепер ви можете надсилати повідомлення на адресу %@";
@@ -6740,10 +6740,10 @@ alert title */
 "You can still view conversation with %@ in the list of chats." = "Ви все ще можете переглянути розмову з %@ у списку чатів.";
 
 /* alert message */
-"You can support SimpleX later in Settings." = "Ви можете підтримати SimpleX пізніше в Налаштуваннях.";
+"You can support POPOPX later in Settings." = "Ви можете підтримати POPOPX пізніше в Налаштуваннях.";
 
 /* No comment provided by engineer. */
-"You can turn on SimpleX Lock via Settings." = "Увімкнути SimpleX Lock можна в Налаштуваннях.";
+"You can turn on POPOPX Lock via Settings." = "Увімкнути POPOPX Lock можна в Налаштуваннях.";
 
 /* No comment provided by engineer. */
 "You can use markdown to format messages:" = "Ви можете використовувати розмітку для форматування повідомлень:";
@@ -6962,7 +6962,7 @@ alert title */
 "Your profile is stored on your device and only shared with your contacts." = "Профіль доступний лише вашим контактам.";
 
 /* No comment provided by engineer. */
-"Your profile is stored on your device and shared only with your contacts. SimpleX servers cannot see your profile." = "Ваш профіль зберігається на вашому пристрої і доступний лише вашим контактам. Сервери SimpleX не бачать ваш профіль.";
+"Your profile is stored on your device and shared only with your contacts. POPOPX servers cannot see your profile." = "Ваш профіль зберігається на вашому пристрої і доступний лише вашим контактам. Сервери POPOPX не бачать ваш профіль.";
 
 /* alert message */
 "Your profile was changed. If you save it, the updated profile will be sent to all your contacts." = "Ваш профіль було змінено. Якщо ви збережете його, оновлений профіль буде надіслано всім вашим контактам.";
@@ -6980,10 +6980,10 @@ alert title */
 "Your settings" = "Ваші налаштування";
 
 /* No comment provided by engineer. */
-"Your SimpleX address" = "Ваша адреса SimpleX";
+"Your POPOPX address" = "Ваша адреса POPOPX";
 
 /* No comment provided by engineer. */
-"Your SimpleX name" = "Ваше ім'я SimpleX";
+"Your POPOPX name" = "Ваше ім'я POPOPX";
 
 /* alert title */
 "Your subscription ended" = "Ваша підписка закінчилася";

@@ -236,7 +236,7 @@ fun checkForUpdate() {
                 }) {
                   Text(
                     generalGetString(MR.strings.app_check_for_updates_button_download).format(
-                      if (asset.name.length > 34) "…" + asset.name.substringAfter("simplex-desktop-") else asset.name,
+                      if (asset.name.length > 34) "…" + asset.name.substringAfter("popopx-desktop-") else asset.name,
                       formatBytes(asset.size)), Modifier.fillMaxWidth(), textAlign = TextAlign.Center, color = MaterialTheme.colors.primary
                   )
                 }
@@ -396,7 +396,7 @@ private fun chooseGitHubReleaseAssets(release: GitHubRelease): List<GitHubAsset>
     val arch = if (desktopPlatform == DesktopPlatform.LINUX_AARCH64) "aarch64" else "x86_64"
     release.assets.filter { asset ->
       val name = asset.name.lowercase()
-      name.startsWith("simplex-desktop-") && name.endsWith("$arch.deb")
+      name.startsWith("popopx-desktop-") && name.endsWith("$arch.deb")
     }
   } else {
     release.assets.filter { it.name == desktopPlatform.githubAssetName }
@@ -447,7 +447,7 @@ private suspend fun installAppUpdate(file: File) = withContext(Dispatchers.IO) {
     }
     desktopPlatform.isWindows() -> {
       // Launch the installer, then exit so our files are no longer locked. While the app runs it
-      // holds SimpleX.exe/JRE/DLLs open, which forces the MSI to defer replacement to a reboot and
+      // holds POPOPX.exe/JRE/DLLs open, which forces the MSI to defer replacement to a reboot and
       // corrupts the upgrade (the app then fails to launch). Array form passes the path as a single
       // argument so a space in the temp path does not break the command.
       Runtime.getRuntime().exec(arrayOf("msiexec", "/i", file.absolutePath))
@@ -455,14 +455,14 @@ private suspend fun installAppUpdate(file: File) = withContext(Dispatchers.IO) {
     }
     desktopPlatform.isMac() -> {
       // Default mount point if no other DMGs were mounted before
-      var volume = "/Volumes/SimpleX"
+      var volume = "/Volumes/POPOPX"
       try {
         val process = Runtime.getRuntime().exec("hdiutil mount ${file.absolutePath}").onExit().join()
         val startedInstallation = process.exitValue() == 0
         val lines = process.inputReader().use { it.readLines() }
         // This is needed for situations when mount point has non-default path. 
-        // For example, when a user already had mounted SimpleX.dmg before and default mount point is not available.
-        // Mac will make volume like /Volumes/SimpleX 1
+        // For example, when a user already had mounted POPOPX.dmg before and default mount point is not available.
+        // Mac will make volume like /Volumes/POPOPX 1
         val lastLine = lines.lastOrNull()?.substringAfterLast('\t')
         if (!startedInstallation || lastLine == null || !lastLine.lowercase().contains("/volumes/")) {
           Log.e(TAG, "Error starting installation: ${process.inputReader().use { it.readLines().joinToString("\n") }}${process.errorStream.use { String(it.readAllBytes()) }}")
@@ -471,7 +471,7 @@ private suspend fun installAppUpdate(file: File) = withContext(Dispatchers.IO) {
           return@withContext
         }
         volume = lastLine
-        File("/Applications/SimpleX.app").renameTo(File("/Applications/SimpleX-old.app"))
+        File("/Applications/SimpleX.app").renameTo(File("/Applications/POPOPX-old.app"))
         val process2 = Runtime.getRuntime().exec(arrayOf("cp", "-R", "${volume}/SimpleX.app", "/Applications")).onExit().join()
         val copiedSuccessfully = process2.exitValue() == 0
         if (!copiedSuccessfully) {
@@ -490,9 +490,9 @@ private suspend fun installAppUpdate(file: File) = withContext(Dispatchers.IO) {
           Runtime.getRuntime().exec(arrayOf("hdiutil", "unmount", volume)).onExit().join()
         } finally {
           if (!File("/Applications/SimpleX.app").exists()) {
-            File("/Applications/SimpleX-old.app").renameTo(File("/Applications/SimpleX.app"))
+            File("/Applications/POPOPX-old.app").renameTo(File("/Applications/SimpleX.app"))
           } else {
-            Runtime.getRuntime().exec("rm -rf /Applications/SimpleX-old.app").onExit().join()
+            Runtime.getRuntime().exec("rm -rf /Applications/POPOPX-old.app").onExit().join()
           }
         }
       }

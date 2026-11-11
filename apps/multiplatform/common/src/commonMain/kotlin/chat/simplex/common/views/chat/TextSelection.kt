@@ -118,7 +118,7 @@ class SelectionManager {
     }
 
     // Snaps boundary offsets to include full transformed segments (mentions, links with showText).
-    fun snapSelection(items: List<MergedItem>, linkMode: SimplexLinkMode) {
+    fun snapSelection(items: List<MergedItem>, linkMode: PopopxLinkMode) {
         val r = range ?: return
         val startCi = items.getOrNull(r.startIndex)?.newest()?.item
         val endCi = items.getOrNull(r.endIndex)?.newest()?.item
@@ -211,7 +211,7 @@ class SelectionManager {
         }
     }
 
-    fun getSelectedCopiedText(items: List<MergedItem>, revealedItems: Set<Long>, linkMode: SimplexLinkMode): String {
+    fun getSelectedCopiedText(items: List<MergedItem>, revealedItems: Set<Long>, linkMode: PopopxLinkMode): String {
         val r = range ?: return ""
         val lo = minOf(r.startIndex, r.endIndex)
         val hi = maxOf(r.startIndex, r.endIndex)
@@ -261,7 +261,7 @@ fun selectedRange(range: SelectionRange?, index: Int): IntRange? {
 // Selection offsets are in display-text space (which includes any leading itemPrefixText).
 // For transformed segments (mentions, links with showText), the full source is emitted if any part
 // is selected. For untransformed segments, partial substring works.
-private fun selectedItemCopiedText(ci: ChatItem, sel: IntRange, linkMode: SimplexLinkMode): String {
+private fun selectedItemCopiedText(ci: ChatItem, sel: IntRange, linkMode: PopopxLinkMode): String {
     val prefix = itemPrefixText(ci)
     val sb = StringBuilder()
     if (sel.first < prefix.length) {
@@ -291,7 +291,7 @@ private fun selectedItemCopiedText(ci: ChatItem, sel: IntRange, linkMode: Simple
 }
 
 // Snaps a boundary offset to include full transformed segments.
-private fun snapOffset(ci: ChatItem, offset: Int, linkMode: SimplexLinkMode, expandRight: Boolean): Int {
+private fun snapOffset(ci: ChatItem, offset: Int, linkMode: PopopxLinkMode, expandRight: Boolean): Int {
     val parts = itemDisplay(ci, linkMode)?.parts ?: return offset
     var displayOffset = itemPrefixText(ci).length
     for ((segDisplay, source) in parts) {
@@ -316,7 +316,7 @@ fun BoxScope.SelectionHandler(
     listState: State<LazyListState>,
     mergedItems: State<MergedItems>,
     revealedItems: State<Set<Long>>,
-    linkMode: SimplexLinkMode
+    linkMode: PopopxLinkMode
 ): Modifier {
     val touchSlop = LocalViewConfiguration.current.touchSlop
     val clipboard = LocalClipboardManager.current

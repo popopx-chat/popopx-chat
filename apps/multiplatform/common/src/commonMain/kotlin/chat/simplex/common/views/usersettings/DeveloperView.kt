@@ -65,10 +65,10 @@ fun DeveloperView(withAuth: (title: String, desc: String, block: () -> Unit) -> 
     }
     SectionDividerSpaced()
     SectionView(stringResource(MR.strings.deprecated_options_section)) {
-      val simplexLinkMode = chatModel.controller.appPrefs.simplexLinkMode
-      SimpleXLinkOptions(chatModel.simplexLinkMode, onSelected = {
-        simplexLinkMode.set(it)
-        chatModel.simplexLinkMode.value = it
+      val popopxLinkMode = chatModel.controller.appPrefs.popopxLinkMode
+      POPOPXLinkOptions(chatModel.popopxLinkMode, onSelected = {
+        popopxLinkMode.set(it)
+        chatModel.popopxLinkMode.value = it
       })
     }
     SectionBottomSpacer()

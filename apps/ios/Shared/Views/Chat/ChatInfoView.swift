@@ -1,9 +1,9 @@
 //
 //  ChatInfoView.swift
-//  SimpleX
+//  POPOPX
 //
 //  Created by Evgeny Poberezkin on 05/02/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/client/chat-view.md
 
@@ -219,9 +219,9 @@ struct ChatInfoView: View {
 
                     if let contactLink = contact.contactLink {
                         Section {
-                            SimpleXLinkQRCode(uri: contactLink)
+                            POPOPXLinkQRCode(uri: contactLink)
                             Button {
-                                showShareSheet(items: [simplexChatLink(contactLink)])
+                                showShareSheet(items: [popopxChatLink(contactLink)])
                             } label: {
                                 Label("Share address", systemImage: "square.and.arrow.up")
                             }
@@ -393,7 +393,7 @@ struct ChatInfoView: View {
                     .lineLimit(3)
                     .padding(.bottom, 2)
             }
-            contactSimplexNameView(contact) { contact = $0 }
+            contactPopopxNameView(contact) { contact = $0 }
             ProfileDescriptionView(shortDescr: cInfo.shortDescr, description: cInfo.profileDescription)
         }
         .frame(maxWidth: .infinity, alignment: .center)
@@ -1374,10 +1374,10 @@ private func deleteNotReadyContact(
     ))
 }
 
-@ViewBuilder func contactSimplexNameView(_ contact: Contact, verifiable: Bool = true, onUpdate: ((Contact) -> Void)? = nil) -> some View {
+@ViewBuilder func contactPopopxNameView(_ contact: Contact, verifiable: Bool = true, onUpdate: ((Contact) -> Void)? = nil) -> some View {
     if let domain = contact.profile.contactDomain,
        contact.profile.contactDomainVerified != nil || domain.proof != nil {
-        SimplexNameView(
+        PopopxNameView(
             simplexName: "@\(domain.domain)",
             verified: contact.profile.contactDomainVerified,
             verify: {
@@ -1398,12 +1398,12 @@ private func deleteNotReadyContact(
     }
 }
 
-@ViewBuilder func groupSimplexNameView(_ groupInfo: GroupInfo, verifiable: Bool = true, onUpdate: ((GroupInfo) -> Void)? = nil) -> some View {
+@ViewBuilder func groupPopopxNameView(_ groupInfo: GroupInfo, verifiable: Bool = true, onUpdate: ((GroupInfo) -> Void)? = nil) -> some View {
     if groupInfo.businessChat == nil {
         if let access = groupInfo.groupProfile.publicGroup?.publicGroupAccess,
            let domain = access.groupDomainClaim?.shortName,
            groupInfo.groupDomainVerified != nil || access.groupDomainClaim?.proof != nil {
-            SimplexNameView(
+            PopopxNameView(
                 simplexName: "#\(domain)",
                 verified: groupInfo.groupDomainVerified,
                 verify: {
@@ -1425,7 +1425,7 @@ private func deleteNotReadyContact(
     } else if let claim = groupInfo.businessChat?.businessDomain,
               groupInfo.groupDomainVerified != nil || claim.proof != nil {
         // A business presents as a contact, so the name retains its .popopx suffix; it cannot be re-verified.
-        SimplexNameView(
+        PopopxNameView(
             simplexName: "@\(claim.domain)",
             verified: groupInfo.groupDomainVerified,
             verify: { nil },
@@ -1434,7 +1434,7 @@ private func deleteNotReadyContact(
     }
 }
 
-struct SimplexNameView: View {
+struct PopopxNameView: View {
     @EnvironmentObject var theme: AppTheme
     @AppStorage(DEFAULT_PRIVACY_VERIFY_SIMPLEX_NAMES) var autoVerify = false
     let simplexName: String
@@ -1511,7 +1511,7 @@ struct SimplexNameView: View {
                 showSpinner = false
                 // show the reason on a manual run, or on an inconclusive auto run (state stayed nil)
                 if let (newV, reason) = res, let reason, manual || newV == nil {
-                    showAlert(NSLocalizedString("SimpleX name not verified", comment: "alert title"), message: reason)
+                    showAlert(NSLocalizedString("POPOPX name not verified", comment: "alert title"), message: reason)
                 }
             }
         }

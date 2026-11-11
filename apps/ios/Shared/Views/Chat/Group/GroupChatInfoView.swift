@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by JRoberts on 14.07.2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/client/chat-view.md
 
@@ -113,9 +113,9 @@ struct GroupChatInfoView: View {
                             if groupInfo.isOwner && groupLink != nil {
                                 channelLinkButton()
                             } else if let link = groupInfo.groupProfile.publicGroup?.groupLink {
-                                SimpleXLinkQRCode(uri: link)
+                                POPOPXLinkQRCode(uri: link)
                                 Button {
-                                    showShareSheet(items: [simplexChatLink(link)])
+                                    showShareSheet(items: [popopxChatLink(link)])
                                 } label: {
                                     Label("Share link", systemImage: "square.and.arrow.up")
                                 }
@@ -159,10 +159,10 @@ struct GroupChatInfoView: View {
 
                     if groupInfo.useRelays && groupInfo.isOwner && groupLink != nil {
                         Section {
-                            channelSimplexNameButton()
+                            channelPopopxNameButton()
                         } header: {
                             if groupInfo.groupProfile.publicGroup?.publicGroupAccess?.groupDomainClaim?.shortName != nil {
-                                Text("Channel SimpleX name").foregroundColor(theme.colors.secondary)
+                                Text("Channel POPOPX name").foregroundColor(theme.colors.secondary)
                             }
                         }
                     }
@@ -339,7 +339,7 @@ struct GroupChatInfoView: View {
                     .lineLimit(4)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            groupSimplexNameView(groupInfo) { groupInfo = $0 }
+            groupPopopxNameView(groupInfo) { groupInfo = $0 }
             if let webPage = groupInfo.groupProfile.publicGroup?.publicGroupAccess?.groupWebPage,
                let url = URL(string: webPage) {
                 Link(destination: url) {
@@ -683,11 +683,11 @@ struct GroupChatInfoView: View {
         }
     }
 
-    private func channelSimplexNameButton() -> some View {
+    private func channelPopopxNameButton() -> some View {
         NavigationLink {
             let domain = if let d = groupInfo.groupProfile.publicGroup?.publicGroupAccess?.groupDomainClaim?.shortName { "#\(d)" } else { "" }
-            SetSimplexDomainView(
-                title: "SimpleX name",
+            SetPopopxDomainView(
+                title: "POPOPX name",
                 footer: "Let people join via name registered with this channel link.",
                 prompt: "#channelname.testing",
                 simplexName: domain,
@@ -710,7 +710,7 @@ struct GroupChatInfoView: View {
             if let d = groupInfo.groupProfile.publicGroup?.publicGroupAccess?.groupDomainClaim?.shortName {
                 Label("\(d)", systemImage: "number")
             } else {
-                Label("Get SimpleX name (BETA)", systemImage: "number")
+                Label("Get POPOPX name (BETA)", systemImage: "number")
             }
         }
     }
@@ -1170,7 +1170,7 @@ func largeGroupReceiptsDisabledAlert() -> Alert {
 func shareChannelPicker(groupInfo: GroupInfo, composeState: Binding<ComposeState>? = nil) -> some View {
     let v = ChatItemForwardingView(
         title: "Share channel",
-        isProhibited: { $0.prohibitedByPref(hasSimplexLink: true, isMediaOrFileAttachment: false, isVoice: false) },
+        isProhibited: { $0.prohibitedByPref(hasPopopxLink: true, isMediaOrFileAttachment: false, isVoice: false) },
         onSelectChat: { chat in shareChatLink(chat, sourceGroupInfo: groupInfo, composeState: composeState) },
         includeLocal: false
     )

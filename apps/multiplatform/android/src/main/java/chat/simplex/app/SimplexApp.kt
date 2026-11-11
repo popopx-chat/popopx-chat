@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit
 
 const val TAG = "SIMPLEX"
 
-class SimplexApp: Application(), LifecycleEventObserver {
+class PopopxApp: Application(), LifecycleEventObserver {
   val chatModel: ChatModel
     get() = chatController.chatModel
 
@@ -84,11 +84,11 @@ class SimplexApp: Application(), LifecycleEventObserver {
     // Present screen for continue migration if it wasn't finished yet
     if (chatModel.migrationState.value != null) {
       // It's important, otherwise, user may be locked in undefined state
-      appPrefs.onboardingStage.set(OnboardingStage.Step1_SimpleXInfo)
+      appPrefs.onboardingStage.set(OnboardingStage.Step1_POPOPXInfo)
     } else if (DatabaseUtils.ksAppPassword.get() == null || DatabaseUtils.ksSelfDestructPassword.get() == null) {
       initChatControllerOnStart()
     }
-    ProcessLifecycleOwner.get().lifecycle.addObserver(this@SimplexApp)
+    ProcessLifecycleOwner.get().lifecycle.addObserver(this@PopopxApp)
   }
 
   override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
@@ -121,7 +121,7 @@ class SimplexApp: Application(), LifecycleEventObserver {
         Lifecycle.Event.ON_RESUME -> {
           isAppOnForeground = true
           if (chatModel.controller.appPrefs.onboardingStage.get() == OnboardingStage.OnboardingComplete && chatModel.currentUser.value != null) {
-            SimplexService.showBackgroundServiceNoticeIfNeeded()
+            PopopxService.showBackgroundServiceNoticeIfNeeded()
           }
           /**
            * We're starting service here instead of in [Lifecycle.Event.ON_START] because
@@ -135,7 +135,7 @@ class SimplexApp: Application(), LifecycleEventObserver {
             // because preferred notification type is not yet chosen. So, check that the user has initialized db already
             appPrefs.newDatabaseInitialized.get()
           ) {
-            SimplexService.start()
+            PopopxService.start()
           }
         }
         else -> isAppOnForeground = false
@@ -145,12 +145,12 @@ class SimplexApp: Application(), LifecycleEventObserver {
 
   fun allowToStartServiceAfterAppExit() = with(chatModel.controller) {
     appPrefs.notificationsMode.get() == NotificationsMode.SERVICE &&
-        (!NotificationsMode.SERVICE.requiresIgnoringBattery || SimplexService.isBackgroundAllowed())
+        (!NotificationsMode.SERVICE.requiresIgnoringBattery || PopopxService.isBackgroundAllowed())
   }
 
   private fun allowToStartPeriodically() = with(chatModel.controller) {
     appPrefs.notificationsMode.get() == NotificationsMode.PERIODIC &&
-        (!NotificationsMode.PERIODIC.requiresIgnoringBattery || SimplexService.isBackgroundAllowed())
+        (!NotificationsMode.PERIODIC.requiresIgnoringBattery || PopopxService.isBackgroundAllowed())
   }
 
   /*
@@ -158,24 +158,24 @@ class SimplexApp: Application(), LifecycleEventObserver {
   * */
   fun schedulePeriodicServiceRestartWorker() = CoroutineScope(Dispatchers.Default).launch {
     if (!allowToStartServiceAfterAppExit()) {
-      getWorkManagerInstance().cancelUniqueWork(SimplexService.SERVICE_START_WORKER_WORK_NAME_PERIODIC)
+      getWorkManagerInstance().cancelUniqueWork(PopopxService.SERVICE_START_WORKER_WORK_NAME_PERIODIC)
       return@launch
     }
     val workerVersion = chatController.appPrefs.autoRestartWorkerVersion.get()
-    val workPolicy = if (workerVersion == SimplexService.SERVICE_START_WORKER_VERSION) {
+    val workPolicy = if (workerVersion == PopopxService.SERVICE_START_WORKER_VERSION) {
       Log.d(TAG, "ServiceStartWorker version matches: choosing KEEP as existing work policy")
       ExistingPeriodicWorkPolicy.KEEP
     } else {
       Log.d(TAG, "ServiceStartWorker version DOES NOT MATCH: choosing REPLACE as existing work policy")
-      chatController.appPrefs.autoRestartWorkerVersion.set(SimplexService.SERVICE_START_WORKER_VERSION)
+      chatController.appPrefs.autoRestartWorkerVersion.set(PopopxService.SERVICE_START_WORKER_VERSION)
       ExistingPeriodicWorkPolicy.REPLACE
     }
-    val work = PeriodicWorkRequestBuilder<SimplexService.ServiceStartWorker>(SimplexService.SERVICE_START_WORKER_INTERVAL_MINUTES, TimeUnit.MINUTES)
-      .addTag(SimplexService.TAG)
-      .addTag(SimplexService.SERVICE_START_WORKER_WORK_NAME_PERIODIC)
+    val work = PeriodicWorkRequestBuilder<PopopxService.ServiceStartWorker>(PopopxService.SERVICE_START_WORKER_INTERVAL_MINUTES, TimeUnit.MINUTES)
+      .addTag(PopopxService.TAG)
+      .addTag(PopopxService.SERVICE_START_WORKER_WORK_NAME_PERIODIC)
       .build()
-    Log.d(TAG, "ServiceStartWorker: Scheduling period work every ${SimplexService.SERVICE_START_WORKER_INTERVAL_MINUTES} minutes")
-    getWorkManagerInstance().enqueueUniquePeriodicWork(SimplexService.SERVICE_START_WORKER_WORK_NAME_PERIODIC, workPolicy, work)
+    Log.d(TAG, "ServiceStartWorker: Scheduling period work every ${PopopxService.SERVICE_START_WORKER_INTERVAL_MINUTES} minutes")
+    getWorkManagerInstance().enqueueUniquePeriodicWork(PopopxService.SERVICE_START_WORKER_WORK_NAME_PERIODIC, workPolicy, work)
   }
 
   fun schedulePeriodicWakeUp() = CoroutineScope(Dispatchers.Default).launch {
@@ -187,7 +187,7 @@ class SimplexApp: Application(), LifecycleEventObserver {
   }
 
   companion object {
-    lateinit var context: SimplexApp private set
+    lateinit var context: PopopxApp private set
   }
 
   private fun initMultiplatform() {
@@ -206,11 +206,11 @@ class SimplexApp: Application(), LifecycleEventObserver {
     }
     platform = object : PlatformInterface {
       override suspend fun androidServiceStart() {
-        SimplexService.start()
+        PopopxService.start()
       }
 
       override fun androidServiceSafeStop() {
-        SimplexService.safeStopService()
+        PopopxService.safeStopService()
       }
 
       override fun androidCallServiceSafeStop() {
@@ -218,53 +218,53 @@ class SimplexApp: Application(), LifecycleEventObserver {
       }
 
       override fun androidNotificationsModeChanged(mode: NotificationsMode) {
-        if (mode.requiresIgnoringBattery && !SimplexService.isBackgroundAllowed()) {
+        if (mode.requiresIgnoringBattery && !PopopxService.isBackgroundAllowed()) {
           appPrefs.backgroundServiceNoticeShown.set(false)
         }
-        SimplexService.StartReceiver.toggleReceiver(mode == NotificationsMode.SERVICE)
-        SimplexService.AppUpdateReceiver.toggleReceiver(mode == NotificationsMode.SERVICE)
+        PopopxService.StartReceiver.toggleReceiver(mode == NotificationsMode.SERVICE)
+        PopopxService.AppUpdateReceiver.toggleReceiver(mode == NotificationsMode.SERVICE)
         CoroutineScope(Dispatchers.Default).launch {
           if (mode == NotificationsMode.SERVICE) {
-            SimplexService.start()
+            PopopxService.start()
             // Sometimes, when we change modes fast from one to another, system destroys the service after start.
             // We can wait a little and restart the service, and it will work in 100% of cases
             delay(2000)
-            if (!SimplexService.isServiceStarted && appPrefs.notificationsMode.get() == NotificationsMode.SERVICE) {
+            if (!PopopxService.isServiceStarted && appPrefs.notificationsMode.get() == NotificationsMode.SERVICE) {
               Log.i(TAG, "Service tried to start but destroyed by system, repeating once more")
-              SimplexService.start()
+              PopopxService.start()
             }
           } else {
-            SimplexService.safeStopService()
+            PopopxService.safeStopService()
           }
         }
         if (mode != NotificationsMode.SERVICE) {
-          getWorkManagerInstance().cancelUniqueWork(SimplexService.SERVICE_START_WORKER_WORK_NAME_PERIODIC)
+          getWorkManagerInstance().cancelUniqueWork(PopopxService.SERVICE_START_WORKER_WORK_NAME_PERIODIC)
         }
         if (mode != NotificationsMode.PERIODIC) {
           MessagesFetcherWorker.cancelAll()
         }
-        SimplexService.showBackgroundServiceNoticeIfNeeded(showOffAlert = false)
+        PopopxService.showBackgroundServiceNoticeIfNeeded(showOffAlert = false)
       }
 
       override fun androidChatStartedAfterBeingOff() {
-        SimplexService.cancelPassphraseNotification()
+        PopopxService.cancelPassphraseNotification()
         when (appPrefs.notificationsMode.get()) {
           NotificationsMode.SERVICE -> CoroutineScope(Dispatchers.Default).launch { platform.androidServiceStart() }
-          NotificationsMode.PERIODIC -> SimplexApp.context.schedulePeriodicWakeUp()
+          NotificationsMode.PERIODIC -> PopopxApp.context.schedulePeriodicWakeUp()
           NotificationsMode.OFF -> {}
         }
       }
 
       override fun androidChatStopped() {
-        getWorkManagerInstance().cancelUniqueWork(SimplexService.SERVICE_START_WORKER_WORK_NAME_PERIODIC)
-        SimplexService.safeStopService()
+        getWorkManagerInstance().cancelUniqueWork(PopopxService.SERVICE_START_WORKER_WORK_NAME_PERIODIC)
+        PopopxService.safeStopService()
         MessagesFetcherWorker.cancelAll()
       }
 
       override fun androidChatInitializedAndStarted() {
         // Prevents from showing "Enable notifications" alert when onboarding wasn't complete yet
         if (chatModel.controller.appPrefs.onboardingStage.get() == OnboardingStage.OnboardingComplete) {
-          SimplexService.showBackgroundServiceNoticeIfNeeded()
+          PopopxService.showBackgroundServiceNoticeIfNeeded()
           if (appPrefs.notificationsMode.get() == NotificationsMode.SERVICE)
             withBGApi {
               platform.androidServiceStart()
@@ -272,7 +272,7 @@ class SimplexApp: Application(), LifecycleEventObserver {
         }
       }
 
-      override fun androidIsBackgroundCallAllowed(): Boolean = !SimplexService.isBackgroundRestricted()
+      override fun androidIsBackgroundCallAllowed(): Boolean = !PopopxService.isBackgroundRestricted()
 
       override fun androidSetNightModeIfSupported() {
         if (Build.VERSION.SDK_INT < 31) return
@@ -379,9 +379,9 @@ class SimplexApp: Application(), LifecycleEventObserver {
       }
 
       override suspend fun androidAskToAllowBackgroundCalls(): Boolean {
-        if (SimplexService.isBackgroundRestricted()) {
+        if (PopopxService.isBackgroundRestricted()) {
           val userChoice: CompletableDeferred<Boolean> = CompletableDeferred()
-          SimplexService.showBGRestrictedInCall {
+          PopopxService.showBGRestrictedInCall {
             userChoice.complete(it)
           }
           return userChoice.await()
@@ -400,6 +400,6 @@ class SimplexApp: Application(), LifecycleEventObserver {
   // Make sure that receivers enabled state is in actual state (same as in prefs)
   private fun reconfigureBroadcastReceivers() {
     val mode = appPrefs.notificationsMode.get()
-    SimplexService.StartReceiver.toggleReceiver(mode == NotificationsMode.SERVICE)
-    SimplexService.AppUpdateReceiver.toggleReceiver(mode == NotificationsMode.SERVICE)}
+    PopopxService.StartReceiver.toggleReceiver(mode == NotificationsMode.SERVICE)
+    PopopxService.AppUpdateReceiver.toggleReceiver(mode == NotificationsMode.SERVICE)}
 }

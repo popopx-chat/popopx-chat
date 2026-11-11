@@ -52,13 +52,13 @@ class CallServerAuthTest {
 
   @Test
   fun testCallPageRejectedWithoutToken() {
-    assertEquals(401, requestStatus(get(path = "/simplex/call/")))
+    assertEquals(401, requestStatus(get(path = "/popopx/call/")))
   }
 
   @Test
   fun testCallPagePassesAuthGateWithToken() {
     // Resource serving may differ in the test classpath, so assert only that the auth gate was passed (not 401)
-    assertNotEquals(401, requestStatus(get(path = "/simplex/call/?token=$token")))
+    assertNotEquals(401, requestStatus(get(path = "/popopx/call/?token=$token")))
   }
 
   private fun get(path: String): List<String> = listOf("GET $path HTTP/1.1", "Host: localhost:$port")

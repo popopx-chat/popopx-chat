@@ -32,7 +32,7 @@ class TerminalMarkdownGapsTest {
         Box(Modifier.width(300.dp).record(placed, "text")) {
           MarkdownText(
             fts.joinToString("") { it.text }, fts, blocks, toggleSecrets = false, modifier = Modifier.record(placed, "drawn"),
-            style = MaterialTheme.typography.body1.copy(lineHeight = 22.sp), linkMode = SimplexLinkMode.DESCRIPTION, prefix = prefix, blockLayout = true
+            style = MaterialTheme.typography.body1.copy(lineHeight = 22.sp), linkMode = PopopxLinkMode.DESCRIPTION, prefix = prefix, blockLayout = true
           )
         }
       }

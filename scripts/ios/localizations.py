@@ -38,7 +38,7 @@ from typing import Union
 IOS_DIR = Path("apps/ios")
 PROJECT = IOS_DIR / "POPOPX.xcodeproj"
 PBXPROJ = PROJECT / "project.pbxproj"
-LOCALIZATIONS_DIR = IOS_DIR / "SimpleX Localizations"
+LOCALIZATIONS_DIR = IOS_DIR / "POPOPX Localizations"
 UPDATE_PBXPROJ = Path("scripts/ios/update-pbxproj.sh")
 SOURCE_LANGUAGE = "en"
 XLIFF_NS = "{urn:oasis:names:tc:xliff:document:1.2}"

@@ -45,7 +45,7 @@ fun ChatPreviewView(
   chatModelDraftChatId: ChatId?,
   currentUserProfileDisplayName: String?,
   disabled: Boolean,
-  linkMode: SimplexLinkMode,
+  linkMode: PopopxLinkMode,
   inProgress: Boolean,
   progressByTimeout: Boolean,
   defaultClickAction: () -> Unit
@@ -643,7 +643,7 @@ private data class ActiveVoicePreview(
 )*/
 @Composable
 fun PreviewChatPreviewView() {
-  SimpleXTheme {
-    ChatPreviewView(Chat.sampleData.copy(chatItems = Chat.sampleData.chatItems.map(::previewDated)), true, null, null, "", disabled = false, linkMode = SimplexLinkMode.DESCRIPTION, inProgress = false, progressByTimeout = false, {})
+  POPOPXTheme {
+    ChatPreviewView(Chat.sampleData.copy(chatItems = Chat.sampleData.chatItems.map(::previewDated)), true, null, null, "", disabled = false, linkMode = PopopxLinkMode.DESCRIPTION, inProgress = false, progressByTimeout = false, {})
   }
 }

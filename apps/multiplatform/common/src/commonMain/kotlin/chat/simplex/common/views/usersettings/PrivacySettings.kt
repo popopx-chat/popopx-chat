@@ -142,8 +142,8 @@ fun MorePrivacyView(chatModel: ChatModel) {
         })
       SettingsPreferenceItem(
         painterResource(MR.images.ic_tag),
-        stringResource(MR.strings.verify_simplex_names),
-        chatModel.controller.appPrefs.privacyVerifySimplexNames
+        stringResource(MR.strings.verify_popopx_names),
+        chatModel.controller.appPrefs.privacyVerifyPopopxNames
       )
       // hidden until message signing is user-facing (recipient-only stage)
 //      SettingsPreferenceItem(
@@ -286,22 +286,22 @@ fun MorePrivacyView(chatModel: ChatModel) {
 }
 
 @Composable
-fun SimpleXLinkOptions(simplexLinkModeState: State<SimplexLinkMode>, onSelected: (SimplexLinkMode) -> Unit) {
-  val modeValues = listOf(SimplexLinkMode.DESCRIPTION, SimplexLinkMode.FULL)
-  val pickerValues = modeValues + if (modeValues.contains(simplexLinkModeState.value)) emptyList() else listOf(simplexLinkModeState.value)
+fun POPOPXLinkOptions(popopxLinkModeState: State<PopopxLinkMode>, onSelected: (PopopxLinkMode) -> Unit) {
+  val modeValues = listOf(PopopxLinkMode.DESCRIPTION, PopopxLinkMode.FULL)
+  val pickerValues = modeValues + if (modeValues.contains(popopxLinkModeState.value)) emptyList() else listOf(popopxLinkModeState.value)
   val values = remember {
     pickerValues.map {
       when (it) {
-        SimplexLinkMode.DESCRIPTION -> it to generalGetString(MR.strings.simplex_link_mode_description)
-        SimplexLinkMode.FULL -> it to generalGetString(MR.strings.simplex_link_mode_full)
-        SimplexLinkMode.BROWSER -> it to generalGetString(MR.strings.simplex_link_mode_browser)
+        PopopxLinkMode.DESCRIPTION -> it to generalGetString(MR.strings.popopx_link_mode_description)
+        PopopxLinkMode.FULL -> it to generalGetString(MR.strings.popopx_link_mode_full)
+        PopopxLinkMode.BROWSER -> it to generalGetString(MR.strings.popopx_link_mode_browser)
       }
     }
   }
   ExposedDropDownSettingRow(
-    generalGetString(MR.strings.simplex_link_mode),
+    generalGetString(MR.strings.popopx_link_mode),
     values,
-    simplexLinkModeState,
+    popopxLinkModeState,
     icon = null,
     enabled = remember { mutableStateOf(true) },
     onSelected = onSelected
@@ -487,7 +487,7 @@ private fun showUserGroupsReceiptsAlert(
 private val laDelays = listOf(10, 30, 60, 180, 600, 0)
 
 @Composable
-fun SimplexLockView(
+fun PopopxLockView(
   chatModel: ChatModel,
   currentLAMode: SharedPreference<LAMode>,
   setPerformLA: (Boolean) -> Unit
@@ -531,7 +531,7 @@ fun SimplexLockView(
         LAResult.Success -> {
           when (toLAMode) {
             LAMode.SYSTEM -> {
-              authenticate(generalGetString(MR.strings.auth_enable_simplex_lock), promptSubtitle = "", usingLAMode = toLAMode, oneTime = true) { laResult ->
+              authenticate(generalGetString(MR.strings.auth_enable_popopx_lock), promptSubtitle = "", usingLAMode = toLAMode, oneTime = true) { laResult ->
                 when (laResult) {
                   LAResult.Success -> {
                     currentLAMode.set(toLAMode)
@@ -853,7 +853,7 @@ private fun selfDestructPasscodeAlert(title: String) {
 }
 
 fun laTurnedOnAlert() = AlertManager.shared.showAlertMsg(
-  generalGetString(MR.strings.auth_simplex_lock_turned_on),
+  generalGetString(MR.strings.auth_popopx_lock_turned_on),
   generalGetString(MR.strings.auth_you_will_be_required_to_authenticate_when_you_start_or_resume)
 )
 

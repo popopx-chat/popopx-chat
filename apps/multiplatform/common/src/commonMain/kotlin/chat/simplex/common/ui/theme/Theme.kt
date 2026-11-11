@@ -345,7 +345,7 @@ data class ThemeOverrides (
     val baseColors = when (base) {
       DefaultTheme.LIGHT -> LightColorPalette
       DefaultTheme.DARK -> DarkColorPalette
-      DefaultTheme.SIMPLEX -> SimplexColorPalette
+      DefaultTheme.SIMPLEX -> PopopxColorPalette
       DefaultTheme.BLACK -> BlackColorPalette
     }
     return baseColors.copy(
@@ -362,7 +362,7 @@ data class ThemeOverrides (
     val baseColors = when (base) {
       DefaultTheme.LIGHT -> LightColorPaletteApp
       DefaultTheme.DARK -> DarkColorPaletteApp
-      DefaultTheme.SIMPLEX -> SimplexColorPaletteApp
+      DefaultTheme.SIMPLEX -> PopopxColorPaletteApp
       DefaultTheme.BLACK -> BlackColorPaletteApp
     }
 
@@ -528,13 +528,13 @@ data class ThemeModeOverride (
     val c = when (base) {
       DefaultTheme.LIGHT -> LightColorPalette
       DefaultTheme.DARK -> DarkColorPalette
-      DefaultTheme.SIMPLEX -> SimplexColorPalette
+      DefaultTheme.SIMPLEX -> PopopxColorPalette
       DefaultTheme.BLACK -> BlackColorPalette
     }
     val ac = when (base) {
       DefaultTheme.LIGHT -> LightColorPaletteApp
       DefaultTheme.DARK -> DarkColorPaletteApp
-      DefaultTheme.SIMPLEX -> SimplexColorPaletteApp
+      DefaultTheme.SIMPLEX -> PopopxColorPaletteApp
       DefaultTheme.BLACK -> BlackColorPaletteApp
     }
     val w = when (val wallpaperType = WallpaperType.from(wallpaper)) {
@@ -668,8 +668,8 @@ val DEFAULT_END_MODAL_WIDTH = 388.dp
 val DEFAULT_MAX_IMAGE_WIDTH = 500.dp
 
 val DarkColorPalette = darkColors(
-  primary = SimplexBlue,  // If this value changes also need to update #0088ff in string resource files
-  primaryVariant = SimplexBlue,
+  primary = PopopxBlue,  // If this value changes also need to update #0088ff in string resource files
+  primaryVariant = PopopxBlue,
   secondary = HighOrLowlight,
   secondaryVariant = DarkGray,
 //  background = Color.Black,
@@ -681,7 +681,7 @@ val DarkColorPalette = darkColors(
 //  onError: Color = Color.Black,
 )
 val DarkColorPaletteApp = AppColors(
-  title = SimplexBlue,
+  title = PopopxBlue,
   primaryVariant2 = Color(0xFF18262E),
   sentMessage = Color(0xFF18262E),
   sentQuote = Color(0xFF1D3847),
@@ -690,8 +690,8 @@ val DarkColorPaletteApp = AppColors(
 )
 
 val LightColorPalette = lightColors(
-  primary = SimplexBlue,  // If this value changes also need to update #0088ff in string resource files
-  primaryVariant = SimplexBlue,
+  primary = PopopxBlue,  // If this value changes also need to update #0088ff in string resource files
+  primaryVariant = PopopxBlue,
   secondary = HighOrLowlight,
   secondaryVariant = LightGray,
   error = Color.Red,
@@ -703,7 +703,7 @@ val LightColorPalette = lightColors(
 //  onSurface = Color.Black,
 )
 val LightColorPaletteApp = AppColors(
-  title = SimplexBlue,
+  title = PopopxBlue,
   primaryVariant2 = Color(0xFFE9F7FF),
   sentMessage = Color(0xFFE9F7FF),
   sentQuote = Color(0xFFD6F0FF),
@@ -711,7 +711,7 @@ val LightColorPaletteApp = AppColors(
   receivedQuote = Color(0xffececee),
 )
 
-val SimplexColorPalette = darkColors(
+val PopopxColorPalette = darkColors(
   primary = Color(0xFF70F0F9),  // If this value changes also need to update #0088ff in string resource files
   primaryVariant = Color(0xFF1298A5),
   secondary = HighOrLowlight,
@@ -725,7 +725,7 @@ val SimplexColorPalette = darkColors(
 //  onSurface = Color(0xFFFFFBFA),
   //  onError: Color = Color.Black,
 )
-val SimplexColorPaletteApp = AppColors(
+val PopopxColorPaletteApp = AppColors(
   title = Color(0xFF267BE5),
   primaryVariant2 = Color(0xFF172941),
   sentMessage = Color(0xFF172941),
@@ -804,9 +804,9 @@ fun reactOnDarkThemeChanges(isDark: Boolean) {
   }
 }
 
-// Spec: spec/services/theme.md#SimpleXTheme
+// Spec: spec/services/theme.md#POPOPXTheme
 @Composable
-fun SimpleXTheme(darkTheme: Boolean? = null, content: @Composable () -> Unit) {
+fun POPOPXTheme(darkTheme: Boolean? = null, content: @Composable () -> Unit) {
 // TODO: Fix preview working with dark/light theme
 
 //  LaunchedEffect(darkTheme) {
@@ -858,7 +858,7 @@ fun SimpleXTheme(darkTheme: Boolean? = null, content: @Composable () -> Unit) {
 }
 
 @Composable
-fun SimpleXThemeOverride(theme: ThemeManager.ActiveTheme, content: @Composable () -> Unit) {
+fun POPOPXThemeOverride(theme: ThemeManager.ActiveTheme, content: @Composable () -> Unit) {
   MaterialTheme(
     colors = theme.colors,
     typography = Typography,

@@ -275,7 +275,7 @@ private fun UseServerSection(
 @Composable
 fun ShowTestStatus(server: UserServer, modifier: Modifier = Modifier) =
   when (server.tested) {
-    true -> Icon(painterResource(MR.images.ic_check), null, modifier, tint = SimplexGreen)
+    true -> Icon(painterResource(MR.images.ic_check), null, modifier, tint = PopopxGreen)
     false -> Icon(painterResource(MR.images.ic_close), null, modifier, tint = MaterialTheme.colors.error)
     else -> Icon(painterResource(MR.images.ic_check), null, modifier, tint = Color.Transparent)
   }

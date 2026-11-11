@@ -40,7 +40,7 @@ fun ChatListNavLinkView(chat: Chat, nextChatSelected: State<Boolean>) {
     chat.chatStats.unreadCount > 0 || chat.chatStats.unreadChat
   }
   val disabled = chatModel.chatRunning.value == false || chatModel.deletedChats.value.contains(chat.remoteHostId to chat.chatInfo.id)
-  val linkMode by remember { chatModel.controller.appPrefs.simplexLinkMode.state }
+  val linkMode by remember { chatModel.controller.appPrefs.popopxLinkMode.state }
   LaunchedEffect(chat.id) {
     showMenu.value = false
     delay(500L)
@@ -1037,7 +1037,7 @@ expect fun ChatListNavLinkLayout(
 )*/
 @Composable
 fun PreviewChatListNavLinkDirect() {
-  SimpleXTheme {
+  POPOPXTheme {
     ChatListNavLinkLayout(
       chatLinkPreview = {
         ChatPreviewView(
@@ -1059,7 +1059,7 @@ fun PreviewChatListNavLinkDirect() {
           null,
           null,
           disabled = false,
-          linkMode = SimplexLinkMode.DESCRIPTION,
+          linkMode = PopopxLinkMode.DESCRIPTION,
           inProgress = false,
           progressByTimeout = false,
           {}
@@ -1082,7 +1082,7 @@ fun PreviewChatListNavLinkDirect() {
 )*/
 @Composable
 fun PreviewChatListNavLinkGroup() {
-  SimpleXTheme {
+  POPOPXTheme {
     ChatListNavLinkLayout(
       chatLinkPreview = {
         ChatPreviewView(
@@ -1104,7 +1104,7 @@ fun PreviewChatListNavLinkGroup() {
           null,
           null,
           disabled = false,
-          linkMode = SimplexLinkMode.DESCRIPTION,
+          linkMode = PopopxLinkMode.DESCRIPTION,
           inProgress = false,
           progressByTimeout = false,
           {}
@@ -1127,7 +1127,7 @@ fun PreviewChatListNavLinkGroup() {
 )*/
 @Composable
 fun PreviewChatListNavLinkContactRequest() {
-  SimpleXTheme {
+  POPOPXTheme {
     ChatListNavLinkLayout(
       chatLinkPreview = {
         ContactRequestView(ChatInfo.ContactRequest(UserContactRequest.sampleData.run { UserContactRequest(contactRequestId, cReqChatVRange, localDisplayName, profile, createdAt = previewDate, updatedAt = previewDate) }))

@@ -22,7 +22,7 @@ import kotlin.concurrent.thread
 internal const val APP_LINK_MIME_TYPE = "x-scheme-handler/$appLinkScheme"
 internal const val CONNECTION_LINK_MIME_TYPE = "x-scheme-handler/$connectionLinkScheme"
 private const val WINDOWS_CLASSES_KEY = "Software\\Classes"
-private const val WINDOWS_PROG_ID_PREFIX = "SimpleX."
+private const val WINDOWS_PROG_ID_PREFIX = "POPOPX."
 private const val WINDOWS_CAPABILITIES_KEY = "Software\\com.popopxchat.popopx\\Capabilities"
 private const val WINDOWS_REGISTERED_APPLICATIONS_KEY = "Software\\RegisteredApplications"
 private const val APP_DESCRIPTION = "Private and secure open-source messenger - no user IDs (not even random numbers)"
@@ -40,10 +40,10 @@ internal const val APPIMAGE_ENTRY_NAME = "com.popopxchat.popopx-links.desktop"
 private const val APPLICATIONS_DIR = "applications"
 // the XDG Base Directory default when XDG_DATA_DIRS is unset
 private const val DEFAULT_XDG_DATA_DIRS = "/usr/local/share:/usr/share"
-private const val APP_DISPLAY_NAME = "SimpleX Chat"
+private const val APP_DISPLAY_NAME = "POPOPX Chat"
 private const val XDG_MIME = "xdg-mime"
 // jpackage names the deb's desktop entry <package>-<app>.desktop
-private const val DEB_ENTRY_NAME = "simplex-simplex.desktop"
+private const val DEB_ENTRY_NAME = "popopx-popopx.desktop"
 private const val PROCESS_TIMEOUT_SECONDS = 5L
 private const val ROOT_USER = "root"
 // the characters the desktop entry spec requires an Exec argument to quote
@@ -58,14 +58,14 @@ internal sealed interface DesktopInstallation {
   data object Unpackaged : DesktopInstallation
 }
 
-// Only simplexchat: decides how the badge page ends, so simplex: is registered without being checked here.
+// Only simplexchat: decides how the badge page ends, so popopx: is registered without being checked here.
 @Volatile
 private var registered = false
 
 actual fun appLinkSchemeRegistered(): Boolean = registered
 
 fun registerLinkSchemes() {
-  thread(name = "simplex-link-schemes", isDaemon = true) {
+  thread(name = "popopx-link-schemes", isDaemon = true) {
     registered = registerForThisInstallation()
   }
 }
@@ -138,7 +138,7 @@ internal fun windowsSchemeValues(scheme: String, appPath: String): List<Registry
   )
 }
 
-// The ProgId is what links resolve to once the user picks SimpleX in settings, so it is repaired even while
+// The ProgId is what links resolve to once the user picks POPOPX in settings, so it is repaired even while
 // another program holds the scheme key, but another installed copy's ProgId is kept like any other handler.
 internal fun windowsProgIdValues(scheme: String, appPath: String): List<RegistryValue> {
   val progIdKey = windowsProgIdKey(scheme)

@@ -184,12 +184,12 @@ fun ModalData.GroupChatInfoView(
       manageWebPage = {
           ModalManager.end.showCustomModal { close -> ChannelWebPageView(rhId, groupInfo, chatModel, close) }
       },
-      setSimplexName = {
+      setPopopxName = {
           ModalManager.end.showCustomModal { close ->
             val domain = groupInfo.groupProfile.publicGroup?.publicGroupAccess?.groupDomainClaim?.shortName
-            SetSimplexDomainView(
-              title = generalGetString(MR.strings.set_simplex_name),
-              footer = generalGetString(MR.strings.set_channel_simplex_name_footer),
+            SetPopopxDomainView(
+              title = generalGetString(MR.strings.set_popopx_name),
+              footer = generalGetString(MR.strings.set_channel_popopx_name_footer),
               placeholder = "#channelname.testing",
               simplexName = if (domain == null) "" else "#$domain",
               save = { domain ->
@@ -538,7 +538,7 @@ fun ModalData.GroupChatInfoLayout(
   leaveGroup: () -> Unit,
   manageGroupLink: () -> Unit,
   manageWebPage: () -> Unit,
-  setSimplexName: () -> Unit,
+  setPopopxName: () -> Unit,
   close: () -> Unit = { ModalManager.closeAllModalsEverywhere()},
   onSearchClicked: () -> Unit,
   deletingItems: State<Boolean>
@@ -674,11 +674,11 @@ fun ModalData.GroupChatInfoLayout(
         if (groupInfo.isOwner && groupLink != null) {
           SectionDividerSpaced()
           val channelDomain = groupInfo.groupProfile.publicGroup?.publicGroupAccess?.groupDomainClaim?.shortName
-          SectionView(title = if (channelDomain != null) generalGetString(MR.strings.channel_simplex_name) else null) {
+          SectionView(title = if (channelDomain != null) generalGetString(MR.strings.channel_popopx_name) else null) {
             SettingsActionItem(
               painterResource(MR.images.ic_tag),
-              channelDomain ?: generalGetString(MR.strings.get_simplex_name_beta),
-              setSimplexName,
+              channelDomain ?: generalGetString(MR.strings.get_popopx_name_beta),
+              setPopopxName,
               iconColor = MaterialTheme.colors.secondary
             )
           }
@@ -987,7 +987,7 @@ private fun GroupChatInfoHeader(cInfo: ChatInfo, groupInfo: GroupInfo) {
       modifier = Modifier.combinedClickable(onClick = copyDisplayName, onLongClick = copyDisplayName).onRightClick(copyDisplayName)
     )
     ChatInfoDescription(cInfo, displayName, copyNameToClipboard)
-    GroupSimplexNameView(groupInfo)
+    GroupPopopxNameView(groupInfo)
     val webPage = groupInfo.groupProfile.publicGroup?.publicGroupAccess?.groupWebPage
     if (webPage != null) {
       val uriHandler = LocalUriHandler.current
@@ -1277,10 +1277,10 @@ private fun ChannelWebPageButton(groupInfo: GroupInfo, onClick: () -> Unit) {
 private fun ChannelLinkQRCodeSection(groupLink: String) {
   val clipboard = LocalClipboardManager.current
   Box(Modifier.padding(vertical = DEFAULT_PADDING_HALF)) {
-    SimpleXLinkQRCode(connReq = groupLink)
+    POPOPXLinkQRCode(connReq = groupLink)
   }
   SectionItemView({
-    clipboard.shareText(simplexChatLink(groupLink))
+    clipboard.shareText(popopxChatLink(groupLink))
   }) {
     Icon(painterResource(MR.images.ic_share), null, tint = MaterialTheme.colors.primary)
     Spacer(Modifier.width(8.dp))
@@ -1447,7 +1447,7 @@ fun <T> toggleItemSelection(itemId: T, selectedItems: MutableState<Set<T>?>) {
 @Preview
 @Composable
 fun PreviewGroupChatInfoLayout() {
-  SimpleXTheme {
+  POPOPXTheme {
     ModalData().GroupChatInfoLayout(
       chat = Chat(
         remoteHostId = null,
@@ -1480,7 +1480,7 @@ fun PreviewGroupChatInfoLayout() {
       manageGroupLink = {},
       manageWebPage = {},
       onSearchClicked = {},
-      setSimplexName = {},
+      setPopopxName = {},
       deletingItems = remember { mutableStateOf(true) }
     )
   }

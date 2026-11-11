@@ -149,10 +149,10 @@ private fun GroupPreferencesLayout(
       applyPrefs(preferences.copy(files = RoleGroupPreference(enable = enable, role)))
     }
   }
-  @Composable fun SimplexLinksPreference() {
+  @Composable fun PopopxLinksPreference() {
     val allowSimplexLinks = remember(preferences) { mutableStateOf(preferences.simplexLinks.enable) }
-    val simplexLinksRole = remember(preferences) { mutableStateOf(preferences.simplexLinks.role) }
-    FeatureSection(GroupFeature.SimplexLinks, allowSimplexLinks, simplexLinksRole, groupInfo, preferences, onTTLUpdated) { enable, role ->
+    val popopxLinksRole = remember(preferences) { mutableStateOf(preferences.simplexLinks.role) }
+    FeatureSection(GroupFeature.SimplexLinks, allowSimplexLinks, popopxLinksRole, groupInfo, preferences, onTTLUpdated) { enable, role ->
       applyPrefs(preferences.copy(simplexLinks = RoleGroupPreference(enable = enable, role)))
     }
   }
@@ -212,7 +212,7 @@ private fun GroupPreferencesLayout(
       SectionDividerSpaced()
       FilesPreference()
       SectionDividerSpaced()
-      SimplexLinksPreference()
+      PopopxLinksPreference()
       SectionDividerSpaced()
       ReportsPreference()
       SectionDividerSpaced()
@@ -288,7 +288,7 @@ private fun FeatureSection(
   SectionView {
     val on = enableFeature.value == GroupFeatureEnabled.ON
     val icon = if (on) feature.iconFilled() else feature.icon
-    val iconTint = if (on) SimplexGreen else MaterialTheme.colors.secondary
+    val iconTint = if (on) PopopxGreen else MaterialTheme.colors.secondary
     val timedOn = feature == GroupFeature.TimedMessages && enableFeature.value == GroupFeatureEnabled.ON
     if (groupInfo.isOwner) {
       PreferenceToggleWithIcon(

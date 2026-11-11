@@ -1,8 +1,8 @@
 //
 //  NameBadge.swift
-//  SimpleX
+//  POPOPX
 //
-//  Copyright © 2026 SimpleX Chat. All rights reserved.
+//  Copyright © 2026 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -149,7 +149,7 @@ func showBadgeInfoAlert(_ name: String, _ badge: LocalBadge) {
         // a verified badge's type is signed and can't be faked, so the real (possibly unknown) type name is the title
         let title = badgeTypeName(badge.badge.badgeType)
         if case .investor = badge.badge.badgeType {
-            let message = String.localizedStringWithFormat(NSLocalizedString("%@ invested in SimpleX Chat crowdfunding.", comment: "badge alert"), name)
+            let message = String.localizedStringWithFormat(NSLocalizedString("%@ invested in POPOPX Chat crowdfunding.", comment: "badge alert"), name)
             showAlert(title, message: message) {
                 [ UIAlertAction(title: NSLocalizedString("Learn more", comment: "badge alert button"), style: .default) { _ in
                     if let url = URL(string: "https://simplex.chat/crowdfunding") {
@@ -162,13 +162,13 @@ func showBadgeInfoAlert(_ name: String, _ badge: LocalBadge) {
             // supporter, legend and unknown types use the supporter wording
             let supports =
                 if badge.status == .expired {
-                    String.localizedStringWithFormat(NSLocalizedString("%1$@ supported SimpleX Chat. The badge expired on %2$@.", comment: "badge alert"), name, badge.badge.badgeExpiry.formatted(date: .abbreviated, time: .omitted))
+                    String.localizedStringWithFormat(NSLocalizedString("%1$@ supported POPOPX Chat. The badge expired on %2$@.", comment: "badge alert"), name, badge.badge.badgeExpiry.formatted(date: .abbreviated, time: .omitted))
                 } else {
-                    String.localizedStringWithFormat(NSLocalizedString("%@ supports SimpleX Chat.", comment: "badge alert"), name)
+                    String.localizedStringWithFormat(NSLocalizedString("%@ supports POPOPX Chat.", comment: "badge alert"), name)
                 }
             if noShownBadge() {
                 showAlert(title, message: supports) {
-                    [ supportSimpleXAlertAction, okAlertAction ]
+                    [ supportPOPOPXAlertAction, okAlertAction ]
                 }
             } else {
                 showAlert(title, message: supports)

@@ -1,9 +1,9 @@
 //
 //  ChatAPI.swift
-//  SimpleX
+//  POPOPX
 //
 //  Created by Evgeny Poberezkin on 27/01/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/api.md | spec/architecture.md
 
@@ -103,8 +103,8 @@ func chatApiSendCmdSync<R: ChatAPIResult>(_ cmd: ChatCommand, bgTask: Bool = tru
     }
     let start = Date.now
     let resp: APIResult<R> = bgTask
-                ? withBGTask(bgDelay: bgDelay) { sendSimpleXCmd(cmd, ctrl, retryNum: retryNum) }
-                : sendSimpleXCmd(cmd, ctrl, retryNum: retryNum)
+                ? withBGTask(bgDelay: bgDelay) { sendPOPOPXCmd(cmd, ctrl, retryNum: retryNum) }
+                : sendPOPOPXCmd(cmd, ctrl, retryNum: retryNum)
     if log {
         logger.debug("chatSendCmd \(cmd.cmdType): \(resp.responseType)")
         if case let .invalid(_, json) = resp {
@@ -242,7 +242,7 @@ func apiResult<R: ChatAPIResult>(_ res: APIResult<R>) throws -> R {
 func chatRecvMsg(_ ctrl: chat_ctrl? = nil) async -> APIResult<ChatEvent>? {
     await withCheckedContinuation { cont in
         _  = withBGTask(bgDelay: msgDelay) { () -> APIResult<ChatEvent>? in
-            let evt: APIResult<ChatEvent>? = recvSimpleXMsg(ctrl)
+            let evt: APIResult<ChatEvent>? = recvPOPOPXMsg(ctrl)
             cont.resume(returning: evt)
             return evt
         }
@@ -1093,23 +1093,23 @@ private func apiConnectResponseAlert<R>(_ r: APIResult<R>) async {
                 NSLocalizedString("Unsupported connection link", comment: ""),
                 message: NSLocalizedString("This link requires a newer app version. Please upgrade the app or ask your contact to send a compatible link.", comment: "")
             )
-        case let .error(.simplexDomainNotReady(domain, err)):
+        case let .error(.popopxDomainNotReady(domain, err)):
             switch err {
             case .noValidLink:
                 showAlert(
                     NSLocalizedString("No valid link", comment: ""),
-                    message: String.localizedStringWithFormat(NSLocalizedString("The SimpleX name %@ is registered, but it has no valid link.", comment: ""), domain.fullDomainName)
+                    message: String.localizedStringWithFormat(NSLocalizedString("The POPOPX name %@ is registered, but it has no valid link.", comment: ""), domain.fullDomainName)
                 )
             case .unknownDomain:
                 showAlert(
                     NSLocalizedString("Unconfirmed name", comment: ""),
-                    message: String.localizedStringWithFormat(NSLocalizedString("The SimpleX name %@ is registered, but not added to profile. Please add it to your address or channel profile, if you are the owner.", comment: ""), domain.fullDomainName)
+                    message: String.localizedStringWithFormat(NSLocalizedString("The POPOPX name %@ is registered, but not added to profile. Please add it to your address or channel profile, if you are the owner.", comment: ""), domain.fullDomainName)
                 )
             }
         case .errorAgent(.NO_NAME_SERVERS):
             showAlert(
-                NSLocalizedString("SimpleX name error", comment: ""),
-                message: NSLocalizedString("None of your servers are set to resolve SimpleX names. Configure servers, or use a connection link.", comment: "")
+                NSLocalizedString("POPOPX name error", comment: ""),
+                message: NSLocalizedString("None of your servers are set to resolve POPOPX names. Configure servers, or use a connection link.", comment: "")
             )
         case .errorAgent(.SMP(_, .AUTH)):
             showAlert(
@@ -1153,16 +1153,16 @@ private func apiConnectResponseAlert<R>(_ r: APIResult<R>) async {
             case .NOT_FOUND:
                 showAlert(
                     NSLocalizedString("Name not found", comment: ""),
-                    message: NSLocalizedString("This SimpleX name is not registered. Please check the name.", comment: "")
+                    message: NSLocalizedString("This POPOPX name is not registered. Please check the name.", comment: "")
                 )
             case .NO_RESOLVER:
                 showAlert(
-                    NSLocalizedString("SimpleX name error", comment: ""),
+                    NSLocalizedString("POPOPX name error", comment: ""),
                     message: String.localizedStringWithFormat(NSLocalizedString("Server %@ does not support name resolution. Configure servers, or use a connection link.", comment: ""), serverAddress)
                 )
             case let .RESOLVER(resolverErr):
                 showAlert(
-                    NSLocalizedString("SimpleX name error", comment: ""),
+                    NSLocalizedString("POPOPX name error", comment: ""),
                     message: String.localizedStringWithFormat(NSLocalizedString("Resolver error: %@", comment: ""), resolverErr)
                 )
             }
@@ -1384,11 +1384,11 @@ func apiSetProfileAddress(on: Bool) async throws -> User? {
     }
 }
 
-func showSetSimplexNameError<R>(_ r: APIResult<R>, isChannel: Bool) async {
-    if case let .error(.simplexDomainNotReady(domain, .noValidLink)) = r.unexpected {
+func showSetPopopxNameError<R>(_ r: APIResult<R>, isChannel: Bool) async {
+    if case let .error(.popopxDomainNotReady(domain, .noValidLink)) = r.unexpected {
         let format = isChannel
-            ? NSLocalizedString("The SimpleX name #%@ is registered without channel link. Add channel link to the name via the registration page.", comment: "alert message")
-            : NSLocalizedString("The SimpleX name @%@ is registered without SimpleX address. Add your SimpleX address to the name via the registration page.", comment: "alert message")
+            ? NSLocalizedString("The POPOPX name #%@ is registered without channel link. Add channel link to the name via the registration page.", comment: "alert message")
+            : NSLocalizedString("The POPOPX name @%@ is registered without POPOPX address. Add your POPOPX address to the name via the registration page.", comment: "alert message")
         await MainActor.run {
             showAlert(NSLocalizedString("Error saving name", comment: "alert title"), message: String.localizedStringWithFormat(format, domain.fullDomainName))
         }
@@ -1404,7 +1404,7 @@ func apiSetUserDomain(_ simplexDomain: String?) async throws -> User {
     case let .result(.userProfileUpdated(user, _, _, _)): return user
     case let .result(.userProfileNoChange(user)): return user
     default:
-        await showSetSimplexNameError(r, isChannel: false)
+        await showSetPopopxNameError(r, isChannel: false)
         throw r.unexpected
     }
 }
@@ -2089,7 +2089,7 @@ func apiUpdateGroup(_ groupId: Int64, _ groupProfile: GroupProfile) async throws
 func apiSetPublicGroupAccess(_ groupId: Int64, access: PublicGroupAccess) async throws -> GroupInfo {
     let r: APIResult<ChatResponse2> = await chatApiSendCmd(.apiSetPublicGroupAccess(groupId: groupId, access: access))
     if case let .result(.groupUpdated(_, toGroup)) = r { return toGroup }
-    await showSetSimplexNameError(r, isChannel: true)
+    await showSetPopopxNameError(r, isChannel: true)
     throw r.unexpected
 }
 
@@ -2351,9 +2351,9 @@ func initializeChat(start: Bool, confirmStart: Bool = false, dbKey: String? = ni
         }
     }
     if m.currentUser == nil {
-        onboardingStageDefault.set(.step1_SimpleXInfo)
+        onboardingStageDefault.set(.step1_POPOPXInfo)
         privacyDeliveryReceiptsSet.set(true)
-        m.onboardingStage = .step1_SimpleXInfo
+        m.onboardingStage = .step1_POPOPXInfo
     } else if confirmStart {
         showStartChatAfterRestartAlert { start in
             do {
@@ -2417,7 +2417,7 @@ func startChat(refreshInvitations: Bool = true, onboarding: Bool = false) throws
         if !onboarding {
             withAnimation {
                 let savedOnboardingStage = onboardingStageDefault.get()
-                m.onboardingStage = [.step1_SimpleXInfo, .step2_CreateProfile].contains(savedOnboardingStage) && m.users.count == 1
+                m.onboardingStage = [.step1_POPOPXInfo, .step2_CreateProfile].contains(savedOnboardingStage) && m.users.count == 1
                 ? .step4_NetworkCommitments
                 : savedOnboardingStage
                 if m.onboardingStage == .onboardingComplete && !privacyDeliveryReceiptsSet.get() {

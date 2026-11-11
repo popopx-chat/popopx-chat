@@ -221,8 +221,8 @@ chatEventNotification t@ChatTerminal {sendNotification} cc = \case
 chatResponseNotification :: ChatTerminal -> Either ChatError ChatResponse -> IO ()
 chatResponseNotification ChatTerminal {sendNotification} = \case
   Right r -> case r of
-    CRUserContactLinkCreated {} -> sendNtf ("SimpleX", "contact link created")
-    CRUserProfileUpdated {} -> sendNtf ("SimpleX", "profile updated")
+    CRUserContactLinkCreated {} -> sendNtf ("POPOPX", "contact link created")
+    CRUserProfileUpdated {} -> sendNtf ("POPOPX", "profile updated")
     _ -> pure ()
   Left _ -> pure ()
   where

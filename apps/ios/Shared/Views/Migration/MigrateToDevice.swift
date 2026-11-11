@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by Avently on 23.02.2024.
-//  Copyright © 2024 SimpleX Chat. All rights reserved.
+//  Copyright © 2024 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/database.md
 
@@ -205,14 +205,14 @@ struct MigrateToDevice: View {
                         switch resp {
                         case let .success(r):
                             let link = r.string
-                            if strHasSimplexFileLink(link.trimmingCharacters(in: .whitespaces)) {
+                            if strHasPopopxFileLink(link.trimmingCharacters(in: .whitespaces)) {
                                 migrationState = .linkDownloading(link: link.trimmingCharacters(in: .whitespaces))
                             } else {
-                                alert = .error(title: "Invalid link", error: "The text you pasted is not a SimpleX link.")
+                                alert = .error(title: "Invalid link", error: "The text you pasted is not a POPOPX link.")
                             }
                         case let .failure(e):
                             logger.error("processQRCode QR code error: \(e.localizedDescription)")
-                            alert = .error(title: "Invalid link", error: "The text you pasted is not a SimpleX link.")
+                            alert = .error(title: "Invalid link", error: "The text you pasted is not a POPOPX link.")
                         }
                     }
                 }
@@ -232,10 +232,10 @@ struct MigrateToDevice: View {
     private func pasteLinkView() -> some View {
         Button {
             if let str = UIPasteboard.general.string {
-                if strHasSimplexFileLink(str.trimmingCharacters(in: .whitespaces)) {
+                if strHasPopopxFileLink(str.trimmingCharacters(in: .whitespaces)) {
                     migrationState = .linkDownloading(link: str.trimmingCharacters(in: .whitespaces))
                 } else {
-                    alert = .error(title: "Invalid link", error: "The text you pasted is not a SimpleX link.")
+                    alert = .error(title: "Invalid link", error: "The text you pasted is not a POPOPX link.")
                 }
             }
         } label: {
@@ -616,7 +616,7 @@ struct MigrateToDevice: View {
                 appSettings.importIntoApp()
             }
             do {
-                try SimpleX.startChat(refreshInvitations: true)
+                try POPOPX.startChat(refreshInvitations: true)
                 AlertManager.shared.showAlertMsg(title: "Chat migrated!", message: "Finalize migration on another device.")
             } catch let error {
                 AlertManager.shared.showAlert(Alert(title: Text("Error starting chat"), message: Text(responseError(error))))
@@ -640,7 +640,7 @@ struct MigrateToDevice: View {
         dismiss()
     }
 
-    private func strHasSimplexFileLink(_ text: String) -> Bool {
+    private func strHasPopopxFileLink(_ text: String) -> Bool {
         text.starts(with: "popopx:/file") || text.starts(with: "https://simplex.chat/file")
     }
 

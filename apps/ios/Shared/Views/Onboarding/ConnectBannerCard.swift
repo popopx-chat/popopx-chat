@@ -2,7 +2,7 @@
 //  ConnectBannerCard.swift
 //  POPOPX (iOS)
 //
-//  Copyright © 2026 SimpleX Chat. All rights reserved.
+//  Copyright © 2026 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI

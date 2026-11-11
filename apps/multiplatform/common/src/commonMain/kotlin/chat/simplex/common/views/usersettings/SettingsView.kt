@@ -73,10 +73,10 @@ fun SettingsView(chatModel: ChatModel, setPerformLA: (Boolean) -> Unit, close: (
   }
 }
 
-val simplexTeamUri =
+val popopxTeamUri =
   "popopx:/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw?h=smp6.simplex.im"
 
-val simplexNewsUri =
+val popopxNewsUri =
   "popopx:/c#grcfG3ulVI4Sh6ow33qBsmSk7uEy3gRSl2KkJ5ER6tA?h=smp18.simplex.im"
 
 @Composable
@@ -111,7 +111,7 @@ fun SettingsLayout(
     SectionDividerSpaced()
 
     val (badgeLabel, badgeBenefits) = when (currentShownBadge()?.badgeType) {
-      null -> MR.strings.badges_support_simplex_title to MR.strings.v7_1_supporter_badge_descr
+      null -> MR.strings.badges_support_popopx_title to MR.strings.v7_1_supporter_badge_descr
       is BadgeType.Legend -> MR.strings.badges_your_legend_badge to MR.strings.badges_legend_benefits
       is BadgeType.Supporter, is BadgeType.Investor, is BadgeType.Unknown -> MR.strings.badges_your_badge to MR.strings.badges_supporter_benefits
     }
@@ -165,16 +165,16 @@ fun HelpAndSupportView(
     AppBarTitle(stringResource(MR.strings.help_and_support))
 
     SectionView(stringResource(MR.strings.settings_section_title_help)) {
-      SettingsActionItem(painterResource(MR.images.ic_help), stringResource(MR.strings.how_to_use_simplex_chat), showModal { HelpView(userDisplayName) }, disabled = stopped)
+      SettingsActionItem(painterResource(MR.images.ic_help), stringResource(MR.strings.how_to_use_popopx_chat), showModal { HelpView(userDisplayName) }, disabled = stopped)
       SettingsActionItem(painterResource(MR.images.ic_add), stringResource(MR.strings.whats_new), showCustomModal { _, close -> WhatsNewView(viaSettings = true, close = close) }, disabled = stopped)
-      SettingsActionItem(painterResource(MR.images.ic_info), stringResource(MR.strings.about_simplex_chat), showModal { SimpleXInfo(it, onboarding = false) })
+      SettingsActionItem(painterResource(MR.images.ic_info), stringResource(MR.strings.about_popopx_chat), showModal { POPOPXInfo(it, onboarding = false) })
     }
     SectionDividerSpaced()
 
     SectionView(stringResource(MR.strings.settings_section_title_contact)) {
       if (!chatModel.desktopNoUserNoRemote) {
-        SettingsActionItem(painterResource(MR.images.ic_bigtop_updates), stringResource(MR.strings.follow_simplex_network_news), { uriHandler.openVerifiedSimplexUri(simplexNewsUri) }, textColor = MaterialTheme.colors.primary, disabled = stopped)
-        SettingsActionItem(painterResource(MR.images.ic_tag), stringResource(MR.strings.chat_with_the_founder), { uriHandler.openVerifiedSimplexUri(simplexTeamUri) }, textColor = MaterialTheme.colors.primary, disabled = stopped)
+        SettingsActionItem(painterResource(MR.images.ic_bigtop_updates), stringResource(MR.strings.follow_popopx_network_news), { uriHandler.openVerifiedPopopxUri(popopxNewsUri) }, textColor = MaterialTheme.colors.primary, disabled = stopped)
+        SettingsActionItem(painterResource(MR.images.ic_tag), stringResource(MR.strings.chat_with_the_founder), { uriHandler.openVerifiedPopopxUri(popopxTeamUri) }, textColor = MaterialTheme.colors.primary, disabled = stopped)
       }
       SettingsActionItem(painterResource(MR.images.ic_mail), stringResource(MR.strings.send_us_an_email), { uriHandler.openUriCatching("mailto:chat@simplex.chat") }, textColor = MaterialTheme.colors.primary)
     }
@@ -252,10 +252,10 @@ fun ChatLockItem(
   val performLA = remember { appPrefs.performLA.state }
   val currentLAMode = remember { ChatModel.controller.appPrefs.laMode }
   SettingsActionItemWithContent(
-    click = showSettingsModal { SimplexLockView(ChatModel, currentLAMode, setPerformLA) },
+    click = showSettingsModal { PopopxLockView(ChatModel, currentLAMode, setPerformLA) },
     icon = if (performLA.value) painterResource(MR.images.ic_lock_filled) else painterResource(MR.images.ic_lock),
     text = stringResource(MR.strings.chat_lock),
-    iconColor = if (performLA.value) SimplexGreen else MaterialTheme.colors.secondary
+    iconColor = if (performLA.value) PopopxGreen else MaterialTheme.colors.secondary
   ) {
     Text(if (performLA.value) remember { currentLAMode.state }.value.text else generalGetString(MR.strings.la_mode_off), color = MaterialTheme.colors.secondary)
   }
@@ -330,7 +330,7 @@ fun ChatLockItem(
       tint = MaterialTheme.colors.secondary,
     )
     TextIconSpaced()
-    Text(generalGetString(MR.strings.install_simplex_chat_for_terminal), color = MaterialTheme.colors.primary)
+    Text(generalGetString(MR.strings.install_popopx_chat_for_terminal), color = MaterialTheme.colors.primary)
   }
 }
 
@@ -535,7 +535,7 @@ private fun runAuth(title: String, desc: String, onFinish: (success: Boolean) ->
 )*/
 @Composable
 fun PreviewSettingsLayout() {
-  SimpleXTheme {
+  POPOPXTheme {
     SettingsLayout(
       stopped = false,
       encrypted = false,

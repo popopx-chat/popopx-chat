@@ -29,17 +29,17 @@ fun ShareListView(chatModel: ChatModel, stopped: Boolean) {
     val sharedContent = chatModel.sharedContent.value
     var isMediaOrFileAttachment = false
     var isVoice = false
-    var hasSimplexLink = false
+    var hasPopopxLink = false
     when (sharedContent) {
       is SharedContent.Text ->
-        hasSimplexLink = hasSimplexLink(sharedContent.text)
+        hasPopopxLink = hasPopopxLink(sharedContent.text)
       is SharedContent.Media -> {
         isMediaOrFileAttachment = true
-        hasSimplexLink = hasSimplexLink(sharedContent.text)
+        hasPopopxLink = hasPopopxLink(sharedContent.text)
       }
       is SharedContent.File -> {
         isMediaOrFileAttachment = true
-        hasSimplexLink = hasSimplexLink(sharedContent.text)
+        hasPopopxLink = hasPopopxLink(sharedContent.text)
       }
       is SharedContent.Forward -> {
         sharedContent.chatItems.forEach { ci ->
@@ -47,12 +47,12 @@ fun ShareListView(chatModel: ChatModel, stopped: Boolean) {
           if (mc != null) {
             isMediaOrFileAttachment = isMediaOrFileAttachment || mc.isMediaOrFileAttachment
             isVoice = isVoice || mc.isVoice
-            hasSimplexLink = hasSimplexLink || hasSimplexLink(mc.text)
+            hasPopopxLink = hasPopopxLink || hasPopopxLink(mc.text)
           }
         }
       }
       is SharedContent.ChatLink, is SharedContent.MyAddress -> {
-        hasSimplexLink = true
+        hasPopopxLink = true
       }
       null -> {}
     }
@@ -62,7 +62,7 @@ fun ShareListView(chatModel: ChatModel, stopped: Boolean) {
         search = searchInList,
         isMediaOrFileAttachment = isMediaOrFileAttachment,
         isVoice = isVoice,
-        hasSimplexLink = hasSimplexLink,
+        hasPopopxLink = hasPopopxLink,
       )
     } else {
       EmptyList()
@@ -78,7 +78,7 @@ fun ShareListView(chatModel: ChatModel, stopped: Boolean) {
   }
 }
 
-private fun hasSimplexLink(msg: String): Boolean {
+private fun hasPopopxLink(msg: String): Boolean {
   val parsedMsg = parseToMarkdown(msg) ?: return false
   return parsedMsg.any { ft -> ft.format is Format.SimplexLink }
 }
@@ -192,7 +192,7 @@ private fun ShareList(
   search: String,
   isMediaOrFileAttachment: Boolean,
   isVoice: Boolean,
-  hasSimplexLink: Boolean,
+  hasPopopxLink: Boolean,
 ) {
   val oneHandUI = remember { appPrefs.oneHandUI.state }
   val chats by remember(search) {
@@ -216,7 +216,7 @@ private fun ShareList(
         chatModel,
         isMediaOrFileAttachment = isMediaOrFileAttachment,
         isVoice = isVoice,
-        hasSimplexLink = hasSimplexLink,
+        hasPopopxLink = hasPopopxLink,
       )
     }
   }

@@ -81,7 +81,7 @@ private fun showFullProfileDescription(description: String) {
           toggleSecrets = true,
           style = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onBackground, lineHeight = 22.sp),
           uriHandler = LocalUriHandler.current,
-          linkMode = chatModel.simplexLinkMode.value,
+          linkMode = chatModel.popopxLinkMode.value,
           modifier = Modifier.padding(horizontal = DEFAULT_PADDING).padding(bottom = DEFAULT_PADDING),
           blockLayout = true,
         )
@@ -109,7 +109,7 @@ private fun typing(w: FontWeight = FontWeight.Light): AnnotatedString =
   AnnotatedString(".", SpanStyle(fontWeight = w))
 
 // Display text for a single formatted segment — must be coordinated with MarkdownText.
-fun segmentDisplayText(ft: FormattedText, mentions: Map<String, CIMention>?, linkMode: SimplexLinkMode): String =
+fun segmentDisplayText(ft: FormattedText, mentions: Map<String, CIMention>?, linkMode: PopopxLinkMode): String =
   when (ft.format) {
     is Format.Mention -> {
       val mention = mentions?.get(ft.format.memberName)
@@ -124,7 +124,7 @@ fun segmentDisplayText(ft: FormattedText, mentions: Map<String, CIMention>?, lin
     is Format.HyperLink -> ft.format.showText ?: ft.text
     is Format.SimplexLink -> {
       val t = ft.format.showText
-        ?: if (linkMode == SimplexLinkMode.DESCRIPTION) ft.format.linkType.description else null
+        ?: if (linkMode == PopopxLinkMode.DESCRIPTION) ft.format.linkType.description else null
       if (t != null) "$t ${ft.format.viaHosts}" else ft.text
     }
     is Format.Command -> ft.text
@@ -135,7 +135,7 @@ fun segmentDisplayText(ft: FormattedText, mentions: Map<String, CIMention>?, lin
 
 class ItemDisplay(val parts: List<Pair<String, String>>, val bases: List<Int>)
 
-fun itemDisplay(ci: ChatItem, linkMode: SimplexLinkMode): ItemDisplay? {
+fun itemDisplay(ci: ChatItem, linkMode: PopopxLinkMode): ItemDisplay? {
   val fts = ci.formattedText ?: return null
   val segment = { ft: FormattedText ->
     val display = segmentDisplayText(ft, ci.mentions, linkMode)
@@ -190,7 +190,7 @@ fun MarkdownText (
   uriHandler: UriHandler? = null,
   senderBold: Boolean = false,
   modifier: Modifier = Modifier,
-  linkMode: SimplexLinkMode,
+  linkMode: PopopxLinkMode,
   inlineContent: Pair<AnnotatedString.Builder.() -> Unit, Map<String, InlineTextContent>>? = null,
   onLinkLongClick: (link: String) -> Unit = {},
   showViaProxy: Boolean = false,
@@ -401,9 +401,9 @@ fun MarkdownText (
               hasLinks = true
               val ftStyle = Format.linkStyle
               val link =
-                if (linkMode == SimplexLinkMode.BROWSER && ft.format.showText == null && !ft.text.startsWith("[")) ft.text
+                if (linkMode == PopopxLinkMode.BROWSER && ft.format.showText == null && !ft.text.startsWith("[")) ft.text
                 else ft.format.simplexUri
-              val t = ft.format.showText ?: if (linkMode == SimplexLinkMode.DESCRIPTION) ft.format.linkType.description else null
+              val t = ft.format.showText ?: if (linkMode == PopopxLinkMode.DESCRIPTION) ft.format.linkType.description else null
               withAnnotation(tag = "SIMPLEX_URL", annotation = link) {
                 if (t == null) {
                   withStyle(ftStyle) { append(ft.text) }
@@ -492,13 +492,13 @@ fun MarkdownText (
             if (hasLinks && uriHandler != null) {
               withAnnotation("WEB_URL") { a -> openBrowserAlert(a.item, uriHandler) }
               withAnnotation("OTHER_URL") { a -> safeOpenUri(a.item, uriHandler) }
-              withAnnotation("SIMPLEX_URL") { a -> uriHandler.openVerifiedSimplexUri(a.item) }
+              withAnnotation("SIMPLEX_URL") { a -> uriHandler.openVerifiedPopopxUri(a.item) }
               withAnnotation("SIMPLEX_NAME") { a ->
                 val idx = a.item.toIntOrNull()
                 val nameText = idx?.let { formattedText.getOrNull(it) }?.text
                 // The name string is routed through the same connect path as a
                 // link; planAndConnect resolves it on the core (name target).
-                if (nameText != null) uriHandler.openVerifiedSimplexUri(nameText)
+                if (nameText != null) uriHandler.openVerifiedPopopxUri(nameText)
               }
             }
             if (hasSecrets) {

@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by JRoberts on 15.10.2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/client/chat-view.md
 
@@ -89,8 +89,8 @@ struct GroupLinkView: View {
                         }
                         .frame(height: 36)
                     }
-                    SimpleXCreatedLinkQRCode(link: groupLink.connLinkContact, short: $showShortLink)
-                        .id("simplex-qrcode-view-for-\(groupLink.connLinkContact.simplexChatUri(short: showShortLink))")
+                    POPOPXCreatedLinkQRCode(link: groupLink.connLinkContact, short: $showShortLink)
+                        .id("popopx-qrcode-view-for-\(groupLink.connLinkContact.popopxChatUri(short: showShortLink))")
                     if !isChannel && groupLink.shouldBeUpgraded {
                         Button {
                             upgradeAndShareLinkAlert()

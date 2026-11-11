@@ -32,7 +32,7 @@ import chat.simplex.common.views.onboarding.TextButtonBelowOnboardingButton
 import chat.simplex.res.*
 
 @Composable
-fun BadgesSupportSimplexView(modalManager: ModalManager, unwindToDepth: Int) {
+fun BadgesSupportPopopxView(modalManager: ModalManager, unwindToDepth: Int) {
   ColumnWithScrollBar(
     Modifier.background(MaterialTheme.colors.background).padding(horizontal = 25.dp).padding(top = 8.dp, bottom = 20.dp),
     verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -40,7 +40,7 @@ fun BadgesSupportSimplexView(modalManager: ModalManager, unwindToDepth: Int) {
     maxIntrinsicSize = true,
   ) {
     Text(
-      stringResource(MR.strings.badges_support_simplex_title),
+      stringResource(MR.strings.badges_support_popopx_title),
       style = MaterialTheme.typography.h1,
       fontWeight = FontWeight.Bold,
       color = MaterialTheme.colors.primary,
@@ -49,7 +49,7 @@ fun BadgesSupportSimplexView(modalManager: ModalManager, unwindToDepth: Int) {
     )
 
     Text(
-      stringResource(MR.strings.badges_support_simplex_body),
+      stringResource(MR.strings.badges_support_popopx_body),
       style = MaterialTheme.typography.body1,
       textAlign = TextAlign.Center,
       modifier = Modifier.fillMaxWidth()
@@ -114,7 +114,7 @@ private fun WhyBuiltButton(modalManager: ModalManager) {
   }) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
       Icon(painterResource(MR.images.ic_info), null, tint = MaterialTheme.colors.primary)
-      Text(stringResource(MR.strings.badges_why_simplex_is_built), color = MaterialTheme.colors.primary, fontWeight = FontWeight.Medium)
+      Text(stringResource(MR.strings.badges_why_popopx_is_built), color = MaterialTheme.colors.primary, fontWeight = FontWeight.Medium)
     }
   }
 }

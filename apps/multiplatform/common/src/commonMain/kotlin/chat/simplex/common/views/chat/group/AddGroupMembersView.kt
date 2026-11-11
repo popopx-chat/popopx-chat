@@ -381,7 +381,7 @@ fun showProhibitedToInviteIncognitoAlertDialog() {
 @Preview
 @Composable
 fun PreviewAddGroupMembersLayout() {
-  SimpleXTheme {
+  POPOPXTheme {
     AddGroupMembersLayout(
       groupInfo = GroupInfo.sampleData,
       creatingGroup = false,

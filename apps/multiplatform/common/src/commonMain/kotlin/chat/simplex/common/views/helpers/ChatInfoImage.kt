@@ -243,15 +243,15 @@ fun showBadgeInfoAlert(name: String, badge: LocalBadge, uriHandler: UriHandler) 
       // Supporter, Legend and unknown types use the supporter wording
       val supports =
         if (badge.status == BadgeStatus.Expired)
-          String.format(generalGetString(MR.strings.badge_supported_simplex), name, localDate(badge.badge.badgeExpiry))
+          String.format(generalGetString(MR.strings.badge_supported_popopx), name, localDate(badge.badge.badgeExpiry))
         else
-          String.format(generalGetString(MR.strings.badge_supports_simplex), name)
+          String.format(generalGetString(MR.strings.badge_supports_popopx), name)
       if (noShownBadge()) {
         AlertManager.shared.showAlertDialog(
           title = title,
           text = supports,
           confirmText = generalGetString(MR.strings.ok),
-          dismissText = generalGetString(MR.strings.badges_support_simplex_title),
+          dismissText = generalGetString(MR.strings.badges_support_popopx_title),
           onDismiss = { if (!appPlatform.isDesktop || !ModalManager.end.hasModalOpen(ModalViewId.BADGES)) openBadgesView() }
         )
       } else {
@@ -335,7 +335,7 @@ fun ProfileImageForActiveCall(
 @Preview
 @Composable
 fun PreviewChatInfoImage() {
-  SimpleXTheme {
+  POPOPXTheme {
     ChatInfoImage(
       chatInfo = ChatInfo.Direct.sampleData,
       size = 55.dp

@@ -20,7 +20,7 @@ import chat.simplex.res.*
 import kotlinx.coroutines.launch
 
 @Composable
-fun SimpleXCreatedLinkQRCode(
+fun POPOPXCreatedLinkQRCode(
   connLink: CreatedConnLink,
   short: Boolean,
   modifier: Modifier = Modifier,
@@ -30,7 +30,7 @@ fun SimpleXCreatedLinkQRCode(
   onShare: (() -> Unit)? = null,
 ) {
   QRCode(
-    connLink.simplexChatUri(short),
+    connLink.popopxChatUri(short),
     small = short && connLink.connShortLink != null,
     modifier,
     padding,
@@ -41,7 +41,7 @@ fun SimpleXCreatedLinkQRCode(
 }
 
 @Composable
-fun SimpleXLinkQRCode(
+fun POPOPXLinkQRCode(
   connReq: String,
   modifier: Modifier = Modifier,
   padding: PaddingValues = PaddingValues(horizontal = DEFAULT_PADDING * 2f, vertical = DEFAULT_PADDING_HALF),
@@ -50,7 +50,7 @@ fun SimpleXLinkQRCode(
   onShare: (() -> Unit)? = null,
 ) {
   QRCode(
-    simplexChatLink(connReq),
+    popopxChatLink(connReq),
     small = connReq.count() < 200,
     modifier,
     padding,
@@ -129,7 +129,7 @@ expect fun ImageBitmap.replaceColor(from: Int, to: Int): ImageBitmap
 @Preview
 @Composable
 fun PreviewQRCode() {
-  SimpleXTheme {
+  POPOPXTheme {
     QRCode(connReq = "https://smp6.simplex.im/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw", small = true)
   }
 }

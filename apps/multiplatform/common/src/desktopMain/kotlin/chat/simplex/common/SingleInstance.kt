@@ -24,7 +24,7 @@ import kotlin.concurrent.thread
 private var lockHandle: FileLock? = null
 private var watcher: WatchService? = null
 
-internal const val SHOW_FILE = "simplex.show"
+internal const val SHOW_FILE = "popopx.show"
 internal const val SHOW_TMP_SUFFIX = ".tmp"
 internal const val TAKEN_SHOW_FILE = "$SHOW_FILE.taken$SHOW_TMP_SUFFIX"
 // File times can lag the system clock by a clock tick, and by 2 s on FAT.
@@ -33,7 +33,7 @@ private const val SIGNAL_WAIT_MILLIS = 1000L
 private const val SIGNAL_POLL_MILLIS = 50L
 private const val SIGNAL_RETRY_MILLIS = 100L
 
-private val lockPath get() = dataDir.resolve("simplex.started").toPath()
+private val lockPath get() = dataDir.resolve("popopx.started").toPath()
 
 var singleInstanceLock = false
   private set
@@ -235,7 +235,7 @@ fun startShowFileWatcher() {
   }
   dir.register(ws, StandardWatchEventKinds.ENTRY_CREATE)
   watcher = ws
-  thread(name = "simplex-single-instance", isDaemon = true) {
+  thread(name = "popopx-single-instance", isDaemon = true) {
     watchShowSignals(ws, dir) { signal ->
       SwingUtilities.invokeLater {
         if (signal.link != null) openDesktopLink(signal.link) else showWindow()

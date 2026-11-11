@@ -38,7 +38,7 @@ import kotlin.system.exitProcess
 // https://robertohuertas.com/2019/06/29/android_foreground_services/
 // https://github.com/binwiederhier/ntfy-android/blob/main/app/src/main/java/io/heckel/ntfy/service/SubscriberService.kt
 
-class SimplexService: Service() {
+class PopopxService: Service() {
   private var wakeLock: PowerManager.WakeLock? = null
   private var isCheckingNewMessages = false
   private var notificationManager: NotificationManager? = null
@@ -63,7 +63,7 @@ class SimplexService: Service() {
 
   override fun onCreate() {
     super.onCreate()
-    Log.d(TAG, "Simplex service created")
+    Log.d(TAG, "Popopx service created")
     createNotificationIfNeeded()
     ServiceCompat.startForeground(this, SIMPLEX_SERVICE_ID, createNotificationIfNeeded(), foregroundServiceType())
     /**
@@ -77,7 +77,7 @@ class SimplexService: Service() {
     } else {
       isServiceStarting = false
       isServiceStarted = true
-      // In case of self-destruct is enabled the initialization process will not start in SimplexApp, Let's start it here
+      // In case of self-destruct is enabled the initialization process will not start in PopopxApp, Let's start it here
       if (DatabaseUtils.ksSelfDestructPassword.get() != null && chatModel.chatDbStatus.value == null) {
         initChatControllerOnStart()
       }
@@ -85,7 +85,7 @@ class SimplexService: Service() {
   }
 
   override fun onDestroy() {
-    Log.d(TAG, "Simplex service destroyed")
+    Log.d(TAG, "Popopx service destroyed")
     try {
       wakeLock?.let {
         while (it.isHeld) it.release() // release all, in case acquired more than once
@@ -100,7 +100,7 @@ class SimplexService: Service() {
     saveServiceState(this, ServiceState.STOPPED)
 
     // If notification service is enabled and battery optimization is disabled, restart the service
-    if (SimplexApp.context.allowToStartServiceAfterAppExit())
+    if (PopopxApp.context.allowToStartServiceAfterAppExit())
       sendBroadcast(Intent(this, AutoRestartReceiver::class.java))
     super.onDestroy()
   }
@@ -109,8 +109,8 @@ class SimplexService: Service() {
     val ntf = serviceNotification
     if (ntf != null) return ntf
 
-    val title = generalGetString(MR.strings.simplex_service_notification_title)
-    val text = generalGetString(MR.strings.simplex_service_notification_text)
+    val title = generalGetString(MR.strings.popopx_service_notification_title)
+    val text = generalGetString(MR.strings.popopx_service_notification_text)
     notificationManager = createNotificationChannel()
     val newNtf = createServiceNotification(title, text)
     serviceNotification = newNtf
@@ -126,7 +126,7 @@ class SimplexService: Service() {
   }
 
   private fun startService() {
-    Log.d(TAG, "SimplexService startService")
+    Log.d(TAG, "PopopxService startService")
     if (wakeLock != null || isCheckingNewMessages) return
     val self = this
     isCheckingNewMessages = true
@@ -137,9 +137,9 @@ class SimplexService: Service() {
         Log.w(TAG, "Starting foreground service")
         val chatDbStatus = chatController.chatModel.chatDbStatus.value
         if (chatDbStatus != DBMigrationResult.OK) {
-          Log.w(com.popopxchat.popopx.TAG, "SimplexService: problem with the database: $chatDbStatus")
+          Log.w(com.popopxchat.popopx.TAG, "PopopxService: problem with the database: $chatDbStatus")
           showPassphraseNotification(chatDbStatus)
-          androidAppContext.getWorkManagerInstance().cancelUniqueWork(SimplexService.SERVICE_START_WORKER_WORK_NAME_PERIODIC)
+          androidAppContext.getWorkManagerInstance().cancelUniqueWork(PopopxService.SERVICE_START_WORKER_WORK_NAME_PERIODIC)
           safeStopService()
           return@withLongRunningApi
         }
@@ -218,11 +218,11 @@ class SimplexService: Service() {
     }
 
     // If notification service isn't enabled or battery optimization isn't disabled, we shouldn't restart the service
-    if (!SimplexApp.context.allowToStartServiceAfterAppExit()) {
+    if (!PopopxApp.context.allowToStartServiceAfterAppExit()) {
       return
     }
 
-    val restartServiceIntent = Intent(applicationContext, SimplexService::class.java).also {
+    val restartServiceIntent = Intent(applicationContext, PopopxService::class.java).also {
       it.setPackage(packageName)
     };
     val restartServicePendingIntent: PendingIntent = PendingIntent.getService(this, 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE);
@@ -240,7 +240,7 @@ class SimplexService: Service() {
       fun toggleReceiver(enable: Boolean) {
         Log.d(TAG, "StartReceiver: toggleReceiver enabled: $enable")
         val component = ComponentName(BuildConfig.APPLICATION_ID, StartReceiver::class.java.name)
-        SimplexApp.context.packageManager.setComponentEnabledSetting(
+        PopopxApp.context.packageManager.setComponentEnabledSetting(
           component,
           if (enable) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
           PackageManager.DONT_KILL_APP
@@ -261,7 +261,7 @@ class SimplexService: Service() {
   class AppUpdateReceiver: BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
       // If notification service is enabled and battery optimization is disabled, restart the service on app update
-      if (SimplexApp.context.allowToStartServiceAfterAppExit()) {
+      if (PopopxApp.context.allowToStartServiceAfterAppExit()) {
         Log.d(TAG, "AppUpdateReceiver: onReceive called")
         scheduleStart(context)
       }
@@ -271,7 +271,7 @@ class SimplexService: Service() {
       fun toggleReceiver(enable: Boolean) {
         Log.d(TAG, "AppUpdateReceiver: toggleReceiver enabled: $enable")
         val component = ComponentName(BuildConfig.APPLICATION_ID, AppUpdateReceiver::class.java.name)
-        SimplexApp.context.packageManager.setComponentEnabledSetting(
+        PopopxApp.context.packageManager.setComponentEnabledSetting(
           component,
           if (enable) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
           PackageManager.DONT_KILL_APP
@@ -307,15 +307,15 @@ class SimplexService: Service() {
   companion object {
     const val TAG = "SIMPLEX_SERVICE"
     const val NOTIFICATION_CHANNEL_ID = "com.popopxchat.popopx.SIMPLEX_SERVICE_NOTIFICATION"
-    const val NOTIFICATION_CHANNEL_NAME = "SimpleX Chat service"
+    const val NOTIFICATION_CHANNEL_NAME = "POPOPX Chat service"
     const val SIMPLEX_SERVICE_ID = 6789
     const val SERVICE_START_WORKER_VERSION = BuildConfig.VERSION_CODE
     const val SERVICE_START_WORKER_INTERVAL_MINUTES = 3 * 60L
-    const val SERVICE_START_WORKER_WORK_NAME_PERIODIC = "SimplexAutoRestartWorkerPeriodic" // Do not change!
+    const val SERVICE_START_WORKER_WORK_NAME_PERIODIC = "PopopxAutoRestartWorkerPeriodic" // Do not change!
 
     private const val PASSPHRASE_NOTIFICATION_ID = 1535
 
-    private const val WAKE_LOCK_TAG = "SimplexService::lock"
+    private const val WAKE_LOCK_TAG = "PopopxService::lock"
     private const val SHARED_PREFS_ID = "com.popopxchat.popopx.SIMPLEX_SERVICE_PREFS"
     private const val SHARED_PREFS_SERVICE_STATE = "SIMPLEX_SERVICE_STATE"
     private const val WORK_NAME_ONCE = "ServiceStartWorkerOnce"
@@ -339,7 +339,7 @@ class SimplexService: Service() {
      * */
     fun safeStopService() {
       if (isServiceStarted) {
-        androidAppContext.stopService(Intent(androidAppContext, SimplexService::class.java))
+        androidAppContext.stopService(Intent(androidAppContext, PopopxService::class.java))
       } else if (isServiceStarting) {
         stopAfterStart = true
       }
@@ -347,12 +347,12 @@ class SimplexService: Service() {
 
     private suspend fun serviceAction(action: Action) {
       if (!NtfManager.areNotificationsEnabledInSystem()) {
-        Log.d(TAG, "SimplexService serviceAction: ${action.name}. Notifications are not enabled in OS yet, not starting service")
+        Log.d(TAG, "PopopxService serviceAction: ${action.name}. Notifications are not enabled in OS yet, not starting service")
         return
       }
-      Log.d(TAG, "SimplexService serviceAction: ${action.name}")
+      Log.d(TAG, "PopopxService serviceAction: ${action.name}")
       withContext(Dispatchers.IO) {
-        Intent(androidAppContext, SimplexService::class.java).also {
+        Intent(androidAppContext, PopopxService::class.java).also {
           it.action = action.name
           isServiceStarting = true
           ContextCompat.startForegroundService(androidAppContext, it)
@@ -361,7 +361,7 @@ class SimplexService: Service() {
     }
 
     fun restart(context: Context) {
-      Intent(context, SimplexService::class.java).also { intent ->
+      Intent(context, PopopxService::class.java).also { intent ->
         context.stopService(intent) // Service will auto-restart
       }
     }
@@ -379,8 +379,8 @@ class SimplexService: Service() {
     }
 
     fun showPassphraseNotification(chatDbStatus: DBMigrationResult?) {
-      val pendingIntent: PendingIntent = Intent(SimplexApp.context, MainActivity::class.java).let { notificationIntent ->
-        PendingIntent.getActivity(SimplexApp.context, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
+      val pendingIntent: PendingIntent = Intent(PopopxApp.context, MainActivity::class.java).let { notificationIntent ->
+        PendingIntent.getActivity(PopopxApp.context, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
       }
 
       val title = when(chatDbStatus) {
@@ -395,7 +395,7 @@ class SimplexService: Service() {
         else -> generalGetString(MR.strings.database_initialization_error_desc)
       }
 
-      val builder =  NotificationCompat.Builder(SimplexApp.context, NOTIFICATION_CHANNEL_ID)
+      val builder =  NotificationCompat.Builder(PopopxApp.context, NOTIFICATION_CHANNEL_ID)
         .setSmallIcon(R.drawable.ntf_service_icon)
         .setColor(0x88FFFF)
         .setContentTitle(title)
@@ -404,12 +404,12 @@ class SimplexService: Service() {
         .setSilent(true)
         .setShowWhen(false)
 
-      val notificationManager = SimplexApp.context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+      val notificationManager = PopopxApp.context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
       notificationManager.notify(PASSPHRASE_NOTIFICATION_ID, builder.build())
     }
 
     fun cancelPassphraseNotification() {
-      val notificationManager = SimplexApp.context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+      val notificationManager = PopopxApp.context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
       notificationManager.cancel(PASSPHRASE_NOTIFICATION_ID)
     }
 
@@ -462,8 +462,8 @@ class SimplexService: Service() {
         }
       } else {
         // service or periodic mode was chosen and battery optimization is disabled
-        SimplexApp.context.schedulePeriodicServiceRestartWorker()
-        SimplexApp.context.schedulePeriodicWakeUp()
+        PopopxApp.context.schedulePeriodicServiceRestartWorker()
+        PopopxApp.context.schedulePeriodicWakeUp()
       }
     }
 
@@ -486,7 +486,7 @@ class SimplexService: Service() {
         text = {
           Column {
             Text(
-              if (mode == NotificationsMode.SERVICE) annotatedStringResource(MR.strings.to_preserve_privacy_simplex_has_background_service_instead_of_push_notifications_it_uses_a_few_pc_battery) else annotatedStringResource(MR.strings.periodic_notifications_desc),
+              if (mode == NotificationsMode.SERVICE) annotatedStringResource(MR.strings.to_preserve_privacy_popopx_has_background_service_instead_of_push_notifications_it_uses_a_few_pc_battery) else annotatedStringResource(MR.strings.periodic_notifications_desc),
               Modifier.padding(bottom = 8.dp)
             )
             Text(
@@ -538,7 +538,7 @@ class SimplexService: Service() {
           text = {
             Column {
               Text(
-                if (mode == NotificationsMode.SERVICE) annotatedStringResource(MR.strings.to_preserve_privacy_simplex_has_background_service_instead_of_push_notifications_it_uses_a_few_pc_battery) else annotatedStringResource(MR.strings.periodic_notifications_desc),
+                if (mode == NotificationsMode.SERVICE) annotatedStringResource(MR.strings.to_preserve_privacy_popopx_has_background_service_instead_of_push_notifications_it_uses_a_few_pc_battery) else annotatedStringResource(MR.strings.periodic_notifications_desc),
                 Modifier.padding(bottom = 8.dp)
               )
               Text(annotatedStringResource(MR.strings.turn_off_battery_optimization))
@@ -726,7 +726,7 @@ class SimplexService: Service() {
       ChatController.appPrefs.notificationsMode.set(NotificationsMode.OFF)
       StartReceiver.toggleReceiver(false)
       AppUpdateReceiver.toggleReceiver(false)
-      androidAppContext.getWorkManagerInstance().cancelUniqueWork(SimplexService.SERVICE_START_WORKER_WORK_NAME_PERIODIC)
+      androidAppContext.getWorkManagerInstance().cancelUniqueWork(PopopxService.SERVICE_START_WORKER_WORK_NAME_PERIODIC)
       MessagesFetcherWorker.cancelAll()
       safeStopService()
     }

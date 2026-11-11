@@ -23,7 +23,7 @@ import chat.simplex.common.views.helpers.*
 import chat.simplex.res.*
 
 @Composable
-fun SupportSimpleXBanner(
+fun SupportPOPOPXBanner(
   title: String = generalGetString(MR.strings.badges_banner_title),
   subtitle: String = generalGetString(MR.strings.badges_banner_subtitle),
   warning: Boolean = false,

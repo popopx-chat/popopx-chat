@@ -18,7 +18,7 @@ object AppLock {
   /**
    * We don't want these values to be bound to Activity lifecycle since activities are changed often, for example, when a user
    * clicks on new message in notification. In this case savedInstanceState will be null (this prevents restoring the values)
-   * See [SimplexService.onTaskRemoved] for another part of the logic which nullifies the values when app closed by the user
+   * See [PopopxService.onTaskRemoved] for another part of the logic which nullifies the values when app closed by the user
    * */
   val userAuthorized = mutableStateOf<Boolean?>(null)
   val enteredBackground = mutableStateOf<Long?>(null)
@@ -36,8 +36,8 @@ object AppLock {
     if (!laNoticeShown.get() && !appPrefs.performLA.get()) {
       laNoticeShown.set(true)
       AlertManager.shared.showAlertDialog(
-        title = generalGetString(MR.strings.la_notice_title_simplex_lock),
-        text = generalGetString(MR.strings.la_notice_to_protect_your_information_turn_on_simplex_lock_you_will_be_prompted_to_complete_authentication_before_this_feature_is_enabled),
+        title = generalGetString(MR.strings.la_notice_title_popopx_lock),
+        text = generalGetString(MR.strings.la_notice_to_protect_your_information_turn_on_popopx_lock_you_will_be_prompted_to_complete_authentication_before_this_feature_is_enabled),
         confirmText = generalGetString(MR.strings.la_notice_turn_on),
         onConfirm = {
           laNoticeShown.set(true)
@@ -82,7 +82,7 @@ object AppLock {
     val appPrefs = ChatController.appPrefs
     appPrefs.laMode.set(LAMode.default)
     authenticate(
-      generalGetString(MR.strings.auth_enable_simplex_lock),
+      generalGetString(MR.strings.auth_enable_popopx_lock),
       generalGetString(MR.strings.auth_confirm_credential),
       oneTime = true,
       completed = { laResult ->
@@ -195,7 +195,7 @@ object AppLock {
     val m = ChatModel
     authenticate(
       if (m.controller.appPrefs.laMode.get() == LAMode.SYSTEM)
-        generalGetString(MR.strings.auth_enable_simplex_lock)
+        generalGetString(MR.strings.auth_enable_popopx_lock)
       else
         generalGetString(MR.strings.new_passcode),
       if (m.controller.appPrefs.laMode.get() == LAMode.SYSTEM)
@@ -231,13 +231,13 @@ object AppLock {
     val m = ChatModel
     authenticate(
       if (m.controller.appPrefs.laMode.get() == LAMode.SYSTEM)
-        generalGetString(MR.strings.auth_disable_simplex_lock)
+        generalGetString(MR.strings.auth_disable_popopx_lock)
       else
         generalGetString(MR.strings.la_enter_app_passcode),
       if (m.controller.appPrefs.laMode.get() == LAMode.SYSTEM)
         generalGetString(MR.strings.auth_confirm_credential)
       else
-        generalGetString(MR.strings.auth_disable_simplex_lock),
+        generalGetString(MR.strings.auth_disable_popopx_lock),
       oneTime = true,
       completed = { laResult ->
         val prefPerformLA = m.controller.appPrefs.performLA

@@ -1029,7 +1029,7 @@ private suspend fun saveServers(
 @Preview
 @Composable
 fun PreviewNetworkAndServersLayout() {
-  SimpleXTheme {
+  POPOPXTheme {
     NetworkAndServersLayout(
       currentRemoteHost = null,
       networkUseSocksProxy = remember { mutableStateOf(true) },

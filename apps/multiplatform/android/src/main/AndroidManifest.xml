@@ -38,7 +38,7 @@
   <!-- enableOnBackInvokedCallback="false": Activity.onBackPressed() overrides are not called on Android 16+ without it.
        UnusedAttribute is ignored because the attribute only exists on API 33+, older versions call onBackPressed() anyway -->
   <application
-      android:name="SimplexApp"
+      android:name="PopopxApp"
       android:allowBackup="false"
       android:fullBackupOnly="false"
       android:icon="@mipmap/icon"
@@ -47,7 +47,7 @@
       android:extractNativeLibs="${extract_native_libs}"
       android:supportsRtl="true"
       android:enableOnBackInvokedCallback="false"
-      android:theme="@style/Theme.SimpleX"
+      android:theme="@style/Theme.POPOPX"
       tools:ignore="UnusedAttribute">
     <!--      android:localeConfig="@xml/locales_config"-->
 
@@ -60,7 +60,7 @@
         android:label="${app_name}"
         android:windowSoftInputMode="adjustResize"
         android:configChanges="uiMode"
-        android:theme="@style/Theme.SimpleX">
+        android:theme="@style/Theme.POPOPX">
       <intent-filter>
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
@@ -187,16 +187,16 @@
         android:enabled="true"
         android:exported="false" />
 
-    <!-- SimplexService foreground service -->
+    <!-- PopopxService foreground service -->
     <service
-        android:name=".SimplexService"
+        android:name=".PopopxService"
         android:enabled="true"
         android:exported="false"
         android:stopWithTask="false"
         android:foregroundServiceType="remoteMessaging"
     />
 
-    <!-- SimplexService restart on reboot -->
+    <!-- PopopxService restart on reboot -->
 
     <service
         android:name=".CallService"
@@ -212,7 +212,7 @@
         android:exported="false" />
 
     <receiver
-        android:name=".SimplexService$StartReceiver"
+        android:name=".PopopxService$StartReceiver"
         android:enabled="true"
         android:exported="true">
       <intent-filter>
@@ -220,15 +220,15 @@
       </intent-filter>
     </receiver>
 
-    <!-- SimplexService restart on destruction -->
+    <!-- PopopxService restart on destruction -->
     <receiver
-        android:name=".SimplexService$AutoRestartReceiver"
+        android:name=".PopopxService$AutoRestartReceiver"
         android:enabled="true"
         android:exported="false" />
 
-    <!-- SimplexService restart on app update -->
+    <!-- PopopxService restart on app update -->
     <receiver
-        android:name=".SimplexService$AppUpdateReceiver"
+        android:name=".PopopxService$AppUpdateReceiver"
         android:enabled="true"
         android:exported="false">
       <intent-filter>

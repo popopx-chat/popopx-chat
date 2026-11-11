@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 23.02.2026.
-//  Copyright © 2026 SimpleX Chat. All rights reserved.
+//  Copyright © 2026 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/architecture.md
 
@@ -41,7 +41,7 @@ func showInvalidRelayNameAlert(_ name: Binding<String>) {
 }
 
 func validRelayAddress(_ address: String) -> Bool {
-    if let parsedMd = parseSimpleXMarkdown(address),
+    if let parsedMd = parsePOPOPXMarkdown(address),
        parsedMd.count == 1,
        case .simplexLink(_, .relay, _, _) = parsedMd.first?.format {
         true

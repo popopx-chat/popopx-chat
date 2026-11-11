@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by Avently on 05.06.2024.
-//  Copyright © 2024 SimpleX Chat. All rights reserved.
+//  Copyright © 2024 POPOPX Chat. All rights reserved.
 //
 
 import Foundation
@@ -15,8 +15,8 @@ import SwiftUI
 //let Teal200 = Color(0xFF03DAC5)
 //let Gray = Color(0x22222222)
 //let Indigo = Color(0xFF9966FF)
-let SimplexBlue = Color(0, 136, 255, a: 255)
-//let SimplexGreen = Color(77, 218, 103, a: 255)
+let PopopxBlue = Color(0, 136, 255, a: 255)
+//let PopopxGreen = Color(77, 218, 103, a: 255)
 //let SecretColor = Color(0x40808080)
 let LightGray = Color(241, 242, 246, a: 255)
 let DarkGray = Color(43, 44, 46, a: 255)

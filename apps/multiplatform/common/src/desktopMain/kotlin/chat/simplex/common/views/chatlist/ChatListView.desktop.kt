@@ -69,7 +69,7 @@ private fun ActiveCallInteractiveAreaOneHand(call: Call, showMenu: MutableState<
       color = MaterialTheme.colors.secondaryVariant.mixWith(MaterialTheme.colors.onBackground, 0.97f)
     )
     Box(
-      Modifier.offset(x = 1.dp, y = (-1).dp).background(SimplexGreen, CircleShape).padding(3.dp)
+      Modifier.offset(x = 1.dp, y = (-1).dp).background(PopopxGreen, CircleShape).padding(3.dp)
         .align(Alignment.TopEnd)
     ) {
       if (call.hasVideo) {
@@ -128,7 +128,7 @@ private fun ActiveCallInteractiveAreaNonOneHand(call: Call, showMenu: MutableSta
         ProfileImageForActiveCall(size = 56.dp, image = call.contact.profile.image)
       }
       Box(
-        Modifier.padding().background(SimplexGreen, CircleShape).padding(4.dp)
+        Modifier.padding().background(PopopxGreen, CircleShape).padding(4.dp)
           .align(Alignment.TopEnd)
       ) {
         if (call.hasVideo) {

@@ -165,7 +165,7 @@ fun RecordingInProgressSlider(recordedDurationMs: Int) {
 @Preview
 @Composable
 fun PreviewComposeAudioView() {
-  SimpleXTheme {
+  POPOPXTheme {
     ComposeFileView(
       "test.txt",
       cancelFile = {},

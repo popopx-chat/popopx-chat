@@ -175,7 +175,7 @@ fun CIGroupInvitationView(
 )*/
 @Composable
 fun PendingCIGroupInvitationViewPreview() = BubblePreview {
-  SimpleXTheme {
+  POPOPXTheme {
     CIGroupInvitationView(
       ci = previewDated(ChatItem.getGroupInvitationSample()),
       groupInvitation = CIGroupInvitation.getSample(),
@@ -193,7 +193,7 @@ fun PendingCIGroupInvitationViewPreview() = BubblePreview {
 )*/
 @Composable
 fun CIGroupInvitationViewAcceptedPreview() = BubblePreview {
-  SimpleXTheme {
+  POPOPXTheme {
     CIGroupInvitationView(
       ci = previewDated(ChatItem.getGroupInvitationSample()),
       groupInvitation = CIGroupInvitation.getSample(status = CIGroupInvitationStatus.Accepted),
@@ -208,7 +208,7 @@ fun CIGroupInvitationViewAcceptedPreview() = BubblePreview {
 @Preview
 @Composable
 fun CIGroupInvitationViewLongNamePreview() = BubblePreview {
-  SimpleXTheme {
+  POPOPXTheme {
     CIGroupInvitationView(
       ci = previewDated(ChatItem.getGroupInvitationSample()),
       groupInvitation = CIGroupInvitation.getSample(

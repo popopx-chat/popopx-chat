@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 12.04.2024.
-//  Copyright © 2024 SimpleX Chat. All rights reserved.
+//  Copyright © 2024 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -77,7 +77,7 @@ struct ChatItemForwardingView: View {
     @ViewBuilder private func forwardListChatView(_ chat: Chat) -> some View {
         let prohibited = isProhibited?(chat) ?? chatItems.map { ci in
             chat.prohibitedByPref(
-                hasSimplexLink: hasSimplexLink(ci.content.msgContent?.text),
+                hasPopopxLink: hasPopopxLink(ci.content.msgContent?.text),
                 isMediaOrFileAttachment: ci.content.msgContent?.isMediaOrFileAttachment ?? false,
                 isVoice: ci.content.msgContent?.isVoice ?? false
             )

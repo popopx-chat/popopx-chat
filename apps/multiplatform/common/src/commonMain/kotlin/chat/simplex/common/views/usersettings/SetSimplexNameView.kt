@@ -28,18 +28,18 @@ import kotlinx.coroutines.*
 import kotlinx.datetime.*
 
 // Each dot-separated label is ASCII letters/digits with single internal hyphens (mirrors popopxmq SimplexName.hs nameLabelP).
-private val simplexNameLabelRegex = Regex("[A-Za-z0-9]+(-[A-Za-z0-9]+)*")
+private val popopxNameLabelRegex = Regex("[A-Za-z0-9]+(-[A-Za-z0-9]+)*")
 
-private val simplexNameSaleStart = LocalDateTime(2026, 12, 12, 18, 0).toInstant(TimeZone.UTC)
+private val popopxNameSaleStart = LocalDateTime(2026, 12, 12, 18, 0).toInstant(TimeZone.UTC)
 private const val SIMPLEX_DOMAINS_URL = "https://simplex.domains/"
 
-// Set the user's own (prefix "@") or a channel's (prefix "#") SimpleX name.
+// Set the user's own (prefix "@") or a channel's (prefix "#") POPOPX name.
 // The field is prefilled with the full prefixed name; `save` receives the encoded name (or null to
 // clear) and returns true on success (it shows its own error alert otherwise).
 // `registerBackgroundClose` is set by the contact/start-panel call site so a desktop background click
 // routes through the save-on-close prompt; the channel call site (opened via ModalManager.end) leaves it false.
 @Composable
-fun SetSimplexDomainView(
+fun SetPopopxDomainView(
   title: String,
   footer: String,
   placeholder: String,
@@ -55,7 +55,7 @@ fun SetSimplexDomainView(
   val uriHandler = LocalUriHandler.current
   val clipboard = LocalClipboardManager.current
 
-  fun addSimplexTLD(s: String): String {
+  fun addPopopxTLD(s: String): String {
     return if (s.contains(".")) s else "$s.popopx"
   }
 
@@ -63,19 +63,19 @@ fun SetSimplexDomainView(
     val t = s.trim()
     return when {
       t.isEmpty() -> null
-      t.startsWith("@") || t.startsWith("#") -> addSimplexTLD(t.substring(1).lowercase())
-      else -> addSimplexTLD(t.lowercase())
+      t.startsWith("@") || t.startsWith("#") -> addPopopxTLD(t.substring(1).lowercase())
+      else -> addPopopxTLD(t.lowercase())
     }
   }
 
-  // An empty field is valid (it means "remove the name"). Otherwise check the SimpleX-name grammar on
+  // An empty field is valid (it means "remove the name"). Otherwise check the POPOPX-name grammar on
   // the normalized value; A-Z is accepted because the core lowercases the name on accept.
   fun isValidName(s: String): Boolean {
     val n = normalized(s) ?: return true
     if (n.length > 253) return false
     val labels = n.split(".")
     if (labels.size < 2) return false
-    return labels.all { it.length in 1..63 && simplexNameLabelRegex.matches(it) }
+    return labels.all { it.length in 1..63 && popopxNameLabelRegex.matches(it) }
   }
 
   val unchanged = normalized(name.value) == normalized(simplexName)
@@ -85,8 +85,8 @@ fun SetSimplexDomainView(
     withBGApi {
       saving.value = true
       val ok = try { save(normalized(name.value)) } catch (e: Exception) {
-        Log.e(TAG, "SetSimplexDomainView save: ${e.stackTraceToString()}")
-        AlertManager.shared.showAlertMsg(generalGetString(MR.strings.error_saving_simplex_name), e.message ?: "")
+        Log.e(TAG, "SetPopopxDomainView save: ${e.stackTraceToString()}")
+        AlertManager.shared.showAlertMsg(generalGetString(MR.strings.error_saving_popopx_name), e.message ?: "")
         false
       }
       saving.value = false
@@ -104,7 +104,7 @@ fun SetSimplexDomainView(
     val changed = normalized(name.value) != normalized(simplexName)
     return if (changed && valid) {
       AlertManager.shared.showAlertDialog(
-        title = generalGetString(MR.strings.save_simplex_name_question),
+        title = generalGetString(MR.strings.save_popopx_name_question),
         text = broadcastWarning,
         confirmText = generalGetString(MR.strings.save_verb),
         onConfirm = { doSave(close) },
@@ -192,19 +192,19 @@ fun SetSimplexDomainView(
         }
       }
       SectionDividerSpaced()
-      val msToSaleStart = remember { mutableStateOf(simplexNameSaleStart.toEpochMilliseconds() - System.currentTimeMillis()) }
+      val msToSaleStart = remember { mutableStateOf(popopxNameSaleStart.toEpochMilliseconds() - System.currentTimeMillis()) }
       LaunchedEffect(Unit) {
         while (msToSaleStart.value > 0) {
           delay(1000)
-          msToSaleStart.value = simplexNameSaleStart.toEpochMilliseconds() - System.currentTimeMillis()
+          msToSaleStart.value = popopxNameSaleStart.toEpochMilliseconds() - System.currentTimeMillis()
         }
       }
-      SectionView(stringResource(MR.strings.simplex_name_sales)) {
+      SectionView(stringResource(MR.strings.popopx_name_sales)) {
         SectionItemView {
           Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(saleCountdown(msToSaleStart.value))
             Text(
-              stringResource(if (msToSaleStart.value > 0) MR.strings.until_register_simplex_domain else MR.strings.update_app_register_simplex_domain),
+              stringResource(if (msToSaleStart.value > 0) MR.strings.until_register_popopx_domain else MR.strings.update_app_register_popopx_domain),
               color = MaterialTheme.colors.secondary,
               fontSize = 12.sp
             )
@@ -212,7 +212,7 @@ fun SetSimplexDomainView(
         }
       }
       SectionTextFooter(buildAnnotatedString {
-        append(generalGetString(MR.strings.simplex_name_sales_footer))
+        append(generalGetString(MR.strings.popopx_name_sales_footer))
         append(" ")
         withLink(LinkAnnotation.Url(SIMPLEX_DOMAINS_URL) { uriHandler.openUriCatching(SIMPLEX_DOMAINS_URL) }) {
           withStyle(SpanStyle(color = MaterialTheme.colors.primary)) {

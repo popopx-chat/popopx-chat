@@ -34,7 +34,7 @@ fun HelpLayout(userDisplayName: String) {
 )*/
 @Composable
 fun PreviewHelpView() {
-  SimpleXTheme {
+  POPOPXTheme {
     HelpLayout("Alice")
   }
 }

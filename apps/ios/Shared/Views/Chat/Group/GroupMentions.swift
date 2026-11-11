@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by Diogo Cunha on 30/01/2025.
-//  Copyright © 2025 SimpleX Chat. All rights reserved.
+//  Copyright © 2025 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI

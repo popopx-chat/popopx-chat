@@ -33,7 +33,7 @@ actual fun SavePassphraseSetting(
       Icon(
         if (storedKey) painterResource(MR.images.ic_vpn_key_filled) else painterResource(MR.images.ic_vpn_key_off_filled),
         stringResource(MR.strings.save_passphrase_in_keychain),
-        tint = if (storedKey) SimplexGreen else MaterialTheme.colors.secondary
+        tint = if (storedKey) PopopxGreen else MaterialTheme.colors.secondary
       )
       if (smallPadding) {
         Spacer(Modifier.padding(horizontal = 4.dp))

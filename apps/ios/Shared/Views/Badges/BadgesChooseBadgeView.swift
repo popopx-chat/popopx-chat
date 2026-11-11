@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 28.07.2026.
-//  Copyright © 2026 SimpleX Chat. All rights reserved.
+//  Copyright © 2026 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -100,7 +100,7 @@ struct BadgesChooseBadgeView: View {
                     VStack(spacing: 10) {
                         continueButton()
                             .padding(.vertical, 10)
-                        // redeeming a code is here only when Support SimpleX offers the browser instead
+                        // redeeming a code is here only when Support POPOPX offers the browser instead
                         Group {
                             if badgeBrowserAllowed {
                                 RedeemCodeButton()

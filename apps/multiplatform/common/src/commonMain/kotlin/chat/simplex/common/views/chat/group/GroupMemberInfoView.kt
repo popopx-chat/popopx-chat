@@ -575,9 +575,9 @@ fun GroupMemberInfoLayout(
 
     if (member.contactLink != null) {
       SectionView(stringResource(MR.strings.address_section_title)) {
-        SimpleXLinkQRCode(member.contactLink)
+        POPOPXLinkQRCode(member.contactLink)
         val clipboard = LocalClipboardManager.current
-        ShareAddressButton { clipboard.shareText(simplexChatLink(member.contactLink)) }
+        ShareAddressButton { clipboard.shareText(popopxChatLink(member.contactLink)) }
         if (contactId != null) {
           if (knownDirectChat(contactId) == null && !groupInfo.fullGroupPreferences.directMessages.on(groupInfo.membership)) {
             ConnectViaAddressButton(onClick = { connectViaAddress(member.contactLink) })
@@ -620,7 +620,7 @@ fun GroupMemberInfoLayout(
       if (relayAddress != null) {
         InfoRow(stringResource(MR.strings.info_row_relay_address), String.format(generalGetString(MR.strings.via_relay_hostname), hostFromRelayLink(relayAddress)))
         val clipboard = LocalClipboardManager.current
-        ShareRelayAddressButton { clipboard.shareText(simplexChatLink(relayAddress)) }
+        ShareRelayAddressButton { clipboard.shareText(popopxChatLink(relayAddress)) }
       }
       if (groupRelay?.relayStatus == RelayStatus.Rejected) {
         InfoRow(stringResource(MR.strings.member_info_status), stringResource(MR.strings.member_info_relay_status_rejected_by_operator))
@@ -658,11 +658,11 @@ fun GroupMemberInfoLayout(
         }
         val rcvServers = cStats.rcvQueuesInfo.map { it.rcvServer }
         if (rcvServers.isNotEmpty()) {
-          SimplexServers(stringResource(MR.strings.receiving_via), rcvServers)
+          PopopxServers(stringResource(MR.strings.receiving_via), rcvServers)
         }
         val sndServers = cStats.sndQueuesInfo.map { it.sndServer }
         if (sndServers.isNotEmpty()) {
-          SimplexServers(stringResource(MR.strings.sending_via), sndServers)
+          PopopxServers(stringResource(MR.strings.sending_via), sndServers)
         }
       }
     } else if (!connectionLoaded && memberConnected) {
@@ -676,8 +676,8 @@ fun GroupMemberInfoLayout(
           }
         }
         SwitchAddressButton(disabled = true, switchAddress = {})
-        SimplexServers(stringResource(MR.strings.receiving_via), emptyList())
-        SimplexServers(stringResource(MR.strings.sending_via), emptyList())
+        PopopxServers(stringResource(MR.strings.receiving_via), emptyList())
+        PopopxServers(stringResource(MR.strings.sending_via), emptyList())
       }
     }
 
@@ -1131,7 +1131,7 @@ fun blockMemberForAll(rhId: Long?, gInfo: GroupInfo, memberIds: List<Long>, bloc
 @Preview
 @Composable
 fun PreviewGroupMemberInfoLayout() {
-  SimpleXTheme {
+  POPOPXTheme {
     GroupMemberInfoLayout(
       rhId = null,
       groupInfo = GroupInfo.sampleData,

@@ -237,7 +237,7 @@ fun CallActivityView() {
         }
       }
   }
-  SimpleXTheme {
+  POPOPXTheme {
     var prevCall by remember { mutableStateOf(call) }
     KeyChangeEffect(m.activeCall.value, remember { appPrefs.appLanguage.state }.value) {
       if (m.activeCall.value != null) {
@@ -392,11 +392,11 @@ fun IncomingCallLockScreenAlertLayout(
         Spacer(Modifier.size(48.dp))
         LockScreenCallButton(stringResource(MR.strings.ignore), painterResource(R.drawable.ic_close), MaterialTheme.colors.primary, ignoreCall)
         Spacer(Modifier.size(48.dp))
-        LockScreenCallButton(stringResource(MR.strings.accept), painterResource(R.drawable.ic_check_filled), SimplexGreen, acceptCall)
+        LockScreenCallButton(stringResource(MR.strings.accept), painterResource(R.drawable.ic_check_filled), PopopxGreen, acceptCall)
       }
     } else if (callOnLockScreen == CallOnLockScreen.SHOW) {
-      SimpleXLogo()
-      Text(stringResource(MR.strings.open_simplex_chat_to_accept_call), textAlign = TextAlign.Center, lineHeight = 22.sp)
+      POPOPXLogo()
+      Text(stringResource(MR.strings.open_popopx_chat_to_accept_call), textAlign = TextAlign.Center, lineHeight = 22.sp)
       Text(stringResource(MR.strings.allow_accepting_calls_from_lock_screen), textAlign = TextAlign.Center, style = MaterialTheme.typography.body2, lineHeight = 22.sp)
       Spacer(Modifier.fillMaxHeight().weight(1f))
       SimpleButton(text = stringResource(MR.strings.open_verb), icon = painterResource(R.drawable.ic_check_filled), click = openApp)
@@ -405,10 +405,10 @@ fun IncomingCallLockScreenAlertLayout(
 }
 
 @Composable
-private fun SimpleXLogo() {
+private fun POPOPXLogo() {
   Image(
     painter = painterResource(if (isInDarkTheme()) R.drawable.logo_light else R.drawable.logo),
-    contentDescription = stringResource(MR.strings.image_descr_simplex_logo),
+    contentDescription = stringResource(MR.strings.image_descr_popopx_logo),
     modifier = Modifier
       .padding(vertical = DEFAULT_PADDING)
       .fillMaxWidth(0.80f)
@@ -443,7 +443,7 @@ private fun LockScreenCallButton(text: String, icon: Painter, color: Color, acti
 )*/
 @Composable
 fun PreviewIncomingCallLockScreenAlert() {
-  SimpleXTheme(true) {
+  POPOPXTheme(true) {
     Surface(
       Modifier
         .fillMaxSize(),
@@ -461,7 +461,7 @@ fun PreviewIncomingCallLockScreenAlert() {
           callTs = Clock.System.now()
         ),
         callOnLockScreen = null,
-        chatModel = SimplexApp.context.chatModel,
+        chatModel = PopopxApp.context.chatModel,
         rejectCall = {},
         ignoreCall = {},
         acceptCall = {},

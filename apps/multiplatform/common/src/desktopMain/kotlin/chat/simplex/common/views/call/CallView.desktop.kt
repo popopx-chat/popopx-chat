@@ -176,7 +176,7 @@ fun WebRTCController(callCommand: SnapshotStateList<WCallCommand>, onResponse: (
   val server = remember {
     startServer(onResponse, token = token).apply {
       try {
-        uriHandler.openUri("http://${SERVER_HOST}:${listeningPort}/simplex/call/?token=$token")
+        uriHandler.openUri("http://${SERVER_HOST}:${listeningPort}/popopx/call/?token=$token")
       } catch (e: Exception) {
         Log.e(TAG, "Unable to open browser: ${e.stackTraceToString()}")
         AlertManager.shared.showAlertMsg(
@@ -258,7 +258,7 @@ fun startServer(
           } else {
             unauthorizedResponse()
           }
-        session.uri.contains("/simplex/call/") ->
+        session.uri.contains("/popopx/call/") ->
           if (hasValidCallServerToken(session.parameters, token)) {
             resourcesToResponse("/desktop/call.html")
           } else {

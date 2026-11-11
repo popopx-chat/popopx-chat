@@ -167,9 +167,9 @@
         <target state="translated">**비공개**: 20분마다 새로운 메시지를 확인합니다. 푸시 서버에는 장치 토큰만 공유됩니다. 연락처 수나 메세지 메타데이터가 표시되지 않습니다.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="**Most private**: do not use SimpleX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app." xml:space="preserve" approved="no">
-        <source>**Most private**: do not use SimpleX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app.</source>
-        <target state="translated">**비공개**: SimpleX 채팅 푸시 서버를 사용하지 마세요. 앱은 사용 빈도에 따라 시스템이 허용하는 백그라운드에서 메세지를 확인합니다.</target>
+      <trans-unit id="**Most private**: do not use POPOPX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app." xml:space="preserve" approved="no">
+        <source>**Most private**: do not use POPOPX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app.</source>
+        <target state="translated">**비공개**: POPOPX 채팅 푸시 서버를 사용하지 마세요. 앱은 사용 빈도에 따라 시스템이 허용하는 백그라운드에서 메세지를 확인합니다.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="**Please note**: you will NOT be able to recover or change passphrase if you lose it." xml:space="preserve" approved="no">
@@ -177,9 +177,9 @@
         <target state="translated">**참고**: 비밀번호를 분실하면 복구하거나 변경할 수 없습니다.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="**Recommended**: device token and end-to-end encrypted notifications are sent to SimpleX Chat push server, but it does not see the message content, size or who it is from." xml:space="preserve" approved="no">
-        <source>**Recommended**: device token and end-to-end encrypted notifications are sent to SimpleX Chat push server, but it does not see the message content, size or who it is from.</source>
-        <target state="translated">**권장**: 디바이스 토큰과 종단 간 암호화 알림이 SimpleX 채팅 푸시 서버로 전송되지만 메세지 내용, 크기 또는 발신자가 표시되지 않습니다.</target>
+      <trans-unit id="**Recommended**: device token and end-to-end encrypted notifications are sent to POPOPX Chat push server, but it does not see the message content, size or who it is from." xml:space="preserve" approved="no">
+        <source>**Recommended**: device token and end-to-end encrypted notifications are sent to POPOPX Chat push server, but it does not see the message content, size or who it is from.</source>
+        <target state="translated">**권장**: 디바이스 토큰과 종단 간 암호화 알림이 POPOPX 채팅 푸시 서버로 전송되지만 메세지 내용, 크기 또는 발신자가 표시되지 않습니다.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="**Warning**: Instant push notifications require passphrase saved in Keychain." xml:space="preserve" approved="no">
@@ -254,9 +254,9 @@
 **참고**: 연결이 많으면 배터리와 트래픽 소비가 상당히 증가하고 일부 연결이 실패할 수 있습니다.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="About SimpleX Chat" xml:space="preserve" approved="no">
-        <source>About SimpleX Chat</source>
-        <target state="translated">SimpleX Chat에 대하여</target>
+      <trans-unit id="About POPOPX Chat" xml:space="preserve" approved="no">
+        <source>About POPOPX Chat</source>
+        <target state="translated">POPOPX Chat에 대하여</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Accept" xml:space="preserve" approved="no">
@@ -1135,11 +1135,11 @@
 - 공백이 있는 프로필 이름.
 - 그리고 더!</target>
       </trans-unit>
-      <trans-unit id="&lt;p&gt;Hi!&lt;/p&gt;&#10;&lt;p&gt;&lt;a href=&quot;%@&quot;&gt;Connect to me via SimpleX Chat&lt;/a&gt;&lt;/p&gt;" xml:space="preserve" approved="no">
+      <trans-unit id="&lt;p&gt;Hi!&lt;/p&gt;&#10;&lt;p&gt;&lt;a href=&quot;%@&quot;&gt;Connect to me via POPOPX Chat&lt;/a&gt;&lt;/p&gt;" xml:space="preserve" approved="no">
         <source>&lt;p&gt;Hi!&lt;/p&gt;
-&lt;p&gt;&lt;a href="%@"&gt;Connect to me via SimpleX Chat&lt;/a&gt;&lt;/p&gt;</source>
+&lt;p&gt;&lt;a href="%@"&gt;Connect to me via POPOPX Chat&lt;/a&gt;&lt;/p&gt;</source>
         <target state="translated">&lt;p&gt;안녕하세요!/p&gt;
-&lt;p&gt;&lt;a href="%@"&gt;SimpleX 채팅을 통해 저에게 연결하세요 &lt;/a&gt;&lt;/p&gt;</target>
+&lt;p&gt;&lt;a href="%@"&gt;POPOPX 채팅을 통해 저에게 연결하세요 &lt;/a&gt;&lt;/p&gt;</target>
       </trans-unit>
       <trans-unit id="A new random profile will be shared." xml:space="preserve" approved="no">
         <source>A new random profile will be shared.</source>
@@ -1345,9 +1345,9 @@
         <source>Copy error</source>
         <target state="translated">복사 오류</target>
       </trans-unit>
-      <trans-unit id="Create SimpleX address" xml:space="preserve" approved="no">
-        <source>Create SimpleX address</source>
-        <target state="translated">SimpleX 주소 생성</target>
+      <trans-unit id="Create POPOPX address" xml:space="preserve" approved="no">
+        <source>Create POPOPX address</source>
+        <target state="translated">POPOPX 주소 생성</target>
       </trans-unit>
       <trans-unit id="Creating link…" xml:space="preserve" approved="no">
         <source>Creating link…</source>
@@ -1579,8 +1579,8 @@ This is your own one-time link!</source>
         <source>All new messages from %@ will be hidden!</source>
         <target state="translated">%@로부터의 모든 새 메세지가 숨겨집니다!</target>
       </trans-unit>
-      <trans-unit id="SimpleX address settings" xml:space="preserve" approved="no">
-        <source>SimpleX address settings</source>
+      <trans-unit id="POPOPX address settings" xml:space="preserve" approved="no">
+        <source>POPOPX address settings</source>
         <target state="translated">자동-수락 설정</target>
       </trans-unit>
       <trans-unit id="Archive contacts to chat later." xml:space="preserve" approved="no">
@@ -1659,8 +1659,8 @@ This is your own one-time link!</source>
         <source>All your contacts will remain connected.</source>
         <target state="translated">당신의 모든 연락은 계속 연결되어 있습니다.</target>
       </trans-unit>
-      <trans-unit id="Allow to send SimpleX links." xml:space="preserve" approved="no">
-        <source>Allow to send SimpleX links.</source>
+      <trans-unit id="Allow to send POPOPX links." xml:space="preserve" approved="no">
+        <source>Allow to send POPOPX links.</source>
         <target state="translated">SinpleX 링크 전송 허용.</target>
       </trans-unit>
       <trans-unit id="Bad message ID" xml:space="preserve" approved="no">
@@ -1799,11 +1799,11 @@ This is your own one-time link!</source>
         <source>Confirm that you remember database passphrase to migrate it.</source>
         <target state="translated">이동하는데에 필요한 데이터베이스 비밀번호를 기억하는지 확인합니다.</target>
       </trans-unit>
-      <trans-unit id="Connect to yourself?&#10;This is your own SimpleX address!" xml:space="preserve" approved="no">
+      <trans-unit id="Connect to yourself?&#10;This is your own POPOPX address!" xml:space="preserve" approved="no">
         <source>Connect to yourself?
-This is your own SimpleX address!</source>
+This is your own POPOPX address!</source>
         <target state="translated">자신과 연결할까요?
-이것은 당신의 SimpleX 주소입니다!</target>
+이것은 당신의 POPOPX 주소입니다!</target>
       </trans-unit>
       <trans-unit id="Connect via contact address" xml:space="preserve" approved="no">
         <source>Connect via contact address</source>
@@ -2067,8 +2067,8 @@ This is your own SimpleX address!</source>
     </header>
     <body>
       <trans-unit id="NSPhotoLibraryAddUsageDescription" xml:space="preserve" approved="no">
-        <source>SimpleX needs access to Photo Library for saving captured and received media</source>
-        <target state="needs-translation">SimpleX는 캡처 및 수신 된 미디어를 저장하기 위해 사진 라이브러리에 접근이 필요합니다</target>
+        <source>POPOPX needs access to Photo Library for saving captured and received media</source>
+        <target state="needs-translation">POPOPX는 캡처 및 수신 된 미디어를 저장하기 위해 사진 라이브러리에 접근이 필요합니다</target>
         <note>Privacy - Photo Library Additions Usage Description</note>
       </trans-unit>
     </body>

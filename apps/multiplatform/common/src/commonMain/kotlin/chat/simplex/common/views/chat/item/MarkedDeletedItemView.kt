@@ -104,7 +104,7 @@ fun markedDeletedText(cItem: ChatItem, chatInfo: ChatInfo): String =
 )*/
 @Composable
 fun PreviewMarkedDeletedItemView() = BubblePreview {
-  SimpleXTheme {
+  POPOPXTheme {
     val ci = ChatItem.getSampleData(ts = previewDate, itemDeleted = CIDeleted.Deleted(previewDate))
     Box(Modifier.clipChatItem(ci)) {
       DeletedItemView(

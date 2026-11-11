@@ -220,7 +220,7 @@ private fun billingDate(period: BadgePeriod): String {
 @Preview
 @Composable
 fun PreviewPeriodCards() {
-  SimpleXTheme {
+  POPOPXTheme {
     Row(
       Modifier.fillMaxWidth().height(IntrinsicSize.Max).padding(25.dp),
       horizontalArrangement = Arrangement.spacedBy(12.dp)

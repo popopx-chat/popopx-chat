@@ -47,7 +47,7 @@ import kotlinx.coroutines.flow.*
 @Composable
 fun AppScreen() {
   AppBarHandler.appBarMaxHeightPx = with(LocalDensity.current) { AppBarHeight.roundToPx() }
-  SimpleXTheme {
+  POPOPXTheme {
     Surface(color = MaterialTheme.colors.background, contentColor = LocalContentColor.current) {
       // This padding applies to landscape view only taking care of navigation bar and holes in screen in status bar area
       // (because nav bar and holes located on vertical sides of screen in landscape view)
@@ -140,10 +140,10 @@ fun MainScreen() {
     val localUserCreated = chatModel.localUserCreated.value
     var showInitializationView by remember { mutableStateOf(false) }
     when {
-      onboarding == OnboardingStage.Step1_SimpleXInfo && chatModel.migrationState.value != null -> {
+      onboarding == OnboardingStage.Step1_POPOPXInfo && chatModel.migrationState.value != null -> {
         // In migration process. Nothing should interrupt it, that's why it's the first branch in when()
         if (appPlatform.isDesktop) DesktopOnboarding(onboarding, chatModel)
-        else SimpleXInfo(chatModel, onboarding = true)
+        else POPOPXInfo(chatModel, onboarding = true)
       }
       chatModel.dbMigrationInProgress.value -> DefaultProgressView(stringResource(MR.strings.database_migration_in_progress))
       chatModel.chatDbStatus.value == null && showInitializationView -> DefaultProgressView(stringResource(MR.strings.opening_database))
@@ -187,12 +187,12 @@ fun MainScreen() {
           ) { state ->
             when (state) {
               OnboardingStage.OnboardingComplete -> {}
-              OnboardingStage.Step1_SimpleXInfo -> SimpleXInfo(chatModel, onboarding = true)
+              OnboardingStage.Step1_POPOPXInfo -> POPOPXInfo(chatModel, onboarding = true)
               OnboardingStage.Step2_CreateProfile -> CreateFirstProfile(chatModel) {}
               OnboardingStage.LinkAMobile -> LinkAMobile()
               OnboardingStage.Step2_5_SetupDatabasePassphrase -> SetupDatabasePassphrase(chatModel)
               OnboardingStage.Step3_ChooseServerOperators,
-              OnboardingStage.Step3_CreateSimpleXAddress,
+              OnboardingStage.Step3_CreatePOPOPXAddress,
               OnboardingStage.Step4_SetNotificationsMode -> YourNetworkView(chatModel)
               OnboardingStage.Step4_NetworkCommitments -> OnboardingConditionsView(chatModel)
             }
@@ -279,11 +279,11 @@ private fun DesktopOnboarding(onboarding: OnboardingStage, chatModel: ChatModel)
   } else {
     DesktopOnboardingShell(onboarding) {
       when (onboarding) {
-        OnboardingStage.Step1_SimpleXInfo -> SimpleXInfo(chatModel, onboarding = true)
+        OnboardingStage.Step1_POPOPXInfo -> POPOPXInfo(chatModel, onboarding = true)
         OnboardingStage.Step2_CreateProfile -> CreateFirstProfile(chatModel) {}
         OnboardingStage.Step2_5_SetupDatabasePassphrase -> SetupDatabasePassphrase(chatModel)
         OnboardingStage.Step3_ChooseServerOperators,
-        OnboardingStage.Step3_CreateSimpleXAddress,
+        OnboardingStage.Step3_CreatePOPOPXAddress,
         OnboardingStage.Step4_SetNotificationsMode -> YourNetworkView(chatModel)
         OnboardingStage.Step4_NetworkCommitments -> OnboardingConditionsView(chatModel)
         else -> {}

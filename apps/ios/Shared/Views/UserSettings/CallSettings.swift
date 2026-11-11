@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by Evgeny on 27/05/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -63,7 +63,7 @@ struct CallSettings: View {
 
                 Section(header: Text("Limitations").foregroundColor(theme.colors.secondary)) {
                     VStack(alignment: .leading, spacing: 8) {
-                        textListItem("1.", "Do NOT use SimpleX for emergency calls.")
+                        textListItem("1.", "Do NOT use POPOPX for emergency calls.")
                         textListItem("2.", "Unless you use iOS call interface, enable Do Not Disturb mode to avoid interruptions.")
                     }
                     .font(.callout)

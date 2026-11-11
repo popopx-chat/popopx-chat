@@ -3,7 +3,7 @@
 //  POPOPXChat
 //
 //  Created by Levitating Pineapple on 15/07/2024.
-//  Copyright © 2024 SimpleX Chat. All rights reserved.
+//  Copyright © 2024 POPOPX Chat. All rights reserved.
 //
 
 import Foundation
@@ -36,17 +36,17 @@ extension ChatLike {
     }
 
     public func prohibitedByPref(
-        hasSimplexLink: Bool,
+        hasPopopxLink: Bool,
         isMediaOrFileAttachment: Bool,
         isVoice: Bool
     ) -> Bool {
         // preference checks should match checks in compose view
-        let simplexLinkProhibited = hasSimplexLink && !groupFeatureEnabled(.simplexLinks)
+        let popopxLinkProhibited = hasPopopxLink && !groupFeatureEnabled(.simplexLinks)
         let fileProhibited = isMediaOrFileAttachment && !groupFeatureEnabled(.files)
         let voiceProhibited = isVoice && !chatInfo.featureEnabled(.voice)
         return switch chatInfo {
         case .direct: voiceProhibited
-        case .group: simplexLinkProhibited || fileProhibited || voiceProhibited
+        case .group: popopxLinkProhibited || fileProhibited || voiceProhibited
         case .local: false
         case .contactRequest: false
         case .contactConnection: false
@@ -102,14 +102,14 @@ public func chatIcon(_ cInfo: ChatInfo) -> Image {
     }
 }
 
-public func hasSimplexLink(_ text: String?) -> Bool {
-    if let text, let parsedMsg = parseSimpleXMarkdown(text) {
-        parsedMsgHasSimplexLink(parsedMsg)
+public func hasPopopxLink(_ text: String?) -> Bool {
+    if let text, let parsedMsg = parsePOPOPXMarkdown(text) {
+        parsedMsgHasPopopxLink(parsedMsg)
     } else {
         false
     }
 }
 
-public func parsedMsgHasSimplexLink(_ parsedMsg: [FormattedText]) -> Bool {
+public func parsedMsgHasPopopxLink(_ parsedMsg: [FormattedText]) -> Bool {
     parsedMsg.contains(where: { ft in ft.format?.isSimplexLink ?? false })
 }

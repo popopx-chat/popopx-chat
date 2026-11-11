@@ -1,9 +1,9 @@
 //
 //  ChatView.swift
-//  SimpleX
+//  POPOPX
 //
 //  Created by Evgeny Poberezkin on 27/01/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/client/chat-view.md
 
@@ -1061,9 +1061,9 @@ struct ChatView: View {
 
                 switch chat.chatInfo {
                 case let .direct(contact):
-                    contactSimplexNameView(contact, verifiable: false)
+                    contactPopopxNameView(contact, verifiable: false)
                 case let .group(groupInfo, _):
-                    groupSimplexNameView(groupInfo, verifiable: false)
+                    groupPopopxNameView(groupInfo, verifiable: false)
                 default:
                     EmptyView()
                 }
@@ -1100,18 +1100,18 @@ struct ChatView: View {
             case let .direct(contact):
                 if !contact.nextConnectPrepared && !contact.nextAcceptContactRequest {
                     let connLink: String? = if let pct = contact.preparedContact, case .con = pct.uiConnLinkType {
-                        pct.connLinkToConnect.simplexChatUri()
+                        pct.connLinkToConnect.popopxChatUri()
                     } else {
                         contact.profile.contactLink
                     }
                     if let connLink {
-                        return ("SimpleX address", connLink)
+                        return ("POPOPX address", connLink)
                     }
                 }
             case let .group(groupInfo, _):
                 if !groupInfo.nextConnectPrepared {
                     if let pg = groupInfo.preparedGroup {
-                        let connLink = pg.connLinkToConnect.simplexChatUri()
+                        let connLink = pg.connLinkToConnect.popopxChatUri()
                         switch groupInfo.businessChat?.chatType {
                         case .none: return ("Group link", connLink)
                         case .business: return ("Business address", connLink)

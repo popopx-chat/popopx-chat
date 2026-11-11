@@ -663,7 +663,7 @@ fun RelayProgressIndicator(active: Int, total: Int) {
 @Preview
 @Composable
 fun PreviewAddChannelView() {
-  SimpleXTheme {
+  POPOPXTheme {
     AddChannelView(chatModel = ChatModel, rh = null, close = {}, closeAll = {})
   }
 }

@@ -82,7 +82,7 @@ fun RcvMsgErrorItemView(rcvMsgError: RcvMsgError, ci: ChatItem, showTimestamp: B
 )*/
 @Composable
 fun IntegrityErrorItemViewPreview() = BubblePreview {
-  SimpleXTheme {
+  POPOPXTheme {
     val ci = ChatItem.getDeletedContentSampleData(ts = previewDate)
     Box(Modifier.clipChatItem(ci)) {
       IntegrityErrorItemView(

@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 11.09.2026.
-//  Copyright © 2026 SimpleX Chat. All rights reserved.
+//  Copyright © 2026 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -99,11 +99,11 @@ struct BadgesYourBadgeView: View {
                             infoRow("Last attempt", badgeTimestamp(issueError.lastAttemptAt))
                         }
                         settingsRow("number", color: theme.colors.secondary) {
-                            Button("Contact SimpleX team") {
+                            Button("Contact POPOPX team") {
                                 dismiss()
                                 DispatchQueue.main.async {
-                                    // simplexTeamURL targets this same app; route to the in-app connect flow
-                                    ChatModel.shared.appOpenUrl = simplexTeamURL
+                                    // popopxTeamURL targets this same app; route to the in-app connect flow
+                                    ChatModel.shared.appOpenUrl = popopxTeamURL
                                 }
                             }
                         }

@@ -64,11 +64,11 @@ fun ReadableText(stringResId: StringResource, textAlign: TextAlign = TextAlign.S
 fun ReadableTextWithLink(stringResId: StringResource, link: String, textAlign: TextAlign = TextAlign.Start, padding: PaddingValues = PaddingValues(bottom = 12.dp), simplexLink: Boolean = false) {
   val annotated = annotatedStringResource(stringResId)
   val primary = MaterialTheme.colors.primary
-  // This replaces links in text highlighted with specific color, e.g. SimplexBlue
+  // This replaces links in text highlighted with specific color, e.g. PopopxBlue
   val newStyles = remember(stringResId) {
     val newStyles = ArrayList<AnnotatedString.Range<SpanStyle>>()
     annotated.spanStyles.forEach {
-      if (it.item.color == SimplexBlue) {
+      if (it.item.color == PopopxBlue) {
         newStyles.add(it.copy(item = it.item.copy(primary)))
       } else {
         newStyles.add(it)
@@ -77,7 +77,7 @@ fun ReadableTextWithLink(stringResId: StringResource, link: String, textAlign: T
     newStyles
   }
   val uriHandler = LocalUriHandler.current
-  Text(AnnotatedString(annotated.text, newStyles), modifier = Modifier.padding(padding).clickable { if (simplexLink) uriHandler.openVerifiedSimplexUri(link) else uriHandler.openExternalLink(link) }, textAlign = textAlign, lineHeight = 22.sp)
+  Text(AnnotatedString(annotated.text, newStyles), modifier = Modifier.padding(padding).clickable { if (simplexLink) uriHandler.openVerifiedPopopxUri(link) else uriHandler.openExternalLink(link) }, textAlign = textAlign, lineHeight = 22.sp)
 }
 
 @Composable
@@ -92,7 +92,7 @@ fun ReadableText(text: String, textAlign: TextAlign = TextAlign.Start, padding: 
 )*/
 @Composable
 fun PreviewHowItWorks() {
-  SimpleXTheme {
+  POPOPXTheme {
     HowItWorks(user = null)
   }
 }

@@ -216,7 +216,7 @@ fun ModalData.ChooseServerOperators(
           }
           Spacer(Modifier.height(DEFAULT_PADDING_HALF))
 
-          SectionTextFooter(annotatedStringResource(MR.strings.onboarding_network_operators_simplex_flux_agreement), textAlign = TextAlign.Center)
+          SectionTextFooter(annotatedStringResource(MR.strings.onboarding_network_operators_popopx_flux_agreement), textAlign = TextAlign.Center)
           SectionTextFooter(annotatedStringResource(MR.strings.onboarding_network_operators_configure_via_settings), textAlign = TextAlign.Center)
         }
         Spacer(Modifier.weight(1f))

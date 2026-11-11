@@ -1,0 +1,30 @@
+POPOPX Chat — notice file
+=========================
+
+This product includes software derived from the SimpleX Chat project
+(https://github.com/simplex-chat/simplex-chat), which is licensed under the GNU
+Affero General Public License version 3 (see LICENSE).
+
+Retained attribution, unchanged in this fork:
+
+  copyright:      2020-22 simplex.chat
+  author:         simplex.chat
+  maintainer:     chat@simplex.chat
+    -- from simplex-chat.cabal, kept verbatim
+
+  Copyright (C) 2026 SimpleX Chat Ltd. All rights reserved.
+    -- from assets/ASSETS_LICENSE.md and its two mirrors, kept verbatim
+
+This repository is a modified, non-official fork. It was imported at commit
+db0768c21 (2026-11-11) and has been changed since; the nature and scope of the
+modifications, including what was deliberately left unchanged, is described in
+FORK.md.
+
+The application graphics (illustrations, icons, visual designs and test-snapshot
+screenshots) are NOT part of the AGPL grant. They are proprietary and licensed
+only for distribution of the unmodified application, per assets/ASSETS_LICENSE.md,
+and are pending replacement in this fork.
+
+"SimpleX", "SimpleX Chat" and the associated logos are trademarks of SimpleX Chat
+Ltd. This fork uses the name POPOPX for that reason; no affiliation, sponsorship
+or endorsement is implied.

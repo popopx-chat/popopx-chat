@@ -1,9 +1,9 @@
 //
 //  ChatHelp.swift
-//  SimpleX
+//  POPOPX
 //
 //  Created by Evgeny Poberezkin on 10/02/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -19,16 +19,16 @@ struct ChatHelp: View {
 
     func chatHelp() -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Thank you for installing SimpleX Chat!")
+            Text("Thank you for installing POPOPX Chat!")
 
             VStack(alignment: .leading, spacing: 0) {
                 Text("To ask any questions and to receive updates:")
-                Button("connect to SimpleX Chat developers.") {
+                Button("connect to POPOPX Chat developers.") {
                     dismissSettingsSheet()
                     DispatchQueue.main.async {
-                        // simplexTeamURL targets this same app; route to the in-app connect flow
+                        // popopxTeamURL targets this same app; route to the in-app connect flow
                         // (UIApplication.shared.open is dropped for self-owned URLs in the foreground)
-                        ChatModel.shared.appOpenUrl = simplexTeamURL
+                        ChatModel.shared.appOpenUrl = popopxTeamURL
                     }
                 }
                 .padding(.top, 2)

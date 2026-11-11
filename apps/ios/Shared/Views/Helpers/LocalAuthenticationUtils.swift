@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by Efim Poberezkin on 26.05.2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -82,15 +82,15 @@ func systemAuthenticate(_ reason: String, _ completed: @escaping (LAResult) -> V
 
 func laTurnedOnAlert() -> Alert {
     mkAlert(
-        title: "SimpleX Lock turned on",
+        title: "POPOPX Lock turned on",
         message: "You will be required to authenticate when you start or resume the app after 30 seconds in background."
     )
 }
 
 func laPasscodeNotSetAlert() -> Alert {
     mkAlert(
-        title: "SimpleX Lock not enabled!",
-        message: "You can turn on SimpleX Lock via Settings."
+        title: "POPOPX Lock not enabled!",
+        message: "You can turn on POPOPX Lock via Settings."
     )
 }
 
@@ -104,14 +104,14 @@ func laFailedAlert() -> Alert {
 func laUnavailableInstructionAlert() -> Alert {
     mkAlert(
         title: "Authentication unavailable",
-        message: "Device authentication is not enabled. You can turn on SimpleX Lock via Settings, once you enable device authentication."
+        message: "Device authentication is not enabled. You can turn on POPOPX Lock via Settings, once you enable device authentication."
     )
 }
 
 func laUnavailableTurningOffAlert() -> Alert {
     mkAlert(
         title: "Authentication unavailable",
-        message: "Device authentication is disabled. Turning off SimpleX Lock."
+        message: "Device authentication is disabled. Turning off POPOPX Lock."
     )
 }
 

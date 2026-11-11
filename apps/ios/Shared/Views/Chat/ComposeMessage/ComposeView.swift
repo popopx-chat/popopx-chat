@@ -367,7 +367,7 @@ func showLargeFileAlert(_ fileSize: Int64, incognito: Bool, senderProfile: Local
     let title = NSLocalizedString("Large file!", comment: "file alert title")
     let message = largeFileMessage(fileSize, incognito: incognito, badgeIssue: expiredBadgeReason(fileSize, senderProfile))
     if !incognito && fileSize <= MAX_FILE_SIZE_XFTP_LEGEND && noShownBadge() {
-        showAlert(title, message: message) { [supportSimpleXAlertAction, okAlertAction] }
+        showAlert(title, message: message) { [supportPOPOPXAlertAction, okAlertAction] }
     } else {
         showAlert(title, message: message)
     }
@@ -386,7 +386,7 @@ struct ComposeView: View {
     @Binding var selectedRange: NSRange
 
     @State var linkUrl: String? = nil
-    @State var hasSimplexLink: Bool = false
+    @State var hasPopopxLink: Bool = false
     @State var prevLinkUrl: String? = nil
     @State var pendingLinkUrl: String? = nil
     @State var cancelledLinks: Set<String> = []
@@ -483,12 +483,12 @@ struct ComposeView: View {
                     Divider()
                 }
                 // preference checks should match checks in forwarding list
-                let simplexLinkProhibited = im.secondaryIMFilter == nil && hasSimplexLink && !chat.groupFeatureEnabled(.simplexLinks)
+                let popopxLinkProhibited = im.secondaryIMFilter == nil && hasPopopxLink && !chat.groupFeatureEnabled(.simplexLinks)
                 let fileProhibited = im.secondaryIMFilter == nil && composeState.attachmentPreview && !chat.groupFeatureEnabled(.files)
                 let voiceProhibited = composeState.voicePreview && !chat.chatInfo.featureEnabled(.voice)
-                let disableSendButton = simplexLinkProhibited || fileProhibited || voiceProhibited
-                if simplexLinkProhibited {
-                    msgNotAllowedView("SimpleX links not allowed", icon: "link")
+                let disableSendButton = popopxLinkProhibited || fileProhibited || voiceProhibited
+                if popopxLinkProhibited {
+                    msgNotAllowedView("POPOPX links not allowed", icon: "link")
                     Divider()
                 } else if fileProhibited {
                     msgNotAllowedView("Files and media not allowed", icon: "doc")
@@ -580,7 +580,7 @@ struct ComposeView: View {
                 updatingCompose = false
                 return
             }
-            var parsedMsg = parseSimpleXMarkdown(msg)
+            var parsedMsg = parsePOPOPXMarkdown(msg)
             if privacySanitizeLinks, let parsed = parsedMsg {
                 let r = sanitizeMessage(parsed)
                 if let sanitizedPos = r.sanitizedPos {
@@ -601,12 +601,12 @@ struct ComposeView: View {
                     showLinkPreview(parsedMsg)
                 } else {
                     resetLinkPreview()
-                    hasSimplexLink = false
+                    hasPopopxLink = false
                     composeState = composeState.copy(preview: .noPreview)
                 }
             } else {
                 resetLinkPreview()
-                hasSimplexLink = !msg.isEmpty && !chat.groupFeatureEnabled(.simplexLinks) && getMessageLinks(parsedMsg).hasSimplexLink
+                hasPopopxLink = !msg.isEmpty && !chat.groupFeatureEnabled(.simplexLinks) && getMessageLinks(parsedMsg).hasPopopxLink
                 if composeState.linkPreviewAllowed {
                     composeState = composeState.copy(preview: .noPreview)
                 }
@@ -1260,7 +1260,7 @@ struct ComposeView: View {
     private func checkLinkPreview_(_ msgText: String) -> MsgContent {
         switch (composeState.preview) {
         case let .linkPreview(linkPreview: linkPreview):
-            if let parsedMsg = parseSimpleXMarkdown(msgText),
+            if let parsedMsg = parsePOPOPXMarkdown(msgText),
                let url = getMessageLinks(parsedMsg).url,
                let linkPreview = linkPreview,
                url == linkPreview.uri {
@@ -1909,7 +1909,7 @@ struct ComposeView: View {
     // Spec: spec/client/compose.md#showLinkPreview
     private func showLinkPreview(_ parsedMsg: [FormattedText]?) {
         prevLinkUrl = linkUrl
-        (linkUrl, hasSimplexLink) = getMessageLinks(parsedMsg)
+        (linkUrl, hasPopopxLink) = getMessageLinks(parsedMsg)
         if let url = linkUrl {
             if url != composeState.linkPreview?.uri && url != pendingLinkUrl {
                 pendingLinkUrl = url
@@ -1927,9 +1927,9 @@ struct ComposeView: View {
     }
 
     // Spec: spec/client/compose.md#getMessageLinks
-    private func getMessageLinks(_ parsedMsg: [FormattedText]?) -> (url: String?, hasSimplexLink: Bool) {
+    private func getMessageLinks(_ parsedMsg: [FormattedText]?) -> (url: String?, hasPopopxLink: Bool) {
         guard let parsedMsg else { return (nil, false) }
-        let simplexLink = parsedMsgHasSimplexLink(parsedMsg)
+        let simplexLink = parsedMsgHasPopopxLink(parsedMsg)
         for ft in parsedMsg {
             if let link = ft.linkUri, !cancelledLinks.contains(link) && !isSimplexLink(link) {
                 return (link, simplexLink)

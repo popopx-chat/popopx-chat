@@ -76,18 +76,18 @@ private val previewScenes = listOf(
   SnapshotScene("CIGroupInvitationView.PendingCIGroupInvitationViewPreview", chatItemFontScales) { PendingCIGroupInvitationViewPreview() },
   SnapshotScene("CIGroupInvitationView.CIGroupInvitationViewAcceptedPreview", chatItemFontScales) { CIGroupInvitationViewAcceptedPreview() },
   SnapshotScene("CIGroupInvitationView.CIGroupInvitationViewLongNamePreview", chatItemFontScales) { CIGroupInvitationViewLongNamePreview() },
-  SnapshotScene("CIMetaView.PreviewCIMetaView", chatItemFontScales) { SimpleXTheme { PreviewCIMetaView() } },
-  SnapshotScene("CIMetaView.PreviewCIMetaViewUnread", chatItemFontScales) { SimpleXTheme { PreviewCIMetaViewUnread() } },
-  SnapshotScene("CIMetaView.PreviewCIMetaViewSendFailed", chatItemFontScales) { SimpleXTheme { PreviewCIMetaViewSendFailed() } },
-  SnapshotScene("CIMetaView.PreviewCIMetaViewSendNoAuth", chatItemFontScales) { SimpleXTheme { PreviewCIMetaViewSendNoAuth() } },
-  SnapshotScene("CIMetaView.PreviewCIMetaViewSendSent", chatItemFontScales) { SimpleXTheme { PreviewCIMetaViewSendSent() } },
-  SnapshotScene("CIMetaView.PreviewCIMetaViewEdited", chatItemFontScales) { SimpleXTheme { PreviewCIMetaViewEdited() } },
-  SnapshotScene("CIMetaView.PreviewCIMetaViewEditedUnread", chatItemFontScales) { SimpleXTheme { PreviewCIMetaViewEditedUnread() } },
-  SnapshotScene("CIMetaView.PreviewCIMetaViewEditedSent", chatItemFontScales) { SimpleXTheme { PreviewCIMetaViewEditedSent() } },
-  SnapshotScene("CIMetaView.PreviewCIMetaViewDeletedContent", chatItemFontScales) { SimpleXTheme { PreviewCIMetaViewDeletedContent() } },
-  SnapshotScene("ChatItemView.PreviewChatItemView", chatItemFontScales) { SimpleXTheme { PreviewChatItemView() } },
-  SnapshotScene("ChatItemView.PreviewChatItemViewEmptyLines", chatItemFontScales) { SimpleXTheme { PreviewChatItemViewEmptyLines() } },
-  SnapshotScene("ChatItemView.PreviewChatItemViewEmptyLinesTerminal", chatItemFontScales) { SimpleXTheme { PreviewChatItemViewEmptyLinesTerminal() } },
+  SnapshotScene("CIMetaView.PreviewCIMetaView", chatItemFontScales) { POPOPXTheme { PreviewCIMetaView() } },
+  SnapshotScene("CIMetaView.PreviewCIMetaViewUnread", chatItemFontScales) { POPOPXTheme { PreviewCIMetaViewUnread() } },
+  SnapshotScene("CIMetaView.PreviewCIMetaViewSendFailed", chatItemFontScales) { POPOPXTheme { PreviewCIMetaViewSendFailed() } },
+  SnapshotScene("CIMetaView.PreviewCIMetaViewSendNoAuth", chatItemFontScales) { POPOPXTheme { PreviewCIMetaViewSendNoAuth() } },
+  SnapshotScene("CIMetaView.PreviewCIMetaViewSendSent", chatItemFontScales) { POPOPXTheme { PreviewCIMetaViewSendSent() } },
+  SnapshotScene("CIMetaView.PreviewCIMetaViewEdited", chatItemFontScales) { POPOPXTheme { PreviewCIMetaViewEdited() } },
+  SnapshotScene("CIMetaView.PreviewCIMetaViewEditedUnread", chatItemFontScales) { POPOPXTheme { PreviewCIMetaViewEditedUnread() } },
+  SnapshotScene("CIMetaView.PreviewCIMetaViewEditedSent", chatItemFontScales) { POPOPXTheme { PreviewCIMetaViewEditedSent() } },
+  SnapshotScene("CIMetaView.PreviewCIMetaViewDeletedContent", chatItemFontScales) { POPOPXTheme { PreviewCIMetaViewDeletedContent() } },
+  SnapshotScene("ChatItemView.PreviewChatItemView", chatItemFontScales) { POPOPXTheme { PreviewChatItemView() } },
+  SnapshotScene("ChatItemView.PreviewChatItemViewEmptyLines", chatItemFontScales) { POPOPXTheme { PreviewChatItemViewEmptyLines() } },
+  SnapshotScene("ChatItemView.PreviewChatItemViewEmptyLinesTerminal", chatItemFontScales) { POPOPXTheme { PreviewChatItemViewEmptyLinesTerminal() } },
   SnapshotScene("ChatItemView.PreviewChatItemViewDeletedContent", chatItemFontScales) { PreviewChatItemViewDeletedContent() },
   SnapshotScene("DeletedItemView.PreviewDeletedItemView", chatItemFontScales) { PreviewDeletedItemView() },
   SnapshotScene("IntegrityErrorItemView.IntegrityErrorItemViewPreview", chatItemFontScales) { IntegrityErrorItemViewPreview() },
@@ -109,7 +109,7 @@ private val previewScenes = listOf(
   SnapshotScene("NewChatSheet.PreviewNewChatSheet") { PreviewNewChatSheet() },
   SnapshotScene("QRCode.PreviewQRCode") { PreviewQRCode() },
   SnapshotScene("HowItWorks.PreviewHowItWorks") { PreviewHowItWorks() },
-  SnapshotScene("SimpleXInfo.PreviewSimpleXInfo") { PreviewSimpleXInfo() },
+  SnapshotScene("POPOPXInfo.PreviewPOPOPXInfo") { PreviewPOPOPXInfo() },
   SnapshotScene("WhatsNewView.PreviewWhatsNewView") { PreviewWhatsNewView() },
   SnapshotScene("SetNotificationsMode.PreviewSetNotificationsMode") { PreviewSetNotificationsMode() },
   SnapshotScene("BadgesHowLongView.PreviewPeriodCards") { PreviewPeriodCards() },
@@ -160,7 +160,7 @@ class SnapshotTest {
     try {
       Locale.setDefault(Locale.US)
       TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
-      simplexWindowState.windowState = WindowState(size = DpSize(SCENE_WIDTH.dp, SCENE_MAX_HEIGHT.dp))
+      popopxWindowState.windowState = WindowState(size = DpSize(SCENE_WIDTH.dp, SCENE_MAX_HEIGHT.dp))
       appPrefs.densityScale.set(1f)
       appPrefs.oneHandUI.set(true)
       appPrefs.chatBottomBar.set(true)

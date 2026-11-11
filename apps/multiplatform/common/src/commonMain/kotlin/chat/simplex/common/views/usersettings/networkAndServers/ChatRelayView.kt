@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ShowRelayTestStatus(relay: UserChatRelay, modifier: Modifier = Modifier) =
   when (relay.tested) {
-    true -> Icon(painterResource(MR.images.ic_check), null, modifier, tint = SimplexGreen)
+    true -> Icon(painterResource(MR.images.ic_check), null, modifier, tint = PopopxGreen)
     false -> Icon(painterResource(MR.images.ic_close), null, modifier, tint = MaterialTheme.colors.error)
     else -> Icon(painterResource(MR.images.ic_check), null, modifier, tint = Color.Transparent)
   }

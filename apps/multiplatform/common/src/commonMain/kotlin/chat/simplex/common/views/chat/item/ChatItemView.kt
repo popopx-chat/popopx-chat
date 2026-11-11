@@ -77,7 +77,7 @@ fun ChatItemView(
   composeState: MutableState<ComposeState>,
   imageProvider: (() -> ImageGalleryProvider)? = null,
   useLinkPreviews: Boolean,
-  linkMode: SimplexLinkMode,
+  linkMode: PopopxLinkMode,
   revealed: State<Boolean>,
   highlighted: State<Boolean>,
   hoveredItemId: MutableState<Long?>,
@@ -1518,7 +1518,7 @@ fun PreviewChatItemView(
     Chat.sampleData,
     chatItem,
     useLinkPreviews = true,
-    linkMode = SimplexLinkMode.DESCRIPTION,
+    linkMode = PopopxLinkMode.DESCRIPTION,
     composeState = remember { mutableStateOf(ComposeState(useLinkPreviews = true)) },
     revealed = remember { mutableStateOf(false) },
     highlighted = remember { mutableStateOf(false) },
@@ -1600,14 +1600,14 @@ fun PreviewChatItemViewEmptyLinesTerminal() = CompositionLocalProvider(LocalTerm
 @Preview
 @Composable
 fun PreviewChatItemViewDeletedContent() = BubblePreview {
-  SimpleXTheme {
+  POPOPXTheme {
     ChatItemView(
       chatsCtx = ChatModel.ChatsContext(secondaryContextFilter = null),
       rhId = null,
       Chat.sampleData,
       ChatItem.getDeletedContentSampleData(ts = previewDate),
       useLinkPreviews = true,
-      linkMode = SimplexLinkMode.DESCRIPTION,
+      linkMode = PopopxLinkMode.DESCRIPTION,
       composeState = remember { mutableStateOf(ComposeState(useLinkPreviews = true)) },
       revealed = remember { mutableStateOf(false) },
       highlighted = remember { mutableStateOf(false) },

@@ -79,7 +79,7 @@ Commands follow `ChatCmdProtocol` (has `cmdString` property), sent as JSON throu
 
 ## Localization
 
-31 languages supported. Localization files in `SimpleX Localizations/`.
+31 languages supported. Localization files in `POPOPX Localizations/`.
 
 Workflow:
 - `Product > Export Localizations` - Export XLIFF files

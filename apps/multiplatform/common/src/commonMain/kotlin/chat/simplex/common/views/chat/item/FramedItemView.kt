@@ -37,7 +37,7 @@ fun FramedItemView(
   ci: ChatItem,
   uriHandler: UriHandler? = null,
   imageProvider: (() -> ImageGalleryProvider)? = null,
-  linkMode: SimplexLinkMode,
+  linkMode: PopopxLinkMode,
   showViaProxy: Boolean,
   showMenu: MutableState<Boolean>,
   showTimestamp: Boolean,
@@ -491,7 +491,7 @@ fun CIMarkdownText(
   ci: ChatItem,
   chat: Chat,
   chatTTL: Int?,
-  linkMode: SimplexLinkMode,
+  linkMode: PopopxLinkMode,
   uriHandler: UriHandler?,
   onLinkLongClick: (link: String) -> Unit = {},
   showViaProxy: Boolean,
@@ -770,13 +770,13 @@ class EditedProvider: PreviewParameterProvider<Boolean> {
 @Composable
 fun PreviewTextItemViewSnd(@PreviewParameter(EditedProvider::class) edited: Boolean) {
   val showMenu = remember { mutableStateOf(false) }
-  SimpleXTheme {
+  POPOPXTheme {
     FramedItemView(
       ChatInfo.Direct.sampleData,
       ChatItem.getSampleData(
         1, CIDirection.DirectSnd(), Clock.System.now(), "hello", itemEdited = edited,
       ),
-      linkMode = SimplexLinkMode.DESCRIPTION,
+      linkMode = PopopxLinkMode.DESCRIPTION,
       showMenu = showMenu,
       receiveFile = {}
     )
@@ -787,13 +787,13 @@ fun PreviewTextItemViewSnd(@PreviewParameter(EditedProvider::class) edited: Bool
 @Composable
 fun PreviewTextItemViewRcv(@PreviewParameter(EditedProvider::class) edited: Boolean) {
   val showMenu = remember { mutableStateOf(false) }
-  SimpleXTheme {
+  POPOPXTheme {
     FramedItemView(
       ChatInfo.Direct.sampleData,
       ChatItem.getSampleData(
         1, CIDirection.DirectRcv(), Clock.System.now(), "hello", itemEdited = edited
       ),
-      linkMode = SimplexLinkMode.DESCRIPTION,
+      linkMode = PopopxLinkMode.DESCRIPTION,
       showMenu = showMenu,
       receiveFile = {}
     )
@@ -804,7 +804,7 @@ fun PreviewTextItemViewRcv(@PreviewParameter(EditedProvider::class) edited: Bool
 @Composable
 fun PreviewTextItemViewLong(@PreviewParameter(EditedProvider::class) edited: Boolean) {
   val showMenu = remember { mutableStateOf(false) }
-  SimpleXTheme {
+  POPOPXTheme {
     FramedItemView(
       ChatInfo.Direct.sampleData,
       ChatItem.getSampleData(
@@ -814,7 +814,7 @@ fun PreviewTextItemViewLong(@PreviewParameter(EditedProvider::class) edited: Boo
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
         itemEdited = edited
       ),
-      linkMode = SimplexLinkMode.DESCRIPTION,
+      linkMode = PopopxLinkMode.DESCRIPTION,
       showMenu = showMenu,
       receiveFile = {}
     )
@@ -825,7 +825,7 @@ fun PreviewTextItemViewLong(@PreviewParameter(EditedProvider::class) edited: Boo
 @Composable
 fun PreviewTextItemViewQuote(@PreviewParameter(EditedProvider::class) edited: Boolean) {
   val showMenu = remember { mutableStateOf(false) }
-  SimpleXTheme {
+  POPOPXTheme {
     FramedItemView(
       ChatInfo.Direct.sampleData,
       ChatItem.getSampleData(
@@ -836,7 +836,7 @@ fun PreviewTextItemViewQuote(@PreviewParameter(EditedProvider::class) edited: Bo
         quotedItem = CIQuote.getSample(1, Clock.System.now(), "hi", chatDir = CIDirection.DirectRcv()),
         itemEdited = edited
       ),
-      linkMode = SimplexLinkMode.DESCRIPTION,
+      linkMode = PopopxLinkMode.DESCRIPTION,
       showMenu = showMenu,
       receiveFile = {}
     )
@@ -847,7 +847,7 @@ fun PreviewTextItemViewQuote(@PreviewParameter(EditedProvider::class) edited: Bo
 @Composable
 fun PreviewTextItemViewEmoji(@PreviewParameter(EditedProvider::class) edited: Boolean) {
   val showMenu = remember { mutableStateOf(false) }
-  SimpleXTheme {
+  POPOPXTheme {
     FramedItemView(
       ChatInfo.Direct.sampleData,
       ChatItem.getSampleData(
@@ -858,7 +858,7 @@ fun PreviewTextItemViewEmoji(@PreviewParameter(EditedProvider::class) edited: Bo
         quotedItem = CIQuote.getSample(1, Clock.System.now(), "Lorem ipsum dolor sit amet", chatDir = CIDirection.DirectRcv()),
         itemEdited = edited
       ),
-      linkMode = SimplexLinkMode.DESCRIPTION,
+      linkMode = PopopxLinkMode.DESCRIPTION,
       showMenu = showMenu,
       receiveFile = {}
     )
@@ -876,7 +876,7 @@ fun PreviewQuoteWithTextAndImage(@PreviewParameter(EditedProvider::class) edited
     )
   )
   val showMenu = remember { mutableStateOf(false) }
-  SimpleXTheme {
+  POPOPXTheme {
     FramedItemView(
       ChatInfo.Direct.sampleData,
       ChatItem.getSampleData(
@@ -887,7 +887,7 @@ fun PreviewQuoteWithTextAndImage(@PreviewParameter(EditedProvider::class) edited
         quotedItem = ciQuote,
         itemEdited = edited
       ),
-      linkMode = SimplexLinkMode.DESCRIPTION,
+      linkMode = PopopxLinkMode.DESCRIPTION,
       showMenu = showMenu,
       receiveFile = {}
     )
@@ -905,7 +905,7 @@ fun PreviewQuoteWithLongTextAndImage(@PreviewParameter(EditedProvider::class) ed
     )
   )
   val showMenu = remember { mutableStateOf(false) }
-  SimpleXTheme {
+  POPOPXTheme {
     FramedItemView(
       ChatInfo.Direct.sampleData,
       ChatItem.getSampleData(
@@ -916,7 +916,7 @@ fun PreviewQuoteWithLongTextAndImage(@PreviewParameter(EditedProvider::class) ed
         quotedItem = ciQuote,
         itemEdited = edited
       ),
-      linkMode = SimplexLinkMode.DESCRIPTION,
+      linkMode = PopopxLinkMode.DESCRIPTION,
       showMenu = showMenu,
       receiveFile = {}
     )
@@ -933,7 +933,7 @@ fun PreviewQuoteWithLongTextAndFile(@PreviewParameter(EditedProvider::class) edi
     )
   )
   val showMenu = remember { mutableStateOf(false) }
-  SimpleXTheme {
+  POPOPXTheme {
     FramedItemView(
       ChatInfo.Direct.sampleData,
       ChatItem.getSampleData(
@@ -944,7 +944,7 @@ fun PreviewQuoteWithLongTextAndFile(@PreviewParameter(EditedProvider::class) edi
         quotedItem = ciQuote,
         itemEdited = edited
       ),
-      linkMode = SimplexLinkMode.DESCRIPTION,
+      linkMode = PopopxLinkMode.DESCRIPTION,
       showMenu = showMenu,
       receiveFile = {}
     )

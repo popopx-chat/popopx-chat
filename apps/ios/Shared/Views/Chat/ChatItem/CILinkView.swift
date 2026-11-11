@@ -1,9 +1,9 @@
 //
 //  LargeLinkPreviewView.swift
-//  SimpleX
+//  POPOPX
 //
 //  Created by Ian Davies on 07/04/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/client/chat-view.md
 

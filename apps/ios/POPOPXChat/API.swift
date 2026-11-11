@@ -3,7 +3,7 @@
 //  POPOPX NSE
 //
 //  Created by Evgeny on 26/04/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 
 import Foundation
@@ -115,10 +115,10 @@ public func resetChatCtrl() {
     migrationResult = nil
 }
 
-// Spec: spec/api.md#sendSimpleXCmd
+// Spec: spec/api.md#sendPOPOPXCmd
 @inline(__always)
-public func sendSimpleXCmd<R: ChatAPIResult>(_ cmd: ChatCmdProtocol, _ ctrl: chat_ctrl? = nil, retryNum: Int32 = 0) -> APIResult<R> {
-    if let d = sendSimpleXCmdStr(cmd.cmdString, ctrl, retryNum: retryNum) {
+public func sendPOPOPXCmd<R: ChatAPIResult>(_ cmd: ChatCmdProtocol, _ ctrl: chat_ctrl? = nil, retryNum: Int32 = 0) -> APIResult<R> {
+    if let d = sendPOPOPXCmdStr(cmd.cmdString, ctrl, retryNum: retryNum) {
         decodeAPIResult(d)
     } else {
         APIResult.error(.invalidJSON(json: nil))
@@ -126,7 +126,7 @@ public func sendSimpleXCmd<R: ChatAPIResult>(_ cmd: ChatCmdProtocol, _ ctrl: cha
 }
 
 @inline(__always)
-public func sendSimpleXCmdStr(_ cmd: String, _ ctrl: chat_ctrl? = nil, retryNum: Int32) -> Data? {
+public func sendPOPOPXCmdStr(_ cmd: String, _ ctrl: chat_ctrl? = nil, retryNum: Int32) -> Data? {
     var c = cmd.cString(using: .utf8)!
     return if let cjson = chat_send_cmd_retry(ctrl ?? getChatCtrl(), &c, retryNum) {
         dataFromCString(cjson)
@@ -139,7 +139,7 @@ public func sendSimpleXCmdStr(_ cmd: String, _ ctrl: chat_ctrl? = nil, retryNum:
 public let MESSAGE_TIMEOUT: Int32 = 15_000_000
 
 @inline(__always)
-public func recvSimpleXMsg<R: ChatAPIResult>(_ ctrl: chat_ctrl? = nil, messageTimeout: Int32 = MESSAGE_TIMEOUT) -> APIResult<R>? {
+public func recvPOPOPXMsg<R: ChatAPIResult>(_ ctrl: chat_ctrl? = nil, messageTimeout: Int32 = MESSAGE_TIMEOUT) -> APIResult<R>? {
     if let cjson = chat_recv_msg_wait(ctrl ?? getChatCtrl(), messageTimeout),
        let d = dataFromCString(cjson) {
         decodeAPIResult(d)
@@ -148,18 +148,18 @@ public func recvSimpleXMsg<R: ChatAPIResult>(_ ctrl: chat_ctrl? = nil, messageTi
     }
 }
 
-public func parseSimpleXMarkdown(_ s: String) -> [FormattedText]? {
-    parseSimpleXMarkdownText(s)?.formattedText
+public func parsePOPOPXMarkdown(_ s: String) -> [FormattedText]? {
+    parsePOPOPXMarkdownText(s)?.formattedText
 }
 
-public func parseSimpleXMarkdownText(_ s: String) -> ParsedMarkdown? {
+public func parsePOPOPXMarkdownText(_ s: String) -> ParsedMarkdown? {
     var c = s.cString(using: .utf8)!
     if let cjson = chat_parse_markdown(&c) {
         if let d = dataFromCString(cjson) {
             do {
                 return try jsonDecoder.decode(ParsedMarkdown.self, from: d)
             } catch {
-                logger.error("parseSimpleXMarkdown jsonDecoder.decode error: \(error.localizedDescription)")
+                logger.error("parsePOPOPXMarkdown jsonDecoder.decode error: \(error.localizedDescription)")
             }
         }
     }

@@ -1,9 +1,9 @@
 //
 //  SettingsView.swift
-//  SimpleX
+//  POPOPX
 //
 //  Created by Evgeny Poberezkin on 31/01/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/client/navigation.md
 
@@ -11,9 +11,9 @@ import SwiftUI
 import StoreKit
 import POPOPXChat
 
-let simplexTeamURL = URL(string: "popopx:/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw?h=smp6.simplex.im")!
+let popopxTeamURL = URL(string: "popopx:/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw?h=smp6.simplex.im")!
 
-let simplexNewsURL = URL(string: "popopx:/c#grcfG3ulVI4Sh6ow33qBsmSk7uEy3gRSl2KkJ5ER6tA?h=smp18.simplex.im")!
+let popopxNewsURL = URL(string: "popopx:/c#grcfG3ulVI4Sh6ow33qBsmSk7uEy3gRSl2KkJ5ER6tA?h=smp18.simplex.im")!
 
 let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
 
@@ -32,9 +32,9 @@ let DEFAULT_WEBRTC_ICE_SERVERS = "webrtcICEServers"
 let DEFAULT_CALL_KIT_CALLS_IN_RECENTS = "callKitCallsInRecents"
 let DEFAULT_PRIVACY_ACCEPT_IMAGES = "privacyAcceptImages" // unused. Use GROUP_DEFAULT_PRIVACY_ACCEPT_IMAGES instead
 let DEFAULT_PRIVACY_LINK_PREVIEWS = "privacyLinkPreviews" // deprecated, moved to app group
-let DEFAULT_PRIVACY_SIMPLEX_LINK_MODE = "privacySimplexLinkMode"
+let DEFAULT_PRIVACY_SIMPLEX_LINK_MODE = "privacyPopopxLinkMode"
 let DEFAULT_PRIVACY_SHOW_CHAT_PREVIEWS = "privacyShowChatPreviews"
-let DEFAULT_PRIVACY_VERIFY_SIMPLEX_NAMES = "privacyVerifySimplexNames"
+let DEFAULT_PRIVACY_VERIFY_SIMPLEX_NAMES = "privacyVerifyPopopxNames"
 let DEFAULT_PRIVACY_SHOW_SIGNATURE = "privacyShowSignature"
 let DEFAULT_PRIVACY_SHOW_FILE_ENCRYPTION = "privacyShowEncryption"
 let DEFAULT_PRIVACY_SAVE_LAST_DRAFT = "privacySaveLastDraft"
@@ -110,7 +110,7 @@ let appDefaults: [String: Any] = [
     DEFAULT_CALL_KIT_CALLS_IN_RECENTS: false,
     DEFAULT_PRIVACY_ACCEPT_IMAGES: true,
     DEFAULT_PRIVACY_LINK_PREVIEWS: true,
-    DEFAULT_PRIVACY_SIMPLEX_LINK_MODE: SimpleXLinkMode.description.rawValue,
+    DEFAULT_PRIVACY_SIMPLEX_LINK_MODE: POPOPXLinkMode.description.rawValue,
     DEFAULT_PRIVACY_SHOW_CHAT_PREVIEWS: true,
     DEFAULT_PRIVACY_VERIFY_SIMPLEX_NAMES: false,
     DEFAULT_PRIVACY_SAVE_LAST_DRAFT: true,
@@ -186,12 +186,12 @@ enum ConnectViaLinkTab: String {
     case paste
 }
 
-enum SimpleXLinkMode: String, Identifiable {
+enum POPOPXLinkMode: String, Identifiable {
     case description
     case full
     case browser
 
-    static var values: [SimpleXLinkMode] = [.description, .full]
+    static var values: [POPOPXLinkMode] = [.description, .full]
 
     public var id: Self { self }
 
@@ -218,7 +218,7 @@ let connectViaLinkTabDefault = EnumDefault<ConnectViaLinkTab>(defaults: UserDefa
 
 let chatLayoutDefault = EnumDefault<ChatLayout>(defaults: UserDefaults.standard, forKey: DEFAULT_CHAT_LAYOUT, withDefault: .classic)
 
-let privacySimplexLinkModeDefault = EnumDefault<SimpleXLinkMode>(defaults: UserDefaults.standard, forKey: DEFAULT_PRIVACY_SIMPLEX_LINK_MODE, withDefault: .description)
+let privacyPopopxLinkModeDefault = EnumDefault<POPOPXLinkMode>(defaults: UserDefaults.standard, forKey: DEFAULT_PRIVACY_SIMPLEX_LINK_MODE, withDefault: .description)
 
 let privacyLocalAuthModeDefault = EnumDefault<LAMode>(defaults: UserDefaults.standard, forKey: DEFAULT_LA_MODE, withDefault: .system)
 
@@ -425,7 +425,7 @@ struct SettingsView: View {
             }
 
             if isInUS {
-                Section(header: Text("Own a part of SimpleX Chat").foregroundColor(theme.colors.secondary)) {
+                Section(header: Text("Own a part of POPOPX Chat").foregroundColor(theme.colors.secondary)) {
                     NavigationLink {
                         GetStakeView(fromSettings: true, showFirstImage: true)
                             .navigationBarTitle("", displayMode: .inline)
@@ -445,7 +445,7 @@ struct SettingsView: View {
 
     private func badgeRowTexts() -> (label: LocalizedStringKey, benefits: LocalizedStringKey) {
         switch currentShownBadge()?.badgeType {
-        case nil: return ("Support SimpleX", "Larger files available for longer.")
+        case nil: return ("Support POPOPX", "Larger files available for longer.")
         case .legend?: return ("Your legend badge", "Files up to 5 GB, stored for 21 days.")
         default: return ("Your badge", "Files up to 2 GB, stored for 7 days.")
         }
@@ -475,21 +475,21 @@ struct SettingsView: View {
                 }
 
                 NavigationLink {
-                    SimpleXInfo(onboarding: false)
+                    POPOPXInfo(onboarding: false)
                         .navigationBarTitle("", displayMode: .inline)
                         .modifier(ThemedBackground())
                         .frame(maxHeight: .infinity, alignment: .top)
                 } label: {
-                    settingsRow("info", color: theme.colors.secondary) { Text("About SimpleX Chat") }
+                    settingsRow("info", color: theme.colors.secondary) { Text("About POPOPX Chat") }
                 }
             }
 
             Section(header: Text("Contact").foregroundColor(theme.colors.secondary)) {
                 settingsRow("antenna.radiowaves.left.and.right", color: theme.colors.secondary) {
-                    Button("Follow SimpleX Network News") {
+                    Button("Follow POPOPX Network News") {
                         dismiss()
                         DispatchQueue.main.async {
-                            ChatModel.shared.appOpenUrl = simplexNewsURL
+                            ChatModel.shared.appOpenUrl = popopxNewsURL
                         }
                     }
                 }
@@ -498,9 +498,9 @@ struct SettingsView: View {
                     Button("Send questions and ideas") {
                         dismiss()
                         DispatchQueue.main.async {
-                            // simplexTeamURL targets this same app; route to the in-app connect flow
+                            // popopxTeamURL targets this same app; route to the in-app connect flow
                             // (UIApplication.shared.open is dropped for self-owned URLs in the foreground)
-                            ChatModel.shared.appOpenUrl = simplexTeamURL
+                            ChatModel.shared.appOpenUrl = popopxTeamURL
                         }
                     }
                 }

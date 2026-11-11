@@ -1,9 +1,9 @@
 //
-//  SimpleXAPI.swift
+//  POPOPXAPI.swift
 //  POPOPX NSE
 //
 //  Created by Evgeny on 26/04/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/api.md
 
@@ -181,8 +181,8 @@ public struct CreatedConnLink: Decodable, Hashable {
         self.connShortLink = connShortLink
     }
 
-    public func simplexChatUri(short: Bool = true) -> String {
-        short ? (connShortLink ?? simplexChatLink(connFullLink)) : simplexChatLink(connFullLink)
+    public func popopxChatUri(short: Bool = true) -> String {
+        short ? (connShortLink ?? popopxChatLink(connFullLink)) : popopxChatLink(connFullLink)
     }
 
     public var cmdString: String {
@@ -190,7 +190,7 @@ public struct CreatedConnLink: Decodable, Hashable {
     }
 }
 
-public func simplexChatLink(_ uri: String) -> String {
+public func popopxChatLink(_ uri: String) -> String {
     uri.starts(with: "popopx:/")
     ? uri.replacingOccurrences(of: "popopx:/", with: "https://simplex.chat/")
     : uri
@@ -763,7 +763,7 @@ public enum ChatErrorType: Decodable, Hashable {
     case chatNotStopped
     case chatStoreChanged
     case invalidConnReq
-    case simplexDomainNotReady(simplexDomain: SimplexDomain, simplexDomainError: SimplexDomainError)
+    case popopxDomainNotReady(simplexDomain: SimplexDomain, simplexDomainError: SimplexDomainError)
     case notResolvedLocally
     case unsupportedConnReq
     case invalidChatMessage(connection: Connection, message: String)

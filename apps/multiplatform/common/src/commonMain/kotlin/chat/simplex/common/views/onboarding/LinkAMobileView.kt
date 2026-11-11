@@ -55,7 +55,7 @@ private fun LinkAMobileLayout(
   staleQrCode: MutableState<Boolean>,
   updateDeviceName: (String) -> Unit,
 ) {
-  ModalView({ appPrefs.onboardingStage.set(OnboardingStage.Step1_SimpleXInfo) }) {
+  ModalView({ appPrefs.onboardingStage.set(OnboardingStage.Step1_POPOPXInfo) }) {
     Column(Modifier.fillMaxSize().padding(top = AppBarHeight * fontSizeSqrtMultiplier)) {
       Box(Modifier.align(Alignment.CenterHorizontally)) {
         AppBarTitle(stringResource(if (remember { chatModel.remoteHosts }.isEmpty()) MR.strings.link_a_mobile else MR.strings.linked_mobiles), overrideTitleColor = MaterialTheme.colors.onBackground)
@@ -77,7 +77,7 @@ private fun LinkAMobileLayout(
           AddingMobileDevice(false, staleQrCode, connecting) {
             // currentRemoteHost will be set instantly but remoteHosts may be delayed
             if (chatModel.remoteHosts.isEmpty() && chatModel.currentRemoteHost.value == null) {
-              chatModel.controller.appPrefs.onboardingStage.set(OnboardingStage.Step1_SimpleXInfo)
+              chatModel.controller.appPrefs.onboardingStage.set(OnboardingStage.Step1_POPOPXInfo)
             } else {
               chatModel.controller.appPrefs.onboardingStage.set(OnboardingStage.OnboardingComplete)
             }

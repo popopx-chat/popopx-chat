@@ -57,8 +57,8 @@ class MainActivity: FragmentActivity() {
     setContent {
       AppScreen()
     }
-    SimplexApp.context.schedulePeriodicServiceRestartWorker()
-    SimplexApp.context.schedulePeriodicWakeUp()
+    PopopxApp.context.schedulePeriodicServiceRestartWorker()
+    PopopxApp.context.schedulePeriodicWakeUp()
   }
 
   override fun onNewIntent(intent: Intent) {
@@ -93,7 +93,7 @@ class MainActivity: FragmentActivity() {
         onBackPressedDispatcher.hasEnabledCallbacks() // Has something to do in a backstack
             || Build.VERSION.SDK_INT >= Build.VERSION_CODES.R // Android 11 or above
             || isTaskRoot // there are still other tasks after we reach the main (home) activity
-        ) && SimplexApp.context.chatModel.sharedContent.value !is SharedContent.Forward
+        ) && PopopxApp.context.chatModel.sharedContent.value !is SharedContent.Forward
     if (canFinishActivity) {
       // https://medium.com/mobile-app-development-publication/the-risk-of-android-strandhogg-security-issue-and-how-it-can-be-mitigated-80d2ddb4af06
       super.onBackPressed()

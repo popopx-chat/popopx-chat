@@ -48,7 +48,7 @@ chatWelcome user =
       " |___/___|_|  |_|_| |____|___" <> "/_/ \\_\\" <> "\\___|_||_/_/ \\_\\_|",
       "",
       "Welcome " <> green userName <> "!",
-      "Thank you for installing SimpleX Chat!",
+      "Thank you for installing POPOPX Chat!",
       "",
       "Connect to SimpleX Chat developers for any questions - just type " <> highlight "/simplex",
       "",
@@ -66,7 +66,7 @@ chatHelpInfo :: [StyledString]
 chatHelpInfo =
   map
     styleMarkdown
-    [ highlight "Using SimpleX Chat",
+    [ highlight "Using POPOPX Chat",
       "Follow these steps to set up a connection:",
       "",
       green "Step 1: " <> highlight "/connect" <> " - Alice adds a contact.",
@@ -93,7 +93,7 @@ chatHelpInfo =
       indent <> highlight "/delete <contact>" <> " - delete contact and all messages with them",
       indent <> highlight "/chats           " <> " - most recent chats",
       indent <> highlight "/markdown        " <> " - supported markdown syntax",
-      indent <> highlight "/version         " <> " - SimpleX Chat version",
+      indent <> highlight "/version         " <> " - POPOPX Chat version",
       indent <> highlight "/quit            " <> " - quit chat",
       "",
       "The commands may be abbreviated: " <> listHighlight ["/c", "/f", "/g", "/p", "/ad"] <> ", etc."

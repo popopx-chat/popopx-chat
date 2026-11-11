@@ -61,7 +61,7 @@ fun ContextItemView(
       toggleSecrets = false,
       maxLines = lines,
       inlineContent = inlineContent,
-      linkMode = SimplexLinkMode.DESCRIPTION,
+      linkMode = PopopxLinkMode.DESCRIPTION,
       modifier = Modifier.fillMaxWidth(),
       mentions = contextItem.mentions,
       userMemberId = when {
@@ -158,7 +158,7 @@ fun ContextItemView(
 @Preview
 @Composable
 fun PreviewContextItemView() {
-  SimpleXTheme {
+  POPOPXTheme {
     ContextItemView(
       contextItems = listOf(ChatItem.getSampleData(1, CIDirection.DirectRcv(), previewDate, "hello")),
       contextIcon = painterResource(MR.images.ic_edit_filled),

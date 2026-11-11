@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by Avently on 14.02.2024.
-//  Copyright © 2024 SimpleX Chat. All rights reserved.
+//  Copyright © 2024 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/database.md
 
@@ -340,7 +340,7 @@ struct MigrateFromDevice: View {
                 .font(.callout)
             }
             Section(header: Text("Show QR code").foregroundColor(theme.colors.secondary)) {
-                SimpleXLinkQRCode(uri: link)
+                POPOPXLinkQRCode(uri: link)
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 12, style: .continuous)

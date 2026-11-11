@@ -331,7 +331,7 @@ fun showLargeFileAlert(fileSize: Long, incognito: Boolean, senderProfile: LocalP
       title = title,
       text = text,
       confirmText = generalGetString(MR.strings.ok),
-      dismissText = generalGetString(MR.strings.badges_support_simplex_title),
+      dismissText = generalGetString(MR.strings.badges_support_popopx_title),
       onDismiss = { if (!appPlatform.isDesktop || !ModalManager.end.hasModalOpen(ModalViewId.BADGES)) openBadgesView() }
     )
   } else {
@@ -444,7 +444,7 @@ fun ComposeView(
 
   val linkUrl = rememberSaveable { mutableStateOf<String?>(null) }
   // default value parsed because of draft
-  val hasSimplexLink = rememberSaveable { mutableStateOf(getMessageLinks(parseToMarkdown(composeState.value.message.text)).second) }
+  val hasPopopxLink = rememberSaveable { mutableStateOf(getMessageLinks(parseToMarkdown(composeState.value.message.text)).second) }
   val prevLinkUrl = rememberSaveable { mutableStateOf<String?>(null) }
   val pendingLinkUrl = rememberSaveable { mutableStateOf<String?>(null) }
   val useLinkPreviews = true
@@ -503,7 +503,7 @@ fun ComposeView(
     prevLinkUrl.value = linkUrl.value
     val linkParsed = getMessageLinks(parsedMessage)
     linkUrl.value = linkParsed.first
-    hasSimplexLink.value = linkParsed.second
+    hasPopopxLink.value = linkParsed.second
     val url = linkUrl.value
     if (url != null) {
       if (url != composeState.value.linkPreview?.uri && url != pendingLinkUrl.value) {
@@ -562,7 +562,7 @@ fun ComposeView(
         is SharedContent.ChatLink -> emptyList()
         is SharedContent.MyAddress -> emptyList()
       }
-      // When sharing a file and pasting it in SimpleX itself, the file shouldn't be deleted before sending or before leaving the chat after sharing
+      // When sharing a file and pasting it in POPOPX itself, the file shouldn't be deleted before sending or before leaving the chat after sharing
       chatModel.filesToDelete.removeAll { file ->
         if (sharedPaths.any { it.endsWith(file.name) }) {
           false
@@ -1076,12 +1076,12 @@ fun ComposeView(
           showLinkPreview(parsedMessage)
         } else {
           resetLinkPreview()
-          hasSimplexLink.value = false
+          hasPopopxLink.value = false
           composeState.value = composeState.value.copy(preview = ComposePreview.NoPreview)
         }
       } else {
         resetLinkPreview()
-        hasSimplexLink.value = s.text.isNotEmpty() && !chat.groupFeatureEnabled(GroupFeature.SimplexLinks) && getMessageLinks(parsedMessage).second
+        hasPopopxLink.value = s.text.isNotEmpty() && !chat.groupFeatureEnabled(GroupFeature.SimplexLinks) && getMessageLinks(parsedMessage).second
         if (composeState.value.linkPreviewAllowed) composeState.value = composeState.value.copy(preview = ComposePreview.NoPreview)
       }
     }
@@ -1744,13 +1744,13 @@ fun ComposeView(
       ReportReasonView(ctx.reason)
     }
 
-    val simplexLinkProhibited = chatsCtx.secondaryContextFilter == null && hasSimplexLink.value && !chat.groupFeatureEnabled(GroupFeature.SimplexLinks)
+    val popopxLinkProhibited = chatsCtx.secondaryContextFilter == null && hasPopopxLink.value && !chat.groupFeatureEnabled(GroupFeature.SimplexLinks)
     val fileProhibited = chatsCtx.secondaryContextFilter == null && composeState.value.attachmentPreview && !chat.groupFeatureEnabled(GroupFeature.Files)
     val voiceProhibited = composeState.value.preview is ComposePreview.VoicePreview && !chat.chatInfo.featureEnabled(ChatFeature.Voice)
-    val disableSendButton = simplexLinkProhibited || fileProhibited || voiceProhibited
+    val disableSendButton = popopxLinkProhibited || fileProhibited || voiceProhibited
     if (composeState.value.preview !is ComposePreview.VoicePreview || composeState.value.editing) {
-      if (simplexLinkProhibited) {
-        MsgNotAllowedView(generalGetString(MR.strings.simplex_links_not_allowed), icon = painterResource(MR.images.ic_link))
+      if (popopxLinkProhibited) {
+        MsgNotAllowedView(generalGetString(MR.strings.popopx_links_not_allowed), icon = painterResource(MR.images.ic_link))
       } else if (fileProhibited) {
         MsgNotAllowedView(generalGetString(MR.strings.files_and_media_not_allowed), icon = painterResource(MR.images.ic_draft))
       } else if (voiceProhibited) {

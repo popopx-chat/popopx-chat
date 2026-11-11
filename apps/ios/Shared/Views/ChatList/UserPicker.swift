@@ -1,6 +1,6 @@
 //
 // Created by Avently on 16.01.2023.
-// Copyright (c) 2023 SimpleX Chat. All rights reserved.
+// Copyright (c) 2023 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -67,7 +67,7 @@ struct UserPicker: View {
                 .onPreferenceChange(DetermineWidth.Key.self) { frameWidth = $0 }
             }
             VStack(spacing: 0) {
-                openSheetOnTap("qrcode", title: m.userAddress == nil ? "Create SimpleX address" : "Your SimpleX address", sheet: .address, disabled: stopped)
+                openSheetOnTap("qrcode", title: m.userAddress == nil ? "Create POPOPX address" : "Your POPOPX address", sheet: .address, disabled: stopped)
                 openSheetOnTap("switch.2", title: "Chat preferences", sheet: .chatPreferences, disabled: stopped)
                 openSheetOnTap("person.crop.rectangle.stack", title: "Your chat profiles", sheet: .chatProfiles, disabled: stopped)
                 openSheetOnTap("desktopcomputer", title: "Use from desktop", sheet: .useFromDesktop, disabled: stopped)

@@ -12,7 +12,7 @@ import java.net.URI
 actual val dataDir: File = File(desktopPlatform.dataPath)
 // No deleteOnExit() here: a transient second instance also inits this val, and its exit
 // would delete the shared folder while the primary runs. Registered in Main instead.
-actual val tmpDir: File = File(System.getProperty("java.io.tmpdir") + File.separator + "simplex")
+actual val tmpDir: File = File(System.getProperty("java.io.tmpdir") + File.separator + "popopx")
 actual val filesDir: File = File(dataDir.absolutePath + File.separator + "simplex_v1_files")
 actual val appFilesDir: File = filesDir
 actual val wallpapersDir: File = File(dataDir.absolutePath + File.separator + "simplex_v1_assets" + File.separator + "wallpapers").also { it.mkdirs() }
@@ -73,10 +73,10 @@ actual class FileChooserLauncher actual constructor() {
         fileFilter = fileFilter(input),
         fileFilterDescription = fileFilterDescription(input),
       )
-      res = simplexWindowState.openDialog.awaitResult(params)
+      res = popopxWindowState.openDialog.awaitResult(params)
     } else {
       val filename = saveDialogFileName(input)
-      res = simplexWindowState.saveDialog.awaitResult(DialogParams(filename = filename))
+      res = popopxWindowState.saveDialog.awaitResult(DialogParams(filename = filename))
       if (res != null && res.isDirectory) {
         res = File(res, filename)
       }
@@ -98,7 +98,7 @@ actual class FileChooserMultipleLauncher actual constructor() {
         fileFilter = fileFilter(input),
         fileFilterDescription = fileFilterDescription(input),
       )
-    onResult(simplexWindowState.openMultipleDialog.awaitResult(params).map { it.toURI() })
+    onResult(popopxWindowState.openMultipleDialog.awaitResult(params).map { it.toURI() })
   }
 }
 

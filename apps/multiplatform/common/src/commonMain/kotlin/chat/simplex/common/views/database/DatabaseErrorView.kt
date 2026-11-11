@@ -349,7 +349,7 @@ private fun ColumnScope.RestoreDbButton(onClick: () -> Unit) {
 @Preview
 @Composable
 fun PreviewChatInfoLayout() {
-  SimpleXTheme {
+  POPOPXTheme {
     DatabaseErrorView(
       remember { mutableStateOf(DBMigrationResult.ErrorNotADatabase("simplex_v1_chat.db")) },
       AppPreferences()

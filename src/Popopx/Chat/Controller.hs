@@ -115,7 +115,7 @@ versionNumber :: String
 versionNumber = showVersion SC.version
 
 versionString :: String -> String
-versionString ver = "SimpleX Chat v" <> ver
+versionString ver = "POPOPX Chat v" <> ver
 
 updateStr :: String
 updateStr = "To update run: curl -o- https://raw.githubusercontent.com/simplex-chat/simplex-chat/master/install.sh | bash"

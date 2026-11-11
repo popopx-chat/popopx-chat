@@ -1,9 +1,9 @@
 //
 //  ChatListView.swift
-//  SimpleX
+//  POPOPX
 //
 //  Created by Evgeny Poberezkin on 27/01/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/client/chat-list.md
 
@@ -22,7 +22,7 @@ enum UserPickerSheet: Identifiable {
 
     var navigationTitle: LocalizedStringKey {
         switch self {
-        case .address: "SimpleX address"
+        case .address: "POPOPX address"
         case .chatPreferences: "Your preferences"
         case .chatProfiles: "Your chat profiles"
         case .currentProfile: "Your current profile"
@@ -162,8 +162,8 @@ struct ChatListView: View {
     @State private var searchMode = false
     @FocusState private var searchFocussed
     @State private var searchText = ""
-    @State private var searchShowingSimplexLink = false
-    @State private var searchChatFilteredBySimplexLink: Set<String> = []
+    @State private var searchShowingPopopxLink = false
+    @State private var searchChatFilteredByPopopxLink: Set<String> = []
     @State private var scrollToSearchBar = false
     @State private var userPickerShown: Bool = false
     @State private var sheet: SomeSheet<AnyView>? = nil
@@ -405,7 +405,7 @@ struct ChatListView: View {
     }
 
     private func badgeAlertBanner(_ title: LocalizedStringKey, _ subtitle: LocalizedStringKey, warning: Bool = false, dismissTitle: String) -> some View {
-        SupportSimpleXBanner(
+        SupportPOPOPXBanner(
             title: title,
             subtitle: subtitle,
             warning: warning,
@@ -428,10 +428,10 @@ struct ChatListView: View {
         }
     }
 
-    private func showSupportSimpleXDismissAlert() {
+    private func showSupportPOPOPXDismissAlert() {
         showAlert(
-            title: NSLocalizedString("Support SimpleX", comment: "alert title"),
-            message: NSLocalizedString("You can support SimpleX later in Settings.", comment: "alert message"),
+            title: NSLocalizedString("Support POPOPX", comment: "alert title"),
+            message: NSLocalizedString("You can support POPOPX later in Settings.", comment: "alert message"),
             buttonTitle: NSLocalizedString("Ok", comment: "alert button"),
             buttonAction: { withAnimation { supporterBannerShown = true } },
             cancelButton: false
@@ -484,8 +484,8 @@ struct ChatListView: View {
                             searchMode: $searchMode,
                             searchFocussed: $searchFocussed,
                             searchText: $searchText,
-                            searchShowingSimplexLink: $searchShowingSimplexLink,
-                            searchChatFilteredBySimplexLink: $searchChatFilteredBySimplexLink,
+                            searchShowingPopopxLink: $searchShowingPopopxLink,
+                            searchChatFilteredByPopopxLink: $searchChatFilteredByPopopxLink,
                             parentSheet: $sheet
                         )
                         .scaleEffect(x: 1, y: oneHandUI ? -1 : 1, anchor: .center)
@@ -535,13 +535,13 @@ struct ChatListView: View {
                     // noShownBadge is false until the badge state loads: the pitch must not lock the slot and then
                     // be hidden by a supporter's badge arriving a moment later, leaving the slot empty for the session
                     } else if chatModel.bannerSlotFree(for: .badgePitch) && !supporterBannerShown && noShownBadge() && chatModel.chats.count > 3 {
-                        SupportSimpleXBanner(
+                        SupportPOPOPXBanner(
                             showDismiss: supporterBannerTapped,
                             onTap: {
                                 supporterBannerTapped = true
                                 showBadgesSheet = true
                             },
-                            onDismiss: showSupportSimpleXDismissAlert
+                            onDismiss: showSupportPOPOPXDismissAlert
                         )
                             .padding(.vertical, 3)
                             .scaleEffect(x: 1, y: oneHandUI ? -1 : 1, anchor: .center)
@@ -665,8 +665,8 @@ struct ChatListView: View {
 
     // Spec: spec/client/chat-list.md#filteredChats
     private func filteredChats() -> [Chat] {
-        if !searchChatFilteredBySimplexLink.isEmpty {
-            return chatModel.chats.filter { searchChatFilteredBySimplexLink.contains($0.id) }
+        if !searchChatFilteredByPopopxLink.isEmpty {
+            return chatModel.chats.filter { searchChatFilteredByPopopxLink.contains($0.id) }
         } else {
             let s = searchString()
             return s == ""
@@ -708,7 +708,7 @@ struct ChatListView: View {
     
     // Spec: spec/client/chat-list.md#searchString
     func searchString() -> String {
-        searchShowingSimplexLink ? "" : searchText.trimmingCharacters(in: .whitespaces).localizedLowercase
+        searchShowingPopopxLink ? "" : searchText.trimmingCharacters(in: .whitespaces).localizedLowercase
     }
 }
 
@@ -779,12 +779,12 @@ struct ChatListSearchBar: View {
     @Binding var searchMode: Bool
     @FocusState.Binding var searchFocussed: Bool
     @Binding var searchText: String
-    @Binding var searchShowingSimplexLink: Bool
-    @Binding var searchChatFilteredBySimplexLink: Set<String>
+    @Binding var searchShowingPopopxLink: Bool
+    @Binding var searchChatFilteredByPopopxLink: Set<String>
     @Binding var parentSheet: SomeSheet<AnyView>?
     @AppStorage(GROUP_DEFAULT_ONE_HAND_UI, store: groupDefaults) private var oneHandUI = true
     @State private var ignoreSearchTextChange = false
-    // when the search text is a SimpleX name, the string to connect to (with @/# preserved); nil otherwise
+    // when the search text is a POPOPX name, the string to connect to (with @/# preserved); nil otherwise
     @State private var connectNameCandidate: String? = nil
     @State private var nameSearchTask: Task<Void, Never>? = nil
 
@@ -806,9 +806,9 @@ struct ChatListSearchBar: View {
             HStack(spacing: 12) {
                 HStack(spacing: 4) {
                     Image(systemName: "magnifyingglass")
-                    TextField("Search or paste SimpleX link", text: $searchText)
-                        .foregroundColor(searchShowingSimplexLink ? theme.colors.secondary : theme.colors.onBackground)
-                        .disabled(searchShowingSimplexLink)
+                    TextField("Search or paste POPOPX link", text: $searchText)
+                        .foregroundColor(searchShowingPopopxLink ? theme.colors.secondary : theme.colors.onBackground)
+                        .disabled(searchShowingPopopxLink)
                         .focused($searchFocussed)
                         .frame(maxWidth: .infinity)
                     if connectProgressManager.showConnectProgress != nil {
@@ -862,19 +862,19 @@ struct ChatListSearchBar: View {
                     searchFocussed = false
                     ignoreSearchTextChange = true
                     searchText = linkText
-                    searchShowingSimplexLink = true
-                    searchChatFilteredBySimplexLink = []
+                    searchShowingPopopxLink = true
+                    searchChatFilteredByPopopxLink = []
                     connectNameCandidate = nil
                     connect(text)
                 default:
-                    // not a link: a recognized SimpleX name shows the connect-by-name row (in place of the
+                    // not a link: a recognized POPOPX name shows the connect-by-name row (in place of the
                     // list tags) and, debounced, resolves locally per keystroke to narrow the list to the
                     // matching known chat(s); tapping the row connects online. Clear the filter immediately so
                     // the list falls back to text search until the search returns.
                     let candidate = nameSearchCandidate(s)
                     connectNameCandidate = candidate
-                    searchShowingSimplexLink = false
-                    searchChatFilteredBySimplexLink = []
+                    searchShowingPopopxLink = false
+                    searchChatFilteredByPopopxLink = []
                     nameSearchTask?.cancel()
                     nameSearchTask = nil
                     if let candidate = candidate {
@@ -889,7 +889,7 @@ struct ChatListSearchBar: View {
                                 if Task.isCancelled { return }
                                 if let id = knownChatId(plan) { ids.append(id) }
                             }
-                            searchChatFilteredBySimplexLink = Set(ids)
+                            searchChatFilteredByPopopxLink = Set(ids)
                             // drop the row only when every searched type is already known locally
                             if ids.count == targets.count { connectNameCandidate = nil }
                         }
@@ -935,13 +935,13 @@ struct ChatListSearchBar: View {
                 searchText = ""
                 searchFocussed = false
             },
-            filterKnownContact: { searchChatFilteredBySimplexLink = [$0.id] },
-            filterKnownGroup: { searchChatFilteredBySimplexLink = [$0.id] }
+            filterKnownContact: { searchChatFilteredByPopopxLink = [$0.id] },
+            filterKnownGroup: { searchChatFilteredByPopopxLink = [$0.id] }
         )
     }
 }
 
-// Row shown when the search text is a SimpleX name — in place of the list tags in the chat list, below
+// Row shown when the search text is a POPOPX name — in place of the list tags in the chat list, below
 // the search field in the new chat sheet. The @ icon marks a contact name, the tag icon a channel/other
 // name; tapping hides the keyboard, connects online, and clears the field.
 struct ConnectByNameRow: View {
@@ -987,7 +987,7 @@ private func isNameLabel(_ s: String) -> Bool {
     s.count >= 1 && s.count <= 63 && s.range(of: "^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$", options: .regularExpression) != nil
 }
 
-// On-device candidate for connecting by SimpleX name: the string sent to the core to resolve it.
+// On-device candidate for connecting by POPOPX name: the string sent to the core to resolve it.
 // The chat id a local (.never) search resolved to — a contact, business, or channel — or nil on a miss.
 // A name-resolved chat may be prepared in the store but not yet listed, so add it so the filter can surface it.
 @MainActor
@@ -1018,7 +1018,7 @@ func knownChatId(_ result: ConnectionPlanResult?) -> String? {
     }
 }
 
-// Mirrors the domain grammar (nameLabelP/mkDomain in SimplexName.hs): an optional @/# prefix, then
+// Mirrors the domain grammar (nameLabelP/mkDomain in Names.hs): an optional @/# prefix, then
 // dot-separated ASCII labels; a dotless word is completed with the default top-level part. Returns
 // the string to send (keeping @/# so the type is preserved), or nil when the text is not a name.
 func nameSearchCandidate(_ str: String) -> String? {

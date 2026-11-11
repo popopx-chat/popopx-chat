@@ -137,14 +137,14 @@ fun DesktopOnboardingShell(stage: OnboardingStage, content: @Composable () -> Un
             contentAlignment = Alignment.Center
         ) {
             when (stage) {
-                OnboardingStage.Step1_SimpleXInfo ->
+                OnboardingStage.Step1_POPOPXInfo ->
                     OnboardingImage(MR.images.intro, MR.images.intro_light, MR.images.ic_forum, Modifier.fillMaxWidth())
                 OnboardingStage.Step2_CreateProfile,
                 OnboardingStage.Step2_5_SetupDatabasePassphrase,
                 OnboardingStage.LinkAMobile ->
                     OnboardingImage(MR.images.your_profile, MR.images.your_profile_light, MR.images.ic_person, Modifier.fillMaxWidth())
                 OnboardingStage.Step3_ChooseServerOperators,
-                OnboardingStage.Step3_CreateSimpleXAddress,
+                OnboardingStage.Step3_CreatePOPOPXAddress,
                 OnboardingStage.Step4_SetNotificationsMode ->
                     OnboardingImage(MR.images.your_network, MR.images.your_network_light, MR.images.ic_dns, Modifier.fillMaxWidth())
                 OnboardingStage.Step4_NetworkCommitments ->

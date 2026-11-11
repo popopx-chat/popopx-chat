@@ -1,9 +1,9 @@
 //
 //  NtfManager.swift
-//  SimpleX
+//  POPOPX
 //
 //  Created by Evgeny Poberezkin on 08/02/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/services/notifications.md
 
@@ -200,7 +200,7 @@ class NtfManager: NSObject, UNUserNotificationCenterDelegate, ObservableObject {
                 identifier: ntfCategoryConnectionEvent,
                 actions: [],
                 intentIdentifiers: [],
-                hiddenPreviewsBodyPlaceholder: NSLocalizedString("SimpleX encrypted message or connection event", comment: "notification")
+                hiddenPreviewsBodyPlaceholder: NSLocalizedString("POPOPX encrypted message or connection event", comment: "notification")
             ),
             UNNotificationCategory(
                 identifier: ntfCategoryManyEvents,

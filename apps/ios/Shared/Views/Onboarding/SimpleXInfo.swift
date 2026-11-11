@@ -1,16 +1,16 @@
 //
-//  SimpleXInfo.swift
+//  POPOPXInfo.swift
 //  POPOPX (iOS)
 //
 //  Created by Evgeny on 07/05/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/client/navigation.md
 
 import SwiftUI
 import POPOPXChat
 
-struct SimpleXInfo: View {
+struct POPOPXInfo: View {
     @EnvironmentObject var m: ChatModel
     @EnvironmentObject var theme: AppTheme
     @Environment(\.colorScheme) var colorScheme: ColorScheme
@@ -79,7 +79,7 @@ struct SimpleXInfo: View {
                     Button {
                         showWhyBuilt = true
                     } label: {
-                        Label("Why SimpleX is built.", systemImage: "info.circle")
+                        Label("Why POPOPX is built.", systemImage: "info.circle")
                             .font(.headline)
                     }
                 }
@@ -103,7 +103,7 @@ struct SimpleXInfo: View {
                 }
             }
             .sheet(isPresented: $showWhyBuilt) {
-                WhySimpleX(
+                WhyPOPOPX(
                     onboarding: onboarding,
                     createProfileNavLinkActive: $createProfileNavLinkActive
                 )
@@ -141,8 +141,8 @@ let textSpace = Text(verbatim: " ")
 
 let textNewLine = Text(verbatim: "\n")
 
-struct SimpleXInfo_Previews: PreviewProvider {
+struct POPOPXInfo_Previews: PreviewProvider {
     static var previews: some View {
-        SimpleXInfo(onboarding: true)
+        POPOPXInfo(onboarding: true)
     }
 }

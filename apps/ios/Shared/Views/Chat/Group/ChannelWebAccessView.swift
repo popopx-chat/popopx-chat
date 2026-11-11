@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by simplex.chat on 31/05/2026.
-//  Copyright © 2026 SimpleX Chat. All rights reserved.
+//  Copyright © 2026 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -124,7 +124,7 @@ struct ChannelWebAccessView: View {
         if let pg = groupInfo.groupProfile.publicGroup,
            !relayDomains.isEmpty {
             """
-            <div data-simplex-channel-preview
+            <div data-popopx-channel-preview
               data-channel-link="\(pg.groupLink)"
               data-channel-id="\(pg.publicGroupId)"
               data-relay-domains="\(relayDomains.joined(separator: ","))"

@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by Evgeny on 06/10/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -63,8 +63,8 @@ struct ContactConnectionInfo: View {
 
                     if contactConnection.initiated,
                        let connLinkInv = contactConnection.connLinkInv {
-                        SimpleXCreatedLinkQRCode(link: connLinkInv, short: $showShortLink)
-                            .id("simplex-invitation-qrcode-\(connLinkInv.simplexChatUri(short: showShortLink))")
+                        POPOPXCreatedLinkQRCode(link: connLinkInv, short: $showShortLink)
+                            .id("popopx-invitation-qrcode-\(connLinkInv.popopxChatUri(short: showShortLink))")
                         incognitoEnabled()
                         shareLinkButton(connLinkInv, short: showShortLink)
                         oneTimeLinkLearnMoreButton()
@@ -172,7 +172,7 @@ struct ContactConnectionInfo: View {
 
 private func shareLinkButton(_ connLinkInvitation: CreatedConnLink, short: Bool) -> some View {
     Button {
-        showShareSheet(items: [connLinkInvitation.simplexChatUri(short: short)])
+        showShareSheet(items: [connLinkInvitation.popopxChatUri(short: short)])
     } label: {
         Label("Share 1-time link", systemImage: "square.and.arrow.up")
     }

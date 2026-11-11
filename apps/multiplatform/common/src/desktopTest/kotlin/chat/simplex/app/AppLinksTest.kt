@@ -17,7 +17,7 @@ class AppLinksTest {
 
   @Test
   fun acceptsTheSchemeInAnyCase() {
-    val link = "SimplexChat:/badge/code/SB0000000000000000000"
+    val link = "PopopxChat:/badge/code/SB0000000000000000000"
     assertEquals(link, linkFromArgs(arrayOf(link)))
   }
 
@@ -38,7 +38,7 @@ class AppLinksTest {
   @Test
   fun ignoresWebAndOtherLinks() {
     assertNull(linkFromArgs(arrayOf("https://simplex.chat/contact#/?v=2-7")), "web link")
-    assertNull(linkFromArgs(arrayOf("simplexfile:/x")), "another scheme sharing the prefix")
+    assertNull(linkFromArgs(arrayOf("popopxfile:/x")), "another scheme sharing the prefix")
     assertNull(linkFromArgs(arrayOf("/home/user/popopx:/a")), "path")
   }
 

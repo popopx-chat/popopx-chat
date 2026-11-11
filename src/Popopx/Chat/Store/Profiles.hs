@@ -411,7 +411,7 @@ setUserBadge db User {userId, profile = LocalProfile {profileId}} localBadge = d
     DB.execute db "UPDATE users SET user_member_profile_updated_at = ? WHERE user_id = ?" (ts, userId)
   getUser db userId
 
-setUserSimplexDomain :: DB.Connection -> User -> Maybe SimplexDomain -> IO User
+setUserSimplexDomain :: DB.Connection -> User -> Maybe PopopxDomain -> IO User
 setUserSimplexDomain db user@User {userId, profile = p@LocalProfile {profileId}} domain_ = do
   ts <- getCurrentTime
   DB.execute
@@ -449,7 +449,7 @@ getUserContactProfiles db User {userId} =
       |]
       (Only userId)
   where
-    toContactProfile :: (ContactName, Text, Maybe Text, Maybe Text, Maybe ImageData, Maybe ConnLinkContact, Maybe ChatPeerType, Maybe SimplexDomain, Maybe Text, Maybe Text) -> Profile
+    toContactProfile :: (ContactName, Text, Maybe Text, Maybe Text, Maybe ImageData, Maybe ConnLinkContact, Maybe ChatPeerType, Maybe PopopxDomain, Maybe Text, Maybe Text) -> Profile
     toContactProfile (displayName, fullName, shortDescr, description, image, contactLink, peerType, domain_, encodedPrefs, receivedPrefs) = Profile {displayName, fullName, shortDescr, description, image, contactLink, contactDomain = mkDomainClaim <$> domain_, peerType, preferences = chatPrefsFromRow encodedPrefs receivedPrefs, badge = Nothing}
 
 createUserContactLink :: DB.Connection -> User -> ConnId -> CreatedLinkContact -> SubscriptionMode -> C.PrivateKeyEd25519 -> ExceptT StoreError IO ()

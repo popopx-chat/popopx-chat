@@ -519,7 +519,7 @@ private fun passphraseEntropy(s: String): Double {
 }
 
 enum class PassphraseStrength(val color: Color) {
-  VERY_WEAK(Color.Red), WEAK(WarningOrange), REASONABLE(WarningYellow), STRONG(SimplexGreen);
+  VERY_WEAK(Color.Red), WEAK(WarningOrange), REASONABLE(WarningYellow), STRONG(PopopxGreen);
 
   companion object {
     fun check(s: String) = with(passphraseEntropy(s)) {
@@ -547,7 +547,7 @@ private fun Char.isASCII() = code in 32..126
 @Preview
 @Composable
 fun PreviewDatabaseEncryptionLayout() {
-  SimpleXTheme {
+  POPOPXTheme {
     DatabaseEncryptionLayout(
       useKeychain = remember { mutableStateOf(true) },
       chatDbEncrypted = true,

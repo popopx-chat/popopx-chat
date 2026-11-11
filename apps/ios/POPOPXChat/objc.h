@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by Stanislav Dmitrenko on 09.09.2024.
-//  Copyright © 2024 SimpleX Chat. All rights reserved.
+//  Copyright © 2024 POPOPX Chat. All rights reserved.
 //
 
 #ifndef objc_h

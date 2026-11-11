@@ -3,7 +3,7 @@
 //  POPOPX NSE
 //
 //  Created by Evgeny on 26/04/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/state.md | spec/api.md
 
@@ -1436,7 +1436,7 @@ public enum GroupFeature: String, Decodable, Feature, Hashable {
         case .reactions: return NSLocalizedString("Message reactions", comment: "chat feature")
         case .voice: return NSLocalizedString("Voice messages", comment: "chat feature")
         case .files: return NSLocalizedString("Files and media", comment: "chat feature")
-        case .simplexLinks: return NSLocalizedString("SimpleX links", comment: "chat feature")
+        case .simplexLinks: return NSLocalizedString("POPOPX links", comment: "chat feature")
         case .reports: return isChannel
             ? NSLocalizedString("Subscriber reports", comment: "chat feature")
             : NSLocalizedString("Member reports", comment: "chat feature")
@@ -1524,8 +1524,8 @@ public enum GroupFeature: String, Decodable, Feature, Hashable {
                 }
             case .simplexLinks:
                 switch enabled {
-                case .on: return "Allow to send SimpleX links."
-                case .off: return "Prohibit sending SimpleX links."
+                case .on: return "Allow to send POPOPX links."
+                case .off: return "Prohibit sending POPOPX links."
                 }
             case .reports:
                 switch enabled {
@@ -1603,9 +1603,9 @@ public enum GroupFeature: String, Decodable, Feature, Hashable {
             case .simplexLinks:
                 switch enabled {
                 case .on: return isChannel
-                    ? "Subscribers can send SimpleX links."
-                    : "Members can send SimpleX links."
-                case .off: return "SimpleX links are prohibited."
+                    ? "Subscribers can send POPOPX links."
+                    : "Members can send POPOPX links."
+                case .off: return "POPOPX links are prohibited."
                 }
             case .reports:
                 switch enabled {
@@ -2755,7 +2755,7 @@ public struct GroupDirectInvitation: Decodable, Hashable {
     }
 
     public static let sampleData = GroupDirectInvitation(
-        groupDirectInvLink: "simplex_link",
+        groupDirectInvLink: "popopx_link",
         fromGroupId_: 1,
         fromGroupMemberId_: 1,
         fromGroupMemberConnId_: 1,
@@ -5998,7 +5998,7 @@ public enum Format: Decodable, Equatable, Hashable {
     case uri
     case hyperLink(showText: String?, linkUri: String)
     case simplexLink(showText: String?, linkType: SimplexLinkType, simplexUri: String, smpHosts: [String])
-    case simplexName(nameInfo: SimplexNameInfo)
+    case simplexName(nameInfo: PopopxNameInfo)
     case command(commandStr: String)
     case mention(memberName: String)
     case modal(modalName: String, text: String)
@@ -6030,20 +6030,20 @@ public enum SimplexLinkType: String, Decodable, Hashable {
 
     public var description: String {
         switch self {
-        case .contact: return NSLocalizedString("SimpleX contact address", comment: "simplex link type")
-        case .invitation: return NSLocalizedString("SimpleX one-time invitation", comment: "simplex link type")
-        case .group: return NSLocalizedString("SimpleX group link", comment: "simplex link type")
-        case .channel: return NSLocalizedString("SimpleX channel link", comment: "simplex link type")
-        case .relay: return NSLocalizedString("SimpleX relay address", comment: "simplex link type")
+        case .contact: return NSLocalizedString("POPOPX contact address", comment: "popopx link type")
+        case .invitation: return NSLocalizedString("POPOPX one-time invitation", comment: "popopx link type")
+        case .group: return NSLocalizedString("POPOPX group link", comment: "popopx link type")
+        case .channel: return NSLocalizedString("POPOPX channel link", comment: "popopx link type")
+        case .relay: return NSLocalizedString("POPOPX relay address", comment: "popopx link type")
         }
     }
 }
 
-public struct SimplexNameInfo: Codable, Equatable, Hashable {
-    public var nameType: SimplexNameType
+public struct PopopxNameInfo: Codable, Equatable, Hashable {
+    public var nameType: PopopxNameType
     public var nameDomain: SimplexDomain
 
-    // mirrors backend shortNameInfoStr: "#name" for a simplex public group, else prefix + full domain
+    // mirrors backend shortNameInfoStr: "#name" for a popopx public group, else prefix + full domain
     public var shortStr: String {
         if nameType == .publicGroup && nameDomain.nameTLD == .popopx && nameDomain.subDomain.isEmpty {
             return "#" + nameDomain.domain
@@ -6052,14 +6052,14 @@ public struct SimplexNameInfo: Codable, Equatable, Hashable {
         }
     }
 
-    public init(nameType: SimplexNameType, nameDomain: SimplexDomain) {
+    public init(nameType: PopopxNameType, nameDomain: SimplexDomain) {
         self.nameType = nameType
         self.nameDomain = nameDomain
     }
 }
 
 public struct SimplexDomain: Codable, Equatable, Hashable {
-    public var nameTLD: SimplexTLD
+    public var nameTLD: PopopxTLD
     public var domain: String
     public var subDomain: [String]
 
@@ -6078,20 +6078,20 @@ public struct SimplexDomain: Codable, Equatable, Hashable {
         "domain=\(fullDomainName)"
     }
 
-    public init(nameTLD: SimplexTLD, domain: String, subDomain: [String]) {
+    public init(nameTLD: PopopxTLD, domain: String, subDomain: [String]) {
         self.nameTLD = nameTLD
         self.domain = domain
         self.subDomain = subDomain
     }
 }
 
-public enum SimplexTLD: String, Codable, Hashable {
+public enum PopopxTLD: String, Codable, Hashable {
     case popopx
     case testing
     case web
 }
 
-public enum SimplexNameType: String, Codable, Hashable {
+public enum PopopxNameType: String, Codable, Hashable {
     case publicGroup
     case contact
 }
@@ -6185,7 +6185,7 @@ extension ReportReason: Decodable {
     }
 }
 
-// Struct to use with simplex API
+// Struct to use with popopx API
 public struct LinkPreview: Codable, Equatable, Hashable {
     public init(uri: String, title: String, description: String = "", image: String) {
         self.uri = uri

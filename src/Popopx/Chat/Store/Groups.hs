@@ -669,7 +669,7 @@ deleteContactCardKeepConn db connId Contact {contactId, profile = LocalProfile {
   DB.execute db "DELETE FROM contacts WHERE contact_id = ?" (Only contactId)
   DB.execute db "DELETE FROM contact_profiles WHERE contact_profile_id = ?" (Only profileId)
 
-createPreparedGroup :: DB.Connection -> TVar ChaChaDRG -> StoreCxt -> User -> GroupProfile -> Bool -> CreatedLinkContact -> Maybe SharedMsgId -> Bool -> GroupMemberRole -> Maybe Int64 -> Maybe SimplexDomain -> ExceptT StoreError IO (GroupInfo, Maybe GroupMember)
+createPreparedGroup :: DB.Connection -> TVar ChaChaDRG -> StoreCxt -> User -> GroupProfile -> Bool -> CreatedLinkContact -> Maybe SharedMsgId -> Bool -> GroupMemberRole -> Maybe Int64 -> Maybe PopopxDomain -> ExceptT StoreError IO (GroupInfo, Maybe GroupMember)
 createPreparedGroup db gVar cxt user@User {userId, userContactId} groupProfile business connLinkToConnect welcomeSharedMsgId useRelays userMemberRole publicMemberCount_ verifiedDomain = do
   currentTs <- liftIO getCurrentTime
   (memberPubKey, memberPrivKey) <- atomically $ C.generateKeyPair gVar
@@ -2792,7 +2792,7 @@ setGroupDomainVerified db User {userId} g@GroupInfo {groupId} verified = do
 
 -- A business group has no publicGroup claim, so the domain it was connected by (from its address) is written
 -- directly to group_domain and marked verified, so it is found by the local name search (getGroupToConnect).
-setPreparedGroupDomain :: DB.Connection -> User -> GroupInfo -> SimplexDomain -> IO GroupInfo
+setPreparedGroupDomain :: DB.Connection -> User -> GroupInfo -> PopopxDomain -> IO GroupInfo
 setPreparedGroupDomain db user@User {userId} g@GroupInfo {groupId} domain = do
   DB.execute
     db

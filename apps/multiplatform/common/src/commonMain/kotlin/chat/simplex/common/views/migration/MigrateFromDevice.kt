@@ -367,7 +367,7 @@ private fun MutableState<MigrationFromState>.LinkShownView(fileId: Long, link: S
   SectionTextFooter(annotatedStringResource(MR.strings.migrate_from_device_choose_migrate_from_another_device))
   SectionDividerSpaced()
   SectionView(stringResource(MR.strings.show_QR_code)) {
-    SimpleXLinkQRCode(link, onShare = {})
+    POPOPXLinkQRCode(link, onShare = {})
   }
   SectionDividerSpaced()
   SectionView(stringResource(MR.strings.migrate_from_device_or_share_this_file_link)) {

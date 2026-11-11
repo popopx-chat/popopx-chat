@@ -63,7 +63,7 @@ fun GroupLinkView(
         groupLinkMemberRole.value = link.acceptMemberRole
         onGroupLinkUpdated?.invoke(link)
         if (shareOnCompletion) {
-          clipboard.shareText(link.connLinkContact.simplexChatUri(short = true))
+          clipboard.shareText(link.connLinkContact.popopxChatUri(short = true))
         }
       }
       creatingLink = false
@@ -236,7 +236,7 @@ fun GroupLinkLayout(
               { ToggleShortLinkButton(showShortLink) }
             } else null) {
           Box(Modifier.padding(vertical = DEFAULT_PADDING_HALF)) {
-            SimpleXCreatedLinkQRCode(groupLink.connLinkContact, short = showShortLink.value)
+            POPOPXCreatedLinkQRCode(groupLink.connLinkContact, short = showShortLink.value)
           }
           if (!isChannel && groupLink.shouldBeUpgraded) {
             SettingsActionItem(
@@ -254,10 +254,10 @@ fun GroupLinkLayout(
             click = {
               if (!isChannel && groupLink.shouldBeUpgraded) {
                 showAddShortLinkAlert {
-                  clipboard.shareText(groupLink.connLinkContact.simplexChatUri(short = showShortLink.value))
+                  clipboard.shareText(groupLink.connLinkContact.popopxChatUri(short = showShortLink.value))
                 }
               } else {
-                clipboard.shareText(groupLink.connLinkContact.simplexChatUri(short = showShortLink.value))
+                clipboard.shareText(groupLink.connLinkContact.popopxChatUri(short = showShortLink.value))
               }
             },
             iconColor = MaterialTheme.colors.primary,

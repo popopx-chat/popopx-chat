@@ -41,14 +41,14 @@ import kotlin.math.ceil
 import kotlin.math.floor
 
 @Composable
-fun SimpleXInfo(chatModel: ChatModel, onboarding: Boolean = true) {
+fun POPOPXInfo(chatModel: ChatModel, onboarding: Boolean = true) {
   if (onboarding) {
     if (appPlatform.isDesktop) {
-      SimpleXInfoDesktop(chatModel)
+      POPOPXInfoDesktop(chatModel)
     } else {
       CompositionLocalProvider(LocalAppBarHandler provides rememberAppBarHandler()) {
         ModalView({}, showClose = false, showAppBar = false) {
-          SimpleXInfoLayout(
+          POPOPXInfoLayout(
             user = chatModel.currentUser.value,
             onboardingStage = chatModel.controller.appPrefs.onboardingStage
           )
@@ -56,7 +56,7 @@ fun SimpleXInfo(chatModel: ChatModel, onboarding: Boolean = true) {
       }
     }
   } else {
-    SimpleXInfoLayout(
+    POPOPXInfoLayout(
       user = chatModel.currentUser.value,
       onboardingStage = null
     )
@@ -64,7 +64,7 @@ fun SimpleXInfo(chatModel: ChatModel, onboarding: Boolean = true) {
 }
 
 @Composable
-private fun SimpleXInfoDesktop(chatModel: ChatModel) {
+private fun POPOPXInfoDesktop(chatModel: ChatModel) {
   val user = chatModel.currentUser.value
   val onboardingStage = chatModel.controller.appPrefs.onboardingStage
   CompositionLocalProvider(LocalAppBarHandler provides rememberAppBarHandler()) {
@@ -72,7 +72,7 @@ private fun SimpleXInfoDesktop(chatModel: ChatModel) {
       ColumnWithScrollBar(Modifier.padding(horizontal = DEFAULT_PADDING), horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(Modifier.height(DEFAULT_PADDING))
         Box(Modifier.widthIn(max = 600.dp).fillMaxWidth(0.45f).align(Alignment.CenterHorizontally)) {
-          SimpleXLogo()
+          POPOPXLogo()
         }
         Spacer(Modifier.fillMaxHeight().weight(1f))
         Column(Modifier.widthIn(max = 600.dp).align(Alignment.CenterHorizontally), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -86,7 +86,7 @@ private fun SimpleXInfoDesktop(chatModel: ChatModel) {
         Spacer(Modifier.fillMaxHeight().weight(1f))
         Column(Modifier.widthIn(max = 1000.dp).align(Alignment.CenterHorizontally), horizontalAlignment = Alignment.CenterHorizontally) {
           OnboardingActionButton(user, onboardingStage)
-          TextButtonBelowOnboardingButton(stringResource(MR.strings.why_simplex_is_built), icon = painterResource(MR.images.ic_info), onClick = {
+          TextButtonBelowOnboardingButton(stringResource(MR.strings.why_popopx_is_built), icon = painterResource(MR.images.ic_info), onClick = {
             ModalManager.fullscreen.showModal(forceAnimated = true) { HowItWorks(user, onboardingStage) }
           })
         }
@@ -101,7 +101,7 @@ private fun SimpleXInfoDesktop(chatModel: ChatModel) {
 }
 
 @Composable
-fun SimpleXInfoLayout(
+fun POPOPXInfoLayout(
   user: User?,
   onboardingStage: SharedPreference<OnboardingStage>?
 ) {
@@ -109,7 +109,7 @@ fun SimpleXInfoLayout(
   val modifier = Modifier.fillMaxSize().systemBarsPadding().padding(horizontal = DEFAULT_ONBOARDING_HORIZONTAL_PADDING)
   Column(if (topBar) modifier.padding(top = AppBarHeight * fontSizeSqrtMultiplier) else modifier, horizontalAlignment = Alignment.CenterHorizontally) {
     Box(Modifier.padding(top = DEFAULT_PADDING * 2).widthIn(max = if (appPlatform.isAndroid) 185.dp else 160.dp), contentAlignment = Alignment.Center) {
-      SimpleXLogo()
+      POPOPXLogo()
     }
     OnboardingShrinkingLayout(
       modifier = Modifier.fillMaxSize(),
@@ -154,7 +154,7 @@ fun SimpleXInfoLayout(
       if (onboardingStage != null) {
         Column(Modifier.widthIn(max = if (appPlatform.isAndroid) 450.dp else 1000.dp), horizontalAlignment = Alignment.CenterHorizontally) {
           OnboardingActionButton(user, onboardingStage)
-          TextButtonBelowOnboardingButton(stringResource(MR.strings.why_simplex_is_built), icon = painterResource(MR.images.ic_info), onClick = {
+          TextButtonBelowOnboardingButton(stringResource(MR.strings.why_popopx_is_built), icon = painterResource(MR.images.ic_info), onClick = {
             ModalManager.fullscreen.showModal { HowItWorks(user, onboardingStage) }
           })
         }
@@ -172,10 +172,10 @@ fun SimpleXInfoLayout(
 }
 
 @Composable
-fun SimpleXLogo() {
+fun POPOPXLogo() {
   Image(
     painter = painterResource(if (isInDarkTheme()) MR.images.logo_light else MR.images.logo),
-    contentDescription = stringResource(MR.strings.image_descr_simplex_logo),
+    contentDescription = stringResource(MR.strings.image_descr_popopx_logo),
     contentScale = ContentScale.FillWidth,
     modifier = Modifier
       .padding(bottom = 10.dp)
@@ -301,9 +301,9 @@ fun OnboardingInformationButton(
   name = "Dark Mode"
 )*/
 @Composable
-fun PreviewSimpleXInfo() {
-  SimpleXTheme {
-    SimpleXInfoLayout(
+fun PreviewPOPOPXInfo() {
+  POPOPXTheme {
+    POPOPXInfoLayout(
       user = null,
       onboardingStage = null
     )

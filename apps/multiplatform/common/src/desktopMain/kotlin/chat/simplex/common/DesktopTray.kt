@@ -48,7 +48,7 @@ val trayIsAvailable: Boolean by lazy {
 }
 
 @Composable
-fun ApplicationScope.SimplexTray() {
+fun ApplicationScope.PopopxTray() {
   if (!trayIsAvailable) return
   if (remember { appPrefs.closeBehavior.state }.value != CloseBehavior.MinimizeToTray) return
   // Sum of per-profile unread (UserInfo.unreadCount, the same field UserPicker renders
@@ -61,9 +61,9 @@ fun ApplicationScope.SimplexTray() {
     }
   }
   val iconRes = if (unread > 0) {
-    if (isInDarkTheme()) MR.images.ic_simplex_tray_dot_light else MR.images.ic_simplex_tray_dot
+    if (isInDarkTheme()) MR.images.ic_popopx_tray_dot_light else MR.images.ic_popopx_tray_dot
   } else {
-    if (isInDarkTheme()) MR.images.ic_simplex_tray_light else MR.images.ic_simplex
+    if (isInDarkTheme()) MR.images.ic_popopx_tray_light else MR.images.ic_popopx
   }
   val tooltip =
     if (unread > 0) stringResource(MR.strings.tray_tooltip_unread, unread)
@@ -106,7 +106,7 @@ fun ApplicationScope.requestCloseBehavior() {
         SectionItemView({
           AlertManager.shared.hideAlert()
           pref.set(CloseBehavior.MinimizeToTray)
-          simplexWindowState.windowVisible.value = false
+          popopxWindowState.windowVisible.value = false
         }) {
           Text(
             stringResource(MR.strings.close_behavior_dialog_minimize),

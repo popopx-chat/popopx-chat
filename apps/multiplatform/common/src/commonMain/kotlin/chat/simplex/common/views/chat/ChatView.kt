@@ -279,7 +279,7 @@ fun ChatView(
         val overrides = if (perChatTheme != null) ThemeManager.currentColors(null, perChatTheme, chatModel.currentUser.value?.uiThemes, appPrefs.themeOverrides.get()) else null
         val fullDeleteAllowed = remember(chatInfo) { chatInfo.featureEnabled(ChatFeature.FullDelete) }
 
-        SimpleXThemeOverride(overrides ?: CurrentColors.collectAsState().value) {
+        POPOPXThemeOverride(overrides ?: CurrentColors.collectAsState().value) {
           val onSearchValueChanged: (String) -> Unit = onSearchValueChanged@{ value ->
             val sameText = searchText.value == value
             // showSearch can be false with empty text when it was closed manually after clicking on message from search to load .around it
@@ -394,7 +394,7 @@ fun ChatView(
             attachmentBottomSheetState,
             searchText,
             useLinkPreviews = useLinkPreviews,
-            linkMode = chatModel.simplexLinkMode.value,
+            linkMode = chatModel.popopxLinkMode.value,
             selectedChatItems = selectedChatItems,
             back = {
               hideKeyboard(view)
@@ -946,7 +946,7 @@ fun ChatLayout(
   attachmentBottomSheetState: ModalBottomSheetState,
   searchValue: State<String>,
   useLinkPreviews: Boolean,
-  linkMode: SimplexLinkMode,
+  linkMode: PopopxLinkMode,
   selectedChatItems: MutableState<Set<Long>?>,
   back: () -> Unit,
   info: () -> Unit,
@@ -1774,7 +1774,7 @@ fun BoxScope.ChatItemsList(
   composeViewHeight: State<Dp>,
   searchValue: State<String>,
   useLinkPreviews: Boolean,
-  linkMode: SimplexLinkMode,
+  linkMode: PopopxLinkMode,
   scrollToItemId: MutableState<Long?>,
   selectedChatItems: MutableState<Set<Long>?>,
   showMemberInfo: (GroupInfo, GroupMember) -> Unit,
@@ -2397,8 +2397,8 @@ fun BoxScope.ChatItemsList(
         )
 
         when (chatInfo) {
-          is ChatInfo.Direct -> ContactSimplexNameView(chatInfo.contact, verifiable = false)
-          is ChatInfo.Group -> GroupSimplexNameView(chatInfo.groupInfo, verifiable = false)
+          is ChatInfo.Direct -> ContactPopopxNameView(chatInfo.contact, verifiable = false)
+          is ChatInfo.Group -> GroupPopopxNameView(chatInfo.groupInfo, verifiable = false)
           else -> {}
         }
 
@@ -3869,7 +3869,7 @@ private fun shouldShowAvatar(current: ChatItem, older: ChatItem?): Boolean {
 )*/
 @Composable
 fun PreviewChatLayout() = BubblePreview {
-  SimpleXTheme {
+  POPOPXTheme {
     val chatItems = listOf(
       ChatItem.getSampleData(
         1, CIDirection.DirectSnd(), previewDate, "hello"
@@ -3902,7 +3902,7 @@ fun PreviewChatLayout() = BubblePreview {
       attachmentBottomSheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden),
       searchValue,
       useLinkPreviews = true,
-      linkMode = SimplexLinkMode.DESCRIPTION,
+      linkMode = PopopxLinkMode.DESCRIPTION,
       selectedChatItems = remember { mutableStateOf(null) },
       back = {},
       info = {},
@@ -3952,7 +3952,7 @@ fun PreviewChatLayout() = BubblePreview {
 @Preview
 @Composable
 fun PreviewGroupChatLayout() = BubblePreview {
-  SimpleXTheme {
+  POPOPXTheme {
     val chatItems = listOf(
       ChatItem.getSampleData(
         1, CIDirection.GroupSnd(), previewDate, "hello"
@@ -3985,7 +3985,7 @@ fun PreviewGroupChatLayout() = BubblePreview {
       attachmentBottomSheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden),
       searchValue,
       useLinkPreviews = true,
-      linkMode = SimplexLinkMode.DESCRIPTION,
+      linkMode = PopopxLinkMode.DESCRIPTION,
       selectedChatItems = remember { mutableStateOf(null) },
       back = {},
       info = {},

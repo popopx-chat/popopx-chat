@@ -22,7 +22,7 @@ object NtfManager {
   private val macToaster by lazy { NotificationCenterToaster(ToasterFactory.getSettings()) }
 
   fun notifyCallInvitation(invitation: RcvCallInvitation): Boolean {
-    if (simplexWindowState.windowFocused.value) return false
+    if (popopxWindowState.windowFocused.value) return false
     val contactId = invitation.contact.id
     Log.d(TAG, "notifyCallInvitation $contactId")
     val image = invitation.contact.image
@@ -182,8 +182,8 @@ object NtfManager {
   private fun windowsDisplayNotification(title: String, text: String, icon: ImageBitmap?) {
     if (SystemTray.isSupported()) {
       val tray = SystemTray.getSystemTray()
-      tray.remove(tray.trayIcons.firstOrNull { it.toolTip == "SimpleX" })
-      val trayIcon = TrayIcon(icon?.toAwtImage(), "SimpleX")
+      tray.remove(tray.trayIcons.firstOrNull { it.toolTip == "POPOPX" })
+      val trayIcon = TrayIcon(icon?.toAwtImage(), "POPOPX")
       trayIcon.isImageAutoSize = true
       tray.add(trayIcon)
       trayIcon.displayMessage(title, text, MessageType.INFO)

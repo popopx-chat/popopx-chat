@@ -149,12 +149,12 @@
       </trans-unit>
       <trans-unit id="**More private**: check new messages every 20 minutes. Only device token is shared with our push server. It doesn't see how many contacts you have, or any message metadata." xml:space="preserve" approved="no">
         <source>**More private**: check new messages every 20 minutes. Only device token is shared with our push server. It doesn't see how many contacts you have, or any message metadata.</source>
-        <target state="needs-translation">**Privatnije**: provjeravajte nove poruke svakih 20 minuta. Token uređaja dijeli se s SimpleX Chat poslužiteljem, ali ne i s brojem kontakata ili poruka koje imate.</target>
+        <target state="needs-translation">**Privatnije**: provjeravajte nove poruke svakih 20 minuta. Token uređaja dijeli se s POPOPX Chat poslužiteljem, ali ne i s brojem kontakata ili poruka koje imate.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="**Most private**: do not use SimpleX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app." xml:space="preserve" approved="no">
-        <source>**Most private**: do not use SimpleX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app.</source>
-        <target state="needs-translation">**Najprivatniji**: nemojte koristiti SimpleX Chat poslužitelj obavijesti, povremeno provjeravajte poruke u pozadini (ovisi o tome koliko često koristite aplikaciju).</target>
+      <trans-unit id="**Most private**: do not use POPOPX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app." xml:space="preserve" approved="no">
+        <source>**Most private**: do not use POPOPX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app.</source>
+        <target state="needs-translation">**Najprivatniji**: nemojte koristiti POPOPX Chat poslužitelj obavijesti, povremeno provjeravajte poruke u pozadini (ovisi o tome koliko često koristite aplikaciju).</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="**Paste received link** or open it in the browser and tap **Open in mobile app**." xml:space="preserve" approved="no">
@@ -167,9 +167,9 @@
         <target state="needs-translation">**Imajte na umu**: NEĆETE moći oporaviti ili promijeniti pristupni izraz ako ga izgubite.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="**Recommended**: device token and end-to-end encrypted notifications are sent to SimpleX Chat push server, but it does not see the message content, size or who it is from." xml:space="preserve" approved="no">
-        <source>**Recommended**: device token and end-to-end encrypted notifications are sent to SimpleX Chat push server, but it does not see the message content, size or who it is from.</source>
-        <target state="needs-translation">**Preporučeno**: token uređaja i obavijesti šalju se na poslužitelj obavijesti SimpleX Chata, ali ne i sadržaj poruke, veličinu ili od koga je.</target>
+      <trans-unit id="**Recommended**: device token and end-to-end encrypted notifications are sent to POPOPX Chat push server, but it does not see the message content, size or who it is from." xml:space="preserve" approved="no">
+        <source>**Recommended**: device token and end-to-end encrypted notifications are sent to POPOPX Chat push server, but it does not see the message content, size or who it is from.</source>
+        <target state="needs-translation">**Preporučeno**: token uređaja i obavijesti šalju se na poslužitelj obavijesti POPOPX Chata, ali ne i sadržaj poruke, veličinu ili od koga je.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="**Scan QR code**: to connect to your contact in person or via video call." xml:space="preserve" approved="no">
@@ -269,14 +269,14 @@
 **Imajte na umu**: ako imate mnogo priključaka, potrošnja baterije i prometa može biti znatno veća, a neke veze mogu propasti.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="About SimpleX" xml:space="preserve" approved="no">
-        <source>About SimpleX</source>
-        <target state="needs-translation">O SimpleX-u</target>
+      <trans-unit id="About POPOPX" xml:space="preserve" approved="no">
+        <source>About POPOPX</source>
+        <target state="needs-translation">O POPOPX-u</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="About SimpleX Chat" xml:space="preserve" approved="no">
-        <source>About SimpleX Chat</source>
-        <target state="translated">O SimpleX chatu</target>
+      <trans-unit id="About POPOPX Chat" xml:space="preserve" approved="no">
+        <source>About POPOPX Chat</source>
+        <target state="translated">O POPOPX chatu</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Accent color" xml:space="preserve" approved="no">

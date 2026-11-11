@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 28.11.2023.
-//  Copyright © 2023 SimpleX Chat. All rights reserved.
+//  Copyright © 2023 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -39,9 +39,9 @@ struct NewChatSheet: View {
     @State private var searchMode = false
     @FocusState var searchFocussed: Bool
     @State private var searchText = ""
-    @State private var searchShowingSimplexLink = false
-    @State private var searchChatFilteredBySimplexLink: String? = nil
-    // when the search text is a SimpleX name, the string to connect to (with @/# preserved); nil otherwise
+    @State private var searchShowingPopopxLink = false
+    @State private var searchChatFilteredByPopopxLink: String? = nil
+    // when the search text is a POPOPX name, the string to connect to (with @/# preserved); nil otherwise
     @State private var connectNameCandidate: String? = nil
     @State private var alert: SomeAlert?
 
@@ -88,8 +88,8 @@ struct NewChatSheet: View {
                     searchMode: $searchMode,
                     searchFocussed: $searchFocussed,
                     searchText: $searchText,
-                    searchShowingSimplexLink: $searchShowingSimplexLink,
-                    searchChatFilteredBySimplexLink: $searchChatFilteredBySimplexLink,
+                    searchShowingPopopxLink: $searchShowingPopopxLink,
+                    searchChatFilteredByPopopxLink: $searchChatFilteredByPopopxLink,
                     connectNameCandidate: $connectNameCandidate
                 )
                 .frame(maxWidth: .infinity)
@@ -162,8 +162,8 @@ struct NewChatSheet: View {
                 searchText: $searchText,
                 header: "Your Contacts",
                 searchFocussed: $searchFocussed,
-                searchShowingSimplexLink: $searchShowingSimplexLink,
-                searchChatFilteredBySimplexLink: $searchChatFilteredBySimplexLink,
+                searchShowingPopopxLink: $searchShowingPopopxLink,
+                searchChatFilteredByPopopxLink: $searchChatFilteredByPopopxLink,
                 showDeletedChatIcon: true
             )
         }
@@ -228,8 +228,8 @@ struct ContactsList: View {
     @Binding var searchText: String
     var header: String? = nil
     @FocusState.Binding var searchFocussed: Bool
-    @Binding var searchShowingSimplexLink: Bool
-    @Binding var searchChatFilteredBySimplexLink: String?
+    @Binding var searchShowingPopopxLink: Bool
+    @Binding var searchChatFilteredByPopopxLink: String?
     var showDeletedChatIcon: Bool
     @AppStorage(DEFAULT_SHOW_UNREAD_AND_FAVORITES) private var showUnreadAndFavorites = false
     
@@ -237,8 +237,8 @@ struct ContactsList: View {
         let contactChats = chatModel.chats.filter { chat in chatPredicate(chat, !searchText.isEmpty) }
         let filteredContactChats = filteredContactChats(
             showUnreadAndFavorites: showUnreadAndFavorites,
-            searchShowingSimplexLink: searchShowingSimplexLink,
-            searchChatFilteredBySimplexLink: searchChatFilteredBySimplexLink,
+            searchShowingPopopxLink: searchShowingPopopxLink,
+            searchChatFilteredByPopopxLink: searchChatFilteredByPopopxLink,
             searchText: searchText,
             contactChats: contactChats
         )
@@ -308,13 +308,13 @@ struct ContactsList: View {
     
     func filteredContactChats(
         showUnreadAndFavorites: Bool,
-        searchShowingSimplexLink: Bool,
-        searchChatFilteredBySimplexLink: String?,
+        searchShowingPopopxLink: Bool,
+        searchChatFilteredByPopopxLink: String?,
         searchText: String,
         contactChats: [Chat]
     ) -> [Chat] {
-        let linkChatId = searchChatFilteredBySimplexLink
-        let s = searchShowingSimplexLink ? "" : searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let linkChatId = searchChatFilteredByPopopxLink
+        let s = searchShowingPopopxLink ? "" : searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
 
         let filteredChats: [Chat]
 
@@ -337,8 +337,8 @@ struct ContactsListSearchBar: View {
     @Binding var searchMode: Bool
     @FocusState.Binding var searchFocussed: Bool
     @Binding var searchText: String
-    @Binding var searchShowingSimplexLink: Bool
-    @Binding var searchChatFilteredBySimplexLink: String?
+    @Binding var searchShowingPopopxLink: Bool
+    @Binding var searchChatFilteredByPopopxLink: String?
     @Binding var connectNameCandidate: String?
     @State private var ignoreSearchTextChange = false
     @AppStorage(DEFAULT_SHOW_UNREAD_AND_FAVORITES) private var showUnreadAndFavorites = false
@@ -352,9 +352,9 @@ struct ContactsListSearchBar: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 16, height: 16)
-                TextField("Search or paste SimpleX link", text: $searchText)
-                    .foregroundColor(searchShowingSimplexLink ? theme.colors.secondary : theme.colors.onBackground)
-                    .disabled(searchShowingSimplexLink)
+                TextField("Search or paste POPOPX link", text: $searchText)
+                    .foregroundColor(searchShowingPopopxLink ? theme.colors.secondary : theme.colors.onBackground)
+                    .disabled(searchShowingPopopxLink)
                     .focused($searchFocussed)
                     .frame(maxWidth: .infinity)
                 if connectProgressManager.showConnectProgress != nil {
@@ -400,13 +400,13 @@ struct ContactsListSearchBar: View {
                     searchFocussed = false
                     ignoreSearchTextChange = true
                     searchText = linkText
-                    searchShowingSimplexLink = true
-                    searchChatFilteredBySimplexLink = nil
+                    searchShowingPopopxLink = true
+                    searchChatFilteredByPopopxLink = nil
                     connectNameCandidate = nil
                     connect(text)
                 default:
                     // A name is resolved only when its "Connect to …" row is tapped, not on every keystroke.
-                    // The simplex-name filter is chat-list only: this contacts/deleted view is a scoped
+                    // The popopx-name filter is chat-list only: this contacts/deleted view is a scoped
                     // subset, so a resolved chat id (channel, business, unlisted or active-only contact)
                     // may not be present in it.
                     let candidate = nameSearchCandidate(s)
@@ -417,8 +417,8 @@ struct ContactsListSearchBar: View {
                         } else {
                             connectProgressManager.cancelConnectProgress()
                         }
-                        searchShowingSimplexLink = false
-                        searchChatFilteredBySimplexLink = nil
+                        searchShowingPopopxLink = false
+                        searchChatFilteredByPopopxLink = nil
                     }
                 }
             }
@@ -449,7 +449,7 @@ struct ContactsListSearchBar: View {
                 searchText = ""
                 searchFocussed = false
             },
-            filterKnownContact: { searchChatFilteredBySimplexLink = $0.id }
+            filterKnownContact: { searchChatFilteredByPopopxLink = $0.id }
         )
     }
 }
@@ -459,8 +459,8 @@ struct DeletedChats: View {
     @State private var searchMode = false
     @FocusState var searchFocussed: Bool
     @State private var searchText = ""
-    @State private var searchShowingSimplexLink = false
-    @State private var searchChatFilteredBySimplexLink: String? = nil
+    @State private var searchShowingPopopxLink = false
+    @State private var searchChatFilteredByPopopxLink: String? = nil
     // deleted contacts are not connected to by name, so this candidate only stops per-keystroke resolution
     @State private var connectNameCandidate: String? = nil
 
@@ -470,8 +470,8 @@ struct DeletedChats: View {
                 searchMode: $searchMode,
                 searchFocussed: $searchFocussed,
                 searchText: $searchText,
-                searchShowingSimplexLink: $searchShowingSimplexLink,
-                searchChatFilteredBySimplexLink: $searchChatFilteredBySimplexLink,
+                searchShowingPopopxLink: $searchShowingPopopxLink,
+                searchChatFilteredByPopopxLink: $searchChatFilteredByPopopxLink,
                 connectNameCandidate: $connectNameCandidate
             )
             .listRowSeparator(.hidden)
@@ -484,8 +484,8 @@ struct DeletedChats: View {
                 searchMode: $searchMode,
                 searchText: $searchText,
                 searchFocussed: $searchFocussed,
-                searchShowingSimplexLink: $searchShowingSimplexLink,
-                searchChatFilteredBySimplexLink: $searchChatFilteredBySimplexLink,
+                searchShowingPopopxLink: $searchShowingPopopxLink,
+                searchChatFilteredByPopopxLink: $searchChatFilteredByPopopxLink,
                 showDeletedChatIcon: false
             )
         }

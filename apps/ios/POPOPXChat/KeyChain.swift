@@ -3,7 +3,7 @@
 //  POPOPXChat
 //
 //  Created by Evgeny on 04/09/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 
 import Foundation

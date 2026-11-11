@@ -6,9 +6,9 @@ import chat.simplex.common.simplexWindowState
 @Composable
 actual fun BackHandler(enabled: Boolean, onBack: () -> Unit) {
   DisposableEffect(enabled) {
-    if (enabled) simplexWindowState.backstack.add(onBack)
+    if (enabled) popopxWindowState.backstack.add(onBack)
     onDispose {
-      simplexWindowState.backstack.remove(onBack)
+      popopxWindowState.backstack.remove(onBack)
     }
   }
 }

@@ -188,7 +188,7 @@ class CallService: Service() {
 companion object {
     const val TAG = "CALL_SERVICE"
     const val CALL_NOTIFICATION_CHANNEL_ID = "com.popopxchat.popopx.CALL_SERVICE_NOTIFICATION"
-    const val CALL_NOTIFICATION_CHANNEL_NAME = "SimpleX Chat call service"
+    const val CALL_NOTIFICATION_CHANNEL_NAME = "POPOPX Chat call service"
     const val CALL_SERVICE_ID = 6788
     const val WAKE_LOCK_TAG = "CallService::lock"
 

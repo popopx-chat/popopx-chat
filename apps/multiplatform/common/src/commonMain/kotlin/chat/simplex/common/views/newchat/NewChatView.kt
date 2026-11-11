@@ -489,16 +489,16 @@ private fun InviteView(rhId: Long?, connLinkInvitation: CreatedConnLink, contact
       Modifier.fillMaxWidth().padding(horizontal = DEFAULT_PADDING, vertical = DEFAULT_PADDING_HALF),
       style = MaterialTheme.typography.body1
     )
-    LinkTextView(connLinkInvitation.simplexChatUri(short = showShortLink.value), true)
+    LinkTextView(connLinkInvitation.popopxChatUri(short = showShortLink.value), true)
     Text(
       stringResource(MR.strings.onboarding_or_show_qr_code),
       Modifier.fillMaxWidth().padding(horizontal = DEFAULT_PADDING, vertical = DEFAULT_PADDING_HALF),
       style = MaterialTheme.typography.body1
     )
-    SimpleXCreatedLinkQRCode(connLinkInvitation, short = showShortLink.value, onShare = { chatModel.markShowingInvitationUsed() })
+    POPOPXCreatedLinkQRCode(connLinkInvitation, short = showShortLink.value, onShare = { chatModel.markShowingInvitationUsed() })
   } else {
     SectionView(stringResource(MR.strings.share_this_1_time_link), headerBottomPadding = 5.dp) {
-      LinkTextView(connLinkInvitation.simplexChatUri(short = showShortLink.value), true)
+      LinkTextView(connLinkInvitation.popopxChatUri(short = showShortLink.value), true)
     }
 
     Spacer(Modifier.height(DEFAULT_PADDING))
@@ -507,7 +507,7 @@ private fun InviteView(rhId: Long?, connLinkInvitation: CreatedConnLink, contact
       stringResource(MR.strings.or_show_this_qr_code).uppercase(),
       titleButton = if (connLinkInvitation.connShortLink != null) {{ ToggleShortLinkButton(showShortLink) }} else null
     ) {
-      SimpleXCreatedLinkQRCode(connLinkInvitation, short = showShortLink.value, onShare = { chatModel.markShowingInvitationUsed() })
+      POPOPXCreatedLinkQRCode(connLinkInvitation, short = showShortLink.value, onShare = { chatModel.markShowingInvitationUsed() })
     }
   }
 
@@ -658,7 +658,7 @@ private fun ConnectView(rhId: Long?, showQRCodeScanner: MutableState<Boolean>, p
         if (!linkVerified) {
           AlertManager.shared.showAlertMsg(
             title = generalGetString(MR.strings.invalid_qr_code),
-            text = generalGetString(MR.strings.code_you_scanned_is_not_simplex_link_qr_code)
+            text = generalGetString(MR.strings.code_you_scanned_is_not_popopx_link_qr_code)
           )
         }
         verifyAndConnect(rhId, text, close)
@@ -777,10 +777,10 @@ private fun filteredProfiles(users: List<User>, searchTextOrPassword: String): L
   }
 }
 
-private fun verifyOnly(text: String?): Boolean = text != null && strIsSimplexLink(text)
+private fun verifyOnly(text: String?): Boolean = text != null && strIsPopopxLink(text)
 
 private suspend fun verifyAndConnect(rhId: Long?, text: String?, close: () -> Unit): Boolean {
-  if (text != null && strIsSimplexLink(text)) {
+  if (text != null && strIsPopopxLink(text)) {
     return withContext(Dispatchers.Default) {
       connect(rhId, text, close)
     }
@@ -821,14 +821,14 @@ private fun createInvitation(
   }
 }
 
-fun strIsSimplexLink(str: String): Boolean {
+fun strIsPopopxLink(str: String): Boolean {
   val parsedMd = parseToMarkdown(str)
   return parsedMd != null && parsedMd.size == 1 && parsedMd[0].format is Format.SimplexLink
 }
 
 sealed class ConnectTarget {
   class Link(val text: String, val linkType: SimplexLinkType, val linkText: String) : ConnectTarget()
-  class Name(val text: String, val nameInfo: SimplexNameInfo) : ConnectTarget()
+  class Name(val text: String, val nameInfo: PopopxNameInfo) : ConnectTarget()
 }
 
 fun strConnectTarget(str: String): ConnectTarget? {
@@ -837,7 +837,7 @@ fun strConnectTarget(str: String): ConnectTarget? {
   if (links.size == 1) {
     val fmt = links[0].format as Format.SimplexLink
     val text = if (fmt.showText != null) fmt.simplexUri else links[0].text
-    return ConnectTarget.Link(text, fmt.linkType, fmt.simplexLinkText)
+    return ConnectTarget.Link(text, fmt.linkType, fmt.popopxLinkText)
   }
   if (links.isEmpty()) {
     val nameFt = parsedMd.firstOrNull { it.format is Format.SimplexName }

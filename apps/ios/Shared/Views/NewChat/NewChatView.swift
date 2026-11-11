@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 28.11.2023.
-//  Copyright © 2023 SimpleX Chat. All rights reserved.
+//  Copyright © 2023 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/client/navigation.md
 
@@ -323,7 +323,7 @@ private struct InviteView: View {
 
     @ViewBuilder private var sectionHeaderText: some View {
         if onboarding {
-            Text("Send the link via any messenger - it's secure. Ask to paste into SimpleX.")
+            Text("Send the link via any messenger - it's secure. Ask to paste into POPOPX.")
                 .font(.body).foregroundColor(theme.colors.onBackground).textCase(nil)
         } else {
             Text("Share this 1-time invite link").foregroundColor(theme.colors.secondary)
@@ -332,7 +332,7 @@ private struct InviteView: View {
 
     private func shareLinkView() -> some View {
         HStack(spacing: 8) {
-            let link = connLinkInvitation.simplexChatUri(short: showShortLink)
+            let link = connLinkInvitation.popopxChatUri(short: showShortLink)
             linkTextView(link)
             Button {
                 showShareSheet(items: [link])
@@ -348,8 +348,8 @@ private struct InviteView: View {
 
     private func qrCodeView() -> some View {
         Section {
-            SimpleXCreatedLinkQRCode(link: connLinkInvitation, short: $showShortLink, onShare: setInvitationUsed)
-                .id("simplex-qrcode-view-for-\(connLinkInvitation.simplexChatUri(short: showShortLink))")
+            POPOPXCreatedLinkQRCode(link: connLinkInvitation, short: $showShortLink, onShare: setInvitationUsed)
+                .id("popopx-qrcode-view-for-\(connLinkInvitation.popopxChatUri(short: showShortLink))")
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -657,8 +657,8 @@ private struct ConnectView: View {
                             connect(pastedLink)
                         case .none:
                             alert = .newChatSomeAlert(alert: SomeAlert(
-                                alert: mkAlert(title: "Invalid link", message: "The text you pasted is not a SimpleX link."),
-                                id: "pasteLinkView: code is not a SimpleX link"
+                                alert: mkAlert(title: "Invalid link", message: "The text you pasted is not a POPOPX link."),
+                                id: "pasteLinkView: code is not a POPOPX link"
                             ))
                         }
                     }
@@ -685,12 +685,12 @@ private struct ConnectView: View {
         switch resp {
         case let .success(r):
             let link = r.string
-            if strIsSimplexLink(r.string) {
+            if strIsPopopxLink(r.string) {
                 connect(link)
             } else {
                 alert = .newChatSomeAlert(alert: SomeAlert(
-                    alert: mkAlert(title: "Invalid QR code", message: "The code you scanned is not a SimpleX link QR code."),
-                    id: "processQRCode: code is not a SimpleX link"
+                    alert: mkAlert(title: "Invalid QR code", message: "The code you scanned is not a POPOPX link QR code."),
+                    id: "processQRCode: code is not a POPOPX link"
                 ))
             }
         case let .failure(e):
@@ -842,8 +842,8 @@ struct InfoSheetButton<Content: View>: View {
     }
 }
 
-func strIsSimplexLink(_ str: String) -> Bool {
-    if let parsedMd = parseSimpleXMarkdown(str),
+func strIsPopopxLink(_ str: String) -> Bool {
+    if let parsedMd = parsePOPOPXMarkdown(str),
        parsedMd.count == 1,
        case .simplexLink = parsedMd[0].format {
         return true
@@ -854,14 +854,14 @@ func strIsSimplexLink(_ str: String) -> Bool {
 
 enum ConnectTarget {
     case link(text: String, linkType: SimplexLinkType, linkText: String)
-    case name(text: String, nameInfo: SimplexNameInfo)
+    case name(text: String, nameInfo: PopopxNameInfo)
 }
 
 func strConnectTarget(_ str: String) -> ConnectTarget? {
-    let parsedMd = parseSimpleXMarkdown(str)
+    let parsedMd = parsePOPOPXMarkdown(str)
     let links = parsedMd?.filter { $0.format?.isSimplexLink ?? false } ?? []
     return if links.count == 1, case let .simplexLink(showText, linkType, simplexUri, smpHosts) = links[0].format {
-        .link(text: showText != nil ? simplexUri : links[0].text, linkType: linkType, linkText: simplexLinkText(linkType, smpHosts))
+        .link(text: showText != nil ? simplexUri : links[0].text, linkType: linkType, linkText: popopxLinkText(linkType, smpHosts))
     } else if links.isEmpty,
               let nameFt = parsedMd?.first(where: { if case .simplexName = $0.format { true } else { false } }),
               case let .simplexName(nameInfo) = nameFt.format {
@@ -1467,7 +1467,7 @@ func planAndConnect(
                         logger.debug("planAndConnect, .contactAddress, .ownLink")
                         await MainActor.run {
                             showAskCurrentOrIncognitoProfileSheet(
-                                title: NSLocalizedString("Connect to yourself?\nThis is your own SimpleX address!", comment: "new chat sheet title"),
+                                title: NSLocalizedString("Connect to yourself?\nThis is your own POPOPX address!", comment: "new chat sheet title"),
                                 actionStyle: .destructive,
                                 connectionLink: connectionLink,
                                 connectionPlan: connectionPlan,

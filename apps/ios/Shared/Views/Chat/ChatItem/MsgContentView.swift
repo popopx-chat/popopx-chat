@@ -1,9 +1,9 @@
 //
 //  MsgContentView.swift
-//  SimpleX
+//  POPOPX
 //
 //  Created by Evgeny on 13/03/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/client/chat-view.md
 
@@ -298,11 +298,11 @@ private func handleTextTaps(
                         }
                     }
                 }
-                if let index, let (uri, browser, simplex) = attributedStringLink(s, for: index) {
+                if let index, let (uri, browser, popopx) = attributedStringLink(s, for: index) {
                     if browser {
                         openBrowserAlert(uri: uri)
-                    } else if simplex, let url = URL(string: uri) {
-                        // SimpleX links target this same app (simplex: scheme / simplex.chat universal link),
+                    } else if popopx, let url = URL(string: uri) {
+                        // POPOPX links target this same app (popopx: scheme / simplex.chat universal link),
                         // so UIApplication.shared.open is dropped by iOS while the app is in the foreground.
                         // Route to the in-app connect flow instead (same sink onOpenURL feeds).
                         ChatModel.shared.appOpenUrl = url
@@ -318,15 +318,15 @@ private func handleTextTaps(
     func attributedStringLink(_ s: NSAttributedString, for index: CFIndex) -> (String, Bool, Bool)? {
         var linkURL: String?
         var browser: Bool = false
-        var simplex: Bool = false
+        var popopx: Bool = false
         s.enumerateAttributes(in: NSRange(location: 0, length: s.length)) { attrs, range, stop in
             if index >= range.location && index < range.location + range.length {
-                if attrs[nameAttrKey] is SimplexNameInfo {
+                if attrs[nameAttrKey] is PopopxNameInfo {
                     planAndConnect(s.attributedSubstring(from: range).string, theme: AppTheme.shared, dismiss: false)
                 } else if let url = attrs[linkAttrKey] as? String {
                     linkURL = url
                     browser = attrs[webLinkAttrKey] != nil
-                    simplex = attrs[simplexLinkAttrKey] != nil
+                    popopx = attrs[popopxLinkAttrKey] != nil
                 } else if let showSecrets, let i = attrs[secretAttrKey] as? Int {
                     if showSecrets.wrappedValue.contains(i) {
                         showSecrets.wrappedValue.remove(i)
@@ -341,7 +341,7 @@ private func handleTextTaps(
                 stop.pointee = true
             }
         }
-        return if let linkURL { (linkURL, browser, simplex) } else { nil }
+        return if let linkURL { (linkURL, browser, popopx) } else { nil }
     }
 }
 
@@ -366,7 +366,7 @@ private let linkAttrKey = NSAttributedString.Key("com.popopxchat.popopx.link")
 
 private let webLinkAttrKey = NSAttributedString.Key("com.popopxchat.popopx.webLink")
 
-private let simplexLinkAttrKey = NSAttributedString.Key("com.popopxchat.popopx.simplexLink")
+private let popopxLinkAttrKey = NSAttributedString.Key("com.popopxchat.popopx.simplexLink")
 
 private let secretAttrKey = NSAttributedString.Key("com.popopxchat.popopx.secret")
 
@@ -421,7 +421,7 @@ private struct FullProfileDescriptionView: View {
                 .listRowBackground(Color.clear)
 
             Section {
-                let parsed = parseSimpleXMarkdownText(description)
+                let parsed = parsePOPOPXMarkdownText(description)
                 MarkdownView(
                     text: description, formattedText: parsed?.formattedText, markdownBlocks: parsed?.markdownBlocks,
                     backgroundColor: theme.colors.background, cardColor: theme.appColors.receivedQuote, showSecrets: $showSecrets
@@ -445,7 +445,7 @@ func markdownText(
     showSecrets: Set<Int>? = nil,
     backgroundColor: Color
 ) -> MsgTextResult {
-    let parsed = parseSimpleXMarkdownText(s)
+    let parsed = parsePOPOPXMarkdownText(s)
     return messageText(
         s,
         parsed?.formattedText,
@@ -486,7 +486,7 @@ func markdownProfileDescription(
     }
     let teaser = short ?? (truncated ? String(firstLine.prefix(100)).trimmingCharacters(in: .whitespaces) + "…" : firstLine + "…")
     let readMore = NSLocalizedString("Read more", comment: "profile description teaser")
-    var formatted = parseSimpleXMarkdown(teaser) ?? [FormattedText(text: teaser)]
+    var formatted = parsePOPOPXMarkdown(teaser) ?? [FormattedText(text: teaser)]
     formatted.append(FormattedText(text: " "))
     formatted.append(FormattedText(text: readMore, format: .modal(modalName: Format.modalDescription, text: descr)))
     return messageText(
@@ -655,10 +655,10 @@ func messageText(
                 attrs = linkAttrs()
                 if !preview {
                     attrs[linkAttrKey] = simplexUri
-                    attrs[simplexLinkAttrKey] = true
+                    attrs[popopxLinkAttrKey] = true
                     handleTaps = true
                 }
-                if let s = text ?? (privacySimplexLinkModeDefault.get() == .description ? linkType.description : nil) {
+                if let s = text ?? (privacyPopopxLinkModeDefault.get() == .description ? linkType.description : nil) {
                     res.append(NSAttributedString(string: s + " ", attributes: attrs))
                     italic = italic ?? UIFont(descriptor: descr.withSymbolicTraits(.traitItalic) ?? descr, size: descr.pointSize)
                     attrs[.font] = italic
@@ -1114,7 +1114,7 @@ private func mentionText(_ name: String) -> String {
     name.contains(" @") ? "@'\(name)'" : "@\(name)"
 }
 
-func simplexLinkText(_ linkType: SimplexLinkType, _ smpHosts: [String]) -> String {
+func popopxLinkText(_ linkType: SimplexLinkType, _ smpHosts: [String]) -> String {
     linkType.description + " " + viaHost(smpHosts)
 }
 

@@ -114,7 +114,7 @@ class ModalManager(private val placement: ModalPlacement? = null) {
   val modalCount: State<Int> = _modalCount
   private val toRemove = mutableSetOf<Int>()
   private var oldViewChanging = AtomicBoolean(false)
-  // Don't use mutableStateOf() here, because it produces this if showing from SimpleXAPI.startChat():
+  // Don't use mutableStateOf() here, because it produces this if showing from POPOPXAPI.startChat():
   // java.lang.IllegalStateException: Reading a state that was created after the snapshot was taken or in a snapshot that has not yet been applied
   private var passcodeView: MutableStateFlow<(@Composable (close: () -> Unit) -> Unit)?> = MutableStateFlow(null)
   private var onTimePasscodeView: MutableStateFlow<(@Composable (close: () -> Unit) -> Unit)?> = MutableStateFlow(null)

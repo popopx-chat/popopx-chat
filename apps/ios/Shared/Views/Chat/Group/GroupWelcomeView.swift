@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by Avently on 21/03/2022.
-//  Copyright © 2023 SimpleX Chat. All rights reserved.
+//  Copyright © 2023 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -59,7 +59,7 @@ struct GroupWelcomeView: View {
     }
 
     private func textPreview() -> some View {
-        let parsed = parseSimpleXMarkdownText(welcomeText)
+        let parsed = parsePOPOPXMarkdownText(welcomeText)
         return MarkdownView(
             text: welcomeText, formattedText: parsed?.formattedText, markdownBlocks: parsed?.markdownBlocks,
             backgroundColor: theme.colors.background, cardColor: theme.appColors.receivedQuote, showSecrets: $showSecrets

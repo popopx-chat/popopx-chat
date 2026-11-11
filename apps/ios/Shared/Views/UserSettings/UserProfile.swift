@@ -1,9 +1,9 @@
 //
 //  UserProfile.swift
-//  SimpleX
+//  POPOPX
 //
 //  Created by Evgeny Poberezkin on 31/01/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -65,7 +65,7 @@ struct UserProfile: View {
                     Text(description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Add description" : "Edit description")
                 }
             } footer: {
-                Text("Your profile is stored on your device and shared only with your contacts. SimpleX servers cannot see your profile.")
+                Text("Your profile is stored on your device and shared only with your contacts. POPOPX servers cannot see your profile.")
             }
 
             Section {

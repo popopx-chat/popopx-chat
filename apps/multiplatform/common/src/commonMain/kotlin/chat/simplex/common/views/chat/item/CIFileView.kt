@@ -418,7 +418,7 @@ class ChatItemProvider: PreviewParameterProvider<ChatItem> {
 @Composable
 fun PreviewCIFileFramedItemView(@PreviewParameter(ChatItemProvider::class) chatItem: ChatItem) {
   val showMenu = remember { mutableStateOf(false) }
-  SimpleXTheme {
-    FramedItemView(ChatInfo.Direct.sampleData, chatItem, linkMode = SimplexLinkMode.DESCRIPTION, showMenu = showMenu, receiveFile = {})
+  POPOPXTheme {
+    FramedItemView(ChatInfo.Direct.sampleData, chatItem, linkMode = PopopxLinkMode.DESCRIPTION, showMenu = showMenu, receiveFile = {})
   }
 }*/

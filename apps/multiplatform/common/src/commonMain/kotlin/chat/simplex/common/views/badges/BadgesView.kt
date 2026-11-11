@@ -29,7 +29,7 @@ fun BadgesView(modalManager: ModalManager, close: () -> Unit) {
     } else if (BadgeStore.checkingPurchases) {
       BadgesPurchaseStateView(MR.strings.badges_checking_purchases_title, null, onDismiss = close)
     } else {
-      BadgesSupportSimplexView(modalManager, unwindToDepth)
+      BadgesSupportPopopxView(modalManager, unwindToDepth)
     }
   }
 }

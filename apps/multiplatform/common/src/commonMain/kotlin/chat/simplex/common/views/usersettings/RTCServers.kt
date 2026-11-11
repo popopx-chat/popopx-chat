@@ -64,7 +64,7 @@ fun RTCServersView(
         isUserRTCServers = true
       } else if (userRTCServers.isNotEmpty()) {
           AlertManager.shared.showAlertDialog(
-            title = generalGetString(MR.strings.use_simplex_chat_servers__question),
+            title = generalGetString(MR.strings.use_popopx_chat_servers__question),
             text = generalGetString(MR.strings.saved_ICE_servers_will_be_removed),
             confirmText = generalGetString(MR.strings.confirm_verb),
             onConfirm = {
@@ -116,7 +116,7 @@ fun RTCServersLayout(
       }
 
       if (!isUserRTCServers) {
-        Text(stringResource(MR.strings.using_simplex_chat_servers), lineHeight = 22.sp)
+        Text(stringResource(MR.strings.using_popopx_chat_servers), lineHeight = 22.sp)
       } else {
         Text(stringResource(MR.strings.enter_one_ICE_server_per_line))
         if (editRTCServers) {

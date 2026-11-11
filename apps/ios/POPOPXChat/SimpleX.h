@@ -1,13 +1,13 @@
 //
-//  SimpleX.h
-//  SimpleX
+//  POPOPX.h
+//  POPOPX
 //
 //  Created by Evgeny on 30/05/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 
-#ifndef SimpleX_h
-#define SimpleX_h
+#ifndef POPOPX_h
+#define POPOPX_h
 
 #include <POPOPXChat/hs_init.h>
 #include <POPOPXChat/objc.h>
@@ -60,4 +60,4 @@ extern char *chat_encrypt_file(chat_ctrl ctl, char *fromPath, char *toPath);
 // chat_decrypt_file returns null-terminated string with the error message
 extern char *chat_decrypt_file(char *fromPath, char *key, char *nonce, char *toPath);
 
-#endif /* SimpleX_h */
+#endif /* POPOPX_h */

@@ -220,7 +220,7 @@ fun UserPicker(
       if (!chatModel.desktopNoUserNoRemote) {
         UserPickerOptionRow(
           painterResource(MR.images.ic_qr_code),
-          if (chatModel.userAddress.value != null) generalGetString(MR.strings.your_simplex_contact_address) else generalGetString(MR.strings.create_simplex_address),
+          if (chatModel.userAddress.value != null) generalGetString(MR.strings.your_popopx_contact_address) else generalGetString(MR.strings.create_popopx_address),
           showCustomModal { it, close ->
             val user = it.currentUser.value
             if (user != null) {

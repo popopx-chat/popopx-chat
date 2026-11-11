@@ -74,7 +74,7 @@
 "Passphrase" = "密码";
 
 /* No comment provided by engineer. */
-"Please create a profile in the SimpleX app" = "请在 SimpleX 应用程序中创建配置文件";
+"Please create a profile in the POPOPX app" = "请在 POPOPX 应用程序中创建配置文件";
 
 /* No comment provided by engineer. */
 "Selected chat preferences prohibit this message." = "选定的聊天首选项禁止此消息。";
@@ -104,5 +104,5 @@
 "Wrong database passphrase" = "数据库密码错误";
 
 /* No comment provided by engineer. */
-"You can allow sharing in Your privacy / SimpleX Lock settings." = "你可以在“你的隐私”/“SimpleX 锁定”设置中允许共享。";
+"You can allow sharing in Your privacy / POPOPX Lock settings." = "你可以在“你的隐私”/“POPOPX 锁定”设置中允许共享。";
 

@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 20.02.2026.
-//  Copyright © 2026 SimpleX Chat. All rights reserved.
+//  Copyright © 2026 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -159,7 +159,7 @@ func relayConnStatus(_ member: GroupMember) -> (text: LocalizedStringKey, color:
 }
 
 func hostFromRelayLink(_ link: String) -> String {
-    if let ft = parseSimpleXMarkdown(link) {
+    if let ft = parsePOPOPXMarkdown(link) {
         for f in ft {
             if case let .simplexLink(_, _, _, smpHosts) = f.format,
                let host = smpHosts.first {

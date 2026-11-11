@@ -1170,7 +1170,7 @@ groupSimplexDomain GroupInfo {groupProfile = GroupProfile {publicGroup}} =
 
 viewDomainVerified :: PopopxNameType -> Maybe PopopxDomain -> Maybe Text -> [StyledString]
 viewDomainVerified nameType domain_ result =
-  let nameStr = maybe "name" (\d -> "SimpleX name " <> shortNameInfoStr (PopopxNameInfo nameType d)) domain_
+  let nameStr = maybe "name" (\d -> "POPOPX name " <> shortNameInfoStr (PopopxNameInfo nameType d)) domain_
    in case result of
         Nothing -> [plain nameStr <> " verified"]
         Just reason -> [plain nameStr <> " not verified: " <> plain reason]
@@ -1187,7 +1187,7 @@ simplexDomainLine nameType (Just SimplexDomainClaim {domain, proof}) status = ca
     | isJust proof -> [line "unverified"]
     | otherwise -> []
   where
-    line s = plain $ "SimpleX name: " <> shortNameInfoStr (PopopxNameInfo nameType (unStrJSON domain)) <> " (" <> s <> ")"
+    line s = plain $ "POPOPX name: " <> shortNameInfoStr (PopopxNameInfo nameType (unStrJSON domain)) <> " (" <> s <> ")"
 
 -- TODO [short links] show all settings
 viewAddressSettings :: AddressSettings -> [StyledString]
@@ -1209,7 +1209,7 @@ groupLink_ showFullLinks intro g GroupLink {connLinkContact = CCLink cReq shortL
     "",
     plain $ maybe cReqStr strEncode shortLink
   ]
-    <> [plain ("SimpleX name: " <>  shortNameInfoStr (PopopxNameInfo NTPublicGroup d)) | Just d <- [groupSimplexDomain g]]
+    <> [plain ("POPOPX name: " <>  shortNameInfoStr (PopopxNameInfo NTPublicGroup d)) | Just d <- [groupSimplexDomain g]]
     <> [ "",
          "Anybody can connect to you and join group as " <> showRole acceptMemberRole <> " with: " <> highlight' "/c <group_link_above>",
          "to show it again: " <> highlight ("/show link #" <> viewGroupName g),
@@ -1290,7 +1290,7 @@ viewGroupLinkRelaysUpdated g groupLink relays =
       [ "group link:",
         plain $ maybe cReqStr strEncode shortLink
       ]
-    <> [plain ("SimpleX name: " <>  shortNameInfoStr (PopopxNameInfo NTPublicGroup d)) | Just d <- [groupSimplexDomain g]]
+    <> [plain ("POPOPX name: " <>  shortNameInfoStr (PopopxNameInfo NTPublicGroup d)) | Just d <- [groupSimplexDomain g]]
   where
     GroupLink {connLinkContact = CCLink cReq shortLink} = groupLink
     cReqStr = strEncode $ simplexChatContact cReq
@@ -2823,7 +2823,7 @@ viewChatError isCmd logLevel testView = \case
       let reason = case domainErr of
             SDENoValidLink -> "has no valid connection link"
             SDEUnknownDomain -> "is not included in the connection link's profile"
-       in [plain $ "SimpleX name " <> strEncode domain <> " " <> reason]
+       in [plain $ "POPOPX name " <> strEncode domain <> " " <> reason]
     CENotResolvedLocally -> ["no matching chat found, name resolution is disabled"]
     CEUnsupportedConnReq -> [ "", "Connection link is not supported by the your app version, please ugrade it.", plain updateStr]
     CEInvalidChatMessage Connection {connId} msgMeta_ msg e ->

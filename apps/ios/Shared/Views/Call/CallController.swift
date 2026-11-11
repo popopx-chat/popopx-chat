@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by Evgeny on 21/05/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/services/calls.md
 
@@ -168,7 +168,7 @@ class CallController: NSObject, CXProviderDelegate, PKPushRegistryDelegate, Obse
     func suspendOnEndCall() {
         if shouldSuspendChat {
             // The delay allows to accept the second call before suspending a chat
-            // see `.onChange(of: scenePhase)` in SimpleXApp
+            // see `.onChange(of: scenePhase)` in POPOPXApp
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
                 logger.debug("CallController: shouldSuspendChat \(String(describing: self?.shouldSuspendChat))")
                 if ChatModel.shared.activeCall == nil && self?.shouldSuspendChat == true {

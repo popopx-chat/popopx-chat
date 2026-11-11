@@ -635,9 +635,9 @@ fun ChatInfoLayout(
 
     if (contact.contactLink != null) {
       SectionView(stringResource(MR.strings.address_section_title)) {
-        SimpleXLinkQRCode(contact.contactLink)
+        POPOPXLinkQRCode(contact.contactLink)
         val clipboard = LocalClipboardManager.current
-        ShareAddressButton { clipboard.shareText(simplexChatLink(contact.contactLink)) }
+        ShareAddressButton { clipboard.shareText(popopxChatLink(contact.contactLink)) }
       }
       SectionTextFooter(stringResource(MR.strings.you_can_share_this_address_with_your_contacts).format(contact.displayName))
       SectionDividerSpaced()
@@ -669,11 +669,11 @@ fun ChatInfoLayout(
           }
           val rcvServers = cStats.rcvQueuesInfo.map { it.rcvServer }
           if (rcvServers.isNotEmpty()) {
-            SimplexServers(stringResource(MR.strings.receiving_via), rcvServers)
+            PopopxServers(stringResource(MR.strings.receiving_via), rcvServers)
           }
           val sndServers = cStats.sndQueuesInfo.map { it.sndServer }
           if (sndServers.isNotEmpty()) {
-            SimplexServers(stringResource(MR.strings.sending_via), sndServers)
+            PopopxServers(stringResource(MR.strings.sending_via), sndServers)
           }
         }
       }
@@ -759,7 +759,7 @@ fun ChatInfoHeader(cInfo: ChatInfo, contact: Contact) {
       modifier = Modifier.combinedClickable(onClick = copyDisplayName, onLongClick = copyDisplayName).onRightClick(copyDisplayName)
     )
     ChatInfoDescription(cInfo, displayName, copyNameToClipboard)
-    ContactSimplexNameView(contact)
+    ContactPopopxNameView(contact)
   }
 }
 
@@ -790,7 +790,7 @@ fun ProfileDescriptionText(shortDescr: String?, description: String?, style: Tex
   val short = shortDescr?.trim()?.ifEmpty { null }
   val descr = description?.trim()?.ifEmpty { null }
   val uriHandler = LocalUriHandler.current
-  val linkMode = chatModel.simplexLinkMode.value
+  val linkMode = chatModel.popopxLinkMode.value
   if (descr == null) {
     if (short != null) {
       val parsed = parseToMarkdownText(short)
@@ -1156,7 +1156,7 @@ private fun ServerImage(subStatus: SubscriptionStatus) {
 }
 
 @Composable
-fun SimplexServers(text: String, servers: List<String>) {
+fun PopopxServers(text: String, servers: List<String>) {
   val info = servers.joinToString(separator = ", ") { it.substringAfter("@") }
   val clipboardManager: ClipboardManager = LocalClipboardManager.current
   InfoRowEllipsis(text, info) {
@@ -1525,7 +1525,7 @@ private suspend fun afterSetChatTTL(chatsCtx: ChatModel.ChatsContext, rhId: Long
 @Preview
 @Composable
 fun PreviewChatInfoLayout() {
-  SimpleXTheme {
+  POPOPXTheme {
     ChatInfoLayout(
       chat = Chat(
         remoteHostId = null,

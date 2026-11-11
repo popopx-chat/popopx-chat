@@ -2,8 +2,8 @@
 //  AddGroupRelayView.swift
 //  POPOPX (iOS)
 //
-//  Created by simplex on 29.04.2026.
-//  Copyright © 2026 SimpleX Chat. All rights reserved.
+//  Created by popopx on 29.04.2026.
+//  Copyright © 2026 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI

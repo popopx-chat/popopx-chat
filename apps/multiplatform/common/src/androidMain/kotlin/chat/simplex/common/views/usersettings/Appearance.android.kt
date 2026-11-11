@@ -38,8 +38,8 @@ import dev.icerock.moko.resources.compose.painterResource
 import kotlinx.coroutines.delay
 
 enum class AppIcon(val image: ImageResource) {
-  DEFAULT(MR.images.ic_simplex_light),
-  DARK_BLUE(MR.images.ic_simplex_dark),
+  DEFAULT(MR.images.ic_popopx_light),
+  DARK_BLUE(MR.images.ic_popopx_dark),
 }
 
 @Composable
@@ -167,7 +167,7 @@ private fun findEnabledIcon(): AppIcon = AppIcon.values().firstOrNull { icon ->
 @Preview
 @Composable
 fun PreviewAppearanceSettings() {
-  SimpleXTheme {
+  POPOPXTheme {
     AppearanceScope.AppearanceLayout(
       icon = remember { mutableStateOf(AppIcon.DARK_BLUE) },
       languagePref = SharedPreference({ null }, {}),

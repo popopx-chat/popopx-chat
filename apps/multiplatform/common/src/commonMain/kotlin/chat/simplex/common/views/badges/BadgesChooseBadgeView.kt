@@ -119,7 +119,7 @@ fun BadgesChooseBadgeView(modalManager: ModalManager, unwindToDepth: Int) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
       ContinueButton(selectedLevel, modalManager, unwindToDepth)
       BadgeStoreFooter {
-        // redeeming a code is here only when Support SimpleX offers the browser instead
+        // redeeming a code is here only when Support POPOPX offers the browser instead
         if (badgeBrowserAllowed()) {
           RedeemCodeButton(modalManager, unwindToDepth)
         } else {

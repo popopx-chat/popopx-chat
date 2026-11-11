@@ -41,7 +41,7 @@ compose {
       }
       mainClass = "chat.simplex.desktop.MainKt"
       nativeDistributions {
-        copyright = "(c) 2020-2026 SimpleX Chat"
+        copyright = "(c) 2020-2026 POPOPX Chat"
         // For debugging via VisualVM
         if (debugJava) {
           modules("jdk.zipfs", "jdk.unsupported", "jdk.management.agent")
@@ -69,7 +69,7 @@ compose {
           appCategory = "Messenger"
         }
         windows {
-          packageName = "SimpleX"
+          packageName = "POPOPX"
           iconFile.set(project.file("src/jvmMain/resources/distribute/simplex.ico"))
           console = false
           perUserInstall = false
@@ -78,14 +78,14 @@ compose {
           upgradeUuid = "CC9EFBC8-AFFF-40D8-BB69-FCD7CE99EFB9"
         }
         macOS {
-          packageName = "SimpleX"
+          packageName = "POPOPX"
           iconFile.set(project.file("src/jvmMain/resources/distribute/simplex.icns"))
           appCategory = "public.app-category.social-networking"
           bundleID = "com.popopxchat.popopx"
           infoPlist {
             extraKeysRawXml = """
               <key>NSMicrophoneUsageDescription</key>
-              <string>SimpleX needs microphone access to record voice messages</string>
+              <string>POPOPX needs microphone access to record voice messages</string>
               <key>CFBundleURLTypes</key>
               <array>
                 <dict>
@@ -94,7 +94,7 @@ compose {
                   <key>CFBundleURLSchemes</key>
                   <array>
                     <string>simplexchat</string>
-                    <string>simplex</string>
+                    <string>popopx</string>
                   </array>
                 </dict>
               </array>
@@ -119,9 +119,9 @@ compose {
           }
         }
         if (os.contains("mac") || os.contains("win")) {
-          packageName = "SimpleX"
+          packageName = "POPOPX"
         } else {
-          packageName = "simplex"
+          packageName = "popopx"
         }
         // Packaging requires to have version like MAJOR.MINOR.PATCH
         var adjustedVersion = rootProject.extra["desktop.version_name"] as String

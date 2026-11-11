@@ -132,7 +132,7 @@ fun prepareChatBeforeFinishingOnboarding() {
 @Preview
 @Composable
 fun PreviewSetNotificationsMode() {
-  SimpleXTheme {
+  POPOPXTheme {
     SetNotificationsMode(remember { mutableStateOf(NotificationsMode.SERVICE) }) {}
   }
 }

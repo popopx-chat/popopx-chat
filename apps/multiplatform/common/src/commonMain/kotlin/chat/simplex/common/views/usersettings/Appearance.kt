@@ -72,9 +72,9 @@ object AppearanceScope {
         val size = 60
         Box(Modifier.offset(x = -(size / 12).dp)) {
           if (!image.isNullOrEmpty()) {
-            ProfileImage(size.dp, image, MR.images.ic_simplex_light, color = Color.Unspecified)
+            ProfileImage(size.dp, image, MR.images.ic_popopx_light, color = Color.Unspecified)
           } else {
-            ProfileImage(size.dp, if (isInDarkTheme()) MR.images.ic_simplex_light else MR.images.ic_simplex_dark)
+            ProfileImage(size.dp, if (isInDarkTheme()) MR.images.ic_popopx_light else MR.images.ic_popopx_dark)
           }
         }
         Spacer(Modifier.width(DEFAULT_PADDING_HALF - (size / 12).dp))
@@ -381,7 +381,7 @@ object AppearanceScope {
         ) {
           if (background != null) {
             val type = background.toType(baseTheme, if (checked) selectedWallpaper?.scale else null)
-            SimpleXThemeOverride(remember(background, selectedWallpaper, CurrentColors.collectAsState().value) { currentColors(type) }) {
+            POPOPXThemeOverride(remember(background, selectedWallpaper, CurrentColors.collectAsState().value) { currentColors(type) }) {
               ChatThemePreview(
                 baseTheme,
                 type.image,
@@ -445,7 +445,7 @@ object AppearanceScope {
       }
     }
 
-    SimpleXThemeOverride(remember(selectedWallpaper, CurrentColors.collectAsState().value) { currentColors(selectedWallpaper) }) {
+    POPOPXThemeOverride(remember(selectedWallpaper, CurrentColors.collectAsState().value) { currentColors(selectedWallpaper) }) {
       ChatThemePreview(
         baseTheme,
         MaterialTheme.wallpaper.type.image,
@@ -761,7 +761,7 @@ object AppearanceScope {
           val lines = yaml.encodeToString<ThemeOverrides>(overrides).lines()
           // Removing theme id without using custom serializer or data class
           theme.value = lines.subList(1, lines.size).joinToString("\n")
-          withLongRunningApi { exportThemeLauncher.launch("simplex.theme") }
+          withLongRunningApi { exportThemeLauncher.launch("popopx.theme") }
         }) {
           Text(generalGetString(MR.strings.export_theme), color = colors.primary)
         }
@@ -1098,7 +1098,7 @@ object AppearanceScope {
 
       val supportedLiveChange = name in listOf(ThemeColor.SECONDARY, ThemeColor.BACKGROUND, ThemeColor.SURFACE, ThemeColor.RECEIVED_MESSAGE, ThemeColor.SENT_MESSAGE, ThemeColor.SENT_QUOTE, ThemeColor.WALLPAPER_BACKGROUND, ThemeColor.WALLPAPER_TINT)
       if (supportedLiveChange) {
-        SimpleXThemeOverride(currentColors()) {
+        POPOPXThemeOverride(currentColors()) {
           ChatThemePreview(theme, wallpaperImage, wallpaperType, previewBackgroundColor, previewTintColor)
         }
         SectionDividerSpaced()
@@ -1253,7 +1253,7 @@ object AppearanceScope {
     val values by remember {
       val darkThemes = ArrayList<Pair<String, String>>()
       darkThemes.add(DefaultTheme.DARK.themeName to generalGetString(MR.strings.theme_dark))
-      darkThemes.add(DefaultTheme.SIMPLEX.themeName to generalGetString(MR.strings.theme_simplex))
+      darkThemes.add(DefaultTheme.SIMPLEX.themeName to generalGetString(MR.strings.theme_popopx))
       darkThemes.add(DefaultTheme.BLACK.themeName to generalGetString(MR.strings.theme_black))
       mutableStateOf(darkThemes.toList())
     }
@@ -1267,7 +1267,7 @@ object AppearanceScope {
     )
   }
   //private fun openSystemLangPicker(activity: Activity) {
-  //  activity.startActivity(Intent(Settings.ACTION_APP_LOCALE_SETTINGS, Uri.parse("package:" + SimplexApp.context.packageName)))
+  //  activity.startActivity(Intent(Settings.ACTION_APP_LOCALE_SETTINGS, Uri.parse("package:" + PopopxApp.context.packageName)))
   //}
 }
 

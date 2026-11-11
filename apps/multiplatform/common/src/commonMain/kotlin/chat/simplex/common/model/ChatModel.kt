@@ -260,7 +260,7 @@ object ChatModel {
   val sharedContent = mutableStateOf(null as SharedContent?)
 
   val filesToDelete = mutableSetOf<File>()
-  val simplexLinkMode by lazy { mutableStateOf(ChatController.appPrefs.simplexLinkMode.get()) }
+  val popopxLinkMode by lazy { mutableStateOf(ChatController.appPrefs.popopxLinkMode.get()) }
 
   val networkInfo = mutableStateOf(UserNetworkInfo(networkType = UserNetworkType.OTHER, online = true))
 
@@ -5326,12 +5326,12 @@ sealed class Format {
     val isEmail: Boolean get() = linkUri.startsWith("mailto:")
   }
   @Serializable @SerialName("simplexLink") class SimplexLink(val showText: String?, val linkType: SimplexLinkType, val simplexUri: String, val smpHosts: List<String>): Format() {
-    val simplexLinkText: String get() =
+    val popopxLinkText: String get() =
       "${linkType.description} $viaHosts"
     val viaHosts: String get() =
-      "(${String.format(generalGetString(MR.strings.simplex_link_connection), smpHosts.firstOrNull() ?: "?")})"
+      "(${String.format(generalGetString(MR.strings.popopx_link_connection), smpHosts.firstOrNull() ?: "?")})"
   }
-  @Serializable @SerialName("simplexName") class SimplexName(val nameInfo: SimplexNameInfo): Format()
+  @Serializable @SerialName("simplexName") class SimplexName(val nameInfo: PopopxNameInfo): Format()
   @Serializable @SerialName("command") class Command(val commandStr: String): Format()
   @Serializable @SerialName("mention") class Mention(val memberName: String): Format()
   @Serializable @SerialName("modal") class Modal(val modalName: String, val text: String): Format() {
@@ -5464,38 +5464,38 @@ enum class SimplexLinkType(val linkType: String) {
   relay("relay");
 
   val description: String get() = generalGetString(when (this) {
-      contact -> MR.strings.simplex_link_contact
-      invitation -> MR.strings.simplex_link_invitation
-      group -> MR.strings.simplex_link_group
-      channel -> MR.strings.simplex_link_channel
-      relay -> MR.strings.simplex_link_relay
+      contact -> MR.strings.popopx_link_contact
+      invitation -> MR.strings.popopx_link_invitation
+      group -> MR.strings.popopx_link_group
+      channel -> MR.strings.popopx_link_channel
+      relay -> MR.strings.popopx_link_relay
   })
 }
 
 @Serializable
-data class SimplexNameInfo(
-  val nameType: SimplexNameType,
+data class PopopxNameInfo(
+  val nameType: PopopxNameType,
   val nameDomain: SimplexDomain
 ) {
-  // mirrors backend shortNameInfoStr: "#name" for a simplex public group, else prefix + full domain
+  // mirrors backend shortNameInfoStr: "#name" for a popopx public group, else prefix + full domain
   val shortStr: String get() = when {
-    nameType == SimplexNameType.publicGroup && nameDomain.nameTLD == SimplexTLD.popopx && nameDomain.subDomain.isEmpty() -> "#" + nameDomain.domain
-    else -> (if (nameType == SimplexNameType.publicGroup) "#" else "@") + nameDomain.fullDomainName
+    nameType == PopopxNameType.publicGroup && nameDomain.nameTLD == PopopxTLD.popopx && nameDomain.subDomain.isEmpty() -> "#" + nameDomain.domain
+    else -> (if (nameType == PopopxNameType.publicGroup) "#" else "@") + nameDomain.fullDomainName
   }
 }
 
 @Serializable
 data class SimplexDomain(
-  val nameTLD: SimplexTLD,
+  val nameTLD: PopopxTLD,
   val domain: String,
   val subDomain: List<String>
 ) {
   // mirrors backend fullDomainName: reverse(subDomain) + [domain] + tld
   val fullDomainName: String get() {
     val tld = when (nameTLD) {
-      SimplexTLD.popopx -> listOf("popopx")
-      SimplexTLD.testing -> listOf("testing")
-      SimplexTLD.web -> emptyList()
+      PopopxTLD.popopx -> listOf("popopx")
+      PopopxTLD.testing -> listOf("testing")
+      PopopxTLD.web -> emptyList()
     }
     return (subDomain.reversed() + domain + tld).joinToString(".")
   }
@@ -5504,14 +5504,14 @@ data class SimplexDomain(
 }
 
 @Serializable
-enum class SimplexTLD {
+enum class PopopxTLD {
   @SerialName("popopx") popopx,
   @SerialName("testing") testing,
   @SerialName("web") web
 }
 
 @Serializable
-enum class SimplexNameType {
+enum class PopopxNameType {
   @SerialName("publicGroup") publicGroup,
   @SerialName("contact") contact
 }
@@ -5537,8 +5537,8 @@ enum class FormatColor(val color: String) {
 
   val uiColor: Color @Composable get() = when (this) {
     red -> Color.Red
-    green -> SimplexGreen
-    blue -> SimplexBlue
+    green -> PopopxGreen
+    blue -> PopopxBlue
     yellow -> WarningYellow
     cyan -> Color.Cyan
     magenta -> Color.Magenta

@@ -1,9 +1,9 @@
 //
-//  CreateSimpleXAddress.swift
+//  CreatePOPOPXAddress.swift
 //  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 28.04.2023.
-//  Copyright © 2023 SimpleX Chat. All rights reserved.
+//  Copyright © 2023 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/client/navigation.md
 
@@ -13,7 +13,7 @@ import ContactsUI
 import MessageUI
 import POPOPXChat
 
-struct CreateSimpleXAddress: View {
+struct CreatePOPOPXAddress: View {
     @EnvironmentObject var m: ChatModel
     @State private var progressIndicator = false
     @State private var showMailView = false
@@ -24,7 +24,7 @@ struct CreateSimpleXAddress: View {
             ScrollView {
                 ZStack {
                     VStack(alignment: .leading) {
-                        Text("SimpleX Address")
+                        Text("POPOPX Address")
                             .font(.largeTitle)
                             .bold()
                             .frame(maxWidth: .infinity)
@@ -32,7 +32,7 @@ struct CreateSimpleXAddress: View {
                         Spacer()
 
                         if let userAddress = m.userAddress {
-                            SimpleXCreatedLinkQRCode(link: userAddress.connLinkContact, short: Binding.constant(false))
+                            POPOPXCreatedLinkQRCode(link: userAddress.connLinkContact, short: Binding.constant(false))
                                 .frame(maxHeight: g.size.width)
                             shareQRCodeButton(userAddress)
                                 .frame(maxWidth: .infinity)
@@ -85,7 +85,7 @@ struct CreateSimpleXAddress: View {
                         }
                         await MainActor.run { progressIndicator = false }
                     } catch let error {
-                        logger.error("CreateSimpleXAddress create address: \(responseError(error))")
+                        logger.error("CreatePOPOPXAddress create address: \(responseError(error))")
                         await MainActor.run {
                             progressIndicator = false
                             showErrorAlert(error, NSLocalizedString("Error creating address", comment: ""))
@@ -93,9 +93,9 @@ struct CreateSimpleXAddress: View {
                     }
                 }
             } label: {
-                Text("Create SimpleX address").font(.title)
+                Text("Create POPOPX address").font(.title)
             }
-            Text("You can make it visible to your SimpleX contacts via Settings.")
+            Text("You can make it visible to your POPOPX contacts via Settings.")
                 .multilineTextAlignment(.center)
                 .font(.footnote)
                 .padding(.horizontal, 32)
@@ -121,7 +121,7 @@ struct CreateSimpleXAddress: View {
 
     private func shareQRCodeButton(_ userAddress: UserContactLink) -> some View {
         Button {
-            showShareSheet(items: [simplexChatLink(userAddress.connLinkContact.simplexChatUri(short: false))])
+            showShareSheet(items: [popopxChatLink(userAddress.connLinkContact.popopxChatUri(short: false))])
         } label: {
             Label("Share", systemImage: "square.and.arrow.up")
         }
@@ -153,7 +153,7 @@ struct CreateSimpleXAddress: View {
                     default: ()
                     }
                 case let .failure(error):
-                    logger.error("CreateSimpleXAddress share via email: \(responseError(error))")
+                    logger.error("CreatePOPOPXAddress share via email: \(responseError(error))")
                     showErrorAlert(error, NSLocalizedString("Error sending email", comment: ""))
                 }
                 mailViewResult = nil
@@ -184,19 +184,19 @@ struct SendAddressMailView: View {
     var body: some View {
         let messageBody = String(format: NSLocalizedString("""
             <p>Hi!</p>
-            <p><a href="%@">Connect to me via SimpleX Chat</a></p>
-            """, comment: "email text"), simplexChatLink(userAddress.connLinkContact.simplexChatUri(short: false)))
+            <p><a href="%@">Connect to me via POPOPX Chat</a></p>
+            """, comment: "email text"), popopxChatLink(userAddress.connLinkContact.popopxChatUri(short: false)))
         MailView(
             isShowing: self.$showMailView,
             result: $mailViewResult,
-            subject: NSLocalizedString("Let's talk in SimpleX Chat", comment: "email subject"),
+            subject: NSLocalizedString("Let's talk in POPOPX Chat", comment: "email subject"),
             messageBody: messageBody
         )
     }
 }
 
-struct CreateSimpleXAddress_Previews: PreviewProvider {
+struct CreatePOPOPXAddress_Previews: PreviewProvider {
     static var previews: some View {
-        CreateSimpleXAddress()
+        CreatePOPOPXAddress()
     }
 }

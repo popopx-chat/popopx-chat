@@ -78,7 +78,7 @@ private fun renewalFailure(): String {
 
 @Composable
 private fun BadgeAlertBanner(title: String, subtitle: String, warning: Boolean = false) {
-  SupportSimpleXBanner(
+  SupportPOPOPXBanner(
     title = title,
     subtitle = subtitle,
     warning = warning,
@@ -114,7 +114,7 @@ private fun showBadgeAlertDismissAlert(title: String) {
   )
 }
 
-private fun showSupportSimpleXDismissAlert() {
+private fun showSupportPOPOPXDismissAlert() {
   AlertManager.shared.showAlertMsg(
     title = generalGetString(MR.strings.badges_banner_title),
     text = generalGetString(MR.strings.badges_banner_dismiss_message),
@@ -820,7 +820,7 @@ fun connectIfOpenedViaUri(rhId: Long?, uri: String, chatModel: ChatModel) {
   }
 }
 
-// the app's own scheme, for every link that is not a connection link, which stays on simplex:
+// the app's own scheme, for every link that is not a connection link, which stays on popopx:
 internal const val appLinkScheme = "simplexchat"
 internal const val connectionLinkScheme = "popopx"
 private const val badgeLinkPath = "/badge/code/"
@@ -846,7 +846,7 @@ private fun openAppLink(rhId: Long?, uri: String) {
 }
 
 @Composable
-private fun ChatListSearchBar(listState: LazyListState, searchText: MutableState<TextFieldValue>, searchShowingSimplexLink: MutableState<Boolean>, searchChatFilteredBySimplexLink: MutableState<Set<String>>, connectNameCandidate: MutableState<String?>) {
+private fun ChatListSearchBar(listState: LazyListState, searchText: MutableState<TextFieldValue>, searchShowingPopopxLink: MutableState<Boolean>, searchChatFilteredByPopopxLink: MutableState<Set<String>>, connectNameCandidate: MutableState<String?>) {
   Box {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
       val focusRequester = remember { FocusRequester() }
@@ -859,10 +859,10 @@ private fun ChatListSearchBar(listState: LazyListState, searchText: MutableState
       )
       SearchTextField(
         Modifier.weight(1f).onFocusChanged { focused = it.hasFocus }.focusRequester(focusRequester),
-        placeholder = stringResource(MR.strings.search_or_paste_simplex_link),
+        placeholder = stringResource(MR.strings.search_or_paste_popopx_link),
         alwaysVisible = true,
         searchText = searchText,
-        enabled = !remember { searchShowingSimplexLink }.value,
+        enabled = !remember { searchShowingPopopxLink }.value,
         trailingContent = null,
         // the clear button must line up with the filter icon it replaces, so no reduction here
         reducedCloseButtonPadding = 0.dp,
@@ -899,17 +899,17 @@ private fun ChatListSearchBar(listState: LazyListState, searchText: MutableState
             if (target is ConnectTarget.Link) {
               hideKeyboard(view)
               searchText.value = searchText.value.copy(target.linkText, selection = TextRange.Zero)
-              searchShowingSimplexLink.value = true
-              searchChatFilteredBySimplexLink.value = emptySet()
+              searchShowingPopopxLink.value = true
+              searchChatFilteredByPopopxLink.value = emptySet()
               connectNameCandidate.value = null
-              connect(target.text, searchChatFilteredBySimplexLink) { searchText.value = TextFieldValue() }
+              connect(target.text, searchChatFilteredByPopopxLink) { searchText.value = TextFieldValue() }
             } else {
               val candidate = nameSearchCandidate(it.trim())
               connectNameCandidate.value = candidate
               if (candidate != null) {
                 // clear the previous match immediately so the list falls back to text search during the debounce,
                 // instead of showing a stale filtered chat while the new search runs
-                searchChatFilteredBySimplexLink.value = emptySet()
+                searchChatFilteredByPopopxLink.value = emptySet()
                 // resolve the name locally on each keystroke, debounced; collectLatest cancels the in-flight
                 // search when the next keystroke arrives. A bare name can be a contact or a channel, so search
                 // both and filter every known chat found; drop the row only when both types are already known.
@@ -920,9 +920,9 @@ private fun ChatListSearchBar(listState: LazyListState, searchText: MutableState
                 val ids = targets.mapNotNull { name ->
                   knownChatId(rhId, chatModel.controller.apiConnectPlan(rhId, name, PlanResolveMode.PRMNever, inProgress = inProgress))
                 }
-                searchChatFilteredBySimplexLink.value = ids.toSet()
+                searchChatFilteredByPopopxLink.value = ids.toSet()
                 if (ids.size == targets.size) connectNameCandidate.value = null
-              } else if (!searchShowingSimplexLink.value || it.isEmpty()) {
+              } else if (!searchShowingPopopxLink.value || it.isEmpty()) {
                 if (it.isNotEmpty()) {
                   focusRequester.requestFocus()
                 } else {
@@ -933,8 +933,8 @@ private fun ChatListSearchBar(listState: LazyListState, searchText: MutableState
                     listState.scrollToItem(0)
                   }
                 }
-                searchShowingSimplexLink.value = false
-                searchChatFilteredBySimplexLink.value = emptySet()
+                searchShowingPopopxLink.value = false
+                searchChatFilteredByPopopxLink.value = emptySet()
               }
             }
           }
@@ -945,13 +945,13 @@ private fun ChatListSearchBar(listState: LazyListState, searchText: MutableState
   }
 }
 
-private fun connect(link: String, searchChatFilteredBySimplexLink: MutableState<Set<String>>, cleanup: (() -> Unit)?) {
+private fun connect(link: String, searchChatFilteredByPopopxLink: MutableState<Set<String>>, cleanup: (() -> Unit)?) {
   withBGApi {
     planAndConnect(
       chatModel.remoteHostId(),
       link,
-      filterKnownContact = { searchChatFilteredBySimplexLink.value = setOf(it.id) },
-      filterKnownGroup = { searchChatFilteredBySimplexLink.value = setOf(it.id) },
+      filterKnownContact = { searchChatFilteredByPopopxLink.value = setOf(it.id) },
+      filterKnownGroup = { searchChatFilteredByPopopxLink.value = setOf(it.id) },
       close = null,
       cleanup = cleanup,
     )
@@ -1044,10 +1044,10 @@ private fun BoxScope.ChatList(searchText: MutableState<TextFieldValue>, listStat
   // In some not always reproducible situations this code produce IndexOutOfBoundsException on Compose's side
   // which is related to [derivedStateOf]. Using safe alternative instead
   // val chats by remember(search, showUnreadAndFavorites) { derivedStateOf { filteredChats(showUnreadAndFavorites, search, allChats.toList()) } }
-  val searchShowingSimplexLink = remember { mutableStateOf(false) }
-  val searchChatFilteredBySimplexLink = remember { mutableStateOf<Set<String>>(emptySet()) }
+  val searchShowingPopopxLink = remember { mutableStateOf(false) }
+  val searchChatFilteredByPopopxLink = remember { mutableStateOf<Set<String>>(emptySet()) }
   val connectNameCandidate = remember { mutableStateOf<String?>(null) }
-  val chats = filteredChats(searchShowingSimplexLink, searchChatFilteredBySimplexLink, searchText.value.text, allChats.value.toList(), activeFilter.value)
+  val chats = filteredChats(searchShowingPopopxLink, searchChatFilteredByPopopxLink, searchText.value.text, allChats.value.toList(), activeFilter.value)
   val topPaddingToContent = topPaddingToContent(false)
   val blankSpaceSize = if (oneHandUI.value) WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + AppBarHeight * fontSizeSqrtMultiplier else topPaddingToContent
   LazyColumnWithScrollBar(
@@ -1085,11 +1085,11 @@ private fun BoxScope.ChatList(searchText: MutableState<TextFieldValue>, listStat
               Divider()
               ConnectByNameRow(candidate, searchText, connectNameCandidate, close = null)
             }
-            ChatListSearchBar(listState, searchText, searchShowingSimplexLink, searchChatFilteredBySimplexLink, connectNameCandidate)
+            ChatListSearchBar(listState, searchText, searchShowingPopopxLink, searchChatFilteredByPopopxLink, connectNameCandidate)
             Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.ime))
           }
         } else {
-          ChatListSearchBar(listState, searchText, searchShowingSimplexLink, searchChatFilteredBySimplexLink, connectNameCandidate)
+          ChatListSearchBar(listState, searchText, searchShowingPopopxLink, searchChatFilteredByPopopxLink, connectNameCandidate)
           // top toolbar: search bar above, so on desktop the connect row goes above the tags
           TagsOrConnectByName(searchText, connectNameCandidate) { candidate ->
             ConnectByNameRow(candidate, searchText, connectNameCandidate, close = null)
@@ -1138,13 +1138,13 @@ private fun BoxScope.ChatList(searchText: MutableState<TextFieldValue>, listStat
       item {
         SideEffect { chatModel.chatListBanner = ChatListBanner.BadgePitch }
         Box(Modifier.zIndex(1f).padding(16.dp)) {
-          SupportSimpleXBanner(
+          SupportPOPOPXBanner(
             showDismiss = supporterBannerTapped.value,
             onTap = {
               appPrefs.supporterBannerTapped.set(true)
               ModalManager.start.showCustomModal(id = ModalViewId.BADGES) { close -> BadgesView(ModalManager.start, close) }
             },
-            onDismiss = ::showSupportSimpleXDismissAlert
+            onDismiss = ::showSupportPOPOPXDismissAlert
           )
         }
       }
@@ -1209,8 +1209,8 @@ internal const val NAME_SEARCH_DEBOUNCE_MS = 300L
 private val nameLabelRegex = Regex("[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*")
 private fun isNameLabel(s: String): Boolean = s.length in 1..63 && nameLabelRegex.matches(s)
 
-// On-device candidate for connecting by SimpleX name: the string sent to the core to resolve it.
-// Mirrors the domain grammar (nameLabelP/mkDomain in SimplexName.hs): an optional @/# prefix, then
+// On-device candidate for connecting by POPOPX name: the string sent to the core to resolve it.
+// Mirrors the domain grammar (nameLabelP/mkDomain in Names.hs): an optional @/# prefix, then
 // dot-separated ASCII labels; a dotless word is completed with the default top-level part. Returns
 // the string to send (keeping @/# so the type is preserved), or null when the text is not a name.
 internal fun nameSearchCandidate(str: String): String? {
@@ -1603,17 +1603,17 @@ fun ItemPresetFilterAction(
 }
 
 fun filteredChats(
-  searchShowingSimplexLink: State<Boolean>,
-  searchChatFilteredBySimplexLink: State<Set<String>>,
+  searchShowingPopopxLink: State<Boolean>,
+  searchChatFilteredByPopopxLink: State<Set<String>>,
   searchText: String,
   chats: List<Chat>,
   activeFilter: ActiveFilter? = null,
 ): List<Chat> {
-  val linkChatIds = searchChatFilteredBySimplexLink.value
+  val linkChatIds = searchChatFilteredByPopopxLink.value
   return if (linkChatIds.isNotEmpty()) {
     chats.filter { it.id in linkChatIds }
   } else {
-    val s = if (searchShowingSimplexLink.value) "" else searchText.trim().lowercase()
+    val s = if (searchShowingPopopxLink.value) "" else searchText.trim().lowercase()
     if (s.isEmpty())
       chats.filter { chat -> chat.id == chatModel.chatId.value || (!chat.chatInfo.chatDeleted && !chat.chatInfo.contactCard && filtered(chat, activeFilter)) }
     else {

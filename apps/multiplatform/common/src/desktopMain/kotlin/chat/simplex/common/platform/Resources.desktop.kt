@@ -95,21 +95,21 @@ actual val settingsThemes: Settings = PropertiesSettings(settingsThemesProps) {
 }
 
 actual fun windowOrientation(): WindowOrientation =
-  if (simplexWindowState.windowState.size.width > simplexWindowState.windowState.size.height) {
+  if (popopxWindowState.windowState.size.width > popopxWindowState.windowState.size.height) {
     WindowOrientation.LANDSCAPE
   } else {
     WindowOrientation.PORTRAIT
   }
 
 @Composable
-actual fun windowWidth(): Dp = simplexWindowState.windowState.size.width
+actual fun windowWidth(): Dp = popopxWindowState.windowState.size.width
 
 @Composable
-actual fun windowHeight(): Dp = simplexWindowState.windowState.size.height
+actual fun windowHeight(): Dp = popopxWindowState.windowState.size.height
 
 actual fun desktopExpandWindowToWidth(width: Dp) {
-  if (simplexWindowState.windowState.size.width >= width) return
-  simplexWindowState.windowState.size = simplexWindowState.windowState.size.copy(width = width)
+  if (popopxWindowState.windowState.size.width >= width) return
+  popopxWindowState.windowState.size = popopxWindowState.windowState.size.copy(width = width)
 }
 
 actual fun isRtl(text: CharSequence): Boolean {

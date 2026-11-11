@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by Evgeny on 07/05/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/client/navigation.md
 
@@ -16,14 +16,14 @@ struct OnboardingView: View {
     var body: some View {
         NavigationView {
             switch onboarding {
-            case .step1_SimpleXInfo:
-                SimpleXInfo(onboarding: true)
+            case .step1_POPOPXInfo:
+                POPOPXInfo(onboarding: true)
                     .modifier(ThemedBackground())
             case .step2_CreateProfile:
                 CreateFirstProfile()
                     .modifier(ThemedBackground())
-            case .step3_CreateSimpleXAddress: // deprecated
-                CreateSimpleXAddress()
+            case .step3_CreatePOPOPXAddress: // deprecated
+                CreatePOPOPXAddress()
             case .step3_ChooseServerOperators,
                 .step4_SetNotificationsMode: // deprecated
                 YourNetworkView()
@@ -45,9 +45,9 @@ func onboardingButtonPlaceholder() -> some View {
 
 // Spec: spec/client/navigation.md#onboardingStage
 enum OnboardingStage: String, Identifiable {
-    case step1_SimpleXInfo
+    case step1_POPOPXInfo
     case step2_CreateProfile
-    case step3_CreateSimpleXAddress // deprecated
+    case step3_CreatePOPOPXAddress // deprecated
     case step3_ChooseServerOperators
     case step4_SetNotificationsMode // deprecated
     case step4_NetworkCommitments
@@ -58,6 +58,6 @@ enum OnboardingStage: String, Identifiable {
 
 struct OnboardingStepsView_Previews: PreviewProvider {
     static var previews: some View {
-        OnboardingView(onboarding: .step1_SimpleXInfo)
+        OnboardingView(onboarding: .step1_POPOPXInfo)
     }
 }

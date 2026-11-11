@@ -22,7 +22,7 @@ class ChatEventTextTest {
   private fun separatorAndTime(terminal: Boolean): Pair<AnnotatedString, AnnotatedString> {
     var result: Pair<AnnotatedString, AnnotatedString>? = null
     renderScene {
-      SimpleXTheme {
+      POPOPXTheme {
         CompositionLocalProvider(LocalTerminalLayout provides terminal) {
           ChatEventWithMeta(event) { separator, ts ->
             result = separator to ts

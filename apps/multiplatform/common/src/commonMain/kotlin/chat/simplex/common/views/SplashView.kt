@@ -15,7 +15,7 @@ fun SplashView(nonTransparent: Boolean = false) {
   ) {
 //    Image(
 //      painter = painterResource(MR.images.logo),
-//      contentDescription = "Simplex Icon",
+//      contentDescription = "Popopx Icon",
 //      modifier = Modifier
 //        .height(230.dp)
 //        .align(Alignment.Center)

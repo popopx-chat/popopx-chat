@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by Evgeny on 29/05/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -16,7 +16,7 @@ struct PrivacySettings: View {
     @AppStorage(GROUP_DEFAULT_PRIVACY_LINK_PREVIEWS, store: groupDefaults) private var useLinkPreviews = true
     @AppStorage(GROUP_DEFAULT_PRIVACY_SANITIZE_LINKS, store: groupDefaults) private var privacySanitizeLinks = false
     @AppStorage(DEFAULT_PRIVACY_SHOW_CHAT_PREVIEWS) private var showChatPreviews = true
-    @AppStorage(DEFAULT_PRIVACY_VERIFY_SIMPLEX_NAMES) private var verifySimplexNames = false
+    @AppStorage(DEFAULT_PRIVACY_VERIFY_SIMPLEX_NAMES) private var verifyPopopxNames = false
     @AppStorage(DEFAULT_PRIVACY_SAVE_LAST_DRAFT) private var saveLastDraft = true
     @AppStorage(DEFAULT_PRIVACY_SHOW_SIGNATURE) private var showSignature = true
     @AppStorage(DEFAULT_PRIVACY_SHOW_FILE_ENCRYPTION) private var showFileEncryption = true
@@ -56,17 +56,17 @@ struct PrivacySettings: View {
             List {
                 Section(header: Text("Device").foregroundColor(theme.colors.secondary)) {
                     NavigationLink {
-                        SimplexLockView(prefPerformLA: $prefPerformLA, currentLAMode: $currentLAMode)
-                            .navigationTitle("SimpleX Lock")
+                        PopopxLockView(prefPerformLA: $prefPerformLA, currentLAMode: $currentLAMode)
+                            .navigationTitle("POPOPX Lock")
                             .modifier(ThemedBackground(grouped: true))
                     } label: {
                         if prefPerformLA {
                             settingsRow("lock.fill", color: .green) {
-                                simplexLockRow(currentLAMode.text)
+                                popopxLockRow(currentLAMode.text)
                             }
                         } else {
                             settingsRow("lock", color: theme.colors.secondary) {
-                                simplexLockRow("Off")
+                                popopxLockRow("Off")
                             }
                         }
                     }
@@ -191,7 +191,7 @@ struct PrivacySettings: View {
                     }
                 }
                 settingsRow("number", color: theme.colors.secondary) {
-                    Toggle("Verify SimpleX names", isOn: $verifySimplexNames)
+                    Toggle("Verify POPOPX names", isOn: $verifyPopopxNames)
                 }
                 // hidden until message signing is user-facing (recipient-only stage)
 //                settingsRow("checkmark.seal", color: theme.colors.secondary) {
@@ -476,9 +476,9 @@ struct PrivacySettings: View {
         }
     }
 
-    private func simplexLockRow(_ value: LocalizedStringKey) -> some View {
+    private func popopxLockRow(_ value: LocalizedStringKey) -> some View {
         HStack {
-            Text("SimpleX Lock")
+            Text("POPOPX Lock")
             Spacer()
             Text(value)
         }
@@ -499,7 +499,7 @@ enum LAMode: String, Identifiable, CaseIterable {
     }
 }
 
-struct SimplexLockView: View {
+struct PopopxLockView: View {
     @Binding var prefPerformLA: Bool
     @Binding var currentLAMode: LAMode
     @EnvironmentObject var m: ChatModel
@@ -584,7 +584,7 @@ struct SimplexLockView: View {
                 }
 
                 if performLA {
-                    Section("Share to SimpleX") {
+                    Section("Share to POPOPX") {
                         Toggle("Allow sharing", isOn: $allowShareExtension)
                     }
                 }
@@ -759,7 +759,7 @@ struct SimplexLockView: View {
                 switch laMode {
                 case .system:
                     updateLAMode()
-                    authenticate(reason: NSLocalizedString("Enable SimpleX Lock", comment: "authentication reason")) { laResult in
+                    authenticate(reason: NSLocalizedString("Enable POPOPX Lock", comment: "authentication reason")) { laResult in
                         switch laResult {
                         case .success:
                             _ = kcAppPassword.remove()
@@ -821,7 +821,7 @@ struct SimplexLockView: View {
 
     private func enableLA() {
         resetLA()
-        authenticate(reason: NSLocalizedString("Enable SimpleX Lock", comment: "authentication reason")) { laResult in
+        authenticate(reason: NSLocalizedString("Enable POPOPX Lock", comment: "authentication reason")) { laResult in
             switch laResult {
             case .success:
                 m.contentViewAccessAuthenticated = true
@@ -844,7 +844,7 @@ struct SimplexLockView: View {
     }
 
     private func disableLA() {
-        authenticate(reason: NSLocalizedString("Disable SimpleX Lock", comment: "authentication reason")) { laResult in
+        authenticate(reason: NSLocalizedString("Disable POPOPX Lock", comment: "authentication reason")) { laResult in
             switch (laResult) {
             case .success:
                 prefPerformLA = false

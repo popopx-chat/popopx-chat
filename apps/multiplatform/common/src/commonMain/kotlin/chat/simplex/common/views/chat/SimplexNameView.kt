@@ -20,12 +20,12 @@ import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.*
 
-// Renders a contact's / channel's SimpleX name with its 3-state verification indicator.
+// Renders a contact's / channel's POPOPX name with its 3-state verification indicator.
 // `verification`: null = not attempted, false = failed, true = verified.
 // `verify` runs the verify API, updates the model and returns (newVerification, failureReason);
 // null on network error. With `autoVerify`, it runs once on open when state is null.
 @Composable
-fun SimplexNameView(
+fun PopopxNameView(
   simplexName: String,
   verified: Boolean?,
   verifiable: Boolean = true,
@@ -54,14 +54,14 @@ fun SimplexNameView(
         val (newV, reason) = res
         // show the reason on a manual run, or on an inconclusive auto run (state stayed null)
         if (reason != null && (manual || newV == null)) {
-          AlertManager.shared.showAlertMsg(generalGetString(MR.strings.simplex_name_not_verified), reason)
+          AlertManager.shared.showAlertMsg(generalGetString(MR.strings.popopx_name_not_verified), reason)
         }
       }
     }
   }
 
   LaunchedEffect(Unit) {
-    if (verifiable && chatModel.controller.appPrefs.privacyVerifySimplexNames.get() && verified == null) runVerify(manual = false)
+    if (verifiable && chatModel.controller.appPrefs.privacyVerifyPopopxNames.get() && verified == null) runVerify(manual = false)
   }
 
   val clipboard = LocalClipboardManager.current
@@ -79,17 +79,17 @@ fun SimplexNameView(
         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp, color = MaterialTheme.colors.secondary)
       }
       verified == true ->
-        SimplexNameWithIcon(simplexName, nameStyle, MR.images.ic_check_filled, MaterialTheme.colors.primary) {
+        PopopxNameWithIcon(simplexName, nameStyle, MR.images.ic_check_filled, MaterialTheme.colors.primary) {
           clipboard.setText(AnnotatedString(simplexName))
           showToast(generalGetString(MR.strings.copied))
         }
       !verifiable -> Text(simplexName, style = nameStyle)
       verified == false ->
-        SimplexNameWithIcon(simplexName, nameStyle, MR.images.ic_close, Color.Red) { runVerify(manual = true) }
+        PopopxNameWithIcon(simplexName, nameStyle, MR.images.ic_close, Color.Red) { runVerify(manual = true) }
       else -> {
         Text(simplexName, style = nameStyle)
         Text(
-          stringResource(MR.strings.verify_simplex_name_action),
+          stringResource(MR.strings.verify_popopx_name_action),
           color = MaterialTheme.colors.primary,
           modifier = Modifier.clickable { runVerify(manual = true) }
         )
@@ -102,7 +102,7 @@ fun SimplexNameView(
 // ~73% of the box height. Align that line with the text baseline so the glyph rests on the baseline; the box is
 // sized so the visible glyph is about the name's cap height. Only the icon is tinted, never the name.
 @Composable
-private fun SimplexNameWithIcon(name: String, style: TextStyle, icon: ImageResource, tint: Color, onClick: () -> Unit) {
+private fun PopopxNameWithIcon(name: String, style: TextStyle, icon: ImageResource, tint: Color, onClick: () -> Unit) {
   Row(
     horizontalArrangement = Arrangement.spacedBy(2.dp),
     modifier = Modifier.clickable { onClick() }
@@ -117,10 +117,10 @@ private fun SimplexNameWithIcon(name: String, style: TextStyle, icon: ImageResou
 }
 
 @Composable
-fun ContactSimplexNameView(contact: Contact, verifiable: Boolean = true) {
+fun ContactPopopxNameView(contact: Contact, verifiable: Boolean = true) {
   val domain = contact.profile.contactDomain
   if (domain != null && (contact.profile.contactDomainVerified != null || domain.proof != null)) {
-    SimplexNameView(
+    PopopxNameView(
       simplexName = "@${domain.domain}",
       verified = contact.profile.contactDomainVerified,
       verifiable = verifiable,
@@ -136,12 +136,12 @@ fun ContactSimplexNameView(contact: Contact, verifiable: Boolean = true) {
 }
 
 @Composable
-fun GroupSimplexNameView(groupInfo: GroupInfo, verifiable: Boolean = true) {
+fun GroupPopopxNameView(groupInfo: GroupInfo, verifiable: Boolean = true) {
   if (groupInfo.businessChat == null) {
     val access = groupInfo.groupProfile.publicGroup?.publicGroupAccess
     val domain = access?.groupDomainClaim?.shortName
     if (domain != null && (groupInfo.groupDomainVerified != null || access.groupDomainClaim?.proof != null)) {
-      SimplexNameView(
+      PopopxNameView(
         simplexName = "#${domain}",
         verified = groupInfo.groupDomainVerified,
         verifiable = verifiable,
@@ -158,7 +158,7 @@ fun GroupSimplexNameView(groupInfo: GroupInfo, verifiable: Boolean = true) {
     val businessClaim = groupInfo.businessChat?.businessDomain
     if (businessClaim != null && (groupInfo.groupDomainVerified != null || businessClaim.proof != null)) {
       // A business presents as a contact, so the name retains its .popopx suffix; it cannot be re-verified.
-      SimplexNameView(
+      PopopxNameView(
         simplexName = "@${businessClaim.domain}",
         verified = groupInfo.groupDomainVerified,
         verifiable = false,

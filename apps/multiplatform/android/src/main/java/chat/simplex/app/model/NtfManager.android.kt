@@ -40,7 +40,7 @@ object NtfManager {
   private const val ChatIdKey: String = "chatId"
   private val appPreferences: AppPreferences = ChatController.appPrefs
   private val context: Context
-    get() = SimplexApp.context
+    get() = PopopxApp.context
 
   fun getUserIdFromIntent(intent: Intent?): Long? {
     val userId = intent?.getLongExtra(UserIdKey, -1L)
@@ -129,11 +129,11 @@ object NtfManager {
 
     for (action in actions) {
       val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-      val actionIntent = Intent(SimplexApp.context, NtfActionReceiver::class.java)
+      val actionIntent = Intent(PopopxApp.context, NtfActionReceiver::class.java)
       actionIntent.action = action.name
       actionIntent.putExtra(UserIdKey, user.userId)
       actionIntent.putExtra(ChatIdKey, chatId)
-      val actionPendingIntent: PendingIntent = PendingIntent.getBroadcast(SimplexApp.context, 0, actionIntent, flags)
+      val actionPendingIntent: PendingIntent = PendingIntent.getBroadcast(PopopxApp.context, 0, actionIntent, flags)
       val actionButton = when (action) {
         NotificationAction.ACCEPT_CONTACT_REQUEST -> generalGetString(MR.strings.accept)
       }
@@ -150,7 +150,7 @@ object NtfManager {
 
     with(NotificationManagerCompat.from(context)) {
       // using cInfo.id only shows one notification per chat and updates it when the message arrives
-      if (ActivityCompat.checkSelfPermission(SimplexApp.context, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+      if (ActivityCompat.checkSelfPermission(PopopxApp.context, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
         notify(chatId.hashCode(), builder.build())
         notify(0, summary)
       }
@@ -218,7 +218,7 @@ object NtfManager {
     // This makes notification sound and vibration repeat endlessly
     notification.flags = notification.flags or NotificationCompat.FLAG_INSISTENT
     with(NotificationManagerCompat.from(context)) {
-      if (ActivityCompat.checkSelfPermission(SimplexApp.context, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+      if (ActivityCompat.checkSelfPermission(PopopxApp.context, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
         notify(CallNotificationId, notification)
       }
     }
@@ -250,7 +250,7 @@ object NtfManager {
       .build()
 
     with(NotificationManagerCompat.from(context)) {
-      if (ActivityCompat.checkSelfPermission(SimplexApp.context, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+      if (ActivityCompat.checkSelfPermission(PopopxApp.context, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
         notify("MESSAGE".hashCode(), builder.build())
         notify(0, summary)
       }
@@ -281,7 +281,7 @@ object NtfManager {
         getPendingIntent(uniqueInt, PendingIntent.FLAG_IMMUTABLE)
       }
     } else {
-      PendingIntent.getBroadcast(SimplexApp.context, uniqueInt, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+      PendingIntent.getBroadcast(PopopxApp.context, uniqueInt, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
   }
 
@@ -311,7 +311,7 @@ object NtfManager {
     override fun onReceive(context: Context?, intent: Intent?) {
       val userId = getUserIdFromIntent(intent)
       val chatId = intent?.getStringExtra(ChatIdKey) ?: return
-      val m = SimplexApp.context.chatModel
+      val m = PopopxApp.context.chatModel
       when (intent.action) {
         NotificationAction.ACCEPT_CONTACT_REQUEST.name -> ntfManager.acceptContactRequestAction(userId, incognito = false, chatId)
         RejectCallAction -> {

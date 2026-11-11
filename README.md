@@ -1,3 +1,10 @@
+> **⚠️ Unofficial fork.** POPOPX Chat is a modified, non-official fork of
+> [SimpleX Chat](https://github.com/simplex-chat/simplex-chat), licensed under AGPL-3.0. It is
+> not affiliated with, sponsored or endorsed by SimpleX Chat Ltd. See [FORK.md](./FORK.md) and
+> [NOTICE](./NOTICE) for what was changed, what upstream attribution is retained, and which
+> assets are **not** covered by the AGPL grant. The badges below still point at the upstream
+> project's build and release feeds.
+
 [![build](https://github.com/simplex-chat/simplex-chat/actions/workflows/build.yml/badge.svg?branch=stable)](https://github.com/simplex-chat/simplex-chat/actions/workflows/build.yml)
 [![GitHub downloads](https://img.shields.io/github/downloads/simplex-chat/simplex-chat/total)](https://github.com/simplex-chat/simplex-chat/releases)
 [![GitHub release](https://img.shields.io/github/v/release/simplex-chat/simplex-chat)](https://github.com/simplex-chat/simplex-chat/releases)
@@ -8,20 +15,21 @@
 
 <img src="images/github-banner.jpg" alt="SimpleX logo" width="100%">
 
-Invest in SimpleX Chat. [Learn more on Wefunder](https://wefunder.com/simplex.chat?utm_source=github).
+This link is **upstream's** fundraising campaign. POPOPX Chat is not part of it and receives
+none of it: [Invest in SimpleX Chat on Wefunder](https://wefunder.com/simplex.chat?utm_source=github).
 
-# SimpleX - the first messaging platform that has no user identifiers of any kind - 100% private by design!
+# POPOPX - the first messaging platform that has no user identifiers of any kind - 100% private by design!
 
 [<img src="./images/trail-of-bits.jpg" height="80">](http://simplex.chat/blog/20221108-simplex-chat-v4.2-security-audit-new-website.html) &nbsp;&nbsp;&nbsp; [<img src="./images/privacy-guides.jpg" height="64">](https://www.privacyguides.org/en/real-time-communication/#simplex-chat) &nbsp;&nbsp;&nbsp; [<img src="./images/whonix-logo.jpg" height="64">](https://www.whonix.org/wiki/Chat#Recommendation) &nbsp;&nbsp;&nbsp; [<img src="./images/kuketz-blog.jpg" height="64">](https://www.kuketz-blog.de/simplex-eindruecke-vom-messenger-ohne-identifier/)
 
 **[Why we are building SimpleX Network](./docs/WHY.md)**
 
-## Welcome to SimpleX Chat!
+## Welcome to POPOPX Chat!
 
 1. 📲 [Install the app](#install-the-app).
 2. ↔️ [Connect to the team](#connect-to-the-team), [join user groups](#join-user-groups) and [follow our updates](#follow-our-updates).
 3. 🤝 [Make a private connection](#make-a-private-connection) with a friend.
-4. 🔤 [Help translating SimpleX Chat](#help-translating-simplex-chat).
+4. 🔤 [Help translating POPOPX Chat](#help-translating-popopx-chat).
 5. ⚡️ [Contribute](#contribute) and [support us with donations](#please-support-us-with-your-donations).
 
 [Learn more about SimpleX Chat](#contents).
@@ -100,11 +108,11 @@ Read about the app features and settings in the new [User guide](./docs/guide/RE
 
 We would love to have you join the development! You can help us with:
 
-- [develop a chat bot](#develop-a-chat-bot) for SimpleX Chat!
+- [develop a chat bot](#develop-a-chat-bot) for POPOPX Chat!
 - writing a tutorial or recipes about hosting servers, chat bots, etc.
 - developing features - please connect to us via chat so we can help you get started.
 
-## Help translating SimpleX Chat
+## Help translating POPOPX Chat
 
 Thanks to our users and [Weblate](https://hosted.weblate.org/engage/simplex-chat/), SimpleX Chat apps, website and documents are translated to many other languages.
 
@@ -279,7 +287,7 @@ See [SimpleX Chat Protocol](./docs/protocol/simplex-chat.md) for the format of m
 
 ## Privacy and security: technical details and limitations
 
-SimpleX Chat is a work in progress – we are releasing improvements as they are ready. You have to decide if the current state is good enough for your usage scenario.
+POPOPX Chat is a work in progress – we are releasing improvements as they are ready. You have to decide if the current state is good enough for your usage scenario.
 
 We compiled a [glossary of terms](./docs/GLOSSARY.md) used to describe communication systems to help understand some terms below and to help compare advantages and disadvantages of various communication systems.
 

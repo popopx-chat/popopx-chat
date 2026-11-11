@@ -1,15 +1,15 @@
 //
-//  BadgesSupportSimplexView.swift
+//  BadgesSupportPopopxView.swift
 //  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 28.07.2026.
-//  Copyright © 2026 SimpleX Chat. All rights reserved.
+//  Copyright © 2026 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
 import POPOPXChat
 
-struct BadgesSupportSimplexView: View {
+struct BadgesSupportPopopxView: View {
     @EnvironmentObject var theme: AppTheme
     @EnvironmentObject var chatModel: ChatModel
     @ObservedObject private var store = BadgeStore.shared
@@ -24,7 +24,7 @@ struct BadgesSupportSimplexView: View {
     var body: some View {
         GeometryReader { g in
             VStack(alignment: .center, spacing: 16) {
-                Text("Support SimpleX")
+                Text("Support POPOPX")
                     .font(.largeTitle)
                     .bold()
                     .foregroundColor(theme.colors.primary)
@@ -117,12 +117,12 @@ struct BadgesSupportSimplexView: View {
             Button { whyBuiltActive = true } label: {
                 HStack(spacing: 4) {
                     Image(systemName: "info.circle")
-                    Text("Why SimpleX is built.").fontWeight(.medium)
+                    Text("Why POPOPX is built.").fontWeight(.medium)
                 }
                 .font(.body)
             }
             NavigationLink(isActive: $whyBuiltActive) {
-                WhySimpleX(onboarding: false, titleColor: theme.colors.primary, createProfileNavLinkActive: .constant(false))
+                WhyPOPOPX(onboarding: false, titleColor: theme.colors.primary, createProfileNavLinkActive: .constant(false))
             } label: {
                 EmptyView()
             }
@@ -229,10 +229,10 @@ struct PhoneSupporterHero: View {
     }
 }
 
-struct BadgesSupportSimplexView_Previews: PreviewProvider {
+struct BadgesSupportPopopxView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            BadgesSupportSimplexView(servedByAppStore: true)
+            BadgesSupportPopopxView(servedByAppStore: true)
         }
     }
 }

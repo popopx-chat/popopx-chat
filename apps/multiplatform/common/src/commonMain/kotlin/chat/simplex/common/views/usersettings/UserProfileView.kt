@@ -164,7 +164,7 @@ fun UserProfileLayout(
             .padding(horizontal = DEFAULT_PADDING),
         ) {
           AppBarTitle(stringResource(MR.strings.your_current_profile), withPadding = false)
-          ReadableText(generalGetString(MR.strings.your_profile_is_stored_on_device_and_shared_only_with_contacts_simplex_cannot_see_it), TextAlign.Center)
+          ReadableText(generalGetString(MR.strings.your_profile_is_stored_on_device_and_shared_only_with_contacts_popopx_cannot_see_it), TextAlign.Center)
           Column(
             Modifier
               .fillMaxWidth()
@@ -311,7 +311,7 @@ private fun canSaveProfile(displayName: String, shortDescr: String, profile: Pro
 )*/
 @Composable
 fun PreviewUserProfileLayoutEditOff() {
-  SimpleXTheme {
+  POPOPXTheme {
     UserProfileLayout(
       profile = Profile.sampleData,
       close = {},
@@ -327,7 +327,7 @@ fun PreviewUserProfileLayoutEditOff() {
 )*/
 @Composable
 fun PreviewUserProfileLayoutEditOn() {
-  SimpleXTheme {
+  POPOPXTheme {
     UserProfileLayout(
       profile = Profile.sampleData,
       close = {},

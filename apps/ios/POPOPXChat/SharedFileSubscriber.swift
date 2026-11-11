@@ -3,7 +3,7 @@
 //  POPOPXChat
 //
 //  Created by Evgeny on 09/12/2023.
-//  Copyright © 2023 SimpleX Chat. All rights reserved.
+//  Copyright © 2023 POPOPX Chat. All rights reserved.
 //
 
 import Foundation
@@ -57,9 +57,9 @@ public class SharedFileSubscriber<Message: Codable>: NSObject, NSFilePresenter {
 
 let appMessagesSharedFile = getGroupContainerDirectory().appendingPathComponent("com.popopxchat.popopx.messages", isDirectory: false)
 
-let nseMessagesSharedFile = getGroupContainerDirectory().appendingPathComponent("com.popopxchat.popopx.SimpleX-NSE.messages", isDirectory: false)
+let nseMessagesSharedFile = getGroupContainerDirectory().appendingPathComponent("com.popopxchat.popopx.POPOPX-NSE.messages", isDirectory: false)
 
-let seMessagesSharedFile = getGroupContainerDirectory().appendingPathComponent("com.popopxchat.popopx.SimpleX-SE.messages", isDirectory: false)
+let seMessagesSharedFile = getGroupContainerDirectory().appendingPathComponent("com.popopxchat.popopx.POPOPX-SE.messages", isDirectory: false)
 
 public struct ProcessMessage<Message: Codable>: Codable {
     var createdAt: Date = Date.now

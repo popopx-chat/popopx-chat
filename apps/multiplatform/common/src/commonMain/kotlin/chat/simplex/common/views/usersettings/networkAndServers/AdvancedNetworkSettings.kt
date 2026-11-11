@@ -575,7 +575,7 @@ private fun showUnsavedChangesAlert(save: () -> Unit, revert: () -> Unit) {
 @Preview
 @Composable
 fun PreviewAdvancedNetworkSettingsLayout() {
-  SimpleXTheme {
+  POPOPXTheme {
     AdvancedNetworkSettingsLayout(
       currentRemoteHost = null,
       developerTools = false,

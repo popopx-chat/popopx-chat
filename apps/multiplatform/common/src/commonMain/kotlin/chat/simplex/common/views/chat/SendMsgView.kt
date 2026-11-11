@@ -603,7 +603,7 @@ private fun showDisabledVoiceAlert(isDirectChat: Boolean) {
 fun PreviewSendMsgView() {
   val smallFont = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onBackground)
   val textStyle = remember { mutableStateOf(smallFont) }
-  SimpleXTheme {
+  POPOPXTheme {
     SendMsgView(
       composeState = remember { mutableStateOf(ComposeState(useLinkPreviews = true)) },
       showVoiceRecordIcon = false,
@@ -638,7 +638,7 @@ fun PreviewSendMsgViewEditing() {
   val smallFont = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onBackground)
   val textStyle = remember { mutableStateOf(smallFont) }
   val composeStateEditing = ComposeState(editingItem = ChatItem.getSampleData(), useLinkPreviews = true)
-  SimpleXTheme {
+  POPOPXTheme {
     SendMsgView(
       composeState = remember { mutableStateOf(composeStateEditing) },
       showVoiceRecordIcon = false,
@@ -673,7 +673,7 @@ fun PreviewSendMsgViewInProgress() {
   val smallFont = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onBackground)
   val textStyle = remember { mutableStateOf(smallFont) }
   val composeStateInProgress = ComposeState(preview = ComposePreview.FilePreview("test.txt", getAppFileUri("test.txt")), inProgress = true, useLinkPreviews = true)
-  SimpleXTheme {
+  POPOPXTheme {
     SendMsgView(
       composeState = remember { mutableStateOf(composeStateInProgress) },
       showVoiceRecordIcon = false,

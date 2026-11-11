@@ -77,7 +77,7 @@
 "Passphrase" = "Phrase secrète";
 
 /* No comment provided by engineer. */
-"Please create a profile in the SimpleX app" = "Veuillez créer un profil dans l'app SimpleX";
+"Please create a profile in the POPOPX app" = "Veuillez créer un profil dans l'app POPOPX";
 
 /* No comment provided by engineer. */
 "Selected chat preferences prohibit this message." = "Les paramètres de conversation sélectionnés ne permettent pas l'envoi de ce message.";
@@ -107,5 +107,5 @@
 "Wrong database passphrase" = "Mauvaise phrase secrète pour la base de données";
 
 /* No comment provided by engineer. */
-"You can allow sharing in Your privacy / SimpleX Lock settings." = "Vous pouvez autoriser le partage dans les paramètres Votre confidentialité / Verrouillage SimpleX.";
+"You can allow sharing in Your privacy / POPOPX Lock settings." = "Vous pouvez autoriser le partage dans les paramètres Votre confidentialité / Verrouillage POPOPX.";
 

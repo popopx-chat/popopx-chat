@@ -91,7 +91,7 @@ fun ModalData.WhatsNewView(updatedConditions: Boolean = false, viaSettings: Bool
       Icon(
         painterResource(MR.images.ic_open_in_new), stringResource(titleId), tint = MaterialTheme.colors.primary,
         modifier = Modifier
-          .clickable { if (link.startsWith("simplex:")) uriHandler.openVerifiedSimplexUri(link) else uriHandler.openExternalLink(link) }
+          .clickable { if (link.startsWith("popopx:")) uriHandler.openVerifiedPopopxUri(link) else uriHandler.openExternalLink(link) }
       )
     }
 
@@ -975,8 +975,8 @@ private val versionDescriptions: List<VersionDescription> = listOf(
       ),
       VersionFeature.FeatureDescription(
         icon = MR.images.ic_alternate_email,
-        titleId = MR.strings.v7_0_simplex_names,
-        descrId = MR.strings.v7_0_simplex_names_descr
+        titleId = MR.strings.v7_0_popopx_names,
+        descrId = MR.strings.v7_0_popopx_names_descr
       ),
       VersionFeature.FeatureDescription(
         icon = null,
@@ -1007,8 +1007,8 @@ private val versionDescriptions: List<VersionDescription> = listOf(
       ),
       VersionFeature.FeatureDescription(
         icon = MR.images.ic_alternate_email,
-        titleId = MR.strings.v7_1_simplex_names,
-        descrId = MR.strings.v7_1_simplex_names_descr,
+        titleId = MR.strings.v7_1_popopx_names,
+        descrId = MR.strings.v7_1_popopx_names_descr,
         learnMoreLink = "https://simplex.domains/?utm_source=$APP_UTM_SOURCE"
       ),
       VersionFeature.FeatureDescription(
@@ -1201,19 +1201,19 @@ private val getStakeSlides: List<CrowdfundingSlide> = listOf(
     MR.images.crowdfunding_2,
     "480,000+ users joined on their own",
     null,
-    "SimpleX users have been more than doubling every year without any paid marketing, and donated over \$650,000."
+    "POPOPX users have been more than doubling every year without any paid marketing, and donated over \$650,000."
   ),
   CrowdfundingSlide(
     MR.images.crowdfunding_3,
-    "Developers already bet on SimpleX success",
+    "Developers already bet on POPOPX success",
     "Independent developers created moderation and AI bots, Telegram bridges, and a public server registry.",
-    "Every service developers build on SimpleX Network may increase its value, and bring new users to SimpleX Chat."
+    "Every service developers build on POPOPX Network may increase its value, and bring new users to POPOPX Chat."
   ),
   CrowdfundingSlide(
     MR.images.crowdfunding_4,
     "Revenue plan: businesses & big channels pay",
-    "SimpleX Chat plans to earn from the infrastructure and services that creators, businesses and large communities need as they grow.",
-    "Read about how we plan to make SimpleX Chat and network profitable, and about all the investment terms on Wefunder."
+    "POPOPX Chat plans to earn from the infrastructure and services that creators, businesses and large communities need as they grow.",
+    "Read about how we plan to make POPOPX Chat and network profitable, and about all the investment terms on Wefunder."
   ),
 )
 
@@ -1245,7 +1245,7 @@ fun GetStakeView(showFirstImage: Boolean, inCenterOfWindow: Boolean = false, clo
 
   ColumnWithScrollBar(Modifier.pinchZoom().padding(horizontal = DEFAULT_PADDING)) {
     // in the center of the window the page is wide enough for the title to fit on one line
-    val title = "Invest in\nSimpleX Chat"
+    val title = "Invest in\nPOPOPX Chat"
     AppBarTitle(if (inCenterOfWindow) title.replace("\n", " ") else title, withPadding = false)
     if (showFirstImage) {
       slideImage(getStakeSlides[0])
@@ -1283,10 +1283,10 @@ fun GetStakeView(showFirstImage: Boolean, inCenterOfWindow: Boolean = false, clo
       )
       if (!chatModel.desktopNoUserNoRemote) {
         TextButtonBelowOnboardingButton(
-          "or ask SimpleX team",
+          "or ask POPOPX team",
           onClick = if (stopped) null else ({
             close()
-            uriHandler.openVerifiedSimplexUri(CROWDFUNDING_CONTACT_URI)
+            uriHandler.openVerifiedPopopxUri(CROWDFUNDING_CONTACT_URI)
           })
         )
       }
@@ -1425,7 +1425,7 @@ fun CreateUpdateAddressShortLinkView(modalManager: ModalManager) {
               interactionSource = remember { MutableInteractionSource() },
               indication = null
             ) {
-              share(addr.connLinkContact.simplexChatUri(short = true))
+              share(addr.connLinkContact.popopxChatUri(short = true))
             }
         )
       }
@@ -1455,7 +1455,7 @@ fun CreateUpdateAddressShortLinkView(modalManager: ModalManager) {
 )*/
 @Composable
 fun PreviewWhatsNewView() {
-  SimpleXTheme {
+  POPOPXTheme {
     val data = remember { ModalData() }
     data.WhatsNewView(
       viaSettings = true,

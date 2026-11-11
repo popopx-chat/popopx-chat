@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 11.09.2026.
-//  Copyright © 2026 SimpleX Chat. All rights reserved.
+//  Copyright © 2026 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -32,7 +32,7 @@ struct BadgesView: View {
                 BadgesPurchaseStateView(title: "Checking your purchases", showsAsSheet: showsAsSheet)
                     .transition(.opacity)
             } else {
-                BadgesSupportSimplexView(showsAsSheet: showsAsSheet)
+                BadgesSupportPopopxView(showsAsSheet: showsAsSheet)
                     .transition(.opacity)
             }
         }
@@ -46,8 +46,8 @@ struct BadgesView: View {
 
 private(set) var badgesViewShown = false
 
-var supportSimpleXAlertAction: UIAlertAction {
-    UIAlertAction(title: NSLocalizedString("Support SimpleX", comment: "alert button"), style: .default) { _ in
+var supportPOPOPXAlertAction: UIAlertAction {
+    UIAlertAction(title: NSLocalizedString("Support POPOPX", comment: "alert button"), style: .default) { _ in
         openBadgesView()
     }
 }

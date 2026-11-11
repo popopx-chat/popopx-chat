@@ -150,12 +150,12 @@ private func withInvisibleCharMarkers(_ line: String) -> Text {
 
 private func openMarkdownFileLink(_ url: URL) {
     let uri = url.absoluteString
-    let parsed = parseSimpleXMarkdown(uri)
+    let parsed = parsePOPOPXMarkdown(uri)
     let format = parsed?.count == 1 ? parsed?.first?.format : nil
     switch format {
     case let .simplexLink(_, _, simplexUri, _)?:
-        if let simplexUrl = URL(string: simplexUri) {
-            ChatModel.shared.appOpenUrl = simplexUrl
+        if let popopxUrl = URL(string: simplexUri) {
+            ChatModel.shared.appOpenUrl = popopxUrl
         } else {
             showInvalidLinkAlert(uri)
         }

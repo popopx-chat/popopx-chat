@@ -29,14 +29,14 @@ object MessagesFetcherWorker {
       .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
       .build()
 
-    SimplexApp.context.getWorkManagerInstance().enqueueUniqueWork(UNIQUE_WORK_TAG, ExistingWorkPolicy.REPLACE, periodicWorkRequest)
+    PopopxApp.context.getWorkManagerInstance().enqueueUniqueWork(UNIQUE_WORK_TAG, ExistingWorkPolicy.REPLACE, periodicWorkRequest)
   }
 
   fun cancelAll(withLog: Boolean = true) {
     if (withLog) {
       Log.d(TAG, "Worker: canceled all tasks")
     }
-    SimplexApp.context.getWorkManagerInstance().cancelUniqueWork(UNIQUE_WORK_TAG)
+    PopopxApp.context.getWorkManagerInstance().cancelUniqueWork(UNIQUE_WORK_TAG)
   }
 }
 
@@ -51,21 +51,21 @@ class MessagesFetcherWork(
   }
 
   override suspend fun doWork(): Result {
-    // Skip when Simplex service is currently working
-    if (SimplexService.getServiceState(SimplexApp.context) == SimplexService.ServiceState.STARTED) {
+    // Skip when Popopx service is currently working
+    if (PopopxService.getServiceState(PopopxApp.context) == PopopxService.ServiceState.STARTED) {
       reschedule()
       return Result.success()
     }
     val durationSeconds = inputData.getInt(INPUT_DATA_DURATION, 60)
     var shouldReschedule = true
     try {
-      // In case of self-destruct is enabled the initialization process will not start in SimplexApp, Let's start it here
+      // In case of self-destruct is enabled the initialization process will not start in PopopxApp, Let's start it here
       if (DatabaseUtils.ksSelfDestructPassword.get() != null && chatModel.chatDbStatus.value == null) {
         initChatControllerOnStart()
       }
       withTimeout(durationSeconds * 1000L) {
         val chatController = ChatController
-        SimplexService.waitDbMigrationEnds(chatController)
+        PopopxService.waitDbMigrationEnds(chatController)
         val chatDbStatus = chatController.chatModel.chatDbStatus.value
         if (chatDbStatus != DBMigrationResult.OK) {
           Log.w(TAG, "Worker: problem with the database: $chatDbStatus")

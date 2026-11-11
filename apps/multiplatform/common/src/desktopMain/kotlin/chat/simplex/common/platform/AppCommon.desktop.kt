@@ -13,7 +13,7 @@ actual val appPlatform = AppPlatform.DESKTOP
 
 actual val deviceName = generalGetString(MR.strings.desktop_device)
 
-actual fun isAppVisibleAndFocused() = simplexWindowState.windowFocused.value
+actual fun isAppVisibleAndFocused() = popopxWindowState.windowFocused.value
 
 @Suppress("ConstantLocale")
 val defaultLocale: Locale = Locale.getDefault()

@@ -599,7 +599,7 @@ inline fun <reified T> serializableSaver(): Saver<T, *> = Saver(
   restore = { json.decodeFromString(it) }
 )
 
-fun UriHandler.openVerifiedSimplexUri(uri: String) {
+fun UriHandler.openVerifiedPopopxUri(uri: String) {
   connectIfOpenedViaUri(chatModel.remoteHostId(), uri, ChatModel)
 }
 
@@ -616,7 +616,7 @@ fun UriHandler.openUriCatching(uri: String) {
 fun UriHandler.openExternalLink(uri: String) {
   val uriHandler = this
   if (uri.startsWith("https://simplex.chat/contact#") || (uri.startsWith("https://smp") && ".simplex.im/a#" in uri)) {
-    uriHandler.openVerifiedSimplexUri(uri)
+    uriHandler.openVerifiedPopopxUri(uri)
   } else {
     AlertManager.shared.showAlertDialog(
       title = generalGetString(MR.strings.open_external_link_title),

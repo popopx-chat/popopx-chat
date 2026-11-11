@@ -35,9 +35,9 @@
         <target state="translated">#gizli#</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="%1$@ supported SimpleX Chat. The badge expired on %2$@." xml:space="preserve" approved="no">
-        <source>%1$@ supported SimpleX Chat. The badge expired on %2$@.</source>
-        <target state="translated">%1$@ SimpleX Chat-ı dəstəklədi. Nişanın müddəti %2$@ tarixində bitdi.</target>
+      <trans-unit id="%1$@ supported POPOPX Chat. The badge expired on %2$@." xml:space="preserve" approved="no">
+        <source>%1$@ supported POPOPX Chat. The badge expired on %2$@.</source>
+        <target state="translated">%1$@ POPOPX Chat-ı dəstəklədi. Nişanın müddəti %2$@ tarixində bitdi.</target>
         <note>badge alert</note>
       </trans-unit>
       <trans-unit id="%@" xml:space="preserve" approved="no">
@@ -90,9 +90,9 @@
         <target state="translated">%@ yüklənib</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="%@ invested in SimpleX Chat crowdfunding." xml:space="preserve" approved="no">
-        <source>%@ invested in SimpleX Chat crowdfunding.</source>
-        <target state="translated">SimpleX Chat-ın kraudfandinqinə %@ sərmayə qoyulub.</target>
+      <trans-unit id="%@ invested in POPOPX Chat crowdfunding." xml:space="preserve" approved="no">
+        <source>%@ invested in POPOPX Chat crowdfunding.</source>
+        <target state="translated">POPOPX Chat-ın kraudfandinqinə %@ sərmayə qoyulub.</target>
         <note>badge alert</note>
       </trans-unit>
       <trans-unit id="%@ is connected!" xml:space="preserve" approved="no">
@@ -120,9 +120,9 @@
         <target state="translated">%@ serverlər</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="%@ supports SimpleX Chat." xml:space="preserve" approved="no">
-        <source>%@ supports SimpleX Chat.</source>
-        <target state="translated">%@ SimpleX Chat-ı dəstəkləyir.</target>
+      <trans-unit id="%@ supports POPOPX Chat." xml:space="preserve" approved="no">
+        <source>%@ supports POPOPX Chat.</source>
+        <target state="translated">%@ POPOPX Chat-ı dəstəkləyir.</target>
         <note>badge alert</note>
       </trans-unit>
       <trans-unit id="%@ uploaded" xml:space="preserve" approved="no">
@@ -450,9 +450,9 @@ channel relay bar</note>
         <target state="translated">**Daha çox məxfilik**: yeni mesajları hər 20 dəqiqədən bir yoxlayın. Push serverimizlə yalnız cihazın tokeni paylaşılır; server kontaktlarınızın sayını və ya mesajlarla bağlı hər hansı metadanatı görmür.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="**Most private**: do not use SimpleX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app." xml:space="preserve" approved="no">
-        <source>**Most private**: do not use SimpleX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app.</source>
-        <target state="translated">**Ən yüksək məxfilik**: SimpleX Chat-ın push serverindən istifadə etmir. Tətbiq, ondan nə qədər tez-tez istifadə etdiyinizdən asılı olaraq, sistem icazə verdikdə mesajları arxa fonda yoxlayacaq.</target>
+      <trans-unit id="**Most private**: do not use POPOPX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app." xml:space="preserve" approved="no">
+        <source>**Most private**: do not use POPOPX Chat push server. The app will check messages in background, when the system allows it, depending on how often you use the app.</source>
+        <target state="translated">**Ən yüksək məxfilik**: POPOPX Chat-ın push serverindən istifadə etmir. Tətbiq, ondan nə qədər tez-tez istifadə etdiyinizdən asılı olaraq, sistem icazə verdikdə mesajları arxa fonda yoxlayacaq.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="**Please note**: using the same database on two devices will break the decryption of messages from your connections, as a security protection." xml:space="preserve" approved="no">
@@ -465,9 +465,9 @@ channel relay bar</note>
         <target state="translated">**Diqqət**: Əgər parol ifadəsini itirsəniz, onu bərpa edə və ya dəyişdirə bilməyəcəksiniz.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="**Recommended**: device token and end-to-end encrypted notifications are sent to SimpleX Chat push server, but it does not see the message content, size or who it is from." xml:space="preserve" approved="no">
-        <source>**Recommended**: device token and end-to-end encrypted notifications are sent to SimpleX Chat push server, but it does not see the message content, size or who it is from.</source>
-        <target state="translated">**Tövsiyə olunur**: cihaz tokeni və uçdan-uca şifrələnmiş bildirişlər SimpleX Chat-ın push serverinə göndərilir, lakin server mesajın məzmununu, həcmini və ya kimdən gəldiyini görmür.</target>
+      <trans-unit id="**Recommended**: device token and end-to-end encrypted notifications are sent to POPOPX Chat push server, but it does not see the message content, size or who it is from." xml:space="preserve" approved="no">
+        <source>**Recommended**: device token and end-to-end encrypted notifications are sent to POPOPX Chat push server, but it does not see the message content, size or who it is from.</source>
+        <target state="translated">**Tövsiyə olunur**: cihaz tokeni və uçdan-uca şifrələnmiş bildirişlər POPOPX Chat-ın push serverinə göndərilir, lakin server mesajın məzmununu, həcmini və ya kimdən gəldiyini görmür.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="**Scan / Paste link**: to connect via a link you received." xml:space="preserve" approved="no">
@@ -608,10 +608,10 @@ time interval</note>
         <target state="translated">30 saniyə</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="&lt;p&gt;Hi!&lt;/p&gt;&#10;&lt;p&gt;&lt;a href=&quot;%@&quot;&gt;Connect to me via SimpleX Chat&lt;/a&gt;&lt;/p&gt;" xml:space="preserve" approved="no">
+      <trans-unit id="&lt;p&gt;Hi!&lt;/p&gt;&#10;&lt;p&gt;&lt;a href=&quot;%@&quot;&gt;Connect to me via POPOPX Chat&lt;/a&gt;&lt;/p&gt;" xml:space="preserve" approved="no">
         <source>&lt;p&gt;Hi!&lt;/p&gt;
-&lt;p&gt;&lt;a href="%@"&gt;Connect to me via SimpleX Chat&lt;/a&gt;&lt;/p&gt;</source>
-        <target state="translated">&lt;p&gt;Salam!&lt;/p&gt; &lt;p&gt;&lt;a href="%@"&gt;SimpleX Chat vasitəsilə mənimlə əlaqə saxlayın&lt;/a&gt;&lt;/p&gt;</target>
+&lt;p&gt;&lt;a href="%@"&gt;Connect to me via POPOPX Chat&lt;/a&gt;&lt;/p&gt;</source>
+        <target state="translated">&lt;p&gt;Salam!&lt;/p&gt; &lt;p&gt;&lt;a href="%@"&gt;POPOPX Chat vasitəsilə mənimlə əlaqə saxlayın&lt;/a&gt;&lt;/p&gt;</target>
         <note>email text</note>
       </trans-unit>
       <trans-unit id="A few more things" xml:space="preserve" approved="no">
@@ -660,9 +660,9 @@ time interval</note>
         <target state="translated">Ünvan dəyişikliyi dayandırılsın?</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="About SimpleX Chat" xml:space="preserve" approved="no">
-        <source>About SimpleX Chat</source>
-        <target state="translated">SimpleX Chat haqqında</target>
+      <trans-unit id="About POPOPX Chat" xml:space="preserve" approved="no">
+        <source>About POPOPX Chat</source>
+        <target state="translated">POPOPX Chat haqqında</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="About operators" xml:space="preserve" approved="no">
@@ -754,9 +754,9 @@ swipe action</note>
         <target state="translated">Əlavə et</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Add address to your profile, so that your SimpleX contacts can share it with other people. Profile update will be sent to your SimpleX contacts." xml:space="preserve" approved="no">
-        <source>Add address to your profile, so that your SimpleX contacts can share it with other people. Profile update will be sent to your SimpleX contacts.</source>
-        <target state="translated">Profilinizə ünvan əlavə edin ki, SimpleX kontaktlarınızı onu başqaları ilə paylaşa bilsinlər. Profil yeniləməsi SimpleX kontaktlarınıza göndəriləcək.</target>
+      <trans-unit id="Add address to your profile, so that your POPOPX contacts can share it with other people. Profile update will be sent to your POPOPX contacts." xml:space="preserve" approved="no">
+        <source>Add address to your profile, so that your POPOPX contacts can share it with other people. Profile update will be sent to your POPOPX contacts.</source>
+        <target state="translated">Profilinizə ünvan əlavə edin ki, POPOPX kontaktlarınızı onu başqaları ilə paylaşa bilsinlər. Profil yeniləməsi POPOPX kontaktlarınıza göndəriləcək.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Add contributors." xml:space="preserve" approved="no">
@@ -1104,9 +1104,9 @@ swipe action</note>
         <target state="translated">İstifadəçilərə mesajları moderatorlara şikayət etmək imkanı verin.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Allow to send SimpleX links." xml:space="preserve" approved="no">
-        <source>Allow to send SimpleX links.</source>
-        <target state="translated">SimpleX linklərinin göndərilməsinə icazə verin.</target>
+      <trans-unit id="Allow to send POPOPX links." xml:space="preserve" approved="no">
+        <source>Allow to send POPOPX links.</source>
+        <target state="translated">POPOPX linklərinin göndərilməsinə icazə verin.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Allow to send files and media." xml:space="preserve" approved="no">
@@ -1788,9 +1788,9 @@ set passcode view</note>
         <target state="translated">Kanal</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Channel SimpleX name" xml:space="preserve" approved="no">
-        <source>Channel SimpleX name</source>
-        <target state="translated">SimpleX kanalı adı</target>
+      <trans-unit id="Channel POPOPX name" xml:space="preserve" approved="no">
+        <source>Channel POPOPX name</source>
+        <target state="translated">POPOPX kanalı adı</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Channel display name" xml:space="preserve" approved="no">
@@ -2291,10 +2291,10 @@ server test step</note>
         <target state="translated">Dostlarınızla daha tez əlaqə qurun.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Connect to yourself?&#10;This is your own SimpleX address!" xml:space="preserve" approved="no">
+      <trans-unit id="Connect to yourself?&#10;This is your own POPOPX address!" xml:space="preserve" approved="no">
         <source>Connect to yourself?
-This is your own SimpleX address!</source>
-        <target state="translated">Özünüzə qoşulun? Bu, sizin şəxsi SimpleX ünvanınızdır!</target>
+This is your own POPOPX address!</source>
+        <target state="translated">Özünüzə qoşulun? Bu, sizin şəxsi POPOPX ünvanınızdır!</target>
         <note>new chat sheet title</note>
       </trans-unit>
       <trans-unit id="Connect to yourself?&#10;This is your own one-time link!" xml:space="preserve" approved="no">
@@ -2585,9 +2585,9 @@ Bu, sizin şəxsi birdəfəlik keçidinizdir!</target>
         <target state="translated">Bir dəfəlik keçid yarat</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Create SimpleX address" xml:space="preserve" approved="no">
-        <source>Create SimpleX address</source>
-        <target state="translated">SimpleX ünvanı yaradın</target>
+      <trans-unit id="Create POPOPX address" xml:space="preserve" approved="no">
+        <source>Create POPOPX address</source>
+        <target state="translated">POPOPX ünvanı yaradın</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Create a group using a random profile." xml:space="preserve" approved="no">
@@ -3235,14 +3235,14 @@ alert button</note>
         <target state="translated">Cihaz</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Device authentication is disabled. Turning off SimpleX Lock." xml:space="preserve" approved="no">
-        <source>Device authentication is disabled. Turning off SimpleX Lock.</source>
-        <target state="translated">Cihazın autentifikasiyası deaktiv edilib. SimpleX Lock söndürülür.</target>
+      <trans-unit id="Device authentication is disabled. Turning off POPOPX Lock." xml:space="preserve" approved="no">
+        <source>Device authentication is disabled. Turning off POPOPX Lock.</source>
+        <target state="translated">Cihazın autentifikasiyası deaktiv edilib. POPOPX Lock söndürülür.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Device authentication is not enabled. You can turn on SimpleX Lock via Settings, once you enable device authentication." xml:space="preserve" approved="no">
-        <source>Device authentication is not enabled. You can turn on SimpleX Lock via Settings, once you enable device authentication.</source>
-        <target state="translated">Cihazın autentifikasiyası aktivləşdirilməyib. Cihazın autentifikasiyasını aktivləşdirdikdən sonra "Ayarlar" vasitəsilə "SimpleX Lock" funksiyasını işə sala bilərsiniz.</target>
+      <trans-unit id="Device authentication is not enabled. You can turn on POPOPX Lock via Settings, once you enable device authentication." xml:space="preserve" approved="no">
+        <source>Device authentication is not enabled. You can turn on POPOPX Lock via Settings, once you enable device authentication.</source>
+        <target state="translated">Cihazın autentifikasiyası aktivləşdirilməyib. Cihazın autentifikasiyasını aktivləşdirdikdən sonra "Ayarlar" vasitəsilə "POPOPX Lock" funksiyasını işə sala bilərsiniz.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Different names, avatars and transport isolation." xml:space="preserve" approved="no">
@@ -3280,9 +3280,9 @@ alert button</note>
         <target state="translated">Deaktiv et (dəyişiklikləri saxla)</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Disable SimpleX Lock" xml:space="preserve" approved="no">
-        <source>Disable SimpleX Lock</source>
-        <target state="translated">SimpleX kilidini deaktiv edin</target>
+      <trans-unit id="Disable POPOPX Lock" xml:space="preserve" approved="no">
+        <source>Disable POPOPX Lock</source>
+        <target state="translated">POPOPX kilidini deaktiv edin</target>
         <note>authentication reason</note>
       </trans-unit>
       <trans-unit id="Disable automatic message deletion?" xml:space="preserve" approved="no">
@@ -3360,9 +3360,9 @@ alert button</note>
         <target state="translated">Hətta sizin və ya təyinat serveriniz şəxsi marşrutlaşdırmanı dəstəkləməsə belə, mesajları birbaşa GÖNDƏRMƏYİN.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Do NOT use SimpleX for emergency calls." xml:space="preserve" approved="no">
-        <source>Do NOT use SimpleX for emergency calls.</source>
-        <target state="translated">Təcili zənglər üçün SimpleX-dən istifadə etməyin.</target>
+      <trans-unit id="Do NOT use POPOPX for emergency calls." xml:space="preserve" approved="no">
+        <source>Do NOT use POPOPX for emergency calls.</source>
+        <target state="translated">Təcili zənglər üçün POPOPX-dən istifadə etməyin.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Do NOT use private routing." xml:space="preserve" approved="no">
@@ -3546,9 +3546,9 @@ chat item action</note>
         <target state="translated">Daha yaxşı metaməlumat məxfiliyi üçün Şəbəkə və server parametrlərində Flux aktivləşdirin.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Enable SimpleX Lock" xml:space="preserve" approved="no">
-        <source>Enable SimpleX Lock</source>
-        <target state="translated">SimpleX Lock-u aktivləşdirin</target>
+      <trans-unit id="Enable POPOPX Lock" xml:space="preserve" approved="no">
+        <source>Enable POPOPX Lock</source>
+        <target state="translated">POPOPX Lock-u aktivləşdirin</target>
         <note>authentication reason</note>
       </trans-unit>
       <trans-unit id="Enable TCP keep-alive" xml:space="preserve" approved="no">
@@ -4556,9 +4556,9 @@ servers warning</note>
         <target state="translated">Konsol üçün</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="For example, if your contact receives messages via a SimpleX Chat server, your app will deliver them via a Flux server." xml:space="preserve" approved="no">
-        <source>For example, if your contact receives messages via a SimpleX Chat server, your app will deliver them via a Flux server.</source>
-        <target state="translated">Məsələn, əgər əlaqə saxladığınız şəxs mesajları SimpleX Chat serveri vasitəsilə qəbul edirsə, tətbiqiniz onları Flux serveri vasitəsilə çatdıracaq.</target>
+      <trans-unit id="For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server." xml:space="preserve" approved="no">
+        <source>For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server.</source>
+        <target state="translated">Məsələn, əgər əlaqə saxladığınız şəxs mesajları POPOPX Chat serveri vasitəsilə qəbul edirsə, tətbiqiniz onları Flux serveri vasitəsilə çatdıracaq.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="For me" xml:space="preserve" approved="no">
@@ -4690,9 +4690,9 @@ Xəta: %2$@</target>
         <target state="translated">GIF-lər və stikerlər</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Get SimpleX name (BETA)" xml:space="preserve" approved="no">
-        <source>Get SimpleX name (BETA)</source>
-        <target state="translated">SimpleX adı əldə edin (BETA)</target>
+      <trans-unit id="Get POPOPX name (BETA)" xml:space="preserve" approved="no">
+        <source>Get POPOPX name (BETA)</source>
+        <target state="translated">POPOPX adı əldə edin (BETA)</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Get link" xml:space="preserve" approved="no">
@@ -4900,9 +4900,9 @@ Xəta: %2$@</target>
         <target state="translated">Yeni abunəçilərə tarixçə göndərilmir.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="How SimpleX works" xml:space="preserve" approved="no">
-        <source>How SimpleX works</source>
-        <target state="translated">SimpleX necə işləyir</target>
+      <trans-unit id="How POPOPX works" xml:space="preserve" approved="no">
+        <source>How POPOPX works</source>
+        <target state="translated">POPOPX necə işləyir</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="How it affects privacy" xml:space="preserve" approved="no">
@@ -5147,9 +5147,9 @@ Tezliklə daha çox təkmilləşdirmə olacaq!</target>
         <target state="translated">İlkin rol</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Install SimpleX Chat for terminal" xml:space="preserve" approved="no">
-        <source>Install SimpleX Chat for terminal</source>
-        <target state="translated">Terminal üçün SimpleX Chat quraşdırın</target>
+      <trans-unit id="Install POPOPX Chat for terminal" xml:space="preserve" approved="no">
+        <source>Install POPOPX Chat for terminal</source>
+        <target state="translated">Terminal üçün POPOPX Chat quraşdırın</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Instant" xml:space="preserve" approved="no">
@@ -5492,9 +5492,9 @@ Bu, %@ qrupu üçün olan keçidinizdir!</target>
         <target state="translated">Mobil şəbəkələrdə daha az trafik.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Let people connect to you via name registered with your SimpleX address." xml:space="preserve" approved="no">
-        <source>Let people connect to you via name registered with your SimpleX address.</source>
-        <target state="translated">Qoy insanlar SimpleX ünvanınızla qeydiyyatdan keçmiş ad vasitəsilə sizinlə əlaqə saxlaya bilsinlər.</target>
+      <trans-unit id="Let people connect to you via name registered with your POPOPX address." xml:space="preserve" approved="no">
+        <source>Let people connect to you via name registered with your POPOPX address.</source>
+        <target state="translated">Qoy insanlar POPOPX ünvanınızla qeydiyyatdan keçmiş ad vasitəsilə sizinlə əlaqə saxlaya bilsinlər.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Let people join via name registered with this channel link." xml:space="preserve" approved="no">
@@ -5507,9 +5507,9 @@ Bu, %@ qrupu üçün olan keçidinizdir!</target>
         <target state="translated">Qoy kimsə sizə qoşulsun</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Let's talk in SimpleX Chat" xml:space="preserve" approved="no">
-        <source>Let's talk in SimpleX Chat</source>
-        <target state="translated">Gəlin SimpleX Chat danışaq</target>
+      <trans-unit id="Let's talk in POPOPX Chat" xml:space="preserve" approved="no">
+        <source>Let's talk in POPOPX Chat</source>
+        <target state="translated">Gəlin POPOPX Chat danışaq</target>
         <note>email subject</note>
       </trans-unit>
       <trans-unit id="Light" xml:space="preserve" approved="no">
@@ -5722,9 +5722,9 @@ Bu, %@ qrupu üçün olan keçidinizdir!</target>
         <target state="translated">Üzvlər mesajları moderatorlara şikayət edə bilərlər.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Members can send SimpleX links." xml:space="preserve" approved="no">
-        <source>Members can send SimpleX links.</source>
-        <target state="translated">Üzvlər SimpleX linkləri göndərə bilərlər.</target>
+      <trans-unit id="Members can send POPOPX links." xml:space="preserve" approved="no">
+        <source>Members can send POPOPX links.</source>
+        <target state="translated">Üzvlər POPOPX linkləri göndərə bilərlər.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Members can send direct messages." xml:space="preserve" approved="no">

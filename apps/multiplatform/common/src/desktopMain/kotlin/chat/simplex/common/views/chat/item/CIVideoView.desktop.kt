@@ -39,7 +39,7 @@ actual fun LocalWindowWidth(): Dp = with(LocalDensity.current) {
   if (windows.size == 1) {
     (windows.getOrNull(0)?.width ?: 0).toDp()
   } else {
-    simplexWindowState.windowState.size.width
+    popopxWindowState.windowState.size.width
   }
 }
 

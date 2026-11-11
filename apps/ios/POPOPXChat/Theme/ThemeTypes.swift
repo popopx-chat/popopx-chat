@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by Avently on 03.06.2024.
-//  Copyright © 2024 SimpleX Chat. All rights reserved.
+//  Copyright © 2024 POPOPX Chat. All rights reserved.
 //
 
 import Foundation
@@ -438,7 +438,7 @@ public struct ThemeOverrides: Codable, Equatable, Hashable {
         let baseColors = switch base {
             case DefaultTheme.LIGHT: LightColorPalette
             case DefaultTheme.DARK: DarkColorPalette
-            case DefaultTheme.SIMPLEX: SimplexColorPalette
+            case DefaultTheme.SIMPLEX: PopopxColorPalette
             case DefaultTheme.BLACK: BlackColorPalette
         }
         let c = baseColors.clone()
@@ -455,7 +455,7 @@ public struct ThemeOverrides: Codable, Equatable, Hashable {
         let baseColors = switch base {
         case DefaultTheme.LIGHT: LightColorPaletteApp
         case DefaultTheme.DARK: DarkColorPaletteApp
-        case DefaultTheme.SIMPLEX: SimplexColorPaletteApp
+        case DefaultTheme.SIMPLEX: PopopxColorPaletteApp
         case DefaultTheme.BLACK: BlackColorPaletteApp
         }
 
@@ -639,8 +639,8 @@ public struct ThemeModeOverride: Codable, Equatable, Hashable {
 }
 
 public let DarkColorPalette = Colors(
-    primary: SimplexBlue,
-    primaryVariant: SimplexBlue,
+    primary: PopopxBlue,
+    primaryVariant: PopopxBlue,
     secondary: HighOrLowlight,
     secondaryVariant: DarkGray,
     background: Color.black,
@@ -660,8 +660,8 @@ public let DarkColorPaletteApp = AppColors(
 )
 
 public let LightColorPalette = Colors (
-    primary: SimplexBlue,
-    primaryVariant: SimplexBlue,
+    primary: PopopxBlue,
+    primaryVariant: PopopxBlue,
     secondary: HighOrLowlight,
     secondaryVariant: LightGray,
     background: Color.white,
@@ -680,7 +680,7 @@ public let LightColorPaletteApp = AppColors(
     receivedQuote: Color(0xffececee)
 )
 
-public let SimplexColorPalette = Colors(
+public let PopopxColorPalette = Colors(
     primary: Color(0xFF70F0F9),
     primaryVariant: Color(0xFF1298A5),
     secondary: HighOrLowlight,
@@ -692,7 +692,7 @@ public let SimplexColorPalette = Colors(
     onSurface: Color.white,
     isLight: false
 )
-public let SimplexColorPaletteApp = AppColors(
+public let PopopxColorPaletteApp = AppColors(
     title: .white,
     primaryVariant2: Color(0xFF172941),
     sentMessage: Color(0xFF172941),

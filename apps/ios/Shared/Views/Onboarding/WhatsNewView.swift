@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by Evgeny on 24/12/2022.
-//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Copyright © 2022 POPOPX Chat. All rights reserved.
 //
 // Spec: spec/client/navigation.md
 
@@ -56,7 +56,7 @@ private let versionDescriptions: [VersionDescription] = [
             .feature(Description(
                 icon: "checkmark.shield",
                 title: "Security assessment",
-                description: "SimpleX Chat security was audited by Trail of Bits."
+                description: "POPOPX Chat security was audited by Trail of Bits."
             )),
             .feature(Description(
                 icon: "person.2",
@@ -501,7 +501,7 @@ private let versionDescriptions: [VersionDescription] = [
             .feature(Description(
                 icon: "checkmark.shield",
                 title: "Better security ✅",
-                description: "SimpleX protocols reviewed by Trail of Bits."
+                description: "POPOPX protocols reviewed by Trail of Bits."
             )),
             .feature(Description(
                 icon: "video",
@@ -634,7 +634,7 @@ private let versionDescriptions: [VersionDescription] = [
             )),
             .view(FeatureView(
                 icon: nil,
-                title: "Short SimpleX address",
+                title: "Short POPOPX address",
                 view: { CreateUpdateAddressShortLink() }
             ))
         ]
@@ -667,7 +667,7 @@ private let versionDescriptions: [VersionDescription] = [
             .feature(Description(
                 icon: "network",
                 title: "Non-profit governance",
-                description: "To make SimpleX Network last."
+                description: "To make POPOPX Network last."
             ))
         ]
     ),
@@ -677,13 +677,13 @@ private let versionDescriptions: [VersionDescription] = [
         features: (isInUS ? [
             .view(FeatureView(
                 icon: nil,
-                title: "Own a part of SimpleX Chat",
+                title: "Own a part of POPOPX Chat",
                 view: { InvestInPOPOPXChat() }
             ))
         ] : []) + [
             .feature(Description(
                 icon: "at",
-                title: "SimpleX public names (BETA)",
+                title: "POPOPX public names (BETA)",
                 description: "Public names for your channel or business."
             )),
             .feature(Description(
@@ -705,7 +705,7 @@ private let versionDescriptions: [VersionDescription] = [
         features: (isInUS ? [
             .view(FeatureView(
                 icon: nil,
-                title: "Own a part of SimpleX Chat",
+                title: "Own a part of POPOPX Chat",
                 view: { InvestInPOPOPXChat() }
             ))
         ] : []) + [
@@ -716,7 +716,7 @@ private let versionDescriptions: [VersionDescription] = [
             )),
             .feature(Description(
                 icon: "at",
-                title: "SimpleX public names",
+                title: "POPOPX public names",
                 description: "Sale starts on December 12.",
                 learnMore: URL(string: "https://simplex.domains/?utm_source=app_ios")
             )),
@@ -766,7 +766,7 @@ fileprivate struct SupporterBadgeWhatsNew: View {
             if currentShownBadge() != nil {
                 Text("You already have a badge!")
             } else if noShownBadge() {
-                Text("Support SimpleX and get a badge.")
+                Text("Support POPOPX and get a badge.")
                     .foregroundColor(theme.colors.primary)
                     .onTapGesture { openBadgesView() }
             }
@@ -805,7 +805,7 @@ fileprivate struct CreateUpdateAddressShortLink: View {
                     .symbolRenderingMode(.monochrome)
                     .foregroundColor(theme.colors.secondary)
                     .frame(minWidth: 30, alignment: .center)
-                Text("Short SimpleX address").font(.title3).bold()
+                Text("Short POPOPX address").font(.title3).bold()
             }
             Group {
                 if let addr = chatModel.userAddress {
@@ -829,7 +829,7 @@ fileprivate struct CreateUpdateAddressShortLink: View {
         .sheet(isPresented: $showAddressSheet) {
             NavigationView {
                 UserAddressView(autoCreate: true)
-                    .navigationTitle("SimpleX address")
+                    .navigationTitle("POPOPX address")
                     .navigationBarTitleDisplayMode(.large)
                     .modifier(ThemedBackground(grouped: true))
             }
@@ -843,7 +843,7 @@ fileprivate struct InvestInPOPOPXChat: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Own a part of SimpleX Chat! 🚀").font(.title3).bold()
+            Text("Own a part of POPOPX Chat! 🚀").font(.title3).bold()
             #if SIMPLEX_ASSETS
             Image("crowdfunding_1")
                 .resizable()
@@ -875,25 +875,25 @@ fileprivate let getStakeSlides: [(image: String, heading: String, info: String?,
         "crowdfunding_2",
         "480,000+ users joined on their own",
         nil,
-        "SimpleX users have been more than doubling every year without any paid marketing, and donated over $650,000."
+        "POPOPX users have been more than doubling every year without any paid marketing, and donated over $650,000."
     ),
     (
         "crowdfunding_3",
-        "Developers already bet on SimpleX success",
+        "Developers already bet on POPOPX success",
         "Independent developers created moderation and AI bots, Telegram bridges, and a public server registry.",
-        "Every service developers build on SimpleX Network may increase its value, and bring new users to SimpleX Chat."
+        "Every service developers build on POPOPX Network may increase its value, and bring new users to POPOPX Chat."
     ),
     (
         "crowdfunding_4",
         "Revenue plan: businesses & big channels pay",
-        "SimpleX Chat plans to earn from the infrastructure and services that creators, businesses and large communities need as they grow.",
-        "Read about how we plan to make SimpleX Chat and network profitable, and about all the investment terms on Wefunder."
+        "POPOPX Chat plans to earn from the infrastructure and services that creators, businesses and large communities need as they grow.",
+        "Read about how we plan to make POPOPX Chat and network profitable, and about all the investment terms on Wefunder."
     ),
 ]
 
 let wefunderURL = URL(string: "https://wefunder.com/simplex.chat?utm_source=app_ios")!
 
-private let simplexCrowdfundingURL = URL(string: "popopx:/a#JxGcOA1_QhlmVFzYYabloMbvMZk5Y9d9iS3ITDnhzYo?h=smp11.simplex.im")!
+private let popopxCrowdfundingURL = URL(string: "popopx:/a#JxGcOA1_QhlmVFzYYabloMbvMZk5Y9d9iS3ITDnhzYo?h=smp11.simplex.im")!
 
 struct GetStakeView: View {
     @Environment(\.dismiss) var dismiss: DismissAction
@@ -904,7 +904,7 @@ struct GetStakeView: View {
     var body: some View {
         ZoomablePageView {
             VStack(alignment: .leading, spacing: 18) {
-                Text(verbatim: "Invest in\nSimpleX Chat")
+                Text(verbatim: "Invest in\nPOPOPX Chat")
                     .font(.largeTitle)
                     .bold()
                     .fixedSize(horizontal: false, vertical: true)
@@ -936,10 +936,10 @@ struct GetStakeView: View {
                 Button {
                     dismiss()
                     DispatchQueue.main.async {
-                        ChatModel.shared.appOpenUrl = simplexCrowdfundingURL
+                        ChatModel.shared.appOpenUrl = popopxCrowdfundingURL
                     }
                 } label: {
-                    Text(verbatim: "or ask SimpleX team")
+                    Text(verbatim: "or ask POPOPX team")
                         .font(.callout)
                 }
                 .disabled(chatModel.chatRunning != true)

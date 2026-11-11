@@ -273,7 +273,7 @@ class FilesTest(RepositoryTestCase):
 
 class ReportTest(unittest.TestCase):
     def test_report_exit_codes_and_blank_grouping(self) -> None:
-        path = Path("apps/ios/SimpleX Localizations/de.xcloc/Localized Contents/de.xliff")
+        path = Path("apps/ios/POPOPX Localizations/de.xcloc/Localized Contents/de.xliff")
         problems = [l10n.Problem(l10n.BLANK, path, f"Key {i}", "empty target") for i in range(5)]
         problems.append(l10n.Problem(l10n.PLACEHOLDER, path, "%@ server", "expected %1 object, found none", "Server"))
         output = io.StringIO()
@@ -288,7 +288,7 @@ class ReportTest(unittest.TestCase):
             self.assertEqual(l10n.report({}, [], {"en"}), 0)
 
     def test_warnings_do_not_fail(self) -> None:
-        path = Path("apps/ios/SimpleX Localizations/ar.xcloc/Localized Contents/ar.xliff")
+        path = Path("apps/ios/POPOPX Localizations/ar.xcloc/Localized Contents/ar.xliff")
         problems = [l10n.Problem(l10n.STALE, path, f"Old {i}", "not in en.xliff") for i in range(4)]
         problems.append(l10n.Problem(l10n.DUPLICATE, path, "A", "2 units with this id"))
         output = io.StringIO()
@@ -633,7 +633,7 @@ class KotlinAdjustTest(RepositoryTestCase):
 
 class SummaryTest(unittest.TestCase):
     def test_empty_columns_are_hidden(self) -> None:
-        path = Path("apps/ios/SimpleX Localizations/de.xcloc/Localized Contents/de.xliff")
+        path = Path("apps/ios/POPOPX Localizations/de.xcloc/Localized Contents/de.xliff")
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
             l10n.print_summary({"de": l10n.LanguageStats(translated=3)}, [l10n.Problem(l10n.LINK, path, "k", "d")], {"de"})

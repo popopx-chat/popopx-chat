@@ -64,7 +64,7 @@ fun IncomingCallAlertLayout(
       Row(verticalAlignment = Alignment.CenterVertically) {
         CallButton(stringResource(MR.strings.reject), painterResource(MR.images.ic_call_end_filled), Color.Red, rejectCall)
         CallButton(stringResource(MR.strings.ignore), painterResource(MR.images.ic_close), MaterialTheme.colors.primary, ignoreCall)
-        CallButton(stringResource(MR.strings.accept), painterResource(MR.images.ic_check_filled), SimplexGreen, acceptCall)
+        CallButton(stringResource(MR.strings.accept), painterResource(MR.images.ic_check_filled), PopopxGreen, acceptCall)
       }
     }
   }
@@ -72,7 +72,7 @@ fun IncomingCallAlertLayout(
 
 @Composable
 fun IncomingCallInfo(invitation: RcvCallInvitation, chatModel: ChatModel) {
-  @Composable fun CallIcon(icon: Painter, descr: String) = Icon(icon, descr, tint = SimplexGreen)
+  @Composable fun CallIcon(icon: Painter, descr: String) = Icon(icon, descr, tint = PopopxGreen)
   Row(verticalAlignment = Alignment.CenterVertically) {
     if (chatModel.users.size > 1) {
       ProfileImage(size = 32.dp, image = invitation.user.profile.image, color = MaterialTheme.colors.secondaryVariant)
@@ -108,7 +108,7 @@ private fun CallButton(text: String, icon: Painter, color: Color, action: () -> 
 @Preview
 @Composable
 fun PreviewIncomingCallAlertLayout() {
-  SimpleXTheme {
+  POPOPXTheme {
     IncomingCallAlertLayout(
       invitation = RcvCallInvitation(
         remoteHostId = null,

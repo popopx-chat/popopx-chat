@@ -139,7 +139,7 @@ private fun FeatureSection(
   SectionView(
     feature.text,
     icon = feature.iconFilled(),
-    iconTint = if (enabled.forUser) SimplexGreen else if (enabled.forContact) WarningYellow else Color.Red,
+    iconTint = if (enabled.forUser) PopopxGreen else if (enabled.forContact) WarningYellow else Color.Red,
     leadingIcon = true,
   ) {
     ExposedDropDownSettingRow(
@@ -174,7 +174,7 @@ private fun TimedMessagesFeatureSection(
   SectionView(
     ChatFeature.TimedMessages.text,
     icon = ChatFeature.TimedMessages.iconFilled(),
-    iconTint = if (enabled.forUser) SimplexGreen else if (enabled.forContact) WarningYellow else Color.Red,
+    iconTint = if (enabled.forUser) PopopxGreen else if (enabled.forContact) WarningYellow else Color.Red,
     leadingIcon = true,
   ) {
     PreferenceToggle(

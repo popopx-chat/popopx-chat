@@ -264,7 +264,7 @@ private fun normalizeImageUri(u: URL, imageUri: String) = when {
 )*/
 @Composable
 fun PreviewChatItemLinkView() {
-  SimpleXTheme {
+  POPOPXTheme {
     ChatItemLinkView(LinkPreview.sampleData, remember { mutableStateOf(false) }) {}
   }
 }
@@ -276,7 +276,7 @@ fun PreviewChatItemLinkView() {
 )*/
 @Composable
 fun PreviewComposeLinkView() {
-  SimpleXTheme {
+  POPOPXTheme {
     ComposeLinkView(LinkPreview.sampleData, cancelPreview = { -> }, true)
   }
 }
@@ -284,7 +284,7 @@ fun PreviewComposeLinkView() {
 @Preview
 @Composable
 fun PreviewComposeLinkViewLoading() {
-  SimpleXTheme {
+  POPOPXTheme {
     ComposeLinkView(null, cancelPreview = { -> }, true)
   }
 }

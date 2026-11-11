@@ -19,7 +19,7 @@ external fun initHS()
 // android-support
 external fun pipeStdOutToSocket(socketName: String) : Int
 
-// SimpleX API
+// POPOPX API
 typealias ChatCtrl = Long
 // Spec: spec/architecture.md#chatMigrateInit
 external fun chatMigrateInit(dbPath: String, dbKey: String, confirm: String): Array<Any>
@@ -91,7 +91,7 @@ suspend fun initChatController(useKey: String? = null, confirmMigrations: Migrat
     val dbKey = useKey ?: DatabaseUtils.useDatabaseKey()
     val confirm = confirmMigrations ?: if (appPreferences.developerTools.get() && appPreferences.confirmDBUpgrades.get()) MigrationConfirmation.Error else MigrationConfirmation.YesUp
     var migrated: Array<Any> = if (databaseBackend == "postgres") {
-      chatMigrateInit("simplex_v1", "postgresql://simplex@/simplex_v1", MigrationConfirmation.Error.value)
+      chatMigrateInit("simplex_v1", "postgresql://popopx@/simplex_v1", MigrationConfirmation.Error.value)
     } else {
       chatMigrateInit(dbAbsolutePrefixPath, dbKey, MigrationConfirmation.Error.value)
     }
@@ -107,7 +107,7 @@ suspend fun initChatController(useKey: String? = null, confirmMigrations: Migrat
     if (rerunMigration) {
       chatModel.dbMigrationInProgress.value = true
       migrated = if (databaseBackend == "postgres") {
-        chatMigrateInit("simplex_v1", "postgresql://simplex@/simplex_v1", confirm.value)
+        chatMigrateInit("simplex_v1", "postgresql://popopx@/simplex_v1", confirm.value)
       } else {
         chatMigrateInit(dbAbsolutePrefixPath, dbKey, confirm.value)
       }
@@ -174,15 +174,15 @@ suspend fun initChatController(useKey: String? = null, confirmMigrations: Migrat
          * */
         chatModel.localUserCreated.value = null
         if (chatController.listRemoteHosts()?.isEmpty() == true) {
-          chatController.appPrefs.onboardingStage.set(OnboardingStage.Step1_SimpleXInfo)
+          chatController.appPrefs.onboardingStage.set(OnboardingStage.Step1_POPOPXInfo)
         }
         chatController.startChatWithoutUser()
       } else {
-        chatController.appPrefs.onboardingStage.set(OnboardingStage.Step1_SimpleXInfo)
+        chatController.appPrefs.onboardingStage.set(OnboardingStage.Step1_POPOPXInfo)
       }
     } else if (startChat().await()) {
       val savedOnboardingStage = appPreferences.onboardingStage.get()
-      val newStage = if (listOf(OnboardingStage.Step1_SimpleXInfo, OnboardingStage.Step2_CreateProfile).contains(savedOnboardingStage) && chatModel.users.size == 1) {
+      val newStage = if (listOf(OnboardingStage.Step1_POPOPXInfo, OnboardingStage.Step2_CreateProfile).contains(savedOnboardingStage) && chatModel.users.size == 1) {
         OnboardingStage.Step4_NetworkCommitments
       } else {
         savedOnboardingStage

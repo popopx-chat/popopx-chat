@@ -99,12 +99,12 @@ class TerminalMetaCopyTest {
   fun ruleOnlyMessageAsWideAsCopy() {
     val placed = mutableMapOf<String, Placed>()
     renderScene {
-      SimpleXTheme {
+      POPOPXTheme {
         CompositionLocalProvider(LocalTerminalLayout provides true, LocalDensity provides Density(1f)) {
           Box(Modifier.width(IntrinsicSize.Max)) {
             MarkdownText(
               "---", listOf(FormattedText("---")), listOf(MarkdownBlock.Rule(SegmentRange(0, 1))), meta = sentEdited,
-              toggleSecrets = false, linkMode = SimplexLinkMode.DESCRIPTION, blockLayout = true, modifier = Modifier.record(placed, "rule")
+              toggleSecrets = false, linkMode = PopopxLinkMode.DESCRIPTION, blockLayout = true, modifier = Modifier.record(placed, "rule")
             )
           }
         }

@@ -217,7 +217,7 @@ fun TerminalLog(floating: Boolean, composeViewHeight: State<Dp>) {
 )*/
 @Composable
 fun PreviewTerminalLayout() {
-  SimpleXTheme {
+  POPOPXTheme {
     TerminalLayout(
       composeState = remember { mutableStateOf(ComposeState(useLinkPreviews = false)) },
       sendCommand = {},

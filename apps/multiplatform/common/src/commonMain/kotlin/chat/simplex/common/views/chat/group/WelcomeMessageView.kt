@@ -69,7 +69,7 @@ fun GroupWelcomeView(m: ChatModel, rhId: Long?, groupInfo: GroupInfo, close: () 
     GroupWelcomeLayout(
       welcomeText,
       gInfo,
-      m.controller.appPrefs.simplexLinkMode.get(),
+      m.controller.appPrefs.popopxLinkMode.get(),
       save = ::save
     )
   }
@@ -87,7 +87,7 @@ private fun welcomeTextFitsLimit(welcomeText: MutableState<String>): Boolean {
 private fun GroupWelcomeLayout(
   welcomeText: MutableState<String>,
   groupInfo: GroupInfo,
-  linkMode: SimplexLinkMode,
+  linkMode: PopopxLinkMode,
   save: () -> Unit,
 ) {
   ColumnWithScrollBar {
@@ -142,7 +142,7 @@ private fun GroupWelcomeLayout(
 }
 
 @Composable
-private fun TextPreview(text: String, linkMode: SimplexLinkMode, markdown: Boolean = true) {
+private fun TextPreview(text: String, linkMode: PopopxLinkMode, markdown: Boolean = true) {
   val uriHandler = LocalUriHandler.current
   Column {
     SelectionContainer(Modifier.fillMaxWidth()) {

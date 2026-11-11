@@ -90,7 +90,7 @@ fun appendColor(b: AnnotatedString.Builder, s: String, c: FormatColor, after: St
 )*/
 @Composable
 fun PreviewMarkdownHelpView() {
-  SimpleXTheme {
+  POPOPXTheme {
     MarkdownHelpView()
   }
 }

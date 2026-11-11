@@ -879,7 +879,7 @@ private fun operationEnded(m: ChatModel, progressIndicator: MutableState<Boolean
 )*/
 @Composable
 fun PreviewDatabaseLayout() {
-  SimpleXTheme {
+  POPOPXTheme {
     DatabaseLayout(
       progressIndicator = false,
       stopped = false,

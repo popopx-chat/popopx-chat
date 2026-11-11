@@ -3,7 +3,7 @@
 //  POPOPX SE
 //
 //  Created by Levitating Pineapple on 09/07/2024.
-//  Copyright © 2024 SimpleX Chat. All rights reserved.
+//  Copyright © 2024 POPOPX Chat. All rights reserved.
 //
 
 import UniformTypeIdentifiers
@@ -27,7 +27,7 @@ class ShareModel: ObservableObject {
     @Published var isLoaded = false
     @Published var bottomBar: BottomBar = .loadingSpinner
     @Published var errorAlert: ErrorAlert?
-    @Published var hasSimplexLink = false
+    @Published var hasPopopxLink = false
     @Published var alertRequiresPassword = false
     var networkTimeout = CFAbsoluteTimeGetCurrent()
 
@@ -62,7 +62,7 @@ class ShareModel: ObservableObject {
 
     func isProhibited(_ chat: SEChatData?) -> Bool {
         if let chat, let sharedContent {
-            sharedContent.prohibited(in: chat, hasSimplexLink: hasSimplexLink)
+            sharedContent.prohibited(in: chat, hasPopopxLink: hasPopopxLink)
         } else { false }
     }
 
@@ -75,7 +75,7 @@ class ShareModel: ObservableObject {
 
     func setup(context: NSExtensionContext) {
         if appLocalAuthEnabledGroupDefault.get() && !allowShareExtensionGroupDefault.get() {
-            errorAlert = ErrorAlert(title: "App is locked!", message: "You can allow sharing in Your privacy / SimpleX Lock settings.")
+            errorAlert = ErrorAlert(title: "App is locked!", message: "You can allow sharing in Your privacy / POPOPX Lock settings.")
             return
         }
         if let item = context.inputItems.first as? NSExtensionItem,
@@ -269,7 +269,7 @@ class ShareModel: ObservableObject {
                 return .failure(
                     ErrorAlert(
                         title: "No active profile",
-                        message: "Please create a profile in the SimpleX app"
+                        message: "Please create a profile in the POPOPX app"
                     )
                 )
             }
@@ -321,7 +321,7 @@ class ShareModel: ObservableObject {
                     }
                 }
             }
-            let r: APIResult<SEChatEvent>? = recvSimpleXMsg(messageTimeout: 1_000_000)
+            let r: APIResult<SEChatEvent>? = recvPOPOPXMsg(messageTimeout: 1_000_000)
             switch r {
             case let .result(.sndFileProgressXFTP(_, ci, _, sentSize, totalSize)):
                 guard isMessage(for: ci) else { continue }
@@ -414,9 +414,9 @@ enum SharedContent {
         }
     }
 
-    func prohibited(in chatData: SEChatData, hasSimplexLink: Bool) -> Bool {
+    func prohibited(in chatData: SEChatData, hasPopopxLink: Bool) -> Bool {
         chatData.prohibitedByPref(
-            hasSimplexLink: hasSimplexLink,
+            hasPopopxLink: hasPopopxLink,
             isMediaOrFileAttachment: cryptoFile != nil,
             isVoice: false
         )

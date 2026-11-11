@@ -161,7 +161,7 @@ private suspend fun awaitFramesAreSeen(hidden: () -> Boolean) {
 }
 
 private fun framesAreSeen(hidden: () -> Boolean): Boolean =
-  simplexWindowState.windowVisible.value && !simplexWindowState.windowState.isMinimized && !hidden()
+  popopxWindowState.windowVisible.value && !popopxWindowState.windowState.isMinimized && !hidden()
 
 // Waiting out the cost as well as the delay leaves an animation about half a decoder thread. The cost is
 // wall time, so a stall is only waited out so far.

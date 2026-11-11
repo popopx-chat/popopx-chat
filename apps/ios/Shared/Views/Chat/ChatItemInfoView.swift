@@ -3,7 +3,7 @@
 //  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 09.05.2023.
-//  Copyright © 2023 SimpleX Chat. All rights reserved.
+//  Copyright © 2023 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
@@ -168,7 +168,7 @@ struct ChatItemInfoView: View {
                     Button {
                         openBadgesView()
                     } label: {
-                        Text("Support SimpleX to send larger files that stay available longer")
+                        Text("Support POPOPX to send larger files that stay available longer")
                             .multilineTextAlignment(.leading)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }

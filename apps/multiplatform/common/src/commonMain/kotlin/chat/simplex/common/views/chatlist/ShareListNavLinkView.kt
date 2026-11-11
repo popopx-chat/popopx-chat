@@ -21,7 +21,7 @@ fun ShareListNavLinkView(
   chatModel: ChatModel,
   isMediaOrFileAttachment: Boolean,
   isVoice: Boolean,
-  hasSimplexLink: Boolean
+  hasPopopxLink: Boolean
 ) {
   val stopped = chatModel.chatRunning.value == false
   val scope = rememberCoroutineScope()
@@ -41,10 +41,10 @@ fun ShareListNavLinkView(
       )
     }
     is ChatInfo.Group -> {
-      val simplexLinkProhibited = hasSimplexLink && !chat.groupFeatureEnabled(GroupFeature.SimplexLinks)
+      val popopxLinkProhibited = hasPopopxLink && !chat.groupFeatureEnabled(GroupFeature.SimplexLinks)
       val fileProhibited = isMediaOrFileAttachment && !chat.groupFeatureEnabled(GroupFeature.Files)
       val voiceProhibited = isVoice && !chat.chatInfo.featureEnabled(ChatFeature.Voice)
-      val prohibitedByPref = simplexLinkProhibited || fileProhibited || voiceProhibited
+      val prohibitedByPref = popopxLinkProhibited || fileProhibited || voiceProhibited
       ShareListNavLinkLayout(
         chatLinkPreview = { SharePreviewView(chat, disabled = prohibitedByPref) },
         click = {

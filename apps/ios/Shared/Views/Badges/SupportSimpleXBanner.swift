@@ -1,18 +1,18 @@
 //
-//  SupportSimpleXBanner.swift
+//  SupportPOPOPXBanner.swift
 //  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 28.07.2026.
-//  Copyright © 2026 SimpleX Chat. All rights reserved.
+//  Copyright © 2026 POPOPX Chat. All rights reserved.
 //
 
 import SwiftUI
 import POPOPXChat
 
-struct SupportSimpleXBanner: View {
+struct SupportPOPOPXBanner: View {
     @EnvironmentObject var theme: AppTheme
     @Environment(\.colorScheme) var colorScheme: ColorScheme
-    var title: LocalizedStringKey = "Support SimpleX"
+    var title: LocalizedStringKey = "Support POPOPX"
     var subtitle: LocalizedStringKey = "Get badge + better files"
     var warning: Bool = false
     var showDismiss: Bool = true
@@ -83,9 +83,9 @@ struct SupportSimpleXBanner: View {
     }
 }
 
-struct SupportSimpleXBanner_Previews: PreviewProvider {
+struct SupportPOPOPXBanner_Previews: PreviewProvider {
     static var previews: some View {
-        SupportSimpleXBanner(onTap: {}, onDismiss: {})
+        SupportPOPOPXBanner(onTap: {}, onDismiss: {})
             .padding()
     }
 }

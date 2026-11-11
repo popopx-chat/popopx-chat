@@ -84,7 +84,7 @@ private suspend fun planAndConnectTask(
     // the name can also resolve to the other kind; its type picks the verb, its short form the label and target
     val connectOtherLink = otherSimplexName?.shortStr
     val connectOtherButton = otherSimplexName?.let {
-      val label = if (it.nameType == SimplexNameType.publicGroup) MR.strings.connect_plan_join_name else MR.strings.connect_plan_connect_to_name
+      val label = if (it.nameType == PopopxNameType.publicGroup) MR.strings.connect_plan_join_name else MR.strings.connect_plan_connect_to_name
       generalGetString(label).format(it.shortStr)
     }
     when (connectionPlan) {
@@ -184,7 +184,7 @@ private suspend fun planAndConnectTask(
           askCurrentOrIncognitoProfileAlert(
             chatModel, rhId, connectionLink, connectionPlan, close,
             title = generalGetString(MR.strings.connect_plan_connect_to_yourself),
-            text = generalGetString(MR.strings.connect_plan_this_is_your_own_simplex_address) + linkText,
+            text = generalGetString(MR.strings.connect_plan_this_is_your_own_popopx_address) + linkText,
             connectDestructive = true,
             cleanup = cleanup,
             connectOtherButton = connectOtherButton,
@@ -513,10 +513,10 @@ fun openChat_(chatModel: ChatModel, rhId: Long?, close: (() -> Unit)?, chat: Cha
 val alertProfileImageSize = 138.dp
 
 // For alerts that show the name inline (not as a profile with an avatar): "Alice" -> "Alice (@alice.testing)".
-private fun nameWithDomain(name: String, planSimplexName: SimplexNameInfo?): String =
+private fun nameWithDomain(name: String, planSimplexName: PopopxNameInfo?): String =
   name + (planSimplexName?.let { " (${it.shortStr})" } ?: "")
 
-private fun showOpenKnownContactAlert(chatModel: ChatModel, rhId: Long?, close: (() -> Unit)?, contact: Contact, planSimplexName: SimplexNameInfo? = null, connectOtherButton: String? = null, connectOtherLink: String? = null) {
+private fun showOpenKnownContactAlert(chatModel: ChatModel, rhId: Long?, close: (() -> Unit)?, contact: Contact, planSimplexName: PopopxNameInfo? = null, connectOtherButton: String? = null, connectOtherLink: String? = null) {
   AlertManager.privacySensitive.showOpenChatAlert(
     profileName = contact.profile.displayName,
     profileFullName = contact.profile.fullName,
@@ -559,7 +559,7 @@ fun ownGroupLinkConfirmConnect(
   groupInfo: GroupInfo,
   close: (() -> Unit)?,
   cleanup: (() -> Unit)?,
-  planSimplexName: SimplexNameInfo? = null,
+  planSimplexName: PopopxNameInfo? = null,
   connectOtherButton: String? = null,
   connectOtherLink: String? = null,
 ) {
@@ -642,7 +642,7 @@ fun ownGroupLinkConfirmConnect(
   }
 }
 
-private fun showOpenKnownGroupAlert(chatModel: ChatModel, rhId: Long?, close: (() -> Unit)?, groupInfo: GroupInfo, planSimplexName: SimplexNameInfo? = null, connectOtherButton: String? = null, connectOtherLink: String? = null) {
+private fun showOpenKnownGroupAlert(chatModel: ChatModel, rhId: Long?, close: (() -> Unit)?, groupInfo: GroupInfo, planSimplexName: PopopxNameInfo? = null, connectOtherButton: String? = null, connectOtherLink: String? = null) {
   val subscriberCount = if (groupInfo.useRelays) groupInfo.groupSummary.publicMemberCount?.let { subscriberCountStr(it) } else null
   AlertManager.privacySensitive.showOpenChatAlert(
     profileName = groupInfo.groupProfile.displayName,
@@ -702,7 +702,7 @@ fun showPrepareContactAlert(
   connectionLink: CreatedConnLink,
   contactShortLinkData: ContactShortLinkData,
   ownerVerification: OwnerVerification? = null,
-  planSimplexName: SimplexNameInfo? = null,
+  planSimplexName: PopopxNameInfo? = null,
   connectOtherButton: String? = null,
   connectOtherLink: String? = null,
   close: (() -> Unit)?,
@@ -752,7 +752,7 @@ fun showPrepareGroupAlert(
   groupShortLinkInfo: GroupShortLinkInfo?,
   groupShortLinkData: GroupShortLinkData,
   ownerVerification: OwnerVerification? = null,
-  planSimplexName: SimplexNameInfo? = null,
+  planSimplexName: PopopxNameInfo? = null,
   connectOtherButton: String? = null,
   connectOtherLink: String? = null,
   close: (() -> Unit)?,

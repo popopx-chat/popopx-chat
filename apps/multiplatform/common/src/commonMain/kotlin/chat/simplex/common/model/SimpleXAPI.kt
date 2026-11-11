@@ -86,7 +86,7 @@ enum class CallOnLockScreen {
   }
 }
 
-enum class SimplexLinkMode {
+enum class PopopxLinkMode {
   DESCRIPTION,
   FULL,
   BROWSER;
@@ -127,12 +127,12 @@ class AppPreferences {
   val privacyProtectScreen = mkBoolPreference(SHARED_PREFS_PRIVACY_PROTECT_SCREEN, true)
   val privacyAcceptImages = mkBoolPreference(SHARED_PREFS_PRIVACY_ACCEPT_IMAGES, true)
   val privacyLinkPreviews = mkBoolPreference(SHARED_PREFS_PRIVACY_LINK_PREVIEWS, true)
-  val privacyVerifySimplexNames = mkBoolPreference(SHARED_PREFS_PRIVACY_VERIFY_SIMPLEX_NAMES, false)
+  val privacyVerifyPopopxNames = mkBoolPreference(SHARED_PREFS_PRIVACY_VERIFY_SIMPLEX_NAMES, false)
   val privacyLinkPreviewsShowAlert = mkBoolPreference(SHARED_PREFS_PRIVACY_LINK_PREVIEWS_SHOW_ALERT, true)
   val privacySanitizeLinks = mkBoolPreference(SHARED_PREFS_PRIVACY_SANITIZE_LINKS, false)
   // TODO remove
   val privacyChatListOpenLinks = mkEnumPreference(SHARED_PREFS_PRIVACY_CHAT_LIST_OPEN_LINKS, PrivacyChatListOpenLinksMode.ASK) { PrivacyChatListOpenLinksMode.values().firstOrNull { it.name == this } }
-  val simplexLinkMode: SharedPreference<SimplexLinkMode> = mkSafeEnumPreference(SHARED_PREFS_PRIVACY_SIMPLEX_LINK_MODE, SimplexLinkMode.default)
+  val popopxLinkMode: SharedPreference<PopopxLinkMode> = mkSafeEnumPreference(SHARED_PREFS_PRIVACY_SIMPLEX_LINK_MODE, PopopxLinkMode.default)
   val privacyShowChatPreviews = mkBoolPreference(SHARED_PREFS_PRIVACY_SHOW_CHAT_PREVIEWS, true)
   val privacyShowSignature = mkBoolPreference(SHARED_PREFS_PRIVACY_SHOW_SIGNATURE, true)
   val privacyShowEncryption = mkBoolPreference(SHARED_PREFS_PRIVACY_SHOW_FILE_ENCRYPTION, true)
@@ -421,11 +421,11 @@ class AppPreferences {
     private const val SHARED_PREFS_PRIVACY_ACCEPT_IMAGES = "PrivacyAcceptImages"
     private const val SHARED_PREFS_PRIVACY_TRANSFER_IMAGES_INLINE = "PrivacyTransferImagesInline"
     private const val SHARED_PREFS_PRIVACY_LINK_PREVIEWS = "PrivacyLinkPreviews"
-    private const val SHARED_PREFS_PRIVACY_VERIFY_SIMPLEX_NAMES = "PrivacyVerifySimplexNames"
+    private const val SHARED_PREFS_PRIVACY_VERIFY_SIMPLEX_NAMES = "PrivacyVerifyPopopxNames"
     private const val SHARED_PREFS_PRIVACY_LINK_PREVIEWS_SHOW_ALERT = "PrivacyLinkPreviewsShowAlert"
     private const val SHARED_PREFS_PRIVACY_SANITIZE_LINKS = "PrivacySanitizeLinks"
     private const val SHARED_PREFS_PRIVACY_CHAT_LIST_OPEN_LINKS = "ChatListOpenLinks" // TODO remove
-    private const val SHARED_PREFS_PRIVACY_SIMPLEX_LINK_MODE = "PrivacySimplexLinkMode"
+    private const val SHARED_PREFS_PRIVACY_SIMPLEX_LINK_MODE = "PrivacyPopopxLinkMode"
     private const val SHARED_PREFS_PRIVACY_SHOW_CHAT_PREVIEWS = "PrivacyShowChatPreviews"
     private const val SHARED_PREFS_PRIVACY_SHOW_SIGNATURE = "PrivacyShowSignature"
     private const val SHARED_PREFS_PRIVACY_SHOW_FILE_ENCRYPTION = "PrivacyShowEncryption"
@@ -1732,25 +1732,25 @@ object ChatController {
         )
       }
       r is API.Error && r.err is ChatError.ChatErrorChat
-          && r.err.errorType is ChatErrorType.SimplexDomainNotReady -> {
+          && r.err.errorType is ChatErrorType.PopopxDomainNotReady -> {
         val domain = r.err.errorType.simplexDomain.fullDomainName
         if (r.err.errorType.simplexDomainError is SimplexDomainError.NoValidLink) {
           AlertManager.shared.showAlertMsg(
-            generalGetString(MR.strings.simplex_name_no_valid_link),
-            generalGetString(MR.strings.simplex_name_no_valid_link_desc).format(domain)
+            generalGetString(MR.strings.popopx_name_no_valid_link),
+            generalGetString(MR.strings.popopx_name_no_valid_link_desc).format(domain)
           )
         } else {
           AlertManager.shared.showAlertMsg(
-            generalGetString(MR.strings.simplex_name_unconfirmed),
-            generalGetString(MR.strings.simplex_name_unconfirmed_desc).format(domain)
+            generalGetString(MR.strings.popopx_name_unconfirmed),
+            generalGetString(MR.strings.popopx_name_unconfirmed_desc).format(domain)
           )
         }
       }
       r is API.Error && r.err is ChatError.ChatErrorAgent
           && r.err.agentError is AgentErrorType.NO_NAME_SERVERS -> {
         AlertManager.shared.showAlertMsg(
-          generalGetString(MR.strings.simplex_name_error),
-          generalGetString(MR.strings.simplex_name_no_servers_desc)
+          generalGetString(MR.strings.popopx_name_error),
+          generalGetString(MR.strings.popopx_name_no_servers_desc)
         )
       }
       r is API.Error && r.err is ChatError.ChatErrorAgent
@@ -1758,16 +1758,16 @@ object ChatController {
           && r.err.agentError.smpErr is SMPErrorType.NAME -> {
         when (val nameErr = r.err.agentError.smpErr.nameErr) {
           is NameErrorType.NOT_FOUND -> AlertManager.shared.showAlertMsg(
-            generalGetString(MR.strings.simplex_name_not_found),
-            generalGetString(MR.strings.simplex_name_not_found_desc)
+            generalGetString(MR.strings.popopx_name_not_found),
+            generalGetString(MR.strings.popopx_name_not_found_desc)
           )
           is NameErrorType.NO_RESOLVER -> AlertManager.shared.showAlertMsg(
-            generalGetString(MR.strings.simplex_name_error),
-            generalGetString(MR.strings.simplex_name_server_no_resolver_desc).format(r.err.agentError.serverAddress)
+            generalGetString(MR.strings.popopx_name_error),
+            generalGetString(MR.strings.popopx_name_server_no_resolver_desc).format(r.err.agentError.serverAddress)
           )
           is NameErrorType.RESOLVER -> AlertManager.shared.showAlertMsg(
-            generalGetString(MR.strings.simplex_name_error),
-            generalGetString(MR.strings.simplex_name_resolver_error_desc).format(nameErr.resolverErr)
+            generalGetString(MR.strings.popopx_name_error),
+            generalGetString(MR.strings.popopx_name_resolver_error_desc).format(nameErr.resolverErr)
           )
         }
       }
@@ -1812,11 +1812,11 @@ object ChatController {
   }
 
   // owner-specific wording for setting one's own/channel name; null for other errors (handled by apiConnectResponseAlert)
-  fun simplexNameOwnerError(err: ChatError, isChannel: Boolean): String? =
-    if (err is ChatError.ChatErrorChat && err.errorType is ChatErrorType.SimplexDomainNotReady && err.errorType.simplexDomainError is SimplexDomainError.NoValidLink) {
+  fun popopxNameOwnerError(err: ChatError, isChannel: Boolean): String? =
+    if (err is ChatError.ChatErrorChat && err.errorType is ChatErrorType.PopopxDomainNotReady && err.errorType.simplexDomainError is SimplexDomainError.NoValidLink) {
       val domain = err.errorType.simplexDomain.fullDomainName
-      if (isChannel) generalGetString(MR.strings.simplex_name_owner_no_channel_link).format(domain)
-      else generalGetString(MR.strings.simplex_name_owner_no_address).format(domain)
+      if (isChannel) generalGetString(MR.strings.popopx_name_owner_no_channel_link).format(domain)
+      else generalGetString(MR.strings.popopx_name_owner_no_address).format(domain)
     } else null
 
   fun connErrorText(e: ChatError): String = when {
@@ -1824,16 +1824,16 @@ object ChatController {
       generalGetString(MR.strings.invalid_connection_link)
     e is ChatError.ChatErrorChat && e.errorType is ChatErrorType.UnsupportedConnReq ->
       generalGetString(MR.strings.unsupported_connection_link)
-    e is ChatError.ChatErrorChat && e.errorType is ChatErrorType.SimplexDomainNotReady ->
+    e is ChatError.ChatErrorChat && e.errorType is ChatErrorType.PopopxDomainNotReady ->
       if (e.errorType.simplexDomainError is SimplexDomainError.NoValidLink)
-        generalGetString(MR.strings.simplex_name_no_valid_link)
-      else generalGetString(MR.strings.simplex_name_unconfirmed)
+        generalGetString(MR.strings.popopx_name_no_valid_link)
+      else generalGetString(MR.strings.popopx_name_unconfirmed)
     e is ChatError.ChatErrorAgent && e.agentError is AgentErrorType.NO_NAME_SERVERS ->
-      generalGetString(MR.strings.simplex_name_error)
+      generalGetString(MR.strings.popopx_name_error)
     e is ChatError.ChatErrorAgent && e.agentError is AgentErrorType.SMP && e.agentError.smpErr is SMPErrorType.NAME ->
       if (e.agentError.smpErr.nameErr is NameErrorType.NOT_FOUND)
-        generalGetString(MR.strings.simplex_name_not_found)
-      else generalGetString(MR.strings.simplex_name_error)
+        generalGetString(MR.strings.popopx_name_not_found)
+      else generalGetString(MR.strings.popopx_name_error)
     e is ChatError.ChatErrorAgent && e.agentError is AgentErrorType.SMP && e.agentError.smpErr is SMPErrorType.AUTH ->
       generalGetString(MR.strings.connection_error_auth)
     e is ChatError.ChatErrorAgent && e.agentError is AgentErrorType.SMP && e.agentError.smpErr is SMPErrorType.BLOCKED ->
@@ -2020,11 +2020,11 @@ object ChatController {
       r is API.Result && r.res is CR.UserProfileNoChange -> r.res.user.updateRemoteHostId(rh)
       else -> {
         if (r is API.Error) {
-          val ownerMsg = simplexNameOwnerError(r.err, isChannel = false)
-          if (ownerMsg != null) AlertManager.shared.showAlertMsg(generalGetString(MR.strings.error_saving_simplex_name), ownerMsg)
+          val ownerMsg = popopxNameOwnerError(r.err, isChannel = false)
+          if (ownerMsg != null) AlertManager.shared.showAlertMsg(generalGetString(MR.strings.error_saving_popopx_name), ownerMsg)
           else apiConnectResponseAlert(r)
         }
-        throw Exception("failed to set SimpleX name: ${r.responseType} ${r.details}")
+        throw Exception("failed to set POPOPX name: ${r.responseType} ${r.details}")
       }
     }
   }
@@ -2589,8 +2589,8 @@ object ChatController {
     return when {
       r is API.Result && r.res is CR.GroupUpdated -> r.res.toGroup
       r is API.Error -> {
-        val ownerMsg = simplexNameOwnerError(r.err, isChannel = true)
-        if (ownerMsg != null) AlertManager.shared.showAlertMsg(generalGetString(MR.strings.error_saving_simplex_name), ownerMsg)
+        val ownerMsg = popopxNameOwnerError(r.err, isChannel = true)
+        if (ownerMsg != null) AlertManager.shared.showAlertMsg(generalGetString(MR.strings.error_saving_popopx_name), ownerMsg)
         else apiConnectResponseAlert(r)
         null
       }
@@ -4762,7 +4762,7 @@ enum class ServerProtocol {
 
 @Serializable
 enum class OperatorTag {
-  @SerialName("simplex") SimpleX,
+  @SerialName("popopx") POPOPX,
   @SerialName("flux") Flux
 }
 
@@ -4776,10 +4776,10 @@ data class ServerOperatorInfo(
   val largeLogoDarkMode: ImageResource
 )
 val operatorsInfo: Map<OperatorTag, ServerOperatorInfo> = mapOf(
-  OperatorTag.SimpleX to ServerOperatorInfo(
+  OperatorTag.POPOPX to ServerOperatorInfo(
     description = listOf(
-      "SimpleX Chat is the first communication network that has no user profile IDs of any kind, not even random numbers or keys that identify the users.",
-      "SimpleX Chat Ltd develops the communication software for SimpleX network."
+      "POPOPX Chat is the first communication network that has no user profile IDs of any kind, not even random numbers or keys that identify the users.",
+      "POPOPX Chat Ltd develops the communication software for POPOPX network."
     ),
     website = "https://simplex.chat",
     logo = MR.images.decentralized,
@@ -4791,10 +4791,10 @@ val operatorsInfo: Map<OperatorTag, ServerOperatorInfo> = mapOf(
     description = listOf(
       "Flux is the largest decentralized cloud, based on a global network of user-operated nodes.",
       "Flux offers a powerful, scalable, and affordable cutting edge technology platform for all.",
-      "Flux operates servers in SimpleX network to improve its privacy and decentralization."
+      "Flux operates servers in POPOPX network to improve its privacy and decentralization."
     ),
     website = "https://runonflux.com",
-    selfhost = "Self-host SimpleX servers on Flux" to "https://home.runonflux.io/apps/marketplace?q=simplex",
+    selfhost = "Self-host POPOPX servers on Flux" to "https://home.runonflux.io/apps/marketplace?q=simplex",
     logo = MR.images.flux_logo_symbol,
     largeLogo = MR.images.flux_logo,
     logoDarkMode = MR.images.flux_logo_symbol,
@@ -4888,9 +4888,9 @@ data class ServerOperator(
 
     val sampleData1 = ServerOperator(
       operatorId = 1,
-      operatorTag = OperatorTag.SimpleX,
-      tradeName = "SimpleX Chat",
-      legalName = "SimpleX Chat Ltd",
+      operatorTag = OperatorTag.POPOPX,
+      tradeName = "POPOPX Chat",
+      legalName = "POPOPX Chat Ltd",
       serverDomains = listOf("simplex.im"),
       conditionsAcceptance = ConditionsAcceptance.Accepted(acceptedAt = null, autoAccepted = false),
       enabled = true,
@@ -6014,7 +6014,7 @@ data class FeatureEnabled(
     }
 
   val iconColor: Color
-    get() = if (forUser) SimplexGreen else if (forContact) WarningYellow else CurrentColors.value.colors.secondary
+    get() = if (forUser) PopopxGreen else if (forContact) WarningYellow else CurrentColors.value.colors.secondary
 
   companion object {
     fun enabled(asymmetric: Boolean, user: ChatPreference, contact: ChatPreference): FeatureEnabled =
@@ -6233,7 +6233,7 @@ enum class GroupFeature: Feature {
       Reactions -> generalGetString(MR.strings.message_reactions)
       Voice -> generalGetString(MR.strings.voice_messages)
       Files -> generalGetString(MR.strings.files_and_media)
-      SimplexLinks -> generalGetString(MR.strings.simplex_links)
+      SimplexLinks -> generalGetString(MR.strings.popopx_links)
       Reports -> generalGetString(if (isChannel) MR.strings.group_reports_subscriber_reports else MR.strings.group_reports_member_reports)
       History -> generalGetString(MR.strings.recent_history)
       Support -> generalGetString(MR.strings.chat_with_admins)
@@ -6298,8 +6298,8 @@ enum class GroupFeature: Feature {
           GroupFeatureEnabled.OFF -> generalGetString(MR.strings.prohibit_sending_files)
         }
         SimplexLinks -> when(enabled) {
-          GroupFeatureEnabled.ON -> generalGetString(MR.strings.allow_to_send_simplex_links)
-          GroupFeatureEnabled.OFF -> generalGetString(MR.strings.prohibit_sending_simplex_links)
+          GroupFeatureEnabled.ON -> generalGetString(MR.strings.allow_to_send_popopx_links)
+          GroupFeatureEnabled.OFF -> generalGetString(MR.strings.prohibit_sending_popopx_links)
         }
         Reports -> when(enabled) {
           GroupFeatureEnabled.ON -> generalGetString(MR.strings.enable_sending_member_reports)
@@ -6345,8 +6345,8 @@ enum class GroupFeature: Feature {
           GroupFeatureEnabled.OFF -> generalGetString(MR.strings.files_are_prohibited_in_group)
         }
         SimplexLinks -> when(enabled) {
-          GroupFeatureEnabled.ON -> generalGetString(if (isChannel) MR.strings.group_members_can_send_simplex_links_channel else MR.strings.group_members_can_send_simplex_links)
-          GroupFeatureEnabled.OFF -> generalGetString(MR.strings.simplex_links_are_prohibited_in_group)
+          GroupFeatureEnabled.ON -> generalGetString(if (isChannel) MR.strings.group_members_can_send_popopx_links_channel else MR.strings.group_members_can_send_popopx_links)
+          GroupFeatureEnabled.OFF -> generalGetString(MR.strings.popopx_links_are_prohibited_in_group)
         }
         Reports -> when(enabled) {
           GroupFeatureEnabled.ON -> generalGetString(if (isChannel) MR.strings.group_members_can_send_reports_channel else MR.strings.group_members_can_send_reports)
@@ -6606,7 +6606,7 @@ enum class GroupFeatureEnabled {
     }
 
   val iconColor: Color
-    get() = if (this == ON) SimplexGreen else CurrentColors.value.colors.secondary
+    get() = if (this == ON) PopopxGreen else CurrentColors.value.colors.secondary
 
 }
 
@@ -6877,7 +6877,7 @@ sealed class CR {
   @Serializable @SerialName("invitation") class Invitation(val user: UserRef, val connLinkInvitation: CreatedConnLink, val connection: PendingContactConnection): CR()
   @Serializable @SerialName("connectionIncognitoUpdated") class ConnectionIncognitoUpdated(val user: UserRef, val toConnection: PendingContactConnection): CR()
   @Serializable @SerialName("connectionUserChanged") class ConnectionUserChanged(val user: UserRef, val fromConnection: PendingContactConnection, val toConnection: PendingContactConnection, val newUser: UserRef): CR()
-  @Serializable @SerialName("connectionPlan") class CRConnectionPlan(val user: UserRef, val connLink: CreatedConnLink, val planSimplexName: SimplexNameInfo? = null, val otherSimplexName: SimplexNameInfo? = null, val connectionPlan: ConnectionPlan): CR()
+  @Serializable @SerialName("connectionPlan") class CRConnectionPlan(val user: UserRef, val connLink: CreatedConnLink, val planSimplexName: PopopxNameInfo? = null, val otherSimplexName: PopopxNameInfo? = null, val connectionPlan: ConnectionPlan): CR()
   @Serializable @SerialName("newPreparedChat") class NewPreparedChat(val user: UserRef, val chat: Chat): CR()
   @Serializable @SerialName("contactUserChanged") class ContactUserChanged(val user: UserRef, val fromContact: Contact, val newUser: UserRef, val toContact: Contact): CR()
   @Serializable @SerialName("groupUserChanged") class GroupUserChanged(val user: UserRef, val fromGroup: GroupInfo, val newUser: UserRef, val toGroup: GroupInfo): CR()
@@ -7279,7 +7279,7 @@ sealed class CR {
     is Invitation -> withUser(user, "connLinkInvitation: ${json.encodeToString(connLinkInvitation)}\nconnection: $connection")
     is ConnectionIncognitoUpdated -> withUser(user, json.encodeToString(toConnection))
     is ConnectionUserChanged -> withUser(user, "fromConnection: ${json.encodeToString(fromConnection)}\ntoConnection: ${json.encodeToString(toConnection)}\nnewUser: ${json.encodeToString(newUser)}" )
-    is CRConnectionPlan -> withUser(user, "connLink: ${json.encodeToString(connLink)}\nplanSimplexName: $planSimplexName\notherSimplexName: $otherSimplexName\nconnectionPlan: ${json.encodeToString(connectionPlan)}")
+    is CRConnectionPlan -> withUser(user, "connLink: ${json.encodeToString(connLink)}\nplanPopopxName: $planSimplexName\notherPopopxName: $otherSimplexName\nconnectionPlan: ${json.encodeToString(connectionPlan)}")
     is NewPreparedChat -> withUser(user, json.encodeToString(chat))
     is ContactUserChanged -> withUser(user, "fromContact: ${json.encodeToString(fromContact)}\nnewUserId: ${json.encodeToString(newUser.userId)}\ntoContact: ${json.encodeToString(toContact)}")
     is GroupUserChanged -> withUser(user, "fromGroup: ${json.encodeToString(fromGroup)}\nnewUserId: ${json.encodeToString(newUser.userId)}\ntoGroup: ${json.encodeToString(toGroup)}")
@@ -7476,14 +7476,14 @@ sealed class ChatDeleteMode {
 
 @Serializable
 data class CreatedConnLink(val connFullLink: String, val connShortLink: String?) {
-  fun simplexChatUri(short: Boolean): String =
-    if (short) connShortLink ?: simplexChatLink(connFullLink)
-    else simplexChatLink(connFullLink)
+  fun popopxChatUri(short: Boolean): String =
+    if (short) connShortLink ?: popopxChatLink(connFullLink)
+    else popopxChatLink(connFullLink)
 
   val cmdString: String get() = connFullLink + (if (connShortLink == null) "" else " $connShortLink")
 }
 
-fun simplexChatLink(uri: String): String =
+fun popopxChatLink(uri: String): String =
   if (uri.startsWith("popopx:/")) uri.replace("popopx:/", "https://simplex.chat/")
   else uri
 
@@ -7624,8 +7624,8 @@ object BadgeServiceErrorCodeSerializer : KSerializer<BadgeServiceErrorCode> {
 
 data class ConnectionPlanResult(
   val connLink: CreatedConnLink,
-  val planSimplexName: SimplexNameInfo?,
-  val otherSimplexName: SimplexNameInfo?,
+  val planSimplexName: PopopxNameInfo?,
+  val otherSimplexName: PopopxNameInfo?,
   val connectionPlan: ConnectionPlan,
 )
 
@@ -7816,7 +7816,7 @@ sealed class SubscriptionStatus {
     }
 }
 
-interface SimplexAddress {
+interface PopopxAddress {
   val connLinkContact: CreatedConnLink
   val shortLinkDataSet: Boolean
   val shortLinkLargeDataSet: Boolean
@@ -7830,7 +7830,7 @@ data class UserContactLinkRec(
   override val shortLinkDataSet: Boolean,
   override val shortLinkLargeDataSet: Boolean,
   val addressSettings: AddressSettings
-): SimplexAddress
+): PopopxAddress
 
 @Serializable
 data class AddressSettings(
@@ -7851,7 +7851,7 @@ data class GroupLink(
   override val shortLinkLargeDataSet: Boolean,
   val groupLinkId: String,
   val acceptMemberRole: GroupMemberRole
-): SimplexAddress {
+): PopopxAddress {
   companion object {
     val nullableStateSaver: Saver<GroupLink?, List<Any?>> = Saver(
       save = { groupLink ->
@@ -7978,7 +7978,7 @@ sealed class ChatErrorType {
       is ChatStoreChanged -> "chatStoreChanged"
       is ConnectionPlanChatError -> "connectionPlan"
       is InvalidConnReq -> "invalidConnReq"
-      is SimplexDomainNotReady -> "simplexDomainNotReady"
+      is PopopxDomainNotReady -> "popopxDomainNotReady"
       is NotResolvedLocally -> "notResolvedLocally"
       is UnsupportedConnReq -> "unsupportedConnReq"
       is InvalidChatMessage -> "invalidChatMessage"
@@ -8063,7 +8063,7 @@ sealed class ChatErrorType {
   @Serializable @SerialName("chatStoreChanged") object ChatStoreChanged: ChatErrorType()
   @Serializable @SerialName("connectionPlan") class ConnectionPlanChatError(val connectionPlan: ConnectionPlan): ChatErrorType()
   @Serializable @SerialName("invalidConnReq") object InvalidConnReq: ChatErrorType()
-  @Serializable @SerialName("simplexDomainNotReady") class SimplexDomainNotReady(val simplexDomain: SimplexDomain, val simplexDomainError: SimplexDomainError): ChatErrorType()
+  @Serializable @SerialName("popopxDomainNotReady") class PopopxDomainNotReady(val simplexDomain: SimplexDomain, val simplexDomainError: SimplexDomainError): ChatErrorType()
   @Serializable @SerialName("notResolvedLocally") object NotResolvedLocally: ChatErrorType()
   @Serializable @SerialName("unsupportedConnReq") object UnsupportedConnReq: ChatErrorType()
   @Serializable @SerialName("invalidChatMessage") class InvalidChatMessage(val connection: Connection, val message: String): ChatErrorType()

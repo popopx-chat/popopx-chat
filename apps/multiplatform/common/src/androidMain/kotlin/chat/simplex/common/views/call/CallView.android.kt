@@ -840,7 +840,7 @@ private class LocalContentWebViewClient(val webView: MutableState<WebView?>, pri
 @Preview
 @Composable
 fun PreviewActiveCallOverlayVideo() {
-  SimpleXTheme {
+  POPOPXTheme {
     ActiveCallOverlayLayout(
       call = Call(
         remoteHostId = null,
@@ -871,7 +871,7 @@ fun PreviewActiveCallOverlayVideo() {
 @Preview
 @Composable
 fun PreviewActiveCallOverlayAudio() {
-  SimpleXTheme {
+  POPOPXTheme {
     ActiveCallOverlayLayout(
       call = Call(
         remoteHostId = null,

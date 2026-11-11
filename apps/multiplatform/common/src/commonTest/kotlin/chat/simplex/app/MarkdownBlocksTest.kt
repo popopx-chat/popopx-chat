@@ -134,19 +134,19 @@ class MarkdownBlocksTest {
   @Test
   fun testItemDisplay() {
     val item = ChatItem.getSampleData(text = "> q1\n> q2\n>\n> **q3**").copy(formattedText = quote.formattedText, markdownBlocks = quote.markdownBlocks)
-    val display = itemDisplay(item, SimplexLinkMode.DESCRIPTION)!!
+    val display = itemDisplay(item, PopopxLinkMode.DESCRIPTION)!!
     assertEquals("q1 q2\n\nq3", display.parts.joinToString("") { it.first })
     assertEquals(listOf(0), display.bases)
     val table = item.copy(formattedText = tableAligned.formattedText, markdownBlocks = tableAligned.markdownBlocks)
-    val tableDisplay = itemDisplay(table, SimplexLinkMode.DESCRIPTION)!!
+    val tableDisplay = itemDisplay(table, PopopxLinkMode.DESCRIPTION)!!
     assertEquals("a\tb\tc\td\nxxx\tyyy\tzzz", tableDisplay.parts.joinToString("") { it.first })
     assertEquals("a\tb\tc\td\nxxx\tyyy\tzzz", tableDisplay.parts.joinToString("") { it.second })
     assertEquals(listOf(0, 2, 4, 6, 8, 12, 16), tableDisplay.bases)
-    val paragraphs = itemDisplay(item.copy(formattedText = gaps.formattedText, markdownBlocks = gaps.markdownBlocks), SimplexLinkMode.DESCRIPTION)!!
+    val paragraphs = itemDisplay(item.copy(formattedText = gaps.formattedText, markdownBlocks = gaps.markdownBlocks), PopopxLinkMode.DESCRIPTION)!!
     assertEquals(listOf("a" to "a", "\n" to "\n\n\n", "h" to "h"), paragraphs.parts)
     assertEquals(listOf(0, 2), paragraphs.bases)
     val plain = item.copy(formattedText = escapes.formattedText, markdownBlocks = null)
-    val plainDisplay = itemDisplay(plain, SimplexLinkMode.DESCRIPTION)!!
+    val plainDisplay = itemDisplay(plain, PopopxLinkMode.DESCRIPTION)!!
     assertEquals(listOf("text " to "text ", "" to "\\", "*not" to "*not", "" to "\\", "*\nmore" to "*\nmore"), plainDisplay.parts)
     assertEquals(listOf(0), plainDisplay.bases)
   }
@@ -155,7 +155,7 @@ class MarkdownBlocksTest {
 
   private fun parsed(s: String): ParsedFormattedText = json.decodeFromString(ParsedFormattedText.serializer(), s)
 
-  private fun display(ft: FormattedText): String = segmentDisplayText(ft, null, SimplexLinkMode.DESCRIPTION)
+  private fun display(ft: FormattedText): String = segmentDisplayText(ft, null, PopopxLinkMode.DESCRIPTION)
 
   private fun texts(p: ParsedFormattedText): List<Pair<Pair<Int, Int>, Boolean>> =
     blockTextRanges(p.markdownBlocks!!).map { it.range.pair to it.inRow }

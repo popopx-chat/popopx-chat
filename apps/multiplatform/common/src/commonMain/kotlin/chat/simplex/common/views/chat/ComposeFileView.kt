@@ -50,7 +50,7 @@ fun ComposeFileView(fileName: String, cancelFile: () -> Unit, cancelEnabled: Boo
 @Preview
 @Composable
 fun PreviewComposeFileView() {
-  SimpleXTheme {
+  POPOPXTheme {
     ComposeFileView(
       "test.txt",
       cancelFile = {},

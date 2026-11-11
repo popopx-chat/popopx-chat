@@ -138,7 +138,7 @@ fun BadgesYourBadgeView(badgeState: BadgeState, modalManager: ModalManager) {
         SettingsActionItem(
           painterResource(MR.images.ic_tag),
           stringResource(MR.strings.badges_contact_team),
-          { uriHandler.openVerifiedSimplexUri(simplexTeamUri) },
+          { uriHandler.openVerifiedPopopxUri(popopxTeamUri) },
           textColor = MaterialTheme.colors.primary
         )
       }

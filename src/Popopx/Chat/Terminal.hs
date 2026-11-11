@@ -62,7 +62,7 @@ terminalChatConfig =
                   smpProxyFallback = SPFAllowProtected
                 }
           },
-      deviceNameForRemote = "SimpleX CLI"
+      deviceNameForRemote = "POPOPX CLI"
     }
 
 simplexChatTerminal :: WithTerminal t => ChatConfig -> ChatOpts -> t -> IO ()
