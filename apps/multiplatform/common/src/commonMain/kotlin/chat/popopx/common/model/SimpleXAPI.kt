@@ -8385,13 +8385,13 @@ sealed class ConnectionErrorType {
   val string: String get() = when (this) {
     is NOT_FOUND -> "NOT_FOUND"
     is DUPLICATE -> "DUPLICATE"
-    is SIMPLEX -> "SIMPLEX"
+    is POPOPX -> "POPOPX"
     is NOT_ACCEPTED -> "NOT_ACCEPTED"
     is NOT_AVAILABLE -> "NOT_AVAILABLE"
   }
   @Serializable @SerialName("NOT_FOUND") class NOT_FOUND: ConnectionErrorType()
   @Serializable @SerialName("DUPLICATE") class DUPLICATE: ConnectionErrorType()
-  @Serializable @SerialName("SIMPLEX") class SIMPLEX: ConnectionErrorType()
+  @Serializable @SerialName("POPOPX") class POPOPX: ConnectionErrorType()
   @Serializable @SerialName("NOT_ACCEPTED") class NOT_ACCEPTED: ConnectionErrorType()
   @Serializable @SerialName("NOT_AVAILABLE") class NOT_AVAILABLE: ConnectionErrorType()
 }
