@@ -2733,10 +2733,10 @@ supporedBrowsers callType
   | otherwise = ""
 
 viewVersionInfo :: ChatLogLevel -> CoreVersionInfo -> [StyledString]
-viewVersionInfo logLevel CoreVersionInfo {version, simplexmqVersion, simplexmqCommit} =
+viewVersionInfo logLevel CoreVersionInfo {version, popopxmqVersion, popopxmqCommit} =
   map plain $
     if logLevel <= CLLInfo
-      then [versionString version, updateStr, "simplexmq: " <> simplexmqVersion <> parens simplexmqCommit]
+      then [versionString version, updateStr, "popopxmq: " <> popopxmqVersion <> parens popopxmqCommit]
       else [versionString version, updateStr]
   where
 

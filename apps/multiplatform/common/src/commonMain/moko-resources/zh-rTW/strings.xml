@@ -404,7 +404,7 @@
     <string name="icon_descr_settings">設定</string>
     <string name="network_use_onion_hosts_prefer">當可用時</string>
     <string name="core_version">核心版本：v%s</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="create_address">建立地址</string>
     <string name="edit_image">編輯圖片</string>
     <string name="italic_text">斜體</string>

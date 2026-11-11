@@ -193,7 +193,7 @@
                   packages.direct-sqlcipher.components.library.libs = pkgs.lib.mkForce [
                     (pkgs.pkgsCross.mingwW64.openssl) #.override) # { static = true; enableKTLS = false; })
                   ];
-                  packages.simplexmq.components.library.libs = pkgs.lib.mkForce [
+                  packages.popopxmq.components.library.libs = pkgs.lib.mkForce [
                     (pkgs.pkgsCross.mingwW64.openssl) #.override) # { static = true; enableKTLS = false; })
                   ];
                   packages.unix-time.postPatch = ''
@@ -228,8 +228,8 @@
                     pkgs.pkgsCross.mingwW64.openssl
                   ];
                   packages.simplex-chat.flags.client_library = true;
-                  packages.simplexmq.flags.client_library = true;
-                  packages.simplexmq.components.library.libs = pkgs.lib.mkForce [
+                  packages.popopxmq.flags.client_library = true;
+                  packages.popopxmq.components.library.libs = pkgs.lib.mkForce [
                     pkgs.pkgsCross.mingwW64.openssl
                   ];
                   packages.unix-time.postPatch = ''
@@ -353,8 +353,8 @@
                     ./scripts/nix/direct-sqlcipher-android-log.patch
                   ];
                   packages.simplex-chat.flags.client_library = true;
-                  packages.simplexmq.flags.client_library = true;
-                  packages.simplexmq.components.library.libs = pkgs8107.lib.mkForce [
+                  packages.popopxmq.flags.client_library = true;
+                  packages.popopxmq.components.library.libs = pkgs8107.lib.mkForce [
                     (android32Pkgs.openssl.override { static = true; enableKTLS = false; })
                   ];
                 }];
@@ -431,8 +431,8 @@
                     ./scripts/nix/direct-sqlcipher-android-log.patch
                   ];
                   packages.simplex-chat.flags.client_library = true;
-                  packages.simplexmq.flags.client_library = true;
-                  packages.simplexmq.components.library.libs = pkgs.lib.mkForce [
+                  packages.popopxmq.flags.client_library = true;
+                  packages.popopxmq.components.library.libs = pkgs.lib.mkForce [
                     (androidPkgs.openssl.override { static = true; })
                   ];
                 }];
@@ -557,13 +557,13 @@
                 pkgs' = pkgs;
                 extra-modules = [{
                   packages.simplex-chat.flags.swift = true;
-                  packages.simplexmq.flags.swift = true;
+                  packages.popopxmq.flags.swift = true;
                   packages.direct-sqlcipher.flags.commoncrypto = true;
-                  packages.simplexmq.flags.commoncrypto = true;
+                  packages.popopxmq.flags.commoncrypto = true;
                   packages.entropy.flags.DoNotGetEntropy = true;
                   packages.simplex-chat.flags.client_library = true;
-                  packages.simplexmq.flags.client_library = true;
-                  packages.simplexmq.components.library.libs = pkgs.lib.mkForce [
+                  packages.popopxmq.flags.client_library = true;
+                  packages.popopxmq.components.library.libs = pkgs.lib.mkForce [
                     # TODO: have a cross override for iOS, that sets this.
                     ((pkgs.openssl.override { static = true; }).overrideDerivation (old: { CFLAGS = "-mcpu=apple-a7 -march=armv8-a+norcpc" ;}))
                   ];
@@ -576,11 +576,11 @@
                 pkgs' = pkgs;
                 extra-modules = [{
                   packages.direct-sqlcipher.flags.commoncrypto = true;
-                  packages.simplexmq.flags.commoncrypto = true;
+                  packages.popopxmq.flags.commoncrypto = true;
                   packages.entropy.flags.DoNotGetEntropy = true;
                   packages.simplex-chat.flags.client_library = true;
-                  packages.simplexmq.flags.client_library = true;
-                  packages.simplexmq.components.library.libs = pkgs.lib.mkForce [
+                  packages.popopxmq.flags.client_library = true;
+                  packages.popopxmq.components.library.libs = pkgs.lib.mkForce [
                     ((pkgs.openssl.override { static = true; }).overrideDerivation (old: { CFLAGS = "-mcpu=apple-a7 -march=armv8-a+norcpc" ;}))
                   ];
                 }];
@@ -594,13 +594,13 @@
                 pkgs' = pkgs;
                 extra-modules = [{
                   packages.simplex-chat.flags.swift = true;
-                  packages.simplexmq.flags.swift = true;
+                  packages.popopxmq.flags.swift = true;
                   packages.direct-sqlcipher.flags.commoncrypto = true;
-                  packages.simplexmq.flags.commoncrypto = true;
+                  packages.popopxmq.flags.commoncrypto = true;
                   packages.entropy.flags.DoNotGetEntropy = true;
                   packages.simplex-chat.flags.client_library = true;
-                  packages.simplexmq.flags.client_library = true;
-                  packages.simplexmq.components.library.libs = pkgs.lib.mkForce [
+                  packages.popopxmq.flags.client_library = true;
+                  packages.popopxmq.components.library.libs = pkgs.lib.mkForce [
                     (pkgs.openssl.override { static = true; })
                   ];
                 }];
@@ -612,11 +612,11 @@
                 pkgs' = pkgs;
                 extra-modules = [{
                   packages.direct-sqlcipher.flags.commoncrypto = true;
-                  packages.simplexmq.flags.commoncrypto = true;
+                  packages.popopxmq.flags.commoncrypto = true;
                   packages.entropy.flags.DoNotGetEntropy = true;
                   packages.simplex-chat.flags.client_library = true;
-                  packages.simplexmq.flags.client_library = true;
-                  packages.simplexmq.components.library.libs = pkgs.lib.mkForce [
+                  packages.popopxmq.flags.client_library = true;
+                  packages.popopxmq.components.library.libs = pkgs.lib.mkForce [
                     (pkgs.openssl.override { static = true; })
                   ];
                 }];

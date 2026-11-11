@@ -1,7 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- | Local HTTP names resolver for chat tests, copied from simplexmq's
+-- | Local HTTP names resolver for chat tests, copied from popopxmq's
 -- NamesResolverServer and made dynamic: it answers /v2/resolve/<query> from a
 -- mutable name -> NameRecord registry, so a test can resolve a name to the
 -- address it just created.

@@ -97,7 +97,7 @@ import Simplex.Messaging.Parsers (defaultJSON, dropPrefix, enumJSON, parseAll, p
 import Simplex.Messaging.Protocol (AProtoServerWithAuth, AProtocolType (..), MsgId, NMsgMeta (..), NtfServer, ProtocolType (..), QueueId, SMPMsgMeta (..), SubscriptionMode (..), XFTPServer)
 import Simplex.Messaging.Session (SessionVar)
 import Simplex.Messaging.TMap (TMap)
-import Simplex.Messaging.Transport (TLS, TransportPeer (..), simplexMQVersion)
+import Simplex.Messaging.Transport (TLS, TransportPeer (..), popopxMQVersion)
 import Simplex.Messaging.Transport.Client (SocksProxyWithAuth, TransportHost)
 import Simplex.Messaging.Util (AnyError (..), catchAllErrors, catchOwn', (<$$>))
 import Simplex.RemoteControl.Client
@@ -120,8 +120,8 @@ versionString ver = "SimpleX Chat v" <> ver
 updateStr :: String
 updateStr = "To update run: curl -o- https://raw.githubusercontent.com/simplex-chat/simplex-chat/master/install.sh | bash"
 
-simplexmqCommitQ :: Q Exp
-simplexmqCommitQ = do
+popopxmqCommitQ :: Q Exp
+popopxmqCommitQ = do
   s <- either (const "") B.unpack . A.parseOnly commitHashP <$> runIO (B.readFile "./cabal.project")
   [|fromString s|]
   where
@@ -135,11 +135,11 @@ simplexmqCommitQ = do
         *> A.takeWhile (A.notInClass " \r\n")
 
 coreVersionInfo :: String -> CoreVersionInfo
-coreVersionInfo simplexmqCommit =
+coreVersionInfo popopxmqCommit =
   CoreVersionInfo
     { version = versionNumber,
-      simplexmqVersion = simplexMQVersion,
-      simplexmqCommit
+      popopxmqVersion = popopxMQVersion,
+      popopxmqCommit
     }
 
 data ChatConfig = ChatConfig
@@ -1476,8 +1476,8 @@ data ChatLogLevel = CLLDebug | CLLInfo | CLLWarning | CLLError | CLLImportant
 
 data CoreVersionInfo = CoreVersionInfo
   { version :: String,
-    simplexmqVersion :: String,
-    simplexmqCommit :: String
+    popopxmqVersion :: String,
+    popopxmqCommit :: String
   }
   deriving (Show)
 

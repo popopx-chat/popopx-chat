@@ -2176,7 +2176,7 @@
     <string name="lock_not_enabled">Το SimpleX Lock δεν είναι ενεργοποιημένο!</string>
     <string name="auth_simplex_lock_turned_on">Το SimpleX Lock είναι ενεργοποιημένο</string>
     <string name="image_descr_simplex_logo">SimpleX Logo</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="simplex_link_invitation">Πρόσκληση 1-χρήσης SimpleX</string>
     <string name="v6_1_better_security_descr">Πρωτόκολλα SimpleX που έχουν ελεγχθεί από την Trail of Bits.</string>
     <string name="simplex_link_relay">Σύνδεσμος αναμεταδότη SimpleX</string>

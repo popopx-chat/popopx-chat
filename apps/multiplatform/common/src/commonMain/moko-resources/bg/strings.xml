@@ -1084,7 +1084,7 @@
     <string name="star_on_github">Звезда в GitHub</string>
     <string name="disable_onion_hosts_when_not_supported"><![CDATA[Задайте <i>Използване на .onion хостове</i> на Не, ако SOCKS проксито не ги поддържа.]]></string>
     <string name="show_dev_options">Покажи:</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="save_and_notify_contact">Запази и уведоми контакта</string>
     <string name="save_and_notify_group_members">Запази и уведоми членовете на групата</string>
     <string name="save_preferences_question">Запази настройките?</string>

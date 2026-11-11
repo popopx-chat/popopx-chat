@@ -7897,8 +7897,8 @@ data class GroupLink(
 @Serializable
 data class CoreVersionInfo(
   val version: String,
-  val simplexmqVersion: String,
-  val simplexmqCommit: String
+  val popopxmqVersion: String,
+  val popopxmqCommit: String
 )
 
 data class SomeRemoteCtrl(

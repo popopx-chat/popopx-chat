@@ -1408,7 +1408,7 @@
     <string name="app_version_name">Lietotnes versijas nosaukums</string>
     <string name="app_version_code">Lietotnes versijas kods</string>
     <string name="core_version">Pamatversija</string>
-    <string name="core_simplexmq_version">Pamat simplexmq versija</string>
+    <string name="core_popopxmq_version">Pamat popopxmq versija</string>
     <string name="app_check_for_updates">Pārbaudīt atjauninājumus</string>
     <string name="app_check_for_updates_disabled">Lietotnes atjauninājumu pārbaude atspējota</string>
     <string name="app_check_for_updates_stable">Lietotnes atjauninājumu pārbaude stabila</string>

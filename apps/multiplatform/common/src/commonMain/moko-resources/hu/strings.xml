@@ -1113,7 +1113,7 @@
     <string name="passcode_changed">A jelkód módosult!</string>
     <string name="notifications_mode_off">Akkor fut, amikor az alkalmazás meg van nyitva</string>
     <string name="waiting_for_file">Várakozás a fájlra</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="unlink_desktop">Leválasztás</string>
     <string name="incognito_random_profile">Véletlenszerű profil</string>
     <string name="wrong_passphrase_title">Érvénytelen jelmondat!</string>

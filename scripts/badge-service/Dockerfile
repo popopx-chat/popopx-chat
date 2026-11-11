@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Built from the repository root, not this directory, because the COPY paths are repo-relative.
-# The Haskell stage compiles simplexmq and simplex-chat from source, which takes hours on a cold
+# The Haskell stage compiles popopxmq and simplex-chat from source, which takes hours on a cold
 # cache and needs about 15 GB.
 
 ARG UBUNTU=24.04

@@ -23,7 +23,7 @@ import Test.Hspec
 testSchemaPath :: FilePath
 testSchemaPath = "tests/tmp/test_schema.sql"
 
--- copied from simplexmq
+-- copied from popopxmq
 postgresSchemaDumpTest :: [Migration] -> DBOpts -> FilePath -> Spec
 postgresSchemaDumpTest migrations testDBOpts@DBOpts {connstr, schema = testDBSchema} srcSchemaPath = do
   it "verify and overwrite schema dump" testVerifySchemaDump

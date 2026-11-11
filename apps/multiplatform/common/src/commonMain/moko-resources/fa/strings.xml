@@ -578,7 +578,7 @@
     <string name="app_version_title">نسخه برنامه</string>
     <string name="theme_colors_section_title">رنگ‌های رابط کاربری</string>
     <string name="core_version">نسخه هسته: v%s</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="shutdown_alert_desc">اعلان‌ها از کار خواهند افتاد تا زمانی که برنامه را دوباره راه‌اندازی کنید</string>
     <string name="create_address">ایجاد نشانی</string>
     <string name="delete_address__question">نشانی حذف شود؟</string>

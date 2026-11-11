@@ -7,7 +7,7 @@
 #   docker build -f apps/simplex-support-bot-light/Dockerfile .
 #
 # The first stage compiles libsimplex from src/. That is a full GHC build of
-# simplexmq and simplex-chat: hours on a cold cache, and it needs ~15 GB.
+# popopxmq and simplex-chat: hours on a cold cache, and it needs ~15 GB.
 
 ARG UBUNTU=24.04
 # The released libs are built on 22.04; a lib built here has to load on a runtime
@@ -55,7 +55,7 @@ RUN --mount=type=cache,target=/root/.cabal \
     cabal update; \
     cabal build lib:simplex-chat \
       --ghc-options='-optl-Wl,-rpath,$ORIGIN -optl-Wl,-soname,libsimplex.so -flink-rts -threaded' \
-      --constraint 'simplexmq +client_library' \
+      --constraint 'popopxmq +client_library' \
       --constraint 'simplex-chat +client_library'; \
     lib=$(ls -t /src/dist-newstyle/build/*/ghc-${GHC}/simplex-chat-*/build/libHSsimplex-chat-*-inplace-ghc${GHC}.so | head -1); \
     build_dir=$(dirname "$lib"); \

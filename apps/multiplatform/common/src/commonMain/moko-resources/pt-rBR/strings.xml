@@ -875,7 +875,7 @@
     <string name="unmute_chat">Ativar som</string>
     <string name="image_descr_simplex_logo">Logo SimpleX</string>
     <string name="smp_servers_test_server">Servidor de teste</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="network_session_mode_transport_isolation">Isolar transporte</string>
     <string name="icon_descr_speaker_on">Alto-falante ligado</string>
     <string name="icon_descr_video_off">Vídeo desativado</string>

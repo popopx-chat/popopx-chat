@@ -857,7 +857,7 @@
     <string name="network_use_onion_hosts_prefer">当可用时</string>
     <string name="network_use_onion_hosts">使用 .onion 主机</string>
     <string name="your_ICE_servers">你的 ICE 服务器</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="you_can_use_markdown_to_format_messages__prompt">你可以使用 markdown 来编排消息格式：</string>
     <string name="ttl_h">%dh</string>
     <string name="ttl_days">%d 天</string>

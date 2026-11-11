@@ -1773,7 +1773,7 @@
     <string name="network_smp_web_port_preset">Servidores predefinidos</string>
     <string name="network_smp_web_port_off">Desativado</string>
     <string name="theme_colors_section_title">Cores da interface</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="app_check_for_updates">Verificar atualizações</string>
     <string name="app_check_for_updates_stable">Estável</string>
     <string name="app_check_for_updates_update_available">Atualização disponível: %s</string>

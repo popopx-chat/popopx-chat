@@ -1755,8 +1755,8 @@ struct AppVersionRange: Decodable {
 
 struct CoreVersionInfo: Decodable {
     var version: String
-    var simplexmqVersion: String
-    var simplexmqCommit: String
+    var popopxmqVersion: String
+    var popopxmqCommit: String
 }
 
 struct ArchiveConfig: Encodable {

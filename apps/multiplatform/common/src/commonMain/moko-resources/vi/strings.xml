@@ -1717,7 +1717,7 @@
     <string name="prefs_error_saving_settings">Lỗi lưu cài đặt</string>
     <string name="settings_notification_preview_mode_title">Hiển thị bản xem trước</string>
     <string name="ntf_channel_calls">Các cuộc gọi SimpleX Chat</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="simplex_links_not_allowed">Các đường dẫn SimpleX là không được phép</string>
     <string name="chat_lock">Khóa SimpleX</string>
     <string name="simplex_links">Các đường dẫn SimpleX</string>

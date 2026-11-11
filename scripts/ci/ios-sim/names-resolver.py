@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# The name resolver that the test smp-server's [NAMES] section points at, as simplexmq's Server/Names/HttpResolver.hs
+# The name resolver that the test smp-server's [NAMES] section points at, as popopxmq's Server/Names/HttpResolver.hs
 # calls it: GET /v2/resolve/<query> answers a NameResponse for the query "[<keccak-256 of the lowercased label, hex>]<.tld>"
 # (or the plain name, which older clients send), GET /health answers {}. Registered names come from a JSON file, read on every request, so names can be added while it runs:
 #   {"cinews.testing": {"simplexChannel": ["https://..."], "simplexContact": []}, ...}

@@ -323,7 +323,7 @@
     <string name="ntf_channel_messages">Mesaje SimpleX Chat</string>
     <string name="ntf_channel_calls">Apeluri SimpleX Chat</string>
     <string name="simplex_address">Adresă SimpleX</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="simplex_links_not_allowed">Linkurile SimpleX nu sunt permise</string>
     <string name="icon_descr_simplex_team">Echipa SimpleX</string>
     <string name="shutdown_alert_question">Opriți?</string>

@@ -917,7 +917,7 @@
     <string name="feature_offered_item">beginne %s</string>
     <string name="feature_offered_item_with_param">beginne %s: %2s</string>
     <string name="feature_cancelled_item">beende %s</string>
-    <string name="core_simplexmq_version">simplexmq Version: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq Version: v%s (%2s)</string>
     <string name="delete_files_and_media_all">Alle Dateien löschen</string>
     <string name="messages_section_title">Nachrichten</string>
     <string name="app_version_code">App Build: %s</string>

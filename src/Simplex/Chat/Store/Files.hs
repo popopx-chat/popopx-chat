@@ -614,7 +614,7 @@ appendRcvFD db userId fileId fd@FileDescr {fileDescrText, fileDescrPartNo, fileD
             (fileDescrText', fileDescrPartNo, BI fileDescrComplete, fileDescrId)
         pure RcvFileDescr {fileDescrId, fileDescrText = fileDescrText', fileDescrPartNo, fileDescrComplete}
 
--- Upper bounds sized above the largest legitimate received description; derived from simplexmq's
+-- Upper bounds sized above the largest legitimate received description; derived from popopxmq's
 -- chunk tiers and redundancy, so a change there must revisit them.
 -- ~1280 chunks max = maxFileSizeHard (5gb) / largest chunk tier (4mb).
 -- ~150 chars per chunk in the description YAML = replicaId 24 + Ed25519 key 64 + SHA-256 digest 44 + chunkNo/colons.

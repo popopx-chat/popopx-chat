@@ -1050,7 +1050,7 @@
     <string name="v6_0_delete_many_messages_descr">Hapus hingga 20 pesan sekaligus.</string>
     <string name="app_check_for_updates">Periksa pembaruan</string>
     <string name="app_check_for_updates_button_download">Unduh %s (%s)</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="network_smp_proxy_mode_unknown_description">Gunakan routing pribadi dengan server yang tak dikenal.</string>
     <string name="v6_1_better_calls">Panggilan lebih baik</string>
     <string name="connect_plan_connect_to_yourself">Terhubung ke diri sendiri?</string>

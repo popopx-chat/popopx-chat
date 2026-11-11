@@ -42,8 +42,8 @@ fun VersionInfoView(
         }
         versionInfo.value?.let { info ->
           Text(String.format(stringResource(MR.strings.core_version), info.version))
-          val simplexmqCommit = if (info.simplexmqCommit.length >= 7) info.simplexmqCommit.substring(startIndex = 0, endIndex = 7) else info.simplexmqCommit
-          Text(String.format(stringResource(MR.strings.core_simplexmq_version), info.simplexmqVersion, simplexmqCommit))
+          val popopxmqCommit = if (info.popopxmqCommit.length >= 7) info.popopxmqCommit.substring(startIndex = 0, endIndex = 7) else info.popopxmqCommit
+          Text(String.format(stringResource(MR.strings.core_popopxmq_version), info.popopxmqVersion, popopxmqCommit))
         }
       }
     }

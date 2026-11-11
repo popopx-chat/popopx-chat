@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# A SimpleX name resolver for the test SMP server's [NAMES] section, as simplexmq's test resolver answers:
+# A SimpleX name resolver for the test SMP server's [NAMES] section, as popopxmq's test resolver answers:
 # GET /v2/resolve/<query> with a NameResponse for every name, registered or not, and GET /health.
 # Names are read from the registry file on each request: {"<label>": {"simplexContact": [...], "simplexChannel": [...]}},
 # all under .testing. A v22 router asks by label hash, "[<keccak-256 hex>].testing", so names are matched by hash.

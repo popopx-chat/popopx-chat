@@ -1845,7 +1845,7 @@
     <string name="network_smp_proxy_fallback_allow_protected_description">Envieu missatges directament quan l\'adreça IP està protegida i el vostre servidor de destinació no admet l\'encaminament privat.</string>
     <string name="network_smp_proxy_fallback_allow_description">Enviar missatges directament quan el vostre servidor de destinació no admet l\'encaminament privat.</string>
     <string name="private_routing_show_message_status">Mostrar l\'estat del missatge</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="app_check_for_updates_button_skip">Ometre aquesta versió</string>
     <string name="private_routing_explanation">Per protegir la vostra adreça IP l\'encaminament privat utilitza els vostres servidors SMP per enviar missatges.</string>
     <string name="network_smp_proxy_mode_unknown">Servidors desconeguts</string>

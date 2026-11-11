@@ -3747,7 +3747,7 @@ processChatCommand cxt nm = \case
     pure $ CRRcvStandaloneFileCreated user ft
   QuitChat -> liftIO exitSuccess
   ShowVersion -> do
-    -- simplexmqCommitQ makes iOS builds crash m(
+    -- popopxmqCommitQ makes iOS builds crash m(
     let versionInfo = coreVersionInfo ""
     chatMigrations <- map upMigration <$> withFastStore' (getCurrentMigrations Nothing)
     agentMigrations <- withAgent getAgentMigrations

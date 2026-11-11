@@ -952,7 +952,7 @@
     <string name="smp_servers_test_servers">เซิร์ฟเวอร์ทดสอบ</string>
     <string name="smp_servers_test_some_failed">บางเซิร์ฟเวอร์ผ่านการทดสอบล้มเหลว:</string>
     <string name="network_socks_proxy_settings">การตั้งค่าพร็อกซี SOCKS</string>
-    <string name="core_simplexmq_version">Simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">Popopxmq: v%s (%2s)</string>
     <string name="icon_descr_speaker_off">ปิดลำโพง</string>
     <string name="icon_descr_speaker_on">เปิดลำโพง</string>
     <string name="alert_title_skipped_messages">ข้อความที่ข้ามไป</string>

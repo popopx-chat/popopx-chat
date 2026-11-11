@@ -1107,7 +1107,7 @@
     <string name="connect_plan_open_group">Grubu aç</string>
     <string name="privacy_show_last_messages">Son mesajları göster</string>
     <string name="this_device_version"><![CDATA[<i>bu cihaz s%s</i>]]></string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="update_database">Güncelle</string>
     <string name="this_device_name_shared_with_mobile">Cihaz ismi bağlı olduğu mobil istemci ile paylaşılacak.</string>
     <string name="v5_3_new_desktop_app_descr">Masaüstü uygulamasında yeni bir profil oluştur. 💻</string>

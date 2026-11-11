@@ -838,7 +838,7 @@
     <string name="network_option_ping_count">Conteggio PING</string>
     <string name="app_version_title">Versione dell\'app</string>
     <string name="core_version">Versione core: v%s</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="app_version_code">Build dell\'app: %s</string>
     <string name="app_version_name">Versione app: v%s</string>
     <string name="smp_servers_per_user">I server per le nuove connessioni del profilo di chat attuale</string>

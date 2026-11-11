@@ -224,7 +224,7 @@
     <string name="network_use_onion_hosts_no">Ne</string>
     <string name="network_session_mode_user">Profil chatu</string>
     <string name="network_session_mode_entity">Připojení</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="create_address">Vytvořit adresu</string>
     <string name="save_and_notify_group_members">Uložit a upozornit členy skupiny</string>
     <string name="exit_without_saving">Ukončit bez uložení</string>

@@ -27,7 +27,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.*
 import kotlinx.datetime.*
 
-// Each dot-separated label is ASCII letters/digits with single internal hyphens (mirrors simplexmq SimplexName.hs nameLabelP).
+// Each dot-separated label is ASCII letters/digits with single internal hyphens (mirrors popopxmq SimplexName.hs nameLabelP).
 private val simplexNameLabelRegex = Regex("[A-Za-z0-9]+(-[A-Za-z0-9]+)*")
 
 private val simplexNameSaleStart = LocalDateTime(2026, 12, 12, 18, 0).toInstant(TimeZone.UTC)

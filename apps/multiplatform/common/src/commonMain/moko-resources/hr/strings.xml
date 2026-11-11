@@ -481,7 +481,7 @@
     <string name="keep_conversation">Zadržite konverzaciju</string>
     <string name="icon_descr_address">SimpleX Adresa</string>
     <string name="save_servers_button">Sačuvati</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="settings_section_title_experimenta">Eksperimentalno</string>
     <string name="chat_item_ttl_none">nikada</string>
     <string name="clear_contacts_selection_button">Očistiti</string>

@@ -29,7 +29,7 @@ package simplex-chat
     shared: False
     ghc-options: -threaded -DIOS
 
-package simplexmq
+package popopxmq
     flags: +swift +client_library +commoncrypto
     extra-include-dirs: $openssl_dir/include
     extra-lib-dirs: $openssl_dir/lib

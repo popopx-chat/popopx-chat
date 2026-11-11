@@ -1010,7 +1010,7 @@
     <string name="auth_simplex_lock_turned_on">شُغّل قفل SimpleX</string>
     <string name="show_dev_options">أظهر:</string>
     <string name="show_developer_options">أظهر خيارات المطوِّر</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="error_smp_test_server_auth">يتطلب الخادم إذنًا لإنشاء قوائم انتظار، تحقق من كلمة المرور.</string>
     <string name="error_xftp_test_server_auth">يتطلب الخادم إذنًا للرفع، تحقق من كلمة المرور.</string>
     <string name="notification_preview_mode_contact_desc">أظهر جهة الاتصال فقط</string>

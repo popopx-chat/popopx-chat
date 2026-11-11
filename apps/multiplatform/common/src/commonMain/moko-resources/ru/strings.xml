@@ -920,7 +920,7 @@
     <string name="feature_offered_item_with_param">предложил(a) %s: %2s</string>
     <string name="feature_cancelled_item">отменил(a) %s</string>
     <string name="icon_descr_cancel_live_message">Отменить живое сообщение</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="network_option_ping_count">Количество PING</string>
     <string name="users_delete_with_connections">Профиль и соединения на сервере</string>
     <string name="app_version_title">Версия приложения</string>

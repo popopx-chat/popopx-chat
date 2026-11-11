@@ -391,7 +391,7 @@
     <string name="ensure_ICE_server_address_are_correct_format_and_unique">WebRTC ICE 서버 주소가 올바른 형식이고 줄로 구분되고 중복이 없는지 확인해 주세요.</string>
     <string name="enter_one_ICE_server_per_line">ICE 서버(한 줄에 하나씩)</string>
     <string name="error_saving_ICE_servers">ICE 서버 저장 오류</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="exit_without_saving">저장하지 않고 나가기</string>
     <string name="encrypt_database">암호화</string>
     <string name="encrypted_database">암호화된 데이터베이스</string>

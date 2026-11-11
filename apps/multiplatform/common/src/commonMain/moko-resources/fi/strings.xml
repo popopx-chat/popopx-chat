@@ -682,7 +682,7 @@
     <string name="icon_descr_profile_image_placeholder">profiilikuvan paikka</string>
     <string name="saved_ICE_servers_will_be_removed">Tallennetut WebRTC ICE -palvelimet poistetaan.</string>
     <string name="smp_save_servers_question">Tallenna palvelimet?</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="network_socks_proxy_settings">SOCKS-välityspalvelimen asetukset</string>
     <string name="callstatus_missed">vastaamaton puhelu</string>
     <string name="secret_text">salainen</string>

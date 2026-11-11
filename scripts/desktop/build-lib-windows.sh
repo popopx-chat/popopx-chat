@@ -39,8 +39,8 @@ scripts/desktop/prepare-openssl-windows.sh
 openssl_windows_style_path=$(echo `pwd`/dist-newstyle/openssl-3.0.15 | sed 's#/\([a-zA-Z]\)#\1:#' | sed 's#/#\\#g')
 rm -rf $BUILD_DIR 2>/dev/null || true
 # Existence of these directories produces build error: cabal's bug
-# (simplexmq, hs-jpeg-turbo and JuicyPixels-stbir are removed because cabal cannot delete their read-only git submodule pack files - blst, libbbs, mozjpeg, stb - on Windows)
-rm -rf dist-newstyle/src/direct-sq* dist-newstyle/src/simplexmq* dist-newstyle/src/hs-jpeg-t* dist-newstyle/src/JuicyPixe* 2>/dev/null || true
+# (popopxmq, hs-jpeg-turbo and JuicyPixels-stbir are removed because cabal cannot delete their read-only git submodule pack files - blst, libbbs, mozjpeg, stb - on Windows)
+rm -rf dist-newstyle/src/direct-sq* dist-newstyle/src/popopxmq* dist-newstyle/src/hs-jpeg-t* dist-newstyle/src/JuicyPixe* 2>/dev/null || true
 rm cabal.project.local 2>/dev/null || true
 echo "ignore-project: False" >> cabal.project.local
 echo "package direct-sqlcipher" >> cabal.project.local
@@ -52,7 +52,7 @@ echo "    ghc-options: -shared -threaded -optl-L$openssl_windows_style_path -opt
 # Very important! Without it the build fails on linking step since the linker can't find exported symbols.
 # It looks like GHC bug because with such random path the build ends successfully
 sed -i "s/ld.lld.exe/abracadabra.exe/" `ghc --print-libdir`/settings
-cabal build lib:simplex-chat --constraint 'simplexmq +client_library' --constraint 'simplex-chat +client_library'
+cabal build lib:simplex-chat --constraint 'popopxmq +client_library' --constraint 'simplex-chat +client_library'
 
 rm -rf apps/multiplatform/common/src/commonMain/cpp/desktop/libs/$OS-$ARCH/
 rm -rf apps/multiplatform/desktop/build/cmake

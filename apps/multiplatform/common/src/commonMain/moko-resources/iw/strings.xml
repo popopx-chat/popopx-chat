@@ -893,7 +893,7 @@
     <string name="add_contact_or_create_group">התחל צ׳אט חדש</string>
     <string name="network_socks_proxy_settings">הגדרות פרוקסי SOCKS</string>
     <string name="show_developer_options">הצג אפשרויות למפתחים</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="show_dev_options">מוצג:</string>
     <string name="share_link">שתף קישור</string>
     <string name="alert_title_skipped_messages">הודעות שדולגו</string>

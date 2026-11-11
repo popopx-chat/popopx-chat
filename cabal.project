@@ -1,6 +1,6 @@
 packages: .
--- packages: . ../simplexmq
--- packages: . ../simplexmq ../direct-sqlcipher ../sqlcipher-simple
+-- packages: . ../popopxmq
+-- packages: . ../popopxmq ../direct-sqlcipher ../sqlcipher-simple
 
 -- uncomment two sections below to run tests with coverage
 -- package *

@@ -309,7 +309,7 @@
     <string name="simplex_link_mode">Lînkên SimpleXê</string>
     <string name="simplex_links">Lînkên SimpleXê</string>
     <string name="simplex_links_are_prohibited_in_group">Lînkên SimpleXê memnû in.</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="simplex_link_invitation">Dewetiya yek carê ya SimpleXê</string>
     <string name="size">Mezinbûnî</string>
     <string name="skip_inviting_button">Ser bakirina endaman ve derbas bibe</string>

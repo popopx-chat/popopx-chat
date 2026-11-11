@@ -243,7 +243,7 @@
     <string name="network_use_onion_hosts_prefer">Якщо доступно</string>
     <string name="network_use_onion_hosts_no">Ні</string>
     <string name="network_use_onion_hosts_prefer_desc">.Onion-хости будуть використовуватися, якщо доступні.</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="create_address">Створити адресу</string>
     <string name="share_link">Поділитися посиланням</string>
     <string name="delete_address">Видалити адресу</string>

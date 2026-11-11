@@ -37,7 +37,7 @@ struct VersionLayout: View {
                 Text("App build: \(appBuild ?? "?")")
                 if let info = versionInfo {
                     Text("Core version: v\(info.version)")
-                    if let v = try? AttributedString(markdown: "simplexmq: v\(info.simplexmqVersion) ([\(info.simplexmqCommit.prefix(7))](https://github.com/simplex-chat/simplexmq/commit/\(info.simplexmqCommit)))") {
+                    if let v = try? AttributedString(markdown: "popopxmq: v\(info.popopxmqVersion) ([\(info.popopxmqCommit.prefix(7))](https://github.com/simplex-chat/simplexmq/commit/\(info.popopxmqCommit)))") {
                         Text(v)
                     }
                 }
@@ -59,6 +59,6 @@ struct VersionLayout: View {
 
 struct VersionView_Previews: PreviewProvider {
     static var previews: some View {
-        VersionLayout(appVersion: "7.1", appBuild: "363", versionInfo: CoreVersionInfo(version: "7.1.0.14", simplexmqVersion: "7.1.0.14", simplexmqCommit: "c0c416daf052eb0215ae432ae665522a7c96c0a6"))
+        VersionLayout(appVersion: "7.1", appBuild: "363", versionInfo: CoreVersionInfo(version: "7.1.0.14", popopxmqVersion: "7.1.0.14", popopxmqCommit: "c0c416daf052eb0215ae432ae665522a7c96c0a6"))
     }
 }

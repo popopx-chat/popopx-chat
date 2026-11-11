@@ -359,7 +359,7 @@
     <string name="share_link">Udostępnij link</string>
     <string name="show_dev_options">Pokaż:</string>
     <string name="show_developer_options">Pokaż opcje dewelopera</string>
-    <string name="core_simplexmq_version">simplexmq: v%s (%2s)</string>
+    <string name="core_popopxmq_version">popopxmq: v%s (%2s)</string>
     <string name="your_current_profile">Twój obecny profil</string>
     <string name="confirm_password">Potwierdź hasło</string>
     <string name="create_profile">Utwórz profil</string>
