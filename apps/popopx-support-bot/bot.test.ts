@@ -2420,7 +2420,7 @@ describe("parseConfig Validation", () => {
 
   test("default --db → sqlite DbConfig with default filePrefix", () => {
     const cfg = parseConfig(baseArgs)
-    expect(cfg.db).toEqual({type: "sqlite", filePrefix: "./data/simplex"})
+    expect(cfg.db).toEqual({type: "sqlite", filePrefix: "./data/popopx"})
   })
 
   test("--pg-conn with sqlite → throws", () => {
@@ -2449,7 +2449,7 @@ describe("parseConfig Validation", () => {
 
   test("sqlite backend with --sqlite-key → DbConfig carries encryptionKey", () => {
     const cfg = parseConfig([...baseArgs, "--sqlite-key", "secret"])
-    expect(cfg.db).toEqual({type: "sqlite", filePrefix: "./data/simplex", encryptionKey: "secret"})
+    expect(cfg.db).toEqual({type: "sqlite", filePrefix: "./data/popopx", encryptionKey: "secret"})
   })
 
   test("unknown flag → parseArgs throws", () => {

@@ -55,7 +55,7 @@ At its first start the server downloads the SimpleX core library, 29 to 50 MB de
 
    ```
    SimpleX MCP server 0.2.0, agent "my-agent"
-   Data folder: /home/alice/.simplex-mcp/my-agent
+   Data folder: /home/alice/.popopx-mcp/my-agent
    Approval mode: requests
    Agent control chat "My Agent" created.
    Join the agent control chat in the SimpleX app. The link works once:
@@ -158,7 +158,7 @@ npx -y @simplex-chat/mcp register my-agent --scope local    # the current projec
 `register NAME` reads the agent's port from its data folder, runs `claude mcp remove --scope SCOPE simplex-NAME` (SCOPE: `user`, or the `--scope` value), ignoring a missing entry, and then, for `register my-agent`:
 
 ```
-claude mcp add-json --scope user simplex-my-agent '{"type":"http","url":"http://127.0.0.1:5226/mcp","headersHelper":"cat /home/alice/.simplex-mcp/my-agent/headers.json","timeout":169800000}'
+claude mcp add-json --scope user simplex-my-agent '{"type":"http","url":"http://127.0.0.1:5226/mcp","headersHelper":"cat /home/alice/.popopx-mcp/my-agent/headers.json","timeout":169800000}'
 ```
 
 - NAME: 1 to 32 lowercase letters, digits and single hyphens, starting with a letter or digit.
@@ -257,7 +257,7 @@ Commands:
 | `/pending` | Lists pending actions. |
 | `/list` | Lists the agent's 100 most recent chats, one line each, and which of them are approved for all messages or all files: `, approved for this chat by NAME` and `, files approved by NAME`; a last line counts the older chats. |
 
-After `/leave #9`, or after the agent's `leave` of #9 is performed in either mode, when the chat's folder has files, the agent posts ``Files from business Ridgeline (#9) are kept in `/home/alice/.simplex-mcp/my-agent/files/group-9`: 3 files, 2.1 MB. /delete #9 files``. The files forwarded from #9 are deleted when the agent leaves it.
+After `/leave #9`, or after the agent's `leave` of #9 is performed in either mode, when the chat's folder has files, the agent posts ``Files from business Ridgeline (#9) are kept in `/home/alice/.popopx-mcp/my-agent/files/group-9`: 3 files, 2.1 MB. /delete #9 files``. The files forwarded from #9 are deleted when the agent leaves it.
 
 `/pending`, `/list` and `/leave` are in the chat's command menu, and the cards carry the others. Tapping `/leave` in the menu puts `/leave <chat ID>` into the entry field: replace `<chat ID>` with the chat's ID from `/list`, such as `#9`, and send it. Each command includes its number, because the app sends a tapped command as a new message, without a quote. Every card form and reply is listed in [`PLAN.md`](PLAN.md), section "What the owner sees: the agent control chat".
 
@@ -313,7 +313,7 @@ A short voice message can arrive with its file already received. The server move
 
 An empty file is refused, and so is `as` without `file`. A message holds at most 15602 bytes with its text, the file's name and preview, the message `reply_to` quotes and the mentioned names. The quote is the quoted text when the message is an image or video; otherwise it is the quoted content, an image's preview included. A `send` over it is refused with `text: too long for a message with this image; shorten it.`, or without a file `text: too long for the message with its quote; shorten it.` An image's preview takes up to 14000 bytes, so its text has about 1 KB.
 
-The server checks the file by its real path, after symbolic links, and refuses files under `~/.ssh` and `~/.gnupg`, files named `id_*`, `*.pem`, `*.key`, `*.p12` and `*.pfx`, and the files under its data folder and under `~/.simplex-mcp`, except those under `files/` of its own data folder; each folder is taken by its real path too. The card shows the real path. A file whose real path, size, inode or change time differs at the send from the request is not sent: the action fails.
+The server checks the file by its real path, after symbolic links, and refuses files under `~/.ssh` and `~/.gnupg`, files named `id_*`, `*.pem`, `*.key`, `*.p12` and `*.pfx`, and the files under its data folder and under `~/.popopx-mcp`, except those under `files/` of its own data folder; each folder is taken by its real path too. The card shows the real path. A file whose real path, size, inode or change time differs at the send from the request is not sent: the action fails.
 
 Incognito: the core creates a random profile for that one chat, so peers of different chats can't link them. The tools' inputs, results and errors are in [`PLAN.md`](PLAN.md), section "What the agent sees: tools", and the call sequences of the scenarios in section "Sequence diagrams".
 
@@ -364,7 +364,7 @@ Usage:
   simplex-mcp register NAME [options]  add agent NAME to Claude Code
 
 serve options:
-  --data DIR             data folder (default: ~/.simplex-mcp/NAME)
+  --data DIR             data folder (default: ~/.popopx-mcp/NAME)
   --display-name TEXT    the agent's name in SimpleX (default at the first start: NAME)
   --approve MODE         what the owner approves in the agent control chat:
                            requests  the agent's connections, messages, downloads
@@ -384,7 +384,7 @@ serve options:
 
 register options:
   --scope SCOPE          user (default) or local
-  --data DIR             data folder (default: ~/.simplex-mcp/NAME)
+  --data DIR             data folder (default: ~/.popopx-mcp/NAME)
 
 --reset-owners takes --owners without a list.
 ```
@@ -392,7 +392,7 @@ register options:
 ## Data folder
 
 ```
-~/.simplex-mcp/my-agent/
+~/.popopx-mcp/my-agent/
   simplex_chat.db    POPOPX chat database: the agent's profile and chats
   simplex_agent.db   SimpleX agent database: connections and keys
   token              access token, readable only by the user
@@ -424,7 +424,7 @@ One server runs per data folder: a second one exits, because two processes on on
 - Without `--owners`, whoever opens the link first becomes an owner. The link works once.
 - With `--owners`, only the listed owners approve.
 - After `/approve #N all`, the agent sends to that chat without asking, files included; `/revoke #N` ends it.
-- The server refuses to send private keys, its own files and the files under `~/.simplex-mcp`, where agents keep their data, except the files under `files/` of its own data folder; other files the agent can read are sent after approval.
+- The server refuses to send private keys, its own files and the files under `~/.popopx-mcp`, where agents keep their data, except the files under `files/` of its own data folder; other files the agent can read are sent after approval.
 - After `/receive #N 7 all`, the agent's later downloads from that chat, of files on its XFTP servers, run without asking; `/receive #N off` ends it. A file on other servers is downloaded only by `/receive` or `/forward` of the card that names them; any other download of it fails, unless the IP address is protected.
 - Peers of a chat connected as the agent see its profile; peers of an incognito chat see a random profile made for that chat only.
 - The agent has no address, so nobody can contact it first.

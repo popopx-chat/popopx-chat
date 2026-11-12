@@ -9,7 +9,7 @@ Your working directory is where your output goes. `ui shot <name>` saves `screen
 - The app is already running, on its first screen, with a new, empty database: never run `ui start` or `ui stop`. Begin with `ui shot start` to see it.
 - `ui type` types into the field that has the focus: tap a field before typing into it. `ui key BACK` is Android's back button.
 - Besides the chats, the chat list shows the app's own cards as list items until they are closed: "New 1-time link / Paste link / Scan" (once there is a conversation), "Bottom bar / Top bar", and "Invest in SimpleX Chat!". They are part of the list, not something drawn over it: leave them open.
-- The emulator's Pictures folder has two images for part D: `test-card.jpg`, a TV test card 1280×720 (colour bars, a large circle, "1080" at the top and "TVB" at the bottom), and `simplex-logo.png`, the dark blue and turquoise SimpleX logo on a transparent background.
+- The emulator's Pictures folder has two images for part D: `test-card.jpg`, a TV test card 1280×720 (colour bars, a large circle, "1080" at the top and "TVB" at the bottom), and `popopx-logo.png`, the dark blue and turquoise SimpleX logo on a transparent background.
 
 ## The test
 
@@ -44,7 +44,7 @@ Your working directory is where your output goes. `ui shot <name>` saves `screen
 1. Click "seeded notes" to open the group. Click "Attach" (left of the message field), then "Image". Android opens a picker that is not part of the app (the photo picker, or Files): find `test-card.jpg` (under Pictures, Images or Recent; its thumbnail shows the test card) and choose it, then confirm the choice if the picker has a button for it ("Add", "Select", "Done").
 2. Back in the app, the compose area shows the image above the message field before it is sent. Take a shot. Check: the preview shows the whole test card, upright, not stretched.
 3. Click "Send Message". Check: the chat shows the sent test card. Click the image: it opens full screen, and "1080" and "TVB" are sharp and readable. Take a shot, then `ui key BACK`.
-4. Repeat 1 to 3 with `simplex-logo.png`. Check: the preview and the sent image show the whole logo, and the area around its letters shows the chat's background, not black or grey.
+4. Repeat 1 to 3 with `popopx-logo.png`. Check: the preview and the sent image show the whole logo, and the area around its letters shows the chat's background, not black or grey.
 5. Check that the chat shows both images after `ui relaunch` and opening "seeded notes" again.
 
 You have at most 90 turns, and the whole test fits in about 45 if you chain steps whose outcome you can predict with `ui do` and look at the screen after each chain. For example:

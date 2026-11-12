@@ -102,8 +102,8 @@ RUN mkdir -p /data && chown supportbot:supportbot /data && chmod 0700 /data
 
 # Read by simplex_chat._native instead of downloading a release, which is what
 # makes the bot run against the core built above rather than the published one.
-COPY --from=libpopopx /libs /opt/simplex/libs
-ENV POPOPX_LIBS_DIR=/opt/simplex/libs
+COPY --from=libpopopx /libs /opt/popopx/libs
+ENV POPOPX_LIBS_DIR=/opt/popopx/libs
 
 USER supportbot
 WORKDIR /home/supportbot
@@ -113,9 +113,9 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # The library is installed from this tree: the APIs the bot uses
 # (install_signal_handlers, sync_profile, api_merge_*_custom_data) are unreleased.
-COPY --chown=supportbot:supportbot packages/popopx-chat-python /home/supportbot/simplex-chat-python
+COPY --chown=supportbot:supportbot packages/popopx-chat-python /home/supportbot/popopx-chat-python
 RUN uv venv --python 3.12 "$VIRTUAL_ENV" && \
-    uv pip install /home/supportbot/simplex-chat-python
+    uv pip install /home/supportbot/popopx-chat-python
 
 COPY --chown=supportbot:supportbot apps/popopx-support-bot-light /home/supportbot/app
 RUN uv pip install -e /home/supportbot/app

@@ -49,11 +49,11 @@
    2. Run in psql:
 
       ```sql
-      CREATE USER simplex WITH ENCRYPTED PASSWORD '123123'; -- Create user with password
+      CREATE USER popopx WITH ENCRYPTED PASSWORD '123123'; -- Create user with password
       -- or
-      -- CREATE USER simplex;
+      -- CREATE USER popopx;
       CREATE DATABASE popopx_v1; -- Create database
-      GRANT ALL PRIVILEGES ON DATABASE popopx_v1 TO simplex; -- Assign permissions
+      GRANT ALL PRIVILEGES ON DATABASE popopx_v1 TO popopx; -- Assign permissions
       ```
 
 3. Prepare database:
@@ -63,19 +63,19 @@
    1. Build CLI with PostgreSQL support:
 
       ```sh
-      cabal build -fclient_postgres exe:simplex-chat
+      cabal build -fclient_postgres exe:popopx-chat
       ```
 
       And rename it to:
 
       ```sh
-      mv simplex-chat simplex-chat-pg
+      mv popopx-chat popopx-chat-pg
       ```
 
    2. Execute CLI:
 
       ```sh
-      ./simplex-chat-pg -d "postgresql://simplex:123123@localhost:5432/popopx_v1" --create-schema
+      ./popopx-chat-pg -d "postgresql://popopx:123123@localhost:5432/popopx_v1" --create-schema
       ```
 
       Press `Ctrl+C` when CLI ask for a display name.
@@ -87,7 +87,7 @@
    Install pgloader and add it to PATH. Run in shell (substitute paths):
 
    ```sh
-   export POSTGRES_CONN='postgresql://simplex:123123@localhost:5432/popopx_v1'
+   export POSTGRES_CONN='postgresql://popopx:123123@localhost:5432/popopx_v1'
    ```
 
    And then:
@@ -107,7 +107,7 @@
    Connect to db:
 
    ```sh
-   PGPASSWORD=123123 psql -h localhost -U simplex -d popopx_v1
+   PGPASSWORD=123123 psql -h localhost -U popopx -d popopx_v1
    ```
 
    Execute the following:
@@ -276,7 +276,7 @@
 2. Transfer data:
 
    ```sh
-   ./pg2sqlite.py --verbose 'postgresql://simplex:123123@localhost:5432/popopx_v1' ~/.local/share/simplex/
+   ./pg2sqlite.py --verbose 'postgresql://popopx:123123@localhost:5432/popopx_v1' ~/.local/share/simplex/
    ```
 
 4. Update BLOBs:

@@ -182,7 +182,7 @@ Tool errors:
 | `mention: CHAT has no member N.` | ID absent from `apiListMembers` | [tools.ts:1195](../src/tools.ts#L1195) |
 | `mention: members N and M have the same name.` | two mentioned members with the same display name | [tools.ts:1198](../src/tools.ts#L1198) |
 | `file: an absolute path is expected.`<br>`file: no file at FILE.`<br>`file: PATH is not a file.`<br>`file: PATH can't be read.` | the path, after symbolic links | [tools.ts:1465-1476](../src/tools.ts#L1465-L1476) |
-| `file: PATH is refused: private keys and the server's own files are not sent.` | a file named `id_*`, `*.pem`, `*.key`, `*.p12` or `*.pfx`, or under `~/.ssh`, `~/.gnupg`, or the data folder or `~/.simplex-mcp` outside `DATA/files/`; each folder by its real path | [tools.ts:862-865](../src/tools.ts#L862-L865), [:871-876](../src/tools.ts#L871-L876) |
+| `file: PATH is refused: private keys and the server's own files are not sent.` | a file named `id_*`, `*.pem`, `*.key`, `*.p12` or `*.pfx`, or under `~/.ssh`, `~/.gnupg`, or the data folder or `~/.popopx-mcp` outside `DATA/files/`; each folder by its real path | [tools.ts:862-865](../src/tools.ts#L862-L865), [:871-876](../src/tools.ts#L871-L876) |
 | `file: PATH is empty.` | size 0 | [tools.ts:866](../src/tools.ts#L866) |
 | `text: too long for the message with its quote; shorten it.`<br>`text: too long for a message with this TYPE; shorten it.` | the message, as the core sends it, above 15602 bytes | [tools.ts:790-792](../src/tools.ts#L790-L792), [:1433-1449](../src/tools.ts#L1433-L1449) |
 | refusals | see [1.9](#19-action-refusals) | |
@@ -533,7 +533,7 @@ NAME: 1 to 32 characters of `[a-z0-9]` and single hyphens, starting with a lette
 
 | Option | Value | Default | Rule | Code |
 |---|---|---|---|---|
-| `--data` | folder | `~/.simplex-mcp/NAME` | resolved to an absolute path; `dataGiven` is set | [cli.ts:69-72](../src/cli.ts#L69-L72) |
+| `--data` | folder | `~/.popopx-mcp/NAME` | resolved to an absolute path; `dataGiven` is set | [cli.ts:69-72](../src/cli.ts#L69-L72) |
 | `--display-name` | text | NAME when the user is created | must equal `validName(text)` | [cli.ts:73-75](../src/cli.ts#L73-L75), [:153-157](../src/cli.ts#L153-L157) |
 | `--approve` | `requests` or `host` | `requests` | | [cli.ts:76-78](../src/cli.ts#L76-L78) |
 | `--owners` | absent value, or `ID:NAME,...` | absent | the value is absent when the next argument is missing or starts with `--`; it is split at each comma followed by `ID:`, so a name may hold commas; entries match `^([1-9]\d*):(.+)$` | [cli.ts:79-81](../src/cli.ts#L79-L81), [:174-178](../src/cli.ts#L174-L178) |
@@ -549,7 +549,7 @@ NAME: 1 to 32 characters of `[a-z0-9]` and single hyphens, starting with a lette
 | Option | Value | Default | Code |
 |---|---|---|---|
 | `--scope` | `user` or `local` | `user` | [cli.ts:114-116](../src/cli.ts#L114-L116) |
-| `--data` | folder | `~/.simplex-mcp/NAME` | [cli.ts:117-119](../src/cli.ts#L117-L119) |
+| `--data` | folder | `~/.popopx-mcp/NAME` | [cli.ts:117-119](../src/cli.ts#L117-L119) |
 
 Entry ([`registryEntry`](../src/register.ts#L46-L53)):
 

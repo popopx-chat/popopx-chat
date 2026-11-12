@@ -114,8 +114,8 @@ newServiceState = do
 
 welcomeGetOpts :: IO BadgeServiceOpts
 welcomeGetOpts = do
-  appDir <- getAppUserDataDirectory "simplex"
-  opts@BadgeServiceOpts {coreOptions, testing, serviceName} <- getBadgeServiceOpts appDir "simplex_badge_service"
+  appDir <- getAppUserDataDirectory "popopx"
+  opts@BadgeServiceOpts {coreOptions, testing, serviceName} <- getBadgeServiceOpts appDir "popopx_badge_service"
   unless testing $ do
     putStrLn $ "SimpleX Badge Service v" ++ versionNumber
     printDbOpts coreOptions

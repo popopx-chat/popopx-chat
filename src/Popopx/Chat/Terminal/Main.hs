@@ -23,7 +23,7 @@ import System.Terminal (withTerminal)
 
 simplexChatCLI :: ChatConfig -> Maybe (ServiceName -> ChatConfig -> ChatOpts -> IO ()) -> IO ()
 simplexChatCLI cfg server_ = do
-  appDir <- getAppUserDataDirectory "simplex"
+  appDir <- getAppUserDataDirectory "popopx"
   opts <- getChatOpts appDir "popopx_v1"
   simplexChatCLI' cfg opts server_
 

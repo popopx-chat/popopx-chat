@@ -96,4 +96,4 @@ EXPOSE 8080
 ENTRYPOINT ["dumb-init", "--", "popopx-badge-service"]
 # Without --yes-migrate the service blocks on stdin at every schema change, and a container has no
 # console to answer.
-CMD ["-d", "postgresql://simplex@127.0.0.1:5432/badge_service", "--create-schema", "--yes-migrate", "--service-config", "/etc/popopx-badge-service/badge_service.ini"]
+CMD ["-d", "postgresql://popopx@127.0.0.1:5432/badge_service", "--create-schema", "--yes-migrate", "--service-config", "/etc/popopx-badge-service/badge_service.ini"]

@@ -47,7 +47,7 @@ Run `npm start -- --help` for the auto-generated reference. Summary:
 | `--team-group` | both | yes | — | team group display name |
 | `--state-file` | both | no | `./data/state.json` | path to bot state JSON |
 | `--db` | both | no | `sqlite` | `sqlite` or `postgres` |
-| `--sqlite-file-prefix` | sqlite | no | `./data/simplex` | DB file prefix (creates `<prefix>_chat.db`, `<prefix>_agent.db`) |
+| `--sqlite-file-prefix` | sqlite | no | `./data/popopx` | DB file prefix (creates `<prefix>_chat.db`, `<prefix>_agent.db`) |
 | `--sqlite-key` | sqlite | no | (unencrypted) | SQLCipher encryption key |
 | `--pg-conn` | postgres | yes | — | PostgreSQL connection string |
 | `--pg-schema` | postgres | no | `popopx_v1` | schema prefix used for bot tables |

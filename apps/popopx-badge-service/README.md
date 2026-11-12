@@ -492,7 +492,7 @@ can be read again.
 If an owner deletes the group, or removes the service from it, the service logs an error on start
 and stops serving the group. To create a new group, stop the service, delete the row, and start it
 again: with SQLite, run `DELETE FROM sx_badge_service_group;` on the `<prefix>_chat.db` file
-(`~/.simplex/simplex_badge_service_chat.db` by default), opened with `sqlcipher` and the database key
+(`~/.popopx/popopx_badge_service_chat.db` by default), opened with `sqlcipher` and the database key
 if one is set; with PostgreSQL, run
 `DELETE FROM <schema-prefix>_chat_schema.sx_badge_service_group;` (`popopx_v1_chat_schema` by default).
 Multi-use codes issued in the old group stay redeemable, but their messages there are no longer

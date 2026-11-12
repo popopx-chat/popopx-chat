@@ -12,7 +12,7 @@ export const helpText = `Usage:
   simplex-mcp register NAME [options]  add agent NAME to Claude Code
 
 serve options:
-  --data DIR             data folder (default: ~/.simplex-mcp/NAME)
+  --data DIR             data folder (default: ~/.popopx-mcp/NAME)
   --display-name TEXT    the agent's name in SimpleX (default at the first start: NAME)
   --approve MODE         what the owner approves in the agent control chat:
                            requests  the agent's connections, messages, downloads
@@ -32,7 +32,7 @@ serve options:
 
 register options:
   --scope SCOPE          user (default) or local
-  --data DIR             data folder (default: ~/.simplex-mcp/NAME)
+  --data DIR             data folder (default: ~/.popopx-mcp/NAME)
 
 --reset-owners takes --owners without a list.
 `
@@ -184,7 +184,7 @@ function integer(option: string, value: string, min: number, max: number, expect
 }
 
 function dataFolder(name: string, home: string): string {
-  return join(home, ".simplex-mcp", name)
+  return join(home, ".popopx-mcp", name)
 }
 
 function unknownOption(option: string): ExitError {

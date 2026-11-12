@@ -529,7 +529,7 @@ describe("files sent by the agent in the agent control chat", () => {
   let files: string
 
   beforeEach(() => {
-    files = realpathSync(mkdtempSync(join(tmpdir(), "simplex-mcp-files-")))
+    files = realpathSync(mkdtempSync(join(tmpdir(), "popopx-mcp-files-")))
   })
 
   afterEach(() => rmSync(files, {recursive: true, force: true}))

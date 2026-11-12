@@ -37,7 +37,7 @@ JNIEXPORT void JNICALL
 Java_chat_popopx_common_platform_CoreKt_initHS(__unused JNIEnv *env, __unused jclass clazz) {
     int argc = 5;
     char *argv[] = {
-        "simplex",
+        "popopx",
         "+RTS", // requires `hs_init_with_rtsopts`
         "-A64m", // chunk size for new allocations
         "-H64m", // initial heap size
@@ -122,7 +122,7 @@ Java_chat_popopx_common_platform_CoreKt_chatSendCmdRetry(JNIEnv *env, __unused j
     const char *_msg = (*env)->GetStringUTFChars(env, msg, JNI_FALSE);
     //jint length = (jint) (*env)->GetStringUTFLength(env, msg);
     //for (int i = 0; i < length; ++i)
-    //    __android_log_print(ANDROID_LOG_ERROR, "simplex", "%d: %02x\n", i, _msg[i]);
+    //    __android_log_print(ANDROID_LOG_ERROR, "popopx", "%d: %02x\n", i, _msg[i]);
     jstring res = decode_and_free(env, chat_send_cmd_retry((void*)controller, _msg, retryNum));
     (*env)->ReleaseStringUTFChars(env, msg, _msg);
     return res;

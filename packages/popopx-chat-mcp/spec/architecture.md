@@ -608,7 +608,7 @@ The server writes the tappable form `/'...'` only in the card's command line ([c
 
 | Rule | Code |
 |---|---|
-| `send` refuses files named `id_*`, `*.pem`, `*.key`, `*.p12` or `*.pfx`, and files under `~/.ssh`, `~/.gnupg`, the data folder and `~/.simplex-mcp` except the agent's own `DATA/files/`, each by its real path; the refusal is posted to the control chat and logged | [tools.ts:862-876](../src/tools.ts#L862-L876), [:1465-1484](../src/tools.ts#L1465-L1484), [control.ts:154-158](../src/control.ts#L154-L158) |
+| `send` refuses files named `id_*`, `*.pem`, `*.key`, `*.p12` or `*.pfx`, and files under `~/.ssh`, `~/.gnupg`, the data folder and `~/.popopx-mcp` except the agent's own `DATA/files/`, each by its real path; the refusal is posted to the control chat and logged | [tools.ts:862-876](../src/tools.ts#L862-L876), [:1465-1484](../src/tools.ts#L1465-L1484), [control.ts:154-158](../src/control.ts#L154-L158) |
 | the file of a `send` is sent only when its real path, size, inode and change time at the perform are those of the request | [tools.ts:878-883](../src/tools.ts#L878-L883) |
 | a sent JPEG or PNG is a resized copy made by the core | [tools.ts:885-896](../src/tools.ts#L885-L896) |
 | `ffmpeg` and `ffprobe` read a video as MP4 or QuickTime, local files only, without standard input, 30 s and 64 MiB of output each | [tools.ts:1534-1552](../src/tools.ts#L1534-L1552) |

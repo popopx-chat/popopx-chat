@@ -29,13 +29,13 @@ import Popopx.Messaging.Agent.Store.SQLite.Util (SQLiteFunc, SQLiteFuncFinal, mk
 --
 -- The final function builds the vector using setNewRelations.
 
-foreign export ccall "simplex_member_relations_step" sqliteMemberRelationsStep :: SQLiteFunc
+foreign export ccall "popopx_member_relations_step" sqliteMemberRelationsStep :: SQLiteFunc
 
-foreign import ccall "&simplex_member_relations_step" sqliteMemberRelationsStepPtr :: FunPtr SQLiteFunc
+foreign import ccall "&popopx_member_relations_step" sqliteMemberRelationsStepPtr :: FunPtr SQLiteFunc
 
-foreign export ccall "simplex_member_relations_final" sqliteMemberRelationsFinal :: SQLiteFuncFinal
+foreign export ccall "popopx_member_relations_final" sqliteMemberRelationsFinal :: SQLiteFuncFinal
 
-foreign import ccall "&simplex_member_relations_final" sqliteMemberRelationsFinalPtr :: FunPtr SQLiteFuncFinal
+foreign import ccall "&popopx_member_relations_final" sqliteMemberRelationsFinalPtr :: FunPtr SQLiteFuncFinal
 
 -- Step function for migrate_relations_vector aggregate.
 -- Accumulates (idx, direction, relation) tuples.
@@ -61,9 +61,9 @@ sqliteMemberRelationsFinal = mkSQLiteAggFinal [] $ \cxt acc -> funcResultBlob cx
 -- Non-aggregate function set_member_vector_new_relation(vector, idx, direction, status).
 -- Sets a new relation in the vector and returns the updated vector.
 
-foreign export ccall "simplex_set_member_vector_new_relation" sqliteSetMemberVectorNewRelation :: SQLiteFunc
+foreign export ccall "popopx_set_member_vector_new_relation" sqliteSetMemberVectorNewRelation :: SQLiteFunc
 
-foreign import ccall "&simplex_set_member_vector_new_relation" sqliteSetMemberVectorNewRelationPtr :: FunPtr SQLiteFunc
+foreign import ccall "&popopx_set_member_vector_new_relation" sqliteSetMemberVectorNewRelationPtr :: FunPtr SQLiteFunc
 
 sqliteSetMemberVectorNewRelation :: SQLiteFunc
 sqliteSetMemberVectorNewRelation = mkSQLiteFunc $ \cxt args -> do

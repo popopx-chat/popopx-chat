@@ -54,7 +54,7 @@ wallpapersFolder = "wallpapers"
 
 exportArchive :: ArchiveConfig -> CM' [ArchiveError]
 exportArchive cfg@ArchiveConfig {archivePath, disableCompression} =
-  withTempDir cfg "simplex-chat." $ \dir -> do
+  withTempDir cfg "popopx-chat." $ \dir -> do
     StorageFiles {chatStore, agentStore, filesPath, assetsPath} <- storageFiles
     copyFile (dbFilePath chatStore) $ dir </> archiveChatDbFile
     copyFile (dbFilePath agentStore) $ dir </> archiveAgentDbFile
@@ -71,7 +71,7 @@ exportArchive cfg@ArchiveConfig {archivePath, disableCompression} =
 
 importArchive :: ArchiveConfig -> CM' [ArchiveError]
 importArchive cfg@ArchiveConfig {archivePath} =
-  withTempDir cfg "simplex-chat." $ \dir -> do
+  withTempDir cfg "popopx-chat." $ \dir -> do
     Z.withArchive archivePath $ Z.unpackInto dir
     fs@StorageFiles {chatStore, agentStore, filesPath, assetsPath} <- storageFiles
     liftIO $ closeDBStore `withStores` fs

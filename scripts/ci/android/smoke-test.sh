@@ -261,9 +261,9 @@ check_layout() {
 }
 
 add_images() {
-  adb push "$fixtures/logo-large-rgba.png" /sdcard/Pictures/simplex-logo/simplex-logo.png
+  adb push "$fixtures/logo-large-rgba.png" /sdcard/Pictures/popopx-logo/popopx-logo.png
   adb push "$fixtures/test.jpg" /sdcard/Pictures/test-card/test-card.jpg
-  for image in simplex-logo/simplex-logo.png test-card/test-card.jpg; do
+  for image in popopx-logo/popopx-logo.png test-card/test-card.jpg; do
     adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file:///sdcard/Pictures/$image" > /dev/null
   done
 }
@@ -313,7 +313,7 @@ send_images() {
   "$ui" click-text "$local_chat" 10
   "$ui" wait Attach 10
   send_image test-card jpg
-  send_image simplex-logo png
+  send_image popopx-logo png
 }
 
 # private routing to unknown servers only: the preset servers that would proxy to the test SMP server can't reach the

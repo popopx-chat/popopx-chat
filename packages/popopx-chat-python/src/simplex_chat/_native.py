@@ -245,10 +245,10 @@ def _setup_signatures(lib: ctypes.CDLL) -> None:
 def _hs_init(lib: ctypes.CDLL) -> None:
     """Initialize the Haskell runtime exactly once. Mirrors cpp/simplex.cc:13-32."""
     if sys.platform == "win32":
-        argv_strs = [b"simplex", b"+RTS", b"-A64m", b"-H64m", b"--install-signal-handlers=no"]
+        argv_strs = [b"popopx", b"+RTS", b"-A64m", b"-H64m", b"--install-signal-handlers=no"]
     else:
         argv_strs = [
-            b"simplex",
+            b"popopx",
             b"+RTS",
             b"-A64m",
             b"-H64m",

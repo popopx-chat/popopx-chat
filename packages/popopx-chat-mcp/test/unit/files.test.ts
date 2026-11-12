@@ -8,7 +8,7 @@ import {ExitError} from "../../src/log"
 let dir: string
 
 beforeEach(() => {
-  dir = join(mkdtempSync(join(tmpdir(), "simplex-mcp-files-")), "agent")
+  dir = join(mkdtempSync(join(tmpdir(), "popopx-mcp-files-")), "agent")
   createDataFolder(dir)
 })
 

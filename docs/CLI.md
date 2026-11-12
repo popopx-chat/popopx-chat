@@ -153,7 +153,7 @@ cabal install popopx-chat
 
 To start the chat client, run `popopx-chat` from the terminal.
 
-By default, app data directory is created in the home directory (`~/.simplex`, or `%APPDATA%/simplex` on Windows), and two SQLite database files `simplex_v1_chat.db` and `simplex_v1_agent.db` are initialized in it.
+By default, app data directory is created in the home directory (`~/.popopx`, or `%APPDATA%/popopx` on Windows), and two SQLite database files `popopx_v1_chat.db` and `popopx_v1_agent.db` are initialized in it.
 
 To specify a different file path prefix for the database files use `-d` command line option:
 

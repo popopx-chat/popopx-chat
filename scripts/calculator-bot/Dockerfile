@@ -65,9 +65,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential python3 && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=libpopopx /libs /opt/simplex/libs
+COPY --from=libpopopx /libs /opt/popopx/libs
 # The library loads libpopopx and the add-on built below instead of downloading the released ones.
-ENV POPOPX_LIBS_DIR=/opt/simplex/libs \
+ENV POPOPX_LIBS_DIR=/opt/popopx/libs \
     POPOPX_ADDON_PATH=/src/packages/popopx-chat-nodejs/build/Release/popopx.node
 
 WORKDIR /src
@@ -107,9 +107,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates dumb-init libffi8 libgmp10 libssl3 zlib1g && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=build /opt/simplex/libs /opt/simplex/libs
+COPY --from=build /opt/popopx/libs /opt/popopx/libs
 COPY --from=build --chown=node:node /src /src
-ENV POPOPX_LIBS_DIR=/opt/simplex/libs \
+ENV POPOPX_LIBS_DIR=/opt/popopx/libs \
     POPOPX_ADDON_PATH=/src/packages/popopx-chat-nodejs/build/Release/popopx.node
 
 # A named volume takes this ownership; a bind mount must be owned by uid 1000.

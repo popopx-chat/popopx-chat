@@ -25,7 +25,7 @@ chatDbOptsP _appDir defaultDbName = do
           <> short 'd'
           <> metavar "DB_CONN"
           <> help "Database connection string"
-          <> value ("postgresql://simplex@/" <> defaultDbName)
+          <> value ("postgresql://popopx@/" <> defaultDbName)
           <> showDefault
       )
   dbSchemaPrefix <-

@@ -27,8 +27,8 @@ import System.Directory (getAppUserDataDirectory)
 
 welcomeGetOpts :: IO BroadcastBotOpts
 welcomeGetOpts = do
-  appDir <- getAppUserDataDirectory "simplex"
-  opts@BroadcastBotOpts {coreOptions} <- getBroadcastBotOpts appDir "simplex_status_bot"
+  appDir <- getAppUserDataDirectory "popopx"
+  opts@BroadcastBotOpts {coreOptions} <- getBroadcastBotOpts appDir "popopx_status_bot"
   putStrLn $ "POPOPX Chat Bot v" ++ versionNumber
   printDbOpts coreOptions
   pure opts

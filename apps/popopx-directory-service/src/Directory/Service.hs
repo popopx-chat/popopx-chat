@@ -134,8 +134,8 @@ newServiceState opts = do
 
 welcomeGetOpts :: IO DirectoryOpts
 welcomeGetOpts = do
-  appDir <- getAppUserDataDirectory "simplex"
-  opts@DirectoryOpts {coreOptions, testing, superUsers, adminUsers, ownersGroup} <- getDirectoryOpts appDir "simplex_directory_service"
+  appDir <- getAppUserDataDirectory "popopx"
+  opts@DirectoryOpts {coreOptions, testing, superUsers, adminUsers, ownersGroup} <- getDirectoryOpts appDir "popopx_directory_service"
   unless testing $ do
     putStrLn $ "SimpleX Directory Service Bot v" ++ versionNumber
     printDbOpts coreOptions

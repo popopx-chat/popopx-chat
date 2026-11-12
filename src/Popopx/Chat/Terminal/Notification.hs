@@ -74,7 +74,7 @@ winNotify path Notification {title, text} =
 
 savePowershellScript :: IO FilePath
 savePowershellScript = do
-  appDir <- getAppUserDataDirectory "simplex"
+  appDir <- getAppUserDataDirectory "popopx"
   createDirectoryIfMissing False appDir
   let psScript = combine appDir "win-toast-notify.ps1"
   writeFile

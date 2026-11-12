@@ -152,7 +152,7 @@ cabal install simplex-chat
 
 Aby uruchomić klienta, uruchom w terminalu polecenie `simplex-chat`.
 
-Domyślnie katalog z danymi aplikacji jest tworzony w katalogu domowym (`~/.simplex`, lub `%APPDATA%/simplex` na Windowsie), a dwa pliki danych SQLite `simplex_v1_chat.db` i `simplex_v1_agent.db` są w nim zainicjowane.
+Domyślnie katalog z danymi aplikacji jest tworzony w katalogu domowym (`~/.popopx`, lub `%APPDATA%/popopx` na Windowsie), a dwa pliki danych SQLite `popopx_v1_chat.db` i `popopx_v1_agent.db` są w nim zainicjowane.
 
 Aby wskazać inny prefiks ścieżki dla plików bazy danych, należy użyć polecenia `-d`:
 

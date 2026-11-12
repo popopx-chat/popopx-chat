@@ -130,7 +130,7 @@ cabal install
 
 Chcete-li spustit klienta chatu, spusťte z terminálu příkaz `simplex-chat`.
 
-Ve výchozím nastavení je datový adresář aplikace vytvořen v domovském adresáři (`~/.simplex` nebo `%APPDATA%/simplex` ve Windows) a jsou v něm inicializovány dva databázové soubory SQLite `simplex_v1_chat.db` a `simplex_v1_agent.db`.
+Ve výchozím nastavení je datový adresář aplikace vytvořen v domovském adresáři (`~/.popopx` nebo `%APPDATA%/popopx` ve Windows) a jsou v něm inicializovány dva databázové soubory SQLite `popopx_v1_chat.db` a `popopx_v1_agent.db`.
 
 Chcete-li zadat jiný prefix cesty k souborům databáze, použijte volbu příkazového řádku `-d`:
 

@@ -120,4 +120,4 @@ graph TD
 | Item watch | [`src/messages.ts`](../src/messages.ts#L86) | `ChatItemsWatch` | [86](../src/messages.ts#L86) |
 | Claude Code entry | [`src/register.ts`](../src/register.ts#L33) | `register` | [33](../src/register.ts#L33) |
 | Data folder files | [`src/files.ts`](../src/files.ts#L12) | `createDataFolder`, `acquireLock` | [12](../src/files.ts#L12) |
-| Package manifest | [`package.json`](../package.json) | `bin.simplex-mcp` | [6](../package.json#L6) |
+| Package manifest | [`package.json`](../package.json) | `bin.popopx-mcp` | [6](../package.json#L6) |

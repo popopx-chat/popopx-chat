@@ -44,7 +44,7 @@ function buildCommand(): Command {
     .requiredOption("--team-group <name>", "team group display name")
     .option("--state-file <path>", "state JSON path", "./data/state.json")
     .addOption(new Option("--db <backend>", "database backend").choices(["sqlite", "postgres"]).default("sqlite"))
-    .option("--sqlite-file-prefix <path>", "SQLite DB file prefix", "./data/simplex")
+    .option("--sqlite-file-prefix <path>", "SQLite DB file prefix", "./data/popopx")
     .option("--sqlite-key <key>", "SQLCipher encryption key (default: unencrypted)")
     .option("--pg-conn <conn>", "PostgreSQL connection string (required with --db postgres)")
     .option("--pg-schema <prefix>", "PostgreSQL schema prefix (default: popopx_v1)")

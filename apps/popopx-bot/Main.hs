@@ -24,8 +24,8 @@ welcomeMessage = "Hello! I am a simple squaring bot.\nIf you send me a number, I
 
 welcomeGetOpts :: IO ChatOpts
 welcomeGetOpts = do
-  appDir <- getAppUserDataDirectory "simplex"
-  opts@ChatOpts {coreOptions} <- getChatOpts appDir "simplex_bot"
+  appDir <- getAppUserDataDirectory "popopx"
+  opts@ChatOpts {coreOptions} <- getChatOpts appDir "popopx_bot"
   putStrLn $ "POPOPX Chat Bot v" ++ versionNumber
   printDbOpts coreOptions
   pure opts

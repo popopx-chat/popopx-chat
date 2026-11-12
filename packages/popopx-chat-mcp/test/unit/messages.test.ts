@@ -547,7 +547,7 @@ describe("send with a file", () => {
   let files: string
 
   beforeEach(() => {
-    files = realpathSync(mkdtempSync(join(os.tmpdir(), "simplex-mcp-files-")))
+    files = realpathSync(mkdtempSync(join(os.tmpdir(), "popopx-mcp-files-")))
   })
 
   afterEach(() => rmSync(files, {recursive: true, force: true}))
@@ -718,12 +718,12 @@ describe("send with a file", () => {
     const home = join(files, "home")
     const keys = join(files, "keys")
     mkdirSync(keys, {recursive: true})
-    mkdirSync(join(home, ".simplex-mcp", "other"), {recursive: true})
+    mkdirSync(join(home, ".popopx-mcp", "other"), {recursive: true})
     symlinkSync(keys, join(home, ".ssh"))
     jest.spyOn(os, "homedir").mockReturnValue(home)
     const config = join(keys, "config")
     writeFileSync(config, "Host *")
-    const token = join(home, ".simplex-mcp", "other", "token")
+    const token = join(home, ".popopx-mcp", "other", "token")
     writeFileSync(token, "secret")
     const {tools, actions} = sendTools()
     const text = async (file: string): Promise<string> => textOf(await tools.call("send", {chat: "@4", file}, signal().call))

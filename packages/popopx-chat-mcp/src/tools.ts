@@ -872,7 +872,7 @@ export class AgentTools {
     const home = homedir()
     const data = this.agent.data
     const within = (folder: string): boolean => path.startsWith(`${realFolder(folder)}${sep}`)
-    return refusedName.test(basename(path)) || within(join(home, ".ssh")) || within(join(home, ".gnupg")) || ((within(data) || within(join(home, ".simplex-mcp"))) && !within(join(data, "files")))
+    return refusedName.test(basename(path)) || within(join(home, ".ssh")) || within(join(home, ".gnupg")) || ((within(data) || within(join(home, ".popopx-mcp"))) && !within(join(data, "files")))
   }
 
   private async fileToSend(file: Attachment): Promise<string> {

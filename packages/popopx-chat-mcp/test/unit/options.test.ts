@@ -23,7 +23,7 @@ describe("serve options", () => {
       command: "serve",
       options: {
         name: "agent",
-        data: "/home/alice/.simplex-mcp/agent",
+        data: "/home/alice/.popopx-mcp/agent",
         dataGiven: false,
         approve: "requests",
         expireHours: 23,
@@ -129,7 +129,7 @@ describe("display names", () => {
 
 describe("register options", () => {
   it("has defaults and reads options", () => {
-    expect(parseCommand(["register", "agent"], home)).toEqual({command: "register", options: {name: "agent", data: "/home/alice/.simplex-mcp/agent", scope: "user"}})
+    expect(parseCommand(["register", "agent"], home)).toEqual({command: "register", options: {name: "agent", data: "/home/alice/.popopx-mcp/agent", scope: "user"}})
     expect(parseCommand(["register", "agent", "--scope", "local", "--data", "/tmp/a"], home)).toEqual({command: "register", options: {name: "agent", data: "/tmp/a", scope: "local"}})
     expect(usage(["register", "agent", "--scope", "project"])).toBe("--scope: user or local expected, got project")
   })

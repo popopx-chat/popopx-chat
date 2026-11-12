@@ -71,7 +71,7 @@ simplex-directory-service \
 | `--super-users ID:NAME[,...]` | *(required)* | Super-user contacts (comma-separated) |
 | `--admin-users ID:NAME[,...]` | none | Admin-only contacts (comma-separated) |
 | `--owners-group ID:NAME` | none | Group (by group ID) that owners of listed groups are invited into — automatically on listing, or via `/invite` |
-| `-d / --database PATH` | `~/.simplex/simplex_directory_service` | Database file path prefix |
+| `-d / --database PATH` | `~/.popopx/popopx_directory_service` | Database file path prefix |
 | `--directory-file PATH` | none | Append-only log of directory state (see [Directory state log](#directory-state-log)) |
 | `--migrate-directory-file check\|import\|export\|listing` | — | Check, import (log → DB), export (DB → log), or regenerate listing files, then exit |
 | `--web-folder PATH` | none | Write static listing JSON + group images here (see [Hosting the directory page](#hosting-the-directory-page)) |

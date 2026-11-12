@@ -132,7 +132,7 @@ cabal install
 
 Pour démarrer le client de chat, exécutez `simplex-chat` depuis le terminal.
 
-Par défaut, le répertoire de données de l'application est créé dans le répertoire personnel (`~/.simplex`, ou `%APPDATA%/simplex` sous Windows), et deux fichiers de base de données SQLite `simplex_v1_chat.db` et `simplex_v1_agent.db` y sont initialisés.
+Par défaut, le répertoire de données de l'application est créé dans le répertoire personnel (`~/.popopx`, ou `%APPDATA%/popopx` sous Windows), et deux fichiers de base de données SQLite `popopx_v1_chat.db` et `popopx_v1_agent.db` y sont initialisés.
 
 Pour spécifier un préfixe de chemin de fichier différent pour les fichiers de la base de données, utilisez l'option de ligne de commande `-d` :
 

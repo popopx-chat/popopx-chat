@@ -27,7 +27,7 @@ Until the package is published, the printed hint `npx -y @simplex-chat/mcp regis
 
 ## Start, join, register
 
-1. `node dist/cli.js serve my-agent --display-name "My Agent"`. NAME, here `my-agent`, names the data folder and the Claude Code entry; `--display-name` is the name people see in SimpleX. It prints the data folder (`~/.simplex-mcp/my-agent`), creates the agent control chat "My Agent", and prints a QR code and a link that works once. For a short link the QR code has 33 modules and takes 37 columns × 19 lines; `--qr-code large` prints it at 74 × 37. Keep it running; Ctrl-C stops it. `node dist/cli.js --help` lists the options.
+1. `node dist/cli.js serve my-agent --display-name "My Agent"`. NAME, here `my-agent`, names the data folder and the Claude Code entry; `--display-name` is the name people see in SimpleX. It prints the data folder (`~/.popopx-mcp/my-agent`), creates the agent control chat "My Agent", and prints a QR code and a link that works once. For a short link the QR code has 33 modules and takes 37 columns × 19 lines; `--qr-code large` prints it at 74 × 37. Keep it running; Ctrl-C stops it. `node dist/cli.js --help` lists the options.
 2. In the SimpleX app, scan the QR code, or paste the link into "Connect via link". If the code does not scan, restart with `--qr-code large`. The chat "My Agent" appears with `I'm your agent. I ask here before I connect, send, download a file or leave a chat.` The terminal prints `Alice joined (member N) and is now an owner. The link is deleted.` and the register hint.
 3. `node dist/cli.js register my-agent`. It prints `Added to Claude Code: scope user, server simplex-my-agent.` Run it in a terminal with the same `CLAUDE_CONFIG_DIR` as the one where `claude` runs: `claude mcp add-json` writes to the config of its own environment.
 4. Add `"mcp__simplex-my-agent"` to `permissions.allow` in `~/.claude/settings.json`, so Claude Code does not prompt for each call; approval happens in the SimpleX app.
@@ -71,14 +71,14 @@ Files, in a group of yours:
 1. In the app, create a group and copy its link. `Connect to <the group link> as yourself.` Approve the card.
 2. Send a photo to the group from the app. `Check for new messages in that group.` The message has `file` with `type: image` and `status: offered`.
 3. `Download that photo.` Card: `I want to download a file from Alice in group <name> (#N):`, with the photo's preview, the file name, its size, and `Servers: known.` when the app uploaded it to servers the agent also has. For a large video asked for right after sending it, the call waits until the upload finishes, and only then the card appears.
-4. Tap `/forward #N A`: the photo arrives in the agent control chat, as a reply to the card when its preview and the card fit in one message, and the card stays pending; `~/.simplex-mcp/my-agent/files/group-N/` has no file, and the photo is in `~/.simplex-mcp/my-agent/forwarded/group-N/`.
-5. Tap `/receive #N A`: the call returns `status: done` and the path, `~/.simplex-mcp/my-agent/files/group-N/<file ID>.jpg`.
+4. Tap `/forward #N A`: the photo arrives in the agent control chat, as a reply to the card when its preview and the card fit in one message, and the card stays pending; `~/.popopx-mcp/my-agent/files/group-N/` has no file, and the photo is in `~/.popopx-mcp/my-agent/forwarded/group-N/`.
+5. Tap `/receive #N A`: the call returns `status: done` and the path, `~/.popopx-mcp/my-agent/files/group-N/<file ID>.jpg`.
 6. Send a document, `Download that file.`, and tap `/receive #N A all` on its card: the reply is `Files approved for group <name> (#N) by Alice. /receive #N off`, and the download completes. The next file downloads with no card; `/list` shows `, files approved by Alice`. Tap `/receive #N off`.
 7. Send another file, `Download it.`, and tap `/reject #N A`: the call returns `status: rejected`.
 8. `Send the photo /home/alice/trail.jpg to that group, with the text "trail map".` Card: `I want to send a message to group <name>:`, `` `trail map` `` and ``attaching image `/home/alice/trail.jpg`, SIZE``, with the photo's preview. Approve it: the group gets the photo, resized to at most 261120 bytes, with its preview.
 9. `Send ~/.ssh/id_ed25519 to that group.` The call returns the error `file: /home/alice/.ssh/id_ed25519 is refused: ...`, and the agent control chat gets ``Refused to send `/home/alice/.ssh/id_ed25519` to group <name> (#N): ...``. A symbolic link to the key gets the same refusal, with the key's real path.
 10. With `ffmpeg` installed, `Send /home/alice/ride.mp4 to that group.`: the card and the message show the video's first frame and its duration; without `ffmpeg`, a gray preview and duration 0.
-11. Tap `/leave #N`: after the reply, the agent posts ``Files from group <name> (#N) are kept in `~/.simplex-mcp/my-agent/files/group-N`: K files, SIZE. /delete #N files``. Tap `/delete #N files`: `Deleted K files from #N, SIZE.`; again: `No files from #N.`
+11. Tap `/leave #N`: after the reply, the agent posts ``Files from group <name> (#N) are kept in `~/.popopx-mcp/my-agent/files/group-N`: K files, SIZE. /delete #N files``. Tap `/delete #N files`: `Deleted K files from #N, SIZE.`; again: `No files from #N.`
 
 Incognito, as a second agent, because the first one already knows the directory:
 
@@ -94,7 +94,7 @@ Stop and restart:
 
 ## Claude Code checks
 
-1. C2, protocol: passed with Claude Code 2.1.302 in the default runtime, with `MCP_PROTOCOL_NEGOTIATION=legacy` and with `MCP_SDK_GENERATION=v1`. To repeat it, write `c2.json` with `{"mcpServers": {"simplex-my-agent": {"type": "http", "url": "http://127.0.0.1:5226/mcp", "headersHelper": "cat <your home folder>/.simplex-mcp/my-agent/headers.json"}}}`, and run it once as is and once with each variable before it:
+1. C2, protocol: passed with Claude Code 2.1.302 in the default runtime, with `MCP_PROTOCOL_NEGOTIATION=legacy` and with `MCP_SDK_GENERATION=v1`. To repeat it, write `c2.json` with `{"mcpServers": {"simplex-my-agent": {"type": "http", "url": "http://127.0.0.1:5226/mcp", "headersHelper": "cat <your home folder>/.popopx-mcp/my-agent/headers.json"}}}`, and run it once as is and once with each variable before it:
    ```
    claude -p "Call the list tool and show its result." --strict-mcp-config --mcp-config c2.json --allowedTools mcp__simplex-my-agent
    ```

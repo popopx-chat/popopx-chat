@@ -111,7 +111,7 @@ void haskell_init() {
   // non-moving GC is broken on windows with GHC 9.4-9.6.3
   int argc = 5;
   const char *argv[] = {
-      "simplex",
+      "popopx",
       "+RTS",  // requires `hs_init_with_rtsopts`
       "-A64m", // chunk size for new allocations
       "-H64m", // initial heap size
@@ -120,7 +120,7 @@ void haskell_init() {
 #else
   int argc = 6;
   const char *argv[] = {
-      "simplex",
+      "popopx",
       "+RTS",  // requires `hs_init_with_rtsopts`
       "-A64m", // chunk size for new allocations
       "-H64m", // initial heap size

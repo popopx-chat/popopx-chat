@@ -35,10 +35,10 @@ describe("register", () => {
 
   it("builds the entry with the timeout from server.json and a helper that prints the headers file", () => {
     onPlatform("linux")
-    expect(registryEntry(5226, "/home/alice/.simplex-mcp/agent", 23)).toEqual({
+    expect(registryEntry(5226, "/home/alice/.popopx-mcp/agent", 23)).toEqual({
       type: "http",
       url: "http://127.0.0.1:5226/mcp",
-      headersHelper: "cat /home/alice/.simplex-mcp/agent/headers.json",
+      headersHelper: "cat /home/alice/.popopx-mcp/agent/headers.json",
       timeout: 169_800_000,
     })
     expect(registryEntry(5227, "/tmp/my agent's", 1)).toMatchObject({headersHelper: "cat '/tmp/my agent'\\''s/headers.json'", timeout: 25 * 3_600_000 + 600_000})
