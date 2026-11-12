@@ -15,7 +15,7 @@ usage() {
 
 build_package() {
   (cd packages/popopx-chat-client/types/typescript && npm install --no-audit --no-fund && npx tsc)
-  (cd "$nodejs" && npm install --ignore-scripts --no-save --no-audit --no-fund ../simplex-chat-client/types/typescript)
+  (cd "$nodejs" && npm install --ignore-scripts --no-save --no-audit --no-fund ../popopx-chat-client/types/typescript)
   if [ -n "${1:-}" ]; then
     (cd "$nodejs" && npx --yes node-gyp rebuild)
   fi

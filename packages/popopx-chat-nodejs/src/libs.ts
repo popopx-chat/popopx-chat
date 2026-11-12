@@ -92,6 +92,7 @@ export function libPath(dir: string): string {
 function envOverride(env: NodeJS.ProcessEnv, current: string, legacy: string): {name: string, value: string} | undefined {
   if (env[current]) return {name: current, value: env[current] as string}
   if (env[legacy]) return {name: legacy, value: env[legacy] as string}
+  return undefined
 }
 
 export async function resolveLibsDir(

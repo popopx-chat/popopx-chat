@@ -1797,8 +1797,8 @@ jobs:
         if: steps.plan.outputs.nodejs_version
         working-directory: packages/popopx-chat-nodejs
         run: |
-          (cd ../simplex-chat-client/types/typescript && npm install --no-audit --no-fund && npx tsc)
-          npm install --ignore-scripts --no-save --no-audit --no-fund ../simplex-chat-client/types/typescript
+          (cd ../popopx-chat-client/types/typescript && npm install --no-audit --no-fund && npx tsc)
+          npm install --ignore-scripts --no-save --no-audit --no-fund ../popopx-chat-client/types/typescript
           npx tsc && cp src/simplex.* dist
           npx jest tests/libs.test.ts tests/api.unit.test.ts
 
@@ -1857,6 +1857,15 @@ jobs:
         working-directory: packages/popopx-chat-mcp
         run: |
           npm ci --no-audit --no-fund
+          # The SDK types come from THIS repository, not from the registry: npm ci above resolves
+          # @simplex-chat/types and simplex-chat from registry.npmjs.org, and those artifacts still export
+          # the pre-rename names (SimplexTLD, SimplexDomain), so typechecking against them fails on the
+          # spellings 1800f1b5e moved (measured: 6 errors in src/log.ts) and would keep passing against
+          # values our core no longer emits. Each package must be built first -- they resolve through
+          # dist/, and a linked directory is not built by npm. Same order as scripts/ci/scope-tests.sh mcp.
+          (cd ../popopx-chat-client/types/typescript && npm install --no-audit --no-fund && npx tsc)
+          (cd ../popopx-chat-nodejs && npm install --ignore-scripts --no-audit --no-fund && npx tsc && cp src/simplex.* dist)
+          npm install --no-save --ignore-scripts --no-audit --no-fund ../popopx-chat-nodejs ../popopx-chat-client/types/typescript
           npx tsc
           npx tsc -p test/tsconfig.json --noEmit
           npm test

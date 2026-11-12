@@ -16,10 +16,10 @@ case "${1:-}" in
     ;;
   mcp)
     (cd packages/popopx-chat-client/types/typescript && npm install --no-audit --no-fund && npx tsc)
-    (cd packages/popopx-chat-nodejs && npm install --ignore-scripts --no-save --no-audit --no-fund ../simplex-chat-client/types/typescript && npx tsc && cp src/simplex.* dist)
+    (cd packages/popopx-chat-nodejs && npm install --ignore-scripts --no-save --no-audit --no-fund ../popopx-chat-client/types/typescript && npx tsc && cp src/simplex.* dist)
     cd packages/popopx-chat-mcp
     npm ci --no-audit --no-fund
-    npm install --no-save --no-audit --no-fund ../simplex-chat-nodejs ../simplex-chat-client/types/typescript
+    npm install --no-save --no-audit --no-fund ../popopx-chat-nodejs ../popopx-chat-client/types/typescript
     npx tsc
     npx tsc -p test/tsconfig.json --noEmit
     npm test

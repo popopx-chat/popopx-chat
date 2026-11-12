@@ -79,7 +79,7 @@ RUN cd packages/popopx-chat-client/types/typescript && \
 COPY packages/popopx-chat-nodejs packages/popopx-chat-nodejs
 RUN cd packages/popopx-chat-nodejs && \
     npm install --no-audit --no-fund && \
-    npm install --no-save --no-audit --no-fund ../simplex-chat-client/types/typescript && \
+    npm install --no-save --no-audit --no-fund ../popopx-chat-client/types/typescript && \
     npx node-gyp rebuild && \
     npx tsc && \
     cp src/simplex.* dist/
