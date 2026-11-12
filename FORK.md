@@ -82,9 +82,12 @@ upstream's [`PRIVACY.md`](./PRIVACY.md) untouched) and
 What remains below is not an undecided attribution — it is infrastructure this fork does not have
 yet. Before any build of this fork is distributed:
 
-- **No service is operated.** The relay presets, the link domain, `.well-known`, the directory and
-  the badge service all still name infrastructure SimpleX Chat Ltd operates; `chat@popopx.chat` is
-  not reachable until `popopx.chat` is served.
+- **No service is operated *by this fork*.** The relay presets, the link domain, `.well-known`, the directory
+  and the badge service all still name infrastructure SimpleX Chat Ltd operates. The `popopx.im` relays and the
+  `popopx.chat` web server that this fork's own domains point at are up (see the two bullets below), but
+  nothing in a build of this fork talks to them yet: no preset names them, because a preset needs their
+  fingerprints and those are only readable on the servers themselves. `chat@popopx.chat` is likewise not
+  reachable until that host serves mail or forwards.
 - **No registry namespace.** The npm and PyPI names in the committed manifests are upstream's, and
   that is the shape the release tooling expects: `packages_release.py test-names` rewrites the names,
   the repository URL and the cross-package dependencies to `npm:` aliases at publish time from the
@@ -108,8 +111,9 @@ yet. Before any build of this fork is distributed:
     returns that server's 404 HTML page, so the files in `website/src/.well-known/` are not deployed at
     all. That is a server-side fix (add the SAN, publish the directory), not a repository fix; the
     GitHub-Pages path in the previous bullet would not deliver them either. The relay fleet under
-    `popopx.im` is likewise already DNS'd (`smp1-8`, `xftp1`, `xftp6`, `ntf1-3`), measured in
-    `tools/r7/relay-keys.yaml` with the command that reads each server's fingerprint on the box.
+    `popopx.im` is likewise already DNS'd (`smp1-8`, `xftp1`, `xftp6`, `ntf1-3` each answer with an A record,
+    `xftp2-5` and `ntf4` do not); the fill-in table for their keys is the fork's `relay-keys.yaml`, kept with
+    the rebrand tooling outside this repository.
   - *The relay hosts exist too.* `smp1-8`, `xftp1`, `xftp6`, `ntf1-3` under `popopx.im` each resolve to
     a distinct address, `xftp2-5` and `ntf4` do not. Their certificate fingerprints — the key half of
     every preset address — cannot be read from a development machine: the protocol ports are not
