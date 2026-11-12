@@ -310,7 +310,7 @@
                 '';
               };
               # The android-support package is at
-              # https://github.com/simplex-chat/android-support
+              # https://github.com/popopx-chat/android-support
               "aarch64-android:lib:support" = (drv androidPkgs).android-support.components.library.override (p: {
                 smallAddressSpace = true;
                 # no -dynamic
