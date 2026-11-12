@@ -52,6 +52,9 @@ authoritative per-file record.
 
 ## Trademarks and artwork — outside the AGPL grant
 
+Clause-by-clause compliance record, including what the asset licence blocks before a release:
+[`AGPL-COMPLIANCE-POPOPX.md`](./AGPL-COMPLIANCE-POPOPX.md).
+
 Two things in this repository are **not** licensed to you under AGPL-3.0, and a text
 substitution does not change that:
 
