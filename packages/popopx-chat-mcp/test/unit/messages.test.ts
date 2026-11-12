@@ -994,7 +994,7 @@ describe("connect", () => {
     expect(chat.commands.at(-1)).toBe("/_read chat items @12 41")
   })
 
-  it("prepares a contact found by its SimpleX name with the domain, and returns no unverified simplex_name", async () => {
+  it("prepares a contact found by its SimpleX name with the domain, and returns no unverified popopx_name", async () => {
     jest.useFakeTimers()
     const chat = new FakeChat()
     const linkData = {profile: {displayName: "SimpleX Directory", fullName: "", peerType: "bot"}, business: false}
@@ -1019,7 +1019,7 @@ describe("connect", () => {
     await jest.advanceTimersByTimeAsync(30_000)
     const result = (await connecting)!.structuredContent
     expect(result).toMatchObject({status: "done", chat: "@9", type: "contact", name: "SimpleX Directory", connected: true})
-    expect(result).not.toHaveProperty("simplex_name")
+    expect(result).not.toHaveProperty("popopx_name")
   })
 })
 

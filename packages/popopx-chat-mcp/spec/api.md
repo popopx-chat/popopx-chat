@@ -103,7 +103,7 @@ Chat fields ([`chatFields`](../src/tools.ts#L1204-L1231)):
 | `chat` | `@contactId` | `#groupId` |
 | `type` | `contact` | `business` with `businessChat`; `channel` with `useRelays` or group type `channel`; otherwise `group` |
 | `name` | profile display name | group display name |
-| `simplex_name` | `@` + `contactDomain.domain` when verified | `#` + `groupDomainClaim.domain` when verified |
+| `popopx_name` | `@` + `contactDomain.domain` when verified | `#` + `groupDomainClaim.domain` when verified |
 | `peer_type` | profile peer type, when present | from the plan, when present |
 | `description` | profile `shortDescr` | group `shortDescr` |
 | `welcome` | from the plan: link data message | group `description` |
@@ -285,7 +285,7 @@ Output:
 
 | Field | Item fields |
 |---|---|
-| `chats` | `chat`<br>`type`<br>`name`<br>`simplex_name`, when verified<br>`peer_type`, when present<br>`incognito`<br>`known_as`, when incognito<br>`connected`<br>`unread`: `chatStats.unreadCount`<br>`approved: true`, only under a standing approval of messages in mode `requests` |
+| `chats` | `chat`<br>`type`<br>`name`<br>`popopx_name`, when verified<br>`peer_type`, when present<br>`incognito`<br>`known_as`, when incognito<br>`connected`<br>`unread`: `chatStats.unreadCount`<br>`approved: true`, only under a standing approval of messages in mode `requests` |
 | `actions` | `action`<br>`tool`<br>`input`: the input of the creating call<br>`state`<br>`open`: `true` while a call waits on it |
 
 `chats`: the contacts and groups of the main conversations from one read, `apiGetChats(USER, last 1000000)`, except the control chat ([tools.ts:1160-1168](../src/tools.ts#L1160-L1168)). `actions`: every action in memory ([tools.ts:1156](../src/tools.ts#L1156)).
@@ -450,7 +450,7 @@ Request lines:
 | `download` | `I want to download a file from SENDER in KIND NAME (CHAT):`, without `SENDER in ` outside groups<br>done: `I downloaded a file from ...` | ``` `NAME`, SIZE ```<br>an XFTP file: `Servers: known.`, or ``Servers: `HOST`, `HOST`, unknown: downloading shows them this computer's IP address.`` (`it` for one) |
 | `leave` | `I want to delete KIND NAME (@N).` or `I want to leave KIND NAME (#N).`<br>done: `I deleted ...` or `I left ...` | |
 
-SUBJECT is `KIND NAME`, or `an unnamed KIND`, followed by ` (SIMPLEX_NAME)` when known ([actions.ts:310-313](../src/actions.ts#L310-L313)). For `connect`, SIMPLEX_NAME is the target when it is a name; for `send`, the chat's verified SimpleX name.
+SUBJECT is `KIND NAME`, or `an unnamed KIND`, followed by ` (POPOPX_NAME)` when known ([actions.ts:310-313](../src/actions.ts#L310-L313)). For `connect`, POPOPX_NAME is the target when it is a name; for `send`, the chat's verified SimpleX name.
 
 A card of a `send` with an image or video file, or of a `download` of an image or video, is an image or video message with the file's preview and the card text as its caption; the preview is resized to fit the card, and the card is text when it can't be resized ([control.ts:441-461](../src/control.ts#L441-L461)).
 
