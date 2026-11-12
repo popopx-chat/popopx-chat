@@ -64,5 +64,8 @@ signed, so they are left as template slots, not as open decisions.
 - Android: <applicationId suffix, signing certificate fingerprint, F-Droid or Play channel>
 - servers this release presets, and whose terms the user is asked to accept: <list>
 - link domain actually serving this release, with .well-known and AASA live: <domain>
+- every upstream-operated host still named in the build (badge contact, notification preset,
+  directory, badge embed, TURN) — each replaced or left, with the reason: <list; the checklist and
+  the failure mode of each is in FORK.md "Upstream-operated hosts, and how each one fails">
 - publisher and contact address shipped in the app and in these files: POPOPX, chat@popopx.chat
 ```
