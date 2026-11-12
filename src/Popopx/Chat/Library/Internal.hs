@@ -3499,7 +3499,7 @@ simplexTeamContactProfile =
   Profile
     { displayName = "Ask SimpleX Team",
       fullName = "",
-      shortDescr = Just "Send questions about SimpleX Chat app and your suggestions",
+      shortDescr = Just "Send questions about POPOPX Chat app and your suggestions",
       description = Nothing,
       image = Just simplexChatImage,
       contactLink = Just $ CLFull adminContactReq,

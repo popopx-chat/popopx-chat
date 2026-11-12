@@ -1642,7 +1642,7 @@ testVoiceCaptchaOldClient ps@TestParams {tmpPath} = do
         -- /audio unavailable: old client can't receive voice in voice-disabled group
         cath #> "#privacy (support) /audio"
         cath <# "#privacy (support) 'SimpleX Directory'!> > cath /audio"
-        cath <## "      Voice captcha is not available - please update SimpleX Chat to v6.5+ or use text captcha."
+        cath <## "      Voice captcha is not available - please update POPOPX Chat to v6.5+ or use text captcha."
         -- text captcha still works
         sendCaptcha cath captcha
         cath <## "#privacy: member bob (Bob) is connected"
@@ -2189,7 +2189,7 @@ testRegisterChannelViaCard ps =
         superUser <# "'SimpleX Directory'> bob submitted the channel ID 1:"
         superUser <## "news"
         superUser <##. "Link to join channel: "
-        superUser <## "You need SimpleX Chat app v6.5 to join."
+        superUser <## "You need POPOPX Chat app v6.5 to join."
         superUser <## "1 subscribers"
         superUser <## ""
         superUser <## "To approve send:"
@@ -2212,7 +2212,7 @@ testRegisterChannelViaCard ps =
           superUser <# ("'SimpleX Directory'> bob submitted the channel ID 1:")
           superUser <## "news (News and Updates)"
           superUser <##. "Link to join channel: "
-          superUser <## "You need SimpleX Chat app v6.5 to join."
+          superUser <## "You need POPOPX Chat app v6.5 to join."
           superUser <## "2 subscribers"
           superUser <## ""
           superUser <## "To approve send:"
@@ -2262,7 +2262,7 @@ testDirectoryChannelName ps = withSmpServerAndNames ps $ \reg ->
         superUser <## "news"
         superUser <## "SimpleX name: #news"
         superUser <##. "Link to join channel: "
-        superUser <## "You need SimpleX Chat app v6.5 to join."
+        superUser <## "You need POPOPX Chat app v6.5 to join."
         superUser <## "1 subscribers"
         superUser <## ""
         superUser <## "To approve send:"
@@ -2295,7 +2295,7 @@ testDirectoryChannelNameNotVerified ps = withSmpServerAndNames ps $ \reg ->
         superUser <## "news"
         superUser <## "SimpleX name: #news (NOT verified - will not be shown)"
         superUser <##. "Link to join channel: "
-        superUser <## "You need SimpleX Chat app v6.5 to join."
+        superUser <## "You need POPOPX Chat app v6.5 to join."
         superUser <## "1 subscribers"
         superUser <## ""
         superUser <## "To approve send:"
@@ -2345,7 +2345,7 @@ testDeleteChannelRegistration ps =
         superUser <# "'SimpleX Directory'> bob submitted the channel ID 1:"
         superUser <## "news"
         superUser <##. "Link to join channel: "
-        superUser <## "You need SimpleX Chat app v6.5 to join."
+        superUser <## "You need POPOPX Chat app v6.5 to join."
         superUser <## "1 subscribers"
         superUser <## ""
         superUser <## "To approve send:"
@@ -2382,7 +2382,7 @@ testReregistrationAlreadyListed ps =
         superUser <# "'SimpleX Directory'> bob submitted the channel ID 1:"
         superUser <## "news"
         superUser <##. "Link to join channel: "
-        superUser <## "You need SimpleX Chat app v6.5 to join."
+        superUser <## "You need POPOPX Chat app v6.5 to join."
         superUser <## "1 subscribers"
         superUser <## ""
         superUser <## "To approve send:"
@@ -2399,7 +2399,7 @@ testReregistrationAlreadyListed ps =
         bob <## "      Found 1 group(s)."
         bob <# "'SimpleX Directory'> news"
         bob <##. "Link to join channel: "
-        bob <## "You need SimpleX Chat app v6.5 to join."
+        bob <## "You need POPOPX Chat app v6.5 to join."
         bob <## "1 subscribers"
         -- owner re-shares card while already listed
         bob ##> "/share chat #news @'SimpleX Directory'"
@@ -2434,7 +2434,7 @@ testLinkCheckUpdatesCount ps = do
             superUser <# "'SimpleX Directory'> bob submitted the channel ID 1:"
             superUser <## "news"
             superUser <##. "Link to join channel: "
-            superUser <## "You need SimpleX Chat app v6.5 to join."
+            superUser <## "You need POPOPX Chat app v6.5 to join."
             superUser <## "1 subscribers"
             superUser <## ""
             superUser <## "To approve send:"
@@ -2461,7 +2461,7 @@ testLinkCheckUpdatesCount ps = do
           bob <## "      Found 1 group(s)."
           bob <# "'SimpleX Directory'> news"
           bob <##. "Link to join channel: "
-          bob <## "You need SimpleX Chat app v6.5 to join."
+          bob <## "You need POPOPX Chat app v6.5 to join."
           countLine <- getTermLine bob
           if countLine == expected || n == 0 then countLine `shouldBe` expected else go (n - 1)
 

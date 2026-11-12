@@ -382,7 +382,7 @@ directoryServiceEvent opts@DirectoryOpts {adminUsers, superUsers, serviceName, o
         linkToJoin = case publicGroup of
           Just pg@PublicGroupProfile {groupLink} ->
             "\nLink to join " <> groupTypeStr' pg <> ": " <> strEncodeTxt groupLink
-              <> "\nYou need SimpleX Chat app v6.5 to join."
+              <> "\nYou need POPOPX Chat app v6.5 to join."
           Nothing -> ""
     membersCountStr GroupProfile {publicGroup} GroupSummary {currentMembers, publicMemberCount} =
       let count = fromMaybe currentMembers publicMemberCount
@@ -744,7 +744,7 @@ directoryServiceEvent opts@DirectoryOpts {adminUsers, superUsers, serviceName, o
         audioAlreadyEnabled :: Text
         audioAlreadyEnabled = "Audio captcha is already enabled."
         voiceCaptchaUnavailable :: Text
-        voiceCaptchaUnavailable = "Voice captcha is not available - please update SimpleX Chat to v6.5+ or use text captcha."
+        voiceCaptchaUnavailable = "Voice captcha is not available - please update POPOPX Chat to v6.5+ or use text captcha."
         unknownCommand :: Text
         unknownCommand = "Unknown command, please enter captcha text."
         tooManyAttempts :: Text

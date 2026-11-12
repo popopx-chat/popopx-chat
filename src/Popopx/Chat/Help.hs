@@ -50,7 +50,7 @@ chatWelcome user =
       "Welcome " <> green userName <> "!",
       "Thank you for installing POPOPX Chat!",
       "",
-      "Connect to SimpleX Chat developers for any questions - just type " <> highlight "/simplex",
+      "Connect to POPOPX Chat developers for any questions - just type " <> highlight "/simplex",
       "",
       "Follow our updates:",
       "> Reddit: https://www.reddit.com/r/SimpleXChat/",
@@ -232,7 +232,7 @@ incognitoHelpInfo =
       indent <> highlight "/connect incognito               " <> " - create new invitation link using incognito profile",
       indent <> highlight "/connect incognito <invitation>  " <> " - accept invitation using incognito profile",
       indent <> highlight "/accept incognito <name>         " <> " - accept contact request using incognito profile",
-      indent <> highlight "/simplex incognito               " <> " - connect to SimpleX Chat developers using incognito profile",
+      indent <> highlight "/simplex incognito               " <> " - connect to POPOPX Chat developers using incognito profile",
       "",
       "The commands may be abbreviated: " <> listHighlight ["/c i", "/c i <invitation>", "/ac i <name>"],
       "To find the profile used for an incognito connection, use " <> highlight "/info <contact>" <> "."
