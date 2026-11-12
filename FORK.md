@@ -82,6 +82,13 @@ yet. Before any build of this fork is distributed:
 - **No service is operated.** The relay presets, the link domain, `.well-known`, the directory and
   the badge service all still name infrastructure SimpleX Chat Ltd operates; `chat@popopx.chat` is
   not reachable until `popopx.chat` is served.
+- **No registry namespace.** The npm and PyPI names in the committed manifests are upstream's, and
+  that is the shape the release tooling expects: `packages_release.py test-names` rewrites the names,
+  the repository URL and the cross-package dependencies to `npm:` aliases at publish time from the
+  repository variables `NPM_SCOPE` and `PYPI_PROJECT`. Setting those two variables — plus an
+  `@popopx-chat` npm org, a `popopx-chat` PyPI project and a `popopx-chat-libs` repository — is the
+  fix; hand-editing the manifests would break `unreleased_pins()` and `check-pins` instead.
+  Full method: [`NODE-PACKAGES-POPOPX.md`](./NODE-PACKAGES-POPOPX.md).
 - **Android link verification is broken by design until re-signed.**
   `website/src/.well-known/assetlinks.json` carries our `package_name` with SimpleX Chat Ltd's
   three signing-certificate fingerprints; `autoVerify` cannot pass for a package signed by anybody

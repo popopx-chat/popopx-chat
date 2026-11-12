@@ -34,7 +34,11 @@ a domain this fork does not yet run.
 
 The FFI library is `libpopopx` (a dual lookup for `libsimplex*` is retained); the Node/Python/Rust
 SDK mirrors, the MCP tool outputs (`popopx_name`) and the `.popopx-mcp` data directory moved with
-them; the SMP dependency is `github.com/popopx-chat/popopxmq`. Environment variables that third
+them; the SMP dependency is `github.com/popopx-chat/popopxmq`.
+The npm and PyPI names in the committed manifests are upstream's on purpose: `packages_release.py
+test-names` rewrites them, with `npm:` aliases for the cross-package dependencies, from the
+repository variables `NPM_SCOPE` and `PYPI_PROJECT` at publish time — see
+[`NODE-PACKAGES-POPOPX.md`](./NODE-PACKAGES-POPOPX.md). Environment variables that third
 party tooling may set are read under both spellings (`SIMPLEX_ASSETS`/`POPOPX_ASSETS`,
 `SIMPLEX_LIBS_DIR`, `SIMPLEX_ADDON_PATH`).
 
