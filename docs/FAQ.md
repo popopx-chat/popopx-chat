@@ -302,9 +302,9 @@ In the previous desktop app versions it could also happen in case of error durin
 
 You can resolve it by deleting the app's database: (WARNING: this results in deletion of all profiles, contacts and messages)
 - on Android/iOS, uninstall the app and install it again.
-- on Windows, delete folder `C:\AppData\Roaming\SimpleX`, you can find it by pressing Windows key + R and entering `%appdata%`.
-- on Linux/Mac, delete directories `~/.local/share/simplex` and `~/.config/simplex`, where `~` represents your home directory (/home/user)
-- on Flatpak, delete directory `~/.var/app/chat.simplex.simplex`.
+- on Windows, delete folder `C:\AppData\Roaming\POPOPX`, you can find it by pressing Windows key + R and entering `%appdata%`.
+- on Linux/Mac, delete directories `~/.local/share/popopx` and `~/.config/popopx`, where `~` represents your home directory (/home/user)
+- on Flatpak, delete directory `~/.var/app/com.popopxchat.popopx`.
 
 ### My mobile app does not connect to desktop app
 

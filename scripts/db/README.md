@@ -250,33 +250,36 @@
 
 1. Prepare sqlite db:
 
-   1. Download simplex-chat CLI:
+   1. Build the CLI:
 
-      You should download the CLI binary from the same `TAG` as the desktop.
+      You should build the CLI binary from the same `TAG` as the desktop.
 
       ```sh
-      export TAG='v6.4.3.1'
-      curl -L "https://github.com/simplex-chat/simplex-chat/releases/download/${TAG}/simplex-chat-ubuntu-22_04-x86_64" -o 'simplex-chat'
+      cabal build exe:popopx-chat
       ```
 
    2. Run the CLI:
 
       ```sh
-      ./simplex-chat
+      cabal run exe:popopx-chat
       ```
 
       Press `Ctrl+C` when CLI ask for a display name.
 
    3. Move database:
 
+      On Linux the CLI and the desktop app use the same directory (`~/.local/share/popopx`), so there
+      is nothing to move. On macOS the CLI writes to `~/Library/Application Support/popopx` while the
+      desktop app reads `~/.local/share/popopx`:
+
       ```sh
-      mv ~/.simplex/popopx_v1_* ~/.local/share/simplex/
+      mv "$HOME/Library/Application Support/popopx/"popopx_v1_* ~/.local/share/popopx/
       ```
 
 2. Transfer data:
 
    ```sh
-   ./pg2sqlite.py --verbose 'postgresql://popopx:123123@localhost:5432/popopx_v1' ~/.local/share/simplex/
+   ./pg2sqlite.py --verbose 'postgresql://popopx:123123@localhost:5432/popopx_v1' ~/.local/share/popopx/
    ```
 
 4. Update BLOBs:

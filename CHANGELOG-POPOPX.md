@@ -19,8 +19,12 @@ An installation that ever used a SimpleX-named build does **not** see its chats 
 migration is provided on purpose. The moved locations are the iOS bundle id / App Group / keychain
 access group, the Android `applicationId`, notification-channel and preference-store ids, the
 on-disk database prefixes `popopx_v1*`, the macOS `bundleID` and Windows registry capabilities, the
-AppImage/AppStream ids and `.appdata.xml` filename, and the CLI/bot per-user data directory
-(`~/.popopx`, `%APPDATA%\popopx`, `getAppUserDataDirectory "popopx"`).
+AppImage/AppStream ids, the Flatpak desktop/metainfo ids (`scripts/flatpak/com.popopxchat.popopx.*`)
+and `.appdata.xml` filename, and the application data directories. The CLI and the bots call
+`getAppUserDataDirectory "popopx"`: `~/.local/share/popopx` on Linux,
+`~/Library/Application Support/popopx` on macOS, `%APPDATA%\popopx` on Windows. The desktop app uses
+`~/.local/share/popopx` and the config dir `~/.config/popopx` (`%AppData%\POPOPX` on Windows) — both
+read from `Platform.desktop.kt:7-16`, which is the generator for these paths.
 
 ### What the user sees
 
