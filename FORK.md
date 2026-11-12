@@ -124,12 +124,21 @@ stands up the equivalent POPOPX service, together with its keys.
 | what it is | where | failure if the host moved alone |
 | --- | --- | --- |
 | badge service contact (an SMP relay + its key, in one address) | `src/Popopx/Chat.hs:74` | **silent**: TLS fingerprint mismatch, retried forever |
-| notification servers preset (`ntf://<key>@ntf3.simplex.im`, `.onion` too) | `src/Popopx/Chat/Library/Commands.hs:167-168` | **silent**: same class. This is the one upstream preset still enabled in the client — the SMP/XFTP presets in `Chat.hs` were emptied, these were not |
+| notification servers preset (`ntf://<key>@ntf3.simplex.im`, `.onion` too) | `src/Popopx/Chat/Library/Commands.hs:167-168` | **silent**: same class. This is the one upstream preset still enabled in the client — the SMP/XFTP presets in `Chat.hs` were emptied, these were not. Kept on purpose: the list is a plain `[NtfServer]` (`Controller.hs:275`, and nothing downstream forces `NonEmpty` — `NtfSubSupervisor.hs:591` returns `Nothing`, `Agent.hs:3283` then fails token registration with `PROHIBITED`), so emptying it would be implementable but only costs push, exactly like the relays cost messaging. It moves with them |
 | which stored relays count as "presets" | `src/Popopx/Chat.hs:103` `presetDomains = [".simplex.im", ".simplexonflux.com"]` | **silent**: keyed on the host suffix, so renamed relays stop matching any stored row |
 | shared directory listing | `website/src/js/directory.jsc:1` (`/data/`), filter at `:149` | **silent-empty**: the fetch fails and the page shows no results |
 | badge embed allow-list | `apps/popopx-badge-service/web/src/embed.ts:53` | **silent**: the widget refuses an origin outside `simplex.chat`/`.simplex.chat` and renders blank |
 | badge purchase deep links | `apps/multiplatform/common/src/commonMain/kotlin/chat/popopx/common/views/badges/BadgeStore.kt:53-54` | **visible**: leaves the app into `badges.simplex.chat` — an upstream-branded page under a POPOPX label |
 | ICE/STUN/TURN defaults | `packages/popopx-chat-webrtc/src/call.ts:355-359` (`stun.simplex.im`, `turn.simplex.im`; the TURN line carries a username and a literal credential) | **visible**: calls fail to connect. Used only when the user configured none (`AppSettings.hs:45` `webrtcICEServers`), and the credential is upstream's to revoke |
+
+One entry in that list is not a host+key pair and could be fixed without any infrastructure, so it was:
+the discovery document `website/src/.well-known/simplex.json` carried five SimpleX Chat Ltd channels, groups
+and contacts (`smp4/smp10/smp18.simplex.im` links titled "SimpleX Network News", "SimpleX Crowdfunding News",
+"SimpleX users group", "Ask SimpleX Team", "SimpleX Directory"). The *path* is a protocol value —
+`docs/protocol/web-discovery.md:99` and `:218` register `simplex.json` as an RFC 8615 URI suffix, and a client
+follows exactly that name — so the file keeps its name; the *entries* are not a protocol value, and publishing
+another operator's identities under our own domain claims them as ours. The three arrays are empty until this
+fork operates relays and can author its own addresses.
 
 The **silent** class is the dangerous one. A host+key pair identifies one server, and only that pair
 is a wire value: `smp://<key>@<host>` is hand-written, never generated, so an identifier sweep that
