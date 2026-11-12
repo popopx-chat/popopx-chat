@@ -14,7 +14,7 @@
 
 ## Executive Summary
 
-The SimpleX Chat theme engine implements a four-level cascade: per-chat theme overrides take precedence over per-user overrides, which take precedence over global (app-settings) overrides, which take precedence over built-in presets. Four preset themes exist (LIGHT, DARK, SIMPLEX, BLACK), each defining a Material `Colors` palette and custom `AppColors` for chat-specific elements. Themes support wallpaper customization (preset patterns or custom images) with background and tint color overrides. Theme configuration is persisted as YAML and can be imported/exported. The `SimpleXTheme` composable wraps `MaterialTheme` with additional `CompositionLocal` providers for app colors and wallpaper.
+The SimpleX Chat theme engine implements a four-level cascade: per-chat theme overrides take precedence over per-user overrides, which take precedence over global (app-settings) overrides, which take precedence over built-in presets. Four preset themes exist (LIGHT, DARK, POPOPX, BLACK), each defining a Material `Colors` palette and custom `AppColors` for chat-specific elements. Themes support wallpaper customization (preset patterns or custom images) with background and tint color overrides. Theme configuration is persisted as YAML and can be imported/exported. The `SimpleXTheme` composable wraps `MaterialTheme` with additional `CompositionLocal` providers for app colors and wallpaper.
 
 ---
 
@@ -55,7 +55,7 @@ fun currentColors(
 
 This is the core resolution function. It:
 1. Determines the non-system theme name (resolving `SYSTEM` to light or dark based on `systemInDarkThemeCurrently`).
-2. Selects the base theme palette (LIGHT/DARK/SIMPLEX/BLACK).
+2. Selects the base theme palette (LIGHT/DARK/POPOPX/BLACK).
 3. Finds the matching `ThemeOverrides` from `appSettingsTheme` based on wallpaper type and theme name.
 4. Selects the `perUserTheme` for the current light/dark mode.
 5. Resolves wallpaper preset colors if applicable.
@@ -83,7 +83,7 @@ fun applyTheme(theme: String) {
 
 **`changeDarkTheme()`** ([line 115](../../common/src/commonMain/kotlin/chat/popopx/common/ui/theme/ThemeManager.kt#L115)):
 
-Sets the dark mode variant (DARK, SIMPLEX, or BLACK) and recalculates colors.
+Sets the dark mode variant (DARK, POPOPX, or BLACK) and recalculates colors.
 
 ### Color and wallpaper modification
 
@@ -143,7 +143,7 @@ Converts `Color` to `#AARRGGBB` hex string with intelligent alpha handling.
 
 ```kotlin
 enum class DefaultTheme {
-  LIGHT, DARK, SIMPLEX, BLACK;
+  LIGHT, DARK, POPOPX, BLACK;
 
   companion object {
     const val SYSTEM_THEME_NAME: String = "SYSTEM"
@@ -155,7 +155,7 @@ enum class DefaultTheme {
 |---|---|---|
 | `LIGHT` | LIGHT | Standard light theme with white/light gray surfaces |
 | `DARK` | DARK | Standard dark theme with dark gray surfaces |
-| `SIMPLEX` | DARK | SimpleX branded dark theme with deep blue background and cyan accent |
+| `POPOPX` | DARK | SimpleX branded dark theme with deep blue background and cyan accent |
 | `BLACK` | DARK | AMOLED-optimized pure black theme |
 
 `SYSTEM` is a virtual theme name that resolves to LIGHT or the configured dark variant at runtime.

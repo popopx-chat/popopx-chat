@@ -15,10 +15,10 @@ let colorModesLocalized: [LocalizedStringKey] = ["System", "Light", "Dark"]
 let colorModesNames: [DefaultThemeMode?] = [nil, DefaultThemeMode.light, DefaultThemeMode.dark]
 
 let darkThemesLocalized: [LocalizedStringKey] = ["Dark", "POPOPX", "Black"]
-let darkThemesNames: [String] = [DefaultTheme.DARK.themeName, DefaultTheme.SIMPLEX.themeName, DefaultTheme.BLACK.themeName]
+let darkThemesNames: [String] = [DefaultTheme.DARK.themeName, DefaultTheme.POPOPX.themeName, DefaultTheme.BLACK.themeName]
 
 let darkThemesWithoutBlackLocalized: [LocalizedStringKey] = ["Dark", "POPOPX"]
-let darkThemesWithoutBlackNames: [String] = [DefaultTheme.DARK.themeName, DefaultTheme.SIMPLEX.themeName]
+let darkThemesWithoutBlackNames: [String] = [DefaultTheme.DARK.themeName, DefaultTheme.POPOPX.themeName]
 
 let appSettingsURL = URL(string: UIApplication.openSettingsURLString)!
 

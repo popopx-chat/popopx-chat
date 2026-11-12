@@ -57,7 +57,7 @@ class PopopxService: Service() {
     } else {
       Log.d(TAG, "null intent. Probably restarted by the system.")
     }
-    ServiceCompat.startForeground(this, SIMPLEX_SERVICE_ID, createNotificationIfNeeded(), foregroundServiceType())
+    ServiceCompat.startForeground(this, POPOPX_SERVICE_ID, createNotificationIfNeeded(), foregroundServiceType())
     return START_STICKY // to restart if killed
   }
 
@@ -65,7 +65,7 @@ class PopopxService: Service() {
     super.onCreate()
     Log.d(TAG, "Popopx service created")
     createNotificationIfNeeded()
-    ServiceCompat.startForeground(this, SIMPLEX_SERVICE_ID, createNotificationIfNeeded(), foregroundServiceType())
+    ServiceCompat.startForeground(this, POPOPX_SERVICE_ID, createNotificationIfNeeded(), foregroundServiceType())
     /**
      * The reason [stopAfterStart] exists is because when the service is not called [startForeground] yet, and
      * we call [stopSelf] on the same service, [ForegroundServiceDidNotStartInTimeException] will be thrown.
@@ -305,10 +305,10 @@ class PopopxService: Service() {
   }
 
   companion object {
-    const val TAG = "SIMPLEX_SERVICE"
-    const val NOTIFICATION_CHANNEL_ID = "com.popopxchat.popopx.SIMPLEX_SERVICE_NOTIFICATION"
+    const val TAG = "POPOPX_SERVICE"
+    const val NOTIFICATION_CHANNEL_ID = "com.popopxchat.popopx.POPOPX_SERVICE_NOTIFICATION"
     const val NOTIFICATION_CHANNEL_NAME = "POPOPX Chat service"
-    const val SIMPLEX_SERVICE_ID = 6789
+    const val POPOPX_SERVICE_ID = 6789
     const val SERVICE_START_WORKER_VERSION = BuildConfig.VERSION_CODE
     const val SERVICE_START_WORKER_INTERVAL_MINUTES = 3 * 60L
     const val SERVICE_START_WORKER_WORK_NAME_PERIODIC = "PopopxAutoRestartWorkerPeriodic" // Do not change!
@@ -316,8 +316,8 @@ class PopopxService: Service() {
     private const val PASSPHRASE_NOTIFICATION_ID = 1535
 
     private const val WAKE_LOCK_TAG = "PopopxService::lock"
-    private const val SHARED_PREFS_ID = "com.popopxchat.popopx.SIMPLEX_SERVICE_PREFS"
-    private const val SHARED_PREFS_SERVICE_STATE = "SIMPLEX_SERVICE_STATE"
+    private const val SHARED_PREFS_ID = "com.popopxchat.popopx.POPOPX_SERVICE_PREFS"
+    private const val SHARED_PREFS_SERVICE_STATE = "POPOPX_SERVICE_STATE"
     private const val WORK_NAME_ONCE = "ServiceStartWorkerOnce"
 
     var isServiceStarting = false

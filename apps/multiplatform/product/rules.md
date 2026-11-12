@@ -199,7 +199,7 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 **Invariant:** On Android, when `NotificationsMode.SERVICE` is selected (default), the app MUST maintain a foreground service (`SimplexService`) to ensure continuous message delivery. The service MUST survive app backgrounding and device sleep. When `NotificationsMode.PERIODIC` is selected, `MessagesFetcherWorker` MUST periodically wake and fetch messages. When `NotificationsMode.OFF`, no background delivery occurs.
 
 **Enforcement:**
-- `SimplexService` runs as a foreground service with `START_STICKY` and a `WakeLock`. It displays a persistent notification on the `SIMPLEX_SERVICE_NOTIFICATION` channel.
+- `SimplexService` runs as a foreground service with `START_STICKY` and a `WakeLock`. It displays a persistent notification on the `POPOPX_SERVICE_NOTIFICATION` channel.
 - `MessagesFetcherWorker` is a `PeriodicWorkRequest` scheduled via `WorkManager`.
 - The mode is stored in `AppPreferences.notificationsMode` and checked at app startup.
 

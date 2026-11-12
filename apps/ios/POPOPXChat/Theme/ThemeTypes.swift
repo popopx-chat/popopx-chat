@@ -13,7 +13,7 @@ import SwiftUI
 public enum DefaultTheme: String, Codable, Equatable {
     case LIGHT
     case DARK
-    case SIMPLEX
+    case POPOPX
     case BLACK
 
     public static let SYSTEM_THEME_NAME: String = "SYSTEM"
@@ -438,7 +438,7 @@ public struct ThemeOverrides: Codable, Equatable, Hashable {
         let baseColors = switch base {
             case DefaultTheme.LIGHT: LightColorPalette
             case DefaultTheme.DARK: DarkColorPalette
-            case DefaultTheme.SIMPLEX: PopopxColorPalette
+            case DefaultTheme.POPOPX: PopopxColorPalette
             case DefaultTheme.BLACK: BlackColorPalette
         }
         let c = baseColors.clone()
@@ -455,7 +455,7 @@ public struct ThemeOverrides: Codable, Equatable, Hashable {
         let baseColors = switch base {
         case DefaultTheme.LIGHT: LightColorPaletteApp
         case DefaultTheme.DARK: DarkColorPaletteApp
-        case DefaultTheme.SIMPLEX: PopopxColorPaletteApp
+        case DefaultTheme.POPOPX: PopopxColorPaletteApp
         case DefaultTheme.BLACK: BlackColorPaletteApp
         }
 

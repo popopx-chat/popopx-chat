@@ -1253,7 +1253,7 @@ object AppearanceScope {
     val values by remember {
       val darkThemes = ArrayList<Pair<String, String>>()
       darkThemes.add(DefaultTheme.DARK.themeName to generalGetString(MR.strings.theme_dark))
-      darkThemes.add(DefaultTheme.SIMPLEX.themeName to generalGetString(MR.strings.theme_popopx))
+      darkThemes.add(DefaultTheme.POPOPX.themeName to generalGetString(MR.strings.theme_popopx))
       darkThemes.add(DefaultTheme.BLACK.themeName to generalGetString(MR.strings.theme_black))
       mutableStateOf(darkThemes.toList())
     }

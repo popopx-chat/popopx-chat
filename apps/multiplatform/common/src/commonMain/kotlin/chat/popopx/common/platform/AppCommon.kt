@@ -51,7 +51,7 @@ fun runMigrations() {
     while (true) {
       if (lastMigration.get() < 117) {
         if (ChatController.appPrefs.currentTheme.get() == DefaultTheme.DARK.name) {
-          ChatController.appPrefs.currentTheme.set(DefaultTheme.SIMPLEX.name)
+          ChatController.appPrefs.currentTheme.set(DefaultTheme.POPOPX.name)
         }
         lastMigration.set(117)
       } else if (lastMigration.get() < 203) {

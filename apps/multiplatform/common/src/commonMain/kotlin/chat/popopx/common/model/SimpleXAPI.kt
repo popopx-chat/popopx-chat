@@ -401,7 +401,7 @@ class AppPreferences {
     )
 
   companion object {
-    const val SHARED_PREFS_ID = "com.popopxchat.popopx.SIMPLEX_APP_PREFS"
+    const val SHARED_PREFS_ID = "com.popopxchat.popopx.POPOPX_APP_PREFS"
     internal const val SHARED_PREFS_THEMES_ID = "com.popopxchat.popopx.THEMES"
     private const val SHARED_PREFS_AUTO_RESTART_WORKER_VERSION = "AutoRestartWorkerVersion"
     private const val SHARED_PREFS_RUN_SERVICE_IN_BACKGROUND = "RunServiceInBackground"
@@ -8915,7 +8915,7 @@ data class AppSettings(
         uiChatItemRoundness = 0.75f,
         uiChatItemTail = true,
         uiColorScheme = DefaultTheme.SYSTEM_THEME_NAME,
-        uiDarkColorScheme = DefaultTheme.SIMPLEX.themeName,
+        uiDarkColorScheme = DefaultTheme.POPOPX.themeName,
         uiCurrentThemeIds = null,
         uiThemes = null,
         oneHandUI = true,
@@ -8955,7 +8955,7 @@ data class AppSettings(
           uiChatItemRoundness = def.chatItemRoundness.get(),
           uiChatItemTail = def.chatItemTail.get(),
           uiColorScheme = def.currentTheme.get() ?: DefaultTheme.SYSTEM_THEME_NAME,
-          uiDarkColorScheme = def.systemDarkTheme.get() ?: DefaultTheme.SIMPLEX.themeName,
+          uiDarkColorScheme = def.systemDarkTheme.get() ?: DefaultTheme.POPOPX.themeName,
           uiCurrentThemeIds = def.currentThemeIds.get(),
           uiThemes = def.themeOverrides.get(),
           oneHandUI = def.oneHandUI.get(),

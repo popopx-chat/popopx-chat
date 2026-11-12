@@ -68,7 +68,7 @@ instance TextEncoding ChatLayout where
     CLTerminal -> "terminal"
     CLUnknown tag -> tag
 
-data DarkColorScheme = DCSDark | DCSBlack | DCSSimplex
+data DarkColorScheme = DCSDark | DCSBlack | DCSPopopx
   deriving (Eq, Ord, Show)
 
 data ThemeColorScheme = TCSLight | TCSDark DarkColorScheme
@@ -81,12 +81,12 @@ instance TextEncoding DarkColorScheme where
   textEncode = \case
     DCSDark -> "DARK"
     DCSBlack -> "BLACK"
-    DCSSimplex -> "SIMPLEX"
+    DCSPopopx -> "POPOPX"
   textDecode s =
     Just $ case s of
       "DARK" -> DCSDark
       "BLACK" -> DCSBlack
-      "SIMPLEX" -> DCSSimplex
+      "POPOPX" -> DCSPopopx
       _ -> DCSDark
 
 instance TextEncoding ThemeColorScheme where

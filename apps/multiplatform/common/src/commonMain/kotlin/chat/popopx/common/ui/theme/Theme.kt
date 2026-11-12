@@ -25,7 +25,7 @@ import java.util.UUID
 
 // Spec: spec/services/theme.md#DefaultTheme
 enum class DefaultTheme {
-  LIGHT, DARK, SIMPLEX, BLACK;
+  LIGHT, DARK, POPOPX, BLACK;
 
   companion object {
     const val SYSTEM_THEME_NAME: String = "SYSTEM"
@@ -345,7 +345,7 @@ data class ThemeOverrides (
     val baseColors = when (base) {
       DefaultTheme.LIGHT -> LightColorPalette
       DefaultTheme.DARK -> DarkColorPalette
-      DefaultTheme.SIMPLEX -> PopopxColorPalette
+      DefaultTheme.POPOPX -> PopopxColorPalette
       DefaultTheme.BLACK -> BlackColorPalette
     }
     return baseColors.copy(
@@ -362,7 +362,7 @@ data class ThemeOverrides (
     val baseColors = when (base) {
       DefaultTheme.LIGHT -> LightColorPaletteApp
       DefaultTheme.DARK -> DarkColorPaletteApp
-      DefaultTheme.SIMPLEX -> PopopxColorPaletteApp
+      DefaultTheme.POPOPX -> PopopxColorPaletteApp
       DefaultTheme.BLACK -> BlackColorPaletteApp
     }
 
@@ -528,13 +528,13 @@ data class ThemeModeOverride (
     val c = when (base) {
       DefaultTheme.LIGHT -> LightColorPalette
       DefaultTheme.DARK -> DarkColorPalette
-      DefaultTheme.SIMPLEX -> PopopxColorPalette
+      DefaultTheme.POPOPX -> PopopxColorPalette
       DefaultTheme.BLACK -> BlackColorPalette
     }
     val ac = when (base) {
       DefaultTheme.LIGHT -> LightColorPaletteApp
       DefaultTheme.DARK -> DarkColorPaletteApp
-      DefaultTheme.SIMPLEX -> PopopxColorPaletteApp
+      DefaultTheme.POPOPX -> PopopxColorPaletteApp
       DefaultTheme.BLACK -> BlackColorPaletteApp
     }
     val w = when (val wallpaperType = WallpaperType.from(wallpaper)) {
@@ -608,20 +608,20 @@ data class ThemeModeOverride (
 // read as gaps showing the screen behind).
 // LIGHT: formula derives off-white from palette bg + onBackground — lifts white
 // cards above. DARK/BLACK: palette bg (cards already raised via founder's
-// formula in Section.kt). SIMPLEX: gradient bottom stop (darker), since the
+// formula in Section.kt). POPOPX: gradient bottom stop (darker), since the
 // canvas itself is a gradient drawn by themedBackgroundBrush.
 fun canvasColorForCurrentTheme(): Color {
   val theme = CurrentColors.value
   val c = theme.colors
   return when (theme.base) {
     DefaultTheme.LIGHT -> c.background.mixWith(c.onBackground, 0.94f)
-    DefaultTheme.SIMPLEX -> c.background.darker(0.4f)
+    DefaultTheme.POPOPX -> c.background.darker(0.4f)
     else -> c.background
   }
 }
 
 // Card background color for SectionView. LIGHT: pure white (raised above the
-// off-white canvas). DARK/BLACK/SIMPLEX: founder's mixWith formula (lifts cards
+// off-white canvas). DARK/BLACK/POPOPX: founder's mixWith formula (lifts cards
 // above palette bg using onBackground tint).
 fun sectionCardColor(): Color {
   val theme = CurrentColors.value
@@ -634,7 +634,7 @@ fun Modifier.themedBackground(baseTheme: DefaultTheme = CurrentColors.value.base
     copyBackgroundToAppBar(bgLayerSize, bgLayer) {
       if (overrideColor != null) {
         drawRect(overrideColor)
-      } else if (baseTheme == DefaultTheme.SIMPLEX) {
+      } else if (baseTheme == DefaultTheme.POPOPX) {
         drawRect(brush = themedBackgroundBrush())
       } else {
         drawRect(CurrentColors.value.colors.background)

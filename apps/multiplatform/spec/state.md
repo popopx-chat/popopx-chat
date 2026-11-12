@@ -419,7 +419,7 @@ val appPrefs: AppPreferences by lazy { AppPreferences() }
 | Key | Type | Default | Purpose |
 |---|---|---|---|
 | `currentTheme` | `String` | `"SYSTEM"` | Active theme name |
-| `systemDarkTheme` | `String` | `"SIMPLEX"` | Theme for system dark mode |
+| `systemDarkTheme` | `String` | `"POPOPX"` | Theme for system dark mode |
 | `currentThemeIds` | `Map<String, String>` | empty | Theme ID per base theme |
 | `themeOverrides` | `List<ThemeOverrides>` | empty | Custom theme overrides |
 | `profileImageCornerRadius` | `Float` | `22.5f` | Avatar corner radius |

@@ -35,7 +35,7 @@ enum class PresetWallpaper(
     tint = mapOf(
       DefaultTheme.LIGHT to "#ffefdca6".colorFromReadableHex(),
       DefaultTheme.DARK to "#ff4b3b0e".colorFromReadableHex(),
-      DefaultTheme.SIMPLEX to "#ff51400f".colorFromReadableHex(),
+      DefaultTheme.POPOPX to "#ff51400f".colorFromReadableHex(),
       DefaultTheme.BLACK to "#ff4b3b0e".colorFromReadableHex()
     ),
     mapOf(
@@ -51,7 +51,7 @@ enum class PresetWallpaper(
         receivedMessage = "#ff272624",
         receivedQuote = "#ff373633",
       ),
-      DefaultTheme.SIMPLEX to ThemeColors(
+      DefaultTheme.POPOPX to ThemeColors(
         sentMessage = "#ff41371b",
         sentQuote = "#ff654f1c",
         receivedMessage = "#ff272624",
@@ -70,7 +70,7 @@ enum class PresetWallpaper(
     tint = mapOf(
       DefaultTheme.LIGHT to "#ff9CEA59".colorFromReadableHex(),
       DefaultTheme.DARK to "#ff31560D".colorFromReadableHex(),
-      DefaultTheme.SIMPLEX to "#ff36600f".colorFromReadableHex(),
+      DefaultTheme.POPOPX to "#ff36600f".colorFromReadableHex(),
       DefaultTheme.BLACK to "#ff31560D".colorFromReadableHex()
     ),
     mapOf(
@@ -86,7 +86,7 @@ enum class PresetWallpaper(
         receivedMessage = "#ff242523",
         receivedQuote = "#ff353733",
       ),
-      DefaultTheme.SIMPLEX to ThemeColors(
+      DefaultTheme.POPOPX to ThemeColors(
         sentMessage = "#ff184739",
         sentQuote = "#ff1F6F4B",
         receivedMessage = "#ff242523",
@@ -105,7 +105,7 @@ enum class PresetWallpaper(
     tint = mapOf(
       DefaultTheme.LIGHT to "#fffde0e0".colorFromReadableHex(),
       DefaultTheme.DARK to "#ff3c0f0f".colorFromReadableHex(),
-      DefaultTheme.SIMPLEX to "#ff411010".colorFromReadableHex(),
+      DefaultTheme.POPOPX to "#ff411010".colorFromReadableHex(),
       DefaultTheme.BLACK to "#ff3C0F0F".colorFromReadableHex()
     ),
     mapOf(
@@ -121,7 +121,7 @@ enum class PresetWallpaper(
         receivedMessage = "#ff242121",
         receivedQuote = "#ff3b3535",
       ),
-      DefaultTheme.SIMPLEX to ThemeColors(
+      DefaultTheme.POPOPX to ThemeColors(
         sentMessage = "#ff491A28",
         sentQuote = "#ff761F29",
         receivedMessage = "#ff242121",
@@ -140,7 +140,7 @@ enum class PresetWallpaper(
     tint = mapOf(
       DefaultTheme.LIGHT to "#ffadeffc".colorFromReadableHex(),
       DefaultTheme.DARK to "#ff16404B".colorFromReadableHex(),
-      DefaultTheme.SIMPLEX to "#ff184753".colorFromReadableHex(),
+      DefaultTheme.POPOPX to "#ff184753".colorFromReadableHex(),
       DefaultTheme.BLACK to "#ff16404B".colorFromReadableHex()
     ),
     mapOf(
@@ -156,7 +156,7 @@ enum class PresetWallpaper(
         receivedMessage = "#ff252626",
         receivedQuote = "#ff373A39",
       ),
-      DefaultTheme.SIMPLEX to ThemeColors(
+      DefaultTheme.POPOPX to ThemeColors(
         sentMessage = "#ff1a4745",
         sentQuote = "#ff1d6b69",
         receivedMessage = "#ff252626",
@@ -175,7 +175,7 @@ enum class PresetWallpaper(
     tint = mapOf(
       DefaultTheme.LIGHT to "#ffCEEBFF".colorFromReadableHex(),
       DefaultTheme.DARK to "#ff0F293B".colorFromReadableHex(),
-      DefaultTheme.SIMPLEX to "#ff112f43".colorFromReadableHex(),
+      DefaultTheme.POPOPX to "#ff112f43".colorFromReadableHex(),
       DefaultTheme.BLACK to "#ff0F293B".colorFromReadableHex()
     ),
     mapOf(
@@ -191,7 +191,7 @@ enum class PresetWallpaper(
         receivedMessage = "#ff26282c",
         receivedQuote = "#ff393c40",
       ),
-      DefaultTheme.SIMPLEX to ThemeColors(
+      DefaultTheme.POPOPX to ThemeColors(
         sentMessage = "#ff1A3C5D",
         sentQuote = "#ff235b80",
         receivedMessage = "#ff26282c",
@@ -210,7 +210,7 @@ enum class PresetWallpaper(
     tint = mapOf(
       DefaultTheme.LIGHT to "#ffeedbfe".colorFromReadableHex(),
       DefaultTheme.DARK to "#ff311E48".colorFromReadableHex(),
-      DefaultTheme.SIMPLEX to "#ff35204e".colorFromReadableHex(),
+      DefaultTheme.POPOPX to "#ff35204e".colorFromReadableHex(),
       DefaultTheme.BLACK to "#ff311E48".colorFromReadableHex()
     ),
     mapOf(
@@ -226,7 +226,7 @@ enum class PresetWallpaper(
         receivedMessage = "#ff272528",
         receivedQuote = "#ff3B373E",
       ),
-      DefaultTheme.SIMPLEX to ThemeColors(
+      DefaultTheme.POPOPX to ThemeColors(
         sentMessage = "#ff3C255D",
         sentQuote = "#ff623485",
         receivedMessage = "#ff26273B",
@@ -257,7 +257,7 @@ fun wallpaperBackgrounds(light: String): Map<DefaultTheme, Color> =
   mapOf(
     DefaultTheme.LIGHT to light.colorFromReadableHex(),
     DefaultTheme.DARK to "#ff121212".colorFromReadableHex(),
-    DefaultTheme.SIMPLEX to "#ff111528".colorFromReadableHex(),
+    DefaultTheme.POPOPX to "#ff111528".colorFromReadableHex(),
     DefaultTheme.BLACK to "#ff070707".colorFromReadableHex()
   )
 

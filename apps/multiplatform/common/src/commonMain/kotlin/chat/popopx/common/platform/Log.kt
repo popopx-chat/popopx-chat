@@ -1,6 +1,6 @@
 package chat.popopx.common.platform
 
-const val TAG = "SIMPLEX"
+const val TAG = "POPOPX"
 
 enum class LogLevel {
   DEBUG, INFO, WARNING, ERROR

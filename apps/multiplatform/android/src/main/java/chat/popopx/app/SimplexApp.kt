@@ -41,7 +41,7 @@ import java.io.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-const val TAG = "SIMPLEX"
+const val TAG = "POPOPX"
 
 class PopopxApp: Application(), LifecycleEventObserver {
   val chatModel: ChatModel

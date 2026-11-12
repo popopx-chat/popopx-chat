@@ -41,7 +41,7 @@ fun AppBarTitle(
   val titleColor = overrideTitleColor ?: MaterialTheme.appColors.title
   val brush = if (overrideTitleColor != null)
     Brush.linearGradient(listOf(titleColor, titleColor), Offset(0f, Float.POSITIVE_INFINITY), Offset(Float.POSITIVE_INFINITY, 0f))
-  else if (theme.value.base == DefaultTheme.SIMPLEX)
+  else if (theme.value.base == DefaultTheme.POPOPX)
     Brush.linearGradient(listOf(titleColor.darker(0.2f), titleColor.lighter(0.35f)), Offset(0f, Float.POSITIVE_INFINITY), Offset(Float.POSITIVE_INFINITY, 0f))
   else
     Brush.linearGradient(listOf(titleColor, titleColor), Offset(0f, Float.POSITIVE_INFINITY), Offset(Float.POSITIVE_INFINITY, 0f))

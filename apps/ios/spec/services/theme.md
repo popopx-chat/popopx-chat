@@ -109,7 +109,7 @@ Four built-in themes with pre-defined color palettes:
 |-------|------|---------------------|
 | **Light** | `DefaultTheme.LIGHT` | White background, standard colors |
 | **Dark** | `DefaultTheme.DARK` | Dark gray background, light text |
-| **SimpleX** | `DefaultTheme.SIMPLEX` | Brand purple accents, dark background |
+| **SimpleX** | `DefaultTheme.POPOPX` | Brand purple accents, dark background |
 | **Black** | `DefaultTheme.BLACK` | Pure black background (OLED), high contrast |
 
 ### [DefaultTheme](../../POPOPXChat/Theme/ThemeTypes.swift#L13) Enum
@@ -118,7 +118,7 @@ Four built-in themes with pre-defined color palettes:
 enum DefaultTheme {
     case LIGHT
     case DARK
-    case SIMPLEX
+    case POPOPX
     case BLACK
 
     static let SYSTEM_THEME_NAME = "SYSTEM"

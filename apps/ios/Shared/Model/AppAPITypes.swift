@@ -2397,7 +2397,7 @@ struct AppSettings: Codable, Equatable {
             uiChatItemRoundness: 0.75,
             uiChatItemTail: true,
             uiColorScheme: DefaultTheme.SYSTEM_THEME_NAME,
-            uiDarkColorScheme: DefaultTheme.SIMPLEX.themeName,
+            uiDarkColorScheme: DefaultTheme.POPOPX.themeName,
             uiCurrentThemeIds: nil as [String: String]?,
             uiThemes: nil as [ThemeOverrides]?,
             oneHandUI: true,

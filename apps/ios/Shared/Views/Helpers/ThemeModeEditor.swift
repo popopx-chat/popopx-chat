@@ -72,7 +72,7 @@ struct UserWallpaperEditor: View {
                 SetDefaultThemeButton(theme.colors.primary) {
                     globalThemeUsed = false
                     let lightBase = DefaultTheme.LIGHT
-                    let darkBase = if theme.base != DefaultTheme.LIGHT { theme.base } else if systemDarkThemeDefault.get() == DefaultTheme.DARK.themeName { DefaultTheme.DARK } else if systemDarkThemeDefault.get() == DefaultTheme.BLACK.themeName { DefaultTheme.BLACK } else { DefaultTheme.SIMPLEX }
+                    let darkBase = if theme.base != DefaultTheme.LIGHT { theme.base } else if systemDarkThemeDefault.get() == DefaultTheme.DARK.themeName { DefaultTheme.DARK } else if systemDarkThemeDefault.get() == DefaultTheme.BLACK.themeName { DefaultTheme.BLACK } else { DefaultTheme.POPOPX }
                     let mode = themeModeOverride.mode
                     Task {
                         // Saving for both modes in one place by changing mode once per save
@@ -119,7 +119,7 @@ struct UserWallpaperEditor: View {
                 .onChange(of: applyToMode) { mode in
                     if let mode, mode != theme.base.mode {
                         let lightBase = DefaultTheme.LIGHT
-                        let darkBase = if theme.base != DefaultTheme.LIGHT { theme.base } else if systemDarkThemeDefault.get() == DefaultTheme.DARK.themeName { DefaultTheme.DARK } else if systemDarkThemeDefault.get() == DefaultTheme.BLACK.themeName { DefaultTheme.BLACK } else { DefaultTheme.SIMPLEX }
+                        let darkBase = if theme.base != DefaultTheme.LIGHT { theme.base } else if systemDarkThemeDefault.get() == DefaultTheme.DARK.themeName { DefaultTheme.DARK } else if systemDarkThemeDefault.get() == DefaultTheme.BLACK.themeName { DefaultTheme.BLACK } else { DefaultTheme.POPOPX }
                         ThemeManager.applyTheme(mode == DefaultThemeMode.light ? lightBase.themeName : darkBase.themeName)
                     }
                 }
@@ -280,7 +280,7 @@ struct ChatWallpaperEditor: View {
                 SetDefaultThemeButton(theme.colors.primary) {
                     globalThemeUsed = false
                     let lightBase = DefaultTheme.LIGHT
-                    let darkBase = if currentTheme.base != DefaultTheme.LIGHT { currentTheme.base } else if systemDarkThemeDefault.get() == DefaultTheme.DARK.themeName { DefaultTheme.DARK } else if systemDarkThemeDefault.get() == DefaultTheme.BLACK.themeName { DefaultTheme.BLACK } else { DefaultTheme.SIMPLEX }
+                    let darkBase = if currentTheme.base != DefaultTheme.LIGHT { currentTheme.base } else if systemDarkThemeDefault.get() == DefaultTheme.DARK.themeName { DefaultTheme.DARK } else if systemDarkThemeDefault.get() == DefaultTheme.BLACK.themeName { DefaultTheme.BLACK } else { DefaultTheme.POPOPX }
                     let mode = themeModeOverride.mode
                     Task {
                         // Saving for both modes in one place by changing mode once per save
@@ -330,7 +330,7 @@ struct ChatWallpaperEditor: View {
                 .onChange(of: applyToMode) { mode in
                     if let mode, mode != currentTheme.base.mode {
                         let lightBase = DefaultTheme.LIGHT
-                        let darkBase = if currentTheme.base != DefaultTheme.LIGHT { currentTheme.base } else if systemDarkThemeDefault.get() == DefaultTheme.DARK.themeName { DefaultTheme.DARK } else if systemDarkThemeDefault.get() == DefaultTheme.BLACK.themeName { DefaultTheme.BLACK } else { DefaultTheme.SIMPLEX }
+                        let darkBase = if currentTheme.base != DefaultTheme.LIGHT { currentTheme.base } else if systemDarkThemeDefault.get() == DefaultTheme.DARK.themeName { DefaultTheme.DARK } else if systemDarkThemeDefault.get() == DefaultTheme.BLACK.themeName { DefaultTheme.BLACK } else { DefaultTheme.POPOPX }
                         ThemeManager.applyTheme(mode == DefaultThemeMode.light ? lightBase.themeName : darkBase.themeName)
                     }
                 }

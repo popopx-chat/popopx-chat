@@ -179,7 +179,7 @@ A foreground `Service` that keeps the app process alive for continuous message r
 
 **Notification:**
 
-- Channel: `SIMPLEX_SERVICE_NOTIFICATION` with `IMPORTANCE_LOW` and badge disabled ([line 165](../../android/src/main/java/chat/popopx/app/SimplexService.kt#L165)).
+- Channel: `POPOPX_SERVICE_NOTIFICATION` with `IMPORTANCE_LOW` and badge disabled ([line 165](../../android/src/main/java/chat/popopx/app/SimplexService.kt#L165)).
 - Shows a persistent notification with a "Hide notification" action that opens channel settings.
 - Service ID: `6789`.
 

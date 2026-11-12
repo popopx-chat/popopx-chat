@@ -29,9 +29,9 @@ class ThemeManager {
     private static func systemDarkThemeColors() -> (Colors, DefaultTheme) {
         switch systemDarkThemeDefault.get() {
         case DefaultTheme.DARK.themeName: (DarkColorPalette, DefaultTheme.DARK)
-        case DefaultTheme.SIMPLEX.themeName: (PopopxColorPalette, DefaultTheme.SIMPLEX)
+        case DefaultTheme.POPOPX.themeName: (PopopxColorPalette, DefaultTheme.POPOPX)
         case DefaultTheme.BLACK.themeName: (BlackColorPalette, DefaultTheme.BLACK)
-        default: (PopopxColorPalette, DefaultTheme.SIMPLEX)
+        default: (PopopxColorPalette, DefaultTheme.POPOPX)
         }
     }
 
@@ -69,7 +69,7 @@ class ThemeManager {
         let baseTheme = switch nonSystemThemeName {
         case DefaultTheme.LIGHT.themeName: ActiveTheme(name: DefaultTheme.LIGHT.themeName, base: DefaultTheme.LIGHT, colors: LightColorPalette.clone(), appColors: LightColorPaletteApp.clone(), wallpaper: AppWallpaper(background: nil, tint: nil, type: PresetWallpaper.school.toType(DefaultTheme.LIGHT)))
         case DefaultTheme.DARK.themeName: ActiveTheme(name: DefaultTheme.DARK.themeName, base: DefaultTheme.DARK, colors: DarkColorPalette.clone(), appColors: DarkColorPaletteApp.clone(), wallpaper: AppWallpaper(background: nil, tint: nil, type: PresetWallpaper.school.toType(DefaultTheme.DARK)))
-        case DefaultTheme.SIMPLEX.themeName: ActiveTheme(name: DefaultTheme.SIMPLEX.themeName, base: DefaultTheme.SIMPLEX, colors: PopopxColorPalette.clone(), appColors: PopopxColorPaletteApp.clone(), wallpaper: AppWallpaper(background: nil, tint: nil, type: PresetWallpaper.school.toType(DefaultTheme.SIMPLEX)))
+        case DefaultTheme.POPOPX.themeName: ActiveTheme(name: DefaultTheme.POPOPX.themeName, base: DefaultTheme.POPOPX, colors: PopopxColorPalette.clone(), appColors: PopopxColorPaletteApp.clone(), wallpaper: AppWallpaper(background: nil, tint: nil, type: PresetWallpaper.school.toType(DefaultTheme.POPOPX)))
         case DefaultTheme.BLACK.themeName: ActiveTheme(name: DefaultTheme.BLACK.themeName, base: DefaultTheme.BLACK, colors: BlackColorPalette.clone(), appColors: BlackColorPaletteApp.clone(), wallpaper: AppWallpaper(background: nil, tint: nil, type: PresetWallpaper.school.toType(DefaultTheme.BLACK)))
         default: ActiveTheme(name: DefaultTheme.LIGHT.themeName, base: DefaultTheme.LIGHT, colors: LightColorPalette.clone(), appColors: LightColorPaletteApp.clone(), wallpaper: AppWallpaper(background: nil, tint: nil, type: PresetWallpaper.school.toType(DefaultTheme.LIGHT)))
         }
@@ -148,7 +148,7 @@ class ThemeManager {
 //        let baseColors = switch theme.base {
 //        case DefaultTheme.LIGHT: LightColorPaletteApp
 //        case DefaultTheme.DARK: DarkColorPaletteApp
-//        case DefaultTheme.SIMPLEX: PopopxColorPaletteApp
+//        case DefaultTheme.POPOPX: PopopxColorPaletteApp
 //        case DefaultTheme.BLACK: BlackColorPaletteApp
 //        }
 //        let isDefaultColor = baseColors.title == theme.appColors.title

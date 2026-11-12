@@ -37,7 +37,7 @@ unset CLAUDE_CODE_OAUTH_TOKEN
 PATH=${ANDROID_HOME:?ANDROID_HOME must be the SDK from install-sdk.sh}/platform-tools:$PATH
 package=com.popopxchat.popopx
 # named after SHARED_PREFS_ID in commonMain SimpleXAPI.kt, which is not the application id
-prefs_file=com.popopxchat.popopx.SIMPLEX_APP_PREFS.xml
+prefs_file=com.popopxchat.popopx.POPOPX_APP_PREFS.xml
 # the button that opens New chat, in the toolbar or floating, whenever the chat list shows
 chat_list_button="Start new chat"
 state=${UI_STATE:-${RUNNER_TEMP:-/tmp}/ui}
