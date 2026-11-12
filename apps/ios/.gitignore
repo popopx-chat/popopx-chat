@@ -72,4 +72,5 @@ testpush.sh
 
 # Local build config and generated assets
 Local.xcconfig
+build/
 Shared/POPOPXAssets.xcassets/*.imageset
