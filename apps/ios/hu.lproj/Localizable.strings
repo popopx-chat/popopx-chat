@@ -2533,7 +2533,6 @@ chat item action */
 "Enable disappearing messages by default." = "Eltűnő üzenetek engedélyezése alapértelmezésként.";
 
 /* No comment provided by engineer. */
-"Enable Flux in Network & servers settings for better metadata privacy." = "A Flux kiszolgálókat engedélyezheti a beállításokban, a „Hálózat és kiszolgálók” menüben, a metaadatok jobb védelme érdekében.";
 
 /* No comment provided by engineer. */
 "Enable for all" = "Engedélyezés az összes tag számára";
@@ -3250,7 +3249,6 @@ servers warning */
 "For console" = "Konzolhoz";
 
 /* No comment provided by engineer. */
-"For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server." = "Például, ha a partnere egy POPOPX Chat kiszolgálón keresztül fogadja az üzeneteket, akkor az Ön alkalmazása egy Flux kiszolgálón keresztül fogja azokat kézbesíteni.";
 
 /* No comment provided by engineer. */
 "For me" = "Csak magamnak";
@@ -4360,7 +4358,6 @@ servers warning */
 "Network connection" = "Hálózati kapcsolat";
 
 /* No comment provided by engineer. */
-"Network decentralization" = "Hálózati decentralizáció";
 
 /* conn error description */
 "Network error" = "Hálózati hiba";
@@ -6826,7 +6823,6 @@ server test failure */
 "The same conditions will apply to operator **%@**." = "Ugyanezek a feltételek lesznek elfogadva a következő üzemeltető számára is: **%@**.";
 
 /* No comment provided by engineer. */
-"The second preset operator in the app!" = "A második előre beállított üzemeltető az alkalmazásban!";
 
 /* No comment provided by engineer. */
 "The second tick we missed! ✅" = "A második pipa, ami már nagyon hiányzott! ✅";

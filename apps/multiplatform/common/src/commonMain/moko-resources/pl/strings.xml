@@ -2160,7 +2160,6 @@
     <string name="group_reports_active">%d raporty</string>
     <string name="edit_chat_list_menu_action">Edytuj</string>
     <string name="v6_4_1_keep_chats_clean_descr">Włącz domyślne znikanie wiadomości.</string>
-    <string name="v6_2_network_decentralization_enable_flux">Włącz Flux w ustawieniach sieci i serwerów, aby uzyskać lepszą prywatność metadanych.</string>
     <string name="debug_logs">Włącz logi</string>
     <string name="encryption_renegotiation_in_progress">Renegocjacja szyfrowania jest w toku.</string>
     <string name="error_accepting_operator_conditions">Błąd podczas akceptacji warunków</string>
@@ -2195,7 +2194,6 @@
     <string name="sync_connection_question">Naprawić połączenie?</string>
     <string name="report_archive_for_all_moderators">Dla wszystkich moderatorów</string>
     <string name="for_chat_profile">Dla profilu czatu %s:</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">Na przykład, jeśli kontakt otrzyma wiadomości za pośrednictwem serwera czatu POPOPX, aplikacja dostarczy je za pośrednictwem serwera Flux.</string>
     <string name="report_archive_for_me">Dla mnie</string>
     <string name="operator_use_for_messages_private_routing">Dla prywatnego routingu</string>
     <string name="for_social_media">Dla mediów społecznościowych</string>
@@ -2239,7 +2237,6 @@
     <string name="group_member_role_moderator">moderator</string>
     <string name="feature_roles_moderators">moderatorzy</string>
     <string name="mute_all_chat">Wycisz wszystko</string>
-    <string name="v6_2_network_decentralization">Decentralizacja sieci</string>
     <string name="operator_info_title">Operator sieci</string>
     <string name="onboarding_network_operators">Operatorzy sieci</string>
     <string name="v6_4_role_moderator">Nowa rola w grupie: Moderator</string>
@@ -2385,7 +2382,6 @@
     <string name="connection_error_quota_desc">Połączenie osiągnęło limit niedostarczonych wiadomości, Twój kontakt może być offline.</string>
     <string name="share_group_profile_via_link_alert_text">Link będzie krótki, a profil grupowy zostanie udostępniony poprzez link.</string>
     <string name="member_role_will_be_changed_with_notification_chat">Rola zostanie zmieniona na %s. Wszyscy uczestnicy czatu zostaną powiadomieni.</string>
-    <string name="v6_2_network_decentralization_descr">Drugi predefiniowany operator w aplikacji!</string>
     <string name="the_sender_will_not_be_notified">Nadawca NIE zostanie poinformowany.</string>
     <string name="xftp_servers_per_user">Serwery dla nowych plików Twojego bieżącego profilu czatu</string>
     <string name="change_automatic_chat_deletion_message">Tej akcji nie można cofnąć - wiadomości wysłane i otrzymane na tym czacie wcześniej niż wybrane zostaną usunięte.</string>

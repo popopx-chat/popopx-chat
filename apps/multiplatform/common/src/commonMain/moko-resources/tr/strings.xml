@@ -2085,7 +2085,6 @@
     <string name="edit_chat_list_menu_action">Düzenle</string>
     <string name="for_social_media">Sosyal medya için</string>
     <string name="create_1_time_link">Tek kullanımlık bağlantı oluştur</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">Örneğin, eğer kişiniz POPOPX Sohbet sunucusundan mesajları alıyorsa, uygulamanız bu mesajları Flux sunucusundan iletecektir.</string>
     <string name="chat_item_ttl_default">varsayılan (%s)</string>
     <string name="block_members_desc">Bu üyelerden gelen yeni mesajların hepsi gizlenecektir.</string>
     <string name="v6_3_better_groups_performance">İyileştirilmiş grup performansı</string>
@@ -2130,8 +2129,6 @@
     <string name="how_it_helps_privacy">Gizliliğe nasıl yardım ediyor</string>
     <string name="duplicated_list_error">Liste adı ve emoji tüm listeler için farklı olmalıdır.</string>
     <string name="mute_all_chat">Herkesi sustur</string>
-    <string name="v6_2_network_decentralization">Ağ merkezsizleştirme</string>
-    <string name="v6_2_network_decentralization_enable_flux">Daha iyi meta veri gizliliği için Ağ ve sunucular ayarlarında Flux\'u etkinleştirin.</string>
     <string name="disable_automatic_deletion">Mesaj silme özelliğini devre dışı bırak</string>
     <string name="disable_automatic_deletion_message">Bu sohbetteki mesajlar asla silinmeyecektir.</string>
     <string name="error_accepting_member">Üyeyi kabul ederken hata oluştu</string>
@@ -2251,7 +2248,6 @@
     <string name="operator_open_changes">Açık değişiklikler</string>
     <string name="view_conditions">Koşulları görüntüle</string>
     <string name="set_member_admission">Üye kabulü</string>
-    <string name="v6_2_network_decentralization_descr">Uygulamadaki ikinci önceden ayarlanmış operatör!</string>
     <string name="add_short_link">Adresi güncelle</string>
     <string name="onboarding_conditions_privacy_policy_and_conditions_of_use">Gizlilik politikası ve kullanım koşulları.</string>
     <string name="onboarding_choose_server_operators">Sunucu operatörleri</string>

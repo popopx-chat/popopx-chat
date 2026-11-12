@@ -1344,7 +1344,6 @@
     <string name="onboarding_network_operators_continue">Tiếp tục</string>
     <string name="operator_conditions_failed_to_load">Không thể tải văn bản về các điều kiện hiện tại, bạn có thể xem xét các điều kiện thông qua đường dẫn này:</string>
     <string name="operator_conditions_of_use">Các điều kiện sử dụng</string>
-    <string name="v6_2_network_decentralization_enable_flux">Sử dụng Flux trong cài đặt Mạng &amp; máy chủ để bảo mật siêu dữ liệu tốt hơn.</string>
     <string name="operator_conditions_will_be_accepted_on">Các điều kiện sẽ được chấp nhận vào: %s.</string>
     <string name="error_adding_server">Lỗi thêm máy chủ</string>
     <string name="error_updating_server_title">Lỗi cập nhật máy chủ</string>
@@ -1368,7 +1367,6 @@
     <string name="direct_messages_are_prohibited_in_chat">Tin nhắn trực tiếp giữa các thành viên bị cấm trong cuộc trò chuyện này.</string>
     <string name="for_chat_profile">Dành cho hồ sơ trò chuyện %s:</string>
     <string name="onboarding_notifications_mode_periodic_desc_short">Kiểm tra tin nhắn mỗi 10 phút.</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">Ví dụ, nếu liên hệ của bạn nhận tin nhắn thông qua một máy chủ POPOPX Chat, ứng dụng của bạn sẽ gửi chúng qua một máy chủ Flux.</string>
     <string name="how_it_helps_privacy">Cách nó cải thiện sự riêng tư</string>
     <string name="invite_to_chat_button">Mời để trò chuyện</string>
     <string name="button_leave_chat">Rời cuộc trò chuyện</string>
@@ -1414,7 +1412,6 @@
     <string name="only_chat_owners_can_change_prefs">Chỉ có các chủ cuộc trò chuyện mới có thể thay đổi các tùy chọn.</string>
     <string name="member_will_be_removed_from_chat_cannot_be_undone">Thành viên sẽ bị xóa khỏi cuộc trò chuyện - việc này không thể được hoàn tác!</string>
     <string name="operator_info_title">Nhà cung cấp mạng</string>
-    <string name="v6_2_network_decentralization">Phi tập trung hóa mạng lưới</string>
     <string name="message_deleted_or_not_received_error_title">Không có tin nhắn</string>
     <string name="no_chats">Không có cuộc trò chuyện nào</string>
     <string name="no_chats_found">Không tìm thấy cuộc trò chuyện nào</string>
@@ -1906,7 +1903,6 @@
     <string name="in_developing_desc">Tính năng này chưa được hỗ trợ. Hãy thử bản phát hành tiếp theo.</string>
     <string name="v5_2_message_delivery_receipts_descr">Dấu tick thứ hai mà chúng ta từng thiếu! ✅</string>
     <string name="xftp_servers_per_user">Những máy chủ cho tệp mới của hồ sơ trò chuyện hiện tại của bạn</string>
-    <string name="v6_2_network_decentralization_descr">Bên vận hành được cài sẵn thứ hai trong ứng dụng!</string>
     <string name="member_role_will_be_changed_with_notification_chat">Chức vụ sẽ được đổi thành %s. Tất cả mọi người trong cuộc trò chuyện sẽ được thông báo.</string>
     <string name="the_text_you_pasted_is_not_a_link">Văn bản bạn vừa dán không phải là một đường dẫn POPOPX.</string>
     <string name="member_role_will_be_changed_with_invitation">Chức vụ sẽ được đổi thành %s. Thành viên sẽ nhận được một lời mời mới.</string>

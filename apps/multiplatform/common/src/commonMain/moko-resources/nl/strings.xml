@@ -2075,10 +2075,6 @@
     <string name="server_added_to_operator__name">Server toegevoegd aan operator %s.</string>
     <string name="appearance_in_app_bars_alpha">Transparantie</string>
     <string name="v6_2_improved_chat_navigation">Verbeterde chatnavigatie</string>
-    <string name="v6_2_network_decentralization">Netwerk decentralisatie</string>
-    <string name="v6_2_network_decentralization_descr">De tweede vooraf ingestelde operator in de app!</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">Als uw contactpersoon bijvoorbeeld berichten ontvangt via een POPOPX Chat-server, worden deze door uw app via een Flux-server verzonden.</string>
-    <string name="v6_2_network_decentralization_enable_flux">Schakel Flux in bij Netwerk- en serverinstellingen voor betere privacy van metagegevens.</string>
     <string name="message_deleted_or_not_received_error_title">Geen bericht</string>
     <string name="appearance_app_toolbars">App-werkbalken</string>
     <string name="appearance_bars_blur_radius">Vervagen</string>

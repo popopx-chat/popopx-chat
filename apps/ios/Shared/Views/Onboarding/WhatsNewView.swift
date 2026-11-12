@@ -531,11 +531,6 @@ private let versionDescriptions: [VersionDescription] = [
         version: "v6.2",
         post: URL(string: "https://simplex.chat/blog/20241210-simplex-network-v6-2-servers-by-flux-business-chats.html"),
         features: [
-            .view(FeatureView(
-                icon: nil,
-                title: "Network decentralization",
-                view: { NewOperatorsView() }
-            )),
             .feature(Description(
                 icon: "briefcase",
                 title: "Business chats",
@@ -772,23 +767,6 @@ fileprivate struct SupporterBadgeWhatsNew: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-    }
-}
-
-fileprivate struct NewOperatorsView: View {
-    var body: some View {
-        VStack(alignment: .leading) {
-            Image((operatorsInfo[.flux] ?? ServerOperator.dummyOperatorInfo).largeLogo)
-                .resizable()
-                .scaledToFit()
-                .frame(height: 48)
-            Text("The second preset operator in the app!")
-                .multilineTextAlignment(.leading)
-                .lineLimit(10)
-            HStack {
-                Text("Enable Flux in Network & servers settings for better metadata privacy.")
-            }
-        }
     }
 }
 

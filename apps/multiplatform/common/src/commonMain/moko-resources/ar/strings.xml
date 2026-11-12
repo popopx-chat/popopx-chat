@@ -2068,9 +2068,6 @@
     <string name="appearance_app_toolbars">أشرطة أدوات التطبيق</string>
     <string name="appearance_bars_blur_radius">تمويه</string>
     <string name="appearance_in_app_bars_alpha">الشفافية</string>
-    <string name="v6_2_network_decentralization_enable_flux">فعّل flux في إعدادات الشبكة والخوادم لتحسين خصوصية البيانات الوصفية.</string>
-    <string name="v6_2_network_decentralization">اللامركزية الشبكية</string>
-    <string name="v6_2_network_decentralization_descr">المُشغل المُعد مسبقًا الثاني في التطبيق!</string>
     <string name="v6_2_improved_chat_navigation">تحسين التنقل في الدردشة</string>
     <string name="view_updated_conditions">اعرض الشروط المُحدثة</string>
     <string name="accept_conditions">اقبل الشروط</string>
@@ -2081,7 +2078,6 @@
     <string name="operator_conditions_failed_to_load">لا يمكن تحميل نص الشروط الحالية، يمكنك مراجعة الشروط عبر هذا الرابط:</string>
     <string name="error_accepting_operator_conditions">خطأ في قبول الشروط</string>
     <string name="failed_to_save_servers">خطأ في حفظ الخوادم</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">على سبيل المثال، إذا استلم أحد جهات اتصالك رسائل عبر خادم POPOPX Chat، فسيقوم تطبيقك بتسليمها عبر خادم Flux.</string>
     <string name="no_message_servers_configured_for_private_routing">لا يوجد خوادم لتوجيه الرسائل الخاصة.</string>
     <string name="no_message_servers_configured">لا يوجد خوادم رسائل.</string>
     <string name="no_media_servers_configured_for_private_routing">لا يوجد خوادم لاستلام الملفات.</string>

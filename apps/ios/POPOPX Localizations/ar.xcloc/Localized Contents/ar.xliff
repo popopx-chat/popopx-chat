@@ -3026,10 +3026,6 @@ This is your own one-time link!</source>
         <source>Enable (keep overrides)</source>
         <target state="translated">تفعيل (الاحتفاظ بالتجاوزات)</target>
       </trans-unit>
-      <trans-unit id="Enable Flux" xml:space="preserve" approved="no">
-        <source>Enable Flux</source>
-        <target state="translated">فعّل flux</target>
-      </trans-unit>
       <trans-unit id="Enable in direct chats (BETA)!" xml:space="preserve" approved="no">
         <source>Enable in direct chats (BETA)!</source>
         <target state="translated">فعّل في الدردشات المباشرة (تجريبي)!</target>
@@ -3300,10 +3296,7 @@ This is your own one-time link!</source>
         <source>Configure server operators</source>
         <target state="translated">تكوين مشغلي الخادم</target>
       </trans-unit>
-      <trans-unit id="Enable Flux in Network &amp; servers settings for better metadata privacy." xml:space="preserve" approved="no">
-        <source>Enable Flux in Network &amp; servers settings for better metadata privacy.</source>
-        <target state="translated">تمكين التدفق في إعدادات الشبكة والخوادم لتحسين خصوصية البيانات الوصفية.</target>
-      </trans-unit>
+      
       <trans-unit id="Discover and join groups" xml:space="preserve" approved="no">
         <source>Discover and join groups</source>
         <target state="translated">اكتشف المجموعات وانضم إليها</target>

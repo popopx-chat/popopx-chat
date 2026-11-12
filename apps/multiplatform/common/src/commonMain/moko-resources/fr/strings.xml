@@ -2088,7 +2088,6 @@
     <string name="chat_list_favorites">Favoris</string>
     <string name="group_reports_active">%d rapports</string>
     <string name="group_member_role_moderator">modérateur(trice)</string>
-    <string name="v6_2_network_decentralization">Décentralisation du réseau</string>
     <string name="report_item_visibility_submitter">Seuls vous et les modérateurs le voient</string>
     <string name="report_item_visibility_moderators">Seuls l\'expéditeur et les modérateurs le voient</string>
     <string name="failed_to_save_servers">Erreur d\'enregistrement des serveurs</string>
@@ -2120,10 +2119,8 @@
     <string name="xftp_servers_per_user">Les serveurs pour les nouveaux fichiers de votre profil de messagerie actuel</string>
     <string name="operator_server_alert_title">Serveur de l\'opérateur</string>
     <string name="error_server_protocol_changed">Le protocole du serveur a été modifié.</string>
-    <string name="v6_2_network_decentralization_enable_flux">Activez Flux dans les paramètres Réseau et serveurs pour une meilleure confidentialité des métadonnées.</string>
     <string name="message_deleted_or_not_received_error_desc">Ce message a été supprimé ou n\'a pas encore été reçu.</string>
     <string name="share_address_publicly">Partager publiquement votre adresse</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">Par exemple, si votre contact reçoit des messages via un serveur POPOPX Chat, votre application les transmettra via un serveur Flux.</string>
     <string name="only_chat_owners_can_change_prefs">Seuls les propriétaires peuvent modifier les préférences.</string>
     <string name="member_role_will_be_changed_with_notification_chat">Le rôle sera remplacé par %s. Tous les participants à la conversation en seront informés.</string>
     <string name="error_creating_chat_tags">Erreur lors de la création d\'une liste de conversations</string>
@@ -2152,7 +2149,6 @@
     <string name="maximum_message_size_reached_non_text">Veuillez réduire la taille du message ou supprimer le média et renvoyer le message.</string>
     <string name="v6_2_improved_chat_navigation_descr">- Premier message non lu à l\'ouverture.\n- Sauter aux messages cités.</string>
     <string name="v6_2_business_chats_descr">Respect de la vie privée de vos clients.</string>
-    <string name="v6_2_network_decentralization_descr">Le deuxième opérateur prédéfini de l\'application !</string>
     <string name="error_adding_server">Erreur lors de l\'ajout du serveur</string>
     <string name="error_saving_database">Erreur d\'enregistrement de la base de données</string>
     <string name="report_compose_reason_header_illegal">Signaler un contenu : seuls les modérateurs du groupe le verront.</string>

@@ -1915,7 +1915,6 @@
     <string name="v6_3_organize_chat_lists_descr">אל תחמיץ הודעות חשובות.</string>
     <string name="v6_0_upgrade_app_descr">הורד גרסאות חדשות מ GitHub.</string>
     <string name="report_reason_profile">פרופיל לא הולם</string>
-    <string name="v6_2_network_decentralization_enable_flux">אפשר Flux בהגדרות רשת ושרתים בשביל לשפר את הפרטיות של המטא דאטא</string>
     <string name="compose_forward_messages_n">מעביר %1$s הודעות</string>
     <string name="error_reading_passphrase">שגיאה בקריאת משפט-סיסמה של מסד נתונים</string>
     <string name="group_members_can_send_reports">משתמשים יכולים לדווח על הודעות לאחראי תוכן</string>
@@ -2035,7 +2034,6 @@
     <string name="servers_info_private_data_disclaimer">החל מ-%s.\nכל הנתונים נשמרים פרטיים במכשיר שלך.</string>
     <string name="network_smp_web_port_all">כל השרתים</string>
     <string name="onboarding_conditions_private_chats_not_accessible">צ\'אטים פרטיים, קבוצות ואנשי הקשר שלך אינם נגישים למפעילי השרת.</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">לדוגמה, אם איש הקשר שלך מקבל הודעות דרך שרת POPOPX Chat, האפליקציה שלך תעביר אותן דרך שרת Flux.</string>
     <string name="onboarding_conditions_privacy_policy_and_conditions_of_use">מדיניות פרטיות ותנאי שימוש.</string>
     <string name="privacy_chat_list_open_links_no">לא</string>
     <string name="settings_message_shape_tail">זנב לבועה</string>

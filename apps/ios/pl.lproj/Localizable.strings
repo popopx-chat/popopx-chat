@@ -2161,7 +2161,6 @@ chat item action */
 "Enable disappearing messages by default." = "Włącz domyślnie znikające wiadomości.";
 
 /* No comment provided by engineer. */
-"Enable Flux in Network & servers settings for better metadata privacy." = "Włącz opcję Flux w ustawieniach sieci i serwerów, aby zapewnić lepszą prywatność metadanych.";
 
 /* No comment provided by engineer. */
 "Enable for all" = "Włącz dla wszystkich";
@@ -2791,7 +2790,6 @@ servers warning */
 "For console" = "Dla konsoli";
 
 /* No comment provided by engineer. */
-"For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server." = "Na przykład, jeśli Twój kontakt odbiera wiadomości za pośrednictwem serwera POPOPX Chat, Twoja aplikacja będzie je dostarczać za pośrednictwem serwera Flux.";
 
 /* No comment provided by engineer. */
 "For me" = "Dla mnie";
@@ -3802,7 +3800,6 @@ servers warning */
 "Network connection" = "Połączenie z siecią";
 
 /* No comment provided by engineer. */
-"Network decentralization" = "Decentralizacja sieci";
 
 /* snd error text */
 "Network issues - message expired after many attempts to send it." = "Błąd sieciowy - wiadomość wygasła po wielu próbach wysłania jej.";
@@ -5936,7 +5933,6 @@ server test failure */
 "The same conditions will apply to operator **%@**." = "Te same warunki będą miały zastosowanie do operatora **%@**.";
 
 /* No comment provided by engineer. */
-"The second preset operator in the app!" = "Drugi predefiniowany operator w aplikacji!";
 
 /* No comment provided by engineer. */
 "The second tick we missed! ✅" = "Drugi tik, który przegapiliśmy! ✅";

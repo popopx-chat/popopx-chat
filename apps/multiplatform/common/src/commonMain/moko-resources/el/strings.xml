@@ -840,7 +840,6 @@
     <string name="feature_enabled_for_contact">ενεργοποιημένο για την επαφή</string>
     <string name="feature_enabled_for_you">ενεργοποιημένο για εσένα</string>
     <string name="v6_4_1_keep_chats_clean_descr">Ενεργοποίηση μηνυμάτων που εξαφανίζονται από προεπιλογή.</string>
-    <string name="v6_2_network_decentralization_enable_flux">Ενεργοποίησε το Flux στις ρυθμίσεις Δικτύου &amp; διακομιστών για καλύτερη προστασία μεταδεδομένων.</string>
     <string name="receipts_contacts_enable_for_all">Ενεργοποίηση για όλα</string>
     <string name="receipts_groups_enable_for_all">Ενεργοποίηση για όλες τις ομάδες</string>
     <string name="v5_6_quantum_resistant_encryption_descr">Ενεργοποίηση στις άμεσες συνομιλίες (ΔΟΚΙΜΑΣΤΙΚΟ)!</string>
@@ -903,7 +902,6 @@
     <string name="for_chat_profile">Για το προφίλ συνομιλίας %s:</string>
     <string name="section_title_for_console">Για κονσόλα</string>
     <string name="for_everybody">Για όλους</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">Για παράδειγμα, αν η επαφή σου λαμβάνει μηνύματα μέσω κάποιου POPOPX Chat διακομιιστή, η εφαρμογή σου θα τα παραδίδει μέσω ενός Flux διακομιστή.</string>
     <string name="report_archive_for_me">Για μένα</string>
     <string name="operator_use_for_messages_private_routing">Για ιδιωτική δρομολόγηση</string>
     <string name="for_social_media">Για μέσα κοινωνικής δικτύωσης</string>
@@ -1236,7 +1234,6 @@
     <string name="mute_all_chat">Σίγαση όλων</string>
     <string name="muted_when_inactive">Σε σίγαση όταν είναι ανενεργό!</string>
     <string name="settings_section_title_network_connection">Σύνδεση δικτύου</string>
-    <string name="v6_2_network_decentralization">Αποκέντρωση δικτύου</string>
     <string name="snd_error_expired">Προβλήματα δικτύου - το μήνυμα έληξε μετά από πολλές προσπάθειες αποστολής.</string>
     <string name="v5_7_network">Διαχείριση δικτύου</string>
     <string name="operator_info_title">Χειριστής δικτύου</string>
@@ -1308,7 +1305,6 @@
     <string name="member_role_will_be_changed_with_notification_chat">Ο ρόλος θα αλλάξει σε %s. Όλοι οι συμμετέχοντες στη συνομιλία θα ειδοποιηθούν.</string>
     <string name="member_role_will_be_changed_with_notification">Ο ρόλος θα αλλάξει σε %s. Όλα τα μέλη της ομάδας θα ενημερωθούν.</string>
     <string name="member_role_will_be_changed_with_invitation">Ο ρόλος θα αλλάξει σε %s. Το μέλος θα λάβει νέα πρόσκληση.</string>
-    <string name="v6_2_network_decentralization_descr">Ο δεύτερος προκαθορισμένος χειριστής στην εφαρμογή!</string>
     <string name="v5_2_message_delivery_receipts_descr">Το δεύτερο τικ που χάσαμε! ✅</string>
     <string name="the_sender_will_not_be_notified">Ο αποστολέας ΔΕΝ θα ειδοποιηθεί.</string>
     <string name="smp_servers_per_user">Οι διακομιστές για τις νέες συνδέσεις του τρέχοντος προφίλ συνομιλίας σου</string>

@@ -2283,7 +2283,6 @@
     <string name="onboarding_network_operators">ネットワーク運営者</string>
     <string name="onboarding_network_operators_app_will_use_different_operators">アプリは会話ごとに異なる運営者を使用することで、あなたのプライバシーを保護します。</string>
     <string name="onboarding_network_operators_cant_see_who_talks_to_whom">複数の運営者が有効な場合、どの運営者も誰が誰と通信しているかを知るためのメタデータを持ちません。</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">例えば、あなたの連絡先がPOPOPX Chatのサーバ経由でメッセージを受信する場合、あなたのアプリはFluxのサーバ経由でそれらを配信します。</string>
     <string name="how_it_helps_privacy">プライバシーにどう役立つか</string>
     <string name="onboarding_your_network">あなたのネットワーク</string>
     <string name="onboarding_network_routers_cannot_know">ネットワークのルーターは\n誰が誰と話しているかを知ることができません</string>
@@ -2499,9 +2498,6 @@
     <string name="v6_1_better_calls_descr">通話中に音声とビデオを切り替えられます。</string>
     <string name="v6_1_switch_chat_profile_descr">ワンタイム招待ごとにチャットプロフィールを切り替えられます。</string>
     <string name="v6_1_forward_many_messages_descr">一度に最大20件のメッセージを転送できます。</string>
-    <string name="v6_2_network_decentralization">ネットワークの分散化</string>
-    <string name="v6_2_network_decentralization_descr">アプリに2番目のプリセット運営者が登場！</string>
-    <string name="v6_2_network_decentralization_enable_flux">メタデータのプライバシー向上のため、「ネットワークとサーバ」設定でFluxを有効にしてください。</string>
     <string name="v6_2_improved_chat_navigation">チャットナビゲーションの改善</string>
     <string name="v6_2_improved_chat_navigation_descr">- 最初の未読メッセージでチャットを開きます。\n- 引用されたメッセージにジャンプします。</string>
     <string name="v6_2_business_chats">ビジネスチャット</string>

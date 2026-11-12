@@ -356,7 +356,6 @@ struct ChooseServerOperatorsInfoView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("The app protects your privacy by using different operators in each conversation.")
                     Text("When more than one operator is enabled, none of them has metadata to learn who communicates with whom.")
-                    Text("For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server.")
                 }
                 .fixedSize(horizontal: false, vertical: true)
                 .listRowBackground(Color.clear)

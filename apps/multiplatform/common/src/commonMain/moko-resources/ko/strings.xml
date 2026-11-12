@@ -1425,7 +1425,6 @@
     <string name="operator_conditions_accepted_for_enabled_operators_on">%s:에서 활성화된 운영자에 대한 약관이 자동으로 수락됩니다.</string>
     <string name="operator_conditions_failed_to_load">현재 약관 텍스트를 로드할 수 없습니다, 다음 링크를 통해 약관을 검토할 수 있습니다:</string>
     <string name="operator_conditions_of_use">사용 약관</string>
-    <string name="v6_2_network_decentralization_enable_flux">Flux 활성화</string>
     <string name="onboarding_notifications_mode_service_desc_short">앱이 항상 백그라운드에서 실행</string>
     <string name="button_add_team_members">팀 멤버 추가하기</string>
     <string name="button_add_friends">친구 추가</string>

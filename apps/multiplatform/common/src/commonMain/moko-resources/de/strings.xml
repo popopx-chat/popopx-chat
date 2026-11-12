@@ -2120,7 +2120,6 @@
     <string name="onboarding_choose_server_operators">Server-Betreiber</string>
     <string name="onboarding_network_operators">Netzwerk-Betreiber</string>
     <string name="onboarding_network_operators_app_will_use_different_operators">Die App verwendet für jede Unterhaltung Server von unterschiedlichen Betreibern, um Ihre Privatsphäre zu schützen.</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">Wenn Ihr Kontakt beispielsweise Nachrichten über einen POPOPX-Chat-Server empfängt, wird Ihre App diese über einen Flux-Server versenden.</string>
     <string name="onboarding_network_operators_configure_via_settings">Sie können die Server über die Einstellungen konfigurieren.</string>
     <string name="onboarding_network_operators_continue">Weiter</string>
     <string name="network_preset_servers_title">Voreingestellte Server</string>
@@ -2153,9 +2152,6 @@
     <string name="error_server_operator_changed">Der Server-Betreiber wurde geändert.</string>
     <string name="error_server_protocol_changed">Das Server-Protokoll wurde geändert.</string>
     <string name="appearance_in_app_bars_alpha">Transparenz</string>
-    <string name="v6_2_network_decentralization_enable_flux">Für einen besseren Metadatenschutz Flux in den Netzwerk- und Servereinstellungen aktivieren.</string>
-    <string name="v6_2_network_decentralization">Dezentralisiertes Netzwerk</string>
-    <string name="v6_2_network_decentralization_descr">Der zweite voreingestellte Netzwerk-Betreiber in der App!</string>
     <string name="v6_2_improved_chat_navigation">Verbesserte Chat-Navigation</string>
     <string name="v6_2_improved_chat_navigation_descr">- Den Chat bei der ersten ungelesenen Nachricht öffnen.\n- Zu zitierten Nachrichten springen.</string>
     <string name="view_updated_conditions">Aktualisierte Nutzungsbedingungen anschauen</string>

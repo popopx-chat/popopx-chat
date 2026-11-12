@@ -3541,11 +3541,7 @@ chat item action</note>
         <target state="translated">Aktivləşdirin (əvəzləmələri saxlayın)</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Enable Flux in Network &amp; servers settings for better metadata privacy." xml:space="preserve" approved="no">
-        <source>Enable Flux in Network &amp; servers settings for better metadata privacy.</source>
-        <target state="translated">Daha yaxşı metaməlumat məxfiliyi üçün Şəbəkə və server parametrlərində Flux aktivləşdirin.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="Enable POPOPX Lock" xml:space="preserve" approved="no">
         <source>Enable POPOPX Lock</source>
         <target state="translated">POPOPX Lock-u aktivləşdirin</target>
@@ -4556,11 +4552,7 @@ servers warning</note>
         <target state="translated">Konsol üçün</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server." xml:space="preserve" approved="no">
-        <source>For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server.</source>
-        <target state="translated">Məsələn, əgər əlaqə saxladığınız şəxs mesajları POPOPX Chat serveri vasitəsilə qəbul edirsə, tətbiqiniz onları Flux serveri vasitəsilə çatdıracaq.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="For me" xml:space="preserve" approved="no">
         <source>For me</source>
         <target state="translated">Mənim üçün</target>

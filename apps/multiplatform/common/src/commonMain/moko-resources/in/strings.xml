@@ -1534,7 +1534,6 @@
     <string name="onboarding_notifications_mode_off_desc_short">Tiada layanan latar belakang</string>
     <string name="onboarding_notifications_mode_service_desc_short">Aplikasi selalu berjalan di latar belakang</string>
     <string name="onboarding_notifications_mode_periodic_desc_short">Periksa pesan setiap 10 menit</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">Misalnya, jika kontak Anda menerima pesan melalui server POPOPX Chat, aplikasi Anda akan mengirimkannya melalui server Flux.</string>
     <string name="how_it_helps_privacy">Bagaimana ini membantu privasi</string>
     <string name="onboarding_network_operators_continue">Lanjutkan</string>
     <string name="onboarding_network_operators_configure_via_settings">Anda dapat konfigurasi server di pengaturan.</string>
@@ -1634,7 +1633,6 @@
     <string name="conn_event_ratchet_sync_allowed">negosiasi ulang enkripsi diperbolehkan</string>
     <string name="conn_event_ratchet_sync_required">negosiasi ulang enkripsi diperlukan</string>
     <string name="snd_conn_event_ratchet_sync_allowed">negosiasi ulang enkripsi diizinkan untuk %s</string>
-    <string name="v6_2_network_decentralization_enable_flux">Aktifkan Flux di pengaturan Jaringan dan server untuk privasi metadata yang lebih baik.</string>
     <string name="v6_2_improved_chat_navigation">Navigasi obrolan ditingkatkan</string>
     <string name="error">Galat</string>
     <string name="migrate_to_device_finalize_migration">Selesaikan migrasi pada perangkat lain.</string>
@@ -1761,7 +1759,6 @@
     <string name="info_row_sent_at">Dikirim pada</string>
     <string name="info_row_received_at">Diterima pada</string>
     <string name="network_options_reset_to_defaults">Reset ke bawaan</string>
-    <string name="v6_2_network_decentralization">Jaringan desentralisasi</string>
     <string name="sending_delivery_receipts_will_be_enabled">Kirim tanda terima pengirim akan diaktifkan untuk semua kontak.</string>
     <string name="linked_desktops">Desktop terhubung</string>
     <string name="migrate_to_device_bytes_downloaded">%s diunduh</string>
@@ -2003,7 +2000,6 @@
     <string name="view_conditions">Lihat ketentuan</string>
     <string name="xftp_servers_per_user">Server untuk berkas baru dari profil obrolan Anda saat ini</string>
     <string name="v6_0_upgrade_app">Perbarui aplikasi secara otomatis</string>
-    <string name="v6_2_network_decentralization_descr">Operator prasetel kedua dalam aplikasi!</string>
     <string name="view_updated_conditions">Lihat ketentuan yang diperbarui</string>
     <string name="this_device_name_shared_with_mobile">Nama perangkat akan dibagikan dengan klien seluler yang terhubung.</string>
     <string name="remote_ctrl_error_timeout">Batas waktu tercapai saat menghubungkan ke desktop</string>

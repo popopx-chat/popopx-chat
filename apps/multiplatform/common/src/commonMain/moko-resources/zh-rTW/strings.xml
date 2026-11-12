@@ -1973,7 +1973,6 @@
     <string name="blocking_reason_content">內容違反使用條款</string>
     <string name="disable_automatic_deletion_question">停用自動刪除訊息？</string>
     <string name="v6_1_delete_many_messages_descr">刪除或審查最多 200 條訊息。</string>
-    <string name="v6_2_network_decentralization_enable_flux">於網路和伺服器設定中啟用 Flux 以獲得更好的元資料隱私。</string>
     <string name="operator_conditions_of_use">使用條款</string>
     <string name="v6_3_better_privacy_and_security">更好的隱私和安全性</string>
     <string name="migrate_from_device_try_again">你可以再試一次。</string>
@@ -2011,7 +2010,6 @@
     <string name="operator_use_for_messages_receiving">接收</string>
     <string name="operator_open_conditions">開啟使用條款</string>
     <string name="operator_open_changes">開啟變更</string>
-    <string name="v6_2_network_decentralization">網路去中心化</string>
     <string name="leave_chat_question">離開聊天？</string>
     <string name="button_leave_chat">離開聊天</string>
     <string name="debug_logs">啟用日誌</string>
@@ -2363,7 +2361,6 @@
     <string name="onboarding_conditions_privacy_policy_and_conditions_of_use">私隱政策與使用條件。</string>
     <string name="onboarding_network_operators_app_will_use_different_operators">應用程式會在每個對話中使用不同營運商，以保護你的私隱。</string>
     <string name="onboarding_network_operators_cant_see_who_talks_to_whom">啟用多於一個營運商時，沒有任何一方擁有足以得知誰與誰通訊的中繼資料。</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">例如，如果你的聯絡人透過 POPOPX Chat 伺服器接收訊息，你的應用程式會透過 Flux 伺服器傳送訊息。</string>
     <string name="how_it_helps_privacy">這如何有助於私隱</string>
     <string name="onboarding_network_operators_configure_via_settings">你可以透過設定配置伺服器。</string>
     <string name="onboarding_your_network">你的網路</string>
@@ -2580,7 +2577,6 @@
     <string name="v6_1_better_calls_descr">通話期間切換語音和視訊。</string>
     <string name="v6_1_switch_chat_profile_descr">為一次性邀請切換聊天個人檔案。</string>
     <string name="v6_1_forward_many_messages_descr">一次最多轉發 20 則訊息。</string>
-    <string name="v6_2_network_decentralization_descr">應用程式中的第二個預設營運商！</string>
     <string name="v6_2_improved_chat_navigation">改進的聊天導覽</string>
     <string name="v6_2_improved_chat_navigation_descr">- 在第一則未讀訊息處開啟聊天。\n- 跳至引用的訊息。</string>
     <string name="v6_2_business_chats_descr">你的客戶私隱。</string>

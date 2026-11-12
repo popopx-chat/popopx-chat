@@ -939,7 +939,6 @@
     <string name="network_option_enable_tcp_keep_alive">Activați funcția TCP keep-alive</string>
     <string name="muted_when_inactive">Fără sunet când este inactiv!</string>
     <string name="v5_8_chat_themes">Teme noi pentru conversații</string>
-    <string name="v6_2_network_decentralization">Descentralizarea rețelei</string>
     <string name="other_label">altul</string>
     <string name="images_limit_desc">Doar 10 imagini pot fi trimise simultan</string>
     <string name="maximum_message_size_title">Mesajul este prea mare!</string>
@@ -1187,7 +1186,6 @@
     <string name="v5_1_japanese_portuguese_interface">Interfață în japoneză și portugheză</string>
     <string name="v5_5_new_interface_languages">Interfață de utilizator maghiară și turcă</string>
     <string name="v5_7_forward">Redirecționează și salvează mesajele</string>
-    <string name="v6_2_network_decentralization_enable_flux">Activează Flux în setările Rețea și servere pentru o mai bună confidențialitate a metadatelor.</string>
     <string name="v6_1_forward_many_messages_descr">Redirecționați până la 20 de mesaje simultan.</string>
     <string name="v6_3_organize_chat_lists_descr">Nu rata mesajele importante.</string>
     <string name="v6_3_organize_chat_lists">Organizează conversațiile în liste</string>
@@ -1384,7 +1382,6 @@
     <string name="expired_label">expirat</string>
     <string name="app_check_for_updates_button_download">Descărcați %s (%s)</string>
     <string name="app_check_for_updates_button_install">Instalează actualizarea</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">De exemplu, dacă un contact al tău primește mesaje printr-un server POPOPX Chat, aplicația ta le va trimite printr-un server Flux.</string>
     <string name="call_desktop_permission_denied_safari">Deschide Setările Safari / Site-uri web / Microfon, apoi selectează Permite pentru localhost.</string>
     <string name="icon_descr_call_missed">Apel ratat</string>
     <string name="alert_text_encryption_renegotiation_failed">Renegocierea criptării a eșuat.</string>
@@ -1978,7 +1975,6 @@
     <string name="v5_4_link_mobile_desktop_descr">Prin protocol securizat de rezistență cuantică.</string>
     <string name="v5_5_private_notes_descr">Cu fișiere și media criptate.</string>
     <string name="v5_7_quantum_resistant_encryption_descr">Va fi activat în conversațiile directe!</string>
-    <string name="v6_2_network_decentralization_descr">Al doilea operator presetat din aplicație!</string>
     <string name="view_updated_conditions">Vizualizați condițiile actualizate</string>
     <string name="verify_connection">Verificați conexiunea</string>
     <string name="you_can_enable_delivery_receipts_later_alert">Le poți activa mai târziu din setările de Confidențialitate și securitate ale aplicației.</string>

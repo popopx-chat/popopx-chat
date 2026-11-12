@@ -2238,7 +2238,6 @@ chat item action */
 "Enable disappearing messages by default." = "Увімкнути зникаючі повідомлення за замовчуванням.";
 
 /* No comment provided by engineer. */
-"Enable Flux in Network & servers settings for better metadata privacy." = "Увімкніть Flux у налаштуваннях мережі та серверів для кращої конфіденційності метаданих.";
 
 /* No comment provided by engineer. */
 "Enable for all" = "Увімкнути для всіх";
@@ -2840,7 +2839,6 @@ servers warning */
 "For console" = "Для консолі";
 
 /* No comment provided by engineer. */
-"For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server." = "Наприклад, якщо ваш контакт отримує повідомлення через сервер POPOPX Chat, ваш додаток доставлятиме їх через сервер Flux.";
 
 /* No comment provided by engineer. */
 "For me" = "Для мене";
@@ -3833,7 +3831,6 @@ servers warning */
 "Network connection" = "Підключення до мережі";
 
 /* No comment provided by engineer. */
-"Network decentralization" = "Децентралізація мережі";
 
 /* snd error text */
 "Network issues - message expired after many attempts to send it." = "Проблеми з мережею - термін дії повідомлення закінчився після багатьох спроб надіслати його.";
@@ -5910,7 +5907,6 @@ server test failure */
 "The same conditions will apply to operator **%@**." = "Такі ж умови діятимуть і для оператора **%@**.";
 
 /* No comment provided by engineer. */
-"The second preset operator in the app!" = "Другий попередньо встановлений оператор у застосунку!";
 
 /* No comment provided by engineer. */
 "The second tick we missed! ✅" = "Другу галочку ми пропустили! ✅";

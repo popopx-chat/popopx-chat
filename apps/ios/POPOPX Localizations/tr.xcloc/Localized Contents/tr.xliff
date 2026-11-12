@@ -3274,11 +3274,7 @@ chat item action</note>
         <target>Etkinleştir (geçersiz kılmaları koru)</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Enable Flux in Network &amp; servers settings for better metadata privacy." xml:space="preserve">
-        <source>Enable Flux in Network &amp; servers settings for better metadata privacy.</source>
-        <target>Daha iyi meta veri gizliliği için Ağ &amp; sunucu ayarlarında Flux'u etkinleştirin.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="Enable POPOPX Lock" xml:space="preserve">
         <source>Enable POPOPX Lock</source>
         <target>POPOPX Kilidini etkinleştir</target>
@@ -4228,11 +4224,7 @@ servers warning</note>
         <target>Konsol için</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server." xml:space="preserve">
-        <source>For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server.</source>
-        <target>Örneğin, eğer kişiniz POPOPX Sohbet sunucusundan mesajları alıyorsa, uygulamanız bu mesajları Flux sunucusundan iletecektir.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="For me" xml:space="preserve">
         <source>For me</source>
         <target>Benim için</target>
@@ -5712,11 +5704,6 @@ Bu senin grup için bağlantın %@!</target>
       <trans-unit id="Network connection" xml:space="preserve">
         <source>Network connection</source>
         <target>Ağ bağlantısı</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
-      <trans-unit id="Network decentralization" xml:space="preserve">
-        <source>Network decentralization</source>
-        <target>Ağ merkeziyetsizliği</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Network issues - message expired after many attempts to send it." xml:space="preserve">
@@ -8985,11 +8972,7 @@ Bazı hatalar nedeniyle veya bağlantı tehlikeye girdiğinde meydana gelebilir.
         <target>Aynı koşullar operatör **%@** için de geçerli olacaktır.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="The second preset operator in the app!" xml:space="preserve">
-        <source>The second preset operator in the app!</source>
-        <target>Uygulamadaki ikinci ön ayar operatörü!</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="The second tick we missed! ✅" xml:space="preserve">
         <source>The second tick we missed! ✅</source>
         <target>Özlediğimiz ikinci tik! ✅</target>

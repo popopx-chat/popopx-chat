@@ -3806,11 +3806,7 @@ chat item action</note>
         <target>Engedélyezés (egyéni beállítások megtartása)</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Enable Flux in Network &amp; servers settings for better metadata privacy." xml:space="preserve">
-        <source>Enable Flux in Network &amp; servers settings for better metadata privacy.</source>
-        <target>A Flux kiszolgálókat engedélyezheti a beállításokban, a „Hálózat és kiszolgálók” menüben, a metaadatok jobb védelme érdekében.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="Enable POPOPX Lock" xml:space="preserve">
         <source>Enable POPOPX Lock</source>
         <target>POPOPX-zár bekapcsolása</target>
@@ -4941,11 +4937,7 @@ servers warning</note>
         <target>Konzolhoz</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server." xml:space="preserve">
-        <source>For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server.</source>
-        <target>Például, ha a partnere egy POPOPX Chat kiszolgálón keresztül fogadja az üzeneteket, akkor az Ön alkalmazása egy Flux kiszolgálón keresztül fogja azokat kézbesíteni.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="For me" xml:space="preserve">
         <source>For me</source>
         <target>Csak magamnak</target>
@@ -6595,11 +6587,6 @@ Ez a saját hivatkozása a(z) %@ nevű csoporthoz!</target>
       <trans-unit id="Network connection" xml:space="preserve">
         <source>Network connection</source>
         <target>Hálózati kapcsolat</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
-      <trans-unit id="Network decentralization" xml:space="preserve">
-        <source>Network decentralization</source>
-        <target>Hálózati decentralizáció</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Network error" xml:space="preserve">
@@ -10449,11 +10436,7 @@ a saját kapcsolatait és csoportjait.</target>
         <target>Ugyanezek a feltételek lesznek elfogadva a következő üzemeltető számára is: **%@**.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="The second preset operator in the app!" xml:space="preserve">
-        <source>The second preset operator in the app!</source>
-        <target>A második előre beállított üzemeltető az alkalmazásban!</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="The second tick we missed! ✅" xml:space="preserve">
         <source>The second tick we missed! ✅</source>
         <target>A második pipa, ami már nagyon hiányzott! ✅</target>

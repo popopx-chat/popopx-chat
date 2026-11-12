@@ -3239,11 +3239,7 @@ chat item action</note>
         <target>Włącz (zachowaj nadpisania)</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Enable Flux in Network &amp; servers settings for better metadata privacy." xml:space="preserve">
-        <source>Enable Flux in Network &amp; servers settings for better metadata privacy.</source>
-        <target>Włącz opcję Flux w ustawieniach sieci i serwerów, aby zapewnić lepszą prywatność metadanych.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="Enable POPOPX Lock" xml:space="preserve">
         <source>Enable POPOPX Lock</source>
         <target>Włącz blokadę POPOPX</target>
@@ -4224,11 +4220,7 @@ servers warning</note>
         <target>Dla konsoli</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server." xml:space="preserve">
-        <source>For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server.</source>
-        <target>Na przykład, jeśli Twój kontakt odbiera wiadomości za pośrednictwem serwera POPOPX Chat, Twoja aplikacja będzie je dostarczać za pośrednictwem serwera Flux.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="For me" xml:space="preserve">
         <source>For me</source>
         <target>Dla mnie</target>
@@ -5733,11 +5725,6 @@ To jest twój link do grupy %@!</target>
       <trans-unit id="Network connection" xml:space="preserve">
         <source>Network connection</source>
         <target>Połączenie z siecią</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
-      <trans-unit id="Network decentralization" xml:space="preserve">
-        <source>Network decentralization</source>
-        <target>Decentralizacja sieci</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Network issues - message expired after many attempts to send it." xml:space="preserve">
@@ -9051,11 +9038,7 @@ Może się to zdarzyć z powodu jakiegoś błędu lub gdy połączenie jest skom
         <target>Te same warunki będą miały zastosowanie do operatora **%@**.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="The second preset operator in the app!" xml:space="preserve">
-        <source>The second preset operator in the app!</source>
-        <target>Drugi predefiniowany operator w aplikacji!</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="The second tick we missed! ✅" xml:space="preserve">
         <source>The second tick we missed! ✅</source>
         <target>Drugi tik, który przegapiliśmy! ✅</target>

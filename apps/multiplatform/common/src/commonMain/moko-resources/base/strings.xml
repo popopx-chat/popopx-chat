@@ -1384,7 +1384,6 @@
   <string name="onboarding_network_operators">Network operators</string>
   <string name="onboarding_network_operators_app_will_use_different_operators">The app protects your privacy by using different operators in each conversation.</string>
   <string name="onboarding_network_operators_cant_see_who_talks_to_whom">When more than one operator is enabled, none of them has metadata to learn who communicates with whom.</string>
-  <string name="onboarding_network_operators_app_will_use_for_routing">For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server.</string>
   <string name="onboarding_network_about_operators">About operators</string>
   <string name="how_it_helps_privacy">How it helps privacy</string>
   <string name="onboarding_network_operators_configure_via_settings">You can configure servers via settings.</string>
@@ -2666,9 +2665,6 @@
   <string name="v6_1_message_dates_descr">Better message dates.</string>
   <string name="v6_1_forward_many_messages_descr">Forward up to 20 messages at once.</string>
   <string name="v6_1_delete_many_messages_descr">Delete or moderate up to 200 messages.</string>
-  <string name="v6_2_network_decentralization">Network decentralization</string>
-  <string name="v6_2_network_decentralization_descr">The second preset operator in the app!</string>
-  <string name="v6_2_network_decentralization_enable_flux">Enable Flux in Network &amp; servers settings for better metadata privacy.</string>
   <string name="v6_2_improved_chat_navigation">Improved chat navigation</string>
   <string name="v6_2_improved_chat_navigation_descr">- Open chat on the first unread message.\n- Jump to quoted messages.</string>
   <string name="v6_2_business_chats">Business chats</string>

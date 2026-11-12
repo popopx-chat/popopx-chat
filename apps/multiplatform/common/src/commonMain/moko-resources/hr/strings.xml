@@ -808,7 +808,6 @@
     <string name="icon_descr_call_connecting">Povezivanje poziva</string>
     <string name="answer_call">Odgovoriti na poziv</string>
     <string name="settings_section_title_network_connection">Mrežna veza</string>
-    <string name="v6_2_network_decentralization">Decentralizacija mreže</string>
     <string name="v6_2_business_chats">Biznis razgovori</string>
     <string name="completed">Završeno</string>
     <string name="expand_verb">Proširiti</string>
@@ -900,7 +899,6 @@
     <string name="chat_preferences_yes">da</string>
     <string name="migrate_from_device_migration_complete">Migracija završena</string>
     <string name="network_smp_proxy_fallback_allow">Da</string>
-    <string name="v6_2_network_decentralization_enable_flux">Omogućiti flux</string>
     <string name="error_with_info">Greška: %s</string>
     <string name="error_stopping_chat">Greška u zaustavljanju razgovora</string>
     <string name="contribute">Doprinesite</string>

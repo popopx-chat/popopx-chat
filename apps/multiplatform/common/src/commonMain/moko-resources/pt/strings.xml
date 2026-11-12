@@ -1889,7 +1889,6 @@
     <string name="onboarding_network_operators">Operadores de rede</string>
     <string name="onboarding_network_operators_app_will_use_different_operators">A aplicação protege a sua privacidade ao usar operadores diferentes em cada conversa.</string>
     <string name="onboarding_network_operators_cant_see_who_talks_to_whom">Quando mais do que um operador está ativado, nenhum deles tem metadados para saber quem comunica com quem.</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">Por exemplo, se o seu contacto receber mensagens através de um servidor POPOPX Chat, a sua aplicação entregá-las-á através de um servidor Flux.</string>
     <string name="how_it_helps_privacy">Como ajuda a privacidade</string>
     <string name="onboarding_network_operators_configure_via_settings">Pode configurar os servidores nas definições.</string>
     <string name="onboarding_your_network">A sua rede</string>
@@ -2523,9 +2522,6 @@
     <string name="v6_1_message_dates_descr">Melhores datas das mensagens.</string>
     <string name="v6_1_forward_many_messages_descr">Reencaminhe até 20 mensagens de uma só vez.</string>
     <string name="v6_1_delete_many_messages_descr">Elimine ou modere até 200 mensagens.</string>
-    <string name="v6_2_network_decentralization">Descentralização da rede</string>
-    <string name="v6_2_network_decentralization_descr">O segundo operador predefinido na aplicação!</string>
-    <string name="v6_2_network_decentralization_enable_flux">Ative o Flux nas definições de Rede e servidores para melhor privacidade dos metadados.</string>
     <string name="v6_2_improved_chat_navigation">Navegação melhorada nas conversas</string>
     <string name="v6_2_improved_chat_navigation_descr">- Abra a conversa na primeira mensagem não lida.\n- Salte para as mensagens citadas.</string>
     <string name="v6_2_business_chats">Conversas empresariais</string>

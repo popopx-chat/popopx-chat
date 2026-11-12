@@ -811,18 +811,6 @@ private val versionDescriptions: List<VersionDescription> = listOf(
     version = "v6.2",
     post = "https://simplex.chat/blog/20241210-simplex-network-v6-2-servers-by-flux-business-chats.html",
     features = listOf(
-      VersionFeature.FeatureView(
-        icon = null,
-        titleId = MR.strings.v6_2_network_decentralization,
-        view = { modalManager ->
-          Column {
-            val src = (operatorsInfo[OperatorTag.Flux] ?: dummyOperatorInfo).largeLogo
-            Image(painterResource(src), null, modifier = Modifier.height(48.dp))
-            Text(stringResource(MR.strings.v6_2_network_decentralization_descr), modifier = Modifier.padding(top = 8.dp))
-            Text(stringResource(MR.strings.v6_2_network_decentralization_enable_flux))
-          }
-        }
-      ),
       VersionFeature.FeatureDescription(
         icon = MR.images.ic_work,
         titleId = MR.strings.v6_2_business_chats,

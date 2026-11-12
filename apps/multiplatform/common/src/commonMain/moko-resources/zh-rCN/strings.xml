@@ -2065,11 +2065,8 @@
     <string name="error_server_operator_changed">服务器运营方已更改。</string>
     <string name="error_server_protocol_changed">服务器协议已更改。</string>
     <string name="appearance_in_app_bars_alpha">透明度</string>
-    <string name="v6_2_network_decentralization">网络去中心化</string>
-    <string name="v6_2_network_decentralization_descr">应用中的第二个预设运营方！</string>
     <string name="v6_2_improved_chat_navigation">改进了聊天导航</string>
     <string name="view_updated_conditions">查看更新后的条款</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">比如，如果你通过 POPOPX 服务器收到消息，应用会通过 Flux 服务器传送它们。</string>
     <string name="onboarding_network_operators_app_will_use_different_operators">应用通过在每个对话中使用不同运营方保护你的隐私。</string>
     <string name="accept_conditions">接受条款</string>
     <string name="appearance_bars_blur_radius">模糊</string>
@@ -2086,7 +2083,6 @@
     <string name="operator_same_conditions_will_apply_to_operators"><![CDATA[相同条款将应用于运营方: <b>%s</b>.]]></string>
     <string name="operator_in_order_to_use_accept_conditions"><![CDATA[要使用 <b>%s</b>的服务器，请接受使用条款。]]></string>
     <string name="operators_conditions_accepted_for"><![CDATA[接受了运营方的条款: <b>%s</b>.]]></string>
-    <string name="v6_2_network_decentralization_enable_flux">在“网络&amp;服务器”设置中启用 Flux，更好地保护元数据隐私。</string>
     <string name="error_accepting_operator_conditions">接受条款出错</string>
     <string name="error_adding_server">添加服务器出错</string>
     <string name="no_media_servers_configured">无媒体和文件服务器。</string>

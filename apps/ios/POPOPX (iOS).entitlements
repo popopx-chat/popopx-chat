@@ -11,8 +11,6 @@
 		<string>applinks:popopx.chat?mode=developer</string>
 		<string>applinks:*.simplex.im</string>
 		<string>applinks:*.simplex.im?mode=developer</string>
-		<string>applinks:*.simplexonflux.com</string>
-		<string>applinks:*.simplexonflux.com?mode=developer</string>
 	</array>
 	<key>com.apple.developer.networking.multicast</key>
 	<true/>

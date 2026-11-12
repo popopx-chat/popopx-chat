@@ -3701,11 +3701,7 @@ chat item action</note>
         <target>启用（保持覆盖）</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Enable Flux in Network &amp; servers settings for better metadata privacy." xml:space="preserve">
-        <source>Enable Flux in Network &amp; servers settings for better metadata privacy.</source>
-        <target>在“网络&amp;服务器”设置中启用 Flux，更好地保护元数据隐私。</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="Enable POPOPX Lock" xml:space="preserve">
         <source>Enable POPOPX Lock</source>
         <target>启用 POPOPX 锁定</target>
@@ -4756,11 +4752,7 @@ servers warning</note>
         <target>用于控制台</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server." xml:space="preserve">
-        <source>For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server.</source>
-        <target>比如，如果你通过 POPOPX 服务器收到消息，应用会通过 Flux 服务器传送它们。</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="For me" xml:space="preserve">
         <source>For me</source>
         <target>仅自己</target>
@@ -6370,11 +6362,6 @@ This is your link for group %@!</source>
       <trans-unit id="Network connection" xml:space="preserve">
         <source>Network connection</source>
         <target>网络连接</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
-      <trans-unit id="Network decentralization" xml:space="preserve">
-        <source>Network decentralization</source>
-        <target>网络去中心化</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Network error" xml:space="preserve">
@@ -10143,11 +10130,7 @@ your contacts and groups.</source>
         <target>相同条件将适用于运营商 **%@**。</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="The second preset operator in the app!" xml:space="preserve">
-        <source>The second preset operator in the app!</source>
-        <target>应用中的第二个预设运营方！</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="The second tick we missed! ✅" xml:space="preserve">
         <source>The second tick we missed! ✅</source>
         <target>我们错过的第二个"√"！✅</target>

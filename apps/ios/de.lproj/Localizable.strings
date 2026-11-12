@@ -2518,7 +2518,6 @@ chat item action */
 "Enable disappearing messages by default." = "Verschwindende Nachrichten sind per Voreinstellung aktiviert.";
 
 /* No comment provided by engineer. */
-"Enable Flux in Network & servers settings for better metadata privacy." = "Für einen besseren Metadatenschutz Flux in den Netzwerk- und Servereinstellungen aktivieren.";
 
 /* No comment provided by engineer. */
 "Enable for all" = "Für Alle aktivieren";
@@ -3232,7 +3231,6 @@ servers warning */
 "For console" = "Für Konsole";
 
 /* No comment provided by engineer. */
-"For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server." = "Wenn Ihr Kontakt beispielsweise Nachrichten über einen POPOPX-Chatserver empfängt, wird Ihre App diese über einen der Server von Flux versenden.";
 
 /* No comment provided by engineer. */
 "For me" = "Für mich";
@@ -4336,7 +4334,6 @@ servers warning */
 "Network connection" = "Netzwerkverbindung";
 
 /* No comment provided by engineer. */
-"Network decentralization" = "Dezentralisiertes Netzwerk";
 
 /* conn error description */
 "Network error" = "Netzwerk-Fehler";
@@ -6793,7 +6790,6 @@ server test failure */
 "The same conditions will apply to operator **%@**." = "Dieselben Nutzungsbedingungen gelten auch für den Betreiber **%@**.";
 
 /* No comment provided by engineer. */
-"The second preset operator in the app!" = "Der zweite voreingestellte Netzwerk-Betreiber in der App!";
 
 /* No comment provided by engineer. */
 "The second tick we missed! ✅" = "Wir haben das zweite Häkchen vermisst! ✅";

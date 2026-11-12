@@ -367,7 +367,6 @@ private fun ChooseServerOperatorsInfoView() {
     ) {
       ReadableText(stringResource(MR.strings.onboarding_network_operators_app_will_use_different_operators))
       ReadableText(stringResource(MR.strings.onboarding_network_operators_cant_see_who_talks_to_whom))
-      ReadableText(stringResource(MR.strings.onboarding_network_operators_app_will_use_for_routing))
     }
 
     SectionDividerSpaced()

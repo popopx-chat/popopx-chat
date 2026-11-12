@@ -2031,7 +2031,6 @@
     <string name="popopx_address_or_1_time_link">POPOPX адрес или еднократен линк?</string>
     <string name="create_1_time_link">Създай еднократен линк</string>
     <string name="onboarding_network_operators_app_will_use_different_operators">Приложението защитава вашата поверителност, като използва различни оператори за всеки разговор.</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">Например, ако контактът ви получава съобщения чрез POPOPX Chat сървър, приложението ви ще ги достави чрез Flux сървър.</string>
     <string name="onboarding_choose_server_operators">Сървърни оператори</string>
     <string name="onboarding_network_operators">Мрежови оператори</string>
     <string name="operator_conditions_accepted_for_enabled_operators_on">Условията ще бъдат автоматично приети за активираните оператори на: %s.</string>
@@ -2063,7 +2062,6 @@
     <string name="direct_messages_are_prohibited_in_chat">Личните съобщения между членовете са забранени в този чат.</string>
     <string name="v6_1_customizable_message_descr">Персонализирана форма на съобщенията.</string>
     <string name="v6_1_message_dates_descr">По-добри дати на съобщението.</string>
-    <string name="v6_2_network_decentralization_enable_flux">Активиране на Flux в настройките Мрежа и сървъри за по -добра поверителност на метаданните.</string>
     <string name="v6_2_improved_chat_navigation">Подобрена навигация в чата</string>
     <string name="error_saving_database">Грешка при запазване на базата данни</string>
     <string name="chat_main_profile_sent">Вашият профил ще бъде изпратен до членовете</string>
@@ -2127,8 +2125,6 @@
     <string name="operator_review_conditions">Преглед на условията</string>
     <string name="xftp_servers_per_user">Сървърите за нови файлове от текущия ви профил</string>
     <string name="v6_2_business_chats_descr">Поверителност за вашите клиенти.</string>
-    <string name="v6_2_network_decentralization">Децентрализация на мрежата</string>
-    <string name="v6_2_network_decentralization_descr">Вторият предварително зададен оператор в приложението!</string>
     <string name="v6_2_business_chats">Бизнес чатове</string>
     <string name="share_address_publicly">Сподели адресът публично</string>
     <string name="chat_list_all">Всички</string>

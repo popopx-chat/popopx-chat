@@ -2494,7 +2494,6 @@ chat item action */
 "Enable disappearing messages by default." = "Включите исчезающие сообщения по умолчанию.";
 
 /* No comment provided by engineer. */
-"Enable Flux in Network & servers settings for better metadata privacy." = "Включите Flux в настройках Сеть и серверы для лучшей конфиденциальности метаданных.";
 
 /* No comment provided by engineer. */
 "Enable for all" = "Включить для всех";
@@ -3175,7 +3174,6 @@ servers warning */
 "For console" = "Для консоли";
 
 /* No comment provided by engineer. */
-"For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server." = "Например, если Ваш контакт получает сообщения через сервер POPOPX Chat, Ваше приложение доставит их через сервер Flux.";
 
 /* No comment provided by engineer. */
 "For me" = "Для меня";
@@ -4264,7 +4262,6 @@ servers warning */
 "Network connection" = "Интернет-соединение";
 
 /* No comment provided by engineer. */
-"Network decentralization" = "Децентрализация сети";
 
 /* conn error description */
 "Network error" = "Ошибка сети";
@@ -6709,7 +6706,6 @@ server test failure */
 "The same conditions will apply to operator **%@**." = "Те же условия будут действовать для оператора **%@**.";
 
 /* No comment provided by engineer. */
-"The second preset operator in the app!" = "Второй оператор серверов в приложении!";
 
 /* No comment provided by engineer. */
 "The second tick we missed! ✅" = "Вторая галочка - знать, что доставлено! ✅";

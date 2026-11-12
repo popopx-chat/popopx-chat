@@ -35,12 +35,17 @@ Two things a privacy statement normally has to disclose are worth stating explic
   | Operator (trade name) | Legal name in source | Domains | Consent |
   |---|---|---|---|
   | SimpleX Chat | SimpleX Chat Ltd | `simplex.im` | `conditionsAcceptance = CARequired` |
-  | Flux | InFlux Technologies Limited | `simplexonflux.com` | `conditionsAcceptance = CARequired` |
 
-  Both require the user to accept *their* conditions before the app uses them. The fork inherits
-  these presets unchanged; it does not have its own servers and therefore cannot offer its own
-  terms in their place. `conditionsAcceptance`, the operator names and the relay addresses move
+  The operator requires the user to accept *its* conditions before the app uses them. The fork
+  inherits this preset unchanged; it does not have its own servers and therefore cannot offer its
+  own terms in their place. `conditionsAcceptance`, the operator names and the relay addresses move
   together with whatever the distributor decides to run — never one at a time.
+
+  Flux (InFlux Technologies Limited, `simplexonflux.com`) was a second preset operator upstream and
+  **is not an operator of this fork**: it is not offered, not described, not linked from the app, and
+  no traffic is configured to it on first run. Its `smp://…@smpN.simplexonflux.com` host-and-key pairs
+  stay in `Presets.hs` for one reason only — previously issued short links encode the host they were
+  created on, so removing them would make other people's links unresolvable.
 
 ## Data this fork holds
 

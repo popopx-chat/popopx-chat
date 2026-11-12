@@ -1010,7 +1010,6 @@
     <string name="v5_8_message_delivery_descr">So zníženou spotrebou batérie.</string>
     <string name="v6_1_delete_many_messages_descr">Vymažte alebo moderujte až 200 správ naraz.</string>
     <string name="v6_5_invite_friends">Ľahšie pozývanie priateľov 👋</string>
-    <string name="v6_2_network_decentralization_enable_flux">Povoľte Flux v nastaveniach siete a serverov pre lepšie súkromie metadát.</string>
     <string name="v6_3_faster_deletion_of_groups">Rýchlejšie mazanie skupín.</string>
     <string name="v6_3_faster_sending_messages">Rýchlejšie odosielanie správ.</string>
     <string name="v6_1_forward_many_messages_descr">Preposlať až 20 správ naraz.</string>
@@ -1020,7 +1019,6 @@
     <string name="v6_0_increase_font_size">Zväčšiť veľkosť písma.</string>
     <string name="v6_0_private_routing_descr">Chráni vašu IP adresu a pripojenia.</string>
     <string name="v6_4_1_keep_chats_clean">Udržujte si svoje chaty čisté</string>
-    <string name="v6_2_network_decentralization">Decentralizácia siete</string>
     <string name="v6_5_non_profit_governance">Neziskové riadenie</string>
     <string name="v6_3_organize_chat_lists">Organizujte chaty do zoznamov</string>
     <string name="v6_5_ownership">Vlastníctvo: môžete prevádzkovať vlastné relé.</string>

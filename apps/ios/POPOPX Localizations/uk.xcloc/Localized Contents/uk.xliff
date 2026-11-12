@@ -3368,11 +3368,7 @@ chat item action</note>
         <target>Увімкнути (зберегти перевизначення)</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Enable Flux in Network &amp; servers settings for better metadata privacy." xml:space="preserve">
-        <source>Enable Flux in Network &amp; servers settings for better metadata privacy.</source>
-        <target>Увімкніть Flux у налаштуваннях мережі та серверів для кращої конфіденційності метаданих.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="Enable POPOPX Lock" xml:space="preserve">
         <source>Enable POPOPX Lock</source>
         <target>Увімкнути POPOPX Lock</target>
@@ -4312,11 +4308,7 @@ servers warning</note>
         <target>Для консолі</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server." xml:space="preserve">
-        <source>For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server.</source>
-        <target>Наприклад, якщо ваш контакт отримує повідомлення через сервер POPOPX Chat, ваш додаток доставлятиме їх через сервер Flux.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="For me" xml:space="preserve">
         <source>For me</source>
         <target>Для мене</target>
@@ -5786,11 +5778,6 @@ This is your link for group %@!</source>
       <trans-unit id="Network connection" xml:space="preserve">
         <source>Network connection</source>
         <target>Підключення до мережі</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
-      <trans-unit id="Network decentralization" xml:space="preserve">
-        <source>Network decentralization</source>
-        <target>Децентралізація мережі</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Network issues - message expired after many attempts to send it." xml:space="preserve">
@@ -9024,11 +9011,7 @@ It can happen because of some bug or when the connection is compromised.</source
         <target>Такі ж умови діятимуть і для оператора **%@**.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="The second preset operator in the app!" xml:space="preserve">
-        <source>The second preset operator in the app!</source>
-        <target>Другий попередньо встановлений оператор у застосунку!</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="The second tick we missed! ✅" xml:space="preserve">
         <source>The second tick we missed! ✅</source>
         <target>Другу галочку ми пропустили! ✅</target>

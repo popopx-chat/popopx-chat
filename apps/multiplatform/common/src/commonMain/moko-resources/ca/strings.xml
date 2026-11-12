@@ -850,7 +850,6 @@
     <string name="ttl_w">%ds</string>
     <string name="ttl_weeks">%d setmanes</string>
     <string name="v6_0_upgrade_app_descr">Baixa noves versions de GitHub.</string>
-    <string name="v6_2_network_decentralization_enable_flux">Habiliteu Flux a la configuració de la xarxa i dels servidors per obtenir una millor privadesa de les metadades.</string>
     <string name="connect_to_desktop">Connectar amb l\'ordinador</string>
     <string name="servers_info_sessions_connecting">Connectant</string>
     <string name="download_errors">Errors de descàrrega</string>
@@ -933,7 +932,6 @@
     <string name="exit_without_saving">Sortir sense desar</string>
     <string name="hidden_profile_password">Contrasenya de perfil amagada</string>
     <string name="permissions_required">Concedir permisos</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">Per exemple, si el vostre contacte rep missatges mitjançant un servidor POPOPX Chat, la vostra aplicació els lliurarà mitjançant un servidor Flux.</string>
     <string name="icon_descr_flip_camera">Gira la càmera</string>
     <string name="enabled_self_destruct_passcode">Activar codi d\'autodestrucció</string>
     <string name="receipts_contacts_title_enable">Activar els rebuts?</string>
@@ -1420,8 +1418,6 @@
     <string name="v6_0_reachable_chat_toolbar_descr">Fes servir l\'aplicació amb una sola mà.</string>
     <string name="v6_0_chat_list_media">Reprodueix des de la llista de xat.</string>
     <string name="v6_0_upgrade_app">Actualitza l\'aplicació automàticament</string>
-    <string name="v6_2_network_decentralization">Descentralització de la xarxa</string>
-    <string name="v6_2_network_decentralization_descr">El segon operador preestablert a l\'aplicació!</string>
     <string name="v6_2_business_chats_descr">Privadesa per als teus clients.</string>
     <string name="view_updated_conditions">Veure condicions actualitzades</string>
     <string name="custom_time_unit_hours">hores</string>

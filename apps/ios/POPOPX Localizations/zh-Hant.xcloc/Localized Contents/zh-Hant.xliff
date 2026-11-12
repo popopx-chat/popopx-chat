@@ -8910,10 +8910,7 @@ More improvements are coming soon!</source>
         <source>For chat profile %@:</source>
         <target state="translated">針對聊天個人檔案 %@：</target>
       </trans-unit>
-      <trans-unit id="For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server." xml:space="preserve" approved="no">
-        <source>For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server.</source>
-        <target state="translated">例如，如果你的聯絡人透過 POPOPX Chat 伺服器接收訊息，你的應用程式會透過 Flux 伺服器傳送訊息。</target>
-      </trans-unit>
+      
       <trans-unit id="For private routing" xml:space="preserve" approved="no">
         <source>For private routing</source>
         <target state="translated">用於私密路由</target>
@@ -8937,10 +8934,6 @@ More improvements are coming soon!</source>
       <trans-unit id="More reliable notifications" xml:space="preserve" approved="no">
         <source>More reliable notifications</source>
         <target state="translated">更可靠的通知</target>
-      </trans-unit>
-      <trans-unit id="Network decentralization" xml:space="preserve" approved="no">
-        <source>Network decentralization</source>
-        <target state="translated">網路去中心化</target>
       </trans-unit>
       <trans-unit id="Network operator" xml:space="preserve" approved="no">
         <source>Network operator</source>
@@ -9060,10 +9053,7 @@ More improvements are coming soon!</source>
         <source>The connection reached the limit of undelivered messages, your contact may be offline.</source>
         <target state="translated">此連線已達未送達訊息上限，你的聯絡人可能離線。</target>
       </trans-unit>
-      <trans-unit id="The second preset operator in the app!" xml:space="preserve" approved="no">
-        <source>The second preset operator in the app!</source>
-        <target state="translated">應用程式中的第二個預設營運商！</target>
-      </trans-unit>
+      
       <trans-unit id="The servers for new files of your current chat profile **%@**." xml:space="preserve" approved="no">
         <source>The servers for new files of your current chat profile **%@**.</source>
         <target state="translated">你目前聊天個人檔案 **%@** 的新檔案伺服器。</target>
@@ -9708,10 +9698,7 @@ More improvements are coming soon!</source>
         <target state="translated">檔案已被伺服器營運商封鎖：
 %@。</target>
       </trans-unit>
-      <trans-unit id="Enable Flux in Network &amp; servers settings for better metadata privacy." xml:space="preserve" approved="no">
-        <source>Enable Flux in Network &amp; servers settings for better metadata privacy.</source>
-        <target state="translated">在「網路與伺服器」設定中啟用 Flux，以提升中繼資料私隱。</target>
-      </trans-unit>
+      
       <trans-unit id="Privacy policy and conditions of use." xml:space="preserve" approved="no">
         <source>Privacy policy and conditions of use.</source>
         <target state="translated">私隱政策和使用條件。</target>

@@ -2023,7 +2023,6 @@
     <string name="operator_conditions_will_be_applied"><![CDATA[Tyto podmínky budou také platit pro: <b>%s</b>.]]></string>
     <string name="operator_conditions_will_be_accepted_for_some"><![CDATA[Podmínky budou přijaty pro operátor(y): <b>%s</b>.]]></string>
     <string name="operator_added_xftp_servers">Přidány servery pro média &amp; soubory</string>
-    <string name="v6_2_network_decentralization_enable_flux">Povolte Flux v nastavení sítě a serverů pro lepší ochranu metadat.</string>
     <string name="servers_info_proxied_servers_section_header">Servery přes proxy</string>
     <string name="v6_2_business_chats_descr">Soukromí pro vaše zákazníky.</string>
     <string name="group_member_role_moderator">moderátor</string>
@@ -2041,7 +2040,6 @@
     <string name="connection_security">Zabezpečení připojení</string>
     <string name="onboarding_notifications_mode_service_desc_short">Aplikace vždy poběží na pozadí</string>
     <string name="onboarding_notifications_mode_battery">Upozornění a baterie</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">Například, pokud váš kontakt dostane zprávu pres Chat server POPOPX, vaše aplikace ji doručí pomocí Flux serveru.</string>
     <string name="error_loading_chat_tags">Chyba načtení seznamů chatu</string>
     <string name="error_creating_chat_tags">Chyba vytváření seznamu chatu</string>
     <string name="error_updating_chat_tags">Chyba aktualizace seznamu chatů</string>
@@ -2083,7 +2081,6 @@
     <string name="disable_sending_member_reports">Zakázat nahlašování zpráv moderátorům.</string>
     <string name="error_updating_server_title">Chyba aktualizace serveru</string>
     <string name="operator_server_alert_title">Operátor serveru</string>
-    <string name="v6_2_network_decentralization">Decentralizace sítě</string>
     <string name="archive_reports">Archivovat hlášení</string>
     <string name="leave_chat_question">Opustit chat?</string>
     <string name="address_settings">Nastavení adres</string>
@@ -2209,7 +2206,6 @@
     <string name="connection_error_quota_desc">Připojení dosáhlo limitu nedoručených zpráv, váš kontakt je asi offline.</string>
     <string name="operator_use_for_sending">Pro odeslílání</string>
     <string name="operator_use_for_files">Použit pro soubory</string>
-    <string name="v6_2_network_decentralization_descr">Druhý přednastavený operátor v aplikaci!</string>
     <string name="call_desktop_permission_denied_title">Chcete-li volat, povolte použití mikrofonu. Ukončete hovor a zkuste to znovu.</string>
     <string name="servers_info_statistics_section_header">Statistiky</string>
     <string name="subscription_errors">Chyby odběru</string>

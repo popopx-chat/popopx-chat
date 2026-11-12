@@ -107,12 +107,6 @@
         <data android:host="smp17.simplex.im" />
         <data android:host="smp18.simplex.im" />
         <data android:host="smp19.simplex.im" />
-        <data android:host="smp1.simplexonflux.com" />
-        <data android:host="smp2.simplexonflux.com" />
-        <data android:host="smp3.simplexonflux.com" />
-        <data android:host="smp4.simplexonflux.com" />
-        <data android:host="smp5.simplexonflux.com" />
-        <data android:host="smp6.simplexonflux.com" />
         <data android:path="/invitation" />
         <data android:path="/contact" />
         <data android:path="/a" />

@@ -2042,7 +2042,6 @@
     <string name="appearance_app_toolbars">Barras de herramientas</string>
     <string name="appearance_bars_blur_radius">Difuminado</string>
     <string name="v6_2_improved_chat_navigation">Navegación en el chat mejorada</string>
-    <string name="v6_2_network_decentralization">Descentralización de la red</string>
     <string name="v6_2_improved_chat_navigation_descr">- El chat abre en el primer mensaje no leído.\n- Desplazamiento hasta los mensajes citados.</string>
     <string name="accept_conditions">Aceptar condiciones</string>
     <string name="operator_conditions_accepted">Condiciones aceptadas</string>
@@ -2052,7 +2051,6 @@
     <string name="operator_conditions_accepted_for_enabled_operators_on">Las condiciones serán aceptadas automáticamente para los operadores habilitados el: %s.</string>
     <string name="onboarding_network_operators_continue">Continuar</string>
     <string name="operator_conditions_failed_to_load">El texto con las condiciones actuales no se ha podido cargar, puedes revisar las condiciones en el siguiente enlace:</string>
-    <string name="v6_2_network_decentralization_enable_flux">Activa Flux en Servidores y Red para mejorar la privacidad de los metadatos.</string>
     <string name="error_accepting_operator_conditions">Error al aceptar las condiciones</string>
     <string name="error_updating_server_title">Error al actualizar el servidor</string>
     <string name="message_deleted_or_not_received_error_title">Ningún mensaje</string>
@@ -2086,12 +2084,10 @@
     <string name="operators_conditions_will_also_apply"><![CDATA[Estas condiciones también se aplican para: <b>%s</b>.]]></string>
     <string name="operator_in_order_to_use_accept_conditions"><![CDATA[Para usar los servidores de <b>%s</b>, debes aceptar las condiciones de uso.]]></string>
     <string name="xftp_servers_per_user">Servidores para enviar archivos en tu perfil</string>
-    <string name="v6_2_network_decentralization_descr">¡Segundo operador predefinido!</string>
     <string name="onboarding_network_operators_configure_via_settings">Puedes configurar los servidores a través de su configuración.</string>
     <string name="to_protect_against_your_link_replaced_compare_codes">Para protegerte contra una sustitución del enlace, puedes comparar los códigos de seguridad con tu contacto.</string>
     <string name="operator_same_conditions_will_apply_to_operators"><![CDATA[Las mismas condiciones se aplican a el/los operador(es) <b>%s</b>.]]></string>
     <string name="operator_conditions_will_be_applied"><![CDATA[Estas condiciones también se aplican para: <b>%s</b>.]]></string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">Por ejemplo, si tu contacto recibe a través de un servidor de POPOPX Chat, tu aplicación enviará a través de un servidor de Flux.</string>
     <string name="connection_error_quota_desc">La conexión ha alcanzado el límite de mensajes no entregados. es posible que tu contacto esté desconectado.</string>
     <string name="message_deleted_or_not_received_error_desc">El mensaje ha sido eliminado o aún no se ha recibido.</string>
     <string name="chat_archive">O importa desde un archivo</string>

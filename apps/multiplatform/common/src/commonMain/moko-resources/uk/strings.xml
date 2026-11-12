@@ -2031,7 +2031,6 @@
     <string name="or_to_share_privately">Або поділитися приватно</string>
     <string name="onboarding_choose_server_operators">Оператори серверів</string>
     <string name="onboarding_network_operators">Мережеві оператори</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">Наприклад, якщо ваш контакт отримує повідомлення через сервер POPOPX Chat, ваш додаток доставлятиме їх через сервер Flux.</string>
     <string name="onboarding_network_operators_configure_via_settings">Ви можете налаштувати сервери за допомогою налаштувань.</string>
     <string name="operator_conditions_accepted">Прийняті умови</string>
     <string name="operator_conditions_accepted_for_enabled_operators_on">Умови будуть автоматично прийняті для увімкнених операторів: %s.</string>
@@ -2062,7 +2061,6 @@
     <string name="appearance_in_app_bars_alpha">Прозорість</string>
     <string name="v6_2_improved_chat_navigation">Покращена навігація в чаті</string>
     <string name="v6_2_improved_chat_navigation_descr">- Відкрити чат на першому непрочитаному повідомленні.\n- Перейти до цитованих повідомлень.</string>
-    <string name="v6_2_network_decentralization_descr">Другий попередньо встановлений оператор у застосунку!</string>
     <string name="view_updated_conditions">Переглянути оновлені умови</string>
     <string name="address_settings">Налаштування адреси</string>
     <string name="operators_conditions_accepted_for"><![CDATA[Умови прийняті для оператора(ів): <b>%s</b>.]]></string>
@@ -2078,12 +2076,10 @@
     <string name="operator_conditions_failed_to_load">Текст поточних умов не вдалося завантажити, ви можете переглянути умови за цим посиланням:</string>
     <string name="errors_in_servers_configuration">Помилки в конфігурації серверів.</string>
     <string name="operator_conditions_accepted_on">Умови приймаються з: %s.</string>
-    <string name="v6_2_network_decentralization_enable_flux">Увімкніть Flux у налаштуваннях мережі та серверів для кращої конфіденційності метаданих</string>
     <string name="operator_conditions_will_be_accepted_on">Умови приймаються до: %s.</string>
     <string name="onboarding_network_operators_continue">Продовжити</string>
     <string name="create_1_time_link">Створити одноразове посилання</string>
     <string name="error_updating_server_title">Помилка оновлення сервера</string>
-    <string name="v6_2_network_decentralization">Децентралізація мережі</string>
     <string name="operator">Оператор</string>
     <string name="no_message_servers_configured_for_receiving">Немає серверів для отримання повідомлень.</string>
     <string name="popopx_address_or_1_time_link">POPOPX адреса або одноразове посилання?</string>

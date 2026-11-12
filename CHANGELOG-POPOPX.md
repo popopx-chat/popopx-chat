@@ -45,6 +45,16 @@ it, but its TLS certificate names only `popopxchat.com` and nothing is published
 `.well-known`, so link previews and profile/domain resolution remain inert until that box serves a
 matching certificate and the two association files.
 
+Flux is **not offered as a server operator** (ruled 2026-11-13). Removed: the preset operator record,
+the v6.2 "Network decentralization" what's-new entry, the operator description cards, the routing
+example that named Flux, the `*.simplexonflux.com` universal links (iOS entitlements) and intent-filter
+hosts (Android), the `Flux` iterations in the CI scripts, the three Flux logo assets, and every locale
+unit whose text named the second operator (56 carrier files). Kept, with the reason at each site: the
+wire tag `"flux"` (`OperatorTag`/`OTFlux` — it decodes stored rows and the published SDK enums), and
+the six `smp://…@smpN.simplexonflux.com` host-and-key pairs in `Presets.hs`, which are members of
+`allPresetServers` because previously issued short links encode the host they were created on.
+`presetDomains` lost `.simplexonflux.com` with the operator.
+
 ### Interfaces that other code reads
 
 The FFI library is `libpopopx` (a dual lookup for `libsimplex*` is retained); the Node/Python/Rust
@@ -59,8 +69,8 @@ party tooling may set are read under both spellings (`SIMPLEX_ASSETS`/`POPOPX_AS
 
 ### Deliberately not changed
 
-Upstream GitHub URLs, copyright and attribution lines, the asset licence files, the preset server
-operators and their relay addresses, the badge service and directory hosts, the names-service
+Upstream GitHub URLs, copyright and attribution lines, the asset licence files, the preset operator
+that remains (SimpleX Chat) and its relay addresses, the badge service and directory hosts, the names-service
 namespace prefix `simplex_domain_v1` (it is a persisted record and a wire value), and the upstream
 artwork and 376 iOS snapshot baselines. Full list with the authority for each:
 [`FORK.md`](./FORK.md).

@@ -3781,11 +3781,7 @@ chat item action</note>
         <target>Aktivieren (vorgenommene Einstellungen bleiben erhalten)</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Enable Flux in Network &amp; servers settings for better metadata privacy." xml:space="preserve">
-        <source>Enable Flux in Network &amp; servers settings for better metadata privacy.</source>
-        <target>Für einen besseren Metadatenschutz Flux in den Netzwerk- und Servereinstellungen aktivieren.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="Enable POPOPX Lock" xml:space="preserve">
         <source>Enable POPOPX Lock</source>
         <target>POPOPX-Sperre aktivieren</target>
@@ -4911,11 +4907,7 @@ servers warning</note>
         <target>Für Konsole</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server." xml:space="preserve">
-        <source>For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server.</source>
-        <target>Wenn Ihr Kontakt beispielsweise Nachrichten über einen POPOPX-Chatserver empfängt, wird Ihre App diese über einen der Server von Flux versenden.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="For me" xml:space="preserve">
         <source>For me</source>
         <target>Für mich</target>
@@ -6555,11 +6547,6 @@ Das ist Ihr Link für die Gruppe %@!</target>
       <trans-unit id="Network connection" xml:space="preserve">
         <source>Network connection</source>
         <target>Netzwerkverbindung</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
-      <trans-unit id="Network decentralization" xml:space="preserve">
-        <source>Network decentralization</source>
-        <target>Dezentralisiertes Netzwerk</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Network error" xml:space="preserve">
@@ -10394,11 +10381,7 @@ in dem Sie Ihre Kontakte und Gruppen besitzen.</target>
         <target>Dieselben Nutzungsbedingungen gelten auch für den Betreiber **%@**.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="The second preset operator in the app!" xml:space="preserve">
-        <source>The second preset operator in the app!</source>
-        <target>Der zweite voreingestellte Netzwerk-Betreiber in der App!</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
+      
       <trans-unit id="The second tick we missed! ✅" xml:space="preserve">
         <source>The second tick we missed! ✅</source>
         <target>Wir haben das zweite Häkchen vermisst! ✅</target>

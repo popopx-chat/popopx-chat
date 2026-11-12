@@ -2125,9 +2125,6 @@
     <string name="server_added_to_operator__name">Сервер добавлен к оператору %s.</string>
     <string name="appearance_app_toolbars">Тулбары приложения</string>
     <string name="appearance_in_app_bars_alpha">Прозрачность</string>
-    <string name="v6_2_network_decentralization">Децентрализация сети</string>
-    <string name="v6_2_network_decentralization_descr">Второй оператор серверов в приложении!</string>
-    <string name="v6_2_network_decentralization_enable_flux">Включите Flux в настройках Сеть и серверы для лучшей конфиденциальности метаданных.</string>
     <string name="v6_2_improved_chat_navigation">Улучшенная навигация в разговоре</string>
     <string name="view_updated_conditions">Посмотреть измененные условия</string>
     <string name="xiaomi_ignore_battery_optimization"><![CDATA[<b>Устройства Xiaomi</b>: пожалуйста, включите опцию Autostart в системных настройках для работы нотификаций.]]></string>
@@ -2213,7 +2210,6 @@
     <string name="error_accepting_operator_conditions">Ошибка приёма условий</string>
     <string name="connection_error_quota_desc">Соединение достигло предела недоставленных сообщений. Возможно, Ваш контакт не в сети.</string>
     <string name="to_protect_against_your_link_replaced_compare_codes">Чтобы защитить Вашу ссылку от замены, Вы можете сравнить код безопасности.</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">Например, если Ваш контакт получает сообщения через сервер POPOPX Chat, Ваше приложение доставит их через сервер Flux.</string>
     <string name="direct_messages_are_prohibited_in_chat">Прямые сообщения между членами группы запрещены.</string>
     <string name="chat_list_groups">Группы</string>
     <string name="delete_chat_list_menu_action">Удалить</string>

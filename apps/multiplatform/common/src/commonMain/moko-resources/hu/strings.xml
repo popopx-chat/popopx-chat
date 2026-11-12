@@ -2046,7 +2046,6 @@
     <string name="onboarding_choose_server_operators">Kiszolgálóüzemeltetők</string>
     <string name="onboarding_network_operators">Hálózatüzemeltetők</string>
     <string name="onboarding_network_operators_app_will_use_different_operators">Az alkalmazás úgy védi az adatait, hogy minden egyes beszélgetéshez más-más üzemeltetőt használ.</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">Például, ha a partnere egy POPOPX Chat kiszolgálón keresztül fogadja az üzeneteket, akkor az Ön alkalmazása egy Flux kiszolgálón keresztül fogja azokat kézbesíteni.</string>
     <string name="onboarding_network_operators_configure_via_settings">A kiszolgálókat a „Hálózat és kiszolgálók” menüben konfigurálhatja.</string>
     <string name="onboarding_network_operators_continue">Folytatás</string>
     <string name="operator_review_conditions">Feltételek felülvizsgálata</string>
@@ -2088,9 +2087,6 @@
     <string name="error_adding_server">Hiba történt a kiszolgáló hozzáadásakor</string>
     <string name="appearance_in_app_bars_alpha">Átlátszóság</string>
     <string name="appearance_bars_blur_radius">Elhomályosítás</string>
-    <string name="v6_2_network_decentralization">Hálózati decentralizáció</string>
-    <string name="v6_2_network_decentralization_descr">A második előre beállított üzemeltető az alkalmazásban!</string>
-    <string name="v6_2_network_decentralization_enable_flux">A Flux kiszolgálókat engedélyezheti a beállításokban, a „Hálózat és kiszolgálók” menüben, a metaadatok jobb védelme érdekében.</string>
     <string name="appearance_app_toolbars">Eszköztárak</string>
     <string name="v6_2_improved_chat_navigation">Továbbfejlesztett csevegési navigáció</string>
     <string name="v6_2_improved_chat_navigation_descr">- Csevegés megnyitása az első olvasatlan üzenetnél.\n- Ugrás az idézett üzenetekre.</string>

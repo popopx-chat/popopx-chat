@@ -2072,9 +2072,6 @@
     <string name="error_server_operator_changed">L\'operatore del server è cambiato.</string>
     <string name="appearance_app_toolbars">Barre degli strumenti</string>
     <string name="appearance_in_app_bars_alpha">Trasparenza</string>
-    <string name="v6_2_network_decentralization">Decentralizzazione della rete</string>
-    <string name="v6_2_network_decentralization_descr">Il secondo operatore preimpostato nell\'app!</string>
-    <string name="v6_2_network_decentralization_enable_flux">Attiva Flux nelle impostazioni \"Rete e server\" per una migliore privacy dei metadati.</string>
     <string name="view_updated_conditions">Vedi le condizioni aggiornate</string>
     <string name="appearance_bars_blur_radius">Sfocatura</string>
     <string name="operator_added_message_servers">Server dei messaggi aggiunti</string>
@@ -2085,7 +2082,6 @@
     <string name="operator_conditions_will_be_accepted_on">Le condizioni verranno accettate il: %s.</string>
     <string name="error_accepting_operator_conditions">Errore di accettazione delle condizioni</string>
     <string name="failed_to_save_servers">Errore di salvataggio dei server</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">Ad esempio, se il tuo contatto riceve i messaggi tramite un server di POPOPX Chat, la tua app li consegnerà tramite un server di Flux.</string>
     <string name="v6_2_improved_chat_navigation">Navigazione della chat migliorata</string>
     <string name="smp_servers_new_server">Nuovo server</string>
     <string name="operator_use_for_files">Usa per i file</string>

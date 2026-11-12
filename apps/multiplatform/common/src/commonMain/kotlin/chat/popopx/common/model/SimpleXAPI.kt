@@ -4787,19 +4787,6 @@ val operatorsInfo: Map<OperatorTag, ServerOperatorInfo> = mapOf(
     logoDarkMode = MR.images.decentralized_light,
     largeLogoDarkMode = MR.images.logo_light
   ),
-  OperatorTag.Flux to ServerOperatorInfo(
-    description = listOf(
-      "Flux is the largest decentralized cloud, based on a global network of user-operated nodes.",
-      "Flux offers a powerful, scalable, and affordable cutting edge technology platform for all.",
-      "Flux operates servers in POPOPX network to improve its privacy and decentralization."
-    ),
-    website = "https://runonflux.com",
-    selfhost = "Self-host POPOPX servers on Flux" to "https://home.runonflux.io/apps/marketplace?q=simplex",
-    logo = MR.images.flux_logo_symbol,
-    largeLogo = MR.images.flux_logo,
-    logoDarkMode = MR.images.flux_logo_symbol,
-    largeLogoDarkMode = MR.images.flux_logo_light
-  ),
 )
 
 @Serializable

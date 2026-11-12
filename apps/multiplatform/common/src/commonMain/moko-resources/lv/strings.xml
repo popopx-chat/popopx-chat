@@ -1567,7 +1567,6 @@
     <string name="onboarding_network_operators">Ievada tīkla operatori</string>
     <string name="onboarding_network_operators_app_will_use_different_operators">Ievada tīkla operatori lietotne izmantos citus operatorus</string>
     <string name="onboarding_network_operators_cant_see_who_talks_to_whom">Ievada tīkla operatori nevar redzēt, kas ar ko runā</string>
-    <string name="onboarding_network_operators_app_will_use_for_routing">Ievada tīkla operatori lietotne izmantos maršrutēšanai</string>
     <string name="onboarding_network_about_operators">Ievada tīkls par operatoriem</string>
     <string name="how_it_helps_privacy">Kā tas palīdz privātumam</string>
     <string name="onboarding_network_operators_configure_via_settings">Ievada tīkla operatori konfigurēt caur iestatījumiem</string>
@@ -2277,9 +2276,6 @@
     <string name="v6_1_message_dates_descr">Ziņu datumi</string>
     <string name="v6_1_forward_many_messages_descr">Pārsūtīt vairākas ziņas</string>
     <string name="v6_1_delete_many_messages_descr">Dzēst vairākas ziņas</string>
-    <string name="v6_2_network_decentralization">Tīkla decentralizācija</string>
-    <string name="v6_2_network_decentralization_descr">Decentralizējiet tīklu, lai uzlabotu drošību.</string>
-    <string name="v6_2_network_decentralization_enable_flux">Tīkla decentralizācija, iespējot plūsmu</string>
     <string name="v6_2_improved_chat_navigation">Uzlabota sarunu navigācija</string>
     <string name="v6_2_improved_chat_navigation_descr">Vieglāka navigācija sarunās.</string>
     <string name="v6_2_business_chats">Uzņēmumu sarunas</string>
