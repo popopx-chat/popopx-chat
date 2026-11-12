@@ -270,6 +270,6 @@ export function chatErrorOf(error: unknown): T.ChatError | undefined {
 }
 
 export function fullDomainName({nameTLD, domain, subDomain}: T.PopopxDomain): string {
-  const tld = nameTLD === T.SimplexTLD.Popopx ? ".popopx" : nameTLD === T.SimplexTLD.Testing ? ".testing" : ""
+  const tld = nameTLD === T.PopopxTLD.Popopx ? ".popopx" : nameTLD === T.PopopxTLD.Testing ? ".testing" : ""
   return `${[...subDomain].reverse().concat(domain).join(".")}${tld}`
 }

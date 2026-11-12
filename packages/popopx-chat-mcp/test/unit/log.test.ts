@@ -7,7 +7,7 @@ const agentError = (error: object): T.ChatError => ({type: "errorAgent", agentEr
 const broker = (brokerErr: object): object => ({type: "BROKER", brokerAddress: server, brokerErr})
 const forwarding = (brokerErr: object): object => ({type: "SMP", serverAddress: server, smpErr: {type: "PROXY", proxyErr: {type: "BROKER", brokerErr}}})
 const destination = (proxyErr: object): object => ({type: "PROXY", proxyServer: server, relayServer: relay, proxyErr: {type: "protocolError", protocolErr: {type: "PROXY", proxyErr}}})
-const domain = {nameTLD: T.SimplexTLD.Popopx, domain: "ridgeline", subDomain: []}
+const domain = {nameTLD: T.PopopxTLD.Popopx, domain: "ridgeline", subDomain: []}
 
 describe("SimpleX errors", () => {
   const cases: [string, T.ChatError, string][] = [
