@@ -151,8 +151,11 @@ dependency are reverted for exactly that reason (see popopxmq `NOTICE` §3).
 The `pairs` mode of this fork's wire-audit tool (`ding_wire_audit.py`, kept with the rebrand
 tooling outside the repository) gates this class: it collects every address
 whose key is a real fingerprint from the client, the pinned dependency and the pre-rebrand upstream
-base, and reports any ours-host+upstream-key pair, any pair that drifted into a generated artifact,
-and any brand host a shipped artifact still names that no source mentions.
+base, in both spellings a pair travels in — `smp://<key>@<host>` and the link form
+`https://<host>/a#<key>` that published documents use — and reports any ours-host+upstream-key pair,
+any pair that drifted into a generated artifact, and any brand host a shipped artifact still names
+that no source mentions. Keys that base64-decode to readable text are test vectors, and are excluded
+by value rather than by path, so the encoder tests in the dependency do not read as broken pairs.
 
 ## Obtaining the source
 
