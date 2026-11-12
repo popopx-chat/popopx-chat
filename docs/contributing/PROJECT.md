@@ -45,7 +45,7 @@ SQLite migrations are in `src/Simplex/Chat/Store/SQLite/Migrations/`. PostgreSQL
 When creating a new migration:
 1. Create the migration module (e.g., `M20260122_feature.hs`)
 2. Register it in the corresponding `Migrations.hs` file
-3. Add the module to `simplex-chat.cabal` under exposed-modules
+3. Add the module to `popopx-chat.cabal` under exposed-modules
 4. Schema files will be updated automatically when tests are run
 
 ### Test Structure

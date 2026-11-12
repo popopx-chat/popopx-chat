@@ -325,7 +325,7 @@ You can:
 
 - [create chat bots and services](#develop-a-chat-bot).
 - run [simplex-chat terminal CLI](./docs/CLI.md) to execute individual chat commands, e.g. to send messages as part of shell script execution.
-- use SimpleX Chat library to integrate chat functionality into your mobile apps.
+- use POPOPX Chat library to integrate chat functionality into your mobile apps.
 - create chat bots and services in Haskell - see [simple](./apps/popopx-bot/) and more [advanced chat bot example](./apps/popopx-bot-advanced/).
 
 If you are considering developing with SimpleX platform please get in touch for any advice and support.
@@ -338,7 +338,7 @@ You can create a chat bot or any chat-based service in any language running Simp
 
 See [our new bot API reference](./bots/README.md). Most of it is automatically generated from core library types, so it stays up to date.
 
-Also see [TypeScript SimpleX Chat client](./packages/popopx-chat-client/) and [JavaScript chat bot example](./packages/popopx-chat-client/typescript/examples/squaring-bot.js).
+Also see [TypeScript POPOPX Chat client](./packages/popopx-chat-client/) and [JavaScript chat bot example](./packages/popopx-chat-client/typescript/examples/squaring-bot.js).
 
 ## Agents
 

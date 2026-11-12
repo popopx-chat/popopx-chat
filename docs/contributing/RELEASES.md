@@ -4,7 +4,7 @@
 
 | Release | Location | Version | Published on |
 |---|---|---|---|
-| libsimplex | simplex-chat-libs release `core-<version>` | `version` of `simplex-chat.cabal` | push to master or stable with a new core version |
+| libsimplex | simplex-chat-libs release `core-<version>` | `version` of `popopx-chat.cabal` | push to master or stable with a new core version |
 | Node.js add-on | simplex-chat-libs release `nodejs-addon-<7 characters of the commit>` | | push to master or stable with unreleased add-on sources |
 | `@simplex-chat/types` | npm | `version` of `packages/popopx-chat-client/types/typescript/package.json` | library release with an unpublished types version |
 | `simplex-chat` | npm | `version` of `packages/popopx-chat-nodejs/package.json` | push to master or stable with an unpublished version |
@@ -46,7 +46,7 @@ pypi.<package>.<version>    commit of the publication
    Checked: version higher than the highest version recorded for the branch.
 
    Written:
-   - `version` of `simplex-chat.cabal`
+   - `version` of `popopx-chat.cabal`
    - with types changed since the previous library release of the branch: types `version` (bumped), `simplexChatCore`, line `SimpleX Chat core:` of the types README
 
    `--types-version` sets the types version, for the first release of an app version, e.g. `--types-version 7.1.0-beta.7.1`.

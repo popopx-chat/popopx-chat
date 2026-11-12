@@ -87,7 +87,7 @@ cabal build
 cabal build --ghc-options -O0
 
 # Build specific executables
-cabal build exe:simplex-chat
+cabal build exe:popopx-chat
 
 # Build with PostgreSQL client support
 cabal build -fclient_postgres
@@ -96,7 +96,7 @@ cabal build -fclient_postgres
 cabal build -fclient_library
 
 # Find binary location
-cabal list-bin exe:simplex-chat
+cabal list-bin exe:popopx-chat
 ```
 
 ### Cabal Flags
