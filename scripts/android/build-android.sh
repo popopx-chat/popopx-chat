@@ -129,7 +129,7 @@ build() {
 
     # Build only one arch
     sed -i.bak "s/include(.*/include(\"${android_arch}\")/" "$folder/apps/multiplatform/android/build.gradle.kts"
-    gradle -p "$folder/apps/multiplatform/" -Psimplex.assets.dir=../../assets clean :android:assembleFossRelease
+    gradle -p "$folder/apps/multiplatform/" -Ppopopx.assets.dir=../../assets clean :android:assembleFossRelease
 
     mkdir -p "$android_tmp_folder"
     unzip -oqd "$android_tmp_folder" "$android_apk_output"

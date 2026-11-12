@@ -19,7 +19,7 @@ trap "rm common/src/commonMain/cpp/desktop/libs/*/`basename $libcrypto_path` 2> 
 cp $libcrypto_path common/src/commonMain/cpp/desktop/libs/*
 
 if [ -n "${ASSETS_DIR:-}" ]; then
-  set -- -Psimplex.assets.dir="$ASSETS_DIR"
+  set -- -Ppopopx.assets.dir="$ASSETS_DIR"
 else
   set --
 fi
@@ -30,18 +30,18 @@ rm -rf $release_app_dir/AppDir 2>/dev/null
 mkdir -p $release_app_dir/AppDir/usr
 
 cd $release_app_dir/AppDir
-cp -r ../*imple*/{bin,lib} usr
-cp usr/lib/simplex.png .
+cp -r ../*popopx*/{bin,lib} usr
+cp usr/lib/popopx.png .
 
 # For https://github.com/TheAssassin/AppImageLauncher to be able to show the icon
 mkdir -p usr/share/{icons,metainfo,applications}
-cp usr/lib/simplex.png usr/share/icons
+cp usr/lib/popopx.png usr/share/icons
 
-ln -s usr/bin/*imple* AppRun
-cp $multiplatform_dir/desktop/src/jvmMain/resources/distribute/*imple*.desktop com.popopxchat.popopx.desktop
-sed -i 's|^Exec=[^ ]*|Exec=simplex|' *imple*.desktop
-sed -i 's|Icon=.*|Icon=simplex|g' *imple*.desktop
-cp *imple*.desktop usr/share/applications/
+ln -s usr/bin/*popopx* AppRun
+cp $multiplatform_dir/desktop/src/jvmMain/resources/distribute/SimpleX.desktop com.popopxchat.popopx.desktop
+sed -i 's|^Exec=[^ ]*|Exec=popopx|' com.popopxchat.popopx.desktop
+sed -i 's|Icon=.*|Icon=popopx|g' com.popopxchat.popopx.desktop
+cp com.popopxchat.popopx.desktop usr/share/applications/
 cp $multiplatform_dir/desktop/src/jvmMain/resources/distribute/*.appdata.xml usr/share/metainfo
 
 if [ ! -f ../appimagetool-${ARCH}.AppImage ]; then
@@ -59,13 +59,13 @@ export SOURCE_DATE_EPOCH=1704067200
 
 # Delete redundant jar file and modify cfg
 rm -f ./usr/lib/app/*skiko-awt-runtime-linux*
-sed -i -e '/skiko-awt-runtime-linux/d' ./usr/lib/app/simplex.cfg
+sed -i -e '/skiko-awt-runtime-linux/d' ./usr/lib/app/popopx.cfg
 
 # Set all files to fixed time
 find . -exec touch -d "@$SOURCE_DATE_EPOCH" {} +
 
 ../appimagetool-${ARCH}.AppImage --verbose --no-appstream --runtime-file ../runtime-${ARCH} .
-mv *imple*.AppImage ../../
+mv *popopx*.AppImage ../../
 
 # Just a safeguard
-strip-nondeterminism ../../*imple*.AppImage
+strip-nondeterminism ../../*popopx*.AppImage

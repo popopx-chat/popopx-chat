@@ -9,7 +9,7 @@ BUILD_FOLDER="${3:-/out/deb-build}"
 
 size=$(stat -c '%s' "$CLI_PATH_TO_BIN" | awk '{printf "%.0f\n", ($1+1023)/1024}')
 arch=$(case "$(uname -m)" in x86_64) printf "amd64" ;; aarch64) printf "arm64" ;; *) printf "unknown" ;; esac)
-package='simplex-chat'
+package='popopx-chat'
 
 mkdir "$BUILD_FOLDER"
 cd "$BUILD_FOLDER"
@@ -22,8 +22,8 @@ Version: ${CLI_VERSION}
 Section: Messenger
 Priority: optional
 Architecture: ${arch}
-Maintainer: SimpleX Chat <chat@popopx.chat>
-Description: SimpleX - the first messaging platform that has no user identifiers of any kind - 100% private by design! (CLI)
+Maintainer: POPOPX Chat <chat@popopx.chat>
+Description: POPOPX - the first messaging platform that has no user identifiers of any kind - 100% private by design! (CLI)
 Installed-Size: ${size}
 EOF
 

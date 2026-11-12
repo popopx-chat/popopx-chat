@@ -26,5 +26,5 @@ unzip -o "$tmp/libsupport.zip" -d "$tmp/simplex-chat/apps/multiplatform/common/s
 # Build only the arch the libs were downloaded for
 sed -i.bak 's/include(.*/include("arm64-v8a")/' "$tmp/simplex-chat/apps/multiplatform/android/build.gradle.kts"
 
-gradle -p "$tmp/simplex-chat/apps/multiplatform/" -Psimplex.assets.dir=../../assets clean :android:assembleFossRelease
+gradle -p "$tmp/simplex-chat/apps/multiplatform/" -Ppopopx.assets.dir=../../assets clean :android:assembleFossRelease
 cp "$tmp/simplex-chat/apps/multiplatform/android/build/outputs/apk/foss/release/android-foss-arm64-v8a-release-unsigned.apk" "$PWD/simplex-chat.apk"

@@ -17,7 +17,7 @@ security list-keychains -s `security list-keychains | xargs` /tmp/popopx.keychai
 scripts/desktop/build-lib-mac.sh
 cd apps/multiplatform
 if [ -n "${ASSETS_DIR:-}" ]; then
-  set -- -Psimplex.assets.dir="$ASSETS_DIR"
+  set -- -Ppopopx.assets.dir="$ASSETS_DIR"
 else
   set --
 fi
