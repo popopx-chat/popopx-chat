@@ -13,6 +13,10 @@ final class SnapshotTests: XCTestCase {
     }
 
     @MainActor
+    // The 376 baselines under References/ and the app logo keep SimpleX's art on purpose: they are
+    // proprietary, not AGPL (References/ASSETS_LICENSE.md), so editing them would void the licence -
+    // the replacement is our own renders, which needs its own approval. This target renders, it does
+    // not compare, so a green run here says nothing about them.
     func testPreviews() throws {
         NSTimeZone.default = try XCTUnwrap(TimeZone(identifier: "UTC"))
         let env = ProcessInfo.processInfo.environment

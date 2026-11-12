@@ -15,6 +15,9 @@
 
 set -euo pipefail
 
+# Kept: this is the --service-name default of our own directory service
+# (apps/popopx-directory-service/src/Directory/Options.hs:137), and the seeded profile in
+# tests/Bots/DirectoryTests.hs:117 uses the same spelling. The three move as one unit, not from here.
 directory_name="SimpleX Directory"
 admin=ci_admin
 search_text="ci seed"
@@ -384,6 +387,8 @@ write_seed() {
     echo
     sqlite3 -markdown "$work/directory_chat.db" "$listings_query"
     echo
+    # Kept: the heading is a section key, not prose - claude-prompt.md:32 tells the UI runner to read
+    # "Test directory" -> "SimpleX names". Renaming one side alone breaks the lookup.
     echo "## SimpleX names"
     echo
     echo "Names server, to add in the app for resolving names: \`$names_server\`"

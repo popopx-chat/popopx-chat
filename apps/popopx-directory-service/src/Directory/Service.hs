@@ -1169,6 +1169,8 @@ directoryServiceEvent opts@DirectoryOpts {adminUsers, superUsers, serviceName, o
         (if isAdmin then withGroupAndReg_ sendReply else withUserGroupReg_) gId gName_ $ \g@GroupInfo {groupId, groupProfile = GroupProfile {publicGroup = pg_}, localDisplayName = gName} gr -> case pg_ of
           Just pg@PublicGroupProfile {groupLink} ->
             sendReply $ "The link to join the " <> groupTypeStr' pg <> " " <> groupReference' gId gName <> ":\n" <> strEncodeTxt groupLink
+              -- Kept with the tests that read it (tests/Bots/DirectoryTests.hs:2263,2296): this reply line is
+              -- the directory service's own wording, and the service moves as one unit with its destination.
               <> maybe "" (("\nSimpleX name: " <>) . simplexNameStr) (verifiedGroupDomain g)
           Nothing -> do
             let groupRef = groupReference' gId gName

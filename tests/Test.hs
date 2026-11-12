@@ -77,6 +77,9 @@ main = do
       around tmpBracket $ describe "WebRTC encryption" webRTCTests
 #endif
       describe "Supporter badges" badgeTests
+      -- The four "SimpleX <service>" titles below are kept deliberately: an hspec title is a CI
+      -- selector (docs/CONTRIBUTING.md:91 - the `ci-tests` block is one hspec match pattern per line)
+      -- and each names the upstream-operated service, not our app. They move only with that service.
       describe "SimpleX badge service" $ do
         badgeConfigTests
         badgeWebTests

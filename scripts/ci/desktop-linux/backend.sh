@@ -14,6 +14,8 @@
 set -euo pipefail
 
 here=$(cd "$(dirname "$0")" && pwd)
+# Kept: the --service-name default of apps/popopx-directory-service (Directory/Options.hs:137) and the
+# seeded profile in tests/Bots/DirectoryTests.hs:117 carry the same spelling - one unit, moves together.
 directory_name="SimpleX Directory"
 admin=ci_admin
 search_text="ci seed"

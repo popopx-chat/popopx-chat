@@ -113,6 +113,8 @@ function filterEntries(mode, s) {
   );
 }
 
+// Kept: entry.simplexName is the JSON key emitted by Directory/Listing.hs:96, served from
+// directory.simplex.chat. Both sides of that pair move with the directory destination, never alone.
 function simplexNameIncludesQuery(name, query) {
   if (!name) return false;
   const q = normalizeSimplexName(query);
@@ -146,6 +148,8 @@ function textIncludesQuery(text, query) {
 function uriIncludesQuery(uri, query) {
   if (!uri) return false;
   uri = uri.toLowerCase();
+  // Kept: links on simplex.simplex.chat / simplex.fluxwire.net hosts are upstream-reserved spellings,
+  // and this filter is the site's third member of the directory pair above. It moves with 戊, not here.
   return !uri.includes('simplex') && uri.includes(query);
 }
 
