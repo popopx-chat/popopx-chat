@@ -72,16 +72,16 @@ Defined in: [src/bot.ts:40](../bot.ts#L40)
 
 ***
 
-### profile
-
-> **profile**: `Profile`
-
-Defined in: [src/bot.ts:37](../bot.ts#L37)
-
-***
-
 ### popopxDomain?
 
 > `optional` **popopxDomain?**: `string` \| `null`
 
 Defined in: [src/bot.ts:38](../bot.ts#L38)
+
+***
+
+### profile
+
+> **profile**: `Profile`
+
+Defined in: [src/bot.ts:37](../bot.ts#L37)

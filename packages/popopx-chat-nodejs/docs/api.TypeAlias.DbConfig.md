@@ -10,7 +10,7 @@
 
 Defined in: [src/api.ts:66](../api.ts#L66)
 
-Database configuration. `type` selects the libsimplex backend loaded by
+Database configuration. `type` selects the libpopopx backend loaded by
 `ChatApi.init`; one backend per process.
 
 ## Union Members

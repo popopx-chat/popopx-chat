@@ -10,8 +10,8 @@
 
 Defined in: [src/core.ts:13](../core.ts#L13)
 
-Resolve (downloading on first use) and load libsimplex for the backend.
-One libsimplex per process: the Haskell runtime is initialized once, and another backend is rejected.
+Resolve (downloading on first use) and load libpopopx for the backend.
+One libpopopx per process: the Haskell runtime is initialized once, and another backend is rejected.
 
 ## Parameters
 

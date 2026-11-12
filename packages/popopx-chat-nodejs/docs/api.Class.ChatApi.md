@@ -2161,7 +2161,7 @@ Returns `undefined` on timeout if specified.
 
 Defined in: [src/api.ts:117](../api.ts#L117)
 
-Initializes the ChatApi, loading libsimplex for `db.type` (downloaded on first use).
+Initializes the ChatApi, loading libpopopx for `db.type` (downloaded on first use).
 
 #### Parameters
 
