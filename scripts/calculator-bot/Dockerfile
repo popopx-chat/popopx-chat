@@ -30,7 +30,7 @@ ENV PATH="/root/.ghcup/bin:/root/.cabal/bin:$PATH"
 ENV CABAL_DIR=/root/.cabal
 
 WORKDIR /src
-COPY cabal.project simplex-chat.cabal README.md PRIVACY.md ./
+COPY cabal.project popopx-chat.cabal README.md PRIVACY.md ./
 COPY scripts/cabal.project.local.linux ./cabal.project.local
 # The build script checks the export lists in these.
 COPY libpopopx.dll.def flake.nix ./
@@ -40,15 +40,15 @@ COPY src ./src
 # VLC is only for the desktop app.
 RUN sed -i '/prepare-vlc-linux.sh/d' scripts/desktop/build-lib-linux.sh
 
-# Other versions' build trees are removed: the script's simplex-chat-* glob
+# Other versions' build trees are removed: the script's popopx-chat-* glob
 # fails with "cd: too many arguments" when the cache holds more than one.
 RUN --mount=type=cache,target=/root/.cabal \
     --mount=type=cache,target=/src/dist-newstyle \
     set -eu; \
-    ver=$(sed -n 's/^version: *//p' simplex-chat.cabal | tr -d '[:space:]'); \
-    build_dir=dist-newstyle/build/$(uname -m)-linux/ghc-${GHC}/simplex-chat-$ver/build; \
-    find dist-newstyle/build -maxdepth 3 -type d -name 'simplex-chat-*' \
-      ! -path "*/simplex-chat-$ver" -exec rm -rf {} + 2>/dev/null || true; \
+    ver=$(sed -n 's/^version: *//p' popopx-chat.cabal | tr -d '[:space:]'); \
+    build_dir=dist-newstyle/build/$(uname -m)-linux/ghc-${GHC}/popopx-chat-$ver/build; \
+    find dist-newstyle/build -maxdepth 3 -type d -name 'popopx-chat-*' \
+      ! -path "*/popopx-chat-$ver" -exec rm -rf {} + 2>/dev/null || true; \
     cabal update; \
     scripts/desktop/build-lib-linux.sh sqlite; \
     mkdir -p /libs; \

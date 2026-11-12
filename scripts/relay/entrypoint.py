@@ -9,7 +9,7 @@ import shlex
 import subprocess
 import sys
 
-BIN = "simplex-chat-relay"
+BIN = "popopx-chat-relay"
 WEB_ROOT = "/var/www/relay-web-channels"
 ADDR_FILE = "/out/relay-address.txt"
 CAPTURE_TIMEOUT = 180  # seconds

@@ -4,7 +4,7 @@ set -eu
 export SOURCE_DATE_EPOCH=1764547200
 
 CLI_VERSION="$1"
-CLI_PATH_TO_BIN="${2:-/out/simplex-chat}"
+CLI_PATH_TO_BIN="${2:-/out/popopx-chat}"
 BUILD_FOLDER="${3:-/out/deb-build}"
 
 size=$(stat -c '%s' "$CLI_PATH_TO_BIN" | awk '{printf "%.0f\n", ($1+1023)/1024}')

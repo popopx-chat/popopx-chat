@@ -27,7 +27,7 @@ chat() {
   local db=$1 secs=$2 cmd=$3
   shift 3
   local status=0
-  "$bin/simplex-chat" -d "$work/$db" -e "$cmd" -t "$secs" --execute-log all "$@" < /dev/null > "$work/out" 2>&1 || status=$?
+  "$bin/popopx-chat" -d "$work/$db" -e "$cmd" -t "$secs" --execute-log all "$@" < /dev/null > "$work/out" 2>&1 || status=$?
   cat "$work/out" >> "$work/$db-cli.log"
   # commands with images are thousands of characters long
   echo "::group::$db: ${cmd:0:200}"
@@ -87,7 +87,7 @@ avatar() {
 }
 
 start_relay() {
-  nohup "$bin/simplex-chat" -d "$work/relay" --relay --headless --user-display-name ci_relay < /dev/null > "$work/relay.log" 2>&1 &
+  nohup "$bin/popopx-chat" -d "$work/relay" --relay --headless --user-display-name ci_relay < /dev/null > "$work/relay.log" 2>&1 &
   echo $! > "$work/relay.pid"
   local deadline=$((SECONDS + 120))
   until grep -qE '^https://[^ ]+/r#' "$work/relay.log"; do
@@ -122,7 +122,7 @@ create_directory() {
 start_directory() {
   local pid deadline=$((SECONDS + 60))
   # -y: the service adds its own tables to the database the CLI created, and would otherwise ask on stdin
-  nohup "$bin/simplex-directory-service" -d "$work/directory" -y --super-users "$1" < /dev/null >> "$work/directory.log" 2>&1 &
+  nohup "$bin/popopx-directory-service" -d "$work/directory" -y --super-users "$1" < /dev/null >> "$work/directory.log" 2>&1 &
   pid=$!
   echo "$pid" > "$work/directory.pid"
   # its output is block-buffered, so it shows that its chat has started by connecting to its servers
@@ -300,8 +300,8 @@ start() {
   bin=$work/bin
   mkdir -p "$bin"
   tar -C "$bin" -xzf "$1"
-  "$bin/simplex-chat" --version
-  "$bin/simplex-directory-service" --version
+  "$bin/popopx-chat" --version
+  "$bin/popopx-directory-service" --version
 
   start_relay
   create_directory

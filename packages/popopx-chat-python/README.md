@@ -54,7 +54,7 @@ uv pip install -e '.[dev]'
 ruff check && pyright && pytest tests/
 ```
 
-Wire types under `src/simplex_chat/types/_*.py` are generated. Regenerate with `cabal test simplex-chat-test --test-options='--match Python'`.
+Wire types under `src/simplex_chat/types/_*.py` are generated. Regenerate with `cabal test popopx-chat-test --test-options='--match Python'`.
 
 ## License
 

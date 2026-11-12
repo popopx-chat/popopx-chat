@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 
-name:           simplex-chat
+name:           popopx-chat
 version:        7.1.2.0
 category:       Web, System, Services, Cryptography
 homepage:       https://github.com/simplex-chat/simplex-chat#readme
@@ -362,7 +362,7 @@ library
           Popopx.Chat.Store.SQLite.Migrations.M20261019_chat_layout
           Popopx.Chat.Store.SQLite.Migrations.M20261021_badge_subscriptions
   other-modules:
-      Paths_simplex_chat
+      Paths_popopx_chat
   hs-source-dirs:
       src
   default-extensions:
@@ -441,7 +441,7 @@ library
       , template-haskell ==2.16.*
       , text >=1.2.4.0 && <1.3
 
-executable simplex-badge-service
+executable popopx-badge-service
   if flag(client_library)
       buildable: False
   main-is: Main.hs
@@ -473,7 +473,7 @@ executable simplex-badge-service
       BadgeService.StoreReceipts.Mock
       BadgeService.Waiters
       BadgeService.Web.Server
-      Paths_simplex_chat
+      Paths_popopx_chat
   ghc-options: -O2 -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-kind-signatures -Wno-missing-deriving-strategies -Wno-monomorphism-restriction -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-implicit-prelude -Wno-missing-safe-haskell-mode -Wno-missing-export-lists -Wno-partial-fields -Wcompat -Werror=incomplete-record-updates -Werror=incomplete-patterns -Werror=missing-methods -Werror=incomplete-uni-patterns -Werror=tabs -Wredundant-constraints -Wincomplete-record-updates -Wunused-type-patterns -Werror=name-shadowing -threaded -rtsopts
   build-depends:
       aeson ==2.2.*
@@ -497,7 +497,7 @@ executable simplex-badge-service
     , optparse-applicative >=0.15 && <0.17
     , scientific ==0.3.*
     , simple-logger ==0.1.*
-    , simplex-chat
+    , popopx-chat
     , popopxmq >=6.3
     , stm ==2.5.*
     , time ==1.12.*
@@ -525,12 +525,12 @@ executable simplex-badge-service
         bytestring ==0.10.*
       , text >=1.2.4.0 && <1.3
 
-executable simplex-bot
+executable popopx-bot
   if flag(client_library)
       buildable: False
   main-is: Main.hs
   other-modules:
-      Paths_simplex_chat
+      Paths_popopx_chat
   hs-source-dirs:
       apps/popopx-bot
   default-extensions:
@@ -539,17 +539,17 @@ executable simplex-bot
   build-depends:
       base >=4.7 && <5
     , directory ==1.3.*
-    , simplex-chat
+    , popopx-chat
   default-language: Haskell2010
   if flag(client_postgres)
     cpp-options: -DdbPostgres
 
-executable simplex-bot-advanced
+executable popopx-bot-advanced
   if flag(client_library)
       buildable: False
   main-is: Main.hs
   other-modules:
-      Paths_simplex_chat
+      Paths_popopx_chat
   hs-source-dirs:
       apps/popopx-bot-advanced
   default-extensions:
@@ -559,7 +559,7 @@ executable simplex-bot-advanced
       async ==2.2.*
     , base >=4.7 && <5
     , directory ==1.3.*
-    , simplex-chat
+    , popopx-chat
     , popopxmq >=6.3
     , stm ==2.5.*
   default-language: Haskell2010
@@ -572,7 +572,7 @@ executable simplex-bot-advanced
     build-depends:
         text >=1.2.4.0 && <1.3
 
-executable simplex-broadcast-bot
+executable popopx-broadcast-bot
   if flag(client_library)
       buildable: False
   main-is: Main.hs
@@ -584,14 +584,14 @@ executable simplex-broadcast-bot
   other-modules:
       Broadcast.Bot
       Broadcast.Options
-      Paths_simplex_chat
+      Paths_popopx_chat
   ghc-options: -O2 -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-kind-signatures -Wno-missing-deriving-strategies -Wno-monomorphism-restriction -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-implicit-prelude -Wno-missing-safe-haskell-mode -Wno-missing-export-lists -Wno-partial-fields -Wcompat -Werror=incomplete-record-updates -Werror=incomplete-patterns -Werror=missing-methods -Werror=incomplete-uni-patterns -Werror=tabs -Wredundant-constraints -Wincomplete-record-updates -Wunused-type-patterns -Werror=name-shadowing -threaded -rtsopts
   build-depends:
       async ==2.2.*
     , base >=4.7 && <5
     , directory ==1.3.*
     , optparse-applicative >=0.15 && <0.17
-    , simplex-chat
+    , popopx-chat
     , popopxmq >=6.3
     , stm ==2.5.*
   default-language: Haskell2010
@@ -604,13 +604,13 @@ executable simplex-broadcast-bot
     build-depends:
         text >=1.2.4.0 && <1.3
 
-executable simplex-chat
+executable popopx-chat
   if flag(client_library)
       buildable: False
   main-is: Main.hs
   other-modules:
       Server
-      Paths_simplex_chat
+      Paths_popopx_chat
   hs-source-dirs:
       apps/popopx-chat
   default-extensions:
@@ -622,7 +622,7 @@ executable simplex-chat
     , directory ==1.3.*
     , mtl >=2.3.1 && <3.0
     , network ==3.1.*
-    , simplex-chat
+    , popopx-chat
     , popopxmq >=6.3
     , stm ==2.5.*
     , unliftio ==0.2.*
@@ -637,7 +637,7 @@ executable simplex-chat
     build-depends:
         text >=1.2.4.0 && <1.3
 
-executable simplex-directory-service
+executable popopx-directory-service
   if flag(client_library)
       buildable: False
   main-is: Main.hs
@@ -656,7 +656,7 @@ executable simplex-directory-service
       Directory.Service
       Directory.Store
       Directory.Store.Migrate
-      Paths_simplex_chat
+      Paths_popopx_chat
   ghc-options: -O2 -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-kind-signatures -Wno-missing-deriving-strategies -Wno-monomorphism-restriction -Wno-prepositive-qualified-module -Wno-unused-packages -Wno-implicit-prelude -Wno-missing-safe-haskell-mode -Wno-missing-export-lists -Wno-partial-fields -Wcompat -Werror=incomplete-record-updates -Werror=incomplete-patterns -Werror=missing-methods -Werror=incomplete-uni-patterns -Werror=tabs -Wredundant-constraints -Wincomplete-record-updates -Wunused-type-patterns -Werror=name-shadowing -threaded -rtsopts
   build-depends:
       aeson ==2.2.*
@@ -675,7 +675,7 @@ executable simplex-directory-service
     , process >=1.6 && <1.6.18
     , random >=1.1 && <1.3
     , simple-logger ==0.1.*
-    , simplex-chat
+    , popopx-chat
     , popopxmq >=6.3
     , stm ==2.5.*
     , time ==1.12.*
@@ -702,7 +702,7 @@ executable simplex-directory-service
         bytestring ==0.10.*
       , text >=1.2.4.0 && <1.3
 
-test-suite simplex-chat-test
+test-suite popopx-chat-test
   if flag(swift)
     cpp-options: -DswiftJSON
   if flag(client_library)
@@ -798,7 +798,7 @@ test-suite simplex-chat-test
       Directory.Service
       Directory.Store
       Directory.Store.Migrate
-      Paths_simplex_chat
+      Paths_popopx_chat
   if flag(client_postgres)
       other-modules:
           ChatTests.DBUtils.Postgres
@@ -852,7 +852,7 @@ test-suite simplex-chat-test
     , scientific ==0.3.*
     , silently ==1.2.*
     , simple-logger ==0.1.*
-    , simplex-chat
+    , popopx-chat
     , popopxmq >=6.3
     , stm ==2.5.*
     , terminal ==0.2.*

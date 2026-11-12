@@ -9,7 +9,7 @@ set -euo pipefail
 mkdir -p "$(dirname "$1")"
 out="$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 ghc_ver=$(ghc --numeric-version)
-version=$(sed -n 's/^version: *//p' simplex-chat.cabal)
+version=$(sed -n 's/^version: *//p' popopx-chat.cabal)
 openssl_dir=$(brew --prefix openssl@3)
 ffi_dir=$(brew --prefix libffi)
 gmp_dir=$(brew --prefix gmp)
@@ -23,7 +23,7 @@ find "$(ghc --print-libdir)" -name 'lib*ffi*.a' -o -name 'libgmp*.a' -o -name 'l
 cat > cabal.project.local <<EOF
 ignore-project: False
 
-package simplex-chat
+package popopx-chat
     flags: +swift +client_library
     static: True
     shared: False
@@ -41,21 +41,21 @@ package entropy
     flags: +DoNotGetEntropy
 EOF
 
-cabal build -j lib:simplex-chat
+cabal build -j lib:popopx-chat
 
-build_dir=dist-newstyle/build/aarch64-osx/ghc-$ghc_ver/simplex-chat-$version/build
-ls -la "$build_dir"/libHSsimplex-chat-*
+build_dir=dist-newstyle/build/aarch64-osx/ghc-$ghc_ver/popopx-chat-$version/build
+ls -la "$build_dir"/libHSpopopx-chat-*
 
-ghc_lib=$(ls "$build_dir"/libHSsimplex-chat-*-ghc"$ghc_ver".a)
+ghc_lib=$(ls "$build_dir"/libHSpopopx-chat-*-ghc"$ghc_ver".a)
 echo "Selected symbols defined in $ghc_lib:"
 { nm -gU "$ghc_lib" 2>/dev/null || true; } \
   | awk '$NF ~ /^_(ffi_call|__gmpz_init|hs_init_with_rtsopts|chat_migrate_init_key|EVP_CIPHER_CTX_new|sqlite3_key)$/ {print "  " $NF}' \
   | sort -u
 
 pkg=$(mktemp -d)
-cp "$build_dir"/libHSsimplex-chat-*.a "$ffi_dir"/lib/libffi.a "$gmp_dir"/lib/libgmp.a "$gmp_dir"/lib/libgmpxx.a "$pkg"
+cp "$build_dir"/libHSpopopx-chat-*.a "$ffi_dir"/lib/libffi.a "$gmp_dir"/lib/libgmp.a "$gmp_dir"/lib/libgmpxx.a "$pkg"
 chmod u+w "$pkg"/*.a
-for f in "$pkg"/libHSsimplex-chat-*.a; do
+for f in "$pkg"/libHSpopopx-chat-*.a; do
   strip -x "$f"
 done
 ls -la "$pkg"

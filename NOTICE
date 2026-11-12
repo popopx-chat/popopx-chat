@@ -10,7 +10,7 @@ Retained attribution, unchanged in this fork:
   copyright:      2020-22 simplex.chat
   author:         simplex.chat
   maintainer:     chat@simplex.chat
-    -- from simplex-chat.cabal, kept verbatim
+    -- from popopx-chat.cabal, kept verbatim
 
   Copyright (C) 2026 SimpleX Chat Ltd. All rights reserved.
     -- from assets/ASSETS_LICENSE.md and its two mirrors, kept verbatim

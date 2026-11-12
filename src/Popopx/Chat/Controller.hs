@@ -52,7 +52,7 @@ import Data.Word (Word16)
 import Language.Haskell.TH (Exp, Q, runIO)
 import Network.Socket (HostName)
 import Numeric.Natural
-import qualified Paths_simplex_chat as SC
+import qualified Paths_popopx_chat as SC
 import Popopx.Chat.AppSettings
 import Popopx.Chat.Call
 import Popopx.Chat.Delivery

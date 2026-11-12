@@ -22,7 +22,7 @@ package direct-sqlcipher
     flags: +openssl
 EOF
 
-cabal build exe:simplex-chat exe:simplex-directory-service
+cabal build exe:popopx-chat exe:popopx-directory-service
 
 popopxmq_tag=$(sed -n '/popopx-chat\/popopxmq.git/{n;s/^ *tag: *//p}' cabal.project)
 smq=$(mktemp -d)
@@ -34,7 +34,7 @@ cp cabal.project.local "$smq"
 (cd "$smq" && cabal build exe:smp-server)
 
 pkg=$(mktemp -d)
-for exe in simplex-chat simplex-directory-service; do
+for exe in popopx-chat popopx-directory-service; do
   cp "$(cabal list-bin "exe:$exe")" "$pkg"
 done
 # in a fresh project list-bin first prints git's output from syncing the source-repository-packages

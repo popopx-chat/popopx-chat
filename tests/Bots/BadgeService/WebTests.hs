@@ -1364,7 +1364,7 @@ testServesTheBuild = bounded "serves the build" $ withWebApp $ \_ client -> do
   statusOf missing `shouldBe` 404
 
 builtSiteDir :: FilePath
-builtSiteDir = "apps" </> "simplex-badge-service" </> "web" </> "dist"
+builtSiteDir = "apps" </> "popopx-badge-service" </> "web" </> "dist"
 
 testServesBuiltWebApp :: IO ()
 testServesBuiltWebApp = bounded "built web app" $ withServiceStore $ \st -> do

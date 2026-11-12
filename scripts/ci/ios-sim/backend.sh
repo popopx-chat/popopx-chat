@@ -27,7 +27,7 @@ chat() {
   local db=$1 secs=$2 cmd=$3
   shift 3
   local status=0
-  "$bin/simplex-chat" -d "$work/$db" -e "$cmd" -t "$secs" --execute-log all "$@" < /dev/null > "$work/out" 2>&1 || status=$?
+  "$bin/popopx-chat" -d "$work/$db" -e "$cmd" -t "$secs" --execute-log all "$@" < /dev/null > "$work/out" 2>&1 || status=$?
   cat "$work/out" >> "$work/$db-cli.log"
   echo "::group::$db: $(cut -c1-200 <<< "$cmd")"
   cat "$work/out"
@@ -81,7 +81,7 @@ listings_query="SELECT gp.display_name AS name, gp.short_descr AS description, g
   ORDER BY g.summary_current_members_count DESC, r.group_id"
 
 start_relay() {
-  nohup "$bin/simplex-chat" -d "$work/relay" --relay --headless --user-display-name ci_relay < /dev/null > "$work/relay.log" 2>&1 &
+  nohup "$bin/popopx-chat" -d "$work/relay" --relay --headless --user-display-name ci_relay < /dev/null > "$work/relay.log" 2>&1 &
   echo $! > "$work/relay.pid"
   local deadline=$((SECONDS + 120))
   until grep -qE '^https://[^ ]+/r#' "$work/relay.log"; do
@@ -109,7 +109,7 @@ create_directory() {
 start_directory() {
   local pid deadline=$((SECONDS + 60))
   # -y: the service adds its own tables to the database the CLI created, and would otherwise ask on stdin
-  nohup "$bin/simplex-directory-service" -d "$work/directory" -y --super-users "$1" < /dev/null >> "$work/directory.log" 2>&1 &
+  nohup "$bin/popopx-directory-service" -d "$work/directory" -y --super-users "$1" < /dev/null >> "$work/directory.log" 2>&1 &
   pid=$!
   echo "$pid" > "$work/directory.pid"
   echo "$1" > "$work/super-user"
@@ -300,7 +300,7 @@ start_contact() {
   named "$db" "$display_name" 5 "/_set domain 1 $name"
   expect_out "^new contact address set$"
   # --headless is for relays only; a command with a long -t keeps the client online, accepting contacts, for 6 hours
-  nohup "$bin/simplex-chat" -d "$work/$db" -e "/auto_accept on" -t 21600 --user-display-name "$display_name" < /dev/null > "$work/$db.log" 2>&1 &
+  nohup "$bin/popopx-chat" -d "$work/$db" -e "/auto_accept on" -t 21600 --user-display-name "$display_name" < /dev/null > "$work/$db.log" 2>&1 &
   echo $! > "$work/$db.pid"
 }
 
@@ -409,8 +409,8 @@ start() {
   bin=$work/bin
   mkdir -p "$bin"
   unzip -o -q "$1" -d "$bin"
-  "$bin/simplex-chat" --version
-  "$bin/simplex-directory-service" --version
+  "$bin/popopx-chat" --version
+  "$bin/popopx-directory-service" --version
   "$bin/smp-server" --version
   make_avatars
 

@@ -36,7 +36,7 @@ import Data.Text.Encoding (decodeLatin1, encodeUtf8)
 import Data.Word (Word16, Word32)
 import qualified Network.HTTP.Types as N
 import Network.HTTP2.Server (responseStreaming)
-import qualified Paths_simplex_chat as SC
+import qualified Paths_popopx_chat as SC
 import Popopx.Chat.Controller
 import Popopx.Chat.Files
 import Popopx.Chat.Messages (chatNameStr)

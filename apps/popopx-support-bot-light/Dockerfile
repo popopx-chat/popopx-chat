@@ -42,7 +42,7 @@ ENV PATH="/root/.ghcup/bin:/root/.cabal/bin:$PATH"
 ENV CABAL_DIR=/root/.cabal
 
 WORKDIR /src
-COPY cabal.project simplex-chat.cabal README.md PRIVACY.md ./
+COPY cabal.project popopx-chat.cabal README.md PRIVACY.md ./
 COPY scripts/cabal.project.local.linux ./cabal.project.local
 COPY src ./src
 
@@ -53,11 +53,11 @@ RUN --mount=type=cache,target=/root/.cabal \
     --mount=type=cache,target=/src/dist-newstyle \
     set -eu; \
     cabal update; \
-    cabal build lib:simplex-chat \
+    cabal build lib:popopx-chat \
       --ghc-options='-optl-Wl,-rpath,$ORIGIN -optl-Wl,-soname,libpopopx.so -flink-rts -threaded' \
       --constraint 'popopxmq +client_library' \
-      --constraint 'simplex-chat +client_library'; \
-    lib=$(ls -t /src/dist-newstyle/build/*/ghc-${GHC}/simplex-chat-*/build/libHSsimplex-chat-*-inplace-ghc${GHC}.so | head -1); \
+      --constraint 'popopx-chat +client_library'; \
+    lib=$(ls -t /src/dist-newstyle/build/*/ghc-${GHC}/simplex-chat-*/build/libHSpopopx-chat-*-inplace-ghc${GHC}.so | head -1); \
     build_dir=$(dirname "$lib"); \
     mv "$lib" "$build_dir/libpopopx.so"; \
     mkdir -p /libs; \

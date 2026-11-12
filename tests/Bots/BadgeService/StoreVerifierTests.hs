@@ -411,7 +411,7 @@ testApplePrice = do
 testReadAppleRoot :: IO ()
 testReadAppleRoot = do
   TestChain {rootCert, intermediateCert} <- trustedChain
-  readAppleRoot ("apps" </> "simplex-badge-service" </> "test-fixtures" </> "apple" </> "AppleRootCA-G3.cer") >>= (`shouldSatisfy` isRight)
+  readAppleRoot ("apps" </> "popopx-badge-service" </> "test-fixtures" </> "apple" </> "AppleRootCA-G3.cer") >>= (`shouldSatisfy` isRight)
   createDirectoryIfMissing True "tests/tmp"
   withTempDirectory "tests/tmp" "apple-root" $ \d -> do
     B.writeFile (d </> "root.cer") (encodeSignedObject rootCert)

@@ -26,7 +26,7 @@ package direct-sqlcipher
     extra-lib-dirs: $openssl_dir/lib
 EOF
 
-targets="exe:simplex-chat exe:simplex-directory-service"
+targets="exe:popopx-chat exe:popopx-directory-service"
 cabal build -j $targets
 
 # popopxmq's sdist leaves out apps/common/Web/static/.well-known, which smp-server embeds, so it is built from a clone

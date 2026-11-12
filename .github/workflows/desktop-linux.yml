@@ -83,8 +83,8 @@ jobs:
       - name: Artifact names
         id: names
         run: |
-          echo "core=desktop-linux-core-${{ hashFiles('src/**', 'cabal.project', 'simplex-chat.cabal', 'PRIVACY.md', 'scripts/desktop/build-lib-linux.sh', 'scripts/ci/desktop-linux/build-core.sh') }}" >> "$GITHUB_OUTPUT"
-          echo "backend=desktop-linux-backend-${{ hashFiles('src/**', 'apps/popopx-chat/**', 'apps/popopx-directory-service/Main.hs', 'apps/popopx-directory-service/src/**', 'cabal.project', 'simplex-chat.cabal', 'scripts/ci/desktop-linux/build-backend.sh') }}" >> "$GITHUB_OUTPUT"
+          echo "core=desktop-linux-core-${{ hashFiles('src/**', 'cabal.project', 'popopx-chat.cabal', 'PRIVACY.md', 'scripts/desktop/build-lib-linux.sh', 'scripts/ci/desktop-linux/build-core.sh') }}" >> "$GITHUB_OUTPUT"
+          echo "backend=desktop-linux-backend-${{ hashFiles('src/**', 'apps/popopx-chat/**', 'apps/popopx-directory-service/Main.hs', 'apps/popopx-directory-service/src/**', 'cabal.project', 'popopx-chat.cabal', 'scripts/ci/desktop-linux/build-backend.sh') }}" >> "$GITHUB_OUTPUT"
 
       - name: Find core library
         id: core

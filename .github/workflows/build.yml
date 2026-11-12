@@ -22,7 +22,7 @@ on:
       - "apps/ios/**"
       - "tests/**"
       - "bots/src/**"
-      - "simplex-chat.cabal"
+      - "popopx-chat.cabal"
       - "cabal.project"
       - "Dockerfile*"
       - "scripts/ci/*.sh"
@@ -102,7 +102,7 @@ jobs:
 # =============================
 
 # Create release, but only if it's triggered by tag push.
-# On pushes to master or stable: claim the simplex-chat-libs release core-<version of simplex-chat.cabal> for the branch
+# On pushes to master or stable: claim the simplex-chat-libs release core-<version of popopx-chat.cabal> for the branch
 # and create its draft, create the draft of a missing add-on release, and find the package versions to publish.
 # On pull requests and other pushes, this job will always complete.
 
@@ -202,7 +202,7 @@ jobs:
           GH_TOKEN: ${{ secrets.NODEJS_REPO_TOKEN }}
           LIBS_REPOSITORY: ${{ github.repository }}-libs
         run: |
-          version=$(sed -n 's/^version: *//p' simplex-chat.cabal)
+          version=$(sed -n 's/^version: *//p' popopx-chat.cabal)
           tag=core-$version
           claim_output=$(python3 scripts/ci/packages_release.py claim-core "$version" "$GITHUB_SHA" "$release_branch")
           eval "$claim_output"
@@ -461,12 +461,12 @@ jobs:
           cabal update
           cabal build -j --enable-tests ${{ env.ghc_options }}
           mkdir -p /out
-          for i in simplex-chat simplex-chat-test; do
+          for i in popopx-chat popopx-chat-test; do
             bin=$(find /project/dist-newstyle -name "$i" -type f -executable)
             chmod +x "$bin"
             cp "$bin" /out/
           done
-          strip /out/simplex-chat
+          strip /out/popopx-chat
 
       # Also for pull requests that change the chat core, for the package tests.
       - name: Build library
@@ -549,7 +549,7 @@ jobs:
         if: matrix.should_run == true
         shell: bash
         run: |
-          docker cp builder:/out/simplex-chat-test .
+          docker cp builder:/out/popopx-chat-test .
 
       - name: Copy CLI from container and prepare it
         id: linux_cli_prepare
@@ -560,7 +560,7 @@ jobs:
           cli_deb_name="${cli_name}.deb"
           cli_path="${{ github.workspace }}"
 
-          docker cp builder:/out/simplex-chat "./${cli_name}"
+          docker cp builder:/out/popopx-chat "./${cli_name}"
           docker cp builder:/out/deb-build/simplex-chat.deb "./${cli_deb_name}"
 
           echo "bin_name=${cli_name}" >> $GITHUB_OUTPUT
@@ -660,7 +660,7 @@ jobs:
           TESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.tests || '' }}
           PR_BODY: ${{ github.event.pull_request.draft == true && github.event.pull_request.body || '' }}
           ATTEMPTS: ${{ (github.ref == 'refs/heads/stable' || startsWith(github.ref, 'refs/tags/v')) && 3 || 1 }}
-        run: scripts/ci/run-tests.sh timeout 35m ./simplex-chat-test
+        run: scripts/ci/run-tests.sh timeout 35m ./popopx-chat-test
 
       # Compiling the desktop and Android targets of :common in parallel exceeds the 2 GB Kotlin daemon heap.
       # cmakeBuildAndCopy links the JNI library against libpopopx, which this job does not build.
@@ -976,7 +976,7 @@ jobs:
         run: |
           ARCH=x86_64
           GHC_VER=${{ needs.variables.outputs.GHC_VER }}
-          BUILD_DIR=$(echo dist-newstyle/build/${ARCH}-linux/ghc-${GHC_VER}/simplex-chat-*)
+          BUILD_DIR=$(echo dist-newstyle/build/${ARCH}-linux/ghc-${GHC_VER}/popopx-chat-*)
           mkdir -p postgres-libs/libs
           cp ${BUILD_DIR}/build/libpopopx.so postgres-libs/libs/
           cp ${BUILD_DIR}/build/deps/* postgres-libs/libs/
@@ -1151,7 +1151,7 @@ jobs:
         run: |
           scripts/ci/prune-old-builds.sh dist-newstyle
           cabal build -j --enable-tests ${{ env.ghc_options }}
-          path=$(cabal list-bin simplex-chat | tail -n 1)
+          path=$(cabal list-bin popopx-chat | tail -n 1)
           echo "bin_path=$path" >> $GITHUB_OUTPUT
           echo "bin_hash=$(echo SHA2-256\(${{ matrix.cli_asset_name }}\)= $(openssl sha256 $path | cut -d' ' -f 2))" >> $GITHUB_OUTPUT
 
@@ -1522,10 +1522,10 @@ jobs:
 
           scripts/ci/prune-old-builds.sh dist-newstyle
           rm -rf dist-newstyle/src/direct-sq* dist-newstyle/src/popopxmq* dist-newstyle/src/hs-jpeg-t* dist-newstyle/src/JuicyPixe*
-          sed -i "s/, unix /--, unix /" simplex-chat.cabal
+          sed -i "s/, unix /--, unix /" popopx-chat.cabal
           cabal build -j --enable-tests ${{ env.ghc_options }}
           rm -rf dist-newstyle/src/direct-sq* dist-newstyle/src/popopxmq* dist-newstyle/src/hs-jpeg-t* dist-newstyle/src/JuicyPixe*
-          path=$(cabal list-bin simplex-chat | tail -n 1)
+          path=$(cabal list-bin popopx-chat | tail -n 1)
           echo "bin_path=$path" >> $GITHUB_OUTPUT
           echo "bin_hash=$(echo SHA2-256\(${{ matrix.cli_asset_name }}\)= $(openssl sha256 $path | cut -d' ' -f 2))" >> $GITHUB_OUTPUT
 

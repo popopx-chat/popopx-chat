@@ -366,7 +366,7 @@ Play gives a resubscription a new purchase token, so subscribing again on the sa
 ### Affected Locations
 
 - `common/src/commonMain/kotlin/chat/popopx/common/views/badges/BadgeStore.kt` -- `restorePurchases()`
-- `../../apps/simplex-badge-service/src/BadgeService/Service.hs` -- the move limit
+- `../../apps/popopx-badge-service/src/BadgeService/Service.hs` -- the move limit
 
 ### Impact
 

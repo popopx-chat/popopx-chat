@@ -53,10 +53,10 @@ idle_seconds = 60
 ; Keep the key file readable by this service alone.
 ;[apple]
 ;bundle_id = chat.simplex.app
-;root_certificates = /etc/simplex-badge-service/AppleRootCA-G3.cer
+;root_certificates = /etc/popopx-badge-service/AppleRootCA-G3.cer
 ;api_key_id = 2X9R4HXF34
 ;api_issuer_id = 57246542-96fe-1a63-e053-0824d011072a
-;api_private_key_file = /etc/simplex-badge-service/AuthKey_2X9R4HXF34.p8
+;api_private_key_file = /etc/popopx-badge-service/AuthKey_2X9R4HXF34.p8
 ;api_host = https://api.storekit.itunes.apple.com
 
 ; verifies Play purchases with the Google Play Developer API. Omit the whole section and the service answers
@@ -67,7 +67,7 @@ idle_seconds = 60
 ; already acknowledged itself is answered internal until the permission is granted. Keep the file readable by this service alone.
 ;[google]
 ;package_name = chat.simplex.app
-;service_account_file = /etc/simplex-badge-service/play-service-account.json
+;service_account_file = /etc/popopx-badge-service/play-service-account.json
 
 ; the key this service signs credentials with. index is the index clients verify against, so
 ; private_key has to be one whose public half already ships in the apps at that index: a fresh

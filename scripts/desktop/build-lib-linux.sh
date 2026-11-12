@@ -20,7 +20,7 @@ fi
 root_dir="$(dirname "$(dirname "$(readlink "$0")")")"
 cd $root_dir
 DIST_DIR="${DIST_DIR:-dist-newstyle}"
-BUILD_DIR=$DIST_DIR/build/$ARCH-$OS/ghc-${GHC_VERSION}/simplex-chat-*
+BUILD_DIR=$DIST_DIR/build/$ARCH-$OS/ghc-${GHC_VERSION}/popopx-chat-*
 
 exports=( $(sed 's/foreign export ccall "chat_migrate_init_key"//' src/Popopx/Chat/Mobile.hs | sed 's/foreign export ccall "chat_reopen_store"//' |grep "foreign export ccall" | cut -d '"' -f2) )
 for elem in "${exports[@]}"; do count=$(grep -R "$elem$" libpopopx.dll.def | wc -l); if [ $count -ne 1 ]; then echo Wrong exports in libpopopx.dll.def. Add \"$elem\" to that file; exit 1; fi ; done
@@ -29,13 +29,13 @@ for elem in "${exports[@]}"; do count=$(grep -R "\"$elem\"" flake.nix | wc -l); 
 #rm -rf $BUILD_DIR
 if [[ "$DATABASE_BACKEND" == "postgres" ]]; then
     echo "Building with postgres backend..."
-    cabal build --builddir="$DIST_DIR" lib:simplex-chat --ghc-options='-optl-Wl,-rpath,$ORIGIN -optl-Wl,-soname,libpopopx.so -flink-rts -threaded' --constraint 'popopxmq +client_library +client_postgres' --constraint 'simplex-chat +client_library +client_postgres'
+    cabal build --builddir="$DIST_DIR" lib:popopx-chat --ghc-options='-optl-Wl,-rpath,$ORIGIN -optl-Wl,-soname,libpopopx.so -flink-rts -threaded' --constraint 'popopxmq +client_library +client_postgres' --constraint 'popopx-chat +client_library +client_postgres'
 else
     echo "Building with sqlite backend..."
-    cabal build --builddir="$DIST_DIR" lib:simplex-chat --ghc-options='-optl-Wl,-rpath,$ORIGIN -optl-Wl,-soname,libpopopx.so -flink-rts -threaded' --constraint 'popopxmq +client_library' --constraint 'simplex-chat +client_library'
+    cabal build --builddir="$DIST_DIR" lib:popopx-chat --ghc-options='-optl-Wl,-rpath,$ORIGIN -optl-Wl,-soname,libpopopx.so -flink-rts -threaded' --constraint 'popopxmq +client_library' --constraint 'popopx-chat +client_library'
 fi
 cd $BUILD_DIR/build
-mv libHSsimplex-chat-*-inplace-ghc${GHC_VERSION}.so libpopopx.so 2> /dev/null || true
+mv libHSpopopx-chat-*-inplace-ghc${GHC_VERSION}.so libpopopx.so 2> /dev/null || true
 #patchelf --add-needed libHSrts_thr-ghc${GHC_VERSION}.so libpopopx.so
 #patchelf --add-rpath '$ORIGIN' libpopopx.so
 

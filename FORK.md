@@ -37,7 +37,7 @@ authoritative per-file record.
 ## What was deliberately NOT changed
 
 - **Copyright and attribution.** The `author` / `maintainer` / `copyright` fields of
-  `simplex-chat.cabal`, the three `Copyright (C) 2026 SimpleX Chat Ltd` asset-licence lines
+  `popopx-chat.cabal`, the three `Copyright (C) 2026 SimpleX Chat Ltd` asset-licence lines
   and the ~78 company-name references in the privacy, licence and legal texts are retained
   verbatim, as AGPL-3.0 §7 requires (and §4 forbids removing). This codebase carries no
   per-file copyright headers, so there is nothing else to preserve.

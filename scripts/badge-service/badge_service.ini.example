@@ -46,10 +46,10 @@ idle_seconds = 60
 ; only host accepted unless [dev] credit_test_purchases = on, which needs the Sandbox host instead.
 ;[apple]
 ;bundle_id = chat.simplex.app
-;root_certificates = /etc/simplex-badge-service/AppleRootCA-G3.cer
+;root_certificates = /etc/popopx-badge-service/AppleRootCA-G3.cer
 ;api_key_id = 2X9R4HXF34
 ;api_issuer_id = 57246542-96fe-1a63-e053-0824d011072a
-;api_private_key_file = /etc/simplex-badge-service/AuthKey_2X9R4HXF34.p8
+;api_private_key_file = /etc/popopx-badge-service/AuthKey_2X9R4HXF34.p8
 
 ; optional; without it every Play receipt is answered provider_not_configured, which the app retries later.
 ; service_account_file is the JSON key of a service account with the Play Console permissions "View
@@ -58,7 +58,7 @@ idle_seconds = 60
 ; itself is answered internal until the permission is granted. Place it in config/; the file must be readable by the service's user alone.
 ;[google]
 ;package_name = chat.simplex.app
-;service_account_file = /etc/simplex-badge-service/play-service-account.json
+;service_account_file = /etc/popopx-badge-service/play-service-account.json
 
 ; index is the one clients verify against; private_key is from `simplex-chat badge keygen`.
 ; To rotate, change both together, once clients trust the new index.

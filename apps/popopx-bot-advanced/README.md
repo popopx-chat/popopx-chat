@@ -1,6 +1,6 @@
 # Advanced SimpleX Chat bot example
 
-In most cases [a simple REPL bot](../simplex-bot/) is sufficient, but in cases you want to program more advanced communication scenarios you may take a more complex event-based approach, as in this example.
+In most cases [a simple REPL bot](../popopx-bot/) is sufficient, but in cases you want to program more advanced communication scenarios you may take a more complex event-based approach, as in this example.
 
 Event-based approach allows you:
 

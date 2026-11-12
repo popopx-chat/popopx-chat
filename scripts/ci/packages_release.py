@@ -49,7 +49,7 @@ PYTHON_DIR = "packages/popopx-chat-python"
 RELEASE_FILE = f"{NODEJS_DIR}/src/release.ts"
 PYTHON_VERSION_FILE = f"{PYTHON_DIR}/src/simplex_chat/_version.py"
 ADDON_SOURCES = [f"{NODEJS_DIR}/binding.gyp", f"{NODEJS_DIR}/cpp"]
-CORE_SOURCES = ["src", "simplex-chat.cabal", "cabal.project"]
+CORE_SOURCES = ["src", "popopx-chat.cabal", "cabal.project"]
 # The pull_request paths of build.yml are the union of the globs of BUILD_CHANGES and SCOPE_CHANGES; ":!" excludes a path from its build.
 BUILD_CHANGES = {
     "haskell": [
@@ -62,7 +62,7 @@ BUILD_CHANGES = {
         "apps/popopx-directory-service/**",
         "tests/**",
         "bots/src/**",
-        "simplex-chat.cabal",
+        "popopx-chat.cabal",
         "cabal.project",
         "Dockerfile*",
         "scripts/ci/*.sh",
@@ -91,7 +91,7 @@ SCOPE_CHANGES = {
         "packages/popopx-chat-client/types/typescript/**",
     ],
 }
-CABAL_FILE = "simplex-chat.cabal"
+CABAL_FILE = "popopx-chat.cabal"
 CABAL_VERSION = re.compile(r"^(version:\s*)(\S+)", re.M)
 TYPES_SOURCES = [f"{TYPES_DIR}/src"]
 TYPES_README = f"{TYPES_DIR}/README.md"
@@ -984,7 +984,7 @@ def main(argv: list[str]) -> None:
     core_release_parser.add_argument("--branch", help=branch_help)
     core_release_parser.add_argument("--types-version", help="this types version instead of a bump when needed")
     claim_parser = commands.add_parser("claim-core")
-    claim_parser.add_argument("version", help="the core version of simplex-chat.cabal")
+    claim_parser.add_argument("version", help="the core version of popopx-chat.cabal")
     claim_parser.add_argument("commit", help="the simplex-chat commit to release it from")
     claim_parser.add_argument("branch", help="the branch of the commit")
     status_parser = commands.add_parser("release-status")

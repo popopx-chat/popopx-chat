@@ -44,19 +44,19 @@ The reduced build runs one Linux job, build-linux (ubuntu-22.04 x86_64), for eve
   - Docker image (step "Build and cache Docker image");
   - caches (the steps "Restore ... from cache");
   - `cabal build -j --enable-tests --ghc-options=-O0` (step "Build CLI");
-  - simplex-chat-test with the selected tests (step "Run tests"), each attempt limited to 35 minutes by `timeout`; an attempt that reaches the limit fails, and "Attempt <n> timed out." is printed.
+  - popopx-chat-test with the selected tests (step "Run tests"), each attempt limited to 35 minutes by `timeout`; an attempt that reaches the limit fails, and "Attempt <n> timed out." is printed.
 - Local:
   ```sh
   cp scripts/cabal.project.local.linux cabal.project.local
   cabal build --enable-tests --ghc-options=-O0
   mkdir -p tests/tmp
-  cabal test simplex-chat-test --ghc-options=-O0 --test-option=-m --test-option='/SimpleX chat client/group tests/'
+  cabal test popopx-chat-test --ghc-options=-O0 --test-option=-m --test-option='/SimpleX chat client/group tests/'
   ```
   The selection runs as in CI with scripts/ci/run-tests.sh, which appends the patterns of `TESTS` to the test binary:
   ```sh
-  TESTS='/SimpleX chat client/group tests/' scripts/ci/run-tests.sh "$(cabal list-bin simplex-chat-test --ghc-options=-O0)"
+  TESTS='/SimpleX chat client/group tests/' scripts/ci/run-tests.sh "$(cabal list-bin popopx-chat-test --ghc-options=-O0)"
   ```
-  `--ghc-options=-O0` matches the reduced build; the library and test-suite stanzas of simplex-chat.cabal set -O2. Test directories are created under tests/tmp (`tmpBracket` in tests/Test.hs).
+  `--ghc-options=-O0` matches the reduced build; the library and test-suite stanzas of popopx-chat.cabal set -O2. Test directories are created under tests/tmp (`tmpBracket` in tests/Test.hs).
 
 #### kotlin
 

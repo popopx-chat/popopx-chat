@@ -79,8 +79,8 @@ jobs:
       - name: Artifact names
         id: names
         run: |
-          echo "core=ios-sim-core-${{ hashFiles('src/**', 'cabal.project', 'simplex-chat.cabal', 'scripts/ci/ios-sim/build-core.sh') }}" >> "$GITHUB_OUTPUT"
-          echo "backend=ios-sim-backend-${{ hashFiles('src/**', 'apps/popopx-chat/**', 'apps/popopx-directory-service/Main.hs', 'apps/popopx-directory-service/src/**', 'cabal.project', 'simplex-chat.cabal', 'scripts/ci/ios-sim/build-backend.sh') }}" >> "$GITHUB_OUTPUT"
+          echo "core=ios-sim-core-${{ hashFiles('src/**', 'cabal.project', 'popopx-chat.cabal', 'scripts/ci/ios-sim/build-core.sh') }}" >> "$GITHUB_OUTPUT"
+          echo "backend=ios-sim-backend-${{ hashFiles('src/**', 'apps/popopx-chat/**', 'apps/popopx-directory-service/Main.hs', 'apps/popopx-directory-service/src/**', 'cabal.project', 'popopx-chat.cabal', 'scripts/ci/ios-sim/build-backend.sh') }}" >> "$GITHUB_OUTPUT"
 
       - name: Find core library
         id: core

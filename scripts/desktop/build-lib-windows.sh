@@ -15,7 +15,7 @@ else
     COMPOSE_ARCH=x64
 fi
 
-BUILD_DIR=dist-newstyle/build/$ARCH-$OS/ghc-*/simplex-chat-*
+BUILD_DIR=dist-newstyle/build/$ARCH-$OS/ghc-*/popopx-chat-*
 
 exports=( $(sed 's/foreign export ccall "chat_migrate_init_key"//' src/Popopx/Chat/Mobile.hs | sed 's/foreign export ccall "chat_reopen_store"//' |grep "foreign export ccall" | cut -d '"' -f2) )
 for elem in "${exports[@]}"; do count=$(grep -R "$elem$" libpopopx.dll.def | wc -l); if [ $count -ne 1 ]; then echo Wrong exports in libpopopx.dll.def. Add \"$elem\" to that file; exit 1; fi ; done
@@ -47,12 +47,12 @@ echo "package direct-sqlcipher" >> cabal.project.local
 echo "    flags: +openssl" >> cabal.project.local
 echo "    extra-include-dirs: $openssl_windows_style_path\include" >> cabal.project.local
 echo "    extra-lib-dirs: $openssl_windows_style_path" >> cabal.project.local
-echo "package simplex-chat" >> cabal.project.local
+echo "package popopx-chat" >> cabal.project.local
 echo "    ghc-options: -shared -threaded -optl-L$openssl_windows_style_path -optl-lcrypto-3-x64 -o libpopopx.dll libpopopx.dll.def" >> cabal.project.local
 # Very important! Without it the build fails on linking step since the linker can't find exported symbols.
 # It looks like GHC bug because with such random path the build ends successfully
 sed -i "s/ld.lld.exe/abracadabra.exe/" `ghc --print-libdir`/settings
-cabal build lib:simplex-chat --constraint 'popopxmq +client_library' --constraint 'simplex-chat +client_library'
+cabal build lib:popopx-chat --constraint 'popopxmq +client_library' --constraint 'popopx-chat +client_library'
 
 rm -rf apps/multiplatform/common/src/commonMain/cpp/desktop/libs/$OS-$ARCH/
 rm -rf apps/multiplatform/desktop/build/cmake

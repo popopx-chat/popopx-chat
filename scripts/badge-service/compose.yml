@@ -1,6 +1,6 @@
 services:
   badge-service:
-    image: simplex-badge-service:latest
+    image: popopx-badge-service:latest
     build:
       context: ../..
       dockerfile: scripts/badge-service/Dockerfile
@@ -17,11 +17,11 @@ services:
       - "--create-schema"
       - "--yes-migrate"
       - "--service-config"
-      - "/etc/simplex-badge-service/badge_service.ini"
+      - "/etc/popopx-badge-service/badge_service.ini"
     volumes:
       - type: bind
         source: ./config
-        target: /etc/simplex-badge-service
+        target: /etc/popopx-badge-service
         read_only: true
         bind:
           create_host_path: false

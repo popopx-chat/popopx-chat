@@ -1,5 +1,5 @@
 {
-  description = "nix flake for simplex-chat";
+  description = "nix flake for popopx-chat";
   inputs.haskellNix.url = "github:input-output-hk/haskell.nix/armv7a";
   inputs.nixpkgs.follows = "haskellNix/nixpkgs-2305";
   inputs.mac2ios.url = "github:zw3rk/mobile-core-tools";
@@ -46,7 +46,7 @@
         # If the stack.yaml was dropped, this would not be necessary.
         projectFileName = "cabal.project";
         src = pkgs.haskell-nix.haskellLib.cleanGit {
-          name = "simplex-chat";
+          name = "popopx-chat";
           src = ./.;
         };
         sha256map = import ./scripts/nix/sha256map.nix;
@@ -67,7 +67,7 @@
           })
 
           ({ pkgs,lib, ... }: lib.mkIf (pkgs.stdenv.hostPlatform.isAndroid) {
-            packages.simplex-chat.components.library.ghcOptions = [ "-pie" ];
+            packages.popopx-chat.components.library.ghcOptions = [ "-pie" ];
           })
 
           ({ lib, ... }: {
@@ -107,7 +107,7 @@
         for pkg in $out/_pkg/*.a; do
           chmod +w $pkg
           ${mac2ios.packages.${system}.mac2ios}/bin/mac2ios $pkg
-          [[ "$pkg" == *simplex-chat* ]] && ${pkgs.stdenv.cc.targetPrefix}strip -x $pkg
+          [[ "$pkg" == *popopx-chat* ]] && ${pkgs.stdenv.cc.targetPrefix}strip -x $pkg
           chmod -w $pkg
         done
 
@@ -134,8 +134,8 @@
       }; in
       rec {
         packages = {
-            "lib:simplex-chat" = (drv pkgs).simplex-chat.components.library;
-            "exe:simplex-chat" = (drv pkgs).simplex-chat.components.exes.simplex-chat;
+            "lib:simplex-chat" = (drv pkgs).popopx-chat.components.library;
+            "exe:simplex-chat" = (drv pkgs).popopx-chat.components.exes.popopx-chat;
         } // ({
             "x86_64-linux" =
               let
@@ -167,7 +167,7 @@
                   }
               );in {
               # STATIC x86_64-linux
-              "${pkgs.pkgsCross.musl64.hostPlatform.system}-static:exe:simplex-chat" = (drv pkgs.pkgsCross.musl64).simplex-chat.components.exes.simplex-chat;
+              "${pkgs.pkgsCross.musl64.hostPlatform.system}-static:exe:simplex-chat" = (drv pkgs.pkgsCross.musl64).popopx-chat.components.exes.popopx-chat;
               # STATIC i686-linux
               "${pkgs.pkgsCross.musl32.hostPlatform.system}-static:exe:simplex-chat" = (drv' {
                 pkgs' = pkgs.pkgsCross.musl32;
@@ -180,7 +180,7 @@
                     ./scripts/nix/memory-pr-99.patch
                   ];
                 }];
-              }).simplex-chat.components.exes.simplex-chat;
+              }).popopx-chat.components.exes.popopx-chat;
               # WINDOWS x86_64-mingwW64
               "${pkgs.pkgsCross.mingwW64.hostPlatform.system}:exe:simplex-chat" = (drv' {
                 pkgs' = pkgs.pkgsCross.mingwW64;
@@ -200,7 +200,7 @@
                     sed -i 's/mingwex//g' unix-time.cabal
                   '';
                  }];
-                }).simplex-chat.components.exes.simplex-chat.override {
+                }).popopx-chat.components.exes.popopx-chat.override {
                 postInstall = ''
                   set -x
                   ${pkgs.tree}/bin/tree $out
@@ -227,7 +227,7 @@
                   packages.direct-sqlcipher.components.library.libs = pkgs.lib.mkForce [
                     pkgs.pkgsCross.mingwW64.openssl
                   ];
-                  packages.simplex-chat.flags.client_library = true;
+                  packages.popopx-chat.flags.client_library = true;
                   packages.popopxmq.flags.client_library = true;
                   packages.popopxmq.components.library.libs = pkgs.lib.mkForce [
                     pkgs.pkgsCross.mingwW64.openssl
@@ -236,7 +236,7 @@
                     sed -i 's/mingwex//g' unix-time.cabal
                   '';
                 }];
-              }).simplex-chat.components.library
+              }).popopx-chat.components.library
               .override (p: {
                 # enableShared = false;
                 setupBuildFlags = p.component.setupBuildFlags ++ map (x: "--ghc-option=${x}") [
@@ -289,10 +289,10 @@
                       > $out/nix-support/hydra-build-products
                 '';
               });
-              # "${pkgs.pkgsCross.muslpi.hostPlatform.system}-static:exe:simplex-chat" = (drv pkgs.pkgsCross.muslpi).simplex-chat.components.exes.simplex-chat;
+              # "${pkgs.pkgsCross.muslpi.hostPlatform.system}-static:exe:simplex-chat" = (drv pkgs.pkgsCross.muslpi).popopx-chat.components.exes.popopx-chat;
 
               # STATIC aarch64-linux
-              "${pkgs.pkgsCross.aarch64-multiplatform-musl.hostPlatform.system}-static:exe:simplex-chat" = (drv pkgs.pkgsCross.aarch64-multiplatform-musl).simplex-chat.components.exes.simplex-chat;
+              "${pkgs.pkgsCross.aarch64-multiplatform-musl.hostPlatform.system}-static:exe:simplex-chat" = (drv pkgs.pkgsCross.aarch64-multiplatform-musl).popopx-chat.components.exes.popopx-chat;
               "armv7a-android:lib:support" = (drv' { pkgs' = android32Pkgs; extra-modules = []; compiler-nix-name = "ghc8107"; }).android-support.components.library.override {
                 smallAddressSpace = true; enableShared = false;
                 setupBuildFlags = map (x: "--ghc-option=${x}") [ "-shared" "-o" "libsupport.so" ];
@@ -352,13 +352,13 @@
                   packages.direct-sqlcipher.patches = [
                     ./scripts/nix/direct-sqlcipher-android-log.patch
                   ];
-                  packages.simplex-chat.flags.client_library = true;
+                  packages.popopx-chat.flags.client_library = true;
                   packages.popopxmq.flags.client_library = true;
                   packages.popopxmq.components.library.libs = pkgs8107.lib.mkForce [
                     (android32Pkgs.openssl.override { static = true; enableKTLS = false; })
                   ];
                 }];
-              }).simplex-chat.components.library.override {
+              }).popopx-chat.components.library.override {
                 smallAddressSpace = true; enableShared = false;
                 # for android we build a shared library, passing these arguments is a bit tricky, as
                 # we want only the threaded rts (HSrts_thr) and ffi to be linked, but not fed into iserv for
@@ -430,13 +430,13 @@
                   packages.direct-sqlcipher.patches = [
                     ./scripts/nix/direct-sqlcipher-android-log.patch
                   ];
-                  packages.simplex-chat.flags.client_library = true;
+                  packages.popopx-chat.flags.client_library = true;
                   packages.popopxmq.flags.client_library = true;
                   packages.popopxmq.components.library.libs = pkgs.lib.mkForce [
                     (androidPkgs.openssl.override { static = true; })
                   ];
                 }];
-              }).simplex-chat.components.library.override (p: {
+              }).popopx-chat.components.library.override (p: {
                 smallAddressSpace = true;
                 # we do not want a dynamically linked object, even though we _do_
                 # want to produce a _shared_ object. But `shared` implied -dyanmic
@@ -556,19 +556,19 @@
               "aarch64-darwin-ios:lib:simplex-chat" = (drv' {
                 pkgs' = pkgs;
                 extra-modules = [{
-                  packages.simplex-chat.flags.swift = true;
+                  packages.popopx-chat.flags.swift = true;
                   packages.popopxmq.flags.swift = true;
                   packages.direct-sqlcipher.flags.commoncrypto = true;
                   packages.popopxmq.flags.commoncrypto = true;
                   packages.entropy.flags.DoNotGetEntropy = true;
-                  packages.simplex-chat.flags.client_library = true;
+                  packages.popopx-chat.flags.client_library = true;
                   packages.popopxmq.flags.client_library = true;
                   packages.popopxmq.components.library.libs = pkgs.lib.mkForce [
                     # TODO: have a cross override for iOS, that sets this.
                     ((pkgs.openssl.override { static = true; }).overrideDerivation (old: { CFLAGS = "-mcpu=apple-a7 -march=armv8-a+norcpc" ;}))
                   ];
                 }];
-              }).simplex-chat.components.library.override (
+              }).popopx-chat.components.library.override (
                 iosOverrides "pkg-ios-aarch64-swift-json"
               );
 	            # aarch64-darwin build with tagged JSON format (for Mac & Flutter)
@@ -578,13 +578,13 @@
                   packages.direct-sqlcipher.flags.commoncrypto = true;
                   packages.popopxmq.flags.commoncrypto = true;
                   packages.entropy.flags.DoNotGetEntropy = true;
-                  packages.simplex-chat.flags.client_library = true;
+                  packages.popopx-chat.flags.client_library = true;
                   packages.popopxmq.flags.client_library = true;
                   packages.popopxmq.components.library.libs = pkgs.lib.mkForce [
                     ((pkgs.openssl.override { static = true; }).overrideDerivation (old: { CFLAGS = "-mcpu=apple-a7 -march=armv8-a+norcpc" ;}))
                   ];
                 }];
-              }).simplex-chat.components.library.override (
+              }).popopx-chat.components.library.override (
                 iosOverrides "pkg-ios-aarch64-tagged-json"
               );
             };
@@ -593,18 +593,18 @@
               "x86_64-darwin-ios:lib:simplex-chat" = (drv' {
                 pkgs' = pkgs;
                 extra-modules = [{
-                  packages.simplex-chat.flags.swift = true;
+                  packages.popopx-chat.flags.swift = true;
                   packages.popopxmq.flags.swift = true;
                   packages.direct-sqlcipher.flags.commoncrypto = true;
                   packages.popopxmq.flags.commoncrypto = true;
                   packages.entropy.flags.DoNotGetEntropy = true;
-                  packages.simplex-chat.flags.client_library = true;
+                  packages.popopx-chat.flags.client_library = true;
                   packages.popopxmq.flags.client_library = true;
                   packages.popopxmq.components.library.libs = pkgs.lib.mkForce [
                     (pkgs.openssl.override { static = true; })
                   ];
                 }];
-              }).simplex-chat.components.library.override (
+              }).popopx-chat.components.library.override (
                 iosOverrides "pkg-ios-x86_64-swift-json"
               );
               # x86_64-darwin build with tagged JSON format (for Mac & Flutter iOS simulator)
@@ -614,13 +614,13 @@
                   packages.direct-sqlcipher.flags.commoncrypto = true;
                   packages.popopxmq.flags.commoncrypto = true;
                   packages.entropy.flags.DoNotGetEntropy = true;
-                  packages.simplex-chat.flags.client_library = true;
+                  packages.popopx-chat.flags.client_library = true;
                   packages.popopxmq.flags.client_library = true;
                   packages.popopxmq.components.library.libs = pkgs.lib.mkForce [
                     (pkgs.openssl.override { static = true; })
                   ];
                 }];
-              }).simplex-chat.components.library.override (
+              }).popopx-chat.components.library.override (
                 iosOverrides "pkg-ios-x86_64-tagged-json"
               );
             };
