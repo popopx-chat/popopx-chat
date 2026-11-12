@@ -16,7 +16,7 @@ struct PrivacySettings: View {
     @AppStorage(GROUP_DEFAULT_PRIVACY_LINK_PREVIEWS, store: groupDefaults) private var useLinkPreviews = true
     @AppStorage(GROUP_DEFAULT_PRIVACY_SANITIZE_LINKS, store: groupDefaults) private var privacySanitizeLinks = false
     @AppStorage(DEFAULT_PRIVACY_SHOW_CHAT_PREVIEWS) private var showChatPreviews = true
-    @AppStorage(DEFAULT_PRIVACY_VERIFY_SIMPLEX_NAMES) private var verifyPopopxNames = false
+    @AppStorage(DEFAULT_PRIVACY_VERIFY_POPOPX_NAMES) private var verifyPopopxNames = false
     @AppStorage(DEFAULT_PRIVACY_SAVE_LAST_DRAFT) private var saveLastDraft = true
     @AppStorage(DEFAULT_PRIVACY_SHOW_SIGNATURE) private var showSignature = true
     @AppStorage(DEFAULT_PRIVACY_SHOW_FILE_ENCRYPTION) private var showFileEncryption = true

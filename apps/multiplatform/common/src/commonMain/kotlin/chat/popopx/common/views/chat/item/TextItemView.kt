@@ -404,7 +404,7 @@ fun MarkdownText (
                 if (linkMode == PopopxLinkMode.BROWSER && ft.format.showText == null && !ft.text.startsWith("[")) ft.text
                 else ft.format.simplexUri
               val t = ft.format.showText ?: if (linkMode == PopopxLinkMode.DESCRIPTION) ft.format.linkType.description else null
-              withAnnotation(tag = "SIMPLEX_URL", annotation = link) {
+              withAnnotation(tag = "POPOPX_URL", annotation = link) {
                 if (t == null) {
                   withStyle(ftStyle) { append(ft.text) }
                 } else {
@@ -416,7 +416,7 @@ fun MarkdownText (
             is Format.SimplexName -> {
               hasLinks = true
               val ftStyle = Format.linkStyle
-              withAnnotation(tag = "SIMPLEX_NAME", annotation = i.toString()) {
+              withAnnotation(tag = "POPOPX_NAME", annotation = i.toString()) {
                 withStyle(ftStyle) { append(ft.text) }
               }
             }
@@ -481,7 +481,7 @@ fun MarkdownText (
                 annotatedText.getStringAnnotations(tag, start = offset, end = offset).firstOrNull()?.let(f)
               }
               withAnnotation("WEB_URL") { a -> onLinkLongClick(a.item) }
-              withAnnotation("SIMPLEX_URL") { a -> onLinkLongClick(a.item) }
+              withAnnotation("POPOPX_URL") { a -> onLinkLongClick(a.item) }
               withAnnotation("OTHER_URL") { a -> onLinkLongClick(a.item) }
             }
           },
@@ -492,8 +492,8 @@ fun MarkdownText (
             if (hasLinks && uriHandler != null) {
               withAnnotation("WEB_URL") { a -> openBrowserAlert(a.item, uriHandler) }
               withAnnotation("OTHER_URL") { a -> safeOpenUri(a.item, uriHandler) }
-              withAnnotation("SIMPLEX_URL") { a -> uriHandler.openVerifiedPopopxUri(a.item) }
-              withAnnotation("SIMPLEX_NAME") { a ->
+              withAnnotation("POPOPX_URL") { a -> uriHandler.openVerifiedPopopxUri(a.item) }
+              withAnnotation("POPOPX_NAME") { a ->
                 val idx = a.item.toIntOrNull()
                 val nameText = idx?.let { formattedText.getOrNull(it) }?.text
                 // The name string is routed through the same connect path as a
@@ -518,7 +518,7 @@ fun MarkdownText (
           },
           onHover = { offset ->
             val hasAnnotation: (String) -> Boolean = { tag -> annotatedText.hasStringAnnotations(tag, start = offset, end = offset) }
-            val hand = hasAnnotation("WEB_URL") || hasAnnotation("SIMPLEX_URL") || hasAnnotation("OTHER_URL") || hasAnnotation("SIMPLEX_NAME") || hasAnnotation("SECRET") || hasAnnotation("COMMAND") || hasAnnotation("MODAL")
+            val hand = hasAnnotation("WEB_URL") || hasAnnotation("POPOPX_URL") || hasAnnotation("OTHER_URL") || hasAnnotation("POPOPX_NAME") || hasAnnotation("SECRET") || hasAnnotation("COMMAND") || hasAnnotation("MODAL")
             icon.value = if (hand) PointerIcon.Hand else PointerIcon.Text
           },
           onHoverExit = {
@@ -527,7 +527,7 @@ fun MarkdownText (
           },
           shouldConsumeEvent = { offset ->
             annotatedText.hasStringAnnotations(tag = "WEB_URL", start = offset, end = offset)
-                || annotatedText.hasStringAnnotations(tag = "SIMPLEX_URL", start = offset, end = offset)
+                || annotatedText.hasStringAnnotations(tag = "POPOPX_URL", start = offset, end = offset)
                 || annotatedText.hasStringAnnotations(tag = "OTHER_URL", start = offset, end = offset)
                 || annotatedText.hasStringAnnotations(tag = "MODAL", start = offset, end = offset)
           },

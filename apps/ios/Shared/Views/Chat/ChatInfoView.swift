@@ -1436,7 +1436,7 @@ private func deleteNotReadyContact(
 
 struct PopopxNameView: View {
     @EnvironmentObject var theme: AppTheme
-    @AppStorage(DEFAULT_PRIVACY_VERIFY_SIMPLEX_NAMES) var autoVerify = false
+    @AppStorage(DEFAULT_PRIVACY_VERIFY_POPOPX_NAMES) var autoVerify = false
     let simplexName: String
     let verified: Bool?
     let verify: () async -> (Bool?, String?)?

@@ -32,9 +32,9 @@ let DEFAULT_WEBRTC_ICE_SERVERS = "webrtcICEServers"
 let DEFAULT_CALL_KIT_CALLS_IN_RECENTS = "callKitCallsInRecents"
 let DEFAULT_PRIVACY_ACCEPT_IMAGES = "privacyAcceptImages" // unused. Use GROUP_DEFAULT_PRIVACY_ACCEPT_IMAGES instead
 let DEFAULT_PRIVACY_LINK_PREVIEWS = "privacyLinkPreviews" // deprecated, moved to app group
-let DEFAULT_PRIVACY_SIMPLEX_LINK_MODE = "privacyPopopxLinkMode"
+let DEFAULT_PRIVACY_POPOPX_LINK_MODE = "privacyPopopxLinkMode"
 let DEFAULT_PRIVACY_SHOW_CHAT_PREVIEWS = "privacyShowChatPreviews"
-let DEFAULT_PRIVACY_VERIFY_SIMPLEX_NAMES = "privacyVerifyPopopxNames"
+let DEFAULT_PRIVACY_VERIFY_POPOPX_NAMES = "privacyVerifyPopopxNames"
 let DEFAULT_PRIVACY_SHOW_SIGNATURE = "privacyShowSignature"
 let DEFAULT_PRIVACY_SHOW_FILE_ENCRYPTION = "privacyShowEncryption"
 let DEFAULT_PRIVACY_SAVE_LAST_DRAFT = "privacySaveLastDraft"
@@ -110,9 +110,9 @@ let appDefaults: [String: Any] = [
     DEFAULT_CALL_KIT_CALLS_IN_RECENTS: false,
     DEFAULT_PRIVACY_ACCEPT_IMAGES: true,
     DEFAULT_PRIVACY_LINK_PREVIEWS: true,
-    DEFAULT_PRIVACY_SIMPLEX_LINK_MODE: POPOPXLinkMode.description.rawValue,
+    DEFAULT_PRIVACY_POPOPX_LINK_MODE: POPOPXLinkMode.description.rawValue,
     DEFAULT_PRIVACY_SHOW_CHAT_PREVIEWS: true,
-    DEFAULT_PRIVACY_VERIFY_SIMPLEX_NAMES: false,
+    DEFAULT_PRIVACY_VERIFY_POPOPX_NAMES: false,
     DEFAULT_PRIVACY_SAVE_LAST_DRAFT: true,
     DEFAULT_PRIVACY_PROTECT_SCREEN: false,
     DEFAULT_PRIVACY_DELIVERY_RECEIPTS_SET: false,
@@ -218,7 +218,7 @@ let connectViaLinkTabDefault = EnumDefault<ConnectViaLinkTab>(defaults: UserDefa
 
 let chatLayoutDefault = EnumDefault<ChatLayout>(defaults: UserDefaults.standard, forKey: DEFAULT_CHAT_LAYOUT, withDefault: .classic)
 
-let privacyPopopxLinkModeDefault = EnumDefault<POPOPXLinkMode>(defaults: UserDefaults.standard, forKey: DEFAULT_PRIVACY_SIMPLEX_LINK_MODE, withDefault: .description)
+let privacyPopopxLinkModeDefault = EnumDefault<POPOPXLinkMode>(defaults: UserDefaults.standard, forKey: DEFAULT_PRIVACY_POPOPX_LINK_MODE, withDefault: .description)
 
 let privacyLocalAuthModeDefault = EnumDefault<LAMode>(defaults: UserDefaults.standard, forKey: DEFAULT_LA_MODE, withDefault: .system)
 
