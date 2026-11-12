@@ -1,5 +1,0 @@
- extern const unsigned char POPOPXChatVersionString[];
- extern const double POPOPXChatVersionNumber;
-
- const unsigned char POPOPXChatVersionString[] __attribute__ ((used)) = "@(#)PROGRAM:POPOPXChat  PROJECT:POPOPX-369" "\n";
- const double POPOPXChatVersionNumber __attribute__ ((used)) = (double)369.;
