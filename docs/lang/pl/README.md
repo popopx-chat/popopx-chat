@@ -279,7 +279,7 @@ Informacje o użytkownikach, ich kontaktach i grupach znajdują się wyłącznie
 
 Przeczytaj [whitepaper SimpleX](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/overview-tjr.md) po więcej informacji o zadaniach platformy oraz by dowiedzieć się jak wygląda koncepcja techniczna modelu.
 
-Zobacz [Protokół Czatu SimpleX](../../protocol/simplex-chat.md) by dowiedzieć się o formacie wiadomości wysyłanych między klientem czatu za pośrednictwem [Protokołu Wiadomości SimpleX](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/simplex-messaging.md).
+Zobacz [Protokół Czatu SimpleX](../../protocol/popopx-chat.md) by dowiedzieć się o formacie wiadomości wysyłanych między klientem czatu za pośrednictwem [Protokołu Wiadomości SimpleX](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/simplex-messaging.md).
 
 ## Prywatność i bezpieczeństwo: szczegóły techniczne i ograniczenia
 

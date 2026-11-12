@@ -80,7 +80,7 @@ For example, this message defines a simple text message `"hello!"`:
 
 `event` property is the type of the message that defines the semantics of the message and the allowed format of `params` property.
 
-`params` property includes message data, depending on `event`, as defined below and in [JTD schema](./simplex-chat.schema.json).
+`params` property includes message data, depending on `event`, as defined below and in [JTD schema](./popopx-chat.schema.json).
 
 ### Compressed format
 
@@ -143,7 +143,7 @@ SimpleX Chat Protocol supports the following message types passed in `event` pro
 - `x.call.*` - messages to invite to WebRTC calls and send signalling messages.
 - `x.ok` - message sent during connection handshake.
 
-JTD schema defining messages for all chat functions is available in [this file](./simplex-chat.schema.json) – please refer to this document for all properties of the message `params`.
+JTD schema defining messages for all chat functions is available in [this file](./popopx-chat.schema.json) – please refer to this document for all properties of the message `params`.
 
 ## x.contact - sending connection request
 
@@ -169,7 +169,7 @@ If the sending client uses `x.info.probe` messages, it MUST send them to all new
 
 When chat clients receive or send this message, they MUST create a new chat item in the conversation. Top level `msgId` property is defined to allow referencing this chat item or message in the future, e.g. to delete, update or quote chat item, or to accept file.
 
-This message uses `params` property of the message as content message container, without any top level properties for the container. Message container (`params`) includes message `content` property, an optional "invitation" to receive file or image attachment in `file` property (that is interpreted depending on message content type) and optional indication whether this message is forwarded (`"forward": true` property of container) or sent in reply to other message (`"quote": {<quoted message>}`). See `/definition/msgContainer` in [JTD schema](./simplex-chat.schema.json) for message container format.
+This message uses `params` property of the message as content message container, without any top level properties for the container. Message container (`params`) includes message `content` property, an optional "invitation" to receive file or image attachment in `file` property (that is interpreted depending on message content type) and optional indication whether this message is forwarded (`"forward": true` property of container) or sent in reply to other message (`"quote": {<quoted message>}`). See `/definition/msgContainer` in [JTD schema](./popopx-chat.schema.json) for message container format.
 
 Message content can be one of four types:
 
@@ -180,7 +180,7 @@ Message content can be one of four types:
 - `voice` - attached file is required, `text` property MAY be empty.
 - `link` - no file attachment is expected, `text` property MUST be non-empty. `preview` property contains information about link preview.
 
-See `/definition/msgContent` in [JTD schema](./simplex-chat.schema.json) for message container format.
+See `/definition/msgContent` in [JTD schema](./popopx-chat.schema.json) for message container format.
 
 ### x.msg.update - update of the previously sent message
 

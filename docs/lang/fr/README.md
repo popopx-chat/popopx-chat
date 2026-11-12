@@ -219,7 +219,7 @@ Seuls les appareils clients disposent d'informations sur les utilisateurs, leurs
 
 Voir le [whitepaper de SimpleX](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/overview-tjr.md) pour plus d'informations sur les objectifs et la conception technique de la plateforme.
 
-Voir le [protocole de SimpleX Chat](/docs/protocol/simplex-chat.md) pour le format des messages envoyés entre les clients de chat sur [SimpleX Messaging Protocol](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/simplex-messaging.md).
+Voir le [protocole de SimpleX Chat](/docs/protocol/popopx-chat.md) pour le format des messages envoyés entre les clients de chat sur [SimpleX Messaging Protocol](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/simplex-messaging.md).
 
 ## Vie privée : détails techniques et limites
 

@@ -283,7 +283,7 @@ Only the client devices have information about users, their contacts and groups.
 
 See [SimpleX whitepaper](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/overview-tjr.md) for more information on platform objectives and technical design.
 
-See [SimpleX Chat Protocol](./docs/protocol/simplex-chat.md) for the format of messages sent between chat clients over [SimpleX Messaging Protocol](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/simplex-messaging.md).
+See [SimpleX Chat Protocol](./docs/protocol/popopx-chat.md) for the format of messages sent between chat clients over [SimpleX Messaging Protocol](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/simplex-messaging.md).
 
 ## Privacy and security: technical details and limitations
 
@@ -349,7 +349,7 @@ Also see [TypeScript SimpleX Chat client](./packages/popopx-chat-client/) and [J
 - Example bots: [support bot](./apps/popopx-support-bot/) and [calculator](./apps/popopx-calculator-bot/) in TypeScript, [support bot light](./apps/popopx-support-bot-light/) in Python, [directory service](./apps/popopx-directory-service/) and [broadcast bot](./apps/popopx-broadcast-bot/) in Haskell.
 - [Terminal client](./docs/CLI.md): installation, building from source and usage.
 - Servers: [SMP](./docs/SERVER.md), [XFTP](./docs/XFTP-SERVER.md) and [chat relay](./docs/CHAT-RELAY.md).
-- Protocols: [SimpleX network](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/overview-tjr.md), [chat](./docs/protocol/simplex-chat.md), [channels](./docs/protocol/channels-overview.md) and [public names](./docs/protocol/names-overview.md).
+- Protocols: [SimpleX network](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/overview-tjr.md), [chat](./docs/protocol/popopx-chat.md), [channels](./docs/protocol/channels-overview.md) and [public names](./docs/protocol/names-overview.md).
 - For coding agents working in this repository: [project structure](./docs/contributing/PROJECT.md) and [coding and building](./docs/contributing/CODE.md).
 
 ## Roadmap

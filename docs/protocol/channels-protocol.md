@@ -22,7 +22,7 @@ For architecture, design rationale, security properties, and threat model, see [
 
 ## Protocol
 
-This document describes the channel protocol as currently implemented. It builds on the [SimpleX Chat Protocol](./simplex-chat.md), using the same message format and connection model, with extensions for relay-mediated distribution and cryptographic message signing.
+This document describes the channel protocol as currently implemented. It builds on the [SimpleX Chat Protocol](./popopx-chat.md), using the same message format and connection model, with extensions for relay-mediated distribution and cryptographic message signing.
 
 ### Channel creation
 

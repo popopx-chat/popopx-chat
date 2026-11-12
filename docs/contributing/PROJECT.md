@@ -16,7 +16,7 @@ SimpleX Chat is a decentralized, privacy-focused messaging platform with **no us
 
 ## Specifications
 
-Chat protocol: docs/protocol/simplex-chat.md
+Chat protocol: docs/protocol/popopx-chat.md
 
 RFCs: docs/rfcs
 

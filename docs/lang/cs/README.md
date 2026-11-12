@@ -132,7 +132,7 @@ Informace o uživatelích, jejich kontaktech a skupinách mají pouze klientská
 
 Další informace o cílech a technickém návrhu platformy naleznete v dokumentu [SimpleX whitepaper](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/overview-tjr.md).
 
-Formát zpráv zasílaných mezi klienty chatu prostřednictvím [SimpleX Messaging Protocol](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/simplex-messaging.md) viz [SimpleX Chat Protocol](../../protocol/simplex-chat.md).
+Formát zpráv zasílaných mezi klienty chatu prostřednictvím [SimpleX Messaging Protocol](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/simplex-messaging.md) viz [SimpleX Chat Protocol](../../protocol/popopx-chat.md).
 
 ## Soukromí: technické podrobnosti a omezení
 

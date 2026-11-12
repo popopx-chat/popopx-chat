@@ -53,7 +53,7 @@ The SimpleX network has three transport layers, each built on the one below:
 
 1. **SMP** ([SimpleX Messaging Protocol](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/simplex-messaging.md)) - stateless, unidirectional packet delivery between two endpoints through SMP routers. Provides fixed-size blocks, 2-node onion routing, and transport metadata protection.
 
-2. **SimpleX agents** ([agent protocol](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/agent-protocol.md)) - bidirectional, redundant connections between endpoints, with end-to-end post-quantum double ratchet encryption. The [SimpleX Chat Protocol](./simplex-chat.md) runs on top of this layer, providing direct messaging, group communication, and metadata delivery for file transfers via [XFTP protocol](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/xftp.md).
+2. **SimpleX agents** ([agent protocol](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/agent-protocol.md)) - bidirectional, redundant connections between endpoints, with end-to-end post-quantum double ratchet encryption. The [SimpleX Chat Protocol](./popopx-chat.md) runs on top of this layer, providing direct messaging, group communication, and metadata delivery for file transfers via [XFTP protocol](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/xftp.md).
 
 3. **Channels** - stateful, one-to-many information delivery and management with cryptographic ownership and programmable governance. This layer runs on top of chat and agent layer 2, and it is described in this document.
 
