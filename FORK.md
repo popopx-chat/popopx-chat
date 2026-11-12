@@ -95,24 +95,33 @@ yet. Before any build of this fork is distributed:
   `@popopx-chat` npm org, a `popopx-chat` PyPI project and a `popopx-chat-libs` repository — is the
   fix; hand-editing the manifests would break `unreleased_pins()` and `check-pins` instead.
   Full method: [`NODE-PACKAGES-POPOPX.md`](./NODE-PACKAGES-POPOPX.md).
-- **Link claims are inert, for two independent reasons.** Both must clear in the same change.
-  - *Nothing is served.* The Deploy step of `.github/workflows/web.yml:36` is gated
+- **Link claims are inert, for three independent reasons.** All three must clear in the same change.
+  - *This tree publishes nothing.* The Deploy step of `.github/workflows/web.yml:36` is gated
     `if: github.repository == 'simplex-chat/simplex-chat'`, so this repository never publishes a
     site at all; `website/src/CNAME`, passed through to the site root by `website/.eleventy.js:471`,
-    still reads `simplex.chat` — GitHub Pages would claim the upstream domain. Everything below is
-    therefore unreachable-by-URL today, not merely wrong.
-  - *Measured 2026-11-12, and the picture is better and worse than that bullet suggests.* `popopx.chat`
-    is registered (Namecheap) and resolves to `43.129.40.33` — identically from 1.1.1.1, 8.8.8.8 and
-    9.9.9.9, unlike `simplex.chat`, which answers a different address per resolver on this network, so
-    these records are real and not injected. A web server does answer there for both `popopx.chat` and
-    `popopxchat.com`. Two things still fail: its Let's Encrypt certificate is issued for
-    **`popopxchat.com`**, so `popopx.chat` over HTTPS is a name-mismatch error to any client — including
-    the OS link verifier, which requires a valid TLS connection — and `/.well-known/assetlinks.json`
-    returns that server's 404 HTML page, so the files in `website/src/.well-known/` are not deployed at
-    all. That is a server-side fix (add the SAN, publish the directory), not a repository fix; the
-    GitHub-Pages path in the previous bullet would not deliver them either. The relay fleet under
-    `popopx.im` is likewise already DNS'd (`smp1-8`, `xftp1`, `xftp6`, `ntf1-3` each answer with an A record,
-    `xftp2-5` and `ntf4` do not); the fill-in table for their keys is the fork's `relay-keys.yaml`, kept with
+    still reads `simplex.chat` — GitHub Pages would claim the upstream domain. What does answer on these
+    domains is a different deployment, described next.
+  - *Measured 2026-11-12, corrected by a closer look on 2026-11-13.* `popopx.chat` is registered
+    (Namecheap) and resolves to `43.129.40.33` — identically from 1.1.1.1, 8.8.8.8 and 9.9.9.9, unlike
+    `simplex.chat`, which answers a different address per resolver on this network, so these records are real
+    and not injected. Something does answer there, and it is **this fork's own site** — `<title>Home - Popopx
+    Chat</title>`, `nginx/1.14.1`, `x-powered-by: PHP/7.2.24`, served for `popopx.chat`, `popopxchat.com` and
+    `www.popopxchat.com` alike, over plain HTTP as well as HTTPS. Three consequences, none of them fixable in
+    this repository:
+    - **The site that is deployed is not the site in this tree.** `website/` is upstream's Eleventy build and
+      nothing in CI publishes it (there is no `gh-pages` branch either — `git ls-remote --heads origin`
+      returns one ref). So `web.yml:36` and `website/src/CNAME` are not the levers; publishing
+      `.well-known` means adding two static locations to that nginx.
+    - **The certificate is single-name.** `CN=popopxchat.com`, and its SAN holds only
+      `DNS:popopxchat.com` — no `popopx.chat`, no `www`. Every client therefore sees a name mismatch on
+      `https://popopx.chat/`, including the OS link verifier, which requires a valid TLS connection before it
+      reads a single byte of `apple-app-site-association`. `www.popopxchat.com` fails the same way.
+    - **Nothing is published under `/.well-known/` on either name** — each returns the PHP application's 404
+      HTML page, so the files in `website/src/.well-known/` are not deployed anywhere.
+    The relay fleet is DNS'd under **both** domains: `smpN`/`xftpN.popopxchat.com` carry the same A records as
+    their `popopx.im` counterparts (the `ntf` hosts exist only under `popopx.im`, and `xftp2-5` and `ntf4` do
+    not resolve at all; the zone has no wildcard, so each record was written deliberately). The fill-in table
+    for their keys is the fork's `relay-keys.yaml`, kept with
     the rebrand tooling outside this repository.
   - *The relay hosts exist too, and most of them are not serving.* `smp1-8`, `xftp1`, `xftp6`, `ntf1-3`
     under `popopx.im` each resolve to a distinct address (`xftp2-5` and `ntf4` do not resolve, and the zone
