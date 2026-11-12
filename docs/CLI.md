@@ -54,7 +54,7 @@ See [Encryption Primitives Used](https://github.com/simplex-chat/simplexmq/blob/
 
 #### Linux and MacOS
 
-To **install** or **update** `simplex-chat`, you should run the install script. To do that, use the following cURL or Wget command:
+To **install** or **update** `popopx-chat`, you should run the install script. To do that, use the following cURL or Wget command:
 
 ```sh
 curl -o- https://raw.githubusercontent.com/simplex-chat/simplex-chat/stable/install.sh | bash
@@ -64,13 +64,13 @@ curl -o- https://raw.githubusercontent.com/simplex-chat/simplex-chat/stable/inst
 wget -qO- https://raw.githubusercontent.com/simplex-chat/simplex-chat/stable/install.sh | bash
 ```
 
-Once the chat client downloads, you can run it with `simplex-chat` command in your terminal.
+Once the chat client downloads, you can run it with `popopx-chat` command in your terminal.
 
 Alternatively, you can manually download the chat binary for your system from the [latest stable release](https://github.com/simplex-chat/simplex-chat/releases) and make it executable as shown below.
 
 ```sh
 chmod +x <binary>
-mv <binary> ~/.local/bin/simplex-chat
+mv <binary> ~/.local/bin/popopx-chat
 ```
 
 (or any other preferred location on `PATH`).
@@ -80,7 +80,7 @@ On MacOS you also need to [allow Gatekeeper to run it](https://support.apple.com
 #### Windows
 
 ```sh
-move <binary> %APPDATA%/local/bin/simplex-chat.exe
+move <binary> %APPDATA%/local/bin/popopx-chat.exe
 ```
 
 ### Build from source
@@ -92,9 +92,9 @@ move <binary> %APPDATA%/local/bin/simplex-chat.exe
 On Linux, you can build the chat executable using [docker build with custom output](https://docs.docker.com/engine/reference/commandline/build/#custom-build-outputs):
 
 ```shell
-git clone git@github.com:simplex-chat/simplex-chat.git
-cd simplex-chat
-git checkout stable
+git clone git@github.com:popopx-chat/popopx-chat.git
+cd popopx-chat
+git checkout master
 DOCKER_BUILDKIT=1 docker build --output ~/.local/bin .
 ```
 
@@ -113,9 +113,9 @@ You can use `ghcup tui` to check or add GHC and cabal versions.
 2. Clone the source code:
 
 ```shell
-git clone git@github.com:simplex-chat/simplex-chat.git
-cd simplex-chat
-git checkout stable
+git clone git@github.com:popopx-chat/popopx-chat.git
+cd popopx-chat
+git checkout master
 # or to build a specific version:
 # git checkout v5.3.0-beta.8
 ```
@@ -151,14 +151,14 @@ cabal install popopx-chat
 
 ### Running the chat client
 
-To start the chat client, run `simplex-chat` from the terminal.
+To start the chat client, run `popopx-chat` from the terminal.
 
 By default, app data directory is created in the home directory (`~/.simplex`, or `%APPDATA%/simplex` on Windows), and two SQLite database files `simplex_v1_chat.db` and `simplex_v1_agent.db` are initialized in it.
 
 To specify a different file path prefix for the database files use `-d` command line option:
 
 ```shell
-$ simplex-chat -d alice
+$ popopx-chat -d alice
 ```
 
 Running above, for example, would create `alice_v1_chat.db` and `alice_v1_agent.db` database files in current directory.
@@ -168,14 +168,14 @@ Three default SMP servers are hosted on Linode - they are [pre-configured in the
 If you deployed your own SMP server(s) you can configure client via `-s` option:
 
 ```shell
-$ simplex-chat -s smp://LcJUMfVhwD8yxjAiSaDzzGF3-kLG4Uh0Fl_ZIjrRwjI=@smp.example.com
+$ popopx-chat -s smp://LcJUMfVhwD8yxjAiSaDzzGF3-kLG4Uh0Fl_ZIjrRwjI=@smp.example.com
 ```
 
 Base64url encoded string preceding the server address is the server's offline certificate fingerprint which is validated by client during TLS handshake.
 
 You can still talk to people using default or any other server - it only affects the location of the message queue when you initiate the connection (and the reply queue can be on another server, as set by the other party's client).
 
-Run `simplex-chat -h` to see all available options.
+Run `popopx-chat -h` to see all available options.
 
 ### Access messaging servers via Tor
 
@@ -189,7 +189,7 @@ brew services start tor
 Use `-x` option to access servers via Tor:
 
 ```
-simplex-chat -x
+popopx-chat -x
 ```
 
 You can also use option `--socks-proxy=ipv4:port` or `--socks-proxy=:port` to configure host and port of your SOCKS5 proxy, e.g. if you are running it on some other host or port.

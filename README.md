@@ -265,7 +265,7 @@ Recent and important updates:
 curl -o- https://raw.githubusercontent.com/simplex-chat/simplex-chat/stable/install.sh | bash
 ```
 
-Once the chat client is installed, simply run `simplex-chat` from your terminal.
+Once the chat client is installed, simply run `popopx-chat` from your terminal.
 
 ![simplex-chat](./images/connection.gif)
 
@@ -324,7 +324,7 @@ We plan to add:
 You can:
 
 - [create chat bots and services](#develop-a-chat-bot).
-- run [simplex-chat terminal CLI](./docs/CLI.md) to execute individual chat commands, e.g. to send messages as part of shell script execution.
+- run [popopx-chat terminal CLI](./docs/CLI.md) to execute individual chat commands, e.g. to send messages as part of shell script execution.
 - use POPOPX Chat library to integrate chat functionality into your mobile apps.
 - create chat bots and services in Haskell - see [simple](./apps/popopx-bot/) and more [advanced chat bot example](./apps/popopx-bot-advanced/).
 
