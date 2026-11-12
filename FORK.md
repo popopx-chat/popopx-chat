@@ -114,12 +114,26 @@ yet. Before any build of this fork is distributed:
     `popopx.im` is likewise already DNS'd (`smp1-8`, `xftp1`, `xftp6`, `ntf1-3` each answer with an A record,
     `xftp2-5` and `ntf4` do not); the fill-in table for their keys is the fork's `relay-keys.yaml`, kept with
     the rebrand tooling outside this repository.
-  - *The relay hosts exist too.* `smp1-8`, `xftp1`, `xftp6`, `ntf1-3` under `popopx.im` each resolve to
-    a distinct address, `xftp2-5` and `ntf4` do not. Their certificate fingerprints — the key half of
-    every preset address — cannot be read from a development machine: the protocol ports are not
-    reachable through a web proxy. They come from the file named `fingerprint` in each server's own
-    config directory. Until then the presets keep shipping upstream's host+key pairs, which are
-    consistent and work, and the cutover is one scripted pass (see "Upstream-operated hosts" below).
+  - *The relay hosts exist too, and most of them are not serving.* `smp1-8`, `xftp1`, `xftp6`, `ntf1-3`
+    under `popopx.im` each resolve to a distinct address (`xftp2-5` and `ntf4` do not resolve, and the zone
+    has no wildcard, so every record was written deliberately). A fingerprint does **not** need the server's
+    shell: it is `base64url(sha256(DER of the CA certificate))`, and a listening relay sends that CA as the
+    second certificate of its chain — which is exactly how the client pins it
+    (popopxmq `src/Popopx/FileTransfer/Client.hs:186` matches `[_leaf, ca]`). It is also stored on the box,
+    in the file `fingerprint` in the server's config directory (`/etc/opt/popopx`, `/etc/opt/popopx-xftp`,
+    `/etc/opt/popopx-notifications`, per that repository's `apps/*/Main.hs`). Reading it from here requires
+    OpenSSL 3, because the relays sign with
+    Ed448 and the system TLS stack answers `handshake failure` for anything else — so a failed handshake is
+    not evidence about the server.
+    Measured 2026-11-13 across those 13 hosts and both protocol ports: **one serves a relay.**
+    `xftp1.popopx.im:443` sends a chain whose CA subject is `CN=SMP server CA, O=POPOPX` — a string only
+    this fork's `popopxmq` writes — so that box already runs our dependency's server. Every other host
+    refuses the connection or is filtered. Nothing therefore moves yet: SMP has zero relays listening, so
+    presetting our own relays would ship a build that cannot message, which is a worse half-config than the
+    one the reverted pin fixed. The remaining input is operational, not informational — start
+    `smp-server`/`xftp-server`/`ntf-server` on those boxes and open the port in the provider's security
+    group; the keys then read themselves and the cutover is one scripted pass (see "Upstream-operated
+    hosts" below).
   - *The signing identity is not ours.* `website/src/.well-known/assetlinks.json` carries our
     `package_name` with SimpleX Chat Ltd's three signing-certificate fingerprints, so `autoVerify`
     cannot pass for a package signed by anybody else. Same class on iOS: the Team ID `PDBA6XRBQT`
