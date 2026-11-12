@@ -98,6 +98,24 @@ yet. Before any build of this fork is distributed:
     site at all; `website/src/CNAME`, passed through to the site root by `website/.eleventy.js:471`,
     still reads `simplex.chat` — GitHub Pages would claim the upstream domain. Everything below is
     therefore unreachable-by-URL today, not merely wrong.
+  - *Measured 2026-11-12, and the picture is better and worse than that bullet suggests.* `popopx.chat`
+    is registered (Namecheap) and resolves to `43.129.40.33` — identically from 1.1.1.1, 8.8.8.8 and
+    9.9.9.9, unlike `simplex.chat`, which answers a different address per resolver on this network, so
+    these records are real and not injected. A web server does answer there for both `popopx.chat` and
+    `popopxchat.com`. Two things still fail: its Let's Encrypt certificate is issued for
+    **`popopxchat.com`**, so `popopx.chat` over HTTPS is a name-mismatch error to any client — including
+    the OS link verifier, which requires a valid TLS connection — and `/.well-known/assetlinks.json`
+    returns that server's 404 HTML page, so the files in `website/src/.well-known/` are not deployed at
+    all. That is a server-side fix (add the SAN, publish the directory), not a repository fix; the
+    GitHub-Pages path in the previous bullet would not deliver them either. The relay fleet under
+    `popopx.im` is likewise already DNS'd (`smp1-8`, `xftp1`, `xftp6`, `ntf1-3`), measured in
+    `tools/r7/relay-keys.yaml` with the command that reads each server's fingerprint on the box.
+  - *The relay hosts exist too.* `smp1-8`, `xftp1`, `xftp6`, `ntf1-3` under `popopx.im` each resolve to
+    a distinct address, `xftp2-5` and `ntf4` do not. Their certificate fingerprints — the key half of
+    every preset address — cannot be read from a development machine: the protocol ports are not
+    reachable through a web proxy. They come from the file named `fingerprint` in each server's own
+    config directory. Until then the presets keep shipping upstream's host+key pairs, which are
+    consistent and work, and the cutover is one scripted pass (see "Upstream-operated hosts" below).
   - *The signing identity is not ours.* `website/src/.well-known/assetlinks.json` carries our
     `package_name` with SimpleX Chat Ltd's three signing-certificate fingerprints, so `autoVerify`
     cannot pass for a package signed by anybody else. Same class on iOS: the Team ID `PDBA6XRBQT`
