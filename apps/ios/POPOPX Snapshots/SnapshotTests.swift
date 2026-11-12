@@ -10,13 +10,17 @@ final class SnapshotTests: XCTestCase {
 
     override func setUp() async throws {
         fixedQRCode = await generateImage(previewQRLink, tintColor: UIColor(red: 0.023, green: 0.176, blue: 0.337, alpha: 1), errorLevel: "M")
+        // previewScenes() builds every preview eagerly and WebRTCClient.swift:22 calls getChatCtrl()
+        // while initializing, so the harness needs a controller before it can render anything.
+        if !hasChatCtrl() { _ = chatMigrateInit() }
     }
 
     @MainActor
-    // The 376 baselines under References/ and the app logo keep SimpleX's art on purpose: they are
-    // proprietary, not AGPL (References/ASSETS_LICENSE.md), so editing them would void the licence -
-    // the replacement is our own renders, which needs its own approval. This target renders, it does
-    // not compare, so a green run here says nothing about them.
+    // The 376 baselines under References/ are our own renders (regenerated 2026-11-12), which is what
+    // References/ASSETS_LICENSE.md requires: SimpleX's screenshots are proprietary and allowed only in
+    // an unmodified distribution. This target renders, it does not compare, so a green run says nothing
+    // about them. SNAPSHOT_SIZE only picks the scenes and names the file - the scale itself comes from
+    // the simulator's content size, so a run that does not set it first re-renders "large" 112 times.
     func testPreviews() throws {
         NSTimeZone.default = try XCTUnwrap(TimeZone(identifier: "UTC"))
         let env = ProcessInfo.processInfo.environment

@@ -69,9 +69,15 @@ A rebranded fork is a modified work. Therefore:
      background colours `icon_background` `#FFFFFF` and `icon_dark_blue_background` `#030749`
      (SimpleX's dark blue) and the 5 `mipmap-anydpi-v26` xml, which only wire foreground to
      background; the foregrounds are full-bleed, so the colours are behind them and invisible.
-   - the **376 iOS snapshot baselines** (`apps/ios/POPOPX Snapshots/References/*.png`) and the **210
-     desktop snapshot images** under `apps/multiplatform/common/src/desktopTest/snapshots` — these are
-     test fixtures of *their* app, and after R4 they no longer match our renders either;
+   - ~~the **376 iOS snapshot baselines**~~ **replaced 2026-11-12** with our own renders from the
+     "POPOPX Snapshots" target: 264 at `large` plus 56 each at `accessibility-medium` and
+     `extra-extra-extra-large`, filenames unchanged. 198 differ byte-for-byte from upstream's, the
+     other 178 are identical because those scenes carry no brand content — an unchanged PNG is not a
+     copied one, they were all written by this repo's run.
+   - the **210 desktop snapshot images** under `apps/multiplatform/common/src/desktopTest/snapshots`
+     — still upstream's, still blocking: regenerating them needs
+     `chat.popopx.app.SnapshotTest#everyPreviewIsRendered` under `gradle desktopTest`, which needs a
+     JDK and dependency downloads this machine has neither of;
    - `website/src/img/**` (the wordmark images, screenshots, illustrations, `SimpleXExplainedLottie.json`)
      and the 93 tracked files under `assets/**`, if this fork's website ships them.
    The action for each is **replace or remove before distribution**, not rename.
