@@ -148,8 +148,8 @@ function textIncludesQuery(text, query) {
 function uriIncludesQuery(uri, query) {
   if (!uri) return false;
   uri = uri.toLowerCase();
-  // Kept: links on simplex.simplex.chat / simplex.fluxwire.net hosts are upstream-reserved spellings,
-  // and this filter is the site's third member of the directory pair above. It moves with 戊, not here.
+  // Kept: this drops every URI containing the substring 'simplex' (upstream's simplex.chat / simplex.im
+  // hosts) from search results. It is the third member of the directory pair above and moves with it.
   return !uri.includes('simplex') && uri.includes(query);
 }
 
