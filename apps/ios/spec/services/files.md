@@ -5,7 +5,7 @@
 > Related specs: [Compose Module](../client/compose.md) | [Chat View](../client/chat-view.md) | [API Reference](../api.md) | [Database](../database.md) | [README](../README.md)
 > Related product: [Product Overview](../../product/README.md)
 
-**Source:** [`FileUtils.swift`](../../POPOPXChat/FileUtils.swift) | [`CryptoFile.swift`](../../POPOPXChat/CryptoFile.swift) | [`ChatTypes.swift`](../../POPOPXChat/ChatTypes.swift) | [`AppAPITypes.swift`](../../Shared/Model/AppAPITypes.swift) | [`SimpleXAPI.swift`](../../Shared/Model/SimpleXAPI.swift)
+**Source:** [`FileUtils.swift`](../../POPOPXChat/FileUtils.swift) | [`CryptoFile.swift`](../../POPOPXChat/CryptoFile.swift) | [`ChatTypes.swift`](../../POPOPXChat/ChatTypes.swift) | [`AppAPITypes.swift`](../../Shared/Model/AppAPITypes.swift) | [`POPOPXAPI.swift`](../../Shared/Model/POPOPXAPI.swift)
 
 ---
 
@@ -190,7 +190,7 @@ public let MAX_VOICE_MESSAGE_LENGTH = TimeInterval(300) // 5 minutes (300 second
 
 ## [7. CryptoFile -- At-Rest Encryption](../../POPOPXChat/ChatTypes.swift#L4241)
 
-When [`apiSetEncryptLocalFiles(enable: true)`](../../Shared/Model/SimpleXAPI.swift#L384) is configured, files stored on the device are AES-encrypted.
+When [`apiSetEncryptLocalFiles(enable: true)`](../../Shared/Model/POPOPXAPI.swift#L384) is configured, files stored on the device are AES-encrypted.
 
 ### [`CryptoFile`](../../POPOPXChat/ChatTypes.swift#L4241) Type
 
@@ -223,7 +223,7 @@ Implemented in [`CryptoFile.swift`](../../POPOPXChat/CryptoFile.swift):
 
 - Encrypted files stored alongside unencrypted files in `Documents/files/`
 - The `CryptoFileArgs` (key + nonce) are stored in the Haskell database, not on the filesystem
-- Toggle via privacy settings: [`apiSetEncryptLocalFiles(enable:)`](../../Shared/Model/SimpleXAPI.swift#L384)
+- Toggle via privacy settings: [`apiSetEncryptLocalFiles(enable:)`](../../Shared/Model/POPOPXAPI.swift#L384)
 
 ---
 
@@ -250,7 +250,7 @@ func getWallpaperDirectory() -> URL   // Documents/wallpapers/
 - Downloaded files: `Documents/files/{filename}`
 - Temporary files during transfer: `Documents/temp_files/`
 - Wallpaper images: `Documents/wallpapers/`
-- File paths are set via [`apiSetAppFilePaths(filesFolder:, tempFolder:, assetsFolder:)`](../../Shared/Model/SimpleXAPI.swift#L377) at startup
+- File paths are set via [`apiSetAppFilePaths(filesFolder:, tempFolder:, assetsFolder:)`](../../Shared/Model/POPOPXAPI.swift#L377) at startup
 
 ---
 
@@ -355,7 +355,7 @@ Cancels an in-progress upload or download. For XFTP transfers, also requests chu
 | CryptoFile FFI operations | [`POPOPXChat/CryptoFile.swift`](../../POPOPXChat/CryptoFile.swift) | `writeCryptoFile`, `readCryptoFile`, `encryptCryptoFile`, `decryptCryptoFile` |
 | CryptoFile / CryptoFileArgs types | [`POPOPXChat/ChatTypes.swift`](../../POPOPXChat/ChatTypes.swift) | `CryptoFile` (L4241), `CryptoFileArgs` (L4289) |
 | API command definitions | [`Shared/Model/AppAPITypes.swift`](../../Shared/Model/AppAPITypes.swift) | `receiveFile`, `cancelFile`, `ChatEvent` file events |
-| API implementations | [`Shared/Model/SimpleXAPI.swift`](../../Shared/Model/SimpleXAPI.swift) | `receiveFile` (L1471), `cancelFile` (L1590) |
+| API implementations | [`Shared/Model/POPOPXAPI.swift`](../../Shared/Model/POPOPXAPI.swift) | `receiveFile` (L1471), `cancelFile` (L1590) |
 | File view (chat item) | [`Shared/Views/Chat/ChatItem/CIFileView.swift`](../../Shared/Views/Chat/ChatItem/CIFileView.swift) | |
 | Image view (chat item) | [`Shared/Views/Chat/ChatItem/CIImageView.swift`](../../Shared/Views/Chat/ChatItem/CIImageView.swift) | |
 | Video view (chat item) | [`Shared/Views/Chat/ChatItem/CIVideoView.swift`](../../Shared/Views/Chat/ChatItem/CIVideoView.swift) | |

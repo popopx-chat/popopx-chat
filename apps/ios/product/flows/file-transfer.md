@@ -199,7 +199,7 @@ File and media sharing in SimpleX Chat iOS. Small files are sent inline within S
 | `Shared/Views/Chat/ChatItem/CIVoiceView.swift` | Voice message display: waveform, playback controls |
 | `Shared/Views/Chat/ChatItem/FramedCIVoiceView.swift` | Voice message inside a framed (quoted/forwarded) context |
 | `Shared/Views/Chat/ChatItem/FullScreenMediaView.swift` | Full-screen image/video viewer |
-| `Shared/Model/SimpleXAPI.swift` | `apiSendMessages`, `receiveFile`, `receiveFiles`, `uploadStandaloneFile`, `downloadStandaloneFile` |
+| `Shared/Model/POPOPXAPI.swift` | `apiSendMessages`, `receiveFile`, `receiveFiles`, `uploadStandaloneFile`, `downloadStandaloneFile` |
 | `Shared/Model/AudioRecPlay.swift` | Audio recording and playback engine for voice messages |
 
 ## Related Specifications

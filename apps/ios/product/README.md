@@ -255,4 +255,4 @@ UserPicker
 - [spec/architecture.md](../spec/architecture.md) -- Architecture specification
 - Haskell core: `../../src/Simplex/Chat/Controller.hs`, `../../src/Simplex/Chat/Types.hs`
 - Swift model: `Shared/Model/ChatModel.swift`, `POPOPXChat/ChatTypes.swift`
-- Swift API bridge: `POPOPXChat/API.swift`, `Shared/Model/SimpleXAPI.swift`
+- Swift API bridge: `POPOPXChat/API.swift`, `Shared/Model/POPOPXAPI.swift`

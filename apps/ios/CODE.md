@@ -23,7 +23,7 @@ Each layer links to the next:
 - `product/concepts.md` links every concept to its spec docs, source files, and tests in a single table — this is the primary navigation entry point
 - `product/views/*.md` and `product/flows/*.md` each have a **Related spec:** line linking to their most relevant spec documents
 - `product/glossary.md` uses *See: [spec/...]* references and `product/rules.md` uses **Spec:** [spec/...] references to link individual terms and rules down to spec
-- `spec/` documents contain **Source:** headers and inline function links pointing down to source. Line references MUST be clickable by embedding the `#Lxx-Lyy` fragment in the link URL: [`functionName()`](Shared/Model/SimpleXAPI.swift#Lxx-Lyy). You MUST NOT duplicate line numbers in the display text — the URL fragment is sufficient. Why: redundant line numbers in display text create maintenance burden on every line shift.
+- `spec/` documents contain **Source:** headers and inline function links pointing down to source. Line references MUST be clickable by embedding the `#Lxx-Lyy` fragment in the link URL: [`functionName()`](Shared/Model/POPOPXAPI.swift#Lxx-Lyy). You MUST NOT duplicate line numbers in the display text — the URL fragment is sufficient. Why: redundant line numbers in display text create maintenance burden on every line shift.
 - Reverse direction: the Document Map (end of this file) maps source → spec → product
 
 ### Navigation workflow
@@ -163,7 +163,7 @@ After completing all changes (code + documentation), you MUST run an adversarial
 | Source Location | Spec Document | Product Document |
 |----------------|---------------|-----------------|
 | Shared/ContentView.swift | spec/client/navigation.md | product/views/chat-list.md |
-| Shared/SimpleXApp.swift | spec/architecture.md | product/flows/onboarding.md |
+| Shared/POPOPXApp.swift | spec/architecture.md | product/flows/onboarding.md |
 | Shared/AppDelegate.swift | spec/services/notifications.md | product/flows/onboarding.md |
 | Shared/Views/ChatList/ChatListView.swift | spec/client/chat-list.md | product/views/chat-list.md |
 | Shared/Views/ChatList/GetStakeBanner.swift | spec/client/chat-list.md | product/views/chat-list.md |
@@ -191,7 +191,7 @@ After completing all changes (code + documentation), you MUST run an adversarial
 | Shared/Views/Database/ | spec/database.md | product/views/settings.md |
 | Shared/Views/Migration/ | spec/database.md | product/flows/onboarding.md |
 | Shared/Model/ChatModel.swift | spec/state.md | product/concepts.md |
-| Shared/Model/SimpleXAPI.swift | spec/api.md, spec/architecture.md | product/concepts.md |
+| Shared/Model/POPOPXAPI.swift | spec/api.md, spec/architecture.md | product/concepts.md |
 | Shared/Model/AppAPITypes.swift | spec/api.md | product/concepts.md |
 | Shared/Model/NtfManager.swift | spec/services/notifications.md | product/flows/messaging.md |
 | Shared/Model/BGManager.swift | spec/services/notifications.md | product/flows/messaging.md |

@@ -208,15 +208,15 @@ If migration is interrupted:
 
 | File | Purpose |
 |------|---------|
-| `Shared/SimpleXApp.swift` | App entry point: `haskell_init`, defaults registration, DB container setup, BG tasks |
+| `Shared/POPOPXApp.swift` | App entry point: `haskell_init`, defaults registration, DB container setup, BG tasks |
 | `Shared/AppDelegate.swift` | Push notification registration, URL handling |
 | `Shared/ContentView.swift` | Root view: authentication, onboarding routing, chat initialization |
 | `Shared/Views/Onboarding/OnboardingView.swift` | Onboarding step router, `OnboardingStage` enum |
-| `Shared/Views/Onboarding/SimpleXInfo.swift` | Step 1: Privacy architecture explanation |
+| `Shared/Views/Onboarding/POPOPXInfo.swift` | Step 1: Privacy architecture explanation |
 | `Shared/Views/Onboarding/CreateProfile.swift` | Profile creation: `CreateProfile` (additional) and `CreateFirstProfile` (onboarding) |
 | `Shared/Views/Onboarding/ChooseServerOperators.swift` | Step 3: Server operator conditions |
 | `Shared/Views/Onboarding/SetNotificationsMode.swift` | Step 4: Notification mode selection |
-| `Shared/Views/Onboarding/CreateSimpleXAddress.swift` | Optional address creation during onboarding |
+| `Shared/Views/Onboarding/CreatePOPOPXAddress.swift` | Optional address creation during onboarding |
 | `Shared/Views/Onboarding/HowItWorks.swift` | Educational content about SimpleX protocol |
 | `Shared/Views/Migration/MigrateFromDevice.swift` | Source device migration UI |
 | `Shared/Views/Migration/MigrateToDevice.swift` | Destination device migration UI |
@@ -224,7 +224,7 @@ If migration is interrupted:
 | `Shared/Views/Database/DatabaseEncryptionView.swift` | Database passphrase management |
 | `Shared/Views/Database/DatabaseErrorView.swift` | Database error recovery UI |
 | `Shared/Views/Database/MigrateToAppGroupView.swift` | Legacy migration from Documents to App Group container |
-| `Shared/Model/SimpleXAPI.swift` | `startChat`, `apiCreateActiveUser`, `apiExportArchive`, `apiImportArchive`, `apiRegisterToken` |
+| `Shared/Model/POPOPXAPI.swift` | `startChat`, `apiCreateActiveUser`, `apiExportArchive`, `apiImportArchive`, `apiRegisterToken` |
 | `POPOPXChat/API.swift` | `chatMigrateInit`, `chatInitTemporaryDatabase`, low-level DB initialization |
 | `POPOPXChat/FileUtils.swift` | DB file paths, constants (`DB_FILE_PREFIX`, `CHAT_DB`, `AGENT_DB`) |
 | `POPOPXChat/AppGroup.swift` | App group container configuration |

@@ -63,11 +63,11 @@ SimpleXApp (root entry point)
 
 | File | Role |
 |------|------|
-| `Shared/SimpleXApp.swift` | App entry point, Haskell init, lifecycle management |
+| `Shared/POPOPXApp.swift` | App entry point, Haskell init, lifecycle management |
 | `Shared/AppDelegate.swift` | UIApplicationDelegate for push token registration |
 | `Shared/ContentView.swift` | Root view -- authentication gate, call overlay, navigation |
 | `Shared/Model/ChatModel.swift` | Primary observable state (ChatModel, ItemsModel, Chat) |
-| `Shared/Model/SimpleXAPI.swift` | FFI bridge -- chatSendCmd, chatApiSendCmd, sendSimpleXCmd |
+| `Shared/Model/POPOPXAPI.swift` | FFI bridge -- chatSendCmd, chatApiSendCmd, sendSimpleXCmd |
 | `Shared/Model/AppAPITypes.swift` | ChatCommand, ChatResponse, ChatEvent enums (iOS app layer) |
 | `POPOPXChat/APITypes.swift` | APIResult, ChatError, ChatCmdProtocol (shared framework) |
 | `POPOPXChat/ChatTypes.swift` | User, ChatInfo, Contact, GroupInfo, ChatItem data types |

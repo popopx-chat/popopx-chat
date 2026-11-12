@@ -49,7 +49,7 @@
 | Source File | Product Concepts Affected | Risk Level | Notes |
 |-------------|--------------------------|------------|-------|
 | Shared/ContentView.swift | PC1, PC2, PC3 | High | Root navigation — affects all chat access |
-| Shared/SimpleXApp.swift | PC1 through PC31 | High | App entry point — initialization affects everything |
+| Shared/POPOPXApp.swift | PC1 through PC31 | High | App entry point — initialization affects everything |
 | Shared/AppDelegate.swift | PC18 | Medium | Push notification registration |
 | Shared/Views/ChatList/ChatListView.swift | PC1, PC28 | High | Main screen rendering and filtering |
 | Shared/Views/ChatList/GetStakeBanner.swift | PC1 | Low | Crowdfunding banner and shared banner card chrome |
@@ -77,7 +77,7 @@
 | Shared/Views/Database/ | PC23, PC26 | High | Database encryption and export |
 | Shared/Views/Migration/ | PC26 | High | Device migration — data portability |
 | Shared/Model/ChatModel.swift | PC1 through PC31 | High | Central state — all features depend on it |
-| Shared/Model/SimpleXAPI.swift | PC1 through PC31 | High | FFI bridge — all commands flow through here |
+| Shared/Model/POPOPXAPI.swift | PC1 through PC31 | High | FFI bridge — all commands flow through here |
 | Shared/Model/AppAPITypes.swift | PC1 through PC31 | High | Command/response types — all API communication |
 | Shared/Model/NtfManager.swift | PC18 | High | Notification delivery |
 | Shared/Model/BGManager.swift | PC18 | Medium | Background fetch scheduling |

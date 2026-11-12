@@ -137,9 +137,9 @@ Persisted via `DEFAULT_ONBOARDING_STAGE` in `UserDefaults`.
 ## Source Files
 
 - `Shared/Views/Onboarding/OnboardingView.swift` -- Step router and `OnboardingStage` enum definition
-- `Shared/Views/Onboarding/SimpleXInfo.swift` -- Step 1: Welcome screen with privacy highlights and migration entry
+- `Shared/Views/Onboarding/POPOPXInfo.swift` -- Step 1: Welcome screen with privacy highlights and migration entry
 - `Shared/Views/Onboarding/CreateProfile.swift` -- Profile creation form (shared between onboarding and user profiles)
-- `Shared/Views/Onboarding/CreateSimpleXAddress.swift` -- Deprecated step 3: SimpleX address creation
+- `Shared/Views/Onboarding/CreatePOPOPXAddress.swift` -- Deprecated step 3: SimpleX address creation
 - `Shared/Views/Onboarding/ChooseServerOperators.swift` -- Step 3: Server operator conditions and selection
 - `Shared/Views/Onboarding/SetNotificationsMode.swift` -- Step 4: Push notification mode selection
 - `Shared/Views/Onboarding/HowItWorks.swift` -- "How it works" info sheet from step 1

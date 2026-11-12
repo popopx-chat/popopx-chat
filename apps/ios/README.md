@@ -51,10 +51,10 @@ Pre-compiled Haskell libraries are in `Libraries/{ios,mac,sim}/`.
 
 ### App Structure
 
-Entry point: `Shared/SimpleXApp.swift`
+Entry point: `Shared/POPOPXApp.swift`
 
 Key directories in `Shared/`:
-- `Model/` - Data models and API layer (`ChatModel.swift`, `SimpleXAPI.swift`)
+- `Model/` - Data models and API layer (`ChatModel.swift`, `POPOPXAPI.swift`)
 - `Views/` - SwiftUI views organized by feature:
   - `ChatList/` - Chat list and user picker
   - `Chat/` - Message display and composition

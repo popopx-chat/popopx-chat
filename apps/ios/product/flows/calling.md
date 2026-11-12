@@ -179,7 +179,7 @@ All signaling messages are exchanged via E2E encrypted SMP messages (no central 
 | `Shared/Views/Call/SoundPlayer.swift` | Ringtone and call sound playback |
 | `Shared/Views/Call/WebRTC.swift` | WebRTC configuration and utilities |
 | `POPOPXChat/CallTypes.swift` | All call-related type definitions |
-| `Shared/Model/SimpleXAPI.swift` | Call API functions: `apiSendCallInvitation`, `apiSendCallOffer`, `apiSendCallAnswer`, `apiSendCallExtraInfo`, `apiEndCall`, `apiRejectCall`, `apiCallStatus` |
+| `Shared/Model/POPOPXAPI.swift` | Call API functions: `apiSendCallInvitation`, `apiSendCallOffer`, `apiSendCallAnswer`, `apiSendCallExtraInfo`, `apiEndCall`, `apiRejectCall`, `apiCallStatus` |
 
 ## Related Specifications
 

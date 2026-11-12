@@ -2,7 +2,7 @@ import XCTest
 import SwiftUI
 import UIKit
 import AVFoundation
-@testable import SimpleX
+@testable import POPOPX
 @testable import POPOPXChat
 
 final class SnapshotTests: XCTestCase {
@@ -214,7 +214,7 @@ private func previewScenes() -> [SnapshotScene] {
         SnapshotScene(BadgesHowItWorksView_Previews.self),
         SnapshotScene(BadgesHowLongView_Previews.self),
         SnapshotScene(BadgesRedeemCodeView_Previews.self, device: true),
-        SnapshotScene(BadgesSupportSimplexView_Previews.self, device: true),
+        SnapshotScene(BadgesSupportPopopxView_Previews.self, device: true),
         SnapshotScene(CallSettings_Previews.self, device: true),
         SnapshotScene(ChannelMembersView_Previews.self),
         SnapshotScene(ChannelRelaysView_Previews.self),
@@ -256,7 +256,7 @@ private func previewScenes() -> [SnapshotScene] {
         SnapshotScene(ContextPendingMemberActionsView_Previews.self),
         SnapshotScene(ContextProfilePickerView_Previews.self),
         SnapshotScene(CreateProfile_Previews.self, device: true),
-        SnapshotScene(CreateSimpleXAddress_Previews.self),
+        SnapshotScene(CreatePOPOPXAddress_Previews.self),
         SnapshotScene(CustomTimePicker_Previews.self),
         SnapshotScene(DatabaseEncryptionView_Previews.self, device: true),
         SnapshotScene(DatabaseErrorView_Previews.self),
@@ -316,9 +316,9 @@ private func previewScenes() -> [SnapshotScene] {
         SnapshotScene(SetAppPasscodeView_Previews.self),
         SnapshotScene(SetDeliveryReceiptsView_Previews.self),
         SnapshotScene(SettingsView_Previews.self, device: true),
-        SnapshotScene(SimpleXInfo_Previews.self, device: true),
+        SnapshotScene(POPOPXInfo_Previews.self, device: true),
         SnapshotScene(SmallLinkPreview_Previews.self),
-        SnapshotScene(SupportSimpleXBanner_Previews.self),
+        SnapshotScene(SupportPOPOPXBanner_Previews.self),
         SnapshotScene(TerminalAvatars_Previews.self, allSizes: true),
         SnapshotScene(TerminalMedia_Previews.self),
         SnapshotScene(TerminalNames_Previews.self, allSizes: true),
@@ -334,7 +334,7 @@ private func previewScenes() -> [SnapshotScene] {
         SnapshotScene(UserPicker_Previews.self),
         SnapshotScene(VerifyCodeView_Previews.self, device: true),
         SnapshotScene(VersionView_Previews.self),
-        SnapshotScene(WhySimpleX_Previews.self),
+        SnapshotScene(WhyPOPOPX_Previews.self),
         SnapshotScene(YourServersView_Previews.self)
     ]
 }
@@ -554,7 +554,7 @@ private struct ChatRows: View {
         }
         return ChatView.ChatItemWithMenu(
             im: im,
-            chat: .constant(ObservedObject(wrappedValue: chat)),
+            chat: chat,
             index: index,
             isLastItem: index == mergedItems.items.count - 1,
             chatItem: ci,

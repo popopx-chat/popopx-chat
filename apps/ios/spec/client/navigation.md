@@ -366,7 +366,7 @@ For channels (`groupInfo.useRelays`): the title is "Open channel"; for groups, "
 | File | Path |
 |------|------|
 | Root view | [`Shared/ContentView.swift`](../../Shared/ContentView.swift) |
-| App entry point | `Shared/SimpleXApp.swift` |
+| App entry point | `Shared/POPOPXApp.swift` |
 | Navigation compat | [`Shared/Views/Helpers/NavStackCompat.swift`](../../Shared/Views/Helpers/NavStackCompat.swift) |
 | Chat list (nav root) | `Shared/Views/ChatList/ChatListView.swift` |
 | Nav link wrapper | `Shared/Views/ChatList/ChatListNavLink.swift` |

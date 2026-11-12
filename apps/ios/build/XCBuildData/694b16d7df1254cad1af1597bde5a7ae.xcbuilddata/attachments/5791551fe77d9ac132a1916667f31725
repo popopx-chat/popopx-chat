@@ -1,0 +1,179 @@
+{
+  "" : {
+    "diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/POPOPXChat-primary.dia",
+    "emit-module-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/POPOPXChat-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/POPOPXChat-primary-emit-module.dia",
+    "pch" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/POPOPXChat-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/POPOPXChat-primary.swiftdeps"
+  },
+  "/Users/elliot/popopx-chat/popopx-chat/apps/ios/POPOPXChat/API.swift" : {
+    "const-values" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/API.swiftconstvalues",
+    "dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/API.d",
+    "diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/API.dia",
+    "index-unit-output-path" : "/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/API.o",
+    "llvm-bc" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/API.bc",
+    "object" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/API.o",
+    "swift-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/API.swiftdeps",
+    "swiftmodule" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/API~partial.swiftmodule"
+  },
+  "/Users/elliot/popopx-chat/popopx-chat/apps/ios/POPOPXChat/APITypes.swift" : {
+    "const-values" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/APITypes.swiftconstvalues",
+    "dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/APITypes.d",
+    "diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/APITypes.dia",
+    "index-unit-output-path" : "/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/APITypes.o",
+    "llvm-bc" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/APITypes.bc",
+    "object" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/APITypes.o",
+    "swift-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/APITypes.swiftdeps",
+    "swiftmodule" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/APITypes~partial.swiftmodule"
+  },
+  "/Users/elliot/popopx-chat/popopx-chat/apps/ios/POPOPXChat/AppGroup.swift" : {
+    "const-values" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/AppGroup.swiftconstvalues",
+    "dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/AppGroup.d",
+    "diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/AppGroup.dia",
+    "index-unit-output-path" : "/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/AppGroup.o",
+    "llvm-bc" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/AppGroup.bc",
+    "object" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/AppGroup.o",
+    "swift-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/AppGroup.swiftdeps",
+    "swiftmodule" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/AppGroup~partial.swiftmodule"
+  },
+  "/Users/elliot/popopx-chat/popopx-chat/apps/ios/POPOPXChat/CallTypes.swift" : {
+    "const-values" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/CallTypes.swiftconstvalues",
+    "dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/CallTypes.d",
+    "diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/CallTypes.dia",
+    "index-unit-output-path" : "/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/CallTypes.o",
+    "llvm-bc" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/CallTypes.bc",
+    "object" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/CallTypes.o",
+    "swift-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/CallTypes.swiftdeps",
+    "swiftmodule" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/CallTypes~partial.swiftmodule"
+  },
+  "/Users/elliot/popopx-chat/popopx-chat/apps/ios/POPOPXChat/ChatTypes.swift" : {
+    "const-values" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatTypes.swiftconstvalues",
+    "dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatTypes.d",
+    "diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatTypes.dia",
+    "index-unit-output-path" : "/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatTypes.o",
+    "llvm-bc" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatTypes.bc",
+    "object" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatTypes.o",
+    "swift-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatTypes.swiftdeps",
+    "swiftmodule" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatTypes~partial.swiftmodule"
+  },
+  "/Users/elliot/popopx-chat/popopx-chat/apps/ios/POPOPXChat/ChatUtils.swift" : {
+    "const-values" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatUtils.swiftconstvalues",
+    "dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatUtils.d",
+    "diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatUtils.dia",
+    "index-unit-output-path" : "/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatUtils.o",
+    "llvm-bc" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatUtils.bc",
+    "object" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatUtils.o",
+    "swift-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatUtils.swiftdeps",
+    "swiftmodule" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatUtils~partial.swiftmodule"
+  },
+  "/Users/elliot/popopx-chat/popopx-chat/apps/ios/POPOPXChat/CryptoFile.swift" : {
+    "const-values" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/CryptoFile.swiftconstvalues",
+    "dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/CryptoFile.d",
+    "diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/CryptoFile.dia",
+    "index-unit-output-path" : "/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/CryptoFile.o",
+    "llvm-bc" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/CryptoFile.bc",
+    "object" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/CryptoFile.o",
+    "swift-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/CryptoFile.swiftdeps",
+    "swiftmodule" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/CryptoFile~partial.swiftmodule"
+  },
+  "/Users/elliot/popopx-chat/popopx-chat/apps/ios/POPOPXChat/ErrorAlert.swift" : {
+    "const-values" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ErrorAlert.swiftconstvalues",
+    "dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ErrorAlert.d",
+    "diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ErrorAlert.dia",
+    "index-unit-output-path" : "/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ErrorAlert.o",
+    "llvm-bc" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ErrorAlert.bc",
+    "object" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ErrorAlert.o",
+    "swift-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ErrorAlert.swiftdeps",
+    "swiftmodule" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ErrorAlert~partial.swiftmodule"
+  },
+  "/Users/elliot/popopx-chat/popopx-chat/apps/ios/POPOPXChat/FileUtils.swift" : {
+    "const-values" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/FileUtils.swiftconstvalues",
+    "dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/FileUtils.d",
+    "diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/FileUtils.dia",
+    "index-unit-output-path" : "/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/FileUtils.o",
+    "llvm-bc" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/FileUtils.bc",
+    "object" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/FileUtils.o",
+    "swift-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/FileUtils.swiftdeps",
+    "swiftmodule" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/FileUtils~partial.swiftmodule"
+  },
+  "/Users/elliot/popopx-chat/popopx-chat/apps/ios/POPOPXChat/ImageUtils.swift" : {
+    "const-values" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ImageUtils.swiftconstvalues",
+    "dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ImageUtils.d",
+    "diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ImageUtils.dia",
+    "index-unit-output-path" : "/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ImageUtils.o",
+    "llvm-bc" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ImageUtils.bc",
+    "object" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ImageUtils.o",
+    "swift-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ImageUtils.swiftdeps",
+    "swiftmodule" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ImageUtils~partial.swiftmodule"
+  },
+  "/Users/elliot/popopx-chat/popopx-chat/apps/ios/POPOPXChat/JSON.swift" : {
+    "const-values" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/JSON.swiftconstvalues",
+    "dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/JSON.d",
+    "diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/JSON.dia",
+    "index-unit-output-path" : "/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/JSON.o",
+    "llvm-bc" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/JSON.bc",
+    "object" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/JSON.o",
+    "swift-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/JSON.swiftdeps",
+    "swiftmodule" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/JSON~partial.swiftmodule"
+  },
+  "/Users/elliot/popopx-chat/popopx-chat/apps/ios/POPOPXChat/KeyChain.swift" : {
+    "const-values" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/KeyChain.swiftconstvalues",
+    "dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/KeyChain.d",
+    "diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/KeyChain.dia",
+    "index-unit-output-path" : "/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/KeyChain.o",
+    "llvm-bc" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/KeyChain.bc",
+    "object" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/KeyChain.o",
+    "swift-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/KeyChain.swiftdeps",
+    "swiftmodule" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/KeyChain~partial.swiftmodule"
+  },
+  "/Users/elliot/popopx-chat/popopx-chat/apps/ios/POPOPXChat/Notifications.swift" : {
+    "const-values" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/Notifications.swiftconstvalues",
+    "dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/Notifications.d",
+    "diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/Notifications.dia",
+    "index-unit-output-path" : "/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/Notifications.o",
+    "llvm-bc" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/Notifications.bc",
+    "object" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/Notifications.o",
+    "swift-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/Notifications.swiftdeps",
+    "swiftmodule" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/Notifications~partial.swiftmodule"
+  },
+  "/Users/elliot/popopx-chat/popopx-chat/apps/ios/POPOPXChat/SharedFileSubscriber.swift" : {
+    "const-values" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/SharedFileSubscriber.swiftconstvalues",
+    "dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/SharedFileSubscriber.d",
+    "diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/SharedFileSubscriber.dia",
+    "index-unit-output-path" : "/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/SharedFileSubscriber.o",
+    "llvm-bc" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/SharedFileSubscriber.bc",
+    "object" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/SharedFileSubscriber.o",
+    "swift-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/SharedFileSubscriber.swiftdeps",
+    "swiftmodule" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/SharedFileSubscriber~partial.swiftmodule"
+  },
+  "/Users/elliot/popopx-chat/popopx-chat/apps/ios/POPOPXChat/Theme/ChatWallpaperTypes.swift" : {
+    "const-values" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatWallpaperTypes.swiftconstvalues",
+    "dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatWallpaperTypes.d",
+    "diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatWallpaperTypes.dia",
+    "index-unit-output-path" : "/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatWallpaperTypes.o",
+    "llvm-bc" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatWallpaperTypes.bc",
+    "object" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatWallpaperTypes.o",
+    "swift-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatWallpaperTypes.swiftdeps",
+    "swiftmodule" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ChatWallpaperTypes~partial.swiftmodule"
+  },
+  "/Users/elliot/popopx-chat/popopx-chat/apps/ios/POPOPXChat/Theme/Color.swift" : {
+    "const-values" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/Color.swiftconstvalues",
+    "dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/Color.d",
+    "diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/Color.dia",
+    "index-unit-output-path" : "/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/Color.o",
+    "llvm-bc" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/Color.bc",
+    "object" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/Color.o",
+    "swift-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/Color.swiftdeps",
+    "swiftmodule" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/Color~partial.swiftmodule"
+  },
+  "/Users/elliot/popopx-chat/popopx-chat/apps/ios/POPOPXChat/Theme/ThemeTypes.swift" : {
+    "const-values" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ThemeTypes.swiftconstvalues",
+    "dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ThemeTypes.d",
+    "diagnostics" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ThemeTypes.dia",
+    "index-unit-output-path" : "/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ThemeTypes.o",
+    "llvm-bc" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ThemeTypes.bc",
+    "object" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ThemeTypes.o",
+    "swift-dependencies" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ThemeTypes.swiftdeps",
+    "swiftmodule" : "/Users/elliot/popopx-chat/popopx-chat/apps/ios/build/POPOPX.build/Debug-iphonesimulator/POPOPXChat.build/Objects-normal/arm64/ThemeTypes~partial.swiftmodule"
+  }
+}

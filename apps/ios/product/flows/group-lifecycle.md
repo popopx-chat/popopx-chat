@@ -189,7 +189,7 @@ Complete group management in SimpleX Chat iOS: creating groups, inviting members
 | `GroupMemberStatus` | `POPOPXChat/ChatTypes.swift` | Member lifecycle: `.invited`, `.accepted`, `.connected`, `.complete`, etc. |
 | `GroupLink` | `Shared/Model/AppAPITypes.swift` | Group link with URI, member role, and short link data |
 | `BusinessChatInfo` | `POPOPXChat/ChatTypes.swift` | Business chat metadata for commercial group chats |
-| `JoinGroupResult` | `Shared/Model/SimpleXAPI.swift` | `.joined(groupInfo)`, `.invitationRemoved`, `.groupNotFound` |
+| `JoinGroupResult` | `Shared/Model/POPOPXAPI.swift` | `.joined(groupInfo)`, `.invitationRemoved`, `.groupNotFound` |
 | `GMember` | `Shared/Views/Chat/Group/` | View-layer wrapper around `GroupMember` for list display |
 
 ## Error Cases
@@ -217,7 +217,7 @@ Complete group management in SimpleX Chat iOS: creating groups, inviting members
 | `Shared/Views/Chat/Group/MemberSupportView.swift` | Admin-to-pending-member chat |
 | `Shared/Views/Chat/Group/MemberSupportChatToolbar.swift` | Support chat accept/reject toolbar |
 | `Shared/Views/Chat/Group/SecondaryChatView.swift` | Secondary chat view for member support |
-| `Shared/Model/SimpleXAPI.swift` | All group API functions |
+| `Shared/Model/POPOPXAPI.swift` | All group API functions |
 | `Shared/Model/AppAPITypes.swift` | `GroupLink`, `ConnectionPlan` |
 | `POPOPXChat/ChatTypes.swift` | `GroupInfo`, `GroupProfile`, `GroupMember`, `GroupMemberRole` |
 

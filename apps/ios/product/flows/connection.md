@@ -168,7 +168,7 @@ Establishing contact between two SimpleX Chat users. SimpleX uses no user identi
 | `Shared/Views/ChatList/ContactRequestView.swift` | Incoming contact request display |
 | `Shared/Views/ChatList/ContactConnectionView.swift` | Pending connection display |
 | `Shared/Views/ChatList/ContactConnectionInfo.swift` | Connection details sheet |
-| `Shared/Model/SimpleXAPI.swift` | API functions: `apiAddContact`, `apiConnect`, `apiConnectPlan`, `apiAcceptContactRequest`, `apiCreateUserAddress` |
+| `Shared/Model/POPOPXAPI.swift` | API functions: `apiAddContact`, `apiConnect`, `apiConnectPlan`, `apiAcceptContactRequest`, `apiCreateUserAddress` |
 | `Shared/Model/AppAPITypes.swift` | `ConnectionPlan` enum, `GroupLink` struct |
 | `POPOPXChat/APITypes.swift` | `CreatedConnLink`, `ComposedMessage`, command/response types |
 | `POPOPXChat/ChatTypes.swift` | `Contact`, `PendingContactConnection`, `UserContactRequest` |

@@ -1,0 +1,48 @@
+Target dependency graph (21 targets)
+Target 'POPOPX Snapshots' in project 'POPOPX'
+➜ Explicit dependency on target 'POPOPX (iOS)' in project 'POPOPX'
+Target 'POPOPX (iOS)' in project 'POPOPX'
+➜ Explicit dependency on target 'POPOPXChat' in project 'POPOPX'
+➜ Explicit dependency on target 'POPOPX NSE' in project 'POPOPX'
+➜ Explicit dependency on target 'POPOPX SE' in project 'POPOPX'
+➜ Explicit dependency on target 'ElegantEmojiPicker-product' in project 'ElegantEmojiPicker'
+➜ Explicit dependency on target 'Yams-product' in project 'Yams'
+➜ Explicit dependency on target 'Ink-product' in project 'Ink'
+➜ Explicit dependency on target 'WebRTC-product' in project 'WebRTC'
+➜ Explicit dependency on target 'SwiftyGif-product' in project 'SwiftyGif'
+➜ Explicit dependency on target 'LZString-product' in project 'LZString'
+➜ Explicit dependency on target 'CodeScanner-product' in project 'CodeScanner'
+Target 'CodeScanner-product' in project 'CodeScanner'
+➜ Explicit dependency on target 'CodeScanner' in project 'CodeScanner'
+➜ Explicit dependency on target 'CodeScanner_CodeScanner' in project 'CodeScanner'
+Target 'CodeScanner' in project 'CodeScanner'
+➜ Explicit dependency on target 'CodeScanner_CodeScanner' in project 'CodeScanner'
+Target 'CodeScanner_CodeScanner' in project 'CodeScanner' (no dependencies)
+Target 'LZString-product' in project 'LZString'
+➜ Explicit dependency on target 'LZString' in project 'LZString'
+Target 'LZString' in project 'LZString' (no dependencies)
+Target 'WebRTC-product' in project 'WebRTC' (no dependencies)
+Target 'Ink-product' in project 'Ink'
+➜ Explicit dependency on target 'Ink' in project 'Ink'
+Target 'Ink' in project 'Ink' (no dependencies)
+Target 'Yams-product' in project 'Yams'
+➜ Explicit dependency on target 'Yams' in project 'Yams'
+➜ Explicit dependency on target 'CYaml' in project 'Yams'
+Target 'Yams' in project 'Yams'
+➜ Explicit dependency on target 'CYaml' in project 'Yams'
+Target 'CYaml' in project 'Yams' (no dependencies)
+Target 'ElegantEmojiPicker-product' in project 'ElegantEmojiPicker'
+➜ Explicit dependency on target 'ElegantEmojiPicker' in project 'ElegantEmojiPicker'
+➜ Explicit dependency on target 'ElegantEmojiPicker_ElegantEmojiPicker' in project 'ElegantEmojiPicker'
+Target 'ElegantEmojiPicker' in project 'ElegantEmojiPicker'
+➜ Explicit dependency on target 'ElegantEmojiPicker_ElegantEmojiPicker' in project 'ElegantEmojiPicker'
+Target 'ElegantEmojiPicker_ElegantEmojiPicker' in project 'ElegantEmojiPicker' (no dependencies)
+Target 'POPOPX SE' in project 'POPOPX'
+➜ Explicit dependency on target 'POPOPXChat' in project 'POPOPX'
+Target 'POPOPX NSE' in project 'POPOPX'
+➜ Explicit dependency on target 'POPOPXChat' in project 'POPOPX'
+Target 'POPOPXChat' in project 'POPOPX'
+➜ Explicit dependency on target 'SwiftyGif-product' in project 'SwiftyGif'
+Target 'SwiftyGif-product' in project 'SwiftyGif'
+➜ Explicit dependency on target 'SwiftyGif' in project 'SwiftyGif'
+Target 'SwiftyGif' in project 'SwiftyGif' (no dependencies)

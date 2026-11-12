@@ -167,7 +167,7 @@ Complete message lifecycle in SimpleX Chat iOS: composing, sending, receiving, e
 | `Shared/Views/Chat/ChatItem/CIMetaView.swift` | Delivery status indicators |
 | `Shared/Views/Chat/ChatItemForwardingView.swift` | Forward destination picker |
 | `Shared/Views/Chat/ChatItemInfoView.swift` | Message info (delivery details, timestamps) |
-| `Shared/Model/SimpleXAPI.swift` | API functions: `apiSendMessages`, `apiUpdateChatItem`, `apiDeleteChatItems`, `apiChatItemReaction`, `apiForwardChatItems` |
+| `Shared/Model/POPOPXAPI.swift` | API functions: `apiSendMessages`, `apiUpdateChatItem`, `apiDeleteChatItems`, `apiChatItemReaction`, `apiForwardChatItems` |
 | `POPOPXChat/APITypes.swift` | `ComposedMessage`, `ChatCommand` enum, response types |
 | `POPOPXChat/ChatTypes.swift` | `MsgContent`, `CIContent`, `CIStatus`, `CIDirection`, `ChatItem` |
 | `Shared/Model/AudioRecPlay.swift` | Voice message recording/playback engine |

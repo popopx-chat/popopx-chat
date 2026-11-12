@@ -1,0 +1,3 @@
+framework module POPOPXChat {
+  header "POPOPXChat-Swift.h"
+}
