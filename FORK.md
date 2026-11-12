@@ -118,14 +118,12 @@ yet. Before any build of this fork is distributed:
       reads a single byte of `apple-app-site-association`. `www.popopxchat.com` fails the same way.
     - **Nothing is published under `/.well-known/` on either name** — each returns the PHP application's 404
       HTML page, so the files in `website/src/.well-known/` are not deployed anywhere.
-    The relay fleet is DNS'd under **both** domains: `smpN`/`xftpN.popopxchat.com` carry the same A records as
-    their `popopx.im` counterparts (the `ntf` hosts exist only under `popopx.im`, and `xftp2-5` and `ntf4` do
-    not resolve at all; the zone has no wildcard, so each record was written deliberately). The fill-in table
-    for their keys is the fork's `relay-keys.yaml`, kept with
-    the rebrand tooling outside this repository.
-  - *The relay hosts exist too, and most of them are not serving.* `smp1-8`, `xftp1`, `xftp6`, `ntf1-3`
+  - *The relay hosts exist too, and all but one are not serving.* `smp1-8`, `xftp1`, `xftp6`, `ntf1-3`
     under `popopx.im` each resolve to a distinct address (`xftp2-5` and `ntf4` do not resolve, and the zone
-    has no wildcard, so every record was written deliberately). A fingerprint does **not** need the server's
+    has no wildcard, so every record was written deliberately); `smp1-8`, `xftp1` and `xftp6` carry the same
+    A records under `popopxchat.com` too, which is the name the servers were initialized with. The fill-in
+    table for their keys is the fork's `relay-keys.yaml`, kept with the rebrand tooling outside this
+    repository. A fingerprint does **not** need the server's
     shell: it is `base64url(sha256(DER of the CA certificate))`, and a listening relay sends that CA as the
     second certificate of its chain — which is exactly how the client pins it
     (popopxmq `src/Popopx/FileTransfer/Client.hs:186` matches `[_leaf, ca]`). It is also stored on the box,
