@@ -89,7 +89,7 @@ Enable and start it:
 
 ```sh
 systemctl daemon-reload
-systemctl enable --now simplex-relay
+systemctl enable --now popopx-relay
 ```
 
 The first start creates the relay profile (with the given name and picture) and its address; later starts reuse them. Both are written to the journal:
@@ -115,7 +115,7 @@ https://smp4.simplex.im/r#73iEnnvCqPTVGArCAWUcRaj5hxRb7TbPCSZ2JY2VjCQ
 The address is created and logged on the first start. Read it from the journal at any time:
 
 ```sh
-journalctl -u simplex-relay | grep -A1 "address is created"
+journalctl -u popopx-relay | grep -A1 "address is created"
 ```
 
 ### Run relay commands
@@ -123,9 +123,9 @@ journalctl -u simplex-relay | grep -A1 "address is created"
 The service runs headless, so there is no attached terminal to type into. To run a one-off command, stop the service, run the command against the relay's database with `-e`, then start it again. For example, to change the picture (`--user-image-file` only sets it when the profile is first created):
 
 ```sh
-systemctl stop simplex-relay
-simplex-chat-relay -d /home/relay/relay -e "/set profile image file /home/relay/new-avatar.png"
-systemctl start simplex-relay
+systemctl stop popopx-relay
+popopx-chat-relay -d /home/relay/relay -e "/set profile image file /home/relay/new-avatar.png"
+systemctl start popopx-relay
 ```
 
 ## Run with Docker
@@ -184,7 +184,7 @@ To run a one-off command against the relay's database, override the entrypoint:
 
 ```sh
 docker compose run --rm --entrypoint sh relay -c \
-  'simplex-chat-relay -d "$DB_CONN" -e "/set profile image file /avatar.png"'
+  'popopx-chat-relay -d "$DB_CONN" -e "/set profile image file /avatar.png"'
 ```
 
 Relay metrics from the database are published by [sql_exporter](https://github.com/burningalchemist/sql_exporter) on `127.0.0.1:9399/metrics`, with the queries in `sql_exporter.yml`.
@@ -192,7 +192,7 @@ Relay metrics from the database are published by [sql_exporter](https://github.c
 Relay database live in PostgreSQL docker volume. To print the full path to PostgreSQL database, execute in the host:
 
 ```sh
-docker volume inspect simplex-chat-relay_pgdata --format '{{.Mountpoint}}'
+docker volume inspect popopx-chat-relay_pgdata --format '{{.Mountpoint}}'
 ```
 
 ## Channel web previews
@@ -229,7 +229,7 @@ chown -R relay:relay /var/www/relay-web-channels
 Restart the relay so the new flags take effect:
 
 ```sh
-systemctl restart simplex-relay
+systemctl restart popopx-relay
 ```
 
 ### Serve the previews with Caddy
@@ -280,7 +280,7 @@ DST=/etc/caddy/popopx-cors.conf
 cmp -s "$SRC" "$DST" 2>/dev/null && exit 0
 install -m 0644 "$SRC" "$DST"
 systemctl reload caddy
-logger -t simplex-cors "reloaded caddy"
+logger -t popopx-cors "reloaded caddy"
 ```
 
 Create `/etc/systemd/system/popopx-cors-sync.service`:
@@ -302,7 +302,7 @@ Description=Watch SimpleX relay CORS config
 After=caddy.service
 [Path]
 PathChanged=/var/www/relay-web-channels/cors.conf
-Unit=simplex-cors-sync.service
+Unit=popopx-cors-sync.service
 TriggerLimitIntervalSec=0
 [Install]
 WantedBy=multi-user.target
@@ -313,13 +313,13 @@ Enable it:
 ```sh
 chmod +x /usr/local/bin/popopx-cors-sync.sh
 systemctl daemon-reload
-systemctl enable --now simplex-cors-sync.path
+systemctl enable --now popopx-cors-sync.path
 ```
 
 ### Verify
 
 ```sh
-systemctl status simplex-cors-sync.path              # active (waiting)
+systemctl status popopx-cors-sync.path              # active (waiting)
 ls /var/www/relay-web-channels/channel               # a JSON file appears once a public channel renders
 curl -sI https://relay.example.com/channel/<id>.json | grep -i access-control
 ```

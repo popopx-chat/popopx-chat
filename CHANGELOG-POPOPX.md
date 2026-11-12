@@ -29,8 +29,11 @@ filesystem identity moved too — 200 occurrences / 9 files across `docs/SERVER.
 `docs/XFTP-SERVER.md`, their `pl`/`fr`/`cs` translations and `docs/CHAT-RELAY.md`:
 `/etc/opt/popopx{,-xftp}`, `/var/opt/popopx{,-xftp}`, `/var/lib/tor/popopx-smp`, the
 caddy/systemd/docker-compose names — matching what `popopxmq` compiles in as `defaultCfgPath`. The
-commands that fetch a server still name upstream's artifact (its release binary and the
-`simplexchat/*-server` image default), which reads `/etc/opt/simplex`; see `FORK.md`.
+chat relay's Postgres role and database are `popopx` and `popopx_chat_relay`
+(`scripts/relay/.env.example`), and the relay guide's `systemctl`, `Unit=` and executable
+references name the `popopx-*` artifacts that guide installs. The commands that fetch a server
+still name upstream's artifact (its release binary and the `simplexchat/*-server` image default),
+which reads `/etc/opt/simplex`; see `FORK.md`.
 
 ### What the user sees
 
