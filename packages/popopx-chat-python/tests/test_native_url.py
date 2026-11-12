@@ -56,8 +56,8 @@ def test_libname_prefers_ours_and_falls_back(tmp_path):
 def test_url_sqlite(_):
     assert (
         _libs_url("sqlite")
-        == "https://github.com/simplex-chat/simplex-chat-libs/releases/download/"
-        f"{LIBS_RELEASE}/simplex-chat-libs-linux-x86_64.zip"
+        == "https://github.com/popopx-chat/popopx-chat-libs/releases/download/"
+        f"{LIBS_RELEASE}/popopx-chat-libs-linux-x86_64.zip"
     )
 
 
@@ -65,6 +65,6 @@ def test_url_sqlite(_):
 def test_url_postgres(_):
     assert (
         _libs_url("postgres")
-        == "https://github.com/simplex-chat/simplex-chat-libs/releases/download/"
-        f"{LIBS_RELEASE}/simplex-chat-libs-linux-x86_64-postgres.zip"
+        == "https://github.com/popopx-chat/popopx-chat-libs/releases/download/"
+        f"{LIBS_RELEASE}/popopx-chat-libs-linux-x86_64-postgres.zip"
     )

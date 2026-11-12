@@ -275,7 +275,7 @@ class RegistryUrlTest(unittest.TestCase):
             [
                 "https://registry.npmjs.org/simplex-chat/1.0.0",
                 "https://pypi.org/pypi/simplex-chat/1.0.0/json",
-                "https://api.github.com/repos/simplex-chat/simplex-chat-libs/releases/tags/core-1.0.0.1",
+                "https://api.github.com/repos/popopx-chat/popopx-chat-libs/releases/tags/core-1.0.0.1",
             ],
         )
 

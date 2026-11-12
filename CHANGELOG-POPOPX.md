@@ -64,6 +64,10 @@ The user-facing download links that named an APK asset now point at the Google P
 publishes no APK), and `{{ release }}` — which was never defined in `website/src`, so every desktop and
 CLI link on `/downloads` rendered as a relative 404 — is now the `release` member of the site's
 `globalConfig`, read as `{% cfg 'release' %}`. See `FORK.md` items 4 and 5.
+The libs release assets (`popopx-chat-libs-<os>-<arch>.zip`, `popopx-chat-nodejs-<platform>.node`) and
+the repository they are fetched from moved in the same shape — publisher, runtime downloader and the
+pinned digest dictionary as one unit, because a half-move downloads upstream's binary and calls it a
+success (`FORK.md` item 6).
 The npm and PyPI names in the committed manifests are upstream's on purpose: `packages_release.py
 test-names` rewrites them, with `npm:` aliases for the cross-package dependencies, from the
 repository variables `NPM_SCOPE` and `PYPI_PROJECT` at publish time — see

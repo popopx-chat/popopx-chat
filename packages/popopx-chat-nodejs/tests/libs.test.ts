@@ -90,10 +90,10 @@ describe("paths", () => {
   })
 
   it("uses the release URLs", () => {
-    const releases = "https://github.com/simplex-chat/simplex-chat-libs/releases/download"
-    expect(releaseUrl("core-7.1.0.11", libsAsset("sqlite", "macos-aarch64"))).toBe(`${releases}/core-7.1.0.11/simplex-chat-libs-macos-aarch64.zip`)
-    expect(releaseUrl("core-7.1.0.11", libsAsset("postgres", "linux-x86_64"))).toBe(`${releases}/core-7.1.0.11/simplex-chat-libs-linux-x86_64-postgres.zip`)
-    expect(releaseUrl("nodejs-addon-1", addonAsset("windows-x86_64"))).toBe(`${releases}/nodejs-addon-1/simplex-chat-nodejs-windows-x86_64.node`)
+    const releases = "https://github.com/popopx-chat/popopx-chat-libs/releases/download"
+    expect(releaseUrl("core-7.1.0.11", libsAsset("sqlite", "macos-aarch64"))).toBe(`${releases}/core-7.1.0.11/popopx-chat-libs-macos-aarch64.zip`)
+    expect(releaseUrl("core-7.1.0.11", libsAsset("postgres", "linux-x86_64"))).toBe(`${releases}/core-7.1.0.11/popopx-chat-libs-linux-x86_64-postgres.zip`)
+    expect(releaseUrl("nodejs-addon-1", addonAsset("windows-x86_64"))).toBe(`${releases}/nodejs-addon-1/popopx-chat-nodejs-windows-x86_64.node`)
   })
 
   it("resolves an absolute SIMPLEX_LIBS_DIR", async () => {
@@ -342,14 +342,14 @@ describe("installLibs", () => {
     const addon = await resolveAddonPath({XDG_CACHE_HOME: tmp}, "linux", "x64")
     const version = path.join(tmp, "simplex-chat", "nodejs-addon-test")
     expect(requested).toEqual([releaseUrl("nodejs-addon-test", addonAsset("linux-x86_64"))])
-    expect(addon).toBe(path.join(version, "simplex-chat-nodejs-linux-x86_64.node"))
+    expect(addon).toBe(path.join(version, "popopx-chat-nodejs-linux-x86_64.node"))
     expect(fs.readFileSync(addon, "utf8")).toBe("addon")
-    expect(fs.readdirSync(version)).toEqual(["simplex-chat-nodejs-linux-x86_64.node"])
+    expect(fs.readdirSync(version)).toEqual(["popopx-chat-nodejs-linux-x86_64.node"])
   })
 
   it("does not download a cached add-on", async () => {
     const requested = mockHttps("/addon.node")
-    const cached = path.join(cacheRoot("darwin", {}), "nodejs-addon-test", "simplex-chat-nodejs-macos-aarch64.node")
+    const cached = path.join(cacheRoot("darwin", {}), "nodejs-addon-test", "popopx-chat-nodejs-macos-aarch64.node")
     fs.mkdirSync(path.dirname(cached), {recursive: true})
     fs.writeFileSync(cached, "addon")
     await expect(resolveAddonPath({}, "darwin", "arm64")).resolves.toBe(cached)
@@ -372,7 +372,7 @@ describe("installLibs", () => {
   it("rejects an asset without a pinned SHA-256", async () => {
     mockHttps("/good.zip")
     await expect(resolveLibsDir("sqlite", {XDG_CACHE_HOME: tmp}, "darwin", "x64"))
-      .rejects.toThrow("no SHA-256 is pinned for simplex-chat-libs-macos-x86_64.zip")
+      .rejects.toThrow("no SHA-256 is pinned for popopx-chat-libs-macos-x86_64.zip")
   })
 
   it("requires POPOPX_ADDON_PATH without a pinned add-on release", async () => {

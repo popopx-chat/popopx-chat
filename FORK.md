@@ -57,6 +57,24 @@ summary:
    site. It is exposed through the shortcode the site already uses for its other two global URLs
    (`{% cfg 'siteLocation' %}`), which is why it is `{% cfg 'release' %}` and not a `{{ }}` variable:
    Eleventy 1.x has no `addGlobalData`.
+
+6. **The libs release assets** (2026-11-13) — `simplex-chat-libs-<os>-<arch>[-postgres].zip` and
+   `simplex-chat-nodejs-<platform>.node` became `popopx-*`, together with the repository they are
+   downloaded from. That repository is no longer upstream's: `popopx-chat/popopx-chat-libs` is this
+   fork's, so the earlier reasoning ("an artifact name is data produced by whoever hosts the releases;
+   renaming our side changes nothing") stopped applying, and `LIBS_REPOSITORY` already resolved to the
+   fork in CI. What made this a two-ended value rather than a cosmetic one: the publisher
+   (`packages_release.py`, `build.yml`, `package-tests.sh`), the *runtime* downloaders
+   (`packages/popopx-chat-nodejs/src/libs.ts`, `packages/popopx-chat-python/src/simplex_chat/_native.py`)
+   and the pinned digest dictionaries they look the name up in (`src/release.ts`, `dist/release.js`,
+   `_version.py`) all spell it — a fork there does not fail, it downloads upstream's `libsimplex` into a
+   POPOPX package and reports success. The digest *values* in those pins still describe upstream's
+   builds; the next `packages_release.py prepare` rewrites them, and that is also the first run that can
+   resolve a release published under these names, because `popopx-chat-libs` has no releases yet. Until
+   then `release-status`/`download` against our repository returns nothing, which is the correct failure:
+   `release_digests` requires every asset of the tag to be present, so a half-published release is
+   refused rather than silently pinned.
+
 Every modification carries the date of the commit that made it; `git log` is the
 authoritative per-file record.
 
@@ -135,14 +153,12 @@ yet. Before any build of this fork is distributed:
   upstream's tracker. Ruled 2026-11-13 to stay until our own tracker is set up; the reason is recorded
   as a comment above the constant. `SUPPORT_EMAIL` on the next line is already `chat@popopx.chat`, which
   is itself not yet reachable (first bullet).
-- **The libs release assets keep their inherited names.** The *repository* already resolves to this
-  fork (`.github/workflows/build.yml:203` sets `LIBS_REPOSITORY: ${{ github.repository }}-libs`), but
-  the zip asset names inside its releases are still `simplex-chat-libs-<platform>.zip`
-  (`scripts/ci/packages_release.py:104-109`, `build.yml:482,698,983,1262,1568`,
-  `scripts/ci/package-tests.sh:49`, `docs/contributing/RELEASES.md`), and
-  `packages_release.py:604` keeps `simplex-chat/simplex-chat-libs` as the **default** for manual runs
-  exactly as the npm/PyPI names do — overridden by the same CI variables, asserted by
-  `scripts/ci/test_packages_release.py:278`.
+- **`popopx-chat-libs` has published no releases yet.** The asset names and the source they are fetched
+  from are ours (item 6 above), so nothing in this repository can resolve a `core-<version>` release
+  today: the fork carries the build inputs and `releases.toml`, and its Releases list is empty. The first
+  one has to come from our own CI, and that publish is also what rewrites the pinned digests in
+  `release.ts`, `dist/release.js` and `_version.py` — until it does, those dictionaries still record
+  upstream's build, under our names.
 - **No registry namespace.** The npm and PyPI names in the committed manifests are upstream's, and
   that is the shape the release tooling expects: `packages_release.py test-names` rewrites the names,
   the repository URL and the cross-package dependencies to `npm:` aliases at publish time from the

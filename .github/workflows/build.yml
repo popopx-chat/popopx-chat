@@ -102,14 +102,14 @@ jobs:
 # =============================
 
 # Create release, but only if it's triggered by tag push.
-# On pushes to master or stable: claim the simplex-chat-libs release core-<version of popopx-chat.cabal> for the branch
+# On pushes to master or stable: claim the popopx-chat-libs release core-<version of popopx-chat.cabal> for the branch
 # and create its draft, create the draft of a missing add-on release, and find the package versions to publish.
 # On pull requests and other pushes, this job will always complete.
 
 # Secrets:
 # -------
 # NODEJS_REPO_TOKEN
-#  Only select repositories: simplex-chat-libs
+#  Only select repositories: popopx-chat-libs
 #  Permissions:
 #   * Contents (Read and Write)
 
@@ -479,7 +479,7 @@ jobs:
           rm -rf dist-lib/src
           ln -s ../dist-newstyle/src dist-lib/src
           DIST_DIR=dist-lib SKIP_VLC=1 scripts/desktop/build-lib-linux.sh
-          name=simplex-chat-libs-linux-${{ matrix.arch }}
+          name=popopx-chat-libs-linux-${{ matrix.arch }}
           mkdir -p release-libs/$name/libs
           find apps/multiplatform/common/src/commonMain/cpp/desktop/libs/linux-${{ matrix.arch }} -maxdepth 1 -type f -exec cp {} release-libs/$name/libs/ \;
           (cd release-libs/$name && zip -r ../$name.zip libs)
@@ -695,7 +695,7 @@ jobs:
         timeout-minutes: 30
         shell: bash
         env:
-          POPOPX_LIBS_DIR: ${{ steps.build-lib.outcome == 'success' && format('{0}/release-libs/simplex-chat-libs-linux-{1}/libs', github.workspace, matrix.arch) || '' }}
+          POPOPX_LIBS_DIR: ${{ steps.build-lib.outcome == 'success' && format('{0}/release-libs/popopx-chat-libs-linux-{1}/libs', github.workspace, matrix.arch) || '' }}
         run: |
           scripts/ci/package-tests.sh build linux-${{ matrix.arch }}
           scripts/ci/package-tests.sh test
@@ -980,7 +980,7 @@ jobs:
           mkdir -p postgres-libs/libs
           cp ${BUILD_DIR}/build/libpopopx.so postgres-libs/libs/
           cp ${BUILD_DIR}/build/deps/* postgres-libs/libs/
-          (cd postgres-libs && zip -r simplex-chat-libs-linux-x86_64-postgres.zip libs)
+          (cd postgres-libs && zip -r popopx-chat-libs-linux-x86_64-postgres.zip libs)
 
       - name: Upload postgres library
         shell: bash
@@ -1259,7 +1259,7 @@ jobs:
           APPLE_POPOPX_NOTARIZATION_PASSWORD: ${{ secrets.APPLE_POPOPX_NOTARIZATION_PASSWORD }}
         run: |
           SKIP_VLC=1 scripts/desktop/build-lib-mac.sh
-          name=simplex-chat-libs-macos-${{ matrix.arch }}
+          name=popopx-chat-libs-macos-${{ matrix.arch }}
           mkdir -p release-libs/$name/libs
           find apps/multiplatform/common/src/commonMain/cpp/desktop/libs/mac-${{ matrix.arch }} -maxdepth 1 -type f -exec cp {} release-libs/$name/libs/ \;
           scripts/ci/sign-libs-mac.sh release-libs/$name/libs
@@ -1565,7 +1565,7 @@ jobs:
           export PATH=$PATH:/c/ghcup/bin:$(echo /c/tools/ghc-*/bin || echo)
           SKIP_VLC=1 scripts/desktop/build-lib-windows.sh
           dlltool -d libpopopx.dll.def -l libpopopx.lib -D libpopopx.dll
-          name=simplex-chat-libs-windows-x86_64
+          name=popopx-chat-libs-windows-x86_64
           mkdir -p release-libs/$name/libs
           find apps/multiplatform/common/src/commonMain/cpp/desktop/libs/windows-x86_64 -maxdepth 1 -type f -exec cp {} release-libs/$name/libs/ \;
           cp libpopopx.lib release-libs/$name/libs/

@@ -10,7 +10,7 @@ already has.
 | directory | npm name as committed | what it is |
 |---|---|---|
 | `packages/popopx-chat-client/types/typescript` | `@simplex-chat/types` | generated TypeScript/Python API types |
-| `packages/popopx-chat-nodejs` | `simplex-chat` | the Node add-on (`simplex-chat-nodejs-<platform>.node`) + JS wrapper |
+| `packages/popopx-chat-nodejs` | `simplex-chat` | the Node add-on (`popopx-chat-nodejs-<platform>.node`) + JS wrapper |
 | `packages/popopx-chat-mcp` | `@simplex-chat/mcp` | the MCP server |
 | `packages/popopx-chat-webrtc` | `@simplex-chat/webrtc` | the WebRTC transport |
 | `packages/popopx-chat-client/typescript` | `@simplex-chat/webrtc-client` | the browser client (not in the release script) |
@@ -56,7 +56,7 @@ change.
 3. **A `-libs` repository next to this one.** `build.yml` uses `LIBS_REPOSITORY: ${{ github.repository
    }}-libs`, so for `popopx-chat/popopx-chat` it resolves to **`popopx-chat/popopx-chat-libs`** with no
    configuration. That repository holds the prebuilt library archives
-   (`simplex-chat-libs-<os>-<arch>.zip`, six of them, listed at `packages_release.py:104`) and the
+   (`popopx-chat-libs-<os>-<arch>.zip`, six of them, listed at `packages_release.py:104`) and the
    `releases.toml` that `record` writes. The asset names are still upstream's; they are filenames of
    releases this fork has not made, so they move with the first real release, not before it.
 4. **Two repository variables** (Settings → Secrets and variables → Actions → Variables), consumed by
@@ -92,8 +92,8 @@ python3 scripts/ci/packages_release.py download-pinned # fetch a pinned asset, v
 unauthenticated and drafts are invisible (`libs_api`, `packages_release.py:607`).
 
 Building the add-on itself is a separate path: the library archives come from the `build.yml` matrix,
-`simplex-chat-libs-*.zip` is downloaded by `download-pinned`, and the platform add-on
-`simplex-chat-nodejs-<platform>.node` (`ADDON_ASSETS`, `packages_release.py:119`) is produced from
+`popopx-chat-libs-*.zip` is downloaded by `download-pinned`, and the platform add-on
+`popopx-chat-nodejs-<platform>.node` (`ADDON_ASSETS`, `packages_release.py:119`) is produced from
 `packages/popopx-chat-nodejs` with `npx tsc` after `npm install --ignore-scripts`
 (`build.yml:1802,1867`).
 

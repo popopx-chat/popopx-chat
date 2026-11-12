@@ -4,8 +4,8 @@
 
 | Release | Location | Version | Published on |
 |---|---|---|---|
-| libsimplex | simplex-chat-libs release `core-<version>` | `version` of `popopx-chat.cabal` | push to master or stable with a new core version |
-| Node.js add-on | simplex-chat-libs release `nodejs-addon-<7 characters of the commit>` | | push to master or stable with unreleased add-on sources |
+| libsimplex | popopx-chat-libs release `core-<version>` | `version` of `popopx-chat.cabal` | push to master or stable with a new core version |
+| Node.js add-on | popopx-chat-libs release `nodejs-addon-<7 characters of the commit>` | | push to master or stable with unreleased add-on sources |
 | `@simplex-chat/types` | npm | `version` of `packages/popopx-chat-client/types/typescript/package.json` | library release with an unpublished types version |
 | `simplex-chat` | npm | `version` of `packages/popopx-chat-nodejs/package.json` | push to master or stable with an unpublished version |
 | `@simplex-chat/mcp` | npm | `version` of `packages/popopx-chat-mcp/package.json` | push to master or stable with an unpublished version, when the versions it pins for `simplex-chat` and `@simplex-chat/types` are on npm |
@@ -16,7 +16,7 @@ Add-on sources:
 - `packages/popopx-chat-nodejs/cpp/`
 - `node-addon-api` version in `devDependencies` of `packages/popopx-chat-nodejs/package.json`
 
-Release states in simplex-chat-libs:
+Release states in popopx-chat-libs:
 
 ```
 draft       created by maybe-release; assets uploaded by the build jobs
@@ -27,7 +27,7 @@ npm tag: `beta` for a version with a prerelease part, `latest` otherwise.
 
 Releases and publications are independent of the Haskell test results.
 
-`releases.toml` of simplex-chat-libs, written by `build.yml`:
+`releases.toml` of popopx-chat-libs, written by `build.yml`:
 
 ```
 core.<branch>.<version>     commit of the library release; branch: master or stable
@@ -158,8 +158,8 @@ A version pinned in the same commit that bumps `simplex-chat` or `@simplex-chat/
 
 ## Settings
 
-- simplex-chat-libs: release immutability enabled
-- secret `NODEJS_REPO_TOKEN`: contents of simplex-chat-libs, read and write
+- popopx-chat-libs: release immutability enabled
+- secret `NODEJS_REPO_TOKEN`: contents of popopx-chat-libs, read and write
 - secrets `APPLE_POPOPX_SIGNING_KEYCHAIN`, `APPLE_POPOPX_NOTARIZATION_APPLE_ID` and `APPLE_POPOPX_NOTARIZATION_PASSWORD`: signing and notarization of the macOS libraries, shared with the desktop app build
 - trusted publisher of `simplex-chat`, `@simplex-chat/types` and `@simplex-chat/mcp` on npm and of `simplex-chat` on PyPI: workflow `build.yml`
 - secrets `NPM_TOKEN` and `PYPI_API_TOKEN`: used instead of trusted publishing when set

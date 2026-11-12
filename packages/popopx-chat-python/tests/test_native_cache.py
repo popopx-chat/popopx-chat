@@ -104,7 +104,7 @@ def fake_libs_zip(tmp_path, monkeypatch, sha256=None) -> None:
     monkeypatch.setattr("simplex_chat._native._stream_to_file", fake_stream)
     monkeypatch.setattr("simplex_chat._native._platform_tag", lambda: "linux-x86_64")
     monkeypatch.setattr(
-        "simplex_chat._native.LIBS_SHA256", {"simplex-chat-libs-linux-x86_64.zip": pinned}
+        "simplex_chat._native.LIBS_SHA256", {"popopx-chat-libs-linux-x86_64.zip": pinned}
     )
 
 
@@ -127,7 +127,7 @@ def test_download_rejects_another_sha256(tmp_path, monkeypatch):
 def test_download_requires_pinned_sha256(tmp_path, monkeypatch):
     fake_libs_zip(tmp_path, monkeypatch)
     with pytest.raises(
-        RuntimeError, match="no SHA-256 is pinned for simplex-chat-libs-linux-x86_64-postgres.zip"
+        RuntimeError, match="no SHA-256 is pinned for popopx-chat-libs-linux-x86_64-postgres.zip"
     ):
         _download(tmp_path / "out", "postgres")
 

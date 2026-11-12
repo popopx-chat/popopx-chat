@@ -23,7 +23,7 @@ from ._version import LIBS_RELEASE, LIBS_SHA256
 
 Backend = Literal["sqlite", "postgres"]
 
-_GITHUB_REPO = "simplex-chat/simplex-chat-libs"
+_GITHUB_REPO = "popopx-chat/popopx-chat-libs"
 
 _PLATFORM_MAP = {
     "linux": ("linux", {"x86_64": "x86_64", "aarch64": "aarch64"}),
@@ -34,9 +34,9 @@ _PLATFORM_MAP = {
 # Two spellings of the same library, in load order.  libpopopx.* is what this fork's own
 # build scripts produce (scripts/desktop/build-lib-*, flake.nix, the Dockerfiles), and a
 # local build reaches it through POPOPX_LIBS_DIR (SIMPLEX_LIBS_DIR still works).
-# libsimplex.* is what the pinned release asset in _libs_asset() still contains, because
-# LIBS_RELEASE points at simplex-chat/simplex-chat-libs -- until POPOPX publishes its own
-# libs repository the download can only serve the old name, so the lookup keeps both.
+# libsimplex.* is what a release published before this repository was forked contains - the
+# pinned digests in _version.py still describe those, so the download can still serve the old
+# name and the lookup keeps both.
 _LIBNAMES = {
     "linux": ("libpopopx.so", "libsimplex.so"),
     "darwin": ("libpopopx.dylib", "libsimplex.dylib"),
@@ -86,7 +86,7 @@ def _has_lib(libs_dir: Path) -> bool:
 
 def _libs_asset(backend: Backend) -> str:
     suffix = "-postgres" if backend == "postgres" else ""
-    return f"simplex-chat-libs-{_platform_tag()}{suffix}.zip"
+    return f"popopx-chat-libs-{_platform_tag()}{suffix}.zip"
 
 
 def _libs_url(backend: Backend) -> str:

@@ -3,7 +3,7 @@
 
 core-release      set the core version and the types version for a library release
 claim-core        claim the library release of the core version for a commit
-release-status    print whether a release of simplex-chat-libs is published, a draft or absent
+release-status    print whether a release of popopx-chat-libs is published, a draft or absent
 addon-release     print the add-on release of the current add-on sources
 latest-libs       print the newest published library release
 publish-release   publish a draft release that has every asset
@@ -15,7 +15,7 @@ scopes            print every scope of scope-tests.sh
 build-plan        print the platforms to test the packages on, none when build.yml builds the core for the pull request
 prepare           update pins and versions of the packages
 publish-plan      print the package versions that are not published yet
-record            record releases and published versions in releases.toml of simplex-chat-libs
+record            record releases and published versions in releases.toml of popopx-chat-libs
 test-names        rename the packages to NPM_SCOPE and PYPI_PROJECT (test repositories)
 """
 
@@ -101,12 +101,12 @@ ADDON_HASH_LENGTH = 12
 CORE_TAG = re.compile(r"^core-(\d+(?:\.\d+)*)$")
 ADDON_TAG_PREFIX = "nodejs-addon-"
 LIBS_ASSETS = [
-    "simplex-chat-libs-linux-aarch64.zip",
-    "simplex-chat-libs-linux-x86_64-postgres.zip",
-    "simplex-chat-libs-linux-x86_64.zip",
-    "simplex-chat-libs-macos-aarch64.zip",
-    "simplex-chat-libs-macos-x86_64.zip",
-    "simplex-chat-libs-windows-x86_64.zip",
+    "popopx-chat-libs-linux-aarch64.zip",
+    "popopx-chat-libs-linux-x86_64-postgres.zip",
+    "popopx-chat-libs-linux-x86_64.zip",
+    "popopx-chat-libs-macos-aarch64.zip",
+    "popopx-chat-libs-macos-x86_64.zip",
+    "popopx-chat-libs-windows-x86_64.zip",
 ]
 ADDON_RUNNERS = {
     "linux-aarch64": "ubuntu-22.04-arm",
@@ -116,7 +116,7 @@ ADDON_RUNNERS = {
     "windows-x86_64": "windows-latest",
 }
 ADDON_PLATFORMS = list(ADDON_RUNNERS)
-ADDON_ASSETS = [f"simplex-chat-nodejs-{platform}.node" for platform in ADDON_PLATFORMS]
+ADDON_ASSETS = [f"popopx-chat-nodejs-{platform}.node" for platform in ADDON_PLATFORMS]
 SHA256_HEX = re.compile(r"^[0-9a-f]{64}$")
 RELEASES_FILE = "releases.toml"
 RECORD_ATTEMPTS = 5
@@ -187,7 +187,7 @@ def render_release(pins: Pins) -> str:
     hashes = "".join(f'  "{asset}": "{pins.sha256[asset]}",\n' for asset in sorted(pins.sha256))
     addon = f'"{pins.addon_release}"' if pins.addon_release else "undefined"
     return (
-        "// Written by scripts/ci/packages_release.py from the simplex-chat-libs releases.\n"
+        "// Written by scripts/ci/packages_release.py from the popopx-chat-libs releases.\n"
         "\n"
         f'export const LIBS_RELEASE = "{pins.libs_release}"\n'
         "\n"
@@ -210,14 +210,14 @@ def parse_python_version(source: str) -> tuple[str, Pins]:
 def render_python_version(version: str, pins: Pins) -> str:
     hashes = "".join(f'    "{asset}": "{pins.sha256[asset]}",\n' for asset in sorted(pins.sha256))
     return (
-        '"""Package version and the simplex-chat-libs release it loads.\n'
+        '"""Package version and the popopx-chat-libs release it loads.\n'
         "\n"
         "Written by scripts/ci/packages_release.py prepare: it bumps the version\n"
         "and pins new library releases with the SHA-256 of their assets.\n"
         '"""\n'
         "\n"
         f'__version__ = "{version}"  # PEP 440 — read by hatchling for wheel metadata\n'
-        f'LIBS_RELEASE = "{pins.libs_release}"  # simplex-chat-libs release tag\n'
+        f'LIBS_RELEASE = "{pins.libs_release}"  # popopx-chat-libs release tag\n'
         "LIBS_SHA256 = {\n"
         f"{hashes}}}\n"
     )
@@ -601,11 +601,11 @@ def pypi_published(version: str) -> bool:
 
 
 def libs_repository() -> str:
-    return os.environ.get("LIBS_REPOSITORY") or "simplex-chat/simplex-chat-libs"
+    return os.environ.get("LIBS_REPOSITORY") or "popopx-chat/popopx-chat-libs"
 
 
 def libs_api(path: str, method: str = "GET", body: dict | None = None) -> Any:
-    """GitHub API of the simplex-chat-libs repository."""
+    """GitHub API of the popopx-chat-libs repository."""
     headers = {"Accept": "application/vnd.github+json"}
     if token := os.environ.get("GH_TOKEN"):
         headers["Authorization"] = f"Bearer {token}"
@@ -618,7 +618,7 @@ def github_release(tag: str) -> dict | None:
 
 
 def libs_releases() -> list[dict]:
-    """The releases of simplex-chat-libs; drafts are listed only with a token that can push to it."""
+    """The releases of popopx-chat-libs; drafts are listed only with a token that can push to it."""
     releases: list[dict] = []
     page = 1
     while batch := libs_api(f"releases?per_page=100&page={page}"):
@@ -653,7 +653,7 @@ def read_releases() -> tuple[dict, str | None]:
 
 
 def record_releases(entries: list[tuple[str, str]], commit: str) -> str:
-    """Adds the entries in one commit of simplex-chat-libs and returns that commit."""
+    """Adds the entries in one commit of popopx-chat-libs and returns that commit."""
     message = ", ".join(f"{key} {version}" for key, version in entries)
     attempt = 1
     while True:

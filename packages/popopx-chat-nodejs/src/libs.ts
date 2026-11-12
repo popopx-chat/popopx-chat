@@ -9,15 +9,14 @@ import * as yauzl from "yauzl"
 import type {Backend} from "./core"
 import {ADDON_RELEASE, LIBS_RELEASE, SHA256} from "./release"
 
-const GITHUB_REPO = "simplex-chat/simplex-chat-libs"
+const GITHUB_REPO = "popopx-chat/popopx-chat-libs"
 const REQUEST_TIMEOUT_MS = 60_000
 export const MAX_REDIRECTS = 5
 // Two spellings of the same library, in load order.  libpopopx.* is what this fork's own build
 // scripts produce (scripts/desktop/build-lib-*, flake.nix, the Dockerfiles) and what
-// POPOPX_LIBS_DIR/SIMPLEX_LIBS_DIR points at after a local build.  libsimplex.* is what the
-// pinned release asset still contains, because GITHUB_REPO is upstream's simplex-chat-libs --
-// until POPOPX publishes its own libs repository the download can only serve the old name, so
-// every lookup keeps both.
+// POPOPX_LIBS_DIR/SIMPLEX_LIBS_DIR points at after a local build.  libsimplex.* is what a release
+// published before this repository was forked contains - the pinned digests in release.ts still
+// describe those, so the download can still serve the old name and every lookup keeps both.
 const PLATFORMS: {[platform: string]: {name: string, libs: string[]} | undefined} = {
   linux: {name: "linux", libs: ["libpopopx.so", "libsimplex.so"]},
   darwin: {name: "macos", libs: ["libpopopx.dylib", "libsimplex.dylib"]},
@@ -66,11 +65,11 @@ export function cacheRoot(platform: string, env: NodeJS.ProcessEnv, home: string
 
 export function libsAsset(backend: Backend, tag: string): string {
   const suffix = backend === "postgres" ? "-postgres" : ""
-  return `simplex-chat-libs-${tag}${suffix}.zip`
+  return `popopx-chat-libs-${tag}${suffix}.zip`
 }
 
 export function addonAsset(tag: string): string {
-  return `simplex-chat-nodejs-${tag}.node`
+  return `popopx-chat-nodejs-${tag}.node`
 }
 
 export function releaseUrl(release: string, asset: string): string {
@@ -243,7 +242,7 @@ function download(url: string, dest: string, timeoutMs: number, redirects = 0): 
     // Once a response arrives, request errors are ignored: a download settles via pipeline, which
     // waits for the file to close, so tmp cleanup cannot fail with EBUSY on Windows.
     let res: http.IncomingMessage | undefined
-    const req = get(url, {headers: {"User-Agent": "simplex-chat-nodejs"}, timeout: timeoutMs}, response => {
+    const req = get(url, {headers: {"User-Agent": "popopx-chat-nodejs"}, timeout: timeoutMs}, response => {
       res = response
       const status = response.statusCode ?? 0
       const location = response.headers.location

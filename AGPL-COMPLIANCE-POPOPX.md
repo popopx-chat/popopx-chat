@@ -27,14 +27,17 @@ The three groups listed in the ruling are **names**, and AGPL-3.0 imposes nothin
   back by `scripts/ci/packages_release.py:726`. It is one value on two sides of a build boundary.
   Renaming it is a branding change that must move the producer, the field and the reader in one commit
   — the rule that `ding_wire_audit.py` enforces. AGPL neither requires nor forbids it.
-- **`simplex-chat-libs`** (100 occ) is the name of *upstream's release artifact repository*. Its role
-  here is already replaced: `build.yml` sets `LIBS_REPOSITORY: ${{ github.repository }}-libs`, which
-  for this fork resolves to `popopx-chat/popopx-chat-libs`. The remaining spellings are the archive
-  filenames inside it (`simplex-chat-libs-<os>-<arch>.zip`, `packages_release.py:104`) and the docs
-  that describe them. Those filenames are data produced by whoever hosts the releases; changing our
-  side alone changes nothing on the wire.
-- **`simplex-chat-nodejs-<platform>.node`** (17 occ) is the add-on artifact name inside those archives
-  (`ADDON_ASSETS`, `packages_release.py:119`) — same reasoning: it is a downloaded artifact's name.
+- **`simplex-chat-libs`** moved to `popopx-chat-libs` on 2026-11-13 (FORK.md item 6). The reasoning here
+  used to be that the name belongs to whoever hosts the releases, so renaming our side changes nothing on
+  the wire — that became false when the repository was forked: `build.yml` already resolved
+  `LIBS_REPOSITORY: ${{ github.repository }}-libs` to it, and the download source is therefore ours to
+  name. What was left was the archive filenames, which are read back at install time by
+  `packages/popopx-chat-nodejs/src/libs.ts` and `packages/popopx-chat-python/src/simplex_chat/_native.py`
+  and keyed into the pinned digest dictionaries, so they are a two-ended value rather than prose — the
+  reason they could not move as documentation.
+- **`simplex-chat-nodejs-<platform>.node`** moved with it, being the other asset family of the same
+  repository (`ADDON_ASSETS`, `packages_release.py:119`); a half-moved pair would have pinned one family
+  from our releases and downloaded the other from upstream's.
 - **322 tracked paths containing "simplex"** are, measured, mostly `website/src/img/**` and
   `website/src/js/**` (upstream's site), `plans/**` and `docs/**` prose, blog posts, and the
   moko-resources source paths. Path names of documents that describe upstream are not a licence

@@ -21,7 +21,7 @@ build_package() {
   fi
   (cd "$nodejs" && npx tsc && cp src/simplex.* dist)
   if [ -n "${1:-}" ]; then
-    cp "$nodejs/build/Release/popopx.node" "$nodejs/build/simplex-chat-nodejs-$1.node"
+    cp "$nodejs/build/Release/popopx.node" "$nodejs/build/popopx-chat-nodejs-$1.node"
   fi
 }
 
@@ -46,11 +46,11 @@ case "${1:-}" in
   addon)
     [ $# -eq 2 ] || usage
     build_package "$2"
-    zip=simplex-chat-libs-$2.zip
+    zip=popopx-chat-libs-$2.zip
     "$python" scripts/ci/packages_release.py download "$LIBS_RELEASE" "$zip" "$temp/libs"
     "$python" -m zipfile -e "$temp/libs/$zip" "$temp/libs"
     POPOPX_LIBS_DIR=$temp/libs/libs test_nodejs
-    gh release upload "$ADDON_TAG" "$nodejs/build/simplex-chat-nodejs-$2.node" --clobber --repo "$LIBS_REPOSITORY"
+    gh release upload "$ADDON_TAG" "$nodejs/build/popopx-chat-nodejs-$2.node" --clobber --repo "$LIBS_REPOSITORY"
     ;;
   publish)
     [ $# -ge 2 ] || usage
@@ -60,7 +60,7 @@ case "${1:-}" in
       case "$suite" in
         nodejs)
           build_package
-          addon=simplex-chat-nodejs-$platform.node
+          addon=popopx-chat-nodejs-$platform.node
           "$python" scripts/ci/packages_release.py download-pinned "$addon" "$temp/addon"
           mkdir -p "$nodejs/build/Release"
           cp "$temp/addon/$addon" "$nodejs/build/Release/popopx.node"
