@@ -1,6 +1,6 @@
 # SimpleX badge service
 
-`simplex-badge-service` runs the whole supporter-badge service as one process, two
+`popopx-badge-service` runs the whole supporter-badge service as one process, two
 lanes: a POPOPX chat bot that answers service RPC over a double-ratchet contact
 address, and — only when `--service-config` names a `badge_service.ini` — the badge-codes
 web checkout (BTCPay and Stripe payment, code issuance, the poller). **Without
@@ -37,13 +37,13 @@ purchase that already exists.
 Build prerequisites and the general contribution flow are in [`docs/CONTRIBUTING.md`](../../docs/CONTRIBUTING.md).
 
 ```
-cabal build exe:simplex-badge-service
+cabal build exe:popopx-badge-service
 ```
 
 ## Run
 
 ```
-simplex-badge-service --help
+popopx-badge-service --help
 ```
 
 - default (no `--run-cli`): background service mode, no interactive terminal.
@@ -90,7 +90,7 @@ Other options:
 - `--service-name NAME`: the bot's display name, without `*`s or spaces (default `SimpleX Badges`).
 - `--client-service`: use the client service certificate.
 - also accepts the standard POPOPX Chat core options — database path, SMP/XFTP servers,
-  `--socks-proxy`, `--log-level`/`-l`, and the rest — run `simplex-badge-service --help`
+  `--socks-proxy`, `--log-level`/`-l`, and the rest — run `popopx-badge-service --help`
   for the complete list.
 
 ### Running the web checkout
@@ -109,7 +109,7 @@ The full walkthrough is in
 ```
 cd apps/popopx-badge-service/web && npm install && npm run build && cd ../../..
 cp apps/popopx-badge-service/badge_service.ini.example apps/popopx-badge-service/badge_service.ini
-cabal run simplex-badge-service -- \
+cabal run popopx-badge-service -- \
   --issuer-key-idx IDX --issuer-secret SECRET \
   --service-config apps/popopx-badge-service/badge_service.ini
 ```
@@ -221,14 +221,14 @@ account key, or either section beside
 ```ini
 [apple]
 bundle_id = chat.simplex.app
-root_certificates = /etc/simplex-badge-service/AppleRootCA-G3.cer
+root_certificates = /etc/popopx-badge-service/AppleRootCA-G3.cer
 api_key_id = 2X9R4HXF34
 api_issuer_id = 57246542-96fe-1a63-e053-0824d011072a
-api_private_key_file = /etc/simplex-badge-service/AuthKey_2X9R4HXF34.p8
+api_private_key_file = /etc/popopx-badge-service/AuthKey_2X9R4HXF34.p8
 
 [google]
 package_name = chat.simplex.app
-service_account_file = /etc/simplex-badge-service/play-service-account.json
+service_account_file = /etc/popopx-badge-service/play-service-account.json
 ```
 
 - `[apple]` verifies the signed transaction offline, against the roots `root_certificates` lists,

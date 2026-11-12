@@ -8,7 +8,7 @@ templateEngineOverride: md
 
 Chat relays are used to deliver channel messages in SimpleX Network. Read more about channels in this [whitepaper](https://github.com/simplex-chat/simplex-chat/blob/master/docs/protocol/channels-overview.md) and this [blog post](https://simplex.chat/blog/20260430-simplex-channels-v6-5-consortium-crowdfunding-freedom-of-speech.html).
 
-A chat relay is the POPOPX Chat CLI (`simplex-chat`) running in relay mode (`--relay`). It has its own profile (a display name and a picture), its own address, and in addition to delivering messages, it can generate data for web previews of the channels it delivers.
+A chat relay is the POPOPX Chat CLI (`popopx-chat`) running in relay mode (`--relay`). It has its own profile (a display name and a picture), its own address, and in addition to delivering messages, it can generate data for web previews of the channels it delivers.
 
 This guide explains how to set up a chat relay on a Linux server, how to run it, and (optionally) how to configure [Caddy](https://caddyserver.com) to serve data for channel web previews.
 
@@ -30,7 +30,7 @@ This guide explains how to set up a chat relay on a Linux server, how to run it,
 
 ## Install the CLI
 
-The relay is the standard `simplex-chat` CLI binary. Install or update it with the install script:
+The relay is the standard `popopx-chat` CLI binary. Install or update it with the install script:
 
 ```sh
 curl -o- https://raw.githubusercontent.com/simplex-chat/simplex-chat/stable/install.sh | bash
@@ -38,7 +38,7 @@ curl -o- https://raw.githubusercontent.com/simplex-chat/simplex-chat/stable/inst
 
 Other options (manual binary download, building from source) are in the [CLI guide](./CLI.md#download-chat-client).
 
-Copy the installed `simplex-chat` binary to `/usr/local/bin/simplex-chat-relay`. The guide uses that name so the relay is separate from any interactive `simplex-chat` you also run on the server.
+Copy the installed `popopx-chat` binary to `/usr/local/bin/popopx-chat-relay`. The guide uses that name so the relay is separate from any interactive `popopx-chat` you also run on the server.
 
 Create a dedicated user for the relay (called `relay` below), so it does not run as root and keeps its database in one place:
 
@@ -56,7 +56,7 @@ Create a run script `/usr/local/bin/relay-run`:
 
 ```sh
 #!/bin/sh
-exec /usr/local/bin/simplex-chat-relay \
+exec /usr/local/bin/popopx-chat-relay \
   --relay \
   --headless \
   --user-display-name "My Relay" \
@@ -68,7 +68,7 @@ exec /usr/local/bin/simplex-chat-relay \
 chmod +x /usr/local/bin/relay-run
 ```
 
-Create `/etc/systemd/system/simplex-relay.service`:
+Create `/etc/systemd/system/popopx-relay.service`:
 
 ```ini
 [Unit]
@@ -252,7 +252,7 @@ relay.example.com {
   handle /channel/* {
     root * /var/www/relay-web-channels    # files resolve to .../channel/<id>.json
     file_server
-    import /etc/caddy/simplex-cors.conf
+    import /etc/caddy/popopx-cors.conf
   }
 }
 ```
@@ -260,7 +260,7 @@ relay.example.com {
 Keep `root` at the parent directory with a non-stripping `handle`. That is what makes `/channel/<id>.json` resolve to `.../channel/<id>.json`. Do not point `root` at the `channel` subdirectory: the relay's generated CORS matchers are `/channel/*.json`, which only match when the prefix is kept.
 
 ```sh
-touch /etc/caddy/simplex-cors.conf      # so the import doesn't fail before the first write
+touch /etc/caddy/popopx-cors.conf      # so the import doesn't fail before the first write
 usermod -aG relay caddy                 # let caddy read the relay user's files
 systemctl restart caddy                 # restart (not reload) to pick up the group
 ```
@@ -269,13 +269,13 @@ systemctl restart caddy                 # restart (not reload) to pick up the gr
 
 The relay updates its CORS file as channels change. Copy it into Caddy's config and reload Caddy whenever it changes.
 
-Create `/usr/local/bin/simplex-cors-sync.sh`:
+Create `/usr/local/bin/popopx-cors-sync.sh`:
 
 ```sh
 #!/bin/sh
 set -eu
 SRC=/var/www/relay-web-channels/cors.conf
-DST=/etc/caddy/simplex-cors.conf
+DST=/etc/caddy/popopx-cors.conf
 [ -f "$SRC" ] || exit 0
 cmp -s "$SRC" "$DST" 2>/dev/null && exit 0
 install -m 0644 "$SRC" "$DST"
@@ -283,7 +283,7 @@ systemctl reload caddy
 logger -t simplex-cors "reloaded caddy"
 ```
 
-Create `/etc/systemd/system/simplex-cors-sync.service`:
+Create `/etc/systemd/system/popopx-cors-sync.service`:
 
 ```ini
 [Unit]
@@ -291,10 +291,10 @@ Description=Sync SimpleX relay CORS config to Caddy
 StartLimitIntervalSec=0
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/simplex-cors-sync.sh
+ExecStart=/usr/local/bin/popopx-cors-sync.sh
 ```
 
-Create `/etc/systemd/system/simplex-cors-sync.path` to run the service whenever the relay's CORS file changes:
+Create `/etc/systemd/system/popopx-cors-sync.path` to run the service whenever the relay's CORS file changes:
 
 ```ini
 [Unit]
@@ -311,7 +311,7 @@ WantedBy=multi-user.target
 Enable it:
 
 ```sh
-chmod +x /usr/local/bin/simplex-cors-sync.sh
+chmod +x /usr/local/bin/popopx-cors-sync.sh
 systemctl daemon-reload
 systemctl enable --now simplex-cors-sync.path
 ```

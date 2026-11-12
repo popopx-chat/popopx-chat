@@ -24,7 +24,13 @@ and `.appdata.xml` filename, and the application data directories. The CLI and t
 `getAppUserDataDirectory "popopx"`: `~/.local/share/popopx` on Linux,
 `~/Library/Application Support/popopx` on macOS, `%APPDATA%\popopx` on Windows. The desktop app uses
 `~/.local/share/popopx` and the config dir `~/.config/popopx` (`%AppData%\POPOPX` on Windows) — both
-read from `Platform.desktop.kt:7-16`, which is the generator for these paths.
+read from `Platform.desktop.kt:7-16`, which is the generator for these paths. The server-side
+filesystem identity moved too — 200 occurrences / 9 files across `docs/SERVER.md`,
+`docs/XFTP-SERVER.md`, their `pl`/`fr`/`cs` translations and `docs/CHAT-RELAY.md`:
+`/etc/opt/popopx{,-xftp}`, `/var/opt/popopx{,-xftp}`, `/var/lib/tor/popopx-smp`, the
+caddy/systemd/docker-compose names — matching what `popopxmq` compiles in as `defaultCfgPath`. The
+commands that fetch a server still name upstream's artifact (its release binary and the
+`simplexchat/*-server` image default), which reads `/etc/opt/simplex`; see `FORK.md`.
 
 ### What the user sees
 

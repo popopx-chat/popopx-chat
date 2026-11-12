@@ -42,6 +42,16 @@ authoritative per-file record.
   verbatim, as AGPL-3.0 §7 requires (and §4 forbids removing). This codebase carries no
   per-file copyright headers, so there is nothing else to preserve.
 - **GitHub URLs** of the upstream project, which still point at the original source.
+- **The server artifacts, though their paths moved.** On 2026-11-13 the operator docs (`docs/SERVER.md`,
+  `docs/XFTP-SERVER.md` and their `pl`/`fr`/`cs` translations, `docs/CHAT-RELAY.md`) were switched to
+  `popopx` filesystem identity — `/etc/opt/popopx{,-xftp}`, `/var/opt/popopx{,-xftp}`,
+  `/var/lib/tor/popopx-smp`, the caddy/systemd/docker-compose names — because that is what `popopxmq`
+  compiles in (`apps/*/Main.hs defaultCfgPath`) and what its own docs already said. The lines that
+  *obtain* a server did not: `docs/SERVER.md:293` and `:854` still download upstream's release binary
+  and the compose blocks still default to `image: ${SIMPLEX_IMAGE:-simplexchat/smp-server:latest}`,
+  whose `defaultCfgPath` really is `/etc/opt/simplex`. A self-hoster must therefore build the server
+  from `popopxmq` (or set `SIMPLEX_IMAGE` to a POPOPX-built image); with upstream's artifact the
+  mounted path and the path the process reads disagree, and the keys land in the container layer.
 - **Cryptographic pre-images** (HKDF info parameters, badge hash inputs, SQLite FFI symbol
   names). Renaming these would silently break key derivation instead of failing to compile.
 - **Anything naming an upstream thing**: upstream operator addresses, the `simplex:` address

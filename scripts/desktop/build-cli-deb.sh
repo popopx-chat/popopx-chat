@@ -27,8 +27,8 @@ Description: SimpleX - the first messaging platform that has no user identifiers
 Installed-Size: ${size}
 EOF
 
-cp "$CLI_PATH_TO_BIN" ./${package}/usr/bin/simplex-chat
-chmod +x ./${package}/usr/bin/simplex-chat
+cp "$CLI_PATH_TO_BIN" ./${package}/usr/bin/popopx-chat
+chmod +x ./${package}/usr/bin/popopx-chat
 
 find ./${package} -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
 

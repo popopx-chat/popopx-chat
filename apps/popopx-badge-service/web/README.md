@@ -68,7 +68,7 @@ is plain TypeScript, tested directly in Node.
 ## Running the real service against this build
 
 **`mock/server.py` is not the service.** The service is the Haskell
-executable `simplex-badge-service`, in `apps/popopx-badge-service/`, and
+executable `popopx-badge-service`, in `apps/popopx-badge-service/`, and
 `dist/` is the directory its listener serves. Nothing about the page changes
 between the two — the service matches this build, never the reverse.
 
@@ -98,7 +98,7 @@ cd ../..
 #    without a key it could sign a credential with. Put it in the ini's [issuer]
 #    section, or pass --issuer-key-idx and --issuer-secret, which override it.
 #    `simplex-chat badge keygen` prints a pair.
-cabal run simplex-badge-service -- \
+cabal run popopx-badge-service -- \
   --service-config apps/popopx-badge-service/badge_service.ini
 ```
 
@@ -119,7 +119,7 @@ needs a chat database and a real BTCPay store.*
 
 What the mock cannot stand in for:
 
-| | `mock/server.py` | `simplex-badge-service` |
+| | `mock/server.py` | `popopx-badge-service` |
 |---|---|---|
 | Invoices | invented in memory | created at BTCPay over Greenfield |
 | Payment detected by | `POST /control/settle/:id`, an endpoint that exists nowhere else | a poller reading the provider, which is the only thing that carries authority |
