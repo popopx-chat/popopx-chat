@@ -109,7 +109,7 @@ change other network settings.
 
 #### SMP servers
 
-By default, the app uses the servers of two preset operators, POPOPX Chat and
+By default, the app uses the servers of two preset operators, SimpleX Chat and
 Flux. You can disable them and add your own servers in **Your servers**. When
 more than one operator is enabled, the app uses different operators in each
 conversation to protect your privacy.

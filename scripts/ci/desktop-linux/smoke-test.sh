@@ -284,7 +284,7 @@ use_names_server() {
   "$ui" key Escape
   "$ui" wait "Add server" 10
   "$ui" key Escape
-  for operator in "POPOPX Chat" Flux; do
+  for operator in "SimpleX Chat" Flux; do
     "$ui" click-text "$operator" 10
     # the operator's own toggle: the title "<operator> servers" can wrap
     "$ui" wait "Use servers" 10
