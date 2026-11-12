@@ -344,8 +344,6 @@ struct ChooseServerOperators: View {
     }
 }
 
-let operatorsPostLink = URL(string: "https://simplex.chat/blog/20241125-servers-operated-by-flux-true-privacy-and-decentralization-for-all-users.html")!
-
 struct ChooseServerOperatorsInfoView: View {
     @Environment(\.colorScheme) var colorScheme: ColorScheme
     @EnvironmentObject var theme: AppTheme
