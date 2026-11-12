@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import chat.popopx.common.ui.theme.SimplexGreen
+import chat.popopx.common.ui.theme.PopopxGreen
 import chat.popopx.common.views.helpers.*
 import chat.popopx.res.*
 import dev.icerock.moko.resources.compose.painterResource

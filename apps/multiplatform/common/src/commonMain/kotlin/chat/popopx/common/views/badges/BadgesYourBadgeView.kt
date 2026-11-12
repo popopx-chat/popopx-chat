@@ -34,9 +34,9 @@ import chat.popopx.common.views.helpers.AppBarTitle
 import chat.popopx.common.views.helpers.ModalManager
 import chat.popopx.common.views.helpers.badgeImage
 import chat.popopx.common.views.helpers.badgeTypeName
-import chat.popopx.common.views.helpers.openVerifiedSimplexUri
+import chat.popopx.common.views.helpers.openVerifiedPopopxUri
 import chat.popopx.common.views.usersettings.SettingsActionItem
-import chat.popopx.common.views.usersettings.simplexTeamUri
+import chat.popopx.common.views.usersettings.popopxTeamUri
 import chat.popopx.res.*
 import kotlinx.datetime.Clock
 

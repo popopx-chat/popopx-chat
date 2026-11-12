@@ -8248,11 +8248,6 @@ chat item action</note>
         <target>POPOPX Adresi</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app." xml:space="preserve">
-        <source>POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app.</source>
-        <target>POPOPX Chat ve Flux, Flux tarafından işletilen sunucuları uygulamaya dahil etmek için bir anlaşma yaptı.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="POPOPX Chat security was audited by Trail of Bits." xml:space="preserve">
         <source>POPOPX Chat security was audited by Trail of Bits.</source>
         <target>POPOPX Chat güvenliği Trails of Bits tarafından denetlenmiştir.</target>

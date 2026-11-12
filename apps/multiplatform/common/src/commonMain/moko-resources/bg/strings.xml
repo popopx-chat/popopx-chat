@@ -2157,7 +2157,6 @@
     <string name="business_address">Бизнес адрес</string>
     <string name="leave_chat_question">Напусни чата?</string>
     <string name="appearance_bars_blur_radius">Размазване</string>
-    <string name="onboarding_network_operators_popopx_flux_agreement">POPOPX Chat и Flux сключиха споразумение за включване на управлявани от Flux сървъри в приложението.</string>
     <string name="operator_conditions_will_be_applied"><![CDATA[Тези условия ще се прилагат и за: <b>%s</b>.]]></string>
     <string name="operators_conditions_will_also_apply"><![CDATA[Тези условия ще се прилагат и за: <b>%s</b>.]]></string>
     <string name="operator_open_conditions">Отвори условията</string>

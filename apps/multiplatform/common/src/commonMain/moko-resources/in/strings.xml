@@ -1557,7 +1557,6 @@
     <string name="desktop_address">Alamat desktop</string>
     <string name="desktop_devices">Perangkat desktop</string>
     <string name="onboarding_network_about_operators">Tentang operator</string>
-    <string name="onboarding_network_operators_popopx_flux_agreement">POPOPX Chat dan Flux membuat kesepakatan untuk sertakan server yang dioperasikan Flux ke aplikasi.</string>
     <string name="delete_chat_profile_question">Hapus profil obrolan?</string>
     <string name="chat_is_stopped_you_should_transfer_database">Obrolan dihentikan. Jika Anda sudah gunakan basis data ini di perangkat lain, Anda harus transfer kembali sebelum memulai obrolan.</string>
     <string name="database_passphrase_will_be_updated">Frasa sandi enkripsi basis data akan diperbarui.</string>

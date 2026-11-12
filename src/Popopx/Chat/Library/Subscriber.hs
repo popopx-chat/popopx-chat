@@ -1496,9 +1496,9 @@ processAgentMessageConn cxt user@User {userId} entity gks_ corrId agentConnId ag
             Nothing -> do
               let UserContactLink {connLinkContact = CCLink connReq _, shortLinkDataSet, addressSettings} = ucl
                   AddressSettings {autoAccept, chatLayout} = addressSettings
-                  isSimplexTeam = sameConnReqContact connReq adminContactReq
+                  isAdminContact = sameConnReqContact connReq adminContactReq
               gVar <- asks random
-              withStore (\db -> createOrUpdateContactRequest db gVar cxt user uclId ucl isSimplexTeam invId chatVRange (Just reqHeader) p xContactId_ welcomeMsgId_ requestMsg_ reqPQSup rejectionSupported) >>= \case
+              withStore (\db -> createOrUpdateContactRequest db gVar cxt user uclId ucl isAdminContact invId chatVRange (Just reqHeader) p xContactId_ welcomeMsgId_ requestMsg_ reqPQSup rejectionSupported) >>= \case
                 RSAcceptedRequest _ucr re -> case re of
                   REContact ct ->
                     -- TODO [short links] update request msg

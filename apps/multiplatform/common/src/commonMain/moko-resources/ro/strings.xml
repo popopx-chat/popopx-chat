@@ -1800,7 +1800,6 @@
     <string name="use_popopx_chat_servers__question">Folosiți servere POPOPX Chat?</string>
     <string name="network_socks_proxy">Proxy SOCKS</string>
     <string name="network_proxy_username">Nume de utilizator</string>
-    <string name="onboarding_network_operators_popopx_flux_agreement">POPOPX Chat și Flux au ajuns la un acord pentru a include în aplicație servere operate de Flux.</string>
     <string name="periodic_notifications_desc">Aplicația preia mesajele noi periodic și consumă câteva procente din baterie pe zi. Aplicația nu folosește notificări push, așadar datele de pe dispozitivul tău nu sunt trimise către servere.</string>
     <string name="la_notice_title_popopx_lock">Blocare POPOPX</string>
     <string name="file_error_auth">Cheie greșită sau adresă necunoscută a fragmentului de fișier - cel mai probabil fișierul este șters.</string>

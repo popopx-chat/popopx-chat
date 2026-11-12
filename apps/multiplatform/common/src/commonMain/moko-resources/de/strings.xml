@@ -2222,7 +2222,6 @@
     <string name="info_row_chat">Chat</string>
     <string name="connect_plan_you_are_already_connected_with_vName"><![CDATA[Sie sind bereits mit <b>%1$s</b> verbunden.]]></string>
     <string name="onboarding_network_about_operators">Über die Betreiber</string>
-    <string name="onboarding_network_operators_popopx_flux_agreement">POPOPX-Chat und Flux haben vereinbart, die von Flux betriebenen Server in die App aufzunehmen.</string>
     <string name="sync_connection_desc">Die Verbindung erfordert eine Neuverhandlung der Verschlüsselung.</string>
     <string name="encryption_renegotiation_in_progress">Die Neuverhandlung der Verschlüsselung läuft.</string>
     <string name="sync_connection_confirm">Reparieren</string>

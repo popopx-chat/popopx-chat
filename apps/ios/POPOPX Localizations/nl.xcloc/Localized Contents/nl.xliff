@@ -7883,11 +7883,6 @@ chat item action</note>
         <target>POPOPX adres</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app." xml:space="preserve">
-        <source>POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app.</source>
-        <target>Popopx-chat en flux hebben een overeenkomst gemaakt om door flux geëxploiteerde servers in de app op te nemen.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="POPOPX Chat security was audited by Trail of Bits." xml:space="preserve">
         <source>POPOPX Chat security was audited by Trail of Bits.</source>
         <target>De beveiliging van POPOPX Chat is gecontroleerd door Trail of Bits.</target>

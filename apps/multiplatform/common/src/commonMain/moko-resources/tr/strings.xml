@@ -2255,7 +2255,6 @@
     <string name="add_short_link">Adresi güncelle</string>
     <string name="onboarding_conditions_privacy_policy_and_conditions_of_use">Gizlilik politikası ve kullanım koşulları.</string>
     <string name="onboarding_choose_server_operators">Sunucu operatörleri</string>
-    <string name="onboarding_network_operators_popopx_flux_agreement">POPOPX Chat ve Flux, Flux tarafından işletilen sunucuların uygulamaya dahil edilmesi konusunda bir anlaşma yaptı.</string>
     <string name="privacy_chat_list_open_links">Sohbet listesinden bağlantıları aç</string>
     <string name="privacy_chat_list_open_links_yes">Evet</string>
     <string name="privacy_chat_list_open_web_link_question">Web bağlantısını açmak ister misiniz?</string>

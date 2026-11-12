@@ -2361,7 +2361,6 @@
     <string name="onboarding_conditions_private_chats_not_accessible">營運商承諾：\n- 保持獨立\n- 盡量減少中繼資料使用\n- 執行已驗證的開源程式碼</string>
     <string name="onboarding_conditions_by_using_you_agree">你承諾：\n- 只在公開群組中發佈合法內容\n- 尊重其他使用者——不發送垃圾訊息</string>
     <string name="onboarding_conditions_privacy_policy_and_conditions_of_use">私隱政策與使用條件。</string>
-    <string name="onboarding_network_operators_popopx_flux_agreement">POPOPX Chat 與 Flux 達成協議，將 Flux 營運的伺服器納入應用程式。</string>
     <string name="onboarding_network_operators_app_will_use_different_operators">應用程式會在每個對話中使用不同營運商，以保護你的私隱。</string>
     <string name="onboarding_network_operators_cant_see_who_talks_to_whom">啟用多於一個營運商時，沒有任何一方擁有足以得知誰與誰通訊的中繼資料。</string>
     <string name="onboarding_network_operators_app_will_use_for_routing">例如，如果你的聯絡人透過 POPOPX Chat 伺服器接收訊息，你的應用程式會透過 Flux 伺服器傳送訊息。</string>

@@ -1882,10 +1882,6 @@
         <source>POPOPX Address</source>
         <target state="translated">عنوان POPOPX</target>
       </trans-unit>
-      <trans-unit id="POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app." xml:space="preserve" approved="no">
-        <source>POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app.</source>
-        <target state="translated">توصلت POPOPX Chat وFlux إلى اتفاق لتضمين الخوادم التي تديرها Flux في التطبيق.</target>
-      </trans-unit>
       <trans-unit id="Allow calls?" xml:space="preserve" approved="no">
         <source>Allow calls?</source>
         <target state="translated">السماح بالمكالمات؟</target>

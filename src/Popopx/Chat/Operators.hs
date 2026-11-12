@@ -71,6 +71,10 @@ usageConditionsText =
       in [|stripFrontMatter $(lift (safeDecodeUtf8 s))|]
    )
 
+-- OTFlux stays although Flux is no longer a preset operator: "flux" is the encoded form of
+-- server_operators.server_operator_tag (FromField/ToField above, and the M20260603 migration
+-- matches on it) and of the SDK enum (OperatorTag.Flux in Swift/Kotlin, PopopxOperatorTag in
+-- types.ts/_types.py). Dropping a case here is a one-sided wire change, not a rename.
 data OperatorTag = OTSimplex | OTFlux
   deriving (Eq, Ord, Show)
 

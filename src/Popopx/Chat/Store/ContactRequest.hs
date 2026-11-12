@@ -72,7 +72,7 @@ createOrUpdateContactRequest
   user@User {userId, userContactId}
   uclId
   UserContactLink {addressSettings = AddressSettings {businessAddress}}
-  isSimplexTeam
+  isAdminContact
   invId
   cReqChatVRange@(VersionRange minV maxV)
   presHeader_
@@ -194,7 +194,7 @@ createOrUpdateContactRequest
         where
           createRequestEntity ldn profileId contactRequestId currentTs
             | businessAddress =
-                if isSimplexTeam && maxV < businessChatsVersion
+                if isAdminContact && maxV < businessChatsVersion
                   then createContact'
                   else createBusinessChat
             | otherwise = createContact'

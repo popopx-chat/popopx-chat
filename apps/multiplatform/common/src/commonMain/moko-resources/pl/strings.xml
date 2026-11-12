@@ -2370,7 +2370,6 @@
     <string name="short_link_button_text">Krótki link</string>
     <string name="v6_4_1_short_address">Krótki adres POPOPX</string>
     <string name="popopx_link_channel">Link do kanału na POPOPX</string>
-    <string name="onboarding_network_operators_popopx_flux_agreement">POPOPX Chat i Flux zawarły umowę na włączenie do aplikacji serwerów obsługiwanych przez Flux.</string>
     <string name="popopx_link_relay">łącze przekaźnikowe POPOPX</string>
     <string name="report_reason_spam">Spam</string>
     <string name="blocking_reason_spam">Spam</string>

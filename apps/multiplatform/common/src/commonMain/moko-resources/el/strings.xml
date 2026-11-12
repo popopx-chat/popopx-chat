@@ -2159,7 +2159,6 @@
     <string name="popopx_address_or_1_time_link">Διεύθυνση POPOPX ή σύνδεσμος 1-χρήσης;</string>
     <string name="system_restricted_background_desc">Το POPOPX δεν μπορεί να λειτουργήσει στο παρασκήνιο. Θα λαμβάνεις τις ειδοποιήσεις μόνο όταν η εφαρμογή είναι σε λειτουργία.</string>
     <string name="popopx_link_channel">Σύνδεσμος καναλιού POPOPX</string>
-    <string name="onboarding_network_operators_popopx_flux_agreement">Η POPOPX Chat και η Flux σύναψαν συμφωνία για την ενσωμάτωση των διακομιστών που λειτουργεί η Flux, στην εφαρμογή.</string>
     <string name="ntf_channel_calls">Κλήσεις POPOPX Chat</string>
     <string name="ntf_channel_messages">Μηνύματα POPOPX Chat</string>
     <string name="v4_2_security_assessment_desc">Η ασφάλεια του POPOPX Chat ελέγχθηκε από την Trail of Bits.</string>

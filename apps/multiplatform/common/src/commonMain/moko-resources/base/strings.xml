@@ -1382,9 +1382,6 @@
   <string name="onboarding_conditions_accept">Accept</string>
   <string name="onboarding_choose_server_operators">Server operators</string>
   <string name="onboarding_network_operators">Network operators</string>
-  <!-- "Flux" stays: it is a preset operator's tradeName (src/Popopx/Chat/Operators/Presets.hs:37), a party to
-       the consent this copy describes - the class 0a5adde7d reverted. The key already moved; ~34 locales repeat this value. -->
-  <string name="onboarding_network_operators_popopx_flux_agreement">POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app.</string>
   <string name="onboarding_network_operators_app_will_use_different_operators">The app protects your privacy by using different operators in each conversation.</string>
   <string name="onboarding_network_operators_cant_see_who_talks_to_whom">When more than one operator is enabled, none of them has metadata to learn who communicates with whom.</string>
   <string name="onboarding_network_operators_app_will_use_for_routing">For example, if your contact receives messages via a POPOPX Chat server, your app will deliver them via a Flux server.</string>

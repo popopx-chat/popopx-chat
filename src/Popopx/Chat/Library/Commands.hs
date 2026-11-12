@@ -499,7 +499,7 @@ processChatCommand cxt nm = \case
     where
       createPresetContactCards :: DB.Connection -> User -> ExceptT StoreError IO ()
       createPresetContactCards db user = do
-        createContact db cxt user simplexTeamContactProfile
+        createContact db cxt user adminContactProfile
       chooseServers :: Maybe User -> CM ([UpdatedUserOperatorServers], (NonEmpty (ServerCfg 'PSMP), NonEmpty (ServerCfg 'PXFTP)))
       chooseServers user_ = do
         as <- asks randomAgentServers

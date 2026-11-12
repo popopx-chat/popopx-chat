@@ -1885,7 +1885,6 @@
     <string name="debug_logs">ログを有効化</string>
     <string name="onboarding_notifications_mode_periodic_desc_short">メッセージ受信を10分毎に確認します</string>
     <string name="onboarding_notifications_mode_service_desc_short">バックグラウンドでアプリが常時動作します</string>
-    <string name="onboarding_network_operators_popopx_flux_agreement">POPOPX ChatとFluxは、Fluxが運営するサーバをアプリに組み込むことに合意しました。</string>
     <string name="operator_review_conditions">利用条件をレビュー</string>
     <string name="network_preset_servers_title">プリセットサーバ</string>
     <string name="operator_conditions_accepted">利用条件を承諾</string>

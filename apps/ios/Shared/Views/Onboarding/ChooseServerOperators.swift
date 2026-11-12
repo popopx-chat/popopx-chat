@@ -262,10 +262,6 @@ struct ChooseServerOperators: View {
                         operatorCheckView(srvOperator)
                     }
                     VStack {
-                        // "Flux" stays: it is the tradeName of a preset operator (Presets.hs:37, legalName
-                        // "InFlux Technologies Limited"), so this copy names a consent-flow party - the class
-                        // 0a5adde7d reverted. This literal is also the lookup key for 24 Localizable.strings.
-                        Text("POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app.").padding(.bottom, 8)
                         Text("You can configure servers via settings.")
                     }
                     .font(.footnote)

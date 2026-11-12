@@ -2164,7 +2164,6 @@
     <string name="connection_error_quota_desc">La connexion a atteint la limite des messages non délivrés, votre contact est peut-être hors ligne.</string>
     <string name="server_added_to_operator__name">Serveur ajouté à l\'opérateur %s.</string>
     <string name="onboarding_network_operators_app_will_use_different_operators">L\'application protège votre vie privée en utilisant des opérateurs différents pour chaque conversation.</string>
-    <string name="onboarding_network_operators_popopx_flux_agreement">POPOPX Chat et Flux ont conclu un accord pour intégrer à l’application des serveurs opérés par Flux.</string>
     <string name="chat_list_notes">Notes</string>
     <string name="or_to_share_privately">Ou à partager en privé</string>
     <string name="popopx_address_or_1_time_link">Adresse POPOPX ou lien unique ?</string>

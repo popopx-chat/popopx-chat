@@ -2133,7 +2133,6 @@
     <string name="onboarding_network_about_operators">Acerca de los operadores</string>
     <string name="onboarding_notifications_mode_service_desc_short">La aplicación siempre funciona en segundo plano</string>
     <string name="maximum_message_size_title">¡Mensaje demasiado largo!</string>
-    <string name="onboarding_network_operators_popopx_flux_agreement">Popopx Chat y Flux han acordado incluir en la aplicación servidores operados por Flux.</string>
     <string name="debug_logs">Activar registros</string>
     <string name="error_saving_database">Error al guardar base de datos</string>
     <string name="sync_connection_desc">La conexión requiere renegociar el cifrado.</string>

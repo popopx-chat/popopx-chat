@@ -1730,7 +1730,6 @@
     <string name="popopx_link_mode">Các đường dẫn POPOPX</string>
     <string name="popopx_link_invitation">Lời mời POPOPX dùng một lần</string>
     <string name="la_notice_title_popopx_lock">Khóa POPOPX</string>
-    <string name="onboarding_network_operators_popopx_flux_agreement">POPOPX Chat và Flux đã đi đến một thỏa thuận để đưa các máy chủ do Flux vận hành vào ứng dụng.</string>
     <string name="theme_popopx">POPOPX</string>
     <string name="popopx_address">Địa chỉ POPOPX</string>
     <string name="shutdown_alert_question">Tắt?</string>

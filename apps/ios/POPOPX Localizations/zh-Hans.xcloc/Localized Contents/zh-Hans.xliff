@@ -9282,11 +9282,6 @@ chat item action</note>
         <target>POPOPX 地址</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app." xml:space="preserve">
-        <source>POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app.</source>
-        <target>POPOPX Chat 与 Flux 达成了协议，将由 Flux 控制的服务器纳入 POPOPX 应用。</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="POPOPX Chat security was audited by Trail of Bits." xml:space="preserve">
         <source>POPOPX Chat security was audited by Trail of Bits.</source>
         <target>POPOPX Chat 的安全性 由 Trail of Bits 审核。</target>

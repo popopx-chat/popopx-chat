@@ -9240,10 +9240,6 @@ More improvements are coming soon!</source>
         <source>Conditions are already accepted for these operator(s): **%@**.</source>
         <target state="translated">已接受這些營運商的條件：**%@**。</target>
       </trans-unit>
-      <trans-unit id="POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app." xml:space="preserve" approved="no">
-        <source>POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app.</source>
-        <target state="translated">POPOPX Chat 與 Flux 達成協議，將 Flux 營運的伺服器納入應用程式。</target>
-      </trans-unit>
       <trans-unit id="All data is kept private on your device." xml:space="preserve" approved="no">
         <source>All data is kept private on your device.</source>
         <target state="translated">所有數據都會在你的裝置上保持私密。</target>

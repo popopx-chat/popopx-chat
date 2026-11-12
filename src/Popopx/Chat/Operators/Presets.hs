@@ -10,7 +10,7 @@ import qualified Data.List.NonEmpty as L
 import Popopx.Chat.Library.Internal (simplexChatImage)
 import Popopx.Chat.Operators
 import Popopx.Chat.Protocol (mkRelayProfile)
-import Popopx.Messaging.Agent.Env.SQLite (ServerRoles (..), allRoles)
+import Popopx.Messaging.Agent.Env.SQLite (allRoles)
 import Popopx.Messaging.Agent.Store.Entity
 import Popopx.Messaging.Encoding.String
 import Popopx.Messaging.Protocol (ProtocolType (..), SMPServer)
@@ -26,20 +26,6 @@ operatorSimpleXChat =
       conditionsAcceptance = CARequired Nothing,
       enabled = True,
       smpRoles = allRoles,
-      xftpRoles = allRoles
-    }
-
-operatorFlux :: NewServerOperator
-operatorFlux =
-  ServerOperator
-    { operatorId = DBNewEntity,
-      operatorTag = Just OTFlux,
-      tradeName = "Flux",
-      legalName = Just "InFlux Technologies Limited",
-      serverDomains = ["simplexonflux.com"],
-      conditionsAcceptance = CARequired Nothing,
-      enabled = True,
-      smpRoles = ServerRoles {storage = False, proxy = True, names = True},
       xftpRoles = allRoles
     }
 
@@ -97,9 +83,10 @@ simplexChatRelays =
     presetChatRelay True (mkRelayProfile "SimpleX Chat Relay 3" $ Just simplexChatImage) ["simplex.im"] (either error id $ strDecode "https://smp4.simplex.im/r#yxNOMJcry5jMTRPEBVtGBATYaKeoRIsZRBPIDLx7x6M")
   ]
 
-fluxSMPServers :: [NewUserServer 'PSMP]
-fluxSMPServers = map (presetServer' True) (L.toList fluxSMPServers_)
-
+-- Flux is not a preset operator of this fork: neither the operator record nor its SMP/XFTP server
+-- lists are offered to new users. fluxSMPServers_ below is kept because it is a member of
+-- allPresetServers above, and short links encode the server they were created on — dropping a host
+-- from that list makes an already-issued link unresolvable.
 -- Please note: if any servers are removed from this list, they MUST be added to allPresetServers.
 -- Otherwise previously created short links won't work.
 --
@@ -114,15 +101,3 @@ fluxSMPServers_ =
     "smp://rWvBYyTamuRCBYb_KAn-nsejg879ndhiTg5Sq3k0xWA=@smp5.simplexonflux.com,4ao347qwiuluyd45xunmii4skjigzuuox53hpdsgbwxqafd4yrticead.onion",
     "smp://PN7-uqLBToqlf1NxHEaiL35lV2vBpXq8Nj8BW11bU48=@smp6.simplexonflux.com,hury6ot3ymebbr2535mlp7gcxzrjpc6oujhtfxcfh2m4fal4xw5fq6qd.onion"
   ]
-
-fluxXFTPServers :: [NewUserServer 'PXFTP]
-fluxXFTPServers =
-  map
-    (presetServer True)
-    [ "xftp://92Sctlc09vHl_nAqF2min88zKyjdYJ9mgxRCJns5K2U=@xftp1.simplexonflux.com,apl3pumq3emwqtrztykyyoomdx4dg6ysql5zek2bi3rgznz7ai3odkid.onion",
-      "xftp://YBXy4f5zU1CEhnbbCzVWTNVNsaETcAGmYqGNxHntiE8=@xftp2.simplexonflux.com,c5jjecisncnngysah3cz2mppediutfelco4asx65mi75d44njvua3xid.onion",
-      "xftp://ARQO74ZSvv2OrulRF3CdgwPz_AMy27r0phtLSq5b664=@xftp3.simplexonflux.com,dc4mohiubvbnsdfqqn7xhlhpqs5u4tjzp7xpz6v6corwvzvqjtaqqiqd.onion",
-      "xftp://ub2jmAa9U0uQCy90O-fSUNaYCj6sdhl49Jh3VpNXP58=@xftp4.simplexonflux.com,4qq5pzier3i4yhpuhcrhfbl6j25udc4czoyascrj4yswhodhfwev3nyd.onion",
-      "xftp://Rh19D5e4Eez37DEE9hAlXDB3gZa1BdFYJTPgJWPO9OI=@xftp5.simplexonflux.com,q7itltdn32hjmgcqwhow4tay5ijetng3ur32bolssw32fvc5jrwvozad.onion",
-      "xftp://0AznwoyfX8Od9T_acp1QeeKtxUi676IBIiQjXVwbdyU=@xftp6.simplexonflux.com,upvzf23ou6nrmaf3qgnhd6cn3d74tvivlmz3p7wdfwq6fhthjrjiiqid.onion"
-    ]

@@ -9578,11 +9578,6 @@ copied message info</note>
         <target>POPOPX-cím</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app." xml:space="preserve">
-        <source>POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app.</source>
-        <target>A POPOPX Chat és a Flux megállapodást kötött arról, hogy a Flux által üzemeltetett kiszolgálókat beépítik az alkalmazásba.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="POPOPX Chat security was audited by Trail of Bits." xml:space="preserve">
         <source>POPOPX Chat security was audited by Trail of Bits.</source>
         <target>A POPOPX Chat biztonsága a Trail of Bits által lett auditálva.</target>

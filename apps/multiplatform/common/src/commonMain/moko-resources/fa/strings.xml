@@ -2010,7 +2010,6 @@
     <string name="subscription_percentage">نمایش درصد</string>
     <string name="popopx_address_and_1_time_links_are_safe_to_share">آدرس POPOPX و لینک‌های یکبارمصرف برای اشتراک توسط هرگونه پیامرسانی امن می‌باشند.</string>
     <string name="popopx_address_or_1_time_link">آدرس POPOPX یا لینک یکبار مصرف؟</string>
-    <string name="onboarding_network_operators_popopx_flux_agreement">POPOPX Chat و Flux به توافق رسیده‌اند که سرورهای تحت کنترل Flux را به برنامه اضافه کنند.</string>
     <string name="v6_1_better_security_descr">پروتکل‌های POPOPX توسط Trail of Bits بررسی شده‌اند.</string>
     <string name="size">اندازه</string>
     <string name="app_check_for_updates_button_skip">نادیده گرفتن این نسخه</string>

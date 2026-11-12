@@ -8292,11 +8292,6 @@ chat item action</note>
         <target>Адреса POPOPX</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app." xml:space="preserve">
-        <source>POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app.</source>
-        <target>POPOPX Chat і Flux уклали угоду про включення серверів, керованих Flux, у додаток.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="POPOPX Chat security was audited by Trail of Bits." xml:space="preserve">
         <source>POPOPX Chat security was audited by Trail of Bits.</source>
         <target>Безпека POPOPX Chat була перевірена компанією Trail of Bits.</target>

@@ -9578,11 +9578,6 @@ copied message info</note>
         <target>Indirizzo POPOPX</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app." xml:space="preserve">
-        <source>POPOPX Chat and Flux made an agreement to include Flux-operated servers into the app.</source>
-        <target>POPOPX Chat e Flux hanno concluso un accordo per includere server gestiti da Flux nell'app.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="POPOPX Chat security was audited by Trail of Bits." xml:space="preserve">
         <source>POPOPX Chat security was audited by Trail of Bits.</source>
         <target>La sicurezza di POPOPX Chat è stata verificata da Trail of Bits.</target>

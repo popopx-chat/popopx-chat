@@ -91,15 +91,6 @@ defaultChatConfig =
                     useXFTP = 3,
                     chatRelays = simplexChatRelays,
                     useChatRelays = 2
-                  },
-                PresetOperator
-                  { operator = Just operatorFlux,
-                    smp = fluxSMPServers,
-                    useSMP = 3,
-                    xftp = fluxXFTPServers,
-                    useXFTP = 3,
-                    chatRelays = [],
-                    useChatRelays = 0
                   }
               ],
             ntf = _defaultNtfServers,

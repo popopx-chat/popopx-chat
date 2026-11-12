@@ -17,7 +17,7 @@ import chat.popopx.common.ui.theme.SimpleXTheme
 import chat.popopx.common.views.helpers.annotatedStringResource
 import chat.popopx.common.views.onboarding.ReadableTextWithLink
 import chat.popopx.common.views.usersettings.MarkdownHelpView
-import chat.popopx.common.views.usersettings.simplexTeamUri
+import chat.popopx.common.views.usersettings.popopxTeamUri
 import chat.popopx.res.*
 
 val bold = SpanStyle(fontWeight = FontWeight.Bold)

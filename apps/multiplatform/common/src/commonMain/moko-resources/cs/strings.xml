@@ -2214,7 +2214,6 @@
     <string name="servers_info_statistics_section_header">Statistiky</string>
     <string name="subscription_errors">Chyby odběru</string>
     <string name="onboarding_network_about_operators">O operátorech</string>
-    <string name="onboarding_network_operators_popopx_flux_agreement">POPOPX Chat a Flux udělali dohodu, a zahrnuly servery spravované Flux do aplikace.</string>
     <string name="smp_server">SMP server</string>
     <string name="contact_list_header_title">Vaše kontakty</string>
     <string name="servers_info_private_data_disclaimer">Od %s.\nJsou všechna data uchovávána ve vašem zařízení.</string>

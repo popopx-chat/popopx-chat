@@ -2135,7 +2135,6 @@
     <string name="display_name_accepted_invitation">elfogadott meghívó</string>
     <string name="display_name_requested_to_connect">függőben lévő kapcsolat</string>
     <string name="onboarding_network_about_operators">Az üzemeltetőkről</string>
-    <string name="onboarding_network_operators_popopx_flux_agreement">A POPOPX Chat és a Flux megállapodást kötött arról, hogy a Flux által üzemeltetett kiszolgálókat beépítik az alkalmazásba.</string>
     <string name="encryption_renegotiation_in_progress">A titkosítás újraegyeztetése folyamatban van.</string>
     <string name="sync_connection_desc">A kapcsolat titkosítása újraegyeztetést igényel.</string>
     <string name="sync_connection_confirm">Javítás</string>
