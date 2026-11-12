@@ -12,13 +12,13 @@
 
 ## Executive Summary
 
-SimpleX Chat uses platform-specific notification strategies. The common `NtfManager` abstract class defines the notification contract with shared helper methods for message, contact, and call notifications. Android implements a full notification system with channels, grouped summaries, full-screen call intents, and a foreground service (`SimplexService`) or periodic `WorkManager` tasks for background message fetching. Desktop uses the TwoSlices library (with OS-native fallbacks) for system notifications. Notification privacy is controlled via `NotificationPreviewMode` (MESSAGE, CONTACT, HIDDEN).
+POPOPX Chat uses platform-specific notification strategies. The common `NtfManager` abstract class defines the notification contract with shared helper methods for message, contact, and call notifications. Android implements a full notification system with channels, grouped summaries, full-screen call intents, and a foreground service (`SimplexService`) or periodic `WorkManager` tasks for background message fetching. Desktop uses the TwoSlices library (with OS-native fallbacks) for system notifications. Notification privacy is controlled via `NotificationPreviewMode` (MESSAGE, CONTACT, HIDDEN).
 
 ---
 
 ## 1. Overview
 
-Notifications serve three purposes in SimpleX Chat:
+Notifications serve three purposes in POPOPX Chat:
 
 1. **Message notifications** -- alert users to new messages when the app is not focused on the relevant chat.
 2. **Call notifications** -- high-priority alerts for incoming WebRTC calls, with full-screen intent support on Android for lock-screen scenarios.

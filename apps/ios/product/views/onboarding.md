@@ -21,7 +21,7 @@ First-time setup flow for new users. Guides through app introduction, profile cr
 
 | Element | Description |
 |---|---|
-| Logo | SimpleX Chat logo (light/dark variant based on color scheme) |
+| Logo | POPOPX Chat logo (light/dark variant based on color scheme) |
 | "The future of messaging" | Info button opening `HowItWorks` sheet |
 | Privacy redefined | "No user identifiers." with privacy icon |
 | Immune to spam | "You decide who can connect." with shield icon |

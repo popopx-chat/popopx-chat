@@ -1,4 +1,4 @@
-# SimpleX Chat iOS -- Impact Graph
+# POPOPX Chat iOS -- Impact Graph
 
 > Source file → product concept mapping. Use this to identify which product documents must be updated when a source file changes.
 >

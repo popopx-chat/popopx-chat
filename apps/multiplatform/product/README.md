@@ -1,6 +1,6 @@
-# SimpleX Chat Android & Desktop -- Product Overview
+# POPOPX Chat Android & Desktop -- Product Overview
 
-> SimpleX Chat multiplatform product specification (Android + Desktop). Bidirectional code links: product docs reference source files, source files reference product docs.
+> POPOPX Chat multiplatform product specification (Android + Desktop). Bidirectional code links: product docs reference source files, source files reference product docs.
 >
 > **Related spec:** [spec/README.md](../spec/README.md) | [spec/architecture.md](../spec/architecture.md)
 
@@ -15,9 +15,9 @@
 
 ## Executive Summary
 
-SimpleX Chat is the first messaging platform with no user identifiers of any kind -- not even random numbers. It provides end-to-end encrypted messaging (with optional post-quantum cryptography), audio/video calls, file sharing, and group communication through a fully decentralized architecture where users control their own SMP relay servers.
+POPOPX Chat is the first messaging platform with no user identifiers of any kind -- not even random numbers. It provides end-to-end encrypted messaging (with optional post-quantum cryptography), audio/video calls, file sharing, and group communication through a fully decentralized architecture where users control their own SMP relay servers.
 
-The Android and Desktop apps share a single **Kotlin Multiplatform + Compose Multiplatform** codebase. Common UI and business logic lives in a shared `common/` module, while platform-specific behavior (notifications, audio, video playback, file system access, call management) is abstracted through the Kotlin `expect`/`actual` pattern and a runtime `PlatformInterface` delegate. The Haskell core library is loaded via **JNI** (`external fun` declarations in `Core.kt`), exposing the full SimpleX Chat API (message send/receive, encryption, migration, file handling) through native FFI.
+The Android and Desktop apps share a single **Kotlin Multiplatform + Compose Multiplatform** codebase. Common UI and business logic lives in a shared `common/` module, while platform-specific behavior (notifications, audio, video playback, file system access, call management) is abstracted through the Kotlin `expect`/`actual` pattern and a runtime `PlatformInterface` delegate. The Haskell core library is loaded via **JNI** (`external fun` declarations in `Core.kt`), exposing the full POPOPX Chat API (message send/receive, encryption, migration, file handling) through native FFI.
 
 Key platform differences:
 
@@ -28,7 +28,7 @@ Key platform differences:
 
 ## Vision
 
-SimpleX Chat is the first messaging platform that has no user identifiers -- not even random numbers. It uses double-ratchet end-to-end encryption with optional post-quantum cryptography. The system is fully decentralized with user-controlled SMP relay servers.
+POPOPX Chat is the first messaging platform that has no user identifiers -- not even random numbers. It uses double-ratchet end-to-end encryption with optional post-quantum cryptography. The system is fully decentralized with user-controlled SMP relay servers.
 
 The protocol design ensures that no server or network observer can determine who communicates with whom. Each conversation uses separate unidirectional messaging queues on potentially different servers, and there is no shared identifier between the sender and receiver queues.
 

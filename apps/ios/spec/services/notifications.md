@@ -1,4 +1,4 @@
-# SimpleX Chat iOS -- Push Notification Service
+# POPOPX Chat iOS -- Push Notification Service
 
 > Technical specification for the notification system: NtfManager, Notification Service Extension (NSE), notification modes, and token lifecycle.
 >
@@ -24,7 +24,7 @@
 
 ## 1. Overview
 
-SimpleX Chat uses a privacy-preserving notification architecture. Because messages are end-to-end encrypted and the notification server never sees message content, the app uses a Notification Service Extension (NSE) to decrypt push payloads on-device before displaying notifications.
+POPOPX Chat uses a privacy-preserving notification architecture. Because messages are end-to-end encrypted and the notification server never sees message content, the app uses a Notification Service Extension (NSE) to decrypt push payloads on-device before displaying notifications.
 
 ```
 APNs Push → NSE receives encrypted payload

@@ -3,7 +3,7 @@ title: Audio & video calls
 ---
 # Audio and Video Calls
 
-SimpleX Chat allows you to make end-to-end encrypted audio and video calls with your contacts via WebRTC. Note: Group calls are not supported at this time.
+POPOPX Chat allows you to make end-to-end encrypted audio and video calls with your contacts via WebRTC. Note: Group calls are not supported at this time.
 
 A call is end-to-end encrypted when both devices support it, and the call
 screen shows its encryption status.
@@ -42,7 +42,7 @@ The call can be accepted from the lock screen, both on Android (it needs to be e
 
 ### Calls on lock screen on Android
 
-SimpleX Chat shows an incoming call on your device's lock screen by default. However, you can change this behavior in the app settings menu.
+POPOPX Chat shows an incoming call on your device's lock screen by default. However, you can change this behavior in the app settings menu.
 
 1. Open the app settings menu.
 2. Tap **Audio & video calls**.
@@ -55,7 +55,7 @@ SimpleX Chat shows an incoming call on your device's lock screen by default. How
 
 ### Calls on lock screen on iOS
 
-By default, SimpleX Chat uses native iOS call interface, where allowed, to show incoming calls on the lock screen. You can disable it:
+By default, POPOPX Chat uses native iOS call interface, where allowed, to show incoming calls on the lock screen. You can disable it:
 
 1. Open the app settings menu.
 2. Tap **Audio & video calls**.
@@ -77,7 +77,7 @@ ends the call.
 
 ### WebRTC ICE servers
 
-SimpleX Chat uses a preset relay server to hide your IP address from your contacts by default, but it can also observe the duration of your calls. If you don't want that, you can configure and use your self-hosted WebRTC relay servers instead for further control of your calls.
+POPOPX Chat uses a preset relay server to hide your IP address from your contacts by default, but it can also observe the duration of your calls. If you don't want that, you can configure and use your self-hosted WebRTC relay servers instead for further control of your calls.
 
 1. Open the app settings menu.
 2. Tap **Audio & video calls**.
@@ -92,7 +92,7 @@ the database or migrate to another device.
 
 ### Always use relay
 
-Audio and video calls on SimpleX Chat are routed via a TURN relay server by default. Optionally you can disable this and use peer-to-peer (P2P) instead, when it is supported by your network. However, your IP address will be known to your contacts.
+Audio and video calls on POPOPX Chat are routed via a TURN relay server by default. Optionally you can disable this and use peer-to-peer (P2P) instead, when it is supported by your network. However, your IP address will be known to your contacts.
 
 1. Open the app settings menu.
 2. Tap **Audio & video calls**.

@@ -4,7 +4,7 @@
 
 ## Overview
 
-Establishing a contact connection in SimpleX Chat follows an invitation-link model. One party creates a connection link (one-time invitation or long-term address), shares it out-of-band, and the other party connects via that link. The process uses SMP queues for the handshake, with no central server involved in identity management.
+Establishing a contact connection in POPOPX Chat follows an invitation-link model. One party creates a connection link (one-time invitation or long-term address), shares it out-of-band, and the other party connects via that link. The process uses SMP queues for the handshake, with no central server involved in identity management.
 
 Connections support incognito mode, where a random profile is used per-connection instead of the user's real profile.
 

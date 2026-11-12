@@ -40,7 +40,7 @@ revision: 13.08.2025
 - [What user data can be provided on request?](#what-user-data-can-be-provided-on-request)
 - [Does SimpleX protect my IP address?](#does-simplex-protect-my-ip-address)
 - [Doesn't private message routing reinvent Tor?](#doesnt-private-message-routing-reinvent-tor)
-- [Why don't you embed Tor in SimpleX Chat app?](#why-dont-you-embed-tor-in-simplex-chat-app)
+- [Why don't you embed Tor in POPOPX Chat app?](#why-dont-you-embed-tor-in-popopx-chat-app)
 - [Can I host my own relays?](#can-i-host-my-own-relays)
 
 [Funding and business model](#funding-and-business-model)
@@ -66,7 +66,7 @@ Please check our [Groups Directory](./DIRECTORY.md) in the first place. You migh
 
 ### What is database? What can I do with it?
 
-Database is essential for SimpleX Chat to function properly. In comparison to centralized messaging providers, it is _the user_ who is responsible for taking care of their data. On the other hand, user is sure that _nobody but them_ has access to it. Please read more about it: [Database](./guide/managing-data.md).
+Database is essential for POPOPX Chat to function properly. In comparison to centralized messaging providers, it is _the user_ who is responsible for taking care of their data. On the other hand, user is sure that _nobody but them_ has access to it. Please read more about it: [Database](./guide/managing-data.md).
 
 ### Can I send files over SimpleX?
 
@@ -74,7 +74,7 @@ Of course! While doing so, you are using a _state-of-the-art_ protocol that grea
 
 ### What’s incognito profile?
 
-This feature is unique to SimpleX Chat – it is independent from chat profiles.
+This feature is unique to POPOPX Chat – it is independent from chat profiles.
 
 When "Incognito Mode” is turned on, your currently chosen profile name and image are hidden from your new contacts. It allows anonymous connections with other people without any shared data – when you make new connections or join groups via a link a new random profile name will be generated for each connection.
 
@@ -120,7 +120,7 @@ You can use your profile from mobile device on desktop. However, to do so you ne
 
 ### Why cannot I delete messages I sent from my contact's device?
 
-In SimpleX Chat, you and your contacts can delete the messages you send from recipients' devices if you both agree to that within 24 hours of sending it. To be able to do that you both have to enable "Delete for everyone" option in Contact preferences - tap on the contact's name above the conversation to get there.
+In POPOPX Chat, you and your contacts can delete the messages you send from recipients' devices if you both agree to that within 24 hours of sending it. To be able to do that you both have to enable "Delete for everyone" option in Contact preferences - tap on the contact's name above the conversation to get there.
 
 You can also revoke the files you send. If the recipients did not yet receive the file, they will not be able to receive it after the file is revoked.
 
@@ -296,9 +296,9 @@ Once the connection is established you don't need to be online at the same time 
 
 If you are prompted to enter database passphrase and you do not know it, this could have happened due to:
 - You may have forgotten the passphrase. (There is no other way to access your data).
-- Migration of app data from one device to another while using unsupported migration process, e.g. via iCloud backup. Use SimpleX Chat's own migration process in the app Settings.
+- Migration of app data from one device to another while using unsupported migration process, e.g. via iCloud backup. Use POPOPX Chat's own migration process in the app Settings.
 
-In the previous desktop app versions it could also happen in case of error during SimpleX Chat installation.
+In the previous desktop app versions it could also happen in case of error during POPOPX Chat installation.
 
 You can resolve it by deleting the app's database: (WARNING: this results in deletion of all profiles, contacts and messages)
 - on Android/iOS, uninstall the app and install it again.
@@ -310,7 +310,7 @@ You can resolve it by deleting the app's database: (WARNING: this results in del
 
 1. Check that both devices are connected to the same network (e.g., it won't work if mobile is connected to mobile Internet and desktop to WiFi).
 2. If you use VPN on mobile, allow connections to local network in your VPN settings, or disable VPN.
-3. Allow SimpleX Chat on desktop to accept network connections in system firewall settings. You may choose a specific port in desktop app to accept connections, by default it uses a random port every time.
+3. Allow POPOPX Chat on desktop to accept network connections in system firewall settings. You may choose a specific port in desktop app to accept connections, by default it uses a random port every time.
 4. Check that your WiFi router allows connections between devices (e.g., it may have an option for "device isolation", or similar).
 5. If you see an error "certificate expired", please check that your device clocks are synchronized within a few seconds.
 6. If iOS app fails to connect and shows an error containing "no route", check that local network connections are allowed for the app in system settings.
@@ -323,7 +323,7 @@ If none of the suggestions work for you, you can create a separate profile on ea
 
 ### Does SimpleX support post quantum cryptography?
 
-Yes! Please read more about how quantum-resistant encryption is added to SimpleX Chat and about various properties of end-to-end encryption in [this post](../blog/20240314-simplex-chat-v5-6-quantum-resistance-signal-double-ratchet-algorithm.md).
+Yes! Please read more about how quantum-resistant encryption is added to POPOPX Chat and about various properties of end-to-end encryption in [this post](../blog/20240314-simplex-chat-v5-6-quantum-resistance-signal-double-ratchet-algorithm.md).
 
 ### Why can't I use the same profile on different devices?
 
@@ -358,7 +358,7 @@ Please see our [Privacy Policy](../PRIVACY.md) and [Transparency Reports](./TRAN
 
 Yes!
 
-SimpleX Chat from version 6.0 uses *private message routing* whenever you send messages to unknown servers (all servers in app network settings, both enabled and not, are considered "known").
+POPOPX Chat from version 6.0 uses *private message routing* whenever you send messages to unknown servers (all servers in app network settings, both enabled and not, are considered "known").
 
 For private routing to work, the servers chosen by your contacts (and by the group members in your groups) must be upgraded to the recent versions. Messaging servers include support for private routing from v5.8, but we recommend using the latest versions.
 
@@ -388,7 +388,7 @@ As each message uses its own random encryption key and random (non-sequential) i
 
 This design is similar to mixnets (e.g. [Nym network](https://nymtech.net)), and it is tailored to the needs of message routing, providing better transport anonymity than general-purpose networks, like Tor or VPN. You still can use Tor or VPN to connect to known servers, to protect your IP address from them.
 
-### Why don't you embed Tor in SimpleX Chat app?
+### Why don't you embed Tor in POPOPX Chat app?
 
 [Tor](https://www.torproject.org) is a fantastic transport overlay network - we believe it might be the best there is right now. If its [threat model](https://support.torproject.org/about/attacks-on-onion-routing/) works for you, you absolutely should use it - SimpleX Chat app supports Tor via SOCKS proxy [since v3.1](https://simplex.chat/blog/20220808-simplex-chat-v3.1-chat-groups.html#access-messaging-servers-via-tor), and SimpleX network servers can be available on both public and onion address at the same time [since v3.2](https://simplex.chat/blog/20220901-simplex-chat-v3.2-incognito-mode.html#using-onion-server-addresses-with-tor), improving anonymity of the users who use Tor.
 

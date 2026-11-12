@@ -4,7 +4,7 @@ This file provides guidance on the project structure to help working with code i
 
 ## Project Overview
 
-SimpleX Chat is a decentralized, privacy-focused messaging platform with **no user identifiers**. Users are identified by disposable, per-connection message queue addresses instead of any persistent ID.
+POPOPX Chat is a decentralized, privacy-focused messaging platform with **no user identifiers**. Users are identified by disposable, per-connection message queue addresses instead of any persistent ID.
 
 **Key components:**
 - **Core library** (Haskell): `src/Simplex/Chat/` - chat protocol, controller, message handling, database storage

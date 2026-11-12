@@ -4,10 +4,10 @@ build-backend = "hatchling.build"
 
 [project]
 name = "simplex-chat"
-description = "SimpleX Chat Python library for chat bots"
+description = "POPOPX Chat Python library for chat bots"
 readme = "README.md"
 license = "AGPL-3.0-only"
-authors = [{name = "SimpleX Chat"}]
+authors = [{name = "POPOPX Chat"}]
 requires-python = ">=3.11"
 keywords = ["simplex", "messenger", "chat", "privacy", "security", "bots"]
 classifiers = [

@@ -1,4 +1,4 @@
-# SimpleX Chat iOS -- Theme Engine
+# POPOPX Chat iOS -- Theme Engine
 
 > Technical specification for the theming system: ThemeManager, default themes, customization layers, wallpapers, and YAML export.
 >

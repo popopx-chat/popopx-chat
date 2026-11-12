@@ -1,4 +1,4 @@
-"""SimpleX Chat — Python client library for chat bots."""
+"""POPOPX Chat — Python client library for chat bots."""
 
 from . import util as util  # re-export the util namespace
 from ._version import __version__

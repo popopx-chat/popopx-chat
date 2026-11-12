@@ -4,7 +4,7 @@ This is a guide to contributing to the develop of the SimpleX android and deskto
 
 ## Project Overview
 
-This is the **Kotlin Multiplatform (KMP)** mobile and desktop client for SimpleX Chat, sharing code between Android and Desktop (JVM) platforms using Compose Multiplatform for UI.
+This is the **Kotlin Multiplatform (KMP)** mobile and desktop client for POPOPX Chat, sharing code between Android and Desktop (JVM) platforms using Compose Multiplatform for UI.
 
 ## Setup
 

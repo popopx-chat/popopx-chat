@@ -1,13 +1,13 @@
 ---
-title: Współtworzenie tłumaczenia SimpleX Chat
+title: Współtworzenie tłumaczenia POPOPX Chat
 revision: 19.03.2023
 ---
 
 | 19.03.2023 | PL, [EN](/docs/TRANSLATIONS.md), [CZ](/docs/lang/cs/TRANSLATIONS.md), [FR](/docs/lang/fr/TRANSLATIONS.md)|
 
-# Współtworzenie tłumaczenia SimpleX Chat
+# Współtworzenie tłumaczenia POPOPX Chat
 
-Dziękujemy za zainteresowanie się tłumaczeniem SimpleX Chat - to bardzo pomaga w uczynieniu go dostępnym dla szerszego grona użytkowników i naprawdę doceniamy Twoją pomoc.
+Dziękujemy za zainteresowanie się tłumaczeniem POPOPX Chat - to bardzo pomaga w uczynieniu go dostępnym dla szerszego grona użytkowników i naprawdę doceniamy Twoją pomoc.
 
 Wymaga to znacznej inwestycji czasu - większość ludzi tego początkowo nie docenia - oraz stałej opieki w miarę rozwoju aplikacji.
 
@@ -72,7 +72,7 @@ Serdecznie dziękujemy! To ogromny wysiłek i wielka pomoc dla rozwoju sieci Sim
 
 ## Częste błędy w tłumaczeniu
 
-1. Słowo "chat" jest używane w kilku znaczeniach, w zależności od kontekstu. Może ono oznaczać "aplikację SimpleX Chat" (np. w opcji Rozpocznij/zatrzymaj czat) lub "pojedynczą rozmowę". Jeśli nie jest to jasne, zapytaj się nas, a my dodamy więcej uwag dotyczących tłumaczenia.
+1. Słowo "chat" jest używane w kilku znaczeniach, w zależności od kontekstu. Może ono oznaczać "aplikację POPOPX Chat" (np. w opcji Rozpocznij/zatrzymaj czat) lub "pojedynczą rozmowę". Jeśli nie jest to jasne, zapytaj się nas, a my dodamy więcej uwag dotyczących tłumaczenia.
 
 2. Prosimy o używanie liczby mnogiej i pojedynczej tak jak w oryginalnych ciągach, w przeciwnym razie może to zmienić ich znaczenie. Przykładowo, niektóre ustawienia mają zastosowanie do wszystkich kontaktów, a niektóre tylko do jednego kontaktu, będzie to mylące dla użytkownika, jeśli użyjesz liczby mnogiej w obu przypadkach.
 
@@ -99,6 +99,6 @@ Znacznie ułatwiłoby to recenzję, gdybyś mógł wcześniej sprawdzić to w te
 3. Ponadto, jeśli chcesz być moderatorem / administratorem grupy użytkowników w swoim języku, po przetłumaczeniu aplikacji możemy hostować taką grupę - przygotowujemy wytyczne dla społeczności i dodajemy kilka narzędzi moderacyjnych do aplikacji, która zostanie wydana w wersji 4.6 w marcu.
 
 
-Jeszcze raz bardzo dziękujemy za pomoc w rozwoju SimpleX Chat!
+Jeszcze raz bardzo dziękujemy za pomoc w rozwoju POPOPX Chat!
 
-Evgeny, założyciel SimpleX Chat.
+Evgeny, założyciel POPOPX Chat.

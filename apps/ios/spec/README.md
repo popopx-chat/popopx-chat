@@ -1,10 +1,10 @@
-# SimpleX Chat iOS -- Specification Overview
+# POPOPX Chat iOS -- Specification Overview
 
-> Technical specification suite for the SimpleX Chat iOS application. Each document provides bidirectional links to product documentation and source code.
+> Technical specification suite for the POPOPX Chat iOS application. Each document provides bidirectional links to product documentation and source code.
 
 ## Executive Summary
 
-The SimpleX Chat iOS app is a native SwiftUI frontend that communicates with a Haskell core library via C FFI. All chat logic, encryption, protocol handling, and database operations happen in the Haskell core (`chat_ctrl`). The iOS layer handles UI rendering, system integration (CallKit, Push Notifications, Background Tasks), local preferences, and theming. The app shares its database with a Notification Service Extension (NSE) for decrypting push payloads while the main app is inactive.
+The POPOPX Chat iOS app is a native SwiftUI frontend that communicates with a Haskell core library via C FFI. All chat logic, encryption, protocol handling, and database operations happen in the Haskell core (`chat_ctrl`). The iOS layer handles UI rendering, system integration (CallKit, Push Notifications, Background Tasks), local preferences, and theming. The app shares its database with a Notification Service Extension (NSE) for decrypting push payloads while the main app is inactive.
 
 ## Dependency Graph
 

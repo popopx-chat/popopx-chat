@@ -1,6 +1,6 @@
 # SimpleX Calculator
 
-A calculator bot built with the [SimpleX Chat Node.js library](../../packages/popopx-chat-nodejs/).
+A calculator bot built with the [POPOPX Chat Node.js library](../../packages/popopx-chat-nodejs/).
 
 Each user who connects via the bot's business address receives a calculator message with keys as commands. The bot replaces this message after each input.
 

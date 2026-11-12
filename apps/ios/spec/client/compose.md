@@ -1,4 +1,4 @@
-# SimpleX Chat iOS -- Message Composition Module
+# POPOPX Chat iOS -- Message Composition Module
 
 > Technical specification for the compose bar, attachment types, reply/edit/forward modes, voice recording, and mentions.
 >

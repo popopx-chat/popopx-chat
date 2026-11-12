@@ -47,7 +47,7 @@ pypi.<package>.<version>    commit of the publication
 
    Written:
    - `version` of `popopx-chat.cabal`
-   - with types changed since the previous library release of the branch: types `version` (bumped), `simplexChatCore`, line `SimpleX Chat core:` of the types README
+   - with types changed since the previous library release of the branch: types `version` (bumped), `simplexChatCore`, line `POPOPX Chat core:` of the types README
 
    `--types-version` sets the types version, for the first release of an app version, e.g. `--types-version 7.1.0-beta.7.1`.
 

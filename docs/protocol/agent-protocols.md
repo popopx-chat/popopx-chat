@@ -603,8 +603,8 @@ Planned:
 ## References
 
 - [A2A] Agent2Agent (A2A) protocol specification, version 1.0: https://a2a-protocol.org/latest/specification/
-- [BUSINESS] Using SimpleX Chat in business: [BUSINESS.md](../BUSINESS.md)
-- [CHAT] SimpleX Chat protocol: [popopx-chat.md](./popopx-chat.md)
+- [BUSINESS] Using POPOPX Chat in business: [BUSINESS.md](../BUSINESS.md)
+- [CHAT] POPOPX Chat protocol: [popopx-chat.md](./popopx-chat.md)
 - [LLMSTXT] The /llms.txt file: https://llmstxt.org
 - [MCP] Model Context Protocol specification, revision 2026-07-28: https://modelcontextprotocol.io/specification/2026-07-28
 - [NAMES] SimpleX public names for channels and businesses: [names-overview.md](./names-overview.md)

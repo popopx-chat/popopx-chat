@@ -20,7 +20,7 @@ Source: `common/src/commonMain/kotlin/chat/popopx/common/App.kt` (470 lines)
 
 ## Executive Summary
 
-SimpleX Chat navigation is a platform-adaptive system implemented in `App.kt`. The root `AppScreen` composable applies theming and safe-area insets, delegating to `MainScreen` which acts as a state machine routing between onboarding, authentication, database error, and the main chat interface. Android uses a 2-column sliding layout (`AndroidScreen`), while desktop uses a fixed 3-column layout (`DesktopScreen`). Modal presentation is managed by `ModalManager`, which provides named zones (start, center, end, fullscreen) for layered content. Authentication is gated by `AppLock`, and onboarding follows a linear `OnboardingStage` enum.
+POPOPX Chat navigation is a platform-adaptive system implemented in `App.kt`. The root `AppScreen` composable applies theming and safe-area insets, delegating to `MainScreen` which acts as a state machine routing between onboarding, authentication, database error, and the main chat interface. Android uses a 2-column sliding layout (`AndroidScreen`), while desktop uses a fixed 3-column layout (`DesktopScreen`). Modal presentation is managed by `ModalManager`, which provides named zones (start, center, end, fullscreen) for layered content. Authentication is gated by `AppLock`, and onboarding follows a linear `OnboardingStage` enum.
 
 ---
 

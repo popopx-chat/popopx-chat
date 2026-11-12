@@ -428,7 +428,7 @@ It is an action: in approval mode requests the owner approves it in the SimpleX 
 Result status: done, rejected, expired, failed (error). If the call ends without a result, repeat it with the same arguments: it attaches to the same action.`
 
 export function instructions(displayName: string): string {
-  return `You act in SimpleX chats through these tools, as the agent ${displayName}.
+  return `You act in POPOPX chats through these tools, as the agent ${displayName}.
 connect joins a contact, group, channel or directory by a link or a SimpleX name, as your profile ${displayName} or incognito with a new random name for that chat only.
 leave deletes a contact, or leaves a group or channel, and deletes the chat.
 download saves the file of a received message on this computer and returns its path. When a message has a file with status offered, call download when your user's task needs it.

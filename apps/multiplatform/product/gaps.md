@@ -1,4 +1,4 @@
-# Known Gaps & Recommendations -- SimpleX Chat (Android & Desktop, Kotlin Multiplatform)
+# Known Gaps & Recommendations -- POPOPX Chat (Android & Desktop, Kotlin Multiplatform)
 
 This document catalogs known gaps in the multiplatform codebase (Android and Desktop) with severity, impact, and recommendations.
 

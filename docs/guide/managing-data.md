@@ -64,7 +64,7 @@ asks for the passphrase of the imported database.
 
 ### Delete database
 
-Here you can delete your chat database. All your SimpleX Chat data will be lost,
+Here you can delete your chat database. All your POPOPX Chat data will be lost,
 unless you have just exported the chat database.
 
 ## Delete files and media

@@ -1478,7 +1478,7 @@
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1540;
 				LastUpgradeCheck = 2720;
-				ORGANIZATIONNAME = "SimpleX Chat";
+				ORGANIZATIONNAME = "POPOPX Chat";
 				TargetAttributes = {
 					5CA059C9279559F40002BEB4 = {
 						CreatedOnToolsVersion = 13.2.1;

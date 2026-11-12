@@ -23,7 +23,7 @@ revision: 31.07.2023
 
 ## Overview
 
-XFTP is a new file transfer protocol focussed on meta-data protection - it is based on the same principles as SimpleX Messaging Protocol used in SimpleX Chat messenger:
+XFTP is a new file transfer protocol focussed on meta-data protection - it is based on the same principles as SimpleX Messaging Protocol used in POPOPX Chat messenger:
 
    - asynchronous file delivery - the sender does not need to be online for file to be received, it is stored on XFTP relays for a limited time (currently, it is 48 hours) or until deleted by the sender.
    - padded e2e encryption of file content.
@@ -148,7 +148,7 @@ This will download images from [Docker Hub](https://hub.docker.com/r/simplexchat
   You can also grab it from here - [docker-compose-xftp.yml](https://raw.githubusercontent.com/simplex-chat/simplexmq/refs/heads/stable/scripts/docker/docker-compose-xftp.yml). Don't forget to rename it to `docker-compose.yml`.
 
   ```yaml
-  name: SimpleX Chat - xftp-server
+  name: POPOPX Chat - xftp-server
 
   services:
     xftp-server:

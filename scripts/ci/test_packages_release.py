@@ -857,7 +857,7 @@ class CoreReleaseTest(GitRepoTest):
         self.write(CABAL_FILE, "name:           simplex-chat\nversion:        7.1.0.11\n")
         types = {"name": "@simplex-chat/types", "version": "0.12.1", "simplexChatCore": "7.1.0.11"}
         self.write(f"{TYPES_DIR}/package.json", json.dumps(types, indent=2) + "\n")
-        self.write(TYPES_README, "# Types\n\nSimpleX Chat core: 7.1.0.11\n")
+        self.write(TYPES_README, "# Types\n\nPOPOPX Chat core: 7.1.0.11\n")
         self.write(f"{TYPES_DIR}/src/types.ts", "a")
         self.commit("types 0.12.1")
         self.releases = {"core": {"master": {"7.1.0.11": self.head()}}}
@@ -882,7 +882,7 @@ class CoreReleaseTest(GitRepoTest):
         self.release("7.1.0.12")
         self.assertIn("version:        7.1.0.12\n", self.read(CABAL_FILE))
         self.assertEqual((self.types()["version"], self.types()["simplexChatCore"]), ("0.12.2", "7.1.0.12"))
-        self.assertIn("SimpleX Chat core: 7.1.0.12\n", self.read(TYPES_README))
+        self.assertIn("POPOPX Chat core: 7.1.0.12\n", self.read(TYPES_README))
 
     def test_unchanged_types_keep_their_version(self):
         self.release("7.1.0.12")

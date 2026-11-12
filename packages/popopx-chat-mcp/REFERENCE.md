@@ -38,7 +38,7 @@ Status: v0.2. [`TESTING.md`](TESTING.md) describes a local build and test. The d
 - Node.js 22.
 - One of the platforms of the `simplex-chat` package: Linux x86-64 or arm64, macOS x86-64 or arm64, Windows x86-64.
 - On Linux x86-64: glibc 2.34 or later, and the system libraries `libcrypto.so.3`, `libgmp.so.10` and `libz.so.1`.
-- The SimpleX Chat app on a phone or computer, for the owner.
+- The POPOPX Chat app on a phone or computer, for the owner.
 - Claude Code; other MCP hosts with Streamable HTTP and custom headers can be configured by hand.
 
 At its first start the server downloads the SimpleX core library, 29 to 50 MB depending on the platform, into `~/.cache/simplex-chat` (macOS: `~/Library/Caches/simplex-chat`, Windows: `%LOCALAPPDATA%\simplex-chat`). Unpacked on Linux, it takes about 240 MB.
@@ -393,7 +393,7 @@ register options:
 
 ```
 ~/.simplex-mcp/my-agent/
-  simplex_chat.db    SimpleX chat database: the agent's profile and chats
+  simplex_chat.db    POPOPX chat database: the agent's profile and chats
   simplex_agent.db   SimpleX agent database: connections and keys
   token              access token, readable only by the user
   headers.json       the token as the Authorization header for Claude Code, readable only by the user

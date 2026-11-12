@@ -1,4 +1,4 @@
-# Business Rules -- SimpleX Chat (Android & Desktop, Kotlin Multiplatform)
+# Business Rules -- POPOPX Chat (Android & Desktop, Kotlin Multiplatform)
 
 This document specifies invariants enforced by the Android and Desktop (Kotlin/Compose Multiplatform) clients.
 

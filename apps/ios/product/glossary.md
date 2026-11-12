@@ -1,6 +1,6 @@
-# SimpleX Chat iOS -- Glossary
+# POPOPX Chat iOS -- Glossary
 
-> SimpleX Chat iOS domain glossary. Defines all domain terms used in SimpleX Chat with links to relevant specifications and source code.
+> POPOPX Chat iOS domain glossary. Defines all domain terms used in POPOPX Chat with links to relevant specifications and source code.
 >
 > **Related spec:** [spec/api.md](../spec/api.md) | [spec/architecture.md](../spec/architecture.md)
 
@@ -42,7 +42,7 @@ The key agreement protocol used for E2E encryption. Provides forward secrecy and
 Optional quantum-resistant key exchange (PQ) available for direct chats. Uses a hybrid scheme combining classical X25519 with Streamlined NTRU-Prime 761 (sntrup761) KEM. The hybrid secret is SHA3-256(DH_secret || KEM_shared_secret). Implemented in the [simplexmq](https://github.com/simplex-chat/simplexmq) library. *See: protocol spec `simplexmq/protocol/pqdr.md`, implementation `simplexmq/src/Simplex/Messaging/Crypto/SNTRUP761.hs`; Swift types `POPOPXChat/ChatTypes.swift` (PQEncryption, PQSupport)*
 
 ### E2E Encryption
-End-to-end encryption ensuring that only the communicating parties can read message contents. Neither SMP relay servers nor any network observer can decrypt messages. All SimpleX Chat messages are E2E encrypted by default using the double-ratchet protocol. *See: `simplexmq/src/Simplex/Messaging/Crypto/Ratchet.hs` (ratchet implementation), `simplexmq/src/Simplex/Messaging/Agent/Protocol.hs` (E2E message envelopes)*
+End-to-end encryption ensuring that only the communicating parties can read message contents. Neither SMP relay servers nor any network observer can decrypt messages. All POPOPX Chat messages are E2E encrypted by default using the double-ratchet protocol. *See: `simplexmq/src/Simplex/Messaging/Crypto/Ratchet.hs` (ratchet implementation), `simplexmq/src/Simplex/Messaging/Agent/Protocol.hs` (E2E message envelopes)*
 
 ### Forward Secrecy
 A property of the double-ratchet protocol ensuring that compromise of current encryption keys does not compromise past session keys. Each message uses a derived key that is deleted after use. *See: `simplexmq/protocol/pqdr.md`, `simplexmq/src/Simplex/Messaging/Crypto/Ratchet.hs`*
@@ -182,16 +182,16 @@ An error occurring when a received message cannot be decrypted, typically due to
 ## Calling & Media
 
 ### CallKit
-Apple's framework for integrating VoIP calls with the native iOS call UI. SimpleX Chat uses CallKit to display incoming calls on the lock screen, support call answering from the system UI, and manage audio sessions. *See: `Shared/Views/Call/CallController.swift`, `Shared/Views/Call/CallManager.swift`*
+Apple's framework for integrating VoIP calls with the native iOS call UI. POPOPX Chat uses CallKit to display incoming calls on the lock screen, support call answering from the system UI, and manage audio sessions. *See: `Shared/Views/Call/CallController.swift`, `Shared/Views/Call/CallManager.swift`*
 
 ### WebRTC
-The real-time communication framework used for audio/video calls. SimpleX Chat wraps WebRTC in an E2E encrypted layer, with signaling performed through the existing SMP message channel rather than a central server. *See: `Shared/Views/Call/WebRTC.swift`, `Shared/Views/Call/WebRTCClient.swift`*
+The real-time communication framework used for audio/video calls. POPOPX Chat wraps WebRTC in an E2E encrypted layer, with signaling performed through the existing SMP message channel rather than a central server. *See: `Shared/Views/Call/WebRTC.swift`, `Shared/Views/Call/WebRTCClient.swift`*
 
 ### ICE Server
-An Interactive Connectivity Establishment server used by WebRTC to discover network paths between call participants. SimpleX Chat supports configuring custom ICE servers. *See: `Shared/Views/UserSettings/RTCServers.swift`, `POPOPXChat/CallTypes.swift`*
+An Interactive Connectivity Establishment server used by WebRTC to discover network paths between call participants. POPOPX Chat supports configuring custom ICE servers. *See: `Shared/Views/UserSettings/RTCServers.swift`, `POPOPXChat/CallTypes.swift`*
 
 ### TURN Server
-A Traversal Using Relays around NAT server that relays WebRTC media when direct peer-to-peer connection is not possible. A specific type of ICE server. SimpleX Chat allows configuring custom TURN servers for call relay. *See: `Shared/Views/UserSettings/RTCServers.swift`*
+A Traversal Using Relays around NAT server that relays WebRTC media when direct peer-to-peer connection is not possible. A specific type of ICE server. POPOPX Chat allows configuring custom TURN servers for call relay. *See: `Shared/Views/UserSettings/RTCServers.swift`*
 
 ### RcvCallInvitation
 An in-memory data structure representing an incoming call invitation. Contains the calling contact, call type (audio/video), encryption keys, and shared key for the WebRTC session. Not persisted to database. *See: `../../src/Simplex/Chat/Call.hs` (data RcvCallInvitation)*

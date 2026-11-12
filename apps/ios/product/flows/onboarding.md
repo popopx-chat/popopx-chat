@@ -4,11 +4,11 @@
 
 ## Overview
 
-First-time setup and migration flows for SimpleX Chat iOS. Covers app initialization, profile creation, server operator selection, notification configuration, and database import/export for device migration. The app uses a Haskell runtime for its core chat engine, with SQLite databases shared between the main app and the Notification Service Extension (NSE).
+First-time setup and migration flows for POPOPX Chat iOS. Covers app initialization, profile creation, server operator selection, notification configuration, and database import/export for device migration. The app uses a Haskell runtime for its core chat engine, with SQLite databases shared between the main app and the Notification Service Extension (NSE).
 
 ## Prerequisites
 
-- Fresh install of SimpleX Chat from the App Store, or
+- Fresh install of POPOPX Chat from the App Store, or
 - Existing install with database archive for import/migration
 - iOS 15+ with App Group entitlement configured
 

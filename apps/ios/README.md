@@ -1,4 +1,4 @@
-# SimpleX Chat iOS app
+# POPOPX Chat iOS app
 
 This file provides guidance when working with code in this repository.
 

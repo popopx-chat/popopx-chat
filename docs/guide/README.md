@@ -1,7 +1,7 @@
 ---
 title: Quick start
 ---
-# SimpleX Chat User Guide
+# POPOPX Chat User Guide
 
 The first messaging network that has no user identifiers of any kind.
 

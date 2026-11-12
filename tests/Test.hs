@@ -86,11 +86,11 @@ main = do
         badgeBTCPayTests
         badgeStripeTests
         badgeStoreVerifierTests
-      describe "SimpleX chat markdown" markdownTests
+      describe "POPOPX chat markdown" markdownTests
       describe "JSON Tests" jsonTests
       describe "Member relations" memberRelationsTests
-      describe "SimpleX chat view" viewTests
-      describe "SimpleX chat protocol" protocolTests
+      describe "POPOPX chat view" viewTests
+      describe "POPOPX chat protocol" protocolTests
       describe "Valid names" validNameTests
       describe "Message batching" batchingTests
       describe "Operators" operatorTests
@@ -109,7 +109,7 @@ main = do
 #if !defined(dbPostgres)
           describe "Mobile API Tests" mobileTests
 #endif
-          describe "SimpleX chat client" chatTests
+          describe "POPOPX chat client" chatTests
           xdescribe'' "SimpleX Broadcast bot" broadcastBotTests
           describe "SimpleX Directory service bot" directoryServiceTests
           describe "SimpleX badge service e2e" $ do

@@ -136,7 +136,7 @@ Formát zpráv zasílaných mezi klienty chatu prostřednictvím [SimpleX Messag
 
 ## Soukromí: technické podrobnosti a omezení
 
-SimpleX Chat je ve vývoji - vylepšení vydáváme, jakmile jsou hotová. Musíte se rozhodnout, zda je současný stav dostatečně dobrý pro váš scénář použití.
+POPOPX Chat je ve vývoji - vylepšení vydáváme, jakmile jsou hotová. Musíte se rozhodnout, zda je současný stav dostatečně dobrý pro váš scénář použití.
 
 Co je již implementováno:
 
@@ -149,8 +149,8 @@ Co je již implementováno:
 6. Počínaje verzí v2 protokolu SMP (současná verze je v4) jsou všechna metadata zprávy včetně času, kdy byla zpráva přijata serverem (zaokrouhleno na sekundy), odesílána příjemcům uvnitř šifrované obálky, takže ani v případě kompromitace TLS je nelze pozorovat.
 7. Pro spojení klient-server je povoleno pouze TLS 1.2/1.3, omezené na kryptografické algoritmy: CHACHA20POLY1305_SHA256, Ed25519/Ed448, Curve25519/Curve448.
 8. Na ochranu proti útokům typu replay vyžadují servery SimpleX [tlsunique channel binding](https://www.rfc-editor.org/rfc/rfc5929.html) jako ID relace v každém klientském příkazu podepsaném efemérním klíčem per-queue.
-9. Pro ochranu vaší IP adresy podporují všichni klienti SimpleX Chat přístup k serverům pro zasílání zpráv přes Tor - více informací najdete v [oznámení o vydání v3.1](../../../blog/20220808-simplex-chat-v3.1-chat-groups.md).
-10. Šifrování místní databáze s přístupovou frází - kontakty, skupiny a všechny odeslané a přijaté zprávy jsou uloženy šifrovaně. Pokud jste používali SimpleX Chat před verzí 4.0, musíte šifrování povolit prostřednictvím nastavení aplikace.
+9. Pro ochranu vaší IP adresy podporují všichni klienti POPOPX Chat přístup k serverům pro zasílání zpráv přes Tor - více informací najdete v [oznámení o vydání v3.1](../../../blog/20220808-simplex-chat-v3.1-chat-groups.md).
+10. Šifrování místní databáze s přístupovou frází - kontakty, skupiny a všechny odeslané a přijaté zprávy jsou uloženy šifrovaně. Pokud jste používali POPOPX Chat před verzí 4.0, musíte šifrování povolit prostřednictvím nastavení aplikace.
 11. Izolace transportu - pro provoz různých uživatelských profilů se používají různá spojení TCP a okruhy Tor, volitelně - pro různá spojení kontaktů a členů skupin.
 
 Plánujeme brzy přidat:
@@ -163,9 +163,9 @@ Plánujeme brzy přidat:
 
 Můžete:
 
-- použít knihovnu SimpleX Chat k integraci funkcí chatu do svých mobilních aplikací.
+- použít knihovnu POPOPX Chat k integraci funkcí chatu do svých mobilních aplikací.
 - vytvářet chatovací boty a služby v jazyce Haskell - viz [simple](./apps/popopx-bot/) a více [advanced chat bot example](./apps/popopx-bot-advanced/).
-- vytvářet chatovací boty a služby v libovolném jazyce se spuštěným terminálem SimpleX Chat CLI jako lokálním serverem WebSocket. Viz [TypeScript SimpleX Chat client](./packages/popopx-chat-client/) a [JavaScript chat bot example](./packages/popopx-chat-client/typescript/examples/squaring-bot.js).
+- vytvářet chatovací boty a služby v libovolném jazyce se spuštěným terminálem POPOPX Chat CLI jako lokálním serverem WebSocket. Viz [TypeScript POPOPX Chat client](./packages/popopx-chat-client/) a [JavaScript chat bot example](./packages/popopx-chat-client/typescript/examples/squaring-bot.js).
 - spustit [simplex-chat terminal CLI](./CLI.md) pro provádění jednotlivých příkazů chatu, např. pro odesílání zpráv v rámci provádění shellových skriptů.
 
 Pokud uvažujete o vývoji s platformou SimpleX, obraťte se na nás pro případné rady a podporu.
@@ -230,7 +230,7 @@ Pokud uvažujete o vývoji s platformou SimpleX, obraťte se na nás pro přípa
 
 Pokud se chcete na něco zeptat, můžete se připojit k anglicky mluvící skupině: [#SimpleX users group](https://simplex.chat/contact#/?v=1-4&smp=smp%3A%2F%2FPQUV2eL0t7OStZOoAsPEV2QYWt4-xilbakvGUGOItUo%3D%40smp6.simplex.im%2Fos8FftfoV8zjb2T89fUEjJtF7y64p5av%23%2F%3Fv%3D1-2%26dh%3DMCowBQYDK2VuAyEAQqMgh0fw2lPhjn3PDIEfAKA_E0-gf8Hr8zzhYnDivRs%253D%26srv%3Dbylepyau3ty4czmn77q4fglvperknl4bi2eb2fdy2bh4jxtf32kf73yd.onion&data=%7B%22type%22%3A%22group%22%2C%22groupLinkId%22%3A%22lBPiveK2mjfUH43SN77R0w%3D%3D%22%7D)
 
-Existuje také několik skupin v jiných jazycích než v angličtině, do kterých jsme nechali přeložit rozhraní aplikací. Tyto skupiny slouží k testování a pokládání otázek ostatním uživatelům SimpleX Chat. Ne vždy v nich odpovídáme na dotazy, proto je prosím pokládejte v některé z anglicky mluvících skupin.
+Existuje také několik skupin v jiných jazycích než v angličtině, do kterých jsme nechali přeložit rozhraní aplikací. Tyto skupiny slouží k testování a pokládání otázek ostatním uživatelům POPOPX Chat. Ne vždy v nich odpovídáme na dotazy, proto je prosím pokládejte v některé z anglicky mluvících skupin.
 
 - [\#SimpleX-DE](https://simplex.chat/contact#/?v=1-2&smp=smp%3A%2F%2FPQUV2eL0t7OStZOoAsPEV2QYWt4-xilbakvGUGOItUo%3D%40smp6.simplex.im%2FkIEl7OQzcp-J6aDmjdlQbRJwqkcZE7XR%23%2F%3Fv%3D1-2%26dh%3DMCowBQYDK2VuAyEAR16PCu02MobRmKAsjzhDWMZcWP9hS8l5AUZi-Gs8z18%253D%26srv%3Dbylepyau3ty4czmn77q4fglvperknl4bi2eb2fdy2bh4jxtf32kf73yd.onion&data=%7B%22type%22%3A%22group%22%2C%22groupLinkId%22%3A%22puYPMCQt11yPUvgmI5jCiw%3D%3D%22%7D) (German-speaking).
 - [\#SimpleX-FR](https://simplex.chat/contact#/?v=1-2&smp=smp%3A%2F%2Fhpq7_4gGJiilmz5Rf-CswuU5kZGkm_zOIooSw6yALRg%3D%40smp5.simplex.im%2FvIHQDxTor53nwnWWTy5cHNwQQAdWN5Hw%23%2F%3Fv%3D1-2%26dh%3DMCowBQYDK2VuAyEAPdgK1eBnETmgiqEQufbUkydKBJafoRx4iRrtrC2NAGc%253D%26srv%3Djjbyvoemxysm7qxap7m5d5m35jzv5qq6gnlv7s4rsn7tdwwmuqciwpid.onion&data=%7B%22type%22%3A%22group%22%2C%22groupLinkId%22%3A%221FyUryBPza-1ZFFE80Ekbg%3D%3D%22%7D) (francouzsky mluvící).
@@ -257,7 +257,7 @@ Jazyky ve vývoji: Čínština, hindština, čeština, japonština, holandština
 
 ## Přispívejte
 
-Budeme rádi, když se zapojíte do vývoje! Do SimpleX Chat můžete přispívat pomocí:
+Budeme rádi, když se zapojíte do vývoje! Do POPOPX Chat můžete přispívat pomocí:
 
 - Přeložit domovskou stránku webu - je zde spousta obsahu, který bychom rádi sdíleli, pomohlo by to přivést nové uživatele.
 - Napsáním návodu nebo receptů o hostování serverů, automatizaci chatbotů atd.
@@ -265,7 +265,7 @@ Budeme rádi, když se zapojíte do vývoje! Do SimpleX Chat můžete přispíva
 
 ## Pomozte nám s dary
 
-Obrovské díky všem, kteří přispěli na SimpleX Chat!
+Obrovské díky všem, kteří přispěli na POPOPX Chat!
 
 Prioritou je pro nás soukromí a bezpečnost uživatelů - bez vaší podpory by to nebylo možné.
 
@@ -288,7 +288,7 @@ Děkujeme,
 
 Evgeny
 
-Zakladatel SimpleX Chat
+Zakladatel POPOPX Chat
 
 ## Odmítnutí odpovědnosti
 
@@ -296,7 +296,7 @@ Protokoly a bezpečnostní model [SimpleX](https://github.com/simplex-chat/simpl
 
 Bezpečnostní audit provedla v říjnu 2022 společnost [Trail of Bits](https://www.trailofbits.com/about) a většina oprav byla vydána ve verzi 4.2.0 - viz [oznámení](../../../blog/20221108-simplex-chat-v4.2-security-audit-new-website.md).
 
-SimpleX Chat je stále relativně ranou fází platformy (mobilní aplikace byly vydány v březnu 2022), takže můžete objevit některé chyby a chybějící funkce. Velmi oceníme, pokud nám dáte vědět o všem, co je třeba opravit nebo vylepšit.
+POPOPX Chat je stále relativně ranou fází platformy (mobilní aplikace byly vydány v březnu 2022), takže můžete objevit některé chyby a chybějící funkce. Velmi oceníme, pokud nám dáte vědět o všem, co je třeba opravit nebo vylepšit.
 
 Výchozí servery nakonfigurované v aplikaci jsou poskytovány na základě nejlepšího úsilí. V současné době negarantujeme žádné smlouvy SLA, ačkoli historicky měly naše servery každý více než 99,9% provozuschopnost.
 

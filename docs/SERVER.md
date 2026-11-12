@@ -370,7 +370,7 @@ This configuration provides quick and easy way to setup your SMP server: Caddy w
   You can also grab it from here - [docker-compose-smp-complete.yml](https://raw.githubusercontent.com/simplex-chat/simplexmq/refs/heads/stable/scripts/docker/docker-compose-smp-complete.yml). Don't forget to rename it to `docker-compose.yml`.
 
   ```yaml
-  name: SimpleX Chat - smp-server
+  name: POPOPX Chat - smp-server
 
   services:
     oneshot:
@@ -476,7 +476,7 @@ This configuration allows you to retain the ability to manage 80 and 443 ports y
   You can also grab it from here - [docker-compose-smp-manual.yml](https://raw.githubusercontent.com/simplex-chat/simplexmq/refs/heads/stable/scripts/docker/docker-compose-smp-manual.yml). Don't forget to rename it to `docker-compose.yml`.
 
   ```yaml
-  name: SimpleX Chat - smp-server
+  name: POPOPX Chat - smp-server
 
   services:
     smp-server:

@@ -6,7 +6,7 @@ title: Notifications
 The app shows notifications for new messages, contact requests, new contacts and
 calls. How it receives messages in the background depends on the platform. iOS
 does not allow apps to run a background service, so the iOS app can use the
-SimpleX Chat push server, which sends notifications through Apple's push
+POPOPX Chat push server, which sends notifications through Apple's push
 service. The Android app receives messages itself, without a push server. The
 desktop app receives messages while it runs.
 
@@ -47,7 +47,7 @@ server**. **Test notifications** checks the connection to the push server and
 the notification token of your device. If there is a problem, the app shows
 **Notifications error** with **Register**, which registers the token again.
 
-If notifications for SimpleX Chat are turned off in the iOS settings, the app
+If notifications for POPOPX Chat are turned off in the iOS settings, the app
 shows **Notifications are disabled!** with **Open Settings**.
 
 ## Notifications on Android
@@ -67,7 +67,7 @@ settings:
 To change the mode, open **Settings**, tap **Notifications**, then
 **Notification service**, and choose a mode.
 
-While the service runs, Android shows the notification **SimpleX Chat service**
+While the service runs, Android shows the notification **POPOPX Chat service**
 with **Receiving messages…**. Its **Hide** button opens the system settings of
 this notification.
 

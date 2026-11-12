@@ -1,4 +1,4 @@
-# SimpleX Chat Android & Desktop -- Impact Graph
+# POPOPX Chat Android & Desktop -- Impact Graph
 
 > Source file to product concept mapping. Use this to identify which product documents must be updated when a source file changes.
 >

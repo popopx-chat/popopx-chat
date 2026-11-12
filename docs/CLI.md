@@ -5,7 +5,7 @@ revision: 31.01.2023
 
 | Updated 31.01.2023 | Languages: EN, [FR](/docs/lang/fr/CLI.md), [CZ](/docs/lang/cs/CLI.md), [PL](/docs/lang/pl/CLI.md) |
 
-# SimpleX Chat terminal (console) app for Linux/MacOS/Windows
+# POPOPX Chat terminal (console) app for Linux/MacOS/Windows
 
 ## Table of contents
 
@@ -20,7 +20,7 @@ revision: 31.01.2023
 - [Usage](#usage)
   - [Running the chat client](#running-the-chat-client)
   - [Access messaging servers via Tor](#access-messaging-servers-via-tor-beta)
-  - [How to use SimpleX chat](#how-to-use-simplex-chat)
+  - [How to use POPOPX chat](#how-to-use-popopx-chat)
   - [Groups](#groups)
   - [Sending files](#sending-files)
   - [User contact addresses](#user-contact-addresses)
@@ -36,7 +36,7 @@ revision: 31.01.2023
 - Auto-populated recipient name - just type your messages to reply to the sender once the connection is established.
 - Demo SMP servers available and pre-configured in the app - or you can [deploy your own server](https://github.com/simplex-chat/simplexmq#using-smp-server-and-smp-agent).
 - No global identity or any names visible to the server(s), ensuring full privacy of your contacts and conversations.
-- Two layers of E2E encryption (double-ratchet for duplex connections, using X3DH key agreement with ephemeral Curve448 keys, and NaCl crypto_box for SMP queues, using Curve25519 keys) and out-of-band passing of recipient keys (see [How to use SimpleX chat](#how-to-use-simplex-chat)).
+- Two layers of E2E encryption (double-ratchet for duplex connections, using X3DH key agreement with ephemeral Curve448 keys, and NaCl crypto_box for SMP queues, using Curve25519 keys) and out-of-band passing of recipient keys (see [How to use POPOPX chat](#how-to-use-popopx-chat)).
 - Message integrity validation (via including the digests of the previous messages).
 - Authentication of each command/message by SMP servers with automatically generated Ed448 keys.
 - TLS 1.3 transport encryption.
@@ -194,7 +194,7 @@ popopx-chat -x
 
 You can also use option `--socks-proxy=ipv4:port` or `--socks-proxy=:port` to configure host and port of your SOCKS5 proxy, e.g. if you are running it on some other host or port.
 
-### How to use SimpleX chat
+### How to use POPOPX chat
 
 Once you have started the chat, you will be prompted to specify your "display name" and an optional "full name" to create a local chat profile. Your display name is an alias for your contacts to refer to you by - it is not unique and does not serve as a global identity. If some of your contacts chose the same display name, the chat client adds a numeric suffix to their local display name.
 

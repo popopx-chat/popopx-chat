@@ -1,6 +1,6 @@
-# SimpleX Chat iOS -- Product Overview
+# POPOPX Chat iOS -- Product Overview
 
-> SimpleX Chat iOS product specification. Bidirectional code links: product docs reference source files, source files reference product docs.
+> POPOPX Chat iOS product specification. Bidirectional code links: product docs reference source files, source files reference product docs.
 >
 > **Related spec:** [spec/README.md](../spec/README.md) | [spec/architecture.md](../spec/architecture.md)
 
@@ -14,13 +14,13 @@
 
 ## Executive Summary
 
-SimpleX Chat is the first messaging platform with no user identifiers of any kind -- not even random numbers. It provides end-to-end encrypted messaging (with optional post-quantum cryptography), audio/video calls, file sharing, and group communication through a fully decentralized architecture where users control their own SMP relay servers. The iOS app is a native SwiftUI application backed by a Haskell core library.
+POPOPX Chat is the first messaging platform with no user identifiers of any kind -- not even random numbers. It provides end-to-end encrypted messaging (with optional post-quantum cryptography), audio/video calls, file sharing, and group communication through a fully decentralized architecture where users control their own SMP relay servers. The iOS app is a native SwiftUI application backed by a Haskell core library.
 
 ---
 
 ## Vision
 
-SimpleX Chat is the first messaging platform that has no user identifiers -- not even random numbers. It uses double-ratchet end-to-end encryption with optional post-quantum cryptography. The system is fully decentralized with user-controlled SMP relay servers.
+POPOPX Chat is the first messaging platform that has no user identifiers -- not even random numbers. It uses double-ratchet end-to-end encryption with optional post-quantum cryptography. The system is fully decentralized with user-controlled SMP relay servers.
 
 The protocol design ensures that no server or network observer can determine who communicates with whom. Each conversation uses separate unidirectional messaging queues on potentially different servers, and there is no shared identifier between the sender and receiver queues.
 

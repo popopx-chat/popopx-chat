@@ -1,4 +1,4 @@
-# SimpleX Chat iOS -- File Transfer Service
+# POPOPX Chat iOS -- File Transfer Service
 
 > Technical specification for file transfer: inline/XFTP protocols, auto-receive thresholds, CryptoFile encryption, and file constants.
 >
@@ -26,7 +26,7 @@
 
 ## 1. Overview
 
-SimpleX Chat supports two file transfer methods depending on file size:
+POPOPX Chat supports two file transfer methods depending on file size:
 
 ```
 File ≤ 255KB (inline)

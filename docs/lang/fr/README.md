@@ -12,15 +12,15 @@
 
 [<img src="./images/trail-of-bits.jpg" height="100">](http://simplex.chat/blog/20221108-simplex-chat-v4.2-security-audit-new-website.html) &nbsp;&nbsp;&nbsp; [<img src="./images/privacy-guides.jpg" height="80">](https://www.privacyguides.org/en/real-time-communication/#simplex-chat) &nbsp;&nbsp;&nbsp; [<img src="./images/kuketz-blog.jpg" height="80">](https://www.kuketz-blog.de/simplex-eindruecke-vom-messenger-ohne-identifier/)
 
-## Bienvenue sur SimpleX Chat !
+## Bienvenue sur POPOPX Chat !
 
 1. 📲 [Installer l'app](#installer-lapp).
 2. ↔️ [Se connecter aux développeurs](#se-connecter-aux-développeurs-via-lapp) et [rejoindre des groupes d'utilisateurs](#rejoindre-des-groupes-dutilisateurs).
 3. 🤝 [Établir une connexion privée](#établir-une-connexion-privée) avec un(e) ami(e).
-4. 🔤 [Aider à traduire SimpleX Chat](#aider-à-traduire-simplex-chat).
+4. 🔤 [Aider à traduire POPOPX Chat](#aider-à-traduire-popopx-chat).
 5. ⚡️ [Contribuer](#contribute) et [nous aider avec des dons](#aidez-nous-en-faisant-des-dons).
 
-[En savoir plus sur SimpleX Chat](#contents).
+[En savoir plus sur POPOPX Chat](#contents).
 
 ## Installer l'app
 
@@ -50,7 +50,7 @@
 
 Vous pouvez rejoindre un groupe anglophone pour poser des questions : [#SimpleX users group](https://simplex.chat/contact#/?v=1-4&smp=smp%3A%2F%2FPQUV2eL0t7OStZOoAsPEV2QYWt4-xilbakvGUGOItUo%3D%40smp6.simplex.im%2Fos8FftfoV8zjb2T89fUEjJtF7y64p5av%23%2F%3Fv%3D1-2%26dh%3DMCowBQYDK2VuAyEAQqMgh0fw2lPhjn3PDIEfAKA_E0-gf8Hr8zzhYnDivRs%253D%26srv%3Dbylepyau3ty4czmn77q4fglvperknl4bi2eb2fdy2bh4jxtf32kf73yd.onion&data=%7B%22type%22%3A%22group%22%2C%22groupLinkId%22%3A%22lBPiveK2mjfUH43SN77R0w%3D%3D%22%7D)
 
-Il existe des groupes dans d'autres langues, dans lesquelles l'interface de l'application a été traduite. Ces groupes servent à tester et à poser des questions aux autres utilisateurs de SimpleX Chat :
+Il existe des groupes dans d'autres langues, dans lesquelles l'interface de l'application a été traduite. Ces groupes servent à tester et à poser des questions aux autres utilisateurs de POPOPX Chat :
 
 [\#SimpleX-DE](https://simplex.chat/contact#/?v=1-2&smp=smp%3A%2F%2FPQUV2eL0t7OStZOoAsPEV2QYWt4-xilbakvGUGOItUo%3D%40smp6.simplex.im%2FkIEl7OQzcp-J6aDmjdlQbRJwqkcZE7XR%23%2F%3Fv%3D1-2%26dh%3DMCowBQYDK2VuAyEAR16PCu02MobRmKAsjzhDWMZcWP9hS8l5AUZi-Gs8z18%253D%26srv%3Dbylepyau3ty4czmn77q4fglvperknl4bi2eb2fdy2bh4jxtf32kf73yd.onion&data=%7B%22type%22%3A%22group%22%2C%22groupLinkId%22%3A%22puYPMCQt11yPUvgmI5jCiw%3D%3D%22%7D) (Germanophone),[\#SimpleX-FR](https://simplex.chat/contact#/?v=1-2&smp=smp%3A%2F%2Fhpq7_4gGJiilmz5Rf-CswuU5kZGkm_zOIooSw6yALRg%3D%40smp5.simplex.im%2FvIHQDxTor53nwnWWTy5cHNwQQAdWN5Hw%23%2F%3Fv%3D1-2%26dh%3DMCowBQYDK2VuAyEAPdgK1eBnETmgiqEQufbUkydKBJafoRx4iRrtrC2NAGc%253D%26srv%3Djjbyvoemxysm7qxap7m5d5m35jzv5qq6gnlv7s4rsn7tdwwmuqciwpid.onion&data=%7B%22type%22%3A%22group%22%2C%22groupLinkId%22%3A%221FyUryBPza-1ZFFE80Ekbg%3D%3D%22%7D) (Francophone),[\#SimpleX-RU](https://simplex.chat/contact#/?v=1-2&smp=smp%3A%2F%2FPQUV2eL0t7OStZOoAsPEV2QYWt4-xilbakvGUGOItUo%3D%40smp6.simplex.im%2FXZyt3hJmWsycpN7Dqve_wbrAqb6myk1R%23%2F%3Fv%3D1-2%26dh%3DMCowBQYDK2VuAyEAMFVIoytozTEa_QXOgoZFq_oe0IwZBYKvW50trSFXzXo%253D%26srv%3Dbylepyau3ty4czmn77q4fglvperknl4bi2eb2fdy2bh4jxtf32kf73yd.onion&data=%7B%22type%22%3A%22group%22%2C%22groupLinkId%22%3A%22xz05ngjA3pNIxLZ32a8Vxg%3D%3D%22%7D) (Russophone),[\#SimpleX-IT](https://simplex.chat/contact#/?v=1-2&smp=smp%3A%2F%2Fu2dS9sG8nMNURyZwqASV4yROM28Er0luVTx5X1CsMrU%3D%40smp4.simplex.im%2F0weR-ZgDUl7ruOtI_8TZwEsnJP6UiImA%23%2F%3Fv%3D1-2%26dh%3DMCowBQYDK2VuAyEAq4PSThO9Fvb5ydF48wB0yNbpzCbuQJCW3vZ9BGUfcxk%253D%26srv%3Do5vmywmrnaxalvz6wi3zicyftgio6psuvyniis6gco6bp6ekl4cqj4id.onion&data=%7B%22type%22%3A%22group%22%2C%22groupLinkId%22%3A%22e-iceLA0SctC62eARgYDWg%3D%3D%22%7D) (Italophone).
 
@@ -70,7 +70,7 @@ Une fois la connexion établie, vous pouvez [vérifier le code de sécurité de 
 
 Découvrez les fonctionnalités et les paramètres de l'application dans le nouveau [Guide de l'utilisateur](../fr/guide/README.md). (PROCHAINEMENT EN FR)
 
-## Aider à traduire SimpleX Chat
+## Aider à traduire POPOPX Chat
 
 Merci à nos utilisateurs et à [Weblate](https://hosted.weblate.org/engage/simplex-chat/), les applications, le site web et les documents de SimpleX Chat sont traduits dans de nombreuses autres langues.
 
@@ -95,12 +95,12 @@ Langues en préparation : Arabe, Hindi, Japonais, Espagnol et [beaucoup d'autres
 Nous serions ravis que vous participiez à notre développement ! Vous pouvez nous aider :
 
 - en écrivant un tutoriel ou des notes sur les serveurs d'hébergement, l'automatisation des chatbots, etc.
-- en contribuant à la base de connaissances de SimpleX Chat.
+- en contribuant à la base de connaissances de POPOPX Chat.
 - ou développer des fonctionnalités - merci de vous connecter à nous via le chat pour que nous puissions vous aider à démarrer.
 
 ## Aidez-nous en faisant des dons
 
-Un grand merci à tous ceux qui ont fait un don à SimpleX Chat !
+Un grand merci à tous ceux qui ont fait un don à POPOPX Chat !
 
 Nous donnons la priorité à la confidentialité et à la sécurité des utilisateurs - cela serait impossible sans votre soutien.
 
@@ -122,7 +122,7 @@ Nous vous remercions,
 
 Evgeny
 
-Fondateur de SimpleX Chat
+Fondateur de POPOPX Chat
 
 ## Sommaire
 
@@ -223,7 +223,7 @@ Voir le [protocole de SimpleX Chat](/docs/protocol/popopx-chat.md) pour le forma
 
 ## Vie privée : détails techniques et limites
 
-SimpleX Chat est un projet en cours - nous publions des améliorations dès qu'elles sont prêtes. Vous devez décider si l'état actuel est suffisant pour votre scénario d'utilisation.
+POPOPX Chat est un projet en cours - nous publions des améliorations dès qu'elles sont prêtes. Vous devez décider si l'état actuel est suffisant pour votre scénario d'utilisation.
 
 Ce qui est déjà mis en place :
 
@@ -236,7 +236,7 @@ Ce qui est déjà mis en place :
 7. Seul TLS 1.2/1.3 est autorisé pour les connexions client-serveur, limité aux algorithmes cryptographiques : CHACHA20POLY1305_SHA256, Ed25519/Ed448, Curve25519/Curve448.
 8. Pour se protéger contre les attaques par relecture, les serveurs SimpleX exigent le [tlsunique channel binding](https://www.rfc-editor.org/rfc/rfc5929.html) comme identifiant de session dans chaque commande client signée avec une clé éphémère par file d'attente.
 9. Pour protéger votre adresse IP, tous les clients SimpleX Chat permettent d'accéder aux serveurs de messagerie via Tor - voir [v3.1 release announcement](/blog/20220808-simplex-chat-v3.1-chat-groups.md) pour plus de détails.
-10. Chiffrement de la base de données locale avec une phrase secrète - vos contacts, groupes et tous les messages envoyés et reçus sont stockés de manière chiffrée. Si vous avez utilisé SimpleX Chat avant la version 4.0, vous devez activer le chiffrement via les paramètres de l'application.
+10. Chiffrement de la base de données locale avec une phrase secrète - vos contacts, groupes et tous les messages envoyés et reçus sont stockés de manière chiffrée. Si vous avez utilisé POPOPX Chat avant la version 4.0, vous devez activer le chiffrement via les paramètres de l'application.
 11. Isolation du transport - des connexions TCP et des circuits Tor différents sont utilisés pour le trafic de différents profils d'utilisateurs, optionnellement - pour des connexions différentes avec des contacts et des membres de groupes.
 
 Nous prévoyons d'ajouter bientôt :
@@ -249,9 +249,9 @@ Nous prévoyons d'ajouter bientôt :
 
 Vous pouvez :
 
-- utiliser la bibliothèque SimpleX Chat pour intégrer des fonctionnalités de chat dans vos applications mobiles.
+- utiliser la bibliothèque POPOPX Chat pour intégrer des fonctionnalités de chat dans vos applications mobiles.
 - créer des bots et services de chat en Haskell - voir un exemple de chat bot [simple](/apps/popopx-bot/) et un plus [avancé](/apps/popopx-bot-advanced/).
-- créer des bots et des services de chat dans n'importe quelle langue en utilisant la CLI du terminal SimpleX Chat comme un serveur WebSocket local. Voir [TypeScript SimpleX Chat client](/packages/popopx-chat-client/) et un [exemple de chat bot en JavaScript](/packages/popopx-chat-client/typescript/examples/squaring-bot.js).
+- créer des bots et des services de chat dans n'importe quelle langue en utilisant la CLI du terminal POPOPX Chat comme un serveur WebSocket local. Voir [TypeScript POPOPX Chat client](/packages/popopx-chat-client/) et un [exemple de chat bot en JavaScript](/packages/popopx-chat-client/typescript/examples/squaring-bot.js).
 - exécuter [simplex-chat terminal CLI](/docs/lang/fr/CLI.md) pour exécuter des commandes de chat individuelles, par exemple pour envoyer des messages dans le cadre de l'exécution d'un script shell.
 
 Si vous envisagez de développer avec la plateforme SimpleX, n'hésitez pas à nous contacter pour obtenir des conseils et de l'aide.
@@ -323,7 +323,7 @@ Les [protocoles et le modèle de sécurité de SimpleX](https://github.com/simpl
 
 L'audit de sécurité a été réalisé en octobre 2022 par [Trail of Bits](https://www.trailofbits.com/about), et la plupart des corrections ont été publiées dans la version 4.2.0 - voir [l'annonce](/blog/20221108-simplex-chat-v4.2-security-audit-new-website.md).
 
-SimpleX Chat est une plateforme encore relativement jeune (les applications mobiles ont été lancées en mars 2022), il est donc possible que vous découvriez quelques bugs et des fonctionnalités manquantes. Nous apprécierions vraiment que vous nous fassiez part de tout ce qui doit être corrigé ou amélioré.
+POPOPX Chat est une plateforme encore relativement jeune (les applications mobiles ont été lancées en mars 2022), il est donc possible que vous découvriez quelques bugs et des fonctionnalités manquantes. Nous apprécierions vraiment que vous nous fassiez part de tout ce qui doit être corrigé ou amélioré.
 
 Les serveurs par défaut configurés dans l'application sont fournis dans la mesure du possible. Nous ne garantissons actuellement aucun accord de niveau de service, bien qu'historiquement nos serveurs aient eu un temps de disponibilité de plus de 99,9 % chacun.
 

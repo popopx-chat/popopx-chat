@@ -15,7 +15,7 @@
 
 ## 1. Overview
 
-SimpleX Chat uses **two SQLite databases** managed entirely by the Haskell core. Kotlin code **never reads or writes the databases directly** -- all data access goes through the JNI command/response protocol defined in [SimpleXAPI.kt](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt).
+POPOPX Chat uses **two SQLite databases** managed entirely by the Haskell core. Kotlin code **never reads or writes the databases directly** -- all data access goes through the JNI command/response protocol defined in [SimpleXAPI.kt](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt).
 
 The two databases are:
 

@@ -1,4 +1,4 @@
-# SimpleX Chat -- Kotlin Multiplatform Specification
+# POPOPX Chat -- Kotlin Multiplatform Specification
 
 ## Table of Contents
 
@@ -12,7 +12,7 @@
 
 ## Executive Summary
 
-SimpleX Chat is a Kotlin Multiplatform application targeting **Android** and **Desktop** (JVM) platforms. The UI layer is built entirely with Jetpack Compose. The application communicates with a Haskell-based cryptographic core (`simplex-chat`) through a **JNI bridge** -- native functions declared in Kotlin and linked at runtime to a shared library (`libapp-lib`). Platform-specific behavior (notifications, file system paths, services, audio/video) is abstracted using the `expect`/`actual` pattern and a runtime-assignable `PlatformInterface` callback object.
+POPOPX Chat is a Kotlin Multiplatform application targeting **Android** and **Desktop** (JVM) platforms. The UI layer is built entirely with Jetpack Compose. The application communicates with a Haskell-based cryptographic core (`simplex-chat`) through a **JNI bridge** -- native functions declared in Kotlin and linked at runtime to a shared library (`libapp-lib`). Platform-specific behavior (notifications, file system paths, services, audio/video) is abstracted using the `expect`/`actual` pattern and a runtime-assignable `PlatformInterface` callback object.
 
 The Gradle project is structured as three modules:
 

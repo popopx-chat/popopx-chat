@@ -54,13 +54,13 @@ Na rozdíl od serverů federativních sítí (e-mail, XMPP nebo Matrix) servery 
 
 Můžete používat SimpleX s vlastními servery a přitom komunikovat s lidmi, kteří používají servery předkonfigurované v aplikacích nebo jakékoli jiné servery SimpleX.
 
-Platforma SimpleX používá otevřený protokol a poskytuje SDK pro vytváření chatovacích botů, což umožňuje implementaci služeb, s nimiž mohou uživatelé komunikovat prostřednictvím aplikací SimpleX Chat - opravdu se těšíme, jaké služby SimpleX bude možné vytvořit.
+Platforma SimpleX používá otevřený protokol a poskytuje SDK pro vytváření chatovacích botů, což umožňuje implementaci služeb, s nimiž mohou uživatelé komunikovat prostřednictvím aplikací POPOPX Chat - opravdu se těšíme, jaké služby SimpleX bude možné vytvořit.
 
-Pokud uvažujete o vývoji s platformou SimpleX, ať už jde o služby chatovacích botů pro uživatele aplikací SimpleX, nebo o integraci knihovny SimpleX Chat do vašich mobilních aplikací, obraťte se na nás pro případné rady a podporu.
+Pokud uvažujete o vývoji s platformou SimpleX, ať už jde o služby chatovacích botů pro uživatele aplikací SimpleX, nebo o integraci knihovny POPOPX Chat do vašich mobilních aplikací, obraťte se na nás pro případné rady a podporu.
 
 ## Srovnání s jinými protokoly
 
-| | SimpleX chat | Signal, big platforms | XMPP, Matrix | P2P protocols |
+| | POPOPX chat | Signal, big platforms | XMPP, Matrix | P2P protocols |
 | :--------------------------------------------- | :----------------: | :-------------------: | :-------------: | :-------------: |
 | Vyžaduje uživatelské identifikátory | Ne = private | Ano<sup>1</sup> | Ano<sup>2</sup> | Yes<sup>3</sup> |
 | Možnost MITM útoku | Žádná = bezpečné | Ano<sup>4</sup> | Ano | Ano | Ano |

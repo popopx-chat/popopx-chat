@@ -238,7 +238,7 @@ The HTML standard requires extension link types to be registered on the microfor
 - [AGENT] SimpleX Agent protocol, short connection links: https://github.com/simplex-chat/simplexmq/blob/stable/protocol/agent-protocol.md#short-connection-link-syntax
 - [AGENTS] Agent protocols over SimpleX: [agent-protocols.md](./agent-protocols.md)
 - [BCP47] Tags for Identifying Languages: https://www.rfc-editor.org/info/bcp47
-- [BUSINESS] Using SimpleX Chat in business: [BUSINESS.md](../BUSINESS.md)
+- [BUSINESS] Using POPOPX Chat in business: [BUSINESS.md](../BUSINESS.md)
 - [HTML] HTML Living Standard, other link types: https://html.spec.whatwg.org/multipage/links.html#other-link-types
 - [MF-REL] Microformats, existing rel values: https://microformats.org/wiki/existing-rel-values
 - [NAMES] SimpleX public names for channels and businesses: [names-overview.md](./names-overview.md)

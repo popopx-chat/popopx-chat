@@ -1,4 +1,4 @@
-# SimpleX Chat iOS -- State Management
+# POPOPX Chat iOS -- State Management
 
 **Source:** [`ChatModel.swift`](../Shared/Model/ChatModel.swift#L1-L1404) | [`ChatTypes.swift`](../POPOPXChat/ChatTypes.swift#L1-L5377)
 

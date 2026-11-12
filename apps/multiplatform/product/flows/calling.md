@@ -4,7 +4,7 @@
 
 ## Overview
 
-SimpleX Chat supports audio and video calls using WebRTC, with signaling delivered over the existing SMP messaging channels. Calls are end-to-end encrypted with an additional shared key layer on top of WebRTC's SRTP encryption.
+POPOPX Chat supports audio and video calls using WebRTC, with signaling delivered over the existing SMP messaging channels. Calls are end-to-end encrypted with an additional shared key layer on top of WebRTC's SRTP encryption.
 
 The architecture differs by platform:
 - **Android**: Calls run in a dedicated `CallActivity` (separate from `MainActivity`) with a `WebView` hosting the WebRTC JavaScript. A foreground `CallService` keeps the process alive and shows a persistent notification.

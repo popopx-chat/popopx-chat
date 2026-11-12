@@ -45,7 +45,7 @@ cabal run simplex-directory-service -- <flags>
 simplex-directory-service --run-cli --super-users 999:nobody --database /path/to/db
 # on startup the bot prints (and, unless --no-address, creates) its contact address:
 #   "Bot's contact address is: simplex:/contact#..."
-# connect to it from your SimpleX Chat app, then in the bot terminal:
+# connect to it from your POPOPX Chat app, then in the bot terminal:
 /contacts           # lists connected contacts by name
 /i alice            # shows full info for contact "alice", including their contact ID
 # note the ID, then restart without --run-cli:
@@ -64,7 +64,7 @@ simplex-directory-service \
 
 ### Flags
 
-`simplex-directory-service` also accepts the standard SimpleX Chat core options (custom SMP/XFTP servers, `--socks-proxy`, network settings, etc.) — run `simplex-directory-service --help` for the complete list. The directory-specific options are:
+`simplex-directory-service` also accepts the standard POPOPX Chat core options (custom SMP/XFTP servers, `--socks-proxy`, network settings, etc.) — run `simplex-directory-service --help` for the complete list. The directory-specific options are:
 
 | Flag | Default | Description |
 |---|---|---|
@@ -109,7 +109,7 @@ A few things to know before deploying it:
   const simplexDirectoryDataURL = 'https://your-domain.example/data/';
   ```
   (the default is the official directory, `https://directory.simplex.chat/data/`). The page fetches `listing.json` from that URL and loads group images relative to it.
-- **Optional:** the "Also available as a SimpleX chat bot" link in `directory.html` points at the official directory bot — update it to your bot's address.
+- **Optional:** the "Also available as a POPOPX chat bot" link in `directory.html` points at the official directory bot — update it to your bot's address.
 
 Then run the bot with `--web-folder` pointing at the folder served at that URL. The bot writes `listing.json` (used by the page), `promoted.json` (the promoted subset — written but not rendered by the bundled page), and group images, refreshing every 5 minutes and immediately when a group is approved or its listing/promotion status changes:
 ```sh
@@ -258,7 +258,7 @@ Admins receive a notification whenever a group enters the PendingApproval state.
 | Command | Syntax | Effect |
 |---|---|---|
 | Feature group | `/promote <ID>:<name> on\|off` | Add or remove group from the promoted listing (`promoted.json`) |
-| Execute API command | `/exec <command>` or `/x <command>` | Run a raw SimpleX Chat API command |
+| Execute API command | `/exec <command>` or `/x <command>` | Run a raw POPOPX Chat API command |
 
 ---
 

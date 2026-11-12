@@ -36,7 +36,7 @@ The `OnboardingStage` enum defines the flow:
 
 | Element | Description |
 |---|---|
-| Logo | `SimpleXLogo` -- SimpleX Chat logo (light/dark variant based on `isInDarkTheme()`) |
+| Logo | `SimpleXLogo` -- POPOPX Chat logo (light/dark variant based on `isInDarkTheme()`) |
 | Info button | `OnboardingInformationButton` -- "The next generation of private messaging"; taps open `HowItWorks` fullscreen modal |
 | Privacy redefined | `InfoRow` with privacy icon: "No user identifiers" |
 | Immune to spam | `InfoRow` with shield icon: "You decide who can connect" |

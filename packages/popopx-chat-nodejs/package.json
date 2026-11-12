@@ -50,11 +50,11 @@
     "privacy",
     "security"
   ],
-  "author": "SimpleX Chat",
+  "author": "POPOPX Chat",
   "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/simplex-chat/simplex-chat/issues"
   },
   "homepage": "https://github.com/simplex-chat/simplex-chat/tree/stable/packages/simplex-chat-nodejs#readme",
-  "description": "SimpleX Chat Node.js library for chat bots"
+  "description": "POPOPX Chat Node.js library for chat bots"
 }

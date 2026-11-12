@@ -1,4 +1,4 @@
-# SimpleX Chat iOS -- System Architecture
+# POPOPX Chat iOS -- System Architecture
 
 > Technical specification for the iOS app's layered architecture, FFI bridge, event system, and extension model.
 >

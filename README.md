@@ -32,7 +32,7 @@ none of it: [Invest in SimpleX Chat on Wefunder](https://wefunder.com/simplex.ch
 4. 🔤 [Help translating POPOPX Chat](#help-translating-popopx-chat).
 5. ⚡️ [Contribute](#contribute) and [support us with donations](#please-support-us-with-your-donations).
 
-[Learn more about SimpleX Chat](#contents).
+[Learn more about POPOPX Chat](#contents).
 
 ## Install the app
 
@@ -68,7 +68,7 @@ If you are interested in helping us to integrate open-source language models, an
 
 You can find the groups created by users in [SimpleX Directory](https://simplex.chat/directory/). It is also available as [SimpleX bot](https://smp4.simplex.im/a#lXUjJW5vHYQzoLYgmi8GbxkGP41_kjefFvBrdwg-0Ok) that allows to add your own groups and communities to the directory. We are not responsible for the content shared in these groups.
 
-**Please note**: The groups below are created for the users to be able to ask questions, make suggestions and ask questions about SimpleX Chat only.
+**Please note**: The groups below are created for the users to be able to ask questions, make suggestions and ask questions about POPOPX Chat only.
 
 You can join an English-speaking users group if you want to ask any questions: [#SimpleX users group](https://smp4.simplex.im/g#hr4lvFeBmndWMKTwqiodPz3VBo_6UmdGWocXd1SupsM)
 
@@ -86,7 +86,7 @@ You can join these and other groups by opening these links in the app or by open
 We publish our updates and releases via:
 
 - [Reddit](https://www.reddit.com/r/SimpleXChat/), [Twitter](https://twitter.com/SimpleXChat), [Lemmy](https://lemmy.ml/c/simplex), [Mastodon](https://mastodon.social/@simplex) and [Nostr](https://snort.social/p/npub1exv22uulqnmlluszc4yk92jhs2e5ajcs6mu3t00a6avzjcalj9csm7d828).
-- SimpleX Chat [team profile](#connect-to-the-team).
+- POPOPX Chat [team profile](#connect-to-the-team).
 - [blog](https://simplex.chat/blog/) and [RSS feed](https://simplex.chat/feed.rss).
 - [mailing list](https://simplex.chat/#join-simplex), very rarely.
 
@@ -303,9 +303,9 @@ What is already implemented:
 8. Only TLS 1.2/1.3 are allowed for client-server connections, limited to cryptographic algorithms: CHACHA20POLY1305_SHA256, Ed25519/Ed448, Curve25519/Curve448.
 9. To protect against replay attacks SimpleX servers require [tlsunique channel binding](https://www.rfc-editor.org/rfc/rfc5929.html) as session ID in each client command signed with per-queue ephemeral key.
 10. To protect your IP address from unknown messaging relays, and for per-message transport anonymity (compared with Tor/VPN per-connection anonymity), from v6.0 all SimpleX Chat clients use private message routing by default. Read more in [this post](./blog/20240604-simplex-chat-v5.8-private-message-routing-chat-themes.md#private-message-routing).
-11. To protect your IP address from unknown file relays, when SOCKS proxy is not enabled SimpleX Chat clients ask for a confirmation before downloading the files from unknown servers.
+11. To protect your IP address from unknown file relays, when SOCKS proxy is not enabled POPOPX Chat clients ask for a confirmation before downloading the files from unknown servers.
 12. To protect your IP address from known servers all SimpleX Chat clients support accessing messaging servers via Tor - see [v3.1 release announcement](./blog/20220808-simplex-chat-v3.1-chat-groups.md) for more details.
-13. Local database encryption with passphrase - your contacts, groups and all sent and received messages are stored encrypted. If you used SimpleX Chat before v4.0 you need to enable the encryption via the app settings.
+13. Local database encryption with passphrase - your contacts, groups and all sent and received messages are stored encrypted. If you used POPOPX Chat before v4.0 you need to enable the encryption via the app settings.
 14. Transport isolation - different TCP connections and Tor circuits are used for traffic of different user profiles, optionally - for different contacts and group member connections.
 15. Manual messaging queue rotations to move conversation to another SMP relay.
 16. Sending end-to-end encrypted files using [XFTP protocol](https://simplex.chat/blog/20230301-simplex-file-transfer-protocol.html).
@@ -334,7 +334,7 @@ Please also join [#simplex-devs](https://simplex.chat/contact#/?v=1-2&smp=smp%3A
 
 ## Develop a chat bot
 
-You can create a chat bot or any chat-based service in any language running SimpleX Chat terminal CLI as a local WebSocket server.
+You can create a chat bot or any chat-based service in any language running POPOPX Chat terminal CLI as a local WebSocket server.
 
 See [our new bot API reference](./bots/README.md). Most of it is automatically generated from core library types, so it stays up to date.
 
@@ -432,7 +432,7 @@ The implementation security assessment of SimpleX cryptography and networking wa
 
 The cryptographic review of SimpleX protocols was done in July 2024 by Trail of Bits – see [the announcement](./blog/20241014-simplex-network-v6-1-security-review-better-calls-user-experience.md).
 
-SimpleX Chat is still a relatively early stage platform (the mobile apps were released in March 2022), so you may discover some bugs and missing features. We would really appreciate if you let us know anything that needs to be fixed or improved.
+POPOPX Chat is still a relatively early stage platform (the mobile apps were released in March 2022), so you may discover some bugs and missing features. We would really appreciate if you let us know anything that needs to be fixed or improved.
 
 The default servers configured in the app are provided on the best effort basis. We are currently not guaranteeing any SLAs, although historically our servers had over 99.9% uptime each.
 

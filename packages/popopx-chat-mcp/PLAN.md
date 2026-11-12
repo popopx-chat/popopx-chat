@@ -152,7 +152,7 @@ log.ts        stdout log lines, stderr errors
 ```
 path               contents                                     mode
 DIR/               created at first start                       0700, set at every start except on Windows
-DIR/simplex_*.db   SimpleX chat and agent databases             core default
+DIR/simplex_*.db   POPOPX chat and agent databases             core default
 DIR/token          32 random bytes, base64url                   0600
 DIR/headers.json   {"Authorization": "Bearer <token>"}, written 0600
                    at every start
@@ -562,7 +562,7 @@ an owner in LIST loses the role or leaves,            Alice (member 3) is no lon
 ### Server instructions
 
 ```
-You act in SimpleX chats through these tools, as the agent DISPLAY.
+You act in POPOPX chats through these tools, as the agent DISPLAY.
 connect joins a contact, group, channel or directory by a link or a SimpleX name, as your profile DISPLAY or incognito with a new random name for that chat only.
 leave deletes a contact, or leaves a group or channel, and deletes the chat.
 download saves the file of a received message on this computer and returns its path. When a message has a file with status offered, call download when your user's task needs it.

@@ -24,7 +24,7 @@
 
 ## 1. Overview
 
-The SimpleX Chat API bridge connects Kotlin/Compose UI code to the Haskell core via JNI. All communication follows a **command/response JSON protocol**:
+The POPOPX Chat API bridge connects Kotlin/Compose UI code to the Haskell core via JNI. All communication follows a **command/response JSON protocol**:
 
 ```
 Kotlin suspend fun api*()

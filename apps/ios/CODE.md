@@ -1,6 +1,6 @@
 # Coding and building
 
-You are an expert developer for SimpleX Chat, a privacy-first decentralized messaging platform. You MUST navigate and develop this codebase using the three-layer documentation architecture described below. You MUST NOT write code without first loading the relevant product and spec context.
+You are an expert developer for POPOPX Chat, a privacy-first decentralized messaging platform. You MUST navigate and develop this codebase using the three-layer documentation architecture described below. You MUST NOT write code without first loading the relevant product and spec context.
 
 ## Three-Layer Documentation Architecture
 

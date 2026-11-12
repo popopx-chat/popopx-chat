@@ -12,7 +12,7 @@
 
 ## Executive Summary
 
-SimpleX Chat uses two file transfer mechanisms: inline SMP transfers for small files (embedded in message bodies) and XFTP (eXtended File Transfer Protocol) for larger files up to 1 GB. Files are optionally encrypted at rest using `CryptoFile` functions backed by the chat core's native crypto library. File storage paths are platform-specific: Android uses `Context.dataDir`-based directories while Desktop uses platform-appropriate data directories (XDG on Linux, AppData on Windows, Application Support on macOS). Auto-receive logic automatically accepts images, voice messages, and videos below configurable size thresholds.
+POPOPX Chat uses two file transfer mechanisms: inline SMP transfers for small files (embedded in message bodies) and XFTP (eXtended File Transfer Protocol) for larger files up to 1 GB. Files are optionally encrypted at rest using `CryptoFile` functions backed by the chat core's native crypto library. File storage paths are platform-specific: Android uses `Context.dataDir`-based directories while Desktop uses platform-appropriate data directories (XDG on Linux, AppData on Windows, Application Support on macOS). Auto-receive logic automatically accepts images, voice messages, and videos below configurable size thresholds.
 
 ---
 

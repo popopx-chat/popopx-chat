@@ -1,4 +1,4 @@
-# SimpleX Chat iOS -- Navigation Architecture
+# POPOPX Chat iOS -- Navigation Architecture
 
 > Technical specification for the navigation stack, deep linking, sheet presentation, and call overlay.
 >

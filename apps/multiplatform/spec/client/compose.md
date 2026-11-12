@@ -20,7 +20,7 @@ Source: `common/src/commonMain/kotlin/chat/popopx/common/views/chat/ComposeView.
 
 ## Executive Summary
 
-Message composition in SimpleX Chat is managed by `ComposeView` (line ~345 in `ComposeView.kt`) backed by the serializable `ComposeState` data class. The compose area supports text input, link previews, media/file/voice attachments, reply/edit/forward contexts, live (streaming) messages, member @mentions, message reports, and timed (disappearing) messages. The `SendMsgView` composable (in `SendMsgView.kt`) provides the text field and action buttons. Draft state persists across chat switches when the privacy preference is enabled.
+Message composition in POPOPX Chat is managed by `ComposeView` (line ~345 in `ComposeView.kt`) backed by the serializable `ComposeState` data class. The compose area supports text input, link previews, media/file/voice attachments, reply/edit/forward contexts, live (streaming) messages, member @mentions, message reports, and timed (disappearing) messages. The `SendMsgView` composable (in `SendMsgView.kt`) provides the text field and action buttons. Draft state persists across chat switches when the privacy preference is enabled.
 
 ---
 

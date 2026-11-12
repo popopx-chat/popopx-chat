@@ -1,4 +1,4 @@
-# Domain Term Glossary -- SimpleX Chat (Android & Desktop, Kotlin Multiplatform)
+# Domain Term Glossary -- POPOPX Chat (Android & Desktop, Kotlin Multiplatform)
 
 This glossary is self-contained and covers the Android and Desktop (Kotlin/Compose Multiplatform) codebase only.
 
@@ -354,9 +354,9 @@ Enum: `Mic`, `Camera`, `ScreenAudio`, `ScreenVideo`. Used in `WCallCommand.Media
 ## 7. Notifications & Background
 
 ### Android: SimplexService
-A foreground `Service` that keeps the chat backend running in the background. Uses a `WakeLock` and displays a persistent notification ("SimpleX Chat service" channel). Started with `START_STICKY` for automatic restart. Manages the `chatRecvMsg` loop indirectly by keeping the process alive.
+A foreground `Service` that keeps the chat backend running in the background. Uses a `WakeLock` and displays a persistent notification ("POPOPX Chat service" channel). Started with `START_STICKY` for automatic restart. Manages the `chatRecvMsg` loop indirectly by keeping the process alive.
 
-Notification channel: `com.popopxchat.popopx.POPOPX_SERVICE_NOTIFICATION` ("SimpleX Chat service")
+Notification channel: `com.popopxchat.popopx.POPOPX_SERVICE_NOTIFICATION` ("POPOPX Chat service")
 
 *See:* `android/src/main/java/chat/popopx/app/SimplexService.kt`
 

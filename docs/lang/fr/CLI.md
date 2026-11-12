@@ -4,7 +4,7 @@ revision: 31.01.2023
 ---
 | 31.01.2023 | FR, [EN](/docs/CLI.md), [CZ](/docs/lang/cs/CLI.md), [PL](/docs/lang/pl/CLI.md) |
 
-# Application de terminal (console) SimpleX Chat pour Linux/MacOS/Windows
+# Application de terminal (console) POPOPX Chat pour Linux/MacOS/Windows
 
 ## Table des matières
 
@@ -19,7 +19,7 @@ revision: 31.01.2023
 - [Utilisation](#utilisation)
   - [Lancement du client de chat](#lancement-du-client-de-chat)
   - [Accéder aux serveurs de messagerie via Tor](#accéder-aux-serveurs-de-messagerie-via-Tor)
-  - [Comment utiliser SimpleX chat](#comment-utiliser-simplex-chat)
+  - [Comment utiliser POPOPX chat](#comment-utiliser-popopx-chat)
   - [Groupes](#groupes)
   - [Envoi de fichiers](#envoi-de-fichiers)
   - [Adresses de contact d'utilisateur](#adresses-de-contact-dutilisateur)
@@ -35,7 +35,7 @@ revision: 31.01.2023
 - Nom du destinataire auto-rempli - il suffit de taper vos messages pour répondre à l'expéditeur une fois la connexion établie.
 - Des serveurs SMP de démonstration sont disponibles et préconfigurés dans l'application - ou vous pouvez [déployer votre propre serveur](https://github.com/simplex-chat/simplexmq#using-smp-server-and-smp-agent).
 - Pas d'identité globale ni de noms visibles par le.s serveur.s, ce qui garantit la confidentialité totale de vos contacts et de vos conversations.
-- Deux couches de chiffrement E2E (double ratchet pour les connexions duplex, utilisant un accord de clé X3DH avec des clés Curve448 éphémères, et NaCl crypto_box pour les files d'attente SMP, utilisant des clés Curve25519) et transmission hors bande des clés des destinataires (voir [Comment utiliser SimpleX chat](#comment-utiliser-simplex-chat)).
+- Deux couches de chiffrement E2E (double ratchet pour les connexions duplex, utilisant un accord de clé X3DH avec des clés Curve448 éphémères, et NaCl crypto_box pour les files d'attente SMP, utilisant des clés Curve25519) et transmission hors bande des clés des destinataires (voir [Comment utiliser POPOPX chat](#comment-utiliser-popopx-chat)).
 - Validation de l'intégrité du message (en incluant les résumés des messages précédents).
 - Authentification de chaque commande/message par les serveurs SMP avec des clés Ed448 générées automatiquement.
 - Chiffrement de transport TLS 1.3.
@@ -173,7 +173,7 @@ simplex-chat -x
 
 Vous pouvez également utiliser l'option `--socks-proxy=ipv4:port` ou `--socks-proxy=:port` pour configurer l'hôte et le port de votre proxy SOCKS5, par exemple si vous l'exécutez sur un autre hôte ou port.
 
-### Comment utiliser SimpleX chat
+### Comment utiliser POPOPX chat
 
 Une fois que vous aurez lancé le chat, vous serez invité à indiquer un "nom d'affichage" et un "nom complet" facultatif pour créer un profil de chat local. Votre nom d'affichage est un alias par lequel vos contacts peuvent se référer à vous. Il n'est pas unique et ne sert pas d'identité globale. Si certains de vos contacts ont choisi le même nom d'affichage, le client de chat ajoute un suffixe numérique à leur nom d'affichage local.
 

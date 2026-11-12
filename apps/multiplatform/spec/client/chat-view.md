@@ -21,7 +21,7 @@ Source: `common/src/commonMain/kotlin/chat/popopx/common/views/chat/ChatView.kt`
 
 ## Executive Summary
 
-The Chat View is the primary message display and interaction surface in SimpleX Chat. It is built around the [`ChatView`](../../common/src/commonMain/kotlin/chat/popopx/common/views/chat/ChatView.kt#L99) composable, which orchestrates a `ChatLayout` containing a reverse-scrolling `LazyColumn` of `ChatItemView` items and a `ComposeView` for message input. The view supports direct chats, group chats, local notes, and contact connections, with per-chat theming, search/filter, multi-select, and side-panel info modals. Message rendering is delegated to type-specific composables in the `views/chat/item/` package.
+The Chat View is the primary message display and interaction surface in POPOPX Chat. It is built around the [`ChatView`](../../common/src/commonMain/kotlin/chat/popopx/common/views/chat/ChatView.kt#L99) composable, which orchestrates a `ChatLayout` containing a reverse-scrolling `LazyColumn` of `ChatItemView` items and a `ComposeView` for message input. The view supports direct chats, group chats, local notes, and contact connections, with per-chat theming, search/filter, multi-select, and side-panel info modals. Message rendering is delegated to type-specific composables in the `views/chat/item/` package.
 
 ---
 

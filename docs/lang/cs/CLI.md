@@ -1,10 +1,10 @@
 ---
-title: SimpleX Chat terminálová
+title: POPOPX Chat terminálová
 revision: 31.01.2023
 ---
 | Aktualizováno 31.01.2023 | Jazyky: CZ, [EN](/docs/CLI.md), [FR](/docs/lang/fr/CLI.md), [PL](/docs/lang/pl/CLI.md) |
 
-# SimpleX Chat terminálová (konzolová) aplikace pro Linux/MacOS/Windows
+# POPOPX Chat terminálová (konzolová) aplikace pro Linux/MacOS/Windows
 
 ## Obsah
 
@@ -19,7 +19,7 @@ revision: 31.01.2023
 - [Použití](#usage)
   - [Spuštění klienta chatu](#running-the-chat-client)
   - [Přístup k serverům pro zasílání zpráv přes Tor](#access-messaging-servers-via-tor-beta)
-  - [Jak používat chat SimpleX](#how-to-use-simplex-chat)
+  - [Jak používat chat SimpleX](#how-to-use-popopx-chat)
   - [Skupiny](#groups)
   - [Posílání souborů](#sending-files)
   - [Kontaktní adresy uživatelů](#user-contact-addresses)
@@ -35,7 +35,7 @@ revision: 31.01.2023
 - Automaticky vyplňované jméno příjemce - po navázání spojení stačí napsat zprávu a odpovědět odesílateli.
 - K dispozici ukázkové servery SMP, které jsou v aplikaci předkonfigurovány - nebo si můžete [nasadit vlastní server](https://github.com/simplex-chat/simplexmq#using-smp-server-and-smp-agent).
 - Žádná globální identita ani žádná jména nejsou pro server(y) viditelná, což zajišťuje plné soukromí vašich kontaktů a konverzací.
-- Dvě vrstvy šifrování E2E (double-ratchet pro duplexní spojení s použitím dohody klíčů X3DH s efemérními klíči Curve448 a NaCl crypto_box pro fronty SMP s použitím klíčů Curve25519) a předávání klíčů příjemců mimo pásmo (viz [Jak používat chat SimpleX](#how-to-use-simplex-chat)).
+- Dvě vrstvy šifrování E2E (double-ratchet pro duplexní spojení s použitím dohody klíčů X3DH s efemérními klíči Curve448 a NaCl crypto_box pro fronty SMP s použitím klíčů Curve25519) a předávání klíčů příjemců mimo pásmo (viz [Jak používat chat SimpleX](#how-to-use-popopx-chat)).
 - Ověřování integrity zpráv (pomocí zahrnutí digestů předchozích zpráv).
 - Ověřování každého příkazu/zprávy servery SMP pomocí automaticky generovaných klíčů Ed448.
 - Transportní šifrování TLS 1.3.
@@ -171,7 +171,7 @@ simplex-chat -x
 
 Můžete také použít volbu `--socks-proxy=ipv4:port` nebo `--socks-proxy=:port` pro konfiguraci hostitele a portu vašeho SOCKS5 proxy serveru, např. pokud jej provozujete na jiném hostiteli nebo portu.
 
-### Jak používat SimpleX chat
+### Jak používat POPOPX chat
 
 Po spuštění chatu budete vyzváni k zadání svého "zobrazovacího jména" a volitelného "celého jména" pro vytvoření místního profilu chatu. Vaše zobrazované jméno je přezdívka, pod kterou se na vás mohou obracet vaše kontakty - není jedinečné a neslouží jako globální identita. Pokud si některé vaše kontakty zvolily stejné zobrazovací jméno, přidá chatovací klient k jejich místnímu zobrazovacímu jménu číselnou příponu.
 

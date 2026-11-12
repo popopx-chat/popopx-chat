@@ -135,7 +135,7 @@ webpage](./channel-webpage.md).
 
 ## Chat relays
 
-Chat relays forward channel messages to subscribers. The SimpleX Chat server
+Chat relays forward channel messages to subscribers. The POPOPX Chat server
 operator provides preset relays, and you can add your own.
 
 Tap **Chat relays** in the channel's chat info to see the relays and their

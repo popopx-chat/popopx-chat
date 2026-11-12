@@ -1,20 +1,20 @@
 ---
-title: SimpleX Chat Protocol
+title: POPOPX Chat Protocol
 revision: 08.08.2022
 ---
 Revision 2, 2024-06-24
 
 Evgeny Poberezkin
 
-# SimpleX Chat Protocol
+# POPOPX Chat Protocol
 
 ## Abstract
 
-SimpleX Chat Protocol is a protocol used by SimpleX Chat clients to exchange messages. This protocol relies on lower level SimpleX protocols - SimpleX Messaging Protocol (SMP) and SimpleX Messaging Agent protocol. SimpleX Chat Protocol describes the format of messages and the client operations that should be performed when receiving such messages.
+POPOPX Chat Protocol is a protocol used by POPOPX Chat clients to exchange messages. This protocol relies on lower level SimpleX protocols - SimpleX Messaging Protocol (SMP) and SimpleX Messaging Agent protocol. POPOPX Chat Protocol describes the format of messages and the client operations that should be performed when receiving such messages.
 
 ## Scope
 
-The scope of SimpleX Chat Protocol is application level messages, both for chat functionality, related to the conversations between the clients, and extensible for any other application functions. Currently supported chat functions:
+The scope of POPOPX Chat Protocol is application level messages, both for chat functionality, related to the conversations between the clients, and extensible for any other application functions. Currently supported chat functions:
 
 - direct and group messages,
 - message replies (quoting), message editing, forwarded messages and message deletions,
@@ -24,7 +24,7 @@ The scope of SimpleX Chat Protocol is application level messages, both for chat 
 
 ## General message format
 
-SimpleX Chat protocol supports these message formats:
+POPOPX Chat protocol supports these message formats:
 
 - JSON-based format for chat and application messages.
 - compressed format for adapting larger messages to reduced size of message envelope, caused by addition of PQ encryption keys to SMP agent message envelope.
@@ -32,13 +32,13 @@ SimpleX Chat protocol supports these message formats:
 
 JSON-based message format supports batching inside a single container message, by encoding list of messages as JSON array.
 
-Current implementation of chat protocol in SimpleX Chat uses SimpleX File Transfer Protocol (XFTP) for file transfer, with passing file description as chat protocol messages, instead passing files in binary format via SMP connections.
+Current implementation of chat protocol in POPOPX Chat uses SimpleX File Transfer Protocol (XFTP) for file transfer, with passing file description as chat protocol messages, instead passing files in binary format via SMP connections.
 
 ### JSON format for chat and application messages
 
 This document uses JTD schemas [RFC 8927](https://www.rfc-editor.org/rfc/rfc8927.html) to define the properties of chat messages, with some additional restrictions on message properties included in metadata member of JTD schemas. In case of any contradiction between JSON examples and JTD schema the latter MUST be considered correct.
 
-Whitespace is used in JSON examples for readability, SimpleX Chat Protocol clients MUST avoid using whitespace when encoding JSON messages.
+Whitespace is used in JSON examples for readability, POPOPX Chat Protocol clients MUST avoid using whitespace when encoding JSON messages.
 
 General message format is defined by this JTD schema:
 
@@ -96,9 +96,9 @@ The actual JSON message is required to fit into 15610 bytes, accounting for grou
 
 ### Binary format for sending files
 
-> Note: Planned to be deprecated. No longer used for file transfer in SimpleX Chat implementation of chat protocol.
+> Note: Planned to be deprecated. No longer used for file transfer in POPOPX Chat implementation of chat protocol.
 
-SimpleX Chat clients use separate connections to send files using a binary format. File chunk size send in each message MUST NOT be bigger than 15,780 bytes to fit into 16kb (16384 bytes) transport block.
+POPOPX Chat clients use separate connections to send files using a binary format. File chunk size send in each message MUST NOT be bigger than 15,780 bytes to fit into 16kb (16384 bytes) transport block.
 
 The syntax of each message used to send files is defined by the following ABNF notation:
 
@@ -116,7 +116,7 @@ The first chunk number MUST be 1.
 
 While users usually use the term "message" to refer to the objects presented in the conversation, the expected functionality of these objects makes it a wrong term. "Messages" are supposed to be immutable; they cannot be modified or deleted once sent. The objects in the conversation are expected to be mutable. This document and implementation use the term "chat item" to refer to these objects to differentiate them from the messages sent between the clients.
 
-## Supported JSON message types and SimpleX Chat sub-protocols
+## Supported JSON message types and POPOPX Chat sub-protocols
 
 Message types are sent as a string in `event` property of JSON messages. General syntax of event string is defined by this ABNF:
 
@@ -127,11 +127,11 @@ subprotocol = eventWord
 eventWord = 1* ALPHA
 ```
 
-All SimpleX Chat Protocol messages related to chat functions are defined in `x` namespace.
+All POPOPX Chat Protocol messages related to chat functions are defined in `x` namespace.
 
 Sub-protocol is a group of messages for related message functions - e.g. sending files, managing groups or negotiating WebRTC calls.
 
-SimpleX Chat Protocol supports the following message types passed in `event` property:
+POPOPX Chat Protocol supports the following message types passed in `event` property:
 
 - `x.contact` - contact profile and additional data sent as part of contact request to a long-term contact address.
 - `x.info*` - messages to send, update and de-duplicate contact profiles.
@@ -210,7 +210,7 @@ File attachment can optionally include connection address to receive the file - 
 
 ### Decentralized design for chat groups
 
-SimpleX Chat groups are fully decentralized and do not have any globally unique group identifiers - they are only defined on client devices as a group profile and a set of bi-directional SimpleX connections with other group members. When a new member accepts group invitation or joins via group link, the inviting member introduces a new member to all existing members and forwards the connection addresses so that they can establish direct and group member connections.
+POPOPX Chat groups are fully decentralized and do not have any globally unique group identifiers - they are only defined on client devices as a group profile and a set of bi-directional SimpleX connections with other group members. When a new member accepts group invitation or joins via group link, the inviting member introduces a new member to all existing members and forwards the connection addresses so that they can establish direct and group member connections.
 
 There is a possibility of the attack here: as the introducing member forwards the addresses, they can substitute them with other addresses, performing MITM attack on the communication between existing and introduced members - this is similar to the communication operator being able to perform MITM on any connection between the users. To mitigate this attack this group sub-protocol will be extended to allow validating security of the connection by sending connection verification out-of-band.
 
@@ -262,7 +262,7 @@ Currently members can have one of four roles - `owner`, `admin`, `member` and `o
 
 `x.grp.del` message is sent to all members by the member who deletes the group. Clients who received this message SHOULD keep a local copy of the deleted group, until it is deleted by the user. This message MUST only be sent by members with `owner` role. Receiving clients MUST ignore this message if it is received from member other than with `owner` role.
 
-`x.grp.info` message is sent to all members by the member who updated group profile. Only group owners can update group profiles. Clients MAY implement some conflict resolution strategy - it is currently not implemented by SimpleX Chat client. This message MUST only be sent by members with `owner` role. Receiving clients MUST ignore this message if it is received from member other than with `owner` role.
+`x.grp.info` message is sent to all members by the member who updated group profile. Only group owners can update group profiles. Clients MAY implement some conflict resolution strategy - it is currently not implemented by POPOPX Chat client. This message MUST only be sent by members with `owner` role. Receiving clients MUST ignore this message if it is received from member other than with `owner` role.
 
 Group profile can include optional `chatLayout` property (`classic` or `terminal`) set by a group owner. Clients use it as the layout of the group chat, also after it is changed by `x.grp.info`, unless the user chose another layout for this chat. Clients MUST treat unknown values as absent.
 

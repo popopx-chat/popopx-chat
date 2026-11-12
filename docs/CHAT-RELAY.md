@@ -8,11 +8,11 @@ templateEngineOverride: md
 
 Chat relays are used to deliver channel messages in SimpleX Network. Read more about channels in this [whitepaper](https://github.com/simplex-chat/simplex-chat/blob/master/docs/protocol/channels-overview.md) and this [blog post](https://simplex.chat/blog/20260430-simplex-channels-v6-5-consortium-crowdfunding-freedom-of-speech.html).
 
-A chat relay is the SimpleX Chat CLI (`simplex-chat`) running in relay mode (`--relay`). It has its own profile (a display name and a picture), its own address, and in addition to delivering messages, it can generate data for web previews of the channels it delivers.
+A chat relay is the POPOPX Chat CLI (`simplex-chat`) running in relay mode (`--relay`). It has its own profile (a display name and a picture), its own address, and in addition to delivering messages, it can generate data for web previews of the channels it delivers.
 
 This guide explains how to set up a chat relay on a Linux server, how to run it, and (optionally) how to configure [Caddy](https://caddyserver.com) to serve data for channel web previews.
 
-> **Please note**: This guide applies only to SimpleX Chat v7.0.0-beta.4 and later.
+> **Please note**: This guide applies only to POPOPX Chat v7.0.0-beta.4 and later.
 
 ## Table of Contents
 
@@ -72,7 +72,7 @@ Create `/etc/systemd/system/simplex-relay.service`:
 
 ```ini
 [Unit]
-Description=SimpleX Chat relay
+Description=POPOPX Chat relay
 After=network.target
 
 [Service]

@@ -1,4 +1,4 @@
-"""SimpleX Chat wire types — auto-generated from Haskell.
+"""POPOPX Chat wire types — auto-generated from Haskell.
 
 Re-exports the four generated modules as namespaces:
 

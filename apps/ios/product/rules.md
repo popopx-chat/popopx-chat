@@ -1,6 +1,6 @@
-# SimpleX Chat iOS -- Business Rules
+# POPOPX Chat iOS -- Business Rules
 
-> Business invariants enforced by the SimpleX Chat iOS app and Haskell core. Each rule states the invariant, where it is enforced, and links to the relevant spec.
+> Business invariants enforced by the POPOPX Chat iOS app and Haskell core. Each rule states the invariant, where it is enforced, and links to the relevant spec.
 >
 > **Related spec:** [spec/api.md](../spec/api.md) | [spec/architecture.md](../spec/architecture.md) | [spec/state.md](../spec/state.md)
 

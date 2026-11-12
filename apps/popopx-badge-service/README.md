@@ -1,7 +1,7 @@
 # SimpleX badge service
 
 `simplex-badge-service` runs the whole supporter-badge service as one process, two
-lanes: a SimpleX chat bot that answers service RPC over a double-ratchet contact
+lanes: a POPOPX chat bot that answers service RPC over a double-ratchet contact
 address, and — only when `--service-config` names a `badge_service.ini` — the badge-codes
 web checkout (BTCPay and Stripe payment, code issuance, the poller). **Without
 `--service-config` the web listener does not start at all**; the process still runs the
@@ -89,7 +89,7 @@ Other options:
   still required either way.
 - `--service-name NAME`: the bot's display name, without `*`s or spaces (default `SimpleX Badges`).
 - `--client-service`: use the client service certificate.
-- also accepts the standard SimpleX Chat core options — database path, SMP/XFTP servers,
+- also accepts the standard POPOPX Chat core options — database path, SMP/XFTP servers,
   `--socks-proxy`, `--log-level`/`-l`, and the rest — run `simplex-badge-service --help`
   for the complete list.
 

@@ -12,7 +12,7 @@
 
 ## Executive Summary
 
-WebRTC calling in SimpleX Chat operates over SMP (SimpleX Messaging Protocol) for signaling, with platform-specific WebRTC media implementations. Android uses a WebView-based approach with a dedicated `CallActivity` and foreground `CallService`, while Desktop opens the system browser and communicates via a NanoWSD WebSocket server on localhost. Both platforms share a common `CallManager` for call lifecycle and a `CallState` enum for state tracking. Call commands and responses are serialized as JSON and exchanged between the native layer and the WebRTC JavaScript layer.
+WebRTC calling in POPOPX Chat operates over SMP (SimpleX Messaging Protocol) for signaling, with platform-specific WebRTC media implementations. Android uses a WebView-based approach with a dedicated `CallActivity` and foreground `CallService`, while Desktop opens the system browser and communicates via a NanoWSD WebSocket server on localhost. Both platforms share a common `CallManager` for call lifecycle and a `CallState` enum for state tracking. Call commands and responses are serialized as JSON and exchanged between the native layer and the WebRTC JavaScript layer.
 
 ---
 

@@ -23,7 +23,7 @@ The menu also has **Use from desktop** (iOS and Android) or **Link a mobile**
 Tap on your avatar/name to update your current profile names and avatar.
 
 Display name can have spaces, but it is recommended to use latin characters and
-numbers to make it easier to type these names to the users who use [SimpleX Chat
+numbers to make it easier to type these names to the users who use [POPOPX Chat
 for the terminal](../CLI.md) (CLI).
 
 **Please note**: When you save your profile, the update will be sent to all your contacts (excluding the contacts with whom your incognito profiles were shared). If you have a large number of contacts it can take several seconds.
@@ -34,7 +34,7 @@ This page allows adding and configuring your chat profiles. Please see [Your cha
 
 ### Incognito
 
-This feature is unique to SimpleX Chat – it is independent from chat profiles.
+This feature is unique to POPOPX Chat – it is independent from chat profiles.
 
 When you choose "Incognito" for a new connection, your current profile name and
 image are not shared with this contact or group. It allows connections with
@@ -109,7 +109,7 @@ change other network settings.
 
 #### SMP servers
 
-By default, the app uses the servers of two preset operators, SimpleX Chat and
+By default, the app uses the servers of two preset operators, POPOPX Chat and
 Flux. You can disable them and add your own servers in **Your servers**. When
 more than one operator is enabled, the app uses different operators in each
 conversation to protect your privacy.
@@ -264,7 +264,7 @@ In the app settings, it is labelled **Help & support**.
 
 This section has information on how to use the app and the links to connect to the team. Please use [Send questions and ideas](https://simplex.chat/contact#/?v=1&smp=smp%3A%2F%2FPQUV2eL0t7OStZOoAsPEV2QYWt4-xilbakvGUGOItUo%3D%40smp6.simplex.im%2FK1rslx-m5bpXVIdMZg9NLUZ_8JBm8xTt%23%2F%3Fv%3D1%26dh%3DMCowBQYDK2VuAyEALDeVe-sG8mRY22LsXlPgiwTNs9dbiLrNuA7f3ZMAJ2w%253D%26srv%3Dbylepyau3ty4czmn77q4fglvperknl4bi2eb2fdy2bh4jxtf32kf73yd.onion) to connect to us via the chat to ask any questions, make any suggestions and report any issues.
 
-## Support SimpleX Chat
+## Support POPOPX Chat
 
 Tap **Support SimpleX** in the app settings to get a supporter badge, see
 [Supporter badges](./supporter-badges.md).

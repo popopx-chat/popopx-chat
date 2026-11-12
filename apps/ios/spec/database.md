@@ -1,4 +1,4 @@
-# SimpleX Chat iOS -- Database & Storage
+# POPOPX Chat iOS -- Database & Storage
 
 **Source:** [`FileUtils.swift`](../POPOPXChat/FileUtils.swift)
 
@@ -24,7 +24,7 @@
 
 ## 1. Database Overview
 
-SimpleX Chat uses two SQLite databases managed entirely by the Haskell core. The iOS Swift layer never reads or writes directly to the databases -- all data access goes through the FFI command/response API.
+POPOPX Chat uses two SQLite databases managed entirely by the Haskell core. The iOS Swift layer never reads or writes directly to the databases -- all data access goes through the FFI command/response API.
 
 | Database | Suffix | Contents |
 |----------|--------|----------|

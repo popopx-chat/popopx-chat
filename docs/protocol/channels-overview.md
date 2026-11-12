@@ -35,7 +35,7 @@ Revision 1, 2026-04-28
 
 ## Introduction
 
-The SimpleX network provides private point-to-point communication without user or endpoint identifiers, but most speech that matters is public. Every existing platform that distributes content at scale identifies both publishers and their audiences to the operator - none protect participation privacy. SimpleX Chat supported peer-to-peer groups, but they cannot scale to large audiences. SimpleX Channels close this gap.
+The SimpleX network provides private point-to-point communication without user or endpoint identifiers, but most speech that matters is public. Every existing platform that distributes content at scale identifies both publishers and their audiences to the operator - none protect participation privacy. POPOPX Chat supported peer-to-peer groups, but they cannot scale to large audiences. SimpleX Channels close this gap.
 
 ### What are SimpleX Channels
 
@@ -59,7 +59,7 @@ The SimpleX network has three transport layers, each built on the one below:
 
 No network-wide user profile identifiers exist at any of these layers. Just as SMP enables private messaging by providing transport without user identifiers, channels enable public communication while preserving participation privacy at the distribution layer.
 
-Channel relays are themselves SimpleX clients in the SMP network, connecting to SMP routers using the same protocol, the same 2-node onion routing, and the same fixed-size transport blocks as any other endpoint. Even though the SMP network can distinguish a relay from a person's phone by its transport patterns, it prevents relays from learning anything about other network endpoints. In the case of SimpleX Chat, any CLI client can act as a chat relay without modifications.
+Channel relays are themselves SimpleX clients in the SMP network, connecting to SMP routers using the same protocol, the same 2-node onion routing, and the same fixed-size transport blocks as any other endpoint. Even though the SMP network can distinguish a relay from a person's phone by its transport patterns, it prevents relays from learning anything about other network endpoints. In the case of POPOPX Chat, any CLI client can act as a chat relay without modifications.
 
 Channels therefore inherit all of SMP's transport privacy properties:
 
@@ -304,7 +304,7 @@ Currently, relays send recent cached history on join but do not support navigati
 
 ### Transcript integrity
 
-- **Opt-in content signing.** Per-channel or per-message choice to sign content, making it non-repudiable. This will be released in SimpleX Chat v7.
+- **Opt-in content signing.** Per-channel or per-message choice to sign content, making it non-repudiable. This will be released in POPOPX Chat v7.
 - **Subscriber transcript acknowledgment.** Subscribers periodically sign a digest of received history ("I've seen it" rather than "I've authored it"), enabling detection of relay manipulation through diverging digests.
 - **Merkle tree signing.** Owner periodically publishes a signed Merkle root. Subscribers verify their copies against the owner's authoritative record.
 

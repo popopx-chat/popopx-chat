@@ -95,7 +95,7 @@ CABAL_FILE = "popopx-chat.cabal"
 CABAL_VERSION = re.compile(r"^(version:\s*)(\S+)", re.M)
 TYPES_SOURCES = [f"{TYPES_DIR}/src"]
 TYPES_README = f"{TYPES_DIR}/README.md"
-TYPES_README_CORE = re.compile(r"^SimpleX Chat core: .*$", re.M)
+TYPES_README_CORE = re.compile(r"^POPOPX Chat core: .*$", re.M)
 PYTHON_TYPES_SOURCES = [f"{PYTHON_DIR}/src/simplex_chat/types"]
 ADDON_HASH_LENGTH = 12
 CORE_TAG = re.compile(r"^core-(\d+(?:\.\d+)*)$")
@@ -765,9 +765,9 @@ def core_release(version: str, branch: str, types_version: str | None) -> None:
         previous = previous_core_commit(releases, branch)
         released = json.loads(git("show", f"{previous}:{TYPES_DIR}/package.json")) if previous else types
         types_version = bump_npm_version(released["version"])
-    readme, found = TYPES_README_CORE.subn(f"SimpleX Chat core: {version}", read_text(TYPES_README), count=1)
+    readme, found = TYPES_README_CORE.subn(f"POPOPX Chat core: {version}", read_text(TYPES_README), count=1)
     if not found:
-        sys.exit(f"{TYPES_README} has no line 'SimpleX Chat core: <version>'")
+        sys.exit(f"{TYPES_README} has no line 'POPOPX Chat core: <version>'")
     write_json(f"{TYPES_DIR}/package.json", {**types, "version": types_version, "simplexChatCore": version})
     (ROOT / TYPES_README).write_text(readme)
     print(f"{types['name']}: {types_version}")

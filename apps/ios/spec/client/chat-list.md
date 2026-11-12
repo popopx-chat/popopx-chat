@@ -1,4 +1,4 @@
-# SimpleX Chat iOS -- Chat List Module
+# POPOPX Chat iOS -- Chat List Module
 
 > Technical specification for the conversation list, filtering, search, swipe actions, and user picker.
 >

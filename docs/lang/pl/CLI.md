@@ -5,7 +5,7 @@ revision: 31.01.2023
 
 | Updated 31.01.2023 | Języki: PL, [EN](/docs/CLI.md), [FR](/docs/lang/fr/CLI.md), [CZ](/docs/lang/cs/CLI.md) |
 
-# Terminalowa (konsolowa) aplikacja SimpleX Chat dla systemów Linux/MacOS/Windows
+# Terminalowa (konsolowa) aplikacja POPOPX Chat dla systemów Linux/MacOS/Windows
 
 ## Spis treści
 
@@ -35,7 +35,7 @@ revision: 31.01.2023
 - Automatycznie wypełniana nazwa odbiorcy - po nawiązaniu połączenia wystarczy po prostu napisać wiadomość, aby odpowiedzieć nadawcy.
 - Dostępne wstępnie skonfigurowane przykładowe serwery SMP - można też użyć [własnego serwera](https://github.com/simplex-chat/simplexmq#using-smp-server-and-smp-agent).
 - Żadna globalna tożsamość ani nazwy użytkowników nie są widoczne dla serwera (serwerów), co zapewnia pełną prywatność kontaktów i rozmów.
-- Dwie warstwy szyfrowania E2E (double-ratchet dla połączeń dwukierunkowych, przy użyciu negocjacji klucza X3DH z efemerycznymi kluczami Curve448 i NaCl crypto_box dla kolejek SMP, przy użyciu kluczy Curve25519) oraz przekazywanie kluczy odbiorców za pomocą komunikacji out-of-band (zobacz [Jak używać czatu SimpleX](#how-to-use-simplex-chat)).
+- Dwie warstwy szyfrowania E2E (double-ratchet dla połączeń dwukierunkowych, przy użyciu negocjacji klucza X3DH z efemerycznymi kluczami Curve448 i NaCl crypto_box dla kolejek SMP, przy użyciu kluczy Curve25519) oraz przekazywanie kluczy odbiorców za pomocą komunikacji out-of-band (zobacz [Jak używać czatu SimpleX](#how-to-use-popopx-chat)).
 - Weryfikacja integralności wiadomości (poprzez uwzględnienie hashu poprzedniej wiadomości).
 - Uwierzytelnianie każdego polecenia/wiadomości przez serwery SMP za pomocą automatycznie generowanych kluczy Ed448.
 - Szyfrowanie transmisji przy użyciu TLS 1.3.

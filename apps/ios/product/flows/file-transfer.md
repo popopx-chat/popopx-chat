@@ -4,7 +4,7 @@
 
 ## Overview
 
-File and media sharing in SimpleX Chat iOS. Small files are sent inline within SMP messages; large files use the XFTP (eXtended File Transfer Protocol) for chunked, encrypted uploads up to 1GB. All files are encrypted end-to-end. Optional local encryption protects downloaded files at rest using AES via `CryptoFile`.
+File and media sharing in POPOPX Chat iOS. Small files are sent inline within SMP messages; large files use the XFTP (eXtended File Transfer Protocol) for chunked, encrypted uploads up to 1GB. All files are encrypted end-to-end. Optional local encryption protects downloaded files at rest using AES via `CryptoFile`.
 
 ## Prerequisites
 

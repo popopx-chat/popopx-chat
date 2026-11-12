@@ -35,6 +35,6 @@ body:
   attributes:
     label: Feature
     description: Describe the feature you would like to see added
-    placeholder: SimpleX Chat should make me coffee! 
+    placeholder: POPOPX Chat should make me coffee! 
   validations:
     required: true

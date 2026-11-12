@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Main screen of the SimpleX Chat app. Displays all conversations sorted by last activity, serves as the navigation root, and provides access to user profiles, settings, and new chat creation.
+Main screen of the POPOPX Chat app. Displays all conversations sorted by last activity, serves as the navigation root, and provides access to user profiles, settings, and new chat creation.
 
 ## Route / Navigation
 

@@ -54,13 +54,13 @@ W przeciwieństwie do serwerów sieci federowanych (e-mail, XMPP lub Matrix), se
 
 Możesz używać SimpleX na własnych serwerach i nadal komunikować się z ludźmi za pomocą serwerów, które są wstępnie skonfigurowane w aplikacjach lub z dowolnymi innymi serwerami SimpleX.
 
-Platforma SimpleX korzysta z otwartego protokołu i zapewnia zestaw SDK do tworzenia czatbotów, umożliwiając implementację usług, z którymi użytkownicy mogą wchodzić w interakcje za pośrednictwem aplikacji SimpleX Chat - naprawdę nie możemy się doczekać, aby zobaczyć, jakie usługi oparte o SimpleX można stworzyć.
+Platforma SimpleX korzysta z otwartego protokołu i zapewnia zestaw SDK do tworzenia czatbotów, umożliwiając implementację usług, z którymi użytkownicy mogą wchodzić w interakcje za pośrednictwem aplikacji POPOPX Chat - naprawdę nie możemy się doczekać, aby zobaczyć, jakie usługi oparte o SimpleX można stworzyć.
 
-Jeśli rozważasz stworzenie czegoś w oparciu o platformę SimpleX, niezależnie od tego, czy chodzi o usługi czatbotów dla użytkowników aplikacji SimpleX, czy też integrację biblioteki SimpleX Chat z aplikacjami mobilnymi, skontaktuj się z nami, aby uzyskać porady i wsparcie.
+Jeśli rozważasz stworzenie czegoś w oparciu o platformę SimpleX, niezależnie od tego, czy chodzi o usługi czatbotów dla użytkowników aplikacji SimpleX, czy też integrację biblioteki POPOPX Chat z aplikacjami mobilnymi, skontaktuj się z nami, aby uzyskać porady i wsparcie.
 
 ## Porównanie z innymi protokołami
 
-|                                                             |       SimpleX Chat       | Signal, duże platformy |   XMPP, Matrix  |  Protokoły P2P  |
+|                                                             |       POPOPX Chat       | Signal, duże platformy |   XMPP, Matrix  |  Protokoły P2P  |
 | :---------------------------------------------------------- | :----------------------: | :--------------------: | :-------------: | :-------------: |
 | Wymaga identyfikatorów użytkownika                          |      Nie = prywatny      |     Tak<sup>1</sup>    | Tak<sup>2</sup> | Tak<sup>3</sup> |
 | Możliwość ataku MITM                                        |     Nie = bezpieczny     |     Tak<sup>4</sup>    |       Tak       |       Tak       |

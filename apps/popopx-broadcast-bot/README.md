@@ -4,6 +4,6 @@ The bot allows anybody to connect to it and re-broadcasts all messages received 
 
 Welcome message and reply to the users who are not set as publishers can also be configured via CLI options.
 
-It's a poor man's feed, until we have a better support for feeds in SimpleX Chat.
+It's a poor man's feed, until we have a better support for feeds in POPOPX Chat.
 
-We use it to broadcast status notifications for SimpleX Chat servers when we do any maintenance or in case they become unavailable.
+We use it to broadcast status notifications for POPOPX Chat servers when we do any maintenance or in case they become unavailable.

@@ -5,12 +5,12 @@ title: Chat profiles
 
 ## Creating additional chat profiles
 
-SimpleX Chat allows creating as many chat profiles as you like. Same as the first
+POPOPX Chat allows creating as many chat profiles as you like. Same as the first
 profile, they are stored on your device and shared only with your contacts. You
 can use different profiles, for example for family and work, or one with a
 pseudonym. All of them receive messages at the same time.
 
-To create an additional SimpleX Chat profile:
+To create an additional POPOPX Chat profile:
 
 - Tap your profile image in the chat list toolbar to open the profile menu.
 - Select "Your chat profiles".
@@ -43,7 +43,7 @@ You can also switch profile via "Your chat profiles" in the same menu.
 
 ## Incognito mode
 
-This feature is unique to SimpleX Chat – it is independent from chat profiles.
+This feature is unique to POPOPX Chat – it is independent from chat profiles.
 
 When you choose "Incognito" for a new connection, your currently chosen profile
 name and image are hidden from this contact, group or channel. It allows
@@ -78,7 +78,7 @@ To edit your profile:
 
 ## Move your chat profiles to another device
 
-SimpleX Chat stores all user data on client devices using a portable encrypted
+POPOPX Chat stores all user data on client devices using a portable encrypted
 database format that can be exported and transferred to any supported device.
 
 You can move all profiles with "Migrate to another device" in the app settings:
@@ -87,7 +87,7 @@ you scan a QR code or paste a link, see [Migrate to another
 device](./managing-data.md#migrate-to-another-device). You can also export the
 database to a file and import it on the new device.
 
-To export your SimpleX Chat data:
+To export your POPOPX Chat data:
 
 - [Open the app settings](./app-settings.md#opening-the-app-settings).
 - Select "Chat data", then "Database passphrase & export".
@@ -101,10 +101,10 @@ To export your SimpleX Chat data:
 - Tap on "Export database" - it won't allow exporting unless you have set a passphrase.
 - Save the file on your device or share it via any available option.
 
-To import your SimpleX Chat data in the app on another device:
+To import your POPOPX Chat data in the app on another device:
 
 - Transfer the database file to the new device.
-- Install SimpleX Chat app.
+- Install POPOPX Chat app.
 - Create chat profile with any name by following the steps in [Create your first
   chat profile](./README.md#create-your-first-chat-profile) – you will replace
   it soon.

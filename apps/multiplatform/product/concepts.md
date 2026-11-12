@@ -1,6 +1,6 @@
-# SimpleX Chat Android & Desktop -- Concept Index
+# POPOPX Chat Android & Desktop -- Concept Index
 
-> SimpleX Chat multiplatform concept index. Maps every product concept to its documentation and source code with bidirectional links.
+> POPOPX Chat multiplatform concept index. Maps every product concept to its documentation and source code with bidirectional links.
 >
 > **Related spec:** [spec/README.md](../spec/README.md) | [spec/architecture.md](../spec/architecture.md)
 

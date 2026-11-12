@@ -1,4 +1,4 @@
-# SimpleX Chat iOS -- WebRTC Calling Service
+# POPOPX Chat iOS -- WebRTC Calling Service
 
 > Technical specification for the calling system: CallController, WebRTCClient, CallKit integration, and signaling via SMP.
 >
@@ -25,7 +25,7 @@
 
 ## 1. Overview
 
-SimpleX Chat provides end-to-end encrypted audio and video calls using WebRTC. The unique aspect is that all call signaling (SDP offers/answers, ICE candidates) is transmitted through the same encrypted SMP messaging channels used for chat, eliminating the need for a separate signaling server.
+POPOPX Chat provides end-to-end encrypted audio and video calls using WebRTC. The unique aspect is that all call signaling (SDP offers/answers, ICE candidates) is transmitted through the same encrypted SMP messaging channels used for chat, eliminating the need for a separate signaling server.
 
 ```
 Caller                          SMP Relay              Callee

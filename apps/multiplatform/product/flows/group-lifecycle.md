@@ -4,7 +4,7 @@
 
 ## Overview
 
-Groups in SimpleX Chat are decentralized: there is no central group server. The group owner's device coordinates membership, and messages are delivered via pairwise SMP connections between members. Groups support roles, invitation links, member admission review, blocking, and profile updates.
+Groups in POPOPX Chat are decentralized: there is no central group server. The group owner's device coordinates membership, and messages are delivered via pairwise SMP connections between members. Groups support roles, invitation links, member admission review, blocking, and profile updates.
 
 ## Prerequisites
 

@@ -5,7 +5,7 @@ import {ChatEvent, CEvt, T} from "@simplex-chat/types"
 
 // This test is currently failing - it gets as far as starting connection.
 // It has to be written differently, with event loop to only process "interesting" events, as some events may arrive in different order.
-describe.skip("ChatClient (expects SimpleX Chat server with a user, without contacts, on localhost:5225)", () => {
+describe.skip("ChatClient (expects POPOPX Chat server with a user, without contacts, on localhost:5225)", () => {
   test("connect, send message to themselves, delete contact", async () => {
     const c = await ChatClient.create("ws://localhost:5225")
     assert.strictEqual((await c.msgQ.dequeue()).type, "connSubSummary")

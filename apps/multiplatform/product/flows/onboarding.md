@@ -104,7 +104,7 @@ enum class OnboardingStage {
 ### 3.1 Step1_SimpleXInfo
 
 1. The `SimpleXInfo` screen is shown.
-2. Explains what SimpleX Chat is: privacy, no user identifiers, decentralized.
+2. Explains what POPOPX Chat is: privacy, no user identifiers, decentralized.
 3. User taps "Create your profile" to proceed.
 4. On Desktop, a "Link a Mobile" option is also available.
 

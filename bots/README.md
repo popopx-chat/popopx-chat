@@ -1,4 +1,4 @@
-# SimpleX Chat bot API
+# POPOPX Chat bot API
 
 - [Why create a bot](#why-create-a-bot)
 - [What is SimpleX bot](#what-is-simplex-bot)
@@ -13,7 +13,7 @@
 
 ## Why create a bot
 
-You can implement SimpleX Chat for these and many other scenarios:
+You can implement POPOPX Chat for these and many other scenarios:
 - customer support - both as a single- and a multi-agent support chat (using SimpleX Chat [business address](https://simplex.chat/docs/business.html) feature),
 - information search and retrieval bots, with or without LLM integration,
 - moderation bots, to moderate your group and communities.
@@ -27,11 +27,11 @@ We will share all useful bots you create in the bottom of this page - please sub
 
 ## What is SimpleX bot
 
-SimpleX bot is a participant of SimpleX network. Theoretically, bot can do everything that a usual SimpleX Chat user can do – send and receive messages and files, connect to addresses and join groups, etc. But to be useful, a bot should distinguish itself as a bot, and to provide an interface for the users to interact with it.
+SimpleX bot is a participant of SimpleX network. Theoretically, bot can do everything that a usual POPOPX Chat user can do – send and receive messages and files, connect to addresses and join groups, etc. But to be useful, a bot should distinguish itself as a bot, and to provide an interface for the users to interact with it.
 
 ## How to configure bot profile
 
-Starting from v6.4.3, SimpleX Chat apps support bot configuration to distinguish bots, to highlight commands in messages, and to show command menus.
+Starting from v6.4.3, POPOPX Chat apps support bot configuration to distinguish bots, to highlight commands in messages, and to show command menus.
 
 ### Set up bot profile
 
@@ -86,7 +86,7 @@ Business chat is a special group chat under the hood, but the connected customer
 
 ## How to create a bot
 
-[SimpleX Chat CLI](../docs/CLI.md) can be run as a local WebSockets server on any port:
+[POPOPX Chat CLI](../docs/CLI.md) can be run as a local WebSockets server on any port:
 
 ```bash
 simplex-chat -p 5225
@@ -102,13 +102,13 @@ Your bot must run as a standalone process connecting to CLI via WebSockets on th
 
 All communication between your bot process and CLI happens via JSON-encoded WebSocket text messages.
 
-To connect to other SimpleX Chat users and to send messages the bot must send commands to CLI. The command WebSocket message contains correlation ID and commands as strings.
+To connect to other POPOPX Chat users and to send messages the bot must send commands to CLI. The command WebSocket message contains correlation ID and commands as strings.
 
 CLI will respond to command messages with command processing results. The response WebSocket message contains the same correlation ID as was sent in the command and JSON-encoded response record.
 
 See [Sending commands](#sending-commands) about message formats and types for commands and responses.
 
-CLI will also send chat events to your bot process. These events represent information about connecting SimpleX Chat users, received messages, etc.
+CLI will also send chat events to your bot process. These events represent information about connecting POPOPX Chat users, received messages, etc.
 
 See [Processing events](#processing-events) about event message format and types.
 
@@ -122,7 +122,7 @@ In the simplest case, your bot must process [NewChatItems](./api/EVENTS.md#newch
 CLI WebSockets API allows to:
 
 - send and receive messages and files.
-- create and change user profile - you also can do it manually, via SimpleX Chat desktop app or CLI.
+- create and change user profile - you also can do it manually, via POPOPX Chat desktop app or CLI.
 - create and accept invitations or connect with the contacts.
 - create and manage long-term user address, accepting connection requests automatically or via code.
 - create, join and manage group.
@@ -138,7 +138,7 @@ Each command your bot sends to CLI should have this JSON format:
 
 You can use sequential numbers, UUIDs or some other unique strings in `corrId` field.
 
-Command strings are the same commands you can can see in `Settings / Developer tools / Chat Console` of mobile and desktop apps. You can test these commands via SimpleX Chat CLI.
+Command strings are the same commands you can can see in `Settings / Developer tools / Chat Console` of mobile and desktop apps. You can test these commands via POPOPX Chat CLI.
 
 When command is processed, CLI will send a response as a WebSockets message in this format:
 
@@ -185,9 +185,9 @@ See [API Events](./api/EVENTS.md) reference about specific JSON types for chat e
 
 ## Security considerations
 
-WebSockets API of SimpleX Chat CLI does not support any authentication. CLI binds only to localhost to prevent accidental access from public network, in case you did not close this port in firewall. The messages in WebSocket API are not encrypted in any way, and must not be sent via public networks.
+WebSockets API of POPOPX Chat CLI does not support any authentication. CLI binds only to localhost to prevent accidental access from public network, in case you did not close this port in firewall. The messages in WebSocket API are not encrypted in any way, and must not be sent via public networks.
 
-It is usually simpler to run your bot process on the same machine where you run SimpleX Chat CLI, and to close CLI port in firewall. That makes connection between your bot and CLI secure. It also simplifies sending and receiving files via bot, as they are stored on the file system accessible to SimpleX Chat CLI.
+It is usually simpler to run your bot process on the same machine where you run POPOPX Chat CLI, and to close CLI port in firewall. That makes connection between your bot and CLI secure. It also simplifies sending and receiving files via bot, as they are stored on the file system accessible to POPOPX Chat CLI.
 
 If you have to run your bot on another machine, you need to secure access to bot CLI via any web proxy that supports WebSockets, e.g. Caddy or Nginx. You must configure TLS termination in the proxy and connect CLI process from bot via a secure TLS connection. If you connect to bot via a public network, you also must configure HTTP basic auth to prevent unauthorized access. You can validate TLS security of your proxy via a free test at [SSLLabs.com](https://www.ssllabs.com/ssltest/). You can also configure firewall on the machine where you run SimpleX CLI to only allow connections from the IP address of your bot.
 

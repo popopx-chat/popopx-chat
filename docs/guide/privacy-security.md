@@ -3,7 +3,7 @@ title: Privacy & security
 ---
 # Privacy and Security
 
-SimpleX Chat default configuration aims to balance privacy, security and convenience. You may want to change the default options.
+POPOPX Chat default configuration aims to balance privacy, security and convenience. You may want to change the default options.
 
 This page lists the main features and options that affect privacy and security.
 
@@ -27,7 +27,7 @@ messages." See [How channels work](./channels.md#how-channels-work).
 
 <img src="./images/privacy-security-verify-code.png" alt="Security code on iOS" width="288">
 
-SimpleX Chat always establishes connection via link passed via an independent
+POPOPX Chat always establishes connection via link passed via an independent
 channel, so servers cannot substitute the encryption keys. In some scenarios,
 the invitation links can be substituted in transit (MITM attack). To protect
 against such attacks, you should verify the security code with your contacts:

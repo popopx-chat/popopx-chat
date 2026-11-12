@@ -67,7 +67,7 @@ SimpleX network applies defense in depth approach to security by having multiple
 
 It is used by two parties to exchange [end-to-end encrypted](#end-to-end-encryption) messages. The parties will use some [key agreement protocol](#key-agreement-protocol) to agree on the initial shared secret key.
 
-Double Ratchet algorithm provides [perfect forward secrecy](#forward-secrecy) and [post-compromise security](#post-compromise-security). It is [designed by Signal](https://signal.org/docs/specifications/doubleratchet), and used in SimpleX Chat and many other secure messengers. Most experts consider it the state-of-the-art encryption protocol in message encryption.
+Double Ratchet algorithm provides [perfect forward secrecy](#forward-secrecy) and [post-compromise security](#post-compromise-security). It is [designed by Signal](https://signal.org/docs/specifications/doubleratchet), and used in POPOPX Chat and many other secure messengers. Most experts consider it the state-of-the-art encryption protocol in message encryption.
 
 ## End-to-end encryption
 

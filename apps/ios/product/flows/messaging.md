@@ -4,7 +4,7 @@
 
 ## Overview
 
-Complete message lifecycle in SimpleX Chat iOS: composing, sending, receiving, editing, deleting, reacting to, replying to, and forwarding messages. All messages are end-to-end encrypted via the SMP protocol. The Haskell core handles encryption, routing, and persistence; the Swift UI layer drives composition and display.
+Complete message lifecycle in POPOPX Chat iOS: composing, sending, receiving, editing, deleting, reacting to, replying to, and forwarding messages. All messages are end-to-end encrypted via the SMP protocol. The Haskell core handles encryption, routing, and persistence; the Swift UI layer drives composition and display.
 
 ## Prerequisites
 

@@ -54,13 +54,13 @@ Contrairement aux serveurs des réseaux fédérés (e-mail, XMPP ou Matrix), les
 
 Vous pouvez utiliser SimpleX avec vos propres serveurs et continuer à communiquer avec les personnes utilisant les serveurs préconfigurés dans les applications ou tout autre serveur SimpleX.
 
-La plateforme SimpleX utilise un protocole ouvert et fournit un SDK pour créer des chatbot, permettant la mise en œuvre de services avec lesquels les utilisateurs peuvent interagir via les applications SimpleX Chat - nous sommes vraiment impatients de voir quels services SimpleX peuvent être créés.
+La plateforme SimpleX utilise un protocole ouvert et fournit un SDK pour créer des chatbot, permettant la mise en œuvre de services avec lesquels les utilisateurs peuvent interagir via les applications POPOPX Chat - nous sommes vraiment impatients de voir quels services SimpleX peuvent être créés.
 
 Si vous envisagez de développer avec la plateforme SimpleX, que ce soit pour des services de chatbot pour les utilisateurs de l'application SimpleX ou pour intégrer la bibliothèque de chat SimpleX dans vos applications mobiles, n'hésitez pas à nous contacter pour tout conseil et assistance.
 
 ## Comparaison avec d'autres protocoles
 
-|                                                |    SimpleX chat    | Signal et autres...   |  XMPP, Matrix   | Protocoles P2P  |
+|                                                |    POPOPX chat    | Signal et autres...   |  XMPP, Matrix   | Protocoles P2P  |
 | :--------------------------------------------- | :----------------: | :-------------------: | :-------------: | :-------------: |
 | Identifiants d'utilisateur nécessaire          |    Non = privé     |    Oui<sup>1</sup>    | Oui<sup>2</sup> | Oui<sup>3</sup> |
 | Risque d'attaque MITM                          |    Non = securisé  |    Oui<sup>4</sup>    |       Oui       |       Oui       |

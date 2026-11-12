@@ -1,4 +1,4 @@
-# SimpleX Chat iOS -- Chat View Module
+# POPOPX Chat iOS -- Chat View Module
 
 > Technical specification for the message rendering, chat item types, and context menu actions in the conversation view.
 >

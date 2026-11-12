@@ -1,11 +1,11 @@
-# SimpleX Chat Node.js library
+# POPOPX Chat Node.js library
 
-This library replaced now deprecated [SimpleX Chat WebRTC TypeScript client](https://www.npmjs.com/package/@simplex-chat/webrtc-client).
+This library replaced now deprecated [POPOPX Chat WebRTC TypeScript client](https://www.npmjs.com/package/@simplex-chat/webrtc-client).
 
 ## Use cases
 
-- chat bots: you can implement any logic of connecting with and communicating with SimpleX Chat users. Using chat groups a chat bot can connect SimpleX Chat users with each other.
-- control of the equipment: e.g. servers or home automation. SimpleX Chat provides secure and authorised connections, so this is more secure than using rest APIs.
+- chat bots: you can implement any logic of connecting with and communicating with POPOPX Chat users. Using chat groups a chat bot can connect POPOPX Chat users with each other.
+- control of the equipment: e.g. servers or home automation. POPOPX Chat provides secure and authorised connections, so this is more secure than using rest APIs.
 - any scenarios of scripted message sending.
 - chat and chat-based interfaces.
 
@@ -145,7 +145,7 @@ This library uses [@simplex-chat/types](https://www.npmjs.com/package/@simplex-c
 
 Library provides types and functions to:
 
-- create and change user profile (although, in most cases you can do it manually, via SimpleX Chat terminal app).
+- create and change user profile (although, in most cases you can do it manually, via POPOPX Chat terminal app).
 - create and accept invitations or connect with the contacts.
 - create and manage long-term user address, accepting connection requests automatically.
 - send, receive, delete and update messages, and add message reactions.

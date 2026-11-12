@@ -1,6 +1,6 @@
-# SimpleX Chat iOS -- Concept Index
+# POPOPX Chat iOS -- Concept Index
 
-> SimpleX Chat iOS concept index. Maps every product concept to its documentation and source code with bidirectional links.
+> POPOPX Chat iOS concept index. Maps every product concept to its documentation and source code with bidirectional links.
 >
 > **Related spec:** [spec/api.md](../spec/api.md) | [spec/state.md](../spec/state.md) | [spec/architecture.md](../spec/architecture.md)
 

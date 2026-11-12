@@ -3,7 +3,7 @@ title: Sending messages
 ---
 # Sending, editing and deleting messages
 
-Sending text messages on SimpleX Chat is pretty straightforward, tap on your contact and then tap on text area, type in your message and tap on "Send" button.
+Sending text messages on POPOPX Chat is pretty straightforward, tap on your contact and then tap on text area, type in your message and tap on "Send" button.
 
 You need to open a conversation to send messages.
 
@@ -54,7 +54,7 @@ badge](./supporter-badges.md).
 <img src="./images/send-messages-chat.png" alt="A chat with the message field, the paperclip on the left, and the microphone and lightning buttons on the right" width="288">
 
 - Tap 🎤 (microphone) button on the right of the message entry box.
-- Allow SimpleX Chat to record the voice if prompted. On Android, you will have
+- Allow POPOPX Chat to record the voice if prompted. On Android, you will have
   to tap on the microphone button once again if this happens.
 - Speak, once you've finished the recording, tap on the square stop icon on the right.
 - You may listen to the recording before sending it, and re-record if necessary.

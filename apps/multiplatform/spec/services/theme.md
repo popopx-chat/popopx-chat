@@ -14,7 +14,7 @@
 
 ## Executive Summary
 
-The SimpleX Chat theme engine implements a four-level cascade: per-chat theme overrides take precedence over per-user overrides, which take precedence over global (app-settings) overrides, which take precedence over built-in presets. Four preset themes exist (LIGHT, DARK, POPOPX, BLACK), each defining a Material `Colors` palette and custom `AppColors` for chat-specific elements. Themes support wallpaper customization (preset patterns or custom images) with background and tint color overrides. Theme configuration is persisted as YAML and can be imported/exported. The `SimpleXTheme` composable wraps `MaterialTheme` with additional `CompositionLocal` providers for app colors and wallpaper.
+The POPOPX Chat theme engine implements a four-level cascade: per-chat theme overrides take precedence over per-user overrides, which take precedence over global (app-settings) overrides, which take precedence over built-in presets. Four preset themes exist (LIGHT, DARK, POPOPX, BLACK), each defining a Material `Colors` palette and custom `AppColors` for chat-specific elements. Themes support wallpaper customization (preset patterns or custom images) with background and tint color overrides. Theme configuration is persisted as YAML and can be imported/exported. The `SimpleXTheme` composable wraps `MaterialTheme` with additional `CompositionLocal` providers for app colors and wallpaper.
 
 ---
 

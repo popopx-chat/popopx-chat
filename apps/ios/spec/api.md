@@ -1,4 +1,4 @@
-# SimpleX Chat iOS -- Chat API Reference
+# POPOPX Chat iOS -- Chat API Reference
 
 > Complete specification of the ChatCommand, ChatResponse, ChatEvent, and ChatError types that form the API between the Swift UI layer and the Haskell core.
 >
