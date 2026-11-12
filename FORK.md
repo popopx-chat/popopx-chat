@@ -69,18 +69,19 @@ substitution does not change that:
 
 ## What is still unset
 
-Everything with a `[FILL]` marker in these files is an unresolved decision, not a finished
-statement — `grep -rn '\[FILL\]' .` lists them. The two documents that exist because of it are
-[`PRIVACY-POPOPX.md`](./PRIVACY-POPOPX.md) (this fork's own privacy statement, upstream's
-[`PRIVACY.md`](./PRIVACY.md) untouched) and
+This fork is published by **POPOPX**, contact **chat@popopx.chat** — see
+[`PRIVACY-POPOPX.md`](./PRIVACY-POPOPX.md). The two documents that exist because the fork needs its
+own statements are [`PRIVACY-POPOPX.md`](./PRIVACY-POPOPX.md) (this fork's privacy statement,
+upstream's [`PRIVACY.md`](./PRIVACY.md) untouched) and
 [`CHANGELOG-POPOPX.md`](./CHANGELOG-POPOPX.md) (this fork's release record, upstream's
 [`CHANGELOG.md`](./CHANGELOG.md) untouched).
 
-Concretely, before any build of this fork is distributed:
+What remains below is not an undecided attribution — it is infrastructure this fork does not have
+yet. Before any build of this fork is distributed:
 
-- **No publisher.** No legal entity, no contact address and no "Portions Copyright (C) 2026
-  `[FILL]`" line for the fork's own changes; AGPL lets those be added, it does not let
-  upstream's be removed.
+- **No service is operated.** The relay presets, the link domain, `.well-known`, the directory and
+  the badge service all still name infrastructure SimpleX Chat Ltd operates; `chat@popopx.chat` is
+  not reachable until `popopx.chat` is served.
 - **Android link verification is broken by design until re-signed.**
   `website/src/.well-known/assetlinks.json` carries our `package_name` with SimpleX Chat Ltd's
   three signing-certificate fingerprints; `autoVerify` cannot pass for a package signed by anybody

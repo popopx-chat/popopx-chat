@@ -3,14 +3,15 @@
 > This file describes **this fork**. The upstream project publishes its own policy at
 > [`PRIVACY.md`](./PRIVACY.md) (SimpleX Chat Ltd, "Operators Privacy Policy and Conditions of
 > Use"); that text is upstream's and is kept here unmodified — see
-> [FORK.md](./FORK.md). Anything marked `[FILL]` below is a decision the distributor of this
-> build still has to make; nothing here asserts a fact about an entity that has not been named.
+> [FORK.md](./FORK.md).
 
 ## Who operates this build
 
-`[FILL]` — legal entity (or "an individual acting in their own name") that publishes POPOPX Chat,
-the jurisdiction it is in, and the contact address users can write to. Until this is filled, this
-fork does not claim to operate any service and no service address is advertised by it.
+**POPOPX** — the distributor of this fork, contact **chat@popopx.chat**.
+
+`popopx.chat` is not yet owned or served by this fork, so that address is not yet reachable and no
+service advertised by this repository is live. Until the domain resolves and the mail route exists,
+this fork operates no servers and this statement describes an application, not a service.
 
 ## What the application sends, and to whom
 
@@ -44,11 +45,14 @@ Two things a privacy statement normally has to disclose are worth stating explic
 ## Data this fork holds
 
 Nothing. This repository contains no backend for user data, no push gateway, no update server and
-no telemetry collector. `[FILL]` — if POPOPX later operates the link-unfurling proxy, the badge
-service, the directory, an F-Droid/APK distribution endpoint or a push gateway, each of them needs
-a section here describing what it stores and for how long, before it is enabled in the app.
+no telemetry collector. If POPOPX later operates the link-unfurling proxy, the badge service, the
+directory, an F-Droid/APK distribution endpoint or a push gateway, each of them needs a section
+here describing what it stores and for how long, before it is enabled in the app.
 
 ## Contact
 
-`[FILL]` — security and privacy contact address. Until then, `chat@simplex.chat` (which appears in
-upstream's files) must not be presented as the contact for this fork: it reaches SimpleX Chat Ltd.
+**chat@popopx.chat** — security and privacy contact for this fork.
+
+The address is not reachable until `popopx.chat` is served (see "Who operates this build" above).
+`chat@simplex.chat`, which appears in upstream's files, must not be presented as the contact for
+this fork: it reaches SimpleX Chat Ltd.

@@ -48,13 +48,17 @@ artwork and 376 iOS snapshot baselines. Full list with the authority for each:
 
 ## Template for the first real release
 
-```markdown
-## vX.Y.Z — [FILL] date
+Fields that are decided: the publisher is **POPOPX** and the contact is **chat@popopx.chat**. The
+angle-bracket fields below are per-release facts that cannot be known until a release is built and
+signed, so they are left as template slots, not as open decisions.
 
-- upstream commit this build starts from: [FILL]
-- iOS: [FILL] App Store id / build number, signing identity and Team ID
-- Android: [FILL] applicationId suffix, signing certificate fingerprint, F-Droid or Play channel
-- servers this release presets, and whose terms the user is asked to accept: [FILL]
-- link domain actually serving this release, with .well-known and AASA live: [FILL]
-- contact address shipped in the app and in these files: [FILL]
+```markdown
+## vX.Y.Z — <date>
+
+- upstream commit this build starts from: <commit>
+- iOS: <App Store id / build number, signing identity and Team ID>
+- Android: <applicationId suffix, signing certificate fingerprint, F-Droid or Play channel>
+- servers this release presets, and whose terms the user is asked to accept: <list>
+- link domain actually serving this release, with .well-known and AASA live: <domain>
+- publisher and contact address shipped in the app and in these files: POPOPX, chat@popopx.chat
 ```
