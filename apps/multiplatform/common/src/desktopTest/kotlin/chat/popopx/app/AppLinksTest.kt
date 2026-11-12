@@ -37,7 +37,7 @@ class AppLinksTest {
 
   @Test
   fun ignoresWebAndOtherLinks() {
-    assertNull(linkFromArgs(arrayOf("https://simplex.chat/contact#/?v=2-7")), "web link")
+    assertNull(linkFromArgs(arrayOf("https://popopx.chat/contact#/?v=2-7")), "web link")
     assertNull(linkFromArgs(arrayOf("popopxfile:/x")), "another scheme sharing the prefix")
     assertNull(linkFromArgs(arrayOf("/home/user/popopx:/a")), "path")
   }

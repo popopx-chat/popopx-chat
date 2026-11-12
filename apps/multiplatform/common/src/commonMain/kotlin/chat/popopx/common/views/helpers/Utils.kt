@@ -615,7 +615,7 @@ fun UriHandler.openUriCatching(uri: String) {
 
 fun UriHandler.openExternalLink(uri: String) {
   val uriHandler = this
-  if (uri.startsWith("https://simplex.chat/contact#") || (uri.startsWith("https://smp") && ".simplex.im/a#" in uri)) {
+  if (uri.startsWith("https://popopx.chat/contact#") || (uri.startsWith("https://smp") && ".simplex.im/a#" in uri)) {
     uriHandler.openVerifiedPopopxUri(uri)
   } else {
     AlertManager.shared.showAlertDialog(

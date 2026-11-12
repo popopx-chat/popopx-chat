@@ -318,15 +318,15 @@ textWithUri = describe "text with Uri" do
     "Visit Example.Com today" <==> "Visit Example.Com today"
   it "SimpleX links" do
     let inv = "/invitation#/?v=1&smp=smp%3A%2F%2F1234-w%3D%3D%40smp.simplex.im%3A5223%2F3456-w%3D%3D%23%2F%3Fv%3D1-2%26dh%3DMCowBQYDK2VuAyEAjiswwI3O_NlS8Fk3HJUW870EY2bAwmttMBsvRB9eV3o%253D&e2e=v%3D2%26x3dh%3DMEIwBQYDK2VvAzkAmKuSYeQ_m0SixPDS8Wq8VBaTS1cW-Lp0n0h4Diu-kUpR-qXx4SDJ32YGEFoGFGSbGPry5Ychr6U%3D%2CMEIwBQYDK2VvAzkAmKuSYeQ_m0SixPDS8Wq8VBaTS1cW-Lp0n0h4Diu-kUpR-qXx4SDJ32YGEFoGFGSbGPry5Ychr6U%3D"
-    ("https://simplex.chat" <> inv) <==> popopxLink XLInvitation ("simplex:" <> inv) ["smp.simplex.im"] ("https://simplex.chat" <> inv)
-    ("simplex:" <> inv) <==> popopxLink XLInvitation ("simplex:" <> inv) ["smp.simplex.im"] ("simplex:" <> inv)
-    ("https://example.com" <> inv) <==> popopxLink XLInvitation ("simplex:" <> inv) ["smp.simplex.im"] ("https://example.com" <> inv)
+    ("https://simplex.chat" <> inv) <==> popopxLink XLInvitation ("popopx:" <> inv) ["smp.simplex.im"] ("https://simplex.chat" <> inv)
+    ("popopx:" <> inv) <==> popopxLink XLInvitation ("popopx:" <> inv) ["smp.simplex.im"] ("popopx:" <> inv)
+    ("https://example.com" <> inv) <==> popopxLink XLInvitation ("popopx:" <> inv) ["smp.simplex.im"] ("https://example.com" <> inv)
     let ct = "/contact#/?v=2&smp=smp%3A%2F%2F1234-w%3D%3D%40smp.simplex.im%3A5223%2F3456-w%3D%3D%23%2F%3Fv%3D1-2%26dh%3DMCowBQYDK2VuAyEAjiswwI3O_NlS8Fk3HJUW870EY2bAwmttMBsvRB9eV3o%253D"
-    ("https://simplex.chat" <> ct) <==> popopxLink XLContact ("simplex:" <> ct) ["smp.simplex.im"] ("https://simplex.chat" <> ct)
-    ("simplex:" <> ct) <==> popopxLink XLContact ("simplex:" <> ct) ["smp.simplex.im"] ("simplex:" <> ct)
+    ("https://simplex.chat" <> ct) <==> popopxLink XLContact ("popopx:" <> ct) ["smp.simplex.im"] ("https://simplex.chat" <> ct)
+    ("popopx:" <> ct) <==> popopxLink XLContact ("popopx:" <> ct) ["smp.simplex.im"] ("popopx:" <> ct)
     let gr = "/contact#/?v=2&smp=smp%3A%2F%2Fu2dS9sG8nMNURyZwqASV4yROM28Er0luVTx5X1CsMrU%3D%40smp4.simplex.im%2FWHV0YU1sYlU7NqiEHkHDB6gxO1ofTync%23%2F%3Fv%3D1-2%26dh%3DMCowBQYDK2VuAyEAWbebOqVYuBXaiqHcXYjEHCpYi6VzDlu6CVaijDTmsQU%253D%26srv%3Do5vmywmrnaxalvz6wi3zicyftgio6psuvyniis6gco6bp6ekl4cqj4id.onion&data=%7B%22type%22%3A%22group%22%2C%22groupLinkId%22%3A%22mL-7Divb94GGmGmRBef5Dg%3D%3D%22%7D"
-    ("https://simplex.chat" <> gr) <==> popopxLink XLGroup ("simplex:" <> gr) ["smp4.simplex.im", "o5vmywmrnaxalvz6wi3zicyftgio6psuvyniis6gco6bp6ekl4cqj4id.onion"] ("https://simplex.chat" <> gr)
-    ("simplex:" <> gr) <==> popopxLink XLGroup ("simplex:" <> gr) ["smp4.simplex.im", "o5vmywmrnaxalvz6wi3zicyftgio6psuvyniis6gco6bp6ekl4cqj4id.onion"] ("simplex:" <> gr)
+    ("https://simplex.chat" <> gr) <==> popopxLink XLGroup ("popopx:" <> gr) ["smp4.simplex.im", "o5vmywmrnaxalvz6wi3zicyftgio6psuvyniis6gco6bp6ekl4cqj4id.onion"] ("https://simplex.chat" <> gr)
+    ("popopx:" <> gr) <==> popopxLink XLGroup ("popopx:" <> gr) ["smp4.simplex.im", "o5vmywmrnaxalvz6wi3zicyftgio6psuvyniis6gco6bp6ekl4cqj4id.onion"] ("popopx:" <> gr)
 
 web :: Text -> Text -> Text -> Markdown
 web t u = Markdown $ Just HyperLink {showText = Just t, linkUri = u}
@@ -363,6 +363,12 @@ obfuscatedPopopxLinks = describe "SimpleX links obfuscated with whitespace" do
     hasObfuscatedPopopxLink (T.intercalate " " $ T.chunksOf 8 $ "https://simplex.chat" <> inv) `shouldBe` True
   it "detects a split link followed by other text" do
     hasObfuscatedPopopxLink (spaced addr <> "\nplease connect") `shouldBe` True
+  it "detects a split app link" do
+    -- the skip set has to reach the scheme this build emits, not only http(s)://
+    let app = "popopx:/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw?h=smp6.simplex.im"
+    hasObfuscatedPopopxLink app `shouldBe` True
+    hasObfuscatedPopopxLink (T.intercalate " " $ T.chunksOf 8 app) `shouldBe` True
+    hasObfuscatedPopopxLink ("tap to connect: " <> T.intercalate "\n" (T.chunksOf 6 app)) `shouldBe` True
   it "ignores text without a SimpleX link" do
     hasObfuscatedPopopxLink "" `shouldBe` False
     hasObfuscatedPopopxLink "hello there, this is a normal message" `shouldBe` False
@@ -524,7 +530,7 @@ multilineMarkdownList = describe "multiline markdown" do
   it "multiline with simplex link" do
     ("https://simplex.chat" <> inv <> "\ntext")
       <<==>>
-        [ FormattedText (simplexLinkFormat XLInvitation ("simplex:" <> inv) ["smp.simplex.im"] Nothing) ("https://simplex.chat" <> inv),
+        [ FormattedText (simplexLinkFormat XLInvitation ("popopx:" <> inv) ["smp.simplex.im"] Nothing) ("https://simplex.chat" <> inv),
           "\ntext"
         ]
   it "command markdown" do

@@ -211,7 +211,7 @@ class SingleInstanceTest {
       assertNotNull(signal, "$case: rejected content is still a signal, so the window comes forward")
       assertNull(signal.link, case)
     }
-    Files.writeString(show, "https://simplex.chat/contact#/?v=2-7")
+    Files.writeString(show, "https://popopx.chat/contact#/?v=2-7")
     assertTakenWithoutLink("web link")
     assertEquals(listOf(), fileNames(dir), "a rejected signal must still be removed")
 

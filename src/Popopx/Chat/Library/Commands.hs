@@ -5246,6 +5246,9 @@ verifyEntityDomain user nm nameType PopopxDomainClaim {domain = StrJSON domain, 
             Just (StrJSON oid) -> ownerKey <$> find (\OwnerAuth {ownerId} -> ownerId == oid) owners
       pure $ maybe False (\k -> C.verify' k signature proofPayload) ownerKey_
       where
+        -- the domain-separation string is signed by the name owner, which is not this repository:
+        -- renaming it here stops every already-issued proof (and proofs other clients issue) from
+        -- verifying, so it stays as the shared spelling until the producer moves too.
         proofPayload = strEncode (Str "simplex_domain_v1", presHeader, domain, ct, srv, key)
 
 data ConnectViaContactResult

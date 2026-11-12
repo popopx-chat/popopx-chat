@@ -46,6 +46,7 @@ import qualified Popopx.Messaging.Crypto as C
 import Popopx.Messaging.Crypto.BBS (BBSPresHeader (..))
 import Popopx.Messaging.Crypto.Ratchet (PQEncryption (..), PQSupport, pattern PQEncOff, pattern PQEncOn, pattern PQSupportOff)
 import Popopx.Messaging.Encoding.String
+import Popopx.Messaging.ServiceScheme (popopxChat)
 import Popopx.Messaging.Version
 import System.Directory (doesFileExist)
 import System.Environment (lookupEnv)
@@ -960,11 +961,14 @@ vRangeStr (VersionRange minVer maxVer) = "(" <> show minVer <> ", " <> show maxV
 
 linkAnotherSchema :: String -> String
 linkAnotherSchema link
-  | "https://simplex.chat/" `isPrefixOf` link =
-      T.unpack $ T.replace "https://simplex.chat/" "popopx:/" $ T.pack link
+  | appLinkPrefix `isPrefixOf` link =
+      T.unpack $ T.replace (T.pack appLinkPrefix) "popopx:/" $ T.pack link
   | "popopx:/" `isPrefixOf` link =
-      T.unpack $ T.replace "popopx:/" "https://simplex.chat/" $ T.pack link
-  | otherwise = error "link starts with neither https://simplex.chat/ nor popopx:/"
+      T.unpack $ T.replace "popopx:/" (T.pack appLinkPrefix) $ T.pack link
+  | otherwise = error "link starts with neither the app server link prefix nor popopx:/"
+-- the host the core emits links with, so this helper cannot drift away from it
+appLinkPrefix :: String
+appLinkPrefix = B.unpack (strEncode popopxChat) <> "/"
 
 xftpCLI :: [String] -> IO [String]
 xftpCLI = \case

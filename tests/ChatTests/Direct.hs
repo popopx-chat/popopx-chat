@@ -3579,7 +3579,7 @@ testLinkContentFilter =
       alice <# "bob> visit http://test.org"
 
       alice #> ("@bob " <> popopxLink)
-      bob <#. "alice> https://simplex.chat/invitation#"
+      bob <#. "alice> https://popopx.chat/invitation#"
 
       bob #> "@alice [click here](https://link.example.com)"
       alice <# "bob> [click here](https://link.example.com)"

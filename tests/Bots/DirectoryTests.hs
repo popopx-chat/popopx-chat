@@ -297,7 +297,7 @@ testSuspendResume ps =
       bob #> "@'SimpleX Directory' /link 1"
       bob <# "'SimpleX Directory'> > /link 1"
       bob <## "      The link to join the group ID 1 (privacy):"
-      bob <##. "https://simplex.chat/contact#/"
+      bob <##. "https://popopx.chat/contact#/"
       bob <## "New member role: member"
       bob <## "The link is being upgraded..."
       bob <# "'SimpleX Directory'> Please replace the old link in welcome message of your group ID 1 (privacy)"

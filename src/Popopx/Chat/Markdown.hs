@@ -333,7 +333,7 @@ hasObfuscatedPopopxLink t =
   fromRight False $ AB.parseOnly findLinkP $ encodeUtf8 $ T.filter (not . isSpace) t
   where
     findLinkP = do
-      AB.skipWhile (\c -> c /= 's' && c /= 'h') -- links start only with "simplex:" or "https://"
+      AB.skipWhile (\c -> c /= 'p' && c /= 'h') -- accepted link prefixes are popopx:/ and http(s):// - see isUri below
       (True <$ (strP :: AB.Parser AConnectionLink))
         <|> (AB.anyChar *> findLinkP)
         <|> pure False

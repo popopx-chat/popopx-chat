@@ -1939,7 +1939,7 @@ struct ComposeView: View {
     }
 
     private func isPopopxLink(_ link: String) -> Bool {
-        link.starts(with: "https://simplex.chat") || link.starts(with: "http://simplex.chat") || link.starts(with: "popopx:/")
+        link.starts(with: "https://popopx.chat") || link.starts(with: "http://popopx.chat") || link.starts(with: "popopx:/")
     }
 
     private func cancelLinkPreview() {
