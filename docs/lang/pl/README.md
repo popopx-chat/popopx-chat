@@ -32,11 +32,11 @@
 &nbsp;
 [<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/testflight.png" alt="iOS TestFlight" height="41">](https://testflight.apple.com/join/DWuT2LQu)
 &nbsp;
-[<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/apk_icon.png" alt="APK" height="41">](https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-aarch64.apk)
+[<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/apk_icon.png" alt="APK" height="41">](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)
 
 - 🖲 Chroni Twoje wiadomości i metadane - z kim rozmawiasz i kiedy.
 - 🔐 Szyfrowanie end-to-end double ratchet, z dodatkową warstwą szyfrowania.
-- 📱 Aplikacje mobilne dla Androida ([Google Play](https://play.google.com/store/apps/details?id=com.popopxchat.popopx), [APK](https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-aarch64.apk)) oraz [iOS](https://apps.apple.com/us/app/popopx-chat/id6799146157).
+- 📱 Aplikacje mobilne dla Androida ([Google Play](https://play.google.com/store/apps/details?id=com.popopxchat.popopx), [APK](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)) oraz [iOS](https://apps.apple.com/us/app/popopx-chat/id6799146157).
 - 🚀 [TestFlight dla iOS](https://testflight.apple.com/join/DWuT2LQu) z nowymi funkcjami na tydzień-dwa wcześniej - **limitowane do 10,000 użytkowników**!
 - 🖥 Dostępny jako terminalowa (konsolowa) [aplikacja / CLI](#zap-quick-installation-of-a-terminal-app) na Linuxa, MacOSa, Windowsa.
 
@@ -429,4 +429,4 @@ Prosimy o traktowanie wszelkich ustaleń dotyczących możliwych ataków korelac
 &nbsp;
 [<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/testflight.png" alt="iOS TestFlight" height="41">](https://testflight.apple.com/join/DWuT2LQu)
 &nbsp;
-[<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/apk_icon.png" alt="APK" height="41">](https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-aarch64.apk)
+[<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/apk_icon.png" alt="APK" height="41">](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)

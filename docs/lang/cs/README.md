@@ -18,11 +18,11 @@
 &nbsp;
 [<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/testflight.png" alt="iOS TestFlight" height="41">](https://testflight.apple.com/join/DWuT2LQu)
 &nbsp;
-[<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/apk_icon.png" alt="APK" height="41">](https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-aarch64.apk)
+[<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/apk_icon.png" alt="APK" height="41">](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)
 
 - 🖲 Chrání vaše zprávy a metadata - s kým a kdy mluvíte.
 - 🔐 Koncové šifrování s další vrstvou šifrování.
-- 📱 Mobilní aplikace pro Android ([Google Play](https://play.google.com/store/apps/details?id=com.popopxchat.popopx), [APK](https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-aarch64.apk)) a [iOS](https://apps.apple.com/us/app/popopx-chat/id6799146157).
+- 📱 Mobilní aplikace pro Android ([Google Play](https://play.google.com/store/apps/details?id=com.popopxchat.popopx), [APK](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)) a [iOS](https://apps.apple.com/us/app/popopx-chat/id6799146157).
 - 🚀 [TestFlight preview for iOS](https://testflight.apple.com/join/DWuT2LQu) s novými funkcemi o 1-2 týdny dříve - **omezeno na 10 000 uživatelů**!
 - 🖥 K dispozici jako terminálová (konzolová) [aplikace / CLI](#zap-quick-installation-of-a-terminal-app) v systémech Linux, MacOS, Windows.
 
@@ -324,4 +324,4 @@ Jakákoli zjištění možných útoků korelace provozu umožňujících korelo
 &nbsp;
 [<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/testflight.png" alt="iOS TestFlight" height="41">](https://testflight.apple.com/join/DWuT2LQu)
 &nbsp;
-[<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/apk_icon.png" alt="APK" height="41">](https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-aarch64.apk)
+[<img src="https://github.com/simplex-chat/.github/blob/master/profile/images/apk_icon.png" alt="APK" height="41">](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)

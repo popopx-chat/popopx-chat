@@ -25,6 +25,8 @@ fun showStartupError(e: Throwable) {
   exitProcess(0)
 }
 
+// HELD 2026-11-13: upstream's issue tracker, used until our own is set up (#16-d).
+// A user reporting a POPOPX bug lands on simplex-chat/simplex-chat issues - known misattribution.
 private const val ISSUES_URL = "https://github.com/simplex-chat/simplex-chat/issues"
 private const val SUPPORT_EMAIL = "chat@popopx.chat"
 

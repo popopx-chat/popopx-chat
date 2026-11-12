@@ -10,10 +10,10 @@
                 <img class="dark:hidden" src="/img/downloads/desktop-light.webp" alt="POPOPX Chat desktop app" width="1311" height="880">
                 <img class="hidden dark:block" src="/img/downloads/desktop-dark.webp" alt="POPOPX Chat desktop app" width="1311" height="880">
             </div>
-            <a class="dl-primary dl-os dl-os-mac" href="{{ release }}popopx-desktop-macos-aarch64.dmg">{{ "downloads-for-mac" | i18n({}, lang) }}</a>
-            <a class="dl-primary dl-os dl-os-windows" href="{{ release }}popopx-desktop-windows-x86_64.msi">{{ "downloads-for-windows" | i18n({}, lang) }}</a>
-            <a class="dl-primary dl-os dl-os-linux" href="{{ release }}popopx-desktop-x86_64.AppImage">{{ "downloads-for-linux" | i18n({}, lang) }}</a>
-            <p class="dl-alt dl-os dl-os-mac">Apple Silicon · <a href="{{ release }}popopx-desktop-macos-x86_64.dmg">Intel</a> · <a href="#dl-all">{{ "downloads-more" | i18n({}, lang) }}</a></p>
+            <a class="dl-primary dl-os dl-os-mac" href="{% cfg 'release' %}popopx-desktop-macos-aarch64.dmg">{{ "downloads-for-mac" | i18n({}, lang) }}</a>
+            <a class="dl-primary dl-os dl-os-windows" href="{% cfg 'release' %}popopx-desktop-windows-x86_64.msi">{{ "downloads-for-windows" | i18n({}, lang) }}</a>
+            <a class="dl-primary dl-os dl-os-linux" href="{% cfg 'release' %}popopx-desktop-x86_64.AppImage">{{ "downloads-for-linux" | i18n({}, lang) }}</a>
+            <p class="dl-alt dl-os dl-os-mac">Apple Silicon · <a href="{% cfg 'release' %}popopx-desktop-macos-x86_64.dmg">Intel</a> · <a href="#dl-all">{{ "downloads-more" | i18n({}, lang) }}</a></p>
             <p class="dl-alt dl-os dl-os-windows">x86_64 · <a href="#dl-all">{{ "downloads-more" | i18n({}, lang) }}</a></p>
             <p class="dl-alt dl-os dl-os-linux">AppImage x86_64 · <a href="https://flathub.org/apps/chat.simplex.simplex" target="_blank" rel="noopener">Flatpak</a> · <a href="#dl-all">{{ "downloads-more" | i18n({}, lang) }}</a></p>
         </div>
@@ -32,7 +32,7 @@
                 <img class="hidden dark:block" src="/img/downloads/android-dark.webp" alt="POPOPX Chat on Android" width="440" height="965">
             </div>
             <a class="dl-badge" href="https://play.google.com/store/apps/details?id=com.popopxchat.popopx" target="_blank" rel="noopener"><img src="/img/new/google_play.svg" alt="Get it on Google Play"></a>
-            <p class="dl-alt"><a href="{{ '' if lang == 'en' else '/' ~ lang }}/fdroid">F-Droid</a> · APK <a href="{{ release }}simplex-aarch64.apk">aarch64</a> · <a href="{{ release }}simplex-armv7a.apk">armv7</a></p>
+            <p class="dl-alt"><a href="{{ '' if lang == 'en' else '/' ~ lang }}/fdroid">F-Droid</a> · APK <a href="https://play.google.com/store/apps/details?id=com.popopxchat.popopx">aarch64</a> · <a href="https://play.google.com/store/apps/details?id=com.popopxchat.popopx">armv7</a></p>
         </div>
     </div>
     <p class="dl-wrap dl-other"><a href="#dl-all">{{ "downloads-other-devices" | i18n({}, lang) }}</a></p>

@@ -36,7 +36,7 @@ You can [verify and reproduce](./REPRODUCE.md) Linux builds.
 
 **iOS**: [App store](https://apps.apple.com/us/app/popopx-chat/id6799146157), [TestFlight](https://testflight.apple.com/join/DWuT2LQu).
 
-**Android**: [Play store](https://play.google.com/store/apps/details?id=com.popopxchat.popopx), [F-Droid](https://simplex.chat/fdroid/), [APK aarch64](https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-aarch64.apk), [APK armv7](https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-armv7a.apk).
+**Android**: [Play store](https://play.google.com/store/apps/details?id=com.popopxchat.popopx), [F-Droid](https://simplex.chat/fdroid/), [APK aarch64](https://play.google.com/store/apps/details?id=com.popopxchat.popopx), [APK armv7](https://play.google.com/store/apps/details?id=com.popopxchat.popopx).
 
 You can [verify and reproduce](./REPRODUCE.md) Android APKs.
 

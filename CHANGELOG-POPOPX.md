@@ -60,6 +60,10 @@ the six `smp://…@smpN.simplexonflux.com` host-and-key pairs in `Presets.hs`, w
 The FFI library is `libpopopx` (a dual lookup for `libsimplex*` is retained); the Node/Python/Rust
 SDK mirrors, the MCP tool outputs (`popopx_name`) and the `.popopx-mcp` data directory moved with
 them; the SMP dependency is `github.com/popopx-chat/popopxmq`, and so did the names this fork's CI publishes into its own releases (`popopx-chat-*`, `popopx-desktop-*`) with the four readers of the same value: the desktop updater's `githubAssetName` literals, its GitHub API repository, and the doc and website URLs.
+The user-facing download links that named an APK asset now point at the Google Play listing (this fork
+publishes no APK), and `{{ release }}` — which was never defined in `website/src`, so every desktop and
+CLI link on `/downloads` rendered as a relative 404 — is now the `release` member of the site's
+`globalConfig`, read as `{% cfg 'release' %}`. See `FORK.md` items 4 and 5.
 The npm and PyPI names in the committed manifests are upstream's on purpose: `packages_release.py
 test-names` rewrites them, with `npm:` aliases for the cross-package dependencies, from the
 repository variables `NPM_SCOPE` and `PYPI_PROJECT` at publish time — see

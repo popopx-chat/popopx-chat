@@ -40,8 +40,23 @@ summary:
    error in the app. The packaging *producers* had been renamed earlier
    (`make-deb-linux.sh:57` → `popopx_${ARCH}.deb`, `desktop/build.gradle.kts:72,81,124` →
    `packageName = "POPOPX"/"popopx"`), while the CI steps that locate their output still globbed the
-   upstream spellings; those five readers now derive the name from the build tree instead of
-   hard-coding it.
+   upstream spellings; those seven readers (4 in `build.yml`, 3 in `desktop-linux.yml`) now derive the
+   name from the build tree instead of hard-coding it.
+
+5. **Download links** (2026-11-13) — every user-facing link that pointed at an APK asset now points at
+   the Google Play listing, because this fork publishes no APK (see "What is still unset"). 25 URLs in
+   README, `docs/DOWNLOADS.md`, the three `docs/lang/*/README.md` and 8 website pages. This leaves pages
+   that show a Play badge next to a badge still labelled "APK"; relabelling or removing those is a copy
+   decision, not a wire one. The three places that still name upstream's APK on purpose are
+   `docs/REPRODUCE.md` (it verifies *their* signed build), `scripts/ci/android/release-apk.sh` with
+   `.github/workflows/android-emu.yml:490` (the emulator smoke test installs that same upstream APK), and
+   `plans/website-file-page-implementation.md:167` (a historical plan).
+   The same pass defined `release` in `.eleventy.js`'s `globalConfig` and replaced 20 uses of
+   `{{ release }}`: that variable is defined nowhere in `website/src`, so eleventy rendered it as the
+   empty string and every desktop and CLI link on `/downloads` was a *relative* path — a 404 on our own
+   site. It is exposed through the shortcode the site already uses for its other two global URLs
+   (`{% cfg 'siteLocation' %}`), which is why it is `{% cfg 'release' %}` and not a `{{ }}` variable:
+   Eleventy 1.x has no `addGlobalData`.
 Every modification carries the date of the commit that made it; `git log` is the
 authoritative per-file record.
 
@@ -112,10 +127,14 @@ yet. Before any build of this fork is distributed:
 - **This fork publishes no Android APK.** `.github/workflows/build.yml` builds and signs nothing for
   Android; `scripts/ci/android/release-apk.sh` downloads **upstream's** release APK and verifies
   SimpleX's signing certificate, which is what the emulator smoke test installs. The gradle output
-  names (`popopx-arm64-v8a.apk`, `popopx-armv7a.apk`) are therefore only local artifacts, and the
-  APK download links still present in `README.md`, `docs/lang/*/README.md`, `docs/DOWNLOADS.md` and
-  the website pages still resolve to upstream's release. Ruling open: remove them, or annotate them
-  as upstream's build (the same treatment as the server binaries below).
+  names (`popopx-arm64-v8a.apk`, `popopx-armv7a.apk`) are therefore only local artifacts. Ruled
+  2026-11-13: the documentation links point at the stores (item 5 above) — but note that our Play
+  listing is itself not published yet, so those links 404 *for us* until it is.
+- **The bug-report address is still upstream's.** `StartupError.kt:28` `ISSUES_URL` →
+  `github.com/simplex-chat/simplex-chat/issues`: a Windows startup crash tells the user to report it in
+  upstream's tracker. Ruled 2026-11-13 to stay until our own tracker is set up; the reason is recorded
+  as a comment above the constant. `SUPPORT_EMAIL` on the next line is already `chat@popopx.chat`, which
+  is itself not yet reachable (first bullet).
 - **The libs release assets keep their inherited names.** The *repository* already resolves to this
   fork (`.github/workflows/build.yml:203` sets `LIBS_REPOSITORY: ${{ github.repository }}-libs`), but
   the zip asset names inside its releases are still `simplex-chat-libs-<platform>.zip`
