@@ -18,9 +18,9 @@ describe("Core tests", () => {
     await core.loadLibrary("sqlite");
   }, 300000);
   const tmpDir = "./tests/tmp";
-  const dbPath = path.join(tmpDir, "simplex_v1");
+  const dbPath = path.join(tmpDir, "popopx_v1");
   const templateDir = "./tests/template";
-  const templateDbPath = path.join(templateDir, "simplex_v1");
+  const templateDbPath = path.join(templateDir, "popopx_v1");
 
   beforeAll(async () => {
     fs.mkdirSync(templateDir, {recursive: true});

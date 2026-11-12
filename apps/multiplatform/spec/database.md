@@ -83,13 +83,13 @@ From [Files.desktop.kt](../common/src/desktopMain/kotlin/chat/popopx/common/plat
 |----------|-------|-------|
 | `dataDir` | `desktopPlatform.dataPath` | XDG_DATA_HOME (Linux), AppData (Windows), Application Support (macOS) |
 | `tmpDir` | `java.io.tmpdir/simplex` | System temp with `deleteOnExit` |
-| `filesDir` | `dataDir/simplex_v1_files` | Flat file storage |
+| `filesDir` | `dataDir/popopx_v1_files` | Flat file storage |
 | `appFilesDir` | Same as `filesDir` | No subdirectory on desktop |
-| `wallpapersDir` | `dataDir/simplex_v1_assets/wallpapers` | Custom wallpaper images |
+| `wallpapersDir` | `dataDir/popopx_v1_assets/wallpapers` | Custom wallpaper images |
 | `coreTmpDir` | `dataDir/tmp` | Haskell core temp directory |
-| `dbAbsolutePrefixPath` | `dataDir/simplex_v1` | Prefix: core appends `_chat.db` / `_agent.db` |
-| `chatDatabaseFileName` | `"simplex_v1_chat.db"` | Full filename: `simplex_v1_chat.db` |
-| `agentDatabaseFileName` | `"simplex_v1_agent.db"` | Full filename: `simplex_v1_agent.db` |
+| `dbAbsolutePrefixPath` | `dataDir/popopx_v1` | Prefix: core appends `_chat.db` / `_agent.db` |
+| `chatDatabaseFileName` | `"popopx_v1_chat.db"` | Full filename: `popopx_v1_chat.db` |
+| `agentDatabaseFileName` | `"popopx_v1_agent.db"` | Full filename: `popopx_v1_agent.db` |
 | `databaseExportDir` | Same as `tmpDir` | Temp location for archive export |
 | `remoteHostsDir` | `dataDir/remote_hosts` | Remote host file staging |
 | `preferencesDir` | `desktopPlatform.configPath` | Platform config directory |
@@ -99,9 +99,9 @@ From [Files.desktop.kt](../common/src/desktopMain/kotlin/chat/popopx/common/plat
 | Platform | Chat DB | Agent DB |
 |----------|---------|----------|
 | Android | `/data/data/<pkg>/files_chat.db` | `/data/data/<pkg>/files_agent.db` |
-| Desktop (Linux) | `~/.local/share/simplex/simplex_v1_chat.db` | `~/.local/share/simplex/simplex_v1_agent.db` |
-| Desktop (macOS) | `~/Library/Application Support/simplex/simplex_v1_chat.db` | ... |
-| Desktop (Windows) | `%APPDATA%/simplex/simplex_v1_chat.db` | ... |
+| Desktop (Linux) | `~/.local/share/popopx/popopx_v1_chat.db` | `~/.local/share/popopx/popopx_v1_agent.db` |
+| Desktop (macOS) | `~/.local/share/popopx/popopx_v1_chat.db` | ... |
+| Desktop (Windows) | `%APPDATA%/POPOPX/popopx_v1_chat.db` | ... |
 
 ---
 
@@ -289,8 +289,8 @@ Declared in [Files.kt](../common/src/commonMain/kotlin/chat/popopx/common/platfo
 
 | Directory | Variable | Android Path | Desktop Path | Purpose |
 |-----------|----------|-------------|--------------|---------|
-| App files | `appFilesDir` | `dataDir/files/app_files` | `dataDir/simplex_v1_files` | Chat file attachments (images, videos, documents) |
-| Wallpapers | `wallpapersDir` | `dataDir/files/assets/wallpapers` | `dataDir/simplex_v1_assets/wallpapers` | Custom chat wallpaper images |
+| App files | `appFilesDir` | `dataDir/files/app_files` | `dataDir/popopx_v1_files` | Chat file attachments (images, videos, documents) |
+| Wallpapers | `wallpapersDir` | `dataDir/files/assets/wallpapers` | `dataDir/popopx_v1_assets/wallpapers` | Custom chat wallpaper images |
 | Core temp | `coreTmpDir` | `dataDir/files/temp_files` | `dataDir/tmp` | Haskell core temporary files (in-progress transfers) |
 | App temp | `tmpDir` | `getDir("temp", MODE_PRIVATE)` | `java.io.tmpdir/simplex` | Application-level temporary files |
 | Remote hosts | `remoteHostsDir` | `tmpDir/remote_hosts` | `dataDir/remote_hosts` | Files staged for remote host sessions |
@@ -302,7 +302,7 @@ Declared in [Files.kt](../common/src/commonMain/kotlin/chat/popopx/common/platfo
 
 Files referenced by chat items use `CryptoFile` (optional encryption metadata + relative path). Path resolution is handled by helper functions in [Files.kt](../common/src/commonMain/kotlin/chat/popopx/common/platform/Files.kt):
 
-- `getAppFilePath(fileName)` ([L81](../common/src/commonMain/kotlin/chat/popopx/common/platform/Files.kt#L81)) -- resolves to `appFilesDir/fileName` for local, or `remoteHostsDir/<storePath>/simplex_v1_files/fileName` for remote hosts
+- `getAppFilePath(fileName)` ([L81](../common/src/commonMain/kotlin/chat/popopx/common/platform/Files.kt#L81)) -- resolves to `appFilesDir/fileName` for local, or `remoteHostsDir/<storePath>/popopx_v1_files/fileName` for remote hosts
 - `getWallpaperFilePath(fileName)` ([L91](../common/src/commonMain/kotlin/chat/popopx/common/platform/Files.kt#L91)) -- resolves wallpaper paths similarly
 - `getLoadedFilePath(file)` ([L105](../common/src/commonMain/kotlin/chat/popopx/common/platform/Files.kt#L105)) -- returns the full path if the file is downloaded and ready
 

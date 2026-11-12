@@ -7,7 +7,7 @@
       1. Open sqlite db:
 
       ```sh
-      sqlcipher simplex_v1_agent.db
+      sqlcipher popopx_v1_agent.db
       ```
 
       2. Run in sqlcipher:
@@ -15,7 +15,7 @@
       ```sql
       PRAGMA key = '<your_password>'; -- Set your db password
       SELECT count(*) FROM sqlite_master; -- Check if db was successfully decrypted
-      ATTACH DATABASE 'simplex_v1_agent_plaintext.db' AS plaintext KEY ''; -- Attach new empty db
+      ATTACH DATABASE 'popopx_v1_agent_plaintext.db' AS plaintext KEY ''; -- Attach new empty db
       SELECT sqlcipher_export('plaintext'); -- Export opened db to attached db as plaintext
       DETACH DATABASE plaintext;
       ```
@@ -25,7 +25,7 @@
       1. Open sqlite db:
 
       ```sh
-      sqlcipher simplex_v1_chat.db
+      sqlcipher popopx_v1_chat.db
       ```
 
       2. Run in sqlcipher:
@@ -33,7 +33,7 @@
       ```sql
       PRAGMA key = '<your_password>';
       SELECT count(*) FROM sqlite_master;
-      ATTACH DATABASE 'simplex_v1_chat_plaintext.db' AS plaintext KEY '';
+      ATTACH DATABASE 'popopx_v1_chat_plaintext.db' AS plaintext KEY '';
       SELECT sqlcipher_export('plaintext');
       DETACH DATABASE plaintext;
       ```
@@ -52,8 +52,8 @@
       CREATE USER simplex WITH ENCRYPTED PASSWORD '123123'; -- Create user with password
       -- or
       -- CREATE USER simplex;
-      CREATE DATABASE simplex_v1; -- Create database
-      GRANT ALL PRIVILEGES ON DATABASE simplex_v1 TO simplex; -- Assign permissions
+      CREATE DATABASE popopx_v1; -- Create database
+      GRANT ALL PRIVILEGES ON DATABASE popopx_v1 TO simplex; -- Assign permissions
       ```
 
 3. Prepare database:
@@ -75,30 +75,30 @@
    2. Execute CLI:
 
       ```sh
-      ./simplex-chat-pg -d "postgresql://simplex:123123@localhost:5432/simplex_v1" --create-schema
+      ./simplex-chat-pg -d "postgresql://simplex:123123@localhost:5432/popopx_v1" --create-schema
       ```
 
       Press `Ctrl+C` when CLI ask for a display name.
 
-   This should create `simplex_v1_agent_schema` and `simplex_v1_chat_schema` schemas in `simplex_v1` database, with `migrations` tables populated. Some tables would have initialization data - it will be truncated via pgloader command in next step.
+   This should create `popopx_v1_agent_schema` and `popopx_v1_chat_schema` schemas in `popopx_v1` database, with `migrations` tables populated. Some tables would have initialization data - it will be truncated via pgloader command in next step.
 
 3. Load data from decrypted SQLite databases to Postgres database via pgloader.
 
    Install pgloader and add it to PATH. Run in shell (substitute paths):
 
    ```sh
-   export POSTGRES_CONN='postgresql://simplex:123123@localhost:5432/simplex_v1'
+   export POSTGRES_CONN='postgresql://simplex:123123@localhost:5432/popopx_v1'
    ```
 
    And then:
 
    ```sh
-   SQLITE_DBPATH='simplex_v1_agent_plaintext.db' \
-   POSTGRES_SCHEMA='simplex_v1_agent_schema' \
+   SQLITE_DBPATH='popopx_v1_agent_plaintext.db' \
+   POSTGRES_SCHEMA='popopx_v1_agent_schema' \
    CPU_CORES=$(nproc) WORKERS=$((CPU_CORES - 1)) pgloader --dynamic-space-size 262144 --on-error-stop sqlite.load
 
-   SQLITE_DBPATH='simplex_v1_chat_plaintext.db' \
-   POSTGRES_SCHEMA='simplex_v1_chat_schema' \
+   SQLITE_DBPATH='popopx_v1_chat_plaintext.db' \
+   POSTGRES_SCHEMA='popopx_v1_chat_schema' \
    CPU_CORES=$(nproc) WORKERS=$((CPU_CORES - 1)) pgloader --dynamic-space-size 262144 --on-error-stop sqlite.load
    ```
 
@@ -107,7 +107,7 @@
    Connect to db:
 
    ```sh
-   PGPASSWORD=123123 psql -h localhost -U simplex -d simplex_v1
+   PGPASSWORD=123123 psql -h localhost -U simplex -d popopx_v1
    ```
 
    Execute the following:
@@ -119,7 +119,7 @@
       DECLARE
          rec RECORD;
       BEGIN
-         EXECUTE 'SET SEARCH_PATH TO simplex_v1_agent_schema';
+         EXECUTE 'SET SEARCH_PATH TO popopx_v1_agent_schema';
 
          FOR rec IN
             SELECT
@@ -129,7 +129,7 @@
             FROM
                information_schema.columns
             WHERE
-               table_schema = 'simplex_v1_agent_schema'
+               table_schema = 'popopx_v1_agent_schema'
                AND identity_generation = 'ALWAYS'
          LOOP
             EXECUTE format(
@@ -147,7 +147,7 @@
       DECLARE
          rec RECORD;
       BEGIN
-         EXECUTE 'SET SEARCH_PATH TO simplex_v1_chat_schema';
+         EXECUTE 'SET SEARCH_PATH TO popopx_v1_chat_schema';
 
          FOR rec IN
             SELECT
@@ -157,7 +157,7 @@
             FROM
                information_schema.columns
             WHERE
-               table_schema = 'simplex_v1_chat_schema'
+               table_schema = 'popopx_v1_chat_schema'
                AND identity_generation = 'ALWAYS'
          LOOP
             EXECUTE format(
@@ -179,7 +179,7 @@
          SELECT table_schema, table_name
          FROM information_schema.Tables
          WHERE table_name NOT LIKE 'pg_%'
-           AND table_schema IN ('simplex_v1_agent_schema')
+           AND table_schema IN ('popopx_v1_agent_schema')
       )
       SELECT
          table_schema AS schema_name,
@@ -198,7 +198,7 @@
          SELECT table_schema, table_name
          FROM information_schema.Tables
          WHERE table_name NOT LIKE 'pg_%'
-           AND table_schema IN ('simplex_v1_chat_schema')
+           AND table_schema IN ('popopx_v1_chat_schema')
       )
       SELECT
          table_schema AS schema_name,
@@ -215,7 +215,7 @@
    1. For `agent`:
 
       ```sh
-      db="simplex_v1_agent_plaintext.db"
+      db="popopx_v1_agent_plaintext.db"
       sqlite3 "$db" "SELECT name FROM sqlite_master WHERE type='table';" |
       while read table; do
          count=$(sqlite3 "$db" "SELECT COUNT(*) FROM \"$table\";")
@@ -226,7 +226,7 @@
    2. For `chat`:
 
       ```sh
-      db="simplex_v1_chat_plaintext.db"
+      db="popopx_v1_chat_plaintext.db"
       sqlite3 "$db" "SELECT name FROM sqlite_master WHERE type='table';" |
       while read table; do
          count=$(sqlite3 "$db" "SELECT COUNT(*) FROM \"$table\";")
@@ -270,19 +270,19 @@
    3. Move database:
 
       ```sh
-      mv ~/.simplex/simplex_v1_* ~/.local/share/simplex/
+      mv ~/.simplex/popopx_v1_* ~/.local/share/simplex/
       ```
 
 2. Transfer data:
 
    ```sh
-   ./pg2sqlite.py --verbose 'postgresql://simplex:123123@localhost:5432/simplex_v1' ~/.local/share/simplex/
+   ./pg2sqlite.py --verbose 'postgresql://simplex:123123@localhost:5432/popopx_v1' ~/.local/share/simplex/
    ```
 
 4. Update BLOBs:
 
    ```sh
-   sqlite3 simplex_v1_chat.db
+   sqlite3 popopx_v1_chat.db
    ```
 
    ```sh

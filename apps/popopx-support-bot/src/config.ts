@@ -47,7 +47,7 @@ function buildCommand(): Command {
     .option("--sqlite-file-prefix <path>", "SQLite DB file prefix", "./data/simplex")
     .option("--sqlite-key <key>", "SQLCipher encryption key (default: unencrypted)")
     .option("--pg-conn <conn>", "PostgreSQL connection string (required with --db postgres)")
-    .option("--pg-schema <prefix>", "PostgreSQL schema prefix (default: simplex_v1)")
+    .option("--pg-schema <prefix>", "PostgreSQL schema prefix (default: popopx_v1)")
     .option("-a, --auto-add-team-members <list>", "comma-separated ID:name pairs (e.g. 1:Alice,2:Bob)")
     .option("--timezone <iana>", "IANA timezone for weekend detection", "UTC")
     .option("--complete-hours <n>", "auto-complete chats after N hours idle (0 disables)", parseNonNegativeInt("--complete-hours"), 3)

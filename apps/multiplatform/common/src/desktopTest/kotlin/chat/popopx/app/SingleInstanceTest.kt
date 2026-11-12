@@ -229,7 +229,7 @@ class SingleInstanceTest {
     val lockAttemptTime = Instant.now().truncatedTo(ChronoUnit.SECONDS)
     val old = FileTime.from(lockAttemptTime.minusSeconds(3600))
     Files.setLastModifiedTime(Files.createFile(dir.resolve("popopx.started")), old)
-    Files.setLastModifiedTime(Files.createFile(dir.resolve("simplex_v1_chat.db")), old)
+    Files.setLastModifiedTime(Files.createFile(dir.resolve("popopx_v1_chat.db")), old)
     Files.setLastModifiedTime(Files.createFile(dir.resolve("other.tmp")), old)
     Files.setLastModifiedTime(Files.createFile(dir.resolve("${SHOW_FILE}123$SHOW_TMP_SUFFIX")), old)
     Files.createFile(dir.resolve("${SHOW_FILE}456$SHOW_TMP_SUFFIX"))
@@ -237,7 +237,7 @@ class SingleInstanceTest {
     Files.createFile(dir.resolve(SHOW_FILE))
     deleteStaleSignalFiles(dir, FileTime.from(lockAttemptTime))
     assertEquals(
-      listOf("other.tmp", SHOW_FILE, "${SHOW_FILE}456$SHOW_TMP_SUFFIX", "popopx.started", "simplex_v1_chat.db"),
+      listOf("other.tmp", SHOW_FILE, "${SHOW_FILE}456$SHOW_TMP_SUFFIX", "popopx.started", "popopx_v1_chat.db"),
       fileNames(dir),
       "an old temp file and a taken file must go; a fresh temp file is a signal being written, and the lock and database stay"
     )

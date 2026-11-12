@@ -40,7 +40,7 @@ Both databases are initialized and migrated via the C FFI function `chat_migrate
 ### [Path Resolution](../POPOPXChat/FileUtils.swift#L63-L73) (FileUtils.swift)
 
 ```swift
-let DB_FILE_PREFIX = "simplex_v1"
+let DB_FILE_PREFIX = "popopx_v1"
 
 // Database path depends on container preference
 func getAppDatabasePath() -> URL {
@@ -50,8 +50,8 @@ func getAppDatabasePath() -> URL {
 }
 
 // Full database file paths:
-// Chat:  {container}/simplex_v1_chat.db
-// Agent: {container}/simplex_v1_agent.db
+// Chat:  {container}/popopx_v1_chat.db
+// Agent: {container}/popopx_v1_agent.db
 ```
 
 ### [File Constants](../POPOPXChat/FileUtils.swift#L38-L44)
@@ -182,8 +182,8 @@ The encryption key is stored in the iOS Keychain via `kcDatabasePassword`:
 │   ├── temp_files/         -- Temporary files during transfer
 │   └── assets/wallpapers/  -- Custom wallpaper images
 ├── {App Group Container}/
-│   ├── simplex_v1_chat.db  -- Chat database
-│   ├── simplex_v1_agent.db -- Agent database
+│   ├── popopx_v1_chat.db  -- Chat database
+│   ├── popopx_v1_agent.db -- Agent database
 │   └── ...
 ```
 
@@ -267,8 +267,8 @@ The main app and NSE share database access through the iOS App Group container:
 
 ```
 Main App ──┐
-            ├── {App Group}/simplex_v1_chat.db
-            ├── {App Group}/simplex_v1_agent.db
+            ├── {App Group}/popopx_v1_chat.db
+            ├── {App Group}/popopx_v1_agent.db
 NSE ────────┘
 ```
 

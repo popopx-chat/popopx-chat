@@ -50,7 +50,7 @@ Run `npm start -- --help` for the auto-generated reference. Summary:
 | `--sqlite-file-prefix` | sqlite | no | `./data/simplex` | DB file prefix (creates `<prefix>_chat.db`, `<prefix>_agent.db`) |
 | `--sqlite-key` | sqlite | no | (unencrypted) | SQLCipher encryption key |
 | `--pg-conn` | postgres | yes | — | PostgreSQL connection string |
-| `--pg-schema` | postgres | no | `simplex_v1` | schema prefix used for bot tables |
+| `--pg-schema` | postgres | no | `popopx_v1` | schema prefix used for bot tables |
 | `-a` / `--auto-add-team-members` | both | no | | comma-separated `ID:name` pairs (e.g. `1:Alice,2:Bob`) |
 | `--timezone` | both | no | `UTC` | IANA zone for weekend detection |
 | `--complete-hours` | both | no | `3` | auto-complete chats after N hours idle (`0` disables) |

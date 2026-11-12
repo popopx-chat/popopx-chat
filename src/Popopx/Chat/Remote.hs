@@ -71,7 +71,7 @@ import UnliftIO.Concurrent (forkIO)
 import UnliftIO.Directory (canonicalizePath, copyFile, createDirectoryIfMissing, doesDirectoryExist, removeDirectoryRecursive, renameFile)
 
 remoteFilesFolder :: String
-remoteFilesFolder = "simplex_v1_files"
+remoteFilesFolder = "popopx_v1_files"
 
 -- when acting as host
 minRemoteCtrlVersion :: AppVersion

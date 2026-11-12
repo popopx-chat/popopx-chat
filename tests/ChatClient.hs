@@ -205,7 +205,7 @@ testCoreOpts =
           dbPoolSize = 10,
           dbCreateSchema = True
 #else
-        { dbFilePrefix = "./simplex_v1", -- dbFilePrefix is not used in tests (except bot tests where it's redefined)
+        { dbFilePrefix = "./popopx_v1", -- dbFilePrefix is not used in tests (except bot tests where it's redefined)
           dbKey = "", -- dbKey = "this is a pass-phrase to encrypt the database",
           trackQueries = DB.TQAll,
           vacuumOnMigration = True

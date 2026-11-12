@@ -33,7 +33,7 @@ chatDbOptsP _appDir defaultDbName = do
       ( long "schema-prefix"
           <> metavar "DB_SCHEMA_PREFIX"
           <> help "Database schema prefix"
-          <> value "simplex_v1"
+          <> value "popopx_v1"
           <> showDefault
       )
   dbPoolSize <-
@@ -62,7 +62,7 @@ toDBOpts :: ChatDbOpts -> String -> Bool -> [()] -> DBOpts
 toDBOpts ChatDbOpts {dbConnstr, dbSchemaPrefix, dbPoolSize, dbCreateSchema} dbSuffix _keepKey _dbFunctions =
   DBOpts
     { connstr = B.pack dbConnstr,
-      schema = B.pack $ if null dbSchemaPrefix then "simplex_v1" <> dbSuffix else dbSchemaPrefix <> dbSuffix,
+      schema = B.pack $ if null dbSchemaPrefix then "popopx_v1" <> dbSuffix else dbSchemaPrefix <> dbSuffix,
       poolSize = dbPoolSize,
       createSchema = dbCreateSchema
     }

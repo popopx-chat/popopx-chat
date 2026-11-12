@@ -75,7 +75,7 @@ export type DbConfig =
   | {
       /** PostgreSQL backend (Linux x86_64 only, libpq5 required). */
       type: "postgres"
-      /** Schema prefix used to namespace tables. Defaults to `"simplex_v1"` when omitted. */
+      /** Schema prefix used to namespace tables. Defaults to `"popopx_v1"` when omitted. */
       schemaPrefix?: string
       /** PostgreSQL connection string (e.g. `postgres://user:pass@host/db`). */
       connectionString: string

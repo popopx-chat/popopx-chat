@@ -38,16 +38,16 @@ import UnliftIO.STM
 import UnliftIO.Temporary
 
 archiveAgentDbFile :: String
-archiveAgentDbFile = "simplex_v1_agent.db"
+archiveAgentDbFile = "popopx_v1_agent.db"
 
 archiveChatDbFile :: String
-archiveChatDbFile = "simplex_v1_chat.db"
+archiveChatDbFile = "popopx_v1_chat.db"
 
 archiveFilesFolder :: String
-archiveFilesFolder = "simplex_v1_files"
+archiveFilesFolder = "popopx_v1_files"
 
 archiveAssetsFolder :: String
-archiveAssetsFolder = "simplex_v1_assets"
+archiveAssetsFolder = "popopx_v1_assets"
 
 wallpapersFolder :: String
 wallpapersFolder = "wallpapers"

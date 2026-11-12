@@ -83,7 +83,7 @@ public func excludeAppDataFromBackup() {
 }
 
 // Spec: spec/database.md#DB_FILE_PREFIX
-let DB_FILE_PREFIX = "simplex_v1"
+let DB_FILE_PREFIX = "popopx_v1"
 
 func getLegacyDatabasePath() -> URL {
     getDocumentsDirectory().appendingPathComponent("mobile_v1", isDirectory: false)

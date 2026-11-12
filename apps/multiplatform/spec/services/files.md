@@ -133,11 +133,11 @@ All functions delegate to native C library functions through the chat core JNI b
 |---|---|
 | `dataDir` | `desktopPlatform.dataPath` (XDG_DATA_HOME on Linux, AppData on Windows, Application Support on macOS) |
 | `tmpDir` | `java.io.tmpdir/simplex` (deleted on exit) |
-| `filesDir` | `dataDir/simplex_v1_files` |
+| `filesDir` | `dataDir/popopx_v1_files` |
 | `appFilesDir` | Same as `filesDir` |
-| `wallpapersDir` | `dataDir/simplex_v1_assets/wallpapers` |
+| `wallpapersDir` | `dataDir/popopx_v1_assets/wallpapers` |
 | `coreTmpDir` | `dataDir/tmp` |
-| `dbAbsolutePrefixPath` | `dataDir/simplex_v1` |
+| `dbAbsolutePrefixPath` | `dataDir/popopx_v1` |
 | `preferencesDir` | `desktopPlatform.configPath` |
 | `databaseExportDir` | Same as `tmpDir` |
 | `remoteHostsDir` | `dataDir/remote_hosts` |

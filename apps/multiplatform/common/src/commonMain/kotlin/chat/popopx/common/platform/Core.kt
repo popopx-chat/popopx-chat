@@ -91,7 +91,7 @@ suspend fun initChatController(useKey: String? = null, confirmMigrations: Migrat
     val dbKey = useKey ?: DatabaseUtils.useDatabaseKey()
     val confirm = confirmMigrations ?: if (appPreferences.developerTools.get() && appPreferences.confirmDBUpgrades.get()) MigrationConfirmation.Error else MigrationConfirmation.YesUp
     var migrated: Array<Any> = if (databaseBackend == "postgres") {
-      chatMigrateInit("simplex_v1", "postgresql://simplex@/simplex_v1", MigrationConfirmation.Error.value)
+      chatMigrateInit("popopx_v1", "postgresql://simplex@/popopx_v1", MigrationConfirmation.Error.value)
     } else {
       chatMigrateInit(dbAbsolutePrefixPath, dbKey, MigrationConfirmation.Error.value)
     }
@@ -107,7 +107,7 @@ suspend fun initChatController(useKey: String? = null, confirmMigrations: Migrat
     if (rerunMigration) {
       chatModel.dbMigrationInProgress.value = true
       migrated = if (databaseBackend == "postgres") {
-        chatMigrateInit("simplex_v1", "postgresql://simplex@/simplex_v1", confirm.value)
+        chatMigrateInit("popopx_v1", "postgresql://simplex@/popopx_v1", confirm.value)
       } else {
         chatMigrateInit(dbAbsolutePrefixPath, dbKey, confirm.value)
       }

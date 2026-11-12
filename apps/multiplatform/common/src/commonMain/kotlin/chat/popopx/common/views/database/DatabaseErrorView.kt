@@ -351,7 +351,7 @@ private fun ColumnScope.RestoreDbButton(onClick: () -> Unit) {
 fun PreviewChatInfoLayout() {
   POPOPXTheme {
     DatabaseErrorView(
-      remember { mutableStateOf(DBMigrationResult.ErrorNotADatabase("simplex_v1_chat.db")) },
+      remember { mutableStateOf(DBMigrationResult.ErrorNotADatabase("popopx_v1_chat.db")) },
       AppPreferences()
     )
   }

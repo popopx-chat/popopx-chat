@@ -175,10 +175,10 @@ Two SQLite databases in the app group container (shared with NSE):
 
 | Database | File | Contents |
 |----------|------|----------|
-| Chat DB | `simplex_v1_chat.db` | Messages, contacts, groups, profiles, files, tags, preferences |
-| Agent DB | `simplex_v1_agent.db` | SMP connections, keys, queues, server info |
+| Chat DB | `popopx_v1_chat.db` | Messages, contacts, groups, profiles, files, tags, preferences |
+| Agent DB | `popopx_v1_agent.db` | SMP connections, keys, queues, server info |
 
-Both databases use the `DB_FILE_PREFIX = "simplex_v1"` prefix. The database path is resolved via [`getAppDatabasePath()`](../POPOPXChat/FileUtils.swift#L70) in `POPOPXChat/FileUtils.swift`, which checks `dbContainerGroupDefault` to determine whether to use the app group container or legacy documents directory.
+Both databases use the `DB_FILE_PREFIX = "popopx_v1"` prefix. The database path is resolved via [`getAppDatabasePath()`](../POPOPXChat/FileUtils.swift#L70) in `POPOPXChat/FileUtils.swift`, which checks `dbContainerGroupDefault` to determine whether to use the app group container or legacy documents directory.
 
 See [Database & Storage specification](database.md) for full details.
 

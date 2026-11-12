@@ -124,7 +124,7 @@ dbOpts: {type: "sqlite", filePrefix: "./data/bot"}
 dbOpts: {
   type: "postgres",
   connectionString: "postgres://user:pass@host/db",
-  // schemaPrefix: "bot",  // optional — defaults to "simplex_v1"
+  // schemaPrefix: "bot",  // optional — defaults to "popopx_v1"
 }
 ```
 

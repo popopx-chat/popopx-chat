@@ -53,7 +53,7 @@ PostgreSQL connection string (e.g. `postgres://user:pass@host/db`).
 
 > `optional` **schemaPrefix?**: `string`
 
-Schema prefix used to namespace tables. Defaults to `"simplex_v1"` when omitted.
+Schema prefix used to namespace tables. Defaults to `"popopx_v1"` when omitted.
 
 #### type
 
