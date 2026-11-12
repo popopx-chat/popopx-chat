@@ -80,7 +80,7 @@ fun ShareListView(chatModel: ChatModel, stopped: Boolean) {
 
 private fun hasPopopxLink(msg: String): Boolean {
   val parsedMsg = parseToMarkdown(msg) ?: return false
-  return parsedMsg.any { ft -> ft.format is Format.SimplexLink }
+  return parsedMsg.any { ft -> ft.format is Format.PopopxLink }
 }
 
 @Composable

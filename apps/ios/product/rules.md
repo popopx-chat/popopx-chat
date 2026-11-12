@@ -120,7 +120,7 @@
 
 ### RULE-21: Relay links cannot be used to connect
 **Rule:** SimpleX links with path `/r` (relay addresses) MUST be rejected when users attempt to connect. An explanatory alert is shown instead.
-**Enforced by:** `ContentView.swift` (`connectViaUrl_` early return for `/r` path), `NewChatView.swift` (`planAndConnect` guard for `.simplexLink(_, .relay, _, _)`).
+**Enforced by:** `ContentView.swift` (`connectViaUrl_` early return for `/r` path), `NewChatView.swift` (`planAndConnect` guard for `.popopxLink(_, .relay, _, _)`).
 **Spec:** [spec/client/navigation.md](../spec/client/navigation.md)
 
 ### RULE-22: Channel subscribers default to observer role

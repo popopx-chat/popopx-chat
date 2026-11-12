@@ -9,8 +9,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Popopx.Chat.Names
-  ( SimplexDomainClaim (..),
-    SimplexDomainProof (..),
+  ( PopopxDomainClaim (..),
+    PopopxDomainProof (..),
     mkDomainClaim,
     claimDomain,
   )
@@ -33,29 +33,29 @@ import Database.SQLite.Simple.ToField (ToField (..))
 #endif
 
 -- A name claim proof: signed by the address owner's key over proof payload - see verifyDomainProof.
-data SimplexDomainProof = SimplexDomainProof
+data PopopxDomainProof = PopopxDomainProof
   { linkOwnerId :: Maybe (StrJSON "OwnerId" OwnerId),
     presHeader :: ProofPresHeader,
     signature :: C.Signature 'C.Ed25519
   }
   deriving (Eq, Show)
 
-$(JQ.deriveJSON defaultJSON ''SimplexDomainProof)
+$(JQ.deriveJSON defaultJSON ''PopopxDomainProof)
 
-instance ToField SimplexDomainProof where toField = toField . encodeJSON
+instance ToField PopopxDomainProof where toField = toField . encodeJSON
 
-instance FromField SimplexDomainProof where fromField = fromTextField_ decodeJSON
+instance FromField PopopxDomainProof where fromField = fromTextField_ decodeJSON
 
-data SimplexDomainClaim = SimplexDomainClaim
-  { domain :: StrJSON "SimplexDomain" PopopxDomain,
-    proof :: Maybe SimplexDomainProof
+data PopopxDomainClaim = PopopxDomainClaim
+  { domain :: StrJSON "PopopxDomain" PopopxDomain,
+    proof :: Maybe PopopxDomainProof
   }
   deriving (Eq, Show)
 
-mkDomainClaim :: PopopxDomain -> SimplexDomainClaim
-mkDomainClaim = (`SimplexDomainClaim` Nothing) . StrJSON
+mkDomainClaim :: PopopxDomain -> PopopxDomainClaim
+mkDomainClaim = (`PopopxDomainClaim` Nothing) . StrJSON
 
-claimDomain :: SimplexDomainClaim -> PopopxDomain
-claimDomain (SimplexDomainClaim n _) = unStrJSON n
+claimDomain :: PopopxDomainClaim -> PopopxDomain
+claimDomain (PopopxDomainClaim n _) = unStrJSON n
 
-$(JQ.deriveJSON defaultJSON ''SimplexDomainClaim)
+$(JQ.deriveJSON defaultJSON ''PopopxDomainClaim)

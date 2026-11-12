@@ -54,7 +54,7 @@ import Data.Time (addUTCTime)
 import Data.Time.Calendar (fromGregorian)
 import Data.Time.Clock (UTCTime (..), diffUTCTime, getCurrentTime, nominalDiffTimeToSeconds, secondsToDiffTime)
 import Popopx.Chat.Badges (BadgeCredential (..), BadgeInfo (..), ProofPresHeader (..), BadgeProof (..), BadgeProofKind (..), BadgeStatus (..), FileSizeLimits (..), LocalBadge (..), acceptedProof, badgeSndGraceInterval, generateBadgeProof, localBadgeStatus, maxXFTPFileSize, mkBadgeStatus, verifyBadge)
-import Popopx.Chat.Names (SimplexDomainClaim (..), claimDomain)
+import Popopx.Chat.Names (PopopxDomainClaim (..), claimDomain)
 import Popopx.Chat.Call
 import Popopx.Chat.Controller
 import Popopx.Chat.Files
@@ -266,7 +266,7 @@ rcvForwardedFrom db user chatDirection RcvMessage {chatMsgEvent} = case chatMsgE
       CDChannelRcv gInfo _ -> allowed GROwner gInfo
       _ -> True
       where
-        allowed role = groupFeatureMemberAllowed' SGFSimplexLinks role . fullGroupPreferences
+        allowed role = groupFeatureMemberAllowed' SGFPopopxLinks role . fullGroupPreferences
 
 forwardLinkCIFF :: DB.Connection -> User -> ForwardLink -> IO CIForwardedFrom
 forwardLinkCIFF db user ForwardLink {displayName, groupLink, publicGroupId, memberId, msgId} =
@@ -404,7 +404,7 @@ prohibitedGroupContent gInfo@GroupInfo {membership = mem@GroupMember {memberRole
   | isVoice mc && not (groupFeatureMemberAllowed SGFVoice m gInfo) && not hostApprovalVoice = Just GFVoice
   | isNothing scopeInfo && not (isVoice mc) && (isJust file_ || isMedia mc) && not (groupFeatureMemberAllowed SGFFiles m gInfo) = Just GFFiles
   | isNothing scopeInfo && isReport mc && (badReportUser || not (groupFeatureAllowed SGFReports gInfo)) = Just GFReports
-  | isNothing scopeInfo && prohibitedSimplexLinks gInfo m mc ft = Just GFSimplexLinks
+  | isNothing scopeInfo && prohibitedPopopxLinks gInfo m mc ft = Just GFPopopxLinks
   | otherwise = Nothing
   where
     supportAllowed = case scopeInfo of
@@ -425,17 +425,17 @@ prohibitedGroupContent gInfo@GroupInfo {membership = mem@GroupMember {memberRole
       | sent = userRole >= GRModerator
       | otherwise = userRole < GRModerator
 
-prohibitedSimplexLinks :: GroupInfo -> GroupMember -> MsgContent -> Maybe MarkdownList -> Bool
-prohibitedSimplexLinks gInfo m mc ft =
-  not (groupFeatureMemberAllowed SGFSimplexLinks m gInfo)
-    && (isChatLink mc || maybe False (any ftIsSimplexLink) ft || hasObfuscatedSimplexLink (msgContentText mc))
+prohibitedPopopxLinks :: GroupInfo -> GroupMember -> MsgContent -> Maybe MarkdownList -> Bool
+prohibitedPopopxLinks gInfo m mc ft =
+  not (groupFeatureMemberAllowed SGFPopopxLinks m gInfo)
+    && (isChatLink mc || maybe False (any ftIsPopopxLink) ft || hasObfuscatedPopopxLink (msgContentText mc))
   where
     isChatLink = \case
       MCChat {} -> True
       _ -> False
 
-ftIsSimplexLink :: FormattedText -> Bool
-ftIsSimplexLink FormattedText {format} = maybe False isSimplexLink format
+ftIsPopopxLink :: FormattedText -> Bool
+ftIsPopopxLink FormattedText {format} = maybe False isPopopxLink format
 
 roundedFDCount :: Int -> Int
 roundedFDCount n
@@ -1366,24 +1366,24 @@ memberInfo g m@GroupMember {memberId, memberRole, memberProfile, memberPubKey, a
 
 redactedMemberProfile :: GroupInfo -> GroupMember -> Profile -> Profile
 redactedMemberProfile g m Profile {displayName, fullName, shortDescr, description, image, contactLink = lnk, peerType, badge, contactDomain} =
-  Profile {displayName, fullName, shortDescr = removeSimplexLink True =<< shortDescr, description = removeSimplexLink False =<< description, image, contactLink, preferences = Nothing, peerType, badge, contactDomain = redactedDomain}
+  Profile {displayName, fullName, shortDescr = removePopopxLink True =<< shortDescr, description = removePopopxLink False =<< description, image, contactLink, preferences = Nothing, peerType, badge, contactDomain = redactedDomain}
   where
-    contactLink = if allowSimplexLinks then lnk else Nothing
-    redactedDomain = if allowDirect then (\d -> d {proof = Nothing} :: SimplexDomainClaim) <$> contactDomain else Nothing
+    contactLink = if allowPopopxLinks then lnk else Nothing
+    redactedDomain = if allowDirect then (\d -> d {proof = Nothing} :: PopopxDomainClaim) <$> contactDomain else Nothing
     allowDirect = groupFeatureMemberAllowed SGFDirectMessages m g
-    allowSimplexLinks = groupFeatureMemberAllowed SGFSimplexLinks m g && allowDirect
-    removeSimplexLink dropOnLink s
-      | allowSimplexLinks = Just s
+    allowPopopxLinks = groupFeatureMemberAllowed SGFPopopxLinks m g && allowDirect
+    removePopopxLink dropOnLink s
+      | allowPopopxLinks = Just s
       | otherwise = case parseMaybeMarkdownList s of
           Nothing -> dropObfuscated
           Just fts
-            | not (any ftIsSimplexLink fts) -> dropObfuscated
-            | dropOnLink || T.null (T.strip kept) || hasObfuscatedSimplexLink kept -> Nothing
+            | not (any ftIsPopopxLink fts) -> dropObfuscated
+            | dropOnLink || T.null (T.strip kept) || hasObfuscatedPopopxLink kept -> Nothing
             | otherwise -> Just kept
             where
-              kept = T.concat $ map (\(FormattedText _ t) -> t) $ filter (not . ftIsSimplexLink) fts
+              kept = T.concat $ map (\(FormattedText _ t) -> t) $ filter (not . ftIsPopopxLink) fts
       where
-        dropObfuscated = if hasObfuscatedSimplexLink s then Nothing else Just s
+        dropObfuscated = if hasObfuscatedPopopxLink s then Nothing else Just s
 
 -- Roles carried by the roster; owners are on the link, not the roster.
 isRosterRole :: GroupMemberRole -> Bool

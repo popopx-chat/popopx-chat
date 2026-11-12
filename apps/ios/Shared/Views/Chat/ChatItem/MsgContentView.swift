@@ -366,7 +366,7 @@ private let linkAttrKey = NSAttributedString.Key("com.popopxchat.popopx.link")
 
 private let webLinkAttrKey = NSAttributedString.Key("com.popopxchat.popopx.webLink")
 
-private let popopxLinkAttrKey = NSAttributedString.Key("com.popopxchat.popopx.simplexLink")
+private let popopxLinkAttrKey = NSAttributedString.Key("com.popopxchat.popopx.popopxLink")
 
 private let secretAttrKey = NSAttributedString.Key("com.popopxchat.popopx.secret")
 
@@ -651,10 +651,10 @@ func messageText(
                     if !ft.isEmailLink { attrs[webLinkAttrKey] = true }
                     handleTaps = true
                 }
-            case let .simplexLink(text, linkType, simplexUri, smpHosts):
+            case let .popopxLink(text, linkType, popopxUri, smpHosts):
                 attrs = linkAttrs()
                 if !preview {
-                    attrs[linkAttrKey] = simplexUri
+                    attrs[linkAttrKey] = popopxUri
                     attrs[popopxLinkAttrKey] = true
                     handleTaps = true
                 }
@@ -691,7 +691,7 @@ func messageText(
                         t = mentionText(memberName)
                     }
                 }
-            case let .simplexName(nameInfo):
+            case let .popopxName(nameInfo):
                 attrs = linkAttrs()
                 if !preview {
                     attrs[nameAttrKey] = nameInfo
@@ -1114,7 +1114,7 @@ private func mentionText(_ name: String) -> String {
     name.contains(" @") ? "@'\(name)'" : "@\(name)"
 }
 
-func popopxLinkText(_ linkType: SimplexLinkType, _ smpHosts: [String]) -> String {
+func popopxLinkText(_ linkType: PopopxLinkType, _ smpHosts: [String]) -> String {
     linkType.description + " " + viaHost(smpHosts)
 }
 

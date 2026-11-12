@@ -28,7 +28,7 @@ fun ChatHelpView(addContact: (() -> Unit)? = null) {
     verticalArrangement = Arrangement.spacedBy(10.dp)
   ) {
     Text(stringResource(MR.strings.thank_you_for_installing_popopx), lineHeight = 22.sp)
-    ReadableTextWithLink(MR.strings.you_can_connect_to_popopx_chat_founder, popopxTeamUri, simplexLink = true)
+    ReadableTextWithLink(MR.strings.you_can_connect_to_popopx_chat_founder, popopxTeamUri, popopxLink = true)
     Column(
       Modifier.padding(top = 24.dp),
       verticalArrangement = Arrangement.spacedBy(10.dp)

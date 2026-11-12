@@ -32,7 +32,7 @@ suspend fun planAndConnect(
 ): CompletableDeferred<Boolean> {
   when (val target = strConnectTarget(shortOrFullLink.trim())) {
     is ConnectTarget.Link -> {
-      if (target.linkType == SimplexLinkType.relay) {
+      if (target.linkType == PopopxLinkType.relay) {
         AlertManager.privacySensitive.showAlertMsg(
           generalGetString(MR.strings.relay_address_alert_title),
           generalGetString(MR.strings.relay_address_alert_message),
@@ -41,7 +41,7 @@ suspend fun planAndConnect(
         return CompletableDeferred(false)
       }
     }
-    // A SimplexName falls through to apiConnectPlan, which resolves it on the
+    // A PopopxName falls through to apiConnectPlan, which resolves it on the
     // core (the /_connect plan command accepts a name target, not only a link).
     is ConnectTarget.Name, null -> {}
   }
@@ -78,12 +78,12 @@ private suspend fun planAndConnectTask(
   connectProgressManager.stopConnectProgress()
   if (!inProgress.value) { return completable }
   if (result != null) {
-    val (connectionLink, planSimplexName, otherSimplexName, connectionPlan) = result
+    val (connectionLink, planPopopxName, otherPopopxName, connectionPlan) = result
     val target = strConnectTarget(shortOrFullLink.trim())
     val linkText = if (target is ConnectTarget.Link) "<br><br><u>${target.linkText}</u>" else ""
     // the name can also resolve to the other kind; its type picks the verb, its short form the label and target
-    val connectOtherLink = otherSimplexName?.shortStr
-    val connectOtherButton = otherSimplexName?.let {
+    val connectOtherLink = otherPopopxName?.shortStr
+    val connectOtherButton = otherPopopxName?.let {
       val label = if (it.nameType == PopopxNameType.publicGroup) MR.strings.connect_plan_join_name else MR.strings.connect_plan_connect_to_name
       generalGetString(label).format(it.shortStr)
     }
@@ -160,7 +160,7 @@ private suspend fun planAndConnectTask(
               connectionLink,
               connectionPlan.contactAddressPlan.contactSLinkData_,
               ownerVerification = connectionPlan.contactAddressPlan.ownerVerification,
-              planSimplexName = planSimplexName,
+              planPopopxName = planPopopxName,
               connectOtherButton = connectOtherButton,
               connectOtherLink = connectOtherLink,
               close,
@@ -209,7 +209,7 @@ private suspend fun planAndConnectTask(
           if (filterKnownContact != null) {
             filterKnownContact(contact)
           } else {
-            showOpenKnownContactAlert(chatModel, rhId, close, contact, planSimplexName = planSimplexName, connectOtherButton = connectOtherButton, connectOtherLink = connectOtherLink)
+            showOpenKnownContactAlert(chatModel, rhId, close, contact, planPopopxName = planPopopxName, connectOtherButton = connectOtherButton, connectOtherLink = connectOtherLink)
             cleanup()
           }
         }
@@ -225,7 +225,7 @@ private suspend fun planAndConnectTask(
           if (filterKnownContact != null) {
             filterKnownContact(contact)
           } else {
-            showOpenKnownContactAlert(chatModel, rhId, close, contact, planSimplexName = planSimplexName, connectOtherButton = connectOtherButton, connectOtherLink = connectOtherLink)
+            showOpenKnownContactAlert(chatModel, rhId, close, contact, planPopopxName = planPopopxName, connectOtherButton = connectOtherButton, connectOtherLink = connectOtherLink)
             cleanup()
           }
         }
@@ -240,7 +240,7 @@ private suspend fun planAndConnectTask(
           if (filterKnownContact != null) {
             filterKnownContact(contact)
           } else {
-            showOpenKnownContactAlert(chatModel, rhId, close, contact, planSimplexName = planSimplexName, connectOtherButton = connectOtherButton, connectOtherLink = connectOtherLink)
+            showOpenKnownContactAlert(chatModel, rhId, close, contact, planPopopxName = planPopopxName, connectOtherButton = connectOtherButton, connectOtherLink = connectOtherLink)
             cleanup()
           }
         }
@@ -255,7 +255,7 @@ private suspend fun planAndConnectTask(
               connectionPlan.groupLinkPlan.groupSLinkInfo_,
               connectionPlan.groupLinkPlan.groupSLinkData_,
               ownerVerification = connectionPlan.groupLinkPlan.ownerVerification,
-              planSimplexName = planSimplexName,
+              planPopopxName = planPopopxName,
               connectOtherButton = connectOtherButton,
               connectOtherLink = connectOtherLink,
               close,
@@ -280,7 +280,7 @@ private suspend fun planAndConnectTask(
           if (filterKnownGroup != null) {
             filterKnownGroup(groupInfo)
           } else {
-            ownGroupLinkConfirmConnect(chatModel, rhId, connectionLink, linkText, connectionPlan, groupInfo, close, cleanup, planSimplexName = planSimplexName, connectOtherButton = connectOtherButton, connectOtherLink = connectOtherLink)
+            ownGroupLinkConfirmConnect(chatModel, rhId, connectionLink, linkText, connectionPlan, groupInfo, close, cleanup, planPopopxName = planPopopxName, connectOtherButton = connectOtherButton, connectOtherLink = connectOtherLink)
           }
         }
         GroupLinkPlan.ConnectingConfirmReconnect -> {
@@ -330,7 +330,7 @@ private suspend fun planAndConnectTask(
           if (filterKnownGroup != null) {
             filterKnownGroup(groupInfo)
           } else {
-            showOpenKnownGroupAlert(chatModel, rhId, close, groupInfo, planSimplexName = planSimplexName, connectOtherButton = connectOtherButton, connectOtherLink = connectOtherLink)
+            showOpenKnownGroupAlert(chatModel, rhId, close, groupInfo, planPopopxName = planPopopxName, connectOtherButton = connectOtherButton, connectOtherLink = connectOtherLink)
             cleanup()
           }
         }
@@ -513,10 +513,10 @@ fun openChat_(chatModel: ChatModel, rhId: Long?, close: (() -> Unit)?, chat: Cha
 val alertProfileImageSize = 138.dp
 
 // For alerts that show the name inline (not as a profile with an avatar): "Alice" -> "Alice (@alice.testing)".
-private fun nameWithDomain(name: String, planSimplexName: PopopxNameInfo?): String =
-  name + (planSimplexName?.let { " (${it.shortStr})" } ?: "")
+private fun nameWithDomain(name: String, planPopopxName: PopopxNameInfo?): String =
+  name + (planPopopxName?.let { " (${it.shortStr})" } ?: "")
 
-private fun showOpenKnownContactAlert(chatModel: ChatModel, rhId: Long?, close: (() -> Unit)?, contact: Contact, planSimplexName: PopopxNameInfo? = null, connectOtherButton: String? = null, connectOtherLink: String? = null) {
+private fun showOpenKnownContactAlert(chatModel: ChatModel, rhId: Long?, close: (() -> Unit)?, contact: Contact, planPopopxName: PopopxNameInfo? = null, connectOtherButton: String? = null, connectOtherLink: String? = null) {
   AlertManager.privacySensitive.showOpenChatAlert(
     profileName = contact.profile.displayName,
     profileFullName = contact.profile.fullName,
@@ -529,7 +529,7 @@ private fun showOpenKnownContactAlert(chatModel: ChatModel, rhId: Long?, close: 
     },
     // the alert shows the badge inline, so it skips the long-expired (ExpiredOld) badge here too
     profileBadge = if (contact.active && contact.profile.localBadge?.status != BadgeStatus.ExpiredOld) contact.profile.localBadge else null,
-    nameCaption = planSimplexName?.shortStr,
+    nameCaption = planPopopxName?.shortStr,
     confirmText = generalGetString(if (contact.nextConnectPrepared) MR.strings.connect_plan_open_new_chat else MR.strings.connect_plan_open_chat),
     onConfirm = {
       openKnownContact(chatModel, rhId, close, contact)
@@ -559,14 +559,14 @@ fun ownGroupLinkConfirmConnect(
   groupInfo: GroupInfo,
   close: (() -> Unit)?,
   cleanup: (() -> Unit)?,
-  planSimplexName: PopopxNameInfo? = null,
+  planPopopxName: PopopxNameInfo? = null,
   connectOtherButton: String? = null,
   connectOtherLink: String? = null,
 ) {
   if (groupInfo.useRelays) {
     AlertManager.privacySensitive.showAlertDialogButtonsColumn(
       title = generalGetString(MR.strings.connect_plan_this_is_your_link_for_channel),
-      text = String.format(generalGetString(MR.strings.connect_plan_this_is_your_link_for_channel_vName), nameWithDomain(groupInfo.displayName, planSimplexName)),
+      text = String.format(generalGetString(MR.strings.connect_plan_this_is_your_link_for_channel_vName), nameWithDomain(groupInfo.displayName, planPopopxName)),
       buttons = {
         Column {
           SectionItemView({
@@ -642,7 +642,7 @@ fun ownGroupLinkConfirmConnect(
   }
 }
 
-private fun showOpenKnownGroupAlert(chatModel: ChatModel, rhId: Long?, close: (() -> Unit)?, groupInfo: GroupInfo, planSimplexName: PopopxNameInfo? = null, connectOtherButton: String? = null, connectOtherLink: String? = null) {
+private fun showOpenKnownGroupAlert(chatModel: ChatModel, rhId: Long?, close: (() -> Unit)?, groupInfo: GroupInfo, planPopopxName: PopopxNameInfo? = null, connectOtherButton: String? = null, connectOtherLink: String? = null) {
   val subscriberCount = if (groupInfo.useRelays) groupInfo.groupSummary.publicMemberCount?.let { subscriberCountStr(it) } else null
   AlertManager.privacySensitive.showOpenChatAlert(
     profileName = groupInfo.groupProfile.displayName,
@@ -654,7 +654,7 @@ private fun showOpenKnownGroupAlert(chatModel: ChatModel, rhId: Long?, close: ((
         icon = groupInfo.chatIconName
       )
     },
-    nameCaption = planSimplexName?.shortStr,
+    nameCaption = planPopopxName?.shortStr,
     subtitle = subscriberCount,
     information = if (groupInfo.nextConnectPrepared || groupInfo.businessChat != null) {
       null
@@ -702,7 +702,7 @@ fun showPrepareContactAlert(
   connectionLink: CreatedConnLink,
   contactShortLinkData: ContactShortLinkData,
   ownerVerification: OwnerVerification? = null,
-  planSimplexName: PopopxNameInfo? = null,
+  planPopopxName: PopopxNameInfo? = null,
   connectOtherButton: String? = null,
   connectOtherLink: String? = null,
   close: (() -> Unit)?,
@@ -721,14 +721,14 @@ fun showPrepareContactAlert(
       )
     },
     profileBadge = if (contactShortLinkData.localBadge?.status == BadgeStatus.ExpiredOld) null else contactShortLinkData.localBadge,
-    nameCaption = planSimplexName?.shortStr,
+    nameCaption = planPopopxName?.shortStr,
     information = ownerVerificationMessage(ownerVerification),
     confirmText = generalGetString(MR.strings.connect_plan_open_new_chat),
     onConfirm = {
       AlertManager.privacySensitive.hideAlert()
       ModalManager.closeAllModalsEverywhere()
       withBGApi {
-        val chat = chatModel.controller.apiPrepareContact(rhId, connectionLink, contactShortLinkData, planSimplexName?.nameDomain)
+        val chat = chatModel.controller.apiPrepareContact(rhId, connectionLink, contactShortLinkData, planPopopxName?.nameDomain)
         if (chat != null) {
           withContext(Dispatchers.Main) {
             ChatController.chatModel.chatsContext.addChat(chat)
@@ -752,7 +752,7 @@ fun showPrepareGroupAlert(
   groupShortLinkInfo: GroupShortLinkInfo?,
   groupShortLinkData: GroupShortLinkData,
   ownerVerification: OwnerVerification? = null,
-  planSimplexName: PopopxNameInfo? = null,
+  planPopopxName: PopopxNameInfo? = null,
   connectOtherButton: String? = null,
   connectOtherLink: String? = null,
   close: (() -> Unit)?,
@@ -770,7 +770,7 @@ fun showPrepareGroupAlert(
         icon = if (isChannel) MR.images.ic_bigtop_updates_circle_filled else MR.images.ic_supervised_user_circle_filled
       )
     },
-    nameCaption = planSimplexName?.shortStr,
+    nameCaption = planPopopxName?.shortStr,
     subtitle = subscriberCount,
     information = ownerVerificationMessage(ownerVerification),
     confirmText = generalGetString(if (isChannel) MR.strings.connect_plan_open_channel else MR.strings.connect_plan_open_group),
@@ -778,7 +778,7 @@ fun showPrepareGroupAlert(
       AlertManager.privacySensitive.hideAlert()
       withBGApi {
         val directLink = groupShortLinkInfo?.direct ?: true
-        val chat = chatModel.controller.apiPrepareGroup(rhId, connectionLink, directLink = directLink, groupShortLinkData, planSimplexName?.nameDomain)
+        val chat = chatModel.controller.apiPrepareGroup(rhId, connectionLink, directLink = directLink, groupShortLinkData, planPopopxName?.nameDomain)
         if (chat != null) {
           withContext(Dispatchers.Main) {
             val relays = groupShortLinkInfo?.groupRelays

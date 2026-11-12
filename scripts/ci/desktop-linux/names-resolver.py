@@ -48,7 +48,7 @@ def keccak_f(a):
     return a
 
 
-# Keccak-256 as Ethereum uses it (padding 0x01, not SHA3-256's 0x06), which labelHash in SimplexName.hs is
+# Keccak-256 as Ethereum uses it (padding 0x01, not SHA3-256's 0x06), which labelHash in PopopxName.hs is
 def keccak256(data):
     rate = 136
     padded = bytearray(data) + b"\x01" + bytes(-(len(data) + 1) % rate)

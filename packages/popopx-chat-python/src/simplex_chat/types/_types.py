@@ -353,7 +353,7 @@ class BusinessChatInfo(TypedDict):
     chatType: "BusinessChatType"
     businessId: str
     customerId: str
-    businessDomain: NotRequired["SimplexDomainClaim"]
+    businessDomain: NotRequired["PopopxDomainClaim"]
 
 BusinessChatType = Literal["business", "customer"]
 
@@ -959,10 +959,10 @@ class ChatErrorType_chatStoreChanged(TypedDict):
 class ChatErrorType_invalidConnReq(TypedDict):
     type: Literal["invalidConnReq"]
 
-class ChatErrorType_simplexDomainNotReady(TypedDict):
-    type: Literal["simplexDomainNotReady"]
-    simplexDomain: "SimplexDomain"
-    simplexDomainError: "SimplexDomainError"
+class ChatErrorType_popopxDomainNotReady(TypedDict):
+    type: Literal["popopxDomainNotReady"]
+    popopxDomain: "PopopxDomain"
+    popopxDomainError: "PopopxDomainError"
 
 class ChatErrorType_notResolvedLocally(TypedDict):
     type: Literal["notResolvedLocally"]
@@ -1201,7 +1201,7 @@ ChatErrorType = (
     | ChatErrorType_chatNotStopped
     | ChatErrorType_chatStoreChanged
     | ChatErrorType_invalidConnReq
-    | ChatErrorType_simplexDomainNotReady
+    | ChatErrorType_popopxDomainNotReady
     | ChatErrorType_notResolvedLocally
     | ChatErrorType_unsupportedConnReq
     | ChatErrorType_connReqMessageProhibited
@@ -1260,7 +1260,7 @@ ChatErrorType = (
     | ChatErrorType_exception
 )
 
-ChatErrorType_Tag = Literal["noActiveUser", "noConnectionUser", "noSndFileUser", "noRcvFileUser", "userUnknown", "userExists", "chatRelayExists", "differentActiveUser", "cantDeleteActiveUser", "cantDeleteLastUser", "cantHideLastUser", "hiddenUserAlwaysMuted", "emptyUserPassword", "userAlreadyHidden", "userNotHidden", "invalidDisplayName", "chatNotStarted", "chatNotStopped", "chatStoreChanged", "invalidConnReq", "simplexDomainNotReady", "notResolvedLocally", "unsupportedConnReq", "connReqMessageProhibited", "contactNotReady", "contactNotActive", "contactDisabled", "connectionDisabled", "groupUserRole", "groupMemberInitialRole", "contactIncognitoCantInvite", "groupIncognitoCantInvite", "groupContactRole", "groupDuplicateMember", "groupDuplicateMemberId", "groupNotJoined", "groupMemberNotActive", "cantBlockMemberForSelf", "groupMemberUserRemoved", "groupMemberNotFound", "groupCantResendInvitation", "groupInternal", "fileNotFound", "fileSize", "fileAlreadyReceiving", "fileCancelled", "fileCancel", "fileAlreadyExists", "fileWrite", "fileSend", "fileRcvChunk", "fileInternal", "fileImageType", "fileImageSize", "fileNotReceived", "fileNotApproved", "fallbackToSMPProhibited", "inlineFileProhibited", "invalidForward", "invalidChatItemUpdate", "invalidChatItemDelete", "hasCurrentCall", "noCurrentCall", "callContact", "directMessagesProhibited", "agentVersion", "agentNoSubResult", "commandError", "badgeRedeemError", "agentCommandError", "invalidFileDescription", "connectionIncognitoChangeProhibited", "connectionUserChangeProhibited", "peerChatVRangeIncompatible", "relayTestError", "internalError", "exception"]
+ChatErrorType_Tag = Literal["noActiveUser", "noConnectionUser", "noSndFileUser", "noRcvFileUser", "userUnknown", "userExists", "chatRelayExists", "differentActiveUser", "cantDeleteActiveUser", "cantDeleteLastUser", "cantHideLastUser", "hiddenUserAlwaysMuted", "emptyUserPassword", "userAlreadyHidden", "userNotHidden", "invalidDisplayName", "chatNotStarted", "chatNotStopped", "chatStoreChanged", "invalidConnReq", "popopxDomainNotReady", "notResolvedLocally", "unsupportedConnReq", "connReqMessageProhibited", "contactNotReady", "contactNotActive", "contactDisabled", "connectionDisabled", "groupUserRole", "groupMemberInitialRole", "contactIncognitoCantInvite", "groupIncognitoCantInvite", "groupContactRole", "groupDuplicateMember", "groupDuplicateMemberId", "groupNotJoined", "groupMemberNotActive", "cantBlockMemberForSelf", "groupMemberUserRemoved", "groupMemberNotFound", "groupCantResendInvitation", "groupInternal", "fileNotFound", "fileSize", "fileAlreadyReceiving", "fileCancelled", "fileCancel", "fileAlreadyExists", "fileWrite", "fileSend", "fileRcvChunk", "fileInternal", "fileImageType", "fileImageSize", "fileNotReceived", "fileNotApproved", "fallbackToSMPProhibited", "inlineFileProhibited", "invalidForward", "invalidChatItemUpdate", "invalidChatItemDelete", "hasCurrentCall", "noCurrentCall", "callContact", "directMessagesProhibited", "agentVersion", "agentNoSubResult", "commandError", "badgeRedeemError", "agentCommandError", "invalidFileDescription", "connectionIncognitoChangeProhibited", "connectionUserChangeProhibited", "peerChatVRangeIncompatible", "relayTestError", "internalError", "exception"]
 
 ChatFeature = Literal["timedMessages", "fullDelete", "reactions", "voice", "files", "calls", "sessions"]
 
@@ -1982,16 +1982,16 @@ class Format_hyperLink(TypedDict):
     showText: NotRequired[str]
     linkUri: str
 
-class Format_simplexLink(TypedDict):
-    type: Literal["simplexLink"]
+class Format_popopxLink(TypedDict):
+    type: Literal["popopxLink"]
     showText: NotRequired[str]
-    linkType: "SimplexLinkType"
-    simplexUri: str
+    linkType: "PopopxLinkType"
+    popopxUri: str
     smpHosts: list[str]  # non-empty
 
-class Format_simplexName(TypedDict):
-    type: Literal["simplexName"]
-    nameInfo: "SimplexNameInfo"
+class Format_popopxName(TypedDict):
+    type: Literal["popopxName"]
+    nameInfo: "PopopxNameInfo"
 
 class Format_command(TypedDict):
     type: Literal["command"]
@@ -2024,8 +2024,8 @@ Format = (
     | Format_colored
     | Format_uri
     | Format_hyperLink
-    | Format_simplexLink
-    | Format_simplexName
+    | Format_popopxLink
+    | Format_popopxName
     | Format_command
     | Format_mention
     | Format_email
@@ -2034,7 +2034,7 @@ Format = (
     | Format_markup
 )
 
-Format_Tag = Literal["bold", "italic", "strikeThrough", "snippet", "secret", "small", "colored", "uri", "hyperLink", "simplexLink", "simplexName", "command", "mention", "email", "phone", "escape", "markup"]
+Format_Tag = Literal["bold", "italic", "strikeThrough", "snippet", "secret", "small", "colored", "uri", "hyperLink", "popopxLink", "popopxName", "command", "mention", "email", "phone", "escape", "markup"]
 
 class FormattedText(TypedDict):
     format: NotRequired["Format"]
@@ -2047,7 +2047,7 @@ class FullGroupPreferences(TypedDict):
     reactions: "GroupPreference"
     voice: "RoleGroupPreference"
     files: "RoleGroupPreference"
-    simplexLinks: "RoleGroupPreference"
+    popopxLinks: "RoleGroupPreference"
     reports: "GroupPreference"
     history: "GroupPreference"
     support: "SupportGroupPreference"
@@ -2097,7 +2097,7 @@ class GroupDirectInvitation(TypedDict):
     fromGroupMemberConnId_: NotRequired[int]  # int64
     groupDirectInvStartedConnection: bool
 
-GroupFeature = Literal["timedMessages", "directMessages", "fullDelete", "reactions", "voice", "files", "simplexLinks", "reports", "history", "support", "sessions", "comments", "signMessages"]
+GroupFeature = Literal["timedMessages", "directMessages", "fullDelete", "reactions", "voice", "files", "popopxLinks", "reports", "history", "support", "sessions", "comments", "signMessages"]
 
 GroupFeatureEnabled = Literal["on", "off"]
 
@@ -2242,7 +2242,7 @@ class GroupPreferences(TypedDict):
     reactions: NotRequired["GroupPreference"]
     voice: NotRequired["RoleGroupPreference"]
     files: NotRequired["RoleGroupPreference"]
-    simplexLinks: NotRequired["RoleGroupPreference"]
+    popopxLinks: NotRequired["RoleGroupPreference"]
     reports: NotRequired["GroupPreference"]
     history: NotRequired["GroupPreference"]
     support: NotRequired["SupportGroupPreference"]
@@ -2435,7 +2435,7 @@ class LocalProfile(TypedDict):
     peerType: NotRequired["ChatPeerType"]
     localBadge: NotRequired["LocalBadge"]
     localAlias: str
-    contactDomain: NotRequired["SimplexDomainClaim"]
+    contactDomain: NotRequired["PopopxDomainClaim"]
     contactDomainVerified: NotRequired[bool]
 
 class MarkdownBlock_paragraph(TypedDict):
@@ -2762,6 +2762,40 @@ PlanResolveMode = Literal["allGroups", "unknown", "never"]
 def PlanResolveMode_cmd_string(self: PlanResolveMode) -> str:
     return ' resolve=allGroups' if str(self) == 'allGroups' else ' resolve=never' if str(self) == 'never' else ''
 
+class PopopxDomain(TypedDict):
+    nameTLD: "PopopxTLD"
+    domain: str
+    subDomain: list[str]
+
+class PopopxDomainClaim(TypedDict):
+    domain: str
+    proof: NotRequired["PopopxDomainProof"]
+
+class PopopxDomainError_noValidLink(TypedDict):
+    type: Literal["noValidLink"]
+
+class PopopxDomainError_unknownDomain(TypedDict):
+    type: Literal["unknownDomain"]
+
+PopopxDomainError = PopopxDomainError_noValidLink | PopopxDomainError_unknownDomain
+
+PopopxDomainError_Tag = Literal["noValidLink", "unknownDomain"]
+
+class PopopxDomainProof(TypedDict):
+    linkOwnerId: NotRequired[str]
+    presHeader: str
+    signature: str
+
+PopopxLinkType = Literal["contact", "invitation", "group", "channel", "relay"]
+
+class PopopxNameInfo(TypedDict):
+    nameType: "PopopxNameType"
+    nameDomain: "PopopxDomain"
+
+PopopxNameType = Literal["publicGroup", "contact"]
+
+PopopxTLD = Literal["popopx", "testing", "web"]
+
 class PrefEnabled(TypedDict):
     forUser: bool
     forContact: bool
@@ -2799,7 +2833,7 @@ class Profile(TypedDict):
     preferences: NotRequired["Preferences"]
     peerType: NotRequired["ChatPeerType"]
     badge: NotRequired["BadgeProof"]
-    contactDomain: NotRequired["SimplexDomainClaim"]
+    contactDomain: NotRequired["PopopxDomainClaim"]
 
 class ProxyClientError_protocolError(TypedDict):
     type: Literal["protocolError"]
@@ -2841,7 +2875,7 @@ ProxyError_Tag = Literal["PROTOCOL", "BROKER", "BASIC_AUTH", "NO_SESSION"]
 
 class PublicGroupAccess(TypedDict):
     groupWebPage: NotRequired[str]
-    groupDomainClaim: NotRequired["SimplexDomainClaim"]
+    groupDomainClaim: NotRequired["PopopxDomainClaim"]
     domainWebPage: bool
     allowEmbedding: bool
 
@@ -3293,40 +3327,6 @@ class ServerRolesOverride(TypedDict):
 
 class SimplePreference(TypedDict):
     allow: "FeatureAllowed"
-
-class SimplexDomain(TypedDict):
-    nameTLD: "SimplexTLD"
-    domain: str
-    subDomain: list[str]
-
-class SimplexDomainClaim(TypedDict):
-    domain: str
-    proof: NotRequired["SimplexDomainProof"]
-
-class SimplexDomainError_noValidLink(TypedDict):
-    type: Literal["noValidLink"]
-
-class SimplexDomainError_unknownDomain(TypedDict):
-    type: Literal["unknownDomain"]
-
-SimplexDomainError = SimplexDomainError_noValidLink | SimplexDomainError_unknownDomain
-
-SimplexDomainError_Tag = Literal["noValidLink", "unknownDomain"]
-
-class SimplexDomainProof(TypedDict):
-    linkOwnerId: NotRequired[str]
-    presHeader: str
-    signature: str
-
-SimplexLinkType = Literal["contact", "invitation", "group", "channel", "relay"]
-
-class SimplexNameInfo(TypedDict):
-    nameType: "SimplexNameType"
-    nameDomain: "SimplexDomain"
-
-SimplexNameType = Literal["publicGroup", "contact"]
-
-SimplexTLD = Literal["popopx", "testing", "web"]
 
 SndCIStatusProgress = Literal["partial", "complete"]
 

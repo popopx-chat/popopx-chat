@@ -457,7 +457,7 @@ data ChatCommand
   | APIGetCallInvitations
   | APICallStatus ContactId WebRTCCallStatus
   | APIUpdateProfile {userId :: UserId, profile :: Profile}
-  | APISetUserDomain {userId :: UserId, simplexDomain :: Maybe (StrJSON "SimplexDomain" PopopxDomain)}
+  | APISetUserDomain {userId :: UserId, popopxDomain :: Maybe (StrJSON "PopopxDomain" PopopxDomain)}
   | APISetContactPrefs {contactId :: ContactId, preferences :: Preferences}
   | APISetContactAlias {contactId :: ContactId, localAlias :: LocalAlias}
   | APISetGroupAlias {groupId :: GroupId, localAlias :: LocalAlias}
@@ -571,8 +571,8 @@ data ChatCommand
   | APISetConnectionIncognito Int64 IncognitoEnabled
   | APIChangeConnectionUser Int64 UserId -- new user id to switch connection to
   | APIConnectPlan {userId :: UserId, connectTarget :: Maybe AConnectTarget, resolveMode :: PlanResolveMode, linkOwnerSig :: Maybe LinkOwnerSig} -- Maybe AConnectTarget is used to report parsing failure as special error
-  | APIPrepareContact {userId :: UserId, connLink :: ACreatedConnLink, verifiedDomain :: Maybe (StrJSON "SimplexDomain" PopopxDomain), contactSLinkData :: ContactShortLinkData}
-  | APIPrepareGroup {userId :: UserId, connLinkContact :: CreatedLinkContact, direct :: DirectLink, verifiedDomain :: Maybe (StrJSON "SimplexDomain" PopopxDomain), groupSLinkData :: GroupShortLinkData}
+  | APIPrepareContact {userId :: UserId, connLink :: ACreatedConnLink, verifiedDomain :: Maybe (StrJSON "PopopxDomain" PopopxDomain), contactSLinkData :: ContactShortLinkData}
+  | APIPrepareGroup {userId :: UserId, connLinkContact :: CreatedLinkContact, direct :: DirectLink, verifiedDomain :: Maybe (StrJSON "PopopxDomain" PopopxDomain), groupSLinkData :: GroupShortLinkData}
   | APIChangePreparedContactUser ContactId UserId
   | APIChangePreparedGroupUser GroupId UserId
   | APIConnectPreparedContact {contactId :: ContactId, incognito :: IncognitoEnabled, msgContent_ :: Maybe MsgContent}
@@ -905,7 +905,7 @@ data ChatResponse
   | CRInvitation {user :: User, connLinkInvitation :: CreatedLinkInvitation, connection :: PendingContactConnection}
   | CRConnectionIncognitoUpdated {user :: User, toConnection :: PendingContactConnection, customUserProfile :: Maybe Profile}
   | CRConnectionUserChanged {user :: User, fromConnection :: PendingContactConnection, toConnection :: PendingContactConnection, newUser :: User}
-  | CRConnectionPlan {user :: User, connLink :: ACreatedConnLink, planSimplexName :: Maybe PopopxNameInfo, otherSimplexName :: Maybe PopopxNameInfo, connectionPlan :: ConnectionPlan}
+  | CRConnectionPlan {user :: User, connLink :: ACreatedConnLink, planPopopxName :: Maybe PopopxNameInfo, otherPopopxName :: Maybe PopopxNameInfo, connectionPlan :: ConnectionPlan}
   | CRNewPreparedChat {user :: User, chat :: AChat}
   | CRContactUserChanged {user :: User, fromContact :: Contact, newUser :: User, toContact :: Contact}
   | CRGroupUserChanged {user :: User, fromGroup :: GroupInfo, newUser :: User, toGroup :: GroupInfo}
@@ -1499,7 +1499,7 @@ data ChatError
   deriving (Show, Exception)
 
 -- why a resolved SimpleX name could not be used (the name itself resolved; an unregistered name is the agent's NAME NOT_FOUND)
-data SimplexDomainError
+data PopopxDomainError
   = SDENoValidLink -- the name's record has no usable contact/channel link
   | SDEUnknownDomain -- the resolved link's profile has no name, or a different name
   deriving (Eq, Show)
@@ -1538,7 +1538,7 @@ data ChatErrorType
   | CEChatNotStopped
   | CEChatStoreChanged
   | CEInvalidConnReq
-  | CESimplexDomainNotReady {simplexDomain :: PopopxDomain, simplexDomainError :: SimplexDomainError}
+  | CEPopopxDomainNotReady {popopxDomain :: PopopxDomain, popopxDomainError :: PopopxDomainError}
   | CENotResolvedLocally -- a name or link is not a known chat in the local store and online resolution is off (PRMNever)
   | CEUnsupportedConnReq
   | CEInvalidChatMessage {connection :: Connection, msgMeta :: Maybe MsgMetaJSON, messageData :: Text, message :: String}
@@ -1872,7 +1872,7 @@ $(JQ.deriveJSON (sumTypeJSON $ dropPrefix "GLP") ''GroupLinkPlan)
 
 $(JQ.deriveJSON (sumTypeJSON $ dropPrefix "FC") ''ForwardConfirmation)
 
-$(JQ.deriveJSON (sumTypeJSON $ dropPrefix "SDE") ''SimplexDomainError)
+$(JQ.deriveJSON (sumTypeJSON $ dropPrefix "SDE") ''PopopxDomainError)
 
 $(JQ.deriveJSON (sumTypeJSON $ dropPrefix "BRE") ''BadgeRedeemError)
 

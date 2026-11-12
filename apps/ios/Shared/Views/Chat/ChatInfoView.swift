@@ -1378,7 +1378,7 @@ private func deleteNotReadyContact(
     if let domain = contact.profile.contactDomain,
        contact.profile.contactDomainVerified != nil || domain.proof != nil {
         PopopxNameView(
-            simplexName: "@\(domain.domain)",
+            popopxName: "@\(domain.domain)",
             verified: contact.profile.contactDomainVerified,
             verify: {
                 do {
@@ -1404,7 +1404,7 @@ private func deleteNotReadyContact(
            let domain = access.groupDomainClaim?.shortName,
            groupInfo.groupDomainVerified != nil || access.groupDomainClaim?.proof != nil {
             PopopxNameView(
-                simplexName: "#\(domain)",
+                popopxName: "#\(domain)",
                 verified: groupInfo.groupDomainVerified,
                 verify: {
                     do {
@@ -1426,7 +1426,7 @@ private func deleteNotReadyContact(
               groupInfo.groupDomainVerified != nil || claim.proof != nil {
         // A business presents as a contact, so the name retains its .popopx suffix; it cannot be re-verified.
         PopopxNameView(
-            simplexName: "@\(claim.domain)",
+            popopxName: "@\(claim.domain)",
             verified: groupInfo.groupDomainVerified,
             verify: { nil },
             verifiable: false
@@ -1437,7 +1437,7 @@ private func deleteNotReadyContact(
 struct PopopxNameView: View {
     @EnvironmentObject var theme: AppTheme
     @AppStorage(DEFAULT_PRIVACY_VERIFY_POPOPX_NAMES) var autoVerify = false
-    let simplexName: String
+    let popopxName: String
     let verified: Bool?
     let verify: () async -> (Bool?, String?)?
     var verifiable: Bool = true
@@ -1451,7 +1451,7 @@ struct PopopxNameView: View {
     }
 
     private var nameText: Text {
-        Text(simplexName)
+        Text(popopxName)
             .font(.subheadline)
             .foregroundColor(verified == true ? theme.colors.primary : theme.colors.secondary)
     }
@@ -1473,7 +1473,7 @@ struct PopopxNameView: View {
             }
             .contentShape(Rectangle())
             .onTapGesture {
-                UIPasteboard.general.string = simplexName
+                UIPasteboard.general.string = popopxName
                 UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
             }
         } else if !verifiable {

@@ -270,20 +270,20 @@ Set or remove SimpleX name of bot address. The name must be registered with the 
 
 **Parameters**:
 - userId: int64
-- simplexDomain: string?
+- popopxDomain: string?
 
 **Syntax**:
 
 ```
-/_set domain <userId>[ <simplexDomain>]
+/_set domain <userId>[ <popopxDomain>]
 ```
 
 ```javascript
-'/_set domain ' + userId + (simplexDomain ? ' ' + simplexDomain : '') // JavaScript
+'/_set domain ' + userId + (popopxDomain ? ' ' + popopxDomain : '') // JavaScript
 ```
 
 ```python
-'/_set domain ' + str(userId) + ((' ' + simplexDomain) if simplexDomain is not None else '') # Python
+'/_set domain ' + str(userId) + ((' ' + popopxDomain) if popopxDomain is not None else '') # Python
 ```
 
 **Responses**:
@@ -304,7 +304,7 @@ ChatCmdError: Command error (only used in WebSockets API).
 - chatError: [ChatError](./TYPES.md#chaterror)
 
 **Errors**:
-- SimplexDomainNotReady: The name does not resolve to the address short link.
+- PopopxDomainNotReady: The name does not resolve to the address short link.
 
 ---
 
@@ -1708,8 +1708,8 @@ ConnectionPlan: Connection link information.
 - type: "connectionPlan"
 - user: [User](./TYPES.md#user)
 - connLink: [CreatedConnLink](./TYPES.md#createdconnlink)
-- planSimplexName: [SimplexNameInfo](./TYPES.md#simplexnameinfo)?
-- otherSimplexName: [SimplexNameInfo](./TYPES.md#simplexnameinfo)?
+- planPopopxName: [PopopxNameInfo](./TYPES.md#popopxnameinfo)?
+- otherPopopxName: [PopopxNameInfo](./TYPES.md#popopxnameinfo)?
 - connectionPlan: [ConnectionPlan](./TYPES.md#connectionplan)
 
 ChatCmdError: Command error (only used in WebSockets API).
@@ -1817,8 +1817,8 @@ ConnectionPlan: Connection link information.
 - type: "connectionPlan"
 - user: [User](./TYPES.md#user)
 - connLink: [CreatedConnLink](./TYPES.md#createdconnlink)
-- planSimplexName: [SimplexNameInfo](./TYPES.md#simplexnameinfo)?
-- otherSimplexName: [SimplexNameInfo](./TYPES.md#simplexnameinfo)?
+- planPopopxName: [PopopxNameInfo](./TYPES.md#popopxnameinfo)?
+- otherPopopxName: [PopopxNameInfo](./TYPES.md#popopxnameinfo)?
 - connectionPlan: [ConnectionPlan](./TYPES.md#connectionplan)
 
 SentInvitationToContact: Invitation sent to contact (when connecting via SimpleX name to a known contact address)..

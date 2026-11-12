@@ -55,7 +55,7 @@ import Popopx.Chat.Bot.Store
 import Popopx.Chat.Controller
 import Popopx.Chat.Core
 import Popopx.Chat.Library.Internal (setGroupLinkData)
-import Popopx.Chat.Markdown (Format (..), FormattedText (..), SimplexLinkType (..), parseMaybeMarkdownList, viewName)
+import Popopx.Chat.Markdown (Format (..), FormattedText (..), PopopxLinkType (..), parseMaybeMarkdownList, viewName)
 import Popopx.Chat.Messages
 import Popopx.Chat.Options
 import Popopx.Chat.Protocol (GroupShortLinkData (..), LinkOwnerSig (..), MsgChatLink (..), MsgContent (..), memberSupportVoiceVersion)
@@ -68,7 +68,7 @@ import Popopx.Chat.Terminal.Main (simplexChatCLI')
 import Popopx.Chat.Types
 import Popopx.Chat.Types.Preferences
 import Popopx.Chat.Types.Shared
-import Popopx.Chat.View (groupSimplexDomain, serializeChatError, serializeChatResponse, simplexChatContact, viewContactName, viewGroupName)
+import Popopx.Chat.View (groupPopopxDomain, serializeChatError, serializeChatResponse, simplexChatContact, viewContactName, viewGroupName)
 import Popopx.Messaging.Agent.Protocol (AConnectionLink (..), ACreatedConnLink (..), AgentErrorType (..), ConnectionLink (..), CreatedConnLink (..), SConnectionMode (..), PopopxDomain)
 import Popopx.Messaging.Client (NetworkRequestMode (..))
 import qualified Popopx.Messaging.Crypto.File as CF
@@ -371,13 +371,13 @@ directoryServiceEvent opts@DirectoryOpts {adminUsers, superUsers, serviceName, o
           logError msg
     verifyGroupDomain_ :: GroupInfo -> IO GroupInfo
     verifyGroupDomain_ g@GroupInfo {groupId}
-      | isJust (groupSimplexDomain g) =
+      | isJust (groupPopopxDomain g) =
           sendChatCmd cc (APIVerifyGroupDomain groupId) >>= \case
             Right CRGroupDomainVerified {groupInfo = g'} -> pure g'
             Right r -> g <$ logError ("verifyGroupDomain_: unexpected response " <> tshow r)
             Left e -> g <$ logInfo ("verifyGroupDomain_: error " <> tshow e)
       | otherwise = pure g
-    groupInfoText simplexName_ p@GroupProfile {description = d, publicGroup} = groupNameDescr p <> maybe "" ("\nSimpleX name: " <>) simplexName_ <> maybe "" ("\nWelcome message:\n" <>) d <> linkToJoin
+    groupInfoText popopxName_ p@GroupProfile {description = d, publicGroup} = groupNameDescr p <> maybe "" ("\nSimpleX name: " <>) popopxName_ <> maybe "" ("\nWelcome message:\n" <>) d <> linkToJoin
       where
         linkToJoin = case publicGroup of
           Just pg@PublicGroupProfile {groupLink} ->
@@ -758,7 +758,7 @@ directoryServiceEvent opts@DirectoryOpts {adminUsers, superUsers, serviceName, o
     sendToApprove g@GroupInfo {groupId, groupProfile = p@GroupProfile {displayName, image = image', publicGroup = pg_}, groupSummary} GroupReg {dbContactId, promoted} gaId = do
       ct_ <- getContact' cc user dbContactId
       let gt = maybe "group" groupTypeStr' pg_
-          nameStr_ = (\d -> simplexNameStr d <> (if groupDomainVerified g == Just True then "" else " (NOT verified - will not be shown)")) <$> groupSimplexDomain g
+          nameStr_ = (\d -> simplexNameStr d <> (if groupDomainVerified g == Just True then "" else " (NOT verified - will not be shown)")) <$> groupPopopxDomain g
           membersStr = "_" <> membersCountStr p groupSummary <> "_\n"
           text =
             either (\_ -> "The " <> gt <> " ID " <> tshow groupId <> " submitted: ") (\c -> localDisplayName' c <> " submitted the " <> gt <> " ID " <> tshow groupId <> ": ") ct_
@@ -1071,7 +1071,7 @@ directoryServiceEvent opts@DirectoryOpts {adminUsers, superUsers, serviceName, o
              in "Found " <> tshow n <> " group(s)" <> more <> "."
         where
           linkNotFound = "No groups found.\nTo register a group or a channel, please use \"Share via chat\" feature."
-          groupLinkUri fts = listToMaybe [uri | FormattedText (Just SimplexLink {linkType, simplexUri = uri}) _ <- fts, linkType == XLGroup || linkType == XLChannel]
+          groupLinkUri fts = listToMaybe [uri | FormattedText (Just PopopxLink {linkType, popopxUri = uri}) _ <- fts, linkType == XLGroup || linkType == XLChannel]
       DCSearchNext ->
         atomically (TM.lookup (contactId' ct) searchRequests) >>= \case
           Just SearchRequest {searchType, searchTime, lastGroup} -> do

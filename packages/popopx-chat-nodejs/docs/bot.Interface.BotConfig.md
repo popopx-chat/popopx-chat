@@ -80,8 +80,8 @@ Defined in: [src/bot.ts:37](../bot.ts#L37)
 
 ***
 
-### simplexDomain?
+### popopxDomain?
 
-> `optional` **simplexDomain?**: `string` \| `null`
+> `optional` **popopxDomain?**: `string` \| `null`
 
 Defined in: [src/bot.ts:38](../bot.ts#L38)

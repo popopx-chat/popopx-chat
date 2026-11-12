@@ -63,7 +63,7 @@ describe("run", () => {
     addressSettings: {businessAddress: false, autoAccept: {acceptIncognito: false}},
   } as unknown as T.UserContactLink
 
-  function fakeChat(contactDomain?: T.SimplexDomainClaim) {
+  function fakeChat(contactDomain?: T.PopopxDomainClaim) {
     const user = {userId: 1, profile: {displayName: "Old", fullName: "", contactDomain}} as unknown as T.User
     const chat = {
       on: jest.fn(),
@@ -78,8 +78,8 @@ describe("run", () => {
     return chat
   }
 
-  const runBot = (simplexDomain?: string | null, options = {}) =>
-    run({profile: {displayName: "Calculator", fullName: ""}, simplexDomain, dbOpts: {type: "sqlite", filePrefix: "unused"}, options})
+  const runBot = (popopxDomain?: string | null, options = {}) =>
+    run({profile: {displayName: "Calculator", fullName: ""}, popopxDomain, dbOpts: {type: "sqlite", filePrefix: "unused"}, options})
 
   const updatedProfile = (chat: ReturnType<typeof fakeChat>) => chat.apiUpdateProfile.mock.calls[0][1]
 
@@ -117,7 +117,7 @@ describe("run", () => {
 
   it("continues when the SimpleX name cannot be set", async () => {
     const chat = fakeChat()
-    chat.apiSetUserDomain.mockRejectedValue(new Error("simplexDomainNotReady"))
+    chat.apiSetUserDomain.mockRejectedValue(new Error("popopxDomainNotReady"))
     await expect(runBot("calc.popopx")).resolves.toBeDefined()
     expect(updatedProfile(chat).contactDomain).toBeUndefined()
   })

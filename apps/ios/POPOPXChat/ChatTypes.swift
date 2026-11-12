@@ -128,7 +128,7 @@ public struct Profile: Codable, NamedChat, Hashable {
         contactLink: String? = nil,
         preferences: Preferences? = nil,
         peerType: ChatPeerType? = nil,
-        contactDomain: SimplexDomainClaim? = nil
+        contactDomain: PopopxDomainClaim? = nil
     ) {
         self.displayName = displayName
         self.fullName = fullName
@@ -152,7 +152,7 @@ public struct Profile: Codable, NamedChat, Hashable {
     // the badge proof from the wire profile - opaque to the UI, round-tripped to the core (apiPrepareContact)
     public var badge: BadgeProof?
     public var localAlias: String { get { "" } }
-    public var contactDomain: SimplexDomainClaim?
+    public var contactDomain: PopopxDomainClaim?
 
     public var profileDescription: String? { description }
 
@@ -179,7 +179,7 @@ public struct LocalProfile: Codable, NamedChat, Hashable {
         peerType: ChatPeerType? = nil,
         localBadge: LocalBadge? = nil,
         localAlias: String,
-        contactDomain: SimplexDomainClaim? = nil,
+        contactDomain: PopopxDomainClaim? = nil,
         contactDomainVerified: Bool? = nil
     ) {
         self.profileId = profileId
@@ -208,7 +208,7 @@ public struct LocalProfile: Codable, NamedChat, Hashable {
     public var peerType: ChatPeerType?
     public var localBadge: LocalBadge?
     public var localAlias: String
-    public var contactDomain: SimplexDomainClaim?
+    public var contactDomain: PopopxDomainClaim?
     public var contactDomainVerified: Bool?
 
     public var profileDescription: String? { description }
@@ -1395,7 +1395,7 @@ public enum GroupFeature: String, Decodable, Feature, Hashable {
     case reactions
     case voice
     case files
-    case simplexLinks
+    case popopxLinks
     case reports
     case history
     case support
@@ -1418,7 +1418,7 @@ public enum GroupFeature: String, Decodable, Feature, Hashable {
         case .reactions: false
         case .voice: true
         case .files: true
-        case .simplexLinks: true
+        case .popopxLinks: true
         case .reports: false
         case .history: false
         case .support: false
@@ -1436,7 +1436,7 @@ public enum GroupFeature: String, Decodable, Feature, Hashable {
         case .reactions: return NSLocalizedString("Message reactions", comment: "chat feature")
         case .voice: return NSLocalizedString("Voice messages", comment: "chat feature")
         case .files: return NSLocalizedString("Files and media", comment: "chat feature")
-        case .simplexLinks: return NSLocalizedString("POPOPX links", comment: "chat feature")
+        case .popopxLinks: return NSLocalizedString("POPOPX links", comment: "chat feature")
         case .reports: return isChannel
             ? NSLocalizedString("Subscriber reports", comment: "chat feature")
             : NSLocalizedString("Member reports", comment: "chat feature")
@@ -1454,7 +1454,7 @@ public enum GroupFeature: String, Decodable, Feature, Hashable {
         case .reactions: return "face.smiling"
         case .voice: return "mic"
         case .files: return "doc"
-        case .simplexLinks: return "link.circle"
+        case .popopxLinks: return "link.circle"
         case .reports: return "flag"
         case .history: return "clock"
         case .support: return "questionmark.circle"
@@ -1470,7 +1470,7 @@ public enum GroupFeature: String, Decodable, Feature, Hashable {
         case .reactions: return "face.smiling.fill"
         case .voice: return "mic.fill"
         case .files: return "doc.fill"
-        case .simplexLinks: return "link.circle.fill"
+        case .popopxLinks: return "link.circle.fill"
         case .reports: return "flag.fill"
         case .history: return "clock.fill"
         case .support: return "questionmark.circle.fill"
@@ -1522,7 +1522,7 @@ public enum GroupFeature: String, Decodable, Feature, Hashable {
                 case .on: return "Allow to send files and media."
                 case .off: return "Prohibit sending files and media."
                 }
-            case .simplexLinks:
+            case .popopxLinks:
                 switch enabled {
                 case .on: return "Allow to send POPOPX links."
                 case .off: return "Prohibit sending POPOPX links."
@@ -1600,7 +1600,7 @@ public enum GroupFeature: String, Decodable, Feature, Hashable {
                     : "Members can send files and media."
                 case .off: return "Files and media are prohibited."
                 }
-            case .simplexLinks:
+            case .popopxLinks:
                 switch enabled {
                 case .on: return isChannel
                     ? "Subscribers can send POPOPX links."
@@ -1786,7 +1786,7 @@ public struct FullGroupPreferences: Decodable, Equatable, Hashable {
     public var reactions: GroupPreference
     public var voice: RoleGroupPreference
     public var files: RoleGroupPreference
-    public var simplexLinks: RoleGroupPreference
+    public var popopxLinks: RoleGroupPreference
     public var reports: GroupPreference
     public var history: GroupPreference
     public var support: GroupPreference
@@ -1800,7 +1800,7 @@ public struct FullGroupPreferences: Decodable, Equatable, Hashable {
         reactions: GroupPreference,
         voice: RoleGroupPreference,
         files: RoleGroupPreference,
-        simplexLinks: RoleGroupPreference,
+        popopxLinks: RoleGroupPreference,
         reports: GroupPreference,
         history: GroupPreference,
         support: GroupPreference,
@@ -1813,7 +1813,7 @@ public struct FullGroupPreferences: Decodable, Equatable, Hashable {
         self.reactions = reactions
         self.voice = voice
         self.files = files
-        self.simplexLinks = simplexLinks
+        self.popopxLinks = popopxLinks
         self.reports = reports
         self.history = history
         self.support = support
@@ -1828,7 +1828,7 @@ public struct FullGroupPreferences: Decodable, Equatable, Hashable {
         reactions: GroupPreference(enable: .on),
         voice: RoleGroupPreference(enable: .on, role: nil),
         files: RoleGroupPreference(enable: .on, role: nil),
-        simplexLinks: RoleGroupPreference(enable: .on, role: nil),
+        popopxLinks: RoleGroupPreference(enable: .on, role: nil),
         reports: GroupPreference(enable: .on),
         history: GroupPreference(enable: .on),
         support: GroupPreference(enable: .on),
@@ -1844,7 +1844,7 @@ public struct GroupPreferences: Codable, Hashable {
     public var reactions: GroupPreference?
     public var voice: RoleGroupPreference?
     public var files: RoleGroupPreference?
-    public var simplexLinks: RoleGroupPreference?
+    public var popopxLinks: RoleGroupPreference?
     public var reports: GroupPreference?
     public var history: GroupPreference?
     public var support: GroupPreference?
@@ -1858,7 +1858,7 @@ public struct GroupPreferences: Codable, Hashable {
         reactions: GroupPreference? = nil,
         voice: RoleGroupPreference? = nil,
         files: RoleGroupPreference? = nil,
-        simplexLinks: RoleGroupPreference? = nil,
+        popopxLinks: RoleGroupPreference? = nil,
         reports: GroupPreference? = nil,
         history: GroupPreference? = nil,
         support: GroupPreference? = nil,
@@ -1871,7 +1871,7 @@ public struct GroupPreferences: Codable, Hashable {
         self.reactions = reactions
         self.voice = voice
         self.files = files
-        self.simplexLinks = simplexLinks
+        self.popopxLinks = popopxLinks
         self.reports = reports
         self.history = history
         self.support = support
@@ -1886,7 +1886,7 @@ public struct GroupPreferences: Codable, Hashable {
         reactions: GroupPreference(enable: .on),
         voice: RoleGroupPreference(enable: .on, role: nil),
         files: RoleGroupPreference(enable: .on, role: nil),
-        simplexLinks: RoleGroupPreference(enable: .on, role: nil),
+        popopxLinks: RoleGroupPreference(enable: .on, role: nil),
         reports: GroupPreference(enable: .on),
         history: GroupPreference(enable: .on),
         support: GroupPreference(enable: .on),
@@ -1902,7 +1902,7 @@ public func toGroupPreferences(_ fullPreferences: FullGroupPreferences) -> Group
         reactions: fullPreferences.reactions,
         voice: fullPreferences.voice,
         files: fullPreferences.files,
-        simplexLinks: fullPreferences.simplexLinks,
+        popopxLinks: fullPreferences.popopxLinks,
         reports: fullPreferences.reports,
         history: fullPreferences.history,
         support: fullPreferences.support,
@@ -3149,7 +3149,7 @@ public enum GroupType: Codable, Hashable {
 }
 
 public struct PublicGroupAccess: Codable, Hashable {
-    public init(groupWebPage: String? = nil, groupDomainClaim: SimplexDomainClaim? = nil, domainWebPage: Bool = false, allowEmbedding: Bool = false) {
+    public init(groupWebPage: String? = nil, groupDomainClaim: PopopxDomainClaim? = nil, domainWebPage: Bool = false, allowEmbedding: Bool = false) {
         self.groupWebPage = groupWebPage
         self.groupDomainClaim = groupDomainClaim
         self.domainWebPage = domainWebPage
@@ -3157,25 +3157,25 @@ public struct PublicGroupAccess: Codable, Hashable {
     }
 
     public var groupWebPage: String?
-    public var groupDomainClaim: SimplexDomainClaim?
+    public var groupDomainClaim: PopopxDomainClaim?
     public var domainWebPage: Bool = false
     public var allowEmbedding: Bool = false
 }
 
-public struct SimplexDomainClaim: Codable, Hashable {
-    public init(domain: String, proof: SimplexDomainProof? = nil) {
+public struct PopopxDomainClaim: Codable, Hashable {
+    public init(domain: String, proof: PopopxDomainProof? = nil) {
         self.domain = domain
         self.proof = proof
     }
     public var domain: String
-    public var proof: SimplexDomainProof?
+    public var proof: PopopxDomainProof?
 
     public var shortName: String {
         domain.hasSuffix(".popopx") ? String(domain.dropLast(".popopx".count)) : domain
     }
 }
 
-public enum SimplexDomainError: Decodable, Hashable {
+public enum PopopxDomainError: Decodable, Hashable {
     case noValidLink
     case unknownDomain
 }
@@ -3409,7 +3409,7 @@ public struct BusinessChatInfo: Decodable, Hashable {
     public var chatType: BusinessChatType
     public var businessId: String
     public var customerId: String
-    public var businessDomain: SimplexDomainClaim?
+    public var businessDomain: PopopxDomainClaim?
 }
 
 public enum BusinessChatType: String, Codable, Hashable {
@@ -5997,8 +5997,8 @@ public enum Format: Decodable, Equatable, Hashable {
     case colored(color: FormatColor)
     case uri
     case hyperLink(showText: String?, linkUri: String)
-    case simplexLink(showText: String?, linkType: SimplexLinkType, simplexUri: String, smpHosts: [String])
-    case simplexName(nameInfo: PopopxNameInfo)
+    case popopxLink(showText: String?, linkType: PopopxLinkType, popopxUri: String, smpHosts: [String])
+    case popopxName(nameInfo: PopopxNameInfo)
     case command(commandStr: String)
     case mention(memberName: String)
     case modal(modalName: String, text: String)
@@ -6011,17 +6011,17 @@ public enum Format: Decodable, Equatable, Hashable {
     // client-only format that opens a modal when tapped, see openMarkdownModal
     public static let modalDescription = "description"
 
-    public var isSimplexLink: Bool {
+    public var isPopopxLink: Bool {
         get {
             switch (self) {
-            case .simplexLink: return true
+            case .popopxLink: return true
             default: return false
             }
         }
     }
 }
 
-public enum SimplexLinkType: String, Decodable, Hashable {
+public enum PopopxLinkType: String, Decodable, Hashable {
     case contact
     case invitation
     case group
@@ -6041,7 +6041,7 @@ public enum SimplexLinkType: String, Decodable, Hashable {
 
 public struct PopopxNameInfo: Codable, Equatable, Hashable {
     public var nameType: PopopxNameType
-    public var nameDomain: SimplexDomain
+    public var nameDomain: PopopxDomain
 
     // mirrors backend shortNameInfoStr: "#name" for a popopx public group, else prefix + full domain
     public var shortStr: String {
@@ -6052,13 +6052,13 @@ public struct PopopxNameInfo: Codable, Equatable, Hashable {
         }
     }
 
-    public init(nameType: PopopxNameType, nameDomain: SimplexDomain) {
+    public init(nameType: PopopxNameType, nameDomain: PopopxDomain) {
         self.nameType = nameType
         self.nameDomain = nameDomain
     }
 }
 
-public struct SimplexDomain: Codable, Equatable, Hashable {
+public struct PopopxDomain: Codable, Equatable, Hashable {
     public var nameTLD: PopopxTLD
     public var domain: String
     public var subDomain: [String]
@@ -6096,7 +6096,7 @@ public enum PopopxNameType: String, Codable, Hashable {
     case contact
 }
 
-public struct SimplexDomainProof: Codable, Hashable {
+public struct PopopxDomainProof: Codable, Hashable {
     public var linkOwnerId: String?
     public var presHeader: String
     public var signature: String

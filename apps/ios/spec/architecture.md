@@ -303,7 +303,7 @@ Chat relays are SMP servers that forward messages to channel subscribers. They a
 | `addChatRelay(...)` | `ChatRelayView.swift` | Validates name/address, appends to `userServers[nil operator].chatRelays`, calls `validateServers_` |
 | `deleteChatRelay(...)` | `ProtocolServersView.swift` | Marks relay as deleted or removes if no `chatRelayId` |
 | `validRelayName(_:)` | `ChatRelayView.swift` | Non-empty + valid display name check |
-| `validRelayAddress(_:)` | `ChatRelayView.swift` | Parses via `parseSimpleXMarkdown`, validates `.simplexLink(_, .relay, _, _)` |
+| `validRelayAddress(_:)` | `ChatRelayView.swift` | Parses via `parseSimpleXMarkdown`, validates `.popopxLink(_, .relay, _, _)` |
 | `showRelayTestStatus(relay:)` | `ChatRelayView.swift` | ViewBuilder returning checkmark/multiply/clear icons |
 | `validateServers_` | `NetworkAndServers.swift` | Extended signature: now accepts optional `Binding<[UserServersWarning]>?`; calls `validateServers` which returns `([UserServersError], [UserServersWarning])` tuple |
 | `globalServersWarning(_:)` | `NetworkAndServers.swift` | Extracts `.noChatRelays` warning text for display |

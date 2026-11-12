@@ -527,7 +527,7 @@ export interface BusinessChatInfo {
   chatType: BusinessChatType
   businessId: string
   customerId: string
-  businessDomain?: SimplexDomainClaim
+  businessDomain?: PopopxDomainClaim
 }
 
 export enum BusinessChatType {
@@ -1302,7 +1302,7 @@ export type ChatErrorType =
   | ChatErrorType.ChatNotStopped
   | ChatErrorType.ChatStoreChanged
   | ChatErrorType.InvalidConnReq
-  | ChatErrorType.SimplexDomainNotReady
+  | ChatErrorType.PopopxDomainNotReady
   | ChatErrorType.NotResolvedLocally
   | ChatErrorType.UnsupportedConnReq
   | ChatErrorType.ConnReqMessageProhibited
@@ -1382,7 +1382,7 @@ export namespace ChatErrorType {
     | "chatNotStopped"
     | "chatStoreChanged"
     | "invalidConnReq"
-    | "simplexDomainNotReady"
+    | "popopxDomainNotReady"
     | "notResolvedLocally"
     | "unsupportedConnReq"
     | "connReqMessageProhibited"
@@ -1539,10 +1539,10 @@ export namespace ChatErrorType {
     type: "invalidConnReq"
   }
 
-  export interface SimplexDomainNotReady extends Interface {
-    type: "simplexDomainNotReady"
-    simplexDomain: SimplexDomain
-    simplexDomainError: SimplexDomainError
+  export interface PopopxDomainNotReady extends Interface {
+    type: "popopxDomainNotReady"
+    popopxDomain: PopopxDomain
+    popopxDomainError: PopopxDomainError
   }
 
   export interface NotResolvedLocally extends Interface {
@@ -2797,8 +2797,8 @@ export type Format =
   | Format.Colored
   | Format.Uri
   | Format.HyperLink
-  | Format.SimplexLink
-  | Format.SimplexName
+  | Format.PopopxLink
+  | Format.PopopxName
   | Format.Command
   | Format.Mention
   | Format.Email
@@ -2817,8 +2817,8 @@ export namespace Format {
     | "colored"
     | "uri"
     | "hyperLink"
-    | "simplexLink"
-    | "simplexName"
+    | "popopxLink"
+    | "popopxName"
     | "command"
     | "mention"
     | "email"
@@ -2870,17 +2870,17 @@ export namespace Format {
     linkUri: string
   }
 
-  export interface SimplexLink extends Interface {
-    type: "simplexLink"
+  export interface PopopxLink extends Interface {
+    type: "popopxLink"
     showText?: string
-    linkType: SimplexLinkType
-    simplexUri: string
+    linkType: PopopxLinkType
+    popopxUri: string
     smpHosts: string[] // non-empty
   }
 
-  export interface SimplexName extends Interface {
-    type: "simplexName"
-    nameInfo: SimplexNameInfo
+  export interface PopopxName extends Interface {
+    type: "popopxName"
+    nameInfo: PopopxNameInfo
   }
 
   export interface Command extends Interface {
@@ -2923,7 +2923,7 @@ export interface FullGroupPreferences {
   reactions: GroupPreference
   voice: RoleGroupPreference
   files: RoleGroupPreference
-  simplexLinks: RoleGroupPreference
+  popopxLinks: RoleGroupPreference
   reports: GroupPreference
   history: GroupPreference
   support: SupportGroupPreference
@@ -2998,7 +2998,7 @@ export enum GroupFeature {
   Reactions = "reactions",
   Voice = "voice",
   Files = "files",
-  SimplexLinks = "simplexLinks",
+  PopopxLinks = "popopxLinks",
   Reports = "reports",
   History = "history",
   Support = "support",
@@ -3213,7 +3213,7 @@ export interface GroupPreferences {
   reactions?: GroupPreference
   voice?: RoleGroupPreference
   files?: RoleGroupPreference
-  simplexLinks?: RoleGroupPreference
+  popopxLinks?: RoleGroupPreference
   reports?: GroupPreference
   history?: GroupPreference
   support?: SupportGroupPreference
@@ -3482,7 +3482,7 @@ export interface LocalProfile {
   peerType?: ChatPeerType
   localBadge?: LocalBadge
   localAlias: string
-  contactDomain?: SimplexDomainClaim
+  contactDomain?: PopopxDomainClaim
   contactDomainVerified?: boolean
 }
 
@@ -3956,6 +3956,65 @@ export namespace PlanResolveMode {
   }
 }
 
+export interface PopopxDomain {
+  nameTLD: PopopxTLD
+  domain: string
+  subDomain: string[]
+}
+
+export interface PopopxDomainClaim {
+  domain: string
+  proof?: PopopxDomainProof
+}
+
+export type PopopxDomainError = PopopxDomainError.NoValidLink | PopopxDomainError.UnknownDomain
+
+export namespace PopopxDomainError {
+  export type Tag = "noValidLink" | "unknownDomain"
+
+  interface Interface {
+    type: Tag
+  }
+
+  export interface NoValidLink extends Interface {
+    type: "noValidLink"
+  }
+
+  export interface UnknownDomain extends Interface {
+    type: "unknownDomain"
+  }
+}
+
+export interface PopopxDomainProof {
+  linkOwnerId?: string
+  presHeader: string
+  signature: string
+}
+
+export enum PopopxLinkType {
+  Contact = "contact",
+  Invitation = "invitation",
+  Group = "group",
+  Channel = "channel",
+  Relay = "relay",
+}
+
+export interface PopopxNameInfo {
+  nameType: PopopxNameType
+  nameDomain: PopopxDomain
+}
+
+export enum PopopxNameType {
+  PublicGroup = "publicGroup",
+  Contact = "contact",
+}
+
+export enum PopopxTLD {
+  Popopx = "popopx",
+  Testing = "testing",
+  Web = "web",
+}
+
 export interface PrefEnabled {
   forUser: boolean
   forContact: boolean
@@ -3997,7 +4056,7 @@ export interface Profile {
   preferences?: Preferences
   peerType?: ChatPeerType
   badge?: BadgeProof
-  contactDomain?: SimplexDomainClaim
+  contactDomain?: PopopxDomainClaim
 }
 
 export type ProxyClientError = 
@@ -4058,7 +4117,7 @@ export namespace ProxyError {
 
 export interface PublicGroupAccess {
   groupWebPage?: string
-  groupDomainClaim?: SimplexDomainClaim
+  groupDomainClaim?: PopopxDomainClaim
   domainWebPage: boolean
   allowEmbedding: boolean
 }
@@ -4726,65 +4785,6 @@ export interface ServerRolesOverride {
 
 export interface SimplePreference {
   allow: FeatureAllowed
-}
-
-export interface SimplexDomain {
-  nameTLD: SimplexTLD
-  domain: string
-  subDomain: string[]
-}
-
-export interface SimplexDomainClaim {
-  domain: string
-  proof?: SimplexDomainProof
-}
-
-export type SimplexDomainError = SimplexDomainError.NoValidLink | SimplexDomainError.UnknownDomain
-
-export namespace SimplexDomainError {
-  export type Tag = "noValidLink" | "unknownDomain"
-
-  interface Interface {
-    type: Tag
-  }
-
-  export interface NoValidLink extends Interface {
-    type: "noValidLink"
-  }
-
-  export interface UnknownDomain extends Interface {
-    type: "unknownDomain"
-  }
-}
-
-export interface SimplexDomainProof {
-  linkOwnerId?: string
-  presHeader: string
-  signature: string
-}
-
-export enum SimplexLinkType {
-  Contact = "contact",
-  Invitation = "invitation",
-  Group = "group",
-  Channel = "channel",
-  Relay = "relay",
-}
-
-export interface SimplexNameInfo {
-  nameType: SimplexNameType
-  nameDomain: SimplexDomain
-}
-
-export enum SimplexNameType {
-  PublicGroup = "publicGroup",
-  Contact = "contact",
-}
-
-export enum SimplexTLD {
-  Popopx = "popopx",
-  Testing = "testing",
-  Web = "web",
 }
 
 export enum SndCIStatusProgress {

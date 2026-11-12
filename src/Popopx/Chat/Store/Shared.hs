@@ -33,7 +33,7 @@ import qualified Data.Text as T
 import Data.Time.Clock (UTCTime (..), getCurrentTime)
 import Data.Type.Equality
 import Popopx.Chat.Badges (BadgeRow, MaybeBadgeProofRow, ProofPresHeader, badgeToRow, maybeRowToBadgeProof, rowToBadge)
-import Popopx.Chat.Names (SimplexDomainProof, SimplexDomainClaim (..), claimDomain)
+import Popopx.Chat.Names (PopopxDomainProof, PopopxDomainClaim (..), claimDomain)
 import Popopx.Chat.Messages
 import Popopx.Chat.Remote.Types
 import Popopx.Chat.Types
@@ -494,7 +494,7 @@ type ContactRow' = (ProfileId, ContactName, ContactName, Text, Maybe Text, Maybe
 
 type ContactRow = Only ContactId :. ContactRow'
 
-type ContactDomainRow = (Maybe PopopxDomain, Maybe SimplexDomainProof, Maybe BoolInt)
+type ContactDomainRow = (Maybe PopopxDomain, Maybe PopopxDomainProof, Maybe BoolInt)
 
 toContact :: UTCTime -> StoreCxt -> User -> [ChatTagId] -> ContactRow :. MaybeConnectionRow -> Contact
 toContact now cxt user chatTags ((Only contactId :. (profileId, localDisplayName, displayName, fullName, shortDescr, description, image, contactLink, peerType, localAlias, BI contactUsed, contactStatus) :. (enableNtfs_, sendRcpts, BI favorite, encodedPrefs, receivedPrefs, userPreferences, createdAt, updatedAt, chatTs) :. preparedContactRow :. (contactRequestId, rejectionSupported_, contactGroupMemberId, BI contactGrpInvSent) :. groupDirectInvRow :. (uiThemes, BI chatDeleted, customData, chatItemTTL, chatLayout) :. badgeRow :. domainRow) :. connRow) =
@@ -509,13 +509,13 @@ toContact now cxt user chatTags ((Only contactId :. (profileId, localDisplayName
       groupDirectInv = toGroupDirectInvitation groupDirectInvRow
    in Contact {contactId, localDisplayName, profile, activeConn, contactUsed, contactStatus, chatSettings, userPreferences, mergedPreferences, createdAt, updatedAt, chatTs, preparedContact, contactRequestId, contactRequest, contactGroupMemberId, contactGrpInvSent, groupDirectInv, chatTags, chatItemTTL, uiThemes, chatLayout, chatDeleted, customData}
 
-rowToContactDomain :: ContactDomainRow -> Maybe SimplexDomainClaim
-rowToContactDomain (domain_, domainProof_, _) = (`SimplexDomainClaim` domainProof_) . StrJSON <$> domain_
+rowToContactDomain :: ContactDomainRow -> Maybe PopopxDomainClaim
+rowToContactDomain (domain_, domainProof_, _) = (`PopopxDomainClaim` domainProof_) . StrJSON <$> domain_
 
 rowToDomainVerified :: ContactDomainRow -> Maybe Bool
 rowToDomainVerified (_, _, domainVerification_) = unBI <$> domainVerification_
 
-contactDomainToRow :: Maybe SimplexDomainClaim -> (Maybe PopopxDomain, Maybe SimplexDomainProof)
+contactDomainToRow :: Maybe PopopxDomainClaim -> (Maybe PopopxDomain, Maybe PopopxDomainProof)
 contactDomainToRow d = (claimDomain <$> d, proof =<< d)
 
 toPreparedContact :: PreparedContactRow -> Maybe PreparedContact
@@ -698,7 +698,7 @@ type GroupKeysRow = (Maybe C.PrivateKeyEd25519, Maybe C.PublicKeyEd25519, Maybe 
 
 type GroupInfoRow = (Int64, GroupName, GroupName, Text, Maybe Text, Text, Maybe Text, Maybe ImageData, Maybe GroupType, Maybe ShortLinkContact, Maybe B64UrlByteString) :. PublicGroupAccessRow :. (Maybe MsgFilter, Maybe BoolInt, BoolInt, Maybe Text, Maybe Text, Maybe GroupMemberAdmission, Maybe ChatLayout) :. (UTCTime, UTCTime, Maybe UTCTime, Maybe UTCTime) :. PreparedGroupRow :. BusinessChatInfoRow :. (BoolInt, Maybe RelayStatus, Maybe UIThemeEntityOverrides, Int64, Maybe Int64, Maybe VersionRoster, Maybe CustomData, Maybe Int64, Int, Maybe ConnReqContact, Maybe BoolInt) :. GroupKeysRow :. GroupMemberRow
 
-type PublicGroupAccessRow = (Maybe Text, Maybe PopopxDomain, Maybe BoolInt, Maybe BoolInt, Maybe SimplexDomainProof)
+type PublicGroupAccessRow = (Maybe Text, Maybe PopopxDomain, Maybe BoolInt, Maybe BoolInt, Maybe PopopxDomainProof)
 
 type GroupMemberRow = (GroupMemberId, GroupId, Int64, MemberId, VersionChat, VersionChat, GroupMemberRole, GroupMemberCategory, GroupMemberStatus, BoolInt, Maybe MemberRestrictionStatus) :. (Maybe Int64, Maybe GroupMemberId, ContactName, Maybe ContactId, ProfileId) :. ProfileRow :. (UTCTime, UTCTime) :. (Maybe UTCTime, Int64, Int64, Int64, Maybe UTCTime, Maybe C.PublicKeyEd25519, Maybe ShortLinkContact, Maybe Text, Maybe UTCTime)
 
@@ -741,7 +741,7 @@ publicGroupAccessRow pgp = case pgp >>= publicGroupAccess of
 toPublicGroupAccess :: PublicGroupAccessRow -> Maybe PublicGroupAccess
 toPublicGroupAccess (groupWebPage, groupDomain_, domainWebPage_, allowEmbedding_, groupDomainProof_)
   | isJust groupWebPage || isJust groupDomain_ || domainWebPage || allowEmbedding =
-      Just PublicGroupAccess {groupWebPage, groupDomainClaim = (`SimplexDomainClaim` groupDomainProof_) . StrJSON <$> groupDomain_, domainWebPage, allowEmbedding}
+      Just PublicGroupAccess {groupWebPage, groupDomainClaim = (`PopopxDomainClaim` groupDomainProof_) . StrJSON <$> groupDomain_, domainWebPage, allowEmbedding}
   | otherwise = Nothing
   where
     domainWebPage = maybe False unBI domainWebPage_
@@ -829,7 +829,7 @@ rowToLocalProfile :: UTCTime -> ProfileRow -> LocalProfile
 rowToLocalProfile now ((profileId, displayName, fullName, shortDescr, description, image, contactLink, peerType, localAlias, encodedPrefs, receivedPrefs) :. badgeRow :. domainRow) =
   LocalProfile {profileId, displayName, fullName, shortDescr, description, image, contactLink, contactDomain = rowToContactDomain domainRow, contactDomainVerified = rowToDomainVerified domainRow, peerType, localBadge = rowToBadge now badgeRow, localAlias, preferences = chatPrefsFromRow encodedPrefs receivedPrefs}
 
-toBusinessChatInfo :: Maybe SimplexDomainClaim -> BusinessChatInfoRow -> Maybe BusinessChatInfo
+toBusinessChatInfo :: Maybe PopopxDomainClaim -> BusinessChatInfoRow -> Maybe BusinessChatInfo
 toBusinessChatInfo businessDomain (Just chatType, Just businessId, Just customerId) = Just BusinessChatInfo {chatType, businessId, customerId, businessDomain}
 toBusinessChatInfo _ _ = Nothing
 

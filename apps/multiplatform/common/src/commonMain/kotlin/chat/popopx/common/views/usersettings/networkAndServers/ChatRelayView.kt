@@ -59,8 +59,8 @@ fun validRelayAddress(address: String): Boolean {
   val parsedMd = parseToMarkdown(address)
   return parsedMd != null &&
     parsedMd.size == 1 &&
-    parsedMd.first().format is Format.SimplexLink &&
-    (parsedMd.first().format as Format.SimplexLink).linkType == SimplexLinkType.relay
+    parsedMd.first().format is Format.PopopxLink &&
+    (parsedMd.first().format as Format.PopopxLink).linkType == PopopxLinkType.relay
 }
 
 fun addChatRelay(

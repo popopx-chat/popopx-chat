@@ -427,19 +427,19 @@ fun ComposeView(
   val cancelledLinks = rememberSaveable { mutableSetOf<String>() }
   val chatScope = remember(chatsCtx) { chatsCtx.groupScopeInfo?.toChatScope() }
   val scopeChatId = remember { chat.id }
-  fun isSimplexLink(link: String): Boolean =
+  fun isPopopxLink(link: String): Boolean =
     link.startsWith("https://simplex.chat", true) || link.startsWith("http://simplex.chat", true)
 
   fun getMessageLinks(parsedMsg: List<FormattedText>?): Pair<String?, Boolean> {
     if (parsedMsg == null) return null to false
-    val simplexLink = parsedMsg.any { ft -> ft.format is Format.SimplexLink }
+    val popopxLink = parsedMsg.any { ft -> ft.format is Format.PopopxLink }
     for (ft in parsedMsg) {
       val link = ft.linkUri
-      if (link != null && !cancelledLinks.contains(link) && !isSimplexLink(link)) {
-        return link to simplexLink
+      if (link != null && !cancelledLinks.contains(link) && !isPopopxLink(link)) {
+        return link to popopxLink
       }
     }
-    return null to simplexLink
+    return null to popopxLink
   }
 
   val linkUrl = rememberSaveable { mutableStateOf<String?>(null) }
@@ -1081,7 +1081,7 @@ fun ComposeView(
         }
       } else {
         resetLinkPreview()
-        hasPopopxLink.value = s.text.isNotEmpty() && !chat.groupFeatureEnabled(GroupFeature.SimplexLinks) && getMessageLinks(parsedMessage).second
+        hasPopopxLink.value = s.text.isNotEmpty() && !chat.groupFeatureEnabled(GroupFeature.PopopxLinks) && getMessageLinks(parsedMessage).second
         if (composeState.value.linkPreviewAllowed) composeState.value = composeState.value.copy(preview = ComposePreview.NoPreview)
       }
     }
@@ -1744,7 +1744,7 @@ fun ComposeView(
       ReportReasonView(ctx.reason)
     }
 
-    val popopxLinkProhibited = chatsCtx.secondaryContextFilter == null && hasPopopxLink.value && !chat.groupFeatureEnabled(GroupFeature.SimplexLinks)
+    val popopxLinkProhibited = chatsCtx.secondaryContextFilter == null && hasPopopxLink.value && !chat.groupFeatureEnabled(GroupFeature.PopopxLinks)
     val fileProhibited = chatsCtx.secondaryContextFilter == null && composeState.value.attachmentPreview && !chat.groupFeatureEnabled(GroupFeature.Files)
     val voiceProhibited = composeState.value.preview is ComposePreview.VoicePreview && !chat.chatInfo.featureEnabled(ChatFeature.Voice)
     val disableSendButton = popopxLinkProhibited || fileProhibited || voiceProhibited

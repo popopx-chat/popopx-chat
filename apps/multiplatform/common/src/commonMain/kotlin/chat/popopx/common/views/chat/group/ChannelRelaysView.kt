@@ -211,7 +211,7 @@ fun hostFromRelayLink(link: String): String {
   if (ft != null) {
     for (f in ft) {
       val format = f.format
-      if (format is Format.SimplexLink) {
+      if (format is Format.PopopxLink) {
         val host = format.smpHosts.firstOrNull()
         if (host != null) return host
       }

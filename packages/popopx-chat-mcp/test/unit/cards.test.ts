@@ -9,7 +9,7 @@ function action(fields: NewAction, state: State, extra: Partial<Action> = {}): A
   return {...fields, n: 1, key: "k", created: expires - 3_600_000, expires, changes: new Changes(), standing: false, state, open: 0, interrupted: false, ...extra} as Action
 }
 
-const directory = {kind: "bot", name: "SimpleX Directory", simplexName: "@directory.popopx", incognito: false}
+const directory = {kind: "bot", name: "SimpleX Directory", popopxName: "@directory.popopx", incognito: false}
 
 function connect(extra: {incognito?: boolean; message?: string; description?: string; welcome?: string} = {}): NewAction {
   return {
@@ -192,7 +192,7 @@ describe("send cards", () => {
 })
 
 describe("leave cards", () => {
-  function leave(chat: string, subject: {kind: string; name?: string; simplexName?: string}): NewAction {
+  function leave(chat: string, subject: {kind: string; name?: string; popopxName?: string}): NewAction {
     return {tool: "leave", input: {chat}, subject: {...subject, incognito: false}, chat}
   }
 

@@ -61,7 +61,7 @@ fun ReadableText(stringResId: StringResource, textAlign: TextAlign = TextAlign.S
 }
 
 @Composable
-fun ReadableTextWithLink(stringResId: StringResource, link: String, textAlign: TextAlign = TextAlign.Start, padding: PaddingValues = PaddingValues(bottom = 12.dp), simplexLink: Boolean = false) {
+fun ReadableTextWithLink(stringResId: StringResource, link: String, textAlign: TextAlign = TextAlign.Start, padding: PaddingValues = PaddingValues(bottom = 12.dp), popopxLink: Boolean = false) {
   val annotated = annotatedStringResource(stringResId)
   val primary = MaterialTheme.colors.primary
   // This replaces links in text highlighted with specific color, e.g. PopopxBlue
@@ -77,7 +77,7 @@ fun ReadableTextWithLink(stringResId: StringResource, link: String, textAlign: T
     newStyles
   }
   val uriHandler = LocalUriHandler.current
-  Text(AnnotatedString(annotated.text, newStyles), modifier = Modifier.padding(padding).clickable { if (simplexLink) uriHandler.openVerifiedPopopxUri(link) else uriHandler.openExternalLink(link) }, textAlign = textAlign, lineHeight = 22.sp)
+  Text(AnnotatedString(annotated.text, newStyles), modifier = Modifier.padding(padding).clickable { if (popopxLink) uriHandler.openVerifiedPopopxUri(link) else uriHandler.openExternalLink(link) }, textAlign = textAlign, lineHeight = 22.sp)
 }
 
 @Composable

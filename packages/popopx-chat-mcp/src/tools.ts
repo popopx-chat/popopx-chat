@@ -87,7 +87,7 @@ export interface PlanSummary {
   cardKind: string
   type: ChatKind
   name?: string
-  simplexName?: string
+  popopxName?: string
   peerType?: string
   description?: string
   welcome?: string
@@ -622,7 +622,7 @@ export class AgentTools {
     if ("known" in plan) return {status: "known", ...(await this.chatFields(plan.known, plan.summary))}
     const summary = plan.join
     if (input.message !== undefined && !summary.takesMessage) throw new ToolError(`message: ${input.target} is not a contact or business address with short link data, or its contact exists without a connection.`)
-    const subject: Subject = {kind: summary.cardKind, name: summary.name, simplexName: summary.simplexName, incognito: input.incognito ?? false}
+    const subject: Subject = {kind: summary.cardKind, name: summary.name, popopxName: summary.popopxName, incognito: input.incognito ?? false}
     const messages = new Collected()
     if (call.signal.aborted) return undefined
     const action = this.agent.actions.find(key) ?? this.agent.actions.create(key, {tool: "connect", input, subject, plan: summary, messages})
@@ -1258,14 +1258,14 @@ function connRef(response: JoinResponse): ConnRef {
 }
 
 export function classifyPlan(r: ConnectionPlan, {target, message}: ConnectInput): Plan {
-  const [plan, connLink, planSimplexName] = r
+  const [plan, connLink, planPopopxName] = r
   const named = target.startsWith("@") || target.startsWith("#") || target.startsWith("popopx:/name")
-  const simplexName = named ? target : undefined
-  const domain = planSimplexName === undefined ? undefined : fullDomainName(planSimplexName.nameDomain)
+  const popopxName = named ? target : undefined
+  const domain = planPopopxName === undefined ? undefined : fullDomainName(planPopopxName.nameDomain)
   const connect: JoinMethod = {type: "connect", connLink}
   const notJoinable = (planType: string): ToolError => new ToolError(`${target} can't be joined now: ${planType}.`)
   const knownContact = (contact: T.Contact): Plan => {
-    const summary = contactSummary(simplexName, undefined, contact.profile, false)
+    const summary = contactSummary(popopxName, undefined, contact.profile, false)
     return contact.preparedContact !== undefined && (contact.activeConn === undefined || contact.activeConn.connStatus.type === "prepared")
       ? {join: {...summary, takesMessage: true}, method: {type: "prepared", conn: {contact: contact.contactId}}}
       : {known: {type: "direct", contact}, summary}
@@ -1277,7 +1277,7 @@ export function classifyPlan(r: ConnectionPlan, {target, message}: ConnectInput)
       const p = plan.invitationLinkPlan
       if (p.type === "known") return knownContact(p.contact)
       if (p.type !== "ok") throw notJoinable(`invitationLink ${p.type}`)
-      return {join: contactSummary(simplexName, p.contactSLinkData_, p.contactSLinkData_?.profile, false), method: connect}
+      return {join: contactSummary(popopxName, p.contactSLinkData_, p.contactSLinkData_?.profile, false), method: connect}
     }
     case "contactAddress": {
       const p = plan.contactAddressPlan
@@ -1287,12 +1287,12 @@ export function classifyPlan(r: ConnectionPlan, {target, message}: ConnectInput)
         case "ok": {
           const linkData = p.contactSLinkData_
           const prepare = linkData !== undefined && (domain !== undefined || message !== undefined)
-          return {join: contactSummary(simplexName, linkData, linkData?.profile, linkData !== undefined), method: prepare ? {type: "prepareContact", connLink, domain, linkData} : connect}
+          return {join: contactSummary(popopxName, linkData, linkData?.profile, linkData !== undefined), method: prepare ? {type: "prepareContact", connLink, domain, linkData} : connect}
         }
         case "contactViaAddress":
-          return {join: contactSummary(simplexName, undefined, p.contact.profile, false), method: {type: "viaAddress", contactId: p.contact.contactId}}
+          return {join: contactSummary(popopxName, undefined, p.contact.profile, false), method: {type: "viaAddress", contactId: p.contact.contactId}}
         case "connectingConfirmReconnect":
-          return {join: contactSummary(simplexName, undefined, undefined, false), method: connect}
+          return {join: contactSummary(popopxName, undefined, undefined, false), method: connect}
         default:
           throw notJoinable(`contactAddress ${p.type}`)
       }
@@ -1303,7 +1303,7 @@ export function classifyPlan(r: ConnectionPlan, {target, message}: ConnectInput)
         case "known": {
           const {groupInfo} = p
           const business = groupInfo.businessChat !== undefined
-          const summary = groupSummary(simplexName, groupInfo.groupProfile, true, business)
+          const summary = groupSummary(popopxName, groupInfo.groupProfile, true, business)
           return groupInfo.preparedGroup !== undefined && !groupInfo.preparedGroup.connLinkStartedConnection
             ? {join: {...summary, takesMessage: business}, method: {type: "prepared", conn: {group: groupInfo.groupId}}}
             : {known: {type: "group", groupInfo}, summary}
@@ -1311,10 +1311,10 @@ export function classifyPlan(r: ConnectionPlan, {target, message}: ConnectInput)
         case "ok": {
           const direct = p.groupSLinkInfo_?.direct ?? true
           const linkData = p.groupSLinkData_
-          return {join: groupSummary(simplexName, linkData?.groupProfile, direct, false), method: !direct && linkData !== undefined ? {type: "prepareChannel", connLink, domain, linkData} : connect}
+          return {join: groupSummary(popopxName, linkData?.groupProfile, direct, false), method: !direct && linkData !== undefined ? {type: "prepareChannel", connLink, domain, linkData} : connect}
         }
         case "connectingConfirmReconnect":
-          return {join: groupSummary(simplexName, undefined, true, false), method: connect}
+          return {join: groupSummary(popopxName, undefined, true, false), method: connect}
         default:
           throw notJoinable(`groupLink ${p.type}`)
       }
@@ -1322,7 +1322,7 @@ export function classifyPlan(r: ConnectionPlan, {target, message}: ConnectInput)
   }
 }
 
-function contactSummary(simplexName: string | undefined, linkData: T.ContactShortLinkData | undefined, profile: T.Profile | T.LocalProfile | undefined, takesMessage: boolean): PlanSummary {
+function contactSummary(popopxName: string | undefined, linkData: T.ContactShortLinkData | undefined, profile: T.Profile | T.LocalProfile | undefined, takesMessage: boolean): PlanSummary {
   const business = linkData?.business ?? false
   const peerType = profile?.peerType as string | undefined
   const welcome = linkData?.message?.text
@@ -1330,18 +1330,18 @@ function contactSummary(simplexName: string | undefined, linkData: T.ContactShor
     cardKind: business ? "business" : contactKind(peerType),
     type: business ? "business" : "contact",
     takesMessage,
-    ...defined({name: profile?.displayName, simplexName, peerType, description: profile?.shortDescr, welcome, commands: commandsOf(profile?.preferences?.commands)}),
+    ...defined({name: profile?.displayName, popopxName, peerType, description: profile?.shortDescr, welcome, commands: commandsOf(profile?.preferences?.commands)}),
   }
 }
 
-function groupSummary(simplexName: string | undefined, profile: T.GroupProfile | undefined, direct: boolean, business: boolean): PlanSummary {
+function groupSummary(popopxName: string | undefined, profile: T.GroupProfile | undefined, direct: boolean, business: boolean): PlanSummary {
   const channel = !direct || profile?.publicGroup?.groupType === T.GroupType.Channel
   const kind: ChatKind = business ? "business" : channel ? "channel" : "group"
   return {
     cardKind: kind,
     type: kind,
     takesMessage: false,
-    ...defined({name: profile?.displayName, simplexName, description: profile?.shortDescr, welcome: profile?.description, commands: commandsOf(profile?.groupPreferences?.commands)}),
+    ...defined({name: profile?.displayName, popopxName, description: profile?.shortDescr, welcome: profile?.description, commands: commandsOf(profile?.groupPreferences?.commands)}),
   }
 }
 
@@ -1357,7 +1357,7 @@ export function chatSubject(chatInfo: T.ChatInfo): Subject {
   const named = chatInfo.type === "direct"
     ? {kind: contactKind(chatInfo.contact.profile.peerType), name: chatInfo.contact.profile.displayName}
     : {kind: groupKind((chatInfo as T.ChatInfo.Group).groupInfo), name: (chatInfo as T.ChatInfo.Group).groupInfo.groupProfile.displayName}
-  return {...named, ...defined({simplexName: simplexNameOf(chatInfo)}), incognito: isIncognito(chatInfo)}
+  return {...named, ...defined({popopxName: simplexNameOf(chatInfo)}), incognito: isIncognito(chatInfo)}
 }
 
 function simplexNameOf(chatInfo: T.ChatInfo): string | undefined {

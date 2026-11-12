@@ -690,11 +690,11 @@ struct GroupChatInfoView: View {
                 title: "POPOPX name",
                 footer: "Let people join via name registered with this channel link.",
                 prompt: "#channelname.testing",
-                simplexName: domain,
+                popopxName: domain,
                 save: { domain in
                     do {
                         var access = groupInfo.groupProfile.publicGroup?.publicGroupAccess ?? PublicGroupAccess()
-                        access.groupDomainClaim = domain.map { SimplexDomainClaim(domain: $0) }
+                        access.groupDomainClaim = domain.map { PopopxDomainClaim(domain: $0) }
                         let gInfo = try await apiSetPublicGroupAccess(groupInfo.groupId, access: access)
                         await MainActor.run {
                             chatModel.updateGroup(gInfo)

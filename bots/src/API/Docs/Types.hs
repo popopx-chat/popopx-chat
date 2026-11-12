@@ -394,10 +394,10 @@ chatTypesDocsData =
     (sti @ServerRolesOverride, STRecord, "", [], "", ""),
     (sti @SimplePreference, STRecord, "", [], "", ""),
     (sti @PopopxDomain, STRecord, "", [], "", ""),
-    (sti @SimplexDomainClaim, STRecord, "", [], "", ""),
-    (sti @SimplexDomainError, STUnion, "SDE", [], "", ""),
-    (sti @SimplexDomainProof, STRecord, "", [], "", ""),
-    (sti @SimplexLinkType, STEnum, "XL", [], "", ""),
+    (sti @PopopxDomainClaim, STRecord, "", [], "", ""),
+    (sti @PopopxDomainError, STUnion, "SDE", [], "", ""),
+    (sti @PopopxDomainProof, STRecord, "", [], "", ""),
+    (sti @PopopxLinkType, STEnum, "XL", [], "", ""),
     (sti @PopopxNameInfo, STRecord, "", [], "", ""),
     (sti @PopopxNameType, STEnum, "NT", [], "", ""),
     (sti @PopopxTLD, STEnum, "TLD", [], "", ""),
@@ -656,10 +656,10 @@ deriving instance Generic (ServerOperator' 'DBStored)
 deriving instance Generic ServerRoles
 deriving instance Generic ServerRolesOverride
 deriving instance Generic PopopxDomain
-deriving instance Generic SimplexDomainClaim
-deriving instance Generic SimplexDomainError
-deriving instance Generic SimplexDomainProof
-deriving instance Generic SimplexLinkType
+deriving instance Generic PopopxDomainClaim
+deriving instance Generic PopopxDomainError
+deriving instance Generic PopopxDomainProof
+deriving instance Generic PopopxLinkType
 deriving instance Generic PopopxNameInfo
 deriving instance Generic PopopxNameType
 deriving instance Generic PopopxTLD

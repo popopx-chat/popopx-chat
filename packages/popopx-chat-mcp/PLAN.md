@@ -816,8 +816,8 @@ SimpleX errors worded by the apps (`chatErrorText`, `log.ts`), copied from the A
 error shape                                              text
 error invalidConnReq                                     Invalid connection link: Please check that you used the correct link or ask your contact to send you another one.
 error unsupportedConnReq                                 Unsupported connection link: This link requires a newer app version. Please upgrade the app or ask your contact to send a compatible link.
-error simplexDomainNotReady noValidLink                  No valid link: The SimpleX name NAME is registered, but it has no valid link.
-error simplexDomainNotReady unknownDomain                Unconfirmed name: The SimpleX name NAME is registered, but not added to profile. Please add it to your address or channel profile, if you are the owner.
+error popopxDomainNotReady noValidLink                  No valid link: The SimpleX name NAME is registered, but it has no valid link.
+error popopxDomainNotReady unknownDomain                Unconfirmed name: The SimpleX name NAME is registered, but not added to profile. Please add it to your address or channel profile, if you are the owner.
 error fileNotApproved                                    Unknown servers! Without Tor or VPN, your IP address will be visible to these XFTP relays: HOST, HOST.   (the hosts sorted, each once)
 errorAgent NO_NAME_SERVERS                               SimpleX name error: None of your servers are set to resolve SimpleX names. Use a connection link.
 errorAgent SMP NAME NOT_FOUND                            Name not found: This SimpleX name is not registered. Please check the name.
@@ -1064,7 +1064,7 @@ chat        chat reference, set during perform
 item        sent item, send after done
 responses   received message items of chat with IDs above item, from newChatItems during perform and until the action is deleted; send
 interrupted the server is stopping during perform
-plan        {type, name, simplexName, description, welcome, commands, connLink, direct, linkData}, connect
+plan        {type, name, popopxName, description, welcome, commands, connLink, direct, linkData}, connect
 conn        {pcc: pccConnId} | {contact: contactId} | {group: groupId}, connect after perform
 known_as    incognito profile's name, connect after perform
 item, from  the message and its sender's display name in a group, download
@@ -1117,7 +1117,7 @@ connect(input, ctx):
     error with errorType invalidConnReq: tool error "not a link or name"
     other errors: tool error "SimpleX error"                             # e.g. an unregistered name: SMP NAME NOT_FOUND (resolveNameRecord, 9711dcfc9 Commands.hs:5175-5180), "Name not found: ..."
   plan type error (a caught store error, Commands.hs:4517, :4549): tool error "SimpleX error" with plan.chatError
-  plan summary: type, name, simplexName, description, welcome, commands, connLink, direct, linkData
+  plan summary: type, name, popopxName, description, welcome, commands, connLink, direct, linkData
   plan with connectionPlanProceed false (Controller.hs:1226-1245):
     invitationLink known, contactAddress known, groupLink known: result {status: "known", chat: @contact.contactId or #groupInfo.groupId, chat fields, connected}; no action
     invitationLink connecting, contactAddress connectingProhibit, groupLink connectingProhibit | noRelays | updateRequired: tool error "link not joinable"
@@ -1159,7 +1159,7 @@ newChatItems        wake the waiting send and receive calls of that chat
 ```
 
 - `APIConnect` refuses channel links ("channel links must be connected via APIConnectPreparedGroup", `Commands.hs:2411`).
-- `simplex_name`: contacts: `@` + `profile.contactDomain.domain` when `profile.contactDomainVerified` (`LocalProfile`, `types.d.ts:2166-2167`); groups and channels: `#` + `groupProfile.publicGroup.publicGroupAccess.groupDomainClaim.domain` when `groupDomainVerified` (`types.d.ts:1880`), as the directory reads it (`verifiedGroupDomain`, `Directory/Store.hs:207-210`). The claim's `domain` is the full name, for example `directory.simplex` (`fullDomainName`, simplexmq `SimplexName.hs:131-132`).
+- `simplex_name`: contacts: `@` + `profile.contactDomain.domain` when `profile.contactDomainVerified` (`LocalProfile`, `types.d.ts:2166-2167`); groups and channels: `#` + `groupProfile.publicGroup.publicGroupAccess.groupDomainClaim.domain` when `groupDomainVerified` (`types.d.ts:1880`), as the directory reads it (`verifiedGroupDomain`, `Directory/Store.hs:207-210`). The claim's `domain` is the full name, for example `directory.simplex` (`fullDomainName`, simplexmq `PopopxName.hs:131-132`).
 - `known_as` after the connect: contacts: the incognito profile from `/_info @C` (`APIContactInfo`, `Commands.hs:1953-1961`); groups: `groupInfo.membership.memberProfile`.
 
 ### send

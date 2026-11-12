@@ -234,7 +234,7 @@ import qualified Data.Text as T
 import Data.Time.Clock (NominalDiffTime, UTCTime (..), addUTCTime, getCurrentTime)
 import Data.Text.Encoding (encodeUtf8)
 import Popopx.Chat.Badges (BadgeProof, BadgeRow, ProofPresHeader, acceptedBadge, badgeProofToRow, badgeToRow, sameBadgeProof, verifyBadge)
-import Popopx.Chat.Names (SimplexDomainClaim (..))
+import Popopx.Chat.Names (PopopxDomainClaim (..))
 import Popopx.Chat.Messages
 import Popopx.Chat.Operators
 import Popopx.Chat.Protocol hiding (Binary)

@@ -3565,7 +3565,7 @@ testLinkContentFilter =
       connectUsers alice bob
 
       alice ##> "/c"
-      simplexLink <- getInvitation alice
+      popopxLink <- getInvitation alice
 
       let linkPreview = "{\"msgContent\": {\"type\": \"link\", \"text\": \"https://simplex.chat\", \"preview\": {\"uri\": \"https://simplex.chat\", \"title\": \"SimpleX Chat\", \"description\": \"SimpleX Chat\", \"image\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII=\"}}}"
       alice ##> ("/_send @2 json [" <> linkPreview <> "]")
@@ -3578,7 +3578,7 @@ testLinkContentFilter =
       bob #> "@alice visit http://test.org"
       alice <# "bob> visit http://test.org"
 
-      alice #> ("@bob " <> simplexLink)
+      alice #> ("@bob " <> popopxLink)
       bob <#. "alice> https://simplex.chat/invitation#"
 
       bob #> "@alice [click here](https://link.example.com)"
@@ -3592,8 +3592,8 @@ testLinkContentFilter =
 
       alice ##> "/_get content types @2"
       alice <## "Chat content types: link, text"
-      alice #$> ("/_get chat @2 content=link count=100", chat, [(1, "https://simplex.chat"), (1, "check out https://example.com"), (0, "visit http://test.org"), (1, simplexLink), (0, "[click here](https://link.example.com)"), (1, "visit example.com for info")])
+      alice #$> ("/_get chat @2 content=link count=100", chat, [(1, "https://simplex.chat"), (1, "check out https://example.com"), (0, "visit http://test.org"), (1, popopxLink), (0, "[click here](https://link.example.com)"), (1, "visit example.com for info")])
 
       bob ##> "/_get content types @2"
       bob <## "Chat content types: link, text"
-      bob #$> ("/_get chat @2 content=link count=100", chat, [(0, "https://simplex.chat"), (0, "check out https://example.com"), (1, "visit http://test.org"), (0, simplexLink), (1, "[click here](https://link.example.com)"), (0, "visit example.com for info")])
+      bob #$> ("/_get chat @2 content=link count=100", chat, [(0, "https://simplex.chat"), (0, "check out https://example.com"), (1, "visit http://test.org"), (0, popopxLink), (1, "[click here](https://link.example.com)"), (0, "visit example.com for info")])

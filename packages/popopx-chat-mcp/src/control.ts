@@ -658,7 +658,7 @@ function linkLines({plan, linkTextBytes = Infinity}: ConnectAction): string[] {
 }
 
 function chatName(subject: Subject, showName: (name: string) => string = safeName): string {
-  return subjectText({...subject, simplexName: undefined}, showName)
+  return subjectText({...subject, popopxName: undefined}, showName)
 }
 
 function serversLine(unknownServers: string[]): string {

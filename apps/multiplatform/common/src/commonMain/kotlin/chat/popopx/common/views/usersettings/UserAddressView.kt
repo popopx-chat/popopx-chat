@@ -383,12 +383,12 @@ private fun UserAddressLayout(
                     title = generalGetString(MR.strings.set_popopx_name),
                     footer = generalGetString(MR.strings.set_user_popopx_name_footer),
                     placeholder = "@yourname.testing",
-                    simplexName = if (domain == null) "" else "@$domain",
+                    popopxName = if (domain == null) "" else "@$domain",
                     registerBackgroundClose = true,
                     broadcastWarning = generalGetString(MR.strings.profile_update_will_be_sent_to_contacts),
-                    save = { simplexDomain ->
+                    save = { popopxDomain ->
                       try {
-                        val u = chatModel.controller.apiSetUserDomain(user?.remoteHostId, simplexDomain)
+                        val u = chatModel.controller.apiSetUserDomain(user?.remoteHostId, popopxDomain)
                         withContext(Dispatchers.Main) { chatModel.updateUser(u) }
                         true
                       } catch (e: Exception) {

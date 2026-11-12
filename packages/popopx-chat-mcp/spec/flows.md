@@ -151,7 +151,7 @@ sequenceDiagram
   H->>T: validated input, abort signal, progress token
   T->>X: find(key): none
   T->>C: apiConnectPlan USER @directory.simplex
-  C-->>T: contactAddress ok, planSimplexName
+  C-->>T: contactAddress ok, planPopopxName
   T->>T: classifyPlan: prepareContact with domain
   T->>X: create(key, connect fields)
   X->>K: refusal: none

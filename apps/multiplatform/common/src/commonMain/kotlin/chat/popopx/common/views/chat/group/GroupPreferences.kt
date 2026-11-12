@@ -150,10 +150,10 @@ private fun GroupPreferencesLayout(
     }
   }
   @Composable fun PopopxLinksPreference() {
-    val allowSimplexLinks = remember(preferences) { mutableStateOf(preferences.simplexLinks.enable) }
-    val popopxLinksRole = remember(preferences) { mutableStateOf(preferences.simplexLinks.role) }
-    FeatureSection(GroupFeature.SimplexLinks, allowSimplexLinks, popopxLinksRole, groupInfo, preferences, onTTLUpdated) { enable, role ->
-      applyPrefs(preferences.copy(simplexLinks = RoleGroupPreference(enable = enable, role)))
+    val allowPopopxLinks = remember(preferences) { mutableStateOf(preferences.popopxLinks.enable) }
+    val popopxLinksRole = remember(preferences) { mutableStateOf(preferences.popopxLinks.role) }
+    FeatureSection(GroupFeature.PopopxLinks, allowPopopxLinks, popopxLinksRole, groupInfo, preferences, onTTLUpdated) { enable, role ->
+      applyPrefs(preferences.copy(popopxLinks = RoleGroupPreference(enable = enable, role)))
     }
   }
   @Composable fun ReportsPreference() {

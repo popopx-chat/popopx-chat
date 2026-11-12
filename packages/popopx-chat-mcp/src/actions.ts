@@ -21,7 +21,7 @@ export class ToolError extends Error {}
 export interface Subject {
   kind: string
   name?: string
-  simplexName?: string
+  popopxName?: string
   incognito: boolean
 }
 
@@ -307,13 +307,13 @@ export function isDecided(state: State): boolean {
   return state === "done" || state === "failed" || state === "rejected" || state === "expired"
 }
 
-export function subjectText({kind, name, simplexName}: Subject, showName: (name: string) => string): string {
+export function subjectText({kind, name, popopxName}: Subject, showName: (name: string) => string): string {
   const named = name === undefined ? `an unnamed ${kind}` : `${kind} ${showName(name)}`
-  return simplexName === undefined ? named : `${named} (${simplexName})`
+  return popopxName === undefined ? named : `${named} (${popopxName})`
 }
 
 export function summary(action: Action, showName: (name: string) => string): {what: string; detail: string} {
-  const target = subjectText({...action.subject, simplexName: undefined}, showName)
+  const target = subjectText({...action.subject, popopxName: undefined}, showName)
   switch (action.tool) {
     case "connect":
       return {what: `connect to ${target}`, detail: `, ${action.subject.incognito ? "incognito" : "as itself"}`}

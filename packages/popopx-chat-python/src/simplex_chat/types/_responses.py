@@ -74,8 +74,8 @@ class ConnectionPlan(TypedDict):
     type: Literal["connectionPlan"]
     user: "T.User"
     connLink: "T.CreatedConnLink"
-    planSimplexName: NotRequired["T.SimplexNameInfo"]
-    otherSimplexName: NotRequired["T.SimplexNameInfo"]
+    planPopopxName: NotRequired["T.PopopxNameInfo"]
+    otherPopopxName: NotRequired["T.PopopxNameInfo"]
     connectionPlan: "T.ConnectionPlan"
 
 class ContactAlreadyExists(TypedDict):

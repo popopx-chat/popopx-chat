@@ -2137,7 +2137,7 @@ data class Profile(
   // the badge proof from the wire profile: not interpreted by the UI (display uses crypto-free LocalBadge),
   // but preserved so passing a link profile back to the core (apiPrepareContact) keeps the proof
   val badge: BadgeProof? = null,
-  val contactDomain: SimplexDomainClaim? = null
+  val contactDomain: PopopxDomainClaim? = null
 ): NamedChat {
   override val profileDescription: String? get() = description
 
@@ -2170,7 +2170,7 @@ data class LocalProfile(
   val preferences: ChatPreferences? = null,
   val peerType: ChatPeerType? = null,
   val localBadge: LocalBadge? = null,
-  val contactDomain: SimplexDomainClaim? = null,
+  val contactDomain: PopopxDomainClaim? = null,
   val contactDomainVerified: Boolean? = null
 ): NamedChat {
   override val profileDescription: String? get() = description
@@ -2717,7 +2717,7 @@ data class GroupInfo (
       GroupFeature.Reactions -> p.reactions.on
       GroupFeature.Voice -> p.voice.on(membership)
       GroupFeature.Files -> p.files.on(membership)
-      GroupFeature.SimplexLinks -> p.simplexLinks.on(membership)
+      GroupFeature.PopopxLinks -> p.popopxLinks.on(membership)
       GroupFeature.Reports -> p.reports.on
       GroupFeature.History -> p.history.on
       GroupFeature.Support -> p.support.on
@@ -2785,9 +2785,9 @@ object GroupTypeSerializer : KSerializer<GroupType> {
 }
 
 @Serializable
-data class SimplexDomainClaim(
+data class PopopxDomainClaim(
   val domain: String,
-  val proof: SimplexDomainProof? = null
+  val proof: PopopxDomainProof? = null
 ) {
   val shortName: String get() = domain.removeSuffix(".popopx")
 }
@@ -2795,7 +2795,7 @@ data class SimplexDomainClaim(
 @Serializable
 data class PublicGroupAccess(
   val groupWebPage: String? = null,
-  val groupDomainClaim: SimplexDomainClaim? = null,
+  val groupDomainClaim: PopopxDomainClaim? = null,
   val domainWebPage: Boolean = false,
   val allowEmbedding: Boolean = false
 )
@@ -2970,7 +2970,7 @@ data class BusinessChatInfo (
   val chatType: BusinessChatType,
   val businessId: String,
   val customerId: String,
-  val businessDomain: SimplexDomainClaim? = null,
+  val businessDomain: PopopxDomainClaim? = null,
 )
 
 @Serializable
@@ -5325,13 +5325,13 @@ sealed class Format {
   @Serializable @SerialName("hyperLink") class HyperLink(val showText: String?, val linkUri: String): Format() {
     val isEmail: Boolean get() = linkUri.startsWith("mailto:")
   }
-  @Serializable @SerialName("simplexLink") class SimplexLink(val showText: String?, val linkType: SimplexLinkType, val simplexUri: String, val smpHosts: List<String>): Format() {
+  @Serializable @SerialName("popopxLink") class PopopxLink(val showText: String?, val linkType: PopopxLinkType, val popopxUri: String, val smpHosts: List<String>): Format() {
     val popopxLinkText: String get() =
       "${linkType.description} $viaHosts"
     val viaHosts: String get() =
       "(${String.format(generalGetString(MR.strings.popopx_link_connection), smpHosts.firstOrNull() ?: "?")})"
   }
-  @Serializable @SerialName("simplexName") class SimplexName(val nameInfo: PopopxNameInfo): Format()
+  @Serializable @SerialName("popopxName") class PopopxName(val nameInfo: PopopxNameInfo): Format()
   @Serializable @SerialName("command") class Command(val commandStr: String): Format()
   @Serializable @SerialName("mention") class Mention(val memberName: String): Format()
   @Serializable @SerialName("modal") class Modal(val modalName: String, val text: String): Format() {
@@ -5355,8 +5355,8 @@ sealed class Format {
     is Colored -> SpanStyle(color = this.color.uiColor)
     is Uri -> linkStyle
     is HyperLink -> linkStyle
-    is SimplexLink -> linkStyle
-    is SimplexName -> linkStyle
+    is PopopxLink -> linkStyle
+    is PopopxName -> linkStyle
     is Command -> SpanStyle(color = MaterialTheme.colors.primary, fontFamily = FontFamily.Monospace)
     is Mention -> SpanStyle(fontWeight = FontWeight.Medium)
     is Email -> linkStyle
@@ -5367,7 +5367,7 @@ sealed class Format {
     is Unknown -> SpanStyle()
   }
 
-  val isSimplexLink = this is SimplexLink
+  val isPopopxLink = this is PopopxLink
 
   companion object {
     val linkStyle @Composable get() = SpanStyle(color = MaterialTheme.colors.primary, textDecoration = TextDecoration.Underline)
@@ -5456,7 +5456,7 @@ fun headingSegments(size: Int, blocks: List<MarkdownBlock>): BooleanArray {
 }
 
 @Serializable
-enum class SimplexLinkType(val linkType: String) {
+enum class PopopxLinkType(val linkType: String) {
   contact("contact"),
   invitation("invitation"),
   group("group"),
@@ -5475,7 +5475,7 @@ enum class SimplexLinkType(val linkType: String) {
 @Serializable
 data class PopopxNameInfo(
   val nameType: PopopxNameType,
-  val nameDomain: SimplexDomain
+  val nameDomain: PopopxDomain
 ) {
   // mirrors backend shortNameInfoStr: "#name" for a popopx public group, else prefix + full domain
   val shortStr: String get() = when {
@@ -5485,7 +5485,7 @@ data class PopopxNameInfo(
 }
 
 @Serializable
-data class SimplexDomain(
+data class PopopxDomain(
   val nameTLD: PopopxTLD,
   val domain: String,
   val subDomain: List<String>
@@ -5518,7 +5518,7 @@ enum class PopopxNameType {
 
 // peer's signed name claim; UI only checks presence
 @Serializable
-data class SimplexDomainProof(
+data class PopopxDomainProof(
   val linkOwnerId: String? = null,
   val presHeader: String,
   val signature: String

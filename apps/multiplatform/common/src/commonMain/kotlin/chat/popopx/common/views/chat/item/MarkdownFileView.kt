@@ -256,7 +256,7 @@ private fun markdownFileUriHandler(parentUriHandler: UriHandler): UriHandler = o
   override fun openUri(uri: String) {
     val format = parseToMarkdown(uri)?.singleOrNull()?.format
     when {
-      format is Format.SimplexLink -> parentUriHandler.openVerifiedPopopxUri(format.simplexUri)
+      format is Format.PopopxLink -> parentUriHandler.openVerifiedPopopxUri(format.popopxUri)
       format is Format.Uri && (uri.startsWith("https://") || uri.startsWith("http://")) -> openBrowserAlert(uri, parentUriHandler)
       else -> showInvalidLinkAlert(uri)
     }

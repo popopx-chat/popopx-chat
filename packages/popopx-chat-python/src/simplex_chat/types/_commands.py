@@ -63,11 +63,11 @@ APISetProfileAddress_Response = CR.UserProfileUpdated | CR.UserProfileNoChange |
 # Network usage: interactive.
 class APISetUserDomain(TypedDict):
     userId: int  # int64
-    simplexDomain: NotRequired[str]
+    popopxDomain: NotRequired[str]
 
 
 def APISetUserDomain_cmd_string(self: APISetUserDomain) -> str:
-    return '/_set domain ' + str(self['userId']) + ((' ' + self.get('simplexDomain')) if self.get('simplexDomain') is not None else '')
+    return '/_set domain ' + str(self['userId']) + ((' ' + self.get('popopxDomain')) if self.get('popopxDomain') is not None else '')
 
 APISetUserDomain_Response = CR.UserProfileUpdated | CR.UserProfileNoChange | CR.ChatCmdError
 

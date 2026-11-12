@@ -52,7 +52,7 @@ groupLinkLinePrefix name = "Link to join the group " <> name <> ": "
 
 matchesGroupLink :: CreatedLinkContact -> FormattedText -> Bool
 matchesGroupLink (CCLink cReq sLnk_) = \case
-  FormattedText (Just SimplexLink {simplexUri = ACL SCMContact cLink}) _ -> case cLink of
+  FormattedText (Just PopopxLink {popopxUri = ACL SCMContact cLink}) _ -> case cLink of
     CLFull cReq' -> sameConnReqContact cReq' cReq
     CLShort sLnk' -> maybe False (sameShortLinkContact sLnk') sLnk_
   _ -> False
@@ -90,7 +90,7 @@ $(JQ.deriveJSON defaultJSON ''PublicLink)
 data DirectoryEntry = DirectoryEntry
   { entryType :: DirectoryEntryType,
     displayName :: Text,
-    simplexName :: Maybe Text,
+    popopxName :: Maybe Text,
     groupLink :: PublicLink,
     shortDescr :: Maybe MarkdownList,
     shortDescrBlocks :: Maybe (NonEmpty MarkdownBlock),
@@ -143,7 +143,7 @@ groupDirectoryEntry now g@GroupInfo {groupProfile, chatTs, createdAt, groupSumma
               DirectoryEntry
                 { entryType,
                   displayName,
-                  simplexName = shortNameInfoStr . PopopxNameInfo NTPublicGroup <$> verifiedGroupDomain g,
+                  popopxName = shortNameInfoStr . PopopxNameInfo NTPublicGroup <$> verifiedGroupDomain g,
                   groupLink,
                   shortDescr = fst <$> shortDescr',
                   shortDescrBlocks = snd =<< shortDescr',

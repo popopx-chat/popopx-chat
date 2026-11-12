@@ -134,8 +134,8 @@ enum ChatCommand: ChatCmdProtocol {
     case apiSetConnectionIncognito(connId: Int64, incognito: Bool)
     case apiChangeConnectionUser(connId: Int64, userId: Int64)
     case apiConnectPlan(userId: Int64, connLink: String, resolveMode: PlanResolveMode, linkOwnerSig: LinkOwnerSig?)
-    case apiPrepareContact(userId: Int64, connLink: CreatedConnLink, contactShortLinkData: ContactShortLinkData, verifiedDomain: SimplexDomain?)
-    case apiPrepareGroup(userId: Int64, connLink: CreatedConnLink, directLink: Bool, groupShortLinkData: GroupShortLinkData, verifiedDomain: SimplexDomain?)
+    case apiPrepareContact(userId: Int64, connLink: CreatedConnLink, contactShortLinkData: ContactShortLinkData, verifiedDomain: PopopxDomain?)
+    case apiPrepareGroup(userId: Int64, connLink: CreatedConnLink, directLink: Bool, groupShortLinkData: GroupShortLinkData, verifiedDomain: PopopxDomain?)
     case apiChangePreparedContactUser(contactId: Int64, newUserId: Int64)
     case apiChangePreparedGroupUser(groupId: Int64, newUserId: Int64)
     case apiConnectPreparedContact(contactId: Int64, incognito: Bool, msg: MsgContent?)
@@ -158,7 +158,7 @@ enum ChatCommand: ChatCmdProtocol {
     case apiAddMyAddressShortLink(userId: Int64)
     case apiSetProfileAddress(userId: Int64, on: Bool)
     case apiSetAddressSettings(userId: Int64, addressSettings: AddressSettings)
-    case apiSetUserDomain(userId: Int64, simplexDomain: String?)
+    case apiSetUserDomain(userId: Int64, popopxDomain: String?)
     case apiVerifyContactDomain(contactId: Int64)
     case apiVerifyGroupDomain(groupId: Int64)
     case apiAcceptContact(incognito: Bool, contactReqId: Int64)
@@ -390,7 +390,7 @@ enum ChatCommand: ChatCmdProtocol {
             case let .apiAddMyAddressShortLink(userId): return "/_short_link_address \(userId)"
             case let .apiSetProfileAddress(userId, on): return "/_profile_address \(userId) \(onOff(on))"
             case let .apiSetAddressSettings(userId, addressSettings): return "/_address_settings \(userId) \(encodeJSON(addressSettings))"
-            case let .apiSetUserDomain(userId, simplexDomain): return "/_set domain \(userId)" + (simplexDomain.map { " " + $0 } ?? "")
+            case let .apiSetUserDomain(userId, popopxDomain): return "/_set domain \(userId)" + (popopxDomain.map { " " + $0 } ?? "")
             case let .apiSetPublicGroupAccess(groupId, access): return "/_public group access #\(groupId) \(encodeJSON(access))"
             case let .apiVerifyContactDomain(contactId): return "/_verify domain @\(contactId)"
             case let .apiVerifyGroupDomain(groupId): return "/_verify domain #\(groupId)"
@@ -908,7 +908,7 @@ enum ChatResponse1: Decodable, ChatAPIResult {
     case invitation(user: UserRef, connLinkInvitation: CreatedConnLink, connection: PendingContactConnection)
     case connectionIncognitoUpdated(user: UserRef, toConnection: PendingContactConnection)
     case connectionUserChanged(user: UserRef, fromConnection: PendingContactConnection, toConnection: PendingContactConnection, newUser: UserRef)
-    case connectionPlan(user: UserRef, connLink: CreatedConnLink, planSimplexName: PopopxNameInfo?, otherSimplexName: PopopxNameInfo?, connectionPlan: ConnectionPlan)
+    case connectionPlan(user: UserRef, connLink: CreatedConnLink, planPopopxName: PopopxNameInfo?, otherPopopxName: PopopxNameInfo?, connectionPlan: ConnectionPlan)
     case newPreparedChat(user: UserRef, chat: ChatData)
     case contactUserChanged(user: UserRef, fromContact: Contact, newUser: UserRef, toContact: Contact)
     case groupUserChanged(user: UserRef, fromGroup: GroupInfo, newUser: UserRef, toGroup: GroupInfo)
@@ -1515,8 +1515,8 @@ enum OwnerVerification: Decodable, Hashable {
 
 struct ConnectionPlanResult {
     var connLink: CreatedConnLink
-    var planSimplexName: PopopxNameInfo?
-    var otherSimplexName: PopopxNameInfo?
+    var planPopopxName: PopopxNameInfo?
+    var otherPopopxName: PopopxNameInfo?
     var connectionPlan: ConnectionPlan
 }
 

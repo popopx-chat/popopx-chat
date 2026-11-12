@@ -43,7 +43,7 @@ func showInvalidRelayNameAlert(_ name: Binding<String>) {
 func validRelayAddress(_ address: String) -> Bool {
     if let parsedMd = parsePOPOPXMarkdown(address),
        parsedMd.count == 1,
-       case .simplexLink(_, .relay, _, _) = parsedMd.first?.format {
+       case .popopxLink(_, .relay, _, _) = parsedMd.first?.format {
         true
     } else {
         false

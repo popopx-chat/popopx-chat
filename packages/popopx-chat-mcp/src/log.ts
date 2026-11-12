@@ -69,9 +69,9 @@ function chatErrorTypeText(error: T.ChatErrorType): string | undefined {
       return "Invalid connection link: Please check that you used the correct link or ask your contact to send you another one."
     case "unsupportedConnReq":
       return "Unsupported connection link: This link requires a newer app version. Please upgrade the app or ask your contact to send a compatible link."
-    case "simplexDomainNotReady": {
-      const name = fullDomainName(error.simplexDomain)
-      return error.simplexDomainError.type === "noValidLink"
+    case "popopxDomainNotReady": {
+      const name = fullDomainName(error.popopxDomain)
+      return error.popopxDomainError.type === "noValidLink"
         ? `No valid link: The SimpleX name ${name} is registered, but it has no valid link.`
         : `Unconfirmed name: The SimpleX name ${name} is registered, but not added to profile. Please add it to your address or channel profile, if you are the owner.`
     }
@@ -269,7 +269,7 @@ export function chatErrorOf(error: unknown): T.ChatError | undefined {
   return error instanceof core.ChatAPIError ? error.chatError : undefined
 }
 
-export function fullDomainName({nameTLD, domain, subDomain}: T.SimplexDomain): string {
+export function fullDomainName({nameTLD, domain, subDomain}: T.PopopxDomain): string {
   const tld = nameTLD === T.SimplexTLD.Popopx ? ".popopx" : nameTLD === T.SimplexTLD.Testing ? ".testing" : ""
   return `${[...subDomain].reverse().concat(domain).join(".")}${tld}`
 }

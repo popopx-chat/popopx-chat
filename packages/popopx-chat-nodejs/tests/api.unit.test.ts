@@ -143,10 +143,10 @@ describe("documented success responses", () => {
   it("apiConnectPlan returns the SimpleX names", async () => {
     const connectionPlan = {type: "contactAddress", contactAddressPlan: {type: "ok"}}
     const connLink = {connFullLink: "L"}
-    const planSimplexName = {nameType: "contact", nameDomain: {nameTLD: "popopx", domain: "biz", subDomain: []}}
-    const otherSimplexName = {nameType: "publicGroup", nameDomain: {nameTLD: "popopx", domain: "news", subDomain: []}}
-    const chat = await chatWithResponse({type: "connectionPlan", user, connLink, planSimplexName, otherSimplexName, connectionPlan})
-    await expect(chat.apiConnectPlan(1, "@biz.popopx")).resolves.toEqual([connectionPlan, connLink, planSimplexName, otherSimplexName])
+    const planPopopxName = {nameType: "contact", nameDomain: {nameTLD: "popopx", domain: "biz", subDomain: []}}
+    const otherPopopxName = {nameType: "publicGroup", nameDomain: {nameTLD: "popopx", domain: "news", subDomain: []}}
+    const chat = await chatWithResponse({type: "connectionPlan", user, connLink, planPopopxName, otherPopopxName, connectionPlan})
+    await expect(chat.apiConnectPlan(1, "@biz.popopx")).resolves.toEqual([connectionPlan, connLink, planPopopxName, otherPopopxName])
   })
 
   it("apiGetNetworkConfig returns the config, apiSetNetworkConfig accepts cmdOk", async () => {

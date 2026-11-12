@@ -2298,8 +2298,8 @@ processAgentMessageConn cxt user@User {userId} entity gks_ corrId agentConnId ag
 
     groupMessageUpdate :: GroupInfo -> Maybe GroupMember -> SharedMsgId -> MsgContent -> Map MemberName MsgMention -> Maybe MsgScope -> RcvMessage -> UTCTime -> Maybe Int -> Maybe Bool -> Maybe Bool -> CM (Maybe DeliveryTaskContext)
     groupMessageUpdate gInfo@GroupInfo {groupId} m_ sharedMsgId mc mentions msgScope_ msg@RcvMessage {msgId, msgSigned, signedMsg_, signedByGMId_} brokerTs ttl_ live_ asGroup_
-      | Just m <- m_, prohibitedSimplexLinks gInfo m mc ft_ =
-          messageWarning ("x.msg.update ignored: feature not allowed " <> groupFeatureNameText GFSimplexLinks) $> Nothing
+      | Just m <- m_, prohibitedPopopxLinks gInfo m mc ft_ =
+          messageWarning ("x.msg.update ignored: feature not allowed " <> groupFeatureNameText GFPopopxLinks) $> Nothing
       | otherwise = do
           updateRcvChatItem `catchCINotFound` \_ -> do
             -- This patches initial sharedMsgId into chat item when locally deleted chat item

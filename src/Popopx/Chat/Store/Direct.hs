@@ -111,7 +111,7 @@ import Data.Type.Equality
 import Popopx.Chat.Badges (ProofPresHeader, badgeToRow)
 import Popopx.Chat.Messages
 import Popopx.Chat.Store.Shared
-import Popopx.Chat.Names (SimplexDomainClaim (..))
+import Popopx.Chat.Names (PopopxDomainClaim (..))
 import Popopx.Chat.Types
 import Popopx.Chat.Types.Preferences
 import Popopx.Chat.Types.UITheme

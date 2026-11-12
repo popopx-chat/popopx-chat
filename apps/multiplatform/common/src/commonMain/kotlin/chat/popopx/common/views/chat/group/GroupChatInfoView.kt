@@ -191,10 +191,10 @@ fun ModalData.GroupChatInfoView(
               title = generalGetString(MR.strings.set_popopx_name),
               footer = generalGetString(MR.strings.set_channel_popopx_name_footer),
               placeholder = "#channelname.testing",
-              simplexName = if (domain == null) "" else "#$domain",
+              popopxName = if (domain == null) "" else "#$domain",
               save = { domain ->
                 val access = groupInfo.groupProfile.publicGroup?.publicGroupAccess ?: PublicGroupAccess()
-                val newAccess = access.copy(groupDomainClaim = domain?.let { SimplexDomainClaim(it) })
+                val newAccess = access.copy(groupDomainClaim = domain?.let { PopopxDomainClaim(it) })
                 val gInfo = chatModel.controller.apiSetPublicGroupAccess(rhId, groupInfo.groupId, newAccess)
                 if (gInfo != null) {
                   withContext(Dispatchers.Main) { chatModel.chatsContext.updateGroup(rhId, gInfo) }

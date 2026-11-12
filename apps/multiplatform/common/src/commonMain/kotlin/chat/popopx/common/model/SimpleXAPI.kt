@@ -1692,7 +1692,7 @@ object ChatController {
   suspend fun apiConnectPlan(rh: Long?, connLink: String, resolveMode: PlanResolveMode = PlanResolveMode.PRMUnknown, linkOwnerSig: LinkOwnerSig? = null, inProgress: MutableState<Boolean>): ConnectionPlanResult? {
     val userId = kotlin.runCatching { currentUserId("apiConnectPlan") }.getOrElse { return null }
     val r = sendCmdWithRetry(rh, CC.APIConnectPlan(userId, connLink, resolveMode, linkOwnerSig), inProgress = inProgress)
-    if (r is API.Result && r.res is CR.CRConnectionPlan) return ConnectionPlanResult(r.res.connLink, r.res.planSimplexName, r.res.otherSimplexName, r.res.connectionPlan)
+    if (r is API.Result && r.res is CR.CRConnectionPlan) return ConnectionPlanResult(r.res.connLink, r.res.planPopopxName, r.res.otherPopopxName, r.res.connectionPlan)
     // a PRMNever (typing) search that matches nothing locally is not an error to surface
     if (r is API.Error && r.err is ChatError.ChatErrorChat && r.err.errorType is ChatErrorType.NotResolvedLocally) return null
     if (inProgress.value && r != null) apiConnectResponseAlert(r)
@@ -1732,9 +1732,9 @@ object ChatController {
         )
       }
       r is API.Error && r.err is ChatError.ChatErrorChat
-          && r.err.errorType is ChatErrorType.SimplexDomainNotReady -> {
-        val domain = r.err.errorType.simplexDomain.fullDomainName
-        if (r.err.errorType.simplexDomainError is SimplexDomainError.NoValidLink) {
+          && r.err.errorType is ChatErrorType.PopopxDomainNotReady -> {
+        val domain = r.err.errorType.popopxDomain.fullDomainName
+        if (r.err.errorType.popopxDomainError is PopopxDomainError.NoValidLink) {
           AlertManager.shared.showAlertMsg(
             generalGetString(MR.strings.popopx_name_no_valid_link),
             generalGetString(MR.strings.popopx_name_no_valid_link_desc).format(domain)
@@ -1813,8 +1813,8 @@ object ChatController {
 
   // owner-specific wording for setting one's own/channel name; null for other errors (handled by apiConnectResponseAlert)
   fun popopxNameOwnerError(err: ChatError, isChannel: Boolean): String? =
-    if (err is ChatError.ChatErrorChat && err.errorType is ChatErrorType.SimplexDomainNotReady && err.errorType.simplexDomainError is SimplexDomainError.NoValidLink) {
-      val domain = err.errorType.simplexDomain.fullDomainName
+    if (err is ChatError.ChatErrorChat && err.errorType is ChatErrorType.PopopxDomainNotReady && err.errorType.popopxDomainError is PopopxDomainError.NoValidLink) {
+      val domain = err.errorType.popopxDomain.fullDomainName
       if (isChannel) generalGetString(MR.strings.popopx_name_owner_no_channel_link).format(domain)
       else generalGetString(MR.strings.popopx_name_owner_no_address).format(domain)
     } else null
@@ -1824,8 +1824,8 @@ object ChatController {
       generalGetString(MR.strings.invalid_connection_link)
     e is ChatError.ChatErrorChat && e.errorType is ChatErrorType.UnsupportedConnReq ->
       generalGetString(MR.strings.unsupported_connection_link)
-    e is ChatError.ChatErrorChat && e.errorType is ChatErrorType.SimplexDomainNotReady ->
-      if (e.errorType.simplexDomainError is SimplexDomainError.NoValidLink)
+    e is ChatError.ChatErrorChat && e.errorType is ChatErrorType.PopopxDomainNotReady ->
+      if (e.errorType.popopxDomainError is PopopxDomainError.NoValidLink)
         generalGetString(MR.strings.popopx_name_no_valid_link)
       else generalGetString(MR.strings.popopx_name_unconfirmed)
     e is ChatError.ChatErrorAgent && e.agentError is AgentErrorType.NO_NAME_SERVERS ->
@@ -1846,7 +1846,7 @@ object ChatController {
       "${generalGetString(MR.strings.error_prefix)}: ${e.string}"
   }
 
-  suspend fun apiPrepareContact(rh: Long?, connLink: CreatedConnLink, contactShortLinkData: ContactShortLinkData, verifiedDomain: SimplexDomain? = null): Chat? {
+  suspend fun apiPrepareContact(rh: Long?, connLink: CreatedConnLink, contactShortLinkData: ContactShortLinkData, verifiedDomain: PopopxDomain? = null): Chat? {
     val userId = try { currentUserId("apiPrepareContact") } catch (e: Exception) { return null }
     val r = sendCmd(rh, CC.APIPrepareContact(userId, connLink, contactShortLinkData, verifiedDomain))
     if (r is API.Result && r.res is CR.NewPreparedChat) return if (rh == null) r.res.chat else r.res.chat.copy(remoteHostId = rh)
@@ -1855,7 +1855,7 @@ object ChatController {
     return null
   }
 
-  suspend fun apiPrepareGroup(rh: Long?, connLink: CreatedConnLink, directLink: Boolean, groupShortLinkData: GroupShortLinkData, verifiedDomain: SimplexDomain? = null): Chat? {
+  suspend fun apiPrepareGroup(rh: Long?, connLink: CreatedConnLink, directLink: Boolean, groupShortLinkData: GroupShortLinkData, verifiedDomain: PopopxDomain? = null): Chat? {
     val userId = try { currentUserId("apiPrepareGroup") } catch (e: Exception) { return null }
     val r = sendCmd(rh, CC.APIPrepareGroup(userId, connLink, directLink, groupShortLinkData, verifiedDomain))
     if (r is API.Result && r.res is CR.NewPreparedChat) return if (rh == null) r.res.chat else r.res.chat.copy(remoteHostId = rh)
@@ -2011,10 +2011,10 @@ object ChatController {
     }
   }
 
-  // name is the encoded SimplexName (e.g. "@alice.popopx"); null clears it. Throws on rejection.
-  suspend fun apiSetUserDomain(rh: Long?, simplexDomain: String?): User {
+  // name is the encoded PopopxName (e.g. "@alice.popopx"); null clears it. Throws on rejection.
+  suspend fun apiSetUserDomain(rh: Long?, popopxDomain: String?): User {
     val userId = currentUserId("apiSetUserDomain")
-    val r = sendCmd(rh, CC.ApiSetUserDomain(userId, simplexDomain))
+    val r = sendCmd(rh, CC.ApiSetUserDomain(userId, popopxDomain))
     return when {
       r is API.Result && r.res is CR.UserProfileUpdated -> r.res.user.updateRemoteHostId(rh)
       r is API.Result && r.res is CR.UserProfileNoChange -> r.res.user.updateRemoteHostId(rh)
@@ -4125,8 +4125,8 @@ sealed class CC {
   class ApiSetConnectionIncognito(val connId: Long, val incognito: Boolean): CC()
   class ApiChangeConnectionUser(val connId: Long, val userId: Long): CC()
   class APIConnectPlan(val userId: Long, val connLink: String, val resolveMode: PlanResolveMode = PlanResolveMode.PRMUnknown, val linkOwnerSig: LinkOwnerSig? = null): CC()
-  class APIPrepareContact(val userId: Long, val connLink: CreatedConnLink, val contactShortLinkData: ContactShortLinkData, val verifiedDomain: SimplexDomain? = null): CC()
-  class APIPrepareGroup(val userId: Long, val connLink: CreatedConnLink, val directLink: Boolean, val groupShortLinkData: GroupShortLinkData, val verifiedDomain: SimplexDomain? = null): CC()
+  class APIPrepareContact(val userId: Long, val connLink: CreatedConnLink, val contactShortLinkData: ContactShortLinkData, val verifiedDomain: PopopxDomain? = null): CC()
+  class APIPrepareGroup(val userId: Long, val connLink: CreatedConnLink, val directLink: Boolean, val groupShortLinkData: GroupShortLinkData, val verifiedDomain: PopopxDomain? = null): CC()
   class APIChangePreparedContactUser(val contactId: Long, val newUserId: Long): CC()
   class APIChangePreparedGroupUser(val groupId: Long, val newUserId: Long): CC()
   class APIConnectPreparedContact(val contactId: Long, val incognito: Boolean, val msg: MsgContent?): CC()
@@ -4148,7 +4148,7 @@ sealed class CC {
   class ApiShowMyAddress(val userId: Long): CC()
   class ApiAddMyAddressShortLink(val userId: Long): CC()
   class ApiSetProfileAddress(val userId: Long, val on: Boolean): CC()
-  class ApiSetUserDomain(val userId: Long, val simplexDomain: String?): CC()
+  class ApiSetUserDomain(val userId: Long, val popopxDomain: String?): CC()
   class ApiVerifyContactDomain(val contactId: Long): CC()
   class ApiVerifyGroupDomain(val groupId: Long): CC()
   class ApiSetAddressSettings(val userId: Long, val addressSettings: AddressSettings): CC()
@@ -4370,7 +4370,7 @@ sealed class CC {
     is ApiShowMyAddress -> "/_show_address $userId"
     is ApiAddMyAddressShortLink -> "/_short_link_address $userId"
     is ApiSetProfileAddress -> "/_profile_address $userId ${onOff(on)}"
-    is ApiSetUserDomain -> "/_set domain $userId" + (if (simplexDomain != null) " $simplexDomain" else "")
+    is ApiSetUserDomain -> "/_set domain $userId" + (if (popopxDomain != null) " $popopxDomain" else "")
     is ApiSetPublicGroupAccess -> "/_public group access #$groupId ${json.encodeToString(access)}"
     is ApiVerifyContactDomain -> "/_verify domain @$contactId"
     is ApiVerifyGroupDomain -> "/_verify domain #$groupId"
@@ -6198,7 +6198,7 @@ enum class GroupFeature: Feature {
   @SerialName("reactions") Reactions,
   @SerialName("voice") Voice,
   @SerialName("files") Files,
-  @SerialName("simplexLinks") SimplexLinks,
+  @SerialName("popopxLinks") PopopxLinks,
   @SerialName("reports") Reports,
   @SerialName("history") History,
   @SerialName("support") Support,
@@ -6217,7 +6217,7 @@ enum class GroupFeature: Feature {
       Reactions -> false
       Voice -> true
       Files -> true
-      SimplexLinks -> true
+      PopopxLinks -> true
       Reports -> false
       History -> false
       Support -> false
@@ -6233,7 +6233,7 @@ enum class GroupFeature: Feature {
       Reactions -> generalGetString(MR.strings.message_reactions)
       Voice -> generalGetString(MR.strings.voice_messages)
       Files -> generalGetString(MR.strings.files_and_media)
-      SimplexLinks -> generalGetString(MR.strings.popopx_links)
+      PopopxLinks -> generalGetString(MR.strings.popopx_links)
       Reports -> generalGetString(if (isChannel) MR.strings.group_reports_subscriber_reports else MR.strings.group_reports_member_reports)
       History -> generalGetString(MR.strings.recent_history)
       Support -> generalGetString(MR.strings.chat_with_admins)
@@ -6248,7 +6248,7 @@ enum class GroupFeature: Feature {
       Reactions -> painterResource(MR.images.ic_add_reaction)
       Voice -> painterResource(MR.images.ic_keyboard_voice)
       Files -> painterResource(MR.images.ic_draft)
-      SimplexLinks -> painterResource(MR.images.ic_link)
+      PopopxLinks -> painterResource(MR.images.ic_link)
       Reports -> painterResource(MR.images.ic_flag)
       History -> painterResource(MR.images.ic_schedule)
       Support -> painterResource(MR.images.ic_help)
@@ -6263,7 +6263,7 @@ enum class GroupFeature: Feature {
     Reactions -> painterResource(MR.images.ic_add_reaction_filled)
     Voice -> painterResource(MR.images.ic_keyboard_voice_filled)
     Files -> painterResource(MR.images.ic_draft_filled)
-    SimplexLinks -> painterResource(MR.images.ic_link)
+    PopopxLinks -> painterResource(MR.images.ic_link)
     Reports -> painterResource(MR.images.ic_flag_filled)
     History -> painterResource(MR.images.ic_schedule_filled)
     Support -> painterResource(MR.images.ic_help_filled)
@@ -6297,7 +6297,7 @@ enum class GroupFeature: Feature {
           GroupFeatureEnabled.ON -> generalGetString(MR.strings.allow_to_send_files)
           GroupFeatureEnabled.OFF -> generalGetString(MR.strings.prohibit_sending_files)
         }
-        SimplexLinks -> when(enabled) {
+        PopopxLinks -> when(enabled) {
           GroupFeatureEnabled.ON -> generalGetString(MR.strings.allow_to_send_popopx_links)
           GroupFeatureEnabled.OFF -> generalGetString(MR.strings.prohibit_sending_popopx_links)
         }
@@ -6344,7 +6344,7 @@ enum class GroupFeature: Feature {
           GroupFeatureEnabled.ON -> generalGetString(if (isChannel) MR.strings.group_members_can_send_files_channel else MR.strings.group_members_can_send_files)
           GroupFeatureEnabled.OFF -> generalGetString(MR.strings.files_are_prohibited_in_group)
         }
-        SimplexLinks -> when(enabled) {
+        PopopxLinks -> when(enabled) {
           GroupFeatureEnabled.ON -> generalGetString(if (isChannel) MR.strings.group_members_can_send_popopx_links_channel else MR.strings.group_members_can_send_popopx_links)
           GroupFeatureEnabled.OFF -> generalGetString(MR.strings.popopx_links_are_prohibited_in_group)
         }
@@ -6486,7 +6486,7 @@ data class FullGroupPreferences(
   val reactions: GroupPreference,
   val voice: RoleGroupPreference,
   val files: RoleGroupPreference,
-  val simplexLinks: RoleGroupPreference,
+  val popopxLinks: RoleGroupPreference,
   val reports: GroupPreference,
   val history: GroupPreference,
   val support: GroupPreference,
@@ -6501,7 +6501,7 @@ data class FullGroupPreferences(
       reactions = reactions,
       voice = voice,
       files = files,
-      simplexLinks = simplexLinks,
+      popopxLinks = popopxLinks,
       reports = reports,
       history = history,
       support = support,
@@ -6517,7 +6517,7 @@ data class FullGroupPreferences(
       reactions = GroupPreference(GroupFeatureEnabled.ON),
       voice = RoleGroupPreference(GroupFeatureEnabled.ON, role = null),
       files = RoleGroupPreference(GroupFeatureEnabled.ON, role = null),
-      simplexLinks = RoleGroupPreference(GroupFeatureEnabled.ON, role = null),
+      popopxLinks = RoleGroupPreference(GroupFeatureEnabled.ON, role = null),
       reports = GroupPreference(GroupFeatureEnabled.ON),
       history = GroupPreference(GroupFeatureEnabled.ON),
       support = GroupPreference(GroupFeatureEnabled.ON),
@@ -6535,7 +6535,7 @@ data class GroupPreferences(
   val reactions: GroupPreference? = null,
   val voice: RoleGroupPreference? = null,
   val files: RoleGroupPreference? = null,
-  val simplexLinks: RoleGroupPreference? = null,
+  val popopxLinks: RoleGroupPreference? = null,
   val reports: GroupPreference? = null,
   val history: GroupPreference? = null,
   val support: GroupPreference? = null,
@@ -6550,7 +6550,7 @@ data class GroupPreferences(
       reactions = GroupPreference(GroupFeatureEnabled.ON),
       voice = RoleGroupPreference(GroupFeatureEnabled.ON, role = null),
       files = RoleGroupPreference(GroupFeatureEnabled.ON, role = null),
-      simplexLinks = RoleGroupPreference(GroupFeatureEnabled.ON, role = null),
+      popopxLinks = RoleGroupPreference(GroupFeatureEnabled.ON, role = null),
       reports = GroupPreference(GroupFeatureEnabled.ON),
       history = GroupPreference(GroupFeatureEnabled.ON),
       commands = null,
@@ -6877,7 +6877,7 @@ sealed class CR {
   @Serializable @SerialName("invitation") class Invitation(val user: UserRef, val connLinkInvitation: CreatedConnLink, val connection: PendingContactConnection): CR()
   @Serializable @SerialName("connectionIncognitoUpdated") class ConnectionIncognitoUpdated(val user: UserRef, val toConnection: PendingContactConnection): CR()
   @Serializable @SerialName("connectionUserChanged") class ConnectionUserChanged(val user: UserRef, val fromConnection: PendingContactConnection, val toConnection: PendingContactConnection, val newUser: UserRef): CR()
-  @Serializable @SerialName("connectionPlan") class CRConnectionPlan(val user: UserRef, val connLink: CreatedConnLink, val planSimplexName: PopopxNameInfo? = null, val otherSimplexName: PopopxNameInfo? = null, val connectionPlan: ConnectionPlan): CR()
+  @Serializable @SerialName("connectionPlan") class CRConnectionPlan(val user: UserRef, val connLink: CreatedConnLink, val planPopopxName: PopopxNameInfo? = null, val otherPopopxName: PopopxNameInfo? = null, val connectionPlan: ConnectionPlan): CR()
   @Serializable @SerialName("newPreparedChat") class NewPreparedChat(val user: UserRef, val chat: Chat): CR()
   @Serializable @SerialName("contactUserChanged") class ContactUserChanged(val user: UserRef, val fromContact: Contact, val newUser: UserRef, val toContact: Contact): CR()
   @Serializable @SerialName("groupUserChanged") class GroupUserChanged(val user: UserRef, val fromGroup: GroupInfo, val newUser: UserRef, val toGroup: GroupInfo): CR()
@@ -7279,7 +7279,7 @@ sealed class CR {
     is Invitation -> withUser(user, "connLinkInvitation: ${json.encodeToString(connLinkInvitation)}\nconnection: $connection")
     is ConnectionIncognitoUpdated -> withUser(user, json.encodeToString(toConnection))
     is ConnectionUserChanged -> withUser(user, "fromConnection: ${json.encodeToString(fromConnection)}\ntoConnection: ${json.encodeToString(toConnection)}\nnewUser: ${json.encodeToString(newUser)}" )
-    is CRConnectionPlan -> withUser(user, "connLink: ${json.encodeToString(connLink)}\nplanPopopxName: $planSimplexName\notherPopopxName: $otherSimplexName\nconnectionPlan: ${json.encodeToString(connectionPlan)}")
+    is CRConnectionPlan -> withUser(user, "connLink: ${json.encodeToString(connLink)}\nplanPopopxName: $planPopopxName\notherPopopxName: $otherPopopxName\nconnectionPlan: ${json.encodeToString(connectionPlan)}")
     is NewPreparedChat -> withUser(user, json.encodeToString(chat))
     is ContactUserChanged -> withUser(user, "fromContact: ${json.encodeToString(fromContact)}\nnewUserId: ${json.encodeToString(newUser.userId)}\ntoContact: ${json.encodeToString(toContact)}")
     is GroupUserChanged -> withUser(user, "fromGroup: ${json.encodeToString(fromGroup)}\nnewUserId: ${json.encodeToString(newUser.userId)}\ntoGroup: ${json.encodeToString(toGroup)}")
@@ -7494,9 +7494,9 @@ sealed class OwnerVerification {
 }
 
 @Serializable
-sealed class SimplexDomainError {
-  @Serializable @SerialName("noValidLink") object NoValidLink : SimplexDomainError()
-  @Serializable @SerialName("unknownDomain") object UnknownDomain : SimplexDomainError()
+sealed class PopopxDomainError {
+  @Serializable @SerialName("noValidLink") object NoValidLink : PopopxDomainError()
+  @Serializable @SerialName("unknownDomain") object UnknownDomain : PopopxDomainError()
 }
 
 @Serializable
@@ -7624,8 +7624,8 @@ object BadgeServiceErrorCodeSerializer : KSerializer<BadgeServiceErrorCode> {
 
 data class ConnectionPlanResult(
   val connLink: CreatedConnLink,
-  val planSimplexName: PopopxNameInfo?,
-  val otherSimplexName: PopopxNameInfo?,
+  val planPopopxName: PopopxNameInfo?,
+  val otherPopopxName: PopopxNameInfo?,
   val connectionPlan: ConnectionPlan,
 )
 
@@ -7978,7 +7978,7 @@ sealed class ChatErrorType {
       is ChatStoreChanged -> "chatStoreChanged"
       is ConnectionPlanChatError -> "connectionPlan"
       is InvalidConnReq -> "invalidConnReq"
-      is SimplexDomainNotReady -> "simplexDomainNotReady"
+      is PopopxDomainNotReady -> "popopxDomainNotReady"
       is NotResolvedLocally -> "notResolvedLocally"
       is UnsupportedConnReq -> "unsupportedConnReq"
       is InvalidChatMessage -> "invalidChatMessage"
@@ -8063,7 +8063,7 @@ sealed class ChatErrorType {
   @Serializable @SerialName("chatStoreChanged") object ChatStoreChanged: ChatErrorType()
   @Serializable @SerialName("connectionPlan") class ConnectionPlanChatError(val connectionPlan: ConnectionPlan): ChatErrorType()
   @Serializable @SerialName("invalidConnReq") object InvalidConnReq: ChatErrorType()
-  @Serializable @SerialName("simplexDomainNotReady") class SimplexDomainNotReady(val simplexDomain: SimplexDomain, val simplexDomainError: SimplexDomainError): ChatErrorType()
+  @Serializable @SerialName("popopxDomainNotReady") class PopopxDomainNotReady(val popopxDomain: PopopxDomain, val popopxDomainError: PopopxDomainError): ChatErrorType()
   @Serializable @SerialName("notResolvedLocally") object NotResolvedLocally: ChatErrorType()
   @Serializable @SerialName("unsupportedConnReq") object UnsupportedConnReq: ChatErrorType()
   @Serializable @SerialName("invalidChatMessage") class InvalidChatMessage(val connection: Connection, val message: String): ChatErrorType()

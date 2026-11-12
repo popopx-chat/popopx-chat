@@ -349,7 +349,7 @@ testPrepareChannelWithName ps = withSmpServerAndNames ps $ \reg ->
     teamName = PopopxNameInfo NTPublicGroup (PopopxDomain TLDPopopx "team" [])
 
 -- The bare name "team.popopx" resolves to both a channel and a direct contact. The channel is tried
--- first and succeeds (bob has joined #team), so it is the primary (planSimplexName); otherSimplexName
+-- first and succeeds (bob has joined #team), so it is the primary (planPopopxName); otherPopopxName
 -- is the direct contact @team.popopx, shown as "You can also connect to @team.popopx in direct chat".
 testConnectByNameChannelAndContact :: HasCallStack => TestParams -> IO ()
 testConnectByNameChannelAndContact ps = withSmpServerAndNames ps $ \reg ->
@@ -387,7 +387,7 @@ testConnectByNameChannelAndContact ps = withSmpServerAndNames ps $ \reg ->
 
 -- The bare name "acme.popopx" resolves to both a channel and a direct contact. The channel is tried
 -- first but its group profile does not claim the domain, so the channel side of the plan fails; the
--- plan falls back to the direct contact as primary (planSimplexName) while otherSimplexName is the
+-- plan falls back to the direct contact as primary (planPopopxName) while otherPopopxName is the
 -- channel #acme, shown as "You can also join channel #acme". The channel link is a real, fetchable
 -- #acme channel, so the failure is the faithful "channel does not claim this domain" case, not a broken link.
 testConnectByNameContactAndChannel :: HasCallStack => TestParams -> IO ()

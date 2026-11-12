@@ -763,7 +763,7 @@ public enum ChatErrorType: Decodable, Hashable {
     case chatNotStopped
     case chatStoreChanged
     case invalidConnReq
-    case simplexDomainNotReady(simplexDomain: SimplexDomain, simplexDomainError: SimplexDomainError)
+    case popopxDomainNotReady(popopxDomain: PopopxDomain, popopxDomainError: PopopxDomainError)
     case notResolvedLocally
     case unsupportedConnReq
     case invalidChatMessage(connection: Connection, message: String)

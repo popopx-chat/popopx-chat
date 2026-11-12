@@ -489,7 +489,7 @@ test("peer text and names with edge spaces and line breaks give the card no tapp
     const formatted = card.chatItem.formattedText ?? []
     const formats = formatted.flatMap(({format}) => (format === undefined ? [] : [format]))
     expect(formats.filter(({type}) => type === "command")).toEqual([{type: "command", commandStr: `approve ${n}`}, {type: "command", commandStr: `reject ${n}`}])
-    expect(formats.filter(({type}) => type === "simplexLink")).toEqual([])
+    expect(formats.filter(({type}) => type === "popopxLink")).toEqual([])
     const snippets = formatted.filter(({format}) => format?.type === "snippet").map(({text}) => text)
     expect(snippets).toEqual([name.shown, ...peerLines.map(line => line.replace(/^ | $/g, "\u00a0"))])
     await alice.chat.apiSendTextMessage([T.ChatType.Group, controlId], `/reject ${n}`)

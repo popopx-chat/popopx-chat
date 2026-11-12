@@ -195,16 +195,16 @@ struct UserAddressView: View {
 
         Section {
             NavigationLink {
-                let simplexName = if let d = chatModel.currentUser?.profile.contactDomain?.domain { "@\(d)" } else { "" }
+                let popopxName = if let d = chatModel.currentUser?.profile.contactDomain?.domain { "@\(d)" } else { "" }
                 SetPopopxDomainView(
                     title: "Your POPOPX name",
                     footer: "Let people connect to you via name registered with your POPOPX address.",
                     prompt: "@yourname.testing",
-                    simplexName: simplexName,
+                    popopxName: popopxName,
                     broadcastWarning: NSLocalizedString("Profile update will be sent to your POPOPX contacts.", comment: "alert title"),
-                    save: { simplexDomain in
+                    save: { popopxDomain in
                         do {
-                            let u = try await apiSetUserDomain(simplexDomain)
+                            let u = try await apiSetUserDomain(popopxDomain)
                             await MainActor.run { chatModel.updateUser(u) }
                             return true
                         } catch {
@@ -821,7 +821,7 @@ struct SetPopopxDomainView: View {
     let title: LocalizedStringKey
     let footer: LocalizedStringKey
     let prompt: String
-    @State var simplexName: String
+    @State var popopxName: String
     let broadcastWarning: String?
     let save: (String?) async -> Bool
     @Environment(\.dismiss) var dismiss
@@ -834,23 +834,23 @@ struct SetPopopxDomainView: View {
     @State private var saleTimer: Timer? = nil
     @FocusState private var nameFocused: Bool
 
-    init(title: LocalizedStringKey, footer: LocalizedStringKey, prompt: String, simplexName: String, broadcastWarning: String? = nil, save: @escaping (String?) async -> Bool) {
+    init(title: LocalizedStringKey, footer: LocalizedStringKey, prompt: String, popopxName: String, broadcastWarning: String? = nil, save: @escaping (String?) async -> Bool) {
         self.title = title
         self.footer = footer
         self.prompt = prompt
-        self._simplexName = State(initialValue: simplexName)
+        self._popopxName = State(initialValue: popopxName)
         self.broadcastWarning = broadcastWarning
         self.save = save
-        self._original = State(initialValue: simplexName)
-        self._editing = State(initialValue: simplexName.isEmpty)
+        self._original = State(initialValue: popopxName)
+        self._editing = State(initialValue: popopxName.isEmpty)
     }
 
     private var changed: Bool {
-        normalized(simplexName) != normalized(original)
+        normalized(popopxName) != normalized(original)
     }
 
     private var isValid: Bool {
-        guard let d = normalized(simplexName) else { return true }
+        guard let d = normalized(popopxName) else { return true }
         return isValidPopopxDomain(d)
     }
 
@@ -859,7 +859,7 @@ struct SetPopopxDomainView: View {
             Section {
                 if editing {
                     ZStack(alignment: .trailing) {
-                        TextField(prompt, text: $simplexName)
+                        TextField(prompt, text: $popopxName)
                             .focused($nameFocused)
                             .autocorrectionDisabled(true)
                             .textInputAutocapitalization(.never)
@@ -871,10 +871,10 @@ struct SetPopopxDomainView: View {
                     }
                 } else {
                     Button {
-                        UIPasteboard.general.string = simplexName
+                        UIPasteboard.general.string = popopxName
                     } label: {
                         HStack {
-                            Text(simplexName)
+                            Text(popopxName)
                                 .foregroundColor(theme.colors.onBackground)
                             Spacer()
                             Image(systemName: "doc.on.doc")
@@ -912,7 +912,7 @@ struct SetPopopxDomainView: View {
                     .disabled(saving || !isValid || !changed)
                 } else {
                     Button("Remove name") {
-                        simplexName = ""
+                        popopxName = ""
                         editing = true
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { nameFocused = true }
                     }
@@ -952,7 +952,7 @@ struct SetPopopxDomainView: View {
             saleTimer?.invalidate()
             saleTimer = nil
             if !didSave, !saving, changed, isValid {
-                let domain = normalized(simplexName)
+                let domain = normalized(popopxName)
                 let saveName = save
                 showAlert(
                     NSLocalizedString("Save POPOPX name?", comment: "alert title"),
@@ -971,7 +971,7 @@ struct SetPopopxDomainView: View {
     private func saveAndDismiss() {
         saving = true
         Task {
-            let ok = await save(normalized(simplexName))
+            let ok = await save(normalized(popopxName))
             await MainActor.run {
                 saving = false
                 if ok {

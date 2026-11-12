@@ -336,7 +336,7 @@ if path == "/r" {
 }
 ```
 
-Similarly, in `planAndConnect()` (`NewChatView.swift`), `.simplexLink(_, .relay, _, _)` patterns trigger the same alert and block connection.
+Similarly, in `planAndConnect()` (`NewChatView.swift`), `.popopxLink(_, .relay, _, _)` patterns trigger the same alert and block connection.
 
 ## 11. Channel-Specific NewChatView Behavior
 

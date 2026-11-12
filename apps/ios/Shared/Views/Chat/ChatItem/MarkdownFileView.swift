@@ -153,8 +153,8 @@ private func openMarkdownFileLink(_ url: URL) {
     let parsed = parsePOPOPXMarkdown(uri)
     let format = parsed?.count == 1 ? parsed?.first?.format : nil
     switch format {
-    case let .simplexLink(_, _, simplexUri, _)?:
-        if let popopxUrl = URL(string: simplexUri) {
+    case let .popopxLink(_, _, popopxUri, _)?:
+        if let popopxUrl = URL(string: popopxUri) {
             ChatModel.shared.appOpenUrl = popopxUrl
         } else {
             showInvalidLinkAlert(uri)

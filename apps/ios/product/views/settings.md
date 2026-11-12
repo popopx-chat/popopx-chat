@@ -61,7 +61,7 @@ Each relay is managed via `ChatRelayView`:
 | Element | Preset relay | Custom relay |
 |---|---|---|
 | Name | Read-only display | Editable text field |
-| Address | Read-only display | Editable text field (validates as `.simplexLink(_, .relay, _, _)`) |
+| Address | Read-only display | Editable text field (validates as `.popopxLink(_, .relay, _, _)`) |
 | Test button | "Test relay" (shows "Not implemented" alert) | Same |
 | Enable toggle | "Use for new channels" | Same |
 | Delete | Not available | "Delete relay" button |

@@ -483,7 +483,7 @@ struct ComposeView: View {
                     Divider()
                 }
                 // preference checks should match checks in forwarding list
-                let popopxLinkProhibited = im.secondaryIMFilter == nil && hasPopopxLink && !chat.groupFeatureEnabled(.simplexLinks)
+                let popopxLinkProhibited = im.secondaryIMFilter == nil && hasPopopxLink && !chat.groupFeatureEnabled(.popopxLinks)
                 let fileProhibited = im.secondaryIMFilter == nil && composeState.attachmentPreview && !chat.groupFeatureEnabled(.files)
                 let voiceProhibited = composeState.voicePreview && !chat.chatInfo.featureEnabled(.voice)
                 let disableSendButton = popopxLinkProhibited || fileProhibited || voiceProhibited
@@ -606,7 +606,7 @@ struct ComposeView: View {
                 }
             } else {
                 resetLinkPreview()
-                hasPopopxLink = !msg.isEmpty && !chat.groupFeatureEnabled(.simplexLinks) && getMessageLinks(parsedMsg).hasPopopxLink
+                hasPopopxLink = !msg.isEmpty && !chat.groupFeatureEnabled(.popopxLinks) && getMessageLinks(parsedMsg).hasPopopxLink
                 if composeState.linkPreviewAllowed {
                     composeState = composeState.copy(preview: .noPreview)
                 }
@@ -1929,16 +1929,16 @@ struct ComposeView: View {
     // Spec: spec/client/compose.md#getMessageLinks
     private func getMessageLinks(_ parsedMsg: [FormattedText]?) -> (url: String?, hasPopopxLink: Bool) {
         guard let parsedMsg else { return (nil, false) }
-        let simplexLink = parsedMsgHasPopopxLink(parsedMsg)
+        let popopxLink = parsedMsgHasPopopxLink(parsedMsg)
         for ft in parsedMsg {
-            if let link = ft.linkUri, !cancelledLinks.contains(link) && !isSimplexLink(link) {
-                return (link, simplexLink)
+            if let link = ft.linkUri, !cancelledLinks.contains(link) && !isPopopxLink(link) {
+                return (link, popopxLink)
             }
         }
-        return (nil, simplexLink)
+        return (nil, popopxLink)
     }
 
-    private func isSimplexLink(_ link: String) -> Bool {
+    private func isPopopxLink(_ link: String) -> Bool {
         link.starts(with: "https://simplex.chat") || link.starts(with: "http://simplex.chat") || link.starts(with: "popopx:/")
     }
 

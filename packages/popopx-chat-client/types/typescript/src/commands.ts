@@ -70,14 +70,14 @@ export namespace APISetProfileAddress {
 // Network usage: interactive.
 export interface APISetUserDomain {
   userId: number // int64
-  simplexDomain?: string
+  popopxDomain?: string
 }
 
 export namespace APISetUserDomain {
   export type Response = CR.UserProfileUpdated | CR.UserProfileNoChange | CR.ChatCmdError
 
   export function cmdString(self: APISetUserDomain): string {
-    return '/_set domain ' + self.userId + (self.simplexDomain ? ' ' + self.simplexDomain : '')
+    return '/_set domain ' + self.userId + (self.popopxDomain ? ' ' + self.popopxDomain : '')
   }
 }
 

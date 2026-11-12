@@ -45,7 +45,7 @@ struct GroupPreferencesView: View {
                     featureSection(.reactions, $preferences.reactions.enable)
                     featureSection(.voice, $preferences.voice.enable, $preferences.voice.role)
                     featureSection(.files, $preferences.files.enable, $preferences.files.role)
-                    featureSection(.simplexLinks, $preferences.simplexLinks.enable, $preferences.simplexLinks.role)
+                    featureSection(.popopxLinks, $preferences.popopxLinks.enable, $preferences.popopxLinks.role)
                     featureSection(.reports, $preferences.reports.enable, disabled: true) // enable reports in 7.0 once directory support added
                     featureSection(.history, $preferences.history.enable)
                     featureSection(.support, $preferences.support.enable, disabled: true)

@@ -209,7 +209,7 @@ data GroupFeature
   | GFReactions
   | GFVoice
   | GFFiles
-  | GFSimplexLinks
+  | GFPopopxLinks
   | GFReports
   | GFHistory
   | GFSupport
@@ -225,7 +225,7 @@ data SGroupFeature (f :: GroupFeature) where
   SGFReactions :: SGroupFeature 'GFReactions
   SGFVoice :: SGroupFeature 'GFVoice
   SGFFiles :: SGroupFeature 'GFFiles
-  SGFSimplexLinks :: SGroupFeature 'GFSimplexLinks
+  SGFPopopxLinks :: SGroupFeature 'GFPopopxLinks
   SGFReports :: SGroupFeature 'GFReports
   SGFHistory :: SGroupFeature 'GFHistory
   SGFSupport :: SGroupFeature 'GFSupport
@@ -255,7 +255,7 @@ groupFeatureNameText = \case
   GFReactions -> "Message reactions"
   GFVoice -> "Voice messages"
   GFFiles -> "Files and media"
-  GFSimplexLinks -> "POPOPX links"
+  GFPopopxLinks -> "POPOPX links"
   GFReports -> "Member reports"
   GFHistory -> "Recent history"
   GFSupport -> "Chat with admins"
@@ -285,7 +285,7 @@ allGroupFeatures =
     AGF SGFReactions,
     AGF SGFVoice,
     AGF SGFFiles,
-    AGF SGFSimplexLinks,
+    AGF SGFPopopxLinks,
     AGF SGFReports,
     AGF SGFHistory,
     AGF SGFSupport,
@@ -305,7 +305,7 @@ groupFeatureInChannel = \case
   GFReactions -> True
   GFVoice -> False
   GFFiles -> False
-  GFSimplexLinks -> False
+  GFPopopxLinks -> False
   GFReports -> False
   GFHistory -> True
   GFSupport -> True
@@ -326,7 +326,7 @@ groupFeatureInRegularGroup = \case
   GFReactions -> True
   GFVoice -> True
   GFFiles -> True
-  GFSimplexLinks -> True
+  GFPopopxLinks -> True
   GFReports -> True
   GFHistory -> True
   GFSupport -> True
@@ -335,14 +335,14 @@ groupFeatureInRegularGroup = \case
   GFSignMessages -> False
 
 groupPrefSel :: SGroupFeature f -> GroupPreferences -> Maybe (GroupFeaturePreference f)
-groupPrefSel f GroupPreferences {timedMessages, directMessages, fullDelete, reactions, voice, files, simplexLinks, reports, history, support, sessions, comments, signMessages} = case f of
+groupPrefSel f GroupPreferences {timedMessages, directMessages, fullDelete, reactions, voice, files, popopxLinks, reports, history, support, sessions, comments, signMessages} = case f of
   SGFTimedMessages -> timedMessages
   SGFDirectMessages -> directMessages
   SGFFullDelete -> fullDelete
   SGFReactions -> reactions
   SGFVoice -> voice
   SGFFiles -> files
-  SGFSimplexLinks -> simplexLinks
+  SGFPopopxLinks -> popopxLinks
   SGFReports -> reports
   SGFHistory -> history
   SGFSupport -> support
@@ -358,7 +358,7 @@ toGroupFeature = \case
   SGFReactions -> GFReactions
   SGFVoice -> GFVoice
   SGFFiles -> GFFiles
-  SGFSimplexLinks -> GFSimplexLinks
+  SGFPopopxLinks -> GFPopopxLinks
   SGFReports -> GFReports
   SGFHistory -> GFHistory
   SGFSupport -> GFSupport
@@ -376,14 +376,14 @@ instance GroupPreferenceI (Maybe GroupPreferences) where
   getGroupPreference pt prefs = fromMaybe (getGroupPreference pt defaultGroupPrefs) (groupPrefSel pt =<< prefs)
 
 instance GroupPreferenceI FullGroupPreferences where
-  getGroupPreference f FullGroupPreferences {timedMessages, directMessages, fullDelete, reactions, voice, files, simplexLinks, reports, history, support, sessions, comments, signMessages} = case f of
+  getGroupPreference f FullGroupPreferences {timedMessages, directMessages, fullDelete, reactions, voice, files, popopxLinks, reports, history, support, sessions, comments, signMessages} = case f of
     SGFTimedMessages -> timedMessages
     SGFDirectMessages -> directMessages
     SGFFullDelete -> fullDelete
     SGFReactions -> reactions
     SGFVoice -> voice
     SGFFiles -> files
-    SGFSimplexLinks -> simplexLinks
+    SGFPopopxLinks -> popopxLinks
     SGFReports -> reports
     SGFHistory -> history
     SGFSupport -> support
@@ -400,7 +400,7 @@ data GroupPreferences = GroupPreferences
     reactions :: Maybe ReactionsGroupPreference,
     voice :: Maybe VoiceGroupPreference,
     files :: Maybe FilesGroupPreference,
-    simplexLinks :: Maybe SimplexLinksGroupPreference,
+    popopxLinks :: Maybe PopopxLinksGroupPreference,
     reports :: Maybe ReportsGroupPreference,
     history :: Maybe HistoryGroupPreference,
     support :: Maybe SupportGroupPreference,
@@ -457,7 +457,7 @@ setGroupPreference_ f pref prefs =
     SGFReactions -> prefs {reactions = pref}
     SGFVoice -> prefs {voice = pref}
     SGFFiles -> prefs {files = pref}
-    SGFSimplexLinks -> prefs {simplexLinks = pref}
+    SGFPopopxLinks -> prefs {popopxLinks = pref}
     SGFReports -> prefs {reports = pref}
     SGFHistory -> prefs {history = pref}
     SGFSupport -> prefs {support = pref}
@@ -502,7 +502,7 @@ data FullGroupPreferences = FullGroupPreferences
     reactions :: ReactionsGroupPreference,
     voice :: VoiceGroupPreference,
     files :: FilesGroupPreference,
-    simplexLinks :: SimplexLinksGroupPreference,
+    popopxLinks :: PopopxLinksGroupPreference,
     reports :: ReportsGroupPreference,
     history :: HistoryGroupPreference,
     support :: SupportGroupPreference,
@@ -575,7 +575,7 @@ defaultGroupPrefs =
       reactions = ReactionsGroupPreference {enable = FEOn},
       voice = VoiceGroupPreference {enable = FEOn, role = Nothing},
       files = FilesGroupPreference {enable = FEOn, role = Nothing},
-      simplexLinks = SimplexLinksGroupPreference {enable = FEOn, role = Nothing},
+      popopxLinks = PopopxLinksGroupPreference {enable = FEOn, role = Nothing},
       reports = ReportsGroupPreference {enable = FEOn},
       history = HistoryGroupPreference {enable = FEOff},
       support = SupportGroupPreference {enable = FEOn},
@@ -614,7 +614,7 @@ defaultBusinessGroupPrefs =
       reactions = Just $ ReactionsGroupPreference FEOn,
       voice = Just $ VoiceGroupPreference FEOff Nothing,
       files = Just $ FilesGroupPreference FEOn Nothing,
-      simplexLinks = Just $ SimplexLinksGroupPreference FEOn Nothing,
+      popopxLinks = Just $ PopopxLinksGroupPreference FEOn Nothing,
       reports = Just $ ReportsGroupPreference FEOff,
       history = Just $ HistoryGroupPreference FEOn,
       support = Just $ SupportGroupPreference FEOn,
@@ -740,7 +740,7 @@ data FilesGroupPreference = FilesGroupPreference
   {enable :: GroupFeatureEnabled, role :: Maybe GroupMemberRole}
   deriving (Eq, Show)
 
-data SimplexLinksGroupPreference = SimplexLinksGroupPreference
+data PopopxLinksGroupPreference = PopopxLinksGroupPreference
   {enable :: GroupFeatureEnabled, role :: Maybe GroupMemberRole}
   deriving (Eq, Show)
 
@@ -803,8 +803,8 @@ instance HasField "enable" VoiceGroupPreference GroupFeatureEnabled where
 instance HasField "enable" FilesGroupPreference GroupFeatureEnabled where
   hasField p@FilesGroupPreference {enable} = (\e -> p {enable = e}, enable)
 
-instance HasField "enable" SimplexLinksGroupPreference GroupFeatureEnabled where
-  hasField p@SimplexLinksGroupPreference {enable} = (\e -> p {enable = e}, enable)
+instance HasField "enable" PopopxLinksGroupPreference GroupFeatureEnabled where
+  hasField p@PopopxLinksGroupPreference {enable} = (\e -> p {enable = e}, enable)
 
 instance HasField "enable" ReportsGroupPreference GroupFeatureEnabled where
   hasField p@ReportsGroupPreference {enable} = (\e -> p {enable = e}, enable)
@@ -860,11 +860,11 @@ instance GroupFeatureI 'GFFiles where
   groupPrefParam _ = Nothing
   groupPrefRole FilesGroupPreference {role} = role
 
-instance GroupFeatureI 'GFSimplexLinks where
-  type GroupFeaturePreference 'GFSimplexLinks = SimplexLinksGroupPreference
-  sGroupFeature = SGFSimplexLinks
+instance GroupFeatureI 'GFPopopxLinks where
+  type GroupFeaturePreference 'GFPopopxLinks = PopopxLinksGroupPreference
+  sGroupFeature = SGFPopopxLinks
   groupPrefParam _ = Nothing
-  groupPrefRole SimplexLinksGroupPreference {role} = role
+  groupPrefRole PopopxLinksGroupPreference {role} = role
 
 instance GroupFeatureI 'GFReports where
   type GroupFeaturePreference 'GFReports = ReportsGroupPreference
@@ -930,8 +930,8 @@ instance HasField "role" VoiceGroupPreference (Maybe GroupMemberRole) where
 instance HasField "role" FilesGroupPreference (Maybe GroupMemberRole) where
   hasField p@FilesGroupPreference {role} = (\r -> p {role = r}, role)
 
-instance HasField "role" SimplexLinksGroupPreference (Maybe GroupMemberRole) where
-  hasField p@SimplexLinksGroupPreference {role} = (\r -> p {role = r}, role)
+instance HasField "role" PopopxLinksGroupPreference (Maybe GroupMemberRole) where
+  hasField p@PopopxLinksGroupPreference {role} = (\r -> p {role = r}, role)
 
 instance HasField "role" SessionsGroupPreference (Maybe GroupMemberRole) where
   hasField p@SessionsGroupPreference {role} = (\r -> p {role = r}, role)
@@ -944,7 +944,7 @@ instance GroupFeatureRoleI 'GFVoice
 
 instance GroupFeatureRoleI 'GFFiles
 
-instance GroupFeatureRoleI 'GFSimplexLinks
+instance GroupFeatureRoleI 'GFPopopxLinks
 
 instance GroupFeatureRoleI 'GFSessions
 
@@ -1105,7 +1105,7 @@ mergeGroupPreferences groupPreferences =
       reactions = pref SGFReactions,
       voice = pref SGFVoice,
       files = pref SGFFiles,
-      simplexLinks = pref SGFSimplexLinks,
+      popopxLinks = pref SGFPopopxLinks,
       reports = pref SGFReports,
       history = pref SGFHistory,
       support = pref SGFSupport,
@@ -1127,7 +1127,7 @@ toGroupPreferences groupPreferences@FullGroupPreferences {commands = ListDef cmd
       reactions = pref SGFReactions,
       voice = pref SGFVoice,
       files = pref SGFFiles,
-      simplexLinks = pref SGFSimplexLinks,
+      popopxLinks = pref SGFPopopxLinks,
       reports = pref SGFReports,
       history = pref SGFHistory,
       support = pref SGFSupport,
@@ -1266,7 +1266,7 @@ $(J.deriveJSON defaultJSON ''VoiceGroupPreference)
 
 $(J.deriveJSON defaultJSON ''FilesGroupPreference)
 
-$(J.deriveJSON defaultJSON ''SimplexLinksGroupPreference)
+$(J.deriveJSON defaultJSON ''PopopxLinksGroupPreference)
 
 $(J.deriveJSON defaultJSON ''ReportsGroupPreference)
 

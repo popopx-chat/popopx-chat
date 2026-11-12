@@ -41,7 +41,7 @@ fun ShareListNavLinkView(
       )
     }
     is ChatInfo.Group -> {
-      val popopxLinkProhibited = hasPopopxLink && !chat.groupFeatureEnabled(GroupFeature.SimplexLinks)
+      val popopxLinkProhibited = hasPopopxLink && !chat.groupFeatureEnabled(GroupFeature.PopopxLinks)
       val fileProhibited = isMediaOrFileAttachment && !chat.groupFeatureEnabled(GroupFeature.Files)
       val voiceProhibited = isVoice && !chat.chatInfo.featureEnabled(ChatFeature.Voice)
       val prohibitedByPref = popopxLinkProhibited || fileProhibited || voiceProhibited

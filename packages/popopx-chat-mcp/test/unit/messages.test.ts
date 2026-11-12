@@ -1003,14 +1003,14 @@ describe("connect", () => {
     const prepare = `/_prepare contact 1 ${link} domain=directory.popopx ${JSON.stringify(linkData)}`
     const name = {nameType: "contact", nameDomain: {nameTLD: "popopx", domain: "directory", subDomain: []}}
     chat.chats.set("@9", {chatInfo: direct(joining), items: []})
-    chat.responses.set("/_connect plan 1 @directory.popopx", {...plan({type: "contactAddress", contactAddressPlan: {type: "ok", contactSLinkData_: linkData}}), planSimplexName: name})
+    chat.responses.set("/_connect plan 1 @directory.popopx", {...plan({type: "contactAddress", contactAddressPlan: {type: "ok", contactSLinkData_: linkData}}), planPopopxName: name})
     chat.responses.set(prepare, {type: "newPreparedChat", chat: {chatInfo: direct(joining), chatItems: []}})
     chat.responses.set("/_connect contact @9", {type: "startedConnectionToContact", contact: joining})
     const {tools, actions} = connectTools(chat)
     const connecting = tools.call("connect", {target: "@directory.popopx"}, signal().call)
     await jest.advanceTimersByTimeAsync(0)
     const action = actions.get(1)!
-    expect(action.subject).toEqual({kind: "bot", name: "SimpleX Directory", simplexName: "@directory.popopx", incognito: false})
+    expect(action.subject).toEqual({kind: "bot", name: "SimpleX Directory", popopxName: "@directory.popopx", incognito: false})
     actions.approve(action, "Alice")
     await jest.advanceTimersByTimeAsync(0)
     expect(chat.commands.filter(cmd => /^\/_(prepare|connect contact)/.test(cmd))).toEqual([prepare, "/_connect contact @9"])

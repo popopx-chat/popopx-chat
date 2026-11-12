@@ -27,7 +27,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.*
 import kotlinx.datetime.*
 
-// Each dot-separated label is ASCII letters/digits with single internal hyphens (mirrors popopxmq SimplexName.hs nameLabelP).
+// Each dot-separated label is ASCII letters/digits with single internal hyphens (mirrors popopxmq PopopxName.hs nameLabelP).
 private val popopxNameLabelRegex = Regex("[A-Za-z0-9]+(-[A-Za-z0-9]+)*")
 
 private val popopxNameSaleStart = LocalDateTime(2026, 12, 12, 18, 0).toInstant(TimeZone.UTC)
@@ -43,15 +43,15 @@ fun SetPopopxDomainView(
   title: String,
   footer: String,
   placeholder: String,
-  simplexName: String,
+  popopxName: String,
   registerBackgroundClose: Boolean = false,
   broadcastWarning: String? = null,
   save: suspend (String?) -> Boolean,
   close: () -> Unit
 ) {
-  val name = rememberSaveable { mutableStateOf(simplexName) }
+  val name = rememberSaveable { mutableStateOf(popopxName) }
   val saving = remember { mutableStateOf(false) }
-  val editing = rememberSaveable { mutableStateOf(simplexName.isBlank()) }
+  val editing = rememberSaveable { mutableStateOf(popopxName.isBlank()) }
   val uriHandler = LocalUriHandler.current
   val clipboard = LocalClipboardManager.current
 
@@ -78,7 +78,7 @@ fun SetPopopxDomainView(
     return labels.all { it.length in 1..63 && popopxNameLabelRegex.matches(it) }
   }
 
-  val unchanged = normalized(name.value) == normalized(simplexName)
+  val unchanged = normalized(name.value) == normalized(popopxName)
   val isValid = isValidName(name.value)
 
   fun doSave(close: () -> Unit) {
@@ -101,7 +101,7 @@ fun SetPopopxDomainView(
   // Returns true when it consumes the close (shows the prompt), false when it lets the close proceed.
   fun onClose(close: () -> Unit): Boolean {
     val valid = isValidName(name.value)
-    val changed = normalized(name.value) != normalized(simplexName)
+    val changed = normalized(name.value) != normalized(popopxName)
     return if (changed && valid) {
       AlertManager.shared.showAlertDialog(
         title = generalGetString(MR.strings.save_popopx_name_question),

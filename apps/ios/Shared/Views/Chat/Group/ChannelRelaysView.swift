@@ -161,7 +161,7 @@ func relayConnStatus(_ member: GroupMember) -> (text: LocalizedStringKey, color:
 func hostFromRelayLink(_ link: String) -> String {
     if let ft = parsePOPOPXMarkdown(link) {
         for f in ft {
-            if case let .simplexLink(_, _, _, smpHosts) = f.format,
+            if case let .popopxLink(_, _, _, smpHosts) = f.format,
                let host = smpHosts.first {
                 return host
             }

@@ -61,8 +61,8 @@ data Format
   | Uri
   -- showText is Nothing for the usual Uri without text
   | HyperLink {showText :: Maybe Text, linkUri :: Text}
-  | SimplexLink {showText :: Maybe Text, linkType :: SimplexLinkType, simplexUri :: AConnectionLink, smpHosts :: NonEmpty Text}
-  | SimplexName {nameInfo :: PopopxNameInfo}
+  | PopopxLink {showText :: Maybe Text, linkType :: PopopxLinkType, popopxUri :: AConnectionLink, smpHosts :: NonEmpty Text}
+  | PopopxName {nameInfo :: PopopxNameInfo}
   | Command {commandStr :: Text}
   | Mention {memberName :: Text}
   | Email
@@ -117,7 +117,7 @@ mentionedNames = mapMaybe (\(FormattedText f _) -> mentionedName =<< f)
       Mention name -> Just name
       _ -> Nothing
 
-data SimplexLinkType = XLContact | XLInvitation | XLGroup | XLChannel | XLRelay
+data PopopxLinkType = XLContact | XLInvitation | XLGroup | XLChannel | XLRelay
   deriving (Eq, Show)
 
 colored :: Color -> Format
@@ -312,24 +312,24 @@ joinMarkdown ms = case map joinGroup $ L.groupBy sameFormat $ filter (\(Formatte
 parseMarkdown :: Text -> Markdown
 parseMarkdown s = fromRight (unmarked s) $ A.parseOnly (markdownP <* A.endOfInput) s
 
-isSimplexLink :: Format -> Bool
-isSimplexLink = \case
-  SimplexLink {} -> True
+isPopopxLink :: Format -> Bool
+isPopopxLink = \case
+  PopopxLink {} -> True
   _ -> False
 
 isLink :: Format -> Bool
 isLink = \case
   Uri -> True
   HyperLink {} -> True
-  SimplexLink {} -> True
-  SimplexName {} -> True
+  PopopxLink {} -> True
+  PopopxName {} -> True
   _ -> False
 
 hasLinks :: MarkdownList -> Bool
 hasLinks = any $ \(FormattedText f _) -> maybe False isLink f
 
-hasObfuscatedSimplexLink :: Text -> Bool
-hasObfuscatedSimplexLink t =
+hasObfuscatedPopopxLink :: Text -> Bool
+hasObfuscatedPopopxLink t =
   fromRight False $ AB.parseOnly findLinkP $ encodeUtf8 $ T.filter (not . isSpace) t
   where
     findLinkP = do
@@ -431,7 +431,7 @@ markdownP = joinMarkdown <$> A.many' fragmentP
               | T.null punct = md'
               | otherwise = md' :|: unmarked punct
               where
-                md' = markdown (SimplexName ni) full
+                md' = markdown (PopopxName ni) full
     styledP :: Parser Markdown
     styledP = do
       f <- A.char '!' *> ((A.char '-' $> Small) <|> (colored <$> colorP)) <* A.satisfy (\c -> isSpace c && c /= '\n')
@@ -460,7 +460,7 @@ markdownP = joinMarkdown <$> A.many' fragmentP
       pure $ markdown f $ "<" <> l <> ">"
     hyperLinkFormat t l = case strDecode $ encodeUtf8 l of
       Right lnk@(ACL _ cLink) -> case cLink of
-        CLShort _ -> pure $ simplexUriFormat (Just t) lnk
+        CLShort _ -> pure $ popopxUriFormat (Just t) lnk
         CLFull _ -> fail "full POPOPX link in hyperlink"
       Left _ -> case parseUri $ encodeUtf8 l of
         Right _ -> pure $ HyperLink (Just t) l
@@ -506,7 +506,7 @@ markdownP = joinMarkdown <$> A.many' fragmentP
     linkMD :: Text -> Maybe Markdown
     linkMD s
       | isUri s' = case strDecode $ encodeUtf8 s' of
-          Right cLink -> Just $ res $ markdown (simplexUriFormat Nothing cLink) s'
+          Right cLink -> Just $ res $ markdown (popopxUriFormat Nothing cLink) s'
           Left _ -> case parseUri $ encodeUtf8 s' of
             Right _ -> Just $ res $ markdown Uri s'
             Left _ -> Nothing
@@ -543,11 +543,11 @@ markdownP = joinMarkdown <$> A.many' fragmentP
             && (let p c = isAscii c && isAlpha c in T.all p name && T.all isAsciiLower tld)
     isEmail s = T.any (== '@') s && Email.isValid (encodeUtf8 s)
     noFormat = pure . unmarked
-    simplexUriFormat :: Maybe Text -> AConnectionLink -> Format
-    simplexUriFormat showText = \case
+    popopxUriFormat :: Maybe Text -> AConnectionLink -> Format
+    popopxUriFormat showText = \case
       ACL m (CLFull cReq) -> case cReq of
-        CRContactUri crData _ -> SimplexLink showText (linkType' crData) cLink $ uriHosts crData
-        CRInvitationUri crData _ -> SimplexLink showText XLInvitation cLink $ uriHosts crData
+        CRContactUri crData _ -> PopopxLink showText (linkType' crData) cLink $ uriHosts crData
+        CRInvitationUri crData _ -> PopopxLink showText XLInvitation cLink $ uriHosts crData
         where
           cLink = ACL m $ CLFull $ popopxConnReqUri cReq
           uriHosts ConnReqUriData {crSmpQueues} = L.map strEncodeText $ sconcat $ L.map (host . qServer) crSmpQueues
@@ -555,8 +555,8 @@ markdownP = joinMarkdown <$> A.many' fragmentP
             Just (CRDataGroup _) -> XLGroup
             Nothing -> XLContact
       ACL m (CLShort sLnk) -> case sLnk of
-        CSLContact _ ct srv _ -> SimplexLink showText (linkType' ct) cLink $ uriHosts srv
-        CSLInvitation _ srv _ _ -> SimplexLink showText XLInvitation cLink $ uriHosts srv
+        CSLContact _ ct srv _ -> PopopxLink showText (linkType' ct) cLink $ uriHosts srv
+        CSLInvitation _ srv _ _ -> PopopxLink showText XLInvitation cLink $ uriHosts srv
         where
           cLink = ACL m $ CLShort $ popopxShortLink sLnk
           uriHosts srv = L.map strEncodeText $ host srv
@@ -975,8 +975,8 @@ markdownText (FormattedText f_ t) = case f_ of
     Colored (FormatColor c) -> color c
     Uri -> t
     HyperLink {} -> t
-    SimplexLink {} -> t
-    SimplexName {} -> t
+    PopopxLink {} -> t
+    PopopxName {} -> t
     Mention _ -> t
     Command _ -> t
     Email -> t
@@ -1031,7 +1031,7 @@ splitPunctuation s = (T.dropWhileEnd isPunctuation s, T.takeWhileEnd isPunctuati
 viewName :: Text -> Text
 viewName s = if T.any isSpace s || maybe False (isPunctuation . snd) (T.unsnoc s) then "'" <> s <> "'" else s
 
-$(JQ.deriveJSON (enumJSON $ dropPrefix "XL") ''SimplexLinkType)
+$(JQ.deriveJSON (enumJSON $ dropPrefix "XL") ''PopopxLinkType)
 
 $(JQ.deriveJSON (enumJSON $ dropPrefix "TA") ''TableAlign)
 

@@ -55,7 +55,7 @@ import Popopx.Chat.Remote.AppVersion (AppVersion (..), pattern AppVersionRange)
 import Popopx.Chat.Remote.Types
 import Popopx.Chat.Store (AddressSettings (..), AutoAccept (..), StoreError (..), UserContactLink (..))
 import Popopx.Chat.Styled
-import Popopx.Chat.Names (SimplexDomainClaim (..), claimDomain)
+import Popopx.Chat.Names (PopopxDomainClaim (..), claimDomain)
 import Popopx.Chat.Types
 import Popopx.Chat.Types.Preferences
 import Popopx.Chat.Types.Shared
@@ -156,7 +156,7 @@ chatResponseToView hu cfg@ChatConfig {logLevel, showReactions, showFullLinks, te
   CRGroupMemberRatchetSyncStarted {} -> ["connection synchronization started"]
   CRConnectionVerified u verified code -> ttyUser u [plain $ if verified then "connection verified" else "connection not verified, current code is " <> code]
   CRContactDomainVerified u (Contact {profile = LocalProfile {contactDomain}}) result -> ttyUser u $ viewDomainVerified NTContact (claimDomain <$> contactDomain) result
-  CRGroupDomainVerified u g result -> ttyUser u $ viewDomainVerified NTPublicGroup (groupSimplexDomain g) result
+  CRGroupDomainVerified u g result -> ttyUser u $ viewDomainVerified NTPublicGroup (groupPopopxDomain g) result
   CRContactCode u ct code -> ttyUser u $ viewContactCode ct code testView
   CRGroupMemberCode u g m code -> ttyUser u $ viewGroupMemberCode g m code testView
   CRNewChatItems u chatItems -> viewChatItems ttyUser unmuted u chatItems ts tz testView
@@ -220,7 +220,7 @@ chatResponseToView hu cfg@ChatConfig {logLevel, showReactions, showFullLinks, te
   CRInvitation u ccLink _ -> ttyUser u $ viewConnReqInvitation showFullLinks ccLink
   CRConnectionIncognitoUpdated u c customUserProfile -> ttyUser u $ viewConnectionIncognitoUpdated c customUserProfile testView
   CRConnectionUserChanged u c c' nu -> ttyUser u $ viewConnectionUserChanged showFullLinks u c nu c'
-  CRConnectionPlan u connLink _ otherSimplexName connectionPlan -> ttyUser u $ viewConnectionPlan cfg connLink connectionPlan <> otherSimplexNameNote otherSimplexName
+  CRConnectionPlan u connLink _ otherPopopxName connectionPlan -> ttyUser u $ viewConnectionPlan cfg connLink connectionPlan <> otherPopopxNameNote otherPopopxName
   CRNewPreparedChat u (AChat _ (Chat cInfo _ _)) -> ttyUser u $ case cInfo of
     DirectChat ct -> [ttyContact' ct <> ": contact is prepared"]
     GroupChat g _ -> [ttyGroup' g <> ": group is prepared"]
@@ -1164,8 +1164,8 @@ simplexChatContact' = \case
   CLFull (CRContactUri crData e2e) -> CLFull $ CRContactUri crData {crScheme = popopxChat} e2e
   l@(CLShort _) -> l
 
-groupSimplexDomain :: GroupInfo -> Maybe PopopxDomain
-groupSimplexDomain GroupInfo {groupProfile = GroupProfile {publicGroup}} =
+groupPopopxDomain :: GroupInfo -> Maybe PopopxDomain
+groupPopopxDomain GroupInfo {groupProfile = GroupProfile {publicGroup}} =
   claimDomain <$> (publicGroup >>= publicGroupAccess >>= groupDomainClaim)
 
 viewDomainVerified :: PopopxNameType -> Maybe PopopxDomain -> Maybe Text -> [StyledString]
@@ -1178,9 +1178,9 @@ viewDomainVerified nameType domain_ result =
 -- §4.7: show a peer's claimed name only with its verification context — "verified" / "verification
 -- failed" when a status is recorded, "unverified" when there is a proof but no status yet, and nothing
 -- at all when there is neither (an unproven, unverifiable claim is not shown).
-simplexDomainLine :: PopopxNameType -> Maybe SimplexDomainClaim -> Maybe Bool -> [StyledString]
-simplexDomainLine _ Nothing _ = []
-simplexDomainLine nameType (Just SimplexDomainClaim {domain, proof}) status = case status of
+popopxDomainLine :: PopopxNameType -> Maybe PopopxDomainClaim -> Maybe Bool -> [StyledString]
+popopxDomainLine _ Nothing _ = []
+popopxDomainLine nameType (Just PopopxDomainClaim {domain, proof}) status = case status of
   Just True -> [line "verified"]
   Just False -> [line "verification failed"]
   Nothing
@@ -1209,7 +1209,7 @@ groupLink_ showFullLinks intro g GroupLink {connLinkContact = CCLink cReq shortL
     "",
     plain $ maybe cReqStr strEncode shortLink
   ]
-    <> [plain ("POPOPX name: " <>  shortNameInfoStr (PopopxNameInfo NTPublicGroup d)) | Just d <- [groupSimplexDomain g]]
+    <> [plain ("POPOPX name: " <>  shortNameInfoStr (PopopxNameInfo NTPublicGroup d)) | Just d <- [groupPopopxDomain g]]
     <> [ "",
          "Anybody can connect to you and join group as " <> showRole acceptMemberRole <> " with: " <> highlight' "/c <group_link_above>",
          "to show it again: " <> highlight ("/show link #" <> viewGroupName g),
@@ -1290,7 +1290,7 @@ viewGroupLinkRelaysUpdated g groupLink relays =
       [ "group link:",
         plain $ maybe cReqStr strEncode shortLink
       ]
-    <> [plain ("POPOPX name: " <>  shortNameInfoStr (PopopxNameInfo NTPublicGroup d)) | Just d <- [groupSimplexDomain g]]
+    <> [plain ("POPOPX name: " <>  shortNameInfoStr (PopopxNameInfo NTPublicGroup d)) | Just d <- [groupPopopxDomain g]]
   where
     GroupLink {connLinkContact = CCLink cReq shortLink} = groupLink
     cReqStr = strEncode $ simplexChatContact cReq
@@ -1903,7 +1903,7 @@ viewContactInfo ct@Contact {contactId, profile = LocalProfile {localAlias, conta
     <> maybe [] ((bold' "description:" :) . map plain . T.lines) description
     <> maybe [] viewConnectionStats stats
     <> maybe [] (\l -> ["contact address: " <> plain (strEncode (simplexChatContact' l))]) contactLink
-    <> simplexDomainLine NTContact contactDomain contactDomainVerified
+    <> popopxDomainLine NTContact contactDomain contactDomainVerified
     <> maybe
       ["you've shared main profile with this contact"]
       (\p -> ["you've shared incognito profile with this contact: " <> incognitoProfile' p])
@@ -1927,8 +1927,8 @@ viewGroupInfo gInfo@GroupInfo {groupId, businessChat, groupDomainVerified, group
   where
     -- a business presents as a contact (@-name); a public group/channel shows its #-name
     domainLine = case businessChat of
-      Just bc -> simplexDomainLine NTContact (businessDomain bc) groupDomainVerified
-      Nothing -> simplexDomainLine NTPublicGroup (publicGroup >>= publicGroupAccess >>= groupDomainClaim) groupDomainVerified
+      Just bc -> popopxDomainLine NTContact (businessDomain bc) groupDomainVerified
+      Nothing -> popopxDomainLine NTPublicGroup (publicGroup >>= publicGroupAccess >>= groupDomainClaim) groupDomainVerified
     memberCountLine
       | useRelays' gInfo, Just count <- publicMemberCount = "subscribers: " <> sShow count
       | otherwise = "current members: " <> sShow currentMembers
@@ -2253,8 +2253,8 @@ viewGroupUserChanged
   where
     userChangedStr = "group " <> ttyGroup' g <> " changed from user " <> plain un <> " to user " <> plain un'
 
-otherSimplexNameNote :: Maybe PopopxNameInfo -> [StyledString]
-otherSimplexNameNote = \case
+otherPopopxNameNote :: Maybe PopopxNameInfo -> [StyledString]
+otherPopopxNameNote = \case
   Just ni@(PopopxNameInfo NTPublicGroup _) -> [plain $ "You can also join channel " <> shortNameInfoStr ni]
   Just ni@(PopopxNameInfo NTContact _) -> [plain $ "You can also connect to " <> shortNameInfoStr ni <> " in direct chat"]
   Nothing -> []
@@ -2341,11 +2341,11 @@ viewConnectionPlan ChatConfig {logLevel, testView} _connLink = \case
       _ -> False
     contactDomainLine :: Contact -> [StyledString]
     contactDomainLine Contact {profile = LocalProfile {contactDomain, contactDomainVerified}} =
-      simplexDomainLine NTContact contactDomain contactDomainVerified
+      popopxDomainLine NTContact contactDomain contactDomainVerified
     groupDomainLine :: GroupInfo -> [StyledString]
     groupDomainLine GroupInfo {groupDomainVerified, groupProfile = GroupProfile {publicGroup}} = do
       let domain = publicGroup >>= publicGroupAccess >>= groupDomainClaim
-       in simplexDomainLine NTPublicGroup domain groupDomainVerified
+       in popopxDomainLine NTPublicGroup domain groupDomainVerified
     viewSigVerification = \case
       Just OVVerified -> ["owner signature: verified"]
       Just (OVFailed r) -> ["owner signature: FAILED (" <> plain r <> ")"]
@@ -2819,7 +2819,7 @@ viewChatError isCmd logLevel testView = \case
     CEChatNotStopped -> ["error: chat not stopped"]
     CEChatStoreChanged -> ["error: chat store changed, please restart chat"]
     CEInvalidConnReq -> viewInvalidConnReq
-    CESimplexDomainNotReady domain domainErr ->
+    CEPopopxDomainNotReady domain domainErr ->
       let reason = case domainErr of
             SDENoValidLink -> "has no valid connection link"
             SDEUnknownDomain -> "is not included in the connection link's profile"

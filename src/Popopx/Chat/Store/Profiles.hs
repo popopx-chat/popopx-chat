@@ -52,7 +52,7 @@ module Popopx.Chat.Store.Profiles
     getUserAddressConnection,
     deleteUserAddress,
     getUserAddress,
-    setUserSimplexDomain,
+    setUserPopopxDomain,
     getUserContactLinkById,
     getGroupLinkInfo,
     getUserContactLinkByConnReq,
@@ -411,8 +411,8 @@ setUserBadge db User {userId, profile = LocalProfile {profileId}} localBadge = d
     DB.execute db "UPDATE users SET user_member_profile_updated_at = ? WHERE user_id = ?" (ts, userId)
   getUser db userId
 
-setUserSimplexDomain :: DB.Connection -> User -> Maybe PopopxDomain -> IO User
-setUserSimplexDomain db user@User {userId, profile = p@LocalProfile {profileId}} domain_ = do
+setUserPopopxDomain :: DB.Connection -> User -> Maybe PopopxDomain -> IO User
+setUserPopopxDomain db user@User {userId, profile = p@LocalProfile {profileId}} domain_ = do
   ts <- getCurrentTime
   DB.execute
     db

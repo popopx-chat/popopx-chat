@@ -26,7 +26,7 @@ import kotlinx.coroutines.*
 // null on network error. With `autoVerify`, it runs once on open when state is null.
 @Composable
 fun PopopxNameView(
-  simplexName: String,
+  popopxName: String,
   verified: Boolean?,
   verifiable: Boolean = true,
   verify: suspend () -> Pair<Boolean?, String?>?
@@ -44,7 +44,7 @@ fun PopopxNameView(
       val res = try {
         verify()
       } catch (e: Exception) {
-        Log.e(TAG, "verify SimplexName: ${e.stackTraceToString()}")
+        Log.e(TAG, "verify PopopxName: ${e.stackTraceToString()}")
         null
       }
       spinner.cancel()
@@ -75,19 +75,19 @@ fun PopopxNameView(
   ) {
     when {
       showSpinner.value -> {
-        Text(simplexName, style = nameStyle)
+        Text(popopxName, style = nameStyle)
         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp, color = MaterialTheme.colors.secondary)
       }
       verified == true ->
-        PopopxNameWithIcon(simplexName, nameStyle, MR.images.ic_check_filled, MaterialTheme.colors.primary) {
-          clipboard.setText(AnnotatedString(simplexName))
+        PopopxNameWithIcon(popopxName, nameStyle, MR.images.ic_check_filled, MaterialTheme.colors.primary) {
+          clipboard.setText(AnnotatedString(popopxName))
           showToast(generalGetString(MR.strings.copied))
         }
-      !verifiable -> Text(simplexName, style = nameStyle)
+      !verifiable -> Text(popopxName, style = nameStyle)
       verified == false ->
-        PopopxNameWithIcon(simplexName, nameStyle, MR.images.ic_close, Color.Red) { runVerify(manual = true) }
+        PopopxNameWithIcon(popopxName, nameStyle, MR.images.ic_close, Color.Red) { runVerify(manual = true) }
       else -> {
-        Text(simplexName, style = nameStyle)
+        Text(popopxName, style = nameStyle)
         Text(
           stringResource(MR.strings.verify_popopx_name_action),
           color = MaterialTheme.colors.primary,
@@ -121,7 +121,7 @@ fun ContactPopopxNameView(contact: Contact, verifiable: Boolean = true) {
   val domain = contact.profile.contactDomain
   if (domain != null && (contact.profile.contactDomainVerified != null || domain.proof != null)) {
     PopopxNameView(
-      simplexName = "@${domain.domain}",
+      popopxName = "@${domain.domain}",
       verified = contact.profile.contactDomainVerified,
       verifiable = verifiable,
       verify = {
@@ -142,7 +142,7 @@ fun GroupPopopxNameView(groupInfo: GroupInfo, verifiable: Boolean = true) {
     val domain = access?.groupDomainClaim?.shortName
     if (domain != null && (groupInfo.groupDomainVerified != null || access.groupDomainClaim?.proof != null)) {
       PopopxNameView(
-        simplexName = "#${domain}",
+        popopxName = "#${domain}",
         verified = groupInfo.groupDomainVerified,
         verifiable = verifiable,
         verify = {
@@ -159,7 +159,7 @@ fun GroupPopopxNameView(groupInfo: GroupInfo, verifiable: Boolean = true) {
     if (businessClaim != null && (groupInfo.groupDomainVerified != null || businessClaim.proof != null)) {
       // A business presents as a contact, so the name retains its .popopx suffix; it cannot be re-verified.
       PopopxNameView(
-        simplexName = "@${businessClaim.domain}",
+        popopxName = "@${businessClaim.domain}",
         verified = groupInfo.groupDomainVerified,
         verifiable = false,
         verify = { null }

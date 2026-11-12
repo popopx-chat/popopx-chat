@@ -164,7 +164,7 @@ chatProfileTests = do
     describe "group preferences for specific member role" $ do
       it "direct messages" testGroupPrefsDirectForRole
       it "files & media" testGroupPrefsFilesForRole
-      it "SimpleX links" testGroupPrefsSimplexLinksForRole
+      it "SimpleX links" testGroupPrefsPopopxLinksForRole
     it "set user, contact and group UI theme" testSetUITheme
   describe "chat layout" $ do
     it "group chat layout from group profile" testGroupChatLayout
@@ -3767,8 +3767,8 @@ testGroupPrefsFilesForRole = testChat3 aliceProfile bobProfile cathProfile $
       cc <## "updated group preferences:"
       cc <## "Files and media: on for owners"
 
-testGroupPrefsSimplexLinksForRole :: HasCallStack => TestParams -> IO ()
-testGroupPrefsSimplexLinksForRole = testChat3 aliceProfile bobProfile cathProfile $
+testGroupPrefsPopopxLinksForRole :: HasCallStack => TestParams -> IO ()
+testGroupPrefsPopopxLinksForRole = testChat3 aliceProfile bobProfile cathProfile $
   \alice bob cath -> withXFTPServer alice $ do
     createGroup3 "team" alice bob cath
     threadDelay 1000000

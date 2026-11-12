@@ -15,12 +15,12 @@ describe("SimpleX errors", () => {
     ["unsupported link", {type: "error", errorType: {type: "unsupportedConnReq"}}, "Unsupported connection link: This link requires a newer app version. Please upgrade the app or ask your contact to send a compatible link."],
     [
       "name without a valid link",
-      {type: "error", errorType: {type: "simplexDomainNotReady", simplexDomain: domain, simplexDomainError: {type: "noValidLink"}}},
+      {type: "error", errorType: {type: "popopxDomainNotReady", popopxDomain: domain, popopxDomainError: {type: "noValidLink"}}},
       "No valid link: The SimpleX name ridgeline.popopx is registered, but it has no valid link.",
     ],
     [
       "name not in a profile",
-      {type: "error", errorType: {type: "simplexDomainNotReady", simplexDomain: domain, simplexDomainError: {type: "unknownDomain"}}},
+      {type: "error", errorType: {type: "popopxDomainNotReady", popopxDomain: domain, popopxDomainError: {type: "unknownDomain"}}},
       "Unconfirmed name: The SimpleX name ridgeline.popopx is registered, but not added to profile. Please add it to your address or channel profile, if you are the owner.",
     ],
     [

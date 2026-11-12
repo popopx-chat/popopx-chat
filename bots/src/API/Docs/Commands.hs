@@ -85,9 +85,9 @@ chatCommandsDocsData =
           [],
           "Set or remove SimpleX name of bot address. The name must be registered with the address short link.",
           ["CRUserProfileUpdated", "CRUserProfileNoChange", "CRChatCmdError"],
-          [TD "CESimplexDomainNotReady" "The name does not resolve to the address short link"],
+          [TD "CEPopopxDomainNotReady" "The name does not resolve to the address short link"],
           Just UNInteractive,
-          "/_set domain " <> Param "userId" <> Optional "" (" " <> Param "$0") "simplexDomain"
+          "/_set domain " <> Param "userId" <> Optional "" (" " <> Param "$0") "popopxDomain"
         ),
         ("APISetAddressSettings", [], "Set bot address settings.", ["CRUserContactLinkUpdated", "CRChatCmdError"], [], Just UNInteractive, "/_address_settings " <> Param "userId" <> OnOffParam "pq_ratchet" "pqRatchet" Nothing <> " " <> Json "settings")
       ]

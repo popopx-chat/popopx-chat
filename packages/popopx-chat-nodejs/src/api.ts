@@ -430,8 +430,8 @@ export class ChatApi {
     }
   }
 
-  async apiSetUserDomain(userId: number, simplexDomain?: string): Promise<T.User> {
-    const r = await this.sendChatCmd(CC.APISetUserDomain.cmdString({userId, simplexDomain}))
+  async apiSetUserDomain(userId: number, popopxDomain?: string): Promise<T.User> {
+    const r = await this.sendChatCmd(CC.APISetUserDomain.cmdString({userId, popopxDomain}))
     switch (r.type) {
       case "userProfileUpdated":
       case "userProfileNoChange":
@@ -734,9 +734,9 @@ export class ChatApi {
    * Determine SimpleX link type and if the bot is already connected via this link.
    * Network usage: interactive.
    */
-  async apiConnectPlan(userId: number, connectionLink: string): Promise<[plan: T.ConnectionPlan, link: T.CreatedConnLink, planSimplexName?: T.SimplexNameInfo, otherSimplexName?: T.SimplexNameInfo]> {
+  async apiConnectPlan(userId: number, connectionLink: string): Promise<[plan: T.ConnectionPlan, link: T.CreatedConnLink, planPopopxName?: T.PopopxNameInfo, otherPopopxName?: T.PopopxNameInfo]> {
     const r = await this.sendChatCmd(CC.APIConnectPlan.cmdString({userId, connectTarget: connectionLink, resolveMode: T.PlanResolveMode.Unknown}))
-    if (r.type === "connectionPlan") return [r.connectionPlan, r.connLink, r.planSimplexName, r.otherSimplexName]
+    if (r.type === "connectionPlan") return [r.connectionPlan, r.connLink, r.planPopopxName, r.otherPopopxName]
     throw new ChatCommandError("error getting connect plan", r)
   }
 

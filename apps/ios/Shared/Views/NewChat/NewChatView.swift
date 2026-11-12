@@ -845,7 +845,7 @@ struct InfoSheetButton<Content: View>: View {
 func strIsPopopxLink(_ str: String) -> Bool {
     if let parsedMd = parsePOPOPXMarkdown(str),
        parsedMd.count == 1,
-       case .simplexLink = parsedMd[0].format {
+       case .popopxLink = parsedMd[0].format {
         return true
     } else {
         return false
@@ -853,18 +853,18 @@ func strIsPopopxLink(_ str: String) -> Bool {
 }
 
 enum ConnectTarget {
-    case link(text: String, linkType: SimplexLinkType, linkText: String)
+    case link(text: String, linkType: PopopxLinkType, linkText: String)
     case name(text: String, nameInfo: PopopxNameInfo)
 }
 
 func strConnectTarget(_ str: String) -> ConnectTarget? {
     let parsedMd = parsePOPOPXMarkdown(str)
-    let links = parsedMd?.filter { $0.format?.isSimplexLink ?? false } ?? []
-    return if links.count == 1, case let .simplexLink(showText, linkType, simplexUri, smpHosts) = links[0].format {
-        .link(text: showText != nil ? simplexUri : links[0].text, linkType: linkType, linkText: popopxLinkText(linkType, smpHosts))
+    let links = parsedMd?.filter { $0.format?.isPopopxLink ?? false } ?? []
+    return if links.count == 1, case let .popopxLink(showText, linkType, popopxUri, smpHosts) = links[0].format {
+        .link(text: showText != nil ? popopxUri : links[0].text, linkType: linkType, linkText: popopxLinkText(linkType, smpHosts))
     } else if links.isEmpty,
-              let nameFt = parsedMd?.first(where: { if case .simplexName = $0.format { true } else { false } }),
-              case let .simplexName(nameInfo) = nameFt.format {
+              let nameFt = parsedMd?.first(where: { if case .popopxName = $0.format { true } else { false } }),
+              case let .popopxName(nameInfo) = nameFt.format {
         .name(text: nameFt.text, nameInfo: nameInfo)
     } else {
         nil
@@ -1116,7 +1116,7 @@ private func showPrepareContactAlert(
     connectionLink: CreatedConnLink,
     contactShortLinkData: ContactShortLinkData,
     ownerVerification: OwnerVerification? = nil,
-    verifiedDomain: SimplexDomain? = nil,
+    verifiedDomain: PopopxDomain? = nil,
     connectOtherButton: String? = nil,
     connectOtherLink: String? = nil,
     theme: AppTheme,
@@ -1169,7 +1169,7 @@ private func showPrepareGroupAlert(
     groupShortLinkInfo: GroupShortLinkInfo?,
     groupShortLinkData: GroupShortLinkData,
     ownerVerification: OwnerVerification? = nil,
-    verifiedDomain: SimplexDomain? = nil,
+    verifiedDomain: PopopxDomain? = nil,
     connectOtherButton: String? = nil,
     connectOtherLink: String? = nil,
     theme: AppTheme,
@@ -1335,7 +1335,7 @@ func planAndConnect(
             cleanup?()
             return
         }
-    // A SimplexName falls through to apiConnectPlan, which resolves it on the
+    // A PopopxName falls through to apiConnectPlan, which resolves it on the
     // core (the /_connect plan command accepts a name target, not only a link).
     case .name, .none: break
     }
@@ -1357,10 +1357,10 @@ func planAndConnect(
             if let result {
                 let connectionLink = result.connLink
                 let connectionPlan = result.connectionPlan
-                let planSimplexName = result.planSimplexName
+                let planPopopxName = result.planPopopxName
                 // the name can also resolve to the other kind; its type picks the verb, its short form the label and target
-                let connectOtherLink = result.otherSimplexName?.shortStr
-                let connectOtherButton: String? = result.otherSimplexName.map { info in
+                let connectOtherLink = result.otherPopopxName?.shortStr
+                let connectOtherButton: String? = result.otherPopopxName.map { info in
                     String.localizedStringWithFormat(
                         info.nameType == .publicGroup
                             ? NSLocalizedString("Join channel %@", comment: "new chat action")
@@ -1442,7 +1442,7 @@ func planAndConnect(
                                     connectionLink: connectionLink,
                                     contactShortLinkData: contactSLinkData,
                                     ownerVerification: ownerVerification,
-                                    verifiedDomain: planSimplexName?.nameDomain,
+                                    verifiedDomain: planPopopxName?.nameDomain,
                                     connectOtherButton: connectOtherButton,
                                     connectOtherLink: connectOtherLink,
                                     theme: theme,
@@ -1529,7 +1529,7 @@ func planAndConnect(
                                     groupShortLinkInfo: groupShortLinkInfo_,
                                     groupShortLinkData: groupSLinkData,
                                     ownerVerification: ownerVerification,
-                                    verifiedDomain: planSimplexName?.nameDomain,
+                                    verifiedDomain: planPopopxName?.nameDomain,
                                     connectOtherButton: connectOtherButton,
                                     connectOtherLink: connectOtherLink,
                                     theme: theme,

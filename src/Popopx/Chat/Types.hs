@@ -55,7 +55,7 @@ import Data.Type.Equality (testEquality, (:~:) (Refl))
 import Data.Typeable (Typeable)
 import Data.Word (Word16)
 import Popopx.Chat.Badges (BadgeInfo (..), BadgeProof (..), BadgeStatus (..), LocalBadge (..), ProofPresHeader, acceptedBadge, localBadgeInfo, localBadgeStatus, mkBadgeStatus, verifyBadge)
-import Popopx.Chat.Names (SimplexDomainClaim (..))
+import Popopx.Chat.Names (PopopxDomainClaim (..))
 import Popopx.Messaging.Crypto.BBS (BBSPublicKey)
 import Popopx.Chat.Types.Preferences
 import Popopx.Chat.Types.Shared
@@ -742,7 +742,7 @@ data Profile = Profile
     preferences :: Maybe Preferences,
     peerType :: Maybe ChatPeerType,
     badge :: Maybe BadgeProof,
-    contactDomain :: Maybe SimplexDomainClaim
+    contactDomain :: Maybe PopopxDomainClaim
     -- fields that should not be read into this data type to prevent sending them as part of profile to contacts:
     -- - contact_profile_id
     -- - incognito
@@ -795,7 +795,7 @@ sameProfileContent :: Profile -> Profile -> Bool
 sameProfileContent p@Profile {badge = b} p'@Profile {badge = b'} =
   clearProofs p == clearProofs p' && (proofInfo <$> b) == (proofInfo <$> b')
   where
-    clearProofs pr@Profile {contactDomain} = pr {badge = Nothing, contactDomain = (\d -> d {proof = Nothing} :: SimplexDomainClaim) <$> contactDomain}
+    clearProofs pr@Profile {contactDomain} = pr {badge = Nothing, contactDomain = (\d -> d {proof = Nothing} :: PopopxDomainClaim) <$> contactDomain}
     proofInfo :: BadgeProof -> BadgeInfo
     proofInfo (BadgeProof _ _ _ info) = info
 
@@ -833,7 +833,7 @@ data LocalProfile = LocalProfile
     peerType :: Maybe ChatPeerType,
     localBadge :: Maybe LocalBadge,
     localAlias :: LocalAlias,
-    contactDomain :: Maybe SimplexDomainClaim,
+    contactDomain :: Maybe PopopxDomainClaim,
     contactDomainVerified :: Maybe Bool
   }
   deriving (Eq, Show)
@@ -850,7 +850,7 @@ toLocalProfile profileId Profile {displayName, fullName, shortDescr, description
 fromLocalProfile :: LocalProfile -> Profile
 fromLocalProfile LocalProfile {displayName, fullName, shortDescr, description, image, contactLink, preferences, peerType, localBadge, contactDomain} =
   -- the name proof is re-signed on each send
-  Profile {displayName, fullName, shortDescr, description, image, contactLink, preferences, peerType, badge = localBadge >>= wireBadge, contactDomain = (\d -> d {proof = Nothing} :: SimplexDomainClaim) <$> contactDomain}
+  Profile {displayName, fullName, shortDescr, description, image, contactLink, preferences, peerType, badge = localBadge >>= wireBadge, contactDomain = (\d -> d {proof = Nothing} :: PopopxDomainClaim) <$> contactDomain}
   where
     wireBadge :: LocalBadge -> Maybe BadgeProof
     wireBadge = \case
@@ -898,7 +898,7 @@ instance ToField GroupType where toField = toField . textEncode
 
 data PublicGroupAccess = PublicGroupAccess
   { groupWebPage :: Maybe Text,
-    groupDomainClaim :: Maybe SimplexDomainClaim,
+    groupDomainClaim :: Maybe PopopxDomainClaim,
     domainWebPage :: Bool,
     allowEmbedding :: Bool
   }
@@ -1131,7 +1131,7 @@ data BusinessChatInfo = BusinessChatInfo
     businessId :: MemberId,
     customerId :: MemberId,
     -- TODO [names] sent in protocol in GroupInvitation
-    businessDomain :: Maybe SimplexDomainClaim
+    businessDomain :: Maybe PopopxDomainClaim
   }
   deriving (Eq, Show)
 

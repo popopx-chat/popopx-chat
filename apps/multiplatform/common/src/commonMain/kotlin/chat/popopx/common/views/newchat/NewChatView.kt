@@ -823,25 +823,25 @@ private fun createInvitation(
 
 fun strIsPopopxLink(str: String): Boolean {
   val parsedMd = parseToMarkdown(str)
-  return parsedMd != null && parsedMd.size == 1 && parsedMd[0].format is Format.SimplexLink
+  return parsedMd != null && parsedMd.size == 1 && parsedMd[0].format is Format.PopopxLink
 }
 
 sealed class ConnectTarget {
-  class Link(val text: String, val linkType: SimplexLinkType, val linkText: String) : ConnectTarget()
+  class Link(val text: String, val linkType: PopopxLinkType, val linkText: String) : ConnectTarget()
   class Name(val text: String, val nameInfo: PopopxNameInfo) : ConnectTarget()
 }
 
 fun strConnectTarget(str: String): ConnectTarget? {
   val parsedMd = parseToMarkdown(str) ?: return null
-  val links = parsedMd.filter { it.format?.isSimplexLink ?: false }
+  val links = parsedMd.filter { it.format?.isPopopxLink ?: false }
   if (links.size == 1) {
-    val fmt = links[0].format as Format.SimplexLink
-    val text = if (fmt.showText != null) fmt.simplexUri else links[0].text
+    val fmt = links[0].format as Format.PopopxLink
+    val text = if (fmt.showText != null) fmt.popopxUri else links[0].text
     return ConnectTarget.Link(text, fmt.linkType, fmt.popopxLinkText)
   }
   if (links.isEmpty()) {
-    val nameFt = parsedMd.firstOrNull { it.format is Format.SimplexName }
-    val nameInfo = (nameFt?.format as? Format.SimplexName)?.nameInfo
+    val nameFt = parsedMd.firstOrNull { it.format is Format.PopopxName }
+    val nameInfo = (nameFt?.format as? Format.PopopxName)?.nameInfo
     if (nameFt != null && nameInfo != null) return ConnectTarget.Name(nameFt.text, nameInfo)
   }
   return null

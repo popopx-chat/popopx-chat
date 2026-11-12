@@ -242,8 +242,8 @@ export namespace CR {
     type: "connectionPlan"
     user: T.User
     connLink: T.CreatedConnLink
-    planSimplexName?: T.SimplexNameInfo
-    otherSimplexName?: T.SimplexNameInfo
+    planPopopxName?: T.PopopxNameInfo
+    otherPopopxName?: T.PopopxNameInfo
     connectionPlan: T.ConnectionPlan
   }
 

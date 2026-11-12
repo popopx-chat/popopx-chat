@@ -122,7 +122,7 @@ fun segmentDisplayText(ft: FormattedText, mentions: Map<String, CIMention>?, lin
     }
     is Format.Uri -> displayedUri(ft.text)
     is Format.HyperLink -> ft.format.showText ?: ft.text
-    is Format.SimplexLink -> {
+    is Format.PopopxLink -> {
       val t = ft.format.showText
         ?: if (linkMode == PopopxLinkMode.DESCRIPTION) ft.format.linkType.description else null
       if (t != null) "$t ${ft.format.viaHosts}" else ft.text
@@ -397,12 +397,12 @@ fun MarkdownText (
                 withStyle(ftStyle) { append(ft.format.showText ?: ft.text) }
               }
             }
-            is Format.SimplexLink -> {
+            is Format.PopopxLink -> {
               hasLinks = true
               val ftStyle = Format.linkStyle
               val link =
                 if (linkMode == PopopxLinkMode.BROWSER && ft.format.showText == null && !ft.text.startsWith("[")) ft.text
-                else ft.format.simplexUri
+                else ft.format.popopxUri
               val t = ft.format.showText ?: if (linkMode == PopopxLinkMode.DESCRIPTION) ft.format.linkType.description else null
               withAnnotation(tag = "POPOPX_URL", annotation = link) {
                 if (t == null) {
@@ -413,7 +413,7 @@ fun MarkdownText (
                 }
               }
             }
-            is Format.SimplexName -> {
+            is Format.PopopxName -> {
               hasLinks = true
               val ftStyle = Format.linkStyle
               withAnnotation(tag = "POPOPX_NAME", annotation = i.toString()) {

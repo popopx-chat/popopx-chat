@@ -377,7 +377,7 @@ Network usage: interactive.
 
 ### apiConnectPlan()
 
-> **apiConnectPlan**(`userId`, `connectionLink`): `Promise`\<\[`plan`: `ConnectionPlan`, `link`: `CreatedConnLink`, `planSimplexName?`: `SimplexNameInfo`, `otherSimplexName?`: `SimplexNameInfo`\]\>
+> **apiConnectPlan**(`userId`, `connectionLink`): `Promise`\<\[`plan`: `ConnectionPlan`, `link`: `CreatedConnLink`, `planPopopxName?`: `PopopxNameInfo`, `otherPopopxName?`: `PopopxNameInfo`\]\>
 
 Defined in: [src/api.ts:737](../api.ts#L737)
 
@@ -396,7 +396,7 @@ Network usage: interactive.
 
 #### Returns
 
-`Promise`\<\[`plan`: `ConnectionPlan`, `link`: `CreatedConnLink`, `planSimplexName?`: `SimplexNameInfo`, `otherSimplexName?`: `SimplexNameInfo`\]\>
+`Promise`\<\[`plan`: `ConnectionPlan`, `link`: `CreatedConnLink`, `planPopopxName?`: `PopopxNameInfo`, `otherPopopxName?`: `PopopxNameInfo`\]\>
 
 ***
 
@@ -1655,7 +1655,7 @@ Network usage: interactive.
 
 ### apiSetUserDomain()
 
-> **apiSetUserDomain**(`userId`, `simplexDomain?`): `Promise`\<`User`\>
+> **apiSetUserDomain**(`userId`, `popopxDomain?`): `Promise`\<`User`\>
 
 Defined in: [src/api.ts:433](../api.ts#L433)
 
@@ -1665,7 +1665,7 @@ Defined in: [src/api.ts:433](../api.ts#L433)
 
 `number`
 
-##### simplexDomain?
+##### popopxDomain?
 
 `string`
 

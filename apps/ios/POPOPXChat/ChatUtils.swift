@@ -24,7 +24,7 @@ extension ChatLike {
             case .reactions: p.reactions.on
             case .voice: p.voice.on(for: groupInfo.membership)
             case .files: p.files.on(for: groupInfo.membership)
-            case .simplexLinks: p.simplexLinks.on(for: groupInfo.membership)
+            case .popopxLinks: p.popopxLinks.on(for: groupInfo.membership)
             case .history: p.history.on
             case .support: p.support.on
             case .reports: p.reports.on
@@ -41,7 +41,7 @@ extension ChatLike {
         isVoice: Bool
     ) -> Bool {
         // preference checks should match checks in compose view
-        let popopxLinkProhibited = hasPopopxLink && !groupFeatureEnabled(.simplexLinks)
+        let popopxLinkProhibited = hasPopopxLink && !groupFeatureEnabled(.popopxLinks)
         let fileProhibited = isMediaOrFileAttachment && !groupFeatureEnabled(.files)
         let voiceProhibited = isVoice && !chatInfo.featureEnabled(.voice)
         return switch chatInfo {
@@ -111,5 +111,5 @@ public func hasPopopxLink(_ text: String?) -> Bool {
 }
 
 public func parsedMsgHasPopopxLink(_ parsedMsg: [FormattedText]) -> Bool {
-    parsedMsg.contains(where: { ft in ft.format?.isSimplexLink ?? false })
+    parsedMsg.contains(where: { ft in ft.format?.isPopopxLink ?? false })
 }

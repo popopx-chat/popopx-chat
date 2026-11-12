@@ -268,7 +268,7 @@ Hooks are bound in [`serve.ts:100-106`](../src/serve.ts#L100-L106): `refusal`, `
 | `fileError` | [197-201](../src/log.ts#L197-L201) | the error of a received file: the apps' words for its status, or the size limit of its sender |
 | `serverHostname` | [246](../src/log.ts#L246) | host of a server address |
 | `chainText`, `errorChain` | [250-262](../src/log.ts#L250-L262) | `SimpleX error: <type chain>: <scalar fields>`, details at most 500 characters |
-| `fullDomainName` | [272](../src/log.ts#L272) | `SimplexDomain` to `name.simplex` or `name.testing` |
+| `fullDomainName` | [272](../src/log.ts#L272) | `PopopxDomain` to `name.simplex` or `name.testing` |
 
 ---
 

@@ -1047,8 +1047,8 @@ func apiConnectPlan(connLink: String, resolveMode: PlanResolveMode = .unknown, l
         return nil
     }
     let r: APIResult<ChatResponse1>? = await chatApiSendCmdWithRetry(.apiConnectPlan(userId: userId, connLink: connLink, resolveMode: resolveMode, linkOwnerSig: linkOwnerSig), inProgress: inProgress)
-    if case let .result(.connectionPlan(_, connLink, planSimplexName, otherSimplexName, connPlan)) = r {
-        return ConnectionPlanResult(connLink: connLink, planSimplexName: planSimplexName, otherSimplexName: otherSimplexName, connectionPlan: connPlan)
+    if case let .result(.connectionPlan(_, connLink, planPopopxName, otherPopopxName, connPlan)) = r {
+        return ConnectionPlanResult(connLink: connLink, planPopopxName: planPopopxName, otherPopopxName: otherPopopxName, connectionPlan: connPlan)
     }
     // a .never (typing) search that matches nothing locally is not an error to surface
     if case .error(.error(.notResolvedLocally)) = r { return nil }
@@ -1093,7 +1093,7 @@ private func apiConnectResponseAlert<R>(_ r: APIResult<R>) async {
                 NSLocalizedString("Unsupported connection link", comment: ""),
                 message: NSLocalizedString("This link requires a newer app version. Please upgrade the app or ask your contact to send a compatible link.", comment: "")
             )
-        case let .error(.simplexDomainNotReady(domain, err)):
+        case let .error(.popopxDomainNotReady(domain, err)):
             switch err {
             case .noValidLink:
                 showAlert(
@@ -1208,14 +1208,14 @@ private func connectionErrorAlert<R>(_ r: APIResult<R>) -> (title: String, messa
     )
 }
 
-func apiPrepareContact(connLink: CreatedConnLink, contactShortLinkData: ContactShortLinkData, verifiedDomain: SimplexDomain? = nil) async throws -> ChatData {
+func apiPrepareContact(connLink: CreatedConnLink, contactShortLinkData: ContactShortLinkData, verifiedDomain: PopopxDomain? = nil) async throws -> ChatData {
     let userId = try currentUserId("apiPrepareContact")
     let r: ChatResponse1 = try await chatSendCmd(.apiPrepareContact(userId: userId, connLink: connLink, contactShortLinkData: contactShortLinkData, verifiedDomain: verifiedDomain))
     if case let .newPreparedChat(_, chat) = r { return chat }
     throw r.unexpected
 }
 
-func apiPrepareGroup(connLink: CreatedConnLink, directLink: Bool, groupShortLinkData: GroupShortLinkData, verifiedDomain: SimplexDomain? = nil) async throws -> ChatData {
+func apiPrepareGroup(connLink: CreatedConnLink, directLink: Bool, groupShortLinkData: GroupShortLinkData, verifiedDomain: PopopxDomain? = nil) async throws -> ChatData {
     let userId = try currentUserId("apiPrepareGroup")
     let r: ChatResponse1 = try await chatSendCmd(.apiPrepareGroup(userId: userId, connLink: connLink, directLink: directLink, groupShortLinkData: groupShortLinkData, verifiedDomain: verifiedDomain))
     if case let .newPreparedChat(_, chat) = r { return chat }
@@ -1385,7 +1385,7 @@ func apiSetProfileAddress(on: Bool) async throws -> User? {
 }
 
 func showSetPopopxNameError<R>(_ r: APIResult<R>, isChannel: Bool) async {
-    if case let .error(.simplexDomainNotReady(domain, .noValidLink)) = r.unexpected {
+    if case let .error(.popopxDomainNotReady(domain, .noValidLink)) = r.unexpected {
         let format = isChannel
             ? NSLocalizedString("The POPOPX name #%@ is registered without channel link. Add channel link to the name via the registration page.", comment: "alert message")
             : NSLocalizedString("The POPOPX name @%@ is registered without POPOPX address. Add your POPOPX address to the name via the registration page.", comment: "alert message")
@@ -1397,9 +1397,9 @@ func showSetPopopxNameError<R>(_ r: APIResult<R>, isChannel: Bool) async {
     }
 }
 
-func apiSetUserDomain(_ simplexDomain: String?) async throws -> User {
+func apiSetUserDomain(_ popopxDomain: String?) async throws -> User {
     let userId = try currentUserId("apiSetUserDomain")
-    let r: APIResult<ChatResponse1> = await chatApiSendCmd(.apiSetUserDomain(userId: userId, simplexDomain: simplexDomain))
+    let r: APIResult<ChatResponse1> = await chatApiSendCmd(.apiSetUserDomain(userId: userId, popopxDomain: popopxDomain))
     switch r {
     case let .result(.userProfileUpdated(user, _, _, _)): return user
     case let .result(.userProfileNoChange(user)): return user
