@@ -39,7 +39,7 @@ xcrun simctl boot "$SIM_UDID"
 xcrun simctl bootstatus "$SIM_UDID" -b
 open -a Simulator --args -CurrentDeviceUDID "$SIM_UDID"
 
-xcrun simctl spawn "$SIM_UDID" log stream --level debug --style compact --predicate 'process == "SimpleX"' > "$UI_OUT/app.log" 2>&1 &
+xcrun simctl spawn "$SIM_UDID" log stream --level debug --style compact --predicate 'process == "POPOPX"' > "$UI_OUT/app.log" 2>&1 &
 log_pid=$!
 
 finish() {
@@ -52,7 +52,7 @@ finish() {
   echo "::group::app log, last 300 lines"
   tail -n 300 "$UI_OUT/app.log"
   echo "::endgroup::"
-  find ~/Library/Logs/DiagnosticReports -name 'SimpleX*' -newer "$app" 2>/dev/null | while read -r report; do
+  find ~/Library/Logs/DiagnosticReports -name 'POPOPX*' -newer "$app" 2>/dev/null | while read -r report; do
     echo "::group::crash report $report"
     head -n 200 "$report"
     echo "::endgroup::"

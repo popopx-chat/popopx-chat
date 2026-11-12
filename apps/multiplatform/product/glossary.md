@@ -535,7 +535,7 @@ A generic wrapper providing `get()` and `set(value)` for a single preference. Al
 **UI:**
 - `oneHandUI` -- one-handed UI mode (bottom-aligned navigation)
 - `chatBottomBar` -- show bottom bar in chat view
-- `simplexLinkMode` -- how SimpleX links are displayed (DESCRIPTION / FULL / BROWSER)
+- `popopxLinkMode` -- how SimpleX links are displayed (DESCRIPTION / FULL / BROWSER)
 - `showUnreadAndFavorites` -- filter chat list to unread/favorites
 - `developerTools` -- enable developer tools (terminal, etc.)
 

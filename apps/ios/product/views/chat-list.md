@@ -32,7 +32,7 @@ The toolbar supports two layout modes:
 - Text field with magnifying glass icon
 - When active, `searchMode = true` hides the navigation bar and shows inline search
 - Filters chat list in real-time by contact/group name and message content
-- Detects pasted SimpleX links (`searchShowingSimplexLink`) and offers to connect
+- Detects pasted SimpleX links (`searchShowingPopopxLink`) and offers to connect
 
 ### Chat Filter Tabs (Tags)
 

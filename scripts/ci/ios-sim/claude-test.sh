@@ -40,7 +40,7 @@ cat > "$settings" << EOF
 {"hooks": {"PreToolUse": [{"matcher": "Bash", "hooks": [{"type": "command", "command": "$dir/claude-guard.py"}]}]}}
 EOF
 
-xcrun simctl spawn "$SIM_UDID" log stream --level debug --style compact --predicate 'process == "SimpleX"' > "$APP_LOG" 2>&1 &
+xcrun simctl spawn "$SIM_UDID" log stream --level debug --style compact --predicate 'process == "POPOPX"' > "$APP_LOG" 2>&1 &
 log_pid=$!
 trap 'kill "$log_pid" 2> /dev/null || true' EXIT
 

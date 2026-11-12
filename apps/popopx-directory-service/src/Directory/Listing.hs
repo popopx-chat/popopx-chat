@@ -90,7 +90,10 @@ $(JQ.deriveJSON defaultJSON ''PublicLink)
 data DirectoryEntry = DirectoryEntry
   { entryType :: DirectoryEntryType,
     displayName :: Text,
-    popopxName :: Maybe Text,
+    -- defaultJSON makes this field the key of listing.json, and the only reader of that key
+    -- (website/src/js/directory.jsc) fetches it from directory.simplex.chat: both sides move with the
+    -- destination, in tier 戊.
+    simplexName :: Maybe Text,
     groupLink :: PublicLink,
     shortDescr :: Maybe MarkdownList,
     shortDescrBlocks :: Maybe (NonEmpty MarkdownBlock),
@@ -143,7 +146,7 @@ groupDirectoryEntry now g@GroupInfo {groupProfile, chatTs, createdAt, groupSumma
               DirectoryEntry
                 { entryType,
                   displayName,
-                  popopxName = shortNameInfoStr . PopopxNameInfo NTPublicGroup <$> verifiedGroupDomain g,
+                  simplexName = shortNameInfoStr . PopopxNameInfo NTPublicGroup <$> verifiedGroupDomain g,
                   groupLink,
                   shortDescr = fst <$> shortDescr',
                   shortDescrBlocks = snd =<< shortDescr',

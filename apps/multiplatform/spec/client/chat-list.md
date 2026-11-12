@@ -169,7 +169,7 @@ fun ChatPreviewView(
   chatModelDraftChatId: ChatId?,
   currentUserProfileDisplayName: String?,
   disabled: Boolean,
-  linkMode: SimplexLinkMode,
+  linkMode: PopopxLinkMode,
   inProgress: Boolean,
   progressByTimeout: Boolean,
   defaultClickAction: () -> Unit

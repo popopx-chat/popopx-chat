@@ -159,7 +159,7 @@ Defined at [`ChatModel.kt line 86`](../common/src/commonMain/kotlin/chat/popopx/
 | [`networkInfo`](../common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt#L186) | `MutableState<UserNetworkInfo>` | 186 | Network type and online status |
 | [`conditions`](../common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt#L188) | `MutableState<ServerOperatorConditionsDetail>` | 188 | Server operator terms/conditions |
 | [`updatingProgress`](../common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt#L190) | `MutableState<Float?>` | 190 | Progress indicator for app updates |
-| [`simplexLinkMode`](../common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt#L183) | `MutableState<SimplexLinkMode>` | 183 | How SimpleX links are displayed |
+| [`popopxLinkMode`](../common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt#L183) | `MutableState<PopopxLinkMode>` | 183 | How SimpleX links are displayed |
 | [`migrationState`](../common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt#L174) | `MutableState<MigrationToState?>` | 174 | Database migration to new device state |
 | [`showingInvitation`](../common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt#L172) | `MutableState<ShowingInvitation?>` | 172 | Currently displayed invitation |
 | [`desktopOnboardingRandomPassword`](../common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt#L134) | `MutableState<Boolean>` | 134 | Desktop: user skipped password setup |
@@ -382,7 +382,7 @@ val appPrefs: AppPreferences by lazy { AppPreferences() }
 | `privacyAcceptImages` | `Boolean` | `true` | Auto-accept images |
 | `privacyLinkPreviews` | `Boolean` | `true` | Generate link previews |
 | `privacySanitizeLinks` | `Boolean` | `false` | Remove tracking params from links |
-| `simplexLinkMode` | `SimplexLinkMode` | `DESCRIPTION` | DESCRIPTION / FULL / BROWSER |
+| `popopxLinkMode` | `PopopxLinkMode` | `DESCRIPTION` | DESCRIPTION / FULL / BROWSER |
 | `privacyShowChatPreviews` | `Boolean` | `true` | Show chat previews in list |
 | `privacySaveLastDraft` | `Boolean` | `true` | Save compose draft |
 | `privacyDeliveryReceiptsSet` | `Boolean` | `false` | Delivery receipts configured |

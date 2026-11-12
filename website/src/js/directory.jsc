@@ -133,7 +133,7 @@ function includesQuery(field, query) {
         switch (ft.format?.type) {
           case 'uri': return uriIncludesQuery(ft.text, query);
           case 'hyperLink': return textIncludesQuery(ft.format.showText, query) || uriIncludesQuery(ft.format.linkUri, query);
-          case 'simplexLink': return textIncludesQuery(ft.format.showText, query);
+          case 'popopxLink': return textIncludesQuery(ft.format.showText, query);
           default: return textIncludesQuery(ft.text, query);
         }
       });
