@@ -3774,22 +3774,22 @@ testGroupPrefsPopopxLinksForRole = testChat3 aliceProfile bobProfile cathProfile
     threadDelay 1000000
     alice ##> "/set links #team on owner"
     alice <## "updated group preferences:"
-    alice <## "SimpleX links: on for owners"
+    alice <## "POPOPX links: on for owners"
     linksForOwners bob
     linksForOwners cath
     threadDelay 1000000
     bob ##> "/c"
     inv <- getInvitation bob
     bob ##> ("#team \"" <> inv <> "\\ntest\"")
-    bob <## "bad chat command: feature not allowed SimpleX links"
+    bob <## "bad chat command: feature not allowed POPOPX links"
     bob ##> ("/_send #1 json [{\"msgContent\": {\"type\": \"text\", \"text\": \"" <> inv <> "\\ntest\"}}]")
-    bob <## "bad chat command: feature not allowed SimpleX links"
+    bob <## "bad chat command: feature not allowed POPOPX links"
     -- a link split with a space or a newline is still blocked
     let (lnk1, lnk2) = splitAt 12 inv
     bob ##> ("#team \"" <> lnk1 <> " " <> lnk2 <> "\"")
-    bob <## "bad chat command: feature not allowed SimpleX links"
+    bob <## "bad chat command: feature not allowed POPOPX links"
     bob ##> ("#team \"" <> lnk1 <> "\\n" <> lnk2 <> "\"")
-    bob <## "bad chat command: feature not allowed SimpleX links"
+    bob <## "bad chat command: feature not allowed POPOPX links"
     (alice </)
     (cath </)
     bob `send` ("@alice \"" <> inv <> "\\ntest\"")
@@ -3797,8 +3797,8 @@ testGroupPrefsPopopxLinksForRole = testChat3 aliceProfile bobProfile cathProfile
     bob <## "test"
     alice <# ("bob> " <> inv)
     alice <## "test"
-    bob ##> "#team <- @alice https://simplex.chat"
-    bob <## "bad chat command: feature not allowed SimpleX links"
+    bob ##> "#team <- @alice https://popopx.chat"
+    bob <## "bad chat command: feature not allowed POPOPX links"
     alice #> ("#team " <> inv)
     bob <# ("#team alice> " <> inv)
     cath <# ("#team alice> " <> inv)
@@ -3807,7 +3807,7 @@ testGroupPrefsPopopxLinksForRole = testChat3 aliceProfile bobProfile cathProfile
     linksForOwners cc = do
       cc <## "alice updated group #team: (signed)"
       cc <## "updated group preferences:"
-      cc <## "SimpleX links: on for owners"
+      cc <## "POPOPX links: on for owners"
 
 testSetUITheme :: HasCallStack => TestParams -> IO ()
 testSetUITheme =
