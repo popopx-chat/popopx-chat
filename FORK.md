@@ -67,6 +67,37 @@ substitution does not change that:
   it must not be redistributed as part of this fork. Any regenerated snapshot baselines are
   POPOPX Chat work product.
 
+## What is still unset
+
+Everything with a `[FILL]` marker in these files is an unresolved decision, not a finished
+statement — `grep -rn '\[FILL\]' .` lists them. The two documents that exist because of it are
+[`PRIVACY-POPOPX.md`](./PRIVACY-POPOPX.md) (this fork's own privacy statement, upstream's
+[`PRIVACY.md`](./PRIVACY.md) untouched) and
+[`CHANGELOG-POPOPX.md`](./CHANGELOG-POPOPX.md) (this fork's release record, upstream's
+[`CHANGELOG.md`](./CHANGELOG.md) untouched).
+
+Concretely, before any build of this fork is distributed:
+
+- **No publisher.** No legal entity, no contact address and no "Portions Copyright (C) 2026
+  `[FILL]`" line for the fork's own changes; AGPL lets those be added, it does not let
+  upstream's be removed.
+- **Android link verification is broken by design until re-signed.**
+  `website/src/.well-known/assetlinks.json` carries our `package_name` with SimpleX Chat Ltd's
+  three signing-certificate fingerprints; `autoVerify` cannot pass for a package signed by anybody
+  else. Same class on iOS: the Team ID `PDBA6XRBQT` is hardcoded in three places that must agree
+  with whatever certificate actually signs the distribution — `KeyChain.swift:13`, two build
+  configurations in `POPOPX.xcodeproj/project.pbxproj`, and
+  `apple-app-site-association/index.json`. A wrong one fails silently: keychain sharing and
+  universal links stop working, and only on device.
+- **`popopx.chat` is not ours yet.** The link namespace, `.well-known` and universal-link entries
+  point at it, so link previews and domain-verified names are inert until the domain is owned,
+  served over HTTPS with those files reachable, and the app is rebuilt against it.
+- **Store links 404.** Every `market://` / `details?id=com.popopxchat.popopx` / App Store URL in
+  this repository names an app record that does not exist yet.
+- **The artwork is still SimpleX's.** The icons, illustrations and the 376 iOS snapshot baselines
+  are proprietary and licensed only for the *unmodified* application, so a rebranded fork may not
+  redistribute them; they need replacing with POPOPX-owned assets and regenerating.
+
 ## Obtaining the source
 
 The complete source code for this program, including everything needed to generate the
