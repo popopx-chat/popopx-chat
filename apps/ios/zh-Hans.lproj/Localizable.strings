@@ -32,7 +32,7 @@
 "(this device v%@)" = "(此设备 v%@)";
 
 /* No comment provided by engineer. */
-"[Send us email](mailto:chat@simplex.chat)" = "[给我们发电邮](mailto:chat@simplex.chat)";
+"[Send us email](mailto:chat@popopx.chat)" = "[给我们发电邮](mailto:chat@popopx.chat)";
 
 /* No comment provided by engineer. */
 "**Create 1-time link**: to create and share a new invitation link." = "**添加联系人**: 创建新的邀请链接，或通过您收到的链接进行连接.";
@@ -4126,7 +4126,7 @@ servers warning */
 "Migration error:" = "迁移错误：";
 
 /* No comment provided by engineer. */
-"Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@simplex.chat](mailto:chat@simplex.chat)." = "迁移失败。点击下面的 **Skip** 继续使用当前数据库。请通过通过聊天或电邮 [chat@simplex.chat](mailto:chat@simplex.chat) 将问题报告给应用程序开发人员。";
+"Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@popopx.chat](mailto:chat@popopx.chat)." = "迁移失败。点击下面的 **Skip** 继续使用当前数据库。请通过通过聊天或电邮 [chat@popopx.chat](mailto:chat@popopx.chat) 将问题报告给应用程序开发人员。";
 
 /* No comment provided by engineer. */
 "Migration is completed" = "迁移完成";

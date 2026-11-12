@@ -14,7 +14,7 @@
 "!1 colored!" = "!1 มีสี!";
 
 /* No comment provided by engineer. */
-"[Send us email](mailto:chat@simplex.chat)" = "[ส่งอีเมลถึงเรา](mailto:chat@simplex.chat)";
+"[Send us email](mailto:chat@popopx.chat)" = "[ส่งอีเมลถึงเรา](mailto:chat@popopx.chat)";
 
 /* No comment provided by engineer. */
 "**e2e encrypted** audio call" = "การโทรเสียงแบบ **encrypted จากต้นจนจบ**";
@@ -1841,7 +1841,7 @@ server test error */
 "Migration error:" = "ข้อผิดพลาดในการย้ายข้อมูล:";
 
 /* No comment provided by engineer. */
-"Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@simplex.chat](mailto:chat@simplex.chat)." = "การย้ายข้อมูลล้มเหลว แตะ **ข้าม** ด้านล่างเพื่อใช้ฐานข้อมูลปัจจุบันต่อไป โปรดรายงานปัญหาให้นักพัฒนาแอปทราบผ่านทางแชทหรืออีเมล [chat@simplex.chat](mailto:chat@simplex.chat)";
+"Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@popopx.chat](mailto:chat@popopx.chat)." = "การย้ายข้อมูลล้มเหลว แตะ **ข้าม** ด้านล่างเพื่อใช้ฐานข้อมูลปัจจุบันต่อไป โปรดรายงานปัญหาให้นักพัฒนาแอปทราบผ่านทางแชทหรืออีเมล [chat@popopx.chat](mailto:chat@popopx.chat)";
 
 /* No comment provided by engineer. */
 "Migration is completed" = "การโยกย้ายเสร็จสมบูรณ์";

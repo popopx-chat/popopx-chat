@@ -26,7 +26,7 @@ fun showStartupError(e: Throwable) {
 }
 
 private const val ISSUES_URL = "https://github.com/simplex-chat/simplex-chat/issues"
-private const val SUPPORT_EMAIL = "chat@simplex.chat"
+private const val SUPPORT_EMAIL = "chat@popopx.chat"
 
 // Win32 constants not defined in jna-platform
 private const val ES_MULTILINE = 0x0004

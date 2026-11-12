@@ -15,4 +15,4 @@ All other use, including modification, redistribution, or incorporation into oth
 
 ## Contact
 
-To request permission, contact chat@simplex.chat.
+To request permission, contact chat@popopx.chat.

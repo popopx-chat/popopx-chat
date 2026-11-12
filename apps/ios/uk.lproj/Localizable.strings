@@ -32,7 +32,7 @@
 "(this device v%@)" = "(цей пристрій v%@)";
 
 /* No comment provided by engineer. */
-"[Send us email](mailto:chat@simplex.chat)" = "[Напишіть нам електронною поштою](mailto:chat@simplex.chat)";
+"[Send us email](mailto:chat@popopx.chat)" = "[Напишіть нам електронною поштою](mailto:chat@popopx.chat)";
 
 /* No comment provided by engineer. */
 "**Create 1-time link**: to create and share a new invitation link." = "**Додати контакт**: створити нове посилання-запрошення.";
@@ -3749,7 +3749,7 @@ servers warning */
 "Migration error:" = "Помилка міграції:";
 
 /* No comment provided by engineer. */
-"Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@simplex.chat](mailto:chat@simplex.chat)." = "Міграція не вдалася. Натисніть **Пропустити** нижче, щоб продовжити використовувати поточну базу даних. Будь ласка, повідомте про проблему розробникам програми через чат або електронну пошту [chat@simplex.chat](mailto:chat@simplex.chat).";
+"Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@popopx.chat](mailto:chat@popopx.chat)." = "Міграція не вдалася. Натисніть **Пропустити** нижче, щоб продовжити використовувати поточну базу даних. Будь ласка, повідомте про проблему розробникам програми через чат або електронну пошту [chat@popopx.chat](mailto:chat@popopx.chat).";
 
 /* No comment provided by engineer. */
 "Migration is completed" = "Міграцію завершено";

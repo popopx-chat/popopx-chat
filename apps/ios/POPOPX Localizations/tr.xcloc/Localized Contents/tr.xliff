@@ -5604,9 +5604,9 @@ Bu senin grup için bağlantın %@!</target>
         <target>Geçiş hatası:</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@simplex.chat](mailto:chat@simplex.chat)." xml:space="preserve">
-        <source>Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@simplex.chat](mailto:chat@simplex.chat).</source>
-        <target>Geçiş başarısız oldu. Alttaki **Geç** tuşuna basarak şu anki veritabanını kullanabilirsiniz. Lütfen sorunu sohbet veya e-posta yoluyla uygulama geliştiricilerine bildirin[chat@simplex.chat](mailto:chat@simplex.chat).</target>
+      <trans-unit id="Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@popopx.chat](mailto:chat@popopx.chat)." xml:space="preserve">
+        <source>Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@popopx.chat](mailto:chat@popopx.chat).</source>
+        <target>Geçiş başarısız oldu. Alttaki **Geç** tuşuna basarak şu anki veritabanını kullanabilirsiniz. Lütfen sorunu sohbet veya e-posta yoluyla uygulama geliştiricilerine bildirin[chat@popopx.chat](mailto:chat@popopx.chat).</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Migration is completed" xml:space="preserve">
@@ -10599,9 +10599,9 @@ Bağlanmak için lütfen kişinizden başka bir bağlantı oluşturmasını iste
         <target>Aboneliğiniz iptal edildi. Rozet %@ tarihine kadar kalır.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="[Send us email](mailto:chat@simplex.chat)" xml:space="preserve">
-        <source>[Send us email](mailto:chat@simplex.chat)</source>
-        <target>[Bize e-posta gönder](mailto:chat@simplex.chat)</target>
+      <trans-unit id="[Send us email](mailto:chat@popopx.chat)" xml:space="preserve">
+        <source>[Send us email](mailto:chat@popopx.chat)</source>
+        <target>[Bize e-posta gönder](mailto:chat@popopx.chat)</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="_italic_" xml:space="preserve">

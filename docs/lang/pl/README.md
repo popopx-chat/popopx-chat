@@ -413,7 +413,7 @@ Więcej informacji można znaleźć w [Warunkach i polityce prywatności](./PRIV
 
 ## Kontakt w sprawie bezpieczeństwa
 
-Aby zgłosić podatność wyślij nam wiadomość e-mail na adres chat@simplex.chat. Będziemy wspólnie pracować nad poprawką i ujawnieniem szczegółów. NIE zgłaszaj luk w zabezpieczeniach za pośrednictwem zgłoszeń GitHub.
+Aby zgłosić podatność wyślij nam wiadomość e-mail na adres chat@popopx.chat. Będziemy wspólnie pracować nad poprawką i ujawnieniem szczegółów. NIE zgłaszaj luk w zabezpieczeniach za pośrednictwem zgłoszeń GitHub.
 
 Prosimy o traktowanie wszelkich ustaleń dotyczących możliwych ataków korelacji ruchu umożliwiających skorelowanie dwóch różnych konwersacji z tym samym użytkownikiem, innych niż objęte [modelem zagrożeń](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/overview-tjr.md#threat-model), jako luk w zabezpieczeniach i postępowanie zgodnie z tym procesem ujawniania.
 

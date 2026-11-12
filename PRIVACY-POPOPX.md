@@ -54,5 +54,5 @@ here describing what it stores and for how long, before it is enabled in the app
 **chat@popopx.chat** — security and privacy contact for this fork.
 
 The address is not reachable until `popopx.chat` is served (see "Who operates this build" above).
-`chat@simplex.chat`, which appears in upstream's files, must not be presented as the contact for
+`chat@popopx.chat`, which appears in upstream's files, must not be presented as the contact for
 this fork: it reaches SimpleX Chat Ltd.

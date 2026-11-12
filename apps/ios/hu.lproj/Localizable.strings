@@ -38,7 +38,7 @@
 "(this device v%@)" = "(ez az eszköz: v%@)";
 
 /* No comment provided by engineer. */
-"[Send us email](mailto:chat@simplex.chat)" = "[Küldjön nekünk e-mailt](mailto:chat@simplex.chat)";
+"[Send us email](mailto:chat@popopx.chat)" = "[Küldjön nekünk e-mailt](mailto:chat@popopx.chat)";
 
 /* No comment provided by engineer. */
 "**Create 1-time link**: to create and share a new invitation link." = "**Partner hozzáadása**: új meghívási hivatkozás létrehozásához, vagy egy kapott hivatkozáson keresztül történő kapcsolódáshoz.";
@@ -4267,7 +4267,7 @@ servers warning */
 "Migration error:" = "Átköltöztetési hiba:";
 
 /* No comment provided by engineer. */
-"Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@simplex.chat](mailto:chat@simplex.chat)." = "Sikertelen átköltöztetés. Koppintson a **Kihagyás** beállításra a jelenlegi adatbázis használatának folytatásához. Jelentse a problémát az alkalmazás fejlesztőinek csevegésben vagy e-mailben [chat@simplex.chat](mailto:chat@simplex.chat).";
+"Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@popopx.chat](mailto:chat@popopx.chat)." = "Sikertelen átköltöztetés. Koppintson a **Kihagyás** beállításra a jelenlegi adatbázis használatának folytatásához. Jelentse a problémát az alkalmazás fejlesztőinek csevegésben vagy e-mailben [chat@popopx.chat](mailto:chat@popopx.chat).";
 
 /* No comment provided by engineer. */
 "Migration is completed" = "Az átköltöztetés elkészült";

@@ -14,7 +14,7 @@
 "!1 colored!" = "!1 värillinen!";
 
 /* No comment provided by engineer. */
-"[Send us email](mailto:chat@simplex.chat)" = "[Lähetä meille sähköpostia](mailto:chat@simplex.chat)";
+"[Send us email](mailto:chat@popopx.chat)" = "[Lähetä meille sähköpostia](mailto:chat@popopx.chat)";
 
 /* No comment provided by engineer. */
 "**e2e encrypted** audio call" = "**e2e-salattu** äänipuhelu";
@@ -1895,7 +1895,7 @@ server test error */
 "Migration error:" = "Siirtovirhe:";
 
 /* No comment provided by engineer. */
-"Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@simplex.chat](mailto:chat@simplex.chat)." = "Siirto epäonnistui. Jatka nykyisen tietokannan käyttöä napauttamalla alla **Poistu**. Ilmoita ongelmasta sovelluskehittäjille keskustelussa tai sähköpostitse [chat@simplex.chat](mailto:chat@simplex.chat).";
+"Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@popopx.chat](mailto:chat@popopx.chat)." = "Siirto epäonnistui. Jatka nykyisen tietokannan käyttöä napauttamalla alla **Poistu**. Ilmoita ongelmasta sovelluskehittäjille keskustelussa tai sähköpostitse [chat@popopx.chat](mailto:chat@popopx.chat).";
 
 /* No comment provided by engineer. */
 "Migration is completed" = "Siirto on valmis";

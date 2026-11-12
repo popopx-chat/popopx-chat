@@ -2735,9 +2735,9 @@ server test error</note>
         <target>Siirtovirhe:</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@simplex.chat](mailto:chat@simplex.chat)." xml:space="preserve">
-        <source>Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@simplex.chat](mailto:chat@simplex.chat).</source>
-        <target>Siirto epäonnistui. Jatka nykyisen tietokannan käyttöä napauttamalla alla **Poistu**. Ilmoita ongelmasta sovelluskehittäjille keskustelussa tai sähköpostitse [chat@simplex.chat](mailto:chat@simplex.chat).</target>
+      <trans-unit id="Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@popopx.chat](mailto:chat@popopx.chat)." xml:space="preserve">
+        <source>Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@popopx.chat](mailto:chat@popopx.chat).</source>
+        <target>Siirto epäonnistui. Jatka nykyisen tietokannan käyttöä napauttamalla alla **Poistu**. Ilmoita ongelmasta sovelluskehittäjille keskustelussa tai sähköpostitse [chat@popopx.chat](mailto:chat@popopx.chat).</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Migration is completed" xml:space="preserve">
@@ -4877,9 +4877,9 @@ Jos haluat muodostaa yhteyden, pyydä kontaktiasi luomaan toinen yhteyslinkki ja
         <target>Asetuksesi</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="[Send us email](mailto:chat@simplex.chat)" xml:space="preserve">
-        <source>[Send us email](mailto:chat@simplex.chat)</source>
-        <target>[Lähetä meille sähköpostia](mailto:chat@simplex.chat)</target>
+      <trans-unit id="[Send us email](mailto:chat@popopx.chat)" xml:space="preserve">
+        <source>[Send us email](mailto:chat@popopx.chat)</source>
+        <target>[Lähetä meille sähköpostia](mailto:chat@popopx.chat)</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="_italic_" xml:space="preserve">

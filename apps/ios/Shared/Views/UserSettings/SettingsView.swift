@@ -505,7 +505,7 @@ struct SettingsView: View {
                     }
                 }
                 .disabled(chatModel.chatRunning != true)
-                settingsRow("envelope", color: theme.colors.secondary) { Text("[Send us email](mailto:chat@simplex.chat)") }
+                settingsRow("envelope", color: theme.colors.secondary) { Text("[Send us email](mailto:chat@popopx.chat)") }
             }
 
             Section(header: Text("Support the project").foregroundColor(theme.colors.secondary)) {

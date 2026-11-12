@@ -308,7 +308,7 @@ Více informací naleznete v [Podmínky a zásady ochrany osobních údajů](./P
 
 ## Bezpečnostní kontakt
 
-Chcete-li nahlásit bezpečnostní zranitelnost, pošlete nám e-mail na adresu chat@simplex.chat. Budeme koordinovat opravu a zveřejnění. Bezpečnostní zranitelnosti prosím NEHLAŠUJTE prostřednictvím issues GitHub.
+Chcete-li nahlásit bezpečnostní zranitelnost, pošlete nám e-mail na adresu chat@popopx.chat. Budeme koordinovat opravu a zveřejnění. Bezpečnostní zranitelnosti prosím NEHLAŠUJTE prostřednictvím issues GitHub.
 
 Jakákoli zjištění možných útoků korelace provozu umožňujících korelovat dvě různé konverzace se stejným uživatelem, jiná než ta, která jsou zahrnuta v [modelu hrozeb](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/overview-tjr.md#threat-model), považujte za bezpečnostní zranitelnosti a postupujte podle tohoto postupu zveřejnění.
 

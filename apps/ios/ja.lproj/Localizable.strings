@@ -26,7 +26,7 @@
 "(this device v%@)" = "(このデバイス v%@)";
 
 /* No comment provided by engineer. */
-"[Send us email](mailto:chat@simplex.chat)" = "[メールを送信](mailto:chat@simplex.chat)";
+"[Send us email](mailto:chat@popopx.chat)" = "[メールを送信](mailto:chat@popopx.chat)";
 
 /* No comment provided by engineer. */
 "**Create 1-time link**: to create and share a new invitation link." = "**コンタクトの追加**: 新しい招待リンクを作成するか、受け取ったリンクから接続します。";
@@ -2243,7 +2243,7 @@ server test error */
 "Migration error:" = "移行エラー：";
 
 /* No comment provided by engineer. */
-"Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@simplex.chat](mailto:chat@simplex.chat)." = "移行に失敗しました。現在のデータベースの使用を続けるには、下の **スキップ**をタップします。 チャットまたはメール [chat@simplex.chat](mailto:chat@simplex.chat) でアプリ開発者に問題を報告してください。";
+"Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@popopx.chat](mailto:chat@popopx.chat)." = "移行に失敗しました。現在のデータベースの使用を続けるには、下の **スキップ**をタップします。 チャットまたはメール [chat@popopx.chat](mailto:chat@popopx.chat) でアプリ開発者に問題を報告してください。";
 
 /* No comment provided by engineer. */
 "Migration is completed" = "移行が完了しました";

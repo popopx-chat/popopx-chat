@@ -32,7 +32,7 @@
 "(this device v%@)" = "(cet appareil v%@)";
 
 /* No comment provided by engineer. */
-"[Send us email](mailto:chat@simplex.chat)" = "[Envoyez-nous un courriel](mailto:chat@simplex.chat)";
+"[Send us email](mailto:chat@popopx.chat)" = "[Envoyez-nous un courriel](mailto:chat@popopx.chat)";
 
 /* No comment provided by engineer. */
 "**Create 1-time link**: to create and share a new invitation link." = "**Ajouter un contact** : pour créer un nouveau lien d'invitation.";
@@ -4246,7 +4246,7 @@ servers warning */
 "Migration error:" = "Erreur de migration :";
 
 /* No comment provided by engineer. */
-"Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@simplex.chat](mailto:chat@simplex.chat)." = "Échec de la migration. Appuyez sur **Ignorer** ci-dessous pour continuer à utiliser la base de données actuelle. Veuillez signaler le problème aux développeurs de l'application via une conversation ou par email à [chat@simplex.chat](mailto:chat@simplex.chat).";
+"Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@popopx.chat](mailto:chat@popopx.chat)." = "Échec de la migration. Appuyez sur **Ignorer** ci-dessous pour continuer à utiliser la base de données actuelle. Veuillez signaler le problème aux développeurs de l'application via une conversation ou par email à [chat@popopx.chat](mailto:chat@popopx.chat).";
 
 /* No comment provided by engineer. */
 "Migration is completed" = "La migration est terminée";

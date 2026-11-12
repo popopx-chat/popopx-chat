@@ -16,7 +16,7 @@ We have scheduled implementation security assessment for June 2026.
 
 ## Reporting security issues
 
-To report a security issue, please contact us directly via email [chat@simplex.chat](mailto:chat@simplex.chat). Please do NOT report security issues via GitHub issues or via any public channels.
+To report a security issue, please contact us directly via email [chat@popopx.chat](mailto:chat@popopx.chat). Please do NOT report security issues via GitHub issues or via any public channels.
 
 Please encrypt the email message using the key for this address from [keys.openpgp.org](https://keys.openpgp.org/search?q=chat%40simplex.chat) (its fingerprint is `FB44 AF81 A45B DE32 7319 797C 8510 7E35 7D4A 17FC`) and make your key available for a secure reply.
 

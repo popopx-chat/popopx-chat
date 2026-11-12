@@ -302,7 +302,7 @@ textWithUri = describe "text with Uri" do
     "(https://en.m.wikipedia.org/wiki/Servo_(software))" <==> "(" <> uri "https://en.m.wikipedia.org/wiki/Servo_(software)" <> ")"
     "https://simplex.chat/page))" <==> uri "https://simplex.chat/page" <> "))"
     "(example.com)" <==> "(" <> uri "example.com" <> ")"
-    "(chat@simplex.chat)" <==> "(" <> email "chat@simplex.chat" <> ")"
+    "(chat@popopx.chat)" <==> "(" <> email "chat@popopx.chat" <> ")"
   it "ignored as markdown" do
     "_https://simplex.chat" <==> "_https://simplex.chat"
     "this is _https://simplex.chat" <==> "this is _https://simplex.chat"
@@ -380,14 +380,14 @@ email = Markdown $ Just Email
 textWithEmail :: Spec
 textWithEmail = describe "text with Email" do
   it "correct markdown" do
-    "chat@simplex.chat" <==> email "chat@simplex.chat"
-    "test chat@simplex.chat" <==> "test " <> email "chat@simplex.chat"
+    "chat@popopx.chat" <==> email "chat@popopx.chat"
+    "test chat@popopx.chat" <==> "test " <> email "chat@popopx.chat"
     "test chat+123@simplex.chat" <==> "test " <> email "chat+123@simplex.chat"
     "test chat.chat+123@simplex.chat" <==> "test " <> email "chat.chat+123@simplex.chat"
-    "chat@simplex.chat test" <==> email "chat@simplex.chat" <> " test"
-    "test1 chat@simplex.chat test2" <==> "test1 " <> email "chat@simplex.chat" <> " test2"
-    "test chat@simplex.chat." <==> "test " <> email "chat@simplex.chat" <> "."
-    "test chat@simplex.chat..." <==> "test " <> email "chat@simplex.chat" <> "..."
+    "chat@popopx.chat test" <==> email "chat@popopx.chat" <> " test"
+    "test1 chat@popopx.chat test2" <==> "test1 " <> email "chat@popopx.chat" <> " test2"
+    "test chat@popopx.chat." <==> "test " <> email "chat@popopx.chat" <> "."
+    "test chat@popopx.chat..." <==> "test " <> email "chat@popopx.chat" <> "..."
   it "ignored as email markdown" do
     "chat @simplex.chat" <==> "chat " <> sname NTContact TLDWeb "simplex.chat" [] "simplex.chat"
     "this is chat @simplex.chat" <==> "this is chat " <> sname NTContact TLDWeb "simplex.chat" [] "simplex.chat"
@@ -580,7 +580,7 @@ inlineMarkdownGFM = describe "inline markdown of GFM" do
     markdownText (fmt Snippet "`a") `shouldBe` "`` `a ``"
   it "autolinks" do
     "<https://simplex.chat>" <==> web "https://simplex.chat" "https://simplex.chat" "<https://simplex.chat>"
-    "mail <chat@simplex.chat>" <==> "mail " <> web "chat@simplex.chat" "mailto:chat@simplex.chat" "<chat@simplex.chat>"
+    "mail <chat@popopx.chat>" <==> "mail " <> web "chat@popopx.chat" "mailto:chat@popopx.chat" "<chat@popopx.chat>"
     "<not a link>" <==> "<not a link>"
     "<https://simplex.chat" <==> "<https://simplex.chat"
     "<ftp://simplex.chat>" <==> "<ftp://simplex.chat>"

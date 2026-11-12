@@ -138,7 +138,7 @@ Database row shows exclamation octagon icon in red when `chatRunning == false`.
 | What's new | `plus` | `WhatsNewView` | Changelog and new features |
 | About POPOPX Chat | `info` | `SimpleXInfo` | About page with privacy explanation |
 | Send questions and ideas | `number` | Opens SimpleX team chat link | Direct contact with developers |
-| Send us email | `envelope` | `mailto:chat@simplex.chat` | Email link |
+| Send us email | `envelope` | `mailto:chat@popopx.chat` | Email link |
 
 ### Support POPOPX Chat Section
 

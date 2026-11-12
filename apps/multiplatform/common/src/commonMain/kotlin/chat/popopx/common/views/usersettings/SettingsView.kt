@@ -176,7 +176,7 @@ fun HelpAndSupportView(
         SettingsActionItem(painterResource(MR.images.ic_bigtop_updates), stringResource(MR.strings.follow_popopx_network_news), { uriHandler.openVerifiedPopopxUri(popopxNewsUri) }, textColor = MaterialTheme.colors.primary, disabled = stopped)
         SettingsActionItem(painterResource(MR.images.ic_tag), stringResource(MR.strings.chat_with_the_founder), { uriHandler.openVerifiedPopopxUri(popopxTeamUri) }, textColor = MaterialTheme.colors.primary, disabled = stopped)
       }
-      SettingsActionItem(painterResource(MR.images.ic_mail), stringResource(MR.strings.send_us_an_email), { uriHandler.openUriCatching("mailto:chat@simplex.chat") }, textColor = MaterialTheme.colors.primary)
+      SettingsActionItem(painterResource(MR.images.ic_mail), stringResource(MR.strings.send_us_an_email), { uriHandler.openUriCatching("mailto:chat@popopx.chat") }, textColor = MaterialTheme.colors.primary)
     }
     SectionDividerSpaced()
 

@@ -26,7 +26,7 @@
 "(this device v%@)" = "(това устройство v%@)";
 
 /* No comment provided by engineer. */
-"[Send us email](mailto:chat@simplex.chat)" = "[Изпратете ни имейл](mailto:chat@simplex.chat)";
+"[Send us email](mailto:chat@popopx.chat)" = "[Изпратете ни имейл](mailto:chat@popopx.chat)";
 
 /* No comment provided by engineer. */
 "**Create 1-time link**: to create and share a new invitation link." = "**Добави контакт**: за създаване на нов линк.";
@@ -2807,7 +2807,7 @@ server test error */
 "Migration error:" = "Грешка при мигриране:";
 
 /* No comment provided by engineer. */
-"Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@simplex.chat](mailto:chat@simplex.chat)." = "Мигрирането е неуспешно. Докоснете **Пропускане** по-долу, за да продължите да използвате текущата база данни. Моля, докладвайте проблема на разработчиците на приложението чрез чат или имейл [chat@simplex.chat](mailto:chat@simplex.chat).";
+"Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@popopx.chat](mailto:chat@popopx.chat)." = "Мигрирането е неуспешно. Докоснете **Пропускане** по-долу, за да продължите да използвате текущата база данни. Моля, докладвайте проблема на разработчиците на приложението чрез чат или имейл [chat@popopx.chat](mailto:chat@popopx.chat).";
 
 /* No comment provided by engineer. */
 "Migration is completed" = "Миграцията е завършена";

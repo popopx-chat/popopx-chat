@@ -2446,9 +2446,9 @@
         <target state="translated">שגיאת העברה:</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@simplex.chat](mailto:chat@simplex.chat)." xml:space="preserve" approved="no">
-        <source>Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@simplex.chat](mailto:chat@simplex.chat).</source>
-        <target state="translated">ההעברה נכשלה. הקש על **דלג** למטה כדי להמשיך להשתמש במסד הנתונים הנוכחי. אנא דווח על הבעיה למפתחי האפליקציה באמצעות צ'אט או דוא"ל [chat@simplex.chat](mailto:chat@simplex.chat).</target>
+      <trans-unit id="Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@popopx.chat](mailto:chat@popopx.chat)." xml:space="preserve" approved="no">
+        <source>Migration failed. Tap **Skip** below to continue using the current database. Please report the issue to the app developers via chat or email [chat@popopx.chat](mailto:chat@popopx.chat).</source>
+        <target state="translated">ההעברה נכשלה. הקש על **דלג** למטה כדי להמשיך להשתמש במסד הנתונים הנוכחי. אנא דווח על הבעיה למפתחי האפליקציה באמצעות צ'אט או דוא"ל [chat@popopx.chat](mailto:chat@popopx.chat).</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Migration is completed" xml:space="preserve" approved="no">

@@ -534,7 +534,7 @@ To verify server binaries after you downloaded them:
 
 4. Run `gpg --verify _sha256sums.asc _sha256sums`. It should print:
 
-> Good signature from "SimpleX Chat <chat@simplex.chat>"
+> Good signature from "SimpleX Chat <chat@popopx.chat>"
 
 5. Compute the hashes of the binaries you plan to use with `sha256sum <file>` or with `openssl sha256 <file>` and compare them with the hashes in the file `_sha256sums` - they must be the same.
 

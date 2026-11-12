@@ -335,7 +335,7 @@ Pour en savoir plus, consultez la section [Conditions et politique de confidenti
 
 ## Contact de sécurité
 
-Pour signaler une vulnérabilité de sécurité, veuillez nous envoyer un courriel à chat@simplex.chat. Nous coordonnerons la correction et la divulgation. Veuillez ne PAS signaler les vulnérabilités de sécurité via les problèmes GitHub.
+Pour signaler une vulnérabilité de sécurité, veuillez nous envoyer un courriel à chat@popopx.chat. Nous coordonnerons la correction et la divulgation. Veuillez ne PAS signaler les vulnérabilités de sécurité via les problèmes GitHub.
 
 Veuillez traiter toute découverte d'une éventuelle attaque par corrélation de trafic permettant de corréler deux conversations différentes au même utilisateur, autre que celle couverte par [le modèle de menace](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/overview-tjr.md#threat-model), comme une vulnérabilité de sécurité, et suivez ce processus de publication.
 
