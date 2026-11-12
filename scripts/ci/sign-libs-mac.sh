@@ -4,15 +4,15 @@ set -euo pipefail
 
 libs=$1
 team=5NN7GUYB6T
-keychain=/tmp/simplex.keychain
+keychain=/tmp/popopx.keychain
 temp=$(mktemp -d)
 trap 'rm -rf "$keychain" "$temp"' EXIT
 
 notarytool() {
-  xcrun notarytool "$@" --apple-id "$APPLE_SIMPLEX_NOTARIZATION_APPLE_ID" --password "$APPLE_SIMPLEX_NOTARIZATION_PASSWORD" --team-id "$team"
+  xcrun notarytool "$@" --apple-id "$APPLE_POPOPX_NOTARIZATION_APPLE_ID" --password "$APPLE_POPOPX_NOTARIZATION_PASSWORD" --team-id "$team"
 }
 
-echo "$APPLE_SIMPLEX_SIGNING_KEYCHAIN" | base64 --decode -o "$keychain"
+echo "$APPLE_POPOPX_SIGNING_KEYCHAIN" | base64 --decode -o "$keychain"
 security unlock-keychain -p "" "$keychain"
 security list-keychains -s $(security list-keychains | xargs) "$keychain"
 

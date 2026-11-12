@@ -1199,9 +1199,9 @@ jobs:
         if: matrix.should_run == true && startsWith(github.ref, 'refs/tags/v')
         shell: bash
         env:
-          APPLE_SIMPLEX_SIGNING_KEYCHAIN: ${{ secrets.APPLE_SIMPLEX_SIGNING_KEYCHAIN }}
-          APPLE_SIMPLEX_NOTARIZATION_APPLE_ID: ${{ secrets.APPLE_SIMPLEX_NOTARIZATION_APPLE_ID }}
-          APPLE_SIMPLEX_NOTARIZATION_PASSWORD: ${{ secrets.APPLE_SIMPLEX_NOTARIZATION_PASSWORD }}
+          APPLE_POPOPX_SIGNING_KEYCHAIN: ${{ secrets.APPLE_POPOPX_SIGNING_KEYCHAIN }}
+          APPLE_POPOPX_NOTARIZATION_APPLE_ID: ${{ secrets.APPLE_POPOPX_NOTARIZATION_APPLE_ID }}
+          APPLE_POPOPX_NOTARIZATION_PASSWORD: ${{ secrets.APPLE_POPOPX_NOTARIZATION_PASSWORD }}
         run: |
           export ASSETS_DIR='../../assets'
           scripts/ci/build-desktop-mac.sh
@@ -1254,9 +1254,9 @@ jobs:
         if: ${{ !cancelled() && matrix.should_run == true && needs.maybe-release.outputs.libs_tag && steps.mac_cli_build.outcome == 'success' }}
         shell: bash
         env:
-          APPLE_SIMPLEX_SIGNING_KEYCHAIN: ${{ secrets.APPLE_SIMPLEX_SIGNING_KEYCHAIN }}
-          APPLE_SIMPLEX_NOTARIZATION_APPLE_ID: ${{ secrets.APPLE_SIMPLEX_NOTARIZATION_APPLE_ID }}
-          APPLE_SIMPLEX_NOTARIZATION_PASSWORD: ${{ secrets.APPLE_SIMPLEX_NOTARIZATION_PASSWORD }}
+          APPLE_POPOPX_SIGNING_KEYCHAIN: ${{ secrets.APPLE_POPOPX_SIGNING_KEYCHAIN }}
+          APPLE_POPOPX_NOTARIZATION_APPLE_ID: ${{ secrets.APPLE_POPOPX_NOTARIZATION_APPLE_ID }}
+          APPLE_POPOPX_NOTARIZATION_PASSWORD: ${{ secrets.APPLE_POPOPX_NOTARIZATION_PASSWORD }}
         run: |
           SKIP_VLC=1 scripts/desktop/build-lib-mac.sh
           name=simplex-chat-libs-macos-${{ matrix.arch }}

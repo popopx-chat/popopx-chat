@@ -160,7 +160,7 @@ A version pinned in the same commit that bumps `simplex-chat` or `@simplex-chat/
 
 - simplex-chat-libs: release immutability enabled
 - secret `NODEJS_REPO_TOKEN`: contents of simplex-chat-libs, read and write
-- secrets `APPLE_SIMPLEX_SIGNING_KEYCHAIN`, `APPLE_SIMPLEX_NOTARIZATION_APPLE_ID` and `APPLE_SIMPLEX_NOTARIZATION_PASSWORD`: signing and notarization of the macOS libraries, shared with the desktop app build
+- secrets `APPLE_POPOPX_SIGNING_KEYCHAIN`, `APPLE_POPOPX_NOTARIZATION_APPLE_ID` and `APPLE_POPOPX_NOTARIZATION_PASSWORD`: signing and notarization of the macOS libraries, shared with the desktop app build
 - trusted publisher of `simplex-chat`, `@simplex-chat/types` and `@simplex-chat/mcp` on npm and of `simplex-chat` on PyPI: workflow `build.yml`
 - secrets `NPM_TOKEN` and `PYPI_API_TOKEN`: used instead of trusted publishing when set
 - variables `NPM_SCOPE`, `PYPI_PROJECT`, `PYPI_URL` and `PYPI_UPLOAD_URL`: publication under other names, for test repositories
