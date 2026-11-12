@@ -35,10 +35,11 @@ if [ -z "$NEW_PLAIN" ] || [ -z "$NEW_GHC" ]; then
     exit 1
 fi
 
-# Current filenames referenced in project.pbxproj.
+# Current filenames referenced in project.pbxproj. Matched generically (any libHS*.a), because
+# before the first run after a rename the pinned name is still the OLD package's.
 OLD_PLAIN=
 OLD_GHC=
-for ref in $(grep -hoE 'libHSpopopx-chat-[^ "/]+\.a' "$PBXPROJ" | sort -u); do
+for ref in $(grep -hoE 'libHS[A-Za-z0-9._-]*\.a' "$PBXPROJ" | sort -u); do
     case "$ref" in
         *-ghc*) OLD_GHC=$ref ;;
         *)      OLD_PLAIN=$ref ;;
