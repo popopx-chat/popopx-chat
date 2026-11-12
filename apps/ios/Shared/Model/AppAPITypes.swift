@@ -1791,9 +1791,9 @@ let operatorsInfo: Dictionary<OperatorTag, ServerOperatorInfo> = [
             "POPOPX Chat Ltd develops the communication software for POPOPX network."
         ],
         website: URL(string: "https://simplex.chat")!,
-        logo: "decentralized",
+        logo: "popopx_app_icon",
         largeLogo: "logo",
-        logoDarkMode: "decentralized-light",
+        logoDarkMode: "popopx_app_icon",
         largeLogoDarkMode: "logo-light"
     ),
     .flux: ServerOperatorInfo(
@@ -1904,9 +1904,9 @@ struct ServerOperator: Identifiable, Equatable, Codable {
     static let dummyOperatorInfo = ServerOperatorInfo(
         description: ["Default"],
         website: URL(string: "https://simplex.chat")!,
-        logo: "decentralized",
+        logo: "popopx_app_icon",
         largeLogo: "logo",
-        logoDarkMode: "decentralized-light",
+        logoDarkMode: "popopx_app_icon",
         largeLogoDarkMode: "logo-light"
     )
 

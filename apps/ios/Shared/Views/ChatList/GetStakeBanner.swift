@@ -32,7 +32,7 @@ struct GetStakeBanner: View {
                             .lineLimit(2)
                     }
                     Spacer(minLength: 6)
-                    Image(colorScheme == .light ? "decentralized" : "decentralized-light")
+                    Image("popopx_app_icon")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 37, height: 37)

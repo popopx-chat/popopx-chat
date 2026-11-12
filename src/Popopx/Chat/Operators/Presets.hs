@@ -7,7 +7,7 @@ module Popopx.Chat.Operators.Presets where
 
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as L
-import Popopx.Chat.Library.Internal (simplexChatImage)
+import Popopx.Chat.Library.Internal (popopxChatImage)
 import Popopx.Chat.Operators
 import Popopx.Chat.Protocol (mkRelayProfile)
 import Popopx.Messaging.Agent.Env.SQLite (allRoles)
@@ -78,9 +78,9 @@ disabledSimplexChatSMPServers =
 
 simplexChatRelays :: [NewUserChatRelay]
 simplexChatRelays =
-  [ presetChatRelay True (mkRelayProfile "SimpleX Chat Relay 1" $ Just simplexChatImage) ["simplex.im"] (either error id $ strDecode "https://smp5.simplex.im/r#Fp5RWXkiRFg-hgcDwC2v-MWnPfvEf42RgCqREntW0mw"),
-    presetChatRelay True (mkRelayProfile "SimpleX Chat Relay 2" $ Just simplexChatImage) ["simplex.im"] (either error id $ strDecode "https://smp6.simplex.im/r#_qlQfogHGDJ8MAF2wKmkglRBM-xHR142gDJstKiGRQQ"),
-    presetChatRelay True (mkRelayProfile "SimpleX Chat Relay 3" $ Just simplexChatImage) ["simplex.im"] (either error id $ strDecode "https://smp4.simplex.im/r#yxNOMJcry5jMTRPEBVtGBATYaKeoRIsZRBPIDLx7x6M")
+  [ presetChatRelay True (mkRelayProfile "SimpleX Chat Relay 1" $ Just popopxChatImage) ["simplex.im"] (either error id $ strDecode "https://smp5.simplex.im/r#Fp5RWXkiRFg-hgcDwC2v-MWnPfvEf42RgCqREntW0mw"),
+    presetChatRelay True (mkRelayProfile "SimpleX Chat Relay 2" $ Just popopxChatImage) ["simplex.im"] (either error id $ strDecode "https://smp6.simplex.im/r#_qlQfogHGDJ8MAF2wKmkglRBM-xHR142gDJstKiGRQQ"),
+    presetChatRelay True (mkRelayProfile "SimpleX Chat Relay 3" $ Just popopxChatImage) ["simplex.im"] (either error id $ strDecode "https://smp4.simplex.im/r#yxNOMJcry5jMTRPEBVtGBATYaKeoRIsZRBPIDLx7x6M")
   ]
 
 -- Flux is not a preset operator of this fork: neither the operator record nor its SMP/XFTP server

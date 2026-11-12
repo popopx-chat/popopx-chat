@@ -28,7 +28,7 @@ class CallController: NSObject, CXProviderDelegate, PKPushRegistryDelegate, Obse
         configuration.includesCallsInRecents = UserDefaults.standard.bool(forKey: DEFAULT_CALL_KIT_CALLS_IN_RECENTS)
         configuration.maximumCallGroups = 1
         configuration.maximumCallsPerCallGroup = 1
-        configuration.iconTemplateImageData = UIImage(named: "icon-transparent")?.pngData()
+        configuration.iconTemplateImageData = UIImage(named: "popopx_app_icon")?.pngData()
         return configuration
     }())
     private let controller = CXCallController()
