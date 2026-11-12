@@ -60,9 +60,11 @@ A rebranded fork is a modified work. Therefore:
    artwork tree rather than from editing SimpleX's files.
 2. **Still blocking a release**, because the licence does not allow them and no POPOPX counterpart
    exists yet:
-   - the Android app-icon layer — 39 `mipmap`/`drawable` files, `icon-playstore.png`,
-     `icon_dark_blue-playstore.png`, `icon_foreground_android_common.png`, the adaptive-icon
-     `@color/icon_background` (`#FFFFFF`) and `ic_launcher_foreground.xml`;
+   - the Android icon layer, measured under `apps/multiplatform/android/src/main`: **36** `icon*`
+     rasters in `mipmap-*`/`drawable-*`, **2** `*-playstore.png`, **10** `ntf_*` notification icons,
+     **5** adaptive-icon xml in `mipmap-anydpi-v26`, the `drawable-v24/ic_launcher_foreground.xml`
+     vector, `icon_foreground_android_common.png` in `common/src/androidMain`, and the two adaptive
+     background colours — `icon_background` `#FFFFFF` and `icon_dark_blue_background` `#030749`;
    - the **376 iOS snapshot baselines** (`apps/ios/POPOPX Snapshots/References/*.png`) and the **210
      desktop snapshot images** under `apps/multiplatform/common/src/desktopTest/snapshots` — these are
      test fixtures of *their* app, and after R4 they no longer match our renders either;
