@@ -116,6 +116,14 @@ yet. Before any build of this fork is distributed:
       `DNS:popopxchat.com` — no `popopx.chat`, no `www`. Every client therefore sees a name mismatch on
       `https://popopx.chat/`, including the OS link verifier, which requires a valid TLS connection before it
       reads a single byte of `apple-app-site-association`. `www.popopxchat.com` fails the same way.
+      Ruled 2026-11-13: the replacement certificate carries `popopx.chat`, `popopxchat.com` and
+      `www.popopxchat.com`.
+    - **The two association files need exact paths and content types**, not just a directory. Apple fetches
+      `https://<domain>/.well-known/apple-app-site-association` — no extension, no trailing slash — while this
+      repository stores it as `apple-app-site-association/index.json`, so the server must map that name to the
+      JSON (or redirect, which Apple follows). `assetlinks.json` is stricter: exactly one path, `200`,
+      `application/json`, no redirect and no HTML error page, and Android reads it before it will verify
+      `autoVerify` for `com.popopxchat.popopx`.
     - **Nothing is published under `/.well-known/` on either name** — each returns the PHP application's 404
       HTML page, so the files in `website/src/.well-known/` are not deployed anywhere.
   - *The relay hosts exist too, and all but one are not serving.* `smp1-8`, `xftp1`, `xftp6`, `ntf1-3`
@@ -148,9 +156,11 @@ yet. Before any build of this fork is distributed:
     `POPOPX.xcodeproj/project.pbxproj`, and `apple-app-site-association/index.json` — and all of
     them must agree with whatever certificate actually signs the distribution. A wrong one fails
     silently: keychain sharing and universal links stop working, and only on device.
-- **`popopx.chat` is not ours yet.** The link namespace, `.well-known` and universal-link entries
-  point at it, so link previews and domain-verified names are inert until the domain is owned,
-  served over HTTPS with those files reachable, and the app is rebuilt against it.
+- **`popopx.chat` is owned and serving, and is now the ruled link domain.** Ruled 2026-11-13:
+  `popopx.chat` for links and the site, `popopx.im` for relays. `website/src/CNAME` moved to
+  `popopx.chat` — nothing reads it but `website/.eleventy.js:471`, which publishes it to the site root, so
+  the change is inert until something departs from the hand-run nginx. What still makes link handling inert
+  is on that box: a certificate that names only `popopxchat.com`, and no `/.well-known/` at all.
 - **Store links 404.** Every `market://` / `details?id=com.popopxchat.popopx` / App Store URL in
   this repository names an app record that does not exist yet.
 - **The artwork is still SimpleX's.** The icons, illustrations and the 376 iOS snapshot baselines

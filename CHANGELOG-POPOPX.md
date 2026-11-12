@@ -26,9 +26,11 @@ AppImage/AppStream ids and `.appdata.xml` filename, and the CLI/bot per-user dat
 
 Display copy in every iOS catalogue, Kotlin/Swift string and locale, terminal output and live
 documentation says POPOPX. The link namespace the app recognizes and emits is `popopx.chat`
-(`.well-known`, universal links, Android `autoVerify`) — **which is inert until that domain is
-owned, served and configured**, so link previews and profile/domain resolution do not work against
-a domain this fork does not yet run.
+(`.well-known`, universal links, Android `autoVerify`) — **ruled as this fork's link domain on
+2026-11-13, with `popopx.im` as the relay domain.** The domain is registered and a site answers on
+it, but its TLS certificate names only `popopxchat.com` and nothing is published under
+`.well-known`, so link previews and profile/domain resolution remain inert until that box serves a
+matching certificate and the two association files.
 
 ### Interfaces that other code reads
 
@@ -63,7 +65,10 @@ signed, so they are left as template slots, not as open decisions.
 - iOS: <App Store id / build number, signing identity and Team ID>
 - Android: <applicationId suffix, signing certificate fingerprint, F-Droid or Play channel>
 - servers this release presets, and whose terms the user is asked to accept: <list>
-- link domain actually serving this release, with .well-known and AASA live: <domain>
+- link domain actually serving this release: `popopx.chat` — certificate SANs present
+  (`popopx.chat`, `popopxchat.com`, `www.popopxchat.com`), `/.well-known/assetlinks.json` and
+  `/.well-known/apple-app-site-association` reachable over HTTPS with no redirect: <yes/no>
+- relay domain `popopx.im`: which hosts are listening, and their fingerprints in the presets: <list>
 - every upstream-operated host still named in the build (badge contact, notification preset,
   directory, badge embed, TURN) — each replaced or left, with the reason: <list; the checklist and
   the failure mode of each is in FORK.md "Upstream-operated hosts, and how each one fails">
