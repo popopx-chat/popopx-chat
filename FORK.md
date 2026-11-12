@@ -31,6 +31,17 @@ summary:
 3. **Structural names** — directory and file names under `apps/` and `packages/`, and the
    paths that reference them in CI, Nix, Docker and flatpak scripts.
 
+4. **Release artifacts** (2026-11-13) — the file names this repository's CI publishes into its own
+   releases are `popopx-chat-*` (CLI) and `popopx-desktop-*` (dmg, msi, deb, AppImage). They are not
+   cosmetic: the desktop updater filters `release.assets` by `name == githubAssetName`
+   (`Platform.desktop.kt:14-18`, `AppUpdater.kt:397-402`) and reads the release list from one
+   repository (`AppUpdater.kt:188`), so the CI name, the app literal, the API repository and the
+   docs/website URLs are one value with four readers — moving any subset fails silently, with no
+   error in the app. The packaging *producers* had been renamed earlier
+   (`make-deb-linux.sh:57` → `popopx_${ARCH}.deb`, `desktop/build.gradle.kts:72,81,124` →
+   `packageName = "POPOPX"/"popopx"`), while the CI steps that locate their output still globbed the
+   upstream spellings; those five readers now derive the name from the build tree instead of
+   hard-coding it.
 Every modification carries the date of the commit that made it; `git log` is the
 authoritative per-file record.
 
@@ -98,6 +109,21 @@ yet. Before any build of this fork is distributed:
   nothing in a build of this fork talks to them yet: no preset names them, because a preset needs their
   fingerprints and those are only readable on the servers themselves. `chat@popopx.chat` is likewise not
   reachable until that host serves mail or forwards.
+- **This fork publishes no Android APK.** `.github/workflows/build.yml` builds and signs nothing for
+  Android; `scripts/ci/android/release-apk.sh` downloads **upstream's** release APK and verifies
+  SimpleX's signing certificate, which is what the emulator smoke test installs. The gradle output
+  names (`popopx-arm64-v8a.apk`, `popopx-armv7a.apk`) are therefore only local artifacts, and the
+  APK download links still present in `README.md`, `docs/lang/*/README.md`, `docs/DOWNLOADS.md` and
+  the website pages still resolve to upstream's release. Ruling open: remove them, or annotate them
+  as upstream's build (the same treatment as the server binaries below).
+- **The libs release assets keep their inherited names.** The *repository* already resolves to this
+  fork (`.github/workflows/build.yml:203` sets `LIBS_REPOSITORY: ${{ github.repository }}-libs`), but
+  the zip asset names inside its releases are still `simplex-chat-libs-<platform>.zip`
+  (`scripts/ci/packages_release.py:104-109`, `build.yml:482,698,983,1262,1568`,
+  `scripts/ci/package-tests.sh:49`, `docs/contributing/RELEASES.md`), and
+  `packages_release.py:604` keeps `simplex-chat/simplex-chat-libs` as the **default** for manual runs
+  exactly as the npm/PyPI names do — overridden by the same CI variables, asserted by
+  `scripts/ci/test_packages_release.py:278`.
 - **No registry namespace.** The npm and PyPI names in the committed manifests are upstream's, and
   that is the shape the release tooling expects: `packages_release.py test-names` rewrites the names,
   the repository URL and the cross-package dependencies to `npm:` aliases at publish time from the

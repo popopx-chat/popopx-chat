@@ -556,7 +556,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v') && matrix.should_run == true
         shell: bash
         run: |
-          cli_name="simplex-chat-ubuntu-${{ matrix.os_underscore }}-${{ matrix.arch }}"
+          cli_name="popopx-chat-ubuntu-${{ matrix.os_underscore }}-${{ matrix.arch }}"
           cli_deb_name="${cli_name}.deb"
           cli_path="${{ github.workspace }}"
 
@@ -603,16 +603,16 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v') && matrix.should_run == true
         shell: bash
         run: |
-          path=$(echo ${{ github.workspace }}/apps/multiplatform/release/main/deb/simplex_${{ matrix.arch }}.deb )
+          path=$(echo ${{ github.workspace }}/apps/multiplatform/release/main/deb/popopx_${{ matrix.arch }}.deb )
           echo "package_path=$path" >> $GITHUB_OUTPUT
-          echo "package_hash=$(echo SHA2-256\(simplex-desktop-ubuntu-${{ matrix.os_underscore }}-${{ matrix.arch }}.deb\)= $(openssl sha256 $path | cut -d' ' -f 2))" >> $GITHUB_OUTPUT
+          echo "package_hash=$(echo SHA2-256\(popopx-desktop-ubuntu-${{ matrix.os_underscore }}-${{ matrix.arch }}.deb\)= $(openssl sha256 $path | cut -d' ' -f 2))" >> $GITHUB_OUTPUT
 
       - name: Upload Desktop
         uses: ./.github/actions/prepare-release
         if: startsWith(github.ref, 'refs/tags/v') && matrix.should_run == true
         with:
           bin_path: ${{ steps.linux_desktop_build.outputs.package_path }}
-          bin_name: simplex-desktop-ubuntu-${{ matrix.os_underscore }}-${{ matrix.arch }}.deb
+          bin_name: popopx-desktop-ubuntu-${{ matrix.os_underscore }}-${{ matrix.arch }}.deb
           bin_hash: ${{ steps.linux_desktop_build.outputs.package_hash }}
           github_ref: ${{ github.ref }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -629,16 +629,16 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os == '22.04' && matrix.should_run == true
         shell: bash
         run: |
-          path=$(echo ${{ github.workspace }}/apps/multiplatform/release/main/*imple*.AppImage)
+          path=$(find ${{ github.workspace }}/apps/multiplatform/release/main -maxdepth 1 -name '*.AppImage' -not -name 'appimagetool*' -print -quit)
           echo "appimage_path=$path" >> $GITHUB_OUTPUT
-          echo "appimage_hash=$(echo SHA2-256\(simplex-desktop-${{ matrix.arch }}.AppImage\)= $(openssl sha256 $path | cut -d' ' -f 2))" >> $GITHUB_OUTPUT
+          echo "appimage_hash=$(echo SHA2-256\(popopx-desktop-${{ matrix.arch }}.AppImage\)= $(openssl sha256 $path | cut -d' ' -f 2))" >> $GITHUB_OUTPUT
 
       - name: Upload AppImage
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os == '22.04' && matrix.should_run == true
         uses: ./.github/actions/prepare-release
         with:
           bin_path: ${{ steps.linux_appimage_build.outputs.appimage_path }}
-          bin_name: "simplex-desktop-${{ matrix.arch }}.AppImage"
+          bin_name: "popopx-desktop-${{ matrix.arch }}.AppImage"
           bin_hash: ${{ steps.linux_appimage_build.outputs.appimage_hash }}
           github_ref: ${{ github.ref }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -1008,15 +1008,15 @@ jobs:
           - os: macos-latest
             arch: aarch64
             ghc: ${{ needs.variables.outputs.GHC_VER }}
-            cli_asset_name: simplex-chat-macos-aarch64
-            desktop_asset_name: simplex-desktop-macos-aarch64.dmg
+            cli_asset_name: popopx-chat-macos-aarch64
+            desktop_asset_name: popopx-desktop-macos-aarch64.dmg
             openssl_dir: "/opt/homebrew/opt"
             should_run: ${{ needs.maybe-release.outputs.haskell == 'true' }}
           - os: macos-15-intel
             arch: x86_64
             ghc: ${{ needs.variables.outputs.GHC_VER }}
-            cli_asset_name: simplex-chat-macos-x86-64
-            desktop_asset_name: simplex-desktop-macos-x86_64.dmg
+            cli_asset_name: popopx-chat-macos-x86-64
+            desktop_asset_name: popopx-desktop-macos-x86_64.dmg
             openssl_dir: "/usr/local/opt"
             should_run: ${{ needs.maybe-release.outputs.haskell == 'true' }}
     steps:
@@ -1205,7 +1205,7 @@ jobs:
         run: |
           export ASSETS_DIR='../../assets'
           scripts/ci/build-desktop-mac.sh
-          path=$(echo $PWD/apps/multiplatform/release/main/dmg/SimpleX-*.dmg)
+          path=$(find $PWD/apps/multiplatform/release/main/dmg -name '*.dmg' -print -quit)
           echo "package_path=$path" >> $GITHUB_OUTPUT
           echo "package_hash=$(echo SHA2-256\(${{ matrix.desktop_asset_name }}\)= $(openssl sha256 $path | cut -d' ' -f 2))" >> $GITHUB_OUTPUT
 
@@ -1412,8 +1412,8 @@ jobs:
         include:
           - os: windows-latest
             ghc: ${{ needs.variables.outputs.GHC_VER }}
-            cli_asset_name: simplex-chat-windows-x86-64
-            desktop_asset_name: simplex-desktop-windows-x86_64.msi
+            cli_asset_name: popopx-chat-windows-x86-64
+            desktop_asset_name: popopx-desktop-windows-x86_64.msi
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -1648,7 +1648,7 @@ jobs:
           cd apps/multiplatform
           ./gradlew -Ppopopx.assets.dir=../../assets packageMsi
           rm -rf dist-newstyle/src/direct-sq* dist-newstyle/src/popopxmq* dist-newstyle/src/hs-jpeg-t* dist-newstyle/src/JuicyPixe*
-          path=$(echo $PWD/release/main/msi/*imple*.msi | sed 's#/\([a-z]\)#\1:#' | sed 's#/#\\#g')
+          path=$(find $PWD/release/main/msi -name '*.msi' -print -quit | sed 's#/\([a-z]\)#\1:#' | sed 's#/#\\#g')
           echo "package_path=$path" >> $GITHUB_OUTPUT
           echo "package_hash=$(echo SHA2-256\(${{ matrix.desktop_asset_name }}\)= $(openssl sha256 $path | cut -d' ' -f 2))" >> $GITHUB_OUTPUT
 
