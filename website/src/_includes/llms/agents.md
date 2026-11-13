@@ -96,7 +96,7 @@ Responses carry the same `corrId`; chat events, such as received messages, arriv
 - [Commands](https://raw.githubusercontent.com/simplex-chat/simplex-chat/stable/bots/api/COMMANDS.md)
 - [Events](https://raw.githubusercontent.com/simplex-chat/simplex-chat/stable/bots/api/EVENTS.md)
 - [Types](https://raw.githubusercontent.com/simplex-chat/simplex-chat/stable/bots/api/TYPES.md)
-- [Terminal client guide](https://simplex.chat/docs/cli.md)
+- [Terminal client guide](https://popopx.chat/docs/cli.md)
 
 ## Build the terminal client from source
 
@@ -121,7 +121,7 @@ cabal update
 cabal install simplex-chat
 ```
 
-On macOS, install OpenSSL with `brew install openssl@3.0` and use `scripts/cabal.project.local.mac` instead. Full instructions: [terminal client guide](https://simplex.chat/docs/cli.md).
+On macOS, install OpenSSL with `brew install openssl@3.0` and use `scripts/cabal.project.local.mac` instead. Full instructions: [terminal client guide](https://popopx.chat/docs/cli.md).
 
 ## OpenClaw
 
@@ -136,8 +136,8 @@ Source: [github.com/dangoldbj/openclaw-simplex](https://github.com/dangoldbj/ope
 
 ## Run your own servers
 
-- [SMP messaging server](https://simplex.chat/docs/server.md)
-- [XFTP file server](https://simplex.chat/docs/xftp-server.md)
+- [SMP messaging server](https://popopx.chat/docs/server.md)
+- [XFTP file server](https://popopx.chat/docs/xftp-server.md)
 
 ## Protocol specifications
 
@@ -147,7 +147,7 @@ Source: [github.com/dangoldbj/openclaw-simplex](https://github.com/dangoldbj/ope
 - [Post-quantum double ratchet](https://raw.githubusercontent.com/simplex-chat/simplexmq/stable/protocol/pqdr.md)
 - [Security model](https://raw.githubusercontent.com/simplex-chat/simplexmq/stable/protocol/security.md)
 - [XFTP file transfer protocol](https://raw.githubusercontent.com/simplex-chat/simplexmq/stable/protocol/xftp.md)
-- [Chat protocol](https://simplex.chat/docs/protocol/simplex-chat.md)
+- [Chat protocol](https://popopx.chat/docs/protocol/simplex-chat.md)
 
 ## Ask the SimpleX team
 

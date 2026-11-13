@@ -112,7 +112,7 @@ async function showPromotedGroups() {
 \\__ \\| || |\\/| |  _/ |__| _| / . \\| (__| __ |/ _ \\| |
 |___/___|_|  |_|_| |____|___/_/ \\_\\\\___|_||_/_/ \\_\\_|
 
-SimpleX directory: https://simplex.chat/directory
+SimpleX directory: https://popopx.chat/directory
 Ask SimpleX team: https://smp6.simplex.im/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw
 GitHub: https://github.com/simplex-chat/simplex-chat
 Reddit: https://www.reddit.com/r/SimpleXChat
@@ -124,18 +124,18 @@ Whitepaper: https://github.com/simplex-chat/simplexmq/blob/stable/protocol/overv
 Bots API: https://github.com/simplex-chat/simplex-chat/tree/stable/bots
 TypeScript library: https://github.com/simplex-chat/simplex-chat/tree/stable/packages/simplex-chat-client/typescript
 Terminal CLI: https://github.com/simplex-chat/simplex-chat/blob/stable/docs/CLI.md
-Hosting SMP servers: https://simplex.chat/docs/server.html
+Hosting SMP servers: https://popopx.chat/docs/server.html
 
 Downloads
 ---------
-Apps: https://simplex.chat/downloads
+Apps: https://popopx.chat/downloads
 Servers: https://github.com/simplex-chat/simplexmq/releases
 
 Project
 -------
-About & Contact us: https://simplex.chat/about
-Privacy policy: https://simplex.chat/privacy
-Join team: https://simplex.chat/jobs
+About & Contact us: https://popopx.chat/about
+Privacy policy: https://popopx.chat/privacy
+Join team: https://popopx.chat/jobs
 Donations: https://github.com/simplex-chat/simplex-chat#please-support-us-with-your-donations
 `
         );

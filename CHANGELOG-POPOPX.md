@@ -81,10 +81,16 @@ The site's own location moved too: `siteLocation` (`website/.eleventy.js`, read 
 sites as `{% cfg 'siteLocation' %}`; there is no environment override) and `website/markdown_pages.js`,
 which declares the same string a second time, plus the two blog feeds' `metadata.url` — all
 `https://simplex.chat` → `https://popopx.chat`, because `website/src/CNAME` already read `popopx.chat`.
-`onionLocation` next to it stayed upstream's. 178 further `https://simplex.chat` occurrences in the site
-were not touched, and 52 of them are in `website/src/llms/{sitemap,robots,docs,llms-txt,llms-full}.njk`,
-which hardcode the host instead of reading `cfg` — so the generated sitemap and robots still point at
-upstream while `og:url` points at us.
+`onionLocation` next to it stayed upstream's. The rest of the site's own declarations followed in the same
+pass — 142 further occurrences in 19 files, because several templates and scripts hardcode the host instead
+of reading `cfg`: the generated sitemap `<loc>`, `robots.njk`'s `Sitemap:` line, the llms indexes and
+`_data/llms_facts.json` sources, the badge images and store links in `js/channel-preview.jsc`,
+`js/directory.jsc`, and both arms of `isCurrentSite` in `js/simplex-lib.jsc` (its `www.simplex.chat` alias
+became `www.popopx.chat`, since the predicate asks "is this our own page"). 36 occurrences stayed, and
+they are not self-declarations: 31 in `website/langs/*.json` and 2 in `src/_includes/blog_previews/` are
+translated display copy and upstream's published announcements whose *labels* still name upstream's app,
+and 3 are `…/contact#/?…smp%3A…` links carrying SimpleX Chat Ltd's encoded SMP address — moving only the
+host would hand that address out from our page.
 The npm and PyPI names in the committed manifests are upstream's on purpose: `packages_release.py
 test-names` rewrites them, with `npm:` aliases for the cross-package dependencies, from the
 repository variables `NPM_SCOPE` and `PYPI_PROJECT` at publish time — see

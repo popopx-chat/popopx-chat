@@ -47,7 +47,7 @@ function viaHost(smpHosts) {
 }
 
 function isCurrentSite(uri) {
-  return uri.startsWith("https://simplex.chat") || uri.startsWith("https://www.simplex.chat")
+  return uri.startsWith("https://popopx.chat") || uri.startsWith("https://www.popopx.chat")
 }
 
 function targetBlank(uri) {
@@ -324,6 +324,6 @@ function platformSimplexUri(uri) {
     if (remainingParams) newFragment += '?' + remainingParams;
     return `https://${host}:/${linkType}#${newFragment}`;
   } else {
-    return `https://simplex.chat/${linkType}#${fragment}`;
+    return `https://popopx.chat/${linkType}#${fragment}`;
   }
 }

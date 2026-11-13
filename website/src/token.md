@@ -19,7 +19,7 @@ These credits are not tradable tokens or speculative assets — there will be no
 
 ## Crowdfunding to Build Community Credits
 
-Building Community Credits requires more capital than we have. So we will raise capital in the same way we designed the network: decentralized, community-funded, with no single point of capture. If you use SimpleX, you can own part of what you already help build. The crowdfunding is now live &mdash; you can [invest in SimpleX Chat](https://simplex.chat/crowdfunding/), and join [SimpleX Crowdfunding News](https://simplex.chat/crowdfunding-news/) for updates.
+Building Community Credits requires more capital than we have. So we will raise capital in the same way we designed the network: decentralized, community-funded, with no single point of capture. If you use SimpleX, you can own part of what you already help build. The crowdfunding is now live &mdash; you can [invest in SimpleX Chat](https://popopx.chat/crowdfunding/), and join [SimpleX Crowdfunding News](https://popopx.chat/crowdfunding-news/) for updates.
 
 ## Why Community Credits?
 

@@ -300,7 +300,7 @@ function displayEntries(entries) {
 
       if (entryType?.groupType) {
         const noteElement = document.createElement('p');
-        noteElement.innerHTML = 'You need <a href="https://simplex.chat/downloads/">SimpleX Chat app v6.5</a> to join.';
+        noteElement.innerHTML = 'You need <a href="https://popopx.chat/downloads/">SimpleX Chat app v6.5</a> to join.';
         noteElement.className = 'text-sm';
         textContainer.appendChild(noteElement);
       }

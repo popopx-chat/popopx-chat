@@ -26,7 +26,7 @@ If you invest $500 or more, you will receive a free SimpleX public name for your
 
 The name will be registered for 5 years while early bird terms apply, and for 3 years after that.
 
-All investors receive free SimpleX supporter badges as perks. More details: [SimpleX Supporter Badges](https://simplex.chat/blog/20260919-simplex-supporter-badges.md).
+All investors receive free SimpleX supporter badges as perks. More details: [SimpleX Supporter Badges](https://popopx.chat/blog/20260919-simplex-supporter-badges.md).
 
 ### Every other network can identify users
 
@@ -66,7 +66,7 @@ SimpleX software is open-source and based on open protocols. It was audited by T
 
 Over 600,000 people use SimpleX Chat every month – up roughly 70% in the last six months – and all of them found it without any paid marketing. Among them are security and cryptography experts – the hardest users to win over.
 
-200+ independent reviews, posts, and videos in 20+ languages ([simplex.chat/links](https://simplex.chat/links.md)).
+200+ independent reviews, posts, and videos in 20+ languages ([simplex.chat/links](https://popopx.chat/links.md)).
 
 3 million people have downloaded the app.
 
@@ -93,7 +93,7 @@ Messaging grows person-by-person: whole social graphs have to move together, whi
 
 Users have created over 12,500 scalable channels in the five months since they shipped. 500+ public groups and channels are in the curated directory, 30% of them are active daily. Telegram channels tried to migrate in 2024/25, before SimpleX channels could scale. All that growth happened without in-app discovery of groups and channels – we are planning to release it this year, to further accelerate the growth.
 
-Each channel can also be published on the open web – like [simplex.chat/news](https://simplex.chat/news). Search engines index these pages, and anyone can read them in a browser without installing the SimpleX Chat app, so a channel can reach more people than use the app, and some of them may install it.
+Each channel can also be published on the open web – like [simplex.chat/news](https://popopx.chat/news). Search engines index these pages, and anyone can read them in a browser without installing the SimpleX Chat app, so a channel can reach more people than use the app, and some of them may install it.
 
 ### Developers already bet on SimpleX success
 
@@ -187,7 +187,7 @@ We are also fortunate to have great advisors. Some of them are: Moritz Angermann
 
 By investing in SimpleX Chat, you benefit from the company growth. You also help build the first network that protects private life because it has no user identifiers – a design decision that cannot be retrofitted into any existing network.
 
-We are building a network that people own. Businesses, creators, and publishers keep the audiences and communities they build, and no company can take them away or unilaterally shut them down. All users can talk, read, and buy without being watched or tracked from one site to the next. None of this is new. Before the Internet, people's conversations were private, and the groups and audiences they built were their own, with no company in the middle. We lost that when we moved online, and we need it back – the future we set out in our [network philosophy](https://simplex.chat/why.md).
+We are building a network that people own. Businesses, creators, and publishers keep the audiences and communities they build, and no company can take them away or unilaterally shut them down. All users can talk, read, and buy without being watched or tracked from one site to the next. None of this is new. Before the Internet, people's conversations were private, and the groups and audiences they built were their own, with no company in the middle. We lost that when we moved online, and we need it back – the future we set out in our [network philosophy](https://popopx.chat/why.md).
 
 We're building the network to support that future. We invite you to own a part of it: [wefunder.com/simplex.chat](https://wefunder.com/simplex.chat).
 

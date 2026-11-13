@@ -116,12 +116,21 @@ authoritative per-file record.
   build), `docs/dependencies/HASKELL.md` (a Dependency License Report whose entries are Hackage package
   names — `simplexmq-6.4.0.1` is upstream's), `plans/**`, `blog/**`, `CHANGELOG.md`, `docs/LINKS.md`,
   `docs/TRANSPARENCY.md` and `PRIVACY.md` as records, the `dist-newstyle/**` paths that captured commands
-  quote, and `website/**` apart from the nav item and from the site's own location (2026-11-13:
-  `siteLocation` and the two feeds' `metadata.url` now say `https://popopx.chat`, because
+  quote, and the parts of `website/**` that are content rather than this site's own declaration.
+  2026-11-13: `siteLocation` and the two feeds' `metadata.url` now say `https://popopx.chat`, because
   `website/src/CNAME` already read `popopx.chat` — the site was configured to be served from our domain
-  while declaring itself `simplex.chat`; `onionLocation` stayed upstream's). Its remaining `simplexmq` and
-  `simplex.chat` links still describe upstream's copy of the spec, which is what `--include-website` would
-  move. Two
+  while declaring itself `simplex.chat` to crawlers, feed readers and link previewers; `onionLocation`
+  beside it stayed upstream's. The same pass moved every *self-pointer* the templates hardcode instead of
+  reading `cfg` — 142 occurrences in 19 files: the generated sitemap `<loc>`, `robots.njk`'s `Sitemap:`,
+  the llms indexes and their facts sources, the badge/store links in `js/channel-preview.jsc`,
+  `js/directory.jsc`, and both arms of `isCurrentSite` in `js/simplex-lib.jsc` (so the `www.` alias became
+  `www.popopx.chat`). 36 occurrences stayed: 31 in `website/langs/*.json` and 2 in
+  `src/_includes/blog_previews/` — translated display copy and upstream's published announcements, whole
+  documents whose *labels* still name upstream's app, so the host cannot move without the copy — plus 3
+  `…/contact#/?…smp%3A…` links whose encoded SMP address is SimpleX Chat Ltd's contact, not ours: moving
+  only the host would hand out another operator's relay from our page, which is the BROKEN_PAIR class the
+  audit gate reports. The site's remaining `simplexmq` links still describe upstream's copy of the spec,
+  which is what `--include-website` would move. Two
   `…/simplexmq/refs/heads/stable/scripts/docker/docker-compose-smp-{complete,manual}.env` references also
   stayed because those files exist nowhere: upstream ships only `docker-compose-smp.env`, so the two doc
   lines are broken at the source and are not this fork's regression.

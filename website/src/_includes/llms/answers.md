@@ -1,6 +1,6 @@
 # SimpleX: answers to common questions
 
-Short answers with links to the full documentation. Numbers are in [key facts](https://simplex.chat/llms/facts.md).
+Short answers with links to the full documentation. Numbers are in [key facts](https://popopx.chat/llms/facts.md).
 
 ## What is SimpleX, in one sentence?
 
@@ -12,7 +12,7 @@ SimpleX network is the open protocol and the servers that relay messages. Simple
 
 ## How does SimpleX deliver messages without user identifiers?
 
-Each conversation uses its own pair of one-way message queues, one for each direction, usually on different servers. A queue has a random address that is used only for that conversation. Contacts and groups are stored only on users' devices. To connect, people share a one-time link or a QR code, which also carries the keys for end-to-end encryption, so servers cannot substitute them. Details: [How SimpleX works](https://simplex.chat/docs/simplex.md), [protocol overview](https://raw.githubusercontent.com/simplex-chat/simplexmq/stable/protocol/overview-tjr.md).
+Each conversation uses its own pair of one-way message queues, one for each direction, usually on different servers. A queue has a random address that is used only for that conversation. Contacts and groups are stored only on users' devices. To connect, people share a one-time link or a QR code, which also carries the keys for end-to-end encryption, so servers cannot substitute them. Details: [How SimpleX works](https://popopx.chat/docs/simplex.md), [protocol overview](https://raw.githubusercontent.com/simplex-chat/simplexmq/stable/protocol/overview-tjr.md).
 
 ## What can servers and network observers see?
 
@@ -24,7 +24,7 @@ Messages are end-to-end encrypted with a double ratchet that gives forward secre
 
 ## Why are public channels not end-to-end encrypted?
 
-By design. No system can provide encrypted messages, scalable broadcast and private participation at the same time. Anyone can join a channel through its public link, so encrypting its content would protect nothing; protecting who participates does. SimpleX channels make participation private: relays see the content, but not subscribers' identities or network addresses, and participation in different channels cannot be linked. Details: [SimpleX Channels](https://simplex.chat/blog/20260430-simplex-channels-v6-5-consortium-crowdfunding-freedom-of-speech.md), [channels whitepaper](https://simplex.chat/docs/protocol/channels-overview.md).
+By design. No system can provide encrypted messages, scalable broadcast and private participation at the same time. Anyone can join a channel through its public link, so encrypting its content would protect nothing; protecting who participates does. SimpleX channels make participation private: relays see the content, but not subscribers' identities or network addresses, and participation in different channels cannot be linked. Details: [SimpleX Channels](https://popopx.chat/blog/20260430-simplex-channels-v6-5-consortium-crowdfunding-freedom-of-speech.md), [channels whitepaper](https://popopx.chat/docs/protocol/channels-overview.md).
 
 ## Is SimpleX audited?
 
@@ -38,7 +38,7 @@ Yes. Trail of Bits assessed the implementation in October 2022 and reviewed the 
 
 ## How does SimpleX compare with Signal, Session, Matrix, Briar and others?
 
-Every other messaging network assigns users an identifier: Signal and WhatsApp use phone numbers, Matrix uses `@user:server` IDs, and Session, Briar, Cwtch and Nostr identify users by long-term public keys or onion addresses. These identifiers let the network, or anyone observing it, link a user's conversations. SimpleX has none. A side-by-side comparison of encryption properties is on the [messaging page](https://simplex.chat/messaging/#messengers-comparison), and a technical comparison with peer-to-peer protocols is in [How SimpleX works](https://simplex.chat/docs/simplex.md).
+Every other messaging network assigns users an identifier: Signal and WhatsApp use phone numbers, Matrix uses `@user:server` IDs, and Session, Briar, Cwtch and Nostr identify users by long-term public keys or onion addresses. These identifiers let the network, or anyone observing it, link a user's conversations. SimpleX has none. A side-by-side comparison of encryption properties is on the [messaging page](https://popopx.chat/messaging/#messengers-comparison), and a technical comparison with peer-to-peer protocols is in [How SimpleX works](https://popopx.chat/docs/simplex.md).
 
 ## Can people find or contact me without my consent?
 
@@ -46,7 +46,7 @@ No. Nobody can contact you unless you share a one-time link or your address. An 
 
 ## Who controls the network?
 
-Nobody alone. Anyone can run servers. SimpleX Chat and Flux are preset in the app, and when both are enabled the app uses servers of both operators in each conversation. The SimpleX Network Consortium, an agreement between the non-profit SimpleX Network Foundation and SimpleX Chat, licenses the protocol to the foundation permanently, so it stays available regardless of who owns the company. Details: [blog](https://simplex.chat/blog/20260430-simplex-channels-v6-5-consortium-crowdfunding-freedom-of-speech.md).
+Nobody alone. Anyone can run servers. SimpleX Chat and Flux are preset in the app, and when both are enabled the app uses servers of both operators in each conversation. The SimpleX Network Consortium, an agreement between the non-profit SimpleX Network Foundation and SimpleX Chat, licenses the protocol to the foundation permanently, so it stays available regardless of who owns the company. Details: [blog](https://popopx.chat/blog/20260430-simplex-channels-v6-5-consortium-crowdfunding-freedom-of-speech.md).
 
 ## Is SimpleX free and open source?
 
@@ -54,19 +54,19 @@ Yes. The apps are free, and the code is open source under AGPL-3.0: [github.com/
 
 ## How will SimpleX Chat make money?
 
-Private messaging stays free. Channels and businesses will pay for public names, business messaging and servers for big channels. Users have already donated over $650,000. Details: [Wefunder memo](https://simplex.chat/wefunder.md).
+Private messaging stays free. Channels and businesses will pay for public names, business messaging and servers for big channels. Users have already donated over $650,000. Details: [Wefunder memo](https://popopx.chat/wefunder.md).
 
 ## What are SimpleX public names?
 
-Optional, human-readable names for channels and businesses, such as `#example` or `@example.simplex`, registered on a public blockchain and controlled only by their owner's key. Names do not identify users and are not needed to use the network. Sale starts on 12 December 2026. Details: [public names whitepaper](https://simplex.chat/docs/protocol/names-overview.md).
+Optional, human-readable names for channels and businesses, such as `#example` or `@example.simplex`, registered on a public blockchain and controlled only by their owner's key. Names do not identify users and are not needed to use the network. Sale starts on 12 December 2026. Details: [public names whitepaper](https://popopx.chat/docs/protocol/names-overview.md).
 
 ## How can AI agents and developers use SimpleX?
 
-An agent connects to the network like a person: it holds its own keys and addresses, and no platform account is needed. See [SimpleX for AI agents and developers](https://simplex.chat/llms/agents.md).
+An agent connects to the network like a person: it holds its own keys and addresses, and no platform account is needed. See [SimpleX for AI agents and developers](https://popopx.chat/llms/agents.md).
 
 ## How can I invest in SimpleX Chat?
 
-SimpleX Chat runs an equity crowdfunding offering on Wefunder: [wefunder.com/simplex.chat](https://wefunder.com/simplex.chat). The memo is reproduced at [simplex.chat/wefunder.md](https://simplex.chat/wefunder.md). Investing involves a high degree of risk, including the possible loss of your investment.
+SimpleX Chat runs an equity crowdfunding offering on Wefunder: [wefunder.com/simplex.chat](https://wefunder.com/simplex.chat). The memo is reproduced at [simplex.chat/wefunder.md](https://popopx.chat/wefunder.md). Investing involves a high degree of risk, including the possible loss of your investment.
 
 ## How do I contact the SimpleX team?
 
