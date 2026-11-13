@@ -4760,9 +4760,11 @@ enum class ServerProtocol {
   @SerialName("xftp") XFTP;
 }
 
+// The serial names are the core's OperatorTag wire values (src/Popopx/Chat/Operators.hs textEncode),
+// stored in server_operators.server_operator_tag and shared with the Python SDK - they name the operators, not us.
 @Serializable
 enum class OperatorTag {
-  @SerialName("popopx") POPOPX,
+  @SerialName("simplex") SIMPLEX,
   @SerialName("flux") Flux
 }
 
@@ -4776,7 +4778,7 @@ data class ServerOperatorInfo(
   val largeLogoDarkMode: ImageResource
 )
 val operatorsInfo: Map<OperatorTag, ServerOperatorInfo> = mapOf(
-  OperatorTag.POPOPX to ServerOperatorInfo(
+  OperatorTag.SIMPLEX to ServerOperatorInfo(
     description = listOf(
       "POPOPX Chat is the first communication network that has no user profile IDs of any kind, not even random numbers or keys that identify the users.",
       "POPOPX Chat Ltd develops the communication software for POPOPX network."
@@ -4875,7 +4877,7 @@ data class ServerOperator(
 
     val sampleData1 = ServerOperator(
       operatorId = 1,
-      operatorTag = OperatorTag.POPOPX,
+      operatorTag = OperatorTag.SIMPLEX,
       tradeName = "POPOPX Chat",
       legalName = "POPOPX Chat Ltd",
       serverDomains = listOf("simplex.im"),

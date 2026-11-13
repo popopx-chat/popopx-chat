@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-13 (101 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-13 (102 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -204,6 +204,23 @@ repository variables `NPM_SCOPE` and `PYPI_PROJECT` at publish time — see
 [`NODE-PACKAGES-POPOPX.md`](./NODE-PACKAGES-POPOPX.md). Environment variables that third
 party tooling may set are read under both spellings (`SIMPLEX_ASSETS`/`POPOPX_ASSETS`,
 `SIMPLEX_LIBS_DIR`, `SIMPLEX_ADDON_PATH`).
+
+**A `@SerialName` is a wire value, and one tier renamed only the Kotlin side of it.** `82130779f` made
+`OperatorTag` read `@SerialName("popopx") POPOPX`, while the core still encodes the preset operator as
+`"simplex"` (`src/Popopx/Chat/Operators.hs` `textEncode OTSimplex = "simplex"` — the same spelling the
+generated Python type carries and `server_operators.server_operator_tag` stores). kotlinx threw on the
+`serverOperatorConditions` response, `APISerializer.fallbackResult` reported it as `* serverOperatorConditions`,
+the conditions list stayed empty and onboarding's **Accept button was never enabled** — the desktop smoke test
+stopped exactly there. No identifier audit can see this class: the string is intact on both sides, only the
+two sides disagree. `PopopxAPI.kt` decodes `"simplex"` again, with its two readers, and the entry keeps
+upstream's name because it names upstream's operator; the copy shown for that operator stays POPOPX-branded
+by ruling. The other five brand-derived tags in the API model were checked against their emitters and match
+(`popopx` TLD, `POPOPX` agent error, `popopxName`, `popopxLink`, `popopxLinks`, `popopxDomainNotReady`).
+The same run left **7 test mirrors** behind from earlier tiers: 5 still named the Windows ProgId
+`SimpleX.simplexchat` after `WINDOWS_PROG_ID_PREFIX` moved to `"POPOPX."`, and 2 case-variant link fixtures
+disagreed with their producers in opposite directions — `PopopxChat:/badge/…` had renamed a scheme that is
+held as `simplexchat`, while `SimpleX:/a#…` still spelled the connection scheme that moved to `popopx` in
+`05dd5a73c`.
 
 ### What was removed from this repository
 

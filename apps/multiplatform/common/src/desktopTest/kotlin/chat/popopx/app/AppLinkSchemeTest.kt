@@ -75,7 +75,7 @@ class AppLinkSchemeTest {
         RegistryValue(key = "Software\\Classes\\simplexchat", name = "URL Protocol", value = ""),
         RegistryValue(key = "Software\\Classes\\simplexchat\\DefaultIcon", name = "", value = "\"$windowsExe\",0"),
         RegistryValue(key = appLinkCommandKey, name = "", value = "\"$windowsExe\" \"%1\""),
-        RegistryValue(key = "Software\\com.popopxchat.popopx\\Capabilities\\URLAssociations", name = "simplexchat", value = "SimpleX.simplexchat"),
+        RegistryValue(key = "Software\\com.popopxchat.popopx\\Capabilities\\URLAssociations", name = "simplexchat", value = "POPOPX.simplexchat"),
       ),
       windowsSchemeValues("simplexchat", windowsExe),
       "app link scheme"
@@ -97,9 +97,9 @@ class AppLinkSchemeTest {
   fun windowsProgIdOpensTheExe() {
     assertEquals(
       listOf(
-        RegistryValue(key = "Software\\Classes\\SimpleX.simplexchat", name = "", value = "URL:POPOPX Chat"),
-        RegistryValue(key = "Software\\Classes\\SimpleX.simplexchat\\DefaultIcon", name = "", value = "\"$windowsExe\",0"),
-        RegistryValue(key = "Software\\Classes\\SimpleX.simplexchat\\shell\\open\\command", name = "", value = "\"$windowsExe\" \"%1\""),
+        RegistryValue(key = "Software\\Classes\\POPOPX.simplexchat", name = "", value = "URL:POPOPX Chat"),
+        RegistryValue(key = "Software\\Classes\\POPOPX.simplexchat\\DefaultIcon", name = "", value = "\"$windowsExe\",0"),
+        RegistryValue(key = "Software\\Classes\\POPOPX.simplexchat\\shell\\open\\command", name = "", value = "\"$windowsExe\" \"%1\""),
       ),
       windowsProgIdValues("simplexchat", windowsExe)
     )
@@ -226,7 +226,7 @@ class AppLinkSchemeTest {
 
   @Test
   fun windowsRegistrationTakesNoSchemeWhoseProgIdCannotBeWritten() {
-    val shell = FakeWindowsShell(failingWrites = setOf("Software\\Classes\\SimpleX.simplexchat"))
+    val shell = FakeWindowsShell(failingWrites = setOf("Software\\Classes\\POPOPX.simplexchat"))
     registerWindowsSchemes(windowsExe, shell)
     assertTrue(windowsSchemeValues("simplexchat", windowsExe).none { it in shell.writes }, "URLAssociations must not name a missing ProgId")
   }

@@ -17,7 +17,7 @@ class AppLinksTest {
 
   @Test
   fun acceptsTheSchemeInAnyCase() {
-    val link = "PopopxChat:/badge/code/SB0000000000000000000"
+    val link = "SimplexChat:/badge/code/SB0000000000000000000"
     assertEquals(link, linkFromArgs(arrayOf(link)))
   }
 
@@ -31,7 +31,7 @@ class AppLinksTest {
     assertEquals(SHORT_CONNECTION_LINK, linkFromArgs(arrayOf(SHORT_CONNECTION_LINK)), "short link")
     val oneTimeLink = oneTimeLinkWithKemKey()
     assertEquals(oneTimeLink, linkFromArgs(arrayOf(oneTimeLink)), "one-time link of ${oneTimeLink.length} bytes with its post-quantum key")
-    val upperCase = "SimpleX:/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw?h=smp6.simplex.im"
+    val upperCase = "Popopx:/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw?h=smp6.simplex.im"
     assertEquals(upperCase, linkFromArgs(arrayOf(upperCase)), "scheme in another case")
   }
 
