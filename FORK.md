@@ -387,6 +387,19 @@ yet. Before any build of this fork is distributed:
     fourth copy, `apple-app-site-association/index.json`, left with `website/`. All of
     them must agree with whatever certificate actually signs the distribution. A wrong one fails
     silently: keychain sharing and universal links stop working, and only on device.
+  - *The CI signing scripts no longer name it.* Ruled 2026-11-13: the identity comes from
+    `APPLE_POPOPX_SIGNING_IDENTITY` and the team id from `APPLE_POPOPX_NOTARIZATION_TEAM_ID`, so no Apple
+    identity for another company is asserted by our build — `build-desktop-mac.sh` and `sign-libs-mac.sh`
+    wrote `Developer ID Application: SimpleX Chat Ltd (5NN7GUYB6T)` and `team_id=5NN7GUYB6T` into the desktop
+    build, and `prepare-keychain-mac.sh` imported SimpleX Chat Ltd's `.cer`/`.p12`/`.pem` by name. The team id
+    is **forced to `PDBA6XRBQT`** (ruled the same day, see the bullet above) and is only the default in these
+    two scripts, so a secret can still override it; it is an identifier, not a credential. The identity string
+    is not derivable here because it embeds our legal entity name as it appears on the Developer ID certificate.
+    With `APPLE_POPOPX_SIGNING_IDENTITY` unset the two macOS desktop steps are skipped and say so, which is the
+    whole point of the "block nothing" ruling, and it does not extend to the libraries: notarizing them is not
+    optional, because `popopx-chat-libs` releases feed the Node.js add-on and the npm packages, so a release
+    tag without Apple material goes red at `Build library` rather than publishing an unnotarized `libsimplex`.
+    Measured: that repository has no releases at all yet.
 - **`popopx.chat` is owned and serving, and is now the ruled link domain.** Ruled 2026-11-13:
   `popopx.chat` for links and the site, `popopx.im` for relays. `website/src/CNAME` had already moved to
   `popopx.chat` before `website/` was removed — nothing read it but `website/.eleventy.js:471`, which

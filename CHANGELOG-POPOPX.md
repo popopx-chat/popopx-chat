@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-13 (109 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-13 (113 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -259,6 +259,33 @@ detects the empty tag and skips; that is what it does nightly now. Held by the u
 script's `REPO_NAME`/`REPO`/`SIMPLEX_REPO`/`SIMPLEX_KEY`, which name upstream's signed APK, because that is
 what it verifies. `FORK.md` §"Reproducing a build" documents how both are run and records that
 `STATUS_POPOPX_WEBHOOK_URL/_USER/_PASS` are not configured here, so a red run is the only signal.
+
+### The macOS signing scripts stopped asserting another company's identity (2026-11-13)
+
+Three CI scripts named SimpleX Chat Ltd's certificate as if it were ours: `build-desktop-mac.sh` wrote
+`desktop.mac.signing.identity=Developer ID Application: SimpleX Chat Ltd (5NN7GUYB6T)` and
+`desktop.mac.notarization.team_id=5NN7GUYB6T` into `local.properties` for the dmg build, `sign-libs-mac.sh`
+had `team=5NN7GUYB6T` and composed the same label for `codesign --sign`, and `prepare-keychain-mac.sh`
+imported `Developer ID Application: SimpleX Chat Ltd (5NN7GUYB6T).cer`, `SimpleX Chat.p12` and
+`SimpleX Chat.pem`. They are unreachable today - the desktop steps are gated on a tag push and this fork has
+published no release (`releases` answers an empty list) - so nothing had ever run them, which is exactly why
+they had to move before #56 rather than after it: the first release tag would have signed and notarized our
+build under SimpleX Chat Ltd's name, or died in the keychain.
+
+The identity is now configuration, not source: `APPLE_POPOPX_SIGNING_IDENTITY` supplies the codesign label and
+`APPLE_POPOPX_NOTARIZATION_TEAM_ID` the team, both read at job level in `build.yml`. The team id is forced to
+`PDBA6XRBQT` - the value already in `DEVELOPMENT_TEAM` (two configurations), in `KeyChain.swift:13`'s access
+group and in `FORK.md` - and is written as the scripts' default, overridable, because it is an identifier and
+not a credential; the label itself cannot be derived here since it embeds our legal entity name as it appears
+on the certificate. When the label is absent the two desktop steps are skipped with a warning instead of
+failing, so a release is not blocked by signing material we do not hold yet. That exemption deliberately does
+not cover `sign-libs-mac.sh`: the notarized dylibs feed the `popopx-chat-libs` release, which feeds the
+Node.js add-on and the npm packages, and publishing an unnotarized `libsimplex` would be the worse half -
+`popopx-chat-libs` has no releases either, measured the same day. `prepare-keychain-mac.sh` is not called by CI
+at all, so it keeps working as the local counterpart, now with the file names derived from the same three
+values. Held: `"Developer ID Certification Authority.cer"`, which is Apple's own intermediate, and
+`apps/multiplatform/README.md:86` / `local.properties.example`'s `app.name=SimpleX Debug`, which is a live
+value (`android/build.gradle.kts:57` puts it in the debug manifest label) and a different question.
 
 ### What was removed from this repository
 

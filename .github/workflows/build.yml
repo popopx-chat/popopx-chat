@@ -995,6 +995,10 @@ jobs:
     needs: [maybe-release, variables]
     if: needs.maybe-release.outputs.reduced != 'true' && needs.maybe-release.outputs.haskell == 'true'
     runs-on: ${{ matrix.os }}
+    env:
+      # The two values that say who signs: kept at job level so the steps can be skipped when they are absent.
+      APPLE_POPOPX_SIGNING_IDENTITY: ${{ secrets.APPLE_POPOPX_SIGNING_IDENTITY }}
+      APPLE_POPOPX_NOTARIZATION_TEAM_ID: ${{ secrets.APPLE_POPOPX_NOTARIZATION_TEAM_ID }}
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-macos-${{ matrix.os }}-${{ needs.maybe-release.outputs.libs_tag }}
       cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -1191,9 +1195,16 @@ jobs:
           github_ref: ${{ github.ref }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Report unsigned desktop build
+        if: matrix.should_run == true && startsWith(github.ref, 'refs/tags/v') && env.APPLE_POPOPX_SIGNING_IDENTITY == ''
+        shell: bash
+        run: |
+          echo "::warning::APPLE_POPOPX_SIGNING_IDENTITY is not configured - publishing the macOS desktop dmg unsigned is not possible, so the step is skipped."
+          echo "Set APPLE_POPOPX_SIGNING_IDENTITY and APPLE_POPOPX_NOTARIZATION_TEAM_ID (and the keychain, apple id and password) to build it."
+
       - name: Build Desktop
         id: mac_desktop_build
-        if: matrix.should_run == true && startsWith(github.ref, 'refs/tags/v')
+        if: matrix.should_run == true && startsWith(github.ref, 'refs/tags/v') && env.APPLE_POPOPX_SIGNING_IDENTITY != ''
         shell: bash
         env:
           APPLE_POPOPX_SIGNING_KEYCHAIN: ${{ secrets.APPLE_POPOPX_SIGNING_KEYCHAIN }}
@@ -1207,7 +1218,7 @@ jobs:
           echo "package_hash=$(echo SHA2-256\(${{ matrix.desktop_asset_name }}\)= $(openssl sha256 $path | cut -d' ' -f 2))" >> $GITHUB_OUTPUT
 
       - name: Upload Desktop
-        if: matrix.should_run == true && startsWith(github.ref, 'refs/tags/v')
+        if: matrix.should_run == true && startsWith(github.ref, 'refs/tags/v') && env.APPLE_POPOPX_SIGNING_IDENTITY != ''
         uses: ./.github/actions/prepare-release
         with:
           bin_path: ${{ steps.mac_desktop_build.outputs.package_path }}

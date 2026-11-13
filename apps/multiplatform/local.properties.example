@@ -5,8 +5,8 @@ app.name=SimpleX Debug
 
 #popopx.assets.dir=path/to/assets
 
-#desktop.mac.signing.identity=SimpleX Chat Ltd
-#desktop.mac.signing.keychain=/path/to/simplex.keychain
+#desktop.mac.signing.identity=Developer ID Application: <entity> (<TEAM ID>)
+#desktop.mac.signing.keychain=/path/to/popopx.keychain
 #desktop.mac.notarization.apple_id=example@example.com
 #desktop.mac.notarization.password=12345678
 #desktop.mac.notarization.team_id=XXXXXXXXXX

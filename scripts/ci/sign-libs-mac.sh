@@ -3,7 +3,8 @@
 set -euo pipefail
 
 libs=$1
-team=5NN7GUYB6T
+team="${APPLE_POPOPX_NOTARIZATION_TEAM_ID:-PDBA6XRBQT}"
+identity="${APPLE_POPOPX_SIGNING_IDENTITY:?APPLE_POPOPX_SIGNING_IDENTITY is not set - e.g. Developer ID Application: <entity> (<team id>)}"
 keychain=/tmp/popopx.keychain
 temp=$(mktemp -d)
 trap 'rm -rf "$keychain" "$temp"' EXIT
@@ -18,7 +19,7 @@ security list-keychains -s $(security list-keychains | xargs) "$keychain"
 
 for lib in "$libs"/*.dylib; do
   codesign --remove-signature "$lib"
-  codesign --timestamp --options runtime --force --sign "Developer ID Application: SimpleX Chat Ltd ($team)" --keychain "$keychain" "$lib"
+  codesign --timestamp --options runtime --force --sign "$identity" --keychain "$keychain" "$lib"
 done
 
 ditto -c -k --keepParent "$libs" "$temp/libs.zip"
