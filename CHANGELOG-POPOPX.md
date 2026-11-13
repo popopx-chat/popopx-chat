@@ -137,14 +137,30 @@ front-end. They are SimpleX Chat Ltd's editorial content about SimpleX Chat, and
 site from this tree (`popopx.chat` is built and published elsewhere). The one fork-authored file inside
 them, `docs/TRADEMARK-POPOPX.md`, was moved out first and is now `TRADEMARK-POPOPX.md` at the root, and
 the notices that cited upstream's `docs/TRADEMARK.md` now cite it where it lives instead of at a deleted
-path. What the removal takes with it: the six `website/src/.well-known/` files, which were never served
-from here but were the only copy of the Android/iOS association work in this tree, and
-`.github/workflows/web.yml`, which is now inert (its build step runs `./website/web.sh`) and will fail if
-a push touches `images/**` or `PRIVACY.md` until it is removed or repointed. `assets/` was deliberately
+path. What the removal took with it: the six `website/src/.well-known/` files, which were never served
+from here but were the only copy of the Android/iOS association work in this tree — serving them now means
+authoring them in the site's own repository. `.github/workflows/web.yml` was deleted with them: its build
+step ran `./website/web.sh` and its Deploy step was gated to upstream's repository name, so from this
+repository it could only ever go red, and the five members of the `website` CI scope went with it
+(`build.yml` PR paths, `SCOPE_CHANGES` in `scripts/ci/packages_release.py`, `scripts/ci/scope-tests.sh`,
+its test, and the `#### website` section of `scripts/ci/README.md`). `assets/` was deliberately
 **not** removed although it was named in the same ruling: it is a gradle build input
 (`-Ppopopx.assets.dir`, checked by `verifyPopopxAssets`), so deleting it would change the artwork
-compiled into the Android and desktop apps rather than trim a folder. `README.md` still links about twenty
-`./docs/**` and `./blog/**` paths, which are now dead; that cleanup is open.
+compiled into the Android and desktop apps rather than trim a folder.
+
+`README.md` was repaired in the same pass — 81 lines removed, 25 rewritten, and **0** relative links into
+`docs/`, `blog/`, `website/` or `plans/` survive the change (measured). What went: the whole
+`News and updates` blog list (15 links) and the `User guide` section, the translated-README row, and the
+`popopx.chat` sub-path pointers that 404 on our own host (`/blog/`, `/feed.rss`, `/llms.txt`,
+`/llms/agents.md`, `/docs/simplex.md`, `/why.md`). Sentences that carried only a dead pointer were deleted;
+sentences that carried information were de-linked; the two protocol references that still have a live
+target now name the `protocol/` documents of `popopxmq` (`popopx-messaging.md`, `agent-protocol.md`,
+`xftp.md`, `pqdr.md`). Two rewrites are copy, not link surgery, and are listed for review: the FAQ item
+whose answer was only a blog link was dropped and its list renumbered, and "Security contact" now says the
+fork publishes no security policy yet and points at the in-app team contact (upstream's `docs/SECURITY.md`
+describes *their* intake process and is not ours to claim).
+`packages/popopx-chat-nodejs/README.md`'s `./docs/*.md` links were left alone — they
+are package-relative typedoc files, not the root `docs/`.
 
 ### Deliberately not changed
 

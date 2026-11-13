@@ -16,8 +16,6 @@
 [![Join on Reddit](https://img.shields.io/reddit/subreddit-subscribers/SimpleXChat?style=social)](https://www.reddit.com/r/SimpleXChat)
 <a rel="me" href="https://mastodon.social/@simplex">![Follow on Mastodon](https://img.shields.io/mastodon/follow/108619463746856738?domain=https%3A%2F%2Fmastodon.social&style=social)</a>
 
-| 30/03/2023 | EN, [FR](/docs/lang/fr/README.md), [CZ](/docs/lang/cs/README.md), [PL](/docs/lang/pl/README.md) |
-
 <img src="images/github-banner.jpg" alt="SimpleX logo" width="100%">
 
 This link is **upstream's** fundraising campaign. POPOPX Chat is not part of it and receives
@@ -26,8 +24,6 @@ none of it: [Invest in SimpleX Chat on Wefunder](https://wefunder.com/simplex.ch
 # POPOPX - the first messaging platform that has no user identifiers of any kind - 100% private by design!
 
 [<img src="./images/trail-of-bits.jpg" height="80">](http://simplex.chat/blog/20221108-simplex-chat-v4.2-security-audit-new-website.html) &nbsp;&nbsp;&nbsp; [<img src="./images/privacy-guides.jpg" height="64">](https://www.privacyguides.org/en/real-time-communication/#simplex-chat) &nbsp;&nbsp;&nbsp; [<img src="./images/whonix-logo.jpg" height="64">](https://www.whonix.org/wiki/Chat#Recommendation) &nbsp;&nbsp;&nbsp; [<img src="./images/kuketz-blog.jpg" height="64">](https://www.kuketz-blog.de/simplex-eindruecke-vom-messenger-ohne-identifier/)
-
-**[Why we are building SimpleX Network](./docs/WHY.md)**
 
 ## Welcome to POPOPX Chat!
 
@@ -67,7 +63,7 @@ You can connect to the team via the app using "chat with the developers button" 
 
 We are replying the questions manually, so it is not instant – it can take up to 24 hours.
 
-If you are interested in helping us to integrate open-source language models, and in [joining our team](./docs/JOIN_TEAM.md), please get in touch.
+If you are interested in helping us to integrate open-source language models, and in joining our team, please get in touch.
 
 ## Join user groups
 
@@ -92,7 +88,6 @@ We publish our updates and releases via:
 
 - [Reddit](https://www.reddit.com/r/SimpleXChat/), [Twitter](https://twitter.com/SimpleXChat), [Lemmy](https://lemmy.ml/c/simplex), [Mastodon](https://mastodon.social/@simplex) and [Nostr](https://snort.social/p/npub1exv22uulqnmlluszc4yk92jhs2e5ajcs6mu3t00a6avzjcalj9csm7d828).
 - POPOPX Chat [team profile](#connect-to-the-team).
-- [blog](https://popopx.chat/blog/) and [RSS feed](https://popopx.chat/feed.rss).
 - [mailing list](https://popopx.chat/#join-simplex), very rarely.
 
 ## Make a private connection
@@ -103,11 +98,7 @@ The channel through which you share the link does not have to be secure - it is 
 
 <img src="https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/app1.png" alt="Make a private connection" height="360"> <img src="https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/arrow.png" height="360"> <img src="https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/app2.png" alt="Conversation" height="360"> <img src="https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/arrow.png" height="360"> <img src="https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/app3.png" alt="Video call" height="360">
 
-After you connect, you can [verify connection security code](./blog/20230103-simplex-chat-v4.4-disappearing-messages.md#connection-security-verification).
-
-## User guide (NEW)
-
-Read about the app features and settings in the new [User guide](./docs/guide/README.md).
+After you connect, you can verify connection security code.
 
 ## Contribute
 
@@ -146,7 +137,7 @@ Join our translators to help SimpleX grow!
 |🇺🇦 uk|Українська| |[![android app](https://hosted.weblate.org/widgets/simplex-chat/uk/android/svg-badge.svg)](https://hosted.weblate.org/projects/simplex-chat/android/uk/)<br>[![ios app](https://hosted.weblate.org/widgets/simplex-chat/uk/ios/svg-badge.svg)](https://hosted.weblate.org/projects/simplex-chat/ios/uk/)|[![website](https://hosted.weblate.org/widgets/simplex-chat/uk/website/svg-badge.svg)](https://hosted.weblate.org/projects/simplex-chat/website/uk/)||
 |🇨🇳 zh-CHS|简体中文|[sith-on-mars](https://github.com/sith-on-mars)<br><br>[Float-hu](https://github.com/Float-hu)|[![android app](https://hosted.weblate.org/widgets/simplex-chat/zh_Hans/android/svg-badge.svg)](https://hosted.weblate.org/projects/simplex-chat/android/zh_Hans/)<br>[![ios app](https://hosted.weblate.org/widgets/simplex-chat/zh_Hans/ios/svg-badge.svg)](https://hosted.weblate.org/projects/simplex-chat/ios/zh_Hans/)<br>&nbsp;|<br><br>[![website](https://hosted.weblate.org/widgets/simplex-chat/zh_Hans/website/svg-badge.svg)](https://hosted.weblate.org/projects/simplex-chat/website/zh_Hans/)||
 
-Languages in progress: Arabic, Japanese, Korean, Portuguese and [others](https://hosted.weblate.org/projects/simplex-chat/#languages). We will be adding more languages as some of the already added are completed – please suggest new languages, review the [translation guide](./docs/TRANSLATIONS.md) and get in touch with us!
+Languages in progress: Arabic, Japanese, Korean, Portuguese and [others](https://hosted.weblate.org/projects/simplex-chat/#languages). We will be adding more languages as some of the already added are completed – please suggest new languages and get in touch with us!
 
 ## Please support us with your donations
 
@@ -186,7 +177,6 @@ SimpleX Chat founder
   - [Ownership and security of your data](#complete-ownership-control-and-security-of-your-data)
   - [Users own SimpleX network](#users-own-simplex-network)
 - [Frequently asked questions](#frequently-asked-questions)
-- [News and updates](#news-and-updates)
 - [Quick installation of a terminal app](#zap-quick-installation-of-a-terminal-app)
 - [SimpleX Platform design](#simplex-platform-design)
 - [Privacy and security: technical details and limitations](#privacy-and-security-technical-details-and-limitations)
@@ -208,61 +198,25 @@ It is not enough to use an end-to-end encrypted messenger, we all should use the
 
 ### Complete privacy of your identity, profile, contacts and metadata
 
-**Unlike any other existing messaging platform, SimpleX has no identifiers assigned to the users** - not even random numbers. This protects the privacy of who are you communicating with, hiding it from SimpleX platform servers and from any observers. [Read more](./docs/SIMPLEX.md#full-privacy-of-your-identity-profile-contacts-and-metadata).
+**Unlike any other existing messaging platform, SimpleX has no identifiers assigned to the users** - not even random numbers. This protects the privacy of who are you communicating with, hiding it from SimpleX platform servers and from any observers.
 
 ### The best protection against spam and abuse
 
-As you have no identifier on SimpleX platform, you cannot be contacted unless you share a one-time invitation link or an optional temporary user address. [Read more](./docs/SIMPLEX.md#the-best-protection-against-spam-and-abuse).
+As you have no identifier on SimpleX platform, you cannot be contacted unless you share a one-time invitation link or an optional temporary user address.
 
 ### Complete ownership, control and security of your data
 
-SimpleX stores all user data on client devices, the messages are only held temporarily on SimpleX relay servers until they are received. [Read more](./docs/SIMPLEX.md#complete-ownership-control-and-security-of-your-data).
+SimpleX stores all user data on client devices, the messages are only held temporarily on SimpleX relay servers until they are received.
 
 ### Users own SimpleX network
 
-You can use SimpleX with your own servers and still communicate with people using the servers that are pre-configured in the apps or any other SimpleX servers. [Read more](./docs/SIMPLEX.md#users-own-simplex-network).
+You can use SimpleX with your own servers and still communicate with people using the servers that are pre-configured in the apps or any other SimpleX servers.
 
 ## Frequently asked questions
 
-1. _How SimpleX can deliver messages without any user identifiers?_ See [v2 release announcement](./blog/20220511-simplex-chat-v2-images-files.md#the-first-messaging-platform-without-user-identifiers) explaining how SimpleX works.
+1. _Why should I not just use Signal?_ Signal is a centralized platform that uses phone numbers to identify its users and their contacts. It means that while the content of your messages on Signal is protected with robust end-to-end encryption, there is a large amount of meta-data visible to Signal - who you talk with and when.
 
-2. _Why should I not just use Signal?_ Signal is a centralized platform that uses phone numbers to identify its users and their contacts. It means that while the content of your messages on Signal is protected with robust end-to-end encryption, there is a large amount of meta-data visible to Signal - who you talk with and when.
-
-3. _How is it different from Matrix, Session, Ricochet, Cwtch, etc., that also don't require user identities?_ Although these platforms do not require a _real identity_, they do rely on anonymous user identities to deliver messages – it can be, for example, an identity key or a random number. Using a persistent user identity, even anonymous, creates a risk that user's connection graph becomes known to the observers and/or service providers, and it can lead to de-anonymizing some users. If the same user profile is used to connect to two different people via any messenger other than SimpleX, these two people can confirm if they are connected to the same person - they would use the same user identifier in the messages. With SimpleX there is no meta-data in common between your conversations with different contacts - the quality that no other messaging platform has.
-
-## News and updates
-
-Recent and important updates:
-
-[Sep 19, 2026. SimpleX Supporter Badges — Send Larger Files That Stay Available Longer, Without Being Identified](./blog/20260919-simplex-supporter-badges.md)
-
-[Aug 20, 2026. Equity Crowdfunding Launched - You Can Get a Stake in SimpleX Chat](./blog/20260819-simplex-chat-crowdfunding.md)
-
-[Jul 22, 2026. SimpleX Public Names — a Name Nobody Can Take From You](./blog/20260722-simplex-public-names.md)
-
-[Apr 30, 2026. SimpleX Channels, SimpleX Network Consortium and Community Crowdfunding - to Preserve Freedom of Speech](./blog/20260430-simplex-channels-v6-5-consortium-crowdfunding-freedom-of-speech.md)
-
-[Jul 29, 2025. SimpleX Chat v6.4.1: welcome your contacts, review members to protect groups, and more.](./blog/20250729-simplex-chat-v6-4-1-welcome-contacts-protect-groups-app-security.md)
-
-[Jul 3, 2025 SimpleX network: new experience of connecting with people &mdash; available in SimpleX Chat v6.4-beta.4](./blog/20250703-simplex-network-protocol-extension-for-securely-connecting-people.md)
-
-[Jan 14, 2025. SimpleX network: large groups and privacy-preserving content moderation](./blog/20250114-simplex-network-large-groups-privacy-preserving-content-moderation.md)
-
-[Dec 10, 2024. SimpleX network: preset servers operated by Flux, business chats and more with v6.2 of the apps](./20241210-simplex-network-v6-2-servers-by-flux-business-chats.md)
-
-[Oct 14, 2024. SimpleX network: security review of protocols design by Trail of Bits, v6.1 released with better calls and user experience.](./blog/20241014-simplex-network-v6-1-security-review-better-calls-user-experience.md)
-
-[Aug 14, 2024. SimpleX network: the investment from Jack Dorsey and Asymmetric, v6.0 released with the new user experience and private message routing](./blog/20240814-simplex-chat-vision-funding-v6-private-routing-new-user-experience.md)
-
-[Jun 4, 2024. SimpleX network: private message routing, v5.8 released with IP address protection and chat themes](./blog/20240604-simplex-chat-v5.8-private-message-routing-chat-themes.md)
-
-[Mar 14, 2024. SimpleX Chat v5.6 beta: adding quantum resistance to Signal double ratchet algorithm.](./blog/20240314-simplex-chat-v5-6-quantum-resistance-signal-double-ratchet-algorithm.md)
-
-[Nov 25, 2023. SimpleX Chat v5.4 released: link mobile and desktop apps via quantum resistant protocol, and much better groups](./blog/20231125-simplex-chat-v5-4-link-mobile-desktop-quantum-resistant-better-groups.md).
-
-[Apr 22, 2023. SimpleX Chat: vision and funding, v5.0 released with videos and files up to 1gb](./blog/20230422-simplex-chat-vision-funding-v5-videos-files-passcode.md).
-
-[All updates](./blog)
+2. _How is it different from Matrix, Session, Ricochet, Cwtch, etc., that also don't require user identities?_ Although these platforms do not require a _real identity_, they do rely on anonymous user identities to deliver messages – it can be, for example, an identity key or a random number. Using a persistent user identity, even anonymous, creates a risk that user's connection graph becomes known to the observers and/or service providers, and it can lead to de-anonymizing some users. If the same user profile is used to connect to two different people via any messenger other than SimpleX, these two people can confirm if they are connected to the same person - they would use the same user identifier in the messages. With SimpleX there is no meta-data in common between your conversations with different contacts - the quality that no other messaging platform has.
 
 ## :zap: Quick installation of a terminal app
 
@@ -274,13 +228,11 @@ Once the chat client is installed, simply run `popopx-chat` from your terminal.
 
 ![simplex-chat](./images/connection.gif)
 
-Read more about [installing and using the terminal app](./docs/CLI.md).
-
 ## SimpleX Platform design
 
 SimpleX is a client-server network with a unique network topology that uses redundant, disposable message relay nodes to asynchronously pass messages via unidirectional (simplex) message queues, providing recipient and sender anonymity.
 
-Unlike P2P networks, all messages are passed through one or several server nodes, that do not even need to have persistence. In fact, the current [SMP server implementation](https://github.com/popopx-chat/popopxmq#smp-server) uses in-memory message storage, persisting only the queue records. SimpleX provides better metadata protection than P2P designs, as no global participant identifiers are used to deliver messages, and avoids [the problems of P2P networks](./docs/SIMPLEX.md#comparison-with-p2p-messaging-protocols).
+Unlike P2P networks, all messages are passed through one or several server nodes, that do not even need to have persistence. In fact, the current [SMP server implementation](https://github.com/popopx-chat/popopxmq#smp-server) uses in-memory message storage, persisting only the queue records. SimpleX provides better metadata protection than P2P designs, as no global participant identifiers are used to deliver messages, and avoids the problems of P2P networks.
 
 Unlike federated networks, the server nodes **do not have records of the users**, **do not communicate with each other** and **do not store messages** after they are delivered to the recipients. There is no way to discover the full list of servers participating in SimpleX network. This design avoids the problem of metadata visibility that all federated networks have and better protects from the network-wide attacks.
 
@@ -288,34 +240,31 @@ Only the client devices have information about users, their contacts and groups.
 
 See [SimpleX whitepaper](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md) for more information on platform objectives and technical design.
 
-See [SimpleX Chat Protocol](./docs/protocol/popopx-chat.md) for the format of messages sent between chat clients over [SimpleX Messaging Protocol](https://github.com/popopx-chat/popopxmq/blob/master/protocol/popopx-messaging.md).
+Messages are exchanged between chat clients over [SimpleX Messaging Protocol](https://github.com/popopx-chat/popopxmq/blob/master/protocol/popopx-messaging.md).
 
 ## Privacy and security: technical details and limitations
 
 POPOPX Chat is a work in progress – we are releasing improvements as they are ready. You have to decide if the current state is good enough for your usage scenario.
 
-We compiled a [glossary of terms](./docs/GLOSSARY.md) used to describe communication systems to help understand some terms below and to help compare advantages and disadvantages of various communication systems.
-
 What is already implemented:
 
-1. Instead of user profile identifiers used by all other platforms, even the most private ones, SimpleX uses [pairwise per-queue identifiers](./docs/GLOSSARY.md#pairwise-pseudonymous-identifier) (2 addresses for each unidirectional message queue, with an optional 3rd address for push notifications on iOS, 2 queues in each connection between the users). It makes observing the network graph on the application level more difficult, as for `n` users there can be up to `n * (n-1)` message queues.
-2. [End-to-end encryption](./docs/GLOSSARY.md#end-to-end-encryption) in each message queue using [NaCl cryptobox](https://nacl.cr.yp.to/box.html). This is added to allow redundancy in the future (passing each message via several servers), to avoid having the same ciphertext in different queues (that would only be visible to the attacker if TLS is compromised). The encryption keys used for this encryption are not rotated, instead we are planning to rotate the queues. Curve25519 keys are used for key negotiation.
-3. [Double ratchet](./docs/GLOSSARY.md#double-ratchet-algorithm) end-to-end encryption in each conversation between two users (or group members). This is the same algorithm that is used in Signal and many other messaging apps; it provides OTR messaging with [forward secrecy](./docs/GLOSSARY.md#forward-secrecy) (each message is encrypted by its own ephemeral key) and [break-in recovery](./docs/GLOSSARY.md#post-compromise-security) (the keys are frequently re-negotiated as part of the message exchange). Two pairs of Curve448 keys are used for the initial [key agreement](./docs/GLOSSARY.md#key-agreement-protocol), initiating party passes these keys via the connection link, accepting side - in the header of the confirmation message.
-4. [Post-quantum resistant key exchange](./docs/GLOSSARY.md#post-quantum-cryptography) in double ratchet protocol *on every ratchet step*. Read more in [this post](./blog/20240314-simplex-chat-v5-6-quantum-resistance-signal-double-ratchet-algorithm.md) and also see this [publication by Apple]( https://security.apple.com/blog/imessage-pq3/) explaining the need for post-quantum key rotation.
+1. Instead of user profile identifiers used by all other platforms, even the most private ones, SimpleX uses pairwise per-queue identifiers (2 addresses for each unidirectional message queue, with an optional 3rd address for push notifications on iOS, 2 queues in each connection between the users). It makes observing the network graph on the application level more difficult, as for `n` users there can be up to `n * (n-1)` message queues.
+2. End-to-end encryption in each message queue using [NaCl cryptobox](https://nacl.cr.yp.to/box.html). This is added to allow redundancy in the future (passing each message via several servers), to avoid having the same ciphertext in different queues (that would only be visible to the attacker if TLS is compromised). The encryption keys used for this encryption are not rotated, instead we are planning to rotate the queues. Curve25519 keys are used for key negotiation.
+3. Double ratchet end-to-end encryption in each conversation between two users (or group members). This is the same algorithm that is used in Signal and many other messaging apps; it provides OTR messaging with forward secrecy (each message is encrypted by its own ephemeral key) and break-in recovery (the keys are frequently re-negotiated as part of the message exchange). Two pairs of Curve448 keys are used for the initial key agreement, initiating party passes these keys via the connection link, accepting side - in the header of the confirmation message.
+4. Post-quantum resistant key exchange in double ratchet protocol *on every ratchet step*. See also this [publication by Apple]( https://security.apple.com/blog/imessage-pq3/) explaining the need for post-quantum key rotation.
 5. Additional layer of encryption using NaCL cryptobox for the messages delivered from the server to the recipient. This layer avoids having any ciphertext in common between sent and received traffic of the server inside TLS (and there are no identifiers in common as well).
-6. Several levels of [content padding](./docs/GLOSSARY.md#message-padding) to frustrate message size attacks.
+6. Several levels of content padding to frustrate message size attacks.
 7. All message metadata, including the time when the message was received by the server (rounded to a second) is sent to the recipients inside an encrypted envelope, so even if TLS is compromised it cannot be observed.
 8. Only TLS 1.2/1.3 are allowed for client-server connections, limited to cryptographic algorithms: CHACHA20POLY1305_SHA256, Ed25519/Ed448, Curve25519/Curve448.
 9. To protect against replay attacks SimpleX servers require [tlsunique channel binding](https://www.rfc-editor.org/rfc/rfc5929.html) as session ID in each client command signed with per-queue ephemeral key.
-10. To protect your IP address from unknown messaging relays, and for per-message transport anonymity (compared with Tor/VPN per-connection anonymity), from v6.0 all SimpleX Chat clients use private message routing by default. Read more in [this post](./blog/20240604-simplex-chat-v5.8-private-message-routing-chat-themes.md#private-message-routing).
+10. To protect your IP address from unknown messaging relays, and for per-message transport anonymity (compared with Tor/VPN per-connection anonymity), from v6.0 all SimpleX Chat clients use private message routing by default.
 11. To protect your IP address from unknown file relays, when SOCKS proxy is not enabled POPOPX Chat clients ask for a confirmation before downloading the files from unknown servers.
-12. To protect your IP address from known servers all SimpleX Chat clients support accessing messaging servers via Tor - see [v3.1 release announcement](./blog/20220808-simplex-chat-v3.1-chat-groups.md) for more details.
+12. To protect your IP address from known servers all SimpleX Chat clients support accessing messaging servers via Tor.
 13. Local database encryption with passphrase - your contacts, groups and all sent and received messages are stored encrypted. If you used POPOPX Chat before v4.0 you need to enable the encryption via the app settings.
 14. Transport isolation - different TCP connections and Tor circuits are used for traffic of different user profiles, optionally - for different contacts and group member connections.
 15. Manual messaging queue rotations to move conversation to another SMP relay.
-16. Sending end-to-end encrypted files using [XFTP protocol](https://popopx.chat/blog/20230301-simplex-file-transfer-protocol.html).
+16. Sending end-to-end encrypted files using XFTP protocol.
 17. Local files encryption.
-18. [Reproducible server builds](./docs/SERVER.md#reproduce-builds).
 
 We plan to add:
 
@@ -329,7 +278,7 @@ We plan to add:
 You can:
 
 - [create chat bots and services](#develop-a-chat-bot).
-- run [popopx-chat terminal CLI](./docs/CLI.md) to execute individual chat commands, e.g. to send messages as part of shell script execution.
+- run popopx-chat terminal CLI to execute individual chat commands, e.g. to send messages as part of shell script execution.
 - use POPOPX Chat library to integrate chat functionality into your mobile apps.
 - create chat bots and services in Haskell - see [simple](./apps/popopx-bot/) and more [advanced chat bot example](./apps/popopx-bot-advanced/).
 
@@ -347,15 +296,10 @@ Also see [TypeScript POPOPX Chat client](./packages/popopx-chat-client/) and [Ja
 
 ## Agents
 
-- For AI assistants: [simplex.chat/llms.txt](https://popopx.chat/llms.txt), an index of the documentation in Markdown, and [SimpleX for AI agents and developers](https://popopx.chat/llms/agents.md).
-- Every page of simplex.chat is also available as Markdown: replace `.html` with `.md` ([simplex.chat/docs/simplex.md](https://popopx.chat/docs/simplex.md)), or add `.md` to the path ([simplex.chat/why.md](https://popopx.chat/why.md)).
 - Libraries: [Node.js](./packages/popopx-chat-nodejs/) ([npm](https://www.npmjs.com/package/simplex-chat)) and [Python](./packages/popopx-chat-python/) ([PyPI](https://pypi.org/project/simplex-chat/)).
 - [Bot API guide](./bots/README.md) and [API reference](./bots/api/README.md): commands, events and types.
 - Example bots: [support bot](./apps/popopx-support-bot/) and [calculator](./apps/popopx-calculator-bot/) in TypeScript, [support bot light](./apps/popopx-support-bot-light/) in Python, [directory service](./apps/popopx-directory-service/) and [broadcast bot](./apps/popopx-broadcast-bot/) in Haskell.
-- [Terminal client](./docs/CLI.md): installation, building from source and usage.
-- Servers: [SMP](./docs/SERVER.md), [XFTP](./docs/XFTP-SERVER.md) and [chat relay](./docs/CHAT-RELAY.md).
-- Protocols: [SimpleX network](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md), [chat](./docs/protocol/popopx-chat.md), [channels](./docs/protocol/channels-overview.md) and [public names](./docs/protocol/names-overview.md).
-- For coding agents working in this repository: [project structure](./docs/contributing/PROJECT.md) and [coding and building](./docs/contributing/CODE.md).
+- Protocols: [SimpleX network](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md), [agent protocol](https://github.com/popopx-chat/popopxmq/blob/master/protocol/agent-protocol.md), [XFTP](https://github.com/popopx-chat/popopxmq/blob/master/protocol/xftp.md) and [PQDR](https://github.com/popopx-chat/popopxmq/blob/master/protocol/pqdr.md).
 
 ## Roadmap
 
@@ -394,7 +338,7 @@ Also see [TypeScript POPOPX Chat client](./packages/popopx-chat-client/) and [Ja
 - ✅ Improved audio & video calls.
 - ✅ Support older Android OS and 32-bit CPUs.
 - ✅ Hidden chat profiles.
-- ✅ Sending and receiving large files via [XFTP protocol](./blog/20230301-simplex-file-transfer-protocol.md).
+- ✅ Sending and receiving large files via XFTP protocol.
 - ✅ Video messages.
 - ✅ App access passcode.
 - ✅ Improved Android app UI design.
@@ -433,9 +377,9 @@ Also see [TypeScript POPOPX Chat client](./packages/popopx-chat-client/) and [Ja
 
 [SimpleX protocols and security model](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md) was reviewed, and had many breaking changes and improvements in v1.0.0.
 
-The implementation security assessment of SimpleX cryptography and networking was done in October 2022 by [Trail of Bits](https://www.trailofbits.com/about) – see [the announcement](./blog/20221108-simplex-chat-v4.2-security-audit-new-website.md).
+The implementation security assessment of SimpleX cryptography and networking was done in October 2022 by [Trail of Bits](https://www.trailofbits.com/about).
 
-The cryptographic review of SimpleX protocols was done in July 2024 by Trail of Bits – see [the announcement](./blog/20241014-simplex-network-v6-1-security-review-better-calls-user-experience.md).
+The cryptographic review of SimpleX protocols was done in July 2024 by Trail of Bits.
 
 POPOPX Chat is still a relatively early stage platform (the mobile apps were released in March 2022), so you may discover some bugs and missing features. We would really appreciate if you let us know anything that needs to be fixed or improved.
 
@@ -449,7 +393,7 @@ Please read more in [Privacy Policy](./PRIVACY.md).
 
 ## Security contact
 
-Please see our [Security Policy](./docs/SECURITY.md) on how to report security vulnerabilities to us. We will coordinate the fix and disclosure.
+POPOPX Chat does not publish a security policy yet - report vulnerabilities to the team in the app (see [Connect to the team](#connect-to-the-team)). We will coordinate the fix and disclosure.
 
 Please do NOT report security vulnerabilities via GitHub issues.
 

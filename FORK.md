@@ -142,6 +142,15 @@ summary:
     build input (`-Ppopopx.assets.dir`, verified by `verifyPopopxAssets`), so deleting it would change
     the artwork compiled into the Android and desktop apps rather than trim prose.
 
+    Two things died with it and neither is a branding question. `.github/workflows/web.yml` was deleted
+    the same day — its build step ran `./website/web.sh` and its Deploy step was gated to
+    `github.repository == 'simplex-chat/simplex-chat'`, so from this fork it could only ever have gone red —
+    and the five members of the `website` CI scope moved with it (`build.yml` PR paths, `SCOPE_CHANGES` in
+    `scripts/ci/packages_release.py`, `scripts/ci/scope-tests.sh`, its test, `scripts/ci/README.md`). The
+    six `website/src/.well-known/` files were this tree's only copy of the Android/iOS association work;
+    they were never served from here, and the work now belongs to the site's own repository (see "Link
+    claims are inert").
+
 Every modification carries the date of the commit that made it; `git log` is the
 authoritative per-file record.
 
@@ -275,11 +284,13 @@ yet. Before any build of this fork is distributed:
   fix; hand-editing the manifests would break `unreleased_pins()` and `check-pins` instead.
   Full method: [`NODE-PACKAGES-POPOPX.md`](./NODE-PACKAGES-POPOPX.md).
 - **Link claims are inert, for three independent reasons.** All three must clear in the same change.
-  - *This tree publishes nothing.* The Deploy step of `.github/workflows/web.yml:36` is gated
-    `if: github.repository == 'simplex-chat/simplex-chat'`, so this repository never publishes a
-    site at all; `website/src/CNAME`, passed through to the site root by `website/.eleventy.js:471`,
-    still reads `simplex.chat` — GitHub Pages would claim the upstream domain. What does answer on these
-    domains is a different deployment, described next.
+  - *This tree publishes nothing, and since 2026-11-13 it holds nothing to publish.* The only site build it
+    carried was `.github/workflows/web.yml`, whose Deploy step was gated
+    `if: github.repository == 'simplex-chat/simplex-chat'`, so this repository never published a site even
+    when `website/` was in the tree; `website/src/CNAME` was read by nothing else. Both were removed on
+    2026-11-13 — `website/` by item 10 above (`9996634ee`), the workflow with it — and that removal took
+    the six `website/src/.well-known/` files, which were this repository's only copy of the association
+    work. What answers on these domains is a different deployment, described next.
   - *Measured 2026-11-12, corrected by a closer look on 2026-11-13.* `popopx.chat` is registered
     (Namecheap) and resolves to `43.129.40.33` — identically from 1.1.1.1, 8.8.8.8 and 9.9.9.9, unlike
     `simplex.chat`, which answers a different address per resolver on this network, so these records are real
@@ -287,10 +298,11 @@ yet. Before any build of this fork is distributed:
     Chat</title>`, `nginx/1.14.1`, `x-powered-by: PHP/7.2.24`, served for `popopx.chat`, `popopxchat.com` and
     `www.popopxchat.com` alike, over plain HTTP as well as HTTPS. Three consequences, none of them fixable in
     this repository:
-    - **The site that is deployed is not the site in this tree.** `website/` is upstream's Eleventy build and
-      nothing in CI publishes it (there is no `gh-pages` branch either — `git ls-remote --heads origin`
-      returns one ref). So `web.yml:36` and `website/src/CNAME` are not the levers; publishing
-      `.well-known` means adding two static locations to that nginx.
+    - **The deployed site is not built from this repository.** `website/` was upstream's Eleventy build and
+      nothing in CI ever published it (there is no `gh-pages` branch either — `git ls-remote --heads origin`
+      returns one ref); it was removed on 2026-11-13. So neither the deleted workflow nor a `CNAME` is the
+      lever: publishing `.well-known` means adding two static locations to that nginx **and** authoring the
+      two files there, because this tree no longer holds them.
     - **The certificate is single-name.** `CN=popopxchat.com`, and its SAN holds only
       `DNS:popopxchat.com` — no `popopx.chat`, no `www`. Every client therefore sees a name mismatch on
       `https://popopx.chat/`, including the OS link verifier, which requires a valid TLS connection before it
@@ -304,7 +316,8 @@ yet. Before any build of this fork is distributed:
       `application/json`, no redirect and no HTML error page, and Android reads it before it will verify
       `autoVerify` for `com.popopxchat.popopx`.
     - **Nothing is published under `/.well-known/` on either name** — each returns the PHP application's 404
-      HTML page, so the files in `website/src/.well-known/` are not deployed anywhere.
+      HTML page. The copies that existed here (`website/src/.well-known/`, six files) were never served from
+      this tree either, and left with it on 2026-11-13.
   - *The relay hosts exist too, and all but one are not serving.* `smp1-8`, `xftp1`, `xftp6`, `ntf1-3`
     under `popopx.im` each resolve to a distinct address (`xftp2-5` and `ntf4` do not resolve, and the zone
     has no wildcard, so every record was written deliberately); `smp1-8`, `xftp1` and `xftp6` carry the same
@@ -328,18 +341,21 @@ yet. Before any build of this fork is distributed:
     `smp-server`/`xftp-server`/`ntf-server` on those boxes and open the port in the provider's security
     group; the keys then read themselves and the cutover is one scripted pass (see "Upstream-operated
     hosts" below).
-  - *The signing identity is not ours.* `website/src/.well-known/assetlinks.json` carries our
-    `package_name` with SimpleX Chat Ltd's three signing-certificate fingerprints, so `autoVerify`
-    cannot pass for a package signed by anybody else. Same class on iOS: the Team ID `PDBA6XRBQT`
-    appears in four places across three files — `KeyChain.swift:13`, two build configurations in
-    `POPOPX.xcodeproj/project.pbxproj`, and `apple-app-site-association/index.json` — and all of
+  - *The signing identity is not ours.* `website/src/.well-known/assetlinks.json` carried our
+    `package_name` with SimpleX Chat Ltd's three signing-certificate fingerprints; the file left with
+    `website/` on 2026-11-13, which removes the residue from this tree but not the condition — the copy we
+    eventually serve must carry **our** fingerprints, because `autoVerify` cannot pass for a package signed
+    by anybody else. Same class on iOS: the Team ID `PDBA6XRBQT` now appears in three places across two
+    files — `KeyChain.swift:13` and two build configurations in `POPOPX.xcodeproj/project.pbxproj`; the
+    fourth copy, `apple-app-site-association/index.json`, left with `website/`. All of
     them must agree with whatever certificate actually signs the distribution. A wrong one fails
     silently: keychain sharing and universal links stop working, and only on device.
 - **`popopx.chat` is owned and serving, and is now the ruled link domain.** Ruled 2026-11-13:
-  `popopx.chat` for links and the site, `popopx.im` for relays. `website/src/CNAME` moved to
-  `popopx.chat` — nothing reads it but `website/.eleventy.js:471`, which publishes it to the site root, so
-  the change is inert until something departs from the hand-run nginx. What still makes link handling inert
-  is on that box: a certificate that names only `popopxchat.com`, and no `/.well-known/` at all.
+  `popopx.chat` for links and the site, `popopx.im` for relays. `website/src/CNAME` had already moved to
+  `popopx.chat` before `website/` was removed — nothing read it but `website/.eleventy.js:471`, which
+  published it to the site root, so removing it changes nothing that was ever served. What still makes link
+  handling inert is on that box: a certificate that names only `popopxchat.com`, and no `/.well-known/` at
+  all.
 - **Store links 404.** Every `market://` / `details?id=com.popopxchat.popopx` / App Store URL in
   this repository names an app record that does not exist yet.
 - **The application artwork is done; the documentation artwork is not.** The icons, illustrations and
@@ -361,7 +377,7 @@ stands up the equivalent POPOPX service, together with its keys.
 | badge service contact (an SMP relay + its key, in one address) | `src/Popopx/Chat.hs:74` | **silent**: TLS fingerprint mismatch, retried forever |
 | notification servers preset (`ntf://<key>@ntf3.simplex.im`, `.onion` too) | `src/Popopx/Chat/Library/Commands.hs:167-168` | **silent**: same class. This is the one upstream preset still enabled in the client — the SMP/XFTP presets in `Chat.hs` were emptied, these were not. Kept on purpose: the list is a plain `[NtfServer]` (`Controller.hs:275`, and nothing downstream forces `NonEmpty` — `NtfSubSupervisor.hs:591` returns `Nothing`, `Agent.hs:3283` then fails token registration with `PROHIBITED`), so emptying it would be implementable but only costs push, exactly like the relays cost messaging. It moves with them |
 | which stored relays count as "presets" | `src/Popopx/Chat.hs:103` `presetDomains = [".simplex.im"]` — `.simplexonflux.com` left with the Flux operator | **silent**: keyed on the host suffix, so renamed relays stop matching any stored row |
-| shared directory listing | `website/src/js/directory.jsc:1` (`/data/`), filter at `:149` | **silent-empty**: the fetch fails and the page shows no results |
+| shared directory listing | the page that read it, `website/src/js/directory.jsc:1` (`/data/`, filter at `:149`), was deleted with `website/` on 2026-11-13; the server half is `apps/popopx-directory-service` and `src/Directory/Listing.hs:94` still records the pair | **silent-empty**: the fetch fails and the page shows no results |
 | badge embed allow-list | `apps/popopx-badge-service/web/src/embed.ts:53` | **silent**: the widget refuses an origin outside `simplex.chat`/`.simplex.chat` and renders blank |
 | badge purchase deep links | `apps/multiplatform/common/src/commonMain/kotlin/chat/popopx/common/views/badges/BadgeStore.kt:53-54` | **visible**: leaves the app into `badges.simplex.chat` — an upstream-branded page under a POPOPX label |
 | ICE/STUN/TURN defaults | `packages/popopx-chat-webrtc/src/call.ts:355-359` (`stun.simplex.im`, `turn.simplex.im`; the TURN line carries a username and a literal credential) | **visible**: calls fail to connect. Used only when the user configured none (`AppSettings.hs:45` `webrtcICEServers`), and the credential is upstream's to revoke |
@@ -369,11 +385,13 @@ stands up the equivalent POPOPX service, together with its keys.
 One entry in that list is not a host+key pair and could be fixed without any infrastructure, so it was:
 the discovery document `website/src/.well-known/simplex.json` carried five SimpleX Chat Ltd channels, groups
 and contacts (`smp4/smp10/smp18.simplex.im` links titled "SimpleX Network News", "SimpleX Crowdfunding News",
-"SimpleX users group", "Ask SimpleX Team", "SimpleX Directory"). The *path* is a protocol value —
-`docs/protocol/web-discovery.md:99` and `:218` register `simplex.json` as an RFC 8615 URI suffix, and a client
-follows exactly that name — so the file keeps its name; the *entries* are not a protocol value, and publishing
+"SimpleX users group", "Ask SimpleX Team", "SimpleX Directory"). The *path* is a protocol value — [upstream
+`docs/protocol/web-discovery.md:99` and `:218`](https://github.com/simplex-chat/simplex-chat/blob/stable/docs/protocol/web-discovery.md)
+register `simplex.json` as an RFC 8615 URI suffix, and a client follows exactly that name — so the file kept
+its name; the *entries* are not a protocol value, and publishing
 another operator's identities under our own domain claims them as ours. The three arrays are empty until this
-fork operates relays and can author its own addresses.
+fork operates relays and can author its own addresses. The file itself went with `website/` on 2026-11-13, so
+authoring it is now a task on the host that serves the domain, not in this tree.
 
 The **silent** class is the dangerous one. A host+key pair identifies one server, and only that pair
 is a wire value: `smp://<key>@<host>` is hand-written, never generated, so an identifier sweep that
