@@ -280,11 +280,15 @@ The FAB (floating action button) in the bottom-right corner opens the new chat f
 
 ---
 
-## 10. [`GetStakeBanner`](../../Shared/Views/ChatList/GetStakeBanner.swift#L13) {#10-crowdfunding-banner}
+## 10. `GetStakeBanner` {#10-crowdfunding-banner}
+
+> Removed from POPOPX iOS builds. This section documents the upstream view: `GetStakeBanner.swift` and
+> `GetStakeView` are not in this app, and the chat-list banner slot they occupied carries
+> [`SupportPOPOPXBanner`](../../Shared/Views/Badges/SupportPOPOPXBanner.swift) instead.
 
 **File**: `Shared/Views/ChatList/GetStakeBanner.swift`
 
-Gradient card inviting the user to invest on Wefunder. Shown only when [`isInUS`](../../Shared/Views/Onboarding/WhatsNewView.swift#L45) — the same condition that gates the Wefunder row in settings — and only while `DEFAULT_GET_STAKE_BANNER_DISMISSED` is false.
+Gradient card inviting the user to invest on Wefunder. Shown only when [`isInUS`](../../Shared/Views/Onboarding/WhatsNewView.swift#L46) — the same condition that gates the Wefunder row in settings — and only while `DEFAULT_GET_STAKE_BANNER_DISMISSED` is false.
 
 ### Placement
 
@@ -301,7 +305,7 @@ In the onboarding branch the `.scaleEffect` and `ThemedBackground` are applied t
 
 | Default | Set by | Effect |
 |---------|--------|--------|
-| `DEFAULT_GET_STAKE_BANNER_TAPPED` | [`openGetStake()`](../../Shared/Views/ChatList/ChatListView.swift#L472) | the dismiss X appears from then on, while there are chats |
+| `DEFAULT_GET_STAKE_BANNER_TAPPED` | `openGetStake()` | the dismiss X appears from then on, while there are chats |
 | `DEFAULT_GET_STAKE_BANNER_DISMISSED` | the dismiss X | hides the banner in both placements |
 | `DEFAULT_SUPPORTER_BANNER_TAPPED` | tapping the supporter pitch | the pitch's dismiss X appears from then on |
 | `DEFAULT_SUPPORTER_BANNER_SHOWN` | the pitch's dismiss X, through its "You can support SimpleX later in Settings." alert, and a successful code redemption | hides the pitch |
@@ -310,7 +314,7 @@ The badge alert banner always offers the X; only the pitch waits to be tapped on
 
 Both are in `hintDefaults`, so "Reset all hints" in the developer settings restores the banner. The X is never offered in the onboarding branch, so the banner cannot be dismissed before the user has a chat.
 
-Tapping the card opens [`GetStakeView`](../../Shared/Views/Onboarding/WhatsNewView.swift#L834) as an `appSheet`.
+Tapping the card opens `GetStakeView` as an `appSheet`.
 
 ### Shared card chrome
 
@@ -333,4 +337,4 @@ Tapping the card opens [`GetStakeView`](../../Shared/Views/Onboarding/WhatsNewVi
 | Contact connection view | [`ContactConnectionView.swift`](../../Shared/Views/ChatList/ContactConnectionView.swift) | | |
 | Server summary | [`ServersSummaryView.swift`](../../Shared/Views/ChatList/ServersSummaryView.swift) | | |
 | One-hand UI card | [`OneHandUICard.swift`](../../Shared/Views/ChatList/OneHandUICard.swift) | | |
-| Crowdfunding banner | [`GetStakeBanner.swift`](../../Shared/Views/ChatList/GetStakeBanner.swift) | `GetStakeBanner` | [13](../../Shared/Views/ChatList/GetStakeBanner.swift#L13) |
+| Crowdfunding banner | `GetStakeBanner.swift` | `GetStakeBanner` | 13 |
