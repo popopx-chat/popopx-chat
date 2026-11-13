@@ -28,7 +28,7 @@ Our team will investigate and prioritize the reported issue. We may work in priv
 
 ## Threat Model
 
-Please review threat model for SimpleX: https://github.com/simplex-chat/simplexmq/blob/stable/protocol/overview-tjr.md#threat-model
+Please review threat model for SimpleX: https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md#threat-model
 
 Certain threats are considered out of the scope of SimpleX security model. For example, we do not consider SimpleX secure against the following classes of attacks:
 

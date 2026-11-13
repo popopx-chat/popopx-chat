@@ -49,7 +49,7 @@ Będziesz musiał dodać `/opt/homebrew/opt/openssl@3.0/bin` do swojego PATH, ab
 
 Branche `master-ios` i `windows-ghc8107` powinny być takie same jak `master-ghc8107` z wyjątkiem plików konfiguracyjnych Nix.
 
-**W repo simplexmq**
+**W repo popopxmq**
 
 - `master` - używa GHC 9.6.3, jego commit powinien być użyty w branchu `master` repo simplex-chat.
 
@@ -59,7 +59,7 @@ Branche `master-ios` i `windows-ghc8107` powinny być takie same jak `master-ghc
 
 1. Tworzenie PR-ów do brancha `master` _tylko_ dla repozytoriów simplex-chat i simplexmq.
 
-2. Jeśli repozytorium simplexmq zostało zmienione, aby skompilować mobilne biblioteki rdzenia należy połączyć jego branch `master` z branchem `master-ghc8107`.
+2. Jeśli repozytorium popopxmq zostało zmienione, aby skompilować mobilne biblioteki rdzenia należy połączyć jego branch `master` z branchem `master-ghc8107`.
 
 3. Aby skompilować podstawowe biblioteki dla Androida, iOS i Windows:
 
@@ -81,7 +81,7 @@ Branche `master-ios` i `windows-ghc8107` powinny być takie same jak `master-ghc
 
 - `master-android` do `stable-android`.
 
-7. Branch `master` repo simplexmq powinien zostać niezależnie scalony z branchem `stable` w wydaniach stabilnych.
+7. Branch `master` repo popopxmq powinien zostać niezależnie scalony z branchem `stable` w wydaniach stabilnych.
 
 
 ## Różnice pomiędzy GHC 8.10.7 i GHC 9.6.3

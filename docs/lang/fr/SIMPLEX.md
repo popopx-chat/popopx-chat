@@ -22,7 +22,7 @@ La concentration de la communication dans un petit nombre de plateformes central
 
 Les différents protocoles proposés résolvent ces problèmes en faisant en sorte que les messages comme les contacts soit stockés exclusivement sur l'appareil client, tout en réduisant le rôle des serveurs à de simples relais de message qui ne nécessite que l'autorisation des messages envoyés dans les files d'attentes, mais qui NE nécessite PAS une authentification utilisateur - les message ne sont pas les seuls à être protégé, les métadonnées le sont aussi car l'utilisateur n'est pas lié à un identifiant - contrairement aux autres platformes. 
 
-Voir [le livre blanc de SimpleX](https://github.com/simplex-chat/simplexmq/blob/master/protocol/overview-tjr.md) pour plus d'information sur les objectifs de la platforme et ses détails techniques.
+Voir [le livre blanc de SimpleX](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md) pour plus d'information sur les objectifs de la platforme et ses détails techniques.
 
 ## Pourquoi utiliser SimpleX
 
@@ -48,7 +48,7 @@ SimpleX stocke toutes les données de l'utilisateur sur les appareils clients, l
 
 Nous utilisons un format de base de données portable qui peut être utilisé sur tous les appareils pris en charge. Nous ajouterons bientôt la possibilité d'exporter la base de données de chat depuis l'application mobile afin qu'elle puisse être utilisée sur un autre appareil.
 
-Contrairement aux serveurs des réseaux fédérés (e-mail, XMPP ou Matrix), les serveurs SimpleX ne stockent pas les comptes des utilisateurs, ils se contentent de relayer les messages aux destinataires, protégeant ainsi la vie privée des deux parties. Il n'y a aucun identifiant ou message chiffré en commun entre le trafic envoyé et reçu du serveur, grâce à la couche de chiffrement supplémentaire pour les messages délivrés. Par conséquent, si quelqu'un observe le trafic du serveur, il ne peut pas facilement déterminer qui communique avec qui (Voir [le livre blanc de SimpleX](https://github.com/simplex-chat/simplexmq/blob/master/protocol/overview-tjr.md) pour les attaques connues de corrélation réseau).
+Contrairement aux serveurs des réseaux fédérés (e-mail, XMPP ou Matrix), les serveurs SimpleX ne stockent pas les comptes des utilisateurs, ils se contentent de relayer les messages aux destinataires, protégeant ainsi la vie privée des deux parties. Il n'y a aucun identifiant ou message chiffré en commun entre le trafic envoyé et reçu du serveur, grâce à la couche de chiffrement supplémentaire pour les messages délivrés. Par conséquent, si quelqu'un observe le trafic du serveur, il ne peut pas facilement déterminer qui communique avec qui (Voir [le livre blanc de SimpleX](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md) pour les attaques connues de corrélation réseau).
 
 ### Les utilisateurs sont maîtres du réseau SimpleX
 

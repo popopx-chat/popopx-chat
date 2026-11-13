@@ -33,4 +33,4 @@ To use the library from this repository, build it and run `npm install --no-save
 npm test
 ```
 
-A local SMP server is started for the end-to-end test. On Linux, `smp-server` is downloaded from [simplexmq releases](https://github.com/simplex-chat/simplexmq/releases); to use another build, or on other systems, set `SMP_SERVER` to the path of `smp-server`.
+A local SMP server is started for the end-to-end test. On Linux, `smp-server` is downloaded from [popopxmq releases](https://github.com/popopx-chat/popopxmq/releases); to use another build, or on other systems, set `SMP_SERVER` to the path of `smp-server`.

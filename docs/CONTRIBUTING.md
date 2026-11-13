@@ -19,7 +19,7 @@ Please discuss the problem you want to solve and your detailed implementation pl
 
 ./contributing/PROJECT.md has information about the structure of this `simplex-chat` repository.
 
-./contributing/CODE.md has details about general requirements common for `simplexmq` and `simplex-chat` repositories.
+./contributing/CODE.md has details about general requirements common for `popopxmq` and `simplex-chat` repositories.
 
 CLAUDE.md in the repository root imports these files, this guide and ../scripts/ci/README.md for Claude Code; apps/ios/CLAUDE.md and apps/multiplatform/CLAUDE.md import the README of each app.
 
@@ -50,13 +50,13 @@ You will have to add `/opt/homebrew/opt/openssl@3.0/bin` to your PATH in order t
 
 - `master` - branch for beta version releases (compatible with both GHC 9.6.3 and 8.10.7). Nix builds Android armv7a core library with GHC 8.10.7 and all other core libraries with GHC 9.6.3.
 
-**In simplexmq repo**
+**In popopxmq repo**
 
 - `master` - compatible with both GHC 9.6.3 and 8.10.7.
 
 ## Development & release process
 
-1. Make PRs to `master` branch _only_ for both simplex-chat and simplexmq repos.
+1. Make PRs to `master` branch _only_ for both simplex-chat and popopxmq repos.
 
 2. To build core libraries for Android, iOS and Windows, push `master` branch to GitHub.
 
@@ -66,7 +66,7 @@ You will have to add `/opt/homebrew/opt/openssl@3.0/bin` to your PATH in order t
 
 5. After the public release to App Store and Play Store, merge `master` to `stable`.
 
-6. Independently, `master` branch of simplexmq repo should be merged to `stable` branch on stable releases.
+6. Independently, `master` branch of popopxmq repo should be merged to `stable` branch on stable releases.
 
 ## Branches and PRs
 

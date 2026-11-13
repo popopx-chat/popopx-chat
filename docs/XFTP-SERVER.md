@@ -53,7 +53,7 @@ This installation script will automatically install binaries, systemd services a
 Run the following script on the server:
 
 ```sh
-curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/simplex-chat/simplexmq/stable/install.sh -o simplex-server-install.sh &&\
+curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/popopx-chat/popopxmq/master/install.sh -o simplex-server-install.sh &&\
 if echo '53fcdb4ceab324316e2c4cda7e84dbbb344f32550a65975a7895425e5a1be757 simplex-server-install.sh' | sha256sum -c; then
   chmod +x ./simplex-server-install.sh
   ./simplex-server-install.sh
@@ -80,7 +80,7 @@ Manual installation is the most advanced deployment that provides the most flexi
 
    - Compiling from source:
 
-     Please refer to [Build from source: Using your distribution](https://github.com/simplex-chat/simplexmq#using-your-distribution)
+     Please refer to [Build from source: Using your distribution](https://github.com/popopx-chat/popopxmq#using-your-distribution)
 
 
 2. Create user and group for `xftp-server`:
@@ -145,7 +145,7 @@ This will download images from [Docker Hub](https://hub.docker.com/r/simplexchat
 
 2. Create `docker-compose.yml` file with the following content:
 
-  You can also grab it from here - [docker-compose-xftp.yml](https://raw.githubusercontent.com/simplex-chat/simplexmq/refs/heads/stable/scripts/docker/docker-compose-xftp.yml). Don't forget to rename it to `docker-compose.yml`.
+  You can also grab it from here - [docker-compose-xftp.yml](https://raw.githubusercontent.com/popopx-chat/popopxmq/master/scripts/docker/docker-compose-xftp.yml). Don't forget to rename it to `docker-compose.yml`.
 
   ```yaml
   name: POPOPX Chat - xftp-server
@@ -168,7 +168,7 @@ This will download images from [Docker Hub](https://hub.docker.com/r/simplexchat
 
 3. In the same directory, create `.env` file with the following content:
 
-  You can also grab it from here - [docker-compose-xftp.env](https://raw.githubusercontent.com/simplex-chat/simplexmq/refs/heads/stable/scripts/docker/docker-compose-xftp.yml). Don't forget to rename it to `.env`.
+  You can also grab it from here - [docker-compose-xftp.env](https://raw.githubusercontent.com/popopx-chat/popopxmq/master/scripts/docker/docker-compose-xftp.yml). Don't forget to rename it to `.env`.
 
   Change variables according to your preferences.
 
@@ -609,14 +609,14 @@ To update your XFTP server to latest version, choose your installation method an
         sudo systemctl start xftp-server
         ```
 
-   - [Official installation script](https://github.com/simplex-chat/simplexmq#using-installation-script)
+   - [Official installation script](https://github.com/popopx-chat/popopxmq#using-installation-script)
      1. Execute the following command:
         ```sh
         sudo simplex-servers-update
         ```
      2. Done!
 
-   - [Docker container](https://github.com/simplex-chat/simplexmq#using-docker)
+   - [Docker container](https://github.com/popopx-chat/popopxmq#using-docker)
      1. Stop and remove the container:
         ```sh
         docker rm $(docker stop $(docker ps -a -q --filter ancestor=simplexchat/xftp-server --format="\{\{.ID\}\}"))

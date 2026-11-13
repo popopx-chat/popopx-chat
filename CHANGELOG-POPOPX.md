@@ -68,6 +68,15 @@ The libs release assets (`popopx-chat-libs-<os>-<arch>.zip`, `popopx-chat-nodejs
 the repository they are fetched from moved in the same shape — publisher, runtime downloader and the
 pinned digest dictionary as one unit, because a half-move downloads upstream's binary and calls it a
 success (`FORK.md` item 6).
+References to the SMP dependency itself moved second: 144 of the 446 `simplexmq` occurrences became
+`popopxmq` — contributor and operator docs, the iOS product/spec layer, the website nav item, and the
+`popopxmq` commit link in the iOS version screen (it pointed our own commit at upstream's repository, so
+the settings screen 404ed on every build). A reference moved only where the thing resolves in the fork:
+the fork renamed `protocol/simplex-messaging.md` → `protocol/popopx-messaging.md` and
+`src/Simplex/**` → `src/Popopx/**`, and it has one branch, `master`, so `stable` ref segments moved with
+the path. The three test harnesses that download `smp-server`/`xftp-server` now take them from
+`popopx-chat/popopxmq`, which publishes no releases: those suites fail with a 404 until it does, by
+ruling, rather than testing our core against a server built from another source (`FORK.md` item 7).
 The npm and PyPI names in the committed manifests are upstream's on purpose: `packages_release.py
 test-names` rewrites them, with `npm:` aliases for the cross-package dependencies, from the
 repository variables `NPM_SCOPE` and `PYPI_PROJECT` at publish time — see
@@ -77,10 +86,13 @@ party tooling may set are read under both spellings (`SIMPLEX_ASSETS`/`POPOPX_AS
 
 ### Deliberately not changed
 
-Upstream GitHub URLs, copyright and attribution lines, the asset licence files, the preset operator
+Upstream GitHub URLs that name something upstream — the protocol and RFC documents, the dependency
+licence report, `plans/**`, `blog/**`, `CHANGELOG.md`, the website — copyright and attribution lines,
+the asset licence files, the preset operator
 that remains (SimpleX Chat) and its relay addresses, the badge service and directory hosts, the names-service
 namespace prefix `simplex_domain_v1` (it is a persisted record and a wire value), and the upstream
-artwork and 376 iOS snapshot baselines. Full list with the authority for each:
+artwork and the 210 desktop snapshot baselines. The dependency references that resolve in `popopxmq`
+moved instead (`FORK.md` item 7). Full list with the authority for each:
 [`FORK.md`](./FORK.md).
 
 ## Template for the first real release

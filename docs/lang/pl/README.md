@@ -271,15 +271,15 @@ Przeczytaj więcej o [instalowaniu i używaniu terminalowej wersji czatu](./CLI.
 
 SimpleX to sieć typu klient-serwer z unikatową topologią sieciową, która wykorzystuje redundantne, jednorazowe węzły przekazywania wiadomości do asynchronicznego przekazywania wiadomości za pośrednictwem jednokierunkowych (simpleksowych) kolejek wiadomości, zapewniając anonimowość odbiorcy i nadawcy.
 
-W przeciwieństwie do sieci P2P, wszystkie wiadomości są przekazywane przez jeden lub kilka węzłów serwera, które nawet nie muszą być trwałe. Obecna implementacja [serwera SMP](https://github.com/simplex-chat/simplexmq#smp-server) wykorzystuje przechowywanie wiadomości w pamięci, utrzymując jedynie rejestr kolejki. SimpleX zapewnia lepszą ochronę metadanych niż projekty P2P, ponieważ żadne globalne identyfikatory uczestników nie są używane do dostarczania wiadomości i pozwala to uniknąć [różnych problemów związanych z sieciami P2P](./SIMPLEX.md#comparison-with-p2p-messaging-protocols).
+W przeciwieństwie do sieci P2P, wszystkie wiadomości są przekazywane przez jeden lub kilka węzłów serwera, które nawet nie muszą być trwałe. Obecna implementacja [serwera SMP](https://github.com/popopx-chat/popopxmq#smp-server) wykorzystuje przechowywanie wiadomości w pamięci, utrzymując jedynie rejestr kolejki. SimpleX zapewnia lepszą ochronę metadanych niż projekty P2P, ponieważ żadne globalne identyfikatory uczestników nie są używane do dostarczania wiadomości i pozwala to uniknąć [różnych problemów związanych z sieciami P2P](./SIMPLEX.md#comparison-with-p2p-messaging-protocols).
 
 W przeciwieństwie do sieci sfederowanych, węzły serwera **nie posiadają danych użytkowników**, **nie komunikują się ze sobą** i **nie przechowują wiadomości** po ich dostarczeniu do odbiorców. Nie ma możliwości na odkrycie pełnej listy serwerów działających w sieci SimpleX. Taka konstrukcja pozwala uniknąć problemu związanego z widocznością metadanych, z którym borykają się wszystkie sieci sfederowane i pozwala ona na lepszą ochronę przed atakami obejmującymi całą sieć.
 
 Informacje o użytkownikach, ich kontaktach i grupach znajdują się wyłącznie na urządzeniach klienckich.
 
-Przeczytaj [whitepaper SimpleX](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/overview-tjr.md) po więcej informacji o zadaniach platformy oraz by dowiedzieć się jak wygląda koncepcja techniczna modelu.
+Przeczytaj [whitepaper SimpleX](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md) po więcej informacji o zadaniach platformy oraz by dowiedzieć się jak wygląda koncepcja techniczna modelu.
 
-Zobacz [Protokół Czatu SimpleX](../../protocol/popopx-chat.md) by dowiedzieć się o formacie wiadomości wysyłanych między klientem czatu za pośrednictwem [Protokołu Wiadomości SimpleX](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/simplex-messaging.md).
+Zobacz [Protokół Czatu SimpleX](../../protocol/popopx-chat.md) by dowiedzieć się o formacie wiadomości wysyłanych między klientem czatu za pośrednictwem [Protokołu Wiadomości SimpleX](https://github.com/popopx-chat/popopxmq/blob/master/protocol/popopx-messaging.md).
 
 ## Prywatność i bezpieczeństwo: szczegóły techniczne i ograniczenia
 
@@ -397,7 +397,7 @@ Dołącz również do grupy [#simplex-devs](https://simplex.chat/contact#/?v=1-2
 
 ## Ostrzeżenia
 
-[Protokoły i model bezpieczeństwa SimpleX](https://github.com/simplex-chat/simplexmq/blob/master/protocol/overview-tjr.md) zostały poddane przeglądowi i zawierały wiele istotnych zmian i ulepszeń w wersji v1.0.0.
+[Protokoły i model bezpieczeństwa SimpleX](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md) zostały poddane przeglądowi i zawierały wiele istotnych zmian i ulepszeń w wersji v1.0.0.
 
 Audyt bezpieczeństwa został przeprowadzony w październiku 2022 r. przez [Trail of Bits](https://www.trailofbits.com/about), a większość poprawek została wydana w wersji 4.2.0 - zobacz [ogłoszenie](../../../blog/20221108-simplex-chat-v4.2-security-audit-new-website.md).
 
@@ -415,7 +415,7 @@ Więcej informacji można znaleźć w [Warunkach i polityce prywatności](./PRIV
 
 Aby zgłosić podatność wyślij nam wiadomość e-mail na adres chat@popopx.chat. Będziemy wspólnie pracować nad poprawką i ujawnieniem szczegółów. NIE zgłaszaj luk w zabezpieczeniach za pośrednictwem zgłoszeń GitHub.
 
-Prosimy o traktowanie wszelkich ustaleń dotyczących możliwych ataków korelacji ruchu umożliwiających skorelowanie dwóch różnych konwersacji z tym samym użytkownikiem, innych niż objęte [modelem zagrożeń](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/overview-tjr.md#threat-model), jako luk w zabezpieczeniach i postępowanie zgodnie z tym procesem ujawniania.
+Prosimy o traktowanie wszelkich ustaleń dotyczących możliwych ataków korelacji ruchu umożliwiających skorelowanie dwóch różnych konwersacji z tym samym użytkownikiem, innych niż objęte [modelem zagrożeń](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md#threat-model), jako luk w zabezpieczeniach i postępowanie zgodnie z tym procesem ujawniania.
 
 ## Licencja
 

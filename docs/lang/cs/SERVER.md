@@ -20,12 +20,12 @@ _Upozornění_: když změníte servery v konfiguraci aplikace, ovlivní to pouz
 
    - Ruční nasazení:
 
-     - [Kompilace ze zdrojových kódů](https://github.com/simplex-chat/simplexmq#using-your-distribution)
-     - [Použití předkompilovaných binárních souborů](https://github.com/simplex-chat/simplexmq#install-binaries)
+     - [Kompilace ze zdrojových kódů](https://github.com/popopx-chat/popopxmq#using-your-distribution)
+     - [Použití předkompilovaných binárních souborů](https://github.com/popopx-chat/popopxmq#install-binaries)
 
    - Alternativně můžete `smp-server` nasadit pomocí:
      - [Docker kontejner](https://github.com/simplex-chat/simplexmq#using-docker-1)
-     - [Linode StackScript](https://github.com/simplex-chat/simplexmq#deploy-smp-server-on-linode)
+     - [Linode StackScript](https://github.com/popopx-chat/popopxmq#deploy-smp-server-on-linode)
 
 Ruční instalace vyžaduje několik předběžných úkonů:
 

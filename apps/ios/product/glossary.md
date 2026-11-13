@@ -21,31 +21,31 @@
 ## Protocols & Cryptography
 
 ### SMP (Simplex Messaging Protocol)
-The core messaging protocol used for asynchronous message delivery through relay servers. Each conversation uses separate unidirectional queues, and sender and receiver queues have no shared identifier. Defined in the [simplexmq](https://github.com/simplex-chat/simplexmq) library. *See: protocol spec `simplexmq/protocol/simplex-messaging.md`, implementation `simplexmq/src/Simplex/Messaging/Protocol.hs`*
+The core messaging protocol used for asynchronous message delivery through relay servers. Each conversation uses separate unidirectional queues, and sender and receiver queues have no shared identifier. Defined in the [popopxmq](https://github.com/popopx-chat/popopxmq) library. *See: protocol spec `popopxmq/protocol/popopx-messaging.md`, implementation `popopxmq/src/Popopx/Messaging/Protocol.hs`*
 
 ### SMP Server
 A relay server that stores and forwards encrypted messages between parties. Users can configure custom SMP servers or use defaults. Servers cannot see message contents or correlate senders with receivers. *See: `Shared/Views/UserSettings/NetworkAndServers/ProtocolServersView.swift`*
 
 ### XFTP (eXtended File Transfer Protocol)
-A protocol for transferring large files (up to 1GB) through relay servers. Files are encrypted, split into chunks, and uploaded to XFTP servers. Recipients download and reassemble chunks independently. Defined in the [simplexmq](https://github.com/simplex-chat/simplexmq) library. *See: protocol spec `simplexmq/protocol/xftp.md`, implementation `simplexmq/src/Simplex/FileTransfer/Protocol.hs`; chat-level integration `../../src/Simplex/Chat/Files.hs`*
+A protocol for transferring large files (up to 1GB) through relay servers. Files are encrypted, split into chunks, and uploaded to XFTP servers. Recipients download and reassemble chunks independently. Defined in the [popopxmq](https://github.com/popopx-chat/popopxmq) library. *See: protocol spec `popopxmq/protocol/xftp.md`, implementation `popopxmq/src/Popopx/FileTransfer/Protocol.hs`; chat-level integration `../../src/Simplex/Chat/Files.hs`*
 
 ### XFTP Server
 A relay server that stores encrypted file chunks for asynchronous file transfer. Like SMP servers, users can configure custom XFTP servers. *See: `Shared/Views/UserSettings/NetworkAndServers/ProtocolServersView.swift`*
 
 ### SMP Agent
-The lower-level agent library (in [simplexmq](https://github.com/simplex-chat/simplexmq)) that manages SMP connections, queue creation/rotation, duplex connection establishment, message delivery, and the double-ratchet encryption protocol. The chat application layer communicates with the agent via its functional API. *See: protocol spec `simplexmq/protocol/agent-protocol.md`, implementation `simplexmq/src/Simplex/Messaging/Agent.hs`; chat-level integration `../../src/Simplex/Chat/Controller.hs`*
+The lower-level agent library (in [popopxmq](https://github.com/popopx-chat/popopxmq)) that manages SMP connections, queue creation/rotation, duplex connection establishment, message delivery, and the double-ratchet encryption protocol. The chat application layer communicates with the agent via its functional API. *See: protocol spec `popopxmq/protocol/agent-protocol.md`, implementation `popopxmq/src/Popopx/Messaging/Agent.hs`; chat-level integration `../../src/Simplex/Chat/Controller.hs`*
 
 ### Double Ratchet
-The key agreement protocol used for E2E encryption. Provides forward secrecy and break-in recovery by deriving new encryption keys for each message. Based on the Signal protocol's double-ratchet algorithm, augmented with post-quantum KEM (PQDR). Implemented in the [simplexmq](https://github.com/simplex-chat/simplexmq) library. *See: protocol spec `simplexmq/protocol/pqdr.md`, implementation `simplexmq/src/Simplex/Messaging/Crypto/Ratchet.hs`*
+The key agreement protocol used for E2E encryption. Provides forward secrecy and break-in recovery by deriving new encryption keys for each message. Based on the Signal protocol's double-ratchet algorithm, augmented with post-quantum KEM (PQDR). Implemented in the [popopxmq](https://github.com/popopx-chat/popopxmq) library. *See: protocol spec `popopxmq/protocol/pqdr.md`, implementation `popopxmq/src/Popopx/Messaging/Crypto/Ratchet.hs`*
 
 ### Post-Quantum Encryption
-Optional quantum-resistant key exchange (PQ) available for direct chats. Uses a hybrid scheme combining classical X25519 with Streamlined NTRU-Prime 761 (sntrup761) KEM. The hybrid secret is SHA3-256(DH_secret || KEM_shared_secret). Implemented in the [simplexmq](https://github.com/simplex-chat/simplexmq) library. *See: protocol spec `simplexmq/protocol/pqdr.md`, implementation `simplexmq/src/Simplex/Messaging/Crypto/SNTRUP761.hs`; Swift types `POPOPXChat/ChatTypes.swift` (PQEncryption, PQSupport)*
+Optional quantum-resistant key exchange (PQ) available for direct chats. Uses a hybrid scheme combining classical X25519 with Streamlined NTRU-Prime 761 (sntrup761) KEM. The hybrid secret is SHA3-256(DH_secret || KEM_shared_secret). Implemented in the [popopxmq](https://github.com/popopx-chat/popopxmq) library. *See: protocol spec `popopxmq/protocol/pqdr.md`, implementation `popopxmq/src/Popopx/Messaging/Crypto/SNTRUP761.hs`; Swift types `POPOPXChat/ChatTypes.swift` (PQEncryption, PQSupport)*
 
 ### E2E Encryption
-End-to-end encryption ensuring that only the communicating parties can read message contents. Neither SMP relay servers nor any network observer can decrypt messages. All POPOPX Chat messages are E2E encrypted by default using the double-ratchet protocol. *See: `simplexmq/src/Simplex/Messaging/Crypto/Ratchet.hs` (ratchet implementation), `simplexmq/src/Simplex/Messaging/Agent/Protocol.hs` (E2E message envelopes)*
+End-to-end encryption ensuring that only the communicating parties can read message contents. Neither SMP relay servers nor any network observer can decrypt messages. All POPOPX Chat messages are E2E encrypted by default using the double-ratchet protocol. *See: `popopxmq/src/Popopx/Messaging/Crypto/Ratchet.hs` (ratchet implementation), `popopxmq/src/Popopx/Messaging/Agent/Protocol.hs` (E2E message envelopes)*
 
 ### Forward Secrecy
-A property of the double-ratchet protocol ensuring that compromise of current encryption keys does not compromise past session keys. Each message uses a derived key that is deleted after use. *See: `simplexmq/protocol/pqdr.md`, `simplexmq/src/Simplex/Messaging/Crypto/Ratchet.hs`*
+A property of the double-ratchet protocol ensuring that compromise of current encryption keys does not compromise past session keys. Each message uses a derived key that is deleted after use. *See: `popopxmq/protocol/pqdr.md`, `popopxmq/src/Popopx/Messaging/Crypto/Ratchet.hs`*
 
 ### Chat Protocol (x-events)
 The chat-level protocol defining message envelopes and content types exchanged between chat participants. Includes x-events (XMsgNew, XMsgUpdate, XMsgDel, XCallInv, XFileCancel, XGrpMemNew, etc.), MsgContent (text, image, video, voice, file, link), and message encoding (Binary/JSON). This is distinct from the lower-level SMP transport protocol. *See: `../../src/Simplex/Chat/Protocol.hs`*
@@ -250,4 +250,4 @@ iOS persistent key-value storage for app preferences. GroupDefaults (UserDefault
 - Haskell messages: `../../src/Simplex/Chat/Messages.hs`
 - Swift model: `Shared/Model/ChatModel.swift`
 - Swift API types: `POPOPXChat/APITypes.swift`, `POPOPXChat/ChatTypes.swift`
-- simplexmq library (SMP, XFTP, Agent, encryption): [github.com/simplex-chat/simplexmq](https://github.com/simplex-chat/simplexmq)
+- popopxmq library (SMP, XFTP, Agent, encryption): [github.com/popopx-chat/popopxmq](https://github.com/popopx-chat/popopxmq)

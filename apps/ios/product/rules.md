@@ -10,12 +10,12 @@
 
 ### RULE-01: No user identifiers
 **Rule:** The system MUST NOT assign, generate, or expose any persistent user identifier (phone number, email, username, UUID) that could be used to correlate a user across conversations.
-**Enforced by:** SMP protocol design in simplexmq library; each connection uses independent unidirectional queues with no shared identifier.
+**Enforced by:** SMP protocol design in popopxmq library; each connection uses independent unidirectional queues with no shared identifier.
 **Spec:** [spec/architecture.md](../spec/architecture.md)
 
 ### RULE-02: End-to-end encryption on all messages
 **Rule:** All message content MUST be encrypted end-to-end using double-ratchet (with optional post-quantum KEM). The SMP server MUST NOT have access to plaintext.
-**Enforced by:** simplexmq library (`Simplex.Messaging.Crypto.Ratchet`); encryption happens before `chat_send_cmd_retry` FFI call.
+**Enforced by:** popopxmq library (`Popopx.Messaging.Crypto.Ratchet`); encryption happens before `chat_send_cmd_retry` FFI call.
 **Spec:** [spec/architecture.md](../spec/architecture.md)
 
 ### RULE-03: Database encryption at rest

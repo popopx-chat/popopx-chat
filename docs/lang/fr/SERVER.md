@@ -20,12 +20,12 @@ _Veuillez noter_ : lorsque vous modifiez les serveurs dans la configuration de l
 
    - Déploiement manuel :
 
-     - [Compiler à partir de la source](https://github.com/simplex-chat/simplexmq#using-your-distribution)
-     - [Utiliser une version pré-compilée](https://github.com/simplex-chat/simplexmq#install-binaries)
+     - [Compiler à partir de la source](https://github.com/popopx-chat/popopxmq#using-your-distribution)
+     - [Utiliser une version pré-compilée](https://github.com/popopx-chat/popopxmq#install-binaries)
 
    - Sinon, vous pouvez déployer votre `smp-server` en utilisant :
      - [Docker container](https://github.com/simplex-chat/simplexmq#using-docker-1)
-     - [Linode StackScript](https://github.com/simplex-chat/simplexmq#deploy-smp-server-on-linode)
+     - [Linode StackScript](https://github.com/popopx-chat/popopxmq#deploy-smp-server-on-linode)
 
 L'installation manuelle nécessite quelques actions préalables :
 

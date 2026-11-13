@@ -275,15 +275,15 @@ Read more about [installing and using the terminal app](./docs/CLI.md).
 
 SimpleX is a client-server network with a unique network topology that uses redundant, disposable message relay nodes to asynchronously pass messages via unidirectional (simplex) message queues, providing recipient and sender anonymity.
 
-Unlike P2P networks, all messages are passed through one or several server nodes, that do not even need to have persistence. In fact, the current [SMP server implementation](https://github.com/simplex-chat/simplexmq#smp-server) uses in-memory message storage, persisting only the queue records. SimpleX provides better metadata protection than P2P designs, as no global participant identifiers are used to deliver messages, and avoids [the problems of P2P networks](./docs/SIMPLEX.md#comparison-with-p2p-messaging-protocols).
+Unlike P2P networks, all messages are passed through one or several server nodes, that do not even need to have persistence. In fact, the current [SMP server implementation](https://github.com/popopx-chat/popopxmq#smp-server) uses in-memory message storage, persisting only the queue records. SimpleX provides better metadata protection than P2P designs, as no global participant identifiers are used to deliver messages, and avoids [the problems of P2P networks](./docs/SIMPLEX.md#comparison-with-p2p-messaging-protocols).
 
 Unlike federated networks, the server nodes **do not have records of the users**, **do not communicate with each other** and **do not store messages** after they are delivered to the recipients. There is no way to discover the full list of servers participating in SimpleX network. This design avoids the problem of metadata visibility that all federated networks have and better protects from the network-wide attacks.
 
 Only the client devices have information about users, their contacts and groups.
 
-See [SimpleX whitepaper](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/overview-tjr.md) for more information on platform objectives and technical design.
+See [SimpleX whitepaper](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md) for more information on platform objectives and technical design.
 
-See [SimpleX Chat Protocol](./docs/protocol/popopx-chat.md) for the format of messages sent between chat clients over [SimpleX Messaging Protocol](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/simplex-messaging.md).
+See [SimpleX Chat Protocol](./docs/protocol/popopx-chat.md) for the format of messages sent between chat clients over [SimpleX Messaging Protocol](https://github.com/popopx-chat/popopxmq/blob/master/protocol/popopx-messaging.md).
 
 ## Privacy and security: technical details and limitations
 
@@ -349,7 +349,7 @@ Also see [TypeScript POPOPX Chat client](./packages/popopx-chat-client/) and [Ja
 - Example bots: [support bot](./apps/popopx-support-bot/) and [calculator](./apps/popopx-calculator-bot/) in TypeScript, [support bot light](./apps/popopx-support-bot-light/) in Python, [directory service](./apps/popopx-directory-service/) and [broadcast bot](./apps/popopx-broadcast-bot/) in Haskell.
 - [Terminal client](./docs/CLI.md): installation, building from source and usage.
 - Servers: [SMP](./docs/SERVER.md), [XFTP](./docs/XFTP-SERVER.md) and [chat relay](./docs/CHAT-RELAY.md).
-- Protocols: [SimpleX network](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/overview-tjr.md), [chat](./docs/protocol/popopx-chat.md), [channels](./docs/protocol/channels-overview.md) and [public names](./docs/protocol/names-overview.md).
+- Protocols: [SimpleX network](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md), [chat](./docs/protocol/popopx-chat.md), [channels](./docs/protocol/channels-overview.md) and [public names](./docs/protocol/names-overview.md).
 - For coding agents working in this repository: [project structure](./docs/contributing/PROJECT.md) and [coding and building](./docs/contributing/CODE.md).
 
 ## Roadmap
@@ -426,7 +426,7 @@ Also see [TypeScript POPOPX Chat client](./packages/popopx-chat-client/) and [Ja
 
 ## Disclaimers
 
-[SimpleX protocols and security model](https://github.com/simplex-chat/simplexmq/blob/master/protocol/overview-tjr.md) was reviewed, and had many breaking changes and improvements in v1.0.0.
+[SimpleX protocols and security model](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md) was reviewed, and had many breaking changes and improvements in v1.0.0.
 
 The implementation security assessment of SimpleX cryptography and networking was done in October 2022 by [Trail of Bits](https://www.trailofbits.com/about) – see [the announcement](./blog/20221108-simplex-chat-v4.2-security-audit-new-website.md).
 

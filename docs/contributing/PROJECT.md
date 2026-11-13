@@ -34,7 +34,7 @@ RFCs: docs/rfcs
 - `Mobile.hs` - FFI interface
 - `Library/` - commands and events processing
   - `Commands.hs` - all supported chat commands. They can be sent via CLI or via FFI functions.
-  - `Subscriber.hs` - processing events from the [agent](../../../simplexmq/src/Simplex/Messaging/Agent/Protocol.hs)
+  - `Subscriber.hs` - processing events from the [agent](../../../popopxmq/src/Popopx/Messaging/Agent/Protocol.hs)
 
 ### Database Migrations
 
@@ -59,7 +59,7 @@ Tests are in `tests/`:
 ## Key Dependencies
 
 The project uses several custom forks managed via `cabal.project`:
-- `simplexmq` - Core SimpleX Messaging Protocol (separate [repo](../../../simplexmq/README.md))
+- `popopxmq` - Core SimpleX Messaging Protocol (separate [repo](../../../popopxmq/README.md))
 - `direct-sqlcipher` - SQLite with encryption
 - `aeson` - JSON serialization (custom fork)
 

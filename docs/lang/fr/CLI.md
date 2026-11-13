@@ -33,7 +33,7 @@ revision: 31.01.2023
 - Adresses de contact des utilisateurs - établissez des connexions via des liens de contact à usage multiple.
 - Les messages sont conservés dans une base de données SQLite locale.
 - Nom du destinataire auto-rempli - il suffit de taper vos messages pour répondre à l'expéditeur une fois la connexion établie.
-- Des serveurs SMP de démonstration sont disponibles et préconfigurés dans l'application - ou vous pouvez [déployer votre propre serveur](https://github.com/simplex-chat/simplexmq#using-smp-server-and-smp-agent).
+- Des serveurs SMP de démonstration sont disponibles et préconfigurés dans l'application - ou vous pouvez [déployer votre propre serveur](https://github.com/popopx-chat/popopxmq#using-smp-server-and-smp-agent).
 - Pas d'identité globale ni de noms visibles par le.s serveur.s, ce qui garantit la confidentialité totale de vos contacts et de vos conversations.
 - Deux couches de chiffrement E2E (double ratchet pour les connexions duplex, utilisant un accord de clé X3DH avec des clés Curve448 éphémères, et NaCl crypto_box pour les files d'attente SMP, utilisant des clés Curve25519) et transmission hors bande des clés des destinataires (voir [Comment utiliser POPOPX chat](#comment-utiliser-popopx-chat)).
 - Validation de l'intégrité du message (en incluant les résumés des messages précédents).
@@ -43,7 +43,7 @@ revision: 31.01.2023
 
 Les clés publiques impliquées dans l'échange de clés ne sont pas utilisées comme identité, elles sont générées aléatoirement pour chaque contact.
 
-Voir les [primitives de chiffrement utilisées](https://github.com/simplex-chat/simplexmq/blob/master/protocol/overview-tjr.md#encryption-primitives-used) pour les détails techniques.
+Voir les [primitives de chiffrement utilisées](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md#encryption-primitives-used) pour les détails techniques.
 
 <a name="🚀-installation"></a>
 
@@ -187,7 +187,7 @@ Une fois que vous avez configuré votre profil local, entrez `/c` (pour `/connec
 
 Vous pouvez créer plusieurs invitations en saisissant plusieurs fois la commande `/connect` et en envoyant ces invitations aux contacts correspondants avec lesquels vous souhaitez vous connecter.
 
-L'invitation ne peut être utilisée qu'une seule fois et même si elle est interceptée, l'attaquant ne pourra pas l'utiliser pour vous envoyer les messages via cette file d'attente une fois que votre contact aura confirmé que la connexion est établie. Voir le protocole de l'agent pour une explication du [format d'invitation](https://github.com/simplex-chat/simplexmq/blob/master/protocol/agent-protocol.md#connection-request).
+L'invitation ne peut être utilisée qu'une seule fois et même si elle est interceptée, l'attaquant ne pourra pas l'utiliser pour vous envoyer les messages via cette file d'attente une fois que votre contact aura confirmé que la connexion est établie. Voir le protocole de l'agent pour une explication du [format d'invitation](https://github.com/popopx-chat/popopxmq/blob/master/protocol/agent-protocol.md#connection-request).
 
 Le contact qui a reçu l'invitation doit saisir `/c <invitation>` pour accepter la connexion. La connexion est alors établie, et les deux parties sont notifiées.
 

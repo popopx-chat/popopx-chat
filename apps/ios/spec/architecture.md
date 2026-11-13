@@ -42,8 +42,8 @@ The app follows a strict layered model where each layer communicates only with i
 │  Haskell Core (chat_ctrl)               │  Chat logic, chat protocol (x-events),
 │  (Simplex.Chat.Controller)              │  database operations, file management
 ├─────────────────────────────────────────┤
-│  simplexmq library (external)           │  SMP/XFTP protocols, SMP Agent,
-│  (github.com/simplex-chat/simplexmq)    │  double-ratchet (PQDR), transport (TLS)
+│  popopxmq library (external)            │  SMP/XFTP protocols, SMP Agent,
+│  (github.com/popopx-chat/popopxmq)      │  double-ratchet (PQDR), transport (TLS)
 └─────────────────────────────────────────┘
 ```
 
@@ -338,16 +338,16 @@ Chat relays are SMP servers that forward messages to channel subscribers. They a
 | Haskell core | `../../src/Simplex/Chat/Controller.hs` — see `processCommand` in `Controller.hs` | |
 | Chat protocol (x-events, message envelopes) | `../../src/Simplex/Chat/Protocol.hs` | |
 
-### External: simplexmq Library
+### External: popopxmq Library
 
-The lower-level protocol and encryption layers are in the separate [simplexmq](https://github.com/simplex-chat/simplexmq) library:
+The lower-level protocol and encryption layers are in the separate [popopxmq](https://github.com/popopx-chat/popopxmq) library:
 
 | Component | Spec | Implementation |
 |-----------|------|----------------|
-| SMP protocol | `simplexmq/protocol/simplex-messaging.md` | `simplexmq/src/Simplex/Messaging/Protocol.hs` |
-| XFTP protocol | `simplexmq/protocol/xftp.md` | `simplexmq/src/Simplex/FileTransfer/Protocol.hs` |
-| SMP Agent (duplex connections) | `simplexmq/protocol/agent-protocol.md` | `simplexmq/src/Simplex/Messaging/Agent.hs` |
-| Double ratchet (PQDR) | `simplexmq/protocol/pqdr.md` | `simplexmq/src/Simplex/Messaging/Crypto/Ratchet.hs` |
-| Post-quantum KEM (sntrup761) | `simplexmq/protocol/pqdr.md` | `simplexmq/src/Simplex/Messaging/Crypto/SNTRUP761.hs` |
-| TLS transport | — | `simplexmq/src/Simplex/Messaging/Transport.hs` |
-| File encryption | — | `simplexmq/src/Simplex/Messaging/Crypto/File.hs` |
+| SMP protocol | `popopxmq/protocol/popopx-messaging.md` | `popopxmq/src/Popopx/Messaging/Protocol.hs` |
+| XFTP protocol | `popopxmq/protocol/xftp.md` | `popopxmq/src/Popopx/FileTransfer/Protocol.hs` |
+| SMP Agent (duplex connections) | `popopxmq/protocol/agent-protocol.md` | `popopxmq/src/Popopx/Messaging/Agent.hs` |
+| Double ratchet (PQDR) | `popopxmq/protocol/pqdr.md` | `popopxmq/src/Popopx/Messaging/Crypto/Ratchet.hs` |
+| Post-quantum KEM (sntrup761) | `popopxmq/protocol/pqdr.md` | `popopxmq/src/Popopx/Messaging/Crypto/SNTRUP761.hs` |
+| TLS transport | — | `popopxmq/src/Popopx/Messaging/Transport.hs` |
+| File encryption | — | `popopxmq/src/Popopx/Messaging/Crypto/File.hs` |

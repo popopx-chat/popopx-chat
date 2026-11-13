@@ -164,7 +164,7 @@ npm test
 
 To run one test file: `npm test -- tests/core.test.ts`.
 
-A local SMP server is started for the API and bot tests. On Linux x86-64 and arm64, `smp-server` is downloaded from [simplexmq releases](https://github.com/simplex-chat/simplexmq/releases) to `node_modules/.cache/smp-server`. To use another build, or on other systems, set `SMP_SERVER` to the path of `smp-server`:
+A local SMP server is started for the API and bot tests. On Linux x86-64 and arm64, `smp-server` is downloaded from [popopxmq releases](https://github.com/popopx-chat/popopxmq/releases) to `node_modules/.cache/smp-server`. To use another build, or on other systems, set `SMP_SERVER` to the path of `smp-server`:
 
 ```sh
 SMP_SERVER=/path/to/smp-server npm test

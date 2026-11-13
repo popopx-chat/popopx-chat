@@ -33,7 +33,7 @@ revision: 31.01.2023
 - Kontaktní adresy uživatelů - navázání spojení prostřednictvím odkazů na více kontaktů.
 - Zprávy uchovávané v místní databázi SQLite.
 - Automaticky vyplňované jméno příjemce - po navázání spojení stačí napsat zprávu a odpovědět odesílateli.
-- K dispozici ukázkové servery SMP, které jsou v aplikaci předkonfigurovány - nebo si můžete [nasadit vlastní server](https://github.com/simplex-chat/simplexmq#using-smp-server-and-smp-agent).
+- K dispozici ukázkové servery SMP, které jsou v aplikaci předkonfigurovány - nebo si můžete [nasadit vlastní server](https://github.com/popopx-chat/popopxmq#using-smp-server-and-smp-agent).
 - Žádná globální identita ani žádná jména nejsou pro server(y) viditelná, což zajišťuje plné soukromí vašich kontaktů a konverzací.
 - Dvě vrstvy šifrování E2E (double-ratchet pro duplexní spojení s použitím dohody klíčů X3DH s efemérními klíči Curve448 a NaCl crypto_box pro fronty SMP s použitím klíčů Curve25519) a předávání klíčů příjemců mimo pásmo (viz [Jak používat chat SimpleX](#how-to-use-popopx-chat)).
 - Ověřování integrity zpráv (pomocí zahrnutí digestů předchozích zpráv).
@@ -43,7 +43,7 @@ revision: 31.01.2023
 
 Veřejné klíče zapojené do výměny klíčů se nepoužívají jako identita, jsou náhodně generovány pro každý kontakt.
 
-Technické podrobnosti viz [Použité šifrovací primitivy](https://github.com/simplex-chat/simplexmq/blob/master/protocol/overview-tjr.md#encryption-primitives-used).
+Technické podrobnosti viz [Použité šifrovací primitivy](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md#encryption-primitives-used).
 
 <a name="🚀-installation"></a>
 
@@ -185,7 +185,7 @@ Po nastavení místního profilu zadejte `/c` (pro `/connect`) pro vytvoření n
 
 Můžete vytvořit více pozvánek zadáním `/connect` vícekrát a odesláním těchto pozvánek příslušným kontaktům, se kterými se chcete spojit.
 
-Pozvánku lze použít pouze jednou, a i kdyby byla zachycena, útočník by ji nemohl použít k odeslání zpráv prostřednictvím této fronty, jakmile váš kontakt potvrdí, že spojení bylo navázáno. Vysvětlení [formátu pozvánky](https://github.com/simplex-chat/simplexmq/blob/master/protocol/agent-protocol.md#connection-request) naleznete v protokolu agenta.
+Pozvánku lze použít pouze jednou, a i kdyby byla zachycena, útočník by ji nemohl použít k odeslání zpráv prostřednictvím této fronty, jakmile váš kontakt potvrdí, že spojení bylo navázáno. Vysvětlení [formátu pozvánky](https://github.com/popopx-chat/popopxmq/blob/master/protocol/agent-protocol.md#connection-request) naleznete v protokolu agenta.
 
 Kontakt, který obdržel pozvánku, by měl zadat `/c <pozvánka>`, aby spojení přijal. Tím se spojení naváže a obě strany jsou o tom informovány.
 

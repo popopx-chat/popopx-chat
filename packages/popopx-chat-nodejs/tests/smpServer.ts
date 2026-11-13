@@ -61,7 +61,8 @@ async function downloadSmpServer(path: string): Promise<void> {
   if (!downloadArch) {
     throw new Error(`smp-server release binaries are not available for ${process.platform} ${process.arch}, set SMP_SERVER to the smp-server path`)
   }
-  const url = `https://github.com/simplex-chat/simplexmq/releases/download/${smpServerRelease}/smp-server-ubuntu-22_04-${downloadArch}`
+  // popopxmq has published no release yet: a 404 here is this fork's own gap, not a reason to fall back to upstream's binary
+  const url = `https://github.com/popopx-chat/popopxmq/releases/download/${smpServerRelease}/smp-server-ubuntu-22_04-${downloadArch}`
   const data = await downloadWithRetries(url)
   mkdirSync(dirname(path), {recursive: true})
   writeFileSync(`${path}.download`, data, {mode: 0o755})

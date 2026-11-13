@@ -22,7 +22,7 @@ Koncentracja komunikacji na niewielkiej liczbie scentralizowanych platform spraw
 
 Proponowany zestaw protokołów pozwala rozwiązać te problemy poprzez przechowywanie zarówno wiadomości, jak i kontaktów wyłącznie na urządzeniach klienckich, redukując rolę serwerów do zwykłych przekaźników wiadomości. Wymagają one jedynie autoryzacji wiadomości wysyłanych do kolejek, ale NIE wymagają uwierzytelniania użytkowników - dzięki temu chronione są nie tylko wiadomości, ale także metadane, ponieważ użytkownicy nie mają przypisanych do siebie żadnych identyfikatorów - w przeciwieństwie do innych platform.
 
-Zobacz [whitepaper](https://github.com/simplex-chat/simplexmq/blob/master/protocol/overview-tjr.md) po więcej informacji o zadaniach platformy oraz by dowiedzieć się jak wygląda koncepcja techniczna modelu.
+Zobacz [whitepaper](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md) po więcej informacji o zadaniach platformy oraz by dowiedzieć się jak wygląda koncepcja techniczna modelu.
 
 ## Dlaczego SimpleX
 
@@ -48,7 +48,7 @@ SimpleX przechowuje wszystkie dane użytkownika na urządzeniach klienckich, wia
 
 Używamy przenośnego formatu bazy danych, który może być używany na wszystkich obsługiwanych urządzeniach - wkrótce dodamy możliwość eksportu bazy danych czatu z aplikacji mobilnej, aby można było jej używać na innym urządzeniu.
 
-W przeciwieństwie do serwerów sieci federowanych (e-mail, XMPP lub Matrix), serwery SimpleX nie przechowują kont użytkowników, a jedynie przekazują wiadomości do odbiorców, chroniąc prywatność obu stron. Nie ma żadnych identyfikatorów ani zaszyfrowanych wiadomości występujących wspólnie z wysłanym i odbieranym ruchem serwera, dzięki dodatkowej warstwie szyfrowania dostarczanych wiadomości. Jeśli więc ktoś obserwuje ruch na serwerze, nie może łatwo określić, kto komunikuje się z kim (sprawdź [SimpleX whitepaper](https://github.com/simplex-chat/simplexmq/blob/master/protocol/overview-tjr.md) by dowiedzieć się o znanych atakach korelacji ruchu).
+W przeciwieństwie do serwerów sieci federowanych (e-mail, XMPP lub Matrix), serwery SimpleX nie przechowują kont użytkowników, a jedynie przekazują wiadomości do odbiorców, chroniąc prywatność obu stron. Nie ma żadnych identyfikatorów ani zaszyfrowanych wiadomości występujących wspólnie z wysłanym i odbieranym ruchem serwera, dzięki dodatkowej warstwie szyfrowania dostarczanych wiadomości. Jeśli więc ktoś obserwuje ruch na serwerze, nie może łatwo określić, kto komunikuje się z kim (sprawdź [SimpleX whitepaper](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md) by dowiedzieć się o znanych atakach korelacji ruchu).
 
 ### Użytkownicy są właścicielami sieci SimpleX
 

@@ -75,6 +75,31 @@ summary:
    `release_digests` requires every asset of the tag to be present, so a half-published release is
    refused rather than silently pinned.
 
+7. **References to the SMP dependency** (2026-11-13) — 144 of the 446 `simplexmq` occurrences became
+   `popopxmq`: the contributor instructions (`docs/CONTRIBUTING.md` and its `pl` translation,
+   `docs/contributing/PROJECT.md`, `scripts/ci/README.md`, `scripts/ci/desktop-linux/README.md`), the
+   operator and product docs a POPOPX reader follows (`README.md`, `docs/SERVER.md`,
+   `docs/XFTP-SERVER.md`, `docs/CLI.md`, `docs/SIMPLEX.md`, `docs/SECURITY.md` and their
+   `pl`/`fr`/`cs` translations), the iOS product/spec layer (`apps/ios/product/glossary.md`,
+   `apps/ios/product/rules.md`, `apps/ios/spec/architecture.md`), the website's nav item, and one link
+   that was simply broken: `apps/ios/Shared/Views/UserSettings/VersionView.swift:40` rendered
+   "popopxmq: v… (commit)" hyperlinked into **upstream's** commit list, so every build of the settings
+   screen 404ed on our own version information.
+   A reference moved only where the same thing exists in `popopxmq`, which is not string equality: the
+   fork renamed its own files, so `protocol/simplex-messaging.md` is `protocol/popopx-messaging.md` and
+   `src/Simplex/**` is `src/Popopx/**`; and because the fork has one branch (`master`, its
+   `origin/HEAD`), every `blob/stable/` and `raw/…/stable/` ref segment had to move with the path or the
+   link 404s on a file that is there. The `#anchor` links moved only where the fork's README still
+   produces that slug (all 8 do). Checked over HTTP: the moved URLs return 200.
+   The three test harnesses that download a server for their suites
+   (`packages/popopx-chat-mcp/test/e2e/smpServer.ts`, `packages/popopx-chat-nodejs/tests/smpServer.ts`,
+   `apps/popopx-calculator-bot/test/smpServer.ts`) were ruled the same day to take it from
+   `popopx-chat/popopxmq`. `popopxmq` publishes no releases, so those suites now fail with a 404 until it
+   does — the comment at each site says so. That is the intended shape: a harness must not test our core
+   against a server built from someone else's source and report a pass, and a 404 is loud. The operator
+   docs are the opposite case, where the download is an instruction to a third party run against a
+   server that has to work today — see "The server artifacts" below.
+
 Every modification carries the date of the commit that made it; `git log` is the
 authoritative per-file record.
 
@@ -85,7 +110,17 @@ authoritative per-file record.
   and the ~78 company-name references in the privacy, licence and legal texts are retained
   verbatim, as AGPL-3.0 §7 requires (and §4 forbids removing). This codebase carries no
   per-file copyright headers, so there is nothing else to preserve.
-- **GitHub URLs** of the upstream project, which still point at the original source.
+- **Upstream GitHub URLs**, and the dependency references that are not ours to claim: `docs/protocol/**`
+  and `docs/rfcs/**` (those documents *are* upstream's source of record), `docs/REPRODUCE.md` and its
+  `simplexmq-reproduce-builds.sh` / `v6.3.1-simplexmq` lines (the recipe reproduces upstream's signed
+  build), `docs/dependencies/HASKELL.md` (a Dependency License Report whose entries are Hackage package
+  names — `simplexmq-6.4.0.1` is upstream's), `plans/**`, `blog/**`, `CHANGELOG.md`, `docs/LINKS.md`,
+  `docs/TRANSPARENCY.md` and `PRIVACY.md` as records, the `dist-newstyle/**` paths that captured commands
+  quote, and `website/**` apart from the nav item — that site is upstream's and its `siteLocation` still
+  says `simplex.chat`, so its protocol links describe upstream's copy of the spec. Two
+  `…/simplexmq/refs/heads/stable/scripts/docker/docker-compose-smp-{complete,manual}.env` references also
+  stayed because those files exist nowhere: upstream ships only `docker-compose-smp.env`, so the two doc
+  lines are broken at the source and are not this fork's regression.
 - **The server artifacts, though their paths moved.** On 2026-11-13 the operator docs (`docs/SERVER.md`,
   `docs/XFTP-SERVER.md` and their `pl`/`fr`/`cs` translations, `docs/CHAT-RELAY.md`) were switched to
   `popopx` filesystem identity — `/etc/opt/popopx{,-xftp}`, `/var/opt/popopx{,-xftp}`,

@@ -103,7 +103,8 @@ async function downloadServer(kind: ServerKind, path: string): Promise<void> {
   if (process.platform !== "linux" || !arch) {
     throw new Error(`${kind.name} release binaries are not available for ${process.platform} ${process.arch}, set ${kind.env} to the ${kind.name} path`)
   }
-  const url = `https://github.com/simplex-chat/simplexmq/releases/download/${serverRelease}/${kind.name}-ubuntu-22_04-${arch}`
+  // popopxmq has published no release yet: a 404 here is this fork's own gap, not a reason to fall back to upstream's binary
+  const url = `https://github.com/popopx-chat/popopxmq/releases/download/${serverRelease}/${kind.name}-ubuntu-22_04-${arch}`
   const response = await fetch(url)
   if (!response.ok) throw new Error(`error downloading ${url}: ${response.status}`)
   mkdirSync(dirname(path), {recursive: true})

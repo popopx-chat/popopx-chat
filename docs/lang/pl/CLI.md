@@ -33,7 +33,7 @@ revision: 31.01.2023
 - Adresy kontaktowe użytkowników - nawiązywanie połączeń za pomocą linków kontaktowych wielokrotnego użytku.
 - Wiadomości przechowywane w lokalnej bazie danych SQLite.
 - Automatycznie wypełniana nazwa odbiorcy - po nawiązaniu połączenia wystarczy po prostu napisać wiadomość, aby odpowiedzieć nadawcy.
-- Dostępne wstępnie skonfigurowane przykładowe serwery SMP - można też użyć [własnego serwera](https://github.com/simplex-chat/simplexmq#using-smp-server-and-smp-agent).
+- Dostępne wstępnie skonfigurowane przykładowe serwery SMP - można też użyć [własnego serwera](https://github.com/popopx-chat/popopxmq#using-smp-server-and-smp-agent).
 - Żadna globalna tożsamość ani nazwy użytkowników nie są widoczne dla serwera (serwerów), co zapewnia pełną prywatność kontaktów i rozmów.
 - Dwie warstwy szyfrowania E2E (double-ratchet dla połączeń dwukierunkowych, przy użyciu negocjacji klucza X3DH z efemerycznymi kluczami Curve448 i NaCl crypto_box dla kolejek SMP, przy użyciu kluczy Curve25519) oraz przekazywanie kluczy odbiorców za pomocą komunikacji out-of-band (zobacz [Jak używać czatu SimpleX](#how-to-use-popopx-chat)).
 - Weryfikacja integralności wiadomości (poprzez uwzględnienie hashu poprzedniej wiadomości).
@@ -43,7 +43,7 @@ revision: 31.01.2023
 
 Klucze publiczne biorące udział podczas wymiany kluczy nie są używane jako tożsamość, są one generowane losowo dla każdego kontaktu.
 
-Aby uzyskać szczegółowe informacje techniczne zobacz [używane metody szyfrowania](https://github.com/simplex-chat/simplexmq/blob/master/protocol/overview-tjr.md#encryption-primitives-used).
+Aby uzyskać szczegółowe informacje techniczne zobacz [używane metody szyfrowania](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md#encryption-primitives-used).
 
 <a name="🚀-installation"></a>
 
@@ -207,7 +207,7 @@ Gdy już skonfigurujesz swój profil lokalny, wpisz `/c` (oznaczające `/connect
 
 Możesz utworzyć wiele zaproszeń, kilkukrotnie wpisując `/connect` i wysłać te zaproszenia do kontaktów, z którymi chcesz się połączyć.
 
-Zaproszenie może być użyte tylko jeden raz i nawet jeśli zostanie ono przechwycone, atakujący nie będzie mógł go użyć do wysłania do Ciebie wiadomości za pośrednictwem tej kolejki, gdy Twój kontakt potwierdzi, że połączenie zostało nawiązane. Zobacz omówienie protokołu agenta dla [formatu zaproszeń](https://github.com/simplex-chat/simplexmq/blob/master/protocol/agent-protocol.md#connection-request).
+Zaproszenie może być użyte tylko jeden raz i nawet jeśli zostanie ono przechwycone, atakujący nie będzie mógł go użyć do wysłania do Ciebie wiadomości za pośrednictwem tej kolejki, gdy Twój kontakt potwierdzi, że połączenie zostało nawiązane. Zobacz omówienie protokołu agenta dla [formatu zaproszeń](https://github.com/popopx-chat/popopxmq/blob/master/protocol/agent-protocol.md#connection-request).
 
 Kontakt, który otrzymał zaproszenie powinien wpisać `/c <zaproszenie>`, aby zaakceptować połączenie. Spowoduje to nawiązanie połączenia, a obie strony zostaną o tym powiadomione.
 

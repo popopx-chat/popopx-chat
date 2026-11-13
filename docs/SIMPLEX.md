@@ -22,7 +22,7 @@ The concentration of the communication in a small number of centralized platform
 
 Proposed stack of protocols solves these problems by making both messages and contacts stored only on client devices, reducing the role of the servers to simple message relays that only require authorization of messages sent to the queues, but do NOT require user authentication - not only the messages but also the metadata is protected because users do not have any identifiers assigned to them - unlike with any other platforms.
 
-See [SimpleX whitepaper](https://github.com/simplex-chat/simplexmq/blob/master/protocol/overview-tjr.md) for more information on platform objectives and technical design.
+See [SimpleX whitepaper](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md) for more information on platform objectives and technical design.
 
 ## Why use SimpleX
 
@@ -48,7 +48,7 @@ SimpleX stores all user data on client devices, the messages are only held tempo
 
 We use portable database format that can be used on all supported devices - we will soon add the ability to export the chat database from the mobile app so it can be used on another device.
 
-Unlike servers of federated networks (email, XMPP or Matrix), SimpleX servers do not store user accounts, they simply relay messages to the recipients, protecting the privacy of both parties. There are no identifiers or encrypted messages in common between sent and received traffic of the server, thanks to the additional encryption layer for delivered messages. So if anybody is observing server traffic, they cannot easily determine who is communicating with whom (see [SimpleX whitepaper](https://github.com/simplex-chat/simplexmq/blob/master/protocol/overview-tjr.md) for the known traffic correlation attacks).
+Unlike servers of federated networks (email, XMPP or Matrix), SimpleX servers do not store user accounts, they simply relay messages to the recipients, protecting the privacy of both parties. There are no identifiers or encrypted messages in common between sent and received traffic of the server, thanks to the additional encryption layer for delivered messages. So if anybody is observing server traffic, they cannot easily determine who is communicating with whom (see [SimpleX whitepaper](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md) for the known traffic correlation attacks).
 
 ### Users own SimpleX network
 

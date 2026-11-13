@@ -124,15 +124,15 @@ Více informací o [instalaci a používání terminálové aplikace](./CLI.md).
 
 SimpleX je síť klient-server s unikátní topologií sítě, která využívá redundantní, jednorázové uzly pro předávání zpráv (relay nodes) k asynchronnímu předávání zpráv prostřednictvím jednosměrných (simplexních) front zpráv, což zajišťuje anonymitu příjemce i odesílatele.
 
-Na rozdíl od sítí P2P jsou všechny zprávy předávány přes jeden nebo několik serverových uzlů, které ani nemusí mít perzistenci. Současná implementace [SMP serveru](https://github.com/simplex-chat/simplexmq#smp-server) ve skutečnosti používá ukládání zpráv v paměti a uchovává pouze záznamy o frontách. SimpleX poskytuje lepší ochranu metadat než návrhy P2P, protože k doručování zpráv se nepoužívají globální identifikátory účastníků, a vyhýbá se [problémům sítí P2P](./SIMPLEX.md#comparison-with-p2p-messaging-protocols).
+Na rozdíl od sítí P2P jsou všechny zprávy předávány přes jeden nebo několik serverových uzlů, které ani nemusí mít perzistenci. Současná implementace [SMP serveru](https://github.com/popopx-chat/popopxmq#smp-server) ve skutečnosti používá ukládání zpráv v paměti a uchovává pouze záznamy o frontách. SimpleX poskytuje lepší ochranu metadat než návrhy P2P, protože k doručování zpráv se nepoužívají globální identifikátory účastníků, a vyhýbá se [problémům sítí P2P](./SIMPLEX.md#comparison-with-p2p-messaging-protocols).
 
 Na rozdíl od federativních sítí nemají uzly serveru **záznamy o uživatelích**, **nekomunikují mezi sebou** a **neukládají zprávy** po jejich doručení příjemcům. Neexistuje způsob, jak zjistit úplný seznam serverů účastnících se sítě SimpleX. Tato konstrukce se vyhýbá problému viditelnosti metadat, který mají všechny federované sítě, a lépe chrání před útoky na celou síť.
 
 Informace o uživatelích, jejich kontaktech a skupinách mají pouze klientská zařízení.
 
-Další informace o cílech a technickém návrhu platformy naleznete v dokumentu [SimpleX whitepaper](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/overview-tjr.md).
+Další informace o cílech a technickém návrhu platformy naleznete v dokumentu [SimpleX whitepaper](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md).
 
-Formát zpráv zasílaných mezi klienty chatu prostřednictvím [SimpleX Messaging Protocol](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/simplex-messaging.md) viz [SimpleX Chat Protocol](../../protocol/popopx-chat.md).
+Formát zpráv zasílaných mezi klienty chatu prostřednictvím [SimpleX Messaging Protocol](https://github.com/popopx-chat/popopxmq/blob/master/protocol/popopx-messaging.md) viz [SimpleX Chat Protocol](../../protocol/popopx-chat.md).
 
 ## Soukromí: technické podrobnosti a omezení
 
@@ -292,7 +292,7 @@ Zakladatel POPOPX Chat
 
 ## Odmítnutí odpovědnosti
 
-Protokoly a bezpečnostní model [SimpleX](https://github.com/simplex-chat/simplexmq/blob/master/protocol/overview-tjr.md) byly revidovány a ve verzi 1.0.0 došlo k mnoha zlomovým změnám a vylepšením.
+Protokoly a bezpečnostní model [SimpleX](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md) byly revidovány a ve verzi 1.0.0 došlo k mnoha zlomovým změnám a vylepšením.
 
 Bezpečnostní audit provedla v říjnu 2022 společnost [Trail of Bits](https://www.trailofbits.com/about) a většina oprav byla vydána ve verzi 4.2.0 - viz [oznámení](../../../blog/20221108-simplex-chat-v4.2-security-audit-new-website.md).
 
@@ -310,7 +310,7 @@ Více informací naleznete v [Podmínky a zásady ochrany osobních údajů](./P
 
 Chcete-li nahlásit bezpečnostní zranitelnost, pošlete nám e-mail na adresu chat@popopx.chat. Budeme koordinovat opravu a zveřejnění. Bezpečnostní zranitelnosti prosím NEHLAŠUJTE prostřednictvím issues GitHub.
 
-Jakákoli zjištění možných útoků korelace provozu umožňujících korelovat dvě různé konverzace se stejným uživatelem, jiná než ta, která jsou zahrnuta v [modelu hrozeb](https://github.com/simplex-chat/simplexmq/blob/stable/protocol/overview-tjr.md#threat-model), považujte za bezpečnostní zranitelnosti a postupujte podle tohoto postupu zveřejnění.
+Jakákoli zjištění možných útoků korelace provozu umožňujících korelovat dvě různé konverzace se stejným uživatelem, jiná než ta, která jsou zahrnuta v [modelu hrozeb](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md#threat-model), považujte za bezpečnostní zranitelnosti a postupujte podle tohoto postupu zveřejnění.
 
 ## Licence
 

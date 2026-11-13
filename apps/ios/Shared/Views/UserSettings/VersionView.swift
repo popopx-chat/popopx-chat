@@ -37,7 +37,7 @@ struct VersionLayout: View {
                 Text("App build: \(appBuild ?? "?")")
                 if let info = versionInfo {
                     Text("Core version: v\(info.version)")
-                    if let v = try? AttributedString(markdown: "popopxmq: v\(info.popopxmqVersion) ([\(info.popopxmqCommit.prefix(7))](https://github.com/simplex-chat/simplexmq/commit/\(info.popopxmqCommit)))") {
+                    if let v = try? AttributedString(markdown: "popopxmq: v\(info.popopxmqVersion) ([\(info.popopxmqCommit.prefix(7))](https://github.com/popopx-chat/popopxmq/commit/\(info.popopxmqCommit)))") {
                         Text(v)
                     }
                 }

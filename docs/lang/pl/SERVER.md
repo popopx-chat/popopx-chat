@@ -22,8 +22,8 @@ _Uwaga_: gdy zmienisz serwery w ustawieniach aplikacji, wpłynie to tylko na to,
    - Manualna instalacja (patrz niżej)
 
    - Półautomatyczna instalacja:
-     - [Oficjalny skrypt instalacyjny](https://github.com/simplex-chat/simplexmq#using-installation-script)
-     - [Kontener Dockera](https://github.com/simplex-chat/simplexmq#using-docker)
+     - [Oficjalny skrypt instalacyjny](https://github.com/popopx-chat/popopxmq#using-installation-script)
+     - [Kontener Dockera](https://github.com/popopx-chat/popopxmq#using-docker)
      - [Linode Marketplace](https://www.linode.com/marketplace/apps/simplex-chat/simplex-chat/)
 
 Instalacja ręczna wymaga kilku kroków wstępnych:
@@ -38,7 +38,7 @@ Instalacja ręczna wymaga kilku kroków wstępnych:
 
    - Budowanie z kodu źródłowego:
 
-     Zobacz [Build from source: Using your distribution](https://github.com/simplex-chat/simplexmq#using-your-distribution)
+     Zobacz [Build from source: Using your distribution](https://github.com/popopx-chat/popopxmq#using-your-distribution)
 
 2. Utwórz użytkownika i grupę dla `smp-server`:
 
@@ -435,14 +435,14 @@ Aby zaktualizować smp-server do najnowszej wersji, wybierz metodę instalacji i
         sudo systemctl start smp-server
         ```
 
-   - Używając [oficjalnego skryptu instalacyjnego](https://github.com/simplex-chat/simplexmq#using-installation-script)
+   - Używając [oficjalnego skryptu instalacyjnego](https://github.com/popopx-chat/popopxmq#using-installation-script)
      1. Uruchom:
         ```sh
         sudo simplex-servers-update
         ```
      2. Gotowe!
 
-   - Używając [kontenera Dockera](https://github.com/simplex-chat/simplexmq#using-docker)
+   - Używając [kontenera Dockera](https://github.com/popopx-chat/popopxmq#using-docker)
      1. Zatrzymaj i usuń kontener:
         ```sh
         docker rm $(docker stop $(docker ps -a -q --filter ancestor=simplexchat/smp-server --format="\{\{.ID\}\}"))

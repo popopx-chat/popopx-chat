@@ -34,7 +34,7 @@ revision: 31.01.2023
 - User contact addresses - establish connections via multiple-use contact links.
 - Messages persisted in a local SQLite database.
 - Auto-populated recipient name - just type your messages to reply to the sender once the connection is established.
-- Demo SMP servers available and pre-configured in the app - or you can [deploy your own server](https://github.com/simplex-chat/simplexmq#using-smp-server-and-smp-agent).
+- Demo SMP servers available and pre-configured in the app - or you can [deploy your own server](https://github.com/popopx-chat/popopxmq#using-smp-server-and-smp-agent).
 - No global identity or any names visible to the server(s), ensuring full privacy of your contacts and conversations.
 - Two layers of E2E encryption (double-ratchet for duplex connections, using X3DH key agreement with ephemeral Curve448 keys, and NaCl crypto_box for SMP queues, using Curve25519 keys) and out-of-band passing of recipient keys (see [How to use POPOPX chat](#how-to-use-popopx-chat)).
 - Message integrity validation (via including the digests of the previous messages).
@@ -44,7 +44,7 @@ revision: 31.01.2023
 
 Public keys involved in key exchange are not used as identity, they are randomly generated for each contact.
 
-See [Encryption Primitives Used](https://github.com/simplex-chat/simplexmq/blob/master/protocol/overview-tjr.md#encryption-primitives-used) for technical details.
+See [Encryption Primitives Used](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md#encryption-primitives-used) for technical details.
 
 <a name="🚀-installation"></a>
 
@@ -208,7 +208,7 @@ Once you've set up your local profile, enter `/c` (for `/connect`) to create a n
 
 You are able to create multiple invitations by entering `/connect` multiple times and sending these invitations to the corresponding contacts you'd like to connect with.
 
-The invitation can only be used once and even if this is intercepted, the attacker would not be able to use it to send you the messages via this queue once your contact confirms that the connection is established. See agent protocol for explanation of [invitation format](https://github.com/simplex-chat/simplexmq/blob/master/protocol/agent-protocol.md#connection-request).
+The invitation can only be used once and even if this is intercepted, the attacker would not be able to use it to send you the messages via this queue once your contact confirms that the connection is established. See agent protocol for explanation of [invitation format](https://github.com/popopx-chat/popopxmq/blob/master/protocol/agent-protocol.md#connection-request).
 
 The contact who received the invitation should enter `/c <invitation>` to accept the connection. This establishes the connection, and both parties are notified.
 

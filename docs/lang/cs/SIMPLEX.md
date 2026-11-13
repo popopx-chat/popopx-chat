@@ -22,7 +22,7 @@ Koncentrace komunikace v malém počtu centralizovaných platforem činí řeše
 
 Navrhovaný zásobník protokolů řeší tyto problémy tím, že zprávy i kontakty jsou uloženy pouze v klientských zařízeních, čímž se role serverů omezuje na pouhé zprostředkovatele zpráv, kteří vyžadují pouze autorizaci zpráv odesílaných do front, ale NEvyžadují autentizaci uživatelů - chráněny jsou nejen zprávy, ale i metadata, protože uživatelé nemají přiřazeny žádné identifikátory - na rozdíl od jiných platforem.
 
-Více informací o cílech a technickém návrhu platformy naleznete v dokumentu [SimpleX whitepaper](https://github.com/simplex-chat/simplexmq/blob/master/protocol/overview-tjr.md).
+Více informací o cílech a technickém návrhu platformy naleznete v dokumentu [SimpleX whitepaper](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md).
 
 ## Proč používat SimpleX
 
@@ -48,7 +48,7 @@ SimpleX ukládá všechna uživatelská data v klientských zařízeních, zprá
 
 Používáme přenosný formát databáze, který lze použít na všech podporovaných zařízeních - brzy přidáme možnost exportovat databázi chatu z mobilní aplikace, aby ji bylo možné použít na jiném zařízení.
 
-Na rozdíl od serverů federativních sítí (e-mail, XMPP nebo Matrix) servery SimpleX neukládají uživatelské účty, pouze předávají zprávy příjemcům, čímž chrání soukromí obou stran. Mezi odesílaným a přijímaným provozem serveru nejsou žádné společné identifikátory ani šifrované zprávy, a to díky dodatečné vrstvě šifrování doručovaných zpráv. Pokud tedy kdokoli sleduje provoz serveru, nemůže snadno zjistit, kdo s kým komunikuje (známé útoky na korelaci provozu viz [SimpleX whitepaper](https://github.com/simplex-chat/simplexmq/blob/master/protocol/overview-tjr.md)).
+Na rozdíl od serverů federativních sítí (e-mail, XMPP nebo Matrix) servery SimpleX neukládají uživatelské účty, pouze předávají zprávy příjemcům, čímž chrání soukromí obou stran. Mezi odesílaným a přijímaným provozem serveru nejsou žádné společné identifikátory ani šifrované zprávy, a to díky dodatečné vrstvě šifrování doručovaných zpráv. Pokud tedy kdokoli sleduje provoz serveru, nemůže snadno zjistit, kdo s kým komunikuje (známé útoky na korelaci provozu viz [SimpleX whitepaper](https://github.com/popopx-chat/popopxmq/blob/master/protocol/overview-tjr.md)).
 
 ### Uživatelé vlastní síť SimpleX
 

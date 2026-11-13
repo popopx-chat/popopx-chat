@@ -62,7 +62,7 @@ To create SMP server as a systemd service, you'll need:
 
 *Please note*: while you can run an SMP server without a domain name, in the near future client applications will start using server domain name in the invitation links (instead of `simplex.chat` domain they use now). In case a server does not have domain name and server pages (see below), the clients will be generating the links with `simplex:` scheme that cannot be opened in the browsers.
 
-1. Install server with [Installation script](https://github.com/simplex-chat/simplexmq#using-installation-script).
+1. Install server with [Installation script](https://github.com/popopx-chat/popopxmq#using-installation-script).
 
 2. Adjust firewall:
 
@@ -268,7 +268,7 @@ This installation script will automatically install binaries, systemd services a
 Run the following script on the server:
 
 ```sh
-curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/simplex-chat/simplexmq/stable/install.sh -o simplex-server-install.sh &&\
+curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/popopx-chat/popopxmq/master/install.sh -o simplex-server-install.sh &&\
 if echo '53fcdb4ceab324316e2c4cda7e84dbbb344f32550a65975a7895425e5a1be757 simplex-server-install.sh' | sha256sum -c; then
   chmod +x ./simplex-server-install.sh
   ./simplex-server-install.sh
@@ -295,7 +295,7 @@ Manual installation is the most advanced deployment that provides the most flexi
 
    - Compiling from source:
 
-     Please refer to [Build from source: Using your distribution](https://github.com/simplex-chat/simplexmq#using-your-distribution)
+     Please refer to [Build from source: Using your distribution](https://github.com/popopx-chat/popopxmq#using-your-distribution)
 
 2. Create user and group for `smp-server`:
 
@@ -367,7 +367,7 @@ This configuration provides quick and easy way to setup your SMP server: Caddy w
 
 2. Create `docker-compose.yml` file with the following content:
 
-  You can also grab it from here - [docker-compose-smp-complete.yml](https://raw.githubusercontent.com/simplex-chat/simplexmq/refs/heads/stable/scripts/docker/docker-compose-smp-complete.yml). Don't forget to rename it to `docker-compose.yml`.
+  You can also grab it from here - [docker-compose-smp-complete.yml](https://raw.githubusercontent.com/popopx-chat/popopxmq/master/scripts/docker/docker-compose-smp-complete.yml). Don't forget to rename it to `docker-compose.yml`.
 
   ```yaml
   name: POPOPX Chat - smp-server
@@ -473,7 +473,7 @@ This configuration allows you to retain the ability to manage 80 and 443 ports y
 
 2. Create `docker-compose.yml` file with the following content:
 
-  You can also grab it from here - [docker-compose-smp-manual.yml](https://raw.githubusercontent.com/simplex-chat/simplexmq/refs/heads/stable/scripts/docker/docker-compose-smp-manual.yml). Don't forget to rename it to `docker-compose.yml`.
+  You can also grab it from here - [docker-compose-smp-manual.yml](https://raw.githubusercontent.com/popopx-chat/popopxmq/master/scripts/docker/docker-compose-smp-manual.yml). Don't forget to rename it to `docker-compose.yml`.
 
   ```yaml
   name: POPOPX Chat - smp-server
@@ -662,11 +662,11 @@ All generated configuration, along with a description for each parameter, is ava
 [INFORMATION]
 # AGPLv3 license requires that you make any source code modifications
 # available to the end users of the server.
-# LICENSE: https://github.com/simplex-chat/simplexmq/blob/stable/LICENSE
+# LICENSE: https://github.com/popopx-chat/popopxmq/blob/master/LICENSE
 # Include correct source code URI in case the server source code is modified in any way.
 # If any other information fields are present, source code property also MUST be present.
 
-source_code: https://github.com/simplex-chat/simplexmq
+source_code: https://github.com/popopx-chat/popopxmq
 
 # Declaring all below information is optional, any of these fields can be omitted.
 
@@ -793,7 +793,7 @@ Follow the steps to quickly initialize the server offline:
 
 1. Install Docker on your system.
 
-2. Deploy [smp-server](https://github.com/simplex-chat/simplexmq#using-docker) locally.
+2. Deploy [smp-server](https://github.com/popopx-chat/popopxmq#using-docker) locally.
 
 3. Destroy the container. All relevant configuration files and keys will be available at `$HOME/simplex/smp/config`.
 
@@ -1066,11 +1066,11 @@ _Please note:_ this configuration is supported since `v6.1.0-beta.2`.
    [INFORMATION]
    # AGPLv3 license requires that you make any source code modifications
    # available to the end users of the server.
-   # LICENSE: https://github.com/simplex-chat/simplexmq/blob/stable/LICENSE
+   # LICENSE: https://github.com/popopx-chat/popopxmq/blob/master/LICENSE
    # Include correct source code URI in case the server source code is modified in any way.
    # If any other information fields are present, source code property also MUST be present.
 
-   source_code: https://github.com/simplex-chat/simplexmq
+   source_code: https://github.com/popopx-chat/popopxmq
 
    # Declaring all below information is optional, any of these fields can be omitted.
 
@@ -1230,11 +1230,11 @@ With the `[NAMES]` section enabled, your smp-server resolves names for the clien
 
 ### 1. Deploy the resolver stack
 
-The resolver stack (a reth + nimbus Ethereum node plus the resolver service) ships in [`scripts/resolver`](https://github.com/simplex-chat/simplexmq/tree/master/scripts/resolver) and starts with one command. See its [README](https://github.com/simplex-chat/simplexmq/blob/master/scripts/resolver/README.md) for details.
+The resolver stack (a reth + nimbus Ethereum node plus the resolver service) ships in [`scripts/resolver`](https://github.com/popopx-chat/popopxmq/tree/master/scripts/resolver) and starts with one command. See its [README](https://github.com/popopx-chat/popopxmq/blob/master/scripts/resolver/README.md) for details.
 
 ```sh
-git clone https://github.com/simplex-chat/simplexmq
-cd simplexmq/scripts/resolver
+git clone https://github.com/popopx-chat/popopxmq
+cd popopxmq/scripts/resolver
 docker compose up -d
 ```
 
@@ -1601,7 +1601,7 @@ To update your smp-server to latest version, choose your installation method and
         sudo systemctl start smp-server
         ```
 
-   - [Official installation script](https://github.com/simplex-chat/simplexmq#using-installation-script)
+   - [Official installation script](https://github.com/popopx-chat/popopxmq#using-installation-script)
 
      1. Execute the following command:
 
@@ -1618,7 +1618,7 @@ To update your smp-server to latest version, choose your installation method and
 
      2. Done!
 
-   - [Docker container](https://github.com/simplex-chat/simplexmq#using-docker)
+   - [Docker container](https://github.com/popopx-chat/popopxmq#using-docker)
 
      1. Stop and remove the container:
 
