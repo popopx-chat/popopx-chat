@@ -400,12 +400,26 @@ yet. Before any build of this fork is distributed:
     optional, because `popopx-chat-libs` releases feed the Node.js add-on and the npm packages, so a release
     tag without Apple material goes red at `Build library` rather than publishing an unnotarized `libsimplex`.
     Measured: that repository has no releases at all yet.
+  - *The installer was pointed at this repository.* Ruled 2026-11-13: `install.sh` set
+    `APP_NAME="simplex-chat"`, and that variable is the **download value**, not a label — `:82`/`:84` compose
+    `https://github.com/$APP_NAME/$APP_NAME/releases/$DOWNLOAD/$APP_NAME-$PLATFORM` from it and `:7` names the
+    installed binary, so our own script fetched upstream's binary from upstream's releases and installed it as
+    `simplex-chat`; the README then told the reader to run `popopx-chat`, which it had not installed. It now
+    fetches `popopx-chat-*`, matching what our CI publishes (`build.yml:1012`/`:1019`/`:1423`, and
+    `popopx-chat-ubuntu-22_04-x86_64` from the matrix at `:280`/`:281` with the derivation at `:556`), and
+    `README.md:224` pipes the script from `popopx-chat/popopx-chat@master` — the only branch this repository
+    has. Held: `$HOME/.simplex/simplex.agent.db` at `:43`, upstream's v0 agent database, which names something
+    that really is upstream's. Not retargeted here: the Darwin branch at `:20`-`:24` asks for `macos-x86-64`
+    only, so Apple Silicon gets the Intel build — an upstream gap in a path that no release exists to test
+    yet. Everything in this item is verified statically; end to end it stays unverifiable until #56 publishes.
 - **`popopx.chat` is owned and serving, and is now the ruled link domain.** Ruled 2026-11-13:
   `popopx.chat` for links and the site, `popopx.im` for relays. `website/src/CNAME` had already moved to
   `popopx.chat` before `website/` was removed — nothing read it but `website/.eleventy.js:471`, which
   published it to the site root, so removing it changes nothing that was ever served. What still makes link
-  handling inert is on that box: a certificate that names only `popopxchat.com`, and no `/.well-known/` at
-  all.
+  handling inert is one thing, not two: the certificate now covers the domain — measured 2026-11-13, the leaf
+  is `CN=popopx.chat` (Let's Encrypt) with `DNS:popopx.chat, DNS:www.popopx.chat` in the SAN — while
+  `/.well-known/apple-app-site-association`, `/.well-known/assetlinks.json` and the `www` copy of the first all
+  answer 404.
 - **Store links 404.** Every `market://` / `details?id=com.popopxchat.popopx` / App Store URL in
   this repository names an app record that does not exist yet.
 - **The application artwork is done; the documentation artwork is not.** The icons, illustrations and

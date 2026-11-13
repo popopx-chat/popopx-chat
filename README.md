@@ -221,7 +221,7 @@ You can use SimpleX with your own servers and still communicate with people usin
 ## :zap: Quick installation of a terminal app
 
 ```sh
-curl -o- https://raw.githubusercontent.com/simplex-chat/simplex-chat/stable/install.sh | bash
+curl -o- https://raw.githubusercontent.com/popopx-chat/popopx-chat/master/install.sh | bash
 ```
 
 Once the chat client is installed, simply run `popopx-chat` from your terminal.

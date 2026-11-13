@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-13 (113 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-13 (114 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -283,9 +283,45 @@ not cover `sign-libs-mac.sh`: the notarized dylibs feed the `popopx-chat-libs` r
 Node.js add-on and the npm packages, and publishing an unnotarized `libsimplex` would be the worse half -
 `popopx-chat-libs` has no releases either, measured the same day. `prepare-keychain-mac.sh` is not called by CI
 at all, so it keeps working as the local counterpart, now with the file names derived from the same three
-values. Held: `"Developer ID Certification Authority.cer"`, which is Apple's own intermediate, and
-`apps/multiplatform/README.md:86` / `local.properties.example`'s `app.name=SimpleX Debug`, which is a live
-value (`android/build.gradle.kts:57` puts it in the debug manifest label) and a different question.
+values. Held: `"Developer ID Certification Authority.cer"`, which is Apple's own intermediate. The
+`app.name=SimpleX Debug` label in `apps/multiplatform/README.md:86` and `local.properties.example:4` was left
+for a separate ruling the same day, which moved it - see "The quick-install path was pointed at this
+repository" below.
+
+### The quick-install path was pointed at this repository (2026-11-13)
+
+`README.md` told readers to run **upstream's** installer - `curl -o-
+https://raw.githubusercontent.com/simplex-chat/simplex-chat/stable/install.sh | bash` - and then, one line
+below, to run `popopx-chat`, which that script never installs. The script this repository ships had the same
+defect from the inside: `APP_NAME="simplex-chat"` is not a label but the download value, interpolated at
+`:82`/`:84` into `https://github.com/$APP_NAME/$APP_NAME/releases/$DOWNLOAD/$APP_NAME-$PLATFORM` (owner,
+repository, asset prefix) and at `:7` into the path of the installed binary, so our own installer fetched
+**upstream's binary from upstream's releases** and named it `simplex-chat`. The next release would have
+appeared in our releases list as `popopx-chat-*` (`build.yml:1012`, `:1019`, `:1423`, and
+`popopx-chat-ubuntu-22_04-x86_64` from the matrix at `:280`/`:281` plus the derivation at `:556`), so the
+script could never have installed this fork.
+
+`APP_NAME` moved to `popopx-chat`, which carries the binary lookup at `:33`/`:34`, the release listing at `:26`
+and the success line at `:92` with it, because they read the variable; the three strings that named the product
+without reading it (`:13`, `:17`, `:61`) moved in the same step, since after the retarget they would have
+described our own build as SimpleX Chat. The README line now fetches `master` of this repository - `master` is
+the only branch here, measured against the remote, so there is no `stable` to point at. Verified statically:
+`bash -n`, the URL recomposed from the moved variable, and the asset names diffed against the CI matrix. Not
+verified end to end, because this repository has published no release yet (#56) - `releases/latest` answers 404
+for both owners today.
+
+Left as they are, with reasons: `$HOME/.simplex/simplex.agent.db` at `:43` probes upstream's v0 agent database
+before offering to move an old binary aside, and it names something that is genuinely upstream's, so it stays
+spelled that way; the Darwin branch at `:20`-`:24` selects only `macos-x86-64`, so an Apple Silicon machine
+installs the Intel build through Rosetta - a pre-existing upstream gap in a path that is not yet testable, and
+widening it is a separate decision from pointing the installer at this repository.
+
+The same ruling closed the debug app label: `app.name=SimpleX Debug` became `POPOPX Debug` in
+`apps/multiplatform/README.md:86` and `local.properties.example:4` (2 occurrences). It is a live value -
+`build.gradle.kts:19` reads it, `android/build.gradle.kts:57` puts it in the manifest placeholder,
+`AndroidManifest.xml:45`/`:60` render it as the launcher name - but only for a developer who sets it, since the
+default is `@string/app_name`, which is already `POPOPX`. No compatibility reading, per "this is a new
+application".
 
 ### What was removed from this repository
 

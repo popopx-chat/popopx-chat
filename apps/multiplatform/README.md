@@ -83,7 +83,7 @@ The app calls into a Haskell core library via JNI/FFI:
 compression.level=0          # APK compression (0-9)
 enable_debuggable=true       # Debug mode
 application_id.suffix=.debug # Multiple app instances on same device
-app.name=SimpleX Debug       # App name for debug builds
+app.name=POPOPX Debug        # App name for debug builds
 ```
 
 ### `gradle.properties`

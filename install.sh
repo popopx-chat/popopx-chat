@@ -2,7 +2,7 @@
 
 set -eu
 
-APP_NAME="simplex-chat"
+APP_NAME="popopx-chat"
 BIN_DIR="$HOME/.local/bin"
 BIN_PATH="$BIN_DIR/$APP_NAME"
 PLATFORM="$(uname)"
@@ -10,11 +10,11 @@ PLATFORM="$(uname)"
 if [ -n "${1:-}" ]; then
   RELEASE="tag/$1"
   DOWNLOAD="download/$1"
-  echo "downloading SimpleX Chat $1 ..."
+  echo "downloading POPOPX Chat $1 ..."
 else
   RELEASE=latest
   DOWNLOAD="latest/download"
-  echo "downloading the latest version of SimpleX Chat ..."
+  echo "downloading the latest version of POPOPX Chat ..."
 fi
 
 if [ $PLATFORM == "Darwin" ]; then
@@ -58,7 +58,7 @@ if [[ -z $binary ]]; then
   fi
 # If chat binary found, check version and offer to abort or continue, on continue rename chat binary
 elif [[ ! $($binary -h | grep v1) ]]; then
-  echo "Warning: found a previous version of SimpleX Chat, the current version is not backwards compatible."
+  echo "Warning: found a previous version of POPOPX Chat, the current version is not backwards compatible."
   echo "If you continue, it will be renamed to $APP_NAME-v0, and the new version will be installed as $APP_NAME with a clean database."
   while true; do
     read -p "Please choose (a)bort or (c)ontinue: " yn < /dev/tty
