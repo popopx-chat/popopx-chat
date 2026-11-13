@@ -171,9 +171,11 @@ authoritative per-file record.
 11. **File and artefact names were the last identifier tier** (2026-11-13) — 45 of the 67 tracked paths
     still named "simplex" moved with their readers (13 Kotlin files, 2 desktop snapshot baselines, 4
     desktop launcher artifacts, 2 build-reproduction scripts + 2 CI readers, 2 support-bot test mocks,
-    22 artwork files with their `branding/source-svg/` mirrors); 22 are held, 20 of them installed
-    package paths (`packages_release.py test-names` owns those names) and 2 byte-identical duplicate
-    masters awaiting a delete ruling. That pass also repaired a compile break this fork shipped with:
+    22 artwork files with their `branding/source-svg/` mirrors); 20 of the 67 are held and 2 were deleted: the held 20 are installed package paths
+(`packages_release.py test-names` owns those names); the 2 deleted were
+`branding/source-svg/moko__ic_simplex_{dark,light}@4x.svg`, byte-identical duplicates of their
+already-renamed counterparts and read by nothing, so a rename could only have collided with the file
+each was meant to become That pass also repaired a compile break this fork shipped with:
     the display-copy tier `82130779f` renamed Kotlin declarations and left their 10 imports behind, so
     `:common:compileKotlinDesktop` failed in CI and no desktop artifact could be produced. Nothing on
     this machine compiles Kotlin, which is why it took a CI run to find it; `kt_import_gate.py` in the

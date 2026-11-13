@@ -44,11 +44,15 @@ pass:
   mirrors, whose names are the output path with `/` written as `__`, so a half-move would break the
   convention that generated them. All 24 files in this set are POPOPX bytes; only the names were upstream's.
 
+**Deleted, not renamed.** `branding/source-svg/moko__ic_simplex_{dark,light}@4x.svg` are byte-identical to
+their already-renamed counterparts `moko__ic_popopx_*@4x.svg` (same md5, `2fb6e266…` and `8e284b07…`) and
+nothing reads them, so a rename could only have collided with the file it was meant to become; deletion is
+the only move that removes the name.
+
 **Held, with reasons.** 20 paths in `packages/**` (the Node `simplex.{cc,h,js,d.ts}` and the Python module
 `src/simplex_chat/**`) — `packages_release.py test-names` rewrites the published names from `NPM_SCOPE`
-and `PYPI_PROJECT`, and an installed distribution name is not prose. 2 `branding/source-svg/moko__ic_*`
-masters are byte-identical duplicates of their renamed counterparts, so renaming them would collide; they
-await a delete ruling.
+and `PYPI_PROJECT`, and an installed distribution name is not prose. That is the whole residue: **67 → 20**
+paths named "simplex", 45 renamed with their readers and 2 deleted.
 
 This pass also repaired a **compile break on `master`**: the display-copy tier `82130779f` renamed Kotlin
 declarations and left 10 import lines naming the old symbols, which made CI's

@@ -12,7 +12,7 @@ not legal advice.
 > `simplex-chat-nodejs-<platform>` asset name), `simplex-chat-libs` **6** (2 asset names), tracked paths
 > whose *name* contains "simplex" **67**. Reproduce with `git grep -Io -- '<term>' | wc -l` and
 > `git ls-files | grep -ic simplex`. §2 now reads the new numbers — and the 67 has itself moved: the
-> naming-residue pass later the same day took it to **22**, all of them `packages/**` installed names.
+> naming-residue pass later the same day took it to **20**, every one of them a `packages/**` installed name.
 
 ## 1. What AGPL-3.0 requires of this fork, and where it is satisfied
 
@@ -49,8 +49,8 @@ The three groups listed in the ruling are **names**, and AGPL-3.0 imposes nothin
 - **`simplex-chat-nodejs-<platform>.node`** moved with it, being the other asset family of the same
   repository (`ADDON_ASSETS`, `packages_release.py:119`); a half-moved pair would have pinned one family
   from our releases and downloaded the other from upstream's.
-- **Tracked paths whose *name* contains "simplex": 322 at ruling 6, 67 on 2026-11-13, 22 after the
-  naming-residue pass the same day.** 250 of the 322 were document and site paths
+- **Tracked paths whose *name* contains "simplex": 322 at ruling 6, 67 on 2026-11-13, 45 renamed and 2 deleted
+  the same day, leaving **20**. 250 of the 322 were document and site paths
   (`website/src/{img,js}/**`, `plans/**`, `docs/**`, blog posts) that left with those directories in
   `9996634ee`. The remaining 45 that moved are source and artefact *names*, which is why they could not
   move as documentation — each needed its reader moved in the same commit: 13 Kotlin files, 2 desktop
@@ -70,14 +70,15 @@ The three groups listed in the ruling are **names**, and AGPL-3.0 imposes nothin
   `SimpleXLinkQRCode` ×2, `SimpleXInfo` ×1), which made `:common:compileKotlinDesktop` fail in CI for two
   days; repaired, and `tools/r7/kt_import_gate.py` now replays kotlinc's resolution over every brand
   import (10 hits when run against `f5a7fd984`, 0 against the repair).
-  What is **left at 22** is all of one kind: **20** in `packages/**` — the Node `cpp/simplex.{cc,h}` and
+  What is **left at 20** is all of one kind: **20** in `packages/**` — the Node `cpp/simplex.{cc,h}` and
   `src/simplex.{js,d.ts}` plus the 16 files of the Python module `src/simplex_chat/**`, whose declared
   distribution name is still `simplex-chat` (`packages/popopx-chat-python/pyproject.toml:6`) — deliberate,
   not missed: `packages_release.py test-names` rewrites the npm/PyPI names from `NPM_SCOPE`/`PYPI_PROJECT`
-  at publish time, which is the same two-ended-value rule in a different register — plus
-  **2** `branding/source-svg/moko__ic_simplex_*@4x.svg` masters held for a deletion ruling, because they
-  are byte-identical (`md5 2fb6e266…`, `8e284b07…`) to the renamed `moko__ic_popopx_*@4x.svg` and a rename
-  would collide with them.
+  at publish time, which is the same two-ended-value rule in a different register.
+  The other 2 paths of the 22 were `branding/source-svg/moko__ic_simplex_{dark,light}@4x.svg`, **deleted** after
+  this paragraph was written: they are byte-identical (`md5 2fb6e266…`, `8e284b07…`) to the renamed
+  `moko__ic_popopx_*@4x.svg`, so a rename would have collided and only a deletion removes the name. Neither
+  had a reader.
   Path names of documents that describe upstream were never a licence problem and none of these are one
   either — but none of them may move as documentation either. Trademark ruling #43 owns them, under the
   wire-audit gate. Measured for provenance: all
