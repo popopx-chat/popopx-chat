@@ -14,7 +14,7 @@ not legal advice.
 | §5a | keep the source-form notices intact | **satisfied** — this codebase carries no per-file copyright headers, so there is nothing per-file to preserve |
 | §5c | prominent notice of modification, with dates | **satisfied** — `FORK.md` states the fork is non-official and modified, names upstream, records the import commit `db0768c21` and its date (2026-11-11), and points at this repository as the complete corresponding source |
 | §6 | offer the Complete Corresponding Source to network users | **satisfied by construction** — the whole fork is the CCS, published at `github.com/popopx-chat/popopx-chat`, build scripts included (`cabal.project`, `flake.nix`, `apps/ios`, `apps/multiplatform`). If this fork ever *runs* a service on top of the code (badge service, directory service, an operator), §13's remote-network clause applies to that service's modified code too |
-| §7 | additional terms: the §7(b)/(c) attribution notices may not be removed | **satisfied** — see §4 above; `docs/TRADEMARK.md` is upstream's trademark policy and is kept |
+| §7 | additional terms: the §7(b)/(c) attribution notices may not be removed | **satisfied** — see §4 above; upstream's trademark policy is cited at its source (`docs/` left this fork on 2026-11-13), and the three `ASSETS_LICENSE.md` notices are kept |
 | §10 | you may accept the licence on behalf of downstream recipients | no action |
 | §13 | AGPL's copyleft over a network service | applies to any service this fork operates; nothing is operated yet (`FORK.md`, "No service is operated") |
 
@@ -112,9 +112,11 @@ that the file *names* stay (they are compiled `MR.images.*` resource identifiers
 - Whether POPOPX may *ask permission* for the artwork (the licence allows use "with prior written
   permission from SimpleX Chat Ltd") — a business decision, not a code one.
 - ~~`docs/TRADEMARK.md` is upstream's policy; the fork's own trademark position is not written yet.~~
-  **Written 2026-11-13**: `docs/TRADEMARK-POPOPX.md` (marks, asserted as unregistered/common-law) and
+  **Written 2026-11-13**: `TRADEMARK-POPOPX.md` (marks, asserted as unregistered/common-law) and
   `ASSETS_LICENSE-POPOPX.md` (the artwork this fork created, proprietary, no redistribution without
-  written permission). Upstream's `docs/TRADEMARK.md` and the three `ASSETS_LICENSE.md` files are kept
-  verbatim, so a downstream fork inherits both brands — recorded in `NOTICE` and in `README.md`'s
+  written permission). The three `ASSETS_LICENSE.md` files are kept verbatim; upstream's
+  `docs/TRADEMARK.md` is not shipped by this fork any more (`docs/` was removed here on 2026-11-13), so
+  it is cited at its source URL everywhere this fork refers to it. A downstream fork still inherits both
+  brands — recorded in `NOTICE` and in `README.md`'s
   License section.
 - Any service this fork later operates triggers §13 for that service; nothing is operated now.

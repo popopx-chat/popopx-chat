@@ -5,7 +5,7 @@ Copyright (C) 2026 POPOPX. All rights reserved.
 This file covers the graphic assets **this fork created**. It is the counterpart of
 [assets/ASSETS_LICENSE.md](assets/ASSETS_LICENSE.md), which is SimpleX Chat Ltd's licence for
 upstream's artwork and is kept in this repository unchanged; and of
-[docs/TRADEMARK-POPOPX.md](docs/TRADEMARK-POPOPX.md), which covers the names.
+[TRADEMARK-POPOPX.md](TRADEMARK-POPOPX.md), which covers the names.
 
 AGPL-3.0 covers the source code ([LICENSE](LICENSE)) and does not cover artwork. Nothing in this file
 restricts what you may do with the code: you may run it, study it, modify it and redistribute it under

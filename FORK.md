@@ -194,7 +194,8 @@ Two things in this repository are **not** licensed to you under AGPL-3.0, and a 
 substitution does not change that:
 
 - **Trademarks.** "SimpleX", "SimpleX Chat" and the associated logos are trademarks of
-  SimpleX Chat Ltd; see [`docs/TRADEMARK.md`](./docs/TRADEMARK.md) for their policy, which
+  SimpleX Chat Ltd; see [their `docs/TRADEMARK.md`](https://github.com/simplex-chat/simplex-chat/blob/stable/docs/TRADEMARK.md)
+  for the policy, which
   forbids using the mark in a fork's name or branding. POPOPX is used instead for that
   reason. This fork makes no claim of affiliation.
 - **Application graphics.** The illustrations, icons, visual designs and test-snapshot

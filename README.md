@@ -6,7 +6,7 @@
 > project's build and release feeds.
 >
 > The same holds for our own brand: **POPOPX**, the POPOPX wordmark, logo, icons and artwork and
-> `popopx.chat` are outside the AGPL grant too — [TRADEMARK-POPOPX](./docs/TRADEMARK-POPOPX.md) and
+> `popopx.chat` are outside the AGPL grant too — [TRADEMARK-POPOPX](./TRADEMARK-POPOPX.md) and
 > [ASSETS_LICENSE-POPOPX](./ASSETS_LICENSE-POPOPX.md). **A fork that distributes must rebrand and
 > redraw**: keep the code, change the name, ship your own icons and illustrations.
 
@@ -463,10 +463,10 @@ of this fork:
 - **Upstream (SimpleX Chat Ltd).** The SimpleX and SimpleX Chat name, logo, associated branding
   materials, and application and website graphic assets (illustrations, images, visual designs, etc.)
   are not covered by this license and are subject to the terms outlined in the
-  [TRADEMARK](./docs/TRADEMARK.md) and [ASSETS_LICENSE](./assets/ASSETS_LICENSE.md) files respectively.
+  [TRADEMARK](https://github.com/simplex-chat/simplex-chat/blob/stable/docs/TRADEMARK.md) and [ASSETS_LICENSE](./assets/ASSETS_LICENSE.md) files respectively.
 - **POPOPX (this fork).** The POPOPX and POPOPX Chat name, wordmark, logo and application icons, the
   artwork this fork created, and the `popopx.chat` domain are not covered by this license either, and
-  are subject to [TRADEMARK-POPOPX](./docs/TRADEMARK-POPOPX.md) and
+  are subject to [TRADEMARK-POPOPX](./TRADEMARK-POPOPX.md) and
   [ASSETS_LICENSE-POPOPX](./ASSETS_LICENSE-POPOPX.md) respectively.
 
 **If you fork this repository and distribute it, rebrand.** You keep every right AGPLv3 gives you over
