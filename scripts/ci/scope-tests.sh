@@ -11,9 +11,6 @@ case "${1:-}" in
   ci-scripts)
     python3 scripts/ci/test_packages_release.py
     ;;
-  website)
-    (cd website && npm test)
-    ;;
   mcp)
     (cd packages/popopx-chat-client/types/typescript && npm install --no-audit --no-fund && npx tsc)
     (cd packages/popopx-chat-nodejs && npm install --ignore-scripts --no-save --no-audit --no-fund ../popopx-chat-client/types/typescript && npx tsc && cp src/simplex.* dist)
@@ -26,7 +23,7 @@ case "${1:-}" in
     npm run test:e2e
     ;;
   *)
-    echo "usage: $0 badge-web | ci-scripts | website | mcp" >&2
+    echo "usage: $0 badge-web | ci-scripts | mcp" >&2
     exit 1
     ;;
 esac

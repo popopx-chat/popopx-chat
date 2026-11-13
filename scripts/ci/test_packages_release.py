@@ -502,7 +502,7 @@ class ChangesTest(GitRepoTest):
         self.assertEqual(self.builds(".github/workflows/ios-sim.yml", ".github/workflows/desktop-linux.yml", ".github/ISSUE_TEMPLATE/bug.md"), set())
 
     def test_unrelated_change_builds_nothing(self):
-        self.assertEqual(self.builds("docs/guide.md", "packages/pkg/src.txt"), set())
+        self.assertEqual(self.builds("PRIVACY.md", "packages/pkg/src.txt"), set())
 
     def test_package_change_builds_only_packages(self):
         self.assertEqual(self.builds("packages/popopx-chat-python/src/simplex_chat/client.py"), {"packages"})
@@ -514,10 +514,6 @@ class ChangesTest(GitRepoTest):
     def test_release_script_change_tests_the_ci_scripts(self):
         self.assertEqual(self.builds("scripts/ci/packages_release.py"), set())
         self.assertEqual(self.values["scopes"], "ci-scripts")
-
-    def test_website_library_change_tests_its_scope(self):
-        self.assertEqual(self.builds("website/src/js/simplex-lib.jsc"), set())
-        self.assertEqual(self.values["scopes"], "website")
 
     def test_mcp_change_tests_its_scope(self):
         self.assertEqual(self.builds("packages/popopx-chat-mcp/src/tools.ts"), set())

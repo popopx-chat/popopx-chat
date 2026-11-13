@@ -115,21 +115,6 @@ The reduced build runs one Linux job, build-linux (ubuntu-22.04 x86_64), for eve
 - CI, in build-linux: `scope-tests.sh ci-scripts` (step "Test changed scopes").
 - Local: `python3 scripts/ci/test_packages_release.py`; Python 3.11 or newer is required for tomllib (packages_release.py).
 
-#### website
-
-- Globs:
-  - website/src/js/simplex-lib.jsc
-  - website/test/**
-  - website/package.json
-- CI:
-  - in build-linux: `scope-tests.sh website` (step "Test changed scopes");
-  - on master pushes: build and deploy of website/**, images/**, blog/**, docs/** and PRIVACY.md (web.yml).
-- Local:
-  ```sh
-  cd website
-  npm test
-  ```
-
 #### mcp
 
 - Globs:

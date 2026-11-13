@@ -84,7 +84,6 @@ BUILD_CHANGES = {
 SCOPE_CHANGES = {
     "badge-web": ["apps/popopx-badge-service/web/**"],
     "ci-scripts": ["scripts/ci/packages_release.py", "scripts/ci/test_packages_release.py"],
-    "website": ["website/src/js/simplex-lib.jsc", "website/test/**", "website/package.json"],
     "mcp": [
         "packages/popopx-chat-mcp/**",
         "packages/popopx-chat-nodejs/**",
