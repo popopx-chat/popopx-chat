@@ -1,7 +1,7 @@
 package chat.popopx.common.platform
 
 import chat.popopx.common.model.*
-import chat.popopx.common.simplexWindowState
+import chat.popopx.common.popopxWindowState
 import chat.popopx.common.views.call.RcvCallInvitation
 import chat.popopx.common.views.database.deleteOldChatArchive
 import chat.popopx.common.views.helpers.*

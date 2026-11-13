@@ -15,7 +15,7 @@ import androidx.compose.ui.window.WindowState
 import boofcv.alg.fiducial.qrcode.QrCode
 import chat.popopx.common.model.ChatController.appPrefs
 import chat.popopx.common.model.ChatModel
-import chat.popopx.common.simplexWindowState
+import chat.popopx.common.popopxWindowState
 import chat.popopx.common.ui.theme.*
 import chat.popopx.common.views.PreviewTerminalLayout
 import chat.popopx.common.views.badges.PreviewPeriodCards

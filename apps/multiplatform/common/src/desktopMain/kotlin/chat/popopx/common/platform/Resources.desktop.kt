@@ -7,7 +7,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
-import chat.popopx.common.simplexWindowState
+import chat.popopx.common.popopxWindowState
 import chat.popopx.common.views.helpers.*
 import chat.popopx.res.*
 import com.jthemedetecor.OsThemeDetector

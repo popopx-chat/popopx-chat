@@ -2,7 +2,7 @@ package chat.popopx.common.model
 
 import androidx.compose.ui.graphics.*
 import chat.popopx.common.platform.*
-import chat.popopx.common.simplexWindowState
+import chat.popopx.common.popopxWindowState
 import chat.popopx.common.views.call.CallMediaType
 import chat.popopx.common.views.call.RcvCallInvitation
 import chat.popopx.common.views.helpers.*

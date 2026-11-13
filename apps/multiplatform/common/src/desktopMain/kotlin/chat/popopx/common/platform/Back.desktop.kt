@@ -1,7 +1,7 @@
 package chat.popopx.common.platform
 
 import androidx.compose.runtime.*
-import chat.popopx.common.simplexWindowState
+import chat.popopx.common.popopxWindowState
 
 @Composable
 actual fun BackHandler(enabled: Boolean, onBack: () -> Unit) {

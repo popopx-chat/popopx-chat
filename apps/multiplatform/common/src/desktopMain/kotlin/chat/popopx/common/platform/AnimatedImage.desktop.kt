@@ -3,7 +3,7 @@ package chat.popopx.common.platform
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asComposeImageBitmap
-import chat.popopx.common.simplexWindowState
+import chat.popopx.common.popopxWindowState
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import org.jetbrains.skia.Bitmap

@@ -9,7 +9,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import chat.popopx.common.platform.*
-import chat.popopx.common.simplexWindowState
+import chat.popopx.common.popopxWindowState
 import java.awt.Window
 
 @Composable

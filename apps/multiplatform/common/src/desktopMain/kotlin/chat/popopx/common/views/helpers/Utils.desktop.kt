@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.Density
 import chat.popopx.common.model.CIFile
 import chat.popopx.common.model.readCryptoFile
 import chat.popopx.common.platform.*
-import chat.popopx.common.simplexWindowState
+import chat.popopx.common.popopxWindowState
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.File
