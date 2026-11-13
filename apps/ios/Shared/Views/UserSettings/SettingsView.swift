@@ -62,8 +62,6 @@ let DEFAULT_ONE_HAND_UI_CARD_SHOWN = "oneHandUICardShown"
 let DEFAULT_ADDRESS_CREATION_CARD_SHOWN = "addressCreationCardShown"
 let DEFAULT_SUPPORTER_BANNER_SHOWN = "supporterBannerShown"
 let DEFAULT_SUPPORTER_BANNER_TAPPED = "supporterBannerTapped"
-let DEFAULT_GET_STAKE_BANNER_TAPPED = "getStakeBannerTapped"
-let DEFAULT_GET_STAKE_BANNER_DISMISSED = "getStakeBannerDismissed"
 let DEFAULT_TOOLBAR_MATERIAL = "toolbarMaterial"
 let DEFAULT_CONNECT_VIA_LINK_TAB = "connectViaLinkTab"
 let DEFAULT_LIVE_MESSAGE_ALERT_SHOWN = "liveMessageAlertShown"
@@ -129,8 +127,6 @@ let appDefaults: [String: Any] = [
     DEFAULT_ADDRESS_CREATION_CARD_SHOWN: false,
     DEFAULT_SUPPORTER_BANNER_SHOWN: false,
     DEFAULT_SUPPORTER_BANNER_TAPPED: false,
-    DEFAULT_GET_STAKE_BANNER_TAPPED: false,
-    DEFAULT_GET_STAKE_BANNER_DISMISSED: false,
     DEFAULT_TOOLBAR_MATERIAL: ToolbarMaterial.defaultMaterial,
     DEFAULT_CONNECT_VIA_LINK_TAB: ConnectViaLinkTab.scan.rawValue,
     DEFAULT_LIVE_MESSAGE_ALERT_SHOWN: false,
@@ -165,8 +161,6 @@ let hintDefaults = [
     DEFAULT_ADDRESS_CREATION_CARD_SHOWN,
     DEFAULT_SUPPORTER_BANNER_SHOWN,
     DEFAULT_SUPPORTER_BANNER_TAPPED,
-    DEFAULT_GET_STAKE_BANNER_TAPPED,
-    DEFAULT_GET_STAKE_BANNER_DISMISSED,
     DEFAULT_LIVE_MESSAGE_ALERT_SHOWN,
     DEFAULT_SIGN_MESSAGE_ALERT_SHOWN,
     DEFAULT_SHOW_HIDDEN_PROFILES_NOTICE,
@@ -424,16 +418,6 @@ struct SettingsView: View {
                 }
             }
 
-            if isInUS {
-                Section(header: Text("Own a part of POPOPX Chat").foregroundColor(theme.colors.secondary)) {
-                    NavigationLink {
-                        GetStakeView(fromSettings: true, showFirstImage: true)
-                            .navigationBarTitle("", displayMode: .inline)
-                    } label: {
-                        settingsRow("dollarsign.circle", color: theme.colors.secondary) { Text("Crowdfunding on Wefunder") }
-                    }
-                }
-            }
         }
         .navigationTitle("Your settings")
         .modifier(ThemedBackground(grouped: true))
@@ -510,7 +494,7 @@ struct SettingsView: View {
 
             Section(header: Text("Support the project").foregroundColor(theme.colors.secondary)) {
                 settingsRow("keyboard", color: theme.colors.secondary) {
-                    ExternalLink("Contribute", destination: URL(string: "https://github.com/simplex-chat/simplex-chat#contribute")!)
+                    ExternalLink("Contribute", destination: URL(string: "https://github.com/popopx-chat/popopx-chat#contribute")!)
                 }
                 settingsRow("star", color: theme.colors.secondary) {
                     Button("Rate the app") {
@@ -519,7 +503,7 @@ struct SettingsView: View {
                         }
                     }
                 }
-                ExternalLink(destination: URL(string: "https://github.com/simplex-chat/simplex-chat")!) {
+                ExternalLink(destination: URL(string: "https://github.com/popopx-chat/popopx-chat")!) {
                     ZStack(alignment: .leading) {
                         Image(colorScheme == .dark ? "github_light" : "github")
                             .resizable()

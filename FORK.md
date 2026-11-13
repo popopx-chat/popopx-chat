@@ -198,12 +198,14 @@ substitution does not change that:
   forbids using the mark in a fork's name or branding. POPOPX is used instead for that
   reason. This fork makes no claim of affiliation.
 - **Application graphics.** The illustrations, icons, visual designs and test-snapshot
-  screenshots are proprietary and all rights reserved per
+  screenshots were proprietary and all rights reserved per
   [`assets/ASSETS_LICENSE.md`](./assets/ASSETS_LICENSE.md), which permits only distribution
-  of the **unmodified** application. That permission does not extend to a rebranded fork.
-  The bundled artwork is therefore pending replacement with POPOPX-owned assets or removal;
-  it must not be redistributed as part of this fork. Any regenerated snapshot baselines are
-  POPOPX Chat work product.
+  of the **unmodified** application. That permission does not extend to a rebranded fork, so the
+  application graphics have been redrawn as POPOPX work product — the icons, the brand kit, the
+  moko build-input illustrations, and (2026-11-13) the last upstream files in the iOS catalog: the
+  crowdfunding badges, the chat wallpapers, `privacy` and `shield`. Any regenerated snapshot
+  baselines are POPOPX Chat work product. What remains of upstream's artwork is documentation and
+  website imagery, measured in [`ASSETS_LICENSE-POPOPX.md`](./ASSETS_LICENSE-POPOPX.md).
 
 ## What is still unset
 
@@ -323,9 +325,12 @@ yet. Before any build of this fork is distributed:
   is on that box: a certificate that names only `popopxchat.com`, and no `/.well-known/` at all.
 - **Store links 404.** Every `market://` / `details?id=com.popopxchat.popopx` / App Store URL in
   this repository names an app record that does not exist yet.
-- **The artwork is still SimpleX's.** The icons, illustrations and the 376 iOS snapshot baselines
-  are proprietary and licensed only for the *unmodified* application, so a rebranded fork may not
-  redistribute them; they need replacing with POPOPX-owned assets and regenerating.
+- **The application artwork is done; the documentation artwork is not.** The icons, illustrations and
+  the 376 iOS snapshot baselines are POPOPX work product now (the iOS catalog's last upstream files —
+  badges, wallpapers, `privacy`, `shield` — were redrawn on 2026-11-13). Still upstream's, and still
+  licensed only for the *unmodified* application: the 210 desktop snapshot baselines, and the
+  documentation and website imagery listed with counts in
+  [`ASSETS_LICENSE-POPOPX.md`](./ASSETS_LICENSE-POPOPX.md).
 
 ### Upstream-operated hosts, and how each one fails
 

@@ -34,8 +34,13 @@ Measured 2026-11-13, that set contains at least:
 - **iOS** — `apps/ios/Shared/Assets.xcassets/popopx_app_icon.imageset/**` (the app icons), the other
   POPOPX marks in `apps/ios/Shared/Assets.xcassets/**`, and the 376 renders under
   `apps/ios/POPOPX Snapshots/References/**`. Those renders were produced by this repository's own
-  snapshot target; 198 differ from upstream's and 178 are byte-equal to them because those scenes carry
+  snapshot target; 246 differ from upstream's and 130 are byte-equal to them because those scenes carry
   no brand content — an unchanged PNG is not a copied one, every file there was written by our run.
+  The last upstream-drawn artwork in the catalog went on 2026-11-13 (ruling 2): the 3 crowdfunding badge
+  SVGs, the 6 wallpaper sets (18 PNGs) and `privacy`/`shield` (6 PNGs) are redrawn from the master's
+  palette, at the same names, pixel sizes and `Contents.json` manifests, from the sources in
+  `branding/source-svg/ios__*.svg`. 8 files there are still upstream's and are not SimpleX marks: the
+  2 Apple SF Symbol exports (`checkmark.2`, `checkmark.wide`) and the 6 GitHub octocat PNGs.
 - **Android** — the 41 launcher/status-bar icons under
   `apps/multiplatform/android/src/main/res/{mipmap*,drawable*}/**`, generated from the iOS masters.
 - **Desktop / multiplatform** — `ic_popopx` and the other files under
@@ -45,14 +50,22 @@ Measured 2026-11-13, that set contains at least:
 
 ## What is NOT ours, and what that means for you
 
-As of 2026-11-13 this repository still contains **1563** image files that are byte-identical to
-upstream's, and they are SimpleX Chat Ltd's, under
-[assets/ASSETS_LICENSE.md](assets/ASSETS_LICENSE.md) — which is *stricter* than this file in one respect
+Measured 2026-11-13 against the tracked working tree (1257 image files, each compared with the blob at the
+same path in `db0768c21`): **566** are still byte-identical to upstream's, and they are SimpleX Chat Ltd's,
+under [assets/ASSETS_LICENSE.md](assets/ASSETS_LICENSE.md) — which is *stricter* than this file in one respect
 and *looser* in another: it permits them in an unmodified SimpleX Chat distribution (which a fork is
-not), and it forbids modification. The largest groups:
+not), and it forbids modification. The groups:
 
-- `website/src/img/**` 333, `docs/**` 275, `blog/**` 194, `plans/**` 30, root `images/**` 14,
-  `media-logos/**` 8, `fastlane/**` 9, `tests/**` 5 — documentation and site artwork;
+- `apps/multiplatform/common/**` 549 — the moko UI glyphs; every name was checked and none is a brand mark;
+- `apps/ios/Shared/**` 9 — 8 of them are not SimpleX marks either: the 2 Apple SF Symbol exports and the
+  6 GitHub octocat PNGs;
+- `tests/**` 5 and root `images/**` 3 — fixtures and the third-party logos (kuketz, trail-of-bits, whonix).
+
+**This count is in flux and should not be quoted as settled.** 1656 files under `docs/`, `website/`, `blog/`
+and `plans/` are staged for deletion in the working tree while that bulk removal is still unruled; measured
+against `HEAD` instead, where those files are all present, the figure is 2089 images and 1471 identical, the
+extra 905 being documentation and site artwork. Whichever way that decision goes, both numbers have to be
+re-measured.
 - ~~**the two build-input sets**~~ **replaced 2026-11-13 (ruling C2)**.
   `assets/multiplatform/resources/MR/images/**` is now 80 POPOPX renders (40 names × @2x/@3x, each at its
   original pixel size) drawn from vector masters in `branding/source-svg/`, and 12 files that no code

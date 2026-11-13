@@ -10,7 +10,9 @@
 import SwiftUI
 import POPOPXChat
 
-let conditionsURL = URL(string: "https://github.com/simplex-chat/simplex-chat/blob/stable/PRIVACY.md")!
+// The privacy statement POPOPX shows in its consent flows. Single place to edit; the site serves it.
+let popopxPrivacyURL = URL(string: "https://popopx.chat/privacy")!
+let conditionsURL = popopxPrivacyURL
 
 struct OnboardingButtonStyle: ButtonStyle {
     @EnvironmentObject var theme: AppTheme

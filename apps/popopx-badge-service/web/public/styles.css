@@ -51,8 +51,8 @@
   --disabled: rgba(13, 27, 58, .07);
   --on-disabled: rgba(13, 27, 58, .50);
 
-  /* Switched with the theme rather than tinted by it. The dark wordmark is the
-     same file with its `#030749` set to white. */
+  /* Switched with the theme rather than tinted by it. Both wordmarks are renders of the
+     same art from the master's palette: light lettering `#3D0A6D`, dark `#F3E8FB`. */
   --hero: url(hero-light.png);
   --wordmark: url(wordmark-light.svg);
 

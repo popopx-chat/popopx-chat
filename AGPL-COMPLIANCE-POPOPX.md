@@ -64,14 +64,24 @@ A rebranded fork is a modified work. Therefore:
 2. **Still blocking a release**, because the licence does not allow them and no POPOPX counterpart
    exists yet:
    - ~~the Android icon layer~~ **replaced 2026-11-12** by art generated from the iOS masters: 45
-     rasters (30 `mipmap-*` icon/round/foreground at 48-432, 10 `ntf_*` status-bar silhouettes from
-     the transparent POPOPX symbol, `drawable-hdpi/icon.png`, the two 512 playstore images and the
-     two 432 shared foregrounds) all resized from `AppIcon/1024.png` (light) and
-     `DarkAppIcon/1024.png` (dark), plus `drawable-v24/ic_launcher_foreground.xml` deleted — it named
-     upstream's vector and no resource referenced it. Still upstream-valued: the two adaptive
-     background colours `icon_background` `#FFFFFF` and `icon_dark_blue_background` `#030749`
-     (SimpleX's dark blue) and the 5 `mipmap-anydpi-v26` xml, which only wire foreground to
-     background; the foregrounds are full-bleed, so the colours are behind them and invisible.
+     rasters (30 `mipmap-*` icon/round/foreground at 48-432, 10 `ntf_*` status-bar icons,
+     `drawable-hdpi/icon.png`, the two 512 playstore images and the two 432 shared foregrounds) all
+     resized from `AppIcon/1024.png` (light) and `DarkAppIcon/1024.png` (dark), plus
+     `drawable-v24/ic_launcher_foreground.xml` deleted — it named upstream's vector and no resource
+     referenced it.
+     **Corrected 2026-11-13:** the sentence above claimed the `ntf_*` files were "transparent POPOPX
+     silhouettes"; measured, they were 24-bit RGB with no alpha channel, where upstream's were
+     32-bit RGBA. Android builds the status-bar icon from the alpha channel alone, so an opaque
+     square is a solid tinted block there, not a mark. All 10 were redrawn as single-colour
+     silhouettes on transparent with the "P" knocked out.
+     The adaptive background colour `icon_dark_blue_background` was still SimpleX's navy `#030749`;
+     it is now the master's deep purple `#3D0A6D`. `icon_background` stays `#FFFFFF`, and neither
+     shows: the foregrounds are full-bleed, so both colours sit behind them. The 5
+     `mipmap-anydpi-v26` xml only wire foreground to background and carry no artwork. The resource
+     and component *names* still say "dark_blue", which no longer describes anything; they are held
+     because `android:name=".MainActivity_dark_blue"` is a component name — the app enables and
+     disables these aliases at runtime to swap the launcher icon, and PackageManager keys that state
+     on the component name, so renaming it resets the user's chosen icon.
    - ~~the **376 iOS snapshot baselines**~~ **replaced 2026-11-12** with our own renders from the
      "POPOPX Snapshots" target: 264 at `large` plus 56 each at `accessibility-medium` and
      `extra-extra-extra-large`, filenames unchanged. 198 differ byte-for-byte from upstream's, the

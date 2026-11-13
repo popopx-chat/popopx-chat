@@ -55,6 +55,19 @@ the six `smp://…@smpN.simplexonflux.com` host-and-key pairs in `Presets.hs`, w
 `allPresetServers` because previously issued short links encode the host they were created on.
 `presetDomains` lost `.simplexonflux.com` with the operator.
 
+**The brand artwork is POPOPX's own.** The iOS app icon is the single master
+(`apps/ios/Shared/Assets.xcassets/AppIcon.appiconset/1024.png`, purple `#7A2BBE → #3D0A6D`) and every
+derived logo, icon, banner, store image and desktop icon is generated from it or redrawn in its palette
+(`branding/source-svg/`, `branding/master-logo/`). The last upstream-drawn files in the iOS catalog were
+replaced on 2026-11-13: the 3 crowdfunding badge SVGs, the 6 chat-wallpaper sets (18 PNGs) and
+`privacy`/`shield` — same names, same pixel sizes, same `Contents.json`, because a wallpaper preset name
+is a persisted value and the images are force-unwrapped by name. The wallpapers stay alpha tiles (the
+Swift side supplies the background colour), now in purple instead of black. The 376 iOS snapshot baselines
+were re-rendered after that: 246 differ from upstream's renders, 130 are byte-equal because those scenes
+carry no brand content. What is left of upstream's artwork is measured in
+[`ASSETS_LICENSE-POPOPX.md`](./ASSETS_LICENSE-POPOPX.md): UI glyphs that are not brand marks, third-party
+logos, and the documentation/site images whose bulk removal is still unruled.
+
 ### Interfaces that other code reads
 
 The FFI library is `libpopopx` (a dual lookup for `libsimplex*` is retained); the Node/Python/Rust
@@ -123,8 +136,9 @@ licence report, `plans/**`, `blog/**`, `CHANGELOG.md`, the website's upstream se
 2022 blog preview — copyright and attribution lines,
 the asset licence files, the preset operator
 that remains (SimpleX Chat) and its relay addresses, the badge service and directory hosts, the names-service
-namespace prefix `simplex_domain_v1` (it is a persisted record and a wire value), and the upstream
-artwork and the 210 desktop snapshot baselines. The dependency references that resolve in `popopxmq`
+namespace prefix `simplex_domain_v1` (it is a persisted record and a wire value), the upstream
+artwork that is still in the repository (documentation and site images, measured in
+`ASSETS_LICENSE-POPOPX.md`) and the 210 desktop snapshot baselines. The dependency references that resolve in `popopxmq`
 moved instead (`FORK.md` item 7). Full list with the authority for each:
 [`FORK.md`](./FORK.md).
 

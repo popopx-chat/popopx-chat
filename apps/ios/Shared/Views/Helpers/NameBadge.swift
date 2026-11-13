@@ -150,14 +150,7 @@ func showBadgeInfoAlert(_ name: String, _ badge: LocalBadge) {
         let title = badgeTypeName(badge.badge.badgeType)
         if case .investor = badge.badge.badgeType {
             let message = String.localizedStringWithFormat(NSLocalizedString("%@ invested in POPOPX Chat crowdfunding.", comment: "badge alert"), name)
-            showAlert(title, message: message) {
-                [ UIAlertAction(title: NSLocalizedString("Learn more", comment: "badge alert button"), style: .default) { _ in
-                    if let url = URL(string: "https://popopx.chat/crowdfunding") {
-                        UIApplication.shared.open(url)
-                    }
-                  },
-                  okAlertAction ]
-            }
+            showAlert(title, message: message)
         } else {
             // supporter, legend and unknown types use the supporter wording
             let supports =

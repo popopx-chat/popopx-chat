@@ -386,7 +386,6 @@ class BadgeModel: ObservableObject {
 enum ChatListBanner {
     case badgeAlert
     case badgePitch
-    case getStake
 }
 
 // Spec: spec/state.md#ChatModel

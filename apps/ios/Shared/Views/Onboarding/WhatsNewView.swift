@@ -669,13 +669,7 @@ private let versionDescriptions: [VersionDescription] = [
     VersionDescription(
         version: isInUS ? "v7.0.1" : "v7.0",
         post: URL(string: "https://popopx.chat/blog/20260819-simplex-chat-crowdfunding.html"),
-        features: (isInUS ? [
-            .view(FeatureView(
-                icon: nil,
-                title: "Own a part of POPOPX Chat",
-                view: { InvestInPOPOPXChat() }
-            ))
-        ] : []) + [
+        features: [
             .feature(Description(
                 icon: "at",
                 title: "POPOPX public names (BETA)",
@@ -697,13 +691,7 @@ private let versionDescriptions: [VersionDescription] = [
     VersionDescription(
         version: "v7.1",
         post: nil,
-        features: (isInUS ? [
-            .view(FeatureView(
-                icon: nil,
-                title: "Own a part of POPOPX Chat",
-                view: { InvestInPOPOPXChat() }
-            ))
-        ] : []) + [
+        features: [
             .view(FeatureView(
                 icon: nil,
                 title: "Supporter badges",
@@ -712,8 +700,7 @@ private let versionDescriptions: [VersionDescription] = [
             .feature(Description(
                 icon: "at",
                 title: "POPOPX public names",
-                description: "Sale starts on December 12.",
-                learnMore: URL(string: "https://simplex.domains/?utm_source=app_ios")
+                description: "Sale starts on December 12."
             )),
             .feature(Description(
                 icon: "antenna.radiowaves.left.and.right",
@@ -812,136 +799,6 @@ fileprivate struct CreateUpdateAddressShortLink: View {
                     .modifier(ThemedBackground(grouped: true))
             }
         }
-    }
-}
-
-fileprivate struct InvestInPOPOPXChat: View {
-    @EnvironmentObject var theme: AppTheme
-    @State private var showGetStakeSheet = false
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Own a part of POPOPX Chat! 🚀").font(.title3).bold()
-            #if POPOPX_ASSETS || SIMPLEX_ASSETS
-            Image("crowdfunding_1")
-                .resizable()
-                .scaledToFit()
-                .cornerRadius(12)
-                .padding(.top, 4)
-                .padding(.bottom, 8)
-                .onTapGesture { showGetStakeSheet = true }
-            #endif
-            (Text("Crowdfunding on Wefunder.") + Text(verbatim: " ") + Text("Learn more").foregroundColor(theme.colors.primary))
-                .multilineTextAlignment(.leading)
-                .onTapGesture { showGetStakeSheet = true }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .sheet(isPresented: $showGetStakeSheet) {
-            GetStakeView(fromSettings: false, showFirstImage: false)
-        }
-    }
-}
-
-fileprivate let getStakeSlides: [(image: String, heading: String, info: String?, text: String)] = [
-    (
-        "crowdfunding_1",
-        "The first and the only messaging network without any user IDs",
-        nil,
-        "By investing, you can benefit from the company growth, and help us build the future of private and secure communications."
-    ),
-    (
-        "crowdfunding_2",
-        "480,000+ users joined on their own",
-        nil,
-        "POPOPX users have been more than doubling every year without any paid marketing, and donated over $650,000."
-    ),
-    (
-        "crowdfunding_3",
-        "Developers already bet on POPOPX success",
-        "Independent developers created moderation and AI bots, Telegram bridges, and a public server registry.",
-        "Every service developers build on POPOPX Network may increase its value, and bring new users to POPOPX Chat."
-    ),
-    (
-        "crowdfunding_4",
-        "Revenue plan: businesses & big channels pay",
-        "POPOPX Chat plans to earn from the infrastructure and services that creators, businesses and large communities need as they grow.",
-        "Read about how we plan to make POPOPX Chat and network profitable, and about all the investment terms on Wefunder."
-    ),
-]
-
-let wefunderURL = URL(string: "https://wefunder.com/simplex.chat?utm_source=app_ios")!
-
-private let popopxCrowdfundingURL = URL(string: "popopx:/a#JxGcOA1_QhlmVFzYYabloMbvMZk5Y9d9iS3ITDnhzYo?h=smp11.simplex.im")!
-
-struct GetStakeView: View {
-    @Environment(\.dismiss) var dismiss: DismissAction
-    @EnvironmentObject var chatModel: ChatModel
-    var fromSettings: Bool
-    var showFirstImage: Bool
-
-    var body: some View {
-        ZoomablePageView {
-            VStack(alignment: .leading, spacing: 18) {
-                Text(verbatim: "Invest in\nPOPOPX Chat")
-                    .font(.largeTitle)
-                    .bold()
-                    .fixedSize(horizontal: false, vertical: true)
-                    .if(!fromSettings) { $0.padding(.top) }
-                if showFirstImage {
-                    slideImage(getStakeSlides[0])
-                }
-                (Text(verbatim: getStakeSlides[0].text) + Text(verbatim: " Learn more and invest on Wefunder.").bold().foregroundColor(.accentColor))
-                    .multilineTextAlignment(.leading)
-                    .onTapGesture {
-                        UIApplication.shared.open(wefunderURL)
-                    }
-                .padding(.bottom)
-                ForEach(getStakeSlides[1...3], id: \.image) { slide in
-                    VStack(alignment: .leading) {
-                        slideImage(slide)
-                        Text(slide.text)
-                    }
-                    .padding(.bottom)
-                }
-
-                Button {
-                    UIApplication.shared.open(wefunderURL)
-                } label: {
-                    Text(verbatim: "Learn more on Wefunder")
-                }
-                .buttonStyle(OnboardingButtonStyle())
-
-                Button {
-                    dismiss()
-                    DispatchQueue.main.async {
-                        ChatModel.shared.appOpenUrl = popopxCrowdfundingURL
-                    }
-                } label: {
-                    Text(verbatim: "or ask POPOPX team")
-                        .font(.callout)
-                }
-                .disabled(chatModel.chatRunning != true)
-                .frame(maxWidth: .infinity)
-            }
-            .padding()
-        }
-        .ignoresSafeArea(edges: .bottom)
-        .modifier(ThemedBackground(grouped: true))
-    }
-
-    @ViewBuilder
-    func slideImage(_ slide: (image: String, heading: String, info: String?, text: String?)) -> some View {
-        #if POPOPX_ASSETS || SIMPLEX_ASSETS
-        Image(slide.image)
-            .resizable()
-            .scaledToFit()
-            .cornerRadius(12)
-        #else
-        Text(slide.heading).font(.title3).bold()
-        if let info = slide.info {
-            Text(info)
-        }
-        #endif
     }
 }
 

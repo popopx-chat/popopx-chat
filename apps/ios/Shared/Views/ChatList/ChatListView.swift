@@ -158,7 +158,6 @@ struct ChatListView: View {
     @EnvironmentObject var theme: AppTheme
     @Binding var activeUserPickerSheet: UserPickerSheet?
     @State private var showNewChatSheet = false
-    @State private var showGetStakeSheet = false
     @State private var searchMode = false
     @FocusState private var searchFocussed
     @State private var searchText = ""
@@ -178,8 +177,6 @@ struct ChatListView: View {
     @AppStorage(DEFAULT_ADDRESS_CREATION_CARD_SHOWN) private var addressCreationCardShown = false
     @AppStorage(DEFAULT_SUPPORTER_BANNER_SHOWN) private var supporterBannerShown = false
     @AppStorage(DEFAULT_SUPPORTER_BANNER_TAPPED) private var supporterBannerTapped = false
-    @AppStorage(DEFAULT_GET_STAKE_BANNER_TAPPED) private var getStakeBannerTapped = false
-    @AppStorage(DEFAULT_GET_STAKE_BANNER_DISMISSED) private var getStakeBannerDismissed = false
     @AppStorage(DEFAULT_TOOLBAR_MATERIAL) private var toolbarMaterial = ToolbarMaterial.defaultMaterial
     @State private var showBadgesSheet = false
     
@@ -223,9 +220,6 @@ struct ChatListView: View {
                 BadgesView(showsAsSheet: true)
                     .modifier(ThemedBackground())
             }
-        }
-        .appSheet(isPresented: $showGetStakeSheet) {
-            GetStakeView(fromSettings: false, showFirstImage: true)
         }
         .onChange(of: activeUserPickerSheet) {
             if $0 != nil {
@@ -455,23 +449,12 @@ struct ChatListView: View {
         if shouldShowOnboarding {
             VStack(spacing: 0) {
                 ConnectOnboardingView()
-                if chatModel.bannerSlotFree(for: .getStake) && isInUS && !getStakeBannerDismissed {
-                    GetStakeBanner(showDismiss: false, onTap: openGetStake, onDismiss: {})
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 8)
-                        .onAppear { chatModel.chatListBanner = .getStake }
-                }
             }
             .scaleEffect(x: 1, y: oneHandUI ? -1 : 1, anchor: .center)
             .modifier(ThemedBackground())
         } else {
             chatListContent
         }
-    }
-
-    private func openGetStake() {
-        getStakeBannerTapped = true
-        showGetStakeSheet = true
     }
 
     private var chatListContent: some View {
@@ -549,18 +532,6 @@ struct ChatListView: View {
                             .listRowBackground(Color.clear)
                             .zIndex(1)
                             .onAppear { chatModel.chatListBanner = .badgePitch }
-                    } else if chatModel.bannerSlotFree(for: .getStake) && isInUS && !getStakeBannerDismissed {
-                        GetStakeBanner(
-                            showDismiss: getStakeBannerTapped && !chatModel.chats.isEmpty,
-                            onTap: openGetStake,
-                            onDismiss: { withAnimation { getStakeBannerDismissed = true } }
-                        )
-                            .padding(.vertical, 3)
-                            .scaleEffect(x: 1, y: oneHandUI ? -1 : 1, anchor: .center)
-                            .listRowSeparator(.hidden)
-                            .listRowBackground(Color.clear)
-                            .zIndex(1)
-                            .onAppear { chatModel.chatListBanner = .getStake }
                     }
                     if #available(iOS 16.0, *) {
                         ForEach(cs, id: \.viewId) { chat in

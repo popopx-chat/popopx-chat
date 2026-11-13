@@ -22,7 +22,7 @@ struct DeveloperView: View {
         VStack {
             List {
                 Section {
-                    ExternalLink(destination: URL(string: "https://github.com/simplex-chat/simplex-chat")!) {
+                    ExternalLink(destination: URL(string: "https://github.com/popopx-chat/popopx-chat")!) {
                         ZStack(alignment: .leading) {
                             Image(colorScheme == .dark ? "github_light" : "github")
                                 .resizable()

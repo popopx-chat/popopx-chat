@@ -395,7 +395,7 @@ struct ConditionsTextView: View {
     @State private var failedToLoad: Bool = false
     @State private var conditionsHTML: String? = nil
 
-    let defaultConditionsLink = "https://github.com/simplex-chat/simplex-chat/blob/stable/PRIVACY.md"
+    let defaultConditionsLink = popopxPrivacyURL.absoluteString
 
     var body: some View {
         viewBody()
@@ -603,7 +603,7 @@ struct SingleOperatorUsageConditionsView: View {
 
 func conditionsLinkButton() -> some View {
     let commit = ChatModel.shared.conditions.currentConditions.conditionsCommit
-    let mdUrl = URL(string: "https://github.com/simplex-chat/simplex-chat/blob/\(commit)/PRIVACY.md") ?? conditionsURL
+    let mdUrl = URL(string: "https://github.com/simplex-chat/simplex-chat/blob/\(commit)/PRIVACY.md") ?? popopxPrivacyURL
     return Menu {
         ExternalLink(destination: mdUrl) {
             Label("Open conditions", systemImage: "doc")

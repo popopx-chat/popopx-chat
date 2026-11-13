@@ -890,14 +890,6 @@ struct SetPopopxDomainView: View {
             Section {
                 if editing {
                     Button {
-                        openBrowserAlert(uri: "https://simplex.domains/#testing")
-                    } label: {
-                        HStack {
-                            Text("How to register a test name")
-                            Image(systemName: "arrow.up.right.circle")
-                        }
-                    }
-                    Button {
                         if let w = broadcastWarning, changed {
                             showAlert(w, actions: {[
                                 UIAlertAction(title: NSLocalizedString("Save", comment: "alert action"), style: .default) { _ in saveAndDismiss() },
@@ -929,7 +921,7 @@ struct SetPopopxDomainView: View {
                 Text("POPOPX name sale starts in")
                     .foregroundColor(theme.colors.secondary)
             } footer: {
-                Text("Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)")
+                Text("Crowdfunding investors can reserve names before the sale starts.")
                     .foregroundColor(theme.colors.secondary)
                     .padding(.bottom)
             }

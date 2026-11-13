@@ -263,12 +263,13 @@ needs the service worker, not the manifest.
 
 The asset table is otherwise built. The brand mark is the difference worth
 knowing about: `public/img/wordmark-*.svg` and `public/img/symbol-*.svg` are
-the official files copied out of `website/` and `media-logos/`, served under
+the official files, copied verbatim out of `branding/source-svg/`, served under
 the build hash and drawn by the stylesheet — NOT path data transcribed into a
 module. `design.test.ts` compares each one against its source byte for byte,
-so a hand-edited mark fails the suite. The one edit is the dark wordmark,
-which is the light file with its `#030749` lettering set to white, exactly as
-simplex.chat's own dark header shows it.
+so a hand-edited mark fails the suite. The light and dark wordmarks are two
+renders of the same art rather than one file recoloured by hand: the light
+lettering is the master's deep purple `#3D0A6D`, the dark one its light ink
+`#F3E8FB`.
 
 ## Content Security Policy
 

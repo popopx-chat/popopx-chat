@@ -190,11 +190,6 @@ struct BadgeInvestorOffer: View {
         VStack(spacing: 4) {
             Text(level.investorOffer)
                 .font(.footnote)
-            Link(destination: wefunderURL) {
-                Text("Learn more on Wefunder")
-                    .font(.subheadline)
-                    .foregroundColor(theme.colors.primary)
-            }
         }
         .multilineTextAlignment(.center)
         .fixedSize(horizontal: false, vertical: true)
