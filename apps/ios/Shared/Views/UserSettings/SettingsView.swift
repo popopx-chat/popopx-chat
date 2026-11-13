@@ -11,6 +11,12 @@ import SwiftUI
 import StoreKit
 import POPOPXChat
 
+// HOLD (task #66): this contact is SimpleX Chat Ltd's - their relay, their server key, their contact
+// hash; the core hands out the identical value as adminContactReq (Popopx/Chat/Library/Internal.hs).
+// "Send questions and ideas" in this view, and ChatHelp.swift's "connect to POPOPX Chat developers."
+// therefore reach upstream, not this fork. The values move when POPOPX runs a relay and creates its
+// own contact, and the labels move with them rather than before them - which is why neither was
+// re-worded here.
 let popopxTeamURL = URL(string: "popopx:/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw?h=smp6.simplex.im")!
 
 let popopxNewsURL = URL(string: "popopx:/c#grcfG3ulVI4Sh6ow33qBsmSk7uEy3gRSl2KkJ5ER6tA?h=smp18.simplex.im")!

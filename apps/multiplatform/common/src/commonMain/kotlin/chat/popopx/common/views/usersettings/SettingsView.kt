@@ -73,6 +73,10 @@ fun SettingsView(chatModel: ChatModel, setPerformLA: (Boolean) -> Unit, close: (
   }
 }
 
+// HOLD (task #66): SimpleX Chat Ltd's contact - their relay, server key and hash, the same value the
+// core returns as adminContactReq. "Send questions and ideas" (chat_with_the_founder) and
+// you_can_connect_to_popopx_chat_founder therefore reach upstream, not this fork, until POPOPX runs
+// a relay and mints its own contact; the labels move with the value, not before it.
 val popopxTeamUri =
   "popopx:/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw?h=smp6.simplex.im"
 

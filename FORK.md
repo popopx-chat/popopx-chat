@@ -334,14 +334,22 @@ yet. Before any build of this fork is distributed:
   the F-Droid, TestFlight, downloads, release, Reddit and Mastodon badges were removed - see
   `CHANGELOG-POPOPX.md`, "The front page stops recruiting, funding or identifying for SimpleX Chat Ltd".
   Still upstream's on purpose: the flatpak release-tag links, and any link whose target only exists in
-  upstream's history. **Awaiting that same ruling, measured late because this pass grepped badge strings
-  instead of the class** - a first-person label whose destinations are upstream's accounts:
-  `src/Popopx/Chat/Help.hs:55-57` "Follow our updates:" with their Reddit and Twitter (a compiled core
-  string, so the shipped iOS archives keep the old text until the next archive rebuild), `README.md:79-81`
-  "We publish our updates and releases via:" with five of their accounts, and
-  `fastlane/metadata/android/en-US/full_description.txt:24-25` - three of the same accounts plus a contact
-  link that joins **upstream's** user group out of the store listing of our app.
-  `SUPPORT_EMAIL` is already `chat@popopx.chat`, which is itself not yet reachable (first bullet).
+  upstream's history. The three holders that pass measured but did not touch - because it grepped badge
+  strings instead of the class - are executed now: `README.md`'s "We publish our updates and releases via:"
+  over five of their accounts and the "our SimpleX address / we reply within 24 hours / joining our team"
+  promises, and `fastlane/metadata/android/en-US/full_description.txt`'s "Follow us on" plus the group link
+  that joined **their** user group from our store listing. `src/Popopx/Chat/Help.hs`'s "Follow our updates:"
+  block was deleted (and the claim that it reached the iOS archives was retracted - the module is not linked
+  into them). What is *held* is the contact itself, at four holders marked `HOLD (task #66)`:
+  `popopxTeamURL`, `popopxTeamUri`, `ChatHelp.swift`'s "connect to POPOPX Chat developers." and
+  `Help.hs`'s "Connect to POPOPX Chat developers … type /simplex". They name our developers and reach
+  SimpleX Chat Ltd's relay, server key and contact hash, and they can only move once POPOPX runs a relay and
+  mints its own contact - which is the same condition already written above `adminContactReq`. Still
+  awaiting a ruling, found after it: `README.md:64-68` claims upstream's two user groups exist for questions
+  "about POPOPX Chat only", and `full_description.txt:21-23` states in the first person that "**our**
+  servers do not have access to this information" about relays this fork does not operate.
+  `SUPPORT_EMAIL` is already `chat@popopx.chat`, which is itself not yet reachable (first bullet) - which is
+  why the front page routes the fork's own questions to the GitHub issue tracker instead.
 - **`popopx-chat-libs` has published no releases yet.** The asset names and the source they are fetched
   from are ours (item 6 above), so nothing in this repository can resolve a `core-<version>` release
   today: the fork carries the build inputs and `releases.toml`, and its Releases list is empty. The first

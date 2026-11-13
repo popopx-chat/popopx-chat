@@ -25,7 +25,7 @@ none of it: [Invest in SimpleX Chat on Wefunder](https://wefunder.com/simplex.ch
 ## Welcome to POPOPX Chat!
 
 1. 📲 [Install the app](#install-the-app).
-2. ↔️ [Connect to the team](#connect-to-the-team), [join user groups](#join-user-groups) and [follow our updates](#follow-our-updates).
+2. ↔️ [Connect to the team](#connect-to-the-team), [join user groups](#join-user-groups) and [follow the upstream project's updates](#follow-the-upstream-projects-updates).
 3. 🤝 [Make a private connection](#make-a-private-connection) with a friend.
 4. 🔤 [Help translating POPOPX Chat](#help-translating-popopx-chat).
 5. ⚡️ [Contribute](#contribute) and [donate to the upstream project](#donate-to-the-upstream-project).
@@ -47,15 +47,15 @@ none of it: [Invest in SimpleX Chat on Wefunder](https://wefunder.com/simplex.ch
 
 ## Connect to the team
 
-You can connect to the team via the app using "chat with the developers button" available when you have no conversations in the profile, "Send questions and ideas" in the app settings or via our [SimpleX address](https://smp6.simplex.im/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw). Please connect to:
+You can connect to the team via the app using "chat with the developers button" available when you have no conversations in the profile, "Send questions and ideas" in the app settings or via the [SimpleX address](https://smp6.simplex.im/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw). Please connect to:
 
 - to ask any questions
 - to suggest any improvements
 - to share anything relevant
 
-We are replying the questions manually, so it is not instant – it can take up to 24 hours.
+The team answering there is **SimpleX Chat Ltd's** - this fork does not operate that address, and nothing sent to it reaches the maintainers of this repository. They answer manually, so it is not instant and can take up to 24 hours. Anything about this fork itself belongs in the [issue tracker](https://github.com/popopx-chat/popopx-chat/issues).
 
-If you are interested in helping us to integrate open-source language models, and in joining our team, please get in touch.
+If you are interested in helping with the open-source language model integrations, or in working on this fork, please get in touch through the [issue tracker](https://github.com/popopx-chat/popopx-chat/issues).
 
 ## Join user groups
 
@@ -74,13 +74,13 @@ There is also a group [#simplex-devs](https://smp6.simplex.im/g#Drx3efC-n418AuSp
 
 You can join these and other groups by opening these links in the app or by opening them in a desktop browser and scanning the QR code.
 
-## Follow our updates
+## Follow the upstream project's updates
 
-We publish our updates and releases via:
+These accounts belong to SimpleX Chat Ltd - they publish their updates and releases via:
 
 - [Reddit](https://www.reddit.com/r/SimpleXChat/), [Twitter](https://twitter.com/SimpleXChat), [Lemmy](https://lemmy.ml/c/simplex), [Mastodon](https://mastodon.social/@simplex) and [Nostr](https://snort.social/p/npub1exv22uulqnmlluszc4yk92jhs2e5ajcs6mu3t00a6avzjcalj9csm7d828).
-- POPOPX Chat [team profile](#connect-to-the-team).
-- [mailing list](https://popopx.chat/#join-simplex), very rarely.
+
+This fork's own release notes are kept in [CHANGELOG-POPOPX.md](./CHANGELOG-POPOPX.md).
 
 ## Make a private connection
 

@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-13 (121 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-13 (122 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -590,14 +590,18 @@ Gates unchanged: sweep 0, pairs 0/0/0/0, audit FORWARD 0 / REVERSE 0 / BARE 16, 
 **The gap that this pass exposed, and what it now owes a ruling.** The hero alt (`alt="SimpleX logo"`)
 was fixed because the file behind it was redrawn by `9c8df8f09` - the alt had simply never followed the
 artwork. But my 必改 list was built by grepping the *badge strings* rather than the *class*, and the class
-grep (`reddit.com/r/SimpleXChat`, `twitter.com/SimpleXChat`, `mastodon.social/@simplex`) found two holders
-this pass did **not** touch, because they were not in the ruled set:
+grep (`reddit.com/r/SimpleXChat`, `twitter.com/SimpleXChat`, `mastodon.social/@simplex`) found the three
+holders below, none of which this pass touched because none of them were in the ruled set:
 
 - `src/Popopx/Chat/Help.hs:55-57` - the CLI's first-run welcome: **"Follow our updates:"** then
   `reddit.com/r/SimpleXChat/` and `twitter.com/SimpleXChat`. Same file, adjacent lines already say
-  "Thank you for installing POPOPX Chat", so the first person is ours and the destinations are theirs. It
-  is a compiled core string: whatever is decided, the shipped iOS archives keep the old text until the
-  next archive rebuild, so this one carries the rebuild cost the 丁/核心 tiers documented.
+  "Thank you for installing POPOPX Chat", so the first person is ours and the destinations are theirs.
+  **The cost claimed here was wrong and is retracted:** it was written as "a compiled core string, so the
+  shipped iOS archives keep the old text until the next archive rebuild", but measured afterwards the
+  `Help` module is **not linked into the iOS archives at all** - `ar -t` on the device slice lists no Help
+  object, and both Help-only strings ("Follow our updates", "Thank you for installing") read 0 there while
+  the control from `Library/Internal.hs` (`smp6.simplex.im`) reads 6. The welcome is CLI-only: the cost was
+  `cabal build`, nothing more, and no archive rebuild and no snapshot re-render were ever owed for it.
 - `README.md:79-81` "**We publish our updates and releases via:**" with five upstream accounts (Reddit,
   Twitter, Lemmy `c/simplex`, Mastodon `@simplex`, Nostr), and
   `fastlane/metadata/android/en-US/full_description.txt:24-25` - "Follow us on" the same three accounts,
@@ -605,12 +609,81 @@ this pass did **not** touch, because they were not in the ruled set:
   app. Measured holders: Reddit 3 lines / 3 occurrences, Twitter 3 / 3, Mastodon 2 / 2, Lemmy 1 / 1,
   Nostr 1 / 1.
 
-Both are the identical misattribution as the badges, so leaving them is an inconsistency this file should
-not hide. `fastlane/…/images/` (icon + 8 screenshots) was checked rather than assumed: `9c8df8f09` already
-redrew them, so the F-Droid artwork is ours and only its text is at issue. Root `README.md`'s upstream-repo
-links went 8 → 4 as a side effect (the two rewritten build URLs and the two deleted release links); the 4
-left are the AGPL attribution at `:2`, the two `docs/lang/{cs,fr}` links that belong to the weblate class
-(H), and upstream's `TRADEMARK.md`, which governs *their* mark and is correct.
+All three are the identical misattribution as the badges, so leaving them would have been an inconsistency
+this file should not hide - they are executed in the section below. `fastlane/…/images/` (icon + 8
+screenshots) was checked rather than assumed: `9c8df8f09` already redrew them, so the F-Droid artwork is
+ours and only its text is at issue. Root `README.md`'s upstream-repo links went 8 → 4 as a side effect (the
+two rewritten build URLs and the two deleted release links); the 4 left are the AGPL attribution at `:2`,
+the two `docs/lang/{cs,fr}` links that belong to the weblate class (H), and upstream's `TRADEMARK.md`, which
+governs *their* mark and is correct.
+
+### The remaining first-person labels that pointed at upstream's accounts went, or were attributed
+
+Ruling: `执行 A B C D + F删 + E/G/H hold`. This section is the A/B/C/D half plus where the holds are
+recorded; the news entry point (F) is a separate commit because it is the only part that is rendered.
+
+The class is **a first-person label whose destination is an account, feed or contact that SimpleX Chat Ltd
+operates**. Where the text carries a label slot the label moves to whoever owns the destination; where the
+sentence exists only to advertise a destination that is not ours, the sentence goes.
+
+- `README.md:77-83` - "We publish our updates and releases via:" over their Reddit, Twitter, Lemmy
+  `c/simplex`, Mastodon `@simplex` and Nostr. The heading became `## Follow the upstream project's updates`
+  and the lead-in names SimpleX Chat Ltd; the five accounts stay, because with the attribution they are
+  true. A heading is an anchor, so the one in-page referrer (`README.md:28`) moved with it - the new slug
+  was **derived** by the same algorithm as the A2 and donation-heading passes and asserted against the
+  written link, not guessed. The "POPOPX Chat team profile" bullet went: it pointed at the contact that the
+  next bullet re-attributes, and it is not a channel anyone publishes updates on. The "mailing list" bullet
+  went too, for a measured reason rather than an editorial one: `https://popopx.chat/#join-simplex` is a
+  **dead anchor** - the hosted homepage is a single 18 KB `index.html` whose only `id` is `langDropdown`,
+  and `join-simplex` appears nowhere in it (`grep -c` = 0), so a sentence about where this fork announces
+  things cannot point there. It now points at `CHANGELOG-POPOPX.md`, which is in this repository and is the
+  only release narration that exists today; the site-side anchor belongs to item #61.
+- `README.md:50/56/58` - "via **our** SimpleX address", "**We** are replying the questions manually … up to
+  24 hours", "joining **our** team". That address is the same `smp6.simplex.im/a#lrdvu2d8…` contact the app
+  opens for "Send questions and ideas", so the front page was promising *our* turnaround for messages that
+  arrive at SimpleX Chat Ltd. The paragraph now says whose team answers, that nothing sent there reaches
+  this repository, and routes anything about the fork itself to `github.com/popopx-chat/popopx-chat/issues` -
+  the one destination that is both ours and live. `chat@popopx.chat` was deliberately **not** added to the
+  front page: FORK.md's first open item records that it is not yet reachable, and an unreachable route in
+  place of a wrong one is not a fix.
+- `fastlane/metadata/android/en-US/full_description.txt:24-25` - "Follow us on" their Mastodon, Twitter and
+  Reddit, and "Once you install SimpleX Chat, join the group of users via this link": a store listing that
+  recruited for their social accounts and joined **their** user group from the page of **our** app. Both
+  sentences are deleted rather than re-worded (the second carries a percent-encoded
+  `simplex.chat/contact#…` group payload, so re-hosting the text would still open upstream's group). The
+  mailto subject in the sentence that stays became "POPOPX Chat on F-Droid".
+- `src/Popopx/Chat/Help.hs:55-57` - the CLI welcome's "Follow our updates:" with their Reddit and Twitter
+  lines, deleted together with the blank line that separated the block.
+
+Held, reason written at each holder as `HOLD (task #66)` - 4 sites, no line numbers quoted because the
+notes themselves shifted them: `popopxTeamURL`
+(`apps/ios/Shared/Views/UserSettings/SettingsView.swift`), `popopxTeamUri`
+(`…/usersettings/SettingsView.kt`), `ChatHelp.swift`'s "connect to POPOPX Chat developers." and
+`Help.hs`'s "Connect to POPOPX Chat developers … type /simplex". They name **our** developers and reach
+SimpleX Chat Ltd's contact; the only honest fix is to mint our own, which first needs a relay that POPOPX
+operates. Re-wording the 32 Kotlin localized values of `you_can_connect_to_popopx_chat_founder`, the 8 of
+`follow_popopx_network_news` and the iOS catalogs now, only to move them back with the value, would churn
+the translations twice - so value and labels move together, later. `adminContactReq` already carried this
+ruling in a comment; the four new notes point at it rather than repeating it.
+
+Verified: `cabal build lib:popopx-chat`; the new anchor re-derived from the new heading and asserted equal
+to the referrer that was written; zero-checks outside the record files on "We publish our updates",
+`#follow-our-updates`, "via our [SimpleX address]", "We are replying the questions manually", "in joining
+our team, please get in touch", `"Follow our updates:"`, `> Reddit: https://www.reddit.com/r/SimpleXChat/`,
+`> Twitter: https://twitter.com/SimpleXChat`, `<p>Follow us on Mastodon (`, `<p>Once you install SimpleX
+Chat, join the group` and `subject=SimpleX Chat on F-Droid` = **0 each**; the Mastodon/Lemmy/Nostr/Reddit/
+Twitter URLs survive only inside the attributed README list. No CI job reads the README, the fastlane text
+or the AppStream metadata, so those checks and the HTTP measurements are the whole gate; nothing in this
+half is rendered, which is why it carries no snapshot cost.
+
+Found by the same predicate after the ruling, **not** in the ruled set, awaiting one:
+`README.md:62` offers upstream's directory bot (`smp4.simplex.im/a#lXUjJW5v…`); `README.md:64-68` says "The
+groups below are created for the users to be able to ask questions … about **POPOPX Chat** only" over two
+groups that SimpleX Chat Ltd created (`#SimpleX users group`, `#simplex-devs`), which puts a statement about
+this fork in their moderators' mouths; and `full_description.txt:21-23` still says "**our** servers do not
+have access to this information", "routed via **our** servers" and "send **us** any questions via the app
+(connect to the team via settings!)" - a store listing that states who holds the user's data, in the first
+person of a relay operator this fork is not. The privacy sentence is the one that matters.
 
 ### What was removed from this repository
 

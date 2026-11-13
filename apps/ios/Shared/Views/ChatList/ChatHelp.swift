@@ -23,6 +23,9 @@ struct ChatHelp: View {
 
             VStack(alignment: .leading, spacing: 0) {
                 Text("To ask any questions and to receive updates:")
+                // HOLD (task #66): the "POPOPX Chat developers" this offers to connect to are reached
+                // through popopxTeamURL, which is SimpleX Chat Ltd's contact - see the note above its
+                // definition in SettingsView.swift.
                 Button("connect to POPOPX Chat developers.") {
                     dismissSettingsSheet()
                     DispatchQueue.main.async {

@@ -50,11 +50,11 @@ chatWelcome user =
       "Welcome " <> green userName <> "!",
       "Thank you for installing POPOPX Chat!",
       "",
+      -- HOLD (task #66): /simplex opens adminContactReq - simplex.im's relay, server key and
+      -- contact hash (see the ruling comment in src/Popopx/Chat/Library/Internal.hs). The label is
+      -- ours, the destination is theirs; both move together once POPOPX runs a relay and mints its
+      -- own contact, which is the same condition as popopxTeamURL in apps/ios.
       "Connect to POPOPX Chat developers for any questions - just type " <> highlight "/simplex",
-      "",
-      "Follow our updates:",
-      "> Reddit: https://www.reddit.com/r/SimpleXChat/",
-      "> Twitter: https://twitter.com/SimpleXChat",
       "",
       "Type " <> highlight "/help" <> " for usage info, " <> highlight "/welcome" <> " to show this message"
     ]
