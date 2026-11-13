@@ -29,7 +29,7 @@ SimpleX Chat (also referred to as SimpleX) is the first communication network ba
 
 SimpleX messaging protocol is the first protocol that has no user profile IDs of any kind, not even random numbers, cryptographic keys or hashes that identify the users. SimpleX apps allow their users to send messages and files via relay server infrastructure. Relay server owners and operators do not have any access to your messages, thanks to quantum-resistant double-ratchet end-to-end encryption algorithm (also known as Signal algorithm - do not confuse with Signal protocols or platform) and additional encryption layers, and they also have no access to your profile and contacts - as they do not host user accounts.
 
-Double ratchet algorithm has such important properties as [forward secrecy](/docs/GLOSSARY.md#forward-secrecy), sender [repudiation](/docs/GLOSSARY.md#) and break-in recovery (also known as [post-compromise security](/docs/GLOSSARY.md#post-compromise-security)).
+Double ratchet algorithm has such important properties as forward secrecy, sender repudiation and break-in recovery (also known as post-compromise security).
 
 If you believe that any part of this document is not aligned with SimpleX network mission or values, please raise it via [email](mailto:chat@simplex.chat) or [chat](https://smp6.simplex.im/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw).
 
@@ -37,7 +37,7 @@ If you believe that any part of this document is not aligned with SimpleX networ
 
 ### General principles
 
-SimpleX network software uses established industry practices for security and encryption to provide secure [end-to-end encrypted](/docs/GLOSSARY.md#end-to-end-encryption) messaging via private connections. This encryption is protected from [man-in-the-middle attack](/docs/GLOSSARY.md#man-in-the-middle-attack) by the relay servers, even if they are modified or compromised.
+SimpleX network software uses established industry practices for security and encryption to provide secure end-to-end encrypted messaging via private connections. This encryption is protected from man-in-the-middle attack by the relay servers, even if they are modified or compromised.
 
 SimpleX software is built on top of SimpleX messaging and application protocols, based on a new message routing protocol allowing to establish private connections without having identifiers assigned to its users - it does not use emails, phone numbers, usernames, identity keys or any other user profile identifiers to pass messages between the user applications.
 
@@ -46,10 +46,6 @@ SimpleX software is similar in its design approach to email clients and browsers
 SimpleX network operators are not communication service provider, and provide public relays "as is", as experimental, without any guarantees of availability or data retention. The operators of the relay servers preset in the app ("Preset Server Operators"), including SimpleX Chat Ltd, are committed to maintain a high level of availability, reliability and security. SimpleX client apps can have multiple preset relay server operators that you can opt-in or opt-out of using. You are and will continue to be able to use any other operators or your own servers.
 
 SimpleX network design is based on the principles of user and data sovereignty, and device and operator portability.
-
-The implementation security assessment of SimpleX cryptography and networking was done in October 2022 by [Trail of Bits](https://www.trailofbits.com/about), and most fixes were released in v4.2 – see [the announcement](/blog/20221108-simplex-chat-v4.2-security-audit-new-website.md).
-
-The cryptographic review of SimpleX protocols design was done in July 2024 by Trail of Bits – see [the announcement](/blog/20241014-simplex-network-v6-1-security-review-better-calls-user-experience.md).
 
 ### Your information
 
@@ -63,7 +59,7 @@ You can transfer the profile to another device by creating a backup of the app d
 
 #### Messages and Files
 
-SimpleX relay servers cannot decrypt or otherwise access the content or even the size of your messages and files you send or receive. Each message is padded to a fixed size of 16kb. Each file is sent in chunks of 64kb, 256kb, 1mb or 4mb via all or some of the configured file relay servers. Both messages and files are sent end-to-end encrypted, and the servers do not have technical means to compromise this encryption, because part of the [key exchange](/docs/GLOSSARY.md#key-exchange) happens out-of-band.
+SimpleX relay servers cannot decrypt or otherwise access the content or even the size of your messages and files you send or receive. Each message is padded to a fixed size of 16kb. Each file is sent in chunks of 64kb, 256kb, 1mb or 4mb via all or some of the configured file relay servers. Both messages and files are sent end-to-end encrypted, and the servers do not have technical means to compromise this encryption, because part of the key exchange happens out-of-band.
 
 Your message history is stored only on your own device and the devices of your contacts. While the recipients' devices are offline, messaging relay servers temporarily store end-to-end encrypted messages – you can configure which relay servers are used to receive the messages from the new contacts, and you can manually change them for the existing contacts too.
 
@@ -111,8 +107,6 @@ When you choose to use instant push notifications in SimpleX iOS app, because th
 
 Preset notification server cannot observe the actual addresses of these queues, as a separate address is used to subscribe to the notifications. It also cannot observe who sends messages to you. Apple push notifications servers can only observe how many notifications are sent to you, but not from how many contacts, or from which messaging relays, as notifications are delivered to your device end-to-end encrypted by one of the preset notification servers - these notifications only contain end-to-end encrypted metadata, not even encrypted message content, and they look completely random to Apple push notification servers.
 
-You can read more about the design of iOS push notifications [here](./blog/20220404-simplex-chat-instant-notifications.md#our-ios-approach-has-one-trade-off).
-
 #### Another information stored on the servers
 
 Additional technical information can be stored on the network servers, including randomly generated authentication tokens, keys, push tokens, and other material that is necessary to transmit messages. SimpleX network design limits this additional technical information to the minimum required to operate the software and servers. To prevent server overloading or attacks, the servers can temporarily store data that can link to particular users or devices, including IP addresses, geographic location, or information related to the transport sessions. This information is not stored for the absolute majority of the app users, even for those who use the servers very actively.
@@ -123,7 +117,7 @@ Because SimpleX servers do not create user accounts and do not store any identif
 
 This section applies only to the experimental group directory chat bot operated by SimpleX Chat Ltd.
 
-[SimpleX Directory](/docs/DIRECTORY.md) bot stores: your search requests, the messages and the members profiles in the registered groups. You can connect to SimpleX Directory via [this address](https://smp4.simplex.im/a#lXUjJW5vHYQzoLYgmi8GbxkGP41_kjefFvBrdwg-0Ok).
+SimpleX Directory bot stores: your search requests, the messages and the members profiles in the registered groups. You can connect to SimpleX Directory via [this address](https://smp4.simplex.im/a#lXUjJW5vHYQzoLYgmi8GbxkGP41_kjefFvBrdwg-0Ok).
 
 You can also view the groups registered in SimpleX directory via the browser at [simplex.chat/directory](https://simplex.chat/directory)
 
@@ -178,7 +172,7 @@ The cases when the preset server operators may share the data temporarily stored
 - To detect, prevent, or otherwise address fraud, security, or technical issues.
 - To protect against harm to the rights, property, or safety of software users, operators of preset servers, or the public as required or permitted by law.
 
-Reports on requests for user data are published in [Transparency reports](./docs/TRANSPARENCY.md). To date, no user information was provided in response to any requests. If the preset server operators are ever required to provide information, they will follow the due legal process to limit any information shared to the minimally required by law.
+To date, no user information was provided in response to any requests. If the preset server operators are ever required to provide information, they will follow the due legal process to limit any information shared to the minimally required by law.
 
 ### Source code license
 

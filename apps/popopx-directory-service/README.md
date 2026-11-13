@@ -21,7 +21,7 @@ cp scripts/cabal.project.local.linux cabal.project.local   # on macOS: scripts/c
 cabal build simplex-directory-service
 ```
 
-See [docs/CONTRIBUTING.md](../../docs/CONTRIBUTING.md) for the full build setup (toolchain, OpenSSL headers, branch compatibility).
+See [Building](#building) above for the build setup (toolchain, OpenSSL headers).
 
 Find the compiled binary with:
 ```sh
@@ -123,7 +123,7 @@ simplex-directory-service \
 
 ## Command Reference
 
-This is a reference for all commands accepted by the SimpleX Directory bot. For a guided walkthrough of group submission see [DIRECTORY.md](../../docs/DIRECTORY.md).
+This is a reference for all commands accepted by the SimpleX Directory bot. For a guided walkthrough of group submission see [Registering a Group](#2-registering-a-group) below.
 
 ---
 
@@ -143,7 +143,7 @@ The bot sends a welcome message automatically when you connect.
 
 ### 2. Registering a Group
 
-Registration is a two-step process — see [DIRECTORY.md](../../docs/DIRECTORY.md) for full details:
+Registration is a two-step process:
 
 1. Invite the directory bot to your group as `admin`.
 2. Wait for admin approval (usually within a day, except holidays).

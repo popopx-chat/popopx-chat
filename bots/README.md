@@ -86,7 +86,7 @@ Business chat is a special group chat under the hood, but the connected customer
 
 ## How to create a bot
 
-[POPOPX Chat CLI](../docs/CLI.md) can be run as a local WebSockets server on any port:
+POPOPX Chat CLI can be run as a local WebSockets server on any port:
 
 ```bash
 simplex-chat -p 5225

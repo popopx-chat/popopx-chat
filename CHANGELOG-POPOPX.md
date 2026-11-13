@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-13 (105 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-13 (107 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -239,6 +239,27 @@ with the reason in the file: in `scripts/flatpak/com.popopxchat.popopx.desktop`,
 command the Flatpak manifest declares (that manifest is not here) and `StartupWMClass=simplex-chat` has to match
 the class the running app sets, which nothing in this repository controls.
 
+### The reproduce chain was pointed at this repository (2026-11-13)
+
+`.github/workflows/reproduce-schedule.yml` was the mirror image of the desktop-CI finding: a workflow
+whose *checkout* names one tree cannot call a *script* renamed in another. It pulled
+`simplex-chat/simplex-chat` at the latest upstream tag, then ran `scripts/popopx-chat-reproduce-builds.sh`,
+which exists only in our tree; `|| :` swallowed the missing file, the `_sha256sums` test found nothing, and
+both scheduled runs (43143049757, 43353616675) went red having compiled nothing. Everything that names
+*which build is being proven* moved as one unit: the releases API and the checkout repository,
+`repo_name`/`repo` in the script, the three release-asset names (matched against our producers
+`build.yml:556`, `:612`, `:638`), the CLI the container builds (`popopx-chat.cabal:607`), the two package
+paths (`build-cli-deb.sh:12`, `make-deb-linux.sh:57`), and the sums directory in the workflow, which is now
+read out of the script instead of written a second time. One of those was invisible to every token sweep:
+`mv release/main/*imple*.AppImage` is a glob, not a word, and would have matched nothing in our build - it
+now derives the file the way `build.yml:629` does.
+
+The job is inert until this fork publishes a release (`releases/latest` answers 404), so the first step
+detects the empty tag and skips; that is what it does nightly now. Held by the usual rule: the Android
+script's `REPO_NAME`/`REPO`/`SIMPLEX_REPO`/`SIMPLEX_KEY`, which name upstream's signed APK, because that is
+what it verifies. `FORK.md` §"Reproducing a build" documents how both are run and records that
+`STATUS_POPOPX_WEBHOOK_URL/_USER/_PASS` are not configured here, so a red run is the only signal.
+
 ### What was removed from this repository
 
 `docs/` (592), `website/` (585), `blog/` (248) and `plans/` (229) — 1654 files — are deleted: upstream's
@@ -317,6 +338,25 @@ upstream filenames, which is trademark ruling #43 rather than an AGPL item. The 
 now 89 tracked files, and of the 103 tracked files under `assets/**` plus root `images/**` exactly **4**
 still carry upstream's bytes — `assets/ASSETS_LICENSE.md` (a notice, kept) and the 3 third-party audit
 logos that `README.md:26` links, none of them a SimpleX mark.
+
+**A second class the citation sweep could not see: markdown links.** 17 links in 4 files still pointed
+into `docs/` and `blog/` - `PRIVACY.md` ×12, `apps/popopx-directory-service/README.md` ×3,
+`bots/README.md` ×1, `media-logos/README.md` ×1. They survived the 26-file sweep because that pass looked
+for *citations* (a path named in prose, retargetable at a pinned upstream blob) and these are link
+targets, and `PRIVACY.md` was in the held-as-records list. Attributed before touching them: resolving
+every relative link in 202 tracked `.md` files against **both** trees gives 17/17 broken here and 0/17
+broken upstream, so all 17 are ours to repair, not inherited. Ruled per kind, not per file: **9
+de-linked** - the seven terminology links (`/docs/GLOSSARY.md`, `/docs/DIRECTORY.md`), `bots/README.md`'s
+"POPOPX Chat CLI" and `media-logos/README.md`'s "blog posts"; the sentence and its claim stay, only the
+dead pointer goes. **4 sentences deleted** - the ones whose whole purpose was to point at something *SimpleX
+Chat Ltd published* (two Trail of Bits announcements, the iOS push-notification post, the transparency
+report), because that promise is not ours to restate without its source; the seventeenth, the
+reproduce-builds sentence at `PRIVACY.md:189`, had already gone in `687f7273f`. **3 repointed inside `apps/popopx-directory-service/README.md`** - two to `#building` and
+`#2-registering-a-group`, the sections of that same README that actually contain what they promised, and the
+third ("see DIRECTORY.md for full details") to nothing, since it sat inside the section it named. Measured
+after: **0** links into `docs/` or `blog/` remain, and no `### ` heading was renamed, so the two new anchors
+resolve. The 3153 other broken relative links in this tree are the pre-existing upstream class (generated
+typedoc `../util.ts` targets and app-internal docs), not collateral of the removal.
 
 ### Deliberately not changed
 
