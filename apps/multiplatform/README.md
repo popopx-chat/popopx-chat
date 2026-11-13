@@ -62,7 +62,7 @@ git submodule update --init --recursive
 ### Key Components (`common/src/commonMain/kotlin/chat/popopx/common/`)
 
 - **`model/ChatModel.kt`** - Main state container with reactive properties (MutableState, MutableStateFlow)
-- **`model/SimpleXAPI.kt`** - API bindings to Haskell core library via FFI
+- **`model/PopopxAPI.kt`** - API bindings to Haskell core library via FFI
 - **`platform/Core.kt`** - FFI interface to native `libapp` library
 - **`platform/`** - Platform abstraction layer (expect/actual pattern for Android/Desktop specifics)
 - **`views/`** - Compose UI screens organized by feature (chat, chatlist, call, usersettings, etc.)

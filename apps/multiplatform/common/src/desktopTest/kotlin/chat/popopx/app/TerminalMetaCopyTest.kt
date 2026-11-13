@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
 import chat.popopx.common.model.*
 import chat.popopx.common.ui.theme.Inter
-import chat.popopx.common.ui.theme.SimpleXTheme
+import chat.popopx.common.ui.theme.POPOPXTheme
 import chat.popopx.common.views.chat.item.LocalTerminalLayout
 import chat.popopx.common.views.chat.item.MarkdownText
 import chat.popopx.common.views.chat.item.metaReserveCopy

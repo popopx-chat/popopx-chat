@@ -33,7 +33,7 @@ The app follows a strict layered model where each layer communicates only with i
 │  ChatModel (ObservableObject)           │  App state, @Published properties
 │  ItemsModel, Chat, ChatTagsModel        │  Per-chat state, tag filtering
 ├─────────────────────────────────────────┤
-│  SimpleXAPI (FFI Bridge)                │  chatSendCmd/chatApiSendCmd
+│  POPOPXAPI (FFI Bridge)                │  chatSendCmd/chatApiSendCmd
 │  AppAPITypes (ChatCommand/Response)     │  JSON serialization/deserialization
 ├─────────────────────────────────────────┤
 │  C FFI Layer                            │  chat_send_cmd_retry, chat_recv_msg_wait

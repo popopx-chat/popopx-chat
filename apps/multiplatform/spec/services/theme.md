@@ -7,14 +7,14 @@
 3. [Default Themes](#3-default-themes)
 4. [Theme Types](#4-theme-types)
 5. [Color System](#5-color-system)
-6. [SimpleXTheme Composable](#6-simplextheme-composable)
+6. [POPOPXTheme Composable](#6-simplextheme-composable)
 7. [Platform Theme](#7-platform-theme)
 8. [YAML Import/Export](#8-yaml-importexport)
 9. [Source Files](#9-source-files)
 
 ## Executive Summary
 
-The POPOPX Chat theme engine implements a four-level cascade: per-chat theme overrides take precedence over per-user overrides, which take precedence over global (app-settings) overrides, which take precedence over built-in presets. Four preset themes exist (LIGHT, DARK, POPOPX, BLACK), each defining a Material `Colors` palette and custom `AppColors` for chat-specific elements. Themes support wallpaper customization (preset patterns or custom images) with background and tint color overrides. Theme configuration is persisted as YAML and can be imported/exported. The `SimpleXTheme` composable wraps `MaterialTheme` with additional `CompositionLocal` providers for app colors and wallpaper.
+The POPOPX Chat theme engine implements a four-level cascade: per-chat theme overrides take precedence over per-user overrides, which take precedence over global (app-settings) overrides, which take precedence over built-in presets. Four preset themes exist (LIGHT, DARK, POPOPX, BLACK), each defining a Material `Colors` palette and custom `AppColors` for chat-specific elements. Themes support wallpaper customization (preset patterns or custom images) with background and tint color overrides. Theme configuration is persisted as YAML and can be imported/exported. The `POPOPXTheme` composable wraps `MaterialTheme` with additional `CompositionLocal` providers for app colors and wallpaper.
 
 ---
 
@@ -350,15 +350,15 @@ Four built-in color palettes, each consisting of a Material `Colors` and an `App
 
 ---
 
-<a id="SimpleXTheme"></a>
+<a id="POPOPXTheme"></a>
 
-## 6. SimpleXTheme Composable
+## 6. POPOPXTheme Composable
 
 [`Theme.kt` line 773](../../common/src/commonMain/kotlin/chat/popopx/common/ui/theme/Theme.kt#L773):
 
 ```kotlin
 @Composable
-fun SimpleXTheme(darkTheme: Boolean? = null, content: @Composable () -> Unit)
+fun POPOPXTheme(darkTheme: Boolean? = null, content: @Composable () -> Unit)
 ```
 
 The root theme composable that wraps all app content:
@@ -373,7 +373,7 @@ The root theme composable that wraps all app content:
    - `LocalAppWallpaper` -- the `AppWallpaper` instance (remembered and updated)
    - `LocalDensity` -- scaled by `desktopDensityScaleMultiplier` and `fontSizeMultiplier`
 
-4. **`SimpleXThemeOverride`** ([line 825](../../common/src/commonMain/kotlin/chat/popopx/common/ui/theme/Theme.kt#L825)): A variant that accepts an explicit `ActiveTheme` for per-chat theme previews and overlays.
+4. **`POPOPXThemeOverride`** ([line 825](../../common/src/commonMain/kotlin/chat/popopx/common/ui/theme/Theme.kt#L825)): A variant that accepts an explicit `ActiveTheme` for per-chat theme previews and overlays.
 
 ### CompositionLocal access
 
@@ -386,7 +386,7 @@ val MaterialTheme.wallpaper: AppWallpaper // via LocalAppWallpaper
 
 <a id="CurrentColors"></a>
 
-`CurrentColors` ([line 727](../../common/src/commonMain/kotlin/chat/popopx/common/ui/theme/Theme.kt#L727)): A `MutableStateFlow<ActiveTheme>` that holds the current resolved theme. Updated by `ThemeManager.applyTheme()` and collected by `SimpleXTheme`.
+`CurrentColors` ([line 727](../../common/src/commonMain/kotlin/chat/popopx/common/ui/theme/Theme.kt#L727)): A `MutableStateFlow<ActiveTheme>` that holds the current resolved theme. Updated by `ThemeManager.applyTheme()` and collected by `POPOPXTheme`.
 
 `systemInDarkThemeCurrently` ([line 724](../../common/src/commonMain/kotlin/chat/popopx/common/ui/theme/Theme.kt#L724)): Tracks the current system dark mode state.
 
@@ -498,7 +498,7 @@ Uses the [kaml](https://github.com/charleskorn/kaml) YAML library for serializat
 | File | Path | Lines | Description |
 |---|---|---|---|
 | `ThemeManager.kt` | [`common/src/commonMain/.../ui/theme/ThemeManager.kt`](../../common/src/commonMain/kotlin/chat/popopx/common/ui/theme/ThemeManager.kt) | 241 | Theme resolution, persistence, color/wallpaper management |
-| `Theme.kt` | [`common/src/commonMain/.../ui/theme/Theme.kt`](../../common/src/commonMain/kotlin/chat/popopx/common/ui/theme/Theme.kt) | 848 | Type definitions, color palettes, `SimpleXTheme` composable |
+| `Theme.kt` | [`common/src/commonMain/.../ui/theme/Theme.kt`](../../common/src/commonMain/kotlin/chat/popopx/common/ui/theme/Theme.kt) | 848 | Type definitions, color palettes, `POPOPXTheme` composable |
 | `Theme.android.kt` | [`common/src/androidMain/.../ui/theme/Theme.android.kt`](../../common/src/androidMain/kotlin/chat/popopx/common/ui/theme/Theme.android.kt) | 6 | Android `isSystemInDarkTheme` |
 | `Theme.desktop.kt` | [`common/src/desktopMain/.../ui/theme/Theme.desktop.kt`](../../common/src/desktopMain/kotlin/chat/popopx/common/ui/theme/Theme.desktop.kt) | 25 | Desktop `isSystemInDarkTheme` via OsThemeDetector |
 | `Files.kt` | [`common/src/commonMain/.../platform/Files.kt`](../../common/src/commonMain/kotlin/chat/popopx/common/platform/Files.kt) | 191 | `readThemeOverrides()` (L125), `writeThemeOverrides()` (L151) |

@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import chat.popopx.common.model.Format
 import chat.popopx.common.model.FormatColor
 import chat.popopx.common.ui.theme.DEFAULT_PADDING
-import chat.popopx.common.ui.theme.SimpleXTheme
+import chat.popopx.common.ui.theme.POPOPXTheme
 import chat.popopx.res.*
 
 @Composable

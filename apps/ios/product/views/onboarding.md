@@ -15,9 +15,9 @@ First-time setup flow for new users. Guides through app introduction, profile cr
 
 ## Onboarding Steps
 
-### Step 1: Welcome / SimpleX Info (`SimpleXInfo`)
+### Step 1: Welcome / SimpleX Info (`POPOPXInfo`)
 
-**Stage**: `step1_SimpleXInfo`
+**Stage**: `step1_POPOPXInfo`
 
 | Element | Description |
 |---|---|
@@ -107,7 +107,7 @@ On completion, `onboardingStageDefault.set(.onboardingComplete)` is called.
 
 ```
 enum OnboardingStage: String {
-    case step1_SimpleXInfo
+    case step1_POPOPXInfo
     case step2_CreateProfile          // deprecated
     case step3_CreateSimpleXAddress   // deprecated
     case step3_ChooseServerOperators  // conditions acceptance

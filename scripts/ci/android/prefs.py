@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Prints the app's SharedPreferences file with the settings given, typed as AppPreferences in SimpleXAPI.kt reads them.
+# Prints the app's SharedPreferences file with the settings given, typed as AppPreferences in PopopxAPI.kt reads them.
 # Usage: prefs.py <prefs .xml, empty when the app has none yet> <name>=<value>...
 
 import sys

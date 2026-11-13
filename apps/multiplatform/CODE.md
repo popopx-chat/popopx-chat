@@ -27,7 +27,7 @@ Each layer links to the next:
 - `product/concepts.md` links every concept to its spec docs, source files, and tests in a single table — this is the primary navigation entry point
 - `product/views/*.md` and `product/flows/*.md` each have a **Related spec:** line linking to their most relevant spec documents
 - `product/glossary.md` uses *See: [spec/...]* references and `product/rules.md` uses **Spec:** [spec/...] references to link individual terms and rules down to spec
-- `spec/` documents contain **Source:** headers and inline function links pointing down to source. Line references MUST be clickable by embedding the `#Lxx-Lyy` fragment in the link URL: [`functionName()`](common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#Lxx-Lyy). You MUST NOT duplicate line numbers in the display text — the URL fragment is sufficient. Why: redundant line numbers in display text create maintenance burden on every line shift.
+- `spec/` documents contain **Source:** headers and inline function links pointing down to source. Line references MUST be clickable by embedding the `#Lxx-Lyy` fragment in the link URL: [`functionName()`](common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#Lxx-Lyy). You MUST NOT duplicate line numbers in the display text — the URL fragment is sufficient. Why: redundant line numbers in display text create maintenance burden on every line shift.
 - Reverse direction: the Document Map (end of this file) maps source → spec → product
 
 ### Navigation workflow
@@ -184,7 +184,7 @@ When modifying platform abstractions, you MUST update both `actual` implementati
 ```
 common/src/
 ├── commonMain/kotlin/chat/popopx/common/    -- Shared code (195 files)
-│   ├── model/          -- ChatModel, SimpleXAPI, CryptoFile
+│   ├── model/          -- ChatModel, PopopxAPI, CryptoFile
 │   ├── platform/       -- expect/actual platform abstractions
 │   ├── ui/theme/       -- Theme system (ThemeManager, colors, types)
 │   └── views/          -- Compose UI (chat, chatlist, call, settings, etc.)
@@ -203,14 +203,14 @@ desktop/src/jvmMain/kotlin/chat/popopx/desktop/ -- Desktop app (1 file)
 | Aspect | Android | Desktop |
 |--------|---------|---------|
 | Layout | 2-column (chat list → chat) | 3-column (sidebar → chat list → details) |
-| Background messaging | SimplexService (foreground service) + MessagesFetcherWorker (WorkManager) | Continuous (always-on process) |
+| Background messaging | PopopxService (foreground service) + MessagesFetcherWorker (WorkManager) | Continuous (always-on process) |
 | Notifications | Android NotificationManager with channels | Desktop system notifications |
 | Calls | CallActivity (separate Activity) + CallService | In-window call view |
 | Video playback | ExoPlayer | VLC (VLCJ) |
 | Authentication | Android BiometricPrompt | Passcode only |
 | Auto-update | Play Store / manual APK | Built-in AppUpdater |
 | Window management | Standard Activity lifecycle | StoreWindowState persistence |
-| Entry point | SimplexApp (Application) + MainActivity | Main.kt → initHaskell() → showApp() |
+| Entry point | PopopxApp (Application) + MainActivity | Main.kt → initHaskell() → showApp() |
 
 ---
 
@@ -223,14 +223,14 @@ desktop/src/jvmMain/kotlin/chat/popopx/desktop/ -- Desktop app (1 file)
 | common/.../common/App.kt | spec/architecture.md | product/views/chat-list.md |
 | common/.../common/AppLock.kt | spec/architecture.md | product/views/settings.md |
 | common/.../common/model/ChatModel.kt | spec/state.md | product/concepts.md |
-| common/.../common/model/SimpleXAPI.kt | spec/api.md, spec/architecture.md | product/concepts.md |
+| common/.../common/model/PopopxAPI.kt | spec/api.md, spec/architecture.md | product/concepts.md |
 | common/.../common/model/CryptoFile.kt | spec/services/files.md | product/flows/file-transfer.md |
 | common/.../common/platform/Core.kt | spec/architecture.md | product/concepts.md |
 | common/.../common/platform/AppCommon.kt | spec/architecture.md | product/flows/onboarding.md |
 | common/.../common/platform/Notifications.kt | spec/services/notifications.md | product/flows/messaging.md |
 | common/.../common/platform/NtfManager.kt | spec/services/notifications.md | product/flows/messaging.md |
 | common/.../common/platform/Files.kt | spec/services/files.md | product/flows/file-transfer.md |
-| common/.../common/platform/SimplexService.kt | spec/services/notifications.md | product/flows/messaging.md |
+| common/.../common/platform/PopopxService.kt | spec/services/notifications.md | product/flows/messaging.md |
 | common/.../common/platform/Share.kt | spec/architecture.md | product/concepts.md |
 | common/.../common/platform/VideoPlayer.kt | spec/services/files.md | product/views/chat.md |
 | common/.../common/platform/RecAndPlay.kt | spec/services/files.md | product/views/chat.md |
@@ -273,9 +273,9 @@ desktop/src/jvmMain/kotlin/chat/popopx/desktop/ -- Desktop app (1 file)
 
 | Source Location | Spec Document | Product Document |
 |----------------|---------------|-----------------|
-| android/.../app/SimplexApp.kt | spec/architecture.md | product/flows/onboarding.md |
+| android/.../app/PopopxApp.kt | spec/architecture.md | product/flows/onboarding.md |
 | android/.../app/MainActivity.kt | spec/architecture.md | product/views/chat-list.md |
-| android/.../app/SimplexService.kt | spec/services/notifications.md | product/flows/messaging.md |
+| android/.../app/PopopxService.kt | spec/services/notifications.md | product/flows/messaging.md |
 | android/.../app/CallService.kt | spec/services/calls.md | product/flows/calling.md |
 | android/.../app/MessagesFetcherWorker.kt | spec/services/notifications.md | product/flows/messaging.md |
 | android/.../app/model/NtfManager.android.kt | spec/services/notifications.md | product/flows/messaging.md |

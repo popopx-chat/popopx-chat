@@ -28,7 +28,7 @@ POPOPX Chat navigation is a platform-adaptive system implemented in `App.kt`. Th
 
 ```
 AppScreen (line 46)
-+-- SimpleXTheme
++-- POPOPXTheme
     +-- Surface
         +-- MainScreen (line 82)
             |-- [Migration in progress]     -> DefaultProgressView
@@ -68,7 +68,7 @@ fun AppScreen()
 
 ### Responsibilities
 
-1. **Theme application:** Wraps content in `SimpleXTheme` with `Surface` using `MaterialTheme.colors.background`.
+1. **Theme application:** Wraps content in `POPOPXTheme` with `Surface` using `MaterialTheme.colors.background`.
 2. **Window insets:** Computes safe padding for landscape mode, accounting for display cutouts on both sides. Uses `WindowInsets.safeDrawing` and `WindowInsets.displayCutout` to calculate symmetric padding.
 3. **Fullscreen gallery overlay:** When `chatModel.fullscreenGalleryVisible` is true, draws a black rectangle behind content extending into the cutout areas to provide an immersive gallery background.
 4. **Delegates to `MainScreen()`.**
@@ -92,7 +92,7 @@ fun MainScreen()
 
 | Priority | Condition | View |
 |---|---|---|
-| 1 | `onboarding == Step1_SimpleXInfo && migrationState != null` | `SimpleXInfo` (migration in progress) |
+| 1 | `onboarding == Step1_POPOPXInfo && migrationState != null` | `POPOPXInfo` (migration in progress) |
 | 2 | `dbMigrationInProgress` | `DefaultProgressView("Database migration...")` |
 | 3 | `chatDbStatus == null && showInitializationView` | `DefaultProgressView("Opening database...")` |
 | 4 | `showChatDatabaseError` | `DatabaseErrorView` |
@@ -330,7 +330,7 @@ The `laLockDelay` preference controls how long after backgrounding the app requi
 
 ```kotlin
 enum class OnboardingStage {
-  Step1_SimpleXInfo,
+  Step1_POPOPXInfo,
   Step2_CreateProfile,
   LinkAMobile,
   Step2_5_SetupDatabasePassphrase,
@@ -345,7 +345,7 @@ enum class OnboardingStage {
 
 | Stage | View | Next Stage |
 |---|---|---|
-| `Step1_SimpleXInfo` | `SimpleXInfo` -- app introduction, privacy features | `Step2_CreateProfile` or `LinkAMobile` (desktop) |
+| `Step1_POPOPXInfo` | `POPOPXInfo` -- app introduction, privacy features | `Step2_CreateProfile` or `LinkAMobile` (desktop) |
 | `Step2_CreateProfile` | `CreateFirstProfile` -- display name, optional image | `Step2_5_SetupDatabasePassphrase` or `Step3_ChooseServerOperators` |
 | `LinkAMobile` | `LinkAMobile` -- desktop linking to mobile device | `Step2_CreateProfile` |
 | `Step2_5_SetupDatabasePassphrase` | `SetupDatabasePassphrase` -- optional DB encryption | `Step3_ChooseServerOperators` |
@@ -372,7 +372,7 @@ The stage value is stored in `appPrefs.onboardingStage` and persisted across app
 | `AppLock.kt` | AppLock object, authentication state, lock notice, LA mode selection |
 | `views/helpers/ModalView.kt` | ModalManager class, ModalPlacement enum, modal stack management |
 | `views/onboarding/OnboardingView.kt` | OnboardingStage enum |
-| `views/onboarding/SimpleXInfo.kt` | Step 1: App introduction |
+| `views/onboarding/POPOPXInfo.kt` | Step 1: App introduction |
 | `views/WelcomeView.kt` | Step 2: Profile creation (CreateFirstProfile) |
 | `views/onboarding/LinkAMobileView.kt` | Desktop: Link a mobile device |
 | `views/onboarding/SetupDatabasePassphrase.kt` | Step 2.5: Database passphrase |

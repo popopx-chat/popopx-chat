@@ -11,7 +11,8 @@ not legal advice.
 > `simplexChatCore` **32 occurrences / 15 files**, `simplex-chat-nodejs` **23** (of which 4 are the
 > `simplex-chat-nodejs-<platform>` asset name), `simplex-chat-libs` **6** (2 asset names), tracked paths
 > whose *name* contains "simplex" **67**. Reproduce with `git grep -Io -- '<term>' | wc -l` and
-> `git ls-files | grep -ic simplex`. §2 now reads the new numbers.
+> `git ls-files | grep -ic simplex`. §2 now reads the new numbers — and the 67 has itself moved: the
+> naming-residue pass later the same day took it to **22**, all of them `packages/**` installed names.
 
 ## 1. What AGPL-3.0 requires of this fork, and where it is satisfied
 
@@ -48,28 +49,40 @@ The three groups listed in the ruling are **names**, and AGPL-3.0 imposes nothin
 - **`simplex-chat-nodejs-<platform>.node`** moved with it, being the other asset family of the same
   repository (`ADDON_ASSETS`, `packages_release.py:119`); a half-moved pair would have pinned one family
   from our releases and downloaded the other from upstream's.
-- **Tracked paths whose *name* contains "simplex": 322 at ruling 6, 67 measured 2026-11-13.** The class
-  changed, so the old description no longer reads. 250 of those paths were document and site paths
-  (`website/src/{img,js}/**`, `plans/**`, `docs/**`, blog posts) and they left with those directories in
-  `9996634ee`; what is left is source and artefact names, not prose:
-  **20** in `packages/**` — the Node `cpp/simplex.{cc,h}` and `src/simplex.{js,d.ts}` plus the 16 files of
-  the Python module `src/simplex_chat/**`, whose declared distribution name is still `simplex-chat`
-  (`packages/popopx-chat-python/pyproject.toml:6`) — deliberate, not missed: `packages_release.py
-  test-names` rewrites the npm/PyPI names from `NPM_SCOPE`/`PYPI_PROJECT` at publish time, which is the
-  same two-ended-value rule in a different register —
-  **21** in `apps/**` — 13 Kotlin class-and-file names (`SimplexService`, `SimpleXAPI`, `SimpleXInfo`,
-  `SimplexApp`, `Support*SimpleX*`), the 4 desktop launcher artifacts (`distribute/SimpleX.desktop` and
-  `simplex.{png,ico,icns}`, wired at `apps/multiplatform/desktop/build.gradle.kts:68,73,82` and copied to
-  `com.popopxchat.popopx.desktop` by `scripts/desktop/make-appimage-linux.sh:41`), 2 desktop snapshot PNGs
-  and 2 support-bot jest mocks —
-  **24** artwork files (`branding/source-svg/**` 13, `media-logos/**` 8, `images/**` 3) and
-  **2** build-reproduction scripts.
+- **Tracked paths whose *name* contains "simplex": 322 at ruling 6, 67 on 2026-11-13, 22 after the
+  naming-residue pass the same day.** 250 of the 322 were document and site paths
+  (`website/src/{img,js}/**`, `plans/**`, `docs/**`, blog posts) that left with those directories in
+  `9996634ee`. The remaining 45 that moved are source and artefact *names*, which is why they could not
+  move as documentation — each needed its reader moved in the same commit: 13 Kotlin files, 2 desktop
+  snapshot baselines, 4 desktop launcher artifacts, 2 support-bot test mocks, 2 build-reproduction
+  scripts (+ their 2 readers in `reproduce-schedule.yml` and `release-apk.sh`) and 22 artwork files
+  (`media-logos/**` and `images/**` with their `branding/source-svg/` mirrors, whose names are the output
+  path with `/` written as `__`).
+  **Corrected against my own earlier description of this tier:** those 13 were *file* names, not
+  class-and-file names. Tier 甲 (`82130779f`) had already renamed the identifiers — `PopopxApp`,
+  `PopopxService`, `POPOPXInfo`, `PopopxNameView`, `SetPopopxDomainView`, `SupportPOPOPXBanner`,
+  `BadgesSupportPopopxView` — so 259 of the 266 `SimpleXAPI` occurrences and 41 of 53 `SimplexService`
+  occurrences were path citations in this fork's own code maps (`apps/multiplatform/{CODE.md,product/**,
+  spec/**}`), which moved with the files. Four of the 13 files had already lost their name's reader
+  entirely: `SimplexNameView`, `SetSimplexNameView`, `SupportSimpleXBanner`,
+  `BadgesSupportSimplexView` were referenced nowhere outside themselves.
+  Tier 甲 also left **10 Kotlin import lines naming the pre-rename symbol** (`SimpleXTheme` ×7,
+  `SimpleXLinkQRCode` ×2, `SimpleXInfo` ×1), which made `:common:compileKotlinDesktop` fail in CI for two
+  days; repaired, and `tools/r7/kt_import_gate.py` now replays kotlinc's resolution over every brand
+  import (10 hits when run against `f5a7fd984`, 0 against the repair).
+  What is **left at 22** is all of one kind: **20** in `packages/**` — the Node `cpp/simplex.{cc,h}` and
+  `src/simplex.{js,d.ts}` plus the 16 files of the Python module `src/simplex_chat/**`, whose declared
+  distribution name is still `simplex-chat` (`packages/popopx-chat-python/pyproject.toml:6`) — deliberate,
+  not missed: `packages_release.py test-names` rewrites the npm/PyPI names from `NPM_SCOPE`/`PYPI_PROJECT`
+  at publish time, which is the same two-ended-value rule in a different register — plus
+  **2** `branding/source-svg/moko__ic_simplex_*@4x.svg` masters held for a deletion ruling, because they
+  are byte-identical (`md5 2fb6e266…`, `8e284b07…`) to the renamed `moko__ic_popopx_*@4x.svg` and a rename
+  would collide with them.
   Path names of documents that describe upstream were never a licence problem and none of these are one
-  either — but they are not the same *kind* of leftover: each is a compiled type, a build input, an
-  installed package path, a snapshot key or an artwork filename, so none of them may move as documentation.
-  Trademark ruling #43 owns them, under the wire-audit gate. Measured for provenance at the same time: all
+  either — but none of them may move as documentation either. Trademark ruling #43 owns them, under the
+  wire-audit gate. Measured for provenance: all
   24 artwork files are POPOPX bytes (11 differ from the same path in `db0768c21`, 13 have no upstream
-  counterpart), so these are our pictures under upstream's filenames — a naming problem, not §3's licence
+  counterpart), so these were our pictures under upstream's filenames — a naming problem, not §3's licence
   problem.
 
 **Conclusion for ruling 6:** the AGPL-compliance action on this residue is *none*. It stays under

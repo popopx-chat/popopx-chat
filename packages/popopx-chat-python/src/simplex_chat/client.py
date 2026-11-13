@@ -637,7 +637,7 @@ class Client:
                 # routine soft errors (stale connections after a peer deletes
                 # a chat, file cleanup failures, etc.) intermixed with
                 # CRITICAL agent failures the operator must see. Mirror the
-                # desktop policy in SimpleXAPI.kt:3332-3340: escalate
+                # desktop policy in PopopxAPI.kt:3332-3340: escalate
                 # CRITICAL agent errors, keep everything else at debug.
                 chat_err: Any = e.chat_error or {}
                 agent_err: Any = (

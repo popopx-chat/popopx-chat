@@ -334,11 +334,11 @@ The `text` extension on the enum returns the localized status string (resource k
 
 ## 5. AppPreferences
 
-Defined at [`SimpleXAPI.kt line 94`](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L94) as `class AppPreferences`.
+Defined at [`PopopxAPI.kt line 94`](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L94) as `class AppPreferences`.
 
 Uses the `multiplatform-settings` library (`com.russhwolf.settings.Settings`) for cross-platform key-value storage (Android `SharedPreferences` / Desktop `java.util.prefs.Preferences`).
 
-The `AppPreferences` instance is created lazily in `ChatController` at [`SimpleXAPI.kt line 496`](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L496):
+The `AppPreferences` instance is created lazily in `ChatController` at [`PopopxAPI.kt line 496`](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L496):
 ```kotlin
 val appPrefs: AppPreferences by lazy { AppPreferences() }
 ```
@@ -494,7 +494,7 @@ val appPrefs: AppPreferences by lazy { AppPreferences() }
 
 ### Preference Utility Types
 
-The `SharedPreference<T>` wrapper (defined in SimpleXAPI.kt) provides:
+The `SharedPreference<T>` wrapper (defined in PopopxAPI.kt) provides:
 - `get(): T` -- read current value
 - `set(value: T)` -- write value
 - `state: MutableState<T>` -- Compose-observable state (derived lazily)
@@ -508,7 +508,7 @@ Factory methods: `mkBoolPreference`, `mkIntPreference`, `mkLongPreference`, `mkF
 | File | Path | Key Contents |
 |---|---|---|
 | ChatModel.kt | [`common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt`](../common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt) | `ChatModel` singleton (line 86), `ChatsContext` (line 339), `Chat` (line 1328), `ChatInfo` (line 1391), `ChatStats` (line 1370), helper methods |
-| SimpleXAPI.kt | [`common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt`](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt) | `AppPreferences` (line 94), `ChatController` (line 493), `startReceiver` (line 660), `sendCmd` (line 804), `recvMsg` (line 829), `processReceivedMsg` (line 2568) |
+| PopopxAPI.kt | [`common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt`](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt) | `AppPreferences` (line 94), `ChatController` (line 493), `startReceiver` (line 660), `sendCmd` (line 804), `recvMsg` (line 829), `processReceivedMsg` (line 2568) |
 | ChatItemsMerger.kt | [`common/src/commonMain/kotlin/chat/popopx/common/views/chat/ChatItemsMerger.kt`](../common/src/commonMain/kotlin/chat/popopx/common/views/chat/ChatItemsMerger.kt) | `ActiveChatState` (line 196), chat item merge/diff logic |
 | Core.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt) | `initChatController` (line 62), state initialization flow |
 | App.kt | [`common/src/commonMain/kotlin/chat/popopx/common/App.kt`](../common/src/commonMain/kotlin/chat/popopx/common/App.kt) | `AppScreen` (line 47), `MainScreen` (line 84), top-level UI state reads |

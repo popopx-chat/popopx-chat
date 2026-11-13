@@ -40,7 +40,7 @@ When the call fails, the caller receives `null` and either silently does nothing
 
 ### Affected Locations
 
-- `SimpleXAPI.kt` -- `getAgentSubsTotal()`, `getAgentServersSummary()`, and dozens of similar `api*` functions
+- `PopopxAPI.kt` -- `getAgentSubsTotal()`, `getAgentServersSummary()`, and dozens of similar `api*` functions
 - Throughout the codebase wherever `sendCmd` results are pattern-matched
 
 ### Impact
@@ -102,7 +102,7 @@ On Android, the encrypted passphrase is stored via the Android Keystore, which p
 
 ### Affected Locations
 
-- `SimpleXAPI.kt` -- `AppPreferences.storeDBPassphrase`, `AppPreferences.initialRandomDBPassphrase`, `AppPreferences.encryptedDBPassphrase`
+- `PopopxAPI.kt` -- `AppPreferences.storeDBPassphrase`, `AppPreferences.initialRandomDBPassphrase`, `AppPreferences.encryptedDBPassphrase`
 - `common/src/commonMain/kotlin/chat/popopx/common/views/helpers/DatabaseUtils.kt`
 - `common/src/commonMain/kotlin/chat/popopx/common/views/onboarding/SetupDatabasePassphrase.kt`
 
@@ -161,9 +161,9 @@ The Kotlin client communicates with the Haskell core via a text-based command pr
 
 ### Affected Locations
 
-- `SimpleXAPI.kt:6986` -- `ChatErrorStore(storeError: StoreError)`
-- `SimpleXAPI.kt` -- `StoreError` sealed class (deserialized from Haskell responses)
-- `SimpleXAPI.kt` -- `ChatErrorDatabase(databaseError: DatabaseError)` for migration errors
+- `PopopxAPI.kt:6986` -- `ChatErrorStore(storeError: StoreError)`
+- `PopopxAPI.kt` -- `StoreError` sealed class (deserialized from Haskell responses)
+- `PopopxAPI.kt` -- `ChatErrorDatabase(databaseError: DatabaseError)` for migration errors
 
 ### Impact
 

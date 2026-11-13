@@ -9,7 +9,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import chat.popopx.common.model.*
-import chat.popopx.common.ui.theme.SimpleXTheme
+import chat.popopx.common.ui.theme.POPOPXTheme
 import chat.popopx.common.views.chat.item.*
 import kotlinx.datetime.Clock
 import kotlin.test.Test

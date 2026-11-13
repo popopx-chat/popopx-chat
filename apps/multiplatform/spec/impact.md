@@ -56,14 +56,14 @@ Path prefix: `common/src/commonMain/kotlin/chat/popopx/common/`
 | `App.kt` | PC1 through PC32 | High | Root composable — navigation scaffold for all features |
 | `AppLock.kt` | PC22 | Medium | App lock state and authorization lifecycle |
 | `model/ChatModel.kt` | PC1 through PC32 | High | Central state object — every feature reads or writes here |
-| `model/SimpleXAPI.kt` | PC1 through PC32 | High | FFI bridge to Haskell core — all commands and responses |
+| `model/PopopxAPI.kt` | PC1 through PC32 | High | FFI bridge to Haskell core — all commands and responses |
 | `model/CryptoFile.kt` | PC10, PC23 | Medium | Encrypted file read/write helpers |
 | `platform/Core.kt` | PC1 through PC32 | High | Native FFI declarations (`chatMigrateInit`, `chatSendCmd`, etc.) — all API traffic |
 | `platform/AppCommon.kt` | PC1 through PC32 | Medium | Shared app initialization logic |
 | `platform/Files.kt` | PC10, PC23, PC26 | Medium | File path resolution, temp dirs, encryption utilities |
 | `platform/NtfManager.kt` | PC18 | High | Notification manager expect declarations |
 | `platform/Notifications.kt` | PC18 | Medium | Notification channel and permission abstractions |
-| `platform/SimplexService.kt` | PC18 | Medium | Background service expect declarations |
+| `platform/PopopxService.kt` | PC18 | Medium | Background service expect declarations |
 | `platform/RecAndPlay.kt` | PC9 | Medium | Audio recording and playback abstractions |
 | `platform/VideoPlayer.kt` | PC10, PC17 | Low | Video playback abstractions |
 | `platform/Cryptor.kt` | PC23 | Medium | Keystore encryption expect declarations |
@@ -83,7 +83,7 @@ Path prefix: `common/src/commonMain/kotlin/chat/popopx/common/`
 | Source File | Product Concepts Affected | Risk Level | Notes |
 |-------------|--------------------------|------------|-------|
 | `ui/theme/ThemeManager.kt` | PC24 | Medium | Theme resolution engine — all color and wallpaper logic |
-| `ui/theme/Theme.kt` | PC24, PC32 | Medium | Theme composables and `SimpleXTheme` |
+| `ui/theme/Theme.kt` | PC24, PC32 | Medium | Theme composables and `POPOPXTheme` |
 | `ui/theme/Color.kt` | PC24 | Low | Color palette definitions |
 | `ui/theme/Shape.kt` | PC24 | Low | Shape token definitions |
 | `ui/theme/Type.kt` | PC24 | Low | Typography definitions |
@@ -255,7 +255,7 @@ Path prefix: `common/src/commonMain/kotlin/chat/popopx/common/`
 | `views/localauth/PasscodeView.kt` | PC22 | Medium | Passcode entry UI |
 | `views/localauth/PasswordEntry.kt` | PC22 | Low | Password input field |
 | `views/onboarding/OnboardingView.kt` | PC1 | Medium | Onboarding flow navigation |
-| `views/onboarding/SimpleXInfo.kt` | PC1 | Low | Welcome screen |
+| `views/onboarding/POPOPXInfo.kt` | PC1 | Low | Welcome screen |
 | `views/onboarding/SetNotificationsMode.kt` | PC18 | Medium | Notification permission and mode setup |
 | `views/onboarding/SetupDatabasePassphrase.kt` | PC23 | Medium | Initial database passphrase setup |
 | `views/onboarding/ChooseServerOperators.kt` | PC25 | Medium | Initial server operator selection |
@@ -329,9 +329,9 @@ Path prefix: `android/src/main/java/chat/popopx/app/`
 
 | Source File | Product Concepts Affected | Risk Level | Notes |
 |-------------|--------------------------|------------|-------|
-| `SimplexApp.kt` | PC1 through PC32 | High | Application class — initializes core, preferences, and notification channels |
+| `PopopxApp.kt` | PC1 through PC32 | High | Application class — initializes core, preferences, and notification channels |
 | `MainActivity.kt` | PC1 through PC32 | High | Single-activity host — intent handling, lifecycle, deep links |
-| `SimplexService.kt` | PC18 | High | Foreground service — keeps message receiver alive |
+| `PopopxService.kt` | PC18 | High | Foreground service — keeps message receiver alive |
 | `CallService.kt` | PC17 | Medium | Foreground service for active calls |
 | `MessagesFetcherWorker.kt` | PC18 | Medium | WorkManager periodic message fetch |
 | `model/NtfManager.android.kt` | PC18 | High | Android notification channels, display, and actions |
@@ -345,7 +345,7 @@ Path prefix: `common/src/androidMain/kotlin/chat/popopx/common/`
 | Source File | Product Concepts Affected | Risk Level | Notes |
 |-------------|--------------------------|------------|-------|
 | `platform/AppCommon.android.kt` | PC1 through PC32 | Medium | Android app initialization actual declarations |
-| `platform/SimplexService.android.kt` | PC18 | Medium | Android foreground service actual implementation |
+| `platform/PopopxService.android.kt` | PC18 | Medium | Android foreground service actual implementation |
 | `platform/Files.android.kt` | PC10, PC23, PC26 | Medium | Android file paths and content-URI resolution |
 | `platform/Cryptor.android.kt` | PC23 | Medium | Android Keystore encryption actual implementation |
 | `platform/RecAndPlay.android.kt` | PC9 | Medium | Android MediaRecorder/MediaPlayer actual implementation |
@@ -391,7 +391,7 @@ Path prefix: `common/src/androidMain/kotlin/chat/popopx/common/`
 | `views/helpers/WorkaroundFocusSearchLayout.kt` | — | Low | Android focus workaround |
 | `views/newchat/QRCode.android.kt` | PC12 | Low | Android QR code rendering |
 | `views/newchat/QRCodeScanner.android.kt` | PC12 | Low | Android camera QR scanner |
-| `views/onboarding/SimpleXInfo.android.kt` | PC1 | Low | Android onboarding extensions |
+| `views/onboarding/POPOPXInfo.android.kt` | PC1 | Low | Android onboarding extensions |
 | `views/onboarding/SetNotificationsMode.android.kt` | PC18 | Low | Android notification mode extensions |
 | `views/usersettings/Appearance.android.kt` | PC24 | Low | Android appearance extensions |
 | `views/usersettings/PrivacySettings.android.kt` | PC20, PC22 | Low | Android privacy settings extensions |
@@ -427,7 +427,7 @@ Path prefix: `common/src/desktopMain/kotlin/chat/popopx/common/`
 | `platform/AppLinkScheme.desktop.kt` | — | Medium | Runtime `simplexchat:` and `simplex:` scheme registration (Windows HKCU, AppImage desktop entry) |
 | `model/NtfManager.desktop.kt` | PC18 | Medium | Desktop system tray notification display |
 | `platform/AppCommon.desktop.kt` | PC1 through PC32 | Medium | Desktop app initialization actual declarations |
-| `platform/SimplexService.desktop.kt` | PC18 | Low | Desktop background receiver (no foreground service) |
+| `platform/PopopxService.desktop.kt` | PC18 | Low | Desktop background receiver (no foreground service) |
 | `platform/Files.desktop.kt` | PC10, PC23, PC26 | Medium | Desktop file path resolution |
 | `platform/Cryptor.desktop.kt` | PC23 | Medium | Desktop keystore encryption actual implementation |
 | `platform/RecAndPlay.desktop.kt` | PC9 | Medium | Desktop audio recording/playback actual implementation |
@@ -471,7 +471,7 @@ Path prefix: `common/src/desktopMain/kotlin/chat/popopx/common/`
 | `views/helpers/DefaultDialog.desktop.kt` | — | Low | Desktop dialog extensions |
 | `views/newchat/QRCode.desktop.kt` | PC12 | Low | Desktop QR code rendering |
 | `views/newchat/QRCodeScanner.desktop.kt` | PC12 | Low | Desktop QR code scanner (screen/clipboard) |
-| `views/onboarding/SimpleXInfo.desktop.kt` | PC1 | Low | Desktop onboarding extensions |
+| `views/onboarding/POPOPXInfo.desktop.kt` | PC1 | Low | Desktop onboarding extensions |
 | `views/onboarding/SetNotificationsMode.desktop.kt` | PC18 | Low | Desktop notification mode extensions |
 | `views/usersettings/Appearance.desktop.kt` | PC24 | Low | Desktop appearance extensions |
 | `views/usersettings/PrivacySettings.desktop.kt` | PC20, PC22 | Low | Desktop privacy settings extensions |

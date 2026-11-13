@@ -3,7 +3,7 @@ package com.popopxchat.popopx
 import android.content.Context
 import android.util.Log
 import androidx.work.*
-import com.popopxchat.popopx.SimplexService.Companion.showPassphraseNotification
+import com.popopxchat.popopx.PopopxService.Companion.showPassphraseNotification
 import chat.popopx.common.model.ChatController
 import chat.popopx.common.platform.*
 import chat.popopx.common.views.helpers.DBMigrationResult

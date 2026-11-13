@@ -119,7 +119,7 @@ Database icon shows warning color (`WarningOrange`) when database is not encrypt
 |---|---|---|---|
 | How to use POPOPX Chat | `ic_help` | `HelpView` | Usage guide |
 | What's new | `ic_add` | `WhatsNewView` | Version changelog |
-| About POPOPX Chat | `ic_info` | `SimpleXInfo` (non-onboarding mode) | App information |
+| About POPOPX Chat | `ic_info` | `POPOPXInfo` (non-onboarding mode) | App information |
 | Chat with the founder | `ic_tag` | Opens SimpleX link | Direct chat with SimpleX team |
 | Send us an email | `ic_mail` | Opens mailto: | Email support |
 

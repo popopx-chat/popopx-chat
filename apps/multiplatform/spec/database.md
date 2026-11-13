@@ -15,7 +15,7 @@
 
 ## 1. Overview
 
-POPOPX Chat uses **two SQLite databases** managed entirely by the Haskell core. Kotlin code **never reads or writes the databases directly** -- all data access goes through the JNI command/response protocol defined in [SimpleXAPI.kt](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt).
+POPOPX Chat uses **two SQLite databases** managed entirely by the Haskell core. Kotlin code **never reads or writes the databases directly** -- all data access goes through the JNI command/response protocol defined in [PopopxAPI.kt](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt).
 
 The two databases are:
 
@@ -199,18 +199,18 @@ enum class MigrationConfirmation(val value: String) {
 
 ### Encryption API
 
-Two API functions manage database encryption, both in [SimpleXAPI.kt](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt):
+Two API functions manage database encryption, both in [PopopxAPI.kt](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt):
 
 | Function | Parameters | Description | Line |
 |----------|-----------|-------------|------|
-| `apiStorageEncryption` | `currentKey: String, newKey: String` | Change or set the database encryption passphrase | [L999](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L999) |
-| `testStorageEncryption` | `key: String, ctrl: ChatCtrl?` | Test whether a given key can decrypt the database | [L1006](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L1006) |
+| `apiStorageEncryption` | `currentKey: String, newKey: String` | Change or set the database encryption passphrase | [L999](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L999) |
+| `testStorageEncryption` | `key: String, ctrl: ChatCtrl?` | Test whether a given key can decrypt the database | [L1006](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L1006) |
 
 Both delegate to the Haskell core via `CC.ApiStorageEncryption(DBEncryptionConfig)` and `CC.TestStorageEncryption(key)` respectively.
 
 <a id="DBEncryptionConfig"></a>
 
-`DBEncryptionConfig` ([SimpleXAPI.kt#L4166](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L4166)):
+`DBEncryptionConfig` ([PopopxAPI.kt#L4166](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L4166)):
 
 ```kotlin
 class DBEncryptionConfig(val currentKey: String, val newKey: String)
@@ -308,7 +308,7 @@ Files referenced by chat items use `CryptoFile` (optional encryption metadata + 
 
 ### Local File Encryption
 
-The `apiSetEncryptLocalFiles(enable)` command ([SimpleXAPI.kt#L967](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L967)) tells the Haskell core to encrypt files stored in `appFilesDir`. When enabled, files are written as `CryptoFile` with a random AES key and nonce. The JNI functions `chatEncryptFile` and `chatDecryptFile` ([Core.kt#L39-L40](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L39)) handle the actual crypto operations.
+The `apiSetEncryptLocalFiles(enable)` command ([PopopxAPI.kt#L967](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L967)) tells the Haskell core to encrypt files stored in `appFilesDir`. When enabled, files are written as `CryptoFile` with a random AES key and nonce. The JNI functions `chatEncryptFile` and `chatDecryptFile` ([Core.kt#L39-L40](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt#L39)) handle the actual crypto operations.
 
 ---
 
@@ -318,13 +318,13 @@ The `apiSetEncryptLocalFiles(enable)` command ([SimpleXAPI.kt#L967](../common/sr
 
 | Function | CC Command | CR Response | Line |
 |----------|-----------|-------------|------|
-| `apiExportArchive(config)` | `CC.ApiExportArchive(config)` | `CR.ArchiveExported(archiveErrors)` | [SimpleXAPI.kt#L981](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L981) |
-| `apiImportArchive(config)` | `CC.ApiImportArchive(config)` | `CR.ArchiveImported(archiveErrors)` | [SimpleXAPI.kt#L987](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L987) |
-| `apiDeleteStorage()` | `CC.ApiDeleteStorage()` | `CR.CmdOk` | [SimpleXAPI.kt#L993](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L993) |
+| `apiExportArchive(config)` | `CC.ApiExportArchive(config)` | `CR.ArchiveExported(archiveErrors)` | [PopopxAPI.kt#L981](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L981) |
+| `apiImportArchive(config)` | `CC.ApiImportArchive(config)` | `CR.ArchiveImported(archiveErrors)` | [PopopxAPI.kt#L987](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L987) |
+| `apiDeleteStorage()` | `CC.ApiDeleteStorage()` | `CR.CmdOk` | [PopopxAPI.kt#L993](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L993) |
 
 ### ArchiveConfig
 
-Defined at [SimpleXAPI.kt#L4162](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L4162):
+Defined at [PopopxAPI.kt#L4162](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L4162):
 
 ```kotlin
 class ArchiveConfig(
@@ -355,7 +355,7 @@ class ArchiveConfig(
 
 ### ArchiveError
 
-Defined at [SimpleXAPI.kt#L7658](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L7658):
+Defined at [PopopxAPI.kt#L7658](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L7658):
 
 ```kotlin
 sealed class ArchiveError {
@@ -374,7 +374,7 @@ sealed class ArchiveError {
 
 | File | Purpose | Path |
 |------|---------|------|
-| SimpleXAPI.kt | API functions: encryption, export/import, storage commands | `common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt` |
+| PopopxAPI.kt | API functions: encryption, export/import, storage commands | `common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt` |
 | Core.kt | JNI externals (`chatMigrateInit`, `chatEncryptFile`, etc.), `initChatController` | `common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt` |
 | Files.kt | Platform-expect file/directory path declarations | `common/src/commonMain/kotlin/chat/popopx/common/platform/Files.kt` |
 | Files.android.kt | Android actual paths (dataDir, appFilesDir, etc.) | `common/src/androidMain/kotlin/chat/popopx/common/platform/Files.android.kt` |

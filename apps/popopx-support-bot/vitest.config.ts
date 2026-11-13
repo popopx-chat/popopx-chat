@@ -8,8 +8,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "simplex-chat": path.resolve(__dirname, "test/__mocks__/simplex-chat.js"),
-      "@simplex-chat/types": path.resolve(__dirname, "test/__mocks__/simplex-chat-types.js"),
+      "simplex-chat": path.resolve(__dirname, "test/__mocks__/popopx-chat.js"),
+      "@simplex-chat/types": path.resolve(__dirname, "test/__mocks__/popopx-chat-types.js"),
     },
   },
 })

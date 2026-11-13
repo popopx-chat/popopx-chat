@@ -48,7 +48,7 @@ import chat.popopx.common.views.chat.*
 import chat.popopx.common.views.chat.item.*
 import chat.popopx.common.views.chatlist.*
 import chat.popopx.common.views.database.TtlOptions
-import chat.popopx.common.views.newchat.SimpleXLinkQRCode
+import chat.popopx.common.views.newchat.POPOPXLinkQRCode
 import chat.popopx.res.*
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.*

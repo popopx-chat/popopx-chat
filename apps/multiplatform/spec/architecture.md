@@ -98,9 +98,9 @@ Key dependencies (from `commonMain`):
 Build file: [`android/build.gradle.kts`](../android/build.gradle.kts)
 
 Contains:
-- `SimplexApp` (Application subclass)
+- `PopopxApp` (Application subclass)
 - `MainActivity` (FragmentActivity)
-- `SimplexService` (foreground Service)
+- `PopopxService` (foreground Service)
 - `NtfManager` (Android NotificationManager wrapper)
 - `CallActivity` (dedicated activity for calls)
 
@@ -199,10 +199,10 @@ initChatController(useKey, confirmMigrations, startChat)
 
 ### Android
 
-Entry: [`SimplexApp.onCreate()`](../android/src/main/java/chat/popopx/app/SimplexApp.kt#L47)
+Entry: [`PopopxApp.onCreate()`](../android/src/main/java/chat/popopx/app/PopopxApp.kt#L47)
 
 ```
-SimplexApp.onCreate()
+PopopxApp.onCreate()
   +-- initHaskell(packageName)           // Load native lib, pipe stdout, call initHS()
   |     +-- System.loadLibrary("app-lib")
   |     +-- pipeStdOutToSocket(packageName)
@@ -223,9 +223,9 @@ MainActivity.onCreate()
   +-- setContent { AppScreen() }         // Compose UI entry point
 ```
 
-Lifecycle callbacks in `SimplexApp` (implements `LifecycleEventObserver`):
+Lifecycle callbacks in `PopopxApp` (implements `LifecycleEventObserver`):
 - `ON_START`: refresh chat list from API if chat is running
-- `ON_RESUME`: show background service notice, start `SimplexService` if configured
+- `ON_RESUME`: show background service notice, start `PopopxService` if configured
 
 ### Desktop
 
@@ -260,10 +260,10 @@ main(args)
 
 ### Receiver Coroutine
 
-[`ChatController.startReceiver()`](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L660) launches a coroutine on `Dispatchers.IO` that continuously polls for events from the Haskell core:
+[`ChatController.startReceiver()`](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L660) launches a coroutine on `Dispatchers.IO` that continuously polls for events from the Haskell core:
 
 ```kotlin
-// SimpleXAPI.kt line 660
+// PopopxAPI.kt line 660
 private fun startReceiver() {
     if (receiverJob != null || chatCtrl == null) return  // guard against double-start
     receiverJob = CoroutineScope(Dispatchers.IO).launch {
@@ -297,15 +297,15 @@ private fun startReceiver() {
 
 ### Message Reception
 
-[`recvMsg()`](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L829) calls `chatRecvMsgWait(ctrl, MESSAGE_TIMEOUT)` where `MESSAGE_TIMEOUT = 300_000_000` microseconds (300 seconds). Returns `null` on timeout (empty string from Haskell), otherwise deserializes the JSON response to an `API` instance.
+[`recvMsg()`](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L829) calls `chatRecvMsgWait(ctrl, MESSAGE_TIMEOUT)` where `MESSAGE_TIMEOUT = 300_000_000` microseconds (300 seconds). Returns `null` on timeout (empty string from Haskell), otherwise deserializes the JSON response to an `API` instance.
 
 ### Command Sending
 
-[`sendCmd()`](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L804) runs on `Dispatchers.IO`, serializes the command via `CC.cmdString`, calls `chatSendCmdRetry()` (or `chatSendRemoteCmdRetry()` for remote hosts), deserializes the response, and logs terminal items.
+[`sendCmd()`](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L804) runs on `Dispatchers.IO`, serializes the command via `CC.cmdString`, calls `chatSendCmdRetry()` (or `chatSendRemoteCmdRetry()` for remote hosts), deserializes the response, and logs terminal items.
 
 ### Event Processing
 
-[`processReceivedMsg()`](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L2568) is a large `when` block that dispatches on the `CR` (ChatResponse) type:
+[`processReceivedMsg()`](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L2568) is a large `when` block that dispatches on the `CR` (ChatResponse) type:
 
 - `CR.ContactConnected` -- update contact in `ChatModel`
 - `CR.NewChatItems` -- add items to chat, trigger notifications
@@ -316,7 +316,7 @@ private fun startReceiver() {
 
 ### Wake Lock
 
-On Android, the receiver acquires a wake lock via [`getWakeLock(timeout)`](../common/src/commonMain/kotlin/chat/popopx/common/platform/SimplexService.kt#L3) (expect function) after each received message with a 60-second timeout. The previous iteration's wake lock is released after a 30-second delay, ensuring overlap so the CPU does not sleep between messages.
+On Android, the receiver acquires a wake lock via [`getWakeLock(timeout)`](../common/src/commonMain/kotlin/chat/popopx/common/platform/PopopxService.kt#L3) (expect function) after each received message with a 60-second timeout. The previous iteration's wake lock is released after a 30-second delay, ensuring overlap so the CPU does not sleep between messages.
 
 ---
 
@@ -346,7 +346,7 @@ Examples from platform files:
 | `expect class RecorderNative` | [`RecAndPlay.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/RecAndPlay.kt#L17) | 17 |
 | `expect val cryptor: CryptorInterface` | [`Cryptor.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Cryptor.kt#L9) | 9 |
 | `expect fun base64ToBitmap(base64ImageString: String): ImageBitmap` | [`Images.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Images.kt#L18) | 18 |
-| `expect fun getWakeLock(timeout: Long): (() -> Unit)` | [`SimplexService.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/SimplexService.kt#L3) | 3 |
+| `expect fun getWakeLock(timeout: Long): (() -> Unit)` | [`PopopxService.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/PopopxService.kt#L3) | 3 |
 | `expect class GlobalExceptionsHandler` | [`UI.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/UI.kt#L24) | 24 |
 | `expect fun UriHandler.sendEmail(subject: String, body: CharSequence)` | [`Share.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Share.kt#L7) | 7 |
 | `expect fun ClipboardManager.shareText(text: String)` | [`Share.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Share.kt#L9) | 9 |
@@ -356,7 +356,7 @@ Examples from platform files:
 
 [`PlatformInterface`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Platform.kt#L15) is an interface with default no-op implementations. It is assigned at runtime by each platform entry point:
 
-- **Android**: assigned in [`SimplexApp.initMultiplatform()`](../android/src/main/java/chat/popopx/app/SimplexApp.kt#L193)
+- **Android**: assigned in [`PopopxApp.initMultiplatform()`](../android/src/main/java/chat/popopx/app/PopopxApp.kt#L193)
 - **Desktop**: assigned in [`Main.kt initHaskell()`](../desktop/src/jvmMain/kotlin/chat/popopx/desktop/Main.kt#L59)
 
 The global variable is declared at [`Platform.kt line 50`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Platform.kt#L50):
@@ -368,8 +368,8 @@ var platform: PlatformInterface = object : PlatformInterface {}
 
 | Callback | Default | Android Implementation |
 |---|---|---|
-| `androidServiceStart()` | no-op | Start `SimplexService` foreground service |
-| `androidServiceSafeStop()` | no-op | Stop `SimplexService` |
+| `androidServiceStart()` | no-op | Start `PopopxService` foreground service |
+| `androidServiceSafeStop()` | no-op | Stop `PopopxService` |
 | `androidCallServiceSafeStop()` | no-op | Stop `CallService` |
 | `androidNotificationsModeChanged(mode)` | no-op | Toggle receivers, start/stop service |
 | `androidChatStartedAfterBeingOff()` | no-op | Start service or schedule periodic worker |
@@ -400,7 +400,7 @@ var platform: PlatformInterface = object : PlatformInterface {}
 | File | Path | Key Contents |
 |---|---|---|
 | Core.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt) | JNI externals, `initChatController`, `chatInitTemporaryDatabase` |
-| SimpleXAPI.kt | [`common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt`](../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt) | `ChatController`, `AppPreferences`, `startReceiver`, `sendCmd`, `recvMsg`, `processReceivedMsg`, all `api*` functions |
+| PopopxAPI.kt | [`common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt`](../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt) | `ChatController`, `AppPreferences`, `startReceiver`, `sendCmd`, `recvMsg`, `processReceivedMsg`, all `api*` functions |
 | ChatModel.kt | [`common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt`](../common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt) | `ChatModel` singleton, `ChatsContext`, `Chat`, `ChatInfo`, `ChatItem` and all domain types |
 | App.kt | [`common/src/commonMain/kotlin/chat/popopx/common/App.kt`](../common/src/commonMain/kotlin/chat/popopx/common/App.kt) | `AppScreen()`, `MainScreen()` |
 
@@ -421,15 +421,15 @@ var platform: PlatformInterface = object : PlatformInterface {}
 | RecAndPlay.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/RecAndPlay.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/RecAndPlay.kt) | `RecorderInterface`, `AudioPlayerInterface` |
 | Cryptor.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/Cryptor.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Cryptor.kt) | `CryptorInterface` |
 | Images.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/Images.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/Images.kt) | `base64ToBitmap`, `resizeImageToStrSize` |
-| SimplexService.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/SimplexService.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/SimplexService.kt) | `expect fun getWakeLock()` |
+| PopopxService.kt | [`common/src/commonMain/kotlin/chat/popopx/common/platform/PopopxService.kt`](../common/src/commonMain/kotlin/chat/popopx/common/platform/PopopxService.kt) | `expect fun getWakeLock()` |
 
 ### Entry Points
 
 | File | Path | Key Contents |
 |---|---|---|
-| SimplexApp.kt | [`android/src/main/java/chat/popopx/app/SimplexApp.kt`](../android/src/main/java/chat/popopx/app/SimplexApp.kt) | Android Application class, lifecycle observer |
+| PopopxApp.kt | [`android/src/main/java/chat/popopx/app/PopopxApp.kt`](../android/src/main/java/chat/popopx/app/PopopxApp.kt) | Android Application class, lifecycle observer |
 | MainActivity.kt | [`android/src/main/java/chat/popopx/app/MainActivity.kt`](../android/src/main/java/chat/popopx/app/MainActivity.kt) | Android main activity |
-| SimplexService.kt | [`android/src/main/java/chat/popopx/app/SimplexService.kt`](../android/src/main/java/chat/popopx/app/SimplexService.kt) | Android foreground service |
+| PopopxService.kt | [`android/src/main/java/chat/popopx/app/PopopxService.kt`](../android/src/main/java/chat/popopx/app/PopopxService.kt) | Android foreground service |
 | Main.kt | [`desktop/src/jvmMain/kotlin/chat/popopx/desktop/Main.kt`](../desktop/src/jvmMain/kotlin/chat/popopx/desktop/Main.kt) | Desktop `main()` |
 | DesktopApp.kt | [`common/src/desktopMain/kotlin/chat/popopx/common/DesktopApp.kt`](../common/src/desktopMain/kotlin/chat/popopx/common/DesktopApp.kt) | `showApp()`, `SimplexWindowState` |
 | SingleInstance.kt | [`common/src/desktopMain/kotlin/chat/popopx/common/SingleInstance.kt`](../common/src/desktopMain/kotlin/chat/popopx/common/SingleInstance.kt) | `acquireSingleInstance()`, `startShowFileWatcher()`, signal file hand-over |

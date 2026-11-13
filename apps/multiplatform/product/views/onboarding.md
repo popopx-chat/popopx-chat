@@ -19,7 +19,7 @@ The `OnboardingStage` enum defines the flow:
 
 | Stage | Description |
 |---|---|
-| `Step1_SimpleXInfo` | Welcome screen with app introduction |
+| `Step1_POPOPXInfo` | Welcome screen with app introduction |
 | `Step2_CreateProfile` | Create first user profile |
 | `LinkAMobile` | Desktop-only: link a mobile device |
 | `Step2_5_SetupDatabasePassphrase` | Desktop-only: set database encryption passphrase |
@@ -30,9 +30,9 @@ The `OnboardingStage` enum defines the flow:
 
 ## Page Sections
 
-### Step 1: Welcome / SimpleX Info (`SimpleXInfo`)
+### Step 1: Welcome / SimpleX Info (`POPOPXInfo`)
 
-**Stage**: `Step1_SimpleXInfo`
+**Stage**: `Step1_POPOPXInfo`
 
 | Element | Description |
 |---|---|
@@ -130,7 +130,7 @@ Triggered in `ChatListView` via `shouldShowWhatsNew()` with a 1-second delay.
 | File | Path |
 |---|---|
 | `OnboardingView.kt` | `views/onboarding/OnboardingView.kt` |
-| `SimpleXInfo.kt` | `views/onboarding/SimpleXInfo.kt` |
+| `POPOPXInfo.kt` | `views/onboarding/POPOPXInfo.kt` |
 | `HowItWorks.kt` | `views/onboarding/HowItWorks.kt` |
 | `SetupDatabasePassphrase.kt` | `views/onboarding/SetupDatabasePassphrase.kt` |
 | `SetNotificationsMode.kt` | `views/onboarding/SetNotificationsMode.kt` |

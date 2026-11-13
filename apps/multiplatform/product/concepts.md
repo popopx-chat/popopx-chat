@@ -36,7 +36,7 @@ This document provides a structured mapping between product-level concepts, thei
 | PC15 | Group Links | [README.md](README.md) (Groups) | [spec/api.md](../spec/api.md) | `common/.../views/chat/group/GroupLinkView.kt` | `Controller.hs` (`APICreateGroupLink`) |
 | PC16 | Member Roles | [README.md](README.md) (Groups) | [spec/api.md](../spec/api.md) | `common/.../model/ChatModel.kt`, `group/GroupMemberInfoView.kt` | `Types/Shared.hs` (`GroupMemberRole`) |
 | PC17 | Audio/Video Calls | [README.md](README.md) (Calling) | [spec/services/calls.md](../spec/services/calls.md) | `common/.../views/call/CallView.kt`, `CallManager.kt`, `WebRTC.kt`, `android/.../CallService.kt`, `android/.../views/call/CallActivity.kt` | `Call.hs` (`RcvCallInvitation`, `CallType`) |
-| PC18 | Notifications | [README.md](README.md) (Background Messaging) | [spec/services/notifications.md](../spec/services/notifications.md) | `common/.../platform/NtfManager.kt`, `Notifications.kt`, `android/.../SimplexService.kt`, `android/.../MessagesFetcherWorker.kt`, `common/.../views/usersettings/NotificationsSettingsView.kt` | `Controller.hs` |
+| PC18 | Notifications | [README.md](README.md) (Background Messaging) | [spec/services/notifications.md](../spec/services/notifications.md) | `common/.../platform/NtfManager.kt`, `Notifications.kt`, `android/.../PopopxService.kt`, `android/.../MessagesFetcherWorker.kt`, `common/.../views/usersettings/NotificationsSettingsView.kt` | `Controller.hs` |
 | PC19 | User Profiles | [README.md](README.md) (User Management) | [spec/state.md](../spec/state.md) | `common/.../views/usersettings/UserProfilesView.kt`, `UserProfileView.kt`, `views/chatlist/UserPicker.kt` | `Types.hs` (`User`), `Store/Profiles.hs` |
 | PC20 | Incognito Mode | [README.md](README.md) (Contacts) | [spec/api.md](../spec/api.md) | `common/.../views/usersettings/IncognitoView.kt` | `ProfileGenerator.hs`, `Types.hs` |
 | PC21 | Hidden Profiles | [README.md](README.md) (Privacy & Security) | [spec/api.md](../spec/api.md) | `common/.../views/usersettings/HiddenProfileView.kt` | `Controller.hs` (`APIHideUser`, `APIUnhideUser`) |
@@ -86,9 +86,9 @@ Key files that exist only on one platform, grouped by concern.
 
 | File | Purpose |
 |------|---------|
-| `android/src/main/java/chat/popopx/app/SimplexApp.kt` | Application subclass, PlatformInterface setup, Haskell init |
+| `android/src/main/java/chat/popopx/app/PopopxApp.kt` | Application subclass, PlatformInterface setup, Haskell init |
 | `android/src/main/java/chat/popopx/app/MainActivity.kt` | Main Activity, deep link handling, lifecycle |
-| `android/src/main/java/chat/popopx/app/SimplexService.kt` | Foreground service for persistent messaging |
+| `android/src/main/java/chat/popopx/app/PopopxService.kt` | Foreground service for persistent messaging |
 | `android/src/main/java/chat/popopx/app/MessagesFetcherWorker.kt` | WorkManager periodic message fetch |
 | `android/src/main/java/chat/popopx/app/CallService.kt` | Foreground service for active calls |
 | `android/src/main/java/chat/popopx/app/views/call/CallActivity.kt` | Dedicated Activity for call UI |
@@ -118,6 +118,6 @@ Key files that exist only on one platform, grouped by concern.
 - Haskell core types: `../../src/Simplex/Chat/Types.hs`
 - Haskell store layer: `../../src/Simplex/Chat/Store/` (`Direct.hs`, `Groups.hs`, `Messages.hs`, `Files.hs`, `Profiles.hs`, `Connections.hs`)
 - Kotlin model: `common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt`
-- Kotlin API bridge: `common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt`
+- Kotlin API bridge: `common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt`
 - Kotlin FFI layer: `common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt`
 - Platform abstraction: `common/src/commonMain/kotlin/chat/popopx/common/platform/Platform.kt` (`PlatformInterface`)

@@ -181,7 +181,7 @@ Remote control of the mobile app from a desktop client.
 ```
 Onboarding
   OnboardingView.swift
-    -> SimpleXInfo -> CreateProfile -> ChooseServerOperators -> SetNotificationsMode -> CreateSimpleXAddress
+    -> POPOPXInfo -> CreateProfile -> ChooseServerOperators -> SetNotificationsMode -> CreateSimpleXAddress
     -> ChatListView (home)
 
 ChatListView (home)

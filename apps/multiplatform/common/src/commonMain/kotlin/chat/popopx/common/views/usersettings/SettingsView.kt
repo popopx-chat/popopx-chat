@@ -33,7 +33,7 @@ import chat.popopx.common.views.database.DatabaseView
 import chat.popopx.common.views.helpers.*
 import chat.popopx.common.views.migration.MigrateFromDeviceView
 import chat.popopx.common.views.onboarding.GetStakeView
-import chat.popopx.common.views.onboarding.SimpleXInfo
+import chat.popopx.common.views.onboarding.POPOPXInfo
 import chat.popopx.common.views.onboarding.WhatsNewView
 import chat.popopx.common.views.onboarding.crowdfundingAvailable
 import chat.popopx.common.views.usersettings.networkAndServers.NetworkAndServersView

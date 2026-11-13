@@ -810,7 +810,7 @@ other SimpleX error                SimpleX error: <the chain of error types>: <t
                                      for example: SimpleX error: error: groupUserRole: {"requiredRole":"author"}
 ```
 
-SimpleX errors worded by the apps (`chatErrorText`, `log.ts`), copied from the Android app's alerts (`SimpleXAPI.kt`, strings in `moko-resources/base/strings.xml`) and iOS (`SimpleXAPI.swift`, `ErrorAlert.swift`). The alert's title and message form one line, joined by ": ", or by a space after "!" and "?"; HOST is the first host of the server address. The text has no "SimpleX error:" prefix, as the title names the error.
+SimpleX errors worded by the apps (`chatErrorText`, `log.ts`), copied from the Android app's alerts (`PopopxAPI.kt`, strings in `moko-resources/base/strings.xml`) and iOS (`PopopxAPI.swift`, `ErrorAlert.swift`). The alert's title and message form one line, joined by ": ", or by a space after "!" and "?"; HOST is the first host of the server address. The text has no "SimpleX error:" prefix, as the title names the error.
 
 ```
 error shape                                              text
@@ -880,7 +880,7 @@ serve(NAME, options):
   create DIR, mode 0700 (set again when DIR exists, except on Windows); DIR/lock created exclusively, or exit 1 when its PID runs; token = DIR/token, created when missing or with --new-token; DIR/headers.json written with the token
   chat = ChatApi.init({type: "sqlite", filePrefix: DIR/simplex})
   profile = the user, or created: /_create user {profile: {displayName: <--display-name or NAME>, fullName: "", peerType: agent}, pastTimestamp: false}
-  cfg = /network; /_network {cfg with smpProxyMode: always, smpProxyFallback: allowProtected}   # the apps' defaults, SimpleXAPI.kt:5427-5447
+  cfg = /network; /_network {cfg with smpProxyMode: always, smpProxyFallback: allowProtected}   # the apps' defaults, PopopxAPI.kt:5427-5447
   mkdir DIR/tmp, mode 0700; /_temp_folder DIR/tmp   # SetTempFolder, Commands.hs:650-653; the XFTP work folder, read by startChat (Commands.hs:290-291)
   delete DIR/files/sent/, the resized copies of the last run
   buffer events; chat.startChat()

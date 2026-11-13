@@ -21,7 +21,7 @@ The Android and Desktop apps share a single **Kotlin Multiplatform + Compose Mul
 
 Key platform differences:
 
-- **Android** uses a 2-column layout (`AndroidScreen`): chat list slides to chat view. Background messaging is handled by `SimplexService` (foreground service) + `MessagesFetcherWorker` (WorkManager periodic fetch). Calls use a dedicated `CallService` + `CallActivity`.
+- **Android** uses a 2-column layout (`AndroidScreen`): chat list slides to chat view. Background messaging is handled by `PopopxService` (foreground service) + `MessagesFetcherWorker` (WorkManager periodic fetch). Calls use a dedicated `CallService` + `CallActivity`.
 - **Desktop** uses a 3-column layout (`DesktopScreen`): chat list (start) | chat view (center) | detail panel (`ModalManager.end`). It includes `AppUpdater` for in-app update checking, `StoreWindowState` for window geometry persistence, and VLC-based video playback. Calls use browser-based WebRTC rendered inline.
 
 ---
@@ -126,7 +126,7 @@ Encryption, authentication, and privacy controls.
 
 | Feature | Description | Key Source (Kotlin) |
 |---------|-------------|---------------------|
-| E2E encryption | Double-ratchet encryption for all messages | `common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt` |
+| E2E encryption | Double-ratchet encryption for all messages | `common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt` |
 | Post-quantum encryption | Optional PQ key exchange for direct chats | `common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt` |
 | Local authentication | Biometric (fingerprint/face) or app passcode lock | `common/src/commonMain/kotlin/chat/popopx/common/views/localauth/LocalAuthView.kt` |
 | Passcode entry | Custom numeric/alphanumeric passcode UI | `common/src/commonMain/kotlin/chat/popopx/common/views/localauth/PasscodeView.kt` |
@@ -218,8 +218,8 @@ Desktop-specific functionality not present on Android.
 
 ```
 Onboarding
-  views/onboarding/SimpleXInfo.kt
-    -> SimpleXInfo -> CreateFirstProfile -> SetupDatabasePassphrase
+  views/onboarding/POPOPXInfo.kt
+    -> POPOPXInfo -> CreateFirstProfile -> SetupDatabasePassphrase
     -> ChooseServerOperators -> SetNotificationsMode
     -> ChatListView (home)
 
@@ -347,7 +347,7 @@ Key `expect`/`actual` abstractions: `appPlatform`, `BackHandler`, `VideoPlayer`,
 ### 2. Runtime `PlatformInterface`
 
 Defined in `common/src/commonMain/kotlin/chat/popopx/common/platform/Platform.kt`, this interface provides platform-specific callbacks that cannot use `expect`/`actual` (because `android/` module code cannot be called from `common/androidMain/`). The `platform` variable is reassigned at app startup:
-- **Android:** `SimplexApp` sets `platform` to an implementation with `CallService`, notification channels, orientation locking, status bar theming, and PiP support.
+- **Android:** `PopopxApp` sets `platform` to an implementation with `CallService`, notification channels, orientation locking, status bar theming, and PiP support.
 - **Desktop:** `Main.kt` sets `platform` to an implementation with `desktopShowAppUpdateNotice()`.
 
 ### 3. Haskell Core (JNI/FFI)
@@ -360,7 +360,7 @@ Native FFI bindings are declared in `common/src/commonMain/kotlin/chat/popopx/co
 
 Android has no equivalent to iOS NSE (Notification Service Extension). Instead, it uses:
 
-- **`SimplexService`** (`android/src/main/java/chat/popopx/app/SimplexService.kt`) -- A foreground service that keeps the Haskell core running to receive messages in real-time. Displays a persistent notification while active.
+- **`PopopxService`** (`android/src/main/java/chat/popopx/app/PopopxService.kt`) -- A foreground service that keeps the Haskell core running to receive messages in real-time. Displays a persistent notification while active.
 - **`MessagesFetcherWorker`** (`android/src/main/java/chat/popopx/app/MessagesFetcherWorker.kt`) -- A WorkManager-based periodic task that wakes the app at configurable intervals to fetch messages when the foreground service is not running (battery-optimized mode).
 - **Notification modes:** Instant (foreground service always running), Periodic (WorkManager fetch every N minutes), Off.
 
@@ -391,7 +391,7 @@ Android has no equivalent to iOS NSE (Notification Service Extension). Instead, 
 
 - Haskell core: `../../src/Simplex/Chat/Controller.hs`, `../../src/Simplex/Chat/Types.hs`
 - Kotlin model: `common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt`
-- Kotlin API bridge: `common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt`
+- Kotlin API bridge: `common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt`
 - Kotlin FFI: `common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt`
-- Android entry: `android/src/main/java/chat/popopx/app/SimplexApp.kt`, `MainActivity.kt`
+- Android entry: `android/src/main/java/chat/popopx/app/PopopxApp.kt`, `MainActivity.kt`
 - Desktop entry: `desktop/src/jvmMain/kotlin/chat/popopx/desktop/Main.kt`

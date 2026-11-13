@@ -19,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import chat.popopx.common.platform.appPlatform
-import chat.popopx.common.ui.theme.SimpleXTheme
+import chat.popopx.common.ui.theme.POPOPXTheme
 import chat.popopx.res.*
 
 @Composable

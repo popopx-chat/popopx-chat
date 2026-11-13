@@ -13,7 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import chat.popopx.common.ui.theme.SimpleXTheme
+import chat.popopx.common.ui.theme.POPOPXTheme
 import chat.popopx.common.views.helpers.annotatedStringResource
 import chat.popopx.common.views.onboarding.ReadableTextWithLink
 import chat.popopx.common.views.usersettings.MarkdownHelpView

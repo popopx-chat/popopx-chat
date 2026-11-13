@@ -32,7 +32,7 @@ Displayed when `selection == .invite`:
 
 | Element | Description |
 |---|---|
-| QR code display | Generated QR code for the invitation link (`SimpleXLinkQRCode`) |
+| QR code display | Generated QR code for the invitation link (`POPOPXLinkQRCode`) |
 | Short/full link toggle | Switch between short and full link display |
 | Share button | System share sheet for the invitation link |
 | Copy button | Copy link to clipboard |

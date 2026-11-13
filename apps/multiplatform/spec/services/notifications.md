@@ -12,7 +12,7 @@
 
 ## Executive Summary
 
-POPOPX Chat uses platform-specific notification strategies. The common `NtfManager` abstract class defines the notification contract with shared helper methods for message, contact, and call notifications. Android implements a full notification system with channels, grouped summaries, full-screen call intents, and a foreground service (`SimplexService`) or periodic `WorkManager` tasks for background message fetching. Desktop uses the TwoSlices library (with OS-native fallbacks) for system notifications. Notification privacy is controlled via `NotificationPreviewMode` (MESSAGE, CONTACT, HIDDEN).
+POPOPX Chat uses platform-specific notification strategies. The common `NtfManager` abstract class defines the notification contract with shared helper methods for message, contact, and call notifications. Android implements a full notification system with channels, grouped summaries, full-screen call intents, and a foreground service (`PopopxService`) or periodic `WorkManager` tasks for background message fetching. Desktop uses the TwoSlices library (with OS-native fallbacks) for system notifications. Notification privacy is controlled via `NotificationPreviewMode` (MESSAGE, CONTACT, HIDDEN).
 
 ---
 
@@ -165,21 +165,21 @@ Previous notifications are tracked in `prevNtfs: ArrayList<Pair<Pair<Long, ChatI
 
 ## 5. Android Background Messaging
 
-### 5.1 SimplexService.kt (734 lines)
+### 5.1 PopopxService.kt (734 lines)
 
-[`SimplexService.kt`](../../android/src/main/java/chat/popopx/app/SimplexService.kt)
+[`PopopxService.kt`](../../android/src/main/java/chat/popopx/app/PopopxService.kt)
 
 A foreground `Service` that keeps the app process alive for continuous message receiving. This is SimpleX's privacy-preserving alternative to push notifications.
 
 **Service lifecycle:**
 
-- `startService()` ([line 128](../../android/src/main/java/chat/popopx/app/SimplexService.kt#L128)): Waits for database migration, validates DB status, saves service state as STARTED. WakeLock acquisition is commented out -- the app relies on battery optimization whitelisting instead.
-- `onDestroy()` ([line 87](../../android/src/main/java/chat/popopx/app/SimplexService.kt#L87)): Releases wakelocks, saves state as STOPPED, sends broadcast to `AutoRestartReceiver` if allowed.
-- `onTaskRemoved()` ([line 211](../../android/src/main/java/chat/popopx/app/SimplexService.kt#L211)): Schedules restart via `AlarmManager` when the app is swiped from recents.
+- `startService()` ([line 128](../../android/src/main/java/chat/popopx/app/PopopxService.kt#L128)): Waits for database migration, validates DB status, saves service state as STARTED. WakeLock acquisition is commented out -- the app relies on battery optimization whitelisting instead.
+- `onDestroy()` ([line 87](../../android/src/main/java/chat/popopx/app/PopopxService.kt#L87)): Releases wakelocks, saves state as STOPPED, sends broadcast to `AutoRestartReceiver` if allowed.
+- `onTaskRemoved()` ([line 211](../../android/src/main/java/chat/popopx/app/PopopxService.kt#L211)): Schedules restart via `AlarmManager` when the app is swiped from recents.
 
 **Notification:**
 
-- Channel: `POPOPX_SERVICE_NOTIFICATION` with `IMPORTANCE_LOW` and badge disabled ([line 165](../../android/src/main/java/chat/popopx/app/SimplexService.kt#L165)).
+- Channel: `POPOPX_SERVICE_NOTIFICATION` with `IMPORTANCE_LOW` and badge disabled ([line 165](../../android/src/main/java/chat/popopx/app/PopopxService.kt#L165)).
 - Shows a persistent notification with a "Hide notification" action that opens channel settings.
 - Service ID: `6789`.
 
@@ -187,16 +187,16 @@ A foreground `Service` that keeps the app process alive for continuous message r
 
 | Receiver | Line | Trigger |
 |---|---|---|
-| `StartReceiver` | [L234](../../android/src/main/java/chat/popopx/app/SimplexService.kt#L234) | Device boot (`BOOT_COMPLETED`) |
-| `AutoRestartReceiver` | [L253](../../android/src/main/java/chat/popopx/app/SimplexService.kt#L253) | Service destruction |
-| `AppUpdateReceiver` | [L261](../../android/src/main/java/chat/popopx/app/SimplexService.kt#L261) | App update (`MY_PACKAGE_REPLACED`) |
-| `ServiceStartWorker` | [L283](../../android/src/main/java/chat/popopx/app/SimplexService.kt#L283) | WorkManager one-time task |
+| `StartReceiver` | [L234](../../android/src/main/java/chat/popopx/app/PopopxService.kt#L234) | Device boot (`BOOT_COMPLETED`) |
+| `AutoRestartReceiver` | [L253](../../android/src/main/java/chat/popopx/app/PopopxService.kt#L253) | Service destruction |
+| `AppUpdateReceiver` | [L261](../../android/src/main/java/chat/popopx/app/PopopxService.kt#L261) | App update (`MY_PACKAGE_REPLACED`) |
+| `ServiceStartWorker` | [L283](../../android/src/main/java/chat/popopx/app/PopopxService.kt#L283) | WorkManager one-time task |
 
 **Battery optimization:**
 
-- `isBackgroundAllowed()` ([line 681](../../android/src/main/java/chat/popopx/app/SimplexService.kt#L681)): Checks both `isIgnoringBatteryOptimizations` and `!isBackgroundRestricted`.
-- `showBackgroundServiceNoticeIfNeeded()` ([line 430](../../android/src/main/java/chat/popopx/app/SimplexService.kt#L430)): Shows alerts guiding users to disable battery optimization or background restriction. Includes Xiaomi-specific guidance.
-- `disableNotifications()` ([line 722](../../android/src/main/java/chat/popopx/app/SimplexService.kt#L722)): Switches mode to OFF, disables receivers, cancels workers.
+- `isBackgroundAllowed()` ([line 681](../../android/src/main/java/chat/popopx/app/PopopxService.kt#L681)): Checks both `isIgnoringBatteryOptimizations` and `!isBackgroundRestricted`.
+- `showBackgroundServiceNoticeIfNeeded()` ([line 430](../../android/src/main/java/chat/popopx/app/PopopxService.kt#L430)): Shows alerts guiding users to disable battery optimization or background restriction. Includes Xiaomi-specific guidance.
+- `disableNotifications()` ([line 722](../../android/src/main/java/chat/popopx/app/PopopxService.kt#L722)): Switches mode to OFF, disables receivers, cancels workers.
 
 ### 5.2 MessagesFetcherWorker.kt (100 lines)
 
@@ -205,20 +205,20 @@ A foreground `Service` that keeps the app process alive for continuous message r
 A `CoroutineWorker` used in `PERIODIC` notification mode as an alternative to the persistent foreground service:
 
 - `scheduleWork()` ([line 18](../../android/src/main/java/chat/popopx/app/MessagesFetcherWorker.kt#L18)): Schedules a `OneTimeWorkRequest` with a default 600-second (10 minute) initial delay and 60-second duration. Requires `NetworkType.CONNECTED` constraint.
-- `doWork()` ([line 53](../../android/src/main/java/chat/popopx/app/MessagesFetcherWorker.kt#L53)): Skips if `SimplexService` is already running. Initializes chat controller if needed (self-destruct mode). Waits for DB migration. Runs for up to `durationSec` seconds, polling every 5 seconds until no messages have been received for 10 seconds (`WAIT_AFTER_LAST_MESSAGE`).
+- `doWork()` ([line 53](../../android/src/main/java/chat/popopx/app/MessagesFetcherWorker.kt#L53)): Skips if `PopopxService` is already running. Initializes chat controller if needed (self-destruct mode). Waits for DB migration. Runs for up to `durationSec` seconds, polling every 5 seconds until no messages have been received for 10 seconds (`WAIT_AFTER_LAST_MESSAGE`).
 - Self-rescheduling: Always calls `reschedule()` at the end (creating a chain of one-time tasks that simulate periodic execution).
 
 <a id="NotificationsMode"></a>
 
 ### 5.3 Notification modes
 
-Defined in [`SimpleXAPI.kt`](../../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L7739):
+Defined in [`PopopxAPI.kt`](../../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L7739):
 
 ```kotlin
 enum class NotificationsMode {
   OFF,      // No background message fetching
   PERIODIC, // WorkManager periodic tasks (MessagesFetcherWorker)
-  SERVICE;  // Persistent foreground service (SimplexService)
+  SERVICE;  // Persistent foreground service (PopopxService)
 }
 ```
 
@@ -255,7 +255,7 @@ Both Android and Desktop implementations check `appPreferences.notificationPrevi
 | `NtfManager.kt` | [`common/src/commonMain/.../platform/NtfManager.kt`](../../common/src/commonMain/kotlin/chat/popopx/common/platform/NtfManager.kt) | 139 | Abstract notification manager with shared logic |
 | `NtfManager.android.kt` | [`android/src/main/java/.../model/NtfManager.android.kt`](../../android/src/main/java/chat/popopx/app/model/NtfManager.android.kt) | 331 | Android notification channels, groups, call intents |
 | `NtfManager.desktop.kt` | [`common/src/desktopMain/.../model/NtfManager.desktop.kt`](../../common/src/desktopMain/kotlin/chat/popopx/common/model/NtfManager.desktop.kt) | 193 | Desktop notifications via TwoSlices/OS-native |
-| `SimplexService.kt` | [`android/src/main/java/.../SimplexService.kt`](../../android/src/main/java/chat/popopx/app/SimplexService.kt) | 734 | Android foreground service for background messaging |
+| `PopopxService.kt` | [`android/src/main/java/.../PopopxService.kt`](../../android/src/main/java/chat/popopx/app/PopopxService.kt) | 734 | Android foreground service for background messaging |
 | `MessagesFetcherWorker.kt` | [`android/src/main/java/.../MessagesFetcherWorker.kt`](../../android/src/main/java/chat/popopx/app/MessagesFetcherWorker.kt) | 100 | WorkManager periodic message fetcher |
 | `ChatModel.kt` | [`common/src/commonMain/.../model/ChatModel.kt`](../../common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt) | -- | `NotificationPreviewMode` enum (L4823) |
-| `SimpleXAPI.kt` | [`common/src/commonMain/.../model/SimpleXAPI.kt`](../../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt) | -- | `NotificationsMode` enum (L7739) |
+| `PopopxAPI.kt` | [`common/src/commonMain/.../model/PopopxAPI.kt`](../../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt) | -- | `NotificationsMode` enum (L7739) |

@@ -15,7 +15,7 @@ import androidx.compose.ui.window.*
 import chat.popopx.common.model.*
 import chat.popopx.common.platform.*
 import chat.popopx.common.ui.theme.DEFAULT_START_MODAL_WIDTH
-import chat.popopx.common.ui.theme.SimpleXTheme
+import chat.popopx.common.ui.theme.POPOPXTheme
 import chat.popopx.common.views.TerminalView
 import chat.popopx.common.views.helpers.*
 import chat.popopx.res.*

@@ -13,6 +13,50 @@ links, the APK/F-Droid artifacts and the website are all still upstream's or abs
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
 
+### File and artefact names — 45 paths moved, 22 held (2026-11-13)
+
+The residue left after the copy, wire and asset tiers was **names**: 67 tracked paths were still spelled
+"simplex". None of them could be renamed as documentation, because each is a build input, an installed
+path, a generated artifact key or a resolved module — so all 45 that moved went with their readers in one
+pass:
+
+- **13 Kotlin files**, each named after the symbol it declares — `PopopxApp.kt`, `PopopxService.kt` (and
+  its `platform/` expect/actual pair), `PopopxAPI.kt`, `POPOPXInfo.kt` (+ `.android`/`.desktop`),
+  `PopopxNameView.kt`, `SetPopopxDomainView.kt`, `SupportPOPOPXBanner.kt`, `BadgesSupportPopopxView.kt`.
+  Four of them were already orphans: the identifiers inside had moved weeks earlier and nothing outside
+  the file named them. 339 path citations in this fork's own code maps
+  (`apps/multiplatform/{CODE.md,product/**,spec/**}`) moved with the files.
+- **2 desktop snapshot baselines**: `SimpleXInfo.PreviewSimpleXInfo-*.png` →
+  `POPOPXInfo.PreviewPOPOPXInfo-*.png`. The name is generated (`SnapshotTest.kt:180`
+  `"${scene.name}-$theme-font-$scale.png"`), so those two files had been orphaned by the display-copy tier
+  and were pointing at nothing.
+- **4 desktop launcher artifacts** — `distribute/SimpleX.desktop` and `distribute/simplex.{png,ico,icns}`
+  became `popopx.desktop` and `popopx.{png,ico,icns}`, together with their three `iconFile.set(…)` sites
+  in `apps/multiplatform/desktop/build.gradle.kts:68,73,82` and the `cp` in
+  `scripts/desktop/make-appimage-linux.sh:41`. These are build inputs: a half-move is a desktop bundle
+  that silently ships the default icon.
+- **2 build-reproduction scripts** and both readers (`.github/workflows/reproduce-schedule.yml`,
+  `scripts/ci/android/release-apk.sh`).
+- **2 support-bot test mocks**. Their **alias keys stayed** (`"simplex-chat"`, `"@simplex-chat/types"` in
+  `vitest.config.ts`): those are the npm names `package.json` installs, so they belong to the published
+  packages, not to us. Only the mock paths moved.
+- **22 artwork files** — `media-logos/**` and `images/**` together with their `branding/source-svg/`
+  mirrors, whose names are the output path with `/` written as `__`, so a half-move would break the
+  convention that generated them. All 24 files in this set are POPOPX bytes; only the names were upstream's.
+
+**Held, with reasons.** 20 paths in `packages/**` (the Node `simplex.{cc,h,js,d.ts}` and the Python module
+`src/simplex_chat/**`) — `packages_release.py test-names` rewrites the published names from `NPM_SCOPE`
+and `PYPI_PROJECT`, and an installed distribution name is not prose. 2 `branding/source-svg/moko__ic_*`
+masters are byte-identical duplicates of their renamed counterparts, so renaming them would collide; they
+await a delete ruling.
+
+This pass also repaired a **compile break on `master`**: the display-copy tier `82130779f` renamed Kotlin
+declarations and left 10 import lines naming the old symbols, which made CI's
+`:common:compileKotlinDesktop` fail (unresolved `SimpleXTheme` ×7, `SimpleXLinkQRCode` ×2, `SimpleXInfo`
+×1). It survived because Kotlin is not compiled on the machines used for this fork's static verification.
+`tools/r7/kt_import_gate.py` now replays kotlinc's import resolution over every brand-derived import —
+10 findings against `f5a7fd984`, 0 against this tree.
+
 ### Data locations — treat this as a new application
 
 An installation that ever used a SimpleX-named build does **not** see its chats in this one, and no

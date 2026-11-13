@@ -23,7 +23,7 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 
 **Enforcement:** The Haskell core library handles all encryption. The Kotlin layer never constructs raw SMP messages. All communication flows through `ChatController.sendCmd()` which delegates to the FFI, ensuring the encryption layer cannot be bypassed.
 
-**Location:** `common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt` -- `ChatController.sendCmd()`, `chatSendCmd()` FFI call
+**Location:** `common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt` -- `ChatController.sendCmd()`, `chatSendCmd()` FFI call
 
 ---
 
@@ -51,7 +51,7 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 
 **Location:**
 - `common/src/commonMain/kotlin/chat/popopx/common/AppLock.kt`
-- `SimpleXAPI.kt` -- `AppPreferences.performLA`, `AppPreferences.laMode`, `AppPreferences.laLockDelay`
+- `PopopxAPI.kt` -- `AppPreferences.performLA`, `AppPreferences.laMode`, `AppPreferences.laLockDelay`
 
 ---
 
@@ -59,11 +59,11 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 
 **Invariant:** When self-destruct is enabled (`AppPreferences.selfDestruct == true`), entering the self-destruct passphrase instead of the real passphrase MUST wipe the database and present a clean profile with `selfDestructDisplayName`.
 
-**Enforcement:** The self-destruct passphrase is stored separately (`encryptedSelfDestructPassphrase` / `initializationVectorSelfDestructPassphrase`). On Android, `SimplexService` checks for self-destruct on initialization. The comparison happens during the local authentication flow.
+**Enforcement:** The self-destruct passphrase is stored separately (`encryptedSelfDestructPassphrase` / `initializationVectorSelfDestructPassphrase`). On Android, `PopopxService` checks for self-destruct on initialization. The comparison happens during the local authentication flow.
 
 **Location:**
-- `SimpleXAPI.kt` -- `AppPreferences.selfDestruct`, `AppPreferences.selfDestructDisplayName`
-- `android/src/main/java/chat/popopx/app/SimplexService.kt` -- initialization check
+- `PopopxAPI.kt` -- `AppPreferences.selfDestruct`, `AppPreferences.selfDestructDisplayName`
+- `android/src/main/java/chat/popopx/app/PopopxService.kt` -- initialization check
 
 ---
 
@@ -73,7 +73,7 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 
 **Enforcement:** The preference defaults to `true`. The Android activity applies `FLAG_SECURE` to its window based on this preference. The Desktop app cannot enforce this at the OS level.
 
-**Location:** `SimpleXAPI.kt` -- `AppPreferences.privacyProtectScreen`
+**Location:** `PopopxAPI.kt` -- `AppPreferences.privacyProtectScreen`
 
 ---
 
@@ -106,8 +106,8 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 **Enforcement:** Global receipt toggle triggers `CC.SetAllContactReceipts(enable)`. Per-type settings use `CC.ApiSetUserContactReceipts` / `CC.ApiSetUserGroupReceipts` with `UserMsgReceiptSettings(enable, clearOverrides)`. The `privacyDeliveryReceiptsSet` preference gates the initial setup prompt shown during onboarding.
 
 **Location:**
-- `SimpleXAPI.kt` -- `CC.SetAllContactReceipts`, `CC.ApiSetUserContactReceipts`, `CC.ApiSetUserGroupReceipts`
-- `SimpleXAPI.kt` -- `ChatController.startChat()` -- triggers `setDeliveryReceipts` prompt
+- `PopopxAPI.kt` -- `CC.SetAllContactReceipts`, `CC.ApiSetUserContactReceipts`, `CC.ApiSetUserGroupReceipts`
+- `PopopxAPI.kt` -- `ChatController.startChat()` -- triggers `setDeliveryReceipts` prompt
 
 ---
 
@@ -117,7 +117,7 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 
 **Enforcement:** Global TTL set via `CC.APISetChatItemTTL(userId, seconds)`. Per-chat TTL set via `CC.APISetChatTTL(userId, chatType, id, seconds)`. The Haskell core performs periodic cleanup. The current global TTL is stored in `ChatModel.chatItemTTL`.
 
-**Location:** `SimpleXAPI.kt` -- `CC.APISetChatItemTTL`, `CC.APISetChatTTL`
+**Location:** `PopopxAPI.kt` -- `CC.APISetChatItemTTL`, `CC.APISetChatTTL`
 
 ---
 
@@ -143,7 +143,7 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 
 **Enforcement:** `CC.ApiRemoveMembers(groupId, memberIds: List<Long>, withMessages: Boolean)` sends all member IDs in a single command. The `withMessages` flag controls whether the removed members' messages are also deleted.
 
-**Location:** `SimpleXAPI.kt` -- `CC.ApiRemoveMembers`
+**Location:** `PopopxAPI.kt` -- `CC.ApiRemoveMembers`
 
 ---
 
@@ -153,7 +153,7 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 
 **Enforcement:** `CC.APICreateGroupLink(groupId, memberRole)` requires a role. `CC.APIGroupLinkMemberRole(groupId, memberRole)` updates it. The link itself remains stable.
 
-**Location:** `SimpleXAPI.kt` -- `CC.APICreateGroupLink`, `CC.APIGroupLinkMemberRole`
+**Location:** `PopopxAPI.kt` -- `CC.APICreateGroupLink`, `CC.APIGroupLinkMemberRole`
 
 ---
 
@@ -163,7 +163,7 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 
 **Enforcement:** `CC.ApiBlockMembersForAll(groupId, memberIds, blocked)` sends the block/unblock to the core, which propagates it to all group members.
 
-**Location:** `SimpleXAPI.kt` -- `CC.ApiBlockMembersForAll`; `ChatModel.kt` -- `GroupMember.blockedByAdmin`
+**Location:** `PopopxAPI.kt` -- `CC.ApiBlockMembersForAll`; `ChatModel.kt` -- `GroupMember.blockedByAdmin`
 
 ---
 
@@ -176,7 +176,7 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 **Enforcement:** The Haskell core handles XFTP encryption. Local file encryption is toggled via `CC.ApiSetEncryptLocalFiles(enable)`. The `CryptoFile` type carries optional `CryptoFileArgs` (key + nonce) for local decryption. Files are decrypted on-demand for display via `decryptCryptoFile()`.
 
 **Location:**
-- `SimpleXAPI.kt` -- `CC.ApiSetEncryptLocalFiles`, `AppPreferences.privacyEncryptLocalFiles`
+- `PopopxAPI.kt` -- `CC.ApiSetEncryptLocalFiles`, `AppPreferences.privacyEncryptLocalFiles`
 - `ChatModel.kt` -- `CryptoFile`, `CryptoFileArgs`
 - `RecAndPlay.desktop.kt` -- `decryptCryptoFile()` usage in audio playback
 
@@ -188,7 +188,7 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 
 **Enforcement:** `CC.ReceiveFile(fileId, userApprovedRelays, encrypt, inline)` passes the approval flag. The UI prompts the user when the file is from an unapproved relay.
 
-**Location:** `SimpleXAPI.kt` -- `CC.ReceiveFile`, `AppPreferences.privacyAskToApproveRelays`
+**Location:** `PopopxAPI.kt` -- `CC.ReceiveFile`, `AppPreferences.privacyAskToApproveRelays`
 
 ---
 
@@ -196,17 +196,17 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 
 ### RULE-16: Background Message Delivery (Android)
 
-**Invariant:** On Android, when `NotificationsMode.SERVICE` is selected (default), the app MUST maintain a foreground service (`SimplexService`) to ensure continuous message delivery. The service MUST survive app backgrounding and device sleep. When `NotificationsMode.PERIODIC` is selected, `MessagesFetcherWorker` MUST periodically wake and fetch messages. When `NotificationsMode.OFF`, no background delivery occurs.
+**Invariant:** On Android, when `NotificationsMode.SERVICE` is selected (default), the app MUST maintain a foreground service (`PopopxService`) to ensure continuous message delivery. The service MUST survive app backgrounding and device sleep. When `NotificationsMode.PERIODIC` is selected, `MessagesFetcherWorker` MUST periodically wake and fetch messages. When `NotificationsMode.OFF`, no background delivery occurs.
 
 **Enforcement:**
-- `SimplexService` runs as a foreground service with `START_STICKY` and a `WakeLock`. It displays a persistent notification on the `POPOPX_SERVICE_NOTIFICATION` channel.
+- `PopopxService` runs as a foreground service with `START_STICKY` and a `WakeLock`. It displays a persistent notification on the `POPOPX_SERVICE_NOTIFICATION` channel.
 - `MessagesFetcherWorker` is a `PeriodicWorkRequest` scheduled via `WorkManager`.
 - The mode is stored in `AppPreferences.notificationsMode` and checked at app startup.
 
 **Location:**
-- `android/src/main/java/chat/popopx/app/SimplexService.kt`
+- `android/src/main/java/chat/popopx/app/PopopxService.kt`
 - `android/src/main/java/chat/popopx/app/MessagesFetcherWorker.kt`
-- `SimpleXAPI.kt:7739` -- `enum class NotificationsMode`
+- `PopopxAPI.kt:7739` -- `enum class NotificationsMode`
 
 ---
 
@@ -222,7 +222,7 @@ This document specifies invariants enforced by the Android and Desktop (Kotlin/C
 **Location:**
 - `android/src/main/java/chat/popopx/app/model/NtfManager.android.kt` -- `displayNotification()`, `notifyCallInvitation()`
 - `android/src/main/java/chat/popopx/app/CallService.kt` -- `updateNotification()`
-- `SimpleXAPI.kt` -- `AppPreferences.notificationPreviewMode`
+- `PopopxAPI.kt` -- `AppPreferences.notificationPreviewMode`
 
 ---
 

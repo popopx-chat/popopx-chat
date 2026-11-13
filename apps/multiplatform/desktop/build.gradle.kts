@@ -65,12 +65,12 @@ compose {
           //, TargetFormat.AppImage // Gradle doesn't sync on Mac with it
         )
         linux {
-          iconFile.set(project.file("src/jvmMain/resources/distribute/simplex.png"))
+          iconFile.set(project.file("src/jvmMain/resources/distribute/popopx.png"))
           appCategory = "Messenger"
         }
         windows {
           packageName = "POPOPX"
-          iconFile.set(project.file("src/jvmMain/resources/distribute/simplex.ico"))
+          iconFile.set(project.file("src/jvmMain/resources/distribute/popopx.ico"))
           console = false
           perUserInstall = false
           dirChooser = true
@@ -79,7 +79,7 @@ compose {
         }
         macOS {
           packageName = "POPOPX"
-          iconFile.set(project.file("src/jvmMain/resources/distribute/simplex.icns"))
+          iconFile.set(project.file("src/jvmMain/resources/distribute/popopx.icns"))
           appCategory = "public.app-category.social-networking"
           bundleID = "com.popopxchat.popopx"
           infoPlist {

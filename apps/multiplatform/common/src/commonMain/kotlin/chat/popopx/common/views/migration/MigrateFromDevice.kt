@@ -28,7 +28,7 @@ import chat.popopx.common.ui.theme.*
 import chat.popopx.common.views.database.*
 import chat.popopx.common.views.helpers.*
 import chat.popopx.common.views.newchat.LinkTextView
-import chat.popopx.common.views.newchat.SimpleXLinkQRCode
+import chat.popopx.common.views.newchat.POPOPXLinkQRCode
 import chat.popopx.common.views.usersettings.*
 import chat.popopx.res.*
 import dev.icerock.moko.resources.compose.painterResource

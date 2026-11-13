@@ -10,7 +10,7 @@ The POPOPX Chat iOS app is a native SwiftUI frontend that communicates with a Ha
 
 ```
 SimpleXApp (root entry point)
-├── ChatModel (ObservableObject state) <-> SimpleXAPI (FFI bridge) <-> Haskell Core (chat_ctrl)
+├── ChatModel (ObservableObject state) <-> POPOPXAPI (FFI bridge) <-> Haskell Core (chat_ctrl)
 ├── Views (SwiftUI)
 │   ├── ChatListView -> ChatView -> ComposeView
 │   ├── ChatItemView (renders individual messages)

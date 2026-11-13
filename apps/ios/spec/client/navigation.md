@@ -280,7 +280,7 @@ First-launch experience controlled by [`ChatModel.onboardingStage`](../../Shared
 
 ```swift
 enum OnboardingStage: String, Identifiable {
-    case step1_SimpleXInfo              // Welcome screen
+    case step1_POPOPXInfo              // Welcome screen
     case step2_CreateProfile            // deprecated
     case step3_CreateSimpleXAddress     // deprecated
     case step3_ChooseServerOperators    // Choose server operators

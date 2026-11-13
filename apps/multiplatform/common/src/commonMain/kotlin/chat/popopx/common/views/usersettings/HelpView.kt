@@ -9,7 +9,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import chat.popopx.common.platform.ColumnWithScrollBar
 import chat.popopx.common.ui.theme.DEFAULT_PADDING
-import chat.popopx.common.ui.theme.SimpleXTheme
+import chat.popopx.common.ui.theme.POPOPXTheme
 import chat.popopx.common.views.chatlist.ChatHelpView
 import chat.popopx.common.views.helpers.AppBarTitle
 import chat.popopx.res.*

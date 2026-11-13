@@ -222,12 +222,12 @@ While connecting, the chat list shows a `PendingContactConnection` with status:
 
 | Type | Location | Purpose |
 |------|----------|---------|
-| `CreatedConnLink` | `model/SimpleXAPI.kt` | Connection link with full URI and short link |
+| `CreatedConnLink` | `model/PopopxAPI.kt` | Connection link with full URI and short link |
 | `PendingContactConnection` | `model/ChatModel.kt` | In-progress connection shown in chat list |
-| `ConnectionPlan` | `model/SimpleXAPI.kt` | Sealed class: InvitationLink, ContactAddress, GroupLink, Error |
-| `InvitationLinkPlan` | `model/SimpleXAPI.kt` | Ok, OwnLink, Connecting, Known |
-| `ContactAddressPlan` | `model/SimpleXAPI.kt` | Ok, OwnLink, ConnectingConfirmReconnect, ConnectingProhibit, Known |
-| `GroupLinkPlan` | `model/SimpleXAPI.kt` | Ok, OwnLink, ConnectingConfirmReconnect, ConnectingProhibit, Known |
+| `ConnectionPlan` | `model/PopopxAPI.kt` | Sealed class: InvitationLink, ContactAddress, GroupLink, Error |
+| `InvitationLinkPlan` | `model/PopopxAPI.kt` | Ok, OwnLink, Connecting, Known |
+| `ContactAddressPlan` | `model/PopopxAPI.kt` | Ok, OwnLink, ConnectingConfirmReconnect, ConnectingProhibit, Known |
+| `GroupLinkPlan` | `model/PopopxAPI.kt` | Ok, OwnLink, ConnectingConfirmReconnect, ConnectingProhibit, Known |
 | `ConnectProgressManager` | `model/ChatModel.kt` | Manages connect progress indicator with timeout |
 | `Contact` | `model/ChatModel.kt` | Established contact with profile, connection status |
 | `ContactRequest` | `model/ChatModel.kt` | Pending inbound contact request |

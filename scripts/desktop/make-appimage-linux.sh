@@ -38,7 +38,7 @@ mkdir -p usr/share/{icons,metainfo,applications}
 cp usr/lib/popopx.png usr/share/icons
 
 ln -s usr/bin/*popopx* AppRun
-cp $multiplatform_dir/desktop/src/jvmMain/resources/distribute/SimpleX.desktop com.popopxchat.popopx.desktop
+cp $multiplatform_dir/desktop/src/jvmMain/resources/distribute/popopx.desktop com.popopxchat.popopx.desktop
 sed -i 's|^Exec=[^ ]*|Exec=popopx|' com.popopxchat.popopx.desktop
 sed -i 's|Icon=.*|Icon=popopx|g' com.popopxchat.popopx.desktop
 cp com.popopxchat.popopx.desktop usr/share/applications/

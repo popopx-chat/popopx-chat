@@ -37,8 +37,8 @@ Then in `ContentView.onAppear`:
 
 Onboarding is managed by `OnboardingStage` enum and `OnboardingView`:
 
-**Step 1: SimpleX Info** (`step1_SimpleXInfo`)
-1. `SimpleXInfo` view is presented.
+**Step 1: SimpleX Info** (`step1_POPOPXInfo`)
+1. `POPOPXInfo` view is presented.
 2. Explains SimpleX's architecture: no user identifiers, E2E encryption, decentralized servers.
 3. User taps "Create your profile" to proceed.
 
@@ -178,7 +178,7 @@ If migration is interrupted:
 
 | Type | Location | Description |
 |------|----------|-------------|
-| `OnboardingStage` | `Shared/Views/Onboarding/OnboardingView.swift` | Enum: `step1_SimpleXInfo`, `step2_CreateProfile`, `step3_ChooseServerOperators`, `step4_SetNotificationsMode`, `onboardingComplete` |
+| `OnboardingStage` | `Shared/Views/Onboarding/OnboardingView.swift` | Enum: `step1_POPOPXInfo`, `step2_CreateProfile`, `step3_ChooseServerOperators`, `step4_SetNotificationsMode`, `onboardingComplete` |
 | `Profile` | `POPOPXChat/ChatTypes.swift` | `displayName`, `fullName`, `image`, `shortDescr` |
 | `User` | `POPOPXChat/ChatTypes.swift` | Full user model with profile, userId, and settings |
 | `ArchiveConfig` | `POPOPXChat/APITypes.swift` | Configuration for database export/import |

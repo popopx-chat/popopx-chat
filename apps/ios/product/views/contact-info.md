@@ -85,7 +85,7 @@ Shown when `contact.contactLink` exists:
 
 | Element | Description |
 |---|---|
-| QR code | `SimpleXLinkQRCode` displaying the contact's address |
+| QR code | `POPOPXLinkQRCode` displaying the contact's address |
 | Share address | Share button for the contact's SimpleX address link |
 
 Footer: "You can share this address with your contacts to let them connect with **[name]**."

@@ -33,7 +33,7 @@ Displayed when `selection == INVITE`:
 
 | Element | Description |
 |---|---|
-| QR code display | Generated QR code for the invitation link (`SimpleXLinkQRCode`) |
+| QR code display | Generated QR code for the invitation link (`POPOPXLinkQRCode`) |
 | Short/full link toggle | Switch between short and full link display |
 | Share button | System share for the invitation link |
 | Copy button | Copy link to clipboard |
@@ -79,7 +79,7 @@ Group creation flow:
 
 | Component | Description |
 |---|---|
-| `SimpleXLinkQRCode` | Renders a QR code for a SimpleX connection link |
+| `POPOPXLinkQRCode` | Renders a QR code for a SimpleX connection link |
 | QR scanner | Platform camera scanner for reading QR codes |
 | Short link display | Compact link text with copy/share actions |
 

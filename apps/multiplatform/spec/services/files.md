@@ -159,22 +159,22 @@ All functions delegate to native C library functions through the chat core JNI b
 
 ## 5. API Commands
 
-Defined in [`SimpleXAPI.kt`](../../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt):
+Defined in [`PopopxAPI.kt`](../../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt):
 
 | Function | Line | Signature | Description |
 |---|---|---|---|
-| `receiveFiles` | [L1946](../../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L1946) | `(rhId, user, fileIds, userApprovedRelays, auto)` | Receive multiple files. Sends `CC.ReceiveFile` for each ID. Handles relay approval workflow: collects unapproved files, shows alert, re-calls with `userApprovedRelays=true`. Respects `privacyEncryptLocalFiles` preference. |
-| `receiveFile` | [L2062](../../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L2062) | `(rhId, user, fileId, userApprovedRelays, auto)` | Delegates to `receiveFiles` with a single-element list. |
-| `cancelFile` | [L2072](../../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L2072) | `(rh, user, fileId)` | Cancels an in-progress file transfer (send or receive). Cleans up the local file. |
-| `apiCancelFile` | [L2080](../../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L2080) | `(rh, fileId, ctrl?)` | Low-level cancel. Returns `AChatItem?` on success (`SndFileCancelled` or `RcvFileCancelled`). |
-| `uploadStandaloneFile` | [L1916](../../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L1916) | `(user, file, ctrl?)` | Upload a standalone file (for database migration). Returns `FileTransferMeta?` with XFTP link. |
-| `downloadStandaloneFile` | [L1926](../../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L1926) | `(user, url, file, ctrl?)` | Download a standalone file from an XFTP URL. Returns `RcvFileTransfer?`. |
+| `receiveFiles` | [L1946](../../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L1946) | `(rhId, user, fileIds, userApprovedRelays, auto)` | Receive multiple files. Sends `CC.ReceiveFile` for each ID. Handles relay approval workflow: collects unapproved files, shows alert, re-calls with `userApprovedRelays=true`. Respects `privacyEncryptLocalFiles` preference. |
+| `receiveFile` | [L2062](../../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L2062) | `(rhId, user, fileId, userApprovedRelays, auto)` | Delegates to `receiveFiles` with a single-element list. |
+| `cancelFile` | [L2072](../../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L2072) | `(rh, user, fileId)` | Cancels an in-progress file transfer (send or receive). Cleans up the local file. |
+| `apiCancelFile` | [L2080](../../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L2080) | `(rh, fileId, ctrl?)` | Low-level cancel. Returns `AChatItem?` on success (`SndFileCancelled` or `RcvFileCancelled`). |
+| `uploadStandaloneFile` | [L1916](../../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L1916) | `(user, file, ctrl?)` | Upload a standalone file (for database migration). Returns `FileTransferMeta?` with XFTP link. |
+| `downloadStandaloneFile` | [L1926](../../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L1926) | `(user, url, file, ctrl?)` | Download a standalone file from an XFTP URL. Returns `RcvFileTransfer?`. |
 
 ---
 
 ## 6. Auto-Receive Logic
 
-Located in [`SimpleXAPI.kt`](../../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt#L2696) within the `CR.NewChatItems` handler:
+Located in [`PopopxAPI.kt`](../../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt#L2696) within the `CR.NewChatItems` handler:
 
 ```kotlin
 if (file != null &&
@@ -210,4 +210,4 @@ When `auto = true`, relay approval alerts are suppressed (the file is silently r
 | `Files.android.kt` | [`common/src/androidMain/.../platform/Files.android.kt`](../../common/src/androidMain/kotlin/chat/popopx/common/platform/Files.android.kt) | 79 | Android file path implementations |
 | `Files.desktop.kt` | [`common/src/desktopMain/.../platform/Files.desktop.kt`](../../common/src/desktopMain/kotlin/chat/popopx/common/platform/Files.desktop.kt) | 116 | Desktop file path implementations |
 | `Utils.kt` | [`common/src/commonMain/.../views/helpers/Utils.kt`](../../common/src/commonMain/kotlin/chat/popopx/common/views/helpers/Utils.kt) | -- | File size constants (L117--L128), `getMaxFileSize()` (L442) |
-| `SimpleXAPI.kt` | [`common/src/commonMain/.../model/SimpleXAPI.kt`](../../common/src/commonMain/kotlin/chat/popopx/common/model/SimpleXAPI.kt) | -- | File transfer API commands (L1911--L2085), auto-receive (L2690) |
+| `PopopxAPI.kt` | [`common/src/commonMain/.../model/PopopxAPI.kt`](../../common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt) | -- | File transfer API commands (L1911--L2085), auto-receive (L2690) |

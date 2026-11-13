@@ -168,6 +168,16 @@ summary:
 Every modification carries the date of the commit that made it; `git log` is the
 authoritative per-file record.
 
+11. **File and artefact names were the last identifier tier** (2026-11-13) — 45 of the 67 tracked paths
+    still named "simplex" moved with their readers (13 Kotlin files, 2 desktop snapshot baselines, 4
+    desktop launcher artifacts, 2 build-reproduction scripts + 2 CI readers, 2 support-bot test mocks,
+    22 artwork files with their `branding/source-svg/` mirrors); 22 are held, 20 of them installed
+    package paths (`packages_release.py test-names` owns those names) and 2 byte-identical duplicate
+    masters awaiting a delete ruling. That pass also repaired a compile break this fork shipped with:
+    the display-copy tier `82130779f` renamed Kotlin declarations and left their 10 imports behind, so
+    `:common:compileKotlinDesktop` failed in CI and no desktop artifact could be produced. Nothing on
+    this machine compiles Kotlin, which is why it took a CI run to find it; `kt_import_gate.py` in the
+    tooling directory is the standing gate for that class.
 ## What was deliberately NOT changed
 
 - **Copyright and attribution.** The `author` / `maintainer` / `copyright` fields of
