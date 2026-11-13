@@ -18,8 +18,15 @@ this fork operates no servers and this statement describes an application, not a
 The protocol itself carries no profile: there is no account, no phone number, no email and no
 contact graph on any server. Message routing metadata is separated per connection, so no server
 that the app talks to learns both who you talk to and what you say. For the protocol-level detail
-the upstream design document describes, see [`docs/SIMPLEX.md`](./docs/SIMPLEX.md) and
-[`docs/SECURITY.md`](./docs/SECURITY.md) — both are upstream's text, kept unmodified here.
+the upstream design document describes, see [`docs/SIMPLEX.md`](https://popopx.chat/docs/SIMPLEX.md)
+and [`docs/SECURITY.md`](https://popopx.chat/docs/SECURITY.md) — both are upstream's text, published
+here byte-for-byte as the files at `simplex-chat@db0768c21`, and disclaimed as upstream's at
+[`docs/UPSTREAM-DISCLAIMER.md`](https://popopx.chat/docs/UPSTREAM-DISCLAIMER.md). **Neither is POPOPX's
+policy**: `SECURITY.md` is SimpleX Chat Ltd's, so the report address it gives (`chat@simplex.chat`) and
+the OpenPGP fingerprint it names are theirs. POPOPX publishes no security policy of its own — report a
+POPOPX issue to **chat@popopx.chat**. These paths live in the fork's site directory and are citable only
+once `popopx.chat` is served (see above); until then the verifiable source of the same text is the pinned
+upstream blob, `https://github.com/simplex-chat/simplex-chat/blob/db0768c21/docs/SIMPLEX.md`.
 
 Two things a privacy statement normally has to disclose are worth stating explicitly for a fork:
 

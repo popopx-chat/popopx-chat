@@ -151,6 +151,20 @@ summary:
     they were never served from here, and the work now belongs to the site's own repository (see "Link
     claims are inert").
 
+    **One upstream document came back, deliberately** (2026-11-13): `docs/SIMPLEX.md` and
+    `docs/SECURITY.md` are published in the fork's site directory as
+    `popopx.chat/docs/{SIMPLEX,SECURITY}.md`, byte-for-byte from `db0768c21` (`cmp`-verified; blobs
+    `e24275d6` and `73c050c1`), so that `PRIVACY-POPOPX.md` can point at the protocol design and at the
+    audit history instead of at a path this repository deleted. Serving them unchanged is the point — an
+    edited copy would be our claim about someone else's security process — which is why they sit next to
+    `docs/UPSTREAM-DISCLAIMER.md`, which says in three lines what they are not: not POPOPX's policy, not
+    our report address (`SECURITY.md` routes issues to `chat@simplex.chat` and names SimpleX Chat Ltd's
+    OpenPGP key fingerprint), and not self-contained (its `/docs/lang/…` and `../blog/…` links resolve on
+    simplex.chat, not here). POPOPX's own contact — `chat@popopx.chat`, and "no security policy published"
+    — is stated beside them in `PRIVACY-POPOPX.md`, not inside them. This does not change item 10: the
+    remaining ~1650 files stay removed, and nothing in this repository deploys the site directory, so the
+    two paths are inert until `popopx.chat` serves them like the `.well-known` files above.
+
 Every modification carries the date of the commit that made it; `git log` is the
 authoritative per-file record.
 

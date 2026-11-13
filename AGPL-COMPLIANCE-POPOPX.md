@@ -6,6 +6,13 @@ paths whose name contains "simplex") has to be dealt with as AGPL-3.0 actually r
 that reading, clause by clause, with the evidence in this checkout. It is a working compliance record,
 not legal advice.
 
+> **Re-measured 2026-11-13**, because those four figures are claims about this tree and the tree moved
+> since (`docs/ website/ blog/ plans/` left in `9996634ee`, the libs asset family moved in `3591a7eba`):
+> `simplexChatCore` **32 occurrences / 15 files**, `simplex-chat-nodejs` **23** (of which 4 are the
+> `simplex-chat-nodejs-<platform>` asset name), `simplex-chat-libs` **6** (2 asset names), tracked paths
+> whose *name* contains "simplex" **67**. Reproduce with `git grep -Io -- '<term>' | wc -l` and
+> `git ls-files | grep -ic simplex`. §2 now reads the new numbers.
+
 ## 1. What AGPL-3.0 requires of this fork, and where it is satisfied
 
 | clause | obligation | state |
@@ -14,7 +21,7 @@ not legal advice.
 | §5a | keep the source-form notices intact | **satisfied** — this codebase carries no per-file copyright headers, so there is nothing per-file to preserve |
 | §5c | prominent notice of modification, with dates | **satisfied** — `FORK.md` states the fork is non-official and modified, names upstream, records the import commit `db0768c21` and its date (2026-11-11), and points at this repository as the complete corresponding source |
 | §6 | offer the Complete Corresponding Source to network users | **satisfied by construction** — the whole fork is the CCS, published at `github.com/popopx-chat/popopx-chat`, build scripts included (`cabal.project`, `flake.nix`, `apps/ios`, `apps/multiplatform`). If this fork ever *runs* a service on top of the code (badge service, directory service, an operator), §13's remote-network clause applies to that service's modified code too |
-| §7 | additional terms: the §7(b)/(c) attribution notices may not be removed | **satisfied** — see §4 above; upstream's trademark policy is cited at its source (`docs/` left this fork on 2026-11-13), and the three `ASSETS_LICENSE.md` notices are kept |
+| §7 | additional terms: the §7(b)/(c) attribution notices may not be removed | **satisfied** — see §4 above; upstream's trademark policy is cited at the pinned blob `simplex-chat@db0768c21:docs/TRADEMARK.md` — the citation convention recorded in `FORK.md`, adopted because `docs/` left this fork on 2026-11-13 — and the three `ASSETS_LICENSE.md` notices are kept |
 | §10 | you may accept the licence on behalf of downstream recipients | no action |
 | §13 | AGPL's copyleft over a network service | applies to any service this fork operates; nothing is operated yet (`FORK.md`, "No service is operated") |
 
@@ -22,12 +29,15 @@ not legal advice.
 
 The three groups listed in the ruling are **names**, and AGPL-3.0 imposes nothing about them:
 
-- **`simplexChatCore`** (37 occ / 18 files) is a Haskell identifier (`src/Popopx/Chat/Core.hs`) that
-  also appears as a field name in `packages/popopx-chat-client/types/typescript/package.json`, read
+- **`simplexChatCore`** (37 occ / 18 files at ruling 6, **32 occ / 15 files** measured 2026-11-13) is a
+  Haskell identifier (`src/Popopx/Chat/Core.hs`) that also appears as a field name in
+  `packages/popopx-chat-client/types/typescript/package.json`, read
   back by `scripts/ci/packages_release.py:726`. It is one value on two sides of a build boundary.
   Renaming it is a branding change that must move the producer, the field and the reader in one commit
   — the rule that `ding_wire_audit.py` enforces. AGPL neither requires nor forbids it.
-- **`simplex-chat-libs`** moved to `popopx-chat-libs` on 2026-11-13 (FORK.md item 6). The reasoning here
+- **`simplex-chat-libs`** (100 occurrences at ruling 6, **6** measured 2026-11-13 — 2 of them the
+  `-<platform>` asset filename inside a quoted download log) moved to `popopx-chat-libs` on 2026-11-13
+  (FORK.md item 6). The reasoning here
   used to be that the name belongs to whoever hosts the releases, so renaming our side changes nothing on
   the wire — that became false when the repository was forked: `build.yml` already resolved
   `LIBS_REPOSITORY: ${{ github.repository }}-libs` to it, and the download source is therefore ours to
@@ -38,10 +48,29 @@ The three groups listed in the ruling are **names**, and AGPL-3.0 imposes nothin
 - **`simplex-chat-nodejs-<platform>.node`** moved with it, being the other asset family of the same
   repository (`ADDON_ASSETS`, `packages_release.py:119`); a half-moved pair would have pinned one family
   from our releases and downloaded the other from upstream's.
-- **322 tracked paths containing "simplex"** are, measured, mostly `website/src/img/**` and
-  `website/src/js/**` (upstream's site), `plans/**` and `docs/**` prose, blog posts, and the
-  moko-resources source paths. Path names of documents that describe upstream are not a licence
-  problem; several of them are the licence texts themselves.
+- **Tracked paths whose *name* contains "simplex": 322 at ruling 6, 67 measured 2026-11-13.** The class
+  changed, so the old description no longer reads. 250 of those paths were document and site paths
+  (`website/src/{img,js}/**`, `plans/**`, `docs/**`, blog posts) and they left with those directories in
+  `9996634ee`; what is left is source and artefact names, not prose:
+  **20** in `packages/**` — the Node `cpp/simplex.{cc,h}` and `src/simplex.{js,d.ts}` plus the 16 files of
+  the Python module `src/simplex_chat/**`, whose declared distribution name is still `simplex-chat`
+  (`packages/popopx-chat-python/pyproject.toml:6`) — deliberate, not missed: `packages_release.py
+  test-names` rewrites the npm/PyPI names from `NPM_SCOPE`/`PYPI_PROJECT` at publish time, which is the
+  same two-ended-value rule in a different register —
+  **21** in `apps/**` — 13 Kotlin class-and-file names (`SimplexService`, `SimpleXAPI`, `SimpleXInfo`,
+  `SimplexApp`, `Support*SimpleX*`), the 4 desktop launcher artifacts (`distribute/SimpleX.desktop` and
+  `simplex.{png,ico,icns}`, wired at `apps/multiplatform/desktop/build.gradle.kts:68,73,82` and copied to
+  `com.popopxchat.popopx.desktop` by `scripts/desktop/make-appimage-linux.sh:41`), 2 desktop snapshot PNGs
+  and 2 support-bot jest mocks —
+  **24** artwork files (`branding/source-svg/**` 13, `media-logos/**` 8, `images/**` 3) and
+  **2** build-reproduction scripts.
+  Path names of documents that describe upstream were never a licence problem and none of these are one
+  either — but they are not the same *kind* of leftover: each is a compiled type, a build input, an
+  installed package path, a snapshot key or an artwork filename, so none of them may move as documentation.
+  Trademark ruling #43 owns them, under the wire-audit gate. Measured for provenance at the same time: all
+  24 artwork files are POPOPX bytes (11 differ from the same path in `db0768c21`, 13 have no upstream
+  counterpart), so these are our pictures under upstream's filenames — a naming problem, not §3's licence
+  problem.
 
 **Conclusion for ruling 6:** the AGPL-compliance action on this residue is *none*. It stays under
 branding rulings, where the wire-audit gate decides whether a rename is safe.
@@ -87,12 +116,22 @@ A rebranded fork is a modified work. Therefore:
      `extra-extra-extra-large`, filenames unchanged. 198 differ byte-for-byte from upstream's, the
      other 178 are identical because those scenes carry no brand content — an unchanged PNG is not a
      copied one, they were all written by this repo's run.
-   - the **210 desktop snapshot images** under `apps/multiplatform/common/src/desktopTest/snapshots`
-     — still upstream's, still blocking: regenerating them needs
-     `chat.popopx.app.SnapshotTest#everyPreviewIsRendered` under `gradle desktopTest`, which needs a
-     JDK and dependency downloads this machine has neither of;
-   - `website/src/img/**` (the wordmark images, screenshots, illustrations, `SimpleXExplainedLottie.json`)
-     and the 93 tracked files under `assets/**`, if this fork's website ships them.
+   - the **210 desktop snapshot images** under `apps/multiplatform/common/src/desktopTest/snapshots` —
+     still upstream's as this line was written. Regenerating them needs
+     `chat.popopx.app.SnapshotTest#everyPreviewIsRendered` under `gradle desktopTest`, which needs a JDK and
+     the dependency downloads this machine has neither of, so the rendering is done by CI:
+     `desktop-linux.yml` (a `workflow_dispatch` job, never push-triggered) runs it with
+     `-Ppopopx.assets.dir=../../assets` and uploads the `desktop-snapshots` artifact, which is then installed
+     into this directory — the method, recorded because it is the only way this item can ever close;
+   - ~~`website/src/img/**` (the wordmark images, screenshots, illustrations, `SimpleXExplainedLottie.json`)
+     and the 93 tracked files under `assets/**`, if this fork's website ships them~~ **closed 2026-11-13,
+     both halves**: `website/` left the fork in `9996634ee`, so its images are not shipped by anything here;
+     and `assets/**` is now 89 tracked files — 88 under `assets/multiplatform/resources/MR/images/**`
+     (replaced by POPOPX renders, ruling C2) plus the licence text. Measured against `db0768c21`, of the 103
+     tracked files under `assets/**` and root `images/**` exactly **4** still carry upstream's bytes:
+     `assets/ASSETS_LICENSE.md` (a notice, kept per §4) and the 3 third-party audit logos
+     `images/{kuketz-blog,trail-of-bits,whonix-logo}.jpg` — not SimpleX marks, and they are what
+     `README.md:26` links. The other 99 are ours (91 differ, 8 have no upstream counterpart).
    The action for each is **replace or remove before distribution**, not rename.
 
 **Ruling C2 (2026-11-13)** promotes the two *build-input* sets above everything else, because they are not

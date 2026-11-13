@@ -180,9 +180,33 @@ deleted (its four `@`-imports pointed at three deleted files, nothing referenced
 it). `scripts/docs/frame-guide-images.py` was deleted with the directory: it wrote into `docs/guide/images`,
 had no CI consumer, and its sibling `scripts/docs/frame-ios-renders.py` is not in this repository. 25 inert
 `website/**` patterns and their 7 orphaned comments left `.gitignore` (measured: 0 tracked paths matched them).
-What is **not** in this sweep and still awaits a ruling: `PRIVACY-POPOPX.md` (2 lines citing upstream's
-`docs/SIMPLEX.md` and `docs/SECURITY.md`) and `AGPL-COMPLIANCE-POPOPX.md` (6 lines, including a compliance
-measurement that reads "322 tracked paths containing simplex" where the tree now measures 67).
+The two items that sweep deliberately left for a ruling are ruled and executed. `PRIVACY-POPOPX.md` no
+longer cites deleted local paths: upstream's `docs/SIMPLEX.md` and `docs/SECURITY.md` are published
+**byte-for-byte** in the fork's site directory — `popopx.chat/docs/SIMPLEX.md` (9356 bytes, blob
+`e24275d6`) and `popopx.chat/docs/SECURITY.md` (6633, blob `73c050c1`), each `cmp`-verified against
+`db0768c21` — beside `docs/UPSTREAM-DISCLAIMER.md`, which states what they are: upstream's texts, not
+POPOPX's, carrying SimpleX Chat Ltd's report address `chat@simplex.chat` and its OpenPGP fingerprint, with
+internal links (`/docs/lang/…`, `../blog/…`) that resolve upstream and not here. `PRIVACY-POPOPX.md` cites
+those URLs and keeps the fact visible that **POPOPX publishes no security policy of its own** and that a
+POPOPX report goes to `chat@popopx.chat`. Nothing in this repository deploys that directory — it is not a
+checkout of anything here — so the two paths 404 until the fork's host serves them, the same pending item
+as the certificate SAN and the `.well-known` files (`FORK.md`); the citation is therefore also given
+against the pinned upstream blob, which is verifiable today.
+`AGPL-COMPLIANCE-POPOPX.md` was **re-measured, not relinked** — its four figures are claims about this tree:
+`simplexChatCore` 37 → **32 occurrences / 15 files**, `simplex-chat-nodejs` 17 → **23** (4 of them the
+`-<platform>` asset name), `simplex-chat-libs` 100 → **6** (2 asset names), "322 tracked paths whose name
+contains simplex" → **67**. The last one changed *class*, which is why the file now says so: 250 of the 322
+were `website/`, `plans/`, `docs/` and blog paths that the removal took, so what survives is 20 package
+paths (the Python module `src/simplex_chat/**`, whose declared name `simplex-chat` is rewritten at publish
+time by `packages_release.py test-names`), 21 under `apps/` (13 Kotlin type/file names, the 4 desktop
+launcher artifacts wired in `desktop/build.gradle.kts:68,73,82`, 2 snapshot baselines, 2 jest mocks), 24
+artwork files and 2 scripts — and those 24 were provenance-checked as well: **all** are POPOPX bytes (11
+differ from the same path in `db0768c21`, 13 have no upstream counterpart), i.e. our pictures under
+upstream filenames, which is trademark ruling #43 rather than an AGPL item. The §3 blocker naming
+`website/src/img/**` and "the 93 tracked files under `assets/**`" closed with measurements: `assets/**` is
+now 89 tracked files, and of the 103 tracked files under `assets/**` plus root `images/**` exactly **4**
+still carry upstream's bytes — `assets/ASSETS_LICENSE.md` (a notice, kept) and the 3 third-party audit
+logos that `README.md:26` links, none of them a SimpleX mark.
 
 ### Deliberately not changed
 
