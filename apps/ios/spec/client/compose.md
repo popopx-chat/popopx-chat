@@ -350,7 +350,7 @@ When `chat.chatInfo.groupInfo?.useRelays == true` (channel mode), compose behave
 - [`send()`](../../Shared/Views/Chat/ComposeMessage/ComposeView.swift#L1498) passes `sendAsGroup: true` to `apiSendMessages` when `useRelays && memberRole >= .owner`
 - [`forwardItems()`](../../Shared/Views/Chat/ComposeMessage/ComposeView.swift#L1526) passes `sendAsGroup: true` to `apiForwardChatItems` under same condition
 - Placeholder text shows "Broadcast" instead of "Message" (via `sendMessageView()` `placeholder:` parameter)
-- Share Extension ([`ShareAPI.swift`](../../SimpleX%20SE/ShareAPI.swift#L71)) uses the same `sendAsGroup` expression
+- Share Extension ([`ShareAPI.swift`](../../POPOPX%20SE/ShareAPI.swift#L71)) uses the same `sendAsGroup` expression
 
 ### Subscriber Compose
 - [`userCantSendReason`](../../POPOPXChat/ChatTypes.swift#L1566) returns `("you are subscriber", nil)` when `useRelays && memberRole == .observer`

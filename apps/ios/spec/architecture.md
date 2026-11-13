@@ -238,11 +238,11 @@ When a CallKit call is active during backgrounding, chat suspension is deferred 
 
 ---
 
-## [6. Extension Architecture](../SimpleX%20NSE/NotificationService.swift#L1-L1228)
+## [6. Extension Architecture](../POPOPX%20NSE/NotificationService.swift#L1-L1228)
 
-### [Notification Service Extension (NSE)](../SimpleX%20NSE/NotificationService.swift#L1-L1228)
+### [Notification Service Extension (NSE)](../POPOPX%20NSE/NotificationService.swift#L1-L1228)
 
-The NSE ([`POPOPX NSE/NotificationService.swift`](../SimpleX%20NSE/NotificationService.swift#L1-L1228)) is a separate process that:
+The NSE ([`POPOPX NSE/NotificationService.swift`](../POPOPX%20NSE/NotificationService.swift#L1-L1228)) is a separate process that:
 
 1. Receives encrypted push notification payload from APNs
 2. Initializes its own Haskell core instance (`chat_ctrl`) with shared database access
@@ -334,7 +334,7 @@ Chat relays are SMP servers that forward messages to channel subscribers. They a
 | API types | [`Shared/Model/AppAPITypes.swift`](../Shared/Model/AppAPITypes.swift#L15) | L15 |
 | Shared types | [`POPOPXChat/APITypes.swift`](../POPOPXChat/APITypes.swift#L27) | L27 |
 | C header | [`POPOPXChat/POPOPX.h`](../POPOPXChat/POPOPX.h#L1-L63) | |
-| NSE | [`POPOPX NSE/NotificationService.swift`](../SimpleX%20NSE/NotificationService.swift#L1-L1228) | |
+| NSE | [`POPOPX NSE/NotificationService.swift`](../POPOPX%20NSE/NotificationService.swift#L1-L1228) | |
 | Haskell core | `../../src/Simplex/Chat/Controller.hs` — see `processCommand` in `Controller.hs` | |
 | Chat protocol (x-events, message envelopes) | `../../src/Simplex/Chat/Protocol.hs` | |
 

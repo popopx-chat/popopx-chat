@@ -11,8 +11,8 @@ The iOS app is a SwiftUI application that interfaces with the Haskell core libra
 Open `SimpleX.xcodeproj` in Xcode. The project has five targets:
 - **SimpleX (iOS)** - Main app (Bundle ID: `com.popopxchat.popopx`)
 - **POPOPXChat** - Framework containing FFI bridge and shared types
-- **SimpleX NSE** - Notification Service Extension
-- **SimpleX SE** - Share Extension
+- **POPOPX NSE** - Notification Service Extension
+- **POPOPX SE** - Share Extension
 - **Tests iOS** - UI tests
 
 Build and run via Xcode (Product > Build/Run). Tests run via Product > Test or:

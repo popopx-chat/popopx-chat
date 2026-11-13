@@ -27,8 +27,8 @@ SimpleXApp (root entry point)
 │   ├── CallController (CallKit + VoIP push)
 │   └── ThemeManager (theme resolution engine)
 └── Extensions
-    ├── SimpleX NSE (Notification Service Extension -- decrypts push payloads)
-    └── SimpleX SE (Share Extension)
+    ├── POPOPX NSE (Notification Service Extension -- decrypts push payloads)
+    └── POPOPX SE (Share Extension)
 ```
 
 ## Specification Documents

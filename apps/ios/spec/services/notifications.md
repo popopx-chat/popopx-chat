@@ -184,7 +184,7 @@ The NSE uses a subset of the chat API:
 | [`receivedMsgNtf(_:)`](../../POPOPX NSE/NotificationService.swift#L1003) | Maps chat events to notification data | [1003](../../POPOPX NSE/NotificationService.swift#L1003) |
 | [`receiveNtfMessages(_:)`](../../POPOPX NSE/NotificationService.swift#L403) | Orchestrates notification message fetch and delivery | [403](../../POPOPX NSE/NotificationService.swift#L403) |
 | [`deliverBestAttemptNtf()`](../../POPOPX NSE/NotificationService.swift#L604) | Delivers the best available notification content | [604](../../POPOPX NSE/NotificationService.swift#L604) |
-| [`didReceive(_:withContentHandler:)`](../../SimpleX%20NSE/NotificationService.swift#L300) | Main NSE entry point -- processes incoming notification | [300](../../SimpleX%20NSE/NotificationService.swift#L300) |
+| [`didReceive(_:withContentHandler:)`](../../POPOPX%20NSE/NotificationService.swift#L300) | Main NSE entry point -- processes incoming notification | [300](../../POPOPX%20NSE/NotificationService.swift#L300) |
 
 ---
 
