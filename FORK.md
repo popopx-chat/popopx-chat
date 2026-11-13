@@ -327,10 +327,21 @@ yet. Before any build of this fork is distributed:
   and `bugs.url` / `[project.urls] Issues` in the package manifests. Moved the same day, in the pass that
   followed (`homepage` / `repository.directory` / `repository.url` of those same manifests, 21 lines in 11
   files - `test-names` leaves all three fields alone, and its alias pair reads only `name` and
-  `dependencies`, so moving them cannot desynchronise `unreleased_pins()`). Still upstream's on purpose:
-  the donation wallet and URL, the flatpak release-tag links, and any link whose target only exists in
-  upstream's history. `SUPPORT_EMAIL` is already `chat@popopx.chat`, which is itself not yet reachable
-  (first bullet).
+  `dependencies`, so moving them cannot desynchronise `unreleased_pins()`). The front page and the store
+  metadata then went through the same test: both AppStream `<url type="donation">` elements were
+  **deleted** (the element has no label slot, so a store renders upstream's channel as "donate to POPOPX"),
+  the donation section keeps upstream's own text and wallets under a heading that names them as theirs, and
+  the F-Droid, TestFlight, downloads, release, Reddit and Mastodon badges were removed - see
+  `CHANGELOG-POPOPX.md`, "The front page stops recruiting, funding or identifying for SimpleX Chat Ltd".
+  Still upstream's on purpose: the flatpak release-tag links, and any link whose target only exists in
+  upstream's history. **Awaiting that same ruling, measured late because this pass grepped badge strings
+  instead of the class** - a first-person label whose destinations are upstream's accounts:
+  `src/Popopx/Chat/Help.hs:55-57` "Follow our updates:" with their Reddit and Twitter (a compiled core
+  string, so the shipped iOS archives keep the old text until the next archive rebuild), `README.md:79-81`
+  "We publish our updates and releases via:" with five of their accounts, and
+  `fastlane/metadata/android/en-US/full_description.txt:24-25` - three of the same accounts plus a contact
+  link that joins **upstream's** user group out of the store listing of our app.
+  `SUPPORT_EMAIL` is already `chat@popopx.chat`, which is itself not yet reachable (first bullet).
 - **`popopx-chat-libs` has published no releases yet.** The asset names and the source they are fetched
   from are ours (item 6 above), so nothing in this repository can resolve a `core-<version>` release
   today: the fork carries the build inputs and `releases.toml`, and its Releases list is empty. The first

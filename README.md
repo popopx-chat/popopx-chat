@@ -2,21 +2,18 @@
 > [SimpleX Chat](https://github.com/simplex-chat/simplex-chat), licensed under AGPL-3.0. It is
 > not affiliated with, sponsored or endorsed by SimpleX Chat Ltd. See [FORK.md](./FORK.md) and
 > [NOTICE](./NOTICE) for what was changed, what upstream attribution is retained, and which
-> assets are **not** covered by the AGPL grant. The badges below still point at the upstream
-> project's build and release feeds.
+> assets are **not** covered by the AGPL grant. The build badge points at this repository's own CI;
+> the store buttons still draw their images from upstream's organization until this fork ships its own
+> artwork, and the donation section is SimpleX Chat Ltd's - this fork receives none of it.
 >
 > The same holds for our own brand: **POPOPX**, the POPOPX wordmark, logo, icons and artwork and
 > `popopx.chat` are outside the AGPL grant too — [TRADEMARK-POPOPX](./TRADEMARK-POPOPX.md) and
 > [ASSETS_LICENSE-POPOPX](./ASSETS_LICENSE-POPOPX.md). **A fork that distributes must rebrand and
 > redraw**: keep the code, change the name, ship your own icons and illustrations.
 
-[![build](https://github.com/simplex-chat/simplex-chat/actions/workflows/build.yml/badge.svg?branch=stable)](https://github.com/simplex-chat/simplex-chat/actions/workflows/build.yml)
-[![GitHub downloads](https://img.shields.io/github/downloads/simplex-chat/simplex-chat/total)](https://github.com/simplex-chat/simplex-chat/releases)
-[![GitHub release](https://img.shields.io/github/v/release/simplex-chat/simplex-chat)](https://github.com/simplex-chat/simplex-chat/releases)
-[![Join on Reddit](https://img.shields.io/reddit/subreddit-subscribers/SimpleXChat?style=social)](https://www.reddit.com/r/SimpleXChat)
-<a rel="me" href="https://mastodon.social/@simplex">![Follow on Mastodon](https://img.shields.io/mastodon/follow/108619463746856738?domain=https%3A%2F%2Fmastodon.social&style=social)</a>
+[![build](https://github.com/popopx-chat/popopx-chat/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/popopx-chat/popopx-chat/actions/workflows/build.yml)
 
-<img src="images/github-banner.jpg" alt="SimpleX logo" width="100%">
+<img src="images/github-banner.jpg" alt="POPOPX Chat" width="100%">
 
 This link is **upstream's** fundraising campaign. POPOPX Chat is not part of it and receives
 none of it: [Invest in SimpleX Chat on Wefunder](https://wefunder.com/simplex.chat?utm_source=github).
@@ -31,7 +28,7 @@ none of it: [Invest in SimpleX Chat on Wefunder](https://wefunder.com/simplex.ch
 2. ↔️ [Connect to the team](#connect-to-the-team), [join user groups](#join-user-groups) and [follow our updates](#follow-our-updates).
 3. 🤝 [Make a private connection](#make-a-private-connection) with a friend.
 4. 🔤 [Help translating POPOPX Chat](#help-translating-popopx-chat).
-5. ⚡️ [Contribute](#contribute) and [support us with donations](#please-support-us-with-your-donations).
+5. ⚡️ [Contribute](#contribute) and [donate to the upstream project](#donate-to-the-upstream-project).
 
 [Learn more about POPOPX Chat](#contents).
 
@@ -41,16 +38,11 @@ none of it: [Invest in SimpleX Chat on Wefunder](https://wefunder.com/simplex.ch
 &nbsp;
 [![Android app](https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/google_play.svg)](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)
 &nbsp;
-[<img src="https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/f_droid.svg" alt="F-Droid" height="41">](https://app.simplex.chat)
-&nbsp;
-[<img src="https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/testflight.png" alt="iOS TestFlight" height="41">](https://testflight.apple.com/join/DWuT2LQu)
-&nbsp;
 [<img src="https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/apk_icon.png" alt="APK" height="41">](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)
 
 - 🖲 Protects your messages and metadata - who you talk to and when.
 - 🔐 Double ratchet end-to-end encryption, with additional encryption layer.
 - 📱 Mobile apps for Android ([Google Play](https://play.google.com/store/apps/details?id=com.popopxchat.popopx), [APK](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)) and [iOS](https://apps.apple.com/us/app/popopx-chat/id6799146157).
-- 🚀 [TestFlight preview for iOS](https://testflight.apple.com/join/DWuT2LQu) with the new features 1-2 weeks earlier - **limited to 10,000 users**!
 - 🖥 Available as a terminal (console) [app / CLI](#zap-quick-installation-of-a-terminal-app) on Linux, MacOS, Windows.
 
 ## Connect to the team
@@ -139,7 +131,10 @@ Join our translators to help SimpleX grow!
 
 Languages in progress: Arabic, Japanese, Korean, Portuguese and [others](https://hosted.weblate.org/projects/simplex-chat/#languages). We will be adding more languages as some of the already added are completed – please suggest new languages and get in touch with us!
 
-## Please support us with your donations
+## Donate to the upstream project
+
+**POPOPX Chat is an unofficial fork and receives none of this.** The text and every channel below are
+SimpleX Chat Ltd's own - the "we" and "us" in them are upstream, not this fork.
 
 Huge thank you to everybody who donated to SimpleX Chat!
 
@@ -423,9 +418,5 @@ If you want to use any graphic assets in your publications, please ask for permi
 [<img src="https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/apple_store.svg" alt="iOS app" height="42">](https://apps.apple.com/us/app/popopx-chat/id6799146157)
 &nbsp;
 [![Android app](https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/google_play.svg)](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)
-&nbsp;
-[<img src="https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/f_droid.svg" alt="F-Droid" height="41">](https://app.simplex.chat)
-&nbsp;
-[<img src="https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/testflight.png" alt="iOS TestFlight" height="41">](https://testflight.apple.com/join/DWuT2LQu)
 &nbsp;
 [<img src="https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/apk_icon.png" alt="APK" height="41">](https://play.google.com/store/apps/details?id=com.popopxchat.popopx)

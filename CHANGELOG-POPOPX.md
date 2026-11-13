@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-13 (120 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-13 (121 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -527,9 +527,11 @@ Per-value decisions, each measured rather than patterned:
 
 Verified: 5 `package.json` re-parsed with `json.load`, 2 XML documents through `ET.parse`, the TOML by
 diff (`tomllib` absent here); the 8 distinct new URLs each measured **HTTP 200** through the proxy;
-after-counts leave exactly the planned residue - the appdata donation line (1), the `blob/stable/docs/CLI.md`
+after-counts leave exactly the planned residue - the appdata donation line (1 - deleted by the pass below),
+the `blob/stable/docs/CLI.md`
 link in `packages/popopx-chat-client/typescript/README.md` (1), the quoted download log in `mcp/PLAN.md` (2),
-the upstream release tags in `metainfo.xml` (2) and the root `README.md` (8, with #62). Gates unchanged:
+the upstream release tags in `metainfo.xml` (2) and the root `README.md` (8, with #62 - that 8 is now 4,
+because the following pass rewrote the build badge and deleted the two release-feed links). Gates unchanged:
 sweep 0, pairs 0/0/0/0 over 127 scanned, audit FORWARD 0 / REVERSE 0 / BARE 16, dead-link gate 1.
 Nothing renders these fields, so no snapshot, build or archive is affected - static verification only.
 
@@ -540,7 +542,75 @@ to translate: the desktop `appdata.xml` points at our README anchor, which resol
 moved to our host by the display-host tier, so the 404 is our own missing page rather than upstream
 residue - the same class as #61's `popopx.chat/blog/…` links, and it closes when the site has a docs tree,
 not with another text move. The metainfo `donation` (`opencollective.com/simplex-chat`) and the appdata
-`donation` are likewise untouched, still awaiting the donation ruling.
+`donation` were untouched at that moment, still awaiting the donation ruling - it came the same day, and
+both `<url type="donation">` elements were deleted: see the next section.
+
+### The front page stops recruiting, funding or identifying for SimpleX Chat Ltd (2026-11-13)
+
+`README.md` 10 inserted / 19 deleted, plus one `<url type="donation">` line out of each AppStream file.
+One label test did all the work: **a first-person label whose destination is upstream's account, feed or
+wallet is a claim this fork cannot make.**
+
+- **Deleted, because there is nothing to substitute.** The F-Droid button (`app.simplex.chat` = upstream's
+  APK repo, under their id, and this fork publishes no APK) and the TestFlight badge + its bullet
+  (`testflight.apple.com/join/DWuT2LQu` = upstream's beta group, capped at 10,000) - 2 badges ×2 blocks +
+  1 bullet, each removed together with the `&nbsp;` separator that followed it, or the row would have
+  rendered as two paragraphs. The downloads and release badges went for the same reason: measured, our own
+  equivalents answer **"no releases"** and **"no releases found"** until #56 publishes something.
+- **`rel="me"` is not a link.** `README.md:17` asserted to Mastodon's verified-links machinery that this
+  page *is* the web identity of `@simplex` - the same protocol-level claim as a `.well-known` file, on our
+  host, about another company's account. The element went whole, because "Follow on Mastodon" under our
+  badges would still read as ours.
+- **The build badge moved rather than went**: `…/popopx-chat/popopx-chat/actions/workflows/build.yml/badge.svg?branch=master`
+  measured 200 and describes *this* repository's CI. `branch=master` because our remote has one branch.
+- **N1a: the AppStream donation URL was deleted, not relabelled.** `<url type="donation">` has **no label
+  slot** - every store renders it as "support this application", and the application described is POPOPX.
+  `appdata.xml:55` (upstream's README anchor) and `metainfo.xml:951` (`opencollective.com/simplex-chat`)
+  therefore cannot be made true by wording. Verified 0 readers of the element in this repository.
+- **N2a: the donation section was relabelled and its text left verbatim.** Heading
+  `## Please support us with your donations` → `## Donate to the upstream project`, with a framing line
+  naming SimpleX Chat Ltd as the author ("the \"we\" and \"us\" in them are upstream"). The five
+  paragraphs, all nine wallets and `donate.simplexchat.eth` are unchanged - it is upstream's own copy,
+  signed by upstream's founder, and rewriting their prose would fight the next upstream re-sync for no
+  attribution gain. This follows the Wefunder block at `:18-19`, which already did exactly this.
+  The anchor moved with the heading; its referrers were measured as **2** (`README.md:34` and the
+  `appdata.xml` donation line, which N1a deletes), and `## Contents` does not list the section, so nothing
+  else needed the new slug.
+
+Verified: the new anchor re-derived from the new heading by the same algorithm as the A2 heading pass
+(`donate-to-the-upstream-project`), and every in-page `](#…)` in README now matches a real heading; both
+XML documents still parse (appdata url types `bugtracker/contact/homepage/translate`, metainfo
+`vcs-browser/translate/faq/details/home/bugtracker`); the badge row and the bullet list came out with the
+right separator counts, which is why each deletion carried its trailing newline; zero-checks on
+`app.simplex.chat` (outside its two parser fixtures), `testflight.apple.com`, `rel="me"`,
+`type="donation"`, `#please-support-us-with-your-donations`, `alt="SimpleX logo"`,
+`simplex-chat/simplex-chat/actions/workflows/build.yml` and the subreddit badge = **0 each**.
+Gates unchanged: sweep 0, pairs 0/0/0/0, audit FORWARD 0 / REVERSE 0 / BARE 16, dead-link 1.
+
+**The gap that this pass exposed, and what it now owes a ruling.** The hero alt (`alt="SimpleX logo"`)
+was fixed because the file behind it was redrawn by `9c8df8f09` - the alt had simply never followed the
+artwork. But my 必改 list was built by grepping the *badge strings* rather than the *class*, and the class
+grep (`reddit.com/r/SimpleXChat`, `twitter.com/SimpleXChat`, `mastodon.social/@simplex`) found two holders
+this pass did **not** touch, because they were not in the ruled set:
+
+- `src/Popopx/Chat/Help.hs:55-57` - the CLI's first-run welcome: **"Follow our updates:"** then
+  `reddit.com/r/SimpleXChat/` and `twitter.com/SimpleXChat`. Same file, adjacent lines already say
+  "Thank you for installing POPOPX Chat", so the first person is ours and the destinations are theirs. It
+  is a compiled core string: whatever is decided, the shipped iOS archives keep the old text until the
+  next archive rebuild, so this one carries the rebuild cost the 丁/核心 tiers documented.
+- `README.md:79-81` "**We publish our updates and releases via:**" with five upstream accounts (Reddit,
+  Twitter, Lemmy `c/simplex`, Mastodon `@simplex`, Nostr), and
+  `fastlane/metadata/android/en-US/full_description.txt:24-25` - "Follow us on" the same three accounts,
+  plus a `simplex.chat/contact#…` group link that joins **upstream's user group** from the listing of our
+  app. Measured holders: Reddit 3 lines / 3 occurrences, Twitter 3 / 3, Mastodon 2 / 2, Lemmy 1 / 1,
+  Nostr 1 / 1.
+
+Both are the identical misattribution as the badges, so leaving them is an inconsistency this file should
+not hide. `fastlane/…/images/` (icon + 8 screenshots) was checked rather than assumed: `9c8df8f09` already
+redrew them, so the F-Droid artwork is ours and only its text is at issue. Root `README.md`'s upstream-repo
+links went 8 → 4 as a side effect (the two rewritten build URLs and the two deleted release links); the 4
+left are the AGPL attribution at `:2`, the two `docs/lang/{cs,fr}` links that belong to the weblate class
+(H), and upstream's `TRADEMARK.md`, which governs *their* mark and is correct.
 
 ### What was removed from this repository
 
