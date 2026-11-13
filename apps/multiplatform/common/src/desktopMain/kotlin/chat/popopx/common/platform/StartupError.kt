@@ -25,9 +25,10 @@ fun showStartupError(e: Throwable) {
   exitProcess(0)
 }
 
-// HELD 2026-11-13: upstream's issue tracker, used until our own is set up (#16-d).
-// A user reporting a POPOPX bug lands on simplex-chat/simplex-chat issues - known misattribution.
-private const val ISSUES_URL = "https://github.com/simplex-chat/simplex-chat/issues"
+// Our own tracker, moved 2026-11-13: this repo is fork:false with issues enabled, so a crash of
+// this build reports to us. The value is read twice - the Linux dialog opens it, the Win32 dialog
+// draws it as the link text - so on Windows the address is shown, not only clicked.
+private const val ISSUES_URL = "https://github.com/popopx-chat/popopx-chat/issues"
 private const val SUPPORT_EMAIL = "chat@popopx.chat"
 
 // Win32 constants not defined in jna-platform

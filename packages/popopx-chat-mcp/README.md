@@ -61,7 +61,7 @@ Approve the connection in "My Agent", and accept the request in the app if it as
 
 ## Only Claude Code, for now
 
-The agent is tested with Claude Code. Tell us which other apps and models you want to use in [an issue](https://github.com/simplex-chat/simplex-chat/issues), or contribute.
+The agent is tested with Claude Code. Tell us which other apps and models you want to use in [an issue](https://github.com/popopx-chat/popopx-chat/issues), or contribute.
 
 ## Reference
 

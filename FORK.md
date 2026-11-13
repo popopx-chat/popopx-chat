@@ -319,11 +319,15 @@ yet. Before any build of this fork is distributed:
   names (`popopx-arm64-v8a.apk`, `popopx-armv7a.apk`) are therefore only local artifacts. Ruled
   2026-11-13: the documentation links point at the stores (item 5 above) — but note that our Play
   listing is itself not published yet, so those links 404 *for us* until it is.
-- **The bug-report address is still upstream's.** `StartupError.kt:28` `ISSUES_URL` →
-  `github.com/simplex-chat/simplex-chat/issues`: a Windows startup crash tells the user to report it in
-  upstream's tracker. Ruled 2026-11-13 to stay until our own tracker is set up; the reason is recorded
-  as a comment above the constant. `SUPPORT_EMAIL` on the next line is already `chat@popopx.chat`, which
-  is itself not yet reachable (first bullet).
+- **The bug-report address is ours.** Every holder of `github.com/simplex-chat/simplex-chat/issues`
+  moved to our repository on 2026-11-13, once our own tracker existed (`fork:false`, issues enabled) -
+  the earlier hold was written as "until our own is set up". Holders: the desktop startup dialog
+  (`ISSUES_URL`, which Linux opens and Windows draws as the link text), the `bugtracker` URL in the
+  AppImage AppStream and in the flatpak metainfo, the F-Droid fastlane description, the mcp README,
+  and `bugs.url` / `[project.urls] Issues` in the package manifests. Left as upstream's, awaiting
+  ruling: the `homepage` and `repository.directory` of those same manifests, which still name paths in
+  upstream's tree and are NOT rewritten by `packages_release.py test-names`. `SUPPORT_EMAIL` is already
+  `chat@popopx.chat`, which is itself not yet reachable (first bullet).
 - **`popopx-chat-libs` has published no releases yet.** The asset names and the source they are fetched
   from are ours (item 6 above), so nothing in this repository can resolve a `core-<version>` release
   today: the fork carries the build inputs and `releases.toml`, and its Releases list is empty. The first

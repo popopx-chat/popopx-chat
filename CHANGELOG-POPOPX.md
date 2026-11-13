@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-13 (115 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-13 (116 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -419,6 +419,40 @@ files whose key is the retired "Invest in POPOPX Chat!"
 (plus 118 rows in the exported `.xcloc` bundles, which are not build inputs - `project.pbxproj` never mentions them);
 they translate a string no longer in the app, and our new English copy has no key there at all, so a non-English
 user sees the restored banner in English until localizations are exported again.
+
+### The bug-report and repository CTAs now point at this repository (2026-11-13)
+
+The test is the one the crowdfunding pass used: a **label that is ours with a destination that is
+upstream's** is ours to move, and a value that only *resolves* in upstream's history stays. 14 lines in
+12 files moved:
+
+- `StartupError.kt` `ISSUES_URL` - the desktop crash dialog. Its own HELD comment read "until our own is
+  set up", so the premise was re-measured before the comment went: `gh api repos/popopx-chat/popopx-chat`
+  is `fork:false` with `has_issues:true`. One constant, two readers - the Linux dialog opens it, the Win32
+  dialog **draws it as the link text** - so on Windows the address is shown, not only clicked.
+- `SettingsView.kt` x3: Contribute (the deep link `#contribute` needs our README to carry that heading -
+  it does, `## Contribute` at :103), Star on GitHub, Install the terminal app.
+- the `bugtracker` URL in the AppImage AppStream and in the flatpak metainfo, the F-Droid fastlane
+  description, and `packages/popopx-chat-mcp/README.md`.
+- `bugs.url` in four package manifests plus `[project.urls] Issues` in the Python one.
+  `packages_release.py test-names` was read before deciding the layer: it rewrites only `name` and
+  `repository.url` (`:891-926`), so `bugs` ships **as committed** and belongs in the source, not in the
+  release step. All three new URLs measured HTTP 200.
+
+Measured and left, with the reason written into `FORK.md`: the `homepage` and `repository.directory` of
+those same manifests, which still name paths inside upstream's tree
+(`.../tree/stable/packages/simplex-chat-nodejs#readme`) and are derived by nothing - that is a decision
+about where our published packages advertise their own documentation, not a text move. Held as upstream's:
+`defaultConditionsLink` and the `conditionsCommit` URLs in `OperatorView.kt` / `NetworkAndServers.kt` and
+their Swift twins (a server-supplied SHA resolves only in upstream's history, and the document is SimpleX
+Chat Ltd's), `CIVoiceView.kt:29`'s PR citation, and the badges-rpc citations pinned at `db0768c21`.
+
+Verified: static only for Kotlin (no gradle or Android SDK on this machine); the four edited
+`package.json` files re-parsed with `json.load` and the single TOML line checked in context (`tomllib` is
+absent from this `python3`); `ding_wire_audit` sweep 0, pairs 0/0/0/0, audit FORWARD 0 / REVERSE 0 /
+BARE 16; the markdown dead-link gate unchanged at 1 broken outside the generated typedoc dirs (upstream's
+`CHANGELOG.md`). The desktop baselines are unaffected - none of these strings is drawn in a previewed
+composable, and the crash dialog is not a snapshot subject.
 
 ### What was removed from this repository
 

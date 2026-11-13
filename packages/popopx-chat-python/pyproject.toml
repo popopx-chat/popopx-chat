@@ -23,7 +23,7 @@ dynamic = ["version"]
 
 [project.urls]
 Homepage = "https://github.com/simplex-chat/simplex-chat/tree/stable/packages/simplex-chat-python"
-Issues = "https://github.com/simplex-chat/simplex-chat/issues"
+Issues = "https://github.com/popopx-chat/popopx-chat/issues"
 
 [project.optional-dependencies]
 test = ["pytest>=8", "pytest-asyncio>=0.23"]

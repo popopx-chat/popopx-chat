@@ -34,7 +34,7 @@
   "author": "POPOPX Chat",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/simplex-chat/simplex-chat/issues"
+    "url": "https://github.com/popopx-chat/popopx-chat/issues"
   },
   "homepage": "https://github.com/simplex-chat/simplex-chat/tree/stable/packages/simplex-chat-client/types/typescript#readme",
   "dependencies": {

@@ -262,7 +262,7 @@ fun ChatLockItem(
 }
 
 @Composable fun ContributeItem(uriHandler: UriHandler) {
-  SectionItemView({ uriHandler.openExternalLink("https://github.com/simplex-chat/simplex-chat#contribute") }) {
+  SectionItemView({ uriHandler.openExternalLink("https://github.com/popopx-chat/popopx-chat#contribute") }) {
     Icon(
       painterResource(MR.images.ic_keyboard),
       contentDescription = "GitHub",
@@ -290,7 +290,7 @@ fun ChatLockItem(
 }
 
 @Composable fun StarOnGithubItem(uriHandler: UriHandler) {
-  SectionItemView({ uriHandler.openExternalLink("https://github.com/simplex-chat/simplex-chat") }) {
+  SectionItemView({ uriHandler.openExternalLink("https://github.com/popopx-chat/popopx-chat") }) {
     Icon(
       painter = painterResource(MR.images.ic_github),
       contentDescription = "GitHub",
@@ -323,7 +323,7 @@ fun ChatLockItem(
 }
 
 @Composable fun InstallTerminalAppItem(uriHandler: UriHandler) {
-  SectionItemView({ uriHandler.openExternalLink("https://github.com/simplex-chat/simplex-chat") }) {
+  SectionItemView({ uriHandler.openExternalLink("https://github.com/popopx-chat/popopx-chat") }) {
     Icon(
       painter = painterResource(MR.images.ic_github),
       contentDescription = "GitHub",
