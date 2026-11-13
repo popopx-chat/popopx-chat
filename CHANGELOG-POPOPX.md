@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-13 (116 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-13 (117 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -378,9 +378,10 @@ orphaned and are now our own renders of our own copy, `ChatListView-{light,dark}
 occupies a list row, and `SettingsView-{light,dark}-large.png`, because `SKStorefront` answers `""` under the
 simulator and `isInUS` counts that as the US. Nothing is new and nothing is missing, so the set stays at 376 files.
 Android/desktop: no desktop scene renders `GetStakeView`, and the what's-new card reads the *localized* `v7_1_invest`
-key, which this commit does not touch - so the only way the 211 desktop baselines are affected is if
+key, which this commit does not touch - so the only way the 210 desktop baselines are affected is if
 `SettingsView.PreviewSettingsLayout` renders the crowdfunding row, and that is a CI question (`desktopTest` is
-`workflow_dispatch`-only) that cannot be answered before the push.
+`workflow_dispatch`-only) that cannot be answered before the push. It was answered the same day, and the answer is
+yes - see the next section.
 
 The documentation that had described the removal went back in the same step: `spec/client/chat-list.md` §10 lost its
 "Removed from POPOPX iOS builds" note and now describes the shipped view - the placement table says what the code
@@ -419,6 +420,32 @@ files whose key is the retired "Invest in POPOPX Chat!"
 (plus 118 rows in the exported `.xcloc` bundles, which are not build inputs - `project.pbxproj` never mentions them);
 they translate a string no longer in the app, and our new English copy has no key there at all, so a non-English
 user sees the restored banner in English until localizations are exported again.
+
+### 2 desktop baselines replaced from CI run 43423298339 (2026-11-13)
+
+The crowdfunding question the previous section left to CI is answered: run `43423298339`, dispatched on `master` at
+`562b28f93`, rendered all **210** desktop baselines (the 211 counted above was wrong - the committed set is 210 PNGs,
+and the artifact's `index-desktop.json` has exactly 210 entries with no name-set difference in either direction).
+`scripts/ci/snapshots-compare.py` judged them **208 `equal`, 2 `changed`**, and the 2 are
+`SettingsView.PreviewSettingsLayout-{light,dark}-font-100.png` - 504 changed pixels each, `maxDelta` 121, every one of
+them inside `x 101-180, y 831-843` of the 402x874 image. That rectangle is the crowdfunding section header:
+`SettingsView.kt:143` titles the section with `MR.strings.invest_settings_title`, and the restore moved that
+non-translatable string to "Own a part of SimpleX Chat". The row is reached on desktop because
+`crowdfundingAvailable()` (`WhatsNewView.kt:1109`) returns `true` for anything that is not a Google Play build.
+
+So the render was right and the committed baseline was stale, which is the opposite of the case for a normal
+residue install and the reason the diff was read before it was copied. The install rule did not change: only the 2
+files the comparator called `changed` were replaced, the 208 `equal` ones were left as they are (they are byte-identical
+to this run's renders, which is also the determinism proof for the runner), and after the copy all 210 committed
+baselines are byte-identical to the artifact. The job's only red step was `Compare snapshots` - the comparator exits 1
+on any failure - while `Run desktop tests`, `Run smoke test` and every upload were green.
+
+`ef2e906b7`'s 3 `SettingsView.kt` edits pass URLs to `uriHandler.openExternalLink` and draw no text, so they are not
+expected to move any preview; the next dispatch on the pushed HEAD should report 210 `equal`. The install is driven by
+the comparator's own `compare.json` (`tools/r7/r63_install_desktop_baselines.py`, 2 rows logged to
+`r63_desktop_baselines_20261113.jsonl`) rather than by a second, independently written pixel diff - a second
+implementation is how this pass nearly went the wrong way: a hand-transcribed copy of the Paeth predictor reported
+2755 changed pixels across the full image width instead of the real 504 in one text row.
 
 ### The bug-report and repository CTAs now point at this repository (2026-11-13)
 
