@@ -12,37 +12,49 @@ jobs:
       - name: Get latest release
         shell: bash
         run: |
-          curl --proto '=https' \
-               --tlsv1.2 \
-               -sSf -L \
-               'https://api.github.com/repos/simplex-chat/simplex-chat/releases/latest' \
-               2>/dev/null | \
-          grep -i "tag_name" | \
-          awk -F \" '{print "TAG="$4}' >> $GITHUB_ENV
+          TAG="$(curl --proto '=https' \
+                       --tlsv1.2 \
+                       -sS -L \
+                       'https://api.github.com/repos/popopx-chat/popopx-chat/releases/latest' \
+                       | grep -i "tag_name" | head -1 | awk -F \" '{print $4}')" || :
+          if [ -z "${TAG}" ]; then
+            # No release has been published from this repository yet, so there is nothing to verify.
+            echo "No published release to reproduce - skipping."
+            echo "REPRODUCE_SKIPPED=true" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          echo "TAG=${TAG}" >> "$GITHUB_ENV"
 
       - name: Checkout code
+        if: env.REPRODUCE_SKIPPED != 'true'
         uses: actions/checkout@v3
         with:
           ref: ${{ env.TAG }}
-          repository: simplex-chat/simplex-chat
 
       # Otherwise we run out of disk space with Docker build
       - name: Free disk space
+        if: env.REPRODUCE_SKIPPED != 'true'
         shell: bash
         run: ./scripts/ci/linux_util_free_space.sh
       - name: Execute reproduce script
+        if: env.REPRODUCE_SKIPPED != 'true'
         run: |
           ${GITHUB_WORKSPACE}/scripts/popopx-chat-reproduce-builds.sh "$TAG" || :
 
       - name: Check if build has been reproduced
+        if: env.REPRODUCE_SKIPPED != 'true'
         env:
           url: ${{ secrets.STATUS_POPOPX_WEBHOOK_URL }}
           user: ${{ secrets.STATUS_POPOPX_WEBHOOK_USER }}
           pass: ${{ secrets.STATUS_POPOPX_WEBHOOK_PASS }}
         run: |
-          if [ -f "${GITHUB_WORKSPACE}/${TAG}-simplex-chat/_sha256sums" ]; then
+          # The script names its own output directory, so read it from there instead of repeating the literal.
+          REPO_NAME="$(sed -n 's/^repo_name="\([^"]*\)".*/\1/p' "${GITHUB_WORKSPACE}/scripts/popopx-chat-reproduce-builds.sh" | head -1)"
+          if [ -f "${GITHUB_WORKSPACE}/${TAG}-${REPO_NAME}/_sha256sums" ]; then
             exit 0
           else
+            # These three secrets are not configured on this repository, so a failed reproduction is reported
+            # by this step going red and not by a notification.
             curl --proto '=https' --tlsv1.2 -sSf \
               -u "${user}:${pass}" \
               -H 'Content-Type: application/json' \

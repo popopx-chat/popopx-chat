@@ -47,10 +47,12 @@ summary:
    the Google Play listing, because this fork publishes no APK (see "What is still unset"). 25 URLs in
    README, `docs/DOWNLOADS.md`, the three `docs/lang/*/README.md` and 8 website pages. This leaves pages
    that show a Play badge next to a badge still labelled "APK"; relabelling or removing those is a copy
-   decision, not a wire one. The three places that still name upstream's APK on purpose are
+   decision, not a wire one. The three places that then still named upstream's APK were
    `docs/REPRODUCE.md` (it verifies *their* signed build), `scripts/ci/android/release-apk.sh` with
    `.github/workflows/android-emu.yml:490` (the emulator smoke test installs that same upstream APK), and
-   `plans/website-file-page-implementation.md:167` (a historical plan).
+   `plans/website-file-page-implementation.md:167` (a historical plan). Only the emulator test is left:
+   `docs/**` and `plans/**` went with the upstream editorial tree (`9996634ee`), and reproducing a build
+   is described under "Obtaining the source".
    The same pass defined `release` in `.eleventy.js`'s `globalConfig` and replaced 20 uses of
    `{{ release }}`: that variable is defined nowhere in `website/src`, so eleventy rendered it as the
    empty string and every desktop and CLI link on `/downloads` was a *relative* path — a 404 on our own
@@ -451,3 +453,33 @@ The complete source code for this program, including everything needed to genera
 binaries distributed for it, is available at
 [github.com/popopx-chat/popopx-chat](https://github.com/popopx-chat/popopx-chat) at no cost,
 under AGPL-3.0, for as long as the corresponding object code remains available.
+
+### Reproducing a build
+
+Two scripts check a published release against this repository; neither one is part of building it:
+
+    ./scripts/popopx-chat-reproduce-builds.sh <tag>           # CLI, deb, AppImage (Linux x86_64)
+    ./scripts/popopx-chat-reproduce-builds-android.sh <tag>   # APK
+
+Both clone `<tag>` from `github.com/popopx-chat/popopx-chat`, rebuild it inside Docker from
+`Dockerfile.build`, download the same file from that release's assets and compare the sha256. They
+need `git`, `docker` and `curl`. The desktop script also writes the `cabal.project.local` the build
+depends on (`package direct-sqlcipher` with `flags: +openssl`), and on a full match it leaves the
+checksums in `<tag>-popopx-chat/_sha256sums`.
+
+The Android script reproduces upstream's APK, not ours: `REPO_NAME`, `REPO`, `SIMPLEX_REPO` and
+`SIMPLEX_KEY` (the signing certificate fingerprint) name upstream's artefacts, which is why they keep
+upstream's spelling, and this fork publishes no APK. It raises `kernel.pid_max` through sudo or doas,
+builds `aarch64` and `armv7a` (override with `ARCHES`), and compares the rebuilt APK once
+`apksigcopier` has copied upstream's signature onto it. No workflow calls it; it is run by hand.
+
+`.github/workflows/reproduce-schedule.yml` runs the desktop script nightly at 02:00 and on dispatch,
+against this repository's own latest release. This repository has published no release, so the job
+prints `No published release to reproduce - skipping.` and finishes green. Before 2026-11-13 the same
+workflow checked out upstream's tree and then called `scripts/popopx-chat-reproduce-builds.sh`, a path
+that exists only in our tree, so each nightly run failed.
+
+The last step posts the failure to `STATUS_POPOPX_WEBHOOK_URL` with `STATUS_POPOPX_WEBHOOK_USER` and
+`STATUS_POPOPX_WEBHOOK_PASS`. None of the three is configured on this repository (`gh secret list`
+returned nothing on 2026-11-13), so a reproduction that fails is visible as a red run and nowhere
+else.
