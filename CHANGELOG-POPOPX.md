@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-13 (100 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-13 (101 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -77,6 +77,17 @@ named `popopx`, seeded settings into `$XDG_CONFIG_HOME/simplex` where `Platform.
 (`search_or_paste_popopx_link`) in 6 places. The launcher is now derived from the app directory, and the
 two jobs that drive **upstream's** released build pass its config directory and window title explicitly,
 so "names an upstream thing keeps upstream's name" still holds there.
+
+**The 210 desktop snapshot baselines were regenerated** by CI run `43397744144`, on the ubuntu runner that
+renders them. 20 files changed, and they are the 9 scenes whose pixels carry the brand:
+`ChatHelpView`, `ContactConnectionInfoView`, `HelpView`, `NewChatSheet`, `POPOPXInfo`, `QRCode`,
+`SettingsView`, `UserAddressView`, `WhatsNewView`. The other 190 are byte-identical to what was committed
+before, which is expected rather than suspicious: those scenes contain no brand content, and an unchanged
+PNG is not a copied one — every file in the set was written by this run. 18 of the 20 had previously been
+identical to upstream's, so they leave the "upstream artwork still in the repository" count
+(`ASSETS_LICENSE-POPOPX.md`: 565 → 545). This run also shows what the class above costs: because
+`desktopTest` renders the baselines, the artifact only exists if `:common:compileTestKotlinDesktop`
+compiles, so a syntax error in one test file ships no baselines at all.
 
 ### Data locations — treat this as a new application
 
@@ -280,8 +291,8 @@ records — copyright and attribution lines,
 the asset licence files, the preset operator
 that remains (SimpleX Chat) and its relay addresses, the badge service and directory hosts, the names-service
 namespace prefix `simplex_domain_v1` (it is a persisted record and a wire value), the upstream
-artwork that is still in the repository (565 files, measured in
-`ASSETS_LICENSE-POPOPX.md`) and the 210 desktop snapshot baselines. The dependency references that resolve in `popopxmq`
+artwork that is still in the repository (545 files, measured in
+`ASSETS_LICENSE-POPOPX.md`). The dependency references that resolve in `popopxmq`
 moved instead (`FORK.md` item 7). Full list with the authority for each:
 [`FORK.md`](./FORK.md).
 

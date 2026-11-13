@@ -50,15 +50,20 @@ Measured 2026-11-13, that set contains at least:
 
 ## What is NOT ours, and what that means for you
 
-Measured 2026-11-13 at `fc7a0470c` (after `docs/`, `website/`, `blog/` and `plans/` left this fork — see
-`FORK.md` item 10 — and after the `agent` glyph was redrawn), comparing each tracked image with the blob at
-the same path in `db0768c21`: of **1544** image files (`.png .jpg .jpeg .gif .svg .icns`), **565** are still
-byte-identical to upstream's, and they are SimpleX Chat Ltd's,
+Measured 2026-11-13, after `docs/`, `website/`, `blog/` and `plans/` left this fork (see `FORK.md` item 10),
+after the file-name pass and after the desktop baselines were re-rendered by CI — comparing each tracked
+image with the blob at the same path in `db0768c21`: of **1542** image files
+(`.png .jpg .jpeg .gif .svg .icns`), **545** are still byte-identical to upstream's, and they are SimpleX
+Chat Ltd's,
 under [assets/ASSETS_LICENSE.md](assets/ASSETS_LICENSE.md) — which is *stricter* than this file in one respect
 and *looser* in another: it permits them in an unmodified SimpleX Chat distribution (which a fork is
 not), and it forbids modification. The groups:
 
-- `apps/multiplatform/**` 549 — the moko UI glyphs; every name was checked and none is a brand mark;
+- `apps/multiplatform/**` 529 — the moko UI glyphs and the desktop snapshot baselines; every name was checked
+  and none is a brand mark. It was 549 before the baselines were re-rendered: 18 of the 210 desktop
+  baselines left this set (see `AGPL-COMPLIANCE-POPOPX.md` §3), 2 more left it when `distribute/simplex.*`
+  became `distribute/popopx.*` and so lost their counterpart at the same path, and the remaining 190 are
+  unchanged renders of scenes that carry no brand artwork;
 - `apps/ios/**` 8 — 2 Apple SF Symbol exports (`checkmark.2`, `checkmark.wide`) and the 6 GitHub octocat
   PNGs. Neither is a SimpleX mark: the symbols are Apple's own glyphs and the octocats are third-party art
   the app must keep to render the "star on GitHub" rows. `SharedAssets.xcassets/agent.imageset/agent.svg`
@@ -67,7 +72,7 @@ not), and it forbids modification. The groups:
 - `tests/fixtures/**` 5 and root `images/**` 3 — fixtures and the third-party audit logos (kuketz,
   trail-of-bits, whonix).
 
-The other 979 are POPOPX's own bytes or have no upstream counterpart at that path. The 905 documentation
+The other 997 are POPOPX's own bytes or have no upstream counterpart at that path. The 905 documentation
 and site images that were in this count before went with the content directories; with them present the
 same measurement gave 2089 tracked and 1471 identical.
 - ~~**the two build-input sets**~~ **replaced 2026-11-13 (ruling C2)**.

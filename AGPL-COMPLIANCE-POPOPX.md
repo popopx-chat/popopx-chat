@@ -130,13 +130,19 @@ A rebranded fork is a modified work. Therefore:
      `extra-extra-extra-large`, filenames unchanged. 198 differ byte-for-byte from upstream's, the
      other 178 are identical because those scenes carry no brand content — an unchanged PNG is not a
      copied one, they were all written by this repo's run.
-   - the **210 desktop snapshot images** under `apps/multiplatform/common/src/desktopTest/snapshots` —
-     still upstream's as this line was written. Regenerating them needs
-     `chat.popopx.app.SnapshotTest#everyPreviewIsRendered` under `gradle desktopTest`, which needs a JDK and
-     the dependency downloads this machine has neither of, so the rendering is done by CI:
-     `desktop-linux.yml` (a `workflow_dispatch` job, never push-triggered) runs it with
-     `-Ppopopx.assets.dir=../../assets` and uploads the `desktop-snapshots` artifact, which is then installed
-     into this directory — the method, recorded because it is the only way this item can ever close;
+   - ~~the **210 desktop snapshot images** under `apps/multiplatform/common/src/desktopTest/snapshots`~~
+     **replaced 2026-11-13** by CI run `43397744144` on `43d54a9b2`: all 210 filenames were re-installed
+     unchanged (0 added, 0 removed) and **20 differ byte-for-byte** from upstream's, across 9 scenes
+     (`ChatHelpView`, `ContactConnectionInfoView`, `HelpView`, `NewChatSheet`, `POPOPXInfo`, `QRCode`,
+     `SettingsView`, `UserAddressView`, `WhatsNewView`) — the screens that show the brand name, an address
+     or a link. The other 190 are identical because those scenes carry no brand content, and as on iOS an
+     unchanged PNG is not a copied one: every file was written by this repo's build.
+     The method is recorded because it is the only way this can ever be re-run:
+     `desktop-linux.yml` (a `workflow_dispatch` job, never push-triggered) runs
+     `chat.popopx.app.SnapshotTest#everyPreviewIsRendered` under `gradle desktopTest` with
+     `-Ppopopx.assets.dir=../../assets` and uploads the `desktop-snapshots` artifact. It needs a JDK, Xvfb
+     and the dependency downloads, so this Mac can never render them; it also means the artifact only
+     exists if `:common:compileTestKotlinDesktop` compiles — a broken test source ships no renders at all.
    - ~~`website/src/img/**` (the wordmark images, screenshots, illustrations, `SimpleXExplainedLottie.json`)
      and the 93 tracked files under `assets/**`, if this fork's website ships them~~ **closed 2026-11-13,
      both halves**: `website/` left the fork in `9996634ee`, so its images are not shipped by anything here;
