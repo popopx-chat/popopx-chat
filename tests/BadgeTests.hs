@@ -364,7 +364,8 @@ testCodeHash = do
   Just typed <- pure $ parseBadgeCode $ T.toLower $ formatBadgeCode code
   badgeCodeHash typed `shouldBe` badgeCodeHash code
 
--- Ledger transitions, against plans/2026-07-30-supporter-badges-v3-ux.md §3
+-- Ledger transitions, against upstream's plans/2026-07-30-supporter-badges-v3-ux.md §3
+-- (simplex-chat@db0768c21 - plans/ was upstream's design-note archive and is not shipped by this fork)
 
 at :: Integer -> Int -> Int -> UTCTime
 at y m d = UTCTime (fromGregorian y m d) (11 * 3600)
@@ -945,7 +946,7 @@ testServiceRetryFloor = do
   badgeRetryAfter ri (Just 600) `shouldBe` 600
   badgeRetryAfter ri (Just $ round aboveCap) `shouldBe` aboveCap
 
--- badges-rpc.md defines retryAfter as marking the transient codes, and every other code as
+-- apps/popopx-badge-service/protocol/badges-rpc.md defines retryAfter as marking the transient codes, and every other code as
 -- terminal for the command attempted. The client repeats a code that carries one on the service's
 -- schedule, so the set is the protocol's and not a judgement to make per call site.
 testServiceRetryAfter :: IO ()
@@ -1068,7 +1069,8 @@ testEntryTypeColumns = do
       J.Object o | Just (J.Object inner) <- KM.lookup fld o, Just (J.String t) <- KM.lookup "type" inner -> Just t
       _ -> Nothing
 
--- Service protocol JSON, against docs/protocol/badges-rpc.schema.json
+-- Service protocol JSON, against apps/popopx-badge-service/protocol/badges-rpc.md
+-- (upstream's docs/protocol/badges-rpc.schema.json at simplex-chat@db0768c21 is not shipped by this fork)
 
 testRedeemRequestJSON :: IO ()
 testRedeemRequestJSON = do

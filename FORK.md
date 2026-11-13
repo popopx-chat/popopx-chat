@@ -167,6 +167,15 @@ authoritative per-file record.
   `PRIVACY.md` records, the upstream URLs quoted inside surviving texts, and the `dist-newstyle/**`
   paths that captured commands quote. They are kept here because they are the record of why each
   identifier was held at the time.*
+  **Citation convention adopted 2026-11-13 for that class:** when a surviving file must still point at one of
+  those deleted upstream documents, it cites the pinned blob `simplex-chat@db0768c21` (in URLs,
+  `https://github.com/simplex-chat/simplex-chat/blob/db0768c21/<path>`) — the commit this fork imported from,
+  at which each of the eight cited paths is verified present in this repository's own history. A branch name
+  (`stable`, `master`) was not used for these because four of the eight do not exist on `stable` at all, and a
+  relative path was not used because the file is gone. The exception is the badge service's own RPC protocol:
+  that specification is now **ours** at `apps/popopx-badge-service/protocol/badges-rpc.md`, with the one
+  remaining live instruction that named a deleted directory (`apps/ios/CODE.md`, `apps/multiplatform/CODE.md`)
+  moved to the fork's own per-app `plans/` folders instead.
   The paths held were: `docs/protocol/**`
   and `docs/rfcs/**` (those documents *are* upstream's source of record), `docs/REPRODUCE.md` and its
   `simplexmq-reproduce-builds.sh` / `v6.3.1-simplexmq` lines (the recipe reproduces upstream's signed

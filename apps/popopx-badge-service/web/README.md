@@ -2,9 +2,9 @@
 
 The buyer-facing page for badge codes: choose a tier and duration, pay by
 card, BTC or XMR, and receive a code. Design and rationale are in
-[`plans/badges-codes/2026-08-27-badge-codes.md`](../../../plans/badges-codes/2026-08-27-badge-codes.md);
+[`plans/badges-codes/2026-08-27-badge-codes.md`](https://github.com/simplex-chat/simplex-chat/blob/db0768c21/plans/badges-codes/2026-08-27-badge-codes.md);
 the implementation plan for this app is
-[`plans/badges-codes/2026-08-28-web-implementation.md`](../../../plans/badges-codes/2026-08-28-web-implementation.md).
+[`plans/badges-codes/2026-08-28-web-implementation.md`](https://github.com/simplex-chat/simplex-chat/blob/db0768c21/plans/badges-codes/2026-08-28-web-implementation.md).
 This file covers how to build, test and run it.
 
 No runtime or dev dependencies beyond `typescript` and `@types/node`.

@@ -179,7 +179,7 @@ entryChecked now badgeType prev e
       SEDebit SDSupport -> uncontradicted
       SEDebit SDUnknown {} -> uncontradicted
       -- an opening credit resets the ledger to the amount it states, with no relation to the entry
-      -- before it (badges-rpc.md), so it is checked against nothing but itself
+      -- before it (apps/popopx-badge-service/protocol/badges-rpc.md), so it is checked against nothing but itself
       SECredit SCOpening -> Just restated
       SECredit SCUnknown {} -> uncontradicted
       SECredit c

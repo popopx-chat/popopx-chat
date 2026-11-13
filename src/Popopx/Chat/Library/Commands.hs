@@ -2770,7 +2770,8 @@ processChatCommand cxt nm = \case
         gVar <- asks random
         groupLinkId <- GroupLinkId <$> drgRandomBytes 16
         subMode <- chatReadVar subscriptionMode
-        -- generate root key pair; entity ID = sha256(rootPubKey) — see docs/rfcs/2026-03-28-group-identity-binding.md
+        -- generate root key pair; entity ID = sha256(rootPubKey)
+        -- — see upstream's docs/rfcs/2026-03-28-group-identity-binding.md (simplex-chat@db0768c21)
         rootKey@(rootPubKey, rootPrivKey) <- atomically $ C.generateKeyPair gVar
         let entityId = C.sha256Hash $ C.pubKeyBytes rootPubKey
             crClientData = encodeJSON $ CRDataGroup groupLinkId
@@ -6359,7 +6360,7 @@ applyBadgeStatement :: DB.Connection -> TVar ChaChaDRG -> Int64 -> BadgeType -> 
 applyBadgeStatement db g purchaseId badgeType BadgeStatement {entries} cred_ now = do
   -- TODO [badges] a service that no longer holds the asserted row re-sends its whole history, which
   -- joins onto the tip without following it, and every row of it verifies. The service is to heal
-  -- and restate as one opening credit instead (badges-rpc.md), which is checked without a tip.
+  -- and restate as one opening credit instead (apps/popopx-badge-service/protocol/badges-rpc.md), which is checked without a tip.
   tip <- getBadgeLedgerLastEntry db purchaseId
   storeBadgeStatement db purchaseId badgeType tip entries now
   getBadgeLedgerLastEntry db purchaseId >>= mapM_ (\StatementEntry {balanceBadgeType} -> setBadgePurchaseType db purchaseId balanceBadgeType now)

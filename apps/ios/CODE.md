@@ -96,7 +96,7 @@ When designing code and planning implementations, you MUST:
 
 ## Plans
 
-When developing via plans (non-trivial features, multi-step changes, architectural decisions), you MUST store the plan in the `plans/` folder before implementing. Why: plans are the persistent record of design decisions and rationale — without them, future sessions cannot understand why the system was built the way it was.
+When developing via plans (non-trivial features, multi-step changes, architectural decisions), you MUST store the plan in this app's plans folder, `apps/ios/plans/`, before implementing. Why: plans are the persistent record of design decisions and rationale — without them, future sessions cannot understand why the system was built the way it was. The repository's root `plans/` was upstream's design-note archive and was removed from this fork on 2026-11-13; plan files here are ours and live with the code they concern, as `apps/popopx-support-bot/plans/` already does.
 
 ### Plan requirements
 

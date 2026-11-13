@@ -162,6 +162,28 @@ describes *their* intake process and is not ours to claim).
 `packages/popopx-chat-nodejs/README.md`'s `./docs/*.md` links were left alone — they
 are package-relative typedoc files, not the root `docs/`.
 
+The citations the removal left behind were then swept: **26 files / 178 occurrences** named a deleted path
+(`README.md` excluded, repaired above). Each was fixed by what it actually refers to, not by one rule. The
+badge service's wire protocol had no specification left in the fork, so this fork **wrote one** —
+`apps/popopx-badge-service/protocol/badges-rpc.md`, derived from the implementation with a file:line for every
+spelling, covering only the RPC layer because the HTTP checkout is already documented in the service README.
+Its eight readers were repointed with it (`README.md` ×3, `src/Popopx/Chat/Badges/Ledger.hs:182`,
+`src/Popopx/Chat/Library/Commands.hs:6363`, `tests/BadgeTests.hs:949` and `:1072`, and the `#commands` anchor
+line 284 uses). Citations to documents that are upstream's and that this fork will never publish
+(the `plans/badges-codes/*` designs, `docs/CONTRIBUTING.md`, `docs/rfcs/2026-03-28-group-identity-binding.md`,
+`docs/protocol/badges-rpc.schema.json`) now name `simplex-chat@db0768c21` — the commit this fork imported from,
+in which each blob is verified to exist here — rather than a branch that can move or a local path that is gone.
+Two live instructions were moved into the fork instead: `apps/ios/CODE.md` and `apps/multiplatform/CODE.md`
+required plans to be stored in the root `plans/`, and they now require `apps/ios/plans/` and
+`apps/multiplatform/plans/`, the convention `apps/popopx-support-bot/plans/` already uses. `CLAUDE.md` was
+deleted (its four `@`-imports pointed at three deleted files, nothing referenced it, and the fork does not use
+it). `scripts/docs/frame-guide-images.py` was deleted with the directory: it wrote into `docs/guide/images`,
+had no CI consumer, and its sibling `scripts/docs/frame-ios-renders.py` is not in this repository. 25 inert
+`website/**` patterns and their 7 orphaned comments left `.gitignore` (measured: 0 tracked paths matched them).
+What is **not** in this sweep and still awaits a ruling: `PRIVACY-POPOPX.md` (2 lines citing upstream's
+`docs/SIMPLEX.md` and `docs/SECURITY.md`) and `AGPL-COMPLIANCE-POPOPX.md` (6 lines, including a compliance
+measurement that reads "322 tracked paths containing simplex" where the tree now measures 67).
+
 ### Deliberately not changed
 
 Upstream GitHub URLs that name something upstream — `CHANGELOG.md`, `PRIVACY.md` and the other surviving
@@ -169,7 +191,7 @@ records — copyright and attribution lines,
 the asset licence files, the preset operator
 that remains (SimpleX Chat) and its relay addresses, the badge service and directory hosts, the names-service
 namespace prefix `simplex_domain_v1` (it is a persisted record and a wire value), the upstream
-artwork that is still in the repository (566 files, measured in
+artwork that is still in the repository (565 files, measured in
 `ASSETS_LICENSE-POPOPX.md`) and the 210 desktop snapshot baselines. The dependency references that resolve in `popopxmq`
 moved instead (`FORK.md` item 7). Full list with the authority for each:
 [`FORK.md`](./FORK.md).

@@ -8,18 +8,19 @@ web checkout (BTCPay and Stripe payment, code issuance, the poller). **Without
 chat side and nothing else.
 
 The wire protocol for the RPC side is
-[`docs/protocol/badges-rpc.md`](../../docs/protocol/badges-rpc.md). The web checkout is
+[`protocol/badges-rpc.md`](protocol/badges-rpc.md), written for this fork from the implementation; upstream's
+longer document is [`docs/protocol/badges-rpc.md`](https://github.com/simplex-chat/simplex-chat/blob/db0768c21/docs/protocol/badges-rpc.md). The web checkout is
 specified in
-[`plans/badges-codes/2026-08-27-badge-codes.md`](../../plans/badges-codes/2026-08-27-badge-codes.md),
+[`plans/badges-codes/2026-08-27-badge-codes.md`](https://github.com/simplex-chat/simplex-chat/blob/db0768c21/plans/badges-codes/2026-08-27-badge-codes.md),
 whose §9 is the `badge_service.ini` reference, with the implementation plan in
-[`plans/badges-codes/2026-08-31-service-btcpay.md`](../../plans/badges-codes/2026-08-31-service-btcpay.md).
+[`plans/badges-codes/2026-08-31-service-btcpay.md`](https://github.com/simplex-chat/simplex-chat/blob/db0768c21/plans/badges-codes/2026-08-31-service-btcpay.md).
 Earlier plans (`2026-07-30-supporter-badges-v3-ux.md`, `2026-07-31-badges-core-implementation.md`,
 `2026-08-04-badges-mvp-scope.md`) predate the web checkout and describe the RPC-only
 scaffold this service started as.
 
 At this stage the service:
 
-- creates a double-ratchet contact address on first start (service RPC requires DR, see [`docs/protocol/badges-rpc.md`](../../docs/protocol/badges-rpc.md)),
+- creates a double-ratchet contact address on first start (service RPC requires DR, see [`protocol/badges-rpc.md`](protocol/badges-rpc.md)),
 - listens for service requests (`CEvtServiceRequest`) on that address, rejects a request whose `purchaseKey` is not the key the agent verified the signature against, and answers `redeemBadgeCode`,
 - issues redemption codes, storing only their `SHA-256` in its code table,
 - does not accept contact requests: the address is for RPC only,
@@ -34,7 +35,7 @@ purchase that already exists.
 
 ## Build
 
-Build prerequisites and the general contribution flow are in [`docs/CONTRIBUTING.md`](../../docs/CONTRIBUTING.md).
+Build prerequisites and the general contribution flow are in [`docs/CONTRIBUTING.md`](https://github.com/simplex-chat/simplex-chat/blob/db0768c21/docs/CONTRIBUTING.md) — upstream's, cited at the commit this fork imported from; the fork's own build notes are in `FORK.md` and `CHANGELOG-POPOPX.md`.
 
 ```
 cabal build exe:popopx-badge-service
@@ -280,7 +281,7 @@ ends nothing. A Play refund that leaves the subscription active is not seen: the
 read Play's voided purchases.
 
 Which answers are terminal for a purchase and which leave it to be presented again is listed per
-store in [`docs/protocol/badges-rpc.md`](../../docs/protocol/badges-rpc.md#commands).
+store in [`protocol/badges-rpc.md`](protocol/badges-rpc.md#commands).
 
 The root certificates, the App Store Server API key and the Play service account key are read only
 at startup, so rotating any of them takes a restart. Until then the old key keeps being used, and

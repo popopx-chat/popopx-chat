@@ -90,9 +90,10 @@ $(JQ.deriveJSON defaultJSON ''PublicLink)
 data DirectoryEntry = DirectoryEntry
   { entryType :: DirectoryEntryType,
     displayName :: Text,
-    -- defaultJSON makes this field the key of listing.json, and the only reader of that key
-    -- (website/src/js/directory.jsc) fetches it from directory.simplex.chat: both sides move with the
-    -- destination, in tier 戊.
+    -- defaultJSON makes this field the key of listing.json, and the only reader of that key was
+    -- upstream's site source website/src/js/directory.jsc - that tree left this fork on 2026-11-13, so the
+    -- reader is now only in the site we do not host. It fetches the key from directory.simplex.chat:
+    -- both sides move with the destination, in tier 戊.
     simplexName :: Maybe Text,
     groupLink :: PublicLink,
     shortDescr :: Maybe MarkdownList,
