@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-13 (118 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-13 (119 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -421,7 +421,7 @@ files whose key is the retired "Invest in POPOPX Chat!"
 they translate a string no longer in the app, and our new English copy has no key there at all, so a non-English
 user sees the restored banner in English until localizations are exported again.
 
-### 2 desktop baselines replaced from CI run 43423298339 (2026-11-13)
+### The 2 desktop baselines the crowdfunding copy moved, twice (CI runs 43423298339 and 43430543180, 2026-11-13)
 
 The crowdfunding question the previous section left to CI is answered: run `43423298339`, dispatched on `master` at
 `562b28f93`, rendered all **210** desktop baselines (the 211 counted above was wrong - the committed set is 210 PNGs,
@@ -454,8 +454,11 @@ one of them avoided the brand name. `invest_settings_title` now reads "Upstream'
 only reader being `SettingsView.kt:143`, no test mirror), which matches iOS rather than the banner's
 "Upstream's crowdfunding round" - the banner pair (`invest_banner_title` and `GetStakeBanner.swift:26`) already agreed
 with each other, and this restores the settings pair the same way. The reader carries the iOS commit's reason as a
-comment. Until a fresh `desktopTest` dispatch re-renders this on the pushed HEAD, the 2 committed baselines show the
-wording `562b28f93` shipped, so the comparator will report exactly those 2 as `changed` and nothing else.
+comment. Run `43430543180`, dispatched on the pushed `b614b38d9`, reported exactly that and closed it: **208 `equal`,
+2 `changed`** - the same two previews, 933 and 927 pixels inside the same 12-row band (`x 20-177, y 831-843`), the crop
+reading "Upstream's crowdfunding" where the baseline still read "Own a part of SimpleX Chat". Only those 2 were
+replaced, and all 210 committed baselines are again byte-identical to a CI render. `Compare snapshots` was the run's
+only red step; `Run desktop tests` and `Run smoke test` were green.
 
 ### The bug-report and repository CTAs now point at this repository (2026-11-13)
 
