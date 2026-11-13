@@ -116,6 +116,12 @@ summary:
    (regenerated from source strings by Xcode — hand-editing them guarantees a drift the next build
    undoes), 42 carrying an encoded SMP/XFTP address or key, 124 in upstream's published text (`blog/`,
    `plans/`, `CHANGELOG.md`, `PRIVACY.md`, `docs/lang/`, `docs/protocol/`), 1 more protocol-document match.
+   Reconcile a recount before suspecting a missed site: `git grep -o 'https://simplex\.chat'` outside
+   `website/**` reads **306** on this tree, not 302, because 4 of those occurrences are this file and
+   `CHANGELOG-POPOPX.md` *quoting* the old spelling to explain the ruling. The same command on the
+   parent of `d7635b53d` reads 679, which is the denominator this item moves 378 of; the bare and
+   subdomain forms (`simplex.chat`, `directory.simplex.chat`, `chat.simplex.app`) are a separate count of
+   582 and were not this tier's subject.
    The 42 payload links are the reason this was not one find-and-replace: for a *contact* the address is
    now ours by ruling and it became `mailto:chat@popopx.chat` (item 9), and for a *group invitation* the
    group exists on upstream's relay, so neither the host nor the payload may move alone.
