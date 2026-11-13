@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-13 (104 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-13 (105 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -226,6 +226,10 @@ held as `simplexchat`, while `SimpleX:/a#…` still spelled the connection schem
 `conditions` value of a real `serverOperatorConditions` response — taken byte for byte from the failed run's
 `app.log` — with the app's own `json`, and asserts both `operatorTag`s read `OperatorTag.SIMPLEX`. Renaming
 either side alone turns it red, and the payload is not hand-written, so it cannot drift from the core.
+Run `43405919477` on this repository proved both: `:common:desktopTest` was green with
+`ServerOperatorsWireTest` listed as 1 test / 0 failures, and the smoke test reported "onboarding reached the
+chat list" with `wait "Talk to someone"` resolving on screen — the button that the broken tag had kept
+disabled.
 
 **The last desktop launcher line moved with it.** `distribute/popopx.desktop`, which `make-appimage-linux.sh`
 installs as `com.popopxchat.popopx.desktop`, still read `Name=SimpleX Chat` and `/opt/simplex/…` although our
