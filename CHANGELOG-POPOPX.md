@@ -355,8 +355,13 @@ reproduce-builds sentence at `PRIVACY.md:189`, had already gone in `687f7273f`. 
 `#2-registering-a-group`, the sections of that same README that actually contain what they promised, and the
 third ("see DIRECTORY.md for full details") to nothing, since it sat inside the section it named. Measured
 after: **0** links into `docs/` or `blog/` remain, and no `### ` heading was renamed, so the two new anchors
-resolve. The 3153 other broken relative links in this tree are the pre-existing upstream class (generated
-typedoc `../util.ts` targets and app-internal docs), not collateral of the removal.
+resolve. Re-measured with the same script afterwards: 254 relative links in the 202 tracked `.md` files still
+do not resolve, **0** of them into `docs/` or `blog/` - 238 are the generated `packages/*/docs/**` typedoc files
+(`../util.ts#L79` targets, identically broken upstream) and 16 are prose citations, 7 of which are equally broken
+in the upstream checkout. The remaining 9 are ours and were **not** in this ruling's scope, so they are recorded
+rather than touched: 5 in `packages/popopx-chat-mcp/spec/*.md` still say `../../simplex-chat-nodejs/src/…` after
+that package's directory moved, 2 in `apps/ios/spec/client/chat-list.md` cite `GetStakeBanner.swift`, deleted with
+the operator cards, and 2 are `-?[a-z0-9]` inside a code span - a regex, not a link.
 
 ### Deliberately not changed
 
