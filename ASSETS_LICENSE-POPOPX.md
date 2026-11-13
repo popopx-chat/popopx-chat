@@ -50,22 +50,25 @@ Measured 2026-11-13, that set contains at least:
 
 ## What is NOT ours, and what that means for you
 
-Measured 2026-11-13 against the tracked working tree (1257 image files, each compared with the blob at the
-same path in `db0768c21`): **566** are still byte-identical to upstream's, and they are SimpleX Chat Ltd's,
+Measured 2026-11-13 at `9996634ee` (after `docs/`, `website/`, `blog/` and `plans/` left this fork — see
+`FORK.md` item 10), comparing each tracked image with the blob at the same path in `db0768c21`: of
+**1544** image files, **566** are still byte-identical to upstream's, and they are SimpleX Chat Ltd's,
 under [assets/ASSETS_LICENSE.md](assets/ASSETS_LICENSE.md) — which is *stricter* than this file in one respect
 and *looser* in another: it permits them in an unmodified SimpleX Chat distribution (which a fork is
 not), and it forbids modification. The groups:
 
-- `apps/multiplatform/common/**` 549 — the moko UI glyphs; every name was checked and none is a brand mark;
-- `apps/ios/Shared/**` 9 — 8 of them are not SimpleX marks either: the 2 Apple SF Symbol exports and the
-  6 GitHub octocat PNGs;
-- `tests/**` 5 and root `images/**` 3 — fixtures and the third-party logos (kuketz, trail-of-bits, whonix).
+- `apps/multiplatform/**` 549 — the moko UI glyphs; every name was checked and none is a brand mark;
+- `apps/ios/**` 9 — 2 Apple SF Symbol exports (`checkmark.2`, `checkmark.wide`), the 6 GitHub octocat
+  PNGs, and `SharedAssets.xcassets/agent.imageset/agent.svg`, a 24px template-rendered glyph for the
+  `.agent` chat type (`ChatTypes.swift:316`). None is a SimpleX mark; the first eight are platform and
+  third-party art the app must keep, and `agent.svg` is a generic figure that a re-draw would still be
+  the right call on;
+- `tests/fixtures/**` 5 and root `images/**` 3 — fixtures and the third-party audit logos (kuketz,
+  trail-of-bits, whonix).
 
-**This count is in flux and should not be quoted as settled.** 1656 files under `docs/`, `website/`, `blog/`
-and `plans/` are staged for deletion in the working tree while that bulk removal is still unruled; measured
-against `HEAD` instead, where those files are all present, the figure is 2089 images and 1471 identical, the
-extra 905 being documentation and site artwork. Whichever way that decision goes, both numbers have to be
-re-measured.
+The other 978 are POPOPX's own bytes or have no upstream counterpart at that path. The 905 documentation
+and site images that were in this count before went with the content directories; with them present the
+same measurement gave 2089 tracked and 1471 identical.
 - ~~**the two build-input sets**~~ **replaced 2026-11-13 (ruling C2)**.
   `assets/multiplatform/resources/MR/images/**` is now 80 POPOPX renders (40 names × @2x/@3x, each at its
   original pixel size) drawn from vector masters in `branding/source-svg/`, and 12 files that no code

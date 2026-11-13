@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-12 (`b4aae6d3d`, 45 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-13 (90 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -129,15 +129,31 @@ repository variables `NPM_SCOPE` and `PYPI_PROJECT` at publish time — see
 party tooling may set are read under both spellings (`SIMPLEX_ASSETS`/`POPOPX_ASSETS`,
 `SIMPLEX_LIBS_DIR`, `SIMPLEX_ADDON_PATH`).
 
+### What was removed from this repository
+
+`docs/` (592), `website/` (585), `blog/` (248) and `plans/` (229) — 1654 files — are deleted: upstream's
+protocol and product documentation, its announcements and roadmap notes, and the simplex.chat site
+front-end. They are SimpleX Chat Ltd's editorial content about SimpleX Chat, and this fork publishes no
+site from this tree (`popopx.chat` is built and published elsewhere). The one fork-authored file inside
+them, `docs/TRADEMARK-POPOPX.md`, was moved out first and is now `TRADEMARK-POPOPX.md` at the root, and
+the notices that cited upstream's `docs/TRADEMARK.md` now cite it where it lives instead of at a deleted
+path. What the removal takes with it: the six `website/src/.well-known/` files, which were never served
+from here but were the only copy of the Android/iOS association work in this tree, and
+`.github/workflows/web.yml`, which is now inert (its build step runs `./website/web.sh`) and will fail if
+a push touches `images/**` or `PRIVACY.md` until it is removed or repointed. `assets/` was deliberately
+**not** removed although it was named in the same ruling: it is a gradle build input
+(`-Ppopopx.assets.dir`, checked by `verifyPopopxAssets`), so deleting it would change the artwork
+compiled into the Android and desktop apps rather than trim a folder. `README.md` still links about twenty
+`./docs/**` and `./blog/**` paths, which are now dead; that cleanup is open.
+
 ### Deliberately not changed
 
-Upstream GitHub URLs that name something upstream — the protocol and RFC documents, the dependency
-licence report, `plans/**`, `blog/**`, `CHANGELOG.md`, the website's upstream service subdomains and its
-2022 blog preview — copyright and attribution lines,
+Upstream GitHub URLs that name something upstream — `CHANGELOG.md`, `PRIVACY.md` and the other surviving
+records — copyright and attribution lines,
 the asset licence files, the preset operator
 that remains (SimpleX Chat) and its relay addresses, the badge service and directory hosts, the names-service
 namespace prefix `simplex_domain_v1` (it is a persisted record and a wire value), the upstream
-artwork that is still in the repository (documentation and site images, measured in
+artwork that is still in the repository (566 files, measured in
 `ASSETS_LICENSE-POPOPX.md`) and the 210 desktop snapshot baselines. The dependency references that resolve in `popopxmq`
 moved instead (`FORK.md` item 7). Full list with the authority for each:
 [`FORK.md`](./FORK.md).

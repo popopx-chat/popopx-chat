@@ -132,6 +132,16 @@ summary:
    `website/langs/*.json` translated contact strings. Group invitation links were left alone — replacing
    one with an email silently deletes the group it pointed at.
 
+10. **Upstream's editorial content was removed** (2026-11-13, `9996634ee`) — `docs/` (592), `website/`
+    (585), `blog/` (248) and `plans/` (229) are deleted, 1654 files: SimpleX Chat Ltd's protocol and
+    product documentation, announcements, roadmap notes and the simplex.chat site front-end. None of it
+    describes POPOPX, and the fork's own notices already disclaimed it. The one fork-authored file that
+    lived inside them, `docs/TRADEMARK-POPOPX.md`, was moved out first and is now `TRADEMARK-POPOPX.md`
+    at the root; every citation of it in `NOTICE`, `README.md`, `AGPL-COMPLIANCE-POPOPX.md` and
+    `ASSETS_LICENSE-POPOPX.md` follows. `assets/` was deliberately NOT removed with them: it is a gradle
+    build input (`-Ppopopx.assets.dir`, verified by `verifyPopopxAssets`), so deleting it would change
+    the artwork compiled into the Android and desktop apps rather than trim prose.
+
 Every modification carries the date of the commit that made it; `git log` is the
 authoritative per-file record.
 
@@ -142,7 +152,13 @@ authoritative per-file record.
   and the ~78 company-name references in the privacy, licence and legal texts are retained
   verbatim, as AGPL-3.0 §7 requires (and §4 forbids removing). This codebase carries no
   per-file copyright headers, so there is nothing else to preserve.
-- **Upstream GitHub URLs**, and the dependency references that are not ours to claim: `docs/protocol/**`
+- **Upstream GitHub URLs**, and the dependency references that are not ours to claim — *this bullet
+  describes the state before 2026-11-13: the `docs/**`, `plans/**`, `blog/**` and `website/**` paths named
+  below were removed by item 10 above, so what remains of this class is the `CHANGELOG.md` /
+  `PRIVACY.md` records, the upstream URLs quoted inside surviving texts, and the `dist-newstyle/**`
+  paths that captured commands quote. They are kept here because they are the record of why each
+  identifier was held at the time.*
+  The paths held were: `docs/protocol/**`
   and `docs/rfcs/**` (those documents *are* upstream's source of record), `docs/REPRODUCE.md` and its
   `simplexmq-reproduce-builds.sh` / `v6.3.1-simplexmq` lines (the recipe reproduces upstream's signed
   build), `docs/dependencies/HASKELL.md` (a Dependency License Report whose entries are Hackage package
