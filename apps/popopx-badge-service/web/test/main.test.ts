@@ -480,7 +480,7 @@ mainTest("shell: index.html carries the prerendered first screen, straight from 
   const html = readFileSync(new URL("../../public/index.html", import.meta.url), "utf8");
   assert.ok(/<script type="module" src="\/assets\/[0-9a-f]{16}\/main\.js"><\/script>/.test(html),
     "the offline promise: the entry module is under /assets/<buildHash>/, so the shell and its modules cannot skew");
-  assert.ok(html.includes("simplex.chat/contact"), "every screen carries the footer");
+  assert.ok(html.includes("popopx.chat/contact"), "every screen carries the footer");
   // If this fails after a screens.ts change, run `npm run build` and commit the regenerated public/index.html.
   const build = await import(new URL("../../build.js", import.meta.url).href);
   const shell = await build.prerenderShell();

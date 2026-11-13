@@ -1023,7 +1023,7 @@ marked deleted chat item preview text */
 "Buy in browser" = "Tarayıcıda satın al";
 
 /* No comment provided by engineer. */
-"By chat profile (default) or [by connection](https://simplex.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)." = "Sohbet profiline göre (varsayılan) veya [bağlantıya göre](https://simplex.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA).";
+"By chat profile (default) or [by connection](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)." = "Sohbet profiline göre (varsayılan) veya [bağlantıya göre](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA).";
 
 /* No comment provided by engineer. */
 "call" = "Ara";
@@ -1631,7 +1631,7 @@ server test step */
 "Create list" = "Liste oluştur";
 
 /* No comment provided by engineer. */
-"Create new profile in [desktop app](https://simplex.chat/downloads/). 💻" = "[bilgisayar uygulamasında](https://simplex.chat/downloads/) yeni bir profil oluştur. 💻";
+"Create new profile in [desktop app](https://popopx.chat/downloads/). 💻" = "[bilgisayar uygulamasında](https://popopx.chat/downloads/) yeni bir profil oluştur. 💻";
 
 /* No comment provided by engineer. */
 "Create profile" = "Profil oluştur";

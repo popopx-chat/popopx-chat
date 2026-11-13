@@ -1,6 +1,6 @@
 # POPOPX Chat Python library
 
-Python 3.11+ client for [SimpleX Chat](https://simplex.chat) bots. Equivalent to the [Node.js library](https://www.npmjs.com/package/simplex-chat).
+Python 3.11+ client for [SimpleX Chat](https://popopx.chat) bots. Equivalent to the [Node.js library](https://www.npmjs.com/package/simplex-chat).
 
 ## Install
 

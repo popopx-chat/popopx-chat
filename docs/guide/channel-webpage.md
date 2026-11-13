@@ -45,7 +45,7 @@ Under **Webpage code** you'll see a snippet like the one below. Tap **Copy code*
   data-app-download-buttons="on"
   data-color-scheme="light"
 ></div>
-<script src="https://simplex.chat/js/channel-preview.js"></script>
+<script src="https://popopx.chat/js/channel-preview.js"></script>
 ```
 
 Everything specific to your channel is already in the code: its link, its ID, and the relay domains that serve the preview. There's no need to edit those values.
@@ -74,7 +74,7 @@ Paste the snippet into the page you're going to publish. Here's a complete minim
     data-relay-domains="relay1.example.com"
     data-app-download-buttons="on"
   ></div>
-  <script src="https://simplex.chat/js/channel-preview.js"></script>
+  <script src="https://popopx.chat/js/channel-preview.js"></script>
 </body>
 </html>
 ```
@@ -118,7 +118,7 @@ For example, here's a dark theme with a custom background and the download butto
   data-color-scheme="dark"
   data-dark-background="#001a4d"
 ></div>
-<script src="https://simplex.chat/js/channel-preview.js"></script>
+<script src="https://popopx.chat/js/channel-preview.js"></script>
 ```
 
 ## Good to know

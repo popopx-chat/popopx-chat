@@ -10,7 +10,7 @@
 import SwiftUI
 import POPOPXChat
 
-private let howToUrl = URL(string: "https://simplex.chat/docs/server.html")!
+private let howToUrl = URL(string: "https://popopx.chat/docs/server.html")!
 
 struct YourServersView: View {
     @Environment(\.dismiss) var dismiss: DismissAction

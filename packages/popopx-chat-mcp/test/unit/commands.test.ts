@@ -854,7 +854,7 @@ describe("approval card size", () => {
   function connectFields(name: string, extra: {message?: string; description?: string; welcome?: string}): NewAction {
     return {
       tool: "connect",
-      input: {target: "https://simplex.chat/a#ridgeline", ...(extra.message === undefined ? {} : {message: extra.message})},
+      input: {target: "https://popopx.chat/a#ridgeline", ...(extra.message === undefined ? {} : {message: extra.message})},
       subject: {kind: "contact", name, incognito: false},
       plan: {cardKind: "contact", type: "contact", takesMessage: true, description: extra.description, welcome: extra.welcome},
       messages: new Collected(),

@@ -1137,7 +1137,7 @@ marked deleted chat item preview text */
 "Buy in browser" = "Купить в браузере";
 
 /* No comment provided by engineer. */
-"By chat profile (default) or [by connection](https://simplex.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)." = "По профилю чата или [по соединению](https://simplex.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (БЕТА).";
+"By chat profile (default) or [by connection](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)." = "По профилю чата или [по соединению](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (БЕТА).";
 
 /* No comment provided by engineer. */
 "call" = "звонок";
@@ -1869,7 +1869,7 @@ server test step */
 "Create list" = "Создать список";
 
 /* No comment provided by engineer. */
-"Create new profile in [desktop app](https://simplex.chat/downloads/). 💻" = "Создайте новый профиль в [приложении для компьютера](https://simplex.chat/downloads/). 💻";
+"Create new profile in [desktop app](https://popopx.chat/downloads/). 💻" = "Создайте новый профиль в [приложении для компьютера](https://popopx.chat/downloads/). 💻";
 
 /* No comment provided by engineer. */
 "Create profile" = "Создать профиль";

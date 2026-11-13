@@ -229,8 +229,8 @@ decodeChatMessageTest = describe "Chat message encoding/decoding" $ do
     "{\"v\":\"9\",\"event\":\"x.msg.new\",\"params\":{\"content\":{\"text\":\"hello\",\"type\":\"text\"},\"live\":true}}"
       #==# XMsgNew ((mcSimple (MCText "hello")) {live = Just True})
   it "x.msg.new simple link" $
-    "{\"v\":\"9\",\"event\":\"x.msg.new\",\"params\":{\"content\":{\"text\":\"https://simplex.chat\",\"type\":\"link\",\"preview\":{\"description\":\"SimpleX Chat\",\"image\":\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgA\",\"title\":\"SimpleX Chat\",\"uri\":\"https://simplex.chat\"}}}}"
-      #==# XMsgNew (mcSimple (MCLink "https://simplex.chat" $ LinkPreview {uri = "https://simplex.chat", title = "SimpleX Chat", description = "SimpleX Chat", image = ImageData "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgA", content = Nothing}))
+    "{\"v\":\"9\",\"event\":\"x.msg.new\",\"params\":{\"content\":{\"text\":\"https://popopx.chat\",\"type\":\"link\",\"preview\":{\"description\":\"SimpleX Chat\",\"image\":\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgA\",\"title\":\"SimpleX Chat\",\"uri\":\"https://popopx.chat\"}}}}"
+      #==# XMsgNew (mcSimple (MCLink "https://popopx.chat" $ LinkPreview {uri = "https://popopx.chat", title = "SimpleX Chat", description = "SimpleX Chat", image = ImageData "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgA", content = Nothing}))
   it "x.msg.new simple image" $
     "{\"v\":\"9\",\"event\":\"x.msg.new\",\"params\":{\"content\":{\"text\":\"\",\"type\":\"image\",\"image\":\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII=\"}}}"
       #==# XMsgNew (mcSimple (MCImage "" $ ImageData "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII="))

@@ -315,7 +315,7 @@ You can resolve it by deleting the app's database: (WARNING: this results in del
 5. If you see an error "certificate expired", please check that your device clocks are synchronized within a few seconds.
 6. If iOS app fails to connect and shows an error containing "no route", check that local network connections are allowed for the app in system settings.
 
-Also see this post: https://simplex.chat/blog/20231125-simplex-chat-v5-4-link-mobile-desktop-quantum-resistant-better-groups.html#link-mobile-and-desktop-apps-via-secure-quantum-resistant-protocol
+Also see this post: https://popopx.chat/blog/20231125-simplex-chat-v5-4-link-mobile-desktop-quantum-resistant-better-groups.html#link-mobile-and-desktop-apps-via-secure-quantum-resistant-protocol
 
 If none of the suggestions work for you, you can create a separate profile on each device and create a small group inviting both of your device profiles and your contact.
 
@@ -327,7 +327,7 @@ Yes! Please read more about how quantum-resistant encryption is added to POPOPX 
 
 ### Why can't I use the same profile on different devices?
 
-SimpleX Chat apps support [linking of mobile and desktop apps](https://simplex.chat/blog/20231125-simplex-chat-v5-4-link-mobile-desktop-quantum-resistant-better-groups.html#link-mobile-and-desktop-apps-via-secure-quantum-resistant-protocol) via secure quantum-resistant protocol. It allows using the profile on your mobile device from desktop clients.
+SimpleX Chat apps support [linking of mobile and desktop apps](https://popopx.chat/blog/20231125-simplex-chat-v5-4-link-mobile-desktop-quantum-resistant-better-groups.html#link-mobile-and-desktop-apps-via-secure-quantum-resistant-protocol) via secure quantum-resistant protocol. It allows using the profile on your mobile device from desktop clients.
 
 Seamlessly and securely using the same profile from two or more devices is a complex and unsolved problem. All apps that provide multi-device support do so at a cost of compromising security of end-to-end encryption. E.g., Session removed the Double Ratchet algorithm entirely to enable multi-device support, sacrificing forward secrecy. Signal provides multi-device support with Double Ratchet algorithm, but by [compromising its "break-in recovery" property](https://eprint.iacr.org/2021/626.pdf) (aka post-compromise security).
 
@@ -344,7 +344,7 @@ Whichever approach we choose for multi-device support, it requires careful desig
 In the meantime, here are several secure options to enhance usability:
 - link mobile profiles with desktop app. It does not compromise security in any way.
 - create small groups with trusted contacts. These contacts would still know which device you use when you send the message, but it won't be shared with all contacts and groups you participate in. This approach is also secure, and it prevents devices being added to the conversation without user noticing.
-- use "[business address](https://simplex.chat/blog/20241210-simplex-network-v6-2-servers-by-flux-business-chats.html#business-chats)" - the app would create a new small group with everybody who connects to you via your address, and you will be able to add your other devices to these groups.
+- use "[business address](https://popopx.chat/blog/20241210-simplex-network-v6-2-servers-by-flux-business-chats.html#business-chats)" - the app would create a new small group with everybody who connects to you via your address, and you will be able to add your other devices to these groups.
 
 While these approaches are not as convenient as seamless multi-device support offered by other apps, they also do not compromise security to achieve that convenience.
 
@@ -390,7 +390,7 @@ This design is similar to mixnets (e.g. [Nym network](https://nymtech.net)), and
 
 ### Why don't you embed Tor in POPOPX Chat app?
 
-[Tor](https://www.torproject.org) is a fantastic transport overlay network - we believe it might be the best there is right now. If its [threat model](https://support.torproject.org/about/attacks-on-onion-routing/) works for you, you absolutely should use it - SimpleX Chat app supports Tor via SOCKS proxy [since v3.1](https://simplex.chat/blog/20220808-simplex-chat-v3.1-chat-groups.html#access-messaging-servers-via-tor), and SimpleX network servers can be available on both public and onion address at the same time [since v3.2](https://simplex.chat/blog/20220901-simplex-chat-v3.2-incognito-mode.html#using-onion-server-addresses-with-tor), improving anonymity of the users who use Tor.
+[Tor](https://www.torproject.org) is a fantastic transport overlay network - we believe it might be the best there is right now. If its [threat model](https://support.torproject.org/about/attacks-on-onion-routing/) works for you, you absolutely should use it - SimpleX Chat app supports Tor via SOCKS proxy [since v3.1](https://popopx.chat/blog/20220808-simplex-chat-v3.1-chat-groups.html#access-messaging-servers-via-tor), and SimpleX network servers can be available on both public and onion address at the same time [since v3.2](https://simplex.chat/blog/20220901-simplex-chat-v3.2-incognito-mode.html#using-onion-server-addresses-with-tor), improving anonymity of the users who use Tor.
 
 If you host your messaging server on the onion address only, the users who don't use Tor would still be able to message you via private message routing - all preset servers are configured to forward messages to onion-only servers.
 
@@ -421,7 +421,7 @@ SimpleX Chat Ltd is funded by private investors and venture capital. As an open-
 Here are some reflections on VC funding being a necessity for a project at this scale, as well as sustainability and profitability for longtime operations: https://www.poberezkin.com/posts/2023-10-31-why-privacy-impossible-without-venture-funding.html
 
 And another perspective from a team member on the delicate balance of venture-backed and nonprofit structures, and the plans for the SimpleX network protocols to evolve under the stewardship of nonprofit entities in various jurisdictions, so that its continued evolution aligns more closely with the vision of community-driven, independent and transparent governance:\
-[https://simplex.chat/blog/20240404-why-i-joined-simplex-chat-esraa-al-shafei.html](../blog/20240404-why-i-joined-simplex-chat-esraa-al-shafei.md).
+[https://popopx.chat/blog/20240404-why-i-joined-simplex-chat-esraa-al-shafei.html](../blog/20240404-why-i-joined-simplex-chat-esraa-al-shafei.md).
 
 ### What will be the business model?
 

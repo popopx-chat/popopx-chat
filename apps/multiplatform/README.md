@@ -122,7 +122,7 @@ Tests are in:
 
 #### SHA Signature for verification for app links/deep links
 
-In order for the SimpleX app to be automatically adopted for opening links from https://simplex.chat the SHA certificate fingerprint for the App installed on the phone must be in the hosted [assetlinks.json](https://simplex.chat/.well-known/assetlinks.json) file on simplex.chat.
+In order for the SimpleX app to be automatically adopted for opening links from https://popopx.chat the SHA certificate fingerprint for the App installed on the phone must be in the hosted [assetlinks.json](https://popopx.chat/.well-known/assetlinks.json) file on simplex.chat.
 
 The accepted fingerprints are in the `sha256_cert_fingerprints` list.
 

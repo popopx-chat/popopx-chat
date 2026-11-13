@@ -1790,7 +1790,7 @@ let operatorsInfo: Dictionary<OperatorTag, ServerOperatorInfo> = [
             "POPOPX Chat is the first communication network that has no user profile IDs of any kind, not even random numbers or identity keys.",
             "POPOPX Chat Ltd develops the communication software for POPOPX network."
         ],
-        website: URL(string: "https://simplex.chat")!,
+        website: URL(string: "https://popopx.chat")!,
         logo: "popopx_app_icon",
         largeLogo: "logo",
         logoDarkMode: "popopx_app_icon",
@@ -1890,7 +1890,7 @@ struct ServerOperator: Identifiable, Equatable, Codable {
 
     static let dummyOperatorInfo = ServerOperatorInfo(
         description: ["Default"],
-        website: URL(string: "https://simplex.chat")!,
+        website: URL(string: "https://popopx.chat")!,
         logo: "popopx_app_icon",
         largeLogo: "logo",
         logoDarkMode: "popopx_app_icon",

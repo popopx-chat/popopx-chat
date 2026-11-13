@@ -94,7 +94,7 @@ You would make the review much easier if you could review it in advance in the s
 
 1. As we update the app, we post the updates in the group of translators. You are absolutely under no obligation to translate these additional strings. We hugely appreciate if you do though, as it makes the users experience so much better when they depend on your translations, than if some new part of the app is not translated.
 
-2. You can further help SimpleX adoption in your country / language group by translating [our website](https://simplex.chat) (also [via weblate](https://hosted.weblate.org/projects/simplex-chat/website/)) and/or [GitHub documents](https://github.com/simplex-chat/simplex-chat/tree/master/docs/lang) (this is only possible via git)!
+2. You can further help SimpleX adoption in your country / language group by translating [our website](https://popopx.chat) (also [via weblate](https://hosted.weblate.org/projects/simplex-chat/website/)) and/or [GitHub documents](https://github.com/simplex-chat/simplex-chat/tree/master/docs/lang) (this is only possible via git)!
 
 3. Also, if you want to be a moderator/admin of the users group in your language, once the app is translated we can host such group - we are preparing community guidelines and adding some moderation tools to the app to be released in v4.6 in March.
 

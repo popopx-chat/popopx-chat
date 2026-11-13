@@ -162,7 +162,7 @@ class FakeChatApi:
     async def api_create_group_link(self, group_id: int, member_role: str) -> str:
         self._check("api_create_group_link")
         self.links.append(group_id)
-        link = f"https://simplex.chat/contact#/?v=2&group={group_id}"
+        link = f"https://popopx.chat/contact#/?v=2&group={group_id}"
         self.group_links[group_id] = link
         return link
 

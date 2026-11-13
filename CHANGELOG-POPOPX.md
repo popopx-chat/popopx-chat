@@ -80,7 +80,7 @@ ruling, rather than testing our core against a server built from another source 
 The site's own location moved too: `siteLocation` (`website/.eleventy.js`, read by 19 `og:url`/`og:image`
 sites as `{% cfg 'siteLocation' %}`; there is no environment override) and `website/markdown_pages.js`,
 which declares the same string a second time, plus the two blog feeds' `metadata.url` — all
-`https://simplex.chat` → `https://popopx.chat`, because `website/src/CNAME` already read `popopx.chat`.
+`https://popopx.chat` → `https://popopx.chat`, because `website/src/CNAME` already read `popopx.chat`.
 `onionLocation` next to it stayed upstream's. The rest of the site's own declarations followed in the same
 pass — 142 further occurrences in 19 files, because several templates and scripts hardcode the host instead
 of reading `cfg`: the generated sitemap `<loc>`, `robots.njk`'s `Sitemap:` line, the llms indexes and
@@ -90,7 +90,25 @@ became `www.popopx.chat`, since the predicate asks "is this our own page"). 36 o
 they are not self-declarations: 31 in `website/langs/*.json` and 2 in `src/_includes/blog_previews/` are
 translated display copy and upstream's published announcements whose *labels* still name upstream's app,
 and 3 are `…/contact#/?…smp%3A…` links carrying SimpleX Chat Ltd's encoded SMP address — moving only the
-host would hand that address out from our page.
+host would hand that address out from our page. Those contacts are now **`mailto:chat@popopx.chat`** (the
+`/connect-team` redirect target, the two llms links with their label, and 21 translated contact strings);
+the 10 upstream *service* subdomains in the site (`directory.`, `app.` with its F-Droid signing
+fingerprint, `badges.`, `git.`, `api.`) and the 2 occurrences inside upstream's own 2022 announcement
+stayed, so no `https://simplex.chat` remains in the website except those.
+The same host then moved everywhere a client or a user follows it: **378 of the 680 remaining occurrences
+outside `website/**`, 300 lines / 83 files** — iOS onboarding and chat-item strings, Kotlin onboarding,
+the Flatpak AppStream URLs, the badge/directory/support-bot packages, `README.md`, `docs/guide`, `docs/FAQ.md`,
+the SDK READMEs and 98 `tests/**` mirrors of those same strings. Two live defects came out of it: the
+Python SDK generated group share links as `https://simplex.chat/contact#/?v=2&group=…` (our app handing out
+an upstream-hosted link for a group our own relay serves) and the badge site's contact footer had moved its
+`href` while its visible label and its test assertion still read `simplex.chat/contact`. Held there: 135
+occurrences in the 23 generated `POPOPX Localizations/*.xliff` catalogs (Xcode re-emits them from source;
+hand-editing guarantees a drift), 42 links carrying another operator's encoded relay address, and 124 in
+upstream's published text (`blog/`, `plans/`, `CHANGELOG.md`, `PRIVACY.md`, `docs/lang/`, `docs/protocol/`).
+Because `popopx.chat` does not yet serve the certificate or the `.well-known` files, the apps now name a
+domain that cannot answer them: universal links and `autoVerify` will not claim until the SAN covers
+`popopx.chat` and our Android signing fingerprints replace upstream's three in `assetlinks.json`.
+Ruled 2026-11-13 as use-first-and-record; the gap is written up in `FORK.md`.
 The npm and PyPI names in the committed manifests are upstream's on purpose: `packages_release.py
 test-names` rewrites them, with `npm:` aliases for the cross-package dependencies, from the
 repository variables `NPM_SCOPE` and `PYPI_PROJECT` at publish time — see
@@ -101,7 +119,8 @@ party tooling may set are read under both spellings (`SIMPLEX_ASSETS`/`POPOPX_AS
 ### Deliberately not changed
 
 Upstream GitHub URLs that name something upstream — the protocol and RFC documents, the dependency
-licence report, `plans/**`, `blog/**`, `CHANGELOG.md`, the website — copyright and attribution lines,
+licence report, `plans/**`, `blog/**`, `CHANGELOG.md`, the website's upstream service subdomains and its
+2022 blog preview — copyright and attribution lines,
 the asset licence files, the preset operator
 that remains (SimpleX Chat) and its relay addresses, the badge service and directory hosts, the names-service
 namespace prefix `simplex_domain_v1` (it is a persisted record and a wire value), and the upstream

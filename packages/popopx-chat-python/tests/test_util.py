@@ -249,4 +249,4 @@ def test_check_profile_image_rejects_another_media_type():
 
 def test_check_profile_image_rejects_a_remote_url():
     with pytest.raises(ValueError, match="must start with"):
-        util.check_profile_image("https://simplex.chat/logo.png")
+        util.check_profile_image("https://popopx.chat/logo.png")

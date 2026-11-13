@@ -66,7 +66,7 @@ If you are interested in helping us to integrate open-source language models, an
 
 ## Join user groups
 
-You can find the groups created by users in [SimpleX Directory](https://simplex.chat/directory/). It is also available as [SimpleX bot](https://smp4.simplex.im/a#lXUjJW5vHYQzoLYgmi8GbxkGP41_kjefFvBrdwg-0Ok) that allows to add your own groups and communities to the directory. We are not responsible for the content shared in these groups.
+You can find the groups created by users in [SimpleX Directory](https://popopx.chat/directory/). It is also available as [SimpleX bot](https://smp4.simplex.im/a#lXUjJW5vHYQzoLYgmi8GbxkGP41_kjefFvBrdwg-0Ok) that allows to add your own groups and communities to the directory. We are not responsible for the content shared in these groups.
 
 **Please note**: The groups below are created for the users to be able to ask questions, make suggestions and ask questions about POPOPX Chat only.
 
@@ -87,8 +87,8 @@ We publish our updates and releases via:
 
 - [Reddit](https://www.reddit.com/r/SimpleXChat/), [Twitter](https://twitter.com/SimpleXChat), [Lemmy](https://lemmy.ml/c/simplex), [Mastodon](https://mastodon.social/@simplex) and [Nostr](https://snort.social/p/npub1exv22uulqnmlluszc4yk92jhs2e5ajcs6mu3t00a6avzjcalj9csm7d828).
 - POPOPX Chat [team profile](#connect-to-the-team).
-- [blog](https://simplex.chat/blog/) and [RSS feed](https://simplex.chat/feed.rss).
-- [mailing list](https://simplex.chat/#join-simplex), very rarely.
+- [blog](https://popopx.chat/blog/) and [RSS feed](https://popopx.chat/feed.rss).
+- [mailing list](https://popopx.chat/#join-simplex), very rarely.
 
 ## Make a private connection
 
@@ -118,7 +118,7 @@ Thanks to our users and [Weblate](https://hosted.weblate.org/engage/simplex-chat
 
 Join our translators to help SimpleX grow!
 
-|locale|language |contributor|[Android](https://play.google.com/store/apps/details?id=com.popopxchat.popopx) and [iOS](https://apps.apple.com/us/app/popopx-chat/id6799146157)|[website](https://simplex.chat)|Github docs|
+|locale|language |contributor|[Android](https://play.google.com/store/apps/details?id=com.popopxchat.popopx) and [iOS](https://apps.apple.com/us/app/popopx-chat/id6799146157)|[website](https://popopx.chat)|Github docs|
 |:----:|:-------:|:---------:|:---------:|:---------:|:---------:|
 |🇬🇧 en|English   | |✓|✓|✓|✓|
 |ar|العربية   |[jermanuts](https://github.com/jermanuts)|[![android app](https://hosted.weblate.org/widgets/simplex-chat/ar/android/svg-badge.svg)](https://hosted.weblate.org/projects/simplex-chat/android/ar/)<br>-|[![website](https://hosted.weblate.org/widgets/simplex-chat/ar/website/svg-badge.svg)](https://hosted.weblate.org/projects/simplex-chat/website/ar/)||
@@ -308,7 +308,7 @@ What is already implemented:
 13. Local database encryption with passphrase - your contacts, groups and all sent and received messages are stored encrypted. If you used POPOPX Chat before v4.0 you need to enable the encryption via the app settings.
 14. Transport isolation - different TCP connections and Tor circuits are used for traffic of different user profiles, optionally - for different contacts and group member connections.
 15. Manual messaging queue rotations to move conversation to another SMP relay.
-16. Sending end-to-end encrypted files using [XFTP protocol](https://simplex.chat/blog/20230301-simplex-file-transfer-protocol.html).
+16. Sending end-to-end encrypted files using [XFTP protocol](https://popopx.chat/blog/20230301-simplex-file-transfer-protocol.html).
 17. Local files encryption.
 18. [Reproducible server builds](./docs/SERVER.md#reproduce-builds).
 
@@ -342,8 +342,8 @@ Also see [TypeScript POPOPX Chat client](./packages/popopx-chat-client/) and [Ja
 
 ## Agents
 
-- For AI assistants: [simplex.chat/llms.txt](https://simplex.chat/llms.txt), an index of the documentation in Markdown, and [SimpleX for AI agents and developers](https://simplex.chat/llms/agents.md).
-- Every page of simplex.chat is also available as Markdown: replace `.html` with `.md` ([simplex.chat/docs/simplex.md](https://simplex.chat/docs/simplex.md)), or add `.md` to the path ([simplex.chat/why.md](https://simplex.chat/why.md)).
+- For AI assistants: [simplex.chat/llms.txt](https://popopx.chat/llms.txt), an index of the documentation in Markdown, and [SimpleX for AI agents and developers](https://popopx.chat/llms/agents.md).
+- Every page of simplex.chat is also available as Markdown: replace `.html` with `.md` ([simplex.chat/docs/simplex.md](https://popopx.chat/docs/simplex.md)), or add `.md` to the path ([simplex.chat/why.md](https://popopx.chat/why.md)).
 - Libraries: [Node.js](./packages/popopx-chat-nodejs/) ([npm](https://www.npmjs.com/package/simplex-chat)) and [Python](./packages/popopx-chat-python/) ([PyPI](https://pypi.org/project/simplex-chat/)).
 - [Bot API guide](./bots/README.md) and [API reference](./bots/api/README.md): commands, events and types.
 - Example bots: [support bot](./apps/popopx-support-bot/) and [calculator](./apps/popopx-calculator-bot/) in TypeScript, [support bot light](./apps/popopx-support-bot-light/) in Python, [directory service](./apps/popopx-directory-service/) and [broadcast bot](./apps/popopx-broadcast-bot/) in Haskell.

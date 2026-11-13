@@ -100,6 +100,32 @@ summary:
    docs are the opposite case, where the download is an instruction to a third party run against a
    server that has to work today — see "The server artifacts" below.
 
+8. **The site host where a client or a user follows it** (2026-11-13) — 378 of the 680 remaining
+   `https://simplex.chat` occurrences outside `website/**` became `https://popopx.chat`, per file, over
+   300 lines / 83 files: iOS Swift (`Views/Onboarding`, `Views/Chat/ChatItem`, the snapshot harness's
+   markdown fixtures), Kotlin multiplatform onboarding, `scripts/flatpak/com.popopxchat.popopx.metainfo.xml`
+   (AppStream `homepage`/`help`/`donations` URLs a store and `appstreamcli` read), `scripts/ios`, the
+   badge/directory/support-bot packages, `README.md`, `docs/guide`, `docs/FAQ.md`, the Node/Python SDK
+   READMEs and the MCP card fixtures, and 98 occurrences in `tests/**` that mirror those same strings.
+   Two of them were live defects: `packages/popopx-chat-python` built group share links as
+   `https://simplex.chat/contact#/?v=2&group=…` — our app emitting an upstream-hosted link for a group our
+   own relay serves, with the test mirrors agreeing with it — and `apps/popopx-badge-service/web` renders
+   a contact footer whose visible label had to move with its `href` (`web/test/main.test.ts:483` asserts
+   the label, so the pair moved together).
+   Held, 302 occurrences: 135 in the 23 generated `apps/ios/POPOPX Localizations/*.xliff` catalogs
+   (regenerated from source strings by Xcode — hand-editing them guarantees a drift the next build
+   undoes), 42 carrying an encoded SMP/XFTP address or key, 124 in upstream's published text (`blog/`,
+   `plans/`, `CHANGELOG.md`, `PRIVACY.md`, `docs/lang/`, `docs/protocol/`), 1 more protocol-document match.
+   The 42 payload links are the reason this was not one find-and-replace: for a *contact* the address is
+   now ours by ruling and it became `mailto:chat@popopx.chat` (item 9), and for a *group invitation* the
+   group exists on upstream's relay, so neither the host nor the payload may move alone.
+
+9. **The contact is chat@popopx.chat** (2026-11-13) — every "contact us / ask the team" link that carried
+   SimpleX Chat Ltd's encoded SMP address was replaced with `mailto:chat@popopx.chat`: the site's
+   `/connect-team` redirect target, the two llms answers/agents links (label included), and 21
+   `website/langs/*.json` translated contact strings. Group invitation links were left alone — replacing
+   one with an email silently deletes the group it pointed at.
+
 Every modification carries the date of the commit that made it; `git log` is the
 authoritative per-file record.
 
@@ -124,13 +150,14 @@ authoritative per-file record.
   reading `cfg` — 142 occurrences in 19 files: the generated sitemap `<loc>`, `robots.njk`'s `Sitemap:`,
   the llms indexes and their facts sources, the badge/store links in `js/channel-preview.jsc`,
   `js/directory.jsc`, and both arms of `isCurrentSite` in `js/simplex-lib.jsc` (so the `www.` alias became
-  `www.popopx.chat`). 36 occurrences stayed: 31 in `website/langs/*.json` and 2 in
-  `src/_includes/blog_previews/` — translated display copy and upstream's published announcements, whole
-  documents whose *labels* still name upstream's app, so the host cannot move without the copy — plus 3
-  `…/contact#/?…smp%3A…` links whose encoded SMP address is SimpleX Chat Ltd's contact, not ours: moving
-  only the host would hand out another operator's relay from our page, which is the BROKEN_PAIR class the
-  audit gate reports. The site's remaining `simplexmq` links still describe upstream's copy of the spec,
-  which is what `--include-website` would move. Two
+  `www.popopx.chat`). The site is closed: what stayed there is 10 URLs on upstream's *service* subdomains
+  (`directory.`, `app.` — including the F-Droid repo line and its signing fingerprint, `badges.`, `git.`,
+  `api.`) which are held by the host-authority rule below, and 2 occurrences in
+  `src/_includes/blog_previews/20221108.html`, upstream's own 2022 announcement ("the new website is
+  live"), which is a record. The translated strings and llms documents that used to carry upstream's
+  contact address now carry `chat@popopx.chat` (item 9), and the `simplex.chat/downloads` links in
+  `website/langs/*.json` followed the host. The site's remaining `simplexmq` links still describe
+  upstream's copy of the spec, which is what `--include-website` would move. Two
   `…/simplexmq/refs/heads/stable/scripts/docker/docker-compose-smp-{complete,manual}.env` references also
   stayed because those files exist nowhere: upstream ships only `docker-compose-smp.env`, so the two doc
   lines are broken at the source and are not this fork's regression.
@@ -184,12 +211,20 @@ upstream's [`PRIVACY.md`](./PRIVACY.md) untouched) and
 What remains below is not an undecided attribution — it is infrastructure this fork does not have
 yet. Before any build of this fork is distributed:
 
-- **No service is operated *by this fork*.** The relay presets, the link domain, `.well-known`, the directory
-  and the badge service all still name infrastructure SimpleX Chat Ltd operates. The `popopx.im` relays and the
-  `popopx.chat` web server that this fork's own domains point at are up (see the two bullets below), but
-  nothing in a build of this fork talks to them yet: no preset names them, because a preset needs their
-  fingerprints and those are only readable on the servers themselves. `chat@popopx.chat` is likewise not
-  reachable until that host serves mail or forwards.
+- **No service is operated *by this fork* — except that `popopx.chat` is now in use anyway.** Ruled
+  2026-11-13: the domain is used before its infrastructure is complete, and the gap is recorded rather
+  than held. Since items 8 and 9 and the website pass, every self-declaration and every live link in the
+  site, the app display copy, the SDKs, the Flatpak metainfo and the docs names `popopx.chat`, and the
+  contact is `chat@popopx.chat`. Two things are still missing on that host and both are silent-to-loud
+  failures to fix there, not in code: its TLS certificate SAN does not include `popopx.chat` (it names
+  `popopxchat.com`), and neither `.well-known/apple-app-site-association` nor
+  `.well-known/assetlinks.json` is served — both answered 404 when measured 2026-11-13. So universal
+  links and `autoVerify` cannot be claimed by an installed app yet, link unescaping falls back to the
+  scheme, and `assetlinks.json` will additionally need our Android signing fingerprints (upstream's three
+  are still in the committed copy) before it verifies. The relay presets and the directory/badge service
+  still name infrastructure SimpleX Chat Ltd operates, because a preset needs their key material and
+  `popopx.im` relays have none published yet. `chat@popopx.chat` is likewise not reachable until that host
+  serves mail or forwards.
 - **This fork publishes no Android APK.** `.github/workflows/build.yml` builds and signs nothing for
   Android; `scripts/ci/android/release-apk.sh` downloads **upstream's** release APK and verifies
   SimpleX's signing certificate, which is what the emulator smoke test installs. The gradle output

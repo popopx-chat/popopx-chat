@@ -151,7 +151,7 @@ Source: [github.com/dangoldbj/openclaw-simplex](https://github.com/dangoldbj/ope
 
 ## Ask the SimpleX team
 
-In the SimpleX Chat app, open the "Ask SimpleX Team" chat, or connect via [simplex.chat/contact](https://simplex.chat/contact#/?v=2&smp=smp%3A%2F%2FPQUV2eL0t7OStZOoAsPEV2QYWt4-xilbakvGUGOItUo%3D%40smp6.simplex.im%2FK1rslx-m5bpXVIdMZg9NLUZ_8JBm8xTt%23%2F%3Fv%3D1%26dh%3DMCowBQYDK2VuAyEALDeVe-sG8mRY22LsXlPgiwTNs9dbiLrNuA7f3ZMAJ2w%253D%26srv%3Dbylepyau3ty4czmn77q4fglvperknl4bi2eb2fdy2bh4jxtf32kf73yd.onion). A support bot answers first:
+In the SimpleX Chat app, open the "Ask SimpleX Team" chat, or connect via [chat@popopx.chat](mailto:chat@popopx.chat). A support bot answers first:
 
 - send `/team` to reach the team – not a bot; the team replies within 24 hours, or 48 hours at weekends;
 - send `/grok` for an instant answer from an AI assistant.

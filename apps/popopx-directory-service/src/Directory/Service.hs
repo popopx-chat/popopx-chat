@@ -444,7 +444,7 @@ directoryServiceEvent opts@DirectoryOpts {adminUsers, superUsers, serviceName, o
           <> "🔍 Send search string to find groups - try _security_.\n\
              \/help - how to submit your group or channel.\n\
              \/new - recent groups.\n\n\
-             \[Directory rules](https://simplex.chat/docs/directory.html)."
+             \[Directory rules](https://popopx.chat/docs/directory.html)."
 
     deGroupInvitation :: Contact -> GroupInfo -> GroupMemberRole -> GroupMemberRole -> IO ()
     deGroupInvitation ct g@GroupInfo {groupProfile = p@GroupProfile {displayName}} fromMemberRole memberRole = do
@@ -1044,8 +1044,8 @@ directoryServiceEvent opts@DirectoryOpts {adminUsers, superUsers, serviceName, o
                \**To register a group**, **invite** "
             <> serviceName
             <> " bot to your group as **admin** - once the group is approved, it will create a link for new members to join.\n\n\
-               \Once your group or channel **approved**, it can be found here or at [simplex.chat/directory](https://simplex.chat/directory).\n\n\
-               \_We usually review within a day, except holidays_. [More details](https://simplex.chat/docs/directory.html#adding-groups-to-the-directory)."
+               \Once your group or channel **approved**, it can be found here or at [simplex.chat/directory](https://popopx.chat/directory).\n\n\
+               \_We usually review within a day, except holidays_. [More details](https://popopx.chat/docs/directory.html#adding-groups-to-the-directory)."
       DCHelp DHSCommands ->
         sendMessage cc ct $
           "/'help commands' - receive this help message.\n\

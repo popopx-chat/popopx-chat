@@ -29,4 +29,4 @@ Evgeny, SimpleX Chat founder
 
 ## SimpleX Community Credits
 
-Please comment on our plan to make SimpleX network sustainable: https://simplex.chat/credits
+Please comment on our plan to make SimpleX network sustainable: https://popopx.chat/credits

@@ -2,9 +2,9 @@ import {isWeekend} from "./util.js"
 
 export const welcomeMessage = `Hello! This is a **SimpleX team** support bot - not an AI.
 
-Discover public groups: [simplex.chat/directory](https://simplex.chat/directory)
+Discover public groups: [simplex.chat/directory](https://popopx.chat/directory)
 
-Join the livestream about SimpleX roadmap and equity crowdfunding: [simplex.chat/livestream](https://simplex.chat/livestream) (September 15, at 17:00 UTC)`
+Join the livestream about SimpleX roadmap and equity crowdfunding: [simplex.chat/livestream](https://popopx.chat/livestream) (September 15, at 17:00 UTC)`
 
 export function queueMessage(timezone: string, grokEnabled: boolean): string {
   const hours = isWeekend(timezone) ? "48" : "24"

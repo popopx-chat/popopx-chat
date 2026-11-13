@@ -32,7 +32,7 @@ async def test_finds_existing_group_by_marker(api):
         },
     }
     api.groups.append(make_group(77, profile, custom_data=MARKER))
-    api.group_links[77] = "https://simplex.chat/contact#/?v=2&group=77"
+    api.group_links[77] = "https://popopx.chat/contact#/?v=2&group=77"
     assert await setup.ensure_roster_group(api, USER_ID, CONFIG) == 77
     assert api.new_groups == []  # not recreated
     assert api.profile_updates == []  # commands already match — no broadcast
@@ -49,10 +49,10 @@ async def test_found_group_with_link_logs_it_without_recreating(api, caplog):
         },
     }
     api.groups.append(make_group(77, profile, custom_data=MARKER))
-    api.group_links[77] = "https://simplex.chat/contact#/?v=2&group=77"
+    api.group_links[77] = "https://popopx.chat/contact#/?v=2&group=77"
     assert await setup.ensure_roster_group(api, USER_ID, CONFIG) == 77
     assert api.links == []  # fetched, not recreated
-    assert "https://simplex.chat/contact#/?v=2&group=77" in caplog.text
+    assert "https://popopx.chat/contact#/?v=2&group=77" in caplog.text
 
 
 async def test_found_group_without_link_recreates_and_logs_it(api, caplog):
@@ -85,7 +85,7 @@ async def test_group_link_get_failure_with_link_present_does_not_block_startup(a
         },
     }
     api.groups.append(make_group(77, profile, custom_data=MARKER))
-    api.group_links[77] = "https://simplex.chat/contact#/?v=2&group=77"
+    api.group_links[77] = "https://popopx.chat/contact#/?v=2&group=77"
     api.fail_on.add("api_get_group_link_str")
     api.fail_on.add("api_create_group_link")
     assert await setup.ensure_roster_group(api, USER_ID, CONFIG) == 77
@@ -169,7 +169,7 @@ async def test_warns_and_picks_one_when_two_groups_are_marked(api, caplog):
         make_group(20, profile, custom_data=MARKER),
         make_group(21, profile, custom_data=MARKER),
     ]
-    api.group_links[20] = "https://simplex.chat/#g20"
+    api.group_links[20] = "https://popopx.chat/#g20"
     with caplog.at_level("WARNING"):
         assert await setup.ensure_roster_group(api, USER_ID, CONFIG) == 20
     assert "2 groups carry the roster marker" in caplog.text

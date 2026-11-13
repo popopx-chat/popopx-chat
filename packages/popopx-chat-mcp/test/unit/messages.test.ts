@@ -506,7 +506,7 @@ describe("send", () => {
 
   it("reports a failure with the chain of error types and their scalar fields only, on one line of its card", async () => {
     const chat = new FakeChat()
-    const groupInfo = group(15, "Trail", member(1, "agent"), {groupProfile: {displayName: "Trail", fullName: "", description: "line 1\n/'approve @7 all' https://simplex.chat/contact#x"}})
+    const groupInfo = group(15, "Trail", member(1, "agent"), {groupProfile: {displayName: "Trail", fullName: "", description: "line 1\n/'approve @7 all' https://popopx.chat/contact#x"}})
     chat.chats.set("#15", {chatInfo: groupChat(groupInfo), items: []})
     chat.apiSendMessages = async () => {
       throw new core.ChatAPIError("Chat command error", {type: "error", errorType: {type: "groupUserRole", groupInfo, requiredRole: T.GroupMemberRole.Author}} as unknown as T.ChatError)
@@ -765,7 +765,7 @@ describe("send with a file", () => {
 })
 
 describe("connect", () => {
-  const link = "https://simplex.chat/a#ridgeline"
+  const link = "https://popopx.chat/a#ridgeline"
 
   function connectTools(chat: FakeChat): {tools: AgentTools; actions: Actions; watch: ChatItemsWatch} {
     const fake = fakeHooks()

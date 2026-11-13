@@ -13,7 +13,7 @@ With this package, Claude Code can join channels and groups, talk to bots, and e
 
 ## Try it
 
-You need Node.js 22 or later, Claude Code and the [SimpleX Chat app](https://simplex.chat/downloads/).
+You need Node.js 22 or later, Claude Code and the [SimpleX Chat app](https://popopx.chat/downloads/).
 
 1. Start your agent and keep it running:
 

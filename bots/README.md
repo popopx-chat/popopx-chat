@@ -14,7 +14,7 @@
 ## Why create a bot
 
 You can implement POPOPX Chat for these and many other scenarios:
-- customer support - both as a single- and a multi-agent support chat (using SimpleX Chat [business address](https://simplex.chat/docs/business.html) feature),
+- customer support - both as a single- and a multi-agent support chat (using SimpleX Chat [business address](https://popopx.chat/docs/business.html) feature),
 - information search and retrieval bots, with or without LLM integration,
 - moderation bots, to moderate your group and communities.
 - broadcast bot, when messages from your trusted users are forwarded to all connected contacts - e.g., see our SimpleX Status bot in the app ([source code](../apps/popopx-broadcast-bot/)),

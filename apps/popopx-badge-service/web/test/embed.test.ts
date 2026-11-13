@@ -3,12 +3,12 @@ import { test } from "node:test";
 import { RETURN_URL_MESSAGE, THEME_MESSAGE, returnUrlFromMessage, themeFromMessage, trustedHost } from "../src/embed.js";
 
 test("embed: only https simplex.chat and its subdomains may drive the theme", () => {
-  for (const origin of ["https://simplex.chat", "https://www.simplex.chat", "https://badges.simplex.chat"]) {
+  for (const origin of ["https://popopx.chat", "https://www.popopx.chat", "https://badges.simplex.chat"]) {
     assert.equal(trustedHost(origin), true, `${origin} is the site`);
   }
   for (const origin of [
     "http://simplex.chat",
-    "https://simplex.chat.attacker.com",
+    "https://popopx.chat.attacker.com",
     "https://notsimplex.chat",
     "https://evil.com",
     "null",
@@ -34,15 +34,15 @@ test("embed: a theme message yields its theme, and anything else yields undefine
 });
 
 test("embed: a return-url message yields a valid http(s) url, and anything else undefined", () => {
-  assert.equal(returnUrlFromMessage({ type: RETURN_URL_MESSAGE, url: "https://simplex.chat/badges/" }), "https://simplex.chat/badges/");
+  assert.equal(returnUrlFromMessage({ type: RETURN_URL_MESSAGE, url: "https://popopx.chat/badges/" }), "https://popopx.chat/badges/");
   assert.equal(returnUrlFromMessage({ type: RETURN_URL_MESSAGE, url: "http://localhost:8001/badges/" }), "http://localhost:8001/badges/");
   for (const bad of [
     { type: RETURN_URL_MESSAGE, url: "not a url" },
     { type: RETURN_URL_MESSAGE, url: "javascript:alert(1)" },
     { type: RETURN_URL_MESSAGE, url: 42 },
-    { type: "simplex-theme", url: "https://simplex.chat/" },
+    { type: "simplex-theme", url: "https://popopx.chat/" },
     null,
-    "https://simplex.chat/",
+    "https://popopx.chat/",
   ]) {
     assert.equal(returnUrlFromMessage(bad), undefined, `${JSON.stringify(bad)} is not a return url`);
   }

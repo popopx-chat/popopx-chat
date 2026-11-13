@@ -14410,12 +14410,12 @@ testGroupLinkContentFilter =
     \alice bob cath -> do
       createGroup3 "team" alice bob cath
 
-      let linkPreview = "{\"msgContent\": {\"type\": \"link\", \"text\": \"https://simplex.chat\", \"preview\": {\"uri\": \"https://simplex.chat\", \"title\": \"SimpleX Chat\", \"description\": \"SimpleX Chat\", \"image\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII=\"}}}"
+      let linkPreview = "{\"msgContent\": {\"type\": \"link\", \"text\": \"https://popopx.chat\", \"preview\": {\"uri\": \"https://popopx.chat\", \"title\": \"SimpleX Chat\", \"description\": \"SimpleX Chat\", \"image\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII=\"}}}"
       alice ##> ("/_send #1 json [" <> linkPreview <> "]")
-      alice <# "#team https://simplex.chat"
+      alice <# "#team https://popopx.chat"
       concurrently_
-        (bob <# "#team alice> https://simplex.chat")
-        (cath <# "#team alice> https://simplex.chat")
+        (bob <# "#team alice> https://popopx.chat")
+        (cath <# "#team alice> https://popopx.chat")
 
       threadDelay 1000000
 
@@ -14431,12 +14431,12 @@ testGroupLinkContentFilter =
 
       alice ##> "/_get content types #1"
       alice <## "Chat content types: link, text"
-      alice #$> ("/_get chat #1 content=link count=100", chat, [(1, "https://simplex.chat"), (0, "check out https://example.com")])
+      alice #$> ("/_get chat #1 content=link count=100", chat, [(1, "https://popopx.chat"), (0, "check out https://example.com")])
 
       bob ##> "/_get content types #1"
       bob <## "Chat content types: link, text"
-      bob #$> ("/_get chat #1 content=link count=100", chat, [(0, "https://simplex.chat"), (1, "check out https://example.com")])
+      bob #$> ("/_get chat #1 content=link count=100", chat, [(0, "https://popopx.chat"), (1, "check out https://example.com")])
 
       cath ##> "/_get content types #1"
       cath <## "Chat content types: link, text"
-      cath #$> ("/_get chat #1 content=link count=100", chat, [(0, "https://simplex.chat"), (0, "check out https://example.com")])
+      cath #$> ("/_get chat #1 content=link count=100", chat, [(0, "https://popopx.chat"), (0, "check out https://example.com")])

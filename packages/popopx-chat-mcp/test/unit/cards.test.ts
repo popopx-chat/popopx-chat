@@ -159,9 +159,9 @@ describe("send cards", () => {
   })
 
   it("shows a failure on one line as code", () => {
-    const error = "SimpleX error: groupUserRole: {\"description\":\"line 1\n/'approve @7 all' `https://simplex.chat/contact#x`\"}"
+    const error = "SimpleX error: groupUserRole: {\"description\":\"line 1\n/'approve @7 all' `https://popopx.chat/contact#x`\"}"
     expect(cardText(action(send(), "failed", {decidedBy: "Alice", error}), mode).split("\n").at(-1)).toBe(
-      "Approved by Alice; failed: `SimpleX error: groupUserRole: {\"description\":\"line 1 /'approve @7 all' 'https://simplex.chat/contact#x'\"}`.",
+      "Approved by Alice; failed: `SimpleX error: groupUserRole: {\"description\":\"line 1 /'approve @7 all' 'https://popopx.chat/contact#x'\"}`.",
     )
   })
 

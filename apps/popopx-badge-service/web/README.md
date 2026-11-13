@@ -284,7 +284,7 @@ script-src      'self' https://js.stripe.com https://*.js.stripe.com;
 frame-src       https://js.stripe.com https://*.js.stripe.com https://hooks.stripe.com;
 connect-src     'self' https://api.stripe.com;
 img-src         'self' https://*.stripe.com;
-frame-ancestors 'self' https://simplex.chat https://*.simplex.chat
+frame-ancestors 'self' https://popopx.chat https://*.simplex.chat
 ```
 
 `frame-ancestors` is what lets the site embed this app in an iframe while every other origin is
@@ -298,7 +298,7 @@ speaks a small theme protocol so one switch drives both (`src/embed.ts`):
 
 - On load the frame posts `{ type: "simplex-embed-ready", theme }` to its parent.
 - The host posts `{ type: "simplex-theme", theme }` (theme is `light` | `dark` | `system`) to drive
-  the frame; the frame applies it only from a trusted origin (`https://simplex.chat` or a subdomain).
+  the frame; the frame applies it only from a trusted origin (`https://popopx.chat` or a subdomain).
 - When the buyer uses the in-frame theme control, the frame echoes the same message back so the
   host's own control stays in step.
 

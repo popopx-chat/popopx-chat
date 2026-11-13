@@ -1,6 +1,6 @@
 # simplex-support-bot-light
 
-A [SimpleX Chat](https://simplex.chat) bot that adds a roster of people to
+A [SimpleX Chat](https://popopx.chat) bot that adds a roster of people to
 incoming business chats.
 
 Anyone who connects to the bot's address gets a business chat with a welcome

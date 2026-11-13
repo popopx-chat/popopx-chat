@@ -6,7 +6,7 @@ templateEngineOverride: md
 
 # Hosting your own Chat Relay
 
-Chat relays are used to deliver channel messages in SimpleX Network. Read more about channels in this [whitepaper](https://github.com/simplex-chat/simplex-chat/blob/master/docs/protocol/channels-overview.md) and this [blog post](https://simplex.chat/blog/20260430-simplex-channels-v6-5-consortium-crowdfunding-freedom-of-speech.html).
+Chat relays are used to deliver channel messages in SimpleX Network. Read more about channels in this [whitepaper](https://github.com/simplex-chat/simplex-chat/blob/master/docs/protocol/channels-overview.md) and this [blog post](https://popopx.chat/blog/20260430-simplex-channels-v6-5-consortium-crowdfunding-freedom-of-speech.html).
 
 A chat relay is the POPOPX Chat CLI (`popopx-chat`) running in relay mode (`--relay`). It has its own profile (a display name and a picture), its own address, and in addition to delivering messages, it can generate data for web previews of the channels it delivers.
 

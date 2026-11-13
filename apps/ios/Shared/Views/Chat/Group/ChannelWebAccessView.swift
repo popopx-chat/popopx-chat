@@ -131,7 +131,7 @@ struct ChannelWebAccessView: View {
               data-app-download-buttons="on"
               data-color-scheme="light"
             ></div>
-            <script src="https://simplex.chat/js/channel-preview.js"></script>
+            <script src="https://popopx.chat/js/channel-preview.js"></script>
             """
         } else {
             nil

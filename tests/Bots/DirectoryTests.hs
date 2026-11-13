@@ -1987,7 +1987,7 @@ u `connectVia` dsLink = do
   u <## "/help - how to submit your group or channel."
   u <## "/new - recent groups."
   u <## ""
-  u <## "[Directory rules](https://simplex.chat/docs/directory.html)."
+  u <## "[Directory rules](https://popopx.chat/docs/directory.html)."
 
 connectViaMerged :: HasCallStack => TestCC -> String -> String -> IO ()
 connectViaMerged u dsLink merged = do
@@ -2001,7 +2001,7 @@ connectViaMerged u dsLink merged = do
            "/help - how to submit your group or channel.",
            "/new - recent groups.",
            "",
-           "[Directory rules](https://simplex.chat/docs/directory.html).",
+           "[Directory rules](https://popopx.chat/docs/directory.html).",
            ConsoleString merged,
            "use @'SimpleX Directory' <message> to send messages"
          ]
@@ -2285,7 +2285,7 @@ testDirectoryChannelNameNotVerified ps = withSmpServerAndNames ps $ \reg ->
         relay <## "bob updated group #news: (signed)"
         relay <## "updated public group access: domain=news.popopx"
         -- the name is re-pointed to a different link after the owner set it
-        registerName reg newsName (channelNameRecord "news.popopx" "https://simplex.chat/other")
+        registerName reg newsName (channelNameRecord "news.popopx" "https://popopx.chat/other")
         bob ##> "/share chat #news @'SimpleX Directory'"
         bob <# "@'SimpleX Directory' link to join channel #news (signed):"
         _ <- getTermLine bob -- short link

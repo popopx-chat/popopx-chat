@@ -152,7 +152,7 @@ func showBadgeInfoAlert(_ name: String, _ badge: LocalBadge) {
             let message = String.localizedStringWithFormat(NSLocalizedString("%@ invested in POPOPX Chat crowdfunding.", comment: "badge alert"), name)
             showAlert(title, message: message) {
                 [ UIAlertAction(title: NSLocalizedString("Learn more", comment: "badge alert button"), style: .default) { _ in
-                    if let url = URL(string: "https://simplex.chat/crowdfunding") {
+                    if let url = URL(string: "https://popopx.chat/crowdfunding") {
                         UIApplication.shared.open(url)
                     }
                   },

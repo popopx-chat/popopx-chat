@@ -36,7 +36,7 @@ SimpleX Chat
 
 Conference talk, Video
 
-Alain Brenzikofer presents our design for Community Credits at Web3 Summit – a payment solution for private infrastructure payments on SimpleX network. See the whitepaper at: https://simplex.chat/credits/whitepaper.pdf
+Alain Brenzikofer presents our design for Community Credits at Web3 Summit – a payment solution for private infrastructure payments on SimpleX network. See the whitepaper at: https://popopx.chat/credits/whitepaper.pdf
 
 Image: simplex-web3-summit-talk.jpg
 

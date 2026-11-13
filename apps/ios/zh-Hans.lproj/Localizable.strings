@@ -1128,7 +1128,7 @@ marked deleted chat item preview text */
 "Buy in browser" = "在浏览器中购买";
 
 /* No comment provided by engineer. */
-"By chat profile (default) or [by connection](https://simplex.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)." = "通过聊天资料（默认）或者[通过连接](https://simplex.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)。";
+"By chat profile (default) or [by connection](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)." = "通过聊天资料（默认）或者[通过连接](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)。";
 
 /* No comment provided by engineer. */
 "call" = "呼叫";
@@ -1857,7 +1857,7 @@ server test step */
 "Create list" = "创建列表";
 
 /* No comment provided by engineer. */
-"Create new profile in [desktop app](https://simplex.chat/downloads/). 💻" = "在[桌面应用程序](https://simplex.chat/downloads/)中创建新的个人资料。 💻";
+"Create new profile in [desktop app](https://popopx.chat/downloads/). 💻" = "在[桌面应用程序](https://popopx.chat/downloads/)中创建新的个人资料。 💻";
 
 /* No comment provided by engineer. */
 "Create profile" = "创建个人资料";

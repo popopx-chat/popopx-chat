@@ -642,8 +642,8 @@ private final class SnapshotFixtures {
     let news: GroupInfo
     let contact: Contact
     private let markdown: [String: ParsedMarkdown] = [
-        "https://simplex.chat": ParsedMarkdown(formattedText: [
-            FormattedText(text: "https://simplex.chat", format: .uri)
+        "https://popopx.chat": ParsedMarkdown(formattedText: [
+            FormattedText(text: "https://popopx.chat", format: .uri)
         ]),
         "---": ParsedMarkdown(
             formattedText: [
@@ -953,14 +953,14 @@ private final class SnapshotFixtures {
     }
 
     func media() -> some View {
-        let link = MsgContent.link(text: "https://simplex.chat", preview: LinkPreview(uri: "https://simplex.chat", title: "SimpleX Chat: private and secure messenger without any user IDs", image: landscape))
+        let link = MsgContent.link(text: "https://popopx.chat", preview: LinkPreview(uri: "https://popopx.chat", title: "SimpleX Chat: private and secure messenger without any user IDs", image: landscape))
         return VStack(spacing: 0) {
             chatRows(direct, [
-                msg(.directRcv, "https://simplex.chat", -20, content: link)
+                msg(.directRcv, "https://popopx.chat", -20, content: link)
             ], terminal: true)
             chatRows(newsChat, [
                 msg(.channelRcv, "Links and videos", -12),
-                msg(.channelRcv, "https://simplex.chat", -11, content: link),
+                msg(.channelRcv, "https://popopx.chat", -11, content: link),
                 msg(.channelRcv, "", -10, content: .video(text: "", image: landscape, duration: 42), file: CIFile.getSample(fileId: id(), fileName: "video.mp4", fileSize: 1_048_576, filePath: nil, fileStatus: .rcvInvitation))
             ], terminal: true)
             chatRows(newsChat, [

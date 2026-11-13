@@ -5,7 +5,7 @@ revision: 09.09.2024
 
 # Download SimpleX apps
 
-Download the app for your platform: https://simplex.chat/downloads/
+Download the app for your platform: https://popopx.chat/downloads/
 
 You can get the latest beta releases from [GitHub](https://github.com/simplex-chat/simplex-chat/releases).
 
@@ -36,7 +36,7 @@ You can [verify and reproduce](./REPRODUCE.md) Linux builds.
 
 **iOS**: [App store](https://apps.apple.com/us/app/popopx-chat/id6799146157), [TestFlight](https://testflight.apple.com/join/DWuT2LQu).
 
-**Android**: [Play store](https://play.google.com/store/apps/details?id=com.popopxchat.popopx), [F-Droid](https://simplex.chat/fdroid/), [APK aarch64](https://play.google.com/store/apps/details?id=com.popopxchat.popopx), [APK armv7](https://play.google.com/store/apps/details?id=com.popopxchat.popopx).
+**Android**: [Play store](https://play.google.com/store/apps/details?id=com.popopxchat.popopx), [F-Droid](https://popopx.chat/fdroid/), [APK aarch64](https://play.google.com/store/apps/details?id=com.popopxchat.popopx), [APK armv7](https://play.google.com/store/apps/details?id=com.popopxchat.popopx).
 
 You can [verify and reproduce](./REPRODUCE.md) Android APKs.
 

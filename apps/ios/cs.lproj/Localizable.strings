@@ -832,7 +832,7 @@ swipe action */
 "Business address" = "Obchodní adresa";
 
 /* No comment provided by engineer. */
-"By chat profile (default) or [by connection](https://simplex.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)." = "Podle profilu chatu (výchozí) nebo [podle připojení](https://simplex.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA).";
+"By chat profile (default) or [by connection](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)." = "Podle profilu chatu (výchozí) nebo [podle připojení](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA).";
 
 /* No comment provided by engineer. */
 "Call already ended!" = "Hovor již skončil!";
@@ -1160,7 +1160,7 @@ server test step */
 "Create link" = "Vytvořit odkaz";
 
 /* No comment provided by engineer. */
-"Create new profile in [desktop app](https://simplex.chat/downloads/). 💻" = "Vytvořit nový profil v [desktop app](https://simplex.chat/downloads/). 💻";
+"Create new profile in [desktop app](https://popopx.chat/downloads/). 💻" = "Vytvořit nový profil v [desktop app](https://popopx.chat/downloads/). 💻";
 
 /* No comment provided by engineer. */
 "Create profile" = "Vytvořte si profil";

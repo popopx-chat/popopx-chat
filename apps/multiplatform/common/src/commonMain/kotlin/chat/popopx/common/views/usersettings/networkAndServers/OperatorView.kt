@@ -780,7 +780,7 @@ private fun ConditionsMarkdown(text: String) {
     style.colors,
     style.typography,
     Modifier.padding(8.dp),
-    // using CommonMarkFlavourDescriptor instead of GFMFlavourDescriptor because it shows `https://simplex.chat/` (link inside backticks) incorrectly
+    // using CommonMarkFlavourDescriptor instead of GFMFlavourDescriptor because it shows `https://popopx.chat/` (link inside backticks) incorrectly
     flavour = CommonMarkFlavourDescriptor(),
     components = style.components,
     padding = style.padding

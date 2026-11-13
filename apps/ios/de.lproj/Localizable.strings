@@ -1146,7 +1146,7 @@ marked deleted chat item preview text */
 "Buy in browser" = "Im Browser kaufen";
 
 /* No comment provided by engineer. */
-"By chat profile (default) or [by connection](https://simplex.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)." = "Per Chat-Profil (Voreinstellung) oder [per Verbindung](https://simplex.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA).";
+"By chat profile (default) or [by connection](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)." = "Per Chat-Profil (Voreinstellung) oder [per Verbindung](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA).";
 
 /* No comment provided by engineer. */
 "call" = "Anrufen";
@@ -1884,7 +1884,7 @@ server test step */
 "Create list" = "Liste erstellen";
 
 /* No comment provided by engineer. */
-"Create new profile in [desktop app](https://simplex.chat/downloads/). 💻" = "Neues Profil in der [Desktop-App](https://simplex.chat/downloads/) erstellen. 💻";
+"Create new profile in [desktop app](https://popopx.chat/downloads/). 💻" = "Neues Profil in der [Desktop-App](https://popopx.chat/downloads/) erstellen. 💻";
 
 /* No comment provided by engineer. */
 "Create profile" = "Profil erstellen";

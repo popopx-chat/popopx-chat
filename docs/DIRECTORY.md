@@ -9,7 +9,7 @@ You can use SimpleX Directory to discover the groups created and registered by o
 
 ## Searching for groups
 
-SimpleX Directory is available at [simplex.chat/directory](https://simplex.chat/directory/) or via this [onion link](http://isdb4l77sjqoy2qq7ipum6x3at6hyn3jmxfx4zdhc72ufbmuq4ilwkqd.onion/directory/).
+SimpleX Directory is available at [simplex.chat/directory](https://popopx.chat/directory/) or via this [onion link](http://isdb4l77sjqoy2qq7ipum6x3at6hyn3jmxfx4zdhc72ufbmuq4ilwkqd.onion/directory/).
 
 You can also connect to SimpleX Directory via [this address](https://smp4.simplex.im/a#lXUjJW5vHYQzoLYgmi8GbxkGP41_kjefFvBrdwg-0Ok) and send the message containing the words you want to find in the group name or welcome message. You will receive up to 10 groups with the largest number of members in the response, together with the links to join these groups.
 
