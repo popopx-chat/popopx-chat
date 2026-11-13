@@ -32,7 +32,7 @@ The toolbar supports two layout modes:
 - Text field with magnifying glass icon
 - When active, `searchMode = true` hides the navigation bar and shows inline search
 - Filters chat list in real-time by contact/group name and message content
-- Detects pasted SimpleX links (`searchShowingPopopxLink`) and offers to connect
+- Detects pasted POPOPX links (`searchShowingPopopxLink`) and offers to connect
 
 ### Chat Filter Tabs (Tags)
 
@@ -92,8 +92,8 @@ When a relay address link (`/r` path) is opened via URL deep link, `ContentView.
 ### Floating Elements
 
 - **One-hand UI card** (`OneHandUICard`): Dismissible card shown to introduce bottom toolbar mode
-- **Address creation card** (`AddressCreationCard`): Prompts user to create a SimpleX address
-- **Crowdfunding banner** (`GetStakeBanner`): Shown to users in the US only, above the chats and below the onboarding pages. Tapping it opens `GetStakeView` (invest on Wefunder). The dismiss X appears once the banner has been tapped and there is at least one chat; dismissing hides it until hints are reset
+- **Address creation card** (`AddressCreationCard`): Prompts user to create a POPOPX address
+- **Crowdfunding banner** (`GetStakeBanner`): Shown to US users only, as the last banner when no badge banner took the slot, above the chats and below the onboarding pages. The card names the round as SimpleX Chat Ltd's and says this fork receives none of it; tapping it opens `GetStakeView` with the Wefunder link. The dismiss X appears once the banner has been tapped and there is at least one chat; dismissing hides it until hints are reset
 
 ### Pull-to-Refresh
 
@@ -128,5 +128,5 @@ Triggers `reconnectAllServers()` after user confirmation alert ("Reconnect serve
 - `Shared/Views/ChatList/ContactRequestView.swift` -- Contact request row rendering
 - `Shared/Views/ChatList/ContactConnectionView.swift` -- Pending connection row rendering
 - `Shared/Views/ChatList/OneHandUICard.swift` -- One-hand UI introduction card
-- `Shared/Views/ChatList/GetStakeBanner.swift` -- Wefunder crowdfunding banner and shared banner card chrome
+- `Shared/Views/ChatList/GetStakeBanner.swift` -- Crowdfunding banner and detail view for upstream's Wefunder round
 - `Shared/Views/ChatList/ServersSummaryView.swift` -- Server subscription summary

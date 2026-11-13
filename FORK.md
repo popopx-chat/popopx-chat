@@ -182,6 +182,23 @@ each was meant to become That pass also repaired a compile break this fork shipp
     `:common:compileKotlinDesktop` failed in CI and no desktop artifact could be produced. Nothing on
     this machine compiles Kotlin, which is why it took a CI run to find it; `kt_import_gate.py` in the
     tooling directory is the standing gate for that class.
+
+12. **The crowdfunding funnel is one funnel on both platforms, and it names upstream** (2026-11-13) — iOS had no
+    `GetStakeBanner` at all (the view was removed in the inherited `9c8df8f09`) while the Kotlin app showed "Invest in
+    POPOPX Chat!" on a card whose only action opens `wefunder.com/simplex.chat`: another company's round, claimed for
+    this fork on one platform only. iOS got the view back with copy that says the round is SimpleX Chat Ltd's and that
+    POPOPX receives none of the money, and the Kotlin label followed. The URL, its `utm_source` tags and the Wefunder
+    wordmark in `apps/popopx-badge-service` stay as they are — they name a destination, not us — and so does
+    `packages/popopx-chat-mcp/README.md`, which already attributes the round to SimpleX Chat Ltd. Upstream's slide
+    artwork was not restored: it is proprietary, absent from this tree, and POPOPX marks on a third party's campaign
+    would restate the claim visually.
+    Maintenance hazard, found the hard way: `apps/ios/POPOPX.xcodeproj` uses classic groups (0
+    `PBXFileSystemSynchronizedRootGroup`), so a Swift file needs four `project.pbxproj` entries — build file, file
+    reference, group child, Sources phase — and a scripted edit that *replaces* its anchor line instead of inserting
+    after it removes a source file from the target while its Sources entry dangles. The module then fails with
+    cross-file `cannot find type` errors that name nothing the script touched. After any `project.pbxproj` edit,
+    `git diff --numstat` on that file must read `N 0`.
+
 ## What was deliberately NOT changed
 
 - **Copyright and attribution.** The `author` / `maintainer` / `copyright` fields of

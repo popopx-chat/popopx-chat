@@ -63,7 +63,7 @@ The root list view. Key responsibilities:
 ### Data Source
 - Reads `ChatModel.shared.chats` (all conversations)
 - Applies active filter from `ChatTagsModel.shared.activeFilter`
-- Applies search query filtering via [`filteredChats()`](../../Shared/Views/ChatList/ChatListView.swift#L555)
+- Applies search query filtering via [`filteredChats()`](../../Shared/Views/ChatList/ChatListView.swift#L586)
 - Sorts by last activity (most recent first), with pinned chats at top
 
 ### Layout
@@ -80,11 +80,11 @@ The root list view. Key responsibilities:
 
 | Function | Line | Description |
 |----------|------|-------------|
-| [`body`](../../Shared/Views/ChatList/ChatListView.swift#L183) | 183 | Main view body |
-| [`filteredChats()`](../../Shared/Views/ChatList/ChatListView.swift#L555) | 555 | Applies active filter and search to chat list |
-| [`searchString()`](../../Shared/Views/ChatList/ChatListView.swift#L598) | 598 | Normalizes search text for comparison |
-| [`unreadBadge()`](../../Shared/Views/ChatList/ChatListView.swift#L529) | 529 | Renders unread count circle badge |
-| [`stopAudioPlayer()`](../../Shared/Views/ChatList/ChatListView.swift#L549) | 549 | Stops any playing voice message |
+| [`body`](../../Shared/Views/ChatList/ChatListView.swift#L186) | 183 | Main view body |
+| [`filteredChats()`](../../Shared/Views/ChatList/ChatListView.swift#L586) | 555 | Applies active filter and search to chat list |
+| [`searchString()`](../../Shared/Views/ChatList/ChatListView.swift#L629) | 598 | Normalizes search text for comparison |
+| [`unreadBadge()`](../../Shared/Views/ChatList/ChatListView.swift#L546) | 529 | Renders unread count circle badge |
+| [`stopAudioPlayer()`](../../Shared/Views/ChatList/ChatListView.swift#L580) | 549 | Stops any playing voice message |
 
 ---
 
@@ -172,7 +172,7 @@ Horizontal scrolling tab bar below the navigation bar. Tabs:
 | Group Reports | `.presetTag(.groupReports)` | Groups with pending reports |
 | User tags | `.userTag(ChatTag)` | User-defined custom tags |
 
-Filter matching is handled by [`presetTagMatchesChat()`](../../Shared/Views/ChatList/ChatListView.swift#L1134) and the in-view [`TagsView`](../../Shared/Views/ChatList/ChatListView.swift#L928) struct.
+Filter matching is handled by [`presetTagMatchesChat()`](../../Shared/Views/ChatList/ChatListView.swift#L1165) and the in-view [`TagsView`](../../Shared/Views/ChatList/ChatListView.swift#L959) struct.
 
 ### ChatTagsModel State
 
@@ -197,7 +197,7 @@ class ChatTagsModel: ObservableObject {
 |------|------|------|-------------|
 | [`PresetTag`](../../Shared/Views/ChatList/ChatListView.swift#L36) | ChatListView.swift | 36 | Enum of built-in filter categories |
 | [`ActiveFilter`](../../Shared/Views/ChatList/ChatListView.swift#L53) | ChatListView.swift | 53 | Enum wrapping preset, user-tag, or unread filter |
-| [`setActiveFilter()`](../../Shared/Views/ChatList/ChatListView.swift#L1113) | ChatListView.swift | 1113 | Applies a filter and persists selection |
+| [`setActiveFilter()`](../../Shared/Views/ChatList/ChatListView.swift#L1144) | ChatListView.swift | 1113 | Applies a filter and persists selection |
 
 ### Tag Management Commands
 - `apiCreateChatTag(tag: ChatTagData)` -- create tag
@@ -212,7 +212,7 @@ class ChatTagsModel: ObservableObject {
 
 Search is available via pull-down gesture or search button in the navigation bar.
 
-**Search bar UI:** [`ChatListSearchBar`](../../Shared/Views/ChatList/ChatListView.swift#L662)
+**Search bar UI:** [`ChatListSearchBar`](../../Shared/Views/ChatList/ChatListView.swift#L693)
 
 ### Filtering Logic
 - Filters `ChatModel.chats` by matching search text against:
@@ -220,7 +220,7 @@ Search is available via pull-down gesture or search button in the navigation bar
   - `chatInfo.localAlias` (local alias)
   - `chatInfo.fullName` (full name)
 - For deeper message content search, uses `apiGetChat(chatId:, search:)` parameter
-- Core logic in [`filteredChats()`](../../Shared/Views/ChatList/ChatListView.swift#L555) and [`searchString()`](../../Shared/Views/ChatList/ChatListView.swift#L598)
+- Core logic in [`filteredChats()`](../../Shared/Views/ChatList/ChatListView.swift#L586) and [`searchString()`](../../Shared/Views/ChatList/ChatListView.swift#L629)
 
 ### Search Results
 - Matching chats are displayed in the same list format
@@ -282,20 +282,21 @@ The FAB (floating action button) in the bottom-right corner opens the new chat f
 
 ## 10. `GetStakeBanner` {#10-crowdfunding-banner}
 
-> Removed from POPOPX iOS builds. This section documents the upstream view: `GetStakeBanner.swift` and
-> `GetStakeView` are not in this app, and the chat-list banner slot they occupied carries
-> [`SupportPOPOPXBanner`](../../Shared/Views/Badges/SupportPOPOPXBanner.swift) instead.
+> POPOPX ships this banner, but not upstream's claim on it: the card says the round belongs to SimpleX Chat Ltd and
+> that this fork receives none of the money, and it carries no image. Upstream's slide artwork is proprietary and is
+> not in this tree, and putting POPOPX marks on a third party's campaign would restate the claim visually. The
+> Wefunder URL and its `utm_source=app_ios` tag are upstream's values, held because they are the destination.
 
-**File**: `Shared/Views/ChatList/GetStakeBanner.swift`
+**File**: [`Shared/Views/ChatList/GetStakeBanner.swift`](../../Shared/Views/ChatList/GetStakeBanner.swift)
 
-Gradient card inviting the user to invest on Wefunder. Shown only when [`isInUS`](../../Shared/Views/Onboarding/WhatsNewView.swift#L46) — the same condition that gates the Wefunder row in settings — and only while `DEFAULT_GET_STAKE_BANNER_DISMISSED` is false.
+Gradient card (chrome only, no image) headed "Upstream's crowdfunding round", subtitled that the round is run by SimpleX Chat Ltd. Shown only when [`chatModel.bannerSlotFree(for: .getStake)`](../../Shared/Model/ChatModel.swift#L478), [`isInUS`](../../Shared/Views/Onboarding/WhatsNewView.swift#L46) — the same condition that gates the crowdfunding row in settings — and `DEFAULT_GET_STAKE_BANNER_DISMISSED` is false.
 
 ### Placement
 
 | Where | Condition | Layout |
 |-------|-----------|--------|
-| Chat list | rendered whenever [`chatListContent`](../../Shared/Views/ChatList/ChatListView.swift#L477) is, in the `List` after `OneHandUICard` and before the chats | `.padding(.vertical, 3)`, flipped for one-hand UI, `.zIndex(1)` |
-| Onboarding | below [`ConnectOnboardingView`](../../Shared/Views/NewChat/OnboardingCards.swift#L135) when `shouldShowOnboarding` | `.padding(.horizontal, 20)` (the onboarding cards' margin), `.padding(.bottom, 8)` |
+| Chat list | the last branch of the banner chain in [`chatListContent`](../../Shared/Views/ChatList/ChatListView.swift#L477), after `OneHandUICard` and before the chats: reached only when neither the badge alert nor the pitch holds the slot | `.padding(.vertical, 3)`, flipped for one-hand UI, `.zIndex(1)` |
+| Onboarding | below [`ConnectOnboardingView`](../../Shared/Views/NewChat/OnboardingCards.swift#L135) when `shouldShowOnboarding`, under the same `bannerSlotFree` check | `.padding(.horizontal, 20)` (the onboarding cards' margin), `.padding(.bottom, 8)` |
 
 The list has a single banner slot, filled by an `if`/`else if` chain in priority order: the badge alert banner, the pitch, then the Wefunder banner. The badge alert banner shows `bannerBadgeAlert`, the current profile's alert when its kind has a banner (support ended, renewal failed, subscription ended, payment problem, subscription cancelled, renewal soon; not prepaid ending or a kind from a newer core), and one `switch` over the kind at the banner site picks its title, subtitle and warning colour; its X leads to the same remind-later or dismiss alert for every kind. The renewal-failed subtitle is `renewalFailure`: the reason in `BadgeModel`'s `badgeState.issueError` (`BadgeIssueFailure.text`), or "Your badge could not be renewed." when the state carries none, as after an alert that arrives without a new state; the payment-problem subtitle is "The store could not charge your payment method.", not `issueError`, which in billing retry is a failed renewal request rather than the payment's reason. Each banner records itself in `ChatModel.chatListBanner` (`.badgeAlert`, `.badgePitch`, `.getStake`) in its `onAppear`, and the pitch and Wefunder conditions start with `chatModel.bannerSlotFree(for:)` — true only while nothing else was shown this app session — so dismissing a banner never puts another in its place until restart. The alerts have no such check: an alert takes the slot whenever present, and once shown it holds it. The pitch also requires `noShownBadge`, false until `BadgeModel` holds the current user's state, so it cannot take the slot from a supporter whose badge loads a moment later. The onboarding placement applies the same `bannerSlotFree` check and records `.getStake`.
 
@@ -308,17 +309,17 @@ In the onboarding branch the `.scaleEffect` and `ThemedBackground` are applied t
 | `DEFAULT_GET_STAKE_BANNER_TAPPED` | `openGetStake()` | the dismiss X appears from then on, while there are chats |
 | `DEFAULT_GET_STAKE_BANNER_DISMISSED` | the dismiss X | hides the banner in both placements |
 | `DEFAULT_SUPPORTER_BANNER_TAPPED` | tapping the supporter pitch | the pitch's dismiss X appears from then on |
-| `DEFAULT_SUPPORTER_BANNER_SHOWN` | the pitch's dismiss X, through its "You can support SimpleX later in Settings." alert, and a successful code redemption | hides the pitch |
+| `DEFAULT_SUPPORTER_BANNER_SHOWN` | the pitch's dismiss X, through its "You can support POPOPX later in Settings." alert, and a successful code redemption | hides the pitch |
 
 The badge alert banner always offers the X; only the pitch waits to be tapped once, so a user who has not looked at it cannot dismiss it unseen.
 
 Both are in `hintDefaults`, so "Reset all hints" in the developer settings restores the banner. The X is never offered in the onboarding branch, so the banner cannot be dismissed before the user has a chat.
 
-Tapping the card opens `GetStakeView` as an `appSheet`.
+Tapping the card opens [`GetStakeView`](../../Shared/Views/ChatList/GetStakeBanner.swift#L48) as an `appSheet`; settings pushes the same view with `fromSettings: true` from the crowdfunding section, gated by the same `isInUS`.
 
 ### Shared card chrome
 
-`BannerCard` (a `ViewModifier`: paddings, minimum height scaled by Dynamic Type, gradient background, rounded corners) and `BannerDismissButton` are declared separately from `GetStakeBanner` so other banners can adopt the same chrome. The gradient reuses `OnboardingCardView.gradientPoints`, `lightStops` and `darkStops`.
+`BannerCard` (a `ViewModifier`: paddings, minimum height scaled by Dynamic Type, gradient background, rounded corners) and `BannerDismissButton` are declared in [`SupportPOPOPXBanner.swift`](../../Shared/Views/Badges/SupportPOPOPXBanner.swift#L94), where the supporter pitch uses them, so both banners share one chrome. The gradient reuses `OnboardingCardView.gradientPoints`, `lightStops` and `darkStops`.
 
 ---
 
@@ -337,4 +338,4 @@ Tapping the card opens `GetStakeView` as an `appSheet`.
 | Contact connection view | [`ContactConnectionView.swift`](../../Shared/Views/ChatList/ContactConnectionView.swift) | | |
 | Server summary | [`ServersSummaryView.swift`](../../Shared/Views/ChatList/ServersSummaryView.swift) | | |
 | One-hand UI card | [`OneHandUICard.swift`](../../Shared/Views/ChatList/OneHandUICard.swift) | | |
-| Crowdfunding banner | `GetStakeBanner.swift` | `GetStakeBanner` | 13 |
+| Crowdfunding banner | [`GetStakeBanner.swift`](../../Shared/Views/ChatList/GetStakeBanner.swift) | `GetStakeBanner` | [15](../../Shared/Views/ChatList/GetStakeBanner.swift#L15) |

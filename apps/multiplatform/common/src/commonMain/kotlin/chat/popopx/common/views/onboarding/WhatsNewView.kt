@@ -1183,25 +1183,25 @@ private val getStakeSlides: List<CrowdfundingSlide> = listOf(
     MR.images.crowdfunding_1,
     "The first and the only messaging network without any user IDs",
     null,
-    "By investing, you can benefit from the company growth, and help us build the future of private and secure communications."
+    "By investing, you can benefit from the company growth, and help SimpleX Chat Ltd build the future of private and secure communications."
   ),
   CrowdfundingSlide(
     MR.images.crowdfunding_2,
     "480,000+ users joined on their own",
     null,
-    "POPOPX users have been more than doubling every year without any paid marketing, and donated over \$650,000."
+    "SimpleX Chat users have been more than doubling every year without any paid marketing, and donated over \$650,000."
   ),
   CrowdfundingSlide(
     MR.images.crowdfunding_3,
-    "Developers already bet on POPOPX success",
+    "Developers already bet on SimpleX Chat's success",
     "Independent developers created moderation and AI bots, Telegram bridges, and a public server registry.",
-    "Every service developers build on POPOPX Network may increase its value, and bring new users to POPOPX Chat."
+    "Every service developers build on SimpleX Network may increase its value, and bring new users to SimpleX Chat."
   ),
   CrowdfundingSlide(
     MR.images.crowdfunding_4,
     "Revenue plan: businesses & big channels pay",
-    "POPOPX Chat plans to earn from the infrastructure and services that creators, businesses and large communities need as they grow.",
-    "Read about how we plan to make POPOPX Chat and network profitable, and about all the investment terms on Wefunder."
+    "SimpleX Chat plans to earn from the infrastructure and services that creators, businesses and large communities need as they grow.",
+    "Read about how SimpleX Chat Ltd plan to make their network profitable, and about all the investment terms on Wefunder."
   ),
 )
 
@@ -1233,7 +1233,7 @@ fun GetStakeView(showFirstImage: Boolean, inCenterOfWindow: Boolean = false, clo
 
   ColumnWithScrollBar(Modifier.pinchZoom().padding(horizontal = DEFAULT_PADDING)) {
     // in the center of the window the page is wide enough for the title to fit on one line
-    val title = "Invest in\nPOPOPX Chat"
+    val title = "Upstream's\ncrowdfunding round"
     AppBarTitle(if (inCenterOfWindow) title.replace("\n", " ") else title, withPadding = false)
     if (showFirstImage) {
       slideImage(getStakeSlides[0])
@@ -1271,7 +1271,7 @@ fun GetStakeView(showFirstImage: Boolean, inCenterOfWindow: Boolean = false, clo
       )
       if (!chatModel.desktopNoUserNoRemote) {
         TextButtonBelowOnboardingButton(
-          "or ask POPOPX team",
+          "or ask the SimpleX Chat team",
           onClick = if (stopped) null else ({
             close()
             uriHandler.openVerifiedPopopxUri(CROWDFUNDING_CONTACT_URI)

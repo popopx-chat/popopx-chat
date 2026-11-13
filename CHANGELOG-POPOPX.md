@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-13 (114 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-13 (115 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -322,6 +322,103 @@ The same ruling closed the debug app label: `app.name=SimpleX Debug` became `POP
 `AndroidManifest.xml:45`/`:60` render it as the launcher name - but only for a developer who sets it, since the
 default is `@string/app_name`, which is already `POPOPX`. No compatibility reading, per "this is a new
 application".
+
+### The iOS crowdfunding funnel was restored, with the round named as upstream's (2026-11-13)
+
+The funnel was asymmetric. The Kotlin app showed a card titled "Invest in POPOPX Chat!" whose only action opens
+`wefunder.com/simplex.chat`; iOS had no such card at all, because the view was removed in the inherited commit
+`9c8df8f09` and its banner slot carries `SupportPOPOPXBanner`. The destination was never the problem - the label
+was: a card in our brand recruiting investors for another company's round, on the platform that still had it.
+Ruled 2026-11-13: restore the iOS funnel, so the two platforms show the same thing, and move both platforms' copy
+to name the round as SimpleX Chat Ltd's.
+
+Restored on iOS as one new file, `Shared/Views/ChatList/GetStakeBanner.swift` (82 lines): `GetStakeBanner` (`:15`)
+and `GetStakeView` (`:48`), with fork-authored copy - headline "Upstream's crowdfunding round", subheadline "The
+round is run by SimpleX Chat Ltd - POPOPX receives none of it", and a detail paragraph that says this fork is not
+part of the round and receives none of the money. The destination is unchanged:
+`https://wefunder.com/simplex.chat?utm_source=app_ios` (`:13`), held verbatim including the `utm_source`, because it
+names where the user goes rather than who we are. The wiring moved with it: `.getStake` in `ChatListBanner`
+(`ChatModel.swift:389`), the chat-list branch as the last arm of the banner-slot chain (`ChatListView.swift:554`) and
+the onboarding branch under the same `bannerSlotFree` check (`:463`), the sheet (`:227`) and `openGetStake()`
+(`:454`), `DEFAULT_GET_STAKE_BANNER_TAPPED`/`DEFAULT_GET_STAKE_BANNER_DISMISSED` (`SettingsView.swift:65`/`:66`)
+registered in `appDefaults` (`:132`/`:133`) and `hintDefaults` (`:168`/`:169`) - so "Reset all hints" restores the
+banner - and the `isInUS`-gated section in settings (`:427`).
+
+Two things upstream had in this view were deliberately not restored. The slide artwork is SimpleX's proprietary
+illustration, absent from this tree, and dressing a third party's campaign with POPOPX marks would restate the very
+claim we removed in text - so the card is chrome only, no image. And the "or ask the SimpleX team" contact route,
+which would send our users into upstream's support chat under our brand.
+
+The Kotlin side kept its destination and lost the claim: `invest_banner_title` in
+`moko-resources/base/strings.xml` and the two `WhatsNewView.kt` strings (3 occurrences) now read "Upstream's
+crowdfunding round", and the slide body says SimpleX Chat Ltd plan to make *their* network profitable. That first
+pass was a half-move, and the rest of the same card said so, so the non-translatable copy went as one unit
+(`tools/r7/r58_kt_funnel_relabel.py`, 7 lines / 2 files): the four slides now name SimpleX Chat Ltd, SimpleX Chat
+and SimpleX Network instead of this fork - the user growth, the donation total, the developer ecosystem and the
+revenue plan are upstream's, and they are what a Wefunder subscriber is buying - and the row under the button reads
+"or ask the SimpleX Chat team", because `CROWDFUNDING_CONTACT_URI` (`WhatsNewView.kt:1074`) is a contact on
+`smp11.simplex.im`, upstream's address, not ours. `invest_settings_title` went the same way ("Own a part of SimpleX
+Chat"). Three `POPOPX` mentions remain in that file, all build identity (`POPOPX_ASSETS`, `POPOPXTheme`,
+`generalGetString`).
+
+Verified: `xcodebuild` **BUILD SUCCEEDED** for the device target and the arm64 simulator. The first attempt failed
+with 25 `cannot find type` errors across the module - `UserPickerSheet`, `PresetTag`, `ActiveFilter`,
+`SaveableSettings`, all declared in `ChatListView.swift` - because the scripted `project.pbxproj` edit *replaced*
+the two `ChatListView.swift` lines instead of inserting beside them, so the file left the target while its Sources
+phase entry dangled. The repair is 4 pure insertions (`git diff --numstat` = `4 0`), and membership was then
+cross-checked file by file: `GetStakeBanner.swift` appears exactly 4 times (build file, file reference, group
+child, Sources phase), and the only disk files with no file reference are a playground `Contents.swift` and
+`Shared/Views/Helpers/Keyboard.swift` - both already absent in `HEAD`, so they are pre-existing dead files, not part
+of this change.
+
+Snapshots: `SnapshotScene(GetStakeBanner_Previews.self)` is back in the harness (`POPOPX Snapshots/SnapshotTests.swift:280`)
+and the set was re-rendered on the iPhone 17 Pro simulator - **264 renders, 258 byte-identical** to the committed
+baselines (the determinism proof), **6 replaced**: `GetStakeBanner-{light,dark}-large.png`, which the removal had
+orphaned and are now our own renders of our own copy, `ChatListView-{light,dark}-large.png`, because the banner
+occupies a list row, and `SettingsView-{light,dark}-large.png`, because `SKStorefront` answers `""` under the
+simulator and `isInUS` counts that as the US. Nothing is new and nothing is missing, so the set stays at 376 files.
+Android/desktop: no desktop scene renders `GetStakeView`, and the what's-new card reads the *localized* `v7_1_invest`
+key, which this commit does not touch - so the only way the 211 desktop baselines are affected is if
+`SettingsView.PreviewSettingsLayout` renders the crowdfunding row, and that is a CI question (`desktopTest` is
+`workflow_dispatch`-only) that cannot be answered before the push.
+
+The documentation that had described the removal went back in the same step: `spec/client/chat-list.md` §10 lost its
+"Removed from POPOPX iOS builds" note and now describes the shipped view - the placement table says what the code
+does (the chat-list arm is the *last* of the banner-slot chain, reached only when no badge banner holds it), the
+chrome paragraph points at `SupportPOPOPXBanner.swift:94` where `BannerCard` and `BannerDismissButton` are actually
+declared, and the Source Files row links the file with `GetStakeBanner` at `:15`. `product/views/chat-list.md` (3
+lines) and `spec/impact.md:55` followed, and `SupportPOPOPXBanner.swift:93`'s comment no longer says the chrome
+"lived in `GetStakeBanner.swift` until the invest tier removed it". The insertions moved every later line in three
+source files, so **65** `#L<n>` anchors across `spec/state.md`, `spec/client/chat-list.md` and `spec/architecture.md`
+were remapped from the diff's insertion hunks (`tools/r7/r58_anchor_remap.py`, logged to
+`r58_anchor_remap_20261113.jsonl`); the remap is content-preserving by measurement, not by argument - for all 65,
+the source line at the new number is byte-identical to the line at the old number in `HEAD`. The same pass repaired
+three doc lines that contradicted shipped copy (the stale-mirror class): "You can support **SimpleX** later in
+Settings." -> POPOPX (the code says POPOPX at `ChatListView.swift:434`), "create a SimpleX address" -> POPOPX, and
+"pasted SimpleX links" -> POPOPX (`:812` renders "Search or paste POPOPX link").
+
+What was measured and left alone. `apps/popopx-badge-service` says "Learn more on Wefunder" beside the Wefunder
+wordmark, and `packages/popopx-chat-mcp/README.md:74` says "SimpleX Chat, the company that builds SimpleX Network,
+is raising a community round" - both name the destination and its owner, so neither misattributes. The rest of the
+crowdfunding copy does claim the round for us, and it comes in two shapes that decide the size of the fix. Part 2 of
+this commit could move the untranslated line: moko key `invest_settings_title` is `translatable="false"`, so naming
+the round's owner there is 1 line in 1 file. Its localized sibling `v7_1_invest` - base "Own a part of POPOPX Chat!
+🚀", read at `WhatsNewView.kt:961`, `:988` and `:1130`, where the third is the `InvestInSimpleXChatView` heading - is
+20 files and 20 lines. The same split on the other two claims: `badge_invested` (23 files, 23 lines) and
+`popopx_name_sales_footer` (21 files, 21 lines) on the Kotlin side, and on iOS the literals at
+`Shared/Views/Helpers/NameBadge.swift:152` ("%@ invested in POPOPX Chat crowdfunding.") and
+`Shared/Views/UserSettings/UserAddressView.swift:924` ("Crowdfunding investors can reserve names before the sale
+starts.") - 1 line each, the first with 12 localized `.strings` rows behind it, the second with none, so it renders in
+English in every language. Naming whose round it is therefore puts "SimpleX Chat" back into 78 shipped string lines
+(64 moko + 12 iOS `.strings` rows + the 2 Swift literals) - the opposite direction from the copy tier - so the whole
+set is listed for ruling rather than carried by this commit. Measured alongside it, a case where the key itself carries
+upstream's address: 11 `.strings` rows keyed on "Crowdfunding investors can reserve names before the sale starts:
+[simplex.domains](https://simplex.domains/)", the retired English source of that line - a URL inside the lookup key,
+which is why it matches nothing in the app today. The iOS localization catalogs also still hold 34 rows in 12 `.lproj`
+files whose key is the retired "Invest in POPOPX Chat!"
+(plus 118 rows in the exported `.xcloc` bundles, which are not build inputs - `project.pbxproj` never mentions them);
+they translate a string no longer in the app, and our new English copy has no key there at all, so a non-English
+user sees the restored banner in English until localizations are exported again.
 
 ### What was removed from this repository
 

@@ -90,7 +90,7 @@ struct SupportPOPOPXBanner_Previews: PreviewProvider {
     }
 }
 
-// Banner chrome shared by the chat-list banners; it lived in GetStakeBanner.swift until the invest tier removed it.
+// Banner chrome for the chat-list banners (`SupportPOPOPXBanner`, `GetStakeBanner`); one declaration so the cards cannot drift apart.
 struct BannerCard: ViewModifier {
     @Environment(\.colorScheme) var colorScheme: ColorScheme
 

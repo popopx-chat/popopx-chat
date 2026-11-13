@@ -266,7 +266,7 @@ Optional desktop pairing allows controlling the mobile app from a desktop client
 
 - **Pairing**: Encrypted QR code scanned by desktop client establishes a session
 - **Commands**: [`connectRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1613), [`findKnownRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1620), [`confirmRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1624), [`verifyRemoteCtrlSession`](../Shared/Model/POPOPXAPI.swift#L1630), [`listRemoteCtrls`](../Shared/Model/POPOPXAPI.swift#L1636), [`stopRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1642), [`deleteRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1646)
-- **State**: [`ChatModel.remoteCtrlSession`](../Shared/Model/ChatModel.swift#L395)`: RemoteCtrlSession?` tracks the active session
+- **State**: [`ChatModel.remoteCtrlSession`](../Shared/Model/ChatModel.swift#L396)`: RemoteCtrlSession?` tracks the active session
 - **Transport**: Encrypted reverse HTTP transport between mobile and desktop
 - **Source**: [`Shared/Views/RemoteAccess/ConnectDesktopView.swift`](../Shared/Views/RemoteAccess/ConnectDesktopView.swift#L1-L545), see `Remote.hs` in `../../src/Simplex/Chat/`
 
