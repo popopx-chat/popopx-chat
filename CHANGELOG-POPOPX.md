@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-13 (102 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-13 (104 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -221,6 +221,19 @@ The same run left **7 test mirrors** behind from earlier tiers: 5 still named th
 disagreed with their producers in opposite directions — `PopopxChat:/badge/…` had renamed a scheme that is
 held as `simplexchat`, while `SimpleX:/a#…` still spelled the connection scheme that moved to `popopx` in
 `05dd5a73c`.
+
+**The class now has a guard that fails if it comes back.** `ServerOperatorsWireTest.kt` decodes the
+`conditions` value of a real `serverOperatorConditions` response — taken byte for byte from the failed run's
+`app.log` — with the app's own `json`, and asserts both `operatorTag`s read `OperatorTag.SIMPLEX`. Renaming
+either side alone turns it red, and the payload is not hand-written, so it cannot drift from the core.
+
+**The last desktop launcher line moved with it.** `distribute/popopx.desktop`, which `make-appimage-linux.sh`
+installs as `com.popopxchat.popopx.desktop`, still read `Name=SimpleX Chat` and `/opt/simplex/…` although our
+package installs the launcher as `/opt/popopx/bin/popopx`. The deb is unaffected either way: `make-deb-linux.sh`
+rewrites the desktop entry jpackage generates for it, and only `Name=` survives into the AppImage menu. Held,
+with the reason in the file: in `scripts/flatpak/com.popopxchat.popopx.desktop`, `Exec=simplex %U` names the
+command the Flatpak manifest declares (that manifest is not here) and `StartupWMClass=simplex-chat` has to match
+the class the running app sets, which nothing in this repository controls.
 
 ### What was removed from this repository
 

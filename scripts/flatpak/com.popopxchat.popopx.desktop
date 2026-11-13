@@ -5,6 +5,9 @@ Name=POPOPX Chat
 Comment=A private & encrypted open-source messenger without any user IDs (not even random ones)!
 Keywords=chat;message;private;secure;popopx;
 Categories=Utility;Chat;InstantMessaging;
+# Exec names the command the Flatpak manifest declares - that manifest is not in this repository, so the value
+# moves with it. StartupWMClass must match the class the running app sets, which is only measurable on a Linux
+# build; nothing in this repository sets it.
 Exec=simplex %U
 Icon=com.popopxchat.popopx
 StartupWMClass=simplex-chat

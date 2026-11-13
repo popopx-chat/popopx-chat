@@ -1,8 +1,8 @@
 [Desktop Entry]
 Type=Application
-Name=SimpleX Chat
+Name=POPOPX Chat
 Comment=Private and secure open-source messenger - no user IDs (not even random numbers)
-Exec=/opt/simplex/bin/simplex %u
-Icon=/opt/simplex/lib/simplex
+Exec=/opt/popopx/bin/popopx %u
+Icon=/opt/popopx/lib/popopx
 Categories=Network;Chat;
 MimeType=x-scheme-handler/simplexchat;x-scheme-handler/popopx;
