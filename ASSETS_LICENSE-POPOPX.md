@@ -53,12 +53,18 @@ not), and it forbids modification. The largest groups:
 
 - `website/src/img/**` 333, `docs/**` 275, `blog/**` 194, `plans/**` 30, root `images/**` 14,
   `media-logos/**` 8, `fastlane/**` 9, `tests/**` 5 — documentation and site artwork;
-- **the two build-input sets** `assets/multiplatform/resources/MR/images/**` (92 rasters) and
-  `apps/multiplatform/common/src/commonMain/resources/assets/default/MR/images/**` (46 vectors). These
-  are not decoration in a corner of the repo: every release and CI build passes
-  `-Ppopopx.assets.dir=../../assets` (`apps/multiplatform/common/build.gradle.kts:14-37`), so upstream's
-  illustrations are compiled **into** our desktop and Android apps. Ruling C2 (2026-11-13) is to replace
-  them; until that lands, no POPOPX build is distributable — ours or a fork's.
+- ~~**the two build-input sets**~~ **replaced 2026-11-13 (ruling C2)**.
+  `assets/multiplatform/resources/MR/images/**` is now 80 POPOPX renders (40 names × @2x/@3x, each at its
+  original pixel size) drawn from vector masters in `branding/source-svg/`, and 12 files that no code
+  referenced were deleted (`own_stake*`, `simplex_address*`). The names stay because they are compiled
+  `MR.images.<name>` identifiers; the bytes are ours, and `cmp` against upstream returns nothing for all
+  80. The companion set `apps/multiplatform/common/src/commonMain/resources/assets/default/MR/images/**`
+  (46 vectors) was measured to be **empty 24×24 placeholders** — `<rect width="24" height="24" fill="none"/>`
+  — which exist so moko generates the identifier when `POPOPX_ASSETS=false`; they carry no artwork, so
+  there is nothing of upstream's to replace in them.
+  These were not decoration: every release and CI build passes `-Ppopopx.assets.dir=../../assets`
+  (`apps/multiplatform/common/build.gradle.kts:14-37`), so until this landed upstream's illustrations were
+  compiled **into** our desktop and Android apps. That blocker is closed for this set.
 
 Replaced or removed upstream files keep their licence notices (AGPL-3.0 §4 forbids removing notices, and
 the notices are the record of what may not ship).
