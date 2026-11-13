@@ -153,7 +153,7 @@ function parseChildren(node, html) {
 
 const globalConfig = {
   onionLocation: "http://isdb4l77sjqoy2qq7ipum6x3at6hyn3jmxfx4zdhc72ufbmuq4ilwkqd.onion",
-  siteLocation: "https://simplex.chat",
+  siteLocation: "https://popopx.chat",
   release: "https://github.com/popopx-chat/popopx-chat/releases/latest/download/"
 }
 

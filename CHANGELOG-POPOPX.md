@@ -77,6 +77,14 @@ the fork renamed `protocol/simplex-messaging.md` → `protocol/popopx-messaging.
 the path. The three test harnesses that download `smp-server`/`xftp-server` now take them from
 `popopx-chat/popopxmq`, which publishes no releases: those suites fail with a 404 until it does, by
 ruling, rather than testing our core against a server built from another source (`FORK.md` item 7).
+The site's own location moved too: `siteLocation` (`website/.eleventy.js`, read by 19 `og:url`/`og:image`
+sites as `{% cfg 'siteLocation' %}`; there is no environment override) and `website/markdown_pages.js`,
+which declares the same string a second time, plus the two blog feeds' `metadata.url` — all
+`https://simplex.chat` → `https://popopx.chat`, because `website/src/CNAME` already read `popopx.chat`.
+`onionLocation` next to it stayed upstream's. 178 further `https://simplex.chat` occurrences in the site
+were not touched, and 52 of them are in `website/src/llms/{sitemap,robots,docs,llms-txt,llms-full}.njk`,
+which hardcode the host instead of reading `cfg` — so the generated sitemap and robots still point at
+upstream while `og:url` points at us.
 The npm and PyPI names in the committed manifests are upstream's on purpose: `packages_release.py
 test-names` rewrites them, with `npm:` aliases for the cross-package dependencies, from the
 repository variables `NPM_SCOPE` and `PYPI_PROJECT` at publish time — see

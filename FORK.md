@@ -116,8 +116,12 @@ authoritative per-file record.
   build), `docs/dependencies/HASKELL.md` (a Dependency License Report whose entries are Hackage package
   names — `simplexmq-6.4.0.1` is upstream's), `plans/**`, `blog/**`, `CHANGELOG.md`, `docs/LINKS.md`,
   `docs/TRANSPARENCY.md` and `PRIVACY.md` as records, the `dist-newstyle/**` paths that captured commands
-  quote, and `website/**` apart from the nav item — that site is upstream's and its `siteLocation` still
-  says `simplex.chat`, so its protocol links describe upstream's copy of the spec. Two
+  quote, and `website/**` apart from the nav item and from the site's own location (2026-11-13:
+  `siteLocation` and the two feeds' `metadata.url` now say `https://popopx.chat`, because
+  `website/src/CNAME` already read `popopx.chat` — the site was configured to be served from our domain
+  while declaring itself `simplex.chat`; `onionLocation` stayed upstream's). Its remaining `simplexmq` and
+  `simplex.chat` links still describe upstream's copy of the spec, which is what `--include-website` would
+  move. Two
   `…/simplexmq/refs/heads/stable/scripts/docker/docker-compose-smp-{complete,manual}.env` references also
   stayed because those files exist nowhere: upstream ships only `docker-compose-smp.env`, so the two doc
   lines are broken at the source and are not this fork's regression.
