@@ -84,6 +84,15 @@ A rebranded fork is a modified work. Therefore:
    - `website/src/img/**` (the wordmark images, screenshots, illustrations, `SimpleXExplainedLottie.json`)
      and the 93 tracked files under `assets/**`, if this fork's website ships them.
    The action for each is **replace or remove before distribution**, not rename.
+
+**Ruling C2 (2026-11-13)** promotes the two *build-input* sets above everything else, because they are not
+documentation: `assets/multiplatform/resources/MR/images/**` (92 rasters) and
+`apps/multiplatform/common/src/commonMain/resources/assets/default/MR/images/**` (46 vectors) are fed to
+the app by `-Ppopopx.assets.dir=../../assets`, which every desktop/Android build and CI job passes
+(`desktop-linux.yml:251,277`, `build.yml:1649`, `android-emu.yml:276`, `scripts/{desktop,android}/*`), so
+upstream's illustrations compile into a POPOPX-branded app. They are being redrawn from POPOPX masters;
+the 25 logical images behind the 138 files are listed in `ASSETS_LICENSE-POPOPX.md`, which also records
+that the file *names* stay (they are compiled `MR.images.*` resource identifiers) while the bytes change.
 3. **The licence texts stay**, including in folders whose assets we have replaced or removed — §4
    forbids removing notices, and they are the record of what we may not ship. Where an asset was
    replaced, the replacement's own provenance belongs next to it.
@@ -92,5 +101,10 @@ A rebranded fork is a modified work. Therefore:
 
 - Whether POPOPX may *ask permission* for the artwork (the licence allows use "with prior written
   permission from SimpleX Chat Ltd") — a business decision, not a code one.
-- `docs/TRADEMARK.md` is upstream's policy; the fork's own trademark position is not written yet.
+- ~~`docs/TRADEMARK.md` is upstream's policy; the fork's own trademark position is not written yet.~~
+  **Written 2026-11-13**: `docs/TRADEMARK-POPOPX.md` (marks, asserted as unregistered/common-law) and
+  `ASSETS_LICENSE-POPOPX.md` (the artwork this fork created, proprietary, no redistribution without
+  written permission). Upstream's `docs/TRADEMARK.md` and the three `ASSETS_LICENSE.md` files are kept
+  verbatim, so a downstream fork inherits both brands — recorded in `NOTICE` and in `README.md`'s
+  License section.
 - Any service this fork later operates triggers §13 for that service; nothing is operated now.

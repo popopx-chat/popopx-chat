@@ -28,3 +28,21 @@ and are pending replacement in this fork.
 "SimpleX", "SimpleX Chat" and the associated logos are trademarks of SimpleX Chat
 Ltd. This fork uses the name POPOPX for that reason; no affiliation, sponsorship
 or endorsement is implied.
+
+POPOPX-side notices, on the same two tracks:
+
+  "POPOPX", "POPOPX Chat", the POPOPX wordmark and logo and the popopx.chat domain
+    are trademarks of the POPOPX Chat project. They are unregistered; the rights
+    asserted are those that attach to an unregistered mark. Policy:
+    docs/TRADEMARK-POPOPX.md
+
+  Copyright (C) 2026 POPOPX. All rights reserved.
+    -- the graphic assets this fork created: the iOS marks and app icons, the
+    Android launcher and status-bar icons, the "POPOPX Snapshots" renders and the
+    package images. They are not part of the AGPL grant and may not be
+    redistributed in another project's distribution, modified or unmodified,
+    without prior written permission. Licence: ASSETS_LICENSE-POPOPX.md
+
+A downstream fork of this repository carries both sets of obligations: POPOPX's,
+above, and SimpleX Chat Ltd's, which are kept verbatim in the files named in the
+first half of this notice.

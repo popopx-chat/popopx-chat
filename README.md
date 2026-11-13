@@ -4,6 +4,11 @@
 > [NOTICE](./NOTICE) for what was changed, what upstream attribution is retained, and which
 > assets are **not** covered by the AGPL grant. The badges below still point at the upstream
 > project's build and release feeds.
+>
+> The same holds for our own brand: **POPOPX**, the POPOPX wordmark, logo, icons and artwork and
+> `popopx.chat` are outside the AGPL grant too — [TRADEMARK-POPOPX](./docs/TRADEMARK-POPOPX.md) and
+> [ASSETS_LICENSE-POPOPX](./ASSETS_LICENSE-POPOPX.md). **A fork that distributes must rebrand and
+> redraw**: keep the code, change the name, ship your own icons and illustrations.
 
 [![build](https://github.com/simplex-chat/simplex-chat/actions/workflows/build.yml/badge.svg?branch=stable)](https://github.com/simplex-chat/simplex-chat/actions/workflows/build.yml)
 [![GitHub downloads](https://img.shields.io/github/downloads/simplex-chat/simplex-chat/total)](https://github.com/simplex-chat/simplex-chat/releases)
@@ -450,7 +455,24 @@ Please do NOT report security vulnerabilities via GitHub issues.
 
 ## License
 
-This software is licensed under the GNU Affero General Public License version 3 (AGPLv3). See the [LICENSE](./LICENSE) file for details. The SimpleX and SimpleX Chat name, logo, associated branding materials, and application and website graphic assets (illustrations, images, visual designs, etc.) are not covered by this license and are subject to the terms outlined in the [TRADEMARK](./docs/TRADEMARK.md) and [ASSETS_LICENSE](./assets/ASSETS_LICENSE.md) files respectively.
+**Two tracks.** The source code of this software is licensed under the GNU Affero General Public
+License version 3 (AGPLv3) — see the [LICENSE](./LICENSE) file. Nothing else follows from that grant:
+the names, the logos and the graphic assets are proprietary and are licensed separately, on both sides
+of this fork:
+
+- **Upstream (SimpleX Chat Ltd).** The SimpleX and SimpleX Chat name, logo, associated branding
+  materials, and application and website graphic assets (illustrations, images, visual designs, etc.)
+  are not covered by this license and are subject to the terms outlined in the
+  [TRADEMARK](./docs/TRADEMARK.md) and [ASSETS_LICENSE](./assets/ASSETS_LICENSE.md) files respectively.
+- **POPOPX (this fork).** The POPOPX and POPOPX Chat name, wordmark, logo and application icons, the
+  artwork this fork created, and the `popopx.chat` domain are not covered by this license either, and
+  are subject to [TRADEMARK-POPOPX](./docs/TRADEMARK-POPOPX.md) and
+  [ASSETS_LICENSE-POPOPX](./ASSETS_LICENSE-POPOPX.md) respectively.
+
+**If you fork this repository and distribute it, rebrand.** You keep every right AGPLv3 gives you over
+the code; what you may not carry away is either project's name or artwork, so your build must ship a
+different name, wordmark, icons and illustrations. [NOTICE](./NOTICE) lists the upstream attribution
+that has to stay.
 
 If you want to use any graphic assets in your publications, please ask for permission. Texts can be used as direct quotes, referencing the source.
 
