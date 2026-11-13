@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-13 (119 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-13 (120 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -482,7 +482,8 @@ upstream's** is ours to move, and a value that only *resolves* in upstream's his
 Measured and left, with the reason written into `FORK.md`: the `homepage` and `repository.directory` of
 those same manifests, which still name paths inside upstream's tree
 (`.../tree/stable/packages/simplex-chat-nodejs#readme`) and are derived by nothing - that is a decision
-about where our published packages advertise their own documentation, not a text move. Held as upstream's:
+about where our published packages advertise their own documentation, not a text move. It was ruled the
+same day, and moved: see the next section. Held as upstream's:
 `defaultConditionsLink` and the `conditionsCommit` URLs in `OperatorView.kt` / `NetworkAndServers.kt` and
 their Swift twins (a server-supplied SHA resolves only in upstream's history, and the document is SimpleX
 Chat Ltd's), `CIVoiceView.kt:29`'s PR citation, and the badges-rpc citations pinned at `db0768c21`.
@@ -493,6 +494,53 @@ absent from this `python3`); `ding_wire_audit` sweep 0, pairs 0/0/0/0, audit FOR
 BARE 16; the markdown dead-link gate unchanged at 1 broken outside the generated typedoc dirs (upstream's
 `CHANGELOG.md`). The desktop baselines are unaffected - none of these strings is drawn in a previewed
 composable, and the crash dialog is not a snapshot subject.
+
+### The packages' own homepages, directories and repository URLs name this repository (2026-11-13)
+
+21 lines in 11 files: the five Node manifests, the Python `pyproject.toml`, three package READMEs, the
+AppImage AppStream translate URL and the flatpak metainfo `vcs-browser`. What they had been advertising
+was upstream's tree - `.../tree/stable/packages/simplex-chat-nodejs#readme` - on the pages a registry or
+a store renders next to our published artifact.
+
+The layer question had to be answered before editing, because the previous pass in this same file was
+blocked by it. `packages_release.py test-names` (`:890-926`) rewrites **`name`, `repository.url`, the
+`npm:` cross-package aliases and the PyPI `name`** - it touches `homepage`, `repository.directory` and
+`bugs.url` not at all, so those ship exactly as committed and belong in the source. The alias hazard that
+made hand-editing dangerous is narrower than it looked: `MCP_PINNED` (`:47`), `npm_key` (`:691`) and
+`unreleased_pins` (`:588`) read only `name` and `dependencies`, which are the fields the generator pairs.
+Moving the three it ignores cannot desynchronise `check-pins`.
+
+Per-value decisions, each measured rather than patterned:
+
+- `tree/stable/` became `tree/master/`, not `tree/stable/` with our org. Our remote has **one branch**
+  (`ls-remote` returns `refs/heads/master` alone), so a stable pin would name a ref that does not exist
+  here; these links age with the branch, which is the trade.
+- `packages/popopx-chat-client/typescript/package.json` `directory` was `"/packages/simplex-chat-client/typescript"` -
+  with a **leading slash**, which is not the shape npm expects, since it joins the directory onto the
+  repository URL to build the link. It became `packages/popopx-chat-client/typescript`.
+- `packages/popopx-chat-webrtc` has no `directory` at all (parsed: `dir=None`), so it moved 2 lines, not 3;
+  its `homepage` was also missing the `#readme` half the other four carry, and now has it.
+- the translate URL became `{repo}#help-translating-popopx-chat`. A 200 does not prove a fragment -
+  GitHub answers 200 for any anchor on an existing page - so the heading was read instead: our
+  `README.md:111` is `## Help translating POPOPX Chat`, which is the slug that anchor needs. Same method
+  as the `#contribute` check in the previous pass.
+
+Verified: 5 `package.json` re-parsed with `json.load`, 2 XML documents through `ET.parse`, the TOML by
+diff (`tomllib` absent here); the 8 distinct new URLs each measured **HTTP 200** through the proxy;
+after-counts leave exactly the planned residue - the appdata donation line (1), the `blob/stable/docs/CLI.md`
+link in `packages/popopx-chat-client/typescript/README.md` (1), the quoted download log in `mcp/PLAN.md` (2),
+the upstream release tags in `metainfo.xml` (2) and the root `README.md` (8, with #62). Gates unchanged:
+sweep 0, pairs 0/0/0/0 over 127 scanned, audit FORWARD 0 / REVERSE 0 / BARE 16, dead-link gate 1.
+Nothing renders these fields, so no snapshot, build or archive is affected - static verification only.
+
+**One inconsistency surfaced, and is left for ruling.** The two AppStream files now disagree about where
+to translate: the desktop `appdata.xml` points at our README anchor, which resolves, while
+`scripts/flatpak/com.popopxchat.popopx.metainfo.xml:952` still points at
+`https://popopx.chat/docs/translations`, which measures **404** (`/docs` too; `/` is 200). That value was
+moved to our host by the display-host tier, so the 404 is our own missing page rather than upstream
+residue - the same class as #61's `popopx.chat/blog/…` links, and it closes when the site has a docs tree,
+not with another text move. The metainfo `donation` (`opencollective.com/simplex-chat`) and the appdata
+`donation` are likewise untouched, still awaiting the donation ruling.
 
 ### What was removed from this repository
 

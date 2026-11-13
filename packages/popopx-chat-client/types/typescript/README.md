@@ -6,7 +6,7 @@ It is used in [simplex-chat](https://www.npmjs.com/package/simplex-chat) Node.js
 
 POPOPX Chat core: 7.1.0.18
 
-[API reference](https://github.com/simplex-chat/simplex-chat/tree/stable/bots).
+[API reference](https://github.com/popopx-chat/popopx-chat/tree/master/bots).
 
 ## License
 

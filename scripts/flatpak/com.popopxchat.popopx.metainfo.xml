@@ -951,7 +951,7 @@
   <url type="donation">https://opencollective.com/simplex-chat</url>
   <url type="translate">https://popopx.chat/docs/translations</url>
   <url type="faq">https://popopx.chat/faq</url>
-  <url type="vcs-browser">https://github.com/simplex-chat/simplex-chat</url>
+  <url type="vcs-browser">https://github.com/popopx-chat/popopx-chat</url>
   
   <launchable type="desktop-id">com.popopxchat.popopx.desktop</launchable>
 

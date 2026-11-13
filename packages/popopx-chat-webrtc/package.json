@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/simplex-chat/simplex-chat.git"
+    "url": "git+https://github.com/popopx-chat/popopx-chat.git"
   },
   "keywords": [
     "SimpleX",
@@ -23,7 +23,7 @@
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
-  "homepage": "https://github.com/simplex-chat/simplex-chat/packages/simplex-chat-webrtc#readme",
+  "homepage": "https://github.com/popopx-chat/popopx-chat/tree/master/packages/popopx-chat-webrtc#readme",
   "author": "POPOPX Chat",
   "license": "AGPL-3.0-or-later",
   "devDependencies": {

@@ -19,8 +19,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/simplex-chat/simplex-chat.git",
-    "directory": "packages/simplex-chat-client/types/typescript"
+    "url": "git+https://github.com/popopx-chat/popopx-chat.git",
+    "directory": "packages/popopx-chat-client/types/typescript"
   },
   "keywords": [
     "simplex",
@@ -36,7 +36,7 @@
   "bugs": {
     "url": "https://github.com/popopx-chat/popopx-chat/issues"
   },
-  "homepage": "https://github.com/simplex-chat/simplex-chat/tree/stable/packages/simplex-chat-client/types/typescript#readme",
+  "homepage": "https://github.com/popopx-chat/popopx-chat/tree/master/packages/popopx-chat-client/types/typescript#readme",
   "dependencies": {
     "typescript": "^5.9.2"
   }

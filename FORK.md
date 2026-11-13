@@ -324,10 +324,13 @@ yet. Before any build of this fork is distributed:
   the earlier hold was written as "until our own is set up". Holders: the desktop startup dialog
   (`ISSUES_URL`, which Linux opens and Windows draws as the link text), the `bugtracker` URL in the
   AppImage AppStream and in the flatpak metainfo, the F-Droid fastlane description, the mcp README,
-  and `bugs.url` / `[project.urls] Issues` in the package manifests. Left as upstream's, awaiting
-  ruling: the `homepage` and `repository.directory` of those same manifests, which still name paths in
-  upstream's tree and are NOT rewritten by `packages_release.py test-names`. `SUPPORT_EMAIL` is already
-  `chat@popopx.chat`, which is itself not yet reachable (first bullet).
+  and `bugs.url` / `[project.urls] Issues` in the package manifests. Moved the same day, in the pass that
+  followed (`homepage` / `repository.directory` / `repository.url` of those same manifests, 21 lines in 11
+  files - `test-names` leaves all three fields alone, and its alias pair reads only `name` and
+  `dependencies`, so moving them cannot desynchronise `unreleased_pins()`). Still upstream's on purpose:
+  the donation wallet and URL, the flatpak release-tag links, and any link whose target only exists in
+  upstream's history. `SUPPORT_EMAIL` is already `chat@popopx.chat`, which is itself not yet reachable
+  (first bullet).
 - **`popopx-chat-libs` has published no releases yet.** The asset names and the source they are fetched
   from are ours (item 6 above), so nothing in this repository can resolve a `core-<version>` release
   today: the fork carries the build inputs and `releases.toml`, and its Releases list is empty. The first

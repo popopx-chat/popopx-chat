@@ -2,7 +2,7 @@
 
 **THIS PACKAGE IS DEPRECATED**
 
-Use [SimpleX Chat Node.js library](https://github.com/simplex-chat/simplex-chat/tree/stable/packages/simplex-chat-nodejs#readme) instead of this package.
+Use [SimpleX Chat Node.js library](https://github.com/popopx-chat/popopx-chat/tree/master/packages/popopx-chat-nodejs#readme) instead of this package.
 
 This is a TypeScript library that defines WebSocket API client for [SimpleX Chat terminal CLI](https://github.com/simplex-chat/simplex-chat/blob/stable/docs/CLI.md) that should be run as a WebSockets server on any port:
 
@@ -42,7 +42,7 @@ See the example of a simple chat bot in [squaring-bot.js](./examples/squaring-bo
 
 Please refer to the available client API in [client.ts](./src/client.ts).
 
-This library uses [@simplex-chat/types](https://www.npmjs.com/package/@simplex-chat/types) package with auto-generated [bot API types](https://github.com/simplex-chat/simplex-chat/tree/stable/bots)
+This library uses [@simplex-chat/types](https://www.npmjs.com/package/@simplex-chat/types) package with auto-generated [bot API types](https://github.com/popopx-chat/popopx-chat/tree/master/bots)
 
 ## License
 

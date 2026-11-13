@@ -37,8 +37,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/simplex-chat/simplex-chat.git",
-    "directory": "packages/simplex-chat-mcp"
+    "url": "git+https://github.com/popopx-chat/popopx-chat.git",
+    "directory": "packages/popopx-chat-mcp"
   },
   "keywords": [
     "simplex",
@@ -51,5 +51,5 @@
   "bugs": {
     "url": "https://github.com/popopx-chat/popopx-chat/issues"
   },
-  "homepage": "https://github.com/simplex-chat/simplex-chat/tree/master/packages/simplex-chat-mcp#readme"
+  "homepage": "https://github.com/popopx-chat/popopx-chat/tree/master/packages/popopx-chat-mcp#readme"
 }

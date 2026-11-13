@@ -22,7 +22,7 @@ classifiers = [
 dynamic = ["version"]
 
 [project.urls]
-Homepage = "https://github.com/simplex-chat/simplex-chat/tree/stable/packages/simplex-chat-python"
+Homepage = "https://github.com/popopx-chat/popopx-chat/tree/master/packages/popopx-chat-python"
 Issues = "https://github.com/popopx-chat/popopx-chat/issues"
 
 [project.optional-dependencies]
