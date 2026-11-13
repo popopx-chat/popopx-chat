@@ -140,6 +140,7 @@ fun SettingsLayout(
 
     if (crowdfundingAvailable()) {
       SectionDividerSpaced()
+      // the header names the round as upstream's, because it is theirs and this fork takes none of it
       SectionView(stringResource(MR.strings.invest_settings_title)) {
         SettingsActionItem(
           painterResource(MR.images.ic_redeem),

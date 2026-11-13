@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-13 (117 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-13 (118 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -440,12 +440,22 @@ to this run's renders, which is also the determinism proof for the runner), and 
 baselines are byte-identical to the artifact. The job's only red step was `Compare snapshots` - the comparator exits 1
 on any failure - while `Run desktop tests`, `Run smoke test` and every upload were green.
 
-`ef2e906b7`'s 3 `SettingsView.kt` edits pass URLs to `uriHandler.openExternalLink` and draw no text, so they are not
-expected to move any preview; the next dispatch on the pushed HEAD should report 210 `equal`. The install is driven by
+`ef2e906b7`'s 3 `SettingsView.kt` edits pass URLs to `uriHandler.openExternalLink` and draw no text, so they move no
+preview: a dispatch on `ef2e906b7` alone would have reported 210 `equal`. The install is driven by
 the comparator's own `compare.json` (`tools/r7/r63_install_desktop_baselines.py`, 2 rows logged to
 `r63_desktop_baselines_20261113.jsonl`) rather than by a second, independently written pixel diff - a second
 implementation is how this pass nearly went the wrong way: a hand-transcribed copy of the Paeth predictor reported
 2755 changed pixels across the full image width instead of the real 504 in one text row.
+
+Ruled the same day, so these 2 baselines are stale again: the header should not have named upstream's product at all.
+The same commit gave the identical iOS slot the wording `SettingsView.swift:429` - "Upstream's crowdfunding" - and the
+Kotlin side had kept "Own a part of SimpleX Chat", so the two platforms described the same section differently and only
+one of them avoided the brand name. `invest_settings_title` now reads "Upstream's crowdfunding" (1 line, 1 holder, the
+only reader being `SettingsView.kt:143`, no test mirror), which matches iOS rather than the banner's
+"Upstream's crowdfunding round" - the banner pair (`invest_banner_title` and `GetStakeBanner.swift:26`) already agreed
+with each other, and this restores the settings pair the same way. The reader carries the iOS commit's reason as a
+comment. Until a fresh `desktopTest` dispatch re-renders this on the pushed HEAD, the 2 committed baselines show the
+wording `562b28f93` shipped, so the comparator will report exactly those 2 as `changed` and nothing else.
 
 ### The bug-report and repository CTAs now point at this repository (2026-11-13)
 
