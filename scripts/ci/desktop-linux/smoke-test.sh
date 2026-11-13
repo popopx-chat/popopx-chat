@@ -169,7 +169,7 @@ back_to_chat_list() {
 
 # New chat has the same search field
 on_chat_list() {
-  not_on_screen "Settings" && not_on_screen "Chat preferences" && not_on_screen "Network" && not_on_screen "New chat" && on_screen "Search or paste SimpleX link"
+  not_on_screen "Settings" && not_on_screen "Chat preferences" && not_on_screen "Network" && not_on_screen "New chat" && on_screen "Search or paste POPOPX link"
 }
 
 # Opens Settings from the user menu, behind the profile picture at the left of the bottom toolbar.
@@ -191,22 +191,22 @@ use_top_toolbar() {
   "$ui" shot appearance-toolbar-switched
   back_to_chat_list || true
   "$ui" shot top-chat-list
-  y=$(y_of "Search or paste SimpleX link") || fail "no search field after closing Settings"
+  y=$(y_of "Search or paste POPOPX link") || fail "no search field after closing Settings"
   [ "$y" -lt 200 ] || fail "the search field is still at the bottom (y $y) after switching Reachable app toolbars"
 }
 
 # The search field and "Add list" next to it: at the bottom of the chat list, "Add list" above the field; at the top, below it.
 check_layout() {
   local layout=$1 field
-  field=$(y_of "Search or paste SimpleX link") || field=""
+  field=$(y_of "Search or paste POPOPX link") || field=""
   "$ui" shot "$layout-layout"
   check "$layout: \"$local_chat\" listed" on_screen "$local_chat"
   if [ "$layout" = bottom ]; then
     check "bottom: the search field is at the bottom" [ "${field:-0}" -gt 600 ]
-    check "bottom: \"Add list\" above the search field" above "Add list" "Search or paste SimpleX link"
+    check "bottom: \"Add list\" above the search field" above "Add list" "Search or paste POPOPX link"
   else
     check "top: the search field is at the top" [ "${field:-900}" -lt 200 ]
-    check "top: \"Add list\" below the search field" above "Search or paste SimpleX link" "Add list"
+    check "top: \"Add list\" below the search field" above "Search or paste POPOPX link" "Add list"
   fi
 }
 
@@ -305,7 +305,7 @@ use_names_server() {
 # A bare name in the search field is offered with the .testing domain; the test SMP server resolves it to ci_contact's
 # address, and the app shows that profile before connecting.
 connect_by_name() {
-  "$ui" click-text "Search or paste SimpleX link"
+  "$ui" click-text "Search or paste POPOPX link"
   "$ui" type "$name_label"
   "$ui" wait "Connect to $name_label.testing" 15
   "$ui" shot name-typed

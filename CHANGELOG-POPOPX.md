@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-13 (90 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-13 (100 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -60,6 +60,23 @@ declarations and left 10 import lines naming the old symbols, which made CI's
 ×1). It survived because Kotlin is not compiled on the machines used for this fork's static verification.
 `tools/r7/kt_import_gate.py` now replays kotlinc's import resolution over every brand-derived import —
 10 findings against `f5a7fd984`, 0 against this tree.
+
+A second class survived the same way: the namespace/link-scheme tier `05dd5a73c` carried its own
+shell-level escaping into the replacement text, so seven assertion lines in `AppLinkSchemeTest.kt` read
+`windowsSchemeValues(\"popopx\", windowsExe)`. A backslash in code position is a **syntax** error, which
+no identifier audit can see — the identifier it looks for is intact. `:common:compileTestKotlinDesktop`
+failed, and because that task gates the tests that render them, the run produced **no snapshot artifact
+at all**: 34e8b5045 removed the 8 stray backslashes, and `tools/r7/kt_lex_gate.py` (a Kotlin lexer replay,
+0 false positives against `db0768c21`) now reports the class.
+
+**The desktop CI harness still addressed the app by its pre-rebrand identity.** The values were moved by
+approved tiers; the readers were not, so `scripts/ci/desktop-linux/ui` execed `bin/simplex` from a package
+named `popopx`, seeded settings into `$XDG_CONFIG_HOME/simplex` where `Platform.desktop.kt:7` writes
+`popopx`, and waited for a window called `SimpleX` while `DesktopApp.kt:130` titles it `POPOPX`;
+`smoke-test.sh` OCR-matched a search field whose text became `Search or paste POPOPX link`
+(`search_or_paste_popopx_link`) in 6 places. The launcher is now derived from the app directory, and the
+two jobs that drive **upstream's** released build pass its config directory and window title explicitly,
+so "names an upstream thing keeps upstream's name" still holds there.
 
 ### Data locations — treat this as a new application
 

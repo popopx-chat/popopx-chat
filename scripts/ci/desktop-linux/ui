@@ -6,8 +6,8 @@
 # a log of every command (steps.log) go to UI_OUT; the app's data stays in UI_STATE between starts.
 #
 #   ui start <app dir> [<setting>=<value>...]
-#                                 start Xvfb, openbox and <app dir>/bin/simplex, and wait for its window; the app gets
-#                                 the settings given when UI_STATE has none yet
+#                                 start Xvfb, openbox and <app dir>/bin/<app dir's name>, and wait for its window;
+#                                 the app gets the settings given when UI_STATE has none yet
 #   ui shot <name>                save UI_OUT/NN-<name>.png and NN-<name>.txt (OCR's input and output in UI_OUT/ocr), and print the text on screen
 #   ui text                       print the text on screen, one phrase per line after its centre x,y
 #   ui find <text>                print "x y left top right bottom", the text's centre and box; fail if it is not on screen
@@ -38,6 +38,9 @@ unset CLAUDE_CODE_OAUTH_TOKEN
 export DISPLAY=${UI_DISPLAY:-:99}
 state=${UI_STATE:-${RUNNER_TEMP:-/tmp}/ui}
 here=$(cd "$(dirname "$0")" && pwd)
+# what identifies the app on the display; the two jobs that drive upstream's released build pass its values
+config_dir=${UI_CONFIG_DIR:-popopx}
+window_re=${UI_WINDOW_RE:-^POPOPX$}
 mkdir -p "$UI_OUT" "$state/ocr"
 
 log() {
@@ -65,7 +68,7 @@ stop_process() {
 }
 
 start() {
-  local app_dir settings=$state/config/simplex/settings.properties
+  local app_dir settings=$state/config/$config_dir/settings.properties
   app_dir=$(cd "$1" && pwd)
   shift
   if running app; then
@@ -95,10 +98,10 @@ start() {
     XDG_CONFIG_HOME="$state/config" \
     JAVA_TOOL_OPTIONS="-Djava.io.tmpdir=$state/tmp -Dskiko.renderApi=SOFTWARE" \
     LD_LIBRARY_PATH="$app_dir/lib/app/resources" \
-    setsid "$app_dir/bin/simplex" < /dev/null >> "$UI_OUT/app.log" 2>&1 &
+    setsid "$app_dir/bin/$(basename "$app_dir")" < /dev/null >> "$UI_OUT/app.log" 2>&1 &
   echo $! > "$state/app.pid"
 
-  if ! timeout 120 xdotool search --sync --onlyvisible --name '^SimpleX$' > "$state/window"; then
+  if ! timeout 120 xdotool search --sync --onlyvisible --name "$window_re" > "$state/window"; then
     echo "error: no app window after 120 s"
     return 1
   fi

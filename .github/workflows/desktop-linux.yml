@@ -405,6 +405,10 @@ jobs:
           sudo chmod +x /usr/local/bin/ui
 
       - name: Start the app
+        # upstream's released build: its config directory and window title predate this fork
+        env:
+          UI_CONFIG_DIR: simplex
+          UI_WINDOW_RE: ^SimpleX$
         run: scripts/ci/desktop-linux/smoke-test.sh "$RUNNER_TEMP/app/simplex" "$RUNNER_TEMP/claude-test/screens" start
 
       - name: Add test images
@@ -477,6 +481,9 @@ jobs:
           dpkg-query -W xvfb xdotool openbox imagemagick tesseract-ocr
 
       - name: Run smoke test
+        env:
+          UI_CONFIG_DIR: simplex
+          UI_WINDOW_RE: ^SimpleX$
         run: scripts/ci/desktop-linux/smoke-test.sh "$RUNNER_TEMP/release/app/opt/simplex" "$RUNNER_TEMP/smoke-test" onboarding
 
       - name: Upload smoke test results
