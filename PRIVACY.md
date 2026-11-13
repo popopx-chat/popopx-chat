@@ -186,8 +186,6 @@ As this software is fully open-source and provided under AGPLv3 license, all inf
 
 In addition to the AGPLv3 license terms, the preset relay server operators are committed to the software users that these servers will always be compiled from the [published open-source code](https://github.com/simplex-chat/simplexmq), without any modifications.
 
-Users can independently [reproduce builds](./docs/REPRODUCE.md) to verify that the published client and server binaries were compiled from the published code.
-
 ### Updates
 
 This Privacy Policy applies to SimpleX Chat Ltd and all other preset server operators you use in the app.
