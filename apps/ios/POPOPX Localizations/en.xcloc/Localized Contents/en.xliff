@@ -4911,11 +4911,6 @@ server test error</note>
         <target>Flat layout and markdown</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Follow POPOPX Network News" xml:space="preserve">
-        <source>Follow POPOPX Network News</source>
-        <target>Follow POPOPX Network News</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="For %@ only" xml:space="preserve">
         <source>For %@ only</source>
         <target>For %@ only</target>

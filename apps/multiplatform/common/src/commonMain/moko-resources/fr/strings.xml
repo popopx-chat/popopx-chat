@@ -2903,7 +2903,6 @@
     <string name="markdown_formatted_view">Vue mise en forme</string>
     <string name="markdown_text_view">Vue texte</string>
     <string name="markdown_file_bidi_warning">Ce fichier contient des caractères de direction du texte. Le texte peut être affiché dans un ordre différent de celui dans lequel il est écrit.</string>
-    <string name="follow_popopx_network_news">Suivre les actualités du réseau POPOPX</string>
     <string name="storage">Stockage</string>
     <string name="storage_total">Total</string>
     <string name="callstate_reconnecting">reconnexion…</string>

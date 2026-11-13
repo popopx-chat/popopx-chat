@@ -19,8 +19,6 @@ import POPOPXChat
 // re-worded here.
 let popopxTeamURL = URL(string: "popopx:/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw?h=smp6.simplex.im")!
 
-let popopxNewsURL = URL(string: "popopx:/c#grcfG3ulVI4Sh6ow33qBsmSk7uEy3gRSl2KkJ5ER6tA?h=smp18.simplex.im")!
-
 let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
 
 let appBuild = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion")  as? String
@@ -493,15 +491,6 @@ struct SettingsView: View {
             }
 
             Section(header: Text("Contact").foregroundColor(theme.colors.secondary)) {
-                settingsRow("antenna.radiowaves.left.and.right", color: theme.colors.secondary) {
-                    Button("Follow POPOPX Network News") {
-                        dismiss()
-                        DispatchQueue.main.async {
-                            ChatModel.shared.appOpenUrl = popopxNewsURL
-                        }
-                    }
-                }
-                .disabled(chatModel.chatRunning != true)
                 settingsRow("number", color: theme.colors.secondary) {
                     Button("Send questions and ideas") {
                         dismiss()

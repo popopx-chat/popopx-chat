@@ -4906,11 +4906,6 @@ server test error</note>
         <target>Lapos elrendezés és markdown formázás</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Follow POPOPX Network News" xml:space="preserve">
-        <source>Follow POPOPX Network News</source>
-        <target>Kövesse a POPOPX Network híreit</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="For %@ only" xml:space="preserve">
         <source>For %@ only</source>
         <target>Csak %@ számára</target>

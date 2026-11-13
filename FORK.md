@@ -344,8 +344,15 @@ yet. Before any build of this fork is distributed:
   `popopxTeamURL`, `popopxTeamUri`, `ChatHelp.swift`'s "connect to POPOPX Chat developers." and
   `Help.hs`'s "Connect to POPOPX Chat developers … type /simplex". They name our developers and reach
   SimpleX Chat Ltd's relay, server key and contact hash, and they can only move once POPOPX runs a relay and
-  mints its own contact - which is the same condition already written above `adminContactReq`. Still
-  awaiting a ruling, found after it: `README.md:64-68` claims upstream's two user groups exist for questions
+  mints its own contact - which is the same condition already written above `adminContactReq`.
+  The one entry point of this class that was **deleted** rather than held is "Follow POPOPX Network News"
+  (`popopxNewsURL` / `popopxNewsUri` -> `popopx:/c#grcfG3ulVI4…?h=smp18.simplex.im`): the team contact
+  self-heals the day POPOPX mints its own address, whereas subscribing this fork's users to another
+  company's announcement feed is not a state to re-word into - when POPOPX has its own channel it gets its
+  own row. 20 sites in 18 files: both rows, both URL constants, and the key in the 7 moko locale files,
+  the 4 `.lproj` catalogs and the 5 `.xcloc` translation units. The `ic_bigtop_updates` image stays - 11
+  other call sites read it for channels generally.
+  Still awaiting a ruling, found after it: `README.md:64-68` claims upstream's two user groups exist for questions
   "about POPOPX Chat only", and `full_description.txt:21-23` states in the first person that "**our**
   servers do not have access to this information" about relays this fork does not operate.
   `SUPPORT_EMAIL` is already `chat@popopx.chat`, which is itself not yet reachable (first bullet) - which is

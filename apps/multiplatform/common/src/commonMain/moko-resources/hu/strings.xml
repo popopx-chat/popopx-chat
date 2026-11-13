@@ -2903,7 +2903,6 @@
     <string name="markdown_formatted_view">Formázott nézet</string>
     <string name="markdown_text_view">Szöveges nézet</string>
     <string name="markdown_file_bidi_warning">Ez a fájl szövegirányt jelölő karaktereket tartalmaz. A szöveg az írásmódtól eltérő sorrendben jelenhet meg.</string>
-    <string name="follow_popopx_network_news">Kövesse a POPOPX Network híreit</string>
     <string name="storage">Tárhely</string>
     <string name="storage_total">Összesen</string>
     <string name="callstate_reconnecting">újrakapcsolódás…</string>

@@ -4876,11 +4876,6 @@ server test error</note>
         <target>Mise en page plate et Markdown</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Follow POPOPX Network News" xml:space="preserve">
-        <source>Follow POPOPX Network News</source>
-        <target>Suivre les actualités du réseau POPOPX</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="For %@ only" xml:space="preserve">
         <source>For %@ only</source>
         <target>Pour %@ uniquement</target>

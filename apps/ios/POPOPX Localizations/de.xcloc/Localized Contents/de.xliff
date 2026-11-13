@@ -4876,11 +4876,6 @@ server test error</note>
         <target>Flaches Layout und Markdown</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Follow POPOPX Network News" xml:space="preserve">
-        <source>Follow POPOPX Network News</source>
-        <target>Folgen Sie den POPOPX-Netzwerk-Neuigkeiten</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="For %@ only" xml:space="preserve">
         <source>For %@ only</source>
         <target>Nur für %@</target>

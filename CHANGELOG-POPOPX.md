@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-13 (122 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-14 (123 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -620,7 +620,8 @@ governs *their* mark and is correct.
 ### The remaining first-person labels that pointed at upstream's accounts went, or were attributed
 
 Ruling: `执行 A B C D + F删 + E/G/H hold`. This section is the A/B/C/D half plus where the holds are
-recorded; the news entry point (F) is a separate commit because it is the only part that is rendered.
+recorded; the news entry point (F) is its own commit below, because it was the part expected to carry a
+snapshot cost - and measured, it carries none.
 
 The class is **a first-person label whose destination is an account, feed or contact that SimpleX Chat Ltd
 operates**. Where the text carries a label slot the label moves to whoever owns the destination; where the
@@ -661,10 +662,13 @@ notes themselves shifted them: `popopxTeamURL`
 (`…/usersettings/SettingsView.kt`), `ChatHelp.swift`'s "connect to POPOPX Chat developers." and
 `Help.hs`'s "Connect to POPOPX Chat developers … type /simplex". They name **our** developers and reach
 SimpleX Chat Ltd's contact; the only honest fix is to mint our own, which first needs a relay that POPOPX
-operates. Re-wording the 32 Kotlin localized values of `you_can_connect_to_popopx_chat_founder`, the 8 of
-`follow_popopx_network_news` and the iOS catalogs now, only to move them back with the value, would churn
-the translations twice - so value and labels move together, later. `adminContactReq` already carried this
-ruling in a comment; the four new notes point at it rather than repeating it.
+operates. Re-wording the 31 localized values of `you_can_connect_to_popopx_chat_founder` (`base` plus 30
+locales - re-counted here; the plan said 32) and the iOS catalogs now, only to move them back with the
+value, would churn the translations twice - so value and labels move together, later.
+`adminContactReq` already carried this ruling in a comment; the four new notes point at it rather than
+repeating it. The other string in that paragraph, `follow_popopx_network_news`, did not get held: the row
+it labels was deleted instead (F, below), which is why it is absent from the 7 moko locale files, the 4
+`.lproj` catalogs and the 5 `.xcloc` units rather than re-worded.
 
 Verified: `cabal build lib:popopx-chat`; the new anchor re-derived from the new heading and asserted equal
 to the referrer that was written; zero-checks outside the record files on "We publish our updates",
@@ -684,6 +688,54 @@ this fork in their moderators' mouths; and `full_description.txt:21-23` still sa
 have access to this information", "routed via **our** servers" and "send **us** any questions via the app
 (connect to the team via settings!)" - a store listing that states who holds the user's data, in the first
 person of a relay operator this fork is not. The privacy sentence is the one that matters.
+
+### The settings row that subscribed this fork's users to upstream's news channel is deleted (F)
+
+Ruling: `F删`. `popopxNewsURL` / `popopxNewsUri` are
+`popopx:/c#grcfG3ulVI4Sh6ow33qBsmSk7uEy3gRSl2KkJ5ER6tA?h=smp18.simplex.im` - a broadcast channel on SimpleX
+Chat Ltd's relay - drawn as "Follow POPOPX Network News" in both settings screens.
+
+Why this one was deleted when the team contact next to it was held: the contact is a value this fork
+intends to replace, so the row becomes true the day POPOPX runs a relay and mints its own address. A news
+channel is not a state to re-word into - subscribing our users to another company's announcements is the
+misattribution itself, and when POPOPX has its own channel that row gets written then, with its own
+address. A hold here would have kept the wrong thing live and merely labelled it.
+
+20 sites in 18 files, 51 deletions, 0 insertions: the row and the constant in
+`apps/ios/Shared/Views/UserSettings/SettingsView.swift` and in
+`apps/multiplatform/common/src/commonMain/kotlin/chat/popopx/common/views/usersettings/SettingsView.kt`,
+then the key `follow_popopx_network_news` in the 7 moko locale files (`base`, `de`, `fr`, `hu`, `it`, `pt`,
+`pt-rBR` - the plan counted 8, re-measured), the 4 `.lproj` catalogs (`fr`, `de`, `it`, `hu`) and the 5
+`.xcloc` translation units (`fr`, `de`, `hu`, `it`, `en`). The destination had exactly these two holders
+and no core, SDK or automation side, so removing the presentation removes it: outside the record files,
+`popopxNewsURL`, `popopxNewsUri`, `follow_popopx_network_news`, `Follow POPOPX Network News` and the channel
+hash `grcfG3ulVI4Sh6ow33qBsmSk7uEy3gRSl2KkJ5ER6tA` are **0 occurrences each**. `ic_bigtop_updates` keeps 13
+occurrences - the imageset plus its other readers - so the image asset was not touched.
+
+**No iOS baseline changes, which is not why I split this into its own commit.** The `large` set was
+re-rendered (264 PNGs, `** TEST SUCCEEDED **`) and `scripts/ci/snapshots-compare.py` reports **264 `equal`,
+0 `changed`, 0 `size`**; the controls `ChatHelp-light/dark-large` and `NetworkServersView-light-large` are
+byte-identical to the committed files. The reason is structural, not a tolerance: the Contact section is
+not in the settings list at all, it is the destination of the "Help & support" `NavigationLink`
+(`SettingsView.swift:351`, the list body being `settingsView()` at `:327`), and the only scene that reads
+this file renders `SettingsView(versionText: "7.1")` - the top level. `SettingsView` also carries no
+`allSizes: true`, so its two `-large` files are the whole coverage and there is nothing else to re-render.
+The desktop set is settled the same way, without rendering it: its only settings scene is
+`SnapshotScene("SettingsView.PreviewSettingsLayout")` (`common/src/desktopTest/kotlin/chat/popopx/app/SnapshotTest.kt:118`),
+which composes `SettingsLayout`, and the deleted row was in `HelpAndSupportView` - reached by
+`showSettingsModal { HelpAndSupportView(...) }` on a tap, so it is in no snapshot tree on either platform.
+Task #67 closes as no-change on that argument.
+
+Two measurement facts that cost a round trip each: `snapshots-compare.py` derives the rendered set from
+`index-*.json`, so a collection step that copies only the PNGs reports every reference as `missing` and
+runs **no** pixel comparison - the first run of this pass looked like a total failure and meant "index
+absent"; and `-extra-extra-extra-large.png` itself ends in `-large.png`, so a suffix count over
+`References/` reads 320 where the `large` set is 264 (264 + 56 + 56 = 376 PNGs, plus `ASSETS_LICENSE.md`).
+
+The localization catalogs were gated by the repo's own tooling rather than assumed:
+`scripts/ios/localizations.py check` exits 0 with 514 pre-existing warnings (5 in code, 3 duplicate, 506
+stale) and none of them names the deleted key; `check-kotlin` exits 1 with 202 placeholder problems and
+109 outdated translations, all on other keys - the Weblate-lag class recorded as item H, not this pass.
 
 ### What was removed from this repository
 
