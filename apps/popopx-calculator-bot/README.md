@@ -25,7 +25,7 @@ The bot prints its address and keeps its data in `./data`.
 
 To add a SimpleX name to the address, register the name with the address short link, and run `npm start -- --domain yourname.simplex`. The name is kept when the bot starts without `--domain`.
 
-To use the library from this repository, build it and run `npm install --no-save ../../packages/popopx-chat-nodejs` instead of `npm install`, then start the bot with `POPOPX_ADDON_PATH=../../packages/popopx-chat-nodejs/build/Release/simplex.node`.
+To use the library from this repository, build it and run `npm install --no-save ../../packages/popopx-chat-nodejs` instead of `npm install`, then start the bot with `POPOPX_ADDON_PATH=../../packages/popopx-chat-nodejs/build/Release/popopx.node`.
 
 ## Test
 
