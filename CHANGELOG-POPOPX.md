@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-14 (127 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-14 (128 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -12,6 +12,52 @@ links, the APK/F-Droid artifacts and the website are all still upstream's or abs
 
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
+
+### The specs stop describing the round (2026-11-14, ruling 删除众筹 — commit 4 of 4)
+
+10 files, 23 insertions / 61 deletions (`tools/r7/r68_h_docs.py`, JSONL in `tools/r7/`; 43 edits, 10 files, each an
+asserted line span or an asserted single-substring replacement). The last group of mirrors: documents that describe the
+app, which after three commits described a screen the app no longer has.
+
+**Section 10 of each `spec/client/chat-list.md` could not be deleted whole.** Under the funnel's heading sat the
+chat-list *banner slot*: the priority chain, the dismissal preferences and the shared card chrome — all of which survive
+with the badge alert banner and the supporter pitch. So both sections were retitled **Chat List Banners** (anchor
+re-derived: `{#10-chat-list-banners}` in the iOS file, which spells its own anchors, and the GitHub slug in the Kotlin
+file, whose TOC link is derived from the heading text) and then trimmed:
+
+- The chain paragraph moved as one unit on both platforms, 4 edits each: `the badge alert banner, the pitch, then the
+  Wefunder banner` → `…, then the supporter pitch`; the recorded enum lists lost their third member (`.badgeAlert`,
+  `.badgePitch` / `BadgeAlert`, `BadgePitch` — verified against `ChatModel.kt:133` `enum class ChatListBanner {
+  BadgeAlert, BadgePitch }` and `ChatModel.swift:386-388`); `the pitch and Wefunder conditions start with` → `the
+  pitch's condition starts with`; and the `ConnectOnboardingView` sentence deleted, because `OnboardingCards.kt` now
+  holds **0** references to `bannerSlotFree`/`chatListBanner` — the onboarding placement is gone, not renamed.
+- **Placement**: the Kotlin chat-list row survived and was re-verified rather than left as prose (`ChatListView.kt`
+  wraps both surviving items in `Box(Modifier.zIndex(1f).padding(16.dp))`, at `:1109` and `:1136`, after
+  `ToggleChatListCard`). The iOS `### Placement` table went whole — both of its rows were the funnel's (last branch of
+  the chain; the slot below `ConnectOnboardingView`, which the current `chatList` does not have: its onboarding branch
+  is now just the pages in one `VStack`).
+- **Dismissal**: the two funnel preference rows out, the two pitch rows kept, and the sentences re-pointed — "Both are
+  in `hintDefaults`" still holds for the survivors (`SettingsView.swift:132-133` declares them, `:166-167` resets them),
+  while "The X is never offered in the onboarding branch…" went with the placement it described.
+- **Index rows were retargeted, not dropped.** `CODE.md`, `spec/impact.md`, `product/concepts.md`,
+  `product/views/chat-list.md` and both Source Files tables named the deleted file; each now names
+  `SupportPOPOPXBanner.*`, the file that holds the chrome after commit 1's repair *and* the pitch the retitled section
+  documents. Dropping them would have left a spec that cites a file no index can find. Declaration lines were measured,
+  not guessed: Swift `struct SupportPOPOPXBanner` `:12`, `struct BannerCard` `:95` — the chrome sentence cited `#L94`,
+  one line out, and was corrected.
+- `product/views/chat-list.md`: the funnel's bullet and its file-map line (retargeted), and "…pages replace the list,
+  **with the crowdfunding banner below them where it applies**" → "…pages replace the list".
+
+One unrelated stale mirror, fixed because it sat in the table being trimmed: `apps/multiplatform/spec/client/chat-list.md`
+quoted the pitch's alert as *"You can support **SimpleX** later in Settings."* while `badges_banner_dismiss_message` has
+emitted *"You can support POPOPX later in Settings."* since the display-strings tier (`strings.xml:3211`; the iOS row of
+the same table already read POPOPX). That is an earlier pass's half-moved pair, not collateral of this ruling.
+
+Gates: every relative link in the 10 edited files resolves — 0 broken: the dead links into
+`GetStakeBanner.{swift,kt}` that an earlier pass counted are gone with the text. `git grep -w` for
+`GetStakeBanner|GetStakeView|getStake|GetStake|crowdfundingAvailable|Wefunder` outside `CHANGELOG-POPOPX.md` and
+`FORK.md` → **1** hit, `packages/popopx-chat-mcp/README.md:74`, which is still awaiting its own ruling. `crowdfund` is
+now absent from every file under `apps/ios` and `apps/multiplatform` except the two What's-new `post` URLs.
 
 ### The Kotlin banner chrome that went with the deleted file (2026-11-14, repair of commit 1 of 4)
 

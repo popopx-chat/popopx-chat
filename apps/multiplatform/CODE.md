@@ -240,7 +240,7 @@ desktop/src/jvmMain/kotlin/chat/popopx/desktop/ -- Desktop app (1 file)
 | common/.../common/ui/theme/Theme.kt | spec/services/theme.md | product/views/settings.md |
 | common/.../common/ui/theme/Color.kt | spec/services/theme.md | product/views/settings.md |
 | common/.../common/views/chatlist/ChatListView.kt | spec/client/chat-list.md | product/views/chat-list.md |
-| common/.../common/views/chatlist/GetStakeBanner.kt | spec/client/chat-list.md | product/views/chat-list.md |
+| common/.../common/views/badges/SupportPOPOPXBanner.kt | spec/client/chat-list.md | product/views/chat-list.md |
 | common/.../common/views/chatlist/ChatListNavLinkView.kt | spec/client/chat-list.md | product/views/chat-list.md |
 | common/.../common/views/chatlist/ChatPreviewView.kt | spec/client/chat-list.md | product/views/chat-list.md |
 | common/.../common/views/chatlist/UserPicker.kt | spec/client/chat-list.md | product/views/chat-list.md |

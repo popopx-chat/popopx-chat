@@ -198,7 +198,10 @@ each was meant to become That pass also repaired a compile break this fork shipp
     "%s has the POPOPX investor badge."), commit 3 the badge service's invest panel (`apps/popopx-badge-service/web`:
     `src/crowdfunding.ts` whole, `investPanel`/`investSentence`/`withInvest` and the `perk` field of 5 screens' options,
     the Wefunder wordmark's path data, the `.invest` CSS, the worker's `PRECACHE` entry and the regenerated
-    `public/index.html` shell + its content-derived build hash), commit 4 the docs mirrors. The
+    `public/index.html` shell + its content-derived build hash), commit 4 the docs mirrors (both
+    `apps/*/spec/client/chat-list.md` section 10s retitled to **Chat List Banners** — they also carried the surviving
+    banner chain, dismissal prefs and card chrome, so they were trimmed rather than deleted — and the `CODE.md` /
+    `impact.md` / `product/**` / Source Files rows retargeted to `SupportPOPOPXBanner.*`). The
     type keeps its name, its wire tag and its images. `CHANGELOG.md`, this file and the flatpak `<release>` notes keep
     the round as record, and the blog URL slugs that contain the word "crowdfunding" are upstream's post addresses,
     not a funnel.
