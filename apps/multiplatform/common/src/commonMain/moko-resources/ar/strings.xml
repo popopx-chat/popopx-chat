@@ -2737,7 +2737,7 @@
     <string name="app_update_required">يلزم تحديث التطبيق</string>
     <string name="badge_unknown_key_title">تعذّر التحقق من الشارة</string>
     <string name="channel_webpage">صفحة القناة</string>
-    <string name="badge_invested">استثمر %s في حملة التمويل الجماعي لـ POPOPX Chat.</string>
+    <string name="badge_invested">%s يحمل شارة المستثمر في POPOPX.</string>
     <string name="badge_supports_popopx">%s يدعم POPOPX Chat.</string>
     <string name="group_member_role_observer_channel">مشترك</string>
     <string name="settings_section_title_support_project">ادعم المشروع</string>

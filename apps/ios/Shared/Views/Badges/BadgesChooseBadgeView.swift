@@ -44,13 +44,6 @@ enum BadgeLevel: String, CaseIterable, Identifiable {
         }
     }
 
-    var investorOffer: LocalizedStringKey {
-        switch self {
-        case .supporter: "Invest $100+ and get a free badge."
-        case .legend: "Invest $1000+ and get a free legend badge."
-        }
-    }
-
     var badgeType: BadgeType {
         switch self {
         case .supporter: .supporter
@@ -109,7 +102,6 @@ struct BadgesChooseBadgeView: View {
                             }
                         }
                         .frame(height: 22)
-                        BadgeInvestorOffer(level: selectedLevel)
                     }
                     .padding(.bottom, g.safeAreaInsets.bottom == 0 ? 20 : 0)
                 }
@@ -179,20 +171,6 @@ struct BadgesChooseBadgeView: View {
             .frame(width: 1, height: 1)
             .hidden()
         }
-    }
-}
-
-struct BadgeInvestorOffer: View {
-    @EnvironmentObject var theme: AppTheme
-    let level: BadgeLevel
-
-    var body: some View {
-        VStack(spacing: 4) {
-            Text(level.investorOffer)
-                .font(.footnote)
-        }
-        .multilineTextAlignment(.center)
-        .fixedSize(horizontal: false, vertical: true)
     }
 }
 

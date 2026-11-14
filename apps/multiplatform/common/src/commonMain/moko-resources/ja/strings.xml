@@ -2716,7 +2716,7 @@
     <string name="appearance_minimize_to_tray_desc">メッセージを受信するためにバックグラウンドで実行します</string>
     <string name="badge_supports_popopx">%s は POPOPX Chat をサポートしています。</string>
     <string name="badge_supported_popopx">%1$s は POPOPX Chat をサポートしました。バッジは %2$s に期限切れになりました。</string>
-    <string name="badge_invested">%s は POPOPX Chat のクラウドファンディングに出資しました。</string>
+    <string name="badge_invested">%s は POPOPX の投資家バッジを持っています。</string>
     <string name="badge_unverified_title">未検証のバッジ</string>
     <string name="badge_unverified_desc">このバッジは検証できず、本物ではない可能性があります。</string>
     <string name="badge_unknown_key_title">バッジを検証できません</string>

@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-14 (124 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-14 (125 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -12,6 +12,53 @@ links, the APK/F-Droid artifacts and the website are all still upstream's or abs
 
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
+
+### The badge keeps its `investor` type and loses the round (2026-11-14, ruling 删除众筹 — commit 2 of 4)
+
+66 files, 95 insertions / 489 deletions (`tools/r7/r68_def_badge.py`, JSONL + patch in `tools/r7/`). This is the
+part of the funnel that lived *inside* the badge UI, so the boundary had to be drawn first: a badge the badge service
+issued is a fact about a contact, a funding round is a promotion. Four groups:
+
+- **D — the investor offer, deleted.** `struct BadgeInvestorOffer` (Swift, 13 lines, and the `BadgeLevel.investorOffer`
+  computed property with its 2 sentences) and `fun BadgeInvestorOffer` (Kotlin, 20 lines, with `BadgeLevel.investorOffer`)
+  were the only carriers; the 4 iOS and 4 Kotlin call sites went with them, so did `WEFUNDER_URL` — commit 1 left it
+  precisely because this offer still read it — the `BadgeInvestorOffer(level: .supporter).hidden()` spacer, and the
+  README's `[Invest in SimpleX Chat on Wefunder]` CTA together with the sentence that qualified it as upstream's.
+  Strings: 3 `badges_investor_offer_*` keys from the 20 moko files that held them (60 line records), 22 `"Invest $100+…"`
+  / `"Invest $1000+…"` entries from 11 `.strings` and 26 units from 13 `.xliff`. 3 further `.xliff` units went because
+  commit 1's key match missed the trailing-period spellings (`Crowdfunding on Wefunder.`, `Learn more on Wefunder.`) —
+  the same near-miss class as an escaped-slash URL in a `sed` address.
+- **E — `badge_invested` rewritten, not deleted.** The alert shown when you tap someone's investor badge asserted an
+  investment; it now asserts the badge, the only thing the client can actually verify: `%s has the POPOPX investor
+  badge.` in 23 moko files, the same at `NameBadge.swift:152`, and in 12 `.strings` (the key **is** the English text, so
+  the key moved with the value) plus 16 `.xliff` (`id` + `<source>` + `<target>`). Translations were composed per locale
+  from that locale's own word for *badge* and *investor* — de `Investor-Badge`, pl `odznaka inwestora`, zh-rCN
+  `投资人徽章`, fa keeps the ZWNJ inside `سرمایه‌گذار`, ca keeps the Android apostrophe escape `d\'inversor` —
+  and the `%s`/`%@` count of every one of the 51 new values was checked against the value it replaced (1 = 1).
+- **E2 — the investor alert's destination.** The Kotlin branch offered *Learn more* → `https://popopx.chat/crowdfunding`
+  (our host, a page we do not publish). Once the sentence stopped claiming an investment the link had nothing to
+  explain, so the branch became confirm-only — the shape iOS already had. The `uriHandler` parameter stayed: deleting it
+  would strand an unused local in 2 more files and it is not a compiler warning.
+- **F — the name-sale footnote, deleted.** `popopx_name_sales_footer` ("Crowdfunding investors can reserve names before
+  the sale starts:") from 21 moko files, 11 `.strings`, 14 `.xliff`, and its two readers. In `SetPopopxDomainView.kt` the
+  `simplex.domains` link stays and only the sentence and its separator space went; in `UserAddressView.swift` the whole
+  `} footer:` clause collapsed onto the Section's own closing brace (brace delta preserved).
+
+**Kept**, because they describe an issued badge rather than the round: `BadgeType.investor` and its wire tag
+(`src/Popopx/Chat/Badges.hs:105,113,118,120-122,165`, `ChatModel.kt:2271 @SerialName("investor")`, the SDK mirrors,
+`badges-rpc.md:88`), the display name `badges_type_investor`, and the `badge-investor` imageset.
+Gates: `ding_wire_audit.py audit` FORWARD 0 / REVERSE 0 / BARE 16 (baseline unchanged — nothing here is a wire value);
+`ET.parse` over all 39 edited `.xml`/`.xliff`; `scripts/ios/localizations.py check` rc 0; the placeholder count of every
+rewritten value checked against the value it replaced; zero-check for
+`BadgeInvestorOffer|investorOffer|investor_offer|WEFUNDER_URL|popopx_name_sales_footer|crowdfund` clean in
+`apps/ios/Shared`, the `.lproj`/`.xcloc` files and `commonMain` except the held blog slugs; `xcodebuild` device **and**
+`ARCHS=arm64` simulator BUILD SUCCEEDED, then `** TEST SUCCEEDED **` for the `large` snapshot re-render — 4 of 262
+baselines legitimately changed (`BadgesCheckOrderView` and `BadgesHowLongView`, light+dark each, the deleted offer line
+was the only difference) and were installed; the re-run reports 0 changed for the `large` set. That the 2
+`BadgesSupportPopopxView` baselines did **not** move is the cross-check that `BadgeInvestorOffer(…).hidden()` really
+drew nothing. Android: static verification only — no Android SDK or gradle on this machine. The 22 imports that
+`WhatsNewView.kt` no longer needs went in the same commit (the 2 that were already unused before commit 1 are upstream's
+state and stayed).
 
 ### The crowdfunding funnel is deleted (2026-11-14, ruling 删除众筹 — commit 1 of 4)
 

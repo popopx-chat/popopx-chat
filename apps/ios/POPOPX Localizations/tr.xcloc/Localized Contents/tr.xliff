@@ -90,9 +90,9 @@
         <target>%@ indirildi</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="%@ invested in POPOPX Chat crowdfunding." xml:space="preserve">
-        <source>%@ invested in POPOPX Chat crowdfunding.</source>
-        <target>%@, POPOPX Chat kitle fonlamasına yatırım yaptı.</target>
+      <trans-unit id="%@ has the POPOPX investor badge." xml:space="preserve">
+        <source>%@ has the POPOPX investor badge.</source>
+        <target>%@, POPOPX yatırımcı rozetine sahip.</target>
         <note>badge alert</note>
       </trans-unit>
       <trans-unit id="%@ is connected!" xml:space="preserve">
@@ -2508,11 +2508,6 @@ Bu senin kendi tek kullanımlık bağlantın!</target>
         <target>Kimlik bilgisi</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)" xml:space="preserve">
-        <source>Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)</source>
-        <target>Kitlesel fonlama yatırımcıları, satış başlamadan önce adları rezerve edebilir: [simplex.domains](https://simplex.domains/)</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="Current Passcode" xml:space="preserve">
         <source>Current Passcode</source>
         <target>Şu anki şifre</target>
@@ -4892,16 +4887,6 @@ Daha fazla iyileştirme yakında geliyor!</target>
         <source>Invalid status</source>
         <target>Geçersiz durum</target>
         <note>item status text</note>
-      </trans-unit>
-      <trans-unit id="Invest $100+ and get a free badge." xml:space="preserve">
-        <source>Invest $100+ and get a free badge.</source>
-        <target>$100+ yatırım yapın ve ücretsiz bir rozet alın.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
-      <trans-unit id="Invest $1000+ and get a free legend badge." xml:space="preserve">
-        <source>Invest $1000+ and get a free legend badge.</source>
-        <target>$1000+ yatırım yapın ve ücretsiz bir efsane rozeti alın.</target>
-        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Investor" xml:space="preserve">
         <source>Investor</source>

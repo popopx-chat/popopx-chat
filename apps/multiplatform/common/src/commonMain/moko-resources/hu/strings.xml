@@ -2745,7 +2745,7 @@
     <string name="relay_status_acknowledged_roster">visszaigazolt névsor</string>
     <string name="badge_supports_popopx">%s támogatja a POPOPX Chatet.</string>
     <string name="badge_supported_popopx">%1$s támogatta a POPOPX Chatet. A kitűző lejárt ekkor: %2$s.</string>
-    <string name="badge_invested">%s befektetett a POPOPX Chat közösségi finanszírozásába.</string>
+    <string name="badge_invested">%s rendelkezik a POPOPX befektetői kitűzőjével.</string>
     <string name="badge_unverified_title">Ellenőrizetlen kitűző</string>
     <string name="badge_unverified_desc">Nem sikerült ellenőrizni ezt a kitűzőt, és lehet, hogy nem eredeti.</string>
     <string name="badge_unknown_key_title">Nem lehetett ellenőrizni a kitűzőt</string>
@@ -2810,7 +2810,6 @@
     <string name="group_invitations">Meghívások csoportokba</string>
     <string name="forwarded_from">továbbítva innen</string>
     <string name="countdown_hrs_min_sec">%1$02d óra %2$02d perc %3$02d mp</string>
-    <string name="popopx_name_sales_footer">A közösségi finanszírozásban részt vevő befektetők már az értékesítés megkezdése előtt lefoglalhatnak POPOPX-neveket:</string>
     <string name="popopx_name_sales">POPOPX-nevek értékesítésének kezdete:</string>
     <string name="until_register_popopx_domain">egy POPOPX-domainnév regisztrációjáig</string>
     <string name="update_app_register_popopx_domain">Frissítse az alkalmazást egy POPOPX-domainnév regisztrálásához</string>
@@ -3042,11 +3041,8 @@
     <string name="badges_legend_benefits">Legfeljebb 5 GB méretű fájlok küldése 21 napos tárolással.</string>
     <string name="chat_layout_flat">Lapos</string>
     <string name="v7_1_flat_layout">Lapos elrendezés és markdown formázás</string>
-    <string name="badges_investor_offer_legend">Fektessen be legalább 1000 dollárt, és szerezzen egy ingyenes legendás kitűzőt.</string>
-    <string name="badges_investor_offer_supporter">Fektessen be legalább 100 dollárt, és szerezzen egy ingyenes kitűzőt.</string>
     <string name="v7_1_supporter_badge_descr">A nagyméretű fájlok hosszabb ideig érhetők el az átjátszókon.</string>
     <string name="whats_new_learn_more">Tudjon meg többet</string>
-    <string name="badges_investor_offer_learn_more">Tudjon meg többet a Wefunder oldalon</string>
     <string name="v7_1_channels">Biztonságosabb csatornák</string>
     <string name="v7_1_popopx_names_descr">Az akció december 12-én kezdődik.</string>
     <string name="v7_1_popopx_names">Nyilvános POPOPX-nevek</string>

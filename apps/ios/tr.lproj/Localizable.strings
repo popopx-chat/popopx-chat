@@ -110,7 +110,7 @@
 "%@ downloaded" = "%@ indirildi";
 
 /* badge alert */
-"%@ invested in POPOPX Chat crowdfunding." = "%@, POPOPX Chat kitle fonlamasına yatırım yaptı.";
+"%@ has the POPOPX investor badge." = "%@, POPOPX yatırımcı rozetine sahip.";
 
 /* notification title */
 "%@ is connected!" = "%@ bağlandı!";
@@ -1670,7 +1670,6 @@ server test step */
 "Credential" = "Kimlik bilgisi";
 
 /* No comment provided by engineer. */
-"Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)" = "Kitlesel fonlama yatırımcıları, satış başlamadan önce adları rezerve edebilir: [simplex.domains](https://simplex.domains/)";
 
 /* No comment provided by engineer. */
 "Current conditions text couldn't be loaded, you can review conditions via this link:" = "Şu anki koşulların yazısı yüklenemiyor, bu bağlantıdan koşullara inceleyebilirsin:";
@@ -3228,10 +3227,8 @@ servers warning */
 "Invalid status" = "Geçersiz durum";
 
 /* No comment provided by engineer. */
-"Invest $100+ and get a free badge." = "$100+ yatırım yapın ve ücretsiz bir rozet alın.";
 
 /* No comment provided by engineer. */
-"Invest $1000+ and get a free legend badge." = "$1000+ yatırım yapın ve ücretsiz bir efsane rozeti alın.";
 
 /* badge type */
 "Investor" = "Yatırımcı";

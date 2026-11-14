@@ -90,9 +90,9 @@
         <target>%@ pobrane</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="%@ invested in POPOPX Chat crowdfunding." xml:space="preserve">
-        <source>%@ invested in POPOPX Chat crowdfunding.</source>
-        <target>%@ zainwestował(a) w crowdfunding POPOPX Chat.</target>
+      <trans-unit id="%@ has the POPOPX investor badge." xml:space="preserve">
+        <source>%@ has the POPOPX investor badge.</source>
+        <target>%@ ma odznakę inwestora POPOPX.</target>
         <note>badge alert</note>
       </trans-unit>
       <trans-unit id="%@ is connected!" xml:space="preserve">
@@ -2461,11 +2461,6 @@ To jest twój jednorazowy link!</target>
       <trans-unit id="Credential" xml:space="preserve">
         <source>Credential</source>
         <target>Poświadczenie</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
-      <trans-unit id="Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)" xml:space="preserve">
-        <source>Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)</source>
-        <target>Inwestorzy crowdfundingu mogą zarezerwować nazwy przed rozpoczęciem sprzedaży: [simplex.domains](https://simplex.domains/)</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Current Passcode" xml:space="preserve">
@@ -4898,16 +4893,6 @@ Wkrótce pojawią się kolejne ulepszenia!</target>
         <source>Invalid status</source>
         <target>Nieprawidłowy status</target>
         <note>item status text</note>
-      </trans-unit>
-      <trans-unit id="Invest $100+ and get a free badge." xml:space="preserve">
-        <source>Invest $100+ and get a free badge.</source>
-        <target>Zainwestuj $100+ i otrzymaj darmową odznakę.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
-      <trans-unit id="Invest $1000+ and get a free legend badge." xml:space="preserve">
-        <source>Invest $1000+ and get a free legend badge.</source>
-        <target>Zainwestuj $1000+ i otrzymaj darmową odznakę legendy.</target>
-        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Investor" xml:space="preserve">
         <source>Investor</source>

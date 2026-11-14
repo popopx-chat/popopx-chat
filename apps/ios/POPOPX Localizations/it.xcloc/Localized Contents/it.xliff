@@ -100,9 +100,9 @@
         <target>%@ scaricati</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="%@ invested in POPOPX Chat crowdfunding." xml:space="preserve">
-        <source>%@ invested in POPOPX Chat crowdfunding.</source>
-        <target>%@ ha investito nella raccolta fondi di POPOPX Chat.</target>
+      <trans-unit id="%@ has the POPOPX investor badge." xml:space="preserve">
+        <source>%@ has the POPOPX investor badge.</source>
+        <target>%@ ha la targhetta investitore di POPOPX.</target>
         <note>badge alert</note>
       </trans-unit>
       <trans-unit id="%@ is connected!" xml:space="preserve">
@@ -2945,11 +2945,6 @@ Questo è il tuo link una tantum!</target>
         <target>Credenziali</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)" xml:space="preserve">
-        <source>Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)</source>
-        <target>Gli investitori della raccolta fondi possono prenotare i nomi prima che inizi la vendita: [simplex.domains](https://simplex.domains/)</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="Current Passcode" xml:space="preserve">
         <source>Current Passcode</source>
         <target>Codice di accesso attuale</target>
@@ -5650,16 +5645,6 @@ Altri miglioramenti sono in arrivo!</target>
         <source>Invalid status</source>
         <target>Stato non valido</target>
         <note>item status text</note>
-      </trans-unit>
-      <trans-unit id="Invest $100+ and get a free badge." xml:space="preserve">
-        <source>Invest $100+ and get a free badge.</source>
-        <target>Investi $100+ e ricevi gratis un distintivo.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
-      <trans-unit id="Invest $1000+ and get a free legend badge." xml:space="preserve">
-        <source>Invest $1000+ and get a free legend badge.</source>
-        <target>Investi $1000+ e ricevi gratis un distintivo leggenda.</target>
-        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Invest in POPOPX Chat!" xml:space="preserve">
         <source>Invest in POPOPX Chat!</source>

@@ -2821,7 +2821,7 @@
     <string name="webpage_url_footer">Dies wird Abonnenten angezeigt und zum Laden der Vorschau genutzt.</string>
     <string name="more_privacy">Weitere Privatsphäre</string>
     <string name="embed_only_your_page">Nur Ihre oben genannte Seite kann die Vorschau anzeigen.</string>
-    <string name="badge_invested">%s hat sich am POPOPX Chat-Crowdfunding beteiligt.</string>
+    <string name="badge_invested">%s hat das Investor-Badge von POPOPX.</string>
     <string name="badge_supports_popopx">%s unterstützt POPOPX Chat.</string>
     <string name="group_member_role_observer_channel">Abonnent</string>
     <string name="settings_section_title_support_project">Unterstützen Sie das Projekt</string>
@@ -2892,7 +2892,6 @@
     <string name="group_invitations">Gruppeneinladungen</string>
     <string name="forwarded_from">weitergeleitet aus</string>
     <string name="countdown_hrs_min_sec">%1$02d h %2$02d min %3$02d s</string>
-    <string name="popopx_name_sales_footer">Crowdfunding-Investoren können vor Verkaufsbeginn Namen reservieren:</string>
     <string name="popopx_name_sales">Der Verkauf von POPOPX-Namen startet in</string>
     <string name="until_register_popopx_domain">bis Sie eine POPOPX-Domain registrieren können</string>
     <string name="update_app_register_popopx_domain">Aktualisieren Sie die App, um eine POPOPX-Domain registrieren zu können</string>
@@ -3123,9 +3122,6 @@
     <string name="badges_supporter_benefits">Dateien bis zu 2 GB, für 7 Tage gespeichert.</string>
     <string name="badges_legend_benefits">Dateien bis zu 5 GB, für 21 Tage gespeichert.</string>
     <string name="badges_benefits">Vorteile</string>
-    <string name="badges_investor_offer_supporter">Investieren Sie ab $100 und erhalten Sie einen kostenlosen Badge.</string>
-    <string name="badges_investor_offer_legend">Investieren Sie ab $1000 und erhalten Sie einen kostenlosen Legenden-Badge.</string>
-    <string name="badges_investor_offer_learn_more">Mehr erfahren auf Wefunder</string>
     <string name="v7_1_supporter_badge_descr">Größere Dateien, die länger verfügbar bleiben.</string>
     <string name="v7_1_supporter_badge_get">Unterstützen Sie POPOPX und erhalten Sie einen Badge.</string>
     <string name="v7_1_supporter_badge_have">Sie haben bereits einen Badge!</string>

@@ -128,7 +128,7 @@
 "%@ downloaded" = "%@ letöltve";
 
 /* badge alert */
-"%@ invested in POPOPX Chat crowdfunding." = "%@ befektetett a POPOPX Chat közösségi finanszírozásába.";
+"%@ has the POPOPX investor badge." = "%@ rendelkezik a POPOPX befektetői kitűzőjével.";
 
 /* notification title */
 "%@ is connected!" = "%@ kapcsolódott!";
@@ -1953,7 +1953,6 @@ server test step */
 "Credential" = "Igazolás";
 
 /* No comment provided by engineer. */
-"Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)" = "A közösségi finanszírozásban részt vevő befektetők már az értékesítés megkezdése előtt lefoglalhatnak POPOPX-neveket: [simplex.domains](https://simplex.domains/)";
 
 /* No comment provided by engineer. */
 
@@ -3723,10 +3722,8 @@ servers warning */
 "Invalid status" = "Érvénytelen állapot";
 
 /* No comment provided by engineer. */
-"Invest $100+ and get a free badge." = "Fektessen be legalább 100 dollárt, és szerezzen egy ingyenes kitűzőt.";
 
 /* No comment provided by engineer. */
-"Invest $1000+ and get a free legend badge." = "Fektessen be legalább 1000 dollárt, és szerezzen egy ingyenes legendás kitűzőt.";
 
 /* No comment provided by engineer. */
 "Invest in POPOPX Chat!" = "Fektessen be a POPOPX Chatbe!";

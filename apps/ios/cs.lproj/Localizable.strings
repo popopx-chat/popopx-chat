@@ -116,7 +116,7 @@
 "%@ downloaded" = "%@ staženo";
 
 /* badge alert */
-"%@ invested in POPOPX Chat crowdfunding." = "%@ investoval do POPOPX Chat crowdfunding.";
+"%@ has the POPOPX investor badge." = "%@ má odznak investora POPOPX.";
 
 /* notification title */
 "%@ is connected!" = "%@ je připojen!";

@@ -95,9 +95,9 @@
         <target>%@ staženo</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="%@ invested in POPOPX Chat crowdfunding." xml:space="preserve">
-        <source>%@ invested in POPOPX Chat crowdfunding.</source>
-        <target>%@ investoval do POPOPX Chat crowdfunding.</target>
+      <trans-unit id="%@ has the POPOPX investor badge." xml:space="preserve">
+        <source>%@ has the POPOPX investor badge.</source>
+        <target>%@ má odznak investora POPOPX.</target>
         <note>badge alert</note>
       </trans-unit>
       <trans-unit id="%@ is connected!" xml:space="preserve">

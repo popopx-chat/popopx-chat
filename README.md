@@ -15,9 +15,6 @@
 
 <img src="images/github-banner.jpg" alt="POPOPX Chat" width="100%">
 
-This link is **upstream's** fundraising campaign. POPOPX Chat is not part of it and receives
-none of it: [Invest in SimpleX Chat on Wefunder](https://wefunder.com/simplex.chat?utm_source=github).
-
 # POPOPX - the first messaging platform that has no user identifiers of any kind - 100% private by design!
 
 [<img src="./images/trail-of-bits.jpg" height="80">](http://simplex.chat/blog/20221108-simplex-chat-v4.2-security-audit-new-website.html) &nbsp;&nbsp;&nbsp; [<img src="./images/privacy-guides.jpg" height="64">](https://www.privacyguides.org/en/real-time-communication/#simplex-chat) &nbsp;&nbsp;&nbsp; [<img src="./images/whonix-logo.jpg" height="64">](https://www.whonix.org/wiki/Chat#Recommendation) &nbsp;&nbsp;&nbsp; [<img src="./images/kuketz-blog.jpg" height="64">](https://www.kuketz-blog.de/simplex-eindruecke-vom-messenger-ohne-identifier/)

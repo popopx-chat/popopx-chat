@@ -192,10 +192,13 @@ each was meant to become That pass also repaired a compile break this fork shipp
     `fullScreenOnClick`, `Modifier.pinchZoom()`), the 16 slide artwork files and every string that advertised it are
     gone. What **stays** is the `investor` badge *type*: `BadgeType.investor` and its wire tag are emitted by
     `src/Popopx/Chat/Badges.hs` for badges the badge service has already issued, so removing them would falsify
-    history instead of promoting anything — its offer copy, the `WEFUNDER_URL` link readers and the badge service's
-    invest panel are deleted with the funnel, and the type keeps its name and its images. `CHANGELOG.md`, this file
-    and the flatpak `<release>` notes keep the round as record, and the blog URL slugs that contain the word
-    "crowdfunding" are upstream's post addresses, not a funnel.
+    history instead of promoting anything. The deletion went in four commits: commit 1 the funnel, commit 2 the badge
+    layer's promotion (`BadgeInvestorOffer` on both platforms, `BadgeLevel.investorOffer`, `WEFUNDER_URL`, the 3
+    `badges_investor_offer_*` keys, the name-sale footnote, and `badge_invested` reworded from an investment claim to
+    "%s has the POPOPX investor badge."), commit 3 the badge service's invest panel, commit 4 the docs mirrors. The
+    type keeps its name, its wire tag and its images. `CHANGELOG.md`, this file and the flatpak `<release>` notes keep
+    the round as record, and the blog URL slugs that contain the word "crowdfunding" are upstream's post addresses,
+    not a funnel.
     Maintenance hazard, found the hard way: `apps/ios/POPOPX.xcodeproj` uses classic groups (0
     `PBXFileSystemSynchronizedRootGroup`), so a Swift file needs four `project.pbxproj` entries — build file, file
     reference, group child, Sources phase — and a scripted edit that *replaces* its anchor line instead of inserting

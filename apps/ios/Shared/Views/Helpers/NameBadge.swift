@@ -149,7 +149,7 @@ func showBadgeInfoAlert(_ name: String, _ badge: LocalBadge) {
         // a verified badge's type is signed and can't be faked, so the real (possibly unknown) type name is the title
         let title = badgeTypeName(badge.badge.badgeType)
         if case .investor = badge.badge.badgeType {
-            let message = String.localizedStringWithFormat(NSLocalizedString("%@ invested in POPOPX Chat crowdfunding.", comment: "badge alert"), name)
+            let message = String.localizedStringWithFormat(NSLocalizedString("%@ has the POPOPX investor badge.", comment: "badge alert"), name)
             showAlert(title, message: message)
         } else {
             // supporter, legend and unknown types use the supporter wording

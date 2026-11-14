@@ -87,7 +87,6 @@ struct BadgesCheckOrderLayout: View {
                         payButton()
                             .padding(.vertical, 10)
                         BadgeBillingFooter(period: period, startDate: startDate)
-                        BadgeInvestorOffer(level: level)
                     }
                     .padding(.bottom, g.safeAreaInsets.bottom == 0 ? 20 : 0)
                 }

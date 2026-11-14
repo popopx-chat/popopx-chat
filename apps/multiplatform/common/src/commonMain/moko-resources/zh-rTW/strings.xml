@@ -2176,7 +2176,6 @@
     <string name="until_register_popopx_domain">後即可註冊 POPOPX 網域</string>
     <string name="update_app_register_popopx_domain">更新應用程式以註冊 POPOPX 網域</string>
     <string name="countdown_hrs_min_sec">%1$02d 小時 %2$02d 分 %3$02d 秒</string>
-    <string name="popopx_name_sales_footer">群眾募資投資者可在開賣前預留名稱：</string>
     <string name="remove_name">移除名稱</string>
     <string name="placeholder_search_voice_messages">搜尋語音訊息</string>
     <string name="delete_messages_cannot_be_undone_warning">訊息將被刪除，此操作無法復原！</string>
@@ -2786,7 +2785,7 @@
     <string name="appearance_minimize_to_tray_desc">在背景執行以接收訊息</string>
     <string name="badge_supports_popopx">%s 支持 POPOPX Chat。</string>
     <string name="badge_supported_popopx">%1$s 曾支持 POPOPX Chat。此徽章已於 %2$s 過期。</string>
-    <string name="badge_invested">%s 投資了 POPOPX Chat 眾籌。</string>
+    <string name="badge_invested">%s 擁有 POPOPX 的投資者徽章.</string>
     <string name="badge_unverified_title">未驗證徽章</string>
     <string name="badge_unverified_desc">無法驗證此徽章，可能並非真實。</string>
     <string name="badge_unknown_key_title">無法驗證徽章</string>
@@ -2961,9 +2960,6 @@
     <string name="badges_supporter_benefits">檔案最大 2 GB，保留 7 天。</string>
     <string name="badges_legend_benefits">檔案最大 5 GB，保留 21 天。</string>
     <string name="badges_benefits">福利</string>
-    <string name="badges_investor_offer_supporter">投資 $100 以上即可免費獲得徽章。</string>
-    <string name="badges_investor_offer_legend">投資 $1000 以上即可免費獲得傳奇徽章。</string>
-    <string name="badges_investor_offer_learn_more">在 Wefunder 上了解更多</string>
     <string name="v7_1_supporter_badge_title">支持者徽章</string>
     <string name="v7_1_supporter_badge_descr">更大的檔案，保留更久。</string>
     <string name="v7_1_supporter_badge_get">支持 POPOPX 並取得徽章。</string>

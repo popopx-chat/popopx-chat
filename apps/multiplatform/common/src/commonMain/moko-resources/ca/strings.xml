@@ -2441,7 +2441,6 @@
     <string name="until_register_popopx_domain">fins que pugueu registrar un domini POPOPX</string>
     <string name="update_app_register_popopx_domain">Actualitzeu l\'aplicació per registrar un domini POPOPX</string>
     <string name="countdown_hrs_min_sec">%1$02d h %2$02d min %3$02d s</string>
-    <string name="popopx_name_sales_footer">Els inversors del micromecenatge poden reservar noms abans que comenci la venda:</string>
     <string name="remove_name">Eliminar el nom</string>
     <string name="supporter_badge">insígnia de mecenes</string>
     <string name="legend_badge">insígnia de llegenda</string>
@@ -2470,7 +2469,7 @@
     <string name="error_prefix">Error</string>
     <string name="badge_supports_popopx">%s dona suport a POPOPX Chat.</string>
     <string name="badge_supported_popopx">%1$s va donar suport a POPOPX Chat. La insígnia va caducar el %2$s.</string>
-    <string name="badge_invested">%s ha invertit en el micromecenatge de POPOPX Chat.</string>
+    <string name="badge_invested">%s té la insígnia d\'inversor de POPOPX.</string>
     <string name="badge_unverified_title">Insígnia no verificada</string>
     <string name="badge_unverified_desc">Aquesta insígnia no s\'ha pogut verificar i pot no ser autèntica.</string>
     <string name="badge_unknown_key_title">No es pot verificar la insígnia</string>
@@ -2645,9 +2644,6 @@
     <string name="badges_supporter_benefits">Fitxers de fins a 2 GB, desats durant 7 dies.</string>
     <string name="badges_legend_benefits">Fitxers de fins a 5 GB, desats durant 21 dies.</string>
     <string name="badges_benefits">Avantatges</string>
-    <string name="badges_investor_offer_supporter">Invertiu 100 $ o més i obteniu una insígnia gratuïta.</string>
-    <string name="badges_investor_offer_legend">Invertiu 1000 $ o més i obteniu una insígnia de llegenda gratuïta.</string>
-    <string name="badges_investor_offer_learn_more">Més informació a Wefunder</string>
     <string name="v7_1_supporter_badge_title">Insígnies de mecenes</string>
     <string name="v7_1_supporter_badge_descr">Fitxers més grans disponibles durant més temps.</string>
     <string name="v7_1_supporter_badge_get">Doneu suport a POPOPX i obteniu una insígnia.</string>

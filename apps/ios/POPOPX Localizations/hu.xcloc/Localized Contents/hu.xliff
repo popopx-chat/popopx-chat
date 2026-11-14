@@ -100,9 +100,9 @@
         <target>%@ letöltve</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="%@ invested in POPOPX Chat crowdfunding." xml:space="preserve">
-        <source>%@ invested in POPOPX Chat crowdfunding.</source>
-        <target>%@ befektetett a POPOPX Chat közösségi finanszírozásába.</target>
+      <trans-unit id="%@ has the POPOPX investor badge." xml:space="preserve">
+        <source>%@ has the POPOPX investor badge.</source>
+        <target>%@ rendelkezik a POPOPX befektetői kitűzőjével.</target>
         <note>badge alert</note>
       </trans-unit>
       <trans-unit id="%@ is connected!" xml:space="preserve">
@@ -2945,11 +2945,6 @@ Ez a saját egyszer használható meghívója!</target>
         <target>Igazolás</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)" xml:space="preserve">
-        <source>Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)</source>
-        <target>A közösségi finanszírozásban részt vevő befektetők már az értékesítés megkezdése előtt lefoglalhatnak POPOPX-neveket: [simplex.domains](https://simplex.domains/)</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="Current Passcode" xml:space="preserve">
         <source>Current Passcode</source>
         <target>Jelenlegi jelkód</target>
@@ -5650,16 +5645,6 @@ További fejlesztések hamarosan!</target>
         <source>Invalid status</source>
         <target>Érvénytelen állapot</target>
         <note>item status text</note>
-      </trans-unit>
-      <trans-unit id="Invest $100+ and get a free badge." xml:space="preserve">
-        <source>Invest $100+ and get a free badge.</source>
-        <target>Fektessen be legalább 100 dollárt, és szerezzen egy ingyenes kitűzőt.</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
-      <trans-unit id="Invest $1000+ and get a free legend badge." xml:space="preserve">
-        <source>Invest $1000+ and get a free legend badge.</source>
-        <target>Fektessen be legalább 1000 dollárt, és szerezzen egy ingyenes legendás kitűzőt.</target>
-        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Invest in POPOPX Chat!" xml:space="preserve">
         <source>Invest in POPOPX Chat!</source>

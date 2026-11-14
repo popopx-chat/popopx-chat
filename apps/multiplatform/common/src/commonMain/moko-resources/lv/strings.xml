@@ -1040,7 +1040,6 @@
     <string name="until_register_popopx_domain">līdz varēsiet reģistrēt POPOPX domēnu</string>
     <string name="update_app_register_popopx_domain">Atjauniniet lietotni, lai reģistrētu POPOPX domēnu</string>
     <string name="countdown_hrs_min_sec">%1$02d st. %2$02d min. %3$02d sek.</string>
-    <string name="popopx_name_sales_footer">Kolektīvās finansēšanas investori var rezervēt vārdus pirms pārdošanas sākuma:</string>
     <string name="remove_name">Noņemt vārdu</string>
     <string name="save_verb">Saglabāt</string>
     <string name="edit_verb">Rediģēt</string>
@@ -2458,7 +2457,7 @@
     <string name="error_prefix">Kļūda</string>
     <string name="badge_supports_popopx">%s atbalsta POPOPX Chat.</string>
     <string name="badge_supported_popopx">%1$s atbalstīja POPOPX Chat. Nozīmītes derīguma termiņš beidzās %2$s.</string>
-    <string name="badge_invested">%s investēja POPOPX Chat kolektīvajā finansēšanā.</string>
+    <string name="badge_invested">%s ir POPOPX Investora nozīmīte.</string>
     <string name="badge_unverified_title">Neverificēta nozīmīte</string>
     <string name="badge_unverified_desc">Šo nozīmīti neizdevās verificēt, un tā var nebūt īsta.</string>
     <string name="badge_unknown_key_title">Nozīmīti nevar verificēt</string>
@@ -2633,9 +2632,6 @@
     <string name="badges_supporter_benefits">Faili līdz 2 GB, tiek glabāti 7 dienas.</string>
     <string name="badges_legend_benefits">Faili līdz 5 GB, tiek glabāti 21 dienu.</string>
     <string name="badges_benefits">Priekšrocības</string>
-    <string name="badges_investor_offer_supporter">Investējiet $100+ un saņemiet bezmaksas nozīmīti.</string>
-    <string name="badges_investor_offer_legend">Investējiet $1000+ un saņemiet bezmaksas leģendas nozīmīti.</string>
-    <string name="badges_investor_offer_learn_more">Uzzināt vairāk vietnē Wefunder</string>
     <string name="v7_1_supporter_badge_title">Atbalstītāju nozīmītes</string>
     <string name="v7_1_supporter_badge_descr">Lielāki faili, pieejami ilgāk.</string>
     <string name="v7_1_supporter_badge_get">Atbalstiet POPOPX un saņemiet nozīmīti.</string>

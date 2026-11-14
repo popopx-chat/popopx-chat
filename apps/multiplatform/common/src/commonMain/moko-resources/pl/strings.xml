@@ -2443,7 +2443,6 @@
     <string name="until_register_popopx_domain">do możliwości rejestracji domeny POPOPX</string>
     <string name="update_app_register_popopx_domain">Zaktualizuj aplikację, aby zarejestrować domenę POPOPX</string>
     <string name="countdown_hrs_min_sec">%1$02d godz. %2$02d min %3$02d s</string>
-    <string name="popopx_name_sales_footer">Inwestorzy crowdfundingu mogą zarezerwować nazwy przed rozpoczęciem sprzedaży:</string>
     <string name="remove_name">Usuń nazwę</string>
     <string name="onboarding_network_operators_configure_via_settings">Serwery można skonfigurować w ustawieniach.</string>
     <string name="maximum_message_size_reached_forwarding">Możesz skopiować i zmniejszyć rozmiar wiadomości, aby ją wysłać.</string>
@@ -2494,7 +2493,7 @@
     <string name="error_prefix">Błąd</string>
     <string name="badge_supports_popopx">%s wspiera POPOPX Chat.</string>
     <string name="badge_supported_popopx">%1$s wspierał(a) POPOPX Chat. Odznaka wygasła %2$s.</string>
-    <string name="badge_invested">%s zainwestował(a) w crowdfunding POPOPX Chat.</string>
+    <string name="badge_invested">%s ma odznakę inwestora POPOPX.</string>
     <string name="badge_unverified_title">Niezweryfikowana odznaka</string>
     <string name="badge_unverified_desc">Nie można zweryfikować tej odznaki i może ona nie być autentyczna.</string>
     <string name="badge_unknown_key_title">Nie można zweryfikować odznaki</string>
@@ -2669,9 +2668,6 @@
     <string name="badges_supporter_benefits">Pliki do 2 GB, przechowywane przez 7 dni.</string>
     <string name="badges_legend_benefits">Pliki do 5 GB, przechowywane przez 21 dni.</string>
     <string name="badges_benefits">Korzyści</string>
-    <string name="badges_investor_offer_supporter">Zainwestuj $100+ i otrzymaj darmową odznakę.</string>
-    <string name="badges_investor_offer_legend">Zainwestuj $1000+ i otrzymaj darmową odznakę legendy.</string>
-    <string name="badges_investor_offer_learn_more">Dowiedz się więcej na Wefunder</string>
     <string name="v7_1_supporter_badge_title">Odznaki wspierających</string>
     <string name="v7_1_supporter_badge_descr">Większe pliki dostępne dłużej.</string>
     <string name="v7_1_supporter_badge_get">Wspieraj POPOPX i zdobądź odznakę.</string>

@@ -1374,7 +1374,6 @@
     <string name="popopx_name_sales">A venda de nomes POPOPX começa em</string>
     <string name="until_register_popopx_domain">até poder registar um domínio POPOPX</string>
     <string name="update_app_register_popopx_domain">Atualize a aplicação para registar um domínio POPOPX</string>
-    <string name="popopx_name_sales_footer">Os investidores do financiamento colaborativo podem reservar nomes antes do início da venda:</string>
     <string name="placeholder_search_videos">Pesquisar vídeos</string>
     <string name="placeholder_search_voice_messages">Pesquisar mensagens de voz</string>
     <string name="placeholder_search_files">Pesquisar ficheiros</string>
@@ -2866,7 +2865,7 @@
     <string name="appearance_minimize_to_tray_desc">Funciona em segundo plano para receber mensagens</string>
     <string name="badge_supports_popopx">%s apoia o POPOPX Chat.</string>
     <string name="badge_supported_popopx">%1$s apoiou o POPOPX Chat. O distintivo expirou em %2$s.</string>
-    <string name="badge_invested">%s investiu no financiamento colaborativo do POPOPX Chat.</string>
+    <string name="badge_invested">%s tem o distintivo de investidor do POPOPX.</string>
     <string name="badge_unverified_title">Distintivo não verificado</string>
     <string name="badge_unverified_desc">Não foi possível verificar este distintivo, pelo que pode não ser genuíno.</string>
     <string name="badge_unknown_key_title">Não é possível verificar o distintivo</string>
@@ -3042,11 +3041,8 @@
     <string name="badges_legend_benefits">Ficheiros até 5 GB, armazenados por 21 dias.</string>
     <string name="chat_layout_flat">Plana</string>
     <string name="v7_1_flat_layout">Estrutura plana e markdown</string>
-    <string name="badges_investor_offer_legend">Invista $1000+ e receba grátis um distintivo de lenda.</string>
-    <string name="badges_investor_offer_supporter">Invista $100+ e receba um distintivo grátis.</string>
     <string name="v7_1_supporter_badge_descr">Ficheiros maiores disponíveis por mais tempo.</string>
     <string name="whats_new_learn_more">Aprenda mais.</string>
-    <string name="badges_investor_offer_learn_more">Aprenda mais no Wefunder</string>
     <string name="v7_1_channels">Canais mais seguros</string>
     <string name="v7_1_popopx_names_descr">A venda começa a 12 de Dezembro.</string>
     <string name="v7_1_popopx_names">Nomes públicos POPOPX</string>

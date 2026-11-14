@@ -2722,7 +2722,7 @@
     <string name="embed_only_your_page">Solo la página superior puede mostrar la vista previa.</string>
     <string name="relay_status_rejected">rechazado</string>
     <string name="member_info_relay_status_rejected_by_operator">rechazado por el operador del servidor</string>
-    <string name="badge_invested">%s ha participado en la financiación colectiva de POPOPX Chat.</string>
+    <string name="badge_invested">%s tiene la insignia de inversor de POPOPX.</string>
     <string name="badge_supports_popopx">%s apoya a POPOPX Chat.</string>
     <string name="member_info_status">Estado</string>
     <string name="group_member_role_observer_channel">suscriptor</string>
@@ -2813,7 +2813,6 @@
     <string name="until_register_popopx_domain">hasta que puedas registrar un dominio POPOPX</string>
     <string name="update_app_register_popopx_domain">Actualiza la app para registrar un dominio POPOPX</string>
     <string name="countdown_hrs_min_sec">%1$02d hrs %2$02d min %3$02d seg</string>
-    <string name="popopx_name_sales_footer">Los inversores de crowdfunding pueden reservar nombres antes del comienzo de la venta:</string>
     <string name="badges_price_monthly">%1$s/mes</string>
     <string name="badges_price_annual">%1$s/año</string>
     <string name="badges_period_one_month">1 mes</string>
@@ -3000,9 +2999,6 @@
     <string name="badges_supporter_benefits">Archivos de hasta 2 GB, almacenados durante 7 días.</string>
     <string name="badges_legend_benefits">Archivos de hasta 5 GB, almacenados durante 21 días.</string>
     <string name="badges_benefits">Ventajas</string>
-    <string name="badges_investor_offer_supporter">Invierte $100 o más y consigue una insignia gratis.</string>
-    <string name="badges_investor_offer_legend">Invierte $1000 o más y consigue una insignia de leyenda gratis.</string>
-    <string name="badges_investor_offer_learn_more">Más información en Wefunder</string>
     <string name="v7_1_supporter_badge_descr">Archivos más grandes disponibles durante más tiempo.</string>
     <string name="v7_1_supporter_badge_get">Patrocina POPOPX y consigue una insignia.</string>
     <string name="v7_1_supporter_badge_have">¡Ya tienes una insignia!</string>

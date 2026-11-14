@@ -2439,7 +2439,6 @@
     <string name="until_register_popopx_domain">مانده تا امکان ثبت دامنه POPOPX</string>
     <string name="update_app_register_popopx_domain">برای ثبت دامنه POPOPX، برنامه را به‌روزرسانی کنید</string>
     <string name="countdown_hrs_min_sec">%1$02d ساعت %2$02d دقیقه %3$02d ثانیه</string>
-    <string name="popopx_name_sales_footer">سرمایه‌گذاران تأمین مالی جمعی می‌توانند پیش از شروع فروش، نام‌ها را رزرو کنند:</string>
     <string name="remove_name">حذف نام</string>
     <string name="supporter_badge">نشان حامی</string>
     <string name="legend_badge">نشان اسطوره</string>
@@ -2464,7 +2463,7 @@
     <string name="error_prefix">خطا</string>
     <string name="badge_supports_popopx">%s از POPOPX Chat حمایت می‌کند.</string>
     <string name="badge_supported_popopx">%1$s از POPOPX Chat حمایت کرده است. نشان در %2$s منقضی شد.</string>
-    <string name="badge_invested">%s در تأمین مالی جمعی POPOPX Chat سرمایه‌گذاری کرده است.</string>
+    <string name="badge_invested">%s نشان سرمایه‌گذار POPOPX را دارد.</string>
     <string name="badge_unverified_title">نشان تاییدنشده</string>
     <string name="badge_unverified_desc">این نشان قابل تایید نیست و ممکن است اصل نباشد.</string>
     <string name="badge_unknown_key_title">نشان قابل تایید نیست</string>
@@ -2639,9 +2638,6 @@
     <string name="badges_supporter_benefits">فایل‌ها تا ۲ GB، نگهداری به مدت ۷ روز.</string>
     <string name="badges_legend_benefits">فایل‌ها تا ۵ GB، نگهداری به مدت ۲۱ روز.</string>
     <string name="badges_benefits">مزایا</string>
-    <string name="badges_investor_offer_supporter">با سرمایه‌گذاری $100+ یک نشان رایگان دریافت کنید.</string>
-    <string name="badges_investor_offer_legend">با سرمایه‌گذاری $1000+ یک نشان اسطوره رایگان دریافت کنید.</string>
-    <string name="badges_investor_offer_learn_more">اطلاعات بیشتر در Wefunder</string>
     <string name="v7_1_supporter_badge_title">نشان‌های حامی</string>
     <string name="v7_1_supporter_badge_descr">فایل‌های بزرگ‌تر، در دسترس برای مدت طولانی‌تر.</string>
     <string name="v7_1_supporter_badge_get">از POPOPX حمایت کنید و یک نشان دریافت کنید.</string>

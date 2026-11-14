@@ -2349,7 +2349,6 @@
     <string name="until_register_popopx_domain">tot u een POPOPX domein kunt registreren</string>
     <string name="update_app_register_popopx_domain">Werk de app bij om een POPOPX domein te registreren</string>
     <string name="countdown_hrs_min_sec">%1$02d uur %2$02d min %3$02d sec</string>
-    <string name="popopx_name_sales_footer">Crowdfunding-investeerders kunnen namen reserveren voordat de verkoop begint:</string>
     <string name="remove_name">Naam verwijderen</string>
     <string name="supporter_badge">supporter-badge</string>
     <string name="legend_badge">legende-badge</string>
@@ -2373,7 +2372,7 @@
     <string name="error_prefix">Fout</string>
     <string name="badge_supports_popopx">%s steunt POPOPX Chat.</string>
     <string name="badge_supported_popopx">%1$s steunde POPOPX Chat. De badge is verlopen op %2$s.</string>
-    <string name="badge_invested">%s heeft geïnvesteerd in de crowdfunding van POPOPX Chat.</string>
+    <string name="badge_invested">%s heeft de Investeerder-badge van POPOPX.</string>
     <string name="badge_unverified_title">Niet-geverifieerde badge</string>
     <string name="badge_unverified_desc">Deze badge kon niet worden geverifieerd en is mogelijk niet echt.</string>
     <string name="badge_unknown_key_title">Badge kan niet worden geverifieerd</string>
@@ -2548,9 +2547,6 @@
     <string name="badges_supporter_benefits">Bestanden tot 2 GB, 7 dagen bewaard.</string>
     <string name="badges_legend_benefits">Bestanden tot 5 GB, 21 dagen bewaard.</string>
     <string name="badges_benefits">Voordelen</string>
-    <string name="badges_investor_offer_supporter">Investeer $100+ en krijg een gratis badge.</string>
-    <string name="badges_investor_offer_legend">Investeer $1000+ en krijg een gratis legende-badge.</string>
-    <string name="badges_investor_offer_learn_more">Kom meer te weten op Wefunder</string>
     <string name="v7_1_supporter_badge_title">Supporter-badges</string>
     <string name="v7_1_supporter_badge_descr">Grotere bestanden, langer beschikbaar.</string>
     <string name="v7_1_supporter_badge_get">Steun POPOPX en krijg een badge.</string>

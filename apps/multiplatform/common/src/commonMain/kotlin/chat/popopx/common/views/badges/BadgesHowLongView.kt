@@ -127,7 +127,6 @@ fun BadgesHowLongView(level: BadgeLevel, modalManager: ModalManager, unwindToDep
       ContinueButton(level, selectedPeriod, modalManager, unwindToDepth) { chosenPeriod = it }
       BadgeStoreFooter {
         BadgeBillingFooter(selectedPeriod)
-        BadgeInvestorOffer(level)
       }
     }
   }

@@ -212,8 +212,6 @@ fun SetPopopxDomainView(
         }
       }
       SectionTextFooter(buildAnnotatedString {
-        append(generalGetString(MR.strings.popopx_name_sales_footer))
-        append(" ")
         withLink(LinkAnnotation.Url(SIMPLEX_DOMAINS_URL) { uriHandler.openUriCatching(SIMPLEX_DOMAINS_URL) }) {
           withStyle(SpanStyle(color = MaterialTheme.colors.primary)) {
             append("simplex.domains")

@@ -122,7 +122,7 @@
 "%@ downloaded" = "%@ heruntergeladen";
 
 /* badge alert */
-"%@ invested in POPOPX Chat crowdfunding." = "%@ hat sich am POPOPX Chat-Crowdfunding beteiligt.";
+"%@ has the POPOPX investor badge." = "%@ hat das Investor-Badge von POPOPX.";
 
 /* notification title */
 "%@ is connected!" = "%@ ist mit Ihnen verbunden!";
@@ -1938,7 +1938,6 @@ server test step */
 "Credential" = "Credential";
 
 /* No comment provided by engineer. */
-"Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)" = "Crowdfunding-Investoren können vor Verkaufsbeginn Namen reservieren: [simplex.domains](https://simplex.domains/)";
 
 /* No comment provided by engineer. */
 
@@ -3705,10 +3704,8 @@ servers warning */
 "Invalid status" = "Ungültiger Status";
 
 /* No comment provided by engineer. */
-"Invest $100+ and get a free badge." = "Investieren Sie ab $100 und erhalten Sie einen kostenlosen Badge.";
 
 /* No comment provided by engineer. */
-"Invest $1000+ and get a free legend badge." = "Investieren Sie ab $1000 und erhalten Sie einen kostenlosen Legenden-Badge.";
 
 /* No comment provided by engineer. */
 "Invest in POPOPX Chat!" = "Investieren Sie in POPOPX-Chat!";

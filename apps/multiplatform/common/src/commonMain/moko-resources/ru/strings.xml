@@ -2782,7 +2782,7 @@
     <string name="badge_unknown_key_desc">Этот значок подписан ключом, который неизвестен текущей версии приложения. Обновите приложение, чтобы проверить его подлинность.</string>
     <string name="badge_unverified_desc">Не удалось проверить подлинность этого значка. Возможно, он не является подлинным.</string>
     <string name="badge_unverified_title">Неподтвержденный значок</string>
-    <string name="badge_invested">%s инвестировал(а) в краудфандинг POPOPX Chat.</string>
+    <string name="badge_invested">%s имеет значок инвестора POPOPX.</string>
     <string name="badge_supports_popopx">%s поддерживает POPOPX Chat.</string>
     <string name="appearance_minimize_to_tray_desc">Работает в фоновом режиме для получения сообщений</string>
     <string name="no_names_servers_enabled">Нет серверов для разрешения имён.</string>
@@ -2845,7 +2845,6 @@
     <string name="until_register_popopx_domain">до открытия регистрации POPOPX доменов</string>
     <string name="update_app_register_popopx_domain">Обновите приложение, чтобы зарегистрировать POPOPX домен</string>
     <string name="countdown_hrs_min_sec">%1$02d ч %2$02d мин %3$02d сек</string>
-    <string name="popopx_name_sales_footer">Инвесторы краудфандинга могут зарезервировать имена до начала продажи:</string>
     <string name="remove_name">Удалить имя</string>
     <string name="supporter_badge">значок «Сторонник»</string>
     <string name="legend_badge">значок «Легенда»</string>
@@ -3072,9 +3071,6 @@
     <string name="badges_supporter_benefits">Файлы до 2 GB, хранятся 7 дней.</string>
     <string name="badges_legend_benefits">Файлы до 5 GB, хранятся 21 день.</string>
     <string name="badges_benefits">Преимущества</string>
-    <string name="badges_investor_offer_supporter">Инвестируйте от $100 и получите бесплатный значок.</string>
-    <string name="badges_investor_offer_legend">Инвестируйте от $1000 и получите бесплатный значок «Легенда».</string>
-    <string name="badges_investor_offer_learn_more">Подробнее на Wefunder</string>
     <string name="v7_1_supporter_badge_title">Значки сторонников</string>
     <string name="v7_1_supporter_badge_descr">Файлы большего размера доступны дольше.</string>
     <string name="v7_1_supporter_badge_get">Поддержите POPOPX и получите значок.</string>

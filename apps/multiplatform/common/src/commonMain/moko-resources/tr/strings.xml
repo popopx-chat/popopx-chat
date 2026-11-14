@@ -2683,7 +2683,7 @@
     <string name="tray_tooltip_unread">POPOPX - %d okunmamış</string>
     <string name="popopx_name_error">POPOPX ad hatası</string>
     <string name="popopx_name_not_verified">POPOPX adı doğrulanmadı</string>
-    <string name="badge_invested">%s, POPOPX Chat kitle fonlamasına yatırım yaptı.</string>
+    <string name="badge_invested">%s, POPOPX yatırımcı rozetine sahip.</string>
     <string name="badge_supports_popopx">%s, POPOPX Chat\'i destekliyor.</string>
     <string name="member_info_status">Durum</string>
     <string name="group_member_role_observer_channel">abone</string>
@@ -2771,7 +2771,6 @@
     <string name="until_register_popopx_domain">sonra POPOPX alan adı kaydedebilirsiniz</string>
     <string name="update_app_register_popopx_domain">POPOPX alan adı kaydetmek için uygulamayı güncelleyin</string>
     <string name="countdown_hrs_min_sec">%1$02d sa %2$02d dk %3$02d sn</string>
-    <string name="popopx_name_sales_footer">Kitlesel fonlama yatırımcıları, satış başlamadan önce adları rezerve edebilir:</string>
     <string name="remove_name">Adı kaldır</string>
     <string name="use_relay">Aktarıcı kullan</string>
     <string name="onboarding_post_address">Bu adresi sosyal medya profilinizde, web sitenizde veya e-posta imzanızda kullanın.</string>
@@ -2960,9 +2959,6 @@
     <string name="badges_supporter_benefits">2 GB\'a kadar dosyalar, 7 gün saklanır.</string>
     <string name="badges_legend_benefits">5 GB\'a kadar dosyalar, 21 gün saklanır.</string>
     <string name="badges_benefits">Avantajlar</string>
-    <string name="badges_investor_offer_supporter">$100+ yatırım yapın ve ücretsiz bir rozet alın.</string>
-    <string name="badges_investor_offer_legend">$1000+ yatırım yapın ve ücretsiz bir efsane rozeti alın.</string>
-    <string name="badges_investor_offer_learn_more">Wefunder\'da daha fazla bilgi edinin</string>
     <string name="v7_1_supporter_badge_title">Destekçi rozetleri</string>
     <string name="v7_1_supporter_badge_descr">Daha büyük dosyalar, daha uzun süre erişilebilir.</string>
     <string name="v7_1_supporter_badge_get">POPOPX\'i destekleyin ve bir rozet alın.</string>

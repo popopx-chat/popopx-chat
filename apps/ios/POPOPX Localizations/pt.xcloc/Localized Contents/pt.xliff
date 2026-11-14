@@ -905,9 +905,9 @@
         <source>%@ accepted the call without end-to-end encryption.</source>
         <target state="translated">%@ aceitou a chamada sem cifragem ponta-a-ponta.</target>
       </trans-unit>
-      <trans-unit id="%@ invested in POPOPX Chat crowdfunding." xml:space="preserve" approved="no">
-        <source>%@ invested in POPOPX Chat crowdfunding.</source>
-        <target state="translated">%@ investiu no POPOPX Chat através do financiamento coletivo.</target>
+      <trans-unit id="%@ has the POPOPX investor badge." xml:space="preserve" approved="no">
+        <source>%@ has the POPOPX investor badge.</source>
+        <target state="translated">%@ tem o distintivo de investidor do POPOPX.</target>
       </trans-unit>
       <trans-unit id="%@ server" xml:space="preserve" approved="no">
         <source>%@ server</source>

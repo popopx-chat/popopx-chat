@@ -71,7 +71,6 @@ fun BadgesCheckOrderView(level: BadgeLevel, period: BadgePeriod, modalManager: M
       PayButton(level, period, purchasing)
       BadgeStoreFooter {
         BadgeBillingFooter(period)
-        BadgeInvestorOffer(level)
       }
     }
   }

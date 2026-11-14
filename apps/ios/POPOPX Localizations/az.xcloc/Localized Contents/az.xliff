@@ -90,9 +90,9 @@
         <target state="translated">%@ yüklənib</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="%@ invested in POPOPX Chat crowdfunding." xml:space="preserve" approved="no">
-        <source>%@ invested in POPOPX Chat crowdfunding.</source>
-        <target state="translated">POPOPX Chat-ın kraudfandinqinə %@ sərmayə qoyulub.</target>
+      <trans-unit id="%@ has the POPOPX investor badge." xml:space="preserve" approved="no">
+        <source>%@ has the POPOPX investor badge.</source>
+        <target state="translated">%@ POPOPX investor nişanına malikdir.</target>
         <note>badge alert</note>
       </trans-unit>
       <trans-unit id="%@ is connected!" xml:space="preserve" approved="no">
@@ -2698,11 +2698,6 @@ Bu, sizin şəxsi birdəfəlik keçidinizdir!</target>
       <trans-unit id="Creating link…" xml:space="preserve" approved="no">
         <source>Creating link…</source>
         <target state="translated">Keçid yaradılır…</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
-      <trans-unit id="Crowdfunding on Wefunder." xml:space="preserve" approved="no">
-        <source>Crowdfunding on Wefunder.</source>
-        <target state="translated">Wefunder də kraudfandinq.</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Current Passcode" xml:space="preserve" approved="no">
@@ -5961,10 +5956,6 @@ Bu, %@ qrupu üçün olan keçidinizdir!</target>
       <trans-unit id="%d day" xml:space="preserve" approved="no">
         <source>%d day</source>
         <target state="translated">%d gün</target>
-      </trans-unit>
-      <trans-unit id="Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)" xml:space="preserve" approved="no">
-        <source>Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)</source>
-        <target state="translated">Kütləvi maliyyələşdirmə investorları satış başlamazdan əvvəl adları sifariş edə bilərlər: [simplex.domains](https://simplex.domains/)</target>
       </trans-unit>
     </body>
   </file>

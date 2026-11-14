@@ -2650,7 +2650,6 @@
     <string name="until_register_popopx_domain">hingga Anda dapat mendaftarkan domain POPOPX</string>
     <string name="update_app_register_popopx_domain">Perbarui aplikasi untuk mendaftarkan domain POPOPX</string>
     <string name="countdown_hrs_min_sec">%1$02d jam %2$02d mnt %3$02d dtk</string>
-    <string name="popopx_name_sales_footer">Investor urun dana dapat memesan nama sebelum penjualan dimulai:</string>
     <string name="remove_name">Hapus nama</string>
     <string name="supporter_badge">lencana pendukung</string>
     <string name="legend_badge">lencana legenda</string>
@@ -2672,7 +2671,7 @@
     <string name="set_channel_popopx_name_footer">Izinkan orang bergabung melalui nama yang terdaftar dengan tautan saluran ini.</string>
     <string name="operator_use_for_names">Untuk meresolusi nama</string>
     <string name="badge_supports_popopx">%s mendukung POPOPX Chat.</string>
-    <string name="badge_invested">%s berinvestasi dalam urun dana POPOPX Chat.</string>
+    <string name="badge_invested">%s memiliki lencana Investor POPOPX.</string>
     <string name="badge_unverified_title">Lencana tidak terverifikasi</string>
     <string name="badge_unverified_desc">Lencana ini tidak dapat diverifikasi dan mungkin tidak asli.</string>
     <string name="badge_unknown_key_desc">Lencana ditandatangani dengan kunci yang tidak dikenali oleh versi aplikasi ini. Perbarui aplikasi untuk memverifikasi lencana ini.</string>
@@ -2846,9 +2845,6 @@
     <string name="badges_supporter_benefits">Berkas hingga 2 GB, disimpan selama 7 hari.</string>
     <string name="badges_legend_benefits">Berkas hingga 5 GB, disimpan selama 21 hari.</string>
     <string name="badges_benefits">Manfaat</string>
-    <string name="badges_investor_offer_supporter">Investasikan $100+ dan dapatkan lencana gratis.</string>
-    <string name="badges_investor_offer_legend">Investasikan $1000+ dan dapatkan lencana legenda gratis.</string>
-    <string name="badges_investor_offer_learn_more">Pelajari lebih lanjut di Wefunder</string>
     <string name="v7_1_supporter_badge_title">Lencana pendukung</string>
     <string name="v7_1_supporter_badge_descr">Berkas lebih besar tersedia lebih lama.</string>
     <string name="v7_1_supporter_badge_get">Dukung POPOPX dan dapatkan lencana.</string>

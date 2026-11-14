@@ -399,7 +399,6 @@
   <string name="until_register_popopx_domain">until you can register a POPOPX domain</string>
   <string name="update_app_register_popopx_domain">Update the app to register a POPOPX domain</string>
   <string name="countdown_hrs_min_sec">%1$02d hrs %2$02d min %3$02d sec</string>
-  <string name="popopx_name_sales_footer">Crowdfunding investors can reserve names before the sale starts:</string>
   <string name="remove_name">Remove name</string>
   <string name="save_verb">Save</string>
   <string name="edit_verb">Edit</string>
@@ -3166,7 +3165,7 @@
   <string name="appearance_minimize_to_tray_desc">Runs in background to receive messages</string>
   <string name="badge_supports_popopx">%s supports POPOPX Chat.</string>
   <string name="badge_supported_popopx">%1$s supported POPOPX Chat. The badge expired on %2$s.</string>
-  <string name="badge_invested">%s invested in POPOPX Chat crowdfunding.</string>
+  <string name="badge_invested">%s has the POPOPX investor badge.</string>
   <string name="badge_unverified_title">Unverified badge</string>
   <string name="badge_unverified_desc">This badge could not be verified and may not be genuine.</string>
   <string name="badge_unknown_key_title">Badge cannot be verified</string>
@@ -3344,9 +3343,6 @@
   <string name="badges_supporter_benefits">Files up to 2 GB, stored for 7 days.</string>
   <string name="badges_legend_benefits">Files up to 5 GB, stored for 21 days.</string>
   <string name="badges_benefits">Benefits</string>
-  <string name="badges_investor_offer_supporter">Invest $100+ and get a free badge.</string>
-  <string name="badges_investor_offer_legend">Invest $1000+ and get a free legend badge.</string>
-  <string name="badges_investor_offer_learn_more">Learn more on Wefunder</string>
   <string name="v7_1_invest">Own a part of POPOPX Chat! 🚀</string>
   <string name="v7_1_supporter_badge_title">Supporter badges</string>
   <string name="v7_1_supporter_badge_body">Send larger files\navailable for longer.</string>

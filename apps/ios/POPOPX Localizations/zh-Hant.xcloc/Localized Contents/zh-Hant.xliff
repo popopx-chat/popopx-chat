@@ -6424,9 +6424,9 @@ It can happen because of some bug or when the connection is compromised.</source
         <source>%1$@ at %2$@:</source>
         <target state="translated">%1$@ 於 %2$@：</target>
       </trans-unit>
-      <trans-unit id="%@ invested in POPOPX Chat crowdfunding." xml:space="preserve" approved="no">
-        <source>%@ invested in POPOPX Chat crowdfunding.</source>
-        <target state="translated">%@ 出資支持了 POPOPX Chat 的群眾募資。</target>
+      <trans-unit id="%@ has the POPOPX investor badge." xml:space="preserve" approved="no">
+        <source>%@ has the POPOPX investor badge.</source>
+        <target state="translated">%@ 擁有 POPOPX 的投資者徽章。</target>
       </trans-unit>
       <trans-unit id="%@ supports POPOPX Chat." xml:space="preserve" approved="no">
         <source>%@ supports POPOPX Chat.</source>
@@ -11691,11 +11691,6 @@ your contacts and groups.</source>
         <target>憑證</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)" xml:space="preserve">
-        <source>Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)</source>
-        <target>群眾募資投資者可在開賣前預留名稱：[simplex.domains](https://simplex.domains/)</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="Date" xml:space="preserve">
         <source>Date</source>
         <target>日期</target>
@@ -11806,16 +11801,6 @@ your contacts and groups.</source>
         <target>如何註冊測試名稱</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Invest $100+ and get a free badge." xml:space="preserve">
-        <source>Invest $100+ and get a free badge.</source>
-        <target>投資 $100 以上即可免費獲得徽章。</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
-      <trans-unit id="Invest $1000+ and get a free legend badge." xml:space="preserve">
-        <source>Invest $1000+ and get a free legend badge.</source>
-        <target>投資 $1000 以上即可免費獲得傳奇徽章。</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="Investor" xml:space="preserve">
         <source>Investor</source>
         <target>投資者</target>
@@ -11854,11 +11839,6 @@ your contacts and groups.</source>
       <trans-unit id="Last attempt" xml:space="preserve">
         <source>Last attempt</source>
         <target>上次嘗試</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
-      <trans-unit id="Learn more on Wefunder." xml:space="preserve">
-        <source>Learn more on Wefunder.</source>
-        <target>在 Wefunder 上了解更多。</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Legend" xml:space="preserve">

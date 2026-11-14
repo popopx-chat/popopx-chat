@@ -920,10 +920,6 @@ struct SetPopopxDomainView: View {
             } header: {
                 Text("POPOPX name sale starts in")
                     .foregroundColor(theme.colors.secondary)
-            } footer: {
-                Text("Crowdfunding investors can reserve names before the sale starts.")
-                    .foregroundColor(theme.colors.secondary)
-                    .padding(.bottom)
             }
         }
         .modifier(ThemedBackground(grouped: true))

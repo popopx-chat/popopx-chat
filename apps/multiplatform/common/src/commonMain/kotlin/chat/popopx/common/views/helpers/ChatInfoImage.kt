@@ -232,12 +232,11 @@ fun showBadgeInfoAlert(name: String, badge: LocalBadge, uriHandler: UriHandler) 
         text = generalGetString(MR.strings.badge_unknown_key_desc)
       )
     badge.badge.badgeType is BadgeType.Investor ->
-      AlertManager.shared.showAlertDialog(
+      // the badge is the fact worth stating; the round it came from is not a destination this
+      // fork promotes, so this branch is confirm-only, exactly like iOS NameBadge.swift:152
+      AlertManager.shared.showAlertMsg(
         title = title,
-        text = String.format(generalGetString(MR.strings.badge_invested), name),
-        confirmText = generalGetString(MR.strings.ok),
-        dismissText = generalGetString(MR.strings.learn_more),
-        onDismiss = { uriHandler.openUriCatching("https://popopx.chat/crowdfunding") }
+        text = String.format(generalGetString(MR.strings.badge_invested), name)
       )
     else -> {
       // Supporter, Legend and unknown types use the supporter wording

@@ -2573,7 +2573,6 @@
     <string name="until_register_popopx_domain">до відкриття реєстрації доменів POPOPX</string>
     <string name="update_app_register_popopx_domain">Оновіть додаток, щоб зареєструвати домен POPOPX</string>
     <string name="countdown_hrs_min_sec">%1$02d год %2$02d хв %3$02d сек</string>
-    <string name="popopx_name_sales_footer">Інвестори краудфандингу можуть зарезервувати імена до початку продажу:</string>
     <string name="remove_name">Видалити ім\'я</string>
     <string name="for_anyone_to_reach_you">Щоб будь-хто міг з вами зв’язатися</string>
     <string name="from_history">З історії</string>
@@ -2619,7 +2618,7 @@
     <string name="action_button_channel_link">Посилання</string>
     <string name="operator_use_for_names">Для розпізнавання імен</string>
     <string name="badge_supports_popopx">%s підтримує POPOPX Chat.</string>
-    <string name="badge_invested">%s інвестував(ла) у краудфандинг POPOPX Chat.</string>
+    <string name="badge_invested">%s має значок інвестора POPOPX.</string>
     <string name="badge_unverified_title">Неперевірений значок</string>
     <string name="badge_unverified_desc">Цей значок не вдалося перевірити, і він може бути несправжнім.</string>
     <string name="badge_unknown_key_desc">Значок підписано ключем, який ця версія додатку не розпізнає. Оновіть додаток, щоб перевірити цей значок.</string>
@@ -2793,9 +2792,6 @@
     <string name="badges_supporter_benefits">Файли до 2 GB, зберігаються 7 днів.</string>
     <string name="badges_legend_benefits">Файли до 5 GB, зберігаються 21 день.</string>
     <string name="badges_benefits">Переваги</string>
-    <string name="badges_investor_offer_supporter">Інвестуйте від $100 і отримайте безкоштовний значок.</string>
-    <string name="badges_investor_offer_legend">Інвестуйте від $1000 і отримайте безкоштовний значок «Легенда».</string>
-    <string name="badges_investor_offer_learn_more">Докладніше на Wefunder</string>
     <string name="v7_1_supporter_badge_title">Значки прихильників</string>
     <string name="v7_1_supporter_badge_descr">Більші файли доступні довше.</string>
     <string name="v7_1_supporter_badge_get">Підтримайте POPOPX і отримайте значок.</string>

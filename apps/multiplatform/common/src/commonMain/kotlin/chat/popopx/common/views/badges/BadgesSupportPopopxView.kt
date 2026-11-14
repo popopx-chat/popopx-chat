@@ -75,7 +75,6 @@ fun BadgesSupportPopopxView(modalManager: ModalManager, unwindToDepth: Int) {
       } else {
         BuyInBrowserButton(modalManager, unwindToDepth)
         RedeemCodeButton(modalManager, unwindToDepth)
-        BadgeInvestorOffer(BadgeLevel.Supporter, shown = false)
       }
     }
   }

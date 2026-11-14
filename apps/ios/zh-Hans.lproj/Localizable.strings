@@ -119,7 +119,7 @@
 "%@ downloaded" = "%@ 已下载";
 
 /* badge alert */
-"%@ invested in POPOPX Chat crowdfunding." = "%@ 出资支持了 POPOPX Chat 的众筹。";
+"%@ has the POPOPX investor badge." = "%@ 拥有 POPOPX 的投资人徽章。";
 
 /* notification title */
 "%@ is connected!" = "%@ 已连接！";
@@ -1908,7 +1908,6 @@ server test step */
 "Credential" = "凭证";
 
 /* No comment provided by engineer. */
-"Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)" = "众筹投资者可在销售开始前保留名称：[simplex.domains](https://simplex.domains/)";
 
 /* No comment provided by engineer. */
 "Current conditions text couldn't be loaded, you can review conditions via this link:" = "无法加载当前条款文本，你可以通过此链接审阅条款：";
@@ -3602,10 +3601,8 @@ servers warning */
 "Invalid status" = "无效状态";
 
 /* No comment provided by engineer. */
-"Invest $100+ and get a free badge." = "投资 $100+ 即可免费获得徽章。";
 
 /* No comment provided by engineer. */
-"Invest $1000+ and get a free legend badge." = "投资 $1000+ 即可免费获得传奇徽章。";
 
 /* badge type */
 "Investor" = "投资人";

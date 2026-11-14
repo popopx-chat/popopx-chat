@@ -2468,7 +2468,6 @@
     <string name="until_register_popopx_domain">până când vei putea înregistra un domeniu POPOPX</string>
     <string name="update_app_register_popopx_domain">Actualizează aplicația pentru a înregistra un domeniu POPOPX</string>
     <string name="countdown_hrs_min_sec">%1$02d ore %2$02d min %3$02d sec</string>
-    <string name="popopx_name_sales_footer">Investitorii din campania de crowdfunding pot rezerva nume înainte de începerea vânzării:</string>
     <string name="remove_name">Elimină numele</string>
     <string name="supporter_badge">insignă de susținător</string>
     <string name="legend_badge">insignă de legendă</string>
@@ -2492,7 +2491,7 @@
     <string name="error_prefix">Eroare</string>
     <string name="channel_will_start_with_relays">Canalul va porni cu %1$d din %2$d relee. Continui?</string>
     <string name="badge_supports_popopx">%s susține POPOPX Chat.</string>
-    <string name="badge_invested">%s a investit în campania de crowdfunding POPOPX Chat.</string>
+    <string name="badge_invested">%s are insigna de Investitor POPOPX.</string>
     <string name="badge_unverified_title">Insignă neverificată</string>
     <string name="badge_unverified_desc">Această insignă nu a putut fi verificată și s-ar putea să nu fie autentică.</string>
     <string name="badge_unknown_key_desc">Insigna este semnată cu o cheie pe care această versiune a aplicației nu o recunoaște. Actualizează aplicația pentru a verifica această insignă.</string>
@@ -2666,9 +2665,6 @@
     <string name="badges_supporter_benefits">Fișiere de până la 2 GB, stocate timp de 7 zile.</string>
     <string name="badges_legend_benefits">Fișiere de până la 5 GB, stocate timp de 21 de zile.</string>
     <string name="badges_benefits">Beneficii</string>
-    <string name="badges_investor_offer_supporter">Investește $100+ și primește o insignă gratuită.</string>
-    <string name="badges_investor_offer_legend">Investește $1000+ și primește o insignă de legendă gratuită.</string>
-    <string name="badges_investor_offer_learn_more">Află mai multe pe Wefunder</string>
     <string name="v7_1_supporter_badge_title">Insigne de susținător</string>
     <string name="v7_1_supporter_badge_descr">Fișiere mai mari, disponibile mai mult timp.</string>
     <string name="v7_1_supporter_badge_get">Susține POPOPX și primește o insignă.</string>

@@ -2733,7 +2733,7 @@
     <string name="webpage_url_footer">它将展示给订阅者并用来允许加载预览。</string>
     <string name="more_privacy">更多隐私</string>
     <string name="embed_only_your_page">只有您上面的页面可以显示预览。</string>
-    <string name="badge_invested">%s 给 POPOPX Chat 众筹投过钱。</string>
+    <string name="badge_invested">%s 拥有 POPOPX 的投资人徽章。</string>
     <string name="badge_supports_popopx">%s 支持 POPOPX Chat。</string>
     <string name="group_member_role_observer_channel">订阅者</string>
     <string name="settings_section_title_support_project">支持本项目</string>
@@ -2808,7 +2808,6 @@
     <string name="group_invitations">群邀请</string>
     <string name="forwarded_from">转发自</string>
     <string name="countdown_hrs_min_sec">%1$02d 小时 %2$02d 分钟 %3$02d 秒</string>
-    <string name="popopx_name_sales_footer">众筹投资者可在销售开始前保留名称：</string>
     <string name="popopx_name_sales">POPOPX 名称销售倒计时</string>
     <string name="until_register_popopx_domain">后即可注册 POPOPX 域名</string>
     <string name="update_app_register_popopx_domain">更新应用来注册 POPOPX 域名</string>
@@ -2998,9 +2997,6 @@
     <string name="badges_supporter_benefits">文件最大 2 GB，保留 7 天。</string>
     <string name="badges_legend_benefits">文件最大 5 GB，保留 21 天。</string>
     <string name="badges_benefits">福利</string>
-    <string name="badges_investor_offer_supporter">投资 $100+ 即可免费获得徽章。</string>
-    <string name="badges_investor_offer_legend">投资 $1000+ 即可免费获得传奇徽章。</string>
-    <string name="badges_investor_offer_learn_more">在 Wefunder 上了解更多</string>
     <string name="v7_1_supporter_badge_descr">更大的文件，保留更久。</string>
     <string name="v7_1_supporter_badge_get">支持 POPOPX 并获得徽章。</string>
     <string name="v7_1_supporter_badge_have">你已经拥有徽章！</string>

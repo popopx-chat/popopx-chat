@@ -119,7 +119,7 @@
 "%@ downloaded" = "%@ встановлено";
 
 /* badge alert */
-"%@ invested in POPOPX Chat crowdfunding." = "%@ інвестував(ла) у краудфандинг POPOPX Chat.";
+"%@ has the POPOPX investor badge." = "%@ має значок інвестора POPOPX.";
 
 /* notification title */
 "%@ is connected!" = "%@ підключено!";
@@ -1727,7 +1727,6 @@ server test step */
 "Credential" = "Посвідчення";
 
 /* No comment provided by engineer. */
-"Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)" = "Інвестори краудфандингу можуть зарезервувати імена до початку продажу: [simplex.domains](https://simplex.domains/)";
 
 /* No comment provided by engineer. */
 "Current conditions text couldn't be loaded, you can review conditions via this link:" = "Текст поточних умов не вдалося завантажити, ви можете переглянути умови за цим посиланням:";
@@ -3276,10 +3275,8 @@ servers warning */
 "Invalid status" = "Недійсний статус";
 
 /* No comment provided by engineer. */
-"Invest $100+ and get a free badge." = "Інвестуйте від $100 і отримайте безкоштовний значок.";
 
 /* No comment provided by engineer. */
-"Invest $1000+ and get a free legend badge." = "Інвестуйте від $1000 і отримайте безкоштовний значок «Легенда».";
 
 /* badge type */
 "Investor" = "Інвестор";

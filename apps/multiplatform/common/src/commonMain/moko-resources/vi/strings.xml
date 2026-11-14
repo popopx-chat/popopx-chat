@@ -2454,7 +2454,6 @@
     <string name="until_register_popopx_domain">cho đến khi bạn có thể đăng ký tên miền POPOPX</string>
     <string name="update_app_register_popopx_domain">Cập nhật ứng dụng để đăng ký tên miền POPOPX</string>
     <string name="countdown_hrs_min_sec">%1$02d giờ %2$02d phút %3$02d giây</string>
-    <string name="popopx_name_sales_footer">Nhà đầu tư gây quỹ cộng đồng có thể đặt trước tên trước khi đợt bán bắt đầu:</string>
     <string name="remove_name">Xóa tên</string>
     <string name="supporter_badge">huy hiệu người ủng hộ</string>
     <string name="legend_badge">huy hiệu huyền thoại</string>
@@ -2478,7 +2477,7 @@
     <string name="group_member_role_observer_channel">người theo dõi</string>
     <string name="operator_use_for_names">Để phân giải tên</string>
     <string name="badge_supports_popopx">%s hỗ trợ POPOPX Chat.</string>
-    <string name="badge_invested">%s đã đầu tư vào đợt gây quỹ cộng đồng của POPOPX Chat.</string>
+    <string name="badge_invested">%s có huy hiệu Nhà đầu tư của POPOPX.</string>
     <string name="badge_unverified_title">Huy hiệu chưa được xác minh</string>
     <string name="badge_unverified_desc">Không thể xác minh huy hiệu này và nó có thể không phải là thật.</string>
     <string name="badge_unknown_key_desc">Huy hiệu được ký bằng một khóa mà phiên bản ứng dụng này không nhận ra. Hãy cập nhật ứng dụng để xác minh huy hiệu này.</string>
@@ -2652,9 +2651,6 @@
     <string name="badges_supporter_benefits">Tệp lên đến 2 GB, lưu trữ trong 7 ngày.</string>
     <string name="badges_legend_benefits">Tệp lên đến 5 GB, lưu trữ trong 21 ngày.</string>
     <string name="badges_benefits">Quyền lợi</string>
-    <string name="badges_investor_offer_supporter">Đầu tư từ $100 và nhận huy hiệu miễn phí.</string>
-    <string name="badges_investor_offer_legend">Đầu tư từ $1000 và nhận huy hiệu huyền thoại miễn phí.</string>
-    <string name="badges_investor_offer_learn_more">Tìm hiểu thêm trên Wefunder</string>
     <string name="v7_1_supporter_badge_title">Huy hiệu người ủng hộ</string>
     <string name="v7_1_supporter_badge_descr">Tệp lớn hơn, khả dụng lâu hơn.</string>
     <string name="v7_1_supporter_badge_get">Hỗ trợ POPOPX và nhận huy hiệu.</string>
