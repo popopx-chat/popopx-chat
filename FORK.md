@@ -499,11 +499,24 @@ yet. Before any build of this fork is distributed:
   2026-11-14: all 27 distinct `popopx.chat/blog/…` URLs the apps carried answer 404 (27/27, no timeouts).
   Ruling 「删除博客链接」: 121 occurrences in 42 files went — the What's-new per-version "read the post"
   links, the transport-isolation description's inline link, the badges "read more in our blog" row and 39
-  flatpak release URLs. Five `popopx.chat/blog` occurrences remain on purpose: the metainfo
-  `<screenshots><image>` (an image, not a link — it needs its own ruling), the fastlane store description,
-  the two `contentModerationPostLink` holders (a paired value with 8 readers, awaiting ruling), and this
-  project's own history in `CHANGELOG-POPOPX.md`. Everything naming `simplex.chat/blog` is held: that host
-  serves upstream's articles, and the `.xcloc` catalogues are not a build input.
+  flatpak release URLs. Four occurrences remain in code and resources, plus the prose of the two records that
+  describe this decision (`CHANGELOG-POPOPX.md`, this file):
+  - the metainfo `<screenshots><image>` — ruled **keep** on 2026-11-14 (「它是图片不是链接，不删掉」); it is an
+    image reference, not a link, and deleting it would leave AppStream's only screenshot empty;
+  - the fastlane store description and the two `contentModerationPostLink` holders (a paired value with 8
+    readers) — both still **awaiting ruling** (A6 and A5).
+  Everything naming `simplex.chat/blog` is held: that host serves upstream's articles, and the `.xcloc`
+  catalogues are not a build input.
+- **`popopx.chat/docs` is a ruled hold (2026-11-14: 「先不动，保留」).** The 31 holders this pass counted stay
+  although measured 2026-11-14 all 13 distinct `popopx.chat/docs…` paths answer 404 (13/13, no timeouts):
+  8 are fixtures in `scripts/ios/test_localizations.py`, 3 each in `PRIVACY-POPOPX.md` and
+  `CHANGELOG-POPOPX.md`, 4 in the directory service pair (2 in `Directory/Service.hs`, 2 in its
+  `tests/Bots/DirectoryTests.hs` mirror) and 1 each in `FORK.md`, `bots/README.md`, the metainfo
+  `<url type="translate">` and the ten in-app help views that carry the same link in iOS and Kotlin
+  (`AddContactLearnMore`, `UserAddressLearnMore`, `RTCServers`, `IncognitoView`/`IncognitoHelp`,
+  `ProtocolServersView`). Those figures are the tree as this pass measured it; these two records naming the
+  URL raises the live count above 31. A later ruling can move the holders as one unit; nothing here claims the
+  paths resolve.
 - **Store links 404.** Every `market://` / `details?id=com.popopxchat.popopx` / App Store URL in
   this repository names an app record that does not exist yet.
 - **The application artwork is done; the documentation artwork is not.** The icons, illustrations and

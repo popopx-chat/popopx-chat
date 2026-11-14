@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-14 (131 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-14 (132 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -52,7 +52,9 @@ in (bg, cs, fi, ja, th). Left that way they would have shipped a key no code ask
 the code now asks for. The per-file count assertions could not see it: they validate the computation, not the
 filesystem. Re-measuring occurrences **on disk** (15 where 5 were expected) is what exposed it.
 
-Gates: `popopx.chat/blog` occurrences 126 → **5**, exactly the holds above; `plutil -lint` 16/16 catalogues
+Gates: `popopx.chat/blog` occurrences 126 → **5**, exactly the holds above (4 in code and resources plus the one
+already in this file; the prose written by this decision has added mentions of its own since);
+`plutil -lint` 16/16 catalogues
 OK; `xmllint` 22/22 XML documents OK; `scripts/ios/localizations.py check` → "No problems found";
 `check-kotlin` unchanged and naming none of the deleted keys; `()`/`{}`/`[]` balance shift +0 in all four code
 files; wire audit FORWARD 0 / REVERSE 0 and `sweep WORKTREE` 0; `xcodebuild` build and `build-for-testing`
@@ -69,6 +71,15 @@ pages — 22 with a `post:` and the newest (`v7.1`) already with `post: nil` —
 renders only the selected newest page, so all 22 deleted "Read more" buttons sit on pages the harness cannot
 reach. Nothing in this repository visually verifies A1; it is verified by the Swift compiler and by the fact
 that both renderers branch on the optional.
+
+**The two questions that pass left open were answered the same day.** The metainfo
+`<screenshots><image>` is ruled **keep** (「它是图片不是链接，不删掉」): it names an image, not a link, and
+removing it would leave AppStream without its only screenshot — the dead `/blog/images/…png` reference stays as
+an inert asset. `popopx.chat/docs` is ruled **hold** (「先不动，保留」): 31 holders in 18 files, measured
+2026-11-14 to answer 404 on all 13 distinct paths, left exactly as they are because that tier is a separate
+decision from the blog and 8 of the 31 are fixtures in `scripts/ios/test_localizations.py`. Both rulings are
+recorded in `FORK.md`. `contentModerationPostLink` (A5) and the fastlane store description (A6) were named in
+the same message but received no decision, so both are untouched and still awaiting one.
 
 ### The five holders that outlived the ruling (2026-11-14, 功能保留)
 
