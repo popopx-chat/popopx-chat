@@ -202,6 +202,13 @@ each was meant to become That pass also repaired a compile break this fork shipp
     type keeps its name, its wire tag and its images. `CHANGELOG.md`, this file and the flatpak `<release>` notes keep
     the round as record, and the blog URL slugs that contain the word "crowdfunding" are upstream's post addresses,
     not a funnel.
+    The one hazard the delete created, and its repair: the two platforms declared the shared banner chrome in
+    **different** files — iOS in `SupportPOPOPXBanner.swift`, Kotlin in the doomed `GetStakeBanner.kt` — so removing the
+    Kotlin file left `commonMain` calling symbols that no longer existed, and no gate on this machine could see it (the
+    Swift build was green because iOS had no such asymmetry, the badge-web suite has no Kotlin, and Android is static
+    verification only). The three declarations, `Modifier.bannerCard`, `BannerDismissButton` and `gradientBrush`, now
+    live in `apps/multiplatform/…/views/badges/SupportPOPOPXBanner.kt`, the file that owns them, as they always did on
+    iOS. Lesson for the next delete: read the doomed file's *other* exports, not only the symbols the plan named.
     Maintenance hazard, found the hard way: `apps/ios/POPOPX.xcodeproj` uses classic groups (0
     `PBXFileSystemSynchronizedRootGroup`), so a Swift file needs four `project.pbxproj` entries — build file, file
     reference, group child, Sources phase — and a scripted edit that *replaces* its anchor line instead of inserting

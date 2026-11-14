@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-14 (126 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-14 (127 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -12,6 +12,35 @@ links, the APK/F-Droid artifacts and the website are all still upstream's or abs
 
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
+
+### The Kotlin banner chrome that went with the deleted file (2026-11-14, repair of commit 1 of 4)
+
+1 file, 67 insertions / 2 deletions. Commit 1 deleted `apps/multiplatform/…/views/chatlist/GetStakeBanner.kt` whole, and
+that file had been declaring more than the funnel: the shared chat-list banner chrome — `fun Modifier.bannerCard`,
+`fun BannerDismissButton`, `private fun gradientBrush` — which `views/badges/SupportPOPOPXBanner.kt` imported and called
+at its own `:51` and `:80`. So `commonMain` could not compile, and **no gate available on this machine could have said
+so**: `xcodebuild` was green because iOS never had the asymmetry (its `SupportPOPOPXBanner.swift` had always declared the
+same chrome, with the comment *"one declaration so the cards cannot drift apart"*), the badge-web suite has no Kotlin,
+and Android remains static verification only (no SDK, no gradle here). The pass's brace-delta gate is also blind to it:
+every span it cut was self-contained, the missing symbol is a cross-file fact.
+
+What found it was the commit-4 survey: `apps/multiplatform/spec/client/chat-list.md:363` says the chrome is *"declared
+separately from `GetStakeBanner` so other banners can adopt the same chrome"*, which read against the deletion means
+*separate top-level symbols in the file being deleted* — so the symbols were grepped for, and there were none.
+
+Fix = the move, not a re-add: the three declarations were recovered verbatim from `git show d09968bd9^:…GetStakeBanner.kt`
+and appended to the file that now owns them, with the iOS comment so the two platforms read alike; the import block lost
+the 2 `views.chatlist` imports and gained the 11 the chrome needs (`CircleShape`, `RoundedCornerShape`, `clip`, `Offset`,
+`Brush`, `onSizeChanged`, `IntSize`, `stringResource`, `darkStops`, `gradientPoints`, `lightStops`).
+
+Verified statically, which is all Android work in this fork can be verified: brace/paren/bracket deltas 0; `git grep -w`
+finds exactly one declaration of each symbol and **zero** remaining `views.chatlist` references from the badges package;
+`darkStops`/`lightStops`/`gradientPoints` are `internal` in `views/newchat/OnboardingCards.kt`, same Gradle module, so
+the `internal` visibility is not a break, and `GradientEndpoints` really does carry `startX`/`startY`/`endX`/`endY`. A
+sweep of the 12 identifiers these four commits deleted (`GetStakeView`, `GetStakeBanner`, `InvestPerk`, `investPerk`,
+`withInvest`, `investPanel`, `INVEST_LABEL`, `CROWDFUNDING_ACTIVE`, `crowdfund*`, `wefund*`) across every `.kt` and
+`.swift` returns only the 2 What's-new `post` URLs whose blog slugs contain "crowdfunding" — record, held with the
+`investor` badge type.
 
 ### The badge service stops offering the round (2026-11-14, ruling 删除众筹 — commit 3 of 4)
 
