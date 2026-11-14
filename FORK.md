@@ -328,13 +328,14 @@ yet. Before any build of this fork is distributed:
   2026-11-13: the domain is used before its infrastructure is complete, and the gap is recorded rather
   than held. Since items 8 and 9 and the website pass, every self-declaration and every live link in the
   site, the app display copy, the SDKs, the Flatpak metainfo and the docs names `popopx.chat`, and the
-  contact is `chat@popopx.chat`. Two things are still missing on that host and both are silent-to-loud
-  failures to fix there, not in code: its TLS certificate SAN does not include `popopx.chat` (it names
-  `popopxchat.com`), and neither `.well-known/apple-app-site-association` nor
-  `.well-known/assetlinks.json` is served — both answered 404 when measured 2026-11-13. So universal
+  contact is `chat@popopx.chat`. One thing is still missing on that host and it is a silent-to-loud
+  failure to fix there, not in code: neither `.well-known/apple-app-site-association` nor
+  `.well-known/assetlinks.json` is served — both answered 404 again when re-measured 2026-11-14, while the
+  TLS name mismatch this bullet used to report was retired the day before (see the certificate item under
+  "Link claims are inert" below). So universal
   links and `autoVerify` cannot be claimed by an installed app yet, link unescaping falls back to the
   scheme, and `assetlinks.json` will additionally need our Android signing fingerprints (upstream's three
-  are still in the committed copy) before it verifies. The relay presets and the directory/badge service
+  are still in the dependency's served copy) before it verifies. The relay presets and the directory/badge service
   still name infrastructure SimpleX Chat Ltd operates, because a preset needs their key material and
   `popopx.im` relays have none published yet. `chat@popopx.chat` is likewise not reachable until that host
   serves mail or forwards.
@@ -395,7 +396,9 @@ yet. Before any build of this fork is distributed:
   `@popopx-chat` npm org, a `popopx-chat` PyPI project and a `popopx-chat-libs` repository — is the
   fix; hand-editing the manifests would break `unreleased_pins()` and `check-pins` instead.
   Full method: [`NODE-PACKAGES-POPOPX.md`](./NODE-PACKAGES-POPOPX.md).
-- **Link claims are inert, for three independent reasons.** All three must clear in the same change.
+- **Link claims are inert, for several independent reasons.** All of them must clear in the same change. The
+  count used to be three; the list grew as the items below were measured, and the certificate reason was
+  retired on 2026-11-13.
   - *This tree publishes nothing, and since 2026-11-13 it holds nothing to publish.* The only site build it
     carried was `.github/workflows/web.yml`, whose Deploy step was gated
     `if: github.repository == 'simplex-chat/simplex-chat'`, so this repository never published a site even
@@ -415,21 +418,35 @@ yet. Before any build of this fork is distributed:
       returns one ref); it was removed on 2026-11-13. So neither the deleted workflow nor a `CNAME` is the
       lever: publishing `.well-known` means adding two static locations to that nginx **and** authoring the
       two files there, because this tree no longer holds them.
-    - **The certificate is single-name.** `CN=popopxchat.com`, and its SAN holds only
-      `DNS:popopxchat.com` — no `popopx.chat`, no `www`. Every client therefore sees a name mismatch on
-      `https://popopx.chat/`, including the OS link verifier, which requires a valid TLS connection before it
-      reads a single byte of `apple-app-site-association`. `www.popopxchat.com` fails the same way.
-      Ruled 2026-11-13: the replacement certificate carries `popopx.chat`, `popopxchat.com` and
-      `www.popopxchat.com`.
+    - **The certificate blocker cleared the day this paragraph was written; the paragraph measured the old
+      one.** Two Let's Encrypt YR1 certificates are installed, one per name pair: `CN=popopx.chat` with
+      `DNS:popopx.chat, DNS:www.popopx.chat` (`notBefore` 2026-11-13 04:04:23Z, `notAfter` 2027-02-11) and
+      `CN=popopxchat.com` with `DNS:popopxchat.com, DNS:www.popopxchat.com` (`notBefore` 04:06:37Z). The
+      2026-11-13 ruling asked for a single certificate carrying `popopx.chat`, `popopxchat.com` and
+      `www.popopxchat.com`; what is deployed covers the same names as two certificates, which is equivalent
+      for the verifier. Re-measured 2026-11-14: `https://popopx.chat/`, `https://www.popopx.chat/` and
+      `https://popopxchat.com/` all answer `200` with no name mismatch, so the OS link verifier now completes
+      TLS and gets to read bytes — which is the next bullet.
     - **The two association files need exact paths and content types**, not just a directory. Apple fetches
-      `https://<domain>/.well-known/apple-app-site-association` — no extension, no trailing slash — while this
-      repository stores it as `apple-app-site-association/index.json`, so the server must map that name to the
-      JSON (or redirect, which Apple follows). `assetlinks.json` is stricter: exactly one path, `200`,
+      `https://<domain>/.well-known/apple-app-site-association` — no extension, no trailing slash — so the
+      server must map that name to the JSON (or redirect, which Apple follows). This tree no longer holds a
+      copy to map: the file lived here as `website/src/.well-known/apple-app-site-association/index.json` and
+      left with `website/` (`9996634ee`), so the only shipped copy is the dependency's, which is already named
+      the way the protocol wants it — `popopxmq/apps/common/Web/static/.well-known/apple-app-site-association`
+      — and `src/Popopx/Messaging/Server/Web.hs` special-cases that extensionless name for `application/json`
+      in two places (`:122` for the file server, `:232` for the generated response), because the default would
+      be `application/octet-stream`. `assetlinks.json` is stricter: exactly one path, `200`,
       `application/json`, no redirect and no HTML error page, and Android reads it before it will verify
       `autoVerify` for `com.popopxchat.popopx`.
     - **Nothing is published under `/.well-known/` on either name** — each returns the PHP application's 404
-      HTML page. The copies that existed here (`website/src/.well-known/`, six files) were never served from
-      this tree either, and left with it on 2026-11-13.
+      HTML page. Re-measured 2026-11-14: `apple-app-site-association`, `assetlinks.json` on `popopx.chat` and
+      `assetlinks.json` on `www.popopx.chat` are all `404` while `/` on the same three hosts is `200`, so this
+      is a missing location, not a missing certificate. The copies that existed here
+      (`website/src/.well-known/`, six files) were never served from this tree either, and left with it on
+      2026-11-13. The dependency's copies are served only by a relay, and no relay answers HTTPS at all yet
+      (`https://smp1.popopx.im/.well-known/assetlinks.json` failed to connect on the same measurement), so
+      nothing is being mis-served either. That is the whole reason the misattribution described under the
+      signing identity below is still latent rather than live.
   - *The relay hosts exist too, and all but one are not serving.* `smp1-8`, `xftp1`, `xftp6`, `ntf1-3`
     under `popopx.im` each resolve to a distinct address (`xftp2-5` and `ntf4` do not resolve, and the zone
     has no wildcard, so every record was written deliberately); `smp1-8`, `xftp1` and `xftp6` carry the same
@@ -453,15 +470,28 @@ yet. Before any build of this fork is distributed:
     `smp-server`/`xftp-server`/`ntf-server` on those boxes and open the port in the provider's security
     group; the keys then read themselves and the cutover is one scripted pass (see "Upstream-operated
     hosts" below).
-  - *The signing identity is not ours.* `website/src/.well-known/assetlinks.json` carried our
-    `package_name` with SimpleX Chat Ltd's three signing-certificate fingerprints; the file left with
-    `website/` on 2026-11-13, which removes the residue from this tree but not the condition — the copy we
-    eventually serve must carry **our** fingerprints, because `autoVerify` cannot pass for a package signed
-    by anybody else. Same class on iOS: the Team ID `PDBA6XRBQT` now appears in three places across two
-    files — `KeyChain.swift:13` and two build configurations in `POPOPX.xcodeproj/project.pbxproj`; the
-    fourth copy, `apple-app-site-association/index.json`, left with `website/`. All of
-    them must agree with whatever certificate actually signs the distribution. A wrong one fails
-    silently: keychain sharing and universal links stop working, and only on device.
+  - *The signing identity is ours — ruled 2026-11-14: `PDBA6XRBQT`.* That closes the question this item was
+    waiting on, and it turns out to need **no identifier change**: the association work already names us.
+    Measured before this edit, `PDBA6XRBQT` is 9 occurrences in 6 files here — `KeyChain.swift:13` (the
+    keychain access group), `project.pbxproj:2137` and `:2201` (`DEVELOPMENT_TEAM`),
+    `build-desktop-mac.sh:8,10` and `sign-libs-mac.sh:6` (both defaulting to it, both overridable by
+    `APPLE_POPOPX_NOTARIZATION_TEAM_ID`), and the two records — and 3 files in the dependency: the AASA,
+    `src/Popopx/Messaging/Notifications/Server/Push/APNS.hs:215` (`appTeamId`) and
+    `Push/testpush.sh:3` (`TEAM_ID`). The earlier "three places across two files" counted this tree alone, at
+    a moment when its own AASA copy was still in it. All of them must agree with whatever certificate actually
+    signs the distribution. A wrong one fails silently: keychain sharing and universal links stop working, and
+    only on device.
+  - *What the ruling did not fix is the other half of the pair.* The dependency's
+    `apps/common/Web/static/.well-known/assetlinks.json` carries **our** `package_name`
+    `com.popopxchat.popopx` with **SimpleX Chat Ltd's three** signing-certificate fingerprints — the copy that
+    `website/src/.well-known/assetlinks.json` used to be, and the one that goes live the first time a relay
+    serves web. `autoVerify` cannot pass for a package signed by anybody else, so the served copy must carry
+    ours, and the value is not derivable here: no keystore is tracked in either repository. The three ways to
+    close it (empty the array / drop the file from the embed / mint our own key) are recorded as an open
+    decision, not as residue to sweep — deleting a fingerprint that somebody's install depends on is a
+    capability removal, not a rename. iOS push, by contrast, is already clean: `appName`/`TOPIC` name our
+    bundle id, `appTeamId` names our team, and the signing key comes from the `APNS_KEY_FILE`/`APNS_KEY_ID`
+    environment, so no upstream push credential is embedded anywhere.
   - *The CI signing scripts no longer name it.* Ruled 2026-11-13: the identity comes from
     `APPLE_POPOPX_SIGNING_IDENTITY` and the team id from `APPLE_POPOPX_NOTARIZATION_TEAM_ID`, so no Apple
     identity for another company is asserted by our build — `build-desktop-mac.sh` and `sign-libs-mac.sh`
@@ -495,6 +525,23 @@ yet. Before any build of this fork is distributed:
   is `CN=popopx.chat` (Let's Encrypt) with `DNS:popopx.chat, DNS:www.popopx.chat` in the SAN — while
   `/.well-known/apple-app-site-association`, `/.well-known/assetlinks.json` and the `www` copy of the first all
   answer 404.
+- **Our own relay hosts are now claimed by the iOS app (`*.popopx.im`, 2026-11-14, #33 item 2 executed).**
+  `apps/ios/POPOPX (iOS).entitlements` went from 5 to 7 `applinks` rows: `applinks:*.popopx.im` and its
+  `?mode=developer` twin, added as the pair `*.simplex.im` already carries (`tools/r7/r33_2_applinks.py`).
+  The claim is inert by design — no `*.popopx.im` host serves HTTPS yet (`https://smp1.popopx.im/.well-known/assetlinks.json`
+  failed to connect on the same day's measurement) — and it is inert in the direction that cannot
+  misattribute anything, because the wildcard names hosts under our own registration.
+  `applinks:*.simplex.im` and its developer twin are **held** by the same ruling: they are inert too, since
+  those hosts' `apple-app-site-association` names upstream's appID and therefore opens our app for nobody, so
+  deleting them would remove a capability from nobody while making the diff harder to review. Android is
+  **not** touched: an intent filter takes no wildcard host, so `AndroidManifest.xml:94-109` would have to
+  enumerate every relay name we operate — upstream's list is exactly that, 16 explicit `smpN.simplex.im` rows
+  plus `popopx.chat` — and the same no-HTTPS measurement leaves it inert there as well. Two things this
+  machine cannot verify and does not claim: the entitlement is checked against the provisioning profile when
+  the app is archived (`CODE_SIGN_STYLE = Automatic` in all 12 build configurations of
+  `POPOPX.xcodeproj/project.pbxproj`, the file referenced from it 4 times), so the Associated Domains
+  capability must be registered for team `PDBA6XRBQT` by whoever signs; and `plutil -lint` only proves the
+  plist parses.
 - **`/blog/` and `/docs/` are not served, so the in-app blog links were deleted, not repointed.** Measured
   2026-11-14: all 27 distinct `popopx.chat/blog/…` URLs the apps carried answer 404 (27/27, no timeouts).
   Ruling 「删除博客链接」: 121 occurrences in 42 files went — the What's-new per-version "read the post"

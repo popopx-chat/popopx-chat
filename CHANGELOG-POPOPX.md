@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-14 (133 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-14 (134 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -12,6 +12,48 @@ links, the APK/F-Droid artifacts and the website are all still upstream's or abs
 
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
+
+### #33 executed as items 2 and 3: our relay hosts are claimed, the stale association record is corrected (2026-11-14)
+
+Ruled 2026-11-14 — the Team ID in the link-association work is **ours**, `PDBA6XRBQT`. That settled the question
+#33 was blocked on and turned out to need **no identifier change**: everything that already names a signer names
+us correctly. What it exposed instead were two defects and one open decision.
+
+- **Item 2 — executed.** `applinks:*.popopx.im` and its `?mode=developer` twin added to
+  `apps/ios/POPOPX (iOS).entitlements` (`tools/r7/r33_2_applinks.py`, 2 insertions, 5 → 7 `applinks` rows,
+  `plutil -lint` OK), declared as the pair `*.simplex.im` already has. `*.simplex.im` is **held** by the ruling
+  「保留」; Android is untouched, because an intent filter takes no wildcard host and no `*.popopx.im` relay
+  serves HTTPS yet. So the app can now be adopted by our own relay hosts the moment they serve the file, and
+  cannot be adopted by anything it does not operate.
+- **Item 3 — executed.** Four stale measurements in `FORK.md` rewritten against a fresh reading the same day:
+  the "certificate is single-name `CN=popopxchat.com`, no `popopx.chat`" claim (two Let's Encrypt YR1 leaves are
+  installed, `CN=popopx.chat` with SAN `popopx.chat`+`www.popopx.chat` at `notBefore` 2026-11-13 04:04:23Z, and
+  `CN=popopxchat.com` with its own pair at 04:06:37Z — the ruled plan asked for one certificate carrying three
+  names, the deployment covers the same names as two, which is equivalent for the verifier); the same claim's
+  shorter form earlier in the file ("Two things are still missing", now one); the "this repository stores it as
+  `apple-app-site-association/index.json`" line, which described a copy that left with `website/` — the shipped
+  copy is the dependency's, already extensionless and already typed `application/json` in two places of
+  `Web.hs`; and "the Team ID appears in three places across two files", which measured 9 occurrences in 6 files
+  here plus 3 files in `popopxmq`. The "link claims are inert, for three independent reasons" count was also
+  wrong — the list had grown to six bullets while the certificate reason retired, so it no longer states a
+  number.
+- **Item 1 — not executed, awaiting the choice.** The dependency's
+  `apps/common/Web/static/.well-known/assetlinks.json` pairs our `package_name` with SimpleX Chat Ltd's three
+  fingerprints. Three ways to close it were laid out (empty the array / drop the file from the embed / mint our
+  own keystore); the value is not derivable here — no keystore is tracked in either repository — and it is a
+  security boundary rather than a name, so it stays a ruling rather than a sweep. It is latent, not live: no
+  relay serves HTTPS, so nothing is currently mis-answering.
+
+Measured 2026-11-14 for the record: `https://popopx.chat/`, `https://www.popopx.chat/` and
+`https://popopxchat.com/` all `200`, while `/.well-known/apple-app-site-association` and
+`/.well-known/assetlinks.json` on `popopx.chat` and the `www` copy of the latter are `404`, and
+`https://smp1.popopx.im/.well-known/assetlinks.json` does not connect. iOS push needed no change and is worth
+recording as clean: `APNS.hs:215` `appTeamId` and `appName`/`TOPIC` already name us, and the key is read from
+`APNS_KEY_FILE`/`APNS_KEY_ID`.
+
+Verified: no source file changed — an entitlements array and two documents — so there is nothing to compile, no
+archive to rebuild and no snapshot to re-render (neither harness reads the entitlements). `ding_wire_audit audit`
+FORWARD 0 / REVERSE 0 / BARE 16, unchanged.
 
 ### The 4 desktop baselines the crowdfunding deletion left behind (CI run 43553929937, 2026-11-14)
 
@@ -44,6 +86,12 @@ Installed: exactly those 4 files, taken from the run's `desktop-snapshots` artif
 every one of the 210 committed PNGs against the artifact afterwards returns **0 differing**, which is the receipt
 that the 206 `equal` ones were not touched. The artifact's own 210-entry name set is identical to the committed one
 in both directions.
+
+Confirmed by a second dispatch rather than by the local comparison alone: run **43559086343**, on `master` at the
+install commit, ended `success` with every step of the Xvfb job green and the comparator logging
+**`210 snapshots, 0 differ from the references in apps/multiplatform/common/src/desktopTest/snapshots`**. The
+artifact it uploaded holds 212 files — the 210 renders plus `compare.json` and `index-desktop.json` — and no
+`snapshots-diff` image, which is the same fact from the other side.
 
 ### The What's-new and release-notes links went with the blog (2026-11-14, 删除博客链接)
 
