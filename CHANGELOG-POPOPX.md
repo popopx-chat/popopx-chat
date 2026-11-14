@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-14 (129 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-14 (130 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -12,6 +12,52 @@ links, the APK/F-Droid artifacts and the website are all still upstream's or abs
 
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
+
+### The five holders that outlived the ruling (2026-11-14, 功能保留)
+
+8 files, 19 insertions / 23 deletions (`tools/r7/r68_i_pending.py`, JSONL in `tools/r7/`). The rule for this group was
+**keep the capability** — repair the pair that was broken, delete the promotion, never the function. The badge-web
+suite is **green: 525 pass / 0 fail** — the first time this fork has measured it without a red (524/3 before the
+crowdfunding tier, 523/2 after commit 3).
+
+- **The brand pin had never run.** `test/design.test.ts:447-450` resolved `../../../../branding/source-svg/…`, which is
+  the depth of the **source** tree; `npm test` executes the compiled `build/test/design.test.js`, one level deeper, so
+  the four marks resolved to `apps/branding/…` and ENOENTed. One `../` each — and the assertion then **passed**, which
+  is the evidence that `public/img/{wordmark,symbol}-{light,dark}.svg` really are byte-for-byte the masters. A test that
+  cannot find its input is not a failing test, it is an absent one: this is the guard that was supposed to stop anyone
+  redrawing the mark "close enough", and it had been silent since the file was written.
+- **`embed.ts` was the other half of a tier-戊 pair.** `test/embed.test.ts` had moved to `popopx.chat` and the allowlist
+  had not. `trustedHost` has exactly one live reader — `main.ts:138`, the `postMessage` origin gate for theme, route and
+  return-url — so the asymmetry meant our own site could not drive our own badge page while upstream's could. Now
+  `popopx.chat` and `*.popopx.chat` are admitted **and** `simplex.chat`/`*.simplex.chat` are kept: nothing that used to
+  work stops working (功能保留 in the direction that matters for a security boundary is *additive*). The dotted-suffix
+  rule is applied to both hosts and one negative, `https://notpopopx.chat`, proves it; `https://popopx.chat.attacker.com`
+  was already asserted. The test's title states the new rule — it names no CI selector (`npm test` runs
+  `build/test/**/*.test.js` wholesale, unlike the hspec group names that are).
+- **Consequence of touching `src/`**: the build hash is derived from the compiled module bytes, so `npm run build`
+  regenerated it — `ee8dc5d62acfb879` → `4782e3e6d8b0fafb` in `public/index.html` (5 lines) and `public/sw.js` (1). The
+  prerendered shell did **not** move this time, which is the cross-check that nothing user-visible in the rendered DOM
+  changed. `test/build.test.ts` fails until the regenerated files are committed, so they are part of this commit.
+- `scripts/ci/android/claude-test.md:11` told the CI test agent to leave the "Invest in SimpleX Chat!" card open; commit
+  1 deleted that card, so the instruction named a screen the app cannot show. The two real cards keep their wording.
+- `packages/popopx-chat-mcp/README.md`: the **whole "Own a part of SimpleX" section** (6 lines) went — a funding CTA with
+  `utm_source=mcp` inside our own package's documentation, the same class as the badge-service README CTA commit 2
+  deleted. Nothing else in the README moved, and no `#own-a-part-of-simplex` reference existed to break. `wefunder` is
+  now **0** occurrences across `apps/`, `packages/` and `scripts/`.
+- `apps/popopx-support-bot/src/messages.ts`: the welcome message kept its identity line and its directory link and lost
+  the *Join the livestream about SimpleX roadmap and equity crowdfunding* line — a dated broadcast whose target was
+  measured **404** on both egress paths. The template literal's closing backtick sat at the end of that line, so it moved
+  onto the directory line. Verified with this repo's own compiler (`typescript` 6.0.3 from the badge web,
+  `tsc --ignoreConfig --noEmit` on `src/messages.ts` + `src/util.ts`): **0** errors in the edited file (the 5 reported
+  errors are `util.ts`'s missing modules — this package has no `node_modules` here); the bot's only assertion on
+  `welcomeMessage` is that it is non-empty (`bot.test.ts:1940-1942`, and vitest cannot run without an install).
+
+**Held**: `apps/popopx-support-bot/plans/20260207-support-bot-implementation.md:882` carries the same welcome text — a
+plan document is a record, the same treatment as `CHANGELOG.md` and the flatpak `<release>` notes.
+
+**Newly noticed, NOT touched, and not a crowdfunding item**: the bot's first line still reads `a **SimpleX team** support
+bot`, and `packages/popopx-chat-mcp/README.md:1` titles the package `# SimpleX MCP server`. Both belong to the
+first-person-attribution class (#66), not to this ruling.
 
 ### The specs stop describing the round (2026-11-14, ruling 删除众筹 — commit 4 of 4)
 

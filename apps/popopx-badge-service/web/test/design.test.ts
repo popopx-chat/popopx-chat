@@ -444,10 +444,10 @@ designTest("type: the monospace runs are sized against the copy beside them", ()
 // The four marks are POPOPX's own, authored as vectors under branding/source-svg/ and copied verbatim
 // here. The pin is still worth keeping: it is what stops someone redrawing the mark "close enough".
 const officialAssets: ReadonlyArray<readonly [string, string, (source: string) => string]> = [
-  ["wordmark-light.svg", "../../../../branding/source-svg/apps__popopx-badge-service__web__public__img__wordmark-light.svg", (x) => x],
-  ["wordmark-dark.svg", "../../../../branding/source-svg/apps__popopx-badge-service__web__public__img__wordmark-dark.svg", (x) => x],
-  ["symbol-light.svg", "../../../../branding/source-svg/apps__popopx-badge-service__web__public__img__symbol-light.svg", (x) => x],
-  ["symbol-dark.svg", "../../../../branding/source-svg/apps__popopx-badge-service__web__public__img__symbol-dark.svg", (x) => x],
+  ["wordmark-light.svg", "../../../../../branding/source-svg/apps__popopx-badge-service__web__public__img__wordmark-light.svg", (x) => x],
+  ["wordmark-dark.svg", "../../../../../branding/source-svg/apps__popopx-badge-service__web__public__img__wordmark-dark.svg", (x) => x],
+  ["symbol-light.svg", "../../../../../branding/source-svg/apps__popopx-badge-service__web__public__img__symbol-light.svg", (x) => x],
+  ["symbol-dark.svg", "../../../../../branding/source-svg/apps__popopx-badge-service__web__public__img__symbol-dark.svg", (x) => x],
 ];
 
 designTest("design: the brand artwork is the official file, byte for byte", () => {

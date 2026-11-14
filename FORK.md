@@ -201,7 +201,12 @@ each was meant to become That pass also repaired a compile break this fork shipp
     `public/index.html` shell + its content-derived build hash), commit 4 the docs mirrors (both
     `apps/*/spec/client/chat-list.md` section 10s retitled to **Chat List Banners** — they also carried the surviving
     banner chain, dismissal prefs and card chrome, so they were trimmed rather than deleted — and the `CODE.md` /
-    `impact.md` / `product/**` / Source Files rows retargeted to `SupportPOPOPXBanner.*`). The
+    `impact.md` / `product/**` / Source Files rows retargeted to `SupportPOPOPXBanner.*`). The follow-up that kept the
+    capabilities (ruling 功能保留) repaired the badge-web brand pin, whose master paths were one directory level shallow
+    for the **compiled** test location — so the byte-for-byte guard had never actually run — widened `embed.ts`
+    `trustedHost` to `popopx.chat`/`*.popopx.chat` while keeping `simplex.chat`, which required a `npm run build` because
+    the build hash covers the module bytes, and deleted the MCP README's funding section, the support bot's livestream
+    line and the Android CI brief's card instruction. `apps/popopx-badge-service/web` is now **525 tests / 0 failures**. The
     type keeps its name, its wire tag and its images. `CHANGELOG.md`, this file and the flatpak `<release>` notes keep
     the round as record, and the blog URL slugs that contain the word "crowdfunding" are upstream's post addresses,
     not a funnel.

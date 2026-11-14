@@ -66,9 +66,3 @@ The agent is tested with Claude Code. Tell us which other apps and models you wa
 ## Reference
 
 Approval modes, owners, several agents, other MCP hosts, recovery and all options: [REFERENCE.md](https://github.com/popopx-chat/popopx-chat/blob/master/packages/popopx-chat-mcp/REFERENCE.md).
-
-## Own a part of SimpleX
-
-Business is moving into messages, and AI agents follow: an agent can ask a company's agent in a chat instead of opening the company's website, and buy there too. These chats hold plans, purchases and accounts, so with AI everyone feels the need for private and secure communication.
-
-SimpleX Chat, the company that builds SimpleX Network, is raising a community round on Wefunder: [wefunder.com/simplex.chat](https://wefunder.com/simplex.chat?utm_source=mcp)

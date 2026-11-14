@@ -42,7 +42,7 @@ export function returnUrlFromMessage(data: unknown): string | undefined {
   }
 }
 
-/** The dotted-suffix check on `.simplex.chat` turns away `simplex.chat.attacker.com` and `notsimplex.chat`. */
+/** The dotted-suffix check on each host turns away `popopx.chat.attacker.com` and `notpopopx.chat`, and the same for `simplex.chat`. */
 export function trustedHost(origin: string): boolean {
   let u: URL;
   try {
@@ -50,7 +50,10 @@ export function trustedHost(origin: string): boolean {
   } catch {
     return false;
   }
-  return u.protocol === "https:" && (u.hostname === "simplex.chat" || u.hostname.endsWith(".simplex.chat"));
+  const h = u.hostname;
+  return u.protocol === "https:" &&
+    (h === "popopx.chat" || h.endsWith(".popopx.chat") ||
+      h === "simplex.chat" || h.endsWith(".simplex.chat"));
 }
 
 export function themeFromMessage(data: unknown): Theme | undefined {

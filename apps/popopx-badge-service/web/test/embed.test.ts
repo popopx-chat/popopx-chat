@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { RETURN_URL_MESSAGE, THEME_MESSAGE, returnUrlFromMessage, themeFromMessage, trustedHost } from "../src/embed.js";
 
-test("embed: only https simplex.chat and its subdomains may drive the theme", () => {
+test("embed: only https popopx.chat or simplex.chat, and their subdomains, may drive the theme", () => {
   for (const origin of ["https://popopx.chat", "https://www.popopx.chat", "https://badges.simplex.chat"]) {
     assert.equal(trustedHost(origin), true, `${origin} is the site`);
   }
@@ -10,6 +10,7 @@ test("embed: only https simplex.chat and its subdomains may drive the theme", ()
     "http://simplex.chat",
     "https://popopx.chat.attacker.com",
     "https://notsimplex.chat",
+    "https://notpopopx.chat",
     "https://evil.com",
     "null",
     "",
