@@ -301,7 +301,8 @@ fun showFileErrorAlert(err: FileError, file: CIFile? = null, temporary: Boolean 
   }
 }
 
-val contentModerationPostLink = "https://popopx.chat/blog/20250114-simplex-network-large-groups-privacy-preserving-content-moderation.html#preventing-server-abuse-without-compromising-e2e-encryption"
+// The moderation article is SimpleX Chat Ltd's, so its host is theirs; popopx.chat serves no /blog tree.
+val contentModerationPostLink = "https://simplex.chat/blog/20250114-simplex-network-large-groups-privacy-preserving-content-moderation.html#preventing-server-abuse-without-compromising-e2e-encryption"
 
 fun showContentBlockedAlert(title: String, message: String) {
   AlertManager.shared.showAlertDialogButtonsColumn(title, text = message, buttons = {

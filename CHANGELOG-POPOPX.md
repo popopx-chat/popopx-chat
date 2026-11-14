@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-14 (136 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-14 (137 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -12,6 +12,47 @@ links, the APK/F-Droid artifacts and the website are all still upstream's or abs
 
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
+
+### The last three app-visible blog links: two repointed to upstream, one documented (2026-11-14, rulings A5-1 + A6-3 + 77-C)
+
+The blog pass left four occurrences in code and resources and ruled two of them the same day. These are the
+remaining two, plus the record of a fourth thing that is not a name at all.
+
+**A5 `contentModerationPostLink` moved to upstream's URL — the two declarations only.** One URL, 11
+occurrences in 6 files: the declarations `apps/ios/POPOPXChat/ChatTypes.swift:25` and
+`.../common/views/chat/item/CIFileView.kt:305`, 2 imports (`PopopxAPI.kt:33`, `ChatModel.kt:16`), 7 reads
+(`ChatTypes.swift:5447`, `POPOPXAPI.swift:1132,3316`, `CIFileView.swift:306`, `CIFileView.kt:313`,
+`PopopxAPI.kt:9130`, `ChatModel.kt:4965`). The host changed in the declarations and nothing else: the
+"how it works" row, the alert actions and the `how_it_works` strings in every locale are as they were, so no
+capability is lost and no snapshot scene is affected — the URL never renders. Both sides gained one line of
+comment naming the reason, because the rest of the fork deliberately moved its display host the other way
+and a future sweep would "fix" this back into a 404.
+
+**A6 `fastlane/metadata/android/en-US/full_description.txt:2` keeps its citation and stops claiming the
+audit.** New text: the November 2022 Trail of Bits assessment *covers the upstream project this app is forked
+from; it is not an audit of this fork*, linking the live upstream article. Deleting the sentence was the other
+option on the table and is the one the file's own history would prefer less: a store listing that drops a real
+audit of the code it ships is a loss for the reader, and a store listing that implies the audit covers POPOPX
+is not true. `en-US` is the only locale directory under `fastlane/metadata/android/`, and no test mirror
+reads this file. **Also measured and NOT changed, because it is a separate ruling: line 1 of the same file
+still opens `<h1>SimpleX - the first messaging platform…`, and lines 15-18, 22 still say "SimpleX" for the
+protocol and the servers — store copy naming the upstream project as if it were this app.**
+
+**77-C: the SDKs' native-backend 404 is recorded, not renamed, and closes with #56.** Re-measured today:
+`popopx-chat/popopx-chat-libs` has **0 releases**, and every one of the 17 digests the two pin dictionaries
+record is upstream's asset digest for the correspondingly-named asset — `release.ts` = upstream tags
+`core-7.1.0.20` + `nodejs-addon-cce06d8`, `_version.py` = `core-7.1.0.14`. So `3591a7eba` ("both ends") moved
+the client and the generator of the asset name and could not move the third end, the host that holds the
+bytes. Pointing the fetchers back at upstream's release was rejected: it would either strand the desktop
+pipeline, which builds a `popopx-chat-libs-<platform>` artifact of its own, or give one zip two spellings by
+pipeline. `check-pins` would catch it (`core-7.1.0.20 is not published`) but has never run on this fork —
+`packages.yml` is pull-request-only — and needs Python ≥ 3.11, which is not this machine's 3.9.6.
+
+Gates after the edit: `popopx.chat/blog` in code and resources **4 → 1** (only the ruled-keep metainfo
+`<image>`), the two slugs now resolve to the upstream host that serves them, `simplex.chat/blog` occurrences
++3 by design. No Kotlin/Swift identifier changed, so nothing recompiled differently and no baseline is
+expected to move; the URL is not a wire value — no reader outside these 6 files exists (`rg` for both slugs
+finds only them plus `README.md:20`, which already said `simplex.chat`).
 
 ### #33 item 1 executed (option 1c): the served association record now names our own certificate (2026-11-14)
 

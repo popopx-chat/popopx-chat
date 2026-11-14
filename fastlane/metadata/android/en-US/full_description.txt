@@ -1,5 +1,5 @@
 <h1>SimpleX - the first messaging platform that has no user identifiers, not even random numbers!</h1>
-<p><a href="https://popopx.chat/blog/20221108-simplex-chat-v4.2-security-audit-new-website.html" target="_blank">Security assessment</a> was done by Trail of Bits in November 2022.</p>
+<p>The <a href="https://simplex.chat/blog/20221108-simplex-chat-v4.2-security-audit-new-website.html" target="_blank">security assessment by Trail of Bits</a> (November 2022) covers the upstream project this app is forked from; it is not an audit of this fork.</p>
 <p>POPOPX Chat features:</p>
 <ul>
   <li>end-to-end encrypted messages, with editing, replies and deletion of messages.</li>

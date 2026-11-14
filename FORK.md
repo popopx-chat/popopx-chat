@@ -389,7 +389,28 @@ yet. Before any build of this fork is distributed:
   today: the fork carries the build inputs and `releases.toml`, and its Releases list is empty. The first
   one has to come from our own CI, and that publish is also what rewrites the pinned digests in
   `release.ts`, `dist/release.js` and `_version.py` — until it does, those dictionaries still record
-  upstream's build, under our names.
+  upstream's build, under our names. Measured 2026-11-14, that last clause is now arithmetic rather than
+  inference: **all 17 pinned digests equal upstream's asset digests byte for byte** — the 11 of
+  `release.ts:8-18` are the tags `core-7.1.0.20` (6 zips) and `nodejs-addon-cce06d8` (5 `.node`) of
+  `simplex-chat/simplex-chat-libs`, the 6 of `_version.py:10-15` are its tag `core-7.1.0.14` — while
+  `popopx-chat/popopx-chat-libs` has 0 releases (`gh release list`). So a `pip`/`npm` install of the native
+  backend 404s, and what 404s is the **name**: `3591a7eba` renamed the asset keys across 44 occurrences in
+  code (`packages_release.py:102-107`+`:119`, the two fetchers `_native.py:92-96`/`libs.ts:68,71`, both pin
+  dictionaries, the four test mirrors, `package-tests.sh:49`) and left the digests where they were, which is
+  the one-sided-rename class with a third end a commit cannot move — the host holding the bytes. Two facts
+  make this a documented gap rather than an outage: nothing is published to npm or PyPI from this fork either
+  (next bullet — no `NPM_SCOPE`/`PYPI_*` variables), so only an install from our own tree reaches it; and
+  `check-pins` would print `core-7.1.0.20 is not published`, but it is an **absent** guard here, because
+  `packages.yml` runs only on pull requests and has never run on this fork, and the script needs
+  Python ≥ 3.11 for `import tomllib` where this machine has 3.9.6.
+  **Ruled 2026-11-14: this is not a naming question and not a separate change — it closes with our first
+  published release (#56).** Renaming the keys back to `simplex-chat-*` was rejected, because `build.yml`
+  builds and reads a `popopx-chat-libs-<platform>` artifact of its own (`:479`, `:980`, `:1270`, read back at
+  `:695` `POPOPX_LIBS_DIR`): one zip would then have two spellings depending on which pipeline asks. The gate
+  for our own publish is one clause of `build.yml:60`, `github.repository == 'simplex-chat/simplex-chat'`,
+  which is the only thing keeping `Library release`/`Add-on release`/`Upload library` inert —
+  `LIBS_REPOSITORY: ${{ github.repository }}-libs` at `:200`/`:225`/`:243`/`:251`/`:707` already expands to
+  our repository — so #56 needs that clause retargeted and a token with release write on the other repository.
 - **No registry namespace.** The npm and PyPI names in the committed manifests are upstream's, and
   that is the shape the release tooling expects: `packages_release.py test-names` rewrites the names,
   the repository URL and the cross-package dependencies to `npm:` aliases at publish time from the
@@ -579,12 +600,27 @@ yet. Before any build of this fork is distributed:
   2026-11-14: all 27 distinct `popopx.chat/blog/…` URLs the apps carried answer 404 (27/27, no timeouts).
   Ruling 「删除博客链接」: 121 occurrences in 42 files went — the What's-new per-version "read the post"
   links, the transport-isolation description's inline link, the badges "read more in our blog" row and 39
-  flatpak release URLs. Four occurrences remain in code and resources, plus the prose of the two records that
-  describe this decision (`CHANGELOG-POPOPX.md`, this file):
+  flatpak release URLs. Three of the four that remained were ruled on 2026-11-14 and moved, so **one**
+  occurrence is left in code and resources, plus the prose of the two records that describe this decision
+  (`CHANGELOG-POPOPX.md`, this file):
   - the metainfo `<screenshots><image>` — ruled **keep** on 2026-11-14 (「它是图片不是链接，不删掉」); it is an
     image reference, not a link, and deleting it would leave AppStream's only screenshot empty;
-  - the fastlane store description and the two `contentModerationPostLink` holders (a paired value with 8
-    readers) — both still **awaiting ruling** (A6 and A5).
+  - **A5 `contentModerationPostLink` — ruled and executed as a repoint to upstream's live article.** The value
+    is one URL with 11 occurrences in 6 files: 2 declarations, 2 imports, 7 reads (this bullet previously
+    described "a paired value with 8 readers"; re-measured). Only the declarations moved —
+    `apps/ios/POPOPXChat/ChatTypes.swift:25` and
+    `apps/multiplatform/common/src/commonMain/kotlin/chat/popopx/common/views/chat/item/CIFileView.kt:305`
+    now name `simplex.chat`, and every reader, the `how_it_works` label and the alert actions are untouched.
+    The article is SimpleX Chat Ltd's, so the host that can serve it is theirs too; this is 「上游的东西沿上游
+    名」 applied to a link, not a rename of one side of it. `popopx.chat` has no `/blog` tree, so the alternative
+    — leaving our host in the URL — was a clickable 404 in the middle of a moderation explanation;
+  - **A6 the fastlane store description — ruled and executed as attribution, not deletion.**
+    `fastlane/metadata/android/en-US/full_description.txt:2` keeps the citation and the link but now says the
+    November 2022 Trail of Bits assessment covers the upstream project this app is forked from and is not an
+    audit of this fork. The audit was of SimpleX Chat v4.2, so presenting it as POPOPX's own would be a
+    misattribution, and dropping the link alone would leave an uncited claim. Only `en-US` exists under
+    `fastlane/metadata/android/`, and this was the sole holder of that slug in the tree besides
+    `README.md:20`, which already named `simplex.chat`.
   Everything naming `simplex.chat/blog` is held: that host serves upstream's articles, and the `.xcloc`
   catalogues are not a build input.
 - **`popopx.chat/docs` is a ruled hold (2026-11-14: 「先不动，保留」).** The 31 holders this pass counted stay

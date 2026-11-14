@@ -21,7 +21,8 @@ public let GROUP_KNOCKING_VERSION = 15
 
 public let CALL_RECONNECT_VERSION = 22
 
-public let contentModerationPostLink = URL(string: "https://popopx.chat/blog/20250114-simplex-network-large-groups-privacy-preserving-content-moderation.html#preventing-server-abuse-without-compromising-e2e-encryption")!
+// The moderation article is SimpleX Chat Ltd's, so its host is theirs; popopx.chat serves no /blog tree.
+public let contentModerationPostLink = URL(string: "https://simplex.chat/blog/20250114-simplex-network-large-groups-privacy-preserving-content-moderation.html#preventing-server-abuse-without-compromising-e2e-encryption")!
 
 public let previewDate = Date(timeIntervalSince1970: 1_736_936_100)
 
