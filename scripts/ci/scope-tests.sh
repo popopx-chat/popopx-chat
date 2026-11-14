@@ -14,6 +14,19 @@ case "${1:-}" in
   mcp)
     (cd packages/popopx-chat-client/types/typescript && npm install --no-audit --no-fund && npx tsc)
     (cd packages/popopx-chat-nodejs && npm install --ignore-scripts --no-save --no-audit --no-fund ../popopx-chat-client/types/typescript && npx tsc && cp src/simplex.* dist)
+    # Test the native backend this job built instead of the one published in popopx-chat-libs.
+    # An override naming a missing path raises instead of falling back (libs.ts resolve*), so
+    # each one is exported only when the artifact it points at exists.
+    nodejs_dir=$PWD/packages/popopx-chat-nodejs
+    if [ -f "$nodejs_dir/build/Release/popopx.node" ]; then
+      export POPOPX_ADDON_PATH="$nodejs_dir/build/Release/popopx.node"
+    fi
+    for libs_dir in release-libs/popopx-chat-libs-linux-*/libs; do
+      if [ -d "$libs_dir" ]; then
+        export POPOPX_LIBS_DIR="$PWD/$libs_dir"
+        break
+      fi
+    done
     cd packages/popopx-chat-mcp
     npm ci --no-audit --no-fund
     npm install --no-save --no-audit --no-fund ../popopx-chat-nodejs ../popopx-chat-client/types/typescript
