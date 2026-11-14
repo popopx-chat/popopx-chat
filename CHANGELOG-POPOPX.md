@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-14 (125 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-14 (126 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -12,6 +12,54 @@ links, the APK/F-Droid artifacts and the website are all still upstream's or abs
 
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
+
+### The badge service stops offering the round (2026-11-14, ruling 删除众筹 — commit 3 of 4)
+
+8 files, 29 insertions / 221 deletions (`tools/r7/r68_g_badgeweb.py`, JSONL in `tools/r7/`). This is the checkout's own
+promotion: the sentence under a Pay button that says *or invest instead*, which is the one place the funnel sat inside
+the app we would actually deploy. `src/crowdfunding.ts` went whole — `CROWDFUNDING_ACTIVE`, `WEFUNDER_URL`, the
+`INVESTOR_PERKS` table (supporter 100/250/1000, legend 1000/2500/10000), `perkAmount`, `minimumFor`, `dollars` — and
+with it every reader:
+
+- `screens.ts`: `INVEST_LABEL`, `InvestPerk`, `investLink`, `investSentence`, `investPanel`, `withInvest` (39 lines),
+  the `perk?: InvestPerk` field of 5 option interfaces and the 8 call sites that wrapped a screen
+  (`return withInvest(panel(…), investPanel(…))` → `return panel(…)`). The copy it stopped rendering named the company:
+  `Invest $100+ in SimpleX Chat`.
+- `main.ts`: `investPerk` + `withPerk` + the 4 `...withPerk({}, investPerk(…))` spreads. The compiler, not the script,
+  caught the last orphan: `const chosen = …` fed only `investPerk(price, chosen?.months)`, so `tsc`'s `noUnusedLocals`
+  is what proved the cut was complete — a brace-delta gate cannot see an unused local.
+- `icons.ts`: `wefunderMark` and its two path strings. `styles.css`: the `.invest` / `.invest-link` / `.wefunder` rules
+  (37 lines). `.panel > button:last-child { margin-bottom: 20px }` therefore applies to the primary button again, which
+  is the pre-round layout `CROWDFUNDING_ACTIVE = false` was written to return to, so no other rule had to move.
+- `public/sw.js`: the `crowdfunding.js` entry, which `test/sw.test.ts` cross-checks against `readdirSync(src)` — a
+  module deleted from `src` but left in the precache fails the suite by itself.
+- `public/index.html`: **generated**, by `npm run build`. The prerendered shell *is* `landing()`'s output
+  (`test/main.test.ts` compares them byte for byte) and the content-derived build hash covers the compiled modules, so
+  the build renamed it `c1e049e40dfe7be6` → `ee8dc5d62acfb879` in `index.html` and `sw.js` together. The diff is the
+  5 hash-bearing lines plus the one shell line losing `<div class="invest">…</svg></a></div>` — nothing else moved,
+  which is what says the committed shell had not drifted for other reasons.
+- `test/screens.test.ts`: 2 `domTest`s deleted whole (the order summary's invest block, the codes list's), 12
+  assertions, 3 `perk:` arguments and 2 copy lines, and 2 assertions rewritten to assert the absence instead
+  (`primary` is now the last child of the landing panel; `div.invest` count 0 on the invoice failure). 527 tests → 525.
+
+**Kept**: `hasBadgeArt("investor")` and `badges-rpc.md:88`'s `investor` wire tag (same reason as commit 2), and the
+"Settings → Supporter perks → Redeem code" strings — that is code redemption, a different feature that merely shares
+the word.
+
+Gates: `npm ci && npm test` → **523 pass / 2 fail** (525); the baseline before this pass was 524 / 3, so nothing here
+broke and one red went with the rebuild. `git grep WEFUNDER|wefunder|crowdfunding\.js|CROWDFUNDING_ACTIVE|investPanel|InvestPerk|perkAmount`
+→ 0 hits outside `CHANGELOG-POPOPX.md`, `FORK.md` (record) and `packages/popopx-chat-mcp/README.md:74` (awaiting its
+own ruling); inside the app only the two kept hits above. `ding_wire_audit.py audit` FORWARD 0 / REVERSE 0.
+
+**The 2 reds are pre-existing and unrelated to this tier** — both are earlier passes' one-sided pairs, reported here so
+they are not mistaken for collateral of this commit:
+`design: the brand artwork is the official file, byte for byte` — `test/design.test.ts:447-450` resolves
+`../../../../branding/source-svg/…` relative to the **compiled** `build/test/`, one level shallower than `test/`, so it
+asks for `apps/branding/source-svg/…` and ENOENTs on a file that exists at the root. Needs one more `../`.
+`embed: only https simplex.chat and its subdomains may drive the theme` — `test/embed.test.ts:6` expects
+`trustedHost("https://popopx.chat") === true` while `src/embed.ts:53` still admits only `simplex.chat` and
+`.simplex.chat`. Unlike a display host this allowlist is a security boundary (which embedding origin may drive the
+theme and the route), so it is a ruling, not a sweep.
 
 ### The badge keeps its `investor` type and loses the round (2026-11-14, ruling 删除众筹 — commit 2 of 4)
 

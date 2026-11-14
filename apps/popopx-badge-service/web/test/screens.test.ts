@@ -13,7 +13,6 @@ const copied = clipboard.writes;
 
 // The stub must be installed before screens.ts is imported, since el reaches for document at call time.
 const screens = await import("../src/screens.js");
-const { WEFUNDER_URL } = await import("../src/crowdfunding.js");
 type Rec = import("../src/domain.js").OrderRecord;
 type View = import("../src/api.js").InvoiceView;
 
@@ -61,25 +60,12 @@ domTest("screens: the landing screen carries the copy the mockups fix", () => {
     "Support SimpleX",
     "Get a badge to send larger files (2‑5GB) that stay available longer (7‑21 days), and to show it on your profile.",
     "Choose your badge",
-    "Invest $100+ in SimpleX Chat and get a free supporter badge.",
-    "Learn more on ",
     "You pay once for the months you choose. No subscription, no account.",
   ]) assert.ok(text.includes(line), `the landing screen is missing: ${line}`);
   assert.equal(p.all("button.link").length, 0, "the history is the menu's, not the landing page's");
-  const invest = p.all("div.invest");
-  assert.equal(invest.length, 1, "one invest panel, under the main button");
-  const links = invest[0]!.all("a.invest-link");
-  assert.equal(links.length, 1, "the block's one action is the link to Wefunder, and it is a link, not a second button");
-  assert.equal(invest[0]!.all("button").length, 0);
-  assert.equal(links[0]!.getAttribute("href"), WEFUNDER_URL);
-  assert.equal(links[0]!.getAttribute("target"), "_blank", "the checkout stays open behind it");
-  assert.equal(links[0]!.all("svg.wefunder").length, 1, "the link carries the Wefunder wordmark");
-  assert.equal(links[0]!.getAttribute("aria-label"), "Learn more on Wefunder", "and reads as the words the wordmark stands for");
-  assert.equal(invest[0]!.all("a").length, 1, "the Wefunder link is the block's only link");
   const kids = p.children.map((c) => (c as { getAttribute?: (n: string) => string | null }).getAttribute?.("class") ?? "");
-  assert.ok(kids.indexOf("notes") < kids.indexOf("primary") && kids.indexOf("primary") < kids.indexOf("invest"),
-    "the notes sit above the button, the invest block under it, and nothing after");
-  assert.equal(kids[kids.length - 1], "invest", "the invest block is the last thing on the screen");
+  assert.ok(kids.indexOf("notes") < kids.indexOf("primary"), "the notes sit above the button");
+  assert.equal(kids[kids.length - 1], "primary", "the button is the last thing on the screen, nothing under it");
 });
 
 domTest("screens: the tier list carries the level copy, and Continue is disabled until one is chosen", () => {
@@ -89,14 +75,9 @@ domTest("screens: the tier list carries the level copy, and Continue is disabled
   ];
   const blank = render(screens.tiers({ tiers, selected: undefined, onSelect: noop, onContinue: noop, onBack: noop }));
   for (const line of ["Choose your badge", "Larger files that stay available longer.",
-    "Supporter", "$7 / month", "Files up to 2 GB", "Stored for 7 days", "Legend", "$70 / month", "Files up to 5 GB", "Stored for 21 days", "Back",
-    "Invest $100+ in SimpleX Chat and get a free supporter badge."]) {
+    "Supporter", "$7 / month", "Files up to 2 GB", "Stored for 7 days", "Legend", "$70 / month", "Files up to 5 GB", "Stored for 21 days", "Back"]) {
     assert.ok(blank.textContent.includes(line), `the tier list is missing: ${line}`);
   }
-  const legend = render(screens.tiers({ tiers, selected: "price_legend", perk: { badgeType: "legend", amount: 1000 },
-    onSelect: noop, onContinue: noop, onBack: noop }));
-  assert.ok(legend.textContent.includes("Invest $1,000+ in SimpleX Chat and get a free legend badge."),
-    "with a tier chosen, the panel names that tier's minimum");
   assert.ok(blank.all("button.primary")[0]!.hasAttribute("disabled"), "Continue must wait for an answer");
 
   let chosen = "";
@@ -137,10 +118,8 @@ domTest("screens: the duration list prints the durations and their savings, unpr
   const priced = render(screens.durations({
     durations: [{ key: "offer_12m", name: "12 months", price: "$420", disabled: false }],
     selected: "offer_12m", tier: { badge: "Legend:", gives: "5 GB files available for 21 days." },
-    perk: { badgeType: "legend", amount: 10000, months: 12 }, onSelect: noop, onContinue: noop, onBack: noop,
+    onSelect: noop, onContinue: noop, onBack: noop,
   }));
-  assert.ok(priced.textContent.includes("Invest $10,000+ in SimpleX Chat and get a free legend badge for 12 months."),
-    "with a term chosen, the panel names the amount and the term");
   const ledes = priced.all("p.lede");
   assert.equal(ledes.length, 2, "the chosen badge and what it gives, then the payment terms");
   assert.equal(ledes[0]!.textContent, "Legend: 5 GB files available for 21 days.");
@@ -170,26 +149,6 @@ domTest("screens: the order summary is the summary and the method row, with the 
   assert.ok(card.textContent.includes("Card payments are processed by Stripe."), "with card chosen, the note names the processor");
   const kids = card.children.map((c) => (c as { getAttribute?: (n: string) => string | null }).getAttribute?.("class") ?? "");
   assert.ok(kids.indexOf("notes slot") < kids.indexOf("primary"), "above the Pay button");
-  assert.ok(p.textContent.includes("Or invest $100+ and get a free supporter badge."),
-    "without a perk the block opens on the round's minimum");
-});
-
-domTest("screens: the order summary offers the investment under Pay as the same block, as the alternative to paying for this badge", () => {
-  const p = render(screens.orderSummary({ canKeepTheCode: true,
-    badgeType: "legend", months: 12, total: "$420.00", selected: "xmr",
-    perk: { badgeType: "legend", amount: 10000, months: 12 },
-    onSelect: noop, onPay: noop, onBack: noop,
-  }));
-  const invest = p.all("div.invest");
-  assert.equal(invest.length, 1);
-  assert.ok(invest[0]!.textContent.includes("Or invest $10,000+ and get this badge free."),
-    "the amount for the badge in the summary above, which the sentence does not name again");
-  assert.equal(invest[0]!.all("a").length, 1, "the Wefunder link is the block's only link");
-  assert.equal(invest[0]!.all("a.invest-link")[0]!.getAttribute("href"), WEFUNDER_URL);
-  assert.equal(invest[0]!.all("button").length, 0);
-  const kids = p.children.map((c) => (c as { getAttribute?: (n: string) => string | null }).getAttribute?.("class") ?? "");
-  assert.ok(kids.indexOf("notes") < kids.indexOf("primary") && kids.indexOf("primary") < kids.indexOf("invest"),
-    "the provider note sits above Pay, and the block under it");
 });
 
 domTest("screens: a discounted order shows the gross price and the reduction above the total", () => {
@@ -915,33 +874,25 @@ domTest("screens: the history list's Copy is offered only on a paid entry, and c
   assert.deepEqual(copied, [HELD_CODE]);
 });
 
-domTest("screens: an empty store reads 'Nothing bought on this device', with the picture and the invest block", () => {
+domTest("screens: an empty store reads 'Nothing bought on this device', with the landing's picture", () => {
   const p = render(screens.purchaseHistory({ onForget: () => {}, keepsNewCodes: true, rows: [], onOpen: noop, onStart: noop }));
   assert.ok(p.textContent.includes("Nothing bought on this device"));
   assert.ok(p.textContent.includes("Choose your badge"));
   assert.equal(p.all("div.hero").length, 1, "the landing's picture, so the screen is not a heading over a button");
-  assert.equal(p.all("div.invest").length, 1, "and the crowdfunding under the button, as on every screen with one");
-});
-
-domTest("screens: the codes list carries the invest block under its wipe control", () => {
-  const p = render(screens.purchaseHistory({ onForget: () => {}, keepsNewCodes: true,
-    rows: historyRows([record({ orderId: "a", status: "paid", code: HELD_CODE })]), onOpen: noop, onStart: noop }));
-  assert.equal(p.all("div.invest").length, 1);
 });
 
 domTest("screens: the invoice failure says nothing was charged, and offers [ Try again ] in the checkout's own shape", () => {
   let retried = false;
   let back = false;
   const p = render(screens.invoiceFailure({
-    perk: { badgeType: "legend", amount: 2500, months: 3 }, onBack: () => { back = true; }, onRetry: () => { retried = true; },
+    onBack: () => { back = true; }, onRetry: () => { retried = true; },
   }));
   for (const line of ["Back", "That did not go through", "The order was not created, and nothing was charged.",
-    "If this happens again, get in touch.", "Try again", "Or invest $2,500+ and get this badge free."]) {
+    "If this happens again, get in touch.", "Try again"]) {
     assert.ok(p.textContent.includes(line), `the failure screen is missing: ${line}`);
   }
   assert.equal(p.all("h1.tight").length, 0, "the heading is the wizard's size, not the payment screens' step down");
-  const kids = p.children.map((c) => (c as { getAttribute?: (n: string) => string | null }).getAttribute?.("class") ?? "");
-  assert.ok(kids.indexOf("primary") < kids.indexOf("invest"), "the invest block sits under the button, as on the checkout");
+  assert.equal(p.all("div.invest").length, 0, "the round is not offered under the button");
   p.all("button.primary")[0]!.click();
   assert.equal(retried, true);
   p.all("button.back")[0]!.click();

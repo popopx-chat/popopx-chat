@@ -195,7 +195,10 @@ each was meant to become That pass also repaired a compile break this fork shipp
     history instead of promoting anything. The deletion went in four commits: commit 1 the funnel, commit 2 the badge
     layer's promotion (`BadgeInvestorOffer` on both platforms, `BadgeLevel.investorOffer`, `WEFUNDER_URL`, the 3
     `badges_investor_offer_*` keys, the name-sale footnote, and `badge_invested` reworded from an investment claim to
-    "%s has the POPOPX investor badge."), commit 3 the badge service's invest panel, commit 4 the docs mirrors. The
+    "%s has the POPOPX investor badge."), commit 3 the badge service's invest panel (`apps/popopx-badge-service/web`:
+    `src/crowdfunding.ts` whole, `investPanel`/`investSentence`/`withInvest` and the `perk` field of 5 screens' options,
+    the Wefunder wordmark's path data, the `.invest` CSS, the worker's `PRECACHE` entry and the regenerated
+    `public/index.html` shell + its content-derived build hash), commit 4 the docs mirrors. The
     type keeps its name, its wire tag and its images. `CHANGELOG.md`, this file and the flatpak `<release>` notes keep
     the round as record, and the blog URL slugs that contain the word "crowdfunding" are upstream's post addresses,
     not a funnel.

@@ -472,7 +472,7 @@ footer a:hover { text-decoration: underline; }
    below, so the free height is shared between the space over the block and the space under it,
    which the button's own `auto` margin takes. */
 .panel > .hero, .panel > .choices, .panel > .rows { margin-top: auto; }
-/* The button is the last thing before the invest block, and sinks to the foot of the screen. Where
+/* The button is the last thing on the screen, and sinks to its foot. Where
    a screen keeps notes above its button, the notes sink with it and the button follows them. */
 .panel > .primary { margin-top: auto; }
 .panel > .notes { margin-top: auto; }
@@ -904,43 +904,6 @@ p.row-line { margin: 16px 0 0; }
    cannot drift a step away from the notice it sits beside. */
 .info .title { color: var(--ink); }
 .info p { color: var(--ink-soft); font-weight: 500; }
-
-/* the crowdfunding, under the main button of a screen while the round is open. No frame and no
-   second button: a sentence, and under it one link in the accent - "Learn more on" and the
-   Wefunder wordmark - the way the site's secondary links are drawn. */
-/* One height for the block under the button, whatever the sentence: one line and the link where
-   the column is wide, two lines below 700px, three on a narrow phone, where the longest sentence
-   takes three, so the button above it stands at one place on every screen. */
-.invest { min-height: 58px; }
-@media (max-width: 700px) { .invest { min-height: 82px; } }
-@media (max-width: 420px) { .invest { min-height: 106px; } }
-.invest {
-  margin: 22px 0 0;
-  text-align: center;
-}
-/* One line where the column holds it. Where it does not, the two halves are inline blocks, so the
-   line breaks between them - before "and" - and never inside the first; a half too wide for a
-   narrow phone wraps within itself, as every lede does. */
-.invest p { font-size: 1rem; margin: 0; color: var(--ink); }
-.invest .half { display: inline-block; }
-.invest-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin: 10px auto 0;
-  color: var(--accent);
-  font-size: 1rem;
-  font-weight: 600;
-  text-decoration: none;
-  white-space: nowrap;
-}
-.invest-link:hover { color: var(--accent-hover); }
-.invest-link:active { color: var(--accent-pressed); }
-.invest-link:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 4px; }
-/* the wordmark, a touch taller than the text and lifted so its baseline sits with the text's */
-.invest-link .wefunder { height: 22px; width: auto; display: block; transform: translateY(-2px); }
-/* `.panel > button:last-child` adds 20px under a trailing button; the invest block is what
-   follows a button here, and the panel's own padding is the space under it. */
 
 /* --------------------------------------------------------------- the landing screen's hero */
 

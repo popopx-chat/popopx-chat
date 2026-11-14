@@ -1,5 +1,4 @@
 import { CATALOG, SINGLE_MONTH, offerTotal, savingPercent, type Offer, type Price, type Total } from "./catalog.js";
-import { minimumFor, perkAmount } from "./crowdfunding.js";
 import { generate, hash } from "./codes.js";
 import { Flow, type CheckoutOutcome, type Selection } from "./flow.js";
 import { applyView, historyRows, selectionFromOrder, type PaymentView, withoutDestination } from "./order.js";
@@ -221,20 +220,6 @@ function tierSummary(badgeType: string): screens.ChosenTier | undefined {
     : { badge: `${tierName(badgeType)}:`, gives: `${limits.gb} GB files available for ${limits.days} days.` };
 }
 
-// The investment that earns the chosen badge as a perk: the tier's minimum until a term is chosen,
-// then the exact amount for that term.
-function investPerk(price: Price | undefined, months: number | undefined): screens.InvestPerk | undefined {
-  if (price === undefined) return undefined;
-  const exact = months === undefined ? undefined : perkAmount(price.badgeType, months);
-  return exact === undefined || months === undefined
-    ? { badgeType: price.badgeType, amount: minimumFor(price.badgeType) }
-    : { badgeType: price.badgeType, amount: exact, months };
-}
-
-function withPerk<T extends object>(o: T, perk: screens.InvestPerk | undefined): T & { perk?: screens.InvestPerk } {
-  return perk === undefined ? o : { ...o, perk };
-}
-
 function priceOf(priceId: string | undefined): Price | undefined {
   return CATALOG.prices.find((p) => p.priceId === priceId);
 }
@@ -334,7 +319,6 @@ function buildPanel(at: number): HTMLElement {
           disabled: totalFor(p, undefined) === undefined,
         })),
         ...(session.priceId !== undefined ? { selected: session.priceId } : { selected: undefined }),
-        ...withPerk({}, investPerk(priceOf(session.priceId), undefined)),
         onSelect: (priceId) => {
           unavailableMethod = undefined;
           store.saveSession({ step: "tier", priceId, offerId: undefined });
@@ -362,13 +346,11 @@ function buildPanel(at: number): HTMLElement {
         };
       });
       const chosenKey = chosenDuration(session);
-      const chosen = chosenKey === undefined ? undefined : totalFor(price, offerOf(chosenKey));
       const tier = price === undefined ? undefined : tierSummary(price.badgeType);
       return screens.durations({
         durations,
         selected: chosenKey,
         ...(tier !== undefined ? { tier } : {}),
-        ...withPerk({}, investPerk(price, chosen?.months)),
         onSelect: (key) => { store.saveSession({ step: "months", offerId: key }); rebuild(2); rebuild(CHECKOUT_INDEX); },
         onContinue: () => goToIndex(CHECKOUT_INDEX),
         onBack: () => history.back(),
@@ -393,7 +375,6 @@ function buildPanel(at: number): HTMLElement {
             } }
           : {}),
         selected: method,
-        ...withPerk({}, investPerk(price, total?.months)),
         ...(unavailableMethod !== undefined ? { unavailable: unavailableMethod } : {}),
         ...(open !== undefined
           ? { openOrder: {
@@ -528,7 +509,6 @@ async function pay(): Promise<void> {
       return;
     case "failed":
       replacePanel(CHECKOUT_INDEX, screens.invoiceFailure({
-        ...withPerk({}, investPerk(price, totalFor(price, offerOf(duration))?.months)),
         onBack: () => { rebuild(CHECKOUT_INDEX); },
         onRetry: () => { rebuild(CHECKOUT_INDEX); void pay(); },
       }));
