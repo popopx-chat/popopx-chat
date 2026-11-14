@@ -1,4 +1,4 @@
-<h1>SimpleX - the first messaging platform that has no user identifiers, not even random numbers!</h1>
+<h1>POPOPX Chat - the first messaging platform that has no user identifiers, not even random numbers!</h1>
 <p>The <a href="https://simplex.chat/blog/20221108-simplex-chat-v4.2-security-audit-new-website.html" target="_blank">security assessment by Trail of Bits</a> (November 2022) covers the upstream project this app is forked from; it is not an audit of this fork.</p>
 <p>POPOPX Chat features:</p>
 <ul>
@@ -12,10 +12,10 @@
 </ul>
 <p>POPOPX Chat advantages:</p>
 <ul>
-  <li><strong>Full privacy of your identity, profile, contacts and metadata</strong>: unlike any other existing messaging platform, SimpleX uses no phone numbers or any other identifiers assigned to the users - not even random numbers. This protects the privacy of who you are communicating with, hiding it from SimpleX platform servers and from any observers.</li>
-  <li><strong>Complete protection against spam and abuse</strong>: as you have no identifier on SimpleX platform, you cannot be contacted unless you share a one-time invitation link or an optional temporary user address.</li>
-  <li><strong>Full ownership, control and security of your data</strong>: SimpleX stores all user data on client devices, the messages are only held temporarily on SimpleX relay servers until they are received.</li>
-  <li><strong>Decentralized network</strong>: you can use SimpleX with your own servers and still communicate with people using the servers that are pre-configured in the apps or any other SimpleX servers.</li>
+  <li><strong>Full privacy of your identity, profile, contacts and metadata</strong>: unlike any other existing messaging platform, POPOPX uses no phone numbers or any other identifiers assigned to the users - not even random numbers. This protects the privacy of who you are communicating with, hiding it from the servers that relay messages and from any observers.</li>
+  <li><strong>Complete protection against spam and abuse</strong>: as you have no identifier on POPOPX, you cannot be contacted unless you share a one-time invitation link or an optional temporary user address.</li>
+  <li><strong>Full ownership, control and security of your data</strong>: POPOPX stores all user data on client devices, the messages are only held temporarily on relay servers until they are received.</li>
+  <li><strong>Decentralized network</strong>: you can use POPOPX with your own servers and still communicate with people using the servers that are pre-configured in the apps or any other servers running the SimpleX Messaging Protocol.</li>
 </ul>
 <p>You can connect to anybody you know via link or scan QR code (in the video call or in person) and start sending messages instantly - no emails, phone numbers or passwords needed.</p> 
 <p>Your profile and contacts are only stored in the app on your device - our servers do not have access to this information.</p>
