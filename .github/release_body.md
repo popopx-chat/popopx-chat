@@ -25,7 +25,7 @@ Built by this repository's CI from the tagged commit:
 
 The AppImage is built once per architecture, from the 22.04 leg, so its name carries no Ubuntu version.
 
-The SHA-256 of each asset is appended below by the build that produced it.
+The SHA-256 of every asset is listed below, read from the digests GitHub recorded for the uploads.
 
 Not published in this release: the macOS `.dmg` (it needs a Developer ID signing and notarization credential that this repository does not have configured yet), Android APKs, and iOS builds.
 

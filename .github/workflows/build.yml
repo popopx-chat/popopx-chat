@@ -178,8 +178,8 @@ jobs:
         uses: simplex-chat/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2
         with:
           # Hand-authored, not generated: this fork's first tag shares no ancestor with any
-          # tag of ours, so a changelog builder has nothing to diff. Each build job appends its
-          # own SHA-256 line to this body via ./.github/actions/prepare-release.
+          # tag of ours, so a changelog builder has nothing to diff. The release-hashes job
+          # appends the SHA-256 of every asset once all the build legs have finished.
           body_path: .github/release_body.md
           # A pre-release is invisible to releases/latest, which is what install.sh and
           # reproduce-schedule.yml resolve - so the download links only work with this off.
@@ -561,11 +561,9 @@ jobs:
 
           echo "bin_name=${cli_name}" >> $GITHUB_OUTPUT
           echo "bin_path=${cli_path}/${cli_name}" >> $GITHUB_OUTPUT
-          echo "bin_hash=$(echo SHA2-256\(${cli_name}\)= $(openssl sha256 "${cli_path}/${cli_name}" | cut -d' ' -f 2))" >> $GITHUB_OUTPUT
 
           echo "deb_name=${cli_deb_name}" >> $GITHUB_OUTPUT
           echo "deb_path=${cli_path}/${cli_deb_name}" >> $GITHUB_OUTPUT
-          echo "deb_hash=$(echo SHA2-256\(${cli_deb_name}\)= $(openssl sha256 "${cli_path}/${cli_deb_name}" | cut -d' ' -f 2))" >> $GITHUB_OUTPUT
 
       - name: Upload CLI
         if: startsWith(github.ref, 'refs/tags/v') && matrix.should_run == true
@@ -573,7 +571,6 @@ jobs:
         with:
           bin_name: ${{ steps.linux_cli_prepare.outputs.bin_name }}
           bin_path: ${{ steps.linux_cli_prepare.outputs.bin_path }}
-          bin_hash: ${{ steps.linux_cli_prepare.outputs.bin_hash }}
           github_ref: ${{ github.ref }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -583,7 +580,6 @@ jobs:
         with:
           bin_name: ${{ steps.linux_cli_prepare.outputs.deb_name }}
           bin_path: ${{ steps.linux_cli_prepare.outputs.deb_path }}
-          bin_hash: ${{ steps.linux_cli_prepare.outputs.deb_hash }}
           github_ref: ${{ github.ref }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -601,7 +597,6 @@ jobs:
         run: |
           path=$(echo ${{ github.workspace }}/apps/multiplatform/release/main/deb/popopx_${{ matrix.arch }}.deb )
           echo "package_path=$path" >> $GITHUB_OUTPUT
-          echo "package_hash=$(echo SHA2-256\(popopx-desktop-ubuntu-${{ matrix.os_underscore }}-${{ matrix.arch }}.deb\)= $(openssl sha256 $path | cut -d' ' -f 2))" >> $GITHUB_OUTPUT
 
       - name: Upload Desktop
         uses: ./.github/actions/prepare-release
@@ -609,7 +604,6 @@ jobs:
         with:
           bin_path: ${{ steps.linux_desktop_build.outputs.package_path }}
           bin_name: popopx-desktop-ubuntu-${{ matrix.os_underscore }}-${{ matrix.arch }}.deb
-          bin_hash: ${{ steps.linux_desktop_build.outputs.package_hash }}
           github_ref: ${{ github.ref }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -627,7 +621,6 @@ jobs:
         run: |
           path=$(find ${{ github.workspace }}/apps/multiplatform/release/main -maxdepth 1 -name '*.AppImage' -not -name 'appimagetool*' -print -quit)
           echo "appimage_path=$path" >> $GITHUB_OUTPUT
-          echo "appimage_hash=$(echo SHA2-256\(popopx-desktop-${{ matrix.arch }}.AppImage\)= $(openssl sha256 $path | cut -d' ' -f 2))" >> $GITHUB_OUTPUT
 
       - name: Upload AppImage
         if: startsWith(github.ref, 'refs/tags/v') && matrix.os == '22.04' && matrix.should_run == true
@@ -635,7 +628,6 @@ jobs:
         with:
           bin_path: ${{ steps.linux_appimage_build.outputs.appimage_path }}
           bin_name: "popopx-desktop-${{ matrix.arch }}.AppImage"
-          bin_hash: ${{ steps.linux_appimage_build.outputs.appimage_hash }}
           github_ref: ${{ github.ref }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -1157,7 +1149,6 @@ jobs:
           cabal build -j --enable-tests ${{ env.ghc_options }}
           path=$(cabal list-bin popopx-chat | tail -n 1)
           echo "bin_path=$path" >> $GITHUB_OUTPUT
-          echo "bin_hash=$(echo SHA2-256\(${{ matrix.cli_asset_name }}\)= $(openssl sha256 $path | cut -d' ' -f 2))" >> $GITHUB_OUTPUT
 
       - name: Compute dependency cache key
         id: hash-deps
@@ -1194,7 +1185,6 @@ jobs:
         with:
           bin_path: ${{ steps.mac_cli_build.outputs.bin_path }}
           bin_name: ${{ matrix.cli_asset_name }}
-          bin_hash: ${{ steps.mac_cli_build.outputs.bin_hash }}
           github_ref: ${{ github.ref }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -1218,7 +1208,6 @@ jobs:
           scripts/ci/build-desktop-mac.sh
           path=$(find $PWD/apps/multiplatform/release/main/dmg -name '*.dmg' -print -quit)
           echo "package_path=$path" >> $GITHUB_OUTPUT
-          echo "package_hash=$(echo SHA2-256\(${{ matrix.desktop_asset_name }}\)= $(openssl sha256 $path | cut -d' ' -f 2))" >> $GITHUB_OUTPUT
 
       - name: Upload Desktop
         if: matrix.should_run == true && startsWith(github.ref, 'refs/tags/v') && env.APPLE_POPOPX_SIGNING_IDENTITY != ''
@@ -1226,7 +1215,6 @@ jobs:
         with:
           bin_path: ${{ steps.mac_desktop_build.outputs.package_path }}
           bin_name: ${{ matrix.desktop_asset_name }}
-          bin_hash: ${{ steps.mac_desktop_build.outputs.package_hash }}
           github_ref: ${{ github.ref }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -1542,7 +1530,6 @@ jobs:
           rm -rf dist-newstyle/src/direct-sq* dist-newstyle/src/popopxmq* dist-newstyle/src/hs-jpeg-t* dist-newstyle/src/JuicyPixe*
           path=$(cabal list-bin popopx-chat | tail -n 1)
           echo "bin_path=$path" >> $GITHUB_OUTPUT
-          echo "bin_hash=$(echo SHA2-256\(${{ matrix.cli_asset_name }}\)= $(openssl sha256 $path | cut -d' ' -f 2))" >> $GITHUB_OUTPUT
 
       - name: Compute dependency cache key
         id: hash-deps
@@ -1649,7 +1636,6 @@ jobs:
         with:
           bin_path: ${{ steps.windows_cli_build.outputs.bin_path }}
           bin_name: ${{ matrix.cli_asset_name }}
-          bin_hash: ${{ steps.windows_cli_build.outputs.bin_hash }}
           github_ref: ${{ github.ref }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -1665,7 +1651,6 @@ jobs:
           rm -rf dist-newstyle/src/direct-sq* dist-newstyle/src/popopxmq* dist-newstyle/src/hs-jpeg-t* dist-newstyle/src/JuicyPixe*
           path=$(find $PWD/release/main/msi -name '*.msi' -print -quit | sed 's#/\([a-z]\)#\1:#' | sed 's#/#\\#g')
           echo "package_path=$path" >> $GITHUB_OUTPUT
-          echo "package_hash=$(echo SHA2-256\(${{ matrix.desktop_asset_name }}\)= $(openssl sha256 $path | cut -d' ' -f 2))" >> $GITHUB_OUTPUT
 
       - name: Upload Desktop
         if: startsWith(github.ref, 'refs/tags/v')
@@ -1673,7 +1658,6 @@ jobs:
         with:
           bin_path: ${{ steps.windows_desktop_build.outputs.package_path }}
           bin_name: ${{ matrix.desktop_asset_name }}
-          bin_hash: ${{ steps.windows_desktop_build.outputs.package_hash }}
           github_ref: ${{ github.ref }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -1720,6 +1704,36 @@ jobs:
 # =========================
 #   Releases and packages
 # =========================
+
+# Every asset's SHA-256 is written by this one job, after all the legs that upload have finished.
+# Each leg used to append its own line through ./.github/actions/prepare-release, and that action
+# reads the release body, edits it and writes it back - with 16 jobs in parallel it lost 2 of the
+# 16 lines on v7.1.2-popopx.1. GitHub records a digest for every uploaded asset, so the hashes
+# need no download and no lock. !cancelled() so a partial release still lists what it does have.
+
+  release-hashes:
+    name: "Add asset hashes to release notes"
+    needs: [build-linux, build-macos, build-windows]
+    if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/v') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Rewrite the release body with every asset digest
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          api="repos/${{ github.repository }}/releases"
+          id=$(gh api "${api}/tags/${GITHUB_REF_NAME}" --jq .id)
+          gh api --paginate "${api}/${id}/assets" \
+            -q '.[] | "SHA2-256(\(.name))= \(.digest | sub("^sha256:"; ""))"' | sort > hashes.txt
+          { cat .github/release_body.md; echo; cat hashes.txt; } > body.md
+          jq -Rs '{body: .}' body.md | gh api -X PATCH "${api}/${id}" --input -
 
   releases:
     needs: [maybe-release, build-linux, build-linux-full, build-linux-push, build-linux-postgres, build-macos, build-ios, build-windows]

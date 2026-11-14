@@ -65,7 +65,10 @@ sed -i -e '/skiko-awt-runtime-linux/d' ./usr/lib/app/popopx.cfg
 find . -exec touch -d "@$SOURCE_DATE_EPOCH" {} +
 
 ../appimagetool-${ARCH}.AppImage --verbose --no-appstream --runtime-file ../runtime-${ARCH} .
-mv *popopx*.AppImage ../../
+# appimagetool names its output after the desktop file's Name= field with spaces as underscores,
+# so the product is taken by position: a brand string here would break on the next artwork rename.
+produced=$(find . -maxdepth 1 -name '*.AppImage' -print -quit)
+mv "$produced" ../../
 
-# Just a safeguard
-strip-nondeterminism ../../*popopx*.AppImage
+# Just a safeguard - only the file we produced, never the appimagetool download next to it
+strip-nondeterminism "../../$(basename "$produced")"
