@@ -138,24 +138,24 @@ describe("paths", () => {
   })
 
   it("returns a relative SIMPLEX_ADDON_PATH as absolute", async () => {
-    const addon = path.join(libsDir, "simplex.node")
+    const addon = path.join(libsDir, "popopx.node")
     fs.writeFileSync(addon, "addon")
     await expect(resolveAddonPath({SIMPLEX_ADDON_PATH: path.relative(process.cwd(), addon)})).resolves.toBe(addon)
   })
 
   it("rejects a missing SIMPLEX_ADDON_PATH", async () => {
-    const addon = path.join(libsDir, "simplex.node")
+    const addon = path.join(libsDir, "popopx.node")
     await expect(resolveAddonPath({SIMPLEX_ADDON_PATH: addon})).rejects.toThrow(`SIMPLEX_ADDON_PATH does not exist: ${addon}`)
   })
 
   it("returns a relative POPOPX_ADDON_PATH as absolute", async () => {
-    const addon = path.join(libsDir, "simplex.node")
+    const addon = path.join(libsDir, "popopx.node")
     fs.writeFileSync(addon, "addon")
     await expect(resolveAddonPath({POPOPX_ADDON_PATH: path.relative(process.cwd(), addon)})).resolves.toBe(addon)
   })
 
   it("prefers POPOPX_ADDON_PATH over SIMPLEX_ADDON_PATH", async () => {
-    const addon = path.join(libsDir, "simplex.node")
+    const addon = path.join(libsDir, "popopx.node")
     fs.writeFileSync(addon, "addon")
     await expect(resolveAddonPath({POPOPX_ADDON_PATH: addon, SIMPLEX_ADDON_PATH: path.join(libsDir, "other.node")})).resolves.toBe(addon)
   })
@@ -364,7 +364,7 @@ describe("installLibs", () => {
 
   it("rejects an add-on with another SHA-256", async () => {
     routes["/addon.node"] = res => res.writeHead(200).end(ADDON)
-    const target = path.join(tmp, "simplex.node")
+    const target = path.join(tmp, "popopx.node")
     await expect(installAddon(`${base}/addon.node`, GOOD_SHA, target)).rejects.toThrow("SHA-256 of")
     expect(fs.readdirSync(tmp)).toEqual([])
   })
@@ -382,14 +382,14 @@ describe("installLibs", () => {
   })
 
   it("rejects a missing add-on and cleans up", async () => {
-    const target = path.join(tmp, "simplex.node")
+    const target = path.join(tmp, "popopx.node")
     await expect(installAddon(`${base}/missing.node`, sha256(ADDON), target)).rejects.toThrow("HTTP 404")
     expect(fs.readdirSync(tmp)).toEqual([])
   })
 
   it("accepts EPERM from rename onto an installed add-on", async () => {
     routes["/addon.node"] = res => res.writeHead(200).end(ADDON)
-    const target = path.join(tmp, "simplex.node")
+    const target = path.join(tmp, "popopx.node")
     fs.writeFileSync(target, "addon")
     renameFails("EPERM")
     await expect(installAddon(`${base}/addon.node`, sha256(ADDON), target)).resolves.toBeUndefined()
@@ -466,7 +466,7 @@ describe("cli", () => {
 
   it("prints the libs directory and the add-on", async () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "libs-cli-"))
-    const addon = path.join(dir, "simplex.node")
+    const addon = path.join(dir, "popopx.node")
     fs.writeFileSync(libPath(dir), "lib")
     fs.writeFileSync(addon, "addon")
     const log = jest.spyOn(console, "log").mockImplementation(() => {})
@@ -484,7 +484,7 @@ describe("cli", () => {
     const log = jest.spyOn(console, "log").mockImplementation(() => {})
     const error = jest.spyOn(console, "error").mockImplementation(() => {})
     try {
-      await expect(installWith(dir, path.join(dir, "simplex.node"))).resolves.toBe(1)
+      await expect(installWith(dir, path.join(dir, "popopx.node"))).resolves.toBe(1)
       expect(log).not.toHaveBeenCalled()
       expect(error).toHaveBeenCalledWith(expect.stringContaining("install failed: SIMPLEX_ADDON_PATH does not exist"))
     } finally {
@@ -494,7 +494,7 @@ describe("cli", () => {
 
   it("returns 1 when install fails", async () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "libs-cli-"))
-    const addon = path.join(dir, "simplex.node")
+    const addon = path.join(dir, "popopx.node")
     fs.writeFileSync(addon, "addon")
     const error = jest.spyOn(console, "error").mockImplementation(() => {})
     try {
