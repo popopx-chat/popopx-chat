@@ -51,7 +51,6 @@ let isInUS = {
 private let versionDescriptions: [VersionDescription] = [
     VersionDescription(
         version: "v4.2",
-        post: URL(string: "https://popopx.chat/blog/20221108-simplex-chat-v4.2-security-audit-new-website.html"),
         features: [
             .feature(Description(
                 icon: "checkmark.shield",
@@ -72,7 +71,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v4.3",
-        post: URL(string: "https://popopx.chat/blog/20221206-simplex-chat-v4.3-voice-messages.html"),
         features: [
             .feature(Description(
                 icon: "mic",
@@ -98,7 +96,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v4.4",
-        post: URL(string: "https://popopx.chat/blog/20230103-simplex-chat-v4.4-disappearing-messages.html"),
         features: [
             .feature(Description(
                 icon: "stopwatch",
@@ -129,7 +126,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v4.5",
-        post: URL(string: "https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html"),
         features: [
             .feature(Description(
                 icon: "person.crop.rectangle.stack",
@@ -144,7 +140,7 @@ private let versionDescriptions: [VersionDescription] = [
             .feature(Description(
                 icon: "network.badge.shield.half.filled",
                 title: "Transport isolation",
-                description: "By chat profile (default) or [by connection](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)."
+                description: "By chat profile (default) or by connection (BETA)."
             )),
             .feature(Description(
                 icon: "lock.doc",
@@ -165,7 +161,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v4.6",
-        post: URL(string: "https://popopx.chat/blog/20230328-simplex-chat-v4-6-hidden-profiles.html"),
         features: [
             .feature(Description(
                 icon: "lock",
@@ -201,7 +196,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v5.0",
-        post: URL(string: "https://popopx.chat/blog/20230422-simplex-chat-vision-funding-v5-videos-files-passcode.html"),
         features: [
             .feature(Description(
                 icon: "arrow.up.doc",
@@ -225,7 +219,6 @@ private let versionDescriptions: [VersionDescription] = [
     // access welcome message via a group profile
     VersionDescription(
         version: "v5.1",
-        post: URL(string: "https://popopx.chat/blog/20230523-simplex-chat-v5-1-message-reactions-self-destruct-passcode.html"),
         features: [
             .feature(Description(
                 icon: "face.smiling",
@@ -251,7 +244,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v5.2",
-        post: URL(string: "https://popopx.chat/blog/20230722-simplex-chat-v5-2-message-delivery-receipts.html"),
         features: [
             .feature(Description(
                 icon: "checkmark",
@@ -282,7 +274,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v5.3",
-        post: URL(string: "https://popopx.chat/blog/20230925-simplex-chat-v5-3-desktop-app-local-file-encryption-directory-service.html"),
         features: [
             .feature(Description(
                 icon: "desktopcomputer",
@@ -313,7 +304,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v5.4",
-        post: URL(string: "https://popopx.chat/blog/20231125-simplex-chat-v5-4-link-mobile-desktop-quantum-resistant-better-groups.html"),
         features: [
             .feature(Description(
                 icon: "desktopcomputer",
@@ -344,7 +334,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v5.5",
-        post: URL(string: "https://popopx.chat/blog/20240124-simplex-chat-infrastructure-costs-v5-5-simplex-ux-private-notes-group-history.html"),
         features: [
             .feature(Description(
                 icon: "folder",
@@ -375,7 +364,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v5.6",
-        post: URL(string: "https://popopx.chat/blog/20240323-simplex-network-privacy-non-profit-v5-6-quantum-resistant-e2e-encryption-simple-migration.html"),
         features: [
             .feature(Description(
                 icon: "key",
@@ -406,7 +394,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v5.7",
-        post: URL(string: "https://popopx.chat/blog/20240426-simplex-legally-binding-transparency-v5-7-better-user-experience.html"),
         features: [
             .feature(Description(
                 icon: "key",
@@ -437,7 +424,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v5.8",
-        post: URL(string: "https://popopx.chat/blog/20240604-simplex-chat-v5.8-private-message-routing-chat-themes.html"),
         features: [
             .feature(Description(
                 icon: "arrow.forward",
@@ -458,7 +444,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v6.0",
-        post: URL(string: "https://popopx.chat/blog/20240814-simplex-chat-vision-funding-v6-private-routing-new-user-experience.html"),
         features: [
             .feature(Description(
                 icon: nil,
@@ -496,7 +481,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v6.1",
-        post: URL(string: "https://popopx.chat/blog/20241014-simplex-network-v6-1-security-review-better-calls-user-experience.html"),
         features: [
             .feature(Description(
                 icon: "checkmark.shield",
@@ -529,7 +513,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v6.2",
-        post: URL(string: "https://popopx.chat/blog/20241210-simplex-network-v6-2-servers-by-flux-business-chats.html"),
         features: [
             .feature(Description(
                 icon: "briefcase",
@@ -545,7 +528,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v6.3",
-        post: URL(string: "https://popopx.chat/blog/20250308-simplex-chat-v6-3-new-user-experience-safety-in-public-groups.html"),
         features: [
             .feature(Description(
                 icon: "at",
@@ -584,7 +566,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v6.4",
-        post: URL(string: "https://popopx.chat/blog/20250703-simplex-network-protocol-extension-for-securely-connecting-people.html"),
         features: [
             .feature(Description(
                 icon: "person",
@@ -615,7 +596,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v6.4.1",
-        post: URL(string: "https://popopx.chat/blog/20250729-simplex-chat-v6-4-1-welcome-contacts-protect-groups-app-security.html"),
         features: [
             .feature(Description(
                 icon: "hand.wave",
@@ -636,7 +616,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: "v6.5",
-        post: URL(string: "https://popopx.chat/blog/20260430-simplex-channels-v6-5-consortium-crowdfunding-freedom-of-speech.html"),
         features: [
             .feature(Description(
                 icon: nil,
@@ -668,7 +647,6 @@ private let versionDescriptions: [VersionDescription] = [
     ),
     VersionDescription(
         version: isInUS ? "v7.0.1" : "v7.0",
-        post: URL(string: "https://popopx.chat/blog/20260819-simplex-chat-crowdfunding.html"),
         features: [
             .feature(Description(
                 icon: "at",

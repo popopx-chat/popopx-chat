@@ -2935,7 +2935,6 @@
     <string name="badges_how_it_works_p1">Значок — это анонимное удостоверение, которое хранится в Вашем профиле на Вашем устройстве. Это удостоверение никогда никому не отправляется.</string>
     <string name="badges_how_it_works_p2">Чтобы доказать контакту или серверу, что у Вас есть значок, приложение создаёт новое доказательство, которое раскрывает только тип значка и срок действия, округлённый до недели.</string>
     <string name="badges_how_it_works_p3">Никто не может связать два разных доказательства друг с другом или с покупкой.</string>
-    <string name="badges_how_it_works_read_more_with_link"><![CDATA[Подробнее в <font color="#0088ff">нашем блоге</font>.]]></string>
     <string name="badges_preview_my_nickname">Мой никнейм</string>
     <string name="badges_banner_title">Поддержать POPOPX</string>
     <string name="badges_banner_subtitle">Получите значок + большие файлы</string>

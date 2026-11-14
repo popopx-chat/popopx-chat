@@ -1152,7 +1152,7 @@ marked deleted chat item preview text */
 "Buy in browser" = "Vásárlás böngészőben";
 
 /* No comment provided by engineer. */
-"By chat profile (default) or [by connection](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)." = "A csevegési profillal (alapértelmezés), vagy a [kapcsolattal](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (béta).";
+"By chat profile (default) or by connection (BETA)." = "A csevegési profillal (alapértelmezés), vagy a kapcsolattal (béta).";
 
 /* No comment provided by engineer. */
 "call" = "hívás";
@@ -5243,7 +5243,6 @@ alert title */
 "Read more" = "Tudjon meg többet";
 
 /* No comment provided by engineer. */
-"Read more in our blog." = "Tudjon meg többet a blogunkon.";
 
 /* No comment provided by engineer. */
 "Read more in our GitHub repository." = "További tudnivalókat a GitHub-tárolónkban talál.";

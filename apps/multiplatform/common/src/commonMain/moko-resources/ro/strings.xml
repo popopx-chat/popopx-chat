@@ -2529,7 +2529,6 @@
     <string name="badges_how_it_works_p1">O insignă este o acreditare anonimă stocată în profilul tău, pe dispozitivul tău. Această acreditare nu este trimisă niciodată nimănui.</string>
     <string name="badges_how_it_works_p2">Pentru a dovedi unui contact sau unui server că ai o insignă, aplicația generează o nouă dovadă care dezvăluie doar tipul insignei și data expirării, rotunjită la o săptămână.</string>
     <string name="badges_how_it_works_p3">Nimeni nu poate asocia două dovezi diferite între ele sau cu achiziția.</string>
-    <string name="badges_how_it_works_read_more_with_link"><![CDATA[Citește mai multe pe <font color="#0088ff">blogul nostru</font>.]]></string>
     <string name="badges_preview_my_nickname">Pseudonimul meu</string>
     <string name="badges_banner_title">Susține POPOPX</string>
     <string name="badges_banner_subtitle">Obține insignă + fișiere mai bune</string>

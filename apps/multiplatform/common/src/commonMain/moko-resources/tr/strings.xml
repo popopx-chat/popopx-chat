@@ -2823,7 +2823,6 @@
     <string name="badges_how_it_works_p1">Rozet, cihazınızdaki profilinizde saklanan anonim bir kimlik bilgisidir. Bu kimlik bilgisi asla kimseye gönderilmez.</string>
     <string name="badges_how_it_works_p2">Bir kişiye veya sunucuya rozetiniz olduğunu kanıtlamak için uygulama, yalnızca rozet türünü ve haftaya yuvarlanmış bitiş tarihini gösteren yeni bir kanıt oluşturur.</string>
     <string name="badges_how_it_works_p3">Hiç kimse iki farklı kanıtı birbirine veya satın alıma bağlayamaz.</string>
-    <string name="badges_how_it_works_read_more_with_link"><![CDATA[Daha fazlasını <font color="#0088ff">blogumuzda</font> okuyun.]]></string>
     <string name="badges_preview_my_nickname">Takma adım</string>
     <string name="badges_banner_title">POPOPX\'i destekle</string>
     <string name="badges_banner_subtitle">Rozet + daha iyi dosyalar al</string>

@@ -474,7 +474,7 @@ swipe action */
 "Both you and your contact can send voice messages." = "Sekä sinä että kontaktisi voitte lähettää ääniviestejä.";
 
 /* No comment provided by engineer. */
-"By chat profile (default) or [by connection](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)." = "Chat-profiilin mukaan (oletus) tai [yhteyden mukaan](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA).";
+"By chat profile (default) or by connection (BETA)." = "Chat-profiilin mukaan (oletus) tai yhteyden mukaan (BETA).";
 
 /* No comment provided by engineer. */
 "Call already ended!" = "Puhelu on jo päättynyt!";

@@ -2932,7 +2932,6 @@
     <string name="member_info_section_title_contributor">Contributeur</string>
     <string name="badges_choose_your_badge_lede">Des fichiers plus volumineux disponibles plus longtemps.</string>
     <string name="badges_how_long_title">Combien de temps ?</string>
-    <string name="badges_how_it_works_read_more_with_link"><![CDATA[En savoir plus sur <font color="#0088ff">notre blog</font>.]]></string>
     <string name="badges_larger_files_longer">Soutenez POPOPX pour envoyer des fichiers plus volumineux disponibles plus longtemps</string>
     <string name="badges_check_your_order_title">Vérifier votre commande</string>
     <string name="badges_order_duration">Durée</string>

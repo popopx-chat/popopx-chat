@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-14 (130 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-14 (131 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -12,6 +12,63 @@ links, the APK/F-Droid artifacts and the website are all still upstream's or abs
 
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
+
+### The What's-new and release-notes links went with the blog (2026-11-14, 删除博客链接)
+
+42 files, 17 insertions / 138 deletions (`tools/r7/r70_bloglinks.py`, five locales completed by
+`r70b_a2_tail.py`, 143 records in `tools/r7/r70_bloglinks.jsonl`). Measured that morning: all 27 distinct
+`popopx.chat/blog/…` URLs the apps carry answer **404** (27/27, no timeouts), and the directory staged for
+the site contains **no `blog/` at all** — so this is not fixed by publishing the site, and the links are
+deleted rather than repointed.
+
+- **A1 — the per-version "read the post" button: 47 URL-bearing lines.** 22 `post: URL(string: "…/blog/…"),`
+  arguments in `WhatsNewView.swift`, 22 `post = "…"` in `WhatsNewView.kt`, plus 3 Kotlin feature-row
+  `link = "…"`. Both `VersionDescription.post` fields were already optional with an existing nil call site,
+  and both renderers branch on them (`if let post = v.post` / `ReadMoreButton(v.post)`), so the rows lose
+  their button and nothing else.
+- **A2 — the link was inside the copy, so the key had to move too: 17 lines.** iOS uses the English string
+  *as* the localization key, and the transport-isolation row carried
+  `[by connection](…/blog/…#transport-isolation)` — so the URL lived in **the key and the value of 16
+  `.lproj` catalogues**, 32 of the 33 occurrences. Stripping only the code literal would have compiled,
+  rendered and silently fallen back to English in 16 languages. The pass rewrote key and value together into
+  the link-free wording Android already had, and asserts all 16 keys equal the code literal byte for byte.
+- **A3 — the badges "read more in our blog" row: 35 lines.** One Swift `ExternalLink`, one Kotlin
+  `ReadableTextWithLink`, **the import that call was the only user of in that file**, the key in 21 moko
+  locales and the same string in 11 iOS catalogues. The helper itself stays; two other views call it.
+- **A4 — 39 of the 43 flatpak release URLs**: `<release><url type="details">` in
+  `com.popopxchat.popopx.metainfo.xml`. The four that survive are not blog links — two `popopx.chat/badges/`
+  and two upstream GitHub release tags.
+
+Held, each with its reason: the metainfo `<screenshots><image>` (a dead `/blog/images/…png`, but an image is
+not a link and dropping the only screenshot is a separate ruling), `contentModerationPostLink` in
+`ChatTypes.swift` / `CIFileView.kt` (a paired value with 8 readers), `fastlane`'s store description, and
+every `simplex.chat/blog` — upstream's host serving upstream's articles — including the 232 `.xcloc`
+catalogues, which `project.pbxproj` references zero times and so are not a build input.
+
+**The tool silently skipped five files, and only the residue count caught it.** `Doc.write()` gated the save
+on `if not self.cut_idx: return`, so a file that was *rewritten* but never *cut* was computed, JSONL-logged
+and reported as edited without ever reaching disk — exactly the five locales A2 rewrote and A3 touched no key
+in (bg, cs, fi, ja, th). Left that way they would have shipped a key no code asks for and no value for the key
+the code now asks for. The per-file count assertions could not see it: they validate the computation, not the
+filesystem. Re-measuring occurrences **on disk** (15 where 5 were expected) is what exposed it.
+
+Gates: `popopx.chat/blog` occurrences 126 → **5**, exactly the holds above; `plutil -lint` 16/16 catalogues
+OK; `xmllint` 22/22 XML documents OK; `scripts/ios/localizations.py check` → "No problems found";
+`check-kotlin` unchanged and naming none of the deleted keys; `()`/`{}`/`[]` balance shift +0 in all four code
+files; wire audit FORWARD 0 / REVERSE 0 and `sweep WORKTREE` 0; `xcodebuild` build and `build-for-testing`
+both **SUCCEEDED**. The Kotlin side is **static verification only**: this machine has no JDK, no Gradle
+distribution and no Android SDK, and the CI "Build and test Kotlin apps" step in run 43547895589 was
+*skipped*, not passed, so the first real Kotlin compile of these files is the next pushed run.
+
+Snapshot re-render (`SNAPSHOT_SIZE=large`, 262 scenes): **260 equal / 2 differ**, and the two are exactly
+`BadgesHowItWorksView-{light,dark}-large` at 1099 changed pixels each — regenerated and installed, reconciling
+the suite at 262/262. (The comparator's other 112 `missing` are the baselines of the four font sizes this
+single-size render cannot produce; CI renders those per job.) `NewFeaturesView-{light,dark}-large` came back
+**byte-identical, and that is a coverage gap rather than a clean bill of health**: HEAD carries 23 What's-new
+pages — 22 with a `post:` and the newest (`v7.1`) already with `post: nil` — and the scene's paged `TabView`
+renders only the selected newest page, so all 22 deleted "Read more" buttons sit on pages the harness cannot
+reach. Nothing in this repository visually verifies A1; it is verified by the Swift compiler and by the fact
+that both renderers branch on the optional.
 
 ### The five holders that outlived the ruling (2026-11-14, 功能保留)
 

@@ -2496,7 +2496,6 @@
     <string name="badges_how_it_works_p1">Nozīmīte ir anonīmi akreditācijas dati, kas glabājas jūsu profilā jūsu ierīcē. Šie akreditācijas dati nekad netiek nevienam nosūtīti.</string>
     <string name="badges_how_it_works_p2">Lai pierādītu kontaktam vai serverim, ka jums ir nozīmīte, lietotne ģenerē jaunu pierādījumu, kas atklāj tikai nozīmītes veidu un derīguma termiņu, noapaļotu līdz nedēļai.</string>
     <string name="badges_how_it_works_p3">Neviens nevar sasaistīt divus dažādus pierādījumus savā starpā vai ar pirkumu.</string>
-    <string name="badges_how_it_works_read_more_with_link"><![CDATA[Lasiet vairāk <font color="#0088ff">mūsu blogā</font>.]]></string>
     <string name="badges_preview_my_nickname">Mans segvārds</string>
     <string name="badges_banner_title">Atbalstīt POPOPX</string>
     <string name="badges_banner_subtitle">Iegūstiet nozīmīti + labākus failus</string>

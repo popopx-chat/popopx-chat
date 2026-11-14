@@ -2515,7 +2515,6 @@
     <string name="badges_how_it_works_p1">Huy hiệu là một chứng chỉ ẩn danh được lưu trong hồ sơ của bạn trên thiết bị. Chứng chỉ này không bao giờ được gửi cho bất kỳ ai.</string>
     <string name="badges_how_it_works_p2">Để chứng minh với một liên hệ hoặc một máy chủ rằng bạn có huy hiệu, ứng dụng tạo một bằng chứng mới chỉ tiết lộ loại huy hiệu và ngày hết hạn, được làm tròn theo tuần.</string>
     <string name="badges_how_it_works_p3">Không ai có thể liên kết hai bằng chứng khác nhau với nhau hoặc với giao dịch mua.</string>
-    <string name="badges_how_it_works_read_more_with_link"><![CDATA[Đọc thêm trong <font color="#0088ff">blog của chúng tôi</font>.]]></string>
     <string name="badges_preview_my_nickname">Biệt danh của tôi</string>
     <string name="badges_banner_title">Hỗ trợ POPOPX</string>
     <string name="badges_banner_subtitle">Nhận huy hiệu + tệp tốt hơn</string>

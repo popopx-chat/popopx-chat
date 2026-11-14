@@ -2892,7 +2892,6 @@
     <string name="badges_choose_your_badge_lede">Archivos más grandes que permanecen disponibles más tiempo.</string>
     <string name="badges_how_long_title">¿Por cuánto tiempo?</string>
     <string name="badges_how_it_works_p2">Para demostrar a un contacto o a un servidor que tienes una insignia, la aplicación genera una prueba nueva que solo revela el tipo de insignia y la fecha de caducidad, redondeada a la semana.</string>
-    <string name="badges_how_it_works_read_more_with_link"><![CDATA[Más información en <font color="#0088ff">nuestro blog</font>.]]></string>
     <string name="badges_larger_files_longer">Patrocina POPOPX para enviar archivos más grandes que permanecen disponibles más tiempo</string>
     <string name="badges_check_your_order_title">Revisa tu pedido</string>
     <string name="badges_order_duration">Duración</string>

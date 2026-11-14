@@ -2890,7 +2890,6 @@
     <string name="badges_banner_dismiss_message">你可以之后在设置中支持 POPOPX。</string>
     <string name="badges_your_badge">你的徽章</string>
     <string name="badges_redeem_code_button">兑换徽章代码</string>
-    <string name="badges_how_it_works_read_more_with_link"><![CDATA[在<font color="#0088ff">我们的博客</font>中了解更多。]]></string>
     <string name="badges_larger_files_longer">支持 POPOPX 即可发送更大的文件，且保留更久</string>
     <string name="badges_check_your_order_title">检查你的订单</string>
     <string name="badges_order_duration">时长</string>

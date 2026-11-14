@@ -2901,7 +2901,6 @@
     <string name="badges_how_it_works_p1">Um distintivo é uma credencial anónima guardada no seu perfil, no seu dispositivo. Esta credencial nunca é enviada a ninguém.</string>
     <string name="badges_how_it_works_p2">Para provar a um contacto ou a um servidor que tem um distintivo, a aplicação gera uma nova prova que revela apenas o tipo de distintivo e a data de expiração, arredondada à semana.</string>
     <string name="badges_how_it_works_p3">Ninguém consegue associar duas provas diferentes entre si nem à compra.</string>
-    <string name="badges_how_it_works_read_more_with_link"><![CDATA[Leia mais no <font color="#0088ff">nosso blogue</font>.]]></string>
     <string name="badges_banner_subtitle">Obtenha um distintivo + melhores ficheiros</string>
     <string name="badges_banner_dismiss_message">Pode apoiar o POPOPX mais tarde nas Definições.</string>
     <string name="badges_larger_files_longer">Apoie o POPOPX para enviar ficheiros maiores que ficam disponíveis durante mais tempo</string>

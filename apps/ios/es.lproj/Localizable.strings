@@ -1140,7 +1140,7 @@ marked deleted chat item preview text */
 "Buy in browser" = "Comprar en el navegador";
 
 /* No comment provided by engineer. */
-"By chat profile (default) or [by connection](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)." = "Mediante perfil (predeterminado) o [por conexión](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA).";
+"By chat profile (default) or by connection (BETA)." = "Mediante perfil (predeterminado) o por conexión (BETA).";
 
 /* No comment provided by engineer. */
 "call" = "llamada";
@@ -5157,7 +5157,6 @@ alert title */
 "Read more" = "Saber más";
 
 /* No comment provided by engineer. */
-"Read more in our blog." = "Más información en nuestro blog.";
 
 /* No comment provided by engineer. */
 "Read more in our GitHub repository." = "Conoce más en nuestro repositorio GitHub.";

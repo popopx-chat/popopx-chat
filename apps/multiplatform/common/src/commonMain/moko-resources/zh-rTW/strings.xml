@@ -2824,7 +2824,6 @@
     <string name="badges_how_it_works_p1">徽章是儲存在你裝置上個人檔案中的匿名憑證。此憑證永遠不會傳送給任何人。</string>
     <string name="badges_how_it_works_p2">為了向聯絡人或伺服器證明你擁有徽章，應用程式會產生新的證明，只透露徽章類型和以週為單位約略計算的到期日。</string>
     <string name="badges_how_it_works_p3">沒有人能將兩個不同的證明互相關聯，或與購買關聯。</string>
-    <string name="badges_how_it_works_read_more_with_link"><![CDATA[在<font color="#0088ff">我們的部落格</font>中了解更多。]]></string>
     <string name="badges_preview_my_nickname">我的暱稱</string>
     <string name="badges_banner_title">支持 POPOPX</string>
     <string name="badges_banner_subtitle">取得徽章 + 更好的檔案功能</string>

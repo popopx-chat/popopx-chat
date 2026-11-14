@@ -3204,7 +3204,6 @@
   <string name="badges_how_it_works_p1">A badge is an anonymous credential stored in your profile on your device. This credential is never sent to anyone.</string>
   <string name="badges_how_it_works_p2">To prove to a contact or a server that you have a badge, the app generates a new proof that reveals only the badge type and the expiry date, rounded to a week.</string>
   <string name="badges_how_it_works_p3">Nobody can link two different proofs to each other or to the purchase.</string>
-  <string name="badges_how_it_works_read_more_with_link"><![CDATA[Read more in <font color="#0088ff">our blog</font>.]]></string>
   <string name="badges_preview_my_nickname">My nickname</string>
   <string name="badges_banner_title">Support POPOPX</string>
   <string name="badges_banner_subtitle">Get badge + better files</string>

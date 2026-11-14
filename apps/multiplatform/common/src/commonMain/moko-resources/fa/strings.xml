@@ -2502,7 +2502,6 @@
     <string name="badges_how_it_works_p1">نشان یک اعتبارنامه ناشناس است که در پروفایل شما روی دستگاهتان ذخیره می‌شود. این اعتبارنامه هرگز برای کسی ارسال نمی‌شود.</string>
     <string name="badges_how_it_works_p2">برای اثبات داشتن نشان به یک مخاطب یا سرور، برنامه یک اثبات جدید تولید می‌کند که فقط نوع نشان و تاریخ انقضای آن را، گردشده به یک هفته، آشکار می‌کند.</string>
     <string name="badges_how_it_works_p3">هیچ‌کس نمی‌تواند دو اثبات متفاوت را به یکدیگر یا به خرید مرتبط کند.</string>
-    <string name="badges_how_it_works_read_more_with_link"><![CDATA[مطالعه بیشتر در <font color="#0088ff">وبلاگ ما</font>.]]></string>
     <string name="badges_preview_my_nickname">نام مستعار من</string>
     <string name="badges_banner_title">حمایت از POPOPX</string>
     <string name="badges_banner_subtitle">دریافت نشان + فایل‌های بهتر</string>

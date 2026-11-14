@@ -874,7 +874,7 @@ marked deleted chat item preview text */
 "Businesses" = "Бизнеси";
 
 /* No comment provided by engineer. */
-"By chat profile (default) or [by connection](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)." = "Чрез чат профил (по подразбиране) или [чрез връзка](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (БЕТА).";
+"By chat profile (default) or by connection (BETA)." = "Чрез чат профил (по подразбиране) или чрез връзка (БЕТА).";
 
 /* No comment provided by engineer. */
 "Call already ended!" = "Разговорът вече приключи!";

@@ -495,6 +495,15 @@ yet. Before any build of this fork is distributed:
   is `CN=popopx.chat` (Let's Encrypt) with `DNS:popopx.chat, DNS:www.popopx.chat` in the SAN — while
   `/.well-known/apple-app-site-association`, `/.well-known/assetlinks.json` and the `www` copy of the first all
   answer 404.
+- **`/blog/` and `/docs/` are not served, so the in-app blog links were deleted, not repointed.** Measured
+  2026-11-14: all 27 distinct `popopx.chat/blog/…` URLs the apps carried answer 404 (27/27, no timeouts).
+  Ruling 「删除博客链接」: 121 occurrences in 42 files went — the What's-new per-version "read the post"
+  links, the transport-isolation description's inline link, the badges "read more in our blog" row and 39
+  flatpak release URLs. Five `popopx.chat/blog` occurrences remain on purpose: the metainfo
+  `<screenshots><image>` (an image, not a link — it needs its own ruling), the fastlane store description,
+  the two `contentModerationPostLink` holders (a paired value with 8 readers, awaiting ruling), and this
+  project's own history in `CHANGELOG-POPOPX.md`. Everything naming `simplex.chat/blog` is held: that host
+  serves upstream's articles, and the `.xcloc` catalogues are not a build input.
 - **Store links 404.** Every `market://` / `details?id=com.popopxchat.popopx` / App Store URL in
   this repository names an app record that does not exist yet.
 - **The application artwork is done; the documentation artwork is not.** The icons, illustrations and

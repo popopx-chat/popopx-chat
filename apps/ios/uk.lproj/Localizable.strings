@@ -1083,7 +1083,7 @@ marked deleted chat item preview text */
 "Buy in browser" = "Купити в браузері";
 
 /* No comment provided by engineer. */
-"By chat profile (default) or [by connection](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)." = "Через профіль чату (за замовчуванням) або [за з'єднанням](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA).";
+"By chat profile (default) or by connection (BETA)." = "Через профіль чату (за замовчуванням) або за з'єднанням (BETA).";
 
 /* No comment provided by engineer. */
 "call" = "дзвонити";
@@ -4585,7 +4585,6 @@ alert button */
 "Read more" = "Читати далі";
 
 /* No comment provided by engineer. */
-"Read more in our blog." = "Докладніше в нашому блозі.";
 
 /* No comment provided by engineer. */
 "Read more in our GitHub repository." = "Читайте більше в нашому GitHub репозиторії.";

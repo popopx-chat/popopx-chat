@@ -2709,7 +2709,6 @@
     <string name="badges_how_it_works_p1">Lencana adalah kredensial anonim yang disimpan di profil Anda pada perangkat Anda. Kredensial ini tidak pernah dikirim ke siapa pun.</string>
     <string name="badges_how_it_works_p2">Untuk membuktikan kepada kontak atau server bahwa Anda memiliki lencana, aplikasi membuat bukti baru yang hanya mengungkapkan jenis lencana dan tanggal kedaluwarsa, dibulatkan ke minggu.</string>
     <string name="badges_how_it_works_p3">Tidak ada yang dapat menautkan dua bukti berbeda satu sama lain atau dengan pembelian.</string>
-    <string name="badges_how_it_works_read_more_with_link"><![CDATA[Baca selengkapnya di <font color="#0088ff">blog kami</font>.]]></string>
     <string name="badges_preview_my_nickname">Nama panggilan saya</string>
     <string name="badges_banner_title">Dukung POPOPX</string>
     <string name="badges_banner_subtitle">Dapatkan lencana + berkas lebih baik</string>

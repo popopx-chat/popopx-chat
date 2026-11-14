@@ -450,7 +450,7 @@ swipe action */
 "Both you and your contact can send voice messages." = "ทั้งคุณและผู้ติดต่อของคุณสามารถส่งข้อความเสียงได้";
 
 /* No comment provided by engineer. */
-"By chat profile (default) or [by connection](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (BETA)." = "ตามโปรไฟล์แชท (ค่าเริ่มต้น) หรือ [โดยการเชื่อมต่อ](https://popopx.chat/blog/20230204-simplex-chat-v4-5-user-chat-profiles.html#transport-isolation) (เบต้า)";
+"By chat profile (default) or by connection (BETA)." = "ตามโปรไฟล์แชท (ค่าเริ่มต้น) หรือ โดยการเชื่อมต่อ (เบต้า)";
 
 /* No comment provided by engineer. */
 "Call already ended!" = "สิ้นสุดการโทรแล้ว!";

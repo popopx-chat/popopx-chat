@@ -2508,7 +2508,6 @@
     <string name="badges_how_it_works_p1">Una insígnia és una credencial anònima desada al vostre perfil al dispositiu. Aquesta credencial no s\'envia mai a ningú.</string>
     <string name="badges_how_it_works_p2">Per demostrar a un contacte o a un servidor que teniu una insígnia, l\'aplicació genera una prova nova que només revela el tipus d\'insígnia i la data de caducitat, arrodonida a una setmana.</string>
     <string name="badges_how_it_works_p3">Ningú no pot vincular dues proves diferents entre si ni amb la compra.</string>
-    <string name="badges_how_it_works_read_more_with_link"><![CDATA[Més informació al <font color="#0088ff">nostre blog</font>.]]></string>
     <string name="badges_preview_my_nickname">El meu sobrenom</string>
     <string name="badges_banner_title">Doneu suport a POPOPX</string>
     <string name="badges_banner_subtitle">Obteniu una insígnia + millors fitxers</string>

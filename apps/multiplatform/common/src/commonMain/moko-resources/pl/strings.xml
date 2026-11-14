@@ -2532,7 +2532,6 @@
     <string name="badges_how_it_works_p1">Odznaka to anonimowe poświadczenie przechowywane w Twoim profilu na Twoim urządzeniu. To poświadczenie nigdy nie jest nikomu wysyłane.</string>
     <string name="badges_how_it_works_p2">Aby udowodnić kontaktowi lub serwerowi, że masz odznakę, aplikacja generuje nowy dowód, który ujawnia tylko typ odznaki i datę wygaśnięcia zaokrągloną do tygodnia.</string>
     <string name="badges_how_it_works_p3">Nikt nie może powiązać dwóch różnych dowodów ze sobą ani z zakupem.</string>
-    <string name="badges_how_it_works_read_more_with_link"><![CDATA[Przeczytaj więcej na <font color="#0088ff">naszym blogu</font>.]]></string>
     <string name="badges_preview_my_nickname">Mój pseudonim</string>
     <string name="badges_banner_title">Wspieraj POPOPX</string>
     <string name="badges_banner_subtitle">Zdobądź odznakę + lepsze pliki</string>

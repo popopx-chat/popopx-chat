@@ -10,7 +10,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.compose.stringResource
 import chat.popopx.common.platform.ColumnWithScrollBar
-import chat.popopx.common.views.onboarding.ReadableTextWithLink
 import chat.popopx.res.*
 
 @Composable
@@ -30,6 +29,5 @@ fun BadgesHowItWorksView() {
     Text(stringResource(MR.strings.badges_how_it_works_p1), style = MaterialTheme.typography.body1)
     Text(stringResource(MR.strings.badges_how_it_works_p2), style = MaterialTheme.typography.body1)
     Text(stringResource(MR.strings.badges_how_it_works_p3), style = MaterialTheme.typography.body1)
-    ReadableTextWithLink(MR.strings.badges_how_it_works_read_more_with_link, "https://popopx.chat/blog/20260919-simplex-supporter-badges.html")
   }
 }

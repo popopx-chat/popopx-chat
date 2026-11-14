@@ -2411,7 +2411,6 @@
     <string name="badges_how_it_works_p1">Een badge is een anonieme credential die in uw profiel op uw apparaat wordt opgeslagen. Deze credential wordt nooit naar iemand verzonden.</string>
     <string name="badges_how_it_works_p2">Om aan een contact of server te bewijzen dat u een badge heeft, genereert de app een nieuw bewijs dat alleen het type badge en de vervaldatum, afgerond op een week, onthult.</string>
     <string name="badges_how_it_works_p3">Niemand kan twee verschillende bewijzen aan elkaar of aan de aankoop koppelen.</string>
-    <string name="badges_how_it_works_read_more_with_link"><![CDATA[Lees meer op <font color="#0088ff">onze blog</font>.]]></string>
     <string name="badges_preview_my_nickname">Mijn bijnaam</string>
     <string name="badges_banner_title">Steun POPOPX</string>
     <string name="badges_banner_subtitle">Krijg een badge + betere bestanden</string>
