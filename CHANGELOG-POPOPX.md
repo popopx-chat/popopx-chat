@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-14 (128 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-14 (129 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -15,7 +15,7 @@ cryptography or the wire format.
 
 ### The specs stop describing the round (2026-11-14, ruling 删除众筹 — commit 4 of 4)
 
-10 files, 23 insertions / 61 deletions (`tools/r7/r68_h_docs.py`, JSONL in `tools/r7/`; 43 edits, 10 files, each an
+10 files, 23 insertions / 62 deletions (`tools/r7/r68_h_docs.py`, JSONL in `tools/r7/`; 43 edits, 10 files, each an
 asserted line span or an asserted single-substring replacement). The last group of mirrors: documents that describe the
 app, which after three commits described a screen the app no longer has.
 
