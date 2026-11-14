@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-14 (135 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-14 (136 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -660,9 +660,12 @@ an upstream-hosted link for a group our own relay serves) and the badge site's c
 occurrences in the 23 generated `POPOPX Localizations/*.xliff` catalogs (Xcode re-emits them from source;
 hand-editing guarantees a drift), 42 links carrying another operator's encoded relay address, and 124 in
 upstream's published text (`blog/`, `plans/`, `CHANGELOG.md`, `PRIVACY.md`, `docs/lang/`, `docs/protocol/`).
-Because `popopx.chat` does not yet serve the certificate or the `.well-known` files, the apps now name a
-domain that cannot answer them: universal links and `autoVerify` will not claim until the SAN covers
-`popopx.chat` and our Android signing fingerprints replace upstream's three in `assetlinks.json`.
+Because `popopx.chat` did not yet serve the `.well-known` files, the apps began naming a domain that cannot
+answer them: universal links and `autoVerify` will not claim until the host publishes those records. Two of the
+three conditions this sentence listed are since retired — the certificate **does** cover `popopx.chat` (measured
+2026-11-13), and our own Android signing fingerprint **replaced** upstream's three in the dependency's
+`assetlinks.json` (2026-11-14, #33 item 1 above) — so what is left is one thing, not three: nothing is served
+under `/.well-known/`.
 Ruled 2026-11-13 as use-first-and-record; the gap is written up in `FORK.md`.
 The npm and PyPI names in the committed manifests are upstream's on purpose: `packages_release.py
 test-names` rewrites them, with `npm:` aliases for the cross-package dependencies, from the
