@@ -5,7 +5,7 @@ import * as os from "os"
 import * as path from "path"
 import {AddressInfo} from "net"
 import * as crypto from "crypto"
-import {addonAsset, cacheRoot, installAddon, installLibs, libPath, libsAsset, MAX_REDIRECTS, platformTag, releaseUrl, resolveAddonPath, resolveLibsDir} from "../src/libs"
+import {addonAsset, cacheRoot, installAddon, installLibs, libNames, libPath, libsAsset, MAX_REDIRECTS, platformTag, releaseUrl, resolveAddonPath, resolveLibsDir} from "../src/libs"
 import * as release from "../src/release"
 import {main, parseInstallArgs} from "../src/cli"
 import * as libs from "../src/libs"
@@ -111,7 +111,7 @@ describe("paths", () => {
   it("names the variable that was set when the directory has no library", async () => {
     fs.rmSync(libPath(libsDir))
     await expect(resolveLibsDir("sqlite", {POPOPX_LIBS_DIR: libsDir}))
-      .rejects.toThrow(`POPOPX_LIBS_DIR has none of ${path.basename(libPath(libsDir))}, libsimplex.so: ${libsDir}`)
+      .rejects.toThrow(`POPOPX_LIBS_DIR has none of ${libNames().join(", ")}: ${libsDir}`)
   })
 
   it("uses SIMPLEX_LIBS_DIR on an unsupported CPU", async () => {
@@ -162,7 +162,7 @@ describe("paths", () => {
 
   it("rejects a SIMPLEX_LIBS_DIR that has neither library name", async () => {
     fs.rmSync(libPath(libsDir))
-    await expect(resolveLibsDir("sqlite", {SIMPLEX_LIBS_DIR: libsDir})).rejects.toThrow(`SIMPLEX_LIBS_DIR has none of ${path.basename(libPath(libsDir))}, libsimplex.so: ${libsDir}`)
+    await expect(resolveLibsDir("sqlite", {SIMPLEX_LIBS_DIR: libsDir})).rejects.toThrow(`SIMPLEX_LIBS_DIR has none of ${libNames().join(", ")}: ${libsDir}`)
   })
 })
 
