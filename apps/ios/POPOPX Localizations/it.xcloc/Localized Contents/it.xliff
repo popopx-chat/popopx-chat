@@ -2950,11 +2950,6 @@ Questo è il tuo link una tantum!</target>
         <target>Gli investitori della raccolta fondi possono prenotare i nomi prima che inizi la vendita: [simplex.domains](https://simplex.domains/)</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Crowdfunding on Wefunder" xml:space="preserve">
-        <source>Crowdfunding on Wefunder</source>
-        <target>Raccolta fondi su Wefunder</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="Current Passcode" xml:space="preserve">
         <source>Current Passcode</source>
         <target>Codice di accesso attuale</target>
@@ -5903,11 +5898,6 @@ Questo è il tuo link per il gruppo %@!</target>
         <source>Learn more</source>
         <target>Maggiori informazioni</target>
         <note>badge alert button</note>
-      </trans-unit>
-      <trans-unit id="Learn more on Wefunder" xml:space="preserve">
-        <source>Learn more on Wefunder</source>
-        <target>Maggiori informazioni su Wefunder</target>
-        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Learn more." xml:space="preserve">
         <source>Learn more.</source>

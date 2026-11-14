@@ -33,10 +33,7 @@ import chat.popopx.common.model.*
 import chat.popopx.common.model.ChatController.appPrefs
 import chat.popopx.common.platform.*
 import chat.popopx.common.ui.theme.*
-import chat.popopx.common.views.chatlist.GetStakeBanner
-import chat.popopx.common.views.chatlist.openGetStake
 import chat.popopx.common.views.helpers.*
-import chat.popopx.common.views.onboarding.crowdfundingAvailable
 import chat.popopx.common.views.usersettings.UserAddressView
 import chat.popopx.res.*
 import kotlinx.coroutines.launch
@@ -429,24 +426,10 @@ fun ConnectOnboardingView() {
     }
   }
 
-  val getStakeBannerDismissed = remember { appPrefs.getStakeBannerDismissed.state }
-  val showGetStakeBanner = chatModel.bannerSlotFree(ChatListBanner.GetStake) && crowdfundingAvailable() && !getStakeBannerDismissed.value
-  // on desktop the pages span the window, but the banner keeps the width it has in the chat list
-  val bannerMaxWidth = if (appPlatform.isDesktop) DEFAULT_START_MODAL_WIDTH * fontSizeSqrtMultiplier else Dp.Unspecified
   val content = @Composable {
     Column(Modifier.fillMaxSize()) {
       Box(Modifier.weight(1f).fillMaxWidth()) {
         pager()
-      }
-      if (showGetStakeBanner) {
-        SideEffect { chatModel.chatListBanner = ChatListBanner.GetStake }
-        Box(Modifier.align(Alignment.CenterHorizontally).widthIn(max = bannerMaxWidth).padding(start = DEFAULT_PADDING, end = DEFAULT_PADDING, bottom = 8.dp)) {
-          GetStakeBanner(
-            showDismiss = false,
-            onTap = cardClickOverride ?: { openGetStake(if (appPlatform.isDesktop) ModalManager.center else ModalManager.start) },
-            onDismiss = {}
-          )
-        }
       }
     }
   }

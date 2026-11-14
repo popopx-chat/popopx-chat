@@ -2950,11 +2950,6 @@ This is your own one-time link!</target>
         <target>Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Crowdfunding on Wefunder" xml:space="preserve">
-        <source>Crowdfunding on Wefunder</source>
-        <target>Crowdfunding on Wefunder</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="Crowdfunding on Wefunder." xml:space="preserve">
         <source>Crowdfunding on Wefunder.</source>
         <target>Crowdfunding on Wefunder.</target>
@@ -5908,11 +5903,6 @@ This is your link for group %@!</target>
         <source>Learn more</source>
         <target>Learn more</target>
         <note>badge alert button</note>
-      </trans-unit>
-      <trans-unit id="Learn more on Wefunder" xml:space="preserve">
-        <source>Learn more on Wefunder</source>
-        <target>Learn more on Wefunder</target>
-        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Learn more." xml:space="preserve">
         <source>Learn more.</source>

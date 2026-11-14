@@ -2925,11 +2925,6 @@ Il s'agit de votre propre lien unique !</target>
         <target>Les investisseurs du financement participatif peuvent réserver des noms avant le début de la vente : [simplex.domains](https://simplex.domains/)</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Crowdfunding on Wefunder" xml:space="preserve">
-        <source>Crowdfunding on Wefunder</source>
-        <target>Financement participatif sur Wefunder</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="Current Passcode" xml:space="preserve">
         <source>Current Passcode</source>
         <target>Code d'accès actuel</target>
@@ -5873,11 +5868,6 @@ Voici votre lien pour le groupe %@ !</target>
         <source>Learn more</source>
         <target>En savoir plus</target>
         <note>badge alert button</note>
-      </trans-unit>
-      <trans-unit id="Learn more on Wefunder" xml:space="preserve">
-        <source>Learn more on Wefunder</source>
-        <target>En savoir plus sur Wefunder</target>
-        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Leave" xml:space="preserve">
         <source>Leave</source>

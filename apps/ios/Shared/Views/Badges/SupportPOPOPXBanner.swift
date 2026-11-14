@@ -90,7 +90,8 @@ struct SupportPOPOPXBanner_Previews: PreviewProvider {
     }
 }
 
-// Banner chrome for the chat-list banners (`SupportPOPOPXBanner`, `GetStakeBanner`); one declaration so the cards cannot drift apart.
+// Banner chrome for the chat-list banner (`SupportPOPOPXBanner`); one declaration so the cards
+// cannot drift apart in appearance.
 struct BannerCard: ViewModifier {
     @Environment(\.colorScheme) var colorScheme: ColorScheme
 

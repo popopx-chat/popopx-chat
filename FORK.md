@@ -183,15 +183,19 @@ each was meant to become That pass also repaired a compile break this fork shipp
     this machine compiles Kotlin, which is why it took a CI run to find it; `kt_import_gate.py` in the
     tooling directory is the standing gate for that class.
 
-12. **The crowdfunding funnel is one funnel on both platforms, and it names upstream** (2026-11-13) — iOS had no
-    `GetStakeBanner` at all (the view was removed in the inherited `9c8df8f09`) while the Kotlin app showed "Invest in
-    POPOPX Chat!" on a card whose only action opens `wefunder.com/simplex.chat`: another company's round, claimed for
-    this fork on one platform only. iOS got the view back with copy that says the round is SimpleX Chat Ltd's and that
-    POPOPX receives none of the money, and the Kotlin label followed. The URL, its `utm_source` tags and the Wefunder
-    wordmark in `apps/popopx-badge-service` stay as they are — they name a destination, not us — and so does
-    `packages/popopx-chat-mcp/README.md`, which already attributes the round to SimpleX Chat Ltd. Upstream's slide
-    artwork was not restored: it is proprietary, absent from this tree, and POPOPX marks on a third party's campaign
-    would restate the claim visually.
+12. **The crowdfunding funnel is deleted** (restored 2026-11-13, deleted 2026-11-14 by the ruling 删除众筹) — it
+    had been made symmetric by restoring the iOS view with copy naming the round as SimpleX Chat Ltd's. The later
+    ruling is that this fork does not promote the round at all, so the attribution went with the funnel rather than
+    surviving as a label: `GetStakeBanner.swift` and `views/chatlist/GetStakeBanner.kt`, the banner-slot arms on both
+    platforms, the settings sections, the persisted banner preferences, the What's-new `FeatureView` entries with the
+    helpers that only they called (`crowdfundingAvailable()`, `CrowdfundingLayout`, `getStakeSlides`,
+    `fullScreenOnClick`, `Modifier.pinchZoom()`), the 16 slide artwork files and every string that advertised it are
+    gone. What **stays** is the `investor` badge *type*: `BadgeType.investor` and its wire tag are emitted by
+    `src/Popopx/Chat/Badges.hs` for badges the badge service has already issued, so removing them would falsify
+    history instead of promoting anything — its offer copy, the `WEFUNDER_URL` link readers and the badge service's
+    invest panel are deleted with the funnel, and the type keeps its name and its images. `CHANGELOG.md`, this file
+    and the flatpak `<release>` notes keep the round as record, and the blog URL slugs that contain the word
+    "crowdfunding" are upstream's post addresses, not a funnel.
     Maintenance hazard, found the hard way: `apps/ios/POPOPX.xcodeproj` uses classic groups (0
     `PBXFileSystemSynchronizedRootGroup`), so a Swift file needs four `project.pbxproj` entries — build file, file
     reference, group child, Sources phase — and a scripted edit that *replaces* its anchor line instead of inserting

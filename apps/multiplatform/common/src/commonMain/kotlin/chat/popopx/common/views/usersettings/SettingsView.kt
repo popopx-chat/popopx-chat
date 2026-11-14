@@ -32,10 +32,8 @@ import chat.popopx.common.views.badges.currentShownBadge
 import chat.popopx.common.views.database.DatabaseView
 import chat.popopx.common.views.helpers.*
 import chat.popopx.common.views.migration.MigrateFromDeviceView
-import chat.popopx.common.views.onboarding.GetStakeView
 import chat.popopx.common.views.onboarding.POPOPXInfo
 import chat.popopx.common.views.onboarding.WhatsNewView
-import chat.popopx.common.views.onboarding.crowdfundingAvailable
 import chat.popopx.common.views.usersettings.networkAndServers.NetworkAndServersView
 import chat.popopx.res.*
 
@@ -139,17 +137,6 @@ fun SettingsLayout(
       AppVersionItem(showVersion, versionInfo)
     }
 
-    if (crowdfundingAvailable()) {
-      SectionDividerSpaced()
-      // the header names the round as upstream's, because it is theirs and this fork takes none of it
-      SectionView(stringResource(MR.strings.invest_settings_title)) {
-        SettingsActionItem(
-          painterResource(MR.images.ic_redeem),
-          stringResource(MR.strings.v7_0_crowdfunding),
-          { ModalManager.start.showModalCloseable(cardScreen = true) { close -> GetStakeView(showFirstImage = true, close = close) } }
-        )
-      }
-    }
     SectionBottomSpacer()
   }
 }

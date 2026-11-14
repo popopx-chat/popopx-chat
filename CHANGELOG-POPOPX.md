@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-14 (123 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-14 (124 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -12,6 +12,56 @@ links, the APK/F-Droid artifacts and the website are all still upstream's or abs
 
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
+
+### The crowdfunding funnel is deleted (2026-11-14, ruling 删除众筹 — commit 1 of 4)
+
+Supersedes ["The iOS crowdfunding funnel was restored, with the round named as upstream's"](#the-ios-crowdfunding-funnel-was-restored-with-the-round-named-as-upstreams-2026-11-13)
+below: the same line of work then ruled that this fork does not promote the round at all, so the attribution went
+with the funnel instead of surviving as a label. Three tangled things were separated first:
+
+- the **promotion** — deleted;
+- the **investor badge type** — kept. `BadgeType.investor` and its wire tag `"investor"` are emitted by
+  `src/Popopx/Chat/Badges.hs:105,113,118,120-122,165` for badges the badge service has already issued, so deleting
+  them would falsify history rather than promote anything. `badges_type_investor` and the `badge-investor` imageset
+  stay; the offer copy around them goes with the next commit;
+- the **records** — `CHANGELOG.md`, `FORK.md`, this file, the flatpak `<release>` notes and the blog URL slugs that
+  contain the word "crowdfunding" are untouched.
+
+Deleted in one scripted pass (`tools/r7/r68_ab_funnel.py`, JSONL + the full patch in `tools/r7/`): 77 files, 3
+insertions / 775 deletions, plus 20 files removed.
+
+- **iOS** — `Shared/Views/ChatList/GetStakeBanner.swift` (whole file, 82 lines); in `ChatListView.swift` the two
+  `@AppStorage` keys, `showGetStakeSheet`, the `.appSheet`, `openGetStake()`, the onboarding branch and the last arm
+  of the banner-slot chain (18 lines, the chain's own closing brace preserved); the `isInUS` section in
+  `SettingsView.swift` and its 2 `DEFAULT_GET_STAKE_BANNER_*` constants with their `allDefaults`/`hintDefaults` rows;
+  `.getStake` from `ChatListBanner`; the `SnapshotScene(GetStakeBanner_Previews…)` line; the 4 `project.pbxproj`
+  records (build file, file reference, group child, Sources phase).
+- **Kotlin** — `views/chatlist/GetStakeBanner.kt` (whole file, 133 lines, including `openGetStake`); the banner arm
+  and its `remember`s in `ChatListView.kt`; the onboarding banner block in `OnboardingCards.kt` and its 3 imports;
+  `GetStake` from `ChatListBanner`; the 2 `mkBoolPreference` rows, the 2 `hintPref` rows and the
+  `SHARED_PREFS_GET_STAKE_BANNER_*` constants — no compat read, this is a new application; the settings section in
+  `SettingsView.kt` and its 2 imports; and in `WhatsNewView.kt` the two `FeatureView` entries plus
+  `CROWDFUNDING_CONTACT_URI`, the 4 layout constants, `CrowdfundingLayout`, `crowdfundingLayout`,
+  `crowdfundingAvailable()`, `InvestInSimpleXChatView`, `CrowdfundingSlide`, `getStakeSlides`, `GetStakeView` and
+  `Modifier.fullScreenOnClick` — 291 lines. `MAX_PAGE_ZOOM` and `Modifier.pinchZoom()` went with it because their
+  only caller was `GetStakeView`; `WEFUNDER_URL` and `isInUs()` stayed because the badge offer and the `v7.0.1`
+  version label still read them — they move with the badge layer, not with the funnel.
+- **Artwork** — the 8 `crowdfunding_{1..4}@{2x,3x}.jpg`, the 4 `assets/default` placeholder SVGs and the 4
+  `branding/source-svg/crowdfunding_*_light.svg` masters.
+- **Strings** — `invest_banner_title`, `invest_banner_subtitle`, `invest_settings_title`, `v7_0_invest_descr`,
+  `v7_0_crowdfunding`, `v7_0_invest_learn_more` (all `translatable="false"`, so base only) and `v7_1_invest`
+  (20 moko files); on iOS the keys "Learn more on Wefunder" and "Crowdfunding on Wefunder" — 16 `.strings` entries
+  in 11 `.lproj` and 20 xliff units in 13 `.xcloc`.
+
+Verified: the token sweep (`GetStake|getStake|crowdfunding|Crowdfunding|CROWDFUNDING`) is **0** in `apps/ios/Shared`
+and `apps/multiplatform/common/src` except the 4 rows this commit does not own (the 2 badge-layer strings go with
+commit 2, the 2 blog URL slugs are held); 69 XML files re-parse; `scripts/ios/localizations.py check` rc 0 (514
+warnings, all pre-existing); `ding_wire_audit audit` FORWARD 0 / REVERSE 0 / BARE 16 — unchanged; `xcodebuild` Debug
+**BUILD SUCCEEDED** for `generic/platform=iOS` and `generic/platform=iOS Simulator`; the `large` set re-rendered as
+**262 scenes with 0 changed** (374 references, down from 376), 4 baselines re-installed — `SettingsView-{light,dark}`
+because the section lived inside the settings list itself (so `isInUS` is true in the harness) and
+`ChatListView-{light,dark}` because the banner row is gone. Android: static checks only, no Android SDK or gradle on
+this machine.
 
 ### File and artefact names — 45 paths moved, 22 held (2026-11-13)
 
@@ -324,6 +374,9 @@ default is `@string/app_name`, which is already `POPOPX`. No compatibility readi
 application".
 
 ### The iOS crowdfunding funnel was restored, with the round named as upstream's (2026-11-13)
+
+> **Superseded 2026-11-14** by "The crowdfunding funnel is deleted" above. Kept as the record of why the funnel was
+> asymmetric, and of the `project.pbxproj` four-entry hazard, which still applies to every iOS source file.
 
 The funnel was asymmetric. The Kotlin app showed a card titled "Invest in POPOPX Chat!" whose only action opens
 `wefunder.com/simplex.chat`; iOS had no such card at all, because the view was removed in the inherited commit

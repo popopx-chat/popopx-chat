@@ -1941,7 +1941,6 @@ server test step */
 "Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)" = "Les investisseurs du financement participatif peuvent réserver des noms avant le début de la vente : [simplex.domains](https://simplex.domains/)";
 
 /* No comment provided by engineer. */
-"Crowdfunding on Wefunder" = "Financement participatif sur Wefunder";
 
 /* No comment provided by engineer. */
 "Current conditions text couldn't be loaded, you can review conditions via this link:" = "Le texte sur les conditions actuelles n'a pas pu être chargé. Vous pouvez consulter les conditions en cliquant sur ce lien :";
@@ -3877,7 +3876,6 @@ servers warning */
 "Learn more" = "En savoir plus";
 
 /* No comment provided by engineer. */
-"Learn more on Wefunder" = "En savoir plus sur Wefunder";
 
 /* swipe action */
 "Leave" = "Quitter";

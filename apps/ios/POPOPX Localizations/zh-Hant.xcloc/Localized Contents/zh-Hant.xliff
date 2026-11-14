@@ -11856,11 +11856,6 @@ your contacts and groups.</source>
         <target>上次嘗試</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Learn more on Wefunder" xml:space="preserve">
-        <source>Learn more on Wefunder</source>
-        <target>在 Wefunder 上了解更多</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="Learn more on Wefunder." xml:space="preserve">
         <source>Learn more on Wefunder.</source>
         <target>在 Wefunder 上了解更多。</target>

@@ -1956,7 +1956,6 @@ server test step */
 "Crowdfunding investors can reserve names before the sale starts: [simplex.domains](https://simplex.domains/)" = "A közösségi finanszírozásban részt vevő befektetők már az értékesítés megkezdése előtt lefoglalhatnak POPOPX-neveket: [simplex.domains](https://simplex.domains/)";
 
 /* No comment provided by engineer. */
-"Crowdfunding on Wefunder" = "Közösségi finanszírozás a Wefunder oldalon";
 
 /* No comment provided by engineer. */
 "Current conditions text couldn't be loaded, you can review conditions via this link:" = "A jelenlegi feltételek szövegét nem sikerült betölteni, a feltételeket a következő hivatkozáson keresztül vizsgálhatja felül:";
@@ -3895,7 +3894,6 @@ servers warning */
 "Learn more" = "Tudjon meg többet";
 
 /* No comment provided by engineer. */
-"Learn more on Wefunder" = "Tudjon meg többet a Wefunder oldalon";
 
 /* No comment provided by engineer. */
 "Learn more." = "Tudjon meg többet.";

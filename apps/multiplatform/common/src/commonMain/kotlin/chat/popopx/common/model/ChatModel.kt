@@ -130,7 +130,7 @@ object BadgeModel {
     this.rhId.value == rhId && this.userId.value == userId
 }
 
-enum class ChatListBanner { BadgeAlert, BadgePitch, GetStake }
+enum class ChatListBanner { BadgeAlert, BadgePitch }
 
 data class FileToOpen(val fileId: Long, val inChatList: Boolean)
 

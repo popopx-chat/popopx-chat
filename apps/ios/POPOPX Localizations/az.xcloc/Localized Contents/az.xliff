@@ -2700,11 +2700,6 @@ Bu, sizin şəxsi birdəfəlik keçidinizdir!</target>
         <target state="translated">Keçid yaradılır…</target>
         <note>No comment provided by engineer.</note>
       </trans-unit>
-      <trans-unit id="Crowdfunding on Wefunder" xml:space="preserve" approved="no">
-        <source>Crowdfunding on Wefunder</source>
-        <target state="translated">Wefunder kraudfandinq</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="Crowdfunding on Wefunder." xml:space="preserve" approved="no">
         <source>Crowdfunding on Wefunder.</source>
         <target state="translated">Wefunder də kraudfandinq.</target>
