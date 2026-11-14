@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-14 (134 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-14 (135 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -12,6 +12,58 @@ links, the APK/F-Droid artifacts and the website are all still upstream's or abs
 
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
+
+### #33 item 1 executed (option 1c): the served association record now names our own certificate (2026-11-14)
+
+Ruled 2026-11-14 — **1c, our own keystore**, out of the three ways to close the item left open above. The other two
+were rejections for the same reason: an empty `sha256_cert_fingerprints` array and a deleted file both *remove a
+capability* (the record stops attesting anything) where the defect was a mismatched value, and a value we control
+now exists.
+
+- **The key pair is new and it is ours.** Material lives outside both repositories, in
+  `/Users/elliot/popopx-chat/keys/` (directory 0700, files 0600): an encrypted PKCS#1 PEM key, its certificate and
+  the passphrase file. Nothing secret is tracked in either repo and the passphrase was never printed. Subject
+  `/CN=com.popopxchat.popopx/OU=POPOPX Chat Android Release/C=US`, RSA 2048, `sha256WithRSAEncryption`, serial
+  `8E22C76424902B78`, no X509v3 extensions, valid 2026-11-14 → 2054-04-01. Its SHA-256 fingerprint — the value
+  Android compares against the installed APK — is
+  `3A:7F:67:1A:8F:21:D3:93:6D:46:78:DE:1D:4F:0E:29:C3:DF:9E:35:2A:CB:26:0D:02:6A:DD:0C:17:FA:4C:CB`.
+- **One line changed, in the dependency**: `apps/common/Web/static/.well-known/assetlinks.json` went from SimpleX
+  Chat Ltd's three fingerprints (Play App Signing, the GitHub APK upload key, F-Droid) to this one. `package_name`
+  was already `com.popopxchat.popopx`; pairing it with three certificates that never sign our build is the
+  misattribution, and it cannot be fixed by renaming anything.
+- **Pin chain.** popopxmq `25d7213d` = tag `popopx-pin-4`, and this repository's two holders of the pin moved with
+  it (`cabal.project:24`, `scripts/nix/sha256map.nix:2`). The nix hash came from the command that file's own generator
+  calls (`nix-prefetch-git --fetch-submodules`, per `scripts/nix/update-sha256.awk`), and the route was proven first by reproducing pin-3's recorded hash
+  byte-for-byte — an unproven hash command against a dependency that has to resolve on someone else's machine is
+  how a pin silently becomes unbuildable. `diff -rq` between the two fetched trees is **exactly one file**, this
+  one, so no Haskell source moved.
+- **Scope, proven two ways.** `Web.Embedded` (the TH module that inlines `static/.well-known/`) is listed only in
+  `executable smp-server`, `executable xftp-server` and `test-suite popopxmq-test` in `popopxmq.cabal` (`:479`,
+  `:518`, `:582`) and never in the library (`:98`), and the tree diff above shows nothing else changed — so the
+  iOS archives stay current and none needed rebuilding. No test anywhere asserts the embedded content: the only
+  readers are `Embedded.hs:14` (embed) and `Web.hs:151` (serve).
+- **What this does not yet accomplish.** This fork still publishes no APK and `apps/android/build.gradle.kts` has
+  no `signingConfig` at all (measured the same day), so nothing consumes this certificate yet; when it does, the
+  conversion keeps the same fingerprint because it is a property of the certificate, not of the container. Play App
+  Signing and F-Droid each sign with their own certificate and their digests join this array when those channels
+  exist (#56). And the record is still not *reachable*: `popopx.chat` answers 404 for both `.well-known` paths and
+  no relay serves HTTPS, so verification stays inert — inert now in the direction where nothing is attributed to
+  the wrong owner.
+- **Two holders of upstream's `3C:52:C4:FD:…:AD:85` are deliberately kept**: `scripts/ci/android/release-apk.sh:10`
+  and `scripts/popopx-chat-reproduce-builds-android.sh:4` verify *upstream's* signed APK, so for them that digest
+  is simply the right value.
+- **Left open by this pass, awaiting a ruling**: `apps/multiplatform/README.md:114`, `:125`, `:134` still tell a
+  contributor to add their signature to `github.com/simplex-chat/website`'s `assetlinks.json` "and make a PR… then
+  you should be able to verify SimpleX", and `:125`'s prose says the hosted file is "on simplex.chat" while both of
+  its links point at `popopx.chat`.
+
+Verified: `assetlinks.json` re-parsed from disk (1 entry, `package_name` unchanged, 1 fingerprint of 32 hex groups
+/ 31 colons, 0 hits for any of the three upstream digests), `nix-instantiate --parse` on `sha256map.nix`, the pin
+SHA in both holders and the superseded one absent from both, fingerprint derived twice independently (and the tempting
+third route is a trap worth recording — LibreSSL 3.3.6 `openssl x509 -outform der` writes **0 bytes** and exits 0,
+whose digest is the empty-input constant `e3b0c442…`). Gates: `ding_wire_audit` FORWARD 0 / REVERSE 0 / BARE 16
+(unchanged), `deps` MIXED 0 / STALE 0, `pairs` all zeros. **The dependency commit and tag are local**: this pin
+resolves from GitHub only after they are pushed, so our commit must not be pushed ahead of theirs.
 
 ### #33 executed as items 2 and 3: our relay hosts are claimed, the stale association record is corrected (2026-11-14)
 

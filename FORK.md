@@ -334,8 +334,9 @@ yet. Before any build of this fork is distributed:
   TLS name mismatch this bullet used to report was retired the day before (see the certificate item under
   "Link claims are inert" below). So universal
   links and `autoVerify` cannot be claimed by an installed app yet, link unescaping falls back to the
-  scheme, and `assetlinks.json` will additionally need our Android signing fingerprints (upstream's three
-  are still in the dependency's served copy) before it verifies. The relay presets and the directory/badge service
+  scheme, and the dependency's served `assetlinks.json` stopped being the mismatched half of the pair on
+  2026-11-14 — its fingerprints are ours now (see "the other half of the pair" under the signing identity
+  below). It still verifies nothing, for a different reason: this fork publishes no APK. The relay presets and the directory/badge service
   still name infrastructure SimpleX Chat Ltd operates, because a preset needs their key material and
   `popopx.im` relays have none published yet. `chat@popopx.chat` is likewise not reachable until that host
   serves mail or forwards.
@@ -481,15 +482,47 @@ yet. Before any build of this fork is distributed:
     a moment when its own AASA copy was still in it. All of them must agree with whatever certificate actually
     signs the distribution. A wrong one fails silently: keychain sharing and universal links stop working, and
     only on device.
-  - *What the ruling did not fix is the other half of the pair.* The dependency's
-    `apps/common/Web/static/.well-known/assetlinks.json` carries **our** `package_name`
-    `com.popopxchat.popopx` with **SimpleX Chat Ltd's three** signing-certificate fingerprints — the copy that
-    `website/src/.well-known/assetlinks.json` used to be, and the one that goes live the first time a relay
-    serves web. `autoVerify` cannot pass for a package signed by anybody else, so the served copy must carry
-    ours, and the value is not derivable here: no keystore is tracked in either repository. The three ways to
-    close it (empty the array / drop the file from the embed / mint our own key) are recorded as an open
-    decision, not as residue to sweep — deleting a fingerprint that somebody's install depends on is a
-    capability removal, not a rename. iOS push, by contrast, is already clean: `appName`/`TOPIC` name our
+  - *The other half of the pair — closed 2026-11-14 by minting our own Android key (option 1c).* The
+    dependency's `apps/common/Web/static/.well-known/assetlinks.json` carried **our** `package_name`
+    `com.popopxchat.popopx` with **SimpleX Chat Ltd's three** signing-certificate fingerprints — the copy
+    that `website/src/.well-known/assetlinks.json` used to be, and the one that goes live the first time a
+    relay serves web. `autoVerify` matches the package name *and* the digest of the certificate that signed
+    the installed app, so upstream's three could never verify our package while ours was absent. All three
+    are replaced by the one fingerprint of a key pair this fork owns:
+
+        3A:7F:67:1A:8F:21:D3:93:6D:46:78:DE:1D:4F:0E:29:C3:DF:9E:35:2A:CB:26:0D:02:6A:DD:0C:17:FA:4C:CB
+
+    The material lives outside both repositories, in `/Users/elliot/popopx-chat/keys/` (directory 0700, each
+    file 0600): `popopx-android-release.key` (PKCS#1 PEM, `Proc-Type: 4,ENCRYPTED`),
+    `popopx-android-release.crt`, `popopx-android.password`. No secret is tracked and the password was never
+    printed. Subject `/CN=com.popopxchat.popopx/OU=POPOPX Chat Android Release/C=US`, RSA 2048,
+    `sha256WithRSAEncryption`, serial `8E22C76424902B78`, no X509v3 extensions, valid 2026-11-14 →
+    2054-04-01. The digest was derived twice — `openssl x509 -fingerprint -sha256`, and SHA-256 over the
+    certificate's own DER decoded from the PEM body — and both give it. A third route on this machine is a
+    trap worth naming: LibreSSL 3.3.6 `openssl x509 -outform der` writes **0 bytes and exits 0**, and the
+    digest of that is the empty-input constant `e3b0c442…`, so it "agrees" with itself while proving nothing.
+    Converting for gradle keeps this same fingerprint, because it is a property of the certificate and not of
+    the container — checked by round-tripping it: `openssl pkcs12 -export -inkey … -in … -name
+    popopx-release -out popopx-release.p12`, and the certificate read back out of that container has the
+    digest above (this LibreSSL rejects the `file:` scheme on `-passin`/`-passout` with "Error reading
+    password from BIO", so pass it as `env:`). Gradle then needs a `signingConfig` reading
+    `storeFile`/`storePassword`/`keyAlias = "popopx-release"`. Nothing reads
+    it yet — `apps/android/build.gradle.kts` carries no `signingConfig` at all (measured the same day), which
+    is the "this fork publishes no APK" item above. **Losing this key pair loses the signature**: an update
+    signed with a different certificate is refused, and with Play App Signing the upload key can be rotated
+    but this is the digest F-Droid and any sideloaded install trust — back it up off this machine before the
+    first release (#56), where Play App Signing's and F-Droid's own fingerprints join this same array.
+    Ship route: popopxmq `25d7213d` = tag `popopx-pin-4`, our pin moved with it (`cabal.project:24`,
+    `scripts/nix/sha256map.nix:2`). The hash came from the command that file's own generator calls
+    (`nix-prefetch-git --fetch-submodules`, per `scripts/nix/update-sha256.awk`), and the method was proven
+    first by reproducing pin-3's stored
+    hash byte-for-byte; `diff -rq` between the two fetched trees is **exactly one file** — this one — so no
+    Haskell source moved and the iOS archives stay current. Ordering constraint: that pin is resolvable from
+    GitHub only once the dependency commit and tag are pushed, so **our pin-bump commit must not land
+    upstream before theirs**. Two holders of upstream's `3C:52:C4:FD:…:AD:85` are **held**:
+    `scripts/ci/android/release-apk.sh:10` and `scripts/popopx-chat-reproduce-builds-android.sh:4` verify
+    *upstream's* APK, so for them that digest is the correct value.
+    iOS push, by contrast, is already clean: `appName`/`TOPIC` name our
     bundle id, `appTeamId` names our team, and the signing key comes from the `APNS_KEY_FILE`/`APNS_KEY_ID`
     environment, so no upstream push credential is embedded anywhere.
   - *The CI signing scripts no longer name it.* Ruled 2026-11-13: the identity comes from

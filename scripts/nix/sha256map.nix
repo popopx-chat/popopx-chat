@@ -1,5 +1,5 @@
 {
-  "https://github.com/popopx-chat/popopxmq.git"."a6072fe7413a1e1e83fa7d0f1365b7b52b0f51a2" = "1dplzq2jykkz5kcikzrhpwh0x1xnljh16rw8nbczkif75l4ya50v";
+  "https://github.com/popopx-chat/popopxmq.git"."25d7213d58924b084174e6e17e60c64cfad4b0c3" = "10bfw4fajq5kqgi26x57rlx8jkgmw6ynpj7x0ycrl03l43sq3mpa";
   "https://github.com/popopx-chat/hs-socks.git"."a30cc7a79a08d8108316094f8f2f82a0c5e1ac51" = "0yasvnr7g91k76mjkamvzab2kvlb1g5pspjyjn2fr6v83swjhj38";
   "https://github.com/popopx-chat/direct-sqlcipher.git"."2330df3dc8c4b660674d3c02d76bb86f66c2abee" = "11pfj1vqsjdl26nplkr2l6z1xj7cn153qijj5gknmlzq3krn7x1i";
   "https://github.com/popopx-chat/sqlcipher-simple.git"."a46bd361a19376c5211f1058908fc0ae6bf42446" = "1z0r78d8f0812kxbgsm735qf6xx8lvaz27k1a0b4a2m0sshpd5gl";
