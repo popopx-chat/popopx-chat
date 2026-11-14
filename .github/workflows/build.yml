@@ -111,6 +111,12 @@ jobs:
 #   * Contents (Read and Write)
 
   maybe-release:
+    # The repository's default workflow token is read-only (actions/permissions/workflow = read).
+    # Create release below runs on that token, so without this grant it answers 403 Resource not
+    # accessible by integration - measured on popopxmq run 43575140034, the same inherited step -
+    # and a red maybe-release skips every build leg, so no asset could ever be attached.
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     outputs:
       libs_tag: ${{ steps.libs.outputs.tag }}
@@ -987,6 +993,10 @@ jobs:
     name: "${{ matrix.os }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
     needs: [maybe-release, variables]
     if: needs.maybe-release.outputs.reduced != 'true' && needs.maybe-release.outputs.haskell == 'true'
+    # Upload CLI and Upload Desktop attach to the app release through prepare-release, which is
+    # given the job token; the default read-only token cannot write a release.
+    permissions:
+      contents: write
     runs-on: ${{ matrix.os }}
     env:
       # The two values that say who signs: kept at job level so the steps can be skipped when they are absent.
@@ -1403,6 +1413,10 @@ jobs:
     name: "${{ matrix.os }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
     needs: [maybe-release, variables]
     if: needs.maybe-release.outputs.reduced != 'true' && needs.maybe-release.outputs.haskell == 'true'
+    # Upload CLI and Upload Desktop attach to the app release through prepare-release, which is
+    # given the job token; the default read-only token cannot write a release.
+    permissions:
+      contents: write
     runs-on: ${{ matrix.os }}
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-windows-${{ matrix.os }}-${{ needs.maybe-release.outputs.libs_tag }}
