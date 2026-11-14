@@ -7,7 +7,7 @@ import {tmpdir} from "os"
 import {dirname, join} from "path"
 
 const tlsFixtures = join(__dirname, "../../../tests/fixtures/tls")
-const smpServerRelease = "v7.1.0-beta.3"
+const smpServerRelease = "v7.1.0.17"
 const releaseArch: Record<string, string | undefined> = {x64: "x86-64", arm64: "aarch64"}
 
 export interface SmpServer {
@@ -58,7 +58,7 @@ async function downloadSmpServer(path: string): Promise<void> {
   if (process.platform !== "linux" || !arch) {
     throw new Error(`smp-server release binaries are not available for ${process.platform} ${process.arch}, set SMP_SERVER to the smp-server path`)
   }
-  // popopxmq has published no release yet: a 404 here is this fork's own gap, not a reason to fall back to upstream's binary
+  // Pinned to a release of popopxmq itself: a 404 here means our own asset is missing, which is not a reason to fall back to upstream's binary
   const url = `https://github.com/popopx-chat/popopxmq/releases/download/${smpServerRelease}/smp-server-ubuntu-22_04-${arch}`
   const response = await fetch(url)
   if (!response.ok) throw new Error(`error downloading ${url}: ${response.status}`)

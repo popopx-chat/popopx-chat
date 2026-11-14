@@ -11,7 +11,7 @@ All commands run in `/code/simplex-chat-6/packages/simplex-chat-mcp`. The depend
 ```
 node node_modules/typescript/bin/tsc
 node node_modules/jest/bin/jest.js test/unit     # about 10 s
-SMP_SERVER=/code/steward/node_modules/.cache/smp-server/smp-server-v7.1.0-beta.3 XFTP_SERVER=/code/simplexmq-5/dist-newstyle/build/x86_64-linux/ghc-9.6.3/simplexmq-7.1.0.9/x/xftp-server/build/xftp-server/xftp-server node node_modules/jest/bin/jest.js test/e2e      # about 4 minutes; a local smp-server and xftp-server on free ports
+SMP_SERVER=/code/steward/node_modules/.cache/smp-server/smp-server-v7.1.0.17 XFTP_SERVER=/code/simplexmq-5/dist-newstyle/build/x86_64-linux/ghc-9.6.3/simplexmq-7.1.0.9/x/xftp-server/build/xftp-server/xftp-server node node_modules/jest/bin/jest.js test/e2e      # about 4 minutes; a local smp-server and xftp-server on free ports
 ```
 
 `node_modules` is not writable here, so the end-to-end test takes the smp-server and xftp-server binaries from `SMP_SERVER` and `XFTP_SERVER` instead of downloading them to `node_modules/.cache`.
@@ -21,7 +21,7 @@ SMP_SERVER=/code/steward/node_modules/.cache/smp-server/smp-server-v7.1.0-beta.3
 1. Check out simplex-chat master; the package is `packages/simplex-chat-mcp`.
 2. In that folder: `npm install`, then `npx tsc`. `tsc` leaves the output of deleted sources in `dist`; `npm pack` and `npm publish` delete `dist` first and build it again (script `prepack`).
 3. `node dist/cli.js serve my-agent --display-name "My Agent"`. At the first start, `simplex-chat` downloads libsimplex and its Node.js add-on, with a `Downloading ...` line each on stderr.
-4. Tests: `npx jest test/unit`; `npx jest test/e2e` downloads smp-server and xftp-server v7.1.0-beta.3 on Linux, and elsewhere takes `SMP_SERVER=/path/to/smp-server XFTP_SERVER=/path/to/xftp-server`.
+4. Tests: `npx jest test/unit`; `npx jest test/e2e` downloads smp-server and xftp-server v7.1.0.17 on Linux, and elsewhere takes `SMP_SERVER=/path/to/smp-server XFTP_SERVER=/path/to/xftp-server`.
 
 Until the package is published, the printed hint `npx -y @simplex-chat/mcp register my-agent` stands for `node dist/cli.js register my-agent`.
 
