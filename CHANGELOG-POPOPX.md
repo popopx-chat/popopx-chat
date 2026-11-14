@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-14 (132 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-14 (133 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -12,6 +12,38 @@ links, the APK/F-Droid artifacts and the website are all still upstream's or abs
 
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
+
+### The 4 desktop baselines the crowdfunding deletion left behind (CI run 43553929937, 2026-11-14)
+
+The dispatch was asked for a different reason: this machine has no JVM, so `desktop-linux.yml` was run on
+`2c98dcda1` to get a real Kotlin compile of the blog pass. That compile is green — `Run desktop tests`
+**255 tests, 0 failed**, and `Run smoke test` reached the chat list — which proves `WhatsNewView.kt` still builds
+with the `post = "…"` arguments deleted, and explains why nothing had to be left behind: Kotlin's row link is an
+optional parameter reached only behind `if (link != null)` (`WhatsNewView.kt:91-92`), the same shape Swift has.
+
+The job's one red step was **Compare snapshots**: **210 rendered, 206 `equal`, 4 `changed`** —
+`SettingsView.PreviewSettingsLayout-{dark,light}-font-100.png` (1046 and 1051 changed pixels, `maxDelta` 120/121)
+and `WhatsNewView.PreviewWhatsNewView-{dark,light}-font-100.png` (64114 and 61052, `maxDelta` 255).
+
+**None of the four belongs to the blog pass.** The comparator's diff image is three panels — reference, render, and
+the changed pixels in red — so reading it says which side moved: in both pairs the *reference* panel still draws
+copy this repository deleted ("Own a part of POPOPX Chat! 🚀" with the badge artwork, and "Crowdfunding on
+Wefunder. Learn more", in the What's-new scene; the "Upstream's crowdfunding" row in the settings scene) while the
+*render* panel draws the current page. The two magnitudes are the two shapes of the same fact: the What's-new card
+was the *first* slide of that pager, so deleting it shifts every later row and 64114 pixels disagree, while the
+settings row sat at the bottom of the list and only its own line and the divider above it differ. The render is
+correct and the committed baseline is the stale half, and the
+history agrees: the last commit to touch `common/src/desktopTest/snapshots` is `91535ad21` (2026-11-13), which
+predates `d09968bd9`, and nothing touched it afterwards — whereas the iOS tree moved twice after that ruling
+(`54cd6cc69`, then `2c98dcda1`). The crowdfunding install therefore landed on one of this fork's two independent
+baseline trees and not the other; only CI renders this one.
+
+Installed: exactly those 4 files, taken from the run's `desktop-snapshots` artifact and selected by its own
+`compare.json` `failed` list rather than by a second pixel diff. Byte sizes `39549 -> 37050`, `37950 -> 35348`,
+`75666 -> 42031`, `72876 -> 39231`; all four stay `402x874` (`sips` on both sides, so no canvas moved); re-measuring
+every one of the 210 committed PNGs against the artifact afterwards returns **0 differing**, which is the receipt
+that the 206 `equal` ones were not touched. The artifact's own 210-entry name set is identical to the committed one
+in both directions.
 
 ### The What's-new and release-notes links went with the blog (2026-11-14, 删除博客链接)
 
