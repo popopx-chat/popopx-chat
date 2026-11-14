@@ -322,7 +322,7 @@ describe("Core tests", () => {
   });
 
   it("should load libpopopx after a failed load and in several workers", () => {
-    const addon = path.resolve(__dirname, "..", "build", "Release", "simplex.node");
+    const addon = path.resolve(__dirname, "..", "build", "Release", "popopx.node");
     const childDbPath = path.resolve(tmpDir, "simplex_workers");
     const script = `
       const {Worker} = require("worker_threads");
@@ -347,7 +347,7 @@ describe("Core tests", () => {
   it("should let the process exit while a receiver is idle", () => {
     const childDbPath = path.resolve(dbPath);
     const script = `
-      const simplex = require("./build/Release/simplex.node");
+      const simplex = require("./build/Release/popopx.node");
       simplex.load(${JSON.stringify(libPath)});
       simplex.chat_migrate_init(${JSON.stringify(childDbPath)}, "key", "yesUp")
         .then(([ctrl]) => simplex.chat_recv_msg_wait(ctrl, 1))
@@ -362,7 +362,7 @@ describe("Core tests", () => {
   it("should not crash when closing stopped controllers repeatedly", async () => {
     const script = `
       const fs = require("fs"), path = require("path");
-      const simplex = require("./build/Release/simplex.node");
+      const simplex = require("./build/Release/popopx.node");
       simplex.load(${JSON.stringify(libPath)});
       (async () => {
         // a new database runs every migration, each committed with a disk flush that takes up to 30 ms on CI runners
