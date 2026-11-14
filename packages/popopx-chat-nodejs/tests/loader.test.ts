@@ -5,11 +5,11 @@ jest.mock("../src/simplex", () => ({load: jest.fn()}))
 jest.mock("../src/libs", () => ({libPath: jest.requireActual("../src/libs").libPath, resolveLibsDir: jest.fn(), resolveAddonPath: jest.fn()}))
 
 const PACKAGE_DIR = path.join(__dirname, "..")
-const ADDON = path.join(PACKAGE_DIR, "build", "Release", "simplex.node")
+const ADDON = path.join(PACKAGE_DIR, "build", "Release", "popopx.node")
 const CHILD_TIMEOUT_MS = 10000
 const LIBS_DIR = path.resolve("libs")
 const SWITCH_ERROR = "libpopopx already loaded with backend=sqlite; cannot switch to postgres in the same process"
-const ADDON_PATH = path.resolve("simplex.node")
+const ADDON_PATH = path.resolve("popopx.node")
 const {libPath} = jest.requireActual<typeof import("../src/libs")>("../src/libs")
 
 function runAddon(script: string): string {
