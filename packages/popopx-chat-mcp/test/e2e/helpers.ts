@@ -1,6 +1,6 @@
 import {T} from "@simplex-chat/types"
 import {api, bot} from "simplex-chat"
-import {ServeOptions} from "../../src/serve"
+import {RunningServer, ServeOptions, startServer} from "../../src/serve"
 
 export const timeout = 60_000
 
@@ -58,6 +58,17 @@ export async function startBot(smpAddress: string, filePrefix: string, displayNa
 
 export function serveOptions(data: string, port: number, extra: Partial<ServeOptions> = {}): ServeOptions {
   return {name: "agent", data, dataGiven: true, approve: "requests", expireHours: 23, resetOwners: false, newToken: false, port, qrCode: "small", stopWait: 10, ...extra}
+}
+
+// jest reports only Error.message, while the core's ChatError travels on the chatError property.
+export async function startAgentServer(options: ServeOptions): Promise<RunningServer> {
+  try {
+    return await startServer(options)
+  } catch (e) {
+    const err = e as Error & {chatError?: unknown}
+    if (err.chatError !== undefined) err.message = `${err.message}: ${JSON.stringify(err.chatError)}`
+    throw err
+  }
 }
 
 export function lastLink(lines: string[]): string {

@@ -2,9 +2,9 @@ import {mkdirSync, mkdtempSync, rmSync} from "fs"
 import {tmpdir} from "os"
 import {join} from "path"
 import {T} from "@simplex-chat/types"
-import {RunningServer, startServer} from "../../src/serve"
+import {RunningServer} from "../../src/serve"
 import {McpClient} from "./client"
-import {captureLog, cardNumber, person, profileWithServer, received, serveOptions, startBot, textStarts, until, updated} from "./helpers"
+import {captureLog, cardNumber, person, profileWithServer, received, serveOptions, startAgentServer, startBot, textStarts, until, updated} from "./helpers"
 import {SmpServer, freePort, startSmpServer} from "./smpServer"
 
 let smpServer: SmpServer
@@ -33,7 +33,7 @@ test("agent with an owner, a bot and the tools", async () => {
   const port = await freePort()
   let server: RunningServer | undefined
   try {
-    server = await startServer(serveOptions(agentData, port))
+    server = await startAgentServer(serveOptions(agentData, port))
     const client = new McpClient(`http://127.0.0.1:${port}/mcp`, server.token)
 
     expect(logLines).toContain('Agent control chat "agent" created.')
@@ -148,7 +148,7 @@ test("agent with an owner, a bot and the tools", async () => {
     expect(logLines).toContain("Stopped.")
     expect((await cancelledCard).chatItem.meta.itemText.split("\n").at(-1)).toBe("Cancelled: the server stopped.")
 
-    server = await startServer(serveOptions(agentData, port))
+    server = await startAgentServer(serveOptions(agentData, port))
     const refused = received(alice, textStarts(`Action ${n5} is not pending.`))
     await ownerSends(`/approve ${n5}`)
     await refused

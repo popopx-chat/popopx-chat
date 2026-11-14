@@ -7,7 +7,7 @@ import {crc32, deflateSync} from "zlib"
 import {T} from "@simplex-chat/types"
 import {api} from "simplex-chat"
 import {readServerFile} from "../../src/files"
-import {RunningServer, ServeOptions, startServer} from "../../src/serve"
+import {RunningServer, ServeOptions} from "../../src/serve"
 import {McpClient} from "./client"
 import {
   captureLog,
@@ -21,6 +21,7 @@ import {
   profileWithServer,
   received,
   serveOptions,
+  startAgentServer,
   startBot,
   textStarts,
   timeout,
@@ -85,7 +86,7 @@ class Agent {
   constructor(private readonly data: string, readonly port: number) {}
 
   async start(extra: Partial<ServeOptions> = {}): Promise<void> {
-    this.server = await startServer(serveOptions(this.data, this.port, extra))
+    this.server = await startAgentServer(serveOptions(this.data, this.port, extra))
     this.client = new McpClient(`http://127.0.0.1:${this.port}/mcp`, this.server.token)
   }
 
