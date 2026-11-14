@@ -410,7 +410,21 @@ yet. Before any build of this fork is distributed:
   for our own publish is one clause of `build.yml:60`, `github.repository == 'simplex-chat/simplex-chat'`,
   which is the only thing keeping `Library release`/`Add-on release`/`Upload library` inert —
   `LIBS_REPOSITORY: ${{ github.repository }}-libs` at `:200`/`:225`/`:243`/`:251`/`:707` already expands to
-  our repository — so #56 needs that clause retargeted and a token with release write on the other repository.
+  our repository — so #56 needs that clause retargeted and a token with release write on the other repository,
+  which the workflow already expects under one name: `GH_TOKEN: ${{ secrets.NODEJS_REPO_TOKEN }}` is consumed
+  by six steps (`:199`, `:224`, `:242`, `:531`, `:708`, `:985`) and listed in the header comment at `:108`.
+- **macOS distribution cannot be produced from this machine, and the Team ID in our code has no identity
+  here.** Measured 2026-11-14: `security find-identity -v -p codesigning` lists exactly one identity,
+  `Apple Development: gang sun (RG6JMG38C8)` — a development certificate for a *different* team than the
+  `PDBA6XRBQT` our entitlements, provisioning and `ACCESS_GROUP` name. There is no `Developer ID Application`
+  identity at all, so a signed, notarized `.dmg` cannot be built locally; on CI the consequence is already
+  handled and was proven in CI — `build.yml:1199-1203` warns and skips when `APPLE_POPOPX_SIGNING_IDENTITY`
+  is unset, which it is (`gh secret list` is empty). The practical cost of shipping a tag with no Apple
+  secrets is therefore a **missing `popopx-desktop-macos-{aarch64,x86_64}.dmg` in the release**, and
+  `Platform.desktop.kt:17-18` points the macOS updater at exactly those two names: the updater on macOS would
+  find no asset rather than a wrong one. The identity string's legal-entity part cannot be chosen from the
+  brand at all — Apple fixes it to the registered organization of the developer account that owns the
+  certificate, so this item needs an Apple Developer Program account, not a naming decision.
 - **No registry namespace.** The npm and PyPI names in the committed manifests are upstream's, and
   that is the shape the release tooling expects: `packages_release.py test-names` rewrites the names,
   the repository URL and the cross-package dependencies to `npm:` aliases at publish time from the
@@ -621,6 +635,13 @@ yet. Before any build of this fork is distributed:
     misattribution, and dropping the link alone would leave an uncited claim. Only `en-US` exists under
     `fastlane/metadata/android/`, and this was the sole holder of that slug in the tree besides
     `README.md:20`, which already named `simplex.chat`.
+  - **A6's follow-up, ruled the same day as 品牌更新 and executed as `e338bbcdd`: the rest of that store
+    description.** The file called the app, its platform and its relays "SimpleX" — 9 occurrences, now 2: the
+    5 app-name uses became POPOPX, the 3 relay phrases became a description of the servers or the protocol's
+    name (the preset relays are still upstream's, so the fork cannot call them its own brand), and what is
+    left is twice the protocol's proper name, `SimpleX Messaging Protocol`, which is upstream's to keep. The
+    other store metadata was already clean: `title.txt`/`short_description.txt` say POPOPX Chat and all nine
+    images under `fastlane/…/images/` were redrawn by `9c8df8f09`.
   Everything naming `simplex.chat/blog` is held: that host serves upstream's articles, and the `.xcloc`
   catalogues are not a build input.
 - **`popopx.chat/docs` is a ruled hold (2026-11-14: 「先不动，保留」).** The 31 holders this pass counted stay

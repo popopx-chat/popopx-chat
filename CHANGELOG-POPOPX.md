@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-14 (137 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-14 (139 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -34,9 +34,19 @@ from; it is not an audit of this fork*, linking the live upstream article. Delet
 option on the table and is the one the file's own history would prefer less: a store listing that drops a real
 audit of the code it ships is a loss for the reader, and a store listing that implies the audit covers POPOPX
 is not true. `en-US` is the only locale directory under `fastlane/metadata/android/`, and no test mirror
-reads this file. **Also measured and NOT changed, because it is a separate ruling: line 1 of the same file
-still opens `<h1>SimpleX - the first messaging platform…`, and lines 15-18, 22 still say "SimpleX" for the
-protocol and the servers — store copy naming the upstream project as if it were this app.**
+reads this file.
+
+**A8 — ruled the same day as 品牌更新 and executed as `e338bbcdd`, the rest of that file's brand wording.**
+It had opened `<h1>SimpleX - the first messaging platform…` and kept calling the app, its platform and its
+relays "SimpleX" in lines 1, 15-18 and 22: store copy wearing another operator's brand while describing this
+application. 9 occurrences became 2 — the 5 app-name uses are POPOPX, the 3 phrases that named the relays
+"SimpleX platform servers" / "SimpleX relay servers" / "any other SimpleX servers" now describe the servers or
+name the protocol, because the preset relays are still upstream's (see the service-destinations rulings), and
+what remains is exactly two instances of the protocol's own name, "SimpleX Messaging Protocol", which stays
+upstream's. `title.txt` and `short_description.txt` already said POPOPX Chat, and all nine image files under
+`fastlane/metadata/android/en-US/images/` were already redrawn by `9c8df8f09`, so nothing else in the store
+metadata carries upstream's brand. One claim was left alone on purpose: "the first messaging platform that has
+no user identifiers" is inherited marketing, and dropping it is a copy decision rather than a brand one.
 
 **77-C: the SDKs' native-backend 404 is recorded, not renamed, and closes with #56.** Re-measured today:
 `popopx-chat/popopx-chat-libs` has **0 releases**, and every one of the 17 digests the two pin dictionaries
