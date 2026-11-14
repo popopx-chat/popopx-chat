@@ -9,6 +9,11 @@ import {dirname, join} from "path"
 const tlsFixtures = join(__dirname, "fixtures/tls")
 const smpServerRelease = "v7.1.0.17"
 const releaseArch: Record<string, string | undefined> = {x64: "x86-64", arm64: "aarch64"}
+// The digests GitHub recorded for the smp-server assets of that popopxmq release.
+const smpServerDigests: Record<string, string> = {
+  "x86-64": "554fffe2e65ef3df9b891158378baf70c41749b6c2faba606c45a8761fb25eb8",
+  aarch64: "b2d57ed88308c18968cd9262add357e523a9b6e685314ef73fc085643c34c439",
+}
 const downloadArch = process.platform === "linux" ? releaseArch[process.arch] : undefined
 const downloadAttempts = 4
 
@@ -64,6 +69,8 @@ async function downloadSmpServer(path: string): Promise<void> {
   // Pinned to a release of popopxmq itself: a 404 here means our own asset is missing, which is not a reason to fall back to upstream's binary
   const url = `https://github.com/popopx-chat/popopxmq/releases/download/${smpServerRelease}/smp-server-ubuntu-22_04-${downloadArch}`
   const data = await downloadWithRetries(url)
+  const digest = createHash("sha256").update(data).digest("hex")
+  if (digest !== smpServerDigests[downloadArch]) throw new Error(`smp-server-${downloadArch} sha256 ${digest} does not match the pinned ${smpServerDigests[downloadArch]}`)
   mkdirSync(dirname(path), {recursive: true})
   writeFileSync(`${path}.download`, data, {mode: 0o755})
   renameSync(`${path}.download`, path)

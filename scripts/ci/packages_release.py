@@ -70,7 +70,6 @@ BUILD_CHANGES = {
         "scripts/desktop/**",
         ".github/workflows/build.yml",
         ".github/actions/**",
-        ".github/changelog_conf.json",
     ],
     "kotlin": ["apps/multiplatform/**", "Dockerfile*", ".github/workflows/build.yml", ".github/actions/**"],
     "ios": ["apps/ios/**", "scripts/ci/ios-stub-libs.sh"],

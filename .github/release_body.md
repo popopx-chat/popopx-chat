@@ -17,8 +17,13 @@ Built by this repository's CI from the tagged commit:
 | Platform | Assets |
 | --- | --- |
 | Linux (Ubuntu 22.04, x86_64) | `popopx-chat-ubuntu-22_04-x86_64`, `popopx-chat-ubuntu-22_04-x86_64.deb`, `popopx-desktop-ubuntu-22_04-x86_64.deb`, `popopx-desktop-x86_64.AppImage` |
+| Linux (Ubuntu 24.04, x86_64) | `popopx-chat-ubuntu-24_04-x86_64`, `popopx-chat-ubuntu-24_04-x86_64.deb`, `popopx-desktop-ubuntu-24_04-x86_64.deb` |
+| Linux (Ubuntu 22.04, aarch64) | `popopx-chat-ubuntu-22_04-aarch64`, `popopx-chat-ubuntu-22_04-aarch64.deb`, `popopx-desktop-ubuntu-22_04-aarch64.deb`, `popopx-desktop-aarch64.AppImage` |
+| Linux (Ubuntu 24.04, aarch64) | `popopx-chat-ubuntu-24_04-aarch64`, `popopx-chat-ubuntu-24_04-aarch64.deb`, `popopx-desktop-ubuntu-24_04-aarch64.deb` |
 | Windows (x86_64) | `popopx-chat-windows-x86-64`, `popopx-desktop-windows-x86_64.msi` |
 | macOS (aarch64, x86_64) | `popopx-chat-macos-aarch64`, `popopx-chat-macos-x86-64` — command line only |
+
+The AppImage is built once per architecture, from the 22.04 leg, so its name carries no Ubuntu version.
 
 The SHA-256 of each asset is appended below by the build that produced it.
 

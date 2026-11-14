@@ -9,6 +9,13 @@ import {dirname, join} from "path"
 const tlsFixtures = join(__dirname, "tls")
 const serverRelease = "v7.1.0.17"
 const releaseArch: Record<string, string | undefined> = {x64: "x86-64", arm64: "aarch64"}
+// The digests GitHub recorded for the assets of that popopxmq release.
+const serverDigests: Record<string, string> = {
+  "smp-server-ubuntu-22_04-x86-64": "554fffe2e65ef3df9b891158378baf70c41749b6c2faba606c45a8761fb25eb8",
+  "smp-server-ubuntu-22_04-aarch64": "b2d57ed88308c18968cd9262add357e523a9b6e685314ef73fc085643c34c439",
+  "xftp-server-ubuntu-22_04-x86-64": "bfa1cba3a7be5d4b4f42e6a7a5d2cb3165a9e76bea088fcc9f09a0cca2c3c158",
+  "xftp-server-ubuntu-22_04-aarch64": "84866b8dec330e79ff318244644af635e72cbb761271182d417cac49bba1595c",
+}
 
 export interface SmpServer {
   address: string
@@ -104,11 +111,15 @@ async function downloadServer(kind: ServerKind, path: string): Promise<void> {
     throw new Error(`${kind.name} release binaries are not available for ${process.platform} ${process.arch}, set ${kind.env} to the ${kind.name} path`)
   }
   // Pinned to a release of popopxmq itself: a 404 here means our own asset is missing, which is not a reason to fall back to upstream's binary
-  const url = `https://github.com/popopx-chat/popopxmq/releases/download/${serverRelease}/${kind.name}-ubuntu-22_04-${arch}`
+  const asset = `${kind.name}-ubuntu-22_04-${arch}`
+  const url = `https://github.com/popopx-chat/popopxmq/releases/download/${serverRelease}/${asset}`
   const response = await fetch(url)
   if (!response.ok) throw new Error(`error downloading ${url}: ${response.status}`)
+  const data = Buffer.from(await response.arrayBuffer())
+  const digest = createHash("sha256").update(data).digest("hex")
+  if (digest !== serverDigests[asset]) throw new Error(`${asset} sha256 ${digest} does not match the pinned ${serverDigests[asset]}`)
   mkdirSync(dirname(path), {recursive: true})
-  writeFileSync(`${path}.download`, Buffer.from(await response.arrayBuffer()), {mode: 0o755})
+  writeFileSync(`${path}.download`, data, {mode: 0o755})
   renameSync(`${path}.download`, path)
 }
 
