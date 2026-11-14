@@ -167,24 +167,17 @@ jobs:
               ;;
           esac >> "$GITHUB_OUTPUT"
 
-      - name: Build changelog
-        id: build_changelog
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: simplex-chat/release-changelog-builder-action@v5
-        with:
-          configuration: .github/changelog_conf.json
-          failOnError: true
-          ignorePreReleases: true
-          commitMode: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Create release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: simplex-chat/action-gh-release@v2
         with:
-          body: ${{ steps.build_changelog.outputs.changelog }}
-          prerelease: true
+          # Hand-authored, not generated: this fork's first tag shares no ancestor with any
+          # tag of ours, so a changelog builder has nothing to diff. Each build job appends its
+          # own SHA-256 line to this body via ./.github/actions/prepare-release.
+          body_path: .github/release_body.md
+          # A pre-release is invisible to releases/latest, which is what install.sh and
+          # reproduce-schedule.yml resolve - so the download links only work with this off.
+          prerelease: false
           files: |
             LICENSE
           fail_on_unmatched_files: true
