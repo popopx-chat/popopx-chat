@@ -3,7 +3,7 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-14 (139 commits after the import point `db0768c21`)
+## Unreleased — as of 2026-11-14 (151 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
 `7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
@@ -12,6 +12,33 @@ links, the APK/F-Droid artifacts and the website are all still upstream's or abs
 
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
+
+### The MCP end-to-end red is a held-host dependency, recorded not fixed (2026-11-14, ruling E3)
+
+The full gate on `ef6ceac9a` (run `43591293792`) finished with one red step: `Test changed scopes`, inside
+the MCP package's end-to-end suite — 12 of 13 tests, all of them the group-link scenarios. The evidence
+run for that ruling printed the core's own answer for the first time, and it is not a code fault:
+
+```
+Chat command error (see chatError property): {"type":"errorAgent","agentError":{"type":"BROKER","brokerAddress":"smp://…=@smp12.simplex.im,…","brokerErr":{"type":"TIMEOUT"}},"agentConnId":""}
+```
+
+The suite starts its own local SMP/XFTP pair and registers it with `/smp`, which *adds* to the user's
+server list instead of replacing it, so the 21 upstream preset relay addresses remain in the pool that
+`apiCreateGroupLink` draws from (`Commands.hs:3387`); across the twelve failures seven different relays
+appear. Ruled to record this rather than to chase it, because three measurements bound it: the dialed
+host+key pairs are byte-for-byte upstream's (`Presets.hs`, SMP and XFTP alike) so no identifier sweep
+moved one half of a wire value; the test files are upstream's except the evidence wrapper and the harness
+server source; and the step has never succeeded here at all — 100 runs: 36 skipped, 4 failed, 0 succeeded.
+It is also not on the release path: `Test changed scopes` is skipped for a tag push, so `v7.1.2-popopx.1`
+publishes exactly what this gate verified regardless of it.
+
+What is left open, and stated in `FORK.md` rather than hidden: upstream ran the same step green in the same
+hour on an mcp-scoped commit (their run `43591265929`), so the residual is ours, and the leading hypothesis
+is that a client from our SMP protocol era stalls against the older software those public relays answer.
+Proving it is a one-line A/B of the harness server binary. The fix that would actually close it is not in
+this tree — it is this fork operating relays and authoring its own pairs, at which point the presets move
+with them and the suite stops reaching outside itself.
 
 ### The last three app-visible blog links: two repointed to upstream, one documented (2026-11-14, rulings A5-1 + A6-3 + 77-C)
 

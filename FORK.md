@@ -699,6 +699,34 @@ preset indefinitely instead of failing over to the next one, and onboarding hang
 user can act on. That is what happened during this fork's preset testing; the pairs in the
 dependency are reverted for exactly that reason (see popopxmq `NOTICE` §3).
 
+Holding those hosts has a second, measurable consequence: they are also a **test** dependency. The MCP
+end-to-end suite starts a local SMP and XFTP server (`packages/popopx-chat-mcp/test/e2e/smpServer.ts`)
+and registers the local address with `/smp`, which *adds* to the user's server list rather than replacing
+it — so the preset relays above stay in the pool. `apiCreateGroupLink` creates its connection inside the
+agent (`src/Popopx/Chat/Library/Commands.hs:3387`), which draws a server from that pool, so the
+group-link scenarios dial upstream's production relays. Ruled 2026-11-14 (E3) and recorded as a known red
+rather than fixed, on these measurements:
+
+- Run `43591293792` (commit `ef6ceac9a`): 12 of 13 e2e tests fail with one core answer, and one of the
+  twelve verbatim — `{"type":"errorAgent","agentError":{"type":"BROKER","brokerAddress":"smp://…=@smp12.simplex.im,…","brokerErr":{"type":"TIMEOUT"}}}`.
+  Seven distinct relays across the twelve (`smp8/9/10/12/14/17/18`), chosen at random from the pool.
+- It is **not** a broken pair. The host+key strings the client dialed are byte-for-byte the pairs in
+  upstream's `Presets.hs`, SMP and XFTP alike, so nothing in the rebrand moved one half of a wire value.
+  The test files are upstream's too: the only differences are the evidence wrapper added in `ef6ceac9a`
+  and the harness server source.
+- Not a regression either: `Test changed scopes` has **never** succeeded in this repository — over the
+  last 100 runs, 36 skipped, 4 failed, 0 succeeded — and it does not run on a tag push (`release_branch`
+  is empty at `build.yml:60`), so no published artifact depends on it.
+- Upstream ran the same step green on an mcp-scoped commit in the same hour (their run `43591265929`),
+  which is why the residual is attributed to our build rather than to the runner's egress. The open
+  hypothesis, unproven: our client is from a newer SMP protocol era than the software those public
+  relays answer, so the dial stalls instead of erroring — upstream's client, pinned older, still matches
+  them. Testing it is a one-line A/B of the harness server binary.
+
+The fix that belongs to this fork is not a code edit: it lands when this fork operates its own relays and
+can author its own pairs, at which point the presets move with them and the suite stops reaching outside
+itself. Until then this step is expected red on a `tests=/` dispatch.
+
 The `pairs` mode of this fork's wire-audit tool (`ding_wire_audit.py`, kept with the rebrand
 tooling outside the repository) gates this class: it collects every address
 whose key is a real fingerprint from the client, the pinned dependency and the pre-rebrand upstream
