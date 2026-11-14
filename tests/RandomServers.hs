@@ -24,25 +24,26 @@ import Test.Hspec
 
 randomServersTests :: Spec
 randomServersTests = describe "choosig random servers" $ do
-  it "should choose 4 + 3 random SMP servers and keep the rest disabled" testRandomSMPServers
-  it "should choose 3 + 3 random XFTP servers and keep the rest disabled" testRandomXFTPServers
+  it "should choose 4 random SMP servers and keep the rest disabled" testRandomSMPServers
+  it "should choose 3 random XFTP servers and keep the rest disabled" testRandomXFTPServers
 
 deriving instance Eq ServerRoles
 
 deriving instance Eq (UserServer' s p)
 
+-- 4 and 3 are useSMP and useXFTP of the one preset operator this fork ships (src/Popopx/Chat.hs).
 testRandomSMPServers :: IO ()
 testRandomSMPServers = do
   [srvs1, srvs2, srvs3] <-
     replicateM 3 $
-      checkEnabled SPSMP 7 False =<< chooseRandomServers (presetServers defaultChatConfig)
+      checkEnabled SPSMP 4 False =<< chooseRandomServers (presetServers defaultChatConfig)
   (srvs1 == srvs2 && srvs2 == srvs3) `shouldBe` False -- && to avoid rare failures
 
 testRandomXFTPServers :: IO ()
 testRandomXFTPServers = do
   [srvs1, srvs2, srvs3] <-
     replicateM 3 $
-      checkEnabled SPXFTP 6 False =<< chooseRandomServers (presetServers defaultChatConfig)
+      checkEnabled SPXFTP 3 False =<< chooseRandomServers (presetServers defaultChatConfig)
   (srvs1 == srvs2 && srvs2 == srvs3) `shouldBe` False -- && to avoid rare failures
 
 checkEnabled :: UserProtocol p => SProtocolType p -> Int -> Bool -> NonEmpty (PresetOperator) -> IO [NewUserServer p]

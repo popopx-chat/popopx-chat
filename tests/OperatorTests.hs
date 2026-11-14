@@ -68,24 +68,24 @@ validateServersTest = describe "validate user servers" $ do
 
 updatedServersTest :: Spec
 updatedServersTest = describe "validate user servers" $ do
+  -- one preset operator: Flux is not a preset operator of this fork (Operators/Presets.hs),
+  -- so groupByOperator' yields it plus the group of servers that belong to no operator.
   it "adding preset operators on first start" $ do
     let ops' :: [(Maybe PresetOperator, Maybe AServerOperator)] =
           updatedServerOperators operators []
-    length ops' `shouldBe` 2
+    length ops' `shouldBe` 1
     all addedPreset ops' `shouldBe` True
     let ops'' :: [(Maybe PresetOperator, Maybe ServerOperator)] =
           saveOps ops' -- mock getUpdateServerOperators
     uss <- groupByOperator' (ops'', [], [], []) -- no stored servers or relays
-    length uss `shouldBe` 3
-    [op1, op2, op3] <- pure $ map updatedUserServers uss
-    [p1, p2] <- pure operators -- presets
+    length uss `shouldBe` 2
+    [op1, op2] <- pure $ map updatedUserServers uss
+    [p1] <- pure operators -- presets
     sameServers p1 op1
     sameRelays p1 op1
-    sameServers p2 op2
-    sameRelays p2 op2
-    null (servers' SPSMP op3) `shouldBe` True
-    null (servers' SPXFTP op3) `shouldBe` True
-    null (chatRelays' op3) `shouldBe` True
+    null (servers' SPSMP op2) `shouldBe` True
+    null (servers' SPXFTP op2) `shouldBe` True
+    null (chatRelays' op2) `shouldBe` True
   it "adding preset operators and assigning servers to operator for existing users" $ do
     let ops' = updatedServerOperators operators []
         ops'' = saveOps ops'
@@ -96,15 +96,13 @@ updatedServersTest = describe "validate user servers" $ do
           saveSrvs $ map (presetServer True) $ L.take 3 defaultXFTPServers,
           saveRelays $ take 2 simplexChatRelays <> [newChatRelay (mkRelayProfile "custom_relay" Nothing) ["example.im"] customRelayAddr]
         )
-    [op1, op2, op3] <- pure $ map updatedUserServers uss
-    [p1, p2] <- pure operators -- presets
+    [op1, op2] <- pure $ map updatedUserServers uss
+    [p1] <- pure operators -- presets
     sameServers p1 op1
     sameRelays p1 op1
-    sameServers p2 op2
-    sameRelays p2 op2
-    map srvHost' (servers' SPSMP op3) `shouldBe` [["smp.example.im"]]
-    null (servers' SPXFTP op3) `shouldBe` True
-    map relayName' (chatRelays' op3) `shouldBe` ["custom_relay"]
+    map srvHost' (servers' SPSMP op2) `shouldBe` [["smp.example.im"]]
+    null (servers' SPXFTP op2) `shouldBe` True
+    map relayName' (chatRelays' op2) `shouldBe` ["custom_relay"]
   where
     addedPreset = \case
       (Just PresetOperator {operator = Just op}, Just (ASO SDBNew op')) -> operatorTag op == operatorTag op'
