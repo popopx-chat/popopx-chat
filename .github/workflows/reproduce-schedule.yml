@@ -5,6 +5,12 @@ on:
   schedule:
     - cron: '0 2 * * *' # every day at 02:00 night
 
+# A manual dispatch and the nightly schedule overlap, and each run is hours of Docker builds.
+# Queued rather than cancelled: a run killed mid-build verifies nothing and leaves no report.
+concurrency:
+  group: reproduce-latest-release
+  cancel-in-progress: false
+
 jobs:
   reproduce:
     runs-on: ubuntu-latest
