@@ -471,8 +471,9 @@ private suspend fun installAppUpdate(file: File) = withContext(Dispatchers.IO) {
           return@withContext
         }
         volume = lastLine
-        File("/Applications/SimpleX.app").renameTo(File("/Applications/POPOPX-old.app"))
-        val process2 = Runtime.getRuntime().exec(arrayOf("cp", "-R", "${volume}/SimpleX.app", "/Applications")).onExit().join()
+        // The bundle name is the packaging macOS packageName (POPOPX.app); the upstream name is a different app on the user's machine.
+        File("/Applications/POPOPX.app").renameTo(File("/Applications/POPOPX-old.app"))
+        val process2 = Runtime.getRuntime().exec(arrayOf("cp", "-R", "${volume}/POPOPX.app", "/Applications")).onExit().join()
         val copiedSuccessfully = process2.exitValue() == 0
         if (!copiedSuccessfully) {
           Log.e(TAG, "Error copying the app: ${process2.inputReader().use { it.readLines().joinToString("\n") }}${process2.errorStream.use { String(it.readAllBytes()) }}")
@@ -489,8 +490,8 @@ private suspend fun installAppUpdate(file: File) = withContext(Dispatchers.IO) {
         try {
           Runtime.getRuntime().exec(arrayOf("hdiutil", "unmount", volume)).onExit().join()
         } finally {
-          if (!File("/Applications/SimpleX.app").exists()) {
-            File("/Applications/POPOPX-old.app").renameTo(File("/Applications/SimpleX.app"))
+          if (!File("/Applications/POPOPX.app").exists()) {
+            File("/Applications/POPOPX-old.app").renameTo(File("/Applications/POPOPX.app"))
           } else {
             Runtime.getRuntime().exec("rm -rf /Applications/POPOPX-old.app").onExit().join()
           }
