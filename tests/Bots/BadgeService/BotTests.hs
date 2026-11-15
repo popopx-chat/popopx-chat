@@ -317,7 +317,7 @@ badgeServiceTests = do
     it "should announce a month a request banks during coverage, though it issues nothing" testBankedMonthAnnounced
 
 badgeBotName :: Text
-badgeBotName = "SimpleX Badges"
+badgeBotName = "POPOPX Badges"
 
 badgeProfile :: Profile
 badgeProfile = Profile {displayName = badgeBotName, fullName = "", shortDescr = Nothing, description = Nothing, image = Nothing, contactLink = Nothing, peerType = Just CPTBot, preferences = Nothing, badge = Nothing, contactDomain = Nothing}

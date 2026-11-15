@@ -1,4 +1,4 @@
-# SimpleX Directory Service
+# POPOPX Directory Service
 
 Chat bot for registering and searching groups. Superusers and admins are configured via CLI flags.
 
@@ -76,7 +76,7 @@ simplex-directory-service \
 | `--migrate-directory-file check\|import\|export\|listing` | — | Check, import (log → DB), export (DB → log), or regenerate listing files, then exit |
 | `--web-folder PATH` | none | Write static listing JSON + group images here (see [Hosting the directory page](#hosting-the-directory-page)) |
 | `--no-address` | off | Skip checking/creating the bot's contact address |
-| `--service-name NAME` | `SimpleX Directory` | Bot display name (without `*` characters) |
+| `--service-name NAME` | `POPOPX Directory` | Bot display name (without `*` characters) |
 | `--profile-name-limit N` | unlimited | Max display-name length allowed to connect / join groups (used by the `name` join filter) |
 | `--blocked-words-file PATH` | none | Words not allowed in profiles (used by the `name` join filter and profile review) |
 | `--blocked-fragments-file PATH` | none | Word fragments not allowed in profiles |
@@ -123,7 +123,7 @@ simplex-directory-service \
 
 ## Command Reference
 
-This is a reference for all commands accepted by the SimpleX Directory bot. For a guided walkthrough of group submission see [Registering a Group](#2-registering-a-group) below.
+This is a reference for all commands accepted by the POPOPX Directory bot. For a guided walkthrough of group submission see [Registering a Group](#2-registering-a-group) below.
 
 ---
 

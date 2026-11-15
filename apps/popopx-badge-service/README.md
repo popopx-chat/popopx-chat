@@ -1,4 +1,4 @@
-# SimpleX badge service
+# POPOPX badge service
 
 `popopx-badge-service` runs the whole supporter-badge service as one process, two
 lanes: a POPOPX chat bot that answers service RPC over a double-ratchet contact
@@ -88,7 +88,7 @@ Other options:
   `--run-cli`, which parses and validates the whole file (`[listener] static_dir` included) but
   uses only its `[issuer]`, `[apple]`, `[google]` and `[dev]` sections. An issuer key is
   still required either way.
-- `--service-name NAME`: the bot's display name, without `*`s or spaces (default `SimpleX Badges`).
+- `--service-name NAME`: the bot's display name, without `*`s or spaces (default `POPOPX Badges`).
 - `--client-service`: use the client service certificate.
 - also accepts the standard POPOPX Chat core options — database path, SMP/XFTP servers,
   `--socks-proxy`, `--log-level`/`-l`, and the rest — run `popopx-badge-service --help`

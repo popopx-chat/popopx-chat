@@ -14,9 +14,10 @@
 set -euo pipefail
 
 here=$(cd "$(dirname "$0")" && pwd)
-# Kept: the --service-name default of apps/popopx-directory-service (Directory/Options.hs:137) and the
-# seeded profile in tests/Bots/DirectoryTests.hs:117 carry the same spelling - one unit, moves together.
-directory_name="SimpleX Directory"
+# This spelling is load-bearing across three files, and it moves with them, never from here:
+# the --service-name default of apps/popopx-directory-service (Directory/Options.hs:137), the
+# seeded profile in tests/Bots/DirectoryTests.hs:117, and scripts/ci/ios-sim/backend.sh.
+directory_name="POPOPX Directory"
 admin=ci_admin
 search_text="ci seed"
 # the longest profile image data URI the apps make and the core accepts (maxProfileImageSize)

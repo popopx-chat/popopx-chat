@@ -80,7 +80,7 @@ main = do
       -- The four "SimpleX <service>" titles below are kept deliberately: an hspec title is a CI
       -- selector (upstream's docs/CONTRIBUTING.md:91, simplex-chat@db0768c21 - the `ci-tests` block is one hspec match pattern per line)
       -- and each names the upstream-operated service, not our app. They move only with that service.
-      describe "SimpleX badge service" $ do
+      describe "POPOPX badge service" $ do
         badgeConfigTests
         badgeWebTests
         badgeCatalogTests
@@ -101,7 +101,7 @@ main = do
       describe "Image resize" imageTests
 #if !defined(dbPostgres)
       around (tmpTestBracket chatQueryStats agentQueryStats portBases) $ describe "names tests" chatNamesTests
-      around (tmpTestBracket chatQueryStats agentQueryStats portBases) $ describe "SimpleX Directory names" directoryNameTests
+      around (tmpTestBracket chatQueryStats agentQueryStats portBases) $ describe "POPOPX Directory names" directoryNameTests
 #endif
 #if defined(dbPostgres)
       around (testBracket portBases)
@@ -114,8 +114,8 @@ main = do
 #endif
           describe "POPOPX chat client" chatTests
           xdescribe'' "SimpleX Broadcast bot" broadcastBotTests
-          describe "SimpleX Directory service bot" directoryServiceTests
-          describe "SimpleX badge service e2e" $ do
+          describe "POPOPX Directory service bot" directoryServiceTests
+          describe "POPOPX badge service e2e" $ do
             badgeServiceTests
             describe "managed group" badgeGroupIntegrationTests
           describe "Remote session" remoteTests

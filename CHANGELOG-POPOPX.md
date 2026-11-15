@@ -95,6 +95,70 @@ whose skip branch is also its error branch turns an outage into a green idle run
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
 
+### A display name moves with its speaker, not with its spelling (2026-11-15, ruling 需裁定 进行改正)
+
+The 需裁定 tier of the four-way sweep listed, by directory, the body text the sweep can reach. Reading it
+produced a rule finer than "is this our brand": **a name moves only when the string is us speaking.** Three
+cases fell out on opposite sides of it, and the difference is not the word `SimpleX`.
+
+- **Us naming ourselves - moved, 511 occurrences / 20 files (6 of them the test-group selector below).**
+  `apps/popopx-badge-service` and
+  `apps/popopx-directory-service` are code this fork runs, and each was introducing itself to *our* users as
+  `SimpleX Badges` / `SimpleX Directory`: the `--service-name` defaults
+  (`BadgeService/Options.hs:41`, `Directory/Options.hs:137`), their help and `progDesc` text, the startup
+  banners, the directory's served page and READMEs, and the ini examples. The directory's own welcome
+  message already ended with `https://popopx.chat/docs/directory.html` while opening with "Welcome to SimpleX
+  Directory" - one sentence, two operators, which is what made it residue rather than a citation.
+- **The other party's name - held.** `adminContactProfile` at `src/Popopx/Chat/Library/Internal.hs:3501` is
+  the contact the core auto-creates for every user, `displayName = "Ask SimpleX Team"`, and `shortDescr` one
+  line below already says "POPOPX Chat app". That half-drift looks like a bug, but `adminContactReq` is a
+  proof-bearing encoded address on **`smp6.simplex.im` with upstream's server key** - the preset contact
+  really is SimpleX Chat Ltd's support line. Renaming it would advertise someone else's support desk as ours,
+  in the one place a user acts on the name. `Help.hs:53` already holds `/simplex` for the same reason. Same
+  test, same answer, for the `packages/popopx-chat-mcp` fixtures (110 occurrences): each
+  `name: "SimpleX Directory"` sits beside upstream's `smp4.simplex.im/a#…` address or the `@directory.simplex`
+  alias, and a peer's display name is whatever that peer declared - our local alias beside it is already
+  `@directory.popopx`. The python SDK's one fixture is a fake API reply for the same kind of peer profile.
+- **A name whose value is set elsewhere - held.** `"simplex-badge-web"` in
+  `apps/popopx-badge-service/web/package.json` is unread in this tree (no importer, no publish scope - the
+  `badge-web` CI scope globs paths, not the package name), so nothing here can prove whether that name was
+  ever published. That is the third end again, so it waits for the same evidence the SDK asset names needed.
+
+The moved group was **one unit, and two comments in this repo already said so**: `scripts/ci/desktop-linux/backend.sh`
+and `scripts/ci/ios-sim/backend.sh` carried "Kept: … the three move as one unit, not from here", naming the
+producer default and `tests/Bots/DirectoryTests.hs:117`. An earlier pass declined to edit the harness string
+alone, correctly, because the CI backends start the service **without** `--service-name` and then assert on the
+name - change one end and the harness silently talks to a bot it can no longer find. All four ends moved here
+(default, seeded profile, 454 assertions in the hermetic suite, both harnesses) plus `tests/Test.hs`'s two
+`describe` labels, which are not CI selectors (`-m` appears nowhere for them, so the label is free). The two
+`Kept:` comments now state the coupling instead of recording a hold that no longer exists.
+Gate: `cabal build popopx-chat-test` compiles **every Haskell file this tier touched** - that target also
+builds the two services' sources (`Directory.Options/Service`, `BadgeService.Options/Service`), so there was no
+"static verification only" excuse here - and the hermetic examples run green: 4/0 for the ini `display_name`
+cases, 2/0 for the two unit cases carrying the moved `"POPOPX Badges"` literals. Both `backend.sh` harnesses
+pass `bash -n`. `packages/popopx-chat-mcp` has no `vitest` binary installed, so its fixtures were not executed -
+which is also why they were left alone.
+
+Reading the suite's own tree surfaced a residue the text sweep could not see: the top-level hspec group was
+named **"SimpleX badge service"**, and that label is a *selector*, not prose. `scripts/ci/run-tests.sh:15` feeds
+each line of a PR body's ` ```ci-tests ` block to `-m`, and `scripts/ci/README.md:102` documents the selected
+tests as `/SimpleX badge service/` and `/SimpleX badge service e2e/`; `apps/popopx-badge-service/web/README.md:135`
+carries a copy-pasteable `cabal test --test-options=…` with the same string. Moving the label therefore had to
+move its four mirrors in the same commit - the recurring lesson that a test group name is a wire value with a
+reader outside the file. It failed loud enough to be safe either way: `run-tests.sh` appends `--fail-on=empty`
+whenever a selector was supplied, so a stale `SimpleX badge service` in some future PR body stops the job
+instead of quietly running nothing. Verified by selection count - the new selector resolves to **412 examples**,
+the old one to **0**.
+
+The `src/Simplex/` half of the same sweep ran first: **191 references rewritten** in 17 documents, because
+`05dd5a73c` moved the module tree and the docs kept pointing at a directory that no longer exists. Counting
+lines rather than occurrences had overstated it as 194/20 files; 3 of those occurrences are in
+`FORK.md`, `CHANGELOG-POPOPX.md` and `POPOPX-REBRAND-PLAN.md` and **are** the record of the rename, so they
+keep the old spelling. Resolution was checked against the filesystem, not by grep: 121 distinct path tokens
+now land on a real file, 8 more (`src/Popopx/Messaging/…`, `FileTransfer/…`) land in the **popopxmq**
+dependency, whose tree has the same layout, and the 31 that look unresolved are table cells and prose whose
+sentence states its own base directory - zero markdown links were broken either way.
+
 ### Which repository may publish, and the two values that shared one spelling (2026-11-15, rulings 使用 popopxChatCore + 名称更新)
 
 - **`.github/workflows/build.yml:59`** (`release_branch`) compared `github.repository` to

@@ -15,10 +15,11 @@
 
 set -euo pipefail
 
-# Kept: this is the --service-name default of our own directory service
-# (apps/popopx-directory-service/src/Directory/Options.hs:137), and the seeded profile in
-# tests/Bots/DirectoryTests.hs:117 uses the same spelling. The three move as one unit, not from here.
-directory_name="SimpleX Directory"
+# This spelling is load-bearing across three files, and it moves with them, never from here:
+# the --service-name default of our own directory service
+# (apps/popopx-directory-service/src/Directory/Options.hs:137) and the seeded profile in
+# tests/Bots/DirectoryTests.hs:117.
+directory_name="POPOPX Directory"
 admin=ci_admin
 search_text="ci seed"
 avatar_search_text="ci avatar"

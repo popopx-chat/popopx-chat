@@ -87,7 +87,7 @@ idle_seconds = 60
 ; display_name must be a name the chat core accepts unchanged: one it would spell
 ; differently stops the whole service, payments included, from starting.
 ;[group]
-;display_name = SimpleX Badges
+;display_name = POPOPX Badges
 ;description = Welcome to the badges group
 
 ; local testing only, in both run modes: accepts any well-formed App Store or Play receipt without

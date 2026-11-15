@@ -27,7 +27,7 @@ You are testing the POPOPX Chat iOS app in an iPhone 17 simulator (iOS 26.5, scr
 
 ## The test backend
 
-When "This session" gives the test directory's address, the runner also runs a test backend: a chat relay, a SimpleX Directory with the groups and channels listed under "Test directory" below, a server that resolves SimpleX names, and contacts that accept connections. `ui directory stop|start` stops and starts the directory (after `ui directory start`, wait about 15 s before using it), and `ui listings` prints what it lists.
+When "This session" gives the test directory's address, the runner also runs a test backend: a chat relay, a POPOPX Directory with the groups and channels listed under "Test directory" below, a server that resolves SimpleX names, and contacts that accept connections. `ui directory stop|start` stops and starts the directory (after `ui directory start`, wait about 15 s before using it), and `ui listings` prints what it lists.
 
 **SimpleX names**: the names server's address is under "This session"; the names it knows are under "Test directory" → "SimpleX names" (all end in `.testing`; a bare word of 5 or more letters is completed with `.testing`, so `cinews` is `cinews.testing`). Set the app up for it once, before the first case that needs names (if an earlier session in this run did it, check it instead: the server is listed under "Your servers"):
 

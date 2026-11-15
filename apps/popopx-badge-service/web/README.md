@@ -132,7 +132,7 @@ polling, partial payment, expiry, late settlement and replay, all against a
 fake Greenfield — is `tests/Bots/BadgeService/WebTests.hs`:
 
 ```
-cabal test --test-options='-m "/SimpleX badge service/"'
+cabal test --test-options='-m "/POPOPX badge service/"'
 ```
 
 ## Running the mock

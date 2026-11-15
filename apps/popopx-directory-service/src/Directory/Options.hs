@@ -133,8 +133,8 @@ directoryOpts appDir defaultDbName = do
     strOption
       ( long "service-name"
           <> metavar "SERVICE_NAME"
-          <> help "The display name of the directory service bot, without *'s and spaces (SimpleX Directory)"
-          <> value "SimpleX Directory"
+          <> help "The display name of the directory service bot, without *'s and spaces (POPOPX Directory)"
+          <> value "POPOPX Directory"
       )
   clientService <-
     switch
@@ -213,7 +213,7 @@ getDirectoryOpts appDir defaultDbName =
   execParser $
     info
       (helper <*> versionOption <*> directoryOpts appDir defaultDbName)
-      (header versionStr <> fullDesc <> progDesc "Start SimpleX Directory Service with DB_FILE, DIRECTORY_FILE and SUPER_USERS options")
+      (header versionStr <> fullDesc <> progDesc "Start POPOPX Directory Service with DB_FILE, DIRECTORY_FILE and SUPER_USERS options")
   where
     versionStr = versionString versionNumber
     versionOption = infoOption versionAndUpdate (long "version" <> short 'v' <> help "Show version")

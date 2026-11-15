@@ -56,7 +56,7 @@ When `apps/ios/POPOPX Snapshots/References` exists, `snapshots.sh` then runs `sc
 
 `backend.sh start <backend zip> <work dir>` (with the `backend` input) starts, on the runner, against the preset SMP and XFTP servers:
 
-- a chat relay for channels, and a SimpleX Directory whose address it writes to `<work dir>/directory-link`;
+- a chat relay for channels, and a POPOPX Directory whose address it writes to `<work dir>/directory-link`;
 - a CLI peer `ci_admin` that creates, registers and gets approved groups and channels with the profile JSON the app sends: `ci_group` and `ci_channel` ("ci seed"), `ci_cards`, six entries with app-size avatars made by `avatar.swift` ("ci avatar"), a long name, markdown in a description, and `cinews`, `cinews_digest`, `cinews_weekly`;
 - a local SMP server with a `[NAMES]` section and `names-resolver.py`, the names `cinews.testing`, `ciboth.testing`, `cialice.testing` and `cibobby.testing` claimed by their owners, and the contacts cialice and Robert, online and accepting connections; its address goes to `<work dir>/names-server`;
 - checks before the app starts: a search sent to the directory as a message must list `ci_group` and `ci_channel`, and `/_connect plan` must resolve each name from a fresh peer.

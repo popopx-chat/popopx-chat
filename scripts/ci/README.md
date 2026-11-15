@@ -99,7 +99,7 @@ The reduced build runs one Linux job, build-linux (ubuntu-22.04 x86_64), for eve
 
 - Globs: apps/popopx-badge-service/web/**. These paths are also in the core globs (apps/popopx-badge-service/**), and web/src/catalog.ts is read by core tests (tests/Bots/BadgeService/CatalogTests.hs, WebTests.hs).
 - CI, in build-linux: core build and tests, then `scope-tests.sh badge-web` (step "Test changed scopes").
-- Selected core tests: `/SimpleX badge service/` and `/SimpleX badge service e2e/`.
+- Selected core tests: `/POPOPX badge service/` and `/POPOPX badge service e2e/`.
 - Local:
   ```sh
   cd apps/popopx-badge-service/web
