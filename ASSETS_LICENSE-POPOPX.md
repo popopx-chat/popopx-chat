@@ -63,28 +63,30 @@ Measured 2026-11-13, that set contains at least:
 
 ## What is NOT ours, and what that means for you
 
-Measured 2026-11-15 on `b6a3ee009` with the recipe above — comparing each tracked image with the blob at its
+Measured 2026-11-15 on `23e22c439` with the recipe above — comparing each tracked image with the blob at its
 path *or at upstream's name for that path* in `db0768c21`, after `docs/`, `website/`, `blog/` and `plans/` left
-this fork (see `FORK.md` item 10), after the file-name pass, after the desktop baselines were re-rendered by CI,
-and after the last upstream drawings went (`2a967acb0` redrew 29 illustrations, `b6a3ee009` redrew 6 icons): of
-**1562** image files (`.png .jpg .jpeg .gif .svg .icns .ico .webp .pdf`), **655** are still byte-identical to
-upstream's and are SimpleX Chat Ltd's,
+this fork (see `FORK.md` item 10), after the file-name pass, after the last upstream drawings went
+(`2a967acb0` redrew 29 illustrations, `b6a3ee009` redrew 6 icons) and after CI re-rendered the desktop baselines
+against those files: of **1562** image files (`.png .jpg .jpeg .gif .svg .icns .ico .webp .pdf`), **651** are still
+byte-identical to upstream's and are SimpleX Chat Ltd's,
 under [assets/ASSETS_LICENSE.md](assets/ASSETS_LICENSE.md) — which is *stricter* than this file in one respect
 and *looser* in another: it permits them in an unmodified SimpleX Chat distribution (which a fork is
 not), and it forbids modification. The earlier figures in this section are not comparable: **545** was measured
-with a same-path-only recipe, **690** was measured before the 29 illustrations went and **661** before the 6
-icons went; each of those two commits also added its own vector masters, which is why the tracked total moved
-1527 → 1556 → 1562.
+with a same-path-only recipe, **690** was measured before the 29 illustrations went, **661** before the 6
+icons went and **655** before the 4 re-rendered baselines went; the two artwork commits also added their own vector
+masters, which is why the tracked total moved 1527 → 1556 → 1562 and has not moved since.
 The groups:
 
-- `apps/multiplatform/**` 494 — 251 moko `ic_*` UI glyphs, 190 desktop snapshot baselines, 42 empty 24x24
+- `apps/multiplatform/**` 490 — 251 moko `ic_*` UI glyphs, 186 desktop snapshot baselines, 42 empty 24x24
   placeholder vectors under `resources/assets/default/MR/images/**` (they exist so moko generates the
   `MR.images.*` identifier when `-Ppopopx.assets.dir` is absent; they carry no drawing, so there was never
   upstream artwork in them), and 11 `ic_*` call glyphs under `resources/assets/www/desktop/images/**`. It was
   529 until `2a967acb0`: the 29 that left are `decentralized` and `decentralized_light` @1x–@4x, `privacy` and
   `shield` @1x–@4x, the 6 `wallpaper_*@4x` tiles and the 3 `badge_*.svg` — the last brand artwork compiled
   into the desktop and Android apps. Then 6 more left in `b6a3ee009`: `ic_double_check.svg`,
-  `ic_radiowaves_up_forward_{1,2,3,4}_bar.svg` and `ic_heart@4x.png`. No name left in this group is a brand
+  `ic_radiowaves_up_forward_{1,2,3,4}_bar.svg` and `ic_heart@4x.png`, and 4 more in `23e22c439`: the
+  `ChatInfoView`/`GroupChatInfoView` baselines at `-light`/`-dark-font-100`, which stopped being upstream's bytes
+  once those two scenes rendered the replaced tick pair. No name left in this group is a brand
   mark;
 - `apps/ios/POPOPX Snapshots/References/**` 130 — unchanged renders of scenes that carry no brand artwork,
   counted here as upstream's for the reason given in the section above;
@@ -111,7 +113,7 @@ The groups:
   structural tests around the PNG (`ImageTests.hs:103` and `:262` require RGBA8 with transparency and a
   preserved aspect), so they need a Haskell run to land.
 
-The other **907** are POPOPX's own bytes: 555 differ from the file at the corresponding upstream path, and
+The other **911** are POPOPX's own bytes: 559 differ from the file at the corresponding upstream path, and
 352 have no counterpart there at all. The 905 documentation and site images that were in this count before went with the content directories; with them present the
 same *same-path* measurement gave 2089 tracked and 1471 identical; under the recipe above it was higher still, because 905 of those files were documentation and site images.
 - ~~**the two build-input sets**~~ **replaced 2026-11-13 (ruling C2)**.

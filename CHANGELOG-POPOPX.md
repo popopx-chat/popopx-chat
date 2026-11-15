@@ -95,6 +95,52 @@ whose skip branch is also its error branch turns an outage into a green idle run
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
 
+### The last upstream drawings compiled into the desktop and Android apps (`2a967acb0` + `b6a3ee009` + `0a7b7172f` + `23e22c439`, 2026-11-15)
+
+Three asset sets reach a desktop/Android build, not one. `assets/multiplatform/resources/MR/images/**` is an
+*overlay* selected by `-Ppopopx.assets.dir=../../assets`: `build.gradle.kts:14-37` `Sync`s it into
+`src/commonMain/resources/assets/simplex/MR/images`, and deletes that directory when the property is absent.
+It was replaced first (ruling C2). `apps/multiplatform/common/src/commonMain/moko-resources/images/**` is a
+plain moko source directory, so it is compiled in **both** cases - with or without the overlay - and it still
+carried upstream's artwork after the overlay went.
+
+- `2a967acb0` redrew the 29 illustrations: `decentralized`, `decentralized_light`, `privacy` and `shield` at
+  @1x/@1.5x/@2x/@3x/@4x (20 files; the first two are the default `ServerOperatorInfo` logo,
+  `PopopxAPI.kt:4781/4783` and `dummyOperatorInfo` `:4866/4868`), the 6 `wallpaper_*@4x` tiles and the 3
+  `badge_*.svg`, from vector masters added as `branding/source-svg/moko__*.src.svg`, each at its original
+  pixel size.
+- `b6a3ee009` redrew 6 more that `2a967acb0` had filed as Google Material geometry and which are not:
+  `ic_double_check.svg`, the 4 `ic_radiowaves_up_forward_{1,2,3,4}_bar.svg` and `ic_heart@4x.png`. Its parent
+  asserted that "the 257 `ic_*` files are Google Material Symbols geometry", which measures wrong for 9 of
+  them: 248 do carry Material's `viewBox`, 2 are Material path data on another grid, 1 is GitHub's octocat and
+  6 are SimpleX's own drawings.
+- The first `ic_double_check` was replaced twice. Delivered as one glyph it read as a **W** at the 22px it
+  renders at, because the left tick's upstroke crossed the right tick's downstroke. The fix is not an
+  opinion: rasterise the replaced file and the candidate at intrinsic size and compare measured ink.
+  Upstream's is a *filled* Fabric.js path (`viewBox="0 0 48 48"`, `matrix(0.05 …)`) whose four sizes put
+  9/28/61/110 opaque pixels inside a 20x10 box; the crossed version put 69 px on the same canvas. `0a7b7172f`
+  ships separated ticks at stroke 1.8 - 9/30/64/112 inside upstream's exact box.
+- `23e22c439` installs the baselines those glyphs move. CI run `43709521708`, dispatched on `0a7b7172f` with
+  `headSha` read back before anything was consumed, rendered 210 files: **202 byte-identical to what was
+  committed, 8 changed** - `ChatInfoView` x2 and `GroupChatInfoView` x2 (the double-check ticks) and
+  `SettingsView` x2 and `WhatsNewView` x2 (the `decentralized` operator logo, 19x24 in the row-icon column),
+  each light+dark at font-100. The control that this is the artwork and not a flaky renderer: this run and
+  `43704584787`, from two separate runners on adjacent tips, differ in exactly 4 of 210 files, and those 4 are
+  exactly the ones whose glyph changed between `e90c911e0` and `0a7b7172f`. Everything else reproduced
+  byte-for-byte, so an unexpected diff means an unexpected change.
+
+Census after all four, measured with the brand-restored-path recipe in `ASSETS_LICENSE-POPOPX.md`:
+**1562** tracked images, **911** ours (559 differ from upstream's, 352 have no counterpart), **651**
+still byte-identical to upstream's. The same-path-only version of that recipe claimed 147 upstream files as
+ours, because this fork renamed `packages/simplex-chat-*` to `packages/popopx-chat-*`; names move, blob ids
+do not. Measuring `HEAD:<f>` right after installing also read 655/190 - an installed file is in the index,
+not in `HEAD`; `git add` first, then measure `:<f>`. What is still upstream's is now geometry and
+documentation rather than brand art (272 Material Symbols, 42 empty placeholders, 186 + 130 renders of
+scenes with no artwork in them, Apple's SF Symbols, GitHub's octocats) except for 4 files: the 2
+`packages/popopx-chat-mcp` UI screenshots and the 2 Haskell logo fixtures, which need a Haskell run to
+replace (`Forward.hs:850` asserts the transferred size; `ImageTests.hs:103` and `:262` assert the PNG's
+structure).
+
 ### The MCP end-to-end red is a held-host dependency, recorded not fixed (2026-11-14, ruling E3)
 
 The full gate on `ef6ceac9a` (run `43591293792`) finished with one red step: `Test changed scopes`, inside

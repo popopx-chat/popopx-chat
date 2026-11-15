@@ -208,13 +208,14 @@ property is absent — upstream's artwork was never in that directory, only its 
   brands — recorded in `NOTICE` and in `README.md`'s
   License section.
 - Any service this fork later operates triggers §13 for that service; nothing is operated now.
-- **The 655 upstream-identical images are still in the distribution** (measured on `b6a3ee009`; 690 before the
-  29 illustrations went, 661 before the 6 icons went). Ruling AGPL-2 fixed what this fork
-  *claims*; it did not change what this fork *ships*. Upstream's asset licence allows those files only in an
+- **The 651 upstream-identical images are still in the distribution** (measured on `23e22c439`; 690 before the
+  29 illustrations went, 661 before the 6 icons went, 655 before the 4 re-rendered baselines went). Ruling
+  AGPL-2 fixed what this fork *claims*; it did not change what this fork *ships*. Upstream's asset licence
+  allows those files only in an
   unmodified SimpleX Chat distribution and forbids modifying them, and this is neither, so the notice now
   tells the truth about ownership while the exposure itself stays open until each one is replaced or
   removed. What is left is no longer brand artwork compiled into the app: 251 moko `ic_*` and 11 www glyphs are
-  Google Material geometry (held, attributed), 42 are empty placeholders that carry no drawing, 190 + 130 are
+  Google Material geometry (held, attributed), 42 are empty placeholders that carry no drawing, 186 + 130 are
   unchanged snapshot renders of scenes that contain no upstream artwork — regenerating them into something
   different requires changing the UI they depict first — 8 are Apple's SF Symbols and GitHub's octocats, 13 in
   `packages/**` are Material glyphs plus the 2 mcp UI screenshots, and 10 are fixtures and third-party audit
