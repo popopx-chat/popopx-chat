@@ -670,16 +670,21 @@ yet. Before any build of this fork is distributed:
 - **Store links 404.** Every `market://` / `details?id=com.popopxchat.popopx` / App Store URL in
   this repository names an app record that does not exist yet.
 - **Everything that ships an image is either ours or is still upstream's, and the line is drawn by the
-  bytes.** Measured 2026-11-15 against `db0768c21`, at the same path or at the brand-restored one: of
-  **1527** tracked image files, **837** are POPOPX's bytes and **690** are byte-identical to upstream's.
+  bytes.** Measured 2026-11-15 on `b6a3ee009` against `db0768c21`, at the same path or at the brand-restored
+  one: of **1562** tracked image files, **907** are POPOPX's bytes and **655** are byte-identical to upstream's.
   The marks, app icons and in-app illustrations are ours — the iOS catalog's last upstream files (badges,
-  wallpapers, `privacy`, `shield`) were redrawn on 2026-11-13 and the Android launcher set with them. What
-  is still upstream's, licensed only for the *unmodified* application under `assets/ASSETS_LICENSE.md`:
-  339 moko glyphs under `apps/multiplatform/common/src/commonMain/**`, 190 of the 210 desktop snapshot
-  baselines, 130 of the 374 iOS renders (renders of scenes that carry no brand artwork are indistinguishable
-  from upstream's, so they are not claimed — see `ASSETS_LICENSE-POPOPX.md` §"What is NOT ours"), the 13
-  `packages/**` images whose only change is their directory name, 8 third-party/Apple files in the iOS
-  catalog, and 10 fixtures and audit logos. The documentation and website imagery left with `docs/` and
+  wallpapers, `privacy`, `shield`) were redrawn on 2026-11-13 and the Android launcher set with them, the
+  29 illustrations the desktop and Android builds compile were redrawn on 2026-11-15 (`2a967acb0`), and so were
+  the 6 icons in the same set that turned out not to be Google's geometry (`b6a3ee009`).
+  What is still upstream's, licensed only for the *unmodified* application under `assets/ASSETS_LICENSE.md`:
+  272 Google Material Symbols glyphs (248 under `moko-resources/images/ic_*`, 11 under
+  `resources/assets/www/desktop/images/ic_*`, 11 in `packages/popopx-chat-webrtc/**`, plus 2 that are Material's
+  path data on another grid form) — Google's geometry, so attributed rather than redrawn — 42 empty 24x24
+  placeholder vectors that carry no drawing, 190 of the 210 desktop snapshot baselines, 130 of the 374 iOS
+  renders (renders of scenes that carry no brand artwork are indistinguishable from upstream's, so they are not
+  claimed — see `ASSETS_LICENSE-POPOPX.md` §"What is NOT ours"), GitHub's octocat in `ic_github.svg` and 8
+  third-party/Apple files in the iOS catalog, the 13 `packages/**` images whose only change is their directory
+  name, and 10 fixtures and audit logos. The documentation and website imagery left with `docs/` and
   `website/`, so nothing here ships it.
 
 ### Upstream-operated hosts, and how each one fails

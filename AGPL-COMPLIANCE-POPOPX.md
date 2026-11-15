@@ -147,6 +147,26 @@ A rebranded fork is a modified work. Therefore:
      `-Ppopopx.assets.dir=../../assets` and uploads the `desktop-snapshots` artifact. It needs a JDK, Xvfb
      and the dependency downloads, so this Mac can never render them; it also means the artifact only
      exists if `:common:compileTestKotlinDesktop` compiles — a broken test source ships no renders at all.
+   - ~~the **29 brand illustrations in the moko resource set**~~ **redrawn 2026-11-15** (`2a967acb0`):
+     `apps/multiplatform/common/src/commonMain/moko-resources/images/**` held the last upstream-drawn
+     artwork that compiles into the desktop and Android apps — `decentralized` + `decentralized_light`
+     @1x–@4x, `privacy` + `shield` @1x–@4x, the 6 `wallpaper_*@4x` tiles and the 3 `badge_*.svg`. Measured
+     with the recipe in `ASSETS_LICENSE-POPOPX.md`: 29 non-`ic_*` files were upstream's before, **0 after**.
+     Names, pixel sizes, the `*_light` = `logoDarkMode` mapping (`PopopxAPI.kt:4783`) and the badges'
+     intrinsic 300x399 are unchanged; the palette is sampled from the iOS app icon and the geometry is the
+     iOS set's, so one named picture is one picture on both platforms. Vector masters:
+     `branding/source-svg/moko__*.src.svg`.
+   - ~~the **`ic_*` glyphs in the same set**, held as "Google Material Symbols, not SimpleX artwork"~~ —
+     that blanket claim was measured file by file on the same day and was wrong for 9 of the 257: 248 do carry
+     Material's viewBox, 2 are Material's path data on another grid form (`ic_chevron_right_2`,
+     `ic_work_filled_padded`), 1 is GitHub's octocat (`ic_github.svg`) — and **6 are upstream's own drawing**:
+     `ic_double_check.svg` (receipt ticks, `ChatModel.kt:4207-4309`), the four
+     `ic_radiowaves_up_forward_*_bar.svg` (subscription quality, `SubscriptionStatusIcon.kt:19-39`) and
+     `ic_heart@4x.png` (reaction glyph, drawn untinted, `ChatItemView.desktop.kt:27`). Replaced in
+     `b6a3ee009` at the same names and intrinsic sizes; the heart keeps the measured colour `#E72E31` and was
+     matched on apparent size (bbox 196x194 / 26838 opaque px against upstream's 200x198 / 26443), and the
+     bars are drawn nested so N bars is an element-wise prefix of N+1, which is what the dim-4/lit-N overlay
+     needs. The three named holds are recorded with their reasons in `ASSETS_LICENSE-POPOPX.md`.
    - ~~`website/src/img/**` (the wordmark images, screenshots, illustrations, `SimpleXExplainedLottie.json`)
      and the 93 tracked files under `assets/**`, if this fork's website ships them~~ **closed 2026-11-13,
      both halves**: `website/` left the fork in `9996634ee`, so its images are not shipped by anything here;
@@ -160,14 +180,17 @@ A rebranded fork is a modified work. Therefore:
      reported for 8 of them.
    The action for each is **replace or remove before distribution**, not rename.
 
-**Ruling C2 (2026-11-13)** promotes the two *build-input* sets above everything else, because they are not
-documentation: `assets/multiplatform/resources/MR/images/**` (80 rasters, 40 names × @2x/@3x, down from 92 when the 12 unreferenced names went) and
-`apps/multiplatform/common/src/commonMain/resources/assets/default/MR/images/**` (42 vectors) are fed to
+**Ruling C2 (2026-11-13)** promotes the *build-input* sets above everything else, because they are not
+documentation: `assets/multiplatform/resources/MR/images/**` (80 rasters, 40 names × @2x/@3x, down from 92 when the 12 unreferenced names went) is fed to
 the app by `-Ppopopx.assets.dir=../../assets`, which every desktop/Android build and CI job passes
 (`desktop-linux.yml:251,277`, `build.yml:1649`, `android-emu.yml:276`, `scripts/{desktop,android}/*`), so
 upstream's illustrations compile into a POPOPX-branded app. They are being redrawn from POPOPX masters;
 the 40 logical images behind the 80 replaced rasters are listed in `ASSETS_LICENSE-POPOPX.md`, which also records
 that the file *names* stay (they are compiled `MR.images.*` resource identifiers) while the bytes change.
+The companion directory `apps/multiplatform/common/src/commonMain/resources/assets/default/MR/images/**`
+(42 vectors) needs nothing: measured, every one of them is a 24x24 empty placeholder
+(`<rect width="24" height="24" fill="none"/>`) that exists only so moko generates the identifier when the
+property is absent — upstream's artwork was never in that directory, only its names.
 3. **The licence texts stay**, including in folders whose assets we have replaced or removed — §4
    forbids removing notices, and they are the record of what we may not ship. Where an asset was
    replaced, the replacement's own provenance belongs next to it.
@@ -185,13 +208,19 @@ that the file *names* stay (they are compiled `MR.images.*` resource identifiers
   brands — recorded in `NOTICE` and in `README.md`'s
   License section.
 - Any service this fork later operates triggers §13 for that service; nothing is operated now.
-- **The 690 upstream-identical images are still in the distribution.** Ruling AGPL-2 fixed what this fork
+- **The 655 upstream-identical images are still in the distribution** (measured on `b6a3ee009`; 690 before the
+  29 illustrations went, 661 before the 6 icons went). Ruling AGPL-2 fixed what this fork
   *claims*; it did not change what this fork *ships*. Upstream's asset licence allows those files only in an
   unmodified SimpleX Chat distribution and forbids modifying them, and this is neither, so the notice now
   tells the truth about ownership while the exposure itself stays open until each one is replaced or
-  removed. That is the remaining artwork item: the 339 moko glyphs and the 190 + 130 unchanged renders are
-  the bulk of it, and the renders cannot be regenerated into something different without first changing the
-  artwork and UI they depict.
+  removed. What is left is no longer brand artwork compiled into the app: 251 moko `ic_*` and 11 www glyphs are
+  Google Material geometry (held, attributed), 42 are empty placeholders that carry no drawing, 190 + 130 are
+  unchanged snapshot renders of scenes that contain no upstream artwork — regenerating them into something
+  different requires changing the UI they depict first — 8 are Apple's SF Symbols and GitHub's octocats, 13 in
+  `packages/**` are Material glyphs plus the 2 mcp UI screenshots, and 10 are fixtures and third-party audit
+  logos. The only upstream *drawings* still shipped are those 2 mcp screenshots and the 2 logo fixtures, and
+  the fixtures need a Haskell run to land (`Forward.hs:850` asserts the transferred size, `ImageTests.hs:103`
+  and `:262` assert the PNG's structure).
 
 ## 5. Per-file copyright headers (clause §5a) — repaired 2026-11-15
 
