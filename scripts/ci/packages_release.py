@@ -662,7 +662,7 @@ def record_releases(entries: list[tuple[str, str]], commit: str) -> str:
         body = {
             "message": message,
             "content": base64.b64encode(render_releases(updated).encode()).decode(),
-            "committer": {"name": "SimpleX Chat", "email": "build@simplex.chat"},
+            "committer": {"name": "POPOPX", "email": "chat@popopx.chat"},
             **({"sha": blob} if blob else {}),
         }
         try:
