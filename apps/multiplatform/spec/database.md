@@ -111,12 +111,12 @@ The Haskell core organizes database access into store modules. Kotlin code invok
 
 | Module | Path | Responsibilities |
 |--------|------|-----------------|
-| `Messages.hs` | `src/Simplex/Chat/Store/Messages.hs` | Message CRUD, chat items, reactions, delivery statuses, TTL cleanup |
-| `Groups.hs` | `src/Simplex/Chat/Store/Groups.hs` | Group profiles, membership, roles, invitations, group links |
-| `Direct.hs` | `src/Simplex/Chat/Store/Direct.hs` | Contact management, direct connections, contact requests |
-| `Files.hs` | `src/Simplex/Chat/Store/Files.hs` | File transfer metadata, XFTP state, standalone files |
-| `Profiles.hs` | `src/Simplex/Chat/Store/Profiles.hs` | User profiles, display names, address book |
-| `Connections.hs` | `src/Simplex/Chat/Store/Connections.hs` | SMP agent connections, pending connections, server switches |
+| `Messages.hs` | `src/Popopx/Chat/Store/Messages.hs` | Message CRUD, chat items, reactions, delivery statuses, TTL cleanup |
+| `Groups.hs` | `src/Popopx/Chat/Store/Groups.hs` | Group profiles, membership, roles, invitations, group links |
+| `Direct.hs` | `src/Popopx/Chat/Store/Direct.hs` | Contact management, direct connections, contact requests |
+| `Files.hs` | `src/Popopx/Chat/Store/Files.hs` | File transfer metadata, XFTP state, standalone files |
+| `Profiles.hs` | `src/Popopx/Chat/Store/Profiles.hs` | User profiles, display names, address book |
+| `Connections.hs` | `src/Popopx/Chat/Store/Connections.hs` | SMP agent connections, pending connections, server switches |
 
 All store operations execute within SQLite transactions managed by the Haskell core. The Kotlin layer has no direct knowledge of table schemas or SQL queries.
 
@@ -383,11 +383,11 @@ sealed class ArchiveError {
 | Cryptor.android.kt | Android: AES-GCM via AndroidKeyStore | `common/src/androidMain/kotlin/chat/popopx/common/platform/Cryptor.android.kt` |
 | Cryptor.desktop.kt | Desktop: placeholder (no-op) implementation | `common/src/desktopMain/kotlin/chat/popopx/common/platform/Cryptor.desktop.kt` |
 | DatabaseUtils.kt | `DBMigrationResult`, `MigrationError`, `MigrationConfirmation`, passphrase helpers | `common/src/commonMain/kotlin/chat/popopx/common/views/helpers/DatabaseUtils.kt` |
-| Messages.hs | Haskell store: message CRUD, reactions, delivery | `src/Simplex/Chat/Store/Messages.hs` |
-| Groups.hs | Haskell store: groups, membership, roles | `src/Simplex/Chat/Store/Groups.hs` |
-| Direct.hs | Haskell store: contacts, direct connections | `src/Simplex/Chat/Store/Direct.hs` |
-| Files.hs | Haskell store: file transfer metadata | `src/Simplex/Chat/Store/Files.hs` |
-| Profiles.hs | Haskell store: user profiles | `src/Simplex/Chat/Store/Profiles.hs` |
-| Connections.hs | Haskell store: SMP agent connections | `src/Simplex/Chat/Store/Connections.hs` |
+| Messages.hs | Haskell store: message CRUD, reactions, delivery | `src/Popopx/Chat/Store/Messages.hs` |
+| Groups.hs | Haskell store: groups, membership, roles | `src/Popopx/Chat/Store/Groups.hs` |
+| Direct.hs | Haskell store: contacts, direct connections | `src/Popopx/Chat/Store/Direct.hs` |
+| Files.hs | Haskell store: file transfer metadata | `src/Popopx/Chat/Store/Files.hs` |
+| Profiles.hs | Haskell store: user profiles | `src/Popopx/Chat/Store/Profiles.hs` |
+| Connections.hs | Haskell store: SMP agent connections | `src/Popopx/Chat/Store/Connections.hs` |
 
 All Kotlin paths are relative to `apps/multiplatform/`. All Haskell paths are relative to the repository root.

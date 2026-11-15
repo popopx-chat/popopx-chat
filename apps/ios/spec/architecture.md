@@ -60,7 +60,7 @@ The app follows a strict layered model where each layer communicates only with i
 | API | [`Shared/Model/AppAPITypes.swift`](../Shared/Model/AppAPITypes.swift#L15) | `ChatCommand`, `ChatResponse`, `ChatEvent` enums | L15, L649, L1055 |
 | FFI | [`POPOPXChat/POPOPX.h`](../POPOPXChat/POPOPX.h#L1-L63) | C header declaring Haskell exports | |
 | FFI | [`POPOPXChat/APITypes.swift`](../POPOPXChat/APITypes.swift#L27) | `APIResult<R>`, `ChatError`, `ChatCmdProtocol` | L27, L699, L17 |
-| Core | `../../src/Simplex/Chat/Controller.hs` | Haskell command processor — see `processCommand` in `Controller.hs` | |
+| Core | `../../src/Popopx/Chat/Controller.hs` | Haskell command processor — see `processCommand` in `Controller.hs` | |
 
 ---
 
@@ -268,7 +268,7 @@ Optional desktop pairing allows controlling the mobile app from a desktop client
 - **Commands**: [`connectRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1613), [`findKnownRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1620), [`confirmRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1624), [`verifyRemoteCtrlSession`](../Shared/Model/POPOPXAPI.swift#L1630), [`listRemoteCtrls`](../Shared/Model/POPOPXAPI.swift#L1636), [`stopRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1642), [`deleteRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1646)
 - **State**: [`ChatModel.remoteCtrlSession`](../Shared/Model/ChatModel.swift#L396)`: RemoteCtrlSession?` tracks the active session
 - **Transport**: Encrypted reverse HTTP transport between mobile and desktop
-- **Source**: [`Shared/Views/RemoteAccess/ConnectDesktopView.swift`](../Shared/Views/RemoteAccess/ConnectDesktopView.swift#L1-L545), see `Remote.hs` in `../../src/Simplex/Chat/`
+- **Source**: [`Shared/Views/RemoteAccess/ConnectDesktopView.swift`](../Shared/Views/RemoteAccess/ConnectDesktopView.swift#L1-L545), see `Remote.hs` in `../../src/Popopx/Chat/`
 
 ---
 
@@ -335,8 +335,8 @@ Chat relays are SMP servers that forward messages to channel subscribers. They a
 | Shared types | [`POPOPXChat/APITypes.swift`](../POPOPXChat/APITypes.swift#L27) | L27 |
 | C header | [`POPOPXChat/POPOPX.h`](../POPOPXChat/POPOPX.h#L1-L63) | |
 | NSE | [`POPOPX NSE/NotificationService.swift`](../POPOPX%20NSE/NotificationService.swift#L1-L1228) | |
-| Haskell core | `../../src/Simplex/Chat/Controller.hs` — see `processCommand` in `Controller.hs` | |
-| Chat protocol (x-events, message envelopes) | `../../src/Simplex/Chat/Protocol.hs` | |
+| Haskell core | `../../src/Popopx/Chat/Controller.hs` — see `processCommand` in `Controller.hs` | |
+| Chat protocol (x-events, message envelopes) | `../../src/Popopx/Chat/Protocol.hs` | |
 
 ### External: popopxmq Library
 

@@ -21,7 +21,7 @@ The `product/`, `spec/`, and source layers form a persistent, structured represe
 | `common/src/desktopMain/` | Desktop-specific Kotlin (platform implementations) | What does it execute on **Desktop**? |
 | `android/src/main/` | Android app module (Application, Activity, Services) | What is the **Android entry point**? |
 | `desktop/src/jvmMain/` | Desktop app module (main function) | What is the **Desktop entry point**? |
-| `../../src/Simplex/Chat/` | Haskell core (chat logic, protocol, database) | What does the **core** execute? |
+| `../../src/Popopx/Chat/` | Haskell core (chat logic, protocol, database) | What does the **core** execute? |
 
 Each layer links to the next:
 - `product/concepts.md` links every concept to its spec docs, source files, and tests in a single table — this is the primary navigation entry point
@@ -296,20 +296,20 @@ desktop/src/jvmMain/kotlin/chat/popopx/desktop/ -- Desktop app (1 file)
 | common/.../common/views/helpers/AppUpdater.kt (desktopMain) | spec/architecture.md | product/views/settings.md |
 | common/.../common/platform/AnimatedImage.desktop.kt (desktopMain) | spec/client/chat-view.md | product/views/chat.md |
 
-### Haskell Core Sources (at `../../src/Simplex/Chat/` relative to `apps/multiplatform/`)
+### Haskell Core Sources (at `../../src/Popopx/Chat/` relative to `apps/multiplatform/`)
 
 | Source Location | Spec Document | Product Document |
 |----------------|---------------|-----------------|
-| ../../src/Simplex/Chat/Controller.hs | spec/api.md | product/concepts.md |
-| ../../src/Simplex/Chat/Types.hs | spec/api.md | product/glossary.md |
-| ../../src/Simplex/Chat/Core.hs | spec/architecture.md | product/concepts.md |
-| ../../src/Simplex/Chat/Protocol.hs | spec/architecture.md | product/concepts.md |
-| ../../src/Simplex/Chat/Messages.hs | spec/api.md | product/flows/messaging.md |
-| ../../src/Simplex/Chat/Messages/CIContent.hs | spec/api.md | product/flows/messaging.md |
-| ../../src/Simplex/Chat/Call.hs | spec/services/calls.md | product/flows/calling.md |
-| ../../src/Simplex/Chat/Files.hs | spec/services/files.md | product/flows/file-transfer.md |
-| ../../src/Simplex/Chat/Store/Messages.hs | spec/database.md | product/flows/messaging.md |
-| ../../src/Simplex/Chat/Store/Groups.hs | spec/database.md | product/flows/group-lifecycle.md |
-| ../../src/Simplex/Chat/Store/Direct.hs | spec/database.md | product/flows/connection.md |
-| ../../src/Simplex/Chat/Store/Files.hs | spec/database.md | product/flows/file-transfer.md |
-| ../../src/Simplex/Chat/Store/Profiles.hs | spec/database.md | product/views/user-profiles.md |
+| ../../src/Popopx/Chat/Controller.hs | spec/api.md | product/concepts.md |
+| ../../src/Popopx/Chat/Types.hs | spec/api.md | product/glossary.md |
+| ../../src/Popopx/Chat/Core.hs | spec/architecture.md | product/concepts.md |
+| ../../src/Popopx/Chat/Protocol.hs | spec/architecture.md | product/concepts.md |
+| ../../src/Popopx/Chat/Messages.hs | spec/api.md | product/flows/messaging.md |
+| ../../src/Popopx/Chat/Messages/CIContent.hs | spec/api.md | product/flows/messaging.md |
+| ../../src/Popopx/Chat/Call.hs | spec/services/calls.md | product/flows/calling.md |
+| ../../src/Popopx/Chat/Files.hs | spec/services/files.md | product/flows/file-transfer.md |
+| ../../src/Popopx/Chat/Store/Messages.hs | spec/database.md | product/flows/messaging.md |
+| ../../src/Popopx/Chat/Store/Groups.hs | spec/database.md | product/flows/group-lifecycle.md |
+| ../../src/Popopx/Chat/Store/Direct.hs | spec/database.md | product/flows/connection.md |
+| ../../src/Popopx/Chat/Store/Files.hs | spec/database.md | product/flows/file-transfer.md |
+| ../../src/Popopx/Chat/Store/Profiles.hs | spec/database.md | product/views/user-profiles.md |

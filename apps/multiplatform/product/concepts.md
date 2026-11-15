@@ -55,7 +55,7 @@ This document provides a structured mapping between product-level concepts, thei
 **Legend for abbreviated paths:**
 - `common/.../` expands to `common/src/commonMain/kotlin/chat/popopx/common/`
 - `android/.../` expands to `android/src/main/java/chat/popopx/app/`
-- Haskell files are in `../../src/Simplex/Chat/` (relative to `apps/multiplatform/`)
+- Haskell files are in `../../src/Popopx/Chat/` (relative to `apps/multiplatform/`)
 
 ---
 
@@ -114,9 +114,9 @@ Key files that exist only on one platform, grouped by concern.
 ## Cross-References
 
 - Product overview: [README.md](README.md)
-- Haskell core controller: `../../src/Simplex/Chat/Controller.hs`
-- Haskell core types: `../../src/Simplex/Chat/Types.hs`
-- Haskell store layer: `../../src/Simplex/Chat/Store/` (`Direct.hs`, `Groups.hs`, `Messages.hs`, `Files.hs`, `Profiles.hs`, `Connections.hs`)
+- Haskell core controller: `../../src/Popopx/Chat/Controller.hs`
+- Haskell core types: `../../src/Popopx/Chat/Types.hs`
+- Haskell store layer: `../../src/Popopx/Chat/Store/` (`Direct.hs`, `Groups.hs`, `Messages.hs`, `Files.hs`, `Profiles.hs`, `Connections.hs`)
 - Kotlin model: `common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt`
 - Kotlin API bridge: `common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt`
 - Kotlin FFI layer: `common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt`

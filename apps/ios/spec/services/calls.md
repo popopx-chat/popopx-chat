@@ -388,4 +388,4 @@ When `ChatModel.activeCallViewIsCollapsed == true`:
 | [Active call UI](../../Shared/Views/Call/ActiveCallView.swift) | `Shared/Views/Call/ActiveCallView.swift` | 528 |
 | WebRTC helpers | `Shared/Views/Call/WebRTC.swift` | |
 | [Call types (Swift)](../../POPOPXChat/CallTypes.swift) | `POPOPXChat/CallTypes.swift` | 115 |
-| Call types (Haskell) | `../../src/Simplex/Chat/Call.hs` | |
+| Call types (Haskell) | `../../src/Popopx/Chat/Call.hs` | |

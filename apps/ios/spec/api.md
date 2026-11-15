@@ -37,7 +37,7 @@ The iOS app communicates with the Haskell core exclusively through a command/res
 - [`Shared/Model/POPOPXAPI.swift`](../Shared/Model/POPOPXAPI.swift) -- FFI bridge functions (`chatSendCmd` [L121](../Shared/Model/POPOPXAPI.swift#L121), `chatRecvMsg` [L237](../Shared/Model/POPOPXAPI.swift#L237))
 - [`POPOPXChat/API.swift`](../POPOPXChat/API.swift) -- Low-level FFI (`sendSimpleXCmd` [L115](../POPOPXChat/API.swift#L115), `recvSimpleXMsg` [L137](../POPOPXChat/API.swift#L137))
 - `POPOPXChat/ChatTypes.swift` -- Data types used in commands/responses (User, Contact, GroupInfo, ChatItem, etc.)
-- `../../src/Simplex/Chat/Controller.hs` -- Haskell controller (function `chat_send_cmd_retry`, `chat_recv_msg_wait`)
+- `../../src/Popopx/Chat/Controller.hs` -- Haskell controller (function `chat_send_cmd_retry`, `chat_recv_msg_wait`)
 
 ---
 
@@ -608,4 +608,4 @@ The `decodeAPIResult<R>` function ([`APITypes.swift` L86](../POPOPXChat/APITypes
 | Low-level FFI | [`POPOPXChat/API.swift`](../POPOPXChat/API.swift) |
 | Data types | `POPOPXChat/ChatTypes.swift` |
 | C header | `POPOPXChat/POPOPX.h` |
-| Haskell controller | `../../src/Simplex/Chat/Controller.hs` |
+| Haskell controller | `../../src/Popopx/Chat/Controller.hs` |

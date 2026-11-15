@@ -408,4 +408,4 @@ Key functions in [`AppearanceSettings.swift`](../../Shared/Views/UserSettings/Ap
 | App theme observable | [`Shared/Theme/Theme.swift`](../../Shared/Theme/Theme.swift) | `AppTheme` (L22), `CurrentColors` (L14), `systemInDarkThemeCurrently` (L95) |
 | Appearance settings UI | [`Shared/Views/UserSettings/AppearanceSettings.swift`](../../Shared/Views/UserSettings/AppearanceSettings.swift) | `AppearanceSettings` (L26), `ToolbarMaterial` (L319), `ImportExportThemeSection` (L603) |
 | Theme mode editor | `Shared/Views/Helpers/ThemeModeEditor.swift` | Theme mode selection UI |
-| Haskell theme types | `../../src/Simplex/Chat/Types/UITheme.hs` | Server-side theme persistence |
+| Haskell theme types | `../../src/Popopx/Chat/Types/UITheme.hs` | Server-side theme persistence |

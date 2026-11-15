@@ -389,7 +389,7 @@ Android has no equivalent to iOS NSE (Notification Service Extension). Instead, 
 
 ### Source Entry Points
 
-- Haskell core: `../../src/Simplex/Chat/Controller.hs`, `../../src/Simplex/Chat/Types.hs`
+- Haskell core: `../../src/Popopx/Chat/Controller.hs`, `../../src/Popopx/Chat/Types.hs`
 - Kotlin model: `common/src/commonMain/kotlin/chat/popopx/common/model/ChatModel.kt`
 - Kotlin API bridge: `common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt`
 - Kotlin FFI: `common/src/commonMain/kotlin/chat/popopx/common/platform/Core.kt`

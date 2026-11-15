@@ -86,12 +86,12 @@ All database operations are implemented in Haskell. Key store modules (paths rel
 
 | Module | Path | Size | Description |
 |--------|------|------|-------------|
-| Messages | `src/Simplex/Chat/Store/Messages.hs` | ~178KB | Message CRUD, pagination, search, reactions, delivery receipts |
-| Groups | `src/Simplex/Chat/Store/Groups.hs` | ~126KB | Group CRUD, member management, roles, links, invitations |
-| Direct | `src/Simplex/Chat/Store/Direct.hs` | ~52KB | Direct contact connections, contact requests. See `createDirectChat` in `Store/Direct.hs` |
-| Files | `src/Simplex/Chat/Store/Files.hs` | ~43KB | File transfer state, XFTP chunks, inline files |
-| Profiles | `src/Simplex/Chat/Store/Profiles.hs` | ~42KB | User profiles, contact profiles, incognito profiles |
-| Connections | `src/Simplex/Chat/Store/Connections.hs` | ~17KB | Connection lifecycle, queue management |
+| Messages | `src/Popopx/Chat/Store/Messages.hs` | ~178KB | Message CRUD, pagination, search, reactions, delivery receipts |
+| Groups | `src/Popopx/Chat/Store/Groups.hs` | ~126KB | Group CRUD, member management, roles, links, invitations |
+| Direct | `src/Popopx/Chat/Store/Direct.hs` | ~52KB | Direct contact connections, contact requests. See `createDirectChat` in `Store/Direct.hs` |
+| Files | `src/Popopx/Chat/Store/Files.hs` | ~43KB | File transfer state, XFTP chunks, inline files |
+| Profiles | `src/Popopx/Chat/Store/Profiles.hs` | ~42KB | User profiles, contact profiles, incognito profiles |
+| Connections | `src/Popopx/Chat/Store/Connections.hs` | ~17KB | Connection lifecycle, queue management |
 
 ### Data Model (key tables)
 
@@ -115,7 +115,7 @@ chat_tags_chats    -- Tag-to-chat assignments
 Database migrations are managed by the Haskell core. Migration files are located in:
 
 ```
-src/Simplex/Chat/Store/SQLite/Migrations/
+src/Popopx/Chat/Store/SQLite/Migrations/
 ```
 
 Migrations are numbered sequentially starting from `M20220101` through `M20260122` (200+ migrations). Each migration is a Haskell module containing SQL statements for schema changes.
@@ -299,5 +299,5 @@ The NSE checks this flag to determine whether to process notifications (it avoid
 | Database management UI | [`Shared/Views/Database/DatabaseView.swift`](../Shared/Views/Database/DatabaseView.swift) |
 | Encryption settings UI | [`Shared/Views/Database/DatabaseEncryptionView.swift`](../Shared/Views/Database/DatabaseEncryptionView.swift) |
 | C FFI (migration, file ops) | `POPOPXChat/POPOPX.h` |
-| Haskell store root | `../../src/Simplex/Chat/Store/` |
-| Haskell migrations | `../../src/Simplex/Chat/Store/SQLite/Migrations/` |
+| Haskell store root | `../../src/Popopx/Chat/Store/` |
+| Haskell migrations | `../../src/Popopx/Chat/Store/SQLite/Migrations/` |

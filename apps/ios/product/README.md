@@ -253,6 +253,6 @@ UserPicker
 - [glossary.md](glossary.md) -- Domain term glossary
 - [spec/README.md](../spec/README.md) -- Technical specification overview
 - [spec/architecture.md](../spec/architecture.md) -- Architecture specification
-- Haskell core: `../../src/Simplex/Chat/Controller.hs`, `../../src/Simplex/Chat/Types.hs`
+- Haskell core: `../../src/Popopx/Chat/Controller.hs`, `../../src/Popopx/Chat/Types.hs`
 - Swift model: `Shared/Model/ChatModel.swift`, `POPOPXChat/ChatTypes.swift`
 - Swift API bridge: `POPOPXChat/API.swift`, `Shared/Model/POPOPXAPI.swift`
