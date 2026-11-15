@@ -15,6 +15,22 @@ Retained attribution, unchanged in this fork:
   Copyright (C) 2026 SimpleX Chat Ltd. All rights reserved.
     -- from assets/ASSETS_LICENSE.md and its two mirrors, kept verbatim
 
+Third-party licence texts, shipped with this fork:
+
+  licences/third-party/haskell/<package-version>/   139 files
+  licences/third-party/apps/<library>/                10 files
+    -- the licence texts upstream collected for the Haskell dependency set (139
+    packages) and for the bundled native libraries (webrtc, mozjpeg, libspng,
+    miniz, sqlcipher, vlc, stb_image_resize, compact-icc-profiles; 10 entries).
+    149 files, 4633 lines, 241774 bytes,
+    taken byte-for-byte from the import commit db0768c21 and re-installed here on
+    2026-11-15 after the docs/ tree that carried them was deleted. They are the
+    notices AGPL-3.0 §4 forbids removing, and they still describe what this fork
+    builds: the cabal dependency set is unchanged from db0768c21, verified by
+    comparing every non-blank line of simplex-chat.cabal with popopx-chat.cabal
+    after restoring the brand words - the only three that differ are the upstream
+    homepage, author and copyright fields, kept upstream deliberately.
+
 This repository is a modified, non-official fork. It was imported at commit
 db0768c21 (2026-11-11) and has been changed since; the nature and scope of the
 modifications, including what was deliberately left unchanged, is described in

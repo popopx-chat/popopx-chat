@@ -18,7 +18,7 @@ not legal advice.
 
 | clause | obligation | state |
 |---|---|---|
-| §4 | do not propagate the work with the legal notices removed | **satisfied** — `LICENSE` (AGPL-3.0 text) and `NOTICE` are untouched; the `Copyright (C) 2026 SimpleX Chat Ltd` lines and the `author`/`maintainer`/`copyright` fields of `popopx-chat.cabal` were deliberately kept (R5, `7794b67cc`) |
+| §4 | do not propagate the work with the legal notices removed | **broken, then repaired 2026-11-15** — `LICENSE` (AGPL-3.0 text) and `NOTICE` were never touched, and the `Copyright (C) 2026 SimpleX Chat Ltd` lines and the `author`/`maintainer`/`copyright` fields of `popopx-chat.cabal` were deliberately kept (R5, `7794b67cc`). But deleting `docs/` in `9996634ee` also deleted `docs/dependencies/licences/**`: the **149 licence texts of our own dependencies**, propagated away with them for two days. They are re-installed byte-for-byte at `licences/third-party/{haskell,apps}/` and `NOTICE` now points at them — see §6 below |
 | §5a | keep the source-form notices intact | **was FALSE, repaired 2026-11-15** — this row previously claimed "this codebase carries no per-file copyright headers, so there is nothing per-file to preserve". It does: upstream's per-file headers are in 297 source files, and the brand pass had rewritten the *holder* in each of them. See §5 below |
 | §5c | prominent notice of modification, with dates | **satisfied** — `FORK.md` states the fork is non-official and modified, names upstream, records the import commit `db0768c21` and its date (2026-11-11), and points at this repository as the complete corresponding source |
 | §6 | offer the Complete Corresponding Source to network users | **satisfied by construction** — the whole fork is the CCS, published at `github.com/popopx-chat/popopx-chat`, build scripts included (`cabal.project`, `flake.nix`, `apps/ios`, `apps/multiplatform`). If this fork ever *runs* a service on top of the code (badge service, directory service, an operator), §13's remote-network clause applies to that service's modified code too |
@@ -227,3 +227,30 @@ Two findings worth keeping:
 So the split is by **silent vs visible**: a header nobody reads carries upstream's notice; a string the
 user reads describes what we ship. A later brand sweep must not "fix" the upstream holder lines back to
 POPOPX — they are the repair, not residue.
+
+## 6. The third-party licence texts (clause §4) — re-installed 2026-11-15
+
+Ruling: delete `docs/`, `website/`, `blog/`, `plans/` — executed in `9996634ee`. That delete was not only
+content: `docs/dependencies/licences/**` held the licence text of **149** packages this fork builds against
+(139 Haskell dependencies under `haskell/<name-version>/`, 10 bundled native libraries under
+`apps/<library>/`, 4633 lines, 241774 bytes). Propagating the work without its dependency notices is what
+§4 forbids, and for two days this repository did exactly that while still shipping the built products the
+notices cover.
+
+They are back, byte-for-byte, at a path that is not `docs/` — `licences/third-party/{haskell,apps}/` — because
+the ruling that removed `docs/` is not undone by restoring a compliance artifact into it. `NOTICE` now names
+the directory and its contents.
+
+Two things were verified rather than assumed:
+
+- **Equality.** Every staged blob id was compared with the id at `docs/dependencies/licences/…` in
+  `db0768c21`: 149 checked, 0 mismatches. Nothing was rewritten, resaved or "tidied".
+- **Currency.** A licence text can also be wrong by being *stale* — it may cover a dependency version we no
+  longer use. The cabal file was compared line by line with the import commit's after restoring the brand
+  words in it, and the only three differing lines are `homepage`, `author` and `copyright`, all deliberately
+  left upstream. So the dependency set is the one these texts were collected for, and the set is neither
+  over- nor under-inclusive because of this fork's work.
+
+A gap this does not close: the texts came from upstream's capture, and if this fork ever *adds* a
+dependency, nothing here checks that its licence text is added too. That check would belong in CI, and the
+fork has no gate for it.
