@@ -4,7 +4,7 @@
 
 ## Overview
 
-Establishing contact between two SimpleX Chat users. SimpleX uses no user identifiers; connections are formed through one-time invitation links or permanent SimpleX addresses. Each connection creates unique unidirectional SMP queues, ensuring no server can correlate sender and receiver. Supports incognito mode for per-contact random profile generation.
+Establishing contact between two SimpleX Chat users. SimpleX uses no user identifiers; connections are formed through one-time invitation links or permanent POPOPX addresses. Each connection creates unique unidirectional SMP queues, ensuring no server can correlate sender and receiver. Supports incognito mode for per-contact random profile generation.
 
 ## Prerequisites
 
@@ -66,7 +66,7 @@ Establishing contact between two SimpleX Chat users. SimpleX uses no user identi
 
 ### 4. Accept Contact Request
 
-1. When a peer connects via the user's SimpleX address, core generates a `ChatEvent.receivedContactRequest`.
+1. When a peer connects via the user's POPOPX address, core generates a `ChatEvent.receivedContactRequest`.
 2. `processReceivedMsg` handles the event, adding a `UserContactRequest` to `ChatModel`.
 3. Contact request appears in `ChatListView` as a special `ContactRequestView` row.
 4. User taps "Accept":
@@ -88,9 +88,9 @@ Establishing contact between two SimpleX Chat users. SimpleX uses no user identi
 4. `NtfManager` may post a notification: "Contact connected".
 5. The `PendingContactConnection` in the chat list is replaced by the full contact chat.
 
-### 6. Create SimpleX Address
+### 6. Create POPOPX Address
 
-1. User navigates to Settings or taps "Create SimpleX address" during onboarding.
+1. User navigates to Settings or taps "Create POPOPX address" during onboarding.
 2. Calls `apiCreateUserAddress()`:
    ```swift
    func apiCreateUserAddress() async throws -> CreatedConnLink?

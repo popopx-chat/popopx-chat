@@ -36,7 +36,7 @@ suspend fun apiAddContact(rh: Long?, incognito: Boolean): Pair<Pair<CreatedConnL
 
 ### 1.2 Long-Term Contact Address
 
-1. User goes to Settings and creates a SimpleX address.
+1. User goes to Settings and creates a POPOPX address.
 2. This creates a persistent address link that multiple people can use.
 3. Incoming connection requests from the address require explicit acceptance (see section 4).
 

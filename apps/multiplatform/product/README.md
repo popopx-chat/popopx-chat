@@ -76,7 +76,7 @@ Establishing, managing, and verifying contacts.
 
 | Feature | Description | Key Source (Kotlin) |
 |---------|-------------|---------------------|
-| Add via SimpleX address | Connect using a SimpleX contact address | `common/src/commonMain/kotlin/chat/popopx/common/views/newchat/NewChatView.kt` |
+| Add via POPOPX address | Connect using a POPOPX contact address | `common/src/commonMain/kotlin/chat/popopx/common/views/newchat/NewChatView.kt` |
 | Add via QR code | Scan QR code to establish connection | `common/src/commonMain/kotlin/chat/popopx/common/views/chat/ScanCodeView.kt` |
 | Contact requests | Accept or reject incoming contact requests | `common/src/commonMain/kotlin/chat/popopx/common/views/chatlist/ContactRequestView.kt` |
 | Local aliases | Set private display names for contacts | `common/src/commonMain/kotlin/chat/popopx/common/views/chat/ChatInfoView.kt` |
@@ -265,7 +265,7 @@ NewChatSheet
   views/newchat/NewChatSheet.kt
     -> NewChatView ............... (QR scanner / paste link)
     -> AddGroupView .............. (create group)
-    -> UserAddressView ........... (create SimpleX address)
+    -> UserAddressView ........... (create POPOPX address)
 
 SettingsView
   views/usersettings/SettingsView.kt
@@ -283,7 +283,7 @@ SettingsView
 UserPicker
   views/chatlist/UserPicker.kt
     -> UserProfilesView .......... (manage all profiles)
-    -> UserAddressView ........... (SimpleX address)
+    -> UserAddressView ........... (POPOPX address)
     -> Preferences ............... (user preferences)
     -> SettingsView .............. (app settings)
     -> ConnectDesktopView ........ (pair with desktop)

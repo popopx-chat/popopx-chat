@@ -261,7 +261,7 @@ Triggered by tapping the user avatar in the navigation bar. Presented as a sheet
 |---------|----------|
 | User list | All non-hidden users with unread counts |
 | Active user | Highlighted with checkmark |
-| Actions | Settings, Your SimpleX address, User profiles |
+| Actions | Settings, Your POPOPX address, User profiles |
 
 ### User Switching
 - Tapping a different user calls `apiSetActiveUser(userId:)`

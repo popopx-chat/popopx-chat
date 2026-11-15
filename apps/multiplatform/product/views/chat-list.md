@@ -113,7 +113,7 @@ Each chat type provides specific dropdown menu items:
 | Element | Condition | Description |
 |---|---|---|
 | One-hand UI card (`ToggleChatListCard`) | `oneHandUICardShown == false` | Dismissible card introducing bottom toolbar mode with toggle switch |
-| Address creation card (`AddressCreationCard`) | `addressCreationCardShown == false` | Prompts user to create a SimpleX address; tappable card opens `UserAddressLearnMore` |
+| Address creation card (`AddressCreationCard`) | `addressCreationCardShown == false` | Prompts user to create a POPOPX address; tappable card opens `UserAddressLearnMore` |
 | FAB (new chat button) | Standard mode, search empty, chat running | `FloatingActionButton` at bottom-right, pencil icon, opens `NewChatSheet` |
 
 ### Empty States

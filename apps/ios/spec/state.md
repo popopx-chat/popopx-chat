@@ -146,7 +146,7 @@ ChatTagsModel (singleton -- filter state)
 #### Misc
 | Property | Type | Description | Line |
 |----------|------|-------------|------|
-| `userAddress` | `UserContactLink?` | User's SimpleX address | [L391](../Shared/Model/ChatModel.swift#L392) |
+| `userAddress` | `UserContactLink?` | User's POPOPX address | [L391](../Shared/Model/ChatModel.swift#L392) |
 | `chatItemTTL` | `ChatItemTTL` | Global message TTL | [L392](../Shared/Model/ChatModel.swift#L393) |
 | `appOpenUrl` | `URL?` | URL opened while app active | [L393](../Shared/Model/ChatModel.swift#L394) |
 | `appOpenUrlLater` | `URL?` | URL opened while app inactive | [L394](../Shared/Model/ChatModel.swift#L395) |

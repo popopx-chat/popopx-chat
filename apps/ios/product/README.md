@@ -64,7 +64,7 @@ Establishing, managing, and verifying contacts.
 
 | Feature | Description | Key Source (Swift) |
 |---------|-------------|--------------------|
-| Add via SimpleX address | Connect using a SimpleX contact address | `Shared/Views/NewChat/NewChatView.swift` |
+| Add via POPOPX address | Connect using a POPOPX contact address | `Shared/Views/NewChat/NewChatView.swift` |
 | Add via QR code | Scan QR code to establish connection | `Shared/Views/Chat/ScanCodeView.swift` |
 | Contact requests | Accept or reject incoming contact requests | `Shared/Views/ChatList/ContactRequestView.swift` |
 | Local aliases | Set private display names for contacts | `Shared/Views/Chat/ChatInfoView.swift` |
@@ -222,7 +222,7 @@ NewChatMenuButton
   Shared/Views/NewChat/NewChatMenuButton.swift
     -> NewChatView ............... (QR scanner / paste link)
     -> AddGroupView .............. (create group)
-    -> UserAddressView ........... (create SimpleX address)
+    -> UserAddressView ........... (create POPOPX address)
 
 SettingsView
   Shared/Views/UserSettings/SettingsView.swift
@@ -239,7 +239,7 @@ SettingsView
 UserPicker
   Shared/Views/ChatList/UserPicker.swift
     -> UserProfilesView .......... (manage all profiles)
-    -> UserAddressView ........... (SimpleX address)
+    -> UserAddressView ........... (POPOPX address)
     -> PreferencesView ........... (user preferences)
     -> SettingsView .............. (app settings)
     -> ConnectDesktopView ........ (pair with desktop)

@@ -268,8 +268,8 @@ The `ChatCommand` enum ([`AppAPITypes.swift` L15](../Shared/Model/AppAPITypes.sw
 
 | Command | Parameters | Description | Source |
 |---------|-----------|-------------|--------|
-| `apiCreateMyAddress` | `userId` | Create SimpleX address | [L148](../Shared/Model/AppAPITypes.swift#L148) |
-| `apiDeleteMyAddress` | `userId` | Delete SimpleX address | [L149](../Shared/Model/AppAPITypes.swift#L149) |
+| `apiCreateMyAddress` | `userId` | Create POPOPX address | [L148](../Shared/Model/AppAPITypes.swift#L148) |
+| `apiDeleteMyAddress` | `userId` | Delete POPOPX address | [L149](../Shared/Model/AppAPITypes.swift#L149) |
 | `apiShowMyAddress` | `userId` | Show current address | [L150](../Shared/Model/AppAPITypes.swift#L150) |
 | `apiAddMyAddressShortLink` | `userId` | Add short link to address | [L151](../Shared/Model/AppAPITypes.swift#L151) |
 | `apiSetProfileAddress` | `userId, on: Bool` | Toggle address in profile | [L152](../Shared/Model/AppAPITypes.swift#L152) |

@@ -216,7 +216,7 @@ Path prefix: `common/src/commonMain/kotlin/chat/popopx/common/`
 | `views/usersettings/UserProfilesView.kt` | PC19, PC21 | Medium | Multi-profile management |
 | `views/usersettings/HiddenProfileView.kt` | PC21 | Medium | Hidden profile access |
 | `views/usersettings/IncognitoView.kt` | PC20 | Low | Incognito mode explanation |
-| `views/usersettings/UserAddressView.kt` | PC29, PC32 | Medium | User SimpleX address management |
+| `views/usersettings/UserAddressView.kt` | PC29, PC32 | Medium | User POPOPX address management |
 | `views/usersettings/UserAddressLearnMore.kt` | PC29 | Low | Address educational content |
 | `views/usersettings/NotificationsSettingsView.kt` | PC18 | Medium | Notification mode configuration |
 | `views/usersettings/CallSettings.kt` | PC17 | Low | Call-related settings |

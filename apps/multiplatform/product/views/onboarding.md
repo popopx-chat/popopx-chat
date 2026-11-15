@@ -4,7 +4,7 @@
 
 ## Purpose
 
-First-time setup flow for new users. Guides through app introduction, profile creation, database passphrase setup (Desktop), server operator conditions acceptance, SimpleX address creation, and notification configuration (Android). Also provides an entry point for device migration.
+First-time setup flow for new users. Guides through app introduction, profile creation, database passphrase setup (Desktop), server operator conditions acceptance, POPOPX address creation, and notification configuration (Android). Also provides an entry point for device migration.
 
 ## Route / Navigation
 
@@ -90,13 +90,13 @@ Profile is stored locally and only shared with contacts.
 
 Managed by `ChooseServerOperators.kt`.
 
-### Step 3b: Create SimpleX Address
+### Step 3b: Create POPOPX Address
 
 **Stage**: `Step3_CreatePOPOPXAddress`
 
 | Element | Description |
 |---|---|
-| Address creation | Auto-creates a SimpleX contact address |
+| Address creation | Auto-creates a POPOPX contact address |
 | QR code | Displays the created address as QR code |
 | Share button | Share address link |
 | Skip button | Skip address creation |

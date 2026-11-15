@@ -137,7 +137,7 @@ Error types returned by the chat controller. Variants: ChatError (application-le
 
 ## Connection & Identity
 
-### SimpleX Address
+### POPOPX Address
 A long-lived contact address that others can use to send connection requests. Unlike one-time invitation links, an address can be reused by multiple contacts. The user can accept or reject each incoming request. *See: `Shared/Views/UserSettings/UserAddressView.swift`, `../../src/Popopx/Chat/Controller.hs` (APICreateMyAddress)*
 
 ### Contact Link

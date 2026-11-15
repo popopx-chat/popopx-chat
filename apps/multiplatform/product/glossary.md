@@ -227,7 +227,7 @@ The core FFI bridge. `sendCmd(rhId, cmd)` serializes a `CC` command and sends it
 
 ## 4. Connection & Identity
 
-### SimpleX Address (User Address)
+### POPOPX Address (User Address)
 A long-lived contact address that others can use to send connection requests. Created via `ApiCreateMyAddress`, retrieved via `ApiShowMyAddress`, deleted via `ApiDeleteMyAddress`. Can optionally include a short link (`ApiAddMyAddressShortLink`). Stored as `ChatModel.userAddress` (`UserContactLinkRec`).
 
 ### Contact Link / Connection Link
@@ -425,7 +425,7 @@ The singleton reactive state container for the entire app. Uses Compose `mutable
 - `groupMembers` -- members of the currently viewed group
 - `callInvitations` -- pending incoming call invitations
 - `activeCall` -- the currently active call
-- `userAddress` -- the user's SimpleX address
+- `userAddress` -- the user's POPOPX address
 - `chatItemTTL` -- global message TTL setting
 - `userTags` -- chat tags
 - `terminalItems` -- debug terminal log items

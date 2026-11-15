@@ -146,7 +146,7 @@ enum class OnboardingStage {
 
 ### 3.6 Step3_CreatePOPOPXAddress
 
-1. User is prompted to create a SimpleX address for receiving contact requests.
+1. User is prompted to create a POPOPX address for receiving contact requests.
 2. This calls the address creation API.
 3. Can be skipped.
 
