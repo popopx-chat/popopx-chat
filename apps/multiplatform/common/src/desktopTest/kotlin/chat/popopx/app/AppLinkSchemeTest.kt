@@ -360,7 +360,7 @@ class AppLinkSchemeTest {
 
   @Test
   fun packagedMacAndWindowsAreRecognised() {
-    assertEquals(DesktopInstallation.MacBundle, desktopInstallation(DesktopPlatform.MAC_AARCH64, "/Applications/SimpleX.app/Contents/MacOS/SimpleX", mapOf()))
+    assertEquals(DesktopInstallation.MacBundle, desktopInstallation(DesktopPlatform.MAC_AARCH64, "/Applications/POPOPX.app/Contents/MacOS/POPOPX", mapOf()))
     assertEquals(DesktopInstallation.WindowsExe(windowsExe), desktopInstallation(DesktopPlatform.WINDOWS_X86_64, windowsExe, mapOf()))
   }
 
