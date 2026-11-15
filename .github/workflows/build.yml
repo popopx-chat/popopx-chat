@@ -198,6 +198,10 @@ jobs:
           GH_TOKEN: ${{ secrets.NODEJS_REPO_TOKEN }}
           LIBS_REPOSITORY: ${{ github.repository }}-libs
         run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::notice title=Library release::NODEJS_REPO_TOKEN is not configured, so the -libs release lane is not provisioned - skipping"
+            exit 0
+          fi
           version=$(sed -n 's/^version: *//p' popopx-chat.cabal)
           tag=core-$version
           claim_output=$(python3 scripts/ci/packages_release.py claim-core "$version" "$GITHUB_SHA" "$release_branch")
@@ -223,6 +227,10 @@ jobs:
           GH_TOKEN: ${{ secrets.NODEJS_REPO_TOKEN }}
           LIBS_REPOSITORY: ${{ github.repository }}-libs
         run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::notice title=Add-on release::NODEJS_REPO_TOKEN is not configured, so the -libs release lane is not provisioned - skipping"
+            exit 0
+          fi
           addon_output=$(python3 scripts/ci/packages_release.py addon-release)
           eval "$addon_output"
           if [ "$status" = absent ]; then
@@ -251,7 +259,12 @@ jobs:
           NPM_SCOPE: ${{ vars.NPM_SCOPE }}
           PYPI_PROJECT: ${{ vars.PYPI_PROJECT }}
           PYPI_URL: ${{ vars.PYPI_URL }}
-        run: python3 scripts/ci/packages_release.py publish-plan >> "$GITHUB_OUTPUT"
+        run: |
+          if [ -z "$NPM_SCOPE" ]; then
+            echo "::notice title=Versions to publish::NPM_SCOPE and the PYPI_* variables are not configured, so this fork publishes no packages - skipping"
+            exit 0
+          fi
+          python3 scripts/ci/packages_release.py publish-plan >> "$GITHUB_OUTPUT"
 
 # =========================
 #        Linux Build

@@ -409,14 +409,28 @@ yet. Before any build of this fork is distributed:
   Python ≥ 3.11 for `import tomllib` where this machine has 3.9.6.
   **Ruled 2026-11-14: this is not a naming question and not a separate change — it closes with our first
   published release (#56).** Renaming the keys back to `simplex-chat-*` was rejected, because `build.yml`
-  builds and reads a `popopx-chat-libs-<platform>` artifact of its own (`:479`, `:980`, `:1270`, read back at
-  `:695` `POPOPX_LIBS_DIR`): one zip would then have two spellings depending on which pipeline asks. The gate
-  for our own publish is one clause of `build.yml:60`, `github.repository == 'simplex-chat/simplex-chat'`,
-  which is the only thing keeping `Library release`/`Add-on release`/`Upload library` inert —
-  `LIBS_REPOSITORY: ${{ github.repository }}-libs` at `:200`/`:225`/`:243`/`:251`/`:707` already expands to
-  our repository — so #56 needs that clause retargeted and a token with release write on the other repository,
-  which the workflow already expects under one name: `GH_TOKEN: ${{ secrets.NODEJS_REPO_TOKEN }}` is consumed
-  by six steps (`:199`, `:224`, `:242`, `:531`, `:708`, `:985`) and listed in the header comment at `:108`.
+  builds and reads a `popopx-chat-libs-<platform>` artifact of its own (`:491`, `:984`, `:1274`, `:1583`, read
+  back at `:699` `POPOPX_LIBS_DIR`): one zip would then have two spellings depending on which pipeline asks.
+  **The clause that used to hold our own publish off — `github.repository == 'simplex-chat/simplex-chat'` in
+  `env.release_branch`, `build.yml:59` — was retargeted to this fork by `4a7f674b1` (2026-11-14).** That made
+  the three `if: env.release_branch` steps (`:195` `Library release`, `:224` `Add-on release`, `:255` `Versions
+  to publish`) execute on a push to master for the first time, and `Library release` failed every push since:
+  `claim-core` compares our generated types against the commit recorded for the highest `core/master` version in
+  the -libs `releases.toml`, which is still *upstream's* (`7.1.0.19 = edb783a5…`), and the same inherited file
+  records upstream's published `@simplex-chat/types` version - so it exits as if we had released those bytes.
+  What keeps the lane inert now is two provisioning switches, each of which exits 0 with a `::notice` while
+  unconfigured, so the test matrix runs instead of the job aborting:
+  - `secrets.NODEJS_REPO_TOKEN` gates `Library release` and `Add-on release` — a token with release write on
+    `popopx-chat-libs`, the name the workflow already uses in twelve steps (`:198`, `:227`, `:249`, `:543`,
+    `:712`, `:989`, `:1284`, `:1318`, `:1593`, `:1627`, `:1756`, `:1936`). Everything downstream already keys on
+    the outputs they leave empty: `Upload library` and `Build library` on `libs_tag`, the `Add-on` test steps and
+    the `releases` job on `addon_draft`, the whole `build-linux-postgres` job on `libs_tag`.
+  - `vars.NPM_SCOPE` (with `PYPI_PROJECT`/`PYPI_URL`) gates `Versions to publish`, whose plan is the only thing
+    that starts the `publish` and `record` jobs. Left unguarded it would emit `nodejs_version`/`python_version`
+    for versions that are genuinely unpublished here, and those jobs would run to a publish that has no
+    credential behind it.
+  Provisioning the first switch also requires moving `packages/popopx-chat-client/types/typescript/package.json`
+  out of upstream's published version set, because `claim-core` reads that field as the thing being released.
 - **macOS distribution cannot be produced from this machine, and the Team ID in our code has no identity
   here.** Measured 2026-11-14: `security find-identity -v -p codesigning` lists exactly one identity,
   `Apple Development: gang sun (RG6JMG38C8)` — a development certificate for a *different* team than the
