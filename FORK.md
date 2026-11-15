@@ -330,7 +330,7 @@ yet. Before any build of this fork is distributed:
   site, the app display copy, the SDKs, the Flatpak metainfo and the docs names `popopx.chat`, and the
   contact is `chat@popopx.chat`. One thing is still missing on that host and it is a silent-to-loud
   failure to fix there, not in code: neither `.well-known/apple-app-site-association` nor
-  `.well-known/assetlinks.json` is served — both answered 404 again when re-measured 2026-11-14, while the
+  `.well-known/assetlinks.json` is served — both answered 404 again when re-measured 2026-11-15, while the
   TLS name mismatch this bullet used to report was retired the day before (see the certificate item under
   "Link claims are inert" below). So universal
   links and `autoVerify` cannot be claimed by an installed app yet, link unescaping falls back to the
@@ -452,8 +452,13 @@ yet. Before any build of this fork is distributed:
     - **The deployed site is not built from this repository.** `website/` was upstream's Eleventy build and
       nothing in CI ever published it (there is no `gh-pages` branch either — `git ls-remote --heads origin`
       returns one ref); it was removed on 2026-11-13. So neither the deleted workflow nor a `CNAME` is the
-      lever: publishing `.well-known` means adding two static locations to that nginx **and** authoring the
-      two files there, because this tree no longer holds them.
+      lever: publishing `.well-known` needs two static locations added to that nginx. The files themselves
+      are authored as of 2026-11-15 in the site directory `/Users/elliot/popopx-chat/popopx.chat/.well-known/`
+      (`apple-app-site-association` with `PDBA6XRBQT.com.popopxchat.popopx` and the six link path shapes,
+      `assetlinks.json` with `com.popopxchat.popopx` and the single release-certificate fingerprint
+      `3A:7F:67:1A…FA:4C:CB`, plus a README naming the source of every value) — they are not in this git
+      tree, which holds no copy since `website/` was removed, so copying them into the served root is the
+      remaining step. Both still answer `404` until that is done.
     - **The certificate blocker cleared the day this paragraph was written; the paragraph measured the old
       one.** Two Let's Encrypt YR1 certificates are installed, one per name pair: `CN=popopx.chat` with
       `DNS:popopx.chat, DNS:www.popopx.chat` (`notBefore` 2026-11-13 04:04:23Z, `notAfter` 2027-02-11) and
@@ -467,7 +472,8 @@ yet. Before any build of this fork is distributed:
       `https://<domain>/.well-known/apple-app-site-association` — no extension, no trailing slash — so the
       server must map that name to the JSON (or redirect, which Apple follows). This tree no longer holds a
       copy to map: the file lived here as `website/src/.well-known/apple-app-site-association/index.json` and
-      left with `website/` (`9996634ee`), so the only shipped copy is the dependency's, which is already named
+      left with `website/` (`9996634ee`), so the copies that exist to map are the site directory's (previous
+      bullet, written as a plain extensionless file) and the dependency's, which is already named
       the way the protocol wants it — `popopxmq/apps/common/Web/static/.well-known/apple-app-site-association`
       — and `src/Popopx/Messaging/Server/Web.hs` special-cases that extensionless name for `application/json`
       in two places (`:122` for the file server, `:232` for the generated response), because the default would

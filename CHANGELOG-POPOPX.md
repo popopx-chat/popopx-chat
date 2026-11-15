@@ -30,6 +30,16 @@ tag rather than with intent:
   The signing identity ruled for this fork is Team ID `PDBA6XRBQT`.
 - Android: not published. `applicationId = "com.popopxchat.popopx"` (`apps/multiplatform/android/build.gradle.kts:15`)
   with a debug suffix variant, and no store listing behind it.
+- in-app update visibility on desktop: **none, on both channels** - ruled **B1 (accept, document)** on
+  2026-11-15, so `AppUpdater.kt` was left untouched. Read from the comparator, not inferred:
+  `:114 isConsideredBeta = preRelease || semVer == null || semVer.isNotStable` filters `-popopx.1` out of
+  STABLE (`:194`), and BETA's only other test is `currentSemVer < r.semVer` (`:195`) while `:60-61`
+  (`preRelease != null -> -1` / `other.preRelease != null -> 1`) ranks a labelled version *below* the same
+  bare numbers an installed 7.1.2 reports. The tag name that avoids colliding with upstream's `v7.1.2` is
+  therefore the reason the release cannot self-update; **B2** would change that comparison. Until then the
+  assets in the release are the update path. `.github/release_body.md` said "only the beta channel will"
+  offer it until this measurement - that sentence was wrong about a published page, and the page is only
+  corrected by patching the release body.
 - servers this release presets: the SMP/XFTP presets still name relays operated by SimpleX Chat Ltd, and
   the consent flow still names that company, because `CARequired` makes the operator name a party to the
   consent. Held with the per-host reasoning in `FORK.md`.
