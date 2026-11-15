@@ -847,7 +847,7 @@ testMultiForwardFiles =
       bob <# "alice> sends file test_1MB.pdf (1017.7 KiB / 1042157 bytes)"
       bob <## "use /fr 3 [<dir>/ | <path>] to receive it"
 
-      bob <# "alice> sends file logo.jpg (31.3 KiB / 32080 bytes)"
+      bob <# "alice> sends file logo.jpg (5.9 KiB / 6074 bytes)"
       bob <## "use /fr 4 [<dir>/ | <path>] to receive it"
 
       alice <## "completed uploading file 1 (test.jpg) for bob"

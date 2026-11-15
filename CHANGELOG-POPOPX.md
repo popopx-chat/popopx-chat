@@ -177,9 +177,51 @@ do not. Measuring `HEAD:<f>` right after installing also read 655/190 - an insta
 not in `HEAD`; `git add` first, then measure `:<f>`. What is still upstream's is now geometry and
 documentation rather than brand art (272 Material Symbols, 42 empty placeholders, 186 + 130 renders of
 scenes with no artwork in them, Apple's SF Symbols, GitHub's octocats) except for 4 files: the 2
-`packages/popopx-chat-mcp` UI screenshots and the 2 Haskell logo fixtures, which need a Haskell run to
+`packages/popopx-chat-mcp` UI screenshots and the 2 Haskell logo fixtures, which needed a Haskell run to
 replace (`Forward.hs:850` asserts the transferred size; `ImageTests.hs:103` and `:262` assert the PNG's
-structure).
+structure). Those 4 went the same day - see the next section.
+
+### The last 4 upstream images: 2 Haskell logo fixtures and the 2 MCP screenshots (2026-11-15, ruling "…进行运行替换")
+
+The ruling asked for a run, and the run is the whole story of the fixtures: `tests/fixtures/logo.jpg`
+(200x200) and `logo-large-rgba.png` (1630x466) are read by **10 examples in 4 files**, and replacing the bytes
+without moving the mirror is red, not neutral. Measured before touching anything, then re-run after:
+
+- `logo.jpg` 32080 -> 6074 bytes, so `Forward.hs:850` and `Files.hs:190` - which hold the *same* assertion in
+  two suites - both moved from `(31.3 KiB / 32080 bytes)` to `(5.9 KiB / 6074 bytes)`. First run was red on
+  exactly that line with the old string expected, which is the stale-mirror class, not a failing feature.
+- `logo-large-rgba.png` 28676 -> 68521 bytes at the same 1630x466, RGBA8 with transparency and the same aspect,
+  because `ImageTests.hs:103/:262` assert those properties and `MobileTests.hs:390/:408` assert the PNG magic.
+  Both fixtures were drawn from `branding/source-svg/tests__fixtures__logo-large-rgba.png.src.svg`.
+- The consumers, by their real group paths: `POPOPX chat client > file tests > messages with files` -> "send
+  image with generated preview" (`Files.hs:187`), `file tests > file transfer over XFTP without chat items` ->
+  "send and receive small standalone file" and the same "with extra information" (`:1332/:1357`),
+  `forward tests > multi forward api` -> "with relative paths: multiple files from contact to contact"
+  (`Forward.hs:801/:850`), `profile tests > user profiles` -> "set profile image from file" (`Profiles.hs:1221`);
+  plus the 3 `Image resize` readers and the 2 `Mobile API Tests` C API readers. Two
+  of them bound a *derived* length from above (`preview <= 14000`, `img <= 12500`), so smaller source bytes cannot
+  break them - and they were run, not reasoned about: `-m '/Image resize/'` = 29 examples / 0 failures, the 2
+  C API examples = 2 / 0, the 5 chat examples = 5 / 0 (`cabal build popopx-chat:test:popopx-chat-test` rc=0).
+- How to select them: `-m` is matched **componentwise from the top-level group**, so a wrong first component
+  silently matches 0 examples - `/POPOPX chat client/image data/` and `/Mobile API Tests/Images/` both returned
+  0 while the real groups are `Image resize` and (nested deeper) `Mobile API Tests`. A plain leaf title matches
+  from anywhere, which is the reliable form here.
+
+The 2 `packages/popopx-chat-mcp` screenshots (742x1489) were rebuilt as vector mockups of the POPOPX agent
+chat - no upstream UI, no third-party brand depicted, the app's own strings for the encryption notice and the
+approval cards - from `branding/source-svg/packages__popopx-chat-mcp__images__*.src.svg`.
+
+The part a byte-level pass cannot see: a published image has a **third end, the host that serves it**.
+`README.md:10-11` pointed at `raw.githubusercontent.com/simplex-chat/simplex-chat/...`, so replacing the
+repository's copies would still have shown readers upstream's art. Both `<img src>` now name
+`popopx-chat/popopx-chat/master/...` and both return 200 (direct egress; they serve the new bytes once
+pushed). The README's prose - "SimpleX MCP server", "SimpleX Network", the 3M downloads / 600k users figures,
+"SimpleX Directory", `mcp__simplex-my-agent` - is untouched and awaits ruling (#100).
+
+Census after this pass, against the index with the recipe in `ASSETS_LICENSE-POPOPX.md`: tracked 1562 -> **1565**
+(the 3 new `.src.svg` masters), still upstream's 651 -> **647**, ours 911 -> **918**. `packages/**` upstream
+images 13 -> **11**, `tests/fixtures/**` 7 -> **5**. Nothing in this repository is upstream's *artwork* now;
+what remains byte-identical is glyphs, empty placeholders, unchanged renders and third-party marks.
 
 ### The 72 overlay illustrations that were still blue, and the patch that never reached them (2026-11-15, ruling 80 张 assets/** 覆盖层图…进行运行替换)
 

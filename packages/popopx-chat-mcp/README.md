@@ -7,8 +7,8 @@ SimpleX Network is the only messaging network without any user identifiers - no 
 With this package, Claude Code can join channels and groups, talk to bots, and even receive your prompts via the SimpleX app. It asks you on your phone before it connects or sends - one tap to approve.
 
 <p>
-  <img src="https://raw.githubusercontent.com/simplex-chat/simplex-chat/master/packages/simplex-chat-mcp/images/approval.png" alt="The agent asks in its chat before it sends a message; one tap approves it" width="320">
-  <img src="https://raw.githubusercontent.com/simplex-chat/simplex-chat/master/packages/simplex-chat-mcp/images/prompts.png" alt="Prompting the agent from the SimpleX app" width="320">
+  <img src="https://raw.githubusercontent.com/popopx-chat/popopx-chat/master/packages/popopx-chat-mcp/images/approval.png" alt="The agent asks in its chat before it sends a message; one tap approves it" width="320">
+  <img src="https://raw.githubusercontent.com/popopx-chat/popopx-chat/master/packages/popopx-chat-mcp/images/prompts.png" alt="Prompting the agent from the POPOPX app" width="320">
 </p>
 
 ## Try it

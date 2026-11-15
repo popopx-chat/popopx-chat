@@ -187,7 +187,7 @@ testSendImagePreview =
       alice ##> "/img @bob ./tests/fixtures/logo.jpg"
       alice <# "/f @bob ./tests/fixtures/logo.jpg"
       alice <## "use /fc 1 to cancel sending"
-      bob <# "alice> sends file logo.jpg (31.3 KiB / 32080 bytes)"
+      bob <# "alice> sends file logo.jpg (5.9 KiB / 6074 bytes)"
       bob <## "use /fr 1 [<dir>/ | <path>] to receive it"
       alice <## "completed uploading file 1 (logo.jpg) for bob"
       preview <- lastImagePreview bob 2
