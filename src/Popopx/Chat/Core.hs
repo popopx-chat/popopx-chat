@@ -5,8 +5,8 @@
 {-# OPTIONS_GHC -fno-warn-ambiguous-fields #-}
 
 module Popopx.Chat.Core
-  ( simplexChatCore,
-    runSimplexChat,
+  ( popopxChatCore,
+    runPopopxChat,
     sendChatCmdStr,
     sendChatCmd,
     printResponseEvent,
@@ -36,7 +36,7 @@ import Popopx.Chat.Store.Profiles
 import Popopx.Chat.Store.Shared (StoreError (..))
 import Popopx.Chat.Types
 import Popopx.Chat.Types.Preferences (FeatureAllowed (..), FilesPreference (..), Preferences (..), emptyChatPrefs)
-import Popopx.Chat.View (ChatResponseEvent, serializeChatError, serializeChatResponse, simplexChatContact)
+import Popopx.Chat.View (ChatResponseEvent, serializeChatError, serializeChatResponse, popopxChatContact)
 import Popopx.Messaging.Agent.Protocol
 import Popopx.Messaging.Agent.Store.Common (DBStore, withTransaction)
 import Popopx.Messaging.Agent.Store.Shared (MigrationConfig (..), MigrationConfirmation (..))
@@ -47,8 +47,8 @@ import Text.Read (readMaybe)
 import UnliftIO.Async
 import UnliftIO.Exception (finally)
 
-simplexChatCore :: ChatConfig -> ChatOpts -> (User -> ChatController -> IO ()) -> IO ()
-simplexChatCore cfg@ChatConfig {confirmMigrations, testView, chatHooks} opts@ChatOpts {coreOptions = coreOptions@CoreChatOpts {dbOptions, logAgent, yesToUpMigrations, migrationBackupPath, maintenance}, createBot, userDisplayName, userImageFile} chat =
+popopxChatCore :: ChatConfig -> ChatOpts -> (User -> ChatController -> IO ()) -> IO ()
+popopxChatCore cfg@ChatConfig {confirmMigrations, testView, chatHooks} opts@ChatOpts {coreOptions = coreOptions@CoreChatOpts {dbOptions, logAgent, yesToUpMigrations, migrationBackupPath, maintenance}, createBot, userDisplayName, userImageFile} chat =
   case logAgent of
     Just level -> do
       setLogLevel level
@@ -85,13 +85,13 @@ simplexChatCore cfg@ChatConfig {confirmMigrations, testView, chatHooks} opts@Cha
                 putStrLn "Note: --user-image-file is ignored for an existing user (it only sets the image on profile creation); use \"/set profile image file <path>\" to change it"
               pure u
           unless testView $ putStrLn $ "Current user: " <> userStr u
-          runSimplexChat cfg opts u cc chat
+          runPopopxChat cfg opts u cc chat
     noMaintenance = when maintenance $ do
       putStrLn "exiting: no active user in maintenance mode"
       exitFailure
 
-runSimplexChat :: ChatConfig -> ChatOpts -> User -> ChatController -> (User -> ChatController -> IO ()) -> IO ()
-runSimplexChat ChatConfig {testView} ChatOpts {coreOptions = CoreChatOpts {chatRelay, chatRelayServer, headless, maintenance}} u cc@ChatController {config = ChatConfig {chatHooks}} chat
+runPopopxChat :: ChatConfig -> ChatOpts -> User -> ChatController -> (User -> ChatController -> IO ()) -> IO ()
+runPopopxChat ChatConfig {testView} ChatOpts {coreOptions = CoreChatOpts {chatRelay, chatRelayServer, headless, maintenance}} u cc@ChatController {config = ChatConfig {chatHooks}} chat
   | maintenance = wait =<< async (chat u cc)
   | otherwise = do
       a1 <- runReaderT (startChatController True True False) cc `onException` stopChatController cc
@@ -197,7 +197,7 @@ askCreateRelayAddress cc@ChatController {chatStore} user@User {userId} server_ h
     addressStr :: CreatedLinkContact -> String
     addressStr (CCLink cReq shortLink) = B.unpack $ maybe cReqStr strEncode shortLink
       where
-        cReqStr = strEncode $ simplexChatContact cReq
+        cReqStr = strEncode $ popopxChatContact cReq
 
 printResponseEvent :: ChatResponseEvent r => (Maybe RemoteHostId, Maybe User) -> ChatConfig -> Either ChatError r -> IO ()
 printResponseEvent hu cfg = \case

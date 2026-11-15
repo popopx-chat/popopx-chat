@@ -56,7 +56,7 @@ Profile is stored locally and only shared with contacts. Footer explains this pr
 | Configure operators | Sheet to customize operator settings |
 | **Accept** button | Accepts conditions and advances to notifications step |
 
-Previous deprecated step `step3_CreateSimpleXAddress` (`CreateSimpleXAddress`) is no longer in the active flow.
+Previous deprecated step `step3_CreatePOPOPXAddress` (`CreatePOPOPXAddress`) is no longer in the active flow.
 
 ### Step 4: Set Notification Mode (`SetNotificationsMode`)
 
@@ -109,7 +109,7 @@ On completion, `onboardingStageDefault.set(.onboardingComplete)` is called.
 enum OnboardingStage: String {
     case step1_POPOPXInfo
     case step2_CreateProfile          // deprecated
-    case step3_CreateSimpleXAddress   // deprecated
+    case step3_CreatePOPOPXAddress   // deprecated
     case step3_ChooseServerOperators  // conditions acceptance
     case step4_SetNotificationsMode
     case onboardingComplete

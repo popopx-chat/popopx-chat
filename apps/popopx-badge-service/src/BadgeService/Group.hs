@@ -60,7 +60,7 @@ import Popopx.Chat.Store.Shared (StoreError (..))
 import Popopx.Chat.Types
 import Popopx.Chat.Types.Preferences (GroupPreferences (..), commands_, emptyGroupPrefs)
 import Popopx.Chat.Types.Shared (GroupMemberRole (..))
-import Popopx.Chat.View (simplexChatContact)
+import Popopx.Chat.View (popopxChatContact)
 import Popopx.Messaging.Agent.Protocol (CreatedConnLink (..), UserId)
 import Popopx.Messaging.Encoding.String (StrEncoding, strEncode)
 import Popopx.Messaging.Util (catchOwn', safeDecodeUtf8, tshow, ($>>=))
@@ -158,7 +158,7 @@ inertGroupConfig GroupConfig {gDisplayName, gDescription} GroupProfile {displayN
       ]
 
 groupLinkText :: CreatedLinkContact -> Text
-groupLinkText (CCLink cReq sLnk_) = maybe (strEncodeTxt (simplexChatContact cReq)) strEncodeTxt sLnk_
+groupLinkText (CCLink cReq sLnk_) = maybe (strEncodeTxt (popopxChatContact cReq)) strEncodeTxt sLnk_
 
 strEncodeTxt :: StrEncoding a => a -> Text
 strEncodeTxt = safeDecodeUtf8 . strEncode

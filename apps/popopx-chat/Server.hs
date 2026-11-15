@@ -67,9 +67,9 @@ instance ToJSON (CSRBody r) => ToJSON (ChatSrvResponse r) where
   toEncoding = $(JQ.mkToEncoding defaultJSON ''ChatSrvResponse)
   toJSON = $(JQ.mkToJSON defaultJSON ''ChatSrvResponse)
 
-simplexChatServer :: ServiceName -> ChatConfig -> ChatOpts -> IO ()
-simplexChatServer chatPort cfg opts =
-  simplexChatCore cfg opts . const $ runChatServer defaultChatServerConfig {chatPort}
+popopxChatServer :: ServiceName -> ChatConfig -> ChatOpts -> IO ()
+popopxChatServer chatPort cfg opts =
+  popopxChatCore cfg opts . const $ runChatServer defaultChatServerConfig {chatPort}
 
 data ChatServerConfig = ChatServerConfig
   { chatPort :: ServiceName,

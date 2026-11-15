@@ -8,4 +8,4 @@ import Popopx.Chat.Terminal (terminalChatConfig)
 main :: IO ()
 main = do
   opts <- welcomeGetOpts
-  simplexChatCore terminalChatConfig (mkChatOpts opts) $ broadcastBot opts
+  popopxChatCore terminalChatConfig (mkChatOpts opts) $ broadcastBot opts

@@ -3,7 +3,7 @@
 # Test backend on the app runner: a chat relay and a directory service on the preset servers, with one group
 # and one channel registered and approved by a CLI peer, and another CLI peer that must find both by sending the
 # directory the search text. Both have profile images as large as the apps make them.
-# For SimpleX names, an SMP server on 127.0.0.1 resolves .testing names through a local resolver, and a CLI peer
+# For POPOPX names, an SMP server on 127.0.0.1 resolves .testing names through a local resolver, and a CLI peer
 # with an address on it claims the name seeded.testing.
 # Usage:
 #   scripts/ci/desktop-linux/backend.sh start <backend .tar.gz> <work dir>   writes the directory's short address to <work dir>/directory-link

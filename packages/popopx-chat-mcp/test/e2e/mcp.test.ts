@@ -53,7 +53,7 @@ test("agent with an owner, a bot and the tools", async () => {
     expect(logLines).toContain("  npx -y @simplex-chat/mcp register agent --data " + agentData)
     const ownerSends = (text: string) => alice.apiSendTextMessage([T.ChatType.Group, controlId], text)
 
-    expect(await client.initialize()).toMatchObject({protocolVersion: "2025-11-25", serverInfo: {name: "simplex-mcp"}})
+    expect(await client.initialize()).toMatchObject({protocolVersion: "2025-11-25", serverInfo: {name: "popopx-mcp"}})
     const {tools} = await client.request("tools/list")
     expect(tools.map(({name}: {name: string}) => name)).toEqual(["connect", "send", "receive", "download", "list", "leave"])
 

@@ -282,7 +282,7 @@ First-launch experience controlled by [`ChatModel.onboardingStage`](../../Shared
 enum OnboardingStage: String, Identifiable {
     case step1_POPOPXInfo              // Welcome screen
     case step2_CreateProfile            // deprecated
-    case step3_CreateSimpleXAddress     // deprecated
+    case step3_CreatePOPOPXAddress     // deprecated
     case step3_ChooseServerOperators    // Choose server operators
     case step4_SetNotificationsMode     // Set notification preferences
     case onboardingComplete             // Normal operation

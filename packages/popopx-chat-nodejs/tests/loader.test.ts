@@ -1,7 +1,7 @@
 import {spawnSync} from "child_process"
 import * as path from "path"
 
-jest.mock("../src/simplex", () => ({load: jest.fn()}))
+jest.mock("../src/popopx", () => ({load: jest.fn()}))
 jest.mock("../src/libs", () => ({libPath: jest.requireActual("../src/libs").libPath, resolveLibsDir: jest.fn(), resolveAddonPath: jest.fn()}))
 
 const PACKAGE_DIR = path.join(__dirname, "..")
@@ -25,7 +25,7 @@ function freshCore(): {core: typeof import("../src/core"), resolveLibsDir: jest.
     modules = {
       core: require("../src/core"),
       resolveLibsDir: libs.resolveLibsDir,
-      load: require("../src/simplex").load,
+      load: require("../src/popopx").load,
     }
   })
   return modules
@@ -61,7 +61,7 @@ describe("native load", () => {
 
 describe("add-on module", () => {
   it("rejects FFI calls before the add-on is loaded", () => {
-    const simplex = jest.requireActual<typeof import("../src/simplex")>("../src/simplex")
+    const simplex = jest.requireActual<typeof import("../src/popopx")>("../src/popopx")
     expect(() => simplex.chat_send_cmd(BigInt(1), "/v")).toThrow("libpopopx is not loaded, call core.loadLibrary(backend) first")
   })
 })

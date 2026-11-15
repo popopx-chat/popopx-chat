@@ -1,5 +1,6 @@
-// These functions are defined in CPP add-on ../cpp/simplex.cc
-
+// The bindings below are exported by the C++ add-on (cpp/simplex.cc, loaded via process.dlopen
+// in popopx.js); this file only types them. It names the add-on source, which is an input to the
+// published nodejs-addon-<hash> tag, so that source keeps its name - see CHANGELOG-POPOPX.md.
 export function load(addonPath: string, libPath: string): void
 export function chat_migrate_init(dbPath: string, dbKey: string, confirm: string): Promise<[bigint, string]>
 export function chat_migrate_init_queue(dbPath: string, dbKey: string, confirm: string, queueSize: number): Promise<[bigint, string]>

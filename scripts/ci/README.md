@@ -16,7 +16,7 @@ On a draft pull request, the tests are selected by a fenced block with the info 
 curl -fsS -X POST \
   -H "Authorization: Bearer $GH_TOKEN" \
   -H "Accept: application/vnd.github+json" \
-  https://api.github.com/repos/<owner>/simplex-chat/actions/workflows/build.yml/dispatches \
+  https://api.github.com/repos/<owner>/popopx-chat/actions/workflows/build.yml/dispatches \
   -d '{"ref": "<branch>", "inputs": {"tests": "/POPOPX chat client/group tests/\n/Message batching/"}}'
 ```
 
@@ -30,8 +30,8 @@ Endpoint: https://docs.github.com/en/rest/actions/workflows#create-a-workflow-di
 When a newer dispatch on the same branch starts build-linux or build-ios, GitHub cancels the unfinished job of the older one (`cancel-in-progress`).
 
 Results:
-- Run and jobs: `GET /repos/<owner>/simplex-chat/actions/runs?head_sha=<commit>&event=workflow_dispatch` returns the run id; `GET /repos/<owner>/simplex-chat/actions/runs/<run id>/jobs` returns each step with its start, end and conclusion.
-- Job log: `GET /repos/<owner>/simplex-chat/actions/jobs/<job id>/logs` returns a redirect to a text file, valid for 1 minute (https://docs.github.com/en/rest/actions/workflow-jobs#download-job-logs-for-a-workflow-run). The test summary is printed as "Finished in N seconds" and "N examples, N failures".
+- Run and jobs: `GET /repos/<owner>/popopx-chat/actions/runs?head_sha=<commit>&event=workflow_dispatch` returns the run id; `GET /repos/<owner>/popopx-chat/actions/runs/<run id>/jobs` returns each step with its start, end and conclusion.
+- Job log: `GET /repos/<owner>/popopx-chat/actions/jobs/<job id>/logs` returns a redirect to a text file, valid for 1 minute (https://docs.github.com/en/rest/actions/workflow-jobs#download-job-logs-for-a-workflow-run). The test summary is printed as "Finished in N seconds" and "N examples, N failures".
 
 ### Scopes
 
@@ -86,9 +86,9 @@ The reduced build runs one Linux job, build-linux (ubuntu-22.04 x86_64), for eve
   - scripts/ci/package-tests.sh
 - CI, in build-linux:
   - Node 22 and Python 3.12 (steps "Setup Node.js" and "Setup Python");
-  - libsimplex, when `CORE_SOURCES` of packages_release.py also changed (step "Build library");
+  - libpopopx, when `CORE_SOURCES` of packages_release.py also changed (step "Build library");
   - `package-tests.sh build linux-x86_64` and `package-tests.sh test` (step "Package tests (pull request)").
-- With libsimplex built, POPOPX_LIBS_DIR is set to it for the nodejs tests; the python tests run with both spellings unset (package-tests.sh). Without POPOPX_LIBS_DIR, the pinned release libraries are downloaded (packages/popopx-chat-nodejs/src/libs.ts).
+- With libpopopx built, POPOPX_LIBS_DIR is set to it for the nodejs tests; the python tests run with both spellings unset (package-tests.sh). Without POPOPX_LIBS_DIR, the pinned release libraries are downloaded (packages/popopx-chat-nodejs/src/libs.ts).
 - Local:
   ```sh
   scripts/ci/package-tests.sh build linux-x86_64
@@ -127,7 +127,7 @@ The reduced build runs one Linux job, build-linux (ubuntu-22.04 x86_64), for eve
     - `npm ci`, then both installed into the MCP package with `npm install --no-save`;
     - `npx tsc` and `npx tsc -p test/tsconfig.json --noEmit`;
     - `npm test`, the unit tests;
-    - `npm run test:e2e`, the end-to-end tests. They download libsimplex and the add-on pinned in packages/popopx-chat-nodejs/src/release.ts, and smp-server and xftp-server of the popopxmq release in test/e2e/smpServer.ts;
+    - `npm run test:e2e`, the end-to-end tests. They download the pinned native library and the add-on pinned in packages/popopx-chat-nodejs/src/release.ts, and smp-server and xftp-server of the popopxmq release in test/e2e/smpServer.ts;
   - before a publication: the package with its published dependencies, type-checked and unit tested in job `publish` of build.yml (docs/contributing/RELEASES.md, "MCP server release").
 - Local: `scripts/ci/scope-tests.sh mcp`.
 
@@ -182,7 +182,7 @@ gh workflow run android-emu.yml --ref <branch> -f claude=true
 
 A newer run of a workflow on the same branch cancels the older one.
 
-Each run uploads the app it built, for manual tests, as an artifact kept 14 days: `ios-sim-app` (SimpleX.app.tar.gz, for the iOS simulator on an Apple-silicon Mac), `desktop-app` (desktop-app.tar.gz, for Linux x86-64) and `android-app` (the debug APK, arm64-v8a only). The run's page lists it under Artifacts; `gh run download <run id> -n <artifact>` downloads it.
+Each run uploads the app it built, for manual tests, as an artifact kept 14 days: `ios-sim-app` (POPOPX.app.tar.gz, for the iOS simulator on an Apple-silicon Mac), `desktop-app` (desktop-app.tar.gz, for Linux x86-64) and `android-app` (the debug APK, arm64-v8a only). The run's page lists it under Artifacts; `gh run download <run id> -n <artifact>` downloads it.
 
 ## How long a run takes
 

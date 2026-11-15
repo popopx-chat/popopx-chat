@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Builds the CLI, the directory service and the SMP server (for SimpleX names) that the app job runs as its test backend.
+# Builds the CLI, the directory service and the SMP server (for POPOPX names) that the app job runs as its test backend.
 # Usage: scripts/ci/ios-sim/build-backend.sh <output zip>
 # They need the server-capable configuration (no client_library), as build.yml's macOS job builds the CLI.
 

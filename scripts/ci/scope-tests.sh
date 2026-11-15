@@ -13,7 +13,7 @@ case "${1:-}" in
     ;;
   mcp)
     (cd packages/popopx-chat-client/types/typescript && npm install --no-audit --no-fund && npx tsc)
-    (cd packages/popopx-chat-nodejs && npm install --ignore-scripts --no-save --no-audit --no-fund ../popopx-chat-client/types/typescript && npx tsc && cp src/simplex.* dist)
+    (cd packages/popopx-chat-nodejs && npm install --ignore-scripts --no-save --no-audit --no-fund ../popopx-chat-client/types/typescript && npx tsc && cp src/popopx.* dist)
     # Test the native backend this job built instead of the one published in popopx-chat-libs.
     # An override naming a missing path raises instead of falling back (libs.ts resolve*), so
     # each one is exported only when the artifact it points at exists.

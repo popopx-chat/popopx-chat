@@ -26,7 +26,7 @@ case "$cases" in
 esac
 package=com.popopxchat.popopx
 local_chat="seeded notes"
-search_field="Search or paste SimpleX link"
+search_field="Search or paste POPOPX link"
 ui=$(dirname "$0")/ui
 fixtures=$(dirname "$0")/../../../tests/fixtures
 checks=$UI_OUT/checks.txt
@@ -171,7 +171,7 @@ open_settings() {
   "$ui" click-text "Settings" 10
 }
 
-# Green pixels of the test status left of a server's host name: SimplexGreen, the tick of a server that passed its test.
+# Green pixels of the test status left of a server's host name, the tick of a server that passed its test.
 green_before() {
   local x y l t r b png
   read -r x y l t r b < <("$ui" find "$1") || return 1

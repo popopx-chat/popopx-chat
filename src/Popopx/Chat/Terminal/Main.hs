@@ -21,14 +21,14 @@ import System.Exit (exitFailure)
 import System.IO (BufferMode (..), hSetBuffering, stdout)
 import System.Terminal (withTerminal)
 
-simplexChatCLI :: ChatConfig -> Maybe (ServiceName -> ChatConfig -> ChatOpts -> IO ()) -> IO ()
-simplexChatCLI cfg server_ = do
+popopxChatCLI :: ChatConfig -> Maybe (ServiceName -> ChatConfig -> ChatOpts -> IO ()) -> IO ()
+popopxChatCLI cfg server_ = do
   appDir <- getAppUserDataDirectory "popopx"
   opts <- getChatOpts appDir "popopx_v1"
-  simplexChatCLI' cfg opts server_
+  popopxChatCLI' cfg opts server_
 
-simplexChatCLI' :: ChatConfig -> ChatOpts -> Maybe (ServiceName -> ChatConfig -> ChatOpts -> IO ()) -> IO ()
-simplexChatCLI' cfg opts@ChatOpts {chatCmd, chatCmdLog, chatCmdDelay, chatServerPort, coreOptions = CoreChatOpts {headless}} server_ = do
+popopxChatCLI' :: ChatConfig -> ChatOpts -> Maybe (ServiceName -> ChatConfig -> ChatOpts -> IO ()) -> IO ()
+popopxChatCLI' cfg opts@ChatOpts {chatCmd, chatCmdLog, chatCmdDelay, chatServerPort, coreOptions = CoreChatOpts {headless}} server_ = do
   if null chatCmd
     then case chatServerPort of
       Just chatPort -> case server_ of
@@ -38,14 +38,14 @@ simplexChatCLI' cfg opts@ChatOpts {chatCmd, chatCmdLog, chatCmdDelay, chatServer
         | headless -> do
             hSetBuffering stdout LineBuffering
             welcome cfg opts
-            simplexChatCore cfg opts runHeadless
+            popopxChatCore cfg opts runHeadless
         | otherwise -> runCLI
-    else simplexChatCore cfg opts runCommand
+    else popopxChatCore cfg opts runCommand
   where
     runCLI = do
       welcome cfg opts
       t <- withTerminal pure
-      simplexChatTerminal cfg opts t
+      popopxChatTerminal cfg opts t
     runHeadless user cc = forever $ do
       (rh, r) <- atomically $ readTBQueue $ outputQ cc
       case r of

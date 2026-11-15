@@ -107,7 +107,7 @@ example ships. `static_dir` is relative to the working directory, so run from
 the repository root or make it absolute.
 
 **The executable is the whole badge service, not just this listener.**
-`badgeService` starts `simplexChatCore` unconditionally and the web listener
+`badgeService` starts `popopxChatCore` unconditionally and the web listener
 is one lane beside the chat one, so a local run opens or creates a chat
 database (`printDbOpts` names the path at startup) and does agent network
 work. `--no-address` skips creating the service's contact address on first

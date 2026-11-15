@@ -19,7 +19,7 @@ build_package() {
   if [ -n "${1:-}" ]; then
     (cd "$nodejs" && npx --yes node-gyp rebuild)
   fi
-  (cd "$nodejs" && npx tsc && cp src/simplex.* dist)
+  (cd "$nodejs" && npx tsc && cp src/popopx.* dist)
   if [ -n "${1:-}" ]; then
     cp "$nodejs/build/Release/popopx.node" "$nodejs/build/popopx-chat-nodejs-$1.node"
   fi

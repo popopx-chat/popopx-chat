@@ -36,7 +36,7 @@ import Data.Time.Format.ISO8601 (iso8601Show)
 import Directory.Store
 import Popopx.Chat.Markdown
 import Popopx.Chat.Types
-import Popopx.Chat.View (simplexChatContact)
+import Popopx.Chat.View (popopxChatContact)
 import Popopx.Messaging.Agent.Protocol
 import Popopx.Messaging.Encoding.String
 import Popopx.Messaging.Parsers (defaultJSON, dropPrefix, taggedObjectJSON)
@@ -136,7 +136,7 @@ groupDirectoryEntry now g@GroupInfo {groupProfile, chatTs, createdAt, groupSumma
         Nothing -> case connLinkContact <$> gLink_ of
           Just gLink@(CCLink cReq sLnk_)
             | not (maybe False (descriptionContainsLink gLink) description) ->
-                let linkText = maybe (strEncode $ simplexChatContact cReq) strEncode sLnk_
+                let linkText = maybe (strEncode $ popopxChatContact cReq) strEncode sLnk_
                     linkLine = groupLinkLine displayName $ decodeUtf8 linkText
                  in Just $ maybe linkLine (<> "\n\n" <> linkLine) description
           _ -> description

@@ -3,7 +3,7 @@
 # Builds the CLI, the directory service and the SMP server that the app job runs as its test backend.
 # Usage: scripts/ci/desktop-linux/build-backend.sh <output .tar.gz>
 # They need the server-capable configuration (no client_library), as build.yml's Linux job builds the CLI.
-# The SMP server, which resolves the test's SimpleX names, comes from a clone of the popopxmq commit that
+# The SMP server, which resolves the test's POPOPX names, comes from a clone of the popopxmq commit that
 # cabal.project pins: cabal builds only the libraries of a source-repository-package.
 
 set -euo pipefail

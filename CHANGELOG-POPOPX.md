@@ -95,6 +95,74 @@ whose skip branch is also its error branch turns an outage into a green idle run
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
 
+### The last five naming sub-tiers, ruled together: A to E (2026-11-15, ruling 推 8 个；A+D 执行，B 改 popopx-mcp，C+E 执行，E 关闭)
+
+The residue left after the naming unit was five tiers, each with a different far end. They were ruled in one
+reply and are executed here as one commit, 49 files. What decided each was not the token but **who reads the
+value**:
+
+- **A - Haskell identifiers (16 files, 59 replacements).** Only code positions moved: `simplexChatCore`,
+  `runSimplexChat`, `simplexChatTerminal`, `simplexChatCLI`, `simplexChatContact`, `simplexChatInvitation`,
+  `simplexChatServer` became popopx-spelled, whole-word. Every **string literal was preserved byte for
+  byte**, per the standing Haskell ruling, so `Operators.hs:94/98` still maps `"simplex" -> OTSimplex`,
+  `server_operator_tag` still writes `'simplex'`, and the persisted values are untouched. Identifiers that
+  *name an upstream thing* also kept their name: `operatorSimpleXChat` 9, `simplexChatRelays` 9,
+  `simplexChatSMPServers` 7, `OTSimplex` 4, `ConnectSimplex` 3 - re-measured after the pass, all unchanged.
+  The gate is real, not a grep: `cabal build all` (library + 8 executables) and
+  `cabal build popopx-chat:test:popopx-chat-test`, both green. It earned its cost - the first run was red on
+  three `apps/**` modules that a `src`/`tests` census does not see, which is how the pass learned that the
+  fork's own services import `Popopx.Chat.View`.
+- **B - the MCP server's identity is ours, the command the user types is not.** `serverInfo.name` becomes
+  `popopx-mcp` (`serve.ts:112`), with its e2e assertion moved in the same commit; `bin simplex-mcp`, the
+  usage text and the `simplex-mcp:` error prefix stay, because that spelling is `package.json` `bin` and is
+  rewritten only at publish time. The `customData` keys `simplexMcp`/`simplexMcpFiles` were refused: they are
+  JSON members the core persists in the agent's database, so renaming one silently forgets approvals an
+  already-running agent stored - the reason is now a comment above the key in `control.ts`.
+- **C - the Node.js facade moved, its two pinned neighbours did not.** `src/simplex.js`/`simplex.d.ts` →
+  `src/popopx.*` and the `import * as simplex` in `core.ts` follow, because nothing outside the package reads
+  those names. `cpp/simplex.cc`/`simplex.h` **cannot** move: they are `ADDON_SOURCES`, the input to
+  `current_addon_hash()`, which is the published `nodejs-addon-<hash>` tag pinned in `src/release.ts` - and
+  no lane exists to publish a re-hashed add-on (`secrets.NODEJS_REPO_TOKEN` is absent, #82). Python's
+  `logging.getLogger("simplex_chat")` likewise stayed: that string equals the import path of the
+  distribution `simplex-chat`, which is a ruled-hold registry name. `popopx.d.ts` records which file it is
+  typing and why that name is load-bearing.
+- **D - the docs that still described the previous round.** `CreateSimpleXAddress` → `CreatePOPOPXAddress` in
+  12 places across `apps/{ios,multiplatform}/{spec,product}`, because the code was renamed two tiers ago and
+  only the documents lagged (`App.kt:195 Step3_CreatePOPOPXAddress`, `OnboardingView.swift:51
+  step3_CreatePOPOPXAddress`, and `CreatePOPOPXAddress.swift` is a real path). The 6 `SimpleX.AppImage`
+  fixtures in `AppLinkSchemeTest.kt` moved as inert input. Held: the persisted raw values of
+  `OnboardingStage`/`enum …: String, Identifiable`, which iOS writes to `UserDefaults`
+  (`onboardingStageDefault.set`), and everything that names an upstream-operated destination.
+- **E - `scripts/ci`, and three of its lines were already broken.** Two of them are repairs this repo caused,
+  not brand edits: `package-tests.sh:22` and `scope-tests.sh:16` still ran `cp src/simplex.* dist` after C
+  moved that file, which would have made every Node.js CI step ship a `dist/` without its facade; and
+  `android/smoke-test.sh:29` matched the on-screen text `Search or paste SimpleX link`, which the app has not
+  rendered since the display tier - `strings.xml:517` says `Search or paste POPOPX link`. The rest were stale
+  citations of this repository's own producers, each checked against the producer first: the artifact is
+  `POPOPX.app.tar.gz` (`ios-sim.yml:210`), the cabal executables are `popopx-chat` /
+  `popopx-directory-service` (`build-backend.sh:25/37`), the library this repo builds is `libpopopx.so`
+  (`build-lib-linux.sh:38`), the Swift preview is `BadgesSupportPopopxView_Previews`, the API paths are
+  `/repos/<owner>/popopx-chat/actions/...`, the test backend's feature heading - which `ios-sim/backend.sh`
+  *generates* and `claude-prompt.md` *reads*, so both sides moved together - is now "POPOPX names".
+
+**Held, with the reason recorded rather than assumed**: `lib:simplex-chat` is a **Nix attribute path**, spelled
+that way in 10 places in our own `flake.nix` and consumed as a command argument by `build-core.sh:14` and
+`scripts/android/build-android.sh:108`, so the CI citations are true and renaming the attribute is a separate
+change; `release-apk.sh` and `release-app.sh` download **upstream's** signed APK and **.deb** and assert
+against upstream's fingerprint and `/opt/simplex`, which is why `reproduce-builds` could only ever verify
+their build; `smoke-test.sh:287`'s `for operator in "SimpleX Chat"` is a preset operator name the core
+returns; `SIMPLEX_LIBS_DIR` is the second spelling of the ruled dual loader. All 23 held lines were
+re-measured, and the residue in `scripts/ci` is exactly those 23.
+
+**Newly measured, NOT touched - and #101 closes with it open.** "SimpleX name(s)" survives in 71 lines / 26
+files outside `scripts/ci`, and unlike the tiers above most of it is **user-visible text this fork writes**:
+`packages/popopx-chat-mcp/src/log.ts:75-130` mirrors the apps' error wording the moko resources now render as
+"POPOPX name error", `tools.ts:230/403/432` describes the tools to the model that reads them,
+`bot.ts:194-201` logs it, and `apps/popopx-directory-service/src/Directory/Service.hs:380/1174` emits
+`"\nSimpleX name: "` into a listing - a Haskell **literal**, so the standing ruling protects it and moving it
+means moving its `DirectoryTests.hs:2263/2296` `<##` mirrors in the same commit. `MarkdownTests.hs:492`'s
+describe title is held as every other hspec title is, because CI selects on it.
+
 ### The app's own link scheme became popopxchat:, with the old spelling left working (2026-11-15, ruling 可以多个则增加 popopxchat://)
 
 `appLinkScheme = "simplexchat"` was the last unresolved item of the apps/ios tier: residue, or something with

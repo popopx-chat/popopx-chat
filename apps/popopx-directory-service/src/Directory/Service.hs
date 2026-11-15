@@ -64,11 +64,11 @@ import Popopx.Chat.Store.Groups (getGroupLink, getGroupMember, getGroupMemberByM
 import Popopx.Chat.Store.Profiles (GroupLinkInfo (..), getGroupLinkInfo)
 import Popopx.Chat.Store.Shared (StoreError (..))
 import Popopx.Chat.Terminal (terminalChatConfig)
-import Popopx.Chat.Terminal.Main (simplexChatCLI')
+import Popopx.Chat.Terminal.Main (popopxChatCLI')
 import Popopx.Chat.Types
 import Popopx.Chat.Types.Preferences
 import Popopx.Chat.Types.Shared
-import Popopx.Chat.View (groupPopopxDomain, serializeChatError, serializeChatResponse, simplexChatContact, viewContactName, viewGroupName)
+import Popopx.Chat.View (groupPopopxDomain, serializeChatError, serializeChatResponse, popopxChatContact, viewContactName, viewGroupName)
 import Popopx.Messaging.Agent.Protocol (AConnectionLink (..), ACreatedConnLink (..), AgentErrorType (..), ConnectionLink (..), CreatedConnLink (..), SConnectionMode (..), PopopxDomain)
 import Popopx.Messaging.Client (NetworkRequestMode (..))
 import qualified Popopx.Messaging.Crypto.File as CF
@@ -164,7 +164,7 @@ directoryServiceCLI opts = do
             acceptMember = Just $ acceptMemberHook opts env
           }
   raceAny_ $
-    [ simplexChatCLI' terminalChatConfig {chatHooks, updateGroupLinksFromApp = True} (mkChatOpts opts) Nothing,
+    [ popopxChatCLI' terminalChatConfig {chatHooks, updateGroupLinksFromApp = True} (mkChatOpts opts) Nothing,
       processEvents env
     ]
       <> maybeToList (updateListingsThread_ opts env)
@@ -255,7 +255,7 @@ directoryService opts cfg env@ServiceState {eventQ} = do
             postStartHook = Just $ directoryPostStartHook opts env,
             acceptMember = Just $ acceptMemberHook opts env
           }
-  simplexChatCore cfg {chatHooks, updateGroupLinksFromApp = True} (mkChatOpts opts) $ \user cc ->
+  popopxChatCore cfg {chatHooks, updateGroupLinksFromApp = True} (mkChatOpts opts) $ \user cc ->
     raceAny_ $
       [ forever $ do
           (_, resp) <- atomically . readTBQueue $ outputQ cc
@@ -344,7 +344,7 @@ directoryServiceEvent opts@DirectoryOpts {adminUsers, superUsers, serviceName, o
     DEVoiceUploadEnded filePath -> void (try $ removeFile filePath :: IO (Either SomeException ()))
     DELogChatResponse r -> logInfo r
   where
-    groupLinkText (CCLink cReq sLnk_) = maybe (strEncodeTxt $ simplexChatContact cReq) strEncodeTxt sLnk_
+    groupLinkText (CCLink cReq sLnk_) = maybe (strEncodeTxt $ popopxChatContact cReq) strEncodeTxt sLnk_
     withAdminUsers action = void . forkIO $ do
       forM_ superUsers $ \KnownContact {contactId} -> action contactId
       forM_ adminUsers $ \KnownContact {contactId} -> action contactId

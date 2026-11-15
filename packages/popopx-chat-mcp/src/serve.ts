@@ -109,7 +109,10 @@ async function startAgent(chat: api.ChatApi, options: ServeOptions, token: strin
   const control: Control = new Control(chat, group, {displayName, owners: options.owners, registerHint: registerHint(options), qrCode: options.qrCode}, actions, tools)
   await control.load()
   const factory = (): McpServer => {
-    const mcp = new McpServer({name: "simplex-mcp", version}, {instructions: instructions(displayName)})
+    // This name is what an MCP client shows as the server's identity, so it is ours to choose.
+    // The help text and the error prefix keep "simplex-mcp": that spells package.json bin, which
+    // is only rewritten at publish time (see POPOPX-REBRAND-PLAN B1) and is what users type.
+    const mcp = new McpServer({name: "popopx-mcp", version}, {instructions: instructions(displayName)})
     tools.register(mcp)
     return mcp
   }

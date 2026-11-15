@@ -54,10 +54,20 @@ The three groups listed in the ruling are **names**, and AGPL-3.0 imposes nothin
   server `apps/popopx-chat/Server.hs` and the four service/bot entries) — 1 call in
   `tests/Bots/BroadcastTests.hs`, 1 sentence in `apps/popopx-badge-service/web/README.md`, and 4 lines
   recording this split in this file and in `CHANGELOG-POPOPX.md`. Renaming an exported library identifier
-  changes the API for anything importing `Popopx.Chat.Core` from this fork, so it is not folded into a
-  scripting commit — it needs its own pass
+  changes the API for anything importing `Popopx.Chat.Core` from this fork, so it was kept out of the
+  scripting commit and given its own pass
   with `cabal build` over the library and all eight executables as the gate. AGPL neither requires nor
   forbids either move.
+
+  **That pass ran on 2026-11-15 (ruling A+D 执行)**: after it, the only mentions of the old spelling left in
+  the tree were 6, in these two record files (4 here, 2 in `CHANGELOG-POPOPX.md`) - no code, resource or
+  script reads `simplexChatCore`, and raising that count again is a documentation act rather than a missed reader.
+  `popopxChatCore` is **33 occurrences / 16 files**: 13 of them the JSON field (`scripts/ci/test_packages_release.py` 9, `scripts/ci/packages_release.py` 3, `package.json` 1) and 15
+  the Haskell identifiers this pass moved (9 files), the rest being the test call, the badge-service README
+  sentence and these records. The gate caught a census error before it could ship: `apps/**/*.hs` held 23
+  further occurrences that a `src`/`tests` count misses, and `cabal build all` named the three modules that
+  failed until they were included. String literals were not touched, per the standing Haskell ruling, so
+  `server_operator_tag = 'simplex'` and its peers survive.
 - **`simplex-chat-libs`** (100 occurrences at ruling 6, **6** measured 2026-11-13 — 2 of them the
   `-<platform>` asset filename inside a quoted download log) moved to `popopx-chat-libs` on 2026-11-13
   (FORK.md item 6). The reasoning here

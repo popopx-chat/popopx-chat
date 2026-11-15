@@ -65,18 +65,18 @@ terminalChatConfig =
       deviceNameForRemote = "POPOPX CLI"
     }
 
-simplexChatTerminal :: WithTerminal t => ChatConfig -> ChatOpts -> t -> IO ()
-simplexChatTerminal cfg options t = run options
+popopxChatTerminal :: WithTerminal t => ChatConfig -> ChatOpts -> t -> IO ()
+popopxChatTerminal cfg options t = run options
   where
 #if defined(dbPostgres)
     run opts =
-      simplexChatCore cfg opts $ \u cc -> do
+      popopxChatCore cfg opts $ \u cc -> do
         ct <- newChatTerminal t opts
         when (firstTime cc) . printToTerminal ct $ chatWelcome u
         runChatTerminal ct cc opts
 #else
     run opts@ChatOpts {coreOptions = coreOptions@CoreChatOpts {dbOptions}} =
-      handle checkDBKeyError . simplexChatCore cfg opts $ \u cc -> do
+      handle checkDBKeyError . popopxChatCore cfg opts $ \u cc -> do
         ct <- newChatTerminal t opts
         when (firstTime cc) . printToTerminal ct $ chatWelcome u
         runChatTerminal ct cc opts

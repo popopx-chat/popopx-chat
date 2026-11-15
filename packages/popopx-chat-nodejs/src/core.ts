@@ -1,6 +1,6 @@
 import {ChatEvent, ChatResponse, T} from "@simplex-chat/types"
 import * as libs from "./libs"
-import * as simplex from "./simplex"
+import * as popopx from "./popopx"
 
 export type Backend = "sqlite" | "postgres"
 
@@ -16,7 +16,7 @@ export function loadLibrary(backend: Backend): Promise<void> {
     return Promise.reject(new Error(`libpopopx already loaded with backend=${loading.backend}; cannot switch to ${backend} in the same process`))
   }
   const promise = Promise.all([libs.resolveLibsDir(backend), libs.resolveAddonPath()])
-    .then(([dir, addon]) => simplex.load(addon, libs.libPath(dir)))
+    .then(([dir, addon]) => popopx.load(addon, libs.libPath(dir)))
   loading = {backend, promise}
   // a failed download or load can be retried
   promise.catch(() => { loading = undefined })
@@ -29,8 +29,8 @@ export function loadLibrary(backend: Backend): Promise<void> {
  */
 export async function chatMigrateInit(dbPath: string, dbKey: string, confirm: MigrationConfirmation, queueSize?: number): Promise<bigint> {
   const [ctrl, res] = queueSize === undefined
-    ? await simplex.chat_migrate_init(dbPath, dbKey, confirm)
-    : await simplex.chat_migrate_init_queue(dbPath, dbKey, confirm, queueSize)
+    ? await popopx.chat_migrate_init(dbPath, dbKey, confirm)
+    : await popopx.chat_migrate_init_queue(dbPath, dbKey, confirm, queueSize)
   const json = JSON.parse(res)
   if (json.type === 'ok') return ctrl
   throw new ChatInitError("Database or migration error (see dbMigrationError property)", json as DBMigrationError)
@@ -40,7 +40,7 @@ export async function chatMigrateInit(dbPath: string, dbKey: string, confirm: Mi
  * Close chat store
  */
 export async function chatCloseStore(ctrl: bigint): Promise<void> {
-  const res = await simplex.chat_close_store(ctrl)
+  const res = await popopx.chat_close_store(ctrl)
   if (res !== "") throw new Error(res)
 }
 
@@ -48,7 +48,7 @@ export async function chatCloseStore(ctrl: bigint): Promise<void> {
  * Send chat command as string
  */
 export async function chatSendCmd(ctrl: bigint, cmd: string): Promise<ChatResponse> {
-  const res = await simplex.chat_send_cmd(ctrl, cmd)
+  const res = await popopx.chat_send_cmd(ctrl, cmd)
   const json = JSON.parse(res) as APIResult<ChatResponse>
   // console.log(cmd.slice(0, 16), json.result?.type || json.error)
   if (typeof json.result === 'object') return json.result
@@ -60,7 +60,7 @@ export async function chatSendCmd(ctrl: bigint, cmd: string): Promise<ChatRespon
  * Receive chat event
  */
 export async function chatRecvMsgWait(ctrl: bigint, wait: number): Promise<ChatEvent | undefined> {
-  const res = await simplex.chat_recv_msg_wait(ctrl, wait)
+  const res = await popopx.chat_recv_msg_wait(ctrl, wait)
   if (res === "") return undefined
   const json = JSON.parse(res) as APIResult<ChatEvent>
   // if (json.result) console.log("event", json.result.type)
@@ -73,7 +73,7 @@ export async function chatRecvMsgWait(ctrl: bigint, wait: number): Promise<ChatE
  * Write buffer to encrypted file
  */
 export async function chatWriteFile(ctrl: bigint, path: string, buffer: ArrayBuffer | Uint8Array): Promise<CryptoArgs> {
-  const res = await simplex.chat_write_file(ctrl, path, buffer)
+  const res = await popopx.chat_write_file(ctrl, path, buffer)
   return cryptoArgsResult(res)
 }
 
@@ -81,14 +81,14 @@ export async function chatWriteFile(ctrl: bigint, path: string, buffer: ArrayBuf
  * Read buffer from encrypted file
  */
 export async function chatReadFile(path: string, {fileKey, fileNonce}: CryptoArgs): Promise<Buffer> {
-  return await simplex.chat_read_file(path, fileKey, fileNonce)
+  return await popopx.chat_read_file(path, fileKey, fileNonce)
 }
 
 /**
  * Encrypt file
  */
 export async function chatEncryptFile(ctrl: bigint, fromPath: string, toPath: string): Promise<CryptoArgs> {
-  const res = await simplex.chat_encrypt_file(ctrl, fromPath, toPath)
+  const res = await popopx.chat_encrypt_file(ctrl, fromPath, toPath)
   return cryptoArgsResult(res)
 }
 
@@ -96,7 +96,7 @@ export async function chatEncryptFile(ctrl: bigint, fromPath: string, toPath: st
  * Decrypt file
  */
 export async function chatDecryptFile(fromPath: string, {fileKey, fileNonce}: CryptoArgs, toPath: string): Promise<void> {
-  const res = await simplex.chat_decrypt_file(fromPath, fileKey, fileNonce, toPath)
+  const res = await popopx.chat_decrypt_file(fromPath, fileKey, fileNonce, toPath)
   if (res !== "") throw new Error(res)
 }
 
@@ -113,7 +113,7 @@ function cryptoArgsResult(res: string): CryptoArgs {
  * Resize image to a data URI of at most maxSize characters
  */
 export async function chatResizeImageUri(image: ArrayBuffer | Uint8Array, maxSize: number): Promise<string> {
-  return resizedImage(await simplex.chat_resize_image_uri(image, maxSize))
+  return resizedImage(await popopx.chat_resize_image_uri(image, maxSize))
 }
 
 /**
@@ -138,7 +138,7 @@ export async function resizeImage(image: ArrayBuffer | Uint8Array, size: ImageSi
 }
 
 async function resizeImageData(image: ArrayBuffer | Uint8Array, maxSize: number, png: number): Promise<Buffer> {
-  return Buffer.from(resizedImage(await simplex.chat_resize_image(image, maxSize, png)), "base64")
+  return Buffer.from(resizedImage(await popopx.chat_resize_image(image, maxSize, png)), "base64")
 }
 
 function resizedImage(res: string): string {

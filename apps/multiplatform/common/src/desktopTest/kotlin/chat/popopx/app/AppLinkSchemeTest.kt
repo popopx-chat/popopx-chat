@@ -47,7 +47,7 @@ private const val OWNER_WRITABLE = "rwxr-xr-x"
 private const val GROUP_WRITABLE = "rwxrwxr-x"
 private const val OTHERS_WRITABLE = "rwxr-xrwx"
 private const val WORLD_WRITABLE = "rwxrwxrwx"
-private const val APPIMAGE_FILE_NAME = "SimpleX.AppImage"
+private const val APPIMAGE_FILE_NAME = "POPOPX.AppImage"
 private const val XDG_MIME = "xdg-mime"
 
 class AppLinkSchemeTest {
@@ -311,7 +311,7 @@ class AppLinkSchemeTest {
 
   @Test
   fun execArgumentKeepsSpacesInsideTheQuotes() {
-    assertEquals("\"/home/user/My Apps/simplex.AppImage\"", desktopExecArgument("/home/user/My Apps/simplex.AppImage"))
+    assertEquals("\"/home/user/My Apps/popopx.AppImage\"", desktopExecArgument("/home/user/My Apps/popopx.AppImage"))
   }
 
   @Test
@@ -334,10 +334,10 @@ class AppLinkSchemeTest {
       |Type=Application
       |Name=POPOPX Chat
       |NoDisplay=true
-      |Exec="/home/user/My Apps/simplex.AppImage" %u
+      |Exec="/home/user/My Apps/popopx.AppImage" %u
       |MimeType=x-scheme-handler/popopxchat;x-scheme-handler/popopx;
       |""".trimMargin(),
-      appImageDesktopEntry("/home/user/My Apps/simplex.AppImage")
+      appImageDesktopEntry("/home/user/My Apps/popopx.AppImage")
     )
   }
 
@@ -476,7 +476,7 @@ class AppLinkSchemeTest {
   @Test
   fun missingAppImageIsRefused() {
     assumePosix()
-    assertFalse(onlyOwnerCanReplace(Path.of("/nonexistent-simplex-dir/SimpleX.AppImage"), "root"))
+    assertFalse(onlyOwnerCanReplace(Path.of("/nonexistent-popopx-dir/POPOPX.AppImage"), "root"))
   }
 
   // Built under the module's build directory, as the check walks up to the root and the system temp directory is open to everyone.
@@ -587,7 +587,7 @@ class AppLinkSchemeTest {
   @Test
   fun appImageRegistrationRewritesTheEntryOfAMovedAppImage() = withRegistration { appImage, applicationsDir ->
     applicationsDir.mkdirs()
-    File(applicationsDir, APPIMAGE_ENTRY_NAME).writeText(appImageDesktopEntry("/old/SimpleX.AppImage")!!)
+    File(applicationsDir, APPIMAGE_ENTRY_NAME).writeText(appImageDesktopEntry("/old/POPOPX.AppImage")!!)
     val xdg = FakeXdgMime(default = APPIMAGE_ENTRY_NAME)
     assertTrue(registerAppImageScheme(appImage, applicationsDir, listOf(), xdg::run))
     assertEquals(appImageDesktopEntry(appImage), File(applicationsDir, APPIMAGE_ENTRY_NAME).readText())

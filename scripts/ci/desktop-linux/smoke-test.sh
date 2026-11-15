@@ -5,7 +5,7 @@
 # tests/fixtures/test.jpg and logo-large-rgba.png picked in the file dialog and sent in the group.
 # Usage: scripts/ci/desktop-linux/smoke-test.sh <app dir> <output dir> [start|onboarding|layouts|setup|backend]
 # With "start" it stops at the first screen, for an agent to go on from; with "onboarding", at the chat list.
-# "setup" creates the group, makes the test SMP server (backend.sh) the one that resolves SimpleX names, and stops;
+# "setup" creates the group, makes the test SMP server (backend.sh) the one that resolves POPOPX names, and stops;
 # "backend" does the same, connects to the name that backend.sh registered, and goes on to both layouts.
 # Both need NAMES_SERVER, the test SMP server's address.
 # Each step saves a numbered screenshot and the text read from it to the output dir, prints the text to the log,

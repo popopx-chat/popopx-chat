@@ -79,12 +79,12 @@ import Popopx.Chat.Badges.Types (BadgeCodePaymentStatus (..))
 import Popopx.Chat.Bot (initializeBotAddress')
 import Popopx.Chat.Bot.Store (withDB, withDB')
 import Popopx.Chat.Controller
-import Popopx.Chat.Core (sendChatCmd, simplexChatCore)
+import Popopx.Chat.Core (sendChatCmd, popopxChatCore)
 import Popopx.Chat.Options (printDbOpts)
 import Popopx.Chat.PaymentService (AppleTransactionFacts (..), ServicePayment (..), appleTransactionFacts)
 import Popopx.Chat.PaymentService.Types (PaymentProvider (..), StoreTransactionRef (..))
 import Popopx.Chat.Terminal (terminalChatConfig)
-import Popopx.Chat.Terminal.Main (simplexChatCLI')
+import Popopx.Chat.Terminal.Main (popopxChatCLI')
 import Popopx.Chat.Types (AgentInvId (..), User (..))
 import Popopx.Messaging.Agent.Store.Common (DBStore)
 import qualified Popopx.Messaging.Agent.Store.DB as DB
@@ -219,7 +219,7 @@ badgeService opts@BadgeServiceOpts {serviceConfigFile} cfg env = do
             preCmdHook = Just badgeCmdHook
           }
   -- The reader runs from the start and must not block, since outputQ carries every chat event and a full queue stalls the core.
-  simplexChatCore cfg {chatHooks} (mkChatOpts opts) $ \_ cc -> raceAny_ [readEvents cc, startLanes cc]
+  popopxChatCore cfg {chatHooks} (mkChatOpts opts) $ \_ cc -> raceAny_ [readEvents cc, startLanes cc]
   where
     serviceLanes :: Waiters -> ChatController -> ServiceConfig -> IO [IO ()]
     serviceLanes ws ChatController {chatStore} sc = do
@@ -261,7 +261,7 @@ badgeServiceCLI opts@BadgeServiceOpts {serviceConfigFile} = do
             eventHook = Just eventHook
           }
   raceAny_
-    [ simplexChatCLI' terminalChatConfig {chatHooks} (mkChatOpts opts) Nothing,
+    [ popopxChatCLI' terminalChatConfig {chatHooks} (mkChatOpts opts) Nothing,
       processQueuedRequests key Nothing env
     ]
 

@@ -335,7 +335,7 @@ enum class OnboardingStage {
   LinkAMobile,
   Step2_5_SetupDatabasePassphrase,
   Step3_ChooseServerOperators,
-  Step3_CreateSimpleXAddress,
+  Step3_CreatePOPOPXAddress,
   Step4_SetNotificationsMode,
   OnboardingComplete
 }
@@ -349,8 +349,8 @@ enum class OnboardingStage {
 | `Step2_CreateProfile` | `CreateFirstProfile` -- display name, optional image | `Step2_5_SetupDatabasePassphrase` or `Step3_ChooseServerOperators` |
 | `LinkAMobile` | `LinkAMobile` -- desktop linking to mobile device | `Step2_CreateProfile` |
 | `Step2_5_SetupDatabasePassphrase` | `SetupDatabasePassphrase` -- optional DB encryption | `Step3_ChooseServerOperators` |
-| `Step3_ChooseServerOperators` | `OnboardingConditionsView` -- server operator selection, T&C | `Step3_CreateSimpleXAddress` or `Step4_SetNotificationsMode` |
-| `Step3_CreateSimpleXAddress` | `SetNotificationsMode` (legacy backcompat) | `Step4_SetNotificationsMode` |
+| `Step3_ChooseServerOperators` | `OnboardingConditionsView` -- server operator selection, T&C | `Step3_CreatePOPOPXAddress` or `Step4_SetNotificationsMode` |
+| `Step3_CreatePOPOPXAddress` | `SetNotificationsMode` (legacy backcompat) | `Step4_SetNotificationsMode` |
 | `Step4_SetNotificationsMode` | `SetNotificationsMode` -- notification permission setup | `OnboardingComplete` |
 | `OnboardingComplete` | Main app screen | -- |
 

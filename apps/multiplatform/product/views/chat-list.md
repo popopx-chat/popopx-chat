@@ -43,7 +43,7 @@ The toolbar supports two layout modes controlled by `appPrefs.oneHandUI`:
 | Element | Description |
 |---|---|
 | Search icon | Magnifying glass icon at leading edge |
-| Text field | `SearchTextField` with placeholder "Search or paste SimpleX link" |
+| Text field | `SearchTextField` with placeholder "Search or paste POPOPX link" |
 | Filter button | `ToggleFilterEnabledButton` (filter icon) toggles unread-only filter; shown when search text is empty |
 | Clear button | Appears when text is entered; `BackHandler` clears search on back |
 

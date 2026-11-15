@@ -5,7 +5,7 @@ import * as path from "path";
 import * as zlib from "zlib";
 import {core} from "../src/index";
 import * as libs from "../src/libs";
-import * as simplex from "../src/simplex";
+import * as simplex from "../src/popopx";
 
 describe("Core tests", () => {
   let libPath: string;

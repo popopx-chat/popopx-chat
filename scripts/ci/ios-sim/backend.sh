@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Test backend on the app runner: a chat relay and a directory service on the preset servers, with groups and
-# channels registered and approved by a CLI peer, and a search that must find them; and for SimpleX names,
+# channels registered and approved by a CLI peer, and a search that must find them; and for POPOPX names,
 # a local SMP server with a name resolver, names claimed by channels and by contacts that accept connections.
 # Usage:
 #   scripts/ci/ios-sim/backend.sh start <backend zip> <work dir>   writes the directory's short address to <work dir>/directory-link,
@@ -43,7 +43,7 @@ admin() {
   chat "$admin" "$1" "$2" --user-display-name "$admin"
 }
 
-# A command that resolves a SimpleX name: given -s, the client uses that server alone, with every role, names included.
+# A command that resolves a POPOPX name: given -s, the client uses that server alone, with every role, names included.
 # -s also saves it among the user's servers, and later runs would put queues on it that the directory can't reach
 # (it routes to unknown servers through a preset proxy), so it is then kept for names only.
 named() {
@@ -384,13 +384,13 @@ write_seed() {
     echo "| \`$avatar_search_text\` | ci_avatar_g1…3 (groups), ci_avatar_c1…3 (channels), each with an avatar the size the app makes | images at the size limit |"
     echo "| \`ci long\` | $long_name (group): a long name and a two-line description | truncation |"
     echo "| \`ci markdown\` | ci_markdown (group): markdown in the description | markdown shown literally |"
-    echo "| \`cinews\` | cinews (channel, with the name cinews.testing), cinews_digest and cinews_weekly (groups) | a search that matches a SimpleX name and listed entries |"
+    echo "| \`cinews\` | cinews (channel, with the name cinews.testing), cinews_digest and cinews_weekly (groups) | a search that matches a POPOPX name and listed entries |"
     echo
     sqlite3 -markdown "$work/directory_chat.db" "$listings_query"
     echo
     # Kept: the heading is a section key, not prose - claude-prompt.md:32 tells the UI runner to read
-    # "Test directory" -> "SimpleX names". Renaming one side alone breaks the lookup.
-    echo "## SimpleX names"
+    # "Test directory" -> "POPOPX names". Renaming one side alone breaks the lookup.
+    echo "## POPOPX names"
     echo
     echo "Names server, to add in the app for resolving names: \`$names_server\`"
     echo

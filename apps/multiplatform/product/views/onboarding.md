@@ -24,7 +24,7 @@ The `OnboardingStage` enum defines the flow:
 | `LinkAMobile` | Desktop-only: link a mobile device |
 | `Step2_5_SetupDatabasePassphrase` | Desktop-only: set database encryption passphrase |
 | `Step3_ChooseServerOperators` | Accept server operator conditions |
-| `Step3_CreateSimpleXAddress` | Create a SimpleX contact address |
+| `Step3_CreatePOPOPXAddress` | Create a POPOPX contact address |
 | `Step4_SetNotificationsMode` | Android-only: configure notification mode |
 | `OnboardingComplete` | Onboarding finished |
 
@@ -92,7 +92,7 @@ Managed by `ChooseServerOperators.kt`.
 
 ### Step 3b: Create SimpleX Address
 
-**Stage**: `Step3_CreateSimpleXAddress`
+**Stage**: `Step3_CreatePOPOPXAddress`
 
 | Element | Description |
 |---|---|

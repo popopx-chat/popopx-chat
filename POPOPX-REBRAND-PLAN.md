@@ -135,6 +135,10 @@
 - **B2a（安全）**：只改**不进 JSON、不进 DB** 的类型名/函数名 + 显示串。
 - **B2b（须同步）**：进 JSON 的字段名 → 与 `popopxmq` fork 同批改，或加显式 `@options/SerialName` 冻结 key 再改名。
 
+  **2026-11-15 已裁定并执行（档 A），实际比 B2a 更窄**：只改**代码位**的 7 个标识符（`simplexChatCore`、`runSimplexChat`、`simplexChatTerminal`、`simplexChatCLI`、`simplexChatContact`、`simplexChatInvitation`、`simplexChatServer`），16 文件 / 59 处；**显示串一个字都没动**，所以 `server_operator_tag = 'simplex'`、`Operators.hs:94/98` 的 `"simplex" -> OTSimplex` 全部存活——Haskell 侧沿用它自己的旧裁定，字面量要改须另开一项。B2b 没被触发：改名的 7 个都不进 JSON、不进 DB，进 DB 的那批（`customData` 的 `simplexMcp`/`simplexMcpFiles`）因此保留。命名上游事物的标识符也没动（`operatorSimpleXChat` 9、`simplexChatRelays` 9、`simplexChatSMPServers` 7、`OTSimplex` 4、`ConnectSimplex` 3，改后复测同数）。门闸是 `cabal build all`（library + 8 个 executable）与 `cabal build popopx-chat:test:popopx-chat-test`，都绿；第一次红是因为 **`apps/**/*.hs` 里还有 23 处读取者**，`src`/`tests` 盘点看不见它们。
+
+  同一轮里 `flake.nix` 的 **`lib:simplex-chat` 没有改**，所以 `scripts/ci/**` 引它的行仍然正确：那是 **Nix attribute 路径**，`build-core.sh:14` 与 `scripts/android/build-android.sh:108` 当命令行参数用它，改文档=改假，改 attribute=另一项。
+
 ### B3 KMP 源码树 `chat/simplex/**`（改名 = 414 路径）
 `apps/multiplatform` 下 **414 个受控路径**；`package chat.simplex` **346**、`import chat.simplex` **1,983**、FQN 合计 **2,364**。
 

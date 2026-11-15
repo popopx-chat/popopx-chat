@@ -95,7 +95,7 @@ enum class OnboardingStage {
   LinkAMobile,
   Step2_5_SetupDatabasePassphrase,
   Step3_ChooseServerOperators,
-  Step3_CreateSimpleXAddress,
+  Step3_CreatePOPOPXAddress,
   Step4_SetNotificationsMode,
   OnboardingComplete
 }
@@ -144,7 +144,7 @@ enum class OnboardingStage {
 3. Server operator conditions may need to be accepted.
 4. The selection is saved via the server configuration APIs.
 
-### 3.6 Step3_CreateSimpleXAddress
+### 3.6 Step3_CreatePOPOPXAddress
 
 1. User is prompted to create a SimpleX address for receiving contact requests.
 2. This calls the address creation API.

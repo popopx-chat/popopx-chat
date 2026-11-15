@@ -1085,10 +1085,10 @@ viewConnReqInvitation showFullLinks (CCLink cReq shortLink) =
           ]
         else []
   where
-    cReqStr = strEncode $ simplexChatInvitation cReq
+    cReqStr = strEncode $ popopxChatInvitation cReq
 
-simplexChatInvitation :: ConnReqInvitation -> ConnReqInvitation
-simplexChatInvitation (CRInvitationUri crData e2e) = CRInvitationUri crData {crScheme = popopxChat} e2e
+popopxChatInvitation :: ConnReqInvitation -> ConnReqInvitation
+popopxChatInvitation (CRInvitationUri crData e2e) = CRInvitationUri crData {crScheme = popopxChat} e2e
 
 viewContactNotFound :: ContactName -> Maybe (GroupInfo, GroupMember) -> [StyledString]
 viewContactNotFound cName suspectedMember =
@@ -1154,13 +1154,13 @@ connReqContact_ showFullLinks intro (CCLink cReq shortLink) =
   ]
     <> ["The contact link for old clients: " <> plain cReqStr | showFullLinks, isJust shortLink]
   where
-    cReqStr = strEncode $ simplexChatContact cReq
+    cReqStr = strEncode $ popopxChatContact cReq
 
-simplexChatContact :: ConnReqContact -> ConnReqContact
-simplexChatContact (CRContactUri crData e2e) = CRContactUri crData {crScheme = popopxChat} e2e
+popopxChatContact :: ConnReqContact -> ConnReqContact
+popopxChatContact (CRContactUri crData e2e) = CRContactUri crData {crScheme = popopxChat} e2e
 
-simplexChatContact' :: ConnLinkContact -> ConnLinkContact
-simplexChatContact' = \case
+popopxChatContact' :: ConnLinkContact -> ConnLinkContact
+popopxChatContact' = \case
   CLFull (CRContactUri crData e2e) -> CLFull $ CRContactUri crData {crScheme = popopxChat} e2e
   l@(CLShort _) -> l
 
@@ -1217,7 +1217,7 @@ groupLink_ showFullLinks intro g GroupLink {connLinkContact = CCLink cReq shortL
        ]
     <> ["The group link for old clients: " <> plain cReqStr | showFullLinks, isJust shortLink]
   where
-    cReqStr = strEncode $ simplexChatContact cReq
+    cReqStr = strEncode $ popopxChatContact cReq
 
 viewGroupLinkDeleted :: GroupInfo -> [StyledString]
 viewGroupLinkDeleted g =
@@ -1293,7 +1293,7 @@ viewGroupLinkRelaysUpdated g groupLink relays =
     <> [plain ("POPOPX name: " <>  shortNameInfoStr (PopopxNameInfo NTPublicGroup d)) | Just d <- [groupPopopxDomain g]]
   where
     GroupLink {connLinkContact = CCLink cReq shortLink} = groupLink
-    cReqStr = strEncode $ simplexChatContact cReq
+    cReqStr = strEncode $ popopxChatContact cReq
 
 viewGroupCreated :: GroupInfo -> Bool -> [StyledString]
 viewGroupCreated g testView =
@@ -1902,7 +1902,7 @@ viewContactInfo ct@Contact {contactId, profile = LocalProfile {localAlias, conta
     <> viewContactBadge localBadge
     <> maybe [] ((bold' "description:" :) . map plain . T.lines) description
     <> maybe [] viewConnectionStats stats
-    <> maybe [] (\l -> ["contact address: " <> plain (strEncode (simplexChatContact' l))]) contactLink
+    <> maybe [] (\l -> ["contact address: " <> plain (strEncode (popopxChatContact' l))]) contactLink
     <> popopxDomainLine NTContact contactDomain contactDomainVerified
     <> maybe
       ["you've shared main profile with this contact"]
@@ -1950,7 +1950,7 @@ viewGroupMemberInfo GroupInfo {groupId} m@GroupMember {groupMemberId, memberProf
     <> viewContactBadge localBadge
     <> maybe [] ((bold' "description:" :) . map plain . T.lines) description
     <> maybe ["member not connected"] viewConnectionStats stats
-    <> maybe [] (\l -> ["contact address: " <> (plain . strEncode) (simplexChatContact' l)]) contactLink
+    <> maybe [] (\l -> ["contact address: " <> (plain . strEncode) (popopxChatContact' l)]) contactLink
     <> ["alias: " <> plain localAlias | localAlias /= ""]
     <> [viewConnectionVerified mSecurityCode | isJust stats || isJust mSecurityCode]
     <> maybe [] (\ac -> [viewPeerChatVRange (peerChatVRange ac)]) activeConn
@@ -2229,7 +2229,7 @@ viewConnectionUserChanged showFullLinks User {localDisplayName = n} PendingConta
               ]
             else []
       where
-        cReqStr = strEncode $ simplexChatInvitation cReq
+        cReqStr = strEncode $ popopxChatInvitation cReq
 
 viewContactUserChanged :: User -> Contact -> User -> Contact -> [StyledString]
 viewContactUserChanged

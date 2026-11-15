@@ -404,7 +404,7 @@ startTestChat_ ps@TestParams {tmpPath, printOutput} db cfg_ opts_ dbPrefix user 
   ct <- newChatTerminal t opts
   Right cc <- newChatController db (Just user) cfg opts False
   void $ execChatCommand' (SetTempFolder (tmpPath </> dbPrefix)) 0 `runReaderT` cc
-  chatAsync <- async $ runSimplexChat cfg opts user cc $ \_u cc' -> runChatTerminal ct cc' opts
+  chatAsync <- async $ runPopopxChat cfg opts user cc $ \_u cc' -> runChatTerminal ct cc' opts
   unless maintenance $ atomically $ readTVar (agentAsync cc) >>= \a -> when (isNothing a) retry
   pure TestCC {chatController = cc, chatAsync, termQ, printOutput, ccParams = ps}
 
