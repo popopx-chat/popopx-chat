@@ -181,6 +181,40 @@ scenes with no artwork in them, Apple's SF Symbols, GitHub's octocats) except fo
 replace (`Forward.hs:850` asserts the transferred size; `ImageTests.hs:103` and `:262` assert the PNG's
 structure).
 
+### The 72 overlay illustrations that were still blue, and the patch that never reached them (2026-11-15, ruling 80 张 assets/** 覆盖层图…进行运行替换)
+
+The ruling counted 80 files in `assets/multiplatform/resources/MR/images`; the measurement is 72. The 8
+`popopx_address*` files are not blue - they were resampled from the iOS master by `9c8df8f09` and read
+hue 271-274, already the brand. They are also the only files in that directory with no
+`<concept>_<theme>.svg` master, so `popopx_assets.py` would have redrawn them from a different scene had
+the pass not stopped at the masters that exist.
+
+Why they stayed blue: `master_palette.install()` patched `popopx_assets`' four module constants
+(`BLUE/TEAL/CYAN/DEEP`) but not the `L`/`D` role dicts, which were built from the pre-sync values at
+import time and are what the scenes actually read - 5 `ink`, 8 `soft`, 3 `line`, 13 `paper` sites. The
+brand kit moved, the illustrations beside it did not, which is the two-targets-two-brands failure the
+module's own docstring exists to prevent. Second cause: `popopx_assets.main()` writes a vector master
+only `if not os.path.exists(src)`, so the 36 tracked masters were frozen and re-running the generator
+would not have touched them.
+
+Executed as `tools/r7/r98_overlay_purple.py`: the dicts are now patched (`L.ink #062A3A→#3D0A6D`,
+`L.soft #D6F0FA→#EBDCF7`, `L.line #A9DDF0→#C9A6E4`, `L.hi #0088FF→#7A2BBE`, `L/D.paper #FFFFFF→#FAF6FE`,
+`L.opaque #EAF7FF→#F3E8FB`, `D.ink→#F3E8FB`, `D.soft #0E3A4F→#2C0B4A`, `D.line #2A6F8C→#5B2A86`,
+`D.hi #70F0F9→#9B5FD0`, `D.opaque #041C28→#1A0533`, and the gradient stops `TEAL→#3D0A6D`,
+`CYAN→#9B5FD0`), the 36 masters are **redrawn** from the patched generator and 72 rasters re-rendered.
+Redrawn, not hex-substituted: `t["paper"]` and the literal `"#FFFFFF"` were the same colour before and
+are different colours after, so only the generator can tell the two roles apart.
+
+Gates, all 72: the colour-stripped master is byte-identical to the tracked one (geometry untouched); the
+**alpha plane hash** of the new render equals this renderer's own re-render of the *old* master and also
+equals the committed bytes, so nothing but RGB moved and the committed files did come from this `svg2png`;
+blue-pixel census `63043 → 0` on `your_network@2x` and 0 blue pixels in all 80 files; names and pixel
+sizes of all 80 verified against the pre-recolour snapshot. Diff: 108 asset files (36 text, 72 binary).
+
+Not yet done: the overlay is compiled into the desktop and Android builds, so the desktop baselines that
+draw these scenes move. CI renders from the pushed tip, so that re-render waits on push authorization -
+and the comparator, not this machine, counts how many of the 210 change.
+
 ### The MCP end-to-end red is a held-host dependency, recorded not fixed (2026-11-14, ruling E3)
 
 The full gate on `ef6ceac9a` (run `43591293792`) finished with one red step: `Test changed scopes`, inside
