@@ -546,7 +546,8 @@ yet. Before any build of this fork is distributed:
     is the "this fork publishes no APK" item above. **Losing this key pair loses the signature**: an update
     signed with a different certificate is refused, and with Play App Signing the upload key can be rotated
     but this is the digest F-Droid and any sideloaded install trust — back it up off this machine before the
-    first release (#56), where Play App Signing's and F-Droid's own fingerprints join this same array.
+    first signed APK, where Play App Signing's and F-Droid's own fingerprints join this same array. The
+    release published 2026-11-15 is #56 and ships no APK, so that deadline moved rather than passed.
     Ship route: popopxmq `25d7213d` = tag `popopx-pin-4`, our pin moved with it (`cabal.project:24`,
     `scripts/nix/sha256map.nix:2`). The hash came from the command that file's own generator calls
     (`nix-prefetch-git --fetch-submodules`, per `scripts/nix/update-sha256.awk`), and the method was proven
@@ -583,8 +584,10 @@ yet. Before any build of this fork is distributed:
     `README.md:224` pipes the script from `popopx-chat/popopx-chat@master` — the only branch this repository
     has. Held: `$HOME/.simplex/simplex.agent.db` at `:43`, upstream's v0 agent database, which names something
     that really is upstream's. Not retargeted here: the Darwin branch at `:20`-`:24` asks for `macos-x86-64`
-    only, so Apple Silicon gets the Intel build — an upstream gap in a path that no release exists to test
-    yet. Everything in this item is verified statically; end to end it stays unverifiable until #56 publishes.
+    only, so Apple Silicon gets the Intel build — a pre-existing upstream gap that is now reachable rather
+    than hypothetical, because `popopx-chat-macos-x86-64` is a published asset. What this script composes is
+    now verified against the published release (2026-11-15): `releases/latest/download/` answered `200` for
+    all seven CLI names - four Ubuntu, both macOS, Windows. The script itself was not executed.
 - **`popopx.chat` is owned and serving, and is now the ruled link domain.** Ruled 2026-11-13:
   `popopx.chat` for links and the site, `popopx.im` for relays. `website/src/CNAME` had already moved to
   `popopx.chat` before `website/` was removed — nothing read it but `website/.eleventy.js:471`, which
@@ -763,10 +766,13 @@ builds `aarch64` and `armv7a` (override with `ARCHES`), and compares the rebuilt
 `apksigcopier` has copied upstream's signature onto it. No workflow calls it; it is run by hand.
 
 `.github/workflows/reproduce-schedule.yml` runs the desktop script nightly at 02:00 and on dispatch,
-against this repository's own latest release. This repository has published no release, so the job
-prints `No published release to reproduce - skipping.` and finishes green. Before 2026-11-13 the same
-workflow checked out upstream's tree and then called `scripts/popopx-chat-reproduce-builds.sh`, a path
-that exists only in our tree, so each nightly run failed.
+against this repository's own latest release. That job was inert and is not any more: since
+`v7.1.2-popopx.1` was published, `releases/latest` answers, so the first step no longer prints
+`No published release to reproduce - skipping.` - measured on dispatch `43657558913`, which got past
+`Get latest release` and `Checkout code` and into the Docker rebuild. Whether the rebuilt bytes match
+is what that job reports, not what this file can promise. Before 2026-11-13 the same workflow checked
+out upstream's tree and then called `scripts/popopx-chat-reproduce-builds.sh`, a path that exists only
+in our tree, so each nightly run failed.
 
 The last step posts the failure to `STATUS_POPOPX_WEBHOOK_URL` with `STATUS_POPOPX_WEBHOOK_USER` and
 `STATUS_POPOPX_WEBHOOK_PASS`. None of the three is configured on this repository (`gh secret list`

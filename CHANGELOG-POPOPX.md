@@ -3,12 +3,61 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
-## Unreleased — as of 2026-11-14 (151 commits after the import point `db0768c21`)
+## v7.1.2-popopx.1 — 2026-11-15 (153 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version
-`7.1.2.0` (`v7.1.2`). No POPOPX binaries have been published from this repository yet: the store
-links, the APK/F-Droid artifacts and the website are all still upstream's or absent, so there is no
-"installed version" of this fork to upgrade or downgrade.
+`7.1.2.0` (`v7.1.2`). This section was headed `Unreleased` while no POPOPX binaries existed; the
+first release is published now, so the heading is the tag itself.
+
+**What was published.** Release `v7.1.2-popopx.1`, built by run `43649743373` from the tagged commit
+`986143710` (annotated tag object `cc428ee06`): 19 assets = 18 binaries + `LICENSE`, each asset named
+by a `SHA2-256(...)` line in the release notes. Neither draft nor prerelease, so `releases/latest`
+resolves - measured, not inferred. `install.sh` recomposes `releases/latest/download/popopx-chat-ubuntu-<ver>-x86_64`
+from its own moved `APP_NAME`, and all four Ubuntu CLI assets exist under those names (the installer was
+not executed on a machine); the desktop updater queries `api.github.com/repos/popopx-chat/popopx-chat/releases`
+(`AppUpdater.kt:188`), which is this repository. Not published here: the macOS `.dmg` (no Developer ID
+credential is configured), Android APKs, iOS builds, and the `popopx-chat-libs` backend releases that
+`pip` and `npm` install (#77 - that repository still has no releases).
+
+The fields the release template at the end of this file asks for, filled with what was measured for this
+tag rather than with intent:
+
+- upstream commit this build starts from: `db0768c21` is this repository's own initial commit ("Initial
+  commit for secondary development", 2026-11-11); the code is upstream's `v7.1.2` = `50a575e44`, which is
+  **not an ancestor** of `master` - the history was re-imported, so the compare API finds no common
+  ancestor and a changelog builder has no base to diff.
+- iOS: not published. `macos-latest (iOS)` is skipped on a tag, so this release carries no iOS artifact.
+  The signing identity ruled for this fork is Team ID `PDBA6XRBQT`.
+- Android: not published. `applicationId = "com.popopxchat.popopx"` (`apps/multiplatform/android/build.gradle.kts:15`)
+  with a debug suffix variant, and no store listing behind it.
+- servers this release presets: the SMP/XFTP presets still name relays operated by SimpleX Chat Ltd, and
+  the consent flow still names that company, because `CARequired` makes the operator name a party to the
+  consent. Held with the per-host reasoning in `FORK.md`.
+- link domain actually serving this release: `popopx.chat` - certificate SANs present (`popopx.chat`,
+  `popopxchat.com`, `www.popopxchat.com`); `/.well-known/assetlinks.json` and
+  `/.well-known/apple-app-site-association` reachable over HTTPS with no redirect: **no** - both `404`
+  when re-measured 2026-11-15 while `/` on the same host answers `200`.
+- relay domain `popopx.im`: no host listens under it and no fingerprint of it is in any preset; the iOS
+  entitlement `applinks:*.popopx.im` is in place for the day one does.
+- every upstream-operated host still named in the build: listed per host, each with whether it fails
+  silently or visibly, in `FORK.md` "Upstream-operated hosts, and how each one fails".
+- publisher and contact address shipped in the app and in these files: POPOPX, chat@popopx.chat.
+
+**Two defects this release had to be rebuilt to fix**, both found by reading the first attempt rather
+than the pipeline: `make-appimage-linux.sh` moved its result with `*popopx*.AppImage`, but appimagetool
+names the output after the desktop file's `Name=` field, so on this tree the file is
+`POPOPX_Chat-<arch>.AppImage` - both AppImage builds succeeded and neither was moved or uploaded. And
+every build leg appended its own SHA-256 line to the one shared release body, which is a
+read-modify-write of that body: 2 of 16 lines were lost to the race. The glob now takes the product by
+position, and a single `release-hashes` job writes all the lines after the uploading legs finish, from
+the digest GitHub records for each asset. The release and the tag were deleted and rebuilt from the
+fixing commit instead of patched: an asset name cannot be uploaded twice into the same release, and the
+tag has to pin the commit the notes describe.
+
+The "no release yet" measurements inside the 2026-11-13 and 2026-11-14 entries below - the reproduce job
+that "prints `No published release to reproduce - skipping.`", `releases/latest` that "answers 404 for
+both owners today" - are kept as written: they were true on their own dates. This section supersedes
+them; `scripts/popopx-chat-reproduce-builds.sh` now has a release to verify, nightly.
 
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
@@ -1402,9 +1451,10 @@ artwork that is still in the repository (545 files, measured in
 moved instead (`FORK.md` item 7). Full list with the authority for each:
 [`FORK.md`](./FORK.md).
 
-## Template for the first real release
+## Template for a release
 
-Fields that are decided: the publisher is **POPOPX** and the contact is **chat@popopx.chat**. The
+The first release filled these fields above, at `v7.1.2-popopx.1`. Fields that are decided: the
+publisher is **POPOPX** and the contact is **chat@popopx.chat**. The
 angle-bracket fields below are per-release facts that cannot be known until a release is built and
 signed, so they are left as template slots, not as open decisions.
 
