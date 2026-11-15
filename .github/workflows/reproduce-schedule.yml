@@ -1,11 +1,9 @@
 name: Reproduce latest release
 
 on:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 2 * * *' # every day at 02:00 night
+  workflow_dispatch
 
-# A manual dispatch and the nightly schedule overlap, and each run is hours of Docker builds.
+# Two dispatches overlap only if one is still building, and each run is hours of Docker builds.
 # Queued rather than cancelled: a run killed mid-build verifies nothing and leaves no report.
 concurrency:
   group: reproduce-latest-release

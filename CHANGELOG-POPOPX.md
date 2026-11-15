@@ -67,7 +67,30 @@ tag has to pin the commit the notes describe.
 The "no release yet" measurements inside the 2026-11-13 and 2026-11-14 entries below - the reproduce job
 that "prints `No published release to reproduce - skipping.`", `releases/latest` that "answers 404 for
 both owners today" - are kept as written: they were true on their own dates. This section supersedes
-them; `scripts/popopx-chat-reproduce-builds.sh` now has a release to verify, nightly.
+them; `scripts/popopx-chat-reproduce-builds.sh` now has a release to verify.
+
+**The first reproduce run answers, and the answer is no** (2026-11-15, dispatch `43657558913`, 2 h 25 m).
+All seven Linux artefacts were rebuilt and **none matched** `v7.1.2-popopx.1`, so `_sha256sums` was never
+written and the last step failed. The script prints only mismatches, so seven lines means nothing matched
+rather than seven of many. For the four CLI artefacts the asymmetry is in the files: the release leg
+compiles with `cabal build -j --enable-tests` (`build.yml:458`) and the reproduce leg with `cabal build -j`
+(`popopx-chat-reproduce-builds.sh:84`), and no `cabal.project.freeze` is tracked here, so each side lets the
+solver choose dependency versions under different constraints. What is *not* the difference: the two sides
+pin the same `ubuntu:22.04`/`24.04` image digests, the same GHC 9.6.3 and the same apt snapshot, and the
+packaging already fixes the timestamps (`SOURCE_DATE_EPOCH`, `dpkg-deb --root-owner-group
+--uniform-compression`). The three desktop artefacts are the Kotlin bundle and need a separate diagnosis.
+Upstream's own nightly fails identically - seven consecutive red runs, 2026-11-08 to 2026-11-14 - so this is
+an inherited property of the build, not something the rebrand introduced. Ruled **option b**: the
+`schedule: - cron: 0 2 * * *` trigger is dropped and `workflow_dispatch` kept, because a run costs about
+2.5 h of runner time to report the same known answer every night. `FORK.md` §"Reproducing a build" carries
+the measurement and the candidates for the desktop half.
+
+The step that reads `releases/latest` is now authenticated with `secrets.GITHUB_TOKEN` and distinguishes
+"404, nothing published" from "could not tell": scheduled run `43668965123` printed
+`No published release to reproduce - skipping.` and went green in 6 seconds on 2026-11-15 02:41:43 while the
+release was published, because its anonymous call from a runner's shared IP returned no `tag_name`. A guard
+whose skip branch is also its error branch turns an outage into a green idle run, so any status other than
+200 or 404 fails the step.
 
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.

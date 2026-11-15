@@ -771,8 +771,10 @@ upstream's spelling, and this fork publishes no APK. It raises `kernel.pid_max` 
 builds `aarch64` and `armv7a` (override with `ARCHES`), and compares the rebuilt APK once
 `apksigcopier` has copied upstream's signature onto it. No workflow calls it; it is run by hand.
 
-`.github/workflows/reproduce-schedule.yml` runs the desktop script nightly at 02:00 and on dispatch,
-against this repository's own latest release. The first verdict is in and it is red: dispatch
+`.github/workflows/reproduce-schedule.yml` runs the desktop script **on dispatch only**, against this
+repository's own latest release: its `schedule: - cron: 0 2 * * *` trigger was dropped on 2026-11-15, because
+each run costs about 2.5 h of runner time and is red by construction until the two build paths below are made
+to agree. The first verdict is in and it is red: dispatch
 `43657558913` (2026-11-15, 2 h 25 m) rebuilt all seven Linux artefacts and **none of them matched**
 `v7.1.2-popopx.1`, so `_sha256sums` was never written and the last step failed. For the four CLI
 artefacts the reason is visible in the files: the release leg compiles with
@@ -781,7 +783,7 @@ artefacts the reason is visible in the files: the release leg compiles with
 side lets the solver choose dependency versions under different constraints. (`${{ env.ghc_options }}`
 on that same line adds `--ghc-options=-O0` only when the event is not a `push`, so a tag build runs
 without it - `build.yml:55`.) The toolchain is not the difference: both sides pin the same
-`ubuntu:22.04`/`24.04` image digests, GHC 9.6.3 and the `UBUNTU_SNAPSHOT` apt snapshot, and both
+`ubuntu:22.04`/`24.04` image digests, GHC 9.6.3 and the `UBUNTU_SNAPSHOT` apt snapshot, and the
 packaging scripts set `SOURCE_DATE_EPOCH` and the two deb builders use `dpkg-deb --root-owner-group
 --uniform-compression`. The three desktop artefacts are the Kotlin bundle, so they need a second
 explanation that is not established here; the candidates are the caches CI restores and the reproduce
@@ -793,7 +795,7 @@ then called a script that exists only in ours, so every run failed for that reas
 The first step authenticates with `secrets.GITHUB_TOKEN` and separates "404, nothing published" from
 "could not tell". Scheduled run `43668965123` printed `No published release to reproduce - skipping.`
 at 02:41:43 and went green in 6 seconds while `v7.1.2-popopx.1` was published, because its anonymous
-call from a runner's shared IP returned no `tag_name`; a nightly that cannot see the release verifies
+call from a runner's shared IP returned no `tag_name`; a run that cannot see the release verifies
 nothing, so any status other than 200 or 404 now fails the step.
 
 The last step posts the failure to `STATUS_POPOPX_WEBHOOK_URL` with `STATUS_POPOPX_WEBHOOK_USER` and
