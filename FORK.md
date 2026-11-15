@@ -229,8 +229,12 @@ each was meant to become That pass also repaired a compile break this fork shipp
 - **Copyright and attribution.** The `author` / `maintainer` / `copyright` fields of
   `popopx-chat.cabal`, the three `Copyright (C) 2026 SimpleX Chat Ltd` asset-licence lines
   and the ~78 company-name references in the privacy, licence and legal texts are retained
-  verbatim, as AGPL-3.0 §7 requires (and §4 forbids removing). This codebase carries no
-  per-file copyright headers, so there is nothing else to preserve.
+  verbatim, as AGPL-3.0 §7 requires (and §4 forbids removing). It used to add "this codebase carries no
+  per-file copyright headers, so there is nothing else to preserve" - that is false, and since 2026-11-15 the
+  headers are preserved: **297 files** (222 Swift, 69 `.strings`, 4 `.h`, 2 `.m`) carry upstream's holder line
+  verbatim from `db0768c21` with `Modifications Copyright © 2026 POPOPX Chat.` directly beneath it, and 116
+  user-visible `NSHumanReadableCopyright` values (62 `.strings`, 54 catalog entries) stay POPOPX on purpose,
+  because that string names the bundle we ship. See `AGPL-COMPLIANCE-POPOPX.md` §5.
 - **Upstream GitHub URLs**, and the dependency references that are not ours to claim — *this bullet
   describes the state before 2026-11-13: the `docs/**`, `plans/**`, `blog/**` and `website/**` paths named
   below were removed by item 10 above, so what remains of this class is the `CHANGELOG.md` /
