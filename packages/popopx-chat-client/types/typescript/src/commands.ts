@@ -66,7 +66,7 @@ export namespace APISetProfileAddress {
   }
 }
 
-// Set or remove SimpleX name of bot address. The name must be registered with the address short link.
+// Set or remove POPOPX name of bot address. The name must be registered with the address short link.
 // Network usage: interactive.
 export interface APISetUserDomain {
   userId: number // int64

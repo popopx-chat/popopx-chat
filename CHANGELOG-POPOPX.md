@@ -95,6 +95,38 @@ whose skip branch is also its error branch turns an outage into a green idle run
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
 
+### The generated bot API docs: 6 literals rewrite 9 output lines (2026-11-15, ruling 必改 the 6 literals)
+
+Of the 93 `SimpleX name` / `SimpleX address` occurrences measured in #109, one tier has its far end **inside
+this repository**: `bots/api/COMMANDS.md`, `bots/api/EVENTS.md`,
+`packages/popopx-chat-client/types/typescript/src/commands.ts` and
+`packages/popopx-chat-python/src/simplex_chat/types/_commands.py` are written by the test-suite, not kept by
+hand. `tests/APIDocs.hs` `testGenerate` reads the current file, writes the generated text, then asserts the two
+are equal — a drift detector that is **supposed to go red the first time after any literal moves**. So editing
+those four files by hand would be undone by the next `cabal test`, and editing only the generators would leave
+the suite red. The only correct move is literal + regeneration, in the same commit.
+
+Moved: `API/Docs/Commands.hs:86` ("Set or remove **POPOPX name** of bot address…"), `API/Docs/Responses.hs:105`,
+and the four in `API/Docs/Events.hs` (**POPOPX address**) — matching the app's shipped wording (`8326d77e3`) and
+the identifiers already sitting next to them (`CEPopopxDomainNotReady`, `popopxDomain`, the `popopx_name` tool
+field). No other file in the repo quotes any of the six sentences: each exact string greps to 0 hits outside
+these seven files.
+
+The gate is a recipe worth repeating, because the harness is a generator and not a comparator:
+`cabal test popopx-chat:test:popopx-chat-test --test-options='-m <markdown|TypeScript|Python>'` — three runs,
+11 writing specs between them. `-m generate` is **wrong**: it matches 20 examples and drags in the badge C-API
+and captcha specs. Run *before* editing it reported `138 / 4 / 4 examples, 0 failures` and left the tree
+byte-identical, which is the proof that the 9-line diff afterwards belongs to this change and nothing else.
+Re-run after the edit: same counts, 0 failures. Both halves of the pair now measure 0 — 6 generator literals and
+9 generated lines — and the residue of #109 is 78 occurrences.
+
+Left untouched by the same ruling: the `需裁定` unit `Directory/Service.hs:380/1174` `"\nSimpleX name: "` with
+its two exact-text `<##` mirrors at `tests/Bots/DirectoryTests.hs:2263/2296` (that text is rendered by a
+directory service we do not operate yet, so our build would differ from what users see), and the `不能改` set —
+the 3 hspec titles (`DirectoryTests.hs:113/114`, `MarkdownTests.hs:492`) which are CI `-m` selectors, the
+historical AppStream release note, the record files, and the printed `npx -y @simplex-chat/mcp …` instructions,
+whose package is still published under that name.
+
 ### The last five naming sub-tiers, ruled together: A to E (2026-11-15, ruling 推 8 个；A+D 执行，B 改 popopx-mcp，C+E 执行，E 关闭)
 
 The residue left after the naming unit was five tiers, each with a different far end. They were ruled in one

@@ -264,7 +264,7 @@ ChatCmdError: Command error (only used in WebSockets API).
 
 ### APISetUserDomain
 
-Set or remove SimpleX name of bot address. The name must be registered with the address short link.
+Set or remove POPOPX name of bot address. The name must be registered with the address short link.
 
 *Network usage*: interactive.
 
@@ -1821,7 +1821,7 @@ ConnectionPlan: Connection link information.
 - otherPopopxName: [PopopxNameInfo](./TYPES.md#popopxnameinfo)?
 - connectionPlan: [ConnectionPlan](./TYPES.md#connectionplan)
 
-SentInvitationToContact: Invitation sent to contact (when connecting via SimpleX name to a known contact address)..
+SentInvitationToContact: Invitation sent to contact (when connecting via POPOPX name to a known contact address)..
 - type: "sentInvitationToContact"
 - user: [User](./TYPES.md#user)
 - contact: [Contact](./TYPES.md#contact)
@@ -2042,7 +2042,7 @@ Connect to existing contact via address in its profile.
 
 **Responses**:
 
-SentInvitationToContact: Invitation sent to contact (when connecting via SimpleX name to a known contact address)..
+SentInvitationToContact: Invitation sent to contact (when connecting via POPOPX name to a known contact address)..
 - type: "sentInvitationToContact"
 - user: [User](./TYPES.md#user)
 - contact: [Contact](./TYPES.md#contact)

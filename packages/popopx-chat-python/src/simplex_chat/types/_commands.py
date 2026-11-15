@@ -59,7 +59,7 @@ def APISetProfileAddress_cmd_string(self: APISetProfileAddress) -> str:
 APISetProfileAddress_Response = CR.UserProfileUpdated | CR.UserProfileNoChange | CR.ChatCmdError
 
 
-# Set or remove SimpleX name of bot address. The name must be registered with the address short link.
+# Set or remove POPOPX name of bot address. The name must be registered with the address short link.
 # Network usage: interactive.
 class APISetUserDomain(TypedDict):
     userId: int  # int64

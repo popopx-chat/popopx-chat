@@ -102,7 +102,7 @@ chatResponsesDocsData =
     ("CRSentGroupInvitation", "Group invitation sent"),
     ("CRSentGroupInvitationViaGroup", "Group invitation sent to member of another group"),
     ("CRSentInvitation", "Invitation sent to contact address"),
-    ("CRSentInvitationToContact", "Invitation sent to contact (when connecting via SimpleX name to a known contact address)."),
+    ("CRSentInvitationToContact", "Invitation sent to contact (when connecting via POPOPX name to a known contact address)."),
     ("CRServiceReplyAccepted", "Service reply accepted for delivery. `connectionId` correlates the reply delivery event."),
     ("CRSndFileCancelled", "Cancelled sending file"),
     ("CRStartedConnectionToContact", "Connection to contact started (when connecting via prepared contact)."),
