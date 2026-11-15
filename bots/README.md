@@ -112,7 +112,7 @@ CLI will also send chat events to your bot process. These events represent infor
 
 See [Processing events](#processing-events) about event message format and types.
 
-In most cases, the bot needs to have a pre-configured user profile and SimpleX address, configured to automatically accept incoming contact requests from all users. It is simpler to do it manually via desktop client and then use this chat database with your bot. But it can also be done programmatically when bot starts.
+In most cases, the bot needs to have a pre-configured user profile and POPOPX address, configured to automatically accept incoming contact requests from all users. It is simpler to do it manually via desktop client and then use this chat database with your bot. But it can also be done programmatically when bot starts.
 
 In the simplest case, your bot must process [NewChatItems](./api/EVENTS.md#newchatitems) event to receive messages from connected users and use [APISendMessages](./api/COMMANDS.md#apisendmessages) command to respond to them.
 

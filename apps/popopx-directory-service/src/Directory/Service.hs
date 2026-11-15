@@ -377,7 +377,7 @@ directoryServiceEvent opts@DirectoryOpts {adminUsers, superUsers, serviceName, o
             Right r -> g <$ logError ("verifyGroupDomain_: unexpected response " <> tshow r)
             Left e -> g <$ logInfo ("verifyGroupDomain_: error " <> tshow e)
       | otherwise = pure g
-    groupInfoText popopxName_ p@GroupProfile {description = d, publicGroup} = groupNameDescr p <> maybe "" ("\nSimpleX name: " <>) popopxName_ <> maybe "" ("\nWelcome message:\n" <>) d <> linkToJoin
+    groupInfoText popopxName_ p@GroupProfile {description = d, publicGroup} = groupNameDescr p <> maybe "" ("\nPOPOPX name: " <>) popopxName_ <> maybe "" ("\nWelcome message:\n" <>) d <> linkToJoin
       where
         linkToJoin = case publicGroup of
           Just pg@PublicGroupProfile {groupLink} ->
@@ -1171,7 +1171,7 @@ directoryServiceEvent opts@DirectoryOpts {adminUsers, superUsers, serviceName, o
             sendReply $ "The link to join the " <> groupTypeStr' pg <> " " <> groupReference' gId gName <> ":\n" <> strEncodeTxt groupLink
               -- Kept with the tests that read it (tests/Bots/DirectoryTests.hs:2263,2296): this reply line is
               -- the directory service's own wording, and the service moves as one unit with its destination.
-              <> maybe "" (("\nSimpleX name: " <>) . simplexNameStr) (verifiedGroupDomain g)
+              <> maybe "" (("\nPOPOPX name: " <>) . simplexNameStr) (verifiedGroupDomain g)
           Nothing -> do
             let groupRef = groupReference' gId gName
             withGroupLinkResult groupRef (sendChatCmd cc $ APIGetGroupLink groupId) $

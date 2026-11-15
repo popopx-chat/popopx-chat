@@ -95,6 +95,44 @@ whose skip branch is also its error branch turns an outage into a green idle run
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
 
+### The rest of the name/address tier, and the one unit only a rendered-text run could prove (2026-11-15, rulings 必改 the rest + 需要确认的按照建议进行)
+
+68 occurrences moved. The residue of #109 is now **4 occurrences outside the record files** — the 3 hspec titles
+and the historical AppStream release note, which is exactly the `不能改` set — plus the mentions in the record
+files themselves, which quote the phrases they rule on.
+
+**必改, 62 occurrences / 59 lines.** `src/log.ts` 7, `src/tools.ts` 3, `src/cli.ts` 1 and their mirrors
+`test/unit/log.test.ts` 7, `messages.test.ts` 2, `options.test.ts` 2 — the pairing is 11 to 11, which is what a
+stale-expectation sweep cannot break: both counts went to 0 in the same commit. `bot.ts` 3 + `api.ts` 1 and the
+7 nodejs mirrors, which are `it` titles only (jest selects by file, so these are cosmetic). `PLAN.md` 16,
+`spec/api.md` 3, `spec/architecture.md` 2, `spec/flows.md` 1, `REFERENCE.md` 2, `TESTING.md` 1,
+mcp `README.md` 2 (its "your SimpleX address" was stale against the shipped "POPOPX address"),
+`apps/popopx-calculator-bot/README.md` 1, and the `Controller.hs:1501` comment. PLAN.md mattered beyond prose:
+its table at 808/819-825 **transcribes the apps' error text**, so it is a mirror of `log.ts` and had to move in
+the same commit. Gate: mcp `274/274`, nodejs `54/54`, both suites run locally.
+
+One occurrence outside the ruled count moved because it shares a ruled sentence: `tools.ts:403` now reads "by a
+**POPOPX link** or a **POPOPX name**". Leaving it would have shipped a sentence that names our feature twice,
+differently. It is 1 of the 64 `SimpleX link` occurrences (31 files; 60 outside the record files) still in the tree —
+that cluster (mcp and nodejs
+sources, their typedoc and spec mirrors, the generated `bots` docs, 4 hspec examples, `Preferences.hs`) remains
+a tier of its own and was not ruled.
+
+**需裁定, 6 occurrences, executed as recommended.** `Directory/Service.hs:380/1174` builds
+`"\nPOPOPX name: "` into the text a directory user sees, and the only readers of that exact string are
+`tests/Bots/DirectoryTests.hs:2263/2296`, so the four lines are one unit. `cabal build all` proves nothing about
+it, because the mismatch would be a runtime string comparison — so the unit was *run*: `-m inconsistent` →
+`2 examples, 0 failures`, and `-m verify` → `21 examples, 0 failures` including
+`should verify and show a channel's SimpleX name [✔]` and the NOT-verified mirror. The titles themselves stayed
+upstream's spelling, which is what kept those selectors working. The reason for moving the pair now, rather than
+at deployment: the text is ours to render the day this fork runs its own directory service, and shipping it
+still saying "SimpleX name" is the misattribution the rebrand exists to remove. Plus `bots/README.md:115` and
+`README.md:47` — the label became POPOPX, the address payload `https://smp6.simplex.im/a#…` stayed, because that
+relay is upstream's.
+
+Verification note: every changed line in all 23 files was checked against `HEAD` by normalizing the tokens
+back — 65 insertions, 65 deletions, **0 lines differ by anything other than the ruled wording**.
+
 ### The generated bot API docs: 6 literals rewrite 9 output lines (2026-11-15, ruling 必改 the 6 literals)
 
 Of the 93 `SimpleX name` / `SimpleX address` occurrences measured in #109, one tier has its far end **inside
@@ -118,8 +156,8 @@ The gate is a recipe worth repeating, because the harness is a generator and not
 and captcha specs. Run *before* editing it reported `138 / 4 / 4 examples, 0 failures` and left the tree
 byte-identical, which is the proof that the 9-line diff afterwards belongs to this change and nothing else.
 Re-run after the edit: same counts, 0 failures. Both halves of the pair now measure 0 — 6 generator literals and
-9 generated lines — and the residue of #109 is 72 occurrences outside the record files, 81 counting this
-document, which quotes the phrases it rules on.
+9 generated lines — and the residue of #109 at this commit is 72 occurrences outside the record files, 81
+counting this document, which quotes the phrases it rules on. The next section brings that 72 down to 4.
 
 Left untouched by the same ruling: the `需裁定` unit `Directory/Service.hs:380/1174` `"\nSimpleX name: "` with
 its two exact-text `<##` mirrors at `tests/Bots/DirectoryTests.hs:2263/2296` (that text is rendered by a

@@ -44,7 +44,7 @@
 
 ## Connect to the team
 
-You can connect to the team via the app using "chat with the developers button" available when you have no conversations in the profile, "Send questions and ideas" in the app settings or via the [SimpleX address](https://smp6.simplex.im/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw). Please connect to:
+You can connect to the team via the app using "chat with the developers button" available when you have no conversations in the profile, "Send questions and ideas" in the app settings or via the [POPOPX address](https://smp6.simplex.im/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw). Please connect to:
 
 - to ask any questions
 - to suggest any improvements

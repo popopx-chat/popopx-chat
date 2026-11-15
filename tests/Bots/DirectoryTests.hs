@@ -2260,7 +2260,7 @@ testDirectoryChannelName ps = withSmpServerAndNames ps $ \reg ->
         -- the directory verified the name against the channel link and shows it to the admin
         superUser <# "'POPOPX Directory'> bob submitted the channel ID 1:"
         superUser <## "news"
-        superUser <## "SimpleX name: #news"
+        superUser <## "POPOPX name: #news"
         superUser <##. "Link to join channel: "
         superUser <## "You need POPOPX Chat app v6.5 to join."
         superUser <## "1 subscribers"
@@ -2293,7 +2293,7 @@ testDirectoryChannelNameNotVerified ps = withSmpServerAndNames ps $ \reg ->
         channelJoinedByDirectory bob relay
         superUser <# "'POPOPX Directory'> bob submitted the channel ID 1:"
         superUser <## "news"
-        superUser <## "SimpleX name: #news (NOT verified - will not be shown)"
+        superUser <## "POPOPX name: #news (NOT verified - will not be shown)"
         superUser <##. "Link to join channel: "
         superUser <## "You need POPOPX Chat app v6.5 to join."
         superUser <## "1 subscribers"
