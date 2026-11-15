@@ -192,7 +192,10 @@ without moving the mirror is red, not neutral. Measured before touching anything
   exactly that line with the old string expected, which is the stale-mirror class, not a failing feature.
 - `logo-large-rgba.png` 28676 -> 68521 bytes at the same 1630x466, RGBA8 with transparency and the same aspect,
   because `ImageTests.hs:103/:262` assert those properties and `MobileTests.hs:390/:408` assert the PNG magic.
-  Both fixtures were drawn from `branding/source-svg/tests__fixtures__logo-large-rgba.png.src.svg`.
+  What the two new bytes *are*: `logo.jpg` is this fork's app icon at 200x200 - the same mark as
+  `apps/ios/Shared/Assets.xcassets/popopx_app_icon.imageset/popopx_app_icon.png` - and `logo-large-rgba.png` is
+  the POPOPX wordmark banner, rendered from
+  `branding/source-svg/tests__fixtures__logo-large-rgba.png.src.svg`. Neither reuses upstream's logo.
 - The consumers, by their real group paths: `POPOPX chat client > file tests > messages with files` -> "send
   image with generated preview" (`Files.hs:187`), `file tests > file transfer over XFTP without chat items` ->
   "send and receive small standalone file" and the same "with extra information" (`:1332/:1357`),

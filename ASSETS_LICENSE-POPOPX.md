@@ -66,7 +66,9 @@ Measured 2026-11-13, that set contains at least:
   logo bytes used as Haskell test inputs until 2026-11-15. They could not move before a Haskell run: the
   transferred-size assertion in `Forward.hs:850` and `Files.hs:190` reads the fixture's byte length, and
   `ImageTests.hs:103` and `:262` require RGBA8 with transparency and a preserved aspect. Both moved together,
-  the assertion now reading `5.9 KiB / 6074 bytes`, and the tests that read them pass.
+  the assertion now reading `5.9 KiB / 6074 bytes`, and the tests that read them pass. The replacements are our own
+  marks: the app icon at 200x200 (the same drawing as `popopx_app_icon.imageset`) and the POPOPX wordmark banner,
+  rendered from `branding/source-svg/tests__fixtures__logo-large-rgba.png.src.svg`.
 
 ## What is NOT ours, and what that means for you
 
