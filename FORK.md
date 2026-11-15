@@ -665,12 +665,18 @@ yet. Before any build of this fork is distributed:
   paths resolve.
 - **Store links 404.** Every `market://` / `details?id=com.popopxchat.popopx` / App Store URL in
   this repository names an app record that does not exist yet.
-- **The application artwork is done; the documentation artwork is not.** The icons, illustrations and
-  the 376 iOS snapshot baselines are POPOPX work product now (the iOS catalog's last upstream files —
-  badges, wallpapers, `privacy`, `shield` — were redrawn on 2026-11-13). Still upstream's, and still
-  licensed only for the *unmodified* application: the 210 desktop snapshot baselines, and the
-  documentation and website imagery listed with counts in
-  [`ASSETS_LICENSE-POPOPX.md`](./ASSETS_LICENSE-POPOPX.md).
+- **Everything that ships an image is either ours or is still upstream's, and the line is drawn by the
+  bytes.** Measured 2026-11-15 against `db0768c21`, at the same path or at the brand-restored one: of
+  **1527** tracked image files, **837** are POPOPX's bytes and **690** are byte-identical to upstream's.
+  The marks, app icons and in-app illustrations are ours — the iOS catalog's last upstream files (badges,
+  wallpapers, `privacy`, `shield`) were redrawn on 2026-11-13 and the Android launcher set with them. What
+  is still upstream's, licensed only for the *unmodified* application under `assets/ASSETS_LICENSE.md`:
+  339 moko glyphs under `apps/multiplatform/common/src/commonMain/**`, 190 of the 210 desktop snapshot
+  baselines, 130 of the 374 iOS renders (renders of scenes that carry no brand artwork are indistinguishable
+  from upstream's, so they are not claimed — see `ASSETS_LICENSE-POPOPX.md` §"What is NOT ours"), the 13
+  `packages/**` images whose only change is their directory name, 8 third-party/Apple files in the iOS
+  catalog, and 10 fixtures and audit logos. The documentation and website imagery left with `docs/` and
+  `website/`, so nothing here ships it.
 
 ### Upstream-operated hosts, and how each one fails
 

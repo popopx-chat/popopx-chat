@@ -127,16 +127,20 @@ A rebranded fork is a modified work. Therefore:
      on the component name, so renaming it resets the user's chosen icon.
    - ~~the **376 iOS snapshot baselines**~~ **replaced 2026-11-12** with our own renders from the
      "POPOPX Snapshots" target: 264 at `large` plus 56 each at `accessibility-medium` and
-     `extra-extra-extra-large`, filenames unchanged. 198 differ byte-for-byte from upstream's, the
-     other 178 are identical because those scenes carry no brand content — an unchanged PNG is not a
-     copied one, they were all written by this repo's run.
+     `extra-extra-extra-large`, filenames unchanged. Re-measured 2026-11-15: **374** PNGs are there (two left with the crowdfunding
+     views), **130 byte-identical** to upstream's, 242 differing, 2 with no counterpart under any name. The
+     clause this entry used to end with — "an unchanged PNG is not a copied one, they were all written by this
+     repo's run" — is **withdrawn**. It was the argument `NOTICE` and `ASSETS_LICENSE-POPOPX.md` used to claim
+     files that no downstream user can tell apart from upstream's by any test they can run, which is exactly
+     the over-claim ruling AGPL-2 exists to remove: those 130 are upstream's for licence purposes, the 244
+     are ours.
    - ~~the **210 desktop snapshot images** under `apps/multiplatform/common/src/desktopTest/snapshots`~~
      **replaced 2026-11-13** by CI run `43397744144` on `43d54a9b2`: all 210 filenames were re-installed
      unchanged (0 added, 0 removed) and **20 differ byte-for-byte** from upstream's, across 9 scenes
      (`ChatHelpView`, `ContactConnectionInfoView`, `HelpView`, `NewChatSheet`, `POPOPXInfo`, `QRCode`,
      `SettingsView`, `UserAddressView`, `WhatsNewView`) — the screens that show the brand name, an address
-     or a link. The other 190 are identical because those scenes carry no brand content, and as on iOS an
-     unchanged PNG is not a copied one: every file was written by this repo's build.
+     or a link. The other 190 are identical because those scenes carry no brand artwork — and under the withdrawal
+     above they are upstream's, not ours: 190 of these 210 files are now claimed by nobody here.
      The method is recorded because it is the only way this can ever be re-run:
      `desktop-linux.yml` (a `workflow_dispatch` job, never push-triggered) runs
      `chat.popopx.app.SnapshotTest#everyPreviewIsRendered` under `gradle desktopTest` with
@@ -146,21 +150,23 @@ A rebranded fork is a modified work. Therefore:
    - ~~`website/src/img/**` (the wordmark images, screenshots, illustrations, `SimpleXExplainedLottie.json`)
      and the 93 tracked files under `assets/**`, if this fork's website ships them~~ **closed 2026-11-13,
      both halves**: `website/` left the fork in `9996634ee`, so its images are not shipped by anything here;
-     and `assets/**` is now 89 tracked files — 88 under `assets/multiplatform/resources/MR/images/**`
-     (replaced by POPOPX renders, ruling C2) plus the licence text. Measured against `db0768c21`, of the 103
+     and `assets/**` is now 81 tracked files — 80 under `assets/multiplatform/resources/MR/images/**`
+     (replaced by POPOPX renders, ruling C2) plus the licence text. Measured against `db0768c21`, of the 95
      tracked files under `assets/**` and root `images/**` exactly **4** still carry upstream's bytes:
      `assets/ASSETS_LICENSE.md` (a notice, kept per §4) and the 3 third-party audit logos
      `images/{kuketz-blog,trail-of-bits,whonix-logo}.jpg` — not SimpleX marks, and they are what
-     `README.md:26` links. The other 99 are ours (91 differ, 8 have no upstream counterpart).
+     `README.md:26` links. The other 91 are ours, and each of the 91 differs from an upstream file at the same
+     path or at the brand-restored one — none of them is "new", which is what the old same-path recipe
+     reported for 8 of them.
    The action for each is **replace or remove before distribution**, not rename.
 
 **Ruling C2 (2026-11-13)** promotes the two *build-input* sets above everything else, because they are not
-documentation: `assets/multiplatform/resources/MR/images/**` (92 rasters) and
-`apps/multiplatform/common/src/commonMain/resources/assets/default/MR/images/**` (46 vectors) are fed to
+documentation: `assets/multiplatform/resources/MR/images/**` (80 rasters, 40 names × @2x/@3x, down from 92 when the 12 unreferenced names went) and
+`apps/multiplatform/common/src/commonMain/resources/assets/default/MR/images/**` (42 vectors) are fed to
 the app by `-Ppopopx.assets.dir=../../assets`, which every desktop/Android build and CI job passes
 (`desktop-linux.yml:251,277`, `build.yml:1649`, `android-emu.yml:276`, `scripts/{desktop,android}/*`), so
 upstream's illustrations compile into a POPOPX-branded app. They are being redrawn from POPOPX masters;
-the 25 logical images behind the 138 files are listed in `ASSETS_LICENSE-POPOPX.md`, which also records
+the 40 logical images behind the 80 replaced rasters are listed in `ASSETS_LICENSE-POPOPX.md`, which also records
 that the file *names* stay (they are compiled `MR.images.*` resource identifiers) while the bytes change.
 3. **The licence texts stay**, including in folders whose assets we have replaced or removed — §4
    forbids removing notices, and they are the record of what we may not ship. Where an asset was
@@ -179,6 +185,13 @@ that the file *names* stay (they are compiled `MR.images.*` resource identifiers
   brands — recorded in `NOTICE` and in `README.md`'s
   License section.
 - Any service this fork later operates triggers §13 for that service; nothing is operated now.
+- **The 690 upstream-identical images are still in the distribution.** Ruling AGPL-2 fixed what this fork
+  *claims*; it did not change what this fork *ships*. Upstream's asset licence allows those files only in an
+  unmodified SimpleX Chat distribution and forbids modifying them, and this is neither, so the notice now
+  tells the truth about ownership while the exposure itself stays open until each one is replaced or
+  removed. That is the remaining artwork item: the 339 moko glyphs and the 190 + 130 unchanged renders are
+  the bulk of it, and the renders cannot be regenerated into something different without first changing the
+  artwork and UI they depict.
 
 ## 5. Per-file copyright headers (clause §5a) — repaired 2026-11-15
 

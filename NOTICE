@@ -21,9 +21,10 @@ modifications, including what was deliberately left unchanged, is described in
 FORK.md.
 
 The application graphics (illustrations, icons, visual designs and test-snapshot
-screenshots) are NOT part of the AGPL grant. They are proprietary and licensed
-only for distribution of the unmodified application, per assets/ASSETS_LICENSE.md,
-and are pending replacement in this fork.
+screenshots) are NOT part of the AGPL grant. The brand-bearing sets were replaced
+with this fork's own artwork during 2026-11-13 and 2026-11-15; what is still
+upstream's is listed in ASSETS_LICENSE-POPOPX.md and stays under
+assets/ASSETS_LICENSE.md.
 
 "SimpleX", "SimpleX Chat" and the associated logos are trademarks of SimpleX Chat
 Ltd. This fork uses the name POPOPX for that reason; no affiliation, sponsorship
@@ -37,11 +38,18 @@ POPOPX-side notices, on the same two tracks:
     TRADEMARK-POPOPX.md
 
   Copyright (C) 2026 POPOPX. All rights reserved.
-    -- the graphic assets this fork created: the iOS marks and app icons, the
-    Android launcher and status-bar icons, the "POPOPX Snapshots" renders and the
-    package images. They are not part of the AGPL grant and may not be
-    redistributed in another project's distribution, modified or unmodified,
-    without prior written permission. Licence: ASSETS_LICENSE-POPOPX.md
+    -- only the graphic assets whose bytes this fork wrote: the iOS marks and app
+    icons, the Android launcher and status-bar icons, this repository's own
+    snapshot renders, and every image that differs from the imported tree or has
+    no counterpart in it. Provenance is the bytes, compared with the blob at the
+    same path in db0768c21, or at upstream's name for that path where this fork
+    renamed it. Measured 2026-11-15: of 1527 tracked image files, 837 are ours and
+    690 are still byte-identical to SimpleX Chat Ltd's - those are NOT claimed
+    here, they stay under assets/ASSETS_LICENSE.md with upstream as their owner,
+    and a file that merely sits under a popopx-* package directory is one of them.
+    They are not part of the AGPL grant and may not be redistributed in another
+    project's distribution, modified or unmodified, without prior written
+    permission. Licence: ASSETS_LICENSE-POPOPX.md
 
 A downstream fork of this repository carries both sets of obligations: POPOPX's,
 above, and SimpleX Chat Ltd's, which are kept verbatim in the files named in the
