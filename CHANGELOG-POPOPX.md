@@ -95,11 +95,51 @@ whose skip branch is also its error branch turns an outage into a green idle run
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
 
+### Which repository may publish, and the two values that shared one spelling (2026-11-15, rulings 使用 popopxChatCore + 名称更新)
+
+- **`.github/workflows/build.yml:59`** (`release_branch`) compared `github.repository` to
+  `simplex-chat/simplex-chat`, so the branch guard that decides *what may be released* resolved to the empty
+  string on every one of our own runs. It now reads `github.repository == 'popopx-chat/popopx-chat'`
+  (`4a7f674b1`). **What this does not yet change: `build.yml:136` (`reduced`) still tests
+  `github.repository != 'simplex-chat/simplex-chat'`** — the second reader of the same value, consumed at 14
+  steps — so our pushes keep running the reduced matrix. That is a *different* decision (which jobs a fork
+  run owes you) and is listed for ruling, not folded in here.
+- **`simplexChatCore` was two values sharing a spelling**, and only one of them is a build boundary: the
+  JSON field in `packages/popopx-chat-client/types/typescript/package.json` and its reader/writer
+  `scripts/ci/packages_release.py:724/:769`. Both ends are in this repository — measured: the `-libs`
+  repository has **0** occurrences of either spelling, and `releases.toml` there keys `[core.master]` by
+  version→SHA, never by this field — so renaming the field to **`popopxChatCore`** moved 14 occurrences /
+  3 files (4 in the script, its 9 test fixtures, 1 in `package.json`) with no third end to chase. The field
+  also *guards a version pair*: it said core `7.1.0.18` while `popopx-chat.cabal:8` says `7.1.2.0`, and
+  `types_problem()` refuses a release unless they agree. Both now read **`7.1.2.0`**, with the
+  `POPOPX Chat core: 7.1.2.0` line that `TYPES_README_CORE` requires (`README.md:7`). The Haskell export
+  keeps its name (20 occurrences / 13 files) — it is a public identifier of `Popopx.Chat.Core`, and a
+  rename of it needs `cabal build` over the library and all eight executables as its gate, so it is listed
+  for ruling rather than folded into a scripting commit. **Verification here is static**: this suite needs
+  `tomllib` (Python ≥ 3.11) and `python3` on this machine is 3.9.6, so it is a CI-only gate.
+- **The generated overlay directory is named for us.** `apps/multiplatform/common/build.gradle.kts:15` and
+  the `apps/multiplatform/.gitignore` entry moved `resources/assets/simplex/` → `resources/assets/popopx/`.
+  Only the *destination* is affected — the 4 CI callers pass the source (`-Ppopopx.assets.dir=../../assets`),
+  and `verifyPopopxAssets` checks that source — so this is a rename of a gitignored build output, with no
+  reader left behind: `assets/simplex` survives only in this file's records (3 occurrences, all markdown),
+  and 0 lines outside markdown in the whole tree.
+- **Two generators outside this repository were still writing upstream names.**
+  `tools/r7/popopx_logo_sync.py` emitted `distribute/simplex.{png,icns,ico}` while the tracked files and both
+  consumers (`desktop/build.gradle.kts:68,73,82`, `make-appimage-linux.sh`) read `popopx.*`, and its brand-kit
+  manifest `tools/r7/popopx_brand.py` named 10 repo paths that no longer exist (`images/simplex-chat-logo*.svg`,
+  `images/how-to-use-simplex.svg`, 8 `media-logos/simplex-*`) plus 2 resample targets whose `size(dst)` read
+  would have failed outright. A re-run would therefore have written untracked `simplex.*` files *beside* our
+  own and refreshed nothing. All 15 target paths and the 6 docstrings that name them now point at the tracked
+  `popopx.*` files, whose pixel sizes match the manifest exactly (measured with `sips`: 1024², 276×276,
+  279×276, 768×190, 768×189, 512²) and whose derived source names match the 15 tracked
+  `branding/source-svg/{images,media-logos}__popopx-*` masters. `py_compile` passes on both files.
+
 ### The last upstream drawings compiled into the desktop and Android apps (`2a967acb0` + `b6a3ee009` + `0a7b7172f` + `23e22c439`, 2026-11-15)
 
 Three asset sets reach a desktop/Android build, not one. `assets/multiplatform/resources/MR/images/**` is an
 *overlay* selected by `-Ppopopx.assets.dir=../../assets`: `build.gradle.kts:14-37` `Sync`s it into
-`src/commonMain/resources/assets/simplex/MR/images`, and deletes that directory when the property is absent.
+`src/commonMain/resources/assets/popopx/MR/images` (that directory is generated and gitignored; it was named
+`assets/simplex` until the 2026-11-15 pass), and deletes that directory when the property is absent.
 It was replaced first (ruling C2). `apps/multiplatform/common/src/commonMain/moko-resources/images/**` is a
 plain moko source directory, so it is compiled in **both** cases - with or without the overlay - and it still
 carried upstream's artwork after the overlay went.
@@ -706,7 +746,10 @@ pass:
   became `popopx.desktop` and `popopx.{png,ico,icns}`, together with their three `iconFile.set(…)` sites
   in `apps/multiplatform/desktop/build.gradle.kts:68,73,82` and the `cp` in
   `scripts/desktop/make-appimage-linux.sh:41`. These are build inputs: a half-move is a desktop bundle
-  that silently ships the default icon.
+  that silently ships the default icon. The generator of the three binaries — `tools/r7/popopx_logo_sync.py`
+  and its manifest `tools/r7/popopx_brand.py`, both outside this repo — kept emitting the old names until
+  2026-11-15, so a re-run would have written untracked `simplex.*` files beside our own and never refreshed
+  them; it now targets the tracked `popopx.{png,icns,ico}`, `media-logos/popopx-*` and `images/popopx-*`.
 - **2 build-reproduction scripts** and both readers (`.github/workflows/reproduce-schedule.yml`,
   `scripts/ci/android/release-apk.sh`).
 - **2 support-bot test mocks**. Their **alias keys stayed** (`"simplex-chat"`, `"@simplex-chat/types"` in

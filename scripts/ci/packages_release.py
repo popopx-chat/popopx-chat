@@ -721,8 +721,8 @@ def types_problem(version: str, releases: dict, branch: str) -> str | None:
     types = read_json(f"{TYPES_DIR}/package.json")
     if npm_released(releases, types["name"], types["version"]):
         return f"{types['name']} changed, and its version {types['version']} is published"
-    if types.get("simplexChatCore") != version:
-        return f"simplexChatCore of {types['name']} is {types.get('simplexChatCore')}, expected {version}"
+    if types.get("popopxChatCore") != version:
+        return f"popopxChatCore of {types['name']} is {types.get('popopxChatCore')}, expected {version}"
     return None
 
 
@@ -766,7 +766,7 @@ def core_release(version: str, branch: str, types_version: str | None) -> None:
     readme, found = TYPES_README_CORE.subn(f"POPOPX Chat core: {version}", read_text(TYPES_README), count=1)
     if not found:
         sys.exit(f"{TYPES_README} has no line 'POPOPX Chat core: <version>'")
-    write_json(f"{TYPES_DIR}/package.json", {**types, "version": types_version, "simplexChatCore": version})
+    write_json(f"{TYPES_DIR}/package.json", {**types, "version": types_version, "popopxChatCore": version})
     (ROOT / TYPES_README).write_text(readme)
     print(f"{types['name']}: {types_version}")
 

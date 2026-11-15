@@ -12,7 +12,7 @@ group = "chat.popopx"
 version = extra["android.version_name"] as String
 
 val popopxAssetsDir = rootProject.findProperty("popopx.assets.dir") as String?
-val popopxAssetsLocal = file("src/commonMain/resources/assets/simplex")
+val popopxAssetsLocal = file("src/commonMain/resources/assets/popopx")
 val hasPopopxAssets = popopxAssetsDir != null
 
 if (popopxAssetsDir != null) {

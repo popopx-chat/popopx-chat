@@ -13,6 +13,16 @@ not legal advice.
 > whose *name* contains "simplex" **67**. Reproduce with `git grep -Io -- '<term>' | wc -l` and
 > `git ls-files | grep -ic simplex`. §2 now reads the new numbers — and the 67 has itself moved: the
 > naming-residue pass later the same day took it to **20**, every one of them a `packages/**` installed name.
+>
+> **Re-measured 2026-11-15** — the tree moved twice more (the libs asset family, the blog/crowdfunding
+> deletions, and `POPOPX-REBRAND-PLAN.md` itself entering the index as `73f453f6b`): `simplexChatCore`
+> **34 / 16** before this pass and **20 / 13** after it (§2 explains which half moved),
+> `simplex-chat-nodejs` **20 / 6**, `simplex-chat-libs` **10 / 5**, tracked paths whose *name* contains
+> "simplex" still **20**, all `packages/**`. The `simplex-chat-libs` figure rose 6 → 10 without anything
+> being renamed back: the four added occurrences are two quoted CI download-log lines in
+> `packages/popopx-chat-mcp/PLAN.md`, one sentence of the plan file, and this callout — records of a
+> destination and GitHub URLs, not readers of a name. `git grep -Io -- '<term>' | wc -l` counts occurrences,
+> `git grep -c` counts lines, and `PLAN.md:239-240` put two on one line.
 
 ## 1. What AGPL-3.0 requires of this fork, and where it is satisfied
 
@@ -30,12 +40,24 @@ not legal advice.
 
 The three groups listed in the ruling are **names**, and AGPL-3.0 imposes nothing about them:
 
-- **`simplexChatCore`** (37 occ / 18 files at ruling 6, **32 occ / 15 files** measured 2026-11-13) is a
-  Haskell identifier (`src/Popopx/Chat/Core.hs`) that also appears as a field name in
-  `packages/popopx-chat-client/types/typescript/package.json`, read
-  back by `scripts/ci/packages_release.py:726`. It is one value on two sides of a build boundary.
-  Renaming it is a branding change that must move the producer, the field and the reader in one commit
-  — the rule that `ding_wire_audit.py` enforces. AGPL neither requires nor forbids it.
+- **`simplexChatCore`** (37 occ / 18 files at ruling 6, 32 / 15 measured 2026-11-13, **34 / 16** measured
+  2026-11-15 before this pass) was **two different values sharing one spelling**: a Haskell identifier
+  (`src/Popopx/Chat/Core.hs`) and a JSON field name in
+  `packages/popopx-chat-client/types/typescript/package.json` read back by
+  `scripts/ci/packages_release.py:724`. The field side moved on 2026-11-15 to `popopxChatCore` — 14
+  occurrences / 3 files, the producer's `write_json` (`:769`), the reader (`:724-725`) and its 9 test
+  fixtures moved in one commit, together with the stale version pair it guards (the field said core
+  `7.1.0.18` while `popopx-chat.cabal:8` said `7.1.2.0`; both now read `7.1.2.0`, and the README line
+  `POPOPX Chat core: 7.1.2.0` that `TYPES_README_CORE` requires matches them). The **remaining 20 / 13**
+  are the other value: 14 occurrences in `src` and `apps` Haskell code — 3 sites in the definition
+  `src/Popopx/Chat/Core.hs` and 11 across its 8 callers (the CLI `Terminal.hs` / `Terminal/Main.hs`, the
+  server `apps/popopx-chat/Server.hs` and the four service/bot entries) — 1 call in
+  `tests/Bots/BroadcastTests.hs`, 1 sentence in `apps/popopx-badge-service/web/README.md`, and 4 lines
+  recording this split in this file and in `CHANGELOG-POPOPX.md`. Renaming an exported library identifier
+  changes the API for anything importing `Popopx.Chat.Core` from this fork, so it is not folded into a
+  scripting commit — it needs its own pass
+  with `cabal build` over the library and all eight executables as the gate. AGPL neither requires nor
+  forbids either move.
 - **`simplex-chat-libs`** (100 occurrences at ruling 6, **6** measured 2026-11-13 — 2 of them the
   `-<platform>` asset filename inside a quoted download log) moved to `popopx-chat-libs` on 2026-11-13
   (FORK.md item 6). The reasoning here

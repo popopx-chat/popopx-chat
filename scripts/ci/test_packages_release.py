@@ -833,25 +833,25 @@ class TypesProblemTest(unittest.TestCase):
             return types_problem("7.1.0.12", releases or {}, "master")
 
     def test_unchanged_types_pass(self):
-        self.assertIsNone(self.problem({"version": "0.12.1", "simplexChatCore": "7.1.0.11"}, changed=False))
+        self.assertIsNone(self.problem({"version": "0.12.1", "popopxChatCore": "7.1.0.11"}, changed=False))
 
     def test_changed_types_with_a_new_version_for_the_core_pass(self):
-        self.assertIsNone(self.problem({"version": "0.12.2", "simplexChatCore": "7.1.0.12"}))
+        self.assertIsNone(self.problem({"version": "0.12.2", "popopxChatCore": "7.1.0.12"}))
 
     def test_changed_types_with_a_published_version_fail(self):
-        self.assertIsNotNone(self.problem({"version": "0.12.1", "simplexChatCore": "7.1.0.12"}, published=True))
+        self.assertIsNotNone(self.problem({"version": "0.12.1", "popopxChatCore": "7.1.0.12"}, published=True))
         recorded = {"npm": {"@simplex-chat/types": {"0.12.1": "c"}}}
-        self.assertIsNotNone(self.problem({"version": "0.12.1", "simplexChatCore": "7.1.0.12"}, releases=recorded))
+        self.assertIsNotNone(self.problem({"version": "0.12.1", "popopxChatCore": "7.1.0.12"}, releases=recorded))
 
     def test_changed_types_for_another_core_fail(self):
-        self.assertIsNotNone(self.problem({"version": "0.12.2", "simplexChatCore": "7.1.0.11"}))
+        self.assertIsNotNone(self.problem({"version": "0.12.2", "popopxChatCore": "7.1.0.11"}))
 
 
 class CoreReleaseTest(GitRepoTest):
     def setUp(self):
         super().setUp()
         self.write(CABAL_FILE, "name:           simplex-chat\nversion:        7.1.0.11\n")
-        types = {"name": "@simplex-chat/types", "version": "0.12.1", "simplexChatCore": "7.1.0.11"}
+        types = {"name": "@simplex-chat/types", "version": "0.12.1", "popopxChatCore": "7.1.0.11"}
         self.write(f"{TYPES_DIR}/package.json", json.dumps(types, indent=2) + "\n")
         self.write(TYPES_README, "# Types\n\nPOPOPX Chat core: 7.1.0.11\n")
         self.write(f"{TYPES_DIR}/src/types.ts", "a")
@@ -877,17 +877,17 @@ class CoreReleaseTest(GitRepoTest):
         self.commit("types change")
         self.release("7.1.0.12")
         self.assertIn("version:        7.1.0.12\n", self.read(CABAL_FILE))
-        self.assertEqual((self.types()["version"], self.types()["simplexChatCore"]), ("0.12.2", "7.1.0.12"))
+        self.assertEqual((self.types()["version"], self.types()["popopxChatCore"]), ("0.12.2", "7.1.0.12"))
         self.assertIn("POPOPX Chat core: 7.1.0.12\n", self.read(TYPES_README))
 
     def test_unchanged_types_keep_their_version(self):
         self.release("7.1.0.12")
         self.assertIn("version:        7.1.0.12\n", self.read(CABAL_FILE))
-        self.assertEqual((self.types()["version"], self.types()["simplexChatCore"]), ("0.12.1", "7.1.0.11"))
+        self.assertEqual((self.types()["version"], self.types()["popopxChatCore"]), ("0.12.1", "7.1.0.11"))
 
     def test_requested_types_version_wins(self):
         self.release("7.1.0.12", "7.1.0-beta.6.1")
-        self.assertEqual((self.types()["version"], self.types()["simplexChatCore"]), ("7.1.0-beta.6.1", "7.1.0.12"))
+        self.assertEqual((self.types()["version"], self.types()["popopxChatCore"]), ("7.1.0-beta.6.1", "7.1.0.12"))
 
     def test_types_version_is_bumped_from_the_previous_core_release(self):
         self.write(f"{TYPES_DIR}/package.json", json.dumps({**self.types(), "version": "0.12.5"}))
