@@ -41,10 +41,10 @@ You need Node.js 22 or later, Claude Code and the [SimpleX Chat app](https://pop
 
 ## Prompt your agent from the app
 
-Give Claude Code your SimpleX address:
+Give Claude Code your POPOPX address:
 
 ```
-Connect to me as yourself at <your SimpleX address>, with the message:
+Connect to me as yourself at <your POPOPX address>, with the message:
 "I'm your agent, connected as you asked in Claude Code. I'll act on your prompts here, except security-sensitive ones."
 Then take my prompts from that chat and answer there: wait for my messages with receive (wait 3600),
 answer each one in that chat, and call receive again after every answer, until I say stop.

@@ -437,7 +437,7 @@ export class ChatApi {
       case "userProfileNoChange":
         return r.user
       default:
-        throw new ChatCommandError("error setting SimpleX name", r)
+        throw new ChatCommandError("error setting POPOPX name", r)
     }
   }
 

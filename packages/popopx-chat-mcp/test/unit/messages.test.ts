@@ -800,7 +800,7 @@ describe("connect", () => {
       } as unknown as T.ChatError)
     }
     const {tools} = connectTools(chat)
-    expect(textOf(await tools.call("connect", {target: "@nobody.popopx"}, signal().call))).toBe("Name not found: This SimpleX name is not registered. Please check the name.")
+    expect(textOf(await tools.call("connect", {target: "@nobody.popopx"}, signal().call))).toBe("Name not found: This POPOPX name is not registered. Please check the name.")
   })
 
   it("connects a known prepared contact, and deletes it when the connection fails", async () => {
@@ -994,7 +994,7 @@ describe("connect", () => {
     expect(chat.commands.at(-1)).toBe("/_read chat items @12 41")
   })
 
-  it("prepares a contact found by its SimpleX name with the domain, and returns no unverified popopx_name", async () => {
+  it("prepares a contact found by its POPOPX name with the domain, and returns no unverified popopx_name", async () => {
     jest.useFakeTimers()
     const chat = new FakeChat()
     const linkData = {profile: {displayName: "SimpleX Directory", fullName: "", peerType: "bot"}, business: false}

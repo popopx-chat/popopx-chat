@@ -72,8 +72,8 @@ function chatErrorTypeText(error: T.ChatErrorType): string | undefined {
     case "popopxDomainNotReady": {
       const name = fullDomainName(error.popopxDomain)
       return error.popopxDomainError.type === "noValidLink"
-        ? `No valid link: The SimpleX name ${name} is registered, but it has no valid link.`
-        : `Unconfirmed name: The SimpleX name ${name} is registered, but not added to profile. Please add it to your address or channel profile, if you are the owner.`
+        ? `No valid link: The POPOPX name ${name} is registered, but it has no valid link.`
+        : `Unconfirmed name: The POPOPX name ${name} is registered, but not added to profile. Please add it to your address or channel profile, if you are the owner.`
     }
     case "fileNotApproved":
       return `Unknown servers! Without Tor or VPN, your IP address will be visible to these XFTP relays: ${[...new Set(error.unknownServers.map(serverHostname))].sort().join(", ")}.`
@@ -85,7 +85,7 @@ function chatErrorTypeText(error: T.ChatErrorType): string | undefined {
 function agentErrorText(error: T.AgentErrorType): string | undefined {
   switch (error.type) {
     case "NO_NAME_SERVERS":
-      return "SimpleX name error: None of your servers are set to resolve SimpleX names. Use a connection link."
+      return "POPOPX name error: None of your servers are set to resolve POPOPX names. Use a connection link."
     case "SMP":
       return smpErrorText(error.smpErr, error.serverAddress)
     case "BROKER":
@@ -123,11 +123,11 @@ function smpErrorText(error: T.ErrorType, server: string): string | undefined {
 function nameErrorText(error: T.NameErrorType, server: string): string {
   switch (error.type) {
     case "NOT_FOUND":
-      return "Name not found: This SimpleX name is not registered. Please check the name."
+      return "Name not found: This POPOPX name is not registered. Please check the name."
     case "NO_RESOLVER":
-      return `SimpleX name error: Server ${server} does not support name resolution. Use a connection link.`
+      return `POPOPX name error: Server ${server} does not support name resolution. Use a connection link.`
     case "RESOLVER":
-      return `SimpleX name error: Resolver error: ${error.resolverErr}`
+      return `POPOPX name error: Resolver error: ${error.resolverErr}`
   }
 }
 

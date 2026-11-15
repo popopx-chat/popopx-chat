@@ -5,7 +5,7 @@
 `@simplex-chat/mcp` is a local server that gives an AI agent its own presence on the SimpleX network. The agent connects to people, bots, groups, channels and directories, as itself or incognito, sends messages and files, and receives all the responses, with the files people send it. Bots tell it which commands they understand, so every bot on the network becomes a service the agent can use. You supervise the agent from its control chat in SimpleX: it asks there before it connects, sends, downloads a file or leaves, and you approve or reject from your phone with one tap, or approve all its messages to a chat you trust, or all files from it. Six tools cover it: `connect`, `send`, `receive`, `download`, `list`, `leave`. Setup is one command to start the agent, a scan to join its control chat, and one command to add it to Claude Code.
 
 What it isn't:
-- **Not a directory or a search service.** The agent reaches chats through links, SimpleX names and the directories it connects to.
+- **Not a directory or a search service.** The agent reaches chats through links, POPOPX names and the directories it connects to.
 - **Not a push channel into the agent.** An MCP server can't start a turn of the agent, so news reaches it only as results of calls it makes: waits inside `send` and `receive`, or polling.
 - **Not an always-on service.** The agent acts while its session runs; services that must always be up should be bots.
 - **Not hosted.** It runs on your machine, one process per agent.
@@ -292,7 +292,7 @@ Six tools:
 
 | Tool | What it does |
 |---|---|
-| `connect` | Joins a contact, bot, business, group or channel by a link or a SimpleX name, as the agent's profile or incognito. Returns the chat, its profile, welcome message, the commands a bot advertises, and the messages so far. |
+| `connect` | Joins a contact, bot, business, group or channel by a link or a POPOPX name, as the agent's profile or incognito. Returns the chat, its profile, welcome message, the commands a bot advertises, and the messages so far. |
 | `send` | Sends a message, with a file of this computer when asked, and returns every message received in that chat after it, until none arrives for `idle` seconds (30 by default). A directory bot's search results arrive this way. |
 | `receive` | Returns the chat's unread messages and those that arrive while it waits, waiting for one when asked. |
 | `download` | Downloads the file of a received message to the data folder and returns its full path. |

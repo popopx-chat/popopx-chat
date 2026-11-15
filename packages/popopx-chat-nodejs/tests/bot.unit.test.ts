@@ -86,28 +86,28 @@ describe("run", () => {
   beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => {}))
   afterEach(() => jest.restoreAllMocks())
 
-  it("sets the configured SimpleX name", async () => {
+  it("sets the configured POPOPX name", async () => {
     const chat = fakeChat()
     await runBot("Calc.popopx")
     expect(chat.apiSetUserDomain).toHaveBeenCalledWith(1, "calc.popopx")
     expect(updatedProfile(chat).contactDomain).toEqual({domain: "calc.popopx"})
   })
 
-  it("removes the SimpleX name set to null", async () => {
+  it("removes the POPOPX name set to null", async () => {
     const chat = fakeChat({domain: "calc.popopx"})
     await runBot(null)
     expect(chat.apiSetUserDomain).toHaveBeenCalledWith(1, undefined)
     expect(updatedProfile(chat).contactDomain).toBeUndefined()
   })
 
-  it("keeps the stored SimpleX name when it is not configured", async () => {
+  it("keeps the stored POPOPX name when it is not configured", async () => {
     const chat = fakeChat({domain: "calc.popopx"})
     await runBot()
     expect(chat.apiSetUserDomain).not.toHaveBeenCalled()
     expect(updatedProfile(chat).contactDomain).toEqual({domain: "calc.popopx"})
   })
 
-  it("keeps the SimpleX name when updating the profile", async () => {
+  it("keeps the POPOPX name when updating the profile", async () => {
     const chat = fakeChat({domain: "calc.popopx", proof: {presHeader: "header", signature: "signature"}})
     await runBot("calc.popopx")
     expect(chat.apiSetUserDomain).not.toHaveBeenCalled()
@@ -115,14 +115,14 @@ describe("run", () => {
     expect(updatedProfile(chat).contactDomain).toEqual({domain: "calc.popopx"})
   })
 
-  it("continues when the SimpleX name cannot be set", async () => {
+  it("continues when the POPOPX name cannot be set", async () => {
     const chat = fakeChat()
     chat.apiSetUserDomain.mockRejectedValue(new Error("popopxDomainNotReady"))
     await expect(runBot("calc.popopx")).resolves.toBeDefined()
     expect(updatedProfile(chat).contactDomain).toBeUndefined()
   })
 
-  it("does not change the SimpleX name without updateAddress", async () => {
+  it("does not change the POPOPX name without updateAddress", async () => {
     const chat = fakeChat()
     await runBot("calc.popopx", {updateAddress: false})
     expect(chat.apiSetUserDomain).not.toHaveBeenCalled()

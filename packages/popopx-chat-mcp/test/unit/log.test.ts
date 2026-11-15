@@ -16,26 +16,26 @@ describe("SimpleX errors", () => {
     [
       "name without a valid link",
       {type: "error", errorType: {type: "popopxDomainNotReady", popopxDomain: domain, popopxDomainError: {type: "noValidLink"}}},
-      "No valid link: The SimpleX name ridgeline.popopx is registered, but it has no valid link.",
+      "No valid link: The POPOPX name ridgeline.popopx is registered, but it has no valid link.",
     ],
     [
       "name not in a profile",
       {type: "error", errorType: {type: "popopxDomainNotReady", popopxDomain: domain, popopxDomainError: {type: "unknownDomain"}}},
-      "Unconfirmed name: The SimpleX name ridgeline.popopx is registered, but not added to profile. Please add it to your address or channel profile, if you are the owner.",
+      "Unconfirmed name: The POPOPX name ridgeline.popopx is registered, but not added to profile. Please add it to your address or channel profile, if you are the owner.",
     ],
     [
       "file servers not approved",
       {type: "error", errorType: {type: "fileNotApproved", fileId: 7, unknownServers: ["xftp://k@xftp2.example.com", "xftp://k@xftp1.example.com:443", "xftp://j@xftp2.example.com"]}},
       "Unknown servers! Without Tor or VPN, your IP address will be visible to these XFTP relays: xftp1.example.com, xftp2.example.com.",
     ],
-    ["no name servers", agentError({type: "NO_NAME_SERVERS"}), "SimpleX name error: None of your servers are set to resolve SimpleX names. Use a connection link."],
-    ["name not found", agentError({type: "SMP", serverAddress: server, smpErr: {type: "NAME", nameErr: {type: "NOT_FOUND"}}}), "Name not found: This SimpleX name is not registered. Please check the name."],
+    ["no name servers", agentError({type: "NO_NAME_SERVERS"}), "POPOPX name error: None of your servers are set to resolve POPOPX names. Use a connection link."],
+    ["name not found", agentError({type: "SMP", serverAddress: server, smpErr: {type: "NAME", nameErr: {type: "NOT_FOUND"}}}), "Name not found: This POPOPX name is not registered. Please check the name."],
     [
       "no name resolver",
       agentError({type: "SMP", serverAddress: server, smpErr: {type: "NAME", nameErr: {type: "NO_RESOLVER"}}}),
-      `SimpleX name error: Server ${server} does not support name resolution. Use a connection link.`,
+      `POPOPX name error: Server ${server} does not support name resolution. Use a connection link.`,
     ],
-    ["resolver error", agentError({type: "SMP", serverAddress: server, smpErr: {type: "NAME", nameErr: {type: "RESOLVER", resolverErr: "bad\nreply"}}}), "SimpleX name error: Resolver error: bad reply"],
+    ["resolver error", agentError({type: "SMP", serverAddress: server, smpErr: {type: "NAME", nameErr: {type: "RESOLVER", resolverErr: "bad\nreply"}}}), "POPOPX name error: Resolver error: bad reply"],
     [
       "link removed",
       agentError({type: "SMP", serverAddress: server, smpErr: {type: "AUTH"}}),

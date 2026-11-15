@@ -135,7 +135,7 @@ Tool definitions, call handlers, connect plans, perform steps, files.
 | Symbol | Line | Contents |
 |---|---|---|
 | `ConnectInput`, `SendInput`, `ReceiveInput`, `LeaveInput`, `DownloadInput` | [46-80](../src/tools.ts#L46-L80) | tool inputs |
-| `PlanSummary` | [86](../src/tools.ts#L86) | card kind, chat type, name, SimpleX name, peer type, description, welcome, commands, `takesMessage` |
+| `PlanSummary` | [86](../src/tools.ts#L86) | card kind, chat type, name, POPOPX name, peer type, description, welcome, commands, `takesMessage` |
 | `ChatFields` | [98](../src/tools.ts#L98) | chat fields of `connect` and `list` results |
 | `Agent` | [112](../src/tools.ts#L112) | `ChatApi`, user, `Actions`, `ChatItemsWatch`, control chat reference, standing approver lookup, refused file post, data folder |
 | `JoinMethod` | [123](../src/tools.ts#L123) | `prepared`, `prepareChannel`, `viaAddress`, `prepareContact`, `connect` |
@@ -171,7 +171,7 @@ Tool definitions, call handlers, connect plans, perform steps, files.
 | `State` | [6](../src/actions.ts#L6) | `pending`, `performing`, `done`, `failed`, `rejected`, `expired` |
 | `Standing` | [7](../src/actions.ts#L7) | `messages`, `files` |
 | `ToolError` | [19](../src/actions.ts#L19) | errors the model can correct; text returned as is |
-| `Subject` | [21](../src/actions.ts#L21) | kind, name, SimpleX name, incognito flag of a card |
+| `Subject` | [21](../src/actions.ts#L21) | kind, name, POPOPX name, incognito flag of a card |
 | `ConnRef` | [28](../src/actions.ts#L28) | pending connection, contact or group of a connect action |
 | `ActionRecord` | [34](../src/actions.ts#L34) | number, key, times, change signal, standing flag, state, card, decider, open calls, interrupted flag, error, card image |
 | `ConnectAction`, `SendAction`, `LeaveAction`, `DownloadAction` | [51-110](../src/actions.ts#L51-L110) | per-tool fields; `Attachment`, the file of a send |

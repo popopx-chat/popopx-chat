@@ -140,7 +140,7 @@ describe("documented success responses", () => {
     await expect(chat.apiConnect(1, false, connLink)).rejects.toThrow("contact already exists")
   })
 
-  it("apiConnectPlan returns the SimpleX names", async () => {
+  it("apiConnectPlan returns the POPOPX names", async () => {
     const connectionPlan = {type: "contactAddress", contactAddressPlan: {type: "ok"}}
     const connLink = {connFullLink: "L"}
     const planPopopxName = {nameType: "contact", nameDomain: {nameTLD: "popopx", domain: "biz", subDomain: []}}

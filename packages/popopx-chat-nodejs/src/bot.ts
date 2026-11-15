@@ -191,14 +191,14 @@ async function updateBotPopopxDomain(bot: api.ChatApi, user: T.User, popopxDomai
   const domain = popopxDomain === null ? undefined : popopxDomain.toLowerCase()
   if (user.profile.contactDomain?.domain === domain) return user
   if (!opts.updateAddress) {
-    console.log("Bot SimpleX name changed")
+    console.log("Bot POPOPX name changed")
     return user
   }
-  console.log("Bot SimpleX name changed, updating...")
+  console.log("Bot POPOPX name changed, updating...")
   try {
     return await bot.apiSetUserDomain(user.userId, domain)
   } catch (e) {
-    console.log("Error updating bot SimpleX name", e)
+    console.log("Error updating bot POPOPX name", e)
     return user
   }
 }

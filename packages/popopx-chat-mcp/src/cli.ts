@@ -152,7 +152,7 @@ export function validAgentName(name: string): boolean {
 
 function displayName(value: string): string {
   const valid = validName(value)
-  if (valid !== value) throw usageError(`--display-name: not a valid SimpleX name; try ${valid}`)
+  if (valid !== value) throw usageError(`--display-name: not a valid POPOPX name; try ${valid}`)
   return value
 }
 

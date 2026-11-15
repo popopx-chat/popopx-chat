@@ -11,7 +11,7 @@ In:
 - the agent control chat: the owner approves the agent's connects, sends, downloads and leaves there, or all sends to one chat, or all downloads from one chat;
 - six tools: `connect`, `send`, `receive`, `download`, `list`, `leave`;
 - files: the `file` field of received messages, `download` to save one in the data folder, `send` with `file` to send one;
-- connections to contact addresses, one-time links, groups, channels and SimpleX names, as the agent's profile or incognito;
+- connections to contact addresses, one-time links, groups, channels and POPOPX names, as the agent's profile or incognito;
 - bots as services: the commands a bot advertises are returned by `connect`.
 
 Out of scope:
@@ -214,7 +214,7 @@ register NAME:
 ```
 
 - NAME names the data folder and the Claude Code entry `simplex-NAME`; a later `serve NAME` uses the data folder of NAME.
-- `--display-name` is the agent's name in SimpleX, which peers see and which the app shows above its cards. The first start creates the profile with it, NAME when absent, and peer type agent; a later start with another value updates the profile. A display name has 1 to 50 characters, none of `.,;/\#@'"`~`, and starts with a letter, a digit or a symbol (`mkValidName`, `Commands.hs:6948-6976`); another value exits with code 2: `--display-name: not a valid SimpleX name; try <the valid form>`.
+- `--display-name` is the agent's name in SimpleX, which peers see and which the app shows above its cards. The first start creates the profile with it, NAME when absent, and peer type agent; a later start with another value updates the profile. A display name has 1 to 50 characters, none of `.,;/\#@'"`~`, and starts with a letter, a digit or a symbol (`mkValidName`, `Commands.hs:6948-6976`); another value exits with code 2: `--display-name: not a valid POPOPX name; try <the valid form>`.
 - `--owners` with no value: the next argument is absent or starts with `--`; parsing is custom, because `util.parseArgs` takes an option either as a flag or with a value. Entries whose NAME has characters other than letters, digits, `_` and `-` are printed in single quotes, `'` escaped as `'\''` (double quotes on Windows): `--owners '3:Alice Smith'`. The register hint adds `--data <folder>`, quoted the same way, when serve was started with `--data`.
 - `--port` and `--expire` apply to one run; `server.json` records them at each start for `register`. An agent on another port takes the same `--port` at every start; after a change of `--port` or `--expire`, `register NAME` runs again.
 - `--expire` at most 23: a sent message is editable for 24 hours (`deletable'`, `Messages.hs:537-548`; refused edit, `Commands.hs:845-868`), so the outcome edit of a pending card falls within that window. Standing and host-mode outcomes are posted, not edited.
@@ -347,7 +347,7 @@ My Agent: I want to connect to bot SimpleX Directory (@directory.simplex), as my
 part                                             source
 contact | bot | agent | business | group | channel   plan type; channel when groupSLinkInfo_.direct = false; business when ContactShortLinkData.business; bot or agent from the contact profile's peerType
 SimpleX Directory                                the contact's or group's display name from the link
-(@directory.simplex)                             the target, when it is a SimpleX name
+(@directory.simplex)                             the target, when it is a POPOPX name
 as myself | incognito                            input.incognito
 quoted lines                                     short description and welcome message from the link, cut to fit the card (section Card size)
 "With the message:" and the message lines        with message; after the quoted lines
@@ -365,7 +365,7 @@ My Agent: I want to send a message to bot SimpleX Directory (@directory.simplex)
 part                                                  source
 contact | bot | agent | business | group | channel    as in the connect card: the type of chat; bot or agent from the contact profile's peerType
 SimpleX Directory                                     the chat's display name
-(@directory.simplex)                                  the chat's verified SimpleX name, when the core has one (simplex_name of connect and list)
+(@directory.simplex)                                  the chat's verified POPOPX name, when the core has one (simplex_name of connect and list)
 , where I am incognito             incognito chats
 ```
 
@@ -563,7 +563,7 @@ an owner in LIST loses the role or leaves,            Alice (member 3) is no lon
 
 ```
 You act in POPOPX chats through these tools, as the agent DISPLAY.
-connect joins a contact, group, channel or directory by a link or a SimpleX name, as your profile DISPLAY or incognito with a new random name for that chat only.
+connect joins a contact, group, channel or directory by a link or a POPOPX name, as your profile DISPLAY or incognito with a new random name for that chat only.
 leave deletes a contact, or leaves a group or channel, and deletes the chat.
 download saves the file of a received message on this computer and returns its path. When a message has a file with status offered, call download when your user's task needs it.
 connect, send, download and leave are actions: in mode requests your owner approves each one in the SimpleX app, and the call waits for the decision. A send to a chat with approved: true in list is performed without waiting for approval.
@@ -633,7 +633,7 @@ chat          string      done, once the chat exists; known
 connected     boolean     done, known
 type          string      done, known: contact | business | group | channel
 name          string      done, known; the contact's or group's display name
-simplex_name  string      done, known; the verified SimpleX name, when the core has one
+simplex_name  string      done, known; the verified POPOPX name, when the core has one
 peer_type     string      done, known, contacts: human | bot | agent | business, when the profile has one
 description   string      done, known; short description from the link, when present
 welcome       string      done, known; welcome message from the link, when present
@@ -650,7 +650,7 @@ Command:
   {label, commands}            CBCMenu: a group of commands (:426-429)
 ```
 
-- `connected: false`: the other side has not accepted within `wait`; `chat` is present when perform found a known chat or `action.conn` names a contact or group (SimpleX names, addresses with `message`, channels, `contactViaAddress`, chats prepared earlier), and absent when `action.conn` is only `{pcc}` (invitation links, group links, addresses without `message`); `list` shows the chat when it connects.
+- `connected: false`: the other side has not accepted within `wait`; `chat` is present when perform found a known chat or `action.conn` names a contact or group (POPOPX names, addresses with `message`, channels, `contactViaAddress`, chats prepared earlier), and absent when `action.conn` is only `{pcc}` (invitation links, group links, addresses without `message`); `list` shows the chat when it connects.
 - Live messages (still streamed by the sender) are left out of `messages`, `responses` and `receive`, stay unread, and count in `more` until their final update; a deleted live message is dropped.
 - `commands` come from the contact's profile preferences (`Preferences.commands`, `Types/Preferences.hs:193`) or the group's preferences (`:410`); the directory bot advertises `new`, `help`, `list` and a "Group settings" menu (`role`, `filter`, `link`, `delete`) for owners of listed groups (`Directory/Service.hs:236-244`), and treats any other text as a search (`DCSearchGroup`, `Directory/Events.hs:205`).
 - A target the agent is already connected to returns `status: "known"` with its chat, without an action or a card.
@@ -805,7 +805,7 @@ item not in chat                   item: #3 has no item 999.
 item without a received file       item: item 31 in #3 has no received file.
 upload not finished within wait    item: the sender has not uploaded the file of item 31 in #3 yet; call download again later.
 file failed                        item: the file of item 31 in #3 failed: The file was cancelled.
-SimpleX error worded by the apps   the apps' text (table below), for example: Name not found: This SimpleX name is not registered. Please check the name.
+SimpleX error worded by the apps   the apps' text (table below), for example: Name not found: This POPOPX name is not registered. Please check the name.
 other SimpleX error                SimpleX error: <the chain of error types>: <the scalar fields of the chain as JSON, at most 500 characters>
                                      for example: SimpleX error: error: groupUserRole: {"requiredRole":"author"}
 ```
@@ -816,13 +816,13 @@ SimpleX errors worded by the apps (`chatErrorText`, `log.ts`), copied from the A
 error shape                                              text
 error invalidConnReq                                     Invalid connection link: Please check that you used the correct link or ask your contact to send you another one.
 error unsupportedConnReq                                 Unsupported connection link: This link requires a newer app version. Please upgrade the app or ask your contact to send a compatible link.
-error popopxDomainNotReady noValidLink                  No valid link: The SimpleX name NAME is registered, but it has no valid link.
-error popopxDomainNotReady unknownDomain                Unconfirmed name: The SimpleX name NAME is registered, but not added to profile. Please add it to your address or channel profile, if you are the owner.
+error popopxDomainNotReady noValidLink                  No valid link: The POPOPX name NAME is registered, but it has no valid link.
+error popopxDomainNotReady unknownDomain                Unconfirmed name: The POPOPX name NAME is registered, but not added to profile. Please add it to your address or channel profile, if you are the owner.
 error fileNotApproved                                    Unknown servers! Without Tor or VPN, your IP address will be visible to these XFTP relays: HOST, HOST.   (the hosts sorted, each once)
-errorAgent NO_NAME_SERVERS                               SimpleX name error: None of your servers are set to resolve SimpleX names. Use a connection link.
-errorAgent SMP NAME NOT_FOUND                            Name not found: This SimpleX name is not registered. Please check the name.
-errorAgent SMP NAME NO_RESOLVER                          SimpleX name error: Server SERVER does not support name resolution. Use a connection link.
-errorAgent SMP NAME RESOLVER                             SimpleX name error: Resolver error: RESOLVER ERROR
+errorAgent NO_NAME_SERVERS                               POPOPX name error: None of your servers are set to resolve POPOPX names. Use a connection link.
+errorAgent SMP NAME NOT_FOUND                            Name not found: This POPOPX name is not registered. Please check the name.
+errorAgent SMP NAME NO_RESOLVER                          POPOPX name error: Server SERVER does not support name resolution. Use a connection link.
+errorAgent SMP NAME RESOLVER                             POPOPX name error: Resolver error: RESOLVER ERROR
 errorAgent SMP AUTH                                      Connection link removed: Your contact removed this link, or it was a one-time link that was already used. To connect, ask your contact to create a new link.
 errorAgent SMP BLOCKED                                   Connection blocked: Connection is blocked by server operator: Spam. (or: Content violates conditions of use.)
 errorAgent SMP QUOTA                                     Undelivered messages: The connection reached the limit of undelivered messages, your contact may be offline.
@@ -1617,7 +1617,7 @@ C6      Claude Code closes the request stream when a call times out or its task 
 
 ## Open
 
-- A convention for services that agents use (MCP within MCP), "Ask SimpleX Team" as a service for agents, the `#agents.simplex` name and the directory's own SimpleX name: after 0.2.0 is tested.
+- A convention for services that agents use (MCP within MCP), "Ask SimpleX Team" as a service for agents, the `#agents.simplex` name and the directory's own POPOPX name: after 0.2.0 is tested.
 - C3 to C6.
 
 ## Decisions of 2026-10-18
