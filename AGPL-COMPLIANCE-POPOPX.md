@@ -19,7 +19,7 @@ not legal advice.
 | clause | obligation | state |
 |---|---|---|
 | §4 | do not propagate the work with the legal notices removed | **satisfied** — `LICENSE` (AGPL-3.0 text) and `NOTICE` are untouched; the `Copyright (C) 2026 SimpleX Chat Ltd` lines and the `author`/`maintainer`/`copyright` fields of `popopx-chat.cabal` were deliberately kept (R5, `7794b67cc`) |
-| §5a | keep the source-form notices intact | **satisfied** — this codebase carries no per-file copyright headers, so there is nothing per-file to preserve |
+| §5a | keep the source-form notices intact | **was FALSE, repaired 2026-11-15** — this row previously claimed "this codebase carries no per-file copyright headers, so there is nothing per-file to preserve". It does: upstream's per-file headers are in 297 source files, and the brand pass had rewritten the *holder* in each of them. See §5 below |
 | §5c | prominent notice of modification, with dates | **satisfied** — `FORK.md` states the fork is non-official and modified, names upstream, records the import commit `db0768c21` and its date (2026-11-11), and points at this repository as the complete corresponding source |
 | §6 | offer the Complete Corresponding Source to network users | **satisfied by construction** — the whole fork is the CCS, published at `github.com/popopx-chat/popopx-chat`, build scripts included (`cabal.project`, `flake.nix`, `apps/ios`, `apps/multiplatform`). If this fork ever *runs* a service on top of the code (badge service, directory service, an operator), §13's remote-network clause applies to that service's modified code too |
 | §7 | additional terms: the §7(b)/(c) attribution notices may not be removed | **satisfied** — see §4 above; upstream's trademark policy is cited at the pinned blob `simplex-chat@db0768c21:docs/TRADEMARK.md` — the citation convention recorded in `FORK.md`, adopted because `docs/` left this fork on 2026-11-13 — and the three `ASSETS_LICENSE.md` notices are kept |
@@ -179,3 +179,38 @@ that the file *names* stay (they are compiled `MR.images.*` resource identifiers
   brands — recorded in `NOTICE` and in `README.md`'s
   License section.
 - Any service this fork later operates triggers §13 for that service; nothing is operated now.
+
+## 5. Per-file copyright headers (clause §5a) — repaired 2026-11-15
+
+The §5a row above asserted there was nothing per-file to preserve. Measured against the import commit
+`db0768c21` that is wrong: upstream ships per-file copyright headers, and an earlier branding pass had
+rewritten the *holder* inside them — `Copyright © 2022 SimpleX Chat.` became `Copyright © 2022 POPOPX
+Chat.` on files whose bytes are upstream's. That is not preserving a notice; it is an authorship claim
+over someone else's file, which AGPL-3.0 §5b forbids propagating.
+
+Repaired as **297 files**: `.swift` 222, `.strings` 69, `.h` 4, `.m` 2. Each header now reads upstream's
+line, taken **verbatim from that file's blob at `db0768c21`** (not from a template — the eight distinct
+literals differ by year and comment style), with one fork line added directly underneath:
+
+```
+//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Modifications Copyright © 2026 POPOPX Chat.
+```
+
+Two findings worth keeping:
+
+- **193 → 222, not by accident.** Classifying a file as "fork-authored" because its path is absent at the
+  root commit is false here: the branding pass renamed paths (`SimpleXAPI.swift` → `POPOPXAPI.swift`), so
+  the blob is upstream's under a different name. Matching rename-aware (`git diff -M`) and by basename
+  recovered 29 more files, all of them upstream's.
+- **Displayed values are the opposite case and were left alone.** 62 `NSHumanReadableCopyright` values in
+  the compiled `InfoPlist.strings` (`POPOPX NSE` 17, `POPOPX SE` 11, catalogs 34) and the 54 `.xcloc`
+  catalog entries carrying the same string still say POPOPX Chat, on purpose. That value is shown as the
+  copyright *of the bundle the user has installed*; restoring upstream's name there would attribute our
+  product to SimpleX Chat Ltd — the misattribution this fork's whole naming policy exists to avoid, and a
+  visible SimpleX mark, which `TRADEMARK-POPOPX.md` rules out. Upstream's attribution belongs in the legal
+  documents (`NOTICE`, `LICENSE`), not in our About panel.
+
+So the split is by **silent vs visible**: a header nobody reads carries upstream's notice; a string the
+user reads describes what we ship. A later brand sweep must not "fix" the upstream holder lines back to
+POPOPX — they are the repair, not residue.

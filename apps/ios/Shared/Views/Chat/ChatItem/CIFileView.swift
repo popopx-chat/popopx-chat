@@ -3,7 +3,8 @@
 //  POPOPX
 //
 //  Created by JRoberts on 28/04/2022.
-//  Copyright © 2022 POPOPX Chat. All rights reserved.
+//  Copyright © 2022 SimpleX Chat. All rights reserved.
+//  Modifications Copyright © 2026 POPOPX Chat.
 //
 // Spec: spec/client/chat-view.md
 

@@ -3,7 +3,8 @@
 //  POPOPX (iOS)
 //
 //  Created by spaced4ndy on 14.08.2026.
-//  Copyright © 2026 POPOPX Chat. All rights reserved.
+//  Copyright © 2026 SimpleX Chat. All rights reserved.
+//  Modifications Copyright © 2026 POPOPX Chat.
 //
 
 import Foundation

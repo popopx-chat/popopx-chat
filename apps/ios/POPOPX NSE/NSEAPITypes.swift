@@ -3,7 +3,8 @@
 //  POPOPX
 //
 //  Created by EP on 01/05/2025.
-//  Copyright © 2025 POPOPX Chat. All rights reserved.
+//  Copyright © 2025 SimpleX Chat. All rights reserved.
+//  Modifications Copyright © 2026 POPOPX Chat.
 //
 
 import POPOPXChat

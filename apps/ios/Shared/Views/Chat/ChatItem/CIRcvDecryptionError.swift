@@ -3,7 +3,8 @@
 //  POPOPX (iOS)
 //
 //  Created by Evgeny on 15/04/2023.
-//  Copyright © 2023 POPOPX Chat. All rights reserved.
+//  Copyright © 2023 SimpleX Chat. All rights reserved.
+//  Modifications Copyright © 2026 POPOPX Chat.
 //
 // Spec: spec/client/chat-view.md
 
