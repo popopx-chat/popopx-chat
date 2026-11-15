@@ -118,7 +118,8 @@ The gate is a recipe worth repeating, because the harness is a generator and not
 and captcha specs. Run *before* editing it reported `138 / 4 / 4 examples, 0 failures` and left the tree
 byte-identical, which is the proof that the 9-line diff afterwards belongs to this change and nothing else.
 Re-run after the edit: same counts, 0 failures. Both halves of the pair now measure 0 — 6 generator literals and
-9 generated lines — and the residue of #109 is 78 occurrences.
+9 generated lines — and the residue of #109 is 72 occurrences outside the record files, 81 counting this
+document, which quotes the phrases it rules on.
 
 Left untouched by the same ruling: the `需裁定` unit `Directory/Service.hs:380/1174` `"\nSimpleX name: "` with
 its two exact-text `<##` mirrors at `tests/Bots/DirectoryTests.hs:2263/2296` (that text is rendered by a
