@@ -28,8 +28,8 @@ not invented: `#0088FF` `PopopxBlue` (`ui/theme/Color.kt:17`, `Theme.kt:671`),
 ## Regenerate
 
 ```sh
-python3 /Users/elliot/popopx-chat/tools/r7/poppopx_assets.py   # writes SVGs + /tmp/poppopx_jobs.tsv
-/Users/elliot/popopx-chat/tools/r7/svg2png --jobs /tmp/poppopx_jobs.tsv
+python3 /Users/elliot/popopx-chat/tools/r7/popopx_assets.py   # writes SVGs + /tmp/popopx_jobs.tsv
+/Users/elliot/popopx-chat/tools/r7/svg2png --jobs /tmp/popopx_jobs.tsv
 ```
 
 `svg2png` decodes the SVG with `NSImage` and draws it into an exact-size

@@ -594,7 +594,7 @@
     <string name="v4_3_improved_privacy_and_security_desc">Uygulamayı, son kullanılanlar kısmından gizle.</string>
     <string name="if_you_cant_meet_in_person">Eğer yüz yüze görüşemiyorsanız bir görüntülü aramada karşıdakine karekodunu gösterebilir ya da konuştuğun kişiye bir katılım bağlantısı paylaşabilirsin.</string>
     <string name="if_you_choose_to_reject_the_sender_will_not_be_notified">Eğer geri çevirmeyi seçersen göndericiye bildirilmeyecek.</string>
-    <string name="if_you_received_popopx_invitation_link_you_can_open_in_browser">Eğer PopopxX Chat katılım bağlantısı alırsan bu bağlantıyı tarayıcında açabilirsin:</string>
+    <string name="if_you_received_popopx_invitation_link_you_can_open_in_browser">Eğer Popopx Chat katılım bağlantısı alırsan bu bağlantıyı tarayıcında açabilirsin:</string>
     <string name="image_will_be_received_when_contact_is_online">Konuştuğun kişi çevrim içi olunca görsel alınmaya başlanılacaktır. Lütfen bekleyin ya da daha sonra yeniden bakın.</string>
     <string name="icon_descr_image_snd_complete">Görsel gönderildi</string>
     <string name="image_will_be_received_when_contact_completes_uploading">Konuştuğun kişi yüklemeyi bitirince görsel alınacaktır.</string>
