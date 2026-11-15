@@ -772,13 +772,29 @@ builds `aarch64` and `armv7a` (override with `ARCHES`), and compares the rebuilt
 `apksigcopier` has copied upstream's signature onto it. No workflow calls it; it is run by hand.
 
 `.github/workflows/reproduce-schedule.yml` runs the desktop script nightly at 02:00 and on dispatch,
-against this repository's own latest release. That job was inert and is not any more: since
-`v7.1.2-popopx.1` was published, `releases/latest` answers, so the first step no longer prints
-`No published release to reproduce - skipping.` - measured on dispatch `43657558913`, which got past
-`Get latest release` and `Checkout code` and into the Docker rebuild. Whether the rebuilt bytes match
-is what that job reports, not what this file can promise. Before 2026-11-13 the same workflow checked
-out upstream's tree and then called `scripts/popopx-chat-reproduce-builds.sh`, a path that exists only
-in our tree, so each nightly run failed.
+against this repository's own latest release. The first verdict is in and it is red: dispatch
+`43657558913` (2026-11-15, 2 h 25 m) rebuilt all seven Linux artefacts and **none of them matched**
+`v7.1.2-popopx.1`, so `_sha256sums` was never written and the last step failed. For the four CLI
+artefacts the reason is visible in the files: the release leg compiles with
+`cabal build -j --enable-tests` (`build.yml:458`) and the reproduce leg with `cabal build -j`
+(`popopx-chat-reproduce-builds.sh:84`), and this repository tracks no `cabal.project.freeze`, so each
+side lets the solver choose dependency versions under different constraints. (`${{ env.ghc_options }}`
+on that same line adds `--ghc-options=-O0` only when the event is not a `push`, so a tag build runs
+without it - `build.yml:55`.) The toolchain is not the difference: both sides pin the same
+`ubuntu:22.04`/`24.04` image digests, GHC 9.6.3 and the `UBUNTU_SNAPSHOT` apt snapshot, and both
+packaging scripts set `SOURCE_DATE_EPOCH` and the two deb builders use `dpkg-deb --root-owner-group
+--uniform-compression`. The three desktop artefacts are the Kotlin bundle, so they need a second
+explanation that is not established here; the candidates are the caches CI restores and the reproduce
+leg builds cold, and timestamps inside the packaged jars that the `touch` pass cannot reach. Upstream's
+own nightly fails identically - seven consecutive red runs, 2026-11-08 to 2026-11-14 - which is why
+this job is a report and not a gate. Before 2026-11-13 the same workflow checked out upstream's tree and
+then called a script that exists only in ours, so every run failed for that reason instead.
+
+The first step authenticates with `secrets.GITHUB_TOKEN` and separates "404, nothing published" from
+"could not tell". Scheduled run `43668965123` printed `No published release to reproduce - skipping.`
+at 02:41:43 and went green in 6 seconds while `v7.1.2-popopx.1` was published, because its anonymous
+call from a runner's shared IP returned no `tag_name`; a nightly that cannot see the release verifies
+nothing, so any status other than 200 or 404 now fails the step.
 
 The last step posts the failure to `STATUS_POPOPX_WEBHOOK_URL` with `STATUS_POPOPX_WEBHOOK_USER` and
 `STATUS_POPOPX_WEBHOOK_PASS`. None of the three is configured on this repository (`gh secret list`

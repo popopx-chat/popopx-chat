@@ -17,17 +17,34 @@ jobs:
     steps:
       - name: Get latest release
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="$(curl --proto '=https' \
-                       --tlsv1.2 \
-                       -sS -L \
-                       'https://api.github.com/repos/popopx-chat/popopx-chat/releases/latest' \
-                       | grep -i "tag_name" | head -1 | awk -F \" '{print $4}')" || :
-          if [ -z "${TAG}" ]; then
-            # No release has been published from this repository yet, so there is nothing to verify.
+          # Authenticated on purpose: an anonymous call from a runner's shared IP is rate limited,
+          # and an empty body here reads as "nothing published" and silently skips the whole run.
+          RESPONSE="$(curl --proto '=https' \
+                           --tlsv1.2 \
+                           -sS -L \
+                           -H "Authorization: Bearer ${GH_TOKEN}" \
+                           -w '\n%{http_code}' \
+                           'https://api.github.com/repos/popopx-chat/popopx-chat/releases/latest')" || :
+          STATUS="${RESPONSE##*$'\n'}"
+          BODY="${RESPONSE%$'\n'*}"
+          if [ "${STATUS}" = "404" ]; then
+            # 404 is the only answer that legitimately means no release has been published from this
+            # repository yet, so there is nothing to verify.
             echo "No published release to reproduce - skipping."
             echo "REPRODUCE_SKIPPED=true" >> "$GITHUB_ENV"
             exit 0
+          fi
+          if [ "${STATUS}" != "200" ]; then
+            echo "releases/latest answered ${STATUS} - not treating that as 'nothing to reproduce'." >&2
+            exit 1
+          fi
+          TAG="$(printf '%s' "${BODY}" | grep -i "tag_name" | head -1 | awk -F \" '{print $4}')" || :
+          if [ -z "${TAG}" ]; then
+            echo "releases/latest answered 200 without a tag_name." >&2
+            exit 1
           fi
           echo "TAG=${TAG}" >> "$GITHUB_ENV"
 
