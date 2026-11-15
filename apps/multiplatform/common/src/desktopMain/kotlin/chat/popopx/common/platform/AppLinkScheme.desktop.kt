@@ -58,7 +58,9 @@ internal sealed interface DesktopInstallation {
   data object Unpackaged : DesktopInstallation
 }
 
-// Only simplexchat: decides how the badge page ends, so popopx: is registered without being checked here.
+// Only the app link scheme decides how the badge page ends, so popopx: is registered without being
+// checked here. The inherited "simplexchat" is recognised but not registered from this path: no
+// desktop build was ever published under that name, so no link of it is out there to answer for.
 @Volatile
 private var registered = false
 

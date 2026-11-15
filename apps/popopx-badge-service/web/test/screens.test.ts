@@ -699,9 +699,9 @@ domTest("screens: Show code reveals the code in place, under a Return to SimpleX
 });
 
 domTest("screens: the launcher is a hidden frame out of the tab order, pointed at the link", () => {
-  const f = render(screens.appLauncher("simplexchat:/badge/code/X"));
+  const f = render(screens.appLauncher("popopxchat:/badge/code/X"));
   assert.equal(f.tagName, "iframe");
-  assert.equal(f.getAttribute("src"), "simplexchat:/badge/code/X");
+  assert.equal(f.getAttribute("src"), "popopxchat:/badge/code/X");
   assert.ok(f.hasAttribute("hidden"));
   assert.equal(f.getAttribute("aria-hidden"), "true");
   assert.equal(f.getAttribute("tabindex"), "-1");

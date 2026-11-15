@@ -82,6 +82,6 @@ routingTest("routing: an app value outside the contract is no flag at all", () =
   }
 });
 
-routingTest("routing: the link back to the app is the simplexchat: scheme with the code as its last segment", () => {
-  assert.equal(appCodeLink("SB-YDC8A-YGQTM-PUYZ9-2TUXP"), "simplexchat:/badge/code/SB-YDC8A-YGQTM-PUYZ9-2TUXP");
+routingTest("routing: the link back to the app is the popopxchat: scheme with the code as its last segment", () => {
+  assert.equal(appCodeLink("SB-YDC8A-YGQTM-PUYZ9-2TUXP"), "popopxchat:/badge/code/SB-YDC8A-YGQTM-PUYZ9-2TUXP");
 });

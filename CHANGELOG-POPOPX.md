@@ -95,6 +95,70 @@ whose skip branch is also its error branch turns an outage into a green idle run
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
 
+### The app's own link scheme became popopxchat:, with the old spelling left working (2026-11-15, ruling 可以多个则增加 popopxchat://)
+
+`appLinkScheme = "simplexchat"` was the last unresolved item of the apps/ios tier: residue, or something with
+a far side? Measured, the second - one cross-process value with **1 producer, 2 recognizers and 7
+registrants**, and iOS already registers two schemes today: `POPOPX--iOS--Info.plist` declares
+`com.popopxchat.popopx -> [popopx]` and `com.popopxchat.popopx.deeplink -> [simplexchat]`. "Only one" was
+never the shape, so the value was added to rather than replaced: `popopxchat` is now the name this project
+issues and registers first, and `simplexchat` stays registered and stays recognised.
+
+- **Producer (1)** `apps/popopx-badge-service/web/src/routing.ts:24 appCodeLink()` - the badge page decides
+  what the browser hands to the OS, so this single line is what a user actually clicks. It emits
+  `popopxchat:/badge/code/<code>`.
+- **Recognizers (2)** iOS `ContentView.swift:isAppLink` and Kotlin `ChatListView.kt:isAppLink` now accept
+  either spelling, so a code handed over before the move still redeems instead of falling into the
+  connection branch (where it would fail as a malformed link). `AppLinksTest.acceptsTheLinkSpelledWithTheInheritedScheme`
+  guards the legacy half, because a compatibility claim with no test in front of it is an absent guard.
+- **Registrants (7)** the iOS deeplink array, `AndroidManifest.xml`'s app-link intent-filter, the jpackage
+  macOS plist in `desktop/build.gradle.kts`, `distribute/popopx.desktop`,
+  `scripts/flatpak/com.popopxchat.popopx.desktop`, and the deb's `SCHEME_MIME_TYPE_LINE` with its own
+  `grep -qxF` guard in `scripts/desktop/make-deb-linux.sh`. Each lists both, so a fresh install answers
+  either. The three Linux MimeType lines are now byte-identical to each other.
+- **Two registrars deliberately kept single-scheme**: Windows HKCU and the AppImage entry, both written at
+  runtime from the one `appLinkScheme` const in `AppLinkScheme.desktop.kt`. Neither has a published build
+  (`releases/latest` is still 404), so no `simplexchat:` desktop link is out there to answer for, and
+  registering a third means re-ordering assertions that compare the exact sequence of writes
+  (`shell.writes.take(3)`, `assertEquals(… + windowsProgIdValues("popopx", …), shell.writes)`) in a
+  680-line file this machine cannot compile - there is no Java runtime here, and 29 scheme literals went
+  through it as a pure 1:1 substitution. A rename keeps every one of them testing what it tested. The asymmetry is stated at `AppLinkScheme.desktop.kt:61`.
+
+Gates, one per end. **badge-web `npm test` = 525/0**, and the suite caught the third end before I did: its
+own build gate failed, because tracked `public/index.html` names the bundle hash on disk - editing
+`routing.ts` without `npm run build` is red, so the rebuilt bundle is in this commit. Those tests also hold
+the leak guard "nothing the page wrote to history or storage holds the link", which was written as
+`!url.includes("simplexchat")`; keyed on the scheme it would have gone quietly false under a rename, so it
+now looks for `/badge/code/`, which no spelling hides. **iOS `xcodebuild build-for-testing`** compiles the
+changed Swift and the plist parses to the two expected arrays. **Kotlin: static only** - CI is the only
+compiler here, and the desktop run has to read this tip.
+
+The five spec/product sentences that describe all this were corrected too, and two of them were not merely
+un-rebranded but wrong: they still called the connection scheme `simplex:` (it moved to `popopx:` in #3) and
+the Windows ProgId prefix `SimpleX.<scheme>` (the code says `POPOPX.`), and the `ChatListView.kt` line
+anchors cited 797/826/829 where the file now says 807/839/832 - re-measured against the file, not
+guessed. The change itself is 25 files / 90 insertions / 69 deletions, `popopxchat` as the scheme in 37
+occurrences across 17 tracked files; everything else in the diff is these two paragraphs of record.
+
+### Preset relays stay upstream's by decision, until ours exist (2026-11-15, ruling 先使用上游的 smp 服务器)
+
+Ruled: the app keeps using upstream's SMP/XFTP presets, and the presets move when this project has its own
+POPOPX relay. **No code changed** - they have pointed at `*.simplex.im` with upstream's keys since the
+service-destinations pass (#3), so this closes the "empty them / replace them now" idea rather than
+executing anything. Recorded here so that pass is not improvised later:
+
+- `simplexChatSMPServers` (`src/Popopx/Chat/Operators/Presets.hs:42-77`) holds **host and key** pairs, and
+  the enabled list is a `NonEmpty` - the type is why "just empty the presets" was rejected, not policy.
+- Renaming one half is the exact failure the `pairs` gate watches for: the client compiles, encodes, sends,
+  and the server answers `UNKNOWNCA` while the app retries forever. A new relay therefore arrives with its
+  own key, and both move in the same commit, together with the `tests/**` mirrors and the two
+  `scripts/ci/*/backend.sh` harnesses that read the same hosts.
+- The operator record moves with it, not before it: `operatorSimpleXChat`'s trade name and the
+  `simplex.im` it states are SimpleX Chat Ltd's, `CARequired` makes that name a party to the user's consent,
+  and `0a5adde7d` reverted an earlier attempt at exactly this. Until our relay has an operator of its own,
+  naming it POPOPX would claim an identity that is not ours - the same test the section above applies to a
+  display name.
+
 ### A display name moves with its speaker, not with its spelling (2026-11-15, ruling 需裁定 进行改正)
 
 The 需裁定 tier of the four-way sweep listed, by directory, the body text the sweep can reach. Reading it

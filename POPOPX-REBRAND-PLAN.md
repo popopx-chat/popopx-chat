@@ -117,9 +117,11 @@
 - `popopx.chat` 在整仓出现 **0 次**（没有任何自有域名被写进来过）；
 - `apps/ios/POPOPX (iOS).entitlements:9-15` 的 `applinks:` 仍全是 `simplex.chat` / `*.simplex.im` / `*.simplexonflux.com`；
 - `website/src/.well-known/{apple-app-site-association/index.json,assetlinks.json}` 要靠**域名托管**才生效（上轮已记为待办）；
-- `appLinkScheme` 上轮刻意留 `"simplexchat"`，理由就是"关联域仍是 simplex.chat"。
+- `appLinkScheme` 上轮刻意留 `"simplexchat"`，理由就是"关联域仍是 simplex.chat"。**2026-11-15 已裁定并执行**：注册端本来就允许多个 scheme（iOS 同 plist 已注册 `popopx` + `simplexchat`），故新增 `popopxchat` 为主名、`simplexchat` 保留登记与识别；scheme 与关联域无关，此前把两者绑在一起的理由不成立。
 
 **结论**：没有自有域名 + SMP/XFTP/RTC/relay/names 服务器之前，改这些串 = 客户端连不上 + Universal/App Links 全断。需要你先回答：**域名与服务器是否已有？** 有则这是一批独立工程（DNS、证书、`.well-known` 上线、entitlements、AASA、assetlinks 指纹），必须与 B1 同批。
+
+**2026-11-15 回答（裁定 先使用上游的 smp 服务器）**：自有 SMP 服务器尚未搭建，预设中继在此轮之前继续指向上游 `*.simplex.im`（host 与 key 成对，不可半改）；服务器建成后按 CHANGELOG "Preset relays stay upstream's by decision" 一节列出的成组移动清单执行。
 
 ### B2 Haskell 客户端自有标识符（`src` 约 300 处）
 `SimplexLinksGroupPreference` 13、`simplexLinks` 11、`SimplexDomainClaim` 8+7+6、`SGFSimplexLinks`/`GFSimplexLinks` 9+9、`simplexChatContact` 9、`simplexDomainLine` 8、`planSimplexName` 7、`CESimplexDomainNotReady` 7、`ftIsSimplexLink` 5、`simplexChatCLI` 5…

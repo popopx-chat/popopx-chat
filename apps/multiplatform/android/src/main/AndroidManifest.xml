@@ -74,13 +74,14 @@
 
         <data android:scheme="popopx" />
       </intent-filter>
-      <!-- open simplexchat:/ app URI -->
+      <!-- open popopxchat:/ app URI; simplexchat:/ stays for the links issued before the move -->
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
 
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
 
+        <data android:scheme="popopxchat" />
         <data android:scheme="simplexchat" />
       </intent-filter>
       <intent-filter android:autoVerify="true">

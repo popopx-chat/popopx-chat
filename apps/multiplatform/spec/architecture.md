@@ -233,7 +233,7 @@ Entry: [`main()`](../desktop/src/jvmMain/kotlin/chat/popopx/desktop/Main.kt#L26)
 
 ```
 main(args)
-  +-- linkFromArgs(args)                 // A simplexchat: or simplex: link passed by the OS
+  +-- linkFromArgs(args)                 // A popopxchat: or popopx: link passed by the OS
   +-- acquireSingleInstance(link)        // Or forward the link to the running instance and exit
   +-- appOpenUrl = link                  // Stored before the watcher can forward a newer link
   +-- startShowFileWatcher()             // Only while holding the single-instance lock

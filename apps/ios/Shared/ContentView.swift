@@ -512,11 +512,13 @@ struct ContentView: View {
 }
 
 // the app's own scheme, for every link that is not a connection link, which stays on popopx:
-private let appLinkScheme = "simplexchat"
+// simplexchat: stays accepted, and stays registered, for the links issued before the move
+private let appLinkSchemes = ["popopxchat", "simplexchat"]
 private let badgeLinkPath = "/badge/code/"
 
 func isAppLink(_ url: URL) -> Bool {
-    url.scheme?.lowercased() == appLinkScheme
+    guard let scheme = url.scheme?.lowercased() else { return false }
+    return appLinkSchemes.contains(scheme)
 }
 
 // a link type added in a later version reaches this build too, so an unknown path asks for an update

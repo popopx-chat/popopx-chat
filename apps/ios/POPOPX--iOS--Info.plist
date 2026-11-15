@@ -49,6 +49,7 @@
 			<string>com.popopxchat.popopx.deeplink</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<string>popopxchat</string>
 				<string>simplexchat</string>
 			</array>
 		</dict>

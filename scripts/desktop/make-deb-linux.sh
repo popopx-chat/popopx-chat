@@ -48,10 +48,11 @@ dpkg-deb -R ./release/main/deb/popopx*.deb ./extracted
 rm -f ./extracted/opt/*popopx*/lib/app/*skiko-awt-runtime-linux*
 sed -i -e '/skiko-awt-runtime-linux/d' ./extracted/opt/*popopx*/lib/app/popopx.cfg
 sed -i "/Version/ s/\$/~$VERSION_CODENAME/" ./extracted/DEBIAN/control
-# jpackage's desktop entry passes no URL and handles no MIME type; this registers the simplexchat: and popopx: schemes
-SCHEME_MIME_TYPE_LINE='MimeType=x-scheme-handler/simplexchat;x-scheme-handler/popopx;'
+# jpackage's desktop entry passes no URL and handles no MIME type; this registers the popopxchat:, simplexchat: and popopx: schemes
+# the same three spellings as distribute/popopx.desktop and the flatpak entry, which are this line's mirrors
+SCHEME_MIME_TYPE_LINE='MimeType=x-scheme-handler/popopxchat;x-scheme-handler/simplexchat;x-scheme-handler/popopx;'
 sed -i -e '/%[uU]/!s|^Exec=.*|& %u|' -e "s|^MimeType=.*|$SCHEME_MIME_TYPE_LINE|" ./extracted/opt/*popopx*/lib/*.desktop
-grep -qxF "$SCHEME_MIME_TYPE_LINE" ./extracted/opt/*popopx*/lib/*.desktop || { echo "desktop entry does not register simplexchat: and popopx:" >&2; exit 1; }
+grep -qxF "$SCHEME_MIME_TYPE_LINE" ./extracted/opt/*popopx*/lib/*.desktop || { echo "desktop entry does not register popopxchat:, simplexchat: and popopx:" >&2; exit 1; }
 find ./extracted/ -exec touch -d "@$SOURCE_DATE_EPOCH" {} +
 
 dpkg-deb --build --root-owner-group --uniform-compression ./extracted ./release/main/deb/popopx_${ARCH}.deb

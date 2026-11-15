@@ -5,4 +5,4 @@ Comment=Private and secure open-source messenger - no user IDs (not even random 
 Exec=/opt/popopx/bin/popopx %u
 Icon=/opt/popopx/lib/popopx
 Categories=Network;Chat;
-MimeType=x-scheme-handler/simplexchat;x-scheme-handler/popopx;
+MimeType=x-scheme-handler/popopxchat;x-scheme-handler/simplexchat;x-scheme-handler/popopx;

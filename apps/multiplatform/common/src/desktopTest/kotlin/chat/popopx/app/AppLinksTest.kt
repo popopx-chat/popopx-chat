@@ -17,8 +17,15 @@ class AppLinksTest {
 
   @Test
   fun acceptsTheSchemeInAnyCase() {
-    val link = "SimplexChat:/badge/code/SB0000000000000000000"
+    val link = "PopopxChat:/badge/code/SB0000000000000000000"
     assertEquals(link, linkFromArgs(arrayOf(link)))
+  }
+
+  // a code handed over before the scheme moved is still an app link, not a connection attempt
+  @Test
+  fun acceptsTheLinkSpelledWithTheInheritedScheme() {
+    val legacy = "${LEGACY_BADGE_LINK_PREFIX}SB0000000000000000000"
+    assertEquals(legacy, linkFromArgs(arrayOf(legacy)))
   }
 
   @Test

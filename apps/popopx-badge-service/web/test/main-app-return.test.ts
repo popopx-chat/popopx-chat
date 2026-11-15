@@ -27,7 +27,7 @@ const heading = (): string => headingOf(screenOf(app));
 returnTest("main: back from Stripe, the order's own flag picks the return-to-app ending", async () => {
   await until(() => heading() === "Paid", `the return-to-app ending, not ${heading()}`);
   assert.equal(page.location.search, "?order=inv_card");
-  assert.equal(screenOf(app).all("iframe")[0]!.getAttribute("src"), `simplexchat:/badge/code/${CODE}`);
+  assert.equal(screenOf(app).all("iframe")[0]!.getAttribute("src"), `popopxchat:/badge/code/${CODE}`);
   assert.ok(!screenOf(app).textContent.includes(CODE));
 });
 

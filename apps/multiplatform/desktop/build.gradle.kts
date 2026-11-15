@@ -93,6 +93,7 @@ compose {
                   <string>$bundleID</string>
                   <key>CFBundleURLSchemes</key>
                   <array>
+                    <string>popopxchat</string>
                     <string>simplexchat</string>
                     <string>popopx</string>
                   </array>

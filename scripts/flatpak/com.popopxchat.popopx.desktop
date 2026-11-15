@@ -11,4 +11,4 @@ Categories=Utility;Chat;InstantMessaging;
 Exec=simplex %U
 Icon=com.popopxchat.popopx
 StartupWMClass=simplex-chat
-MimeType=x-scheme-handler/simplexchat;x-scheme-handler/popopx;
+MimeType=x-scheme-handler/popopxchat;x-scheme-handler/simplexchat;x-scheme-handler/popopx;

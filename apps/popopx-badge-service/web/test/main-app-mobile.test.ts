@@ -1,4 +1,4 @@
-// Opened by the mobile app: the code leaves by the simplexchat: link, and the page shows it only when asked.
+// Opened by the mobile app: the code leaves by the popopxchat: link, and the page shows it only when asked.
 import { mock } from "node:test";
 import assert from "node:assert/strict";
 import { headingOf, inViewOf, installPage, primaryOf, screenOf, settle, timedTest, until } from "./boot.js";
@@ -58,7 +58,7 @@ appTest("main: once paid, the ending tries the link once and holds the code back
   await until(() => heading() === "Paid", `the return-to-app ending, not ${heading()}`);
 
   const code = stored().code as string;
-  const link = `simplexchat:/badge/code/${code}`;
+  const link = `popopxchat:/badge/code/${code}`;
   const frames = screenOf(app).all("iframe");
   assert.equal(frames.length, 1, "one automatic attempt");
   assert.equal(frames[0]!.getAttribute("src"), link);
@@ -79,7 +79,7 @@ appTest("main: a repaint keeps the ending but does not fire the link again", asy
 appTest("main: with the automatic attempt refused, Return to SimpleX still navigates, off the page's history", () => {
   const before = [...history.stack];
   screenOf(app).all("button.primary").find((b) => b.textContent === "Return to SimpleX")!.click();
-  assert.equal((location as { href?: string }).href, `simplexchat:/badge/code/${stored().code as string}`);
+  assert.equal((location as { href?: string }).href, `popopxchat:/badge/code/${stored().code as string}`);
   assert.deepEqual(history.stack, before, "the page adds no history entry of its own");
   assert.equal(heading(), "Paid", "and the screen is still there to fall back on");
 });
@@ -108,12 +108,12 @@ appTest("main: Show code reveals the stored code in place, keeps Return to Simpl
   revealed();
 
   screenOf(app).all("button.primary").find((b) => b.textContent === "Return to SimpleX")!.click();
-  assert.equal((location as { href?: string }).href, `simplexchat:/badge/code/${code}`, "the button still works once the code is out");
+  assert.equal((location as { href?: string }).href, `popopxchat:/badge/code/${code}`, "the button still works once the code is out");
 });
 
 appTest("main: nothing the page wrote to history or storage outside the order holds the link", () => {
-  for (const url of history.stack) assert.ok(!url.includes("simplexchat") && !url.includes("SB-"), url);
+  for (const url of history.stack) assert.ok(!url.includes("/badge/code/") && !url.includes("SB-"), url);
   for (const [key, value] of storage.m) {
-    if (key !== "sb.orders.v1") assert.ok(!value.includes("SB-") && !value.includes("simplexchat"), key);
+    if (key !== "sb.orders.v1") assert.ok(!value.includes("SB-") && !value.includes("/badge/code/"), key);
   }
 });

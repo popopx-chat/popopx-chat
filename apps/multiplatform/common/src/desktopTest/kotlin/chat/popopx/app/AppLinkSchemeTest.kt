@@ -52,7 +52,7 @@ private const val XDG_MIME = "xdg-mime"
 
 class AppLinkSchemeTest {
   private val windowsExe = "C:\\Program Files\\POPOPX\\POPOPX.exe"
-  private val appLinkCommandKey = "Software\\Classes\\simplexchat\\shell\\open\\command"
+  private val appLinkCommandKey = "Software\\Classes\\popopxchat\\shell\\open\\command"
   private val connectionCommandKey = "Software\\Classes\\popopx\\shell\\open\\command"
   private val appLinkCommand = appLinkCommandKey to ""
   private val connectionCommand = connectionCommandKey to ""
@@ -71,13 +71,13 @@ class AppLinkSchemeTest {
   fun windowsSchemeIsAUrlProtocolNamingItsProgId() {
     assertEquals(
       listOf(
-        RegistryValue(key = "Software\\Classes\\simplexchat", name = "", value = "URL:POPOPX Chat"),
-        RegistryValue(key = "Software\\Classes\\simplexchat", name = "URL Protocol", value = ""),
-        RegistryValue(key = "Software\\Classes\\simplexchat\\DefaultIcon", name = "", value = "\"$windowsExe\",0"),
+        RegistryValue(key = "Software\\Classes\\popopxchat", name = "", value = "URL:POPOPX Chat"),
+        RegistryValue(key = "Software\\Classes\\popopxchat", name = "URL Protocol", value = ""),
+        RegistryValue(key = "Software\\Classes\\popopxchat\\DefaultIcon", name = "", value = "\"$windowsExe\",0"),
         RegistryValue(key = appLinkCommandKey, name = "", value = "\"$windowsExe\" \"%1\""),
-        RegistryValue(key = "Software\\com.popopxchat.popopx\\Capabilities\\URLAssociations", name = "simplexchat", value = "POPOPX.simplexchat"),
+        RegistryValue(key = "Software\\com.popopxchat.popopx\\Capabilities\\URLAssociations", name = "popopxchat", value = "POPOPX.popopxchat"),
       ),
-      windowsSchemeValues("simplexchat", windowsExe),
+      windowsSchemeValues("popopxchat", windowsExe),
       "app link scheme"
     )
     assertEquals(
@@ -97,11 +97,11 @@ class AppLinkSchemeTest {
   fun windowsProgIdOpensTheExe() {
     assertEquals(
       listOf(
-        RegistryValue(key = "Software\\Classes\\POPOPX.simplexchat", name = "", value = "URL:POPOPX Chat"),
-        RegistryValue(key = "Software\\Classes\\POPOPX.simplexchat\\DefaultIcon", name = "", value = "\"$windowsExe\",0"),
-        RegistryValue(key = "Software\\Classes\\POPOPX.simplexchat\\shell\\open\\command", name = "", value = "\"$windowsExe\" \"%1\""),
+        RegistryValue(key = "Software\\Classes\\POPOPX.popopxchat", name = "", value = "URL:POPOPX Chat"),
+        RegistryValue(key = "Software\\Classes\\POPOPX.popopxchat\\DefaultIcon", name = "", value = "\"$windowsExe\",0"),
+        RegistryValue(key = "Software\\Classes\\POPOPX.popopxchat\\shell\\open\\command", name = "", value = "\"$windowsExe\" \"%1\""),
       ),
-      windowsProgIdValues("simplexchat", windowsExe)
+      windowsProgIdValues("popopxchat", windowsExe)
     )
   }
 
@@ -146,9 +146,9 @@ class AppLinkSchemeTest {
 
   @Test
   fun windowsRegistrationRepairsAValueMissingBesideAMatchingCommand() {
-    val shell = FakeWindowsShell(user = registered().apply { remove("Software\\Classes\\simplexchat" to "URL Protocol") })
+    val shell = FakeWindowsShell(user = registered().apply { remove("Software\\Classes\\popopxchat" to "URL Protocol") })
     registerWindowsSchemes(windowsExe, shell)
-    assertEquals(windowsSchemeValues("simplexchat", windowsExe), shell.writes, "only the incomplete scheme is rewritten")
+    assertEquals(windowsSchemeValues("popopxchat", windowsExe), shell.writes, "only the incomplete scheme is rewritten")
   }
 
   @Test
@@ -165,7 +165,7 @@ class AppLinkSchemeTest {
     val shell = FakeWindowsShell(user = mutableMapOf(appLinkCommand to otherCommand, connectionCommand to otherCommand))
     registerWindowsSchemes(windowsExe, shell)
     assertEquals(
-      windowsProgIdValues("simplexchat", windowsExe) + windowsProgIdValues("popopx", windowsExe),
+      windowsProgIdValues("popopxchat", windowsExe) + windowsProgIdValues("popopx", windowsExe),
       shell.writes,
       "only this app's own ProgIds are written; no scheme is taken and no application is listed without one"
     )
@@ -183,10 +183,10 @@ class AppLinkSchemeTest {
   @Test
   fun windowsRegistrationRepairsItsProgIdWhileAnotherProgramHoldsTheScheme() = withTempDir { dir ->
     val otherCommand = "\"${Files.createFile(dir.resolve("Other.exe"))}\" \"%1\""
-    val staleProgId = windowsProgIdValues("simplexchat", "C:\\Old\\POPOPX.exe").associate { (it.key to it.name) to it.value }
+    val staleProgId = windowsProgIdValues("popopxchat", "C:\\Old\\POPOPX.exe").associate { (it.key to it.name) to it.value }
     val shell = FakeWindowsShell(user = (staleProgId + (appLinkCommand to otherCommand)).toMutableMap())
     registerWindowsSchemes(windowsExe, shell)
-    assertEquals(windowsProgIdValues("simplexchat", windowsExe), shell.writes.take(3), "the ProgId points at this exe again")
+    assertEquals(windowsProgIdValues("popopxchat", windowsExe), shell.writes.take(3), "the ProgId points at this exe again")
   }
 
   @Test
@@ -198,9 +198,9 @@ class AppLinkSchemeTest {
 
   @Test
   fun windowsRegistrationContinuesPastARegistryError() {
-    val shell = FakeWindowsShell(failingWrites = setOf("Software\\Classes\\simplexchat"))
+    val shell = FakeWindowsShell(failingWrites = setOf("Software\\Classes\\popopxchat"))
     registerWindowsSchemes(windowsExe, shell)
-    assertTrue(windowsSchemeValues("simplexchat", windowsExe).none { it in shell.writes }, "the app link scheme could not be written")
+    assertTrue(windowsSchemeValues("popopxchat", windowsExe).none { it in shell.writes }, "the app link scheme could not be written")
     assertTrue(windowsSchemeValues("popopx", windowsExe).all { it in shell.writes }, "the connection link scheme is still written")
     assertTrue(windowsApplicationValues.all { it in shell.writes }, "the application is listed for the scheme that is ours")
   }
@@ -210,7 +210,7 @@ class AppLinkSchemeTest {
     val shell = FakeWindowsShell(failingReads = setOf(appLinkCommandKey, connectionCommandKey))
     registerWindowsSchemes(windowsExe, shell)
     assertEquals(
-      windowsProgIdValues("simplexchat", windowsExe) + windowsProgIdValues("popopx", windowsExe),
+      windowsProgIdValues("popopxchat", windowsExe) + windowsProgIdValues("popopx", windowsExe),
       shell.writes,
       "an unreadable handler is left alone, and no application is listed without a scheme"
     )
@@ -220,24 +220,24 @@ class AppLinkSchemeTest {
   fun windowsRegistrationTakesNoSchemeWhoseMachineWideHandlerCannotBeRead() {
     val shell = FakeWindowsShell(failingMachineReads = setOf(appLinkCommandKey))
     registerWindowsSchemes(windowsExe, shell)
-    assertTrue(windowsSchemeValues("simplexchat", windowsExe).none { it in shell.writes }, "the app link scheme is left alone")
+    assertTrue(windowsSchemeValues("popopxchat", windowsExe).none { it in shell.writes }, "the app link scheme is left alone")
     assertTrue(windowsSchemeValues("popopx", windowsExe).all { it in shell.writes }, "the readable scheme is taken")
   }
 
   @Test
   fun windowsRegistrationTakesNoSchemeWhoseProgIdCannotBeWritten() {
-    val shell = FakeWindowsShell(failingWrites = setOf("Software\\Classes\\POPOPX.simplexchat"))
+    val shell = FakeWindowsShell(failingWrites = setOf("Software\\Classes\\POPOPX.popopxchat"))
     registerWindowsSchemes(windowsExe, shell)
-    assertTrue(windowsSchemeValues("simplexchat", windowsExe).none { it in shell.writes }, "URLAssociations must not name a missing ProgId")
+    assertTrue(windowsSchemeValues("popopxchat", windowsExe).none { it in shell.writes }, "URLAssociations must not name a missing ProgId")
   }
 
   @Test
   fun windowsRegistrationKeepsAnotherInstalledCopysProgId() = withTempDir { dir ->
     val otherCopy = Files.createFile(dir.resolve("POPOPX.exe")).toString()
-    val otherProgId = windowsProgIdValues("simplexchat", otherCopy).associate { (it.key to it.name) to it.value }
+    val otherProgId = windowsProgIdValues("popopxchat", otherCopy).associate { (it.key to it.name) to it.value }
     val shell = FakeWindowsShell(user = otherProgId.toMutableMap())
     registerWindowsSchemes(windowsExe, shell)
-    assertTrue(shell.writes.none { it.key.contains("simplexchat") }, "links picked for the other copy keep reaching it: neither its ProgId nor the scheme is taken")
+    assertTrue(shell.writes.none { it.key.contains("popopxchat") }, "links picked for the other copy keep reaching it: neither its ProgId nor the scheme is taken")
   }
 
   @Test
@@ -249,11 +249,11 @@ class AppLinkSchemeTest {
       machine = mutableMapOf(appLinkCommand to "\"$otherExe\" \"%1\""),
     )
     registerWindowsSchemes(exe, shell)
-    assertTrue(windowsSchemeValues("simplexchat", exe).all { it in shell.writes }, "a command for this exe is updated, and the hidden machine-wide one is ignored")
+    assertTrue(windowsSchemeValues("popopxchat", exe).all { it in shell.writes }, "a command for this exe is updated, and the hidden machine-wide one is ignored")
   }
 
   private fun fullRegistration(): List<RegistryValue> =
-    windowsProgIdValues("simplexchat", windowsExe) + windowsSchemeValues("simplexchat", windowsExe) +
+    windowsProgIdValues("popopxchat", windowsExe) + windowsSchemeValues("popopxchat", windowsExe) +
       windowsProgIdValues("popopx", windowsExe) + windowsSchemeValues("popopx", windowsExe) + windowsApplicationValues
 
   private fun registered(): MutableMap<Pair<String, String>, String> =
@@ -335,7 +335,7 @@ class AppLinkSchemeTest {
       |Name=POPOPX Chat
       |NoDisplay=true
       |Exec="/home/user/My Apps/simplex.AppImage" %u
-      |MimeType=x-scheme-handler/simplexchat;x-scheme-handler/popopx;
+      |MimeType=x-scheme-handler/popopxchat;x-scheme-handler/popopx;
       |""".trimMargin(),
       appImageDesktopEntry("/home/user/My Apps/simplex.AppImage")
     )
@@ -604,7 +604,7 @@ class AppLinkSchemeTest {
   @Test
   fun appImageRegistrationSucceedsWhenAnotherHandlerKeepsOnlyTheConnectionDefault() = withRegistration { appImage, applicationsDir ->
     val xdg = FakeXdgMime(default = "other.desktop", keptMimeTypes = setOf(CONNECTION_LINK_MIME_TYPE))
-    assertTrue(registerAppImageScheme(appImage, applicationsDir, listOf(), xdg::run), "only simplexchat: decides the badge page")
+    assertTrue(registerAppImageScheme(appImage, applicationsDir, listOf(), xdg::run), "only popopxchat: decides the badge page")
     assertEquals(listOf(updateDatabase(applicationsDir)) + setBothDefaults, xdg.calls)
   }
 

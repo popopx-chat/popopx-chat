@@ -20,8 +20,10 @@ export function readHash(hash: string): HashParts {
 }
 
 // A bearer token: whoever reads this URL can redeem the badge.
+// The scheme is the app's registered app-link scheme; the apps also still accept the inherited
+// "simplexchat", so an older link keeps opening, but this page only ever issues the current one.
 export function appCodeLink(code: string): string {
-  return `simplexchat:/badge/code/${encodeURIComponent(code)}`;
+  return `popopxchat:/badge/code/${encodeURIComponent(code)}`;
 }
 
 export function resolveLoad(url: UrlParts, newestOpen: OrderRecord | undefined): Load {

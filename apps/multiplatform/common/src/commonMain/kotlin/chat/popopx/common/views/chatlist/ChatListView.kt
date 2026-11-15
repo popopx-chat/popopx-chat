@@ -821,13 +821,16 @@ fun connectIfOpenedViaUri(rhId: Long?, uri: String, chatModel: ChatModel) {
 }
 
 // the app's own scheme, for every link that is not a connection link, which stays on popopx:
-internal const val appLinkScheme = "simplexchat"
+internal const val appLinkScheme = "popopxchat"
+// a link issued before the scheme moved still arrives with this spelling, and is still an app link:
+// the platforms that may have installed builds register both, so both must be recognised
+internal const val legacyAppLinkScheme = "simplexchat"
 internal const val connectionLinkScheme = "popopx"
 private const val badgeLinkPath = "/badge/code/"
 
 // the prefix of the raw text, not a parsed URI: a link that does not parse is still an app link
 fun isAppLink(uri: String): Boolean =
-  uri.startsWith("$appLinkScheme:", ignoreCase = true)
+  uri.startsWith("$appLinkScheme:", ignoreCase = true) || uri.startsWith("$legacyAppLinkScheme:", ignoreCase = true)
 
 fun isConnectionLink(uri: String): Boolean =
   uri.startsWith("$connectionLinkScheme:", ignoreCase = true)
@@ -835,7 +838,7 @@ fun isConnectionLink(uri: String): Boolean =
 // a link type added in a later version reaches this build too, so an unknown path asks for an update
 private fun openAppLink(rhId: Long?, uri: String) {
   // a link that does not parse is dropped, as iOS never receives one; one that parses without
-  // a path, such as simplexchat:badge/code/X, is an unknown link on both platforms
+  // a path, such as popopxchat:badge/code/X, is an unknown link on both platforms
   val parsed = uriCreateOrNull(uri) ?: return
   val path = parsed.path ?: ""
   if (path.startsWith(badgeLinkPath)) {
