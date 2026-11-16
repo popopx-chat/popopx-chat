@@ -1,7 +1,7 @@
 import {ChildProcess, spawn} from "child_process"
 import {createHash} from "crypto"
 import {once} from "events"
-import {copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync} from "fs"
+import {copyFileSync, existsSync, mkdirSync, mkdtempSync, openSync, closeSync, readFileSync, renameSync, rmSync, writeFileSync} from "fs"
 import {AddressInfo, createConnection, createServer} from "net"
 import {tmpdir} from "os"
 import {dirname, join} from "path"
@@ -64,22 +64,30 @@ async function startServer(kind: ServerKind): Promise<SmpServer> {
   const fingerprint = caFingerprint(join(configDir, "ca.crt"))
   writeFileSync(join(configDir, "fingerprint"), `${fingerprint}\n`)
   writeFileSync(join(configDir, kind.ini), kind.config(port, dir))
-  const server = spawn(await serverExecutable(kind), ["start"], {
+  // The relay's diagnostics go to its stdout/stderr (lc_file = Nothing, and this ini
+  // disables the store log), so they have to land in a file to survive the cleanup.
+  const logFile = join(dir, "relay.log")
+  const executable = await serverExecutable(kind)
+  const logs = openSync(logFile, "w")
+  const server = spawn(executable, ["start"], {
     env: {...process.env, [`${kind.env}_CFG_PATH`]: configDir, [`${kind.env}_LOG_PATH`]: join(dir, "logs")},
-    stdio: ["ignore", "ignore", "inherit"],
+    stdio: ["ignore", logs, logs],
   })
+  closeSync(logs)
   const stop = async (): Promise<void> => {
     if (server.exitCode === null) {
       const exited = once(server, "exit")
       server.kill()
       await exited
     }
-    rmSync(dir, {recursive: true, force: true})
+    if (failedTests()) console.error(relayLog(kind, logFile, server))
+    else rmSync(dir, {recursive: true, force: true})
   }
   try {
     await once(server, "spawn")
-    await waitForServer(server, kind, port)
+    await waitForServer(server, kind, port, logFile)
   } catch (e) {
+    console.error(relayLog(kind, logFile, server))
     await stop()
     throw e
   }
@@ -128,11 +136,27 @@ function caFingerprint(caFile: string): string {
   return createHash("sha256").update(der).digest("base64").replace(/\+/g, "-").replace(/\//g, "_")
 }
 
-async function waitForServer(server: ChildProcess, kind: ServerKind, port: number): Promise<void> {
+async function waitForServer(server: ChildProcess, kind: ServerKind, port: number, logFile: string): Promise<void> {
   const deadline = Date.now() + 15_000
   while (!(await canConnect(port))) {
-    if (server.exitCode !== null || Date.now() > deadline) throw new Error(`${kind.name} did not start on port ${port}`)
+    if (server.exitCode !== null || Date.now() > deadline)
+      throw new Error(`${kind.name} did not start on port ${port}\n${relayLog(kind, logFile, server)}`)
     await new Promise(resolve => setTimeout(resolve, 100))
+  }
+}
+
+function relayLog(kind: ServerKind, logFile: string, server: ChildProcess): string {
+  const lines = existsSync(logFile) ? readFileSync(logFile, "utf-8").split(/\r?\n/).filter(line => line !== "") : []
+  const state = server.exitCode === null ? "running" : `exit=${server.exitCode} signal=${server.signalCode}`
+  const tail = lines.slice(-150)
+  return `${kind.name} ${state}, ${lines.length} log line(s) from ${logFile}${lines.length > tail.length ? ` - last ${tail.length}` : ""}:\n${tail.join("\n")}`
+}
+
+function failedTests(): boolean {
+  try {
+    return expect.getState().numFailedTests > 0
+  } catch (e) {
+    return false
   }
 }
 
