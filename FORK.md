@@ -226,6 +226,43 @@ each was meant to become That pass also repaired a compile break this fork shipp
     cross-file `cannot find type` errors that name nothing the script touched. After any `project.pbxproj` edit,
     `git diff --numstat` on that file must read `N 0`.
 
+13. **The link scheme's stale mirrors, and the repository the relay image is built from** (2026-11-16, rulings
+    `simplex:/ 更新为 popopx:/` and 执行 A1+A2+A4+A6 + #112 A + #113 仅 tools.ts 两处) - five live texts still said
+    `simplex:/` although the app has emitted and parsed only `popopx:/` since `05dd5a73c` (`82ac26bec`). One of
+    the five was not prose: `scripts/relay/entrypoint.py:40` decides which token in the relay's own output *is*
+    the address, so with the old prefix it never matched, `/out/relay-address.txt` was never written, and every
+    start repeated the one-shot capture and logged `relay address not captured; will retry next start`. Checking
+    which prefix that scan should take meant reading the build, and the build was broken on its own:
+    `scripts/relay/Dockerfile` fetched `github.com/simplex-chat/simplex-chat` at `88df79d1e` - an upstream commit
+    whose tree declares `executable simplex-chat` in `simplex-chat.cabal` - while asking cabal for
+    `exe:popopx-chat`, because `5fd42d793` renamed the executable and the `COPY` target and left the remote and
+    `CHAT_REF` untouched. The relay image has therefore been unbuildable since 2026-11-12, and
+    `docker-compose.yaml:8` defaulted `CHAT_REF` to the same commit, so neither path worked. Both now name this
+    repository and are pinned to a recorded master commit that does declare the executable (`a51c59355`). Stated
+    as statically verified, because that is all it was: no `docker build` was run here, the pin came from the
+    locally recorded `origin/master` since neither egress path reached GitHub, and the checks were that
+    `executable popopx-chat` and `flag client_postgres` are declared at that commit, that
+    `scripts/cabal.project.local.linux` exists there, and that all ten switches `entrypoint.py` passes are
+    parsed there. The pin must be bumped by whoever advances a deployment.
+
+    The naming tier that ran after it moved the phrase "SimpleX link", 59 of its 64 occurrences: `f2a262472` the
+    directory service's group notice with its three verbatim test mirrors and five hspec titles, `5932bccee` the
+    MCP server's schema text and the sentence it throws, `bb6a7c4ca` the generated bot-API and SDK docs,
+    `a77fe94dd` the two clients' product and spec documents, `57b8a0bb3` the name-format examples and the field
+    name the plan still called `simplex_name`. Two mechanisms outlived this tier:
+    - an hspec title is a CI selector, but the selector lives in a pull request body, not in a file -
+      `scripts/ci/run-tests.sh:15` turns each `ci-tests` line into one `-m` argument - so titles naming this
+      app's feature move, and no title in `tests/**` now names an upstream service. The comment that
+      asserted otherwise at `tests/Test.hs:80` was itself a stale mirror: it claimed four "SimpleX
+      &lt;service&gt;" titles below it were kept deliberately, while `968907a2d` had already renamed all four
+      on 2026-11-15, so the comment now states the mechanism instead of the count that had gone stale -
+      the kind of note that only surfaces when a tier has to ask what pins a title;
+    - `testGenerate` in `tests/APIDocs.hs:153` writes the generated file *before* asserting the new text against
+      the old, so one `-m` run on `Bot API docs` is both the generator and the comparator. It read 2 failures
+      while the stale lines were being rewritten and 17 of 17 after, which is the proof that the outputs match
+      their producers; no generated line was typed by hand, and `typedoc` was re-run rather than editing
+      `docs/api.Class.ChatApi.md`.
+
 ## What was deliberately NOT changed
 
 - **Copyright and attribution.** The `author` / `maintainer` / `copyright` fields of
@@ -292,6 +329,25 @@ each was meant to become That pass also repaired a compile break this fork shipp
 - **Anything naming an upstream thing**: upstream operator addresses, the `simplex:` address
   format as understood on the public network, upstream social accounts. An identifier that
   names something belonging to upstream keeps upstream's name, or it stops resolving.
+  Measured again on 2026-11-16 for the last two spelling families. `simplex:/` survives in
+  exactly four tracked files - `POPOPX-REBRAND-PLAN.md` (the question asked *about* it),
+  `CHANGELOG.md`, `PRIVACY.md` (upstream's sentence about replacing the initial part of an old
+  link) and `.github/ISSUE_TEMPLATE/question.yml`, where it sits inside a working upstream
+  invitation URL. And `@directory.simplex` (17 occurrences across the MCP package's `PLAN.md`,
+  `spec/flows.md`, `REFERENCE.md`, `TESTING.md`), `#ridgeline.simplex`, `#agents.simplex` and the
+  peer name "SimpleX Directory" stay upstream's spelling, because those documents describe
+  connecting to services SimpleX Chat Ltd operates and reach them by their upstream relay
+  address (`REFERENCE.md:88`). What moved in the same lines was only what this build spells:
+  `data PopopxTLD = TLDPopopx | TLDTesting | TLDWeb` and its parser (`popopxmq`
+  `PopopxName.hs:54,121`) accept no `.simplex` name, so a row that documents the *shape* of a
+  name target now reads `.popopx` while a *destination* keeps the name it has upstream.
+- **The recorded migration name `20260603_simplex_name`** (`src/Popopx/Chat/Store/SQLite/Migrations.hs:347`,
+  `src/Popopx/Chat/Store/Postgres/Migrations.hs:100`, mirrored in `tests/SchemaDump.hs:149` and
+  `tests/PostgresSchemaDump.hs:85`). A database that has applied it stores that string and matches
+  migrations against it, so renaming it does not rename a label - it makes an existing database
+  disagree with the build. The Haskell symbols beside it (`m20260603_simplex_name`, in modules
+  already named `M20260603_popopx_name`) were left with the string for the same reason: the pair is
+  one fact, and the safe half to rename is the one nothing reads.
 - **The domains** (`simplex.chat`, `simplex.im`) and the associated-domains / universal-link
   entries, until POPOPX owns and operates its own.
 

@@ -95,6 +95,80 @@ whose skip branch is also its error branch turns an outage into a green idle run
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
 
+### The last five `simplex:/` texts, and the phrase that named them (2026-11-16, rulings `simplex:/ 更新为 popopx:/` + 执行 A1+A2+A4+A6 + #112 A + #113 仅 tools.ts)
+
+Two rulings, one sentence long each, and both turned on reading the producer rather than the
+text. `05dd5a73c` moved the link scheme to `popopx:/`; the app has emitted and parsed nothing else
+since, and the accepted prefixes are `popopx:/` and `http(s)://` (`Markdown.hs isUri`, and the
+dependency's `ServiceScheme.hs`, whose `SSPopopx -> "popopx:"` parser accepts no other spelling).
+That answers the open question in `POPOPX-REBRAND-PLAN.md` D9: there is **no dual parse**, so links
+issued before the move are inert on this fork's clients - and any text still saying `simplex:/` was
+describing a scheme that no longer exists here.
+
+`82ac26bec` moved those five texts and held four records (one occurrence each). Four of the five
+were prose - the MCP `spec/api.md` target row, the directory service README's sample output, the iOS
+navigation spec, and `apps/ios/README.md`, whose claim `URL scheme: simplex:// for deep linking` was
+simply untrue of this build: the registered schemes measured from `POPOPX--iOS--Info.plist` are
+`popopx` for connection links and `popopxchat` + `simplexchat` for app links. The fifth was
+behaviour. `scripts/relay/entrypoint.py:40` scans the relay's output to decide which token *is* the
+address; it looked for `simplex:`, so it never matched, `/out/relay-address.txt` was never created,
+and every container start re-ran the capture and logged `relay address not captured; will retry next
+start`. A guard whose input path is authored for a tree that no longer exists is not a failing guard -
+it is an absent one, and it had been absent since the scheme moved.
+
+Reading that file to decide which prefix is correct pulled up the build behind it, and the build was
+broken independently of any naming question: `scripts/relay/Dockerfile` fetched
+`github.com/simplex-chat/simplex-chat@88df79d1e`, an upstream commit from August whose tree declares
+`executable simplex-chat` in `simplex-chat.cabal`, while running `cabal build exe:popopx-chat`.
+`5fd42d793` renamed the executable and the `COPY` target but left the remote and `CHAT_REF`, and
+`docker-compose.yaml:8` defaulted to the same ref, so **the relay image has been unbuildable since
+2026-11-12** and never could have produced the binary `entrypoint.py` names. `a51c59355` points both
+at this repository, pinned to a recorded master commit. Verified statically, and stated as such:
+`executable popopx-chat`, `flag client_postgres`, `scripts/cabal.project.local.linux` and all ten
+switches the entrypoint passes exist at that pin; no `docker build` was run, and the pin came from the
+locally recorded `origin/master` because neither egress path reached GitHub while this was written.
+
+The phrase tier that followed moved 59 of the 64 `SimpleX link` occurrences - the other 5 are records
+(`CHANGELOG-POPOPX.md` 3, `CHANGELOG.md` 1, the AppStream release note in
+`com.popopxchat.popopx.metainfo.xml` 1):
+
+| commit | what moved | how it was proved |
+|--------|------------|-------------------|
+| `f2a262472` | the directory service's group-settings notice, its three verbatim test mirrors, five hspec titles, one comment | producer and mirrors compared byte-for-byte afterwards (1 in `Service.hs`, 3 in `DirectoryTests.hs`, 0 of the old spelling); titles carry no in-repo pin - the only `--match` is `scripts/ci/run-tests.sh:15`, whose patterns come from a pull request's `ci-tests` block - and asking that question exposed a stale note: the comment at `tests/Test.hs:80` claimed four "SimpleX &lt;service&gt;" titles below it were kept upstream-valued, but `968907a2d` had renamed all four on 2026-11-15, so it now records the mechanism instead of a count that had already gone stale |
+| `5932bccee` | the MCP tool schema, the sentence the server throws, and the spec/plan/reference rows that quote it | `tsc --noEmit` rc 0, `jest test/unit` 9 suites / 274 tests green; no test asserted the thrown sentence, its only other holders moved in the same commit |
+| `bb6a7c4ca` | 20 lines across `COMMANDS.md`, `commands.ts`, `_commands.py` and the nodejs `api.ts`/`docs` pair | regenerated, never typed: `tests/APIDocs.hs:153` writes before asserting, so `-m"Bot API docs"` is generator and comparator at once - 2 failures while stale, 17 of 17 green after; `typedoc` changed exactly 4 ins / 4 del and no other line |
+| `a77fe94dd` | 19 lines in the two clients' product and spec documents | each row compared with what ships: iOS's picker is titled `POPOPX links` at `DeveloperView.swift:74` under *Deprecated options*, so `SimpleX link mode` was stale twice; Kotlin's label is `strings.xml:116`; the citation `strHasSingleSimplexLink` names a symbol no file has ever declared and became `strConnectTarget` (`ChatListView.kt:901`) |
+| `57b8a0bb3` | the four *format* examples `@name.simplex` / `#name.simplex`, and four `simplex_name` field rows in the MCP plan | authority is `popopxmq` `PopopxName.hs:54,121`: `data PopopxTLD = TLDPopopx \| TLDTesting \| TLDWeb`, parser accepts the label `popopx` - this build cannot parse a `.simplex` name, so a shape example must spell it the way the client does, and `tools.ts:242` already did |
+
+`5932bccee` also settled #113's two live sites, which were self-contradictions rather than naming:
+`popopx_name`'s own description offered `@directory.simplex` while 20 assertions in `test/unit` use
+`@directory.popopx`, and the target row gave `#name.simplex` in the same sentence as
+`@directory.popopx`. `57b8a0bb3` completed the pair in the rows describing them. Everything else in
+that family is held, and the reason is the same test that has decided every name tier here: a
+destination belongs to whoever operates it. `@directory.simplex` (17 occurrences in the package's
+`PLAN.md`, `spec/flows.md`, `REFERENCE.md`, `TESTING.md`), `#ridgeline.simplex`, `#agents.simplex` and
+the peer display name "SimpleX Directory" describe connecting to services SimpleX Chat Ltd operates -
+`REFERENCE.md:88` still reaches that directory by `https://smp4.simplex.im/a#…`, and the package's own
+fixture pairs the upstream display name with our namespace (`messages.test.ts:1013`:
+`name: "SimpleX Directory", popopxName: "@directory.popopx"`). Two documents therefore read
+"POPOPX link" beside an unchanged `.simplex` example; that is the split, not an unfinished line.
+
+Measured at the end of the pass: `simplex:/` 4 occurrences / 4 files, all records. `SimpleX link` 5 /
+3, all records. `POPOPX link` 576 / 91 files. `[@#]<name>.simplex` 25, of which 20 are upstream-operated
+names in the MCP package, 2 are host names in the WebRTC files of both clients, and 3 are the records in
+`CHANGELOG-POPOPX.md` and `PRIVACY-POPOPX.md`. `simplex_name` 24 / 9 files, and only 16 of them are code:
+the recorded database migration name `20260603_simplex_name` - 3 in each `Migrations.hs` (the string, plus
+`m20260603_simplex_name` and `down_` it) and 4 in each module that already bears the file name
+`M20260603_popopx_name.hs`, plus 1 in each schema-dump mirror; a database that applied it stores that
+string, so it does not move. 2 more are `POPOPX-REBRAND-PLAN.md`'s protected-literal list, and the last 6
+are the two paragraphs above quoting it.
+
+Nothing here was compiled by CI and nothing was pushed: GitHub was unreachable on both egress paths,
+so the Haskell side rests on the local generator run above and on string-only diffs, the iOS and Kotlin
+document edits need no build, and the Android/desktop legs remain static verification as elsewhere in
+this section.
+
+
 ### The rest of the name/address tier, and the one unit only a rendered-text run could prove (2026-11-15, rulings 必改 the rest + 需要确认的按照建议进行)
 
 68 occurrences moved. The residue of #109 is now **4 occurrences outside the record files** — the 3 hspec titles

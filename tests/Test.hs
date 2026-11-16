@@ -77,9 +77,11 @@ main = do
       around tmpBracket $ describe "WebRTC encryption" webRTCTests
 #endif
       describe "Supporter badges" badgeTests
-      -- The four "SimpleX <service>" titles below are kept deliberately: an hspec title is a CI
-      -- selector (upstream's docs/CONTRIBUTING.md:91, simplex-chat@db0768c21 - the `ci-tests` block is one hspec match pattern per line)
-      -- and each names the upstream-operated service, not our app. They move only with that service.
+      -- An hspec title is a selector: scripts/ci/run-tests.sh turns each line of a pull request's
+      -- `ci-tests` block into one -m argument (upstream's docs/CONTRIBUTING.md:91 at simplex-chat@db0768c21),
+      -- so renaming one breaks instructions already written, even though no file in this repository pins a
+      -- title. This comment used to claim that four "SimpleX <service>" titles below were kept upstream-valued;
+      -- 968907a2d renamed them, because those services speak as us and their titles are ours to choose.
       describe "POPOPX badge service" $ do
         badgeConfigTests
         badgeWebTests
