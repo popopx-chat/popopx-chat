@@ -52,7 +52,8 @@ export interface Bot {
 
 export async function startBot(smpAddress: string, filePrefix: string, displayName: string, addressSettings: api.BotAddressSettings): Promise<Bot> {
   await profileWithServer(smpAddress, filePrefix, {displayName, fullName: "", peerType: T.ChatPeerType.Bot})
-  const [chat, user, address] = await bot.run({
+  // bot.run registers the address on the relay, so it answers with a chat error when that fails.
+  const [chat, user, address] = await withChatError(() => bot.run({
     profile: {displayName, fullName: "", shortDescr: "Find groups and bots."},
     dbOpts: {type: "sqlite", filePrefix},
     options: {addressSettings, commands: [{type: "command", keyword: "help", label: "Help"}], logContacts: false},
@@ -65,7 +66,7 @@ export async function startBot(smpAddress: string, filePrefix: string, displayNa
         await botChat.apiSendTextReply(ci, "Send a search, for example: trail shoes")
       },
     },
-  })
+  }))
   return {chat, user, link: address!.connLinkContact.connShortLink ?? address!.connLinkContact.connFullLink}
 }
 
