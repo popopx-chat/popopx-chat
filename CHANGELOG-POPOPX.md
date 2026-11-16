@@ -92,6 +92,17 @@ release was published, because its anonymous call from a runner's shared IP retu
 whose skip branch is also its error branch turns an outage into a green idle run, so any status other than
 200 or 404 fails the step.
 
+### This fork's own artwork is licensed now; the names and upstream's art are not (2026-11-16)
+
+The images whose bytes this fork wrote are licensed under **AGPL-3.0-only, or at the recipient's option
+CC0-1.0**, which withdraws the 双轨制 ruling that held the pictures proprietary while the code was free.
+The reasoning is in `FORK.md` item 15: the icons ship inside the binaries and the vector masters that
+draw them are the §13 corresponding source, so a permission requirement on that part of the work is a
+further restriction §10 forbids and §12 does not let us keep by disclosing it. Untouched are the names —
+trade mark sits outside the copyright licence — and upstream's byte-identical files, which this fork has
+nothing to grant. `ASSETS_LICENSE-POPOPX.md` was rewritten first, then `NOTICE`, `README.md`,
+`TRADEMARK-POPOPX.md`, `AGPL-COMPLIANCE-POPOPX.md` §4, `branding/source-svg/README.md` and `FORK.md`.
+
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
 

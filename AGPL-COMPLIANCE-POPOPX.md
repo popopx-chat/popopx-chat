@@ -230,11 +230,22 @@ property is absent — upstream's artwork was never in that directory, only its 
 ## 4. Open items this record does not close
 
 - Whether POPOPX may *ask permission* for the artwork (the licence allows use "with prior written
-  permission from SimpleX Chat Ltd") — a business decision, not a code one.
+  permission from SimpleX Chat Ltd") — a business decision, not a code one. **Narrowed 2026-11-16:**
+  this item was written while this fork's own artwork was held under the same restrictive terms, so it
+  covered both sides. It no longer covers ours — `ASSETS_LICENSE-POPOPX.md` §"The grant" releases it
+  outright, and there is nothing left for us to license by permission. It is still live for the files
+  measured byte-identical to upstream's, whose licence is SimpleX Chat Ltd's to interpret.
 - ~~`docs/TRADEMARK.md` is upstream's policy; the fork's own trademark position is not written yet.~~
   **Written 2026-11-13**: `TRADEMARK-POPOPX.md` (marks, asserted as unregistered/common-law) and
-  `ASSETS_LICENSE-POPOPX.md` (the artwork this fork created, proprietary, no redistribution without
-  written permission). The three `ASSETS_LICENSE.md` files are kept verbatim; upstream's
+  `ASSETS_LICENSE-POPOPX.md` ~~(the artwork this fork created, proprietary, no redistribution without
+  written permission)~~ — **corrected 2026-11-16**: that parenthetical described the file as it read on
+  the day it was written, and the ruling it recorded is withdrawn. The same file now licenses the
+  artwork this fork created under **AGPL-3.0-only, or at the recipient's option CC0-1.0**, because a
+  work conveyed as a whole under AGPL-3.0 cannot carry one part of itself forbidding redistribution:
+  §10 calls that a further restriction on the rights §11 grants, and §12 does not let us keep it by
+  disclosing it. The names are untouched by the change — trade mark is outside the licence — and so is
+  upstream's artwork, which that document cannot grant and §3 above still blocks.
+  The three `ASSETS_LICENSE.md` files are kept verbatim; upstream's
   `docs/TRADEMARK.md` is not shipped by this fork any more (`docs/` was removed here on 2026-11-13), so
   it is cited at its source URL everywhere this fork refers to it. A downstream fork still inherits both
   brands — recorded in `NOTICE` and in `README.md`'s

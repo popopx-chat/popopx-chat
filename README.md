@@ -6,10 +6,12 @@
 > the store buttons still draw their images from upstream's organization until this fork ships its own
 > artwork, and the donation section is SimpleX Chat Ltd's - this fork receives none of it.
 >
-> The same holds for our own brand: **POPOPX**, the POPOPX wordmark, logo, icons and artwork and
-> `popopx.chat` are outside the AGPL grant too — [TRADEMARK-POPOPX](./TRADEMARK-POPOPX.md) and
-> [ASSETS_LICENSE-POPOPX](./ASSETS_LICENSE-POPOPX.md). **A fork that distributes must rebrand and
-> redraw**: keep the code, change the name, ship your own icons and illustrations.
+> Our own brand splits the same way: **POPOPX**, the POPOPX wordmark, the logo and `popopx.chat` are
+> outside the AGPL grant — [TRADEMARK-POPOPX](./TRADEMARK-POPOPX.md). The artwork this fork drew is
+> inside it: [ASSETS_LICENSE-POPOPX](./ASSETS_LICENSE-POPOPX.md) licenses it under AGPL-3.0-only, or
+> CC0-1.0 at the recipient's option. So **a fork that distributes must rebrand, and must not carry
+> upstream's artwork**; it no longer has to redraw ours, but copying our drawings under a licence does
+> not make them your mark — keep the code, change the name, ship your own wordmark and icons.
 
 [![build](https://github.com/popopx-chat/popopx-chat/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/popopx-chat/popopx-chat/actions/workflows/build.yml)
 
@@ -391,26 +393,31 @@ Please do NOT report security vulnerabilities via GitHub issues.
 
 ## License
 
-**Two tracks.** The source code of this software is licensed under the GNU Affero General Public
-License version 3 (AGPLv3) — see the [LICENSE](./LICENSE) file. Nothing else follows from that grant:
-the names, the logos and the graphic assets are proprietary and are licensed separately, on both sides
-of this fork:
+**The code, the artwork, the names.** The source code of this software is licensed under the GNU
+Affero General Public License version 3 (AGPLv3) — see the [LICENSE](./LICENSE) file. The artwork this
+fork created carries the same grant, or CC0-1.0 at the recipient's option, since 2026-11-16. The names
+follow from nothing here: a trade mark sits outside a copyright licence. Upstream's side of both is
+separate again:
 
 - **Upstream (SimpleX Chat Ltd).** The SimpleX and SimpleX Chat name, logo, associated branding
   materials, and application and website graphic assets (illustrations, images, visual designs, etc.)
   are not covered by this license and are subject to the terms outlined in the
   [TRADEMARK](https://github.com/simplex-chat/simplex-chat/blob/stable/docs/TRADEMARK.md) and [ASSETS_LICENSE](./assets/ASSETS_LICENSE.md) files respectively.
-- **POPOPX (this fork).** The POPOPX and POPOPX Chat name, wordmark, logo and application icons, the
-  artwork this fork created, and the `popopx.chat` domain are not covered by this license either, and
-  are subject to [TRADEMARK-POPOPX](./TRADEMARK-POPOPX.md) and
-  [ASSETS_LICENSE-POPOPX](./ASSETS_LICENSE-POPOPX.md) respectively.
+- **POPOPX (this fork).** The POPOPX and POPOPX Chat name, the wordmark, the logo and the icons
+  derived from it, and the `popopx.chat` domain are not licensed to anyone by this document and are
+  subject to [TRADEMARK-POPOPX](./TRADEMARK-POPOPX.md). The artwork this fork created is licensed,
+  not reserved: [ASSETS_LICENSE-POPOPX](./ASSETS_LICENSE-POPOPX.md). It licenses only what this fork
+  drew — it cannot and does not release the upstream-identical files listed there.
 
 **If you fork this repository and distribute it, rebrand.** You keep every right AGPLv3 gives you over
-the code; what you may not carry away is either project's name or artwork, so your build must ship a
-different name, wordmark, icons and illustrations. [NOTICE](./NOTICE) lists the upstream attribution
-that has to stay.
+the code, and since 2026-11-16 the same rights over this fork's own artwork; what you may not carry
+away is either project's name, or upstream's artwork. So your build must ship a different name and its
+own wordmark, icons and marks — our other drawings you may keep, but never as the identity of your
+product. [NOTICE](./NOTICE) lists the upstream attribution that has to stay.
 
-If you want to use any graphic assets in your publications, please ask for permission. Texts can be used as direct quotes, referencing the source.
+This fork's own artwork needs no permission to use; [ASSETS_LICENSE-POPOPX](./ASSETS_LICENSE-POPOPX.md)
+is the grant. Upstream's graphic assets still do — they are SimpleX Chat Ltd's to give, not ours. Texts
+can be used as direct quotes, referencing the source.
 
 [<img src="https://raw.githubusercontent.com/simplex-chat/.github/refs/heads/master/profile/images/apple_store.svg" alt="iOS app" height="42">](https://apps.apple.com/us/app/popopx-chat/id6799146157)
 &nbsp;

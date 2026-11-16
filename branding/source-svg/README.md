@@ -1,7 +1,10 @@
 # POPOPX artwork sources
 
 Vector masters for the artwork this fork owns. Everything rendered from here is
-covered by `../../ASSETS_LICENSE-POPOPX.md`; the generated rasters next to it in
+licensed by `../../ASSETS_LICENSE-POPOPX.md` under **AGPL-3.0-only, or, at the
+recipient's option, CC0-1.0** (the grant is dated 2026-11-16; before that this file
+was proprietary). The names in these drawings are not part of it — those are
+`../../TRADEMARK-POPOPX.md`. The generated rasters next to it in
 `assets/multiplatform/resources/MR/images/` keep their upstream **file names**
 (they are compiled `MR.images.<name>` resource identifiers) while their **bytes**
 are ours — the test is `cmp` against the pristine upstream, not the name.

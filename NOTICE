@@ -37,36 +37,53 @@ modifications, including what was deliberately left unchanged, is described in
 FORK.md.
 
 The application graphics (illustrations, icons, visual designs and test-snapshot
-screenshots) are NOT part of the AGPL grant. The brand-bearing sets were replaced
-with this fork's own artwork during 2026-11-13 and 2026-11-15; what is still
-upstream's is listed in ASSETS_LICENSE-POPOPX.md and stays under
-assets/ASSETS_LICENSE.md.
+screenshots) split in two, and the line is drawn by the bytes. What this fork drew
+is part of the AGPL grant from 2026-11-16: AGPL-3.0-only, or at the recipient's
+option CC0-1.0. What is byte-identical to upstream's is not part of any grant this
+fork can give; the brand-bearing sets were replaced with this fork's own artwork
+during 2026-11-13 and 2026-11-15, and what is still upstream's is listed in
+ASSETS_LICENSE-POPOPX.md and stays under assets/ASSETS_LICENSE.md.
 
 "SimpleX", "SimpleX Chat" and the associated logos are trademarks of SimpleX Chat
 Ltd. This fork uses the name POPOPX for that reason; no affiliation, sponsorship
 or endorsement is implied.
 
-POPOPX-side notices, on the same two tracks:
+POPOPX-side notices, one per right this fork holds:
 
   "POPOPX", "POPOPX Chat", the POPOPX wordmark and logo and the popopx.chat domain
     are trademarks of the POPOPX Chat project. They are unregistered; the rights
     asserted are those that attach to an unregistered mark. Policy:
     TRADEMARK-POPOPX.md
 
-  Copyright (C) 2026 POPOPX. All rights reserved.
+  Copyright (C) 2026 POPOPX.
     -- only the graphic assets whose bytes this fork wrote: the iOS marks and app
     icons, the Android launcher and status-bar icons, this repository's own
     snapshot renders, and every image that differs from the imported tree or has
     no counterpart in it. Provenance is the bytes, compared with the blob at the
     same path in db0768c21, or at upstream's name for that path where this fork
-    renamed it. Measured 2026-11-15: of 1527 tracked image files, 837 are ours and
-    690 are still byte-identical to SimpleX Chat Ltd's - those are NOT claimed
-    here, they stay under assets/ASSETS_LICENSE.md with upstream as their owner,
-    and a file that merely sits under a popopx-* package directory is one of them.
-    They are not part of the AGPL grant and may not be redistributed in another
-    project's distribution, modified or unmodified, without prior written
-    permission. Licence: ASSETS_LICENSE-POPOPX.md
+    renamed it. Measured 2026-11-16 with the recipe in ASSETS_LICENSE-POPOPX.md: of 1565
+    tracked image files, 918 are ours (563 differing from the file at the corresponding
+    upstream path, 355 with no counterpart there) and 647 are still byte-identical to
+    SimpleX Chat Ltd's - those are NOT claimed here, they stay under
+    assets/ASSETS_LICENSE.md with upstream as their owner, and a file that merely sits
+    under a popopx-* package directory is one of them. An earlier revision of this notice
+    read "1527 tracked, 837 ours, 690 upstream's"; that was the same-path-only comparison
+    taken before the last artwork commits, and it is the count ASSETS_LICENSE-POPOPX.md
+    replaced. The 918 are licensed on the same terms as the code - AGPL-3.0-only, or, at
+    the recipient's option, CC0-1.0. Licence: ASSETS_LICENSE-POPOPX.md
+    Until 2026-11-16 this block read "Copyright (C) 2026 POPOPX. All rights
+    reserved." and said these files were not part of the AGPL grant and "may not
+    be redistributed in another project's distribution, modified or unmodified,
+    without prior written permission". That position is withdrawn: a work conveyed
+    as a whole under AGPL-3.0 cannot carry one part of itself that forbids
+    redistribution - section 10 calls that a further restriction, and section 12
+    does not let us keep it by disclosing it. Nothing changed for the 647: they are
+    upstream's, this fork cannot licence them, and a fork still may not carry them.
 
 A downstream fork of this repository carries both sets of obligations: POPOPX's,
 above, and SimpleX Chat Ltd's, which are kept verbatim in the files named in the
-first half of this notice.
+first half of this notice. Since 2026-11-16 the two are not the same kind of
+obligation. POPOPX's artwork may be taken under AGPL-3.0 or CC0-1.0, so what still
+binds a fork of this fork is the names (TRADEMARK-POPOPX.md, outside any copyright
+licence) and SimpleX Chat Ltd's artwork, which no term in this repository can
+licence away from upstream.

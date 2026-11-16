@@ -354,6 +354,32 @@ each was meant to become. That pass also repaired a compile break this fork ship
     the guard into a no-op that never fires. It is the same class of hold as the `simplex_xor_md5_combine`
     function name in `popopxmq`.
 
+15. **This fork's own artwork was relicensed; the names and upstream's art were not** (2026-11-16) —
+    `ASSETS_LICENSE-POPOPX.md` now licenses the images whose bytes this fork wrote under
+    **AGPL-3.0-only, or at the recipient's option CC0-1.0**, and the 双轨制 ruling it
+    replaced — code free, brand *and artwork* proprietary, on the Firefox/WordPress/SimpleX model — is
+    withdrawn. The reason is not generosity, it is that the old position could not be held: a fork
+    conveys one work, pictures included, because the icons are embedded in the binaries and the vector
+    masters that draw them are the corresponding source a server owes its users under §13, so keeping
+    one part of that work behind a permission requirement is a further restriction on the rights §11
+    grants. §10 forbids adding such a restriction, and §12 ("No Surrender of Others' Freedom") does not
+    let us keep one by writing it down: it says a contradicting condition excuses nobody from the
+    licence's own terms, and that anyone who cannot satisfy both at once may not convey at all. The
+    names are untouched, because trade mark law is outside the copyright licence altogether:
+    `TRADEMARK-POPOPX.md` still binds a fork in full, and taking our wordmark bytes under CC0 licenses
+    the drawing, never the mark, so a downstream build may not present them as identifying our product
+    or our approval. Upstream's artwork is untouched for
+    the opposite reason — this fork has nothing to grant: the files the recipe measures
+    byte-identical to `db0768c21` stay SimpleX Chat Ltd's under `assets/ASSETS_LICENSE.md`, whose term
+    withholding them from a distribution that is not unmodified SimpleX Chat no document here reaches,
+    so the standing advice that a fork must not carry them is unchanged. What *is* changed is the second
+    half of that advice: a fork is still compelled to rebrand, still cannot carry upstream's drawings,
+    and is no longer compelled by this repository's copyright to redraw ours. Updated in the same pass,
+    each carrying the date and what it used to say: `ASSETS_LICENSE-POPOPX.md` (the grant itself, first),
+    `NOTICE`, `README.md` (top blockquote and §License), `TRADEMARK-POPOPX.md`,
+    `AGPL-COMPLIANCE-POPOPX.md` §4 as a dated correction rather than a deletion, this file's
+    §"Trademarks and artwork", `branding/source-svg/README.md` and `CHANGELOG-POPOPX.md`.
+
 ## What was deliberately NOT changed
 
 - **Copyright and attribution.** `author: simplex.chat` and `copyright: 2020-22 simplex.chat` in
@@ -467,13 +493,16 @@ each was meant to become. That pass also repaired a compile break this fork ship
 - **The domains** (`simplex.chat`, `simplex.im`) and the associated-domains / universal-link
   entries, until POPOPX owns and operates its own.
 
-## Trademarks and artwork — outside the AGPL grant
+## Trademarks and artwork — outside the AGPL grant, and inside it
 
 Clause-by-clause compliance record, including what the asset licence blocks before a release:
 [`AGPL-COMPLIANCE-POPOPX.md`](./AGPL-COMPLIANCE-POPOPX.md).
 
-Two things in this repository are **not** licensed to you under AGPL-3.0, and a text
-substitution does not change that:
+Two things in this repository are **not** licensed to you by anything here, and a text substitution
+does not change that: the **names**, in both projects, because a trade mark is not conveyed by a
+copyright licence, and **upstream's artwork**, because this fork never held it to grant. What this fork
+drew is a third thing, and since 2026-11-16 it is inside the grant — AGPL-3.0-only, or CC0-1.0 at the
+recipient's option, per [`ASSETS_LICENSE-POPOPX.md`](./ASSETS_LICENSE-POPOPX.md) and item 15 above.
 
 - **Trademarks.** "SimpleX", "SimpleX Chat" and the associated logos are trademarks of
   SimpleX Chat Ltd; see [their `docs/TRADEMARK.md`](https://github.com/simplex-chat/simplex-chat/blob/stable/docs/TRADEMARK.md)
@@ -481,7 +510,7 @@ substitution does not change that:
   forbids using the mark in a fork's name or branding. POPOPX is used instead for that
   reason. This fork makes no claim of affiliation.
 - **Application graphics.** The illustrations, icons, visual designs and test-snapshot
-  screenshots were proprietary and all rights reserved per
+  screenshots we imported were proprietary and all rights reserved per
   [`assets/ASSETS_LICENSE.md`](./assets/ASSETS_LICENSE.md), which permits only distribution
   of the **unmodified** application. That permission does not extend to a rebranded fork, so the
   application graphics have been redrawn as POPOPX work product — the icons, the brand kit, the
@@ -489,6 +518,10 @@ substitution does not change that:
   crowdfunding badges, the chat wallpapers, `privacy` and `shield`. Any regenerated snapshot
   baselines are POPOPX Chat work product. What remains of upstream's artwork is documentation and
   website imagery, measured in [`ASSETS_LICENSE-POPOPX.md`](./ASSETS_LICENSE-POPOPX.md).
+  The redraw was compelled by upstream's licence, and that compulsion is unchanged; what changed on
+  2026-11-16 is our half of the result, now licensed (AGPL-3.0-only, or CC0-1.0 at your option). So a
+  fork is no longer required by this repository's copyright to draw its own pictures — it is still
+  required by `TRADEMARK-POPOPX.md` not to present our marks as its own.
 
 ## What is still unset
 

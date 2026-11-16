@@ -1,15 +1,21 @@
 # POPOPX Graphic Assets License
 
-Copyright (C) 2026 POPOPX. All rights reserved.
+Copyright (C) 2026 POPOPX. The artwork this fork created is licensed under
+**AGPL-3.0-only, or at your option CC0-1.0** — see [The grant](#the-grant) below. The
+names are not: they are governed by [TRADEMARK-POPOPX.md](TRADEMARK-POPOPX.md).
 
 This file covers the graphic assets **this fork created**. It is the counterpart of
 [assets/ASSETS_LICENSE.md](assets/ASSETS_LICENSE.md), which is SimpleX Chat Ltd's licence for
 upstream's artwork and is kept in this repository unchanged; and of
 [TRADEMARK-POPOPX.md](TRADEMARK-POPOPX.md), which covers the names.
 
-AGPL-3.0 covers the source code ([LICENSE](LICENSE)) and does not cover artwork. Nothing in this file
-restricts what you may do with the code: you may run it, study it, modify it and redistribute it under
-AGPL-3.0. What you may not do is redistribute **our pictures** while you do it.
+AGPL-3.0 covers the source code ([LICENSE](LICENSE)). This file used to hold the artwork out of that
+grant: it said the code was free and the pictures were not. That position was withdrawn on 2026-11-16,
+because a work cannot be conveyed as a whole under AGPL-3.0 while one of its own parts carries a term
+forbidding redistribution — AGPL-3.0 section 10 calls that a further restriction, and section 12 does
+not let us cure it by disclosing it. The artwork this fork created is therefore free in the same way
+the code is, and the control that AGPL never reached — the names — stays where it belongs, in
+[TRADEMARK-POPOPX.md](TRADEMARK-POPOPX.md).
 
 ## What is POPOPX-owned artwork
 
@@ -151,26 +157,49 @@ same *same-path* measurement gave 2089 tracked and 1471 identical; under the rec
 Replaced or removed upstream files keep their licence notices (AGPL-3.0 §4 forbids removing notices, and
 the notices are the record of what may not ship).
 
-## Permitted use
+## The grant
 
-- You may view these files, and you may build the application with them.
-- Only POPOPX's own distribution channels may ship POPOPX-owned artwork to users.
+The artwork this fork created — the set the recipe above measures, and nothing else — is licensed
+under **AGPL-3.0-only**, the same terms as the code, or, **at your option, CC0-1.0**.
 
-## Not permitted
+> This work is free software: you can redistribute it and/or modify it under the terms of the GNU
+> Affero General Public License as published by the Free Software Foundation, version 3 only.
 
-Any other use of POPOPX-owned artwork — redistribution, incorporation into another work, use as a
-fork's icons, wordmark or marketing imagery, use on a website or in advertising, modified or
-unmodified — without prior written permission from POPOPX.
+CC0-1.0: we waive our copyright and related rights in these files to the greatest extent permitted
+by law; the operative text is
+[creativecommons.org/publicdomain/zero/1.0/legalcode](https://creativecommons.org/publicdomain/zero/1.0/legalcode).
 
-Permission requests: **chat@popopx.chat**.
+Two grants rather than one plain CC0, for one reason: a picture anyone may copy is still *our* mark,
+and CC0 waives copyright but never a trade mark. Take the copyleft grant and the artwork travels with
+the work it belongs to, which is what stops someone shipping our drawings inside a build they will not
+give anyone the source of. Take CC0 and the artwork carries no obligation at all, which is what a
+translated document, a distribution manifest or a packaging recipe needs when it cannot carry one.
+Questions: **chat@popopx.chat** — asking is no longer required to use any of it.
 
-## Why it is written this strictly
+## Not a licence of anything upstream's
 
-Ruling: 双轨制 — the code stays AGPL-3.0 and free, the brand and the artwork stay proprietary. That is
-the Firefox/WordPress/SimpleX structure, and it is the only structure that survives AGPL: a fork may not
-be stopped from taking the code, so the deterrent has to sit on the parts AGPL does not reach. A fork
-that wants to ship keeps every AGPL right it already had and supplies its own name and its own design;
-the cost of that design work is the protection. This is deliberately stricter than upstream's asset
-licence, which allows an unmodified distribution — a rebranded fork is by definition not unmodified.
+This file can grant only what we made. The image files measured byte-identical to upstream in
+[What is NOT ours](#what-is-not-ours-and-what-that-means-for-you) are SimpleX Chat Ltd's artwork under
+[assets/ASSETS_LICENSE.md](assets/ASSETS_LICENSE.md), whose terms nothing in this repository reaches or
+changes — including the one that withholds them from a distribution that is not unmodified SimpleX Chat.
+That exposure is ours to carry, not ours to relicense, and it is recorded here rather than resolved.
+
+## Names
+
+[TRADEMARK-POPOPX.md](TRADEMARK-POPOPX.md) governs POPOPX, Popopx and the wordmark as marks. Neither
+grant above is a trade mark licence: you may copy these bytes, and you may not present them as our
+product, our endorsement, or our application.
+
+## Why the strict version was withdrawn
+
+The ruling this file used to record was 双轨制 — the code free, the brand and the artwork proprietary,
+on the Firefox/WordPress/SimpleX model, on the reasoning that since AGPL cannot stop a fork taking the
+code the deterrent has to sit on the part AGPL does not reach. That reasoning was sound about the names
+and wrong about the artwork. A fork conveys one work, pictures included: the icons are embedded in the
+binaries and the vectors that draw them are shipped as the corresponding source a server owes its users
+under AGPL section 13. Holding one of those parts back under a permission requirement is a further
+restriction on the rights section 11 grants, which section 10 forbids and section 12 does not let us
+keep by disclosing. The names were never at risk from this: trade mark law is outside the license, and
+still says what it said.
 
 This file is a licensing position, not legal advice.
