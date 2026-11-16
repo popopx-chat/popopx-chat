@@ -14,12 +14,25 @@ export function captureLog(): string[] {
   return lines
 }
 
+// jest reports only Error.message, while the core's ChatError travels on the chatError property -
+// so any call that can answer with a chat error has to be awaited through here, or CI shows the
+// SDK's generic message and the reason is lost.
+export async function withChatError<T>(run: () => Promise<T>): Promise<T> {
+  try {
+    return await run()
+  } catch (e) {
+    const err = e as Error & {chatError?: unknown}
+    if (err.chatError !== undefined) err.message = `${err.message}: ${JSON.stringify(err.chatError)}`
+    throw err
+  }
+}
+
 export async function profileWithServer(smpAddress: string, filePrefix: string, profile: T.Profile, xftpAddress?: string): Promise<void> {
   const chat = await api.ChatApi.init({type: "sqlite", filePrefix})
   await chat.apiCreateActiveUser(profile)
   await chat.startChat()
-  expect(await chat.sendChatCmd(`/smp ${smpAddress}`)).toMatchObject({type: "cmdOk"})
-  if (xftpAddress !== undefined) expect(await chat.sendChatCmd(`/xftp ${xftpAddress}`)).toMatchObject({type: "cmdOk"})
+  expect(await withChatError(() => chat.sendChatCmd(`/smp ${smpAddress}`))).toMatchObject({type: "cmdOk"})
+  if (xftpAddress !== undefined) expect(await withChatError(() => chat.sendChatCmd(`/xftp ${xftpAddress}`))).toMatchObject({type: "cmdOk"})
   await chat.close()
 }
 
@@ -60,15 +73,8 @@ export function serveOptions(data: string, port: number, extra: Partial<ServeOpt
   return {name: "agent", data, dataGiven: true, approve: "requests", expireHours: 23, resetOwners: false, newToken: false, port, qrCode: "small", stopWait: 10, ...extra}
 }
 
-// jest reports only Error.message, while the core's ChatError travels on the chatError property.
-export async function startAgentServer(options: ServeOptions): Promise<RunningServer> {
-  try {
-    return await startServer(options)
-  } catch (e) {
-    const err = e as Error & {chatError?: unknown}
-    if (err.chatError !== undefined) err.message = `${err.message}: ${JSON.stringify(err.chatError)}`
-    throw err
-  }
+export function startAgentServer(options: ServeOptions): Promise<RunningServer> {
+  return withChatError(() => startServer(options))
 }
 
 export function lastLink(lines: string[]): string {
@@ -77,8 +83,8 @@ export function lastLink(lines: string[]): string {
 
 export async function joinByLink({chat, user}: {chat: api.ChatApi; user: T.User}, link: string): Promise<number> {
   const joined = chat.wait("userJoinedGroup", timeout)
-  const [, connLink] = await chat.apiConnectPlan(user.userId, link)
-  await chat.apiConnect(user.userId, false, connLink)
+  const [, connLink] = await withChatError(() => chat.apiConnectPlan(user.userId, link))
+  await withChatError(() => chat.apiConnect(user.userId, false, connLink))
   const event = await joined
   if (event === undefined) throw new Error("not joined")
   return event.groupInfo.groupId
