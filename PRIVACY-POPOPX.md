@@ -21,7 +21,7 @@ that the app talks to learns both who you talk to and what you say. For the prot
 the upstream design document describes, see [`docs/SIMPLEX.md`](https://popopx.chat/docs/SIMPLEX.md)
 and [`docs/SECURITY.md`](https://popopx.chat/docs/SECURITY.md) — both are upstream's text, published
 here byte-for-byte as the files at `simplex-chat@db0768c21`, and disclaimed as upstream's at
-[`docs/UPSTREAM-DISCLAIMER.md`](https://popopx.chat/docs/UPSTREAM-DISCLAIMER.md). **Neither is POPOPX's
+[`docs/UPSTREAM-DISCLAIMER.md`](https://popopx.chat/docs/upstream-disclaimer.html). **Neither is POPOPX's
 policy**: `SECURITY.md` is SimpleX Chat Ltd's, so the report address it gives (`chat@simplex.chat`) and
 the OpenPGP fingerprint it names are theirs. POPOPX publishes no security policy of its own — report a
 POPOPX issue to **chat@popopx.chat**. These paths live in the fork's site directory and are citable only
