@@ -365,7 +365,7 @@ My Agent: I want to send a message to bot SimpleX Directory (@directory.simplex)
 part                                                  source
 contact | bot | agent | business | group | channel    as in the connect card: the type of chat; bot or agent from the contact profile's peerType
 SimpleX Directory                                     the chat's display name
-(@directory.simplex)                                  the chat's verified POPOPX name, when the core has one (simplex_name of connect and list)
+(@directory.simplex)                                  the chat's verified POPOPX name, when the core has one (popopx_name of connect and list)
 , where I am incognito             incognito chats
 ```
 
@@ -618,7 +618,7 @@ error    failed: "The received file is not in the agent's files folder.", "Large
 
 ```
 input field   type      rule
-target        string    required; POPOPX link, @name.simplex or #name.simplex
+target        string    required; POPOPX link, @name.popopx or #name.popopx
 incognito     boolean   optional; default false; true: the core creates a random profile for this chat only; the description asks for true unless the user asked to connect as the profile
 message       string    optional; 1 to 2000 characters; for contact and business addresses with short link data; the description asks for one only when the user asked for it
 wait          number    optional; seconds from the approval for the other side to accept and, with message, to send its first reply; the call returns at the latest then; 0 to 86400; default 60; the wait for the connection ends at most 23 h 50 min after the action's creation, so the card's outcome edit falls within 24 hours
@@ -633,7 +633,7 @@ chat          string      done, once the chat exists; known
 connected     boolean     done, known
 type          string      done, known: contact | business | group | channel
 name          string      done, known; the contact's or group's display name
-simplex_name  string      done, known; the verified POPOPX name, when the core has one
+popopx_name  string      done, known; the verified POPOPX name, when the core has one
 peer_type     string      done, known, contacts: human | bot | agent | business, when the profile has one
 description   string      done, known; short description from the link, when present
 welcome       string      done, known; welcome message from the link, when present
@@ -722,7 +722,7 @@ Input: none.
 
 ```
 result field  type    content
-chats         array   {chat, type, name, simplex_name, peer_type, incognito, known_as, connected, unread, approved}
+chats         array   {chat, type, name, popopx_name, peer_type, incognito, known_as, connected, unread, approved}
 actions       array   {action, tool, input, state, open}: actions of this server run in memory, whose result no call has returned; open: at least one call waits on it
 ```
 
@@ -1159,7 +1159,7 @@ newChatItems        wake the waiting send and receive calls of that chat
 ```
 
 - `APIConnect` refuses channel links ("channel links must be connected via APIConnectPreparedGroup", `Commands.hs:2411`).
-- `simplex_name`: contacts: `@` + `profile.contactDomain.domain` when `profile.contactDomainVerified` (`LocalProfile`, `types.d.ts:2166-2167`); groups and channels: `#` + `groupProfile.publicGroup.publicGroupAccess.groupDomainClaim.domain` when `groupDomainVerified` (`types.d.ts:1880`), as the directory reads it (`verifiedGroupDomain`, `Directory/Store.hs:207-210`). The claim's `domain` is the full name, for example `directory.simplex` (`fullDomainName`, simplexmq `PopopxName.hs:131-132`).
+- `popopx_name`: contacts: `@` + `profile.contactDomain.domain` when `profile.contactDomainVerified` (`LocalProfile`, `types.d.ts:2166-2167`); groups and channels: `#` + `groupProfile.publicGroup.publicGroupAccess.groupDomainClaim.domain` when `groupDomainVerified` (`types.d.ts:1880`), as the directory reads it (`verifiedGroupDomain`, `Directory/Store.hs:207-210`). The claim's `domain` is the full name, for example `directory.simplex` (`fullDomainName`, simplexmq `PopopxName.hs:131-132`).
 - `known_as` after the connect: contacts: the incognito profile from `/_info @C` (`APIContactInfo`, `Commands.hs:1953-1961`); groups: `groupInfo.membership.memberProfile`.
 
 ### send
