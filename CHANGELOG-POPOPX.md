@@ -127,8 +127,12 @@ at this repository, pinned to a recorded master commit. Verified statically, and
 `executable popopx-chat`, `flag client_postgres`, `scripts/cabal.project.local.linux` and all ten
 switches the entrypoint passes exist at that pin; no `docker build` was run. The pin came from the locally
 recorded `origin/master` while both egress paths were down, and was confirmed once direct egress answered:
-`git ls-remote origin refs/heads/master` returns `967cd6e88ae1e88eaa4078ecc4fa9aa07f4fe317`, so the pinned
-commit is this repository's live master tip. The same probe re-measured the publishing blockers for #82 -
+`git ls-remote origin refs/heads/master` returned `967cd6e88ae1e88eaa4078ecc4fa9aa07f4fe317`, which was then the
+live master tip. That was only true until the push of the same day moved master to
+`d591bc28e243c8acf678927ca67c2ace9d9c265a`, twelve commits ahead of the pin. The pin is therefore an ancestor, not
+the tip: it still fetches and still declares everything `entrypoint.py` reads, and advancing it to a CI-validated
+commit is a deployment decision rather than something a newer SHA forces. The same probe re-measured the publishing
+blockers for #82 -
 `gh secret list` and `gh variable list` are empty for both `popopx-chat/popopx-chat` and
 `popopx-chat/popopx-chat-libs`, while that second repository now answers `gh release list` with the two
 mirrored releases (`core-7.1.0.20`, `nodejs-addon-cce06d8`), which is why the MCP end-to-end job fetches its

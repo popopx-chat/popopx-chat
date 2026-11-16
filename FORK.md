@@ -244,8 +244,11 @@ each was meant to become That pass also repaired a compile break this fork shipp
     `scripts/cabal.project.local.linux` exists there, and that all ten switches `entrypoint.py` passes are
     parsed there. The pin was first read from the locally recorded `origin/master` because neither egress path
     reached GitHub; it was confirmed against the remote the same day, when direct egress answered
-    `967cd6e88ae1e88eaa4078ecc4fa9aa07f4fe317 refs/heads/master` - the pinned commit is the live master tip. The
-    pin must still be bumped by whoever advances a deployment.
+    `967cd6e88ae1e88eaa4078ecc4fa9aa07f4fe317 refs/heads/master`, so at that moment the pin was the live master tip.
+    It no longer is: the push that landed this tier moved master to
+    `d591bc28e243c8acf678927ca67c2ace9d9c265a`, twelve commits ahead of the pin. The pin is an ancestor that still
+    fetches and still declares everything the entrypoint reads, and bumping it to a CI-validated commit stays a
+    deployment decision - whoever advances a deployment moves `Dockerfile:6` and `docker-compose.yaml:8` together.
 
     The naming tier that ran after it moved the phrase "SimpleX link", 59 of its 64 occurrences: `f2a262472` the
     directory service's group notice with its three verbatim test mirrors and five hspec titles, `5932bccee` the
