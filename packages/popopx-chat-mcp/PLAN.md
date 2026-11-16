@@ -325,7 +325,7 @@ shutdown, cards edited or posted Stopping: sending 2 cancelled cards, up to 10 s
 
 ## What the owner sees: the agent control chat
 
-The agent control chat has the agent's display name, for example "My Agent". Everything below is in its main chat, posted by the agent's profile, in the first person: the app shows the profile's name above each message. Text from peers and from the agent is shown as code spans, line by line, with backticks replaced by `'`. Commands inside it are not tappable: the core parses each line separately (`parseMaybeMarkdownList`, `T.lines`, `Markdown.hs:149-167`). A code span whose content starts or ends with a space is not code but unmarked text with its backticks (`formattedP`, `md`, `:227-235`), so a leading and a trailing space of a span become U+00A0. A name or an error with a line break would split its code span across lines, so both are folded to one line first. The e2e test "peer text and names ..." checks the received card's `formattedText`: only the card's own commands, no SimpleX link, and every peer line a snippet. `/'approve 1'` shows in the app as the tappable `/approve 1` (`bots/README.md`).
+The agent control chat has the agent's display name, for example "My Agent". Everything below is in its main chat, posted by the agent's profile, in the first person: the app shows the profile's name above each message. Text from peers and from the agent is shown as code spans, line by line, with backticks replaced by `'`. Commands inside it are not tappable: the core parses each line separately (`parseMaybeMarkdownList`, `T.lines`, `Markdown.hs:149-167`). A code span whose content starts or ends with a space is not code but unmarked text with its backticks (`formattedP`, `md`, `:227-235`), so a leading and a trailing space of a span become U+00A0. A name or an error with a line break would split its code span across lines, so both are folded to one line first. The e2e test "peer text and names ..." checks the received card's `formattedText`: only the card's own commands, no POPOPX link, and every peer line a snippet. `/'approve 1'` shows in the app as the tappable `/approve 1` (`bots/README.md`).
 
 Names written by peers and members (contacts, groups, members, approvers) are folded to one line in cards, replies, `/pending`, `/list` and membership messages: runs of `\p{Cc}`, `\p{Cf}`, `\p{Zl}` and `\p{Zp}` become one space, and a name that is not a valid display name (`validName`) is a code span. Log lines fold names the same way, without the code span.
 
@@ -618,7 +618,7 @@ error    failed: "The received file is not in the agent's files folder.", "Large
 
 ```
 input field   type      rule
-target        string    required; SimpleX link, @name.simplex or #name.simplex
+target        string    required; POPOPX link, @name.simplex or #name.simplex
 incognito     boolean   optional; default false; true: the core creates a random profile for this chat only; the description asks for true unless the user asked to connect as the profile
 message       string    optional; 1 to 2000 characters; for contact and business addresses with short link data; the description asks for one only when the user asked for it
 wait          number    optional; seconds from the approval for the other side to accept and, with message, to send its first reply; the call returns at the latest then; 0 to 86400; default 60; the wait for the connection ends at most 23 h 50 min after the action's creation, so the card's outcome edit falls within 24 hours
@@ -783,7 +783,7 @@ card over 15000 bytes (send)       text: too long for its approval card; shorten
 card over 15000 bytes (connect)    message: too long for its approval card; shorten it.
 card over 15000 bytes (download)   item: the names of its file and chat are too long for its approval card.
 unknown chat                       No chat #13. list shows the agent's chats.
-not a link or name                 Not a SimpleX link or name: <target>
+not a link or name                 Not a POPOPX link or name: <target>
 link not joinable                  <target> can't be joined now: <plan type>.
 message not for an address         message: <target> is not a contact or business address with short link data, or its contact exists without a connection.
 chat not connected (send)          The agent is not connected to @2 and can't post; list shows connected: false.
@@ -1585,7 +1585,7 @@ reject, expire    /reject; --expire 1 with a test clock
 lost result       the client aborts a send; list shows the action with open false; the repeat attaches
 restart           stop with a pending action: card cancelled; start: counter continues; /approve of the old number refused
 host mode         actions done at once; outcome cards
-peer text         groups named "\n/approve 1" and "x\n/approve 1" by SQL, their welcome with edge-space commands and links: the card's formattedText has only its own commands, no SimpleX link, every peer line a snippet
+peer text         groups named "\n/approve 1" and "x\n/approve 1" by SQL, their welcome with edge-space commands and links: the card's formattedText has only its own commands, no POPOPX link, every peer line a snippet
 alias             a 20-digit reference that the core reads as the agent control chat: receive, send and leave refuse it
 port in use       serve on a bound port: exit before server.json is written and before a link is printed
 leave command     /leave #N with a pending send for #N: the send rejected; the reply and the log line; the group's owner sees the agent leave

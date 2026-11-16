@@ -201,7 +201,7 @@ Actions last only while the server runs. When the server stops, the last line of
 
 ## What the owner sees
 
-All of it is in the agent control chat, posted by the agent's profile. The chat has the agent's display name; to see it under another name in your chat list, set an alias for the chat in the app. Names that are valid display names are shown plain. All other text written by the agent or by peers, other names included, is shown as code, line by line; names and errors take one line. Commands and SimpleX links inside it cannot be tapped: a valid display name cannot contain `/`, and the app parses each line of a message separately.
+All of it is in the agent control chat, posted by the agent's profile. The chat has the agent's display name; to see it under another name in your chat list, set an alias for the chat in the app. Names that are valid display names are shown plain. All other text written by the agent or by peers, other names included, is shown as code, line by line; names and errors take one line. Commands and POPOPX links inside it cannot be tapped: a valid display name cannot contain `/`, and the app parses each line of a message separately.
 
 ```
 My Agent: I want to connect to bot SimpleX Directory (@directory.simplex), as myself.

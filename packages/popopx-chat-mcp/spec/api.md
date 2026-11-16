@@ -80,7 +80,7 @@ Input:
 
 | Field | Type | Range | Default | Rule |
 |---|---|---|---|---|
-| `target` | string | 1 character or more | required | SimpleX link (`https://...`, `popopx:/...`), contact name `@name.simplex` or channel name `#name.simplex`; whitespace refused |
+| `target` | string | 1 character or more | required | POPOPX link (`https://...`, `popopx:/...`), contact name `@name.simplex` or channel name `#name.simplex`; whitespace refused |
 | `incognito` | boolean | | `false` | `true`: the join methods take `incognito` true |
 | `message` | string | 1 to 2000 characters | | first message of a contact request; plans with `takesMessage` only |
 | `wait` | number | 0 to 86400 | 60 | seconds from the approval: for the other side to accept and, with `message`, for its first reply |
@@ -118,7 +118,7 @@ Tool errors:
 
 | Text | Condition | Code |
 |---|---|---|
-| `Not a SimpleX link or name: TARGET` | whitespace in `target`, or `invalidConnReq` from `apiConnectPlan` | [tools.ts:674](../src/tools.ts#L674), [:680](../src/tools.ts#L680) |
+| `Not a POPOPX link or name: TARGET` | whitespace in `target`, or `invalidConnReq` from `apiConnectPlan` | [tools.ts:674](../src/tools.ts#L674), [:680](../src/tools.ts#L680) |
 | an app error text, for example `Name not found: This POPOPX name is not registered. Please check the name.`, or `SimpleX error: CHAIN: DETAILS` | other errors of `apiConnectPlan`, or a plan of type `error` | [tools.ts:681](../src/tools.ts#L681), [:1275](../src/tools.ts#L1275), [log.ts:51-53](../src/log.ts#L51-L53) |
 | `TARGET can't be joined now: PLAN.` | `invitationLink` other than `ok` and `known`<br>`contactAddress` other than `ok`, `known`, `contactViaAddress` and `connectingConfirmReconnect`<br>`groupLink` other than `ok`, `known` and `connectingConfirmReconnect` | [tools.ts:1266](../src/tools.ts#L1266), [:1279](../src/tools.ts#L1279), [:1297](../src/tools.ts#L1297), [:1319](../src/tools.ts#L1319) |
 | `message: TARGET is not a contact or business address with short link data, or its contact exists without a connection.` | `message` given and the plan has `takesMessage: false` | [tools.ts:624](../src/tools.ts#L624) |
