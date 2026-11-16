@@ -73,7 +73,7 @@ them; `scripts/popopx-chat-reproduce-builds.sh` now has a release to verify.
 All seven Linux artefacts were rebuilt and **none matched** `v7.1.2-popopx.1`, so `_sha256sums` was never
 written and the last step failed. The script prints only mismatches, so seven lines means nothing matched
 rather than seven of many. For the four CLI artefacts the asymmetry is in the files: the release leg
-compiles with `cabal build -j --enable-tests` (`build.yml:458`) and the reproduce leg with `cabal build -j`
+compiles with `cabal build -j --enable-tests` (`build.yml:471`) and the reproduce leg with `cabal build -j`
 (`popopx-chat-reproduce-builds.sh:84`), and no `cabal.project.freeze` is tracked here, so each side lets the
 solver choose dependency versions under different constraints. What is *not* the difference: the two sides
 pin the same `ubuntu:22.04`/`24.04` image digests, the same GHC 9.6.3 and the same apt snapshot, and the
@@ -128,9 +128,14 @@ at this repository, pinned to a recorded master commit. Verified statically, and
 switches the entrypoint passes exist at that pin; no `docker build` was run. The pin came from the locally
 recorded `origin/master` while both egress paths were down, and was confirmed once direct egress answered:
 `git ls-remote origin refs/heads/master` returned `967cd6e88ae1e88eaa4078ecc4fa9aa07f4fe317`, which was then the
-live master tip. That was only true until the push of the same day moved master to
-`d591bc28e243c8acf678927ca67c2ace9d9c265a`, twelve commits ahead of the pin. The pin is therefore an ancestor, not
-the tip: it still fetches and still declares everything `entrypoint.py` reads, and advancing it to a CI-validated
+live master tip. That lasted one day: master has moved twice since, so this sentence now gives the command rather
+than a SHA. Measured 2026-11-16 on tip `667c102d4`, `git rev-list --count 967cd6e88..HEAD` reads **15** and
+`git rev-list --count origin/master..HEAD` reads **1** (`origin/master` = `e3ce5da01`). An earlier version of this
+paragraph named `d591bc28e` and "twelve commits ahead", which was true for the few hours between those two pushes -
+that is the trap, not the number. The pin is therefore an ancestor, not
+the tip: it still fetches and still declares everything `entrypoint.py` reads (`executable popopx-chat` at
+`popopx-chat.cabal:607`, `flag client_postgres` at `:33`, `scripts/cabal.project.local.linux`, and all ten long
+switches parsed in `src/Popopx/Chat/Options.hs`), and advancing it to a CI-validated
 commit is a deployment decision rather than something a newer SHA forces. The same probe re-measured the publishing
 blockers for #82 -
 `gh secret list` and `gh variable list` are empty for both `popopx-chat/popopx-chat` and
@@ -140,7 +145,11 @@ backend from us rather than 404ing.
 
 The phrase tier that followed moved 59 of the 64 `SimpleX link` occurrences - the other 5 are records
 (`CHANGELOG-POPOPX.md` 3, `CHANGELOG.md` 1, the AppStream release note in
-`com.popopxchat.popopx.metainfo.xml` 1):
+`com.popopxchat.popopx.metainfo.xml` 1). The denominator is a command, not a memory: `git grep -o 'SimpleX link'
+f2a262472^ | wc -l` reads 64. Re-measured on `667c102d4` the phrase reads 9 occurrences in 4 files, the same 4
+files: the two holders the tier deliberately left are unchanged at 1 each (`CHANGELOG.md`, the AppStream release
+note) and the rest is these two records quoting the phrase they rule on (6 here, 1 in `FORK.md`) - a recount after
+reading this sentence runs higher again, because the sentence quotes it:
 
 | commit | what moved | how it was proved |
 |--------|------------|-------------------|
@@ -163,8 +172,8 @@ fixture pairs the upstream display name with our namespace (`messages.test.ts:10
 `name: "SimpleX Directory", popopxName: "@directory.popopx"`). Two documents therefore read
 "POPOPX link" beside an unchanged `.simplex` example; that is the split, not an unfinished line.
 
-Measured at the end of the pass: `simplex:/` 4 occurrences / 4 files, all records. `SimpleX link` 5 /
-3, all records. `POPOPX link` 576 / 91 files. `[@#]<name>.simplex` 25, of which 20 are upstream-operated
+Measured at the end of the pass: `simplex:/` 4 occurrences / 4 files, none of them code. `SimpleX link` 5 /
+3, of which one is the AppStream release note. `POPOPX link` 576 / 91 files. `[@#]<name>.simplex` 25, of which 20 are upstream-operated
 names in the MCP package, 2 are host names in the WebRTC files of both clients, and 3 are the records in
 `CHANGELOG-POPOPX.md` and `PRIVACY-POPOPX.md`. `simplex_name` 24 / 9 files, and only 16 of them are code:
 the recorded database migration name `20260603_simplex_name` - 3 in each `Migrations.hs` (the string, plus
@@ -173,14 +182,34 @@ the recorded database migration name `20260603_simplex_name` - 3 in each `Migrat
 string, so it does not move. 2 more are `POPOPX-REBRAND-PLAN.md`'s protected-literal list, and the last 6
 are the two paragraphs above quoting it.
 
-Nothing here was compiled by CI and nothing was pushed: neither egress path reached GitHub while these
-edits were made (direct answered again near the end, the proxy never did), and no push was authorized, so
-the Haskell side rests on the local generator run above and on a real compile -
+Re-measured on `667c102d4`, because every one of those five numbers is a working-tree count and the tree moved:
+`simplex:/` still reads 4 occurrences in 4 files outside these two records, and none of the four is code
+(`POPOPX-REBRAND-PLAN.md`, `CHANGELOG.md`, `PRIVACY.md`, and the live `.github/ISSUE_TEMPLATE/question.yml:9`,
+whose occurrence sits inside a working upstream invitation URL - the reason "all records" above is the wrong
+label and `FORK.md` states the four by name). `POPOPX link` reads 579 occurrences in the same 91 files, the 3
+extra being these records. `simplex_name` reads one more than the 24 above, in the same 9 files - the pass's own
+count already included 6 record quotes, and the code side is unchanged at 18 (16 Haskell + 2 plan), so what grew is
+the quoting, now 7:
+`[@#]<name>.simplex` reads 31 in 6 files: the MCP package's 20 are unchanged, and the other 11 are these two
+records quoting the examples they rule on - so the "2 WebRTC" line above does not reproduce in any tree this
+repository holds, and is left unrepaired rather than rewritten into a guess (the only WebRTC spellings carrying a
+dot are `stun.simplex.im` and `turn.simplex.im`, which are hosts on `simplex.im`, not `.simplex` names;
+`PRIVACY-POPOPX.md` holds no such occurrence at all, its `.simplex` string being `simplexonflux.com`).
+This paragraph quotes the very spellings it counts, so a recount taken after reading it runs higher than the
+numbers above - the stable facts are the *file* counts and which files those are.
+
+What this paragraph said when it was written - that nothing here was compiled by CI and **nothing was pushed** -
+is no longer true, and the push is the part a reader can check from this checkout: the branch was authorized and
+landed the same day, so `origin/master` moved past these commits. Measured 2026-11-16, `git rev-list --count
+origin/master..HEAD` reads **1** on tip `667c102d4` - and that one commit is the badge-web tier below, not these
+records. Re-read the command instead of copying a SHA or a status; either way the sentence is about GitHub or
+about a moving branch, and both go stale mid-sentence. What did not change is the *kind* of proof: the Haskell
+side rests on the local generator run above and on a real compile -
 `cabal build test:popopx-chat-test` rebuilt and linked the test executable, which is what compiles every
 module this tier edited (`Preferences.hs`, the directory service, its three mirrors, `MarkdownTests.hs`,
 `Profiles.hs`, `Commands.hs` and `Test.hs`). The iOS and Kotlin document edits need no build, and the
-Android/desktop legs remain static verification as elsewhere in this section. CI proof of the whole tip
-awaits a push.
+Android/desktop legs remain static verification as elsewhere in this section. CI's own verdicts are named by run
+id where they were read, and no line here claims a badge for a commit it cannot name.
 
 
 ### The rest of the name/address tier, and the one unit only a rendered-text run could prove (2026-11-15, rulings 必改 the rest + 需要确认的按照建议进行)
@@ -272,7 +301,7 @@ value**:
   three `apps/**` modules that a `src`/`tests` census does not see, which is how the pass learned that the
   fork's own services import `Popopx.Chat.View`.
 - **B - the MCP server's identity is ours, the command the user types is not.** `serverInfo.name` becomes
-  `popopx-mcp` (`serve.ts:112`), with its e2e assertion moved in the same commit; `bin simplex-mcp`, the
+  `popopx-mcp` (`serve.ts:115`), with its e2e assertion moved in the same commit; `bin simplex-mcp`, the
   usage text and the `simplex-mcp:` error prefix stay, because that spelling is `package.json` `bin` and is
   rewritten only at publish time. The `customData` keys `simplexMcp`/`simplexMcpFiles` were refused: they are
   JSON members the core persists in the agent's database, so renaming one silently forgets approvals an
@@ -648,9 +677,9 @@ The blog pass left four occurrences in code and resources and ruled two of them 
 remaining two, plus the record of a fourth thing that is not a name at all.
 
 **A5 `contentModerationPostLink` moved to upstream's URL — the two declarations only.** One URL, 11
-occurrences in 6 files: the declarations `apps/ios/POPOPXChat/ChatTypes.swift:25` and
+occurrences in 6 files: the declarations `apps/ios/POPOPXChat/ChatTypes.swift:26` and
 `.../common/views/chat/item/CIFileView.kt:305`, 2 imports (`PopopxAPI.kt:33`, `ChatModel.kt:16`), 7 reads
-(`ChatTypes.swift:5447`, `POPOPXAPI.swift:1132,3316`, `CIFileView.swift:306`, `CIFileView.kt:313`,
+(`ChatTypes.swift:5448`, `POPOPXAPI.swift:1133,3317`, `CIFileView.swift:307`, `CIFileView.kt:313`,
 `PopopxAPI.kt:9130`, `ChatModel.kt:4965`). The host changed in the declarations and nothing else: the
 "how it works" row, the alert actions and the `how_it_works` strings in every locale are as they were, so no
 capability is lost and no snapshot scene is affected — the URL never renders. Both sides gained one line of
@@ -1400,11 +1429,11 @@ which exists only in our tree; `|| :` swallowed the missing file, the `_sha256su
 both scheduled runs (43143049757, 43353616675) went red having compiled nothing. Everything that names
 *which build is being proven* moved as one unit: the releases API and the checkout repository,
 `repo_name`/`repo` in the script, the three release-asset names (matched against our producers
-`build.yml:556`, `:612`, `:638`), the CLI the container builds (`popopx-chat.cabal:607`), the two package
-paths (`build-cli-deb.sh:12`, `make-deb-linux.sh:57`), and the sums directory in the workflow, which is now
+`build.yml:568`, `:619`, `:643`), the CLI the container builds (`popopx-chat.cabal:607`), the two package
+paths (`build-cli-deb.sh:12`, `make-deb-linux.sh:58`), and the sums directory in the workflow, which is now
 read out of the script instead of written a second time. One of those was invisible to every token sweep:
 `mv release/main/*imple*.AppImage` is a glob, not a word, and would have matched nothing in our build - it
-now derives the file the way `build.yml:629` does.
+now derives the file the way `build.yml:635` does.
 
 The job is inert until this fork publishes a release (`releases/latest` answers 404), so the first step
 detects the empty tag and skips; that is what it does nightly now. Held by the usual rule: the Android
@@ -1449,8 +1478,8 @@ defect from the inside: `APP_NAME="simplex-chat"` is not a label but the downloa
 `:82`/`:84` into `https://github.com/$APP_NAME/$APP_NAME/releases/$DOWNLOAD/$APP_NAME-$PLATFORM` (owner,
 repository, asset prefix) and at `:7` into the path of the installed binary, so our own installer fetched
 **upstream's binary from upstream's releases** and named it `simplex-chat`. The next release would have
-appeared in our releases list as `popopx-chat-*` (`build.yml:1012`, `:1019`, `:1423`, and
-`popopx-chat-ubuntu-22_04-x86_64` from the matrix at `:280`/`:281` plus the derivation at `:556`), so the
+appeared in our releases list as `popopx-chat-*` (`build.yml:1020`, `:1027`, `:1431`, and
+`popopx-chat-ubuntu-22_04-x86_64` from the matrix at `:291`/`:292` plus the derivation at `:568`), so the
 script could never have installed this fork.
 
 `APP_NAME` moved to `popopx-chat`, which carries the binary lookup at `:33`/`:34`, the release listing at `:26`

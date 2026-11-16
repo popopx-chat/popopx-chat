@@ -98,9 +98,14 @@ summary:
    The three test harnesses that download a server for their suites
    (`packages/popopx-chat-mcp/test/e2e/smpServer.ts`, `packages/popopx-chat-nodejs/tests/smpServer.ts`,
    `apps/popopx-calculator-bot/test/smpServer.ts`) were ruled the same day to take it from
-   `popopx-chat/popopxmq`. `popopxmq` publishes no releases, so those suites now fail with a 404 until it
-   does — the comment at each site says so. That is the intended shape: a harness must not test our core
-   against a server built from someone else's source and report a pass, and a 404 is loud. The operator
+   `popopx-chat/popopxmq`. That ruling said so in the present tense when `popopxmq` published **no** releases
+   and the suites therefore failed with a 404; `0ae51df42` (2026-11-14) repinned all three to `v7.1.0.17`,
+   whose 25 assets exist, so the URLs resolve and the 404-is-our-gap sentence no longer describes anything.
+   Each site now says what a 404 means *there*: our own asset went missing - which is not a reason to fall
+   back to upstream's binary, and cannot pass silently, because the download is checked against a pinned
+   sha256 dictionary at `:12`/`:128` of the mcp harness. That is the intended shape: a harness must not test
+   our core against a server built from someone else's source and report a pass, and a digest mismatch is
+   loud. The operator
    docs are the opposite case, where the download is an instruction to a third party run against a
    server that has to work today — see "The server artifacts" below.
 
