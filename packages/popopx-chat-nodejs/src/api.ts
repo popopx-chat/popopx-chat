@@ -731,7 +731,7 @@ export class ChatApi {
   }
 
   /**
-   * Determine SimpleX link type and if the bot is already connected via this link.
+   * Determine POPOPX link type and if the bot is already connected via this link.
    * Network usage: interactive.
    */
   async apiConnectPlan(userId: number, connectionLink: string): Promise<[plan: T.ConnectionPlan, link: T.CreatedConnLink, planPopopxName?: T.PopopxNameInfo, otherPopopxName?: T.PopopxNameInfo]> {
@@ -741,7 +741,7 @@ export class ChatApi {
   }
 
   /**
-   * Connect via prepared SimpleX link. The link can be 1-time invitation link, contact address or group link
+   * Connect via prepared POPOPX link. The link can be 1-time invitation link, contact address or group link
    * Network usage: interactive.
    */
   async apiConnect(userId: number, incognito: boolean, preparedLink: T.CreatedConnLink): Promise<ConnReqType> {
@@ -750,7 +750,7 @@ export class ChatApi {
   }
 
   /**
-   * Connect via prepared SimpleX link. The link can be 1-time invitation link, contact address or group link.
+   * Connect via prepared POPOPX link. The link can be 1-time invitation link, contact address or group link.
    * Returns the response with the pending connection, or with the contact when it already exists.
    * Network usage: interactive.
    */
@@ -822,7 +822,7 @@ export class ChatApi {
   }
 
   /**
-   * Connect via SimpleX link as string in the active user profile.
+   * Connect via POPOPX link as string in the active user profile.
    * Network usage: interactive.
    */
   async apiConnectActiveUser(connLink: string): Promise<ConnReqType> {

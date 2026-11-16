@@ -528,7 +528,7 @@ def APIAddContact_cmd_string(self: APIAddContact) -> str:
 APIAddContact_Response = CR.Invitation | CR.ChatCmdError
 
 
-# Determine SimpleX link type and if the bot is already connected via this link or name.
+# Determine POPOPX link type and if the bot is already connected via this link or name.
 # Network usage: interactive.
 class APIConnectPlan(TypedDict):
     userId: int  # int64
@@ -543,7 +543,7 @@ def APIConnectPlan_cmd_string(self: APIConnectPlan) -> str:
 APIConnectPlan_Response = CR.ConnectionPlan | CR.ChatCmdError
 
 
-# Connect via prepared SimpleX link. The link can be 1-time invitation link, contact address or group link.
+# Connect via prepared POPOPX link. The link can be 1-time invitation link, contact address or group link.
 # Network usage: interactive.
 class APIConnect(TypedDict):
     userId: int  # int64
@@ -557,7 +557,7 @@ def APIConnect_cmd_string(self: APIConnect) -> str:
 APIConnect_Response = CR.SentConfirmation | CR.ContactAlreadyExists | CR.SentInvitation | CR.ChatCmdError
 
 
-# Connect via SimpleX link or name as string in the active user profile.
+# Connect via POPOPX link or name as string in the active user profile.
 # Network usage: interactive.
 class Connect(TypedDict):
     incognito: bool

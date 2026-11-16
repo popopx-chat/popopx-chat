@@ -603,7 +603,7 @@ export namespace APIAddContact {
   }
 }
 
-// Determine SimpleX link type and if the bot is already connected via this link or name.
+// Determine POPOPX link type and if the bot is already connected via this link or name.
 // Network usage: interactive.
 export interface APIConnectPlan {
   userId: number // int64
@@ -620,7 +620,7 @@ export namespace APIConnectPlan {
   }
 }
 
-// Connect via prepared SimpleX link. The link can be 1-time invitation link, contact address or group link.
+// Connect via prepared POPOPX link. The link can be 1-time invitation link, contact address or group link.
 // Network usage: interactive.
 export interface APIConnect {
   userId: number // int64
@@ -636,7 +636,7 @@ export namespace APIConnect {
   }
 }
 
-// Connect via SimpleX link or name as string in the active user profile.
+// Connect via POPOPX link or name as string in the active user profile.
 // Network usage: interactive.
 export interface Connect {
   incognito: boolean

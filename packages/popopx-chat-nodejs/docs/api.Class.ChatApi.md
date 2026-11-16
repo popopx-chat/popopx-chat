@@ -302,7 +302,7 @@ Network usage: no.
 
 Defined in: [src/api.ts:747](../api.ts#L747)
 
-Connect via prepared SimpleX link. The link can be 1-time invitation link, contact address or group link
+Connect via prepared POPOPX link. The link can be 1-time invitation link, contact address or group link
 Network usage: interactive.
 
 #### Parameters
@@ -331,7 +331,7 @@ Network usage: interactive.
 
 Defined in: [src/api.ts:828](../api.ts#L828)
 
-Connect via SimpleX link as string in the active user profile.
+Connect via POPOPX link as string in the active user profile.
 Network usage: interactive.
 
 #### Parameters
@@ -381,7 +381,7 @@ Network usage: interactive.
 
 Defined in: [src/api.ts:737](../api.ts#L737)
 
-Determine SimpleX link type and if the bot is already connected via this link.
+Determine POPOPX link type and if the bot is already connected via this link.
 Network usage: interactive.
 
 #### Parameters
@@ -468,7 +468,7 @@ Network usage: interactive.
 
 Defined in: [src/api.ts:757](../api.ts#L757)
 
-Connect via prepared SimpleX link. The link can be 1-time invitation link, contact address or group link.
+Connect via prepared POPOPX link. The link can be 1-time invitation link, contact address or group link.
 Returns the response with the pending connection, or with the contact when it already exists.
 Network usage: interactive.
 
