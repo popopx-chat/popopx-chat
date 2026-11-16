@@ -44,8 +44,8 @@ The three groups listed in the ruling are **names**, and AGPL-3.0 imposes nothin
   2026-11-15 before this pass) was **two different values sharing one spelling**: a Haskell identifier
   (`src/Popopx/Chat/Core.hs`) and a JSON field name in
   `packages/popopx-chat-client/types/typescript/package.json` read back by
-  `scripts/ci/packages_release.py:725`. The field side moved on 2026-11-15 to `popopxChatCore` — 14
-  occurrences / 3 files, the producer's `write_json` (`:770`), the reader (`:725-726`) and its 9 test
+  `scripts/ci/packages_release.py:730`. The field side moved on 2026-11-15 to `popopxChatCore` — 14
+  occurrences / 3 files, the producer's `write_json` (`:775`), the reader (`:730-731`) and its 9 test
   fixtures moved in one commit, together with the stale version pair it guards (the field said core
   `7.1.0.18` while `popopx-chat.cabal:8` said `7.1.2.0`; both now read `7.1.2.0`, and the README line
   `POPOPX Chat core: 7.1.2.0` that `TYPES_README_CORE` requires matches them). The **remaining 20 / 13**
