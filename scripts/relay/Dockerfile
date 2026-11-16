@@ -1,6 +1,9 @@
 # syntax=docker/dockerfile:1
 
-ARG CHAT_REF=88df79d1e26921c7d1835fc8484fade596356fb6
+# The source must be our fork: exe:popopx-chat is built below and it only
+# exists here. A pin must name a commit where that executable is declared,
+# and bumping it is part of taking a relay deployment forward.
+ARG CHAT_REF=967cd6e88ae1e88eaa4078ecc4fa9aa07f4fe317
 ARG GHC=9.6.3
 # 3.10.1.0 predates the Hackage root key rotation and fails `cabal update`.
 ARG CABAL=3.10.2.0
@@ -36,7 +39,7 @@ RUN cabal update || { sleep 5; cabal update; } || { sleep 20; cabal update; }
 ARG CHAT_REF
 WORKDIR /project
 RUN git init -q . \
-    && git remote add origin https://github.com/simplex-chat/simplex-chat \
+    && git remote add origin https://github.com/popopx-chat/popopx-chat.git \
     && git fetch -q --depth 1 origin "${CHAT_REF}" \
     && git checkout -q FETCH_HEAD
 

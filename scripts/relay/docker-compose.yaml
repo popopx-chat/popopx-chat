@@ -5,7 +5,7 @@ services:
     build:
       context: .
       args:
-        CHAT_REF: ${CHAT_REF:-88df79d1e26921c7d1835fc8484fade596356fb6}
+        CHAT_REF: ${CHAT_REF:-967cd6e88ae1e88eaa4078ecc4fa9aa07f4fe317}
     image: chat-relay:latest                 # set your image/registry name
     container_name: chat-relay
     depends_on:
