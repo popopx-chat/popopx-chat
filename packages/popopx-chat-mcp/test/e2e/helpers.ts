@@ -1,6 +1,7 @@
 import {T} from "@simplex-chat/types"
 import {api, bot} from "simplex-chat"
 import {RunningServer, ServeOptions, startServer} from "../../src/serve"
+import {markRelayFailure} from "./smpServer"
 
 export const timeout = 60_000
 
@@ -23,6 +24,7 @@ export async function withChatError<T>(run: () => Promise<T>): Promise<T> {
   } catch (e) {
     const err = e as Error & {chatError?: unknown}
     if (err.chatError !== undefined) err.message = `${err.message}: ${JSON.stringify(err.chatError)}`
+    markRelayFailure()
     throw err
   }
 }
@@ -87,14 +89,20 @@ export async function joinByLink({chat, user}: {chat: api.ChatApi; user: T.User}
   const [, connLink] = await withChatError(() => chat.apiConnectPlan(user.userId, link))
   await withChatError(() => chat.apiConnect(user.userId, false, connLink))
   const event = await joined
-  if (event === undefined) throw new Error("not joined")
+  if (event === undefined) {
+    markRelayFailure()
+    throw new Error("not joined")
+  }
   return event.groupInfo.groupId
 }
 
 export async function until(condition: () => boolean | Promise<boolean>, ms = timeout): Promise<void> {
   const deadline = Date.now() + ms
   while (!(await condition())) {
-    if (Date.now() > deadline) throw new Error("condition timed out")
+    if (Date.now() > deadline) {
+      markRelayFailure()
+      throw new Error("condition timed out")
+    }
     await new Promise(resolve => setTimeout(resolve, 100))
   }
 }
@@ -103,16 +111,31 @@ export type ItemCheck = (ci: T.AChatItem) => boolean
 
 export function received(chat: api.ChatApi, check: ItemCheck): Promise<T.AChatItem> {
   return chat.wait("newChatItems", ({chatItems}) => chatItems.some(check), timeout).then(event => {
-    if (event === undefined) throw new Error("no matching item")
+    if (event === undefined) {
+      markRelayFailure()
+      throw new Error("no matching item")
+    }
     return event.chatItems.find(check)!
   })
 }
 
 export function updated(chat: api.ChatApi, check: ItemCheck): Promise<T.AChatItem> {
   return chat.wait("chatItemUpdated", ({chatItem}) => check(chatItem), timeout).then(event => {
-    if (event === undefined) throw new Error("no matching update")
+    if (event === undefined) {
+      markRelayFailure()
+      throw new Error("no matching update")
+    }
     return event.chatItem
   })
+}
+
+// A wait that times out resolves to undefined, and "expected undefined to be defined" names no event and
+// implicates nothing - this says which event never arrived and marks it, so the relay log survives cleanup.
+export async function expectEvent(event: Promise<unknown>, name: string): Promise<void> {
+  if (await event === undefined) {
+    markRelayFailure()
+    throw new Error(`no ${name} event`)
+  }
 }
 
 export const textStarts = (prefix: string): ItemCheck => ci => ci.chatItem.meta.itemText.startsWith(prefix)

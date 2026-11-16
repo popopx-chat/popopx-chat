@@ -13,6 +13,7 @@ import {
   captureLog,
   cardNumber,
   controlGroupOf,
+  expectEvent,
   isActive,
   joinByLink,
   lastLink,
@@ -282,7 +283,7 @@ test("/leave: the owner makes the agent leave a group at once, and the pending s
   expect(logLines).toContain(line)
   expect((await sending).result).toEqual({action: cardNumber(card), status: "rejected"})
   expect(lines(await rejectedCard).at(-1)).toBe("Rejected by Alice.")
-  expect(await agentLeft).toBeDefined()
+  await expectEvent(agentLeft, "leftMember")
   expect((await agent.client.tool("list", {})).result.chats).not.toContainEqual(expect.objectContaining({chat: group}))
 }, 600_000)
 
@@ -399,7 +400,7 @@ test("send with a file: a PNG reaches the group resized, with the core's preview
   const copy = join(dir, "send-file", "received.png")
   const complete = alice.chat.wait("rcvFileComplete", ({chatItem}) => chatItem.chatItem.file?.fileId === fileId, timeout)
   await alice.chat.apiReceiveFile(fileId, copy)
-  expect(await complete).toBeDefined()
+  await expectEvent(complete, "rcvFileComplete")
   expect(readFileSync(copy).length).toBe(fileSize)
 
   const key = join(dir, "send-file", "id_ed25519")
@@ -541,5 +542,5 @@ test("--display-name names the profile and the agent control chat", async () => 
   await agent.start({displayName: "Ridge Scout"})
   expect(agent.server.user.profile.displayName).toBe("Ridge Scout")
   expect((await controlGroupOf(agent.server.chat, agent.server.user.userId)).groupProfile.displayName).toBe("Ridge Scout")
-  expect(await renamed).toBeDefined()
+  await expectEvent(renamed, "groupUpdated")
 }, 600_000)

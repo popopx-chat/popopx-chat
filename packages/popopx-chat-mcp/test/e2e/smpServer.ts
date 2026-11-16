@@ -65,7 +65,7 @@ async function startServer(kind: ServerKind): Promise<SmpServer> {
   writeFileSync(join(configDir, "fingerprint"), `${fingerprint}\n`)
   writeFileSync(join(configDir, kind.ini), kind.config(port, dir))
   // The relay's diagnostics go to its stdout/stderr (lc_file = Nothing, and this ini
-  // disables the store log), so they have to land in a file to survive the cleanup.
+  // disables the store log), so they have to land in a file to survive the cleanup - see failedTests.
   const logFile = join(dir, "relay.log")
   const executable = await serverExecutable(kind)
   const logs = openSync(logFile, "w")
@@ -152,12 +152,16 @@ function relayLog(kind: ServerKind, logFile: string, server: ChildProcess): stri
   return `${kind.name} ${state}, ${lines.length} log line(s) from ${logFile}${lines.length > tail.length ? ` - last ${tail.length}` : ""}:\n${tail.join("\n")}`
 }
 
+// Jest 30 exposes no failure counter to the sandbox - expect.getState().numFailedTests is undefined
+// inside a test and in every hook - so helpers.ts marks relay-dependent failures here instead.
+let relayFailureMarked = false
+
+export function markRelayFailure(): void {
+  relayFailureMarked = true
+}
+
 function failedTests(): boolean {
-  try {
-    return expect.getState().numFailedTests > 0
-  } catch (e) {
-    return false
-  }
+  return relayFailureMarked
 }
 
 function canConnect(port: number): Promise<boolean> {
