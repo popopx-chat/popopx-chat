@@ -72,10 +72,12 @@ summary:
    `_version.py`) all spell it — a fork there does not fail, it downloads upstream's `libsimplex` into a
    POPOPX package and reports success. The digest *values* in those pins still describe upstream's
    builds; the next `packages_release.py prepare` rewrites them, and that is also the first run that can
-   resolve a release published under these names, because `popopx-chat-libs` has no releases yet. Until
-   then `release-status`/`download` against our repository returns nothing, which is the correct failure:
-   `release_digests` requires every asset of the tag to be present, so a half-published release is
-   refused rather than silently pinned.
+   resolve a release published under these names, because `popopx-chat-libs` had no releases when this was
+   written. Measured 2026-11-16 it hosts two, and they are not enough for this script: `release_status`
+   (`:251`) now answers `published` for both of those tags, while `release_digests` (`:228`) still returns
+   nothing because it requires *every* asset of `LIBS_ASSETS` (`:101`) / `ADDON_ASSETS` (`:117`) to be present
+   — so `download_asset` (`:961`) exits "is not published with a digest" and `prepare` cannot pin from a
+   half-published release. That refusal is the correct behaviour, not a second bug.
 
 7. **References to the SMP dependency** (2026-11-13) — 144 of the 446 `simplexmq` occurrences became
    `popopxmq`: the contributor instructions (`docs/CONTRIBUTING.md` and its `pl` translation,
@@ -388,17 +390,18 @@ yet. Before any build of this fork is distributed:
   servers do not have access to this information" about relays this fork does not operate.
   `SUPPORT_EMAIL` is already `chat@popopx.chat`, which is itself not yet reachable (first bullet) - which is
   why the front page routes the fork's own questions to the GitHub issue tracker instead.
-- **`popopx-chat-libs` has published no releases yet.** The asset names and the source they are fetched
-  from are ours (item 6 above), so nothing in this repository can resolve a `core-<version>` release
-  today: the fork carries the build inputs and `releases.toml`, and its Releases list is empty. The first
-  one has to come from our own CI, and that publish is also what rewrites the pinned digests in
+- **`popopx-chat-libs` had published no releases at all until 2026-11-16.** The asset names and the source
+  they are fetched from are ours (item 6 above), so nothing in this repository could resolve a
+  `core-<version>` release: the fork carries the build inputs and `releases.toml`, and its Releases list was
+  empty. The first one has to come from our own CI, and that publish is also what rewrites the pinned digests in
   `release.ts`, `dist/release.js` and `_version.py` — until it does, those dictionaries still record
   upstream's build, under our names. Measured 2026-11-14, that last clause is now arithmetic rather than
   inference: **all 17 pinned digests equal upstream's asset digests byte for byte** — the 11 of
   `release.ts:8-18` are the tags `core-7.1.0.20` (6 zips) and `nodejs-addon-cce06d8` (5 `.node`) of
   `simplex-chat/simplex-chat-libs`, the 6 of `_version.py:10-15` are its tag `core-7.1.0.14` — while
-  `popopx-chat/popopx-chat-libs` has 0 releases (`gh release list`). So a `pip`/`npm` install of the native
-  backend 404s, and what 404s is the **name**: `3591a7eba` renamed the asset keys across 44 occurrences in
+  `popopx-chat/popopx-chat-libs` had 0 releases then (`gh release list`); it has two now, each with a single
+  asset, so a `pip`/`npm` install of the native backend still 404s everywhere except the one pair the CI
+  e2e fetches (below). What 404s is the **name**: `3591a7eba` renamed the asset keys across 44 occurrences in
   code (`packages_release.py:102-107`+`:119`, the two fetchers `_native.py:92-96`/`libs.ts:68,71`, both pin
   dictionaries, the four test mirrors, `package-tests.sh:49`) and left the digests where they were, which is
   the one-sided-rename class with a third end a commit cannot move — the host holding the bytes. Two facts
@@ -407,6 +410,28 @@ yet. Before any build of this fork is distributed:
   `check-pins` would print `core-7.1.0.20 is not published`, but it is an **absent** guard here, because
   `packages.yml` runs only on pull requests and has never run on this fork, and the script needs
   Python ≥ 3.11 for `import tomllib` where this machine has 3.9.6.
+  **The linux pair was mirrored on 2026-11-16** (ruling: upstream's bytes, our names), so the two tags
+  `release.ts` names now exist here as published releases of one asset each, both tagged on -libs `master`
+  (`4d00516afe27fa83d4e532ce5f918e7d1f9576b2`):
+  `core-7.1.0.20` → `popopx-chat-libs-linux-x86_64.zip`, 47,719,648 B,
+  `3080a41272f9ca1b670b0faf9bfc67919d0dc0e82defaebb423e1aae1f327af3`;
+  `nodejs-addon-cce06d8` → `popopx-chat-nodejs-linux-x86_64.node`, 163,288 B,
+  `fda77e39a5d38b1132a6a04ef9f9cd2c939a429e709f28c81c3777684ba73603`. Both digests are the pinned ones,
+  checked twice: on the bytes downloaded from upstream before the upload, and again on an anonymous `curl`
+  of the `browser_download_url` afterwards. **No pin was rewritten** - which was the alternative, and the
+  unverifiable one, since `libs.ts:206-208` only fails the install when the hash matches upstream's build.
+  The content is upstream's own and says so: the archive still holds `libs/libsimplex.so` (64,653,952 B)
+  and `libHSsimplexmq-7.1.0.16-…-ghc9.6.3.so` among its 165 `libHS*.so`, and the add-on has 240 `simplex`
+  strings against 0 `popopx`, including the mangled symbols of the C++ `simplex::` namespace
+  (`_ZN7simplex8Receiver…`) - so each release body states that the bytes are SimpleX Chat Ltd's and that
+  the POPOPX file name is a hosting convenience. That is the rule this fork follows for content belonging
+  upstream. What the mirror does **not** close: the other 9 `release.ts` assets and all 6 `_version.py`
+  ones are still unhosted, so every non-linux install still 404s, and `check-pins`/`prepare` still cannot
+  pin from this repo because `release_digests` requires every asset of the tag (item 6). It is a hosting
+  act, not the fork's publish lane running - the two switches below stay unprovisioned. **One new
+  hazard:** these tags are not in the inherited `releases.toml`, so the lane's accounting does not know
+  they exist; if `release.ts` is ever re-pinned to a build of ours, the mirrored tags stay behind as
+  published releases of upstream bytes under a `core/master` version the record never claimed.
   **Ruled 2026-11-14: this is not a naming question and not a separate change — it closes with our first
   published release (#56).** Renaming the keys back to `simplex-chat-*` was rejected, because `build.yml`
   builds and reads a `popopx-chat-libs-<platform>` artifact of its own (`:491`, `:984`, `:1274`, `:1583`, read
