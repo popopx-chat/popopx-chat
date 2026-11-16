@@ -237,7 +237,10 @@ class AppLinkSchemeTest {
     val otherProgId = windowsProgIdValues("popopxchat", otherCopy).associate { (it.key to it.name) to it.value }
     val shell = FakeWindowsShell(user = otherProgId.toMutableMap())
     registerWindowsSchemes(windowsExe, shell)
-    assertTrue(shell.writes.none { it.key.contains("popopxchat") }, "links picked for the other copy keep reaching it: neither its ProgId nor the scheme is taken")
+    // The app link scheme is named by its registry keys, not by a substring of them: the Capabilities key
+    // com.popopxchat.popopx also names the scheme, and the connection link scheme writes to it legitimately.
+    val appLinkValues = (otherProgId + windowsSchemeValues("popopxchat", windowsExe).associate { (it.key to it.name) to it.value }).keys
+    assertTrue(shell.writes.none { (it.key to it.name) in appLinkValues }, "links picked for the other copy keep reaching it: neither its ProgId nor the scheme is taken")
   }
 
   @Test
