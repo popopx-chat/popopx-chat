@@ -103,6 +103,21 @@ trade mark sits outside the copyright licence — and upstream's byte-identical 
 nothing to grant. `ASSETS_LICENSE-POPOPX.md` was rewritten first, then `NOTICE`, `README.md`,
 `TRADEMARK-POPOPX.md`, `AGPL-COMPLIANCE-POPOPX.md` §4, `branding/source-svg/README.md` and `FORK.md`.
 
+### The sponsor entries are gone from both repositories (2026-11-16, ruling 「删掉两个仓库的 FUNDING.yml」)
+
+`.github/FUNDING.yml` declared `github: simplex-chat` and `open_collective: simplex-chat` — upstream's
+funding address on the front page of a repository that is not upstream's and whose README disclaims any
+affiliation with them. Measured on the rendered repository page, GitHub was displaying no sponsor
+affordance from the file (`"showSponsorButton": false`, `"sponsors": false`), so it moved no money; it
+only asserted a relationship, which is the sort of claim that starts being visible without anybody
+changing it. Removed rather than repointed: this fork's organization has no sponsor program to point at
+(`/sponsors/popopx-chat` falls back to the organization page, no tiers), and the precedent is this fork's
+own 2026-11-13 deletion of the AppStream `<url type="donation">` elements — a funding entry has no slot
+to say whose funds they are — and `FORK.md` item 12, by which this fork deleted its own crowdfunding
+funnel rather than relabel it. Donating to upstream is still described, in words, with the recipient named,
+in `README.md`; that section is upstream's copy and this fork receives none of it. `popopxmq` deleted its
+copy under the same ruling, recorded in that repository's NOTICE.
+
 Everything below is a **name and identity** change. Nothing in this list alters the protocol, the
 cryptography or the wire format.
 
