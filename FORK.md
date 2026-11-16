@@ -606,20 +606,20 @@ yet. Before any build of this fork is distributed:
   `simplex-chat/simplex-chat-libs`, the 6 of `_version.py:10-15` are its tag `core-7.1.0.14` — while
   `popopx-chat/popopx-chat-libs` had 0 releases then (`gh release list`). How many it has is a query, not a
   fact to keep: `gh api repos/popopx-chat/popopx-chat-libs/releases --jq '.[] | .tag_name'` read **three**
-  tags on 2026-11-16 (tip `012ec8373`), and `packages_release.py:602` (`libs_repository()`) asks that same
+  tags on 2026-11-16 (tip `012ec8373`), and `packages_release.py:603` (`libs_repository()`) asks that same
   repository by default, so the 404 this
   sentence described is closed at the host. What 404ed was the **name**: `3591a7eba` renamed the asset keys —
   `git grep -o 'popopx-chat-libs-\|popopx-chat-nodejs-' -- ':!FORK.md' ':!CHANGELOG-POPOPX.md' ':!POPOPX-REBRAND-PLAN.md' | wc -l`
   reads **52** occurrences in 12 files today (44 when first written; the set grew with the mirrors, and this
   paragraph quotes the prefix, so a recount taken after reading it runs higher) —
-  `packages_release.py:102-107`+`:117`, the two fetchers `_native.py:92-96`/`libs.ts:68,72`, both pin
+  `packages_release.py:103-108`+`:118`, the two fetchers `_native.py:92-96`/`libs.ts:68,72`, both pin
   dictionaries, the four test mirrors, `package-tests.sh:49` — and left the digests where they were, which is
   the one-sided-rename class with a third end a commit cannot move — the host holding the bytes. Two facts
   make this a documented gap rather than an outage: nothing is published to npm or PyPI from this fork either
   (next bullet — no `NPM_SCOPE`/`PYPI_*` variables), so only an install from our own tree reaches it; and
   `check-pins` used to be the sentence that would print `core-7.1.0.20 is not published` here (`pin_problems`,
-  `packages_release.py:288`); it is an **absent** guard either way, and that half is still what a command
-  shows: `packages.yml` runs only on pull requests and has never run on this fork, and
+  `packages_release.py:289`); that half was an **absent** guard until 2026-11-17, when `check-pins` gained the
+  ledger rule and a scope that runs it (see "The ledger is ours now" below), and what a command showed here is: `packages.yml` runs only on pull requests and has never run on this fork, and
   `python3 scripts/ci/packages_release.py check-pins` dies before its first API call on this machine —
   `ModuleNotFoundError: No module named 'tomllib'` at `packages_release.py:35`, Python 3.9.6, measured
   2026-11-16, with no interpreter ≥ 3.11 installed here.
@@ -674,8 +674,9 @@ yet. Before any build of this fork is distributed:
   the three `if: env.release_branch` steps (`:195` `Library release`, `:224` `Add-on release`, `:255` `Versions
   to publish`) execute on a push to master for the first time, and `Library release` failed every push since:
   `claim-core` compares our generated types against the commit recorded for the highest `core/master` version in
-  the -libs `releases.toml`, which is still *upstream's* (`7.1.0.19 = edb783a5…`), and the same inherited file
+  the -libs `releases.toml`, which was then *upstream's* (`7.1.0.19 = edb783a5…`), and the same inherited file
   records upstream's published `@simplex-chat/types` version - so it exits as if we had released those bytes.
+  Both files moved on 2026-11-17; see "The ledger is ours now" two bullets below.
   What keeps the lane inert now is two provisioning switches, each of which exits 0 with a `::notice` while
   unconfigured, so the test matrix runs instead of the job aborting:
   - `secrets.NODEJS_REPO_TOKEN` gates `Library release` and `Add-on release` — a token with release write on
@@ -687,8 +688,43 @@ yet. Before any build of this fork is distributed:
     that starts the `publish` and `record` jobs. Left unguarded it would emit `nodejs_version`/`python_version`
     for versions that are genuinely unpublished here, and those jobs would run to a publish that has no
     credential behind it.
-  Provisioning the first switch also requires moving `packages/popopx-chat-client/types/typescript/package.json`
+  Provisioning the first switch also required moving `packages/popopx-chat-client/types/typescript/package.json`
   out of upstream's published version set, because `claim-core` reads that field as the thing being released.
+  That move is done — next bullet.
+- **The ledger is ours now; the pins are the last thing that is not (2026-11-17, rulings "2 选(b) 重置成我们自己的空账",
+  "3 版本 设置 7.1.0-beta.9.2", "4 删掉", "B 真修").**
+  - `popopx-chat-libs/releases.toml` is a comments-only file as of commit `2b5e7046c82a0bc20070500ff50f372fd00095ab`
+    (blob `3294f7304928484cb4950a178316227c8f37ae6e`): no `[core.master]` entry, so **nothing** is recorded as published
+    by this repository. The inherited history stays retrievable as blob `aa35f4beaf6eee7a84fcad7411ea00c3c9f903ba`
+    (23 lines, 1030 B — `[core.master]` reaching `7.1.0.19 = edb783a5…`, plus upstream's `[npm.*]`/`[pypi.*]` tables).
+    `record_releases()` rewrites the file from the parsed table, so those comments do not survive the first recorded release.
+  - Why the version had to move: the blocker was never the ledger contents. `claim-core` → `types_problem` →
+    `npm_released("@simplex-chat/types", "7.1.0-beta.9.1")`, and the registry answers **200** for that exact version
+    (upstream's `beta` dist-tag; `7.1.0-beta.9.2` answers **404**), so the step exited as if we had published upstream's
+    artifact. `7.1.2.0` in `popopxChatCore` already matched `popopx-chat.cabal:8`, so the version was the only value in reach.
+  - What that one line does **not** touch: the dependents keep `^7.1.0-beta.9.1` — 8 occurrences in 5 files before, **7 in 4**
+    after the source `package.json:3` moved (`packages/popopx-chat-mcp/package.json:27` with its lock at `:14`/`:1487-1488`/`:4289`,
+    `packages/popopx-chat-nodejs/package.json:27`, `packages/popopx-chat-mcp/PLAN.md:129`). Those name the npm artifact
+    *upstream* published and `npm ci` resolves from the registry, `^7.1.0-beta.9.1` still accepts the source package, and
+    `scope-tests.sh` consumes the types source by path (`npm install … ../popopx-chat-client/types/typescript`), not by version.
+  - The guard that was missing: `check-pins` compared the pinned digests against *whatever release hosts the tag*, so a copy
+    of someone else's bytes passed it. It now also demands that each pinned `core-<version>` be recorded —
+    `recorded_pin_problems()` at `packages_release.py:783`, called from `check_pins()` at `:966` — because only the ledger says
+    who built the bytes. At this branch tip it fails on purpose: the pins still name `core-7.1.0.20`, which is hosted and unrecorded.
+    Measured against the live repository it reports two problems and no digest mismatch —
+    `core-7.1.0.20` (nodejs) and `core-7.1.0.14` (`_version.py:8`, an older mirror the two files disagree about), both `draft=false`.
+    The blind spot left is the add-on pin: `record` accepts only `--types/--nodejs/--mcp/--python` and `claim-core` writes only `core/<branch>`,
+    so a `nodejs-addon-<hash>` tag has no ledger entry to be judged against and `recorded_pin_problems` passes it by design.
+  - The lane that runs it: `check-pins` used to execute only inside `publish`, which starts on a planned package release. It is the
+    `libs-pins` scope now (`SCOPE_CHANGES` at `packages_release.py:86`, `scripts/ci/scope-tests.sh:14-16`), so `Test changed scopes`
+    runs it for any push or pull request changing `packages/popopx-chat-nodejs/src/release.ts` or
+    `packages/popopx-chat-python/src/simplex_chat/_version.py`; those two globs joined `build.yml`'s `pull_request` paths because
+    `test_build_yml_runs_for_the_paths_of_its_builds` requires the list and the tables to be the same set. Neither that test nor the
+    new `test_a_pinned_core_release_must_be_recorded` has been run here — this machine has no python ≥ 3.11 (see the `tomllib`
+    paragraph above), so CI is the only proof.
+  - Order of what is left: `secrets.NODEJS_REPO_TOKEN` (the user provisions it) → the lane publishes `core-7.1.2.0` and the add-on and
+    records them → both pin files re-derived from GitHub's own asset digests in one commit → only then delete the three mirror releases
+    (ruling "4 删掉"), because deleting first would leave the pins naming a 404 with no path back to green.
 - **macOS distribution cannot be produced from this machine, and the Team ID in our code has no identity
   here.** Measured 2026-11-14: `security find-identity -v -p codesigning` lists exactly one identity,
   `Apple Development: gang sun (RG6JMG38C8)` — a development certificate for a *different* team than the

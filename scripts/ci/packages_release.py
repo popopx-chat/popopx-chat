@@ -7,7 +7,7 @@ release-status    print whether a release of popopx-chat-libs is published, a dr
 addon-release     print the add-on release of the current add-on sources
 latest-libs       print the newest published library release
 publish-release   publish a draft release that has every asset
-check-pins        check the pins of the packages against the published releases
+check-pins        check the pins of the packages against the published releases and the recorded core versions
 download          download a release asset and check its digest
 download-pinned   download a pinned asset and check its pin
 changes           print whether the changes since a commit touch the chat core, the add-on, each build of build.yml and each scope of scope-tests.sh
@@ -83,6 +83,7 @@ BUILD_CHANGES = {
 SCOPE_CHANGES = {
     "badge-web": ["apps/popopx-badge-service/web/**"],
     "ci-scripts": ["scripts/ci/packages_release.py", "scripts/ci/test_packages_release.py"],
+    "libs-pins": [RELEASE_FILE, PYTHON_VERSION_FILE],
     "mcp": [
         "packages/popopx-chat-mcp/**",
         "packages/popopx-chat-nodejs/**",
@@ -779,6 +780,16 @@ def published_pin_problems(pins: Pins) -> list[str]:
     return pin_problems(pins, {tag: github_release(tag) for tag in pinned_tags(pins)})
 
 
+def recorded_pin_problems(pins: Pins, releases: dict) -> list[str]:
+    """Pinned core releases this repository did not record; a mirror matches its own digests, only the ledger says who built them."""
+    problems = []
+    for tag in pinned_tags(pins):
+        version = core_version(tag)
+        if version and recorded_core_commit(releases, version) is None:
+            problems.append(f"{tag} is not recorded in {RELEASES_FILE} of {libs_repository()}")
+    return problems
+
+
 def prepare(args: argparse.Namespace) -> None:
     packages = frozenset(args.packages or ["nodejs", "python"])
     branch = args.branch or current_branch()
@@ -952,7 +963,10 @@ def publish_release(tag: str) -> None:
 
 def check_pins() -> None:
     _, python_pins = parse_python_version(read_text(PYTHON_VERSION_FILE))
-    problems = published_pin_problems(parse_release(read_text(RELEASE_FILE))) + published_pin_problems(python_pins)
+    releases, _ = read_releases()
+    problems = []
+    for pins in (parse_release(read_text(RELEASE_FILE)), python_pins):
+        problems += published_pin_problems(pins) + recorded_pin_problems(pins, releases)
     if problems:
         sys.exit("\n".join(problems))
     print("the pins match the published releases")

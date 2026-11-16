@@ -38,6 +38,8 @@ on:
       - "scripts/ci/packages_release.py"
       - "scripts/ci/test_packages_release.py"
       - "packages/popopx-chat-mcp/**"
+      - "packages/popopx-chat-nodejs/src/release.ts"
+      - "packages/popopx-chat-python/src/simplex_chat/_version.py"
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
     inputs:

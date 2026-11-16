@@ -55,6 +55,7 @@ from packages_release import (
     publish_plan,
     record_releases,
     recorded_commit,
+    recorded_pin_problems,
     release_status,
     render_releases,
     dist_tag,
@@ -740,6 +741,12 @@ class ReleasesTest(unittest.TestCase):
         self.assertEqual(
             pin_problems(pins, {**published, "nodejs-addon-1111111": None}), ["nodejs-addon-1111111 is not published"]
         )
+
+    def test_a_pinned_core_release_must_be_recorded(self):
+        pins = Pins("core-7.1.0.11", {**digests(LIBS_ASSETS, 1), **digests(ADDON_ASSETS, 2)}, "nodejs-addon-1111111")
+        unrecorded = f"core-7.1.0.11 is not recorded in {packages_release.RELEASES_FILE} of {packages_release.libs_repository()}"
+        self.assertEqual(recorded_pin_problems(pins, {}), [unrecorded])
+        self.assertEqual(recorded_pin_problems(pins, {"core": {"master": {"7.1.0.11": "a"}}}), [])
 
 
 class PublishReleaseTest(unittest.TestCase):

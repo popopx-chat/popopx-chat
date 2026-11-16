@@ -1,6 +1,6 @@
 {
   "name": "@simplex-chat/types",
-  "version": "7.1.0-beta.9.1",
+  "version": "7.1.0-beta.9.2",
   "popopxChatCore": "7.1.2.0",
   "description": "TypeScript types for POPOPX Chat bot libraries",
   "main": "dist/index.js",

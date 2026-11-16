@@ -11,6 +11,9 @@ case "${1:-}" in
   ci-scripts)
     python3 scripts/ci/test_packages_release.py
     ;;
+  libs-pins)
+    python3 scripts/ci/packages_release.py check-pins
+    ;;
   mcp)
     (cd packages/popopx-chat-client/types/typescript && npm install --no-audit --no-fund && npx tsc)
     (cd packages/popopx-chat-nodejs && npm install --ignore-scripts --no-save --no-audit --no-fund ../popopx-chat-client/types/typescript && npx tsc && cp src/popopx.* dist)
