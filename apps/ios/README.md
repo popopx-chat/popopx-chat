@@ -110,5 +110,5 @@ cd path/to/assets && ./resize.sh
 
 Configured in Info.plist:
 - Background modes: audio, fetch, remote-notification, voip
-- URL scheme: `simplex://` for deep linking
+- URL schemes: `popopx://` for connection links, `popopxchat://` and `simplexchat://` for app links
 - BGTaskScheduler: `com.popopxchat.popopx.receive`

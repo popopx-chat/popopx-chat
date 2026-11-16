@@ -44,7 +44,7 @@ cabal run simplex-directory-service -- <flags>
 ```sh
 simplex-directory-service --run-cli --super-users 999:nobody --database /path/to/db
 # on startup the bot prints (and, unless --no-address, creates) its contact address:
-#   "Bot's contact address is: simplex:/contact#..."
+#   "Bot's contact address is: popopx:/contact#..."
 # connect to it from your POPOPX Chat app, then in the bot terminal:
 /contacts           # lists connected contacts by name
 /i alice            # shows full info for contact "alice", including their contact ID

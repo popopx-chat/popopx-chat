@@ -80,7 +80,7 @@ Input:
 
 | Field | Type | Range | Default | Rule |
 |---|---|---|---|---|
-| `target` | string | 1 character or more | required | SimpleX link (`https://...`, `simplex:/...`), contact name `@name.simplex` or channel name `#name.simplex`; whitespace refused |
+| `target` | string | 1 character or more | required | SimpleX link (`https://...`, `popopx:/...`), contact name `@name.simplex` or channel name `#name.simplex`; whitespace refused |
 | `incognito` | boolean | | `false` | `true`: the join methods take `incognito` true |
 | `message` | string | 1 to 2000 characters | | first message of a contact request; plans with `takesMessage` only |
 | `wait` | number | 0 to 86400 | 60 | seconds from the approval: for the other side to accept and, with `message`, for its first reply |

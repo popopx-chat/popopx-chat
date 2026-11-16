@@ -37,7 +37,7 @@ def rts_args():
 
 def find_address(text):
     for token in text.split():
-        if token.startswith("https://") or token.startswith("simplex:"):
+        if token.startswith("https://") or token.startswith("popopx:"):
             return token
     return None
 
