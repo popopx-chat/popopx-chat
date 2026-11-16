@@ -125,8 +125,14 @@ broken independently of any naming question: `scripts/relay/Dockerfile` fetched
 2026-11-12** and never could have produced the binary `entrypoint.py` names. `a51c59355` points both
 at this repository, pinned to a recorded master commit. Verified statically, and stated as such:
 `executable popopx-chat`, `flag client_postgres`, `scripts/cabal.project.local.linux` and all ten
-switches the entrypoint passes exist at that pin; no `docker build` was run, and the pin came from the
-locally recorded `origin/master` because neither egress path reached GitHub while this was written.
+switches the entrypoint passes exist at that pin; no `docker build` was run. The pin came from the locally
+recorded `origin/master` while both egress paths were down, and was confirmed once direct egress answered:
+`git ls-remote origin refs/heads/master` returns `967cd6e88ae1e88eaa4078ecc4fa9aa07f4fe317`, so the pinned
+commit is this repository's live master tip. The same probe re-measured the publishing blockers for #82 -
+`gh secret list` and `gh variable list` are empty for both `popopx-chat/popopx-chat` and
+`popopx-chat/popopx-chat-libs`, while that second repository now answers `gh release list` with the two
+mirrored releases (`core-7.1.0.20`, `nodejs-addon-cce06d8`), which is why the MCP end-to-end job fetches its
+backend from us rather than 404ing.
 
 The phrase tier that followed moved 59 of the 64 `SimpleX link` occurrences - the other 5 are records
 (`CHANGELOG-POPOPX.md` 3, `CHANGELOG.md` 1, the AppStream release note in
@@ -163,10 +169,14 @@ the recorded database migration name `20260603_simplex_name` - 3 in each `Migrat
 string, so it does not move. 2 more are `POPOPX-REBRAND-PLAN.md`'s protected-literal list, and the last 6
 are the two paragraphs above quoting it.
 
-Nothing here was compiled by CI and nothing was pushed: GitHub was unreachable on both egress paths,
-so the Haskell side rests on the local generator run above and on string-only diffs, the iOS and Kotlin
-document edits need no build, and the Android/desktop legs remain static verification as elsewhere in
-this section.
+Nothing here was compiled by CI and nothing was pushed: neither egress path reached GitHub while these
+edits were made (direct answered again near the end, the proxy never did), and no push was authorized, so
+the Haskell side rests on the local generator run above and on a real compile -
+`cabal build test:popopx-chat-test` rebuilt and linked the test executable, which is what compiles every
+module this tier edited (`Preferences.hs`, the directory service, its three mirrors, `MarkdownTests.hs`,
+`Profiles.hs`, `Commands.hs` and `Test.hs`). The iOS and Kotlin document edits need no build, and the
+Android/desktop legs remain static verification as elsewhere in this section. CI proof of the whole tip
+awaits a push.
 
 
 ### The rest of the name/address tier, and the one unit only a rendered-text run could prove (2026-11-15, rulings 必改 the rest + 需要确认的按照建议进行)

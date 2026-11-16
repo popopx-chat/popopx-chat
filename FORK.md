@@ -239,11 +239,13 @@ each was meant to become That pass also repaired a compile break this fork shipp
     `CHAT_REF` untouched. The relay image has therefore been unbuildable since 2026-11-12, and
     `docker-compose.yaml:8` defaulted `CHAT_REF` to the same commit, so neither path worked. Both now name this
     repository and are pinned to a recorded master commit that does declare the executable (`a51c59355`). Stated
-    as statically verified, because that is all it was: no `docker build` was run here, the pin came from the
-    locally recorded `origin/master` since neither egress path reached GitHub, and the checks were that
+    as statically verified, because that is all it was: no `docker build` was run here, and the checks were that
     `executable popopx-chat` and `flag client_postgres` are declared at that commit, that
     `scripts/cabal.project.local.linux` exists there, and that all ten switches `entrypoint.py` passes are
-    parsed there. The pin must be bumped by whoever advances a deployment.
+    parsed there. The pin was first read from the locally recorded `origin/master` because neither egress path
+    reached GitHub; it was confirmed against the remote the same day, when direct egress answered
+    `967cd6e88ae1e88eaa4078ecc4fa9aa07f4fe317 refs/heads/master` - the pinned commit is the live master tip. The
+    pin must still be bumped by whoever advances a deployment.
 
     The naming tier that ran after it moved the phrase "SimpleX link", 59 of its 64 occurrences: `f2a262472` the
     directory service's group notice with its three verbatim test mirrors and five hspec titles, `5932bccee` the
