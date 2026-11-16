@@ -18,6 +18,6 @@
   <li><strong>Decentralized network</strong>: you can use POPOPX with your own servers and still communicate with people using the servers that are pre-configured in the apps or any other servers running the SimpleX Messaging Protocol.</li>
 </ul>
 <p>You can connect to anybody you know via link or scan QR code (in the video call or in person) and start sending messages instantly - no emails, phone numbers or passwords needed.</p> 
-<p>Your profile and contacts are only stored in the app on your device - our servers do not have access to this information.</p>
-<p>All messages are end-to-end encrypted using open-source double-ratchet protocol; the messages are routed via our servers using open-source SimpleX Messaging Protocol.</p>
-<p>Please send us any questions via the app (connect to the team via settings!), <a href="mailto:chat@popopx.chat?subject=POPOPX Chat on F-Droid">email us</a> or submit an <a href="https://github.com/popopx-chat/popopx-chat/issues" target="_blank">issue on GitHub</a>.</p>
+<p>Your profile and contacts are only stored in the app on your device - the relays your app talks to never see them, and POPOPX operates no relays of its own.</p>
+<p>All messages are end-to-end encrypted using open-source double-ratchet protocol; the messages are routed via the relays your app is configured to use, over the open-source SimpleX Messaging Protocol.</p>
+<p>Ask about this build in the <a href="https://github.com/popopx-chat/popopx-chat/issues" target="_blank">issue tracker</a>, or email chat@popopx.chat. The in-app option to connect to the development team opens a contact that lives on SimpleX Chat Ltd's relay - it is upstream's team, not this fork's maintainers.</p>

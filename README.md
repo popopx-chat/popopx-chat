@@ -58,9 +58,9 @@ If you are interested in helping with the open-source language model integration
 
 ## Join user groups
 
-You can find the groups created by users in [SimpleX Directory](https://popopx.chat/directory/). It is also available as [SimpleX bot](https://smp4.simplex.im/a#lXUjJW5vHYQzoLYgmi8GbxkGP41_kjefFvBrdwg-0Ok) that allows to add your own groups and communities to the directory. We are not responsible for the content shared in these groups.
+Groups are listed in the SimpleX Directory, which is **SimpleX Chat Ltd's** service - [its contact on `smp4.simplex.im`](https://smp4.simplex.im/a#lXUjJW5vHYQzoLYgmi8GbxkGP41_kjefFvBrdwg-0Ok) is also a bot you can use to add your own group. This fork operates no directory and moderates nothing in it, so nobody here is answerable for what those groups share.
 
-**Please note**: The groups below are created for the users to be able to ask questions, make suggestions and ask questions about POPOPX Chat only.
+**Please note**: the groups below are SimpleX Chat Ltd's community groups, on relays that company operates. They are the right place for questions about the SimpleX network and protocol; they cannot be expected to answer about a POPOPX Chat build, which belongs in the [issue tracker](https://github.com/popopx-chat/popopx-chat/issues).
 
 You can join an English-speaking users group if you want to ask any questions: [#SimpleX users group](https://smp4.simplex.im/g#hr4lvFeBmndWMKTwqiodPz3VBo_6UmdGWocXd1SupsM)
 
@@ -375,19 +375,17 @@ The implementation security assessment of SimpleX cryptography and networking wa
 
 The cryptographic review of SimpleX protocols was done in July 2024 by Trail of Bits.
 
-POPOPX Chat is still a relatively early stage platform (the mobile apps were released in March 2022), so you may discover some bugs and missing features. We would really appreciate if you let us know anything that needs to be fixed or improved.
+POPOPX Chat is a fork of a relatively early stage platform - the upstream mobile apps were released in March 2022, this fork published its own first binaries in November 2026 - so you may discover bugs and missing features. We would really appreciate if you let us know anything that needs to be fixed or improved.
 
-The default servers configured in the app are provided on the best effort basis. We are currently not guaranteeing any SLAs, although historically our servers had over 99.9% uptime each.
+The relays this app presets are operated by **SimpleX Chat Ltd**, on a best-effort basis, and their conditions are the ones the app asks you to accept. POPOPX operates no relays, so it makes no availability promise about either: the uptime figures that used to sit in this paragraph were upstream's, about upstream's servers.
 
-We have never provided or have been requested access to our servers or any information from our servers by any third parties. If we are ever requested to provide such access or information, we will be following due legal process.
+Whether a relay logs IP addresses or correlates traffic is a property of whoever operates the relay you use - for the presets that is SimpleX Chat Ltd, and their [privacy policy](./PRIVACY.md) and transparency reports are the record of that. This fork runs no relay, so it can neither make that claim nor contradict it. If transport-level security matters to you, use Tor or a similar network, and [point the app at a relay you trust](https://popopx.chat/docs/server.html).
 
-We do not log IP addresses of the users and we do not perform any traffic correlation on our servers. If transport level security is critical you must use Tor or some other similar network to access messaging servers. We will be improving the client applications to reduce the opportunities for traffic correlation.
-
-Please read more in [Privacy Policy](./PRIVACY.md).
+This fork's own statement about what it collects is [PRIVACY-POPOPX.md](./PRIVACY-POPOPX.md). [PRIVACY.md](./PRIVACY.md) is SimpleX Chat Ltd's, kept here unmodified because their relays are what the app is configured to use.
 
 ## Security contact
 
-POPOPX Chat does not publish a security policy yet - report vulnerabilities to the team in the app (see [Connect to the team](#connect-to-the-team)). We will coordinate the fix and disclosure.
+Report a vulnerability in a POPOPX Chat build to **chat@popopx.chat**; the policy for it is published at [popopx.chat/security/](https://popopx.chat/security/), which is upstream's text carrying our report address and no encryption key, because POPOPX publishes none. Mail delivery to that address is **not verified** - no MX record is published for `popopx.chat` - which is recorded, not hidden, under "Contact" in [PRIVACY-POPOPX.md](./PRIVACY-POPOPX.md). We will coordinate the fix and disclosure.
 
 Please do NOT report security vulnerabilities via GitHub issues.
 

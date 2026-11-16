@@ -59,6 +59,33 @@ Documentation only: no `src/**`, no build file, no asset and no wire value chang
   `ntf3.simplex.im` / `ntf4.simplex.im`. Each was found the same way - the assertion was re-derived from
   the host or the source that has to back it.
 
+- **Store and package copy that spoke as the operator of someone else's relays.** Four user-facing
+  descriptions - `README.md`'s disclaimers, `fastlane/.../full_description.txt`, the desktop
+  `com.popopxchat.popopx.appdata.xml`, `scripts/flatpak/com.popopxchat.popopx.metainfo.xml` - carried
+  SimpleX Chat Ltd's operator statements in this fork's first person: "historically our servers had
+  over 99.9% uptime each", "we have never provided ... access to our servers", "we do not log IP
+  addresses ... on our servers", "your profile and contacts ... our servers do not have access",
+  "routed via our servers". POPOPX operates no relay, so not one of those is this fork's to assert -
+  and one of them was not even English any more: the AppStream copy had been swept into
+  "**POPOPX** Messaging Protocol", a protocol that does not exist. Each now names the operator
+  (`SimpleX Chat Ltd` for the presets, "whoever runs the relay you use" for the logging claim), routes
+  POPOPX questions to this repository's issue tracker, and says so where the sentence used to promise
+  an answer ("report vulnerabilities to the team in the app" - the in-app team contact is upstream's,
+  held at four `HOLD (task #66)` sites pending our own relay). Gates, scoped so the records quoting
+  these strings do not measure themselves: `git grep -n 'POPOPX Messaging Protocol' -- . ':!FORK.md'
+  ':!CHANGELOG-POPOPX.md'` → 0 (unscoped: 2, the record itself); `git grep -n 'our servers' --
+  apps/multiplatform/desktop scripts/flatpak fastlane` → 0 (HEAD: 6); `git grep -n '99\.9\|never
+  provided or have been requested\|do not log IP' -- README.md` → 0. Both AppStream files re-parsed
+  with `xml.dom.minidom` after the edits.
+- **`README.md` also denied having a security policy** while this fork publishes one at
+  [popopx.chat/security/](https://popopx.chat/security/) - and sent vulnerability reports "to the team
+  in the app", i.e. to SimpleX Chat Ltd's contact. It now gives **chat@popopx.chat**, states plainly
+  that no OpenPGP key is published for it, and states plainly that **no MX record exists for
+  `popopx.chat`**, which means this fork currently has no *confirmed* confidential reporting path;
+  closing that gap needs a mail route or a published key, which is infrastructure, not wording.
+  `PRIVACY-POPOPX.md` was re-read against that and its fallback to the issue tracker is now scoped to
+  non-security reports, because the policy it cites forbids public issues for unpatched ones.
+
 ## v7.1.2-popopx.1 — 2026-11-15 (153 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version

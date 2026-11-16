@@ -600,9 +600,19 @@ yet. Before any build of this fork is distributed:
   own row. 20 sites in 18 files: both rows, both URL constants, and the key in the 7 moko locale files,
   the 4 `.lproj` catalogs and the 5 `.xcloc` translation units. The `ic_bigtop_updates` image stays - 11
   other call sites read it for channels generally.
-  Still awaiting a ruling, found after it: `README.md:61-68` claims upstream's two user groups exist for questions
-  "about POPOPX Chat only", and `full_description.txt:21-23` states in the first person that "**our**
-  servers do not have access to this information" about relays this fork does not operate.
+  Ruled and executed 2026-11-17 (same pass as the citations above): `README.md:61-68` had claimed
+  upstream's two user groups exist for questions "about POPOPX Chat only", `full_description.txt`,
+  the desktop `appdata.xml` and the flatpak `metainfo.xml` spoke in the first person about relays this
+  fork does not operate ("our servers do not have access", "routed via our servers"), the AppStream
+  copy invented a protocol called "POPOPX Messaging Protocol", and `README.md`'s disclaimers carried
+  SimpleX Chat Ltd's uptime, no-third-party-access and no-IP-logging claims as this fork's own. Each
+  now says whose infrastructure it is and routes POPOPX questions to the issue tracker. Gates, each
+  excluding the two records that quote the strings they count - a record otherwise measures itself:
+  `git grep -n 'POPOPX Messaging Protocol' -- . ':!FORK.md' ':!CHANGELOG-POPOPX.md'` → 0 (the protocol's name is upstream's),
+  `git grep -n 'our servers' -- apps/multiplatform/desktop scripts/flatpak fastlane` → 0,
+  `git grep -n '99\.9\|never provided or have been requested\|do not log IP' -- README.md` → 0.
+  What remains held is the four `HOLD (task #66)` contact entries above, which move only when POPOPX
+  runs a relay and mints its own address.
   `SUPPORT_EMAIL` is already `chat@popopx.chat`, whose delivery is unverified (first bullet) - which is
   why the front page routes the fork's own questions to the GitHub issue tracker instead.
 - **`popopx-chat-libs` had published no releases at all until 2026-11-16.** The asset names and the source

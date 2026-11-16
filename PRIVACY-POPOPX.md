@@ -11,10 +11,14 @@
 
 `popopx.chat` serves this project's website: measured 2026-11-17, the domain resolves to
 `43.129.4.33` and `https://popopx.chat/`, `/security/` and the two `/docs/…` pages linked below all
-answer `200`. It publishes **no MX record**, so delivery to **chat@popopx.chat** is not verified:
-send the report either way, and if nothing comes back, open an issue at
-[`popopx-chat/popopx-chat/issues`](https://github.com/popopx-chat/popopx-chat/issues) - issues are
-enabled (`has_issues: true`, measured the same day). The servers this fork does **not** operate are
+answer `200`. It publishes **no MX record**, so delivery to **chat@popopx.chat** is not verified.
+Send the report either way, and for anything that is **not** a security report the fallback is the
+issue tracker ([`popopx-chat/popopx-chat/issues`](https://github.com/popopx-chat/popopx-chat/issues),
+`has_issues: true`, measured the same day). A security report has no fallback to offer: the security
+policy at [`/security/`](https://popopx.chat/security/) asks reporters to stay off public channels
+while a fix is unreleased, so it goes to the address and nowhere else - which means this fork
+currently has **no confirmed confidential reporting path**, and closing that gap is a working mail
+route or a published OpenPGP key, not more wording. The servers this fork does **not** operate are
 listed below; this statement describes an application, not a service POPOPX runs.
 
 ## What the application sends, and to whom
