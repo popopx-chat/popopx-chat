@@ -164,7 +164,7 @@ chatProfileTests = do
     describe "group preferences for specific member role" $ do
       it "direct messages" testGroupPrefsDirectForRole
       it "files & media" testGroupPrefsFilesForRole
-      it "SimpleX links" testGroupPrefsPopopxLinksForRole
+      it "POPOPX links" testGroupPrefsPopopxLinksForRole
     it "set user, contact and group UI theme" testSetUITheme
   describe "chat layout" $ do
     it "group chat layout from group profile" testGroupChatLayout

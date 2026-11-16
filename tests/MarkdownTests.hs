@@ -316,7 +316,7 @@ textWithUri = describe "text with Uri" do
     "popopx:/example" <==> "popopx:/example"
     "end of sentence.Next sentence" <==> "end of sentence.Next sentence"
     "Visit Example.Com today" <==> "Visit Example.Com today"
-  it "SimpleX links" do
+  it "POPOPX links" do
     let inv = "/invitation#/?v=1&smp=smp%3A%2F%2F1234-w%3D%3D%40smp.simplex.im%3A5223%2F3456-w%3D%3D%23%2F%3Fv%3D1-2%26dh%3DMCowBQYDK2VuAyEAjiswwI3O_NlS8Fk3HJUW870EY2bAwmttMBsvRB9eV3o%253D&e2e=v%3D2%26x3dh%3DMEIwBQYDK2VvAzkAmKuSYeQ_m0SixPDS8Wq8VBaTS1cW-Lp0n0h4Diu-kUpR-qXx4SDJ32YGEFoGFGSbGPry5Ychr6U%3D%2CMEIwBQYDK2VvAzkAmKuSYeQ_m0SixPDS8Wq8VBaTS1cW-Lp0n0h4Diu-kUpR-qXx4SDJ32YGEFoGFGSbGPry5Ychr6U%3D"
     ("https://popopx.chat" <> inv) <==> popopxLink XLInvitation ("popopx:" <> inv) ["smp.simplex.im"] ("https://popopx.chat" <> inv)
     ("popopx:" <> inv) <==> popopxLink XLInvitation ("popopx:" <> inv) ["smp.simplex.im"] ("popopx:" <> inv)
@@ -351,7 +351,7 @@ textWithHyperlink = describe "text with HyperLink without link text" do
     "[click here](https://example.com )" <==> "[click here](" <> uri "https://example.com" <> " )"
 
 obfuscatedPopopxLinks :: Spec
-obfuscatedPopopxLinks = describe "SimpleX links obfuscated with whitespace" do
+obfuscatedPopopxLinks = describe "POPOPX links obfuscated with whitespace" do
   let addr = "https://smp6.simplex.im/a#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw"
       inv = "/invitation#/?v=1&smp=smp%3A%2F%2F1234-w%3D%3D%40smp.simplex.im%3A5223%2F3456-w%3D%3D%23%2F%3Fv%3D1-2%26dh%3DMCowBQYDK2VuAyEAjiswwI3O_NlS8Fk3HJUW870EY2bAwmttMBsvRB9eV3o%253D&e2e=v%3D2%26x3dh%3DMEIwBQYDK2VvAzkAmKuSYeQ_m0SixPDS8Wq8VBaTS1cW-Lp0n0h4Diu-kUpR-qXx4SDJ32YGEFoGFGSbGPry5Ychr6U%3D%2CMEIwBQYDK2VvAzkAmKuSYeQ_m0SixPDS8Wq8VBaTS1cW-Lp0n0h4Diu-kUpR-qXx4SDJ32YGEFoGFGSbGPry5Ychr6U%3D"
   let spaced s = T.replace "://" ":// " s -- insert a space right after the scheme
@@ -369,7 +369,7 @@ obfuscatedPopopxLinks = describe "SimpleX links obfuscated with whitespace" do
     hasObfuscatedPopopxLink app `shouldBe` True
     hasObfuscatedPopopxLink (T.intercalate " " $ T.chunksOf 8 app) `shouldBe` True
     hasObfuscatedPopopxLink ("tap to connect: " <> T.intercalate "\n" (T.chunksOf 6 app)) `shouldBe` True
-  it "ignores text without a SimpleX link" do
+  it "ignores text without a POPOPX link" do
     hasObfuscatedPopopxLink "" `shouldBe` False
     hasObfuscatedPopopxLink "hello there, this is a normal message" `shouldBe` False
     hasObfuscatedPopopxLink "see https://example.com/page?ref=123 for details" `shouldBe` False
@@ -1143,7 +1143,7 @@ markdownConsumers = describe "consumers of parsed Markdown" do
     links "a\n\nhttps://popopx.chat" `shouldBe` True
     links "a\n\nb" `shouldBe` False
     links "```\nhttps://popopx.chat\n```" `shouldBe` False
-  it "SimpleX links in blocks and in code" do
+  it "POPOPX links in blocks and in code" do
     popopxLinks ("- " <> addr) `shouldBe` True
     popopxLinks ("| " <> addr <> " |\n|---|") `shouldBe` True
     popopxLinks ("```\n" <> addr <> "\n```") `shouldBe` False

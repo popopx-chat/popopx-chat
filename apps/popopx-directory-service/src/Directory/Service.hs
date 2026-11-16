@@ -295,7 +295,7 @@ groupMemberAcceptance GroupInfo {customData} = (\DirectoryGroupData {memberAccep
 
 recommendedSettingsNotice :: UserGroupRegId -> Text
 recommendedSettingsNotice userGroupId =
-  "We recommend allowing direct messages, media, voice, and SimpleX links only for group moderators and admins. Use group preferences to set them.\n\
+  "We recommend allowing direct messages, media, voice, and POPOPX links only for group moderators and admins. Use group preferences to set them.\n\
   \Captcha verification is enabled. Use /'filter " <> tshow userGroupId <> "' to change it."
 
 useMemberFilter :: Maybe ImageData -> Maybe ProfileCondition -> Bool

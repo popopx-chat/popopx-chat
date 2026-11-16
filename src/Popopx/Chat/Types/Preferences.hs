@@ -293,7 +293,7 @@ allGroupFeatures =
   ]
 
 -- Channels (public groups) show a subset of group features. Direct messages, voice,
--- files, SimpleX links and member reports are group-only and excluded in channels.
+-- files, POPOPX links and member reports are group-only and excluded in channels.
 channelGroupFeatures :: [AGroupFeature]
 channelGroupFeatures = filter (\(AGF f) -> groupFeatureInChannel (toGroupFeature f)) allGroupFeatures
 

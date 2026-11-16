@@ -186,7 +186,7 @@ testDirectoryService ps =
                  "#PSA: 'POPOPX Directory' joined the group"
                ]
         bob <# "'POPOPX Directory'> Joined the group PSA. Registration is pending approval — it may take up to 48 hours."
-        bob <# "'POPOPX Directory'> We recommend allowing direct messages, media, voice, and SimpleX links only for group moderators and admins. Use group preferences to set them."
+        bob <# "'POPOPX Directory'> We recommend allowing direct messages, media, voice, and POPOPX links only for group moderators and admins. Use group preferences to set them."
         bob <## "Captcha verification is enabled. Use /'filter 1' to change it."
         notifySuperUser_ superUser bob "PSA" "Privacy, Security & Anonymity" Nothing 1 1
         -- putStrLn "*** update profile before approval - new approval code"
@@ -1859,7 +1859,7 @@ groupAccepted u n ugId = do
       ConsoleString ("#" <> viewName n <> ": 'POPOPX Directory' joined the group")
     ]
   u <# ("'POPOPX Directory'> Joined the group " <> n <> ". Registration is pending approval — it may take up to 48 hours.")
-  u <# "'POPOPX Directory'> We recommend allowing direct messages, media, voice, and SimpleX links only for group moderators and admins. Use group preferences to set them."
+  u <# "'POPOPX Directory'> We recommend allowing direct messages, media, voice, and POPOPX links only for group moderators and admins. Use group preferences to set them."
   u <## ("Captcha verification is enabled. Use /'filter " <> show ugId <> "' to change it.")
 
 channelJoinedByDirectory :: HasCallStack => TestCC -> TestCC -> IO ()
@@ -1872,7 +1872,7 @@ channelJoinedByDirectory owner relay =
         <### [ WithTime "'POPOPX Directory'> Joining the channel news…",
                "#news: relay introduced 'POPOPX Directory_1' in the channel",
                WithTime "'POPOPX Directory'> Joined the channel news. Registration is pending approval — it may take up to 48 hours.",
-               WithTime "'POPOPX Directory'> We recommend allowing direct messages, media, voice, and SimpleX links only for group moderators and admins. Use group preferences to set them.",
+               WithTime "'POPOPX Directory'> We recommend allowing direct messages, media, voice, and POPOPX links only for group moderators and admins. Use group preferences to set them.",
                "Captcha verification is enabled. Use /'filter 1' to change it."
              ]
     ]
