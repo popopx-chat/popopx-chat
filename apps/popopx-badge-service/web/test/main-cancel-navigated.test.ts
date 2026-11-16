@@ -24,7 +24,7 @@ cancelTest("main: a cancel answered after the buyer left is still written to the
   await settle();
 
   chrome.all("button.menu-item").find((b) => b.textContent === "Buy a code")!.click();
-  assert.equal(headingOf(screenOf(app)), "Support SimpleX", "the buyer is starting a new purchase");
+  assert.equal(headingOf(screenOf(app)), "Support POPOPX", "the buyer is starting a new purchase");
 
   assert.ok(page.answerHeld({ status: 200, body: { status: "expired", amount: 42000, currency: "usd" } }, "/cancel"),
     "the cancel is the request still holding");

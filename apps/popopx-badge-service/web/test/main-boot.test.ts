@@ -14,7 +14,7 @@ const inView = (): StubElement => inViewOf(app);
 const heading = (): string => headingOf(inView());
 
 bootTest("main: booting at #/checkout with nothing answered lands on the landing screen, not a blank order summary", () => {
-  assert.equal(heading(), "Support SimpleX");
+  assert.equal(heading(), "Support POPOPX");
   assert.ok(!inView().textContent.includes("Check your order"));
   assert.ok(!inView().textContent.includes("Pay "), "and no Pay button anywhere on it");
   assert.equal(storage.getItem("sb.session.v1"), null, "nothing was invented to make it renderable");

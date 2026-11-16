@@ -208,7 +208,7 @@ resumeTest("main: [ Forget everything ] leaves nothing that restores the order",
 
   assert.equal(storage.getItem("sb.orders.v1"), null);
   assert.equal(storage.getItem("sb.session.v1"), null, "the draft goes with the codes");
-  assert.equal(heading(), "Support SimpleX", "the landing page is the only screen still true once nothing is stored");
+  assert.equal(heading(), "Support POPOPX", "the landing page is the only screen still true once nothing is stored");
   await settle(10);
   assert.equal(storage.getItem("sb.orders.v1"), null, "and nothing wrote it back");
   assert.equal(fetches.length, before, "no loop survived to ask again");

@@ -29,7 +29,7 @@ test("main: loading straight at a deep step rebuilds the stack, so [ Back ] walk
   assert.equal(history.left, false, "and it stayed in the wizard, it did not leave the site");
 
   back();
-  assert.equal(heading(), "Support SimpleX", "Back again reaches the landing");
+  assert.equal(heading(), "Support POPOPX", "Back again reaches the landing");
   assert.equal(history.url, "/");
   assert.equal(history.left, false);
 });

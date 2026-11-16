@@ -502,7 +502,7 @@ designTest("design: the chrome is a wordmark home link and a menu, and holds no 
   const brand = bar.all("a.brand")[0]!;
   assert.equal(brand.getAttribute("href"), "/", "the wordmark goes home");
   assert.equal(brand.getAttribute("target"), null, "standalone, it stays in this page");
-  assert.equal(brand.getAttribute("aria-label"), "SimpleX", "and carries the name, since it has no text");
+  assert.equal(brand.getAttribute("aria-label"), "POPOPX", "and carries the name, since it has no text");
   const trigger = bar.all("button.menu-button")[0]!;
   assert.equal(trigger.getAttribute("aria-expanded"), "false");
   assert.equal(trigger.getAttribute("aria-controls"), screens.MENU_ID);

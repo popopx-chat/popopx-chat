@@ -24,7 +24,7 @@ cancelTest("main: a not_open refused after the buyer left still takes the destin
   await settle();
 
   chrome.all("button.menu-item").find((b) => b.textContent === "Buy a code")!.click();
-  assert.equal(headingOf(screenOf(app)), "Support SimpleX", "the buyer is starting a new purchase");
+  assert.equal(headingOf(screenOf(app)), "Support POPOPX", "the buyer is starting a new purchase");
 
   assert.ok(page.answerHeld({ status: 409, body: { error: "not_open" } }, "/cancel"),
     "the cancel is the request still holding");

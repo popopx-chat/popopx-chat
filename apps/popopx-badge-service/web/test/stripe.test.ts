@@ -338,7 +338,7 @@ function stripeTags(): StubElement[] {
 }
 
 cardTest("main: nothing of Stripe's is fetched at page load", () => {
-  assert.equal(heading(), "Support SimpleX", "the boot is the landing screen");
+  assert.equal(heading(), "Support POPOPX", "the boot is the landing screen");
   assert.equal(scripts().length, 0, "the shell adds no script of its own");
   assert.equal(stripeTags().length, 0, "Stripe.js is loaded on the card path and nowhere else");
   assert.ok(!fetches.some((f) => f.url.includes("stripe")), "and nothing requested it another way");
@@ -346,7 +346,7 @@ cardTest("main: nothing of Stripe's is fetched at page load", () => {
 
 function walkToCard(): void {
   const primary = (): StubElement => primaryOf(screen())!;
-  if (heading() === "Support SimpleX") primary().click();
+  if (heading() === "Support POPOPX") primary().click();
   if (heading() === "Choose your badge") {
     screen().all("button.choice").find((c) => c.textContent.startsWith("Legend"))!.click();
     primary().click();

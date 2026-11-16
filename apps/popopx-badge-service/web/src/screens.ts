@@ -85,7 +85,7 @@ export interface Chrome {
 }
 
 export function chrome(o: ChromeOptions): Chrome {
-  const brand = el("a", { class: "brand", href: "/", "aria-label": "SimpleX" });
+  const brand = el("a", { class: "brand", href: "/", "aria-label": "POPOPX" });
   brand.addEventListener("click", (e) => { e.preventDefault(); o.onHome(); });
   const panelNode = el("div", {
     class: "menu", id: MENU_ID, hidden: "", role: "dialog", "aria-label": MENU_LABEL,
@@ -228,7 +228,7 @@ export interface LandingOptions {
 
 export function landing(o: LandingOptions): HTMLElement {
   return panel(
-    el("h1", {}, "Support SimpleX"),
+    el("h1", {}, "Support POPOPX"),
     el("p", { class: "lede" },
       el("span", { class: "line" }, "Get a badge to send larger files (2‑5GB)"), " ",
       el("span", { class: "line" }, "that stay available longer (7‑21 days),"), " ",
@@ -782,7 +782,7 @@ export function codeIssued(o: CodeIssuedOptions): HTMLElement {
   return p;
 }
 
-export const RETURN_TO_APP = "Return to SimpleX";
+export const RETURN_TO_APP = "Return to POPOPX";
 export const SHOW_CODE = "Show code";
 
 export type AppCode =
@@ -801,7 +801,7 @@ export function returnToApp(o: ReturnToAppOptions): HTMLElement {
     el("h1", { class: "tight" }, "Paid"),
     el("p", { class: "lede" },
       el("span", { class: "line" }, "Your badge is ready."), " ",
-      el("span", { class: "line" }, "Return to SimpleX to add it."),
+      el("span", { class: "line" }, "Return to POPOPX to add it."),
     ),
     button(RETURN_TO_APP, o.onReturn),
   );

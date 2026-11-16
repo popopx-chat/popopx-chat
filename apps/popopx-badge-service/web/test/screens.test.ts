@@ -57,7 +57,7 @@ domTest("screens: the landing screen carries the copy the mockups fix", () => {
   const p = render(screens.landing({ onStart: noop }));
   const text = p.textContent;
   for (const line of [
-    "Support SimpleX",
+    "Support POPOPX",
     "Get a badge to send larger files (2‑5GB) that stay available longer (7‑21 days), and to show it on your profile.",
     "Choose your badge",
     "You pay once for the months you choose. No subscription, no account.",
@@ -666,14 +666,14 @@ domTest("screens: the return-to-app ending opens on the tick, offers the link an
   assert.equal(p.all("div.tick")[0]!.textContent, "✓");
   assert.equal(p.all("h1")[0]!.textContent, "Paid");
   assert.ok(p.textContent.includes("Your badge is ready."));
-  assert.ok(p.textContent.includes("Return to SimpleX to add it."));
+  assert.ok(p.textContent.includes("Return to POPOPX to add it."));
   assertNoCode(p, "the return-to-app ending");
   p.all("button.primary").find((b) => b.textContent === screens.RETURN_TO_APP)!.click();
   p.all("button.link").find((b) => b.textContent === screens.SHOW_CODE)!.click();
   assert.deepEqual([returned, shown], [1, 1]);
 });
 
-domTest("screens: Show code reveals the code in place, under a Return to SimpleX that stays, and with no QR", () => {
+domTest("screens: Show code reveals the code in place, under a Return to POPOPX that stays, and with no QR", () => {
   copied.length = 0;
   let returned = 0;
   const p = render(screens.returnToApp({

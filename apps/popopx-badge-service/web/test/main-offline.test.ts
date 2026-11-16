@@ -91,12 +91,12 @@ offlineTest("main: leaving the payment screen stops its loop, and no repaint ret
   page.history.pushState(null, "", "/");
   page.fire("popstate");
   await settle();
-  assert.equal(heading(), "Support SimpleX", "the landing screen — and the watch loop stopped that invoice's loop on the way");
+  assert.equal(heading(), "Support POPOPX", "the landing screen — and the watch loop stopped that invoice's loop on the way");
   // A connectivity change repaints the waiting screen, so with none left a repaint must not put the abandoned payment screen over the wizard with no loop behind it.
   for (const off of [false, true]) {
     page.setOffline(off);
     await settle();
-    assert.equal(heading(), "Support SimpleX", `an ${off ? "offline" : "online"} event must not restore the payment screen`);
+    assert.equal(heading(), "Support POPOPX", `an ${off ? "offline" : "online"} event must not restore the payment screen`);
     assert.ok(!app.serialize().includes(ADDRESS), "the abandoned invoice is nowhere on screen");
   }
 });

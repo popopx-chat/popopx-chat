@@ -32,13 +32,13 @@ mainTest("main: a first load renders the landing screen, with the other three pa
   assert.equal(panels().length, 4, "the landing screen to the order summary are four panels of one track");
   assert.equal(track().getAttribute("class"), "track");
   assert.deepEqual(inertFlags(), [false, true, true, true]);
-  assert.equal(heading(inView()), "Support SimpleX");
+  assert.equal(heading(inView()), "Support POPOPX");
   assert.equal(railStyle().includes("translateX(-0%)"), true, railStyle());
   assert.equal(history.url, "/", "the landing screen carries no hash, so browser Back leaves the site");
 });
 
 mainTest("main: the four panels are the landing screen, the tier list, the duration list and the order summary in order, built once", () => {
-  assert.deepEqual(panels().map(heading), ["Support SimpleX", "Choose your badge", "How long?", "Check your order"]);
+  assert.deepEqual(panels().map(heading), ["Support POPOPX", "Choose your badge", "How long?", "Check your order"]);
 });
 
 mainTest("main: prefers-reduced-motion: reduce JUMPS instead of scrolling", () => {
@@ -50,7 +50,7 @@ mainTest("main: prefers-reduced-motion: reduce JUMPS instead of scrolling", () =
     assert.ok(railStyle().includes("translateX(-100%)"), `it still moves: ${railStyle()}`);
     assert.ok(railStyle().includes("--slide:0ms"), `but it does not animate: ${railStyle()}`);
     inView().all("button.back")[0]!.click();
-    assert.equal(heading(inView()), "Support SimpleX");
+    assert.equal(heading(inView()), "Support POPOPX");
     assert.ok(railStyle().includes("--slide:0ms"), railStyle());
   } finally {
     page.reducedMotion(false);
@@ -72,7 +72,7 @@ mainTest("main: [ Back ] is history.back(), and scrolls the track left again", (
   assert.equal(back.textContent, "Back");
   assert.equal(back.all("svg.chevron").length, 1, "with the chevron before the word");
   back.click();
-  assert.equal(heading(inView()), "Support SimpleX");
+  assert.equal(heading(inView()), "Support POPOPX");
   assert.deepEqual(inertFlags(), [false, true, true, true]);
   assert.ok(railStyle().includes("translateX(-0%)"), `Back travels left: ${railStyle()}`);
   assert.ok(railStyle().includes("--slide:320ms"), "and it animates, as Continue does");
@@ -84,7 +84,7 @@ mainTest("main: browser Back on the landing screen leaves the site rather than m
   assert.equal(history.at, 0);
   history.back();
   assert.equal(history.left, true);
-  assert.equal(heading(inView()), "Support SimpleX");
+  assert.equal(heading(inView()), "Support POPOPX");
   history.left = false;
 });
 
@@ -275,21 +275,21 @@ mainTest("main: Back after a purchase reaches a usable duration list, not an emp
   const legend = inView().all("button.choice").find((c) => c.textContent.startsWith("Legend"))!;
   assert.equal(legend.getAttribute("aria-pressed"), "true");
   history.back();
-  assert.equal(heading(inView()), "Support SimpleX");
+  assert.equal(heading(inView()), "Support POPOPX");
   assert.equal(history.at, 0, "and the landing screen is the bottom of the stack");
 });
 
 mainTest("main: a bare `/` is the landing screen, so browser Back leaves the site", () => {
   assert.equal(location.hash, "");
-  assert.equal(heading(inView()), "Support SimpleX");
+  assert.equal(heading(inView()), "Support POPOPX");
   history.back();
   assert.equal(history.left, true, "there is nothing behind the landing screen");
   history.left = false;
-  assert.equal(heading(inView()), "Support SimpleX");
+  assert.equal(heading(inView()), "Support POPOPX");
 });
 
 mainTest("main: the menu opens the history list from the store, with [ Open ] as a link", async () => {
-  assert.equal(heading(inView()), "Support SimpleX");
+  assert.equal(heading(inView()), "Support POPOPX");
   assert.equal(inView().all("button.link").length, 0, "the landing page carries no navigation of its own");
   menuItem("Your codes").click();
   await until(() => app.all("li.entry").length > 0, "the history list's list");
@@ -336,13 +336,13 @@ mainTest("main: [ Forget everything ] removes the key and returns to the landing
   // Every screen but the landing page draws from data just deleted, so the wipe navigates to the landing page rather than leave a stale code on screen.
   assert.equal(history.url, "/", "the URL names the landing page, not the wiped order");
   const landing = screenOf(app);
-  assert.ok(landing.textContent.includes("Support SimpleX"), landing.textContent);
+  assert.ok(landing.textContent.includes("Support POPOPX"), landing.textContent);
   assert.ok(landing.textContent.includes("Choose your badge"));
   assert.ok(!landing.textContent.includes("Nothing bought on this device"));
 });
 
 mainTest("main: the provider-unavailable screen notice does not outlive the checkout it belongs to", async () => {
-  assert.equal(heading(inView()), "Support SimpleX");
+  assert.equal(heading(inView()), "Support POPOPX");
   const walk = (): void => {
     primary(inView())!.click();
     inView().all("button.choice").find((c) => c.textContent.startsWith("Legend"))?.click();
@@ -377,7 +377,7 @@ mainTest("main: the provider-unavailable screen notice does not outlive the chec
   history.back();
   history.back();
   history.back();
-  assert.equal(heading(inView()), "Support SimpleX");
+  assert.equal(heading(inView()), "Support POPOPX");
   walk();
   assert.equal(heading(inView()), "Check your order");
   assert.ok(!inView().textContent.includes("temporarily unavailable"), inView().textContent);

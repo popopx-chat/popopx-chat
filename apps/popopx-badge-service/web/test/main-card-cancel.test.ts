@@ -65,7 +65,7 @@ cardCancelTest("main: the card form offers Cancel, and a clean cancel marks the 
   page.confirmAnswer(true);
   page.respondWith({ status: 200, body: { status: "expired", amount: 700, currency: "usd" } });
   cancelBtn()!.click();
-  await until(() => heading() === "Support SimpleX", "a clean cancel lands on the landing screen");
+  await until(() => heading() === "Support POPOPX", "a clean cancel lands on the landing screen");
 
   assert.equal(storedOrder("inv_card_c1")?.canceled, true,
     "the order is marked canceled, so Your codes reads it as canceled, not expired");

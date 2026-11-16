@@ -76,22 +76,22 @@ appTest("main: a repaint keeps the ending but does not fire the link again", asy
   assert.equal(screenOf(app).all("iframe").length, 0);
 });
 
-appTest("main: with the automatic attempt refused, Return to SimpleX still navigates, off the page's history", () => {
+appTest("main: with the automatic attempt refused, Return to POPOPX still navigates, off the page's history", () => {
   const before = [...history.stack];
-  screenOf(app).all("button.primary").find((b) => b.textContent === "Return to SimpleX")!.click();
+  screenOf(app).all("button.primary").find((b) => b.textContent === "Return to POPOPX")!.click();
   assert.equal((location as { href?: string }).href, `popopxchat:/badge/code/${stored().code as string}`);
   assert.deepEqual(history.stack, before, "the page adds no history entry of its own");
   assert.equal(heading(), "Paid", "and the screen is still there to fall back on");
 });
 
-appTest("main: Show code reveals the stored code in place, keeps Return to SimpleX, and it stays revealed", async () => {
+appTest("main: Show code reveals the stored code in place, keeps Return to POPOPX, and it stays revealed", async () => {
   screenOf(app).all("button.link").find((b) => b.textContent === "Show code")!.click();
   const code = stored().code as string;
   const revealed = (): void => {
     assert.equal(heading(), "Paid", "still the ending, not the plain code screen");
     assert.equal(screenOf(app).all("div.code")[0]!.textContent, code);
     assert.equal(screenOf(app).all("svg").filter((s) => s.getAttribute("class") === "qr").length, 0, "no QR");
-    assert.ok(screenOf(app).all("button.primary").some((b) => b.textContent === "Return to SimpleX"));
+    assert.ok(screenOf(app).all("button.primary").some((b) => b.textContent === "Return to POPOPX"));
   };
   revealed();
   assert.equal(screenOf(app).all("iframe").length, 0, "revealing does not fire the link again");
@@ -107,7 +107,7 @@ appTest("main: Show code reveals the stored code in place, keeps Return to Simpl
   await settle();
   revealed();
 
-  screenOf(app).all("button.primary").find((b) => b.textContent === "Return to SimpleX")!.click();
+  screenOf(app).all("button.primary").find((b) => b.textContent === "Return to POPOPX")!.click();
   assert.equal((location as { href?: string }).href, `popopxchat:/badge/code/${code}`, "the button still works once the code is out");
 });
 

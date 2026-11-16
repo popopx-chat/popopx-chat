@@ -87,6 +87,6 @@ cancelTest("main: a cancelled order keeps its code and loses everything payable"
   }
   assert.ok(!JSON.stringify(after).includes(ADDRESS), "and nothing anywhere still names it");
 
-  await until(() => headingOf(screenOf(app)) === "Support SimpleX",
+  await until(() => headingOf(screenOf(app)) === "Support POPOPX",
     "the landing screen, ready for a new purchase");
 });

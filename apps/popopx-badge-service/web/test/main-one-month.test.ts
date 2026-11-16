@@ -27,7 +27,7 @@ function session(): Record<string, unknown> {
 }
 
 function walkToDurations(level: string): StubElement {
-  while (heading(inView()) !== "Support SimpleX") inView().all("button.back")[0]!.click();
+  while (heading(inView()) !== "Support POPOPX") inView().all("button.back")[0]!.click();
   continueButton(inView()).click();
   assert.equal(heading(inView()), "Choose your badge");
   choice(inView(), level).click();
@@ -88,7 +88,7 @@ monthTest("main: changing the level clears the duration and disables Continue ag
 monthTest("main: a session stored by an older build as offerId \"\" loads as nothing chosen", () => {
   // A legacy empty-string offerId is ambiguous, so it is read as "not answered" rather than stranding the buyer on a Continue that never enables.
   storage.setItem(SESSION_KEY, JSON.stringify({ step: "months", priceId: "price_legend", offerId: "" }));
-  while (heading(inView()) !== "Support SimpleX") inView().all("button.back")[0]!.click();
+  while (heading(inView()) !== "Support POPOPX") inView().all("button.back")[0]!.click();
   continueButton(inView()).click();
   continueButton(inView()).click();
   const durations = inView();

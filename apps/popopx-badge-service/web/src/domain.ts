@@ -12,7 +12,7 @@ export type Theme = (typeof THEMES)[number];
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 export type Method = (typeof METHODS)[number];
 export type Chain = (typeof CHAINS)[number];
-/** The SimpleX app that opened the page, which decides how the code is handed over at the end. */
+/** The POPOPX app that opened the page, which decides how the code is handed over at the end. */
 export type App = (typeof APPS)[number];
 
 export const readStep = oneOf(STEPS);
