@@ -104,7 +104,8 @@ summary:
    is `:40` at `8e6d62f19^` (`git show 8e6d62f19^:apps/ios/Shared/Views/UserSettings/VersionView.swift`) and
    `:41` on this tip, where the same string names `popopx-chat/popopxmq`. Of the paths just listed every `docs/**` and `website/**` one
    is gone — item 10 deleted those trees the same day — so the surviving readers are `README.md`,
-   `scripts/ci/**` and `apps/ios/{product,spec}/**` (`git ls-files docs/ | wc -l` reads 0); that is why the
+   `scripts/ci/**` and `apps/ios/{product,spec}/**` (`git ls-files docs/ | wc -l` read 0 until item 14
+   re-imported `docs/CLI.md`, which is one more reader of the `popopxmq` name); that is why the
    counts above are commands rather than this list.
    A reference moved only where the same thing exists in `popopxmq`, which is not string equality: the
    fork renamed its own files, so `protocol/simplex-messaging.md` is `protocol/popopx-messaging.md` and
@@ -324,6 +325,35 @@ each was meant to become. That pass also repaired a compile break this fork ship
       their producers; no generated line was typed by hand, and `typedoc` was re-run rather than editing
       `docs/api.Class.ChatApi.md`.
 
+14. **One upstream document came back** (2026-11-16, ruling 将上游 stable 的这份文档 fork 过来) —
+    `popopxmq`'s relay pages carry a footer row linking the terminal manual at `docs/CLI.md`, which item 10
+    deleted here, so the manual was re-imported from upstream's `stable` and sanitized rather than left
+    pointing outside this fork. The same four-case rule as item 2 moved **47** occurrences over **31** lines;
+    **10** remain and all are deliberate — 4 in the provenance block this item added above the title (it names
+    upstream on purpose) and 6 in the three `docs/lang/{fr,cs,pl}/CLI.md` links, which now point back to
+    upstream `stable` because this fork republishes only the English text. Values the copy asserted were taken
+    from their producers, not from the sweep: the executable `popopx-chat` (`install.sh:5` `APP_NAME`, written
+    to `~/.local/bin`), the data directory `~/.popopx` and the prefix `popopx_v1` (`Terminal/Main.hs:26,27`),
+    the databases `popopx_v1_chat.db` / `popopx_v1_agent.db` (`Options/SQLite.hs:35,73,78` joining prefix and
+    suffix) — which also corrects the imported claim that `-d alice` creates `alice_v1_chat.db`: `-d` replaces
+    the whole prefix, so it creates `alice_chat.db`. Six links that were wrong upstream are wrong no longer:
+    `overview-tjr.md#encryption-primitives-used` and `agent-protocol.md#connection-request` named headings that
+    do not exist in `popopxmq` (now `protocol/security.md#encryption-primitives` and
+    `#accept-and-reject-connection-requests`), `src/Simplex/Chat/Options.hs#L42` predates the presets moving to
+    `src/Popopx/Chat/Terminal.hs#L47`, `tree/stable` and the two `git checkout stable` named a branch this fork
+    does not have, and the `curl -o- …/simplex-chat/stable/install.sh | bash` pair now reads
+    `raw.githubusercontent.com/popopx-chat/popopx-chat/master/install.sh` (3519 bytes at `master`). Two
+    table-of-contents rows anchored to sections the file does not contain — `#access-chat-history`, whose
+    section upstream deleted, and `…-via-tor-beta`, which never matched the heading — were fixed, so all 15
+    in-page anchors resolve. The sentence "Three default SMP servers are hosted on Linode" now reads "operated
+    by the upstream project": the presets at `Terminal.hs:47-49` are `smp{4,5,6}.simplex.im` and this fork runs
+    no server, which is the rule under "Upstream-operated hosts" below.
+    What this item does **not** touch: `install.sh:43` still tests `$HOME/.simplex/simplex.agent.db`, and that
+    is not residue. The block is the v0-to-v1 upgrade guard — it looks for a *legacy upstream* database at
+    upstream's pre-v1 location and warns before installing with a clean one, so renaming the path there turns
+    the guard into a no-op that never fires. It is the same class of hold as the `simplex_xor_md5_combine`
+    function name in `popopxmq`.
+
 ## What was deliberately NOT changed
 
 - **Copyright and attribution.** `author: simplex.chat` and `copyright: 2020-22 simplex.chat` in
@@ -395,8 +425,9 @@ each was meant to become. That pass also repaired a compile break this fork ship
   `popopx` filesystem identity — `/etc/opt/popopx{,-xftp}`, `/var/opt/popopx{,-xftp}`,
   `/var/lib/tor/popopx-smp`, the caddy/systemd/docker-compose names — because that is what `popopxmq`
   compiles in (`apps/*/Main.hs defaultCfgPath`) and what its own docs already said. The lines that
-  *obtain* a server did not — and because item 10 deleted `docs/` the same day (`git ls-files docs/ | wc -l`
-  reads 0 on this tip), the citation is anchored to the import commit where it is still checkable rather than
+  *obtain* a server did not — and because item 10 deleted `docs/` the same day (the one file under `docs/` on
+  this tip is the terminal manual item 14 re-imported, not an operator document, so `git ls-files docs/ | wc -l`
+  reads 1 and none of the paths this bullet names is in the tree), the citation is anchored to the import commit where it is still checkable rather than
   to a path in this tree: `git show db0768c21:docs/SERVER.md` puts the upstream release download at `:293`
   (`curl -L …/simplexmq/releases/latest/download/smp-server-ubuntu-20_04-x86-64`) and at `:854`, and the two
   compose blocks at its `:417` and `:483` default to `image: ${SIMPLEX_IMAGE:-simplexchat/smp-server:latest}`,
