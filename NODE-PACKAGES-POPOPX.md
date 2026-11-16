@@ -27,16 +27,16 @@ python3 scripts/ci/packages_release.py test-names
 
 With `NPM_SCOPE=@popopx-chat` it rewrites, in the working copy only:
 
-- every `name` to `NPM_SCOPE/<basename>` (`registry_name`, `packages_release.py:165`) — so
+- every `name` to `NPM_SCOPE/<basename>` (`registry_name`, `packages_release.py:164`) — so
   `simplex-chat` → `@popopx-chat/simplex-chat`, `@simplex-chat/types` → `@popopx-chat/types`;
 - every `repository.url` to `git+https://github.com/<GITHUB_REPOSITORY>.git`, which npm provenance
   requires to be the repository of the publishing workflow;
 - the cross-package dependencies to **`npm:` aliases**
-  (`packages_release.py:902,913`): `simplex-chat`'s dependency on the types package becomes
+  (`packages_release.py:911,922`): `simplex-chat`'s dependency on the types package becomes
   `npm:@popopx-chat/types@<pin>`, and the MCP's two pins likewise.
 
 That alias step is why the committed manifests keep the upstream spellings. `MCP_PINNED`
-(`packages_release.py:47`) and `unreleased_pins()` (`:588`) read the *committed* names to decide which
+(`packages_release.py:47`) and `unreleased_pins()` (`:587`) read the *committed* names to decide which
 versions are already published; `check-pins` compares them against the published releases. Editing the
 manifests by hand would move one side of that pair and leave the alias generation with nothing to
 alias — the release tooling would then compute "unpublished" for packages that are published, and
@@ -56,7 +56,7 @@ change.
 3. **A `-libs` repository next to this one.** `build.yml` uses `LIBS_REPOSITORY: ${{ github.repository
    }}-libs`, so for `popopx-chat/popopx-chat` it resolves to **`popopx-chat/popopx-chat-libs`** with no
    configuration. That repository holds the prebuilt library archives
-   (`popopx-chat-libs-<os>-<arch>.zip`, six of them, listed at `packages_release.py:104`) and the
+   (`popopx-chat-libs-<os>-<arch>.zip`, six of them, listed at `packages_release.py:103-108`) and the
    `releases.toml` that `record` writes. The asset names are still upstream's; they are filenames of
    releases this fork has not made, so they move with the first real release, not before it.
 4. **Two repository variables** (Settings → Secrets and variables → Actions → Variables), consumed by
@@ -89,11 +89,11 @@ python3 scripts/ci/packages_release.py download-pinned # fetch a pinned asset, v
 ```
 
 `GH_TOKEN` is read for anything that touches the `-libs` repository; without it the API calls are
-unauthenticated and drafts are invisible (`libs_api`, `packages_release.py:607`).
+unauthenticated and drafts are invisible (`libs_api`, `packages_release.py:606`).
 
 Building the add-on itself is a separate path: the library archives come from the `build.yml` matrix,
 `popopx-chat-libs-*.zip` is downloaded by `download-pinned`, and the platform add-on
-`popopx-chat-nodejs-<platform>.node` (`ADDON_ASSETS`, `packages_release.py:119`) is produced from
+`popopx-chat-nodejs-<platform>.node` (`ADDON_ASSETS`, `packages_release.py:118`) is produced from
 `packages/popopx-chat-nodejs` with `npx tsc` after `npm install --ignore-scripts`
 (`build.yml:1802,1867`).
 

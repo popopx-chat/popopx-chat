@@ -39,7 +39,7 @@ case "${1:-}" in
     npm run test:e2e
     ;;
   *)
-    echo "usage: $0 badge-web | ci-scripts | mcp" >&2
+    echo "usage: $0 badge-web | ci-scripts | libs-pins | mcp" >&2
     exit 1
     ;;
 esac

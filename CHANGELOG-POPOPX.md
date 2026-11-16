@@ -516,7 +516,7 @@ sentence states its own base directory - zero markdown links were broken either 
   run owes you) and is listed for ruling, not folded in here.
 - **`simplexChatCore` was two values sharing a spelling**, and only one of them is a build boundary: the
   JSON field in `packages/popopx-chat-client/types/typescript/package.json` and its reader/writer
-  `scripts/ci/packages_release.py:724/:769`. Both ends are in this repository — measured: the `-libs`
+  `scripts/ci/packages_release.py:725/:770`. Both ends are in this repository — measured: the `-libs`
   repository has **0** occurrences of either spelling, and `releases.toml` there keys `[core.master]` by
   version→SHA, never by this field — so renaming the field to **`popopxChatCore`** moved 14 occurrences /
   3 files (4 in the script, its 9 test fixtures, 1 in `package.json`) with no third end to chase. The field
@@ -1686,7 +1686,7 @@ upstream's** is ours to move, and a value that only *resolves* in upstream's his
   description, and `packages/popopx-chat-mcp/README.md`.
 - `bugs.url` in four package manifests plus `[project.urls] Issues` in the Python one.
   `packages_release.py test-names` was read before deciding the layer: it rewrites only `name` and
-  `repository.url` (`:891-926`), so `bugs` ships **as committed** and belongs in the source, not in the
+  `repository.url` (`:902-936`), so `bugs` ships **as committed** and belongs in the source, not in the
   release step. All three new URLs measured HTTP 200.
 
 Measured and left, with the reason written into `FORK.md`: the `homepage` and `repository.directory` of
@@ -1713,11 +1713,11 @@ was upstream's tree - `.../tree/stable/packages/simplex-chat-nodejs#readme` - on
 a store renders next to our published artifact.
 
 The layer question had to be answered before editing, because the previous pass in this same file was
-blocked by it. `packages_release.py test-names` (`:890-926`) rewrites **`name`, `repository.url`, the
+blocked by it. `packages_release.py test-names` (`:901-936`) rewrites **`name`, `repository.url`, the
 `npm:` cross-package aliases and the PyPI `name`** - it touches `homepage`, `repository.directory` and
 `bugs.url` not at all, so those ship exactly as committed and belong in the source. The alias hazard that
-made hand-editing dangerous is narrower than it looked: `MCP_PINNED` (`:47`), `npm_key` (`:691`) and
-`unreleased_pins` (`:588`) read only `name` and `dependencies`, which are the fields the generator pairs.
+made hand-editing dangerous is narrower than it looked: `MCP_PINNED` (`:47`), `npm_key` (`:690`) and
+`unreleased_pins` (`:587`) read only `name` and `dependencies`, which are the fields the generator pairs.
 Moving the three it ignores cannot desynchronise `check-pins`.
 
 Per-value decisions, each measured rather than patterned:
@@ -2061,6 +2061,37 @@ artwork that is still in the repository (545 files, measured in
 `ASSETS_LICENSE-POPOPX.md`). The dependency references that resolve in `popopxmq`
 moved instead (`FORK.md` item 7). Full list with the authority for each:
 [`FORK.md`](./FORK.md).
+
+### The library pins are now judged by who recorded them, not by who hosts them (2026-11-17, rulings 执行B + 2 选(b) 重置成我们自己的空账 + 3 版本 设置 7.1.0-beta.9.2 + 4 删掉)
+
+`packages/popopx-chat-nodejs/src/release.ts:3` and `packages/popopx-chat-python/src/simplex_chat/_version.py:8` pin
+`core-7.1.0.20` and `core-7.1.0.14` of `popopx-chat/popopx-chat-libs`. Both releases are published, every pinned digest
+matches, and the bytes are upstream's — the archive in `core-7.1.0.20` carries `libHSsimplexmq-7.1.0.16` and
+`SimpleXX3DH`/`SimpleXService`/`SimpleXRootRatchet` with no `POPOPX` spelling anywhere, which is why the mcp end-to-end job
+reaches our broker and times out. A mirror matches its own digests, so `check-pins` could not see the difference.
+
+- `popopx-chat-libs/releases.toml` is a comments-only file now (`2b5e7046c82a0bc20070500ff50f372fd00095ab`, blob `3294f730…`):
+  no `[core.master]` row, so nothing is recorded as published here. The inherited rows stay retrievable as blob `aa35f4be…`
+  (23 lines, 1030 B).
+- `check-pins` also requires each pinned `core-<version>` to be recorded — `recorded_pin_problems()` (`packages_release.py:783`)
+  called from `check_pins()` (`:966`). Run against the real pin files it reports `core-7.1.0.20 is not recorded…` and
+  `core-7.1.0.14 is not recorded…`, and nothing once those versions are in the ledger. Add-on tags are not covered: `record` takes
+  only `--types/--nodejs/--mcp/--python`, so a `nodejs-addon-<hash>` release has no ledger row to be judged against.
+- The check needed a lane. It appeared once in `build.yml` (`:1817`, inside `publish`, which starts only on a planned package
+  release); it is the `libs-pins` scope now (`SCOPE_CHANGES` at `packages_release.py:86`, `scripts/ci/scope-tests.sh:14-16`), so
+  `Test changed scopes` runs it for any push or pull request touching either pin file — and those two globs joined `build.yml`'s
+  `pull_request` paths, because `test_build_yml_runs_for_the_paths_of_its_builds` holds the paths list and the change tables to one set.
+- The types package moves `7.1.0-beta.9.1` → `7.1.0-beta.9.2` because the claim gate could not be opened while the version was
+  upstream's: `claim-core` → `types_problem` → `npm_released(…)`, and the registry answers **200** for `.9.1` (upstream's `beta`
+  dist-tag) and **404** for `.9.2`. That held under both ledgers, so the ledger contents were never what blocked the lane.
+  `popopxChatCore` already matched `popopx-chat.cabal:8` (`7.1.2.0`), and the dependents keep `^7.1.0-beta.9.1` (7 occurrences in 4
+  files): they name the npm artifact upstream published, and `scope-tests.sh` installs the types source by path, not by version.
+- Verified here, not only promised to CI: the suite is 94 tests green with this change against 93 in the untouched tree. This machine
+  has no python ≥ 3.11, so running it took a `__future__.annotations` compile and a stand-in TOML parser — the same route used to
+  exercise the guard against the real pin files.
+- Still open, in order: `secrets.NODEJS_REPO_TOKEN` (`gh secret list` for this repository is empty — the user provisions it), then the
+  lane's first `core-7.1.2.0` and add-on release, then both pin files re-derived from GitHub's own asset digests in one commit, then the
+  three mirror releases deleted (ruling 4) — last, so no window leaves the pins naming a 404 with no path back to green.
 
 ## Template for a release
 
