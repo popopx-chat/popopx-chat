@@ -192,19 +192,21 @@ summary:
     they were never served from here, and the work now belongs to the site's own repository (see "Link
     claims are inert").
 
-    **One upstream document came back, deliberately** (2026-11-13): `docs/SIMPLEX.md` and
-    `docs/SECURITY.md` are published in the fork's site directory as
-    `popopx.chat/docs/{SIMPLEX,SECURITY}.md`, byte-for-byte from `db0768c21` (`cmp`-verified; blobs
-    `e24275d6` and `73c050c1`), so that `PRIVACY-POPOPX.md` can point at the protocol design and at the
-    audit history instead of at a path this repository deleted. Serving them unchanged is the point — an
-    edited copy would be our claim about someone else's security process — which is why they sit next to
-    `docs/UPSTREAM-DISCLAIMER.md`, which says in three lines what they are not: not POPOPX's policy, not
-    our report address (`SECURITY.md` routes issues to `chat@simplex.chat` and names SimpleX Chat Ltd's
-    OpenPGP key fingerprint), and not self-contained (its `/docs/lang/…` and `../blog/…` links resolve on
-    simplex.chat, not here). POPOPX's own contact — `chat@popopx.chat`, and "no security policy published"
-    — is stated beside them in `PRIVACY-POPOPX.md`, not inside them. This does not change item 10: the
-    remaining ~1650 files stay removed, and nothing in this repository deploys the site directory, so the
-    two paths are inert until `popopx.chat` serves them like the `.well-known` files above.
+    **Two upstream documents came back, deliberately** (2026-11-13; re-measured 2026-11-17): the site
+    repository publishes them as `https://popopx.chat/docs/simplex.html` and
+    `https://popopx.chat/security/`, both answering 200, from `docs/SIMPLEX.md` and `docs/SECURITY.md` as
+    they were at the import commit `db0768c21` (blobs `e24275d6` and `73c050c1`). They are no longer
+    verbatim: `SECURITY.md` differs by 4 lines — the two Trail of Bits links made absolute when the blog
+    left this fork, the report address moved to **chat@popopx.chat**, and the sentence pointing at SimpleX
+    Chat Ltd's OpenPGP key replaced by "POPOPX publishes no encryption key for this address" — and
+    `SIMPLEX.md` by 2, both its whitepaper link naming `stable` where upstream's text says `master`. The
+    last two of the first group are assertions about *this* build: left upstream's, a security report would
+    have gone to SimpleX Chat Ltd and the page would claim a key we do not hold. Everything else in them is
+    upstream's, including both assessments, and `docs/UPSTREAM-DISCLAIMER.md` says which parts are. What an
+    earlier note here called "not self-contained" has also gone the other way: the build rewrites the
+    language row's `/docs/lang/fr/SIMPLEX.md` targets to `/docs/lang/fr/simplex.html`, which publish.
+    Re-derive with `diff <(git -C <fork> show db0768c21:docs/SECURITY.md) <site>/docs/SECURITY.md`. This does
+    not change item 10: its 1654 deleted files stay deleted, and nothing in this repository deploys them.
 
 Every modification carries the date of the commit that made it; `git log` is the
 authoritative per-file record.
@@ -412,12 +414,17 @@ each was meant to become. That pass also repaired a compile break this fork ship
   `PRIVACY.md` records, the upstream URLs quoted inside surviving texts, and the `dist-newstyle/**`
   paths that captured commands quote. They are kept here because they are the record of why each
   identifier was held at the time.*
-  **Citation convention adopted 2026-11-13 for that class:** when a surviving file must still point at one of
-  those deleted upstream documents, it cites the pinned blob `simplex-chat@db0768c21` (in URLs,
-  `https://github.com/simplex-chat/simplex-chat/blob/db0768c21/<path>`) — the commit this fork imported from,
-  at which each of the eight cited paths is verified present in this repository's own history. A branch name
-  (`stable`, `master`) was not used for these because four of the eight do not exist on `stable` at all, and a
-  relative path was not used because the file is gone. The exception is the badge service's own RPC protocol:
+  **Citation convention adopted 2026-11-13, corrected 2026-11-17:** when a surviving file must still point at
+  one of those deleted upstream documents, it cites the pinned upstream blob
+  `https://github.com/simplex-chat/simplex-chat/blob/f8776692dfedc27dc3e723231b2ca11e02bedd06/<path>`. That
+  commit is upstream's, and its tree is byte-identical to this fork's own root commit — `git rev-parse
+  db0768c21^{tree} f8776692dfedc27dc3e723231b2ca11e02bedd06^{tree}` prints `a038752ebaf9ede903a7e48d912847bca1589ca8`
+  twice. That is why `db0768c21` stays valid as a *prose* pointer (`simplex-chat@db0768c21`, resolvable with
+  `git show db0768c21:<path>` in this repository) but must not appear in a URL: the commit exists only here,
+  and every `blob/db0768c21` link answered 404 when re-measured on 2026-11-17, while the same path under the
+  upstream SHA answered 200. A branch name (`stable`, `master`) was rejected because it drifts — all six
+  cited paths open on both branches today, but the pinned SHA is the text this fork actually imported.
+  The exception is the badge service's own RPC protocol:
   that specification is now **ours** at `apps/popopx-badge-service/protocol/badges-rpc.md`, with the one
   remaining live instruction that named a deleted directory (`apps/ios/CODE.md`, `apps/multiplatform/CODE.md`)
   moved to the fork's own per-app `plans/` folders instead.
@@ -549,8 +556,11 @@ yet. Before any build of this fork is distributed:
   2026-11-14 — its fingerprints are ours now (see "the other half of the pair" under the signing identity
   below). It still verifies nothing, for a different reason: this fork publishes no APK. The relay presets and the directory/badge service
   still name infrastructure SimpleX Chat Ltd operates, because a preset needs their key material and
-  `popopx.im` relays have none published yet. `chat@popopx.chat` is likewise not reachable until that host
-  serves mail or forwards.
+  `popopx.im` relays have none published yet. `chat@popopx.chat` is unverified rather than known dead:
+  measured 2026-11-17, no MX record is published for the domain (`dig +short MX popopx.chat` is empty
+  while `dig +short A popopx.chat` answers `43.129.4.33` and the site there answers `200`), and the
+  host's SMTP behaviour was not measured - an A-record fallback may accept mail. So nothing here claims
+  the address is dead, and nothing here promises it is read either.
 - **This fork publishes no Android APK.** `.github/workflows/build.yml` builds and signs nothing for
   Android; `scripts/ci/android/release-apk.sh` downloads **upstream's** release APK and verifies
   SimpleX's signing certificate, which is what the emulator smoke test installs. The gradle output
@@ -593,7 +603,7 @@ yet. Before any build of this fork is distributed:
   Still awaiting a ruling, found after it: `README.md:61-68` claims upstream's two user groups exist for questions
   "about POPOPX Chat only", and `full_description.txt:21-23` states in the first person that "**our**
   servers do not have access to this information" about relays this fork does not operate.
-  `SUPPORT_EMAIL` is already `chat@popopx.chat`, which is itself not yet reachable (first bullet) - which is
+  `SUPPORT_EMAIL` is already `chat@popopx.chat`, whose delivery is unverified (first bullet) - which is
   why the front page routes the fork's own questions to the GitHub issue tracker instead.
 - **`popopx-chat-libs` had published no releases at all until 2026-11-16.** The asset names and the source
   they are fetched from are ours (item 6 above), so nothing in this repository could resolve a

@@ -9,11 +9,11 @@ chat side and nothing else.
 
 The wire protocol for the RPC side is
 [`protocol/badges-rpc.md`](protocol/badges-rpc.md), written for this fork from the implementation; upstream's
-longer document is [`docs/protocol/badges-rpc.md`](https://github.com/simplex-chat/simplex-chat/blob/db0768c21/docs/protocol/badges-rpc.md). The web checkout is
+longer document is [`docs/protocol/badges-rpc.md`](https://github.com/simplex-chat/simplex-chat/blob/f8776692dfedc27dc3e723231b2ca11e02bedd06/docs/protocol/badges-rpc.md). The web checkout is
 specified in
-[`plans/badges-codes/2026-08-27-badge-codes.md`](https://github.com/simplex-chat/simplex-chat/blob/db0768c21/plans/badges-codes/2026-08-27-badge-codes.md),
+[`plans/badges-codes/2026-08-27-badge-codes.md`](https://github.com/simplex-chat/simplex-chat/blob/f8776692dfedc27dc3e723231b2ca11e02bedd06/plans/badges-codes/2026-08-27-badge-codes.md),
 whose §9 is the `badge_service.ini` reference, with the implementation plan in
-[`plans/badges-codes/2026-08-31-service-btcpay.md`](https://github.com/simplex-chat/simplex-chat/blob/db0768c21/plans/badges-codes/2026-08-31-service-btcpay.md).
+[`plans/badges-codes/2026-08-31-service-btcpay.md`](https://github.com/simplex-chat/simplex-chat/blob/f8776692dfedc27dc3e723231b2ca11e02bedd06/plans/badges-codes/2026-08-31-service-btcpay.md).
 Earlier plans (`2026-07-30-supporter-badges-v3-ux.md`, `2026-07-31-badges-core-implementation.md`,
 `2026-08-04-badges-mvp-scope.md`) predate the web checkout and describe the RPC-only
 scaffold this service started as.
@@ -35,7 +35,7 @@ purchase that already exists.
 
 ## Build
 
-Build prerequisites and the general contribution flow are in [`docs/CONTRIBUTING.md`](https://github.com/simplex-chat/simplex-chat/blob/db0768c21/docs/CONTRIBUTING.md) — upstream's, cited at the commit this fork imported from; the fork's own build notes are in `FORK.md` and `CHANGELOG-POPOPX.md`.
+Build prerequisites and the general contribution flow are in [`docs/CONTRIBUTING.md`](https://github.com/simplex-chat/simplex-chat/blob/f8776692dfedc27dc3e723231b2ca11e02bedd06/docs/CONTRIBUTING.md) — upstream's, cited at the commit this fork imported from; the fork's own build notes are in `FORK.md` and `CHANGELOG-POPOPX.md`.
 
 ```
 cabal build exe:popopx-badge-service

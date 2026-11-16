@@ -3,6 +3,62 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
+## Unreleased — records and citations, 2026-11-17
+
+Documentation only: no `src/**`, no build file, no asset and no wire value changed in this section.
+
+- **A citation that 404s is not a citation.** Five fork documents linked upstream source with
+  `github.com/simplex-chat/simplex-chat/blob/db0768c21/...`, but `db0768c21` is **this** repository's
+  initial commit - it exists only here - and `blob/<sha>` resolves against the host in the URL. Both
+  halves were ours and the pair named no real object. 9 lines / 5 files (`FORK.md`,
+  `PRIVACY-POPOPX.md`, `apps/popopx-badge-service/README.md`,
+  `apps/popopx-badge-service/protocol/badges-rpc.md`, `apps/popopx-badge-service/web/README.md`) now
+  carry the upstream commit whose tree they were written against -
+  `f8776692dfedc27dc3e723231b2ca11e02bedd06` (= `master` of `simplex-chat/simplex-chat`, measured
+  2026-11-17) - so the link opens upstream's file instead of a 404 on our fork. `db0768c21` stays in
+  these files wherever the text means *"this repository's own initial commit"*, which is a fact about
+  our history rather than an address into theirs. Re-derive both directions, each command excluding this
+  file because this entry quotes both spellings and would otherwise count itself:
+  `git grep -n 'blob/db0768c21' -- . ':!CHANGELOG-POPOPX.md'` → 2 lines, both prose about the convention;
+  `git grep -c 'f8776692dfedc27dc3e723231b2ca11e02bedd06/' -- . ':!CHANGELOG-POPOPX.md'` → 9 lines / 5 files.
+  The rule this generalises: a link is a wire value with a second end, the host that serves it - check
+  that end answers before shipping the text that depends on it.
+- **Links into deleted directories.** `PRIVACY-POPOPX.md` pointed at `/docs/*.md` paths that this
+  repository no longer carries (`git ls-files docs` returns one surviving file, `docs/CLI.md`); they
+  now name the permalinks the site publishes. Gate:
+  `git grep -n 'popopx\.chat/docs/[A-Za-z0-9_.-]*\.md' -- . ':!CHANGELOG-POPOPX.md'` → 0.
+- **Two more sentences this fork outgrew, and one a sweep inverted** (same file):
+  - "popopx.chat is not yet owned or served by this fork, so that address is not yet reachable and no
+    service advertised by this repository is live", and the matching line under **Contact**. Both were
+    written before the site existed; re-measured 2026-11-17 - the domain resolves to `43.129.4.33` and
+    `/`, `/security/`, `/docs/simplex.html`, `/docs/upstream-disclaimer.html` all answer `200`, while
+    `dig +short MX popopx.chat` is **empty**. They now say what is actually unverified (mail delivery,
+    because no MX is published) and name the fallback channel, GitHub issues (`has_issues: true`).
+    Self-contradiction was the tell: the same file links to four `popopx.chat` pages ten lines below
+    the sentence denying that the domain is served.
+  - "chat@popopx.chat, which appears in upstream's files, must not be presented as the contact for
+    this fork: it reaches SimpleX Chat Ltd" - true of `chat@simplex.chat`, nonsense about our own
+    address, and already on the pushed tip. That is the address-sweep reading the *entity* out of the
+    sentence: the fix restores `chat@simplex.chat`. Gate for the class:
+    `git grep -n 'chat@popopx\.chat' -- . ':!CHANGELOG-POPOPX.md' | grep -i 'upstream\|simplex chat ltd\|reaches'`
+    → 1 line
+    (`FORK.md:171`), which correctly describes replacing upstream's encoded relay address with ours.
+- **This file was overtaken by a later action, and says so instead of being rewritten.** The
+  `v7.1.2-popopx.1` section above records "the `popopx-chat-libs` backend releases ... that repository
+  still has no releases". That was true on 2026-11-15 and is not now: `popopx-chat/popopx-chat-libs`
+  has 3 published releases (measured 2026-11-17, `api.github.com/repos/popopx-chat/popopx-chat-libs/releases`
+  = `core-7.1.0.20` 6 assets, `nodejs-addon-cce06d8` 5 assets, `core-7.1.0.14` 6 assets), each named
+  "(mirror of simplex-chat/simplex-chat-libs)" - upstream's bytes, whose pinned SHA-256s are unchanged,
+  under our repository and asset names (ruling 2026-11-16). The 2026-11-15 text stays as it was
+  written, because a dated record is evidence about the date it carries; this bullet is the correction.
+- **Site-side mirror of the same defect class** (repository `popopx.chat-site`, branch `main`, commits
+  `8e60eaa` and `f74c3f3` - unpushed as of this entry): two `popopx-desktop-macos-*.dmg` links that 404
+  (the release above never published a macOS desktop asset, see "Not published here" above), upstream's
+  PGP fingerprint presented as the fork's contact key, the fork loading SimpleX Chat's directory listing
+  into our own pages, and a privacy page that said "no push service is used" while the build presets
+  `ntf3.simplex.im` / `ntf4.simplex.im`. Each was found the same way - the assertion was re-derived from
+  the host or the source that has to back it.
+
 ## v7.1.2-popopx.1 — 2026-11-15 (153 commits after the import point `db0768c21`)
 
 Forked from `github.com/simplex-chat/simplex-chat` at `db0768c21` (2026-11-11), code version

@@ -3,7 +3,7 @@
 This fork's own specification of the **chat-side service RPC** of `popopx-badge-service`. It is derived from
 the implementation, line by line, at the file:line cited in every table; it is not a copy of upstream's
 longer document, which is upstream's
-[`docs/protocol/badges-rpc.md`](https://github.com/simplex-chat/simplex-chat/blob/db0768c21/docs/protocol/badges-rpc.md)
+[`docs/protocol/badges-rpc.md`](https://github.com/simplex-chat/simplex-chat/blob/f8776692dfedc27dc3e723231b2ca11e02bedd06/docs/protocol/badges-rpc.md)
 cited at the commit this fork imported from.
 
 The HTTP checkout (`/api/invoice`, the webhooks, the poller) is **not** specified here — this repository's

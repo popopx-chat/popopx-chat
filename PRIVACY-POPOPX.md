@@ -9,24 +9,34 @@
 
 **POPOPX** — the distributor of this fork, contact **chat@popopx.chat**.
 
-`popopx.chat` is not yet owned or served by this fork, so that address is not yet reachable and no
-service advertised by this repository is live. Until the domain resolves and the mail route exists,
-this fork operates no servers and this statement describes an application, not a service.
+`popopx.chat` serves this project's website: measured 2026-11-17, the domain resolves to
+`43.129.4.33` and `https://popopx.chat/`, `/security/` and the two `/docs/…` pages linked below all
+answer `200`. It publishes **no MX record**, so delivery to **chat@popopx.chat** is not verified:
+send the report either way, and if nothing comes back, open an issue at
+[`popopx-chat/popopx-chat/issues`](https://github.com/popopx-chat/popopx-chat/issues) - issues are
+enabled (`has_issues: true`, measured the same day). The servers this fork does **not** operate are
+listed below; this statement describes an application, not a service POPOPX runs.
 
 ## What the application sends, and to whom
 
 The protocol itself carries no profile: there is no account, no phone number, no email and no
 contact graph on any server. Message routing metadata is separated per connection, so no server
-that the app talks to learns both who you talk to and what you say. For the protocol-level detail
-the upstream design document describes, see [`docs/SIMPLEX.md`](https://popopx.chat/docs/SIMPLEX.md)
-and [`docs/SECURITY.md`](https://popopx.chat/docs/SECURITY.md) — both are upstream's text, published
-here byte-for-byte as the files at `simplex-chat@db0768c21`, and disclaimed as upstream's at
-[`docs/UPSTREAM-DISCLAIMER.md`](https://popopx.chat/docs/upstream-disclaimer.html). **Neither is POPOPX's
-policy**: `SECURITY.md` is SimpleX Chat Ltd's, so the report address it gives (`chat@simplex.chat`) and
-the OpenPGP fingerprint it names are theirs. POPOPX publishes no security policy of its own — report a
-POPOPX issue to **chat@popopx.chat**. These paths live in the fork's site directory and are citable only
-once `popopx.chat` is served (see above); until then the verifiable source of the same text is the pinned
-upstream blob, `https://github.com/simplex-chat/simplex-chat/blob/db0768c21/docs/SIMPLEX.md`.
+that the app talks to learns both who you talk to and what you say. For the protocol-level detail the
+upstream design document describes, see [the platform document](https://popopx.chat/docs/simplex.html),
+and for the audit history [the security policy](https://popopx.chat/security/) — upstream's texts,
+disclaimed as upstream's at
+[`docs/UPSTREAM-DISCLAIMER.md`](https://popopx.chat/docs/upstream-disclaimer.html). POPOPX authors no
+policy of its own: four lines of the security policy are ours — its two Trail of Bits links made
+absolute when the blog left this fork, its report address changed to **chat@popopx.chat**, and the
+sentence telling the reader to encrypt with upstream's published key replaced by one saying **POPOPX
+publishes no key for that address**. The platform document differs from upstream's by one word used
+twice: its whitepaper link names the `stable` branch, not `master`. So report a POPOPX issue to
+**chat@popopx.chat**, unencrypted unless you have a key from elsewhere, and read the cited assessments
+as SimpleX Chat Ltd's process rather than a POPOPX claim about these builds. The text as imported is
+verifiable at
+`https://github.com/simplex-chat/simplex-chat/blob/f8776692dfedc27dc3e723231b2ca11e02bedd06/docs/` —
+this fork's own import commit `db0768c21` carries that same tree but is not a ref in upstream's
+repository, so a `blob/db0768c21` URL answers 404.
 
 Two things a privacy statement normally has to disclose are worth stating explicitly for a fork:
 
@@ -65,6 +75,10 @@ here describing what it stores and for how long, before it is enabled in the app
 
 **chat@popopx.chat** — security and privacy contact for this fork.
 
-The address is not reachable until `popopx.chat` is served (see "Who operates this build" above).
-`chat@popopx.chat`, which appears in upstream's files, must not be presented as the contact for
-this fork: it reaches SimpleX Chat Ltd.
+No MX record is published for `popopx.chat` - measured 2026-11-17, `dig +short MX popopx.chat` is
+empty while the domain resolves and its website answers `200` - so delivery to this address is not
+verified. If a report gets no acknowledgement, open an issue at
+[`popopx-chat/popopx-chat/issues`](https://github.com/popopx-chat/popopx-chat/issues) instead.
+`chat@simplex.chat`, which is the address upstream's files name, must not be presented as the contact
+for this fork: it reaches SimpleX Chat Ltd. The two are not interchangeable, and a report sent there
+about a POPOPX build is a request to a company that does not distribute it.
