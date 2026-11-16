@@ -89,7 +89,7 @@ Server validation (`validateServers_`) now returns both errors and warnings.
 | Encrypt local files | Encrypt media and files stored on device |
 | Auto-accept images | Automatically download received images |
 | Link previews | Generate link previews for sent URLs |
-| SimpleX link mode | Description / Full link / Via browser |
+| POPOPX links | Description / Full link / Via browser |
 | Chat previews | Show message previews in chat list |
 | Save last draft | Remember unsent message drafts |
 | Delivery receipts | Enable/disable read receipts globally |

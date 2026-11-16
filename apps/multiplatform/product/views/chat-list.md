@@ -49,7 +49,7 @@ The toolbar supports two layout modes controlled by `appPrefs.oneHandUI`:
 
 Behavior:
 - Filters chat list in real-time by contact/group name via `filteredChats()`
-- Detects pasted SimpleX links (`strHasSingleSimplexLink`) and triggers `planAndConnect()` connection dialogue
+- Detects pasted POPOPX links (`strConnectTarget`) and triggers `planAndConnect()` connection dialogue
 - In one-hand UI mode, search bar appears below tag filters with IME spacer; in standard mode, above tag filters
 
 ### Chat Filter Tags (`TagsView`)

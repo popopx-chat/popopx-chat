@@ -21,7 +21,7 @@ Source: `common/src/commonMain/kotlin/chat/popopx/common/views/chatlist/ChatList
 
 ## Executive Summary
 
-The Chat List is the landing screen of POPOPX Chat, rendering all conversations for the active user. Built around `ChatListView` (line 179 in `ChatListView.kt`), it provides a searchable, filterable `LazyColumn` of chat previews with a toolbar, tag-based filtering, and a user-switching side panel. The view adapts between one-hand UI mode (toolbar at bottom, reversed list) and standard mode (toolbar at top). Search also accepts SimpleX links for direct connection.
+The Chat List is the landing screen of POPOPX Chat, rendering all conversations for the active user. Built around `ChatListView` (line 179 in `ChatListView.kt`), it provides a searchable, filterable `LazyColumn` of chat previews with a toolbar, tag-based filtering, and a user-switching side panel. The view adapts between one-hand UI mode (toolbar at bottom, reversed list) and standard mode (toolbar at top). Search also accepts POPOPX links for direct connection.
 
 ---
 
@@ -139,7 +139,7 @@ sealed class ActiveFilter {
 
 The `filteredChats` function (line ~1474) applies filters in this order:
 
-1. **SimpleX link match:** If a pasted link resolved to a known contact/group, show only that chat.
+1. **POPOPX link match:** If a pasted link resolved to a known contact/group, show only that chat.
 2. **Text search:** Case-insensitive match against `chat.chatInfo.chatViewName`, `chat.chatInfo.fullName`, and `chat.chatInfo.localAlias`.
 3. **Active filter:**
    - `PresetTag`: Matches chat type and characteristics (e.g., `CONTACTS` filters `ChatInfo.Direct`, `GROUPS` filters `ChatInfo.Group`).
@@ -150,7 +150,7 @@ The `filteredChats` function (line ~1474) applies filters in this order:
 
 `ChatListSearchBar` (line ~765) provides:
 - Text input with search icon.
-- SimpleX link detection: When a pasted string contains a single SimpleX link, it triggers `planAndConnect` for connection, suppressing normal search.
+- POPOPX link detection: When a pasted string contains a single POPOPX link, it triggers `planAndConnect` for connection, suppressing normal search.
 - Unread filter toggle button (right side, when search is empty).
 
 ---

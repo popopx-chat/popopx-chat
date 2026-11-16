@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Create new contacts, groups, or connect with others via one-time invitation links or by scanning/pasting SimpleX links. This is the primary entry point for establishing new E2E encrypted connections.
+Create new contacts, groups, or connect with others via one-time invitation links or by scanning/pasting POPOPX links. This is the primary entry point for establishing new E2E encrypted connections.
 
 ## Route / Navigation
 
@@ -50,10 +50,10 @@ Displayed when `selection == CONNECT`:
 | Element | Description |
 |---|---|
 | QR code scanner | Camera-based QR code scanner (`showQRCodeScanner` state) |
-| Paste link field | Text field for pasting a SimpleX link (`pastedLink`) |
+| Paste link field | Text field for pasting a POPOPX link (`pastedLink`) |
 | Connect button | Initiates connection via `planAndConnect()` |
 
-When a valid SimpleX link is detected:
+When a valid POPOPX link is detected:
 1. `planAndConnect()` is called with the link URI
 2. If the link matches a known contact, filters to that chat
 3. If the link matches a known group, filters to that group

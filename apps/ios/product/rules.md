@@ -119,7 +119,7 @@
 **Spec:** [spec/client/chat-view.md](../spec/client/chat-view.md)
 
 ### RULE-21: Relay links cannot be used to connect
-**Rule:** SimpleX links with path `/r` (relay addresses) MUST be rejected when users attempt to connect. An explanatory alert is shown instead.
+**Rule:** POPOPX links with path `/r` (relay addresses) MUST be rejected when users attempt to connect. An explanatory alert is shown instead.
 **Enforced by:** `ContentView.swift` (`connectViaUrl_` early return for `/r` path), `NewChatView.swift` (`planAndConnect` guard for `.popopxLink(_, .relay, _, _)`).
 **Spec:** [spec/client/navigation.md](../spec/client/navigation.md)
 

@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Create new contacts, groups, or connect with others via one-time invitation links or by scanning/pasting SimpleX links. This is the primary onramp for establishing new E2E encrypted connections.
+Create new contacts, groups, or connect with others via one-time invitation links or by scanning/pasting POPOPX links. This is the primary onramp for establishing new E2E encrypted connections.
 
 ## Route / Navigation
 
@@ -49,7 +49,7 @@ Displayed when `selection == .connect`:
 | Element | Description |
 |---|---|
 | QR code scanner | Camera-based `CodeScanner` view for scanning SimpleX QR codes |
-| Paste link field | Text input for pasting a SimpleX link manually |
+| Paste link field | Text input for pasting a POPOPX link manually |
 | Connect button | Initiates connection via the pasted/scanned link |
 
 Handled by `ConnectView` sub-view with `showQRCodeScanner` state.

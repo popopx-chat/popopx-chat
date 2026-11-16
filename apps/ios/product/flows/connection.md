@@ -35,7 +35,7 @@ Establishing contact between two SimpleX Chat users. SimpleX uses no user identi
 
 ### 2. Connect via Link
 
-1. User receives a SimpleX link (pasted, scanned, or opened via URL scheme).
+1. User receives a POPOPX link (pasted, scanned, or opened via URL scheme).
 2. If opened via deep link: `SimpleXApp.onOpenURL` sets `chatModel.appOpenUrl`.
 3. For manual entry: User pastes link in `NewChatView`.
 4. First, `apiConnectPlan(connLink:inProgress:)` is called to validate:

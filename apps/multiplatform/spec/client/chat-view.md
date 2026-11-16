@@ -305,7 +305,7 @@ Opened via the `info` callback for group chats. Displayed in `ModalManager.end`.
 
 Preloads group members (`setGroupMembers`) and group link (`apiGetGroupLink`).
 
-Key sections: group profile, group link, member list with roles, group preferences (disappearing messages, direct messages, full deletion, voice, files, SimpleX links, history), member admission, welcome message, reports view, and group deletion/leave.
+Key sections: group profile, group link, member list with roles, group preferences (disappearing messages, direct messages, full deletion, voice, files, POPOPX links, history), member admission, welcome message, reports view, and group deletion/leave.
 
 ---
 
