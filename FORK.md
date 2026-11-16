@@ -38,7 +38,7 @@ summary:
    repository (`AppUpdater.kt:188`), so the CI name, the app literal, the API repository and the
    docs/website URLs are one value with four readers — moving any subset fails silently, with no
    error in the app. The packaging *producers* had been renamed earlier
-   (`make-deb-linux.sh:57` → `popopx_${ARCH}.deb`, `desktop/build.gradle.kts:72,81,124` →
+   (`make-deb-linux.sh:58` → `popopx_${ARCH}.deb`, `desktop/build.gradle.kts:72,81,123,125` →
    `packageName = "POPOPX"/"popopx"`), while the CI steps that locate their output still globbed the
    upstream spellings; those seven readers (4 in `build.yml`, 3 in `desktop-linux.yml`) now derive the
    name from the build tree instead of hard-coding it.
@@ -73,22 +73,39 @@ summary:
    POPOPX package and reports success. The digest *values* in those pins still describe upstream's
    builds; the next `packages_release.py prepare` rewrites them, and that is also the first run that can
    resolve a release published under these names, because `popopx-chat-libs` had no releases when this was
-   written. Measured 2026-11-16 it hosts two, and they are not enough for this script: `release_status`
-   (`:251`) now answers `published` for both of those tags, while `release_digests` (`:228`) still returns
-   nothing because it requires *every* asset of `LIBS_ASSETS` (`:101`) / `ADDON_ASSETS` (`:117`) to be present
-   — so `download_asset` (`:961`) exits "is not published with a digest" and `prepare` cannot pin from a
-   half-published release. That refusal is the correct behaviour, not a second bug.
+   written. How many it has now is a query, not a fact to remember: `gh api
+   repos/popopx-chat/popopx-chat-libs/releases --jq '.[] | .tag_name + " " + (.assets | length | tostring)'`
+   read **three** tags on 2026-11-16 (tip `012ec8373`) — `core-7.1.0.20` with 6 assets, `nodejs-addon-cce06d8`
+   with 5, `core-7.1.0.14` with 6. Two of those tags existed when this item was written, one asset each, and
+   the gap they left was this script's refusal, which the rule still explains correctly: `release_status`
+   (`:251`) answers `published` from the tag alone, while `release_digests` (`:228`) returns nothing unless
+   *every* asset of `LIBS_ASSETS` (`:101`, 6 names) / `ADDON_ASSETS` (`:117`, 5) is present, so `download_asset`
+   (`:961`) exits "is not published with a digest" and `prepare` cannot pin from a half-published release.
+   Measured against those two lists on 2026-11-16 the published sets are complete — the same 6 zip names and
+   5 `.node` names, so the refusal no longer fires for these tags and #116 is what closed it. The refusal
+   itself is the correct behaviour, not a second bug, and it is what will fire on the next partial release.
 
-7. **References to the SMP dependency** (2026-11-13) — 144 of the 446 `simplexmq` occurrences became
-   `popopxmq`: the contributor instructions (`docs/CONTRIBUTING.md` and its `pl` translation,
+7. **References to the SMP dependency** (2026-11-13) — the denominator and the moved count are commands,
+   because the tree they were read from moved under them: `git grep -o 'simplexmq' 8e6d62f19^ | wc -l` reads
+   **444** and `git show 8e6d62f19 -U0 --format='' | grep '^-' | grep -o 'simplexmq' | wc -l` reads **143**,
+   where this item printed 446 and 144. Re-measured on tip `012ec8373` the spelling survives as **24**
+   occurrences in **8** files (`git grep -o 'simplexmq' | wc -l`; `-l` for the files): 18 of the 24 are the
+   records, the plan and the legal texts that hold upstream's name on purpose, the other 6 are
+   `packages/popopx-chat-mcp/**` plus one literal in `src/Popopx/Chat/Remote/Protocol.hs`. This paragraph
+   quotes the spelling it counts, so a recount taken after reading it runs higher.
+   What the tier moved: the contributor instructions (`docs/CONTRIBUTING.md` and its `pl` translation,
    `docs/contributing/PROJECT.md`, `scripts/ci/README.md`, `scripts/ci/desktop-linux/README.md`), the
    operator and product docs a POPOPX reader follows (`README.md`, `docs/SERVER.md`,
    `docs/XFTP-SERVER.md`, `docs/CLI.md`, `docs/SIMPLEX.md`, `docs/SECURITY.md` and their
    `pl`/`fr`/`cs` translations), the iOS product/spec layer (`apps/ios/product/glossary.md`,
    `apps/ios/product/rules.md`, `apps/ios/spec/architecture.md`), the website's nav item, and one link
-   that was simply broken: `apps/ios/Shared/Views/UserSettings/VersionView.swift:40` rendered
-   "popopxmq: v… (commit)" hyperlinked into **upstream's** commit list, so every build of the settings
-   screen 404ed on our own version information.
+   that was simply broken: the settings screen rendered "popopxmq: v… (commit)" hyperlinked into
+   **upstream's** commit list, so every build of that screen 404ed on our own version information — the line
+   is `:40` at `8e6d62f19^` (`git show 8e6d62f19^:apps/ios/Shared/Views/UserSettings/VersionView.swift`) and
+   `:41` on this tip, where the same string names `popopx-chat/popopxmq`. Of the paths just listed every `docs/**` and `website/**` one
+   is gone — item 10 deleted those trees the same day — so the surviving readers are `README.md`,
+   `scripts/ci/**` and `apps/ios/{product,spec}/**` (`git ls-files docs/ | wc -l` reads 0); that is why the
+   counts above are commands rather than this list.
    A reference moved only where the same thing exists in `popopxmq`, which is not string equality: the
    fork renamed its own files, so `protocol/simplex-messaging.md` is `protocol/popopx-messaging.md` and
    `src/Simplex/**` is `src/Popopx/**`; and because the fork has one branch (`master`, its
@@ -109,9 +126,12 @@ summary:
    docs are the opposite case, where the download is an instruction to a third party run against a
    server that has to work today — see "The server artifacts" below.
 
-8. **The site host where a client or a user follows it** (2026-11-13) — 378 of the 680 remaining
-   `https://simplex.chat` occurrences outside `website/**` became `https://popopx.chat`, per file, over
-   300 lines / 83 files: iOS Swift (`Views/Onboarding`, `Views/Chat/ChatItem`, the snapshot harness's
+8. **The site host where a client or a user follows it** (2026-11-13) — the tier moved 378 of the remaining
+   `https://simplex.chat` occurrences outside `website/**` to `https://popopx.chat`, and the shape of the work
+   is one command wide: `git show d7635b53d -U0 --format=''` adds the new host on **301 lines** in
+   **84 files** once `website/**` is excluded, and the denominator it worked from is `git grep -o
+   'https://simplex\.chat' d7635b53d^ -- ':!website' | wc -l` = **679** — one below the 680 this item first
+   printed. In detail: iOS Swift (`Views/Onboarding`, `Views/Chat/ChatItem`, the snapshot harness's
    markdown fixtures), Kotlin multiplatform onboarding, `scripts/flatpak/com.popopxchat.popopx.metainfo.xml`
    (AppStream `homepage`/`help`/`donations` URLs a store and `appstreamcli` read), `scripts/ios`, the
    badge/directory/support-bot packages, `README.md`, `docs/guide`, `docs/FAQ.md`, the Node/Python SDK
@@ -121,16 +141,27 @@ summary:
    own relay serves, with the test mirrors agreeing with it — and `apps/popopx-badge-service/web` renders
    a contact footer whose visible label had to move with its `href` (`web/test/main.test.ts:483` asserts
    the label, so the pair moved together).
-   Held, 302 occurrences: 135 in the 23 generated `apps/ios/POPOPX Localizations/*.xliff` catalogs
+   Held, 302 occurrences as this tier measured them: 135 in the 23 generated `apps/ios/POPOPX Localizations/*.xliff` catalogs
    (regenerated from source strings by Xcode — hand-editing them guarantees a drift the next build
    undoes), 42 carrying an encoded SMP/XFTP address or key, 124 in upstream's published text (`blog/`,
    `plans/`, `CHANGELOG.md`, `PRIVACY.md`, `docs/lang/`, `docs/protocol/`), 1 more protocol-document match.
-   Reconcile a recount before suspecting a missed site: `git grep -o 'https://simplex\.chat'` outside
-   `website/**` reads **306** on this tree, not 302, because 4 of those occurrences are this file and
-   `CHANGELOG-POPOPX.md` *quoting* the old spelling to explain the ruling. The same command on the
+   That composition does not survive item 10, which deleted `blog/`, `plans/` and `docs/` the same day, so the
+   residue is a command rather than a memory: `git grep -o 'https://simplex\.chat' -- ':!website' | wc -l`
+   read **306** when this paragraph was written and reads **162** on tip `012ec8373` — 135 of them still the
+   catalogs above, the other 27 in 13 files: 12 in `CHANGELOG.md` and 2 in `PRIVACY.md` (upstream's own
+   records, the only survivors of the 124), 4 in these two records quoting the old spelling to explain the
+   ruling, 6 in the app strings that reach upstream's moderation article and upstream-hosted contact/group
+   examples (`ChatTypes.swift`, `CIFileView.kt`, `GroupLinkView.swift`, both `UserAddressView`s,
+   `ContactConnectionInfoView.kt`), and 1 each in `README.md`, `fastlane/…/full_description.txt` and
+   `.github/ISSUE_TEMPLATE/question.yml`. The held *classes* are unchanged — a host a user or a crawler
+   follows moves; upstream's own text, an upstream payload and a regenerated catalog do not — so the number
+   fell because the files left, not because a hold was overridden, and a recount taken on a later tip moves
+   whenever these records rewrite the sentence that quotes the spelling. The same command on the
    parent of `d7635b53d` reads 679, which is the denominator this item moves 378 of; the bare and
-   subdomain forms (`simplex.chat`, `directory.simplex.chat`, `chat.simplex.app`) are a separate count of
-   582 and were not this tier's subject.
+   subdomain forms (`simplex.chat`, `directory.simplex.chat`, `chat.simplex.app`) are a separate, **nested**
+   count — without the `https://` it reads 298 here against 956 at `d7635b53d^`, and it contains every
+   occurrence above, so the 582 first printed beside them is neither additive nor reproducible by that
+   command.
    The 42 payload links are the reason this was not one find-and-replace: for a *contact* the address is
    now ours by ruling and it became `mailto:chat@popopx.chat` (item 9), and for a *group invitation* the
    group exists on upstream's relay, so neither the host nor the payload may move alone.
@@ -180,11 +211,16 @@ authoritative per-file record.
 11. **File and artefact names were the last identifier tier** (2026-11-13) — 45 of the 67 tracked paths
     still named "simplex" moved with their readers (13 Kotlin files, 2 desktop snapshot baselines, 4
     desktop launcher artifacts, 2 build-reproduction scripts + 2 CI readers, 2 support-bot test mocks,
-    22 artwork files with their `branding/source-svg/` mirrors); 20 of the 67 are held and 2 were deleted: the held 20 are installed package paths
-(`packages_release.py test-names` owns those names); the 2 deleted were
+    22 artwork files with their `branding/source-svg/` mirrors); 20 of the 67 were held and 2 were deleted. The
+    held set is a command, not a memory: `git ls-files | grep -i simplex | wc -l` reads **18** on tip
+    `012ec8373`, and all 18 are installed package paths — 16 under `packages/popopx-chat-python/src/simplex_chat/`
+    plus `packages/popopx-chat-nodejs/cpp/simplex.{cc,h}` — so the hold is intact and the two that fell away
+    fell to a later tier rather than to drift: `5bddc33ae` moved the SDK facade
+    `packages/popopx-chat-nodejs/src/simplex.{d.ts,js}` to `popopx.{d.ts,js}` the day after this item was
+    written (`packages_release.py test-names` owns the 18 that remain); the 2 deleted were
 `branding/source-svg/moko__ic_simplex_{dark,light}@4x.svg`, byte-identical duplicates of their
 already-renamed counterparts and read by nothing, so a rename could only have collided with the file
-each was meant to become That pass also repaired a compile break this fork shipped with:
+each was meant to become. That pass also repaired a compile break this fork shipped with:
     the display-copy tier `82130779f` renamed Kotlin declarations and left their 10 imports behind, so
     `:common:compileKotlinDesktop` failed in CI and no desktop artifact could be produced. Nothing on
     this machine compiles Kotlin, which is why it took a CI run to find it; `kt_import_gate.py` in the
@@ -243,19 +279,34 @@ each was meant to become That pass also repaired a compile break this fork shipp
     `exe:popopx-chat`, because `5fd42d793` renamed the executable and the `COPY` target and left the remote and
     `CHAT_REF` untouched. The relay image has therefore been unbuildable since 2026-11-12, and
     `docker-compose.yaml:8` defaulted `CHAT_REF` to the same commit, so neither path worked. Both now name this
-    repository and are pinned to a recorded master commit that does declare the executable (`a51c59355`). Stated
+    repository and are pinned by `a51c59355` — the commit that made the repair, which an earlier revision of
+    this sentence mistook for the pin itself. The pin is read, not
+    remembered: `grep -n 'CHAT_REF' scripts/relay/Dockerfile` shows `967cd6e88ae1e88eaa4078ecc4fa9aa07f4fe317`
+    at `:6`, and `docker-compose.yaml:8` defaults to the same SHA. Stated
     as statically verified, because that is all it was: no `docker build` was run here, and the checks were that
     `executable popopx-chat` and `flag client_postgres` are declared at that commit, that
     `scripts/cabal.project.local.linux` exists there, and that all ten switches `entrypoint.py` passes are
     parsed there. The pin was first read from the locally recorded `origin/master` because neither egress path
     reached GitHub; it was confirmed against the remote the same day, when direct egress answered
     `967cd6e88ae1e88eaa4078ecc4fa9aa07f4fe317 refs/heads/master`, so at that moment the pin was the live master tip.
-    It no longer is: the push that landed this tier moved master to
-    `d591bc28e243c8acf678927ca67c2ace9d9c265a`, twelve commits ahead of the pin. The pin is an ancestor that still
+    It has not been the tip since the next push, and this sentence now gives the command instead of a SHA:
+    measured 2026-11-16 on tip `012ec8373`, `git rev-list --count 967cd6e88..HEAD` reads **16** and
+    `git rev-list --count origin/master..HEAD` reads **0** — the branch is pushed, so the gap is a two-command
+    fact in any clone rather than something to trust here. An earlier revision of this paragraph named
+    `d591bc28e` and "twelve commits ahead", which was true for the few hours between two pushes; that is the
+    trap, not the number. The pin is an ancestor that still
     fetches and still declares everything the entrypoint reads, and bumping it to a CI-validated commit stays a
     deployment decision - whoever advances a deployment moves `Dockerfile:6` and `docker-compose.yaml:8` together.
 
-    The naming tier that ran after it moved the phrase "SimpleX link", 59 of its 64 occurrences: `f2a262472` the
+    The naming tier that ran after it moved the phrase "SimpleX link", 59 of its 64 occurrences — both numbers
+    are commands on the commits, not memory: `git grep -o 'SimpleX link' f2a262472^ | wc -l` reads **64**, and
+    `for c in f2a262472 5932bccee bb6a7c4ca a77fe94dd 57b8a0bb3; do git show $c -U0 --format='' | grep '^-'; done | grep -o 'SimpleX link' | wc -l`
+    reads **59**. The residue is smaller than 64 − 59 because three of those five were this fork's own record
+    quoting the phrase to explain the ruling: `git grep -o 'SimpleX link' a77fe94dd` lists 5, and the same
+    command with `':!CHANGELOG-POPOPX.md'` added leaves the 2 that are genuinely held — `CHANGELOG.md:205` and
+    `scripts/flatpak/com.popopxchat.popopx.metainfo.xml:344`, both upstream release notes this fork does not
+    author (today the whole family reads 10 in 4 files, 8 of them records quoting it). The five commits:
+    `f2a262472` the
     directory service's group notice with its three verbatim test mirrors and five hspec titles, `5932bccee` the
     MCP server's schema text and the sentence it throws, `bb6a7c4ca` the generated bot-API and SDK docs,
     `a77fe94dd` the two clients' product and spec documents, `57b8a0bb3` the name-format examples and the field
@@ -275,15 +326,30 @@ each was meant to become That pass also repaired a compile break this fork shipp
 
 ## What was deliberately NOT changed
 
-- **Copyright and attribution.** The `author` / `maintainer` / `copyright` fields of
-  `popopx-chat.cabal`, the three `Copyright (C) 2026 SimpleX Chat Ltd` asset-licence lines
-  and the ~78 company-name references in the privacy, licence and legal texts are retained
-  verbatim, as AGPL-3.0 §7 requires (and §4 forbids removing). It used to add "this codebase carries no
+- **Copyright and attribution.** `author: simplex.chat` and `copyright: 2020-22 simplex.chat` in
+  `popopx-chat.cabal:11,13` are verbatim from `db0768c21`; `maintainer:` is **not** — it reads
+  `chat@popopx.chat` (`:12`) because item 9 moved the contact, so this item's earlier "the `author` /
+  `maintainer` / `copyright` fields are retained verbatim" was true of two of the three. The three
+  `Copyright (C) 2026 SimpleX Chat Ltd` asset-licence lines are retained (they are the three
+  `ASSETS_LICENSE.md`: `assets/`, `apps/ios/POPOPX Snapshots/References/` and the desktop snapshot baselines,
+  and `git grep -c 'Copyright (C) 2026 SimpleX Chat Ltd'` reads one in each), and so are the company-name
+  references in the privacy, licence and legal texts — that count is a command:
+  `git grep -o 'SimpleX Chat Ltd' -- PRIVACY.md PRIVACY-POPOPX.md LICENSE NOTICE TRADEMARK-POPOPX.md
+  AGPL-COMPLIANCE-POPOPX.md ASSETS_LICENSE-POPOPX.md assets/ASSETS_LICENSE.md | wc -l` reads **58** (41 of
+  them in `PRIVACY.md`, and 0 in `LICENSE`, which names the licence rather than the licensee), and
+  repo-wide **134**; the "~78" first printed here does not reproduce under either. AGPL-3.0 §7 requires the
+  retention (and §4 forbids removing it). It used to add "this codebase carries no
   per-file copyright headers, so there is nothing else to preserve" - that is false, and since 2026-11-15 the
-  headers are preserved: **297 files** (222 Swift, 69 `.strings`, 4 `.h`, 2 `.m`) carry upstream's holder line
-  verbatim from `db0768c21` with `Modifications Copyright © 2026 POPOPX Chat.` directly beneath it, and 116
-  user-visible `NSHumanReadableCopyright` values (62 `.strings`, 54 catalog entries) stay POPOPX on purpose,
-  because that string names the bundle we ship. See `AGPL-COMPLIANCE-POPOPX.md` §5.
+  headers are preserved: `git grep -l 'Modifications Copyright © 2026 POPOPX Chat' | wc -l` reads **299** on
+  tip `012ec8373` — 222 Swift, 69 `.strings`, 4 `.h`, 2 `.m`, and 2 `.md` that are records quoting the line
+  (`AGPL-COMPLIANCE-POPOPX.md` and this file), which is why this item printed 297 (222+69+4+2) and why a
+  recount taken after reading this sentence runs higher. All 299 also carry upstream's holder line above the
+  POPOPX one (`Copyright © <year> SimpleX Chat. All rights reserved.`), which is what the rule preserves. The
+  user-visible copyright strings are 62 `NSHumanReadableCopyright` keys in `.strings` and 32 in the `.xliff`
+  catalogs — `git grep -o 'NSHumanReadableCopyright' -- '*.strings' '*.xliff' | wc -l` reads **94** here and
+  read 94 at `e3652ffc5` too, so the "116 (62 `.strings`, 54 catalog entries)" this item printed does not
+  reproduce and the stable facts are the 62 files and the rule: those strings stay POPOPX on purpose, because
+  that string names the bundle we ship. See `AGPL-COMPLIANCE-POPOPX.md` §5.
 - **Upstream GitHub URLs**, and the dependency references that are not ours to claim — *this bullet
   describes the state before 2026-11-13: the `docs/**`, `plans/**`, `blog/**` and `website/**` paths named
   below were removed by item 10 above, so what remains of this class is the `CHANGELOG.md` /
@@ -329,21 +395,30 @@ each was meant to become That pass also repaired a compile break this fork shipp
   `popopx` filesystem identity — `/etc/opt/popopx{,-xftp}`, `/var/opt/popopx{,-xftp}`,
   `/var/lib/tor/popopx-smp`, the caddy/systemd/docker-compose names — because that is what `popopxmq`
   compiles in (`apps/*/Main.hs defaultCfgPath`) and what its own docs already said. The lines that
-  *obtain* a server did not: `docs/SERVER.md:293` and `:854` still download upstream's release binary
-  and the compose blocks still default to `image: ${SIMPLEX_IMAGE:-simplexchat/smp-server:latest}`,
-  whose `defaultCfgPath` really is `/etc/opt/simplex`. A self-hoster must therefore build the server
-  from `popopxmq` (or set `SIMPLEX_IMAGE` to a POPOPX-built image); with upstream's artifact the
+  *obtain* a server did not — and because item 10 deleted `docs/` the same day (`git ls-files docs/ | wc -l`
+  reads 0 on this tip), the citation is anchored to the import commit where it is still checkable rather than
+  to a path in this tree: `git show db0768c21:docs/SERVER.md` puts the upstream release download at `:293`
+  (`curl -L …/simplexmq/releases/latest/download/smp-server-ubuntu-20_04-x86-64`) and at `:854`, and the two
+  compose blocks at its `:417` and `:483` default to `image: ${SIMPLEX_IMAGE:-simplexchat/smp-server:latest}`,
+  whose `defaultCfgPath` really is `/etc/opt/simplex`. The hold itself is unchanged and is now a rule about
+  whichever operator text we serve, not a live line in this repository; a self-hoster must therefore build the
+  server from `popopxmq` (or set `SIMPLEX_IMAGE` to a POPOPX-built image); with upstream's artifact the
   mounted path and the path the process reads disagree, and the keys land in the container layer.
 - **Cryptographic pre-images** (HKDF info parameters, badge hash inputs, SQLite FFI symbol
   names). Renaming these would silently break key derivation instead of failing to compile.
 - **Anything naming an upstream thing**: upstream operator addresses, the `simplex:` address
   format as understood on the public network, upstream social accounts. An identifier that
   names something belonging to upstream keeps upstream's name, or it stops resolving.
-  Measured again on 2026-11-16 for the last two spelling families. `simplex:/` survives in
-  exactly four tracked files - `POPOPX-REBRAND-PLAN.md` (the question asked *about* it),
+  Measured again on 2026-11-16 for the last two spelling families, with the measuring command in the
+  sentence: `git grep -l 'simplex:/' -- ':!FORK.md' ':!CHANGELOG-POPOPX.md'` reads **four** files and four
+  occurrences - `POPOPX-REBRAND-PLAN.md` (the question asked *about* it),
   `CHANGELOG.md`, `PRIVACY.md` (upstream's sentence about replacing the initial part of an old
   link) and `.github/ISSUE_TEMPLATE/question.yml`, where it sits inside a working upstream
-  invitation URL. And `@directory.simplex` (17 occurrences across the MCP package's `PLAN.md`,
+  invitation URL; none of the four is code, which is why the hold reads as complete. The same command with no
+  exclusions reads 13 occurrences in 6 tracked files - the surplus is this file and `CHANGELOG-POPOPX.md`
+  spelling the old prefix inside the rulings that keep it, and this sentence quotes it again, so a recount
+  taken after reading it runs higher than 13. Take the exclusion form as the answer to "where does it still
+  survive", and the bare form as the answer to "how much of the tree is record". And `@directory.simplex` (17 occurrences across the MCP package's `PLAN.md`,
   `spec/flows.md`, `REFERENCE.md`, `TESTING.md`), `#ridgeline.simplex`, `#agents.simplex` and the
   peer name "SimpleX Directory" stay upstream's spelling, because those documents describe
   connecting to services SimpleX Chat Ltd operates and reach them by their upstream relay
@@ -451,7 +526,7 @@ yet. Before any build of this fork is distributed:
   own row. 20 sites in 18 files: both rows, both URL constants, and the key in the 7 moko locale files,
   the 4 `.lproj` catalogs and the 5 `.xcloc` translation units. The `ic_bigtop_updates` image stays - 11
   other call sites read it for channels generally.
-  Still awaiting a ruling, found after it: `README.md:64-68` claims upstream's two user groups exist for questions
+  Still awaiting a ruling, found after it: `README.md:61-68` claims upstream's two user groups exist for questions
   "about POPOPX Chat only", and `full_description.txt:21-23` states in the first person that "**our**
   servers do not have access to this information" about relays this fork does not operate.
   `SUPPORT_EMAIL` is already `chat@popopx.chat`, which is itself not yet reachable (first bullet) - which is
@@ -465,38 +540,66 @@ yet. Before any build of this fork is distributed:
   inference: **all 17 pinned digests equal upstream's asset digests byte for byte** — the 11 of
   `release.ts:8-18` are the tags `core-7.1.0.20` (6 zips) and `nodejs-addon-cce06d8` (5 `.node`) of
   `simplex-chat/simplex-chat-libs`, the 6 of `_version.py:10-15` are its tag `core-7.1.0.14` — while
-  `popopx-chat/popopx-chat-libs` had 0 releases then (`gh release list`); it has two now, each with a single
-  asset, so a `pip`/`npm` install of the native backend still 404s everywhere except the one pair the CI
-  e2e fetches (below). What 404s is the **name**: `3591a7eba` renamed the asset keys across 44 occurrences in
-  code (`packages_release.py:102-107`+`:119`, the two fetchers `_native.py:92-96`/`libs.ts:68,71`, both pin
-  dictionaries, the four test mirrors, `package-tests.sh:49`) and left the digests where they were, which is
+  `popopx-chat/popopx-chat-libs` had 0 releases then (`gh release list`). How many it has is a query, not a
+  fact to keep: `gh api repos/popopx-chat/popopx-chat-libs/releases --jq '.[] | .tag_name'` read **three**
+  tags on 2026-11-16 (tip `012ec8373`), and `packages_release.py:602` (`libs_repository()`) asks that same
+  repository by default, so the 404 this
+  sentence described is closed at the host. What 404ed was the **name**: `3591a7eba` renamed the asset keys —
+  `git grep -o 'popopx-chat-libs-\|popopx-chat-nodejs-' -- ':!FORK.md' ':!CHANGELOG-POPOPX.md' ':!POPOPX-REBRAND-PLAN.md' | wc -l`
+  reads **52** occurrences in 12 files today (44 when first written; the set grew with the mirrors, and this
+  paragraph quotes the prefix, so a recount taken after reading it runs higher) —
+  `packages_release.py:102-107`+`:117`, the two fetchers `_native.py:92-96`/`libs.ts:68,72`, both pin
+  dictionaries, the four test mirrors, `package-tests.sh:49` — and left the digests where they were, which is
   the one-sided-rename class with a third end a commit cannot move — the host holding the bytes. Two facts
   make this a documented gap rather than an outage: nothing is published to npm or PyPI from this fork either
   (next bullet — no `NPM_SCOPE`/`PYPI_*` variables), so only an install from our own tree reaches it; and
-  `check-pins` would print `core-7.1.0.20 is not published`, but it is an **absent** guard here, because
-  `packages.yml` runs only on pull requests and has never run on this fork, and the script needs
-  Python ≥ 3.11 for `import tomllib` where this machine has 3.9.6.
-  **The linux pair was mirrored on 2026-11-16** (ruling: upstream's bytes, our names), so the two tags
-  `release.ts` names now exist here as published releases of one asset each, both tagged on -libs `master`
-  (`4d00516afe27fa83d4e532ce5f918e7d1f9576b2`):
-  `core-7.1.0.20` → `popopx-chat-libs-linux-x86_64.zip`, 47,719,648 B,
-  `3080a41272f9ca1b670b0faf9bfc67919d0dc0e82defaebb423e1aae1f327af3`;
-  `nodejs-addon-cce06d8` → `popopx-chat-nodejs-linux-x86_64.node`, 163,288 B,
-  `fda77e39a5d38b1132a6a04ef9f9cd2c939a429e709f28c81c3777684ba73603`. Both digests are the pinned ones,
+  `check-pins` used to be the sentence that would print `core-7.1.0.20 is not published` here (`pin_problems`,
+  `packages_release.py:288`); it is an **absent** guard either way, and that half is still what a command
+  shows: `packages.yml` runs only on pull requests and has never run on this fork, and
+  `python3 scripts/ci/packages_release.py check-pins` dies before its first API call on this machine —
+  `ModuleNotFoundError: No module named 'tomllib'` at `packages_release.py:35`, Python 3.9.6, measured
+  2026-11-16, with no interpreter ≥ 3.11 installed here.
+  **The mirror was completed on 2026-11-16** (ruling: upstream's bytes, our names): first the linux pair, one
+  asset per tag (`core-7.1.0.20` → `popopx-chat-libs-linux-x86_64.zip`, 47,719,648 B,
+  `3080a41272f9ca1b670b0faf9bfc67919d0dc0e82defaebb423e1aae1f327af3`; `nodejs-addon-cce06d8` →
+  `popopx-chat-nodejs-linux-x86_64.node`, 163,288 B,
+  `fda77e39a5d38b1132a6a04ef9f9cd2c939a429e709f28c81c3777684ba73603` — both digests are the pinned ones,
   checked twice: on the bytes downloaded from upstream before the upload, and again on an anonymous `curl`
-  of the `browser_download_url` afterwards. **No pin was rewritten** - which was the alternative, and the
-  unverifiable one, since `libs.ts:206-208` only fails the install when the hash matches upstream's build.
+  of the `browser_download_url` afterwards), then every remaining name both pin dictionaries carry.
+  **No pin was rewritten** - which was the alternative, and the
+  unverifiable one: `libs.ts:205-210` throws unless the downloaded bytes hash to the pinned value
+  (`actual !== expected`), so rewriting a pin to whatever a download produced would have made the check
+  pass for any bytes at all and proved nothing about their origin.
   The content is upstream's own and says so: the archive still holds `libs/libsimplex.so` (64,653,952 B)
   and `libHSsimplexmq-7.1.0.16-…-ghc9.6.3.so` among its 165 `libHS*.so`, and the add-on has 240 `simplex`
   strings against 0 `popopx`, including the mangled symbols of the C++ `simplex::` namespace
   (`_ZN7simplex8Receiver…`) - so each release body states that the bytes are SimpleX Chat Ltd's and that
   the POPOPX file name is a hosting convenience. That is the rule this fork follows for content belonging
-  upstream. What the mirror does **not** close: the other 9 `release.ts` assets and all 6 `_version.py`
-  ones are still unhosted, so every non-linux install still 404s, and `check-pins`/`prepare` still cannot
-  pin from this repo because `release_digests` requires every asset of the tag (item 6). It is a hosting
-  act, not the fork's publish lane running - the two switches below stay unprovisioned. **One new
-  hazard:** these tags are not in the inherited `releases.toml`, so the lane's accounting does not know
-  they exist; if `release.ts` is ever re-pinned to a build of ours, the mirrored tags stay behind as
+  upstream. What the mirror does **not** close: these are upstream's builds, so every pinned digest still
+  describes a build this fork did not run, and the fork's own publish lane has still not run (the two
+  switches below stay unprovisioned). What it **does** close is the hosting half, and that is a command, not a
+  number to remember:
+  `gh api repos/popopx-chat/popopx-chat-libs/releases --jq '.[] | .tag_name as $t | .assets[] | $t + " " + .name + " " + .digest'`
+  read **17** assets across the three tags on 2026-11-16 (tip `012ec8373`) — `core-7.1.0.20`'s 6 zips are the 6
+  of `release.ts:8-13`, `nodejs-addon-cce06d8`'s 5 `.node` are `release.ts:14-18`, `core-7.1.0.14`'s 6 zips are
+  `_version.py:10-15` — and comparing those two sets name by name found no pinned asset unhosted, no hosted
+  asset unnamed, and **no digest differing from its pin**. So `release_digests` (`:228`), which returns nothing
+  unless *every* asset of the tag is present, no longer refuses these tags, and `download`/`prepare` can pin
+  from them. That agreement is GitHub's own `sha256:` field per asset, plus `size` compared against upstream's
+  same-tag assets (17/17 equal); it is not a local re-hash of 800 MB — though the add-on was re-hashed today,
+  `curl -sSL .../nodejs-addon-cce06d8/popopx-chat-nodejs-linux-x86_64.node | shasum -a 256` returning the
+  pinned `fda77e39…` and `strings | grep -c` returning **240** `simplex` against **0** `popopx`, so the
+  sentence just above it about the add-on still reproduces. The zip half did not (the download of
+  47,719,648 B did not complete on this line on 2026-11-16).
+  **What the mirror did create is an accounting hazard, and it is in the file, not in the pins:**
+  `releases.toml` is read from -libs over the API (`read_releases`, `:645`), not from this working tree
+  (`git ls-files | grep -c releases.toml` is 0), and its `[core.master]` section stops at
+  `7.1.0.19 = edb783a5…` with **no line for `7.1.0.20`**, so the lane's `latest_libs` (`:273`) cannot select the
+  tag our pin names. `core-7.1.0.14` *is* recorded there, but against upstream's commit `5a02b906…`, while our
+  tag of that name sits on our own history (`bd78134f…`; `core-7.1.0.20` is at `4d00516afe27fa83d4e532ce5f918e7d1f9576b2`
+  and `nodejs-addon-cce06d8` at `616c4549f35237142f6ed793d30769caab8817ce` — all three from
+  `gh api repos/popopx-chat/popopx-chat-libs/tags`, with -libs `master` since advanced to `5105d782…`). If
+  `release.ts` is ever re-pinned to a build of ours, the mirrored tags stay behind as
   published releases of upstream bytes under a `core/master` version the record never claimed.
   **Ruled 2026-11-14: this is not a naming question and not a separate change — it closes with our first
   published release (#56).** Renaming the keys back to `simplex-chat-*` was rejected, because `build.yml`
@@ -527,7 +630,7 @@ yet. Before any build of this fork is distributed:
   `Apple Development: gang sun (RG6JMG38C8)` — a development certificate for a *different* team than the
   `PDBA6XRBQT` our entitlements, provisioning and `ACCESS_GROUP` name. There is no `Developer ID Application`
   identity at all, so a signed, notarized `.dmg` cannot be built locally; on CI the consequence is already
-  handled and was proven in CI — `build.yml:1199-1203` warns and skips when `APPLE_POPOPX_SIGNING_IDENTITY`
+  handled and was proven in CI — `build.yml:1204-1209` warns and skips when `APPLE_POPOPX_SIGNING_IDENTITY`
   is unset, which it is (`gh secret list` is empty). The practical cost of shipping a tag with no Apple
   secrets is therefore a **missing `popopx-desktop-macos-{aarch64,x86_64}.dmg` in the release**, and
   `Platform.desktop.kt:17-18` points the macOS updater at exactly those two names: the updater on macOS would
@@ -623,10 +726,15 @@ yet. Before any build of this fork is distributed:
     hosts" below).
   - *The signing identity is ours — ruled 2026-11-14: `PDBA6XRBQT`.* That closes the question this item was
     waiting on, and it turns out to need **no identifier change**: the association work already names us.
-    Measured before this edit, `PDBA6XRBQT` is 9 occurrences in 6 files here — `KeyChain.swift:13` (the
+    Measured on tip `012ec8373` (2026-11-16), `git grep -o 'PDBA6XRBQT' | wc -l` reads **17** occurrences in 7
+    files — but this paragraph quotes the string it counts, so a recount taken after reading it runs higher.
+    The code side is a command of its own,
+    `git grep -o 'PDBA6XRBQT' -- ':!FORK.md' ':!CHANGELOG-POPOPX.md' ':!POPOPX-REBRAND-PLAN.md' | wc -l`: **6**
+    occurrences in 4 files — `KeyChain.swift:14` (the
     keychain access group), `project.pbxproj:2137` and `:2201` (`DEVELOPMENT_TEAM`),
     `build-desktop-mac.sh:8,10` and `sign-libs-mac.sh:6` (both defaulting to it, both overridable by
-    `APPLE_POPOPX_NOTARIZATION_TEAM_ID`), and the two records — and 3 files in the dependency: the AASA,
+    `APPLE_POPOPX_NOTARIZATION_TEAM_ID`) — and the other 11 are the three records naming it (6 lines here,
+    3 in `CHANGELOG-POPOPX.md`, 2 in `POPOPX-REBRAND-PLAN.md`). In the dependency it is 3 files: the AASA,
     `src/Popopx/Messaging/Notifications/Server/Push/APNS.hs:215` (`appTeamId`) and
     `Push/testpush.sh:3` (`TEAM_ID`). The earlier "three places across two files" counted this tree alone, at
     a moment when its own AASA copy was still in it. All of them must agree with whatever certificate actually
@@ -688,15 +796,20 @@ yet. Before any build of this fork is distributed:
     whole point of the "block nothing" ruling, and it does not extend to the libraries: notarizing them is not
     optional, because `popopx-chat-libs` releases feed the Node.js add-on and the npm packages, so a release
     tag without Apple material goes red at `Build library` rather than publishing an unnotarized `libsimplex`.
-    Measured: that repository has no releases at all yet.
+    The releases of that repository are a query, not a fact to keep: on 2026-11-16 (tip `012ec8373`)
+    `gh api repos/popopx-chat/popopx-chat-libs/releases --jq '.[].tag_name'` read **three** tags —
+    `core-7.1.0.20`, `nodejs-addon-cce06d8`, `core-7.1.0.14`, 17 assets between them. Not one of them was
+    built or notarized here: all 17 are mirrors of upstream's bytes under our names (see the `-libs` bullet
+    under "What is still unset"), which is the sharper way of saying the same thing — the Apple material is
+    missing, not merely unrecorded.
   - *The installer was pointed at this repository.* Ruled 2026-11-13: `install.sh` set
     `APP_NAME="simplex-chat"`, and that variable is the **download value**, not a label — `:82`/`:84` compose
     `https://github.com/$APP_NAME/$APP_NAME/releases/$DOWNLOAD/$APP_NAME-$PLATFORM` from it and `:7` names the
     installed binary, so our own script fetched upstream's binary from upstream's releases and installed it as
     `simplex-chat`; the README then told the reader to run `popopx-chat`, which it had not installed. It now
-    fetches `popopx-chat-*`, matching what our CI publishes (`build.yml:1012`/`:1019`/`:1423`, and
-    `popopx-chat-ubuntu-22_04-x86_64` from the matrix at `:280`/`:281` with the derivation at `:556`), and
-    `README.md:224` pipes the script from `popopx-chat/popopx-chat@master` — the only branch this repository
+    fetches `popopx-chat-*`, matching what our CI publishes (`build.yml:1020`/`:1027`/`:1431`, and
+    `popopx-chat-ubuntu-22_04-x86_64` from the matrix at `:291`/`:292` with the derivation at `:568`), and
+    `README.md:216` pipes the script from `popopx-chat/popopx-chat@master` — the only branch this repository
     has. Held: `$HOME/.simplex/simplex.agent.db` at `:43`, upstream's v0 agent database, which names something
     that really is upstream's. Not retargeted here: the Darwin branch at `:20`-`:24` asks for `macos-x86-64`
     only, so Apple Silicon gets the Intel build — a pre-existing upstream gap that is now reachable rather
@@ -720,8 +833,9 @@ yet. Before any build of this fork is distributed:
   `applinks:*.simplex.im` and its developer twin are **held** by the same ruling: they are inert too, since
   those hosts' `apple-app-site-association` names upstream's appID and therefore opens our app for nobody, so
   deleting them would remove a capability from nobody while making the diff harder to review. Android is
-  **not** touched: an intent filter takes no wildcard host, so `AndroidManifest.xml:94-109` would have to
-  enumerate every relay name we operate — upstream's list is exactly that, 16 explicit `smpN.simplex.im` rows
+  **not** touched: an intent filter takes no wildcard host, so `AndroidManifest.xml:95-110` would have to
+  enumerate every relay name we operate — upstream's list is exactly that, `grep -c 'android:host="smp'` on
+  the file reads **15** explicit `smpN.simplex.im` rows (smp4–smp12 and smp14–smp19; there is no smp13)
   plus `popopx.chat` — and the same no-HTTPS measurement leaves it inert there as well. Two things this
   machine cannot verify and does not claim: the entitlement is checked against the provisioning profile when
   the app is archived (`CODE_SIGN_STYLE = Automatic` in all 12 build configurations of
@@ -738,9 +852,14 @@ yet. Before any build of this fork is distributed:
   - the metainfo `<screenshots><image>` — ruled **keep** on 2026-11-14 (「它是图片不是链接，不删掉」); it is an
     image reference, not a link, and deleting it would leave AppStream's only screenshot empty;
   - **A5 `contentModerationPostLink` — ruled and executed as a repoint to upstream's live article.** The value
-    is one URL with 11 occurrences in 6 files: 2 declarations, 2 imports, 7 reads (this bullet previously
-    described "a paired value with 8 readers"; re-measured). Only the declarations moved —
-    `apps/ios/POPOPXChat/ChatTypes.swift:25` and
+    is one URL, and its set is a command: on tip `012ec8373` (2026-11-16)
+    `git grep -o 'contentModerationPostLink' -- ':!FORK.md' ':!CHANGELOG-POPOPX.md' ':!POPOPX-REBRAND-PLAN.md'`
+    reads **11** occurrences in 6 files, and those 11 are exactly 2 declarations, 2 imports, 7 reads (this
+    bullet previously described "a paired value with 8 readers"; re-measured). The unexcluded recount is 15 in
+    8 files — the surplus is the records, and this sentence names the symbol again, so read it after measuring,
+    not before.
+    Only the declarations moved —
+    `apps/ios/POPOPXChat/ChatTypes.swift:26` and
     `apps/multiplatform/common/src/commonMain/kotlin/chat/popopx/common/views/chat/item/CIFileView.kt:305`
     now name `simplex.chat`, and every reader, the `how_it_works` label and the alert actions are untouched.
     The article is SimpleX Chat Ltd's, so the host that can serve it is theirs too; this is 「上游的东西沿上游
@@ -804,10 +923,10 @@ stands up the equivalent POPOPX service, together with its keys.
 | what it is | where | failure if the host moved alone |
 | --- | --- | --- |
 | badge service contact (an SMP relay + its key, in one address) | `src/Popopx/Chat.hs:74` | **silent**: TLS fingerprint mismatch, retried forever |
-| notification servers preset (`ntf://<key>@ntf3.simplex.im`, `.onion` too) | `src/Popopx/Chat/Library/Commands.hs:167-168` | **silent**: same class. This is the one upstream preset still enabled in the client — the SMP/XFTP presets in `Chat.hs` were emptied, these were not. Kept on purpose: the list is a plain `[NtfServer]` (`Controller.hs:275`, and nothing downstream forces `NonEmpty` — `NtfSubSupervisor.hs:591` returns `Nothing`, `Agent.hs:3283` then fails token registration with `PROHIBITED`), so emptying it would be implementable but only costs push, exactly like the relays cost messaging. It moves with them |
+| notification servers preset (`ntf://<key>@ntf3.simplex.im`, `.onion` too) | `src/Popopx/Chat/Library/Commands.hs:167-168` | **silent**: same class. This is the one upstream preset still enabled in the client — the SMP/XFTP presets in `Chat.hs` were emptied, these were not. Kept on purpose: the list is a plain `[NtfServer]` (`Controller.hs:275`, and nothing downstream forces `NonEmpty` — in the dependency, `popopxmq:src/Popopx/Messaging/Agent/NtfSubSupervisor.hs:591` `getNtfServer` returns `Nothing` for the empty list at its `:595`, and the call site `popopxmq:src/Popopx/Messaging/Agent.hs:3273` then fails token registration with `PROHIBITED` at `:3284`), so emptying it would be implementable but only costs push, exactly like the relays cost messaging. It moves with them |
 | which stored relays count as "presets" | `src/Popopx/Chat.hs:103` `presetDomains = [".simplex.im"]` — `.simplexonflux.com` left with the Flux operator | **silent**: keyed on the host suffix, so renamed relays stop matching any stored row |
-| shared directory listing | the page that read it, `website/src/js/directory.jsc:1` (`/data/`, filter at `:149`), was deleted with `website/` on 2026-11-13; the server half is `apps/popopx-directory-service` and `src/Directory/Listing.hs:94` still records the pair | **silent-empty**: the fetch fails and the page shows no results |
-| badge embed allow-list | `apps/popopx-badge-service/web/src/embed.ts:53` | **silent**: the widget refuses an origin outside `simplex.chat`/`.simplex.chat` and renders blank |
+| shared directory listing | the page that read it, `website/src/js/directory.jsc:1` (`/data/`, filter at `:149`), was deleted with `website/` on 2026-11-13; the server half is `apps/popopx-directory-service` and its `src/Directory/Listing.hs:93-96` still records the pair | **silent-empty**: the fetch fails and the page shows no results |
+| badge embed allow-list | `apps/popopx-badge-service/web/src/embed.ts:56`, inside `trustedHost` (`:46-57`) | **silent**: the widget refuses an origin outside `simplex.chat`/`.simplex.chat` and renders blank |
 | badge purchase deep links | `apps/multiplatform/common/src/commonMain/kotlin/chat/popopx/common/views/badges/BadgeStore.kt:53-54` | **visible**: leaves the app into `badges.simplex.chat` — an upstream-branded page under a POPOPX label |
 | ICE/STUN/TURN defaults | `packages/popopx-chat-webrtc/src/call.ts:355-359` (`stun.simplex.im`, `turn.simplex.im`; the TURN line carries a username and a literal credential) | **visible**: calls fail to connect. Used only when the user configured none (`AppSettings.hs:45` `webrtcICEServers`), and the credential is upstream's to revoke |
 
@@ -847,7 +966,7 @@ rather than fixed, on these measurements:
   and the harness server source.
 - Not a regression either: `Test changed scopes` has **never** succeeded in this repository — over the
   last 100 runs, 36 skipped, 4 failed, 0 succeeded — and it does not run on a tag push (`release_branch`
-  is empty at `build.yml:60`), so no published artifact depends on it.
+  is empty at `build.yml:59`), so no published artifact depends on it.
 - Upstream ran the same step green on an mcp-scoped commit in the same hour (their run `43591265929`),
   which is why the residual is attributed to our build rather than to the runner's egress. The open
   hypothesis, unproven: our client is from a newer SMP protocol era than the software those public
@@ -900,7 +1019,7 @@ to agree. The first verdict is in and it is red: dispatch
 `43657558913` (2026-11-15, 2 h 25 m) rebuilt all seven Linux artefacts and **none of them matched**
 `v7.1.2-popopx.1`, so `_sha256sums` was never written and the last step failed. For the four CLI
 artefacts the reason is visible in the files: the release leg compiles with
-`cabal build -j --enable-tests` (`build.yml:458`) and the reproduce leg with `cabal build -j`
+`cabal build -j --enable-tests` (`build.yml:471`) and the reproduce leg with `cabal build -j`
 (`popopx-chat-reproduce-builds.sh:84`), and this repository tracks no `cabal.project.freeze`, so each
 side lets the solver choose dependency versions under different constraints. (`${{ env.ghc_options }}`
 on that same line adds `--ghc-options=-O0` only when the event is not a `push`, so a tag build runs
