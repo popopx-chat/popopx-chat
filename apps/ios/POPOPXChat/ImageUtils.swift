@@ -363,11 +363,12 @@ public func makeVideoQualityLower(_ input: URL, outputUrl: URL) async -> Bool {
 }
 
 extension AVAsset {
-    public func generatePreview() -> (UIImage, Int)? {
+    public func generatePreview() async -> (UIImage, Int)? {
         let generator = AVAssetImageGenerator(asset: self)
         generator.appliesPreferredTrackTransform = true
         var actualTime = CMTimeMake(value: 0, timescale: 0)
-        if let image = try? generator.copyCGImage(at: CMTimeMakeWithSeconds(0.0, preferredTimescale: 1), actualTime: &actualTime) {
+        if let image = try? generator.copyCGImage(at: CMTimeMakeWithSeconds(0.0, preferredTimescale: 1), actualTime: &actualTime),
+           let duration = try? await load(.duration) {
             return (UIImage(cgImage: image), Int(duration.seconds))
         }
         return nil

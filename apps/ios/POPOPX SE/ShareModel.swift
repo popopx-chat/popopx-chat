@@ -316,10 +316,8 @@ class ShareModel: ObservableObject {
         while await ch.isRunning {
             if CFAbsoluteTimeGetCurrent() - networkTimeout > 30 {
                 await MainActor.run {
-                    self.errorAlert = ErrorAlert(title: "Slow network?", message: "Sending a message takes longer than expected.") {
-                        Button("Wait", role: .cancel) { self.networkTimeout = CFAbsoluteTimeGetCurrent() }
-                        Button("Cancel", role: .destructive) { self.completion() }
-                    }
+                    // the alert's buttons come from ShareView's .alert(errorAlert:): ErrorAlert discards its actions parameter
+                    self.errorAlert = ErrorAlert(title: "Slow network?", message: "Sending a message takes longer than expected.")
                 }
             }
             let r: APIResult<SEChatEvent>? = recvPOPOPXMsg(messageTimeout: 1_000_000)
@@ -452,7 +450,7 @@ fileprivate func getSharedContent(_ ip: NSItemProvider, _ senderProfile: LocalPr
         case .movie:
             if let url = try? await inPlaceUrl(type: type),
                let trancodedUrl = await transcodeVideo(from: url),
-               let (image, duration) = AVAsset(url: trancodedUrl).generatePreview(),
+               let (image, duration) = await AVAsset(url: trancodedUrl).generatePreview(),
                let preview = await resizeImageToStrSize(image, maxDataSize: MAX_DATA_SIZE),
                let cryptoFile = moveTempFileFromURL(trancodedUrl) {
                 try? FileManager.default.removeItem(at: trancodedUrl)

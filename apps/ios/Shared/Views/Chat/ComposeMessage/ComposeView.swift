@@ -352,9 +352,9 @@ enum UploadContent: Equatable {
         return nil
     }
 
-    static func loadVideoFromURL(url: URL) -> UploadContent? {
+    static func loadVideoFromURL(url: URL) async -> UploadContent? {
         let asset = AVAsset(url: url)
-        if let (image, duration) = asset.generatePreview() {
+        if let (image, duration) = await asset.generatePreview() {
             return .video(image: image, url: url, duration: duration)
         }
         return nil
@@ -575,7 +575,7 @@ struct ComposeView: View {
                 .overlay(ToolbarMaterial.material(toolbarMaterial))
                 .ignoresSafeArea(.all, edges: .bottom)
         }
-        .onChange(of: composeState.message) { msg in
+        .onChange(of: composeState.message) { _, msg in
             if updatingCompose {
                 updatingCompose = false
                 return
@@ -612,14 +612,14 @@ struct ComposeView: View {
                 }
             }
         }
-        .onChange(of: chat.chatInfo.sendMsgEnabled) { sendEnabled in
+        .onChange(of: chat.chatInfo.sendMsgEnabled) { _, sendEnabled in
             if !sendEnabled {
                 cancelCurrentVoiceRecording()
                 clearCurrentDraft()
                 clearState()
             }
         }
-        .onChange(of: composeState.inProgress) { inProgress in
+        .onChange(of: composeState.inProgress) { _, inProgress in
             if inProgress {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     composeState.progressByTimeout = composeState.inProgress
@@ -668,7 +668,7 @@ struct ComposeView: View {
                 }
             }
         }
-        .onChange(of: chosenMedia) { selected in
+        .onChange(of: chosenMedia) { _, selected in
             Task {
                 var media: [(String, UploadContent)] = []
                 for content in selected {
@@ -736,7 +736,7 @@ struct ComposeView: View {
             }
             chatModel.removeLiveDummy(animated: false)
         }
-        .onChange(of: chatModel.stopPreviousRecPlay) { _ in
+        .onChange(of: chatModel.stopPreviousRecPlay) { _, _ in
             if !startingRecording {
                 if composeState.voiceMessageRecordingState == .recording {
                     finishVoiceMessageRecording()
@@ -745,7 +745,7 @@ struct ComposeView: View {
                 startingRecording = false
             }
         }
-        .onChange(of: chat.chatInfo.featureEnabled(.voice)) { vmAllowed in
+        .onChange(of: chat.chatInfo.featureEnabled(.voice)) { _, vmAllowed in
             if !vmAllowed && composeState.voicePreview,
                let fileName = composeState.voiceMessageRecordingFileName {
                 cancelVoiceMessageRecording(fileName)

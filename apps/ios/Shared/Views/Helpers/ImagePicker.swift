@@ -126,7 +126,7 @@ struct LibraryMediaListPicker: UIViewControllerRepresentable {
                             try? FileManager.default.removeItem(at: tempUrl)
                             if success {
                                 _ = ChatModel.shared.filesToDelete.insert(convertedVideoUrl)
-                                let video = UploadContent.loadVideoFromURL(url: convertedVideoUrl)
+                                let video = await UploadContent.loadVideoFromURL(url: convertedVideoUrl)
                                 return cont.resume(returning: video)
                             }
                             try? FileManager.default.removeItem(at: convertedVideoUrl)
@@ -175,7 +175,7 @@ struct CameraImageListPicker: View {
 
     var body: some View {
         CameraImagePicker(image: $image)
-            .onChange(of: image) { img in
+            .onChange(of: image) { _, img in
                 if let img = img {
                     images = [UploadContent.simpleImage(image: img)]
                 } else {
