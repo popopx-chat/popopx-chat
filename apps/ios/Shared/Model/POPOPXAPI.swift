@@ -175,7 +175,7 @@ func retryableNetworkErrorAlert(_ e: ChatError) -> (title: String, message: Stri
         title: NSLocalizedString("Connection timeout", comment: "alert title"),
         message: serverErrorAlertMessage(addr)
     )
-    case let .errorAgent(.BROKER(addr, .NETWORK(.unknownCAError))): nil
+    case .errorAgent(.BROKER(_, .NETWORK(.unknownCAError))): nil
     case let .errorAgent(.BROKER(addr, .NETWORK)): (
         title: NSLocalizedString("Connection error", comment: "alert title"),
         message: serverErrorAlertMessage(addr)
@@ -184,7 +184,7 @@ func retryableNetworkErrorAlert(_ e: ChatError) -> (title: String, message: Stri
         title: NSLocalizedString("Private routing timeout", comment: "alert title"),
         message: proxyErrorAlertMessage(serverAddress)
     )
-    case let .errorAgent(.SMP(serverAddress, .PROXY(.BROKER(.NETWORK(.unknownCAError))))): nil
+    case .errorAgent(.SMP(_, .PROXY(.BROKER(.NETWORK(.unknownCAError))))): nil
     case let .errorAgent(.SMP(serverAddress, .PROXY(.BROKER(.NETWORK)))): (
         title: NSLocalizedString("Private routing error", comment: "alert title"),
         message: proxyErrorAlertMessage(serverAddress)
@@ -193,7 +193,7 @@ func retryableNetworkErrorAlert(_ e: ChatError) -> (title: String, message: Stri
         title: NSLocalizedString("Private routing timeout", comment: "alert title"),
         message: proxyDestinationErrorAlertMessage(proxyServer: proxyServer, destServer: destServer)
     )
-    case let .errorAgent(.PROXY(proxyServer, destServer, .protocolError(.PROXY(.BROKER(.NETWORK(.unknownCAError)))))): nil
+    case .errorAgent(.PROXY(_, _, .protocolError(.PROXY(.BROKER(.NETWORK(.unknownCAError)))))): nil
     case let .errorAgent(.PROXY(proxyServer, destServer, .protocolError(.PROXY(.BROKER(.NETWORK))))): (
         title: NSLocalizedString("Private routing error", comment: "alert title"),
         message: proxyDestinationErrorAlertMessage(proxyServer: proxyServer, destServer: destServer)
@@ -570,8 +570,9 @@ private func processSendMessageCmd(toChatType: ChatType, cmd: ChatCommand) async
         var cItem: ChatItem? = nil
         let endTask = beginBGTask({
             if let cItem = cItem {
+                // looked up on the main queue instead of capturing chatModel: this handler is @Sendable
                 DispatchQueue.main.async {
-                    chatModel.messageDelivery.removeValue(forKey: cItem.id)
+                    ChatModel.shared.messageDelivery.removeValue(forKey: cItem.id)
                 }
             }
         })
@@ -2035,7 +2036,7 @@ func apiDeleteMemberSupportChat(_ groupId: Int64, _ groupMemberId: Int64) async 
 
 func apiRemoveMembers(_ groupId: Int64, _ memberIds: [Int64], _ withMessages: Bool) async throws -> (GroupInfo, [GroupMember]) {
     let r: ChatResponse2 = try await chatSendCmd(.apiRemoveMembers(groupId: groupId, memberIds: memberIds, withMessages: withMessages), bgTask: false)
-    if case let .userDeletedMembers(_, updatedGroupInfo, members, _withMessages) = r { return (updatedGroupInfo, members) }
+    if case let .userDeletedMembers(_, updatedGroupInfo, members, _) = r { return (updatedGroupInfo, members) }
     throw r.unexpected
 }
 
@@ -2406,7 +2407,13 @@ func startChat(refreshInvitations: Bool = true, onboarding: Bool = false) throws
         try getUserChatData()
         NtfManager.shared.setNtfBadgeCount(m.totalUnreadCountForAllUsers())
         if (refreshInvitations) {
-            Task { try await refreshCallInvitations() }
+            Task {
+                do {
+                    try await refreshCallInvitations()
+                } catch let error {
+                    logger.error("startChat refreshCallInvitations error: \(responseError(error))")
+                }
+            }
         }
         (m.savedToken, m.tokenStatus, m.notificationMode, m.notificationServer) = apiGetNtfToken()
         _ = try apiStartChat()
@@ -2892,7 +2899,7 @@ func processReceivedMsg(_ res: ChatEvent) async {
                 _ = m.upsertGroupMember(groupInfo, member)
             }
         }
-    case let .connectedToGroupMember(user, groupInfo, member, memberContact):
+    case let .connectedToGroupMember(user, groupInfo, member, _):
         if active(user) {
             await MainActor.run {
                 _ = m.upsertGroupMember(groupInfo, member)
@@ -3169,22 +3176,25 @@ func processReceivedMsg(_ res: ChatEvent) async {
     }
 
     func showUnencryptedCallAlert(_ call: Call, onContinue: @escaping () -> Void) {
+        // only values cross the @Sendable hop: the call is matched by object identity, the model is re-read on the main queue
+        let contactName = call.contact.displayName
+        let callIdentity = ObjectIdentifier(call)
         DispatchQueue.main.async {
             showAlert(
                 NSLocalizedString("Call is not encrypted", comment: "alert title"),
-                message: String.localizedStringWithFormat(NSLocalizedString("%@ accepted the call without end-to-end encryption.", comment: "alert message"), call.contact.displayName),
+                message: String.localizedStringWithFormat(NSLocalizedString("%@ accepted the call without end-to-end encryption.", comment: "alert message"), contactName),
                 actions: {[
                     UIAlertAction(title: NSLocalizedString("End call", comment: "alert action"), style: .destructive) { _ in
                         // the call may have ended, or a new one started with the same contact, while the alert was shown
-                        guard m.activeCall === call else { return }
-                        if let uuid = call.callUUID {
+                        guard let currentCall = ChatModel.shared.activeCall, ObjectIdentifier(currentCall) == callIdentity else { return }
+                        if let uuid = currentCall.callUUID {
                             CallController.shared.endCall(callUUID: uuid)
                         } else {
-                            CallController.shared.endCall(call: call) {}
+                            CallController.shared.endCall(call: currentCall) {}
                         }
                     },
                     UIAlertAction(title: NSLocalizedString("Continue", comment: "alert action"), style: .default) { _ in
-                        if m.activeCall === call { onContinue() }
+                        if let currentCall = ChatModel.shared.activeCall, ObjectIdentifier(currentCall) == callIdentity { onContinue() }
                     }
                 ]}
             )

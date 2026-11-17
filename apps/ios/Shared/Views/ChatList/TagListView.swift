@@ -164,22 +164,26 @@ struct TagListView: View {
     
     private func deleteTag(_ tagId: Int64) {
         Task {
-            try await apiDeleteChatTag(tagId: tagId)
+            do {
+                try await apiDeleteChatTag(tagId: tagId)
 
-            await MainActor.run {
-                chatTagsModel.userTags = chatTagsModel.userTags.filter { $0.chatTagId != tagId }
-                if case let .userTag(tag) = chatTagsModel.activeFilter, tagId == tag.chatTagId {
-                    chatTagsModel.activeFilter = nil
-                }
-                m.chats.forEach { c in
-                    if var contact = c.chatInfo.contact, contact.chatTags.contains(tagId) {
-                        contact.chatTags = contact.chatTags.filter({ $0 != tagId })
-                        m.updateContact(contact)
-                    } else if var group = c.chatInfo.groupInfo, group.chatTags.contains(tagId) {
-                        group.chatTags = group.chatTags.filter({ $0 != tagId })
-                        m.updateGroup(group)
+                await MainActor.run {
+                    chatTagsModel.userTags = chatTagsModel.userTags.filter { $0.chatTagId != tagId }
+                    if case let .userTag(tag) = chatTagsModel.activeFilter, tagId == tag.chatTagId {
+                        chatTagsModel.activeFilter = nil
+                    }
+                    m.chats.forEach { c in
+                        if var contact = c.chatInfo.contact, contact.chatTags.contains(tagId) {
+                            contact.chatTags = contact.chatTags.filter({ $0 != tagId })
+                            m.updateContact(contact)
+                        } else if var group = c.chatInfo.groupInfo, group.chatTags.contains(tagId) {
+                            group.chatTags = group.chatTags.filter({ $0 != tagId })
+                            m.updateGroup(group)
+                        }
                     }
                 }
+            } catch let error {
+                logger.error("TagListView apiDeleteChatTag error: \(responseError(error))")
             }
         }
     }
