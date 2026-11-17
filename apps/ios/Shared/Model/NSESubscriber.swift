@@ -8,7 +8,7 @@
 //
 
 import Foundation
-import POPOPXChat
+@preconcurrency import POPOPXChat
 
 private var nseSubscribers: [UUID:NSESubscriber] = [:]
 

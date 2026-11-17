@@ -47,7 +47,7 @@ public struct ErrorAlert: Error {
     }
 }
 
-extension LocalizedStringKey: @unchecked Sendable { }
+extension LocalizedStringKey: @retroactive @unchecked Sendable { }
 
 extension View {
     /// Bridges ``ErrorAlert`` to the generic alert API.

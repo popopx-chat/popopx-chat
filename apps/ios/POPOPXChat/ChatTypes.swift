@@ -2059,7 +2059,7 @@ public enum ChatInfo: Identifiable, Decodable, NamedChat, Hashable {
         case let .group(groupInfo, _): groupInfo.groupProfile.shortDescr
         case .local: nil
         case let .contactRequest(contactRequest): contactRequest.profile.shortDescr
-        case let .contactConnection(contactConnection): nil
+        case .contactConnection: nil
         case .invalidJSON: nil
         }
     }
@@ -2596,7 +2596,7 @@ public func sameChatScope(_ scope1: GroupChatScope, _ scope2: GroupChatScope) ->
         true
     case (.reports, .memberSupport):
         false
-    case (.memberSupport(groupMemberId_: let groupMemberId_), .reports):
+    case (.memberSupport(groupMemberId_: _), .reports):
         false
     }
 }
@@ -5339,7 +5339,7 @@ public struct AlertInfo: Hashable {
     public var confirm: LocalizedStringKey
 }
 
-extension LocalizedStringKey: Hashable {
+extension LocalizedStringKey: @retroactive Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine("\(self)")
     }
