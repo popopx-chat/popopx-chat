@@ -777,7 +777,7 @@ yet. Before any build of this fork is distributed:
   `simplex-chat/simplex-chat-libs`, the 6 of `_version.py:10-15` are its tag `core-7.1.0.14` — while
   `popopx-chat/popopx-chat-libs` had 0 releases then (`gh release list`). How many it has is a query, not a
   fact to keep: `gh api repos/popopx-chat/popopx-chat-libs/releases --jq '.[] | .tag_name'` read **three**
-  tags on 2026-11-16 (tip `012ec8373`), and `packages_release.py:603` (`libs_repository()`) asks that same
+  tags on 2026-11-16 (tip `012ec8373`), and `packages_release.py:608` (`libs_repository()`) asks that same
   repository by default, so the 404 this
   sentence described is closed at the host. What 404ed was the **name**: `3591a7eba` renamed the asset keys —
   `git grep -o 'popopx-chat-libs-\|popopx-chat-nodejs-' -- ':!FORK.md' ':!CHANGELOG-POPOPX.md' ':!POPOPX-REBRAND-PLAN.md' | wc -l`
@@ -794,6 +794,12 @@ yet. Before any build of this fork is distributed:
   `python3 scripts/ci/packages_release.py check-pins` dies before its first API call on this machine —
   `ModuleNotFoundError: No module named 'tomllib'` at `packages_release.py:35`, Python 3.9.6, measured
   2026-11-16, with no interpreter ≥ 3.11 installed here.
+  That last limitation was worked around rather than accepted, and the suite runs here since: compile the module with
+  `__future__.annotations.compiler_flag` (its `X | None` annotations stay lazy only under that import), put the module object into
+  `sys.modules` before executing it so `from packages_release import …` resolves to that same object, and stand in for
+  `tomllib.loads` over the subset `render_releases()` writes — `[a.b]` headers, optionally quoted, and `"key" = "value"` rows.
+  A one-line `loads = lambda s: {}` does not pass: it drops every recorded version and turns 4 tests red, so any count quoted from a
+  local run names the stand-in that produced it.
   **The mirror was completed on 2026-11-16** (ruling: upstream's bytes, our names): first the linux pair, one
   asset per tag (`core-7.1.0.20` → `popopx-chat-libs-linux-x86_64.zip`, 47,719,648 B,
   `3080a41272f9ca1b670b0faf9bfc67919d0dc0e82defaebb423e1aae1f327af3`; `nodejs-addon-cce06d8` →
@@ -880,19 +886,36 @@ yet. Before any build of this fork is distributed:
     `scope-tests.sh` consumes the types source by path (`npm install … ../popopx-chat-client/types/typescript`), not by version.
   - The guard that was missing: `check-pins` compared the pinned digests against *whatever release hosts the tag*, so a copy
     of someone else's bytes passed it. It now also demands that each pinned `core-<version>` be recorded —
-    `recorded_pin_problems()` at `packages_release.py:783`, called from `check_pins()` at `:966` — because only the ledger says
-    who built the bytes. At this branch tip it fails on purpose: the pins still name `core-7.1.0.20`, which is hosted and unrecorded.
-    Measured against the live repository it reports two problems and no digest mismatch —
+    `recorded_pin_problems()` at `packages_release.py:788`, called from `check_pins()` at `:969` — because only the ledger says
+    who built the bytes. `has_recorded_core()` (`:427`) decides how loudly: while the ledger records no core release at all — our state
+    until the lane's first one — each unrecorded pin is a `::warning title=Unrecorded pin::` annotation and the scope exits 0; once a
+    `core/<branch>` row exists the same pins are fatal. The switch needs no second edit, because arming it is what recording our own
+    release means.
+    Measured against the live repository it names two problems and no digest mismatch —
     `core-7.1.0.20` (nodejs) and `core-7.1.0.14` (`_version.py:8`, an older mirror the two files disagree about), both `draft=false`.
+    The same call against `releases.toml` fetched from `popopx-chat-libs` exits 0 with those two as warnings, and exits 1 naming both
+    once a `[core.master]` row is fed to it: that pair is how both modes were proven here.
     The blind spot left is the add-on pin: `record` accepts only `--types/--nodejs/--mcp/--python` and `claim-core` writes only `core/<branch>`,
     so a `nodejs-addon-<hash>` tag has no ledger entry to be judged against and `recorded_pin_problems` passes it by design.
   - The lane that runs it: `check-pins` used to execute only inside `publish`, which starts on a planned package release. It is the
     `libs-pins` scope now (`SCOPE_CHANGES` at `packages_release.py:86`, `scripts/ci/scope-tests.sh:14-16`), so `Test changed scopes`
-    runs it for any push or pull request changing `packages/popopx-chat-nodejs/src/release.ts` or
+    runs it for a pull request changing `packages/popopx-chat-nodejs/src/release.ts` or
     `packages/popopx-chat-python/src/simplex_chat/_version.py`; those two globs joined `build.yml`'s `pull_request` paths because
-    `test_build_yml_runs_for_the_paths_of_its_builds` requires the list and the tables to be the same set. Neither that test nor the
-    new `test_a_pinned_core_release_must_be_recorded` has been run here — this machine has no python ≥ 3.11 (see the `tomllib`
-    paragraph above), so CI is the only proof.
+    `test_build_yml_runs_for_the_paths_of_its_builds` requires the list and the tables to be the same set. That gate is pull-request
+    only. On a **push** `Check changes` takes its `*)` branch and, when `env.release_branch` is set (`build.yml:61` — this fork's
+    `master` and `stable`), runs `packages_release.py scopes` (`build.yml:172`), which prints every key of `SCOPE_CHANGES`
+    (`packages_release.py:1072`); `Test changed scopes` (`build.yml:733`) then loops them in one `shell: bash` step, and Actions runs
+    that with `-e -o pipefail`. Run `43913834179` at `75ad2ca61` therefore read `SCOPES: badge-web ci-scripts libs-pins mcp` on a push
+    touching neither pin file: `badge-web` and `ci-scripts` passed, `libs-pins` exited 1, and `mcp` never started — 0 `BROKER` occurrences
+    against the **11** occurrences of the same step on the preceding master push (`43904789237` at `2d4926e6a`, job `133430903589`). The warning
+    mode is what keeps the guard from standing in front of the defect beside it, and the push that carried it proved that: run
+    `43982143632` at `d361ba1a2` read the same `SCOPES: badge-web ci-scripts libs-pins mcp`, `ci-scripts` printed `Ran 95 tests … OK`,
+    `libs-pins` emitted 2 `##[warning]` lines and exited 0, and `mcp` ran to `Tests: 11 failed, 2 passed, 13 total` — the identical
+    summary of `43904789237`, so the failure is back where it belongs. Both new tests and
+    `test_build_yml_runs_for_the_paths_of_its_builds` are green on the runner (94 at `75ad2ca61`, 95 at `d361ba1a2`) and 95 on this
+    machine through the `__future__.annotations` compile and stand-in TOML parser of the `tomllib` paragraph above, which also reaches
+    the live `releases.toml`. `macos-latest (iOS)` completed in 7 steps, so the zero-step `cancelled` leg of `43913834179` was not this
+    change either.
   - Order of what is left: `secrets.NODEJS_REPO_TOKEN` (the user provisions it) → the lane publishes `core-7.1.2.0` and the add-on and
     records them → both pin files re-derived from GitHub's own asset digests in one commit → only then delete the three mirror releases
     (ruling "4 删掉"), because deleting first would leave the pins naming a 404 with no path back to green.

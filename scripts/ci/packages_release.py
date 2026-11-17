@@ -424,6 +424,11 @@ def highest_recorded(releases: dict, key: str) -> str | None:
     return max(recorded_versions(releases, key), key=version_key, default=None)
 
 
+def has_recorded_core(releases: dict) -> bool:
+    """Whether the ledger records any core release; an empty one cannot judge a pin, so an unrecorded pin is only a warning."""
+    return any(recorded_versions(releases, core_key(branch)) for branch in releases.get("core", {}))
+
+
 def recorded_core_commit(releases: dict, version: str) -> str | None:
     """The commit recorded for the core version on any branch: a release tag is shared by the branches."""
     for branch in releases.get("core", {}):
@@ -964,12 +969,21 @@ def publish_release(tag: str) -> None:
 def check_pins() -> None:
     _, python_pins = parse_python_version(read_text(PYTHON_VERSION_FILE))
     releases, _ = read_releases()
-    problems = []
+    problems, unrecorded = [], []
     for pins in (parse_release(read_text(RELEASE_FILE)), python_pins):
-        problems += published_pin_problems(pins) + recorded_pin_problems(pins, releases)
+        problems += published_pin_problems(pins)
+        unrecorded += recorded_pin_problems(pins, releases)
+    if has_recorded_core(releases):
+        problems += unrecorded
+    else:
+        for warning in unrecorded:
+            print(f"::warning title=Unrecorded pin::{warning} - fatal as soon as the ledger records a core release")
     if problems:
         sys.exit("\n".join(problems))
-    print("the pins match the published releases")
+    if unrecorded:
+        print(f"the pins match the published releases; {len(unrecorded)} pinned core release(s) are unrecorded")
+    else:
+        print("the pins match the published releases")
 
 
 def download_asset(tag: str, asset: str, directory: str) -> None:

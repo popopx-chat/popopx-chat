@@ -45,6 +45,7 @@ from packages_release import (
     claim_core,
     core_release,
     download,
+    has_recorded_core,
     highest_recorded,
     latest_libs,
     missing_assets,
@@ -747,6 +748,26 @@ class ReleasesTest(unittest.TestCase):
         unrecorded = f"core-7.1.0.11 is not recorded in {packages_release.RELEASES_FILE} of {packages_release.libs_repository()}"
         self.assertEqual(recorded_pin_problems(pins, {}), [unrecorded])
         self.assertEqual(recorded_pin_problems(pins, {"core": {"master": {"7.1.0.11": "a"}}}), [])
+
+    def test_an_unrecorded_pin_is_fatal_only_once_the_ledger_records_a_core_release(self):
+        pinned = parse_release(packages_release.read_text(RELEASE_FILE)).libs_release
+        recorded = {"core": {"master": {"7.1.0.11": "a"}}}
+        self.assertTrue(has_recorded_core(recorded))
+        self.assertFalse(has_recorded_core({}))
+        self.assertFalse(has_recorded_core({"core": {"master": {}}}))
+        self.assertFalse(has_recorded_core({"npm": {"@popopx-chat/types": {"7.1.0.11": "a"}}}))
+        with mock.patch.object(packages_release, "published_pin_problems", lambda pins: []):
+            with mock.patch.object(packages_release, "read_releases", lambda: (recorded, "blob")):
+                with self.assertRaises(SystemExit) as fatal:
+                    packages_release.check_pins()
+            self.assertIn(f"{pinned} is not recorded", str(fatal.exception))
+            with mock.patch.object(packages_release, "read_releases", lambda: ({}, None)):
+                reported = io.StringIO()
+                with contextlib.redirect_stdout(reported):
+                    packages_release.check_pins()
+            self.assertIn(f"::warning title=Unrecorded pin::{pinned} is not recorded", reported.getvalue())
+            self.assertIn("pinned core release(s) are unrecorded", reported.getvalue())
+            self.assertNotIn("the pins match the published releases\n", reported.getvalue())
 
 
 class PublishReleaseTest(unittest.TestCase):

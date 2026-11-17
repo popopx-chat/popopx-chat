@@ -32,11 +32,11 @@ With `NPM_SCOPE=@popopx-chat` it rewrites, in the working copy only:
 - every `repository.url` to `git+https://github.com/<GITHUB_REPOSITORY>.git`, which npm provenance
   requires to be the repository of the publishing workflow;
 - the cross-package dependencies to **`npm:` aliases**
-  (`packages_release.py:911,922`): `simplex-chat`'s dependency on the types package becomes
+  (`packages_release.py:916,927`): `simplex-chat`'s dependency on the types package becomes
   `npm:@popopx-chat/types@<pin>`, and the MCP's two pins likewise.
 
 That alias step is why the committed manifests keep the upstream spellings. `MCP_PINNED`
-(`packages_release.py:47`) and `unreleased_pins()` (`:587`) read the *committed* names to decide which
+(`packages_release.py:47`) and `unreleased_pins()` (`:592`) read the *committed* names to decide which
 versions are already published; `check-pins` compares them against the published releases. Editing the
 manifests by hand would move one side of that pair and leave the alias generation with nothing to
 alias — the release tooling would then compute "unpublished" for packages that are published, and
@@ -89,7 +89,7 @@ python3 scripts/ci/packages_release.py download-pinned # fetch a pinned asset, v
 ```
 
 `GH_TOKEN` is read for anything that touches the `-libs` repository; without it the API calls are
-unauthenticated and drafts are invisible (`libs_api`, `packages_release.py:606`).
+unauthenticated and drafts are invisible (`libs_api`, `packages_release.py:611`).
 
 Building the add-on itself is a separate path: the library archives come from the `build.yml` matrix,
 `popopx-chat-libs-*.zip` is downloaded by `download-pinned`, and the platform add-on

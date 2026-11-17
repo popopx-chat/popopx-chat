@@ -647,7 +647,7 @@ sentence states its own base directory - zero markdown links were broken either 
   run owes you) and is listed for ruling, not folded in here.
 - **`simplexChatCore` was two values sharing a spelling**, and only one of them is a build boundary: the
   JSON field in `packages/popopx-chat-client/types/typescript/package.json` and its reader/writer
-  `scripts/ci/packages_release.py:725/:770`. Both ends are in this repository — measured: the `-libs`
+  `scripts/ci/packages_release.py:730/:775`. Both ends are in this repository — measured: the `-libs`
   repository has **0** occurrences of either spelling, and `releases.toml` there keys `[core.master]` by
   version→SHA, never by this field — so renaming the field to **`popopxChatCore`** moved 14 occurrences /
   3 files (4 in the script, its 9 test fixtures, 1 in `package.json`) with no third end to chase. The field
@@ -2204,22 +2204,45 @@ reaches our broker and times out. A mirror matches its own digests, so `check-pi
 - `popopx-chat-libs/releases.toml` is a comments-only file now (`2b5e7046c82a0bc20070500ff50f372fd00095ab`, blob `3294f730…`):
   no `[core.master]` row, so nothing is recorded as published here. The inherited rows stay retrievable as blob `aa35f4be…`
   (23 lines, 1030 B).
-- `check-pins` also requires each pinned `core-<version>` to be recorded — `recorded_pin_problems()` (`packages_release.py:783`)
-  called from `check_pins()` (`:966`). Run against the real pin files it reports `core-7.1.0.20 is not recorded…` and
+- `check-pins` also requires each pinned `core-<version>` to be recorded — `recorded_pin_problems()` (`packages_release.py:788`)
+  called from `check_pins()` (`:969`). Run against the real pin files it reports `core-7.1.0.20 is not recorded…` and
   `core-7.1.0.14 is not recorded…`, and nothing once those versions are in the ledger. Add-on tags are not covered: `record` takes
   only `--types/--nodejs/--mcp/--python`, so a `nodejs-addon-<hash>` release has no ledger row to be judged against.
 - The check needed a lane. It appeared once in `build.yml` (`:1817`, inside `publish`, which starts only on a planned package
   release); it is the `libs-pins` scope now (`SCOPE_CHANGES` at `packages_release.py:86`, `scripts/ci/scope-tests.sh:14-16`), so
-  `Test changed scopes` runs it for any push or pull request touching either pin file — and those two globs joined `build.yml`'s
+  `Test changed scopes` runs it for any pull request touching either pin file — and those two globs joined `build.yml`'s
   `pull_request` paths, because `test_build_yml_runs_for_the_paths_of_its_builds` holds the paths list and the change tables to one set.
+  A push is not path-gated, which is what the run below had to find out.
+- The guard's first CI run (`43913834179`, client `master` at `75ad2ca61`, `completed/failure`) measured why that distinction matters:
+  `Check changes` only narrows scopes for `pull_request` and `workflow_dispatch` (`build.yml:160`/`:165`). Its `*)` branch — every push —
+  prints `haskell=true` and, when `env.release_branch` is set (`build.yml:61`: this fork's `master` and `stable`), runs
+  `packages_release.py scopes` (`build.yml:172`), which emits **every** key of `SCOPE_CHANGES` (`packages_release.py:1072`). The step header
+  read `SCOPES: badge-web ci-scripts libs-pins mcp` on a push that touched neither pin file. `badge-web` passed, `ci-scripts` passed
+  (`Ran 94 tests … OK` on the runner's python), `libs-pins` then reported the two unrecorded releases and exited 1, and since
+  `Test changed scopes` (`build.yml:733`) loops the scopes in one `shell: bash` step — which Actions runs with `-e -o pipefail` — `mcp`
+  never started. The log held **0** `BROKER` lines: the guard had masked the defect it was written beside.
+- Ruling C on that finding: `check_pins()` judges the pins against the ledger only once the ledger records a core release
+  (`has_recorded_core()`, `packages_release.py:427`). While it records none — our state until the lane's first release — every unrecorded
+  pin becomes a `::warning title=Unrecorded pin::` annotation and the scope exits 0, so `mcp` runs and reports its own failure again;
+  the guard arms itself with no second edit, because arming it is what publishing our own `core-7.1.2.0` means. The success line names
+  the count (`the pins match the published releases; 2 pinned core release(s) are unrecorded`) instead of claiming a clean check.
+  Master stays red at `mcp`, for the original reason, until the pins move.
+- C verified on the push that carried it (`43982143632` at `d361ba1a2`, `completed/failure`, one failing step — `Test changed scopes` on
+  `ubuntu-22.04-x86_64 (CLI,Desktop)`): the step header read `SCOPES: badge-web ci-scripts libs-pins mcp` again, `ci-scripts` printed
+  `Ran 95 tests in 0.803s` / `OK` on the runner, `libs-pins` emitted **2** `##[warning]` lines — `core-7.1.0.20` and `core-7.1.0.14`, each
+  ending `- fatal as soon as the ledger records a core release` — and exited 0, and `mcp` then ran to `Tests: 11 failed, 2 passed, 13
+  total`, the same summary as the preceding push `43904789237`. Count `BROKER` as occurrences (13 here, 11 there), not as failed tests;
+  the summaries are identical. `macos-latest (iOS)` completed successfully in 7 steps, so the `cancelled` zero-step leg of
+  `43913834179` was not this change either.
 - The types package moves `7.1.0-beta.9.1` → `7.1.0-beta.9.2` because the claim gate could not be opened while the version was
   upstream's: `claim-core` → `types_problem` → `npm_released(…)`, and the registry answers **200** for `.9.1` (upstream's `beta`
   dist-tag) and **404** for `.9.2`. That held under both ledgers, so the ledger contents were never what blocked the lane.
   `popopxChatCore` already matched `popopx-chat.cabal:8` (`7.1.2.0`), and the dependents keep `^7.1.0-beta.9.1` (7 occurrences in 4
   files): they name the npm artifact upstream published, and `scope-tests.sh` installs the types source by path, not by version.
-- Verified here, not only promised to CI: the suite is 94 tests green with this change against 93 in the untouched tree. This machine
-  has no python ≥ 3.11, so running it took a `__future__.annotations` compile and a stand-in TOML parser — the same route used to
-  exercise the guard against the real pin files.
+- Verified here, not only promised to CI: the suite ran on this machine after all — 95 green with ruling C, 93 in the untouched tree,
+  and the runner agrees (`Ran 95 tests … OK` inside `ci-scripts` at `d361ba1a2`). Running it without python ≥ 3.11 took a
+  `__future__.annotations` compile and a stand-in TOML parser, the same route used to exercise the guard against the real pin files and
+  the real `releases.toml` fetched from `popopx-chat-libs`.
 - Still open, in order: `secrets.NODEJS_REPO_TOKEN` (`gh secret list` for this repository is empty — the user provisions it), then the
   lane's first `core-7.1.2.0` and add-on release, then both pin files re-derived from GitHub's own asset digests in one commit, then the
   three mirror releases deleted (ruling 4) — last, so no window leaves the pins naming a 404 with no path back to green.
