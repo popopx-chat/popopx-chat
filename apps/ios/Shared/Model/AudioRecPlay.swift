@@ -82,14 +82,14 @@ class AudioRecorder {
     }
 
     private func checkPermission() async -> Bool {
-        let av = AVAudioSession.sharedInstance()
+        let av = AVAudioApplication.shared
         switch av.recordPermission {
         case .granted: return true
         case .denied: return false
         case .undetermined:
             return await withCheckedContinuation { cont in
                 DispatchQueue.main.async {
-                    av.requestRecordPermission { allowed in
+                    AVAudioApplication.requestRecordPermission { allowed in
                         cont.resume(returning: allowed)
                     }
                 }
@@ -180,7 +180,7 @@ class AudioPlayer: NSObject, AVAudioPlayerDelegate {
         if playback {
             if AVAudioSession.sharedInstance().category != .playback {
                 logger.log("AudioSession: playback")
-                try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, options: [.duckOthers, .allowBluetooth, .allowAirPlay, .allowBluetoothA2DP])
+                try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, options: [.duckOthers, .allowBluetoothHFP, .allowAirPlay, .allowBluetoothA2DP])
             }
         } else {
             if AVAudioSession.sharedInstance().category != .soloAmbient {

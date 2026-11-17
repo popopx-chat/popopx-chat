@@ -80,11 +80,11 @@ struct ActiveCallView: View {
             hideKeyboard()
             prevColorScheme = colorScheme
         }
-        .onChange(of: canConnectCall) { _ in
+        .onChange(of: canConnectCall) { _, _ in
             logger.debug("ActiveCallView: canConnectCall changed to \(canConnectCall)")
             createWebRTCClient()
         }
-        .onChange(of: m.activeCallViewIsCollapsed) { _ in
+        .onChange(of: m.activeCallViewIsCollapsed) { _, _ in
             hideKeyboard()
         }
         .onDisappear {
@@ -132,7 +132,7 @@ struct ActiveCallView: View {
                         call.localCapabilities = capabilities
                     }
                     if call.hasVideo && !AVAudioSession.sharedInstance().hasExternalAudioDevice() {
-                        try? AVAudioSession.sharedInstance().setCategory(.playback, options: [.allowBluetooth, .allowAirPlay, .allowBluetoothA2DP])
+                        try? AVAudioSession.sharedInstance().setCategory(.playback, options: [.allowBluetoothHFP, .allowAirPlay, .allowBluetoothA2DP])
                     }
                     CallSoundsPlayer.shared.startConnectingCallSound()
                     activeCallWaitDeliveryReceipt()
@@ -452,7 +452,7 @@ struct ActiveCallOverlay: View {
                 audioDevicePickerButton()
             }
         }
-        .onChange(of: call.localMediaSources.hasVideo) { hasVideo in
+        .onChange(of: call.localMediaSources.hasVideo) { _, hasVideo in
             let current = AVAudioSession.sharedInstance().currentRoute.outputs.first?.portType
             let speakerEnabled = current == .builtInSpeaker
             let receiverEnabled = current == .builtInReceiver

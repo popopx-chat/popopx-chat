@@ -130,9 +130,9 @@ class CallController: NSObject, CXProviderDelegate, PKPushRegistryDelegate, Obse
         do {
             let hasVideo = ChatModel.shared.activeCall?.hasVideo == true
             if hasVideo {
-                try audioSession.setCategory(.playAndRecord, mode: .videoChat, options: [.defaultToSpeaker, .mixWithOthers, .allowBluetooth, .allowAirPlay, .allowBluetoothA2DP])
+                try audioSession.setCategory(.playAndRecord, mode: .videoChat, options: [.defaultToSpeaker, .mixWithOthers, .allowBluetoothHFP, .allowAirPlay, .allowBluetoothA2DP])
             } else {
-                try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.mixWithOthers, .allowBluetooth, .allowAirPlay, .allowBluetoothA2DP])
+                try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.mixWithOthers, .allowBluetoothHFP, .allowAirPlay, .allowBluetoothA2DP])
             }
             // Without any delay sound is not playing from speaker or external device in incoming call
             Task {

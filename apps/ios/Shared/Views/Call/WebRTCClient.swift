@@ -5,7 +5,9 @@
 //
 // Spec: spec/services/calls.md
 
-import WebRTC
+// WebRTC's ObjC completion handlers are annotated @Sendable but its classes are not,
+// which the compiler cannot fix from our side; @preconcurrency keeps that from being diagnosed here.
+@preconcurrency import WebRTC
 import LZString
 import SwiftUI
 import POPOPXChat
@@ -1038,7 +1040,7 @@ extension WebRTCClient {
             do {
                 let hasExternalAudioDevice = self.rtcAudioSession.session.hasExternalAudioDevice()
                 if enabled {
-                    try self.rtcAudioSession.setCategory(AVAudioSession.Category.playAndRecord, with: [.defaultToSpeaker, .allowBluetooth, .allowAirPlay, .allowBluetoothA2DP])
+                    try self.rtcAudioSession.setCategory(AVAudioSession.Category.playAndRecord, with: [.defaultToSpeaker, .allowBluetoothHFP, .allowAirPlay, .allowBluetoothA2DP])
                     try self.rtcAudioSession.setMode(AVAudioSession.Mode.videoChat)
                     if hasExternalAudioDevice && !skipExternalDevice, let preferred = self.rtcAudioSession.session.preferredInputDevice() {
                         try self.rtcAudioSession.setPreferredInput(preferred)
@@ -1046,7 +1048,7 @@ extension WebRTCClient {
                         try self.rtcAudioSession.overrideOutputAudioPort(.speaker)
                     }
                 } else {
-                    try self.rtcAudioSession.setCategory(AVAudioSession.Category.playAndRecord, with: [.allowBluetooth, .allowAirPlay, .allowBluetoothA2DP])
+                    try self.rtcAudioSession.setCategory(AVAudioSession.Category.playAndRecord, with: [.allowBluetoothHFP, .allowAirPlay, .allowBluetoothA2DP])
                     try self.rtcAudioSession.setMode(AVAudioSession.Mode.voiceChat)
                     try self.rtcAudioSession.overrideOutputAudioPort(.none)
                 }
