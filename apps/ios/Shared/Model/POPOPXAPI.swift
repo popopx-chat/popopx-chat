@@ -52,6 +52,18 @@ enum TerminalItem: Identifiable {
     }
 }
 
+extension TerminalItem {
+    // The conformance of a generic result type can only be used where it is provably not
+    // isolated, so the APIResult is erased to a TerminalItem before it reaches the actor.
+    static func resultItem<R: ChatAPIResult>(_ res: APIResult<R>) -> TerminalItem {
+        switch res {
+        case let .result(r): .res(.now, r)
+        case let .error(e): .err(.now, e)
+        case let .invalid(type, json): .bad(.now, type, json)
+        }
+    }
+}
+
 // Spec: spec/architecture.md#beginBGTask
 func beginBGTask(_ handler: (() -> Void)? = nil) -> (() -> Void) {
     var id: UIBackgroundTaskIdentifier!
@@ -111,8 +123,9 @@ func chatApiSendCmdSync<R: ChatAPIResult>(_ cmd: ChatCommand, bgTask: Bool = tru
         if case let .invalid(_, json) = resp {
             logger.debug("chatSendCmd \(cmd.cmdType) response: \(dataToString(json))")
         }
+        let items = [TerminalItem.cmd(start, cmd.obfuscated), TerminalItem.resultItem(resp)]
         Task {
-            await TerminalItems.shared.addCommand(start, cmd.obfuscated, resp)
+            for item in items { await TerminalItems.shared.add(item) }
         }
     }
     return resp

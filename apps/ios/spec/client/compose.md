@@ -292,7 +292,7 @@ Optional feature where the recipient sees typing in real-time.
 - Compressed audio format for small file sizes
 
 ### Audio Management
-- [`AudioRecorder`](../../Shared/Model/AudioRecPlay.swift#L15) (`Shared/Model/AudioRecPlay.swift` L14) manages recording and playback
+- [`AudioRecorder`](../../Shared/Model/AudioRecPlay.swift#L16) (`Shared/Model/AudioRecPlay.swift` L14) manages recording and playback
 - `ChatModel.stopPreviousRecPlay` coordinates exclusive audio playback (only one audio source plays at a time)
 
 ---

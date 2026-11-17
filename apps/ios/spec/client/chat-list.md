@@ -192,7 +192,7 @@ is independent of the chat the sheet was opened from. "Create list" is a `Naviga
 
 ### ChatTagsModel State
 
-Filtering state is managed by [`ChatTagsModel`](../../Shared/Model/ChatModel.swift#L190):
+Filtering state is managed by [`ChatTagsModel`](../../Shared/Model/ChatModel.swift#L185):
 
 ```swift
 class ChatTagsModel: ObservableObject {
@@ -203,7 +203,7 @@ class ChatTagsModel: ObservableObject {
 }
 ```
 
-- `presetTags` counts are updated whenever `chats` changes via [`updateChatTags()`](../../Shared/Model/ChatModel.swift#L198)
+- `presetTags` counts are updated whenever `chats` changes via [`updateChatTags()`](../../Shared/Model/ChatModel.swift#L193)
 - Tags with zero matching chats are auto-hidden
 - Active filter is auto-cleared when its tag has no matching chats
 

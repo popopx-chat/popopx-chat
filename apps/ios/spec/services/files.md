@@ -190,7 +190,7 @@ public let MAX_VOICE_MESSAGE_LENGTH = TimeInterval(300) // 5 minutes (300 second
 
 ## [7. CryptoFile -- At-Rest Encryption](../../POPOPXChat/ChatTypes.swift#L4241)
 
-When [`apiSetEncryptLocalFiles(enable: true)`](../../Shared/Model/POPOPXAPI.swift#L384) is configured, files stored on the device are AES-encrypted.
+When [`apiSetEncryptLocalFiles(enable: true)`](../../Shared/Model/POPOPXAPI.swift#L397) is configured, files stored on the device are AES-encrypted.
 
 ### [`CryptoFile`](../../POPOPXChat/ChatTypes.swift#L5278) Type
 
@@ -223,7 +223,7 @@ Implemented in [`CryptoFile.swift`](../../POPOPXChat/CryptoFile.swift):
 
 - Encrypted files stored alongside unencrypted files in `Documents/files/`
 - The `CryptoFileArgs` (key + nonce) are stored in the Haskell database, not on the filesystem
-- Toggle via privacy settings: [`apiSetEncryptLocalFiles(enable:)`](../../Shared/Model/POPOPXAPI.swift#L384)
+- Toggle via privacy settings: [`apiSetEncryptLocalFiles(enable:)`](../../Shared/Model/POPOPXAPI.swift#L397)
 
 ---
 
@@ -250,7 +250,7 @@ func getWallpaperDirectory() -> URL   // Documents/wallpapers/
 - Downloaded files: `Documents/files/{filename}`
 - Temporary files during transfer: `Documents/temp_files/`
 - Wallpaper images: `Documents/wallpapers/`
-- File paths are set via [`apiSetAppFilePaths(filesFolder:, tempFolder:, assetsFolder:)`](../../Shared/Model/POPOPXAPI.swift#L377) at startup
+- File paths are set via [`apiSetAppFilePaths(filesFolder:, tempFolder:, assetsFolder:)`](../../Shared/Model/POPOPXAPI.swift#L390) at startup
 
 ---
 

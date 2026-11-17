@@ -38,12 +38,7 @@ actor TerminalItems {
     }
 
     func addResult<R: ChatAPIResult>(_ res: APIResult<R>) async {
-        let item: TerminalItem = switch res {
-        case let .result(r): .res(.now, r)
-        case let .error(e): .err(.now, e)
-        case let .invalid(type, json): .bad(.now, type, json)
-        }
-        await add(item)
+        await add(TerminalItem.resultItem(res))
     }
 }
 

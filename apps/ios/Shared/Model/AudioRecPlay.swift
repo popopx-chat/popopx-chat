@@ -12,6 +12,7 @@ import AVFoundation
 import SwiftUI
 import POPOPXChat
 
+@MainActor
 class AudioRecorder {
     var onTimer: ((TimeInterval) -> Void)?
     var onFinishRecording: (() -> Void)?
@@ -48,12 +49,14 @@ class AudioRecorder {
 
             await MainActor.run {
                 AppDelegate.keepScreenOn(true)
-                recordingTimer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { timer in
-                    guard let time = self.audioRecorder?.currentTime else { return }
-                    self.onTimer?(time)
-                    if time >= MAX_VOICE_MESSAGE_LENGTH {
-                        self.stop()
-                        self.onFinishRecording?()
+                recordingTimer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
+                    MainActor.assumeIsolated {
+                        guard let time = self.audioRecorder?.currentTime else { return }
+                        self.onTimer?(time)
+                        if time >= MAX_VOICE_MESSAGE_LENGTH {
+                            self.stop()
+                            self.onFinishRecording?()
+                        }
                     }
                 }
             }
