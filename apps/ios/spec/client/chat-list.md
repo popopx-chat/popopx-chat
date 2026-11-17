@@ -117,18 +117,18 @@ Renders a single row in the chat list. Shows:
 
 ---
 
-## 4. [`ChatListNavLink`](../../Shared/Views/ChatList/ChatListNavLink.swift#L45-L669) {#4-chatlistnavlink}
+## 4. [`ChatListNavLink`](../../Shared/Views/ChatList/ChatListNavLink.swift#L45-L663) {#4-chatlistnavlink}
 
 **File**: `Shared/Views/ChatList/ChatListNavLink.swift`
 
 Wraps `ChatPreviewView` in a navigation link with tap and swipe behavior:
 
 ### Tap Behavior
-- Direct chat: navigates to `ChatView` via `ItemsModel.loadOpenChat(chatId)` -- [`contactNavLink()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L96) L93
-- Group chat: navigates to `ChatView` -- [`groupNavLink()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L218) L214
-- Contact request: shows `ContactRequestView` with accept/reject -- [`contactRequestNavLink()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L496) L486
-- Contact connection: shows `ContactConnectionInfo` -- [`contactConnectionNavLink()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L531) L520
-- Notes folder: navigates to `ChatView` -- [`noteFolderNavLink()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L303) L298
+- Direct chat: navigates to `ChatView` via `ItemsModel.loadOpenChat(chatId)` -- [`contactNavLink()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L96)
+- Group chat: navigates to `ChatView` -- [`groupNavLink()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L218)
+- Contact request: shows `ContactRequestView` with accept/reject -- [`contactRequestNavLink()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L490)
+- Contact connection: shows `ContactConnectionInfo` -- [`contactConnectionNavLink()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L525)
+- Notes folder: navigates to `ChatView` -- [`noteFolderNavLink()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L303)
 
 ### Navigation
 - Uses `NavigationLink` (iOS 15) or programmatic navigation (iOS 16+)
@@ -155,7 +155,7 @@ When `groupInfo.useRelays == true`:
 
 ## 5. Filtering & Tags
 
-### Filter Tabs ([`TagListView`](../../Shared/Views/ChatList/TagListView.swift#L21))
+### Filter Tabs ([`TagListView`](../../Shared/Views/ChatList/TagListView.swift#L56))
 
 **File**: `Shared/Views/ChatList/TagListView.swift`
 
@@ -172,7 +172,23 @@ Horizontal scrolling tab bar below the navigation bar. Tabs:
 | Group Reports | `.presetTag(.groupReports)` | Groups with pending reports |
 | User tags | `.userTag(ChatTag)` | User-defined custom tags |
 
-Filter matching is handled by [`presetTagMatchesChat()`](../../Shared/Views/ChatList/ChatListView.swift#L1227) and the in-view [`TagsView`](../../Shared/Views/ChatList/ChatListView.swift#L1021) struct.
+Filter matching is handled by [`presetTagMatchesChat()`](../../Shared/Views/ChatList/ChatListView.swift#L1222) and the in-view [`TagsView`](../../Shared/Views/ChatList/ChatListView.swift#L1021) struct.
+
+### The lists sheet
+
+[`TagSheetRoot`](../../Shared/Views/ChatList/TagListView.swift#L32) is the root of every lists sheet: it owns the
+`NavigationStack`, its `NavigationPath` and the one `navigationDestination(for:)` registration for
+[`TagEditorRoute`](../../Shared/Views/ChatList/TagListView.swift#L14), because the sheet is presented outside the app's
+navigation stack and only the declaration nearest the stack root resolves a pushed value
+([Navigation](navigation.md#servers-pages-push-by-value-registered-at-the-stack-root)). Three hosts present it:
+[`setTagChatSheet()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L412) from a row's Tag action (and opens the
+editor as the root while the user has no lists), the `TagsView` tab long-press
+([ChatListView.swift#L1081](../../Shared/Views/ChatList/ChatListView.swift#L1081)), and the "Add list" button, which
+passes `editorAsRoot: true` ([ChatListView.swift#L1095](../../Shared/Views/ChatList/ChatListView.swift#L1095)).
+
+A row tap or a leading-swipe Edit pushes `.edit(tagId:emoji:name:)`, which names no chat: editing a list's definition
+is independent of the chat the sheet was opened from. "Create list" is a `NavigationLink(value: .create)`, and
+`.create` does carry the chat, so a new list is added to that chat in the same step.
 
 ### ChatTagsModel State
 
@@ -197,7 +213,7 @@ class ChatTagsModel: ObservableObject {
 |------|------|------|-------------|
 | [`PresetTag`](../../Shared/Views/ChatList/ChatListView.swift#L37) | ChatListView.swift | 37 | Enum of built-in filter categories |
 | [`ActiveFilter`](../../Shared/Views/ChatList/ChatListView.swift#L54) | ChatListView.swift | 54 | Enum wrapping preset, user-tag, or unread filter |
-| [`setActiveFilter()`](../../Shared/Views/ChatList/ChatListView.swift#L1206) | ChatListView.swift | 1206 | Applies a filter and persists selection |
+| [`setActiveFilter()`](../../Shared/Views/ChatList/ChatListView.swift#L1201) | ChatListView.swift | 1201 | Applies a filter and persists selection |
 
 ### Tag Management Commands
 - `apiCreateChatTag(tag: ChatTagData)` -- create tag
@@ -237,15 +253,15 @@ Search is available via pull-down gesture or search button in the navigation bar
 
 | Action | Icon | Handler | Line | API | Condition |
 |--------|------|---------|------|-----|-----------|
-| Pin / Unpin | pin | [`toggleFavoriteButton()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L354) | 347 | `apiSetChatSettings` (favorite) | Always |
-| Read / Unread | envelope | [`markReadButton()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L334) | 328 | `apiChatRead` / `apiChatUnread` | Always |
+| Pin / Unpin | pin | [`toggleFavoriteButton()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L354) | 354 | `apiSetChatSettings` (favorite) | Always |
+| Read / Unread | envelope | [`markReadButton()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L334) | 334 | `apiChatRead` / `apiChatUnread` | Always |
 
 ### Trailing Swipe (right-to-left)
 
 | Action | Icon | Handler | Line | API | Condition |
 |--------|------|---------|------|-----|-----------|
-| Mute / Unmute | bell.slash | [`toggleNtfsButton()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L373) | 365 | `apiSetChatSettings` (enableNtfs) | Always |
-| Clear | trash | [`clearChatButton()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L394) | 385 | `apiClearChat` | Has messages |
+| Mute / Unmute | bell.slash | [`toggleNtfsButton()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L373) | 373 | `apiSetChatSettings` (enableNtfs) | Always |
+| Clear | trash | [`clearChatButton()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L394) | 394 | `apiClearChat` | Has messages |
 | Delete | trash.fill | -- | -- | `apiDeleteChat` | Not active chat |
 | Tag | tag | -- | -- | `apiSetChatTags` | Always |
 
@@ -308,10 +324,10 @@ Both are in `hintDefaults`, so "Reset all hints" in the developer settings resto
 | File | Path | Key struct | Line |
 |------|------|------------|------|
 | Chat list view | [`ChatListView.swift`](../../Shared/Views/ChatList/ChatListView.swift) | `ChatListView` | [164](../../Shared/Views/ChatList/ChatListView.swift#L164) |
-| Chat preview row | [`ChatPreviewView.swift`](../../Shared/Views/ChatList/ChatPreviewView.swift) | `ChatPreviewView` | [12](../../Shared/Views/ChatList/ChatPreviewView.swift#L13) |
-| Navigation link wrapper | [`ChatListNavLink.swift`](../../Shared/Views/ChatList/ChatListNavLink.swift) | `ChatListNavLink` | [43](../../Shared/Views/ChatList/ChatListNavLink.swift#L44) |
-| Tag filter tabs | [`TagListView.swift`](../../Shared/Views/ChatList/TagListView.swift) | `TagListView` | [19](../../Shared/Views/ChatList/TagListView.swift#L20) |
-| User picker sheet | [`UserPicker.swift`](../../Shared/Views/ChatList/UserPicker.swift) | `UserPicker` | [9](../../Shared/Views/ChatList/UserPicker.swift#L10) |
+| Chat preview row | [`ChatPreviewView.swift`](../../Shared/Views/ChatList/ChatPreviewView.swift) | `ChatPreviewView` | [14](../../Shared/Views/ChatList/ChatPreviewView.swift#L14) |
+| Navigation link wrapper | [`ChatListNavLink.swift`](../../Shared/Views/ChatList/ChatListNavLink.swift) | `ChatListNavLink` | [45](../../Shared/Views/ChatList/ChatListNavLink.swift#L45) |
+| Tag filter tabs | [`TagListView.swift`](../../Shared/Views/ChatList/TagListView.swift) | `TagListView` | [56](../../Shared/Views/ChatList/TagListView.swift#L56) |
+| User picker sheet | [`UserPicker.swift`](../../Shared/Views/ChatList/UserPicker.swift) | `UserPicker` | [11](../../Shared/Views/ChatList/UserPicker.swift#L11) |
 | Getting started help | [`ChatHelp.swift`](../../Shared/Views/ChatList/ChatHelp.swift) | | |
 | Contact request view | [`ContactRequestView.swift`](../../Shared/Views/ChatList/ContactRequestView.swift) | | |
 | Contact connection info | [`ContactConnectionInfo.swift`](../../Shared/Views/ChatList/ContactConnectionInfo.swift) | | |

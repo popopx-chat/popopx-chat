@@ -1078,10 +1078,7 @@ struct TagsView: View {
                     parentSheet = SomeSheet(
                         content: {
                             AnyView(
-                                NavigationView {
-                                    TagListView(chat: nil)
-                                        .modifier(ThemedBackground(grouped: true))
-                                }
+                                TagSheetRoot(chat: nil)
                             )
                         },
                         id: "tag list",
@@ -1095,9 +1092,7 @@ struct TagsView: View {
             parentSheet = SomeSheet(
                 content: {
                     AnyView(
-                        NavigationView {
-                            TagListEditor()
-                        }
+                        TagSheetRoot(editorAsRoot: true)
                     )
                 },
                 id: "tag create"

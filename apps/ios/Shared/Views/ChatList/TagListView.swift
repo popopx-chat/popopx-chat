@@ -11,21 +11,56 @@ import SwiftUI
 import POPOPXChat
 import ElegantEmojiPicker
 
-struct TagEditorNavParams {
-    let chat: Chat?
-    let chatListTag: ChatTagData?
-    let tagId: Int64?
+enum TagEditorRoute: Hashable {
+    case create
+    case edit(tagId: Int64, emoji: String?, name: String)
+}
+
+@ViewBuilder func tagEditorDestination(_ route: TagEditorRoute, chat: Chat?) -> some View {
+    switch route {
+    case .create:
+        TagListEditor(chat: chat)
+    case let .edit(tagId, emoji, name):
+        // Editing a list's definition is independent of the chat the sheet was opened from.
+        TagListEditor(chat: nil, tagId: tagId, emoji: emoji, name: name)
+    }
+}
+
+// The root of a lists sheet. The stack, its path and the destination all live here because the
+// sheet is presented outside the app's navigation stack, and only the declaration nearest the
+// stack root resolves a pushed value (spec/client/navigation.md).
+struct TagSheetRoot: View {
+    var chat: Chat? = nil
+    var editorAsRoot: Bool = false
+    @State private var path = NavigationPath()
+
+    var body: some View {
+        NavigationStack(path: $path) {
+            rootContent
+                .navigationDestination(for: TagEditorRoute.self) { route in
+                    tagEditorDestination(route, chat: chat)
+                }
+        }
+    }
+
+    @ViewBuilder private var rootContent: some View {
+        if editorAsRoot {
+            TagListEditor(chat: chat)
+        } else {
+            TagListView(chat: chat, path: $path)
+        }
+    }
 }
 
 // Spec: spec/client/chat-list.md#TagListView
 struct TagListView: View {
     var chat: Chat? = nil
+    @Binding var path: NavigationPath
     @Environment(\.dismiss) var dismiss: DismissAction
     @EnvironmentObject var theme: AppTheme
     @EnvironmentObject var chatTagsModel: ChatTagsModel
     @EnvironmentObject var m: ChatModel
     @State private var editMode = EditMode.inactive
-    @State private var tagEditorNavParams: TagEditorNavParams? = nil
     
     var chatTagsIds: [Int64] { chat?.chatInfo.contact?.chatTags ?? chat?.chatInfo.groupInfo?.chatTags ?? [] }
     
@@ -56,7 +91,7 @@ struct TagListView: View {
                         if let c = chat {
                             setChatTag(tagId: selected ? nil : tagId, chat: c) { dismiss() }
                         } else {
-                            tagEditorNavParams = TagEditorNavParams(chat: nil, chatListTag: ChatTagData(emoji: emoji, text: text), tagId: tagId)
+                            path.append(TagEditorRoute.edit(tagId: tagId, emoji: emoji, name: text))
                         }
                     }
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -82,34 +117,16 @@ struct TagListView: View {
                     }
                     .swipeActions(edge: .leading, allowsFullSwipe: true) {
                         Button {
-                            tagEditorNavParams = TagEditorNavParams(chat: nil, chatListTag: ChatTagData(emoji: emoji, text: text), tagId: tagId)
+                            path.append(TagEditorRoute.edit(tagId: tagId, emoji: emoji, name: text))
                         } label: {
                             Label("Edit", systemImage: "pencil")
                         }
                         .tint(theme.colors.primary)
                     }
-                    .background(
-                        // isActive required to navigate to edit view from any possible tag edited in swipe action
-                        NavigationLink(isActive: Binding(get: { tagEditorNavParams != nil }, set: { _ in tagEditorNavParams = nil })) {
-                            if let params = tagEditorNavParams {
-                                TagListEditor(
-                                    chat: params.chat,
-                                    tagId: params.tagId,
-                                    emoji: params.chatListTag?.emoji,
-                                    name: params.chatListTag?.text ?? ""
-                                )
-                            }
-                        } label: {
-                            EmptyView()
-                        }
-                            .opacity(0)
-                    )
                 }
                 .onMove(perform: moveItem)
                 
-                NavigationLink {
-                    TagListEditor(chat: chat)
-                } label: {
+                NavigationLink(value: TagEditorRoute.create) {
                     Label("Create list", systemImage: "plus")
                 }
             } header: {

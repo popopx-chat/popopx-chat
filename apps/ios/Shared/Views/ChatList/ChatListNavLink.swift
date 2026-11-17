@@ -418,13 +418,7 @@ struct ChatListNavLink: View {
         parentSheet = SomeSheet(
             content: {
                 AnyView(
-                    NavigationView {
-                        if chatTagsModel.userTags.isEmpty {
-                            TagListEditor(chat: chat)
-                        } else {
-                            TagListView(chat: chat)
-                        }
-                    }
+                    TagSheetRoot(chat: chat, editorAsRoot: chatTagsModel.userTags.isEmpty)
                 )
             },
             id: "lists sheet",
