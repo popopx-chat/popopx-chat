@@ -266,13 +266,13 @@ class NtfManager: NSObject, UNUserNotificationCenterDelegate, ObservableObject {
 
     // Spec: spec/services/notifications.md#setNtfBadgeCount
     func setNtfBadgeCount(_ count: Int) {
-        UIApplication.shared.applicationIconBadgeNumber = count
         ntfBadgeCountGroupDefault.set(count)
+        Task { try? await UNUserNotificationCenter.current().setBadgeCount(count) }
     }
 
     // Spec: spec/services/notifications.md#changeNtfBadgeCount
     func changeNtfBadgeCount(by count: Int = 1) {
-        setNtfBadgeCount(max(0, UIApplication.shared.applicationIconBadgeNumber + count))
+        setNtfBadgeCount(max(0, ntfBadgeCountGroupDefault.get() + count))
     }
 
     private func addNotification(_ content: UNMutableNotificationContent) {
