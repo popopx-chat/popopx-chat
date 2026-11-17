@@ -88,7 +88,7 @@ struct GroupMemberInfoView: View {
 
     var body: some View {
         if navigation {
-            NavigationView { groupMemberInfoView() }
+            NavigationStack { groupMemberInfoView() }
         } else {
             groupMemberInfoView()
         }

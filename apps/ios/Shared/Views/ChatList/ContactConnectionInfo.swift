@@ -34,7 +34,7 @@ struct ContactConnectionInfo: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             let v = List {
                 Group {
                     Text(contactConnection.initiated ? "You invited a contact" : "You accepted connection")

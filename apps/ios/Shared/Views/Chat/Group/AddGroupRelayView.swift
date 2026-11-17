@@ -22,7 +22,7 @@ struct AddGroupRelayView: View {
     @State private var isAdding = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 if isLoading {
                     Section {

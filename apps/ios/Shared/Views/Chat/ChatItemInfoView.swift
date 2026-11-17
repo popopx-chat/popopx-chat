@@ -42,7 +42,7 @@ struct ChatItemInfoView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             itemInfoView()
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {

@@ -139,7 +139,7 @@ struct ChatInfoView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 List {
                     contactInfoHeader()
@@ -1296,7 +1296,7 @@ struct DeleteActiveContactDialog: View {
     @State private var keepConversation = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 Section {
                     Toggle("Keep conversation", isOn: $keepConversation)

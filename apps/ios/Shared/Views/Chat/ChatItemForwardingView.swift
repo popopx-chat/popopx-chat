@@ -28,7 +28,7 @@ struct ChatItemForwardingView: View {
     private var chatsToForwardTo: [Chat] { filterChatsToForwardTo(chats: ChatModel.shared.chats, includeLocal: includeLocal) }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             forwardListView()
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {

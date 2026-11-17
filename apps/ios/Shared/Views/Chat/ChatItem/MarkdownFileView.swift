@@ -175,7 +175,7 @@ struct MarkdownFileView: View {
     let hasBidiControls: Bool
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 0) {
                 if hasBidiControls {
                     Text("This file has text direction characters. The text can be shown in a different order than it is written.")
@@ -218,6 +218,5 @@ struct MarkdownFileView: View {
                 }
             }
         }
-        .navigationViewStyle(.stack)
     }
 }

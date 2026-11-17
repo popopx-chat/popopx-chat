@@ -32,7 +32,7 @@ struct ServersSummaryView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             viewBody()
                 .navigationTitle("Servers info")
                 .navigationBarTitleDisplayMode(.large)
