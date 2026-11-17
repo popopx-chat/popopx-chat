@@ -254,7 +254,7 @@ func openBadgeLink(_ codeText: String) {
     }
     let state = BadgeLinkState()
     badgeLinkSheet = showAppSheet {
-        NavigationView {
+        NavigationStack {
             BadgesRedeemLinkView(code: code, state: state)
                 .modifier(ThemedBackground())
         }
@@ -440,7 +440,7 @@ struct BadgesRedeemLinkView: View {
 
 struct BadgesRedeemCodeView_Previews: PreviewProvider {
     static var previews: some View {
-        NavigationView {
+        NavigationStack {
             BadgesRedeemCodeView()
         }
     }

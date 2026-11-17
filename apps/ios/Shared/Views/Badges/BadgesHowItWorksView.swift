@@ -40,7 +40,7 @@ struct BadgesHowItWorksView: View {
 
 struct BadgesHowItWorksView_Previews: PreviewProvider {
     static var previews: some View {
-        NavigationView {
+        NavigationStack {
             BadgesHowItWorksView()
         }
     }

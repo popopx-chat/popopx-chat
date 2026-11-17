@@ -205,7 +205,7 @@ struct PhoneSupporterHero: View {
 
 struct BadgesSupportPopopxView_Previews: PreviewProvider {
     static var previews: some View {
-        NavigationView {
+        NavigationStack {
             BadgesSupportPopopxView(servedByAppStore: true)
         }
     }

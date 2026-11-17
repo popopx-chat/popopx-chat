@@ -207,7 +207,7 @@ struct RestorePurchasesButton: View {
 
 struct BadgesCheckOrderView_Previews: PreviewProvider {
     static var previews: some View {
-        NavigationView {
+        NavigationStack {
             BadgesCheckOrderLayout(
                 level: .supporter,
                 period: .oneMonth,

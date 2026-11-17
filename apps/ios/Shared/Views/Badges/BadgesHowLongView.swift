@@ -242,7 +242,7 @@ struct BadgeBillingFooter: View {
 
 struct BadgesHowLongView_Previews: PreviewProvider {
     static var previews: some View {
-        NavigationView {
+        NavigationStack {
             BadgesHowLongLayout(
                 level: .supporter,
                 startDate: previewDate,

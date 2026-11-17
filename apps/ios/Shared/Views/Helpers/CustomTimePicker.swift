@@ -101,7 +101,7 @@ struct CustomTimePickerView: View {
     var timeUnitsLimits = CustomTimePicker.TimeUnitLimits.defaultUnitsLimits
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             customTimePickerView()
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
