@@ -35,9 +35,9 @@ SimpleXApp
     │   └── NavigationStack
     │       ├── ChatListView (root of stack)
     │       │   ├── ChatView (pushed)
-    │       │   │   ├── ChatInfoView / GroupChatInfoView (pushed)
-    │       │   │   └── ChatItemInfoView (pushed)
-    │       │   └── ContactConnectionInfo (pushed)
+    │       │   │   ├── ChatInfoView / GroupChatInfoView (.appSheet, modal)
+    │       │   │   └── ChatItemInfoView (.sheet, modal)
+    │       │   └── ContactConnectionInfo (.appSheet, modal)
     │       └── Settings views (pushed)
     ├── Sheets (modal)
     │   ├── UserPicker
