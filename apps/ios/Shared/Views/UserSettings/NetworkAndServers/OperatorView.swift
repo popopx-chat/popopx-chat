@@ -468,7 +468,7 @@ struct SingleOperatorUsageConditionsView: View {
 
         } else if !operatorsWithConditionsAccepted.isEmpty {
 
-            NavigationView {
+            NavigationStack {
                 VStack(alignment: .leading, spacing: 20) {
                     viewHeader()
                     Text("Conditions are already accepted for these operator(s): **\(operatorsWithConditionsAccepted.map { $0.legalName_ }.joined(separator: ", "))**.")

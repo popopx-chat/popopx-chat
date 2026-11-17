@@ -17,7 +17,7 @@ struct ShareView: View {
     @AppStorage(GROUP_DEFAULT_PROFILE_IMAGE_CORNER_RADIUS, store: groupDefaults) private var radius = defaultProfileImageCorner
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack(alignment: .bottom) {
                 if model.isLoaded {
                     List(model.filteredChats) { chat in

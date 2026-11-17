@@ -110,7 +110,6 @@ struct TerminalView: View {
                 .padding(.horizontal, 12)
             }
         }
-        .navigationViewStyle(.stack)
         .toolbar {
             // Redaction broken for `.navigationTitle` - using a toolbar item instead.
             ToolbarItem(placement: .principal) {
@@ -199,7 +198,7 @@ struct TerminalView_Previews: PreviewProvider {
             .err(previewDate, APIResult<ChatResponse2>.invalid(type: "contactSubscribed", json: "{}".data(using: .utf8)!).unexpected),
             .err(previewDate + 1, APIResult<ChatResponse2>.invalid(type: "newChatItems", json: "{}".data(using: .utf8)!).unexpected)
         ]
-        return NavigationView {
+        return NavigationStack {
             TerminalView()
                 .environmentObject(chatModel)
         }
