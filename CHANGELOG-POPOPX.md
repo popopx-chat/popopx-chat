@@ -3,6 +3,44 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
+## Unreleased — the branded key-derivation labels reverted, 2026-11-17
+
+This one changes a wire value, so it is not part of the documentation section below it.
+
+- **A fork whose peers derive different keys is not a compatible build.** The brand sweep of the
+  dependency `popopxmq` moved ten HKDF and BBS **domain separators** to `POPOPX…` spellings:
+  `sbcInit`/`sbcHkdf` (SMP transport blocks — `Transport.hs:846` runs the same chain on the server and
+  the client), `pqX3dh` ×2, `rootKdf`, `chainKdf` (the end-to-end ratchet), `contactShortLinkKdf`,
+  `invShortLinkKdf`, `serviceReqBinding` and `entitlementBBSHeader`. Each is hashed independently on
+  both sides of a connection, so both sides stay internally consistent and simply stop understanding
+  each other. Measured on built bytes: our CLI ↔ a relay built here delivers (`NEW` → `IDS`, the queue
+  created and the subscription accepted); the same CLI ↔ upstream's relay binary sends `NEW`, waits 7 s,
+  returns `BROKER {brokerErr=TIMEOUT}` and that relay logs nothing about the connection; from the other
+  side the published `-libs` core times out against a relay we build and succeeds against upstream's;
+  and the CLI rebuilt after this revert gets `IDS` in the same second it sends `NEW`, against that very
+  same upstream relay binary. Both
+  relays report the same `v7.1.0.17`, so it was not a version gap. **Corrects a verdict in the task
+  record of 2026-11-15**: the `BROKER TIMEOUT` family was not "the preset relay's, not our wire" — it
+  is our wire, on the label side, and the same cause makes the e2e suite green when the harness builds
+  its own relay and red when it fetches the published core.
+- **Reverted to upstream's exact bytes** in `popopxmq` commit `cb9e1aa3cbd8bd2fdb932243ffb9c554b3826bae`
+  = tag `popopx-pin-5` (12 files: the 5 source files above, plus `NOTICE`, `protocol/crypto-registry.md`,
+  `protocol/agent-protocol.md`, `protocol/xrcp.md`, `protocol/pqdr.md` and two `plans/`, all of which had
+  recorded the branded values). Every derivation site now carries a line saying the literal is a protocol
+  constant. Gates, scoped to the dependency's `src` so the prose here cannot count itself:
+  `git -C ../popopxmq grep -o '"POPOPX\(SbChainInit\|SbChain\|X3DH\|VerifyCode\|RootRatchet\|ChainRatchet\|ContactLink\|InvLink\|Service\| badges v1\)"' -- src | wc -l` → **0**,
+  and its positive control, the same command with `SimpleX` → **10**. Held as branding because no
+  foreign process reads them: the two `POPOPX XFTP … v` `--version` strings, the `.popopx` name TLD,
+  and the `adminPopopx`/`complaintsPopopx` keys this server serves — emitted at `Server/Web.hs:273,280`,
+  read only by `apps/common/Web/static/index.html:272,290`, a page the same server serves.
+- **What is NOT yet true, and why.** `cabal.project:24` still pins `25d7213d…`, because a pin to a
+  commit that has not been pushed resolves for nobody; `popopx-pin-5` is local. Until that tag is
+  pushed and the pin moves with it, the iOS Haskell archives installed on this machine
+  (`libHSpopopx-chat-7.1.2.0-*-ghc9.6.3.a`, measured 2 branded / 0 upstream) and every CI artifact still
+  carry the old labels, and `v7.1.2-popopx.1`'s published assets were built through that pin — the one
+  number in this entry taken from inference rather than measurement, because downloading the asset is
+  the step egress keeps failing. The rebuild order is in FORK.md item 16.
+
 ## Unreleased — records and citations, 2026-11-17
 
 Documentation only: no `src/**`, no build file, no asset and no wire value changed in this section.

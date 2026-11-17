@@ -382,6 +382,131 @@ each was meant to become. That pass also repaired a compile break this fork ship
     `AGPL-COMPLIANCE-POPOPX.md` §4 as a dated correction rather than a deletion, this file's
     §"Trademarks and artwork", `branding/source-svg/README.md` and `CHANGELOG-POPOPX.md`.
 
+16. **The dependency's branded key-derivation labels are reverted; a labelled build is a build that
+    does not talk to the network** (2026-11-17) — `popopxmq` carried ten HKDF and BBS domain separators
+    spelled `POPOPX…`: two in `Messaging/Crypto.hs` (`sbcInit`, `sbcHkdf` — every SMP frame after the
+    handshake, because `Messaging/Transport.hs:846 blockEncryption` runs it on the server side and the
+    client side), four in `Messaging/Crypto/Ratchet.hs` (`pqX3dh` ×2, `rootKdf`, `chainKdf` — the
+    end-to-end ratchet, so peer-to-peer as well as client-to-server), two in
+    `Messaging/Crypto/ShortLink.hs` (`contactShortLinkKdf`, `invShortLinkKdf` — the keys inside links
+    already handed to other people), `serviceReqBinding` in `Messaging/Agent.hs:1824`, recomputed by
+    the receiving agent before it verifies a signature, and `entitlementBBSHeader` in
+    `Messaging/Crypto/Entitlement.hs:92`, the header a badge issuer signs over. A domain separator is
+    an input each peer hashes on its own side, so renaming it changes nothing you can see and breaks
+    the derivation on the other side. Measured on built bytes rather than on source, before reverting:
+    our CLI (2 branded / 0 upstream) against a relay built here (self-reporting
+    `v7.1.0.17 / 01278a2`) gives `NEW` then `IDS +mAO 6G80` — queue created, subscribed, invitation
+    link handed back — and the *same* CLI against upstream's relay binary (`0 branded / 2 upstream`)
+    sends `NEW`, waits 7 s and reports `BROKER {brokerErr=TIMEOUT}` while that relay logs **no** line
+    about the connection — it never parsed the block. Run from the other side it inverts: the published
+    `-libs` core (upstream's bytes, 0 branded / 2 upstream) times out against a relay we build and
+    succeeds against upstream's. Both relays self-report `SMP server v7.1.0.17` and differ only by the
+    commit hash they print, so this was never a version gap; each cell bound a fresh random loopback
+    port, so no two cells share an address either.
+    This is the mechanism under the `BROKER TIMEOUT` family of 2026-11-15 and 2026-11-16, and it
+    corrects the verdict recorded in the task list at the time — *"the preset relay's, not our wire"*:
+    it is our wire, on the label side. It also explains a test that was green and red for the same
+    reason: the e2e harness builds its own relay, so it pairs a branded client with a branded relay and
+    passes, while the leg that fetches the published core pairs an unbranded client with that same
+    branded relay and fails. Nothing in either repository could have caught this, and that is the
+    finding worth keeping: every test derives **both** ends from the same source tree, so a labelled
+    build is internally self-consistent and stays green — an absent guard, not a passing one. The ten
+    values are now upstream's exact bytes in `popopxmq` commit
+    `cb9e1aa3cbd8bd2fdb932243ffb9c554b3826bae` = tag `popopx-pin-5`, each derivation site carrying a
+    comment saying the literal is a protocol constant — in `src` that commit is 10 deleted lines and 17
+    added ones, and the 17 breaks down exactly as the ten rewritten literals plus eight one-line
+    comments, one of those comments sitting at the end of a literal line rather than alone
+    (`git -C ../popopxmq show cb9e1aa3 -- src | grep '^+' | grep -c '"SimpleX'` → 10, and the same pipe
+    with `grep -c -- '-- '` → 8, one line in both counts), and nothing else
+    (`git -C ../popopxmq show --numstat --format='' cb9e1aa3 -- src | awk '{a+=$1;d+=$2} END{print a" "d}')`
+    → `17 10`) — and that commit also corrects the documents in
+    the dependency that had recorded the branded values (`NOTICE`, `protocol/crypto-registry.md`,
+    `protocol/agent-protocol.md`, `protocol/xrcp.md`, `protocol/pqdr.md` and two `plans/`), so the spec
+    and the code describe the same bytes again. Both gates are scoped to the dependency's `src`, and the
+    scoping is load-bearing: the same command without `-- src` counts **33** upstream occurrences
+    because 23 of them sit in prose — six files, the four `protocol/*.md` specs and the two `plans/`
+    documents, while `NOTICE` names them without the quotes this pattern needs. Within `src` the second
+    gate is the positive control that the first is measuring something:
+
+    ```sh
+    git -C ../popopxmq grep -o '"POPOPX\(SbChainInit\|SbChain\|X3DH\|VerifyCode\|RootRatchet\|ChainRatchet\|ContactLink\|InvLink\|Service\| badges v1\)"' -- src | wc -l   # 0
+    git -C ../popopxmq grep -o '"SimpleX\(SbChainInit\|SbChain\|X3DH\|VerifyCode\|RootRatchet\|ChainRatchet\|ContactLink\|InvLink\|Service\| badges v1\)"' -- src | wc -l   # 10
+    ```
+
+    Still branded, and correctly so, because nothing outside our own build reads them: the two
+    `POPOPX XFTP … v` strings, printed only by `--version`
+    (`src/Popopx/FileTransfer/{Client,Server}/Main.hs`, mirrored by `tests/CLITests.hs:255`), the
+    `.popopx` name TLD, and the `adminPopopx`/`complaintsPopopx` keys this server serves. The keys were
+    measured again before writing this: they are emitted by `Server/Web.hs:273,280` and read by
+    `apps/common/Web/static/index.html:272,290` — a page the same server serves, so both ends of the
+    field name are bytes from one build.
+    What this item does **not** do is move the pin: `cabal.project:24` still
+    names `25d7213d…`, because a pin to a commit that has not been pushed would resolve for nobody.
+    The pin, the iOS Haskell archives that are built through it, and every CI artifact inherit the
+    old labels until `popopx-pin-5` is pushed and the pin moves with it. Measured on the two installed
+    slices, `apps/ios/Libraries/ios/libHSpopopx-chat-7.1.2.0-2pJp6QhAZjZInPLhny3S4B-ghc9.6.3.a` and
+    `…/sim/…same name…`, both **2 branded / 0 upstream** — so what an App Store build would carry is
+    the broken side, not the working one. That count is `grep -a -o -E 'POPOPXSbChain' ARCHIVE | wc -l`,
+    a raw-byte read, because `strings` reports 0 on the simulator slice: it aborts on `Mobile.o`
+    (`malformed object (linker optimization hint … overlaps section relocation entries)`) and skips the
+    member carrying the literal, so a `strings`-based gate would call that archive clean. Two things
+    make this whole measurement re-derivable rather than a story about a deleted build. The *after*
+    state is on this machine now: the relay built from `../popopxmq` self-reports
+    `SMP server v7.1.0.17 / cb9e1aa` and reads **0 branded / 2 upstream**, and the relay taken from
+    upstream's own build reads the same **0 / 2** while reporting `71179c4` — those two differ only by
+    the hash they print, which is why this was never a version gap. The *before* state survives as
+    bytes, not as a tree: the branded client is kept at `/tmp/ppx-before/popopx-chat-branded`
+    (195,600,984 bytes, **2 branded / 0 upstream** by the same raw-byte read). Building a client against
+    a dependency commit that has not been pushed takes more than this repository's documented
+    `cabal.project.local` `packages:` stanza, and that is worth writing down because every route short
+    of this one *succeeds*: `packages: . ../popopxmq` is shadowed by the `source-repository-package`
+    entry (measured — `Up to date`, 0 recompiled modules, binary still 2 branded), and repointing that
+    entry at `/Users/elliot/popopx-chat/popopxmq` with `tag: cb9e1aa3…` does fetch the right commit —
+    the log shows `From /Users/elliot/popopx-chat/popopxmq … HEAD is now at cb9e1aa3` and 149
+    `Compiling Popopx.Messaging` lines — yet still links the branded objects, because cabal unpacks the
+    fetched repository into `dist-newstyle/src/<name>-<version>` and reuses that directory whenever the
+    *version* is unchanged (the reused one was a September-dated checkout of `5b881a70`, branded). Both
+    `dist-newstyle/src/popopxmq-7.1.0.17` and
+    `dist-newstyle/build/aarch64-osx/ghc-9.6.3/popopxmq-7.1.0.17` have to go — measured both ways: with
+    only the build directory cleared, `Popopx/Messaging/Crypto.o` came out 2 branded / 0 upstream at
+    08:12, and with the extraction directory cleared too it came out **0 branded / 2 upstream** at 08:21.
+    A clean CI run cannot hit this, so the trap is local-only — and what proves it either way is the
+    raw-byte read on `…/popopxmq-7.1.0.17/build/Popopx/Messaging/Crypto.o`, never the log's `Linking`
+    line.
+
+    Acceptance, measured 2026-11-17 on loopback ports only. The broken pair, re-run with the bytes this
+    item replaced: the preserved branded client against upstream's own relay
+    (`/private/tmp/up-relay/smp-server`, **0 branded / 2 upstream**, self-reporting
+    `SMP server v7.1.0.17 / 71179c4`) writes `A (1) --> localhost:63967 : NEW` at 08:09:21 and
+    `BROKER {brokerErr = TIMEOUT}` seven seconds later, and that relay's 915-byte log has no line about
+    the queue — no error, just silence. That is the whole reason this class of rename is dangerous: the
+    client cannot tell a domain-separator mismatch from a dead server. The working pair puts the other
+    end on bytes this fork does not produce at all — the published native backend's
+    `libHSsmplxmq-7.1.0.16-a258938b-ghc9.6.3.dylib`, upstream's package name and **0 branded /
+    2 upstream** — against the relay built from `cb9e1aa`, which self-reports
+    `SMP server v7.1.0.17 / cb9e1aa`; with the store log on it records
+    `CREATE rid=… queue_mode=C link_id=…`, so the queue was created and the end-to-end link established
+    (`/private/tmp/relay-matrix/logs/smp-server-store.log`, 21,451 bytes). That relay binary is not kept
+    on this machine, so its label count is quoted from its own self-reported commit rather than from the
+    file. Harnesses: `/tmp/smp-exp/run2.sh <client> <relay> <tag>` for the CLI pair (store log off),
+    `/tmp/relay-matrix/run.js` with `SMP_SERVER=` and `POPOPX_LIBS_DIR=` for the node pair. The third
+    cell is the one that decides it, because it is the pairing no test in either repository can make:
+    the CLI rebuilt from the reverted tree — `…/popopx-chat-7.1.2.0/x/popopx-chat/build/popopx-chat`,
+    relinked 08:32:33 and reading **0 branded / 2 upstream** — against the *same* upstream relay binary
+    as the broken cell (`71179c4`), which answers `NEW` with `IDS kkHo BbBV` in the same second on port
+    65229 where the branded build of the same CLI spent 7 s timing out. Bytes in, bytes out, both ends
+    from different trees, and nothing on either side had to be branded for it to work.
+
+    The order in which the built artifacts have to be put back, because none of them is rebuilt by the
+    dependency commit itself: push `cb9e1aa3` and `popopx-pin-5` in `popopxmq`; move `cabal.project:24`
+    from `25d7213d…` onto that commit; then rebuild everything that reads the pin — the two installed
+    iOS slices named above, the `-libs` bundle and the desktop artifacts CI publishes — and clear both
+    `dist-newstyle` directories named above on any machine with a warm cache, which is what turns "I
+    rebuilt it" back into a claim about bytes. The staleness runs in both directions: when
+    `cabal.project` went back to `25d7213d…` at the end of this work, the extraction directory was
+    deleted again on purpose, because it then held the *reverted* tree while the pin said branded, and a
+    build left running against it would have produced a client whose bytes contradict its own pin.
+
 ## What was deliberately NOT changed
 
 - **Copyright and attribution.** `author: simplex.chat` and `copyright: 2020-22 simplex.chat` in
@@ -470,6 +595,9 @@ each was meant to become. That pass also repaired a compile break this fork ship
   mounted path and the path the process reads disagree, and the keys land in the container layer.
 - **Cryptographic pre-images** (HKDF info parameters, badge hash inputs, SQLite FFI symbol
   names). Renaming these would silently break key derivation instead of failing to compile.
+  This hold was written for the app repository and *violated in the dependency*: the ten HKDF and BBS
+  labels were branded there, which is why they were reverted on 2026-11-17 — item 16 in
+  §"What was changed" carries the measurement and the two gates.
 - **Anything naming an upstream thing**: upstream operator addresses, the `simplex:` address
   format as understood on the public network, upstream social accounts. An identifier that
   names something belonging to upstream keeps upstream's name, or it stops resolving.
