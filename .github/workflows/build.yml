@@ -815,7 +815,7 @@ jobs:
   build-linux-push:
     name: "ubuntu-${{ matrix.os }}-${{ matrix.arch }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
     needs: [maybe-release, variables]
-    if: needs.maybe-release.outputs.reduced != 'true' && github.event_name == 'push'
+    if: (needs.maybe-release.outputs.reduced != 'true' || needs.maybe-release.outputs.libs_tag != '') && github.event_name == 'push'
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: write
@@ -999,7 +999,7 @@ jobs:
   build-macos:
     name: "${{ matrix.os }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
     needs: [maybe-release, variables]
-    if: needs.maybe-release.outputs.reduced != 'true' && needs.maybe-release.outputs.haskell == 'true'
+    if: (needs.maybe-release.outputs.reduced != 'true' || needs.maybe-release.outputs.libs_tag != '') && needs.maybe-release.outputs.haskell == 'true'
     # Upload CLI and Upload Desktop attach to the app release through prepare-release, which is
     # given the job token; the default read-only token cannot write a release.
     permissions:
@@ -1415,7 +1415,7 @@ jobs:
   build-windows:
     name: "${{ matrix.os }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
     needs: [maybe-release, variables]
-    if: needs.maybe-release.outputs.reduced != 'true' && needs.maybe-release.outputs.haskell == 'true'
+    if: (needs.maybe-release.outputs.reduced != 'true' || needs.maybe-release.outputs.libs_tag != '') && needs.maybe-release.outputs.haskell == 'true'
     # Upload CLI and Upload Desktop attach to the app release through prepare-release, which is
     # given the job token; the default read-only token cannot write a release.
     permissions:
