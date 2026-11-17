@@ -1770,8 +1770,11 @@ struct DBEncryptionConfig: Codable {
     var newKey: String
 }
 
+// The raw values are the core's wire values, not brand names: src/Popopx/Chat/Operators.hs
+// textEncode emits "simplex"/"flux", and the preset operator always carries "simplex".
+// Renaming a raw value here breaks decoding of serverOperatorConditions (Kotlin/TS keep the same values).
 enum OperatorTag: String, Codable {
-    case popopx = "popopx"
+    case simplex = "simplex"
     case flux = "flux"
 }
 
@@ -1786,7 +1789,7 @@ struct ServerOperatorInfo {
 }
 
 let operatorsInfo: Dictionary<OperatorTag, ServerOperatorInfo> = [
-    .popopx: ServerOperatorInfo(
+    .simplex: ServerOperatorInfo(
         description: [
             "POPOPX Chat is the first communication network that has no user profile IDs of any kind, not even random numbers or identity keys.",
             "POPOPX Chat Ltd develops the communication software for POPOPX network."
@@ -1908,7 +1911,7 @@ struct ServerOperator: Identifiable, Equatable, Codable {
 
     static var sampleData1 = ServerOperator(
         operatorId: 1,
-        operatorTag: .popopx,
+        operatorTag: .simplex,
         tradeName: "POPOPX Chat",
         legalName: "POPOPX Chat Ltd",
         serverDomains: ["simplex.im"],
