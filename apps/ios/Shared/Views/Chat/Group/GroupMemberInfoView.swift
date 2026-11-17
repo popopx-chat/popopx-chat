@@ -553,22 +553,19 @@ struct GroupMemberInfoView: View {
         var groupInfo: GroupInfo
         var member: GMember
         @Binding var scrollToItemId: ChatItem.ID?
-        @State private var navLinkActive = false
 
         var body: some View {
             let scopeInfo: GroupChatScopeInfo = .memberSupport(groupMember_: member.wrapped)
-            NavigationLink(isActive: $navLinkActive) {
+            NavigationLink {
                 SecondaryChatView(
                     chat: Chat(chatInfo: .group(groupInfo: groupInfo, groupChatScope: scopeInfo), chatItems: [], chatStats: ChatStats()),
                     scrollToItemId: $scrollToItemId
                 )
-            } label: {
-                Label("Chat with member", systemImage: "flag")
-            }
-            .onChange(of: navLinkActive) { _, active in
-                if active {
+                .onAppear {
                     ItemsModel.loadSecondaryChat(groupInfo.id, chatFilter: .groupChatScopeContext(groupScopeInfo: scopeInfo))
                 }
+            } label: {
+                Label("Chat with member", systemImage: "flag")
             }
         }
     }

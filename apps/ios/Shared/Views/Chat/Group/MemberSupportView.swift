@@ -81,17 +81,12 @@ struct MemberSupportView: View {
                 } label: {
                     SupportChatRowView(groupMember: memberWithChat, groupInfo: groupInfo)
                 }
-
-                NavigationLink(isActive: $memberSupportChatNavLinkActive) {
+                .navigationDestination(isPresented: $memberSupportChatNavLinkActive) {
                     SecondaryChatView(
                         chat: Chat(chatInfo: .group(groupInfo: groupInfo, groupChatScope: scopeInfo), chatItems: [], chatStats: ChatStats()),
                         scrollToItemId: $scrollToItemId
                     )
-                } label: {
-                    EmptyView()
                 }
-                .frame(width: 1, height: 1)
-                .hidden()
             }
             .if(!memberWithChat.wrapped.memberPending && memberWithChat.wrapped.supportChatNotRead) { v in
                 v.swipeActions(edge: .leading, allowsFullSwipe: true) {

@@ -70,7 +70,7 @@ struct GroupChatInfoView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             let members = chatModel.groupMembers
                 .filter { m in let status = m.wrapped.memberStatus; return status != .memLeft && status != .memRemoved }
                 .sorted { $0.wrapped.memberRole > $1.wrapped.memberRole }
@@ -425,26 +425,16 @@ struct GroupChatInfoView: View {
                 InfoViewButton(image: "link.badge.plus", title: "invite", width: width) {
                     groupLinkNavLinkActive = true
                 }
-
-                NavigationLink(isActive: $groupLinkNavLinkActive) {
+                .navigationDestination(isPresented: $groupLinkNavLinkActive) {
                     groupLinkDestinationView()
-                } label: {
-                    EmptyView()
                 }
-                .frame(width: 1, height: 1)
-                .hidden()
             } else {
                 InfoViewButton(image: "person.fill.badge.plus", title: "invite", width: width) {
                     addMembersNavLinkActive = true
                 }
-
-                NavigationLink(isActive: $addMembersNavLinkActive) {
+                .navigationDestination(isPresented: $addMembersNavLinkActive) {
                     addMembersDestinationView()
-                } label: {
-                    EmptyView()
                 }
-                .frame(width: 1, height: 1)
-                .hidden()
             }
         }
         .disabled(!groupInfo.ready)
@@ -462,18 +452,11 @@ struct GroupChatInfoView: View {
     }
 
     private func channelLinkActionButton(width: CGFloat) -> some View {
-        ZStack {
-            InfoViewButton(image: "link", title: "link", width: width) {
-                groupLinkNavLinkActive = true
-            }
-
-            NavigationLink(isActive: $groupLinkNavLinkActive) {
-                groupLinkDestinationView()
-            } label: {
-                EmptyView()
-            }
-            .frame(width: 1, height: 1)
-            .hidden()
+        InfoViewButton(image: "link", title: "link", width: width) {
+            groupLinkNavLinkActive = true
+        }
+        .navigationDestination(isPresented: $groupLinkNavLinkActive) {
+            groupLinkDestinationView()
         }
         .disabled(!groupInfo.ready)
     }
