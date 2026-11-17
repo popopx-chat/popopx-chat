@@ -22,7 +22,6 @@ struct YourServersView: View {
     @Binding var serverErrors: [UserServersError]
     @Binding var serverWarnings: [UserServersWarning]
     var operatorIndex: Int
-    @State private var selectedServer: String? = nil
     @State private var showAddServer = false
     @State private var newServerNavLinkActive = false
     @State private var newChatRelayNavLinkActive = false
@@ -40,6 +39,18 @@ struct YourServersView: View {
                 }
             }
             .allowsHitTesting(!testing)
+            .navigationDestination(for: ProtocolServerSelection.self) { sel in
+                protocolServerDestination(sel, userServers: $userServers, serverErrors: $serverErrors, serverWarnings: $serverWarnings, backLabel: "Your servers")
+            }
+            .navigationDestination(for: ChatRelaySelection.self) { sel in
+                chatRelayDestination(sel, userServers: $userServers, serverErrors: $serverErrors, serverWarnings: $serverWarnings, backLabel: "Your servers")
+            }
+            .navigationDestination(isPresented: $newChatRelayNavLinkActive) {
+                NewChatRelayView(userServers: $userServers, serverErrors: $serverErrors, serverWarnings: $serverWarnings)
+                    .navigationTitle("New chat relay")
+                    .navigationBarTitleDisplayMode(.large)
+                    .modifier(ThemedBackground(grouped: true))
+            }
     }
 
     private func yourServersView() -> some View {
@@ -51,13 +62,8 @@ struct YourServersView: View {
                     ForEach(bindingForChatRelays($userServers, operatorIndex)) { relay in
                         if !relay.wrappedValue.deleted {
                             ChatRelayViewLink(
-                                userServers: $userServers,
-                                serverErrors: $serverErrors,
-                                serverWarnings: $serverWarnings,
                                 relay: relay,
-                                duplicateRelayAddresses: duplicateRelayAddresses,
-                                backLabel: "Your servers",
-                                selectedServer: $selectedServer
+                                duplicateRelayAddresses: duplicateRelayAddresses
                             )
                         } else { EmptyView() }
                     }
@@ -77,14 +83,9 @@ struct YourServersView: View {
                     ForEach($userServers[operatorIndex].smpServers) { srv in
                         if !srv.wrappedValue.deleted {
                             ProtocolServerViewLink(
-                                userServers: $userServers,
-                                serverErrors: $serverErrors,
-                                serverWarnings: $serverWarnings,
                                 duplicateHosts: duplicateHosts,
                                 server: srv,
-                                serverProtocol: .smp,
-                                backLabel: "Your servers",
-                                selectedServer: $selectedServer
+                                serverProtocol: .smp
                             )
                         } else {
                             EmptyView()
@@ -113,14 +114,9 @@ struct YourServersView: View {
                     ForEach($userServers[operatorIndex].xftpServers) { srv in
                         if !srv.wrappedValue.deleted {
                             ProtocolServerViewLink(
-                                userServers: $userServers,
-                                serverErrors: $serverErrors,
-                                serverWarnings: $serverWarnings,
                                 duplicateHosts: duplicateHosts,
                                 server: srv,
-                                serverProtocol: .xftp,
-                                backLabel: "Your servers",
-                                selectedServer: $selectedServer
+                                serverProtocol: .xftp
                             )
                         } else {
                             EmptyView()
@@ -145,29 +141,11 @@ struct YourServersView: View {
             }
 
             Section {
-                ZStack {
-                    Button("Add server") {
-                        showAddServer = true
-                    }
-
-                    NavigationLink(isActive: $newServerNavLinkActive) {
-                        newServerDestinationView()
-                    } label: {
-                        EmptyView()
-                    }
-                    .frame(width: 1, height: 1)
-                    .hidden()
-
-                    NavigationLink(isActive: $newChatRelayNavLinkActive) {
-                        NewChatRelayView(userServers: $userServers, serverErrors: $serverErrors, serverWarnings: $serverWarnings)
-                            .navigationTitle("New chat relay")
-                            .navigationBarTitleDisplayMode(.large)
-                            .modifier(ThemedBackground(grouped: true))
-                    } label: {
-                        EmptyView()
-                    }
-                    .frame(width: 1, height: 1)
-                    .hidden()
+                Button("Add server") {
+                    showAddServer = true
+                }
+                .navigationDestination(isPresented: $newServerNavLinkActive) {
+                    newServerDestinationView()
                 }
             } footer: {
                 let errs = globalServersErrors(serverErrors)
@@ -242,31 +220,12 @@ struct YourServersView: View {
 
 struct ProtocolServerViewLink: View {
     @EnvironmentObject var theme: AppTheme
-    @Binding var userServers: [UserOperatorServers]
-    @Binding var serverErrors: [UserServersError]
-    @Binding var serverWarnings: [UserServersWarning]
     var duplicateHosts: Set<String>
     @Binding var server: UserServer
     var serverProtocol: ServerProtocol
-    var backLabel: LocalizedStringKey
-    @Binding var selectedServer: String?
 
     var body: some View {
-        let proto = serverProtocol.rawValue.uppercased()
-
-        NavigationLink(tag: server.id, selection: $selectedServer) {
-            ProtocolServerView(
-                userServers: $userServers,
-                serverErrors: $serverErrors,
-                serverWarnings: $serverWarnings,
-                server: $server,
-                serverToEdit: server,
-                backLabel: backLabel
-            )
-            .navigationBarTitle("\(proto) server")
-            .modifier(ThemedBackground(grouped: true))
-            .navigationBarTitleDisplayMode(.large)
-        } label: {
+        NavigationLink(value: ProtocolServerSelection(serverId: server.id, serverProtocol: serverProtocol)) {
             let address = parseServerAddress(server.server)
             HStack {
                 Group {
@@ -299,6 +258,45 @@ struct ProtocolServerViewLink: View {
 
     private func invalidServer() -> some View {
         Image(systemName: "exclamationmark.circle").foregroundColor(.red)
+    }
+}
+
+struct ProtocolServerSelection: Hashable {
+    var serverId: String
+    var serverProtocol: ServerProtocol
+}
+
+func userServerBinding(_ userServers: Binding<[UserOperatorServers]>, _ sel: ProtocolServerSelection) -> Binding<UserServer>? {
+    for (op, group) in userServers.wrappedValue.enumerated() {
+        switch sel.serverProtocol {
+        case .smp:
+            if let i = group.smpServers.firstIndex(where: { $0.id == sel.serverId }) { return userServers[op].smpServers[i] }
+        case .xftp:
+            if let i = group.xftpServers.firstIndex(where: { $0.id == sel.serverId }) { return userServers[op].xftpServers[i] }
+        }
+    }
+    return nil
+}
+
+@ViewBuilder func protocolServerDestination(
+    _ sel: ProtocolServerSelection,
+    userServers: Binding<[UserOperatorServers]>,
+    serverErrors: Binding<[UserServersError]>,
+    serverWarnings: Binding<[UserServersWarning]>,
+    backLabel: LocalizedStringKey
+) -> some View {
+    if let server = userServerBinding(userServers, sel) {
+        ProtocolServerView(
+            userServers: userServers,
+            serverErrors: serverErrors,
+            serverWarnings: serverWarnings,
+            server: server,
+            serverToEdit: server.wrappedValue,
+            backLabel: backLabel
+        )
+        .navigationBarTitle("\(sel.serverProtocol.rawValue.uppercased()) server")
+        .modifier(ThemedBackground(grouped: true))
+        .navigationBarTitleDisplayMode(.large)
     }
 }
 

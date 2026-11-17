@@ -25,7 +25,6 @@ struct OperatorView: View {
     @State var useOperator: Bool
     @State private var useOperatorToggleReset: Bool = false
     @State private var showConditionsSheet: Bool = false
-    @State private var selectedServer: String? = nil
     @State private var testing = false
 
     var body: some View {
@@ -39,6 +38,12 @@ struct OperatorView: View {
                 }
             }
             .allowsHitTesting(!testing)
+            .navigationDestination(for: ProtocolServerSelection.self) { sel in
+                protocolServerDestination(sel, userServers: $userServers, serverErrors: $serverErrors, serverWarnings: $serverWarnings, backLabel: "\(userServers[operatorIndex].operator_.tradeName) servers")
+            }
+            .navigationDestination(for: ChatRelaySelection.self) { sel in
+                chatRelayDestination(sel, userServers: $userServers, serverErrors: $serverErrors, serverWarnings: $serverWarnings, backLabel: "\(userServers[operatorIndex].operator_.tradeName) servers")
+            }
     }
 
     private func operatorView() -> some View {
@@ -85,13 +90,8 @@ struct OperatorView: View {
                             ForEach(bindingForChatRelays($userServers, operatorIndex)) { relay in
                                 if !relay.wrappedValue.deleted {
                                     ChatRelayViewLink(
-                                        userServers: $userServers,
-                                        serverErrors: $serverErrors,
-                                        serverWarnings: $serverWarnings,
                                         relay: relay,
-                                        duplicateRelayAddresses: duplicateRelayAddresses,
-                                        backLabel: "\(userServers[operatorIndex].operator_.tradeName) servers",
-                                        selectedServer: $selectedServer
+                                        duplicateRelayAddresses: duplicateRelayAddresses
                                     )
                                 } else { EmptyView() }
                             }
@@ -132,14 +132,9 @@ struct OperatorView: View {
                             ForEach($userServers[operatorIndex].smpServers) { srv in
                                 if srv.wrappedValue.preset {
                                     ProtocolServerViewLink(
-                                        userServers: $userServers,
-                                        serverErrors: $serverErrors,
-                                        serverWarnings: $serverWarnings,
                                         duplicateHosts: duplicateHosts,
                                         server: srv,
-                                        serverProtocol: .smp,
-                                        backLabel: "\(userServers[operatorIndex].operator_.tradeName) servers",
-                                        selectedServer: $selectedServer
+                                        serverProtocol: .smp
                                     )
                                 } else {
                                     EmptyView()
@@ -164,14 +159,9 @@ struct OperatorView: View {
                             ForEach($userServers[operatorIndex].smpServers) { srv in
                                 if !srv.wrappedValue.preset && !srv.wrappedValue.deleted {
                                     ProtocolServerViewLink(
-                                        userServers: $userServers,
-                                        serverErrors: $serverErrors,
-                                        serverWarnings: $serverWarnings,
                                         duplicateHosts: duplicateHosts,
                                         server: srv,
-                                        serverProtocol: .smp,
-                                        backLabel: "\(userServers[operatorIndex].operator_.tradeName) servers",
-                                        selectedServer: $selectedServer
+                                        serverProtocol: .smp
                                     )
                                 } else {
                                     EmptyView()
@@ -209,14 +199,9 @@ struct OperatorView: View {
                             ForEach($userServers[operatorIndex].xftpServers) { srv in
                                 if srv.wrappedValue.preset {
                                     ProtocolServerViewLink(
-                                        userServers: $userServers,
-                                        serverErrors: $serverErrors,
-                                        serverWarnings: $serverWarnings,
                                         duplicateHosts: duplicateHosts,
                                         server: srv,
-                                        serverProtocol: .xftp,
-                                        backLabel: "\(userServers[operatorIndex].operator_.tradeName) servers",
-                                        selectedServer: $selectedServer
+                                        serverProtocol: .xftp
                                     )
                                 } else {
                                     EmptyView()
@@ -241,14 +226,9 @@ struct OperatorView: View {
                             ForEach($userServers[operatorIndex].xftpServers) { srv in
                                 if !srv.wrappedValue.preset && !srv.wrappedValue.deleted {
                                     ProtocolServerViewLink(
-                                        userServers: $userServers,
-                                        serverErrors: $serverErrors,
-                                        serverWarnings: $serverWarnings,
                                         duplicateHosts: duplicateHosts,
                                         server: srv,
-                                        serverProtocol: .xftp,
-                                        backLabel: "\(userServers[operatorIndex].operator_.tradeName) servers",
-                                        selectedServer: $selectedServer
+                                        serverProtocol: .xftp
                                     )
                                 } else {
                                     EmptyView()

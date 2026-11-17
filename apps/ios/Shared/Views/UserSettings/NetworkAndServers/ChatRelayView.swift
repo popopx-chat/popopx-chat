@@ -240,28 +240,11 @@ struct ChatRelayView: View {
 
 struct ChatRelayViewLink: View {
     @EnvironmentObject var theme: AppTheme
-    @Binding var userServers: [UserOperatorServers]
-    @Binding var serverErrors: [UserServersError]
-    @Binding var serverWarnings: [UserServersWarning]
     @Binding var relay: UserChatRelay
     var duplicateRelayAddresses: Set<String>
-    var backLabel: LocalizedStringKey
-    @Binding var selectedServer: String?
 
     var body: some View {
-        NavigationLink(tag: relay.id, selection: $selectedServer) {
-            ChatRelayView(
-                userServers: $userServers,
-                serverErrors: $serverErrors,
-                serverWarnings: $serverWarnings,
-                relay: $relay,
-                relayToEdit: relay,
-                backLabel: backLabel
-            )
-            .navigationBarTitle("Chat relay")
-            .modifier(ThemedBackground(grouped: true))
-            .navigationBarTitleDisplayMode(.large)
-        } label: {
+        NavigationLink(value: ChatRelaySelection(relayId: relay.id)) {
             HStack {
                 Group {
                     if duplicateRelayAddresses.contains(relay.address) {
@@ -284,6 +267,39 @@ struct ChatRelayViewLink: View {
                 }
             }
         }
+    }
+}
+
+struct ChatRelaySelection: Hashable {
+    var relayId: String
+}
+
+func userChatRelayBinding(_ userServers: Binding<[UserOperatorServers]>, _ sel: ChatRelaySelection) -> Binding<UserChatRelay>? {
+    for (op, group) in userServers.wrappedValue.enumerated() {
+        if let i = group.chatRelays.firstIndex(where: { $0.id == sel.relayId }) { return userServers[op].chatRelays[i] }
+    }
+    return nil
+}
+
+@ViewBuilder func chatRelayDestination(
+    _ sel: ChatRelaySelection,
+    userServers: Binding<[UserOperatorServers]>,
+    serverErrors: Binding<[UserServersError]>,
+    serverWarnings: Binding<[UserServersWarning]>,
+    backLabel: LocalizedStringKey
+) -> some View {
+    if let relay = userChatRelayBinding(userServers, sel) {
+        ChatRelayView(
+            userServers: userServers,
+            serverErrors: serverErrors,
+            serverWarnings: serverWarnings,
+            relay: relay,
+            relayToEdit: relay.wrappedValue,
+            backLabel: backLabel
+        )
+        .navigationBarTitle("Chat relay")
+        .modifier(ThemedBackground(grouped: true))
+        .navigationBarTitleDisplayMode(.large)
     }
 }
 
