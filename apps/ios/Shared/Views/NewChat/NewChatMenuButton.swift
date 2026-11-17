@@ -54,8 +54,15 @@ struct NewChatSheet: View {
     @State private var connectNameCandidate: String? = nil
     @State private var alert: SomeAlert?
 
+    // Owned here, at the stack root, so the pages below (AddChannelView → NetworkAndServers) and the
+    // server/relay destinations registered on this stack read and write the same store instance.
+    @StateObject private var ss = SaveableSettings()
+
     // Sheet height management
-    @State private var path: [NewChatDestination] = []
+    // NavigationPath, not [NewChatDestination]: the stack resolves a pushed value against the
+    // navigationDestination declarations registered by the pages below, and an array path - even
+    // [AnyHashable] - makes the stack homogeneous so those declarations are ignored.
+    @State private var path = NavigationPath()
     @State private var isLargeSheet = false
     @State private var allowSmallSheet = true
 
@@ -96,9 +103,19 @@ struct NewChatSheet: View {
                         AnyView(DeletedChats())
                     }
                 }
+                .navigationDestination(for: ServersDestination.self) { destination in
+                    serversDestination(destination, ss: ss, servers: $ss.servers)
+                }
+                .navigationDestination(for: ProtocolServerSelection.self) { sel in
+                    protocolServerDestination(sel, servers: $ss.servers)
+                }
+                .navigationDestination(for: ChatRelaySelection.self) { sel in
+                    chatRelayDestination(sel, servers: $ss.servers)
+                }
         }.onDisappear {
             ConnectProgressManager.shared.cancelConnectProgress()
         }
+        .environmentObject(ss)
         .onChange(of: path) { _, newPath in
             // the sheet has to grow before the pushed view is laid out, hence the async
             if !newPath.isEmpty {

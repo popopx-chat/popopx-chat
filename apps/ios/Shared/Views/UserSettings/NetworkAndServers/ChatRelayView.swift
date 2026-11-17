@@ -303,6 +303,27 @@ func userChatRelayBinding(_ userServers: Binding<[UserOperatorServers]>, _ sel: 
     }
 }
 
+func chatRelayGroupIndex(_ userServers: [UserOperatorServers], _ sel: ChatRelaySelection) -> Int? {
+    for (idx, group) in userServers.enumerated() {
+        if group.chatRelays.contains(where: { $0.id == sel.relayId }) { return idx }
+    }
+    return nil
+}
+
+@ViewBuilder func chatRelayDestination(
+    _ sel: ChatRelaySelection,
+    servers: Binding<ServerSettings>
+) -> some View {
+    let groups = servers.wrappedValue.userServers
+    chatRelayDestination(
+        sel,
+        userServers: servers.userServers,
+        serverErrors: servers.serverErrors,
+        serverWarnings: servers.serverWarnings,
+        backLabel: serversBackLabel(groups, groupIndex: chatRelayGroupIndex(groups, sel))
+    )
+}
+
 struct NewChatRelayView: View {
     @Environment(\.dismiss) var dismiss: DismissAction
     @EnvironmentObject var theme: AppTheme

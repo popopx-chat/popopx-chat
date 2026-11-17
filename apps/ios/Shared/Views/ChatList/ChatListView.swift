@@ -112,6 +112,15 @@ struct UserPickerSheetView: View {
             .navigationTitle(sheet.navigationTitle)
             .navigationBarTitleDisplayMode(.large)
             .modifier(ThemedBackground(grouped: true))
+            .navigationDestination(for: ServersDestination.self) { destination in
+                serversDestination(destination, ss: ss, servers: $ss.servers)
+            }
+            .navigationDestination(for: ProtocolServerSelection.self) { sel in
+                protocolServerDestination(sel, servers: $ss.servers)
+            }
+            .navigationDestination(for: ChatRelaySelection.self) { sel in
+                chatRelayDestination(sel, servers: $ss.servers)
+            }
         }
         .overlay {
             if let la = chatModel.laRequest {

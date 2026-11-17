@@ -15,7 +15,6 @@ struct AddChannelView: View {
     @EnvironmentObject var m: ChatModel
     @EnvironmentObject var theme: AppTheme
     @StateObject private var channelRelaysModel = ChannelRelaysModel.shared
-    @StateObject private var ss = SaveableSettings()
     @State private var profile = GroupProfile(displayName: "", fullName: "")
     @FocusState private var focusDisplayName: Bool
     @State private var showChooseSource = false
@@ -83,12 +82,7 @@ struct AddChannelView: View {
 
             Section {
                 channelNameTextField()
-                NavigationLink {
-                    NetworkAndServers()
-                        .navigationTitle("Network & servers")
-                        .modifier(ThemedBackground(grouped: true))
-                        .environmentObject(ss)
-                } label: {
+                NavigationLink(value: ServersDestination.networkAndServers) {
                     let color: Color = hasRelays ? .accentColor : .orange
                     settingsRow("externaldrive.connected.to.line.below", color: color) {
                         Text("Configure relays").foregroundColor(color)

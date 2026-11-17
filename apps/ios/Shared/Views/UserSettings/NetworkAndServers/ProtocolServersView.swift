@@ -39,17 +39,14 @@ struct YourServersView: View {
                 }
             }
             .allowsHitTesting(!testing)
-            .navigationDestination(for: ProtocolServerSelection.self) { sel in
-                protocolServerDestination(sel, userServers: $userServers, serverErrors: $serverErrors, serverWarnings: $serverWarnings, backLabel: "Your servers")
-            }
-            .navigationDestination(for: ChatRelaySelection.self) { sel in
-                chatRelayDestination(sel, userServers: $userServers, serverErrors: $serverErrors, serverWarnings: $serverWarnings, backLabel: "Your servers")
-            }
             .navigationDestination(isPresented: $newChatRelayNavLinkActive) {
                 NewChatRelayView(userServers: $userServers, serverErrors: $serverErrors, serverWarnings: $serverWarnings)
                     .navigationTitle("New chat relay")
                     .navigationBarTitleDisplayMode(.large)
                     .modifier(ThemedBackground(grouped: true))
+            }
+            .navigationDestination(isPresented: $newServerNavLinkActive) {
+                newServerDestinationView()
             }
     }
 
@@ -143,9 +140,6 @@ struct YourServersView: View {
             Section {
                 Button("Add server") {
                     showAddServer = true
-                }
-                .navigationDestination(isPresented: $newServerNavLinkActive) {
-                    newServerDestinationView()
                 }
             } footer: {
                 let errs = globalServersErrors(serverErrors)
@@ -298,6 +292,41 @@ func userServerBinding(_ userServers: Binding<[UserOperatorServers]>, _ sel: Pro
         .modifier(ThemedBackground(grouped: true))
         .navigationBarTitleDisplayMode(.large)
     }
+}
+
+// The destinations for these rows are declared on the NavigationStack that hosts NetworkAndServers,
+// not on the page that shows them: SwiftUI keeps only the registration closest to the stack root for a
+// given value type, so a per-page one is deduplicated away and the row taps resolve to nothing.
+
+func protocolServerGroupIndex(_ userServers: [UserOperatorServers], _ sel: ProtocolServerSelection) -> Int? {
+    for (idx, group) in userServers.enumerated() {
+        switch sel.serverProtocol {
+        case .smp:
+            if group.smpServers.contains(where: { $0.id == sel.serverId }) { return idx }
+        case .xftp:
+            if group.xftpServers.contains(where: { $0.id == sel.serverId }) { return idx }
+        }
+    }
+    return nil
+}
+
+func serversBackLabel(_ userServers: [UserOperatorServers], groupIndex: Int?) -> LocalizedStringKey {
+    guard let idx = groupIndex, let serverOperator = userServers[idx].operator else { return "Your servers" }
+    return "\(serverOperator.tradeName) servers"
+}
+
+@ViewBuilder func protocolServerDestination(
+    _ sel: ProtocolServerSelection,
+    servers: Binding<ServerSettings>
+) -> some View {
+    let groups = servers.wrappedValue.userServers
+    protocolServerDestination(
+        sel,
+        userServers: servers.userServers,
+        serverErrors: servers.serverErrors,
+        serverWarnings: servers.serverWarnings,
+        backLabel: serversBackLabel(groups, groupIndex: protocolServerGroupIndex(groups, sel))
+    )
 }
 
 func deleteSMPServer(

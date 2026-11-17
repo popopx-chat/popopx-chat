@@ -75,16 +75,7 @@ struct NetworkAndServers: View {
 
                 Section {
                     if let idx = ss.servers.userServers.firstIndex(where: { $0.operator == nil }) {
-                        NavigationLink {
-                            YourServersView(
-                                userServers: $ss.servers.userServers,
-                                serverErrors: $ss.servers.serverErrors,
-                                serverWarnings: $ss.servers.serverWarnings,
-                                operatorIndex: idx
-                            )
-                            .navigationTitle("Your servers")
-                            .modifier(ThemedBackground(grouped: true))
-                        } label: {
+                        NavigationLink(value: ServersDestination.yourServers(groupIndex: idx)) {
                             HStack {
                                 Text("Your servers")
                                 
@@ -181,19 +172,7 @@ struct NetworkAndServers: View {
     }
 
     private func serverOperatorView(_ operatorIndex: Int, _ serverOperator: ServerOperator) -> some View {
-        NavigationLink() {
-            OperatorView(
-                currUserServers: $ss.servers.currUserServers,
-                userServers: $ss.servers.userServers,
-                serverErrors: $ss.servers.serverErrors,
-                serverWarnings: $ss.servers.serverWarnings,
-                operatorIndex: operatorIndex,
-                useOperator: serverOperator.enabled
-            )
-            .navigationBarTitle("\(serverOperator.tradeName) servers")
-            .modifier(ThemedBackground(grouped: true))
-            .navigationBarTitleDisplayMode(.large)
-        } label: {
+        NavigationLink(value: ServersDestination.serverOperator(groupIndex: operatorIndex)) {
             HStack {
                 Image(serverOperator.logo(colorScheme))
                     .resizable()
@@ -229,6 +208,52 @@ struct NetworkAndServers: View {
                 Text("Accepted conditions")
             }
         }
+    }
+}
+
+// The servers pages are pushed by value so that the NavigationStack that hosts them - the settings
+// sheet or the new chat sheet - is the one that resolves them: a page pushed by a destination-closure
+// link keeps its own rows' value links inert, at any registration depth.
+enum ServersDestination: Hashable {
+    case networkAndServers
+    case yourServers(groupIndex: Int)
+    case serverOperator(groupIndex: Int)
+}
+
+@ViewBuilder func serversDestination(
+    _ destination: ServersDestination,
+    ss: SaveableSettings,
+    servers: Binding<ServerSettings>
+) -> some View {
+    switch destination {
+    case .networkAndServers:
+        NetworkAndServers()
+            .navigationTitle("Network & servers")
+            .modifier(ThemedBackground(grouped: true))
+            .environmentObject(ss)
+    case let .yourServers(groupIndex):
+        YourServersView(
+            userServers: servers.userServers,
+            serverErrors: servers.serverErrors,
+            serverWarnings: servers.serverWarnings,
+            operatorIndex: groupIndex
+        )
+        .navigationTitle("Your servers")
+        .modifier(ThemedBackground(grouped: true))
+    case let .serverOperator(groupIndex):
+        let serverOperator = servers.wrappedValue.userServers[groupIndex].operator_
+        OperatorView(
+            currUserServers: servers.currUserServers,
+            userServers: servers.userServers,
+            serverErrors: servers.serverErrors,
+            serverWarnings: servers.serverWarnings,
+            operatorIndex: groupIndex,
+            useOperator: serverOperator.enabled
+        )
+        .navigationTitle("\(serverOperator.tradeName) servers")
+        .navigationBarTitleDisplayMode(.large)
+        .modifier(ThemedBackground(grouped: true))
+        .environmentObject(ss)
     }
 }
 

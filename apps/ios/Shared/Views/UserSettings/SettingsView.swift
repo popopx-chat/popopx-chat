@@ -386,11 +386,7 @@ struct SettingsView: View {
             }
 
             Section(header: Text("Advanced settings").foregroundColor(theme.colors.secondary)) {
-                NavigationLink {
-                    NetworkAndServers()
-                        .navigationTitle("Network & servers")
-                        .modifier(ThemedBackground(grouped: true))
-                } label: {
+                NavigationLink(value: ServersDestination.networkAndServers) {
                     settingsRow("externaldrive.connected.to.line.below", color: theme.colors.secondary) { Text("Network & servers") }
                 }
                 .disabled(chatModel.chatRunning != true)

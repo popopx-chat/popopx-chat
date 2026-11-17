@@ -30,6 +30,12 @@ struct TerminalView: View {
     var body: some View {
         if authorized {
             terminalView()
+                .navigationDestination(isPresented: Binding(
+                    get: { terminalItem != nil },
+                    set: { if !$0 { terminalItem = nil } }
+                )) {
+                    terminalItemView()
+                }
                 .onAppear {
                     if showing { return }
                     showing = true
@@ -86,12 +92,6 @@ struct TerminalView: View {
                                     scrollToBottom(proxy, animation: .easeInOut(duration: 1))
                                 }
                             }
-                        }
-                        .navigationDestination(isPresented: Binding(
-                            get: { terminalItem != nil },
-                            set: { if !$0 { terminalItem = nil } }
-                        )) {
-                            terminalItemView()
                         }
                     }
                 }

@@ -38,12 +38,6 @@ struct OperatorView: View {
                 }
             }
             .allowsHitTesting(!testing)
-            .navigationDestination(for: ProtocolServerSelection.self) { sel in
-                protocolServerDestination(sel, userServers: $userServers, serverErrors: $serverErrors, serverWarnings: $serverWarnings, backLabel: "\(userServers[operatorIndex].operator_.tradeName) servers")
-            }
-            .navigationDestination(for: ChatRelaySelection.self) { sel in
-                chatRelayDestination(sel, userServers: $userServers, serverErrors: $serverErrors, serverWarnings: $serverWarnings, backLabel: "\(userServers[operatorIndex].operator_.tradeName) servers")
-            }
     }
 
     private func operatorView() -> some View {

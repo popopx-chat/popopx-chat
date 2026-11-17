@@ -92,7 +92,7 @@ The [`contentView()`](../../Shared/ContentView.swift#L171) function further deci
 
 ### iOS Version Compatibility
 
-**File**: [`Shared/Views/ChatList/ChatListView.swift`](../../Shared/Views/ChatList/ChatListView.swift#L195)
+**File**: [`Shared/Views/ChatList/ChatListView.swift`](../../Shared/Views/ChatList/ChatListView.swift#L204)
 
 The deployment target is iOS 17.0, so `NavigationStack` is used directly and the former
 `NavStackCompat` wrapper (needed while the app still supported iOS 15) was removed. The chat
@@ -136,6 +136,21 @@ ChatListView
                        ├─→ DatabaseView
                        └─→ UserProfilesView
 ```
+
+### Servers pages push by value, registered at the stack root
+
+[`SettingsView`](../../Shared/Views/UserSettings/SettingsView.swift#L389) and
+[`AddChannelView`](../../Shared/Views/NewChat/AddChannelView.swift#L85) push a
+[`ServersDestination`](../../Shared/Views/UserSettings/NetworkAndServers/NetworkAndServers.swift#L217); the relay and
+message-server rows on the pages below push `ChatRelaySelection` / `ProtocolServerSelection`. The matching
+`navigationDestination(for:)` declarations live on the two stacks that host them -
+[`UserPickerSheetView`](../../Shared/Views/ChatList/ChatListView.swift#L115) (settings sheet) and
+[`NewChatSheet`](../../Shared/Views/NewChat/NewChatMenuButton.swift#L106) (new chat sheet) - and never on the page that
+shows the rows: for one value type SwiftUI keeps only the registration nearest the stack root, so a per-page
+declaration is inert and the row tap navigates nowhere. Each of those stacks owns the `SaveableSettings` whose
+`servers` the destination closures bind ([ChatListView.swift#L83](../../Shared/Views/ChatList/ChatListView.swift#L83),
+[NewChatMenuButton.swift#L59](../../Shared/Views/NewChat/NewChatMenuButton.swift#L59)), so the two entry paths edit the
+same store.
 
 ### Navigation Trigger
 
@@ -374,7 +389,7 @@ For channels (`groupInfo.useRelays`): the title is "Open channel"; for groups, "
 |------|------|
 | Root view | [`Shared/ContentView.swift`](../../Shared/ContentView.swift) |
 | App entry point | `Shared/POPOPXApp.swift` |
-| Chat list (nav root) | [`Shared/Views/ChatList/ChatListView.swift`](../../Shared/Views/ChatList/ChatListView.swift#L195) |
+| Chat list (nav root) | [`Shared/Views/ChatList/ChatListView.swift`](../../Shared/Views/ChatList/ChatListView.swift#L204) |
 | Nav link wrapper | `Shared/Views/ChatList/ChatListNavLink.swift` |
 | User picker | `Shared/Views/ChatList/UserPicker.swift` |
 | New chat view | [`Shared/Views/NewChat/NewChatView.swift`](../../Shared/Views/NewChat/NewChatView.swift) |
