@@ -155,22 +155,15 @@ struct BadgesChooseBadgeView: View {
     }
 
     private func continueButton() -> some View {
-        ZStack {
-            Button {
-                continueActive = true
-            } label: {
-                Text("Continue")
-            }
-            .buttonStyle(OnboardingButtonStyle(isDisabled: false))
-
-            NavigationLink(isActive: $continueActive) {
-                BadgesHowLongView(level: selectedLevel)
-                    .modifier(ThemedBackground())
-            } label: {
-                EmptyView()
-            }
-            .frame(width: 1, height: 1)
-            .hidden()
+        Button {
+            continueActive = true
+        } label: {
+            Text("Continue")
+        }
+        .buttonStyle(OnboardingButtonStyle(isDisabled: false))
+        .navigationDestination(isPresented: $continueActive) {
+            BadgesHowLongView(level: selectedLevel)
+                .modifier(ThemedBackground())
         }
     }
 }

@@ -55,7 +55,7 @@ var supportPOPOPXAlertAction: UIAlertAction {
 
 func openBadgesView() {
     showAppSheet {
-        NavigationView {
+        NavigationStack {
             BadgesView(showsAsSheet: true)
                 .modifier(ThemedBackground())
         }

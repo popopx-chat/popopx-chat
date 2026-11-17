@@ -92,62 +92,43 @@ struct BadgesSupportPopopxView: View {
 
     private func chooseLevelButton() -> some View {
         let disabled = !store.canBuy(chatModel.currentUser?.userId)
-        return ZStack {
-            Button {
-                chooseLevelActive = true
-            } label: {
-                Text("Choose your badge")
-            }
-            .buttonStyle(OnboardingButtonStyle(isDisabled: disabled))
-            .disabled(disabled)
-
-            NavigationLink(isActive: $chooseLevelActive) {
-                BadgesChooseBadgeView()
-                    .modifier(ThemedBackground())
-            } label: {
-                EmptyView()
-            }
-            .frame(width: 1, height: 1)
-            .hidden()
+        return Button {
+            chooseLevelActive = true
+        } label: {
+            Text("Choose your badge")
+        }
+        .buttonStyle(OnboardingButtonStyle(isDisabled: disabled))
+        .disabled(disabled)
+        .navigationDestination(isPresented: $chooseLevelActive) {
+            BadgesChooseBadgeView()
+                .modifier(ThemedBackground())
         }
     }
 
     private func whyBuiltButton() -> some View {
-        ZStack {
-            Button { whyBuiltActive = true } label: {
-                HStack(spacing: 4) {
-                    Image(systemName: "info.circle")
-                    Text("Why POPOPX is built.").fontWeight(.medium)
-                }
-                .font(.body)
+        Button { whyBuiltActive = true } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "info.circle")
+                Text("Why POPOPX is built.").fontWeight(.medium)
             }
-            NavigationLink(isActive: $whyBuiltActive) {
-                WhyPOPOPX(onboarding: false, titleColor: theme.colors.primary, createProfileNavLinkActive: .constant(false))
-            } label: {
-                EmptyView()
-            }
-            .frame(width: 1, height: 1)
-            .hidden()
+            .font(.body)
+        }
+        .navigationDestination(isPresented: $whyBuiltActive) {
+            WhyPOPOPX(onboarding: false, titleColor: theme.colors.primary, createProfileNavLinkActive: .constant(false))
         }
     }
 
     private func howItWorksButton() -> some View {
-        ZStack {
-            Button { howItWorksActive = true } label: {
-                HStack(spacing: 4) {
-                    Image(systemName: "info.circle")
-                    Text("How badges protect your privacy").fontWeight(.medium)
-                }
-                .font(.body)
+        Button { howItWorksActive = true } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "info.circle")
+                Text("How badges protect your privacy").fontWeight(.medium)
             }
-            NavigationLink(isActive: $howItWorksActive) {
-                BadgesHowItWorksView()
-                    .modifier(ThemedBackground())
-            } label: {
-                EmptyView()
-            }
-            .frame(width: 1, height: 1)
-            .hidden()
+            .font(.body)
+        }
+        .navigationDestination(isPresented: $howItWorksActive) {
+            BadgesHowItWorksView()
+                .modifier(ThemedBackground())
         }
     }
 
@@ -177,24 +158,17 @@ struct RedeemCodeButton: View {
     @State private var redeemCodeActive = false
 
     var body: some View {
-        ZStack {
-            Button {
-                redeemCodeActive = true
-            } label: {
-                Text("Redeem badge code")
-                    .font(.body)
-                    .fontWeight(.medium)
-                    .foregroundColor(theme.colors.primary)
-            }
-
-            NavigationLink(isActive: $redeemCodeActive) {
-                BadgesRedeemCodeView()
-                    .modifier(ThemedBackground())
-            } label: {
-                EmptyView()
-            }
-            .frame(width: 1, height: 1)
-            .hidden()
+        Button {
+            redeemCodeActive = true
+        } label: {
+            Text("Redeem badge code")
+                .font(.body)
+                .fontWeight(.medium)
+                .foregroundColor(theme.colors.primary)
+        }
+        .navigationDestination(isPresented: $redeemCodeActive) {
+            BadgesRedeemCodeView()
+                .modifier(ThemedBackground())
         }
     }
 }

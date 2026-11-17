@@ -217,7 +217,7 @@ struct ChatListView: View {
                 .environment(\EnvironmentValues.refresh as! WritableKeyPath<EnvironmentValues, RefreshAction?>, nil)
         }
         .appSheet(isPresented: $showBadgesSheet) {
-            NavigationView {
+            NavigationStack {
                 BadgesView(showsAsSheet: true)
                     .modifier(ThemedBackground())
             }

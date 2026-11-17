@@ -200,23 +200,16 @@ struct BadgesHowLongLayout: View {
     }
 
     private func continueButton() -> some View {
-        ZStack {
-            Button {
-                chosenPeriod = selectedPeriod
-                continueActive = true
-            } label: {
-                Text("Continue")
-            }
-            .buttonStyle(OnboardingButtonStyle(isDisabled: false))
-
-            NavigationLink(isActive: $continueActive) {
-                BadgesCheckOrderView(level: level, period: selectedPeriod)
-                    .modifier(ThemedBackground(grouped: true))
-            } label: {
-                EmptyView()
-            }
-            .frame(width: 1, height: 1)
-            .hidden()
+        Button {
+            chosenPeriod = selectedPeriod
+            continueActive = true
+        } label: {
+            Text("Continue")
+        }
+        .buttonStyle(OnboardingButtonStyle(isDisabled: false))
+        .navigationDestination(isPresented: $continueActive) {
+            BadgesCheckOrderView(level: level, period: selectedPeriod)
+                .modifier(ThemedBackground(grouped: true))
         }
     }
 }
