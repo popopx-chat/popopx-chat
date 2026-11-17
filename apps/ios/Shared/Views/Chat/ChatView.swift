@@ -348,17 +348,17 @@ struct ChatView: View {
                 }
             }
         }
-        .onChange(of: chatModel.secondaryPendingInviteeChatOpened) { secondaryChatOpened in
+        .onChange(of: chatModel.secondaryPendingInviteeChatOpened) { _, secondaryChatOpened in
             if secondaryChatOpened {
                 ItemsModel.loadSecondaryChat(chat.id, chatFilter: .groupChatScopeContext(groupScopeInfo: userSupportScopeInfo)) {
                     showUserSupportChatSheet = true
                 }
             }
         }
-        .onChange(of: chatModel.chatId) { cId in
+        .onChange(of: chatModel.chatId) { _, cId in
             handleChatIdChange(cId)
         }
-        .onChange(of: chatModel.secondaryPendingInviteeChatOpened) { opened in
+        .onChange(of: chatModel.secondaryPendingInviteeChatOpened) { _, opened in
             if im.secondaryIMFilter != nil && !opened {
                 Task {
                     try? await Task.sleep(nanoseconds: 650_000000)
@@ -366,7 +366,7 @@ struct ChatView: View {
                 }
             }
         }
-        .onChange(of: chatModel.openAroundItemId) { openAround in
+        .onChange(of: chatModel.openAroundItemId) { _, openAround in
             if let openAround {
                 closeSearch()
                 mergedItems.boxedValue = MergedItems.create(im, revealedItems)
@@ -389,7 +389,7 @@ struct ChatView: View {
         .onDisappear {
             handleChatDisappear()
         }
-        .onChange(of: colorScheme) { _ in
+        .onChange(of: colorScheme) { _, _ in
             theme = buildTheme()
         }
         .toolbar {
@@ -409,7 +409,7 @@ struct ChatView: View {
             }
         }
         .if(im.secondaryIMFilter == nil) { v in
-            v.onChange(of: scrollToItemId) { itemId in
+            v.onChange(of: scrollToItemId) { _, itemId in
                 if let itemId = itemId {
                     dismissAllSheets(animated: false) {
                         scrollToItem(itemId)
@@ -991,12 +991,12 @@ struct ChatView: View {
                     updateWithInitiallyLoadedItems()
                 }
             }
-            .onChange(of: im.isLoading) { loading in
+            .onChange(of: im.isLoading) { _, loading in
                 if !loading {
                     updateWithInitiallyLoadedItems()
                 }
             }
-            .onChange(of: im.reversedChatItems) { items in
+            .onChange(of: im.reversedChatItems) { _, items in
                 mergedItems.boxedValue = MergedItems.create(im, revealedItems)
                 scrollView.updateItems(mergedItems.boxedValue.items)
                 if im.itemAdded {
@@ -1008,14 +1008,14 @@ struct ChatView: View {
                     }
                 }
             }
-            .onChange(of: revealedItems) { revealed in
+            .onChange(of: revealedItems) { _, revealed in
                 mergedItems.boxedValue = MergedItems.create(im, revealed)
                 scrollView.updateItems(mergedItems.boxedValue.items)
             }
-            .onChange(of: terminal) { _ in
+            .onChange(of: terminal) { _, _ in
                 scrollView.updateItems(mergedItems.boxedValue.items, true)
             }
-            .onChange(of: chat.id) { _ in
+            .onChange(of: chat.id) { _, _ in
                 allowLoadMoreItems = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     allowLoadMoreItems = true
@@ -1023,7 +1023,7 @@ struct ChatView: View {
             }
             .padding(.vertical, -100)
             .onTapGesture { hideKeyboard() }
-            .onChange(of: searchText) { s in
+            .onChange(of: searchText) { _, s in
                 if showSearch {
                     searchTextChanged(s)
                 }
@@ -1315,13 +1315,13 @@ struct ChatView: View {
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .trailing)
             }
-            .onChange(of: loadingTopItems) { loading in
+            .onChange(of: loadingTopItems) { _, loading in
                 if !loading && requestedTopScroll {
                     requestedTopScroll = false
                     scrollToTopUnread()
                 }
             }
-            .onChange(of: loadingBottomItems) { loading in
+            .onChange(of: loadingBottomItems) { _, loading in
                 if !loading && requestedBottomScroll && im.lastItemsLoaded {
                     requestedBottomScroll = false
                     scrollToBottom()
@@ -1973,24 +1973,13 @@ struct ChatView: View {
                         if ci.content.showMemberName {
                             Group {
                                 Group {
-                                    if #available(iOS 16.0, *) {
-                                        MemberLayout(spacing: 16, msgWidth: msgWidth) {
-                                            Text(groupInfo.chatViewName)
-                                                .lineLimit(1)
-                                            Text(NSLocalizedString("channel", comment: "shown as sender role for channel messages"))
-                                                .fontWeight(.semibold)
-                                                .lineLimit(1)
-                                                .padding(.trailing, 8)
-                                        }
-                                    } else {
-                                        HStack(spacing: 16) {
-                                            Text(groupInfo.chatViewName)
-                                                .lineLimit(1)
-                                            Text(NSLocalizedString("channel", comment: "shown as sender role for channel messages"))
-                                                .fontWeight(.semibold)
-                                                .lineLimit(1)
-                                                .layoutPriority(1)
-                                        }
+                                    MemberLayout(spacing: 16, msgWidth: msgWidth) {
+                                        Text(groupInfo.chatViewName)
+                                            .lineLimit(1)
+                                        Text(NSLocalizedString("channel", comment: "shown as sender role for channel messages"))
+                                            .fontWeight(.semibold)
+                                            .lineLimit(1)
+                                            .padding(.trailing, 8)
                                     }
                                 }
                                 .frame(
@@ -2052,24 +2041,13 @@ struct ChatView: View {
                                         (member.chatViewName, member.memberRole.text(isChannel: groupInfo.isChannel))
                                     }
                                     Group {
-                                        if #available(iOS 16.0, *) {
-                                            MemberLayout(spacing: 16, msgWidth: msgWidth) {
-                                                NameWithBadge(Text(name), ci.meta.showGroupAsSender ? nil : member.nameBadge, .caption1)
-                                                    .lineLimit(1)
-                                                Text(role)
-                                                    .fontWeight(.semibold)
-                                                    .lineLimit(1)
-                                                    .padding(.trailing, 8)
-                                            }
-                                        } else {
-                                            HStack(spacing: 16) {
-                                                NameWithBadge(Text(name), ci.meta.showGroupAsSender ? nil : member.nameBadge, .caption1)
-                                                    .lineLimit(1)
-                                                Text(role)
-                                                    .fontWeight(.semibold)
-                                                    .lineLimit(1)
-                                                    .layoutPriority(1)
-                                            }
+                                        MemberLayout(spacing: 16, msgWidth: msgWidth) {
+                                            NameWithBadge(Text(name), ci.meta.showGroupAsSender ? nil : member.nameBadge, .caption1)
+                                                .lineLimit(1)
+                                            Text(role)
+                                                .fontWeight(.semibold)
+                                                .lineLimit(1)
+                                                .padding(.trailing, 8)
                                         }
                                     }
                                     .frame(
@@ -3046,7 +3024,7 @@ struct ChatView: View {
                     .onAppear {
                         checked = selectedChatItems?.contains(ciId) == true
                     }
-                    .onChange(of: selectedChatItems) { selected in
+                    .onChange(of: selectedChatItems) { _, selected in
                         checked = selected?.contains(ciId) == true
                     }
             }

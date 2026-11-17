@@ -71,7 +71,7 @@ struct DatabaseEncryptionView: View {
         Section {
             settingsRow(storedKey ? "key.fill" : "key", color: storedKey ? .green : theme.colors.secondary) {
                 Toggle("Save passphrase in Keychain", isOn: $useKeychainToggle)
-                    .onChange(of: useKeychainToggle) { _ in
+                    .onChange(of: useKeychainToggle) { _, _ in
                         if useKeychainToggle {
                             setUseKeychain(true)
                         } else if storedKey && !migration {
@@ -394,6 +394,6 @@ func validKey(_ s: String) -> Bool {
 
 struct DatabaseEncryptionView_Previews: PreviewProvider {
     static var previews: some View {
-        DatabaseEncryptionView(useKeychain: Binding.constant(true), migration: false, stopChatRunBlockStartChat: { _, _ in true })
+        DatabaseEncryptionView(useKeychain: Binding.constant(true), migration: false, stopChatRunBlockStartChat: { _, _ in })
     }
 }

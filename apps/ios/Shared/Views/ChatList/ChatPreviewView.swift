@@ -75,13 +75,13 @@ struct ChatPreviewView: View {
                                 chatInfoIcon(chat).frame(minWidth: 37, alignment: .trailing)
                             }
                         }
-                        .onChange(of: chatModel.stopPreviousRecPlay?.path) { _ in
+                        .onChange(of: chatModel.stopPreviousRecPlay?.path) { _, _ in
                             checkActiveContentPreview(chat, ci, mc)
                         }
-                        .onChange(of: activeContentPreview) { _ in
+                        .onChange(of: activeContentPreview) { _, _ in
                             checkActiveContentPreview(chat, ci, mc)
                         }
-                        .onChange(of: showFullscreenGallery) { _ in
+                        .onChange(of: showFullscreenGallery) { _, _ in
                             checkActiveContentPreview(chat, ci, mc)
                         }
                         chatStatusImage()
@@ -103,7 +103,7 @@ struct ChatPreviewView: View {
                     .scaleEffect(2)
             }
         }
-        .onChange(of: chatModel.deletedChats.contains(chat.chatInfo.id)) { contains in
+        .onChange(of: chatModel.deletedChats.contains(chat.chatInfo.id)) { _, contains in
             deleting = contains
             // Stop voice when deleting the chat
             if contains, let ci = activeContentPreview?.ci {
@@ -231,7 +231,7 @@ struct ChatPreviewView: View {
             let mentionColor = mentionColor(chat)
             HStack(alignment: .center, spacing: 2) {
                 if s.unreadMentions > 0 && s.unreadCount > 1 {
-                    Text("\(MENTION_START)")
+                    Text("\(String(MENTION_START))")
                         .font(userFont <= .xxxLarge ? .body : .callout)
                         .foregroundColor(mentionColor)
                         .frame(minWidth: dynamicChatInfoSize, minHeight: dynamicChatInfoSize)
@@ -239,7 +239,7 @@ struct ChatPreviewView: View {
                         .padding(.bottom, 1)
                 }
                 let singleUnreadIsMention = s.unreadMentions > 0 && s.unreadCount == 1
-                (singleUnreadIsMention ? Text("\(MENTION_START)") : unreadCountText(s.unreadCount))
+                (singleUnreadIsMention ? Text("\(String(MENTION_START))") : unreadCountText(s.unreadCount))
                     .font(userFont <= .xxxLarge ? .caption : .caption2)
                     .foregroundColor(.white)
                     .padding(.horizontal, dynamicSize(userFont).unreadPadding)
