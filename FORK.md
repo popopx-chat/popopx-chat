@@ -382,8 +382,10 @@ each was meant to become. That pass also repaired a compile break this fork ship
     `AGPL-COMPLIANCE-POPOPX.md` §4 as a dated correction rather than a deletion, this file's
     §"Trademarks and artwork", `branding/source-svg/README.md` and `CHANGELOG-POPOPX.md`.
 
-16. **The dependency's branded key-derivation labels are reverted; a labelled build is a build that
-    does not talk to the network** (2026-11-17) — `popopxmq` carried ten HKDF and BBS domain separators
+16. **The dependency's branded key-derivation labels were reverted, and the dependency then reverted
+    that revert; a labelled build is a build that does not talk to the network** (2026-11-17; the brand is
+    back at the commit this repository pins now, so read the counts below as measurements of `cb9e1aa3`
+    rather than of `13df615d`) — `popopxmq` carried ten HKDF and BBS domain separators
     spelled `POPOPX…`: two in `Messaging/Crypto.hs` (`sbcInit`, `sbcHkdf` — every SMP frame after the
     handshake, because `Messaging/Transport.hs:846 blockEncryption` runs it on the server side and the
     client side), four in `Messaging/Crypto/Ratchet.hs` (`pqX3dh` ×2, `rootKdf`, `chainKdf` — the
@@ -411,9 +413,13 @@ each was meant to become. That pass also repaired a compile break this fork ship
     branded relay and fails. Nothing in either repository could have caught this, and that is the
     finding worth keeping: every test derives **both** ends from the same source tree, so a labelled
     build is internally self-consistent and stays green — an absent guard, not a passing one. The ten
-    values are now upstream's exact bytes in `popopxmq` commit
+    values were upstream's exact bytes in `popopxmq` commit
     `cb9e1aa3cbd8bd2fdb932243ffb9c554b3826bae` = tag `popopx-pin-5`, each derivation site carrying a
-    comment saying the literal is a protocol constant — in `src` that commit is 10 deleted lines and 17
+    comment saying the literal is a protocol constant. The past tense is a correction, not a style
+    choice: `b5bc7577`, an ancestor of the commit this repository now pins, put the `POPOPX` spellings
+    back under the ruling that POPOPX is a new system rather than an interoperating upstream client, so
+    the same gate re-run at `13df615df7892532b4e83f92d529b96c3d788dea` reads **10 branded / 0 upstream**
+    and re-run at `cb9e1aa3` still reads **0** — the two numbers simply changed places. In `src` that commit is 10 deleted lines and 17
     added ones, and the 17 breaks down exactly as the ten rewritten literals plus eight one-line
     comments, one of those comments sitting at the end of a literal line rather than alone
     (`git -C ../popopxmq show cb9e1aa3 -- src | grep '^+' | grep -c '"SimpleX'` → 10, and the same pipe
@@ -440,10 +446,15 @@ each was meant to become. That pass also repaired a compile break this fork ship
     measured again before writing this: they are emitted by `Server/Web.hs:273,280` and read by
     `apps/common/Web/static/index.html:272,290` — a page the same server serves, so both ends of the
     field name are bytes from one build.
-    What this item does **not** do is move the pin: `cabal.project:24` still
-    names `25d7213d…`, because a pin to a commit that has not been pushed would resolve for nobody.
-    The pin and the iOS Haskell archives that are built through it inherit the old labels until
-    `popopx-pin-5` is pushed and the pin moves with it. CI is a different story, told below, because the
+    What this item did **not** do at the time was move the pin: `cabal.project:24` named
+    `25d7213d…`, because a pin to a commit that has not been pushed would resolve for nobody.
+    That constraint is discharged and the pin has moved since: `popopx-pin-5` was pushed, `b5bc7577`
+    reverted its revert, and `cabal.project:24` with `scripts/nix/sha256map.nix:2` now read
+    `13df615d…` = `popopx-pin-7`, so the labels this paragraph says were inherited are branded again by
+    the dependency itself. What did **not** follow the pin is the built half — the archives measured in
+    the next sentences were installed through pin-4 (mtimes 2026-11-13, two days before pin-5 exists),
+    and pin-6 and pin-7 both moved the store's UDF name, which is the drift that shows there.
+    CI is a different story, told below, because the
     test that is red there does not read the pin at all. Measured on the two installed
     slices, `apps/ios/Libraries/ios/libHSpopopx-chat-7.1.2.0-2pJp6QhAZjZInPLhny3S4B-ghc9.6.3.a` and
     `…/sim/…same name…`, both **2 branded / 0 upstream** — so what an App Store build would carry is
@@ -499,14 +510,85 @@ each was meant to become. That pass also repaired a compile break this fork ship
     from different trees, and nothing on either side had to be branded for it to work.
 
     The order in which the built artifacts have to be put back, because none of them is rebuilt by the
-    dependency commit itself: push `cb9e1aa3` and `popopx-pin-5` in `popopxmq`; move `cabal.project:24`
-    from `25d7213d…` onto that commit; then rebuild everything that reads the pin — the two installed
-    iOS slices named above, the `-libs` bundle and the desktop artifacts CI publishes — and clear both
+    dependency commit itself. Its first two steps are done and its premise is not: `cb9e1aa3` and
+    `popopx-pin-5` were pushed, `b5bc7577` then restored the brand on top of them, and `cabal.project:24`
+    moved twice — the second time onto `13df615d…` = `popopx-pin-7`, skipping `popopx-pin-6` (`4cc1b9d4`),
+    which renamed the XOR-aggregation UDF by adding a 126-line migration
+    `src/Popopx/Messaging/Agent/Store/SQLite/Migrations/M20261117_xor_udf_rename.hs` that pin-7 deletes
+    36 minutes later in favour of renaming it in place and dropping the old SQL name entirely. Pin-6's
+    own push run `44027639184` concluded `failure` before pin-7 landed, and a pin to pin-6 would record a
+    migration its successor removes. What is still outstanding is the second half of the order — rebuild
+    everything that reads the pin: the two installed iOS slices named above, the `-libs` bundle and the
+    desktop artifacts CI publishes — and clear both
     `dist-newstyle` directories named above on any machine with a warm cache, which is what turns "I
-    rebuilt it" back into a claim about bytes. The staleness runs in both directions: when
+    rebuilt it" back into a claim about bytes. Re-measured after the re-pin, the drift is in the store and
+    in the call key, not in the ten labels: on each of `apps/ios/Libraries/{ios,sim,mac}/*.a`,
+    `grep -a -o -E simplex_xor_md5_combine ARCHIVE | wc -l` reads **8** with
+    `popopx_xor_md5_combine` **0** and `SimpleXCallMediaKey` **1**, while
+    `grep -a -o -E '(POPOPX|SimpleX)(SbChainInit|SbChain|X3DH|VerifyCode|RootRatchet|ChainRatchet|ContactLink|InvLink)' ARCHIVE | grep -c POPOPX`
+    reads **8** on `ios` and `sim` — pin-4 branded, pin-7 re-branded, so the two agree by accident — and
+    **0** on the upstream-named `libHSsimplex-chat-…` archive under `mac/`, which reads **8** on the
+    `SimpleX` counterpart. None of this is visible to `git status`: `apps/ios/.gitignore:67` ignores
+    `Libraries/` and `:75` ignores `build/`, so a clean status says nothing at all about built bytes. The staleness runs in both directions: when
     `cabal.project` went back to `25d7213d…` at the end of this work, the extraction directory was
     deleted again on purpose, because it then held the *reverted* tree while the pin said branded, and a
     build left running against it would have produced a client whose bytes contradict its own pin.
+
+    Measured again at 16:2x on 2026-11-17, after the re-pin, and the two readings of "did the pin take
+    effect" disagree, so both are recorded here rather than reconciled. The link side says yes: `cabal build`
+    and `cabal build popopx-chat-test` both exit 0, and all seven executables they produce — the six under
+    `x/` (16:08) and `t/popopx-chat-test` (16:26) — read `grep -a -o -E popopx_xor_md5_combine EXE | wc -l`
+    = **7** with `simplex_xor_md5_combine` **0**, next to the C symbol `_popopx_xor_md5_combine`, while the
+    same recipe on the test binary reads `POPOPXCallMediaKey` **1** and `SimpleXCallMediaKey` **1**, which
+    are the two guards of `callMediaKey`. No source file in this repository spells that UDF — `git grep -l
+    popopx_xor_md5_combine` lists only these two documents — and the fetched tree is
+    `13df615df7892532b4e83f92d529b96c3d788dea` ("Rename the XOR UDF in place and drop the old SQL name
+    entirely"), so the link consumed pin-7 bytes. The dependency's own archives say no:
+    `find dist-newstyle ../popopxmq -name 'libHSpopopxmq*' -type f` returns four files and all four read
+    `popopx_xor_md5_combine` **0**, with the old name **8** in each `.a` and **11** in each `.dylib`, newest
+    mtime 08:25:33 — before the 15:56 fetch of pin-7. This item's remedy for exactly that pairing is to
+    clear the two `dist-newstyle` trees, and it was deliberately not run in this session: deleting build
+    products is held as a red line here, and `popopxmq` and its build state are being worked on by another
+    process as of this entry, so the discrepancy is left to that work instead of settled from this side.
+    What this session does prove is the client half, and it proves it from binaries that carry the change:
+    `-m "POPOPX chat protocol"` 82 examples / 0 failures, `-m "WebRTC crypto"` 4 / 0, and
+    `-m "webrtc calls api"` 3 / 0 including `negotiate call between current and v1 clients`, each selected
+    separately under `--fail-on=empty` so that an empty selection cannot pass as green.
+
+    The gate this pin was taken at, stated as measured: the dependency's all-platform push run
+    `44037250044` concluded `cancelled`, and its own `build.yml:21` reads
+    `cancel-in-progress: ${{ github.event_name != 'push' }}`, so on a push nothing cancels itself — the
+    cancel was manual, and the commit that superseded it is `4c8bdb7e`, a re-pin of the XFTP test server.
+    Two legs had finished green before the cancel (`ubuntu-22.04-aarch64` and `ubuntu-24.04-aarch64`, both
+    GHC 9.6.3), and PR run `44036381631` at the same commit adds `ubuntu-24.04-x86-64, GHC 9.6.3`. That is
+    three compile legs green at `13df615d`. What reached no conclusion is the rest of that run's x86-64
+    matrix — `ubuntu-22.04-x86-64` at GHC 8.10.7 and at 9.6.3, and its own `ubuntu-24.04-x86-64` leg, all
+    `cancelled` rather than failed — plus one unexpanded matrix leg reporting `skipped`. No leg builds
+    `aarch64-darwin`, so the macOS build named above is the only evidence here for what these bytes do on
+    this platform.
+
+    Premise (a) of the pin-4 → pin-7 crossing, ruled on 2026-11-17: an existing agent store does not survive
+    this span, and no existing agent store needs to. It is recorded as a premise and not as a migration task
+    because POPOPX is a new system with no user databases in the wild — the same ground the dependency stands
+    on for its own separators, and a statement about deployments rather than about published artifacts, since
+    `v7.1.2-popopx.1`'s desktop assets were built through pin-4. The reason it has to be written down is that
+    this rename is not confined to code a binary re-runs. `git diff --stat 25d7213d..13df615d --
+    src/Popopx/Messaging/Agent/Store/SQLite.hs src/Popopx/Messaging/Agent/Store/SQLite/` is exactly three files
+    and 11 insertions against 11 deletions, every one of them the same string — and four of those lines are
+    `CREATE TRIGGER` bodies, duplicated between `Migrations/M20260411_service_certs.hs:37,49,61,73` and the
+    schema dump `Migrations/agent_schema.sql:656,667,678,689`, for `tr_rcv_queue_insert`,
+    `tr_rcv_queue_delete`, `tr_rcv_queue_update_add` and `tr_rcv_queue_update_remove`. SQLite keeps trigger
+    bodies as text in `sqlite_master`, so a store created through pin-4 carries
+    `service_queue_ids_hash = simplex_xor_md5_combine(...)` inside its own schema while pin-7 registers only
+    `popopx_xor_md5_combine` (`Store/SQLite.hs:131`, with the C export and import beside it at `:137,139`).
+    Nothing rewrites that text on the way up, and that is the sharp part: the registered migration ids and the
+    `Migrations/` file list are identical at the two pins — `git diff 25d7213d..13df615d --
+    src/Popopx/Messaging/Agent/Store/SQLite/Migrations.hs` is empty — so no migration re-runs, and the store
+    opens without complaint. The failure is deferred to the first write that fires one of those triggers,
+    `no such function: simplex_xor_md5_combine`, and it lands on `rcv_queues` rather than anywhere near the
+    pin. So a local store from the pin-4 era is deleted and rebuilt, not carried. If one is ever found worth
+    keeping, what it needs is a migration that recreates those four triggers under the new name — a re-pin
+    changes nothing already written into `sqlite_master`.
 
     The fourth end, and the reason this item does not make CI green: `build.yml`'s `Test changed scopes`
     runs the mcp e2e, and that e2e takes *both* of its ends from published release assets, not from the
@@ -1065,12 +1147,17 @@ yet. Before any build of this fork is distributed:
     but this is the digest F-Droid and any sideloaded install trust — back it up off this machine before the
     first signed APK, where Play App Signing's and F-Droid's own fingerprints join this same array. The
     release published 2026-11-15 is #56 and ships no APK, so that deadline moved rather than passed.
-    Ship route: popopxmq `25d7213d` = tag `popopx-pin-4`, our pin moved with it (`cabal.project:24`,
+    Ship route: popopxmq `25d7213d` = tag `popopx-pin-4` was the pin at the time, our pin moved with it (`cabal.project:24`,
     `scripts/nix/sha256map.nix:2`). The hash came from the command that file's own generator calls
     (`nix-prefetch-git --fetch-submodules`, per `scripts/nix/update-sha256.awk`), and the method was proven
     first by reproducing pin-3's stored
     hash byte-for-byte; `diff -rq` between the two fetched trees is **exactly one file** — this one — so no
-    Haskell source moved and the iOS archives stay current. Ordering constraint: that pin is resolvable from
+    Haskell source moved and the iOS archives stay current. Both halves of that last clause are scoped to the
+    pin-3→pin-4 step and neither holds for the pin this repository carries now, `13df615df7892532b4e83f92d529b96c3d788dea`
+    = tag `popopx-pin-7` (2026-11-17, recorded hash `04ihl1j1qm4s9sik4c65gh2w78x6k2y8nv8a5jir11i6fm9gir9z`, again
+    produced by that generator over all thirteen entries and diffed to one changed line): source did move, 81 files
+    and 16 of them under `src`, and the installed archives do not stay current — see item 16 for what each of the
+    three reads and why `git status` cannot see any of it. Ordering constraint: that pin is resolvable from
     GitHub only once the dependency commit and tag are pushed, so **our pin-bump commit must not land
     upstream before theirs**. Two holders of upstream's `3C:52:C4:FD:…:AD:85` are **held**:
     `scripts/ci/android/release-apk.sh:10` and `scripts/popopx-chat-reproduce-builds-android.sh:4` verify

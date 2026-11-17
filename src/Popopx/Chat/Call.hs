@@ -65,9 +65,12 @@ initialCallVersion = VersionCall 1
 callMediaKdfVersion :: VersionCall
 callMediaKdfVersion = VersionCall 2
 
+callMediaKdfPopopxVersion :: VersionCall
+callMediaKdfPopopxVersion = VersionCall 3
+
 -- This should not be used directly in code, instead use `callVRange` from ChatConfig
 currentCallVersion :: VersionCall
-currentCallVersion = VersionCall 2
+currentCallVersion = VersionCall 3
 
 supportedCallVRange :: VersionRangeCall
 supportedCallVRange = mkVersionRange initialCallVersion currentCallVersion
@@ -79,8 +82,10 @@ newtype CallVersionRange = CallVersionRange {fromCallVRange :: VersionRangeCall}
   deriving (Eq, Show)
   deriving (FromJSON, ToJSON) via (StrJSON "CallVersionRange" VersionRangeCall)
 
+-- The separator is selected by the negotiated version, so a peer that only supports v2 derives the same key.
 callMediaKey :: VersionCall -> CallId -> C.PublicKeyX25519 -> C.PrivateKeyX25519 -> C.Key
 callMediaKey v (CallId salt) peerPubKey privKey
+  | v >= callMediaKdfPopopxVersion = C.Key $ C.hkdf salt dhSecret "POPOPXCallMediaKey" callMediaKeySize
   | v >= callMediaKdfVersion = C.Key $ C.hkdf salt dhSecret "SimpleXCallMediaKey" callMediaKeySize
   | otherwise = C.Key dhSecret
   where

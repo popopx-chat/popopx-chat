@@ -3,6 +3,47 @@
 > This file records **this fork**. [`CHANGELOG.md`](./CHANGELOG.md) is upstream's release history and
 > is kept unmodified; the versions below are the fork's own state, not upstream releases.
 
+## Unreleased — the pin moves to `popopx-pin-7`, and the call media key gets its own separator, 2026-11-17
+
+- **`cabal.project:24` now reads `13df615df7892532b4e83f92d529b96c3d788dea`** = tag `popopx-pin-7` of the
+  dependency, with `scripts/nix/sha256map.nix:2` carrying its Base32 hash
+  `04ihl1j1qm4s9sik4c65gh2w78x6k2y8nv8a5jir11i6fm9gir9z`. The hash was not typed in: re-running the file's
+  own generator (`gawk -f scripts/nix/update-sha256.awk cabal.project`) over all twelve entries rewrote
+  exactly one line, which re-proves the other eleven in the same pass. `popopx-pin-6` (`4cc1b9d4`) is
+  skipped on purpose — it renamed the XOR-aggregation UDF by adding a 126-line migration that pin-7 deletes
+  36 minutes later in favour of renaming it in place, and pin-6's own push run `44027639184` concluded
+  `failure`. The gate this pin was taken at is recorded in FORK.md item 16: the dependency's all-platform
+  push run `44037250044` concluded `cancelled`, manually and not by the workflow (`build.yml:21` does not
+  cancel on push), once `4c8bdb7e` superseded it; green at `13df615d` are three compile legs across two
+  runs — `ubuntu-22.04-aarch64` and `ubuntu-24.04-aarch64` from that run, `ubuntu-24.04-x86-64` from PR run
+  `44036381631` — while the rest of that run's x86-64 matrix reached no conclusion (`cancelled`, not
+  failed), and no leg anywhere builds `aarch64-darwin`.
+- **`SimpleXCallMediaKey` is the eleventh domain separator, and it lives here, not in the dependency** —
+  `src/Popopx/Chat/Call.hs` uses it as the HKDF separator when deriving a call's media key, so the sweep
+  recorded in the entry below, which moved ten separators inside `popopxmq`, passed over it. A separator is
+  hashed independently on each side of a connection, which rules out a find-and-replace: swapping the
+  string where it stood would leave two builds of this fork registering with the same relay and
+  negotiating SRTP keys that cannot decrypt each other, silently and in both directions. The brand
+  therefore rides the call protocol version instead — `callMediaKdfPopopxVersion = VersionCall 3`,
+  `currentCallVersion` raised from `2` to `3`, and the separator chosen by the *negotiated* version at
+  `Call.hs:88-90` — so a peer that advertises at most v2 keeps deriving with `SimpleXCallMediaKey` and the
+  call still connects. Nothing had to be written twice to get there: `supportedCallVRange` derives the
+  ceiling from `currentCallVersion`, `git grep -n VersionCall -- src` is 14 lines all inside `Call.hs`, and
+  the same grep outside it is empty.
+- **Verified locally, with one number deliberately left unsettled.** `cabal build` and
+  `cabal build popopx-chat-test` both exit 0. `-m "POPOPX chat protocol"` = 82 examples / 0 failures (among
+  them `x.call.inv with call version range`, the `CallVersionRange` wire fixture at
+  `tests/ProtocolTests.hs:435-436`), `-m "WebRTC crypto"`
+  = 4 / 0, and `-m "webrtc calls api"` = 3 / 0, which contains `negotiate call between current and v1
+  clients` — the test that would fail if the version gate were wrong. Each selector was run separately
+  under `--fail-on=empty`, so an empty selection cannot be read as a pass. The linked proof is in the
+  bytes: all seven executables read `popopx_xor_md5_combine` **7** times and `simplex_xor_md5_combine`
+  **0**, and the test binary carries `POPOPXCallMediaKey` once next to `SimpleXCallMediaKey` once, both
+  guards live. What is not reconciled is the dependency's own build tree: the four `libHSpopopxmq*`
+  archives on disk still read the old UDF name with zero of the new, and none of their objects post-dates
+  the pin fetch. That is the drift FORK.md item 16 describes, it belongs to the work being done on
+  `popopxmq`, and nothing here was deleted or force-rebuilt to make the two agree.
+
 ## Unreleased — the branded key-derivation labels reverted, 2026-11-17
 
 This one changes a wire value, so it is not part of the documentation section below it.
@@ -43,13 +84,21 @@ This one changes a wire value, so it is not part of the documentation section be
   foreign process reads them: the two `POPOPX XFTP … v` `--version` strings, the `.popopx` name TLD,
   and the `adminPopopx`/`complaintsPopopx` keys this server serves — emitted at `Server/Web.hs:273,280`,
   read only by `apps/common/Web/static/index.html:272,290`, a page the same server serves.
-- **What is NOT yet true, and why.** `cabal.project:24` still pins `25d7213d…`, because a pin to a
-  commit that has not been pushed resolves for nobody; `popopx-pin-5` is local. Until that tag is
-  pushed and the pin moves with it, the iOS Haskell archives installed on this machine
-  (`libHSpopopx-chat-7.1.2.0-*-ghc9.6.3.a`, measured 2 branded / 0 upstream) and every CI artifact still
-  carry the old labels, and `v7.1.2-popopx.1`'s published assets were built through that pin — the one
-  number in this entry taken from inference rather than measurement, because downloading the asset is
-  the step egress keeps failing. The rebuild order is in FORK.md item 16.
+- **What is NOT yet true, and why — overtaken the same day, and the half that still is.** This bullet was
+  written while `popopx-pin-5` was unpushed and `cabal.project:24` still named `25d7213d…`. Neither is
+  the state now: `cb9e1aa3` was pushed and tagged, `b5bc7577` reverted it, and the pin reads
+  `13df615d…` = `popopx-pin-7` — see the top entry, and the gate above re-run at that commit reads
+  **10 branded / 0 upstream** where this entry quotes **0 / 10**. The built half of this bullet is the
+  part that stayed true, and it is worth keeping because it is the one thing a pin move cannot do by
+  itself: the iOS Haskell archives installed on this machine are still pin-4 bytes. Measured again after
+  the re-pin, `grep -a -o -E 'POPOPXSbChain' ARCHIVE | wc -l` reads **2** on each of
+  `apps/ios/Libraries/ios/` and `apps/ios/Libraries/sim/` — which now agrees with the dependency by
+  accident, pin-4 having branded what pin-7 re-branded — while the same recipe on
+  `simplex_xor_md5_combine` reads **8** and on `popopx_xor_md5_combine` reads **0**, and
+  each slice still carries `SimpleXCallMediaKey` once with no path to the v3 separator. `v7.1.2-popopx.1`'s
+  published assets were built through pin-4 too, and that remains the one number here taken from inference
+  rather than measurement, because downloading the asset is the step egress keeps failing. The rebuild
+  order, and why pin-6 was skipped, are in FORK.md item 16.
 
 ## Unreleased — records and citations, 2026-11-17
 
@@ -897,12 +946,17 @@ now exists.
   Chat Ltd's three fingerprints (Play App Signing, the GitHub APK upload key, F-Droid) to this one. `package_name`
   was already `com.popopxchat.popopx`; pairing it with three certificates that never sign our build is the
   misattribution, and it cannot be fixed by renaming anything.
-- **Pin chain.** popopxmq `25d7213d` = tag `popopx-pin-4`, and this repository's two holders of the pin moved with
+- **Pin chain.** popopxmq `25d7213d` = tag `popopx-pin-4` was the pin as of this section, and this repository's two holders of the pin moved with
   it (`cabal.project:24`, `scripts/nix/sha256map.nix:2`). The nix hash came from the command that file's own generator
   calls (`nix-prefetch-git --fetch-submodules`, per `scripts/nix/update-sha256.awk`), and the route was proven first by reproducing pin-3's recorded hash
   byte-for-byte — an unproven hash command against a dependency that has to resolve on someone else's machine is
   how a pin silently becomes unbuildable. `diff -rq` between the two fetched trees is **exactly one file**, this
-  one, so no Haskell source moved.
+  one, so no Haskell source moved — a clause scoped to that one step, because the same generator pass carried both
+  holders to `13df615df7892532b4e83f92d529b96c3d788dea` = tag `popopx-pin-7` on 2026-11-17, across which
+  `git -C ../popopxmq diff --stat 25d7213d..13df615d` counts **81 files**, 16 of them under `src`. The hash recorded
+  for pin-7 is `04ihl1j1qm4s9sik4c65gh2w78x6k2y8nv8a5jir11i6fm9gir9z`, again the generator's own output rather than a
+  typed value, and regenerating all thirteen entries diffed **exactly one line** against the committed file, which is
+  what re-proves the twelve entries this section does not touch.
 - **Scope, proven two ways.** `Web.Embedded` (the TH module that inlines `static/.well-known/`) is listed only in
   `executable smp-server`, `executable xftp-server` and `test-suite popopxmq-test` in `popopxmq.cabal` (`:479`,
   `:518`, `:582`) and never in the library (`:98`), and the tree diff above shows nothing else changed — so the
