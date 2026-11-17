@@ -143,25 +143,18 @@ struct YourNetworkView: View {
     }
 
     private func continueButton() -> some View {
-        ZStack {
-            Button {
-                applyNotificationMode()
-                onboardingStageDefault.set(.step4_NetworkCommitments)
-                nextStepNavLinkActive = true
-            } label: {
-                Text("Continue")
-            }
-            .buttonStyle(OnboardingButtonStyle())
-
-            NavigationLink(isActive: $nextStepNavLinkActive) {
-                OnboardingConditionsView(selectedOperatorIds: selectedOperatorIds)
-                    .navigationBarBackButtonHidden(true)
-                    .modifier(ThemedBackground())
-            } label: {
-                EmptyView()
-            }
-            .frame(width: 1, height: 1)
-            .hidden()
+        Button {
+            applyNotificationMode()
+            onboardingStageDefault.set(.step4_NetworkCommitments)
+            nextStepNavLinkActive = true
+        } label: {
+            Text("Continue")
+        }
+        .buttonStyle(OnboardingButtonStyle())
+        .navigationDestination(isPresented: $nextStepNavLinkActive) {
+            OnboardingConditionsView(selectedOperatorIds: selectedOperatorIds)
+                .navigationBarBackButtonHidden(true)
+                .modifier(ThemedBackground())
         }
     }
 

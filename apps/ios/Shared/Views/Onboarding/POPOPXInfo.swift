@@ -118,22 +118,15 @@ struct POPOPXInfo: View {
     }
 
     private func createFirstProfileButton() -> some View {
-        ZStack {
-            Button {
-                createProfileNavLinkActive = true
-            } label: {
-                Text("Get started")
-            }
-            .buttonStyle(OnboardingButtonStyle(isDisabled: false))
-
-            NavigationLink(isActive: $createProfileNavLinkActive) {
-                CreateFirstProfile()
-                    .modifier(ThemedBackground())
-            } label: {
-                EmptyView()
-            }
-            .frame(width: 1, height: 1)
-            .hidden()
+        Button {
+            createProfileNavLinkActive = true
+        } label: {
+            Text("Get started")
+        }
+        .buttonStyle(OnboardingButtonStyle(isDisabled: false))
+        .navigationDestination(isPresented: $createProfileNavLinkActive) {
+            CreateFirstProfile()
+                .modifier(ThemedBackground())
         }
     }
 }

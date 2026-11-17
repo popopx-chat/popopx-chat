@@ -328,22 +328,15 @@ struct CreateFirstProfile: View {
     }
 
     private func createProfileButton() -> some View {
-        ZStack {
-            Button {
-                createProfile()
-            } label: {
-                Text("Create profile")
-            }
-            .buttonStyle(OnboardingButtonStyle(isDisabled: !canCreateProfile(displayName)))
-            .disabled(!canCreateProfile(displayName))
-
-            NavigationLink(isActive: $nextStepNavLinkActive) {
-                nextStepDestinationView()
-            } label: {
-                EmptyView()
-            }
-            .frame(width: 1, height: 1)
-            .hidden()
+        Button {
+            createProfile()
+        } label: {
+            Text("Create profile")
+        }
+        .buttonStyle(OnboardingButtonStyle(isDisabled: !canCreateProfile(displayName)))
+        .disabled(!canCreateProfile(displayName))
+        .navigationDestination(isPresented: $nextStepNavLinkActive) {
+            nextStepDestinationView()
         }
     }
 

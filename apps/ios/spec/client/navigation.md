@@ -283,7 +283,7 @@ When [`DEFAULT_PERFORM_LA`](../../Shared/ContentView.swift#L44) is enabled:
 
 ## 8. [Onboarding Flow](../../Shared/Views/Onboarding/OnboardingView.swift#L13)
 
-First-launch experience controlled by [`ChatModel.onboardingStage`](../../Shared/Views/Onboarding/OnboardingView.swift#L46):
+First-launch experience controlled by [`ChatModel.onboardingStage`](../../Shared/Model/ChatModel.swift#L393):
 
 ```swift
 enum OnboardingStage: String, Identifiable {

@@ -15,7 +15,7 @@ struct OnboardingView: View {
     var onboarding: OnboardingStage
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             switch onboarding {
             case .step1_POPOPXInfo:
                 POPOPXInfo(onboarding: true)
