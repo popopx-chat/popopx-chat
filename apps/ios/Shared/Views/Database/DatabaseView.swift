@@ -73,22 +73,17 @@ struct DatabaseView: View {
                 ProgressView().scaleEffect(2)
             }
         }
-    }
-
-    @ViewBuilder
-    private func chatDatabaseView() -> some View {
-        NavigationLink(isActive: $showDatabaseEncryptionView) {
+        .navigationDestination(isPresented: $showDatabaseEncryptionView) {
             DatabaseEncryptionView(useKeychain: $useKeychain, migration: false, stopChatRunBlockStartChat: { progressIndicator, block in
                 stopChatRunBlockStartChat(false, progressIndicator, block)
             })
                 .navigationTitle("Database passphrase")
                 .modifier(ThemedBackground(grouped: true))
-        } label: {
-            EmptyView()
         }
-        .frame(width: 1, height: 1)
-        .hidden()
+    }
 
+    @ViewBuilder
+    private func chatDatabaseView() -> some View {
         List {
             let stopped = m.chatRunning == false
             Section {

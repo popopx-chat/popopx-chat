@@ -87,11 +87,12 @@ struct TerminalView: View {
                                 }
                             }
                         }
-                        .background(NavigationLink(
-                            isActive: Binding(get: { terminalItem != nil }, set: { _ in }),
-                            destination: terminalItemView,
-                            label: { EmptyView() }
-                        ))
+                        .navigationDestination(isPresented: Binding(
+                            get: { terminalItem != nil },
+                            set: { if !$0 { terminalItem = nil } }
+                        )) {
+                            terminalItemView()
+                        }
                     }
                 }
 

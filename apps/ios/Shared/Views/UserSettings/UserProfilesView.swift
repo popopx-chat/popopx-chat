@@ -84,22 +84,17 @@ struct UserProfilesView: View {
                 }
 
                 if trimmedSearchTextOrPassword == "" {
-                    NavigationLink(
-                        destination: CreateProfile(),
-                        isActive: $navigateToProfileCreate
-                    ) {
-                        Label("Add profile", systemImage: "plus")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .frame(height: 38)
-                            .padding(.leading, 16).padding(.vertical, 8).padding(.trailing, 32)
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                withAuth {
-                                    self.navigateToProfileCreate = true
-                                }
+                    Label("Add profile", systemImage: "plus")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(height: 38)
+                        .padding(.leading, 16).padding(.vertical, 8).padding(.trailing, 32)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            withAuth {
+                                self.navigateToProfileCreate = true
                             }
-                            .padding(.leading, -16).padding(.vertical, -8).padding(.trailing, -32)
-                    }
+                        }
+                        .padding(.leading, -16).padding(.vertical, -8).padding(.trailing, -32)
                 }
             } footer: {
                 Text("Tap to activate profile.")
@@ -113,6 +108,9 @@ struct UserProfilesView: View {
             if #available(iOS 16, *) {
                 EditButton()
             }
+        }
+        .navigationDestination(isPresented: $navigateToProfileCreate) {
+            CreateProfile()
         }
         .navigationTitle("Your chat profiles")
         .modifier(ThemedBackground(grouped: true))

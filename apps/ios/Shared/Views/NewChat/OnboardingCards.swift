@@ -163,7 +163,7 @@ struct ConnectOnboardingView: View {
             .environment(\EnvironmentValues.refresh as! WritableKeyPath<EnvironmentValues, RefreshAction?>, nil)
         }
         .sheet(isPresented: $showCreateAddress) {
-            NavigationView {
+            NavigationStack {
                 UserAddressView(autoCreate: true, onboarding: true)
                     .modifier(ThemedBackground(grouped: true))
             }

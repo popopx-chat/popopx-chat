@@ -85,7 +85,7 @@ struct UserPickerSheetView: View {
     @State private var loaded = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 if loaded, let currentUser = chatModel.currentUser {
                     switch sheet {

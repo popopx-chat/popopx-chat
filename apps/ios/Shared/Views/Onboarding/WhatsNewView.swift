@@ -771,7 +771,7 @@ fileprivate struct CreateUpdateAddressShortLink: View {
             .lineLimit(10)
         }
         .sheet(isPresented: $showAddressSheet) {
-            NavigationView {
+            NavigationStack {
                 UserAddressView(autoCreate: true)
                     .navigationTitle("POPOPX address")
                     .navigationBarTitleDisplayMode(.large)

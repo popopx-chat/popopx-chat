@@ -59,45 +59,31 @@ struct UserAddressLearnMore: View {
     }
     
     private func addressCreationButton() -> some View {
-        ZStack {
-            Button {
-                createAddressLinkActive = true
-            } label: {
-                Text("Create POPOPX address")
-            }
-            .buttonStyle(OnboardingButtonStyle())
-
-            NavigationLink(isActive: $createAddressLinkActive) {
-                UserAddressView(autoCreate: true)
-                    .navigationTitle("POPOPX address")
-                    .navigationBarTitleDisplayMode(.large)
-            } label: {
-                EmptyView()
-            }
-            .frame(width: 1, height: 1)
-            .hidden()
+        Button {
+            createAddressLinkActive = true
+        } label: {
+            Text("Create POPOPX address")
+        }
+        .buttonStyle(OnboardingButtonStyle())
+        .navigationDestination(isPresented: $createAddressLinkActive) {
+            UserAddressView(autoCreate: true)
+                .navigationTitle("POPOPX address")
+                .navigationBarTitleDisplayMode(.large)
         }
     }
 
     private func createOneTimeLinkButton() -> some View {
-        ZStack {
-            Button {
-                createOneTimeLinkActive = true
-            } label: {
-                Text("Create 1-time link")
-                    .font(.callout)
-            }
-
-            NavigationLink(isActive: $createOneTimeLinkActive) {
-                NewChatView(selection: .invite)
-                    .navigationTitle("New chat")
-                    .navigationBarTitleDisplayMode(.large)
-                    .modifier(ThemedBackground(grouped: true))
-            } label: {
-                EmptyView()
-            }
-            .frame(width: 1, height: 1)
-            .hidden()
+        Button {
+            createOneTimeLinkActive = true
+        } label: {
+            Text("Create 1-time link")
+                .font(.callout)
+        }
+        .navigationDestination(isPresented: $createOneTimeLinkActive) {
+            NewChatView(selection: .invite)
+                .navigationTitle("New chat")
+                .navigationBarTitleDisplayMode(.large)
+                .modifier(ThemedBackground(grouped: true))
         }
     }
 }
