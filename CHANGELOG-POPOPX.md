@@ -2095,14 +2095,21 @@ reaches our broker and times out. A mirror matches its own digests, so `check-pi
   pin becomes a `::warning title=Unrecorded pin::` annotation and the scope exits 0, so `mcp` runs and reports its own failure again;
   the guard arms itself with no second edit, because arming it is what publishing our own `core-7.1.2.0` means. The success line names
   the count (`the pins match the published releases; 2 pinned core release(s) are unrecorded`) instead of claiming a clean check.
-  Master is expected to stay red after this — at `mcp`, for the original reason — until the pins move.
+  Master stays red at `mcp`, for the original reason, until the pins move.
+- C verified on the push that carried it (`43982143632` at `d361ba1a2`, `completed/failure`, one failing step — `Test changed scopes` on
+  `ubuntu-22.04-x86_64 (CLI,Desktop)`): the step header read `SCOPES: badge-web ci-scripts libs-pins mcp` again, `ci-scripts` printed
+  `Ran 95 tests in 0.803s` / `OK` on the runner, `libs-pins` emitted **2** `##[warning]` lines — `core-7.1.0.20` and `core-7.1.0.14`, each
+  ending `- fatal as soon as the ledger records a core release` — and exited 0, and `mcp` then ran to `Tests: 11 failed, 2 passed, 13
+  total`, the same summary as the preceding push `43904789237`. Count `BROKER` as occurrences (13 here, 11 there), not as failed tests;
+  the summaries are identical. `macos-latest (iOS)` completed successfully in 7 steps, so the `cancelled` zero-step leg of
+  `43913834179` was not this change either.
 - The types package moves `7.1.0-beta.9.1` → `7.1.0-beta.9.2` because the claim gate could not be opened while the version was
   upstream's: `claim-core` → `types_problem` → `npm_released(…)`, and the registry answers **200** for `.9.1` (upstream's `beta`
   dist-tag) and **404** for `.9.2`. That held under both ledgers, so the ledger contents were never what blocked the lane.
   `popopxChatCore` already matched `popopx-chat.cabal:8` (`7.1.2.0`), and the dependents keep `^7.1.0-beta.9.1` (7 occurrences in 4
   files): they name the npm artifact upstream published, and `scope-tests.sh` installs the types source by path, not by version.
-- Verified here, not only promised to CI: the suite ran on this machine after all — 95 green with ruling C, 94 at `75ad2ca61` (also
-  green on the runner, `Ran 94 tests … OK`), 93 in the untouched tree. Running it without python ≥ 3.11 took a
+- Verified here, not only promised to CI: the suite ran on this machine after all — 95 green with ruling C, 93 in the untouched tree,
+  and the runner agrees (`Ran 95 tests … OK` inside `ci-scripts` at `d361ba1a2`). Running it without python ≥ 3.11 took a
   `__future__.annotations` compile and a stand-in TOML parser, the same route used to exercise the guard against the real pin files and
   the real `releases.toml` fetched from `popopx-chat-libs`.
 - Still open, in order: `secrets.NODEJS_REPO_TOKEN` (`gh secret list` for this repository is empty — the user provisions it), then the

@@ -735,12 +735,16 @@ yet. Before any build of this fork is distributed:
     `master` and `stable`), runs `packages_release.py scopes` (`build.yml:172`), which prints every key of `SCOPE_CHANGES`
     (`packages_release.py:1072`); `Test changed scopes` (`build.yml:733`) then loops them in one `shell: bash` step, and Actions runs
     that with `-e -o pipefail`. Run `43913834179` at `75ad2ca61` therefore read `SCOPES: badge-web ci-scripts libs-pins mcp` on a push
-    touching neither pin file: `badge-web` and `ci-scripts` passed, `libs-pins` exited 1, and `mcp` never started — 0 `BROKER` lines
-    against the **11** of the same step on the preceding master push (`43904789237` at `2d4926e6a`, job `133430903589`). The warning
-    mode is what keeps the guard from standing in front of the defect beside it. Both new tests and
-    `test_build_yml_runs_for_the_paths_of_its_builds` have run since:
-    94 green on the runner, 95 on this machine through the `__future__.annotations` compile and stand-in TOML parser of the `tomllib`
-    paragraph above, which also reaches the live `releases.toml`.
+    touching neither pin file: `badge-web` and `ci-scripts` passed, `libs-pins` exited 1, and `mcp` never started — 0 `BROKER` occurrences
+    against the **11** occurrences of the same step on the preceding master push (`43904789237` at `2d4926e6a`, job `133430903589`). The warning
+    mode is what keeps the guard from standing in front of the defect beside it, and the push that carried it proved that: run
+    `43982143632` at `d361ba1a2` read the same `SCOPES: badge-web ci-scripts libs-pins mcp`, `ci-scripts` printed `Ran 95 tests … OK`,
+    `libs-pins` emitted 2 `##[warning]` lines and exited 0, and `mcp` ran to `Tests: 11 failed, 2 passed, 13 total` — the identical
+    summary of `43904789237`, so the failure is back where it belongs. Both new tests and
+    `test_build_yml_runs_for_the_paths_of_its_builds` are green on the runner (94 at `75ad2ca61`, 95 at `d361ba1a2`) and 95 on this
+    machine through the `__future__.annotations` compile and stand-in TOML parser of the `tomllib` paragraph above, which also reaches
+    the live `releases.toml`. `macos-latest (iOS)` completed in 7 steps, so the zero-step `cancelled` leg of `43913834179` was not this
+    change either.
   - Order of what is left: `secrets.NODEJS_REPO_TOKEN` (the user provisions it) → the lane publishes `core-7.1.2.0` and the add-on and
     records them → both pin files re-derived from GitHub's own asset digests in one commit → only then delete the three mirror releases
     (ruling "4 删掉"), because deleting first would leave the pins naming a 404 with no path back to green.
