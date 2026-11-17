@@ -229,7 +229,7 @@ struct MemberSupportView: View {
                 HStack(alignment: .center, spacing: 2) {
                     if supportChat.unread > 0 || supportChat.mentions > 0 || supportChat.memberAttention > 0 {
                         if supportChat.mentions > 0 && supportChat.unread > 1 {
-                            Text("\(MENTION_START)")
+                            Text("\(String(MENTION_START))")
                                 .font(userFont <= .xxxLarge ? .body : .callout)
                                 .foregroundColor(indicatorTint)
                                 .frame(minWidth: dynamicChatInfoSize, minHeight: dynamicChatInfoSize)
@@ -237,7 +237,7 @@ struct MemberSupportView: View {
                                 .padding(.bottom, 1)
                         }
                         let singleUnreadIsMention = supportChat.mentions > 0 && supportChat.unread == 1
-                        (singleUnreadIsMention ? Text("\(MENTION_START)") : unreadCountText(supportChat.unread))
+                        (singleUnreadIsMention ? Text("\(String(MENTION_START))") : unreadCountText(supportChat.unread))
                             .font(userFont <= .xxxLarge ? .caption : .caption2)
                             .foregroundColor(.white)
                             .padding(.horizontal, dynamicSize(userFont).unreadPadding)
