@@ -233,26 +233,16 @@ struct ItemWithMeta<Meta: View, Content: View>: View {
     }
 
     @ViewBuilder private var terminalBody: some View {
-        if #available(iOS 16, *) {
-            TerminalMetaLayout(metaReserved: metaReserved, hasOverlay: overlayMeta != nil, hasEndButton: endButton != nil, lastBlockGap: lastBlockGap) {
-                ZStack(alignment: .topLeading) {
-                    content(nil)
-                }
-                metaBox(meta(), theme.colors.secondary)
-                if let overlayMeta {
-                    metaBox(overlayMeta, nil)
-                }
-                if let endButton {
-                    endButton.padding(.trailing, chatItemTextPadding)
-                }
+        TerminalMetaLayout(metaReserved: metaReserved, hasOverlay: overlayMeta != nil, hasEndButton: endButton != nil, lastBlockGap: lastBlockGap) {
+            ZStack(alignment: .topLeading) {
+                content(nil)
             }
-        } else {
-            HStack(alignment: .lastTextBaseline, spacing: 0) {
-                content(nil).frame(maxWidth: .infinity, alignment: .leading)
-                if let endButton {
-                    endButton
-                }
-                metaBox(meta(), theme.colors.secondary)
+            metaBox(meta(), theme.colors.secondary)
+            if let overlayMeta {
+                metaBox(overlayMeta, nil)
+            }
+            if let endButton {
+                endButton.padding(.trailing, chatItemTextPadding)
             }
         }
     }

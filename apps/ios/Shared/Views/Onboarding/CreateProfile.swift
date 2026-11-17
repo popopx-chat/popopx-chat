@@ -139,7 +139,7 @@ struct CreateProfile: View {
                 }
             }
         }
-        .onChange(of: chosenImage) { image in
+        .onChange(of: chosenImage) { _, image in
             Task {
                 let resized: String? = if let image {
                     await resizeImageToStrSize(cropToSquare(image), maxDataSize: 12500)
@@ -272,13 +272,7 @@ struct CreateFirstProfile: View {
                         .modifier(ThemedBackground(grouped: true))
                 }
             }
-            if #available(iOS 17, *) {
-                v.scrollBounceBehavior(.basedOnSize).defaultScrollAnchor(.bottom)
-            } else if #available(iOS 16.4, *) {
-                v.scrollBounceBehavior(.basedOnSize)
-            } else {
-                v
-            }
+            v.scrollBounceBehavior(.basedOnSize).defaultScrollAnchor(.bottom)
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {

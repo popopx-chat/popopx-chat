@@ -80,7 +80,7 @@ struct ChatListNavLink: View {
                 invalidJSONPreview(json)
             }
         }
-        .onChange(of: inProgress) { inProgress in
+        .onChange(of: inProgress) { _, inProgress in
             if inProgress {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     progressByTimeout = inProgress
@@ -671,18 +671,7 @@ struct ChatListNavLink: View {
 extension View {
     @inline(__always)
     @ViewBuilder fileprivate func frameCompat(height: CGFloat) -> some View {
-        if #available(iOS 16, *) {
-            self.frame(height: height)
-        } else {
-            VStack(spacing: 0) {
-                Divider()
-                    .padding(.leading, 16)
-                self
-                    .frame(height: height)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 8)
-            }
-        }
+        self.frame(height: height)
     }
 }
 

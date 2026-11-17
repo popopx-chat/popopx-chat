@@ -92,8 +92,8 @@ struct UserProfile: View {
                 loaded = true
             }
         }
-        .onChange(of: editSnapshot) { _ in updateProfileSaver() }
-        .onChange(of: chosenImage) { image in
+        .onChange(of: editSnapshot) { _, _ in updateProfileSaver() }
+        .onChange(of: chosenImage) { _, image in
             Task {
                 let resized: String? = if let image {
                     await resizeImageToStrSize(cropToSquare(image), maxDataSize: 12500)
@@ -288,28 +288,9 @@ struct ProfileDescriptionEditor: View {
     var body: some View {
         List {
             Section {
-                if #available(iOS 16.0, *) {
-                    TextField("Enter description (optional)", text: $description, axis: .vertical)
-                        .lineLimit(6...12)
-                        .focused($keyboardVisible)
-                } else {
-                    // iOS 15 has no vertically-growing TextField (axis:) — fixed-height editor instead
-                    ZStack {
-                        Group {
-                            if description.isEmpty {
-                                TextEditor(text: Binding.constant(NSLocalizedString("Enter description (optional)", comment: "placeholder")))
-                                    .foregroundColor(theme.colors.secondary)
-                                    .disabled(true)
-                            }
-                            TextEditor(text: $description)
-                                .focused($keyboardVisible)
-                        }
-                        .padding(.horizontal, -5)
-                        .padding(.top, -8)
-                        .frame(height: 130, alignment: .topLeading)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                }
+                TextField("Enter description (optional)", text: $description, axis: .vertical)
+                    .lineLimit(6...12)
+                    .focused($keyboardVisible)
             }
         }
         .onAppear {
