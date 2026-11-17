@@ -222,7 +222,7 @@ struct FramedItemView: View {
                 }
             case let .file(text):
                 ciFileView(chatItem, text)
-            case let .report(text, reason):
+            case let .report(_, reason):
                 ciMsgContentView(chatItem, txtPrefix: reason.attrString)
             case let .link(_, preview):
                 CILinkView(linkPreview: preview, maxWidth: maxWidth)

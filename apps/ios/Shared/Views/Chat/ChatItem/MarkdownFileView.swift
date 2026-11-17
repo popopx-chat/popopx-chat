@@ -25,7 +25,7 @@ func showMarkdownFile(_ file: CIFile) {
             let html = withinMarkdownLimits(lines) ? htmlShowingTagsAsText(text) : nil
             let shownLines = lines.flatMap(chunkedLine)
             let hasBidiControls = text.unicodeScalars.contains(where: isBidiControl)
-            await MainActor.run {
+            _ = await MainActor.run {
                 showAppSheet {
                     MarkdownFileView(file: file, fileSource: fileSource, lines: shownLines, html: html, hasBidiControls: hasBidiControls)
                 }

@@ -196,7 +196,6 @@ class ChatTagsModel: ObservableObject {
     @Published var unreadTags: [Int64:Int] = [:]
 
     func updateChatTags(_ chats: [Chat]) {
-        let tm = ChatTagsModel.shared
         var newPresetTags: [PresetTag:Int] = [:]
         var newUnreadTags: [Int64:Int] = [:]
         for chat in chats {

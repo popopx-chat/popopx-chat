@@ -299,7 +299,7 @@ func showFileErrorAlert(_ err: FileError, _ file: CIFile? = nil, temporary: Bool
     } else {
         NSLocalizedString("File error", comment: "file error alert title")
     }
-    if let btn = err.moreInfoButton {
+    if err.moreInfoButton != nil {
         showAlert(title, message: err.errorInfo) {
             [
                 okAlertAction,

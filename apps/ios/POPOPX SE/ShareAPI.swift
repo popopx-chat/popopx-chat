@@ -109,7 +109,7 @@ func apiSuspendChat(expired: Bool) {
         }
     }
     if !suspended {
-        let _r1: APIResult<SEChatResponse> = sendPOPOPXCmd(SEChatCommand.apiSuspendChat(timeoutMicroseconds: 0))
+        let _: APIResult<SEChatResponse> = sendPOPOPXCmd(SEChatCommand.apiSuspendChat(timeoutMicroseconds: 0))
     }
     logger.debug("close store")
     chatCloseStore()
