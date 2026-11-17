@@ -514,5 +514,5 @@ Chat-level preferences stored in the SQLite database (managed by Haskell core):
 |------|------|
 | ChatModel, ItemsModel, Chat, ChatTagsModel, ChannelRelaysModel | [`Shared/Model/ChatModel.swift`](../Shared/Model/ChatModel.swift) |
 | ChatInfo, User, Contact, GroupInfo, ChatItem | [`POPOPXChat/ChatTypes.swift`](../POPOPXChat/ChatTypes.swift) |
-| ActiveFilter | [`Shared/Views/ChatList/ChatListView.swift`](../Shared/Views/ChatList/ChatListView.swift#L52) |
+| ActiveFilter | [`Shared/Views/ChatList/ChatListView.swift`](../Shared/Views/ChatList/ChatListView.swift#L54) |
 | Preference defaults | [`Shared/Model/ChatModel.swift`](../Shared/Model/ChatModel.swift), [`POPOPXChat/FileUtils.swift`](../POPOPXChat/FileUtils.swift) |
