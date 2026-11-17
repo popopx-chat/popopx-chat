@@ -73,8 +73,8 @@ struct MsgContentView: View {
                 switchTyping()
             }
             .onDisappear(perform: stopTyping)
-            .onChange(of: meta?.isLive, perform: switchTyping)
-            .onChange(of: meta?.recent, perform: switchTyping)
+            .onChange(of: meta?.isLive) { switchTyping() }
+            .onChange(of: meta?.recent) { switchTyping() }
         } else {
             v
         }

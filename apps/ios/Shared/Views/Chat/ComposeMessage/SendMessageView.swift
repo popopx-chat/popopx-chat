@@ -100,7 +100,7 @@ struct SendMessageView: View {
         .background(theme.colors.background)
         .clipShape(composeShape)
         .overlay(composeShape.strokeBorder(.secondary, lineWidth: 0.5).opacity(0.7))
-        .onChange(of: composeState.message, perform: { text in updateFont(text) })
+        .onChange(of: composeState.message) { _, text in updateFont(text) }
         .padding(.vertical, 8)
     }
 

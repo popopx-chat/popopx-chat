@@ -47,7 +47,7 @@ struct CallSettings: View {
                         Toggle("Use iOS call interface", isOn: $callKitEnabled)
                         Toggle("Show calls in phone history", isOn: $callKitCallsInRecents)
                         .disabled(!callKitEnabled)
-                        .onChange(of: callKitCallsInRecents) { value in
+                        .onChange(of: callKitCallsInRecents) { _, value in
                             CallController.shared.showInRecents(value)
                         }
                     } header: {

@@ -164,7 +164,7 @@ struct UserAddressView: View {
             // }
             settingsRow("briefcase", color: theme.colors.secondary) {
                 Toggle("Business address", isOn: $settings.businessAddress)
-                    .onChange(of: settings.businessAddress) { ba in
+                    .onChange(of: settings.businessAddress) { _, ba in
                         if ba {
                             settings.autoAccept = true
                             settings.autoAcceptIncognito = false
@@ -423,7 +423,7 @@ struct UserAddressView: View {
             )
             .edgesIgnoringSafeArea(.bottom)
         }
-        .onChange(of: mailViewResult == nil) { _ in
+        .onChange(of: mailViewResult == nil) { _, _ in
             if let r = mailViewResult {
                 switch r {
                 case .success: ()
@@ -643,7 +643,7 @@ struct UserAddressSettingsView: View {
                         settings = AddressSettingsState(settings: userAddress.addressSettings)
                         savedSettings = AddressSettingsState(settings: userAddress.addressSettings)
                     }
-                    .onChange(of: settings.autoAccept) { autoAccept in
+                    .onChange(of: settings.autoAccept) { _, autoAccept in
                         if !autoAccept {
                             settings.businessAddress = false
                             settings.autoReply = ""
@@ -696,7 +696,7 @@ struct UserAddressSettingsView: View {
     private func shareWithContactsButton() -> some View {
         settingsRow("person", color: theme.colors.secondary) {
             Toggle("Share with POPOPX contacts", isOn: $shareViaProfile)
-                .onChange(of: shareViaProfile) { on in
+                .onChange(of: shareViaProfile) { _, on in
                     if ignoreShareViaProfileChange {
                         ignoreShareViaProfileChange = false
                     } else {
@@ -759,7 +759,7 @@ struct UserAddressSettingsView: View {
     private func autoAcceptToggle() -> some View {
         settingsRow("checkmark", color: theme.colors.secondary) {
             Toggle("Auto-accept", isOn: $settings.autoAccept)
-                .onChange(of: settings.autoAccept) { _ in
+                .onChange(of: settings.autoAccept) { _, _ in
                     saveAddressSettings(settings, $savedSettings)
                 }
         }

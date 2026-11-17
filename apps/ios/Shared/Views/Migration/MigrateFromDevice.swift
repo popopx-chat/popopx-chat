@@ -108,7 +108,7 @@ struct MigrateFromDevice: View {
                 finishedView(chatDeletion)
             }
         }
-        .onChange(of: migrationState) { state in
+        .onChange(of: migrationState) { _, state in
             backDisabled = switch migrationState {
             case .chatStopInProgress, .archiving, .linkShown, .finished: true
             case .chatStopFailed, .passphraseNotSet, .passphraseConfirmation, .uploadConfirmation, .uploadProgress, .uploadFailed, .linkCreation: false
@@ -226,7 +226,7 @@ struct MigrateFromDevice: View {
     private func passphraseNotSetView() -> some View {
         DatabaseEncryptionView(useKeychain: $useKeychain, migration: true, stopChatRunBlockStartChat: { _, _ in
         })
-            .onChange(of: initialRandomDBPassphrase) { initial in
+            .onChange(of: initialRandomDBPassphrase) { _, initial in
                 if !initial {
                     migrationState = .uploadConfirmation
                 }

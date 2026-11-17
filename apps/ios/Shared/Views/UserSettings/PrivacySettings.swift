@@ -79,7 +79,7 @@ struct PrivacySettings: View {
                 Section {
                     settingsRow("network", color: theme.colors.secondary) {
                         Toggle("Send link previews", isOn: $useLinkPreviews)
-                            .onChange(of: useLinkPreviews) { linkPreviews in
+                            .onChange(of: useLinkPreviews) { _, linkPreviews in
                                 UserDefaults.standard.set(linkPreviews, forKey: DEFAULT_PRIVACY_LINK_PREVIEWS)
                                 privacyLinkPreviewsShowAlertGroupDefault.set(false)
                             }
@@ -95,8 +95,8 @@ struct PrivacySettings: View {
                 Section {
                     settingsRow("photo", color: theme.colors.secondary) {
                         Toggle("Auto-accept images", isOn: $autoAcceptImages)
-                            .onChange(of: autoAcceptImages) {
-                                privacyAcceptImagesGroupDefault.set($0)
+                            .onChange(of: autoAcceptImages) { _, autoAccept in
+                                privacyAcceptImagesGroupDefault.set(autoAccept)
                             }
                     }
                     settingsRow("circle.filled.pattern.diagonalline.rectangle", color: theme.colors.secondary) {
@@ -141,14 +141,14 @@ struct PrivacySettings: View {
                 }
             }
         }
-        .onChange(of: autoAcceptMemberContacts) { _ in
+        .onChange(of: autoAcceptMemberContacts) { _, _ in
             if autoAcceptMemberContactsReset {
                 autoAcceptMemberContactsReset = false
             } else {
                 setAutoAcceptMemberContacts(autoAcceptMemberContacts)
             }
         }
-        .onChange(of: autoAcceptGroupInvitations) { _ in
+        .onChange(of: autoAcceptGroupInvitations) { _, _ in
             if autoAcceptGroupInvitationsReset {
                 autoAcceptGroupInvitationsReset = false
             } else {
@@ -185,7 +185,7 @@ struct PrivacySettings: View {
                 settingsRow("rectangle.and.pencil.and.ellipsis", color: theme.colors.secondary) {
                     Toggle("Message draft", isOn: $saveLastDraft)
                 }
-                .onChange(of: saveLastDraft) { saveDraft in
+                .onChange(of: saveLastDraft) { _, saveDraft in
                     if !saveDraft {
                         m.draft = nil
                         m.draftChatId = nil
@@ -206,8 +206,8 @@ struct PrivacySettings: View {
             Section {
                 settingsRow("lock.doc", color: theme.colors.secondary) {
                     Toggle("Encrypt local files", isOn: $encryptLocalFiles)
-                        .onChange(of: encryptLocalFiles) {
-                            setEncryptLocalFiles($0)
+                        .onChange(of: encryptLocalFiles) { _, encrypt in
+                            setEncryptLocalFiles(encrypt)
                         }
                 }
                 settingsRow("network.badge.shield.half.filled", color: theme.colors.secondary) {
@@ -307,14 +307,14 @@ struct PrivacySettings: View {
                 }
             }
         }
-        .onChange(of: contactReceipts) { _ in
+        .onChange(of: contactReceipts) { _, _ in
             if contactReceiptsReset {
                 contactReceiptsReset = false
             } else {
                 setOrAskSendReceiptsContacts(contactReceipts)
             }
         }
-        .onChange(of: groupReceipts) { _ in
+        .onChange(of: groupReceipts) { _, _ in
             if groupReceiptsReset {
                 groupReceiptsReset = false
             } else {
@@ -613,7 +613,7 @@ struct PopopxLockView: View {
                 }
             }
         }
-        .onChange(of: performLA) { performLAToggle in
+        .onChange(of: performLA) { _, performLAToggle in
             appLocalAuthEnabledGroupDefault.set(performLAToggle)
             prefLANoticeShown = true
             if performLAToggleReset {
@@ -630,7 +630,7 @@ struct PopopxLockView: View {
                 disableLA()
             }
         }
-        .onChange(of: laMode) { _ in
+        .onChange(of: laMode) { _, _ in
             if performLAModeReset {
                 performLAModeReset = false
             } else if prefPerformLA {
@@ -639,7 +639,7 @@ struct PopopxLockView: View {
                 updateLAMode()
             }
         }
-        .onChange(of: selfDestruct) { _ in
+        .onChange(of: selfDestruct) { _, _ in
             if performLASelfDestructReset {
                 performLASelfDestructReset = false
             } else if prefPerformLA {

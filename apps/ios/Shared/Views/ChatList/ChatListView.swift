@@ -222,8 +222,8 @@ struct ChatListView: View {
                     .modifier(ThemedBackground())
             }
         }
-        .onChange(of: activeUserPickerSheet) {
-            if $0 != nil {
+        .onChange(of: activeUserPickerSheet) { _, sheet in
+            if sheet != nil {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     userPickerShown = false
                 }
@@ -562,17 +562,17 @@ struct ChatListView: View {
                     }
                 }
                 .listStyle(.plain)
-                .onChange(of: chatModel.chatId) { currentChatId in
+                .onChange(of: chatModel.chatId) { _, currentChatId in
                     if let chatId = chatModel.chatToTop, currentChatId != chatId {
                         chatModel.chatToTop = nil
                         chatModel.popChat(chatId)
                     }
                     stopAudioPlayer()
                 }
-                .onChange(of: chatModel.currentUser?.userId) { _ in
+                .onChange(of: chatModel.currentUser?.userId) { _, _ in
                     stopAudioPlayer()
                 }
-                .onChange(of: scrollToSearchBar) { scrollToSearchBar in
+                .onChange(of: scrollToSearchBar) { _, scrollToSearchBar in
                     if scrollToSearchBar {
                         Task { self.scrollToSearchBar = false }
                         withAnimation { scrollProxy.scrollTo("searchBar") }
@@ -819,10 +819,10 @@ struct ChatListSearchBar: View {
                 )
             }
         }
-        .onChange(of: searchFocussed) { sf in
+        .onChange(of: searchFocussed) { _, sf in
             withAnimation { searchMode = sf }
         }
-        .onChange(of: searchText) { t in
+        .onChange(of: searchText) { _, t in
             if ignoreSearchTextChange {
                 ignoreSearchTextChange = false
             } else {
@@ -873,7 +873,7 @@ struct ChatListSearchBar: View {
                 }
             }
         }
-        .onChange(of: chatTagsModel.activeFilter) { _ in
+        .onChange(of: chatTagsModel.activeFilter) { _, _ in
             searchText = ""
         }
     }

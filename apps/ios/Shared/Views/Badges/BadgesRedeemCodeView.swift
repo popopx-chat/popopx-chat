@@ -163,7 +163,7 @@ struct BadgesRedeemCodeView: View {
             .padding(EdgeInsets(top: 14, leading: 12, bottom: 14, trailing: 12))
             .background(Color(.tertiarySystemFill))
             .cornerRadius(10.0)
-            .onChange(of: code) { applyCodeInput($0) }
+            .onChange(of: code) { _, code in applyCodeInput(code) }
     }
 
     private func pasteButton() -> some View {

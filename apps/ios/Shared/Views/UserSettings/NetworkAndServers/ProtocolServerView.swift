@@ -69,7 +69,7 @@ struct ProtocolServerView: View {
                 message: Text(testFailure?.localizedDescription ?? "")
             )
         }
-        .onChange(of: serverToEdit.server) { _ in
+        .onChange(of: serverToEdit.server) { _, _ in
             serverToEdit.tested = serverToEdit.server == server.server ? server.tested : nil
         }
     }

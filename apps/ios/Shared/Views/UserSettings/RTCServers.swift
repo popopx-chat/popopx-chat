@@ -28,7 +28,7 @@ struct RTCServers: View {
         List {
             Section {
                 Toggle("Configure ICE servers", isOn: $isUserRTCServersToggle)
-                    .onChange(of: isUserRTCServersToggle) { _ in
+                    .onChange(of: isUserRTCServersToggle) { _, _ in
                         if (isUserRTCServersToggle) {
                             isUserRTCServers = true
                         } else if (userRTCServers.isEmpty) {

@@ -135,7 +135,7 @@ struct ChatRelayView: View {
                 message: Text(testFailure?.localizedDescription ?? "")
             )
         }
-        .onChange(of: relayToEdit.address) { _ in
+        .onChange(of: relayToEdit.address) { _, _ in
             if relayToEdit.address == relay.address {
                 relayToEdit.tested = relay.tested
                 relayToEdit.displayName = relay.displayName
@@ -376,7 +376,7 @@ struct NewChatRelayView: View {
                 message: Text(testFailure?.localizedDescription ?? "")
             )
         }
-        .onChange(of: relayToEdit.address) { _ in
+        .onChange(of: relayToEdit.address) { _, _ in
             relayToEdit.tested = nil
         }
     }

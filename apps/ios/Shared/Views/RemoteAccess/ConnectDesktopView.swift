@@ -109,11 +109,11 @@ struct ConnectDesktopView: View {
                 disconnectDesktop()
             }
         }
-        .onChange(of: deviceName) {
-            setDeviceName($0)
+        .onChange(of: deviceName) { _, name in
+            setDeviceName(name)
         }
-        .onChange(of: m.activeRemoteCtrl) {
-            UIApplication.shared.isIdleTimerDisabled = $0
+        .onChange(of: m.activeRemoteCtrl) { _, active in
+            UIApplication.shared.isIdleTimerDisabled = active
         }
         .alert(item: $alert) { a in
             switch a {

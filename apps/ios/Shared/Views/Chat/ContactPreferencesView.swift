@@ -85,7 +85,7 @@ struct ContactPreferencesView: View {
         )
         return Section {
             Toggle("You allow", isOn: $featuresAllowed.timedMessagesAllowed)
-                .onChange(of: featuresAllowed.timedMessagesAllowed) { allow in
+                .onChange(of: featuresAllowed.timedMessagesAllowed) { _, allow in
                     if allow {
                         if featuresAllowed.timedMessagesTTL == nil {
                             featuresAllowed.timedMessagesTTL = 86400

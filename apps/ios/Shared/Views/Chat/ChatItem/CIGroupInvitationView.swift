@@ -88,7 +88,7 @@ struct CIGroupInvitationView: View {
         }
         .textSelection(.disabled)
         .onPreferenceChange(DetermineWidth.Key.self) { frameWidth = $0 }
-        .onChange(of: inProgress) { inProgress in
+        .onChange(of: inProgress) { _, inProgress in
             if inProgress {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     progressByTimeout = inProgress

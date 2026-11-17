@@ -80,8 +80,8 @@ struct ShareView: View {
                 Button("Ok") { model.completion() }
             }
         }
-        .onChange(of: model.comment) {
-            model.hasPopopxLink = hasPopopxLink($0)
+        .onChange(of: model.comment) { _, comment in
+            model.hasPopopxLink = hasPopopxLink(comment)
         }
     }
 

@@ -405,7 +405,7 @@ struct ChatInfoView: View {
             .disableAutocorrection(true)
             .focused($aliasTextFieldFocused)
             .submitLabel(.done)
-            .onChange(of: aliasTextFieldFocused) { focused in
+            .onChange(of: aliasTextFieldFocused) { _, focused in
                 if !focused {
                     setContactAlias()
                 }
@@ -504,7 +504,7 @@ struct ChatInfoView: View {
         } label: {
             Label("Send receipts", systemImage: "checkmark.message")
         }
-        .onChange(of: sendReceipts) { _ in
+        .onChange(of: sendReceipts) { _, _ in
             setSendReceipts()
         }
     }
@@ -680,7 +680,7 @@ struct ChatTTLOption: View {
             }
         }
         .disabled(progressIndicator)
-        .onChange(of: chatItemTTL) { ttl in
+        .onChange(of: chatItemTTL) { _, ttl in
             if ttl == currentChatItemTTL { return }
             setChatTTL(
                 ttl,
@@ -964,10 +964,10 @@ struct ChatWallpaperEditorSheet: View {
         .onAppear {
             globalThemeUsed = preferred == nil
         }
-        .onChange(of: theme.base.mode) { _ in
+        .onChange(of: theme.base.mode) { _, _ in
             globalThemeUsed = themesFromChat(chat).preferredMode(!theme.colors.isLight) == nil
         }
-        .onChange(of: ChatModel.shared.chatId) { _ in
+        .onChange(of: ChatModel.shared.chatId) { _, _ in
             dismiss()
         }
     }

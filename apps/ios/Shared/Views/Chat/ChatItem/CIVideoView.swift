@@ -112,7 +112,7 @@ struct CIVideoView: View {
         .onAppear {
             setupPlayer(chatItem.file)
         }
-        .onChange(of: chatItem.file) { file in
+        .onChange(of: chatItem.file) { _, file in
             // ChatItem can be changed in small view on chat list screen
             setupPlayer(file)
         }
@@ -178,7 +178,7 @@ struct CIVideoView: View {
                         showFullScreenPlayer = urlDecrypted != nil
                     }
                 })
-                .onChange(of: m.activeCallViewIsCollapsed) { _ in
+                .onChange(of: m.activeCallViewIsCollapsed) { _, _ in
                     showFullScreenPlayer = false
                 }
                 if !blurred {
@@ -209,7 +209,7 @@ struct CIVideoView: View {
                 VideoPlayerView(player: player, url: url, showControls: false)
                 .frame(width: w, height: w * heightRatio(preview.size))
                 .clipped()
-                .onChange(of: m.stopPreviousRecPlay) { playingUrl in
+                .onChange(of: m.stopPreviousRecPlay) { _, playingUrl in
                     if playingUrl != url {
                         player.pause()
                         videoPlaying = false
@@ -230,7 +230,7 @@ struct CIVideoView: View {
                         }
                     })
                 }
-                .onChange(of: m.activeCallViewIsCollapsed) { _ in
+                .onChange(of: m.activeCallViewIsCollapsed) { _, _ in
                     showFullScreenPlayer = false
                 }
                 if !videoPlaying && !blurred {
@@ -263,7 +263,7 @@ struct CIVideoView: View {
                         showFullScreenPlayer = urlDecrypted != nil
                     }
                 }
-                .onChange(of: m.activeCallViewIsCollapsed) { _ in
+                .onChange(of: m.activeCallViewIsCollapsed) { _, _ in
                     showFullScreenPlayer = false
                 }
             if file.showStatusIconInSmallView {
@@ -282,7 +282,7 @@ struct CIVideoView: View {
                 .onTapGesture { // this is shown in chat list, where onTapGesture works
                     showFullScreenPlayer = true
                 }
-                .onChange(of: m.activeCallViewIsCollapsed) { _ in
+                .onChange(of: m.activeCallViewIsCollapsed) { _, _ in
                     showFullScreenPlayer = false
                 }
 

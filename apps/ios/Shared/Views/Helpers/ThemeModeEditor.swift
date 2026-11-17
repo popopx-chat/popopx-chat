@@ -90,13 +90,13 @@ struct UserWallpaperEditor: View {
                             ThemeManager.applyTheme(currentThemeDefault.get())
                         }
                     }
-                }.onChange(of: initialTheme.mode) { mode in
+                }.onChange(of: initialTheme.mode) { _, mode in
                     themeModeOverride = initialTheme
                     if applyToMode != nil {
                         applyToMode = mode
                     }
                 }
-                .onChange(of: theme) { _ in
+                .onChange(of: theme) { _, _ in
                     // Applies updated global theme if current one tracks global theme
                     if globalThemeUsed {
                         themeModeOverride = ThemeManager.defaultActiveTheme(ChatModel.shared.currentUser?.uiThemes, themeOverridesDefault.get())
@@ -117,7 +117,7 @@ struct UserWallpaperEditor: View {
                     }
                 }
                 .frame(height: 36)
-                .onChange(of: applyToMode) { mode in
+                .onChange(of: applyToMode) { _, mode in
                     if let mode, mode != theme.base.mode {
                         let lightBase = DefaultTheme.LIGHT
                         let darkBase = if theme.base != DefaultTheme.LIGHT { theme.base } else if systemDarkThemeDefault.get() == DefaultTheme.DARK.themeName { DefaultTheme.DARK } else if systemDarkThemeDefault.get() == DefaultTheme.BLACK.themeName { DefaultTheme.BLACK } else { DefaultTheme.POPOPX }
@@ -295,7 +295,7 @@ struct ChatWallpaperEditor: View {
                         await save(themeModeOverride.mode, themeModeOverride)
                     }
                 }
-                .onChange(of: initialTheme) { initial in
+                .onChange(of: initialTheme) { _, initial in
                     if initial.mode != themeModeOverride.mode {
                         themeModeOverride = initial
                         currentTheme = ThemeManager.currentColors(nil, globalThemeUsed ? nil : themeModeOverride, ChatModel.shared.currentUser?.uiThemes, themeOverridesDefault.get())
@@ -304,14 +304,14 @@ struct ChatWallpaperEditor: View {
                         }
                     }
                 }
-                .onChange(of: currentTheme) { _ in
+                .onChange(of: currentTheme) { _, _ in
                     // Applies updated global theme if current one tracks global theme
                     if globalThemeUsed {
                         themeModeOverride = ThemeManager.defaultActiveTheme(ChatModel.shared.currentUser?.uiThemes, themeOverridesDefault.get())
                         globalThemeUsed = true
                     }
                 }
-                .onChange(of: themeModeOverride) { override in
+                .onChange(of: themeModeOverride) { _, override in
                     currentTheme = ThemeManager.currentColors(nil, globalThemeUsed ? nil : override, ChatModel.shared.currentUser?.uiThemes, themeOverridesDefault.get())
                 }
             }
@@ -328,7 +328,7 @@ struct ChatWallpaperEditor: View {
                     }
                 }
                 .frame(height: 36)
-                .onChange(of: applyToMode) { mode in
+                .onChange(of: applyToMode) { _, mode in
                     if let mode, mode != currentTheme.base.mode {
                         let lightBase = DefaultTheme.LIGHT
                         let darkBase = if currentTheme.base != DefaultTheme.LIGHT { currentTheme.base } else if systemDarkThemeDefault.get() == DefaultTheme.DARK.themeName { DefaultTheme.DARK } else if systemDarkThemeDefault.get() == DefaultTheme.BLACK.themeName { DefaultTheme.BLACK } else { DefaultTheme.POPOPX }

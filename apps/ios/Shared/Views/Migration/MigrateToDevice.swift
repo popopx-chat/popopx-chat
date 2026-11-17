@@ -141,7 +141,7 @@ struct MigrateToDevice: View {
             case .archiveImport, .passphrase, .migrationConfirmation, .migration, .onion: true
             }
         }
-        .onChange(of: migrationState) { state in
+        .onChange(of: migrationState) { _, state in
             backDisabled = switch state {
             case nil, .pasteOrScanLink, .linkDownloading, .downloadProgress, .downloadFailed, .archiveImportFailed: false
             case .archiveImport, .passphrase, .migrationConfirmation, .migration, .onion: true

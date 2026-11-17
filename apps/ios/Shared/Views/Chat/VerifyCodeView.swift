@@ -87,7 +87,7 @@ struct VerifyCodeView: View {
                 }
             }
         }
-        .onChange(of: connectionVerified) { _ in
+        .onChange(of: connectionVerified) { _, _ in
             if connectionVerified { dismiss() }
         }
     }

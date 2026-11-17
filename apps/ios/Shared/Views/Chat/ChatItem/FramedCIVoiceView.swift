@@ -71,7 +71,7 @@ struct FramedCIVoiceView: View {
                 seek(time)
                 playbackTime = time
             })
-        .onChange(of: .playing == playbackState || (playbackTime ?? 0) > 0) { show in
+        .onChange(of: .playing == playbackState || (playbackTime ?? 0) > 0) { _, show in
             if !show {
                 allowMenu = true
             }

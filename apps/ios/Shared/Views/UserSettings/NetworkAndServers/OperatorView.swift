@@ -105,15 +105,15 @@ struct OperatorView: View {
                     if !userServers[operatorIndex].smpServers.filter({ !$0.deleted }).isEmpty {
                         Section {
                             Toggle("To receive", isOn: $userServers[operatorIndex].operator_.smpRoles.storage)
-                                .onChange(of: userServers[operatorIndex].operator_.smpRoles.storage) { _ in
+                                .onChange(of: userServers[operatorIndex].operator_.smpRoles.storage) { _, _ in
                                     validateServers_($userServers, $serverErrors, $serverWarnings)
                                 }
                             Toggle("For private routing", isOn: $userServers[operatorIndex].operator_.smpRoles.proxy)
-                                .onChange(of: userServers[operatorIndex].operator_.smpRoles.proxy) { _ in
+                                .onChange(of: userServers[operatorIndex].operator_.smpRoles.proxy) { _, _ in
                                     validateServers_($userServers, $serverErrors, $serverWarnings)
                                 }
                             Toggle("To resolve names", isOn: $userServers[operatorIndex].operator_.smpRoles.names)
-                                .onChange(of: userServers[operatorIndex].operator_.smpRoles.names) { _ in
+                                .onChange(of: userServers[operatorIndex].operator_.smpRoles.names) { _, _ in
                                     validateServers_($userServers, $serverErrors, $serverWarnings)
                                 }
                         } header: {
@@ -190,7 +190,7 @@ struct OperatorView: View {
                     if !userServers[operatorIndex].xftpServers.filter({ !$0.deleted }).isEmpty {
                         Section {
                             Toggle("To send", isOn: $userServers[operatorIndex].operator_.xftpRoles.storage)
-                                .onChange(of: userServers[operatorIndex].operator_.xftpRoles.storage) { _ in
+                                .onChange(of: userServers[operatorIndex].operator_.xftpRoles.storage) { _, _ in
                                     validateServers_($userServers, $serverErrors, $serverWarnings)
                                 }
                         } header: {
@@ -312,7 +312,7 @@ struct OperatorView: View {
 
     private func useOperatorToggle() -> some View {
         Toggle("Use servers", isOn: $useOperator)
-            .onChange(of: useOperator) { useOperatorToggle in
+            .onChange(of: useOperator) { _, useOperatorToggle in
                 if useOperatorToggleReset {
                     useOperatorToggleReset = false
                 } else if useOperatorToggle {

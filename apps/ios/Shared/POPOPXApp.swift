@@ -64,8 +64,8 @@ struct POPOPXApp: App {
                     }
                 }
 // Spec: spec/architecture.md#scenePhaseHandling
-                .onChange(of: scenePhase) { phase in
-                    logger.debug("scenePhase was \(String(describing: scenePhase)), now \(String(describing: phase))")
+                .onChange(of: scenePhase) { oldPhase, phase in
+                    logger.debug("scenePhase was \(String(describing: oldPhase)), now \(String(describing: phase))")
                     AppSheetState.shared.scenePhaseActive = phase == .active
                     switch (phase) {
                     case .background:

@@ -131,7 +131,7 @@ struct AddChannelView: View {
                 await MainActor.run { showImagePicker = false }
             }
         }
-        .onChange(of: chosenImage) { image in
+        .onChange(of: chosenImage) { _, image in
             Task {
                 let resized: String? = if let image {
                     await resizeImageToStrSize(cropToSquare(image), maxDataSize: 12500)
@@ -374,7 +374,7 @@ struct AddChannelView: View {
                 showCancelChannelAlert(gInfo)
             }
         }
-        .onChange(of: channelRelaysModel.groupRelays) { relays in
+        .onChange(of: channelRelaysModel.groupRelays) { _, relays in
             guard channelRelaysModel.groupId == gInfo.groupId else { return }
             groupRelays = relays.sorted { relayDisplayName($0) < relayDisplayName($1) }
             if relays.allSatisfy({ $0.relayStatus == .active && relayMemberConnFailed($0) == nil }) {

@@ -72,7 +72,7 @@ struct CustomTimePicker: View {
                 selection = selectedUnit.toSeconds * selectedDuration
             }
         }
-        .onChange(of: selectedUnit) { unit in
+        .onChange(of: selectedUnit) { _, unit in
             if let maxValue = timeUnitsLimits.first(where: { $0.timeUnit == unit })?.maxValue,
                selectedDuration > maxValue {
                 selectedDuration = maxValue
@@ -80,7 +80,7 @@ struct CustomTimePicker: View {
                 selection = unit.toSeconds * selectedDuration
             }
         }
-        .onChange(of: selectedDuration) { duration in
+        .onChange(of: selectedDuration) { _, duration in
             selection = selectedUnit.toSeconds * duration
         }
     }
@@ -176,11 +176,11 @@ struct DropdownCustomTimePicker: View {
             dropdownSelection = .dropdownValue(value: selection)
             justOpened = false
         }
-        .onChange(of: selection) { v in
+        .onChange(of: selection) { _, v in
             logger.debug("*** .onChange(of: selection)")
             dropdownSelection = .dropdownValue(value: v)
         }
-        .onChange(of: dropdownSelection) { v in
+        .onChange(of: dropdownSelection) { _, v in
             logger.debug("*** .onChange(of: dropdownSelection)")
             switch v {
             case let .dropdownValue(value): selection = value

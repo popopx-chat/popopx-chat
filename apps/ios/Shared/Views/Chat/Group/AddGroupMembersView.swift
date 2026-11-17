@@ -139,7 +139,7 @@ struct AddGroupMembersViewCommon: View {
                 return mkAlert(title: title, message: error)
             }
         }
-        .onChange(of: selectedContacts) { _ in
+        .onChange(of: selectedContacts) { _, _ in
             searchFocussed = false
         }
         .modifier(ThemedBackground(grouped: true))

@@ -139,7 +139,7 @@ struct DatabaseView: View {
             appFilesCountAndSize = directoryFileCountAndSize(getAppFilesDirectory())
             currentChatItemTTL = chatItemTTL
         }
-        .onChange(of: chatItemTTL) { ttl in
+        .onChange(of: chatItemTTL) { _, ttl in
             if ttl < currentChatItemTTL {
                 alert = .setChatItemTTL(ttl: ttl)
             } else if ttl != currentChatItemTTL {
@@ -170,7 +170,7 @@ struct DatabaseView: View {
                     stopped ? "Chat is stopped" : "Chat is running",
                     isOn: $runChat
                 )
-                .onChange(of: runChat) { _ in
+                .onChange(of: runChat) { _, _ in
                     if runChat {
                         DatabaseView.startChat($runChat, $progressIndicator)
                     } else if !stoppingChat {
@@ -582,7 +582,7 @@ struct DatabaseView: View {
     }
 
     private func setCiTTL(_ ttl: ChatItemTTL) {
-        logger.debug("DatabaseView setChatItemTTL \(ttl.seconds ?? -1)")
+        logger.debug("DatabaseView setChatItemTTL \(ttl.seconds)")
         progressIndicator = true
         Task {
             do {

@@ -151,7 +151,7 @@ struct GroupLinkView: View {
                     return mkAlert(title: title, message: error)
                 }
             }
-            .onChange(of: groupLinkMemberRole) { _ in
+            .onChange(of: groupLinkMemberRole) { _, _ in
                 Task {
                     do {
                         groupLink = try await apiGroupLinkMemberRole(groupId, memberRole: groupLinkMemberRole)

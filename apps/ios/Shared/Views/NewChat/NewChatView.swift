@@ -102,7 +102,7 @@ struct NewChatView: View {
                 }
                 .pickerStyle(.segmented)
                 .padding()
-                .onChange(of: $selection.wrappedValue) { opt in
+                .onChange(of: $selection.wrappedValue) { _, opt in
                     if opt == NewChatOption.connect {
                         showQRCodeScanner = true
                     }
@@ -162,7 +162,7 @@ struct NewChatView: View {
         }
         .if(onboarding) { $0.navigationBarTitleDisplayMode(.inline) }
         .modifier(ThemedBackground(grouped: true))
-        .onChange(of: invitationUsed) { used in
+        .onChange(of: invitationUsed) { _, used in
             if used && !(m.showingInvitation?.connChatUsed ?? true) {
                 m.markShowingInvitationUsed()
             }
@@ -296,10 +296,10 @@ private struct InviteView: View {
                 }
             }
         }
-        .onChange(of: incognitoDefault) { incognito in
+        .onChange(of: incognitoDefault) { _, incognito in
             setInvitationUsed()
         }
-        .onChange(of: chatModel.currentUser) { u in
+        .onChange(of: chatModel.currentUser) { _, u in
             setInvitationUsed()
         }
     }
@@ -411,7 +411,7 @@ private struct ActiveProfilePicker: View {
                 profiles = chatModel.users
                     .map { $0.user }
             }
-            .onChange(of: incognitoEnabled) { incognito in
+            .onChange(of: incognitoEnabled) { _, incognito in
                 if profileSwitchStatus != .switchingIncognito {
                     return
                 }
@@ -437,7 +437,7 @@ private struct ActiveProfilePicker: View {
                     }
                 }
             }
-            .onChange(of: profileSwitchStatus) { sp in
+            .onChange(of: profileSwitchStatus) { _, sp in
                 if sp != .idle {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         switchingProfileByTimeout = profileSwitchStatus != .idle
@@ -446,7 +446,7 @@ private struct ActiveProfilePicker: View {
                     switchingProfileByTimeout = false
                 }
             }
-            .onChange(of: selectedProfile) { profile in
+            .onChange(of: selectedProfile) { _, profile in
                 if (profileSwitchStatus != .switchingUser) {
                     return
                 }

@@ -45,7 +45,7 @@ struct ContextContactRequestActionsView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .onChange(of: inProgress) { inPrgrs in
+        .onChange(of: inProgress) { _, inPrgrs in
             if inPrgrs {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     progressByTimeout = inProgress

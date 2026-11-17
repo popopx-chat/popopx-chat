@@ -99,13 +99,13 @@ struct SelectedItemsBottomToolbar: View {
         .onAppear {
             recheckItems(chatInfo, im.reversedChatItems, selectedChatItems)
         }
-        .onChange(of: chatInfo) { info in
+        .onChange(of: chatInfo) { _, info in
             recheckItems(info, im.reversedChatItems, selectedChatItems)
         }
-        .onChange(of: im.reversedChatItems) { items in
+        .onChange(of: im.reversedChatItems) { _, items in
             recheckItems(chatInfo, items, selectedChatItems)
         }
-        .onChange(of: selectedChatItems) { selected in
+        .onChange(of: selectedChatItems) { _, selected in
             recheckItems(chatInfo, im.reversedChatItems, selected)
         }
         .frame(height: 55.5)

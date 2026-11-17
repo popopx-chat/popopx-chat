@@ -119,13 +119,13 @@ struct ComposeVoiceView: View {
                 }
             }
         }
-        .onChange(of: stopPlayback) { _ in
+        .onChange(of: stopPlayback) { _, _ in
             audioPlayer?.stop()
         }
         .onDisappear {
             audioPlayer?.stop()
         }
-        .onChange(of: chatModel.stopPreviousRecPlay) { _ in
+        .onChange(of: chatModel.stopPreviousRecPlay) { _, _ in
             if !startingPlayback {
                 audioPlayer?.stop()
                 playbackState = .noPlayback

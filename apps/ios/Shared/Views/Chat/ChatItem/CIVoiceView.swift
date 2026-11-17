@@ -114,7 +114,7 @@ struct CIVoiceView: View {
                     seek(time)
                     playbackTime = time
                 })
-            .onChange(of: .playing == playbackState || (playbackTime ?? 0) > 0) { show in
+            .onChange(of: .playing == playbackState || (playbackTime ?? 0) > 0) { _, show in
                 if !show {
                     allowMenu = true
                 }
@@ -243,13 +243,13 @@ struct VoiceMessagePlayer: View {
                 stopPlayback()
             }
         }
-        .onChange(of: chatModel.stopPreviousRecPlay) { it in
+        .onChange(of: chatModel.stopPreviousRecPlay) { _, it in
             if let recordingFileName = getLoadedFileSource(recordingFile)?.filePath,
                chatModel.stopPreviousRecPlay != getAppFilePath(recordingFileName) {
                 stopPlayback()
             }
         }
-        .onChange(of: playbackState) { state in
+        .onChange(of: playbackState) { _, state in
             allowMenu = state == .paused || state == .noPlayback
             // Notify activeContentPreview in ChatPreviewView that playback is finished
             if state == .noPlayback, let recordingFileName = getLoadedFileSource(recordingFile)?.filePath,
@@ -257,7 +257,7 @@ struct VoiceMessagePlayer: View {
                 chatModel.stopPreviousRecPlay = nil
             }
         }
-        .onChange(of: chatModel.chatId) { _ in
+        .onChange(of: chatModel.chatId) { _, _ in
             stopPlayback()
         }
         .onDisappear {

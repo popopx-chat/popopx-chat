@@ -79,8 +79,8 @@ struct TerminalView: View {
                                 scrolled = true
                             }
                         }
-                        .onChange(of: chatModel.terminalItems.count) { _ in scrollToBottom(proxy) }
-                        .onChange(of: keyboardVisible) { _ in
+                        .onChange(of: chatModel.terminalItems.count) { _, _ in scrollToBottom(proxy) }
+                        .onChange(of: keyboardVisible) { _, _ in
                             if keyboardVisible {
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                                     scrollToBottom(proxy, animation: .easeInOut(duration: 1))

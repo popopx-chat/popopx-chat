@@ -59,7 +59,7 @@ struct CommandsMenuView: View {
                 .onPreferenceChange(DetermineWidth.Key.self) { keywordWidth = $0 }
             }
         }
-        .onChange(of: composeState.message) { message in
+        .onChange(of: composeState.message) { _, message in
             let msg = message.trimmingCharacters(in: .whitespaces)
             if msg == "/" {
                 currentCommands = chat.chatInfo.menuCommands
@@ -71,7 +71,7 @@ struct CommandsMenuView: View {
             }
             menuTreeBackPath = []
         }
-        .onChange(of: showCommandsMenu) { show in
+        .onChange(of: showCommandsMenu) { _, show in
             currentCommands = show ? chat.chatInfo.menuCommands : []
             menuTreeBackPath = []
         }

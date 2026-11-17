@@ -154,14 +154,14 @@ struct AdvancedNetworkSettings: View {
                             .foregroundColor(theme.colors.secondary)
                     }
                 }
-                .onChange(of: useNetProxy) { useNetProxy in
+                .onChange(of: useNetProxy) { _, useNetProxy in
                     netCfg.socksProxy = useNetProxy && currentNetProxy.valid
                         ? currentNetProxy.toProxyString()
                         : nil
                     netProxy = currentNetProxy
                     netProxyAuth = netProxy.username != "" || netProxy.password != ""
                 }
-                .onChange(of: netProxyAuth) { netProxyAuth in
+                .onChange(of: netProxyAuth) { _, netProxyAuth in
                     if netProxyAuth {
                         netProxy.auth = currentNetProxy.auth
                         netProxy.username = currentNetProxy.username
@@ -172,7 +172,7 @@ struct AdvancedNetworkSettings: View {
                         netProxy.password = ""
                     }
                 }
-                .onChange(of: netProxy) { netProxy in
+                .onChange(of: netProxy) { _, netProxy in
                     netCfg.socksProxy = useNetProxy && netProxy.valid
                         ? netProxy.toProxyString()
                         : nil
@@ -187,7 +187,7 @@ struct AdvancedNetworkSettings: View {
                     Text(onionHostsInfo(onionHosts))
                         .foregroundColor(theme.colors.secondary)
                 }
-                .onChange(of: onionHosts) { hosts in
+                .onChange(of: onionHosts) { _, hosts in
                     if hosts != OnionHosts(netCfg: currentNetCfg) {
                         let (hostMode, requiredHostMode) = hosts.hostMode
                         netCfg.hostMode = hostMode
@@ -264,10 +264,10 @@ struct AdvancedNetworkSettings: View {
                 }
             }
         }
-        .onChange(of: keepAliveOpts) { opts in
+        .onChange(of: keepAliveOpts) { _, opts in
             netCfg.tcpKeepAlive = keepAliveOpts
         }
-        .onChange(of: enableKeepAlive) { on in
+        .onChange(of: enableKeepAlive) { _, on in
             netCfg.tcpKeepAlive = on ? (currentNetCfg.tcpKeepAlive ?? KeepAliveOpts.defaults) : nil
         }
         .onAppear {

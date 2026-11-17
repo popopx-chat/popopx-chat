@@ -866,7 +866,7 @@ struct WhatsNewView: View {
             pagination()
         }
         .padding()
-        .onChange(of: currentVersion) { _ in
+        .onChange(of: currentVersion) { _, _ in
             currentVersionNav = currentVersion
         }
     }

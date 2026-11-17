@@ -111,7 +111,7 @@ struct GroupProfileView: View {
                 }
             }
         }
-        .onChange(of: chosenImage) { image in
+        .onChange(of: chosenImage) { _, image in
             Task {
                 let resized: String? = if let image {
                     await resizeImageToStrSize(cropToSquare(image), maxDataSize: 12500)

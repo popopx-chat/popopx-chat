@@ -79,11 +79,11 @@ struct GroupMentionsView: View {
                 }
             }
         }
-        .onChange(of: composeState.parsedMessage) { parsedMsg in
+        .onChange(of: composeState.parsedMessage) { _, parsedMsg in
             currentMessage = composeState.message
             messageChanged(currentMessage, parsedMsg, selectedRange)
         }
-        .onChange(of: selectedRange) { r in
+        .onChange(of: selectedRange) { _, r in
             // This condition is needed to prevent messageChanged called twice,
             // because composeState.formattedText triggers later when message changes.
             // The condition is only true if position changed without text change

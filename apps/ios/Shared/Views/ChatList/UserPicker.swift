@@ -115,8 +115,8 @@ struct UserPicker: View {
                 }
             }
         }
-        .onChange(of: userPickerShown) {
-            if !$0 { resetScroll() }
+        .onChange(of: userPickerShown) { _, shown in
+            if !shown { resetScroll() }
         }
         .modifier(ThemedBackground(grouped: true))
         .disabled(switchingProfile)

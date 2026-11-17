@@ -80,7 +80,7 @@ struct DeveloperView: View {
                         }
                     }
                     .frame(height: 36)
-                    .onChange(of: popopxLinkMode) { mode in
+                    .onChange(of: popopxLinkMode) { _, mode in
                         privacyPopopxLinkModeDefault.set(mode)
                     }
                 }

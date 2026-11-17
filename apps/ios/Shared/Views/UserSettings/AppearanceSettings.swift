@@ -165,11 +165,11 @@ struct AppearanceSettings: View {
                     Text("Themes")
                         .foregroundColor(theme.colors.secondary)
                 }
-                .onChange(of: profileImageCornerRadius) { cornerRadius in
+                .onChange(of: profileImageCornerRadius) { _, cornerRadius in
                     profileImageCornerRadiusGroupDefault.set(cornerRadius)
                     saveThemeToDatabase(nil)
                 }
-                .onChange(of: colorMode) { mode in
+                .onChange(of: colorMode) { _, mode in
                     guard let mode else {
                         ThemeManager.applyTheme(DefaultTheme.SYSTEM_THEME_NAME)
                         return
@@ -180,7 +180,7 @@ struct AppearanceSettings: View {
                         ThemeManager.applyTheme(systemDarkThemeDefault.get())
                     }
                 }
-                .onChange(of: darkModeTheme) { darkTheme in
+                .onChange(of: darkModeTheme) { _, darkTheme in
                     ThemeManager.changeDarkTheme(darkTheme)
                     if currentThemeDefault.get() == DefaultTheme.SYSTEM_THEME_NAME {
                         ThemeManager.applyTheme(currentThemeDefault.get())
@@ -750,10 +750,10 @@ struct UserWallpaperEditorSheet: View {
         .onAppear {
             globalThemeUsed = preferred == nil
         }
-        .onChange(of: theme.base.mode) { _ in
+        .onChange(of: theme.base.mode) { _, _ in
             globalThemeUsed = (ChatModel.shared.currentUser?.uiThemes ?? ThemeModeOverrides()).preferredMode(!theme.colors.isLight) == nil
         }
-        .onChange(of: ChatModel.shared.currentUser?.userId) { _ in
+        .onChange(of: ChatModel.shared.currentUser?.userId) { _, _ in
             dismiss()
         }
     }
@@ -861,7 +861,7 @@ struct ThemeDestinationPicker: View {
                 }
             }
             .frame(height: 36)
-            .onChange(of: themeUserDest) { userId in
+            .onChange(of: themeUserDest) { _, userId in
                 themeUserDest = userId
                 if let userId {
                     themeUserDestination = (userId, m.users.first { $0.user.userId == userId }?.user.uiThemes)
@@ -872,7 +872,7 @@ struct ThemeDestinationPicker: View {
                     changeActiveUser(userId, viewPwd: nil)
                 }
             }
-            .onChange(of: themeUserDestination == nil) { isNil in
+            .onChange(of: themeUserDestination == nil) { _, isNil in
                 if isNil {
                     // Easiest way to hide per-user customization.
                     // Otherwise, it would be needed to make global variable and to use it everywhere for making a decision to include these overrides into active theme constructing or not
@@ -1078,14 +1078,14 @@ private struct picker: View {
 
     var body: some View {
         ColorPickerView(name: name, selection: $color)
-            .onChange(of: color) { newColor in
+            .onChange(of: color) { _, newColor in
                 let editedColor = editColor(name)
                 if editedColor.wrappedValue != newColor {
                     editedColor.wrappedValue = newColor
                     lastColorUpdate = .now
                 }
             }
-            .onChange(of: editColor(name).wrappedValue) { newValue in
+            .onChange(of: editColor(name).wrappedValue) { _, newValue in
                 // Allows to update underlying color in the picker when color changed externally, for example, by reseting colors of a theme or changing the theme
                 if lastColorUpdate < Date.now - 1 && newValue != color {
                     color = newValue

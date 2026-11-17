@@ -37,7 +37,7 @@ struct CIImageView: View {
                 .if(!blurred) { v in
                     v.simultaneousGesture(TapGesture().onEnded { showFullScreenImage = true })
                 }
-                .onChange(of: m.activeCallViewIsCollapsed) { _ in
+                .onChange(of: m.activeCallViewIsCollapsed) { _, _ in
                     showFullScreenImage = false
                 }
             } else if let preview {

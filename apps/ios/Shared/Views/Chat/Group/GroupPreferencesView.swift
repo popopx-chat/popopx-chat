@@ -52,7 +52,7 @@ struct GroupPreferencesView: View {
                     featureSection(.support, $preferences.support.enable, disabled: true)
                 } else {
                     featureSection(.signMessages, $preferences.signMessages.enable)
-                        .onChange(of: preferences.signMessages.enable) { enable in
+                        .onChange(of: preferences.signMessages.enable) { _, enable in
                             if enable == .on && currentPreferences.signMessages.enable != .on {
                                 showAlert(
                                     NSLocalizedString("Sign messages?", comment: "alert title"),
@@ -72,7 +72,7 @@ struct GroupPreferencesView: View {
                     featureSection(.history, $preferences.history.enable)
                     let supportNotice = NSLocalizedString("Chats with admins in public channels have no E2E encryption - use only with trusted chat relays.", comment: "alert message")
                     featureSection(.support, $preferences.support.enable, notice: supportNotice)
-                        .onChange(of: preferences.support.enable) { enable in
+                        .onChange(of: preferences.support.enable) { _, enable in
                             if enable == .on {
                                 showAlert(
                                     NSLocalizedString("Enable chats with admins?", comment: "alert title"),
@@ -97,7 +97,7 @@ struct GroupPreferencesView: View {
                 }
             }
         }
-        .onChange(of: preferences.timedMessages.enable) { enable in
+        .onChange(of: preferences.timedMessages.enable) { _, enable in
             if enable == .on {
                 if preferences.timedMessages.ttl == nil {
                     preferences.timedMessages.ttl = 86400
@@ -183,7 +183,7 @@ struct GroupPreferencesView: View {
             }
             .foregroundColor(theme.colors.secondary)
         }
-        .onChange(of: enableFeature.wrappedValue) { enabled in
+        .onChange(of: enableFeature.wrappedValue) { _, enabled in
             if case .off = enabled {
                 enableForRole?.wrappedValue = nil
             }

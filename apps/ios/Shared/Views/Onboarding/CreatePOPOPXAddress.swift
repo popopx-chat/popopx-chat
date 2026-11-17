@@ -143,7 +143,7 @@ struct CreatePOPOPXAddress: View {
             )
             .edgesIgnoringSafeArea(.bottom)
         }
-        .onChange(of: mailViewResult == nil) { _ in
+        .onChange(of: mailViewResult == nil) { _, _ in
             if let r = mailViewResult {
                 switch r {
                 case let .success(composeResult):

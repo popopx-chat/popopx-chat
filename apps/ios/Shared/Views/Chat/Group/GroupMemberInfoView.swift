@@ -327,12 +327,12 @@ struct GroupMemberInfoView: View {
                     }
                 }
             }
-            .onChange(of: newRole) { newRole in
+            .onChange(of: newRole) { _, newRole in
                 if newRole != member.memberRole {
                     alert = .changeMemberRoleAlert(mem: member, role: newRole)
                 }
             }
-            .onChange(of: member.memberRole) { role in
+            .onChange(of: member.memberRole) { _, role in
                 newRole = role
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -356,7 +356,7 @@ struct GroupMemberInfoView: View {
                 ProgressView().scaleEffect(2)
             }
         }
-        .onChange(of: chat.chatInfo) { c in
+        .onChange(of: chat.chatInfo) { _, c in
             if case let .group(gI, _) = chat.chatInfo {
                 groupInfo = gI
             }
@@ -565,7 +565,7 @@ struct GroupMemberInfoView: View {
             } label: {
                 Label("Chat with member", systemImage: "flag")
             }
-            .onChange(of: navLinkActive) { active in
+            .onChange(of: navLinkActive) { _, active in
                 if active {
                     ItemsModel.loadSecondaryChat(groupInfo.id, chatFilter: .groupChatScopeContext(groupScopeInfo: scopeInfo))
                 }

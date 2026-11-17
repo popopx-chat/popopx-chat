@@ -131,7 +131,7 @@ struct UserProfilesView: View {
         .appSheet(item: $selectedUser) { user in
             HiddenProfileView(user: user, profileHidden: $profileHidden)
         }
-        .onChange(of: profileHidden) { _ in
+        .onChange(of: profileHidden) { _, _ in
             DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
                 withAnimation { profileHidden = false }
             }
