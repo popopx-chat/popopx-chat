@@ -201,28 +201,6 @@ struct ChatView: View {
             if im.showLoadingProgress == chat.id {
                 ProgressView().scaleEffect(2)
             }
-            if case let .group(groupInfo, _) = chat.chatInfo,
-               case let .groupChatScopeContext(groupScopeInfo) = im.secondaryIMFilter,
-               case let .memberSupport(groupMember_) = groupScopeInfo,
-               let groupMember = groupMember_ {
-                NavigationLink(isActive: $supportChatMemberInfoLinkActive) {
-                    GroupMemberInfoView(
-                        groupInfo: groupInfo,
-                        chat: chat,
-                        groupMember: GMember(groupMember),
-                        scrollToItemId: $scrollToItemId,
-                        openedFromSupportChat: true
-                    )
-                    .navigationBarHidden(false)
-                    .modifier(BackButton(disabled: Binding.constant(false)) {
-                        supportChatMemberInfoLinkActive = false
-                    })
-                } label: {
-                    EmptyView()
-                }
-                .frame(width: 1, height: 1)
-                .hidden()
-            }
         }
         .safeAreaInset(edge: .top) {
             VStack(spacing: .zero) {
@@ -238,6 +216,9 @@ struct ChatView: View {
         )
         .background(theme.colors.background)
         .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(isPresented: $supportChatMemberInfoLinkActive) {
+            memberSupportChatInfoView()
+        }
         .environmentObject(theme)
         .confirmationDialog(selectedChatItems?.count == 1 ? "Delete message?" : "Delete \((selectedChatItems?.count ?? 0)) messages?", isPresented: $showDeleteSelectedMessages, titleVisibility: .visible) {
             Button("Delete for me", role: .destructive) {
@@ -441,6 +422,27 @@ struct ChatView: View {
             .frame(minHeight: 54)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(ToolbarMaterial.material(toolbarMaterial))
+        }
+    }
+
+    // The destination re-derives the member-support scope, because the toolbar button
+    // that sets the flag is the only thing that can reach this state.
+    @ViewBuilder private func memberSupportChatInfoView() -> some View {
+        if case let .group(groupInfo, _) = chat.chatInfo,
+           case let .groupChatScopeContext(groupScopeInfo) = im.secondaryIMFilter,
+           case let .memberSupport(groupMember_) = groupScopeInfo,
+           let groupMember = groupMember_ {
+            GroupMemberInfoView(
+                groupInfo: groupInfo,
+                chat: chat,
+                groupMember: GMember(groupMember),
+                scrollToItemId: $scrollToItemId,
+                openedFromSupportChat: true
+            )
+            .navigationBarHidden(false)
+            .modifier(BackButton(disabled: Binding.constant(false)) {
+                supportChatMemberInfoLinkActive = false
+            })
         }
     }
 
