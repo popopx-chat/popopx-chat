@@ -192,15 +192,15 @@ struct ChatListView: View {
     
     private var viewBody: some View {
         ZStack(alignment: oneHandUI ? .bottomLeading : .topLeading) {
-            NavStackCompat(
-                isActive: Binding(
-                    get: { chatModel.chatId != nil },
-                    set: { active in
-                        if !active { chatModel.chatId = nil }
-                    }
-                ),
-                destination: chatView
-            ) { chatListView }
+            NavigationStack(path: Binding(
+                get: { chatModel.chatId != nil ? [true] : [] },
+                set: { path in
+                    if path.isEmpty { chatModel.chatId = nil }
+                }
+            )) {
+                chatListView
+                    .navigationDestination(for: Bool.self) { _ in chatView() }
+            }
         }
         .modifier(
             Sheet(isPresented: $userPickerShown) {

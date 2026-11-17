@@ -92,14 +92,21 @@ The [`contentView()`](../../Shared/ContentView.swift#L171) function further deci
 
 ### iOS Version Compatibility
 
-**File**: [`Shared/Views/Helpers/NavStackCompat.swift`](../../Shared/Views/Helpers/NavStackCompat.swift)
+**File**: [`Shared/Views/ChatList/ChatListView.swift`](../../Shared/Views/ChatList/ChatListView.swift#L195)
 
-The app supports iOS 15+ and uses a compatibility wrapper ([`NavStackCompat`](../../Shared/Views/Helpers/NavStackCompat.swift#L12)):
+The deployment target is iOS 17.0, so `NavigationStack` is used directly and the former
+`NavStackCompat` wrapper (needed while the app still supported iOS 15) was removed. The chat
+list root pushes `ChatView` through a `NavigationPath` derived from `chatModel.chatId`:
 
 ```swift
-// NavStackCompat provides:
-// - NavigationStack (iOS 16+): programmatic navigation via NavigationPath
-// - NavigationView (iOS 15): classic NavigationLink-based navigation
+// ChatListView: path is [true] while a chat is open, and an empty path clears chatId
+NavigationStack(path: Binding(
+    get: { chatModel.chatId != nil ? [true] : [] },
+    set: { path in if path.isEmpty { chatModel.chatId = nil } }
+)) {
+    chatListView
+        .navigationDestination(for: Bool.self) { _ in chatView() }
+}
 ```
 
 ### Primary Navigation Path
@@ -367,8 +374,7 @@ For channels (`groupInfo.useRelays`): the title is "Open channel"; for groups, "
 |------|------|
 | Root view | [`Shared/ContentView.swift`](../../Shared/ContentView.swift) |
 | App entry point | `Shared/POPOPXApp.swift` |
-| Navigation compat | [`Shared/Views/Helpers/NavStackCompat.swift`](../../Shared/Views/Helpers/NavStackCompat.swift) |
-| Chat list (nav root) | `Shared/Views/ChatList/ChatListView.swift` |
+| Chat list (nav root) | [`Shared/Views/ChatList/ChatListView.swift`](../../Shared/Views/ChatList/ChatListView.swift#L195) |
 | Nav link wrapper | `Shared/Views/ChatList/ChatListNavLink.swift` |
 | User picker | `Shared/Views/ChatList/UserPicker.swift` |
 | New chat view | [`Shared/Views/NewChat/NewChatView.swift`](../../Shared/Views/NewChat/NewChatView.swift) |
