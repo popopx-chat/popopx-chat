@@ -442,8 +442,9 @@ each was meant to become. That pass also repaired a compile break this fork ship
     field name are bytes from one build.
     What this item does **not** do is move the pin: `cabal.project:24` still
     names `25d7213d…`, because a pin to a commit that has not been pushed would resolve for nobody.
-    The pin, the iOS Haskell archives that are built through it, and every CI artifact inherit the
-    old labels until `popopx-pin-5` is pushed and the pin moves with it. Measured on the two installed
+    The pin and the iOS Haskell archives that are built through it inherit the old labels until
+    `popopx-pin-5` is pushed and the pin moves with it. CI is a different story, told below, because the
+    test that is red there does not read the pin at all. Measured on the two installed
     slices, `apps/ios/Libraries/ios/libHSpopopx-chat-7.1.2.0-2pJp6QhAZjZInPLhny3S4B-ghc9.6.3.a` and
     `…/sim/…same name…`, both **2 branded / 0 upstream** — so what an App Store build would carry is
     the broken side, not the working one. That count is `grep -a -o -E 'POPOPXSbChain' ARCHIVE | wc -l`,
@@ -506,6 +507,28 @@ each was meant to become. That pass also repaired a compile break this fork ship
     `cabal.project` went back to `25d7213d…` at the end of this work, the extraction directory was
     deleted again on purpose, because it then held the *reverted* tree while the pin said branded, and a
     build left running against it would have produced a client whose bytes contradict its own pin.
+
+    The fourth end, and the reason this item does not make CI green: `build.yml`'s `Test changed scopes`
+    runs the mcp e2e, and that e2e takes *both* of its ends from published release assets, not from the
+    tree under test. `smpServer.ts:10` pins `serverRelease = "v7.1.0.17"` and `:123` downloads
+    `https://github.com/popopx-chat/popopxmq/releases/download/v7.1.0.17/<name>-ubuntu-22_04-<arch>`,
+    while the client end downloads `popopx-chat-libs-linux-x86_64.zip` from the `-libs` tag
+    `core-7.1.0.20`; both fetches are in the log of run 43982143632, job 133701122623. No local artifact
+    reaches it, because the override is exported only when the locally built libs exist and the release
+    lane that builds them is off. The bytes of those published files, read on this machine: the zip's
+    `libHSsimplexmq-7.1.0.16-25c1c0e9…-ghc9.6.3.so` is **0 branded / 2 upstream**, upstream's package name
+    included, while `smp-server-ubuntu-22_04-x86-64` is **2 branded / 0 upstream** — as is
+    `xftp-server-ubuntu-22_04-x86-64`, two of that release's 25 assets sampled, each matching the sha256
+    pinned at `smpServer.ts:14,16` byte for byte (`554fffe2…`, `bfa1cba3…`). Upstream publishes no
+    `v7.1.0.17` release at all (`gh api repos/simplex-chat/simplexmq/releases/tags/v7.1.0.17` is a 404),
+    so those binaries were built by us, from the branded tree. That is the same split sitting in our own
+    published artifacts — unbranded client against branded relay — and the run answers it the way the
+    loopback cells do: `Test Suites: 2 failed, 2 total`, `Tests: 11 failed, 2 passed`, and all 11
+    failures carry `{"type":"BROKER","brokerErr":{"type":"TIMEOUT"}}` against a `localhost` address.
+    Closing it needs a publish, not a rebuild: republish the relay binaries from the reverted tree and
+    move `smpServer.ts:10` together with its four digests, or stop the e2e fetching a published relay at
+    all. "We reverted the labels" and "CI is green" are therefore two claims, and only the first is
+    settled by `cb9e1aa3`.
 
 ## What was deliberately NOT changed
 

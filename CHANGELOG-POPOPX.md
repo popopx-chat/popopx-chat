@@ -21,8 +21,18 @@ This one changes a wire value, so it is not part of the documentation section be
   same upstream relay binary. Both
   relays report the same `v7.1.0.17`, so it was not a version gap. **Corrects a verdict in the task
   record of 2026-11-15**: the `BROKER TIMEOUT` family was not "the preset relay's, not our wire" — it
-  is our wire, on the label side, and the same cause makes the e2e suite green when the harness builds
-  its own relay and red when it fetches the published core.
+  is our wire, on the label side.
+- **CI is the fourth pairing, and reverting does not close it.** `Test changed scopes` runs the mcp e2e,
+  which takes *both* ends from published release assets rather than from the tree under test: the client
+  from `-libs` tag `core-7.1.0.20` (measured **0 branded / 2 upstream**, upstream's package name still)
+  and the relay from our own `popopxmq` release `v7.1.0.17` (measured **2 branded / 0 upstream**, digests
+  matching the pins at `smpServer.ts:14,16`; upstream has no `v7.1.0.17` release, so those are our builds).
+  Run 43982143632 answers that mismatch with `Tests: 11 failed, 2 passed`, every failure a
+  `BROKER {brokerErr=TIMEOUT}` on a `localhost` address. So the harness is not green "when it builds its
+  own relay and red when it fetches the published core" — it is green when both ends come from one tree
+  and red when the two published ends disagree, which they do today. Closing it needs a republish of the
+  relay binaries from the reverted tree, with `smpServer.ts:10` and its four digests moved in the same
+  change; the pin move alone leaves CI exactly as red as it was.
 - **Reverted to upstream's exact bytes** in `popopxmq` commit `cb9e1aa3cbd8bd2fdb932243ffb9c554b3826bae`
   = tag `popopx-pin-5` (12 files: the 5 source files above, plus `NOTICE`, `protocol/crypto-registry.md`,
   `protocol/agent-protocol.md`, `protocol/xrcp.md`, `protocol/pqdr.md` and two `plans/`, all of which had
