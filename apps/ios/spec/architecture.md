@@ -144,7 +144,7 @@ The Haskell core emits async events (new messages, connection status changes, fi
 Haskell Core --[chat_recv_msg_wait]--> Swift event loop --> ChatModel update --> SwiftUI re-render
 ```
 
-The event loop is implemented in [`ChatReceiver`](../Shared/Model/POPOPXAPI.swift#L2581-L2624), and events are dispatched by [`processReceivedMsg`](../Shared/Model/POPOPXAPI.swift#L2279).
+The event loop is implemented in [`ChatReceiver`](../Shared/Model/POPOPXAPI.swift#L2581-L2624), and events are dispatched by [`processReceivedMsg`](../Shared/Model/POPOPXAPI.swift#L2627).
 
 ### [Event Types (ChatEvent enum)](../Shared/Model/AppAPITypes.swift#L1055-L1129)
 
@@ -265,7 +265,7 @@ The Share Extension (`POPOPX SE/`) allows sharing content (text, images, files) 
 Optional desktop pairing allows controlling the mobile app from a desktop client:
 
 - **Pairing**: Encrypted QR code scanned by desktop client establishes a session
-- **Commands**: [`connectRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1626), [`findKnownRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1633), [`confirmRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1637), [`verifyRemoteCtrlSession`](../Shared/Model/POPOPXAPI.swift#L1643), [`listRemoteCtrls`](../Shared/Model/POPOPXAPI.swift#L1649), [`stopRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1655), [`deleteRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1659)
+- **Commands**: [`connectRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1761), [`findKnownRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1768), [`confirmRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1772), [`verifyRemoteCtrlSession`](../Shared/Model/POPOPXAPI.swift#L1778), [`listRemoteCtrls`](../Shared/Model/POPOPXAPI.swift#L1784), [`stopRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1790), [`deleteRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1794)
 - **State**: [`ChatModel.remoteCtrlSession`](../Shared/Model/ChatModel.swift#L449)`: RemoteCtrlSession?` tracks the active session
 - **Transport**: Encrypted reverse HTTP transport between mobile and desktop
 - **Source**: [`Shared/Views/RemoteAccess/ConnectDesktopView.swift`](../Shared/Views/RemoteAccess/ConnectDesktopView.swift#L1-L561), see `Remote.hs` in `../../src/Popopx/Chat/`

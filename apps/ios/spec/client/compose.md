@@ -292,7 +292,7 @@ Optional feature where the recipient sees typing in real-time.
 - Compressed audio format for small file sizes
 
 ### Audio Management
-- [`AudioRecorder`](../../Shared/Model/AudioRecPlay.swift#L16) (`Shared/Model/AudioRecPlay.swift` L14) manages recording and playback
+- [`AudioRecorder`](../../Shared/Model/AudioRecPlay.swift#L16) (`Shared/Model/AudioRecPlay.swift` L16) manages recording and playback
 - `ChatModel.stopPreviousRecPlay` coordinates exclusive audio playback (only one audio source plays at a time)
 
 ---
@@ -369,4 +369,4 @@ When `chat.chatInfo.groupInfo?.useRelays == true` (channel mode), compose behave
 | File preview | [`ComposeFileView.swift`](../../Shared/Views/Chat/ComposeMessage/ComposeFileView.swift) | `ComposeFileView` | [L11](../../Shared/Views/Chat/ComposeMessage/ComposeFileView.swift#L11) |
 | Voice preview | [`ComposeVoiceView.swift`](../../Shared/Views/Chat/ComposeMessage/ComposeVoiceView.swift) | `ComposeVoiceView` | [L26](../../Shared/Views/Chat/ComposeMessage/ComposeVoiceView.swift#L26) |
 | Link preview | [`ComposeLinkView.swift`](../../Shared/Views/Chat/ComposeMessage/ComposeLinkView.swift) | `ComposeLinkView` | [L13](../../Shared/Views/Chat/ComposeMessage/ComposeLinkView.swift#L13) |
-| Audio recording | [`AudioRecPlay.swift`](../../Shared/Model/AudioRecPlay.swift) | `AudioRecorder` | [L14](../../Shared/Model/AudioRecPlay.swift#L14) |
+| Audio recording | [`AudioRecPlay.swift`](../../Shared/Model/AudioRecPlay.swift) | `AudioRecorder` | [L16](../../Shared/Model/AudioRecPlay.swift#L16) |

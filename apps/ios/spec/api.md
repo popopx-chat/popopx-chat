@@ -369,7 +369,7 @@ Group, file, call, notification, and misc responses ([`AppAPITypes.swift` L919](
 
 The `ChatEvent` enum ([`AppAPITypes.swift` L1069](../Shared/Model/AppAPITypes.swift#L1069)) represents async events from the Haskell core. These arrive via `chat_recv_msg_wait` polling, not as responses to commands.
 
-Event processing entry point: [`processReceivedMsg`](../Shared/Model/POPOPXAPI.swift#L2295) in `POPOPXAPI.swift`.
+Event processing entry point: [`processReceivedMsg`](../Shared/Model/POPOPXAPI.swift#L2627) in `POPOPXAPI.swift`.
 
 ### Connection Events
 
