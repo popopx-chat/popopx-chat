@@ -192,7 +192,7 @@ public let MAX_VOICE_MESSAGE_LENGTH = TimeInterval(300) // 5 minutes (300 second
 
 When [`apiSetEncryptLocalFiles(enable: true)`](../../Shared/Model/POPOPXAPI.swift#L384) is configured, files stored on the device are AES-encrypted.
 
-### [`CryptoFile`](../../POPOPXChat/ChatTypes.swift#L4241) Type
+### [`CryptoFile`](../../POPOPXChat/ChatTypes.swift#L5278) Type
 
 ```swift
 struct CryptoFile {

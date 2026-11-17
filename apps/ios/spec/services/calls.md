@@ -76,13 +76,13 @@ class CallController: NSObject, CXProviderDelegate, PKPushRegistryDelegate, Obse
 
 | Method | Purpose | Line |
 |--------|---------|------|
-| [`reportNewIncomingCall()`](../../Shared/Views/Call/CallController.swift#L287) | Reports incoming call to CallKit for native UI | L287 |
-| [`reportOutgoingCall()`](../../Shared/Views/Call/CallController.swift#L328) | Reports outgoing call to CallKit | L328 |
-| [`provider(_:perform: CXAnswerCallAction)`](../../Shared/Views/Call/CallController.swift#L66) | Handles user answering via CallKit UI | L66 |
-| [`provider(_:perform: CXEndCallAction)`](../../Shared/Views/Call/CallController.swift#L96) | Handles user ending via CallKit UI | L96 |
-| [`provider(_:perform: CXStartCallAction)`](../../Shared/Views/Call/CallController.swift#L55) | Handles outgoing call start | L55 |
-| [`pushRegistry(_:didReceiveIncomingPushWith:)`](../../Shared/Views/Call/CallController.swift#L202) | Handles VoIP push tokens | L202 |
-| [`hasActiveCalls()`](../../Shared/Views/Call/CallController.swift#L435) | Checks if any calls are active | L435 |
+| [`reportNewIncomingCall()`](../../Shared/Views/Call/CallController.swift#L288) | Reports incoming call to CallKit for native UI | L287 |
+| [`reportOutgoingCall()`](../../Shared/Views/Call/CallController.swift#L329) | Reports outgoing call to CallKit | L328 |
+| [`provider(_:perform: CXAnswerCallAction)`](../../Shared/Views/Call/CallController.swift#L67) | Handles user answering via CallKit UI | L66 |
+| [`provider(_:perform: CXEndCallAction)`](../../Shared/Views/Call/CallController.swift#L97) | Handles user ending via CallKit UI | L96 |
+| [`provider(_:perform: CXStartCallAction)`](../../Shared/Views/Call/CallController.swift#L56) | Handles outgoing call start | L55 |
+| [`pushRegistry(_:didReceiveIncomingPushWith:)`](../../Shared/Views/Call/CallController.swift#L203) | Handles VoIP push tokens | L202 |
+| [`hasActiveCalls()`](../../Shared/Views/Call/CallController.swift#L436) | Checks if any calls are active | L435 |
 
 ### Call Manager (internal)
 
@@ -111,20 +111,20 @@ Manages the WebRTC peer connection, media streams, and data channels.
 
 | Operation | Description | Line |
 |-----------|-------------|------|
-| [`initializeCall`](../../Shared/Views/Call/WebRTCClient.swift#L93) | Sets up peer connection, tracks, encryption | L93 |
-| [`createPeerConnection`](../../Shared/Views/Call/WebRTCClient.swift#L139) | Creates and configures RTCPeerConnection | L139 |
-| [`sendCallCommand`](../../Shared/Views/Call/WebRTCClient.swift#L176) | Dispatches WCallCommand (offer/answer/ICE) | L176 |
-| [`addIceCandidates`](../../Shared/Views/Call/WebRTCClient.swift#L165) | `peerConnection.add(RTCIceCandidate)` | L165 |
-| [`getInitialIceCandidates`](../../Shared/Views/Call/WebRTCClient.swift#L285) | Collects initial ICE candidates | L285 |
-| [`sendIceCandidates`](../../Shared/Views/Call/WebRTCClient.swift#L409) | Sends gathered ICE candidates | L409 |
-| [`startReconnecting`](../../Shared/Views/Call/WebRTCClient.swift#L313) | Reports "reconnecting", starts reconnection timeout and, for the party that sent the initial offer, periodic ICE restarts | L313 |
-| [`restartIce`](../../Shared/Views/Call/WebRTCClient.swift#L339) | Creates ICE restart offer and sends it with candidates in `.ice(iceCandidates:session:)` | L339 |
-| [`receiveRestartSession`](../../Shared/Views/Call/WebRTCClient.swift#L350) | Applies ICE restart offer (and sends the answer) or answer received in `.ice` command | L350 |
-| [`enableMedia`](../../Shared/Views/Call/WebRTCClient.swift#L365) | Enable/disable audio or video track | L365 |
-| [`setupLocalTracks`](../../Shared/Views/Call/WebRTCClient.swift#L423) | Creates audio/video tracks and adds to connection | L423 |
-| [`startCaptureLocalVideo`](../../Shared/Views/Call/WebRTCClient.swift#L581) | Front/back camera toggle and capture start | L581 |
-| [`endCall`](../../Shared/Views/Call/WebRTCClient.swift#L645) | Tears down connection and tracks | L645 |
-| [`setupEncryptionForLocalTracks`](../../Shared/Views/Call/WebRTCClient.swift#L503) | Sets up frame encryption for local media tracks | L503 |
+| [`initializeCall`](../../Shared/Views/Call/WebRTCClient.swift#L99) | Sets up peer connection, tracks, encryption | L93 |
+| [`createPeerConnection`](../../Shared/Views/Call/WebRTCClient.swift#L145) | Creates and configures RTCPeerConnection | L139 |
+| [`sendCallCommand`](../../Shared/Views/Call/WebRTCClient.swift#L182) | Dispatches WCallCommand (offer/answer/ICE) | L176 |
+| [`addIceCandidates`](../../Shared/Views/Call/WebRTCClient.swift#L171) | `peerConnection.add(RTCIceCandidate)` | L165 |
+| [`getInitialIceCandidates`](../../Shared/Views/Call/WebRTCClient.swift#L295) | Collects initial ICE candidates | L285 |
+| [`sendIceCandidates`](../../Shared/Views/Call/WebRTCClient.swift#L410) | Sends gathered ICE candidates | L409 |
+| [`startReconnecting`](../../Shared/Views/Call/WebRTCClient.swift#L314) | Reports "reconnecting", starts reconnection timeout and, for the party that sent the initial offer, periodic ICE restarts | L313 |
+| [`restartIce`](../../Shared/Views/Call/WebRTCClient.swift#L340) | Creates ICE restart offer and sends it with candidates in `.ice(iceCandidates:session:)` | L339 |
+| [`receiveRestartSession`](../../Shared/Views/Call/WebRTCClient.swift#L351) | Applies ICE restart offer (and sends the answer) or answer received in `.ice` command | L350 |
+| [`enableMedia`](../../Shared/Views/Call/WebRTCClient.swift#L470) | Enable/disable audio or video track | L365 |
+| [`setupLocalTracks`](../../Shared/Views/Call/WebRTCClient.swift#L528) | Creates audio/video tracks and adds to connection | L423 |
+| [`startCaptureLocalVideo`](../../Shared/Views/Call/WebRTCClient.swift#L708) | Front/back camera toggle and capture start | L581 |
+| [`endCall`](../../Shared/Views/Call/WebRTCClient.swift#L772) | Tears down connection and tracks | L645 |
+| [`setupEncryptionForLocalTracks`](../../Shared/Views/Call/WebRTCClient.swift#L623) | Sets up frame encryption for local media tracks | L503 |
 
 ### [Additional Encryption](../../Shared/Views/Call/WebRTCClient.swift#L513-L546)
 
@@ -230,16 +230,16 @@ CallKit requires VoIP push for incoming calls on locked device:
 
 | CXAction | Handler | Description | Line |
 |----------|---------|-------------|------|
-| `CXStartCallAction` | [`provider(_:perform:)`](../../Shared/Views/Call/CallController.swift#L55) | User starts outgoing call | L55 |
-| `CXAnswerCallAction` | [`provider(_:perform:)`](../../Shared/Views/Call/CallController.swift#L66) | User answers incoming call from CallKit UI | L66 |
-| `CXEndCallAction` | [`provider(_:perform:)`](../../Shared/Views/Call/CallController.swift#L96) | User ends call from CallKit UI | L96 |
-| `CXSetMutedCallAction` | [`provider(_:perform:)`](../../Shared/Views/Call/CallController.swift#L112) | User mutes from CallKit UI | L112 |
+| `CXStartCallAction` | [`provider(_:perform:)`](../../Shared/Views/Call/CallController.swift#L56) | User starts outgoing call | L55 |
+| `CXAnswerCallAction` | [`provider(_:perform:)`](../../Shared/Views/Call/CallController.swift#L67) | User answers incoming call from CallKit UI | L66 |
+| `CXEndCallAction` | [`provider(_:perform:)`](../../Shared/Views/Call/CallController.swift#L97) | User ends call from CallKit UI | L96 |
+| `CXSetMutedCallAction` | [`provider(_:perform:)`](../../Shared/Views/Call/CallController.swift#L113) | User mutes from CallKit UI | L112 |
 
 ### [Lock Screen Answer](../../Shared/Views/Call/CallController.swift#L66-L94)
 
 When answering from the lock screen:
 1. `CXAnswerCallAction` fires
-2. CallController waits for chat to be ready ([`waitUntilChatStarted(timeoutMs: 30_000)`](../../Shared/Views/Call/CallController.swift#L183))
+2. CallController waits for chat to be ready ([`waitUntilChatStarted(timeoutMs: 30_000)`](../../Shared/Views/Call/CallController.swift#L184))
 3. WebRTC connection established
 4. `fulfillOnConnect` action is fulfilled only when WebRTC reaches connected state (required for audio to work on lock screen)
 
@@ -357,18 +357,18 @@ Full-screen call UI when `ChatModel.showCallView == true`:
 - Control buttons: mute, camera toggle, speaker toggle, camera flip, end call
 - Minimize button (collapses to banner)
 
-### [ActiveCallOverlay](../../Shared/Views/Call/ActiveCallView.swift#L288-L522)
+### [ActiveCallOverlay](../../Shared/Views/Call/ActiveCallView.swift#L303-L537)
 
 | Control | Method | Line |
 |---------|--------|------|
-| Audio call info | [`audioCallInfoView`](../../Shared/Views/Call/ActiveCallView.swift#L357) | L357 |
-| Video call info | [`videoCallInfoView`](../../Shared/Views/Call/ActiveCallView.swift#L377) | L377 |
-| End call | [`endCallButton`](../../Shared/Views/Call/ActiveCallView.swift#L407) | L407 |
-| Mute toggle | [`toggleMicButton`](../../Shared/Views/Call/ActiveCallView.swift#L418) | L418 |
-| Audio device | [`audioDeviceButton`](../../Shared/Views/Call/ActiveCallView.swift#L428) | L428 |
-| Speaker toggle | [`toggleSpeakerButton`](../../Shared/Views/Call/ActiveCallView.swift#L452) | L452 |
-| Camera toggle | [`toggleCameraButton`](../../Shared/Views/Call/ActiveCallView.swift#L464) | L464 |
-| Flip camera | [`flipCameraButton`](../../Shared/Views/Call/ActiveCallView.swift#L475) | L475 |
+| Audio call info | [`audioCallInfoView`](../../Shared/Views/Call/ActiveCallView.swift#L372) | L357 |
+| Video call info | [`videoCallInfoView`](../../Shared/Views/Call/ActiveCallView.swift#L392) | L377 |
+| End call | [`endCallButton`](../../Shared/Views/Call/ActiveCallView.swift#L422) | L407 |
+| Mute toggle | [`toggleMicButton`](../../Shared/Views/Call/ActiveCallView.swift#L433) | L418 |
+| Audio device | [`audioDeviceButton`](../../Shared/Views/Call/ActiveCallView.swift#L443) | L428 |
+| Speaker toggle | [`toggleSpeakerButton`](../../Shared/Views/Call/ActiveCallView.swift#L467) | L452 |
+| Camera toggle | [`toggleCameraButton`](../../Shared/Views/Call/ActiveCallView.swift#L479) | L464 |
+| Flip camera | [`flipCameraButton`](../../Shared/Views/Call/ActiveCallView.swift#L490) | L475 |
 
 ### PiP (Picture-in-Picture)
 

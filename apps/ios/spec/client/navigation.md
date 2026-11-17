@@ -51,7 +51,7 @@ SimpleXApp
 
 ---
 
-## 2. Root View -- [`ContentView`](../../Shared/ContentView.swift#L24)
+## 2. Root View -- [`ContentView`](../../Shared/ContentView.swift#L26)
 
 **File**: [`Shared/ContentView.swift`](../../Shared/ContentView.swift)
 
@@ -65,10 +65,10 @@ SimpleXApp
 ### [Key State](../../Shared/ContentView.swift#L35-L52)
 | Property | Type | Purpose |
 |----------|------|---------|
-| [`contentAccessAuthenticationExtended`](../../Shared/ContentView.swift#L35) | `Bool` | Passed at init to avoid re-render timing issues |
-| [`automaticAuthenticationAttempted`](../../Shared/ContentView.swift#L38) | `Bool` | Whether biometric auth was auto-attempted |
-| [`waitingForOrPassedAuth`](../../Shared/ContentView.swift#L51) | `Bool` | Whether auth gate should show |
-| [`chatListUserPickerSheet`](../../Shared/ContentView.swift#L52) | `UserPickerSheet?` | Active user picker sheet |
+| [`contentAccessAuthenticationExtended`](../../Shared/ContentView.swift#L37) | `Bool` | Passed at init to avoid re-render timing issues |
+| [`automaticAuthenticationAttempted`](../../Shared/ContentView.swift#L40) | `Bool` | Whether biometric auth was auto-attempted |
+| [`waitingForOrPassedAuth`](../../Shared/ContentView.swift#L53) | `Bool` | Whether auth gate should show |
+| [`chatListUserPickerSheet`](../../Shared/ContentView.swift#L54) | `UserPickerSheet?` | Active user picker sheet |
 
 ### [View Selection Logic](../../Shared/ContentView.swift#L60-L80)
 
@@ -81,7 +81,7 @@ if !prefPerformLA || accessAuthenticated {
 }
 ```
 
-The [`contentView()`](../../Shared/ContentView.swift#L169) function further decides:
+The [`contentView()`](../../Shared/ContentView.swift#L171) function further decides:
 - If `chatModel.onboardingStage != .onboardingComplete`: show [onboarding](../../Shared/ContentView.swift#L174)
 - If `chatModel.migrationState != nil`: show migration UI
 - Otherwise: show `ChatListView` in a navigation container
@@ -94,7 +94,7 @@ The [`contentView()`](../../Shared/ContentView.swift#L169) function further deci
 
 **File**: [`Shared/Views/Helpers/NavStackCompat.swift`](../../Shared/Views/Helpers/NavStackCompat.swift)
 
-The app supports iOS 15+ and uses a compatibility wrapper ([`NavStackCompat`](../../Shared/Views/Helpers/NavStackCompat.swift#L11)):
+The app supports iOS 15+ and uses a compatibility wrapper ([`NavStackCompat`](../../Shared/Views/Helpers/NavStackCompat.swift#L12)):
 
 ```swift
 // NavStackCompat provides:
@@ -151,7 +151,7 @@ Sheets are presented modally on top of the navigation stack:
 | Sheet | Trigger | Content |
 |-------|---------|---------|
 | UserPicker | Tap user avatar in nav bar | User list, settings shortcuts |
-| [`NewChatView`](../../Shared/Views/NewChat/NewChatView.swift#L78) | Tap FAB / "+" button | Create link, scan QR, paste link, new group |
+| [`NewChatView`](../../Shared/Views/NewChat/NewChatView.swift#L79) | Tap FAB / "+" button | Create link, scan QR, paste link, new group |
 | WhatsNew | App update detected | Release notes |
 | AddGroupView | "New Group" action | Group creation wizard |
 | ConnectDesktopView | Settings > Desktop | Remote desktop pairing |
@@ -161,7 +161,7 @@ Sheets are presented modally on top of the navigation stack:
 
 ### Sheet Management
 
-Sheets use SwiftUI `.sheet(item:)` or `.sheet(isPresented:)` modifiers on `ContentView` and `ChatListView`. Some sheets use the centralized [`AppSheetState.shared`](../../Shared/ContentView.swift#L29) observable for coordination:
+Sheets use SwiftUI `.sheet(item:)` or `.sheet(isPresented:)` modifiers on `ContentView` and `ChatListView`. Some sheets use the centralized [`AppSheetState.shared`](../../Shared/ContentView.swift#L528) observable for coordination:
 
 ```swift
 class AppSheetState: ObservableObject {
@@ -186,7 +186,7 @@ When the user taps a notification:
 
 ### [URL Deep Link](../../Shared/ContentView.swift#L281)
 
-POPOPX links (`popopx:/chat#...`) are handled via [`connectViaUrl()`](../../Shared/ContentView.swift#L439):
+POPOPX links (`popopx:/chat#...`) are handled via [`connectViaUrl()`](../../Shared/ContentView.swift#L457):
 
 ```swift
 .onOpenURL { url in
@@ -253,12 +253,12 @@ ZStack {
 
 ## 7. Authentication Gate
 
-### [Local Authentication](../../Shared/ContentView.swift#L359)
+### [Local Authentication](../../Shared/ContentView.swift#L367)
 
 When [`DEFAULT_PERFORM_LA`](../../Shared/ContentView.swift#L44) is enabled:
 
 1. App enters background: `chatModel.contentViewAccessAuthenticated = false`
-2. App returns to foreground: `ContentView` shows [`lockButton()`](../../Shared/ContentView.swift#L238) instead of content
+2. App returns to foreground: `ContentView` shows [`lockButton()`](../../Shared/ContentView.swift#L240) instead of content
 3. User taps lock button: [`LocalAuthView`](../../Shared/ContentView.swift#L95) presented
 4. On successful auth: `chatModel.contentViewAccessAuthenticated = true`, content revealed
 
@@ -267,9 +267,9 @@ When [`DEFAULT_PERFORM_LA`](../../Shared/ContentView.swift#L44) is enabled:
 - Custom numeric passcode
 - Custom alphanumeric passcode
 
-### [Extended Authentication](../../Shared/ContentView.swift#L351)
-- After successful auth, a grace period prevents re-auth for brief background/foreground cycles ([`unlockedRecently()`](../../Shared/ContentView.swift#L351))
-- [`contentAccessAuthenticationExtended`](../../Shared/ContentView.swift#L35) is computed at `ContentView.init` to avoid render-time race conditions
+### [Extended Authentication](../../Shared/ContentView.swift#L359)
+- After successful auth, a grace period prevents re-auth for brief background/foreground cycles ([`unlockedRecently()`](../../Shared/ContentView.swift#L359))
+- [`contentAccessAuthenticationExtended`](../../Shared/ContentView.swift#L37) is computed at `ContentView.init` to avoid render-time race conditions
 - The `enteredBackgroundAuthenticated` timestamp tracks when the app was last authenticated in background
 
 ---
@@ -289,7 +289,7 @@ enum OnboardingStage: String, Identifiable {
 }
 ```
 
-Each stage is a dedicated view presented in place of `ChatListView` within [`ContentView`](../../Shared/ContentView.swift#L174).
+Each stage is a dedicated view presented in place of `ChatListView` within [`ContentView`](../../Shared/ContentView.swift#L26).
 
 Migration state (`ChatModel.migrationState != nil`) takes precedence over onboarding.
 
@@ -324,7 +324,7 @@ Migration state (`ChatModel.migrationState != nil`) takes precedence over onboar
 
 ## 10. Relay URL Interception
 
-**Source:** [`Shared/ContentView.swift`](../../Shared/ContentView.swift#L454)
+**Source:** [`Shared/ContentView.swift`](../../Shared/ContentView.swift#L464)
 
 In `connectViaUrl_()`, relay address links (URL path `/r`) are intercepted before processing:
 

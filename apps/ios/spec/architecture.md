@@ -5,7 +5,7 @@
 > Related specs: [README](README.md) | [API Reference](api.md) | [State Management](state.md) | [Database](database.md)
 > Related product: [Product Overview](../product/README.md)
 
-**Source:** [`POPOPXApp.swift`](../Shared/POPOPXApp.swift#L1-L183) | [`AppDelegate.swift`](../Shared/AppDelegate.swift#L1-L209) | [`ContentView.swift`](../Shared/ContentView.swift#L1-L513) | [`ChatModel.swift`](../Shared/Model/ChatModel.swift#L1-L1373) | [`POPOPXAPI.swift`](../Shared/Model/POPOPXAPI.swift#L1-L2915) | [`AppAPITypes.swift`](../Shared/Model/AppAPITypes.swift#L1-L2357) | [`APITypes.swift`](../POPOPXChat/APITypes.swift#L1-L1071) | [`API.swift`](../POPOPXChat/API.swift#L1-L388)
+**Source:** [`POPOPXApp.swift`](../Shared/POPOPXApp.swift#L1-L186) | [`AppDelegate.swift`](../Shared/AppDelegate.swift#L1-L209) | [`ContentView.swift`](../Shared/ContentView.swift#L1-L557) | [`ChatModel.swift`](../Shared/Model/ChatModel.swift#L1-L1522) | [`POPOPXAPI.swift`](../Shared/Model/POPOPXAPI.swift#L1-L3340) | [`AppAPITypes.swift`](../Shared/Model/AppAPITypes.swift#L1-L2357) | [`APITypes.swift`](../POPOPXChat/APITypes.swift#L1-L1071) | [`API.swift`](../POPOPXChat/API.swift#L1-L388)
 
 ---
 
@@ -55,7 +55,7 @@ The app follows a strict layered model where each layer communicates only with i
 |-------|------|------|------|
 | Views | [`Shared/Views/ChatList/ChatListView.swift`](../Shared/Views/ChatList/ChatListView.swift) | Chat list rendering | |
 | Views | [`Shared/Views/Chat/ChatView.swift`](../Shared/Views/Chat/ChatView.swift) | Conversation rendering | |
-| State | [`Shared/Model/ChatModel.swift`](../Shared/Model/ChatModel.swift#L337) | `ChatModel`, `ItemsModel`, `Chat` classes | L337, L74, L1271 |
+| State | [`Shared/Model/ChatModel.swift`](../Shared/Model/ChatModel.swift#L392) | `ChatModel`, `ItemsModel`, `Chat` classes | L392, L75, L1415 |
 | API | [`Shared/Model/POPOPXAPI.swift`](../Shared/Model/POPOPXAPI.swift#L93) | FFI bridge functions | L93 |
 | API | [`Shared/Model/AppAPITypes.swift`](../Shared/Model/AppAPITypes.swift#L15) | `ChatCommand`, `ChatResponse`, `ChatEvent` enums | L15, L649, L1055 |
 | FFI | [`POPOPXChat/POPOPX.h`](../POPOPXChat/POPOPX.h#L1-L63) | C header declaring Haskell exports | |
@@ -144,7 +144,7 @@ The Haskell core emits async events (new messages, connection status changes, fi
 Haskell Core --[chat_recv_msg_wait]--> Swift event loop --> ChatModel update --> SwiftUI re-render
 ```
 
-The event loop is implemented in [`ChatReceiver`](../Shared/Model/POPOPXAPI.swift#L2220-L2263), and events are dispatched by [`processReceivedMsg`](../Shared/Model/POPOPXAPI.swift#L2266).
+The event loop is implemented in [`ChatReceiver`](../Shared/Model/POPOPXAPI.swift#L2568-L2611), and events are dispatched by [`processReceivedMsg`](../Shared/Model/POPOPXAPI.swift#L2266).
 
 ### [Event Types (ChatEvent enum)](../Shared/Model/AppAPITypes.swift#L1055-L1129)
 
@@ -266,9 +266,9 @@ Optional desktop pairing allows controlling the mobile app from a desktop client
 
 - **Pairing**: Encrypted QR code scanned by desktop client establishes a session
 - **Commands**: [`connectRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1613), [`findKnownRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1620), [`confirmRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1624), [`verifyRemoteCtrlSession`](../Shared/Model/POPOPXAPI.swift#L1630), [`listRemoteCtrls`](../Shared/Model/POPOPXAPI.swift#L1636), [`stopRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1642), [`deleteRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1646)
-- **State**: [`ChatModel.remoteCtrlSession`](../Shared/Model/ChatModel.swift#L396)`: RemoteCtrlSession?` tracks the active session
+- **State**: [`ChatModel.remoteCtrlSession`](../Shared/Model/ChatModel.swift#L454)`: RemoteCtrlSession?` tracks the active session
 - **Transport**: Encrypted reverse HTTP transport between mobile and desktop
-- **Source**: [`Shared/Views/RemoteAccess/ConnectDesktopView.swift`](../Shared/Views/RemoteAccess/ConnectDesktopView.swift#L1-L545), see `Remote.hs` in `../../src/Popopx/Chat/`
+- **Source**: [`Shared/Views/RemoteAccess/ConnectDesktopView.swift`](../Shared/Views/RemoteAccess/ConnectDesktopView.swift#L1-L561), see `Remote.hs` in `../../src/Popopx/Chat/`
 
 ---
 
@@ -330,7 +330,7 @@ Chat relays are SMP servers that forward messages to channel subscribers. They a
 | Root view | [`Shared/ContentView.swift`](../Shared/ContentView.swift#L24) | L24 |
 | FFI bridge | [`Shared/Model/POPOPXAPI.swift`](../Shared/Model/POPOPXAPI.swift#L93) | L93 |
 | Low-level FFI | [`POPOPXChat/API.swift`](../POPOPXChat/API.swift#L115) | L115 |
-| App state | [`Shared/Model/ChatModel.swift`](../Shared/Model/ChatModel.swift#L337) | L337 |
+| App state | [`Shared/Model/ChatModel.swift`](../Shared/Model/ChatModel.swift#L392) | L392 |
 | API types | [`Shared/Model/AppAPITypes.swift`](../Shared/Model/AppAPITypes.swift#L15) | L15 |
 | Shared types | [`POPOPXChat/APITypes.swift`](../POPOPXChat/APITypes.swift#L27) | L27 |
 | C header | [`POPOPXChat/POPOPX.h`](../POPOPXChat/POPOPX.h#L1-L63) | |

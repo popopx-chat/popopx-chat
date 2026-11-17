@@ -16,8 +16,6 @@ struct ServersSummaryView: View {
     @State private var serversSummary: PresentedServersSummary? = nil
     @State private var selectedUserCategory: PresentedUserCategory = .allUsers
     @State private var selectedServerType: PresentedServerType = .smp
-    @State private var selectedSMPServer: String? = nil
-    @State private var selectedXFTPServer: String? = nil
     @State private var timer: Timer? = nil
     @State private var alert: SomeAlert?
 
@@ -273,7 +271,7 @@ struct ServersSummaryView: View {
     }
 
     private func smpServerView(_ srvSumm: SMPServerSummary, _ statsStartedAt: Date) -> some View {
-        NavigationLink(tag: srvSumm.id, selection: $selectedSMPServer) {
+        NavigationLink {
             SMPServerSummaryView(
                 summary: srvSumm,
                 statsStartedAt: statsStartedAt
@@ -342,7 +340,7 @@ struct ServersSummaryView: View {
     }
 
     private func xftpServerView(_ srvSumm: XFTPServerSummary, _ statsStartedAt: Date) -> some View {
-        NavigationLink(tag: srvSumm.id, selection: $selectedXFTPServer) {
+        NavigationLink {
             XFTPServerSummaryView(
                 summary: srvSumm,
                 statsStartedAt: statsStartedAt

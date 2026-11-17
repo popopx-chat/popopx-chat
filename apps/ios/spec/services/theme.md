@@ -384,14 +384,14 @@ Key functions in [`AppearanceSettings.swift`](../../Shared/Views/UserSettings/Ap
 
 | Function | Purpose | Line |
 |----------|---------|------|
-| [`ImportExportThemeSection`](../../Shared/Views/UserSettings/AppearanceSettings.swift#L603) | UI section for import/export controls | [L603](../../Shared/Views/UserSettings/AppearanceSettings.swift#L603) |
-| [`ThemeImporter`](../../Shared/Views/UserSettings/AppearanceSettings.swift#L640) | ViewModifier for YAML file import | [L640](../../Shared/Views/UserSettings/AppearanceSettings.swift#L640) |
+| [`ImportExportThemeSection`](../../Shared/Views/UserSettings/AppearanceSettings.swift#L631) | UI section for import/export controls | [L631](../../Shared/Views/UserSettings/AppearanceSettings.swift#L631) |
+| [`ThemeImporter`](../../Shared/Views/UserSettings/AppearanceSettings.swift#L668) | ViewModifier for YAML file import | [L668](../../Shared/Views/UserSettings/AppearanceSettings.swift#L668) |
 | [`decodeYAML(_:)`](../../Shared/Views/UserSettings/AppearanceSettings.swift#L1150) | Parse YAML string into Decodable type | [L1150](../../Shared/Views/UserSettings/AppearanceSettings.swift#L1150) |
 | [`encodeThemeOverrides(_:)`](../../Shared/Views/UserSettings/AppearanceSettings.swift#L1160) | Encode ThemeOverrides to YAML string | [L1160](../../Shared/Views/UserSettings/AppearanceSettings.swift#L1160) |
 
 ### Toolbar Material
 
-[`ToolbarMaterial`](../../Shared/Views/UserSettings/AppearanceSettings.swift#L319) controls the navigation bar appearance:
+[`ToolbarMaterial`](../../Shared/Views/UserSettings/AppearanceSettings.swift#L325) controls the navigation bar appearance:
 - Configurable opacity/material (translucent, opaque)
 - Stored in app settings
 

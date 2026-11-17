@@ -80,13 +80,13 @@ class NtfManager: NSObject, UNUserNotificationCenterDelegate, ObservableObject {
 
 | Method | Purpose | Line |
 |--------|---------|------|
-| [`registerCategories()`](../../Shared/Model/NtfManager.swift#L156) | Registers notification action categories with iOS | [156](../../Shared/Model/NtfManager.swift#L156) |
-| [`requestAuthorization()`](../../Shared/Model/NtfManager.swift#L215) | Requests notification permission from user | [215](../../Shared/Model/NtfManager.swift#L215) |
-| [`setNtfBadgeCount(_:)`](../../Shared/Model/NtfManager.swift#L264) | Updates app icon badge | [264](../../Shared/Model/NtfManager.swift#L264) |
-| [`processNotificationResponse(_:)`](../../Shared/Model/NtfManager.swift#L54) | Handles user interaction with notification | [54](../../Shared/Model/NtfManager.swift#L54) |
-| [`notifyContactRequest(_:)`](../../Shared/Model/NtfManager.swift#L239) | Shows contact request notification | [239](../../Shared/Model/NtfManager.swift#L239) |
-| [`notifyCallInvitation(_:)`](../../Shared/Model/NtfManager.swift#L258) | Shows incoming call notification | [258](../../Shared/Model/NtfManager.swift#L258) |
-| [`notifyMessageReceived(_:)`](../../Shared/Model/NtfManager.swift#L250) | Shows message received notification | [250](../../Shared/Model/NtfManager.swift#L250) |
+| [`registerCategories()`](../../Shared/Model/NtfManager.swift#L157) | Registers notification action categories with iOS | [156](../../Shared/Model/NtfManager.swift#L156) |
+| [`requestAuthorization()`](../../Shared/Model/NtfManager.swift#L216) | Requests notification permission from user | [215](../../Shared/Model/NtfManager.swift#L215) |
+| [`setNtfBadgeCount(_:)`](../../Shared/Model/NtfManager.swift#L268) | Updates app icon badge | [264](../../Shared/Model/NtfManager.swift#L264) |
+| [`processNotificationResponse(_:)`](../../Shared/Model/NtfManager.swift#L55) | Handles user interaction with notification | [54](../../Shared/Model/NtfManager.swift#L54) |
+| [`notifyContactRequest(_:)`](../../Shared/Model/NtfManager.swift#L243) | Shows contact request notification | [239](../../Shared/Model/NtfManager.swift#L239) |
+| [`notifyCallInvitation(_:)`](../../Shared/Model/NtfManager.swift#L262) | Shows incoming call notification | [258](../../Shared/Model/NtfManager.swift#L258) |
+| [`notifyMessageReceived(_:)`](../../Shared/Model/NtfManager.swift#L254) | Shows message received notification | [250](../../Shared/Model/NtfManager.swift#L250) |
 
 ### [Notification Response Processing](../../Shared/Model/NtfManager.swift#L40)
 
@@ -95,7 +95,7 @@ When user taps a notification:
 1. `userNotificationCenter(didReceive:)` delegate method fires
 2. If app is active: calls `processNotificationResponse()` immediately
 3. If app is inactive: stores in `ChatModel.notificationResponse` for later processing
-4. [`processNotificationResponse()`](../../Shared/Model/NtfManager.swift#L54):
+4. [`processNotificationResponse()`](../../Shared/Model/NtfManager.swift#L55):
    - Extracts `userId` from `userInfo` -- switches user if needed
    - Extracts `chatId` -- navigates to the conversation
    - Handles action identifiers (accept contact, accept/reject call)
@@ -240,7 +240,7 @@ Called when:
 
 ## 6. Notification Categories & Actions
 
-Registered in [`NtfManager.registerCategories()`](../../Shared/Model/NtfManager.swift#L156):
+Registered in [`NtfManager.registerCategories()`](../../Shared/Model/NtfManager.swift#L157):
 
 ### Contact Request Category
 
@@ -302,8 +302,8 @@ NtfManager.shared.setNtfBadgeCount(chatModel.totalUnreadCountForAllUsers())
 | Method | Purpose | Line |
 |--------|---------|------|
 | [`setBadgeCount()`](../../POPOPX NSE/NotificationService.swift#L592) | Increments badge via `ntfBadgeCountGroupDefault` | [592](../../POPOPX NSE/NotificationService.swift#L592) |
-| [`setNtfBadgeCount(_:)`](../../Shared/Model/NtfManager.swift#L264) | Sets badge on `UIApplication` | [264](../../Shared/Model/NtfManager.swift#L264) |
-| [`changeNtfBadgeCount(by:)`](../../Shared/Model/NtfManager.swift#L270) | Adjusts badge by delta | [270](../../Shared/Model/NtfManager.swift#L270) |
+| [`setNtfBadgeCount(_:)`](../../Shared/Model/NtfManager.swift#L268) | Sets badge on `UIApplication` | [264](../../Shared/Model/NtfManager.swift#L264) |
+| [`changeNtfBadgeCount(by:)`](../../Shared/Model/NtfManager.swift#L274) | Adjusts badge by delta | [270](../../Shared/Model/NtfManager.swift#L270) |
 
 ---
 

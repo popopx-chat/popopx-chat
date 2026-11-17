@@ -73,7 +73,7 @@ The main conversation view. Key responsibilities:
 
 ### Navigation Bar
 - Title: contact name / group name with connection status indicator
-- Trailing button: navigates to [`ChatInfoView`](../../Shared/Views/Chat/ChatInfoView.swift#L93) (direct) or [`GroupChatInfoView`](../../Shared/Views/Chat/Group/GroupChatInfoView.swift#L16) (group)
+- Trailing button: navigates to [`ChatInfoView`](../../Shared/Views/Chat/ChatInfoView.swift#L94) (direct) or [`GroupChatInfoView`](../../Shared/Views/Chat/Group/GroupChatInfoView.swift#L17) (group)
 - Search button: toggles in-chat message search
 
 ### Scroll Behavior
@@ -85,31 +85,31 @@ The main conversation view. Key responsibilities:
 
 | Function | Line | Description |
 |----------|------|-------------|
-| [`body`](../../Shared/Views/Chat/ChatView.swift#L75) | L75 | Main view body |
-| [`initChatView()`](../../Shared/Views/Chat/ChatView.swift#L660) | L660 | Initializes chat view state on appear |
-| [`chatItemsList()`](../../Shared/Views/Chat/ChatView.swift#L817) | L817 | Builds the scrollable message list |
-| [`scrollToItem(_:)`](../../Shared/Views/Chat/ChatView.swift#L731) | L731 | Scrolls to a specific message by ID |
-| [`searchToolbar()`](../../Shared/Views/Chat/ChatView.swift#L765) | L765 | In-chat search toolbar UI |
-| [`searchTextChanged(_:)`](../../Shared/Views/Chat/ChatView.swift#L1095) | L1095 | Handles search query changes |
-| [`loadChatItems(_:_:)`](../../Shared/Views/Chat/ChatView.swift#L1531) | L1531 | Loads chat items with pagination |
-| [`filtered(_:)`](../../Shared/Views/Chat/ChatView.swift#L803) | L803 | Filters items by content type |
-| [`callButton(_:_:imageName:)`](../../Shared/Views/Chat/ChatView.swift#L1273) | L1273 | Audio/video call toolbar button |
-| [`searchButton()`](../../Shared/Views/Chat/ChatView.swift#L1293) | L1293 | Search toggle toolbar button |
-| [`addMembersButton()`](../../Shared/Views/Chat/ChatView.swift#L1361) | L1361 | Group add-members toolbar button |
-| [`forwardSelectedMessages()`](../../Shared/Views/Chat/ChatView.swift#L1420) | L1420 | Forwards batch-selected messages |
-| [`deletedSelectedMessages()`](../../Shared/Views/Chat/ChatView.swift#L1411) | L1411 | Deletes batch-selected messages |
-| [`onChatItemsUpdated()`](../../Shared/Views/Chat/ChatView.swift#L1572) | L1572 | Reacts to chat items model changes |
-| [`contentFilterMenu(withLabel:)`](../../Shared/Views/Chat/ChatView.swift#L1301) | L1301 | Content filter dropdown menu |
+| [`body`](../../Shared/Views/Chat/ChatView.swift#L108) | L108 | Main view body |
+| [`initChatView()`](../../Shared/Views/Chat/ChatView.swift#L756) | L756 | Initializes chat view state on appear |
+| [`chatItemsList()`](../../Shared/Views/Chat/ChatView.swift#L921) | L921 | Builds the scrollable message list |
+| [`scrollToItem(_:)`](../../Shared/Views/Chat/ChatView.swift#L835) | L835 | Scrolls to a specific message by ID |
+| [`searchToolbar()`](../../Shared/Views/Chat/ChatView.swift#L869) | L869 | In-chat search toolbar UI |
+| [`searchTextChanged(_:)`](../../Shared/Views/Chat/ChatView.swift#L1216) | L1216 | Handles search query changes |
+| [`loadChatItems(_:_:)`](../../Shared/Views/Chat/ChatView.swift#L1656) | L1656 | Loads chat items with pagination |
+| [`filtered(_:)`](../../Shared/Views/Chat/ChatView.swift#L907) | L907 | Filters items by content type |
+| [`callButton(_:_:imageName:)`](../../Shared/Views/Chat/ChatView.swift#L1394) | L1394 | Audio/video call toolbar button |
+| [`searchButton()`](../../Shared/Views/Chat/ChatView.swift#L1414) | L1414 | Search toggle toolbar button |
+| [`addMembersButton()`](../../Shared/Views/Chat/ChatView.swift#L1482) | L1482 | Group add-members toolbar button |
+| [`forwardSelectedMessages()`](../../Shared/Views/Chat/ChatView.swift#L1545) | L1545 | Forwards batch-selected messages |
+| [`deletedSelectedMessages()`](../../Shared/Views/Chat/ChatView.swift#L1536) | L1536 | Deletes batch-selected messages |
+| [`onChatItemsUpdated()`](../../Shared/Views/Chat/ChatView.swift#L1697) | L1697 | Reacts to chat items model changes |
+| [`contentFilterMenu(withLabel:)`](../../Shared/Views/Chat/ChatView.swift#L1422) | L1422 | Content filter dropdown menu |
 
 ### Supporting Types
 
 | Type | Line | Description |
 |------|------|-------------|
 | [`ChatItemWithMenu`](../../Shared/Views/Chat/ChatView.swift#L1600) | L1600 | Wraps each chat item with context menu |
-| [`FloatingButtonModel`](../../Shared/Views/Chat/ChatView.swift#L2787) | L2787 | Manages scroll-to-bottom button state |
-| [`ReactionContextMenu`](../../Shared/Views/Chat/ChatView.swift#L2974) | L2974 | Reaction picker context menu |
-| [`ToggleNtfsButton`](../../Shared/Views/Chat/ChatView.swift#L3072) | L3072 | Mute/unmute notifications button |
-| [`ContentFilter`](../../Shared/Views/Chat/ChatView.swift#L3124) | L3124 | Enum for message content filter types |
+| [`FloatingButtonModel`](../../Shared/Views/Chat/ChatView.swift#L3036) | L3036 | Manages scroll-to-bottom button state |
+| [`ReactionContextMenu`](../../Shared/Views/Chat/ChatView.swift#L3234) | L3234 | Reaction picker context menu |
+| [`ToggleNtfsButton`](../../Shared/Views/Chat/ChatView.swift#L3332) | L3332 | Mute/unmute notifications button |
+| [`ContentFilter`](../../Shared/Views/Chat/ChatView.swift#L3384) | L3384 | Enum for message content filter types |
 | [`deleteMessages()`](../../Shared/Views/Chat/ChatView.swift#L2870) | L2870 | Deletes messages with confirmation |
 | [`archiveReports()`](../../Shared/Views/Chat/ChatView.swift#L2917) | L2917 | Archives report messages |
 
@@ -125,12 +125,12 @@ Routes each `ChatItem` to the appropriate renderer based on its `CIContent` type
 
 | Content Type | Renderer | Line | Description |
 |-------------|----------|------|-------------|
-| `sndMsgContent` / `rcvMsgContent` | [`FramedItemView`](../../Shared/Views/Chat/ChatItem/FramedItemView.swift#L14) | L14 | Standard sent/received text+media message |
+| `sndMsgContent` / `rcvMsgContent` | [`FramedItemView`](../../Shared/Views/Chat/ChatItem/FramedItemView.swift#L17) | L14 | Standard sent/received text+media message |
 | `sndDeleted` / `rcvDeleted` | [`DeletedItemView`](../../Shared/Views/Chat/ChatItem/DeletedItemView.swift#L14) | L14 | Locally deleted message placeholder |
 | `sndCall` / `rcvCall` | [`CICallItemView`](../../Shared/Views/Chat/ChatItem/CICallItemView.swift#L13) | L13 | Call event (missed, ended, duration) |
 | `rcvIntegrityError` | [`IntegrityErrorItemView`](../../Shared/Views/Chat/ChatItem/IntegrityErrorItemView.swift#L14) | L14 | Message integrity error |
 | `rcvDecryptionError` | [`CIRcvDecryptionError`](../../Shared/Views/Chat/ChatItem/CIRcvDecryptionError.swift#L16) | L16 | Decryption failure |
-| `sndGroupInvitation` / `rcvGroupInvitation` | [`CIGroupInvitationView`](../../Shared/Views/Chat/ChatItem/CIGroupInvitationView.swift#L14) | L14 | Group invite |
+| `sndGroupInvitation` / `rcvGroupInvitation` | [`CIGroupInvitationView`](../../Shared/Views/Chat/ChatItem/CIGroupInvitationView.swift#L15) | L14 | Group invite |
 | `sndGroupEvent` / `rcvGroupEvent` | [`CIEventView`](../../Shared/Views/Chat/ChatItem/CIEventView.swift#L14) | L14 | Group system event |
 | `rcvConnEvent` / `sndConnEvent` | [`CIEventView`](../../Shared/Views/Chat/ChatItem/CIEventView.swift#L14) | L14 | Connection event |
 | `rcvChatFeature` / `sndChatFeature` | [`CIChatFeatureView`](../../Shared/Views/Chat/ChatItem/CIChatFeatureView.swift#L14) | L14 | Feature toggle event |
@@ -152,22 +152,22 @@ Each [`ChatItemWithMenu`](../../Shared/Views/Chat/ChatView.swift#L1600) may depe
 
 ### Channel Message Rendering (`.channelRcv`)
 
-Channel messages (`CIDirection.channelRcv`) are rendered with the group avatar and group name as sender, with "channel" as the role label. This mirrors the `.groupRcv` path's `showGroupAsSender` visual but uses a dedicated code branch in [`chatItemListView()`](../../Shared/Views/Chat/ChatView.swift#L1846).
+Channel messages (`CIDirection.channelRcv`) are rendered with the group avatar and group name as sender, with "channel" as the role label. This mirrors the `.groupRcv` path's `showGroupAsSender` visual but uses a dedicated code branch in [`chatItemListView()`](../../Shared/Views/Chat/ChatView.swift#L1960).
 
 Key differences from `.groupRcv`:
 - No `prevMember`/`memCount` logic — channels have no per-member identity
 - Always shows group avatar (via `ProfileImage` with `groupInfo.image` / `groupInfo.chatIconName`)
 - Tapping avatar opens `showChatInfoSheet` (not member info)
 - [`shouldShowAvatar()`](../../Shared/Views/Chat/ChatView.swift#L1670) treats consecutive `.channelRcv` items as same sender
-- [`getItemSeparation()`](../../Shared/Views/Chat/ChatView.swift#L1649) treats consecutive `.channelRcv` items as `sameMemberAndDirection`
-- [`showMemberImage()`](../../Shared/Views/Chat/ChatView.swift#L2116) returns `true` when previous item is `.channelRcv` (different sender type)
-- [`memberToModerate()`](../../POPOPXChat/ChatTypes.swift#L3297) returns `nil` for `.channelRcv` (no per-member moderation)
+- [`getItemSeparation()`](../../Shared/Views/Chat/ChatView.swift#L1786) treats consecutive `.channelRcv` items as `sameMemberAndDirection`
+- [`showMemberImage()`](../../Shared/Views/Chat/ChatView.swift#L2361) returns `true` when previous item is `.channelRcv` (different sender type)
+- [`memberToModerate()`](../../POPOPXChat/ChatTypes.swift#L4154) returns `nil` for `.channelRcv` (no per-member moderation)
 
 ---
 
 ## 4. Message Renderers
 
-### [FramedItemView](../../Shared/Views/Chat/ChatItem/FramedItemView.swift#L14)
+### [FramedItemView](../../Shared/Views/Chat/ChatItem/FramedItemView.swift#L17)
 
 **File**: [`Shared/Views/Chat/ChatItem/FramedItemView.swift`](../../Shared/Views/Chat/ChatItem/FramedItemView.swift)
 
@@ -186,7 +186,7 @@ The standard message bubble. Renders:
 
 Renders emoji-only messages (messages containing only emoji characters) in a larger font without a bubble background.
 
-### [MsgContentView](../../Shared/Views/Chat/ChatItem/MsgContentView.swift#L28)
+### [MsgContentView](../../Shared/Views/Chat/ChatItem/MsgContentView.swift#L29)
 
 **File**: [`Shared/Views/Chat/ChatItem/MsgContentView.swift`](../../Shared/Views/Chat/ChatItem/MsgContentView.swift)
 
@@ -207,7 +207,7 @@ Text colour: `textColor`, else `messageTextColor(theme)`: `onSurface`, at 95% in
 
 Centered system event text for group events (member joined, left, role changed) and connection events.
 
-### [CIGroupInvitationView](../../Shared/Views/Chat/ChatItem/CIGroupInvitationView.swift#L14)
+### [CIGroupInvitationView](../../Shared/Views/Chat/ChatItem/CIGroupInvitationView.swift#L15)
 
 **File**: [`Shared/Views/Chat/ChatItem/CIGroupInvitationView.swift`](../../Shared/Views/Chat/ChatItem/CIGroupInvitationView.swift)
 
@@ -217,13 +217,13 @@ Renders group invitation with accept/reject buttons.
 
 ## 5. Media Views
 
-### [CIImageView](../../Shared/Views/Chat/ChatItem/CIImageView.swift#L14)
+### [CIImageView](../../Shared/Views/Chat/ChatItem/CIImageView.swift#L15)
 
 **File**: [`Shared/Views/Chat/ChatItem/CIImageView.swift`](../../Shared/Views/Chat/ChatItem/CIImageView.swift)
 
 Renders inline images. Tapping opens `FullScreenMediaView` for zooming/panning. Images are compressed to `MAX_IMAGE_SIZE` (255KB) before sending.
 
-### [CIVideoView](../../Shared/Views/Chat/ChatItem/CIVideoView.swift#L16)
+### [CIVideoView](../../Shared/Views/Chat/ChatItem/CIVideoView.swift#L17)
 
 **File**: [`Shared/Views/Chat/ChatItem/CIVideoView.swift`](../../Shared/Views/Chat/ChatItem/CIVideoView.swift)
 
@@ -233,9 +233,9 @@ Renders video thumbnails with play button. Tapping opens video player. Videos ab
 
 **Files**: [`Shared/Views/Chat/ChatItem/CIVoiceView.swift`](../../Shared/Views/Chat/ChatItem/CIVoiceView.swift) | [`Shared/Views/Chat/ChatItem/FramedCIVoiceView.swift`](../../Shared/Views/Chat/ChatItem/FramedCIVoiceView.swift)
 
-Renders voice messages with waveform visualization, play/pause control, and duration. [`FramedCIVoiceView`](../../Shared/Views/Chat/ChatItem/FramedCIVoiceView.swift#L16) is the version inside a message bubble with additional context.
+Renders voice messages with waveform visualization, play/pause control, and duration. [`FramedCIVoiceView`](../../Shared/Views/Chat/ChatItem/FramedCIVoiceView.swift#L17) is the version inside a message bubble with additional context.
 
-### [CIFileView](../../Shared/Views/Chat/ChatItem/CIFileView.swift#L14)
+### [CIFileView](../../Shared/Views/Chat/ChatItem/CIFileView.swift#L15)
 
 **File**: [`Shared/Views/Chat/ChatItem/CIFileView.swift`](../../Shared/Views/Chat/ChatItem/CIFileView.swift)
 
@@ -352,7 +352,7 @@ unknown values                              skipped
 
 ### Rows
 
-[`ChatItemWithMenu.terminalItemRow`](../../Shared/Views/Chat/ChatView.swift#L2149) wraps `chatItemWithMenu` in [`TerminalChatItemRow`](../../Shared/Views/Chat/ChatItem/TerminalItemView.swift#L384). Gaps follow the paragraph unit `terminalParagraphGap` (user, terminal spacing mockup):
+[`ChatItemWithMenu.terminalItemRow`](../../Shared/Views/Chat/ChatView.swift#L2140) wraps `chatItemWithMenu` in [`TerminalChatItemRow`](../../Shared/Views/Chat/ChatItem/TerminalItemView.swift#L374). Gaps follow the paragraph unit `terminalParagraphGap` (user, terminal spacing mockup):
 
 ```
 row padding        top: topGap
@@ -380,8 +380,8 @@ bottom padding     newest row: 8pt; above a date separator: terminalLevelStep; o
 | [`terminalCardTopGap(item)`](../../Shared/Views/Chat/ChatItem/TerminalItemView.swift#L150) | `terminalParagraphGap` above media, voice, file and emoji when a quote or header is above them (`hasQuoteOrHeader`), otherwise 0 |
 | [`terminalCardBottomGap(item)`](../../Shared/Views/Chat/ChatItem/TerminalItemView.swift#L154) | `terminalParagraphGap` below a card that ends the item when reactions follow, otherwise 0 |
 | [`terminalTextTopGap(item)`](../../Shared/Views/Chat/ChatItem/TerminalItemView.swift#L158) | Above the text of `FramedItemView`: 0 at the item top; `terminalParagraphGap` below a quote or media, or when the text starts with a code block, table or rule (0 when the text starts with empty lines, which are at least as high: `startsWithEmptyLine`; block markdown: `leadingEmptyLines`; other text: a line break at its start, except in reports, whose reason is drawn first); `terminalLevelStep` below a header when the text starts with a heading; otherwise 0 |
-| [`terminalRowsSeparated(olderRow)`](../../Shared/Views/Chat/ChatView.swift#L2180) | The newest item of the older row is the chat banner, or its `getItemSeparation` has a date (against its newer item only for single and revealed rows) |
-| [`chatItemSender(ci, range)`](../../Shared/Views/Chat/ChatView.swift#L2187) | Channel as sender: group name, role "channel", group image. Received direct: contact name and badge. Group member: `memberNames`, badge and role of a single member, member image (tap: member info). Own group items: membership name, badge, role, image. Other own items: user name and badge, or "Incognito" |
+| [`terminalRowsSeparated(olderRow)`](../../Shared/Views/Chat/ChatView.swift#L2171) | The newest item of the older row is the chat banner, or its `getItemSeparation` has a date (against its newer item only for single and revealed rows) |
+| [`chatItemSender(ci, range)`](../../Shared/Views/Chat/ChatView.swift#L2178) | Channel as sender: group name, role "channel", group image. Received direct: contact name and badge. Group member: `memberNames`, badge and role of a single member, member image (tap: member info). Own group items: membership name, badge, role, image. Other own items: user name and badge, or "Incognito" |
 | `CIContent.hasTerminalSender` | Sent messages, deleted and moderated items, calls and group invitations; received content with `showMemberName` |
 
 `ChatView` passes `olderRow`, the next merged item. `MergedItem.revealed`: true for `.single`, the flag of `.grouped`.
@@ -479,7 +479,7 @@ row height         at least the meta height
 
 `metaReserved`: content with its own reserve for the time: text with the copy, files, emoji, events.
 
-[`ChatEventWithMeta(chatItem) { ts in }`](../../Shared/Views/Chat/ChatItem/TerminalItemView.swift#L351) passes the end of the event text, placed after the classic separator: classic `chatItem.timestampText`; terminal `metaCopyJoiner`, two no-break spaces and the transparent unbreakable time in regular weight.
+[`ChatEventWithMeta(chatItem) { ts in }`](../../Shared/Views/Chat/ChatItem/TerminalItemView.swift#L341) passes the end of the event text, placed after the classic separator: classic `chatItem.timestampText`; terminal `metaCopyJoiner`, two no-break spaces and the transparent unbreakable time in regular weight.
 
 Meta copy, `ciMetaText(unbreakable: true)`:
 
@@ -538,7 +538,7 @@ WallpaperSetupView        image scale type, scale slider and wallpaper tint hidd
 
 ## GroupChatInfoView — Channel Adaptations
 
-When `groupInfo.useRelays == true`, [`GroupChatInfoView`](../../Shared/Views/Chat/Group/GroupChatInfoView.swift#L16) adapts its sections:
+When `groupInfo.useRelays == true`, [`GroupChatInfoView`](../../Shared/Views/Chat/Group/GroupChatInfoView.swift#L17) adapts its sections:
 
 ### Section Structure (Channel)
 
@@ -555,7 +555,7 @@ When `groupInfo.useRelays == true`, [`GroupChatInfoView`](../../Shared/Views/Cha
 
 All "group" labels are replaced with "channel" equivalents via `groupInfo.useRelays ? "Channel..." :` ternary prepended before existing `businessChat` ternary. Affected: delete/leave buttons, delete/leave alerts, remove member alert, edit profile button, group link nav title. Channel link button uses a separate `channelLinkButton()` with hardcoded "Channel link" label.
 
-### [`channelMembersButton()`](../../Shared/Views/Chat/Group/GroupChatInfoView.swift#L627) → [`ChannelMembersView`](../../Shared/Views/Chat/Group/ChannelMembersView.swift)
+### [`channelMembersButton()`](../../Shared/Views/Chat/Group/GroupChatInfoView.swift#L735) → [`ChannelMembersView`](../../Shared/Views/Chat/Group/ChannelMembersView.swift)
 
 Navigates to a dedicated members view with two sections:
 - **Owners**: current user (if owner) + members with `memberRole >= .owner`
@@ -565,11 +565,11 @@ Member rows show profile image, display name (with verified shield), connection 
 
 ### Channel Link
 
-Owner sees [`channelLinkButton()`](../../Shared/Views/Chat/Group/GroupChatInfoView.swift#L605) (navigates to `GroupLinkView` for full link management), guarded by `groupInfo.isOwner && groupLink != nil` — channel links can only be created during channel creation, not from the info view. A TODO marks the need for protocol changes to allow other owners to manage the same channel link. Non-owner sees read-only QR code displaying `groupProfile.publicGroup?.groupLink` via `POPOPXLinkQRCode`. `apiGetGroupLink` is skipped in `onAppear` for non-owner channels.
+Owner sees [`channelLinkButton()`](../../Shared/Views/Chat/Group/GroupChatInfoView.swift#L668) (navigates to `GroupLinkView` for full link management), guarded by `groupInfo.isOwner && groupLink != nil` — channel links can only be created during channel creation, not from the info view. A TODO marks the need for protocol changes to allow other owners to manage the same channel link. Non-owner sees read-only QR code displaying `groupProfile.publicGroup?.groupLink` via `POPOPXLinkQRCode`. `apiGetGroupLink` is skipped in `onAppear` for non-owner channels.
 
-Groups use separate [`groupLinkButton()`](../../Shared/Views/Chat/Group/GroupChatInfoView.swift#L593) which supports both "Create group link" and "Group link" labels.
+Groups use separate [`groupLinkButton()`](../../Shared/Views/Chat/Group/GroupChatInfoView.swift#L656) which supports both "Create group link" and "Group link" labels.
 
-### [`channelRelaysButton()`](../../Shared/Views/Chat/Group/GroupChatInfoView.swift#L639) → [`ChannelRelaysView`](../../Shared/Views/Chat/Group/ChannelRelaysView.swift)
+### [`channelRelaysButton()`](../../Shared/Views/Chat/Group/GroupChatInfoView.swift#L747) → [`ChannelRelaysView`](../../Shared/Views/Chat/Group/ChannelRelaysView.swift)
 
 Navigates to relay list view with role-based branches:
 - **Owner**: loads `[GroupRelay]` via [`apiGetGroupRelays`](../../Shared/Model/POPOPXAPI.swift#L1839) (owner-only API, guarded by `assertUserGroupRole GROwner` on backend). Joins with `chatModel.groupMembers` by `groupMemberId` for display names. Shows status indicators (colored circle + `RelayStatus.text`). When `relayStatus == .rsRejected` the indicator dot is red and the text reads "rejected", matching the `connFailed`/`removed` rendering.

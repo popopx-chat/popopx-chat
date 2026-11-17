@@ -367,7 +367,7 @@ struct GroupChatInfoView: View {
             .disableAutocorrection(true)
             .focused($aliasTextFieldFocused)
             .submitLabel(.done)
-            .onChange(of: aliasTextFieldFocused) { focused in
+            .onChange(of: aliasTextFieldFocused) { _, focused in
                 if !focused {
                     setGroupAlias()
                 }
@@ -761,15 +761,17 @@ struct GroupChatInfoView: View {
         var groupInfo: GroupInfo
         @EnvironmentObject var chatModel: ChatModel
         @Binding var scrollToItemId: ChatItem.ID?
-        @State private var navLinkActive = false
 
         var body: some View {
             let scopeInfo: GroupChatScopeInfo = .memberSupport(groupMember_: nil)
-            NavigationLink(isActive: $navLinkActive) {
+            NavigationLink {
                 SecondaryChatView(
                     chat: Chat(chatInfo: .group(groupInfo: groupInfo, groupChatScope: scopeInfo), chatItems: [], chatStats: ChatStats()),
                     scrollToItemId: $scrollToItemId
                 )
+                .onAppear {
+                    ItemsModel.loadSecondaryChat(groupInfo.id, chatFilter: .groupChatScopeContext(groupScopeInfo: scopeInfo))
+                }
             } label: {
                 HStack {
                     Label("Chat with admins", systemImage: chat.supportUnreadCount > 0 ? "flag.fill" : "flag")
@@ -777,11 +779,6 @@ struct GroupChatInfoView: View {
                     if chat.supportUnreadCount > 0 {
                         UnreadBadge(count: chat.supportUnreadCount, color: theme.colors.primary)
                     }
-                }
-            }
-            .onChange(of: navLinkActive) { active in
-                if active {
-                    ItemsModel.loadSecondaryChat(groupInfo.id, chatFilter: .groupChatScopeContext(groupScopeInfo: scopeInfo))
                 }
             }
         }
@@ -813,14 +810,16 @@ struct GroupChatInfoView: View {
         var groupInfo: GroupInfo
         @EnvironmentObject var chatModel: ChatModel
         @Binding var scrollToItemId: ChatItem.ID?
-        @State private var navLinkActive = false
 
         var body: some View {
-            NavigationLink(isActive: $navLinkActive) {
+            NavigationLink {
                 SecondaryChatView(
                     chat: Chat(chatInfo: .group(groupInfo: groupInfo, groupChatScope: .reports), chatItems: [], chatStats: ChatStats()),
                     scrollToItemId: $scrollToItemId
                 )
+                .onAppear {
+                    ItemsModel.loadSecondaryChat(chat.id, chatFilter: .msgContentTagContext(contentTag: .report))
+                }
             } label: {
                 HStack {
                     Label {
@@ -832,11 +831,6 @@ struct GroupChatInfoView: View {
                     if chat.chatStats.reportsCount > 0 {
                         UnreadBadge(count: chat.chatStats.reportsCount, color: .red)
                     }
-                }
-            }
-            .onChange(of: navLinkActive) { active in
-                if active {
-                    ItemsModel.loadSecondaryChat(chat.id, chatFilter: .msgContentTagContext(contentTag: .report))
                 }
             }
         }
@@ -967,7 +961,7 @@ struct GroupChatInfoView: View {
         } label: {
             Label("Send receipts", systemImage: "checkmark.message")
         }
-        .onChange(of: sendReceipts) { _ in
+        .onChange(of: sendReceipts) { _, _ in
             setSendReceipts()
         }
     }
