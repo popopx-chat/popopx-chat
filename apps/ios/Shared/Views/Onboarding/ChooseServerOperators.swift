@@ -108,7 +108,7 @@ struct OnboardingConditionsView: View {
         .frame(maxHeight: .infinity)
         .navigationBarHidden(true)
         .sheet(isPresented: $showConditionsSheet) {
-            NavigationView {
+            NavigationStack {
                 VStack {
                     ConditionsTextView()
                         .padding()
@@ -352,7 +352,7 @@ struct ChooseServerOperatorsInfoView: View {
     @EnvironmentObject var theme: AppTheme
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("The app protects your privacy by using different operators in each conversation.")

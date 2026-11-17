@@ -149,14 +149,14 @@ struct ConnectOnboardingView: View {
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
         .sheet(isPresented: $showConnectViaLink) {
-            NavigationView {
+            NavigationStack {
                 NewChatView(selection: .connect, showQRCodeScanner: true, onboarding: true)
                     .modifier(ThemedBackground(grouped: true))
             }
             .environment(\EnvironmentValues.refresh as! WritableKeyPath<EnvironmentValues, RefreshAction?>, nil)
         }
         .sheet(isPresented: $showInviteSomeone) {
-            NavigationView {
+            NavigationStack {
                 NewChatView(selection: .invite, onboarding: true)
                     .modifier(ThemedBackground(grouped: true))
             }

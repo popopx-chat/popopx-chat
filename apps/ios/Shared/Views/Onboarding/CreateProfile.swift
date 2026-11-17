@@ -266,7 +266,7 @@ struct CreateFirstProfile: View {
             }
             .onTapGesture { focusDisplayName = false }
             .sheet(isPresented: $showMigrateSheet, onDismiss: { m.migrationState = nil }) {
-                NavigationView {
+                NavigationStack {
                     MigrateToDevice(migrationState: $m.migrationState)
                         .navigationTitle("Migrate here")
                         .modifier(ThemedBackground(grouped: true))

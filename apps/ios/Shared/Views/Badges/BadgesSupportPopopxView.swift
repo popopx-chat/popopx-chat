@@ -81,7 +81,7 @@ struct BadgesSupportPopopxView: View {
             .padding(.horizontal, 25)
             .padding(.top, showsAsSheet ? 48 : 0)
             .padding(.bottom, 20)
-            // .frame(height:) not minHeight — inside the banner sheet's NavigationView minHeight
+            // .frame(height:) not minHeight — inside the banner sheet's NavigationStack minHeight
             // would let the VStack expand past the visible area and inflate the hero.
             .frame(height: g.size.height)
         }

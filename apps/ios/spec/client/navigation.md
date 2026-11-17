@@ -32,7 +32,7 @@ SimpleXApp
     ├── Authentication gate (LocalAuthView / SetAppPasscodeView)
     ├── Onboarding flow (if first launch / migration)
     ├── Main content
-    │   └── NavigationStack / NavigationView
+    │   └── NavigationStack
     │       ├── ChatListView (root of stack)
     │       │   ├── ChatView (pushed)
     │       │   │   ├── ChatInfoView / GroupChatInfoView (pushed)

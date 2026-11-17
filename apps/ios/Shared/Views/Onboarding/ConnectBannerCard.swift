@@ -47,13 +47,13 @@ struct ConnectBannerCard: View {
             .clipShape(RoundedRectangle(cornerRadius: 18))
         }
         .sheet(isPresented: $showNewLink) {
-            NavigationView {
+            NavigationStack {
                 NewChatView(selection: .invite)
                     .modifier(ThemedBackground(grouped: true))
             }
         }
         .sheet(isPresented: $showPasteLink) {
-            NavigationView {
+            NavigationStack {
                 NewChatView(selection: .connect, showQRCodeScanner: true)
                     .modifier(ThemedBackground(grouped: true))
             }

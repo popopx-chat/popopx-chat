@@ -95,7 +95,7 @@ struct POPOPXInfo: View {
                     m.migrationState = nil
                     MigrationToDeviceState.save(nil) }
             )) {
-                NavigationView {
+                NavigationStack {
                     VStack(alignment: .leading) {
                         MigrateToDevice(migrationState: $m.migrationState)
                     }
