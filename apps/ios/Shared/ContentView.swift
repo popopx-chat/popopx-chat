@@ -120,8 +120,8 @@ struct ContentView: View {
             Button("System authentication") { initialEnableLA() }
             Button("Passcode entry") { showSetPasscode = true }
         }
-        .onChange(of: scenePhase) { phase in
-            logger.debug("scenePhase was \(String(describing: scenePhase)), now \(String(describing: phase))")
+        .onChange(of: scenePhase) { oldPhase, phase in
+            logger.debug("scenePhase was \(String(describing: oldPhase)), now \(String(describing: phase))")
             switch (phase) {
             case .background:
                 // also see .onChange(of: scenePhase) in POPOPXApp: on entering background
@@ -157,12 +157,12 @@ struct ContentView: View {
         .onAppear {
             reactOnDarkThemeChanges(systemInDarkThemeCurrently)
         }
-        .onChange(of: colorScheme) { scheme in
+        .onChange(of: colorScheme) { _, scheme in
             // It's needed to update UI colors when iOS wants to make screenshot after going to background,
             // so when a user changes his global theme from dark to light or back, the app will adapt to it
             reactOnDarkThemeChanges(scheme == .dark)
         }
-        .onChange(of: theme.name) { _ in
+        .onChange(of: theme.name) {
             ThemeManager.adjustWindowStyle()
         }
     }
@@ -289,8 +289,8 @@ struct ContentView: View {
                 }
                 prefShowLANotice = true
             }
-            .onChange(of: chatModel.appOpenUrl) { _ in connectViaUrl() }
-            .onChange(of: chatModel.reRegisterTknStatus) { _ in showReRegisterTokenAlert() }
+            .onChange(of: chatModel.appOpenUrl) { connectViaUrl() }
+            .onChange(of: chatModel.reRegisterTknStatus) { showReRegisterTokenAlert() }
             .sheet(item: $noticesSheetItem) { item in
                 switch item {
                 case let .whatsNew(updatedConditions):
@@ -311,8 +311,6 @@ struct ContentView: View {
             IncomingCallView()
         }
         .onContinueUserActivity("INStartCallIntent", perform: processUserActivity)
-        .onContinueUserActivity("INStartAudioCallIntent", perform: processUserActivity)
-        .onContinueUserActivity("INStartVideoCallIntent", perform: processUserActivity)
         .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { userActivity in
             if let url = userActivity.webpageURL {
                 logger.debug("onContinueUserActivity.NSUserActivityTypeBrowsingWeb: \(url)")
@@ -331,13 +329,8 @@ struct ContentView: View {
     }
 
     private func processUserActivity(_ activity: NSUserActivity) {
-        let intent = activity.interaction?.intent
-        if let intent = intent as? INStartCallIntent {
+        if let intent = activity.interaction?.intent as? INStartCallIntent {
             callToRecentContact(intent.contacts, intent.callCapability == .videoCall ? .video : .audio)
-        } else if let intent = intent as? INStartAudioCallIntent {
-            callToRecentContact(intent.contacts, .audio)
-        } else if let intent = intent as? INStartVideoCallIntent {
-            callToRecentContact(intent.contacts, .video)
         }
     }
 
