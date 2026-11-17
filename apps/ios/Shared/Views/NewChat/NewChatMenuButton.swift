@@ -34,6 +34,14 @@ struct NewChatMenuButton: View {
 
 private var indent: CGFloat = 36
 
+private enum NewChatDestination: Hashable {
+    case oneTimeLink
+    case scanOrPasteLink
+    case createGroup
+    case createChannel
+    case archivedContacts
+}
+
 struct NewChatSheet: View {
     @EnvironmentObject var theme: AppTheme
     @EnvironmentObject var chatModel: ChatModel
@@ -47,8 +55,7 @@ struct NewChatSheet: View {
     @State private var alert: SomeAlert?
 
     // Sheet height management
-    @State private var isAddContactActive = false
-    @State private var isScanPasteLinkActive = false
+    @State private var path: [NewChatDestination] = []
     @State private var isLargeSheet = false
     @State private var allowSmallSheet = true
 
@@ -56,7 +63,7 @@ struct NewChatSheet: View {
 
     var body: some View {
         let showArchive = chatModel.chats.contains { $0.chatInfo.contact?.chatDeleted == true }
-        let v = NavigationView {
+        let v = NavigationStack(path: $path) {
             viewBody(showArchive)
                 .navigationTitle("New chat")
                 .navigationBarTitleDisplayMode(.large)
@@ -65,10 +72,43 @@ struct NewChatSheet: View {
                 .alert(item: $alert) { a in
                     return a.alert
                 }
+                .navigationDestination(for: NewChatDestination.self) { destination in
+                    switch destination {
+                    case .oneTimeLink:
+                        AnyView(NewChatView(selection: .invite)
+                            .modifier(ThemedBackground(grouped: true))
+                            .navigationBarTitleDisplayMode(.inline))
+                    case .scanOrPasteLink:
+                        AnyView(NewChatView(selection: .connect, showQRCodeScanner: true)
+                            .modifier(ThemedBackground(grouped: true))
+                            .navigationBarTitleDisplayMode(.inline))
+                    case .createGroup:
+                        AnyView(AddGroupView()
+                            .navigationTitle("Create group")
+                            .modifier(ThemedBackground(grouped: true))
+                            .navigationBarTitleDisplayMode(.large))
+                    case .createChannel:
+                        AnyView(AddChannelView()
+                            .navigationTitle("Create public channel")
+                            .modifier(ThemedBackground(grouped: true))
+                            .navigationBarTitleDisplayMode(.large))
+                    case .archivedContacts:
+                        AnyView(DeletedChats())
+                    }
+                }
         }.onDisappear {
             ConnectProgressManager.shared.cancelConnectProgress()
         }
-        if #available(iOS 16.0, *), oneHandUI {
+        .onChange(of: path) { _, newPath in
+            // the sheet has to grow before the pushed view is laid out, hence the async
+            if !newPath.isEmpty {
+                isLargeSheet = true
+                DispatchQueue.main.async {
+                    allowSmallSheet = false
+                }
+            }
+        }
+        if oneHandUI {
             let sheetHeight: CGFloat = showArchive ? 575 : 500
             v.presentationDetents(
                 allowSmallSheet ? [.height(sheetHeight), .large] : [.large],
@@ -110,47 +150,23 @@ struct NewChatSheet: View {
 
             if (searchText.isEmpty) {
                 Section {
-                    NavigationLink(isActive: $isAddContactActive) {
-                        NewChatView(selection: .invite)
-                            .modifier(ThemedBackground(grouped: true))
-                            .navigationBarTitleDisplayMode(.inline)
-                    } label: {
-                        navigateOnTap(Label("Create 1-time link", systemImage: "link.badge.plus")) {
-                            isAddContactActive = true
-                        }
+                    NavigationLink(value: NewChatDestination.oneTimeLink) {
+                        widenTapArea(Label("Create 1-time link", systemImage: "link.badge.plus"))
                     }
-                    NavigationLink(isActive: $isScanPasteLinkActive) {
-                        NewChatView(selection: .connect, showQRCodeScanner: true)
-                            .modifier(ThemedBackground(grouped: true))
-                            .navigationBarTitleDisplayMode(.inline)
-                    } label: {
-                        navigateOnTap(Label("Scan / Paste link", systemImage: "qrcode")) {
-                            isScanPasteLinkActive = true
-                        }
+                    NavigationLink(value: NewChatDestination.scanOrPasteLink) {
+                        widenTapArea(Label("Scan / Paste link", systemImage: "qrcode"))
                     }
-                    NavigationLink {
-                        AddGroupView()
-                            .navigationTitle("Create group")
-                            .modifier(ThemedBackground(grouped: true))
-                            .navigationBarTitleDisplayMode(.large)
-                    } label: {
+                    NavigationLink(value: NewChatDestination.createGroup) {
                         Label("Create group", systemImage: "person.2.circle.fill")
                     }
-                    NavigationLink {
-                        AddChannelView()
-                            .navigationTitle("Create public channel")
-                            .modifier(ThemedBackground(grouped: true))
-                            .navigationBarTitleDisplayMode(.large)
-                    } label: {
+                    NavigationLink(value: NewChatDestination.createChannel) {
                         Label("Create public channel", systemImage: "antenna.radiowaves.left.and.right")
                     }
                 }
                 
                 if (showArchive) {
                     Section {
-                        NavigationLink {
-                            DeletedChats()
-                        } label: {
+                        NavigationLink(value: NewChatDestination.archivedContacts) {
                             newChatActionButton("archivebox", color: theme.colors.secondary) { Text("Archived contacts") }
                         }
                     }
@@ -179,18 +195,11 @@ struct NewChatSheet: View {
     }
 
     /// Extends label's tap area to match `.insetGrouped` list row insets
-    private func navigateOnTap<L: View>(_ label: L, setActive: @escaping () -> Void) -> some View {
+    private func widenTapArea<L: View>(_ label: L) -> some View {
         label
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.leading, 16).padding(.vertical, 8).padding(.trailing, 32)
             .contentShape(Rectangle())
-            .onTapGesture {
-                isLargeSheet = true
-                DispatchQueue.main.async {
-                    allowSmallSheet = false
-                    setActive()
-                }
-            }
             .padding(.leading, -16).padding(.vertical, -8).padding(.trailing, -32)
     }
 
@@ -388,10 +397,10 @@ struct ContactsListSearchBar: View {
             }
         }
         .padding(.top, 24)
-        .onChange(of: searchFocussed) { sf in
+        .onChange(of: searchFocussed) { _, sf in
             withAnimation { searchMode = sf }
         }
-        .onChange(of: searchText) { t in
+        .onChange(of: searchText) { _, t in
             if ignoreSearchTextChange {
                 ignoreSearchTextChange = false
             } else {

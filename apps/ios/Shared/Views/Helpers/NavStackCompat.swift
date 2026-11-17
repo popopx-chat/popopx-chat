@@ -15,32 +15,19 @@ struct NavStackCompat <C: View, D: View>: View {
     let content: () -> C
 
     var body: some View {
-        if #available(iOS 16, *) {
-            NavigationStack(path: Binding(
-                get: { isActive.wrappedValue ? [true] : [] },
-                set: { path in
-                    if path.isEmpty { isActive.wrappedValue = false }
-                }
-            )) {
-                ZStack {
-                    NavigationLink(value: true) { EmptyView() }
-                    content()
-                }
-                .navigationDestination(for: Bool.self) { show in
-                    if show { destination() }
-                }
+        NavigationStack(path: Binding(
+            get: { isActive.wrappedValue ? [true] : [] },
+            set: { path in
+                if path.isEmpty { isActive.wrappedValue = false }
             }
-        } else {
-            NavigationView {
-                ZStack {
-                    NavigationLink(
-                        destination: destination(),
-                        isActive: isActive
-                    ) { EmptyView() }
-                    content()
-                }
+        )) {
+            ZStack {
+                NavigationLink(value: true) { EmptyView() }
+                content()
             }
-            .navigationViewStyle(.stack)
+            .navigationDestination(for: Bool.self) { show in
+                if show { destination() }
+            }
         }
     }
 }
