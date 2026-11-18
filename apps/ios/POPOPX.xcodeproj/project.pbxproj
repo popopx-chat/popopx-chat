@@ -2472,7 +2472,7 @@
 				INFOPLIST_FILE = "POPOPX--iOS--Info.plist";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "POPOPX uses a camera to scan QR codes to add contacts and make video calls, and detects camera glare and other acts of taking photos while viewing top-secret messages; this detection only runs while the top-secret card is open, and the image does not leave the device.";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "POPOPX uses Face ID for local authentication,POPOPX uses Face ID to verify your identity before viewing confidential messages and native data.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "POPOPX uses Face ID to verify your identity before unlocking top-secret ephemeral messages and local data.";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "POPOPX uses local network access to allow using user chat profile via desktop app on the same network.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "POPOPX needs microphone access for audio and video calls, and to record voice messages.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "POPOPX needs access to Photo Library for saving captured and received media";
@@ -2521,7 +2521,7 @@
 				INFOPLIST_FILE = "POPOPX--iOS--Info.plist";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "POPOPX uses a camera to scan QR codes to add contacts and make video calls, and detects camera glare and other acts of taking photos while viewing top-secret messages; this detection only runs while the top-secret card is open, and the image does not leave the device.";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "POPOPX uses Face ID for local authentication,POPOPX uses Face ID to verify your identity before viewing confidential messages and native data.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "POPOPX uses Face ID to verify your identity before unlocking top-secret ephemeral messages and local data.";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "POPOPX uses local network access to allow using user chat profile via desktop app on the same network.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "POPOPX needs microphone access for audio and video calls, and to record voice messages.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "POPOPX needs access to Photo Library for saving captured and received media";
