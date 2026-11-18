@@ -282,6 +282,8 @@
 		E5DDBE702DC4217900A0EFF0 /* NSEAPITypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5DDBE6F2DC4217900A0EFF0 /* NSEAPITypes.swift */; };
 		E5E418012F83D2CA00252B9E /* OnboardingCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E418002F83D2CA00252B9E /* OnboardingCards.swift */; };
 		E5E418022F83D2CA00252B9E /* ChannelWebAccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E418032F83D2CA00252B9E /* ChannelWebAccessView.swift */; };
+		D916410C3E494FD69E0DE25F /* PopopxMeshKit in Frameworks */ = {isa = PBXBuildFile; productRef = 59BB3E192C5F4167BA23E562 /* PopopxMeshKit */; };
+		514EDF43056542C1A167891C /* PopopxMeshUI in Frameworks */ = {isa = PBXBuildFile; productRef = 146130EA4D2F4289AD0FF1D9 /* PopopxMeshUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -750,6 +752,8 @@
 				D741547A29AF90B00022400A /* PushKit.framework in Frameworks */,
 				646BB38C283BEEB9001CE359 /* LocalAuthentication.framework in Frameworks */,
 				5C8F01CD27A6F0D8007D2C8D /* CodeScanner in Frameworks */,
+				D916410C3E494FD69E0DE25F /* PopopxMeshKit in Frameworks */,
+				514EDF43056542C1A167891C /* PopopxMeshUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1365,6 +1369,8 @@
 				8C8118712C220B5B00E6FC94 /* Yams */,
 				8CB3476B2CF5CFFA006787A5 /* Ink */,
 				B728945A2D0C62BF00F7A19A /* ElegantEmojiPicker */,
+				59BB3E192C5F4167BA23E562 /* PopopxMeshKit */,
+				146130EA4D2F4289AD0FF1D9 /* PopopxMeshUI */,
 			);
 			productName = "POPOPX (iOS)";
 			productReference = 5CA059CA279559F40002BEB4 /* POPOPX.app */;
@@ -1532,6 +1538,7 @@
 				8C73C1162C21E17B00892670 /* XCRemoteSwiftPackageReference "Yams" */,
 				8CB3476A2CF5CFFA006787A5 /* XCRemoteSwiftPackageReference "ink" */,
 				B72894592D0C62BF00F7A19A /* XCRemoteSwiftPackageReference "Elegant-Emoji-Picker" */,
+				63EBEBBEC5224BB197BCAA50 /* XCLocalSwiftPackageReference "PopopxMeshKit" */,
 			);
 			productRefGroup = 5CA059CB279559F40002BEB4 /* Products */;
 			projectDirPath = "";
@@ -2703,6 +2710,12 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		63EBEBBEC5224BB197BCAA50 /* XCLocalSwiftPackageReference "PopopxMeshKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = PopopxMeshKit;
+		};
+/* End XCLocalSwiftPackageReference section */
 /* Begin XCRemoteSwiftPackageReference section */
 		5C8F01CB27A6F0D8007D2C8D /* XCRemoteSwiftPackageReference "CodeScanner" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -2802,6 +2815,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D7F0E33729964E7D0068AF69 /* XCRemoteSwiftPackageReference "lzstring-swift" */;
 			productName = LZString;
+		};
+		59BB3E192C5F4167BA23E562 /* PopopxMeshKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 63EBEBBEC5224BB197BCAA50 /* XCLocalSwiftPackageReference "PopopxMeshKit" */;
+			productName = PopopxMeshKit;
+		};
+		146130EA4D2F4289AD0FF1D9 /* PopopxMeshUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 63EBEBBEC5224BB197BCAA50 /* XCLocalSwiftPackageReference "PopopxMeshKit" */;
+			productName = PopopxMeshUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
