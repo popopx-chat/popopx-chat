@@ -12,7 +12,7 @@
 //     灰时钟 = 还躺在 Mesh 中继队列里。语义分工是硬规则（§1.1），不是装饰。
 //  3. 【发送位置】的渲染半边：本文件末尾的 `PopopxLocationCardBubble`——地图快照卡片，列表行里
 //     只放**位图**，绝不放活的 `Map`/`MKMapView`（`location-prompt.md:72` 那条性能红线）。
-//     载荷 `PopopxLocationPayload` 在隔壁 PopopxLocation.swift：发送侧（ComposeView）也要用它，
+//     载荷 `PopopxLocationPayload` 在 `Shared/Features/ChatInfo/PopopxLocation.swift`：发送侧（ComposeView）也要用它，
 //     而那个文件一个 MapKit/CoreLocation 符号都不 import。两半边对同一串字节的一致性是
 //     `wireString` ↔ `parse(from:)` 这一对函数的事，改任何一边都必须同时看另一边。
 //
