@@ -398,6 +398,7 @@ struct ComposeView: View {
     @State private var showTakePhoto = false
     @State var chosenMedia: [UploadContent] = []
     @State private var showFileImporter = false
+    @State private var showLocationPicker = false
 
     @State private var audioRecorder: AudioRecorder?
     @State private var voiceMessageRecordingTime: TimeInterval?
@@ -683,6 +684,15 @@ struct ComposeView: View {
                     }
                 }
             }
+        }
+        .sheet(isPresented: $showLocationPicker) {
+            // 选择器只管选出坐标，发不发、走哪条通道归这里：它连 `chat` 都不知道。
+            // 关掉开关由宿主做，`onSend` 里先关再发，避免发送失败时表单还挂在那儿。
+            PopopxLocationPickerSheet { payload in
+                showLocationPicker = false
+                Task { await popopxSendLocation(payload) }
+            }
+            .presentationDetents([.fraction(0.8)])
         }
         .onChange(of: chosenMedia) { _, selected in
             Task {
@@ -1309,10 +1319,19 @@ struct ComposeView: View {
     private func popopxPlusAction(_ action: PopopxPlusAction) {
         switch action {
         case .location:
-            AlertManager.shared.showAlertMsg(
-                title: "Location messages",
-                message: "POPOPX Chat does not send location messages."
-            )
+            // 位置和相册 / 拍摄 / 文件不是一条链路：它在线上就是一行纯文本，所以群里"禁用文件与媒体"
+            // 那条限制不该拦它；但改写 / 转发 / live / 举报 / 已挂附件的草稿会让这条独立消息和草稿
+            // 各说各话（发出去的是位置，留在框里的还是草稿），所以沿用旧链路那个现成的门。
+            if composeState.attachmentDisabled {
+                AlertManager.shared.showAlertMsg(
+                    title: "暂不能发送位置",
+                    message: "正在改写、转发、录制即时消息或已挂载附件时，不能插入位置消息。"
+                )
+            } else if !chat.chatInfo.sendMsgEnabled {
+                AlertManager.shared.showAlertMsg(title: "会话未就绪", message: "该会话当前不允许发送消息。")
+            } else {
+                showLocationPicker = true
+            }
         case .photo, .camera, .file:
             if im.secondaryIMFilter == nil, !chat.chatInfo.featureEnabled(.files) {
                 AlertManager.shared.showAlertMsg(
@@ -1326,6 +1345,66 @@ struct ComposeView: View {
                 case .file: showFileImporter = true
                 case .location: break
                 }
+            }
+        }
+    }
+
+    /// 「发送位置」的落点。位置在线上就是一行纯文本，所以它和输入条里的普通文本共用**同一张判定表**
+    /// （`PopopxComposerRouting.dispatch`）：已绑定 + 射频开 + 邻居可达就交给模块 5，否则交回宿主的 SMP。
+    /// 判定表因此不需要为位置开新格 —— 它判的是"这条消息有没有路由带不动的东西"，位置一个都没有。
+    ///
+    /// 刻意不走 `sendMessageAsync`：那条链路会连草稿一起发（`composeState.preview` 的六支），末尾还
+    /// `clearState` 把用户没发完的草稿和链接预览清掉。位置是一条独立消息，草稿该原样留着。
+    ///
+    /// 同理它也不进 `checkComposeLinksAsync`：`popopx://loc` 和一次性邀请链接是同一个 scheme，
+    /// 被当成连接链接就会把一条位置消息变成一次加好友（`PopopxLocation.swift:17`-`:21`）。
+    @MainActor private func popopxSendLocation(_ payload: PopopxLocationPayload) async {
+        let contactId = chat.chatInfo.contact?.contactId
+        // 这条消息自己的前提只有"直聊联系人"一条：草稿里挂着的附件、引用、@提及、live 都不属于它，
+        // 把它们算进来会让一条已经选好的位置因为框里有图而绕开蓝牙。阅后即焚是真档位，照旧参与判定。
+        let context: PopopxComposerContext
+        if let contactId {
+            context = .directContact(contactId)
+        } else {
+            context = .outsideDirectContact
+        }
+        let eligibility = await PopopxInputBarModel.resolveFromRuntime(contactId: contactId)
+        switch PopopxComposerRouting.dispatch(
+            text: payload.messageContent,
+            context: context,
+            eligibility: eligibility,
+            ttlSeconds: popopxTTLSeconds
+        ) {
+        case let .routeViaMesh(message):
+            await PopopxMeshRuntime.shared.router.send(message)
+        case .hostShouldSend:
+            // 档位和旧链路一样是一次性的：发完放回 nil，下一条回到"不阅后即焚"。
+            let ttl = popopxTTLSeconds
+            popopxTTLSeconds = nil
+            await popopxSendLocationViaSMP(payload.messageContent, ttl: ttl)
+        case .ignoreEmptyDraft:
+            break
+        }
+    }
+
+    /// 交回宿主那一支，抄 `sendMessageAsync` 里嵌套的 `send(_ msgs:)`：`apiSendMessages` +
+    /// `removeLiveDummy` + `addChatItem`，一位不多 —— 位置没有文件要回收，失败提示也在
+    /// `apiSendMessages` 自己那侧弹（`POPOPXAPI.swift:640`），这里不再叠第二层。
+    private func popopxSendLocationViaSMP(_ text: String, ttl: Int?) async {
+        guard let chatItems = await apiSendMessages(
+            type: chat.chatInfo.chatType,
+            id: chat.chatInfo.apiId,
+            scope: chat.chatInfo.groupChatScope(),
+            sendAsGroup: chat.chatInfo.sendAsGroup,
+            live: false,
+            ttl: ttl,
+            sign: false,
+            composedMessages: [ComposedMessage(msgContent: .text(text))]
+        ) else { return }
+        await MainActor.run {
+            chatModel.removeLiveDummy(animated: false)
+            for chatItem in chatItems {
+                chatModel.addChatItem(chat.chatInfo, chatItem)
             }
         }
     }

@@ -108,7 +108,7 @@ struct ChatView: View {
     @State private var scrollView: EndlessScrollView<MergedItem> = EndlessScrollView(frame: .zero)
 
     // 【B5】气泡的通道表。一次读齐、逐行查表：`PopopxBubbleTransportResolver` 那三次 actor hop
-    // 必须整批发起，一行一次 await 是那个组件明确禁止的画法（PopopxMessageBubble.swift:17）。
+    // 必须整批发起，一行一次 await 是那个组件明确禁止的画法（PopopxMessageBubble.swift:22）。
     @ObservedObject private var popopxMeshRuntime = PopopxMeshRuntime.shared
     @ObservedObject private var popopxMeshStateSource = PopopxMeshStateSource.shared
     @ObservedObject private var popopxMeshTimelineModel = PopopxMeshRuntime.shared.timelineModel
@@ -1810,7 +1810,7 @@ struct ChatView: View {
         let listWidth: CGFloat
         let maxWidth: CGFloat
         /// 【B5】整表在 ChatView 一次算好，行渲染只查字典（逐行 await 是气泡禁止的画法，
-        /// PopopxMessageBubble.swift:17）。声明位置决定 memberwise init 的参数次序，别往上挪。
+        /// PopopxMessageBubble.swift:22）。声明位置决定 memberwise init 的参数次序，别往上挪。
         let channelTable: PopopxBubbleChannelTable
         @Binding var composeState: ComposeState
         @Binding var selectedMember: GMember?
@@ -2323,7 +2323,7 @@ struct ChatView: View {
                             goToItemButton(true)
                         }
                         if !terminal, let bubbleContent = PopopxBubbleMount.body(of: ci, chat: chat) {
-                            // 气泡自己用 `UnevenRoundedRectangle` 画底（PopopxMessageBubble.swift:155-166），
+                            // 气泡自己用 `UnevenRoundedRectangle` 画底（PopopxMessageBubble.swift:163-174），
                             // 所以这一支**不套** `ChatItemClipped`，也**不抹**无障碍标签（它自带合并后的整句）。
                             PopopxMessageBubble(
                                 PopopxBubbleMount.item(

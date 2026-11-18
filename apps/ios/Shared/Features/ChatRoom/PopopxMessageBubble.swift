@@ -4,12 +4,17 @@
 //
 //  【第五阶段 · 1】现代对话流气泡 + 通道角标。
 //
-//  这个文件只干两件事：
+//  这个文件干三件事：
 //  1. 把一条**已经定好性**的会话项画成一枚气泡：左（收方）`card` 卡面、右（发方在线）`brand` 实底，
 //     外侧 16pt（`PopopxMetrics.radiusCard`），同发送者连续的那一角收紧为 4pt
 //     （`PopopxMetrics.radiusBubbleTucked`）——Docs/popopx-brand-spec.md §2.1、§4。
 //  2. 说清"这一条是经过哪条通道送达的"：靛紫 = SMP 公网，青绿 = 厢语离线 BLE Mesh（**必带跳数**），
 //     灰时钟 = 还躺在 Mesh 中继队列里。语义分工是硬规则（§1.1），不是装饰。
+//  3. 【发送位置】的渲染半边：本文件末尾的 `PopopxLocationCardBubble`——地图快照卡片，列表行里
+//     只放**位图**，绝不放活的 `Map`/`MKMapView`（`location-prompt.md:72` 那条性能红线）。
+//     载荷 `PopopxLocationPayload` 在隔壁 PopopxLocation.swift：发送侧（ComposeView）也要用它，
+//     而那个文件一个 MapKit/CoreLocation 符号都不 import。两半边对同一串字节的一致性是
+//     `wireString` ↔ `parse(from:)` 这一对函数的事，改任何一边都必须同时看另一边。
 //
 //  刻意不认识 `ChatItem`：所有值从入参进来（`PopopxBubbleItem`），环境不读全局。通道真值也不在这一层取——
 //  `PopopxBubbleTransportResolver` 是挂载缝：host 一次读齐（`allMappings` + `pendingMessages` +
@@ -35,6 +40,9 @@
 //
 
 import SwiftUI
+import UIKit
+import CoreLocation
+import MapKit
 import POPOPXChat
 import PopopxMeshKit
 import PopopxMeshUI
@@ -167,8 +175,8 @@ struct PopopxBubbleTail: Hashable {
     }
 }
 
-/// 一条会话项要画的内容。五个档覆盖现网这一行真正会出现的五种东西，
-/// 挂载点只需做一次 `ChatItem.content` → 本枚举的映射，不在气泡里读 `ChatItem`。
+/// 一条会话项要画的内容。前五个档覆盖现网这一行真正会出现的五种东西，第六档（`.location`）
+/// 是【发送位置】带来的：挂载点只需做一次 `ChatItem.content` → 本枚举的映射，不在气泡里读 `ChatItem`。
 enum PopopxBubbleBody: Hashable {
     /// 正文。
     case text(String)
@@ -182,6 +190,8 @@ enum PopopxBubbleBody: Hashable {
     case event(String)
     /// 读不懂的内容（`invalidJSON`、解密失败）。
     case unavailable(String)
+    /// 一条位置消息。载荷本身带着经纬度、地名和地址，渲染成地图卡片（本文件末 `PopopxLocationCardBubble`）。
+    case location(PopopxLocationPayload)
 
     /// VoiceOver 要说的那句正文。`.event` 由 `PopopxMessageBubble.body` 分给 `eventLine`，
     /// 不上气泡底——判据只写在那一处分流里。
@@ -192,6 +202,7 @@ enum PopopxBubbleBody: Hashable {
         case let .withdrawn(text): text
         case let .event(text): text
         case let .unavailable(text): text
+        case let .location(payload): PopopxLocationCopy.spoken(payload)
         }
     }
 }
@@ -289,7 +300,7 @@ struct PopopxMessageBubble: View {
     }
 
     var body: some View {
-        Group {
+        let row = Group {
             switch item.content {
             case let .event(text):
                 eventLine(text)
@@ -298,8 +309,15 @@ struct PopopxMessageBubble: View {
             }
         }
         .frame(maxWidth: item.maxWidth, alignment: item.side.alignment)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(spoken)
+        if case .location = item.content {
+            // 位置卡片里有一枚真按钮。`.combine` 会把子树的点击动作并进整行，VoiceOver 就再也
+            // 打不开那张地图了，所以这一支改成 `.contain`：容器还在，children 各自保留自己的
+            // 标签与动作（正文文本 + 「打开位置卡片菜单」那一句在卡片内部说）。
+            row.accessibilityElement(children: .contain)
+        } else {
+            row.accessibilityElement(children: .combine)
+                .accessibilityLabel(spoken)
+        }
     }
 
     // MARK: 气泡
@@ -377,6 +395,10 @@ struct PopopxMessageBubble: View {
                     .font(PopopxType.caption)
                     .foregroundStyle(ink.meta)
             }
+        case let .location(payload):
+            // 气泡的内边距就是这张地图卡与气泡边缘的呼吸，所以缩略图自己圆角、不另描边。
+            // 时间 / 回执 / 通道角标由下面那个 `footer` 出，卡片只出地图、地名、地址。
+            PopopxLocationCardBubble(payload: payload, ink: ink, channel: item.channel)
         }
     }
 
@@ -896,9 +918,15 @@ enum PopopxBubbleMount {
     private static func msgBody(_ mc: MsgContent, ci: ChatItem) -> PopopxBubbleBody? {
         switch mc {
         case .text:
+            // 位置卡片排在最前面，而且必须压过下面那三道 guard：载荷里带 `popopx://loc`，
+            // 现网的 `formattedText`/`markdownBlocks` 会把它认成链接，于是这一行永远走不到
+            // 卡片这一支——真机上表现成"位置消息静默退化成一行纯文本"，比崩还难查。
+            if let location = PopopxLocationPayload.parse(from: mc.text) {
+                return .location(location)
+            }
             // 带富文本/提及/markdown 的行交给现网：气泡只画纯 `Text`，链接和 @ 就不再可点。
             guard ci.formattedText == nil, ci.mentions == nil, ci.markdownBlocks == nil else { return nil }
-            // 引用回复条和附件都不在 `PopopxBubbleBody` 的 5 个档里。
+            // 引用回复条和附件都不在 `PopopxBubbleBody` 的 6 个档里。
             guard ci.quotedItem == nil, ci.file == nil else { return nil }
             // 下面这些标记现网画在 `CIMetaView` 里，气泡的下沿没有对应位置（本文件 :199 的"挂载时二选一"）。
             guard ci.meta.itemDeleted == nil, !ci.meta.itemEdited, ci.meta.itemTimed == nil,
@@ -927,7 +955,7 @@ enum PopopxBubbleMount {
         let tucked: Bool
         switch content {
         case .withdrawn, .unavailable, .event: tucked = false
-        case .text, .media: tucked = tailVisible
+        case .text, .media, .location: tucked = tailVisible
         }
         return PopopxBubbleItem(
             messageKey: String(ci.id),
@@ -980,6 +1008,305 @@ enum PopopxBubbleMount {
     }
 }
 
+// MARK: - 位置卡片
+
+/// 位置卡片的全部文案。和载荷、渲染同文件，理由见文件头第 7 条。
+enum PopopxLocationCopy {
+    /// VoiceOver 说这一条气泡的一句话正文。**不含通道**——通道由
+    /// `PopopxMessageBubble.spoken` 在前面拼好，这里重复一次就会念两遍。
+    static func spoken(_ payload: PopopxLocationPayload) -> String {
+        var parts = ["位置"]
+        if let name = payload.name { parts.append(name) }
+        if let address = payload.address { parts.append(address) }
+        parts.append(payload.coordinateString)
+        return parts.joined(separator: "，")
+    }
+
+    /// 卡片自己的动作提示。SwiftUI 会自己补"按钮"，所以这里只说点了会怎样。
+    static let hint = "打开位置菜单"
+    static let openNavigation = "在 Apple 地图中打开导航"
+    static let copyCoordinates = "复制经纬度坐标"
+    static let copied = "已复制经纬度坐标"
+    static let cancel = "取消"
+}
+
+/// 一条位置消息的渲染。
+///
+/// 红线（`location-prompt.md:72`）：**列表里的气泡绝不内嵌可交互的 `MKMapView`**——那是一整条
+/// GL 渲染管线，一屏七八行就是七八条。这里只有一张 `MKMapSnapshotter` 渲出来的静态位图，配
+/// 一个进程内 LRU（`PopopxLocationSnapshotCache`）。图没到、渲染失败、或这个坐标正被别人渲，
+/// 一律退回品牌色占位块：地名、地址、坐标永远在，缺的只是那张图。
+///
+/// 整张卡片是一枚无边框按钮，点了弹 `confirmationDialog`（导航 / 复制坐标）。通道角标不在这里
+/// 画——`PopopxMessageBubble.footer` 本来就负责时间、回执、角标那一行。
+private struct PopopxLocationCardBubble: View {
+    let payload: PopopxLocationPayload
+    let ink: PopopxBubbleInk
+    /// 针的颜色要跟右下角那枚角标讲同一条通道，而 `PopopxBubbleInk` 只留颜色不留结论，
+    /// 所以通道自己传进来。
+    let channel: PopopxBubbleChannel
+
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var snapshot: UIImage?
+    @State private var showMenu = false
+    /// 聊天列表这一层没有屏幕级的 toast 宿主：`.popopxToast` 的契约是"一屏挂一次、贴在最上面"
+    /// （PopopxToast.swift:131），而我不打算为一句回执去改 ChatView。所以它挂在卡片自己头顶——
+    /// 离动作最近，也不越界。
+    @State private var toast = PopopxToastModel()
+
+    var body: some View {
+        Button(action: presentMenu) {
+            VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
+                thumbnail
+                VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
+                    Text(payload.displayName)
+                        .font(PopopxType.meta)
+                        .foregroundStyle(ink.text)
+                        .lineLimit(2)
+                    if let address = payload.address {
+                        Text(address)
+                            .font(PopopxType.caption)
+                            .foregroundStyle(ink.meta)
+                            .lineLimit(2)
+                    }
+                }
+            }
+            .frame(maxWidth: PopopxLocationSnapshotCache.size.width, alignment: .leading)
+            .contentShape(RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(PopopxLocationCopy.spoken(payload))
+        .accessibilityHint(PopopxLocationCopy.hint)
+        // 标题用坐标而不是地名：一个会话里发过两个"家"，菜单得说清是哪一个。
+        .confirmationDialog(
+            payload.coordinateString,
+            isPresented: $showMenu,
+            titleVisibility: .visible
+        ) {
+            Button(PopopxLocationCopy.openNavigation) { openInMaps() }
+            Button(PopopxLocationCopy.copyCoordinates) { copyCoordinates() }
+            Button(PopopxLocationCopy.cancel, role: .cancel) {}
+        }
+        .popopxToast(toast)
+        .task(id: cacheKey) {
+            let image = await PopopxLocationSnapshotCache.shared.image(
+                forKey: cacheKey,
+                coordinate: coordinate,
+                tint: markerTintColor,
+                style: interfaceStyle
+            )
+            // 取不到（没网、被限流、这个坐标正有人在渲）就保留现状：已经画出来的地图不该
+            // 因为一次失败的取数被抹回占位块。键变了会再跑一次，命中缓存的那条路径是纯查表。
+            if let image { snapshot = image }
+        }
+    }
+
+    // MARK: 图
+
+    /// 载荷自己不认识 CoreLocation（PopopxLocation.swift 文件头第 1 条），坐标在这一层现拼。
+    private var coordinate: CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: payload.latitude, longitude: payload.longitude)
+    }
+
+    /// SwiftUI 的 `ColorScheme` 翻成 UIKit 的 trait：底图样式、针的颜色解析、缓存键三处都
+    /// 要它，只在这里翻一次。
+    private var interfaceStyle: UIUserInterfaceStyle { colorScheme == .dark ? .dark : .light }
+
+    /// 缓存键要带三样：坐标、针的通道色、深浅色。通道色进键是因为它真的会画进位图里——
+    /// 同一个坐标，SMP 那枚是靛针、Mesh 那枚是青针，省掉这一段就会串色。深浅色换的是底图
+    /// 样式（苹果给深色底图另有一套瓦片）。
+    private var cacheKey: String {
+        "\(payload.coordinateKey)|\(channel.isMesh ? "mesh" : "smp")|\(interfaceStyle == .dark ? "d" : "l")"
+    }
+
+    /// 针的颜色跟右下角那枚角标讲同一条通道：靛紫 = SMP，青绿 = Mesh（§1.1 第 2 条：
+    /// 色相不跨通道借用，所以青色通路的消息在地图上继续用青）。
+    private var markerColor: Color { channel.isMesh ? PopopxPalette.mesh : PopopxPalette.brand }
+
+    /// 占位块的墨：卡面（收方）可以用通道色，实底（发方）必须退成本墨——判据和角标那条
+    /// 一模一样（`PopopxBubbleInk.onCard` / `monochromeBadgeInk`）。
+    private var placeholderInk: Color { ink.onCard ? markerColor : ink.text }
+
+    /// `UIColor(_:) + resolvedColor(with:)` 是 SwiftUI `Color` 落到 UIKit 侧唯一站得住的写法
+    /// （PopopxQRCardSheet.swift:145-149 同一先例）。
+    private var markerTintColor: UIColor {
+        UIColor(markerColor).resolvedColor(with: UITraitCollection(userInterfaceStyle: interfaceStyle))
+    }
+
+    @ViewBuilder private var thumbnail: some View {
+        ZStack {
+            if let snapshot {
+                Image(uiImage: snapshot)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                // 占位块：一层极淡的底色 + 一枚针。它不是"加载失败"的红色告警——图缺了
+                // 这条消息照样读得懂，也不该在历史消息里长期挂着一个报错。
+                //
+                // 底色和针**都不许用通道色本身**：发方气泡是 `brand` 实底，靛底画靛针等于没画
+                // （§1.1 同一条禁令，`PopopxBubbleInk.monochromeBadgeInk` 在角标上做的就是这件事）。
+                // 快照里那枚针不受这条限制——它有整张底图给它做对比度。
+                placeholderInk.opacity(colorScheme == .dark ? 0.16 : 0.08)
+                Image(systemName: "mappin.and.ellipse")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(placeholderInk)
+                    .accessibilityHidden(true)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: PopopxLocationSnapshotCache.size.height)
+        .clipShape(.rect(cornerRadius: PopopxMetrics.radiusControl, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl, style: .continuous)
+                .strokeBorder(PopopxPalette.hairlineInner, lineWidth: PopopxMetrics.hairline)
+        }
+        // 图不单独播报：坐标、地名、地址都在下面那两行和整张卡片的 label 里。
+        .accessibilityHidden(true)
+    }
+
+    // MARK: 动作
+
+    private func presentMenu() {
+        PopopxHaptics.selection()
+        showMenu = true
+    }
+
+    /// 交给 Apple 地图并直接进步行导航态——发位置的场景几乎总是"我要过来"。
+    private func openInMaps() {
+        let item = MKMapItem(placemark: MKPlacemark(coordinate: coordinate))
+        item.name = payload.displayName
+        item.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking])
+    }
+
+    private func copyCoordinates() {
+        UIPasteboard.general.string = payload.coordinateString
+        PopopxHaptics.notice(.success)
+        toast.show(PopopxLocationCopy.copied)
+    }
+}
+
+/// 进程内的地图快照缓存：`坐标 + 深浅色` → 位图，LRU。
+///
+/// 上限是照着内存算的：一张 `size`（244×140 pt）@2x 的位图约 0.5 MB，24 张最坏 ≈ 13 MB，
+/// 换来的是翻回上半屏不必重渲；再往上就是拿整个 App 的内存换几行已经滚过去的图。
+///
+/// 这个类**永不 import Metal/GL，也不持有任何 `MKMapView`**：它只是把 `MKMapSnapshotter`
+/// 的一次性输出存起来（`location-prompt.md:72` 那条红线的另一半）。
+@MainActor
+final class PopopxLocationSnapshotCache {
+    static let shared = PopopxLocationSnapshotCache()
+
+    /// 缩略图尺寸（pt）。卡片的排版宽度和快照的渲染尺寸是同一个数，改一处两处一起变。
+    static let size = CGSize(width: 244, height: 140)
+
+    /// 快照视野的**整幅宽度**（米）：800 m 就是中心点向东西各 400 m，够看清一个路口，
+    /// 又不会糊到只剩街区色块。它比选择器那张工作面的视野（`PopopxLocationPickerSheet.swift:443`）宽得多——卡片是缩略图，选择器要认得出单个门牌。
+    static let spanMeters: Double = 800
+
+    private static let capacity = 24
+    private static let renderScale: CGFloat = 2
+
+    private var images: [String: UIImage] = [:]
+    private var order: [String] = []
+    private var inFlight: Set<String> = []
+
+    /// 取一张快照：命中就返回，没命中就现渲。
+    ///
+    /// 同一个 key 已经有别人在渲时直接返回 nil——这一支先退回占位块，等这张卡片下次
+    /// `.task(id:)` 重跑（翻回上半屏、换深浅色都会重跑）。不做等待队列：一个会话里的
+    /// 位置消息是个位数的量，为它排队不值这套复杂度。
+    func image(
+        forKey key: String,
+        coordinate: CLLocationCoordinate2D,
+        tint: UIColor,
+        style: UIUserInterfaceStyle
+    ) async -> UIImage? {
+        if let hit = touch(key) { return hit }
+        guard !inFlight.contains(key) else { return nil }
+        inFlight.insert(key)
+        defer { inFlight.remove(key) }
+        guard let image = await Self.render(coordinate: coordinate, tint: tint, style: style) else { return nil }
+        store(image, forKey: key)
+        return image
+    }
+
+    private func touch(_ key: String) -> UIImage? {
+        guard let image = images[key] else { return nil }
+        order.removeAll { $0 == key }
+        order.append(key)
+        return image
+    }
+
+    private func store(_ image: UIImage, forKey key: String) {
+        while images.count >= Self.capacity, let oldest = order.first {
+            order.removeFirst()
+            images[oldest] = nil
+        }
+        images[key] = image
+        order.removeAll { $0 == key }
+        order.append(key)
+    }
+
+    private static func render(
+        coordinate: CLLocationCoordinate2D,
+        tint: UIColor,
+        style: UIUserInterfaceStyle
+    ) async -> UIImage? {
+        // 这个类型的 ObjC 名是 `MKMapSnapshotOptions`，Swift 侧只认嵌套写法（探针实测：
+        // 直接写 ObjC 名会报 "has been renamed to 'MKMapSnapshotter.Options'"）。
+        let options = MKMapSnapshotter.Options()
+        options.size = size
+        // 倍率和深浅色一次写进同一个 trait：`scale` 这个属性在本 SDK 已经标了
+        // deprecated（"Use traitCollection.displayScale"），碰它就破 0 警告门禁。
+        options.traitCollection = UITraitCollection { traits in
+            traits.displayScale = renderScale
+            traits.userInterfaceStyle = style
+        }
+        // 视野用 `region` 而不是 `cameraBoundary`：后者在本 SDK 的 Options 上不存在（探针实测）。
+        options.region = MKCoordinateRegion(center: coordinate, span: span(around: coordinate))
+        guard let snapshot = try? await MKMapSnapshotter(options: options).start() else { return nil }
+        let base = snapshot.image
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = renderScale
+        format.opaque = true
+        return UIGraphicsImageRenderer(size: base.size, format: format).image { _ in
+            base.draw(at: .zero)
+            // 针画在正中央：`region` 本来就是绕着目标点要的视野，所以"画面中心 = 坐标"这一步
+            // 不需要 `point(for:)`，也就不必为一张静态位图去造一个 `MKAnnotation`。
+            if let pin = pin(tint: tint) {
+                pin.draw(at: CGPoint(
+                    x: (base.size.width - pin.size.width) / 2,
+                    y: base.size.height / 2 - pin.size.height
+                ))
+            }
+        }
+    }
+
+    /// 一枚通道色的针。这里没有用 `MKMarkerAnnotationView`：本 SDK 的 `MKMapSnapshotOptions`
+    /// 已经没有 `annotationViews` 这个属性，而 marker 那套默认还会带一只白色标题框——
+    /// "除角标那两块贴片之外不得再引入第三种蓝"这条红线在地图上同样成立。
+    private static func pin(tint: UIColor) -> UIImage? {
+        let configuration = UIImage.SymbolConfiguration(pointSize: 22, weight: .semibold)
+        return UIImage(systemName: "mappin.circle.fill", withConfiguration: configuration)
+            .map { $0.withTintColor(tint, renderingMode: .alwaysTemplate) }
+    }
+
+    /// 把"米"换算成经纬度 delta：纬度 1°≈111.32 km，经度还要除 cos(纬度)，否则中高纬度
+    /// 的视野会被压扁。两个 delta 按卡片的长宽比分配，好让 `region` 的比画率和位图一致
+    /// （不一致时苹果会自己凑，代价是实际视野比名义值宽或窄一截）。
+    /// 极地附近 cos→0，这时退回用纬度那一档：宁可视野窄一点，也不要算出 inf 递进 MapKit。
+    private static func span(around coordinate: CLLocationCoordinate2D) -> MKCoordinateSpan {
+        let degreesPerMeter = 1.0 / 111_320.0
+        let width = spanMeters * degreesPerMeter
+        let height = spanMeters * Double(size.height / size.width) * degreesPerMeter
+        let cosine = cos(coordinate.latitude * .pi / 180)
+        return MKCoordinateSpan(
+            latitudeDelta: height,
+            longitudeDelta: cosine > 0.01 ? width / cosine : width
+        )
+    }
+}
+
 // MARK: - 预览
 
 #if DEBUG
@@ -1028,6 +1355,30 @@ private struct PopopxBubbleGallery: View {
             tail: PopopxBubbleTail(side: .sent),
             channel: .none,
             timeText: "09:16"
+        ),
+        PopopxBubbleItem(
+            messageKey: "7",
+            content: .location(
+                PopopxLocationPayload(
+                    latitude: 22.543096,
+                    longitude: 114.057865,
+                    name: "深圳北站",
+                    address: "深圳市龙华区民治街道留仙大道"
+                )
+            ),
+            tail: PopopxBubbleTail(side: .sent),
+            channel: .smp,
+            timeText: "09:18",
+            receipt: .delivered
+        ),
+        PopopxBubbleItem(
+            // 只有坐标、没有地名：卡片第一行退化成 `coordinateString`，这条退化路径要能在
+            // 画布里一眼看到。
+            messageKey: "8",
+            content: .location(PopopxLocationPayload(latitude: 31.230416, longitude: 121.473701)),
+            tail: PopopxBubbleTail(side: .received, tucked: true),
+            channel: .mesh(hops: 2),
+            timeText: "09:20"
         )
     ]
 

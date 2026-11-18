@@ -212,6 +212,8 @@
 		8B008BCC30AD6DDE009F3AAA /* PopopxControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B008BC830AD6DDE009F3AAA /* PopopxControls.swift */; };
 		8B008BCD30AD6DDE009F3AAA /* PopopxHaptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B008BC930AD6DDE009F3AAA /* PopopxHaptics.swift */; };
 		8B008BCE30AD6DDE009F3AAA /* PopopxToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B008BCA30AD6DDE009F3AAA /* PopopxToast.swift */; };
+		8B0B930930ADF0400020D403 /* PopopxLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0B930730ADF0400020D403 /* PopopxLocation.swift */; };
+		8B0B930A30ADF0400020D403 /* PopopxLocationPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0B930830ADF0400020D403 /* PopopxLocationPickerSheet.swift */; };
 		8B0D97BE30AD900E00985BD5 /* PopopxCabinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0D97BC30AD900E00985BD5 /* PopopxCabinView.swift */; };
 		8B2E872D30AD6A7700670E4A /* PopopxTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B2E872C30AD6A7700670E4A /* PopopxTheme.swift */; };
 		8B51158530AD7BBA00B15CFE /* PopopxTelemetryHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B51158330AD7BBA00B15CFE /* PopopxTelemetryHeader.swift */; };
@@ -638,6 +640,8 @@
 		8B008BC830AD6DDE009F3AAA /* PopopxControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxControls.swift; sourceTree = "<group>"; };
 		8B008BC930AD6DDE009F3AAA /* PopopxHaptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxHaptics.swift; sourceTree = "<group>"; };
 		8B008BCA30AD6DDE009F3AAA /* PopopxToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxToast.swift; sourceTree = "<group>"; };
+		8B0B930730ADF0400020D403 /* PopopxLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxLocation.swift; sourceTree = "<group>"; };
+		8B0B930830ADF0400020D403 /* PopopxLocationPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxLocationPickerSheet.swift; sourceTree = "<group>"; };
 		8B0D97BC30AD900E00985BD5 /* PopopxCabinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxCabinView.swift; sourceTree = "<group>"; };
 		8B2E872C30AD6A7700670E4A /* PopopxTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxTheme.swift; sourceTree = "<group>"; };
 		8B51158330AD7BBA00B15CFE /* PopopxTelemetryHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxTelemetryHeader.swift; sourceTree = "<group>"; };
@@ -1362,6 +1366,8 @@
 		8BBDA84830AD9C880013F482 /* ChatInfo */ = {
 			isa = PBXGroup;
 			children = (
+				8B0B930730ADF0400020D403 /* PopopxLocation.swift */,
+				8B0B930830ADF0400020D403 /* PopopxLocationPickerSheet.swift */,
 				8BBDA84630AD9C880013F482 /* PopopxChatInfoView.swift */,
 				8BBDA84730AD9C880013F482 /* PopopxGroupChatInfoView.swift */,
 			);
@@ -2003,6 +2009,8 @@
 				1841560FD1CD447955474C1D /* UserProfilesView.swift in Sources */,
 				64C3B0212A0D359700E19930 /* CustomTimePicker.swift in Sources */,
 				8CC4ED902BD7B8530078AEE8 /* CallAudioDeviceManager.swift in Sources */,
+				8B0B930930ADF0400020D403 /* PopopxLocation.swift in Sources */,
+				8B0B930A30ADF0400020D403 /* PopopxLocationPickerSheet.swift in Sources */,
 				64A779F62DBFB9F200FDEF2F /* MemberAdmissionView.swift in Sources */,
 				18415C6C56DBCEC2CBBD2F11 /* WebRTCClient.swift in Sources */,
 				8CB15EA02CFDA30600C28209 /* ChatItemsMerger.swift in Sources */,
