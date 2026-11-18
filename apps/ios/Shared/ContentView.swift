@@ -22,18 +22,18 @@ private enum NoticesSheet: Identifiable {
     }
 }
 
-// Spec: spec/client/navigation.md#ContentView
+// Spec: spec/client/navigation.md#2-root-view
 struct ContentView: View {
     @EnvironmentObject var chatModel: ChatModel
     @ObservedObject var alertManager = AlertManager.shared
     @ObservedObject var callController = CallController.shared
-    // Spec: spec/client/navigation.md#AppSheetState
+    // Spec: spec/client/navigation.md#4-sheet-presentation
     @ObservedObject var appSheetState = AppSheetState.shared
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var theme: AppTheme
     @EnvironmentObject var sceneDelegate: SceneDelegate
 
-    // Spec: spec/client/navigation.md#contentAccessAuthenticationExtended
+    // Spec: spec/client/navigation.md#2-root-view
     var contentAccessAuthenticationExtended: Bool
 
     @Environment(\.scenePhase) var scenePhase
@@ -167,7 +167,7 @@ struct ContentView: View {
         }
     }
 
-    // Spec: spec/client/navigation.md#contentView
+    // Spec: spec/client/navigation.md#2-root-view
     @ViewBuilder private func contentView() -> some View {
         if let status = chatModel.chatDbStatus, status != .ok {
             DatabaseErrorView(status: status)
@@ -183,7 +183,7 @@ struct ContentView: View {
         }
     }
 
-    // Spec: spec/client/navigation.md#callView
+    // Spec: spec/client/navigation.md#6-call-overlay
     @ViewBuilder private func callView(_ call: Call) -> some View {
         if CallController.useCallKit() {
             ActiveCallView(call: call, canConnectCall: Binding.constant(true))
@@ -201,16 +201,16 @@ struct ContentView: View {
         }
     }
 
-    // Spec: spec/client/navigation.md#callBanner
+    // Spec: spec/client/navigation.md#6-call-overlay
     private func activeCallInteractiveArea(_ call: Call) -> some View {
         HStack {
-            Text(call.contact.displayName).font(.body).foregroundColor(.white)
+            Text(call.contact.displayName).font(PopopxType.body).foregroundStyle(PopopxPalette.onSuccess)
             Spacer()
             CallDuration(call: call)
         }
         .padding(.horizontal)
         .frame(height: callTopPadding)
-        .background(Color(uiColor: UIColor(red: 47/255, green: 208/255, blue: 88/255, alpha: 1)))
+        .background(PopopxPalette.success)
         .onTapGesture {
             chatModel.activeCallViewIsCollapsed = false
         }
@@ -222,7 +222,7 @@ struct ContentView: View {
         @State var timer: Timer? = nil
 
         var body: some View {
-            Text(text).frame(minWidth: text.count <= 5 ? 52 : 77, alignment: .leading).offset(x: 4).font(.body).foregroundColor(.white)
+            Text(text).frame(minWidth: text.count <= 5 ? 52 : 77, alignment: .leading).offset(x: 4).font(PopopxType.body).foregroundStyle(PopopxPalette.onSuccess)
             .onAppear {
                 timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { timer in
                     if let connectedAt = call.connectedAt {
@@ -236,7 +236,7 @@ struct ContentView: View {
         }
     }
 
-    // Spec: spec/client/navigation.md#lockButton
+    // Spec: spec/client/navigation.md#7-authentication-gate
     private func lockButton() -> some View {
         Button(action: authenticateContentViewAccess) { Label("Unlock", systemImage: "lock") }
     }
@@ -250,13 +250,13 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity )
         .background(
             Rectangle()
-                .fill(theme.colors.background)
+                .fill(PopopxPalette.base)
         )
     }
 
     private func mainView() -> some View {
         ZStack(alignment: .top) {
-            ChatListView(activeUserPickerSheet: $chatListUserPickerSheet)
+            MainTabView()
                 .redacted(reason: appSheetState.redactionReasons(protectScreen))
             .onAppear {
                 // Connect only after the notifications prompt is resolved: the system prompt suspends
@@ -355,7 +355,7 @@ struct ContentView: View {
         }
     }
 
-    // Spec: spec/client/navigation.md#unlockedRecently
+    // Spec: spec/client/navigation.md#7-authentication-gate
     private func unlockedRecently() -> Bool {
         if let lastSuccessfulUnlock = lastSuccessfulUnlock {
             return ProcessInfo.processInfo.systemUptime - lastSuccessfulUnlock < 2
@@ -444,7 +444,7 @@ struct ContentView: View {
         )
     }
 
-    // Spec: spec/client/navigation.md#connectViaUrl
+    // Spec: spec/client/navigation.md#5-deep-linking
     // a URL opened via link that is ready to be connected now (appOpenUrl immediately, or
     // appOpenUrlLater once the app is active — see .onChange(of: scenePhase) in POPOPXApp)
     private var pendingConnectUrl: URL? {

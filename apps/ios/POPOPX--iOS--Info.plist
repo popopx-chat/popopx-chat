@@ -60,6 +60,12 @@
 	</array>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>POPOPX uses Bluetooth to discover nearby POPOPX devices and exchange messages offline when there is no internet connection.</string>
+	<key>NSNearbyInteractionUsageDescription</key>
+	<string>POPOPX uses nearby interaction to measure the distance to a device you are meeting in person, so that adding a friend only happens when you are within arm's reach. No location is read or stored.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_popopx-uwb._tcp</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>

@@ -90,7 +90,7 @@ struct NewChatSheet: View {
                             .modifier(ThemedBackground(grouped: true))
                             .navigationBarTitleDisplayMode(.inline))
                     case .createGroup:
-                        AnyView(AddGroupView()
+                        AnyView(PopopxCreateGroupView()
                             .navigationTitle("Create group")
                             .modifier(ThemedBackground(grouped: true))
                             .navigationBarTitleDisplayMode(.large))

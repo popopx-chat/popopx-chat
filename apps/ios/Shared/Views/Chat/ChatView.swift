@@ -473,7 +473,7 @@ struct ChatView: View {
                 ChatInfoToolbar(chat: chat)
             }
             .appSheet(isPresented: $showChatInfoSheet, onDismiss: { theme = buildTheme() }) {
-                ChatInfoView(
+                PopopxChatInfoView(
                     chat: chat,
                     contact: contact,
                     localAlias: chat.chatInfo.localAlias,
@@ -493,7 +493,7 @@ struct ChatView: View {
                 chatModel.secondaryIM = nil
                 theme = buildTheme()
             }) {
-                GroupChatInfoView(
+                PopopxGroupChatInfoView(
                     chat: chat,
                     groupInfo: Binding(
                         get: { groupInfo },

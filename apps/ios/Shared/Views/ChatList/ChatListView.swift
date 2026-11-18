@@ -104,7 +104,7 @@ struct UserPickerSheetView: View {
                     case .useFromDesktop:
                         ConnectDesktopView()
                     case .settings:
-                        SettingsView()
+                        PopopxSettingsView()
                     }
                 }
                 Color.clear // Required for list background to be rendered during loading
