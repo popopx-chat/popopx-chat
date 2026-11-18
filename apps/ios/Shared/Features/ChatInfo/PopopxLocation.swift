@@ -10,10 +10,11 @@
 //     谁都不需要地图能力，只需要两个 Double 和它们对外的文本形式。
 //  2. `Map` / `CLLocationManager` 只会出现在 PopopxLocationPickerSheet.swift 一个文件里，
 //     少一个 import 就少一处能被误用的入口。
-//  3. 编解码是纯字符串算术，能脱离 UI 和系统框架单独验（`/tmp` 的往返试验跑过：中文、
-//     `&`、`#`、引号、空格、emoji、换行都能原样回来）。
-//  4. 这个文件是新挂载点，需要人工拖进 Xcode 的 `POPOPX (iOS)` target；少拖一个，
-//     报错的是全工程，不会只报"少个文件"。
+//  3. 编解码是纯字符串算术，能脱离 UI 和系统框架单独验（macOS 上编译本文件跑的 31 项
+//     往返/拒绝试验：中文、`&`、`#`、`=`、引号、空格、emoji、换行、长得像载荷的地名都
+//     原样回来；邀请链接、越界/`nan`/`inf` 坐标、缺坐标、非法 UTF-8 转义、野 host 全部判死）。
+//  4. 本文件在 `Shared/Features/ChatInfo/`，已人工拖入 `POPOPX (iOS)` target（`.pbxproj`
+//     零脚本改动）。少拖一个，报错的是全工程，不会只报"少个文件"。
 //  5. 命名空间：`popopx:/` 和 `popopx://` 是邀请链接的前缀（PopopxOfflineBridge.swift:91、
 //     ChatUtils.swift:106、APITypes.swift:195），`popopx://loc?...` 因此**必须永远和邀请
 //     链接互斥**——host 只认 `loc`，坐标必须有限且在量程内，任一条不满足就整串判死。
@@ -102,6 +103,10 @@ struct PopopxLocationPayload: Hashable, Sendable {
     }
 
     /// 单独那一行降级文本。
+    ///
+    /// 它必须正好是一行——`name` / `address` 在 `init` 里已经把空白收敛成单个空格，所以
+    /// 来自 `CLPlacemark` 的换行（邮政地址里很常见）不会把这条消息撑成三行，接收方的
+    /// 纯文本降级视图和 `PopopxLocationCardBubble` 的标题行拿到的永远是同一句完整的话。
     var degradeLine: String {
         "📍 [位置] \(displayName) \(coordinateString)"
     }
@@ -114,8 +119,13 @@ struct PopopxLocationPayload: Hashable, Sendable {
     ///
     /// 非锚定的整串匹配是有意的：真机上一旦给载荷前后加了标点，位置卡片就会无声地退化成
     /// 一行纯文本，比抛错难查得多。宁可多认，也不放过。
+    ///
+    /// 命中多个候选时取**最后一个**，因为生产端把机器行拼在可读行之后——人读的那行里若
+    /// 夹着一个长得像载荷的串（地名就叫 `popopx://loc?lat=0&lon=0`，或转发来的文本），
+    /// 取第一个会让卡片的动作坐标和它自己印出来的坐标各行其是。实测过这条：取首个时
+    /// `messageContent` 甚至回不到自己。
     static func parse(from text: String) -> PopopxLocationPayload? {
-        for token in text.split(whereSeparator: \.isWhitespace) {
+        for token in text.split(whereSeparator: \.isWhitespace).reversed() {
             if let payload = parseToken(String(token)) {
                 return payload
             }
@@ -130,16 +140,21 @@ struct PopopxLocationPayload: Hashable, Sendable {
         else { return nil }
 
         var fields: [String: String] = [:]
-        for pair in components.query?.split(separator: "&") ?? [] {
+        // 必须是 `percentEncodedQuery`，不能用 `query`：后者返回的是**已解码**的查询串，
+        // `name=a%26b` 到它手里先变成 `name=a&b`，再按 `&` 切就把地名截断成了 `a`（实测）。
+        // 在编码形式上切分、再逐个值解码，`&` / `#` / `=` / 换行才回得来。
+        for pair in components.percentEncodedQuery?.split(separator: "&") ?? [] {
             guard let separator = pair.firstIndex(of: "=") else { continue }
             let key = String(pair[..<separator])
             // 只认这四个键，其余（包括来历不明的野键）一律丢掉，不让一条字符串借着
-            // 我们的 scheme 拿到界面。
+            // 我们的 scheme 拿到界面。键名在这里按**编码原字节**比较，所以写成 `na%6De`
+            // 这种绕过形式的键也一并落不进白名单。
             guard fieldNames.contains(key) else { continue }
             let rawValue = String(pair[pair.index(after: separator)...])
-            // 编码端只可能产出字母数字加 `%`，所以这里 `removingPercentEncoding` 唯一还能
-            // 失败的原因是手打的残缺 `%` 序列——那种 token 本来就不该被认成载荷，不
-            // fallback 到原串，整串判死。
+            // `URLComponents` 会把非法转义先修好（`name=%zz` 交出来的是 `%25zz`，读回字面量
+            // `%zz`），所以这道 guard 挡的不是残缺的 `%`，而是**语法合法、字节不是 UTF-8**
+            // 的序列（`%C0%80`、`%FF` 实测返回 nil）：那种 token 整串判死，不 fallback 到
+            // 原串，也不让半个字段进来。
             guard let value = rawValue.removingPercentEncoding else { return nil }
             fields[key] = value
         }
@@ -195,8 +210,13 @@ extension String {
     }
 
     /// 空白串当 nil：一个只有空格的地名不如没有，界面上会显示成一行空白。
+    ///
+    /// 顺手把内部的空白串收敛成一个空格，于是 `name` / `address` 里不可能留换行，
+    /// `degradeLine` 恒为一行（见上面那段）。
     fileprivate var popopxTrimmedOrNil: String? {
-        let trimmed = trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? nil : trimmed
+        let collapsed = self
+            .split(whereSeparator: \.isWhitespace)
+            .joined(separator: " ")
+        return collapsed.isEmpty ? nil : collapsed
     }
 }
