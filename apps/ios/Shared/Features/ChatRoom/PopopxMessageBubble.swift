@@ -35,6 +35,7 @@
 //
 
 import SwiftUI
+import POPOPXChat
 import PopopxMeshKit
 import PopopxMeshUI
 
@@ -842,6 +843,139 @@ enum PopopxBubbleCopy {
 
     static func reasonHopUnverifiable(_ hops: Int, _ cap: Int) -> String {
         "待中继 · 跳数 \(hops) 超上限 \(cap)"
+    }
+}
+
+// MARK: - B5 挂载适配（ChatItem → PopopxBubbleItem）
+
+/// 现网 `ChatItem` 到气泡入参的唯一映射入口。
+///
+/// `CIContent`（POPOPXChat/ChatTypes.swift:4862，**33 个 case**）在这里是**穷尽枚举**的：`switch` 没有
+/// `default`，Haskell 端以后加一个 case 就编译不过，映射表不会悄悄落后于协议。
+///
+/// 但"覆盖"不等于"交给气泡画"。`PopopxBubbleBody` 只有 5 个档（本文件 :172），而缩略图、播放器、
+/// 文件下载控件、链接预览卡、引用回复条、通话回拨、入群接受/拒绝都不在它的能力之内——本文件 :174-176
+/// 写明了这条边界。这些行一律返回 `nil`，挂载点据此把**整行**继续交给现网 `ChatItemView`，
+/// 而不是压成 `.media(name:detail:)` 之后把控件悄悄画没（裁定 A：分层挂载，零回归优先于全覆盖）。
+@MainActor
+enum PopopxBubbleMount {
+    /// `nil` = 这一行现网 `ChatItemView` 继续负责。
+    ///
+    /// 本轮只接管**直接会话**：群/频道的内容行由现网画头像和成员名（`CIMemberNameView`），
+    /// 气泡只有一个 `author: String?`，接管就等于把头像画没了。系统行（`.event`）本来就没头像，
+    /// 扩到群/频道只差去掉这一条 guard——留作后续单独一轮，因为它要重新核对 `eventItemViewText`
+    /// 里拼进去的发送者。
+    static func body(of ci: ChatItem, chat: Chat) -> PopopxBubbleBody? {
+        guard chat.chatInfo.chatType == .direct else { return nil }
+        guard !ci.isLiveDummy, !ci.localNote else { return nil }
+        let isChannel = chat.chatInfo.isChannel
+        switch ci.content {
+        case let .sndMsgContent(mc), let .rcvMsgContent(mc):
+            return msgBody(mc, ci: ci)
+        case .sndDeleted, .rcvDeleted, .sndModerated, .rcvModerated, .rcvBlocked:
+            return .withdrawn(ci.text(isChannel: isChannel))
+        case .rcvIntegrityError, .rcvDecryptionError, .rcvMsgError, .invalidJSON:
+            return .unavailable(ci.text(isChannel: isChannel))
+        case .rcvDirectEvent, .rcvGroupEvent, .sndGroupEvent, .rcvConnEvent, .sndConnEvent,
+             .rcvChatFeature, .sndChatFeature, .rcvChatPreference, .sndChatPreference,
+             .rcvGroupFeature, .sndGroupFeature, .rcvChatFeatureRejected, .rcvGroupFeatureRejected,
+             .sndDirectE2EEInfo, .rcvDirectE2EEInfo, .sndGroupE2EEInfo, .rcvGroupE2EEInfo:
+            let text = ci.text(isChannel: isChannel)
+            return text.isEmpty ? nil : .event(text)
+        case .sndCall, .rcvCall:
+            return nil
+        case .rcvGroupInvitation, .sndGroupInvitation:
+            return nil
+        case .chatBanner:
+            return nil
+        }
+    }
+
+    /// 内容行。文本之外的 7 个 `MsgContent` 档都有现网专属控件，一个都不接管。
+    private static func msgBody(_ mc: MsgContent, ci: ChatItem) -> PopopxBubbleBody? {
+        switch mc {
+        case .text:
+            // 带富文本/提及/markdown 的行交给现网：气泡只画纯 `Text`，链接和 @ 就不再可点。
+            guard ci.formattedText == nil, ci.mentions == nil, ci.markdownBlocks == nil else { return nil }
+            // 引用回复条和附件都不在 `PopopxBubbleBody` 的 5 个档里。
+            guard ci.quotedItem == nil, ci.file == nil else { return nil }
+            // 下面这些标记现网画在 `CIMetaView` 里，气泡的下沿没有对应位置（本文件 :199 的"挂载时二选一"）。
+            guard ci.meta.itemDeleted == nil, !ci.meta.itemEdited, ci.meta.itemTimed == nil,
+                  ci.meta.itemForwarded == nil, ci.meta.sentViaProxy != true,
+                  ci.meta.msgVerified == nil, !ci.meta.isLive
+            else { return nil }
+            return mc.text.isEmpty ? nil : .text(mc.text)
+        case let .unknown(_, text):
+            return .unavailable(text)
+        case .link, .image, .video, .voice, .file, .report, .chat:
+            return nil
+        }
+    }
+
+    /// 组装气泡入参；只在 `body(of:)` 已经给出内容之后调用。
+    static func item(
+        _ ci: ChatItem,
+        content: PopopxBubbleBody,
+        chat: Chat,
+        maxWidth: CGFloat,
+        timestamp: Bool,
+        tailVisible: Bool,
+        table: PopopxBubbleChannelTable
+    ) -> PopopxBubbleItem {
+        // 撤回/不可读/系统行现网不画 tail（ChatItemClipShape.swift:55-60），气泡也就不收紧任何角。
+        let tucked: Bool
+        switch content {
+        case .withdrawn, .unavailable, .event: tucked = false
+        case .text, .media: tucked = tailVisible
+        }
+        return PopopxBubbleItem(
+            messageKey: String(ci.id),
+            content: content,
+            tail: PopopxBubbleTail(side: ci.chatDir.sent ? .sent : .received, tucked: tucked),
+            channel: table.channel(forKey: String(ci.id)),
+            timeText: timestamp ? formatTimestampMeta(ci.meta.itemTs) : nil,
+            receipt: receipt(of: ci),
+            contactId: contactId(of: chat),
+            maxWidth: maxWidth
+        )
+    }
+
+    /// 投递回执。判据和现网 `CIStatus.statusIcon` 同一处（ChatTypes.swift:4614-4627），
+    /// 只是把那两枚资产勾换成 `PopopxBubbleReceipt` 的档位。
+    static func receipt(of ci: ChatItem) -> PopopxBubbleReceipt? {
+        switch ci.meta.itemStatus {
+        case .sndNew: .inFlight
+        case let .sndSent(progress): progress == .partial ? .inFlight : .delivered
+        case let .sndRcvd(status, progress):
+            status == .ok ? (progress == .partial ? .delivered : .read) : .failed(nil)
+        case .sndErrorAuth, .sndError, .sndWarning, .invalid: .failed(nil)
+        case .rcvNew: .received
+        case .rcvRead: nil
+        }
+    }
+
+    static func contactId(of chat: Chat) -> Int64? {
+        if case let .direct(contact) = chat.chatInfo { return contact.contactId }
+        return nil
+    }
+
+    /// 建通道表要的全部行地址。**只在 ChatView 层调用一次**——逐行 await 是本组件禁止的画法
+    /// （本文件 :17）。
+    static func addresses(for items: [ChatItem], chat: Chat) -> [PopopxBubbleRowAddress] {
+        let contact = contactId(of: chat)
+        var rows: [PopopxBubbleRowAddress] = []
+        rows.reserveCapacity(items.count)
+        for ci in items where body(of: ci, chat: chat) != nil {
+            rows.append(
+                PopopxBubbleRowAddress(
+                    messageKey: String(ci.id),
+                    contactId: contact,
+                    sent: ci.chatDir.sent,
+                    isMessage: ci.content.msgContent != nil
+                )
+            )
+        }
+        return rows
     }
 }
 

@@ -43,6 +43,16 @@ private func shouldShowAvatar(_ current: ChatItem, _ older: ChatItem?) -> Bool {
     }
 }
 
+// 【B5】重算气泡通道表的触发量。必须是 `Equatable` 才能当 `.task(id:)` 的键——带标签的 tuple
+// 不合成 `==`，所以用显式结构体。四个成员都是 `Hashable`，比较代价与现网已有的
+// `.onChange(of: im.reversedChatItems)` 同一量级。
+private struct PopopxBubbleTableKey: Equatable {
+    var items: [ChatItem]
+    var fuse: Bool
+    var timeline: PopopxMeshTimelineMergeResult
+    var radio: PopopxMeshStreamState
+}
+
 // Spec: spec/client/chat-view.md#ChatView
 struct ChatView: View {
     @EnvironmentObject var chatModel: ChatModel
@@ -97,12 +107,49 @@ struct ChatView: View {
     @State private var supportChatMemberInfoLinkActive = false
     @State private var scrollView: EndlessScrollView<MergedItem> = EndlessScrollView(frame: .zero)
 
+    // 【B5】气泡的通道表。一次读齐、逐行查表：`PopopxBubbleTransportResolver` 那三次 actor hop
+    // 必须整批发起，一行一次 await 是那个组件明确禁止的画法（PopopxMessageBubble.swift:17）。
+    @ObservedObject private var popopxMeshRuntime = PopopxMeshRuntime.shared
+    @ObservedObject private var popopxMeshStateSource = PopopxMeshStateSource.shared
+    @ObservedObject private var popopxMeshTimelineModel = PopopxMeshRuntime.shared.timelineModel
+    @State private var popopxBubbleTable = PopopxBubbleChannelTable(channels: [:])
+
     @AppStorage(DEFAULT_TOOLBAR_MATERIAL) private var toolbarMaterial = ToolbarMaterial.defaultMaterial
 
     let userSupportScopeInfo: GroupChatScopeInfo = .memberSupport(groupMember_: nil)
 
     private var terminal: Bool {
         chat.chatInfo.activeChatLayout(profileChatLayout(ChatModel.shared.currentUser)) == .terminal
+    }
+
+    /// 重算通道表的全部触发量：换消息、开关保险丝、时间线定性、射频档位。
+    private var popopxBubbleTableKey: PopopxBubbleTableKey {
+        PopopxBubbleTableKey(
+            items: im.reversedChatItems,
+            fuse: popopxMeshRuntime.isFuseOn,
+            timeline: popopxMeshTimelineModel.result,
+            radio: popopxMeshStateSource.state
+        )
+    }
+
+    @MainActor
+    private func refreshPopopxBubbleTable() async {
+        let key = popopxBubbleTableKey
+        let addresses = PopopxBubbleMount.addresses(for: key.items, chat: chat)
+        guard !addresses.isEmpty else {
+            popopxBubbleTable = PopopxBubbleChannelTable(channels: [:])
+            return
+        }
+        let sources = await PopopxBubbleTransportResolver.loadSources(
+            fuseOn: key.fuse,
+            state: key.radio,
+            timelineRows: key.timeline.rows,
+            mappingStore: popopxMeshRuntime.mappingStore,
+            router: popopxMeshRuntime.router
+        )
+        // 读的同时又翻了页就不落这一版：下一次 `.task(id:)` 会带更新的答案重来。
+        guard popopxBubbleTableKey == key else { return }
+        popopxBubbleTable = PopopxBubbleTransportResolver.table(sources, rows: addresses)
     }
 
     // Spec: spec/client/chat-view.md#body
@@ -117,6 +164,9 @@ struct ChatView: View {
                     messages: PopopxMeshApplicationStream.rows(from: im.reversedChatItems)
                 )
                 .popopxMeshBanner(PopopxMeshRuntime.shared.bannerModel)
+                .task(id: popopxBubbleTableKey) {
+                    await refreshPopopxBubbleTable()
+                }
         } else {
             viewBody
                 .popopxMergedTimeline(
@@ -125,6 +175,9 @@ struct ChatView: View {
                     messages: PopopxMeshApplicationStream.rows(from: im.reversedChatItems)
                 )
                 .popopxMeshBanner(PopopxMeshRuntime.shared.bannerModel)
+                .task(id: popopxBubbleTableKey) {
+                    await refreshPopopxBubbleTable()
+                }
         }
     }
 
@@ -983,6 +1036,7 @@ struct ChatView: View {
                             olderRow: mergedItems.boxedValue.items.indices.contains(index + 1) ? mergedItems.boxedValue.items[index + 1] : nil,
                             listWidth: g.size.width,
                             maxWidth: maxWidth,
+                            channelTable: popopxBubbleTable,
                             composeState: $composeState,
                             selectedMember: $selectedMember,
                             showChatInfoSheet: $showChatInfoSheet,
@@ -1755,6 +1809,9 @@ struct ChatView: View {
         let olderRow: MergedItem?
         let listWidth: CGFloat
         let maxWidth: CGFloat
+        /// 【B5】整表在 ChatView 一次算好，行渲染只查字典（逐行 await 是气泡禁止的画法，
+        /// PopopxMessageBubble.swift:17）。声明位置决定 memberwise init 的参数次序，别往上挪。
+        let channelTable: PopopxBubbleChannelTable
         @Binding var composeState: ComposeState
         @Binding var selectedMember: GMember?
         @Binding var showChatInfoSheet: Bool
@@ -2265,21 +2322,38 @@ struct ChatView: View {
                         if alignEnd {
                             goToItemButton(true)
                         }
-                        ChatItemView(
-                            chat: chat,
-                            im: im,
-                            chatItem: ci,
-                            scrollToItem: scrollToItem,
-                            scrollToItemId: $scrollToItemId,
-                            maxWidth: maxWidth,
-                            allowMenu: $allowMenu,
-                            endButton: terminal && !searchIsNotBlank && ci.meta.itemForwarded?.chatTypeApiIdMsgId != nil ? AnyView(goToItemButton(false)) : nil
-                        )
-                        .environment(\.revealed, revealed)
-                        .environment(\.showTimestamp, itemSeparation.timestamp)
-                        .if(!terminal) { $0.modifier(ChatItemClipped(ci, tailVisible: itemSeparation.largeGap && (ci.meta.itemDeleted == nil || revealed))) }
-                        .contextMenu { menu(ci, range, live: live) }
-                        .accessibilityLabel("")
+                        if !terminal, let bubbleContent = PopopxBubbleMount.body(of: ci, chat: chat) {
+                            // 气泡自己用 `UnevenRoundedRectangle` 画底（PopopxMessageBubble.swift:155-166），
+                            // 所以这一支**不套** `ChatItemClipped`，也**不抹**无障碍标签（它自带合并后的整句）。
+                            PopopxMessageBubble(
+                                PopopxBubbleMount.item(
+                                    ci,
+                                    content: bubbleContent,
+                                    chat: chat,
+                                    maxWidth: maxWidth,
+                                    timestamp: itemSeparation.timestamp,
+                                    tailVisible: itemSeparation.largeGap && (ci.meta.itemDeleted == nil || revealed),
+                                    table: channelTable
+                                )
+                            )
+                            .contextMenu { menu(ci, range, live: live) }
+                        } else {
+                            ChatItemView(
+                                chat: chat,
+                                im: im,
+                                chatItem: ci,
+                                scrollToItem: scrollToItem,
+                                scrollToItemId: $scrollToItemId,
+                                maxWidth: maxWidth,
+                                allowMenu: $allowMenu,
+                                endButton: terminal && !searchIsNotBlank && ci.meta.itemForwarded?.chatTypeApiIdMsgId != nil ? AnyView(goToItemButton(false)) : nil
+                            )
+                            .environment(\.revealed, revealed)
+                            .environment(\.showTimestamp, itemSeparation.timestamp)
+                            .if(!terminal) { $0.modifier(ChatItemClipped(ci, tailVisible: itemSeparation.largeGap && (ci.meta.itemDeleted == nil || revealed))) }
+                            .contextMenu { menu(ci, range, live: live) }
+                            .accessibilityLabel("")
+                        }
                         if !alignEnd && (!terminal || searchIsNotBlank || markedDeleted) {
                             goToItemButton(false)
                         }
