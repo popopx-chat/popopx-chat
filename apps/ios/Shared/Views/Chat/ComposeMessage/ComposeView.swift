@@ -2,6 +2,7 @@
 
 import SwiftUI
 import POPOPXChat
+import PopopxMeshKit
 import SwiftyGif
 import PhotosUI
 
@@ -416,6 +417,15 @@ struct ComposeView: View {
     @State private var relayListExpanded = false
     @StateObject private var channelRelaysModel = ChannelRelaysModel.shared
 
+    // 【B6】下面三个是 `PopopxInputBar` 挂在会话页底部时新长的宿主状态，全部 private + 带默认值，
+    // 所以合成 memberwise init 的入参表一位没动（`ChatView.swift:237`-`:245` 那个唯一调用点照常）。
+    /// 阅后即焚的真值在宿主：输入条只读只报（`PopopxInputBar.swift:21`）。旧的 `SendMessageView`
+    /// 把它藏在发送键菜单的 `@State` 里（`SendMessageView.swift:48`-`:52`），换皮后必须有地方接。
+    @State private var popopxTTLSeconds: Int? = nil
+    @FocusState private var popopxComposerFocused: Bool
+    /// 和 `SendMessageView.swift:51` 用同一个 UserDefaults 键：提醒只弹一次这件事不该有两份真值。
+    @UserDefault(DEFAULT_LIVE_MESSAGE_ALERT_SHOWN) private var liveMessageAlertShown = false
+
     // Spec: spec/client/compose.md#body
     var body: some View {
         VStack(spacing: 0) {
@@ -542,6 +552,12 @@ struct ComposeView: View {
                     ContextContactRequestActionsView(contactRequestId: crId)
                 } else if let ct = contact, ct.nextAcceptContactRequest, let groupDirectInv = ct.groupDirectInv {
                     ContextMemberContactActionsView(contact: ct, groupDirectInv: groupDirectInv)
+                } else if popopxBarEligible {
+                    // 【B6】底部输入条换皮：引用条（`contextItemView()`）与附件预览条（`previewView()`）
+                    // 在上面原样呈现，这一支只替掉最底下那一条。为什么不是全部会话都换，见
+                    // `popopxBarEligible` 的注释。
+                    popopxComposerBar(disableSendButton: disableSendButton)
+                        .padding(.horizontal, 12)
                 } else {
                     HStack (alignment: .center) {
                         attachmentAndCommandsButtons()
@@ -1167,6 +1183,200 @@ struct ComposeView: View {
             }
         } else {
             b
+        }
+    }
+
+    // MARK: - 【B6】`PopopxInputBar` 挂载（会话页底部输入条）
+    //
+    //  口径和 B5 的气泡完全一致：新组件能完整表达的那部分换皮，表达不了的整支留在旧视图树里，
+    //  两边共用同一批宿主状态（`composeState`、`chosenMedia`、`audioRecorder`、`showCommandsMenu`）。
+    //  旧链路的 `attachmentAndCommandsButtons()` 与 `sendMessageView()` 一位没动，
+    //  引用条 `contextItemView()` 和附件预览条 `previewView()` 也原位不动 —— 它们本来就在输入条上方。
+
+    /// 换皮范围三条边界，全部是**功能**边界不是审美边界：
+    /// - 只有 active 的 1:1 联系人：厢语路由只认 `.direct` 的 contactId（`PopopxRouteTarget`），
+    ///   `PopopxComposerContext` 也要求 active（`Contact.active`）。群 / 频道 / 待接受的联系留旧树。
+    /// - 有命令菜单的会话留旧树：命令唯一的入口是旧树里的 `commandsButton()`（"//" 键），
+    ///   `CommandsMenuView` 还要靠 `selectedRange` 在光标处插命令，而 `TextField` 不回写光标。
+    /// - 群 @提及同理：`GroupMentionsView` 拿 `selectedRange` 做字符串拼接（`insertMention`），
+    ///   群留在旧树里这个字段就还是真值。
+    /// live 消息的节拍，和 `SendMessageView.swift:13` 的 `liveMsgInterval` 同一个值。
+    private static let popopxLiveMsgInterval: UInt64 = 3_000_000_000
+
+    private var popopxBarEligible: Bool {
+        chat.chatInfo.contact?.active == true && !chat.chatInfo.useCommands
+    }
+
+    /// `ComposeState` → `PopopxComposerContext`。输入条故意不认识 `ComposeState`，
+    /// 折算这一步必须由宿主做，九个前提一个都不能漏：漏一个就是"静默丢掉阅后即焚 / 引用 / 附件"那一类事故。
+    private var popopxComposerContext: PopopxComposerContext {
+        var ctx = PopopxComposerContext.outsideDirectContact
+        if case let .direct(contact) = chat.chatInfo, contact.active {
+            ctx = .directContact(contact.contactId)
+        }
+        switch composeState.preview {
+        case let .mediaPreviews(media): ctx.hasAttachments = !media.isEmpty
+        case .filePreview, .voicePreview: ctx.hasAttachments = true
+        case .linkPreview, .chatLinkPreview: ctx.hasLinkPreview = true
+        case .noPreview: break
+        }
+        ctx.carriesContextItem = composeState.contextItem != .noContextItem
+        ctx.hasMentions = !composeState.memberMentions.isEmpty
+        ctx.isLiveMessage = composeState.liveMessage != nil
+        ctx.requiresSignature = chat.chatInfo.groupInfo?.useRelays == true
+        return ctx
+    }
+
+    /// 亮不亮发送键，条件抄 `SendMessageView.swift:186`-`:192`（旧发送键的 `.disabled`）。
+    /// "草稿非空"那一半归输入条自己判（它还要求挂了附件也能发，见 `PopopxComposerRouting.dispatch`）。
+    private func popopxSendEnabled(_ disableSendButton: Bool) -> Bool {
+        chat.chatInfo.sendMsgEnabled
+        && composeState.sendEnabled
+        && !composeState.inProgress
+        && !(composeState.voicePreview && !chat.chatInfo.featureEnabled(.voice))
+        && !composeState.endLiveDisabled
+        && !disableSendButton
+    }
+
+    /// 刻意做成独立函数而不是就地展开：会话页这一路 `if/else` 已经贴着 Swift 类型检查的
+    /// 表达式预算（B5 在 `ChatView` 为此连撞 5 次 `unable to type-check in reasonable time`），
+    /// `some View` 不透明返回类型把这一支单独算一份预算。
+    @ViewBuilder private func popopxComposerBar(disableSendButton: Bool) -> some View {
+        let bar = ZStack(alignment: .leading) {
+            PopopxInputBar(
+                text: $composeState.message,
+                context: popopxComposerContext,
+                ttlSeconds: popopxTTLSeconds,
+                isSendEnabled: popopxSendEnabled(disableSendButton),
+                // 旧链路在禁用态把占位文案置 nil（`sendMessageView` 的 `placeholder:` 那一行），
+                // 那句 `disabledText` 压在框上时不该再叠一层提示。
+                placeholder: disabledText == nil ? "发消息…" : "",
+                onSend: popopxComposerSend,
+                onHoldToTalk: popopxHoldToTalk,
+                onPlusTap: popopxPlusAction,
+                onTTLChange: { seconds in popopxTTLSeconds = seconds }
+            )
+            if let disabledText {
+                Text(disabledText)
+                    .italic()
+                    .foregroundColor(theme.colors.secondary)
+                    .padding(.horizontal, 12)
+            }
+        }
+        .focused($popopxComposerFocused)
+        .onChange(of: popopxComposerFocused) { _, focused in
+            keyboardVisible = focused
+            if !focused { keyboardHiddenDate = Date.now }
+        }
+        if popopxLiveMessageAllowed {
+            bar.contextMenu { popopxLiveMessageMenuItem() }
+        } else {
+            bar
+        }
+    }
+
+    /// 发送键的落点：归谁发已经由 `PopopxComposerRouting.dispatch` 判完，这里只执行两支副作用。
+    /// - `.routeViaMesh`：交给模块 5，由它决定公网 / 蓝牙 / 兜底队列；草稿由输入条自己清。
+    /// - `.hostShouldSend`：原样走旧链路 `sendMessage(ttl:)`，草稿在 `sendMessageAsync` 末尾清；
+    ///   阅后即焚是一次性的发送选项（旧菜单每按一次重选），所以发完把档位放回 nil。
+    private func popopxComposerSend(_ send: PopopxComposerSend) {
+        switch send.dispatch {
+        case let .routeViaMesh(message):
+            Task { await PopopxMeshRuntime.shared.router.send(message) }
+        case .hostShouldSend:
+            popopxTTLSeconds = nil
+            sendMessage(ttl: send.ttlSeconds)
+            resetLinkPreview()
+        case .ignoreEmptyDraft:
+            break
+        }
+    }
+
+    /// 「按住说话」在新条里是一次**按下即回调**（`PopopxInputBar` 的 `holdToTalkBar`），
+    /// 所以桥接成点按开始 / 点按结束。`audioRecorder` 与 `voiceMessageRecordingState`
+    /// 那套状态机本身一位没动，计时也还是 `AudioRecorder.onTimer` 在推。
+    private func popopxHoldToTalk() {
+        if case .recording = composeState.voiceMessageRecordingState {
+            finishVoiceMessageRecording()
+        } else {
+            Task { await startVoiceMessageRecording() }
+        }
+    }
+
+    /// 「+」面板四格接回既有链路：相册 / 拍摄 / 文件本来就是 `showMediaPicker` / `showTakePhoto` /
+    /// `showFileImporter` 三个开关；位置消息这个 app 没有实现，如实说，不拿别的功能顶。
+    /// 禁用条件抄 `attachmentButton()`：已有附件、改写 / 转发 / live / 举报中不给开，本会话禁文件时给同样的提示。
+    private func popopxPlusAction(_ action: PopopxPlusAction) {
+        switch action {
+        case .location:
+            AlertManager.shared.showAlertMsg(
+                title: "Location messages",
+                message: "POPOPX Chat does not send location messages."
+            )
+        case .photo, .camera, .file:
+            if im.secondaryIMFilter == nil, !chat.chatInfo.featureEnabled(.files) {
+                AlertManager.shared.showAlertMsg(
+                    title: "Files and media prohibited!",
+                    message: chat.chatInfo.groupInfo == nil ? nil : "Only group owners can enable files and media."
+                )
+            } else if !composeState.attachmentDisabled, chat.chatInfo.sendMsgEnabled {
+                switch action {
+                case .photo: showMediaPicker = true
+                case .camera: showTakePhoto = true
+                case .file: showFileImporter = true
+                case .location: break
+                }
+            }
+        }
+    }
+
+    /// live 消息的入口在旧链路里只长在发送键的长按菜单上（`SendMessageView.swift:194`-`:241`），
+    /// 新条没有可挂菜单的发送键，所以整条 composer 接同一个菜单，内容只有这一项：
+    /// 阅后即焚归「+」面板，签名那一支在上游就被注释掉了，而且它只属于群 / 频道，不在换皮范围内。
+    private var popopxLiveMessageAllowed: Bool {
+        composeState.liveMessage == nil
+        && !composeState.editing
+        && composeState.contextItem == .noContextItem
+        && !composeState.voicePreview
+        && !composeState.manyMediaPreviews
+        && chat.chatInfo.chatType != .local
+    }
+
+    @ViewBuilder private func popopxLiveMessageMenuItem() -> some View {
+        Button {
+            startPopopxLiveMessage()
+        } label: {
+            Label("Send live message", systemImage: "bolt.fill")
+        }
+    }
+
+    /// 和 `SendMessageView.startLiveMessage` 同一条链路：先发一条 live，再按同一个节拍 `updateLiveMessage`。
+    /// 节拍常量 `liveMsgInterval` 在 `SendMessageView.swift:13` 是文件级 `private let`，取不过来，
+    /// 这里写死同一个 3 秒；只弹一次提醒用的是同一个 UserDefaults 键，不是第二份开关。
+    /// 旧键的脉冲动画（`sendButtonSize` / `sendButtonOpacity`）是旧发送键自己的皮，不跟过来。
+    private func startPopopxLiveMessage() {
+        func start() {
+            Task {
+                await sendLiveMessage()
+                _ = try? await Task.sleep(nanoseconds: Self.popopxLiveMsgInterval)
+                while composeState.liveMessage != nil {
+                    await updateLiveMessage()
+                    _ = try? await Task.sleep(nanoseconds: Self.popopxLiveMsgInterval)
+                }
+            }
+        }
+        if liveMessageAlertShown {
+            start()
+        } else {
+            AlertManager.shared.showAlert(Alert(
+                title: Text("Live message!"),
+                message: Text("Send a live message - it will update for the recipient(s) as you type it"),
+                primaryButton: .default(Text("Send")) {
+                    liveMessageAlertShown = true
+                    start()
+                },
+                secondaryButton: .cancel()
+            ))
         }
     }
 

@@ -5,27 +5,27 @@
 //  【第五阶段 · 会话输入条】磨砂玻璃底的弹起式输入条 + "智能路由"接缝。
 //
 //  这是一个**宿主所有（host-owned）**的图层，不是 `ComposeView` 的替代品。今天会话页把 composer
-//  挂在 `Shared/Views/Chat/ChatView.swift:184`，一次给足 15 个入参（`$composeState`、
-//  `$showCommandsMenu`、`$keyboardVisible`、`$keyboardHiddenDate`、`$selectedRange` …），
-//  而 `ComposeView.swift` 有 2043 行、`Shared/Views/Chat/ComposeMessage/` 另有 13 个同目录文件；
+//  挂在 `Shared/Views/Chat/ChatView.swift:237`-`:245`，实传 7 个入参（`chat`、`im`、
+//  `$composeState`、`$showCommandsMenu`、`$keyboardVisible`、`$keyboardHiddenDate`、`$selectedRange`），
+//  而 `ComposeView.swift` 有 2253 行、`Shared/Views/Chat/ComposeMessage/` 目录内共 13 个文件；
 //  真正的文本框是 `NativeTextEditor`（`SendMessageView.swift:67`，结构体在 :16，由
-//  `ComposeView.swift:1069 sendMessageView(_:placeholder:sendToConnect:)` 造出来）。多选态下会话页
-//  还会把它换成 `SelectedItemsBottomToolbar`（`ChatView.swift:194`）。所以本文件：
+//  `ComposeView.swift:1085 sendMessageView(_:placeholder:sendToConnect:)` 造出来）。多选态下会话页
+//  还会把它换成 `SelectedItemsBottomToolbar`（`ChatView.swift:247`）。所以本文件：
 //  ① 不 import 也不改写 `ComposeState`，只吃宿主折算进来的值；② 不改任何既有 initializer；
 //  ③ 所有副作用一律走闭包递出去。**"替换还是并挂"由人来裁定，本条两边都能接。**
 //
 //  ── 宿主必须接的五根线 ────────────────────────────────────────────────────────────
 //  1. `text`：宿主自己的草稿绑定（`composeState.message` 也行）。
 //  2. `context`：把 `ComposeState` 的九个前提折算成 `PopopxComposerContext`（见该结构体的字段注释，
-//     对应 `ComposeView.swift:1517` mentions、`:1522`-`:1538` contextItem 四支、`:1540`-`:1545` preview 三支）。
+//     对应 `ComposeView.swift:1727` mentions、`:1732`-`:1748` contextItem 四支、`:1750`-`:1755` preview 三支）。
 //  3. `ttlSeconds` / `onTTLChange`：阅后即焚。**真值在宿主那里**，本条只读只报，不存第二份。
 //  4. `onSend`：拿到 `PopopxComposerSend`，其中 `dispatch` 已经分好支：
 //     · `.routeViaMesh(message)` → 宿主做 `await PopopxMeshRuntime.shared.router.send(message)`
 //       （`PopopxMeshKit/…/Router/PopopxMessageRouter.swift:627`），返回的 `PopopxRoutedMessage`
 //       （:241）交给模块 7 的时间线；本条**自己不发**，也不碰 `router.start()`/`stop()`——那是保险丝的
 //       事（`Shared/Model/POPOPXAPI.swift:3752` 把 router 注册进 killSwitch）。
-//     · `.hostShouldSend(reason)` → 宿主走原链路（`ComposeView.swift:1504 sendMessage(ttl:sign:)` →
-//       `:1513 sendMessageAsync` → `:1542 send(.text…)` → `:1721`/`:1730 send(_ msgs:)` →
+//     · `.hostShouldSend(reason)` → 宿主走原链路（`ComposeView.swift:1714 sendMessage(ttl:sign:)` →
+//       `:1723 sendMessageAsync` → `:1752 send(.text…)` → `:1931`/`:1940 send(_ msgs:)` →
 //       `apiSendMessages`（`POPOPXAPI.swift:577`）→ `processSendMessageCmd`（:582）→ `chatApiSendCmd`）。
 //  5. 键盘避让、safe area、`keyboardVisible` 归宿主：本条只画自己那一条，不读屏幕常量。
 //
@@ -41,7 +41,7 @@
 //  ── 判定表（`PopopxComposerRouting.dispatch`，纯函数，可单测）───────────────────────
 //  | 输入 | 结论 | 为什么 |
 //  |---|---|---|
-//  | 草稿全空白 | `.ignoreEmptyDraft` | 既不发也不交回，宿主不会被叫两次 |
+//  | 草稿全空白、且没挂附件 | `.ignoreEmptyDraft` | 既不发也不交回，宿主不会被叫两次；挂了附件的空文本框照发（`.richContent` → 交回宿主） |
 //  | `ttlSeconds != nil` | `.hostShouldSend(.timedMessage)` | 路由腿不带 ttl，阅后即焚会被丢掉 |
 //  | `requiresSignature` | `.hostShouldSend(.signedMessage)` | 同上，腿上没有 sign |
 //  | 非直聊联系人（群 / 本机笔记 / 待接受 / 无效 / 非 active） | `.hostShouldSend(.notDirectContact)` | `PopopxRouteTarget`（:99）只有 `.contactId` 能被公网写到；群的 scope/sendAsGroup 在请求体里没有位置 |
@@ -89,7 +89,7 @@ import PopopxMeshUI
 
 /// 「这一条将要发出去的东西」除文本以外的全部前提。
 ///
-/// 故意不做成 `ComposeState` 的包装：那个结构体（`ComposeView.swift:46`）带着 `parsedMessage`、
+/// 故意不做成 `ComposeState` 的包装：那个结构体（`ComposeView.swift:47`）带着 `parsedMessage`、
 /// `preview`、`contextItem`、`voiceMessageRecordingState` 等一整套只有旧 composer 才懂的东西，
 /// 本条只想知道"能不能交给模块 5"。
 struct PopopxComposerContext: Hashable {
@@ -100,15 +100,15 @@ struct PopopxComposerContext: Hashable {
     var isDirectContact = false
     /// 草稿挂了附件（图片 / 文件 / 语音 / 多媒体）。
     var hasAttachments = false
-    /// `composeState.preview != .noPreview`（`ComposeView.swift:1540`-`:1545`）：链接预览也是消息体的一部分。
+    /// `composeState.preview != .noPreview`（`ComposeView.swift:1750`-`:1755`）：链接预览也是消息体的一部分。
     var hasLinkPreview = false
-    /// `contextItem` 是 quoted / editing / forwarding / reported 四支之一（`ComposeView.swift:1522`-`:1538`）。
+    /// `contextItem` 是 quoted / editing / forwarding / reported 四支之一（`ComposeView.swift:1732`-`:1748`）。
     var carriesContextItem = false
-    /// `composeState.memberMentions` 非空（`ComposeView.swift:1517`）。
+    /// `composeState.memberMentions` 非空（`ComposeView.swift:1727`）。
     var hasMentions = false
-    /// 即时消息（live），`ComposeView.swift:1518`-`:1520`。
+    /// 即时消息（live），`ComposeView.swift:1728`-`:1730`。
     var isLiveMessage = false
-    /// 需要签名，`ComposeView.swift:1504` 的 `send(sign:)`。
+    /// 需要签名，`ComposeView.swift:1714` 的 `send(sign:)`。
     var requiresSignature = false
 
     /// 最常用的一支：一个 active 的直聊联系人，纯文本，无 TTL、无签名。
@@ -310,7 +310,11 @@ enum PopopxComposerRouting {
         ttlSeconds: Int?,
         messageId: String = PopopxOutboundMessage.newMessageId()
     ) -> PopopxComposerDispatch {
-        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+        let blankDraft = text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        // 空草稿不等于"没东西可发"：挂了附件（图片 / 文件 / 语音）的草稿文本框本来就是空的，
+        // 而旧链路的 `ComposeState.sendEnabled` 对这几支都返回 true。一律 ignore 的话，
+        // 这条接缝上永远发不出不带文字的附件。
+        if blankDraft && !context.hasAttachments {
             return .ignoreEmptyDraft
         }
         if let reason = hostReason(context: context, eligibility: eligibility, ttlSeconds: ttlSeconds) {
@@ -705,7 +709,8 @@ struct PopopxInputBar: View {
     }
 
     private var sendKey: some View {
-        let canFire = isSendEnabled && !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let blank = text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let canFire = isSendEnabled && (!blank || context.hasAttachments)
         return Button(action: send) {
             Image(systemName: sendSymbolName)
                 .font(PopopxType.emphasis)

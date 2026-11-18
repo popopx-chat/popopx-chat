@@ -53,7 +53,7 @@ ChatView
 
 ---
 
-## [2. ChatView](../../Shared/Views/Chat/ChatView.swift#L47-L3048)
+## [2. ChatView](../../Shared/Views/Chat/ChatView.swift#L57-L3122)
 
 **File**: [`Shared/Views/Chat/ChatView.swift`](../../Shared/Views/Chat/ChatView.swift)
 
@@ -85,33 +85,33 @@ The main conversation view. Key responsibilities:
 
 | Function | Line | Description |
 |----------|------|-------------|
-| [`body`](../../Shared/Views/Chat/ChatView.swift#L109) | L109 | Main view body |
-| [`initChatView()`](../../Shared/Views/Chat/ChatView.swift#L771) | L771 | Initializes chat view state on appear |
-| [`chatItemsList()`](../../Shared/Views/Chat/ChatView.swift#L936) | L936 | Builds the scrollable message list |
-| [`scrollToItem(_:)`](../../Shared/Views/Chat/ChatView.swift#L850) | L850 | Scrolls to a specific message by ID |
-| [`searchToolbar()`](../../Shared/Views/Chat/ChatView.swift#L884) | L884 | In-chat search toolbar UI |
-| [`searchTextChanged(_:)`](../../Shared/Views/Chat/ChatView.swift#L1231) | L1231 | Handles search query changes |
-| [`loadChatItems(_:_:)`](../../Shared/Views/Chat/ChatView.swift#L1671) | L1671 | Loads chat items with pagination |
-| [`filtered(_:)`](../../Shared/Views/Chat/ChatView.swift#L922) | L922 | Filters items by content type |
-| [`callButton(_:_:imageName:)`](../../Shared/Views/Chat/ChatView.swift#L1409) | L1409 | Audio/video call toolbar button |
-| [`searchButton()`](../../Shared/Views/Chat/ChatView.swift#L1429) | L1429 | Search toggle toolbar button |
-| [`addMembersButton()`](../../Shared/Views/Chat/ChatView.swift#L1497) | L1497 | Group add-members toolbar button |
-| [`forwardSelectedMessages()`](../../Shared/Views/Chat/ChatView.swift#L1560) | L1560 | Forwards batch-selected messages |
-| [`deletedSelectedMessages()`](../../Shared/Views/Chat/ChatView.swift#L1551) | L1551 | Deletes batch-selected messages |
-| [`onChatItemsUpdated()`](../../Shared/Views/Chat/ChatView.swift#L1712) | L1712 | Reacts to chat items model changes |
-| [`contentFilterMenu(withLabel:)`](../../Shared/Views/Chat/ChatView.swift#L1437) | L1437 | Content filter dropdown menu |
+| [`body`](../../Shared/Views/Chat/ChatView.swift#L156) | L156 | Main view body |
+| [`initChatView()`](../../Shared/Views/Chat/ChatView.swift#L824) | L824 | Initializes chat view state on appear |
+| [`chatItemsList()`](../../Shared/Views/Chat/ChatView.swift#L989) | L989 | Builds the scrollable message list |
+| [`scrollToItem(_:)`](../../Shared/Views/Chat/ChatView.swift#L903) | L903 | Scrolls to a specific message by ID |
+| [`searchToolbar()`](../../Shared/Views/Chat/ChatView.swift#L937) | L937 | In-chat search toolbar UI |
+| [`searchTextChanged(_:)`](../../Shared/Views/Chat/ChatView.swift#L1285) | L1285 | Handles search query changes |
+| [`loadChatItems(_:_:)`](../../Shared/Views/Chat/ChatView.swift#L1725) | L1725 | Loads chat items with pagination |
+| [`filtered(_:)`](../../Shared/Views/Chat/ChatView.swift#L975) | L975 | Filters items by content type |
+| [`callButton(_:_:imageName:)`](../../Shared/Views/Chat/ChatView.swift#L1463) | L1463 | Audio/video call toolbar button |
+| [`searchButton()`](../../Shared/Views/Chat/ChatView.swift#L1483) | L1483 | Search toggle toolbar button |
+| [`addMembersButton()`](../../Shared/Views/Chat/ChatView.swift#L1551) | L1551 | Group add-members toolbar button |
+| [`forwardSelectedMessages()`](../../Shared/Views/Chat/ChatView.swift#L1614) | L1614 | Forwards batch-selected messages |
+| [`deletedSelectedMessages()`](../../Shared/Views/Chat/ChatView.swift#L1605) | L1605 | Deletes batch-selected messages |
+| [`onChatItemsUpdated()`](../../Shared/Views/Chat/ChatView.swift#L1766) | L1766 | Reacts to chat items model changes |
+| [`contentFilterMenu(withLabel:)`](../../Shared/Views/Chat/ChatView.swift#L1491) | L1491 | Content filter dropdown menu |
 
 ### Supporting Types
 
 | Type | Line | Description |
 |------|------|-------------|
-| [`ChatItemWithMenu`](../../Shared/Views/Chat/ChatView.swift#L1740) | L1740 | Wraps each chat item with context menu |
-| [`FloatingButtonModel`](../../Shared/Views/Chat/ChatView.swift#L3051) | L3051 | Manages scroll-to-bottom button state |
-| [`ReactionContextMenu`](../../Shared/Views/Chat/ChatView.swift#L3249) | L3249 | Reaction picker context menu |
-| [`ToggleNtfsButton`](../../Shared/Views/Chat/ChatView.swift#L3347) | L3347 | Mute/unmute notifications button |
-| [`ContentFilter`](../../Shared/Views/Chat/ChatView.swift#L3399) | L3399 | Enum for message content filter types |
-| [`deleteMessages()`](../../Shared/Views/Chat/ChatView.swift#L3142) | L3142 | Deletes messages with confirmation |
-| [`archiveReports()`](../../Shared/Views/Chat/ChatView.swift#L3192) | L3192 | Archives report messages |
+| [`ChatItemWithMenu`](../../Shared/Views/Chat/ChatView.swift#L1794) | L1794 | Wraps each chat item with context menu |
+| [`FloatingButtonModel`](../../Shared/Views/Chat/ChatView.swift#L3125) | L3125 | Manages scroll-to-bottom button state |
+| [`ReactionContextMenu`](../../Shared/Views/Chat/ChatView.swift#L3323) | L3323 | Reaction picker context menu |
+| [`ToggleNtfsButton`](../../Shared/Views/Chat/ChatView.swift#L3421) | L3421 | Mute/unmute notifications button |
+| [`ContentFilter`](../../Shared/Views/Chat/ChatView.swift#L3473) | L3473 | Enum for message content filter types |
+| [`deleteMessages()`](../../Shared/Views/Chat/ChatView.swift#L3216) | L3216 | Deletes messages with confirmation |
+| [`archiveReports()`](../../Shared/Views/Chat/ChatView.swift#L3266) | L3266 | Archives report messages |
 
 ---
 
@@ -137,13 +137,39 @@ Routes each `ChatItem` to the appropriate renderer based on its `CIContent` type
 | `rcvChatPreference` / `sndChatPreference` | [`CIFeaturePreferenceView`](../../Shared/Views/Chat/ChatItem/CIFeaturePreferenceView.swift#L14) | L14 | Preference change |
 | `invalidJSON` | [`CIInvalidJSONView`](../../Shared/Views/Chat/ChatItem/CIInvalidJSONView.swift#L14) | L14 | Failed to decode |
 
+### Redesigned bubble mount (B5)
+
+The routing above is unchanged. What changed is who *draws* the row:
+`chatItemWithMenu` ([ChatView.swift#L2308](../../Shared/Views/Chat/ChatView.swift#L2308)) asks [`PopopxBubbleMount.body(of:chat:)`](../../Shared/Features/ChatRoom/PopopxMessageBubble.swift#L868) first and only takes the row over when it returns a
+body; otherwise the whole row keeps going through `ChatItemView` → `ChatItemContentView`,
+controls included.
+
+Taken over (direct chats only — `chatType == .direct`):
+
+| `CIContent` | `PopopxBubbleBody` |
+|---|---|
+| `sndMsgContent` / `rcvMsgContent` carrying plain `.text`, with no quote, no file, no formatted text / mentions / markdown and no edited, timed, forwarded, via-proxy, verified or live meta | `.text` |
+| `sndDeleted`, `rcvDeleted`, `sndModerated`, `rcvModerated`, `rcvBlocked` | `.withdrawn` |
+| `rcvIntegrityError`, `rcvDecryptionError`, `rcvMsgError`, `invalidJSON`, `MsgContent.unknown` | `.unavailable` |
+| connection / group / feature / preference / E2EE event rows with non-empty text | `.event` |
+
+Deliberately left on the legacy path (裁定 A — 分层挂载): calls, group invitations, `chatBanner`,
+`MsgContent.link / image / video / voice / file / report / chat`, and every text row carrying markup
+or a meta flag the bubble cannot draw. `PopopxBubbleBody` has 5 cases and no media player, download
+control, link card or reply strip, so collapsing those into `.media(name:detail:)` would silently
+delete working UI.
+
+Transport badge: [`PopopxBubbleTransportResolver`](../../Shared/Features/ChatRoom/PopopxMessageBubble.swift#L671) maps message keys to `.smp` / `.mesh` / `.meshRelay` / `.pending`
+from a chat-scoped table rebuilt at [ChatView.swift#L126](../../Shared/Views/Chat/ChatView.swift#L126) and filled at [ChatView.swift#L138](../../Shared/Views/Chat/ChatView.swift#L138) from `PopopxMeshRuntime`; a
+message with no mesh record keeps the SMP look.
+
 ### Bubble Direction
 - Sent messages: aligned right, sender-colored bubble
 - Received messages: aligned left, receiver-colored bubble
 - Events/system messages: centered, no bubble
 
 ### Appearance Dependencies
-Each [`ChatItemWithMenu`](../../Shared/Views/Chat/ChatView.swift#L1740) may depend on the previous and next items for visual decisions:
+Each [`ChatItemWithMenu`](../../Shared/Views/Chat/ChatView.swift#L1794) may depend on the previous and next items for visual decisions:
 - Whether to show the sender name (group messages, different sender than previous)
 - Whether to show the tail on the bubble (last consecutive message from same sender)
 - Date separator between messages on different days
@@ -152,15 +178,15 @@ Each [`ChatItemWithMenu`](../../Shared/Views/Chat/ChatView.swift#L1740) may depe
 
 ### Channel Message Rendering (`.channelRcv`)
 
-Channel messages (`CIDirection.channelRcv`) are rendered with the group avatar and group name as sender, with "channel" as the role label. This mirrors the `.groupRcv` path's `showGroupAsSender` visual but uses a dedicated code branch in [`chatItemListView()`](../../Shared/Views/Chat/ChatView.swift#L1975).
+Channel messages (`CIDirection.channelRcv`) are rendered with the group avatar and group name as sender, with "channel" as the role label. This mirrors the `.groupRcv` path's `showGroupAsSender` visual but uses a dedicated code branch in [`chatItemListView()`](../../Shared/Views/Chat/ChatView.swift#L2032).
 
 Key differences from `.groupRcv`:
 - No `prevMember`/`memCount` logic — channels have no per-member identity
 - Always shows group avatar (via `ProfileImage` with `groupInfo.image` / `groupInfo.chatIconName`)
 - Tapping avatar opens `showChatInfoSheet` (not member info)
 - [`shouldShowAvatar()`](../../Shared/Views/Chat/ChatView.swift#L23) treats consecutive `.channelRcv` items as same sender
-- [`getItemSeparation()`](../../Shared/Views/Chat/ChatView.swift#L1801) treats consecutive `.channelRcv` items as `sameMemberAndDirection`
-- [`showMemberImage()`](../../Shared/Views/Chat/ChatView.swift#L2376) returns `true` when previous item is `.channelRcv` (different sender type)
+- [`getItemSeparation()`](../../Shared/Views/Chat/ChatView.swift#L1858) treats consecutive `.channelRcv` items as `sameMemberAndDirection`
+- [`showMemberImage()`](../../Shared/Views/Chat/ChatView.swift#L2450) returns `true` when previous item is `.channelRcv` (different sender type)
 - [`memberToModerate()`](../../POPOPXChat/ChatTypes.swift#L4154) returns `nil` for `.channelRcv` (no per-member moderation)
 
 ---
@@ -352,7 +378,7 @@ unknown values                              skipped
 
 ### Rows
 
-[`ChatItemWithMenu.terminalItemRow`](../../Shared/Views/Chat/ChatView.swift#L2155) wraps `chatItemWithMenu` in [`TerminalChatItemRow`](../../Shared/Views/Chat/ChatItem/TerminalItemView.swift#L374). Gaps follow the paragraph unit `terminalParagraphGap` (user, terminal spacing mockup):
+[`ChatItemWithMenu.terminalItemRow`](../../Shared/Views/Chat/ChatView.swift#L2212) wraps `chatItemWithMenu` in [`TerminalChatItemRow`](../../Shared/Views/Chat/ChatItem/TerminalItemView.swift#L374). Gaps follow the paragraph unit `terminalParagraphGap` (user, terminal spacing mockup):
 
 ```
 row padding        top: topGap
@@ -380,8 +406,8 @@ bottom padding     newest row: 8pt; above a date separator: terminalLevelStep; o
 | [`terminalCardTopGap(item)`](../../Shared/Views/Chat/ChatItem/TerminalItemView.swift#L150) | `terminalParagraphGap` above media, voice, file and emoji when a quote or header is above them (`hasQuoteOrHeader`), otherwise 0 |
 | [`terminalCardBottomGap(item)`](../../Shared/Views/Chat/ChatItem/TerminalItemView.swift#L154) | `terminalParagraphGap` below a card that ends the item when reactions follow, otherwise 0 |
 | [`terminalTextTopGap(item)`](../../Shared/Views/Chat/ChatItem/TerminalItemView.swift#L158) | Above the text of `FramedItemView`: 0 at the item top; `terminalParagraphGap` below a quote or media, or when the text starts with a code block, table or rule (0 when the text starts with empty lines, which are at least as high: `startsWithEmptyLine`; block markdown: `leadingEmptyLines`; other text: a line break at its start, except in reports, whose reason is drawn first); `terminalLevelStep` below a header when the text starts with a heading; otherwise 0 |
-| [`terminalRowsSeparated(olderRow)`](../../Shared/Views/Chat/ChatView.swift#L2186) | The newest item of the older row is the chat banner, or its `getItemSeparation` has a date (against its newer item only for single and revealed rows) |
-| [`chatItemSender(ci, range)`](../../Shared/Views/Chat/ChatView.swift#L2193) | Channel as sender: group name, role "channel", group image. Received direct: contact name and badge. Group member: `memberNames`, badge and role of a single member, member image (tap: member info). Own group items: membership name, badge, role, image. Other own items: user name and badge, or "Incognito" |
+| [`terminalRowsSeparated(olderRow)`](../../Shared/Views/Chat/ChatView.swift#L2243) | The newest item of the older row is the chat banner, or its `getItemSeparation` has a date (against its newer item only for single and revealed rows) |
+| [`chatItemSender(ci, range)`](../../Shared/Views/Chat/ChatView.swift#L2250) | Channel as sender: group name, role "channel", group image. Received direct: contact name and badge. Group member: `memberNames`, badge and role of a single member, member image (tap: member info). Own group items: membership name, badge, role, image. Other own items: user name and badge, or "Incognito" |
 | `CIContent.hasTerminalSender` | Sent messages, deleted and moderated items, calls and group invitations; received content with `showMemberName` |
 
 `ChatView` passes `olderRow`, the next merged item. `MergedItem.revealed`: true for `.single`, the flag of `.grouped`.
@@ -590,7 +616,7 @@ Sole channel owner cannot leave (only delete). Guard: `members.filter({ $0.wrapp
 
 | File | Path | Line |
 |------|------|------|
-| Chat view | [`Shared/Views/Chat/ChatView.swift`](../../Shared/Views/Chat/ChatView.swift) | [L47](../../Shared/Views/Chat/ChatView.swift#L47) |
+| Chat view | [`Shared/Views/Chat/ChatView.swift`](../../Shared/Views/Chat/ChatView.swift) | [L57](../../Shared/Views/Chat/ChatView.swift#L57) |
 | Item router | [`Shared/Views/Chat/ChatItemView.swift`](../../Shared/Views/Chat/ChatItemView.swift) | [L42](../../Shared/Views/Chat/ChatItemView.swift#L42) |
 | Framed bubble | [`Shared/Views/Chat/ChatItem/FramedItemView.swift`](../../Shared/Views/Chat/ChatItem/FramedItemView.swift) | [L14](../../Shared/Views/Chat/ChatItem/FramedItemView.swift#L14) |
 | Emoji message | [`Shared/Views/Chat/ChatItem/EmojiItemView.swift`](../../Shared/Views/Chat/ChatItem/EmojiItemView.swift) | [L14](../../Shared/Views/Chat/ChatItem/EmojiItemView.swift#L14) |
