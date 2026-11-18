@@ -571,6 +571,7 @@ private struct ChatRows: View {
             olderRow: mergedItems.items.indices.contains(index + 1) ? mergedItems.items[index + 1] : nil,
             listWidth: width,
             maxWidth: rowMaxWidth(ci, mergedItem, chat.chatInfo, width),
+            channelTable: PopopxBubbleChannelTable(channels: [:]),
             composeState: .constant(ComposeState()),
             selectedMember: .constant(nil),
             showChatInfoSheet: .constant(false),

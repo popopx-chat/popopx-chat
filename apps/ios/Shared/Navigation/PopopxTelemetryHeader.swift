@@ -302,16 +302,32 @@ struct PopopxDualStatusCapsule: View {
     }
 
     var body: some View {
-        HStack(spacing: PopopxMetrics.spaceS) {
-            PopopxStatusPill(symbol: network.symbol, text: network.label, tint: network.tint,
-                             pulsing: network.isBreathing)
-                .accessibilityLabel("网络 \(network.label)")
-            ViewThatFits(in: .horizontal) {
-                bluetooth
-                PopopxStatusPill(symbol: bluetooth.symbol, text: "", tint: bluetooth.tint)
-            }
-            .accessibilityLabel("蓝牙 \(bluetoothSpoken)")
+        // 三档：两端全文字 → 射频退回圆点 → 两端都退回圆点。降级靠换档，不靠截断中文。
+        // 实测 375pt 窄屏：身份胶囊右边 97、「+」左边 307，这一栏拿到 210pt 的可用宽度。
+        // 调用方不能再对它 `.fixedSize()`：那会把 proposal 变成 nil，三档永远停在最宽一档，
+        // 溢出的 HStack 以中心对齐，于是两端同时被推出安全区（T0 就是先在这里红的）。
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: PopopxMetrics.spaceS) { networkPill; bluetooth }
+            HStack(spacing: PopopxMetrics.spaceS) { networkPill; bluetoothDot }
+            HStack(spacing: PopopxMetrics.spaceS) { networkDot; bluetoothDot }
         }
+    }
+
+    private var networkPill: some View {
+        PopopxStatusPill(symbol: network.symbol, text: network.label, tint: network.tint,
+                         pulsing: network.isBreathing)
+            .accessibilityLabel("网络 \(network.label)")
+    }
+
+    private var networkDot: some View {
+        PopopxStatusPill(symbol: network.symbol, text: "", tint: network.tint,
+                         pulsing: network.isBreathing)
+            .accessibilityLabel("网络 \(network.label)")
+    }
+
+    private var bluetoothDot: some View {
+        PopopxStatusPill(symbol: bluetooth.symbol, text: "", tint: bluetooth.tint)
+            .accessibilityLabel("蓝牙 \(bluetoothSpoken)")
     }
 
     /// 射频档位说人话。`unknown` 与 `resetting` 还不能下结论，所以不给危险色。
@@ -460,17 +476,21 @@ struct PopopxTelemetryHeader: View {
     var body: some View {
         HStack(spacing: PopopxMetrics.spaceS) {
             PopopxIdentitySwitcher(userId: $currentUserId, identities: identities)
-                .fixedSize()
+                .frame(maxWidth: PopopxMetrics.headerIdentityMaxWidth, alignment: .leading)
+                .layoutPriority(1)
                 .accessibilityIdentifier("popopx.header.identity")
             Spacer(minLength: PopopxMetrics.spaceS)
+            // 不 fixedSize：把剩余宽度真的报给它，ViewThatFits 的三档才有得选。
             PopopxDualStatusCapsule(network: signal, radio: radioState)
-                .fixedSize()
             Spacer(minLength: PopopxMetrics.spaceS)
             PopopxPlusMenu(onAddFriend: onAddFriend, onStartGroupChat: onStartGroupChat, onScan: onScan)
+                .fixedSize()
+                .layoutPriority(1)
                 .accessibilityIdentifier("popopx.header.plus")
         }
         .padding(.horizontal, PopopxMetrics.spaceL)
-        .frame(height: PopopxMetrics.minHitTarget)
+        // 两枚胶囊自己要 48：原来按 44 夹，画出来只剩 34，点按热区跟着缩水。
+        .frame(height: PopopxMetrics.space2XL)
         .background(PopopxMaterial.bar)
         .accessibilityElement(children: .contain)
     }

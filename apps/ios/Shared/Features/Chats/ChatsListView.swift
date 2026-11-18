@@ -595,6 +595,9 @@ struct ChatsListView: View {
         }
         .popopxCardElevation(colorScheme: colorScheme)
         .contentShape(Rectangle())
+        // 验收锚点：行的 AX 形状会随屏宽和模态层变（375pt 冷启实测：列表画着两行，行标题只剩 staticText，
+        // 唯一带群名的"按钮"是导航标题 220x32），用例需要一个不随语言、不随形状变的把手。
+        .accessibilityIdentifier("popopx.row")
     }
 
     private var avatar: some View {

@@ -181,6 +181,9 @@ enum PopopxMetrics {
 
     /// HIG minimum, enforced rather than assumed.
     static let minHitTarget: CGFloat = 44
+
+    /// 顶栏身份胶囊的宽度上限：留出状态胶囊与「+」的份额，375pt 窄屏也不会把两端挤出安全区。
+    static let headerIdentityMaxWidth: CGFloat = 120
 }
 
 // MARK: - Typography

@@ -667,6 +667,7 @@ struct PopopxInputBar: View {
                 if showsPlusPanel { isFocused = false }
                 PopopxHaptics.selection()
             }
+            .accessibilityIdentifier("popopx.inputBar.plusButton")
 
             sendKey
         }
@@ -692,6 +693,7 @@ struct PopopxInputBar: View {
                     )
             )
             .accessibilityLabel(placeholder)
+            .accessibilityIdentifier("popopx.inputBar.textField")
     }
 
     /// 录音不归本条所有：这里只把"按住说话"这个面切换出来，并把按下这件事递出去。
@@ -724,6 +726,7 @@ struct PopopxInputBar: View {
         .opacity(canFire ? 1 : 0.45)
         .accessibilityLabel("发送")
         .accessibilityValue(sendAccessoryLabel)
+        .accessibilityIdentifier("popopx.inputBar.sendButton")
     }
 
     /// 一个控件里只可能有一把强调色：靛紫（SMP）或青绿（mesh），或两者都不是的中性灰。

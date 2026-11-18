@@ -505,6 +505,7 @@ struct PopopxBadge: View {
             badge
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(spoken)
+                .accessibilityIdentifier("popopx.bubble.channel")
         } else {
             EmptyView()
         }

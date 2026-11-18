@@ -43,6 +43,7 @@ SimpleXApp (root entry point)
 | [Chat List](client/chat-list.md) | Conversation list, filtering, search, swipe actions |
 | [Message Composition](client/compose.md) | Compose bar, attachments, reply/edit/forward modes, voice recording |
 | [Navigation](client/navigation.md) | Navigation stack, deep linking, sheet presentation, call overlay |
+| [Simulator Test Harness](client/testing.md) | Test targets, code-signing gate for app groups, XCUITest locator rules |
 | [Push Notifications](services/notifications.md) | NtfManager, NSE, notification modes, token lifecycle |
 | [WebRTC Calling](services/calls.md) | CallController, WebRTCClient, CallKit, signaling via SMP |
 | [File Transfer](services/files.md) | Inline/XFTP transfer, auto-receive, CryptoFile, file constants |
