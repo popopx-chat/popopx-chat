@@ -74,3 +74,9 @@ testpush.sh
 Local.xcconfig
 build/
 Shared/POPOPXAssets.xcassets/*.imageset
+
+# 绝密防窥模型的导出产物：AGPL 权重的构建结果，由 scripts/setup_pretrained_coreml.py 现生成，
+# 不进仓库（脚本第 390 行写的就是这个口径）。Resources/ 是脚本默认输出目录，
+# Shared/Features/SecureEphemeral/ 那份是 Xcode 拖入时按 "Copy items if needed" 复制的副本。
+Resources/SecureEphemeral/
+Shared/Features/SecureEphemeral/*.mlpackage

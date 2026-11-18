@@ -33,6 +33,86 @@ struct POPOPXApp: App {
         setDbContainer()
         BGManager.shared.register()
         NtfManager.shared.registerCategories()
+        installSecureEphemeralHost()
+        // 反调试只在 Release 里真正 `PT_DENY_ATTACH`；Debug 下这行只置一个标志位
+        // （PopopxAntiDebug.swift:41），否则 Xcode 挂不上去，整个特性在开发期就没法验。
+        PopopxAntiDebug.enableProtection()
+    }
+
+    /// 绝密阅后即焚的宿主侧两只钩子：物理删除本机记录、把销毁回执发回给对方。
+    ///
+    /// 为什么装在 `init()` 而不是某个视图的 `.task`：`PopopxSecureWindowManager` 是 fail-closed 的
+    /// （钩子为空时直接拒开窗口），装配必须排在任何卡片出现之前，否则用户会碰到"卡片在、点了没反应"
+    /// 那一格。`App.init()` 本身就在主 actor 上（SwiftUI 的 `App` 协议是 `@MainActor` 的），
+    /// 所以这里可以直接调那个 `@MainActor` 单例。
+    ///
+    /// `target.chatId` 只用来查现网会话（`ChatModel.getChat(_:)`，ChatModel.swift:548），
+    /// 传进去的就是 `ChatInfo.id` 原样；这两个值不在这里二次拼装（理由见 `PopopxSecureChatTarget`）。
+    /// 查不到就只记一条 error：宁可这一条没删成，也不能拿猜出来的键去删别人的行。
+    private func installSecureEphemeralHost() {
+        PopopxSecureWindowManager.shared.install(
+            host: PopopxSecureHostHooks(
+                deleteItem: { target in
+                    guard let itemId = target.itemId else { return }
+                    // 整段跑在主 actor 上：`getChat` 读的是 `ChatModel.chats`，
+                    // 在别的线程读它等于和 UI 抢一份没有锁的数组。两个 await 只是让出，不占主线程。
+                    Task { @MainActor in
+                        guard let chat = ChatModel.shared.getChat(target.chatId) else {
+                            logger.error("secure burn: chat not found for \(target.chatId)")
+                            return
+                        }
+                        do {
+                            // `.cidmInternal` = 只删本机这一份，不向对方广播删除。对方的知情路径
+                            // 只有下面那条回执文本：一条"我看完了并销毁了"的话，而不是一条协议事件。
+                            let deletions = try await apiDeleteChatItems(
+                                type: chat.chatInfo.chatType,
+                                id: chat.chatInfo.apiId,
+                                scope: chat.chatInfo.groupChatScope(),
+                                itemIds: [itemId],
+                                mode: .cidmInternal
+                            )
+                            let model = ChatModel.shared
+                            for deletion in deletions {
+                                if let toItem = deletion.toChatItem {
+                                    _ = model.upsertChatItem(chat.chatInfo, toItem.chatItem)
+                                } else {
+                                    model.removeChatItem(chat.chatInfo, deletion.deletedChatItem.chatItem)
+                                }
+                                model.updateChatInfo(deletion.deletedChatItem.chatInfo)
+                            }
+                        } catch {
+                            // 这条日志是验收口径："看完但没删掉"的全部发生次数都由它统计。
+                            logger.error("secure burn: apiDeleteChatItems failed \(responseError(error))")
+                        }
+                    }
+                },
+                sendReceipt: { text, target in
+                    Task { @MainActor in
+                        guard let chat = ChatModel.shared.getChat(target.chatId) else {
+                            logger.error("secure receipt: chat not found for \(target.chatId)")
+                            return
+                        }
+                        // 回执是**普通明文消息**：它说的是"那条绝密已经销毁了"这件事，
+                        // 本身不含任何正文，所以不需要再走一次载荷封装，对方也永远收得到。
+                        guard let items = await apiSendMessages(
+                            type: chat.chatInfo.chatType,
+                            id: chat.chatInfo.apiId,
+                            scope: chat.chatInfo.groupChatScope(),
+                            sendAsGroup: chat.chatInfo.sendAsGroup,
+                            live: false,
+                            ttl: nil,
+                            sign: false,
+                            composedMessages: [ComposedMessage(msgContent: .text(text))]
+                        ) else {
+                            logger.error("secure receipt: apiSendMessages returned nil")
+                            return
+                        }
+                        let model = ChatModel.shared
+                        for item in items { model.addChatItem(chat.chatInfo, item) }
+                    }
+                }
+            )
+        )
     }
 
     var body: some Scene {

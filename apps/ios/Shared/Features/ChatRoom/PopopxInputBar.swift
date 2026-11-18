@@ -228,8 +228,86 @@ struct PopopxComposerSend: Hashable {
     let text: String
     let context: PopopxComposerContext
     let ttlSeconds: Int?
+    /// 绝密档的屏幕停留时长，秒；nil = 这条不是绝密消息。
+    ///
+    /// 与 `ttlSeconds` **是两个独立的值，不能合并**：那一格是 SMP 侧"消息多久从服务器消失"，
+    /// 这一格是"明文允许停在收件方屏幕上多久"。它们由不同的模块执行，也可以同时开着
+    /// （一条既走公网阅后即焚、又在屏幕上阅后即焚的消息是合法组合）。
+    /// 载荷文件里 `PopopxSecureCopy.ttlOptions` 拒绝复用 `durationOptions` 是同一条理由的另一侧。
+    let secureTTLSeconds: Int?
     let dispatch: PopopxComposerDispatch
     let channel: PopopxComposerChannel
+
+    init(
+        text: String,
+        context: PopopxComposerContext,
+        ttlSeconds: Int?,
+        secureTTLSeconds: Int? = nil,
+        dispatch: PopopxComposerDispatch,
+        channel: PopopxComposerChannel
+    ) {
+        self.text = text
+        self.context = context
+        self.ttlSeconds = ttlSeconds
+        self.secureTTLSeconds = secureTTLSeconds
+        self.dispatch = dispatch
+        self.channel = channel
+    }
+}
+
+/// 时长档位要能被同一排 chips 画出来：阅后即焚与绝密用的是同一个控件，只有数据和落点不同。
+/// 两个类型各自留在自己的文件里（`PopopxComposerDurationOption` 在本文件、
+/// `PopopxSecureTTLOption` 在绝密载荷文件），这个协议是它们唯一的交集。
+protocol PopopxDurationOption {
+    var seconds: Int { get }
+    var title: String { get }
+}
+
+extension PopopxComposerDurationOption: PopopxDurationOption {}
+extension PopopxSecureTTLOption: PopopxDurationOption {}
+
+/// 一排时长 chip。从 `disappearingBlock` 里原样搬出来（逐条修饰符未改），
+/// 目的是让绝密那一档不必抄第二遍——两排 chip 长得不一样才是更难查的 bug。
+private struct PopopxDurationChips<Option>: View where Option: PopopxDurationOption & Identifiable {
+    let options: [Option]
+    let selectedSeconds: Int
+    let label: String
+    let onSelect: (Int) -> Void
+
+    var body: some View {
+        HStack(spacing: PopopxMetrics.spaceXS) {
+            ForEach(options) { option in
+                let isSelected = selectedSeconds == option.seconds
+                Button {
+                    PopopxHaptics.selection()
+                    onSelect(option.seconds)
+                } label: {
+                    Text(option.title)
+                        .font(PopopxType.meta)
+                        .foregroundStyle(isSelected ? PopopxPalette.onBrand : PopopxPalette.labelSecondary)
+                        .lineLimit(1)
+                        .frame(minWidth: PopopxMetrics.space2XL, minHeight: PopopxMetrics.minHitTarget)
+                        .background(
+                            isSelected ? PopopxPalette.brand : Color.clear,
+                            in: .rect(cornerRadius: PopopxMetrics.radiusChip)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: PopopxMetrics.radiusChip)
+                                .strokeBorder(
+                                    isSelected ? Color.clear : PopopxPalette.labelHint,
+                                    lineWidth: PopopxMetrics.hairline
+                                )
+                        )
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(PopopxPressButtonStyle(feedback: nil))
+                .accessibilityAddTraits(isSelected ? .isSelected : [])
+            }
+            Spacer(minLength: PopopxMetrics.spaceXS)
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(Text(label))
+    }
 }
 
 /// 阅后即焚的一档。做成结构体而不是带标签的元组：`ForEach(…, id: \.seconds)` 的键路径取不了元组成员。
@@ -433,6 +511,9 @@ enum PopopxPlusAction: String, CaseIterable, Identifiable {
     case camera
     case file
     case location
+    /// 绝密这一格是**武装开关**，不是选择器：它把这条草稿标成绝密，时长在同一条面板里那排 chip 上调。
+    /// 因此它和其余四格不一样 —— 按下去不关面板（见 `plusPanel` 里那一处 `action != .secure`）。
+    case secure
 
     var id: String { rawValue }
 
@@ -442,6 +523,7 @@ enum PopopxPlusAction: String, CaseIterable, Identifiable {
         case .camera: return "拍摄"
         case .file: return "文件"
         case .location: return "位置"
+        case .secure: return "绝密"
         }
     }
 
@@ -451,6 +533,7 @@ enum PopopxPlusAction: String, CaseIterable, Identifiable {
         case .camera: return "camera.fill"
         case .file: return "folder.fill"
         case .location: return "location.fill"
+        case .secure: return "lock.shield.fill"
         }
     }
 }
@@ -471,6 +554,7 @@ struct PopopxInputBar: View {
 
     private let context: PopopxComposerContext
     private let ttlSeconds: Int?
+    private let secureTTLSeconds: Int?
     private let isSendEnabled: Bool
     private let placeholder: String
     private let onSend: (PopopxComposerSend) -> Void
@@ -478,6 +562,7 @@ struct PopopxInputBar: View {
     private let onHoldToTalk: () -> Void
     private let onPlusTap: (PopopxPlusAction) -> Void
     private let onTTLChange: (Int?) -> Void
+    private let onSecureTTLChange: (Int?) -> Void
 
     @State private var showsPlusPanel = false
     @State private var showsEmojiTray = false
@@ -494,13 +579,15 @@ struct PopopxInputBar: View {
         text: Binding<String>,
         context: PopopxComposerContext = .outsideDirectContact,
         ttlSeconds: Int? = nil,
+        secureTTLSeconds: Int? = nil,
         isSendEnabled: Bool = true,
         placeholder: String = "发消息…",
         onSend: @escaping (PopopxComposerSend) -> Void,
         onVoiceTap: @escaping (Bool) -> Void = { _ in },
         onHoldToTalk: @escaping () -> Void = {},
         onPlusTap: @escaping (PopopxPlusAction) -> Void = { _ in },
-        onTTLChange: @escaping (Int?) -> Void = { _ in }
+        onTTLChange: @escaping (Int?) -> Void = { _ in },
+        onSecureTTLChange: @escaping (Int?) -> Void = { _ in }
     ) {
         _text = text
         _model = StateObject(wrappedValue: PopopxInputBarModel())
@@ -508,6 +595,7 @@ struct PopopxInputBar: View {
         _meshState = ObservedObject(wrappedValue: PopopxMeshStateSource.shared)
         self.context = context
         self.ttlSeconds = ttlSeconds
+        self.secureTTLSeconds = secureTTLSeconds
         self.isSendEnabled = isSendEnabled
         self.placeholder = placeholder
         self.onSend = onSend
@@ -515,6 +603,7 @@ struct PopopxInputBar: View {
         self.onHoldToTalk = onHoldToTalk
         self.onPlusTap = onPlusTap
         self.onTTLChange = onTTLChange
+        self.onSecureTTLChange = onSecureTTLChange
     }
 
     var body: some View {
@@ -804,32 +893,46 @@ struct PopopxInputBar: View {
                 spacing: PopopxMetrics.spaceXS
             ) {
                 ForEach(PopopxPlusAction.allCases) { action in
+                    // 有"已武装"态的格子目前只有绝密：按普通一次性动作画的话，
+                    // 用户看不出这条草稿到底是不是绝密消息 —— 那是发送前唯一的可见线索。
+                    // 声明必须放在 `Button` 之前而不是 `label:` 里：下面的 `.accessibilityAddTraits`
+                    // 挂在 Button 的返回值上，看不见 label 闭包内部的作用域。
+                    let armed = action == .secure && secureTTLSeconds != nil
                     Button {
-                        closeTrays()
+                        // 绝密这一格按下去**不关面板**：它是个武装开关，关掉之后用户只会看见
+                        // 面板消失、什么也没发生；留在面板里才能立刻看见那排时长 chip 亮起来。
+                        // 其余四格是一次性动作（开选择器/系统面板），必须关。
+                        if action != .secure { closeTrays() }
                         onPlusTap(action)
                     } label: {
                         VStack(spacing: PopopxMetrics.space2XS) {
                             Image(systemName: action.symbolName)
                                 .font(PopopxType.sectionHeader)
-                                .foregroundStyle(PopopxPalette.label)
+                                .foregroundStyle(armed ? PopopxPalette.onBrand : PopopxPalette.label)
                                 .frame(
                                     minWidth: PopopxMetrics.minHitTarget,
                                     minHeight: PopopxMetrics.minHitTarget
                                 )
-                                .background(PopopxPalette.card, in: .rect(cornerRadius: PopopxMetrics.radiusControl))
+                                .background(
+                                    armed ? PopopxPalette.brand : PopopxPalette.card,
+                                    in: .rect(cornerRadius: PopopxMetrics.radiusControl)
+                                )
                             Text(action.title)
                                 .font(PopopxType.microTag)
-                                .foregroundStyle(PopopxPalette.labelSecondary)
+                                .foregroundStyle(armed ? PopopxPalette.brand : PopopxPalette.labelSecondary)
                         }
                         .frame(maxWidth: .infinity)
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(PopopxPressButtonStyle(feedback: .light))
                     .accessibilityLabel(action.title)
+                    .accessibilityAddTraits(armed ? .isSelected : [])
                 }
             }
 
             disappearingBlock
+
+            secureBlock
 
             Text("阅后即焚、附件与引用不由蓝牙中继，仍按原样从公网发送。")
                 .font(PopopxType.microTag)
@@ -845,40 +948,32 @@ struct PopopxInputBar: View {
             note: "开启后这条只走在线加密，不经蓝牙中继",
             isOn: disappearingSwitch
         )
-        if ttlSeconds != nil {
-            HStack(spacing: PopopxMetrics.spaceXS) {
-                ForEach(PopopxComposerRouting.durationOptions) { option in
-                    let isSelected = ttlSeconds == option.seconds
-                    Button {
-                        PopopxHaptics.selection()
-                        onTTLChange(option.seconds)
-                    } label: {
-                        Text(option.title)
-                            .font(PopopxType.meta)
-                            .foregroundStyle(isSelected ? PopopxPalette.onBrand : PopopxPalette.labelSecondary)
-                            .lineLimit(1)
-                            .frame(minWidth: PopopxMetrics.space2XL, minHeight: PopopxMetrics.minHitTarget)
-                            .background(
-                                isSelected ? PopopxPalette.brand : Color.clear,
-                                in: .rect(cornerRadius: PopopxMetrics.radiusChip)
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: PopopxMetrics.radiusChip)
-                                    .strokeBorder(
-                                        isSelected ? Color.clear : PopopxPalette.labelHint,
-                                        lineWidth: PopopxMetrics.hairline
-                                    )
-                            )
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(PopopxPressButtonStyle(feedback: nil))
-                    .accessibilityAddTraits(isSelected ? .isSelected : [])
-                }
-                Spacer(minLength: PopopxMetrics.spaceXS)
-            }
+        if let ttlSeconds {
             // 三档就是旧发送键菜单里的那三档（`SendMessageView.swift:199`-`:201`），这里不另立时长。
-            .accessibilityElement(children: .contain)
-            .accessibilityLabel(Text("阅后即焚时长"))
+            PopopxDurationChips(
+                options: PopopxComposerRouting.durationOptions,
+                selectedSeconds: ttlSeconds,
+                label: "阅后即焚时长",
+                onSelect: onTTLChange
+            )
+        }
+    }
+
+    /// 绝密那一档。它和上面那一档在版面上挨着，所以两处文案必须把**区别**说出来：
+    /// 一个管服务器留多久，一个管屏幕留多久，而且这一条可以走蓝牙（发出去的是密文）。
+    @ViewBuilder private var secureBlock: some View {
+        PopopxCheckbox(
+            "绝密阅后即焚",
+            note: "正文以密文发送，对方需生物识别后才能查看；可走蓝牙中继（中继只存密文）",
+            isOn: secureSwitch
+        )
+        if let secureTTLSeconds {
+            PopopxDurationChips(
+                options: PopopxSecureCopy.ttlOptions,
+                selectedSeconds: secureTTLSeconds,
+                label: "绝密消息在对方屏幕上的停留时长",
+                onSelect: onSecureTTLChange
+            )
         }
     }
 
@@ -893,6 +988,20 @@ struct PopopxInputBar: View {
                     return
                 }
                 onTTLChange(ttlSeconds ?? PopopxComposerRouting.fallbackDurationSeconds)
+            }
+        )
+    }
+
+    /// 绝密那一档的同一个规矩：读 `secureTTLSeconds`、写 `onSecureTTLChange`，本地不留副本。
+    /// 默认档取自载荷层（`PopopxSecureCopy.defaultTTLSeconds`），理由见那里。
+    private var secureSwitch: Binding<Bool> {
+        Binding(
+            get: { secureTTLSeconds != nil },
+            set: { turnedOn in
+                PopopxHaptics.impact(.light)
+                onSecureTTLChange(turnedOn
+                    ? secureTTLSeconds ?? PopopxSecureCopy.defaultTTLSeconds
+                    : nil)
             }
         )
     }
@@ -919,6 +1028,7 @@ struct PopopxInputBar: View {
                 text: text,
                 context: context,
                 ttlSeconds: ttlSeconds,
+                secureTTLSeconds: secureTTLSeconds,
                 dispatch: dispatch,
                 channel: channel
             )

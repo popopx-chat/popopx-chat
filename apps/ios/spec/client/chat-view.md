@@ -140,7 +140,7 @@ Routes each `ChatItem` to the appropriate renderer based on its `CIContent` type
 ### Redesigned bubble mount (B5)
 
 The routing above is unchanged. What changed is who *draws* the row:
-`chatItemWithMenu` ([ChatView.swift#L2308](../../Shared/Views/Chat/ChatView.swift#L2308)) asks [`PopopxBubbleMount.body(of:chat:)`](../../Shared/Features/ChatRoom/PopopxMessageBubble.swift#L891) first and only takes the row over when it returns a
+`chatItemWithMenu` ([ChatView.swift#L2308](../../Shared/Views/Chat/ChatView.swift#L2308)) asks [`PopopxBubbleMount.body(of:chat:)`](../../Shared/Features/ChatRoom/PopopxMessageBubble.swift#L908) first and only takes the row over when it returns a
 body; otherwise the whole row keeps going through `ChatItemView` → `ChatItemContentView`,
 controls included.
 
@@ -159,7 +159,7 @@ or a meta flag the bubble cannot draw. `PopopxBubbleBody` has 5 cases and no med
 control, link card or reply strip, so collapsing those into `.media(name:detail:)` would silently
 delete working UI.
 
-Transport badge: [`PopopxBubbleTransportResolver`](../../Shared/Features/ChatRoom/PopopxMessageBubble.swift#L694) maps message keys to `.smp` / `.mesh` / `.meshRelay` / `.pending`
+Transport badge: [`PopopxBubbleTransportResolver`](../../Shared/Features/ChatRoom/PopopxMessageBubble.swift#L711) maps message keys to `.smp` / `.mesh` / `.meshRelay` / `.pending`
 from a chat-scoped table rebuilt at [ChatView.swift#L126](../../Shared/Views/Chat/ChatView.swift#L126) and filled at [ChatView.swift#L138](../../Shared/Views/Chat/ChatView.swift#L138) from `PopopxMeshRuntime`; a
 message with no mesh record keeps the SMP look.
 

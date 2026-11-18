@@ -216,10 +216,20 @@
 		8B0B930A30ADF0400020D403 /* PopopxLocationPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0B930830ADF0400020D403 /* PopopxLocationPickerSheet.swift */; };
 		8B0D97BE30AD900E00985BD5 /* PopopxCabinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0D97BC30AD900E00985BD5 /* PopopxCabinView.swift */; };
 		8B2E872D30AD6A7700670E4A /* PopopxTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B2E872C30AD6A7700670E4A /* PopopxTheme.swift */; };
+		8B36F14A30AE127C00ABC182 /* POPOPXAntiSpyDetector.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F14930AE127C00ABC182 /* POPOPXAntiSpyDetector.mlpackage */; };
 		8B51158530AD7BBA00B15CFE /* PopopxTelemetryHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B51158330AD7BBA00B15CFE /* PopopxTelemetryHeader.swift */; };
 		8B51158B30AD7BC200B15CFE /* PopopxProximityAddContactView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B51158730AD7BC200B15CFE /* PopopxProximityAddContactView.swift */; };
 		8B51158C30AD7BC200B15CFE /* PopopxAddFriendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B51158630AD7BC200B15CFE /* PopopxAddFriendView.swift */; };
 		8B51158D30AD7BC200B15CFE /* PopopxQRCardSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B51158830AD7BC200B15CFE /* PopopxQRCardSheet.swift */; };
+		8B84792D30AE0DAE005E18B2 /* PopopxWeakDisplayLinkProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84792B30AE0DAE005E18B2 /* PopopxWeakDisplayLinkProxy.swift */; };
+		8B84792E30AE0DAE005E18B2 /* PopopxGlareDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84792630AE0DAE005E18B2 /* PopopxGlareDetector.swift */; };
+		8B84792F30AE0DAE005E18B2 /* PopopxSecureWindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84792A30AE0DAE005E18B2 /* PopopxSecureWindowManager.swift */; };
+		8B84793030AE0DAE005E18B2 /* PopopxAntiDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84792330AE0DAE005E18B2 /* PopopxAntiDebug.swift */; };
+		8B84793130AE0DAE005E18B2 /* PopopxSecurePayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84792830AE0DAE005E18B2 /* PopopxSecurePayload.swift */; };
+		8B84793230AE0DAE005E18B2 /* PopopxCameraGuardEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84792530AE0DAE005E18B2 /* PopopxCameraGuardEngine.swift */; };
+		8B84793330AE0DAE005E18B2 /* PopopxScreenCaptureShieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84792730AE0DAE005E18B2 /* PopopxScreenCaptureShieldView.swift */; };
+		8B84793430AE0DAE005E18B2 /* PopopxAntiPhotoRenderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84792430AE0DAE005E18B2 /* PopopxAntiPhotoRenderView.swift */; };
+		8B84793530AE0DAE005E18B2 /* PopopxSecureSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84792930AE0DAE005E18B2 /* PopopxSecureSheetView.swift */; };
 		8BBDA85030AD9C880013F482 /* PopopxCreateGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBDA84C30AD9C880013F482 /* PopopxCreateGroupView.swift */; };
 		8BBDA85130AD9C880013F482 /* PopopxChatInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBDA84630AD9C880013F482 /* PopopxChatInfoView.swift */; };
 		8BBDA85230AD9C880013F482 /* PopopxInputBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBDA84930AD9C880013F482 /* PopopxInputBar.swift */; };
@@ -644,10 +654,20 @@
 		8B0B930830ADF0400020D403 /* PopopxLocationPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxLocationPickerSheet.swift; sourceTree = "<group>"; };
 		8B0D97BC30AD900E00985BD5 /* PopopxCabinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxCabinView.swift; sourceTree = "<group>"; };
 		8B2E872C30AD6A7700670E4A /* PopopxTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxTheme.swift; sourceTree = "<group>"; };
+		8B36F14930AE127C00ABC182 /* POPOPXAntiSpyDetector.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = POPOPXAntiSpyDetector.mlpackage; sourceTree = "<group>"; };
 		8B51158330AD7BBA00B15CFE /* PopopxTelemetryHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxTelemetryHeader.swift; sourceTree = "<group>"; };
 		8B51158630AD7BC200B15CFE /* PopopxAddFriendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxAddFriendView.swift; sourceTree = "<group>"; };
 		8B51158730AD7BC200B15CFE /* PopopxProximityAddContactView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxProximityAddContactView.swift; sourceTree = "<group>"; };
 		8B51158830AD7BC200B15CFE /* PopopxQRCardSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxQRCardSheet.swift; sourceTree = "<group>"; };
+		8B84792330AE0DAE005E18B2 /* PopopxAntiDebug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxAntiDebug.swift; sourceTree = "<group>"; };
+		8B84792430AE0DAE005E18B2 /* PopopxAntiPhotoRenderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxAntiPhotoRenderView.swift; sourceTree = "<group>"; };
+		8B84792530AE0DAE005E18B2 /* PopopxCameraGuardEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxCameraGuardEngine.swift; sourceTree = "<group>"; };
+		8B84792630AE0DAE005E18B2 /* PopopxGlareDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxGlareDetector.swift; sourceTree = "<group>"; };
+		8B84792730AE0DAE005E18B2 /* PopopxScreenCaptureShieldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxScreenCaptureShieldView.swift; sourceTree = "<group>"; };
+		8B84792830AE0DAE005E18B2 /* PopopxSecurePayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxSecurePayload.swift; sourceTree = "<group>"; };
+		8B84792930AE0DAE005E18B2 /* PopopxSecureSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxSecureSheetView.swift; sourceTree = "<group>"; };
+		8B84792A30AE0DAE005E18B2 /* PopopxSecureWindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxSecureWindowManager.swift; sourceTree = "<group>"; };
+		8B84792B30AE0DAE005E18B2 /* PopopxWeakDisplayLinkProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxWeakDisplayLinkProxy.swift; sourceTree = "<group>"; };
 		8BBDA84630AD9C880013F482 /* PopopxChatInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxChatInfoView.swift; sourceTree = "<group>"; };
 		8BBDA84730AD9C880013F482 /* PopopxGroupChatInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxGroupChatInfoView.swift; sourceTree = "<group>"; };
 		8BBDA84930AD9C880013F482 /* PopopxInputBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxInputBar.swift; sourceTree = "<group>"; };
@@ -1359,8 +1379,26 @@
 				8BFBC88730AD8E2100DC58B0 /* Contacts */,
 				8BFBC88930AD8E2100DC58B0 /* Me */,
 				8B51158930AD7BC200B15CFE /* AddFriend */,
+				8B84792C30AE0DAE005E18B2 /* SecureEphemeral */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		8B84792C30AE0DAE005E18B2 /* SecureEphemeral */ = {
+			isa = PBXGroup;
+			children = (
+				8B84792330AE0DAE005E18B2 /* PopopxAntiDebug.swift */,
+				8B84792430AE0DAE005E18B2 /* PopopxAntiPhotoRenderView.swift */,
+				8B84792530AE0DAE005E18B2 /* PopopxCameraGuardEngine.swift */,
+				8B84792630AE0DAE005E18B2 /* PopopxGlareDetector.swift */,
+				8B84792730AE0DAE005E18B2 /* PopopxScreenCaptureShieldView.swift */,
+				8B84792830AE0DAE005E18B2 /* PopopxSecurePayload.swift */,
+				8B84792930AE0DAE005E18B2 /* PopopxSecureSheetView.swift */,
+				8B84792A30AE0DAE005E18B2 /* PopopxSecureWindowManager.swift */,
+				8B84792B30AE0DAE005E18B2 /* PopopxWeakDisplayLinkProxy.swift */,
+				8B36F14930AE127C00ABC182 /* POPOPXAntiSpyDetector.mlpackage */,
+			);
+			path = SecureEphemeral;
 			sourceTree = "<group>";
 		};
 		8BBDA84830AD9C880013F482 /* ChatInfo */ = {
@@ -1983,11 +2021,21 @@
 				5C9329412929248A0090FFF9 /* ScanProtocolServer.swift in Sources */,
 				8C7DF3202B7CDB0A00C886D0 /* MigrateFromDevice.swift in Sources */,
 				E5DBF1932F88169800E1D7FD /* ConnectBannerCard.swift in Sources */,
+				8B36F14A30AE127C00ABC182 /* POPOPXAntiSpyDetector.mlpackage in Sources */,
 				64EEB0F72C353F1C00972D62 /* ServersSummaryView.swift in Sources */,
 				64AA1C6C27F3537400AC7277 /* DeletedItemView.swift in Sources */,
 				5C93293F2928E0FD0090FFF9 /* AudioRecPlay.swift in Sources */,
 				5C029EA82837DBB3004A9677 /* CICallItemView.swift in Sources */,
 				5CE4407227ADB1D0007B033A /* Emoji.swift in Sources */,
+				8B84792D30AE0DAE005E18B2 /* PopopxWeakDisplayLinkProxy.swift in Sources */,
+				8B84792E30AE0DAE005E18B2 /* PopopxGlareDetector.swift in Sources */,
+				8B84792F30AE0DAE005E18B2 /* PopopxSecureWindowManager.swift in Sources */,
+				8B84793030AE0DAE005E18B2 /* PopopxAntiDebug.swift in Sources */,
+				8B84793130AE0DAE005E18B2 /* PopopxSecurePayload.swift in Sources */,
+				8B84793230AE0DAE005E18B2 /* PopopxCameraGuardEngine.swift in Sources */,
+				8B84793330AE0DAE005E18B2 /* PopopxScreenCaptureShieldView.swift in Sources */,
+				8B84793430AE0DAE005E18B2 /* PopopxAntiPhotoRenderView.swift in Sources */,
+				8B84793530AE0DAE005E18B2 /* PopopxSecureSheetView.swift in Sources */,
 				CEDB245B2C9CD71800FBC5F6 /* StickyScrollView.swift in Sources */,
 				5C9CC7A928C532AB00BEF955 /* DatabaseErrorView.swift in Sources */,
 				5C1A4C1E27A715B700EAD5AD /* ChatItemView.swift in Sources */,
@@ -2423,8 +2471,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "POPOPX--iOS--Info.plist";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_NSCameraUsageDescription = "SimpleX needs camera access to scan QR codes to connect to other users and for video calls.";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "SimpleX uses Face ID for local authentication";
+				INFOPLIST_KEY_NSCameraUsageDescription = "POPOPX uses a camera to scan QR codes to add contacts and make video calls, and detects camera glare and other acts of taking photos while viewing top-secret messages; this detection only runs while the top-secret card is open, and the image does not leave the device.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "POPOPX uses Face ID for local authentication,POPOPX uses Face ID to verify your identity before viewing confidential messages and native data.";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "POPOPX uses local network access to allow using user chat profile via desktop app on the same network.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "POPOPX needs microphone access for audio and video calls, and to record voice messages.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "POPOPX needs access to Photo Library for saving captured and received media";
@@ -2472,8 +2520,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "POPOPX--iOS--Info.plist";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_NSCameraUsageDescription = "SimpleX needs camera access to scan QR codes to connect to other users and for video calls.";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "SimpleX uses Face ID for local authentication";
+				INFOPLIST_KEY_NSCameraUsageDescription = "POPOPX uses a camera to scan QR codes to add contacts and make video calls, and detects camera glare and other acts of taking photos while viewing top-secret messages; this detection only runs while the top-secret card is open, and the image does not leave the device.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "POPOPX uses Face ID for local authentication,POPOPX uses Face ID to verify your identity before viewing confidential messages and native data.";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "POPOPX uses local network access to allow using user chat profile via desktop app on the same network.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "POPOPX needs microphone access for audio and video calls, and to record voice messages.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "POPOPX needs access to Photo Library for saving captured and received media";

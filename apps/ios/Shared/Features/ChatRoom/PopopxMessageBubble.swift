@@ -192,6 +192,9 @@ enum PopopxBubbleBody: Hashable {
     case unavailable(String)
     /// 一条位置消息。载荷本身带着经纬度、地名和地址，渲染成地图卡片（本文件末 `PopopxLocationCardBubble`）。
     case location(PopopxLocationPayload)
+    /// 一条绝密消息。这一档**只带密文**：载荷里的 `sealed`/`key` 是 `Data`，渲染只用 `ttlSeconds`
+    /// 说时长，正文明细只在绝密窗口里存在，永不出现在气泡、`spokenText` 或列表预览里。
+    case secure(PopopxSecurePayload)
 
     /// VoiceOver 要说的那句正文。`.event` 由 `PopopxMessageBubble.body` 分给 `eventLine`，
     /// 不上气泡底——判据只写在那一处分流里。
@@ -203,6 +206,9 @@ enum PopopxBubbleBody: Hashable {
         case let .event(text): text
         case let .unavailable(text): text
         case let .location(payload): PopopxLocationCopy.spoken(payload)
+        // 绝密这一句只说"这是一条要生物识别的绝密消息，时长多少"。它和卡片自己的
+        // `accessibilityText` 同一族措辞：两处各说一套的话，读屏用户会得到两个不一致的事实。
+        case let .secure(payload): "绝密阅后即焚，\(payload.summaryText)，轻触后需生物识别查看"
         }
     }
 }
@@ -261,6 +267,10 @@ struct PopopxBubbleItem: Hashable {
     var receipt: PopopxBubbleReceipt?
     /// 会话对象的 id，只用来让判定表能把"这个联系人的邻居"和这一行对上；nil = 广播/未知。
     var contactId: Int64?
+    /// 这一行绝密消息的定位（会话 id + 消息 id），点开绝密窗口时原样交给管理器去删和回执。
+    /// **只有 `PopopxBubbleBody.secure` 用得上**，其它正文一律 `nil`。取不到就留 `nil`：
+    /// 卡片会退化成"不可点开"，也比拿猜出来的 id 去删别人家的消息好。
+    var secureTarget: PopopxSecureChatTarget?
     /// 行宽上限，挂载点现成的那个 `maxWidth`（ChatView.swift:2251 的入参）。
     var maxWidth: CGFloat = .infinity
 
@@ -309,12 +319,13 @@ struct PopopxMessageBubble: View {
             }
         }
         .frame(maxWidth: item.maxWidth, alignment: item.side.alignment)
-        if case .location = item.content {
-            // 位置卡片里有一枚真按钮。`.combine` 会把子树的点击动作并进整行，VoiceOver 就再也
-            // 打不开那张地图了，所以这一支改成 `.contain`：容器还在，children 各自保留自己的
-            // 标签与动作（正文文本 + 「打开位置卡片菜单」那一句在卡片内部说）。
+        switch item.content {
+        case .location, .secure:
+            // 这两张卡片里各有一枚真按钮（打开地图 / 轻触查看）。`.combine` 会把子树的点击动作
+            // 并进整行，VoiceOver 就再也打不开它们了，所以改成 `.contain`：容器还在，children
+            // 各自保留自己的标签与动作（位置卡片的那一句在卡片内部说）。
             row.accessibilityElement(children: .contain)
-        } else {
+        default:
             row.accessibilityElement(children: .combine)
                 .accessibilityLabel(spoken)
         }
@@ -399,6 +410,12 @@ struct PopopxMessageBubble: View {
             // 气泡的内边距就是这张地图卡与气泡边缘的呼吸，所以缩略图自己圆角、不另描边。
             // 时间 / 回执 / 通道角标由下面那个 `footer` 出，卡片只出地图、地名、地址。
             PopopxLocationCardBubble(payload: payload, ink: ink, channel: item.channel)
+        case let .secure(payload):
+            // 这一支不吃 `ink`：绝密卡片自带固定的深靛紫表面（见 PopopxSecureSheetView.swift:413），
+            // 换成 SMP 那支实底紫就分不出"一条能点的消息"和"一个保险柜的门"了。
+            PopopxSecureBubbleMount(payload: payload,
+                                    target: item.secureTarget,
+                                    incoming: item.side == .received)
         }
     }
 
@@ -924,6 +941,12 @@ enum PopopxBubbleMount {
             if let location = PopopxLocationPayload.parse(from: mc.text) {
                 return .location(location)
             }
+            // 绝密载荷同一条理由，而且更硬：`PopopxSecurePayload.parse` 认的是 `popopx://sec?...`，
+            // 邀请链接的前缀也是 `popopx:/`。这一支落在下面那三道 guard 之后，现网就会把一条
+            // 绝密消息当成"对方发来的加好友邀请"来渲染——那是一次误加好友，不只是一行难看。
+            if let secure = PopopxSecurePayload.parse(from: mc.text) {
+                return .secure(secure)
+            }
             // 带富文本/提及/markdown 的行交给现网：气泡只画纯 `Text`，链接和 @ 就不再可点。
             guard ci.formattedText == nil, ci.mentions == nil, ci.markdownBlocks == nil else { return nil }
             // 引用回复条和附件都不在 `PopopxBubbleBody` 的 6 个档里。
@@ -955,7 +978,17 @@ enum PopopxBubbleMount {
         let tucked: Bool
         switch content {
         case .withdrawn, .unavailable, .event: tucked = false
-        case .text, .media, .location: tucked = tailVisible
+        case .text, .media, .location, .secure: tucked = tailVisible
+        }
+        // 绝密那一格要能回答"关掉之后去删哪一行"。两个 id 都只从现网对象上原样读，不拼、不猜：
+        // `chat.chatInfo.id` = `ChatInfo.id`（ChatTypes.swift:2104-2112 的按档生成），`ci.id` = 消息 id。
+        // 自己拼一份键（`"@" + contactId` 那种）等于再造一个真相源——它和 `ChatInfo.id` 一旦漂移，
+        // 删的就是别人家的消息，而且 SMP 那边不会报错。所以这里只搬运，不加工；非 `.secure` 留 nil。
+        let secureTarget: PopopxSecureChatTarget?
+        if case .secure = content {
+            secureTarget = PopopxSecureChatTarget(chatId: chat.chatInfo.id, itemId: ci.id)
+        } else {
+            secureTarget = nil
         }
         return PopopxBubbleItem(
             messageKey: String(ci.id),
@@ -965,6 +998,7 @@ enum PopopxBubbleMount {
             timeText: timestamp ? formatTimestampMeta(ci.meta.itemTs) : nil,
             receipt: receipt(of: ci),
             contactId: contactId(of: chat),
+            secureTarget: secureTarget,
             maxWidth: maxWidth
         )
     }
@@ -1307,11 +1341,69 @@ final class PopopxLocationSnapshotCache {
     }
 }
 
+// MARK: - 绝密卡片
+
+/// 绝密卡片 + "点开它的那一次跳转"。
+///
+/// 卡片本体在 `PopopxSecureSheetView.swift`（`PopopxSecureCardBubble`），这一层只做两件事：
+/// 把 `PopopxSecureChatTarget` 递给窗口管理器，以及把"这一条再也解不开"记在自己的状态里。
+/// 之所以要有这么一层而不是在 `contentText` 里直接调：`present` 是异步的（中间隔着一次生物识别），
+/// 而 body 是同步的——失败之后卡片要变色，那个事实必须住在一个 View 的 `@State` 里才重画得动。
+@MainActor
+private struct PopopxSecureBubbleMount: View {
+    let payload: PopopxSecurePayload
+    /// 本机这条记录的出处。`nil` 不是"未知所以赌一把"：卡片直接落到不可打开那一档。
+    /// 赌错的代价是删掉别人的消息，而这条消息还在用户眼前——两笔账都还不回来。
+    let target: PopopxSecureChatTarget?
+    let incoming: Bool
+
+    @State private var damaged = false
+
+    var body: some View {
+        PopopxSecureCardBubble(
+            ttlText: payload.summaryText,
+            state: state,
+            incoming: incoming,
+            onOpen: open
+        )
+    }
+
+    private var state: PopopxSecureCardBubble.State {
+        if damaged { return .damaged }
+        if target == nil { return .unlocated }
+        return .locked
+    }
+
+    private func open() {
+        guard let target else { return }
+        // 不存这个 Task：它中间隔着一次生物识别等待，列表回收、切后台都不该替用户取消掉
+        // 他已经按下的一次"查看"。真要收尾的是窗口自己（模块五的生命周期那一条）。
+        Task { @MainActor in
+            if let failure = await PopopxSecureWindowManager.shared.present(payload: payload, target: target) {
+                if failure.marksCardDamaged { damaged = true }
+                // 走 `Text(verbatim:)`：`showAlertMsg` 的入参是 `LocalizedStringKey`
+                // （ContentView.swift:540），运行时字符串转不过去，也不该拿去查格式化表。
+                AlertManager.shared.showAlert(
+                    Alert(title: Text(verbatim: "打不开这条绝密消息"),
+                          message: Text(verbatim: failure.userText))
+                )
+            }
+        }
+    }
+}
+
 // MARK: - 预览
 
 #if DEBUG
 @MainActor
 private struct PopopxBubbleGallery: View {
+    /// 预览用的绝密载荷：`make` 只在本机做一次 AES-GCM，不碰网络，所以它是自包含的模拟数据。
+    /// 这里的 `try!` 成立是因为入参是写死的字面量——`make` 只在"空正文"和"超过 32 KiB"两档抛错。
+    private static let previewPayload = try! PopopxSecurePayload.make(
+        plaintext: "预览用的绝密正文，它在列表里永远不会显示。",
+        ttlSeconds: 30
+    )
+
     private static let rows: [PopopxBubbleItem] = [
         PopopxBubbleItem(
             messageKey: "1",
@@ -1379,6 +1471,20 @@ private struct PopopxBubbleGallery: View {
             tail: PopopxBubbleTail(side: .received, tucked: true),
             channel: .mesh(hops: 2),
             timeText: "09:20"
+        ),
+        PopopxBubbleItem(
+            // 绝密那一格。载荷走真封装（`make` = 本机一次 AES-GCM，不碰网络），正文写什么都不重要：
+            // 它在列表里永远不会显示，能显示的只有那枚锁盾卡片和时长。
+            //
+            // 这里的 `chatId: "preview"` 是**惰性**的，不是"猜一个 id"那件被禁止的事：预览进程里
+            // 没人 `install(host:)`，`present` 在第一步就返回 `.hostNotInstalled`，删不到任何一行。
+            // 真机上这两个值只从 `chat.chatInfo.id` / `ci.id` 原样搬（见上面 `item(...)`）。
+            messageKey: "9",
+            content: .secure(PopopxBubbleGallery.previewPayload),
+            tail: PopopxBubbleTail(side: .received),
+            channel: .smp,
+            timeText: "09:22",
+            secureTarget: PopopxSecureChatTarget(chatId: "preview", itemId: 9)
         )
     ]
 

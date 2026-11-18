@@ -423,6 +423,10 @@ struct ComposeView: View {
     /// 阅后即焚的真值在宿主：输入条只读只报（`PopopxInputBar.swift:21`）。旧的 `SendMessageView`
     /// 把它藏在发送键菜单的 `@State` 里（`SendMessageView.swift:48`-`:52`），换皮后必须有地方接。
     @State private var popopxTTLSeconds: Int? = nil
+    /// 绝密档的真值同样在宿主，和上面那一格**互不影响**：`ttlSeconds` 管 SMP 侧留多久，
+    /// 这一格管明文在对方屏幕上留多久。两格同时非 nil 是合法组合（既走在线阅后即焚、又阅后即焚）。
+    /// 也全部 private + 带默认值，理由与上面那三格相同：不动 memberwise init 的入参表。
+    @State private var popopxSecureTTLSeconds: Int? = nil
     @FocusState private var popopxComposerFocused: Bool
     /// 和 `SendMessageView.swift:51` 用同一个 UserDefaults 键：提醒只弹一次这件事不该有两份真值。
     @UserDefault(DEFAULT_LIVE_MESSAGE_ALERT_SHOWN) private var liveMessageAlertShown = false
@@ -1257,6 +1261,7 @@ struct ComposeView: View {
                 text: $composeState.message,
                 context: popopxComposerContext,
                 ttlSeconds: popopxTTLSeconds,
+                secureTTLSeconds: popopxSecureTTLSeconds,
                 isSendEnabled: popopxSendEnabled(disableSendButton),
                 // 旧链路在禁用态把占位文案置 nil（`sendMessageView` 的 `placeholder:` 那一行），
                 // 那句 `disabledText` 压在框上时不该再叠一层提示。
@@ -1264,7 +1269,8 @@ struct ComposeView: View {
                 onSend: popopxComposerSend,
                 onHoldToTalk: popopxHoldToTalk,
                 onPlusTap: popopxPlusAction,
-                onTTLChange: { seconds in popopxTTLSeconds = seconds }
+                onTTLChange: { seconds in popopxTTLSeconds = seconds },
+                onSecureTTLChange: { seconds in popopxSecureTTLSeconds = seconds }
             )
             if let disabledText {
                 Text(disabledText)
@@ -1290,6 +1296,20 @@ struct ComposeView: View {
     /// - `.hostShouldSend`：原样走旧链路 `sendMessage(ttl:)`，草稿在 `sendMessageAsync` 末尾清；
     ///   阅后即焚是一次性的发送选项（旧菜单每按一次重选），所以发完把档位放回 nil。
     private func popopxComposerSend(_ send: PopopxComposerSend) {
+        if let secureTTL = send.secureTTLSeconds {
+            // 绝密这一支不走下面那张 switch：`send.dispatch` 是**用明文算出来的结论**，
+            // 而真正要发出去的是密文行，判定表要拿到的是最终落在路上的那串字节。
+            // 所以这里把明文交给载荷层重铸（`PopopxSecurePayload.make`），再按密文重新判定一次通道
+            // —— 和 `popopxSendLocation` 同一个形状：那条也是自带文本、自己重算 dispatch。
+            Task {
+                await popopxSendSecure(
+                    plaintext: send.text,
+                    smpTTLSeconds: send.ttlSeconds,
+                    secureTTLSeconds: secureTTL
+                )
+            }
+            return
+        }
         switch send.dispatch {
         case let .routeViaMesh(message):
             Task { await PopopxMeshRuntime.shared.router.send(message) }
@@ -1332,6 +1352,23 @@ struct ComposeView: View {
             } else {
                 showLocationPicker = true
             }
+        case .secure:
+            // 「+」面板里那一格是**武装开关**，不是选择器：只翻宿主那一格真值，输入条不留副本。
+            // 这里的拒绝只是提前说一句人话；真正的门禁在 `popopxSendSecure` 里，
+            // 因为面板上那个复选框走的是另一条写入路径，挡不住它。
+            if composeState.attachmentDisabled {
+                AlertManager.shared.showAlertMsg(
+                    title: "暂不能发送绝密消息",
+                    message: "正在改写、转发、录制即时消息或已挂载附件时，不能把这条草稿标成绝密。"
+                )
+            } else if !chat.chatInfo.sendMsgEnabled {
+                AlertManager.shared.showAlertMsg(title: "会话未就绪", message: "该会话当前不允许发送消息。")
+            } else {
+                PopopxHaptics.impact(.light)
+                popopxSecureTTLSeconds = popopxSecureTTLSeconds == nil
+                    ? PopopxSecureCopy.defaultTTLSeconds
+                    : nil
+            }
         case .photo, .camera, .file:
             if im.secondaryIMFilter == nil, !chat.chatInfo.featureEnabled(.files) {
                 AlertManager.shared.showAlertMsg(
@@ -1343,7 +1380,10 @@ struct ComposeView: View {
                 case .photo: showMediaPicker = true
                 case .camera: showTakePhoto = true
                 case .file: showFileImporter = true
-                case .location: break
+                // 这两格在 `.photo/.camera/.file` 这一支里到不了：外层 switch 已经把它们分出去了。
+                // 写 `break` 而不是删掉，是为了让这个 switch 保持穷尽 —— 加新的一格时
+                // 这里会编译不过，提醒两处都要改。
+                case .location, .secure: break
                 }
             }
         }
@@ -1381,16 +1421,21 @@ struct ComposeView: View {
             // 档位和旧链路一样是一次性的：发完放回 nil，下一条回到"不阅后即焚"。
             let ttl = popopxTTLSeconds
             popopxTTLSeconds = nil
-            await popopxSendLocationViaSMP(payload.messageContent, ttl: ttl)
+            await popopxSendPlainViaSMP(payload.messageContent, ttl: ttl)
         case .ignoreEmptyDraft:
             break
         }
     }
 
     /// 交回宿主那一支，抄 `sendMessageAsync` 里嵌套的 `send(_ msgs:)`：`apiSendMessages` +
-    /// `removeLiveDummy` + `addChatItem`，一位不多 —— 位置没有文件要回收，失败提示也在
+    /// `removeLiveDummy` + `addChatItem`，一位不多 —— 位置和绝密都没有文件要回收，失败提示也在
     /// `apiSendMessages` 自己那侧弹（`POPOPXAPI.swift:640`），这里不再叠第二层。
-    private func popopxSendLocationViaSMP(_ text: String, ttl: Int?) async {
+    ///
+    /// 名字从 `…LocationViaSMP` 改成了 `…PlainViaSMP`：这条链路对"线上一行纯文本"负责，
+    /// 位置是它第一个用户，绝密载荷是第二个（那两行文本在外形上完全同构，见
+    /// `PopopxSecurePayload.swift:9`-`:14`）。留着 Location 的名字会让下一个人再抄一遍。
+    @discardableResult
+    private func popopxSendPlainViaSMP(_ text: String, ttl: Int?) async -> Bool {
         guard let chatItems = await apiSendMessages(
             type: chat.chatInfo.chatType,
             id: chat.chatInfo.apiId,
@@ -1400,12 +1445,127 @@ struct ComposeView: View {
             ttl: ttl,
             sign: false,
             composedMessages: [ComposedMessage(msgContent: .text(text))]
-        ) else { return }
+        ) else { return false }
         await MainActor.run {
             chatModel.removeLiveDummy(animated: false)
             for chatItem in chatItems {
                 chatModel.addChatItem(chat.chatInfo, chatItem)
             }
+        }
+        return true
+    }
+
+    /// 「发送绝密消息」的落点。铸载荷排在**任何判定之前**：判定表、SMP、蓝牙中继队列拿到的
+    /// 都只能是密文行（`payload.messageContent`）。让明文穿过其中任何一站，"严禁在列表里暴露明文"
+    /// 就先在发送侧破了。
+    ///
+    /// 和位置一样**不走** `sendMessageAsync`：那条链路会把草稿连同链接预览、引用一起发出去，
+    /// 末尾还 `clearState`；而 `popopx://sec` 与一次性邀请链接同 scheme，进了
+    /// `checkComposeLinksAsync` 就是一次误加好友（`PopopxSecurePayload.swift:37`-`:41`）。
+    ///
+    /// 但绝密有一处和位置**必须**不同：位置的内容来自地图选择器，绝密的明文就停在输入框里，
+    /// 所以发送成功后必须把它清掉 —— 见 `popopxAfterSecureSend()`。
+    @MainActor private func popopxSendSecure(
+        plaintext: String,
+        smpTTLSeconds: Int?,
+        secureTTLSeconds: Int
+    ) async {
+        // 门禁在这里，不在「+」面板那一格：面板上的复选框走的是另一条写入路径，
+        // 只挡按钮会留下"能武装、发不出、也不说为什么"的那种静默失败。
+        guard !composeState.attachmentDisabled else {
+            popopxSecureBlocked()
+            return
+        }
+        guard chat.chatInfo.sendMsgEnabled else {
+            AlertManager.shared.showAlertMsg(title: "会话未就绪", message: "该会话当前不允许发送消息。")
+            return
+        }
+        let payload: PopopxSecurePayload
+        do {
+            payload = try PopopxSecurePayload.make(plaintext: plaintext, ttlSeconds: secureTTLSeconds)
+        } catch let error as PopopxSecureError {
+            // 这一句走 `Text(verbatim:)` 而不是 `showAlertMsg`：后者的入参是 `LocalizedStringKey`
+            // （ContentView.swift:540），运行时拼出来的 String 根本转不过去，而且里面带着字节数，
+            // 当成格式化串去查本地化表是把话交给运气。
+            AlertManager.shared.showAlert(
+                Alert(title: Text(verbatim: "绝密消息未发出"),
+                      message: Text(verbatim: Self.popopxSecureSendReason(error)))
+            )
+            return
+        } catch {
+            AlertManager.shared.showAlertMsg(
+                title: "绝密消息未发出",
+                message: "本机封装失败，这条内容一个字节都没离开这台设备。"
+            )
+            return
+        }
+
+        let contactId = chat.chatInfo.contact?.contactId
+        // 同位置那条判定：这条消息自己的前提只有"直聊联系人"，框里挂着的附件/引用/live 不属于它。
+        // 阅后即焚（SMP 那一档）是真档位，照旧参与判定。
+        let context: PopopxComposerContext
+        if let contactId {
+            context = .directContact(contactId)
+        } else {
+            context = .outsideDirectContact
+        }
+        let eligibility = await PopopxInputBarModel.resolveFromRuntime(contactId: contactId)
+        switch PopopxComposerRouting.dispatch(
+            text: payload.messageContent,
+            context: context,
+            eligibility: eligibility,
+            ttlSeconds: smpTTLSeconds
+        ) {
+        case let .routeViaMesh(message):
+            await PopopxMeshRuntime.shared.router.send(message)
+            popopxAfterSecureSend()
+        case .hostShouldSend:
+            // 只有真发出去了才清草稿：`apiSendMessages` 返回 nil 时它自己已经弹过提示，
+            // 那时把明文清掉等于让用户白丢一条内容。
+            if await popopxSendPlainViaSMP(payload.messageContent, ttl: smpTTLSeconds) {
+                popopxAfterSecureSend()
+            }
+        case .ignoreEmptyDraft:
+            break
+        }
+    }
+
+    /// 绝密发送成功后的收尾。三件事各有各的理由：
+    /// 1. **清草稿**：用户打的明文还在 `composeState.message` 里，不清就等于这条消息
+    ///    在发送方自己的屏幕上永久留着 —— 这是整个特性里唯一一处"发送侧"的明文残留。
+    /// 2. **关链接预览**：`composeState.preview` 是明文的第二种存法（它抄的就是这条草稿的文本）。
+    /// 3. **两档都归 nil**：绝密与阅后即焚都是"一次发送一次选择"，和旧发送键菜单同一语义；
+    ///    留着下一档会让下一条普通消息被误标成绝密，而那比反过来更糟。
+    private func popopxAfterSecureSend() {
+        composeState.message = ""
+        resetLinkPreview()
+        popopxSecureTTLSeconds = nil
+        popopxTTLSeconds = nil
+    }
+
+    private func popopxSecureBlocked() {
+        AlertManager.shared.showAlertMsg(
+            title: "暂不能发送绝密消息",
+            message: "正在改写、转发、录制即时消息或已挂载附件时，不能把这条草稿标成绝密。"
+        )
+    }
+
+    /// 载荷层的错误到句人话。这里只做映射，不新增判断：长度上限的数字取自契约方，
+    /// 免得这句提示和 `maximumPlainBytes` 长成两个版本。
+    private static func popopxSecureSendReason(_ error: PopopxSecureError) -> String {
+        switch error {
+        case .emptyPlaintext:
+            return "内容为空。"
+        case let .plaintextTooLong(bytes):
+            return "绝密消息最长 \(PopopxSecurePayload.maximumPlainBytes / 1024) KiB，当前 \(bytes) 字节。"
+        case .sealingFailed:
+            return "本机封装失败，这条内容一个字节都没离开这台设备。"
+        case .unusablePlaintext, .wrongKeyLength, .wrongSealedLength, .decryptionFailed:
+            // 这三条只在接收侧解得开时才可能出，发送侧到不了；写出来是为了让这个 switch 穷尽，
+            // 也为了万一以后有人在这条路上调 `open()`，不会掉进 `default` 那句含糊话里。
+            return "载荷不可用，未发送。"
+        case .authenticationFailed, .biometricsUnavailable, .screenIsCaptured:
+            return "这台设备当前不允许打开绝密消息。"
         }
     }
 

@@ -5,7 +5,7 @@
 > Related specs: [README](README.md) | [API Reference](api.md) | [State Management](state.md) | [Database](database.md)
 > Related product: [Product Overview](../product/README.md)
 
-**Source:** [`POPOPXApp.swift`](../Shared/POPOPXApp.swift#L1-L191) | [`AppDelegate.swift`](../Shared/AppDelegate.swift#L1-L209) | [`ContentView.swift`](../Shared/ContentView.swift#L1-L557) | [`ChatModel.swift`](../Shared/Model/ChatModel.swift#L1-L1517) | [`POPOPXAPI.swift`](../Shared/Model/POPOPXAPI.swift#L1-L3963) | [`AppAPITypes.swift`](../Shared/Model/AppAPITypes.swift#L1-L2357) | [`APITypes.swift`](../POPOPXChat/APITypes.swift#L1-L1071) | [`API.swift`](../POPOPXChat/API.swift#L1-L388)
+**Source:** [`POPOPXApp.swift`](../Shared/POPOPXApp.swift#L1-L271) | [`AppDelegate.swift`](../Shared/AppDelegate.swift#L1-L209) | [`ContentView.swift`](../Shared/ContentView.swift#L1-L557) | [`ChatModel.swift`](../Shared/Model/ChatModel.swift#L1-L1517) | [`POPOPXAPI.swift`](../Shared/Model/POPOPXAPI.swift#L1-L3963) | [`AppAPITypes.swift`](../Shared/Model/AppAPITypes.swift#L1-L2357) | [`APITypes.swift`](../POPOPXChat/APITypes.swift#L1-L1071) | [`API.swift`](../POPOPXChat/API.swift#L1-L388)
 
 ---
 
@@ -21,7 +21,7 @@
 
 ---
 
-## [1. Layered Architecture](../Shared/POPOPXApp.swift#L17-L184)
+## [1. Layered Architecture](../Shared/POPOPXApp.swift#L17-L271)
 
 The app follows a strict layered model where each layer communicates only with its immediate neighbor:
 
@@ -184,18 +184,20 @@ See [Database & Storage specification](database.md) for full details.
 
 ---
 
-## [5. App Lifecycle](../Shared/POPOPXApp.swift#L17-L184)
+## [5. App Lifecycle](../Shared/POPOPXApp.swift#L17-L271)
 
-### [Initialization Sequence (POPOPXApp.swift)](../Shared/POPOPXApp.swift#L17-L38)
+### [Initialization Sequence (POPOPXApp.swift)](../Shared/POPOPXApp.swift#L17-L40)
 
 ```swift
 // SimpleXApp.init()
 1. haskell_init()                    // Initialize Haskell RTS (background queue, sync)
 2. UserDefaults.register(defaults:)  // Register app preference defaults
 3. setGroupDefaults()                // Sync preferences to app group container
-4. setDbContainer()                  // Set database path                          L122
+4. setDbContainer()                  // Set database path                          L211
 5. BGManager.shared.register()       // Register background task handlers
 6. NtfManager.shared.registerCategories()  // Register notification action categories
+7. installSecureEphemeralHost()      // Install the secure-ephemeral host hooks    L52
+8. PopopxAntiDebug.enableProtection() // Debug/attacher detection (Release only)    L39
 ```
 
 ### State Transitions
@@ -226,7 +228,7 @@ See [Database & Storage specification](database.md) for full details.
               └──────────┘
 ```
 
-### [Scene Phase Handling (POPOPXApp.swift)](../Shared/POPOPXApp.swift#L38-L123)
+### [Scene Phase Handling (POPOPXApp.swift)](../Shared/POPOPXApp.swift#L118-L207)
 
 - **`.active`**: Calls `startChatAndActivate()`, processes pending notification responses, refreshes chat list and call invitations
 - **`.background`**: Records authentication timestamp, calls `suspendChat()` (unless CallKit call active), schedules `BGManager` background refresh, updates badge count

@@ -1,0 +1,19 @@
+# POPOPX anti-spy detector export toolchain — offline only, never a runtime app dependency.
+#   python3 -m pip install -r scripts/requirements.txt
+#
+# Ranges, not exact pins: whoever rebuilds the model runs this on whatever interpreter they have
+# (the macOS system python3 is 3.9.6), and a hard pin that has no cp39 wheel fails the install
+# instead of telling anyone why. The upper bounds below are the Python 3.9 cliffs, checked against
+# PyPI metadata when this file was written; loosen them on a newer Python.
+# Nothing here is in the app bundle — the only thing this toolchain hands to Xcode is the
+# .mlpackage / .mlmodelc pair that scripts/setup_pretrained_coreml.py writes.
+
+ultralytics>=8.2,<9          # YOLO loading + export(format="coreml"); 8.x is the API the script calls
+coremltools>=8.0,<10         # >=8.0 for the composite NON_MAX_SUPPRESSION op that nms=True needs
+torch>=2.2,<2.9              # 2.9.0 stopped shipping cp39 wheels (2.8.x is the last for python 3.9)
+torchvision>=0.17,<0.24      # must track the torch line: 0.17 <-> 2.2 ... 0.23 <-> 2.8
+numpy>=1.23,<2.1             # numpy 2.1 dropped python 3.9; ultralytics also excludes 2.0/2.1 on macOS,
+                             # so on Darwin pip resolves 1.26.x — the range is deliberate, not slack
+Pillow>=9.0                  # coremltools needs it to feed image-typed inputs; ultralytics needs it
+                             # to read the weights' example images. No pillow-heif: nothing here
+                             # touches HEIC
