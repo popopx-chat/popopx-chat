@@ -42,6 +42,11 @@ struct POPOPXApp: App {
             ContentView(contentAccessAuthenticationExtended: !authenticationExpired())
                 .environmentObject(chatModel)
                 .environmentObject(AppTheme.shared)
+                // 第二阶段 app 侧挂载：离线网格的两条挂载。两行都只影响 app 自己新加的修饰符，熔断关闭时
+                // `PopopxMeshPanicWipeMount` 的 overlay 里什么都不放（连 44pt 的角落都不是命中区），
+                // `bootstrap()` 也不会建出任何蓝牙对象 —— 见 Shared/Model/POPOPXAPI.swift 末尾。
+                .modifier(PopopxMeshPanicWipeMount())
+                .task { await PopopxMeshRuntime.shared.bootstrap() }
                 .onOpenURL { url in
                     // an app link can carry a secret, such as a badge code that anyone who reads it can redeem
                     logger.debug("ContentView.onOpenURL: \(isAppLink(url) ? "app link" : url.absoluteString)")

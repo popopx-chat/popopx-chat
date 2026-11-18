@@ -5,7 +5,7 @@
 > Related specs: [README](README.md) | [API Reference](api.md) | [State Management](state.md) | [Database](database.md)
 > Related product: [Product Overview](../product/README.md)
 
-**Source:** [`POPOPXApp.swift`](../Shared/POPOPXApp.swift#L1-L186) | [`AppDelegate.swift`](../Shared/AppDelegate.swift#L1-L209) | [`ContentView.swift`](../Shared/ContentView.swift#L1-L557) | [`ChatModel.swift`](../Shared/Model/ChatModel.swift#L1-L1517) | [`POPOPXAPI.swift`](../Shared/Model/POPOPXAPI.swift#L1-L3353) | [`AppAPITypes.swift`](../Shared/Model/AppAPITypes.swift#L1-L2357) | [`APITypes.swift`](../POPOPXChat/APITypes.swift#L1-L1071) | [`API.swift`](../POPOPXChat/API.swift#L1-L388)
+**Source:** [`POPOPXApp.swift`](../Shared/POPOPXApp.swift#L1-L191) | [`AppDelegate.swift`](../Shared/AppDelegate.swift#L1-L209) | [`ContentView.swift`](../Shared/ContentView.swift#L1-L557) | [`ChatModel.swift`](../Shared/Model/ChatModel.swift#L1-L1517) | [`POPOPXAPI.swift`](../Shared/Model/POPOPXAPI.swift#L1-L3963) | [`AppAPITypes.swift`](../Shared/Model/AppAPITypes.swift#L1-L2357) | [`APITypes.swift`](../POPOPXChat/APITypes.swift#L1-L1071) | [`API.swift`](../POPOPXChat/API.swift#L1-L388)
 
 ---
 
@@ -56,7 +56,7 @@ The app follows a strict layered model where each layer communicates only with i
 | Views | [`Shared/Views/ChatList/ChatListView.swift`](../Shared/Views/ChatList/ChatListView.swift) | Chat list rendering | |
 | Views | [`Shared/Views/Chat/ChatView.swift`](../Shared/Views/Chat/ChatView.swift) | Conversation rendering | |
 | State | [`Shared/Model/ChatModel.swift`](../Shared/Model/ChatModel.swift#L387) | `ChatModel`, `ItemsModel`, `Chat` classes | L387, L70, L1410 |
-| API | [`Shared/Model/POPOPXAPI.swift`](../Shared/Model/POPOPXAPI.swift#L105) | FFI bridge functions | L105 |
+| API | [`Shared/Model/POPOPXAPI.swift`](../Shared/Model/POPOPXAPI.swift#L110) | FFI bridge functions | L110 |
 | API | [`Shared/Model/AppAPITypes.swift`](../Shared/Model/AppAPITypes.swift#L15) | `ChatCommand`, `ChatResponse`, `ChatEvent` enums | L15, L649, L1055 |
 | FFI | [`POPOPXChat/POPOPX.h`](../POPOPXChat/POPOPX.h#L1-L63) | C header declaring Haskell exports | |
 | FFI | [`POPOPXChat/APITypes.swift`](../POPOPXChat/APITypes.swift#L27) | `APIResult<R>`, `ChatError`, `ChatCmdProtocol` | L27, L699, L17 |
@@ -105,16 +105,16 @@ char *chat_resize_image_file(char *path, int maxSize, int png);
 char *chat_resize_image_file_uri(char *path, int maxSize);
 ```
 
-### [Swift Bridge Functions (POPOPXAPI.swift)](../Shared/Model/POPOPXAPI.swift#L105-L234)
+### [Swift Bridge Functions (POPOPXAPI.swift)](../Shared/Model/POPOPXAPI.swift#L110-L237)
 
 ```swift
 // Synchronous send -- blocks calling thread
 func chatSendCmdSync<R: ChatAPIResult>(_ cmd: ChatCommand, bgTask: Bool = true,
-    bgDelay: Double? = nil, ctrl: chat_ctrl? = nil) throws -> R                      // L91
+    bgDelay: Double? = nil, ctrl: chat_ctrl? = nil) throws -> R                      // L110
 
 // Async send -- dispatches to background
 func chatApiSendCmd<R: ChatAPIResult>(_ cmd: ChatCommand, bgTask: Bool = true,
-    bgDelay: Double? = nil, ctrl: chat_ctrl? = nil) async -> APIResult<R>             // L215
+    bgDelay: Double? = nil, ctrl: chat_ctrl? = nil) async -> APIResult<R>             // L243
 
 // Low-level FFI call -- serializes command to string, calls chat_send_cmd_retry, decodes JSON
 func sendSimpleXCmd<R: ChatAPIResult>(_ cmd: ChatCmdProtocol, _ ctrl: chat_ctrl?,
@@ -130,13 +130,13 @@ func sendSimpleXCmd<R: ChatAPIResult>(_ cmd: ChatCmdProtocol, _ ctrl: chat_ctrl?
 5. Swift decodes JSON into [`APIResult<R>`](../POPOPXChat/APITypes.swift#L27) where `R: ChatAPIResult`
 6. Result is either `.result(R)`, `.error(ChatError)`, or `.invalid(type, json)`
 
-### [Background Task Protection](../Shared/Model/POPOPXAPI.swift#L67-L91)
+### [Background Task Protection](../Shared/Model/POPOPXAPI.swift#L71-L94)
 
-All FFI calls are wrapped in [`beginBGTask()`](../Shared/Model/POPOPXAPI.swift#L67) / `endBackgroundTask()` to prevent iOS from killing the app mid-operation. The `maxTaskDuration` is 15 seconds.
+All FFI calls are wrapped in [`beginBGTask()`](../Shared/Model/POPOPXAPI.swift#L71) / `endBackgroundTask()` to prevent iOS from killing the app mid-operation. The `maxTaskDuration` is 15 seconds.
 
 ---
 
-## [3. Event Streaming](../Shared/Model/POPOPXAPI.swift#L2233-L2929)
+## [3. Event Streaming](../Shared/Model/POPOPXAPI.swift#L2584-L3224)
 
 The Haskell core emits async events (new messages, connection status changes, file progress, etc.) that are not direct responses to commands. These are received via polling:
 
@@ -144,7 +144,7 @@ The Haskell core emits async events (new messages, connection status changes, fi
 Haskell Core --[chat_recv_msg_wait]--> Swift event loop --> ChatModel update --> SwiftUI re-render
 ```
 
-The event loop is implemented in [`ChatReceiver`](../Shared/Model/POPOPXAPI.swift#L2581-L2624), and events are dispatched by [`processReceivedMsg`](../Shared/Model/POPOPXAPI.swift#L2627).
+The event loop is implemented in [`ChatReceiver`](../Shared/Model/POPOPXAPI.swift#L2584-L2627), and events are dispatched by [`processReceivedMsg`](../Shared/Model/POPOPXAPI.swift#L2630).
 
 ### [Event Types (ChatEvent enum)](../Shared/Model/AppAPITypes.swift#L1055-L1129)
 
@@ -209,15 +209,15 @@ See [Database & Storage specification](database.md) for full details.
               ┌──────────┐
               │ DB Setup  │ chat_migrate_init_key()
               └─────┬─────┘
-                    │ startChat()                                    POPOPXAPI.swift L2098
+                    │ startChat()                                    POPOPXAPI.swift L2416
                     v
               ┌──────────┐
-              │  Active   │ apiActivateChat()                        POPOPXAPI.swift L358
+              │  Active   │ apiActivateChat()                        POPOPXAPI.swift L384
               └─────┬─────┘
                     │ scenePhase == .background
                     v
               ┌──────────┐
-              │Background │ apiSuspendChat(timeoutMicroseconds:)     POPOPXAPI.swift L368
+              │Background │ apiSuspendChat(timeoutMicroseconds:)     POPOPXAPI.swift L394
               └─────┬─────┘
                     │ scenePhase == .active
                     v
@@ -265,7 +265,7 @@ The Share Extension (`POPOPX SE/`) allows sharing content (text, images, files) 
 Optional desktop pairing allows controlling the mobile app from a desktop client:
 
 - **Pairing**: Encrypted QR code scanned by desktop client establishes a session
-- **Commands**: [`connectRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1761), [`findKnownRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1768), [`confirmRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1772), [`verifyRemoteCtrlSession`](../Shared/Model/POPOPXAPI.swift#L1778), [`listRemoteCtrls`](../Shared/Model/POPOPXAPI.swift#L1784), [`stopRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1790), [`deleteRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1794)
+- **Commands**: [`connectRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1764), [`findKnownRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1771), [`confirmRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1775), [`verifyRemoteCtrlSession`](../Shared/Model/POPOPXAPI.swift#L1781), [`listRemoteCtrls`](../Shared/Model/POPOPXAPI.swift#L1787), [`stopRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1793), [`deleteRemoteCtrl`](../Shared/Model/POPOPXAPI.swift#L1797)
 - **State**: [`ChatModel.remoteCtrlSession`](../Shared/Model/ChatModel.swift#L449)`: RemoteCtrlSession?` tracks the active session
 - **Transport**: Encrypted reverse HTTP transport between mobile and desktop
 - **Source**: [`Shared/Views/RemoteAccess/ConnectDesktopView.swift`](../Shared/Views/RemoteAccess/ConnectDesktopView.swift#L1-L561), see `Remote.hs` in `../../src/Popopx/Chat/`
@@ -328,7 +328,7 @@ Chat relays are SMP servers that forward messages to channel subscribers. They a
 | App entry point | [`Shared/POPOPXApp.swift`](../Shared/POPOPXApp.swift#L17) | L17 |
 | App delegate | [`Shared/AppDelegate.swift`](../Shared/AppDelegate.swift#L15) | L15 |
 | Root view | [`Shared/ContentView.swift`](../Shared/ContentView.swift#L24) | L24 |
-| FFI bridge | [`Shared/Model/POPOPXAPI.swift`](../Shared/Model/POPOPXAPI.swift#L105) | L105 |
+| FFI bridge | [`Shared/Model/POPOPXAPI.swift`](../Shared/Model/POPOPXAPI.swift#L110) | L110 |
 | Low-level FFI | [`POPOPXChat/API.swift`](../POPOPXChat/API.swift#L115) | L115 |
 | App state | [`Shared/Model/ChatModel.swift`](../Shared/Model/ChatModel.swift#L387) | L387 |
 | API types | [`Shared/Model/AppAPITypes.swift`](../Shared/Model/AppAPITypes.swift#L15) | L15 |

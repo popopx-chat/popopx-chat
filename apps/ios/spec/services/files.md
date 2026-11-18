@@ -190,7 +190,7 @@ public let MAX_VOICE_MESSAGE_LENGTH = TimeInterval(300) // 5 minutes (300 second
 
 ## [7. CryptoFile -- At-Rest Encryption](../../POPOPXChat/ChatTypes.swift#L4241)
 
-When [`apiSetEncryptLocalFiles(enable: true)`](../../Shared/Model/POPOPXAPI.swift#L407) is configured, files stored on the device are AES-encrypted.
+When [`apiSetEncryptLocalFiles(enable: true)`](../../Shared/Model/POPOPXAPI.swift#L410) is configured, files stored on the device are AES-encrypted.
 
 ### [`CryptoFile`](../../POPOPXChat/ChatTypes.swift#L5278) Type
 
@@ -223,7 +223,7 @@ Implemented in [`CryptoFile.swift`](../../POPOPXChat/CryptoFile.swift):
 
 - Encrypted files stored alongside unencrypted files in `Documents/files/`
 - The `CryptoFileArgs` (key + nonce) are stored in the Haskell database, not on the filesystem
-- Toggle via privacy settings: [`apiSetEncryptLocalFiles(enable:)`](../../Shared/Model/POPOPXAPI.swift#L407)
+- Toggle via privacy settings: [`apiSetEncryptLocalFiles(enable:)`](../../Shared/Model/POPOPXAPI.swift#L410)
 
 ---
 
@@ -250,7 +250,7 @@ func getWallpaperDirectory() -> URL   // Documents/wallpapers/
 - Downloaded files: `Documents/files/{filename}`
 - Temporary files during transfer: `Documents/temp_files/`
 - Wallpaper images: `Documents/wallpapers/`
-- File paths are set via [`apiSetAppFilePaths(filesFolder:, tempFolder:, assetsFolder:)`](../../Shared/Model/POPOPXAPI.swift#L400) at startup
+- File paths are set via [`apiSetAppFilePaths(filesFolder:, tempFolder:, assetsFolder:)`](../../Shared/Model/POPOPXAPI.swift#L403) at startup
 
 ---
 
@@ -355,7 +355,7 @@ Cancels an in-progress upload or download. For XFTP transfers, also requests chu
 | CryptoFile FFI operations | [`POPOPXChat/CryptoFile.swift`](../../POPOPXChat/CryptoFile.swift) | `writeCryptoFile`, `readCryptoFile`, `encryptCryptoFile`, `decryptCryptoFile` |
 | CryptoFile / CryptoFileArgs types | [`POPOPXChat/ChatTypes.swift`](../../POPOPXChat/ChatTypes.swift) | `CryptoFile` (L4241), `CryptoFileArgs` (L4289) |
 | API command definitions | [`Shared/Model/AppAPITypes.swift`](../../Shared/Model/AppAPITypes.swift) | `receiveFile`, `cancelFile`, `ChatEvent` file events |
-| API implementations | [`Shared/Model/POPOPXAPI.swift`](../../Shared/Model/POPOPXAPI.swift) | `receiveFile` (L1471), `cancelFile` (L1590) |
+| API implementations | [`Shared/Model/POPOPXAPI.swift`](../../Shared/Model/POPOPXAPI.swift) | `receiveFile` (L1622), `cancelFile` (L1741) |
 | File view (chat item) | [`Shared/Views/Chat/ChatItem/CIFileView.swift`](../../Shared/Views/Chat/ChatItem/CIFileView.swift) | |
 | Image view (chat item) | [`Shared/Views/Chat/ChatItem/CIImageView.swift`](../../Shared/Views/Chat/ChatItem/CIImageView.swift) | |
 | Video view (chat item) | [`Shared/Views/Chat/ChatItem/CIVideoView.swift`](../../Shared/Views/Chat/ChatItem/CIVideoView.swift) | |

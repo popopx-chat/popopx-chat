@@ -12,6 +12,7 @@ import SwiftUI
 import POPOPXChat
 import SwiftyGif
 import Combine
+import PopopxMeshUI
 
 private let memberImageBaseSize: CGFloat = 34
 
@@ -110,8 +111,20 @@ struct ChatView: View {
             viewBody
                 .scrollDismissesKeyboard(.immediately)
                 .toolbarBackground(.hidden, for: .navigationBar)
+                .popopxMergedTimeline(
+                    PopopxMeshRuntime.shared.timelineModel,
+                    chatID: chat.chatInfo.id,
+                    messages: PopopxMeshApplicationStream.rows(from: im.reversedChatItems)
+                )
+                .popopxMeshBanner(PopopxMeshRuntime.shared.bannerModel)
         } else {
             viewBody
+                .popopxMergedTimeline(
+                    PopopxMeshRuntime.shared.timelineModel,
+                    chatID: chat.chatInfo.id,
+                    messages: PopopxMeshApplicationStream.rows(from: im.reversedChatItems)
+                )
+                .popopxMeshBanner(PopopxMeshRuntime.shared.bannerModel)
         }
     }
 

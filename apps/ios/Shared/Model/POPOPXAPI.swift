@@ -14,6 +14,9 @@ import Dispatch
 import BackgroundTasks
 import SwiftUI
 import StoreKit
+import Combine
+import PopopxMeshKit
+import PopopxMeshUI
 @preconcurrency import POPOPXChat
 
 private var chatController: chat_ctrl?
@@ -2647,6 +2650,9 @@ func processReceivedMsg(_ res: ChatEvent) async {
                     m.chatSubStatus = .active
                 }
             }
+            // 模块 6 的只读旁路：它不改变、不延迟、不重排、不吞掉上面任何一行 —— 熔断关着时它连一个
+            // Task 都不生成（`PopopxMeshRuntime.feedSessionEvent`）。
+            PopopxMeshRuntime.feedSessionEvent(kind: .contactConnected, user: user, contact: contact)
         }
         if contact.directOrUsed {
             NtfManager.shared.notifyContactConnected(user, contact)
@@ -2670,6 +2676,8 @@ func processReceivedMsg(_ res: ChatEvent) async {
                     m.removeChat(conn.id)
                 }
             }
+            // 模块 6 的第二条边：第一条消息落到公网 = 这个离线配对已经是一个真实联系人。
+            PopopxMeshRuntime.feedSessionEvent(kind: .contactSndReady, user: user, contact: contact)
         }
     case let .receivedContactRequest(user, contactRequest, chat_):
         if active(user) {
@@ -3348,6 +3356,608 @@ private func showClientNotice(_ server: String, _ preset: Bool, _ expiresAt: Dat
                         howItWorks
                     ]
                     : [okAlertAction, howItWorks]
+        }
+    }
+}
+
+// MARK: - 第二阶段 app 侧集成层: the app-target integration for the offline Bluetooth mesh
+
+//  This is the glue between the finished `PopopxMeshKit` / `PopopxMeshUI` package and this target:
+//  the coordinator that owns 模块 1–7's host-side objects, the chat-core adapters the package's seams
+//  ask for, the backend that keeps `PopopxMeshEngine.shared` from ever existing while the fuse is off,
+//  模块 6's read-only bypass, and the three mount points the views call.
+//
+//  Why it is appended here instead of in a new file: this wave may not edit `POPOPX.xcodeproj`
+//  (严禁用脚本修改 .pbxproj), and a file that is not in a PBXSourcesBuildPhase is never compiled — a
+//  brand-new file would simply not exist to the build. `POPOPXAPI.swift` is compiled by the
+//  "POPOPX (iOS)" target (the only target that compiles it — the NSE, the SE, the framework and both
+//  test targets have their own file lists), and it is the file that already owns the three chat-core
+//  calls the adapters below forward to: `apiAddContact` (:1036), `apiConnect` (:1074) and
+//  `apiSendMessages` (:574). That is the point of 模块 2's seam — the package says "use the functions
+//  that already exist", so no FFI call is added here and no C symbol is invented.
+
+/// 全局熔断开关（the fuse）as the app sees it: the one persisted key of the whole feature.
+enum PopopxMeshFuse {
+    /// The key, written by `IdentityMappingStore.meshEnabled` and read by the package's
+    /// `PopopxMeshKillSwitch.enabledDefaultsKey` — the same string, which is
+    /// `chat.popopx.mesh.enabled`. Off by default, because `UserDefaults.bool` on an absent key is
+    /// false and a fuse must not be on just because nobody decided yet.
+    ///
+    /// The literal is the app's own copy on purpose: the receive pump reads this switch
+    /// *synchronously* on every `contactConnected` (see `PopopxMeshRuntime.feedSessionEvent`), and the
+    /// package's constant lives behind a `@MainActor` type, so reaching for it there would be an
+    /// actor hop in the middle of the chat core's event loop. `bootstrap()` compares the two at launch
+    /// and logs loudly if the package ever renames it.
+    static let defaultsKey = "chat.popopx.mesh.enabled"
+
+    /// Thread-safe, non-isolated, and cheap: `UserDefaults` is documented for exactly this.
+    static var isOn: Bool {
+        UserDefaults.standard.bool(forKey: defaultsKey)
+    }
+}
+
+// MARK: The chat core, seen from the mesh
+
+/// Why the app-side chat core refused a mesh request. The package's own `throws(PopopxOfflineBridgeError)`
+/// is produced by 模块 2; these are only the failures this layer can see, and they are wrapped by the
+/// bridge as `.coreFailed`.
+enum PopopxMeshChatCoreError: Error, Hashable, Sendable {
+    /// `apiAddContact` returned nothing: no active user, or the core answered an error the app
+    /// already alerted about.
+    case inviteUnavailable(reason: String)
+    /// `apiConnect` returned nothing for a link that passed 模块 2's prefix rules.
+    case acceptanceUnavailable(reason: String)
+    /// `apiSendMessages` came back empty — the SMP queue refused the item, or there is no contact.
+    case smpSendFailed(messageId: String, contactId: Int64)
+}
+
+/// 模块 2's `PopopxOfflineChatCore` and 模块 5's `PopopxSMPChatCore`, implemented on top of the chat
+/// core functions this file already exports.
+///
+/// It is a struct with no stored properties, so `Sendable` is free and there is no state to leak
+/// between the mesh's actors and the app's.
+struct PopopxMeshChatCore: PopopxSMPChatCore {
+    /// 离线 pairing 的第一步: 创建联系人邀请. `apiAddContact(incognito:)` is the app's own path — the
+    /// same one "Add contact" uses — so the link it returns carries the real `popopx:/` prefix 模块 2
+    /// validates, the pending connection is a real `PendingContactConnection`, and the incognito flag
+    /// means what it means everywhere else in the app.
+    func createOfflineInvite(incognito: Bool) async throws -> PopopxOfflineInvite {
+        guard let (link, connection) = await apiAddContact(incognito: incognito) else {
+            throw PopopxMeshChatCoreError.inviteUnavailable(reason: "apiAddContact returned no invitation")
+        }
+        return PopopxOfflineInvite(inviteLink: link.connFullLink, tempConnId: connection.pccConnId)
+    }
+
+    /// 离线 pairing 的第二步: 吃掉对方的链接. `apiConnect(incognito:connLink:)` is the app's existing
+    /// `/_connect` call, so consuming a mesh-carried invite does what consuming a pasted one does.
+    ///
+    /// The two enums name the same exchange from opposite ends, and the mapping is the package's, not
+    /// a guess: the app's `ConnReqType` describes the *peer's* link (`sentConfirmation` ⇒ we answered
+    /// an invitation ⇒ `.invitation`), while `PopopxOfflineAcceptance.Kind` describes *what we sent*
+    /// (`sentConfirmation` ⇒ `.confirmation`).
+    func acceptOfflineInvite(_ inviteLink: String, incognito: Bool) async throws -> PopopxOfflineAcceptance {
+        let connLink = CreatedConnLink(connFullLink: inviteLink, connShortLink: nil)
+        guard let (connReqType, connection) = await apiConnect(incognito: incognito, connLink: connLink) else {
+            throw PopopxMeshChatCoreError.acceptanceUnavailable(reason: "apiConnect returned no pending connection")
+        }
+        // `apiConnect` only ever answers `.invitation` (we sent a confirmation) or `.contact` (we sent an
+        // invitation) — `.groupLink` is what `apiJoinGroup` produces, not this call. Named anyway so a
+        // future widening here fails loudly instead of silently calling a group link a contact invite.
+        let kind: PopopxOfflineAcceptance.Kind
+        switch connReqType {
+        case .invitation: kind = .confirmation
+        case .contact: kind = .invitation
+        case .groupLink:
+            throw PopopxMeshChatCoreError.acceptanceUnavailable(reason: "a group link is not an offline pairing")
+        }
+        return PopopxOfflineAcceptance(tempConnId: connection.pccConnId, kind: kind)
+    }
+
+    /// 公网回退路径: 模块 5 asks for a text send when the radio could not deliver. This is the app's
+    /// normal direct-message send (`apiSendMessages`, which never throws and alerts on failure itself),
+    /// and the row is inserted into the open conversation exactly the way `ComposeView` inserts it after
+    /// a send of its own — a fallback that silently disappears from the timeline is worse than one that
+    /// visibly failed.
+    func sendTextOverSMP(_ request: PopopxSMPSendRequest) async throws -> PopopxSMPAck {
+        let composed = ComposedMessage(msgContent: .text(request.text))
+        guard let items = await apiSendMessages(
+            type: .direct,
+            id: request.contactId,
+            scope: nil,
+            composedMessages: [composed]
+        ), !items.isEmpty else {
+            throw PopopxMeshChatCoreError.smpSendFailed(messageId: request.messageId, contactId: request.contactId)
+        }
+        await MainActor.run {
+            let m = ChatModel.shared
+            guard let chat = m.getContactChat(request.contactId) else { return }
+            for item in items {
+                m.addChatItem(chat.chatInfo, item)
+            }
+        }
+        // The ack carries both names of the same message: 模块 5's `messageId`, which is what the mesh
+        // knows (the id never travels in the SMP payload — `ComposedMessage` carries only the content),
+        // and the local row this send just created, which is what the app's own list knows. 模块 5 keeps
+        // the pair and 模块 7's merger collapses the offline copy against this row when the fallback
+        // lands, so the recovered message is one bubble, not a bubble plus a strip row (裁定 1).
+        return PopopxSMPAck(
+            messageId: request.messageId,
+            contactId: request.contactId,
+            acknowledgedAt: .now,
+            appChatItemId: items.first?.id
+        )
+    }
+}
+
+/// 模块 6's event feed, app side. `PopopxEventObserver` takes a *fresh* subscription per
+/// `startObserving()` and reads it on its own task, so mounting it can never take events away from the
+/// app's pump — and it is the pump's own protection that this class only ever `yield`s into an
+/// unbounded buffer, which cannot suspend the caller.
+final class PopopxMeshChatEventFeed: PopopxChatEventFeeding, @unchecked Sendable {
+    /// One mailbox, lock-confined: the same shape 模块 7 uses for its own fan-out, and `@unchecked
+    /// Sendable` there means the same thing it means here — every mutation happens under the lock.
+    private let lock = NSLock()
+    private var subscriptions: [UUID: AsyncStream<PopopxChatSessionEvent>.Continuation] = [:]
+
+    /// A fresh subscription. Called once per `startObserving()`, so the observer's own cancellation is
+    /// what removes it, through `onTermination`.
+    func sessionEvents() async -> AsyncStream<PopopxChatSessionEvent> {
+        let id = UUID()
+        let (stream, continuation) = AsyncStream<PopopxChatSessionEvent>.makeStream()
+        continuation.onTermination = { [weak self] _ in self?.removeSubscription(id) }
+        insert(continuation, id: id)
+        return stream
+    }
+
+    /// Drops an event on the floor here, and only here, if nobody is listening: with the fuse off the
+    /// observer never subscribed, and this returns without touching anything.
+    func publish(_ event: PopopxChatSessionEvent) {
+        lock.lock()
+        let targets = Array(subscriptions.values)
+        lock.unlock()
+        for continuation in targets { continuation.yield(event) }
+    }
+
+    /// How many bypasses are mounted. Non-zero with the fuse off would be a leaked subscription.
+    var subscriptionCount: Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return subscriptions.count
+    }
+
+    private func insert(_ continuation: AsyncStream<PopopxChatSessionEvent>.Continuation, id: UUID) {
+        lock.lock()
+        defer { lock.unlock() }
+        subscriptions[id] = continuation
+    }
+
+    private func removeSubscription(_ id: UUID) {
+        lock.lock()
+        defer { lock.unlock() }
+        subscriptions[id] = nil
+    }
+}
+
+/// The only object in the app that is allowed to make `PopopxMeshEngine.shared` exist.
+///
+/// The engine is a singleton whose `init` does two things the fuse's red line forbids in the off
+/// state: it writes the mesh's static key to the Keychain (`loadOrMakeIdentity`), and its default
+/// `transport:` argument builds a `CBCentralManager` and a `CBPeripheralManager`. So nothing here
+/// references `.shared` directly — the fuse's `engine:` component, 模块 3's `outbound:`, 模块 5's
+/// `outbound:`, the plaza's `outbound:` and the panic wipe's `keys:` all get this instead, and the
+/// singleton is only brought up on the path that the fuse has already switched on.
+///
+/// Once it exists, forwarding is unconditional: the engine's own `start`/`stop` are idempotent, and a
+/// stopped-but-alive engine answers a send with its own `radioUnavailable`, which is the honest answer
+/// rather than this class's opinion.
+final class PopopxMeshEngineBackend: PopopxMeshSwitchable, PopopxMeshOutbound, PopopxMeshKeyBurning, @unchecked Sendable {
+    private let lock = NSLock()
+    private var engineExists = false
+
+    func meshSwitchDidTurnOn(nickname: String?) async {
+        markExisted()
+        await PopopxMeshEngine.shared.start(nickname: nickname)
+    }
+
+    /// "Stop the engine" must never turn into "create the engine": a fuse that was never on has no
+    /// radio to shut down.
+    func meshSwitchDidTurnOff() async {
+        guard hasExisted() else { return }
+        await PopopxMeshEngine.shared.stop()
+    }
+
+    var localMeshPublicKeyHex: String {
+        get async {
+            guard hasExisted() else { return "" }
+            // explicit `return`: an implicit single-expression return is not accepted in a
+            // `get async` under the app target's Swift 5 language mode.
+            return await PopopxMeshEngine.shared.localMeshPublicKeyHex
+        }
+    }
+
+    func send(envelope: PopopxMeshEnvelope, to meshPublicKeyHex: String) async throws(PopopxMeshSendError) {
+        guard hasExisted() else {
+            throw PopopxMeshSendError(messageId: envelope.id, failure: .radioUnavailable(.unknown))
+        }
+        try await PopopxMeshEngine.shared.send(envelope: envelope, to: meshPublicKeyHex)
+    }
+
+    func sendBroadcast(text: String) async throws(PopopxMeshSendError) {
+        guard hasExisted() else {
+            throw PopopxMeshSendError(
+                messageId: PopopxOutboundMessage.newMessageId(),
+                failure: .radioUnavailable(.unknown)
+            )
+        }
+        try await PopopxMeshEngine.shared.sendBroadcast(text: text)
+    }
+
+    func burnMeshKeys() async {
+        guard hasExisted() else { return }
+        await PopopxMeshEngine.shared.burnMeshKeys()
+    }
+
+    private func markExisted() {
+        lock.lock()
+        defer { lock.unlock() }
+        engineExists = true
+    }
+
+    private func hasExisted() -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return engineExists
+    }
+}
+
+// MARK: - The coordinator
+
+/// The app-side coordinator: one object that owns the engine backend, the offline bridge, 模块 3's
+/// pairing manager, 模块 5's router, 模块 6's observer, the fuse, and the two UI models the views mount
+/// against. `start`/`stop` are not its API — the fuse is, and 全局熔断开关 is the only thing that drives
+/// them.
+///
+/// Every object it holds is built in `init` and every one of them is inert: no Bluetooth object, no
+/// started monitor, no mounted notification observer, no running timer, until the persisted key says
+/// on. That is what lets `ChatView`, the settings page and the app root mount against a stable
+/// reference (one line each) instead of branching on the fuse and rebuilding their own view trees.
+@MainActor
+final class PopopxMeshRuntime: ObservableObject {
+    static let shared = PopopxMeshRuntime()
+
+    /// The file 模块 5 keeps its 离线兜底记录 in. 名字是这个层选的：包里只给了
+    /// `PopopxMeshPaths.unacknowledgedQueueURL()`，没有 offline-records 的 URL helper，而 `recordsURL`
+    /// 为 nil 时那些记录就只在内存里。见交付说明里的 API gap 一条。
+    static let offlineRecordsFileName = "offline_mesh_records.json"
+
+    /// What the fuse says, mirrored from the kill switch so the app's views have one object to observe.
+    @Published private(set) var isFuseOn = false
+
+    /// 配对策略的可见镜像。真值在 `IdentityMappingStore`（UserDefaults 里的
+    /// `chat.popopx.mesh.pairingPolicy`）；这里只是让 `SettingsView` 的 Picker 能观察到变化。
+    @Published private(set) var pairingPolicy: MeshPairingPolicy = .manualConfirm
+
+    let core: PopopxMeshChatCore
+    let eventFeed: PopopxMeshChatEventFeed
+    let engineBackend: PopopxMeshEngineBackend
+    let mappingStore: IdentityMappingStore
+    let bridge: PopopxOfflineBridge
+    let pairing: ManualPairingManager
+    let router: PopopxMessageRouter
+    let eventObserver: PopopxEventObserver
+    let stateSource: PopopxMeshStateSource
+    let healthMonitor: BluetoothHealthMonitor
+    let killSwitch: PopopxMeshKillSwitch
+    let bannerModel: PopopxMeshBannerModel
+    let timelineModel: PopopxMeshTimelineModel
+    let panicWipe: PopopxPanicWipeManager
+
+    private var fuseMirror: AnyCancellable?
+    private var bootstrapped = false
+
+    private init() {
+        // 模块 1 cannot know this app's container, so it leaves the Documents directory to the host —
+        // and the injection has to happen before anything below computes a URL from it. The
+        // FileManager form (rather than `URL.documentsDirectory`, which is iOS 16) is the same
+        // directory and keeps this file's iOS 15 floor.
+        if let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            PopopxMeshPaths.setDocumentsDirectory(documents)
+        }
+
+        let core = PopopxMeshChatCore()
+        let feed = PopopxMeshChatEventFeed()
+        let backend = PopopxMeshEngineBackend()
+        let store = IdentityMappingStore.shared
+        let bridge = PopopxOfflineBridge(core: core, store: store)
+        let pairing = ManualPairingManager(outbound: backend, bridge: bridge, store: store)
+        let router = PopopxMessageRouter(
+            core: core,
+            outbound: backend,
+            store: store,
+            queueURL: PopopxMeshPaths.unacknowledgedQueueURL(),
+            recordsURL: PopopxMeshPaths.meshDirectory().appendingPathComponent(Self.offlineRecordsFileName)
+        )
+        let observer = PopopxEventObserver(feed: feed, store: store, router: router)
+        let stateSource = PopopxMeshStateSource.shared
+        let healthMonitor = BluetoothHealthMonitor.shared
+        let killSwitch = PopopxMeshKillSwitch(
+            engine: backend,
+            healthMonitor: healthMonitor,
+            pairing: pairing,
+            interface: stateSource
+        )
+        let bannerModel = PopopxMeshBannerModel(
+            pairing: pairing,
+            binding: store,
+            routing: router,
+            source: stateSource
+        )
+        let timelineModel = PopopxMeshTimelineModel(source: stateSource, routing: router)
+        // 红线「零数据库修改」（POPOPX_MESH_PROMPT.md 一.5）的承诺在这里是可见的：`applicationDatabaseURL` 留成 nil，
+        // SQLCipher 聊天库的路径从未被交给这个 manager，所以它连被读一次大小都不会。
+        let panicWipe = PopopxPanicWipeManager(
+            radio: [backend, healthMonitor, pairing],
+            keys: backend,
+            mapping: store,
+            inMemoryMirrors: [stateSource, bannerModel, timelineModel],
+            meshDirectory: PopopxMeshPaths.meshDirectory(),
+            applicationDatabaseURL: nil,
+            termination: PopopxPanicWipeManager.processExit
+        )
+
+        self.core = core
+        self.eventFeed = feed
+        self.engineBackend = backend
+        self.mappingStore = store
+        self.bridge = bridge
+        self.pairing = pairing
+        self.router = router
+        self.eventObserver = observer
+        self.stateSource = stateSource
+        self.healthMonitor = healthMonitor
+        self.killSwitch = killSwitch
+        self.bannerModel = bannerModel
+        self.timelineModel = timelineModel
+        self.panicWipe = panicWipe
+        self.isFuseOn = killSwitch.persistedIsEnabled
+
+        // 镜像熔断。任何路径翻这个开关 —— 本页的 Toggle、`MeshPrivacySettingsView` 自己的
+        // @AppStorage + `setFuseEnabled`、plaza 的昵称重启 —— 都只更新同一个真值。
+        self.fuseMirror = killSwitch.$isEnabled.removeDuplicates().sink { [weak self] enabled in
+            Task { @MainActor in self?.isFuseOn = enabled }
+        }
+    }
+
+    // MARK: Launch
+
+    /// Called once, at app launch, from the root view's `.task`.
+    ///
+    /// OFF is off: `restoreOnLaunch()` stops every component first (idempotent, and the point is that a
+    /// switch left on by a crashed session cannot keep a half-initialized radio) and then returns
+    /// without starting anything. Nothing here opens a socket, a Keychain item or a CB object either —
+    /// the objects above were built, not started.
+    func bootstrap() async {
+        guard !bootstrapped else { return }
+        bootstrapped = true
+
+        if PopopxMeshKillSwitch.enabledDefaultsKey != PopopxMeshFuse.defaultsKey {
+            PopopxMeshLog.store.error(
+                "❌ fuse key drift: package says \(PopopxMeshKillSwitch.enabledDefaultsKey, privacy: .public), the app's copy says \(PopopxMeshFuse.defaultsKey, privacy: .public)"
+            )
+        }
+
+        // The three host-built components join the fuse. `register` does NOT start them — the kill
+        // switch only starts a newcomer when the switch is already on, which is the case that would
+        // otherwise leave them running behind an off switch.
+        await killSwitch.register(PopopxMeshSwitchedComponent(name: "meshRouter", role: .radio, component: router))
+        await killSwitch.register(PopopxMeshSwitchedComponent(name: "chatEventObserver", role: .interface, component: eventObserver))
+        await killSwitch.register(PopopxMeshSwitchedComponent(name: "pairingBanner", role: .interface, component: bannerModel))
+        await killSwitch.register(PopopxMeshSwitchedComponent(name: "meshTimeline", role: .interface, component: timelineModel))
+
+        pairingPolicy = await mappingStore.pairingPolicy
+        await killSwitch.restoreOnLaunch()
+        isFuseOn = killSwitch.isEnabled
+        let mounted = killSwitch.componentNames.joined(separator: " ")
+        PopopxMeshLog.route.info(
+            "🧵 mesh glue ready: fuse=\(self.isFuseOn, privacy: .public), components=\(mounted, privacy: .public)"
+        )
+    }
+
+    // MARK: The switch
+
+    /// The settings page's Toggle writes through this. It is synchronous because a SwiftUI `Binding`
+    /// setter cannot await; the transition it schedules is the kill switch's own, which is where this
+    /// app-side layer persists the key (包里的 `MeshPrivacySettingsView` 用同名 `@AppStorage` 落到同一个开关).
+    func requestFuse(_ enabled: Bool) {
+        guard enabled != killSwitch.isEnabled else { return }
+        Task { await self.setFuse(enabled) }
+    }
+
+    /// 直接开或关。ON 走一条干净的启动；OFF 走一次完整的停止，并且可以再来一遍。
+    func setFuse(_ enabled: Bool) async {
+        await killSwitch.setEnabled(enabled)
+        isFuseOn = killSwitch.isEnabled
+    }
+
+    /// 配对策略。写入走 模块 1 自己的 setter（它同时更新 UserDefaults 与日志），镜像先更新，所以
+    /// Picker 不会因为一次 actor hop 而回弹。
+    func setPairingPolicy(_ policy: MeshPairingPolicy) {
+        pairingPolicy = policy
+        Task { await self.mappingStore.updatePairingPolicy(policy) }
+    }
+
+    // MARK: 模块 6 的只读旁路
+
+    /// `processReceivedMsg` 唯一的 mesh 入口：`.contactConnected` 与 `.contactSndReady` 各调用一次。
+    ///
+    /// **Nonisolated, and synchronous on purpose.** It runs on the chat core's receive pump, so it must
+    /// not await the observer (that would let a slow store stall message delivery for the whole app) and
+    /// must not change, delay, reorder or swallow anything the pump already does. It therefore: reads
+    /// the fuse key synchronously (with the fuse off it does not even create a `Task`), reduces the
+    /// event to the four facts 模块 6 needs, and hops into its own `Task`. The observer consumes them
+    /// from its own subscription, in the order the core sent them.
+    nonisolated static func feedSessionEvent(kind: PopopxChatSessionEventKind, user: UserRef, contact: Contact) {
+        guard PopopxMeshFuse.isOn else { return }
+        // `tempConnId` is deliberately nil. At this moment the app's `contact.activeConn` is the
+        // *finished* connection, and in SimpleX's id space that number can collide with a pending
+        // connection's; handing it over would let the observer upgrade somebody else's pairing. The
+        // observer's own tie-break — mesh key, then the sole pending row, refuse when there is more
+        // than one — is the safe path, and it is 模块 6's documented one.
+        let event = PopopxChatSessionEvent(
+            kind: kind,
+            contactId: contact.contactId,
+            tempConnId: nil,
+            peerMeshPublicKeyHex: nil,
+            userRef: user.localDisplayName,
+            nickname: contact.profile.displayName
+        )
+        Task { await PopopxMeshRuntime.shared.publish(event) }
+    }
+
+    /// Hands one event to the bypass. Nothing in here awaits the observer: `publish` only yields into an
+    /// unbounded buffer, and the observer does its actor work on its own task.
+    func publish(_ event: PopopxChatSessionEvent) {
+        eventFeed.publish(event)
+    }
+}
+
+// MARK: - The host-built components as fuse components
+
+// 包把 `PopopxMeshSwitchable` 的绑定写在了它自己的单例上（模块 1/3/4/7）。宿主建的那三个 —— 模块 5 的
+// router、模块 6 的 observer、banner 的模型 —— 不在包里，所以绑定在这一层；它们只调用各自已经有的生命周期
+// 方法，不增加任何状态。banner 模型是 @MainActor 的，而协议的要求都是 `async` 的，所以隔离在这里可以跳
+// —— 和包里 `PopopxMeshStateSource` 自己的写法是同一个模式。
+
+extension PopopxMessageRouter: @retroactive PopopxMeshSwitchable {
+    public func meshSwitchDidTurnOn(nickname: String?) async {
+        await start()
+    }
+
+    public func meshSwitchDidTurnOff() async {
+        await stop()
+    }
+}
+
+extension PopopxEventObserver: @retroactive PopopxMeshSwitchable {
+    public func meshSwitchDidTurnOn(nickname: String?) async {
+        await startObserving()
+    }
+
+    public func meshSwitchDidTurnOff() async {
+        stopObserving()
+    }
+}
+
+extension PopopxMeshBannerModel: @retroactive PopopxMeshSwitchable {
+    public func meshSwitchDidTurnOn(nickname: String?) async {
+        start()
+    }
+
+    public func meshSwitchDidTurnOff() async {
+        stop()
+    }
+}
+
+extension PopopxMeshTimelineModel: @retroactive PopopxMeshSwitchable {
+    public func meshSwitchDidTurnOn(nickname: String?) async {
+        start()
+    }
+
+    public func meshSwitchDidTurnOff() async {
+        stop()
+    }
+}
+
+/// 模块 7 要的三件路由事实。包说宿主"可以在一个 extension 里"满足它，但 模块 5 把 `network`/`store`
+/// 都留成了 private let，所以这里只能是实现而不是转发。用的对象和 router 构造时用的是同一批单例，
+/// 所以答案不会和它自己的判断分叉。
+extension PopopxMessageRouter: @retroactive PopopxMeshRoutingObserving {
+    public func isPublicNetworkAvailable() async -> Bool {
+        await NetworkStateMonitor.shared.isConnectedNow()
+    }
+
+    public func pendingRelayMessageIDs() async -> Set<String> {
+        Set(pendingMessages().map(\.messageId))
+    }
+
+    public func isContactBound(forMeshPublicKeyHex meshPublicKeyHex: String) async -> Bool {
+        await IdentityMappingStore.shared.mapping(forMeshPublicKeyHex: meshPublicKeyHex)?.contactId != nil
+    }
+
+    /// 裁定 1's read side: the pairs the flushes left behind, so 模块 7 can collapse an offline copy
+    /// against the row the app stored. The router's accessor is named `recorded…` for exactly this
+    /// call: written as `flushedAppChatItemIDs()` it resolves to the requirement this function is, and
+    /// the compile of the harness copy caught the recursion before any device could.
+    public func flushedAppChatItemIDs() async -> [String: Int64] {
+        recordedFlushedAppChatItemIDs()
+    }
+}
+
+/// The app's own rendered rows, in the shape 模块 7's merge takes (裁定 1).
+///
+/// The strip deduplicates against this: a mesh row whose pair points at one of these ids is the same
+/// message the list already draws, so it is not drawn again. Without it the app stream is empty, every
+/// mesh row looks offline-only, and a recovered message shows as a bubble *and* a strip row.
+///
+/// Fed from `ItemsModel.reversedChatItems` rather than from `mergedItems`: the merged list groups and
+/// hides rows behind the reveal state, and an item the user has collapsed is still an item the app has,
+/// which is the only property the merge cares about.
+///
+/// Lives here rather than in a new file because 红线「严禁直接用脚本修改 .pbxproj 工程文件」means a file
+/// the package does not own only compiles if the project already lists it.
+@MainActor enum PopopxMeshApplicationStream {
+    /// How many of a chat's newest rows it contributes. The strip draws three mesh-only rows and the
+    /// pairs it collapses are the messages that just went out, so the window covers everything that can
+    /// collide; `PopopxMeshStateSource.defaultCapacity` is the same idea on the mesh side. Older rows
+    /// would only make every list change cost a longer map.
+    static let maxRowsPerChat = 128
+
+    static func rows(from items: [ChatItem]) -> [PopopxMeshTimelineMessage] {
+        var rows: [PopopxMeshTimelineMessage] = []
+        rows.reserveCapacity(maxRowsPerChat)
+        // Newest-first, and filled until the cap: `reversedChatItems` puts the newest message at index
+        // 0, which is the order the app's own scroll view renders in.
+        for item in items {
+            if rows.count >= maxRowsPerChat { break }
+            rows.append(
+                PopopxMeshTimelineMessage.application(
+                    messageID: String(item.id),
+                    timestamp: item.meta.itemTs,
+                    text: item.text,
+                    direction: item.chatDir.sent ? .outgoing : .incoming
+                )
+            )
+        }
+        return rows
+    }
+}
+
+// MARK: - The mounts
+
+/// 红线「UI 零破坏挂载」（POPOPX_MESH_PROMPT.md 一.5）要的隐藏路径，mounted once on the app's root view.
+///
+/// The package's own `popopxPanicWipeTrigger(_:)` would be the one-line mount, and it is not used here
+/// for one reason: it has to be either present or absent, and branching on the fuse *outside* the
+/// content would change the root view's structural identity every time the switch flips — which throws
+/// away every `@State` in the app. So the modifier is always attached, and the condition sits inside
+/// its `overlay`: with the fuse off nothing is drawn, the 44 pt corner is not a hit target, and the
+/// three-tap gesture cannot arm. The package's `PopopxPanicWipeGate` still owns the gesture, the
+/// 1 秒三击的判定、确认弹窗和抹除的顺序 —— 这里只决定它存不存在。
+@MainActor
+struct PopopxMeshPanicWipeMount: ViewModifier {
+    /// The corner's side, copied from 模块 7's own trigger so the hidden target is the size the
+    /// package documents and nothing larger.
+    static let hitTargetSide: CGFloat = 44
+
+    @ObservedObject private var runtime = PopopxMeshRuntime.shared
+
+    func body(content: Content) -> some View {
+        content.overlay(alignment: .bottomTrailing) {
+            if runtime.isFuseOn {
+                PopopxPanicWipeGate(runtime.panicWipe) {
+                    Color.clear.frame(width: Self.hitTargetSide, height: Self.hitTargetSide)
+                }
+            }
         }
     }
 }
