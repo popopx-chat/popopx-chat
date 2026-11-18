@@ -5,7 +5,7 @@
 //  【第四阶段】设置树的 popopx 版本：替换 Shared/Views/UserSettings/SettingsView.swift:305。
 //  输入面与它逐字对齐（`showProgress`、`versionText`、`colorScheme`/`dismiss`/`ChatModel`/
 //  `SceneDelegate` 环境、观察 `BadgeModel.shared`），所以两处调用点各改一个词就能挂载：
-//  Shared/Features/Me/PopopxMeView.swift:189 与 Shared/Views/ChatList/ChatListView.swift:107。
+//  Shared/Features/Me/PopopxMeView.swift:249 与 Shared/Views/ChatList/ChatListView.swift:107。
 //
 //  四条结构决定：
 //
@@ -363,7 +363,7 @@ struct PopopxSettingsView: View {
         .popopxAnimation(PopopxSpring.fluid, value: meshRuntime.isFuseOn, reduceMotion: reduceMotion)
     }
 
-    /// 只经 `requestFuse` 翻转（POPOPXAPI.swift:3771）：那是唯一会带着全部厢语组件一起启停的路径。
+    /// 只经 `requestFuse` 翻转（POPOPXAPI.swift:3777）：那是唯一会带着全部厢语组件一起启停的路径。
     private var fuseBinding: Binding<Bool> {
         Binding(
             get: { meshRuntime.isFuseOn },

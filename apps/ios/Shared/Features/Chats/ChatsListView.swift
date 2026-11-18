@@ -444,7 +444,7 @@ struct ChatsListView: View {
         }
     }
 
-    /// 可切换的身份：与 UserPicker.swift:33-35（同 `PopopxMeView.swift:405-407`）一个口径 ——
+    /// 可切换的身份：与 UserPicker.swift:33-35（同 `PopopxMeView.swift:465-467`）一个口径 ——
     /// 加锁的身份（`user.hidden`，即有 `viewPwdHash`）不进切换器，因为这里传的是 `viewPwd: nil`，
     /// 带着 nil 去切加锁身份只会失败；加锁身份归「我」页的身份管理。
     /// 但当前身份必须在表里，否则顶栏会把自己的名字显示成"未选择"。顺序同 UserPicker

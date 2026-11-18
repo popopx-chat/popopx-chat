@@ -399,6 +399,8 @@ struct ComposeView: View {
     @State var chosenMedia: [UploadContent] = []
     @State private var showFileImporter = false
     @State private var showLocationPicker = false
+    /// 「+」面板里那一格「个人主页」按下后的本次发送确认表单（模式 + 时长只作用于这一次发送）。
+    @State private var showProfileSendSheet = false
 
     @State private var audioRecorder: AudioRecorder?
     @State private var voiceMessageRecordingTime: TimeInterval?
@@ -697,6 +699,15 @@ struct ComposeView: View {
                 Task { await popopxSendLocation(payload) }
             }
             .presentationDetents([.fraction(0.8)])
+        }
+        .sheet(isPresented: $showProfileSendSheet) {
+            // 表单只决定"这一次怎么发"（模式 + 时长），已保存的主页草稿它一个字都不改；
+            // 关开关的时机抄上面那一支：先关再发，发送失败时表单不会还挂在那儿。
+            ProfileSendModeSheet { manifest in
+                showProfileSendSheet = false
+                Task { await popopxSendProfile(manifest) }
+            }
+            .presentationDetents([.medium])
         }
         .onChange(of: chosenMedia) { _, selected in
             Task {
@@ -1352,6 +1363,20 @@ struct ComposeView: View {
             } else {
                 showLocationPicker = true
             }
+        case .personalProfile:
+            // 和 `.location` 同一条门：主页在线上先是一行索引文本，媒体原件随后各自成行，
+            // 所以"群里禁用文件与媒体"那道限制（`.photo/.camera/.file` 那一支）不该拦它——
+            // 但改写 / 转发 / live / 举报 / 已挂附件的草稿会让主页和草稿各说各话，照旧拦。
+            if composeState.attachmentDisabled {
+                AlertManager.shared.showAlertMsg(
+                    title: "暂不能发送个人主页",
+                    message: "正在改写、转发、录制即时消息或已挂载附件时，不能另外发送一份个人主页。"
+                )
+            } else if !chat.chatInfo.sendMsgEnabled {
+                AlertManager.shared.showAlertMsg(title: "会话未就绪", message: "该会话当前不允许发送消息。")
+            } else {
+                showProfileSendSheet = true
+            }
         case .secure:
             // 「+」面板里那一格是**武装开关**，不是选择器：只翻宿主那一格真值，输入条不留副本。
             // 这里的拒绝只是提前说一句人话；真正的门禁在 `popopxSendSecure` 里，
@@ -1380,10 +1405,10 @@ struct ComposeView: View {
                 case .photo: showMediaPicker = true
                 case .camera: showTakePhoto = true
                 case .file: showFileImporter = true
-                // 这两格在 `.photo/.camera/.file` 这一支里到不了：外层 switch 已经把它们分出去了。
+                // 这三格在 `.photo/.camera/.file` 这一支里到不了：外层 switch 已经把它们分出去了。
                 // 写 `break` 而不是删掉，是为了让这个 switch 保持穷尽 —— 加新的一格时
                 // 这里会编译不过，提醒两处都要改。
-                case .location, .secure: break
+                case .location, .secure, .personalProfile: break
                 }
             }
         }
@@ -1424,6 +1449,36 @@ struct ComposeView: View {
             await popopxSendPlainViaSMP(payload.messageContent, ttl: ttl)
         case .ignoreEmptyDraft:
             break
+        }
+    }
+
+    /// 「发送个人主页」的落点。和上面两支不同，这里**不在本文件里判定通道**：一份主页同时牵着一行
+    /// 索引文本和 N 件媒体原件，原件永远不能走蓝牙（判定表的 `.richContent`），降级成纯文字又是产品
+    /// 要求的行为——两件事的先后次序（索引先落公网、原件随后排队、断网时整份改走厢语投影）属于发送器，
+    /// 放在这里会让 `ComposeView` 变成第二个真相源。所以本函数只做三件事：交出去、把结论说给用户、
+    /// 清掉那条 live dummy（判据抄 `popopxSendPlainViaSMP`，只在真的公网送达之后）。
+    ///
+    /// 它同样不进 `checkComposeLinksAsync`，也不走 `sendMessageAsync`：两条理由和位置那一份完全相同
+    /// （`popopx://profile` 与一次性邀请链接同 scheme；草稿必须原样留在框里）。
+    @MainActor private func popopxSendProfile(_ manifest: PopopxProfileManifest) async {
+        let outcome = await ProfileAutoSender.shared.send(manifest, to: chat)
+        switch outcome {
+        case let .sentFullMedia(indexSent, mediaQueued):
+            if indexSent { chatModel.removeLiveDummy(animated: false) }
+            logger.notice("POPOPX profile: 本机手动发送走公网（媒体排队 \(mediaQueued, privacy: .public) 件）")
+        case let .sentMeshTextOnly(omitted):
+            logger.notice("POPOPX profile: 本机手动发送走厢语纯文字（省去 \(omitted, privacy: .public) 件媒体）")
+        case let .refused(refusal):
+            PopopxHaptics.notice(.warning)
+            AlertManager.shared.showAlertMsg(
+                title: "无法发送个人主页",
+                // 插值而不是直传：`showAlertMsg` 收的是 `LocalizedStringKey`（ContentView.swift:540），
+                // 一句运行期才算出来的拒绝理由只能用插值落进去。
+                message: "\(refusal.explanation ?? refusal.description)"
+            )
+        case let .failed(reason):
+            PopopxHaptics.notice(.error)
+            AlertManager.shared.showAlertMsg(title: "发送失败", message: "\(reason)")
         }
     }
 

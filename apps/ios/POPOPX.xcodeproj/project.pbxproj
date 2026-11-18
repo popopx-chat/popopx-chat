@@ -217,6 +217,13 @@
 		8B0D97BE30AD900E00985BD5 /* PopopxCabinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0D97BC30AD900E00985BD5 /* PopopxCabinView.swift */; };
 		8B2E872D30AD6A7700670E4A /* PopopxTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B2E872C30AD6A7700670E4A /* PopopxTheme.swift */; };
 		8B36F14A30AE127C00ABC182 /* POPOPXAntiSpyDetector.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F14930AE127C00ABC182 /* POPOPXAntiSpyDetector.mlpackage */; };
+		8B36F15330AE6E8600ABC182 /* PersonalProfileModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F14B30AE6E8600ABC182 /* PersonalProfileModel.swift */; };
+		8B36F15430AE6E8600ABC182 /* ProfileReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F15030AE6E8600ABC182 /* ProfileReaderView.swift */; };
+		8B36F15530AE6E8600ABC182 /* ProfileCardBubbleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F14E30AE6E8600ABC182 /* ProfileCardBubbleView.swift */; };
+		8B36F15630AE6E8600ABC182 /* ProfileBuilderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F14D30AE6E8600ABC182 /* ProfileBuilderView.swift */; };
+		8B36F15730AE6E8600ABC182 /* ProfileStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F15130AE6E8600ABC182 /* ProfileStorageManager.swift */; };
+		8B36F15830AE6E8600ABC182 /* ProfileAutoSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F14C30AE6E8600ABC182 /* ProfileAutoSender.swift */; };
+		8B36F15930AE6E8600ABC182 /* ProfileQRCodeSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F14F30AE6E8600ABC182 /* ProfileQRCodeSheet.swift */; };
 		8B51158530AD7BBA00B15CFE /* PopopxTelemetryHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B51158330AD7BBA00B15CFE /* PopopxTelemetryHeader.swift */; };
 		8B51158B30AD7BC200B15CFE /* PopopxProximityAddContactView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B51158730AD7BC200B15CFE /* PopopxProximityAddContactView.swift */; };
 		8B51158C30AD7BC200B15CFE /* PopopxAddFriendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B51158630AD7BC200B15CFE /* PopopxAddFriendView.swift */; };
@@ -655,6 +662,13 @@
 		8B0D97BC30AD900E00985BD5 /* PopopxCabinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxCabinView.swift; sourceTree = "<group>"; };
 		8B2E872C30AD6A7700670E4A /* PopopxTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxTheme.swift; sourceTree = "<group>"; };
 		8B36F14930AE127C00ABC182 /* POPOPXAntiSpyDetector.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = POPOPXAntiSpyDetector.mlpackage; sourceTree = "<group>"; };
+		8B36F14B30AE6E8600ABC182 /* PersonalProfileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalProfileModel.swift; sourceTree = "<group>"; };
+		8B36F14C30AE6E8600ABC182 /* ProfileAutoSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileAutoSender.swift; sourceTree = "<group>"; };
+		8B36F14D30AE6E8600ABC182 /* ProfileBuilderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileBuilderView.swift; sourceTree = "<group>"; };
+		8B36F14E30AE6E8600ABC182 /* ProfileCardBubbleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileCardBubbleView.swift; sourceTree = "<group>"; };
+		8B36F14F30AE6E8600ABC182 /* ProfileQRCodeSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileQRCodeSheet.swift; sourceTree = "<group>"; };
+		8B36F15030AE6E8600ABC182 /* ProfileReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileReaderView.swift; sourceTree = "<group>"; };
+		8B36F15130AE6E8600ABC182 /* ProfileStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileStorageManager.swift; sourceTree = "<group>"; };
 		8B51158330AD7BBA00B15CFE /* PopopxTelemetryHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxTelemetryHeader.swift; sourceTree = "<group>"; };
 		8B51158630AD7BC200B15CFE /* PopopxAddFriendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxAddFriendView.swift; sourceTree = "<group>"; };
 		8B51158730AD7BC200B15CFE /* PopopxProximityAddContactView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxProximityAddContactView.swift; sourceTree = "<group>"; };
@@ -1348,6 +1362,20 @@
 			path = Cabin;
 			sourceTree = "<group>";
 		};
+		8B36F15230AE6E8600ABC182 /* PersonalProfile */ = {
+			isa = PBXGroup;
+			children = (
+				8B36F14B30AE6E8600ABC182 /* PersonalProfileModel.swift */,
+				8B36F14C30AE6E8600ABC182 /* ProfileAutoSender.swift */,
+				8B36F14D30AE6E8600ABC182 /* ProfileBuilderView.swift */,
+				8B36F14E30AE6E8600ABC182 /* ProfileCardBubbleView.swift */,
+				8B36F14F30AE6E8600ABC182 /* ProfileQRCodeSheet.swift */,
+				8B36F15030AE6E8600ABC182 /* ProfileReaderView.swift */,
+				8B36F15130AE6E8600ABC182 /* ProfileStorageManager.swift */,
+			);
+			path = PersonalProfile;
+			sourceTree = "<group>";
+		};
 		8B51158430AD7BBA00B15CFE /* Navigation */ = {
 			isa = PBXGroup;
 			children = (
@@ -1370,6 +1398,7 @@
 		8B51158A30AD7BC200B15CFE /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				8B36F15230AE6E8600ABC182 /* PersonalProfile */,
 				8BBDA84830AD9C880013F482 /* ChatInfo */,
 				8BBDA84B30AD9C880013F482 /* ChatRoom */,
 				8BBDA84D30AD9C880013F482 /* Group */,
@@ -1983,6 +2012,13 @@
 				6407BA83295DA85D0082BA18 /* CIInvalidJSONView.swift in Sources */,
 				8CAD466F2D15A8100078D18F /* ChatScrollHelpers.swift in Sources */,
 				644EFFDE292BCD9D00525D5B /* ComposeVoiceView.swift in Sources */,
+				8B36F15330AE6E8600ABC182 /* PersonalProfileModel.swift in Sources */,
+				8B36F15430AE6E8600ABC182 /* ProfileReaderView.swift in Sources */,
+				8B36F15530AE6E8600ABC182 /* ProfileCardBubbleView.swift in Sources */,
+				8B36F15630AE6E8600ABC182 /* ProfileBuilderView.swift in Sources */,
+				8B36F15730AE6E8600ABC182 /* ProfileStorageManager.swift in Sources */,
+				8B36F15830AE6E8600ABC182 /* ProfileAutoSender.swift in Sources */,
+				8B36F15930AE6E8600ABC182 /* ProfileQRCodeSheet.swift in Sources */,
 				5CA059EB279559F40002BEB4 /* POPOPXApp.swift in Sources */,
 				64D0C2C029F9688300B38D5F /* UserAddressView.swift in Sources */,
 				6448BBB628FA9D56000D2AB9 /* GroupLinkView.swift in Sources */,

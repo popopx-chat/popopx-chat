@@ -48,6 +48,10 @@ struct PopopxMeView: View {
     @State private var toast = PopopxToastModel()
     @State private var showsAddFriend = false
     @State private var showsPairingPolicy = false
+    /// 「主页名片码」那张 Sheet 的开关（入口就在下面 `identityEntries` 第二组里）。
+    @State private var showsProfileQR = false
+    /// 本机加密个人主页的当前档位，形如「已配置 · 常驻名片」；`nil` = 还没读出来（首帧不给假状态）。
+    @State private var profileStatusValue: String?
 
     /// 正在切换的身份编号；nil = 此刻没有切换在跑。切换期间不接受第二次点击，否则两次
     /// `setActiveUser` 会互相抢 `ChatModel.currentUser`。
@@ -86,10 +90,28 @@ struct PopopxMeView: View {
         .sheet(isPresented: $showsPairingPolicy) {
             pairingPolicySheet
         }
+        .sheet(isPresented: $showsProfileQR) {
+            // detents 归调用方（`ProfileQRCodeSheet.swift:19` 那条约定）。这张卡的内容是
+            // 名片 + 模式选择 + 动作行，比聊天里那张位置卡高得多，0.8 是它与 `identityCard`
+            // 同屏时不挤掉自己动作行的那一档。
+            ProfileQRCodeSheet(identityName: chatModel.currentUser?.displayName ?? Copy.profileQRIdentityFallback)
+                .presentationDetents([.fraction(0.8)])
+        }
+        .onChange(of: showsProfileQR) { _, opened in
+            // 关掉名片码就重读一次档位：那张 Sheet 里的模式开关会改本机那份武装记录，
+            // 入口行上那一格说的必须是现在真实的那一档。
+            if !opened { Task { await refreshProfileStatus() } }
+        }
         .popopxToast(toast)
         // 开关一翻就去核验。`.task(id:)` 在熔断镜像变化时重跑；稳定态下只多一次 actor hop。
         .task(id: meshRuntime.isFuseOn) {
             await refreshVerification(waitingForSettle: true)
+        }
+        // 入口行那一格的初值：进本页读一次，换身份再读一次。读不到就是"还没制作"，
+        // 这一句必须是读出来的而不是猜的——`ProfileStorageManager.loadEditable()` 返回 nil
+        // 才是唯一能说"未配置"的依据。
+        .task(id: chatModel.currentUser?.userId) {
+            await refreshProfileStatus()
         }
     }
 
@@ -134,6 +156,25 @@ struct PopopxMeView: View {
         }
     }
 
+    /// 入口行那一格读出来的档位。优先级和这张主页实际的发送行为一致：
+    /// **名片码留下的武装记录压过已保存的主页**——扫码自动推送用的就是那一档
+    ///（`ProfileAutoSender.handleContactConnected(contactId:)`，ProfileAutoSender.swift:241），
+    /// 所以标签跟着它说，而不是说一份这次并不会发出去的档位。
+    /// 只认**还在有效期内**的那一份：`armingWindowSeconds` 一过它就推不出去了（ProfileAutoSender.swift:168 那一格会被清），
+    /// 把过期显示成一个档位只会让人去关一个已经不存在的开关。
+    private func refreshProfileStatus() async {
+        let armed = ProfileAutoSender.shared.armedProfileScene
+        if let armed, armed.expiresAt > Date() {
+            profileStatusValue = "\(Copy.profileConfigured) · \(armed.mode.cardLabel)"
+            return
+        }
+        guard let manifest = await ProfileStorageManager.shared.loadEditable() else {
+            profileStatusValue = Copy.profileUnconfigured
+            return
+        }
+        profileStatusValue = "\(Copy.profileConfigured) · \(manifest.sendMode.cardLabel)"
+    }
+
     // MARK: 身份
 
     private var identityEntries: some View {
@@ -141,6 +182,25 @@ struct PopopxMeView: View {
             PopopxMeRowLink(Copy.myProfile, systemImage: "person.text.rectangle", tint: .brand) {
                 PopopxProfileHost()
             }
+            PopopxMeDivider()
+            // 加密个人主页：制作器用 `NavigationLink` 推上去，不是 Sheet —— 它自己不带导航容器
+            //（`ProfileBuilderView.swift:434` 那一层的约定），推上去就白拿现成的返回键。
+            // `value` 那一格是这台机器上主页的当前档位；读盘是 actor hop，放在 `.task` 里，
+            // 不在 body 里同步读，否则每次重排这组卡片都会去问一次磁盘。
+            PopopxMeRowLink(Copy.personalProfile, value: profileStatusValue, systemImage: "person.text.rectangle.fill", tint: .brand) {
+                ProfileBuilderView()
+                    .navigationTitle(Copy.personalProfile)
+            }
+            PopopxMeDivider()
+            // 名片码是 Sheet 不是页面（`ProfileQRCodeSheet` 自带关闭键、dismiss 归调用方），
+            // 所以这一行不能借上面那个 `PopopxMeRowLink`——它是 NavigationLink，推不开 Sheet。
+            // 命框高度与 `PopopxMeRowLink` 对齐，两行看上去是同一族。
+            PopopxPickerRow(Copy.personalProfileQR, systemImage: "qrcode.viewfinder", tint: .brand) {
+                PopopxHaptics.impact(.light)
+                showsProfileQR = true
+            }
+            .frame(maxWidth: .infinity, minHeight: PopopxMetrics.minHitTarget, alignment: .leading)
+            .accessibilityIdentifier("popopx.me.profileQR")
             PopopxMeDivider()
             PopopxMeRowLink(
                 Copy.manageIdentities,
@@ -437,10 +497,10 @@ struct PopopxMeView: View {
 
     /// 只往既有的布防状态机里送一次轻触：`PopopxPanicWipeArming.tap` 自己判定"一秒内正好三次"。
     /// 确认弹窗是 `PopopxPanicWipeGate` 的职责，而它已经由 `PopopxMeshPanicWipeMount`
-    /// （POPOPXApp.swift:48 → POPOPXAPI.swift:3947-3964）挂在 app 根上、绑定同一个
+    /// （POPOPXApp.swift:48 → POPOPXAPI.swift:3953-3970）挂在 app 根上、绑定同一个
     /// `isAwaitingConfirmation`。所以这里绝不写第二个 alert：写了就有两道确认抢同一个状态机，
     /// 而铁律要的是一次、且只有那一次确认。熔断关闭时那道门根本不存在
-    /// （POPOPXAPI.swift:3956 的 `if runtime.isFuseOn`），所以这一行同时被禁用。
+    /// （POPOPXAPI.swift:3962 的 `if runtime.isFuseOn`），所以这一行同时被禁用。
     @MainActor private func armPanicWipe() {
         guard meshRuntime.isFuseOn else { return }
         PopopxHaptics.impact(.light)
@@ -800,6 +860,13 @@ private enum Copy {
     static let myProfile = "我的资料"
     static let manageIdentities = "身份管理"
     static let identityCountFormat = "共 %d 个"
+
+    // 加密个人主页（ProfileReaderView.md:59 的行名是「我的加密个人主页」，档位标签是「已配置 · <模式>」）
+    static let personalProfile = "我的加密个人主页"
+    static let personalProfileQR = "主页名片码"
+    static let profileConfigured = "已配置"
+    static let profileUnconfigured = "未制作"
+    static let profileQRIdentityFallback = "未命名身份"
 
     // 通用
     static let addFriend = "添加朋友"

@@ -113,7 +113,7 @@ struct PopopxContactsView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    /// 熔断真值在 runtime（Shared/Model/POPOPXAPI.swift:3634），配对队列在 bannerModel。
+    /// 熔断真值在 runtime（Shared/Model/POPOPXAPI.swift:3640），配对队列在 bannerModel。
     /// 两者都是进程级单例，和 Phase 3 一样在 `@MainActor init()` 里装进 `@ObservedObject`。
     @ObservedObject private var meshRuntime: PopopxMeshRuntime
     @ObservedObject private var meshBanner: PopopxMeshBannerModel

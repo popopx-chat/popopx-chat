@@ -195,6 +195,9 @@ enum PopopxBubbleBody: Hashable {
     /// 一条绝密消息。这一档**只带密文**：载荷里的 `sealed`/`key` 是 `Data`，渲染只用 `ttlSeconds`
     /// 说时长，正文明细只在绝密窗口里存在，永不出现在气泡、`spokenText` 或列表预览里。
     case secure(PopopxSecurePayload)
+    /// 一条加密个人主页的**索引载荷**。和 `.location`/`.secure` 同一族：这一档带的是结构化清单而不是
+    /// 正文，渲染成一张可点开的名片卡片（`ProfileCardBubbleView`）。图文原件是普通附件行，不进这一档。
+    case profile(PopopxProfilePayload)
 
     /// VoiceOver 要说的那句正文。`.event` 由 `PopopxMessageBubble.body` 分给 `eventLine`，
     /// 不上气泡底——判据只写在那一处分流里。
@@ -209,6 +212,9 @@ enum PopopxBubbleBody: Hashable {
         // 绝密这一句只说"这是一条要生物识别的绝密消息，时长多少"。它和卡片自己的
         // `accessibilityText` 同一族措辞：两处各说一套的话，读屏用户会得到两个不一致的事实。
         case let .secure(payload): "绝密阅后即焚，\(payload.summaryText)，轻触后需生物识别查看"
+        // 措辞和卡片自己的 `accessibilityText` 同一族（:211 那条理由在两处都成立）：主页的图文正文
+        // 不在气泡里，所以这里只说"这是一份什么样的主页"，不报块数、不报标题之外的任何东西。
+        case let .profile(payload): "加密个人主页，\(payload.manifest.title)，\(payload.isEphemeral ? "阅后即焚 · \(payload.ttlText)" : "常驻名片，可反复查看")"
         }
     }
 }
@@ -254,7 +260,7 @@ enum PopopxBubbleReceipt: Hashable {
 /// 一枚气泡要的全部输入值。字段都有默认值，挂载点按名字填。
 struct PopopxBubbleItem: Hashable {
     /// 通道表用的键：现网 app 行就是 `String(ChatItem.id)`（`PopopxMeshApplicationStream.rows(from:)`
-    /// 在 Shared/Model/POPOPXAPI.swift:3924 就是这么喂时间线的），mesh 行是 envelope 的 `messageId`。
+    /// 在 Shared/Model/POPOPXAPI.swift:3930 就是这么喂时间线的），mesh 行是 envelope 的 `messageId`。
     var messageKey: String
     var content: PopopxBubbleBody = .text("")
     var tail: PopopxBubbleTail = PopopxBubbleTail()
@@ -271,6 +277,14 @@ struct PopopxBubbleItem: Hashable {
     /// **只有 `PopopxBubbleBody.secure` 用得上**，其它正文一律 `nil`。取不到就留 `nil`：
     /// 卡片会退化成"不可点开"，也比拿猜出来的 id 去删别人家的消息好。
     var secureTarget: PopopxSecureChatTarget?
+    /// 这一行加密主页的定位（会话 id + 消息 id），点开阅读器时原样交给 `ProfileReaderHost` 去计时、
+    /// 删除与回执。**只有 `PopopxBubbleBody.profile` 用得上**，其它正文一律 `nil`；取不到就留 `nil`，
+    /// 卡片会退化成"不可点开"——`secureTarget` 上面那两条理由是同一条，不重复一遍。
+    var profileTarget: PopopxProfileReadKey?
+    /// 这一行的消息时间，只服务于加密主页那张卡的"发出后 24 小时无人点开"兜底。
+    /// 默认 `Date()`（= 现在）而不是 1970：拿不到时间时宁可**不提前销毁**一张阅后即焚的名片，
+    /// 也不要在一行历史消息上凭空画出"已过期"。
+    var createdAt: Date = Date()
     /// 行宽上限，挂载点现成的那个 `maxWidth`（ChatView.swift:2251 的入参）。
     var maxWidth: CGFloat = .infinity
 
@@ -320,10 +334,10 @@ struct PopopxMessageBubble: View {
         }
         .frame(maxWidth: item.maxWidth, alignment: item.side.alignment)
         switch item.content {
-        case .location, .secure:
-            // 这两张卡片里各有一枚真按钮（打开地图 / 轻触查看）。`.combine` 会把子树的点击动作
+        case .location, .secure, .profile:
+            // 这三张卡片里各有一枚真按钮（打开地图 / 轻触查看 / 点开名片）。`.combine` 会把子树的点击动作
             // 并进整行，VoiceOver 就再也打不开它们了，所以改成 `.contain`：容器还在，children
-            // 各自保留自己的标签与动作（位置卡片的那一句在卡片内部说）。
+            // 各自保留自己的标签与动作（位置卡片与名片卡片的那一句在卡片内部说）。
             row.accessibilityElement(children: .contain)
         default:
             row.accessibilityElement(children: .combine)
@@ -416,6 +430,14 @@ struct PopopxMessageBubble: View {
             PopopxSecureBubbleMount(payload: payload,
                                     target: item.secureTarget,
                                     incoming: item.side == .received)
+        case let .profile(payload):
+            // 和绝密那一支同一理由：名片卡片自带固定表面（深靛紫 / 厢语青绿两色按 delivery 分），
+            // 吃 `ink` 就会把"一条能点的消息"和"一扇保险柜的门"画成同一个东西。
+            ProfileCardBubbleView(payload: payload,
+                                  target: item.profileTarget,
+                                  incoming: item.side == .received,
+                                  channel: item.channel,
+                                  createdAt: item.createdAt)
         }
     }
 
@@ -646,7 +668,7 @@ struct PopopxBubbleRowAddress: Hashable {
 
 /// 判定表的全部真值，一次读齐之后的快照。字段都可以直接传值，没有一个是环境或单例。
 struct PopopxBubbleTransportSources: Hashable {
-    /// 全局熔断（`PopopxMeshRuntime.isFuseOn`，Shared/Model/POPOPXAPI.swift:3634）。
+    /// 全局熔断（`PopopxMeshRuntime.isFuseOn`，Shared/Model/POPOPXAPI.swift:3640）。
     var fuseOn = false
     /// 射频档位（`PopopxMeshStreamState.radioState`，PopopxMeshStateSource.swift:24 + `isUsable`，PopopxMeshEvents.swift:22）。
     var radioUsable = false
@@ -663,7 +685,7 @@ struct PopopxBubbleTransportSources: Hashable {
     /// mesh message id → 队列原因（`PopopxMessageRouter.pendingMessages()`，Router/PopopxMessageRouter.swift:863）。
     var queueReasons: [String: PopopxQueueReason] = [:]
     /// app 行 id → mesh message id，来自裁定 1 的双 id 表
-    /// （`recordedFlushedAppChatItemIDs()`，同文件 :878；app 行键的写法见 POPOPXAPI.swift:3924）。
+    /// （`recordedFlushedAppChatItemIDs()`，同文件 :878；app 行键的写法见 POPOPXAPI.swift:3930）。
     var meshKeyByRowKey: [String: String] = [:]
     /// 这批值读出来的时刻。新鲜度一律用它，不用 `Date.now`：重画不等于重新判定。
     var readAt = Date.now
@@ -947,6 +969,12 @@ enum PopopxBubbleMount {
             if let secure = PopopxSecurePayload.parse(from: mc.text) {
                 return .secure(secure)
             }
+            // 加密主页同样必须压过下面那三道 guard，理由和上面两支一样：`popopx://profile?...`
+            // 会被现网的 `formattedText`/`markdownBlocks` 认成链接，那一行就永远只是一条纯文本了。
+            // 三支的先后不敏感——三个 host（`loc`/`sec`/`profile`）互不重叠，各自的 `parse` 只认自己那一格。
+            if let profile = PopopxProfilePayload.parse(from: mc.text) {
+                return .profile(profile)
+            }
             // 带富文本/提及/markdown 的行交给现网：气泡只画纯 `Text`，链接和 @ 就不再可点。
             guard ci.formattedText == nil, ci.mentions == nil, ci.markdownBlocks == nil else { return nil }
             // 引用回复条和附件都不在 `PopopxBubbleBody` 的 6 个档里。
@@ -978,7 +1006,7 @@ enum PopopxBubbleMount {
         let tucked: Bool
         switch content {
         case .withdrawn, .unavailable, .event: tucked = false
-        case .text, .media, .location, .secure: tucked = tailVisible
+        case .text, .media, .location, .secure, .profile: tucked = tailVisible
         }
         // 绝密那一格要能回答"关掉之后去删哪一行"。两个 id 都只从现网对象上原样读，不拼、不猜：
         // `chat.chatInfo.id` = `ChatInfo.id`（ChatTypes.swift:2104-2112 的按档生成），`ci.id` = 消息 id。
@@ -990,6 +1018,16 @@ enum PopopxBubbleMount {
         } else {
             secureTarget = nil
         }
+        // 加密主页那一格和绝密那一格**不同键**：绝密用的是 `ChatInfo.id` 那个字符串（`getChat(_:)` 反查），
+        // 而 `PopopxProfileReadKey.chatId` 是 `Int64`，取的是 `ChatInfo.apiId`（ProfileReaderView.swift:745-752
+        // 的删除路径就是按 apiId 找回会话的）。计时仍然**按这一行**算：同一个人收到两份同名主页，
+        // 各有各的焚毁钟，所以键里必须带 `ci.id`，不能只带 profileId。两个 id 都只从现网对象上原样读。
+        let profileTarget: PopopxProfileReadKey?
+        if case .profile = content {
+            profileTarget = PopopxProfileReadKey(chatId: chat.chatInfo.apiId, itemId: ci.id)
+        } else {
+            profileTarget = nil
+        }
         return PopopxBubbleItem(
             messageKey: String(ci.id),
             content: content,
@@ -999,6 +1037,8 @@ enum PopopxBubbleMount {
             receipt: receipt(of: ci),
             contactId: contactId(of: chat),
             secureTarget: secureTarget,
+            profileTarget: profileTarget,
+            createdAt: ci.meta.itemTs,
             maxWidth: maxWidth
         )
     }

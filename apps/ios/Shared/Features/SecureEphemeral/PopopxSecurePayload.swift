@@ -25,7 +25,7 @@
 //  防（`data=` 是 AES-256-GCM 密文这一事实带来的）：
 //  - 明文进 SQLite：本地库里 `msgContent.text` 存的这两行里没有正文；
 //  - 明文进通知、会话列表预览、引用回复条、转发引用：这些都直接取 `text`，看到的只有降级行；
-//  - 明文进 Mesh 中继队列：`PopopxMeshRuntime` 的离线兜底记录会原样落盘（POPOPXAPI.swift:3628），
+//  - 明文进 Mesh 中继队列：`PopopxMeshRuntime` 的离线兜底记录会原样落盘（POPOPXAPI.swift:3634），
 //    中继节点存的是密文；这也是绝密消息敢走双模路由的前提。
 //  - GCM tag 顺带管住"载荷被改写过"：`open()` 解不开就是被改过，界面按损毁处理，不画半个字。
 //  不防：

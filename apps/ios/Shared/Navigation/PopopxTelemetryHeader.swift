@@ -14,7 +14,7 @@
 //
 //  恐慌清除不重复实现：三击判定、确认弹窗与抹除顺序都在 `PopopxPanicWipeArming`
 //  （PopopxMeshKit/Sources/PopopxMeshUI/PanicWipeManager.swift:355）里，app 根部已经用
-//  `PopopxMeshPanicWipeMount`（Shared/Model/POPOPXAPI.swift:3947）挂载过一次。本文件的标记只是
+//  `PopopxMeshPanicWipeMount`（Shared/Model/POPOPXAPI.swift:3953）挂载过一次。本文件的标记只是
 //  **第二个入口**：把点击转发进同一台状态机，确认弹窗仍只由根部那一处呈现 —— 不会出现两个 alert
 //  抢同一次武装。
 //

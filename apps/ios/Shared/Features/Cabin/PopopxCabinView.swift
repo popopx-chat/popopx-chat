@@ -18,7 +18,7 @@
 //     `pendingRequests()` / `initiatePairing(with:incognito:)` 给配对事实，`allMappings()` 给「已绑定」事实。
 //
 //  发包路径逐字照抄 `MeshPlazaView`：广播 = `PopopxMeshOutbound.sendBroadcast(text:)`，对象是
-//  `PopopxMeshRuntime.shared.engineBackend`（`Shared/Model/POPOPXAPI.swift:3642`），也就是
+//  `PopopxMeshRuntime.shared.engineBackend`（`Shared/Model/POPOPXAPI.swift:3648`），也就是
 //  `PopopxAddFriendView.swift:121-125` 挂载广场时传进去的同一个 backend；截断/上限/本机回声/去重的
 //  规则照抄 `PopopxMeshPlazaModel.broadcastDraft()`（`MeshPlazaView.swift:168-186`）、
 //  `rebuildPosts(from:)`（`:213-232`）与 `deduped(_:)`（`:255-265`）。昵称写入口 =
@@ -26,7 +26,7 @@
 //  「点击直接开启蓝牙私聊」= `initiatePairing(with:incognito:)` 发一次离线建联邀请（这是唯一能让一条
 //  Noise 私聊会话存在的动作），然后 push 包里那条私聊面 `PopopxMeshPrivateChatView`，四个依赖全部显式
 //  给真对象——它的默认参数是 `PopopxMeshEngine.shared` / `.shared` 单例，会让总闸关着的一页顺手把引擎
-//  与射频建出来（`POPOPXAPI.swift:3551` 之后那段注释说的就是这件事），所以一个默认值都不走。
+//  与射频建出来（`POPOPXAPI.swift:3557` 之后那段注释说的就是这件事），所以一个默认值都不走。
 //
 //  频道命名（裁定；包内是英文 `#mesh`，全仓 `Shared/` 里 `#mesh` 出现 0 次）：
 //  - 公共广播频道 = 「#厢语大厅」。保留 `#`：它是「一个频道」的视觉记号，不是 `#mesh` 这个词；
@@ -350,7 +350,7 @@ struct PopopxCabinView: View {
         return Copy.lastBroadcastWords(PopopxCabinClock.since(latest))
     }
 
-    /// 熔断只有一个落点：`killSwitch.setEnabled(_:)`（POPOPXAPI.swift:3777 的 `setFuse` 是它唯一的生产调用者）。
+    /// 熔断只有一个落点：`killSwitch.setEnabled(_:)`（POPOPXAPI.swift:3783 的 `setFuse` 是它唯一的生产调用者）。
     /// Binding 的 setter 不能 await，所以开关一律走同步的 `requestFuse(_:)`（:3771，它转手起一个 `setFuse`）；
     /// 而本页两个"开启总闸"按钮（:181、:417）本来就在 async 上下文里，直接 `await setFuse(true)` 再刷新。
     /// 两条路都不是本页自己写 `UserDefaults`，否则会出现「开关是关的但蓝牙还在跑」或者反过来。

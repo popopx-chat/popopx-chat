@@ -5,7 +5,7 @@
 > Related specs: [README](README.md) | [API Reference](api.md) | [State Management](state.md) | [Database](database.md)
 > Related product: [Product Overview](../product/README.md)
 
-**Source:** [`POPOPXApp.swift`](../Shared/POPOPXApp.swift#L1-L271) | [`AppDelegate.swift`](../Shared/AppDelegate.swift#L1-L209) | [`ContentView.swift`](../Shared/ContentView.swift#L1-L557) | [`ChatModel.swift`](../Shared/Model/ChatModel.swift#L1-L1517) | [`POPOPXAPI.swift`](../Shared/Model/POPOPXAPI.swift#L1-L3963) | [`AppAPITypes.swift`](../Shared/Model/AppAPITypes.swift#L1-L2357) | [`APITypes.swift`](../POPOPXChat/APITypes.swift#L1-L1071) | [`API.swift`](../POPOPXChat/API.swift#L1-L388)
+**Source:** [`POPOPXApp.swift`](../Shared/POPOPXApp.swift#L1-L271) | [`AppDelegate.swift`](../Shared/AppDelegate.swift#L1-L209) | [`ContentView.swift`](../Shared/ContentView.swift#L1-L557) | [`ChatModel.swift`](../Shared/Model/ChatModel.swift#L1-L1517) | [`POPOPXAPI.swift`](../Shared/Model/POPOPXAPI.swift#L1-L3969) | [`AppAPITypes.swift`](../Shared/Model/AppAPITypes.swift#L1-L2357) | [`APITypes.swift`](../POPOPXChat/APITypes.swift#L1-L1071) | [`API.swift`](../POPOPXChat/API.swift#L1-L388)
 
 ---
 
@@ -136,7 +136,7 @@ All FFI calls are wrapped in [`beginBGTask()`](../Shared/Model/POPOPXAPI.swift#L
 
 ---
 
-## [3. Event Streaming](../Shared/Model/POPOPXAPI.swift#L2584-L3224)
+## [3. Event Streaming](../Shared/Model/POPOPXAPI.swift#L2584-L3230)
 
 The Haskell core emits async events (new messages, connection status changes, file progress, etc.) that are not direct responses to commands. These are received via polling:
 

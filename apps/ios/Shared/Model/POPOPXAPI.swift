@@ -2653,6 +2653,12 @@ func processReceivedMsg(_ res: ChatEvent) async {
             // 模块 6 的只读旁路：它不改变、不延迟、不重排、不吞掉上面任何一行 —— 熔断关着时它连一个
             // Task 都不生成（`PopopxMeshRuntime.feedSessionEvent`）。
             PopopxMeshRuntime.feedSessionEvent(kind: .contactConnected, user: user, contact: contact)
+            // 加密个人主页的触发源 A（扫码建连后自动推送）。同样是旁路：主线程那一跳交给 Task，
+            // 消息循环不等它。只把 `contactId` 带过去，不带整个 `contact`（`Contact` 不是 Sendable，
+            // 闭包捕获它会撞上严格并发告警）。没武装时它第一行就返回，不读盘也不发东西，
+            // 所以普通加好友不会被这张名片码蹭出一张主页。
+            let autoProfileContactId = contact.contactId
+            Task { await ProfileAutoSender.shared.handleContactConnected(contactId: autoProfileContactId) }
         }
         if contact.directOrUsed {
             NtfManager.shared.notifyContactConnected(user, contact)

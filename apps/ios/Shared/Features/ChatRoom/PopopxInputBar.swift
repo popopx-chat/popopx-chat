@@ -9,7 +9,7 @@
 //  `$composeState`、`$showCommandsMenu`、`$keyboardVisible`、`$keyboardHiddenDate`、`$selectedRange`），
 //  而 `ComposeView.swift` 有 2253 行、`Shared/Views/Chat/ComposeMessage/` 目录内共 13 个文件；
 //  真正的文本框是 `NativeTextEditor`（`SendMessageView.swift:67`，结构体在 :16，由
-//  `ComposeView.swift:1095 sendMessageView(_:placeholder:sendToConnect:)` 造出来）。多选态下会话页
+//  `ComposeView.swift:1106 sendMessageView(_:placeholder:sendToConnect:)` 造出来）。多选态下会话页
 //  还会把它换成 `SelectedItemsBottomToolbar`（`ChatView.swift:247`）。所以本文件：
 //  ① 不 import 也不改写 `ComposeState`，只吃宿主折算进来的值；② 不改任何既有 initializer；
 //  ③ 所有副作用一律走闭包递出去。**"替换还是并挂"由人来裁定，本条两边都能接。**
@@ -17,13 +17,13 @@
 //  ── 宿主必须接的五根线 ────────────────────────────────────────────────────────────
 //  1. `text`：宿主自己的草稿绑定（`composeState.message` 也行）。
 //  2. `context`：把 `ComposeState` 的九个前提折算成 `PopopxComposerContext`（见该结构体的字段注释，
-//     对应 `ComposeView.swift:1806` mentions、`:1811`-`:1827` contextItem 四支、`:1829`-`:1834` preview 三支）。
+//     对应 `ComposeView.swift:1861` mentions、`:1811`-`:1827` contextItem 四支、`:1829`-`:1834` preview 三支）。
 //  3. `ttlSeconds` / `onTTLChange`：阅后即焚。**真值在宿主那里**，本条只读只报，不存第二份。
 //  4. `onSend`：拿到 `PopopxComposerSend`，其中 `dispatch` 已经分好支：
 //     · `.routeViaMesh(message)` → 宿主做 `await PopopxMeshRuntime.shared.router.send(message)`
 //       （`PopopxMeshKit/…/Router/PopopxMessageRouter.swift:627`），返回的 `PopopxRoutedMessage`
 //       （:241）交给模块 7 的时间线；本条**自己不发**，也不碰 `router.start()`/`stop()`——那是保险丝的
-//       事（`Shared/Model/POPOPXAPI.swift:3752` 把 router 注册进 killSwitch）。
+//       事（`Shared/Model/POPOPXAPI.swift:3758` 把 router 注册进 killSwitch）。
 //     · `.hostShouldSend(reason)` → 宿主走原链路（`ComposeView.swift:1793 sendMessage(ttl:sign:)` →
 //       `:1723 sendMessageAsync` → `:1752 send(.text…)` → `:1931`/`:1940 send(_ msgs:)` →
 //       `apiSendMessages`（`POPOPXAPI.swift:577`）→ `processSendMessageCmd`（:582）→ `chatApiSendCmd`）。
@@ -33,7 +33,7 @@
 //  模块 5 的公网腿**就是 app 自己的发送**：`PopopxSMPSendRequest`（`PopopxMessageRouter.swift:36`）只有
 //  `messageId / contactId / text / sentAt` 四个字段，app 侧的实现把 `.text(request.text)` 组成
 //  `ComposedMessage` 后调 `apiSendMessages(type: .direct, id: contactId, …)` 并自己 `addChatItem`
-//  （`POPOPXAPI.swift:3461`-`:3480`）。所以路由一条直聊纯文本**不会分叉出第二条网线**；
+//  （`POPOPXAPI.swift:3467`-`:3480`）。所以路由一条直聊纯文本**不会分叉出第二条网线**；
 //  但那条腿上**没有 `ttl` 也没有 `sign`**（`apiSendMessages` 的这两个入参在 `POPOPXAPI.swift:577`），
 //  且只支持 `.direct` 的 contactId。于是"全部交给路由"会静默丢掉阅后即焚、签名、群组 scope、引用、
 //  附件、@提及与 live 消息。这个限制因此被写进判定表，而不是藏在视图代码里。
@@ -100,13 +100,13 @@ struct PopopxComposerContext: Hashable {
     var isDirectContact = false
     /// 草稿挂了附件（图片 / 文件 / 语音 / 多媒体）。
     var hasAttachments = false
-    /// `composeState.preview != .noPreview`（`ComposeView.swift:1829`-`:1834`）：链接预览也是消息体的一部分。
+    /// `composeState.preview != .noPreview`（`ComposeView.swift:1884`-`:1834`）：链接预览也是消息体的一部分。
     var hasLinkPreview = false
     /// `contextItem` 是 quoted / editing / forwarding / reported 四支之一（`ComposeView.swift:1811`-`:1827`）。
     var carriesContextItem = false
-    /// `composeState.memberMentions` 非空（`ComposeView.swift:1806`）。
+    /// `composeState.memberMentions` 非空（`ComposeView.swift:1861`）。
     var hasMentions = false
-    /// 即时消息（live），`ComposeView.swift:1807`-`:1809`。
+    /// 即时消息（live），`ComposeView.swift:1862`-`:1809`。
     var isLiveMessage = false
     /// 需要签名，`ComposeView.swift:1793` 的 `send(sign:)`。
     var requiresSignature = false
@@ -127,7 +127,7 @@ struct PopopxComposerContext: Hashable {
 
 /// 一次批量读出来的网格事实。值类型，判定表只读它，视图不在渲染路径上 await 它。
 struct PopopxMeshEligibility: Equatable {
-    /// 厢语总闸（`PopopxMeshRuntime.isFuseOn`，`POPOPXAPI.swift:3634`）。
+    /// 厢语总闸（`PopopxMeshRuntime.isFuseOn`，`POPOPXAPI.swift:3640`）。
     var fuseOn = false
     /// 绑定表读完没有。没读完时任何通道结论都为时过早。
     var bindingLoaded = false
@@ -514,6 +514,10 @@ enum PopopxPlusAction: String, CaseIterable, Identifiable {
     /// 绝密这一格是**武装开关**，不是选择器：它把这条草稿标成绝密，时长在同一条面板里那排 chip 上调。
     /// 因此它和其余四格不一样 —— 按下去不关面板（见 `plusPanel` 里那一处 `action != .secure`）。
     case secure
+    /// 加密个人主页那一格是**发送入口**，和 `.location` 同一族：按下即关面板、由宿主弹出本次发送的
+    /// 模式确认 Sheet（`ProfileSendModeSheet`），面板本身不承载时长——主页的时长是"这一次发送"的属性，
+    /// 不是这条草稿的属性，所以它不能像 `.secure` 那样做成常驻武装开关。
+    case personalProfile
 
     var id: String { rawValue }
 
@@ -524,6 +528,7 @@ enum PopopxPlusAction: String, CaseIterable, Identifiable {
         case .file: return "文件"
         case .location: return "位置"
         case .secure: return "绝密"
+        case .personalProfile: return "个人主页"
         }
     }
 
@@ -534,6 +539,7 @@ enum PopopxPlusAction: String, CaseIterable, Identifiable {
         case .file: return "folder.fill"
         case .location: return "location.fill"
         case .secure: return "lock.shield.fill"
+        case .personalProfile: return "person.text.rectangle.fill"
         }
     }
 }
@@ -572,7 +578,7 @@ struct PopopxInputBar: View {
     private static let maxComposerLines = 5
 
     /// `@MainActor` 是为了在 init 里取那两个 `@MainActor` 单例（`PopopxMeshRuntime.shared`
-    /// `POPOPXAPI.swift:3626`、`PopopxMeshStateSource.shared` `PopopxMeshStateSource.swift:158`）——
+    /// `POPOPXAPI.swift:3632`、`PopopxMeshStateSource.shared` `PopopxMeshStateSource.swift:158`）——
     /// 和第四阶段那几页同一个写法（`Shared/Features/Chats/ChatsListView.swift:160`）。
     @MainActor
     init(
@@ -1034,7 +1040,7 @@ struct PopopxInputBar: View {
             )
         )
         // 只有路由这一支由本条负责清草稿：模块 5 的 SMP 腿自己把行插进时间线
-        // （`POPOPXAPI.swift:3461`-`:3480`），除了这里没有第二个人会清 `text`。
+        // （`POPOPXAPI.swift:3467`-`:3480`），除了这里没有第二个人会清 `text`。
         // 交回宿主的那一支沿用宿主原有的清空时机（`SendMessageView.swift:152`），本条不去动它，
         // 否则宿主的失败回填、改写草稿会被抹掉。
         if dispatch.isRouted { text = "" }
