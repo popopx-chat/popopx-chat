@@ -7,14 +7,18 @@
 //  "抹掉存储并重建"的例程 `PopopxStorageWipe`。
 //
 //  ### 为什么校验位走 PBKDF2，而上游自毁码走明文比对
-//  上游把自毁码原文存进 Keychain（`kcSelfDestructPassword`，POPOPXChat/KeyChain.swift:20），
+//  上游把自毁码原文存进 Keychain（`kcSelfDestructPassword`，POPOPXChat/KeyChain.swift:23），
 //  校验是 `password == sdPassword`（LocalAuthView.swift:23）。Keychain 本身是加密的，所以这不是
 //  一个明显的洞，但它有两个后果：一是拿到密钥链转储（越狱设备 + iKeyDB）就等于拿到码本身，
 //  二是没有可加价的余地——想让它变贵只能整个换掉表示方式。本模块按任务要求换成
 //  salt + PBKDF2-HMAC-SHA256(100_000)，从此**磁盘上不存在口令**，只有派生值。
 //  ⚠️ 这不等于"上游那两个 Keychain 条目消失了"：`kcAppPassword`/`kcSelfDestructPassword`
-//  仍是独立的、以原文存储的凭据，仍然被上游的 LA 门使用。本模块只在自毁时把它们一并删除
-//  （见 `PopopxStorageWipe`），并不替换它们的读取路径。这一条写在验收报告里，不做掩盖。
+//  仍是独立的、以原文存储的凭据，仍然被上游的 LA 门使用。`kcSelfDestructPassword` 只在自毁时
+//  被删（见 `PopopxStorageWipe`）。`kcAppPassword` 多一条路：它只是 `.passcode` 模式下
+//  `authenticate` 拿来逐字比对的那把入口码（LocalAuthenticationUtils.swift:45，**不是** SQLCipher
+//  的库钥匙，库钥匙是 `kcDatabasePassword`，见 POPOPXChat/API.swift:43），本模块在启用/更换
+//  POPOPX 进入密码时先验证再把它迁掉，让双密码锁成为唯一的前端认证入口
+//  （见 `migrateNativeEntryPassword`）。这一条写在验收报告里，不做掩盖。
 //
 //  ### 为什么恒定做两次派生
 //  常规码和胁迫码的校验耗时若不同（1 次 vs 2 次派生），胁迫者拿秒表就能分辨自己按下的
@@ -165,6 +169,12 @@ enum PopopxDuressSetupError: Error, Equatable, LocalizedError {
     case normalPinRequiredFirst
     /// Keychain 写入被拒（设备未解锁、或条目不可写）。
     case keychainWriteFailed
+    /// 原生入口码（`kcAppPassword`）还开着，但界面没采集到用来确认迁移的那一次输入。
+    /// 这一支不是"做错了"，而是"还差一步"：写新码之前得先把旧前门体面地关掉。
+    case nativePasscodeRequired
+    /// 采集到了，但与 `kcAppPassword` 里那把对不上。此时**什么都没改**——旧前门还在原处，
+    /// 新前门也没装上。
+    case nativePasscodeIncorrect
 
     var errorDescription: String? {
         switch self {
@@ -172,6 +182,8 @@ enum PopopxDuressSetupError: Error, Equatable, LocalizedError {
         case .pinsMustDiffer: return "胁迫密码不能与常规密码相同"
         case .normalPinRequiredFirst: return "请先设置常规密码"
         case .keychainWriteFailed: return "安全存储写入失败，请稍后重试"
+        case .nativePasscodeRequired: return "请先输入设备原有的入口密码，以关闭重复的解锁键盘"
+        case .nativePasscodeIncorrect: return "原有入口密码不正确，本次未做任何修改"
         }
     }
 }
@@ -383,7 +395,12 @@ enum PopopxDuressKeychain {
 enum PopopxStorageWipe {
     struct Options {
         /// 抹完之后写回上游 `kcAppPassword` 的那把码。上游自毁路径传"自毁码本身"
-        /// （行为：设备仍然有锁，且锁就是这把码）。胁迫路径传 nil：烟雾弹必须能直接进去。
+        /// （行为：设备仍然有锁，且锁就是这把码）。胁迫路径传 nil——传 nil 走的就是
+        /// `wipe` 里 `kcAppPassword.remove()` 那一支，烟雾弹必须能直接进去，而且降级码
+        /// 只该活在本模块那一条 verifier 里，同时活在两处等于把刚拆掉的第二套键盘装回去。
+        /// 这里刻意不谈"库口令"：`kcAppPassword` 与 SQLCipher 无关，库钥匙是
+        /// `kcDatabasePassword`，重建出来的新库由 `chatMigrateInit` 自己生成随机钥匙
+        /// （POPOPXChat/API.swift:34-42）。
         var reinstatesAppPasscode: String?
         /// 新建用户的显示名。上游自毁路径读 `DEFAULT_LA_SELF_DESTRUCT_DISPLAY_NAME`；
         /// 胁迫路径取模块四给的仿真名字。
@@ -543,6 +560,14 @@ enum PopopxAntiTheftSwitches {
 /// 而不是靠删文件。
 enum PopopxDuressProfileKeeper {
     /// 阶段名只进日志，绝不进界面。调用方按它决定要不要降级重建（见 `runDuressFlow`）。
+    ///
+    /// `appPasscode` 由调用方现读 `kcAppPassword` 传进来，只当隐藏身份 `viewPwd` 的**退路**用。
+    /// 诚实边界：隐藏身份的查看口令是机主切换身份时手输的另一把码
+    /// （NewChatView.swift:464 的 `trimmedSearchTextOrPassword`），并不保证等于入口码；
+    /// 这里只是拿它试一次，试不通就走 `failure` → 调用方降级为全量重建（安全方向更彻底那一支）。
+    /// 机主在设置页启用/更换 POPOPX 进入密码后入口码会被迁掉（`migrateNativeEntryPassword`），
+    /// 那时这一条读到的是 nil，"保留一个隐藏身份"的成功率因此下降——这是拆双键盘换来的代价，
+    /// 写清楚，不让回退路径把它藏起来。
     @MainActor
     static func retain(profileId: Int64, appPasscode: String?) async -> PopopxWipeOutcome {
         // 1) 身份列表以底层为准：`ChatModel.users` 可能还是启动时读的那份，
@@ -683,10 +708,76 @@ final class PopopxDuressAuthManager {
         pin.count == pinLength && pin.allSatisfy { digits.contains($0) }
     }
 
+    // MARK: 原生入口码迁移（前端认证入口只留一个）
+
+    /// 上游那把"入口密码"与本模块的双密码锁是并列的两套前门：`authenticate(reason:)`
+    /// （LocalAuthenticationUtils.swift:40）在 `privacyLocalAuthModeDefault == .passcode` 时
+    /// 把键盘挂成 `LocalAuthView`（ContentView.swift:97、ChatListView.swift:127），而
+    /// `PopopxAppLockOverlayView` 是本模块自己的键盘。两把码不同 = 同一台设备开两次锁，
+    /// 两把码相同 = 同一个码输两遍。启用/更换 POPOPX 进入密码时把前者迁掉，前端只留一个入口。
+    ///
+    /// 迁移**不需要重建库钥匙**：SQLCipher 的口令是 `kcDatabasePassword`
+    /// （POPOPXChat/API.swift:43 开库时读它），与 `kcAppPassword` 无关——后者只是 `.passcode`
+    /// 模式下塞进 `LocalAuthRequest.password` 做字符串比对的那把码（LocalAuthenticationUtils.swift:45）。
+    @MainActor
+    static var nativeEntryPasswordActive: Bool {
+        privacyLocalAuthModeDefault.get() == .passcode && kcAppPassword.get() != nil
+    }
+
+    /// 先验证、后迁移。三道判定全部排在任何写入之前，所以任何一支失败都是"什么都没改"。
+    ///
+    /// 迁掉码的同时把模式拨回上游自己的 `.system`——只删码不改模式是不够的：
+    /// `.passcode` + 无条目时 `authenticate` 回 `.unavailable`，而 `authorize()` 把它当作已授权
+    /// （LocalAuthenticationUtils.swift:24），用它把守的那两处调用点会当场静默放行。上游另有
+    /// 九处直接调 `authenticate(reason:)`（PrivacySettings 六处、ContentView 两处、DatabaseView
+    /// 一处），它们各自怎么处理 `.unavailable` 本模块不依赖、也不替它们下结论。
+    /// `.system` 是上游的出厂默认（SettingsView.swift:224），也是它自己在 biometric
+    /// 开启时的既有配置（PrivacySettings.swift:766 就是 `kcAppPassword.remove()`），
+    /// 迁移后由系统 Face ID/设备密码把守这些门，应用内的键盘只剩本模块这一套。
+    ///
+    /// 明文比对走 `PopopxDuressCrypto.matchesInConstantTime`：`kcAppPassword` 是原文存的
+    /// （POPOPXChat/KeyChain.swift:21），Swift 的 `==` 逐字符短路，会把"前几位对不对"泄漏成耗时差。
+    ///
+    /// `kcDatabasePassword` 与 `kcSelfDestructPassword` 一律不动。
+    /// - Parameter passcode: 界面向机主索取的那一次原始入口码输入。nil = 没采集。
+    static func migrateNativeEntryPassword(passcode: String?) throws {
+        guard let stored = kcAppPassword.get() else {
+            // 绝大多数设备的状态：没有原生入口码，什么都不做。但"模式还停在 .passcode、条目却已经
+            // 不在"这种半迁移状态要顺手订正，理由就是上面那条 `authorize()` 的静默放行。
+            if privacyLocalAuthModeDefault.get() == .passcode {
+                privacyLocalAuthModeDefault.set(.system)
+            }
+            return
+        }
+        guard let passcode, !passcode.isEmpty else {
+            throw PopopxDuressSetupError.nativePasscodeRequired
+        }
+        guard PopopxDuressCrypto.matchesInConstantTime(Data(passcode.utf8), Data(stored.utf8)) else {
+            throw PopopxDuressSetupError.nativePasscodeIncorrect
+        }
+        _ = kcAppPassword.remove()
+        privacyLocalAuthModeDefault.set(.system)
+    }
+
+    /// 降级流程专用的"无条件退役"，与 `migrateNativeEntryPassword` 做的动作一模一样。
+    /// 区别只有一条：这里**不能验证**——键盘上站着的是逼迫者，让他再输一遍机主的原始码
+    /// 既做不到、也是暴露。删旧凭据本身正是简报步骤 C 要求的效果。
+    /// 两步必须一起做完、不可拆：只删码会把 `authorize()` 变成静默放行。
+    private func retireNativeEntryPassword() {
+        _ = kcAppPassword.remove()
+        privacyLocalAuthModeDefault.set(.system)
+    }
+
     /// 设置/更换常规码。`confirming` 与 `first` 必须一致（设置页让主人输两遍，
     /// 是因为一次误触就会把主人自己锁在外面，而那在这个功能里意味着数据全丢）。
-    func setNormalPin(_ first: String, confirming second: String) async throws {
+    ///
+    /// 迁移排在写新码**之前**，顺序承重：反过来（先写后迁）会在中途留下"两套前门并存"的窗口，
+    /// 而这一支的正确终态只有一个——旧前门关了、新前门装上，要么一起成，要么整体没发生。
+    /// `nativePasscode` 为 nil 且原生入口码还在生效时抛 `.nativePasscodeRequired`，
+    /// 绝不静默替机主删掉那把码。
+    func setNormalPin(_ first: String, confirming second: String, nativePasscode: String? = nil) async throws {
         guard Self.isValidPin(first), first == second else { throw PopopxDuressSetupError.malformedPin }
+        try Self.migrateNativeEntryPassword(passcode: nativePasscode)
         let salt = PopopxDuressCrypto.randomSalt()
         guard !salt.isEmpty else { throw PopopxDuressSetupError.keychainWriteFailed }
         let normalHash = await hash(pin: first, salt: salt, iterations: PopopxDuressCrypto.iterations)
@@ -837,7 +928,7 @@ final class PopopxDuressAuthManager {
             // false = 已经有一轮在跑（那条链不可重入）。此时**不再启第二轮，但照样返回 .duress**：
             // 返回 .wrong 会当场弹一条"密码错误"，那正是整条路径要避免的暴露。
             if PopopxAppLockState.shared.beginDuressFlow() {
-                await runDuressFlow(strategy: strategy, demoted: &demoted, pin: pin)
+                await runDuressFlow(strategy: strategy, demoted: &demoted)
                 PopopxAppLockState.shared.endDuressFlow()
                 PopopxAppLockState.shared.unlock()
             }
@@ -855,20 +946,24 @@ final class PopopxDuressAuthManager {
 
     /// 步骤 B → C → D，命名与简报逐条对齐，验收时按编号核对。
     ///
-    /// 三条分支的收敛点只有一个：**Keychain 里最后只剩一条 normal 记录，且它认这把降级码**。
-    /// 全量擦除分支额外把降级码写回上游 `kcAppPassword`（第 9 步重建出来的库就是用它的派生密钥
-    /// 加密的，所以"逼迫者下次输入同一把码仍能进去"在两层都成立）；
-    /// 保留分支**绝不碰 `kcAppPassword`**——那条是现网 SQLCipher 的密钥，改掉它等于
-    /// 把机主点名要留的那个身份一起锁死在门外。这条差异是有意为之，不是遗漏。
+    /// 三条分支的收敛点只有一个：**Keychain 里最后只剩一条 normal 记录，且它认这把降级码**，
+    /// 而上游那套 `LocalAuthView` 键盘同时退役，前端认证入口只剩本模块这一个。
+    /// 两支都不再把降级码写回 `kcAppPassword`：同一把码同时活在两个地方，等于把刚拆掉的
+    /// 第二套键盘在原处装回去（全量分支见 `runFullWipe` 传的 nil，保留分支见下面那一步）。
     private func runDuressFlow(
         strategy: PopopxDuressRetentionStrategy,
-        demoted: inout PopopxDuressVerifier,
-        pin: String
+        demoted: inout PopopxDuressVerifier
     ) async {
         // 步骤 B：按策略执行选择性或全量物理擦除。第二个返回值是"等 C 写完之后再装的仿真计划"，
         // 把它交到 C 之后的理由写在 `runFullWipe` 的注释里（顺序安全），不是顺手。
-        let outcome = await executeErasure(strategy: strategy, pin: pin)
+        let outcome = await executeErasure(strategy: strategy)
         let effective = outcome.strategy
+        // 单一前门：原生入口码在这里退役，两支都覆盖（全量那支 `PopopxStorageWipe` 传 nil 已经删过
+        // 一次，这里是幂等的第二次 + 把模式补齐）。排在 `executeErasure` **之后**是承重的：
+        // 保留分支要用 `kcAppPassword` 当隐藏身份 `viewPwd` 的退路（见 `PopopxDuressProfileKeeper.retain`），
+        // 先删就自断那条路；也排在步骤 C 之前，于是屏幕上永远不会出现"两套前门都在、
+        // 而认的都是降级码"那一瞬。
+        retireNativeEntryPassword()
         // 步骤 C（单向写入降级凭据）：顺序承重在后——B 里两条旧凭据都被删掉了
         // （全量路径见 `PopopxStorageWipe.wipe`，保留路径见 `scrubCredentialHistory()`），
         // 先写会被自己删掉；写在这里，从此没有第二条路能读到应急记录。
@@ -903,8 +998,7 @@ final class PopopxDuressAuthManager {
     /// 策略回给调用是为了把"点名要保留的那个身份已经不在了"安全降级为 `.simulatedDecoy`
     /// 全量重建（简报原话：绝不卡死在白屏）；计划回给调用是为了让落盘排在降级凭据之后。
     private func executeErasure(
-        strategy: PopopxDuressRetentionStrategy,
-        pin: String
+        strategy: PopopxDuressRetentionStrategy
     ) async -> (strategy: PopopxDuressRetentionStrategy, pendingDecoy: PopopxDecoyPlan?) {
         if strategy.isRetainExisting, let profileId = strategy.retainedProfileId {
             let outcome = await PopopxDuressProfileKeeper.retain(
@@ -919,10 +1013,10 @@ final class PopopxDuressAuthManager {
                 // 只进日志。降级方向是"更彻底的那一种擦除"，绝不会反过来变成"少擦一点"。
                 logger.error("duress retain failed at \(stage); falling back to simulated decoy")
                 let fallback = PopopxDuressRetentionStrategy.simulatedDecoy
-                return (fallback, await runFullWipe(strategy: fallback, pin: pin))
+                return (fallback, await runFullWipe(strategy: fallback))
             }
         }
-        return (strategy, await runFullWipe(strategy: strategy, pin: pin))
+        return (strategy, await runFullWipe(strategy: strategy))
     }
 
     /// 装载延后到步骤 C 之后的那一半。`install` 对"不注入内容"的计划自己就是 no-op
@@ -940,13 +1034,16 @@ final class PopopxDuressAuthManager {
     /// 里装**：那个钩子跑在步骤 C 之前，会让模块四把布局文件写到盘上、然后流程才写降级凭据；
     /// 中间崩一次，沙盒里就留下一份"曾经有个账号、却不再被任何凭据保护"的痕迹。
     /// 延后到 C 之后，磁盘时序变成 凭据 → 内容，任何一次中断都不会留下比凭据更弱的东西。
-    private func runFullWipe(strategy: PopopxDuressRetentionStrategy, pin: String) async -> PopopxDecoyPlan? {
+    private func runFullWipe(strategy: PopopxDuressRetentionStrategy) async -> PopopxDecoyPlan? {
         // 空白号 = 不装任何仿真内容；烟雾弹 = 按模块四的排程装。两者的**擦除**完全相同，
         // 区别只在重建后交出的那个账号里有没有编造的聊天记录。
         let plan: PopopxDecoyPlan? = strategy == .emptyProfile ? nil : PopopxDecoyProfileGenerator.shared.makePlan(strategy: strategy)
         let options = PopopxStorageWipe.Options(
-            // 降级后的应急码成为唯一的进入密码：连上游那把库口令也换成它。
-            reinstatesAppPasscode: pin,
+            // 降级码只写进本模块那一条 verifier。写回 `kcAppPassword` 会在原处重建第二套键盘，
+            // 而传 nil 走的正是 `wipe` 里 `kcAppPassword.remove()` 那一支：重建出来的新库由
+            // `chatMigrateInit` 自己生成随机 `kcDatabasePassword`（API.swift:34-42），
+            // 与入口码无关，所以这里不需要、也没有"重建库钥匙"这一步。
+            reinstatesAppPasscode: nil,
             displayName: plan?.userDisplayName,
             disarmsAntiTheft: true,
             afterRebuild: nil
@@ -962,9 +1059,12 @@ final class PopopxDuressAuthManager {
         return plan
     }
 
-    /// 保留路径的凭据清扫。全量路径由 `PopopxStorageWipe` 负责删这四条，
+    /// 保留路径的凭据清扫。全量路径由 `PopopxStorageWipe` 负责删这几条，
     /// 而保留路径不删库，所以在这里按同一个口径自己删一遍。
-    /// 特别注意：**不包含 `kcAppPassword`**，它是现网库的加密密钥，不是"一条口令偏好"。
+    /// `kcAppPassword` 不在这里删，但**不等于不删**：它由 `runDuressFlow` 里的
+    /// `retireNativeEntryPassword()` 在 `executeErasure` 返回之后统一退役——必须排在那之后，
+    /// 因为本函数的调用方（`PopopxDuressProfileKeeper.retain`）还要拿它当隐藏身份的 `viewPwd` 退路。
+    /// 它从来不是库钥匙（库钥匙是 `kcDatabasePassword`，见 POPOPXChat/API.swift:43）。
     private func scrubCredentialHistory() {
         _ = kcSelfDestructPassword.remove()
         PopopxDuressKeychain.delete(PopopxDuressKeychain.normalAccount)

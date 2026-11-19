@@ -15,8 +15,8 @@
 //  ### 误判代价的边界：只能是"重新认证一次"，不能是"丢数据"
 //  模块一头注（`PopopxAntiTheftMotionGuard.swift:13-19`）已经把分工写死：传感器判据只锁、绝不擦。
 //  本文件严格遵守这条边界，并且**在调用图上根本不指向擦除**——全文件对模块三只有一句读调用
-//  （`PopopxDuressAuthManager.shared.requestBiometricUnlock`，`PopopxDuressAuthManager.swift:1015`），
-//  那条路自己也只通向"解锁"（成功时它已经 `unlock()`，见 :1033-1035）。
+//  （`PopopxDuressAuthManager.shared.requestBiometricUnlock`，`PopopxDuressAuthManager.swift:1113`），
+//  那条路自己也只通向"解锁"（成功时它已经 `unlock()`，见 `PopopxDuressAuthManager.swift:1131-1134`）。
 //  行为判据比拽落/跌落更容易误报：拽落的误报需要一次 3g 冲击，而"姿势不对 + 手滑乱点"
 //  在地铁上每天都能凑齐。所以本模块宁可把自己写得"只锁"——一次锁屏的代价是两秒钟，
 //  一次误擦的代价是整个人的聊天记录，两者根本不在同一个数量级上，不值得交换。
@@ -51,7 +51,7 @@
 //  ### 为什么用 `userAcceleration` 而不是原始加速度（和模块一恰好相反）
 //  模块一量失重，必须用**含重力**的原始读数（`PopopxAntiTheftMotionGuard.swift:30-32` 解释了原因）。
 //  本模块量"晃动"，要的是**减掉重力**的那一份：手机平放不动时原始合模长≈1g
-//  （字段语义见 :292），用原始值就会把"静止"读成"一直在晃"，判据反过来。
+//  （字段语义见 `PopopxAntiTheftMotionGuard.swift:292`），用原始值就会把"静止"读成"一直在晃"，判据反过来。
 //  也正因为字段含义相反，这里**不复用** `PopopxMotionSample`：把 `userAcceleration` 塞进一个
 //  文档写明"含重力"的 `g` 字段里，下一个读代码的人会按 1g 静置去理解它，那是个埋好的坑。
 //  姿态角本身用 `gravity` 分量算（不含离心力，比 `attitude` 更稳，也不受航向漂移影响）。
@@ -72,7 +72,7 @@
 //  ### `.unavailable` 一律按"不放行"
 //  上游的 `authorize()` 把 `.unavailable` 直接当认证成功（`LocalAuthenticationUtils.swift:24`），
 //  那是为"设备解锁便利性"写的语义，本模块的在场核验不许继承它：生物识别不可用、被关掉、
-//  或者已连续失败两次降级（`PopopxDuressAuthManager.swift:1026-1028`）时，一律 `completion(false)`
+//  或者已连续失败两次降级（`PopopxDuressAuthManager.swift:1124-1127`）时，一律 `completion(false)`
 //  并且拉一次 `.manual` 锁（`PopopxAntiTheftMotionGuard.swift:98-99` 把"模块二的强制重认证"
 //  明确划给了这个 case），让人从遮罩的键盘走——降级方向只能是更强的证明。
 //  同理也不借用 `authenticate(reason:)`：它的 `.passcode` 分支把请求挂到
@@ -544,7 +544,7 @@ final class PopopxBehaviorGuard {
     /// 只有 `.suspicious` 才拦；`.calm`、`.watching` 一律立刻放行——
     /// 一道需要思考要不要调用的门，最后一定被跳过，所以它必须几乎不添麻烦。
     /// `completion(true)` 只意味着"可以做了"，认证本身已经在这里做完（生物识别成功时
-    /// 模块二顺手解掉了锁，见 `PopopxDuressAuthManager.swift:1033-1035`）。
+    /// 模块二顺手解掉了锁，见 `PopopxDuressAuthManager.swift:1131-1134`）。
     /// 返回 `false` 时宿主应当**什么都不做**：人已经落到遮罩上，会从键盘走一遍。
     func authorizeSensitiveAction(
         reason: String,
