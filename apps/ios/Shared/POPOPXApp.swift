@@ -34,6 +34,7 @@ struct POPOPXApp: App {
         BGManager.shared.register()
         NtfManager.shared.registerCategories()
         installSecureEphemeralHost()
+        installAntiTheftDuress()
         // 反调试只在 Release 里真正 `PT_DENY_ATTACH`；Debug 下这行只置一个标志位
         // （PopopxAntiDebug.swift:41），否则 Xcode 挂不上去，整个特性在开发期就没法验。
         PopopxAntiDebug.enableProtection()
@@ -115,6 +116,17 @@ struct POPOPXApp: App {
         )
     }
 
+    /// 防盗与双密码模块的宿主侧装配。
+    ///
+    /// `enabled` 默认 false（fail-closed：没在设置页开过就没有 20Hz 采样），`sync()` 幂等，
+    /// 所以设置页拨完开关再调一次也不会重复启动。这里只做这一件事：
+    /// Keychain 探测（`refreshConfiguration()`）是一次同步 `SecItemCopyMatching`，
+    /// 不排在冷启动关键路径上，改由根视图的 `.task` 在首帧之后取。
+    private func installAntiTheftDuress() {
+        PopopxAntiTheftMotionGuard.shared.sync()
+        PopopxBehaviorGuard.shared.sync()
+    }
+
     var body: some Scene {
         WindowGroup {
             // contentAccessAuthenticationExtended has to be passed to ContentView on view initialization,
@@ -126,7 +138,14 @@ struct POPOPXApp: App {
                 // `PopopxMeshPanicWipeMount` 的 overlay 里什么都不放（连 44pt 的角落都不是命中区），
                 // `bootstrap()` 也不会建出任何蓝牙对象 —— 见 Shared/Model/POPOPXAPI.swift 末尾。
                 .modifier(PopopxMeshPanicWipeMount())
-                .task { await PopopxMeshRuntime.shared.bootstrap() }
+                .task {
+                    await PopopxMeshRuntime.shared.bootstrap()
+                    // 触摸节拍：给"多久没动就锁"提供真实交互时间戳。窗口句柄由 SceneDelegate
+                    // 在 willConnectTo 里存好（AppDelegate.swift:145），`.task` 排在首帧之后，
+                    // 此时它必定已就绪；挂不上也只是不刷新空闲计时，不会锁错人。
+                    PopopxTouchBeat.install(in: SceneDelegate.windowStatic)
+                    PopopxDuressAuthManager.shared.refreshConfiguration()
+                }
                 .onOpenURL { url in
                     // an app link can carry a secret, such as a badge code that anyone who reads it can redeem
                     logger.debug("ContentView.onOpenURL: \(isAppLink(url) ? "app link" : url.absoluteString)")
@@ -205,6 +224,15 @@ struct POPOPXApp: App {
                         break
                     }
                 }
+                // 防盗遮罩：必须是这条内容链上的**最后一条**修饰符，才压得住上面所有业务页。
+                // 只能无条件挂，不许在宿主外面再套一层 `if lock.coversContent`：
+                // `submit(pin:)` 的顺序是 beginDuressFlow → 擦除 → endDuressFlow → unlock() → 补时，
+                // `unlock()` 落在补时**之前**，宿主那一层 `if` 会在自毁还剩最多 1.2 秒时把遮罩连带
+                // 它的 `@State` 整个从层级里摘掉——那一下"画面突然变了"正是整条静默路径要避免的暴露。
+                // 遮罩自己在未锁时是空 `ZStack`（零命中区、零动画），所以常态开销等于不挂。
+                // 失效范围也不在这里：`PopopxAppLockOverlayView` 自己是视图、就是失效边界，
+                // App 的 body 不读锁状态，因此拉锁不会重跑上面那个 `!authenticationExpired()`。
+                .popopxAppLockOverlay()
         }
     }
 

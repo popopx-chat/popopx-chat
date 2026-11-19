@@ -1419,6 +1419,10 @@ private struct PopopxSecureBubbleMount: View {
         // 不存这个 Task：它中间隔着一次生物识别等待，列表回收、切后台都不该替用户取消掉
         // 他已经按下的一次"查看"。真要收尾的是窗口自己（模块五的生命周期那一条）。
         Task { @MainActor in
+            // 在场核验门（防盗模块二）：绝密卡片是"看一眼就销毁"的内容，正是旁人抢着
+            // 按指纹要拿到的那一格。放行才开窗；被拦时这里**什么都不弹**——模块二已经把
+            // 用户落到全屏遮罩上，再叠一条"操作已取消"反而是多出来的信号。
+            guard await PopopxBehaviorGuard.shared.authorized(reason: "查看绝密消息前请确认是本人操作") else { return }
             if let failure = await PopopxSecureWindowManager.shared.present(payload: payload, target: target) {
                 if failure.marksCardDamaged { damaged = true }
                 // 走 `Text(verbatim:)`：`showAlertMsg` 的入参是 `LocalizedStringKey`

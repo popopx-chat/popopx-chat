@@ -493,6 +493,17 @@ func loadChat(chat: Chat, im: ItemsModel, contentTag: MsgContentTag? = nil, sear
 }
 
 func loadChat(chatId: ChatId, im: ItemsModel, contentTag: MsgContentTag? = nil, search: String = "", openAroundItemId: ChatItem.ID? = nil, clearItems: Bool = true) async {
+    // POPOPX 防盗模块四（仿真烟雾弹）的接管点。必须排在下面那次清空之前：
+    // `apiLoadMessages` 会先把 `reversedChatItems` 清空再从库里取，而假消息根本不在库里，
+    // 一取就等于当场把这层抹平。返回 false（未装载、开关关了、这个 chatId 不是它造的）
+    // 时这一行什么都不是，正常路径一个字节的行为都没变。
+    if await PopopxDecoyProfileGenerator.hostTakeover(
+        chatId: chatId,
+        im: im,
+        contentTag: contentTag,
+        search: search,
+        openAroundItemId: openAroundItemId
+    ) { return }
     await MainActor.run {
         if clearItems {
             im.reversedChatItems = []

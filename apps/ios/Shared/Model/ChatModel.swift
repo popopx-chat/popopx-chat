@@ -686,6 +686,10 @@ final class ChatModel: ObservableObject {
         }
         NtfManager.shared.setNtfBadgeCount(totalUnreadCountForAllUsers())
         popChatCollector.clear()
+        // POPOPX 防盗模块四：核心这一步刚把会话列表刷成"这个号什么会话都没有"的样子，
+        // 仿真会话在这里被补回去。它自己内部起 Task 到主 actor，未装载时当场 return，
+        // 所以对没有开这个功能的设备是一次空转；不能同步调——`updateChats` 的调用方横跨多个 actor。
+        PopopxDecoyProfileGenerator.hostChatListRefreshed()
     }
 
 //    func addGroup(_ group: POPOPXChat.Group) {

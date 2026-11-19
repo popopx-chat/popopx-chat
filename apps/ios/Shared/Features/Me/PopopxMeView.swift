@@ -246,9 +246,11 @@ struct PopopxMeView: View {
             }
             PopopxMeDivider()
             PopopxMeRowLink(Copy.allSettings, systemImage: "gearshape") {
-                PopopxSettingsView()
-                    .navigationTitle(Copy.allSettings)
-                    .modifier(ThemedBackground(grouped: true))
+                PopopxPresenceGated(reason: "进入设置页前请确认是本人操作") {
+                    PopopxSettingsView()
+                        .navigationTitle(Copy.allSettings)
+                        .modifier(ThemedBackground(grouped: true))
+                }
             }
         }
     }
@@ -258,10 +260,26 @@ struct PopopxMeView: View {
     private var privacyEntries: some View {
         PopopxSectionCard(Copy.groupPrivacy) {
             PopopxMeRowLink(Copy.privacySettings, systemImage: "lock.shield", tint: .brand) {
-                PrivacySettings()
-                    .navigationTitle(Copy.privacySettings)
+                PopopxPresenceGated(reason: "进入隐私与安全设置前请确认是本人操作") {
+                    PrivacySettings()
+                        .navigationTitle(Copy.privacySettings)
+                        .modifier(ThemedBackground(grouped: true))
+                }
+            }
+            PopopxMeDivider()
+            // 右侧的值只报"传感器那半边开没开"，不报双密码配没配：后者本身就是不想让旁人
+            // 一眼看出来的信息，摆在第一层页面上等于替胁迫者做了排查。
+            PopopxMeRowLink(
+                Copy.antiTheft,
+                value: PopopxAntiTheftMotionGuard.shared.enabled ? Copy.antiTheftOn : Copy.antiTheftOff,
+                systemImage: "exclamationmark.shield.fill",
+                tint: .brand
+            ) {
+                PopopxAntiTheftSettingsView()
+                    .navigationTitle(Copy.antiTheft)
                     .modifier(ThemedBackground(grouped: true))
             }
+            .accessibilityIdentifier("popopx.me.antiTheft")
         }
     }
 
@@ -762,6 +780,40 @@ private struct PopopxMeAvatar: View {
 /// 原子库里的行本身是个 `Button`，嵌套按钮会把链接的点击吃掉，所以这一行整体设为不可命中、
 /// 也不进无障碍树，由链接自己带上同名的 label 与 hint（44pt 由 `minHitTarget` 兜住）。
 @MainActor
+/// 敏感页面的"在场核验"外壳（防盗模块二）。通不过就**一帧正文都不画**。
+///
+/// 为什么不拦在 `NavigationLink` 上：这一族的行是目标式链接，拦推送要改整个 Me 页的
+/// 导航结构；而 `.suspicious` 的语义是"手机可能正握在别人手里"，晚一帧渲染正文就是泄露。
+/// 被拒时模块二已经把用户落到全屏遮罩上，所以这里只需要 `dismiss()` 把自己退掉，
+/// 不必再画一条"已拒绝"——多一个提示就多一个可被胁迫者读到的信号。
+private struct PopopxPresenceGated<Content: View>: View {
+    private let reason: String
+    private let content: () -> Content
+    @Environment(\.dismiss) private var dismiss
+    @State private var allowed = false
+
+    init(reason: String, @ViewBuilder content: @escaping () -> Content) {
+        self.reason = reason
+        self.content = content
+    }
+
+    var body: some View {
+        if allowed {
+            content()
+        } else {
+            // 与页面底色同色的空壳：不能是空白页，也不能是转圈——两者都在传递"被拦下了"。
+            Color.clear
+                .task {
+                    if await PopopxBehaviorGuard.shared.authorized(reason: reason) {
+                        allowed = true
+                    } else {
+                        dismiss()
+                    }
+                }
+        }
+    }
+}
+
 private struct PopopxMeRowLink<Destination: View>: View {
     private let title: String
     private let value: String?
@@ -878,6 +930,9 @@ private enum Copy {
 
     // 隐私与安全
     static let privacySettings = "隐私与安全设置"
+    static let antiTheft = "防盗锁定与双密码自毁"
+    static let antiTheftOn = "已开启"
+    static let antiTheftOff = "未开启"
 
     // 离线组网
     static let meshFootnote = "总开关一关，蓝牙扫描、广播与中继全部停；本页其余行仍可查看，但不会启动任何蓝牙对象。"

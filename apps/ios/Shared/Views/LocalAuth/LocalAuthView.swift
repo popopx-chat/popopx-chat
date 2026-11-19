@@ -46,60 +46,24 @@ struct LocalAuthView: View {
     }
 
     private func deleteStorageAndRestart(_ password: String, completed: @escaping (LAResult) -> Void) {
-        Task {
-            do {
-                /** Waiting until [initializeChat] finishes */
-                while (m.ctrlInitInProgress) {
-                    try await Task.sleep(nanoseconds: 50_000000)
-                }
-                if m.chatRunning == true {
-                    try await stopChatAsync()
-                }
-                if m.chatInitialized {
-                    /**
-                     * The following sequence can bring a user here:
-                     * the user opened the app, entered app passcode, went to background, returned back, entered self-destruct code.
-                     * In this case database should be closed to prevent possible situation when OS can deny database removal command
-                     * */
-                    chatCloseStore()
-                }
-                deleteAppDatabaseAndFiles()
-                // Clear sensitive data on screen just in case app fails to hide its views while new database is created
-                m.chatId = nil
-                ItemsModel.shared.reversedChatItems = []
-                ItemsModel.shared.chatState.clear()
-                ChatModel.shared.secondaryIM?.reversedChatItems = []
-                ChatModel.shared.secondaryIM?.chatState.clear()
-                m.updateChats([])
-                m.users = []
-                _ = kcAppPassword.set(password)
-                _ = kcSelfDestructPassword.remove()
-                await NtfManager.shared.removeAllNotifications()
-                let displayName = UserDefaults.standard.string(forKey: DEFAULT_LA_SELF_DESTRUCT_DISPLAY_NAME)
-                UserDefaults.standard.removeObject(forKey: DEFAULT_LA_SELF_DESTRUCT)
-                UserDefaults.standard.removeObject(forKey: DEFAULT_LA_SELF_DESTRUCT_DISPLAY_NAME)
-                await MainActor.run {
-                    m.chatDbChanged = true
-                    m.chatInitialized = false
-                }
-                resetChatCtrl()
-                try initializeChat(start: true)
-                m.chatDbChanged = false
-                AppChatState.shared.set(.active)
-                if m.currentUser != nil || !m.chatInitialized { return }
-                var profile: Profile? = nil
-                if let displayName = displayName, displayName != "" {
-                    profile = Profile(displayName: displayName, fullName: "")
-                }
-                m.currentUser = try apiCreateActiveUser(profile, pastTimestamp: true)
-                onboardingStageDefault.set(.onboardingComplete)
-                m.onboardingStage = .onboardingComplete
-                try startChat()
-                completed(.success)
-            } catch {
-                completed(.failed(authError: NSLocalizedString("Incorrect passcode", comment: "PIN entry")))
-            }
-        }
+        /**
+         * 这里原本是 56 行手写的"关库 → 删文件 → 清内存 → 重建"序列。它被抽到
+         * `PopopxStorageWipe`（Shared/Features/AntiTheftDuress/PopopxDuressAuthManager.swift），
+         * 因为双密码胁迫自毁要做的是**同一件事**；复制一份的代价是将来只改了一边。
+         *
+         * `displayName` 必须在调用**之前**读出来：抽出去的那段序列会先清掉
+         * `DEFAULT_LA_SELF_DESTRUCT*` 两个键再建新用户，等到建用户时再读就永远是 nil，
+         * 机主预设的重建后显示名会静默丢失。
+         */
+        PopopxStorageWipe.run(
+            options: PopopxStorageWipe.Options(
+                reinstatesAppPasscode: password,
+                displayName: UserDefaults.standard.string(forKey: DEFAULT_LA_SELF_DESTRUCT_DISPLAY_NAME),
+                disarmsAntiTheft: false,
+                afterRebuild: nil
+            ),
+            completed: completed
+        )
     }
 }
 

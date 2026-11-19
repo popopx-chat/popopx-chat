@@ -215,6 +215,12 @@
 		8B0B930930ADF0400020D403 /* PopopxLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0B930730ADF0400020D403 /* PopopxLocation.swift */; };
 		8B0B930A30ADF0400020D403 /* PopopxLocationPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0B930830ADF0400020D403 /* PopopxLocationPickerSheet.swift */; };
 		8B0D97BE30AD900E00985BD5 /* PopopxCabinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0D97BC30AD900E00985BD5 /* PopopxCabinView.swift */; };
+		8B1B85A230AE9049005C5769 /* PopopxBehaviorGuard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1B859E30AE9049005C5769 /* PopopxBehaviorGuard.swift */; };
+		8B1B85A330AE9049005C5769 /* PopopxAntiTheftMotionGuard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1B859B30AE9049005C5769 /* PopopxAntiTheftMotionGuard.swift */; };
+		8B1B85A430AE9049005C5769 /* PopopxAntiTheftSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1B859C30AE9049005C5769 /* PopopxAntiTheftSettingsView.swift */; };
+		8B1B85A530AE9049005C5769 /* PopopxAppLockOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1B859D30AE9049005C5769 /* PopopxAppLockOverlayView.swift */; };
+		8B1B85A630AE9049005C5769 /* PopopxDecoyProfileGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1B859F30AE9049005C5769 /* PopopxDecoyProfileGenerator.swift */; };
+		8B1B85A730AE9049005C5769 /* PopopxDuressAuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1B85A030AE9049005C5769 /* PopopxDuressAuthManager.swift */; };
 		8B2E872D30AD6A7700670E4A /* PopopxTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B2E872C30AD6A7700670E4A /* PopopxTheme.swift */; };
 		8B36F14A30AE127C00ABC182 /* POPOPXAntiSpyDetector.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F14930AE127C00ABC182 /* POPOPXAntiSpyDetector.mlpackage */; };
 		8B36F15330AE6E8600ABC182 /* PersonalProfileModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F14B30AE6E8600ABC182 /* PersonalProfileModel.swift */; };
@@ -660,6 +666,12 @@
 		8B0B930730ADF0400020D403 /* PopopxLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxLocation.swift; sourceTree = "<group>"; };
 		8B0B930830ADF0400020D403 /* PopopxLocationPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxLocationPickerSheet.swift; sourceTree = "<group>"; };
 		8B0D97BC30AD900E00985BD5 /* PopopxCabinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxCabinView.swift; sourceTree = "<group>"; };
+		8B1B859B30AE9049005C5769 /* PopopxAntiTheftMotionGuard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxAntiTheftMotionGuard.swift; sourceTree = "<group>"; };
+		8B1B859C30AE9049005C5769 /* PopopxAntiTheftSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxAntiTheftSettingsView.swift; sourceTree = "<group>"; };
+		8B1B859D30AE9049005C5769 /* PopopxAppLockOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxAppLockOverlayView.swift; sourceTree = "<group>"; };
+		8B1B859E30AE9049005C5769 /* PopopxBehaviorGuard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxBehaviorGuard.swift; sourceTree = "<group>"; };
+		8B1B859F30AE9049005C5769 /* PopopxDecoyProfileGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxDecoyProfileGenerator.swift; sourceTree = "<group>"; };
+		8B1B85A030AE9049005C5769 /* PopopxDuressAuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxDuressAuthManager.swift; sourceTree = "<group>"; };
 		8B2E872C30AD6A7700670E4A /* PopopxTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxTheme.swift; sourceTree = "<group>"; };
 		8B36F14930AE127C00ABC182 /* POPOPXAntiSpyDetector.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = POPOPXAntiSpyDetector.mlpackage; sourceTree = "<group>"; };
 		8B36F14B30AE6E8600ABC182 /* PersonalProfileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalProfileModel.swift; sourceTree = "<group>"; };
@@ -1362,6 +1374,19 @@
 			path = Cabin;
 			sourceTree = "<group>";
 		};
+		8B1B85A130AE9049005C5769 /* AntiTheftDuress */ = {
+			isa = PBXGroup;
+			children = (
+				8B1B859B30AE9049005C5769 /* PopopxAntiTheftMotionGuard.swift */,
+				8B1B859C30AE9049005C5769 /* PopopxAntiTheftSettingsView.swift */,
+				8B1B859D30AE9049005C5769 /* PopopxAppLockOverlayView.swift */,
+				8B1B859E30AE9049005C5769 /* PopopxBehaviorGuard.swift */,
+				8B1B859F30AE9049005C5769 /* PopopxDecoyProfileGenerator.swift */,
+				8B1B85A030AE9049005C5769 /* PopopxDuressAuthManager.swift */,
+			);
+			path = AntiTheftDuress;
+			sourceTree = "<group>";
+		};
 		8B36F15230AE6E8600ABC182 /* PersonalProfile */ = {
 			isa = PBXGroup;
 			children = (
@@ -1398,6 +1423,7 @@
 		8B51158A30AD7BC200B15CFE /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				8B1B85A130AE9049005C5769 /* AntiTheftDuress */,
 				8B36F15230AE6E8600ABC182 /* PersonalProfile */,
 				8BBDA84830AD9C880013F482 /* ChatInfo */,
 				8BBDA84B30AD9C880013F482 /* ChatRoom */,
@@ -1955,6 +1981,12 @@
 				5C9FD96E27A5D6ED0075386C /* SendMessageView.swift in Sources */,
 				5CA7DFC329302AF000F7FDDE /* AppSheet.swift in Sources */,
 				64E972072881BB22008DBC02 /* CIGroupInvitationView.swift in Sources */,
+				8B1B85A230AE9049005C5769 /* PopopxBehaviorGuard.swift in Sources */,
+				8B1B85A330AE9049005C5769 /* PopopxAntiTheftMotionGuard.swift in Sources */,
+				8B1B85A430AE9049005C5769 /* PopopxAntiTheftSettingsView.swift in Sources */,
+				8B1B85A530AE9049005C5769 /* PopopxAppLockOverlayView.swift in Sources */,
+				8B1B85A630AE9049005C5769 /* PopopxDecoyProfileGenerator.swift in Sources */,
+				8B1B85A730AE9049005C5769 /* PopopxDuressAuthManager.swift in Sources */,
 				5CC1C99227A6C7F5000D9FF6 /* QRCode.swift in Sources */,
 				64E5E3672DFC16A900A4D530 /* ContextProfilePickerView.swift in Sources */,
 				5C116CDC27AABE0400E66D01 /* ContactRequestView.swift in Sources */,
