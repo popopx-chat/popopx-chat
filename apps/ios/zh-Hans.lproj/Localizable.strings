@@ -8002,9 +8002,9 @@ alert title */
 /* Onboarding: page 4 commitments and legal */
 "Security commitments and local protection" = "安全承诺与本地防护";
 "Network and security commitments" = "网络与安全承诺";
-"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "已知悉消息由动态 SMP 中继节点集群异步转发，在本机删除后不可恢复。";
-"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "已知悉多跳隐私路由默认开启以隐藏真实 IP；完成本引导即获赠 3 天先锋节点体验徽章，到期平滑回退免费公共节点，聊天记录全部保留。";
-"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "已知悉连续点击顶部 Logo 3 次触发紧急物理擦除；绝密消息受硬件级防截屏与防录屏保护。";
+"Asynchronous SMP relaying; deleting here is irreversible." = "异步 SMP 中继；在此删除不可恢复。";
+"Private routing hides your IP; finishing grants the 3-day trial badge." = "私有路由隐藏你的 IP；完成引导即赠 3 天体验徽章。";
+"Three taps on the logo erase local data; screenshots are blocked." = "三连点按 Logo 抹除本机数据；截屏被拦截。";
 "Launch protection" = "启动防护";
 "Face ID / Touch ID lock" = "Face ID / Touch ID 启动锁";
 "POPOPX asks for biometrics before it opens. The database stays locked until then." = "打开 POPOPX 前先验生物识别，在此之前数据库保持锁定。";

@@ -100,7 +100,7 @@ public enum PopopxPathBlockage: String, Hashable, Sendable {
         case .cellularDenied: "蜂窝网络权限被拒绝"
         case .wifiDenied: "Wi-Fi 权限被拒绝"
         case .localNetworkDenied: "本地网络权限被拒绝"
-        case .vpnInactive: "VPN 未就绪"
+        case .vpnInactive: "加密通道未就绪"
         }
     }
 }

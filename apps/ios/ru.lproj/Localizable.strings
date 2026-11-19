@@ -8090,9 +8090,9 @@ alert title */
 /* Onboarding: page 4 commitments and legal */
 "Security commitments and local protection" = "Обязательства безопасности и локальная защита";
 "Network and security commitments" = "Сетевые обязательства и обязательства безопасности";
-"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "Я понимаю, что сообщения асинхронно передаёт динамический кластер SMP-ретрансляционных узлов и что удаление здесь необратимо.";
-"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "Я понимаю, что приватная маршрутизация включена по умолчанию, чтобы скрыть ваш реальный IP-адрес. Завершение настройки выдаёт пробный значок узла-пионера на 3 дня, а по истечении он бесшовно возвращается к бесплатным публичным узлам, и все сообщения сохраняются.";
-"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "Я понимаю, что тройное касание логотипа запускает Panic Wipe — физическое стирание локальной базы данных. Совершенно секретные сообщения защищены от снимков и записи экрана.";
+"Asynchronous SMP relaying; deleting here is irreversible." = "Асинхронная SMP-ретрансляция; удаление здесь необратимо.";
+"Private routing hides your IP; finishing grants the 3-day trial badge." = "Приватная маршрутизация скрывает ваш IP; после завершения выдаётся пробный значок на 3 дня.";
+"Three taps on the logo erase local data; screenshots are blocked." = "Три касания логотипа стирают локальные данные; снимки экрана блокируются.";
 "Launch protection" = "Защита при запуске";
 "Face ID / Touch ID lock" = "Блокировка Face ID / Touch ID";
 "POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX запрашивает биометрию перед открытием. До этого момента база данных остаётся заблокированной.";

@@ -153,15 +153,12 @@ enum PopopxOnboardingCopy {
     // 第 4 屏 · 安全承诺、启动防护与法务
     static let commitmentsTitle = key("Security commitments and local protection")
     static let commitmentsCard = key("Network and security commitments")
-    static let commitmentRelay = key(
-        "Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible."
-    )
-    static let commitmentRouting = key(
-        "Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message."
-    )
-    static let commitmentWipe = key(
-        "Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording."
-    )
+    // 三条承诺在 393×852 上必须各占一行：原句把三条从句塞进一句，任何语种都要 3 行以上，
+    // 第 4 屏必然要下滑。这里只保留可执行的核心断言，完整表述仍由离线阅读器的正文承担
+    // （英文原句即 Key，所以 16 个语种目录里对应的行是整行改写，不是新增）。
+    static let commitmentRelay = key("Asynchronous SMP relaying; deleting here is irreversible.")
+    static let commitmentRouting = key("Private routing hides your IP; finishing grants the 3-day trial badge.")
+    static let commitmentWipe = key("Three taps on the logo erase local data; screenshots are blocked.")
     static let launchProtection = key("Launch protection")
     static let biometricRow = key("Face ID / Touch ID lock")
     static let biometricNote = key("POPOPX asks for biometrics before it opens. The database stays locked until then.")
@@ -316,7 +313,7 @@ struct PopopxOnboardingHeader: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: PopopxMetrics.spaceS) {
+        VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
             HStack(spacing: PopopxMetrics.spaceXS) {
                 Text(verbatim: "\(step) / \(steps)")
                     .font(PopopxType.metricSmall)

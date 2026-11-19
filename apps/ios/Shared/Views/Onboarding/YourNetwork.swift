@@ -27,10 +27,13 @@ struct YourNetworkView: View {
     @State private var nextStepNavLinkActive = false
     @State private var justOpened = true
 
+    /// 与第 1 屏同一套做法：「继续 / 返回」钉在底部安全区之上，卡片之间的间距按屏高收一档，
+    /// 393×852 上三张卡与两颗按钮一次看全，不必下滑。判据仍是 GeometryReader 的可用高度。
     var body: some View {
         GeometryReader { g in
+            let compact = g.size.height < 900
             ScrollView {
-                VStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
+                VStack(alignment: .leading, spacing: compact ? PopopxMetrics.spaceS : PopopxMetrics.spaceL) {
                     PopopxOnboardingHeader(
                         step: 2,
                         steps: 3,
@@ -39,22 +42,27 @@ struct YourNetworkView: View {
                     )
                     .padding(.horizontal, PopopxMetrics.gutter)
 
-                    modesCard
+                    modesCard(compact: compact)
 
                     meshCard
 
-                    relayCard
-
-                    actions
-                        .padding(.horizontal, PopopxMetrics.gutter)
+                    relayCard(compact: compact)
                 }
-                .padding(.top, PopopxMetrics.spaceM)
-                .padding(.bottom, PopopxMetrics.space2XL)
-                .frame(maxWidth: .infinity, minHeight: g.size.height, alignment: .top)
+                .padding(.top, PopopxMetrics.spaceS)
+                .padding(.bottom, PopopxMetrics.spaceM)
+                .frame(maxWidth: .infinity, alignment: .top)
             }
             .scrollBounceBehavior(.basedOnSize)
         }
+        .safeAreaInset(edge: .bottom, spacing: PopopxMetrics.spaceS) {
+            actions
+        }
         .background(PopopxPalette.base, ignoresSafeAreaEdges: .all)
+        .navigationDestination(isPresented: $nextStepNavLinkActive) {
+            OnboardingConditionsView(selectedOperatorIds: selectedOperatorIds)
+                .navigationBarBackButtonHidden(true)
+                .modifier(ThemedBackground())
+        }
         .onAppear {
             if justOpened {
                 serverOperators = ChatModel.shared.conditions.serverOperators
@@ -73,14 +81,14 @@ struct YourNetworkView: View {
 
     // MARK: - 卡片
 
-    private var modesCard: some View {
+    private func modesCard(compact: Bool) -> some View {
         PopopxSectionCard(
             PopopxOnboardingCopy.onlineChannel,
             footnote: PopopxOnboardingCopy.pushFootnote
         ) {
             ForEach(NotificationsMode.values, id: \.rawValue) { mode in
-                modeRow(mode)
-                    .padding(.vertical, PopopxMetrics.spaceXS)
+                modeRow(mode, compact: compact)
+                    .padding(.vertical, compact ? PopopxMetrics.space2XS : PopopxMetrics.spaceXS)
             }
         }
         .popopxAnimation(PopopxSpring.snappy, value: notificationMode, reduceMotion: reduceMotion)
@@ -90,7 +98,7 @@ struct YourNetworkView: View {
     /// 「已选」微标、双层实心圆点），未选中态只留 0.5pt 发丝描边，让三档读起来是控件而不是文案。
     /// 没有复用 `PopopxRadioRow`：那个原子的行尾只放圆点，插不进状态微标，
     /// 而共享控件 `PopopxControls.swift` 不在本轮改动范围内。
-    private func modeRow(_ mode: NotificationsMode) -> some View {
+    private func modeRow(_ mode: NotificationsMode, compact: Bool) -> some View {
         let selected = notificationMode == mode
         return Button {
             guard !selected else { return }
@@ -117,7 +125,7 @@ struct YourNetworkView: View {
                 radioMark(selected)
             }
             .padding(.horizontal, PopopxMetrics.spaceXS)
-            .padding(.vertical, PopopxMetrics.spaceS)
+            .padding(.vertical, compact ? PopopxMetrics.space2XS : PopopxMetrics.spaceS)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 selected ? PopopxPalette.brand.opacity(0.08) : Color.clear,
@@ -166,7 +174,7 @@ struct YourNetworkView: View {
         }
     }
 
-    private var relayCard: some View {
+    private func relayCard(compact: Bool) -> some View {
         PopopxSectionCard(
             footnote: serverOperators.count > 1 ? nil : PopopxOnboardingCopy.operatorsNote
         ) {
@@ -182,14 +190,14 @@ struct YourNetworkView: View {
                 PopopxOnboardingHairline()
                 operatorLogos
             } else {
-                relayReadyRow
+                relayReadyRow(compact: compact)
             }
         }
     }
 
     /// 只有 1 个（或 0 个）可用运营商时，"1 / 1" 的多选切换只会让人以为必须去选一个；
     /// 这里改成状态展示，整行仍通向同一个详情弹层，入口没有丢。
-    private var relayReadyRow: some View {
+    private func relayReadyRow(compact: Bool) -> some View {
         Button {
             showOperators = true
         } label: {
@@ -214,7 +222,7 @@ struct YourNetworkView: View {
                 Spacer(minLength: PopopxMetrics.spaceXS)
                 PopopxOnboardingChip(PopopxOnboardingCopy.relayAutoRouting)
             }
-            .padding(.vertical, PopopxMetrics.spaceS)
+            .padding(.vertical, compact ? PopopxMetrics.spaceXS : PopopxMetrics.spaceS)
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
         }
@@ -245,6 +253,8 @@ struct YourNetworkView: View {
 
     // MARK: - 底部操作
 
+    /// 底部固定栏：与第 1 屏同一套（不透明底 + 顶部发丝线）。横向内边距从调用点挪到这里，
+    /// 钉住之后已经没有外层 VStack 替它补 gutter。
     private var actions: some View {
         VStack(alignment: .center, spacing: PopopxMetrics.spaceS) {
             PopopxButton(PopopxOnboardingCopy.continueButton, systemImage: "arrow.right") {
@@ -256,10 +266,14 @@ struct YourNetworkView: View {
                 dismiss()
             }
         }
-        .navigationDestination(isPresented: $nextStepNavLinkActive) {
-            OnboardingConditionsView(selectedOperatorIds: selectedOperatorIds)
-                .navigationBarBackButtonHidden(true)
-                .modifier(ThemedBackground())
+        .padding(.horizontal, PopopxMetrics.gutter)
+        .padding(.top, PopopxMetrics.spaceXS)
+        .padding(.bottom, PopopxMetrics.spaceXS)
+        .background(PopopxPalette.base)
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(PopopxPalette.separator)
+                .frame(height: PopopxMetrics.hairline)
         }
     }
 

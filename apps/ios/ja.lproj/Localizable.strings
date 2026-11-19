@@ -3841,9 +3841,9 @@ server test failure */
 /* Onboarding: page 4 commitments and legal */
 "Security commitments and local protection" = "セキュリティコミットメントとローカル保護";
 "Network and security commitments" = "ネットワークとセキュリティのコミットメント";
-"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "メッセージは動的な SMP 中継ノードクラスタによって非同期に転送されること、ここで削除すると元に戻せないことを理解しています。";
-"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "実際の IP アドレスを隠すため、プライベートルーティングが既定でオンになっていること、この設定を完了すると パイオニアノード3日間体験バッジが付与され、期限切れ後は無料の公開ノードにシームレスに戻り、メッセージはすべて保持されることを理解しています。";
-"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "ロゴを 3 回タップすると Panic Wipe が起動し、ローカルデータベースが物理的に消去されること、最高機密メッセージはスクリーンショットや画面収録から保護されることを理解しています。";
+"Asynchronous SMP relaying; deleting here is irreversible." = "非同期 SMP リレー。ここで削除すると復元できません。";
+"Private routing hides your IP; finishing grants the 3-day trial badge." = "プライベートルーティングで IP を非表示。完了すると 3 日間のお試しバッジを取得。";
+"Three taps on the logo erase local data; screenshots are blocked." = "ロゴを 3 回タップで端末のデータを消去。スクリーンショットはブロック。";
 "Launch protection" = "起動時の保護";
 "Face ID / Touch ID lock" = "Face ID / Touch ID ロック";
 "POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX は開く前に生体認証を要求します。そのあいだ、データベースはロックされたままです。";

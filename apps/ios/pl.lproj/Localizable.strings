@@ -7205,9 +7205,9 @@ alert title */
 /* Onboarding: page 4 commitments and legal */
 "Security commitments and local protection" = "Zobowiązania bezpieczeństwa i ochrona lokalna";
 "Network and security commitments" = "Zobowiązania sieciowe i bezpieczeństwa";
-"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "Mam świadomość, że wiadomości są przekazywane asynchronicznie przez dynamiczny klaster węzłów przekaźnikowych SMP, a usunięcie ich tutaj jest nieodwracalne.";
-"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "Mam świadomość, że prywatny routing jest domyślnie włączony, aby ukryć Twój prawdziwy adres IP. Ukończenie konfiguracji daje 3-dniową odznakę próbną węzła pioniera; po wygaśnięciu płynnie wraca do darmowych węzłów publicznych, a wszystkie wiadomości zostają zachowane.";
-"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "Mam świadomość, że trzykrotne dotknięcie logo uruchamia Panic Wipe, fizyczne wymazanie lokalnej bazy danych. Ściśle tajne wiadomości są chronione przed zrzutami i nagraniami.";
+"Asynchronous SMP relaying; deleting here is irreversible." = "Asynchroniczne przekazywanie SMP; usunięcie stąd jest nieodwracalne.";
+"Private routing hides your IP; finishing grants the 3-day trial badge." = "Prywatne routowanie ukrywa Twój adres IP; po ukończeniu dostajesz 3-dniową odznakę próbną.";
+"Three taps on the logo erase local data; screenshots are blocked." = "Trzy dotknięcia logo usuwają dane lokalne; zrzuty ekranu są blokowane.";
 "Launch protection" = "Ochrona przy starcie";
 "Face ID / Touch ID lock" = "Blokada Face ID / Touch ID";
 "POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX żąda biometrii przed otwarciem. Baza danych pozostaje zablokowana do tego momentu.";

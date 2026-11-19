@@ -6831,9 +6831,9 @@ server test failure */
 /* Onboarding: page 4 commitments and legal */
 "Security commitments and local protection" = "Veiligheidstoezeggingen en lokale bescherming";
 "Network and security commitments" = "Netwerk- en veiligheidstoezeggingen";
-"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "Ik begrijp dat berichten asynchroon worden doorgegeven door het dynamisch cluster van SMP-relaisknooppunten, en dat verwijderen hier onomkeerbaar is.";
-"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "Ik begrijp dat privé-routing standaard aan staat om je echte IP-adres te verbergen. Als je deze set-up afrondt krijg je de 3 dagen proefbadge voor knooppionier; na afloop valt die naadloos terug naar gratis publieke knooppunten en blijft elk bericht behouden.";
-"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "Ik begrijp dat driemaal tikken op het logo Panic Wipe activeert, een fysieke wis van de lokale database. Uiterst geheime berichten zijn beschermd tegen screenshots en opnames.";
+"Asynchronous SMP relaying; deleting here is irreversible." = "Asynchroon SMP-doorgeven; hier verwijderen is onomkeerbaar.";
+"Private routing hides your IP; finishing grants the 3-day trial badge." = "Privé-routering verbergt je IP; na afloop krijg je de 3-daagse proefbadge.";
+"Three taps on the logo erase local data; screenshots are blocked." = "Drie tikken op het logo wissen lokale gegevens; screenshots zijn geblokkeerd.";
 "Launch protection" = "Startbescherming";
 "Face ID / Touch ID lock" = "Face ID / Touch ID-vergrendeling";
 "POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX vraagt biometrie voordat het opent. De database blijft tot dat moment vergrendeld.";

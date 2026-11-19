@@ -8101,9 +8101,9 @@ alert title */
 /* Onboarding: page 4 commitments and legal */
 "Security commitments and local protection" = "Compromisos de seguridad y protección local";
 "Network and security commitments" = "Compromisos de red y seguridad";
-"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "Tengo presente que los mensajes se retransmiten de forma asíncrona por el clúster dinámico de nodos retransmisores SMP, y que borrarlos aquí es irreversible.";
-"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "Tengo presente que el enrutado privado está activado de serie para ocultar tu dirección IP real. Al terminar se concede la insignia de prueba de 3 días del nodo pionero, que al caducar vuelve sin cortes a los nodos públicos gratuitos y conserva todos los mensajes.";
-"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "Tengo presente que tocar el logotipo tres veces activa el borrado de pánico, un borrado físico de la base de datos local. Los mensajes ultrasecretos están protegidos frente a capturas y grabaciones.";
+"Asynchronous SMP relaying; deleting here is irreversible." = "Reenvío SMP asíncrono; eliminar aquí es irreversible.";
+"Private routing hides your IP; finishing grants the 3-day trial badge." = "El enrutamiento privado oculta tu IP; al terminar obtienes la insignia de prueba de 3 días.";
+"Three taps on the logo erase local data; screenshots are blocked." = "Tres toques en el logo borran los datos locales; las capturas están bloqueadas.";
 "Launch protection" = "Protección de arranque";
 "Face ID / Touch ID lock" = "Bloqueo con Face ID / Touch ID";
 "POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX pide biometría antes de abrirse. La base de datos permanece bloqueada hasta entonces.";

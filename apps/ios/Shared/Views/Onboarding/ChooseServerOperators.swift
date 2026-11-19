@@ -72,10 +72,13 @@ struct OnboardingConditionsView: View {
     private static let toastHold: Duration = .seconds(1.3)
     private static let toastPair: Duration = .seconds(2.6)
 
+    /// 第 4 屏必须在 393×852 上一屏点完：主按钮钉进底部安全区，卡片间距与承诺行内边距按屏高收一档，
+    /// 三条承诺改为短句摘要，法务两本文档并排成双胶囊。判据同样是 GeometryReader 的可用高度。
     var body: some View {
         GeometryReader { g in
+            let compact = g.size.height < 900
             ScrollView {
-                VStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
+                VStack(alignment: .leading, spacing: compact ? PopopxMetrics.spaceS : PopopxMetrics.spaceL) {
                     PopopxOnboardingHeader(
                         step: 3,
                         steps: 3,
@@ -84,23 +87,20 @@ struct OnboardingConditionsView: View {
                     )
                     .padding(.horizontal, PopopxMetrics.gutter)
 
-                    commitmentsCard
+                    commitmentsCard(compact: compact)
 
-                    launchCard
+                    launchCard(compact: compact)
 
-                    legalCard
-
-                    VStack(alignment: .leading, spacing: PopopxMetrics.spaceS) {
-                        enterButton
-                        gateHint
-                    }
-                    .padding(.horizontal, PopopxMetrics.gutter)
+                    legalCard(compact: compact)
                 }
-                .padding(.top, PopopxMetrics.spaceM)
-                .padding(.bottom, PopopxMetrics.space2XL)
-                .frame(maxWidth: .infinity, minHeight: g.size.height, alignment: .top)
+                .padding(.top, PopopxMetrics.spaceS)
+                .padding(.bottom, PopopxMetrics.spaceM)
+                .frame(maxWidth: .infinity, alignment: .top)
             }
             .scrollBounceBehavior(.basedOnSize)
+        }
+        .safeAreaInset(edge: .bottom, spacing: PopopxMetrics.spaceS) {
+            enterBar
         }
         .background(PopopxPalette.base, ignoresSafeAreaEdges: .all)
         .onAppear {
@@ -116,16 +116,34 @@ struct OnboardingConditionsView: View {
         .navigationBarHidden(true)
     }
 
+    /// 底部固定栏：主按钮 + 闸门提示，不透明底与发丝线同第 1、3 屏。
+    /// 提示语留在栏内，勾选进度变化时它就在按钮上方原地消失，不必下滑去找原因。
+    private var enterBar: some View {
+        VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
+            enterButton
+            gateHint
+        }
+        .padding(.horizontal, PopopxMetrics.gutter)
+        .padding(.top, PopopxMetrics.spaceXS)
+        .padding(.bottom, PopopxMetrics.spaceXS)
+        .background(PopopxPalette.base)
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(PopopxPalette.separator)
+                .frame(height: PopopxMetrics.hairline)
+        }
+    }
+
     // MARK: - 卡片
 
-    private var commitmentsCard: some View {
+    private func commitmentsCard(compact: Bool) -> some View {
         PopopxSectionCard(PopopxOnboardingCopy.commitmentsCard) {
-            commitmentRow(PopopxOnboardingCopy.commitmentRelay, isOn: $relayCommitted)
-                .padding(.vertical, PopopxMetrics.spaceXS)
-            commitmentRow(PopopxOnboardingCopy.commitmentRouting, isOn: $routingCommitted)
-                .padding(.vertical, PopopxMetrics.spaceXS)
-            commitmentRow(PopopxOnboardingCopy.commitmentWipe, isOn: $wipeCommitted)
-                .padding(.vertical, PopopxMetrics.spaceXS)
+            commitmentRow(PopopxOnboardingCopy.commitmentRelay, isOn: $relayCommitted, compact: compact)
+                .padding(.vertical, compact ? PopopxMetrics.space2XS : PopopxMetrics.spaceXS)
+            commitmentRow(PopopxOnboardingCopy.commitmentRouting, isOn: $routingCommitted, compact: compact)
+                .padding(.vertical, compact ? PopopxMetrics.space2XS : PopopxMetrics.spaceXS)
+            commitmentRow(PopopxOnboardingCopy.commitmentWipe, isOn: $wipeCommitted, compact: compact)
+                .padding(.vertical, compact ? PopopxMetrics.space2XS : PopopxMetrics.spaceXS)
         }
     }
 
@@ -134,7 +152,7 @@ struct OnboardingConditionsView: View {
     /// 自己组合）。这里沿用那套写法，但不动共享的 `PopopxControls.swift`，其它调用点保持原样：
     /// 外层 `Button` + `contentShape(Rectangle())` 铺满整行，选中态叠三重信号
     /// （brand 8% 行底、1pt brand 描边、实心方格 + 纯白加粗勾），触觉仍在点击这一侧发。
-    private func commitmentRow(_ title: String, isOn: Binding<Bool>) -> some View {
+    private func commitmentRow(_ title: String, isOn: Binding<Bool>, compact: Bool) -> some View {
         let checked = isOn.wrappedValue
         return Button {
             PopopxHaptics.selection()
@@ -169,7 +187,7 @@ struct OnboardingConditionsView: View {
                     )
             }
             .padding(.horizontal, PopopxMetrics.spaceXS)
-            .padding(.vertical, PopopxMetrics.spaceS)
+            .padding(.vertical, compact ? PopopxMetrics.space2XS : PopopxMetrics.spaceS)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 checked ? PopopxPalette.brand.opacity(0.08) : Color.clear,
@@ -190,45 +208,96 @@ struct OnboardingConditionsView: View {
         .popopxAnimation(PopopxSpring.snappy, value: checked, reduceMotion: reduceMotion)
     }
 
-    private var launchCard: some View {
+    /// Face ID 卡在本文件内组合，没有用 `PopopxToggleRow`：那个原子固定给 8pt 上下内边距，
+    /// 写在共享的 `PopopxControls.swift` 里，本轮不能改，而这 16pt 恰好是第 4 屏
+    /// 393×852 上要不要下滑的分界。这里逐条沿用它的几何（同一对字号、`spaceS` 间距、
+    /// `spaceXL` 徽章、`.switch` 样式与 brand 着色），只把垂直内边距按屏高收一档。
+    private func launchCard(compact: Bool) -> some View {
         PopopxSectionCard(PopopxOnboardingCopy.launchProtection) {
-            PopopxToggleRow(
-                PopopxOnboardingCopy.biometricRow,
-                note: biometricAvailable
-                    ? PopopxOnboardingCopy.biometricNote
-                    : PopopxOnboardingCopy.biometricUnavailable,
-                systemImage: "faceid",
-                tint: .brand,
-                isOn: $biometricOn
-            )
+            Toggle(isOn: $biometricOn) {
+                HStack(alignment: .center, spacing: PopopxMetrics.spaceS) {
+                    PopopxOnboardingIconBadge(systemName: "faceid", tint: .brand)
+                    VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
+                        Text(PopopxOnboardingCopy.biometricRow)
+                            .font(PopopxType.sectionHeader)
+                            .foregroundStyle(PopopxPalette.label)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Text(biometricAvailable
+                                ? PopopxOnboardingCopy.biometricNote
+                                : PopopxOnboardingCopy.biometricUnavailable)
+                            .font(PopopxType.caption)
+                            .foregroundStyle(PopopxPalette.labelSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: PopopxMetrics.spaceXS)
+                }
+            }
+            .toggleStyle(.switch)
+            .tint(PopopxPalette.brand)
             .disabled(!biometricAvailable)
+            .padding(.vertical, compact ? PopopxMetrics.space2XS : PopopxMetrics.spaceS)
+            .contentShape(Rectangle())
+            .popopxAnimation(PopopxSpring.snappy, value: biometricOn, reduceMotion: reduceMotion)
         }
     }
 
-    private var legalCard: some View {
+    /// 法务卡：两本文档从"占两行的 Disclosure 行"改成左右并排的双胶囊，垂直空间省一行；
+    /// 胶囊下面紧跟整行可点的同意行。标题仍是同一对 Key，与离线阅读器的页头逐字一致。
+    private func legalCard(compact: Bool) -> some View {
         PopopxSectionCard(
             PopopxOnboardingCopy.legalCard,
             footnote: PopopxOnboardingCopy.legalReadableOffline
         ) {
-            PopopxPickerRow(
-                PopopxOnboardingCopy.privacyPolicy,
-                systemImage: "hand.raised.fill",
-                tint: .brand
-            ) {
-                document = .privacy
-            }
-            PopopxOnboardingHairline()
-            PopopxPickerRow(
-                PopopxOnboardingCopy.termsOfUse,
-                systemImage: "doc.text.fill",
-                tint: .mesh
-            ) {
-                document = .terms
+            HStack(spacing: PopopxMetrics.spaceXS) {
+                legalCapsule(
+                    PopopxOnboardingCopy.privacyPolicy,
+                    systemImage: "hand.raised.fill",
+                    doc: .privacy
+                )
+                legalCapsule(
+                    PopopxOnboardingCopy.termsOfUse,
+                    systemImage: "doc.text.fill",
+                    doc: .terms
+                )
             }
             PopopxOnboardingHairline()
             agreementRow
+                .padding(.top, compact ? PopopxMetrics.space2XS : PopopxMetrics.spaceXS)
                 .popopxAnimation(PopopxSpring.snappy, value: agreed, reduceMotion: reduceMotion)
         }
+    }
+
+    /// 单颗文档胶囊：整枚可点，命中高度不低于 `minHitTarget`；窄语种允许两行，
+    /// 绝不省略成 "POPOPX Privacy…"，法务入口的标题被截断就等于没给全。
+    private func legalCapsule(
+        _ title: String,
+        systemImage: String,
+        doc: PopopxLegalDocumentSheet.Document
+    ) -> some View {
+        Button {
+            PopopxHaptics.selection()
+            document = doc
+        } label: {
+            HStack(alignment: .center, spacing: PopopxMetrics.space2XS) {
+                Image(systemName: systemImage)
+                    .font(PopopxType.microTag)
+                    .foregroundStyle(PopopxPalette.brand)
+                Text(title)
+                    .font(PopopxType.caption)
+                    .foregroundStyle(PopopxPalette.label)
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, minHeight: PopopxMetrics.minHitTarget)
+            .background(PopopxPalette.brand.opacity(0.10), in: .capsule)
+            .overlay(
+                Capsule()
+                    .strokeBorder(PopopxPalette.brand.opacity(0.35), lineWidth: PopopxMetrics.hairline)
+            )
+            .contentShape(.capsule)
+        }
+        .buttonStyle(PopopxPressButtonStyle(feedback: nil))
     }
 
     // MARK: - 同意行（勾选 + 行内热区）
@@ -239,10 +308,35 @@ struct OnboardingConditionsView: View {
     /// brand/onBrand 填充、未选中用 `labelHint` 描边），右句整段走 `openURL` 拦截，
     /// 命中本文件的 `popopx://legal/*` 才弹阅读器，其余 URL 仍交回系统。
     private var agreementRow: some View {
+        ZStack(alignment: .topLeading) {
+            // 整行热区放在最下层：SwiftUI 只对"挂了手势的视图"做命中，普通文字与空白不吃命中，
+            // 点击会落到这枚透明按钮上；《隐私政策》《使用条款》两个书名是可交互的 run，
+            // 命中留在它们身上，由下面的 openURL 拦截接走，不会被误勾选。
+            // 方格自己仍是独立按钮，VoiceOver 的控件也仍是它（这层透明按钮对无障碍隐藏）。
+            Button {
+                toggleAgreement()
+            } label: {
+                Color.clear
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityHidden(true)
+
+            agreementContent
+        }
+        .environment(\.openURL, OpenURLAction { url in
+            guard let doc = PopopxLegalLink.document(for: url) else { return .systemAction }
+            PopopxHaptics.selection()
+            document = doc
+            return .handled
+        })
+    }
+
+    private var agreementContent: some View {
         HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.spaceS) {
             Button {
-                PopopxHaptics.selection()
-                agreed.toggle()
+                toggleAgreement()
             } label: {
                 Image(systemName: "checkmark")
                     .font(PopopxType.microTag)
@@ -273,14 +367,15 @@ struct OnboardingConditionsView: View {
                 .tint(PopopxPalette.brand)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .environment(\.openURL, OpenURLAction { url in
-            guard let doc = PopopxLegalLink.document(for: url) else { return .systemAction }
-            PopopxHaptics.selection()
-            document = doc
-            return .handled
-        })
         .padding(.vertical, PopopxMetrics.spaceXS)
-        .contentShape(Rectangle())
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func toggleAgreement() {
+        PopopxHaptics.selection()
+        withAnimation(PopopxSpring.snappy) {
+            agreed.toggle()
+        }
     }
 
     /// 切句只认"标题在原句中出现"，且按隐私政策、使用条款的顺序各切一次。

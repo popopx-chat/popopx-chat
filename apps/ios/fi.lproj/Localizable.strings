@@ -3504,9 +3504,9 @@ server test failure */
 /* Onboarding: page 4 commitments and legal */
 "Security commitments and local protection" = "Turvallisuussitoumukset ja suojaus laitteella";
 "Network and security commitments" = "Verkko- ja turvallisuussitoumukset";
-"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "Ymmärrän, että dynaaminen SMP-välityssolmujen rykelmä välittää viestit epäsynkronisesti, ja että poistaminen täällä on peruuttamatonta.";
-"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "Ymmärrän, että yksityinen reititys on oletuksena päällä, jotta todellinen IP-osoitteesi pysyy piilossa. Asennuksen viimeistely myöntää 3 päivän kokeilumerkin pioneerisolmulta; sen päättyessä paluu maksuttomiin julkisiin solmuihin on saumaton ja jokainen viesti säilyy.";
-"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "Ymmärrän, että logon kolmoisnapautus käynnistää Panic Wipen, joka tyhjentää paikallisen tietokannan fyysisesti. Huippusalaiset viestit on suojattu kuvakaappauksilta ja tallennuksilta.";
+"Asynchronous SMP relaying; deleting here is irreversible." = "Epäsynkroninen SMP-välitys; poistaminen täällä on peruuttamatonta.";
+"Private routing hides your IP; finishing grants the 3-day trial badge." = "Yksityinen reititys piilottaa IP-osoitteesi; saat valmiista 3 päivän kokeilumerkin.";
+"Three taps on the logo erase local data; screenshots are blocked." = "Kolme napautusta logoa poistavat paikalliset tiedot; kuvakaappaukset on estetty.";
 "Launch protection" = "Käynnistyssuojaus";
 "Face ID / Touch ID lock" = "Face ID / Touch ID -lukitus";
 "POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX kysyy biometriaa ennen avaamista. Tietokanta pysyy lukittuna siihen asti.";

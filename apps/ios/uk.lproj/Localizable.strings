@@ -7152,9 +7152,9 @@ alert title */
 /* Onboarding: page 4 commitments and legal */
 "Security commitments and local protection" = "Зобов'язання безпеки та локальний захист";
 "Network and security commitments" = "Мережеві зобов'язання та зобов'язання безпеки";
-"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "Я розумію, що повідомлення асинхронно передає динамічний кластер SMP-ретрансляційних вузлів і що видалення тут є незворотним.";
-"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "Я розумію, що приватна маршрутизація типово увімкнена, щоб приховати вашу справжню IP-адресу. Завершення налаштування видає пробний значок вузла-піонера на 3 дні, а після закінчення він безшовно повертається до безкоштовних публічних вузлів, і всі повідомлення зберігаються.";
-"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "Я розумію, що потрійний дотик до логотипа запускає Panic Wipe — фізичне стирання локальної бази даних. Цілком таємні повідомлення захищені від знімків і запису екрана.";
+"Asynchronous SMP relaying; deleting here is irreversible." = "Асинхронна SMP-ретрансляція; видалення тут є незворотним.";
+"Private routing hides your IP; finishing grants the 3-day trial badge." = "Приватна маршрутизація приховує вашу IP; після завершення ви отримуєте 3-денний пробний значок.";
+"Three taps on the logo erase local data; screenshots are blocked." = "Три дотики до логотипа стирають локальні дані; знімки екрана блокуються.";
 "Launch protection" = "Захист під час запуску";
 "Face ID / Touch ID lock" = "Блокування Face ID / Touch ID";
 "POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX запитує біометрію перед відкриттям. До того часу база даних залишається заблокованою.";

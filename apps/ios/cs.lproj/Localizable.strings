@@ -3962,9 +3962,9 @@ server test failure */
 /* Onboarding: page 4 commitments and legal */
 "Security commitments and local protection" = "Bezpečnostní závazky a lokální ochrana";
 "Network and security commitments" = "Síťové a bezpečnostní závazky";
-"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "Mám jasno v tom, že zprávy předávají asynchronně dynamické relé uzly SMP a že smazání zde je nevratné.";
-"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "Mám jasno v tom, že soukromé směrování je zapnuto jako výchozí, aby skrylo vaši skutečnou IP adresu. Dokončením nastavení získáte zkušební odznak pionýrského uzlu na 3 dny; po vypršení se bez výpadku vrátí na bezplatné veřejné uzly a všechny zprávy zůstanou zachovány.";
-"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "Mám jasno v tom, že trojí klepnutí na logo spustí Panic Wipe, fyzické vymazání lokální databáze. Nejpřísněji utajené zprávy jsou chráněny před snímky a nahrávkami.";
+"Asynchronous SMP relaying; deleting here is irreversible." = "Asynchronní SMP přenos; odstranění zde je nevratné.";
+"Private routing hides your IP; finishing grants the 3-day trial badge." = "Soukromé směrování skrývá vaši IP; dokonáním získáte zkušební odznak na 3 dny.";
+"Three taps on the logo erase local data; screenshots are blocked." = "Tři klepnutí na logo smaže lokální data; screenshoty jsou blokovány.";
 "Launch protection" = "Ochrana při spuštění";
 "Face ID / Touch ID lock" = "Zámek Face ID / Touch ID";
 "POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX před otevřením vyžaduje biometriku. Databáze zůstává do té doby zamčená.";

@@ -4798,9 +4798,9 @@ server test failure */
 /* Onboarding: page 4 commitments and legal */
 "Security commitments and local protection" = "Задължения за сигурност и локална защита";
 "Network and security commitments" = "Задължения за мрежата и сигурността";
-"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "Разбирам, че съобщенията се препредават асинхронно от динамичния клъстер от SMP релейни възли и че изтриването тук е необратимо.";
-"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "Разбирам, че личната маршрутизация е включена по подразбиране, за да скрие истинския ти IP адрес. Завършването на настройката дава пробния значка на възел пионер за 3 дни, който след изтичането се връща без прекъсване към безплатни обществени възли, а всички съобщения остават запазени.";
-"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "Разбирам, че тройното докосване на логото стартира Panic Wipe, физическо изтриване на локалната база данни. Строго поверителните съобщения са защитени от екранни снимки и записи.";
+"Asynchronous SMP relaying; deleting here is irreversible." = "Асинхронно SMP препредаване; изтриването тук е необратимо.";
+"Private routing hides your IP; finishing grants the 3-day trial badge." = "Поверит насочване скрива IP адреса ви; след завършване получавате 3-дневен пробен значок.";
+"Three taps on the logo erase local data; screenshots are blocked." = "Три допирания до логото изтриват локалните данни; екранни снимки се блокират.";
 "Launch protection" = "Защита при стартиране";
 "Face ID / Touch ID lock" = "Заключване с Face ID / Touch ID";
 "POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX изисква биометрия, преди да се отвори. До тогава базата данни остава заключена.";

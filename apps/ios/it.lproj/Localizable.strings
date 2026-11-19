@@ -8214,9 +8214,9 @@ alert title */
 /* Onboarding: page 4 commitments and legal */
 "Security commitments and local protection" = "Impegni di sicurezza e protezione locale";
 "Network and security commitments" = "Impegni di rete e sicurezza";
-"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "Ho capito che i messaggi sono inoltrati in modo asincrono dal cluster dinamico di nodi relay SMP e che eliminarli qui è irreversibile.";
-"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "Ho capito che l'instradamento privato è attivo di default per nascondere il tuo vero indirizzo IP. Completando la configurazione ricevi il badge di prova di 3 giorni per nodo pioniere; alla scadenza torna in modo fluido ai nodi pubblici gratuiti e conserva tutti i messaggi.";
-"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "Ho capito che toccare tre volte il logo attiva la cancellazione di panico, una distruzione fisica del database locale. I messaggi ultra-segreti sono protetti da screenshot e registrazioni.";
+"Asynchronous SMP relaying; deleting here is irreversible." = "Instradamento SMP asincrono; eliminare qui è irreversibile.";
+"Private routing hides your IP; finishing grants the 3-day trial badge." = "Il routing privato nasconde il tuo IP; al termine ricevi il badge di prova di 3 giorni.";
+"Three taps on the logo erase local data; screenshots are blocked." = "Tre tocchi sul logo cancellano i dati locali; gli screenshot sono bloccati.";
 "Launch protection" = "Protezione all'avvio";
 "Face ID / Touch ID lock" = "Blocco Face ID / Touch ID";
 "POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX richiede la biometria prima di aprirsi. Il database resta bloccato fino a quel momento.";

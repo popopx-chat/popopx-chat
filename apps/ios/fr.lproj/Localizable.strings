@@ -8181,9 +8181,9 @@ alert title */
 /* Onboarding: page 4 commitments and legal */
 "Security commitments and local protection" = "Engagements de sécurité et protection locale";
 "Network and security commitments" = "Engagements réseau et sécurité";
-"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "J'ai compris que les messages transitent de façon asynchrone par le cluster dynamique de nœuds relais SMP, et que les supprimer ici est irréversible.";
-"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "J'ai compris que le routage privé est actif par défaut pour masquer ta véritable adresse IP. Terminer ce parcours offre le badge d'essai de 3 jours pour nœud pionnier ; à son expiration, le retour aux nœuds publics gratuits est progressif et tous les messages sont conservés.";
-"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "J'ai compris que toucher le logo trois fois déclenche l'effacement panique, une destruction physique de la base locale. Les messages top secrets sont protégés contre les captures et les enregistrements.";
+"Asynchronous SMP relaying; deleting here is irreversible." = "Relais SMP asynchrone ; la suppression ici est irréversible.";
+"Private routing hides your IP; finishing grants the 3-day trial badge." = "Le routage privé masque votre IP ; à la fin vous recevez le badge d'essai de 3 jours.";
+"Three taps on the logo erase local data; screenshots are blocked." = "Trois appuis sur le logo effacent les données locales ; les captures d'écran sont bloquées.";
 "Launch protection" = "Protection au démarrage";
 "Face ID / Touch ID lock" = "Verrou Face ID / Touch ID";
 "POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX demande la biométrie avant de s'ouvrir. La base reste verrouillée jusque-là.";

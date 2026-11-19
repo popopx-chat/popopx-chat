@@ -8181,9 +8181,9 @@ alert title */
 /* Onboarding: page 4 commitments and legal */
 "Security commitments and local protection" = "Sicherheitszusagen und lokaler Schutz";
 "Network and security commitments" = "Netzwerk- und Sicherheitszusagen";
-"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "Ich habe verstanden: Nachrichten werden asynchron über den dynamischen Cluster aus SMP-Relaisknoten geleitet, und das Löschen auf diesem Gerät ist unumkehrbar.";
-"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "Ich habe verstanden: Private Routing ist standardmäßig aktiv und verbirgt deine echte IP-Adresse. Nach Abschluss erhältst du das 3-tägige Testabzeichen für Pionierknoten; läuft es ab, kehrst du nahtlos zu kostenlosen öffentlichen Knoten zurück, jede Nachricht bleibt erhalten.";
-"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "Ich habe verstanden: Dreimaliges Tippen auf das Logo löst Panic Wipe aus, eine physische Löschung der lokalen Datenbank. Geheime Nachrichten sind gegen Screenshot und Aufnahme geschützt.";
+"Asynchronous SMP relaying; deleting here is irreversible." = "Asynchrone SMP-Weiterleitung; Löschen hier ist endgültig.";
+"Private routing hides your IP; finishing grants the 3-day trial badge." = "Privates Routing verbirgt Ihre IP; nach Abschluss erhalten Sie das 3-Tage-Testabzeichen.";
+"Three taps on the logo erase local data; screenshots are blocked." = "Drei Tipper auf das Logo löschen lokale Daten; Screenshots sind blockiert.";
 "Launch protection" = "Startschutz";
 "Face ID / Touch ID lock" = "Face ID / Touch ID Sperre";
 "POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX fragt vor dem Öffnen nach Biometrie, die Datenbank bleibt bis dahin gesperrt.";

@@ -3402,9 +3402,9 @@ server test failure */
 /* Onboarding: page 4 commitments and legal */
 "Security commitments and local protection" = "ข้อผูกมัดด้านความปลอดภัยและการปกป้องในเครื่อง";
 "Network and security commitments" = "ข้อผูกมัดด้านเครือข่ายและความปลอดภัย";
-"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "รับทราบว่าข้อความถูกส่งต่อแบบอะซิงโครนัสผ่านกลุ่มโหนดรีเลย์ SMP แบบไดนามิก และการลบที่นี่ไม่สามารถย้อนกลับได้";
-"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "รับทราบว่าการกำหนดเส้นทางแบบส่วนตัวเปิดเป็นค่าเริ่มต้นเพื่อซ่อน IP จริงของคุณ เมื่อตั้งค่าเสร็จจะได้รับป้ายทดลองโหนดผู้บุกเบิก 3 วัน ซึ่งเมื่อหมดอายุจะกลับไปใช้โหนดสาธารณะฟรีอย่างราบรื่น และข้อความทั้งหมดจะยังคงอยู่";
-"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "รับทราบว่าการแตะโลโก้สามครั้งจะทริกเกอร์ Panic Wipe ซึ่งเป็นการลบฐานข้อมูลในเครื่องจริง ๆ ข้อความลับมากได้รับการปกป้องจากภาพหน้าจอและการบันทึก";
+"Asynchronous SMP relaying; deleting here is irreversible." = "การรีเลย์ SMP แบบอะซิงโครนัส ลบที่นี่แล้วกู้คืนไม่ได้";
+"Private routing hides your IP; finishing grants the 3-day trial badge." = "การกำหนดเส้นทางแบบส่วนตัวซ่อน IP ของคุณ ทำให้เสร็จเพื่อรับป้ายทดลอง 3 วัน";
+"Three taps on the logo erase local data; screenshots are blocked." = "แตะโลโก้ 3 ครั้งจะลบข้อมูลในเครื่อง ภาพหน้าจอถูกบล็อก";
 "Launch protection" = "การปกป้องตอนเปิดใช้";
 "Face ID / Touch ID lock" = "ล็อกด้วย Face ID / Touch ID";
 "POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX จะขอตรวจสอบชีวมิติก่อนเปิดใช้ ฐานข้อมูลจะถูกล็อกจนกว่าจะถึงตอนนั้น";

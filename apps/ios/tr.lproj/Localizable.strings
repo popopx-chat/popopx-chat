@@ -7137,9 +7137,9 @@ alert title */
 /* Onboarding: page 4 commitments and legal */
 "Security commitments and local protection" = "Güvenlik taahhütleri ve yerel koruma";
 "Network and security commitments" = "Ağ ve güvenlik taahhütleri";
-"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "Mesajların dinamik SMP röle düğüm kümesi tarafından eşzamansız olarak iletildiğini ve burada silmenin geri alınamaz olduğunu anlıyorum.";
-"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "Gerçek IP adresini gizlemek için özel yönlendirmenin varsayılan olarak açık olduğunu anlıyorum. Kurulumu tamamlamak 3 günlük öncü düğüm deneme rozetini verir; süresi dolunca ücretsiz genel düğümlere sorunsuz şekilde geri döner ve her mesaj korunur.";
-"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "Logoya üç kez dokunmanın Panic Wipe'ı tetiklediğini, yani yerel veritabanının fiziksel olarak silindiğini anlıyorum. En gizli mesajlar ekran görüntülerine ve kayda karşı korunur.";
+"Asynchronous SMP relaying; deleting here is irreversible." = "Asenkron SMP yönlendirme; buradan silme geri alınamaz.";
+"Private routing hides your IP; finishing grants the 3-day trial badge." = "Özel yönlendirme IP'nizi gizler; bitirince 3 günlük deneme rozetini alırsınız.";
+"Three taps on the logo erase local data; screenshots are blocked." = "Logoya üç dokunuş yerel verileri siler; ekran görüntüleri engellenir.";
 "Launch protection" = "Başlatma koruması";
 "Face ID / Touch ID lock" = "Face ID / Touch ID kilidi";
 "POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX açılmadan önce biyometri ister. O ana kadar veritabanı kilitli kalır.";

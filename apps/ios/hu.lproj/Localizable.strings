@@ -8214,9 +8214,9 @@ alert title */
 /* Onboarding: page 4 commitments and legal */
 "Security commitments and local protection" = "Biztonsági elköteleződések és helyi védelem";
 "Network and security commitments" = "Hálózati és biztonsági elköteleződések";
-"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "Tudomásul veszem, hogy az üzeneteket a dinamikus SMP közvetítő csomópont klaszter továbbítja, és hogy a törlés innen visszavonhatatlan.";
-"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "Tudomásul veszem, hogy a privát útválasztás alapból be van kapcsolva, hogy elrejtse a valódi IP-címedet. A beállítás befejezése megadja a 3 napos próba jelvény úttörő csomóponthoz; ha lejár, ingyenes nyilvános csomópontokra vált vissza, és minden üzenet megmarad.";
-"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "Tudomásul veszem, hogy a logo háromszori érintése elindítja a Panic Wipe-ot, vagyis a helyi adatbázis fizikai törlését. A fokozottan titkos üzenetek védettek a képernyőképek és a felvételek ellen.";
+"Asynchronous SMP relaying; deleting here is irreversible." = "Aszinkron SMP-továbbítás; a törlés itt visszavonhatatlan.";
+"Private routing hides your IP; finishing grants the 3-day trial badge." = "A privát útválasztás elrejti IP-címed; befejezéskor 3 napos próba jelvényt kapsz.";
+"Three taps on the logo erase local data; screenshots are blocked." = "Három érintés a logón törli a helyi adatokat; a képernyőképek blokkolva vannak.";
 "Launch protection" = "Védelem indításkor";
 "Face ID / Touch ID lock" = "Face ID / Touch ID-zár";
 "POPOPX asks for biometrics before it opens. The database stays locked until then." = "A POPOPX biometrikus azonosítást kér a megnyitás előtt. Az adatbázis addig zárva marad.";
