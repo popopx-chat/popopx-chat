@@ -16,7 +16,9 @@
 //  仍是独立的、以原文存储的凭据，仍然被上游的 LA 门使用。`kcSelfDestructPassword` 在两处被删：
 //  自毁路径（见 `PopopxStorageWipe`），以及入口码迁移那一步——后者顺带删它的理由是它唯一的输入口
 //  （`LocalAuthView`）随 `kcAppPassword` 一起没了，留着就是一个谁也按不动的凭据，还会让隐私设置
-//  那一格显示"已启用"（那一格只读 UserDefaults 的 bool，不读 Keychain）。
+//  那一格显示"已启用"（那一格只读 UserDefaults 的 bool，不读 Keychain）。若是入口码先就没了、
+//  只剩这把自毁码，那一步改成**先让机主把它输一遍**才删（`retireGhostSelfDestructCode`）：
+//  那是一整条迁移里唯一手上没有别的凭据能证明身份的路径。
 //  `kcAppPassword` 多一条路：它只是 `.passcode` 模式下
 //  `authenticate` 拿来逐字比对的那把入口码（LocalAuthenticationUtils.swift:45，**不是** SQLCipher
 //  的库钥匙，库钥匙是 `kcDatabasePassword`，见 POPOPXChat/API.swift:43），本模块在启用/更换
@@ -178,6 +180,13 @@ enum PopopxDuressSetupError: Error, Equatable, LocalizedError {
     /// 采集到了，但与 `kcAppPassword` 里那把对不上。此时**什么都没改**——旧前门还在原处，
     /// 新前门也没装上。
     case nativePasscodeIncorrect
+    /// 本机已经没有原生入口码了，那把自毁码（或它对应的开关）却还留着：它唯一的输入口是
+    /// 入口码那台键盘，键盘先没了，于是成了一把谁也按不动的幽灵凭据。要清它得先证明身份，
+    /// 理由与完整推导写在 `migrateNativeEntryPassword` 的"幽灵自毁码"那一节。
+    case nativeSelfDestructCodeRequired
+    /// 采集到了，但与 `kcSelfDestructPassword` 里那把原文对不上。**什么都没改**，
+    /// 幽灵状态原样留着——它按不动，所以留着也不比删了更危险，而误删是不可逆的。
+    case nativeSelfDestructCodeIncorrect
 
     var errorDescription: String? {
         switch self {
@@ -187,6 +196,8 @@ enum PopopxDuressSetupError: Error, Equatable, LocalizedError {
         case .keychainWriteFailed: return "安全存储写入失败，请稍后重试"
         case .nativePasscodeRequired: return "请先输入设备原有的入口密码，以关闭重复的解锁键盘"
         case .nativePasscodeIncorrect: return "原有入口密码不正确，本次未做任何修改"
+        case .nativeSelfDestructCodeRequired: return "请先输入设备原有的自毁密码，才能把它一并关掉"
+        case .nativeSelfDestructCodeIncorrect: return "原有自毁密码不正确，本次未做任何修改"
         }
     }
 }
@@ -722,9 +733,27 @@ final class PopopxDuressAuthManager {
     /// 迁移**不需要重建库钥匙**：SQLCipher 的口令是 `kcDatabasePassword`
     /// （POPOPXChat/API.swift:43 开库时读它），与 `kcAppPassword` 无关——后者只是 `.passcode`
     /// 模式下塞进 `LocalAuthRequest.password` 做字符串比对的那把码（LocalAuthenticationUtils.swift:45）。
+    /// 判据只有一条：**Keychain 里那把原文入口码还在不在**，不看模式。
+    ///
+    /// 它刻意与 `migrateNativeEntryPassword` 的第一道 `guard` 用同一个条件（同一个
+    /// `kcAppPassword.get()`）。这两个判断一个是"界面要不要问密码"、一个是"代码要不要密码"，
+    /// 只要差一种状态——模式已经 `.system`、条目却还留着（上游改模式时并不保证删条目）——
+    /// 就会变成"迁移坚持要一次输入，而页面上根本没有那个输入格"的死锁，机主只能干看着。
+    /// 模式为 `.system` 时这台键盘确实不弹（`authenticate` 直接走 `systemAuthenticate`，
+    /// LocalAuthenticationUtils.swift:42），但那把明文凭据仍然躺在密钥链里，照样该由机主亲手关掉。
     @MainActor
     static var nativeEntryPasswordActive: Bool {
-        privacyLocalAuthModeDefault.get() == .passcode && kcAppPassword.get() != nil
+        kcAppPassword.get() != nil
+    }
+
+    /// 「幽灵自毁码」：入口码已经没了（所以上面那一格不会出现），而那把只有入口码键盘才输得进去
+    /// 的自毁码还留着——`kcSelfDestructPassword` 有条目，或者 `DEFAULT_LA_SELF_DESTRUCT` 仍为真。
+    /// 条件与 `retireGhostSelfDestructCode` 严格同构，理由同上：不能代码要、界面不问。
+    @MainActor
+    static var nativeSelfDestructGhostActive: Bool {
+        kcAppPassword.get() == nil
+            && (kcSelfDestructPassword.get() != nil
+                || UserDefaults.standard.bool(forKey: DEFAULT_LA_SELF_DESTRUCT))
     }
 
     /// 先验证、后迁移。三道判定全部排在任何写入之前，所以任何一支失败都是"什么都没改"。
@@ -752,11 +781,18 @@ final class PopopxDuressAuthManager {
     /// `kcDatabasePassword` 一个字都不动——它才是 SQLCipher 的库钥匙，删了就得重建库。
     /// `DEFAULT_LA_SELF_DESTRUCT_DISPLAY_NAME` 留着：那个名字只在那台键盘真的自毁时被读
     ///（LocalAuthView.swift:61），入口码没了以后它是一条死键，不值得为它多删一次。
-    /// - Parameter passcode: 界面向机主索取的那一次原始入口码输入。nil = 没采集。
-    static func migrateNativeEntryPassword(passcode: String?) throws {
+    /// - Parameters:
+    ///   - passcode: 界面向机主索取的那一次原始入口码输入。nil = 没采集。
+    ///   - selfDestructPasscode: 只有"入口码已经没了、只剩幽灵自毁码"那一支用得上（见
+    ///     `retireGhostSelfDestructCode`）。入口码还在的那一支不需要它：身份已经被上面那次比对
+    ///     证明了，而这一把码在那台键盘消失之后本来就按不动——这是两轮裁定的分界，写清楚免得
+    ///     后来人以为是漏了验证。
+    static func migrateNativeEntryPassword(passcode: String?, selfDestructPasscode: String? = nil) throws {
         guard let stored = kcAppPassword.get() else {
-            // 绝大多数设备的状态：没有原生入口码，什么都不做。但"模式还停在 .passcode、条目却已经
-            // 不在"这种半迁移状态要顺手订正，理由就是上面那条 `authorize()` 的静默放行。
+            // 绝大多数设备的状态：没有原生入口码。先处理可能存在的幽灵自毁码（它要验证，
+            // 失败就整支什么都不改），再顺手订正"模式还停在 .passcode、条目却已经不在"这种
+            // 半迁移状态——订正的理由就是上面那条 `authorize()` 的静默放行。
+            try retireGhostSelfDestructCode(passcode: selfDestructPasscode)
             if privacyLocalAuthModeDefault.get() == .passcode {
                 privacyLocalAuthModeDefault.set(.system)
             }
@@ -774,12 +810,41 @@ final class PopopxDuressAuthManager {
         privacyLocalAuthModeDefault.set(.system)
     }
 
+    /// 清掉「幽灵自毁码」——入口码先没了，于是这把只有那台键盘才输得进去的码成了按不动的死凭据。
+    /// 裁定是先验证、后清除，但**只对真凭据验证**，两种残留分开处理：
+    ///
+    /// - 条目还在 → 必须让机主把它输一遍。这一支是整条迁移里唯一"手上没有任何其他凭据可以证明
+    ///   身份"的路径：不问清楚就删，等于替一个陌生人关掉他自己不知道存在的保险。
+    /// - 条目没了、只有 `DEFAULT_LA_SELF_DESTRUCT` 为真 → 直接落掉，不问。那个 bool 单独存在时
+    ///   删不掉任何数据：自毁那一步要求 `kcSelfDestructPassword.get()` 有值且与输入相等
+    ///   （LocalAuthView.swift:23），所以它纯粹是一条显示残留；而"请输入一个已经不存在的密码"
+    ///   这种要求既满足不了也没有意义。
+    ///
+    /// 比对走 `matchesInConstantTime` 的理由与上面那条完全相同：这把码也是原文存的
+    /// （POPOPXChat/KeyChain.swift:23）。
+    private static func retireGhostSelfDestructCode(passcode: String?) throws {
+        guard let stored = kcSelfDestructPassword.get() else {
+            if UserDefaults.standard.bool(forKey: DEFAULT_LA_SELF_DESTRUCT) {
+                UserDefaults.standard.removeObject(forKey: DEFAULT_LA_SELF_DESTRUCT)
+            }
+            return
+        }
+        guard let passcode, !passcode.isEmpty else {
+            throw PopopxDuressSetupError.nativeSelfDestructCodeRequired
+        }
+        guard PopopxDuressCrypto.matchesInConstantTime(Data(passcode.utf8), Data(stored.utf8)) else {
+            throw PopopxDuressSetupError.nativeSelfDestructCodeIncorrect
+        }
+        _ = kcSelfDestructPassword.remove()
+        UserDefaults.standard.removeObject(forKey: DEFAULT_LA_SELF_DESTRUCT)
+    }
+
     /// 降级流程专用的"无条件退役"，与 `migrateNativeEntryPassword` 验证通过之后那几步做的动作
     /// 同向（入口码删掉 + 模式回 `.system`），区别只有一条：这里**不能验证**——键盘上站着的是
     /// 逼迫者，让他再输一遍机主的原始码既做不到、也是暴露。删旧凭据本身正是简报步骤 C 要求的效果。
     ///
-    /// 自毁码不在这里重复删：全量分支由 `PopopxStorageWipe` 删（:440 条目 + :444 那个 bool），
-    /// 保留分支由 `scrubCredentialHistory` 删（:1093-:1094，条目与 bool 都在里面），
+    /// 自毁码不在这里重复删：全量分支由 `PopopxStorageWipe` 删（:451 条目 + :455 那个 bool），
+    /// 保留分支由 `scrubCredentialHistory` 删（:1163-:1164，条目与 bool 都在里面），
     /// 两条都排在函数返回之前，所以回到这一行时它已经不在了。
     /// 这几步必须一起做完、不可拆：只删码会把 `authorize()` 变成静默放行。
     private func retireNativeEntryPassword() {
@@ -793,10 +858,15 @@ final class PopopxDuressAuthManager {
     /// 迁移排在写新码**之前**，顺序承重：反过来（先写后迁）会在中途留下"两套前门并存"的窗口，
     /// 而这一支的正确终态只有一个——旧前门关了、新前门装上，要么一起成，要么整体没发生。
     /// `nativePasscode` 为 nil 且原生入口码还在生效时抛 `.nativePasscodeRequired`，
-    /// 绝不静默替机主删掉那把码。
-    func setNormalPin(_ first: String, confirming second: String, nativePasscode: String? = nil) async throws {
+    /// 绝不静默替机主删掉那把码；本机只剩幽灵自毁码时换 `nativeSelfDestructCode` 说话，同理。
+    func setNormalPin(
+        _ first: String,
+        confirming second: String,
+        nativePasscode: String? = nil,
+        nativeSelfDestructCode: String? = nil
+    ) async throws {
         guard Self.isValidPin(first), first == second else { throw PopopxDuressSetupError.malformedPin }
-        try Self.migrateNativeEntryPassword(passcode: nativePasscode)
+        try Self.migrateNativeEntryPassword(passcode: nativePasscode, selfDestructPasscode: nativeSelfDestructCode)
         let salt = PopopxDuressCrypto.randomSalt()
         guard !salt.isEmpty else { throw PopopxDuressSetupError.keychainWriteFailed }
         let normalHash = await hash(pin: first, salt: salt, iterations: PopopxDuressCrypto.iterations)
@@ -1088,7 +1158,7 @@ final class PopopxDuressAuthManager {
     /// 自毁码那个 bool 也在清理之列，理由与 `migrateNativeEntryPassword` 里那条完全相同：
     /// 隐私设置那一格只读 `UserDefaults`，不读 Keychain（PrivacySettings.swift:512/:898），
     /// 条目删了而 bool 还留着，页面就会一直显示"自毁码已启用"而它已经无凭据可比。
-    /// 口径对齐全量路径的 `PopopxStorageWipe`（:441 同样 removeObject）。
+    /// 口径对齐全量路径的 `PopopxStorageWipe`（:455 同样 removeObject）。
     private func scrubCredentialHistory() {
         _ = kcSelfDestructPassword.remove()
         UserDefaults.standard.removeObject(forKey: DEFAULT_LA_SELF_DESTRUCT)

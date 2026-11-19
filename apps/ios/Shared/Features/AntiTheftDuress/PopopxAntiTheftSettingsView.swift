@@ -95,19 +95,22 @@ struct PopopxAntiTheftSettingsView: View {
     @State private var duressPin = ""
     @State private var duressConfirm = ""
 
-    /// 原生入口码迁移：`nativeEntryPasswordActive` 是进本页时现问 Keychain 得到的事实，不为真时
-    /// 下面那一整段卡片根本不渲染，本机没开过原生入口码的人不会莫名其妙被要一个密码。
+    /// 原生入口码迁移：那两个 `...Active` 是进本页时现问 Keychain 得到的事实，都不为真时下面
+    /// 那一整段卡片根本不渲染，本机没开过原生凭据的人不会莫名其妙被要一个密码。两者按构造互斥
+    ///（`nativeSelfDestructGhostActive` 的定义里带着"入口码已经不在"），所以同一时刻只会出现一格。
     ///
-    /// 它不能复用 `pinField`：原生那道码是**纯数字、4 到 16 位**——键盘只有 0-9 且写死
+    /// 它们不能复用 `pinField`：原生那两道码是**纯数字、4 到 16 位**——键盘只有 0-9 且写死
     /// `password.count < 16`（Shared/Views/LocalAuth/PasscodeEntry.swift:122-131），
     /// 提交键还额外要求不少于 4 位（同目录 PasscodeView.swift:81）；`pinField` 截到 6 位，
-    /// 套上去会让一位 7 到 16 位的旧码永远输不完整、机主撞上"我明明输对了"那次拒绝。
+    /// 套上去会让一条 7 到 16 位的旧码永远输不完整、机主撞上"我明明输对了"那次拒绝。
     /// 存进去的是原文（Shared/Views/LocalAuth/SetAppPasscodeView.swift:37 `set(passcode)`），
     /// 所以比对必须由机主重新输一遍，无法从别处推导。
     @State private var nativeEntryPasswordActive = false
+    @State private var nativeSelfDestructGhostActive = false
     @State private var nativePasscode = ""
+    @State private var nativeSelfDestructCode = ""
 
-    /// 写入过程中的错误文案：只装 `PopopxDuressSetupError.errorDescription` 原样那六句，
+    /// 写入过程中的错误文案：只装 `PopopxDuressSetupError.errorDescription` 原样那八句，
     /// 本页不另写一份同义文案。
     @State private var pinFeedback: String?
     @State private var isWritingPins = false
@@ -220,9 +223,10 @@ struct PopopxAntiTheftSettingsView: View {
             //（`refreshConfiguration` 自己的文档注释写明了为什么要重新读，而不是信内存那份缓存）。
             duress.refreshConfiguration()
             biometricsAvailable = duress.biometricsAvailable
-            // 原生入口码是否还开着，同样只在这一句里问一次：它是一个 Keychain 读数，
+            // 原生入口码 / 幽灵自毁码是否还在，同样只在这一句里问一次：它们是 Keychain 读数，
             // 放进 body 会让每次重绘都去访问一次 Keychain。
             nativeEntryPasswordActive = PopopxDuressAuthManager.nativeEntryPasswordActive
+            nativeSelfDestructGhostActive = PopopxDuressAuthManager.nativeSelfDestructGhostActive
             // 身份列表同理：机主很可能就是"先去首页建一个马甲、再进来点这一档"，
             // 用上次那份列表判"只有一个身份"会把他挡在门外。
             await loadRetainCandidates()
@@ -488,6 +492,7 @@ struct PopopxAntiTheftSettingsView: View {
                 PopopxHaptics.impact(.light)
                 duress.refreshConfiguration()
                 nativeEntryPasswordActive = PopopxDuressAuthManager.nativeEntryPasswordActive
+                nativeSelfDestructGhostActive = PopopxDuressAuthManager.nativeSelfDestructGhostActive
                 showsPinSheet = true
             }
             .accessibilityIdentifier("popopx.antiTheft.duressEntry")
@@ -560,13 +565,23 @@ struct PopopxAntiTheftSettingsView: View {
                     AntiTheftDivider()
                     pinStateLine(normalPin, confirming: normalConfirm)
                 }
-                // 这一段只在原生入口码确实还开着时出现，且紧跟常规密码那一组：迁移就发生在
-                // `setNormalPin` 里、任何写入之前（PopopxDuressAuthManager.swift:799），
+                // 这一段只在原生那两道旧凭据确实还留着时出现，且紧跟常规密码那一组：迁移就发生在
+                // `setNormalPin` 里、任何写入之前（PopopxDuressAuthManager.swift:869），
                 // 放在胁迫码之后会让"先填旧密码"这个先后关系在页面上读不出来。
+                // 两格互斥，由模块三那两个读数保证：入口码还在 → 要入口码；入口码已经没了、
+                // 只剩一把按不动的自毁码 → 要那把自毁码。
                 // 与 `pinField` 一样不送 `systemImage`/`keyboard:`——`isSecure` 那条分支不读它。
                 if nativeEntryPasswordActive {
                     PopopxSectionCard(Copy.pinNativeGroup, footnote: Copy.pinNativeFootnote) {
-                        nativePasscodeField()
+                        nativePasscodeField(Copy.pinNativeLabel, prompt: Copy.pinNativePrompt, text: $nativePasscode)
+                    }
+                } else if nativeSelfDestructGhostActive {
+                    PopopxSectionCard(Copy.pinNativeSDGroup, footnote: Copy.pinNativeSDFootnote) {
+                        nativePasscodeField(
+                            Copy.pinNativeSDLabel,
+                            prompt: Copy.pinNativePrompt,
+                            text: $nativeSelfDestructCode
+                        )
                     }
                 }
                 PopopxSectionCard(Copy.pinGroupDuress, footnote: Copy.pinDuressFootnote) {
@@ -650,12 +665,13 @@ struct PopopxAntiTheftSettingsView: View {
     /// 同一件事还在 :131 把按键整个禁用掉）。
     private static let nativePasscodeMaxLength = 16
 
-    /// 原生入口码那一格：同一个 `PopopxTextField(isSecure:)`，但截到原生键盘自己的 16 位上限，
-    /// 而不是双密码的 6 位。
-    private func nativePasscodeField() -> some View {
-        PopopxTextField(Copy.pinNativeLabel, prompt: Copy.pinNativePrompt, text: $nativePasscode, isSecure: true)
-            .onChange(of: nativePasscode) { _, newValue in
-                clampToDigits($nativePasscode, newValue, maxLength: Self.nativePasscodeMaxLength)
+    /// 原生那两道旧码共用的输入格：同一个 `PopopxTextField(isSecure:)`，但截到原生键盘自己的
+    /// 16 位上限，而不是双密码的 6 位。入口码与自毁码出自同一台键盘（同一个 `PasscodeEntry`），
+    /// 所以长度与字符集完全同规，只有标签和说明不同。
+    private func nativePasscodeField(_ label: String, prompt: String, text: Binding<String>) -> some View {
+        PopopxTextField(label, prompt: prompt, text: text, isSecure: true)
+            .onChange(of: text.wrappedValue) { _, newValue in
+                clampToDigits(text, newValue, maxLength: Self.nativePasscodeMaxLength)
             }
     }
 
@@ -704,7 +720,7 @@ struct PopopxAntiTheftSettingsView: View {
     /// 真正的闸门（`setDuressPin` 里那次"用常规记录自己的盐再派生一遍"的常量时间比较）做最后一次判定。
     ///
     /// 原生入口码的迁移不用本页操心：它在 `setNormalPin` 内部、本地这两道校验之后、任何 Keychain
-    /// 写入之前（PopopxDuressAuthManager.swift:798-799），所以旧码输错那一次连常规码都不会落盘。
+    /// 写入之前（PopopxDuressAuthManager.swift:868-869），所以旧码输错那一次连常规码都不会落盘。
     private func writePins() async {
         pinFeedback = nil
         guard PopopxDuressAuthManager.isValidPin(normalPin),
@@ -725,14 +741,19 @@ struct PopopxAntiTheftSettingsView: View {
         isWritingPins = true
         defer { isWritingPins = false }
         do {
-            try await duress.setNormalPin(normalPin, confirming: normalConfirm, nativePasscode: nativePasscode)
+            try await duress.setNormalPin(
+                normalPin,
+                confirming: normalConfirm,
+                nativePasscode: nativePasscode,
+                nativeSelfDestructCode: nativeSelfDestructCode
+            )
             try await duress.setDuressPin(duressPin, confirming: duressConfirm)
             clearPinFields()
             showsPinSheet = false
             PopopxHaptics.notice(.success)
             toast.show(Copy.pinToastWritten, kind: .encrypted)
         } catch let setup as PopopxDuressSetupError {
-            // 六句 `errorDescription` 原样显示，不重写、不加工。
+            // 八句 `errorDescription` 原样显示，不重写、不加工。
             pinFeedback = setup.errorDescription
             clearPinFields()
             PopopxHaptics.notice(.error)
@@ -752,15 +773,18 @@ struct PopopxAntiTheftSettingsView: View {
         toast.show(Copy.duressCleared, kind: .danger)
     }
 
-    /// 五个字段一次性清空。口令的界面副本不该比它的使用场合活得更久。
-    /// 原生入口码那一格也在其中，包括"旧码输错"那一次（`.nativePasscodeIncorrect` 走同一个
-    /// catch）：宁可让机主重输一遍旧码，也不让它在页面上多活一次重绘。
+    /// 六个字段一次性清空。口令的界面副本不该比它的使用场合活得更久。
+    /// 原生那两格（入口码、幽灵自毁码）也在其中，包括"旧码输错"那一次（两个
+    /// `...Incorrect` 走同一个 catch）：宁可让机主重输一遍旧码，也不让它在页面上多活一次重绘。
+    /// 两格在同一页上互斥（`nativeEntryPasswordActive` 与 `nativeSelfDestructGhostActive`
+    /// 不可能同时为真），但清空不看这个条件——少写一行判断就多一个以后改错的机会。
     private func clearPinFields() {
         normalPin = ""
         normalConfirm = ""
         duressPin = ""
         duressConfirm = ""
         nativePasscode = ""
+        nativeSelfDestructCode = ""
         pinFeedback = nil
     }
 
@@ -1387,7 +1411,7 @@ private struct AntiTheftDivider: View {
 
 // MARK: - 文案
 
-/// 页面上每一句中文只在这里出现一次。六句双密码设置失败的文案不在这里：那六句是
+/// 页面上每一句中文只在这里出现一次。八句双密码设置失败的文案不在这里：那八句是
 /// `PopopxDuressSetupError.errorDescription` 原样引用的，抄一份过来就会出现两套说法。
 private enum Copy {
     static let pageTitle = "防盗锁定与自毁"
@@ -1475,6 +1499,11 @@ private enum Copy {
     static let pinNativeLabel = "原有的入口密码"
     static let pinNativePrompt = "4 到 16 位数字"
     static let pinNativeFootnote = "这台设备还开着 app 自带的入口密码：解锁时它会先弹一次自己的键盘，POPOPX 再弹一次，两个键盘干的是同一件事。填对它，我们把它关掉，今后只认上面那把常规码。跟着一起关掉的还有那把只有这台旧键盘才输得进去的自毁码——旧键盘没了它就没有输入口，留着只会让隐私设置那一格显示「已启用」。这一步不重建数据库钥匙，聊天数据一个字都不动；想再要回来，得去「隐私与安全」那页重新设置一次。"
+    // 幽灵自毁码那一段：入口码已经不在了、只剩一把输不进去的自毁码时才会渲染，和上面三段互斥。
+    // 提示语共用 `pinNativePrompt`——两把码出自同一台键盘（同一个 `PasscodeEntry`），格式同规。
+    static let pinNativeSDGroup = "关闭残留的自毁密码"
+    static let pinNativeSDLabel = "原有的自毁密码"
+    static let pinNativeSDFootnote = "这台设备上留着一把旧的自毁密码，可它只有 app 自带的那台键盘才输得进去，而那台键盘已经不弹了——它现在既触发不了也看不见，只会让隐私设置那一格显示「已启用」。填对它，我们把它连同那一格一起关掉；填错则这次什么都不改，上面两把新码也不会落盘。如果认证方式还停在「app 密码」那一档，也会一并退回系统认证。这一步不重建数据库钥匙，聊天数据一个字都不动。"
     static let pinIrreversibleGroup = "写下去之前"
     static let pinIrreversibleNote = "这两把码只以派生值存在，本机不存原文，也没有任何找回通道：忘记常规码就等于把自己永久锁在外面。确认弹窗里那一次点击就是这个后果的最后一道门。"
     static let pinWriteButton = "写入两把码"
