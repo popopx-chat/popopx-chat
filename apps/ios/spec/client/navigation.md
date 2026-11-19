@@ -303,15 +303,18 @@ First-launch experience controlled by [`ChatModel.onboardingStage`](../../Shared
 ```swift
 enum OnboardingStage: String, Identifiable {
     case step1_POPOPXInfo              // Welcome screen
-    case step2_CreateProfile            // deprecated
+    case step2_CreateProfile           // Create the first anonymous identity
     case step3_CreatePOPOPXAddress     // deprecated
-    case step3_ChooseServerOperators    // Choose server operators
-    case step4_SetNotificationsMode     // Set notification preferences
-    case onboardingComplete             // Normal operation
+    case step3_ChooseServerOperators   // Routing: push mode + offline mesh + relay operators
+    case step4_SetNotificationsMode    // deprecated
+    case step4_NetworkCommitments      // Commitments, launch protection, privacy policy / terms
+    case onboardingComplete            // Normal operation
 }
 ```
 
 Each stage is a dedicated view presented in place of `ChatListView` within [`ContentView`](../../Shared/ContentView.swift#L26).
+
+The four live screens are pushed one after another (`POPOPXInfo` → `CreateFirstProfile` → `YourNetworkView` → `OnboardingConditionsView`), each rendering the shared `PopopxOnboardingHeader` progress pill; the header and the offline `PopopxLegalDocumentSheet` reader live in [`OnboardingView.swift`](../../Shared/Views/Onboarding/OnboardingView.swift) alongside the stage enum. Accepting on the last screen records the conditions with `acceptConditions`/`setServerOperators`, idempotently issues the pioneer trial badge, then swaps the stage inside `dismissAllSheets(animated: false)` + a deferred `DispatchQueue.main.async`, which is what keeps the deep nav stack from being torn down inside its own event handler.
 
 Migration state (`ChatModel.migrationState != nil`) takes precedence over onboarding.
 

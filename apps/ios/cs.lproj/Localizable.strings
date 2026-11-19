@@ -3905,3 +3905,117 @@ server test failure */
 
 /* error */
 "Your Compute Credits balance cannot go above %lld. Spend some credits first." = "Zůstatek výpočetních bodů nemůže překročit %lld. Nejdřív část bodů utraťte.";
+
+/* ==== POPOPX onboarding v2 (2026-11-19) — 引导页四屏 + 隐私政策/使用条款 ==== */
+/* POPOPX onboarding v2 — generated block, 2026-11-19 */
+
+/* Onboarding: header pills */
+"Identity isolation" = "Izolace identit";
+"Routing & notifications" = "Směrování a oznámení";
+"Commitments & launch" = "Závazky a spuštění";
+
+/* Onboarding: page 1 welcome */
+"Own your network." = "Vaše síť patří vám.";
+"Private messaging with no account and no user IDs." = "Soukromé zprávy bez účtu a bez uživatelských identifikátorů.";
+"SMP end-to-end encrypted" = "SMP šifrováno end-to-end";
+"厢语 Bluetooth Mesh relay" = "Relé Bluetooth Mesh 厢语";
+"What POPOPX gives you" = "Co POPOPX dává";
+"No user IDs" = "Žádné uživatelské identifikátory";
+"No phone number, no email, no global public key. Nothing links your contacts to each other, and each anonymous identity stays separate." = "Žádné telefonní číslo, žádný e-mail, žádný globální veřejný klíč. Nic nepropojuje vaše kontakty navzájem a každá anonymní identita zůstává oddělená.";
+"Dynamic relays and near-field" = "Dynamická relé a blízké spojení";
+"Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "Online používáte dynamický cluster relé uzlů SMP. Offline přejde 厢语 na Bluetooth Mesh o 1–7 skocích a páruje se tváří v tvář přes UWB nebo klepnutím.";
+"Anti-peeping and local-only cards" = "Ochrana proti nahlížení a karty pouze lokálně";
+"Screenshots and recordings are blocked, top-secret messages burn after reading, and your encrypted profile card never leaves this device." = "Snímky obrazovky a nahrávky jsou blokovány, nejpřísněji utajené zprávy se po přečtení zničí a vaše šifrovaná profilová karta nikdy neopustí toto zařízení.";
+"Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "Dokončete nastavení a obdržíte zkušební odznak pionýrského uzlu na 3 dny.";
+"Create encrypted identity" = "Vytvořit šifrovanou identitu";
+"Restore from encrypted backup" = "Obnovit ze šifrované zálohy";
+
+/* Onboarding: page 2 identity */
+"Create your first anonymous identity" = "Vytvořte svou první anonymní identitu";
+"Identity, keys, POPOPX Compute Credits and your profile card are encrypted on this device only. Servers cannot see them." = "Identita, klíče, výpočetní body POPOPX a vaše profilová karta jsou šifrovány pouze na tomto zařízení. Servery je nevidí.";
+"Profile photo" = "Profilová fotka";
+"Tap to choose a photo" = "Klepnutím vyberete fotku";
+"New avatar" = "Nový avatar";
+"Anonymous name" = "Anonymní jméno";
+"How you appear to contacts" = "Jak vás uvidí kontakty";
+"Note for friends" = "Poznámka pro přátele";
+"Optional full name, visible only to contacts you choose" = "Nepovinné celé jméno, viditelné jen vybraným kontaktům";
+"Enter an anonymous name to continue." = "Pokračujte zadáním anonymního jména.";
+"This name contains characters POPOPX cannot use." = "Tento název obsahuje znaky, které POPOPX nemůže použít.";
+"Privacy boost" = "Vylepšené soukromí";
+"Incognito mode by default" = "Režim incognito jako výchozí";
+"Every new connection gets a fresh random nickname, so one name never links two chats." = "Každé nové spojení dostane náhodnou přezdívku, takže jedno jméno nikdy nepropojí dva chaty.";
+"Next" = "Další";
+
+/* Onboarding: page 3 dual mode */
+"Choose how POPOPX connects and wakes" = "Zvolte, jak POPOPX připojuje a probouzí";
+"Dynamic SMP relay nodes" = "Dynamický cluster reléových uzlů SMP";
+"Online encrypted channel" = "Online šifrovaný kanál";
+"Low latency · minor metadata exposure" = "Nízká latence · mírné odhalení metadat";
+"Higher privacy · balanced battery" = "Více soukromí · vyvážená baterie";
+"Maximum discretion · nothing pushed" = "Maximální diskrétnost · nic se neposílá push";
+"Apple's push service carries only the signal that new data is waiting, never the content." = "Push služba Apple přenáší pouze signál, že čekají nová data, nikdy jejich obsah.";
+"厢语 offline mesh" = "Offline mesh 厢语";
+"When the internet is down, messages hop over nearby devices, up to 7 hops, with no server. Pair face to face with UWB or a tap." = "Když není internet, zprávy skáčou mezi blízkými zařízeními, až 7 skoků, bez serveru. Párujte se tváří v tvář přes UWB nebo klepnutím.";
+"Bluetooth permission is requested the first time the mesh starts." = "Oprávnění k Bluetooth se žádá při prvním spuštění mesh.";
+
+/* Onboarding: page 4 commitments and legal */
+"Security commitments and local protection" = "Bezpečnostní závazky a lokální ochrana";
+"Network and security commitments" = "Síťové a bezpečnostní závazky";
+"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "Mám jasno v tom, že zprávy předávají asynchronně dynamické relé uzly SMP a že smazání zde je nevratné.";
+"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "Mám jasno v tom, že soukromé směrování je zapnuto jako výchozí, aby skrylo vaši skutečnou IP adresu. Dokončením nastavení získáte zkušební odznak pionýrského uzlu na 3 dny; po vypršení se bez výpadku vrátí na bezplatné veřejné uzly a všechny zprávy zůstanou zachovány.";
+"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "Mám jasno v tom, že trojí klepnutí na logo spustí Panic Wipe, fyzické vymazání lokální databáze. Nejpřísněji utajené zprávy jsou chráněny před snímky a nahrávkami.";
+"Launch protection" = "Ochrana při spuštění";
+"Face ID / Touch ID lock" = "Zámek Face ID / Touch ID";
+"POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX před otevřením vyžaduje biometriku. Databáze zůstává do té doby zamčená.";
+"Biometrics are not available on this device." = "Biometrika není na tomto zařízení dostupná.";
+"Privacy policy and terms of use" = "Zásady ochrany osobních údajů a podmínky použití";
+"POPOPX Privacy Policy" = "Zásady ochrany osobních údajů POPOPX";
+"POPOPX Terms of Use" = "Podmínky použití POPOPX";
+"Read offline, any time" = "Přečtete offline, kdykoli";
+"I have read and agree to the POPOPX Privacy Policy and the POPOPX Terms of Use." = "Potvrzuji přečtení zásad ochrany osobních údajů POPOPX a podmínek použití POPOPX a souhlasím s nimi.";
+"I have read it" = "Přečteno, zavřít";
+"Agree and enter POPOPX" = "Souhlasím a vstupuji do POPOPX";
+"Confirm the three commitments above." = "Potvrďte tři závazky výše.";
+"Agree to the privacy policy and terms of use to continue." = "Souhlaste se zásadami a podmínkami, abyste mohli pokračovat.";
+"Encrypted queue, Bluetooth Mesh and the privacy shield are ready." = "Šifrovaná fronta, Bluetooth Mesh a štít soukromí jsou připraveny.";
+"The 3-Day Pioneer Node Trial Badge is active." = "Zkušební odznak uzlu pionýra na 3 dny je aktivní.";
+
+/* Legal: shared */
+"Effective: November 2026" = "Platí od: listopad 2026";
+"The full published statement is at popopx.chat/privacy." = "Úplné znění je publikováno na popopx.chat/privacy.";
+
+/* Legal: privacy */
+"No account, no collection" = "Žádné účty, žádný sběr";
+"POPOPX creates no accounts. Your profiles, contacts, groups, messages and settings exist only in the encrypted database on this device, and nothing here links who talks to whom." = "POPOPX nevytváří účty. Vaše profily, kontakty, skupiny, zprávy a nastavení existují pouze ve šifrované databázi v tomto zařízení a nic zde nespojuje, kdo s kým mluví.";
+"Encrypted relay queues" = "Šifrované fronty relé";
+"Online messages travel through the dynamic SMP relay node cluster. Queues are encrypted end to end, so a relay node sees neither message content nor both ends of a conversation, and it keeps no history of delivered messages." = "Online zprávy putují dynamickým clusterem relé uzlů SMP. Fronty jsou šifrovány end-to-end, takže relé uzel nevidí obsah zprávy ani oba konce konverzace a neuchovává historii doručených zpráv.";
+"No analytics in this build" = "Žádná analytika v tomto buildu";
+"This build bundles no analytics or crash-reporting SDK and no telemetry collector. The status you see in the header describes the nodes your own device is talking to, not you." = "Tento build neobsahuje žádné SDK pro analytiku ani hlášení pádů a žádný sběrač telemetrie. Stav v horní liště popisuje uzly, se kterými komunikuje vaše zařízení, ne vás.";
+"Credentials stay on device" = "Údaje zůstávají v zařízení";
+"Identity keys, the POPOPX Compute Credits balance and privacy node badges are kept in this device's Keychain and local encrypted store. They are never uploaded, only you can move them, and a reinstall without a backup loses them." = "Klíče identit, zůstatek výpočetních bodů POPOPX a odznaky soukromých uzlů jsou uloženy v Keychainu a lokálním šifrovaném úložišti tohoto zařízení. Nikdy se nenahrávají, přenést je můžete pouze vy, a přeinstalace bez zálohy je ztratí.";
+"Push token and replay protection" = "Push token a ochrana proti opakovanému použití";
+"Push delivery uses an Apple device token bound to the notification mode you chose. The token carries no message content, is reissued when you change server or mode, and is used once so a captured token cannot be replayed." = "Doručování push používá token zařízení Apple svázaný s vámi zvoleným režimem oznámení. Token neobsahuje obsah zprávy, při změně serveru nebo režimu se vydává nový a používá se jednorázově, takže zachycený token nelze zopakovat.";
+"The camera guard stays local" = "Hlídač kamery zůstává lokální";
+"The anti-peeping guard switches the front camera on only while a top-secret sheet is open, at the lowest resolution, processes every frame on this device and stops the stream when the sheet closes. Nothing is written to disk and nothing is uploaded." = "Hlídač proti nahlížení zapne přední kameru jen dokud je otevřený list nejpřísněji utajené schránky, v nejnižším rozlišení, každý snímek zpracovává na tomto zařízení a po zavření listu tok zastaví. Nic se nezapisuje na disk ani nenahrává.";
+"Screenshots, recordings and offline hops" = "Snímky, nahrávky a offline skoky";
+"Protected screens are blocked from screenshots and screen recording by the system itself. In 厢语 mode messages hop over Bluetooth between nearby devices and never reach the public internet." = "Systém sám blokuje snímky obrazovky a nahrávání obrazovky u chráněných obrazovek. V režimu 厢语 zprávy skáčou přes Bluetooth mezi blízkými zařízeními a nikdy se nedostanou do veřejného internetu.";
+"Your controls" = "Máte to pod kontrolou";
+"You can export or delete any identity, erase the local database or trigger Panic Wipe at any time. Deletion is irreversible because no server holds a copy." = "Kdykoli můžete exportovat nebo smazat kteroukoli identitu, vymazat lokální databázi nebo spustit Panic Wipe. Smazání je nevratné, protože žádný server nedrží kopii.";
+
+/* Legal: terms */
+"Acceptable use" = "Přijatelné použití";
+"Use POPOPX within the laws of the country you are in. Public groups and 厢语 broadcasts must carry no unlawful content, no spam and no harassment of other users." = "POPOPX používejte v souladu se zákony země, ve které jste. Veřejné skupiny a vysílání 厢语 nesmí obsahovat nezákonný obsah, spam ani obtěžování ostatních uživatelů.";
+"Your keys, your responsibility" = "Vaše klíče, vaše odpovědnost";
+"Your mnemonic phrase, identity keys, badges and POPOPX Compute Credits exist only on this device. If the device or the phrase is lost, they cannot be recovered, frozen or reissued by anyone." = "Vaše obnovovací fráze, klíče identit, odznaky a výpočetní body POPOPX existují pouze v tomto zařízení. Když zařízení nebo frázi ztratíte, nikdo je nemůže obnovit, zmrazit ani znovu vydat.";
+"No guarantee of availability" = "Žádná záruka dostupnosti";
+"Relay nodes, push queues and Bluetooth Mesh hops are provided as they are. Offline delivery depends on nearby devices being present and switched on, so it cannot be guaranteed." = "Relé uzly, push fronty a skoky Bluetooth Mesh se poskytují tak, jak jsou. Offline doručení závisí na přítomnosti zapnutých zařízení v okolí, takže ho nelze zaručit.";
+"Panic Wipe disclaimer" = "Odmítnutí odpovědnosti za Panic Wipe";
+"Tapping the logo three times erases local data irreversibly to protect you under coercion. Messages already waiting in a relay queue cannot be erased from this device and are not recovered for you." = "Trojí klepnutí na logo nevratně vymaže lokální data, aby vás ochránilo pod nátlakem. Zprávy, které už čekají ve frontě relé, z tohoto zařízení vymazat nelze a nejsou pro vás obnovovány.";
+"Operator conditions" = "Podmínky provozovatelů";
+"Relay operators set their own conditions for the servers they run. When an operator requires acceptance, the app shows that operator's conditions and records your acceptance before using them." = "Provozovatelé relé si určují vlastní podmínky pro servery, které provozují. Když provozovatel vyžaduje souhlas, aplikace zobrazí jeho podmínky a zaznamená váš souhlas dřív, než servery použije.";
+"Names and changes" = "Názvy a změny";
+"POPOPX and the POPOPX logo are the names of this build. These terms and the privacy statement may change; the app always shows the version you agreed to, and continuing to use POPOPX means you accept the change." = "POPOPX a logo POPOPX jsou názvy tohoto buildu. Tyto podmínky a zásady ochrany osobních údajů se mohou změnit; aplikace vždy zobrazuje verzi, se kterou jste souhlasili, a další používání POPOPX znamená, že změnu přijímáte.";
+/* POPOPX 引导页补录（第四轮：迁移入口标题与条款接受失败提示） */
+"Migrate here" = "Migrovat sem";
+"Error accepting conditions" = "Chyba při přijímání podmínek";

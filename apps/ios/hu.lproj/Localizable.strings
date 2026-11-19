@@ -8157,3 +8157,114 @@ alert title */
 
 /* error */
 "Your Compute Credits balance cannot go above %lld. Spend some credits first." = "A számítási kredit egyenleg nem haladhatja meg a %lld értéket. Először költsön el néhány kreditet.";
+
+/* ==== POPOPX onboarding v2 (2026-11-19) — 引导页四屏 + 隐私政策/使用条款 ==== */
+/* POPOPX onboarding v2 — generated block, 2026-11-19 */
+
+/* Onboarding: header pills */
+"Identity isolation" = "Identitások elkülönítése";
+"Routing & notifications" = "Útválasztás és értesítések";
+"Commitments & launch" = "Elköteleződések és indítás";
+
+/* Onboarding: page 1 welcome */
+"Own your network." = "A háló a tiéd.";
+"Private messaging with no account and no user IDs." = "Privát üzenetküldés fiók és felhasználói azonosítók nélkül.";
+"SMP end-to-end encrypted" = "SMP végpontok között titkosítva";
+"厢语 Bluetooth Mesh relay" = "厢语 Bluetooth Mesh átjátszó";
+"What POPOPX gives you" = "Mit ad a POPOPX";
+"No user IDs" = "Nincsenek felhasználói azonosítók";
+"No phone number, no email, no global public key. Nothing links your contacts to each other, and each anonymous identity stays separate." = "Nincs telefonszám, nincs e-mail, nincs globális nyilvános kulcs. Semmi nem kapcsolja össze a névjegyeidet, és minden névtelen identitás külön marad.";
+"Dynamic relays and near-field" = "Dinamikus átjátszók és közeli kapcsolódás";
+"Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "Online a dinamikus SMP közvetítő csomópont klasztert használod. Offline a 厢语 1–7 ugrásos Bluetooth Mesh-re vált, és szemtől szemben párosít UWB-vel vagy érintéssel.";
+"Anti-peeping and local-only cards" = "A leselés elleni védelem és csak helyi kártyák";
+"Screenshots and recordings are blocked, top-secret messages burn after reading, and your encrypted profile card never leaves this device." = "A képernyőképek és a felvételek blokkolva vannak, a fokozottan titkos üzenetek az olvasás után megsemmisülnek, és a titkosított profilkártyád soha nem hagyja el ezt az eszközt.";
+"Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "Fejezd be a beállítást, hogy megkapd a 3 napos próba jelvény úttörő csomóponthoz.";
+"Create encrypted identity" = "Titkosított identitás létrehozása";
+"Restore from encrypted backup" = "Visszaállítás titkosított biztonsági mentésből";
+
+/* Onboarding: page 2 identity */
+"Create your first anonymous identity" = "Hozd létre az első névtelen identitásod";
+"Identity, keys, POPOPX Compute Credits and your profile card are encrypted on this device only. Servers cannot see them." = "Az identitás, a kulcsok, a POPOPX számítási kreditek és a profilkártyád csak ezen az eszközön vannak titkosítva. A szerverek nem látják őket.";
+"Profile photo" = "Profilkép";
+"Tap to choose a photo" = "Koppints a kép kiválasztásához";
+"New avatar" = "Új avatar";
+"Anonymous name" = "Névtelen név";
+"How you appear to contacts" = "Így látnak a névjegyeid";
+"Note for friends" = "Jegyzet barátoknak";
+"Optional full name, visible only to contacts you choose" = "Nem kötelező teljes név, csak a kiválasztott névjegyeid látják";
+"Enter an anonymous name to continue." = "A folytatáshoz adj meg egy névtelen nevet.";
+"This name contains characters POPOPX cannot use." = "Ez a név olyan karaktereket tartalmaz, amelyeket a POPOPX nem tud használni.";
+"Privacy boost" = "További védelem";
+"Incognito mode by default" = "Inkognitó mód alapból";
+"Every new connection gets a fresh random nickname, so one name never links two chats." = "Minden új kapcsolat új véletlen becenevet kap, így egy név soha nem kapcsol össze két csevegést.";
+"Next" = "Következő";
+
+/* Onboarding: page 3 dual mode */
+"Choose how POPOPX connects and wakes" = "Válassza ki, hogyan kapcsolódik és ébred a POPOPX";
+"Dynamic SMP relay nodes" = "Dinamikus SMP-közvetítőcsomópont-klaszter";
+"Online encrypted channel" = "Online titkosított csatorna";
+"Low latency · minor metadata exposure" = "Alacsony késleltetés · kis metaadat-kitettség";
+"Higher privacy · balanced battery" = "Több magánszféra · kiegyensúlyozott akkumulátor";
+"Maximum discretion · nothing pushed" = "Maximális diszkréció · nincs push";
+"Apple's push service carries only the signal that new data is waiting, never the content." = "Az Apple push-szolgálata csak azt a jelet közvetíti, hogy új adat érhető el, a tartalmat soha.";
+"厢语 offline mesh" = "厢语 offline mesh";
+"When the internet is down, messages hop over nearby devices, up to 7 hops, with no server. Pair face to face with UWB or a tap." = "Ha nincs internet, az üzenetek közeli eszközökön át ugranak, max. 7 ugrásban, szerver nélkül. Párosíts szemtől szemben UWB-vel vagy érintéssel.";
+"Bluetooth permission is requested the first time the mesh starts." = "A Bluetooth-engedélyt a mesh első indításakor kell megadni.";
+
+/* Onboarding: page 4 commitments and legal */
+"Security commitments and local protection" = "Biztonsági elköteleződések és helyi védelem";
+"Network and security commitments" = "Hálózati és biztonsági elköteleződések";
+"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "Tudomásul veszem, hogy az üzeneteket a dinamikus SMP közvetítő csomópont klaszter továbbítja, és hogy a törlés innen visszavonhatatlan.";
+"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "Tudomásul veszem, hogy a privát útválasztás alapból be van kapcsolva, hogy elrejtse a valódi IP-címedet. A beállítás befejezése megadja a 3 napos próba jelvény úttörő csomóponthoz; ha lejár, ingyenes nyilvános csomópontokra vált vissza, és minden üzenet megmarad.";
+"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "Tudomásul veszem, hogy a logo háromszori érintése elindítja a Panic Wipe-ot, vagyis a helyi adatbázis fizikai törlését. A fokozottan titkos üzenetek védettek a képernyőképek és a felvételek ellen.";
+"Launch protection" = "Védelem indításkor";
+"Face ID / Touch ID lock" = "Face ID / Touch ID-zár";
+"POPOPX asks for biometrics before it opens. The database stays locked until then." = "A POPOPX biometrikus azonosítást kér a megnyitás előtt. Az adatbázis addig zárva marad.";
+"Biometrics are not available on this device." = "A biometria nem érhető el ezen az eszközön.";
+"Privacy policy and terms of use" = "Adatvédelmi irányelv és használati feltételek";
+"POPOPX Privacy Policy" = "POPOPX adatvédelmi irányelv";
+"POPOPX Terms of Use" = "POPOPX használati feltételek";
+"Read offline, any time" = "Olvasd offline, bármikor";
+"I have read and agree to the POPOPX Privacy Policy and the POPOPX Terms of Use." = "Elolvastam és elfogadom a POPOPX adatvédelmi irányelvét és a POPOPX használati feltételeit.";
+"I have read it" = "Elolvastam, bezárás";
+"Agree and enter POPOPX" = "Elfogadom és belépek a POPOPX-be";
+"Confirm the three commitments above." = "Erősítsd meg a fenti három elköteleződést.";
+"Agree to the privacy policy and terms of use to continue." = "Folytatáshoz fogadd el az irányelvet és a feltételeket.";
+"Encrypted queue, Bluetooth Mesh and the privacy shield are ready." = "A titkosított sor, a Bluetooth Mesh és a magánszféra-pajzs kész.";
+"The 3-Day Pioneer Node Trial Badge is active." = "A 3 napos próba jelvény úttörő csomóponthoz aktív.";
+
+/* Legal: shared */
+"Effective: November 2026" = "Érvényes: 2026. november";
+"The full published statement is at popopx.chat/privacy." = "A teljes, közzétett szöveg a popopx.chat/privacy címen olvasható.";
+
+/* Legal: privacy */
+"No account, no collection" = "Nincs fiók, nincs gyűjtés";
+"POPOPX creates no accounts. Your profiles, contacts, groups, messages and settings exist only in the encrypted database on this device, and nothing here links who talks to whom." = "A POPOPX nem hoz létre fiókokat. A profiljaid, névjegyeid, csoportjaid, üzeneteid és beállításaid csak ezen az eszközön lévő titkosított adatbázisban léteznek, és itt semmi nem kapcsolja össze, ki kivel beszél.";
+"Encrypted relay queues" = "Titkosított átjátszói sorok";
+"Online messages travel through the dynamic SMP relay node cluster. Queues are encrypted end to end, so a relay node sees neither message content nor both ends of a conversation, and it keeps no history of delivered messages." = "Az online üzenetek a dinamikus SMP közvetítő csomópont klaszteren keresztül haladnak. A sorok végpontok között titkosítottak, így egy közvetítő csomópont sem látja az üzenet tartalmát, sem a beszélgetés két végét, és nem őriz meg előzményeket a kézbesített üzenetekről.";
+"No analytics in this build" = "Nincs analitika ebben a buildben";
+"This build bundles no analytics or crash-reporting SDK and no telemetry collector. The status you see in the header describes the nodes your own device is talking to, not you." = "Ez a build nem tartalmaz analitikai vagy hibajelentési SDK-t, és telemetriagyűjtőt sem. A felső sávban látott állapot azokról a csomópontokról szól, amelyekkel az eszközöd beszél, nem rólad.";
+"Credentials stay on device" = "Az adatok az eszközön maradnak";
+"Identity keys, the POPOPX Compute Credits balance and privacy node badges are kept in this device's Keychain and local encrypted store. They are never uploaded, only you can move them, and a reinstall without a backup loses them." = "Az identitáskulcsok, a POPOPX számítási kreditek egyenlege és a magánszféra-jelvények az eszköz Kulcscsomójában és a helyi titkosított tárolóban vannak. Ezeket soha nem töltjük fel, csak te mozgathatod őket, és mentés nélküli újratelepítés elveszíti őket.";
+"Push token and replay protection" = "Push-token és az ismétlés elleni védelem";
+"Push delivery uses an Apple device token bound to the notification mode you chose. The token carries no message content, is reissued when you change server or mode, and is used once so a captured token cannot be replayed." = "A push kézbesítés egy olyan Apple eszköz-azonosítót használ, amely a választott értesítési módhoz kapcsolódik. Az azonosító nem tartalmaz üzeneteket, szerver vagy mód váltásakor újra kiadjuk, és csak egyszer használható, ezért egy megszerzett azonosító nem játszható vissza.";
+"The camera guard stays local" = "A kamerás védelem az eszközön marad";
+"The anti-peeping guard switches the front camera on only while a top-secret sheet is open, at the lowest resolution, processes every frame on this device and stops the stream when the sheet closes. Nothing is written to disk and nothing is uploaded." = "A leselés elleni védelem csak addig kapcsolja be az elülső kamerát, amíg a fokozottan titkos lap nyitva van, a legalacsonyabb felbontásban, minden képkockát ezen az eszközön dolgoz fel, és leállítja a streamet a lap bezárásakor. Semmit nem írunk a lemezre, és semmit nem töltünk fel.";
+"Screenshots, recordings and offline hops" = "Képernyőképek, felvételek és offline ugrások";
+"Protected screens are blocked from screenshots and screen recording by the system itself. In 厢语 mode messages hop over Bluetooth between nearby devices and never reach the public internet." = "A védett képernyőkön maga a rendszer tiltja a képernyőfotót és a felvételt. 厢语 módban az üzenetek közeli eszközök között Bluetoothon ugranak, és soha nem érik el a nyilvános internetet.";
+"Your controls" = "Az irányítás nálad van";
+"You can export or delete any identity, erase the local database or trigger Panic Wipe at any time. Deletion is irreversible because no server holds a copy." = "Bármikor exportálhatsz vagy törölhetsz egy identitást, törölheted a helyi adatbázist, vagy elindíthatod a Panic Wipe-ot. A törlés visszavonhatatlan, mert egyik szerver sem őriz másolatot.";
+
+/* Legal: terms */
+"Acceptable use" = "Megengedett használat";
+"Use POPOPX within the laws of the country you are in. Public groups and 厢语 broadcasts must carry no unlawful content, no spam and no harassment of other users." = "A POPOPX-t a tartózkodási helyed országának törvényein belül használd. A nyilvános csoportok és a 厢语 sugárzások nem tartalmazhatnak jogellenes tartalmat, spamet és más felhasználók zaklatását.";
+"Your keys, your responsibility" = "A kulcsaid, a felelősséged";
+"Your mnemonic phrase, identity keys, badges and POPOPX Compute Credits exist only on this device. If the device or the phrase is lost, they cannot be recovered, frozen or reissued by anyone." = "A visszaállító kifejezésed, az identitáskulcsaid, a jelvényeid és a POPOPX számítási kreditek csak ezen az eszközön léteznek. Ha az eszköz vagy a kifejezés elveszik, senki nem tudja őket visszaállítani, befagyasztani vagy újra kiadni.";
+"No guarantee of availability" = "Nincs elérhetőségi garancia";
+"Relay nodes, push queues and Bluetooth Mesh hops are provided as they are. Offline delivery depends on nearby devices being present and switched on, so it cannot be guaranteed." = "A közvetítő csomópontok, a push sorok és a Bluetooth Mesh ugrások olyan állapotban vannak, ahogy vannak. Az offline kézbesítés attól függ, hogy vannak-e közelben bekapcsolt eszközök, ezért nem garantálható.";
+"Panic Wipe disclaimer" = "Panic Wipe mentesség";
+"Tapping the logo three times erases local data irreversibly to protect you under coercion. Messages already waiting in a relay queue cannot be erased from this device and are not recovered for you." = "A logo háromszori érintése visszavonhatatlanul törli a helyi adatokat, hogy megvédjen kényszer esetén. A már sorban várakozó üzeneteket nem lehet innen törölni, és nem állítjuk vissza neked.";
+"Operator conditions" = "Üzemeltetői feltételek";
+"Relay operators set their own conditions for the servers they run. When an operator requires acceptance, the app shows that operator's conditions and records your acceptance before using them." = "Az üzemeltetők maguk határozzák meg a feltételeiket a saját szervereikhez. Ha egy üzemeltető elfogadást kér, az alkalmazás megmutatja az ő feltételeit, és rögzíti az elfogadásod, mielőtt használná őket.";
+"Names and changes" = "Nevek és változások";
+"POPOPX and the POPOPX logo are the names of this build. These terms and the privacy statement may change; the app always shows the version you agreed to, and continuing to use POPOPX means you accept the change." = "A POPOPX és a POPOPX logó ennek a buildnek a nevei. Ezek a feltételek és az adatvédelmi nyilatkozat változhatnak; az alkalmazás mindig azt a verziót mutatja, amelyet elfogadtál, és a POPOPX használatának folytatása az elfogadást jelenti.";

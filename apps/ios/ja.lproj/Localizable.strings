@@ -3784,3 +3784,117 @@ server test failure */
 
 /* error */
 "Your Compute Credits balance cannot go above %lld. Spend some credits first." = "計算クレジットの残高は %lld を超えられません。先に一部をご利用ください。";
+
+/* ==== POPOPX onboarding v2 (2026-11-19) — 引导页四屏 + 隐私政策/使用条款 ==== */
+/* POPOPX onboarding v2 — generated block, 2026-11-19 */
+
+/* Onboarding: header pills */
+"Identity isolation" = "アイデンティティの分離";
+"Routing & notifications" = "ルーティングと通知";
+"Commitments & launch" = "コミットメントと起動";
+
+/* Onboarding: page 1 welcome */
+"Own your network." = "ネットワークはあなたのもの。";
+"Private messaging with no account and no user IDs." = "アカウントもユーザーIDも不要のプライベートメッセージ。";
+"SMP end-to-end encrypted" = "SMP エンドツーエンド暗号化";
+"厢语 Bluetooth Mesh relay" = "厢语 Bluetooth Mesh リレー";
+"What POPOPX gives you" = "POPOPX が提供するもの";
+"No user IDs" = "ユーザーIDなし";
+"No phone number, no email, no global public key. Nothing links your contacts to each other, and each anonymous identity stays separate." = "電話番号もメールもグローバルな公開鍵もありません。連絡先どうしが結ばれることはなく、匿名のアイデンティティはそれぞれ分離されたままです。";
+"Dynamic relays and near-field" = "動的中継と至近接続";
+"Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "オンラインでは動的な SMP 中継ノードクラスタを利用します。オフラインでは厢语が 1〜7 ホップの Bluetooth Mesh に切り替わり、UWB またはタップで向かい合わせのペアリングを行います。";
+"Anti-peeping and local-only cards" = "覗き見防止とカードの完全ローカル";
+"Screenshots and recordings are blocked, top-secret messages burn after reading, and your encrypted profile card never leaves this device." = "スクリーンショットと画面収録はブロックされ、最高機密メッセージは読み取り後に破棄され、暗号化されたプロフィールカードがこの端末から出ることはありません。";
+"Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "この設定を完了すると、パイオニアノード3日間体験バッジを受け取れます。";
+"Create encrypted identity" = "暗号化アイデンティティを作成";
+"Restore from encrypted backup" = "暗号化バックアップから復元";
+
+/* Onboarding: page 2 identity */
+"Create your first anonymous identity" = "最初の匿名アイデンティティを作成";
+"Identity, keys, POPOPX Compute Credits and your profile card are encrypted on this device only. Servers cannot see them." = "アイデンティティ、鍵、POPOPX 計算クレジット、プロフィールカードはすべてこの端末でのみ暗号化されます。サーバーには見えません。";
+"Profile photo" = "プロフィール写真";
+"Tap to choose a photo" = "タップして写真を選択";
+"New avatar" = "新しいアバター";
+"Anonymous name" = "匿名の名前";
+"How you appear to contacts" = "連絡先に表示される名前";
+"Note for friends" = "友人向けのメモ";
+"Optional full name, visible only to contacts you choose" = "任意のフルネーム。選択した連絡先にのみ表示されます";
+"Enter an anonymous name to continue." = "続行するには匿名の名前を入力してください。";
+"This name contains characters POPOPX cannot use." = "この名前には POPOPX が使用できない文字が含まれています。";
+"Privacy boost" = "プライバシー強化";
+"Incognito mode by default" = "インコグニートモードを既定でオン";
+"Every new connection gets a fresh random nickname, so one name never links two chats." = "新しい接続ごとにランダムなニックネームが割り当てられるため、一つの名前が二つのチャットを結ぶことはありません。";
+"Next" = "次へ";
+
+/* Onboarding: page 3 dual mode */
+"Choose how POPOPX connects and wakes" = "POPOPX の接続方法と目覚め方を選択";
+"Dynamic SMP relay nodes" = "動的な SMP 中継ノードクラスタ";
+"Online encrypted channel" = "オンライン暗号化チャネル";
+"Low latency · minor metadata exposure" = "低遅延 · メタデータ露出は軽微";
+"Higher privacy · balanced battery" = "より高いプライバシー · バッテリーとの均衡";
+"Maximum discretion · nothing pushed" = "最大限の慎重さ · push は行いません";
+"Apple's push service carries only the signal that new data is waiting, never the content." = "Apple のプッシュサービスは新しいデータが届いたという合図のみを届け、内容が届くことはありません。";
+"厢语 offline mesh" = "厢语 オフラインメッシュ";
+"When the internet is down, messages hop over nearby devices, up to 7 hops, with no server. Pair face to face with UWB or a tap." = "インターネットが無い状態では、メッセージは近くの端末の間を最大 7 ホップで中継され、サーバーは使いません。UWB またはタップで向かい合わせのペアリングを行ってください。";
+"Bluetooth permission is requested the first time the mesh starts." = "Bluetooth の許可はメッシュの初回起動時に要求されます。";
+
+/* Onboarding: page 4 commitments and legal */
+"Security commitments and local protection" = "セキュリティコミットメントとローカル保護";
+"Network and security commitments" = "ネットワークとセキュリティのコミットメント";
+"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "メッセージは動的な SMP 中継ノードクラスタによって非同期に転送されること、ここで削除すると元に戻せないことを理解しています。";
+"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "実際の IP アドレスを隠すため、プライベートルーティングが既定でオンになっていること、この設定を完了すると パイオニアノード3日間体験バッジが付与され、期限切れ後は無料の公開ノードにシームレスに戻り、メッセージはすべて保持されることを理解しています。";
+"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "ロゴを 3 回タップすると Panic Wipe が起動し、ローカルデータベースが物理的に消去されること、最高機密メッセージはスクリーンショットや画面収録から保護されることを理解しています。";
+"Launch protection" = "起動時の保護";
+"Face ID / Touch ID lock" = "Face ID / Touch ID ロック";
+"POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX は開く前に生体認証を要求します。そのあいだ、データベースはロックされたままです。";
+"Biometrics are not available on this device." = "この端末では生体認証を利用できません。";
+"Privacy policy and terms of use" = "プライバシーポリシーと利用規約";
+"POPOPX Privacy Policy" = "POPOPX プライバシーポリシー";
+"POPOPX Terms of Use" = "POPOPX 利用規約";
+"Read offline, any time" = "いつでもオフラインで読めます";
+"I have read and agree to the POPOPX Privacy Policy and the POPOPX Terms of Use." = "POPOPX プライバシーポリシーと POPOPX 利用規約を読み、同意します。";
+"I have read it" = "読みました、閉じる";
+"Agree and enter POPOPX" = "同意して POPOPX を開く";
+"Confirm the three commitments above." = "上記の 3 つのコミットメントを確認してください。";
+"Agree to the privacy policy and terms of use to continue." = "続行するにはポリシーと規約に同意してください。";
+"Encrypted queue, Bluetooth Mesh and the privacy shield are ready." = "暗号化キュー、Bluetooth Mesh、プライバシーシールドの準備ができました。";
+"The 3-Day Pioneer Node Trial Badge is active." = "パイオニアノード3日間体験バッジが有効になりました。";
+
+/* Legal: shared */
+"Effective: November 2026" = "発効：2026年11月";
+"The full published statement is at popopx.chat/privacy." = "公開されている全文は popopx.chat/privacy にあります。";
+
+/* Legal: privacy */
+"No account, no collection" = "アカウントなし、収集なし";
+"POPOPX creates no accounts. Your profiles, contacts, groups, messages and settings exist only in the encrypted database on this device, and nothing here links who talks to whom." = "POPOPX はアカウントを作成しません。プロフィール、連絡先、グループ、メッセージ、設定はすべてこの端末の暗号化データベースにのみ存在し、ここで誰が誰と話しているかを結ぶものは何もありません。";
+"Encrypted relay queues" = "暗号化された中継キュー";
+"Online messages travel through the dynamic SMP relay node cluster. Queues are encrypted end to end, so a relay node sees neither message content nor both ends of a conversation, and it keeps no history of delivered messages." = "オンラインのメッセージは動的な SMP 中継ノードクラスタを通過します。キューはエンドツーエンドで暗号化されるため、中継ノードはメッセージの内容も会話の両端も見ることができず、配送済みメッセージの履歴も保持しません。";
+"No analytics in this build" = "このビルドに分析機能はありません";
+"This build bundles no analytics or crash-reporting SDK and no telemetry collector. The status you see in the header describes the nodes your own device is talking to, not you." = "このビルドには分析 SDK もクラッシュレポート SDK もテレメトリ収集器も同梱されていません。ヘッダーのステータスは、あなた自身の端末が通信しているノードを示すもので、あなたを示すものではありません。";
+"Credentials stay on device" = "認証情報は端末内に保持";
+"Identity keys, the POPOPX Compute Credits balance and privacy node badges are kept in this device's Keychain and local encrypted store. They are never uploaded, only you can move them, and a reinstall without a backup loses them." = "アイデンティティ鍵、POPOPX 計算クレジットの残高、プライバシーノードバッジは、この端末のキーチェーンとローカルの暗号化ストレージに保存されます。アップロードされることはなく、移動できるのはあなただけで、バックアップなしで再インストールすると失われます。";
+"Push token and replay protection" = "プッシュトークンとリプレイ保護";
+"Push delivery uses an Apple device token bound to the notification mode you chose. The token carries no message content, is reissued when you change server or mode, and is used once so a captured token cannot be replayed." = "プッシュ配信は、選択した通知モードに紐付けられた Apple の端末トークンを使用します。トークンにメッセージ内容は含まれず、サーバーやモードの変更で再発行され、一度だけ使われるため、取得されたトークンを再生することはできません。";
+"The camera guard stays local" = "カメラ監視は端末内のみ";
+"The anti-peeping guard switches the front camera on only while a top-secret sheet is open, at the lowest resolution, processes every frame on this device and stops the stream when the sheet closes. Nothing is written to disk and nothing is uploaded." = "覗き見防止の監視は、最高機密シートを開いている間だけ前面カメラを最低解像度でオンにし、各フレームをこの端末で処理して、シートを閉じると映像を停止します。ディスクに書き込むものも、送信するものもありません。";
+"Screenshots, recordings and offline hops" = "スクリーンショット、画面収録、オフラインホップ";
+"Protected screens are blocked from screenshots and screen recording by the system itself. In 厢语 mode messages hop over Bluetooth between nearby devices and never reach the public internet." = "保護された画面はシステム自体がスクリーンショットと画面収録をブロックします。厢语モードでは、メッセージは近くの端末の間を Bluetooth でホップし、公衆インターネットに到達することは決してありません。";
+"Your controls" = "管理はあなたが行います";
+"You can export or delete any identity, erase the local database or trigger Panic Wipe at any time. Deletion is irreversible because no server holds a copy." = "いつでも、任意のアイデンティティのエクスポートや削除、ローカルデータベースの消去、Panic Wipe の実行ができます。どのサーバーもコピーを持っていないため、削除は元に戻せません。";
+
+/* Legal: terms */
+"Acceptable use" = "許容される利用";
+"Use POPOPX within the laws of the country you are in. Public groups and 厢语 broadcasts must carry no unlawful content, no spam and no harassment of other users." = "あなたが所在する国の法律の範囲内で POPOPX を利用してください。公開グループと厢语のブロードキャストに、違法な内容、スパム、他のユーザーへの嫌がらせを含めてはなりません。";
+"Your keys, your responsibility" = "あなたの鍵、あなたの責任";
+"Your mnemonic phrase, identity keys, badges and POPOPX Compute Credits exist only on this device. If the device or the phrase is lost, they cannot be recovered, frozen or reissued by anyone." = "復元フレーズ、アイデンティティ鍵、バッジ、POPOPX 計算クレジットは、この端末にのみ存在します。端末またはフレーズを失くした場合、誰でも復元・凍結・再発行を依頼することはできません。";
+"No guarantee of availability" = "可用性の保証はありません";
+"Relay nodes, push queues and Bluetooth Mesh hops are provided as they are. Offline delivery depends on nearby devices being present and switched on, so it cannot be guaranteed." = "中継ノード、プッシュキュー、Bluetooth Mesh のホップは、現状のまま提供されます。オフライン配信は近くに電源の入った端末があるかに依存するため、保証できません。";
+"Panic Wipe disclaimer" = "Panic Wipe に関する免責";
+"Tapping the logo three times erases local data irreversibly to protect you under coercion. Messages already waiting in a relay queue cannot be erased from this device and are not recovered for you." = "ロゴを 3 回タップすると、強制に迫られた状況であなたを保護するため、ローカルデータが回復不能な形で消去されます。中継キューで待機中のメッセージはこの端末から消去できず、代わりに取り戻すこともできません。";
+"Operator conditions" = "オペレーターの条件";
+"Relay operators set their own conditions for the servers they run. When an operator requires acceptance, the app shows that operator's conditions and records your acceptance before using them." = "中継ノードの運営者は、自身が運営するサーバーについての条件を独自に定めます。運営者が同意を要求する場合、アプリはその運営者の条件を表示し、使用の前にあなたの同意を記録します。";
+"Names and changes" = "名称と変更";
+"POPOPX and the POPOPX logo are the names of this build. These terms and the privacy statement may change; the app always shows the version you agreed to, and continuing to use POPOPX means you accept the change." = "POPOPX と POPOPX ロゴはこのビルドの名称です。本規約とプライバシーポリシーは変更される可能性があります。アプリはあなたが同意した版を常に表示し、POPOPX を使い続けることは変更に同意することを意味します。";
+/* POPOPX 引导页补录（第四轮：迁移入口标题与条款接受失败提示） */
+"Migrate here" = "ここに移行";
+"Error accepting conditions" = "条件の承認中にエラーが発生しました";

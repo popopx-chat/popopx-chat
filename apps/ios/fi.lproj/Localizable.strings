@@ -3447,3 +3447,117 @@ server test failure */
 
 /* error */
 "Your Compute Credits balance cannot go above %lld. Spend some credits first." = "Laskentapisteiden saldo ei voi ylittää %lld. Käytä ensin osa pisteistä.";
+
+/* ==== POPOPX onboarding v2 (2026-11-19) — 引导页四屏 + 隐私政策/使用条款 ==== */
+/* POPOPX onboarding v2 — generated block, 2026-11-19 */
+
+/* Onboarding: header pills */
+"Identity isolation" = "Identiteettien eristäminen";
+"Routing & notifications" = "Reititys ja ilmoitukset";
+"Commitments & launch" = "Sitoumukset ja käynnistys";
+
+/* Onboarding: page 1 welcome */
+"Own your network." = "Verkkosi on sinun.";
+"Private messaging with no account and no user IDs." = "Yksityisviestintää ilman tiliä ja ilman käyttäjätunnisteita.";
+"SMP end-to-end encrypted" = "SMP päästä päähän salattu";
+"厢语 Bluetooth Mesh relay" = "厢语 Bluetooth Mesh -välityssolmu";
+"What POPOPX gives you" = "Mitä POPOPX antaa";
+"No user IDs" = "Ei käyttäjätunnisteita";
+"No phone number, no email, no global public key. Nothing links your contacts to each other, and each anonymous identity stays separate." = "Ei puhelinnumeroa, ei sähköpostia, ei globaalia julkista avainta. Mikään ei liitä kontaktejasi toisiinsa, ja jokainen anonyymi identiteetti pysyy erillään.";
+"Dynamic relays and near-field" = "Dynaamiset välityssolmut ja läheisyys";
+"Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "Verkossa käytät dynaamista SMP-välityssolmujen rykelmää. Ilman verkkoa 厢语 vaihtaa 1–7 hyppyn Bluetooth Mesh -verkkoon ja muodostaa parin kasvokkain UWB:llä tai napautuksella.";
+"Anti-peeping and local-only cards" = "Tirkistelyn esto ja kortit vain laitteella";
+"Screenshots and recordings are blocked, top-secret messages burn after reading, and your encrypted profile card never leaves this device." = "Kuvakaappaukset ja tallennukset estetään, huippusalaiset viestit tuhoutuvat lukemisen jälkeen, eikä salattu profiilikorttisi poistu tältä laitteelta.";
+"Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "Viimeistele tämä asennus saadaksesi 3 päivän kokeilumerkin pioneerisolmulta.";
+"Create encrypted identity" = "Luo salattu identiteetti";
+"Restore from encrypted backup" = "Palauta salatusta varmuuskopiosta";
+
+/* Onboarding: page 2 identity */
+"Create your first anonymous identity" = "Luo ensimmäinen anonyymi identiteettisi";
+"Identity, keys, POPOPX Compute Credits and your profile card are encrypted on this device only. Servers cannot see them." = "Identiteetti, avaimet, POPOPX-laskentapisteet ja profiilikorttisi ovat salattuja vain tällä laitteella. Palvelimet eivät näe niitä.";
+"Profile photo" = "Profiilikuva";
+"Tap to choose a photo" = "Napauta valitaksesi kuvan";
+"New avatar" = "Uusi hahmo";
+"Anonymous name" = "Anonyymi nimi";
+"How you appear to contacts" = "Näytät kontakteille";
+"Note for friends" = "Merkintä ystäville";
+"Optional full name, visible only to contacts you choose" = "Valinnainen koko nimi, näkyy vain valituille kontakteille";
+"Enter an anonymous name to continue." = "Anna anonyymi nimi jatkaaksesi.";
+"This name contains characters POPOPX cannot use." = "Tämä nimi sisältää merkkejä, joita POPOPX ei voi käyttää.";
+"Privacy boost" = "Lisää yksityisyyttä";
+"Incognito mode by default" = "Incognito-tila oletuksena";
+"Every new connection gets a fresh random nickname, so one name never links two chats." = "Jokainen uusi yhteys saa uuden satunnaisen nimimerkin, joten yksi nimi ei koskaan yhdistä kahta keskustelua.";
+"Next" = "Seuraava";
+
+/* Onboarding: page 3 dual mode */
+"Choose how POPOPX connects and wakes" = "Valitse, miten POPOPX yhdistää ja herää";
+"Dynamic SMP relay nodes" = "Dynaaminen SMP-välityssolmujen rykelmä";
+"Online encrypted channel" = "Salattu verkko-kanava";
+"Low latency · minor metadata exposure" = "Matala viive · vähän metadatavuotoa";
+"Higher privacy · balanced battery" = "Enemmän yksityisyyttä · tasapainoinen akku";
+"Maximum discretion · nothing pushed" = "Maksimaalinen huomaamattomuus · ei pushia";
+"Apple's push service carries only the signal that new data is waiting, never the content." = "Appen push-palvelu välittää vain merkkin uudesta datasta, ei koskaan sisältöä.";
+"厢语 offline mesh" = "厢语 offline-mesh";
+"When the internet is down, messages hop over nearby devices, up to 7 hops, with no server. Pair face to face with UWB or a tap." = "Ilman internetiä viestit hyppivät lähilaitteiden kautta, enintään 7 hyppyä, ilman palvelinta. Muodosta pari kasvokkain UWB:llä tai napautuksella.";
+"Bluetooth permission is requested the first time the mesh starts." = "Bluetooth-lupa kysytään mesh-verkon ensimmäisellä käynnistyksellä.";
+
+/* Onboarding: page 4 commitments and legal */
+"Security commitments and local protection" = "Turvallisuussitoumukset ja suojaus laitteella";
+"Network and security commitments" = "Verkko- ja turvallisuussitoumukset";
+"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "Ymmärrän, että dynaaminen SMP-välityssolmujen rykelmä välittää viestit epäsynkronisesti, ja että poistaminen täällä on peruuttamatonta.";
+"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "Ymmärrän, että yksityinen reititys on oletuksena päällä, jotta todellinen IP-osoitteesi pysyy piilossa. Asennuksen viimeistely myöntää 3 päivän kokeilumerkin pioneerisolmulta; sen päättyessä paluu maksuttomiin julkisiin solmuihin on saumaton ja jokainen viesti säilyy.";
+"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "Ymmärrän, että logon kolmoisnapautus käynnistää Panic Wipen, joka tyhjentää paikallisen tietokannan fyysisesti. Huippusalaiset viestit on suojattu kuvakaappauksilta ja tallennuksilta.";
+"Launch protection" = "Käynnistyssuojaus";
+"Face ID / Touch ID lock" = "Face ID / Touch ID -lukitus";
+"POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX kysyy biometriaa ennen avaamista. Tietokanta pysyy lukittuna siihen asti.";
+"Biometrics are not available on this device." = "Biometriaa ei ole käytettävissä tällä laitteella.";
+"Privacy policy and terms of use" = "Tietosuojaseloste ja käyttöehdot";
+"POPOPX Privacy Policy" = "POPOPX-tietosuojaseloste";
+"POPOPX Terms of Use" = "POPOPX-käyttöehdot";
+"Read offline, any time" = "Luettavissa offline milloin tahansa";
+"I have read and agree to the POPOPX Privacy Policy and the POPOPX Terms of Use." = "Luin POPOPXin tietosuojakäytännön ja käyttöehdot ja hyväksyn ne.";
+"I have read it" = "Luettu, sulje";
+"Agree and enter POPOPX" = "Hyväksy ja avaa POPOPX";
+"Confirm the three commitments above." = "Vahvista kolme yllä olevaa sitoumusta.";
+"Agree to the privacy policy and terms of use to continue." = "Hyväksy seloste ja ehdot jatkaaksesi.";
+"Encrypted queue, Bluetooth Mesh and the privacy shield are ready." = "Salattu jono, Bluetooth Mesh ja yksityisyyssuoja ovat valmiina.";
+"The 3-Day Pioneer Node Trial Badge is active." = "3 päivän kokeilumerkki pioneerisolmulta on aktiivinen.";
+
+/* Legal: shared */
+"Effective: November 2026" = "Voimassa: marraskuu 2026";
+"The full published statement is at popopx.chat/privacy." = "Koko julkaistu seloste on osoitteessa popopx.chat/privacy.";
+
+/* Legal: privacy */
+"No account, no collection" = "Ei tilejä, ei keruuta";
+"POPOPX creates no accounts. Your profiles, contacts, groups, messages and settings exist only in the encrypted database on this device, and nothing here links who talks to whom." = "POPOPX ei luo tilejä. Profiilisi, kontaktisi, ryhmäsi, viestisi ja asetuksesi ovat vain tämän laitteen salatulla tietokannalla, eivätkä mikään täällä yhdistä keskustelijoita toisiinsa.";
+"Encrypted relay queues" = "Salatut välitysjonot";
+"Online messages travel through the dynamic SMP relay node cluster. Queues are encrypted end to end, so a relay node sees neither message content nor both ends of a conversation, and it keeps no history of delivered messages." = "Verkkoviestit kulkevat dynaamisen SMP-välityssolmujen rykelmän kautta. Jonot on salattu päästä päähän, joten välityssolmu ei näe viestin sisältöä eikä keskustelun molempia päitä, eikä se säilytä historiaa toimitetuista viesteistä.";
+"No analytics in this build" = "Ei analytiikkaa tässä versiossa";
+"This build bundles no analytics or crash-reporting SDK and no telemetry collector. The status you see in the header describes the nodes your own device is talking to, not you." = "Tässä versiossa ei ole työkaluja käytön analysointiin eikä kaatumisten raportointiin, eikä telemetrian keruuta. Yläpalkin tila kuvaa solmuja, joihin laitteesi keskustelee, ei sinua.";
+"Credentials stay on device" = "Tunnisteet pysyvät laitteella";
+"Identity keys, the POPOPX Compute Credits balance and privacy node badges are kept in this device's Keychain and local encrypted store. They are never uploaded, only you can move them, and a reinstall without a backup loses them." = "Identiteettiavaimet, POPOPX-laskentapisteiden saldo ja yksityisyyssolmujen merkit säilyvät tämän laitteen avainnoudassa ja salatussa paikallisessa tallennustilassa. Niitä ei ladata palvelimelle, vain sinä voit siirtää ne, ja ilman varmuuskopiota tehty asennus menettää ne.";
+"Push token and replay protection" = "Push-tunniste ja toistojen esto";
+"Push delivery uses an Apple device token bound to the notification mode you chose. The token carries no message content, is reissued when you change server or mode, and is used once so a captured token cannot be replayed." = "Push-toimitus käyttää Apple-laitetunnistetta, joka on liitetty valitsemaasi ilmoitustilaan. Tunniste ei sisällä viestien sisältöä, se myönnetään uudelleen vaihtaessasi palvelinta tai tilaa, ja sitä käytetään vain kerran, joten kaapattua tunnistetta ei voi toistaa.";
+"The camera guard stays local" = "Kameravalvonta pysyy laitteella";
+"The anti-peeping guard switches the front camera on only while a top-secret sheet is open, at the lowest resolution, processes every frame on this device and stops the stream when the sheet closes. Nothing is written to disk and nothing is uploaded." = "Tirkistelyn esto laskee etukameran päälle vain huippusalaisen näytön ollessa auki ja pienimmällä resoluutiolla, käsittelee jokaisen kuvan kehyksen tällä laitteella ja pysäyttää striimin näytön sulkeutuessa. Mitään ei kirjoiteta levylle eikä mitään ladata palvelimelle.";
+"Screenshots, recordings and offline hops" = "Kuvakaappaukset, tallennukset ja offline-hypyt";
+"Protected screens are blocked from screenshots and screen recording by the system itself. In 厢语 mode messages hop over Bluetooth between nearby devices and never reach the public internet." = "Järjestelmä itse estää suojatuilla näytöillä kuvakaappaukset ja näytön tallennukset. 厢语-tilassa viestit hyppivät Bluetoothin kautta lähilaitteiden välillä eivätkä koskaan saavuta julkista internetiä.";
+"Your controls" = "Sinulla on kontrolli";
+"You can export or delete any identity, erase the local database or trigger Panic Wipe at any time. Deletion is irreversible because no server holds a copy." = "Voit milloin tahansa viedä tai poistaa minkä tahansa identiteetin, tyhjentää paikallisen tietokannan tai käynnistää Panic Wipen. Poistaminen on peruuttamatonta, koska mikään palvelin ei säilytä kopiota.";
+
+/* Legal: terms */
+"Acceptable use" = "Hyväksyttävä käyttö";
+"Use POPOPX within the laws of the country you are in. Public groups and 厢语 broadcasts must carry no unlawful content, no spam and no harassment of other users." = "Käytä POPOPXia sen maan lakien mukaisesti, jossa olet. Julkiset ryhmät ja 厢语-lähetykset eivät saa sisältää laitonta sisältöä, roskapostia eikä muiden käyttäjien häirintää.";
+"Your keys, your responsibility" = "Avaimet, vastuusi";
+"Your mnemonic phrase, identity keys, badges and POPOPX Compute Credits exist only on this device. If the device or the phrase is lost, they cannot be recovered, frozen or reissued by anyone." = "Muistilause, identiteettiavaimet, merkit ja POPOPX-laskentapisteet ovat olemassa vain tällä laitteella. Jos laite tai lause katoaa, kukaan ei voi palauttaa, jäädyttää tai myöntää niitä uudelleen.";
+"No guarantee of availability" = "Ei saatavuustakuuta";
+"Relay nodes, push queues and Bluetooth Mesh hops are provided as they are. Offline delivery depends on nearby devices being present and switched on, so it cannot be guaranteed." = "Välityssolmut, push-jonot ja Bluetooth Mesh -hypyt toimitetaan sellaisina kuin ne ovat. Offline-toimitus riippuu siitä, onko lähellä päällä olevia laitteita, joten sitä ei voi taata.";
+"Panic Wipe disclaimer" = "Panic Wipe -vastuuvapaus";
+"Tapping the logo three times erases local data irreversibly to protect you under coercion. Messages already waiting in a relay queue cannot be erased from this device and are not recovered for you." = "Logon kolmoisnapautus tyhjentää paikallisen datan peruuttamattomasti suojatakseen sinua pakotetilanteessa. Välitysjonossa jo odottavia viestejä ei voi tyhjentää tältä laitteelta, eikä niitä palauteta puolestasi.";
+"Operator conditions" = "Operaattorien ehdot";
+"Relay operators set their own conditions for the servers they run. When an operator requires acceptance, the app shows that operator's conditions and records your acceptance before using them." = "Välityspalvelinten operaattorit määrittävät itse omat ehtonsa niille palvelimille, joita he ylläpitävät. Kun operaattori vaatii hyväksymisen, sovellus näyttää tämän operaattorin ehdot ja tallentaa hyväksyntäsi ennen niiden käyttöä.";
+"Names and changes" = "Nimet ja muutokset";
+"POPOPX and the POPOPX logo are the names of this build. These terms and the privacy statement may change; the app always shows the version you agreed to, and continuing to use POPOPX means you accept the change." = "POPOPX ja POPOPX-logo ovat tämän version nimet. Nämä ehdot ja tietosuojaseloste voivat muuttua; sovellus näyttää aina sen version, jonka olet hyväksynyt, ja POPOPXin jatkaminen tarkoittaa, että hyväksyt muutoksen.";
+/* POPOPX 引导页补录（第四轮：迁移入口标题与条款接受失败提示） */
+"Migrate here" = "Siirrä tänne";
+"Error accepting conditions" = "Virhe ehtoja hyväksyttäessä";

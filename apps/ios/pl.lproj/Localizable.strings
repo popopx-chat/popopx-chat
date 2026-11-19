@@ -7148,3 +7148,114 @@ alert title */
 
 /* error */
 "Your Compute Credits balance cannot go above %lld. Spend some credits first." = "Twoje saldo punktów obliczeniowych nie może przekroczyć %lld. Najpierw wydaj część punktów.";
+
+/* ==== POPOPX onboarding v2 (2026-11-19) — 引导页四屏 + 隐私政策/使用条款 ==== */
+/* POPOPX onboarding v2 — generated block, 2026-11-19 */
+
+/* Onboarding: header pills */
+"Identity isolation" = "Izolacja tożsamości";
+"Routing & notifications" = "Routing i powiadomienia";
+"Commitments & launch" = "Zobowiązania i start";
+
+/* Onboarding: page 1 welcome */
+"Own your network." = "Twoja sieć należy do Ciebie.";
+"Private messaging with no account and no user IDs." = "Prywatne wiadomości bez konta i bez identyfikatorów użytkowników.";
+"SMP end-to-end encrypted" = "SMP szyfrowane end-to-end";
+"厢语 Bluetooth Mesh relay" = "Przekaźnik mesh Bluetooth 厢语";
+"What POPOPX gives you" = "Co daje POPOPX";
+"No user IDs" = "Zero identyfikatorów użytkowników";
+"No phone number, no email, no global public key. Nothing links your contacts to each other, and each anonymous identity stays separate." = "Bez numeru telefonu, bez e-maila, bez globalnego klucza publicznego. Nic nie łączy Twoich kontaktów ze sobą, a każda anonimowa tożsamość pozostaje oddzielona.";
+"Dynamic relays and near-field" = "Dynamiczne przekaźniki i zasięg bliski";
+"Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "Online korzystasz z dynamicznego klastra węzłów przekaźnikowych SMP. Offline 厢语 przechodzi na sieć mesh Bluetooth o 1–7 skokach i paruje twarzą w twarz przez UWB lub dotyk.";
+"Anti-peeping and local-only cards" = "Ochrona przed podglądaniem i karty tylko lokalne";
+"Screenshots and recordings are blocked, top-secret messages burn after reading, and your encrypted profile card never leaves this device." = "Zrzuty ekranu i nagrywanie są blokowane, ściśle tajne wiadomości palą się po przeczytaniu, a Twoja zaszyfrowana karta profilu nigdy nie opuszcza tego urządzenia.";
+"Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "Ukończ konfigurację, aby otrzymać 3-dniową odznakę próbną węzła pioniera.";
+"Create encrypted identity" = "Utwórz zaszyfrowaną tożsamość";
+"Restore from encrypted backup" = "Przywróć z zaszyfrowanej kopii zapasowej";
+
+/* Onboarding: page 2 identity */
+"Create your first anonymous identity" = "Utwórz swoją pierwszą anonimową tożsamość";
+"Identity, keys, POPOPX Compute Credits and your profile card are encrypted on this device only. Servers cannot see them." = "Tożsamość, klucze, Punkty obliczeniowe POPOPX i Twoja karta profilu są zaszyfrowane wyłącznie na tym urządzeniu. Serwery nie mają do nich wglądu.";
+"Profile photo" = "Zdjęcie profilowe";
+"Tap to choose a photo" = "Dotknij, aby wybrać zdjęcie";
+"New avatar" = "Nowy awatar";
+"Anonymous name" = "Anonimowa nazwa";
+"How you appear to contacts" = "Tak widzą Cię kontakty";
+"Note for friends" = "Notatka dla znajomych";
+"Optional full name, visible only to contacts you choose" = "Opcjonalne pełne imię, widoczne tylko dla wybranych kontaktów";
+"Enter an anonymous name to continue." = "Wpisz anonimową nazwę, aby kontynuować.";
+"This name contains characters POPOPX cannot use." = "Ta nazwa zawiera znaki, których POPOPX nie może użyć.";
+"Privacy boost" = "Wzmocniona prywatność";
+"Incognito mode by default" = "Tryb incognito domyślnie włączony";
+"Every new connection gets a fresh random nickname, so one name never links two chats." = "Każde nowe połączenie dostaje losowy pseudonim, więc jedna nazwa nigdy nie łączy dwóch czatów.";
+"Next" = "Dalej";
+
+/* Onboarding: page 3 dual mode */
+"Choose how POPOPX connects and wakes" = "Wybierz, jak POPOPX łączy się i wybudza";
+"Dynamic SMP relay nodes" = "Dynamiczny klaster węzłów przekaźnikowych SMP";
+"Online encrypted channel" = "Kanał online szyfrowany";
+"Low latency · minor metadata exposure" = "Niskie opóźnienia · niewielkie ujawnienie metadanych";
+"Higher privacy · balanced battery" = "Więcej prywatności · zrównoważona bateria";
+"Maximum discretion · nothing pushed" = "Maksymalna dyskrecja · nic nie jest pushowane";
+"Apple's push service carries only the signal that new data is waiting, never the content." = "Usługa push Apple przekazuje tylko sygnał, że czekają nowe dane, nigdy ich treść.";
+"厢语 offline mesh" = "Sieć offline 厢语";
+"When the internet is down, messages hop over nearby devices, up to 7 hops, with no server. Pair face to face with UWB or a tap." = "Gdy nie ma internetu, wiadomości skaczą między urządzeniami w pobliżu, do 7 skoków, bez serwera. Paruj twarzą w twarz przez UWB lub dotyk.";
+"Bluetooth permission is requested the first time the mesh starts." = "Zgoda na Bluetooth jest wymagana przy pierwszym uruchomieniu sieci mesh.";
+
+/* Onboarding: page 4 commitments and legal */
+"Security commitments and local protection" = "Zobowiązania bezpieczeństwa i ochrona lokalna";
+"Network and security commitments" = "Zobowiązania sieciowe i bezpieczeństwa";
+"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "Mam świadomość, że wiadomości są przekazywane asynchronicznie przez dynamiczny klaster węzłów przekaźnikowych SMP, a usunięcie ich tutaj jest nieodwracalne.";
+"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "Mam świadomość, że prywatny routing jest domyślnie włączony, aby ukryć Twój prawdziwy adres IP. Ukończenie konfiguracji daje 3-dniową odznakę próbną węzła pioniera; po wygaśnięciu płynnie wraca do darmowych węzłów publicznych, a wszystkie wiadomości zostają zachowane.";
+"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "Mam świadomość, że trzykrotne dotknięcie logo uruchamia Panic Wipe, fizyczne wymazanie lokalnej bazy danych. Ściśle tajne wiadomości są chronione przed zrzutami i nagraniami.";
+"Launch protection" = "Ochrona przy starcie";
+"Face ID / Touch ID lock" = "Blokada Face ID / Touch ID";
+"POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX żąda biometrii przed otwarciem. Baza danych pozostaje zablokowana do tego momentu.";
+"Biometrics are not available on this device." = "Biometria nie jest dostępna na tym urządzeniu.";
+"Privacy policy and terms of use" = "Polityka prywatności i warunki użytkowania";
+"POPOPX Privacy Policy" = "Polityka prywatności POPOPX";
+"POPOPX Terms of Use" = "Warunki użytkowania POPOPX";
+"Read offline, any time" = "Do przeczytania offline, zawsze";
+"I have read and agree to the POPOPX Privacy Policy and the POPOPX Terms of Use." = "Przeczytałem i akceptuję Politykę prywatności POPOPX oraz Warunki użytkowania POPOPX.";
+"I have read it" = "Przeczytałem, zamknij";
+"Agree and enter POPOPX" = "Zgadzam się i wchodzę do POPOPX";
+"Confirm the three commitments above." = "Zatwierdź trzy zobowiązania powyżej.";
+"Agree to the privacy policy and terms of use to continue." = "Zaakceptuj politykę i warunki, aby kontynuować.";
+"Encrypted queue, Bluetooth Mesh and the privacy shield are ready." = "Zaszyfrowana kolejka, sieć mesh Bluetooth i tarcza prywatności są gotowe.";
+"The 3-Day Pioneer Node Trial Badge is active." = "3-dniowa odznaka próbna węzła pioniera jest aktywna.";
+
+/* Legal: shared */
+"Effective: November 2026" = "Obowiązuje: listopad 2026";
+"The full published statement is at popopx.chat/privacy." = "Pełna opublikowana treść znajduje się pod popopx.chat/privacy.";
+
+/* Legal: privacy */
+"No account, no collection" = "Zero kont, zero zbierania";
+"POPOPX creates no accounts. Your profiles, contacts, groups, messages and settings exist only in the encrypted database on this device, and nothing here links who talks to whom." = "POPOPX nie tworzy kont. Twoje profile, kontakty, grupy, wiadomości i ustawienia istnieją tylko w zaszyfrowanej bazie na tym urządzeniu i nic tutaj nie łączy tego, kto z kim rozmawia.";
+"Encrypted relay queues" = "Zaszyfrowane kolejki przekaźników";
+"Online messages travel through the dynamic SMP relay node cluster. Queues are encrypted end to end, so a relay node sees neither message content nor both ends of a conversation, and it keeps no history of delivered messages." = "Wiadomości online wędrują przez dynamiczny klaster węzłów przekaźnikowych SMP. Kolejki są szyfrowane end-to-end, więc węzeł przekaźnikowy nie widzi treści ani obu końców rozmowy i nie przechowuje historii doręczonych wiadomości.";
+"No analytics in this build" = "Brak analityki w tej wersji";
+"This build bundles no analytics or crash-reporting SDK and no telemetry collector. The status you see in the header describes the nodes your own device is talking to, not you." = "Ta wersja nie zawiera żadnych SDK do analityki ani raportowania awarii, ani zbieracza telemetrii. Status na pasku nagłówka opisuje węzły, z którymi rozmawia Twoje urządzenie, a nie Ciebie.";
+"Credentials stay on device" = "Dane uwierzytelniające zostają na urządzeniu";
+"Identity keys, the POPOPX Compute Credits balance and privacy node badges are kept in this device's Keychain and local encrypted store. They are never uploaded, only you can move them, and a reinstall without a backup loses them." = "Klucze tożsamości, saldo Punktów obliczeniowych POPOPX i odznaki węzłów prywatności są przechowywane w Pęku kluczy i lokalnej zaszyfrowanej przechowalni. Nigdy nie są wysyłane, tylko Ty możesz je przenieść, a reinstalacja bez kopii zapasowej oznacza ich utratę.";
+"Push token and replay protection" = "Token push i ochrona przed odtworzeniem";
+"Push delivery uses an Apple device token bound to the notification mode you chose. The token carries no message content, is reissued when you change server or mode, and is used once so a captured token cannot be replayed." = "Doręczanie push korzysta z tokenu urządzenia Apple powiązanego z wybranym trybem powiadomień. Token nie zawiera treści wiadomości, jest wydawany ponownie po zmianie serwera lub trybu i używany jednorazowo, więc przechwycony token nie może być odtworzony.";
+"The camera guard stays local" = "Straż kamery zostaje lokalnie";
+"The anti-peeping guard switches the front camera on only while a top-secret sheet is open, at the lowest resolution, processes every frame on this device and stops the stream when the sheet closes. Nothing is written to disk and nothing is uploaded." = "Straż przed podglądaniem włącza przednią kamerę tylko, gdy otwarta jest karta ściśle tajna, w najniższej rozdzielczości, przetwarza każdą klatkę na tym urządzeniu i zatrzymuje strumień po jej zamknięciu. Nic nie jest zapisywane na dysk ani wysyłane.";
+"Screenshots, recordings and offline hops" = "Zrzuty, nagrania i skoki offline";
+"Protected screens are blocked from screenshots and screen recording by the system itself. In 厢语 mode messages hop over Bluetooth between nearby devices and never reach the public internet." = "Sam system blokuje zrzuty ekranu i nagrywanie na chronionych ekranach. W trybie 厢语 wiadomości skaczą przez Bluetooth między urządzeniami w pobliżu i nigdy nie trafiają do publicznego internetu.";
+"Your controls" = "Kontrola jest Twoja";
+"You can export or delete any identity, erase the local database or trigger Panic Wipe at any time. Deletion is irreversible because no server holds a copy." = "Możesz wyeksportować lub usunąć dowolną tożsamość, wymazać lokalną bazę danych albo uruchomić Panic Wipe w każdej chwili. Usunięcie jest nieodwracalne, ponieważ żaden serwer nie przechowuje kopii.";
+
+/* Legal: terms */
+"Acceptable use" = "Dozwolone użytkowanie";
+"Use POPOPX within the laws of the country you are in. Public groups and 厢语 broadcasts must carry no unlawful content, no spam and no harassment of other users." = "Używaj POPOPX zgodnie z prawem kraju, w którym jesteś. Publiczne grupy i transmisje 厢语 nie mogą zawierać treści bezprawnych, spamu ani nękania innych użytkowników.";
+"Your keys, your responsibility" = "Twoje klucze, Twoja odpowiedzialność";
+"Your mnemonic phrase, identity keys, badges and POPOPX Compute Credits exist only on this device. If the device or the phrase is lost, they cannot be recovered, frozen or reissued by anyone." = "Twoja fraza mnemoniczna, klucze tożsamości, odznaki i Punkty obliczeniowe POPOPX istnieją tylko na tym urządzeniu. Jeśli zgubisz urządzenie lub frazę, nikt nie może ich odzyskać, zablokować ani wydać ponownie.";
+"No guarantee of availability" = "Brak gwarancji dostępności";
+"Relay nodes, push queues and Bluetooth Mesh hops are provided as they are. Offline delivery depends on nearby devices being present and switched on, so it cannot be guaranteed." = "Węzły przekaźnikowe, kolejki push i skoki mesh Bluetooth są dostarczane w stanie, w jakim istnieją. Doręczenie offline zależy od obecności włączonych urządzeń w pobliżu, więc nie jest gwarantowane.";
+"Panic Wipe disclaimer" = "Zastrzeżenie Panic Wipe";
+"Tapping the logo three times erases local data irreversibly to protect you under coercion. Messages already waiting in a relay queue cannot be erased from this device and are not recovered for you." = "Trzykrotne dotknięcie logo nieodwracalnie wymazuje dane lokalne, aby chronić Cię pod przymusem. Wiadomości już czekające w kolejce przekaźnika nie mogą zostać wymazane z tego urządzenia i nie są dla Ciebie odzyskiwane.";
+"Operator conditions" = "Warunki operatorów";
+"Relay operators set their own conditions for the servers they run. When an operator requires acceptance, the app shows that operator's conditions and records your acceptance before using them." = "Operatorzy przekaźników ustalają własne warunki dla serwerów, które prowadzą. Gdy operator wymaga akceptacji, aplikacja pokazuje jego warunki i zapisuje Twoją akceptację, zanim zacznie z nich korzystać.";
+"Names and changes" = "Nazwy i zmiany";
+"POPOPX and the POPOPX logo are the names of this build. These terms and the privacy statement may change; the app always shows the version you agreed to, and continuing to use POPOPX means you accept the change." = "POPOPX i logo POPOPX to nazwy tej wersji. Niniejsze warunki i polityka prywatności mogą się zmieniać; aplikacja zawsze pokazuje wersję, którą zaakceptowałeś, a dalsze korzystanie z POPOPX oznacza akceptację zmiany.";

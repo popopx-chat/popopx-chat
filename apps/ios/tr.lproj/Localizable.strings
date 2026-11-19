@@ -7080,3 +7080,114 @@ alert title */
 
 /* error */
 "Your Compute Credits balance cannot go above %lld. Spend some credits first." = "Hesaplama kredisi bakiyeniz %lld üzerine çıkamaz. Önce birkaç kredi harcayın.";
+
+/* ==== POPOPX onboarding v2 (2026-11-19) — 引导页四屏 + 隐私政策/使用条款 ==== */
+/* POPOPX onboarding v2 — generated block, 2026-11-19 */
+
+/* Onboarding: header pills */
+"Identity isolation" = "Kimlik yalıtımı";
+"Routing & notifications" = "Yönlendirme ve bildirimler";
+"Commitments & launch" = "Taahhütler ve başlatma";
+
+/* Onboarding: page 1 welcome */
+"Own your network." = "Ağın sana ait.";
+"Private messaging with no account and no user IDs." = "Hesap ve kullanıcı kimliği olmadan özel mesajlaşma.";
+"SMP end-to-end encrypted" = "SMP uçtan uca şifreli";
+"厢语 Bluetooth Mesh relay" = "厢语 Bluetooth Mesh rölesi";
+"What POPOPX gives you" = "POPOPX sana ne veriyor";
+"No user IDs" = "Kullanıcı kimliği yok";
+"No phone number, no email, no global public key. Nothing links your contacts to each other, and each anonymous identity stays separate." = "Telefon numarası yok, e-posta yok, genel bir açık anahtar yok. Hiçbir şey kişilerini birbirine bağlamaz ve her anonim kimlik ayrı kalır.";
+"Dynamic relays and near-field" = "Dinamik röleler ve yakın alan";
+"Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "Çevrimiçi olduğunda dinamik SMP röle düğüm kümesini kullanırsın. Çevrimdışı olduğunda 厢语 1–7 atlamalı bir Bluetooth Mesh'e geçer ve UWB ya da dokunuşla yüz yüze eşleşir.";
+"Anti-peeping and local-only cards" = "Gözlemeye karşı koruma ve yalnızca yerel kartlar";
+"Screenshots and recordings are blocked, top-secret messages burn after reading, and your encrypted profile card never leaves this device." = "Ekran görüntüleri ve kayıtlar engellenir, en gizli mesajlar okunduktan sonra yok olur ve şifreli profil kartın bu cihazdan asla çıkmaz.";
+"Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "Kurulumu tamamla ve 3 günlük öncü düğüm deneme rozetini al.";
+"Create encrypted identity" = "Şifreli kimlik oluştur";
+"Restore from encrypted backup" = "Şifreli yedekten geri yükle";
+
+/* Onboarding: page 2 identity */
+"Create your first anonymous identity" = "İlk anonim kimliğini oluştur";
+"Identity, keys, POPOPX Compute Credits and your profile card are encrypted on this device only. Servers cannot see them." = "Kimlik, anahtarlar, POPOPX Hesaplama Kredisi ve profil kartın yalnızca bu cihazda şifrelenir. Sunucular bunları göremez.";
+"Profile photo" = "Profil fotoğrafı";
+"Tap to choose a photo" = "Fotoğraf seçmek için dokun";
+"New avatar" = "Yeni simge";
+"Anonymous name" = "Anonim ad";
+"How you appear to contacts" = "Kişilerine nasıl göründüğün";
+"Note for friends" = "Arkadaşlar için not";
+"Optional full name, visible only to contacts you choose" = "İsteğe bağlı tam ad, yalnızca seçtiğin kişilere görünür";
+"Enter an anonymous name to continue." = "Devam etmek için anonim bir ad gir.";
+"This name contains characters POPOPX cannot use." = "Bu ad, POPOPX'un kullanamadığı karakterler içeriyor.";
+"Privacy boost" = "Gizlilik artışı";
+"Incognito mode by default" = "Varsayılan olarak gizli mod";
+"Every new connection gets a fresh random nickname, so one name never links two chats." = "Her yeni bağlantı yepyeni rastgele bir takma ad alır, böylece bir ad iki sohbeti asla birbirine bağlamaz.";
+"Next" = "İleri";
+
+/* Onboarding: page 3 dual mode */
+"Choose how POPOPX connects and wakes" = "POPOPX'in nasıl bağlanacağını ve uyanacağını seç";
+"Dynamic SMP relay nodes" = "Dinamik SMP röle düğüm kümesi";
+"Online encrypted channel" = "Çevrimiçi şifreli kanal";
+"Low latency · minor metadata exposure" = "Düşük gecikme · az üst veri sızıntısı";
+"Higher privacy · balanced battery" = "Daha fazla gizlilik · dengeli pil";
+"Maximum discretion · nothing pushed" = "Maksimum ihtiyat · push yok";
+"Apple's push service carries only the signal that new data is waiting, never the content." = "Apple'ın push hizmeti yalnızca yeni veri beklediği sinyalini taşır, içeriği asla.";
+"厢语 offline mesh" = "厢语 çevrimdışı mesh";
+"When the internet is down, messages hop over nearby devices, up to 7 hops, with no server. Pair face to face with UWB or a tap." = "İnternet olmadığında mesajlar yakındaki cihazlar arasında, en fazla 7 atlama ve sunucusuz olarak atlar. UWB ya da dokunuşla yüz yüze eşleş.";
+"Bluetooth permission is requested the first time the mesh starts." = "Bluetooth izni, mesh ilk kez başladığında istenir.";
+
+/* Onboarding: page 4 commitments and legal */
+"Security commitments and local protection" = "Güvenlik taahhütleri ve yerel koruma";
+"Network and security commitments" = "Ağ ve güvenlik taahhütleri";
+"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "Mesajların dinamik SMP röle düğüm kümesi tarafından eşzamansız olarak iletildiğini ve burada silmenin geri alınamaz olduğunu anlıyorum.";
+"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "Gerçek IP adresini gizlemek için özel yönlendirmenin varsayılan olarak açık olduğunu anlıyorum. Kurulumu tamamlamak 3 günlük öncü düğüm deneme rozetini verir; süresi dolunca ücretsiz genel düğümlere sorunsuz şekilde geri döner ve her mesaj korunur.";
+"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "Logoya üç kez dokunmanın Panic Wipe'ı tetiklediğini, yani yerel veritabanının fiziksel olarak silindiğini anlıyorum. En gizli mesajlar ekran görüntülerine ve kayda karşı korunur.";
+"Launch protection" = "Başlatma koruması";
+"Face ID / Touch ID lock" = "Face ID / Touch ID kilidi";
+"POPOPX asks for biometrics before it opens. The database stays locked until then." = "POPOPX açılmadan önce biyometri ister. O ana kadar veritabanı kilitli kalır.";
+"Biometrics are not available on this device." = "Biyometri bu cihazda kullanılabilir değil.";
+"Privacy policy and terms of use" = "Gizlilik politikası ve kullanım koşulları";
+"POPOPX Privacy Policy" = "POPOPX Gizlilik Politikası";
+"POPOPX Terms of Use" = "POPOPX Kullanım Koşulları";
+"Read offline, any time" = "Çevrimdışı oku, her zaman";
+"I have read and agree to the POPOPX Privacy Policy and the POPOPX Terms of Use." = "POPOPX Gizlilik Politikası'nı ve POPOPX Kullanım Koşulları'nı okudum ve kabul ediyorum.";
+"I have read it" = "Okudum, kapat";
+"Agree and enter POPOPX" = "Kabul et ve POPOPX'e gir";
+"Confirm the three commitments above." = "Yukarıdaki üç taahhüdü onayla.";
+"Agree to the privacy policy and terms of use to continue." = "Devam etmek için politikayı ve koşulları kabul et.";
+"Encrypted queue, Bluetooth Mesh and the privacy shield are ready." = "Şifreli kuyruk, Bluetooth Mesh ve gizlilik kalkanı hazır.";
+"The 3-Day Pioneer Node Trial Badge is active." = "3 günlük öncü düğüm deneme rozeti etkin.";
+
+/* Legal: shared */
+"Effective: November 2026" = "Yürürlük: Kasım 2026";
+"The full published statement is at popopx.chat/privacy." = "Yayınlanmış tam metin popopx.chat/privacy adresinde.";
+
+/* Legal: privacy */
+"No account, no collection" = "Hesap yok, toplama yok";
+"POPOPX creates no accounts. Your profiles, contacts, groups, messages and settings exist only in the encrypted database on this device, and nothing here links who talks to whom." = "POPOPX hesap oluşturmaz. Profillerin, kişilerin, grupların, mesajların ve ayarların yalnızca bu cihazdaki şifreli veritabanında bulunur ve burada kimin kiminle konuştuğunu bağlayan hiçbir şey yoktur.";
+"Encrypted relay queues" = "Şifreli röle kuyrukları";
+"Online messages travel through the dynamic SMP relay node cluster. Queues are encrypted end to end, so a relay node sees neither message content nor both ends of a conversation, and it keeps no history of delivered messages." = "Çevrimiçi mesajlar dinamik SMP röle düğüm kümesi üzerinden yol alır. Kuyruklar uçtan uca şifrelendiği için bir röle düğümü ne mesaj içeriğini ne de bir konuşmanın iki ucunu görür ve iletilmiş mesajların geçmişini de tutmaz.";
+"No analytics in this build" = "Bu derlemede analiz yok";
+"This build bundles no analytics or crash-reporting SDK and no telemetry collector. The status you see in the header describes the nodes your own device is talking to, not you." = "Bu derlemeye herhangi bir analiz veya çökme raporlama SDK'sı ve telemetri toplayıcısı dahil değildir. Üst çubukta gördüğün durum, kendi cihazının konuştuğu düğümleri anlatır; seni değil.";
+"Credentials stay on device" = "Kimlik verileri cihazda kalır";
+"Identity keys, the POPOPX Compute Credits balance and privacy node badges are kept in this device's Keychain and local encrypted store. They are never uploaded, only you can move them, and a reinstall without a backup loses them." = "Kimlik anahtarları, POPOPX Hesaplama Kredisi bakiyesi ve gizlilik düğümü rozetleri bu cihazın Anahtar Zinciri'nde ve yerel şifreli deposunda saklanır. Bunlar asla yüklenmez, yalnızca sen taşıyabilirsin ve yedek olmadan yapılan bir kurulum bunları kaybeder.";
+"Push token and replay protection" = "Push jetonu ve yeniden oynatmaya karşı koruma";
+"Push delivery uses an Apple device token bound to the notification mode you chose. The token carries no message content, is reissued when you change server or mode, and is used once so a captured token cannot be replayed." = "Push teslimi, seçtiğin bildirim moduna bağlı bir Apple cihaz jetonu kullanır. Jeton mesaj içeriği taşımaz, sunucu veya mod değiştirdiğinde yeniden verilir ve bir kez kullanılır; bu yüzden ele geçirilen bir jeton yeniden oynatılamaz.";
+"The camera guard stays local" = "Kamera bekçisi yerel kalır";
+"The anti-peeping guard switches the front camera on only while a top-secret sheet is open, at the lowest resolution, processes every frame on this device and stops the stream when the sheet closes. Nothing is written to disk and nothing is uploaded." = "Gözlemeye karşı bekçi, ön kamerayı yalnızca en gizli sayfa açıkken ve en düşük çözünürlükte açar, her kareyi bu cihazda işler ve sayfa kapanınca akışı durdurur. Diske hiçbir şey yazılmaz ve hiçbir şey yüklenmez.";
+"Screenshots, recordings and offline hops" = "Ekran görüntüleri, kayıtlar ve çevrimdışı atmalar";
+"Protected screens are blocked from screenshots and screen recording by the system itself. In 厢语 mode messages hop over Bluetooth between nearby devices and never reach the public internet." = "Korunan ekranlarda ekran görüntüsünü ve ekran kaydını sistemin kendisi engeller. 厢语 modunda mesajlar Bluetooth üzerinden yakındaki cihazlar arasında atlar ve genel internete asla ulaşmaz.";
+"Your controls" = "Kontrol sende";
+"You can export or delete any identity, erase the local database or trigger Panic Wipe at any time. Deletion is irreversible because no server holds a copy." = "İstediğin zaman herhangi bir kimliği dışa aktarabilir veya silebilir, yerel veritabanını silebilir ya da Panic Wipe'ı tetikleyebilirsin. Silme geri alınamaz çünkü hiçbir sunucu bir kopya tutmaz.";
+
+/* Legal: terms */
+"Acceptable use" = "Kabul edilebilir kullanım";
+"Use POPOPX within the laws of the country you are in. Public groups and 厢语 broadcasts must carry no unlawful content, no spam and no harassment of other users." = "POPOPX'i bulunduğun ülkenin yasaları içinde kullan. Genel gruplar ve 厢语 yayınları yasa dışı içerik, spam ve diğer kullanıcılara taciz taşıyamaz.";
+"Your keys, your responsibility" = "Anahtarların, senin sorumluluğun";
+"Your mnemonic phrase, identity keys, badges and POPOPX Compute Credits exist only on this device. If the device or the phrase is lost, they cannot be recovered, frozen or reissued by anyone." = "Hatırlama ifaden, kimlik anahtarların, rozetlerin ve POPOPX Hesaplama Kredisi yalnızca bu cihazda bulunur. Cihaz ya da ifade kaybedilirse kimse bunları geri getiremez, donduramaz veya yeniden veremez.";
+"No guarantee of availability" = "Kullanılabilirlik garantisi yok";
+"Relay nodes, push queues and Bluetooth Mesh hops are provided as they are. Offline delivery depends on nearby devices being present and switched on, so it cannot be guaranteed." = "Röle düğümleri, push kuyrukları ve Bluetooth Mesh atmaları bulundukları gibi sağlanır. Çevrimdışı teslim, yakında açık cihazların bulunmasına bağlıdır, bu yüzden garanti edilemez.";
+"Panic Wipe disclaimer" = "Panic Wipe sorumluluk reddi";
+"Tapping the logo three times erases local data irreversibly to protect you under coercion. Messages already waiting in a relay queue cannot be erased from this device and are not recovered for you." = "Logoya üç kez dokunmak, baskı altında seni korumak için yerel verileri geri alınamaz şekilde siler. Bir röle kuyruğunda bekleyen mesajlar bu cihazdan silinemez ve senin adına kurtarılamaz.";
+"Operator conditions" = "Operatör koşulları";
+"Relay operators set their own conditions for the servers they run. When an operator requires acceptance, the app shows that operator's conditions and records your acceptance before using them." = "Röle operatörleri, işlettikleri sunucular için kendi koşullarını belirler. Bir operatör onay istediğinde uygulama o operatörün koşullarını gösterir ve kullanmadan önce onayını kaydeder.";
+"Names and changes" = "Adlar ve değişiklikler";
+"POPOPX and the POPOPX logo are the names of this build. These terms and the privacy statement may change; the app always shows the version you agreed to, and continuing to use POPOPX means you accept the change." = "POPOPX ve POPOPX logosu bu derlemenin adlarıdır. Bu koşullar ve gizlilik bildirimi değişebilir; uygulama her zaman onay verdiğin sürümü gösterir ve POPOPX'i kullanmaya devam etmek değişikliği kabul ettiğin anlamına gelir.";

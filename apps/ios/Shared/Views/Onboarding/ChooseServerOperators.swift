@@ -9,6 +9,7 @@
 // Spec: spec/client/navigation.md
 
 import SwiftUI
+import LocalAuthentication
 import POPOPXChat
 
 // The privacy statement POPOPX shows in its consent flows. Single place to edit; the site serves it.
@@ -47,147 +48,215 @@ struct OnboardingButtonStyle: ButtonStyle {
     }
 }
 
+// Spec: spec/client/navigation.md#OnboardingConditionsView
+// 引导第 4 屏：三条安全承诺 + 启动防护 + 两份内置法律文书。
+// 「同意并进入」的链路顺序不可调换：先落服务端条件接受，再做生物识别证明，
+// 最后幂等发放先锋徽章并等两条 Toast 走完，才拆掉引导栈。
 struct OnboardingConditionsView: View {
-    @EnvironmentObject var theme: AppTheme
-    @Environment(\.colorScheme) var colorScheme: ColorScheme
-    @State private var showConditionsSheet = false
+    @EnvironmentObject var m: ChatModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    @AppStorage(DEFAULT_PERFORM_LA) private var prefPerformLA = false
+
     var selectedOperatorIds: Set<Int64>
+
+    @State private var relayCommitted = false
+    @State private var routingCommitted = false
+    @State private var wipeCommitted = false
+    @State private var agreed = false
+    @State private var biometricOn = false
+    @State private var biometricAvailable = false
+    @State private var document: PopopxLegalDocumentSheet.Document? = nil
+    @State private var toast = PopopxToastModel()
+
+    private static let toastHold: Duration = .seconds(1.3)
+    private static let toastPair: Duration = .seconds(2.6)
 
     var body: some View {
         GeometryReader { g in
-            VStack(alignment: .leading, spacing: 10) {
-                Spacer(minLength: 0)
+            ScrollView {
+                VStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
+                    PopopxOnboardingHeader(
+                        step: 3,
+                        steps: 3,
+                        stage: PopopxOnboardingCopy.stageCommitments,
+                        title: PopopxOnboardingCopy.commitmentsTitle
+                    )
+                    .padding(.horizontal, PopopxMetrics.gutter)
 
-                heroImage().frame(maxWidth: .infinity, minHeight: 80)
+                    commitmentsCard
 
-                Text("Network commitments")
-                    .font(.largeTitle)
-                    .bold()
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .fixedSize(horizontal: false, vertical: true)
+                    launchCard
 
-                Text("Operators commit to:\n- Be independent\n- Minimize metadata usage\n- Run verified open-source code")
-                    .font(.callout)
-                    .lineSpacing(2)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 4)
-                    .padding(.top, 10)
-                    .fixedSize(horizontal: false, vertical: true)
+                    legalCard
 
-                Text("You commit to:\n- Only legal content in public groups\n- Respect other users - no spam")
-                    .font(.callout)
-                    .lineSpacing(2)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 4)
-                    .padding(.top, 10)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                Button {
-                    showConditionsSheet = true
-                } label: {
-                    Text("Privacy policy and conditions of use.")
-                        .fontWeight(.medium)
-                        .fixedSize(horizontal: false, vertical: true)
+                    VStack(alignment: .leading, spacing: PopopxMetrics.spaceS) {
+                        enterButton
+                        gateHint
+                    }
+                    .padding(.horizontal, PopopxMetrics.gutter)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.leading, 4)
-                .padding(.top, 10)
-                .padding(.bottom, 15)
-
-                Spacer(minLength: 0)
-
-                acceptButton()
-                    .padding(.bottom, g.safeAreaInsets.bottom == 0 ? 20 : 0)
+                .padding(.top, PopopxMetrics.spaceM)
+                .padding(.bottom, PopopxMetrics.space2XL)
+                .frame(maxWidth: .infinity, minHeight: g.size.height, alignment: .top)
             }
-            .padding(.horizontal, 25)
-            .padding(.top, 25)
-            .padding(.bottom, 25)
-            .frame(minHeight: g.size.height)
+            .scrollBounceBehavior(.basedOnSize)
         }
+        .background(PopopxPalette.base, ignoresSafeAreaEdges: .all)
+        .onAppear {
+            var error: NSError? = nil
+            biometricAvailable = LAContext().canEvaluatePolicy(.deviceOwnerAuthentication, error: &error)
+        }
+        .sheet(item: $document) { doc in
+            PopopxLegalDocumentSheet(document: doc)
+                .presentationDetents([.medium, .large])
+        }
+        .popopxToast(toast)
         .frame(maxHeight: .infinity)
         .navigationBarHidden(true)
-        .sheet(isPresented: $showConditionsSheet) {
-            NavigationStack {
-                VStack {
-                    ConditionsTextView()
-                        .padding()
-                    acceptButton()
-                        .padding(.horizontal, 25)
-                        .padding(.bottom, 20)
-                }
-                .navigationTitle("Conditions of use")
-                .navigationBarTitleDisplayMode(.large)
-                .toolbar { ToolbarItem(placement: .navigationBarTrailing, content: conditionsLinkButton) }
-                .modifier(ThemedBackground(grouped: true))
-            }
+    }
+
+    // MARK: - 卡片
+
+    private var commitmentsCard: some View {
+        PopopxSectionCard(PopopxOnboardingCopy.commitmentsCard) {
+            PopopxCheckbox(PopopxOnboardingCopy.commitmentRelay, isOn: $relayCommitted)
+            PopopxOnboardingHairline()
+            PopopxCheckbox(PopopxOnboardingCopy.commitmentRouting, isOn: $routingCommitted)
+            PopopxOnboardingHairline()
+            PopopxCheckbox(PopopxOnboardingCopy.commitmentWipe, isOn: $wipeCommitted)
         }
     }
 
-    @ViewBuilder
-    private func heroImage() -> some View {
-        #if POPOPX_ASSETS || SIMPLEX_ASSETS
-        Image(colorScheme == .light ? "network-commitments" : "network-commitments-light")
-            .resizable()
-            .scaledToFit()
-        #else
-        ZStack {
-            let gp = OnboardingCardView.gradientPoints(aspectRatio: 1.5, scale: colorScheme == .light ? 1.2 : 1.5)
-            LinearGradient(
-                stops: colorScheme == .light ? OnboardingCardView.lightStops : OnboardingCardView.darkStops,
-                startPoint: gp.start,
-                endPoint: gp.end
+    private var launchCard: some View {
+        PopopxSectionCard(PopopxOnboardingCopy.launchProtection) {
+            PopopxToggleRow(
+                PopopxOnboardingCopy.biometricRow,
+                note: biometricAvailable
+                    ? PopopxOnboardingCopy.biometricNote
+                    : PopopxOnboardingCopy.biometricUnavailable,
+                systemImage: "faceid",
+                tint: .brand,
+                isOn: $biometricOn
             )
-            Image(systemName: "checkmark.shield")
-                .font(.system(size: 72))
-                .foregroundColor(theme.colors.primary)
+            .disabled(!biometricAvailable)
         }
-        .aspectRatio(1.5, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: 24))
-        .padding(.horizontal, 25)
-        #endif
     }
 
-    private func acceptButton() -> some View {
-        Button {
-            Task {
-                do {
-                    let conditionsId = ChatModel.shared.conditions.currentConditions.conditionsId
-                    let r = try await acceptConditions(conditionsId: conditionsId, operatorIds: Array(selectedOperatorIds))
-                    await MainActor.run {
-                        ChatModel.shared.conditions = r
-                    }
-                    if let enabledOps = enabledOperators(r.serverOperators) {
-                        let r2 = try await setServerOperators(operators: enabledOps)
-                        await MainActor.run {
-                            ChatModel.shared.conditions = r2
-                            completeOnboarding()
-                        }
-                    } else {
-                        await MainActor.run {
-                            completeOnboarding()
-                        }
-                    }
-                } catch let error {
-                    await MainActor.run {
-                        showAlert(
-                            NSLocalizedString("Error accepting conditions", comment: "alert title"),
-                            message: responseError(error)
-                        )
-                    }
-                }
+    private var legalCard: some View {
+        PopopxSectionCard(
+            PopopxOnboardingCopy.legalCard,
+            footnote: PopopxOnboardingCopy.legalReadableOffline
+        ) {
+            PopopxPickerRow(
+                PopopxOnboardingCopy.privacyPolicy,
+                systemImage: "hand.raised.fill",
+                tint: .brand
+            ) {
+                document = .privacy
             }
-        } label: {
-            Text("Accept")
+            PopopxOnboardingHairline()
+            PopopxPickerRow(
+                PopopxOnboardingCopy.termsOfUse,
+                systemImage: "checkmark.seal.fill",
+                tint: .neutral
+            ) {
+                document = .terms
+            }
+            PopopxOnboardingHairline()
+            PopopxCheckbox(PopopxOnboardingCopy.legalAgreement, isOn: $agreed)
         }
-        .buttonStyle(OnboardingButtonStyle(isDisabled: selectedOperatorIds.isEmpty))
-        .disabled(selectedOperatorIds.isEmpty)
+    }
+
+    // MARK: - 闸门
+
+    private var commitmentsMet: Bool { relayCommitted && routingCommitted && wipeCommitted }
+
+    private var canEnter: Bool { commitmentsMet && agreed && !selectedOperatorIds.isEmpty }
+
+    @ViewBuilder private var gateHint: some View {
+        if !commitmentsMet {
+            Text(PopopxOnboardingCopy.commitmentsRequired)
+                .font(PopopxType.caption)
+                .foregroundStyle(PopopxPalette.labelSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        } else if !agreed {
+            Text(PopopxOnboardingCopy.legalRequired)
+                .font(PopopxType.caption)
+                .foregroundStyle(PopopxPalette.labelSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var enterButton: some View {
+        PopopxButton(PopopxOnboardingCopy.agreeAndEnter, systemImage: "lock.shield.fill") {
+            await finishOnboarding()
+        }
+        .disabled(!canEnter)
+        .popopxAnimation(PopopxSpring.snappy, value: canEnter, reduceMotion: reduceMotion)
+    }
+
+    // MARK: - 完成链
+
+    @MainActor private func finishOnboarding() async {
+        do {
+            let conditionsId = m.conditions.currentConditions.conditionsId
+            let r = try await acceptConditions(conditionsId: conditionsId, operatorIds: Array(selectedOperatorIds))
+            m.conditions = r
+            if let enabledOps = enabledOperators(r.serverOperators) {
+                m.conditions = try await setServerOperators(operators: enabledOps)
+            }
+        } catch let error {
+            showAlert(
+                NSLocalizedString("Error accepting conditions", comment: "alert title"),
+                message: responseError(error)
+            )
+            return
+        }
+
+        if biometricOn {
+            await enableLaunchLock()
+        }
+
+        // 幂等：`PopopxBadgeManager` 先落 `.trialGuard` 再落徽章，重复调用只会返回 nil，
+        // 因此第四屏这条链不会烧掉第二次 72 小时（裁定 2）。
+        _ = await PopopxBadgeManager.shared.issuePioneerTrialIfNeeded()
+
+        toast.show(PopopxToastMessage(text: PopopxOnboardingCopy.readyToast, kind: .encrypted, duration: Self.toastHold))
+        toast.show(PopopxToastMessage(text: PopopxOnboardingCopy.badgeToast, kind: .mesh, duration: Self.toastHold))
+        try? await Task.sleep(for: Self.toastPair)
+        PopopxHaptics.impact(.heavy)
+        completeOnboarding()
+    }
+
+    /// 与 `ContentView.initialEnableLA()`（ContentView.swift:416）同一套契约：
+    /// 模式回到 `.system` → 系统生物识别证明 → 成功才落 `prefPerformLA` 与 app group 镜像。
+    /// 失败或不可用一律写回 false，绝不留"开关是开的但没证明过"。
+    @MainActor private func enableLaunchLock() async {
+        privacyLocalAuthModeDefault.set(.system)
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            authenticate(reason: NSLocalizedString("Enable POPOPX Lock", comment: "authentication reason")) { laResult in
+                switch laResult {
+                case .success:
+                    m.contentViewAccessAuthenticated = true
+                    prefPerformLA = true
+                    appLocalAuthEnabledGroupDefault.set(true)
+                case .failed:
+                    prefPerformLA = false
+                    appLocalAuthEnabledGroupDefault.set(false)
+                case .unavailable:
+                    prefPerformLA = false
+                    appLocalAuthEnabledGroupDefault.set(false)
+                }
+                continuation.resume()
+            }
+        }
     }
 
     private func completeOnboarding() {
         let m = ChatModel.shared
         onboardingStageDefault.set(.onboardingComplete)
-        // defer the stage swap off the Accept handler's call stack so the deep onboarding nav stack
+        // defer the stage swap off the finish button's call stack so the deep onboarding nav stack
         // isn't torn down from inside its own event handling (UIKit crash on completion); the inner
         // async guarantees this even if dismissAllSheets runs its completion synchronously.
         dismissAllSheets(animated: false) {

@@ -195,76 +195,74 @@ struct CreateProfile: View {
 
 struct CreateFirstProfile: View {
     @EnvironmentObject var m: ChatModel
-    @EnvironmentObject var theme: AppTheme
-    @Environment(\.colorScheme) var colorScheme: ColorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    @AppStorage(GROUP_DEFAULT_INCOGNITO, store: groupDefaults) private var incognitoDefault = false
+
     @State private var displayName: String = ""
-    @FocusState private var focusDisplayName
+    @State private var note: String = ""
+    @State private var profileImage: String? = nil
+    @State private var chosenImage: UIImage? = nil
+    @State private var avatarTintIndex = 0
+    @State private var showChooseSource = false
+    @State private var showImagePicker = false
+    @State private var showTakePhoto = false
     @State private var nextStepNavLinkActive = false
     @State private var showMigrateSheet = false
+
+    // 引导第 2 屏：创建第一个匿名身份。
+    private static let avatarSize: CGFloat = 112
+    private static let avatarTints: [Color] = [
+        PopopxPalette.brand,
+        PopopxPalette.mesh,
+        PopopxPalette.success,
+        PopopxPalette.danger,
+        PopopxPalette.labelSecondary
+    ]
+
     var body: some View {
-        let spacing: CGFloat = 10
-        let topPadding: CGFloat = 8
-        let padding: CGFloat = 25
         GeometryReader { g in
-            let v = ScrollView {
-                VStack(alignment: .center, spacing: spacing) {
-                    #if POPOPX_ASSETS || SIMPLEX_ASSETS
-                    Image(colorScheme == .light ? "your-profile" : "your-profile-light")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(maxWidth: .infinity)
-                    #else
-                    ZStack {
-                        let gp = OnboardingCardView.gradientPoints(aspectRatio: 1.0, scale: colorScheme == .light ? 1.2 : 1.5)
-                        LinearGradient(
-                            stops: colorScheme == .light ? OnboardingCardView.lightStops : OnboardingCardView.darkStops,
-                            startPoint: gp.start,
-                            endPoint: gp.end
-                        )
-                        Image(systemName: "person.crop.rectangle")
-                            .font(.system(size: 72))
-                            .foregroundColor(theme.colors.primary)
-                    }
-                    .aspectRatio(1.0, contentMode: .fit)
-                    .clipShape(RoundedRectangle(cornerRadius: 24))
-                    .padding(.horizontal, 25)
-                    .frame(maxWidth: .infinity)
-                    #endif
+            ScrollView {
+                VStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
+                    PopopxOnboardingHeader(
+                        step: 1,
+                        steps: 3,
+                        stage: PopopxOnboardingCopy.stageIdentity,
+                        title: PopopxOnboardingCopy.identityTitle,
+                        note: PopopxOnboardingCopy.identityNote
+                    )
+                    .padding(.horizontal, PopopxMetrics.gutter)
 
-                    Text("Your profile")
-                        .font(.largeTitle)
-                        .bold()
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
+                    avatarRow
+                        .padding(.horizontal, PopopxMetrics.gutter)
 
-                    Text("On your phone, not on servers.")
-                        .font(.title3)
-                        .fontWeight(.medium)
-                        .foregroundColor(theme.colors.secondary)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
+                    fieldsCard
 
-                    Text("No account. No phone. No email. No ID.\nThe most secure encryption.")
-                        .font(.footnote)
-                        .foregroundColor(theme.colors.secondary)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
+                    privacyCard
 
-                    profileNameField()
-                        .padding(.top)
-                        .padding(.bottom, 5)
-
-                    Spacer(minLength: 0)
-
-                    createProfileButton()
-                        .padding(.bottom, g.safeAreaInsets.bottom == 0 ? 20 : 0)
+                    nextButton
+                        .padding(.horizontal, PopopxMetrics.gutter)
+                        .padding(.top, PopopxMetrics.space2XS)
                 }
-                .padding(.horizontal, padding)
-                .padding(.top, topPadding)
-                .padding(.bottom, padding)
-                .frame(minHeight: g.size.height)
+                .padding(.top, PopopxMetrics.spaceM)
+                .padding(.bottom, PopopxMetrics.space2XL)
+                .frame(maxWidth: .infinity, minHeight: g.size.height)
             }
-            .onTapGesture { focusDisplayName = false }
+            .scrollBounceBehavior(.basedOnSize)
+            .onTapGesture { hideKeyboard() }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        if m.migrationState == nil {
+                            m.migrationState = .pasteOrScanLink
+                        }
+                        showMigrateSheet = true
+                    } label: {
+                        Image(systemName: "tray.and.arrow.down.fill")
+                    }
+                    .accessibilityLabel(Text(PopopxOnboardingCopy.restoreBackup))
+                }
+            }
             .sheet(isPresented: $showMigrateSheet, onDismiss: { m.migrationState = nil }) {
                 NavigationStack {
                     MigrateToDevice(migrationState: $m.migrationState)
@@ -272,69 +270,176 @@ struct CreateFirstProfile: View {
                         .modifier(ThemedBackground(grouped: true))
                 }
             }
-            v.scrollBounceBehavior(.basedOnSize).defaultScrollAnchor(.bottom)
         }
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    if m.migrationState == nil {
-                        m.migrationState = .pasteOrScanLink
-                    }
-                    showMigrateSheet = true
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "tray.and.arrow.down")
-                        Text("Migrate")
-                            .fontWeight(.medium)
-                    }
+        .background(PopopxPalette.base, ignoresSafeAreaEdges: .all)
+        .confirmationDialog(PopopxOnboardingCopy.profilePhoto, isPresented: $showChooseSource, titleVisibility: .visible) {
+            Button("Take picture") {
+                showTakePhoto = true
+            }
+            Button("Choose from library") {
+                showImagePicker = true
+            }
+        }
+        .fullScreenCover(isPresented: $showTakePhoto) {
+            ZStack {
+                Color.black.edgesIgnoringSafeArea(.all)
+                CameraImagePicker(image: $chosenImage)
+            }
+        }
+        .sheet(isPresented: $showImagePicker) {
+            LibraryImagePicker(image: $chosenImage) { _ in
+                await MainActor.run {
+                    showImagePicker = false
                 }
             }
         }
-        .onAppear() {
-            if #available(iOS 16, *) {
-                focusDisplayName = true
-            } else {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    focusDisplayName = true
+        .onChange(of: chosenImage) { _, image in
+            Task {
+                let resized: String? = if let image {
+                    await resizeImageToStrSize(cropToSquare(image), maxDataSize: 12500)
+                } else {
+                    nil
                 }
+                await MainActor.run { profileImage = resized }
             }
         }
         .frame(maxHeight: .infinity)
     }
 
-    private func profileNameField() -> some View {
-        let name = displayName.trimmingCharacters(in: .whitespaces)
-        let validName = mkValidName(name)
-        return ZStack(alignment: .trailing) {
-            TextField("Enter profile name...", text: $displayName)
-                .focused($focusDisplayName)
-                .padding(.horizontal)
-                .padding(.trailing, name != validName ? 20 : 0)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(Color(uiColor: .tertiarySystemFill))
-                )
-            if name != validName {
-                Button {
-                    showAlert(.invalidNameError(validName: validName))
-                } label: {
-                    Image(systemName: "exclamationmark.circle")
-                        .foregroundColor(.red)
-                        .padding(.horizontal, 10)
+    // MARK: - 头像
+
+    private var avatarTint: Color { Self.avatarTints[avatarTintIndex % Self.avatarTints.count] }
+
+    private var avatarRow: some View {
+        HStack(alignment: .center, spacing: PopopxMetrics.spaceM) {
+            Button {
+                PopopxHaptics.impact(.light)
+                showChooseSource = true
+            } label: {
+                ZStack(alignment: .bottomTrailing) {
+                    ProfileImage(
+                        imageStr: profileImage,
+                        size: Self.avatarSize,
+                        color: avatarTint,
+                        backgroundColor: avatarTint.opacity(0.16)
+                    )
+                    .frame(width: Self.avatarSize, height: Self.avatarSize)
+                    .clipShape(Circle())
+
+                    Image(systemName: "camera.fill")
+                        .font(PopopxType.microTag)
+                        .foregroundStyle(PopopxPalette.onBrand)
+                        .frame(width: PopopxMetrics.spaceXL, height: PopopxMetrics.spaceXL)
+                        .background(PopopxPalette.brand, in: Circle())
+                        .overlay(Circle().strokeBorder(PopopxPalette.base, lineWidth: PopopxMetrics.divider))
+                }
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text(PopopxOnboardingCopy.profilePhoto))
+            .accessibilityHint(Text(PopopxOnboardingCopy.tapToChoosePhoto))
+
+            VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
+                Text(PopopxOnboardingCopy.profilePhoto)
+                    .font(PopopxType.emphasis)
+                    .foregroundStyle(PopopxPalette.label)
+                Text(PopopxOnboardingCopy.tapToChoosePhoto)
+                    .font(PopopxType.caption)
+                    .foregroundStyle(PopopxPalette.labelSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                PopopxButton(
+                    PopopxOnboardingCopy.newAvatar,
+                    systemImage: "paintpalette.fill",
+                    role: .secondary,
+                    fullWidth: false
+                ) {
+                    withAnimation(PopopxSpring.snappy) {
+                        avatarTintIndex += 1
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    // MARK: - 字段
+
+    private var trimmedName: String { displayName.trimmingCharacters(in: .whitespaces) }
+
+    private var suggestedName: String { mkValidName(trimmedName) }
+
+    private var nameIsUsable: Bool { canCreateProfile(displayName) }
+
+    private var noteFitsLimit: Bool { chatJsonLength(note) <= MAX_BIO_LENGTH_BYTES }
+
+    private var fieldsCard: some View {
+        PopopxSectionCard {
+            PopopxTextField(
+                PopopxOnboardingCopy.anonymousName,
+                prompt: PopopxOnboardingCopy.anonymousNamePrompt,
+                text: $displayName,
+                systemImage: "person.crop.circle.badge.plus",
+                onSubmit: { _ in hideKeyboard() }
+            )
+
+            if !trimmedName.isEmpty && trimmedName != suggestedName {
+                HStack(alignment: .center, spacing: PopopxMetrics.spaceS) {
+                    PopopxOnboardingIconBadge(systemName: "exclamationmark.circle.fill", tint: .danger)
+                    Text(PopopxOnboardingCopy.nameInvalidHint)
+                        .font(PopopxType.caption)
+                        .foregroundStyle(PopopxPalette.dangerInk)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 0)
+                }
+                .transition(.opacity)
+            } else if trimmedName.isEmpty {
+                Text(PopopxOnboardingCopy.nameRequired)
+                    .font(PopopxType.caption)
+                    .foregroundStyle(PopopxPalette.labelSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            PopopxOnboardingHairline()
+
+            PopopxTextField(
+                PopopxOnboardingCopy.noteForFriends,
+                prompt: PopopxOnboardingCopy.noteForFriendsPrompt,
+                text: $note,
+                systemImage: "text.alignleft",
+                onSubmit: { _ in hideKeyboard() }
+            )
+
+            if !note.isEmpty {
+                HStack(alignment: .center, spacing: PopopxMetrics.spaceXS) {
+                    Spacer(minLength: 0)
+                    Text(verbatim: "\(chatJsonLength(note)) / \(MAX_BIO_LENGTH_BYTES)")
+                        .font(PopopxType.metricSmall)
+                        .foregroundStyle(noteFitsLimit ? PopopxPalette.labelHint : PopopxPalette.dangerInk)
                 }
             }
         }
+        .popopxAnimation(PopopxSpring.snappy, value: trimmedName, reduceMotion: reduceMotion)
     }
 
-    private func createProfileButton() -> some View {
-        Button {
-            createProfile()
-        } label: {
-            Text("Create profile")
+    private var privacyCard: some View {
+        PopopxSectionCard(PopopxOnboardingCopy.privacyBoost) {
+            PopopxToggleRow(
+                PopopxOnboardingCopy.incognitoRow,
+                note: PopopxOnboardingCopy.incognitoNote,
+                systemImage: "person.crop.circle.badge.questionmark",
+                tint: .brand,
+                isOn: $incognitoDefault
+            )
         }
-        .buttonStyle(OnboardingButtonStyle(isDisabled: !canCreateProfile(displayName)))
-        .disabled(!canCreateProfile(displayName))
+    }
+
+    // MARK: - 下一步
+
+    private var nextButton: some View {
+        PopopxButton(PopopxOnboardingCopy.next, systemImage: "arrow.right") {
+            createProfile()
+        }
+        .disabled(!nameIsUsable || !noteFitsLimit)
         .navigationDestination(isPresented: $nextStepNavLinkActive) {
             nextStepDestinationView()
         }
@@ -353,8 +458,10 @@ struct CreateFirstProfile: View {
     private func createProfile() {
         hideKeyboard()
         let profile = Profile(
-            displayName: displayName.trimmingCharacters(in: .whitespaces),
-            fullName: ""
+            displayName: trimmedName,
+            fullName: "",
+            shortDescr: note.isEmpty ? nil : note,
+            image: profileImage
         )
         let m = ChatModel.shared
         do {

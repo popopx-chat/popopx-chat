@@ -7945,3 +7945,114 @@ alert title */
 
 /* error */
 "Your Compute Credits balance cannot go above %lld. Spend some credits first." = "算力点余额不能超过 %lld，请先花掉一部分。";
+
+/* ==== POPOPX onboarding v2 (2026-11-19) — 引导页四屏 + 隐私政策/使用条款 ==== */
+/* POPOPX onboarding v2 — generated block, 2026-11-19 */
+
+/* Onboarding: header pills */
+"Identity isolation" = "身份隔离";
+"Routing & notifications" = "双模路由与通知";
+"Commitments & launch" = "安全承诺与启动";
+
+/* Onboarding: page 1 welcome */
+"Own your network." = "网络归你所有。";
+"Private messaging with no account and no user IDs." = "无账号、无用户 ID 的私密通讯。";
+"SMP end-to-end encrypted" = "SMP 端到端加密";
+"厢语 Bluetooth Mesh relay" = "厢语蓝牙 Mesh 无网中继";
+"What POPOPX gives you" = "POPOPX 给你的";
+"No user IDs" = "零用户 ID";
+"No phone number, no email, no global public key. Nothing links your contacts to each other, and each anonymous identity stays separate." = "不要手机号、不要邮箱、没有全局公钥。任何数据都无法把你的联系人彼此关联，每个匿名身份都相互隔离。";
+"Dynamic relays and near-field" = "动态中继与近场建连";
+"Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "有网时走动态 SMP 中继节点集群；断网时厢语切换到 1–7 跳蓝牙 Mesh，并用 UWB 或轻触完成面对面建连。";
+"Anti-peeping and local-only cards" = "防偷窥与纯本地名片";
+"Screenshots and recordings are blocked, top-secret messages burn after reading, and your encrypted profile card never leaves this device." = "禁止截屏与录屏，绝密消息阅后即焚，加密个人名片永不离开本机。";
+"Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "完成本引导即可获得 3 天先锋节点体验徽章。";
+"Create encrypted identity" = "创建加密身份";
+"Restore from encrypted backup" = "从加密备份恢复";
+
+/* Onboarding: page 2 identity */
+"Create your first anonymous identity" = "创建你的首个匿名身份";
+"Identity, keys, POPOPX Compute Credits and your profile card are encrypted on this device only. Servers cannot see them." = "身份、密钥、POPOPX 算力点与个人主页只加密存放在本机，服务器完全不可见。";
+"Profile photo" = "头像";
+"Tap to choose a photo" = "点击选择照片";
+"New avatar" = "换一张头像";
+"Anonymous name" = "匿名代号";
+"How you appear to contacts" = "你在联系人面前的显示名";
+"Note for friends" = "备注全名";
+"Optional full name, visible only to contacts you choose" = "选填，仅展示给你指定的联系人";
+"Enter an anonymous name to continue." = "请先填写匿名代号。";
+"This name contains characters POPOPX cannot use." = "该名称包含 POPOPX 无法使用的字符。";
+"Privacy boost" = "隐私增强";
+"Incognito mode by default" = "默认启用隐身模式";
+"Every new connection gets a fresh random nickname, so one name never links two chats." = "每次建立新连接都随机生成独立临时昵称，同一个名字不会串起两场会话。";
+"Next" = "下一步";
+
+/* Onboarding: page 3 dual mode */
+"Choose how POPOPX connects and wakes" = "选择连接与唤醒方式";
+"Dynamic SMP relay nodes" = "动态 SMP 中继节点集群";
+"Online encrypted channel" = "在线加密通道";
+"Low latency · minor metadata exposure" = "低延迟 · 轻微元数据暴露";
+"Higher privacy · balanced battery" = "更高隐私 · 均衡续航";
+"Maximum discretion · nothing pushed" = "极致隐身 · 零服务器推送";
+"Apple's push service carries only the signal that new data is waiting, never the content." = "Apple 推送只传递「有新数据」的信号，绝不传递消息内容。";
+"厢语 offline mesh" = "厢语离线 Mesh 与近场";
+"When the internet is down, messages hop over nearby devices, up to 7 hops, with no server. Pair face to face with UWB or a tap." = "断网时消息经附近设备中继，最多 7 跳、不经服务器；面对面可用 UWB 或轻触配对。";
+"Bluetooth permission is requested the first time the mesh starts." = "首次启动 Mesh 时会请求蓝牙权限。";
+
+/* Onboarding: page 4 commitments and legal */
+"Security commitments and local protection" = "安全承诺与本地防护";
+"Network and security commitments" = "网络与安全承诺";
+"Messages are relayed asynchronously by the dynamic SMP relay node cluster, and deleting them here is irreversible." = "已知悉消息由动态 SMP 中继节点集群异步转发，在本机删除后不可恢复。";
+"Private routing is on by default to hide your real IP address. Finishing this setup grants the 3-Day Pioneer Node Trial Badge, which falls back to free public nodes when it expires and keeps every message." = "已知悉多跳隐私路由默认开启以隐藏真实 IP；完成本引导即获赠 3 天先锋节点体验徽章，到期平滑回退免费公共节点，聊天记录全部保留。";
+"Tapping the logo three times triggers Panic Wipe, a physical erasure of the local database. Top-secret messages are shielded from screenshots and recording." = "已知悉连续点击顶部 Logo 3 次触发紧急物理擦除；绝密消息受硬件级防截屏与防录屏保护。";
+"Launch protection" = "启动防护";
+"Face ID / Touch ID lock" = "Face ID / Touch ID 启动锁";
+"POPOPX asks for biometrics before it opens. The database stays locked until then." = "打开 POPOPX 前先验生物识别，在此之前数据库保持锁定。";
+"Biometrics are not available on this device." = "本机不可用生物识别。";
+"Privacy policy and terms of use" = "隐私政策与使用条款";
+"POPOPX Privacy Policy" = "《POPOPX 隐私政策》";
+"POPOPX Terms of Use" = "《POPOPX 使用条款》";
+"Read offline, any time" = "离线可读";
+"I have read and agree to the POPOPX Privacy Policy and the POPOPX Terms of Use." = "我已阅读并同意《POPOPX 隐私政策》与《POPOPX 使用条款》。";
+"I have read it" = "已阅读并关闭";
+"Agree and enter POPOPX" = "同意并进入 POPOPX";
+"Confirm the three commitments above." = "请先勾选上方三项安全承诺。";
+"Agree to the privacy policy and terms of use to continue." = "请先同意隐私政策与使用条款。";
+"Encrypted queue, Bluetooth Mesh and the privacy shield are ready." = "加密队列、蓝牙 Mesh 与防窥盾已就绪。";
+"The 3-Day Pioneer Node Trial Badge is active." = "3 天先锋节点体验徽章已生效。";
+
+/* Legal: shared */
+"Effective: November 2026" = "生效日期：2026 年 11 月";
+"The full published statement is at popopx.chat/privacy." = "完整对外文本见 popopx.chat/privacy。";
+
+/* Legal: privacy */
+"No account, no collection" = "无账号、不收集";
+"POPOPX creates no accounts. Your profiles, contacts, groups, messages and settings exist only in the encrypted database on this device, and nothing here links who talks to whom." = "POPOPX 不创建账号。你的身份、联系人、群组、消息与设置只存在于本机加密数据库中，任何数据都不会把谁在和谁说话拼在一起。";
+"Encrypted relay queues" = "加密中继队列";
+"Online messages travel through the dynamic SMP relay node cluster. Queues are encrypted end to end, so a relay node sees neither message content nor both ends of a conversation, and it keeps no history of delivered messages." = "在线消息经由动态 SMP 中继节点集群转发。队列全程端到端加密，中继节点既看不到消息内容，也无法同时获知通信两端，且不保留已投递消息的历史。";
+"No analytics in this build" = "本构建不含统计";
+"This build bundles no analytics or crash-reporting SDK and no telemetry collector. The status you see in the header describes the nodes your own device is talking to, not you." = "本构建不内置任何统计分析或崩溃上报 SDK，也没有遥测采集器。顶栏状态只描述本机正在连接的节点，不描述你。";
+"Credentials stay on device" = "凭证只留在本机";
+"Identity keys, the POPOPX Compute Credits balance and privacy node badges are kept in this device's Keychain and local encrypted store. They are never uploaded, only you can move them, and a reinstall without a backup loses them." = "身份密钥、POPOPX 算力点余额与隐私节点徽章存放在本机钥匙串与本地加密存储中，永不上传，只有你能转移；没有备份就重装将全部丢失。";
+"Push token and replay protection" = "推送令牌与防重放";
+"Push delivery uses an Apple device token bound to the notification mode you chose. The token carries no message content, is reissued when you change server or mode, and is used once so a captured token cannot be replayed." = "推送使用与你所选通知模式绑定的 Apple 设备令牌。令牌不含任何消息内容，在更换服务器或通知模式时重新签发，且一次一用，被截获也无法重放。";
+"The camera guard stays local" = "防偷窥相机仅本地处理";
+"The anti-peeping guard switches the front camera on only while a top-secret sheet is open, at the lowest resolution, processes every frame on this device and stops the stream when the sheet closes. Nothing is written to disk and nothing is uploaded." = "防旁观引擎只在绝密弹窗打开期间启用前置摄像头，取最低分辨率，每一帧只在本机处理，弹窗关闭立即停止采集。不写盘，也不上传。";
+"Screenshots, recordings and offline hops" = "截屏、录屏与离线跳数";
+"Protected screens are blocked from screenshots and screen recording by the system itself. In 厢语 mode messages hop over Bluetooth between nearby devices and never reach the public internet." = "受保护界面由系统层面禁止截屏与录屏。厢语模式下消息在附近设备间经蓝牙中继，全程不经公网。";
+"Your controls" = "控制权在你";
+"You can export or delete any identity, erase the local database or trigger Panic Wipe at any time. Deletion is irreversible because no server holds a copy." = "你可以随时导出或删除任一身份、抹除本地数据库或触发紧急物理擦除。任何服务器都不持有副本，所以删除不可恢复。";
+
+/* Legal: terms */
+"Acceptable use" = "使用规范";
+"Use POPOPX within the laws of the country you are in. Public groups and 厢语 broadcasts must carry no unlawful content, no spam and no harassment of other users." = "请在所在国家与地区的法律范围内使用 POPOPX。公开群组与厢语广播不得包含违法内容、垃圾信息或对他人的骚扰。";
+"Your keys, your responsibility" = "密钥自担责任";
+"Your mnemonic phrase, identity keys, badges and POPOPX Compute Credits exist only on this device. If the device or the phrase is lost, they cannot be recovered, frozen or reissued by anyone." = "助记词、身份密钥、徽章与 POPOPX 算力点只存在于本机。设备或助记词遗失后，任何人都无法找回、冻结或补发。";
+"No guarantee of availability" = "不保证可用性";
+"Relay nodes, push queues and Bluetooth Mesh hops are provided as they are. Offline delivery depends on nearby devices being present and switched on, so it cannot be guaranteed." = "中继节点、推送队列与蓝牙 Mesh 跳数按现状提供。离线投递取决于附近是否有已开启的设备，因此无法保证送达。";
+"Panic Wipe disclaimer" = "紧急物理擦除免责";
+"Tapping the logo three times erases local data irreversibly to protect you under coercion. Messages already waiting in a relay queue cannot be erased from this device and are not recovered for you." = "连续点击 Logo 3 次会不可逆地抹除本机数据，用于在胁迫下保护你。已在中继队列中等待的消息无法由本机删除，也不会为你找回。";
+"Operator conditions" = "运营方条款";
+"Relay operators set their own conditions for the servers they run. When an operator requires acceptance, the app shows that operator's conditions and records your acceptance before using them." = "中继节点运营方对其服务器另设各自的条件。当某一运营方要求确认时，App 会先展示该运营方的条款并记录你的确认，之后才使用其服务器。";
+"Names and changes" = "名称与变更";
+"POPOPX and the POPOPX logo are the names of this build. These terms and the privacy statement may change; the app always shows the version you agreed to, and continuing to use POPOPX means you accept the change." = "POPOPX 与 POPOPX 标志是本构建的名称。本条款与隐私说明可能修订，App 内始终展示你所同意的版本；继续使用 POPOPX 即视为接受变更。";
