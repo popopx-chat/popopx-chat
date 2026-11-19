@@ -13,8 +13,11 @@
 //  二是没有可加价的余地——想让它变贵只能整个换掉表示方式。本模块按任务要求换成
 //  salt + PBKDF2-HMAC-SHA256(100_000)，从此**磁盘上不存在口令**，只有派生值。
 //  ⚠️ 这不等于"上游那两个 Keychain 条目消失了"：`kcAppPassword`/`kcSelfDestructPassword`
-//  仍是独立的、以原文存储的凭据，仍然被上游的 LA 门使用。`kcSelfDestructPassword` 只在自毁时
-//  被删（见 `PopopxStorageWipe`）。`kcAppPassword` 多一条路：它只是 `.passcode` 模式下
+//  仍是独立的、以原文存储的凭据，仍然被上游的 LA 门使用。`kcSelfDestructPassword` 在两处被删：
+//  自毁路径（见 `PopopxStorageWipe`），以及入口码迁移那一步——后者顺带删它的理由是它唯一的输入口
+//  （`LocalAuthView`）随 `kcAppPassword` 一起没了，留着就是一个谁也按不动的凭据，还会让隐私设置
+//  那一格显示"已启用"（那一格只读 UserDefaults 的 bool，不读 Keychain）。
+//  `kcAppPassword` 多一条路：它只是 `.passcode` 模式下
 //  `authenticate` 拿来逐字比对的那把入口码（LocalAuthenticationUtils.swift:45，**不是** SQLCipher
 //  的库钥匙，库钥匙是 `kcDatabasePassword`，见 POPOPXChat/API.swift:43），本模块在启用/更换
 //  POPOPX 进入密码时先验证再把它迁掉，让双密码锁成为唯一的前端认证入口
@@ -735,10 +738,20 @@ final class PopopxDuressAuthManager {
     /// 开启时的既有配置（PrivacySettings.swift:766 就是 `kcAppPassword.remove()`），
     /// 迁移后由系统 Face ID/设备密码把守这些门，应用内的键盘只剩本模块这一套。
     ///
+    /// 自毁码那一把也一并删，理由是它已经**不可能再被触发**：它唯一的输入口是 `LocalAuthView`
+    ///（LocalAuthView.swift:23 `password == sdPassword`），而那张视图只有在 `.passcode` 模式且
+    /// `kcAppPassword` 取得到值时才会被挂起（LocalAuthenticationUtils.swift:45-47）——上一行刚把
+    /// 入口码删掉，这把码就再也没有地方可输。留着它不是"多一道保险"，而是一个谁也按不动的凭据，
+    /// 外加隐私设置那一格的谎：开关状态只读 UserDefaults 里那个 bool（PrivacySettings.swift:512
+    /// 是它的初值、:898 是写回），根本不读 Keychain，所以两个必须一起落，页面才会老实说"没开"。
+    /// 删法对齐上游自己的 `resetSelfDestruct()`（PrivacySettings.swift:886-890 就是"删条目 + 置假"）。
+    ///
     /// 明文比对走 `PopopxDuressCrypto.matchesInConstantTime`：`kcAppPassword` 是原文存的
     /// （POPOPXChat/KeyChain.swift:21），Swift 的 `==` 逐字符短路，会把"前几位对不对"泄漏成耗时差。
     ///
-    /// `kcDatabasePassword` 与 `kcSelfDestructPassword` 一律不动。
+    /// `kcDatabasePassword` 一个字都不动——它才是 SQLCipher 的库钥匙，删了就得重建库。
+    /// `DEFAULT_LA_SELF_DESTRUCT_DISPLAY_NAME` 留着：那个名字只在那台键盘真的自毁时被读
+    ///（LocalAuthView.swift:61），入口码没了以后它是一条死键，不值得为它多删一次。
     /// - Parameter passcode: 界面向机主索取的那一次原始入口码输入。nil = 没采集。
     static func migrateNativeEntryPassword(passcode: String?) throws {
         guard let stored = kcAppPassword.get() else {
@@ -756,13 +769,19 @@ final class PopopxDuressAuthManager {
             throw PopopxDuressSetupError.nativePasscodeIncorrect
         }
         _ = kcAppPassword.remove()
+        _ = kcSelfDestructPassword.remove()
+        UserDefaults.standard.removeObject(forKey: DEFAULT_LA_SELF_DESTRUCT)
         privacyLocalAuthModeDefault.set(.system)
     }
 
-    /// 降级流程专用的"无条件退役"，与 `migrateNativeEntryPassword` 做的动作一模一样。
-    /// 区别只有一条：这里**不能验证**——键盘上站着的是逼迫者，让他再输一遍机主的原始码
-    /// 既做不到、也是暴露。删旧凭据本身正是简报步骤 C 要求的效果。
-    /// 两步必须一起做完、不可拆：只删码会把 `authorize()` 变成静默放行。
+    /// 降级流程专用的"无条件退役"，与 `migrateNativeEntryPassword` 验证通过之后那几步做的动作
+    /// 同向（入口码删掉 + 模式回 `.system`），区别只有一条：这里**不能验证**——键盘上站着的是
+    /// 逼迫者，让他再输一遍机主的原始码既做不到、也是暴露。删旧凭据本身正是简报步骤 C 要求的效果。
+    ///
+    /// 自毁码不在这里重复删：全量分支由 `PopopxStorageWipe` 删（:440 条目 + :444 那个 bool），
+    /// 保留分支由 `scrubCredentialHistory` 删（:1093-:1094，条目与 bool 都在里面），
+    /// 两条都排在函数返回之前，所以回到这一行时它已经不在了。
+    /// 这几步必须一起做完、不可拆：只删码会把 `authorize()` 变成静默放行。
     private func retireNativeEntryPassword() {
         _ = kcAppPassword.remove()
         privacyLocalAuthModeDefault.set(.system)
@@ -1065,8 +1084,14 @@ final class PopopxDuressAuthManager {
     /// `retireNativeEntryPassword()` 在 `executeErasure` 返回之后统一退役——必须排在那之后，
     /// 因为本函数的调用方（`PopopxDuressProfileKeeper.retain`）还要拿它当隐藏身份的 `viewPwd` 退路。
     /// 它从来不是库钥匙（库钥匙是 `kcDatabasePassword`，见 POPOPXChat/API.swift:43）。
+    ///
+    /// 自毁码那个 bool 也在清理之列，理由与 `migrateNativeEntryPassword` 里那条完全相同：
+    /// 隐私设置那一格只读 `UserDefaults`，不读 Keychain（PrivacySettings.swift:512/:898），
+    /// 条目删了而 bool 还留着，页面就会一直显示"自毁码已启用"而它已经无凭据可比。
+    /// 口径对齐全量路径的 `PopopxStorageWipe`（:441 同样 removeObject）。
     private func scrubCredentialHistory() {
         _ = kcSelfDestructPassword.remove()
+        UserDefaults.standard.removeObject(forKey: DEFAULT_LA_SELF_DESTRUCT)
         PopopxDuressKeychain.delete(PopopxDuressKeychain.normalAccount)
         PopopxDuressKeychain.delete(PopopxDuressKeychain.duressAccount)
     }

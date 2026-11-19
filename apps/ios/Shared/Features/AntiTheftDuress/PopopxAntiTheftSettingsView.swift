@@ -561,7 +561,7 @@ struct PopopxAntiTheftSettingsView: View {
                     pinStateLine(normalPin, confirming: normalConfirm)
                 }
                 // 这一段只在原生入口码确实还开着时出现，且紧跟常规密码那一组：迁移就发生在
-                // `setNormalPin` 里、任何写入之前（PopopxDuressAuthManager.swift:778），
+                // `setNormalPin` 里、任何写入之前（PopopxDuressAuthManager.swift:799），
                 // 放在胁迫码之后会让"先填旧密码"这个先后关系在页面上读不出来。
                 // 与 `pinField` 一样不送 `systemImage`/`keyboard:`——`isSecure` 那条分支不读它。
                 if nativeEntryPasswordActive {
@@ -704,7 +704,7 @@ struct PopopxAntiTheftSettingsView: View {
     /// 真正的闸门（`setDuressPin` 里那次"用常规记录自己的盐再派生一遍"的常量时间比较）做最后一次判定。
     ///
     /// 原生入口码的迁移不用本页操心：它在 `setNormalPin` 内部、本地这两道校验之后、任何 Keychain
-    /// 写入之前（PopopxDuressAuthManager.swift:777-778），所以旧码输错那一次连常规码都不会落盘。
+    /// 写入之前（PopopxDuressAuthManager.swift:798-799），所以旧码输错那一次连常规码都不会落盘。
     private func writePins() async {
         pinFeedback = nil
         guard PopopxDuressAuthManager.isValidPin(normalPin),
@@ -1474,7 +1474,7 @@ private enum Copy {
     static let pinNativeGroup = "关闭 app 自带的入口密码"
     static let pinNativeLabel = "原有的入口密码"
     static let pinNativePrompt = "4 到 16 位数字"
-    static let pinNativeFootnote = "这台设备还开着 app 自带的入口密码：解锁时它会先弹一次自己的键盘，POPOPX 再弹一次，两个键盘干的是同一件事。填对它，我们把它关掉，今后只认上面那把常规码。这一步只删那一把旧码，不会重建数据库钥匙，聊天数据一个字都不动；关掉之后想再要回来，得去「隐私与安全」那页重新设置一次。"
+    static let pinNativeFootnote = "这台设备还开着 app 自带的入口密码：解锁时它会先弹一次自己的键盘，POPOPX 再弹一次，两个键盘干的是同一件事。填对它，我们把它关掉，今后只认上面那把常规码。跟着一起关掉的还有那把只有这台旧键盘才输得进去的自毁码——旧键盘没了它就没有输入口，留着只会让隐私设置那一格显示「已启用」。这一步不重建数据库钥匙，聊天数据一个字都不动；想再要回来，得去「隐私与安全」那页重新设置一次。"
     static let pinIrreversibleGroup = "写下去之前"
     static let pinIrreversibleNote = "这两把码只以派生值存在，本机不存原文，也没有任何找回通道：忘记常规码就等于把自己永久锁在外面。确认弹窗里那一次点击就是这个后果的最后一道门。"
     static let pinWriteButton = "写入两把码"
