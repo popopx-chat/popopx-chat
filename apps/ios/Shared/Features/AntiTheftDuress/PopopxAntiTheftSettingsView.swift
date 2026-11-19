@@ -32,7 +32,10 @@
 //  滑动手势是肌肉记忆动作，快、连续、没有停顿点，一次兜里的滑动就足以构成"确认"；而这两个后果都不接受这种触发概率。
 //  所以这里一律是 `PopopxButton(role: .destructive)` + `confirmationDialog` 两段式：第一段是明确的
 //  红色 CTA（它自己还带一次 `.medium` 触觉），第二段是系统级、必须再点一次、且带"取消"的独立弹窗。
-//  两次输入之间屏幕内容不变，机主有整段时间反悔。关掉双密码那一格也走同一条门：它的 `didSet` 会
+//  两次输入之间屏幕内容不变，机主有整段时间反悔。第三处不可逆动作是「重新生成一组」——它作废的是
+//  机主手上抄存的那一张纸，所以它在这两段**之前**还多一段：先在 Keychain 里过一次身份门
+//  （`proveIdentityForRegenerate()`，与「查看」同一对方法），验过了才轮到那枚红色 CTA。
+//  关掉双密码那一格也走同一条门：它的 `didSet` 会
 //  删除胁迫码记录（`PopopxDuressAuthManager.duressEnabled` 的 `didSet`），所以本页把它包成"先问一次"的绑定，
 //  而不是让开关一滑就生效。
 //
@@ -150,17 +153,22 @@ struct PopopxAntiTheftSettingsView: View {
     //
     // 12 个英文词是**明文**，比那两把码更需要"用完就丢"：它不像 `PopopxDuressVerifier` 那样
     // 只有派生值，它本身就是能直接开门的东西。所以本页没有任何一处把它写进 `logger`、
-    // `UIPasteboard`、`toast` 或任何持久化位置，也不在卡片上默认显示——必须点「查看」、
-    // 当场验一次进入密码，才在这一个 `@State` 里出现一次。
+    // `UIPasteboard`、`toast` 或任何持久化位置，也不在卡片上默认显示——必须过一次身份门
+    // （输对当前进入密码，或在「生物识别快捷解锁」开着时让 Face ID 认出机主），
+    // 才在这一个 `@State` 里出现一次。「重新生成一组」走的是同一对门，但它只取"证明"、
+    // 不取词组：作废旧的那一张不需要先把旧的那一张摆到屏幕上。
     @State private var showsMnemonicSheet = false
-    /// 「查看」那一次性的进入密码输入。
+    /// 「查看」与「重新生成」那一次性的进入密码输入。
     @State private var mnemonicUnlockPin = ""
     /// 验过之后拿到的那 12 个词（`revealMnemonic` 返回的已规范化单词数组，只为带序号显示；
     /// 比对从来不用这一份）。空数组 = 当前没有显示。
     @State private var mnemonicWords: [String] = []
     @State private var mnemonicFeedback: String?
+    /// 这一格唯一的单飞开关：三问（密码查看、Face ID 查看、重新生成的证明）共用它，
+    /// 所以任何一问在跑时其余两枚按钮自己变灰——一次只该有一个证明在飞行中。
     @State private var isReadingMnemonic = false
     /// 重新生成 = 旧那张纸当场作废，所以它和"写入两把码"一样是红色二次确认。
+    /// 那一次确认只在身份门验过之后才出现，见 `proveIdentityForRegenerate()`。
     @State private var showsMnemonicRegenDialog = false
     /// 随进入密码一起生成的那一份新词组：设置成功后留在 sheet 上，等机主亲手点"我已抄存"。
     /// 不自动关 sheet —— 一弹出来就关掉，等于把唯一的抄存机会扔了。
@@ -255,6 +263,8 @@ struct PopopxAntiTheftSettingsView: View {
         }
         // 「重新生成」毁掉的是机主手上那张纸，而这个动作在页面上看起来只是点了一下按钮。
         // 所以它必须有一次独立、带"取消"、且把后果念一遍的第二击——与"写入两把码"同一道题。
+        // 这一击排在身份验证**之后**：`proveIdentityForRegenerate()` 先证明按的人有机主的
+        // 凭据，这里再证明他知道自己要作废什么。两道都不给缓存，所以取消之后再按会重新问一遍。
         .confirmationDialog(Copy.mnemonicRegenTitle, isPresented: $showsMnemonicRegenDialog, titleVisibility: .visible) {
             Button(Copy.mnemonicRegenConfirm, role: .destructive) {
                 Task { @MainActor in
@@ -624,14 +634,15 @@ struct PopopxAntiTheftSettingsView: View {
     }
 
     /// Face ID 那道门现在能不能用。三条缺一不可，且与
-    /// `PopopxDuressAuthManager.revealMnemonicWithBiometrics` 开头那三道 `guard` 一一对应：
-    /// 少一条，弹层里那枚按钮按下去就只会得到一句"未通过"。
+    /// `PopopxDuressAuthManager.verifyIdentityWithBiometrics` 开头那三道 `guard` 一一对应：
+    /// 少一条，弹层里那枚「用 Face ID 验证并显示」与那枚「用 Face ID 验证并重新生成」
+    /// 按下去就只会得到一句"未通过"——两问共用这一道门，所以也共用这一条判断。
     /// - `duress.biometricsEnabled`：本页那个总开关。
     /// - `!duress.keypadRequired`：遮罩上刚连着失败两次，本次会话降级成"只认键盘码"。
     ///   这条降级同样管到设置页——它是"这段时间内生物识别不可信"，不是"锁屏那一面暂时不给"。
     /// - `biometricsAvailable`：本机现在判得出可用。这里用的是本页 `@State` 那份"进来问一次"的
     ///   读数；管理器那一版每次读都新建一个 `LAContext`，放进 body 就是每次重绘问一次。
-    /// 冷却状态故意不在这里问，理由与那边相同：这一问不吃失败计数，也就没有可归零的东西。
+    /// 冷却状态故意不在这里问，理由与那边相同：这两问都不吃失败计数，也就没有可归零的东西。
     private var mnemonicFaceIDOffered: Bool {
         duress.biometricsEnabled && !duress.keypadRequired && biometricsAvailable
     }
@@ -641,6 +652,35 @@ struct PopopxAntiTheftSettingsView: View {
     private var mnemonicRowValue: String {
         guard duress.mnemonicConfigured else { return Copy.mnemonicRowGenerate }
         return mnemonicFaceIDOffered ? Copy.mnemonicRowRevealEither : Copy.mnemonicRowReveal
+    }
+
+    /// 「重新生成一组」这一问走哪道门，取值规则与上面那两枚「查看」按钮是同一套：
+    /// - `.entryPin`：密码框里已经填够 6 位——走 `verifyEntryPin`，与「验证并显示」同一半实现。
+    /// - `.biometric`：没填够，但 Face ID 那道门开着——走 `verifyIdentityWithBiometrics`。
+    /// - `.unavailable`：两条都不满足，没有门可走。这一支**禁用**按钮，理由与 Face ID
+    ///   那一枚只在真能通过时出现是同一条：一枚按下去只会报错的按钮不该存在于页面上。
+    /// 填了 3 位、Face ID 又开着时算 `.biometric`：那半截密码不构成一条能走的路，
+    /// 而"用 Face ID 也一样能过"是真的，机主随时可以改成打满 6 位换回密码那一道路。
+    private enum MnemonicRegenDoor {
+        case entryPin
+        case biometric
+        case unavailable
+    }
+
+    private var mnemonicRegenDoor: MnemonicRegenDoor {
+        if PopopxDuressAuthManager.isValidPin(mnemonicUnlockPin) { return .entryPin }
+        return mnemonicFaceIDOffered ? .biometric : .unavailable
+    }
+
+    /// 门写在按钮名字上，机主按下去之前就知道这一次要交的是什么。词法与「验证并显示」/
+    /// 「用 Face ID 验证并显示」那一对齐：不带定语的"验证"就是指上面那个密码框。
+    private var mnemonicRegenLabel: String {
+        guard duress.mnemonicConfigured else { return Copy.mnemonicSheetGenerate }
+        switch mnemonicRegenDoor {
+        case .entryPin: return Copy.mnemonicSheetRegenerateVerified
+        case .biometric: return Copy.mnemonicSheetRegenerateFaceID
+        case .unavailable: return Copy.mnemonicSheetRegenerate
+        }
     }
 
     private var mnemonicCard: some View {
@@ -671,7 +711,7 @@ struct PopopxAntiTheftSettingsView: View {
 
     /// 助记词的查看/生成弹层。
     ///
-    /// 三条实现约定，都是这一格特有的：
+    /// 四条实现约定，都是这一格特有的：
     /// 1. **不给 `.textSelection(.enabled)`**：一选中就可能进系统剪贴板，而剪贴板会被其他 app
     ///    读到、也可能随 iCloud 同步到别的设备上。一张能明文恢复身份的词组不该被系统复制到
     ///    本模块管不着的地方，所以这一格只能"用眼睛抄"。
@@ -681,6 +721,10 @@ struct PopopxAntiTheftSettingsView: View {
     /// 3. 那两枚按钮都不是"一点就亮"：密码那一道路要走一次约 355 ms 的 PBKDF2 派生，
     ///    Face ID 那一道路要等系统弹层收结果，所以两枚都带 `isLoading`；
     ///    不靠转场动画盖这段等待。
+    /// 4. **「重新生成一组」先过同一对门**（`proveIdentityForRegenerate()`）：这一问作废的是
+    ///    机主手上那张纸，旁人拿到已解锁的手机顺手点一下就够糟，所以那一次红色二次确认
+    ///    只在身份验过之后才出现。顺序是"先验身份、再问确认"，两问各管一件事：
+    ///    前者证明有权，后者证明有意。这一问不读取、不显示旧词组。
     private var mnemonicSheet: some View {
         NavigationStack {
             PopopxSheetContainer(Copy.mnemonicSheetTitle, subtitle: mnemonicSheetHint) {
@@ -705,7 +749,7 @@ struct PopopxAntiTheftSettingsView: View {
                             .disabled(!PopopxDuressAuthManager.isValidPin(mnemonicUnlockPin))
                             .accessibilityIdentifier("popopx.antiTheft.mnemonicReveal")
                             // 另一道门只在它真能通过的时候出现。三个条件与
-                            // `PopopxDuressAuthManager.revealMnemonicWithBiometrics` 那三道前置门
+                            // `PopopxDuressAuthManager.verifyIdentityWithBiometrics` 那三道前置门
                             // 逐字对应——少一条，这里就是一枚按下去只会报错的按钮。
                             // 两枚按钮共用 `isReadingMnemonic`，所以任一条路在跑时另一枚自己变灰：
                             // 同一次点击只该交出去一份明文。
@@ -724,18 +768,21 @@ struct PopopxAntiTheftSettingsView: View {
                             AntiTheftDivider()
                         }
                         PopopxButton(
-                            duress.mnemonicConfigured ? Copy.mnemonicSheetRegenerate : Copy.mnemonicSheetGenerate,
+                            mnemonicRegenLabel,
                             systemImage: duress.mnemonicConfigured ? "arrow.triangle.2.circlepath" : "plus",
-                            role: duress.mnemonicConfigured ? .destructive : .primary
+                            role: duress.mnemonicConfigured ? .destructive : .primary,
+                            isLoading: isReadingMnemonic
                         ) {
-                            // 已有词组时的"重新生成"毁掉的是机主手上那张纸，必须先问一次；
-                            // 还没有词组时这一次点击不毁掉任何东西，直接生成。
+                            // 还没有词组时这一次点击不毁掉任何东西，直接生成；已有词组时它毁掉的是
+                            // 机主手上那张纸，所以先过一次与「查看」完全相同的身份门，
+                            // 验过了才轮到那一次红色二次确认。
                             if duress.mnemonicConfigured {
-                                showsMnemonicRegenDialog = true
+                                await proveIdentityForRegenerate()
                             } else {
                                 await regenerateMnemonic()
                             }
                         }
+                        .disabled(duress.mnemonicConfigured && mnemonicRegenDoor == .unavailable)
                         .accessibilityIdentifier("popopx.antiTheft.mnemonicGenerate")
                     }
                     if let mnemonicFeedback {
@@ -986,10 +1033,61 @@ struct PopopxAntiTheftSettingsView: View {
         }
     }
 
+    /// 「重新生成一组」那一次点击：先按 `mnemonicRegenDoor` 指定的那一道路证明机主本人，
+    /// 验过了才把红色二次确认放出来。顺序是刻意的——先验身份、再问"你确定要作废那张纸吗"：
+    /// 这一问要防的是旁人拿到已解锁的手机顺手点一下，而那一次点击连一次证明都不该拿到。
+    ///
+    /// 两道门调的是管理器里与「查看」同一对方法，所以两问的放行条件不许有差别。这里**不**读取、
+    /// 也不显示旧词组：证明过就等于有权作废它，没有必要把上一张纸再摆到屏幕上来。
+    ///
+    /// 证明不缓存，与 `revealMnemonicNow` 同一条收尾纪律：密码当场从界面上清掉，成功与失败都一样。
+    /// 所以取消那一次红色确认之后再按，会重新问一遍——上一次"我已经验过了"的状态不在这里留着。
+    private func proveIdentityForRegenerate() async {
+        mnemonicFeedback = nil
+        // 与那两枚「查看」按钮同一件事：问之前重新读一遍 Keychain 的真实状态，
+        // 别信内存里那份缓存——中途发生过自毁时，这里的 `mnemonicConfigured` 必须说得上话。
+        duress.refreshConfiguration()
+        isReadingMnemonic = true
+        defer { isReadingMnemonic = false }
+        do {
+            switch mnemonicRegenDoor {
+            case .entryPin:
+                let pin = mnemonicUnlockPin
+                mnemonicUnlockPin = ""
+                try await duress.verifyEntryPin(pin)
+            case .biometric:
+                try await duress.verifyIdentityWithBiometrics(reason: Copy.mnemonicRegenFaceIDReason)
+            case .unavailable:
+                // 这一支的按钮是禁用的（见 `mnemonicRegenDoor`），正常到不了；真到了也直接返回，
+                // 宁可什么都不做，也不"没有证明就放行"。
+                return
+            }
+        } catch let error as PopopxDuressSetupError {
+            mnemonicFeedback = error.errorDescription
+            mnemonicUnlockPin = ""
+            PopopxHaptics.notice(.error)
+            toast.show(Copy.mnemonicRegenToastRejected, kind: .danger)
+            return
+        } catch {
+            mnemonicFeedback = Copy.mnemonicRegenUnexpectedFailure
+            mnemonicUnlockPin = ""
+            PopopxHaptics.notice(.error)
+            toast.show(Copy.mnemonicRegenToastRejected, kind: .danger)
+            return
+        }
+        PopopxHaptics.notice(.success)
+        showsMnemonicRegenDialog = true
+    }
+
     /// 生成 / 重新生成助记词。成功就把新词组显示出来——这是机主唯一一次能抄到它的机会。
     ///
     /// 失败分支不重试、也不留半成品：管理器那边（`storeMnemonic`）任一半失败就整对回滚，
     /// 所以这里只需要照实说一句"没有生成"，不必判断"是不是只写进去了一半"。
+    ///
+    /// 调用它之前该已经过一次证明：`showsMnemonicRegenDialog` 那一支由
+    /// `proveIdentityForRegenerate` 在验过身份之后才打开；`mnemonicConfigured` 还是 false 时
+    /// 这一次点击不毁掉任何东西，所以那一条路不需要门。写入本身在管理器里不设门——
+    /// 随进入密码一起生成第一组词组的那条路也走同一个方法，那道门在那边是无意义的。
     private func regenerateMnemonic() async {
         showsMnemonicRegenDialog = false
         mnemonicFeedback = nil
@@ -1044,7 +1142,7 @@ struct PopopxAntiTheftSettingsView: View {
                     pinStateLine(normalPin, confirming: normalConfirm)
                 }
                 // 这一段只在原生那两道旧凭据确实还留着时出现，且紧跟常规密码那一组：迁移就发生在
-                // `setNormalPin` 里、任何写入之前（PopopxDuressAuthManager.swift:1354），
+                // `setNormalPin` 里、任何写入之前（PopopxDuressAuthManager.swift:1357），
                 // 放在胁迫码之后会让"先填旧密码"这个先后关系在页面上读不出来。
                 // 两格互斥，由模块三那两个读数保证：入口码还在 → 要入口码；入口码已经没了、
                 // 只剩一把按不动的自毁码 → 要那把自毁码。
@@ -1198,7 +1296,7 @@ struct PopopxAntiTheftSettingsView: View {
     /// 真正的闸门（`setDuressPin` 里那次"用常规记录自己的盐再派生一遍"的常量时间比较）做最后一次判定。
     ///
     /// 原生入口码的迁移不用本页操心：它在 `setNormalPin` 内部、本地这两道校验之后、任何 Keychain
-    /// 写入之前（PopopxDuressAuthManager.swift:1354-1359），所以旧码输错那一次连常规码都不会落盘。
+    /// 写入之前（PopopxDuressAuthManager.swift:1357-1362），所以旧码输错那一次连常规码都不会落盘。
     private func writePins() async {
         pinFeedback = nil
         guard PopopxDuressAuthManager.isValidPin(normalPin),
@@ -2023,8 +2121,8 @@ private enum Copy {
     static let mnemonicRowGenerate = "现在生成"
     static let mnemonicConsequence = "用助记词在锁屏上重置进入密码，会连带把应急擦除密码清成「未设置」：那把码从此不存在，交出去也不会抹掉任何数据。重置完请回到上一页重新设置一次应急擦除密码。"
     static let mnemonicSheetTitle = "12 词恢复助记词"
-    static let mnemonicSheetHintHave = "先输一次当前进入密码，词组才会显示。这一问不计入锁屏那一道失败计数，理由见下方说明。"
-    static let mnemonicSheetHintHaveBiometric = "先输一次当前进入密码，或用 Face ID 证明一次，词组才会显示。这一问不计入锁屏那一道失败计数，理由见下方说明。"
+    static let mnemonicSheetHintHave = "先输一次当前进入密码，词组才会显示；「重新生成一组」要的也是这一道门。这一问不计入锁屏那一道失败计数，理由见下方说明。"
+    static let mnemonicSheetHintHaveBiometric = "先输一次当前进入密码，或用 Face ID 证明一次，词组才会显示；「重新生成一组」也是这两道门里任一道过了就行。这一问不计入锁屏那一道失败计数，理由见下方说明。"
     static let mnemonicSheetHintNone = "这台设备还没有助记词。生成一次，当场把 12 个英文词抄在纸上。"
     static let mnemonicSheetGroup = "词组"
     static let mnemonicSheetFootnote = "词表是标准 BIP-39 英文词表（2048 个词），12 个词由 16 字节随机数加 4 位校验和导出，顺序与拼写都要照抄。派生用 PBKDF2-HMAC-SHA256、10 万次迭代，所以点一下会等三分之一秒左右，那不是卡住；Face ID 那一枚等的是系统弹层，同样不是卡住。"
@@ -2037,17 +2135,30 @@ private enum Copy {
     static let mnemonicSheetFaceIDReason = "显示你的 12 词恢复助记词"
     static let mnemonicSheetHide = "隐藏词组"
     static let mnemonicSheetGenerate = "生成 12 词助记词"
+    /// 没有一道门能走时的那一句（按钮此时是禁用的）。
     static let mnemonicSheetRegenerate = "重新生成一组"
+    /// 上面那两枚「查看」按钮的同一套词法：不带定语的"验证"就是指那个密码框。
+    static let mnemonicSheetRegenerateVerified = "验证并重新生成"
+    static let mnemonicSheetRegenerateFaceID = "用 Face ID 验证并重新生成"
+    /// 系统 Face ID 弹层上那一句说明，与「查看」那一问成对：这一问要干的事不是"把词显示出来"，
+    /// 是"作废旧的、换一组新的"。同样不写 app 名。
+    static let mnemonicRegenFaceIDReason = "重新生成你的 12 词恢复助记词"
     static let mnemonicSheetPaperGroup = "抄下来"
     static let mnemonicSheetPaperNote = "关掉这一格之后，本机再无任何途径把这 12 个词显示出来——除非下次你还能过验证那一关：输对当前进入密码，或在「生物识别快捷解锁」开着时让机器认出你。请当场抄在纸上：不要截图，不要手打进任何云备忘录，也不要指望系统剪贴板。这一格因此不开放选中文字，一旦选中就可能进了剪贴板，而剪贴板会被别的 app 读到、也可能随 iCloud 同步到别的设备。"
     static let mnemonicSheetWhyGroup = "为什么这一问不计次"
     static let mnemonicSheetWhyNoCount = "为什么这里的失败不进冷却表：这一问要防的是「忘了词的机主」，不是「拿着手机猜的人」。如果它计次，设置页就变成第二个可以猜的入口，而机主一次抄错（12 个词抄错位是常事）会把自己锁进 1 小时冷却，正好落在最不该被锁的地方。真正通向重置的那一问在锁屏上，那一道才计次。"
     static let mnemonicRegenTitle = "作废旧的 12 个词？"
     static let mnemonicRegenConfirm = "作废旧词组并生成"
-    static let mnemonicRegenMessage = "旧词组会立刻从安全存储里删除，抄在纸上的那一份同时作废。新的 12 个词只在这一屏完整显示一次，进入密码与应急擦除密码都不受影响。"
+    static let mnemonicRegenMessage = "身份已经验过，这一击不会再问第二次。旧词组会立刻从安全存储里删除，抄在纸上的那一份同时作废。新的 12 个词只在这一屏完整显示一次，进入密码与应急擦除密码都不受影响。"
     static let mnemonicGridLabel = "12 个英文助记词，带序号两列排列"
     static let mnemonicToastShown = "词组已显示，关掉这一格即消失"
     static let mnemonicToastRejected = "没有显示，原因见上方"
+    /// 「重新生成」那一问的失败播报与上面那句不许共用：这一问失败时没有"没显示出来的东西"，
+    /// 只有一桩没做成的生成。
+    static let mnemonicRegenToastRejected = "没有重新生成，原因见上方"
+    /// 与 `mnemonicUnexpectedFailure` 分成两句：那一句说的是"把词组读回来"，
+    /// 这一句说的是"过身份门"，而这一条路连读都没开始读。
+    static let mnemonicRegenUnexpectedFailure = "验证失败，请稍后再试"
     static let mnemonicToastGenerated = "助记词已生成，请当场抄存"
     static let mnemonicGenerateFailed = "没有生成：安全存储写入失败，本机仍是没有助记词的状态"
     static let mnemonicUnexpectedFailure = "读取失败，请稍后再试"

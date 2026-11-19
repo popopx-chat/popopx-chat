@@ -41,8 +41,9 @@
 //  明文，只为"查看/备份"这一件事存在。明面代价写清楚，不做掩盖：拿到密钥链转储的人能读回短语，
 //  而两把码仍然只是哈希。这不是新引入的攻击面——上游的 `kcAppPassword`/`kcSelfDestructPassword`
 //  连同存着库钥匙的 `kcDatabasePassword` 全是原文存的（POPOPXChat/KeyChain.swift:21-23），
-//  那种转储到手时先输掉的本来就是整个库。补偿三条：查看前必须先过**当前进入密码**
-//  （`revealMnemonic`，应急码不算通过）、两条记录都带 `WhenUnlockedThisDeviceOnly`
+//  那种转储到手时先输掉的本来就是整个库。补偿三条：查看前必须先过一次身份门
+//  （`verifyEntryPin` 或 `verifyIdentityWithBiometrics`，应急码不算通过；同一对门也管着
+//  「重新生成一组」那一问）、两条记录都带 `WhenUnlockedThisDeviceOnly`
 //  （锁屏即不可读、不随设备备份走）、自毁/重置/解除三条路径都把这两条一起删。
 //
 //  ### 冷却计数为什么不放 UserDefaults
@@ -219,13 +220,15 @@ enum PopopxDuressSetupError: Error, Equatable, LocalizedError {
     case mnemonicMalformed
     /// 12 个词全部合法，但与存下来的那条对不上。这是一次真实的错误尝试，吃计数。
     case mnemonicIncorrect
-    /// 查看助记词时界面没交来进入密码。
+    /// 验证进入密码那一道门（`verifyEntryPin`）没交来密码。这道门同时管着「查看助记词」与
+    /// 「重新生成一组」两问，所以那句"没交来密码"对两问都成立。
     case entryPinRequired
-    /// 查看助记词时交来的密码不是当前进入密码（应急码也算错，见 `revealMnemonic`）。
+    /// 验证进入密码那一道门（`verifyEntryPin`）收到的不是当前进入密码（应急码也算错，理由见那条方法）。
     case entryPinIncorrect
-    /// 用 Face ID 查看助记词没通过：系统判不出可用、开关关着、已被降级到键盘，或机主没认出来。
-    /// 四种情况合并成一句，是因为对拿着手机的人来说它们的区别没有意义——词组没有显示；
-    /// 而对机主，区分"Face ID 坏了"和"Face ID 没认我"要走的是系统设置那一面，不是这一格。
+    /// Face ID 那一道门（`verifyIdentityWithBiometrics`）没通过：系统判不出可用、开关关着、
+    /// 已被降级到键盘，或机主没认出来。这一句同样对「查看」与「重新生成」两问生效。
+    /// 四种情况合并成一句，是因为对拿着手机的人来说它们的区别没有意义——词组没有显示、
+    /// 词组也没有换掉；而对机主，区分"Face ID 坏了"和"Face ID 没认我"要走的是系统设置那一面，不是这一格。
     case biometricDenied
     /// 冷却期内试图验证：什么都不做，把剩余秒数回给界面。
     case lockedOut(remaining: TimeInterval)
@@ -1241,7 +1244,8 @@ final class PopopxDuressAuthManager {
     /// （LocalAuthenticationUtils.swift:24），用它把守的那两处调用点会当场静默放行。上游另有
     /// 九处直接调 `authenticate(reason:)`（PrivacySettings 六处、ContentView 两处、DatabaseView
     /// 一处），它们各自怎么处理 `.unavailable` 本模块不依赖、也不替它们下结论。
-    /// `.system` 是上游的出厂默认（SettingsView.swift:224），也是它自己在 biometric
+    /// `.system` 是上游的出厂默认（Shared/Views/UserSettings/SettingsView.swift:224，
+    /// 与本页同名的另一个文件），也是它自己在 biometric
     /// 开启时的既有配置（PrivacySettings.swift:766 就是 `kcAppPassword.remove()`），
     /// 迁移后由系统 Face ID/设备密码把守这些门，应用内的键盘只剩本模块这一套。
     ///
@@ -1458,51 +1462,59 @@ final class PopopxDuressAuthManager {
         return true
     }
 
-    /// 查看助记词：先用**当前进入密码**换出明文词组。
+    /// 第一道门：只证明"当场知道当前进入密码"，不交出任何东西。
     ///
-    /// 三条刻意的取舍：
+    /// 这一半同时是「查看助记词」与「重新生成一组」那两问的门——同一件事不许有两套放行条件，
+    /// 所以两处都调这里，而不是各写一遍比对。三条刻意的取舍：
     /// 1. 只与常规记录比对。应急擦除密码是另一条条目，拿它派生必然比不中 →
-    ///    `.entryPinIncorrect`、什么都不显示。这不是漏了一条路：交出胁迫码的人换来的是
-    ///    "当场自毁"，不该再多赚一份可读的备份。
+    ///    `.entryPinIncorrect`、什么都不发生。这不是漏了一条路：交出胁迫码的人换来的是
+    ///    "当场自毁"，不该再多赚一份可读的备份或一次改词组的权利。
     /// 2. **不吃冷却计数**（不调 `settleWrongAttempt`）。键盘是胁迫者手上唯一的门，所以那
-    ///    张表长在那里；设置页这一格如果也接上去，等于给了来人第二个可以尝试的入口、
+    ///    张表长在那里；设置页这两格如果也接上去，等于给了来人第二个可以尝试的入口、
     ///    也给机主一个"抄错三遍就被锁 60 分钟"的拒服务把手。这里失败的代价已经够明确：
-    ///    什么都不显示。
+    ///    什么都不发生。
     /// 3. 比对走同一个 `matches(pin:record:)`，同 100_000 轮、同样恒定时间，所以
-    ///    "看一次助记词"与"解一次锁"耗时一致，秒表量不出这里发生过一次查看。
-    func revealMnemonic(unlockingWith pin: String) async throws -> [String] {
-        refreshConfiguration()
-        guard mnemonicConfigured else { throw PopopxDuressSetupError.mnemonicMissing }
+    ///    "看一次助记词"与"解一次锁"耗时一致，秒表量不出这里发生过一次查看或一次重新生成。
+    ///
+    /// 常规记录不在了 = 没有任何"当前进入密码"可供比对。真出现这种状态（手动清过
+    /// Keychain、或 `clearAllPins` 与一次落盘的助记词交错）时当作没通过，
+    /// 而不是"没有密码就免验"——这一格的放行条件必须是证明机主知道进入密码。
+    func verifyEntryPin(_ pin: String) async throws {
         guard Self.isValidPin(pin) else { throw PopopxDuressSetupError.entryPinRequired }
-        // 常规记录不在了 = 没有任何"当前进入密码"可供比对。真出现这种状态（手动清过
-        // Keychain、或 `clearAllPins` 与一次落盘的助记词交错）时选择什么都不显示，
-        // 而不是"没有密码就免验"——这一格的放行条件必须是证明机主知道进入密码。
         guard let normal = PopopxDuressKeychain.read(PopopxDuressKeychain.normalAccount) else {
             throw PopopxDuressSetupError.entryPinRequired
         }
         guard await matches(pin: pin, record: normal) else {
             throw PopopxDuressSetupError.entryPinIncorrect
         }
+    }
+
+    /// 查看助记词：先用**当前进入密码**换出明文词组。
+    /// 证明本身在 `verifyEntryPin(_:)`，那里的三条取舍一条不改地适用于这里。
+    func revealMnemonic(unlockingWith pin: String) async throws -> [String] {
+        refreshConfiguration()
+        guard mnemonicConfigured else { throw PopopxDuressSetupError.mnemonicMissing }
+        try await verifyEntryPin(pin)
         return try readRevealedMnemonic()
     }
 
-    /// 「用 Face ID 查看」那一条路（简报原文："查看前需验证当前进入密码**或 FaceID**"）。
-    /// 证明方式换成系统说的"机主本人就在这台设备上"，其余与 `revealMnemonic(unlockingWith:)`
-    /// 逐字相同——要交出去的是同一份东西，两道门的收尾不许有差别。
+    /// 第二道门：只证明"Face ID 当场认出了机主本人"，不交出任何东西。
+    ///
+    /// 「用 Face ID 查看」与「用 Face ID 验证并重新生成」共用这一半，所以两问得到的必须是
+    /// 同一个判断，而不是"看词组那一问严一点、改词组这一问松一点"。
     ///
     /// 三道前置门一律**关而不放**：总开关关着、刚被"连续失败两次"降级到键盘、系统判不出可用，
     /// 全部直接抛错。这是与上游 `authorize()` 相反的选择（它对 `.unavailable` 直接放行，
     /// 见 LocalAuthenticationUtils.swift:20-24）：那一层管的是"设备解锁的便利性"，
-    /// 而这一格交出去的是一张能重置进入密码的明文，问不出结果时只能当作没通过。
+    /// 而这两问交出去的是一张能重置进入密码的明文、以及作废那张纸的权利，
+    /// 问不出结果时只能当作没通过。
     ///
-    /// 冷却表故意不在这里问：那张表拦的是锁屏遮罩上的三个输入口，而这一问不吃失败计数
+    /// 冷却表故意不在这里问：那张表拦的是锁屏遮罩上的三个输入口，而这两问不吃失败计数
     /// （理由写在设置页那一格的说明里），也就没有可归零的东西。
     ///
     /// 也故意**不**复用 `requestBiometricUnlock`：那一条路成功时顺手 `unlock()` 遮罩并清计数，
     /// 把"看一眼词组"变成"解一次锁"，是完全不同的两件事。
-    func revealMnemonicWithBiometrics(reason: String) async throws -> [String] {
-        refreshConfiguration()
-        guard mnemonicConfigured else { throw PopopxDuressSetupError.mnemonicMissing }
+    func verifyIdentityWithBiometrics(reason: String) async throws {
         guard biometricsEnabled, !keypadRequired, biometricsAvailable else {
             throw PopopxDuressSetupError.biometricDenied
         }
@@ -1513,6 +1525,15 @@ final class PopopxDuressAuthManager {
             }
         }
         guard granted else { throw PopopxDuressSetupError.biometricDenied }
+    }
+
+    /// 「用 Face ID 查看」那一条路（简报原文："查看前需验证当前进入密码**或 FaceID**"）。
+    /// 证明方式换成 `verifyIdentityWithBiometrics(reason:)`，其余与 `revealMnemonic(unlockingWith:)`
+    /// 逐字相同——要交出去的是同一份东西，两道门的收尾不许有差别。
+    func revealMnemonicWithBiometrics(reason: String) async throws -> [String] {
+        refreshConfiguration()
+        guard mnemonicConfigured else { throw PopopxDuressSetupError.mnemonicMissing }
+        try await verifyIdentityWithBiometrics(reason: reason)
         return try readRevealedMnemonic()
     }
 

@@ -48,7 +48,8 @@ import CoreMotion
 
 // MARK: - 本模块的 UserDefaults 键
 
-/// 键名口径跟仓库现状（裸 camelCase，无前缀，见 SettingsView.swift:29-72 的 `DEFAULT_*` 块），
+/// 键名口径跟仓库现状（裸 camelCase，无前缀，见 Shared/Views/UserSettings/SettingsView.swift:29-72
+/// 的 `DEFAULT_*` 块——那是上游同名文件，不是本模块的 `PopopxAntiTheftSettingsView.swift`），
 /// 但整套防盗键集中在**本文件**声明：一个模块的键散到宿主文件里，改名时就会漏掉一半。
 let DEFAULT_ANTI_THEFT_ENABLED = "antiTheftEnabled"
 let DEFAULT_ANTI_THEFT_SENSITIVITY = "antiTheftSensitivity"
