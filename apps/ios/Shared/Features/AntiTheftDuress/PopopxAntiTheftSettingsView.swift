@@ -1142,7 +1142,7 @@ struct PopopxAntiTheftSettingsView: View {
                     pinStateLine(normalPin, confirming: normalConfirm)
                 }
                 // 这一段只在原生那两道旧凭据确实还留着时出现，且紧跟常规密码那一组：迁移就发生在
-                // `setNormalPin` 里、任何写入之前（PopopxDuressAuthManager.swift:1357），
+                // `setNormalPin` 里、任何写入之前（PopopxDuressAuthManager.swift:1358），
                 // 放在胁迫码之后会让"先填旧密码"这个先后关系在页面上读不出来。
                 // 两格互斥，由模块三那两个读数保证：入口码还在 → 要入口码；入口码已经没了、
                 // 只剩一把按不动的自毁码 → 要那把自毁码。
@@ -1296,7 +1296,7 @@ struct PopopxAntiTheftSettingsView: View {
     /// 真正的闸门（`setDuressPin` 里那次"用常规记录自己的盐再派生一遍"的常量时间比较）做最后一次判定。
     ///
     /// 原生入口码的迁移不用本页操心：它在 `setNormalPin` 内部、本地这两道校验之后、任何 Keychain
-    /// 写入之前（PopopxDuressAuthManager.swift:1357-1362），所以旧码输错那一次连常规码都不会落盘。
+    /// 写入之前（PopopxDuressAuthManager.swift:1358-1363），所以旧码输错那一次连常规码都不会落盘。
     private func writePins() async {
         pinFeedback = nil
         guard PopopxDuressAuthManager.isValidPin(normalPin),
