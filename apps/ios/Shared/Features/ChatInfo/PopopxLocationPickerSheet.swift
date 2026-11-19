@@ -781,8 +781,10 @@ private extension View {
 // MARK: - 预览
 
 #if DEBUG
-#Preview("位置选择器") {
-    PopopxLocationPickerSheet { _ in }
-        .padding(.horizontal, PopopxMetrics.space2XS)
+struct PopopxLocationPickerSheet_Previews: PreviewProvider {
+    static var previews: some View {
+        PopopxLocationPickerSheet { _ in }
+            .padding(.horizontal, PopopxMetrics.space2XS)
+    }
 }
 #endif

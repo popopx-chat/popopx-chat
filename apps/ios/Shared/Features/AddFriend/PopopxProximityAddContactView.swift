@@ -560,8 +560,10 @@ private enum PopopxProximityCopy {
 
 /// 页面本体带 iOS 17 闸门，预览不能直接构造它：这里放一个非闸门的外壳，运行时再判。
 #if DEBUG
-#Preview("面对面加友") {
-    PopopxProximityPreviewHost()
+struct PopopxProximityPreviewHost_Previews: PreviewProvider {
+    static var previews: some View {
+        PopopxProximityPreviewHost()
+    }
 }
 
 private struct PopopxProximityPreviewHost: View {

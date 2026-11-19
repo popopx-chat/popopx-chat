@@ -1540,7 +1540,9 @@ private struct PopopxBubbleGallery: View {
     }
 }
 
-#Preview("popopx message bubble") {
-    PopopxBubbleGallery()
+struct PopopxBubbleGallery_Previews: PreviewProvider {
+    static var previews: some View {
+        PopopxBubbleGallery()
+    }
 }
 #endif

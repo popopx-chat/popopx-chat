@@ -890,16 +890,20 @@ private enum Copy {
 
 #if DEBUG
 // 栈由本页自己建（见文件头"栈的归属"），预览因此不再包 NavigationStack。
-#Preview("消息 · 真实单例") {
-    ChatsListView()
-        .environmentObject(ChatModel.shared)
-        .environmentObject(AppTheme.shared)
+struct ChatsListView_Previews: PreviewProvider {
+    static var previews: some View {
+        ChatsListView()
+            .environmentObject(ChatModel.shared)
+            .environmentObject(AppTheme.shared)
+    }
 }
 
-#Preview("消息 · 深色") {
-    ChatsListView()
-        .environmentObject(ChatModel.shared)
-        .environmentObject(AppTheme.shared)
-        .preferredColorScheme(.dark)
+struct ChatsListViewDark_Previews: PreviewProvider {
+    static var previews: some View {
+        ChatsListView()
+            .environmentObject(ChatModel.shared)
+            .environmentObject(AppTheme.shared)
+            .preferredColorScheme(.dark)
+    }
 }
 #endif

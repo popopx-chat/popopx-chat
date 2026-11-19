@@ -971,15 +971,17 @@ private enum Copy {
 // MARK: - Previews
 
 #if DEBUG
-#Preview("群信息") {
-    PopopxGroupChatInfoView(
-        chat: Chat(chatInfo: ChatInfo.sampleData.group, chatItems: []),
-        groupInfo: Binding.constant(GroupInfo.sampleData),
-        scrollToItemId: Binding.constant(nil),
-        composeState: Binding.constant(ComposeState()),
-        onSearch: {},
-        localAlias: ""
-    )
-    .environmentObject(ChatModel.shared)
+struct PopopxGroupChatInfoView_Previews: PreviewProvider {
+    static var previews: some View {
+        PopopxGroupChatInfoView(
+            chat: Chat(chatInfo: ChatInfo.sampleData.group, chatItems: []),
+            groupInfo: Binding.constant(GroupInfo.sampleData),
+            scrollToItemId: Binding.constant(nil),
+            composeState: Binding.constant(ComposeState()),
+            onSearch: {},
+            localAlias: ""
+        )
+        .environmentObject(ChatModel.shared)
+    }
 }
 #endif

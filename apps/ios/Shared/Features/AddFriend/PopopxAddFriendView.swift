@@ -737,8 +737,10 @@ private enum Copy {
     static let clipboardEmptyToast = "剪贴板里没有可用链接"
 }
 
-#Preview("添加朋友") {
-    PopopxAddFriendView()
-        .environmentObject(ChatModel.shared)
-        .environmentObject(AppTheme.shared)
+struct PopopxAddFriendView_Previews: PreviewProvider {
+    static var previews: some View {
+        PopopxAddFriendView()
+            .environmentObject(ChatModel.shared)
+            .environmentObject(AppTheme.shared)
+    }
 }

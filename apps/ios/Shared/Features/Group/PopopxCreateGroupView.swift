@@ -855,9 +855,11 @@ private struct PopopxCreateGroupFormPreviewHost: View {
     }
 }
 
-#Preview("创建群组 — 表单") {
-    NavigationStack {
-        PopopxCreateGroupFormPreviewHost()
+struct PopopxCreateGroupView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            PopopxCreateGroupFormPreviewHost()
+        }
     }
 }
 #endif

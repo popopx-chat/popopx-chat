@@ -948,7 +948,9 @@ private struct PopopxDividerRow: View {
     }
 }
 
-#Preview("popopx anti-photo") {
-    PopopxAntiPhotoGallery()
+struct PopopxAntiPhotoGallery_Previews: PreviewProvider {
+    static var previews: some View {
+        PopopxAntiPhotoGallery()
+    }
 }
 #endif

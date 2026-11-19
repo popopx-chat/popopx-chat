@@ -65,11 +65,11 @@ enum PopopxProfileSendMode: String, Codable, Hashable, Sendable, CaseIterable {
         }
     }
 
-    /// 制作器顶部分段选择器的标签（`ProfileBuilderView` 直接用这两条，别再抄一份）。
+    /// 分段器只给一行，长标签在小屏 iPhone 上会被省略号截断，所以直接用卡片徽章那四个字的短标签。
     var sheetLabel: String {
         switch self {
-        case .ephemeral: return "隐私发送（打开后即焚）"
-        case .standard: return "非隐私发送（永久留存）"
+        case .ephemeral, .standard:
+            return cardLabel
         }
     }
 }

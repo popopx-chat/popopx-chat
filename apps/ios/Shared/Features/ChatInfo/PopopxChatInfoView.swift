@@ -1254,16 +1254,18 @@ private enum Copy {
 // MARK: - Previews
 
 #if DEBUG
-#Preview("联系人信息") {
-    PopopxChatInfoView(
-        chat: Chat(chatInfo: ChatInfo.sampleData.direct, chatItems: []),
-        contact: Contact.sampleData,
-        localAlias: "",
-        featuresAllowed: contactUserPrefsToFeaturesAllowed(Contact.sampleData.mergedPreferences),
-        currentFeaturesAllowed: contactUserPrefsToFeaturesAllowed(Contact.sampleData.mergedPreferences),
-        onSearch: {}
-    )
-    .environmentObject(ChatModel.shared)
-    .environmentObject(AppTheme.shared)
+struct PopopxChatInfoView_Previews: PreviewProvider {
+    static var previews: some View {
+        PopopxChatInfoView(
+            chat: Chat(chatInfo: ChatInfo.sampleData.direct, chatItems: []),
+            contact: Contact.sampleData,
+            localAlias: "",
+            featuresAllowed: contactUserPrefsToFeaturesAllowed(Contact.sampleData.mergedPreferences),
+            currentFeaturesAllowed: contactUserPrefsToFeaturesAllowed(Contact.sampleData.mergedPreferences),
+            onSearch: {}
+        )
+        .environmentObject(ChatModel.shared)
+        .environmentObject(AppTheme.shared)
+    }
 }
 #endif

@@ -587,15 +587,17 @@ private extension PopopxSecureCopy {
     static let antiPhotoNote = "高频抖动可干扰卷帘快门翻拍，会增加功耗与发热。"
 }
 
-#Preview("popopx secure card") {
-    // 三档状态一次看全：能打开、解不开、本机定位不到。后两档都必须读得出"这不是可以重试的事"，
-    // 所以符号、墨色、副标题三处同时变，只靠降透明度是不够的。
-    VStack(spacing: PopopxMetrics.spaceS) {
-        PopopxSecureCardBubble(ttlText: PopopxSecureCopy.duration(60), state: .locked) {}
-        PopopxSecureCardBubble(ttlText: PopopxSecureCopy.duration(60), state: .damaged) {}
-        PopopxSecureCardBubble(ttlText: PopopxSecureCopy.duration(60), state: .unlocated) {}
+struct PopopxSecureCardBubbleStates_Previews: PreviewProvider {
+    static var previews: some View {
+        // 三档状态一次看全：能打开、解不开、本机定位不到。后两档都必须读得出"这不是可以重试的事"，
+        // 所以符号、墨色、副标题三处同时变，只靠降透明度是不够的。
+        VStack(spacing: PopopxMetrics.spaceS) {
+            PopopxSecureCardBubble(ttlText: PopopxSecureCopy.duration(60), state: .locked) {}
+            PopopxSecureCardBubble(ttlText: PopopxSecureCopy.duration(60), state: .damaged) {}
+            PopopxSecureCardBubble(ttlText: PopopxSecureCopy.duration(60), state: .unlocated) {}
+        }
+        .padding(PopopxMetrics.gutter)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(PopopxPalette.base)
     }
-    .padding(PopopxMetrics.gutter)
-    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-    .background(PopopxPalette.base)
 }

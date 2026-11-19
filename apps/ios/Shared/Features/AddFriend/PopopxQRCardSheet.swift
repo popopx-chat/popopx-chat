@@ -235,10 +235,12 @@ private enum Copy {
 // MARK: - Preview
 
 #if DEBUG
-#Preview("popopx 加密名片") {
-    PopopxQRCardSheet(
-        uri: "popopx:/contact#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw",
-        identityName: "墨蓝信使"
-    )
+struct PopopxQRCardSheet_Previews: PreviewProvider {
+    static var previews: some View {
+        PopopxQRCardSheet(
+            uri: "popopx:/contact#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw",
+            identityName: "墨蓝信使"
+        )
+    }
 }
 #endif

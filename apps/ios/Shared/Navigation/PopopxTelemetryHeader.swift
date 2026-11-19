@@ -505,44 +505,52 @@ struct PopopxTelemetryHeader: View {
 
 // MARK: - Previews
 
-#Preview("三段式头部 · 干净在线") {
-    PopopxTelemetryHeader(
-        currentUserId: .constant(1),
-        network: .online,
-        radio: .poweredOn
-    )
-    .padding(.vertical, PopopxMetrics.spaceS)
-    .background(PopopxPalette.base)
-    .preferredColorScheme(.dark)
+struct PopopxTelemetryHeaderOnline_Previews: PreviewProvider {
+    static var previews: some View {
+        PopopxTelemetryHeader(
+            currentUserId: .constant(1),
+            network: .online,
+            radio: .poweredOn
+        )
+        .padding(.vertical, PopopxMetrics.spaceS)
+        .background(PopopxPalette.base)
+        .preferredColorScheme(.dark)
+    }
 }
 
-#Preview("三段式头部 · 蜂窝降级") {
-    PopopxTelemetryHeader(
-        currentUserId: .constant(1),
-        network: .resolve(proximityActive: false, directPeerCount: 0,
-                          path: PopopxNetworkPath(isConnected: true, interface: .cellular, isExpensive: true)),
-        radio: .poweredOn
-    )
-    .padding(.vertical, PopopxMetrics.spaceS)
-    .background(PopopxPalette.base)
+struct PopopxTelemetryHeaderCellular_Previews: PreviewProvider {
+    static var previews: some View {
+        PopopxTelemetryHeader(
+            currentUserId: .constant(1),
+            network: .resolve(proximityActive: false, directPeerCount: 0,
+                              path: PopopxNetworkPath(isConnected: true, interface: .cellular, isExpensive: true)),
+            radio: .poweredOn
+        )
+        .padding(.vertical, PopopxMetrics.spaceS)
+        .background(PopopxPalette.base)
+    }
 }
 
-#Preview("三段式头部 · 仅近场") {
-    PopopxTelemetryHeader(
-        currentUserId: .constant(1),
-        network: .resolve(proximityActive: true, directPeerCount: 2, path: .unknown),
-        radio: .poweredOn
-    )
-    .padding(.vertical, PopopxMetrics.spaceS)
-    .background(PopopxPalette.base)
+struct PopopxTelemetryHeaderProximityOnly_Previews: PreviewProvider {
+    static var previews: some View {
+        PopopxTelemetryHeader(
+            currentUserId: .constant(1),
+            network: .resolve(proximityActive: true, directPeerCount: 2, path: .unknown),
+            radio: .poweredOn
+        )
+        .padding(.vertical, PopopxMetrics.spaceS)
+        .background(PopopxPalette.base)
+    }
 }
 
-#Preview("三段式头部 · 蓝牙未授权") {
-    PopopxTelemetryHeader(
-        currentUserId: .constant(1),
-        network: .offline,
-        radio: .unauthorized
-    )
-    .padding(.vertical, PopopxMetrics.spaceS)
-    .background(PopopxPalette.base)
+struct PopopxTelemetryHeaderBluetoothOff_Previews: PreviewProvider {
+    static var previews: some View {
+        PopopxTelemetryHeader(
+            currentUserId: .constant(1),
+            network: .offline,
+            radio: .unauthorized
+        )
+        .padding(.vertical, PopopxMetrics.spaceS)
+        .background(PopopxPalette.base)
+    }
 }

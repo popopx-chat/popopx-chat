@@ -823,11 +823,13 @@ private enum Copy {
 /// 画布只呈现本页根视图：它自己读的环境就这两个。推进去的子页面另外要全 app 的主题对象，
 /// 那是那条红线名单禁止在本页出现的名字，也不该在预览里造一个假的 —— 所以预览不覆盖子页面。
 /// `SceneDelegate()` 在这里只为满足环境查找，它的 `windowScene` 是 nil，评分那一行会自己退出。
-#Preview("设置") {
-    NavigationStack {
-        PopopxSettingsView(versionText: "7.1")
+struct PopopxSettingsView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            PopopxSettingsView(versionText: "7.1")
+        }
+        .environmentObject(ChatModel.shared)
+        .environmentObject(SceneDelegate())
     }
-    .environmentObject(ChatModel.shared)
-    .environmentObject(SceneDelegate())
 }
 #endif

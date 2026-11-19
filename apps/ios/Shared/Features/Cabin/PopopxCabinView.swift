@@ -1514,11 +1514,13 @@ private enum Copy {
 #if DEBUG
 // mesh 的类型（`PopopxMeshPeer`、`PopopxPeerReachability`）没有 public init，伪造不出数据；
 // 下面每个预览都挂真单例，`bootstrap()` 就是 `Shared/POPOPXApp.swift` 启动时走的那条路径。
-#Preview("厢语 · 标签页") {
-    NavigationStack {
-        PopopxCabinView()
+struct PopopxCabinView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            PopopxCabinView()
+        }
+        .task { await PopopxMeshRuntime.shared.bootstrap() }
     }
-    .task { await PopopxMeshRuntime.shared.bootstrap() }
 }
 
 // Reduce Motion 那条预览删了：`EnvironmentValues.accessibilityReduceMotion` 在这个 SDK 里是只读的
@@ -1526,34 +1528,38 @@ private enum Copy {
 // WritableKeyPath，写不进去，也没有受支持的替身。本页三处雷达/徽章动效都读同一个环境值
 // （:127、:690、:856），要验证静态雷达就把系统的开关打开：设置 → 辅助功能 → 动态效果 → 减少动态效果。
 
-#Preview("厢语 · 大厅空态") {
-    NavigationStack {
-        PopopxCabinHallView(
-            fuseOn: true,
-            radioUsable: true,
-            nickname: .constant(PopopxMeshNicknameStore().read() ?? ""),
-            posts: [],
-            onBroadcast: { _ in nil },
-            onSaveNickname: {},
-            onTurnOnFuse: {}
-        )
-        .navigationTitle(Copy.hallRow)
+struct PopopxCabinHallView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            PopopxCabinHallView(
+                fuseOn: true,
+                radioUsable: true,
+                nickname: .constant(PopopxMeshNicknameStore().read() ?? ""),
+                posts: [],
+                onBroadcast: { _ in nil },
+                onSaveNickname: {},
+                onTurnOnFuse: {}
+            )
+            .navigationTitle(Copy.hallRow)
+        }
+        .task { await PopopxMeshRuntime.shared.bootstrap() }
     }
-    .task { await PopopxMeshRuntime.shared.bootstrap() }
 }
 
-#Preview("厢语 · 本地加密频道") {
-    NavigationStack {
-        PopopxCabinChannelsView(
-            fuseOn: PopopxMeshRuntime.shared.isFuseOn,
-            nodes: [],
-            openingNodeID: nil,
-            pendingCount: 0,
-            onOpenChat: { _ in },
-            onShowPending: {}
-        )
-        .navigationTitle(Copy.encryptedChannelsRow)
+struct PopopxCabinChannelsView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            PopopxCabinChannelsView(
+                fuseOn: PopopxMeshRuntime.shared.isFuseOn,
+                nodes: [],
+                openingNodeID: nil,
+                pendingCount: 0,
+                onOpenChat: { _ in },
+                onShowPending: {}
+            )
+            .navigationTitle(Copy.encryptedChannelsRow)
+        }
+        .task { await PopopxMeshRuntime.shared.bootstrap() }
     }
-    .task { await PopopxMeshRuntime.shared.bootstrap() }
 }
 #endif

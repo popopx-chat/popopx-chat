@@ -859,7 +859,9 @@ private struct PopopxDivider: View {
     }
 }
 
-#Preview("popopx controls") {
-    PopopxControlsGallery()
+struct PopopxControlsGallery_Previews: PreviewProvider {
+    static var previews: some View {
+        PopopxControlsGallery()
+    }
 }
 #endif

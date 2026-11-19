@@ -350,7 +350,9 @@ private struct PopopxThemeGallery: View {
     }
 }
 
-#Preview("popopx theme") {
-    PopopxThemeGallery()
+struct PopopxThemeGallery_Previews: PreviewProvider {
+    static var previews: some View {
+        PopopxThemeGallery()
+    }
 }
 #endif

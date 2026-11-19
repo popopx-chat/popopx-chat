@@ -164,8 +164,10 @@ enum PopopxMainTabCopy {
 
 // MARK: - Previews
 
-#Preview("四栏导航") {
-    MainTabView()
-        .environmentObject(ChatModel.shared)
-        .environmentObject(AppTheme.shared)
+struct MainTabView_Previews: PreviewProvider {
+    static var previews: some View {
+        MainTabView()
+            .environmentObject(ChatModel.shared)
+            .environmentObject(AppTheme.shared)
+    }
 }

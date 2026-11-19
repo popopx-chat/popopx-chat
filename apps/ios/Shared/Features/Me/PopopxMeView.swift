@@ -921,26 +921,30 @@ private enum Copy {
 // MARK: - Previews
 
 #if DEBUG
-#Preview("我 — 空状态") {
-    NavigationStack {
-        PopopxMeView()
+struct PopopxMeView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            PopopxMeView()
+        }
+        .environmentObject(ChatModel.shared)
+        .environmentObject(AppTheme.shared)
     }
-    .environmentObject(ChatModel.shared)
-    .environmentObject(AppTheme.shared)
 }
 
-#Preview("我 — 已有身份") {
-    NavigationStack {
-        PopopxMeView()
-    }
-    .environmentObject(ChatModel.shared)
-    .environmentObject(AppTheme.shared)
-    .onAppear {
-        // 预览可以没有活数据：这里只把既有的 sampleData 交给共享模型，
-        // 空状态那张卡本身没有造假数据（上一张预览就是它的真实样子）。
-        if ChatModel.shared.currentUser == nil {
-            ChatModel.shared.currentUser = User.sampleData
-            ChatModel.shared.users = [UserInfo.sampleData]
+struct PopopxMeViewPopulated_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            PopopxMeView()
+        }
+        .environmentObject(ChatModel.shared)
+        .environmentObject(AppTheme.shared)
+        .onAppear {
+            // 预览可以没有活数据：这里只把既有的 sampleData 交给共享模型，
+            // 空状态那张卡本身没有造假数据（上一张预览就是它的真实样子）。
+            if ChatModel.shared.currentUser == nil {
+                ChatModel.shared.currentUser = User.sampleData
+                ChatModel.shared.users = [UserInfo.sampleData]
+            }
         }
     }
 }

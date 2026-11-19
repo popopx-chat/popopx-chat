@@ -1361,27 +1361,33 @@ private enum Copy {
 // MARK: - Preview
 
 #if DEBUG
-#Preview("通讯录") {
-    NavigationStack {
-        PopopxContactsView()
+struct PopopxContactsView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            PopopxContactsView()
+        }
+        .environmentObject(ChatModel.shared)
+        .environmentObject(AppTheme.shared)
     }
-    .environmentObject(ChatModel.shared)
-    .environmentObject(AppTheme.shared)
 }
 
-#Preview("新的加密连接") {
-    NavigationStack {
-        PopopxNewConnectionsPage()
+struct PopopxNewConnectionsPage_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            PopopxNewConnectionsPage()
+        }
+        .environmentObject(ChatModel.shared)
+        .environmentObject(AppTheme.shared)
     }
-    .environmentObject(ChatModel.shared)
-    .environmentObject(AppTheme.shared)
 }
 
-#Preview("我的加密群组") {
-    NavigationStack {
-        PopopxGroupsPage()
+struct PopopxGroupsPage_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            PopopxGroupsPage()
+        }
+        .environmentObject(ChatModel.shared)
+        .environmentObject(AppTheme.shared)
     }
-    .environmentObject(ChatModel.shared)
-    .environmentObject(AppTheme.shared)
 }
 #endif
