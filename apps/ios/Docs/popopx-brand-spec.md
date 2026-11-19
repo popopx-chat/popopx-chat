@@ -41,7 +41,7 @@ Token 实现：`apps/ios/Shared/Theme/PopopxTheme.swift`。
 
 > 结论：Phase 3 的"挂起/恢复"必须走 `engineBackend`（或包内 `PopopxMeshEngine`）的 **stop/start**，不得只翻布尔位；上表已证明 stop 路径真的落到 CoreBluetooth。
 
-**遥测与健康（Phase 3 顶栏 / Phase 4 厢语页绑定）**
+**节点状态与健康（Phase 3 顶栏 / Phase 4 厢语页绑定）**
 
 | 能力 | 实测位置 |
 |---|---|
@@ -276,7 +276,7 @@ NON-TEXT UI components (target 3.0:1)
 | `caption` | `.footnote` | 13 | 时间戳、说明 |
 | `microTag` | `.caption` | 12 | 徽章文字 |
 | `metric` | `.footnote` + `monospacedDigit` | 13 | 跳数、延迟、链接码 |
-| `metricSmall` | `.caption2` + `monospacedDigit` | 11 | 顶栏遥测数字 |
+| `metricSmall` | `.caption2` + `monospacedDigit` | 11 | 顶栏节点状态数字 |
 
 数字一律 `monospacedDigit()`，避免 Mesh 状态刷新时布局抖动。
 

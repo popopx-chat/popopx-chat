@@ -228,6 +228,19 @@ Nothing is persisted on our side because we run no side for this feature.
 （例如 onion 主机的连接设置）。这一点很重要：如果产品描述里出现"隐藏你的网络活动"，3.1.4（硬件/网络功能）
 与 VPN 相关条款就会把 app 推到另一个审核类别。
 
+**术语通俗化记录（2026-11-19 追加）**：产品要求把用户看得见的"遥测面板 / Telemetry"改成
+"节点状态面板 / Node Status Panel"。落点四处，全部是功能内文案（`private enum Copy`，不走 `.lproj`）：
+`PopopxBadgeDetailSheet.swift:241`（面板标题本身）、`:242`（脚注）、`PopopxTrialWelcomeModal.swift:179`、
+`PopopxBadgePaywallView.swift:437`（收益条目那句，注释在 `:279`）。复算与例外：
+- `遥测` 这个词在**全部 Swift 与 `.strings` 里 = 0 处**（附录给命令）；17 个 `.lproj` 本来就没有它，
+  所以"含 17 个 `.lproj`"那一条是**空操作**，不是漏做——那些目录只放涉钱/合规句子。
+- `Docs/popopx-brand-spec.md` 原有 2 处（`:44` 小节标题、`:279` 字号表"顶栏遥测数字"）已按用户
+  2026-11-19 的明确指示改为"节点状态"；**同一次指示覆盖了此前"不改 brand-spec"的裁定 4**，
+  但只覆盖这两行——§2.4 那类条目仍然没有动（第 9 节第 4 条的例外仍由你定）。
+- 类型与文件名 `Shared/Navigation/PopopxTelemetryHeader.swift` **保持原样**：改名要动 `.pbxproj`（红线），
+  且 brand-spec `:249` 与 `:352` 引用的是这个真实路径，改了会让文档对不上代码。
+- 用户自己的输入件 `apps/ios/prompt.md:64` 与 `apps/ios/ui-prompt.md:72` 仍写"遥测导航栏"，我没有改。
+
 ---
 
 ## 6. 本地化 / Localization evidence
@@ -573,6 +586,11 @@ grep -rn 'static let [a-zA-Z]* = "[^"]*\(VPN\|专网\|代理\)' Shared/Features/
 # SimpleX 品牌残留：本特性文件里 6 处命中全部是**注释里指向上游 SimpleX 语义**的说明句，
 # 没有一处出现在用户可见字符串或类型名里
 grep -rn "SimpleX" Shared/Features/BadgeCredits/ | sed 's/:.*\(\/\/.*\)/  \1/' | cut -c1-100
+# 术语通俗化：中文"遥测"在所有 Swift 与 .strings 里必须为 0；改名落点为 4 处功能内文案
+grep -rn "遥测" Shared POPOPX POPOPXChat *.lproj 2>/dev/null | wc -l                              # 期望 0
+grep -rn "节点状态面板" Shared/Features/BadgeCredits/ | cut -c1-90                                  # 期望 4 行
+grep -n "遥测" Docs/popopx-brand-spec.md ; echo "^ 期望无输出（2026-11-19 指示后已改）"
+grep -rn "遥测" prompt.md ui-prompt.md | cut -c1-70   # 只应命中用户的提示词原件；本文件与 brand-spec 里的命中都是"记录"而非界面文案
 # 本地化：37 个 key 在 16 个目录里齐备、占位符合法、plutil 全绿
 grep -c "NSLocalizedString(" Shared/Features/BadgeCredits/PopopxBadgeCreditsModels.swift
 # 校验器只查源目录的等价命令（下面那条说明解释为什么不能直接跑 `check`）
