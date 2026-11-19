@@ -1300,7 +1300,7 @@ private enum Copy {
     static let ephemeralNote = "阅读有效期在好友点击打开后起计，到点后本机内容与图片、视频原件一并销毁。"
     static let ttlLabel = "阅读有效期"
     static let antiSpyToggle = "强制开启防窥防偷拍镜头检测"
-    static let antiSpyNote = "只在隐私发送时生效：对方打开阅读时才在其设备上启用前置镜头检测，摄像头权限由对方设备届时请求。"
+    static let antiSpyNote = "只在阅后即焚时生效：对方打开阅读时才在其设备上启用前置镜头检测，摄像头权限由对方设备届时请求。"
 
     // 图文与视频
     static let blocksGroup = "图文与视频"
