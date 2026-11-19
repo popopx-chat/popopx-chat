@@ -2,10 +2,10 @@
 //  PopopxMeView.swift
 //  POPOPX (iOS)
 //
-//  【第四阶段】Tab 4「我」。顶部一枚大的当前身份卡，下面五组分卡片：
-//  身份 / 通用 / 隐私与安全 / 离线组网 / 关于（裁定 B、§2.3）。
+//  【第四阶段】Tab 4「我」。微信式信息架构：顶部一枚个人名片头，下面四组分卡片
+//  资产与节点权益 / 个人空间与离线网络 / 常用 / 隐私与安全防线（2026-11-20 重构裁定）。
 //
-//  结构上的三条决定：
+//  结构上的五条决定：
 //
 //  1. 页面自己不放 NavigationStack —— 栈由 Shared/Navigation/MainTabView.swift:90-92 统一包好。
 //     这里只往外推既有页面（`NavigationLink { 页面 }`，与 SettingsView.swift:405-424 同一种写法），
@@ -17,9 +17,17 @@
 //     kill switch / store；开关下面那块状态文字是 `verifiedActivitySnapshot()` 亲口回答的核验结果
 //     （phase + 真在跑的蓝牙/界面组件 + 事件订阅数），不是 SwiftUI 自己记住的那个布尔。紧急抹除
 //     只往既有的布防状态机里送轻触，确认弹窗仍由全 app 已挂载的那道门呈现，本页不写第二个 alert。
+//  4. 这次重排只动"行住在哪个卡片里"，没有删掉任何一条既有路由：身份管理与主页名片码从行升格为
+//     名片头的整行热区与二维码微标，其余行全部落在上面四组之中。「充值算力点」仍然是一枚无条件
+//     入口（理由见下面 `showsPaywall` 那条注释），蓝牙真实核验块与三击紧急抹除也原样保留。
+//  5. 徽章那一行的三条出口不另立判据：它 switch 的是 `phase.capsuleState` 这个共享枚举本身，
+//     与顶栏胶囊 `PopopxBadgeCapsuleView.route()` 读同一份状态、同一套分支，将来加一档会在这里
+//     编译报错，而不是两处各说一套。
 //
 //  配色、字号、圆角、间距一律取 Shared/Theme/PopopxTheme.swift 的 token；控件只用
-//  Shared/Components 里已有的原子库，没有新造按钮、开关或输入框。
+//  Shared/Components 里已有的原子库，没有新造按钮、开关或输入框（`PopopxIconBadge` 在原子库里
+//  是 private，本页需要的辅助件全部内聚在这一个文件内）。文案一律英文原句即 Key，
+//  新词条写进 16 个译本目录，`en.lproj` 不写冗余词条（读到 Key 本身就是英文）。
 //
 //  ⚠️ Xcode 工程集成：本文件必须人工拖进 POPOPX (iOS) target —— 铁律禁止脚本改 project.pbxproj。
 //
@@ -51,10 +59,10 @@ struct PopopxMeView: View {
     @State private var toast = PopopxToastModel()
     @State private var showsAddFriend = false
     @State private var showsPairingPolicy = false
-    /// 「主页名片码」那张 Sheet 的开关（入口就在下面 `identityEntries` 第二组里）。
+    /// 「主页名片码」那张 Sheet 的开关。入口是名片头右端的二维码微标（裁定 4：不再单占一行）。
     @State private var showsProfileQR = false
-    /// 算力点生态的三张面板。徽章详情与升级不必在这里再开一个开关——顶栏那枚胶囊的
-    /// `route()` 已经按状态分发了这三条出口（PopopxBadgeCapsuleView.swift:197-203）。
+    /// 算力点生态的三张面板。徽章**详情**与**升级**现在也在本页有一行（微信式分组要求资产
+    /// 直达），但它不自带判据，见上面结构决定 5 与下面 `routeBadge()`。
     @State private var showsCreditsStore = false
     @State private var showsRedeemCode = false
     @State private var showsGiftCard = false
@@ -62,6 +70,14 @@ struct PopopxMeView: View {
     /// `.activeLit` 那一档把点击交给徽章详情，于是**已经点亮的人再也没有地方买点数**。
     /// 而算力点中心那一页按它自己的文件头不挂付费墙。所以这一行是唯一的无条件入口。
     @State private var showsPaywall = false
+    /// 徽章三条出口里除付费墙外的两条，与顶栏胶囊一一对应：体验态开欢迎页、点亮态开详情。
+    @State private var showsBadgeDetail = false
+    @State private var showsTrialWelcome = false
+    /// 徽章运行时：`@Observable` 单例，与顶栏胶囊、徽章详情读同一份 `phase`，本页不分第二套状态。
+    @State private var badge = PopopxBadgeManager.shared
+    /// 本机未使用的礼品券张数。`PopopxP2PVoucherVault` 是 actor，只能在 `.task` 里 await 读，
+    /// 不能在 body 里同步问它；读不到就留 0，这一行因此不会假装"有券"。
+    @State private var unusedVouchers = 0
     /// 本机加密个人主页的当前档位，形如「已配置 · 常驻名片」；`nil` = 还没读出来（首帧不给假状态）。
     @State private var profileStatusValue: String?
 
@@ -81,13 +97,11 @@ struct PopopxMeView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
-                identityCard
-                identityEntries
+                nameCard
+                assetEntries
+                spaceEntries
                 generalEntries
-                privacyEntries
-                meshEntries
-                commerceEntries
-                aboutEntries
+                securityEntries
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top, PopopxMetrics.spaceS)
@@ -105,7 +119,7 @@ struct PopopxMeView: View {
         }
         .sheet(isPresented: $showsProfileQR) {
             // detents 归调用方（`ProfileQRCodeSheet.swift:19` 那条约定）。这张卡的内容是
-            // 名片 + 模式选择 + 动作行，比聊天里那张位置卡高得多，0.8 是它与 `identityCard`
+            // 名片 + 模式选择 + 动作行，比聊天里那张位置卡高得多，0.8 是它与 `nameCard`
             // 同屏时不挤掉自己动作行的那一档。
             ProfileQRCodeSheet(identityName: chatModel.currentUser?.displayName ?? Copy.profileQRIdentityFallback)
                 .presentationDetents([.fraction(0.8)])
@@ -130,10 +144,27 @@ struct PopopxMeView: View {
             PopopxBadgePaywallView()
                 .presentationDetents([.large])
         }
+        // 徽章另外两条出口，detents 照顶栏胶囊那两个开关原样给（PopopxBadgeCapsuleView.swift:184-193）。
+        .sheet(isPresented: $showsBadgeDetail) {
+            PopopxBadgeDetailSheet()
+                .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $showsTrialWelcome) {
+            PopopxTrialWelcomeModal()
+                .presentationDetents([.medium, .large])
+        }
         .onChange(of: showsProfileQR) { _, opened in
             // 关掉名片码就重读一次档位：那张 Sheet 里的模式开关会改本机那份武装记录，
             // 入口行上那一格说的必须是现在真实的那一档。
             if !opened { Task { await refreshProfileStatus() } }
+        }
+        // 卡包那一行说的是"此刻还剩几张能用"，所以两张会动券的 Sheet 一关就重读一次：
+        // 兑换把券写成已用、转赠把券交给对方，两者都不回调本页，只能回去问保险柜。
+        .onChange(of: showsRedeemCode) { _, opened in
+            if !opened { Task { await refreshVoucherCount() } }
+        }
+        .onChange(of: showsGiftCard) { _, opened in
+            if !opened { Task { await refreshVoucherCount() } }
         }
         .popopxToast(toast)
         // 开关一翻就去核验。`.task(id:)` 在熔断镜像变化时重跑；稳定态下只多一次 actor hop。
@@ -146,19 +177,28 @@ struct PopopxMeView: View {
         .task(id: chatModel.currentUser?.userId) {
             await refreshProfileStatus()
         }
+        // 券是本机钥匙串里的东西，与切哪个身份无关，所以它只跟"进过这一页"绑定一次。
+        .task {
+            await refreshVoucherCount()
+        }
     }
 
-    // MARK: 顶部身份卡
+    // MARK: 顶部个人名片头
 
-    @ViewBuilder private var identityCard: some View {
+    @ViewBuilder private var nameCard: some View {
         if let user = chatModel.currentUser {
             PopopxIdentityCard(
                 user: user,
+                phase: badge.phase,
                 others: switchableOthers(of: user),
                 lockedCount: lockedCount,
                 busyUserID: busyUserID,
                 onSwitch: { info in switchIdentity(to: info) },
-                onCopyUserID: { copyUserID(user.userId) }
+                onCopyUserID: { copyUserID(user.userId) },
+                onShowProfileQR: {
+                    PopopxHaptics.impact(.light)
+                    showsProfileQR = true
+                }
             )
         } else {
             emptyIdentityCard
@@ -167,7 +207,7 @@ struct PopopxMeView: View {
 
     /// 真·空状态：没有 `currentUser` 时不摆假名片，只说明身份是什么，并给一个既有的创建页。
     private var emptyIdentityCard: some View {
-        PopopxSectionCard(Copy.identityCardTitle, footnote: Copy.emptyFootnote) {
+        PopopxSectionCard(footnote: Copy.emptyFootnote) {
             HStack(alignment: .top, spacing: PopopxMetrics.spaceS) {
                 PopopxMeAvatar(image: nil, side: PopopxMetrics.space2XL)
                 VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
@@ -198,24 +238,82 @@ struct PopopxMeView: View {
     private func refreshProfileStatus() async {
         let armed = ProfileAutoSender.shared.armedProfileScene
         if let armed, armed.expiresAt > Date() {
-            profileStatusValue = "\(Copy.profileConfigured) · \(armed.mode.cardLabel)"
+            profileStatusValue = "\(Copy.profileConfigured) · \(profileModeLabel(armed.mode))"
             return
         }
         guard let manifest = await ProfileStorageManager.shared.loadEditable() else {
             profileStatusValue = Copy.profileUnconfigured
             return
         }
-        profileStatusValue = "\(Copy.profileConfigured) · \(manifest.sendMode.cardLabel)"
+        profileStatusValue = "\(Copy.profileConfigured) · \(profileModeLabel(manifest.sendMode))"
     }
 
-    // MARK: 身份
+    /// 档位怎么说归本页：`PersonalProfileModel.cardLabel` 是那两个模块内的中文常量，而本页要进
+    /// 16 个语种，所以照同一个 `mode` 自己映射。两处读的是同一份档位，不会读出两种状态。
+    private func profileModeLabel(_ mode: PopopxProfileSendMode) -> String {
+        switch mode {
+        case .ephemeral: return Copy.profileModeEphemeral
+        case .standard: return Copy.profileModeStandard
+        }
+    }
 
-    private var identityEntries: some View {
-        PopopxSectionCard(Copy.groupIdentity) {
-            PopopxMeRowLink(Copy.myProfile, systemImage: "person.text.rectangle", tint: .brand) {
-                PopopxProfileHost()
+    // MARK: 组 1 · 资产与节点权益
+
+    private var assetEntries: some View {
+        PopopxSectionCard(Copy.groupAssets, footnote: Copy.commerceFootnote) {
+            PopopxPickerRow(Copy.creditsWallet, value: creditsBalanceTitle,
+                            systemImage: "wallet.pass.fill", tint: .brand) {
+                PopopxHaptics.selection()
+                showsCreditsStore = true
             }
             PopopxMeDivider()
+            PopopxPickerRow(Copy.badgeRow, value: badgeRowValue,
+                            systemImage: "checkmark.shield.fill", tint: badge.phase.isLit ? .success : .neutral) {
+                PopopxHaptics.selection()
+                routeBadge()
+            }
+            .accessibilityIdentifier("popopx.me.badge")
+            PopopxMeDivider()
+            // 无条件付费墙入口：整页只有这一行不看徽章状态就能打开购买面板，理由见上面 `showsPaywall`。
+            PopopxPickerRow(Copy.purchaseCredits, systemImage: "cart.fill", tint: .brand) {
+                PopopxHaptics.selection()
+                showsPaywall = true
+            }
+            .accessibilityIdentifier("popopx.me.paywall")
+        }
+    }
+
+    /// 徽章那一格说三档真话：休眠不写"0 天"，体验与正式不共用"剩余"这个词（口径同
+    /// `PopopxBadgeCopy.remaining`）。天数一律向上取整，还剩一分钟不能说"0 天"。
+    private var badgeRowValue: String {
+        switch badge.phase {
+        case .dormant:
+            return Copy.badgeDormant
+        case let .trial(expiresAt):
+            return String(format: Copy.badgeTrialFormat, badgeDaysLeft(expiresAt))
+        case let .active(_, expiresAt):
+            return String(format: Copy.badgeRunningFormat, badgeDaysLeft(expiresAt))
+        }
+    }
+
+    private func badgeDaysLeft(_ expiresAt: Date) -> Int {
+        max(1, Int(ceil(max(0, expiresAt.timeIntervalSinceNow) / 86_400)))
+    }
+
+    /// 与顶栏胶囊 `route()` 同一份判据：分支挂在共享枚举 `PopopxBadgeCapsuleState` 上，
+    /// 而不是挂在"我以为的三态"上。胶囊将来加一档，这里就编译不过去。
+    private func routeBadge() {
+        switch badge.phase.capsuleState {
+        case .dormant: showsPaywall = true
+        case .trialPulsing: showsTrialWelcome = true
+        case .activeLit: showsBadgeDetail = true
+        }
+    }
+
+    // MARK: 组 2 · 个人空间与离线网络
+
+    private var spaceEntries: some View {
+        PopopxSectionCard(Copy.groupSpace) {
             // 加密个人主页：制作器用 `NavigationLink` 推上去，不是 Sheet —— 它自己不带导航容器
             //（`ProfileBuilderView.swift:434` 那一层的约定），推上去就白拿现成的返回键。
             // `value` 那一格是这台机器上主页的当前档位；读盘是 actor hop，放在 `.task` 里，
@@ -225,33 +323,76 @@ struct PopopxMeView: View {
                     .navigationTitle(Copy.personalProfile)
             }
             PopopxMeDivider()
-            // 名片码是 Sheet 不是页面（`ProfileQRCodeSheet` 自带关闭键、dismiss 归调用方），
-            // 所以这一行不能借上面那个 `PopopxMeRowLink`——它是 NavigationLink，推不开 Sheet。
-            // 命框高度与 `PopopxMeRowLink` 对齐，两行看上去是同一族。
-            PopopxPickerRow(Copy.personalProfileQR, systemImage: "qrcode.viewfinder", tint: .brand) {
-                PopopxHaptics.impact(.light)
-                showsProfileQR = true
+            PopopxMeRowLink(Copy.myProfile, systemImage: "person.text.rectangle", tint: .brand) {
+                PopopxProfileHost()
             }
-            .frame(maxWidth: .infinity, minHeight: PopopxMetrics.minHitTarget, alignment: .leading)
-            .accessibilityIdentifier("popopx.me.profileQR")
             PopopxMeDivider()
-            PopopxMeRowLink(
-                Copy.manageIdentities,
-                value: String(format: Copy.identityCountFormat, chatModel.users.count),
-                systemImage: "person.crop.rectangle.stack"
-            ) {
-                UserProfilesView()
-                    .navigationTitle(Copy.manageIdentities)
-                    .modifier(ThemedBackground(grouped: true))
+            giftVaultRow
+            PopopxMeDivider()
+            PopopxMeRowLink(Copy.meshRow, value: meshRowValue,
+                            systemImage: "dot.radiowaves.left.and.right", tint: .mesh) {
+                // 挂载方式照 SettingsView.swift:417-424：三个对象全部来自 runtime，页面自己在熔断
+                // 关闭时渲染"已关闭"状态，所以这一行永远可以点。
+                MeshPrivacySettingsView(
+                    store: meshRuntime.mappingStore,
+                    pairing: meshRuntime.pairing,
+                    killSwitch: meshRuntime.killSwitch
+                )
+                .navigationTitle(Copy.meshPrivacy)
+                .modifier(ThemedBackground(grouped: true))
             }
         }
     }
 
-    // MARK: 通用
+    /// 卡包那一行是一条 `Menu`，不是一个页面：仓库里没有"卡包浏览页"这个视图，
+    /// 只有转赠与兑换两张 Sheet，所以这一行把两个动作并成一次长按式的选择，
+    /// 而不是再造一个只列本机券的第四页。行本体仍由 `PopopxPickerRow` 画，
+    /// 但它自带的 `Button` 会吃掉菜单的点击，所以整行设为不可命中、交给外层 `Menu`。
+    private var giftVaultRow: some View {
+        Menu {
+            Button(Copy.giftSend) {
+                PopopxHaptics.selection()
+                showsGiftCard = true
+            }
+            Button(Copy.redeemCode) {
+                PopopxHaptics.selection()
+                showsRedeemCode = true
+            }
+        } label: {
+            PopopxPickerRow(Copy.giftVault, value: voucherValueTitle,
+                            systemImage: "giftcard.fill", tint: .neutral) { }
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+                .frame(maxWidth: .infinity, minHeight: PopopxMetrics.minHitTarget, alignment: .leading)
+                .contentShape(Rectangle())
+        }
+        .menuIndicator(.hidden)
+        .accessibilityLabel(Text(verbatim: Copy.giftVault))
+        .accessibilityValue(Text(verbatim: voucherValueTitle ?? ""))
+        .accessibilityHint(Text(verbatim: Copy.giftMenuHint))
+        .accessibilityIdentifier("popopx.me.giftVault")
+    }
+
+    /// 一格都没有就不显示数字：空卡包写"0 张可用"会让人以为系统里有个"张"的概念在等着凑。
+    private var voucherValueTitle: String? {
+        unusedVouchers > 0 ? String(format: Copy.vouchersAvailableFormat, unusedVouchers) : nil
+    }
+
+    /// 熔断关着就说"已熔断关闭"，不说"未开启"：这一档是用户自己拉下的闸，不是一个没装的开关。
+    private var meshRowValue: String {
+        meshRuntime.isFuseOn ? Copy.meshRowOn : Copy.meshRowFusedOff
+    }
+
+    @MainActor private func refreshVoucherCount() async {
+        unusedVouchers = await PopopxP2PVoucherVault.shared.vouchers(state: .unused).count
+    }
+
+    // MARK: 组 3 · 常用
 
     private var generalEntries: some View {
         PopopxSectionCard(Copy.groupGeneral) {
             PopopxPickerRow(Copy.addFriend, systemImage: "person.badge.plus", tint: .brand) {
+                PopopxHaptics.impact(.light)
                 showsAddFriend = true
             }
             if let user = chatModel.currentUser {
@@ -278,22 +419,31 @@ struct PopopxMeView: View {
                     .modifier(ThemedBackground(grouped: true))
             }
             PopopxMeDivider()
-            PopopxMeRowLink(Copy.allSettings, systemImage: "gearshape") {
-                PopopxPresenceGated(reason: "进入设置页前请确认是本人操作") {
+            PopopxMeRowLink(Copy.settings, systemImage: "gearshape.fill") {
+                PopopxPresenceGated(reason: Copy.presenceReasonSettings) {
                     PopopxSettingsView()
-                        .navigationTitle(Copy.allSettings)
+                        .navigationTitle(Copy.settings)
                         .modifier(ThemedBackground(grouped: true))
                 }
+            }
+            PopopxMeDivider()
+            PopopxMeRowLink(Copy.versionRow, value: appVersion, systemImage: "info.circle") {
+                VersionView()
+                    .navigationTitle(Copy.versionRow)
+                    .modifier(ThemedBackground(grouped: true))
             }
         }
     }
 
-    // MARK: 隐私与安全
+    // MARK: 组 4 · 隐私与安全防线
 
-    private var privacyEntries: some View {
-        PopopxSectionCard(Copy.groupPrivacy) {
-            PopopxMeRowLink(Copy.privacySettings, systemImage: "lock.shield", tint: .brand) {
-                PopopxPresenceGated(reason: "进入隐私与安全设置前请确认是本人操作") {
+    /// 裁定 6：不把四件事压成一行。一行写"应用锁、双密码、防录屏、三击抹除"是不诚实的——
+    /// 前两项分别在 `PrivacySettings` 与 `PopopxAntiTheftSettingsView` 两个页面里，最后一项
+    /// 只活在本页这块卡上，任何一行都到不了另一行的目的地。所以拆成两行，各说各的去处。
+    private var securityEntries: some View {
+        PopopxSectionCard(Copy.groupSecurity, footnote: Copy.meshFootnote) {
+            PopopxMeRowLink(Copy.privacySettings, systemImage: "lock.shield.fill", tint: .brand) {
+                PopopxPresenceGated(reason: Copy.presenceReasonPrivacy) {
                     PrivacySettings()
                         .navigationTitle(Copy.privacySettings)
                         .modifier(ThemedBackground(grouped: true))
@@ -313,13 +463,7 @@ struct PopopxMeView: View {
                     .modifier(ThemedBackground(grouped: true))
             }
             .accessibilityIdentifier("popopx.me.antiTheft")
-        }
-    }
-
-    // MARK: 离线组网
-
-    private var meshEntries: some View {
-        PopopxSectionCard(Copy.groupMesh, footnote: Copy.meshFootnote) {
+            PopopxMeDivider()
             PopopxToggleRow(
                 Copy.fuseRow,
                 note: Copy.fuseRowNote,
@@ -327,6 +471,8 @@ struct PopopxMeView: View {
                 tint: .mesh,
                 isOn: fuseBinding
             )
+            // 开关的回执归调用方：原子库那枚 `Toggle` 里没有触觉，翻闸这种动作必须有手感。
+            .onChange(of: meshRuntime.isFuseOn) { _, _ in PopopxHaptics.selection() }
             PopopxMeDivider()
             verificationBlock
             PopopxMeDivider()
@@ -340,50 +486,7 @@ struct PopopxMeView: View {
                 showsPairingPolicy = true
             }
             PopopxMeDivider()
-            PopopxMeRowLink(Copy.meshPrivacy, systemImage: "lock.shield.fill", tint: .mesh) {
-                // 挂载方式照 SettingsView.swift:417-424：三个对象全部来自 runtime，页面自己在熔断
-                // 关闭时渲染"已关闭"状态，所以这一行永远可以点。
-                MeshPrivacySettingsView(
-                    store: meshRuntime.mappingStore,
-                    pairing: meshRuntime.pairing,
-                    killSwitch: meshRuntime.killSwitch
-                )
-                .navigationTitle(Copy.meshPrivacy)
-                .modifier(ThemedBackground(grouped: true))
-            }
-            PopopxMeDivider()
             panicBlock
-        }
-    }
-
-    // MARK: 算力点与徽章
-
-    /// 算力点钱包的第二入口。徽章**详情**不在这里重复一档：顶栏那枚胶囊就是它的第一入口，
-    /// 这里再放一行"徽章详情"会让人以为两处可能读出两种状态。
-    /// 但**充值**在这里必须有一行，理由见上面 `showsPaywall` 那条注释：胶囊按状态分发，
-    /// 点亮之后就没有任何一处能打开付费墙了。
-    private var commerceEntries: some View {
-        PopopxSectionCard(Copy.groupCommerce, footnote: Copy.commerceFootnote) {
-            PopopxPickerRow(Copy.creditsStore, value: creditsBalanceTitle,
-                            systemImage: "circle.hexagongrid.fill", tint: .brand) {
-                PopopxHaptics.selection()
-                showsCreditsStore = true
-            }
-            PopopxMeDivider()
-            PopopxPickerRow(Copy.purchaseCredits, systemImage: "cart.fill", tint: .brand) {
-                PopopxHaptics.selection()
-                showsPaywall = true
-            }
-            PopopxMeDivider()
-            PopopxPickerRow(Copy.redeemCode, systemImage: "key.horizontal.fill", tint: .brand) {
-                PopopxHaptics.selection()
-                showsRedeemCode = true
-            }
-            PopopxMeDivider()
-            PopopxPickerRow(Copy.giftCard, systemImage: "giftcard.fill", tint: .brand) {
-                PopopxHaptics.selection()
-                showsGiftCard = true
-            }
         }
     }
 
@@ -448,18 +551,6 @@ struct PopopxMeView: View {
         .disabled(!meshRuntime.isFuseOn)
         .opacity(meshRuntime.isFuseOn ? 1 : 0.45)
         .accessibilityHint(Text(verbatim: Copy.panicRowHint))
-    }
-
-    // MARK: 关于
-
-    private var aboutEntries: some View {
-        PopopxSectionCard(Copy.groupAbout, footnote: Copy.aboutFootnote) {
-            PopopxMeRowLink(Copy.versionRow, value: appVersion, systemImage: "info.circle") {
-                VersionView()
-                    .navigationTitle(Copy.versionRow)
-                    .modifier(ThemedBackground(grouped: true))
-            }
-        }
     }
 
     // MARK: 配对策略
@@ -620,92 +711,142 @@ struct PopopxMeView: View {
     }
 }
 
-// MARK: - 身份卡
+// MARK: - 顶部个人名片头
 
+/// 微信式名片头：64pt 头像 + 粗体身份名 + 双模状态条，右端二维码微标与 `chevron.right`。
+/// 整行（头像到状态条）推「身份管理」，二维码微标是并列的第二个按钮 —— 所以这两个按钮必须是
+/// **兄弟**而不是嵌套：`Button` 套 `Button` 只会让外层吃掉点击，名片码就打不开了。
 @MainActor
 private struct PopopxIdentityCard: View {
     private let user: User
+    private let phase: PopopxBadgePhase
     private let others: [UserInfo]
     private let lockedCount: Int
     private let busyUserID: Int64?
     private let onSwitch: (UserInfo) -> Void
     private let onCopyUserID: () async -> Void
+    private let onShowProfileQR: () -> Void
 
     init(
         user: User,
+        phase: PopopxBadgePhase,
         others: [UserInfo],
         lockedCount: Int,
         busyUserID: Int64?,
         onSwitch: @escaping (UserInfo) -> Void,
-        onCopyUserID: @escaping () async -> Void
+        onCopyUserID: @escaping () async -> Void,
+        onShowProfileQR: @escaping () -> Void
     ) {
         self.user = user
+        self.phase = phase
         self.others = others
         self.lockedCount = lockedCount
         self.busyUserID = busyUserID
         self.onSwitch = onSwitch
         self.onCopyUserID = onCopyUserID
+        self.onShowProfileQR = onShowProfileQR
     }
 
-    /// 边长不写裸数字：大头像 = spaceXL × 2，切换器里的小头像 = spaceXL。
+    /// 边长不写裸数字：大头像 = spaceXL × 2（64pt），切换器里的小头像 = spaceXL。
     private static let avatarSide: CGFloat = PopopxMetrics.spaceXL * 2
     private static let chipAvatarSide: CGFloat = PopopxMetrics.spaceXL
 
-    /// 身份色是怎么派生出来的：全仓没有 `colorForProfile` 这一类按身份给色相的 helper（0 命中），
-    /// 而 §1.1 里靛紫只说"在线身份"、青绿只说"离线厢语"，把青绿拿来当纯装饰就会伪造一条不存在
-    /// 的传输通道。所以色相不动，只把 `brand` 压到 0.12 当这张卡的重心；上面的文字仍走 `label`，
-    /// 对比度不受这层底影响。
-    private static let identityWash = PopopxPalette.brand.opacity(0.12)
-
     var body: some View {
-        PopopxSectionCard(Copy.identityCardTitle, footnote: footnote) {
+        PopopxSectionCard(footnote: footnote) {
+            HStack(spacing: PopopxMetrics.space2XS) {
+                nameRow
+                profileQRButton
+                disclosureChevron
+            }
+            PopopxMeDivider()
+            identityNumberLine
+            if !others.isEmpty {
+                PopopxMeDivider()
+                switcher
+            }
+        }
+    }
+
+    private var nameRow: some View {
+        NavigationLink {
+            UserProfilesView()
+                .navigationTitle(Copy.manageIdentities)
+                .modifier(ThemedBackground(grouped: true))
+        } label: {
             HStack(alignment: .center, spacing: PopopxMetrics.spaceS) {
                 PopopxMeAvatar(image: user.image, side: Self.avatarSide)
                 VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
                     Text(user.displayName)
-                        .font(PopopxType.title)
+                        .font(PopopxType.emphasis)
                         .foregroundStyle(PopopxPalette.label)
                         .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
                     if showsFullName {
                         Text(user.fullName)
-                            .font(PopopxType.secondary)
+                            .font(PopopxType.caption)
                             .foregroundStyle(PopopxPalette.labelSecondary)
                             .lineLimit(1)
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    identityNumberLine
+                    PopopxMeStatusCapsule(phase: phase)
                 }
                 Spacer(minLength: PopopxMetrics.spaceXS)
             }
-            .padding(PopopxMetrics.spaceS)
+            .padding(PopopxMetrics.space2XS)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Self.identityWash, in: .rect(cornerRadius: PopopxMetrics.radiusControl))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PopopxPressButtonStyle())
+        .accessibilityHint(Text(verbatim: Copy.manageIdentitiesHint))
+    }
 
-            if !others.isEmpty {
-                PopopxMeDivider()
-                VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
-                    Text(Copy.otherIdentities)
-                        .font(PopopxType.caption)
-                        .foregroundStyle(PopopxPalette.labelSecondary)
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        LazyHStack(spacing: PopopxMetrics.spaceS) {
-                            ForEach(others) { info in
-                                PopopxIdentityChip(
-                                    name: info.user.displayName,
-                                    image: info.user.image,
-                                    unread: info.unreadCount,
-                                    busy: busyUserID == info.user.userId,
-                                    action: { onSwitch(info) }
-                                )
-                            }
-                        }
-                        .padding(.vertical, PopopxMetrics.space2XS)
+    /// 名片码微标。44×44 的命框由 `minHitTarget` 兜住，图标本身只有 `spaceM`。
+    private var profileQRButton: some View {
+        Button(action: onShowProfileQR) {
+            Image(systemName: "qrcode")
+                .font(PopopxType.microTag)
+                .imageScale(.large)
+                .foregroundStyle(PopopxPalette.brand)
+                .frame(width: PopopxMetrics.spaceM, height: PopopxMetrics.spaceM)
+                .frame(width: PopopxMetrics.minHitTarget, height: PopopxMetrics.minHitTarget)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(PopopxPressButtonStyle())
+        .accessibilityLabel(Text(verbatim: Copy.personalProfileQR))
+        .accessibilityHint(Text(verbatim: Copy.linkHint))
+        .accessibilityIdentifier("popopx.me.profileQR")
+    }
+
+    /// 装饰用的箭头：命框在左边的 `nameRow` 上，所以它自己不进无障碍树。
+    private var disclosureChevron: some View {
+        Image(systemName: "chevron.right")
+            .font(PopopxType.microTag)
+            .imageScale(.medium)
+            .foregroundStyle(PopopxPalette.labelHint)
+            .accessibilityHidden(true)
+    }
+
+    private var switcher: some View {
+        VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
+            Text(Copy.otherIdentities)
+                .font(PopopxType.caption)
+                .foregroundStyle(PopopxPalette.labelSecondary)
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(spacing: PopopxMetrics.spaceS) {
+                    ForEach(others) { info in
+                        PopopxIdentityChip(
+                            name: info.user.displayName,
+                            image: info.user.image,
+                            unread: info.unreadCount,
+                            busy: busyUserID == info.user.userId,
+                            action: { onSwitch(info) }
+                        )
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, PopopxMetrics.space2XS)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     /// 昵称与全名相同（或全名为空）时不重复念一遍 —— 口径同 SettingsView.swift:690 的 `profileName`。
@@ -727,6 +868,8 @@ private struct PopopxIdentityCard: View {
             .accessibilityLabel(Text(verbatim: Copy.identityNumberLabel))
             .accessibilityValue(Text(verbatim: "\(user.userId)"))
 
+            Spacer(minLength: PopopxMetrics.spaceXS)
+
             PopopxButton(
                 Copy.copyUserID,
                 systemImage: "doc.on.doc",
@@ -735,6 +878,7 @@ private struct PopopxIdentityCard: View {
                 action: onCopyUserID
             )
         }
+        .padding(PopopxMetrics.space2XS)
     }
 
     private var footnote: String? {
@@ -744,6 +888,57 @@ private struct PopopxIdentityCard: View {
         return lockedCount > 0
             ? String(format: Copy.switchNoteWithLockedFormat, lockedCount)
             : Copy.switchNote
+    }
+}
+
+/// 名片头部的双模状态条：左段是在线传输（SMP），右段是节点权益档位。
+/// 两段各读各的唯一真值源（传输口径沿用引导页那条已译好的 Key，权益读 `PopopxBadgeManager.phase`），
+/// 本页不再判第三条通道。着色只用 `successInk` / `labelSecondary`：
+/// §1.1 里青绿专指离线厢语，拿它给在线权益上色会伪造一条并不存在的传输通道。
+private struct PopopxMeStatusCapsule: View {
+    private let phase: PopopxBadgePhase
+
+    init(phase: PopopxBadgePhase) {
+        self.phase = phase
+    }
+
+    var body: some View {
+        let tint = phase.isLit ? PopopxPalette.successInk : PopopxPalette.labelSecondary
+        HStack(spacing: PopopxMetrics.space2XS) {
+            Image(systemName: "lock.fill")
+                .font(PopopxType.microTag)
+                .imageScale(.medium)
+            Text(Copy.smpEncrypted)
+                .font(PopopxType.microTag)
+            Text(verbatim: "·")
+                .font(PopopxType.microTag)
+            Text(badgeWords)
+                .font(PopopxType.microTag)
+        }
+        .foregroundStyle(tint)
+        .lineLimit(1)
+        .padding(.horizontal, PopopxMetrics.spaceS)
+        .padding(.vertical, PopopxMetrics.space2XS)
+        .background(PopopxPalette.brand.opacity(0.10), in: .capsule)
+        .overlay(Capsule().strokeBorder(tint.opacity(0.35), lineWidth: PopopxMetrics.hairline))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: "\(Copy.smpEncrypted), \(badgeWords)"))
+    }
+
+    /// 短到能跟在身份名后面不换行：休眠只说"未激活"，点亮与体验各说自己的天数。
+    private var badgeWords: String {
+        switch phase {
+        case .dormant:
+            return Copy.badgeDormant
+        case let .trial(expiresAt):
+            return String(format: Copy.badgeTrialShortFormat, Self.daysLeft(expiresAt))
+        case let .active(_, expiresAt):
+            return String(format: Copy.badgeActiveShortFormat, Self.daysLeft(expiresAt))
+        }
+    }
+
+    private static func daysLeft(_ expiresAt: Date) -> Int {
+        max(1, Int(ceil(max(0, expiresAt.timeIntervalSinceNow) / 86_400)))
     }
 }
 
@@ -815,7 +1010,10 @@ private struct PopopxIdentityChip: View {
     private static let chipAvatarSide: CGFloat = PopopxMetrics.spaceXL
 }
 
-/// 头像。有 base64 就用既有的 `ProfileImage`，没有就落到品牌标记 —— 不画占位人形。
+/// 头像。有 base64 就用既有的 `ProfileImage`，没有就落到品牌标记 —— 不画占位人形，
+/// 也不画"按身份派生色相的几何渐变首字母"（裁定 5）：全仓没有 `colorForProfile` 这一类
+/// 按身份给色相的 helper（0 命中），而 §1.1 里靛紫只说"在线身份"、青绿只说"离线厢语"，
+/// 拿色相当纯装饰就会伪造一条并不存在的传输通道。宁可空着，不猜。
 @MainActor
 private struct PopopxMeAvatar: View {
     private let image: String?
@@ -984,107 +1182,130 @@ private struct PopopxProfileHost: View {
 
 // MARK: - 文案
 
-/// 页面上每一句中文只在这里出现一次。
+/// 页面上每一句看得见的（或 VoiceOver 念得出的）话都只在这里出现一次，并且一律走
+/// `NSLocalizedString`：**英文原句就是 Key**，与引导页、算力点生态同一套做法。
+/// 新词条写进 `bg/cs/de/es/fi/fr/hu/it/ja/nl/pl/ru/th/tr/uk/zh-Hans` 共 16 个译本目录，
+/// `en.lproj` 不写（读不到词条就回落 Key 本身，那就是英文）。
+/// 三个 Key 是刻意复用的既有词条 —— `"Settings"`、`"Notifications"`、
+/// `"SMP end-to-end encrypted"`：它们在 16 个目录里都已经有译法，且中文值正是本页要显示的那句。
 private enum Copy {
-    static let pageTitle = "我"
-    static let close = "关闭"
-    static let linkHint = "打开"
+    private static func key(_ value: String) -> String {
+        NSLocalizedString(value, comment: "POPOPX Me tab")
+    }
 
-    // 顶部身份卡
-    static let identityCardTitle = "当前身份"
-    static let identityNumberLabel = "身份编号"
-    static let copyUserID = "复制编号"
-    static let copiedUserID = "身份编号已复制"
-    static let otherIdentities = "切换到其它身份"
-    static let switchHint = "以这个身份继续"
-    static let switchDone = "已切换身份"
-    static let switchFailed = "切换失败，请稍后再试"
-    static let switchNote = "加锁身份不在这里出现：切换它们需要输入查看密码。"
-    static let switchNoteWithLockedFormat = "轻触头像即可切换；本机另有 %d 个加锁身份，需在「身份管理」里输入查看密码。"
-    static let lockedOnlyNoteFormat = "本机另有 %d 个加锁身份，需在「身份管理」里输入查看密码后才能切换。"
-    static let unreadBadgeFormat = "未读 %d 个"
-    static let emptyTitle = "还没有激活的身份"
-    static let emptyNote = "身份就是你在 popopx 里的匿名名片：一个昵称、一张头像、一份属于自己的会话库。创建一个就能开始聊天。"
-    static let emptyFootnote = "创建身份不要求手机号或邮箱。"
-    static let createIdentity = "创建新身份"
+    static let pageTitle = key("Me")
+    static let close = key("Close")
+    static let linkHint = key("Open")
 
-    // 分组标题
-    static let groupIdentity = "身份"
-    static let groupGeneral = "通用"
-    static let groupPrivacy = "隐私与安全"
-    static let groupMesh = "离线组网"
-    static let groupCommerce = "算力点"
-    static let creditsStore = "算力点中心"
+    // 顶部个人名片头
+    static let identityNumberLabel = key("Identity number")
+    static let copyUserID = key("Copy number")
+    static let copiedUserID = key("Identity number copied")
+    static let manageIdentities = key("Manage identities")
+    static let manageIdentitiesHint = key("Opens the identity list on this device")
+    static let smpEncrypted = NSLocalizedString("SMP end-to-end encrypted", comment: "Me: transport segment of the name card status capsule")
+    static let otherIdentities = key("Switch to another identity")
+    static let switchHint = key("Continue as this identity")
+    static let switchDone = key("Identity switched")
+    static let switchFailed = key("Switch failed. Try again later.")
+    static let switchNote = key("Locked identities are not listed here: switching to them needs the view password.")
+    static let switchNoteWithLockedFormat = NSLocalizedString("Tap an avatar to switch; this device has %d locked identities that need the view password in Manage identities.", comment: "Me: identity switcher footnote")
+    static let lockedOnlyNoteFormat = NSLocalizedString("This device has %d locked identities that need the view password before you can switch.", comment: "Me: identity switcher footnote, no switchable identity")
+    static let unreadBadgeFormat = NSLocalizedString("%d unread", comment: "Me: unread count spoken on an identity chip")
+    static let emptyTitle = key("No active identity yet")
+    static let emptyNote = key("An identity is your anonymous card on popopx: a display name, an avatar and a message store of its own. Create one and you can start chatting.")
+    static let emptyFootnote = key("Creating an identity asks for no phone number and no email.")
+    static let createIdentity = key("Create a new identity")
+
+    // 组标题
+    static let groupAssets = key("Assets and node benefits")
+    static let groupSpace = key("Personal space and offline mesh")
+    static let groupGeneral = key("Everyday")
+    static let groupSecurity = key("Privacy and security defences")
+
+    // 组 1 · 算力点与徽章
+    static let creditsWallet = key("Compute Credits wallet")
+    static let badgeRow = key("Dynamic privacy node badge")
+    static let badgeDormant = key("Not activated")
+    static let badgeTrialFormat = NSLocalizedString("Trial: %d days left", comment: "Me: badge row value, pioneer trial")
+    static let badgeRunningFormat = NSLocalizedString("Running: %d days left", comment: "Me: badge row value, active badge")
+    static let badgeTrialShortFormat = NSLocalizedString("Trial %d days", comment: "Me: name card capsule, pioneer trial")
+    static let badgeActiveShortFormat = NSLocalizedString("Routing %d days", comment: "Me: name card capsule, active badge")
     /// 「充值」而不是「购买算力点礼包」：这一档没有任何赠送，句子也不能暗示有。
-    static let purchaseCredits = "充值算力点"
-    static let redeemCode = "兑换码"
-    static let giftCard = "转赠徽章礼品卡"
-    static let groupAbout = "关于"
+    static let purchaseCredits = key("Top up Compute Credits")
 
-    // 身份
-    static let myProfile = "我的资料"
-    static let manageIdentities = "身份管理"
-    static let identityCountFormat = "共 %d 个"
+    // 组 2 · 加密个人主页与卡包
+    static let myProfile = key("My profile")
+    static let personalProfile = key("My encrypted profile page")
+    static let personalProfileQR = key("Profile card code")
+    static let profileConfigured = key("Configured")
+    static let profileUnconfigured = key("Not created yet")
+    static let profileModeEphemeral = key("Burn after reading")
+    static let profileModeStandard = key("Persistent card")
+    static let profileQRIdentityFallback = key("Unnamed identity")
+    static let giftVault = key("Gift badge cards and redemption")
+    static let giftSend = key("Gift a badge card")
+    static let redeemCode = key("Redeem a code")
+    static let vouchersAvailableFormat = NSLocalizedString("%d available", comment: "Me: unused gift vouchers on this device")
+    static let giftMenuHint = key("Lets you gift a badge card or redeem a code")
+    static let meshRow = key("Offline Bluetooth mesh")
+    static let meshRowOn = key("Fuse is open")
+    static let meshRowFusedOff = key("Closed by the fuse")
+    static let meshPrivacy = key("Offline mesh privacy and pairings")
 
-    // 加密个人主页（ProfileReaderView.md:59 的行名是「我的加密个人主页」，档位标签是「已配置 · <模式>」）
-    static let personalProfile = "我的加密个人主页"
-    static let personalProfileQR = "主页名片码"
-    static let profileConfigured = "已配置"
-    static let profileUnconfigured = "未制作"
-    static let profileQRIdentityFallback = "未命名身份"
+    // 组 3 · 常用
+    static let addFriend = key("Add a friend")
+    /// 刻意不叫 `"Chat preferences"`：那个 Key 在 16 个目录里已经属于别的页面，中文值是
+    /// 「聊天偏好设置」。复用等于让本页这一行的说法由别人决定，所以源文唯一化（同算力点生态那条约定）。
+    static let chatPreferences = key("Chat preferences for this identity")
+    static let notifyOn = key("Notifications on")
+    static let notifyOff = key("This identity is muted")
+    static let notifications = NSLocalizedString("Notifications", comment: "Me: reuses the existing all-catalog term")
+    static let settings = NSLocalizedString("Settings", comment: "Me: reuses the existing all-catalog term")
+    static let versionRow = key("Version and updates")
 
-    // 通用
-    static let addFriend = "添加朋友"
-    static let chatPreferences = "聊天偏好"
-    static let notifyOn = "通知已开"
-    static let notifyOff = "此身份已静音"
-    static let notifications = "通知"
-    static let allSettings = "全部设置"
-
-    // 隐私与安全
-    static let privacySettings = "隐私与安全设置"
-    static let antiTheft = "防盗锁定与双密码自毁"
-    static let antiTheftOn = "已开启"
-    static let antiTheftOff = "未开启"
-
-    // 离线组网
-    static let meshFootnote = "总开关一关，蓝牙扫描、广播与中继全部停；本页其余行仍可查看，但不会启动任何蓝牙对象。"
-    static let commerceFootnote = "点数与徽章都只存在这台设备的钥匙串里：没有服务器记账，也没有任何一侧能远程改它。"
-    static let fuseRow = "厢语离线组网总开关"
-    static let fuseRowNote = "关闭即熔断：所有厢语组件一起停。"
-    static let verifyHeadline = "蓝牙实际状态"
-    static let verifyAgain = "核验"
-    static let verifyPending = "本次运行还没核验过，点「核验」读取真实运行态。"
-    static let phaseOff = "已停止"
-    static let phaseStarting = "启动中"
-    static let phaseOn = "运行中"
-    static let phaseStopping = "停止中"
-    static let quietSuffix = "，没有任何组件在运行"
-    static let busySuffixFormat = "，仍有蓝牙组件 %d 个、界面组件 %d 个在运行"
-    static let subscribersSuffixFormat = "，事件订阅 %d 个"
-    static let mismatchSuffix = "；开关与运行态暂不一致"
-    static let pairingPolicy = "附近配对策略"
-    static let pairingSheetTitle = "附近配对策略"
-    static let pairingSheetSubtitle = "决定附近设备的蓝牙配对要不要你亲自确认。"
-    static let policyManual = "配对前先问我"
-    static let policyManualNote = "附近设备发起配对时弹出确认，你不点就永远不连接。"
-    static let policyAuto = "静默配对"
-    static let policyAutoNote = "蓝牙私有会话建立后自动完成配对，不再询问。"
-    static let meshPrivacy = "厢语隐私与配对记录"
+    // 组 4 · 隐私与安全防线
+    static let privacySettings = key("Privacy and security settings")
+    static let antiTheft = key("Anti-theft lock")
+    static let antiTheftOn = key("Turned on")
+    static let antiTheftOff = key("Turned off")
+    /// 在场核验的理由文案：它进的是系统生物识别提示框，所以同样是看得见的文案。
+    static let presenceReasonPrivacy = key("Confirm this is you before opening privacy and security settings")
+    static let presenceReasonSettings = key("Confirm this is you before opening settings")
+    static let meshFootnote = key("Closing the master switch stops Bluetooth scanning, advertising and relaying all at once; the other rows on this page stay readable but start no Bluetooth object.")
+    static let commerceFootnote = key("Credits and badges live only in this device's keychain: no server keeps the ledger, and neither side can change it remotely.")
+    static let fuseRow = key("Offline mesh master switch")
+    static let fuseRowNote = key("Switching this off is the fuse: every mesh component stops together.")
+    static let verifyHeadline = key("Actual Bluetooth state")
+    /// 不叫 `"Verify"`：那个 Key 只在一个语种里已有译法，且中文是「验证」。这一格要说的是
+    /// "拿真实运行态核对一遍"，所以源文唯一、16 个目录由本页自己写齐。
+    static let verifyAgain = key("Verify actual state")
+    static let verifyPending = key("Not verified yet in this run. Tap Verify to read the real state.")
+    static let phaseOff = key("Stopped")
+    static let phaseStarting = key("Starting")
+    static let phaseOn = key("Running")
+    static let phaseStopping = key("Stopping")
+    static let quietSuffix = key(", with no component running")
+    static let busySuffixFormat = NSLocalizedString(", still running %1$d Bluetooth component(s) and %2$d interface component(s)", comment: "Me: verified activity counts")
+    static let subscribersSuffixFormat = NSLocalizedString(", %d event subscriptions", comment: "Me: verified event hub subscribers")
+    static let mismatchSuffix = key("; the switch and the running state do not agree yet")
+    static let pairingPolicy = key("Nearby pairing policy")
+    static let pairingSheetTitle = key("Nearby pairing policy")
+    static let pairingSheetSubtitle = key("Decides whether a nearby device's Bluetooth pairing needs your confirmation.")
+    static let policyManual = key("Ask me before pairing")
+    static let policyManualNote = key("A nearby pairing request shows a confirmation; nothing connects until you tap it.")
+    static let policyAuto = key("Pair silently")
+    static let policyAutoNote = key("Pairing completes on its own once the private Bluetooth session is up, without asking.")
 
     // 危险行
-    static let panicRow = "紧急抹除厢语数据"
-    static let panicReady = "连击三次"
-    static let panicTapsFormat = "已计 %d/3 次"
-    static let panicAwaiting = "等待确认"
-    static let panicWiping = "正在抹除…"
-    static let panicDisabled = "熔断关闭时不可用"
-    static let panicRowHint = "一秒内轻触三次才会布防"
-    static let panicNote = "一秒内连击三次这一行才会布防，布防后由全 app 唯一的确认弹窗问你一次；取消即作废，绝不静默抹除。熔断关闭时这道确认不存在，这一行也随之停用。"
-
-    // 关于
-    static let versionRow = "版本与更新"
-    static let aboutFootnote = "版本页同时给出本机版本与网络核心版本。"
+    static let panicRow = key("Erase offline mesh data now")
+    static let panicReady = key("Triple tap")
+    static let panicTapsFormat = NSLocalizedString("%d/3 taps counted", comment: "Me: panic wipe arming progress")
+    static let panicAwaiting = key("Waiting for confirmation")
+    static let panicWiping = key("Erasing…")
+    static let panicDisabled = key("Unavailable while the fuse is closed")
+    static let panicRowHint = key("Three taps within one second arm it")
+    static let panicNote = key("Three taps on this row within one second arm the wipe; the app's single confirmation dialog then asks you once. Cancelling voids it — nothing is ever erased silently. While the fuse is closed that dialog does not exist, so this row is disabled too.")
 }
 
 // MARK: - Previews
