@@ -4019,3 +4019,8 @@ server test failure */
 /* POPOPX 引导页补录（第四轮：迁移入口标题与条款接受失败提示） */
 "Migrate here" = "Migrovat sem";
 "Error accepting conditions" = "Chyba při přijímání podmínek";
+"I have read and agree to %1$@ and %2$@." = "Přečetl(a) jsem si a přijímám dokumenty: %1$@ a %2$@.";
+"Server operators" = "Operátoři serverů";
+"You can configure servers via settings." = "Servery můžete nastavit v nastavení.";
+"How it helps privacy" = "Jak to pomáhá soukromí";
+"OK" = "OK";

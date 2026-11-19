@@ -3459,3 +3459,9 @@ server test failure */
 /* POPOPX 引导页补录（第四轮：迁移入口标题与条款接受失败提示） */
 "Migrate here" = "ย้ายมายังที่นี่";
 "Error accepting conditions" = "เกิดข้อผิดพลาดในการยอมรับข้อกำหนด";
+"I have read and agree to %1$@ and %2$@." = "ฉันอ่านและยอมรับ%1$@ และ%2$@";
+"Server operators" = "ผู้ให้บริการเซิร์ฟเวอร์";
+"You can configure servers via settings." = "คุณสามารถกำหนดค่าเซิร์ฟเวอร์ได้ในการตั้งค่า";
+"How it helps privacy" = "สิ่งนี้ช่วยความเป็นส่วนตัวอย่างไร";
+"About operators" = "เกี่ยวกับผู้ให้บริการ";
+"OK" = "ตกลง";

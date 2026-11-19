@@ -167,9 +167,83 @@ struct OnboardingConditionsView: View {
                 document = .terms
             }
             PopopxOnboardingHairline()
-            PopopxCheckbox(PopopxOnboardingCopy.legalAgreement, isOn: tick($agreed))
+            agreementRow
                 .popopxAnimation(PopopxSpring.snappy, value: agreed, reduceMotion: reduceMotion)
         }
+    }
+
+    // MARK: - 同意行（勾选 + 行内热区）
+
+    /// `PopopxCheckbox` 的标题收的是 `String`，装不下可点热区；而 `Text` 拼接出来的
+    /// 片段不能被单独点击。所以这一行在本文件内组合：左格沿用
+    /// `PopopxCheckboxToggleStyle` 的几何与配色（`spaceM` 方格、`radiusChip`、
+    /// brand/onBrand 填充、未选中用 `labelHint` 描边），右句整段走 `openURL` 拦截，
+    /// 命中本文件的 `popopx://legal/*` 才弹阅读器，其余 URL 仍交回系统。
+    private var agreementRow: some View {
+        HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.spaceS) {
+            Button {
+                PopopxHaptics.selection()
+                agreed.toggle()
+            } label: {
+                Image(systemName: "checkmark")
+                    .font(PopopxType.microTag)
+                    .fontWeight(.bold)
+                    .foregroundStyle(agreed ? PopopxPalette.onBrand : Color.clear)
+                    .frame(width: PopopxMetrics.spaceM, height: PopopxMetrics.spaceM)
+                    .background(
+                        agreed ? PopopxPalette.brand : Color.clear,
+                        in: .rect(cornerRadius: PopopxMetrics.radiusChip)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: PopopxMetrics.radiusChip)
+                            .strokeBorder(
+                                PopopxPalette.labelHint,
+                                lineWidth: PopopxMetrics.stroke
+                            )
+                            .opacity(agreed ? 0 : 1)
+                    )
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(PopopxOnboardingCopy.legalAgreement)
+            .accessibilityAddTraits(agreed ? .isSelected : [])
+
+            agreementSentence
+                .font(PopopxType.sectionHeader)
+                .foregroundStyle(PopopxPalette.label)
+                .tint(PopopxPalette.brand)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .environment(\.openURL, OpenURLAction { url in
+            guard let doc = PopopxLegalLink.document(for: url) else { return .systemAction }
+            PopopxHaptics.selection()
+            document = doc
+            return .handled
+        })
+        .padding(.vertical, PopopxMetrics.spaceXS)
+        .contentShape(Rectangle())
+    }
+
+    /// 切句只认"标题在原句中出现"，且按隐私政策、使用条款的顺序各切一次。
+    /// 某语言没命中时那段原样留在正文里 —— 宁可不带链接，也不丢字。
+    private var agreementSentence: Text {
+        let docs: [PopopxLegalDocumentSheet.Document] = [.privacy, .terms]
+        let sentence = String(
+            format: PopopxOnboardingCopy.legalAgreementLinks,
+            docs[0].title,
+            docs[1].title
+        )
+        var result = Text(verbatim: "")
+        var rest = Substring(sentence)
+        for doc in docs {
+            let title = doc.title
+            guard let range = rest.range(of: title) else { continue }
+            result = result
+                + Text(verbatim: String(rest[rest.startIndex..<range.lowerBound]))
+                + Text(PopopxLegalLink.styled(title, url: PopopxLegalLink.url(for: doc)))
+            rest = rest[range.upperBound..<rest.endIndex]
+        }
+        return result + Text(verbatim: String(rest))
     }
 
     // MARK: - 闸门
@@ -315,6 +389,32 @@ struct OnboardingConditionsView: View {
     }
 }
 
+/// 同意行的行内热区：URL 只在本文件内解析，不交给系统、也不打开网页。
+private enum PopopxLegalLink {
+    static func url(for document: PopopxLegalDocumentSheet.Document) -> URL {
+        switch document {
+        case .privacy: return URL(string: "popopx://legal/privacy")!
+        case .terms: return URL(string: "popopx://legal/terms")!
+        }
+    }
+
+    static func document(for url: URL) -> PopopxLegalDocumentSheet.Document? {
+        guard url.scheme == "popopx", url.host == "legal" else { return nil }
+        switch url.lastPathComponent {
+        case "privacy": return .privacy
+        case "terms": return .terms
+        default: return nil
+        }
+    }
+
+    static func styled(_ title: String, url: URL) -> AttributedString {
+        var attributed = AttributedString(title)
+        attributed.link = url
+        attributed.foregroundColor = PopopxPalette.brand
+        return attributed
+    }
+}
+
 private enum ChooseServerOperatorsSheet: Identifiable {
     case showInfo
 
@@ -328,127 +428,106 @@ private enum ChooseServerOperatorsSheet: Identifiable {
 struct ChooseServerOperators: View {
     @Environment(\.dismiss) var dismiss: DismissAction
     @Environment(\.colorScheme) var colorScheme: ColorScheme
-    @EnvironmentObject var theme: AppTheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var serverOperators: [ServerOperator]
     @Binding var selectedOperatorIds: Set<Int64>
     @State private var sheetItem: ChooseServerOperatorsSheet? = nil
 
     var body: some View {
-        GeometryReader { g in
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    Text("Server operators")
-                        .font(.largeTitle)
-                        .bold()
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.top, 25)
-
-                    infoText()
-                        .frame(maxWidth: .infinity, alignment: .center)
-
-                    Spacer()
-                    
-                    ForEach(serverOperators) { srvOperator in
-                        operatorCheckView(srvOperator)
-                    }
-                    VStack {
-                        Text("You can configure servers via settings.")
-                    }
-                    .font(.footnote)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.horizontal, 16)
-                    
-                    Spacer()
-
-                    VStack(spacing: 8) {
-                        setOperatorsButton()
-                        onboardingButtonPlaceholder()
-                    }
-                }
-                .frame(minHeight: g.size.height)
+        PopopxSheetContainer(
+            PopopxOnboardingCopy.operatorsTitle,
+            subtitle: PopopxOnboardingCopy.operatorsNote
+        ) {
+            PopopxPickerRow(
+                PopopxOnboardingCopy.operatorsHowItHelps,
+                systemImage: "info.circle",
+                tint: .brand
+            ) {
+                sheetItem = .showInfo
             }
-            .sheet(item: $sheetItem) { item in
-                switch item {
-                case .showInfo:
-                    ChooseServerOperatorsInfoView()
+            .padding(.horizontal, PopopxMetrics.gutter)
+
+            VStack(spacing: PopopxMetrics.spaceS) {
+                ForEach(serverOperators) { srvOperator in
+                    operatorCheckView(srvOperator)
                 }
             }
-            .frame(maxHeight: .infinity, alignment: .top)
+            .padding(.horizontal, PopopxMetrics.gutter)
+        } footer: {
+            PopopxButton(PopopxOnboardingCopy.operatorsOK, systemImage: "checkmark") {
+                dismiss()
+            }
+            .disabled(selectedOperatorIds.isEmpty)
+            .padding(PopopxMetrics.spaceM)
         }
-        .frame(maxHeight: .infinity, alignment: .top)
-        .padding(25)
+        .sheet(item: $sheetItem) { item in
+            switch item {
+            case .showInfo:
+                ChooseServerOperatorsInfoView()
+            }
+        }
         .interactiveDismissDisabled(selectedOperatorIds.isEmpty)
-    }
-
-    private func infoText() -> some View {
-        Button {
-            sheetItem = .showInfo
-        } label: {
-            Label("How it helps privacy", systemImage: "info.circle")
-                .font(.headline)
-        }
     }
 
     private func operatorCheckView(_ serverOperator: ServerOperator) -> some View {
         let checked = selectedOperatorIds.contains(serverOperator.operatorId)
-        let icon = checked ? "checkmark.circle.fill" : "circle"
-        let iconColor = checked ? theme.colors.primary : Color(uiColor: .tertiaryLabel).asAnotherColorFromSecondary(theme)
-        return HStack(spacing: 10) {
-            Image(serverOperator.largeLogo(colorScheme))
-                .resizable()
-                .scaledToFit()
-                .frame(height: 48)
-            Spacer()
-            Image(systemName: icon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 26, height: 26)
-                .foregroundColor(iconColor)
-        }
-        .background(theme.colors.background)
-        .padding()
-        .clipShape(RoundedRectangle(cornerRadius: 18))
-        .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .stroke(Color(uiColor: .secondarySystemFill), lineWidth: 2)
-        )
-        .padding(.horizontal, 2)
-        .onTapGesture {
+        return Button {
+            PopopxHaptics.selection()
             if checked {
                 selectedOperatorIds.remove(serverOperator.operatorId)
             } else {
                 selectedOperatorIds.insert(serverOperator.operatorId)
             }
-        }
-    }
-
-    private func setOperatorsButton() -> some View {
-        Button {
-            dismiss()
         } label: {
-            Text("OK")
+            HStack(spacing: PopopxMetrics.spaceM) {
+                Image(serverOperator.largeLogo(colorScheme))
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: PopopxMetrics.space2XL)
+                Spacer(minLength: PopopxMetrics.spaceXS)
+                Image(systemName: checked ? "checkmark.circle.fill" : "circle")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: PopopxMetrics.spaceL, height: PopopxMetrics.spaceL)
+                    .foregroundStyle(checked ? PopopxPalette.brand : PopopxPalette.labelHint)
+            }
+            .padding(PopopxMetrics.spaceM)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                PopopxPalette.card,
+                in: .rect(cornerRadius: PopopxMetrics.radiusCard, style: .continuous)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: PopopxMetrics.radiusCard, style: .continuous)
+                    .strokeBorder(
+                        checked ? PopopxPalette.brand : PopopxPalette.hairlineInner,
+                        lineWidth: checked ? PopopxMetrics.stroke : PopopxMetrics.hairline
+                    )
+            )
+            .contentShape(Rectangle())
         }
-        .buttonStyle(OnboardingButtonStyle(isDisabled: selectedOperatorIds.isEmpty))
-        .disabled(selectedOperatorIds.isEmpty)
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(checked ? .isSelected : [])
+        .popopxAnimation(PopopxSpring.snappy, value: checked, reduceMotion: reduceMotion)
     }
 }
 
 struct ChooseServerOperatorsInfoView: View {
     @Environment(\.colorScheme) var colorScheme: ColorScheme
-    @EnvironmentObject var theme: AppTheme
 
     var body: some View {
         NavigationStack {
             List {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: PopopxMetrics.spaceS) {
                     Text("The app protects your privacy by using different operators in each conversation.")
                     Text("When more than one operator is enabled, none of them has metadata to learn who communicates with whom.")
                 }
+                .font(PopopxType.secondary)
+                .foregroundStyle(PopopxPalette.labelSecondary)
                 .fixedSize(horizontal: false, vertical: true)
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: PopopxMetrics.spaceS, trailing: 0))
                 .padding(.top)
 
                 Section {
@@ -456,11 +535,11 @@ struct ChooseServerOperatorsInfoView: View {
                         operatorInfoNavLinkView(op)
                     }
                 } header: {
-                    Text("About operators")
-                        .foregroundColor(theme.colors.secondary)
+                    Text(PopopxOnboardingCopy.operatorsAbout)
+                        .foregroundStyle(PopopxPalette.labelSecondary)
                 }
             }
-            .navigationTitle("Server operators")
+            .navigationTitle(PopopxOnboardingCopy.operatorsTitle)
             .navigationBarTitleDisplayMode(.large)
             .modifier(ThemedBackground(grouped: true))
         }
@@ -477,7 +556,7 @@ struct ChooseServerOperatorsInfoView: View {
                 Image(op.logo(colorScheme))
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 24, height: 24)
+                    .frame(width: PopopxMetrics.spaceXL, height: PopopxMetrics.spaceXL)
                 Text(op.tradeName)
             }
         }

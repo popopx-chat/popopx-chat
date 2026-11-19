@@ -4854,3 +4854,7 @@ server test failure */
 "POPOPX and the POPOPX logo are the names of this build. These terms and the privacy statement may change; the app always shows the version you agreed to, and continuing to use POPOPX means you accept the change." = "POPOPX и логото на POPOPX са имената на тази версия. Настоящите условия и политиката за поверителност могат да се променят; приложението винаги показва версията, с която сте се съгласили, а продължаването на използването на POPOPX означава, че приемате промяната.";
 /* POPOPX 引导页补录（第四轮：迁移入口标题与条款接受失败提示） */
 "Error accepting conditions" = "Грешка при приемане на условията";
+"I have read and agree to %1$@ and %2$@." = "Прочетох и приемам документите: %1$@ и %2$@.";
+"Server operators" = "Оператори на сървъри";
+"You can configure servers via settings." = "Можете да настроите сървърите в настройките.";
+"How it helps privacy" = "Как това помага на поверителността";

@@ -134,6 +134,13 @@ enum PopopxOnboardingCopy {
     )
     static let bluetoothPermissionNote = key("Bluetooth permission is requested the first time the mesh starts.")
     static let relayNodes = key("Dynamic SMP relay nodes")
+    // 「中继运营商」弹层：Key 全部沿用上游既有句子，只是改由本枚举解析，
+    // 这样弹层里的每个字都和其他三屏走同一条本地化通道。
+    static let operatorsTitle = key("Server operators")
+    static let operatorsNote = key("You can configure servers via settings.")
+    static let operatorsHowItHelps = key("How it helps privacy")
+    static let operatorsAbout = key("About operators")
+    static let operatorsOK = key("OK")
     static let back = key("Back")
     static let continueButton = key("Continue")
 
@@ -160,6 +167,12 @@ enum PopopxOnboardingCopy {
     static let legalAgreement = key(
         "I have read and agree to the POPOPX Privacy Policy and the POPOPX Terms of Use."
     )
+    /// 同意句的可链接版本：两个文档标题由 `%1$@` / `%2$@` 注入，行内热区取的就是
+    /// `privacyPolicy` / `termsOfUse` 的译文，与阅读器标题逐字一致。
+    /// 不能拿原句找子串切分：16 个译本里 bg cs fi hu pl ru uk 这 7 个给标题加了变格或
+    /// 冠词，逐字包含不成立，链接会静默掉回纯文本；其余 9 个的译文就是照原句替换标题
+    /// 生成的。`legalAgreement` 保留作无障碍标签。
+    static let legalAgreementLinks = key("I have read and agree to %1$@ and %2$@.")
     static let readAndClose = key("I have read it")
     static let agreeAndEnter = key("Agree and enter POPOPX")
     static let commitmentsRequired = key("Confirm the three commitments above.")

@@ -8056,3 +8056,4 @@ alert title */
 "Relay operators set their own conditions for the servers they run. When an operator requires acceptance, the app shows that operator's conditions and records your acceptance before using them." = "中继节点运营方对其服务器另设各自的条件。当某一运营方要求确认时，App 会先展示该运营方的条款并记录你的确认，之后才使用其服务器。";
 "Names and changes" = "名称与变更";
 "POPOPX and the POPOPX logo are the names of this build. These terms and the privacy statement may change; the app always shows the version you agreed to, and continuing to use POPOPX means you accept the change." = "POPOPX 与 POPOPX 标志是本构建的名称。本条款与隐私说明可能修订，App 内始终展示你所同意的版本；继续使用 POPOPX 即视为接受变更。";
+"I have read and agree to %1$@ and %2$@." = "我已阅读并同意%1$@与%2$@。";

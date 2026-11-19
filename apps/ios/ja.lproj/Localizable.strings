@@ -3898,3 +3898,8 @@ server test failure */
 /* POPOPX 引导页补录（第四轮：迁移入口标题与条款接受失败提示） */
 "Migrate here" = "ここに移行";
 "Error accepting conditions" = "条件の承認中にエラーが発生しました";
+"I have read and agree to %1$@ and %2$@." = "%1$@と %2$@を読み、同意します。";
+"Server operators" = "サーバー運営者";
+"You can configure servers via settings." = "設定からサーバーを設定できます。";
+"How it helps privacy" = "プライバシー保護にどう役立つか";
+"OK" = "OK";
