@@ -92,8 +92,8 @@
 //     （它们在窗口层级里位于本视图之上）。宿主必须挂在最顶层窗口容器上，
 //     并且锁定时如果正有模态在飞，需要由宿主自己先收掉——这是接线侧的事。
 //  3. `PIN` 是 `String`，归 ARC 管、覆写不了，本层只承诺"流程结束立刻丢引用"。
-//     真正被清零的那一份拷贝在 `PopopxDuressAuthManager.hash(pin:salt:iterations:)` 里
-//     （`PopopxDuressAuthManager` 的 `hash(pin:salt:iterations:)`：派生出的那份 `Data`
+//     真正被清零的那一份拷贝在 `PopopxDuressAuthManager.derive(secret:salt:iterations:)` 里
+//     （`PopopxDuressAuthManager` 的 `derive(secret:salt:iterations:)`：派生出的那份 `Data`
 //     由 `defer { popopxSecureErase(&secret) }` 就地清零）。
 //  4. 口令派生要跑两次 PBKDF2，常规码也要等满 1.2 秒——这不是本层的 bug，
 //     是 `minimumFlowSeconds` 存在的原因：让真自毁藏在同一条下限里。
@@ -126,6 +126,25 @@ private enum PopopxLockCopy {
     static let minimalPrompt = "本机还没有解锁密码"
     static let minimalNote = "这台设备尚未设置解锁密码，先解锁，再到设置里开启。"
     static let minimalUnlock = "解锁"
+
+    // 冷却层。`%@` 只吃 `PopopxLockoutSchedule.phrase(_:)` 那一种读法，别处不许另拼一套数字。
+    static let lockedOutPrompt = "已停用"
+    static let lockedOutFormat = "POPOPX 已停用，请 %@后再试"
+    static let lockedOutFootnote = "这段时间里键盘、面容与助记词那三样都不会被接受。"
+    /// 读给 VoiceOver 的那一句**不含秒数**：理由见 `PopopxLockPanel.lockedOut`。
+    static let lockedOutVoiceOver = "POPOPX 已停用，正在冷却。键盘、面容与助记词都暂时不可用，倒计时结束后会自动恢复。"
+
+    // 助记词那一格。`mnemonicConsequence` 必须在**按下之前**就看得见：它说的是一次不可逆的删除。
+    static let mnemonicEntry = "忘记密码？使用 12 词助记词重置"
+    static let mnemonicPrompt = "使用 12 词助记词"
+    static let mnemonicPhraseField = "12 个助记词"
+    static let mnemonicPhrasePrompt = "按顺序输入，词之间用空格或换行都可以"
+    static let mnemonicNewPinField = "新的进入密码"
+    static let mnemonicConfirmField = "再输一遍新的进入密码"
+    static let mnemonicConsequence = "重置会同时把应急擦除密码清成「未设置」，之后那把码不再存在。"
+    static let mnemonicSubmit = "重置进入密码"
+    static let mnemonicCancel = "返回键盘"
+    static let mnemonicFailed = "重置没有完成，请稍后再试"
 }
 
 // MARK: - 尺寸与动效常量
@@ -171,6 +190,11 @@ final class PopopxAppLockOverlayModel {
         case breathing
         /// 还没设过双密码：只有一个"解锁"按钮的降级态。
         case minimalUnlock
+        /// 防爆破冷却中。数字键、Face ID、助记词入口三样一起不接命中，
+        /// 画面中央只剩一个每秒一跳的倒计时。
+        case lockedOut
+        /// 「用 12 词助记词重置」那一格：词组 + 新码 + 再输一遍，提交后进 `completeUnlock()`。
+        case mnemonicReset
     }
 
     /// 锁状态、认证、传感器——三个共享单例。`let`：本类只读它们、只经由公开方法写它们。
@@ -199,6 +223,40 @@ final class PopopxAppLockOverlayModel {
     private var biometricRequested = false
     /// 本轮流程是否已经把呼吸提交给动画系统。见 `setBreathing(_:reduceMotion:)`。
     private var breathStarted = false
+    /// 冷却到点的那**一次**唤醒。不是每秒心跳——每秒那一跳由面板的 `TimelineView` 自己负责，
+    /// 见 `startLockoutWatch()` 的理由。
+    private var lockoutTask: Task<Void, Never>?
+
+    // MARK: 助记词那一格的三个输入
+    //
+    // 这三个字段和设置页那两把码是同一类东西：**明文的界面副本**。管理器只在这一格
+    // 的一次 `resetEntryPinWithMnemonic` 调用里读它们，之后（提交、退回键盘、遮罩退场、
+    // 重新拉锁）一律由 `resetMnemonicForm()` 清掉。`mnemonicInput` 尤其要紧——
+    // 那 12 个词在安全存储里另有一份可读副本，界面上这一份不该比这一次机会活得更久。
+    var mnemonicInput = ""
+    var newPin = ""
+    var newPinConfirm = ""
+
+    /// 「忘记密码？使用 12 词助记词重置」那一行给不给。三个条件缺一不可：
+    /// 词组真的在（不在就没有可校验的东西）、常规码记录还在（重置写的就是它）、
+    /// 并且当前不在冷却（冷却期内三样输入口一起关掉，这是那张表的定义）。
+    var canOfferMnemonicReset: Bool {
+        auth.mnemonicConfigured && auth.normalConfigured && !auth.isLockedOut
+    }
+
+    var canSubmitMnemonicReset: Bool {
+        !PopopxBIP39.normalizedWords(mnemonicInput).isEmpty
+            && newPin.count == PopopxDuressAuthManager.pinLength
+            && newPin == newPinConfirm
+    }
+
+    /// 面板每秒问一次"还剩多久"。它读的是 `context.date`，不是 `Date()`：
+    /// 一个 `TimelineView` 的调度时刻和一次自行取来的当前时间可以差几十毫秒，
+    /// 显示的数字因此应当只来自那一个被调度的时刻。
+    func lockoutRemaining(at date: Date) -> TimeInterval {
+        guard let endsAt = auth.lockoutEndsAt else { return 0 }
+        return max(0, endsAt.timeIntervalSince(date))
+    }
 
     /// 是否处于"只呼吸、什么都不显示"的那一格。两条来源，缺一不可：
     /// 1. 本地 `phase == .breathing`——本层刚提交过密码，常规码也要静默满 1.2 秒；
@@ -231,6 +289,7 @@ final class PopopxAppLockOverlayModel {
         wrongHint = nil
         shakeOffset = 0
         stopBreathing()
+        resetMnemonicForm()
         biometricRequested = false
         // Keychain 可能在别的会话里被改过（自毁就是这种改动），每次进遮罩重问一遍。
         auth.refreshConfiguration()
@@ -239,7 +298,12 @@ final class PopopxAppLockOverlayModel {
             headSymbol = reason.symbolName
         }
         showsBiometricKey = auth.prefersBiometricUnlock
-        if auth.normalConfigured {
+        // 冷却的判断放在"有没有常规码"之前：这张表拦的是**输入口**，与拦下的是哪一把码无关。
+        // 冷启动落在冷却中段也走这一支——`lockoutEndsAt` 落盘在安全存储里，就是为了这一刻。
+        if auth.isLockedOut {
+            phase = .lockedOut
+            startLockoutWatch()
+        } else if auth.normalConfigured {
             phase = .keypad
             requestBiometricsIfNeeded()
         } else {
@@ -257,6 +321,9 @@ final class PopopxAppLockOverlayModel {
         wrongHint = nil
         shakeOffset = 0
         stopBreathing()
+        lockoutTask?.cancel()
+        lockoutTask = nil
+        resetMnemonicForm()
         phase = .keypad
         biometricRequested = false
     }
@@ -314,6 +381,114 @@ final class PopopxAppLockOverlayModel {
         phase = .keypad
         lock.unlock()
         motion.lockedDidChange()
+    }
+
+    // MARK: 助记词重置
+
+    func beginMnemonicReset() {
+        guard keypadLive, canOfferMnemonicReset else { return }
+        lock.noteInteraction()
+        resetMnemonicForm()
+        wrongHint = nil
+        phase = .mnemonicReset
+    }
+
+    func cancelMnemonicReset() {
+        guard phase == .mnemonicReset else { return }
+        resetMnemonicForm()
+        wrongHint = nil
+        phase = .keypad
+    }
+
+    /// 提交那 12 个词。校验、写新码、清应急擦除密码、清冷却计数全部在
+    /// `PopopxDuressAuthManager.resetEntryPinWithMnemonic` 里做完，本层只管界面。
+    ///
+    /// **先清界面副本、后 `await`**：这一次调用可能要走三百多毫秒（两次 10 万次派生），
+    /// 那期间键盘上还留着明文的风险比"失败后要重输一遍"大得多。失败时管理器会给出
+    /// 那十五句里的一句，机主照着再输一次就行。
+    ///
+    /// 结构不合法（`mnemonicMalformed`）也在这一格解释：`canSubmitMnemonicReset` 只看
+    /// "有没有输过东西"，不看词数与拼法。把不合法的输入用"按钮按不动"来表达，
+    /// 机主读到的是"这个按钮坏了"；让管理器说出"需要 12 个标准英文词"才是一句能照着做的话。
+    func submitMnemonicReset() async {
+        guard phase == .mnemonicReset, canSubmitMnemonicReset else { return }
+        lock.noteInteraction()
+        let phrase = mnemonicInput
+        let candidate = newPin
+        let confirmed = newPinConfirm
+        resetMnemonicForm()
+        pin = ""
+        do {
+            try await auth.resetEntryPinWithMnemonic(phrase: phrase, newPin: candidate, confirmingPin: confirmed)
+            mnemonicResetSucceeded()
+        } catch let error as PopopxDuressSetupError {
+            wrongHint = error.errorDescription
+            PopopxHaptics.notice(.error)
+            // 不问"抛出来的是不是 `lockedOut`"，直接问冷却表：这一次错的助记词可能刚好
+            // 把第 5 次踩出来（`settleWrongAttempt` 在抛 `.mnemonicIncorrect` 之前就跑过了），
+            // 那时错误句是"助记词不正确"，而输入口已经该关上了。
+            if auth.isLockedOut {
+                phase = .lockedOut
+                startLockoutWatch()
+            } else {
+                phase = .mnemonicReset
+            }
+        } catch {
+            wrongHint = PopopxLockCopy.mnemonicFailed
+            phase = .mnemonicReset
+            PopopxHaptics.notice(.error)
+        }
+    }
+
+    /// 重置成功之后的收尾，走的是与"一次成功解锁"完全相同的那一段。
+    ///
+    /// 为什么可以直接进去、不再逼机主用刚设的码在键盘上验一遍：这一条路**在类型上就
+    /// 不可能是胁迫码**——`resetEntryPinWithMnemonic` 的末尾把应急擦除密码删了，
+    /// 交出那把码的人不会再抹掉任何数据，所以这里没有"替胁迫者念出结论"的风险。
+    /// 而逼一个刚丢过密码的人立刻盲打一把 3 秒前才设的码，只会把"重置到底成没成"
+    /// 变成第二个疑问。
+    private func mnemonicResetSucceeded() {
+        auth.refreshConfiguration()
+        wrongHint = nil
+        phase = .keypad
+        completeUnlock()
+    }
+
+    /// 三个输入框一次性收回。凡是从 `phase == .mnemonicReset` 出去的路口都要过这里。
+    private func resetMnemonicForm() {
+        mnemonicInput = ""
+        newPin = ""
+        newPinConfirm = ""
+    }
+
+    // MARK: 冷却
+
+    /// 冷却到点时把画面交回键盘的**一次性**闹钟。
+    ///
+    /// 为什么不是每秒一跳的心跳：那一跳由面板里的 `TimelineView` 负责，它自己会随剩余
+    /// 时间归零而停。两个都要，就有了两个"现在几点"的口径，而它们迟早会说不一样的话。
+    /// `+0.25` 是留给取整的余量：`phrase(_:)` 向上取整，界面上"0 秒"之后还剩几百毫秒是常态，
+    /// 到点再问一次 `isLockedOut`，还锁着就重挂一次闹钟。
+    private func startLockoutWatch() {
+        lockoutTask?.cancel()
+        let remaining = auth.lockoutRemainingSeconds
+        guard remaining > 0 else {
+            if phase == .lockedOut { phase = .keypad }
+            return
+        }
+        lockoutTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(remaining + 0.25))
+            guard let self, !Task.isCancelled else { return }
+            guard self.phase == .lockedOut else { return }
+            if self.auth.isLockedOut {
+                self.startLockoutWatch()
+            } else {
+                self.wrongHint = nil
+                self.phase = .keypad
+                // 交回键盘的那一瞬间不重放 Face ID：机主刚被这道表拦下，
+                // 弹一条系统认证条只会让他以为"锁解了"。让他自己按。
+            }
+        }
     }
 
     // MARK: 动效（由面板把 Reduce Motion 传进来：本类不是 View，拿不到 environment）
@@ -409,6 +584,18 @@ final class PopopxAppLockOverlayModel {
             stopBreathing()
             wrongHint = nil
             phase = .minimalUnlock
+        case .lockedOut:
+            // 第 5 次起走这一支（以及"已经在冷却里又按了一次确认"）。它**不是**一条错误提示：
+            // 键盘、面容、助记词那三个输入口一起收掉，中央只剩一个每秒一跳的倒计时。
+            // 触觉与 `.wrong` 那一次不同（那里是 `notice(.error)`），但两者在"这一把没开门"
+            // 这件事上完全一致，常规码与胁迫码走的是同一段代码，因此不构成穿帮。
+            pin = ""
+            stopBreathing()
+            wrongHint = nil
+            resetMnemonicForm()
+            phase = .lockedOut
+            startLockoutWatch()
+            PopopxHaptics.notice(.warning)
         }
     }
 
@@ -422,6 +609,12 @@ final class PopopxAppLockOverlayModel {
         auth.resetBiometricFailures()
         lock.unlock()
         motion.lockedDidChange()
+        // 冷却闹钟与助记词那三个明文副本跟着这一次成功一起收掉。`endPresenting()` 也会做
+        // 同样的事，但那一句要等 `coversContent` 翻过来才跑，而 `submit` 在补时之前就 `unlock()`
+        // 了——中间那几百毫秒里闹钟仍在、词组仍在界面上。这一句把它提前。
+        lockoutTask?.cancel()
+        lockoutTask = nil
+        resetMnemonicForm()
         // `submit` 的胁迫分支内部已经 unlock() 过一次（`submit(pin:)` 里那句 `PopopxAppLockState.shared.unlock()`），
         // 上面那一句因此可能是第二次——`unlock()` 只是几个赋值，重复调用无副作用。
         // 保留它，是为了让两支**共用同一段代码**这件事没有例外：常规码那一路不会自己解铃。
@@ -537,6 +730,15 @@ private struct PopopxLockPanel: View {
         .onChange(of: model.wrongCount) { _, _ in
             model.shake(reduceMotion: reduceMotion)
         }
+        .onChange(of: model.phase) { _, phase in
+            // 冷却那一格换掉的是整个舞台：键盘不在了，Face ID 也不接了。看不见的机主
+            // 只会得到"按不动了"这一个事实，所以推进去一次 `.layoutChanged`，让焦点落到
+            // 新格上、念 `lockedOut` 那句静态标签（不含秒数，理由见那里的说明）。
+            // 只报"进"不报"出"：出冷却换回键盘时上一句往往还没念完，再推一次会把自已完成的话掐断。
+            if phase == .lockedOut {
+                UIAccessibility.post(notification: .layoutChanged, argument: nil)
+            }
+        }
         .accessibilityIdentifier("popopx.lock.panel")
     }
 
@@ -572,7 +774,7 @@ private struct PopopxLockPanel: View {
         .frame(maxWidth: .infinity)
     }
 
-    /// 面板实际呈现的三种格。`breathing` 由 `model.silentFlow` 决定：它同时吃本地 `phase`
+    /// 面板实际呈现的五种格。`breathing` 由 `model.silentFlow` 决定：它同时吃本地 `phase`
     /// 和上游 `showsLockUI`，所以"自毁在飞、但本层没提交过密码"那种情况也落在这一格里。
     /// 副标题、进度点朗读、舞台切换全部只读这一个判据——三个地方各拼一次条件，
     /// 迟早拼出自相矛盾的画面。
@@ -580,6 +782,8 @@ private struct PopopxLockPanel: View {
         case keypad
         case breathing
         case minimal
+        case lockedOut
+        case mnemonic
     }
 
     private var stageKind: StageKind {
@@ -589,7 +793,16 @@ private struct PopopxLockPanel: View {
         // 被上一行吃掉，写在这里只为穷尽：本地 `.breathing` 一定让 `silentFlow` 为真。
         case .breathing: return .breathing
         case .minimalUnlock: return .minimal
+        case .lockedOut: return .lockedOut
+        case .mnemonicReset: return .mnemonic
         }
+    }
+
+    /// 冷却与助记词那两格不显示进度点：那六个点是"6 位数字里第几位"，
+    /// 而这两格一个没有输入、一个用文本框输入。隐藏而不是删掉，是为了让面板高度
+    /// 在这五格之间保持完全一致（文件头那条反抖动约定）。
+    private var showsDots: Bool {
+        stageKind == .keypad || stageKind == .breathing || stageKind == .minimal
     }
 
     /// 三个相位各有一句副标题。呼吸那一句对常规码与胁迫码是同一句——见不变量。
@@ -598,6 +811,8 @@ private struct PopopxLockPanel: View {
         case .keypad: return PopopxLockCopy.prompt
         case .breathing: return PopopxLockCopy.breathing
         case .minimal: return PopopxLockCopy.minimalPrompt
+        case .lockedOut: return PopopxLockCopy.lockedOutPrompt
+        case .mnemonic: return PopopxLockCopy.mnemonicPrompt
         }
     }
 
@@ -609,6 +824,8 @@ private struct PopopxLockPanel: View {
                 dot(filled: index < model.pin.count)
             }
         }
+        .opacity(showsDots ? 1 : 0)
+        .accessibilityHidden(!showsDots)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(dotsLabel)
         .accessibilityIdentifier("popopx.lock.dots")
@@ -655,7 +872,10 @@ private struct PopopxLockPanel: View {
 
     // MARK: 舞台
 
-    /// 键盘始终在场（必要时透明），呼吸层与降级层叠在它上面——高度因此恒定。
+    /// 键盘始终在场（必要时透明），呼吸层、降级层、冷却层与助记词层叠在它上面——
+    /// 高度因此恒定。`allowsHitTesting(stageKind == .keypad)` 这一句顺带完成了简报要的
+    /// "冷却期内禁用数字键盘、Face ID 与助记词按钮"：那三样全都长在键盘这一层里，
+    /// 层被关掉命中，三样一起关掉，不需要各写一个 `if`（各写一个就会漏写第四个）。
     private var stage: some View {
         ZStack {
             keypad
@@ -668,6 +888,12 @@ private struct PopopxLockPanel: View {
             }
             if stageKind == .minimal {
                 minimalUnlock
+            }
+            if stageKind == .lockedOut {
+                lockedOut
+            }
+            if stageKind == .mnemonic {
+                mnemonicReset
             }
         }
         .frame(maxWidth: .infinity)
@@ -687,7 +913,16 @@ private struct PopopxLockPanel: View {
                     .accessibilityIdentifier("popopx.lock.deleteKey")
             }
             sendButton
+            // 「忘记密码」那一行只在词组真的存在时占这一格。它会不会在会话中途出现/消失
+            // 进而顶动面板高度？不会：`mnemonicConfigured` 只在设置页与抹除流程里变，
+            // 而这两种时刻遮罩都不在 `.keypad` 这一格上。
+            if model.canOfferMnemonicReset {
+                mnemonicEntry
+            }
         }
+        // 冷却、呼吸、降级、助记词那四格里键盘都不该被 VoiceOver 摸到（`stageKind != .keypad`
+        // 时它已整层不接命中）；`disabled` 再补一道，把"看不见却还能聚焦"这条路也关掉。
+        .disabled(!model.keypadLive)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(PopopxLockCopy.keypad)
         .accessibilityIdentifier("popopx.lock.keypad")
@@ -804,6 +1039,165 @@ private struct PopopxLockPanel: View {
             .accessibilityIdentifier("popopx.lock.minimalUnlock")
         }
         .frame(maxWidth: .infinity)
+    }
+
+    // MARK: 冷却层
+
+    /// 冷却期中央那一块。**每秒一跳由 `TimelineView` 提供**，不是本层的心跳任务：
+    /// 数字是 `auth.lockoutEndsAt` 与"这一帧被调度的时刻"之差，读的就是它自己那一份时间，
+    /// 因此遮罩被系统短暂挂起再回来也不会跳到错的秒数上。
+    ///
+    /// 字体：`PopopxType.title`（`.title2` + semibold）再叠 `.monospacedDigit()`。
+    /// 任务要的是"等宽字体实时倒计时"，而 `PopopxType` 里没有更大的等宽档——
+    /// `metric` 是 `.footnote`、`metricSmall` 是 `.caption2`，都不该出现在屏幕正中。
+    /// 所以这里不改字号、只换数字形态：等宽在这个位置的作用只有一个，就是每秒跳一位时
+    /// 后面的汉字不许左右移动（那会是一次肉眼可见的 reflow，正是这一屏唯一要避免的事）。
+    ///
+    /// 那串数字对 VoiceOver 是隐藏的：每秒变化的标签会被反复朗读，而朗读一遍"4 分 59 秒"
+    /// 与朗读一遍"4 分 58 秒"对听的人没有任何区别。静态那一句 + 进这一格时的一次
+    /// `.layoutChanged`（见 `PopopxLockPanel.body`）才是读得懂的版本。
+    private var lockedOut: some View {
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            let remaining = model.lockoutRemaining(at: context.date)
+            VStack(spacing: PopopxMetrics.spaceS) {
+                Image(systemName: "lock.circle")
+                    .font(PopopxType.title)
+                    .imageScale(.large)
+                    .foregroundStyle(PopopxPalette.labelSecondary)
+                    .accessibilityHidden(true)
+                Text(String(format: PopopxLockCopy.lockedOutFormat, PopopxLockoutSchedule.phrase(remaining)))
+                    .font(PopopxType.title.monospacedDigit())
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(PopopxPalette.label)
+                    .accessibilityHidden(true)
+                    .accessibilityIdentifier("popopx.lock.lockoutCountdown")
+                Text(PopopxLockCopy.lockedOutFootnote)
+                    .font(PopopxType.caption)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(PopopxPalette.labelSecondary)
+            }
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(PopopxLockCopy.lockedOutVoiceOver)
+        }
+    }
+
+    // MARK: 助记词层
+
+    /// 「忘记密码」那一行。它是键盘的一部分（而不是键盘外面多出来的一块），
+    /// 为的是冷却期里那一层整块不接命中时，它跟着一起消失——
+    /// 单独挂在外面就要在这里再补一个 `if`，而补的那个 `if` 迟早会漏。
+    private var mnemonicEntry: some View {
+        Button {
+            model.beginMnemonicReset()
+        } label: {
+            Text(PopopxLockCopy.mnemonicEntry)
+                .font(PopopxType.caption)
+                .foregroundStyle(PopopxPalette.brand)
+                .frame(maxWidth: .infinity, minHeight: PopopxMetrics.minHitTarget)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(PopopxPressButtonStyle(feedback: .light))
+        .accessibilityIdentifier("popopx.lock.mnemonicEntry")
+    }
+
+    /// 那 12 个词的输入格 + 两遍新码。提交键不用 `PopopxButton`，理由见 `mnemonicSubmitKey`。
+    private var mnemonicReset: some View {
+        VStack(spacing: PopopxMetrics.spaceS) {
+            PopopxTextArea(
+                PopopxLockCopy.mnemonicPhraseField,
+                prompt: PopopxLockCopy.mnemonicPhrasePrompt,
+                text: $model.mnemonicInput
+            )
+            .accessibilityIdentifier("popopx.lock.mnemonicPhraseField")
+            PopopxTextField(
+                PopopxLockCopy.mnemonicNewPinField,
+                prompt: pinPrompt,
+                text: $model.newPin,
+                isSecure: true
+            )
+            .onChange(of: model.newPin) { _, entered in clampPin($model.newPin, entered) }
+            PopopxTextField(
+                PopopxLockCopy.mnemonicConfirmField,
+                prompt: pinPrompt,
+                text: $model.newPinConfirm,
+                isSecure: true
+            )
+            .onChange(of: model.newPinConfirm) { _, entered in clampPin($model.newPinConfirm, entered) }
+            Text(PopopxLockCopy.mnemonicConsequence)
+                .font(PopopxType.caption)
+                .multilineTextAlignment(.center)
+                .foregroundStyle(PopopxPalette.dangerInk)
+                .fixedSize(horizontal: false, vertical: true)
+            mnemonicSubmitKey
+            PopopxButton(PopopxLockCopy.mnemonicCancel, systemImage: "chevron.left", role: .ghost) {
+                model.cancelMnemonicReset()
+            }
+            .accessibilityIdentifier("popopx.lock.mnemonicCancel")
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(PopopxLockCopy.mnemonicPrompt)
+        .accessibilityIdentifier("popopx.lock.mnemonicForm")
+    }
+
+    /// 位数提示现拼，不写死"6 位数字"：`PopopxDuressAuthManager.pinLength` 改了，
+    /// 这一句要跟着改（文件头那条"两支必须逐字相同"的不变量在这里同样成立）。
+    private var pinPrompt: String {
+        "需恰好 \(PopopxDuressAuthManager.pinLength) 位数字"
+    }
+
+    /// 数字格只留数字、只留 `pinLength` 位。过滤器是唯一防线而不是锦上添花：
+    /// `PopopxTextField(isSecure:)` 走的是 `SecureField` 那一支，它**不读** `keyboard:`
+    /// 参数（`PopopxControls.swift:237-241`——只有 `TextField` 那一支挂了 `.keyboardType`），
+    /// 所以这两格弹出的是全键盘，机主能敲进字母和标点。
+    ///
+    /// 拿 `Binding` 而不是一个 `String` 参数：两格共用这一个函数，若按值传进来再写回
+    /// 同一个字段，"新码"和"确认码"就会互相覆盖。与设置页 `clampToDigits` 同形。
+    /// 只在确实滤掉了东西时才回写，避免每次输入都触发一次无谓的状态变更。
+    private func clampPin(_ target: Binding<String>, _ entered: String) {
+        let kept = String(
+            entered
+                .filter { PopopxDuressAuthManager.digits.contains($0) }
+                .prefix(PopopxDuressAuthManager.pinLength)
+        )
+        if kept != entered { target.wrappedValue = kept }
+    }
+
+    /// 提交那颗键。画法与 `sendButton` 共用同一套代币，也因此同样**不能**用 `PopopxButton`：
+    /// 那一个在动作返回时闪一次绿勾再补一发 `notice(.success)`，而"重置失败"也是一次
+    /// 动作返回。给一次没成功的重置打勾，机主会以为新码已经生效——
+    /// 走到键盘前按不动的那一刻才知道没有，比从一开始就不打勾糟糕得多。
+    private var mnemonicSubmitKey: some View {
+        Button {
+            Task { await model.submitMnemonicReset() }
+        } label: {
+            HStack(spacing: PopopxMetrics.spaceXS) {
+                Image(systemName: "key.fill")
+                    .fontWeight(.semibold)
+                Text(PopopxLockCopy.mnemonicSubmit)
+            }
+            .font(PopopxType.emphasis)
+            .foregroundStyle(model.canSubmitMnemonicReset ? PopopxPalette.onBrand : PopopxPalette.labelSecondary)
+            .frame(maxWidth: .infinity, minHeight: PopopxMetrics.minHitTarget)
+            .background(
+                model.canSubmitMnemonicReset ? PopopxPalette.brand : PopopxPalette.card,
+                in: RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl)
+                    .strokeBorder(
+                        model.canSubmitMnemonicReset ? Color.clear : PopopxPalette.labelHint,
+                        lineWidth: PopopxMetrics.divider
+                    )
+            )
+            .contentShape(RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl))
+        }
+        .buttonStyle(PopopxPressButtonStyle(feedback: .light))
+        .disabled(!model.canSubmitMnemonicReset)
+        .accessibilityLabel(PopopxLockCopy.mnemonicSubmit)
+        .accessibilityIdentifier("popopx.lock.mnemonicSubmit")
     }
 }
 

@@ -60,6 +60,11 @@ let DEFAULT_ANTI_THEFT_ANGLE_LIMIT = "antiTheftAngleLimitDegrees"
 /// 模块三（双密码）用。
 let DEFAULT_ANTI_THEFT_DURESS_ENABLED = "antiTheftDuressEnabled"
 let DEFAULT_ANTI_THEFT_BIOMETRICS_ENABLED = "antiTheftBiometricsEnabled"
+/// 第 10 次连续错误是否直接抹数据。默认关（键不存在时读出来就是 `false`），
+/// 且必须由机主在设置页明确打开——这一格把"猜错十次"的代价从"锁一小时"换成"身份没了"。
+/// 它**只**存这个 bool，不存任何凭据，但它是一条"这台设备开启过极端自毁"的指纹，
+/// 所以和其余开关一样进下面那张清扫表。
+let DEFAULT_ANTI_THEFT_TEN_STRIKE_WIPE = "antiTheftTenStrikeWipe"
 /// 自毁后的重建模式（`.emptyProfile` / `.simulatedDecoy`）。
 let DEFAULT_ANTI_THEFT_RETENTION_STRATEGY = "antiTheftRetentionStrategy"
 /// 模块四（烟雾弹）用。
@@ -76,6 +81,7 @@ let POPOPX_ANTI_THEFT_DEFAULT_KEYS: [String] = [
     DEFAULT_ANTI_THEFT_ANGLE_LIMIT,
     DEFAULT_ANTI_THEFT_DURESS_ENABLED,
     DEFAULT_ANTI_THEFT_BIOMETRICS_ENABLED,
+    DEFAULT_ANTI_THEFT_TEN_STRIKE_WIPE,
     DEFAULT_ANTI_THEFT_RETENTION_STRATEGY,
     DEFAULT_ANTI_THEFT_DECOY_ENABLED,
 ]

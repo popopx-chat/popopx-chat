@@ -27,14 +27,25 @@
 //  所以演练报出来的门限不是"给看的那一套"，就是运行时用的那一套——这是这一页能自证的前提。
 //
 //  ### 为什么危险操作全部走二次确认，而不是滑动手势
-//  本页唯一的不可逆动作是把两把码写进 Keychain（写错并忘记 ⇒ 机主自己永久被锁在外面，且本 app
-//  没有手机号/邮箱找回通道：创建身份不要求任何联系方式）与删除这两把码。滑动手势是肌肉记忆动作，
-//  快、连续、没有停顿点，一次兜里的滑动就足以构成"确认"；而这两个后果都不接受这种触发概率。
+//  本页唯一的不可逆动作是把两把码写进 Keychain（写错并忘记时，唯一出路是手上抄存的那 12 个
+//  英文词；助记词本身没有任何找回通道，且创建身份不要求手机号/邮箱）与删除这两把码。
+//  滑动手势是肌肉记忆动作，快、连续、没有停顿点，一次兜里的滑动就足以构成"确认"；而这两个后果都不接受这种触发概率。
 //  所以这里一律是 `PopopxButton(role: .destructive)` + `confirmationDialog` 两段式：第一段是明确的
 //  红色 CTA（它自己还带一次 `.medium` 触觉），第二段是系统级、必须再点一次、且带"取消"的独立弹窗。
 //  两次输入之间屏幕内容不变，机主有整段时间反悔。关掉双密码那一格也走同一条门：它的 `didSet` 会
 //  删除胁迫码记录（`PopopxDuressAuthManager.duressEnabled` 的 `didSet`），所以本页把它包成"先问一次"的绑定，
 //  而不是让开关一滑就生效。
+//
+//  ### 助记词是这一页新开的唯一一扇"明文门"，所以它的三件事都带成本说明
+//  12 个英文词是本模块唯一一处可明文恢复的凭据：查看它要先当场验一次机主本人——输对进入密码，
+//  或在「生物识别快捷解锁」开着时过一次 Face ID，而抄在纸上的
+//  那一份等价于"知道这 12 个词的人可以重新设一把进入密码"。本页因此只做三件事——
+//  生成（随进入密码一起，或自己按一次）、查看（每次都要重新验一次，不缓存）、重新生成
+//  （红色二次确认：旧那张纸当场作废，而机主很可能正拿着它）。并且把后果写在明面上：
+//  **用助记词重置进入密码会把应急擦除密码一并清成"未设置"**
+//  （`PopopxDuressAuthManager.resetEntryPinWithMnemonic`）。这一句不是提示而是设计——能重置密码的人
+//  不该同时保有一把他不知道的自毁入口。重置也**不消耗**助记词，想要"用后即焚"要自己按重新生成。
+//  这三条在页面上各有一句人话，不靠实现细节替它们说话。
 //
 //  ### 版式与依赖
 //  骨架照抄 Shared/Features/Me/PopopxMeView.swift：ScrollView + `PopopxSectionCard` 分组、
@@ -110,7 +121,7 @@ struct PopopxAntiTheftSettingsView: View {
     @State private var nativePasscode = ""
     @State private var nativeSelfDestructCode = ""
 
-    /// 写入过程中的错误文案：只装 `PopopxDuressSetupError.errorDescription` 原样那八句，
+    /// 写入过程中的错误文案：只装 `PopopxDuressSetupError.errorDescription` 原样那十五句，
     /// 本页不另写一份同义文案。
     @State private var pinFeedback: String?
     @State private var isWritingPins = false
@@ -135,6 +146,26 @@ struct PopopxAntiTheftSettingsView: View {
     @State private var retainLoaded = false
     @State private var showsRetainSheet = false
 
+    // MARK: 助记词的三份界面副本（值只活在这里，离开本页/查看成功后立刻清）
+    //
+    // 12 个英文词是**明文**，比那两把码更需要"用完就丢"：它不像 `PopopxDuressVerifier` 那样
+    // 只有派生值，它本身就是能直接开门的东西。所以本页没有任何一处把它写进 `logger`、
+    // `UIPasteboard`、`toast` 或任何持久化位置，也不在卡片上默认显示——必须点「查看」、
+    // 当场验一次进入密码，才在这一个 `@State` 里出现一次。
+    @State private var showsMnemonicSheet = false
+    /// 「查看」那一次性的进入密码输入。
+    @State private var mnemonicUnlockPin = ""
+    /// 验过之后拿到的那 12 个词（`revealMnemonic` 返回的已规范化单词数组，只为带序号显示；
+    /// 比对从来不用这一份）。空数组 = 当前没有显示。
+    @State private var mnemonicWords: [String] = []
+    @State private var mnemonicFeedback: String?
+    @State private var isReadingMnemonic = false
+    /// 重新生成 = 旧那张纸当场作废，所以它和"写入两把码"一样是红色二次确认。
+    @State private var showsMnemonicRegenDialog = false
+    /// 随进入密码一起生成的那一份新词组：设置成功后留在 sheet 上，等机主亲手点"我已抄存"。
+    /// 不自动关 sheet —— 一弹出来就关掉，等于把唯一的抄存机会扔了。
+    @State private var freshMnemonic: [String]?
+
     init() {}
 
     var body: some View {
@@ -142,7 +173,7 @@ struct PopopxAntiTheftSettingsView: View {
     }
 
     /// 卡片本身。与下面 `wrapped` 分开写，是为了给类型检查器两个独立的推断上下文：
-    /// 六张卡 + 三只 sheet + 三个确认框 + `task`/`onChange` 挂在同一条链上时，Swift 报的是
+    /// 九张卡 + 四只 sheet + 四个确认框 + `task`/`onChange` 挂在同一条链上时，Swift 报的是
     /// "unable to type-check this expression in reasonable time"，而落点指向中间某行无辜的
     /// `Text(...)`——拆表达式是唯一修法，行为一行都不改。
     private var pageContent: some View {
@@ -152,6 +183,8 @@ struct PopopxAntiTheftSettingsView: View {
                 sensitivityCard
                 inactivityCard
                 duressCard
+                mnemonicCard
+                lockoutCard
                 rebuildCard
                 drillCard
                 riskCard
@@ -169,7 +202,7 @@ struct PopopxAntiTheftSettingsView: View {
     }
 
     /// 弹层与生命周期钩子。这一层里 `pageContent` 已经是一个敲定的不透明类型，所以下面这条长链
-    /// 不必再把六张卡的类型一起推——:171 那次 "unable to type-check this expression in reasonable
+    /// 不必再把六张卡的类型一起推——上面 `pageContent` 记的那次 "unable to type-check this expression in reasonable
     /// time" 报在一行无辜的 `Text(...)` 上，病根是整条链只有一个推断上下文。行为一行都没改。
     private var wrapped: some View {
         pageContent
@@ -181,6 +214,9 @@ struct PopopxAntiTheftSettingsView: View {
         }
         .sheet(isPresented: $showsRetainSheet) {
             retainSheet
+        }
+        .sheet(isPresented: $showsMnemonicSheet) {
+            mnemonicSheet
         }
         // 模块四现读那把键、不订阅变更通知，所以撤销/装载仿真内容必须由这一句去叫它重读磁盘。
         // 只挂在 `decoyEnabled` 上：另一格（行为判据）绑的是单例本体，它的 `didSet` 自己 `sync()`。
@@ -217,6 +253,18 @@ struct PopopxAntiTheftSettingsView: View {
         } message: {
             Text(Copy.duressOffDialogMessage)
         }
+        // 「重新生成」毁掉的是机主手上那张纸，而这个动作在页面上看起来只是点了一下按钮。
+        // 所以它必须有一次独立、带"取消"、且把后果念一遍的第二击——与"写入两把码"同一道题。
+        .confirmationDialog(Copy.mnemonicRegenTitle, isPresented: $showsMnemonicRegenDialog, titleVisibility: .visible) {
+            Button(Copy.mnemonicRegenConfirm, role: .destructive) {
+                Task { @MainActor in
+                    await regenerateMnemonic()
+                }
+            }
+            Button(Copy.cancel, role: .cancel) {}
+        } message: {
+            Text(Copy.mnemonicRegenMessage)
+        }
         .popopxToast(toast)
         .task {
             // 每次进本页都问一次 Keychain 真实配置，而不是相信内存里那次缓存
@@ -234,11 +282,24 @@ struct PopopxAntiTheftSettingsView: View {
         .onChange(of: showsPinSheet) { _, opened in
             if !opened { clearPinFields() }
         }
+        // 关掉查看弹层 = 那 12 个明文词从界面上消失。下一次要看必须重新验一次进入密码，
+        // 本页没有任何一处把词组缓存到 `didSet`、UserDefaults 或"上次看过"的状态里。
+        .onChange(of: showsMnemonicSheet) { _, opened in
+            if !opened { clearMnemonicFields() }
+        }
     }
 
     /// 动画的触发键：把会影响卡片文字的几个状态并成一个字符串，避免为每个状态各挂一次动画。
+    ///
+    /// 后三项是这一轮加的：助记词的"已设置/未设置"、十次抹除开关、当前失败次数，
+    /// 三个都会改写卡片里的说明句子。漏掉任何一项，那一格会在状态已经变了之后仍留着上一句
+    /// ——本页没有别的刷新时机（`task` 只在进场时跑一次），所以这个键就是唯一的驱动。
+    ///
+    /// **冷却剩余秒数故意不进这个键**：它是 `Date` 与存下来那个时刻的差，只有墙钟在动、
+    /// 状态没动，放进键里既不会真的每秒变化（没有东西驱动重绘），又会误导后来人以为它在跳。
+    /// 那一行的每秒刷新由 `cooldownRow` 自己的 `TimelineView` 负责。
     private var animationKey: String {
-        "\(motion.enabled)-\(motion.sensitivity.wireValue)-\(duress.normalConfigured)-\(duress.duressConfigured)-\(duress.retentionStrategy.segmentIndex)-\(duress.retentionStrategy.retainedProfileId ?? -1)"
+        "\(motion.enabled)-\(motion.sensitivity.wireValue)-\(duress.normalConfigured)-\(duress.duressConfigured)-\(duress.retentionStrategy.segmentIndex)-\(duress.retentionStrategy.retainedProfileId ?? -1)-\(duress.mnemonicConfigured)-\(duress.wipeOnTenthFailure)-\(duress.failedAttemptCount)"
     }
 
     // MARK: 总开关
@@ -553,9 +614,426 @@ struct PopopxAntiTheftSettingsView: View {
         duress.duressConfigured ? Copy.duressStateSet : Copy.duressStateUnset
     }
 
+    // MARK: 12 词助记词
+
+    /// 助记词那一格的状态，与 `duressStateValue` 同一个口径：**现问 Keychain**。
+    /// `mnemonicConfigured` 要求"派生哈希 + 可回看明文"两条记录都在（管理器里那条与运算），
+    /// 所以半新一旧的助记词在这里读作"未设置"，而不是显示一句"可以查看"再把机主送去撞一次失败。
+    private var mnemonicStateValue: String {
+        duress.mnemonicConfigured ? Copy.mnemonicStateSet : Copy.mnemonicStateUnset
+    }
+
+    /// Face ID 那道门现在能不能用。三条缺一不可，且与
+    /// `PopopxDuressAuthManager.revealMnemonicWithBiometrics` 开头那三道 `guard` 一一对应：
+    /// 少一条，弹层里那枚按钮按下去就只会得到一句"未通过"。
+    /// - `duress.biometricsEnabled`：本页那个总开关。
+    /// - `!duress.keypadRequired`：遮罩上刚连着失败两次，本次会话降级成"只认键盘码"。
+    ///   这条降级同样管到设置页——它是"这段时间内生物识别不可信"，不是"锁屏那一面暂时不给"。
+    /// - `biometricsAvailable`：本机现在判得出可用。这里用的是本页 `@State` 那份"进来问一次"的
+    ///   读数；管理器那一版每次读都新建一个 `LAContext`，放进 body 就是每次重绘问一次。
+    /// 冷却状态故意不在这里问，理由与那边相同：这一问不吃失败计数，也就没有可归零的东西。
+    private var mnemonicFaceIDOffered: Bool {
+        duress.biometricsEnabled && !duress.keypadRequired && biometricsAvailable
+    }
+
+    /// 助记词那一行的行尾值。三个值而不是"已配置/未配置"两个：那道门开不开，机主在
+    /// 这一行就该看见，而不是点进弹层才发现少了一枚按钮。
+    private var mnemonicRowValue: String {
+        guard duress.mnemonicConfigured else { return Copy.mnemonicRowGenerate }
+        return mnemonicFaceIDOffered ? Copy.mnemonicRowRevealEither : Copy.mnemonicRowReveal
+    }
+
+    private var mnemonicCard: some View {
+        PopopxSectionCard(Copy.groupMnemonic, footnote: Copy.mnemonicFootnote) {
+            thresholdLine(Copy.mnemonicStateHeadline, mnemonicStateValue)
+            AntiTheftDivider()
+            PopopxPickerRow(
+                Copy.mnemonicRow,
+                value: mnemonicRowValue,
+                systemImage: "text.page.fill",
+                tint: .brand
+            ) {
+                PopopxHaptics.impact(.light)
+                duress.refreshConfiguration()
+                clearMnemonicFields()
+                freshMnemonic = nil
+                showsMnemonicSheet = true
+            }
+            .accessibilityIdentifier("popopx.antiTheft.mnemonicEntry")
+            .accessibilityValue(mnemonicRowValue)
+            .disabled(!duress.normalConfigured)
+            // 后果写在明面上，而不是等机主在锁屏上撞见：重置会把应急擦除密码清成"未设置"。
+            // 这一句与 `lockoutCard` 那句红是本页仅有的两处 dangerInk 说明，两处都是不可逆方向。
+            AntiTheftDivider()
+            warningLine(Copy.mnemonicConsequence)
+        }
+    }
+
+    /// 助记词的查看/生成弹层。
+    ///
+    /// 三条实现约定，都是这一格特有的：
+    /// 1. **不给 `.textSelection(.enabled)`**：一选中就可能进系统剪贴板，而剪贴板会被其他 app
+    ///    读到、也可能随 iCloud 同步到别的设备上。一张能明文恢复身份的词组不该被系统复制到
+    ///    本模块管不着的地方，所以这一格只能"用眼睛抄"。
+    /// 2. **关掉弹层即清空**（`onChange(of: showsMnemonicSheet)` → `clearMnemonicFields()`），
+    ///    下一次要看必须重新验一次——进入密码或 Face ID，两道门都一样只当场有效。
+    ///    本页不留"上次看过"的状态。
+    /// 3. 那两枚按钮都不是"一点就亮"：密码那一道路要走一次约 355 ms 的 PBKDF2 派生，
+    ///    Face ID 那一道路要等系统弹层收结果，所以两枚都带 `isLoading`；
+    ///    不靠转场动画盖这段等待。
+    private var mnemonicSheet: some View {
+        NavigationStack {
+            PopopxSheetContainer(Copy.mnemonicSheetTitle, subtitle: mnemonicSheetHint) {
+                PopopxSectionCard(Copy.mnemonicSheetGroup, footnote: Copy.mnemonicSheetFootnote) {
+                    if !mnemonicWords.isEmpty {
+                        mnemonicWordGrid(mnemonicWords)
+                        AntiTheftDivider()
+                        PopopxButton(Copy.mnemonicSheetHide, systemImage: "eye.slash") {
+                            clearMnemonicFields()
+                        }
+                    } else {
+                        if duress.mnemonicConfigured {
+                            pinField(Copy.mnemonicSheetPinLabel, prompt: Copy.pinPrompt, text: $mnemonicUnlockPin)
+                            AntiTheftDivider()
+                            PopopxButton(
+                                Copy.mnemonicSheetReveal,
+                                systemImage: "eye",
+                                isLoading: isReadingMnemonic
+                            ) {
+                                await revealMnemonicNow()
+                            }
+                            .disabled(!PopopxDuressAuthManager.isValidPin(mnemonicUnlockPin))
+                            .accessibilityIdentifier("popopx.antiTheft.mnemonicReveal")
+                            // 另一道门只在它真能通过的时候出现。三个条件与
+                            // `PopopxDuressAuthManager.revealMnemonicWithBiometrics` 那三道前置门
+                            // 逐字对应——少一条，这里就是一枚按下去只会报错的按钮。
+                            // 两枚按钮共用 `isReadingMnemonic`，所以任一条路在跑时另一枚自己变灰：
+                            // 同一次点击只该交出去一份明文。
+                            if mnemonicFaceIDOffered {
+                                AntiTheftDivider()
+                                PopopxButton(
+                                    Copy.mnemonicSheetRevealFaceID,
+                                    systemImage: "faceid",
+                                    role: .secondary,
+                                    isLoading: isReadingMnemonic
+                                ) {
+                                    await revealMnemonicWithFaceID()
+                                }
+                                .accessibilityIdentifier("popopx.antiTheft.mnemonicRevealFaceID")
+                            }
+                            AntiTheftDivider()
+                        }
+                        PopopxButton(
+                            duress.mnemonicConfigured ? Copy.mnemonicSheetRegenerate : Copy.mnemonicSheetGenerate,
+                            systemImage: duress.mnemonicConfigured ? "arrow.triangle.2.circlepath" : "plus",
+                            role: duress.mnemonicConfigured ? .destructive : .primary
+                        ) {
+                            // 已有词组时的"重新生成"毁掉的是机主手上那张纸，必须先问一次；
+                            // 还没有词组时这一次点击不毁掉任何东西，直接生成。
+                            if duress.mnemonicConfigured {
+                                showsMnemonicRegenDialog = true
+                            } else {
+                                await regenerateMnemonic()
+                            }
+                        }
+                        .accessibilityIdentifier("popopx.antiTheft.mnemonicGenerate")
+                    }
+                    if let mnemonicFeedback {
+                        AntiTheftDivider()
+                        Text(mnemonicFeedback)
+                            .font(PopopxType.caption)
+                            .foregroundStyle(PopopxPalette.dangerInk)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                PopopxSectionCard(Copy.mnemonicSheetPaperGroup, footnote: nil) {
+                    warningLine(Copy.mnemonicSheetPaperNote)
+                }
+                if duress.mnemonicConfigured {
+                    PopopxSectionCard(Copy.mnemonicSheetWhyGroup, footnote: nil) {
+                        Text(Copy.mnemonicSheetWhyNoCount)
+                            .font(PopopxType.caption)
+                            .foregroundStyle(PopopxPalette.labelSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(Copy.close) { showsMnemonicSheet = false }
+                }
+            }
+        }
+        .presentationDragIndicator(.visible)
+    }
+
+    /// 写盘成功后那一张抄存页。它不提供任何输入框，也不提供"重新生成"：机主刚点过一次
+    /// 「写入这两把码」，这一屏唯一要完成的事是把 12 个词抄到纸上。想换一组词，
+    /// 关掉之后回到助记词那一格重做。
+    ///
+    /// 只提供 `.large` 一档 detent：那 12 个格子加两句说明在 `.medium` 上会被裁掉一半，
+    /// 而一张裁掉了词的抄存页比没有这一屏更糟——机主会以为自已抄完了。
+    private func mnemonicCaptureSheet(_ words: [String]) -> some View {
+        NavigationStack {
+            PopopxSheetContainer(Copy.mnemonicCaptureTitle, subtitle: Copy.mnemonicCaptureSubtitle) {
+                PopopxSectionCard(Copy.mnemonicSheetGroup, footnote: Copy.mnemonicSheetFootnote) {
+                    mnemonicWordGrid(words)
+                }
+                PopopxSectionCard(Copy.mnemonicSheetPaperGroup, footnote: nil) {
+                    warningLine(Copy.mnemonicSheetPaperNote)
+                }
+            } footer: {
+                PopopxButton(Copy.mnemonicCaptureDone, systemImage: "checkmark") {
+                    showsPinSheet = false
+                }
+                .padding(PopopxMetrics.spaceM)
+            }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(Copy.close) { showsPinSheet = false }
+                }
+            }
+        }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
+    }
+
+    /// 12 个词、带序号、两列。序号是必要的，不是装饰：抄错位置（把第 7 个词抄到第 6 格）
+    /// 与抄错字母一样会让整条词组失效，而 BIP-39 的校验和只有 4 bit，挡不住这种错位。
+    /// 两列用 `.flexible()`，不写最小宽度——`PopopxMetrics` 里没有这一类代币，
+    /// 编一个数出来就是这一页承诺过的"不写死一处尺寸"的反面。
+    ///
+    /// 参数而不是直接读 `mnemonicWords`：回看那一屏与抄存那一屏用的是两份不同的 `@State`
+    /// （前者用完即丢，后者要撑到机主亲手点「我已抄存」），排版这一段则必须完全一样。
+    private func mnemonicWordGrid(_ words: [String]) -> some View {
+        LazyVGrid(
+            columns: [GridItem(.flexible(), spacing: PopopxMetrics.spaceXS), GridItem(.flexible(), spacing: PopopxMetrics.spaceXS)],
+            spacing: PopopxMetrics.spaceXS
+        ) {
+            ForEach(Array(words.enumerated()), id: \.offset) { index, word in
+                HStack(spacing: PopopxMetrics.spaceXS) {
+                    Text("\(index + 1)")
+                        .font(PopopxType.microTag)
+                        .foregroundStyle(PopopxPalette.labelHint)
+                        .frame(width: PopopxMetrics.spaceXL, alignment: .trailing)
+                        .accessibilityHidden(true)
+                    Text(word)
+                        .font(PopopxType.emphasis)
+                        .foregroundStyle(PopopxPalette.label)
+                    Spacer(minLength: PopopxMetrics.space2XS)
+                }
+                .padding(.vertical, PopopxMetrics.space2XS)
+                .padding(.horizontal, PopopxMetrics.spaceXS)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(PopopxPalette.cardHigh, in: .rect(cornerRadius: PopopxMetrics.radiusChip))
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(Copy.mnemonicGridLabel)
+        .accessibilityIdentifier("popopx.antiTheft.mnemonicWords")
+    }
+
+    /// 弹层副标题要说的是"这一格现在真的能用什么"：Face ID 那道门没开时不许写"或 Face ID"，
+    /// 否则机主会在一排按钮里找一个不存在的。
+    private var mnemonicSheetHint: String {
+        guard duress.mnemonicConfigured else { return Copy.mnemonicSheetHintNone }
+        return mnemonicFaceIDOffered ? Copy.mnemonicSheetHintHaveBiometric : Copy.mnemonicSheetHintHave
+    }
+
+    // MARK: 渐进式防爆破
+
+    private var lockoutStrikesValue: String {
+        let strikes = duress.failedAttemptCount
+        if strikes == 0 {
+            return Copy.lockoutStrikesNone
+        }
+        return String(
+            format: Copy.lockoutStrikesFormat,
+            "\(strikes)",
+            "\(duress.strikesUntilWipe)"
+        )
+    }
+
+    /// 那张表**从表本体读出来**，不在这里另抄一遍数字：`PopopxLockoutSchedule` 改了，
+    /// 这一句跟着改。抄一份就是给将来那个改表的人留一处会说不成立的话的文案。
+    private var lockoutScheduleValue: String {
+        let steps = [5, 6, 7, 8].map { attempt in
+            String(
+                format: Copy.lockoutStepFormat,
+                "\(attempt)",
+                PopopxLockoutSchedule.phrase(PopopxLockoutSchedule.lockoutSeconds(afterAttemptCount: attempt))
+            )
+        }
+        return String(format: Copy.lockoutScheduleFormat, steps.joined(separator: " · "))
+    }
+
+    /// 冷却那一行每秒都要动，而"剩余秒数"是 `Date` 与存下来那个时刻的差、没有任何状态在变，
+    /// 所以它不能靠 `animationKey` 驱动（见那里那条注释）。`TimelineView` 是这一格自己的心跳。
+    private var cooldownRow: some View {
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            let remaining = duress.lockoutEndsAt.map { $0.timeIntervalSince(context.date) } ?? 0
+            thresholdLine(
+                Copy.lockoutCoolingHeadline,
+                remaining > 0
+                    ? String(format: Copy.lockoutCoolingFormat, PopopxLockoutSchedule.phrase(remaining))
+                    : Copy.lockoutCoolingIdle
+            )
+        }
+    }
+
+    private var lockoutCard: some View {
+        PopopxSectionCard(Copy.groupLockout, footnote: Copy.lockoutFootnote) {
+            thresholdLine(Copy.lockoutStrikesHeadline, lockoutStrikesValue)
+            AntiTheftDivider()
+            cooldownRow
+            AntiTheftDivider()
+            thresholdLine(Copy.lockoutScheduleHeadline, lockoutScheduleValue)
+            AntiTheftDivider()
+            PopopxToggleRow(
+                Copy.lockoutTenStrikeRow,
+                note: lockoutTenStrikeNote,
+                systemImage: "exclamationmark.octagon.fill",
+                tint: .danger,
+                isOn: $duress.wipeOnTenthFailure
+            )
+            .accessibilityIdentifier("popopx.antiTheft.tenStrikeWipe")
+            AntiTheftDivider()
+            warningLine(Copy.lockoutTenStrikeWarning)
+        }
+    }
+
+    /// 开与关说的是两件相反的事，所以两句分开写，不玩"前缀 + 共用后半句"那种拼接：
+    /// 关掉那一档意味着第 10 次只是"再多锁一小时"，这一句必须让机主知道自己是**主动**放弃了抹除。
+    private var lockoutTenStrikeNote: String {
+        duress.wipeOnTenthFailure ? Copy.lockoutTenStrikeNoteOn : Copy.lockoutTenStrikeNoteOff
+    }
+
+    /// `riskLine` 的红色版本：本页只有"会被执行到的破坏性后果"配得上这个颜色。
+    private func warningLine(_ text: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.spaceXS) {
+            Image(systemName: "exclamationmark.octagon.fill")
+                .font(PopopxType.microTag)
+                .imageScale(.medium)
+                .foregroundStyle(PopopxPalette.dangerInk)
+                .accessibilityHidden(true)
+            Text(text)
+                .font(PopopxType.caption)
+                .foregroundStyle(PopopxPalette.dangerInk)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// 查看助记词：交一次进入密码，换 12 个词。
+    ///
+    /// 密码在这一句之后立刻从界面上清掉（`mnemonicUnlockPin = ""`），**成功与失败都一样**：
+    /// 这一格的目的只是"当场证明机主知道进入密码"，证明完那一份副本就该没了。
+    /// 失败只把 `errorDescription` 原样显示，不做任何"第几位不对"之类的提示。
+    private func revealMnemonicNow() async {
+        let pin = mnemonicUnlockPin
+        mnemonicUnlockPin = ""
+        mnemonicFeedback = nil
+        mnemonicWords = []
+        guard PopopxDuressAuthManager.isValidPin(pin) else {
+            mnemonicFeedback = PopopxDuressSetupError.entryPinRequired.errorDescription
+            PopopxHaptics.notice(.warning)
+            return
+        }
+        isReadingMnemonic = true
+        defer { isReadingMnemonic = false }
+        do {
+            mnemonicWords = try await duress.revealMnemonic(unlockingWith: pin)
+            PopopxHaptics.notice(.success)
+            toast.show(Copy.mnemonicToastShown, kind: .encrypted)
+        } catch let error as PopopxDuressSetupError {
+            mnemonicFeedback = error.errorDescription
+            clearMnemonicFields()
+            PopopxHaptics.notice(.error)
+            toast.show(Copy.mnemonicToastRejected, kind: .danger)
+        } catch {
+            mnemonicFeedback = Copy.mnemonicUnexpectedFailure
+            clearMnemonicFields()
+            PopopxHaptics.notice(.error)
+            toast.show(Copy.mnemonicToastRejected, kind: .danger)
+        }
+    }
+
+    /// 查看助记词的第二道门：Face ID。要交出去的东西与 `revealMnemonicNow` 完全相同，
+    /// 所以收尾纪律也完全相同——先清掉上一屏残留（反馈文案与可能还亮着的词组），
+    /// 失败只把 `errorDescription` 原样说一句，然后 `clearMnemonicFields()`。
+    ///
+    /// 这一条没有明文副本要清：密码不进这一路，`mnemonicUnlockPin` 保持原样，机主刚打的字
+    /// 不该被另一枚按钮的失败没收。派生也不走这一路，所以这一次等待是系统弹层，不是三百毫秒。
+    private func revealMnemonicWithFaceID() async {
+        mnemonicFeedback = nil
+        mnemonicWords = []
+        isReadingMnemonic = true
+        defer { isReadingMnemonic = false }
+        do {
+            mnemonicWords = try await duress.revealMnemonicWithBiometrics(reason: Copy.mnemonicSheetFaceIDReason)
+            PopopxHaptics.notice(.success)
+            toast.show(Copy.mnemonicToastShown, kind: .encrypted)
+        } catch let error as PopopxDuressSetupError {
+            mnemonicFeedback = error.errorDescription
+            clearMnemonicFields()
+            PopopxHaptics.notice(.error)
+            toast.show(Copy.mnemonicToastRejected, kind: .danger)
+        } catch {
+            mnemonicFeedback = Copy.mnemonicUnexpectedFailure
+            clearMnemonicFields()
+            PopopxHaptics.notice(.error)
+            toast.show(Copy.mnemonicToastRejected, kind: .danger)
+        }
+    }
+
+    /// 生成 / 重新生成助记词。成功就把新词组显示出来——这是机主唯一一次能抄到它的机会。
+    ///
+    /// 失败分支不重试、也不留半成品：管理器那边（`storeMnemonic`）任一半失败就整对回滚，
+    /// 所以这里只需要照实说一句"没有生成"，不必判断"是不是只写进去了一半"。
+    private func regenerateMnemonic() async {
+        showsMnemonicRegenDialog = false
+        mnemonicFeedback = nil
+        mnemonicWords = []
+        isReadingMnemonic = true
+        defer { isReadingMnemonic = false }
+        if let words = await duress.generateMnemonic() {
+            mnemonicWords = words
+            PopopxHaptics.notice(.success)
+            toast.show(Copy.mnemonicToastGenerated, kind: .encrypted)
+        } else {
+            mnemonicFeedback = Copy.mnemonicGenerateFailed
+            PopopxHaptics.notice(.error)
+            toast.show(Copy.pinToastRejected, kind: .danger)
+        }
+        duress.refreshConfiguration()
+    }
+
+    /// 助记词与密码那三格一次性清空。与 `clearPinFields` 同一个理由：明文副本不该比
+    /// 它的使用场合活得更久——这里甚至比那两把码更要紧，因为这一份是**可读的原文**。
+    private func clearMnemonicFields() {
+        mnemonicUnlockPin = ""
+        mnemonicWords = []
+        mnemonicFeedback = nil
+        isReadingMnemonic = false
+    }
+
     // MARK: 双密码设置 Sheet
 
+    /// 同一个 sheet 位置上的两种互斥界面：填那两把码的表，与写盘成功后紧接着出现的抄存页。
+    ///
+    /// 分成两张、而不是在那张表里插一段 `if`：写入成功后那六个输入框已经没有任何待办，
+    /// 把它们留着只等于再给一次「写入这两把码」的点击机会——那一次点击会用一把新盐把刚写进去的
+    /// 东西再覆盖一遍，界面上却是一片"我刚才到底写了什么"。
+    @ViewBuilder
     private var pinSetupSheet: some View {
+        if let words = freshMnemonic {
+            mnemonicCaptureSheet(words)
+        } else {
+            pinSetupFormSheet
+        }
+    }
+
+    private var pinSetupFormSheet: some View {
         NavigationStack {
             PopopxSheetContainer(Copy.pinSheetTitle, subtitle: Copy.pinSheetSubtitle) {
                 PopopxSectionCard(Copy.pinGroupNormal, footnote: Copy.pinNormalFootnote) {
@@ -566,7 +1044,7 @@ struct PopopxAntiTheftSettingsView: View {
                     pinStateLine(normalPin, confirming: normalConfirm)
                 }
                 // 这一段只在原生那两道旧凭据确实还留着时出现，且紧跟常规密码那一组：迁移就发生在
-                // `setNormalPin` 里、任何写入之前（PopopxDuressAuthManager.swift:869），
+                // `setNormalPin` 里、任何写入之前（PopopxDuressAuthManager.swift:1354），
                 // 放在胁迫码之后会让"先填旧密码"这个先后关系在页面上读不出来。
                 // 两格互斥，由模块三那两个读数保证：入口码还在 → 要入口码；入口码已经没了、
                 // 只剩一把按不动的自毁码 → 要那把自毁码。
@@ -720,7 +1198,7 @@ struct PopopxAntiTheftSettingsView: View {
     /// 真正的闸门（`setDuressPin` 里那次"用常规记录自己的盐再派生一遍"的常量时间比较）做最后一次判定。
     ///
     /// 原生入口码的迁移不用本页操心：它在 `setNormalPin` 内部、本地这两道校验之后、任何 Keychain
-    /// 写入之前（PopopxDuressAuthManager.swift:868-869），所以旧码输错那一次连常规码都不会落盘。
+    /// 写入之前（PopopxDuressAuthManager.swift:1354-1359），所以旧码输错那一次连常规码都不会落盘。
     private func writePins() async {
         pinFeedback = nil
         guard PopopxDuressAuthManager.isValidPin(normalPin),
@@ -741,7 +1219,7 @@ struct PopopxAntiTheftSettingsView: View {
         isWritingPins = true
         defer { isWritingPins = false }
         do {
-            try await duress.setNormalPin(
+            let generated = try await duress.setNormalPin(
                 normalPin,
                 confirming: normalConfirm,
                 nativePasscode: nativePasscode,
@@ -749,11 +1227,19 @@ struct PopopxAntiTheftSettingsView: View {
             )
             try await duress.setDuressPin(duressPin, confirming: duressConfirm)
             clearPinFields()
-            showsPinSheet = false
+            // 这一次调用可能顺手生成了 12 个词（`setNormalPin` 只在"原本没有助记词"时生成，
+            // 有则返回 nil，绝不覆盖手上那张纸）。返回了词组就**不关 sheet**：这一份数组是
+            // 它们唯一一次以可读形式出现在界面上，一关掉就再也拼不回来——管理器那边留着派生值
+            // 与可读原文两条记录，但"回看"那一条要重新过一次验证（进入密码或 Face ID）才走得到。
+            if let generated, !generated.isEmpty {
+                freshMnemonic = generated
+            } else {
+                showsPinSheet = false
+            }
             PopopxHaptics.notice(.success)
             toast.show(Copy.pinToastWritten, kind: .encrypted)
         } catch let setup as PopopxDuressSetupError {
-            // 八句 `errorDescription` 原样显示，不重写、不加工。
+            // 十五句 `errorDescription` 原样显示，不重写、不加工。
             pinFeedback = setup.errorDescription
             clearPinFields()
             PopopxHaptics.notice(.error)
@@ -773,11 +1259,15 @@ struct PopopxAntiTheftSettingsView: View {
         toast.show(Copy.duressCleared, kind: .danger)
     }
 
-    /// 六个字段一次性清空。口令的界面副本不该比它的使用场合活得更久。
+    /// 六个输入字段、那一句反馈，外加"顺手生成的 12 个词"一次性清空。口令的界面副本不该
+    /// 比它的使用场合活得更久。
     /// 原生那两格（入口码、幽灵自毁码）也在其中，包括"旧码输错"那一次（两个
     /// `...Incorrect` 走同一个 catch）：宁可让机主重输一遍旧码，也不让它在页面上多活一次重绘。
     /// 两格在同一页上互斥（`nativeEntryPasswordActive` 与 `nativeSelfDestructGhostActive`
     /// 不可能同时为真），但清空不看这个条件——少写一行判断就多一个以后改错的机会。
+    ///
+    /// `freshMnemonic` 也在其中，因此 `writePins` 的成功分支必须是"先清、后赋值"：
+    /// 反过来写等于刚抄下来就自己抹掉。
     private func clearPinFields() {
         normalPin = ""
         normalConfirm = ""
@@ -786,6 +1276,7 @@ struct PopopxAntiTheftSettingsView: View {
         nativePasscode = ""
         nativeSelfDestructCode = ""
         pinFeedback = nil
+        freshMnemonic = nil
     }
 
     // MARK: 自毁后交出什么账号（保留策略，三选一）
@@ -1308,6 +1799,7 @@ private struct PopopxAntiTheftDrillView: View {
         case .duress: return Copy.drillOutcomeDuress
         case .wrong: return Copy.drillOutcomeWrong
         case .notConfigured: return Copy.drillOutcomeNotConfigured
+        case .lockedOut: return Copy.drillOutcomeLockedOut
         }
     }
 
@@ -1411,7 +1903,7 @@ private struct AntiTheftDivider: View {
 
 // MARK: - 文案
 
-/// 页面上每一句中文只在这里出现一次。八句双密码设置失败的文案不在这里：那八句是
+/// 页面上每一句中文只在这里出现一次。双密码写入与助记词查看那十五句失败文案不在这里：那十五句是
 /// `PopopxDuressSetupError.errorDescription` 原样引用的，抄一份过来就会出现两套说法。
 private enum Copy {
     static let pageTitle = "防盗锁定与自毁"
@@ -1505,7 +1997,7 @@ private enum Copy {
     static let pinNativeSDLabel = "原有的自毁密码"
     static let pinNativeSDFootnote = "这台设备上留着一把旧的自毁密码，可它只有 app 自带的那台键盘才输得进去，而那台键盘已经不弹了——它现在既触发不了也看不见，只会让隐私设置那一格显示「已启用」。填对它，我们把它连同那一格一起关掉；填错则这次什么都不改，上面两把新码也不会落盘。如果认证方式还停在「app 密码」那一档，也会一并退回系统认证。这一步不重建数据库钥匙，聊天数据一个字都不动。"
     static let pinIrreversibleGroup = "写下去之前"
-    static let pinIrreversibleNote = "这两把码只以派生值存在，本机不存原文，也没有任何找回通道：忘记常规码就等于把自己永久锁在外面。确认弹窗里那一次点击就是这个后果的最后一道门。"
+    static let pinIrreversibleNote = "这两把码只以派生值存在，本机不存原文。忘记进入密码时唯一的出路是手上抄存的那 12 个英文词，而助记词本身没有任何找回通道——所以这一次写入会顺手生成一份，抄不抄在你。确认弹窗里那一次点击就是这个后果的最后一道门。"
     static let pinWriteButton = "写入两把码"
     static let pinStateEmptyFormat = "还没输入，需要恰好 %@ 位数字"
     static let pinStateShortFormat = "已填 %@ 位中的 %@ 位"
@@ -1517,6 +2009,68 @@ private enum Copy {
     static let commitDialogTitle = "确认写入这两把码？"
     static let commitDialogConfirm = "确认写入"
     static let commitDialogMessage = "覆盖现有的常规码或胁迫码之后无法撤销、无法找回。请再核对两遍输入，尤其是手指是否被屏幕油膜带偏过一位。"
+
+    // 12 词助记词
+    static let groupMnemonic = "12 词恢复助记词"
+    static let mnemonicFootnote = "忘记进入密码时唯一的出路：在锁屏上输对这 12 个英文词，就能设一把新的进入密码。词组由本机生成，安全存储里同时留着它的派生值（供锁屏比对）和可读原文（只供本页回看）。"
+    static let mnemonicStateHeadline = "助记词"
+    static let mnemonicStateSet = "已生成"
+    static let mnemonicStateUnset = "未生成"
+    static let mnemonicRow = "查看或重新生成"
+    static let mnemonicRowReveal = "需验进入密码"
+    /// 只有 `mnemonicFaceIDOffered` 为真时才用得上这一句：那道门没开时行尾不许提 Face ID。
+    static let mnemonicRowRevealEither = "需验进入密码或 Face ID"
+    static let mnemonicRowGenerate = "现在生成"
+    static let mnemonicConsequence = "用助记词在锁屏上重置进入密码，会连带把应急擦除密码清成「未设置」：那把码从此不存在，交出去也不会抹掉任何数据。重置完请回到上一页重新设置一次应急擦除密码。"
+    static let mnemonicSheetTitle = "12 词恢复助记词"
+    static let mnemonicSheetHintHave = "先输一次当前进入密码，词组才会显示。这一问不计入锁屏那一道失败计数，理由见下方说明。"
+    static let mnemonicSheetHintHaveBiometric = "先输一次当前进入密码，或用 Face ID 证明一次，词组才会显示。这一问不计入锁屏那一道失败计数，理由见下方说明。"
+    static let mnemonicSheetHintNone = "这台设备还没有助记词。生成一次，当场把 12 个英文词抄在纸上。"
+    static let mnemonicSheetGroup = "词组"
+    static let mnemonicSheetFootnote = "词表是标准 BIP-39 英文词表（2048 个词），12 个词由 16 字节随机数加 4 位校验和导出，顺序与拼写都要照抄。派生用 PBKDF2-HMAC-SHA256、10 万次迭代，所以点一下会等三分之一秒左右，那不是卡住；Face ID 那一枚等的是系统弹层，同样不是卡住。"
+    static let mnemonicSheetPinLabel = "当前进入密码"
+    static let mnemonicSheetReveal = "验证并显示"
+    /// 与上面那一句成对：两枚按钮各写清自己用的是哪道门，机主才知道按的是哪一问。
+    static let mnemonicSheetRevealFaceID = "用 Face ID 验证并显示"
+    /// 系统 Face ID 弹层上那一句说明。按苹果的写法不写 app 名（系统自己带），
+    /// 只说这一问要干什么：不是"解锁"，是"把 12 个词显示出来"。
+    static let mnemonicSheetFaceIDReason = "显示你的 12 词恢复助记词"
+    static let mnemonicSheetHide = "隐藏词组"
+    static let mnemonicSheetGenerate = "生成 12 词助记词"
+    static let mnemonicSheetRegenerate = "重新生成一组"
+    static let mnemonicSheetPaperGroup = "抄下来"
+    static let mnemonicSheetPaperNote = "关掉这一格之后，本机再无任何途径把这 12 个词显示出来——除非下次你还能过验证那一关：输对当前进入密码，或在「生物识别快捷解锁」开着时让机器认出你。请当场抄在纸上：不要截图，不要手打进任何云备忘录，也不要指望系统剪贴板。这一格因此不开放选中文字，一旦选中就可能进了剪贴板，而剪贴板会被别的 app 读到、也可能随 iCloud 同步到别的设备。"
+    static let mnemonicSheetWhyGroup = "为什么这一问不计次"
+    static let mnemonicSheetWhyNoCount = "为什么这里的失败不进冷却表：这一问要防的是「忘了词的机主」，不是「拿着手机猜的人」。如果它计次，设置页就变成第二个可以猜的入口，而机主一次抄错（12 个词抄错位是常事）会把自己锁进 1 小时冷却，正好落在最不该被锁的地方。真正通向重置的那一问在锁屏上，那一道才计次。"
+    static let mnemonicRegenTitle = "作废旧的 12 个词？"
+    static let mnemonicRegenConfirm = "作废旧词组并生成"
+    static let mnemonicRegenMessage = "旧词组会立刻从安全存储里删除，抄在纸上的那一份同时作废。新的 12 个词只在这一屏完整显示一次，进入密码与应急擦除密码都不受影响。"
+    static let mnemonicGridLabel = "12 个英文助记词，带序号两列排列"
+    static let mnemonicToastShown = "词组已显示，关掉这一格即消失"
+    static let mnemonicToastRejected = "没有显示，原因见上方"
+    static let mnemonicToastGenerated = "助记词已生成，请当场抄存"
+    static let mnemonicGenerateFailed = "没有生成：安全存储写入失败，本机仍是没有助记词的状态"
+    static let mnemonicUnexpectedFailure = "读取失败，请稍后再试"
+    static let mnemonicCaptureTitle = "抄存这 12 个词"
+    static let mnemonicCaptureSubtitle = "两把码已经写进去了。这一屏是它们对应的助记词第一次、也可能是最后一次完整显示。"
+    static let mnemonicCaptureDone = "我已抄存，关闭"
+
+    // 渐进式防爆破
+    static let groupLockout = "连续输错的冷却"
+    static let lockoutFootnote = "这一张表同时管着数字键盘、Face ID 与助记词那三个入口，因为它们验证的是同一件事：机主本人。前 4 次只震一下、不锁，手滑和油膜带偏一位不该被当成攻击。计数存在安全存储里，杀掉进程再打开还在。"
+    static let lockoutStrikesHeadline = "当前失败计数"
+    static let lockoutStrikesNone = "无"
+    static let lockoutStrikesFormat = "已连错 %@ 次 · 距第 10 次还差 %@ 次"
+    static let lockoutCoolingHeadline = "冷却剩余"
+    static let lockoutCoolingFormat = "%@ 后可再输"
+    static let lockoutCoolingIdle = "不在冷却"
+    static let lockoutScheduleHeadline = "递增表"
+    static let lockoutStepFormat = "第 %@ 次 %@"
+    static let lockoutScheduleFormat = "%@ · 第 9 次起每次 1 小时"
+    static let lockoutTenStrikeRow = "连续 10 次输错即抹掉数据"
+    static let lockoutTenStrikeNoteOn = "已开启：第 10 次输错会静默走完与应急擦除密码完全相同的抹除与重建流程，屏幕上不会先弹任何警告。"
+    static let lockoutTenStrikeNoteOff = "已关闭（默认）：第 10 次及以后每次只锁 1 小时，数据不动。"
+    static let lockoutTenStrikeWarning = "开着这一档，就要接受两件事：一个拿到已解锁手机、并有 10 次机会的人可能替你抹掉身份；你自己也可能在黑暗中数到第 10 次。误触的代价（家人乱按、孩子试玩、自己抄错助记词连错十次）由这一次明确的点击承担。"
 
     // 重建模式
     static let groupRebuild = "自毁之后"
@@ -1582,6 +2136,7 @@ private enum Copy {
     static let drillOutcomeDuress = "命中的是胁迫码——真实情况下它会抹掉这台设备上的身份。演练没有执行任何抹除。"
     static let drillOutcomeWrong = "两把都不匹配——真实情况下它只会再要一次输入。"
     static let drillOutcomeNotConfigured = "这台设备还没设置常规码，所以没有可比对的记录。"
+    static let drillOutcomeLockedOut = "演练走的是只读比对，它不查冷却表，所以这一句在这一页永远出现不了：它存在只是因为那个结果多了一种可能，而编译器要求把话说完整。锁屏上那一格才是冷却真正落地的地方。"
 
     // 页脚风险说明
     static let groupRisk = "这一套不能保护你什么"

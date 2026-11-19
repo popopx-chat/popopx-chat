@@ -3,7 +3,8 @@
 //  POPOPX (iOS)
 //
 //  【双密码胁迫自毁 · 模块三】两把 6 位码（常规 + 胁迫）、PBKDF2-HMAC-SHA256 校验位、
-//  Keychain 只存派生值、Face ID/Touch ID 快捷解锁与连续失败降级，以及**全 app 唯一一份**
+//  Keychain 只存派生值、Face ID/Touch ID 快捷解锁与连续失败降级、12 词 BIP-39 恢复短语、
+//  仿 iOS 原生锁屏的渐进式冷却（含第 10 次可选抹除），以及**全 app 唯一一份**
 //  "抹掉存储并重建"的例程 `PopopxStorageWipe`。
 //
 //  ### 为什么校验位走 PBKDF2，而上游自毁码走明文比对
@@ -13,8 +14,10 @@
 //  二是没有可加价的余地——想让它变贵只能整个换掉表示方式。本模块按任务要求换成
 //  salt + PBKDF2-HMAC-SHA256(100_000)，从此**磁盘上不存在口令**，只有派生值。
 //  ⚠️ 这不等于"上游那两个 Keychain 条目消失了"：`kcAppPassword`/`kcSelfDestructPassword`
-//  仍是独立的、以原文存储的凭据，仍然被上游的 LA 门使用。`kcSelfDestructPassword` 在两处被删：
-//  自毁路径（见 `PopopxStorageWipe`），以及入口码迁移那一步——后者顺带删它的理由是它唯一的输入口
+//  仍是独立的、以原文存储的凭据，仍然被上游的 LA 门使用。`kcSelfDestructPassword` 有四个删除点
+//  （`PopopxStorageWipe.wipe`、`scrubCredentialHistory`、`migrateNativeEntryPassword`、
+//  `retireGhostSelfDestructCode`）：全量与保留两条自毁路径各一次，迁移那两支各一次。
+//  迁移顺带删它的理由是它唯一的输入口
 //  （`LocalAuthView`）随 `kcAppPassword` 一起没了，留着就是一个谁也按不动的凭据，还会让隐私设置
 //  那一格显示"已启用"（那一格只读 UserDefaults 的 bool，不读 Keychain）。若是入口码先就没了、
 //  只剩这把自毁码，那一步改成**先让机主把它输一遍**才删（`retireGhostSelfDestructCode`）：
@@ -30,6 +33,22 @@
 //  是哪一把。所以 `verify` 无条件对**两条记录各做一次** PBKDF2（缺一条就用等价的固定盐补一次
 //  无意义派生），先算完、后分支。这是"零异常"在时间维度上的那一半——界面上的 1.2 秒下限
 //  （`minimumFlowSeconds`）是另一半，两者都写在代码里，不靠 UI 自觉。
+//
+//  ### 助记词是本模块唯一一处"明文可恢复"的存储，这是查看功能换来的
+//  简报同时要了两件事：「设置页随时查看」与「规范化后经 PBKDF2 派生哈希存入 Keychain」。
+//  哈希是单向的，查看不了。所以这里存**两条**记录：`mnemonicAccount` 存派生哈希——重置时
+//  唯一参与比对的就是这一条，走常量时间，与两把码完全同构；`mnemonicPhraseAccount` 存规范化后的
+//  明文，只为"查看/备份"这一件事存在。明面代价写清楚，不做掩盖：拿到密钥链转储的人能读回短语，
+//  而两把码仍然只是哈希。这不是新引入的攻击面——上游的 `kcAppPassword`/`kcSelfDestructPassword`
+//  连同存着库钥匙的 `kcDatabasePassword` 全是原文存的（POPOPXChat/KeyChain.swift:21-23），
+//  那种转储到手时先输掉的本来就是整个库。补偿三条：查看前必须先过**当前进入密码**
+//  （`revealMnemonic`，应急码不算通过）、两条记录都带 `WhenUnlockedThisDeviceOnly`
+//  （锁屏即不可读、不随设备备份走）、自毁/重置/解除三条路径都把这两条一起删。
+//
+//  ### 冷却计数为什么不放 UserDefaults
+//  `failedAttemptCount` 与解冻时刻落在 `lockoutAccount` 那一条 Keychain 记录里。存 UserDefaults
+//  的话，"杀掉 App 进程重开"就是一次免费的清零——而杀进程重开恰恰是胁迫者最先试的那件事。
+//  读不到时**保留内存值**而不是当作零（见 `PopopxDuressKeychain.readLockout`）。
 //
 //  ### PBKDF2 为什么自己实现
 //  仓库里没有 CommonCrypto 桥接，也没有第三方可用（`git grep -i pbkdf2` 只有本任务的提示词）。
@@ -161,6 +180,9 @@ enum PopopxDuressAuthOutcome: Hashable, Sendable {
     case duress
     case wrong
     case notConfigured
+    /// 正在冷却：`remaining` = 还剩多少秒。**这一支必须在任何派生之前返回**，
+    /// 否则"锁定期"里每次按压仍然要付 0.71 秒，界面看起来像还在接受输入。
+    case lockedOut(remaining: TimeInterval)
 }
 
 /// 设置页配置两把码时的失败原因。全是本地校验，不涉及网络。
@@ -187,6 +209,26 @@ enum PopopxDuressSetupError: Error, Equatable, LocalizedError {
     /// 采集到了，但与 `kcSelfDestructPassword` 里那把原文对不上。**什么都没改**，
     /// 幽灵状态原样留着——它按不动，所以留着也不比删了更危险，而误删是不可逆的。
     case nativeSelfDestructCodeIncorrect
+    /// 还没生成过助记词，却要查看或用它重置。与"助记词不对"分开是有必要的：前者是
+    /// 机主少做了一步设置（该告诉他去做），后者是一次真实的失败（该进冷却计数）。
+    case mnemonicMissing
+    /// 格式就不对：不是 12 个词、有词不在 BIP-39 表内、或校验和重算不回来。
+    /// **这一支不吃冷却计数**，理由是它根本还没进入"比口令"这一步——本地就能判定的
+    /// 手滑（把 `watch` 抄成 `wach`）如果也扣一次机会，机主抄错三次就被锁 15 分钟，
+    /// 而那个惩罚是给"有人在猜"准备的，不是给"有人在抄"准备的。
+    case mnemonicMalformed
+    /// 12 个词全部合法，但与存下来的那条对不上。这是一次真实的错误尝试，吃计数。
+    case mnemonicIncorrect
+    /// 查看助记词时界面没交来进入密码。
+    case entryPinRequired
+    /// 查看助记词时交来的密码不是当前进入密码（应急码也算错，见 `revealMnemonic`）。
+    case entryPinIncorrect
+    /// 用 Face ID 查看助记词没通过：系统判不出可用、开关关着、已被降级到键盘，或机主没认出来。
+    /// 四种情况合并成一句，是因为对拿着手机的人来说它们的区别没有意义——词组没有显示；
+    /// 而对机主，区分"Face ID 坏了"和"Face ID 没认我"要走的是系统设置那一面，不是这一格。
+    case biometricDenied
+    /// 冷却期内试图验证：什么都不做，把剩余秒数回给界面。
+    case lockedOut(remaining: TimeInterval)
 
     var errorDescription: String? {
         switch self {
@@ -198,6 +240,13 @@ enum PopopxDuressSetupError: Error, Equatable, LocalizedError {
         case .nativePasscodeIncorrect: return "原有入口密码不正确，本次未做任何修改"
         case .nativeSelfDestructCodeRequired: return "请先输入设备原有的自毁密码，才能把它一并关掉"
         case .nativeSelfDestructCodeIncorrect: return "原有自毁密码不正确，本次未做任何修改"
+        case .mnemonicMissing: return "还没有生成恢复助记词，请先生成并抄存"
+        case .mnemonicMalformed: return "助记词需要 12 个标准英文词，请逐字核对后重试"
+        case .mnemonicIncorrect: return "助记词不正确"
+        case .entryPinRequired: return "请先输入当前进入密码"
+        case .entryPinIncorrect: return "进入密码不正确，未显示助记词"
+        case .biometricDenied: return "Face ID 未通过，未显示助记词"
+        case let .lockedOut(remaining): return "尝试过多，请 \(PopopxLockoutSchedule.phrase(remaining))后再试"
         }
     }
 }
@@ -315,7 +364,14 @@ enum PopopxDuressCrypto {
     /// 32 字节系统随机盐。`SecRandomCopyBytes` 与上游生成数据库密钥用的是同一个来源
     /// （POPOPXChat/KeyChain.swift:42-45），不引入 `arc4random` 之类的第二套口径。
     static func randomSalt() -> Data {
-        var bytes = [UInt8](repeating: 0, count: saltBytes)
+        randomBytes(count: saltBytes)
+    }
+
+    /// 任意长度的系统随机字节。失败时返回**空 Data**而不是退回时间戳：那会让随机值可预测，
+    /// 而可预测的盐与可预测的助记词熵源是同一个错误。调用方必须把空值当作"这次不写盘"。
+    static func randomBytes(count: Int) -> Data {
+        guard count > 0 else { return Data() }
+        var bytes = [UInt8](repeating: 0, count: count)
         let status = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
         if status != errSecSuccess {
             // 系统随机源失败时**不能**退回时间戳：那会让盐可预测，而这正是盐要解决的问题。
@@ -324,6 +380,286 @@ enum PopopxDuressCrypto {
         }
         return Data(bytes)
     }
+}
+
+// MARK: - BIP-39 助记词
+
+/// 标准 BIP-39 英文词表与 12 词助记词的生成/校验。
+///
+/// ### 为什么用真词表、真校验和，而不是"随便 12 个英文单词"
+/// 简报要的是「12 个标准英文助记词」。标准这件事不是装饰：词表把每个词钉成 11 bit 索引，
+/// 12 个词正好是 132 bit = 128 bit 熵 + 4 bit SHA-256 校验和。校验和让"抄错一个词"在
+/// **本地**就能被判出来（`validate` 返回 false），而不是等到 PBKDF2 比完才发现整串不对——
+/// 后者会把一次手滑也算进锁屏那十次机会里。
+///
+/// ### 词表来源与可复算性
+/// 词表逐字取自 bitcoin/bips 的 `bip-0039/english.txt`，2048 行、字典序、唯一、`[a-z]{3,8}`，
+/// 源文件 sha256 = `2f5eed53a4727b4bf8880d8f3f199efc90e58503646d9ff8eff3a2ed3b24dbda`。
+/// 下面那段字面量是脚本按 16 词一行切出来的（不是手抄），回读后与源文件逐项相等——
+/// 索引 = 词表位置，所以顺序错一个词，整个词的编号就都错了，这条必须可复算。
+enum PopopxBIP39 {
+    /// 12 词 = 128 bit 熵 + 4 bit 校验和 = 132 bit = 12 × 11 bit。
+    static let wordCount = 12
+    /// 熵的字节数：128 bit。BIP-39 里 12 词那一档就是这个数，不是"随便取 16 字节"。
+    static let entropyBytes = 16
+
+    static let englishWords: [String] = {
+        let packed = """
+        abandon ability able about above absent absorb abstract absurd abuse access accident account accuse achieve acid
+        acoustic acquire across act action actor actress actual adapt add addict address adjust admit adult advance
+        advice aerobic affair afford afraid again age agent agree ahead aim air airport aisle alarm album
+        alcohol alert alien all alley allow almost alone alpha already also alter always amateur amazing among
+        amount amused analyst anchor ancient anger angle angry animal ankle announce annual another answer antenna antique
+        anxiety any apart apology appear apple approve april arch arctic area arena argue arm armed armor
+        army around arrange arrest arrive arrow art artefact artist artwork ask aspect assault asset assist assume
+        asthma athlete atom attack attend attitude attract auction audit august aunt author auto autumn average avocado
+        avoid awake aware away awesome awful awkward axis baby bachelor bacon badge bag balance balcony ball
+        bamboo banana banner bar barely bargain barrel base basic basket battle beach bean beauty because become
+        beef before begin behave behind believe below belt bench benefit best betray better between beyond bicycle
+        bid bike bind biology bird birth bitter black blade blame blanket blast bleak bless blind blood
+        blossom blouse blue blur blush board boat body boil bomb bone bonus book boost border boring
+        borrow boss bottom bounce box boy bracket brain brand brass brave bread breeze brick bridge brief
+        bright bring brisk broccoli broken bronze broom brother brown brush bubble buddy budget buffalo build bulb
+        bulk bullet bundle bunker burden burger burst bus business busy butter buyer buzz cabbage cabin cable
+        cactus cage cake call calm camera camp can canal cancel candy cannon canoe canvas canyon capable
+        capital captain car carbon card cargo carpet carry cart case cash casino castle casual cat catalog
+        catch category cattle caught cause caution cave ceiling celery cement census century cereal certain chair chalk
+        champion change chaos chapter charge chase chat cheap check cheese chef cherry chest chicken chief child
+        chimney choice choose chronic chuckle chunk churn cigar cinnamon circle citizen city civil claim clap clarify
+        claw clay clean clerk clever click client cliff climb clinic clip clock clog close cloth cloud
+        clown club clump cluster clutch coach coast coconut code coffee coil coin collect color column combine
+        come comfort comic common company concert conduct confirm congress connect consider control convince cook cool copper
+        copy coral core corn correct cost cotton couch country couple course cousin cover coyote crack cradle
+        craft cram crane crash crater crawl crazy cream credit creek crew cricket crime crisp critic crop
+        cross crouch crowd crucial cruel cruise crumble crunch crush cry crystal cube culture cup cupboard curious
+        current curtain curve cushion custom cute cycle dad damage damp dance danger daring dash daughter dawn
+        day deal debate debris decade december decide decline decorate decrease deer defense define defy degree delay
+        deliver demand demise denial dentist deny depart depend deposit depth deputy derive describe desert design desk
+        despair destroy detail detect develop device devote diagram dial diamond diary dice diesel diet differ digital
+        dignity dilemma dinner dinosaur direct dirt disagree discover disease dish dismiss disorder display distance divert divide
+        divorce dizzy doctor document dog doll dolphin domain donate donkey donor door dose double dove draft
+        dragon drama drastic draw dream dress drift drill drink drip drive drop drum dry duck dumb
+        dune during dust dutch duty dwarf dynamic eager eagle early earn earth easily east easy echo
+        ecology economy edge edit educate effort egg eight either elbow elder electric elegant element elephant elevator
+        elite else embark embody embrace emerge emotion employ empower empty enable enact end endless endorse enemy
+        energy enforce engage engine enhance enjoy enlist enough enrich enroll ensure enter entire entry envelope episode
+        equal equip era erase erode erosion error erupt escape essay essence estate eternal ethics evidence evil
+        evoke evolve exact example excess exchange excite exclude excuse execute exercise exhaust exhibit exile exist exit
+        exotic expand expect expire explain expose express extend extra eye eyebrow fabric face faculty fade faint
+        faith fall false fame family famous fan fancy fantasy farm fashion fat fatal father fatigue fault
+        favorite feature february federal fee feed feel female fence festival fetch fever few fiber fiction field
+        figure file film filter final find fine finger finish fire firm first fiscal fish fit fitness
+        fix flag flame flash flat flavor flee flight flip float flock floor flower fluid flush fly
+        foam focus fog foil fold follow food foot force forest forget fork fortune forum forward fossil
+        foster found fox fragile frame frequent fresh friend fringe frog front frost frown frozen fruit fuel
+        fun funny furnace fury future gadget gain galaxy gallery game gap garage garbage garden garlic garment
+        gas gasp gate gather gauge gaze general genius genre gentle genuine gesture ghost giant gift giggle
+        ginger giraffe girl give glad glance glare glass glide glimpse globe gloom glory glove glow glue
+        goat goddess gold good goose gorilla gospel gossip govern gown grab grace grain grant grape grass
+        gravity great green grid grief grit grocery group grow grunt guard guess guide guilt guitar gun
+        gym habit hair half hammer hamster hand happy harbor hard harsh harvest hat have hawk hazard
+        head health heart heavy hedgehog height hello helmet help hen hero hidden high hill hint hip
+        hire history hobby hockey hold hole holiday hollow home honey hood hope horn horror horse hospital
+        host hotel hour hover hub huge human humble humor hundred hungry hunt hurdle hurry hurt husband
+        hybrid ice icon idea identify idle ignore ill illegal illness image imitate immense immune impact impose
+        improve impulse inch include income increase index indicate indoor industry infant inflict inform inhale inherit initial
+        inject injury inmate inner innocent input inquiry insane insect inside inspire install intact interest into invest
+        invite involve iron island isolate issue item ivory jacket jaguar jar jazz jealous jeans jelly jewel
+        job join joke journey joy judge juice jump jungle junior junk just kangaroo keen keep ketchup
+        key kick kid kidney kind kingdom kiss kit kitchen kite kitten kiwi knee knife knock know
+        lab label labor ladder lady lake lamp language laptop large later latin laugh laundry lava law
+        lawn lawsuit layer lazy leader leaf learn leave lecture left leg legal legend leisure lemon lend
+        length lens leopard lesson letter level liar liberty library license life lift light like limb limit
+        link lion liquid list little live lizard load loan lobster local lock logic lonely long loop
+        lottery loud lounge love loyal lucky luggage lumber lunar lunch luxury lyrics machine mad magic magnet
+        maid mail main major make mammal man manage mandate mango mansion manual maple marble march margin
+        marine market marriage mask mass master match material math matrix matter maximum maze meadow mean measure
+        meat mechanic medal media melody melt member memory mention menu mercy merge merit merry mesh message
+        metal method middle midnight milk million mimic mind minimum minor minute miracle mirror misery miss mistake
+        mix mixed mixture mobile model modify mom moment monitor monkey monster month moon moral more morning
+        mosquito mother motion motor mountain mouse move movie much muffin mule multiply muscle museum mushroom music
+        must mutual myself mystery myth naive name napkin narrow nasty nation nature near neck need negative
+        neglect neither nephew nerve nest net network neutral never news next nice night noble noise nominee
+        noodle normal north nose notable note nothing notice novel now nuclear number nurse nut oak obey
+        object oblige obscure observe obtain obvious occur ocean october odor off offer office often oil okay
+        old olive olympic omit once one onion online only open opera opinion oppose option orange orbit
+        orchard order ordinary organ orient original orphan ostrich other outdoor outer output outside oval oven over
+        own owner oxygen oyster ozone pact paddle page pair palace palm panda panel panic panther paper
+        parade parent park parrot party pass patch path patient patrol pattern pause pave payment peace peanut
+        pear peasant pelican pen penalty pencil people pepper perfect permit person pet phone photo phrase physical
+        piano picnic picture piece pig pigeon pill pilot pink pioneer pipe pistol pitch pizza place planet
+        plastic plate play please pledge pluck plug plunge poem poet point polar pole police pond pony
+        pool popular portion position possible post potato pottery poverty powder power practice praise predict prefer prepare
+        present pretty prevent price pride primary print priority prison private prize problem process produce profit program
+        project promote proof property prosper protect proud provide public pudding pull pulp pulse pumpkin punch pupil
+        puppy purchase purity purpose purse push put puzzle pyramid quality quantum quarter question quick quit quiz
+        quote rabbit raccoon race rack radar radio rail rain raise rally ramp ranch random range rapid
+        rare rate rather raven raw razor ready real reason rebel rebuild recall receive recipe record recycle
+        reduce reflect reform refuse region regret regular reject relax release relief rely remain remember remind remove
+        render renew rent reopen repair repeat replace report require rescue resemble resist resource response result retire
+        retreat return reunion reveal review reward rhythm rib ribbon rice rich ride ridge rifle right rigid
+        ring riot ripple risk ritual rival river road roast robot robust rocket romance roof rookie room
+        rose rotate rough round route royal rubber rude rug rule run runway rural sad saddle sadness
+        safe sail salad salmon salon salt salute same sample sand satisfy satoshi sauce sausage save say
+        scale scan scare scatter scene scheme school science scissors scorpion scout scrap screen script scrub sea
+        search season seat second secret section security seed seek segment select sell seminar senior sense sentence
+        series service session settle setup seven shadow shaft shallow share shed shell sheriff shield shift shine
+        ship shiver shock shoe shoot shop short shoulder shove shrimp shrug shuffle shy sibling sick side
+        siege sight sign silent silk silly silver similar simple since sing siren sister situate six size
+        skate sketch ski skill skin skirt skull slab slam sleep slender slice slide slight slim slogan
+        slot slow slush small smart smile smoke smooth snack snake snap sniff snow soap soccer social
+        sock soda soft solar soldier solid solution solve someone song soon sorry sort soul sound soup
+        source south space spare spatial spawn speak special speed spell spend sphere spice spider spike spin
+        spirit split spoil sponsor spoon sport spot spray spread spring spy square squeeze squirrel stable stadium
+        staff stage stairs stamp stand start state stay steak steel stem step stereo stick still sting
+        stock stomach stone stool story stove strategy street strike strong struggle student stuff stumble style subject
+        submit subway success such sudden suffer sugar suggest suit summer sun sunny sunset super supply supreme
+        sure surface surge surprise surround survey suspect sustain swallow swamp swap swarm swear sweet swift swim
+        swing switch sword symbol symptom syrup system table tackle tag tail talent talk tank tape target
+        task taste tattoo taxi teach team tell ten tenant tennis tent term test text thank that
+        theme then theory there they thing this thought three thrive throw thumb thunder ticket tide tiger
+        tilt timber time tiny tip tired tissue title toast tobacco today toddler toe together toilet token
+        tomato tomorrow tone tongue tonight tool tooth top topic topple torch tornado tortoise toss total tourist
+        toward tower town toy track trade traffic tragic train transfer trap trash travel tray treat tree
+        trend trial tribe trick trigger trim trip trophy trouble truck true truly trumpet trust truth try
+        tube tuition tumble tuna tunnel turkey turn turtle twelve twenty twice twin twist two type typical
+        ugly umbrella unable unaware uncle uncover under undo unfair unfold unhappy uniform unique unit universe unknown
+        unlock until unusual unveil update upgrade uphold upon upper upset urban urge usage use used useful
+        useless usual utility vacant vacuum vague valid valley valve van vanish vapor various vast vault vehicle
+        velvet vendor venture venue verb verify version very vessel veteran viable vibrant vicious victory video view
+        village vintage violin virtual virus visa visit visual vital vivid vocal voice void volcano volume vote
+        voyage wage wagon wait walk wall walnut want warfare warm warrior wash wasp waste water wave
+        way wealth weapon wear weasel weather web wedding weekend weird welcome west wet whale what wheat
+        wheel when where whip whisper wide width wife wild will win window wine wing wink winner
+        winter wire wisdom wise wish witness wolf woman wonder wood wool word work world worry worth
+        wrap wreck wrestle wrist write wrong yard year yellow you young youth zebra zero zone zoo
+        """
+        return packed.split(whereSeparator: { $0 == " " || $0 == "\n" }).map(String.init)
+    }()
+
+    /// 规范化：去首尾空白、转小写、任意连续空白收成单个空格。
+    /// `lowercased()` 用的是 Unicode 不变量映射（不是 `lowercased(with:)` 那一种），
+    /// 所以土耳其语区域下的 `I` 不会被折成 `ı`——那会让一条抄对的助记词永远比不中。
+    static func normalize(_ phrase: String) -> String {
+        phrase.lowercased()
+            .components(separatedBy: .whitespacesAndNewlines)
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+    }
+
+    static func normalizedWords(_ phrase: String) -> [String] {
+        let normalized = normalize(phrase)
+        return normalized.isEmpty ? [] : normalized.components(separatedBy: " ")
+    }
+
+    /// 取第 `offset` 个 bit 起的 11 bit，MSB 优先。
+    private static func elevenBits(atBit offset: Int, in bytes: [UInt8]) -> Int {
+        var value = 0
+        for step in 0..<11 {
+            let position = offset + step
+            let byte = bytes[position / 8]
+            let bit = Int((byte >> (7 - position % 8)) & 1)
+            value = (value << 1) | bit
+        }
+        return value
+    }
+
+    /// 生成：128 bit 系统随机熵 → 4 bit SHA-256 校验和 → 12 个词。
+    /// 熵源失败（返回空）时**不降级**、直接返回 nil，让调用方明确失败。
+    static func generate() -> [String]? {
+        let entropy = PopopxDuressCrypto.randomBytes(count: entropyBytes)
+        guard entropy.count == entropyBytes else { return nil }
+        // 摘要先落成 `[UInt8]` 再取首字节：`SHA256Digest` 上的裸 `.first` 会被解析成
+        // `first(where:)` 那个函数值（编译器报的是"条件绑定不是可选类型"，两句都指不到字节上），
+        // 而数组的 `first` 就是它字面上的意思。SHA-256 恒定 32 字节，这一句实际上不会走 nil。
+        let digest = [UInt8](SHA256.hash(data: entropy))
+        guard let checksum = digest.first else { return nil }
+        var stream = [UInt8](entropy)
+        // 校验和只取前 CS(=4) bit，放在下一个字节的**高**四位，读的时候按位读，多余的低四位不会被碰到。
+        stream.append(checksum & 0xF0)
+        return (0..<wordCount).map { elevenBits(atBit: $0 * 11, in: stream) }.map { englishWords[$0] }
+    }
+
+    /// 校验：词数、每个词是否在表内、校验和是否重算得回。三分之一的输入错误都能在这里挡住。
+    static func validate(_ words: [String]) -> Bool {
+        guard words.count == wordCount else { return false }
+        var indices = [Int]()
+        indices.reserveCapacity(wordCount)
+        for word in words {
+            guard let index = englishWords.firstIndex(of: word) else { return false }
+            indices.append(index)
+        }
+        // 12 × 11 bit 回填成 17 字节（最后一字节只有低 4 bit 是校验和，其余留空）。
+        var stream = [UInt8](repeating: 0, count: (wordCount * 11 + 7) / 8)
+        for (slot, index) in indices.enumerated() {
+            for step in 0..<11 {
+                let bit = (index >> (10 - step)) & 1
+                let position = slot * 11 + step
+                if bit & 1 == 1 { stream[position / 8] |= 1 << (7 - position % 8) }
+            }
+        }
+        let entropy = Data(stream.prefix(entropyBytes))
+        let expected = [UInt8](SHA256.hash(data: entropy)).first.map { $0 & 0xF0 } ?? 0
+        let got = stream[entropyBytes] & 0xF0
+        return expected == got
+    }
+
+    static func validate(phrase: String) -> Bool {
+        validate(normalizedWords(phrase))
+    }
+}
+
+// MARK: - 渐进式冷却时间表
+
+/// 仿 iOS 原生锁屏的那张冷却表。**纯函数**，好让它能被单测逐格核对。
+///
+/// 为什么冷却次数与"是不是同一种输入"无关：简报把密码错误与助记词错误并进同一个计数器，
+/// 这是对的——胁迫者拿到的是一张表，不两条表；两条表等于告诉他"输 12 个词更划算"。
+enum PopopxLockoutSchedule {
+    /// 前 4 次只报错、不锁。
+    static let freeAttempts = 4
+    /// 第 10 次：开关开着就抹数据。
+    static let wipeThreshold = 10
+    /// 第 8 次以后的默认锁定时长，也是"未开抹除"时第 10 次及以后每次的锁定时长。
+    static let finalLockSeconds: TimeInterval = 3_600
+
+    /// 第 5/6/7 次各锁一档，第 8、9 次都锁到上限。
+    static func lockoutSeconds(afterAttemptCount count: Int) -> TimeInterval {
+        switch count {
+        case ..<(freeAttempts + 1): return 0
+        case 5: return 60
+        case 6: return 300
+        case 7: return 900
+        default: return finalLockSeconds
+        }
+    }
+
+    /// 把剩余秒数读成「4 分 59 秒」这一类人话。**三处共用这一个函数**：遮罩中央的倒计时、
+    /// `PopopxDuressSetupError.lockedOut` 那句说明、设置页那张递增表。同一个剩余时长在三个
+    /// 地方读出三种样子（"300 秒" / "5 分钟" / "05:00"），比统一读得粗一点更糟——
+    /// 机主会怀疑这三个数字说的不是同一件事。
+    ///
+    /// 向上取整：倒计时不许出现「0 秒后再试」这种还在锁着却说已经到点的话。
+    static func phrase(_ seconds: TimeInterval) -> String {
+        let whole = max(0, Int(seconds.rounded(.up)))
+        let hours = whole / 3_600
+        let minutes = (whole % 3_600) / 60
+        let rest = whole % 60
+        if hours > 0 { return minutes > 0 ? "\(hours) 小时 \(minutes) 分" : "\(hours) 小时" }
+        if minutes > 0 { return rest > 0 ? "\(minutes) 分 \(rest) 秒" : "\(minutes) 分钟" }
+        return "\(rest) 秒"
+    }
+}
+
+/// 落进 Keychain 的那一条冷却记录。
+///
+/// `lockoutEndTimestamp` 是**墙钟**时间戳而不是单调时钟：本条记录的唯一存在理由就是
+/// "杀掉进程再打开还在"，而 `DispatchTime` 一出进程就没意义了。诚实边界——机主可以把
+/// 系统时间往前调来提前解冻，这一层挡不住；挡得住的是另一半：`failedAttempts` 同样落盘，
+/// 所以调完时间接着猜只会一路走到第 10 次那一道。
+struct PopopxLockoutRecord: Codable, Equatable {
+    var failedAttempts: Int
+    var lockoutEndTimestamp: Double?
 }
 
 // MARK: - 校验位存储
@@ -339,6 +675,16 @@ enum PopopxDuressCrypto {
 enum PopopxDuressKeychain {
     static let normalAccount = "popopx.duress.normal"
     static let duressAccount = "popopx.duress.duress"
+    /// 12 词助记词的派生哈希。与 `normalAccount` **互相独立**：清掉进入码不会连带清掉恢复能力，
+    /// 反过来用助记词换一把进入码也不会让这条短语失效（机主纸上抄的那一份继续有效）。
+    /// **比对只认这一条**，绝不读 `mnemonicPhraseAccount`——见下面那一条的理由。
+    static let mnemonicAccount = "popopx.duress.mnemonic"
+    /// 助记词的明文（规范化后的那 12 个词），**只为设置页"查看"存在**。
+    /// 文件头「助记词是本模块唯一一处明文可恢复的存储」那一节写了这笔交换的全部内容、
+    /// 以及为什么它不比上游已有的原文条目更弱。
+    static let mnemonicPhraseAccount = "popopx.duress.mnemonic-phrase"
+    /// 冷却记录：连续失败次数 + 解冻时刻。**不**走 `UserDefaults`，理由见 `PopopxLockoutRecord`。
+    static let lockoutAccount = "popopx.duress.lockout"
 
     private static let service = "popopx.duress"
     private static let accessGroup = "PDBA6XRBQT.com.popopxchat.popopx"
@@ -383,6 +729,76 @@ enum PopopxDuressKeychain {
     static func exists(_ account: String) -> Bool {
         read(account) != nil
     }
+
+    /// 读一条原文（助记词明文用）。与 `read(_:)` 分开而不是复用，是因为后者解的是
+    /// `PopopxDuressVerifier` 的 JSON：把明文短语塞进那个类型会让"这一条是哈希"这件事
+    /// 在类型上看不出来，而这个区别正是本模块最需要被看见的。
+    static func readString(_ account: String) -> String? {
+        var query = baseQuery(account)
+        query[kSecReturnData as String] = true
+        query[kSecMatchLimit as String] = kSecMatchLimitOne
+        var result: AnyObject?
+        guard SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess,
+              let data = result as? Data else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    /// 写一条原文，可访问性与校验位那两条**同一档**（`WhenUnlockedThisDeviceOnly`）：
+    /// 这一条装的是可以还原成秘密的明文，把它降档到 `AfterFirstUnlock` 是拿错东西换便宜。
+    @discardableResult
+    static func writeString(_ value: String, account: String) -> Bool {
+        guard let data = value.data(using: .utf8) else { return false }
+        var query = baseQuery(account)
+        SecItemDelete(query as CFDictionary)
+        query[kSecValueData as String] = data
+        query[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        return SecItemAdd(query as CFDictionary, nil) == errSecSuccess
+    }
+
+    // MARK: 冷却记录
+
+    /// 读冷却记录。**读不到就返回 nil**，由调用方保留内存里的值——把"读失败"当成"没有失败过"
+    /// 等于一次 Keychain 抖动就白送爆破者 4 次免费机会，所以这一侧宁可锁着也不放行。
+    static func readLockout() -> PopopxLockoutRecord? {
+        var query = baseQuery(lockoutAccount)
+        query[kSecReturnData as String] = true
+        query[kSecMatchLimit as String] = kSecMatchLimitOne
+        var result: AnyObject?
+        guard SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess,
+              let data = result as? Data,
+              let record = try? JSONDecoder().decode(PopopxLockoutRecord.self, from: data)
+        else { return nil }
+        return record
+    }
+
+    /// 写冷却记录，走"先改后加"：先清后加会让任何一次写入失败都变成**把旧记录一起删掉**，
+    /// 而这一条记的是"这个人已经猜错了几次"——抹掉它等于送还那几次机会。
+    ///
+    /// 用的可访问性是 `AfterFirstUnlock`，**与三条凭据故意不同**：那三条只在用户正在输入时
+    /// 才被读，解锁前读不到毫无影响；这一条是倒计时本身，App 被挂起后重新拉起时
+    /// （界面此刻可能还没解锁）必须还能把"还剩几分钟"读出来，否则
+    /// `errSecInteractionNotAllowed` 会让一次 60 分钟的冷却看起来像已经结束。
+    /// 它不含任何凭据，只有次数与时刻。
+    static func writeLockout(_ record: PopopxLockoutRecord) -> Bool {
+        guard let data = try? JSONEncoder().encode(record) else { return false }
+        let query = baseQuery(lockoutAccount)
+        let status = SecItemUpdate(
+            query as CFDictionary,
+            [kSecValueData as String: data] as CFDictionary
+        )
+        if status == errSecSuccess { return true }
+        guard status == errSecItemNotFound else {
+            logger.error("duress lockout: keychain update failed \(status)")
+            return false
+        }
+        var add = query
+        add[kSecValueData as String] = data
+        add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        let added = SecItemAdd(add as CFDictionary, nil)
+        if added == errSecSuccess { return true }
+        logger.error("duress lockout: keychain add failed \(added)")
+        return false
+    }
 }
 
 // MARK: - 抹除与重建（全 app 唯一一份）
@@ -402,7 +818,10 @@ enum PopopxDuressKeychain {
 ///    覆盖 chat.db / agent.db / 备份 / 导出 / 临时目录 / 壁纸目录 / `deleteAppFiles()` 的
 ///    XFTP 收件目录，并顺手删掉 `kcDatabasePassword`）；
 /// 6. 清内存里已经渲染出来的东西——遮罩先盖住，再慢慢清，避免"重建期间屏幕上还留着上一条消息"；
-/// 7. 删所有口令类 Keychain 条目（上游两条 + 本模块两条）；
+/// 7. 删所有口令类 Keychain 条目（上游两条 + 本模块五条：两把码、助记词的哈希与明文、
+///    冷却记录）。助记词那两条必须和码一起死：抹除的承诺是"这台设备上再也没有可恢复的身份"，
+///    留一张能重置出进入密码的备份 = 承诺当场作废；冷却记录同理，它本身就是"这里启用过
+///    防爆破"的指纹。
 /// 8. 清通知；
 /// 9. 重建控制层、建新用户、起线程；
 /// 10. 交回调用方做善后（胁迫路径在这里装烟雾弹身份）。
@@ -451,6 +870,9 @@ enum PopopxStorageWipe {
             _ = kcSelfDestructPassword.remove()
             PopopxDuressKeychain.delete(PopopxDuressKeychain.normalAccount)
             PopopxDuressKeychain.delete(PopopxDuressKeychain.duressAccount)
+            PopopxDuressKeychain.delete(PopopxDuressKeychain.mnemonicAccount)
+            PopopxDuressKeychain.delete(PopopxDuressKeychain.mnemonicPhraseAccount)
+            PopopxDuressKeychain.delete(PopopxDuressKeychain.lockoutAccount)
             await NtfManager.shared.removeAllNotifications()
             UserDefaults.standard.removeObject(forKey: DEFAULT_LA_SELF_DESTRUCT)
             UserDefaults.standard.removeObject(forKey: DEFAULT_LA_SELF_DESTRUCT_DISPLAY_NAME)
@@ -662,6 +1084,47 @@ final class PopopxDuressAuthManager {
     /// true = 键盘强制模式（生物连续失败后，或设备没有生物识别能力）。
     private(set) var keypadRequired = false
 
+    /// 连续失败次数。进入码与助记词**共用这一张表**（简报原话），两条表等于告诉来人
+    /// "输 12 个词更划算"。落 Keychain 的 `lockoutAccount`，这里是它的内存副本，理由写在
+    /// 文件头「冷却计数为什么不放 UserDefaults」那一节。
+    private(set) var failedAttemptCount = 0
+
+    /// 解冻时刻。nil = 当前不在冷却（也包括"错 1~4 次"那一档：只报错，不上锁）。
+    private(set) var lockoutEndsAt: Date?
+
+    /// 助记词是否可用 = **两条记录都在**。半新一旧（哈希认 A、查看显示 B）比没有更糟：
+    /// 设置页会显示一条永远通不过重置的短语，而机主手上那张纸已经作废了。
+    private(set) var mnemonicConfigured = false
+
+    /// 剩余冷却秒数。只用 `Date` 与一个存下来的时刻做减法，所以遮罩那条每秒一跳的计时器
+    /// 可以直接调它，不需要谁去"刷新"它。
+    var lockoutRemainingSeconds: TimeInterval {
+        lockoutEndsAt.map { max(0, $0.timeIntervalSinceNow) } ?? 0
+    }
+
+    var isLockedOut: Bool { lockoutRemainingSeconds > 0 }
+
+    /// 距离第 10 次还剩几次，给设置页那格红色警戒用。**它是算出来的**，不是另一个计数：
+    /// 多一个状态就多一处会和 `failedAttemptCount` 说假话的地方。
+    var strikesUntilWipe: Int {
+        max(0, PopopxLockoutSchedule.wipeThreshold - failedAttemptCount)
+    }
+
+    /// 第 10 次连续错误是否抹数据。默认关闭，且必须由机主在设置页明确打开：这一条把
+    /// "猜错十次"的代价从"锁一小时"换成"这台设备上的身份没了"，而误触的代价（家人乱按键盘、
+    /// 自己抄错助记词）必须由一次明确的、看得见说明的动作来承担。
+    var wipeOnTenthFailure: Bool {
+        didSet {
+            guard oldValue != wipeOnTenthFailure, !resyncingTenStrikeSwitch else { return }
+            UserDefaults.standard.set(wipeOnTenthFailure, forKey: DEFAULT_ANTI_THEFT_TEN_STRIKE_WIPE)
+        }
+    }
+
+    /// 与 `resyncingRetentionStrategy` 同一个理由、同一副闸：`eraseAllTraces()` 刚把这个键删掉，
+    /// 紧接着"让内存归位"的那一次赋值如果不走闸，就会亲手把键重新创建出来——
+    /// 抹除要消掉的痕迹由抹除流程自己写回去。
+    private var resyncingTenStrikeSwitch = false
+
     /// 双密码自毁总开关。关掉之后胁迫码不再存在（记录会被删除），避免"关了开关但
     /// 那把码还留着"这种最危险的状态。
     var duressEnabled: Bool {
@@ -691,8 +1154,10 @@ final class PopopxDuressAuthManager {
     }
 
     /// 遮罩决定"开局给生物识别还是直接给键盘"用的那一条判断。
+    /// `!isLockedOut` 是简报那条硬要求（冷却期内 Face ID 不许弹）在这里的第一次落点；
+    /// `requestBiometricUnlock` 里还有第二道，因为调用方可能自己拼条件。
     var prefersBiometricUnlock: Bool {
-        biometricsEnabled && !keypadRequired && biometricsAvailable && normalConfigured
+        biometricsEnabled && !keypadRequired && !isLockedOut && biometricsAvailable && normalConfigured
     }
 
     private init() {
@@ -703,9 +1168,13 @@ final class PopopxDuressAuthManager {
         biometricsEnabled = defaults.object(forKey: DEFAULT_ANTI_THEFT_BIOMETRICS_ENABLED) == nil
             ? true
             : defaults.bool(forKey: DEFAULT_ANTI_THEFT_BIOMETRICS_ENABLED)
+        // 这一条不玩"读不到就当真开着"：抹数据是把十次误触变成不可逆动作的那一档，
+        // 键不存在时只能是 false。
+        wipeOnTenthFailure = defaults.bool(forKey: DEFAULT_ANTI_THEFT_TEN_STRIKE_WIPE)
         retentionStrategy = PopopxDuressRetentionStrategy.load(from: defaults)
-        normalConfigured = PopopxDuressKeychain.exists(PopopxDuressKeychain.normalAccount)
-        duressConfigured = duressEnabled && PopopxDuressKeychain.exists(PopopxDuressKeychain.duressAccount)
+        // 凭据、助记词、冷却三条状态都由同一处读盘（`didSet` 已经在上面把三个开关属性
+        // 初始化完了，这里不会再触发写回）。
+        refreshConfiguration()
     }
 
     /// Keychain 会在别的进程/别的会话里被改动（自毁就是这种改动），所以每次进入遮罩
@@ -714,6 +1183,15 @@ final class PopopxDuressAuthManager {
     func refreshConfiguration() {
         normalConfigured = PopopxDuressKeychain.exists(PopopxDuressKeychain.normalAccount)
         duressConfigured = duressEnabled && PopopxDuressKeychain.exists(PopopxDuressKeychain.duressAccount)
+        mnemonicConfigured = PopopxDuressKeychain.read(PopopxDuressKeychain.mnemonicAccount) != nil
+            && PopopxDuressKeychain.readString(PopopxDuressKeychain.mnemonicPhraseAccount) != nil
+        // 冷却记录**只在读到时才覆盖内存**。读失败与"确实没有这条记录"在 Keychain 层是同一个
+        // nil，而猜错的代价不对称：当成"没有失败过"等于白送 4 次免费机会，
+        // 当成"还在冷却"最多是让机主多等一次他已经等过的时间。所以宁可锁着。
+        if let record = PopopxDuressKeychain.readLockout() {
+            failedAttemptCount = record.failedAttempts
+            lockoutEndsAt = record.lockoutEndTimestamp.map { Date(timeIntervalSince1970: $0) }
+        }
     }
 
     // MARK: 配置
@@ -843,8 +1321,8 @@ final class PopopxDuressAuthManager {
     /// 同向（入口码删掉 + 模式回 `.system`），区别只有一条：这里**不能验证**——键盘上站着的是
     /// 逼迫者，让他再输一遍机主的原始码既做不到、也是暴露。删旧凭据本身正是简报步骤 C 要求的效果。
     ///
-    /// 自毁码不在这里重复删：全量分支由 `PopopxStorageWipe` 删（:451 条目 + :455 那个 bool），
-    /// 保留分支由 `scrubCredentialHistory` 删（:1163-:1164，条目与 bool 都在里面），
+    /// 自毁码不在这里重复删：全量分支由 `PopopxStorageWipe` 删（:870 条目 + :877 那个 bool），
+    /// 保留分支由 `scrubCredentialHistory` 删（:1989-:1990，条目与 bool 都在里面），
     /// 两条都排在函数返回之前，所以回到这一行时它已经不在了。
     /// 这几步必须一起做完、不可拆：只删码会把 `authorize()` 变成静默放行。
     private func retireNativeEntryPassword() {
@@ -859,22 +1337,31 @@ final class PopopxDuressAuthManager {
     /// 而这一支的正确终态只有一个——旧前门关了、新前门装上，要么一起成，要么整体没发生。
     /// `nativePasscode` 为 nil 且原生入口码还在生效时抛 `.nativePasscodeRequired`，
     /// 绝不静默替机主删掉那把码；本机只剩幽灵自毁码时换 `nativeSelfDestructCode` 说话，同理。
+    ///
+    /// 返回值 = 简报要求的"设置进入密码时一并生成 12 词助记词"那一份新短语，
+    /// 交给设置页显示一次让机主抄存；**nil 有两种意思**，调用方用 `mnemonicConfigured` 分辨：
+    /// 已经有一条（绝不覆盖——机主手上那张纸抄的是旧的，静默换一份等于让他的备份在他不知情
+    /// 的情况下作废），或者这一次随机源/写盘失败（他去助记词卡片自己按"生成"）。
+    /// 这里不额外抛错：进入码已经写成功了，为一个辅助恢复手段回滚主凭据是更坏的结果。
+    @discardableResult
     func setNormalPin(
         _ first: String,
         confirming second: String,
         nativePasscode: String? = nil,
         nativeSelfDestructCode: String? = nil
-    ) async throws {
+    ) async throws -> [String]? {
         guard Self.isValidPin(first), first == second else { throw PopopxDuressSetupError.malformedPin }
         try Self.migrateNativeEntryPassword(passcode: nativePasscode, selfDestructPasscode: nativeSelfDestructCode)
         let salt = PopopxDuressCrypto.randomSalt()
         guard !salt.isEmpty else { throw PopopxDuressSetupError.keychainWriteFailed }
-        let normalHash = await hash(pin: first, salt: salt, iterations: PopopxDuressCrypto.iterations)
+        let normalHash = await derive(secret: first, salt: salt, iterations: PopopxDuressCrypto.iterations)
         let verifier = PopopxDuressVerifier(salt: salt, hash: normalHash, iterations: PopopxDuressCrypto.iterations)
         guard PopopxDuressKeychain.write(verifier, account: PopopxDuressKeychain.normalAccount) else {
             throw PopopxDuressSetupError.keychainWriteFailed
         }
         normalConfigured = true
+        guard !mnemonicConfigured else { return nil }
+        return await generateMnemonic()
     }
 
     /// 设置/更换胁迫码。两道硬约束：格式、以及与常规码不得相同。
@@ -887,13 +1374,13 @@ final class PopopxDuressAuthManager {
         }
         let salt = PopopxDuressCrypto.randomSalt()
         guard !salt.isEmpty else { throw PopopxDuressSetupError.keychainWriteFailed }
-        let duressHash = await hash(pin: first, salt: salt, iterations: PopopxDuressCrypto.iterations)
+        let duressHash = await derive(secret: first, salt: salt, iterations: PopopxDuressCrypto.iterations)
         // "两把码相同"这一条只能在派生值层面判，但**必须用常规记录自己的盐**再派生一次：
         // 两条记录各带各的随机盐，拿新盐算出的哈希去比常规记录的哈希必然永远不等——
         // 那样这道闸门看着在，实际一次也不会关上，红线就此静默失效。
         // 同一个口令 + 同一把盐 ⇒ 同一个哈希，所以"用这把码撞常规记录"撞中即两码相同。
         // 局部量刻意不叫 `hash`：那会遮蔽下面这个方法调用本身（`Data` 不是函数）。
-        let againstNormal = await hash(pin: first, salt: normal.salt, iterations: normal.iterations)
+        let againstNormal = await derive(secret: first, salt: normal.salt, iterations: normal.iterations)
         if PopopxDuressCrypto.matchesInConstantTime(againstNormal, normal.hash) {
             throw PopopxDuressSetupError.pinsMustDiffer
         }
@@ -909,29 +1396,218 @@ final class PopopxDuressAuthManager {
         duressConfigured = false
     }
 
-    /// 关闭整个双密码功能（设置页"解除"）。两条记录都删，不留残余。
+    /// 关闭整个双密码功能（设置页"解除"）。两条码、助记词的一对记录、冷却记录全删，不留残余：
+    /// 机主已经明确不要这套锁了，而"功能已关但那张纸还能重置出一个进入密码"是比留着码
+    /// 更糟的状态——它会凭空造出一把没人设置过的进入密码。
     func clearAllPins() {
         PopopxDuressKeychain.delete(PopopxDuressKeychain.normalAccount)
         PopopxDuressKeychain.delete(PopopxDuressKeychain.duressAccount)
+        PopopxDuressKeychain.delete(PopopxDuressKeychain.mnemonicAccount)
+        PopopxDuressKeychain.delete(PopopxDuressKeychain.mnemonicPhraseAccount)
+        PopopxDuressKeychain.delete(PopopxDuressKeychain.lockoutAccount)
         normalConfigured = false
         duressConfigured = false
+        mnemonicConfigured = false
+        failedAttemptCount = 0
+        lockoutEndsAt = nil
         biometricFailures = 0
         keypadRequired = false
     }
 
+    // MARK: 助记词（12 词 BIP-39 恢复）
+
+    /// 生成一组新的 12 词助记词、落盘，并把明文词组返回给界面显示一次让机主抄存。
+    ///
+    /// 熵来自 `SecRandomCopyBytes`，校验和位按 BIP-39 由 SHA-256 算出，所以这一条短语是
+    /// **标准钱包格式**：机主将来可以拿任何 BIP-39 工具核对自己抄没抄对，不必信任本 app 的显示。
+    ///
+    /// 已有旧词组时覆盖。`storeMnemonic` 任一半失败就整对回滚，因此"重新生成"要么整套换掉、
+    /// 要么仍是旧的，不会留下"哈希认 A、查看显示 B"这种 `mnemonicConfigured` 报真却永远
+    /// 重置不通过的半成品。
+    @discardableResult
+    func generateMnemonic() async -> [String]? {
+        guard let words = PopopxBIP39.generate() else { return nil }
+        return await storeMnemonic(words) ? words : nil
+    }
+
+    /// 把一组词同时写成"派生校验记录"与"可回看明文"两条。
+    ///
+    /// 写之前先 `validate` 一次自己的生成结果：这不是防御用户输入，而是防御词表与位切分
+    /// 在后来被改坏——一份校验和算错的助记词一旦落盘，机主手上那张纸就成了打不开的备份，
+    /// 而且**没人会知道**，直到他真的忘记密码那天。宁可这里返回 nil。
+    private func storeMnemonic(_ words: [String]) async -> Bool {
+        let phrase = PopopxBIP39.normalize(words.joined(separator: " "))
+        let salt = PopopxDuressCrypto.randomSalt()
+        guard PopopxBIP39.validate(phrase: phrase), !salt.isEmpty else {
+            logger.error("duress mnemonic: generated phrase failed self-validation, nothing stored")
+            return false
+        }
+        let hash = await derive(secret: phrase, salt: salt, iterations: PopopxDuressCrypto.iterations)
+        let verifier = PopopxDuressVerifier(salt: salt, hash: hash, iterations: PopopxDuressCrypto.iterations)
+        guard
+            PopopxDuressKeychain.write(verifier, account: PopopxDuressKeychain.mnemonicAccount),
+            PopopxDuressKeychain.writeString(phrase, account: PopopxDuressKeychain.mnemonicPhraseAccount)
+        else {
+            PopopxDuressKeychain.delete(PopopxDuressKeychain.mnemonicAccount)
+            PopopxDuressKeychain.delete(PopopxDuressKeychain.mnemonicPhraseAccount)
+            mnemonicConfigured = false
+            logger.error("duress mnemonic: store failed, pair rolled back")
+            return false
+        }
+        mnemonicConfigured = true
+        return true
+    }
+
+    /// 查看助记词：先用**当前进入密码**换出明文词组。
+    ///
+    /// 三条刻意的取舍：
+    /// 1. 只与常规记录比对。应急擦除密码是另一条条目，拿它派生必然比不中 →
+    ///    `.entryPinIncorrect`、什么都不显示。这不是漏了一条路：交出胁迫码的人换来的是
+    ///    "当场自毁"，不该再多赚一份可读的备份。
+    /// 2. **不吃冷却计数**（不调 `settleWrongAttempt`）。键盘是胁迫者手上唯一的门，所以那
+    ///    张表长在那里；设置页这一格如果也接上去，等于给了来人第二个可以尝试的入口、
+    ///    也给机主一个"抄错三遍就被锁 60 分钟"的拒服务把手。这里失败的代价已经够明确：
+    ///    什么都不显示。
+    /// 3. 比对走同一个 `matches(pin:record:)`，同 100_000 轮、同样恒定时间，所以
+    ///    "看一次助记词"与"解一次锁"耗时一致，秒表量不出这里发生过一次查看。
+    func revealMnemonic(unlockingWith pin: String) async throws -> [String] {
+        refreshConfiguration()
+        guard mnemonicConfigured else { throw PopopxDuressSetupError.mnemonicMissing }
+        guard Self.isValidPin(pin) else { throw PopopxDuressSetupError.entryPinRequired }
+        // 常规记录不在了 = 没有任何"当前进入密码"可供比对。真出现这种状态（手动清过
+        // Keychain、或 `clearAllPins` 与一次落盘的助记词交错）时选择什么都不显示，
+        // 而不是"没有密码就免验"——这一格的放行条件必须是证明机主知道进入密码。
+        guard let normal = PopopxDuressKeychain.read(PopopxDuressKeychain.normalAccount) else {
+            throw PopopxDuressSetupError.entryPinRequired
+        }
+        guard await matches(pin: pin, record: normal) else {
+            throw PopopxDuressSetupError.entryPinIncorrect
+        }
+        return try readRevealedMnemonic()
+    }
+
+    /// 「用 Face ID 查看」那一条路（简报原文："查看前需验证当前进入密码**或 FaceID**"）。
+    /// 证明方式换成系统说的"机主本人就在这台设备上"，其余与 `revealMnemonic(unlockingWith:)`
+    /// 逐字相同——要交出去的是同一份东西，两道门的收尾不许有差别。
+    ///
+    /// 三道前置门一律**关而不放**：总开关关着、刚被"连续失败两次"降级到键盘、系统判不出可用，
+    /// 全部直接抛错。这是与上游 `authorize()` 相反的选择（它对 `.unavailable` 直接放行，
+    /// 见 LocalAuthenticationUtils.swift:20-24）：那一层管的是"设备解锁的便利性"，
+    /// 而这一格交出去的是一张能重置进入密码的明文，问不出结果时只能当作没通过。
+    ///
+    /// 冷却表故意不在这里问：那张表拦的是锁屏遮罩上的三个输入口，而这一问不吃失败计数
+    /// （理由写在设置页那一格的说明里），也就没有可归零的东西。
+    ///
+    /// 也故意**不**复用 `requestBiometricUnlock`：那一条路成功时顺手 `unlock()` 遮罩并清计数，
+    /// 把"看一眼词组"变成"解一次锁"，是完全不同的两件事。
+    func revealMnemonicWithBiometrics(reason: String) async throws -> [String] {
+        refreshConfiguration()
+        guard mnemonicConfigured else { throw PopopxDuressSetupError.mnemonicMissing }
+        guard biometricsEnabled, !keypadRequired, biometricsAvailable else {
+            throw PopopxDuressSetupError.biometricDenied
+        }
+        let context = LAContext()
+        let granted = await withCheckedContinuation { (resume: CheckedContinuation<Bool, Never>) in
+            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { ok, _ in
+                resume.resume(returning: ok)
+            }
+        }
+        guard granted else { throw PopopxDuressSetupError.biometricDenied }
+        return try readRevealedMnemonic()
+    }
+
+    /// 词组读回来那一半，两条证明路径共用。Keychain 里那条明文必须仍然过得了 BIP-39 的
+    /// 结构校验，否则宁可说"没有助记词"——把一串坏字节显示成"你的 12 个词"，
+    /// 机主会照着一张坏纸去重置，然后在下一道门前彻底进不去。
+    private func readRevealedMnemonic() throws -> [String] {
+        guard
+            let stored = PopopxDuressKeychain.readString(PopopxDuressKeychain.mnemonicPhraseAccount),
+            PopopxBIP39.validate(phrase: stored)
+        else {
+            throw PopopxDuressSetupError.mnemonicMissing
+        }
+        return PopopxBIP39.normalizedWords(stored)
+    }
+
+    /// 只做结构校验（12 个词、都在表内、校验和重算得回），不碰 Keychain、不派生、不计失败。
+    ///
+    /// 给输入过程中的"要不要禁用提交按钮"用。派生一次 355 ms，每改一个字符跑一次既慢，
+    /// 又会把"前几个词已经对了"这种信息在真正校验之前泄漏成耗时差。
+    func verifyMnemonic(_ phrase: String) -> Bool {
+        PopopxBIP39.validate(phrase: phrase)
+    }
+
+    /// 用助记词重置进入密码：校验词组 → 写入新进入密码 → **应急擦除密码置为未设置** →
+    /// 冷却计数清零。
+    ///
+    /// 与键盘共用同一条 `settleWrongAttempt`，这是简报"同一张表同时适用于密码错误与
+    /// 助记词错误"的落点；但只有**结构合法而派生不匹配**才计次，把 `watch` 抄成 `wach`
+    /// 走 `.mnemonicMalformed` 直接抛（见那条 case 上的理由）。
+    ///
+    /// 重置**不消耗**助记词：成功后这条词组仍可用来做下一次重置。机主刚丢过一次密码，
+    /// 此时让唯一的备份失效只会把他第二次关在门外；要"用后即焚"就自己按"重新生成"。
+    ///
+    /// 应急擦除密码必定被删，**与它原来设没设无关**——"重置后自毁码归零"这句断言的落点。
+    /// 真机验收：先设好自毁码 → 用助记词重置 → 再拿重置前那把自毁码去解锁，
+    /// 应当得到一次普通失败（计数 +1），而不是静默自毁。
+    func resetEntryPinWithMnemonic(
+        phrase: String,
+        newPin: String,
+        confirmingPin: String
+    ) async throws {
+        refreshConfiguration()
+        guard !isLockedOut else {
+            throw PopopxDuressSetupError.lockedOut(remaining: lockoutRemainingSeconds)
+        }
+        guard mnemonicConfigured else { throw PopopxDuressSetupError.mnemonicMissing }
+        let normalized = PopopxBIP39.normalize(phrase)
+        guard PopopxBIP39.validate(phrase: normalized) else {
+            throw PopopxDuressSetupError.mnemonicMalformed
+        }
+        guard Self.isValidPin(newPin), newPin == confirmingPin else {
+            throw PopopxDuressSetupError.malformedPin
+        }
+        guard let record = PopopxDuressKeychain.read(PopopxDuressKeychain.mnemonicAccount) else {
+            throw PopopxDuressSetupError.mnemonicMissing
+        }
+        guard await matches(pin: normalized, record: record) else {
+            // 一次真实的猜测。返回值在这里没用：这条路径的界面已经切到重置表单，
+            // 冷却由 `isLockedOut` / `lockoutRemainingSeconds` 把状态带回去。
+            _ = await settleWrongAttempt()
+            throw PopopxDuressSetupError.mnemonicIncorrect
+        }
+        let salt = PopopxDuressCrypto.randomSalt()
+        guard !salt.isEmpty else { throw PopopxDuressSetupError.keychainWriteFailed }
+        let pinHash = await derive(secret: newPin, salt: salt, iterations: PopopxDuressCrypto.iterations)
+        guard PopopxDuressKeychain.write(
+            PopopxDuressVerifier(salt: salt, hash: pinHash, iterations: PopopxDuressCrypto.iterations),
+            account: PopopxDuressKeychain.normalAccount
+        ) else {
+            throw PopopxDuressSetupError.keychainWriteFailed
+        }
+        PopopxDuressKeychain.delete(PopopxDuressKeychain.duressAccount)
+        normalConfigured = true
+        duressConfigured = false
+        clearFailures()
+    }
+
     // MARK: 校验
 
-    /// 一次 PBKDF2 派生。`inout` + `popopxSecureErase` 是本仓库既有的销毁口径
-    /// （PopopxSecurePayload.swift:446）：`String` 归 ARC 管、覆写不了，所以口令一落地
-    /// 就立刻拷成 `Data`，用完就地清零。能承诺的只有这一份拷贝——`Task.detached` 会在
-    /// 派生期间共享同一块缓冲，`.value` 返回、闭包释放之后 `secret` 才重新独占，
-    /// 于是 `defer` 擦到的确实是原件而不是 COW 副本。这一点不写清楚就会被后来人改坏。
-    private func hash(pin: String, salt: Data, iterations: Int) async -> Data {
-        var secret = Data(pin.utf8)
-        defer { popopxSecureErase(&secret) }
+    /// 一次 PBKDF2 派生。参数叫 `secret` 而不是 `pin`：进这一行的有两种秘密——6 位数字，
+    /// 以及规范化后的 12 词短语。派生口径完全相同（同 100_000 轮、同 32 字节输出），
+    /// 所以助记词的比对与两把码的比对一样贵、一样常量时间。
+    ///
+    /// `popopxSecureErase` 是本仓库既有的销毁口径（PopopxSecurePayload.swift:446）：
+    /// `String` 归 ARC 管、覆写不了，所以秘密一落地就立刻拷成 `Data`，用完就地清零。
+    /// 能承诺的只有这一份拷贝——`Task.detached` 会在派生期间共享同一块缓冲，
+    /// `.value` 返回、闭包释放之后 `bytes` 才重新独占，于是 `defer` 擦到的确实是原件而不是
+    /// COW 副本。这一点不写清楚就会被后来人改坏。
+    private func derive(secret: String, salt: Data, iterations: Int) async -> Data {
+        var bytes = Data(secret.utf8)
+        defer { popopxSecureErase(&bytes) }
         return await Task.detached(priority: .userInitiated) {
             PopopxDuressCrypto.pbkdf2SHA256(
-                password: secret,
+                password: bytes,
                 salt: salt,
                 iterations: iterations,
                 outputCount: PopopxDuressCrypto.hashBytes
@@ -957,7 +1633,7 @@ final class PopopxDuressAuthManager {
     }
 
     private func matches(pin: String, record: PopopxDuressVerifier) async -> Bool {
-        let derived = await hash(pin: pin, salt: record.salt, iterations: record.iterations)
+        let derived = await derive(secret: pin, salt: record.salt, iterations: record.iterations)
         return PopopxDuressCrypto.matchesInConstantTime(derived, record.hash)
     }
 
@@ -985,10 +1661,12 @@ final class PopopxDuressAuthManager {
     /// 一个 POPOPX 专有的键名重新出现在 UserDefaults 里，正是这一整套抹除要消掉的东西。
     private var resyncingRetentionStrategy = false
 
-    /// 键盘提交。遮罩只调这一个方法，然后**按同一支处理 `.unlocked` 与 `.duress`**。
+    /// 键盘提交。遮罩只调这一个方法，然后**按同一支处理 `.unlocked`、`.duress` 与 `.lockedOut`
+    /// 之外的所有结论**——冷却那一支也只渲染倒计时，不弹"错误"。
     ///
-    /// 时序：先在起点抽一个本次目标时长 → 恒定两次派生 → 若是胁迫码则取模式快照 → 整段抹除
-    /// → 按快照重建 → 最后才把不足目标的时间补齐。补时放在最后而不是最前，是为了让真自毁
+    /// 时序：先查冷却（**排在任何派生之前**）→ 抽本次目标时长 → 恒定两次派生 → 按结论分支
+    /// （胁迫命中 → 双快照 + 整段抹除重建；错误 → 计数与冷却；第 10 次且开关开着 → 静默抹除）
+    /// → 最后才把不足目标的时间补齐。补时放在最后而不是最前，是为了让真自毁
     /// 完全藏在同一条下限里；目标时长在**任何判定发生之前**抽取，否则随机数会泄露分支。
     ///
     /// 为什么还要随机抖动而不是死等 1.2 秒：实测一次 100k 派生 355ms，两条分支都要付
@@ -999,37 +1677,58 @@ final class PopopxDuressAuthManager {
     /// 而真正的强判据是"按下去之后界面有没有变化"，那由 `PopopxAppLockState.showsLockUI`
     /// 在整段流程里恒为 false（遮罩一直盖着、只有同一条呼吸）来保证。
     func submit(pin: String) async -> PopopxDuressAuthOutcome {
+        refreshConfiguration()
+        // 冷却期内一次派生都不付。这不是省 CPU：付掉那 0.71 秒的界面看起来仍在"核验"，
+        // 而它其实什么都不会放行——简报要的是键盘、Face ID、助记词三个入口一起禁用。
+        guard !isLockedOut else { return .lockedOut(remaining: lockoutRemainingSeconds) }
         let started = Date()
         let target = Self.flowTargetSeconds()
-        let outcome = await verify(pin: pin)
-        if outcome == .duress {
-            // 步骤 A（擦除前双快照锁定）。两件事都必须排在任何擦除动作之前，理由各不同：
-            // A1 策略快照：`PopopxStorageWipe` 会把本模块的 UserDefaults 键全部删掉，
-            //    其中就包括保留策略（`.retainExistingProfile` 还带着目标 profileId，
-            //    那是一条身份信息，同样在这个键里）。所以动手之前读进这个局部常量，
-            //    重建阶段只认这份副本，绝不再回头读配置。
-            // A2 凭据快照：为刚输入的这把应急码换一把**全新的 32 字节盐**重新派生。
-            //    擦除会删掉两条旧记录，届时手上只剩明文口令；而这一次派生实测 355ms，
-            //    放在擦除后面就等于在遮罩底下多付一次可被感知的停顿。
-            let strategy = retentionStrategy
-            var demoted = await demotedVerifier(for: pin)
-            // 立旗，遮罩从此走"照常呼吸"那一支；无论擦除成败都由 `endDuressFlow()` 收。
-            // false = 已经有一轮在跑（那条链不可重入）。此时**不再启第二轮，但照样返回 .duress**：
-            // 返回 .wrong 会当场弹一条"密码错误"，那正是整条路径要避免的暴露。
-            if PopopxAppLockState.shared.beginDuressFlow() {
-                await runDuressFlow(strategy: strategy, demoted: &demoted)
-                PopopxAppLockState.shared.endDuressFlow()
-                PopopxAppLockState.shared.unlock()
-            }
+        var outcome = await verify(pin: pin)
+        switch outcome {
+        case .unlocked:
+            // 「任意一次正确验证成功后，立即清零 failedAttemptCount」。
+            clearFailures()
+        case .duress:
+            clearFailures()
+            await runDuressUnlock(pin: pin)
+        case .wrong:
+            outcome = await settleWrongAttempt()
+        case .notConfigured:
+            break
+        case .lockedOut:
+            // `verify` 永远不返回这一支（它是纯校验），只为穷尽 switch 留个诚实的落点。
+            break
         }
         await pad(to: started, target: target)
         return outcome
     }
 
+    /// 命中应急码时的那一条静默流水线（简报步骤 A → B → C → D）。
+    /// 从 `submit` 里拆出来只为了让 `submit` 的分支形状一眼可核；顺序、快照、立旗全部保持原样。
+    private func runDuressUnlock(pin: String) async {
+        // 步骤 A（擦除前双快照锁定）。两件事都必须排在任何擦除动作之前，理由各不同：
+        // A1 策略快照：`PopopxStorageWipe` 会把本模块的 UserDefaults 键全部删掉，
+        //    其中就包括保留策略（`.retainExistingProfile` 还带着目标 profileId，
+        //    那是一条身份信息，同样在这个键里）。所以动手之前读进这个局部常量，
+        //    重建阶段只认这份副本，绝不再回头读配置。
+        // A2 凭据快照：为刚输入的这把应急码换一把**全新的 32 字节盐**重新派生。
+        //    擦除会删掉两条旧记录，届时手上只剩明文口令；而这一次派生实测 355ms，
+        //    放在擦除后面就等于在遮罩底下多付一次可被感知的停顿。
+        let strategy = retentionStrategy
+        var demoted = await demotedVerifier(for: pin)
+        // 立旗，遮罩从此走"照常呼吸"那一支；无论擦除成败都由 `endDuressFlow()` 收。
+        // false = 已经有一轮在跑（那条链不可重入）。此时**不再启第二轮，但结论仍是 .duress**：
+        // 改成 `.wrong` 会当场弹一条"密码错误"，那正是整条路径要避免的暴露。
+        guard PopopxAppLockState.shared.beginDuressFlow() else { return }
+        await runDuressFlow(strategy: strategy, demoted: &demoted)
+        PopopxAppLockState.shared.endDuressFlow()
+        PopopxAppLockState.shared.unlock()
+    }
+
     /// 步骤 A2 的派生侧：算出"降级后那条唯一进入密码"的完整记录（新盐 + 新哈希）。
     private func demotedVerifier(for pin: String) async -> PopopxDuressVerifier {
         let salt = PopopxDuressCrypto.randomSalt()
-        let derived = await hash(pin: pin, salt: salt, iterations: PopopxDuressCrypto.iterations)
+        let derived = await derive(secret: pin, salt: salt, iterations: PopopxDuressCrypto.iterations)
         return PopopxDuressVerifier(salt: salt, hash: derived, iterations: PopopxDuressCrypto.iterations)
     }
 
@@ -1081,6 +1780,129 @@ final class PopopxDuressAuthManager {
             retentionStrategy = .emptyProfile
             resyncingRetentionStrategy = false
         }
+        resyncErasedSwitches()
+    }
+
+    /// 抹除之后把"内存里还留着、盘上已被 `eraseAllTraces()` 删掉"的那两项归位：
+    /// 助记词状态与第 10 次开关。两条分支都覆盖（全量那支经 `disarmsAntiTheft`、保留那支经
+    /// `PopopxDuressProfileKeeper.retain` 第 4 步，两处都调了同一个清扫）。
+    ///
+    /// 开关那一项**走闸赋值**，理由与 `resyncingRetentionStrategy` 一字不差：不归位则设置页
+    /// 继续显示"已开启"（而键已经没了，下次冷启动就变回关闭——同一台设备对同一件事说两种话），
+    /// 归位时不走闸则亲手把刚删掉的键创建回来。
+    ///
+    /// 助记词两条记录本身由擦除删（全量见 `PopopxStorageWipe` 第 7 步，保留见
+    /// `scrubCredentialHistory`），这里只把内存状态拨平。恢复能力跟着身份一起没了是**故意的**：
+    /// 一个 `popopx.duress.mnemonic` 条目本身就是"这台设备装过防盗双密码"的指纹。
+    /// 代价写清楚：降级码从此没有离线恢复手段，忘了就只能再自毁一次；机主要恢复能力，
+    /// 得在设置页重新生成一条并重新抄存。
+    private func resyncErasedSwitches() {
+        mnemonicConfigured = false
+        resyncingTenStrikeSwitch = true
+        wipeOnTenthFailure = false
+        resyncingTenStrikeSwitch = false
+    }
+
+    /// 第 10 次连续错误 + 开关开着：跑**与应急码那条完全相同**的擦除与重建流水线
+    /// （B → 退役原生入口码 → 装仿真内容 → 归位），只有一步不同：**不做步骤 C 的凭据降级**。
+    ///
+    /// 那一步的输入是"刚被证明正确的那把码"，而这里刚刚被证明的是"这把码不对"。降级下去
+    /// 等于把来人猜错的第 10 次输入升格成设备的唯一进入密码——那是本模块最不该发生的一件事。
+    /// 于是终态是"双密码未设置"：抹完之后交出一个刚装好的空 app，连那台键盘都不再出现
+    /// （`PopopxAppLockOverlayModel.begin()` 走 `normalConfigured == false` 那一支）。
+    /// 这一条与简报「与应急擦除密码完全相同的自毁与重建流程」的差别是刻意的，已写进验收报告。
+    private func runTenStrikeWipe() async {
+        let strategy = retentionStrategy
+        let outcome = await executeErasure(strategy: strategy)
+        retireNativeEntryPassword()
+        // 凭据在这里再删一次：全量分支的 `PopopxStorageWipe` 与保留分支的
+        // `scrubCredentialHistory` 都已经删过，这一对是幂等的第三次，但它保证"擦除中途失败"
+        // 也不会漏下一条还能进门的凭据——这一次连降级码都没有，留着旧凭据等于留着真身份。
+        // 助记词那一对算在同一个"还能进门"的集合里：那张纸能重置出进入密码，
+        // 所以它和两把码一样必须在这里第三次落掉。冷却记录不在这列——它由下面的
+        // `clearFailures()` 负责，那里同时把内存里的 `lockoutEndsAt` 一起归零。
+        PopopxDuressKeychain.delete(PopopxDuressKeychain.normalAccount)
+        PopopxDuressKeychain.delete(PopopxDuressKeychain.duressAccount)
+        PopopxDuressKeychain.delete(PopopxDuressKeychain.mnemonicAccount)
+        PopopxDuressKeychain.delete(PopopxDuressKeychain.mnemonicPhraseAccount)
+        normalConfigured = false
+        duressConfigured = false
+        // 计数器与冷却一起清：设备已经空了，"你已经猜错 10 次"这件事不再有保护对象，
+        // 而留着它会让下一次锁屏直接弹一小时倒计时（那是给机主看的假警报）。
+        clearFailures()
+        await installDecoyPlan(outcome.pendingDecoy)
+        if outcome.strategy.isRetainExisting {
+            resyncingRetentionStrategy = true
+            retentionStrategy = .emptyProfile
+            resyncingRetentionStrategy = false
+        }
+        resyncErasedSwitches()
+    }
+
+    // MARK: 渐进式冷却（仿 iOS 原生锁屏）
+
+    /// 一次错误验证的结算：计数 +1、按表上锁，第 10 次在开关开着时改走静默抹除。
+    ///
+    /// 键盘那条路（`submit`）拿返回值当本次结论；助记词那条路（`resetEntryPinWithMnemonic`）
+    /// 忽略返回值、只管往外抛错——它那边界面已经切到重置表单，冷却由 `isLockedOut` 与
+    /// `lockoutRemainingSeconds` 两个只读属性把状态带回去。两条路共用同一个结算，
+    /// 于是"同一张表"这件事在代码里只有一处实现。
+    @discardableResult
+    private func settleWrongAttempt() async -> PopopxDuressAuthOutcome {
+        let strikes = registerFailure()
+        guard strikes >= PopopxLockoutSchedule.wipeThreshold, wipeOnTenthFailure else {
+            return isLockedOut ? .lockedOut(remaining: lockoutRemainingSeconds) : .wrong
+        }
+        guard PopopxAppLockState.shared.beginDuressFlow() else {
+            // 已经有一轮在跑：不启第二轮，也不回 `.wrong`（那会在自毁进行中的遮罩上
+            // 弹一条"密码错误"，而这条界面的任何异常反馈都是暴露）。回 `.duress` 让 UI
+            // 继续走"照常呼吸"那一支，与 `runDuressUnlock` 的不可重入完全同构。
+            return .duress
+        }
+        await runTenStrikeWipe()
+        // 计数与冷却一起归零。三条理由叠在这一句上：
+        // 1. 简报要求这条路「与应急擦除密码完全相同的自毁与重建流程」——命中应急码那一支
+        //    在 `submit` 里就是 `clearFailures()` 先行，不清就不叫完全相同。
+        // 2. 抹除之后常规码记录已经不存在（`PopopxStorageWipe` 第 7 步连着它一起删），
+        //    这道表已经没有要保护的东西；留着它只会让遮罩在一台"根本没有密码"的设备上
+        //    显示一小时倒计时，而那是机主最难自证的一格。
+        // 3. 盘上那条记录已经被抹除删掉了，内存这一份若不清就成了只有本次会话知道的
+        //    幽灵状态——重启即消失，与"防爆破挡得住杀进程重开"这句承诺正好相反。
+        clearFailures()
+        PopopxAppLockState.shared.endDuressFlow()
+        PopopxAppLockState.shared.unlock()
+        return .duress
+    }
+
+    /// 记一次失败，并按 `PopopxLockoutSchedule` 上锁。返回本次是第几次。
+    ///
+    /// 顺序：先改内存、再落盘。反过来（先落盘）会在写失败时留下"盘上有 5、内存里是 4"的
+    /// 分裂，而内存值才是这一次界面读的那一份；写失败的后果只有"杀进程重开会退回 4 次"，
+    /// 这是一次降级，不是一次绕过——而且它已经在 `logger` 里留了痕（不含任何凭据）。
+    @discardableResult
+    private func registerFailure() -> Int {
+        let strikes = failedAttemptCount + 1
+        failedAttemptCount = strikes
+        let seconds = PopopxLockoutSchedule.lockoutSeconds(afterAttemptCount: strikes)
+        lockoutEndsAt = seconds > 0 ? Date().addingTimeInterval(seconds) : nil
+        if !PopopxDuressKeychain.writeLockout(
+            PopopxLockoutRecord(
+                failedAttempts: strikes,
+                lockoutEndTimestamp: lockoutEndsAt?.timeIntervalSince1970
+            )
+        ) {
+            logger.error("duress lockout: persistence failed at strike \(strikes)")
+        }
+        return strikes
+    }
+
+    /// 清零：内存与盘上一起。**删条目**而不是写一个 0 进去——留一条"0 次"的记录等于
+    /// 在密钥链里长期保存"这台设备启用过防爆破"这个事实，而自毁那一路要清的就是它
+    /// （`PopopxStorageWipe` 第 7 步与 `scrubCredentialHistory` 也按同一个口径删）。
+    private func clearFailures() {
+        failedAttemptCount = 0
+        lockoutEndsAt = nil
+        PopopxDuressKeychain.delete(PopopxDuressKeychain.lockoutAccount)
     }
 
     /// 步骤 B 的实现。返回**实际执行**的策略与一份"留到步骤 C 之后再装"的仿真计划：
@@ -1158,12 +1980,19 @@ final class PopopxDuressAuthManager {
     /// 自毁码那个 bool 也在清理之列，理由与 `migrateNativeEntryPassword` 里那条完全相同：
     /// 隐私设置那一格只读 `UserDefaults`，不读 Keychain（PrivacySettings.swift:512/:898），
     /// 条目删了而 bool 还留着，页面就会一直显示"自毁码已启用"而它已经无凭据可比。
-    /// 口径对齐全量路径的 `PopopxStorageWipe`（:455 同样 removeObject）。
+    /// 口径对齐全量路径的 `PopopxStorageWipe`（:877 同样 removeObject）。
+    ///
+    /// 助记词那一对与冷却记录也在这里删，"同口径"指的就是 `PopopxStorageWipe` 第 7 步那五条：
+    /// 保留路径不删库，如果只删两把码，机主手上那张纸就还能重置出一把能打开**真身份**的
+    /// 进入密码——那是这条路径上唯一一条没有关掉的门。冷却记录是"这里启用过防爆破"的指纹。
     private func scrubCredentialHistory() {
         _ = kcSelfDestructPassword.remove()
         UserDefaults.standard.removeObject(forKey: DEFAULT_LA_SELF_DESTRUCT)
         PopopxDuressKeychain.delete(PopopxDuressKeychain.normalAccount)
         PopopxDuressKeychain.delete(PopopxDuressKeychain.duressAccount)
+        PopopxDuressKeychain.delete(PopopxDuressKeychain.mnemonicAccount)
+        PopopxDuressKeychain.delete(PopopxDuressKeychain.mnemonicPhraseAccount)
+        PopopxDuressKeychain.delete(PopopxDuressKeychain.lockoutAccount)
     }
 
     /// 步骤 C + D 的写入侧：先写盘，再**就地**覆写内存里的那两份缓冲。
@@ -1174,7 +2003,7 @@ final class PopopxDuressAuthManager {
     /// `inout` 借到的是调用方独占的那一份（口径同 `PopopxSecurePayload.swift:455` 那段注释）。
     ///
     /// 诚实边界：口令明文本身是 ARC 管的 `String`，Swift 层覆写不了。全流水线上它只落地成
-    /// 一次 `Data`（在 `hash(pin:salt:iterations:)` 里），并由那个函数自己的 `defer` 当场清零；
+    /// 一次 `Data`（在 `derive(secret:salt:iterations:)` 里），并由那个函数自己的 `defer` 当场清零；
     /// 除此之外它没有被存进任何属性、任何集合、任何日志。
     private func demoteCredential(_ verifier: inout PopopxDuressVerifier) -> Bool {
         let written = PopopxDuressKeychain.write(verifier, account: PopopxDuressKeychain.normalAccount)
@@ -1207,10 +2036,20 @@ final class PopopxDuressAuthManager {
     /// 成功时本方法**已经**把锁解掉（`PopopxAppLockState.unlock()`），`completion` 的
     /// `false` 只表示"该把键盘交出来了"；遮罩因此不需要自己判断要不要改锁状态。
     /// 生物识别永远不可能通向自毁：它只证明"是本人"，证明不了"用的是哪把码"。
+    ///
+    /// `!isLockedOut` 是简报"冷却期内 Face ID 不许弹"的第二道闸（第一道在
+    /// `prefersBiometricUnlock`）。放在这里而不是只放那里：调用方可以自己拼条件，
+    /// 而这一条的性质是"任何入口都不给冷却期开后门"，所以要在离动作最近的地方再挡一次。
+    /// 挡下时回 `completion(false)`——语义就是"该把键盘交出来了"，而键盘同样被
+    /// `isLockedOut` 禁着，于是界面停在倒计时上，这正是设计要的样子。
+    ///
+    /// 成功那一路顺带 `clearFailures()`：简报写的是"任意一次正确的验证后立即清零"，
+    /// 而生物识别是一次正确的验证。不接的话会出现一种荒谬状态——机主本人脸解锁进来，
+    /// 下次锁屏却仍然对着他播一小时倒计时，因为来人猜错过 5 次。
     func requestBiometricUnlock(reason: String, completion: @escaping (Bool) -> Void) {
         let context = LAContext()
         var error: NSError?
-        guard biometricsEnabled, !keypadRequired,
+        guard biometricsEnabled, !keypadRequired, !isLockedOut,
               context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
             completion(false)
             return
@@ -1227,6 +2066,7 @@ final class PopopxDuressAuthManager {
                 }
                 self.biometricFailures = 0
                 self.keypadRequired = false
+                self.clearFailures()
                 PopopxAppLockState.shared.unlock()
                 completion(true)
             }
@@ -1234,6 +2074,10 @@ final class PopopxDuressAuthManager {
     }
 
     /// 键盘成功解锁后调用，把失败计数清零，下次遮罩开局仍可用生物识别。
+    ///
+    /// 冷却计数不在这里清——`submit(pin:)` 命中常规码那一支已经调过 `clearFailures()`，
+    /// 那才是这张表的归零点；这个函数只管生物识别自己的"连续失败 2 次改走键盘"，
+    /// 两者是两张不同的表，混在一起会让一次 Face ID 手滑看起来像一次猜码。
     func resetBiometricFailures() {
         biometricFailures = 0
         keypadRequired = false

@@ -10,19 +10,19 @@
 //     `DEFAULT_ANTI_THEFT_ANGLE_LIMIT`）；
 //  2. 同期出现高频不规则触摸（`UITouch.majorRadius` 相对机主本人异常偏大，或连续打在屏幕边缘）。
 //  后果只有一个：`PopopxAppLockState.shared.lock(reason: .behavior)`
-//  （`PopopxAntiTheftMotionGuard.swift:92-93` 把这个 case 的用途写成了"模块二"，本文件是它唯一的作者）。
+//  （`PopopxAntiTheftMotionGuard.swift:98-99` 把这个 case 的用途写成了"模块二"，本文件是它唯一的作者）。
 //
 //  ### 误判代价的边界：只能是"重新认证一次"，不能是"丢数据"
 //  模块一头注（`PopopxAntiTheftMotionGuard.swift:13-19`）已经把分工写死：传感器判据只锁、绝不擦。
 //  本文件严格遵守这条边界，并且**在调用图上根本不指向擦除**——全文件对模块三只有一句读调用
-//  （`PopopxDuressAuthManager.shared.requestBiometricUnlock`，`PopopxDuressAuthManager.swift:1210`），
-//  那条路自己也只通向"解锁"（成功时它已经 `unlock()`，见 `PopopxDuressAuthManager.swift:1228-1231`）。
+//  （`PopopxDuressAuthManager.shared.requestBiometricUnlock`，`PopopxDuressAuthManager.swift:2049`），
+//  那条路自己也只通向"解锁"（成功时它已经 `unlock()`，见 `PopopxDuressAuthManager.swift:2067-2071`）。
 //  行为判据比拽落/跌落更容易误报：拽落的误报需要一次 3g 冲击，而"姿势不对 + 手滑乱点"
 //  在地铁上每天都能凑齐。所以本模块宁可把自己写得"只锁"——一次锁屏的代价是两秒钟，
 //  一次误擦的代价是整个人的聊天记录，两者根本不在同一个数量级上，不值得交换。
 //
 //  ### EMA 基线为什么是 α=0.004（≈8.7 秒半衰期），而不是别的窗口
-//  20Hz 沿用模块一同一档采样率（`PopopxMotionCriteria.sampleRateHz`，:322）。一阶低通的半衰期
+//  20Hz 沿用模块一同一档采样率（`PopopxMotionCriteria.sampleRateHz`，:328）。一阶低通的半衰期
 //  是 `ln2 / α` 帧：α=0.004 → 173 帧 ≈ 8.7 秒。这个数是被两头夹出来的：
 //  - 必须**明显慢于一次姿势变化**（人从坐到躺是 1–3 秒的事，约 20–60 帧）。若 α 取 0.05，
 //    半衰期不到 0.7 秒，躺下的过程本身就把基线拖着走，偏差永远长不起来——判据自己吃掉自己。
@@ -51,13 +51,13 @@
 //  ### 为什么用 `userAcceleration` 而不是原始加速度（和模块一恰好相反）
 //  模块一量失重，必须用**含重力**的原始读数（`PopopxAntiTheftMotionGuard.swift:30-32` 解释了原因）。
 //  本模块量"晃动"，要的是**减掉重力**的那一份：手机平放不动时原始合模长≈1g
-//  （字段语义见 `PopopxAntiTheftMotionGuard.swift:292`），用原始值就会把"静止"读成"一直在晃"，判据反过来。
+//  （字段语义见 `PopopxAntiTheftMotionGuard.swift:298`），用原始值就会把"静止"读成"一直在晃"，判据反过来。
 //  也正因为字段含义相反，这里**不复用** `PopopxMotionSample`：把 `userAcceleration` 塞进一个
 //  文档写明"含重力"的 `g` 字段里，下一个读代码的人会按 1g 静置去理解它，那是个埋好的坑。
 //  姿态角本身用 `gravity` 分量算（不含离心力，比 `attitude` 更稳，也不受航向漂移影响）。
 //
 //  ### 为什么另起一台 `CMMotionManager`
-//  模块一那台（:525）已经占着 accelerometer + gyro 两路，而且它的 start/stop 跟着"锁定"走，
+//  模块一那台（:531）已经占着 accelerometer + gyro 两路，而且它的 start/stop 跟着"锁定"走，
 //  本文件的 start/stop 跟着"前台 + 锁定"走，时机不同。两件事塞进同一台机器上只会互相打断，
 //  还要替对方操心副作用范围。两台实例各自 20Hz，合计仍远低于系统的功耗上限。
 //
@@ -65,15 +65,15 @@
 //  `PopopxAppLockState` 是 `@Observable` 的，跨对象观察它要手写 `withObservationTracking` 递归
 //  （等于在传感器类里塞一套 SwiftUI 的机制，而且重入时机不可控）。模块一走的是另一条路：
 //  `lock`/`unlock` 里显式调 `PopopxAntiTheftMotionGuard.shared.lockedDidChange()`
-//  （`PopopxAntiTheftMotionGuard.swift:168-170`、:180）。本模块同样需要"解锁沿"——那是重建
+//  （`PopopxAntiTheftMotionGuard.swift:174-176`、:186）。本模块同样需要"解锁沿"——那是重建
 //  基线的唯一时机——但挂进那两个方法要改模块一，越界了。所以这里改成 1Hz 自轮询：
 //  读一个 Bool 的成本低于一次触觉反馈，代价是解锁后最多 1 秒才开始重学，可以接受。
 //
 //  ### `.unavailable` 一律按"不放行"
 //  上游的 `authorize()` 把 `.unavailable` 直接当认证成功（`LocalAuthenticationUtils.swift:24`），
 //  那是为"设备解锁便利性"写的语义，本模块的在场核验不许继承它：生物识别不可用、被关掉、
-//  或者已连续失败两次降级（`PopopxDuressAuthManager.swift:1221-1224`）时，一律 `completion(false)`
-//  并且拉一次 `.manual` 锁（`PopopxAntiTheftMotionGuard.swift:98-99` 把"模块二的强制重认证"
+//  或者已连续失败两次降级（`PopopxDuressAuthManager.swift:2052-2054`）时，一律 `completion(false)`
+//  并且拉一次 `.manual` 锁（`PopopxAntiTheftMotionGuard.swift:104-105` 把"模块二的强制重认证"
 //  明确划给了这个 case），让人从遮罩的键盘走——降级方向只能是更强的证明。
 //  同理也不借用 `authenticate(reason:)`：它的 `.passcode` 分支把请求挂到
 //  `ChatModel.shared.laRequest`（:47），那是"谁能进 app"的门，不是"此刻拿手机的是不是本人"的门。
@@ -342,7 +342,7 @@ enum PopopxBehaviorCriteria {
 final class PopopxBehaviorGuard {
     static let shared = PopopxBehaviorGuard()
 
-    /// 命中后的冷却。与 `PopopxAntiTheftMotionGuard.swift:481` 同值，是为了让
+    /// 命中后的冷却。与 `PopopxAntiTheftMotionGuard.swift:487` 同值，是为了让
     /// "解锁之后 5 秒内不再拉锁"在全模块只有一口径。真正防"解锁—立刻又锁"的是
     /// `updateSampling()` 里那次基线重建，这里只是第二道保险。
     static let triggerCooldown: TimeInterval = 5
@@ -350,8 +350,8 @@ final class PopopxBehaviorGuard {
     // MARK: 对外状态
 
     /// 行为判据总开关。默认关闭，口径同模块一的 `DEFAULT_ANTI_THEFT_ENABLED`
-    /// （`PopopxAntiTheftMotionGuard.swift:539`：读不到键就是 false）——
-    /// 不像 `instantLockOnBackground`（:546-548）默认开：那条没有误判成本，这条有。
+    /// （`PopopxAntiTheftMotionGuard.swift:545`：读不到键就是 false）——
+    /// 不像 `instantLockOnBackground`（:552-554）默认开：那条没有误判成本，这条有。
     ///
     /// ⚠️ `didSet` 会把值写回 UserDefaults，所以自毁清扫必须"先拨开关、再删键"
     /// （见 `PopopxDuressAuthManager.swift` 里的 `PopopxAntiTheftSwitches.eraseAllTraces()`，那里正是这么调本属性的）。
@@ -416,7 +416,7 @@ final class PopopxBehaviorGuard {
     private var wasLocked = false
     /// 前台标志。`scenePhase` 是 SwiftUI 侧的量，这个类不是 View，
     /// 所以用 `UIApplication.didBecomeActive/didEnterBackground` 两条通知实现同一条硬约束
-    /// （照 `PopopxAntiTheftMotionGuard.swift:684-735` 的写法）。
+    /// （照 `PopopxAntiTheftMotionGuard.swift:690-741` 的写法）。
     private var appIsActive = true
     private var heartbeat: Timer?
     private var observers: [NSObjectProtocol] = []
@@ -456,7 +456,7 @@ final class PopopxBehaviorGuard {
     /// 停采 + 停表 + 摘通知。基线**不清**：退一次后台就该重新学握姿，
     /// 等于这个功能在每个 app 切换之后都失效几十秒。
     ///
-    /// 锁状态本身不在这里改（模块一 :568-578 同理）：停表是因为不必再测，锁该继续锁。
+    /// 锁状态本身不在这里改（模块一 :574-584 同理）：停表是因为不必再测，锁该继续锁。
     func stop() {
         // 关掉之后不许留着一道"看不见"的门：宿主的敏感动作核验必须回到放行状态。
         suspicion = .calm
@@ -502,8 +502,9 @@ final class PopopxBehaviorGuard {
 
     // MARK: 触摸动力学入口
 
-    /// `UITouch.majorRadius` 的喂入口。由 `PopopxTouchBeat`（模块一 :748-756，
-    /// 它现在只喂 `noteInteraction()`）或宿主在 `touchesBegan` 里逐指调用。
+    /// `UITouch.majorRadius` 的喂入口。由 `PopopxTouchBeat`（模块一 :754——它在 `touchesBegan`
+    /// 里既喂 `noteInteraction()`（:771），也逐指算出边缘占比后转交本模块（:788））
+    /// 或宿主在自己的 `touchesBegan` 里调用。
     ///
     /// 本文件只消费参数，不改那个识别器：它的定位是"只观察、永不参与识别"，
     /// 往里加识别逻辑会把两个模块的生死绑在一起。
@@ -544,7 +545,7 @@ final class PopopxBehaviorGuard {
     /// 只有 `.suspicious` 才拦；`.calm`、`.watching` 一律立刻放行——
     /// 一道需要思考要不要调用的门，最后一定被跳过，所以它必须几乎不添麻烦。
     /// `completion(true)` 只意味着"可以做了"，认证本身已经在这里做完（生物识别成功时
-    /// 模块二顺手解掉了锁，见 `PopopxDuressAuthManager.swift:1228-1231`）。
+    /// 模块二顺手解掉了锁，见 `PopopxDuressAuthManager.swift:2067-2071`）。
     /// 返回 `false` 时宿主应当**什么都不做**：人已经落到遮罩上，会从键盘走一遍。
     func authorizeSensitiveAction(
         reason: String,
@@ -563,7 +564,8 @@ final class PopopxBehaviorGuard {
         }
         let auth = PopopxDuressAuthManager.shared
         // `.unavailable` 按不放行处理（见头注）。`prefersBiometricUnlock` 已经把
-        // "关了生物识别 / 连续失败降级 / 没配常规码"三种情况都折进去了（:543-546）。
+        // "关了生物识别 / 连续失败降级 / 没配常规码"三种情况都折进去了
+        // （`PopopxDuressAuthManager.swift:1156-1161`）。
         guard auth.prefersBiometricUnlock, auth.biometricsAvailable else {
             denyAndLock()
             completion(false)
@@ -572,8 +574,9 @@ final class PopopxBehaviorGuard {
         awaitingAuthorization = true
         auth.requestBiometricUnlock(reason: reason) { granted in
             // 模块二两条 completion 路径都在主线程上：guard 那条在 `@MainActor` 方法里同步调，
-            // 另一条包在 `Task { @MainActor in }` 里（:768-788）。`assumeIsolated` 只是把
-            // 这件事告诉类型系统，不额外排队（同模块一 :598、`AudioRecPlay.swift:53`）。
+            // 另一条包在 `Task { @MainActor in }` 里（`PopopxDuressAuthManager.swift:2057-2073`）。
+            // `assumeIsolated` 只是把这件事告诉类型系统，不额外排队
+            // （同模块一 `PopopxAntiTheftMotionGuard.swift:602-604`、`AudioRecPlay.swift:53`）。
             MainActor.assumeIsolated {
                 self.awaitingAuthorization = false
                 if granted {
@@ -771,7 +774,7 @@ final class PopopxBehaviorGuard {
         PopopxHaptics.notice(.warning)
         // 字符串必须是一条字面量：`os` 的 `debug` 重载走 `OSLogMessage`，
         // 中间出现 `+` 拼接就退化成 `StaticString?` 那次重载，编译不过。而 `debug` 的参数是
-        // `@autoclosure`，所以插值里的属性必须写 `self.`（模块一 :654 没插值属性，碰不到这条）。
+        // `@autoclosure`，所以插值里的属性必须写 `self.`（模块一 :660 没插值属性，碰不到这条）。
         // 日志里没有个人信息，只有三个数字——它们足够解释"刚才为什么锁了"。
         logger.debug(
             "behavior: locked, deviation \(Int(deviation)) over limit \(Int(limit)), \(self.irregularTouchCount) irregular touches"
@@ -849,7 +852,7 @@ final class PopopxBehaviorGuard {
         let state = PopopxAppLockState.shared
         guard !state.duressSilentFlow else { return }
         guard !state.isLocked else { return }
-        // `.manual` 而不是 `.behavior`：模块一 :98 把"模块二的强制重认证"划给了它。
+        // `.manual` 而不是 `.behavior`：模块一 :104-105 把"模块二的强制重认证"划给了它。
         state.lock(reason: .manual)
     }
 
@@ -864,7 +867,7 @@ final class PopopxBehaviorGuard {
             }
         }
         // `.common` 模式：键盘弹出时主 runloop 在 eventTracking 模式，不跑普通定时器，
-        // 而那正是最需要看住锁状态的时候（同模块一 :668-670）。
+        // 而那正是最需要看住锁状态的时候（同模块一 :674-676）。
         RunLoop.main.add(timer, forMode: .common)
         heartbeat = timer
     }
