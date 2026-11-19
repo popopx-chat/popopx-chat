@@ -7100,7 +7100,7 @@ alert title */
 "Dynamic relays and near-field" = "Dinamik röleler ve yakın alan";
 "Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "Çevrimiçi olduğunda dinamik SMP röle düğüm kümesini kullanırsın. Çevrimdışı olduğunda 厢语 1–7 atlamalı bir Bluetooth Mesh'e geçer ve UWB ya da dokunuşla yüz yüze eşleşir.";
 "Anti-peeping and local-only cards" = "Gözlemeye karşı koruma ve yalnızca yerel kartlar";
-"Screenshots and recordings are blocked, top-secret messages burn after reading, and your encrypted profile card never leaves this device." = "Ekran görüntüleri ve kayıtlar engellenir, en gizli mesajlar okunduktan sonra yok olur ve şifreli profil kartın bu cihazdan asla çıkmaz.";
+"Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "Ekran görüntüleri ve kayıtlar engellenir, en gizli mesajlar okunduktan sonra yok olur, konum her iki modda şifreli kalır ve şifreli profil kartın bu cihazdan asla çıkmaz.";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "Kurulumu tamamla ve 3 günlük öncü düğüm deneme rozetini al.";
 "Create encrypted identity" = "Şifreli kimlik oluştur";
 "Restore from encrypted backup" = "Şifreli yedekten geri yükle";

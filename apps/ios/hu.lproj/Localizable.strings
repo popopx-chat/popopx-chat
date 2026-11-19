@@ -8177,7 +8177,7 @@ alert title */
 "Dynamic relays and near-field" = "Dinamikus átjátszók és közeli kapcsolódás";
 "Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "Online a dinamikus SMP közvetítő csomópont klasztert használod. Offline a 厢语 1–7 ugrásos Bluetooth Mesh-re vált, és szemtől szemben párosít UWB-vel vagy érintéssel.";
 "Anti-peeping and local-only cards" = "A leselés elleni védelem és csak helyi kártyák";
-"Screenshots and recordings are blocked, top-secret messages burn after reading, and your encrypted profile card never leaves this device." = "A képernyőképek és a felvételek blokkolva vannak, a fokozottan titkos üzenetek az olvasás után megsemmisülnek, és a titkosított profilkártyád soha nem hagyja el ezt az eszközt.";
+"Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "A képernyőképek és a felvételek blokkolva vannak, a fokozottan titkos üzenetek az olvasás után megsemmisülnek, a tartózkodási hely mindkét módban titkosított, és a titkosított profilkártyád soha nem hagyja el ezt az eszközt.";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "Fejezd be a beállítást, hogy megkapd a 3 napos próba jelvény úttörő csomóponthoz.";
 "Create encrypted identity" = "Titkosított identitás létrehozása";
 "Restore from encrypted backup" = "Visszaállítás titkosított biztonsági mentésből";

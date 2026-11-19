@@ -7168,7 +7168,7 @@ alert title */
 "Dynamic relays and near-field" = "Dynamiczne przekaźniki i zasięg bliski";
 "Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "Online korzystasz z dynamicznego klastra węzłów przekaźnikowych SMP. Offline 厢语 przechodzi na sieć mesh Bluetooth o 1–7 skokach i paruje twarzą w twarz przez UWB lub dotyk.";
 "Anti-peeping and local-only cards" = "Ochrona przed podglądaniem i karty tylko lokalne";
-"Screenshots and recordings are blocked, top-secret messages burn after reading, and your encrypted profile card never leaves this device." = "Zrzuty ekranu i nagrywanie są blokowane, ściśle tajne wiadomości palą się po przeczytaniu, a Twoja zaszyfrowana karta profilu nigdy nie opuszcza tego urządzenia.";
+"Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "Zrzuty ekranu i nagrywanie są blokowane, ściśle tajne wiadomości palą się po przeczytaniu, lokalizacja pozostaje zaszyfrowana w obu trybach, a Twoja zaszyfrowana karta profilu nigdy nie opuszcza tego urządzenia.";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "Ukończ konfigurację, aby otrzymać 3-dniową odznakę próbną węzła pioniera.";
 "Create encrypted identity" = "Utwórz zaszyfrowaną tożsamość";
 "Restore from encrypted backup" = "Przywróć z zaszyfrowanej kopii zapasowej";

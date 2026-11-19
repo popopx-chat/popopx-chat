@@ -7115,7 +7115,7 @@ alert title */
 "Dynamic relays and near-field" = "Динамічні ретранслятори та близький зв'язок";
 "Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "У мережі ви використовуєте динамічний кластер SMP-ретрансляційних вузлів. Без мережі 厢语 переходить на Bluetooth Mesh із 1–7 стрибками та встановлює з'єднання віч-на-віч через UWB або дотик.";
 "Anti-peeping and local-only cards" = "Захист від підгляду та картки лише локально";
-"Screenshots and recordings are blocked, top-secret messages burn after reading, and your encrypted profile card never leaves this device." = "Знімки екрана й запис блокуються, цілком таємні повідомлення знищуються після прочитання, і ваша шифрована картка профілю ніколи не покидає цей пристрій.";
+"Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "Знімки екрана й запис блокуються, цілком таємні повідомлення знищуються після прочитання, локація залишається зашифрована в обох режимах, і ваша шифрована картка профілю ніколи не покидає цей пристрій.";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "Завершіть налаштування, щоб отримати пробний значок вузла-піонера на 3 дні.";
 "Create encrypted identity" = "Створити шифровану ідентичність";
 "Restore from encrypted backup" = "Відновити з шифрованої резервної копії";

@@ -3467,7 +3467,7 @@ server test failure */
 "Dynamic relays and near-field" = "Dynaamiset välityssolmut ja läheisyys";
 "Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "Verkossa käytät dynaamista SMP-välityssolmujen rykelmää. Ilman verkkoa 厢语 vaihtaa 1–7 hyppyn Bluetooth Mesh -verkkoon ja muodostaa parin kasvokkain UWB:llä tai napautuksella.";
 "Anti-peeping and local-only cards" = "Tirkistelyn esto ja kortit vain laitteella";
-"Screenshots and recordings are blocked, top-secret messages burn after reading, and your encrypted profile card never leaves this device." = "Kuvakaappaukset ja tallennukset estetään, huippusalaiset viestit tuhoutuvat lukemisen jälkeen, eikä salattu profiilikorttisi poistu tältä laitteelta.";
+"Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "Kuvakaappaukset ja tallennukset estetään, huippusalaiset viestit tuhoutuvat lukemisen jälkeen, sijainti pysyy salattuna molemmissa käyttötiloissa eikä salattu profiilikorttisi poistu tältä laitteelta.";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "Viimeistele tämä asennus saadaksesi 3 päivän kokeilumerkin pioneerisolmulta.";
 "Create encrypted identity" = "Luo salattu identiteetti";
 "Restore from encrypted backup" = "Palauta salatusta varmuuskopiosta";

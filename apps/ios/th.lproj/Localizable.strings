@@ -3365,7 +3365,7 @@ server test failure */
 "Dynamic relays and near-field" = "รีเลย์ไดนามิกและการเชื่อมต่อระยะใกล้";
 "Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "เมื่อออนไลน์คุณใช้กลุ่มโหนดรีเลย์ SMP แบบไดนามิก เมื่อออฟไลน์ 厢语 จะสลับไปใช้ Bluetooth Mesh 1–7 ฮอป และจับคู่แบบตัวต่อตัวผ่าน UWB หรือการแตะ";
 "Anti-peeping and local-only cards" = "ป้องกันการแอบมอง และเก็บบัตรไว้ในเครื่องเท่านั้น";
-"Screenshots and recordings are blocked, top-secret messages burn after reading, and your encrypted profile card never leaves this device." = "บล็อกทั้งภาพหน้าจอและการบันทึกหน้าจอ ข้อความลับมากจะสลายหลังอ่าน และบัตรโปรไฟล์ที่เข้ารหัสของคุณจะไม่ออกจากเครื่องนี้";
+"Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "บล็อกทั้งภาพหน้าจอและการบันทึกหน้าจอ ข้อความลับมากจะสลายหลังอ่าน ตำแหน่งยังคงถูกเข้ารหัสทั้งสองโหมด และบัตรโปรไฟล์ที่เข้ารหัสของคุณจะไม่ออกจากเครื่องนี้";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "ตั้งค่าให้เสร็จเพื่อรับป้ายทดลองโหนดผู้บุกเบิก 3 วัน";
 "Create encrypted identity" = "สร้างตัวตนที่เข้ารหัส";
 "Restore from encrypted backup" = "กู้คืนจากการสำรองข้อมูลที่เข้ารหัส";

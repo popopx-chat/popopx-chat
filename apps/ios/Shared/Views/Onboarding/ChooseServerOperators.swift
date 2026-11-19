@@ -120,11 +120,14 @@ struct OnboardingConditionsView: View {
 
     private var commitmentsCard: some View {
         PopopxSectionCard(PopopxOnboardingCopy.commitmentsCard) {
-            PopopxCheckbox(PopopxOnboardingCopy.commitmentRelay, isOn: $relayCommitted)
+            PopopxCheckbox(PopopxOnboardingCopy.commitmentRelay, isOn: tick($relayCommitted))
+                .popopxAnimation(PopopxSpring.snappy, value: relayCommitted, reduceMotion: reduceMotion)
             PopopxOnboardingHairline()
-            PopopxCheckbox(PopopxOnboardingCopy.commitmentRouting, isOn: $routingCommitted)
+            PopopxCheckbox(PopopxOnboardingCopy.commitmentRouting, isOn: tick($routingCommitted))
+                .popopxAnimation(PopopxSpring.snappy, value: routingCommitted, reduceMotion: reduceMotion)
             PopopxOnboardingHairline()
-            PopopxCheckbox(PopopxOnboardingCopy.commitmentWipe, isOn: $wipeCommitted)
+            PopopxCheckbox(PopopxOnboardingCopy.commitmentWipe, isOn: tick($wipeCommitted))
+                .popopxAnimation(PopopxSpring.snappy, value: wipeCommitted, reduceMotion: reduceMotion)
         }
     }
 
@@ -158,13 +161,14 @@ struct OnboardingConditionsView: View {
             PopopxOnboardingHairline()
             PopopxPickerRow(
                 PopopxOnboardingCopy.termsOfUse,
-                systemImage: "checkmark.seal.fill",
-                tint: .neutral
+                systemImage: "doc.text.fill",
+                tint: .mesh
             ) {
                 document = .terms
             }
             PopopxOnboardingHairline()
-            PopopxCheckbox(PopopxOnboardingCopy.legalAgreement, isOn: $agreed)
+            PopopxCheckbox(PopopxOnboardingCopy.legalAgreement, isOn: tick($agreed))
+                .popopxAnimation(PopopxSpring.snappy, value: agreed, reduceMotion: reduceMotion)
         }
     }
 
@@ -173,6 +177,20 @@ struct OnboardingConditionsView: View {
     private var commitmentsMet: Bool { relayCommitted && routingCommitted && wipeCommitted }
 
     private var canEnter: Bool { commitmentsMet && agreed && !selectedOperatorIds.isEmpty }
+
+    /// 勾选回执：`PopopxCheckbox` 本身不带触觉（0.97 微缩只在 `PopopxButton` 的按压态里），
+    /// 所以在写入这一侧补一次 selection 轻震，动画由调用点的 `popopxAnimation` 负责。
+    private func tick(_ source: Binding<Bool>) -> Binding<Bool> {
+        Binding(
+            get: { source.wrappedValue },
+            set: { newValue in
+                if source.wrappedValue != newValue {
+                    PopopxHaptics.selection()
+                }
+                source.wrappedValue = newValue
+            }
+        )
+    }
 
     @ViewBuilder private var gateHint: some View {
         if !commitmentsMet {

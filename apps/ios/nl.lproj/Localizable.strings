@@ -6794,7 +6794,7 @@ server test failure */
 "Dynamic relays and near-field" = "Dynamische relais en nabije verbinding";
 "Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "Online gebruik je het dynamisch cluster van SMP-relaisknooppunten. Offline schakelt 厢语 over naar een Bluetooth Mesh van 1–7 hops en koppelt face-to-face via UWB of een tik.";
 "Anti-peeping and local-only cards" = "Antispieden en kaarten alleen lokaal";
-"Screenshots and recordings are blocked, top-secret messages burn after reading, and your encrypted profile card never leaves this device." = "Screenshots en schermopnames worden geblokkeerd, uiterst geheime berichten vernietigen zich na het lezen, en je versleutelde profielkaart verlaat dit apparaat nooit.";
+"Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "Screenshots en schermopnames worden geblokkeerd, uiterst geheime berichten vernietigen zich na het lezen, de locatie blijft in beide modi versleuteld, en je versleutelde profielkaart verlaat dit apparaat nooit.";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "Rond deze set-up af om de 3 dagen proefbadge voor knooppionier te ontvangen.";
 "Create encrypted identity" = "Versleutelde identiteit aanmaken";
 "Restore from encrypted backup" = "Herstellen uit versleutelde back-up";

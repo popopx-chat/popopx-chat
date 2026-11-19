@@ -88,7 +88,7 @@ enum PopopxOnboardingCopy {
     )
     static let shieldTitle = key("Anti-peeping and local-only cards")
     static let shieldNote = key(
-        "Screenshots and recordings are blocked, top-secret messages burn after reading, and your encrypted profile card never leaves this device."
+        "Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device."
     )
     static let trialBadgeNote = key("Complete this setup to receive the 3-Day Pioneer Node Trial Badge.")
     static let createIdentity = key("Create encrypted identity")

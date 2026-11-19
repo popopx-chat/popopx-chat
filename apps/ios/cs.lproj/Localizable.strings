@@ -3925,7 +3925,7 @@ server test failure */
 "Dynamic relays and near-field" = "Dynamická relé a blízké spojení";
 "Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "Online používáte dynamický cluster relé uzlů SMP. Offline přejde 厢语 na Bluetooth Mesh o 1–7 skocích a páruje se tváří v tvář přes UWB nebo klepnutím.";
 "Anti-peeping and local-only cards" = "Ochrana proti nahlížení a karty pouze lokálně";
-"Screenshots and recordings are blocked, top-secret messages burn after reading, and your encrypted profile card never leaves this device." = "Snímky obrazovky a nahrávky jsou blokovány, nejpřísněji utajené zprávy se po přečtení zničí a vaše šifrovaná profilová karta nikdy neopustí toto zařízení.";
+"Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "Snímky obrazovky a nahrávky jsou blokovány, nejpřísněji utajené zprávy se po přečtení zničí, poloha zůstává šifrovaná v obou režimech a vaše šifrovaná profilová karta nikdy neopustí toto zařízení.";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "Dokončete nastavení a obdržíte zkušební odznak pionýrského uzlu na 3 dny.";
 "Create encrypted identity" = "Vytvořit šifrovanou identitu";
 "Restore from encrypted backup" = "Obnovit ze šifrované zálohy";

@@ -7965,7 +7965,7 @@ alert title */
 "Dynamic relays and near-field" = "动态中继与近场建连";
 "Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "有网时走动态 SMP 中继节点集群；断网时厢语切换到 1–7 跳蓝牙 Mesh，并用 UWB 或轻触完成面对面建连。";
 "Anti-peeping and local-only cards" = "防偷窥与纯本地名片";
-"Screenshots and recordings are blocked, top-secret messages burn after reading, and your encrypted profile card never leaves this device." = "禁止截屏与录屏，绝密消息阅后即焚，加密个人名片永不离开本机。";
+"Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "禁止截屏与录屏，绝密消息阅后即焚，双模加密定位，加密个人名片永不离开本机。";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "完成本引导即可获得 3 天先锋节点体验徽章。";
 "Create encrypted identity" = "创建加密身份";
 "Restore from encrypted backup" = "从加密备份恢复";

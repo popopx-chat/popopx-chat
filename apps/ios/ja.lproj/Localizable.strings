@@ -3804,7 +3804,7 @@ server test failure */
 "Dynamic relays and near-field" = "動的中継と至近接続";
 "Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "オンラインでは動的な SMP 中継ノードクラスタを利用します。オフラインでは厢语が 1〜7 ホップの Bluetooth Mesh に切り替わり、UWB またはタップで向かい合わせのペアリングを行います。";
 "Anti-peeping and local-only cards" = "覗き見防止とカードの完全ローカル";
-"Screenshots and recordings are blocked, top-secret messages burn after reading, and your encrypted profile card never leaves this device." = "スクリーンショットと画面収録はブロックされ、最高機密メッセージは読み取り後に破棄され、暗号化されたプロフィールカードがこの端末から出ることはありません。";
+"Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "スクリーンショットと画面収録はブロックされ、最高機密メッセージは読み取り後に破棄され、位置情報は両モードとも暗号化されたまま、暗号化されたプロフィールカードがこの端末から出ることはありません。";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "この設定を完了すると、パイオニアノード3日間体験バッジを受け取れます。";
 "Create encrypted identity" = "暗号化アイデンティティを作成";
 "Restore from encrypted backup" = "暗号化バックアップから復元";
