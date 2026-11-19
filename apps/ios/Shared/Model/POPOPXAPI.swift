@@ -2670,6 +2670,17 @@ func processReceivedMsg(_ res: ChatEvent) async {
             // 所以普通加好友不会被这张名片码蹭出一张主页。
             let autoProfileContactId = contact.contactId
             Task { await ProfileAutoSender.shared.handleContactConnected(contactId: autoProfileContactId) }
+            // 徽章兑换信令的挂载点 1：那条一次性链接建成连接了，才把攒着的 `EXT_REDEEM_REQ` 发出去。
+            // 同样是旁路，只带两个标量。键的同一性是现网自己证的：上面那行 `replaceConnReqView(conn.id, …)`
+            // 拿 `Connection.id`（`":\(connId)"`）去比 `pcc.id`（`":\(pccConnId)"`），两者相等才谈得上"换掉那一屏"
+            // （ChatModel.swift:1303-1310），所以这里传的 `connId` 就是 `startExternalRedeem` 存进去的那个。
+            // 没有攒着的 REQ 时它第一行查表即返回，不读盘也不发东西。
+            if let connectionId = contact.activeConn?.connId {
+                Task { @MainActor in
+                    PopopxSilentSignalingRouter.shared.contactConnected(connectionId: connectionId,
+                                                                        contactId: autoProfileContactId)
+                }
+            }
         }
         if contact.directOrUsed {
             NtfManager.shared.notifyContactConnected(user, contact)
@@ -2763,6 +2774,24 @@ func processReceivedMsg(_ res: ChatEvent) async {
             if let file = cItem.autoReceiveFile() {
                 Task {
                     await receiveFile(user: user, fileId: file.fileId, auto: true)
+                }
+            }
+            // 徽章兑换信令的挂载点 2：这一行是不是一条 `::popopx_sys::` 载荷。
+            // 旁路同上一条，判据只有一份（`PopopxSysMarker.parse` 要求整串相等，见
+            // `Shared/Features/BadgeCredits/PopopxBadgeCreditsModels.swift:830` 那一节），
+            // 所以普通消息在这里只是多一次前缀比较就返回。`apiId` 是发信令那一侧用的同一个数
+            // （`getContactChat`/`getGroupChat` 按它找会话），`chatDir.groupMemberId`
+            // 只有群消息才非空，用来把"谁领了这份红包"记到人头（ChatTypes.swift:4440）。
+            if active(user), let text = cItem.content.msgContent?.text, !text.isEmpty {
+                let signalChatType = cInfo.chatType
+                let signalChatId = cInfo.apiId
+                let signalItemId = cItem.id
+                let signalMemberId = cItem.chatDir.groupMemberId
+                Task { @MainActor in
+                    PopopxSilentSignalingRouter.shared.observeIncoming(
+                        chatType: signalChatType, chatId: signalChatId, itemId: signalItemId,
+                        memberId: signalMemberId, text: text
+                    )
                 }
             }
             if cItem.showNotification {

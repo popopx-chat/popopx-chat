@@ -65,7 +65,9 @@ final class PopopxSecureSheetModel {
 
     private(set) var text: String?
     private(set) var phase: Phase = .reading
-    let totalSeconds: Int
+    /// 这一档能被本机付费抬高（见 `extendTotal(by:)`），所以它不是 `let`；
+    /// 写入权仍然只在管理器手里，视图读不到setter之外的那一半。
+    private(set) var totalSeconds: Int
     private(set) var remainingSeconds: Int
 
     /// 阅读模式（模块六）。默认聚光：它不需要用户先学会一个手势就能用。
@@ -148,6 +150,18 @@ final class PopopxSecureSheetModel {
     func updateRemainingSeconds(_ seconds: Int) {
         guard isReading, !isDisconnected else { return }
         remainingSeconds = max(0, seconds)
+    }
+
+    /// 本机付费延长时，把进度条的分母一起抬高。
+    ///
+    /// 只有这一格需要动：`remainingSeconds` 归管理器的钟管，紧接着那次 `tick()` 会用挪过的
+    /// 截止时刻把它重写。分母不跟着抬的后果是条子一路满格到底、再也不缩短——`progress`
+    /// 那一格里有 `min(1, …)` 会把它压平，所以这个 bug 不会以"超过 100%"的形式暴露出来，
+    /// 只会让唯一那条可视化剩余时间的东西变成一根装饰条。
+    /// 与 `updateRemainingSeconds` 共用同一道 guard：已焚/已断开的时间段里没有东西可以延长。
+    func extendTotal(by seconds: Int) {
+        guard isReading, !isDisconnected else { return }
+        totalSeconds += seconds
     }
 
     func lock(reason: String) {
@@ -355,6 +369,26 @@ struct PopopxSecureSheetView: View {
                 .font(PopopxType.microTag)
                 .foregroundStyle(PopopxSecureSurface.inkTertiary)
                 .fixedSize(horizontal: false, vertical: true)
+
+            // 「算力点延长防窥窗口」：点数由本地账本扣、钟由管理器挪，这一层只负责按一颗钮。
+            // 时长与价格都不写在文案里，两处都取自 `PopopxCommerceLimits`：前者决定挪多少秒，
+            // 后者就是扣款那一个数。算力点中心的用途表已经把这两个数显示过一次，
+            // 这里再各抄一遍就是第三个抄点。
+            PopopxButton(
+                PopopxSecureCopy.extendWindowTitle(
+                    seconds: PopopxCommerceLimits.extendedSecureWindowSeconds,
+                    cost: PopopxCommerceLimits.extendedSecureWindowCost
+                ),
+                systemImage: "hourglass",
+                role: .secondary,
+                fullWidth: true
+            ) {
+                // 失败一定要说出来：点数不足那一句由账本给，"没有可延长的会话"那一句由管理器给。
+                // 静默的付费按钮是这一族里最难看的东西——用户只知道按了没反应。
+                if let failure = PopopxSecureWindowManager.shared.extendViewingWindow() {
+                    toastModel.show(failure, kind: .danger)
+                }
+            }
 
             PopopxButton(
                 "关闭并销毁",
@@ -585,6 +619,11 @@ private extension PopopxSecureCopy {
         return receipts > 0 ? burntWithReceipt(count: receipts) : burntQuietly
     }
     static let antiPhotoNote = "高频抖动可干扰卷帘快门翻拍，会增加功耗与发热。"
+    /// 延长按钮的一行标签。时长走 `PopopxSecureCopy.duration`，所以将来把
+    /// `PopopxCommerceLimits.extendedSecureWindowSeconds` 改成 1800，这里会自动变成"30 分钟"。
+    static func extendWindowTitle(seconds: Int, cost: Int) -> String {
+        "延长 \(duration(seconds)) · \(cost) 算力点"
+    }
 }
 
 struct PopopxSecureCardBubbleStates_Previews: PreviewProvider {

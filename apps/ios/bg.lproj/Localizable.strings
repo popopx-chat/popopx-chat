@@ -4627,3 +4627,117 @@ server test failure */
 /* No comment provided by engineer. */
 "Your POPOPX address" = "Вашият адрес в POPOPX";
 
+
+/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
+/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+
+/* product name */
+"POPOPX Dynamic Privacy Node Badge" = "Значка POPOPX за динамичен поверителен възел";
+
+/* trial product name */
+"3-Day Pioneer Node Trial Badge" = "Пробен значка на възел пионер за 3 дни";
+
+/* virtual currency name */
+"POPOPX Compute Credits" = "Изчислителни точки POPOPX";
+
+/* never VPN */
+"dynamic SMP relay node cluster" = "динамичен клъстер от SMP релейни възли";
+
+/* paywall title */
+"Light up a privacy node" = "Активирай поверителен възел";
+
+/* segment */
+"For myself" = "За мен";
+
+/* segment */
+"Gift badge" = "Подари значка";
+
+/* button */
+"Restore badge purchases" = "Възстанови покупките на значки";
+
+/* button */
+"Enter a code or scan" = "Въведи код или сканирай";
+
+/* button */
+"Exchange with Compute Credits" = "Обменяй с изчислителни точки";
+
+/* price suffix */
+"/ year" = "/ година";
+
+/* price suffix */
+"/ month" = "/ месец";
+
+/* annual badge savings, computed from the two live display prices */
+"Save %lld%% off" = "Спестете %lld%%";
+
+/* credit pack amount */
+"%lld Compute Credits" = "%lld изчислителни точки";
+
+/* Apple 3.1.2(c) auto-renewable disclosure */
+"Payment will be charged to your Apple Account at confirmation of purchase. Subscriptions renew automatically unless they are cancelled at least 24 hours before the end of the current period. You can manage or cancel subscriptions in App Store settings at any time." = "Плащането се таксува към Apple профила ви при потвърждаване на покупката. Абонаментите се подновяват автоматично, освен ако не бъдат отменени поне 24 часа преди края на текущия период. Можете да управлявате или отменяате абонаменти по всяко време в настройките на App Store.";
+
+/* no promotional top-up */
+"Compute Credits are added at the exact amount shown. No bonus credits are granted." = "Изчислителните точки се добавят в точно показаното количество. Няма бонус точки.";
+
+/* wallet label */
+"Compute Credits balance" = "Налични изчислителни точки";
+
+/* sheet title */
+"Send Compute Credits" = "Изпрати изчислителни точки";
+
+/* Apple 3.1.1 no random amounts */
+"Only the fixed amounts listed here can be sent. Nowhere in this feature can you type a custom amount." = "Могат да се изпращат само посочените фиксирани суми. Никъде в тази функция не можете да въведете сума по избор.";
+
+/* refund promise */
+"Credits nobody claims are returned to the sender %lld days after the packet was sent." = "Точките, които никой не получи, се връщат на подателя %lld дни след изпращането.";
+
+/* sheet title */
+"Subscribe to this channel" = "Абонирай се за този канал";
+
+/* channel subscription period */
+"Each purchase is valid for %lld days." = "Всяка покупка е валидна %lld дни.";
+
+/* renewal is cumulative, money promise */
+"Subscribing again adds %lld days to the time you already have." = "Повторният абонамент добавя %lld дни към вече наличното време.";
+
+/* error */
+"The store is not available right now." = "Магазинът в момента не е наличен.";
+
+/* error */
+"This item is not available (%@)." = "Този елемент не е наличен (%@).";
+
+/* error */
+"Purchase failed: %@" = "Неуспешна покупка: %@";
+
+/* error */
+"Purchase cancelled." = "Покупката е отменена.";
+
+/* error */
+"The receipt could not be verified." = "Потвърждението за покупка не можа да бъде проверено.";
+
+/* error */
+"Secure storage is unavailable on this device." = "Защитеното хранилище не е налично на това устройство.";
+
+/* error */
+"This needs %1$lld Compute Credits and you have %2$lld." = "Това изисква %1$lld изчислителни точки, а вие имате %2$lld.";
+
+/* error */
+"This gift badge is no longer available." = "Този подаръчен значка вече не е наличен.";
+
+/* error */
+"This code has already been redeemed." = "Този код вече е използван.";
+
+/* error */
+"The code is not valid. Check it and try again." = "Кодът не е валиден. Проверете го и опитайте отново.";
+
+/* error */
+"The secure exchange could not be started." = "Защитената размяна не можа да бъде стартирана.";
+
+/* error */
+"The sender did not confirm this exchange." = "Подателят не потвърди тази размяна.";
+
+/* error */
+"This badge has already expired." = "Този значка вече е изтекъл.";
+
+/* error */
+"Your Compute Credits balance cannot go above %lld. Spend some credits first." = "Балансът на изчислителни точки не може да надвишава %lld. Изразходвайте част от точките първо.";

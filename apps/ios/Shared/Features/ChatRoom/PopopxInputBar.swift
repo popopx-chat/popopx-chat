@@ -518,6 +518,13 @@ enum PopopxPlusAction: String, CaseIterable, Identifiable {
     /// 模式确认 Sheet（`ProfileSendModeSheet`），面板本身不承载时长——主页的时长是"这一次发送"的属性，
     /// 不是这条草稿的属性，所以它不能像 `.secure` 那样做成常驻武装开关。
     case personalProfile
+    /// 算力点红包：按下即关面板，宿主弹 `PopopxSendRedPacketSheet`。它在单聊与群聊都成立，
+    /// 因为落点由会话自己给（`PopopxPacketDestination` 从 `ChatInfo` 算），份数上限跟着成员数走。
+    case redPacket
+    /// 徽章礼品卡：按下即关面板，宿主弹 `PopopxGiftBadgeCardSheet(contactId:)`。
+    /// **只有单聊该出现这一格** —— 礼品卡的核销回执走单聊那条连接，群组与频道没有对应落点，
+    /// 所以宿主用 `plusActions` 把它筛掉，而不是摆一个只会报错的按钮（见 init 里那个参数）。
+    case giftCard
 
     var id: String { rawValue }
 
@@ -529,6 +536,8 @@ enum PopopxPlusAction: String, CaseIterable, Identifiable {
         case .location: return "位置"
         case .secure: return "绝密"
         case .personalProfile: return "个人主页"
+        case .redPacket: return "红包"
+        case .giftCard: return "礼品卡"
         }
     }
 
@@ -540,6 +549,8 @@ enum PopopxPlusAction: String, CaseIterable, Identifiable {
         case .location: return "location.fill"
         case .secure: return "lock.shield.fill"
         case .personalProfile: return "person.text.rectangle.fill"
+        case .redPacket: return "gift"
+        case .giftCard: return "giftcard.fill"
         }
     }
 }
@@ -569,6 +580,10 @@ struct PopopxInputBar: View {
     private let onPlusTap: (PopopxPlusAction) -> Void
     private let onTTLChange: (Int?) -> Void
     private let onSecureTTLChange: (Int?) -> Void
+    /// 「+」面板里实际画哪几格。默认是全部；宿主按会话筛掉**在这个会话里根本发不出去**的那些
+    /// （礼品卡只在单聊成立）。刻意不做成"画出来、按下去再弹提示"：少一格只是少一个入口，
+    /// 而一格点了只换来一句"这里不行"，是在骗用户按它。
+    private let plusActions: [PopopxPlusAction]
 
     @State private var showsPlusPanel = false
     @State private var showsEmojiTray = false
@@ -593,7 +608,8 @@ struct PopopxInputBar: View {
         onHoldToTalk: @escaping () -> Void = {},
         onPlusTap: @escaping (PopopxPlusAction) -> Void = { _ in },
         onTTLChange: @escaping (Int?) -> Void = { _ in },
-        onSecureTTLChange: @escaping (Int?) -> Void = { _ in }
+        onSecureTTLChange: @escaping (Int?) -> Void = { _ in },
+        plusActions: [PopopxPlusAction] = PopopxPlusAction.allCases
     ) {
         _text = text
         _model = StateObject(wrappedValue: PopopxInputBarModel())
@@ -610,6 +626,7 @@ struct PopopxInputBar: View {
         self.onPlusTap = onPlusTap
         self.onTTLChange = onTTLChange
         self.onSecureTTLChange = onSecureTTLChange
+        self.plusActions = plusActions
     }
 
     var body: some View {
@@ -898,7 +915,7 @@ struct PopopxInputBar: View {
                 columns: [GridItem(.adaptive(minimum: PopopxMetrics.space2XL), spacing: PopopxMetrics.spaceS)],
                 spacing: PopopxMetrics.spaceXS
             ) {
-                ForEach(PopopxPlusAction.allCases) { action in
+                ForEach(plusActions) { action in
                     // 有"已武装"态的格子目前只有绝密：按普通一次性动作画的话，
                     // 用户看不出这条草稿到底是不是绝密消息 —— 那是发送前唯一的可见线索。
                     // 声明必须放在 `Button` 之前而不是 `label:` 里：下面的 `.accessibilityAddTraits`

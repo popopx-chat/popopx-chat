@@ -221,7 +221,25 @@
 		8B1B85A530AE9049005C5769 /* PopopxAppLockOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1B859D30AE9049005C5769 /* PopopxAppLockOverlayView.swift */; };
 		8B1B85A630AE9049005C5769 /* PopopxDecoyProfileGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1B859F30AE9049005C5769 /* PopopxDecoyProfileGenerator.swift */; };
 		8B1B85A730AE9049005C5769 /* PopopxDuressAuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1B85A030AE9049005C5769 /* PopopxDuressAuthManager.swift */; };
+		8B2E25BA30AEF54F00D91FDC /* PopopxStoreKit.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 8B2E25B930AEF54F00D91FDC /* PopopxStoreKit.storekit */; };
 		8B2E872D30AD6A7700670E4A /* PopopxTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B2E872C30AD6A7700670E4A /* PopopxTheme.swift */; };
+		8B34642F30AEF48D00F92867 /* PopopxBadgeCapsuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B34641D30AEF48D00F92867 /* PopopxBadgeCapsuleView.swift */; };
+		8B34643030AEF48D00F92867 /* PopopxGiftBadgeCardSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B34642730AEF48D00F92867 /* PopopxGiftBadgeCardSheet.swift */; };
+		8B34643130AEF48D00F92867 /* PopopxBadgeCreditExchangeSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B34641E30AEF48D00F92867 /* PopopxBadgeCreditExchangeSheet.swift */; };
+		8B34643230AEF48D00F92867 /* PopopxBadgeDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B34642030AEF48D00F92867 /* PopopxBadgeDetailSheet.swift */; };
+		8B34643330AEF48D00F92867 /* PopopxCommerceCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B34642430AEF48D00F92867 /* PopopxCommerceCards.swift */; };
+		8B34643430AEF48D00F92867 /* PopopxChannelSubscriptionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B34642330AEF48D00F92867 /* PopopxChannelSubscriptionSheet.swift */; };
+		8B34643530AEF48D00F92867 /* PopopxBadgeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B34642130AEF48D00F92867 /* PopopxBadgeManager.swift */; };
+		8B34643630AEF48D00F92867 /* PopopxP2PVoucherVault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B34642830AEF48D00F92867 /* PopopxP2PVoucherVault.swift */; };
+		8B34643730AEF48D00F92867 /* PopopxTrialWelcomeModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B34642C30AEF48D00F92867 /* PopopxTrialWelcomeModal.swift */; };
+		8B34643830AEF48D00F92867 /* PopopxSilentSignalingRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B34642A30AEF48D00F92867 /* PopopxSilentSignalingRouter.swift */; };
+		8B34643930AEF48D00F92867 /* PopopxCreditsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B34642530AEF48D00F92867 /* PopopxCreditsManager.swift */; };
+		8B34643A30AEF48D00F92867 /* PopopxSendRedPacketSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B34642930AEF48D00F92867 /* PopopxSendRedPacketSheet.swift */; };
+		8B34643B30AEF48D00F92867 /* PopopxVoucherRedeemSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B34642D30AEF48D00F92867 /* PopopxVoucherRedeemSheet.swift */; };
+		8B34643C30AEF48D00F92867 /* PopopxBadgeCreditsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B34641F30AEF48D00F92867 /* PopopxBadgeCreditsModels.swift */; };
+		8B34643D30AEF48D00F92867 /* PopopxStoreKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B34642B30AEF48D00F92867 /* PopopxStoreKitManager.swift */; };
+		8B34643E30AEF48D00F92867 /* PopopxCreditsStoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B34642630AEF48D00F92867 /* PopopxCreditsStoreView.swift */; };
+		8B34643F30AEF48D00F92867 /* PopopxBadgePaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B34642230AEF48D00F92867 /* PopopxBadgePaywallView.swift */; };
 		8B36F14A30AE127C00ABC182 /* POPOPXAntiSpyDetector.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F14930AE127C00ABC182 /* POPOPXAntiSpyDetector.mlpackage */; };
 		8B36F15330AE6E8600ABC182 /* PersonalProfileModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F14B30AE6E8600ABC182 /* PersonalProfileModel.swift */; };
 		8B36F15430AE6E8600ABC182 /* ProfileReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F15030AE6E8600ABC182 /* ProfileReaderView.swift */; };
@@ -672,7 +690,25 @@
 		8B1B859E30AE9049005C5769 /* PopopxBehaviorGuard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxBehaviorGuard.swift; sourceTree = "<group>"; };
 		8B1B859F30AE9049005C5769 /* PopopxDecoyProfileGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxDecoyProfileGenerator.swift; sourceTree = "<group>"; };
 		8B1B85A030AE9049005C5769 /* PopopxDuressAuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxDuressAuthManager.swift; sourceTree = "<group>"; };
+		8B2E25B930AEF54F00D91FDC /* PopopxStoreKit.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = PopopxStoreKit.storekit; sourceTree = "<group>"; };
 		8B2E872C30AD6A7700670E4A /* PopopxTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxTheme.swift; sourceTree = "<group>"; };
+		8B34641D30AEF48D00F92867 /* PopopxBadgeCapsuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxBadgeCapsuleView.swift; sourceTree = "<group>"; };
+		8B34641E30AEF48D00F92867 /* PopopxBadgeCreditExchangeSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxBadgeCreditExchangeSheet.swift; sourceTree = "<group>"; };
+		8B34641F30AEF48D00F92867 /* PopopxBadgeCreditsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxBadgeCreditsModels.swift; sourceTree = "<group>"; };
+		8B34642030AEF48D00F92867 /* PopopxBadgeDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxBadgeDetailSheet.swift; sourceTree = "<group>"; };
+		8B34642130AEF48D00F92867 /* PopopxBadgeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxBadgeManager.swift; sourceTree = "<group>"; };
+		8B34642230AEF48D00F92867 /* PopopxBadgePaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxBadgePaywallView.swift; sourceTree = "<group>"; };
+		8B34642330AEF48D00F92867 /* PopopxChannelSubscriptionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxChannelSubscriptionSheet.swift; sourceTree = "<group>"; };
+		8B34642430AEF48D00F92867 /* PopopxCommerceCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxCommerceCards.swift; sourceTree = "<group>"; };
+		8B34642530AEF48D00F92867 /* PopopxCreditsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxCreditsManager.swift; sourceTree = "<group>"; };
+		8B34642630AEF48D00F92867 /* PopopxCreditsStoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxCreditsStoreView.swift; sourceTree = "<group>"; };
+		8B34642730AEF48D00F92867 /* PopopxGiftBadgeCardSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxGiftBadgeCardSheet.swift; sourceTree = "<group>"; };
+		8B34642830AEF48D00F92867 /* PopopxP2PVoucherVault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxP2PVoucherVault.swift; sourceTree = "<group>"; };
+		8B34642930AEF48D00F92867 /* PopopxSendRedPacketSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxSendRedPacketSheet.swift; sourceTree = "<group>"; };
+		8B34642A30AEF48D00F92867 /* PopopxSilentSignalingRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxSilentSignalingRouter.swift; sourceTree = "<group>"; };
+		8B34642B30AEF48D00F92867 /* PopopxStoreKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxStoreKitManager.swift; sourceTree = "<group>"; };
+		8B34642C30AEF48D00F92867 /* PopopxTrialWelcomeModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxTrialWelcomeModal.swift; sourceTree = "<group>"; };
+		8B34642D30AEF48D00F92867 /* PopopxVoucherRedeemSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxVoucherRedeemSheet.swift; sourceTree = "<group>"; };
 		8B36F14930AE127C00ABC182 /* POPOPXAntiSpyDetector.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = POPOPXAntiSpyDetector.mlpackage; sourceTree = "<group>"; };
 		8B36F14B30AE6E8600ABC182 /* PersonalProfileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalProfileModel.swift; sourceTree = "<group>"; };
 		8B36F14C30AE6E8600ABC182 /* ProfileAutoSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileAutoSender.swift; sourceTree = "<group>"; };
@@ -1387,6 +1423,31 @@
 			path = AntiTheftDuress;
 			sourceTree = "<group>";
 		};
+		8B34642E30AEF48D00F92867 /* BadgeCredits */ = {
+			isa = PBXGroup;
+			children = (
+				8B34641D30AEF48D00F92867 /* PopopxBadgeCapsuleView.swift */,
+				8B34641E30AEF48D00F92867 /* PopopxBadgeCreditExchangeSheet.swift */,
+				8B34641F30AEF48D00F92867 /* PopopxBadgeCreditsModels.swift */,
+				8B34642030AEF48D00F92867 /* PopopxBadgeDetailSheet.swift */,
+				8B34642130AEF48D00F92867 /* PopopxBadgeManager.swift */,
+				8B34642230AEF48D00F92867 /* PopopxBadgePaywallView.swift */,
+				8B34642330AEF48D00F92867 /* PopopxChannelSubscriptionSheet.swift */,
+				8B34642430AEF48D00F92867 /* PopopxCommerceCards.swift */,
+				8B34642530AEF48D00F92867 /* PopopxCreditsManager.swift */,
+				8B34642630AEF48D00F92867 /* PopopxCreditsStoreView.swift */,
+				8B34642730AEF48D00F92867 /* PopopxGiftBadgeCardSheet.swift */,
+				8B34642830AEF48D00F92867 /* PopopxP2PVoucherVault.swift */,
+				8B34642930AEF48D00F92867 /* PopopxSendRedPacketSheet.swift */,
+				8B34642A30AEF48D00F92867 /* PopopxSilentSignalingRouter.swift */,
+				8B34642B30AEF48D00F92867 /* PopopxStoreKitManager.swift */,
+				8B34642C30AEF48D00F92867 /* PopopxTrialWelcomeModal.swift */,
+				8B34642D30AEF48D00F92867 /* PopopxVoucherRedeemSheet.swift */,
+				8B2E25B930AEF54F00D91FDC /* PopopxStoreKit.storekit */,
+			);
+			path = BadgeCredits;
+			sourceTree = "<group>";
+		};
 		8B36F15230AE6E8600ABC182 /* PersonalProfile */ = {
 			isa = PBXGroup;
 			children = (
@@ -1423,6 +1484,7 @@
 		8B51158A30AD7BC200B15CFE /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				8B34642E30AEF48D00F92867 /* BadgeCredits */,
 				8B1B85A130AE9049005C5769 /* AntiTheftDuress */,
 				8B36F15230AE6E8600ABC182 /* PersonalProfile */,
 				8BBDA84830AD9C880013F482 /* ChatInfo */,
@@ -1815,6 +1877,7 @@
 				5CA059EF279559F40002BEB4 /* Assets.xcassets in Resources */,
 				5CC2C0FC2809BF11000C35E3 /* Localizable.strings in Resources */,
 				5CC2C0FF2809BF11000C35E3 /* POPOPX--iOS--InfoPlist.strings in Resources */,
+				8B2E25BA30AEF54F00D91FDC /* PopopxStoreKit.storekit in Resources */,
 				E5C0BBE82F82B45500EA7527 /* POPOPXAssets.xcassets in Resources */,
 				E5C0BBEB2F82B45500EA7527 /* SharedAssets.xcassets in Resources */,
 			);
@@ -1979,6 +2042,23 @@
 				8CC956EE2BC0041000412A11 /* NetworkObserver.swift in Sources */,
 				5C2E261227A30FEA00F70299 /* TerminalView.swift in Sources */,
 				5C9FD96E27A5D6ED0075386C /* SendMessageView.swift in Sources */,
+				8B34642F30AEF48D00F92867 /* PopopxBadgeCapsuleView.swift in Sources */,
+				8B34643030AEF48D00F92867 /* PopopxGiftBadgeCardSheet.swift in Sources */,
+				8B34643130AEF48D00F92867 /* PopopxBadgeCreditExchangeSheet.swift in Sources */,
+				8B34643230AEF48D00F92867 /* PopopxBadgeDetailSheet.swift in Sources */,
+				8B34643330AEF48D00F92867 /* PopopxCommerceCards.swift in Sources */,
+				8B34643430AEF48D00F92867 /* PopopxChannelSubscriptionSheet.swift in Sources */,
+				8B34643530AEF48D00F92867 /* PopopxBadgeManager.swift in Sources */,
+				8B34643630AEF48D00F92867 /* PopopxP2PVoucherVault.swift in Sources */,
+				8B34643730AEF48D00F92867 /* PopopxTrialWelcomeModal.swift in Sources */,
+				8B34643830AEF48D00F92867 /* PopopxSilentSignalingRouter.swift in Sources */,
+				8B34643930AEF48D00F92867 /* PopopxCreditsManager.swift in Sources */,
+				8B34643A30AEF48D00F92867 /* PopopxSendRedPacketSheet.swift in Sources */,
+				8B34643B30AEF48D00F92867 /* PopopxVoucherRedeemSheet.swift in Sources */,
+				8B34643C30AEF48D00F92867 /* PopopxBadgeCreditsModels.swift in Sources */,
+				8B34643D30AEF48D00F92867 /* PopopxStoreKitManager.swift in Sources */,
+				8B34643E30AEF48D00F92867 /* PopopxCreditsStoreView.swift in Sources */,
+				8B34643F30AEF48D00F92867 /* PopopxBadgePaywallView.swift in Sources */,
 				5CA7DFC329302AF000F7FDDE /* AppSheet.swift in Sources */,
 				64E972072881BB22008DBC02 /* CIGroupInvitationView.swift in Sources */,
 				8B1B85A230AE9049005C5769 /* PopopxBehaviorGuard.swift in Sources */,

@@ -299,6 +299,12 @@ struct ChatPreviewView: View {
     }
 
     func chatItemPreview(_ cItem: ChatItem) -> (Text, Bool) {
+        // 静默信令不做会话预览。这一行在聊天页已经不渲染（ChatView.swift 的行闸），但信令常常正是
+        // 这一会话的最后一条，列表里就会把 `::popopx_sys::…` 原样念出来；删行落地之前这里是它唯一
+        // 可见的时刻。判据与行闸、通知闸共用 `PopopxSysMarker`（要求整串相等），所以这里不多一次解析规则。
+        if PopopxSysMarker.isSignalText(cItem.content.msgContent?.text ?? "") {
+            return (Text(""), false)
+        }
         let (itemText, itemFormattedText) = chatItemPreviewText(cItem)
         let r = messageText(itemText, itemFormattedText, markdownBlocks: itemFormattedText == nil ? nil : cItem.markdownBlocks, sender: cItem.meta.showGroupAsSender ? nil : cItem.memberDisplayName, preview: true, mentions: cItem.mentions, userMemberId: chat.chatInfo.groupInfo?.membership.memberId, showSecrets: nil, backgroundColor: UIColor(theme.colors.background), prefix: prefix())
         return (Text(AttributedString(r.string)), r.hasSecrets)

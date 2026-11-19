@@ -3231,3 +3231,117 @@ server test failure */
 /* No comment provided by engineer. */
 "Your POPOPX address" = "ที่อยู่ POPOPX ของคุณ";
 
+
+/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
+/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+
+/* product name */
+"POPOPX Dynamic Privacy Node Badge" = "ป้าย POPOPX ของโหนดความเป็นส่วนตัวแบบไดนามิก";
+
+/* trial product name */
+"3-Day Pioneer Node Trial Badge" = "ป้ายทดลองโหนดผู้บุกเบิก 3 วัน";
+
+/* virtual currency name */
+"POPOPX Compute Credits" = "เครดิตการประมวลผล POPOPX";
+
+/* never VPN */
+"dynamic SMP relay node cluster" = "กลุ่มโหนดรีเลย์ SMP แบบไดนามิก";
+
+/* paywall title */
+"Light up a privacy node" = "เปิดใช้โหนดความเป็นส่วนตัว";
+
+/* segment */
+"For myself" = "สำหรับฉัน";
+
+/* segment */
+"Gift badge" = "มอบป้ายเป็นของขวัญ";
+
+/* button */
+"Restore badge purchases" = "กู้คืนการซื้อป้าย";
+
+/* button */
+"Enter a code or scan" = "กรอกรหัสหรือสแกน";
+
+/* button */
+"Exchange with Compute Credits" = "แลกด้วยเครดิตการประมวลผล";
+
+/* price suffix */
+"/ year" = "/ ปี";
+
+/* price suffix */
+"/ month" = "/ เดือน";
+
+/* annual badge savings, computed from the two live display prices */
+"Save %lld%% off" = "ประหยัด %lld%%";
+
+/* credit pack amount */
+"%lld Compute Credits" = "%lld เครดิตการประมวลผล";
+
+/* Apple 3.1.2(c) auto-renewable disclosure */
+"Payment will be charged to your Apple Account at confirmation of purchase. Subscriptions renew automatically unless they are cancelled at least 24 hours before the end of the current period. You can manage or cancel subscriptions in App Store settings at any time." = "จะเรียกเก็บเงินจากบัญชี Apple ของคุณเมื่อยืนยันการซื้อ การเป็นสมาชิกจะต่ออายุอัตโนมัติ ยกเว้นจะยกเลิกอย่างน้อย 24 ชั่วโมงก่อนหมดช่วงเวลาปัจจุบัน คุณสามารถจัดการหรือยกเลิกการเป็นสมาชิกได้ตลอดเวลาในการตั้งค่า App Store";
+
+/* no promotional top-up */
+"Compute Credits are added at the exact amount shown. No bonus credits are granted." = "เครดิตการประมวลผลจะเพิ่มตามจำนวนที่แสดงพอดี ไม่มีการแจกเครดิตโบนัส";
+
+/* wallet label */
+"Compute Credits balance" = "ยอดเครดิตการประมวลผล";
+
+/* sheet title */
+"Send Compute Credits" = "ส่งเครดิตการประมวลผล";
+
+/* Apple 3.1.1 no random amounts */
+"Only the fixed amounts listed here can be sent. Nowhere in this feature can you type a custom amount." = "ส่งได้ตามจำนวนคงที่ที่ระบุที่นี่เท่านั้น ไม่มีที่ใดในฟีเจอร์นี้ที่ให้กรอกจำนวนเอง";
+
+/* refund promise */
+"Credits nobody claims are returned to the sender %lld days after the packet was sent." = "เครดิตที่ไม่มีใครรับ จะถูกส่งกลับผู้ส่งหลังส่งไป %lld วัน";
+
+/* sheet title */
+"Subscribe to this channel" = "สมัครสมาชิกช่องนี้";
+
+/* channel subscription period */
+"Each purchase is valid for %lld days." = "แต่ละการซื้อใช้ได้ %lld วัน";
+
+/* renewal is cumulative, money promise */
+"Subscribing again adds %lld days to the time you already have." = "การสมัครซ้ำจะเพิ่ม %lld วันเข้าไปในเวลาที่เหลืออยู่ของคุณ";
+
+/* error */
+"The store is not available right now." = "สโตร์ไม่พร้อมใช้งานในขณะนี้";
+
+/* error */
+"This item is not available (%@)." = "รายการนี้ไม่พร้อมใช้งาน (%@)";
+
+/* error */
+"Purchase failed: %@" = "ซื้อไม่สำเร็จ: %@";
+
+/* error */
+"Purchase cancelled." = "ยกเลิกการซื้อแล้ว";
+
+/* error */
+"The receipt could not be verified." = "ไม่สามารถตรวจสอบใบเสร็จได้";
+
+/* error */
+"Secure storage is unavailable on this device." = "ที่จัดเก็บที่ปลอดภัยไม่พร้อมใช้งานบนอุปกรณ์นี้";
+
+/* error */
+"This needs %1$lld Compute Credits and you have %2$lld." = "ต้องใช้ %1$lld เครดิตการประมวลผล แต่คุณมี %2$lld";
+
+/* error */
+"This gift badge is no longer available." = "ป้ายของขวัญนี้ไม่พร้อมใช้งานอีกต่อไป";
+
+/* error */
+"This code has already been redeemed." = "รหัสนี้ถูกแลกไปแล้ว";
+
+/* error */
+"The code is not valid. Check it and try again." = "รหัสไม่ถูกต้อง กรุณาตรวจสอบแล้วลองอีกครั้ง";
+
+/* error */
+"The secure exchange could not be started." = "ไม่สามารถเริ่มการแลกเปลี่ยนที่ปลอดภัยได้";
+
+/* error */
+"The sender did not confirm this exchange." = "ผู้ส่งไม่ได้ยืนยันการแลกเปลี่ยนนี้";
+
+/* error */
+"This badge has already expired." = "ป้ายนี้หมดอายุแล้ว";
+
+/* error */
+"Your Compute Credits balance cannot go above %lld. Spend some credits first." = "ยอดเครดิตการประมวลผลของคุณต้องไม่เกิน %lld ใช้เครดิตบางส่วนก่อน";

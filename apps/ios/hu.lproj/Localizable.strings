@@ -8043,3 +8043,117 @@ alert title */
 /* No comment provided by engineer. */
 "Your subscription is cancelled. The badge stays until %@." = "Az előfizetése meg lett szakítva. A kitűző eddig marad meg: %@.";
 
+
+/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
+/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+
+/* product name */
+"POPOPX Dynamic Privacy Node Badge" = "POPOPX dinamikus adatvédelmi csomópont jelvény";
+
+/* trial product name */
+"3-Day Pioneer Node Trial Badge" = "3 napos próba jelvény úttörő csomóponthoz";
+
+/* virtual currency name */
+"POPOPX Compute Credits" = "POPOPX számítási kreditek";
+
+/* never VPN */
+"dynamic SMP relay node cluster" = "dinamikus SMP közvetítő csomópont klaszter";
+
+/* paywall title */
+"Light up a privacy node" = "Aktiváljon egy adatvédelmi csomópontot";
+
+/* segment */
+"For myself" = "Nekem";
+
+/* segment */
+"Gift badge" = "Jelvény ajándékozása";
+
+/* button */
+"Restore badge purchases" = "Jelvényvásárlások visszaállítása";
+
+/* button */
+"Enter a code or scan" = "Kód bevitele vagy beolvasása";
+
+/* button */
+"Exchange with Compute Credits" = "Beváltás számítási kreditekkel";
+
+/* price suffix */
+"/ year" = "/ év";
+
+/* price suffix */
+"/ month" = "/ hónap";
+
+/* annual badge savings, computed from the two live display prices */
+"Save %lld%% off" = "%lld%% megtakarítás";
+
+/* credit pack amount */
+"%lld Compute Credits" = "%lld számítási kredit";
+
+/* Apple 3.1.2(c) auto-renewable disclosure */
+"Payment will be charged to your Apple Account at confirmation of purchase. Subscriptions renew automatically unless they are cancelled at least 24 hours before the end of the current period. You can manage or cancel subscriptions in App Store settings at any time." = "A vételárat a vásárlás jóváhagyásakor terheljük az Apple-fiókjára. Az előfizetések automatikusan megújulnak, hacsak nem mondja le őket legalább 24 órával az aktuális időszak vége előtt. Az előfizetéseket bármikor kezelheti vagy lemondhatja az App Store beállításaiban.";
+
+/* no promotional top-up */
+"Compute Credits are added at the exact amount shown. No bonus credits are granted." = "A számítási krediteket pontosan a feltüntetett mennyiségben írjuk jóvá. Nincsenek bónusz kreditek.";
+
+/* wallet label */
+"Compute Credits balance" = "Számítási kredit egyenleg";
+
+/* sheet title */
+"Send Compute Credits" = "Számítási kredit küldése";
+
+/* Apple 3.1.1 no random amounts */
+"Only the fixed amounts listed here can be sent. Nowhere in this feature can you type a custom amount." = "Csak a itt szereplő rögzített összegek küldhetők. Ebben a funkcióban sehol nem adhat meg egyedi összeget.";
+
+/* refund promise */
+"Credits nobody claims are returned to the sender %lld days after the packet was sent." = "A senki által be nem váltott kreditek %lld nappal az elküldés után visszakerülnek a feladóhoz.";
+
+/* sheet title */
+"Subscribe to this channel" = "Feliratkozás erre a csatornára";
+
+/* channel subscription period */
+"Each purchase is valid for %lld days." = "Minden vásárlás %lld napig érvényes.";
+
+/* renewal is cumulative, money promise */
+"Subscribing again adds %lld days to the time you already have." = "Az újrafeliratkozás %lld nappal hosszabbítja a már meglévő időt.";
+
+/* error */
+"The store is not available right now." = "A bolt most nem érhető el.";
+
+/* error */
+"This item is not available (%@)." = "Ez a termék nem érhető el (%@).";
+
+/* error */
+"Purchase failed: %@" = "A vásárlás sikertelen: %@";
+
+/* error */
+"Purchase cancelled." = "A vásárlás megszakítva.";
+
+/* error */
+"The receipt could not be verified." = "A bizonylat nem igazolható.";
+
+/* error */
+"Secure storage is unavailable on this device." = "A biztonságos tároló nem érhető el ezen az eszközön.";
+
+/* error */
+"This needs %1$lld Compute Credits and you have %2$lld." = "Ehhez %1$lld számítási kredit szükséges, és Önnek %2$lld van.";
+
+/* error */
+"This gift badge is no longer available." = "Ez az ajándék jelvény már nem érhető el.";
+
+/* error */
+"This code has already been redeemed." = "Ezt a kódot már beváltották.";
+
+/* error */
+"The code is not valid. Check it and try again." = "A kód nem érvényes. Ellenőrizze, majd próbálja újra.";
+
+/* error */
+"The secure exchange could not be started." = "A biztonságos csere nem indítható el.";
+
+/* error */
+"The sender did not confirm this exchange." = "A feladó nem erősítette meg ezt a cserét.";
+
+/* error */
+"This badge has already expired." = "Ez a jelvény már lejárt.";
+
+/* error */
+"Your Compute Credits balance cannot go above %lld. Spend some credits first." = "A számítási kredit egyenleg nem haladhatja meg a %lld értéket. Először költsön el néhány kreditet.";

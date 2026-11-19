@@ -3791,3 +3791,117 @@ server test failure */
 /* No comment provided by engineer. */
 "Your POPOPX address" = "Vaše POPOPX adresa";
 
+
+/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
+/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+
+/* product name */
+"POPOPX Dynamic Privacy Node Badge" = "Odznak POPOPX dynamického soukromého uzlu";
+
+/* trial product name */
+"3-Day Pioneer Node Trial Badge" = "Zkušební odznak pionýrského uzlu na 3 dny";
+
+/* virtual currency name */
+"POPOPX Compute Credits" = "Výpočetní body POPOPX";
+
+/* never VPN */
+"dynamic SMP relay node cluster" = "dynamický cluster přeposílacích SMP uzlů";
+
+/* paywall title */
+"Light up a privacy node" = "Aktivovat soukromý uzel";
+
+/* segment */
+"For myself" = "Pro mě";
+
+/* segment */
+"Gift badge" = "Dát odznak";
+
+/* button */
+"Restore badge purchases" = "Obnovit nákupy odznaků";
+
+/* button */
+"Enter a code or scan" = "Zadejte kód, nebo naskenujte";
+
+/* button */
+"Exchange with Compute Credits" = "Vyměnit za výpočetní body";
+
+/* price suffix */
+"/ year" = "/ rok";
+
+/* price suffix */
+"/ month" = "/ měsíc";
+
+/* annual badge savings, computed from the two live display prices */
+"Save %lld%% off" = "Ušetřete %lld%%";
+
+/* credit pack amount */
+"%lld Compute Credits" = "%lld výpočetních bodů";
+
+/* Apple 3.1.2(c) auto-renewable disclosure */
+"Payment will be charged to your Apple Account at confirmation of purchase. Subscriptions renew automatically unless they are cancelled at least 24 hours before the end of the current period. You can manage or cancel subscriptions in App Store settings at any time." = "Platba je účtována na váš Apple účet při potvrzení nákupu. Předplatná se obnovují automaticky, pokud nejsou zrušena alespoň 24 hodin před koncem aktuálního období. Předplatná můžete spravovat nebo zrušit kdykoli v nastavení App Store.";
+
+/* no promotional top-up */
+"Compute Credits are added at the exact amount shown. No bonus credits are granted." = "Výpočetní body se připsávají přesně v uvedené výši. Žádné bonusové body se neposkytují.";
+
+/* wallet label */
+"Compute Credits balance" = "Zůstatek výpočetních bodů";
+
+/* sheet title */
+"Send Compute Credits" = "Poslat výpočetní body";
+
+/* Apple 3.1.1 no random amounts */
+"Only the fixed amounts listed here can be sent. Nowhere in this feature can you type a custom amount." = "Lze posílat pouze pevné částky uvedené zde. V této funkci nikde nelze zadat vlastní částku.";
+
+/* refund promise */
+"Credits nobody claims are returned to the sender %lld days after the packet was sent." = "Body, které nikdo nevyzvedl, se vrátí odesilateli %lld dní po odeslání.";
+
+/* sheet title */
+"Subscribe to this channel" = "Přihlásit se k tomuto kanálu";
+
+/* channel subscription period */
+"Each purchase is valid for %lld days." = "Každý nákup platí %lld dní.";
+
+/* renewal is cumulative, money promise */
+"Subscribing again adds %lld days to the time you already have." = "Opětovné předplatné přidá %lld dní k času, který už máte.";
+
+/* error */
+"The store is not available right now." = "Obchod není právě dostupný.";
+
+/* error */
+"This item is not available (%@)." = "Tato položka není dostupná (%@).";
+
+/* error */
+"Purchase failed: %@" = "Nákup se nezdařil: %@";
+
+/* error */
+"Purchase cancelled." = "Nákup zrušen.";
+
+/* error */
+"The receipt could not be verified." = "Účtenku nebylo možné ověřit.";
+
+/* error */
+"Secure storage is unavailable on this device." = "Zabezpečené úložiště není na tomto zařízení dostupné.";
+
+/* error */
+"This needs %1$lld Compute Credits and you have %2$lld." = "Vyžaduje to %1$lld výpočetních bodů a vy máte %2$lld.";
+
+/* error */
+"This gift badge is no longer available." = "Tento dárkový odznak již není dostupný.";
+
+/* error */
+"This code has already been redeemed." = "Tento kód již byl uplatněn.";
+
+/* error */
+"The code is not valid. Check it and try again." = "Kód není platný. Zkontrolujte ho a zkuste to znovu.";
+
+/* error */
+"The secure exchange could not be started." = "Zabezpečenou výměnu nebylo možné zahájit.";
+
+/* error */
+"The sender did not confirm this exchange." = "Odesílatel tuto výměnu nepotvrdil.";
+
+/* error */
+"This badge has already expired." = "Tento odznak již propadl.";
+
+/* error */
+"Your Compute Credits balance cannot go above %lld. Spend some credits first." = "Zůstatek výpočetních bodů nemůže překročit %lld. Nejdřív část bodů utraťte.";

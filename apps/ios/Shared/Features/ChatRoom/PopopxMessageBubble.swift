@@ -198,6 +198,10 @@ enum PopopxBubbleBody: Hashable {
     /// 一条加密个人主页的**索引载荷**。和 `.location`/`.secure` 同一族：这一档带的是结构化清单而不是
     /// 正文，渲染成一张可点开的名片卡片（`ProfileCardBubbleView`）。图文原件是普通附件行，不进这一档。
     case profile(PopopxProfilePayload)
+    /// 一条算力点生态的消息：徽章礼品卡或红包。挂载点用 `PopopxCommerceContent.detect(in:)`
+    /// 从同一条正文里判一次，判不出来就还是 `.text`——这一档不带任何本机状态，
+    /// 卡片自己从钥匙串账本读，所以 `PopopxBubbleBody` 仍然 `Hashable` 且可比较。
+    case commerce(PopopxCommerceContent)
 
     /// VoiceOver 要说的那句正文。`.event` 由 `PopopxMessageBubble.body` 分给 `eventLine`，
     /// 不上气泡底——判据只写在那一处分流里。
@@ -215,6 +219,9 @@ enum PopopxBubbleBody: Hashable {
         // 措辞和卡片自己的 `accessibilityText` 同一族（:211 那条理由在两处都成立）：主页的图文正文
         // 不在气泡里，所以这里只说"这是一份什么样的主页"，不报块数、不报标题之外的任何东西。
         case let .profile(payload): "加密个人主页，\(payload.manifest.title)，\(payload.isEphemeral ? "阅后即焚 · \(payload.ttlText)" : "常驻名片，可反复查看")"
+        // 措辞归卡片那一侧（`PopopxCommerceCards.swift`），这里只转发：同一枚红包，气泡要说的事
+        // 和卡片上写的数必须来自同一处，否则改一处漏一处。
+        case let .commerce(content): content.spokenText
         }
     }
 }
@@ -281,6 +288,10 @@ struct PopopxBubbleItem: Hashable {
     /// 删除与回执。**只有 `PopopxBubbleBody.profile` 用得上**，其它正文一律 `nil`；取不到就留 `nil`，
     /// 卡片会退化成"不可点开"——`secureTarget` 上面那两条理由是同一条，不重复一遍。
     var profileTarget: PopopxProfileReadKey?
+    /// 这一行礼品卡/红包所在的会话落点。**只有 `PopopxBubbleBody.commerce` 用得上**，其它正文一律 `nil`。
+    /// 取不到就留 `nil`：礼品卡与红包会退化成只读——拆开与兑换都要往这个会话里回一条静默消息，
+    /// 拿猜出来的 chatId 去回，回的就是别人家的会话。
+    var commerceContext: PopopxCommerceCardContext?
     /// 这一行的消息时间，只服务于加密主页那张卡的"发出后 24 小时无人点开"兜底。
     /// 默认 `Date()`（= 现在）而不是 1970：拿不到时间时宁可**不提前销毁**一张阅后即焚的名片，
     /// 也不要在一行历史消息上凭空画出"已过期"。
@@ -334,8 +345,9 @@ struct PopopxMessageBubble: View {
         }
         .frame(maxWidth: item.maxWidth, alignment: item.side.alignment)
         switch item.content {
-        case .location, .secure, .profile:
-            // 这三张卡片里各有一枚真按钮（打开地图 / 轻触查看 / 点开名片）。`.combine` 会把子树的点击动作
+        case .location, .secure, .profile, .commerce:
+            // 这几张卡片里各有一枚真按钮（打开地图 / 轻触查看 / 点开名片 / 拆开与兑换）。
+            // `.combine` 会把子树的点击动作
             // 并进整行，VoiceOver 就再也打不开它们了，所以改成 `.contain`：容器还在，children
             // 各自保留自己的标签与动作（位置卡片与名片卡片的那一句在卡片内部说）。
             row.accessibilityElement(children: .contain)
@@ -438,7 +450,23 @@ struct PopopxMessageBubble: View {
                                   incoming: item.side == .received,
                                   channel: item.channel,
                                   createdAt: item.createdAt)
+        case let .commerce(content):
+            // 同一族：这两张卡片自带表面，不吃 `ink`（`PopopxCommerceCards.swift` 顶部那一节写了为什么）。
+            switch content {
+            case let .gift(payload):
+                PopopxGiftCardBubble(payload: payload, context: commerceContext)
+            case let .packet(payload):
+                PopopxRedPacketBubble(payload: payload, context: commerceContext)
+            case let .channel(payload):
+                PopopxChannelAccessBubble(payload: payload, context: commerceContext)
+            }
         }
+    }
+
+    /// 挂载点没给落点时的兜底：`target` 与 `chatId` 都留空，三张卡片因此停在只读那一格。
+    /// 宁可少一个能点的按钮，也不要拿猜出来的 chatId 往别的会话里回一条信令、签一张凭证。
+    private var commerceContext: PopopxCommerceCardContext {
+        item.commerceContext ?? PopopxCommerceCardContext(target: nil, incoming: item.side == .received)
     }
 
     /// 下沿一行：时间 + 回执 + 角标。三个都是次要信息，所以同一支 `meta` 墨，
@@ -923,13 +951,15 @@ enum PopopxBubbleCopy {
 enum PopopxBubbleMount {
     /// `nil` = 这一行现网 `ChatItemView` 继续负责。
     ///
-    /// 本轮只接管**直接会话**：群/频道的内容行由现网画头像和成员名（`CIMemberNameView`），
+    /// 本轮接管**直接会话**：群/频道的内容行由现网画头像和成员名（`CIMemberNameView`），
     /// 气泡只有一个 `author: String?`，接管就等于把头像画没了。系统行（`.event`）本来就没头像，
     /// 扩到群/频道只差去掉这一条 guard——留作后续单独一轮，因为它要重新核对 `eventItemViewText`
     /// 里拼进去的发送者。
+    ///
+    /// 唯一的例外是群里的礼品卡与红包（下面 `groupCommerceBody`），那条边界写在那一处。
     static func body(of ci: ChatItem, chat: Chat) -> PopopxBubbleBody? {
-        guard chat.chatInfo.chatType == .direct else { return nil }
         guard !ci.isLiveDummy, !ci.localNote else { return nil }
+        guard chat.chatInfo.chatType == .direct else { return groupCommerceBody(ci, chat: chat) }
         let isChannel = chat.chatInfo.isChannel
         switch ci.content {
         case let .sndMsgContent(mc), let .rcvMsgContent(mc):
@@ -953,6 +983,25 @@ enum PopopxBubbleMount {
         }
     }
 
+    /// 群聊那一侧唯一的接管：只有礼品卡和红包这两条正文，其它仍交回现网 `ChatItemView`。
+    ///
+    /// 为什么非要接管：红包那条正文是 `popopx://redpacket?id=…&n=…&sig=…`，交给现网就是把一枚
+    /// 签名原样念给用户看，而发红包的人本来就在群里@了大家来拆。
+    /// 为什么只此两条：接管整行就要把头像和成员名一起画没（上面那条裁定），
+    /// 成员名这一支由 `item` 里的 `author: ci.memberDisplayName` 补回现网同一个来源，头像补不回来。
+    /// 频道（`isChannel`）不在这一支里：SimpleX 的频道也是 group，但拆开时要往这个会话回一条回执，
+    /// 那会变成对全部订阅者的广播——红包按提示词只做"单人定向或群聊均分"，没有频道这一档。
+    private static func groupCommerceBody(_ ci: ChatItem, chat: Chat) -> PopopxBubbleBody? {
+        guard chat.chatInfo.chatType == .group, !chat.chatInfo.isChannel else { return nil }
+        let mc: MsgContent
+        switch ci.content {
+        case let .sndMsgContent(m), let .rcvMsgContent(m): mc = m
+        default: return nil
+        }
+        guard case .text = mc else { return nil }
+        return PopopxCommerceContent.detect(in: mc.text).map(PopopxBubbleBody.commerce)
+    }
+
     /// 内容行。文本之外的 7 个 `MsgContent` 档都有现网专属控件，一个都不接管。
     private static func msgBody(_ mc: MsgContent, ci: ChatItem) -> PopopxBubbleBody? {
         switch mc {
@@ -974,6 +1023,11 @@ enum PopopxBubbleMount {
             // 三支的先后不敏感——三个 host（`loc`/`sec`/`profile`）互不重叠，各自的 `parse` 只认自己那一格。
             if let profile = PopopxProfilePayload.parse(from: mc.text) {
                 return .profile(profile)
+            }
+            // 礼品卡与红包是同一族判据，也必须压过下面那三道 guard：`popopx://voucher`/`popopx://redpacket`
+            // 会被现网认成链接，那一行就永远只是一串带签名的纯文本。
+            if let commerce = PopopxCommerceContent.detect(in: mc.text) {
+                return .commerce(commerce)
             }
             // 带富文本/提及/markdown 的行交给现网：气泡只画纯 `Text`，链接和 @ 就不再可点。
             guard ci.formattedText == nil, ci.mentions == nil, ci.markdownBlocks == nil else { return nil }
@@ -1006,7 +1060,7 @@ enum PopopxBubbleMount {
         let tucked: Bool
         switch content {
         case .withdrawn, .unavailable, .event: tucked = false
-        case .text, .media, .location, .secure, .profile: tucked = tailVisible
+        case .text, .media, .location, .secure, .profile, .commerce: tucked = tailVisible
         }
         // 绝密那一格要能回答"关掉之后去删哪一行"。两个 id 都只从现网对象上原样读，不拼、不猜：
         // `chat.chatInfo.id` = `ChatInfo.id`（ChatTypes.swift:2104-2112 的按档生成），`ci.id` = 消息 id。
@@ -1028,16 +1082,38 @@ enum PopopxBubbleMount {
         } else {
             profileTarget = nil
         }
+        // 礼品卡/红包那一格要往哪个会话回信令。`apiId` 就是路由那一次 `apiSendMessages` 用的同一个数
+        // （`getContactChat`/`getGroupChat` 找的也是它，ChatModel.swift:551-568），所以这两处不会各说一套；
+        // `.invalidJSON` 那一档 `apiId` 是凭空的 0，所以只认 direct/group，其余留 nil 让卡片停在只读。
+        let commerceContext: PopopxCommerceCardContext?
+        if case .commerce = content {
+            commerceContext = PopopxCommerceCardContext(
+                target: PopopxCommerceTarget.commerceTarget(chatType: chat.chatInfo.chatType,
+                                                             chatId: chat.chatInfo.apiId),
+                incoming: !ci.chatDir.sent,
+                // 门槛卡片给本机签凭证用的会话键与名字：`ChatInfo.id` 原样搬（与 `secureTarget` 同一句话），
+                // 凭证因此和"这台设备上这个频道"同生同死，跨设备本来就不通用（钥匙串那一格说明过）。
+                chatId: chat.chatInfo.id,
+                chatTitle: chat.chatInfo.displayName,
+                // 门槛卡片只认频道。判据与频道信息页那一格同一个数（`GroupInfo.isChannel`），
+                // 拿不到 groupInfo 的会话一律 false，卡片因此停在"这一条不在频道里"。
+                isChannel: chat.chatInfo.groupInfo?.isChannel == true
+            )
+        } else {
+            commerceContext = nil
+        }
         return PopopxBubbleItem(
             messageKey: String(ci.id),
             content: content,
             tail: PopopxBubbleTail(side: ci.chatDir.sent ? .sent : .received, tucked: tucked),
             channel: table.channel(forKey: String(ci.id)),
+            author: ci.memberDisplayName,
             timeText: timestamp ? formatTimestampMeta(ci.meta.itemTs) : nil,
             receipt: receipt(of: ci),
             contactId: contactId(of: chat),
             secureTarget: secureTarget,
             profileTarget: profileTarget,
+            commerceContext: commerceContext,
             createdAt: ci.meta.itemTs,
             maxWidth: maxWidth
         )

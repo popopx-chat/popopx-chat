@@ -7831,3 +7831,117 @@ alert title */
 /* No comment provided by engineer. */
 "Your subscription is cancelled. The badge stays until %@." = "你的订阅已取消。徽章将保留到 %@。";
 
+
+/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
+/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+
+/* product name */
+"POPOPX Dynamic Privacy Node Badge" = "POPOPX 动态隐私节点徽章";
+
+/* trial product name */
+"3-Day Pioneer Node Trial Badge" = "3 天先锋节点体验徽章";
+
+/* virtual currency name */
+"POPOPX Compute Credits" = "POPOPX 算力点";
+
+/* never VPN */
+"dynamic SMP relay node cluster" = "动态 SMP 中继节点集群";
+
+/* paywall title */
+"Light up a privacy node" = "点亮一个隐私节点";
+
+/* segment */
+"For myself" = "为自己";
+
+/* segment */
+"Gift badge" = "赠送徽章";
+
+/* button */
+"Restore badge purchases" = "恢复徽章购买";
+
+/* button */
+"Enter a code or scan" = "输入兑换码或扫码";
+
+/* button */
+"Exchange with Compute Credits" = "用算力点兑换";
+
+/* price suffix */
+"/ year" = "/ 年";
+
+/* price suffix */
+"/ month" = "/ 月";
+
+/* annual badge savings, computed from the two live display prices */
+"Save %lld%% off" = "立省 %lld%%";
+
+/* credit pack amount */
+"%lld Compute Credits" = "%lld 算力点";
+
+/* Apple 3.1.2(c) auto-renewable disclosure */
+"Payment will be charged to your Apple Account at confirmation of purchase. Subscriptions renew automatically unless they are cancelled at least 24 hours before the end of the current period. You can manage or cancel subscriptions in App Store settings at any time." = "付款将在确认购买时向您的 Apple 账户扣款。订阅会自动续订，除非在当前周期结束前至少 24 小时取消。您可以随时在 App Store 设置中管理或取消订阅。";
+
+/* no promotional top-up */
+"Compute Credits are added at the exact amount shown. No bonus credits are granted." = "算力点按所示数额原额入账，没有任何赠送点数。";
+
+/* wallet label */
+"Compute Credits balance" = "算力点余额";
+
+/* sheet title */
+"Send Compute Credits" = "发送算力点";
+
+/* Apple 3.1.1 no random amounts */
+"Only the fixed amounts listed here can be sent. Nowhere in this feature can you type a custom amount." = "只能发送这里列出的固定数额，整个功能里没有可自定义数额的输入框。";
+
+/* refund promise */
+"Credits nobody claims are returned to the sender %lld days after the packet was sent." = "无人领取的算力点会在发出 %lld 天后退回给发送方。";
+
+/* sheet title */
+"Subscribe to this channel" = "订阅此频道";
+
+/* channel subscription period */
+"Each purchase is valid for %lld days." = "每次订阅有效期 %lld 天。";
+
+/* renewal is cumulative, money promise */
+"Subscribing again adds %lld days to the time you already have." = "再次订阅会在剩余时长上追加 %lld 天。";
+
+/* error */
+"The store is not available right now." = "商店当前不可用。";
+
+/* error */
+"This item is not available (%@)." = "该商品暂不可用（%@）。";
+
+/* error */
+"Purchase failed: %@" = "购买失败：%@";
+
+/* error */
+"Purchase cancelled." = "已取消购买。";
+
+/* error */
+"The receipt could not be verified." = "无法验证购买凭证。";
+
+/* error */
+"Secure storage is unavailable on this device." = "此设备上的安全存储不可用。";
+
+/* error */
+"This needs %1$lld Compute Credits and you have %2$lld." = "这需要 %1$lld 算力点，你当前有 %2$lld。";
+
+/* error */
+"This gift badge is no longer available." = "这枚徽章礼品卡已失效。";
+
+/* error */
+"This code has already been redeemed." = "此兑换码已被使用。";
+
+/* error */
+"The code is not valid. Check it and try again." = "兑换码无效，请检查后重试。";
+
+/* error */
+"The secure exchange could not be started." = "无法开始安全交换。";
+
+/* error */
+"The sender did not confirm this exchange." = "发送方未确认这次交换。";
+
+/* error */
+"This badge has already expired." = "这枚徽章已过期。";
+
+/* error */
+"Your Compute Credits balance cannot go above %lld. Spend some credits first." = "算力点余额不能超过 %lld，请先花掉一部分。";

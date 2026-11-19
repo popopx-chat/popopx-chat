@@ -401,6 +401,15 @@ struct ComposeView: View {
     @State private var showLocationPicker = false
     /// 「+」面板里那一格「个人主页」按下后的本次发送确认表单（模式 + 时长只作用于这一次发送）。
     @State private var showProfileSendSheet = false
+    // 「+」面板里红包与礼品卡两格的开关。
+    //
+    // 落点在按下那一刻快照进 `packetDestination` / `giftCardContactId`，而不是让 Sheet 每次刷新时
+    // 重新读当前会话：面板里"扣点 → 发可见行 → 发机器行"是三步，中途读到别的会话就会把红包发进
+    // 一个没预览过的位置。空的那一格只在 Sheet 收起时出现。
+    @State private var showRedPacketSheet = false
+    @State private var packetDestination: PopopxPacketDestination?
+    @State private var showGiftCardSheet = false
+    @State private var giftCardContactId: Int64?
 
     @State private var audioRecorder: AudioRecorder?
     @State private var voiceMessageRecordingTime: TimeInterval?
@@ -708,6 +717,21 @@ struct ComposeView: View {
                 Task { await popopxSendProfile(manifest) }
             }
             .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $showRedPacketSheet, onDismiss: { packetDestination = nil }) {
+            // 扣点、发可见行、发机器行三步全在面板里完成（`PopopxSendRedPacketSheet.send()`），
+            // 宿主这里只给落点。`if let` 那一层不是装饰： destination 为空时呈现一个空白面板，
+            // 用户只会看见一个发不出去红包的页面。
+            if let packetDestination {
+                PopopxSendRedPacketSheet(destination: packetDestination)
+                    .presentationDetents([.large])
+            }
+        }
+        .sheet(isPresented: $showGiftCardSheet, onDismiss: { giftCardContactId = nil }) {
+            // 铸码、发卡片、发信令也全在面板里（它自己持有 `PopopxSilentSignalingRouter`）。
+            // `contactId` 是可选项：面板据此决定"发送给联系人"那颗按钮画不画。
+            PopopxGiftBadgeCardSheet(contactId: giftCardContactId)
+                .presentationDetents([.large])
         }
         .onChange(of: chosenMedia) { _, selected in
             Task {
@@ -1281,7 +1305,8 @@ struct ComposeView: View {
                 onHoldToTalk: popopxHoldToTalk,
                 onPlusTap: popopxPlusAction,
                 onTTLChange: { seconds in popopxTTLSeconds = seconds },
-                onSecureTTLChange: { seconds in popopxSecureTTLSeconds = seconds }
+                onSecureTTLChange: { seconds in popopxSecureTTLSeconds = seconds },
+                plusActions: popopxPlusActions
             )
             if let disabledText {
                 Text(disabledText)
@@ -1344,9 +1369,39 @@ struct ComposeView: View {
         }
     }
 
-    /// 「+」面板四格接回既有链路：相册 / 拍摄 / 文件本来就是 `showMediaPicker` / `showTakePhoto` /
-    /// `showFileImporter` 三个开关；位置消息这个 app 没有实现，如实说，不拿别的功能顶。
+    /// 「+」面板在当前会话里真正能用的格子。判据只有一条来源：`popopxPacketDestination`。
+    /// 之所以筛而不是画出来再拦 —— 见 `PopopxInputBar.plusActions` 那段注释。
+    private var popopxPlusActions: [PopopxPlusAction] {
+        PopopxPlusAction.allCases.filter { action in
+            switch action {
+            case .redPacket: popopxPacketDestination != nil && chat.chatInfo.sendMsgEnabled
+            // 礼品卡的核销回执只有 `PopopxCommerceTarget.contact` 一条落点（路由器没有群组那一支），
+            // 所以这一格只在单聊出现；群里想要徽章请让对方把码抄给对方，或直接走「我的 · 兑换码」。
+            case .giftCard: chat.chatInfo.contact != nil && chat.chatInfo.sendMsgEnabled
+            case .photo, .camera, .file, .location, .secure, .personalProfile: true
+            }
+        }
+    }
+
+    /// 红包落点：**只有 1:1 单聊**。判据只有一条来源，`popopxPlusActions` 里那一格跟着它筛。
+    ///
+    /// 裁定记录（2026-11-19）：群里不发红包。一份红包在群里由 N 个人各自"拆开"，
+    /// 而这一层没有服务端账本 —— 去重只存在于**各台设备自己的**流水里
+    /// （`PopopxCreditsManager.claimRedPacket` 按 packetId 夹一份，`recordClaim` 按成员记账），
+    /// 并发拆开时最坏能多到账。单聊没有这个形状：只有一台设备能拆，回执也只回它自己那一份。
+    /// 频道、私人笔记、连接中、请求这四类会话同样返回 nil（后三类本来就没有对面这个人）。
+    private var popopxPacketDestination: PopopxPacketDestination? {
+        if let contact = chat.chatInfo.contact {
+            return .contact(id: contact.contactId, name: contact.displayName)
+        }
+        return nil
+    }
+
+    /// 「+」面板每一格接回既有链路：相册 / 拍摄 / 文件是 `showMediaPicker` / `showTakePhoto` /
+    /// `showFileImporter` 三个开关；位置与个人主页各开一个确认 Sheet，绝密那格只翻武装开关。
     /// 禁用条件抄 `attachmentButton()`：已有附件、改写 / 转发 / live / 举报中不给开，本会话禁文件时给同样的提示。
+    /// 红包与礼品卡是最后两支：它们不共用那条门 —— 格子本身只在有落点的会话里出现（`popopxPlusActions`），
+    /// 所以那两处的 `guard` 是给"筛完格子到按下之间会话变了"留的余量：宁可不发，也不把红包发进一个没有落点的会话。
     private func popopxPlusAction(_ action: PopopxPlusAction) {
         switch action {
         case .location:
@@ -1394,6 +1449,16 @@ struct ComposeView: View {
                     ? PopopxSecureCopy.defaultTTLSeconds
                     : nil
             }
+        case .redPacket:
+            // 面板已经按会话筛过这一格（`popopxPlusActions`），能走到这里说明落点一定存在；
+            // 这一支只兜"面板开着时会话变成了不能发消息"那种极窄的窗口 —— 宁可不发，也不发进一个没有落点的会话。
+            guard let destination = popopxPacketDestination else { return }
+            packetDestination = destination
+            showRedPacketSheet = true
+        case .giftCard:
+            guard let contactId = chat.chatInfo.contact?.contactId else { return }
+            giftCardContactId = contactId
+            showGiftCardSheet = true
         case .photo, .camera, .file:
             if im.secondaryIMFilter == nil, !chat.chatInfo.featureEnabled(.files) {
                 AlertManager.shared.showAlertMsg(
@@ -1405,10 +1470,10 @@ struct ComposeView: View {
                 case .photo: showMediaPicker = true
                 case .camera: showTakePhoto = true
                 case .file: showFileImporter = true
-                // 这三格在 `.photo/.camera/.file` 这一支里到不了：外层 switch 已经把它们分出去了。
+                // 这几格在 `.photo/.camera/.file` 这一支里到不了：外层 switch 已经把它们分出去了。
                 // 写 `break` 而不是删掉，是为了让这个 switch 保持穷尽 —— 加新的一格时
                 // 这里会编译不过，提醒两处都要改。
-                case .location, .secure, .personalProfile: break
+                case .location, .secure, .personalProfile, .redPacket, .giftCard: break
                 }
             }
         }

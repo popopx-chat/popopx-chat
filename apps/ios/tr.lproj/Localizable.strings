@@ -6966,3 +6966,117 @@ alert title */
 /* No comment provided by engineer. */
 "Your subscription is cancelled. The badge stays until %@." = "Aboneliğiniz iptal edildi. Rozet %@ tarihine kadar kalır.";
 
+
+/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
+/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+
+/* product name */
+"POPOPX Dynamic Privacy Node Badge" = "POPOPX Dinamik Gizlilik Düğümü Rozeti";
+
+/* trial product name */
+"3-Day Pioneer Node Trial Badge" = "3 günlük öncü düğüm deneme rozeti";
+
+/* virtual currency name */
+"POPOPX Compute Credits" = "POPOPX Hesaplama Kredisi";
+
+/* never VPN */
+"dynamic SMP relay node cluster" = "dinamik SMP aktarma düğümü kümesi";
+
+/* paywall title */
+"Light up a privacy node" = "Bir gizlilik düğümünü etkinleştirin";
+
+/* segment */
+"For myself" = "Kendim için";
+
+/* segment */
+"Gift badge" = "Rozet hediye et";
+
+/* button */
+"Restore badge purchases" = "Rozet satın alımlarını geri yükle";
+
+/* button */
+"Enter a code or scan" = "Bir kod girin veya tarayın";
+
+/* button */
+"Exchange with Compute Credits" = "Hesaplama kredisiyle değiştir";
+
+/* price suffix */
+"/ year" = "/ yıl";
+
+/* price suffix */
+"/ month" = "/ ay";
+
+/* annual badge savings, computed from the two live display prices */
+"Save %lld%% off" = "%lld%% tasarruf";
+
+/* credit pack amount */
+"%lld Compute Credits" = "%lld hesaplama kredisi";
+
+/* Apple 3.1.2(c) auto-renewable disclosure */
+"Payment will be charged to your Apple Account at confirmation of purchase. Subscriptions renew automatically unless they are cancelled at least 24 hours before the end of the current period. You can manage or cancel subscriptions in App Store settings at any time." = "Ödeme, satın alma onaylandığında Apple hesabınızdan tahsil edilir. Abonelikler, mevcut dönemin bitişinden en az 24 saat önce iptal edilmedikçe otomatik olarak yenilenir. Aboneliklerinizi App Store ayarlarından istediğiniz zaman yönetebilir veya iptal edebilirsiniz.";
+
+/* no promotional top-up */
+"Compute Credits are added at the exact amount shown. No bonus credits are granted." = "Hesaplama kredileri tam olarak gösterilen miktarda yüklenir. Bonus kredi verilmez.";
+
+/* wallet label */
+"Compute Credits balance" = "Hesaplama kredisi bakiyesi";
+
+/* sheet title */
+"Send Compute Credits" = "Hesaplama kredisi gönder";
+
+/* Apple 3.1.1 no random amounts */
+"Only the fixed amounts listed here can be sent. Nowhere in this feature can you type a custom amount." = "Yalnızca burada listelenen sabit miktarlar gönderilebilir. Bu özellikte hiçbir yerde özel bir miktar yazamazsınız.";
+
+/* refund promise */
+"Credits nobody claims are returned to the sender %lld days after the packet was sent." = "Kimsenin almadığı krediler, gönderimden %lld gün sonra gönderene iade edilir.";
+
+/* sheet title */
+"Subscribe to this channel" = "Bu kanara abone ol";
+
+/* channel subscription period */
+"Each purchase is valid for %lld days." = "Her satın alma %lld gün geçerlidir.";
+
+/* renewal is cumulative, money promise */
+"Subscribing again adds %lld days to the time you already have." = "Yeniden abone olmak, elinizdeki süreye %lld gün ekler.";
+
+/* error */
+"The store is not available right now." = "Mağaza şu anda kullanılamıyor.";
+
+/* error */
+"This item is not available (%@)." = "Bu öğe kullanılamıyor (%@).";
+
+/* error */
+"Purchase failed: %@" = "Satın alma başarısız: %@";
+
+/* error */
+"Purchase cancelled." = "Satın alma iptal edildi.";
+
+/* error */
+"The receipt could not be verified." = "Satın alma fişi doğrulanamadı.";
+
+/* error */
+"Secure storage is unavailable on this device." = "Güvenli depolama bu cihazda kullanılamıyor.";
+
+/* error */
+"This needs %1$lld Compute Credits and you have %2$lld." = "Bu, %1$lld hesaplama kredisi gerektiriyor ve sizde %2$lld var.";
+
+/* error */
+"This gift badge is no longer available." = "Bu hediye rozeti artık kullanılamıyor.";
+
+/* error */
+"This code has already been redeemed." = "Bu kod zaten kullanıldı.";
+
+/* error */
+"The code is not valid. Check it and try again." = "Kod geçerli değil. Kontrol edip yeniden deneyin.";
+
+/* error */
+"The secure exchange could not be started." = "Güvenli değiştirme başlatılamadı.";
+
+/* error */
+"The sender did not confirm this exchange." = "Gönderen bu değiştirmeyi onaylamadı.";
+
+/* error */
+"This badge has already expired." = "Bu rozet zaten süresi dolmuş.";
+
+/* error */
+"Your Compute Credits balance cannot go above %lld. Spend some credits first." = "Hesaplama kredisi bakiyeniz %lld üzerine çıkamaz. Önce birkaç kredi harcayın.";

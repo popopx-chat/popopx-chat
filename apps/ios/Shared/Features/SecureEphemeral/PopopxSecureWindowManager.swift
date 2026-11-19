@@ -312,6 +312,44 @@ final class PopopxSecureWindowManager {
         return nil
     }
 
+    // MARK: 延长查看窗口
+
+    /// 「算力点延长防窥窗口」的唯一入口。由窗口里那一颗按钮调用，视图不自己挪钟。
+    ///
+    /// 时长与价格都不在这里再写一遍：两者都由 `PopopxCommerceLimits` 那一处给出
+    /// （`extendedSecureWindowSeconds` / `extendedSecureWindowCost`），后者正是扣款那一侧用的同一个数。
+    /// 这两格此前在代码里没有任何消费者，接上这一条链路之后，"延长多久"和"扣多少点"
+    /// 才第一次和按钮上写的话处在同一个真值之下。
+    ///
+    /// 顺序是**先确认会话还活着、再扣钱、最后挪钟**，三步全在主线程且中间没有任何 `await`，
+    /// 所以整块是一个同步整体：既不会出现"钱扣了钟没挪"，也不会反过来。
+    /// 会话检查排在扣款之前是必须的：lingering 那几秒里窗口还在、`isSessionActive` 已经 false，
+    /// 那时按下去只能得到一句"已经没有可延长的会话"，不能拿走点数。
+    ///
+    /// 只挪本机这一侧的钟：载荷里的 `ttl` 由发送方铸造，延长不写回任何一条消息、
+    /// 不改对方的回执，也不产生任何一条信令——算力点中心里那句"只影响本机渲染"说的就是这个形状。
+    ///
+    /// 返回 nil = 已延长；否则给一句可以直接显示的话。点数不足那一句由账本自己给，
+    /// 这里不重抄一遍余额：两个地方各说一个余额是这类页面最容易分叉的地方。
+    func extendViewingWindow() -> String? {
+        guard isSessionActive, isWindowOpen, let model = sheetModel, model.isReading else {
+            return PopopxSecureCopy.extendWindowClosed
+        }
+        do {
+            _ = try PopopxCreditsManager.shared.purchaseExtendedSecureWindow()
+        } catch {
+            return error.localizedDescription
+        }
+        let seconds = PopopxCommerceLimits.extendedSecureWindowSeconds
+        deadlineUptime += Double(seconds)
+        model.extendTotal(by: seconds)
+        // 立刻走一次 tick：`Timer` 下一次触发要等满一个间隔，那段时间里 `remainingSeconds`
+        // 还是延长前的数而 `totalSeconds` 已经变大，进度条会先缩一截再弹回来。
+        tick()
+        PopopxHaptics.notice(.success)
+        return nil
+    }
+
     // MARK: 收尾
 
     /// 用户主动关闭、或倒计时归零：一样焚毁——"阅后即焚"的"焚"不由用户决定。
@@ -585,6 +623,14 @@ final class PopopxSecureWindowManager {
             ?? scene.windows.first?.overrideUserInterfaceStyle
             ?? .unspecified
     }
+}
+
+// MARK: - 延长窗口的一句话
+
+private extension PopopxSecureCopy {
+    /// 没有可延长的会话时那一句。它只在"窗口还开着、会话已经死了"那段 lingering 里出现，
+    /// 所以不写成"延长失败"：失败会让人以为重试有用，而这里重试永远没有用。
+    static let extendWindowClosed = "这条消息已经没有可延长的时间了。"
 }
 
 // MARK: - 窗口内容

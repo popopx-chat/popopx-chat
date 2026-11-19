@@ -480,6 +480,13 @@ struct PopopxTelemetryHeader: View {
                 .layoutPriority(1)
                 .accessibilityIdentifier("popopx.header.identity")
             Spacer(minLength: PopopxMetrics.spaceS)
+            // 徽章胶囊：算力点生态唯一常驻的入口，所以放在顶栏而不是"我的"页里。
+            // 用 `compact: true`——这一行已经有四段，窄屏（320pt）上中文那一段最先该省；
+            // 双模那枚自己有 `ViewThatFits` 的三档（下面那句注释），省字段的活儿交给它更合适。
+            PopopxBadgeCapsuleView(compact: true)
+                .fixedSize()
+                .accessibilityIdentifier("popopx.header.badge")
+            Spacer(minLength: PopopxMetrics.spaceS)
             // 不 fixedSize：把剩余宽度真的报给它，ViewThatFits 的三档才有得选。
             PopopxDualStatusCapsule(network: signal, radio: radioState)
             Spacer(minLength: PopopxMetrics.spaceS)

@@ -45,11 +45,23 @@ struct PopopxMeView: View {
     @ObservedObject private var panicWipe: PopopxPanicWipeManager
     @ObservedObject private var panicArming: PopopxPanicWipeArming
 
+    /// 算力点账本：`@Observable` 单例，本页只读一格余额给入口行当副标题。
+    @State private var credits = PopopxCreditsManager.shared
+
     @State private var toast = PopopxToastModel()
     @State private var showsAddFriend = false
     @State private var showsPairingPolicy = false
     /// 「主页名片码」那张 Sheet 的开关（入口就在下面 `identityEntries` 第二组里）。
     @State private var showsProfileQR = false
+    /// 算力点生态的三张面板。徽章详情与升级不必在这里再开一个开关——顶栏那枚胶囊的
+    /// `route()` 已经按状态分发了这三条出口（PopopxBadgeCapsuleView.swift:197-203）。
+    @State private var showsCreditsStore = false
+    @State private var showsRedeemCode = false
+    @State private var showsGiftCard = false
+    /// 付费墙在这里必须有第二个开关，尽管胶囊已经挂过它：胶囊按状态分发，
+    /// `.activeLit` 那一档把点击交给徽章详情，于是**已经点亮的人再也没有地方买点数**。
+    /// 而算力点中心那一页按它自己的文件头不挂付费墙。所以这一行是唯一的无条件入口。
+    @State private var showsPaywall = false
     /// 本机加密个人主页的当前档位，形如「已配置 · 常驻名片」；`nil` = 还没读出来（首帧不给假状态）。
     @State private var profileStatusValue: String?
 
@@ -74,6 +86,7 @@ struct PopopxMeView: View {
                 generalEntries
                 privacyEntries
                 meshEntries
+                commerceEntries
                 aboutEntries
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -96,6 +109,26 @@ struct PopopxMeView: View {
             // 同屏时不挤掉自己动作行的那一档。
             ProfileQRCodeSheet(identityName: chatModel.currentUser?.displayName ?? Copy.profileQRIdentityFallback)
                 .presentationDetents([.fraction(0.8)])
+        }
+        // 算力点生态的第二入口。detents 同样归调用方（上面那条约定）：购买页那一张要装下七档价格表，
+        // 给 `.medium` 会让它在自己的表上滚动；兑换码最短，中档即可。
+        .sheet(isPresented: $showsCreditsStore) {
+            PopopxCreditsStoreView()
+                .presentationDetents([.large])
+        }
+        .sheet(isPresented: $showsRedeemCode) {
+            PopopxVoucherRedeemSheet()
+                .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $showsGiftCard) {
+            PopopxGiftBadgeCardSheet()
+                .presentationDetents([.large])
+        }
+        // 付费墙与算力点中心是两张平行的 Sheet，不是套娃：两边都能独立打开，
+        // 打开付费墙时它自己再挂「算力点中心」那一层（`PopopxBadgePaywallView.swift:168`）。
+        .sheet(isPresented: $showsPaywall) {
+            PopopxBadgePaywallView()
+                .presentationDetents([.large])
         }
         .onChange(of: showsProfileQR) { _, opened in
             // 关掉名片码就重读一次档位：那张 Sheet 里的模式开关会改本机那份武装记录，
@@ -321,6 +354,44 @@ struct PopopxMeView: View {
             PopopxMeDivider()
             panicBlock
         }
+    }
+
+    // MARK: 算力点与徽章
+
+    /// 算力点钱包的第二入口。徽章**详情**不在这里重复一档：顶栏那枚胶囊就是它的第一入口，
+    /// 这里再放一行"徽章详情"会让人以为两处可能读出两种状态。
+    /// 但**充值**在这里必须有一行，理由见上面 `showsPaywall` 那条注释：胶囊按状态分发，
+    /// 点亮之后就没有任何一处能打开付费墙了。
+    private var commerceEntries: some View {
+        PopopxSectionCard(Copy.groupCommerce, footnote: Copy.commerceFootnote) {
+            PopopxPickerRow(Copy.creditsStore, value: creditsBalanceTitle,
+                            systemImage: "circle.hexagongrid.fill", tint: .brand) {
+                PopopxHaptics.selection()
+                showsCreditsStore = true
+            }
+            PopopxMeDivider()
+            PopopxPickerRow(Copy.purchaseCredits, systemImage: "cart.fill", tint: .brand) {
+                PopopxHaptics.selection()
+                showsPaywall = true
+            }
+            PopopxMeDivider()
+            PopopxPickerRow(Copy.redeemCode, systemImage: "key.horizontal.fill", tint: .brand) {
+                PopopxHaptics.selection()
+                showsRedeemCode = true
+            }
+            PopopxMeDivider()
+            PopopxPickerRow(Copy.giftCard, systemImage: "giftcard.fill", tint: .brand) {
+                PopopxHaptics.selection()
+                showsGiftCard = true
+            }
+        }
+    }
+
+    /// 余额这一格读账本本身，不读某一次购买回调里的数：面板关掉之后这一行必须自己变对。
+    /// 装载不必在这里做——`PopopxCreditsManager.start()` 的第一行就是 `loadIfNeeded()`
+    /// （PopopxCreditsManager.swift:79-86），而那一跳排在 `POPOPXApp.init()` 里。
+    private var creditsBalanceTitle: String {
+        String(format: PopopxCommerceCopy.creditsAmountFormat, credits.balance)
     }
 
     /// 危险行 + 它自己的说明合成一块，卡片里只占一个位置。
@@ -750,6 +821,19 @@ private struct PopopxMeAvatar: View {
     private let image: String?
     private let side: CGFloat
 
+    /// 本机已解锁的外观。与外层同一个单例，不是第二份状态：这里只读 `owns`，
+    /// 花费仍然只在算力点中心那一页发生。
+    @State private var credits = PopopxCreditsManager.shared
+
+    /// 只有大头像那一档描边：芯片档的 `side` 是 `spaceXL`，1.5pt 的双色环在那个尺寸上
+    /// 糊成一圈脏边，看不出"外观"反而看出"渲染坏了"。阈值写成两倍而不是直接比 `avatarSide`，
+    /// 是为了不在同一个类型里再抄一遍外层那两个尺寸常量。
+    private static let ringMinimumSide: CGFloat = PopopxMetrics.spaceXL * 2
+
+    private var wearsAuroraFrame: Bool {
+        side >= Self.ringMinimumSide && credits.owns(.auroraShieldAvatarFrame)
+    }
+
     init(image: String?, side: CGFloat) {
         self.image = image
         self.side = side
@@ -771,9 +855,32 @@ private struct PopopxMeAvatar: View {
             }
         }
         .frame(width: side, height: side)
+        // 「极光盾头像框」：只描在本机自己的头像外面。这一族头像类型只画本机身份
+        // （联系人和群的头像各有各的类型），所以算力点中心那句"本机头像渲染生效，不上传"
+        // 在这里是结构成立的，不需要再判一次方向。
+        // `strokeBorder` 而不是 `stroke`：前者向内吃线宽，头像尺寸不会被撑大，
+        // 同一张卡上的身份名与地址不会因为买了外观而挪一行。
+        // 两个色停在环上对角走，起点仍是 `PopopxPalette.brand`：这一档不替换品牌色，只加一圈。
+        .overlay {
+            if wearsAuroraFrame {
+                RoundedRectangle(cornerRadius: PopopxMetrics.radiusAvatar, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [PopopxPalette.brand, Self.auroraFrameEnd],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: PopopxMetrics.stroke
+                    )
+            }
+        }
         // 头像在这页永远是装饰：身份名就在同一张卡上，不让 VoiceOver 念两遍。
         .accessibilityHidden(true)
     }
+
+    /// 极光盾的终点色（青）。这一档唯一不在 `PopopxPalette` 里的值，也是整个商业特性里
+    /// 装饰色就该待处的位置：只有这一处读它，别处要用就得先解锁再描边，而不是一份共享 token。
+    private static let auroraFrameEnd = Color.popopx(light: 0x1F8A70, dark: 0x4FD8B6)
 }
 
 /// 「推一个既有页面」的一行。外观直接复用 `PopopxPickerRow`，但点击交给外层 `NavigationLink`：
@@ -906,6 +1013,12 @@ private enum Copy {
     static let groupGeneral = "通用"
     static let groupPrivacy = "隐私与安全"
     static let groupMesh = "离线组网"
+    static let groupCommerce = "算力点"
+    static let creditsStore = "算力点中心"
+    /// 「充值」而不是「购买算力点礼包」：这一档没有任何赠送，句子也不能暗示有。
+    static let purchaseCredits = "充值算力点"
+    static let redeemCode = "兑换码"
+    static let giftCard = "转赠徽章礼品卡"
     static let groupAbout = "关于"
 
     // 身份
@@ -936,6 +1049,7 @@ private enum Copy {
 
     // 离线组网
     static let meshFootnote = "总开关一关，蓝牙扫描、广播与中继全部停；本页其余行仍可查看，但不会启动任何蓝牙对象。"
+    static let commerceFootnote = "点数与徽章都只存在这台设备的钥匙串里：没有服务器记账，也没有任何一侧能远程改它。"
     static let fuseRow = "厢语离线组网总开关"
     static let fuseRowNote = "关闭即熔断：所有厢语组件一起停。"
     static let verifyHeadline = "蓝牙实际状态"

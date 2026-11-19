@@ -8,9 +8,18 @@
 //  A Wallet-style "physical object" pass: it is the one surface where the brand
 //  spec allows a gradient (Docs/popopx-brand-spec.md §2.4), so the fill is built
 //  only from `PopopxPalette.brand` and a dimmed stop of that same brand — never a
-//  purple→blue wash. Red lines observed: the QR itself is the existing
+//  purple→blue wash. One opt-in exception exists: the purchased cosmetic
+//  `PopopxCosmetic.darkGoldQRCardSkin` replaces the *hue* of that same single-hue
+//  ramp with a dark-gold one (`Pass.darkGoldBase`). The three stop locations, the
+//  three alphas, the `label` underlay and the `onBrand` ink are all untouched, so
+//  the ramp is still one brand colour fading into itself — §2.4's ban on a two-hue
+//  wash is not relaxed, only its hue is. No skin ever touches the purple logo
+//  mark, and the ownership flag is read only here: the QR payload is identical
+//  either way, which is what "本机配色，不上传" means in code.
+//  Red lines observed: the QR itself is the existing
 //  `POPOPXLinkQRCode` (no CIFilter written here), colour/spacing/type/material all
-//  come from PopopxTheme, the sheet carries no navigation container of its own and
+//  come from PopopxTheme (except the two skin hues in `Pass`, documented above), the
+//  sheet carries no navigation container of its own and
 //  dismissal chrome stays with the host (`presentationDetents`), and every
 //  user-facing string is Chinese and lives once in `Copy`.
 //
@@ -23,6 +32,14 @@ struct PopopxQRCardSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var toast = PopopxToastModel()
+    /// The one cosmetic the owner may have bought for this surface. Read-only here:
+    /// the sheet never spends, never loads a paywall and never explains the price —
+    /// that conversation happens in 算力点中心, and a card whose face depends on it
+    /// only has to answer "worn or not".
+    /// `.task` matters: `owns` reads a Keychain-backed set, and on a cold launch the
+    /// sheet can be opened before the ledger has been read. Without the load the
+    /// owned skin silently renders as the default brand card.
+    @State private var credits = PopopxCreditsManager.shared
 
     private let uri: String
     private let identityName: String
@@ -41,6 +58,7 @@ struct PopopxQRCardSheet: View {
             actionRow
         }
         .popopxToast(toast)
+        .task { credits.loadIfNeeded() }
     }
 
     // MARK: - Pass
@@ -84,7 +102,8 @@ struct PopopxQRCardSheet: View {
         .padding(.horizontal, PopopxMetrics.gutter)
     }
 
-    /// Opaque `brand` at the leading edge, a dimmed `brand` at the trailing one.
+    /// Opaque `passBase` at the leading edge, a dimmed `passBase` at the trailing one
+    /// (brand purple by default, dark gold while the owned cosmetic is worn).
     /// The dim stop needs a solid base under it: over the sheet's `cardHigh` it
     /// would wash out to a pale lilac that no `onBrand` ink can clear, so `label`
     /// (near-black in light, near-white in dark) carries it — the tail then deepens
@@ -98,12 +117,19 @@ struct PopopxQRCardSheet: View {
         .clipShape(.rect(cornerRadius: PopopxMetrics.radiusSheet, style: .continuous))
     }
 
+    /// The single hue the ramp is built from: brand purple, or dark gold once the
+    /// cosmetic is owned. Everything downstream is derived from this one value, so
+    /// the skin cannot desynchronise the three stops from each other.
+    private var passBase: Color {
+        credits.owns(.darkGoldQRCardSkin) ? Pass.darkGoldBase : PopopxPalette.brand
+    }
+
     private var passGradient: LinearGradient {
         LinearGradient(
             stops: [
-                .init(color: PopopxPalette.brand, location: 0),
-                .init(color: PopopxPalette.brand.opacity(0.92), location: 0.45),
-                .init(color: PopopxPalette.brand.opacity(Pass.dimOpacity(for: colorScheme)), location: 1)
+                .init(color: passBase, location: 0),
+                .init(color: passBase.opacity(0.92), location: 0.45),
+                .init(color: passBase.opacity(Pass.dimOpacity(for: colorScheme)), location: 1)
             ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
@@ -142,8 +168,14 @@ struct PopopxQRCardSheet: View {
     /// `UIColor`. `PopopxPalette.brand` is a two-mode `Color`, so it is resolved
     /// against this sheet's own style rather than whatever traits happen to be
     /// current when the image is generated off the main layout pass.
+    ///
+    /// The skin's ink is deliberately NOT the gold the card is wearing: a light
+    /// 0xD9B24C-style module on the white `card` plate drops module-to-plate contrast
+    /// below 4.5:1, which is a scanner failure rather than a taste problem. So the
+    /// face may be gold while the code stays dark bronze.
     private var qrInk: UIColor {
-        UIColor(PopopxPalette.brand).resolvedColor(
+        let ink = credits.owns(.darkGoldQRCardSkin) ? Pass.darkGoldQRInk : PopopxPalette.brand
+        return UIColor(ink).resolvedColor(
             with: UITraitCollection(userInterfaceStyle: colorScheme == .dark ? .dark : .light)
         )
     }
@@ -208,6 +240,16 @@ struct PopopxQRCardSheet: View {
 /// the caption reveals.
 private enum Pass {
     static let linkPreviewCharacters = 28
+
+    /// The dark-gold skin's hue, and its scanner-safe ink. These two literals are the
+    /// only colours in the commerce feature that live outside `PopopxPalette`, and
+    /// they belong here rather than in the theme: an owned cosmetic is a decoration
+    /// one person bought, not a semantic token every page may reach for. Each is read
+    /// by exactly one computed property in this file, gated on `credits.owns`.
+    static let darkGoldBase = Color.popopx(light: 0xB8912F, dark: 0xD9B24C)
+    /// Dark bronze in light (over the white plate), bright gold in dark (over the
+    /// dark card grey) — the same direction the brand purple already travels in.
+    static let darkGoldQRInk = Color.popopx(light: 0x5C450F, dark: 0xE8CE72)
 
     /// Light mode fades further, so the tail reads as a deep indigo edge under the
     /// white ink; dark mode fades less, because there the ink is near-black and the

@@ -74,6 +74,13 @@ struct ProfileCardBubbleView: View {
     @State private var didRemoveMedia = false
     /// 那一次"点开"的进行中请求。
     @State private var openTask: Task<Void, Never>?
+    /// 本地账本：只为"这一张要不要先收钱"这一问服务，扣点全走它的方法，卡片自己不算余额。
+    @State private var credits = PopopxCreditsManager.shared
+    /// 解锁回执的唯一出口。卡片不自己拼信令文本——那是路由器那一层的职责。
+    @State private var signaling = PopopxSilentSignalingRouter.shared
+    /// 等用户点头的那一笔解锁。它是**唯一**的真值：弹窗的可见性由它派生（下面那个 Binding），
+    /// 所以不存在"弹窗还在、键已经空了"或者反过来的中间帧。
+    @State private var pendingUnlock: PopopxProfileReadKey?
 
     /// 卡片的可见相位。与 `PopopxProfileReadState` 不是一一对应：这里多了两条展示层规则
     /// （24 小时兜底、本会话已焚账），少了存储层的细节（起点时刻）。
@@ -90,6 +97,7 @@ struct ProfileCardBubbleView: View {
             VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
                 headline
                 statusLine
+                priceLine
                 if let refusal {
                     refusalLine(refusal)
                 }
@@ -120,6 +128,12 @@ struct ProfileCardBubbleView: View {
         .onChange(of: refusal, initial: false) { _, message in
             guard let message else { return }
             AccessibilityNotification.Announcement(message).post()
+        }
+        .alert(Copy.unlockTitle, isPresented: unlockPromptShown) {
+            Button(Copy.unlockConfirm(unlockPrice)) { confirmUnlock() }
+            Button(Copy.unlockCancel, role: .cancel) {}
+        } message: {
+            Text(Copy.unlockMessage(price: unlockPrice, balance: credits.balance))
         }
     }
 
@@ -194,6 +208,14 @@ struct ProfileCardBubbleView: View {
             line(Copy.destroyed, ink: secondaryInk)
         case .unlocated:
             line(Copy.unlocated, ink: secondaryInk)
+        }
+    }
+
+    /// 收费那一档在卡片上的预告。只在那一笔还没付时出现：解锁过之后再写一遍就成了承诺第二次收费。
+    /// 用品牌色而不是次要灰 —— 这一行要回答的是"点下去会发生什么"，它是这张卡当前最重要的一句事实。
+    @ViewBuilder private var priceLine: some View {
+        if unlockRequired, let price = payload.manifest.unlockCredits {
+            line(Copy.price(price), ink: PopopxPalette.brand)
         }
     }
 
@@ -308,6 +330,26 @@ struct ProfileCardBubbleView: View {
         }
     }
 
+    /// 这一张现在要不要先收钱。判据只有本地账本那一格：`hasUnlocked` 按（谁的哪张、哪个会话、哪一行）
+    /// 三个字段一起查，所以"在别的会话里解锁过"不会被当成这里也付过了。
+    private var unlockRequired: Bool {
+        guard let price = payload.manifest.unlockCredits, price > 0, let key = target else { return false }
+        return !credits.hasUnlocked(profileId: payload.manifest.profileId, chatId: key.chatId, itemId: key.itemId)
+    }
+
+    /// 弹窗上要写的价。它只在 `pendingUnlock != nil` 期间被读，而那个键只可能由 `open()` 在
+    /// `unlockCredits > 0` 那一支里设起来，所以这里不需要再判一次存在性。
+    private var unlockPrice: Int { payload.manifest.unlockCredits ?? 0 }
+
+    /// 弹窗的可见性不另存一格真值：读 `pendingUnlock`，关掉时把它清空。
+    /// 两处各存一份的话，"弹窗还在但键已经空了"那一帧会让确认按钮拿不到落点。
+    private var unlockPromptShown: Binding<Bool> {
+        Binding(
+            get: { pendingUnlock != nil },
+            set: { shown in if !shown { pendingUnlock = nil } }
+        )
+    }
+
     private var accessibilityText: String {
         var parts: [String] = []
         parts.append(payload.isEphemeral ? Copy.modeEphemeral : Copy.modeStandard)
@@ -320,6 +362,8 @@ struct ProfileCardBubbleView: View {
         case .unlocated: parts.append(Copy.unlocated)
         }
         if let channelSpoken { parts.append(channelSpoken) }
+        // 收费那一档也是这张卡的一部分：读屏要先把价念出来，才轮到"点开"那句提示。
+        if unlockRequired, let price = payload.manifest.unlockCredits { parts.append(Copy.price(price)) }
         // 卡内那行拒绝理由同样是这张卡的一部分（整卡一个无障碍元素，子视图被 ignore）。
         if let refusal { parts.append(refusal) }
         return parts.joined(separator: "，")
@@ -345,6 +389,15 @@ struct ProfileCardBubbleView: View {
 
     private func open() {
         guard isOpenable, let key = target else { return }
+        // 收费那一档先问钱，再谈打开：`present` 一上去就是阅读器前台，那时已经没有"用户还没点头"这条退路。
+        // 判据用 `hasUnlocked` 而不是本视图的一格状态：同一张卡可以转发、可以在别的会话里再出现一次，
+        // 而那三个字段（谁、哪个会话、哪一行）才是"这一次解锁付过钱没有"的完整答案。
+        if let price = payload.manifest.unlockCredits, price > 0,
+           !credits.hasUnlocked(profileId: payload.manifest.profileId, chatId: key.chatId, itemId: key.itemId) {
+            refusal = nil
+            pendingUnlock = key
+            return
+        }
         // 记在 `openTask` 上而不是随手丢掉：一次点击对应一个进行中的打开请求，
         // 重绘不该让它变成孤儿（视图身份换掉时 `.task` 会停掉轮询，这一条则由下一次点击接管）。
         openTask = Task {
@@ -371,6 +424,45 @@ struct ProfileCardBubbleView: View {
             // 点开了也要重读：卡片得立刻从"未点开"翻成"计时中"，而不是等下一拍。
             await pollOnce(key: key)
         }
+    }
+
+    /// 用户点头之后才扣点，扣成功了才打开。反过来就是"钱付了没看到内容"，是这一族里最难看的失败。
+    ///
+    /// 扣点这件事只有本地账本知道：`PopopxCreditsManager` 是唯一能改余额的东西，卡片不碰它的钱包，
+    /// 只调这一个方法，于是"同一张卡点两次不会收两次钱"由 `unlockProfile` 里那三条 guard 一起保证。
+    private func confirmUnlock() {
+        guard let key = pendingUnlock, let price = payload.manifest.unlockCredits else { return }
+        pendingUnlock = nil
+        do {
+            _ = try credits.unlockProfile(profileId: payload.manifest.profileId,
+                                          chatId: key.chatId, itemId: key.itemId, price: price)
+            PopopxHaptics.notice(.success)
+            open()
+            sendUnlockReceipt(key: key)
+        } catch {
+            // 一句卡内说明就够：`errorDescription` 那批句子本来就说清了"差多少点"，
+            // 在这里再抄一遍余额只会给出第二个数。
+            refusal = Copy.unlockFailed(error.localizedDescription)
+            PopopxHaptics.notice(.error)
+        }
+    }
+
+    /// 解锁回执：告诉主页主人"这张名片被解开了"。它是五种既有静默信令之外补的第六种
+    /// （`PopopxCommerceSignalKind.profileUnlocked`），只进不出——收的一侧删行、不动任何界面。
+    ///
+    /// **尽力而为**：钱已扣、内容已开，这一条发不出去不影响这一笔，所以既不重试也不告诉用户。
+    /// 排在 `open()` 之后：回执不该推迟阅读器第一帧。
+    ///
+    /// 两道 gate 都是必须的，不是保险丝：
+    /// - `incoming`：出站那一格是我自己发出的名片，"查看的人"在对端设备上，这里没有可通知的对象。
+    /// - `getContactChat`：`PopopxProfileReadKey.chatId` 在群聊里装的是**群号**，而落点要的是
+    ///   **联系人号**，两套编号各自从 1 往上排、完全可能撞成同一个数。拿群号当 contactId 会把这条
+    ///   机器行发给一个毫不相干的人，所以宁可少发一条：少一条回执只是主页主人不知道，
+    ///   发错人则是在别人的会话里多出一行谁都不会看见的东西。
+    private func sendUnlockReceipt(key: PopopxProfileReadKey) {
+        guard incoming, ChatModel.shared.getContactChat(key.chatId) != nil else { return }
+        let profileId = payload.manifest.profileId
+        Task { _ = await signaling.sendProfileUnlockReceipt(profileId: profileId, contactId: key.chatId) }
     }
 
     // MARK: 钟
@@ -480,6 +572,17 @@ private enum Copy {
 
     static func counting(_ seconds: Int) -> String { "本次阅读剩余 \(seconds) 秒" }
     static func countingSpoken(_ seconds: Int) -> String { "计时中，剩余 \(seconds) 秒" }
+
+    // 收费那一档。数字直接插进句子里，不套 `PopopxCommerceCopy.creditsAmountFormat`：那一句是给
+    // 全语种目录里的钱话用的，这两句按本地化裁定留在文件内，两处各抄一遍迟早对不上。
+    static func price(_ value: Int) -> String { "查看需 \(value) 算力点" }
+    static let unlockTitle = "解锁这份个人主页"
+    static func unlockConfirm(_ value: Int) -> String { "花费 \(value) 点" }
+    static let unlockCancel = "取消"
+    static func unlockMessage(price: Int, balance: Int) -> String {
+        "发送方给这一份设了 \(price) 点的门槛；你的余额是 \(balance) 点。解锁记录只写在这台设备的钥匙串里。"
+    }
+    static func unlockFailed(_ reason: String) -> String { "没有解锁：\(reason)" }
 }
 
 // MARK: - 预览

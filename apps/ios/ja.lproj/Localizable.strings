@@ -3670,3 +3670,117 @@ server test failure */
 /* No comment provided by engineer. */
 "Your POPOPX address" = "あなたのPOPOPXアドレス";
 
+
+/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
+/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+
+/* product name */
+"POPOPX Dynamic Privacy Node Badge" = "POPOPX 動的プライバシーノードバッジ";
+
+/* trial product name */
+"3-Day Pioneer Node Trial Badge" = "パイオニアノード3日間体験バッジ";
+
+/* virtual currency name */
+"POPOPX Compute Credits" = "POPOPX 計算クレジット";
+
+/* never VPN */
+"dynamic SMP relay node cluster" = "動的な SMP リレーノードクラスター";
+
+/* paywall title */
+"Light up a privacy node" = "プライバシーノードを有効にする";
+
+/* segment */
+"For myself" = "自分のために";
+
+/* segment */
+"Gift badge" = "バッジをプレゼント";
+
+/* button */
+"Restore badge purchases" = "バッジの購入を復元";
+
+/* button */
+"Enter a code or scan" = "コードを入力またはスキャン";
+
+/* button */
+"Exchange with Compute Credits" = "計算クレジットで交換";
+
+/* price suffix */
+"/ year" = "/ 年";
+
+/* price suffix */
+"/ month" = "/ 月";
+
+/* annual badge savings, computed from the two live display prices */
+"Save %lld%% off" = "%lld%% お得";
+
+/* credit pack amount */
+"%lld Compute Credits" = "%lld 計算クレジット";
+
+/* Apple 3.1.2(c) auto-renewable disclosure */
+"Payment will be charged to your Apple Account at confirmation of purchase. Subscriptions renew automatically unless they are cancelled at least 24 hours before the end of the current period. You can manage or cancel subscriptions in App Store settings at any time." = "購入の確認時に Apple アカウントへ請求が行われます。サブスクリプションは、現在の期間の終了 24 時間以上前に解約されない限り自動的に更新されます。App Store の設定からいつでも管理または解約できます。";
+
+/* no promotional top-up */
+"Compute Credits are added at the exact amount shown. No bonus credits are granted." = "計算クレジットは表示どおりの数だけ付与されます。ボーナスのクレジットはありません。";
+
+/* wallet label */
+"Compute Credits balance" = "計算クレジットの残高";
+
+/* sheet title */
+"Send Compute Credits" = "計算クレジットを送る";
+
+/* Apple 3.1.1 no random amounts */
+"Only the fixed amounts listed here can be sent. Nowhere in this feature can you type a custom amount." = "送信できるのはここにある固定額のみです。この機能のどこにも任意の額を入力する場所はありません。";
+
+/* refund promise */
+"Credits nobody claims are returned to the sender %lld days after the packet was sent." = "誰も受け取らなかったクレジットは、送信から %lld 日後に送信者へ返されます。";
+
+/* sheet title */
+"Subscribe to this channel" = "このチャンネルを購読する";
+
+/* channel subscription period */
+"Each purchase is valid for %lld days." = "購入はそれぞれ %lld 日間有効です。";
+
+/* renewal is cumulative, money promise */
+"Subscribing again adds %lld days to the time you already have." = "再度購読すると、残り期間に %lld 日追加されます。";
+
+/* error */
+"The store is not available right now." = "ストアは現在利用できません。";
+
+/* error */
+"This item is not available (%@)." = "この項目は利用できません (%@)。";
+
+/* error */
+"Purchase failed: %@" = "購入に失敗しました: %@";
+
+/* error */
+"Purchase cancelled." = "購入を取り消しました。";
+
+/* error */
+"The receipt could not be verified." = "レシートを検証できませんでした。";
+
+/* error */
+"Secure storage is unavailable on this device." = "このデバイスでは安全なストレージを利用できません。";
+
+/* error */
+"This needs %1$lld Compute Credits and you have %2$lld." = "これには %1$lld 計算クレジットが必要で、残りは %2$lld です。";
+
+/* error */
+"This gift badge is no longer available." = "このギフトバッジは利用できません。";
+
+/* error */
+"This code has already been redeemed." = "このコードはすでに使用されています。";
+
+/* error */
+"The code is not valid. Check it and try again." = "コードが正しくありません。確認してもう一度お試しください。";
+
+/* error */
+"The secure exchange could not be started." = "安全な交換を開始できませんでした。";
+
+/* error */
+"The sender did not confirm this exchange." = "送信者がこの交換を確認しませんでした。";
+
+/* error */
+"This badge has already expired." = "このバッジはすでに期限切れです。";
+
+/* error */
+"Your Compute Credits balance cannot go above %lld. Spend some credits first." = "計算クレジットの残高は %lld を超えられません。先に一部をご利用ください。";

@@ -6660,3 +6660,117 @@ server test failure */
 /* No comment provided by engineer. */
 "Your subscription is cancelled. The badge stays until %@." = "Uw abonnement is opgezegd. De badge blijft tot %@.";
 
+
+/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
+/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+
+/* product name */
+"POPOPX Dynamic Privacy Node Badge" = "POPOPX-badge voor dynamische privacyknooppunten";
+
+/* trial product name */
+"3-Day Pioneer Node Trial Badge" = "3 dagen proefbadge voor knooppionier";
+
+/* virtual currency name */
+"POPOPX Compute Credits" = "POPOPX-rekenpunten";
+
+/* never VPN */
+"dynamic SMP relay node cluster" = "dynamisch cluster van SMP-relaisknooppunten";
+
+/* paywall title */
+"Light up a privacy node" = "Een privacyknooppunt activeren";
+
+/* segment */
+"For myself" = "Voor mij";
+
+/* segment */
+"Gift badge" = "Badge kado doen";
+
+/* button */
+"Restore badge purchases" = "Aankopen van badges herstellen";
+
+/* button */
+"Enter a code or scan" = "Code invoeren of scannen";
+
+/* button */
+"Exchange with Compute Credits" = "Wisselen met rekenpunten";
+
+/* price suffix */
+"/ year" = "/ jaar";
+
+/* price suffix */
+"/ month" = "/ maand";
+
+/* annual badge savings, computed from the two live display prices */
+"Save %lld%% off" = "%lld%% besparen";
+
+/* credit pack amount */
+"%lld Compute Credits" = "%lld rekenpunten";
+
+/* Apple 3.1.2(c) auto-renewable disclosure */
+"Payment will be charged to your Apple Account at confirmation of purchase. Subscriptions renew automatically unless they are cancelled at least 24 hours before the end of the current period. You can manage or cancel subscriptions in App Store settings at any time." = "Het bedrag wordt bij bevestiging van de aankoop op uw Apple-account in rekening gebracht. Abonnementen worden automatisch verlengd tenzij ze minstens 24 uur vóór het einde van de huidige periode worden opgezegd. U kunt abonnementen altijd beheren of opzeggen in de App-Store-instellingen.";
+
+/* no promotional top-up */
+"Compute Credits are added at the exact amount shown. No bonus credits are granted." = "Rekenpunten worden exact in het getoonde aantal bijgeschreven. Er worden geen bonuspunten gegeven.";
+
+/* wallet label */
+"Compute Credits balance" = "Saldo rekenpunten";
+
+/* sheet title */
+"Send Compute Credits" = "Rekenpunten verzenden";
+
+/* Apple 3.1.1 no random amounts */
+"Only the fixed amounts listed here can be sent. Nowhere in this feature can you type a custom amount." = "Alleen de vaste bedragen die hier worden vermeld, kunnen worden verzonden. U kunt in deze functie nergens een eigen bedrag invoeren.";
+
+/* refund promise */
+"Credits nobody claims are returned to the sender %lld days after the packet was sent." = "Punten die niemand opeist, worden %lld dagen na het verzenden teruggestuurd naar de afzender.";
+
+/* sheet title */
+"Subscribe to this channel" = "Abonneren op dit kanaal";
+
+/* channel subscription period */
+"Each purchase is valid for %lld days." = "Elke aankoop is %lld dagen geldig.";
+
+/* renewal is cumulative, money promise */
+"Subscribing again adds %lld days to the time you already have." = "Opnieuw abonneren voegt %lld dagen toe aan de tijd die u al heeft.";
+
+/* error */
+"The store is not available right now." = "De winkel is momenteel niet beschikbaar.";
+
+/* error */
+"This item is not available (%@)." = "Dit item is niet beschikbaar (%@).";
+
+/* error */
+"Purchase failed: %@" = "Aankoop mislukt: %@";
+
+/* error */
+"Purchase cancelled." = "Aankoop geannuleerd.";
+
+/* error */
+"The receipt could not be verified." = "Het bewijs kon niet worden geverifieerd.";
+
+/* error */
+"Secure storage is unavailable on this device." = "Beveiligde opslag is niet beschikbaar op dit apparaat.";
+
+/* error */
+"This needs %1$lld Compute Credits and you have %2$lld." = "Hiervoor zijn %1$lld rekenpunten nodig en u heeft %2$lld.";
+
+/* error */
+"This gift badge is no longer available." = "Deze kadobadge is niet meer beschikbaar.";
+
+/* error */
+"This code has already been redeemed." = "Deze code is al ingewisseld.";
+
+/* error */
+"The code is not valid. Check it and try again." = "De code is niet geldig. Controleer hem en probeer het opnieuw.";
+
+/* error */
+"The secure exchange could not be started." = "De beveiligde uitwisseling kon niet worden gestart.";
+
+/* error */
+"The sender did not confirm this exchange." = "De afzender heeft deze uitwisseling niet bevestigd.";
+
+/* error */
+"This badge has already expired." = "Deze badge is al verlopen.";
+
+/* error */
+"Your Compute Credits balance cannot go above %lld. Spend some credits first." = "Uw saldo rekenpunten kan niet boven %lld komen. Gebruik eerst een deel van de punten.";

@@ -87,6 +87,7 @@ struct PopopxGroupChatInfoView: View {
                     headerCard
                     renameCard
                     groupCard
+                    subscriptionCard
                     messageCard
                     membersCard
                     dangerCard
@@ -255,6 +256,44 @@ struct PopopxGroupChatInfoView: View {
                 }
             }
         }
+    }
+
+    // MARK: 频道订阅门槛
+
+    /// 只有频道画这一格（判据 `GroupInfo.isChannel` = `publicGroup?.groupType == .channel`，
+    /// ChatTypes.swift:3064、:3233）。私人群不给：订阅这个语义需要一个"定价的人"，而群里的成员彼此都是主人。
+    ///
+    /// 频道主这一支推的是真正的发布页，**管理员也能进**（判据与 `sendChannelAccess` 的守卫同一份：
+    /// `popopxCanPublishChannelThreshold`）；成员这一支只读，显示本机那张凭证。
+    /// 成员**不在这里**订阅或续订，原因是价格不在本机：门槛只有频道里那条卡片带着，
+    /// 在这一页凭空摆一个数字，扣的就是没人宣布过的钱。所以文案把入口指回那条卡片。
+    @ViewBuilder private var subscriptionCard: some View {
+        if groupInfo.isChannel {
+            PopopxSectionCard(Copy.sectionSubscription,
+                              footnote: groupInfo.popopxCanPublishChannelThreshold ? nil : Copy.memberFootnote) {
+                if groupInfo.popopxCanPublishChannelThreshold {
+                    PopopxGroupRowLink(Copy.publishThreshold, systemImage: "lock", tint: .brand) {
+                        PopopxChannelThresholdView(groupId: groupInfo.groupId,
+                                                   channelTitle: groupInfo.displayName)
+                            .navigationTitle(Copy.publishThreshold)
+                    }
+                } else {
+                    PopopxPickerRow(Copy.subscriptionState,
+                                    value: memberTicketValue,
+                                    systemImage: memberTicketValue == nil ? "lock.open" : "lock.fill") { }
+                        .allowsHitTesting(false)
+                        .accessibilityHidden(true)
+                }
+            }
+        }
+    }
+
+    /// 成员侧那一格右边的数：有效期，或 nil = 本机没有这张凭证。
+    /// 键用 `GroupInfo.id`，与卡片签凭证时用的 `ChatInfo.id` 同一个串（`ChatInfo` 的 group 那一档
+    /// 就是转发给 `groupInfo.id`），所以"在频道里订阅"与"在这一页看到状态"必然指向同一张票。
+    private var memberTicketValue: String? {
+        guard let ticket = PopopxCreditsManager.shared.ticket(forChannelId: groupInfo.id) else { return nil }
+        return String(format: Copy.subscriptionValidFormat, PopopxCommerceFormat.date(ticket.expiresAtMs))
     }
 
     // MARK: 消息
@@ -896,6 +935,13 @@ private enum Copy {
     static let groupLink = "群链接"
     static let linkAbsent = "未创建"
     static let linkPresent = "已创建"
+
+    // 频道订阅门槛
+    static let sectionSubscription = "频道订阅"
+    static let memberFootnote = "订阅在频道里那条门槛卡片上完成：价格由频道主发布，本机没有定价权。"
+    static let publishThreshold = "发布订阅门槛"
+    static let subscriptionState = "订阅凭证"
+    static let subscriptionValidFormat = "有效至 %@"
 
     // 消息
     static let retentionFootnote = "设置消息在这台设备上自动删除的时间。"

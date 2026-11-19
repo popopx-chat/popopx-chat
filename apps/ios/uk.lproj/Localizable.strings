@@ -6981,3 +6981,117 @@ alert title */
 /* No comment provided by engineer. */
 "Your subscription is cancelled. The badge stays until %@." = "Вашу підписку скасовано. Значок діє до %@.";
 
+
+/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
+/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+
+/* product name */
+"POPOPX Dynamic Privacy Node Badge" = "Значок POPOPX динамічного вузла конфіденційності";
+
+/* trial product name */
+"3-Day Pioneer Node Trial Badge" = "Пробний значок вузла-піонера на 3 дні";
+
+/* virtual currency name */
+"POPOPX Compute Credits" = "Обчислювальні бали POPOPX";
+
+/* never VPN */
+"dynamic SMP relay node cluster" = "динамічний кластер ретрансляційних вузлів SMP";
+
+/* paywall title */
+"Light up a privacy node" = "Увімкнути вузол конфіденційності";
+
+/* segment */
+"For myself" = "Для мене";
+
+/* segment */
+"Gift badge" = "Подарувати значок";
+
+/* button */
+"Restore badge purchases" = "Відновити покупки значків";
+
+/* button */
+"Enter a code or scan" = "Введіть код або скануйте";
+
+/* button */
+"Exchange with Compute Credits" = "Обміняти на обчислювальні бали";
+
+/* price suffix */
+"/ year" = "/ рік";
+
+/* price suffix */
+"/ month" = "/ місяць";
+
+/* annual badge savings, computed from the two live display prices */
+"Save %lld%% off" = "Заощаджуйте %lld%%";
+
+/* credit pack amount */
+"%lld Compute Credits" = "%lld обчислювальних балів";
+
+/* Apple 3.1.2(c) auto-renewable disclosure */
+"Payment will be charged to your Apple Account at confirmation of purchase. Subscriptions renew automatically unless they are cancelled at least 24 hours before the end of the current period. You can manage or cancel subscriptions in App Store settings at any time." = "Оплата стягується з вашого облікового запису Apple під час підтвердження покупки. Підписки продовжуються автоматично, якщо їх не скасувати щонайменше за 24 години до завершення поточного періоду. Керувати підписками чи скасовувати їх можна будь-коли в налаштуваннях App Store.";
+
+/* no promotional top-up */
+"Compute Credits are added at the exact amount shown. No bonus credits are granted." = "Обчислювальні бали нараховуються рівно в зазначеній кількості. Бонусні бали не нараховуються.";
+
+/* wallet label */
+"Compute Credits balance" = "Баланс обчислювальних балів";
+
+/* sheet title */
+"Send Compute Credits" = "Надіслати обчислювальні бали";
+
+/* Apple 3.1.1 no random amounts */
+"Only the fixed amounts listed here can be sent. Nowhere in this feature can you type a custom amount." = "Можна надсилати лише фіксовані суми, наведені тут. У цій функції ніде не можна ввести власну суму.";
+
+/* refund promise */
+"Credits nobody claims are returned to the sender %lld days after the packet was sent." = "Бали, які ніхто не забрав, повертаються відправнику через %lld днів після надсилання.";
+
+/* sheet title */
+"Subscribe to this channel" = "Підписатися на цей канал";
+
+/* channel subscription period */
+"Each purchase is valid for %lld days." = "Кожна покупка дійсна %lld днів.";
+
+/* renewal is cumulative, money promise */
+"Subscribing again adds %lld days to the time you already have." = "Повторна підписка додає %lld днів до вже наявного строку.";
+
+/* error */
+"The store is not available right now." = "Магазин наразі недоступний.";
+
+/* error */
+"This item is not available (%@)." = "Цей товар недоступний (%@).";
+
+/* error */
+"Purchase failed: %@" = "Покупка не вдалася: %@";
+
+/* error */
+"Purchase cancelled." = "Покупку скасовано.";
+
+/* error */
+"The receipt could not be verified." = "Не вдалося перевірити квитанцію.";
+
+/* error */
+"Secure storage is unavailable on this device." = "Захищене сховище недоступне на цьому пристрої.";
+
+/* error */
+"This needs %1$lld Compute Credits and you have %2$lld." = "Потрібно %1$lld обчислювальних балів, у вас %2$lld.";
+
+/* error */
+"This gift badge is no longer available." = "Цей подарунковий значок більше недоступний.";
+
+/* error */
+"This code has already been redeemed." = "Цей код уже використано.";
+
+/* error */
+"The code is not valid. Check it and try again." = "Код недійсний. Перевірте його й спробуйте ще раз.";
+
+/* error */
+"The secure exchange could not be started." = "Не вдалося розпочати захищений обмін.";
+
+/* error */
+"The sender did not confirm this exchange." = "Відправник не підтвердив цей обмін.";
+
+/* error */
+"This badge has already expired." = "Цей значок уже прострочений.";
+
+/* error */
+"Your Compute Credits balance cannot go above %lld. Spend some credits first." = "Баланс обчислювальних балів не може перевищувати %lld. Спершу витратьте частину балів.";

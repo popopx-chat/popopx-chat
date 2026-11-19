@@ -3333,3 +3333,117 @@ server test failure */
 /* No comment provided by engineer. */
 "Your POPOPX address" = "POPOPX-osoitteesi";
 
+
+/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
+/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+
+/* product name */
+"POPOPX Dynamic Privacy Node Badge" = "POPOPX:n dynaamisen yksityisyyssolmun merkki";
+
+/* trial product name */
+"3-Day Pioneer Node Trial Badge" = "3 päivän kokeilumerkki pioneerisolmulta";
+
+/* virtual currency name */
+"POPOPX Compute Credits" = "POPOPX-laskentapisteet";
+
+/* never VPN */
+"dynamic SMP relay node cluster" = "dynaaminen SMP-välityssolmrykelmä";
+
+/* paywall title */
+"Light up a privacy node" = "Aktivoi yksityisyyssolmu";
+
+/* segment */
+"For myself" = "Minulle";
+
+/* segment */
+"Gift badge" = "Lahjoita merkki";
+
+/* button */
+"Restore badge purchases" = "Palauta merkkiostot";
+
+/* button */
+"Enter a code or scan" = "Syötä koodi tai skannaa";
+
+/* button */
+"Exchange with Compute Credits" = "Vaihda laskentapisteillä";
+
+/* price suffix */
+"/ year" = "/ vuosi";
+
+/* price suffix */
+"/ month" = "/ kuukausi";
+
+/* annual badge savings, computed from the two live display prices */
+"Save %lld%% off" = "Säästä %lld%%";
+
+/* credit pack amount */
+"%lld Compute Credits" = "%lld laskentapistettä";
+
+/* Apple 3.1.2(c) auto-renewable disclosure */
+"Payment will be charged to your Apple Account at confirmation of purchase. Subscriptions renew automatically unless they are cancelled at least 24 hours before the end of the current period. You can manage or cancel subscriptions in App Store settings at any time." = "Maksu veloitetaan Apple-tililtäsi ostoksen vahvistuksen yhteydessä. Tilaukset uusiutuvat automaattisesti, ellei niitä peruuteta vähintään 24 tuntia ennen nykyisen kauden päättymistä. Voit hallita tai peruuttaa tilauksia milloin tahansa App Storen asetuksissa.";
+
+/* no promotional top-up */
+"Compute Credits are added at the exact amount shown. No bonus credits are granted." = "Laskentapisteet lisätään täsmälleen näytetyn määrän mukaisesti. Bonuspisteitä ei myönnetä.";
+
+/* wallet label */
+"Compute Credits balance" = "Laskentapisteiden saldo";
+
+/* sheet title */
+"Send Compute Credits" = "Lähetä laskentapisteitä";
+
+/* Apple 3.1.1 no random amounts */
+"Only the fixed amounts listed here can be sent. Nowhere in this feature can you type a custom amount." = "Vain tässä lueteltuja kiinteitä määriä voi lähettää. Tästä toiminnosta missään kohdin ei voi syöttää omaa määrää.";
+
+/* refund promise */
+"Credits nobody claims are returned to the sender %lld days after the packet was sent." = "Pisteet, joita kukaan lunasta, palautetaan lähettäjälle %lld päivän lähettämisen jälkeen.";
+
+/* sheet title */
+"Subscribe to this channel" = "Tilaa tämä kanava";
+
+/* channel subscription period */
+"Each purchase is valid for %lld days." = "Jokainen osto on voimassa %lld päivää.";
+
+/* renewal is cumulative, money promise */
+"Subscribing again adds %lld days to the time you already have." = "Uusi tilaus lisää %lld päivää jo olevaan aikaan.";
+
+/* error */
+"The store is not available right now." = "Kauppa ei ole juuri nyt käytettävissä.";
+
+/* error */
+"This item is not available (%@)." = "Tämä tuote ei ole käytettävissä (%@).";
+
+/* error */
+"Purchase failed: %@" = "Osto epäonnistui: %@";
+
+/* error */
+"Purchase cancelled." = "Osto peruttu.";
+
+/* error */
+"The receipt could not be verified." = "Kuittia ei voitu vahvistaa.";
+
+/* error */
+"Secure storage is unavailable on this device." = "Suojattu tallennustila ei ole käytettävissä tällä laitteella.";
+
+/* error */
+"This needs %1$lld Compute Credits and you have %2$lld." = "Tämä vaatii %1$lld laskentapistettä ja sinulla on %2$lld.";
+
+/* error */
+"This gift badge is no longer available." = "Tämä lahjamerkki ei ole enää käytettävissä.";
+
+/* error */
+"This code has already been redeemed." = "Tämä koodi on jo lunastettu.";
+
+/* error */
+"The code is not valid. Check it and try again." = "Koodi ei kelpaa. Tarkista se ja yritä uudelleen.";
+
+/* error */
+"The secure exchange could not be started." = "Suojattua vaihtoa ei voitu aloittaa.";
+
+/* error */
+"The sender did not confirm this exchange." = "Lähettäjä ei vahvistanut tätä vaihtoa.";
+
+/* error */
+"This badge has already expired." = "Tämä merkki on jo vanhentunut.";
+
+/* error */
+"Your Compute Credits balance cannot go above %lld. Spend some credits first." = "Laskentapisteiden saldo ei voi ylittää %lld. Käytä ensin osa pisteistä.";

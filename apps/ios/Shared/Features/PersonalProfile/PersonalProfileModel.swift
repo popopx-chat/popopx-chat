@@ -12,7 +12,7 @@
 //
 //  ```text
 //  👤 [加密个人主页] 张三 · 后端 / 摄影 (阅后即焚)
-//  popopx://profile?mode=ephemeral&ttl=300&delivery=full&data=<base64url(JSON)>
+//  popopx://profile?mode=ephemeral&ttl=300&delivery=full&credits=20&data=<base64url(JSON)>
 //  ```
 //
 //  ### `data=` 不额外加密，是有意的
@@ -22,7 +22,8 @@
 //  ### 与邀请链接互斥（同 `PopopxLocation.swift:18`-`:22`、`PopopxSecurePayload.swift:37`-`:41`）
 //  `popopx:/` 和 `popopx://` 是邀请链接的前缀，`hasPopopxLink` 认的就是这个 scheme。所以 host
 //  只认 `profile`，`mode`/`ttl`/`delivery`/`data` 四格全部量死后才判活，任一条不满足就整串判死、
-//  退回纯文本渲染。一条主页消息被认成邀请链接 = 一次加好友，这条事故的形状和位置那版一模一样。
+//  退回纯文本渲染。第五格 `credits=`（收费门槛）是唯一可缺省的：老主页没有它，缺省就是免费看。
+//  一条主页消息被认成邀请链接 = 一次加好友，这条事故的形状和位置那版一模一样。
 //
 //  ### 两个方向的严格程度刻意不同
 //  `parse` 的输入是对方送过来的文本，所以它**永不抛错**：越界的块数、超长的标题、字母表外的
@@ -186,6 +187,17 @@ struct PopopxProfileManifest: Codable, Hashable, Sendable {
     var omittedMediaCount: Int
     /// 阅读时是否启动前置镜头的防窥防偷拍检测。只在 `.ephemeral` 一档有意义，但字段本身常驻。
     var enableAntiSpyCamera: Bool
+    /// 查看这份主页要花的算力点。`nil` = 免费看，也是所有老主页解出来的值（信封里没有 `credits=`、
+    /// JSON 里没这个键，两处都判成 nil），所以 `version` 不用升：那句注释写的是"加可选字段不用换版本"。
+    ///
+    /// 它既在信封（`credits=`）也在正文，和 `mode`/`ttl`/`delivery` 同一做法：信封那一格让"要不要先收钱"
+    /// 这个决定不必先解一段 base64 JSON，正文那一份则是唯一真值——两处不等就整串判死（见 `parseToken`）。
+    /// 上界不在这里夹：`PopopxCreditsManager.unlockProfile` 自己判 `1…maximumCreditsThreshold`，
+    /// 扣点那一侧才是钱的边界，展示与扣点之间不该有第二份真值。
+    ///
+    /// `= nil` 是写给编译器看的：可选属性"自动就是 nil"那条规则不会给成员初始化器带上默认实参，
+    /// 少了这两个字符，`blank()` 之外每一处手工造 manifest 的调用点都要多写一个参数。
+    var unlockCredits: Int? = nil
     var updatedAt: TimeInterval
     var blocks: [PopopxProfileBlock]
 
@@ -422,10 +434,14 @@ struct PopopxProfilePayload: Hashable, Sendable {
         "👤 [加密个人主页] \(Self.oneLine(manifest.title)) (\(manifest.sendMode.cardLabel))"
     }
 
-    /// 机器读的那一行。四个值全都只含 `[A-Za-z0-9-_]`：`mode`/`delivery` 是白名单词，`ttl` 是十进制
-    /// 数字，`data` 是无填充 base64url（`+` `/` `=` 三个字符在字母表里就没有了）。所以这里既不需要
-    /// `PopopxLocation.swift:81`-`:84` 那套 `.alphanumerics` 转义，也不会出现 `PopopxSecurePayload.swift:131`-`:133`
-    /// 说的"字段值里带空白/`&`/`=`"，解析端按空白切 token、按 `&` 切字段、按第一个 `=` 分键值才安全。
+    /// 机器读的那一行。信封里的值全都只含 `[A-Za-z0-9-_]`：`mode`/`delivery` 是白名单词，`ttl` 与
+    /// `credits` 是十进制数字，`data` 是无填充 base64url（`+` `/` `=` 三个字符在字母表里就没有了）。
+    /// 所以这里既不需要 `PopopxLocation.swift:81`-`:84` 那套 `.alphanumerics` 转义，也不会出现
+    /// `PopopxSecurePayload.swift:131`-`:133` 说的"字段值里带空白/`&`/`=`"，解析端按空白切 token、
+    /// 按 `&` 切字段、按第一个 `=` 分键值才安全。
+    ///
+    /// `credits=` 是唯一**可缺省**的一格：老主页发出去时还没有这个概念，缺省就是免费，
+    /// 而不是"这份载荷不完整"。其余四格缺任何一格都整串判死。
     var wireString: String {
         let mode = manifest.sendMode.wireValue
         let ttl = manifest.ttlSeconds
@@ -433,7 +449,12 @@ struct PopopxProfilePayload: Hashable, Sendable {
         // `make` 已经编过一次并保证编得出；这里的 `try?` 只兜住"手工塞进来一个畸形 manifest"
         // 这一种情况，代价是一条空载荷——见 `init(manifest:)` 的说明。
         let data = (try? manifest.encodedJSON()).map { $0.popopxBase64URL } ?? ""
-        return "\(Self.scheme)://\(Self.host)?mode=\(mode)&ttl=\(ttl)&delivery=\(delivery)&data=\(data)"
+        var wire = "\(Self.scheme)://\(Self.host)?mode=\(mode)&ttl=\(ttl)&delivery=\(delivery)"
+        // 顺序：`credits` 排在 `data` 之前，和 `fieldNames` 那张白名单同一读序，也让人一眼能看见门槛。
+        if let credits = manifest.unlockCredits, credits > 0 {
+            wire += "&credits=\(credits)"
+        }
+        return wire + "&data=\(data)"
     }
 
     /// 实际发出去的那条文本。它是纯文本，所以和位置、绝密消息一样天然满足 `PopopxComposerRouting`
@@ -521,6 +542,14 @@ struct PopopxProfilePayload: Hashable, Sendable {
         guard manifest.sendMode == mode, manifest.deliveryMode == delivery, manifest.ttlSeconds == ttl else {
             return nil
         }
+        // `credits=` 是四格必填之外唯一可缺省的一格，所以它不进上面那道 `guard let` 链：
+        // 缺省 = 免费，那是老主页的正常形态，不是残缺。写着就必须是纯数字、不超位；
+        // 然后把信封那一份和 JSON 那一份比一次——钱的话两处各说各话是最不能忍的一种分歧。
+        let rawCredits = fields["credits"]
+        if let rawCredits {
+            guard rawCredits.allSatisfy(\.isNumber), rawCredits.count <= Self.maximumThresholdDigits else { return nil }
+        }
+        guard manifest.unlockCredits ?? 0 == (rawCredits.flatMap(Int.init) ?? 0) else { return nil }
         switch mode {
         case .standard:
             guard ttl == 0 else { return nil }
@@ -531,11 +560,16 @@ struct PopopxProfilePayload: Hashable, Sendable {
         return PopopxProfilePayload(manifest: manifest.normalized())
     }
 
-    private static let fieldNames: Set<String> = ["mode", "ttl", "delivery", "data"]
+    private static let fieldNames: Set<String> = ["mode", "ttl", "delivery", "credits", "data"]
 
     /// `ttl=` 的位数上限。`maximumTTLSeconds` 是 3600，四位数够用；多出来的位数一律判死，
     /// 免得有人拿 `99999999999` 去试探 `Int` 的边界。
     private static let maximumTTLDigits = 4
+
+    /// `credits=` 的位数上限，直接取商业层那张表（`PopopxCommerceLimits.maximumThresholdDigits`，
+    /// 由 `maximumCreditsThreshold = 100_000` 推出来）。在这里抄一个数就是第二份真值，
+    /// 而两份真值迟早会在"门槛改大"那一天分开。
+    private static let maximumThresholdDigits = PopopxCommerceLimits.maximumThresholdDigits
 
     /// base64url 后的最大字符数（含容忍带填充的写法）。`((bytes + 2) / 3) * 4` 是标准 base64
     /// 的长度上界，从它反推就不必先把整段解成 `Data` 才知道超标。

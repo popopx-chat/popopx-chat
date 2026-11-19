@@ -8010,3 +8010,117 @@ alert title */
 /* No comment provided by engineer. */
 "Your subscription is cancelled. The badge stays until %@." = "Ihr Abonnement wurde gekündigt. Der Badge bleibt bis %@ aktiv.";
 
+
+/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
+/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+
+/* product name */
+"POPOPX Dynamic Privacy Node Badge" = "POPOPX-Abzeichen für dynamische Privatknoten";
+
+/* trial product name */
+"3-Day Pioneer Node Trial Badge" = "3-tägiges Testabzeichen für Pionierknoten";
+
+/* virtual currency name */
+"POPOPX Compute Credits" = "POPOPX-Rechenpunkte";
+
+/* never VPN */
+"dynamic SMP relay node cluster" = "dynamischer Cluster aus SMP-Relaisknoten";
+
+/* paywall title */
+"Light up a privacy node" = "Einen Privatknoten aktivieren";
+
+/* segment */
+"For myself" = "Für mich";
+
+/* segment */
+"Gift badge" = "Abzeichen verschenken";
+
+/* button */
+"Restore badge purchases" = "Abzeichen-Käufe wiederherstellen";
+
+/* button */
+"Enter a code or scan" = "Code eingeben oder scannen";
+
+/* button */
+"Exchange with Compute Credits" = "Mit Rechenpunkten tauschen";
+
+/* price suffix */
+"/ year" = "/ Jahr";
+
+/* price suffix */
+"/ month" = "/ Monat";
+
+/* annual badge savings, computed from the two live display prices */
+"Save %lld%% off" = "%lld%% sparen";
+
+/* credit pack amount */
+"%lld Compute Credits" = "%lld Rechenpunkte";
+
+/* Apple 3.1.2(c) auto-renewable disclosure */
+"Payment will be charged to your Apple Account at confirmation of purchase. Subscriptions renew automatically unless they are cancelled at least 24 hours before the end of the current period. You can manage or cancel subscriptions in App Store settings at any time." = "Die Zahlung wird bei Bestellbestätigung mit Ihrem Apple-Account verrechnet. Abos verlängern sich automatisch, sofern sie nicht mindestens 24 Stunden vor Ende des aktuellen Zeitraums gekündigt werden. Sie können Ihre Abos jederzeit in den App-Store-Einstellungen verwalten oder kündigen.";
+
+/* no promotional top-up */
+"Compute Credits are added at the exact amount shown. No bonus credits are granted." = "Rechenpunkte werden exakt im angegebenen Betrag gutgeschrieben. Es werden keine Bonuspunkte gewährt.";
+
+/* wallet label */
+"Compute Credits balance" = "Rechenpunkte-Guthaben";
+
+/* sheet title */
+"Send Compute Credits" = "Rechenpunkte senden";
+
+/* Apple 3.1.1 no random amounts */
+"Only the fixed amounts listed here can be sent. Nowhere in this feature can you type a custom amount." = "Es können nur die hier aufgeführten festen Beträge gesendet werden. Sie können in diesem Bereich nirgends einen eigenen Betrag eingeben.";
+
+/* refund promise */
+"Credits nobody claims are returned to the sender %lld days after the packet was sent." = "Punkte, die niemand abholt, werden dem Sender %lld Tage nach dem Senden zurückerstattet.";
+
+/* sheet title */
+"Subscribe to this channel" = "Diesen Kanal abonnieren";
+
+/* channel subscription period */
+"Each purchase is valid for %lld days." = "Jeder Kauf ist %lld Tage gültig.";
+
+/* renewal is cumulative, money promise */
+"Subscribing again adds %lld days to the time you already have." = "Wenn Sie erneut abonnieren, werden %lld Tage auf Ihre verbleibende Zeit addiert.";
+
+/* error */
+"The store is not available right now." = "Der Store ist derzeit nicht verfügbar.";
+
+/* error */
+"This item is not available (%@)." = "Dieser Artikel ist nicht verfügbar (%@).";
+
+/* error */
+"Purchase failed: %@" = "Kauf fehlgeschlagen: %@";
+
+/* error */
+"Purchase cancelled." = "Kauf abgebrochen.";
+
+/* error */
+"The receipt could not be verified." = "Der Kaufbeleg konnte nicht überprüft werden.";
+
+/* error */
+"Secure storage is unavailable on this device." = "Der sichere Speicher ist auf diesem Gerät nicht verfügbar.";
+
+/* error */
+"This needs %1$lld Compute Credits and you have %2$lld." = "Dafür sind %1$lld Rechenpunkte nötig, Sie haben %2$lld.";
+
+/* error */
+"This gift badge is no longer available." = "Dieses Geschenke-Abzeichen ist nicht mehr verfügbar.";
+
+/* error */
+"This code has already been redeemed." = "Dieser Code wurde bereits eingelöst.";
+
+/* error */
+"The code is not valid. Check it and try again." = "Der Code ist nicht gültig. Prüfen Sie ihn und versuchen Sie es erneut.";
+
+/* error */
+"The secure exchange could not be started." = "Der sichere Austausch konnte nicht gestartet werden.";
+
+/* error */
+"The sender did not confirm this exchange." = "Der Sender hat diesen Austausch nicht bestätigt.";
+
+/* error */
+"This badge has already expired." = "Dieses Abzeichen ist bereits abgelaufen.";
+
+/* error */
+"Your Compute Credits balance cannot go above %lld. Spend some credits first." = "Ihr Rechenpunkte-Guthaben kann nicht über %lld steigen. Geben Sie vorher einige Punkte aus.";

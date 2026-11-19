@@ -117,6 +117,10 @@ private struct PopopxMeshBindingKey: Equatable {
 
 // MARK: - 页面
 
+/// 先锋体验弹窗"问过没有"的那一格键名。写成文件级常量而不是 `@AppStorage("…")` 的字面量：
+/// UserDefaults 的键要靠名字普查（自毁与迁移那几处按名字清点），散在装饰器里就搜不到归属。
+private let popopxTrialWelcomeAskedKey = "popopx.commerce.trialWelcomeAsked"
+
 /// 整页 `@MainActor`：与 `MainTabView.swift:76`、`PopopxMeView.swift:36`、
 /// `PopopxProximityAddContactView.swift:39` 同一写法，这样页内的同步小助手
 /// （判定通道、震动、写 @State）都不必再各自标注，也不会踩隔离相关的警告。
@@ -139,6 +143,11 @@ struct ChatsListView: View {
     @State private var showsAddFriend = false
     @State private var showsCreateGroup = false
     @State private var showsScan = false
+    /// 3 天先锋体验徽章的告知弹窗：只问一次，关掉就不再打扰。
+    /// 这一格只表"问过没有"；"这台设备领过没有"在 Keychain 的 `trialGuard` 里
+    /// （`PopopxBadgeManager.canClaimPioneerTrial` 读的就是它），所以清掉这一格不会让人多领一次。
+    @AppStorage(popopxTrialWelcomeAskedKey) private var trialWelcomeAsked = false
+    @State private var showsTrialWelcome = false
     /// 切换进行中的身份 id：`changeActiveUserAsync_` 会重载会话，二次进入只会把状态搅乱。
     @State private var switchingUserId: Int64?
     /// contactId → meshPublicKeyHex，一次 actor hop 读出来的整表。
@@ -243,8 +252,16 @@ struct ChatsListView: View {
         .sheet(isPresented: $showsAddFriend) {
             PopopxAddFriendView()
         }
+        // 先锋体验徽章的告知弹窗。挂在这一页而不是 `POPOPXApp` 那一层：这里已经有会话栈，
+        // sheet 才挂得住；`PopopxTrialWelcomeModal` 自己带"领取"按钮和失败原因，
+        // 所以这一层只决定"要不要问这一次"，不替它领。
+        .sheet(isPresented: $showsTrialWelcome) {
+            PopopxTrialWelcomeModal()
+                .presentationDetents([.medium, .large])
+        }
         .popopxToast(toast)
         .task { await startTelemetry() }
+        .task { presentTrialWelcomeIfNeeded() }
         .task(id: meshBindingKey) { await reloadMeshBindings() }
         .task(id: runtime.isFuseOn) { await pollMeshFreshness() }
         .onChange(of: currentUserId) { _, userId in
@@ -422,6 +439,19 @@ struct ChatsListView: View {
 
     private func startTelemetry() async {
         await telemetry.start()
+    }
+
+    /// 首启那一次体验徽章的告知：两个条件都成立才问，问完就落那一格 UserDefaults。
+    ///
+    /// `canClaimPioneerTrial` 读的是"没有徽章记录 + Keychain 里没有 trialGuard"，
+    /// 而那份记录在 `PopopxBadgeManager` 的 `init()` 里就同步取好了（PopopxBadgeManager.swift:65-71），
+    /// 所以这里不必等 `start()`：`start()` 装的是 StoreKit 交付与心跳，和这一格判定无关。
+    /// 已经领过的人、已经到期降级的人、已经问过的人，都从这里直接返回，不弹窗、不读盘、不发东西。
+    private func presentTrialWelcomeIfNeeded() {
+        guard !trialWelcomeAsked else { return }
+        guard PopopxBadgeManager.shared.canClaimPioneerTrial else { return }
+        trialWelcomeAsked = true
+        showsTrialWelcome = true
     }
 
     /// 顶栏只把选中的 userId 写回来，切换（api 层重载会话、重建整棵聊天视图树）归这里 ——

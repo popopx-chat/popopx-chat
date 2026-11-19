@@ -70,6 +70,11 @@ final class ProfileBuilderViewModel {
     var title = ""
     var subtitle = ""
     var enableAntiSpyCamera = false
+    /// 查看这份主页要收的算力点，0 = 免费。视图直接绑它（和上面那格同一个做法），落进清单时 0 变 nil。
+    ///
+    /// 这里没有"能不能收这个价"的校验：钱的边界在 `PopopxCreditsManager.unlockProfile` 那一侧，
+    /// 制作器只负责把用户选的数原样带出去。
+    var unlockCredits = 0
 
     // MARK: 只读状态
 
@@ -170,6 +175,9 @@ final class ProfileBuilderViewModel {
         sendMode = manifest.sendMode
         ttlSeconds = manifest.ttlSeconds
         enableAntiSpyCamera = manifest.enableAntiSpyCamera
+        // 原样带回来，不贴档位：门槛是自定义数字，选择表里没有的合法值（比如 37）也是用户设过的决定，
+        // 载入时悄悄改成 20 或 0 都是在改他的收费。真正的边界在扣点那一侧。
+        unlockCredits = manifest.unlockCredits ?? 0
         blocks = manifest.blocks
         blockIDs = manifest.blocks.map { _ in UUID() }
         rememberedEphemeralTTL = manifest.sendMode == .ephemeral
@@ -358,6 +366,9 @@ final class ProfileBuilderViewModel {
             deliveryMode: .fullMedia,
             omittedMediaCount: 0,
             enableAntiSpyCamera: enableAntiSpyCamera,
+            // 0 存成 nil，而不是 JSON 里写一个 `unlockCredits: 0`：门槛这格"没写过"和"写过但等于零"
+            // 在收件方那边必须给出完全相同的行为（直接打开），而所有老主页就是"没写过"那一档。
+            unlockCredits: unlockCredits > 0 ? unlockCredits : nil,
             updatedAt: updatedAt,
             blocks: blocks
         )
@@ -530,7 +541,44 @@ struct ProfileBuilderView: View {
                 )
                 .accessibilityIdentifier("popopx.profile.builder.antiSpy")
             }
+            PopopxBuilderDivider()
+            // 收费门槛这一档不属于"隐私"那一族（它改变的是收件人要不要付钱，不是内容留多久），
+            // 所以它不跟着 `sendMode == .ephemeral` 那一支走：常驻名片同样可以设门槛。
+            Text(Copy.thresholdLabel)
+                .font(PopopxType.sectionHeader)
+                .foregroundStyle(PopopxPalette.label)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            PopopxTextField(
+                Copy.thresholdField,
+                prompt: Copy.thresholdPrompt,
+                text: unlockCreditsText,
+                systemImage: "circle.hexagongrid.fill",
+                keyboard: .numberPad
+            )
+            .accessibilityIdentifier("popopx.profile.builder.threshold")
+            Text(Copy.thresholdNote(PopopxCommerceLimits.maximumCreditsThreshold))
+                .font(PopopxType.caption)
+                .foregroundStyle(PopopxPalette.labelSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
+    }
+
+    /// 门槛数字框与模型之间只做一次换算：框里留空 = 模型里的 0 = 清单里的 nil。
+    ///
+    /// 刻意不在模型里再存一格"要不要收费"的布尔：那两处真值迟早会分家，而分家之后的形状是
+    /// "开关说收费、数字是 0"——收件人那边就得到一个要点开却收不到钱的卡片。
+    private var unlockCreditsText: Binding<String> {
+        Binding(
+            get: { model.unlockCredits > 0 ? String(model.unlockCredits) : "" },
+            set: { text in
+                // 只认数字：打字打到一半的 `-`、空格、误触的字母都当成还没写完，按 0（免费）处理，
+                // 而不是把半截输入解释成别的数。超出上限就贴到上限，那句话写在下面的注释里。
+                let digits = text.filter(\.isNumber)
+                let entered = Int(digits) ?? 0
+                model.unlockCredits = min(entered, PopopxCommerceLimits.maximumCreditsThreshold)
+            }
+        )
     }
 
     // MARK: 图文视频块
@@ -1301,6 +1349,14 @@ private enum Copy {
     static let ttlLabel = "阅读有效期"
     static let antiSpyToggle = "强制开启防窥防偷拍镜头检测"
     static let antiSpyNote = "只在阅后即焚时生效：对方打开阅读时才在其设备上启用前置镜头检测，摄像头权限由对方设备届时请求。"
+
+    // 查看门槛（算力点）
+    static let thresholdLabel = "查看门槛"
+    static let thresholdField = "算力点"
+    static let thresholdPrompt = "留空 = 免费查看"
+    static func thresholdNote(_ maximum: Int) -> String {
+        "对方点开这张名片时会先看见这个数，确认后才从他自己那台设备的余额里扣。留空或 0 就是免费看；上限 \(maximum) 点，写了更大的数会贴到上限。门槛跟着名片走，POPOPX 没有任何一侧能替对方改它。"
+    }
 
     // 图文与视频
     static let blocksGroup = "图文与视频"

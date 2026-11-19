@@ -35,9 +35,25 @@ struct POPOPXApp: App {
         NtfManager.shared.registerCategories()
         installSecureEphemeralHost()
         installAntiTheftDuress()
+        installCommerceRuntime()
         // 反调试只在 Release 里真正 `PT_DENY_ATTACH`；Debug 下这行只置一个标志位
         // （PopopxAntiDebug.swift:41），否则 Xcode 挂不上去，整个特性在开发期就没法验。
         PopopxAntiDebug.enableProtection()
+    }
+
+    /// 算力点生态的两台常驻机：徽章状态机与点数账本。
+    ///
+    /// 为什么装在 `init()` 而不是某个视图的 `.task`：`start()` 各自做三件不能在用户点开面板之后
+    /// 才做的事——接管 StoreKit 交付（未结算的交易在启动时就会推过来）、起时间心跳、与 Apple 权益对账
+    /// （PopopxBadgeManager.swift:76-84 / PopopxCreditsManager.swift:79-86）。装晚了不会崩，
+    /// 但那一晚里买到的点数没有人来入账。
+    ///
+    /// 两个 `Task` 都不许 `await`：`App.init()` 在主 actor 上，等它们就是把启动画面卡在钥匙串读盘上。
+    /// 两处都是幂等的（`guard deliveryToken == nil`），重复调用等于什么都没发生。
+    /// StoreKit 的交易观察者由 `PopopxBadgeManager.start()` 那一步顺带装好，这里不再叫第二次。
+    private func installCommerceRuntime() {
+        Task { await PopopxBadgeManager.shared.start() }
+        Task { await PopopxCreditsManager.shared.start() }
     }
 
     /// 绝密阅后即焚的宿主侧两只钩子：物理删除本机记录、把销毁回执发回给对方。

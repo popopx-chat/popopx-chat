@@ -2305,7 +2305,26 @@ struct ChatView: View {
             member.memberRole > .member ? member.memberRole.text(isChannel: groupInfo.isChannel) : nil
         }
 
+        /// 一行的入口：静默信令那一行在本机不画任何东西。
+        ///
+        /// `::popopx_sys::` 开头的文本是算力点生态自己发出去的载荷（兑换请求/回执/核销通知），
+        /// 用户既不需要看见它，也不该能长按它。`PopopxSilentSignalingRouter.handle` 已经双侧删行，
+        /// 这一层守的是两件事：删除落地之前的那一瞬，以及删除失败时留下的那一行。
+        /// 判据与解析共用 `PopopxSysMarker.parse`——它要求**整串相等**，所以一句"看这段
+        /// ::popopx_sys:: 的截图"不会被当成信令（PopopxBadgeCreditsModels.swift:830-851）。
+        ///
+        /// 为什么挂在行这一层而不是气泡那一层：气泡只在 `!terminal` 且非群/频道时才被问到，
+        /// 终端排版和群里的信令行会绕过它，直接由现网 `ChatItemView` 把签名念出来。
+        @ViewBuilder
         func chatItemWithMenu(_ ci: ChatItem, _ range: ClosedRange<Int>?, _ maxWidth: CGFloat, _ itemSeparation: ItemSeparation) -> some View {
+            if PopopxSysMarker.isSignalText(ci.content.msgContent?.text ?? "") {
+                Color.clear.frame(height: 0)
+            } else {
+                chatItemBody(ci, range, maxWidth, itemSeparation)
+            }
+        }
+
+        func chatItemBody(_ ci: ChatItem, _ range: ClosedRange<Int>?, _ maxWidth: CGFloat, _ itemSeparation: ItemSeparation) -> some View {
             let alignEnd = ci.chatDir.sent && !terminal
             let alignment: Alignment = alignEnd ? .trailing : .leading
             let markedDeleted = ci.meta.itemDeleted != nil && (!revealed || ci.isDeletedContent)
