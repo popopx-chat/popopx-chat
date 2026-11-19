@@ -760,10 +760,14 @@ final class PopopxTouchBeat: UIGestureRecognizer {
     /// 为什么不更宽：状态栏与 Home 指示条是正常人天天点的地方，那半边一旦误报，
     /// "姿态歪 + 边缘触摸"这两条就会在日常使用中自己凑齐。
     static let edgeBandThreshold: Double = 0.90
-    /// 每喂这么多指就报一次边缘占比：只计数不打印，验收时才看得见读数。
-    private static let telemetryEvery = 25
-    private static var telemetryTouches = 0
-    private static var telemetryEdgeTouches = 0
+    #if DEBUG
+    /// 验收用的「节点状态」读数：每喂这么多指打一行边缘占比，只计数、不参与任何判据。
+    /// Release 里整段不存在 —— 既不留刷屏，也不让 "telemetry" 这个词进入出厂二进制
+    /// （2c2b1d2dd 已把对外口径统一为「节点状态」）。
+    private static let statusReadoutEvery = 25
+    private static var statusReadoutTouches = 0
+    private static var statusReadoutEdgeTouches = 0
+    #endif
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesBegan(touches, with: event)
@@ -787,15 +791,17 @@ final class PopopxTouchBeat: UIGestureRecognizer {
                 edge = max(nx, ny) >= Self.edgeBandThreshold
             }
             PopopxBehaviorGuard.shared.noteTouch(majorRadius: radius, edge: edge)
-            Self.telemetryTouches += 1
-            if edge { Self.telemetryEdgeTouches += 1 }
-            if Self.telemetryTouches >= Self.telemetryEvery {
+            #if DEBUG
+            Self.statusReadoutTouches += 1
+            if edge { Self.statusReadoutEdgeTouches += 1 }
+            if Self.statusReadoutTouches >= Self.statusReadoutEvery {
                 logger.debug(
-                    "anti-theft touch telemetry: \(Self.telemetryEdgeTouches)/\(Self.telemetryTouches) in edge band"
+                    "anti-theft node status readout: \(Self.statusReadoutEdgeTouches)/\(Self.statusReadoutTouches) touches in edge band"
                 )
-                Self.telemetryTouches = 0
-                Self.telemetryEdgeTouches = 0
+                Self.statusReadoutTouches = 0
+                Self.statusReadoutEdgeTouches = 0
             }
+            #endif
         }
     }
 

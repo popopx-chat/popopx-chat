@@ -124,6 +124,13 @@ public protocol PopopxMeshSecretStoring: Sendable {
 
 /// Generic-password items, `kSecAttrAccessibleWhenUnlockedThisDeviceOnly` — never backed up,
 /// never moved to another device, unreadable while locked.
+///
+/// Cold-start invariant this type now enforces, because losing it is silent and expensive: the
+/// Noise static key (`chat.popopx.mesh.identity`) and the mapping-table snapshot
+/// (`chat.popopx.mesh.identity-map`) must survive a relaunch. When they do not, every pairing and
+/// every mapped peer ID bound to the old key is invalidated with no visible symptom. A query that
+/// `SecItemAdd` accepts is therefore not believed until the same call has read the bytes back —
+/// see `verifyStored`.
 public struct PopopxMeshKeychain: Sendable {
     public static let shared = PopopxMeshKeychain()
 
@@ -131,7 +138,7 @@ public struct PopopxMeshKeychain: Sendable {
 
     public func data(service: String, account: String) throws -> Data? {
         let query: [String: Any] = [
-            SecClass.genericPassword: true,
+            kSecClass as String: kSecClassGenericPassword,
             SecAttr.service: service,
             SecAttr.account: account,
             SecAttr.returnData: true
@@ -144,13 +151,22 @@ public struct PopopxMeshKeychain: Sendable {
         case errSecItemNotFound:
             return nil
         default:
+            // A caller may swallow this — `loadOrMakeIdentity` reads with `try?` and quietly falls
+            // back to a fresh key — so an unexpected keychain state is named here, at the only
+            // place that can see it. Reading a `WhenUnlocked` item while the device is locked is
+            // the one ordinary case, and it stays silent.
+            if status != errSecInteractionNotAllowed {
+                PopopxMeshLog.store.error(
+                    "mesh keychain read rejected: OSStatus \(status) for \(service, privacy: .public)"
+                )
+            }
             throw PopopxMeshStorageError.keychain(status: status, operation: "copy")
         }
     }
 
     public func set(_ data: Data, service: String, account: String) throws {
         let attributes: [String: Any] = [
-            SecClass.genericPassword: true,
+            kSecClass as String: kSecClassGenericPassword,
             SecAttr.service: service,
             SecAttr.account: account,
             SecAttr.value: data,
@@ -158,11 +174,14 @@ public struct PopopxMeshKeychain: Sendable {
         ]
         let status = SecItemAdd(attributes as CFDictionary, nil)
         guard status == errSecDuplicateItem else {
-            if status == errSecSuccess { return }
+            if status == errSecSuccess {
+                try verifyStored(data, service: service, account: account)
+                return
+            }
             throw PopopxMeshStorageError.keychain(status: status, operation: "add")
         }
         let query: [String: Any] = [
-            SecClass.genericPassword: true,
+            kSecClass as String: kSecClassGenericPassword,
             SecAttr.service: service,
             SecAttr.account: account
         ]
@@ -170,11 +189,12 @@ public struct PopopxMeshKeychain: Sendable {
         guard updateStatus == errSecSuccess else {
             throw PopopxMeshStorageError.keychain(status: updateStatus, operation: "update")
         }
+        try verifyStored(data, service: service, account: account)
     }
 
     public func remove(service: String, account: String) throws {
         let query: [String: Any] = [
-            SecClass.genericPassword: true,
+            kSecClass as String: kSecClassGenericPassword,
             SecAttr.service: service,
             SecAttr.account: account
         ]
@@ -186,7 +206,7 @@ public struct PopopxMeshKeychain: Sendable {
 
     public func removeAll(service: String) throws {
         let query: [String: Any] = [
-            SecClass.genericPassword: true,
+            kSecClass as String: kSecClassGenericPassword,
             SecAttr.service: service
         ]
         let status = SecItemDelete(query as CFDictionary)
@@ -194,14 +214,33 @@ public struct PopopxMeshKeychain: Sendable {
             throw PopopxMeshStorageError.keychain(status: status, operation: "deleteAll")
         }
     }
+
+    /// Read-after-write for the only keychain failure that looks like success: `SecItemAdd`
+    /// returning 0 for a query that stored nothing usable. A device run showed what the old
+    /// spelling did — `"class"` carried a `Bool` instead of `kSecClassGenericPassword`, so every
+    /// call died with `errSecParam (-50)`, the identity read came back empty through a `try?`, and
+    /// each cold start minted a new Noise static key. `verifyStored` is what a build cannot prove
+    /// for us: the bytes are only reported as persisted once they have come back out equal.
+    private func verifyStored(_ data: Data, service: String, account: String) throws {
+        let stored: Data?
+        do {
+            stored = try self.data(service: service, account: account)
+        } catch let error as PopopxMeshStorageError {
+            // `WhenUnlocked` items are unreadable while the device is locked. That says nothing
+            // about the write, so it must not be reported as one.
+            if case .keychain(let status, _) = error, status == errSecInteractionNotAllowed { return }
+            throw error
+        }
+        guard stored == data else {
+            throw PopopxMeshStorageError.keychain(status: errSecItemNotFound, operation: "verify")
+        }
+    }
 }
 
-/// `Security`'s constants are `CFString`; these are the `String` keys a `[String: Any]` query
-/// needs, kept in one place so no caller has to remember which spelling `SecItemAdd` wants.
-enum SecClass {
-    static let genericPassword = kSecClass as String
-}
-
+/// The attribute NAMES a `[String: Any]` query needs. `Security` hands these out as `CFString`,
+/// which is why every one of them is `… as String` at the point of use — including `kSecClass`
+/// above. The class VALUE is a different constant (`kSecClassGenericPassword`): a shim that
+/// collapsed the two into one name is what broke persistence on device.
 enum SecAttr {
     static let service = kSecAttrService as String
     static let account = kSecAttrAccount as String

@@ -74,11 +74,44 @@ func getAppDirectory() -> URL {
 public func excludeAppDataFromBackup() {
     var values = URLResourceValues()
     values.isExcludedFromBackup = true
-    for var dir in [getGroupContainerDirectory(), getDocumentsDirectory()] {
+    exclude(getDocumentsDirectory(), values: values, includingRoot: true)
+    exclude(getGroupContainerDirectory(), values: values, includingRoot: false)
+}
+
+/// `NSURLIsExcludedFromBackupKey` can be set on the Documents root, but the app group container
+/// root belongs to the sandbox, not to us: setting it there fails with a permissions error and
+/// excludes nothing — and that root is exactly where SQLCipher keeps `popopx_v1.db` and its
+/// `-wal`/`-shm` siblings, so the single root-level call left the encrypted database inside the
+/// iCloud backup. Permitted items are excluded one by one instead; exclusion set on a directory
+/// covers everything below it, so the file directories and any future sibling are included.
+private func exclude(_ directory: URL, values: URLResourceValues, includingRoot: Bool) {
+    if includingRoot {
+        var root = directory
         do {
-            try dir.setResourceValues(values)
+            try root.setResourceValues(values)
         } catch {
             logger.error("FileUtils.excludeAppDataFromBackup error: \(error.localizedDescription)")
+        }
+    }
+    let items: [URL]
+    do {
+        // Hidden entries are the container's own bookkeeping (MCMMetadata), not our data.
+        items = try FileManager.default.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: nil,
+            options: [.skipsHiddenFiles]
+        )
+    } catch {
+        logger.error("FileUtils.excludeAppDataFromBackup listing error: \(error.localizedDescription)")
+        return
+    }
+    for var item in items {
+        // System-managed subtree (Preferences, Caches) that cfprefsd already holds.
+        if item.lastPathComponent == "Library" { continue }
+        do {
+            try item.setResourceValues(values)
+        } catch {
+            logger.error("FileUtils.excludeAppDataFromBackup error for \(item.lastPathComponent): \(error.localizedDescription)")
         }
     }
 }
