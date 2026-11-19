@@ -18,7 +18,12 @@
 //     附件打开（ChatModel.swift:1303）与新建联系人（CIMemberCreatedContactView.swift:29）。
 //     而把该字段翻成"推送一页"的地方全工程只有一处：旧 ChatListView 的栈路径绑定
 //     （ChatListView.swift:204-211）。这条绑定必须留在消息页内部，四栏壳才不会切断通知点开会话。
-//     另外三栏只需要自己的推送栈，所以由壳统一包 NavigationStack。
+//     其余三栏里：通讯录与「我」只带行内 Sheet，由壳统一包 NavigationStack（:99、:111）；厢语
+//     2026-11-20 起自己持有 `NavigationStack(path:)`（PopopxCabinView.swift:180），壳这里只放裸页面
+//     （:107），因为它的广场频道页要靠自己的路径栈做程序化返回。
+//     「我 → 全部设置」那三个服务器子页的 `navigationDestination` 登记也挂在本栏的栈根（:119-127）：
+//     按值的链接只认承载它的那个栈，而设置页是从本页用目标闭包推进去的，闭包推进的页面自己写登记
+//     一行都不生效 —— 这就是「中继服务器」点了只重画「全部设置」的根因。
 //
 //  2. **未读数字只用既有接口。** 消息栏的 tab 徽章走
 //     `ChatModel.totalUnreadCountForAllUsers()`（ChatModel.swift:1187，含跨匿名身份聚合），
@@ -83,6 +88,11 @@ struct MainTabView: View {
     @EnvironmentObject private var chatModel: ChatModel
     @State private var selection: PopopxTab = .chats
 
+    /// 「我 → 全部设置 → 中继与服务器」这条轨道的服务器内存副本，口径同 ChatListView.swift:83：
+    /// 谁承载栈，谁就持有 `SaveableSettings`，`serversDestination` 的闭包绑的就是这一份。
+    /// 页面自己在返回时问"要不要保存"（NetworkAndServers.swift:149），本文件不管保存。
+    @StateObject private var meshServers = SaveableSettings()
+
     var body: some View {
         TabView(selection: $selection) {
             // 消息：自带 NavigationStack（见文件头决定 1）。
@@ -97,14 +107,29 @@ struct MainTabView: View {
             .tabItem { tabLabel(.contacts) }
             .tag(PopopxTab.contacts)
 
-            NavigationStack {
-                PopopxCabinView()
-            }
-            .tabItem { tabLabel(.cabin) }
-            .tag(PopopxTab.cabin)
+            // 厢语自带推送栈：这一页的私聊是"发出离线建联邀请之后再推一页"，动作是 async 的，
+            // 只有绑定在自己栈上的 `path` 能在那之后推着走（`PopopxCabinView.swift:134`）。
+            PopopxCabinView()
+                .tabItem { tabLabel(.cabin) }
+                .tag(PopopxTab.cabin)
 
             NavigationStack {
                 PopopxMeView()
+                    // 服务器三页的登记必须在栈根，不能由「全部设置」自己登记：那一页是「我」用
+                    // 目标闭包推进去的，而闭包推进的页面自己写的 `navigationDestination` 不生效
+                    // （口径同 NetworkAndServers.swift:214-216、spec/client/navigation.md
+                    // "Servers pages push by value, registered at the stack root"）。
+                    // 写在壳里，「我 → 全部设置 → 中继与服务器」这条新轨道就与
+                    // ChatListView.swift:115-123 那条旧轨道共用同一组三个类型、同一个函数。
+                    .navigationDestination(for: ServersDestination.self) { destination in
+                        serversDestination(destination, ss: meshServers, servers: $meshServers.servers)
+                    }
+                    .navigationDestination(for: ProtocolServerSelection.self) { selection in
+                        protocolServerDestination(selection, servers: $meshServers.servers)
+                    }
+                    .navigationDestination(for: ChatRelaySelection.self) { selection in
+                        chatRelayDestination(selection, servers: $meshServers.servers)
+                    }
             }
             .tabItem { tabLabel(.me) }
             .tag(PopopxTab.me)

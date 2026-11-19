@@ -3,23 +3,28 @@
 //  POPOPX (iOS)
 //
 //  【第四阶段】Tab 4「我」。微信式信息架构：顶部一枚个人名片头，下面四组分卡片
-//  资产与节点权益 / 个人空间与离线网络 / 常用 / 隐私与安全防线（2026-11-20 重构裁定）。
+//  资产与节点权益 / 加密主页与卡包 / 常用 / 隐私与安全防线（2026-11-20 重构裁定）。
 //
 //  结构上的五条决定：
 //
-//  1. 页面自己不放 NavigationStack —— 栈由 Shared/Navigation/MainTabView.swift:90-92 统一包好。
-//     这里只往外推既有页面（`NavigationLink { 页面 }`，与 SettingsView.swift:405-424 同一种写法），
-//     以及用 sheet 呈现自带栈的页面（`PopopxAddFriendView` 内部已有自己的 NavigationStack）。
+//  1. 页面自己不放 NavigationStack —— 栈由 Shared/Navigation/MainTabView.swift:111-128 统一包好，
+//     「中继与服务器」那三个值的 `navigationDestination` 也登记在那一层（值链接会被提到栈根，
+//     写在「全部设置」自己身上一行都不生效）。
+//     这里只往外推既有页面（`NavigationLink { 页面 }`，与 SettingsView.swift:405-424 同一种写法）。
 //  2. 每一行都推到真实存在、且逐个核对过 init 与环境依赖的页面，没有占位行、没有 TODO。
 //     `UserProfile` 依赖 `SaveableSettings`（见 PopopxProfileHost 的注释），所以照 app 现有的
 //     挂载方式包一层再注入，避免 EnvironmentObject 缺失。
-//  3. 离线组网那一组不新建第二套状态：开关与策略都经 `PopopxMeshRuntime.shared` 写回包里唯一的
-//     kill switch / store；开关下面那块状态文字是 `verifiedActivitySnapshot()` 亲口回答的核验结果
-//     （phase + 真在跑的蓝牙/界面组件 + 事件订阅数），不是 SwiftUI 自己记住的那个布尔。紧急抹除
-//     只往既有的布防状态机里送轻触，确认弹窗仍由全 app 已挂载的那道门呈现，本页不写第二个 alert。
+//  3. 本页只留与蓝牙无关的三击紧急抹除。离线组网的总闸、真实核验块与配对策略原先都在这第四张卡上，
+//     2026-11-20 整块迁到厢语页右上角的设置中心（`PopopxCabinMeshSettingsSheet`，
+//     `Shared/Features/Cabin/PopopxCabinView.swift`）；迁移是逐条等效的，四个落点都还经
+//     `PopopxMeshRuntime.shared` 写回包里唯一的 kill switch / store / 绑定表，本页不分第二套状态。
+//     紧急抹除留在这里：它抹的正是那一整套，而它只往既有的布防状态机里送轻触，确认弹窗仍由全 app
+//     已挂载的那道门呈现，本页不写第二个 alert。
 //  4. 这次重排只动"行住在哪个卡片里"，没有删掉任何一条既有路由：身份管理与主页名片码从行升格为
 //     名片头的整行热区与二维码微标，其余行全部落在上面四组之中。「充值算力点」仍然是一枚无条件
-//     入口（理由见下面 `showsPaywall` 那条注释），蓝牙真实核验块与三击紧急抹除也原样保留。
+//     入口（理由见下面 `showsPaywall` 那条注释）。2026-11-20 删掉的两行各有去处：「添加朋友」——
+//     消息栏右上角「+」挂着同一个 `PopopxAddFriendView`（ChatsListView.swift:252-254）；「离线组网」
+//     一行——厢语页设置中心，见决定 3。
 //  5. 徽章那一行的三条出口不另立判据：它 switch 的是 `phase.capsuleState` 这个共享枚举本身，
 //     与顶栏胶囊 `PopopxBadgeCapsuleView.route()` 读同一份状态、同一套分支，将来加一档会在这里
 //     编译报错，而不是两处各说一套。
@@ -57,8 +62,6 @@ struct PopopxMeView: View {
     @State private var credits = PopopxCreditsManager.shared
 
     @State private var toast = PopopxToastModel()
-    @State private var showsAddFriend = false
-    @State private var showsPairingPolicy = false
     /// 「主页名片码」那张 Sheet 的开关。入口是名片头右端的二维码微标（裁定 4：不再单占一行）。
     @State private var showsProfileQR = false
     /// 算力点生态的三张面板。徽章**详情**与**升级**现在也在本页有一行（微信式分组要求资产
@@ -85,9 +88,6 @@ struct PopopxMeView: View {
     /// `setActiveUser` 会互相抢 `ChatModel.currentUser`。
     @State private var busyUserID: Int64?
 
-    /// kill switch 亲口回答的核验快照；nil = 本次运行还没核验过（不替它猜一个默认值显示）。
-    @State private var verifiedSnapshot: PopopxMeshActivitySnapshot?
-
     @MainActor init() {
         let runtime = PopopxMeshRuntime.shared
         _panicWipe = ObservedObject(wrappedValue: runtime.panicWipe)
@@ -111,12 +111,6 @@ struct PopopxMeView: View {
         }
         .background(PopopxPalette.base)
         .navigationTitle(Copy.pageTitle)
-        .sheet(isPresented: $showsAddFriend) {
-            PopopxAddFriendView()
-        }
-        .sheet(isPresented: $showsPairingPolicy) {
-            pairingPolicySheet
-        }
         .sheet(isPresented: $showsProfileQR) {
             // detents 归调用方（`ProfileQRCodeSheet.swift:19` 那条约定）。这张卡的内容是
             // 名片 + 模式选择 + 动作行，比聊天里那张位置卡高得多，0.8 是它与 `nameCard`
@@ -167,10 +161,6 @@ struct PopopxMeView: View {
             if !opened { Task { await refreshVoucherCount() } }
         }
         .popopxToast(toast)
-        // 开关一翻就去核验。`.task(id:)` 在熔断镜像变化时重跑；稳定态下只多一次 actor hop。
-        .task(id: meshRuntime.isFuseOn) {
-            await refreshVerification(waitingForSettle: true)
-        }
         // 入口行那一格的初值：进本页读一次，换身份再读一次。读不到就是"还没制作"，
         // 这一句必须是读出来的而不是猜的——`ProfileStorageManager.loadEditable()` 返回 nil
         // 才是唯一能说"未配置"的依据。
@@ -310,7 +300,7 @@ struct PopopxMeView: View {
         }
     }
 
-    // MARK: 组 2 · 个人空间与离线网络
+    // MARK: 组 2 · 加密主页与卡包
 
     private var spaceEntries: some View {
         PopopxSectionCard(Copy.groupSpace) {
@@ -328,19 +318,6 @@ struct PopopxMeView: View {
             }
             PopopxMeDivider()
             giftVaultRow
-            PopopxMeDivider()
-            PopopxMeRowLink(Copy.meshRow, value: meshRowValue,
-                            systemImage: "dot.radiowaves.left.and.right", tint: .mesh) {
-                // 挂载方式照 SettingsView.swift:417-424：三个对象全部来自 runtime，页面自己在熔断
-                // 关闭时渲染"已关闭"状态，所以这一行永远可以点。
-                MeshPrivacySettingsView(
-                    store: meshRuntime.mappingStore,
-                    pairing: meshRuntime.pairing,
-                    killSwitch: meshRuntime.killSwitch
-                )
-                .navigationTitle(Copy.meshPrivacy)
-                .modifier(ThemedBackground(grouped: true))
-            }
         }
     }
 
@@ -378,11 +355,6 @@ struct PopopxMeView: View {
         unusedVouchers > 0 ? String(format: Copy.vouchersAvailableFormat, unusedVouchers) : nil
     }
 
-    /// 熔断关着就说"已熔断关闭"，不说"未开启"：这一档是用户自己拉下的闸，不是一个没装的开关。
-    private var meshRowValue: String {
-        meshRuntime.isFuseOn ? Copy.meshRowOn : Copy.meshRowFusedOff
-    }
-
     @MainActor private func refreshVoucherCount() async {
         unusedVouchers = await PopopxP2PVoucherVault.shared.vouchers(state: .unused).count
     }
@@ -391,12 +363,9 @@ struct PopopxMeView: View {
 
     private var generalEntries: some View {
         PopopxSectionCard(Copy.groupGeneral) {
-            PopopxPickerRow(Copy.addFriend, systemImage: "person.badge.plus", tint: .brand) {
-                PopopxHaptics.impact(.light)
-                showsAddFriend = true
-            }
+            // 「添加朋友」这一行原先在这里，2026-11-20 删：消息栏右上角「+」已经挂着同一个
+            // `PopopxAddFriendView`（ChatsListView.swift:252-254），同一件事不该在两处各有一个入口。
             if let user = chatModel.currentUser {
-                PopopxMeDivider()
                 PopopxMeRowLink(
                     Copy.chatPreferences,
                     value: user.showNtfs ? Copy.notifyOn : Copy.notifyOff,
@@ -411,8 +380,10 @@ struct PopopxMeView: View {
                     .navigationTitle(Copy.chatPreferences)
                     .modifier(ThemedBackground(grouped: true))
                 }
+                // 分隔线跟着这一行走：没有 `currentUser` 时这一组的第一行就是通知，
+                // 卡片顶上不该先落一条孤线。
+                PopopxMeDivider()
             }
-            PopopxMeDivider()
             PopopxMeRowLink(Copy.notifications, systemImage: "bell") {
                 NotificationsView()
                     .navigationTitle(Copy.notifications)
@@ -441,7 +412,7 @@ struct PopopxMeView: View {
     /// 前两项分别在 `PrivacySettings` 与 `PopopxAntiTheftSettingsView` 两个页面里，最后一项
     /// 只活在本页这块卡上，任何一行都到不了另一行的目的地。所以拆成两行，各说各的去处。
     private var securityEntries: some View {
-        PopopxSectionCard(Copy.groupSecurity, footnote: Copy.meshFootnote) {
+        PopopxSectionCard(Copy.groupSecurity) {
             PopopxMeRowLink(Copy.privacySettings, systemImage: "lock.shield.fill", tint: .brand) {
                 PopopxPresenceGated(reason: Copy.presenceReasonPrivacy) {
                     PrivacySettings()
@@ -464,28 +435,9 @@ struct PopopxMeView: View {
             }
             .accessibilityIdentifier("popopx.me.antiTheft")
             PopopxMeDivider()
-            PopopxToggleRow(
-                Copy.fuseRow,
-                note: Copy.fuseRowNote,
-                systemImage: "antenna.radiowaves.left.and.right",
-                tint: .mesh,
-                isOn: fuseBinding
-            )
-            // 开关的回执归调用方：原子库那枚 `Toggle` 里没有触觉，翻闸这种动作必须有手感。
-            .onChange(of: meshRuntime.isFuseOn) { _, _ in PopopxHaptics.selection() }
-            PopopxMeDivider()
-            verificationBlock
-            PopopxMeDivider()
-            PopopxPickerRow(
-                Copy.pairingPolicy,
-                value: policyTitle(meshRuntime.pairingPolicy),
-                systemImage: "person.2.wave.2.fill",
-                tint: .mesh
-            ) {
-                PopopxHaptics.selection()
-                showsPairingPolicy = true
-            }
-            PopopxMeDivider()
+            // 离线组网的总闸、真实核验块与配对策略原先都在这张卡上，2026-11-20 整块迁到
+            // 厢语页右上角的设置中心（`PopopxCabinMeshSettingsSheet`）。这一张卡留的是与蓝牙
+            // 无关的三道防线；三击抹除留在最后，因为它抹的正是迁走的那套 mesh 数据。
             panicBlock
         }
     }
@@ -509,35 +461,6 @@ struct PopopxMeView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// 熔断开关只是"意愿"。这一行写的是运行态：phase、真在跑的蓝牙/界面组件数、事件订阅数，
-    /// 全部来自 `PopopxMeshKillSwitch.verifiedActivitySnapshot()`（包里唯一的权威答案）。
-    private var verificationBlock: some View {
-        VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
-            HStack(spacing: PopopxMetrics.space2XS) {
-                Image(systemName: "waveform.path")
-                    .font(PopopxType.microTag)
-                    .imageScale(.medium)
-                    .foregroundStyle(PopopxPalette.meshInk)
-                    .accessibilityHidden(true)
-                Text(Copy.verifyHeadline)
-                    .font(PopopxType.sectionHeader)
-                    .foregroundStyle(PopopxPalette.label)
-                Spacer(minLength: PopopxMetrics.spaceXS)
-                PopopxButton(Copy.verifyAgain, systemImage: "arrow.clockwise", role: .ghost, fullWidth: false) {
-                    await refreshVerification(waitingForSettle: false)
-                }
-            }
-            Text(verifiedSentence)
-                .font(PopopxType.caption)
-                .foregroundStyle(PopopxPalette.labelSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, PopopxMetrics.space2XS)
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel(Text(verbatim: Copy.verifyHeadline))
-    }
-
     /// 唯一一行红色（§1.1 危险 = 系统红）：紧急抹除。它不自己弹确认。
     private var panicWipeRow: some View {
         PopopxPickerRow(
@@ -551,91 +474,6 @@ struct PopopxMeView: View {
         .disabled(!meshRuntime.isFuseOn)
         .opacity(meshRuntime.isFuseOn ? 1 : 0.45)
         .accessibilityHint(Text(verbatim: Copy.panicRowHint))
-    }
-
-    // MARK: 配对策略
-
-    private var pairingPolicySheet: some View {
-        NavigationStack {
-            PopopxSheetContainer(Copy.pairingSheetTitle, subtitle: Copy.pairingSheetSubtitle) {
-                PopopxSectionCard {
-                    // 只枚举 `MeshPairingPolicy` 真实存在的两个 case（IdentityMappingStore.swift:24-30）。
-                    ForEach(Array(MeshPairingPolicy.allCases.enumerated()), id: \.element) { index, policy in
-                        if index > 0 {
-                            PopopxMeDivider()
-                        }
-                        PopopxRadioRow(
-                            policyTitle(policy),
-                            note: policyNote(policy),
-                            selected: meshRuntime.pairingPolicy == policy
-                        ) {
-                            PopopxHaptics.selection()
-                            meshRuntime.setPairingPolicy(policy)
-                            showsPairingPolicy = false
-                        }
-                    }
-                }
-            }
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(Copy.close) { showsPairingPolicy = false }
-                }
-            }
-        }
-        .presentationDragIndicator(.visible)
-    }
-
-    // MARK: 行为
-
-    /// 熔断只经 `requestFuse` 翻转 —— 那是唯一会带着 模块 1–7 一起启停的那条路
-    /// （SettingsView.swift:630-635 同一个绑定）。
-    private var fuseBinding: Binding<Bool> {
-        Binding(
-            get: { meshRuntime.isFuseOn },
-            set: { meshRuntime.requestFuse($0) }
-        )
-    }
-
-    /// 核验一次真实运行态。`waitingForSettle` 时给过渡态最多 5 × 250 ms 的等待窗口：
-    /// `starting`/`stopping` 期间拿到的快照说的是"上一刻"，等它落到 on/off 才算答案。
-    @MainActor private func refreshVerification(waitingForSettle: Bool) async {
-        var snapshot = await meshRuntime.killSwitch.verifiedActivitySnapshot()
-        if waitingForSettle {
-            for _ in 0..<5 where snapshot.phase == .starting || snapshot.phase == .stopping {
-                try? await Task.sleep(for: .milliseconds(250))
-                snapshot = await meshRuntime.killSwitch.verifiedActivitySnapshot()
-            }
-        }
-        verifiedSnapshot = snapshot
-    }
-
-    /// 开关说的话与蓝牙真实状态的关系，全在这里说清楚：宁可写"仍在运行"也不粉饰。
-    private var verifiedSentence: String {
-        guard let snapshot = verifiedSnapshot else { return Copy.verifyPending }
-        var text: String
-        switch snapshot.phase {
-        case .off: text = Copy.phaseOff
-        case .starting: text = Copy.phaseStarting
-        case .on: text = Copy.phaseOn
-        case .stopping: text = Copy.phaseStopping
-        }
-        if snapshot.isActive {
-            text += String(
-                format: Copy.busySuffixFormat,
-                snapshot.runningRadioWork.count,
-                snapshot.runningInterfaceWork.count
-            )
-        } else {
-            text += Copy.quietSuffix
-        }
-        if let subscribers = snapshot.eventHubSubscribers {
-            text += String(format: Copy.subscribersSuffixFormat, subscribers)
-        }
-        // 磁盘开关说"开"而 phase 不是 on（或反过来）就是一次没走完的启停，也可能是崩在中间。
-        if snapshot.persistedSwitch != (snapshot.phase == .on) {
-            text += Copy.mismatchSuffix
-        }
-        return text
     }
 
     /// 可切换的其它身份：与 UserPicker.swift:33-35 同一口径 —— 加锁（`user.hidden`，即有
@@ -694,20 +532,6 @@ struct PopopxMeView: View {
         if !meshRuntime.isFuseOn { return Copy.panicDisabled }
         let taps = panicArming.tapCount
         return taps > 0 ? String(format: Copy.panicTapsFormat, taps) : Copy.panicReady
-    }
-
-    private func policyTitle(_ policy: MeshPairingPolicy) -> String {
-        switch policy {
-        case .manualConfirm: return Copy.policyManual
-        case .autoSilent: return Copy.policyAuto
-        }
-    }
-
-    private func policyNote(_ policy: MeshPairingPolicy) -> String {
-        switch policy {
-        case .manualConfirm: return Copy.policyManualNote
-        case .autoSilent: return Copy.policyAutoNote
-        }
     }
 }
 
@@ -1194,7 +1018,6 @@ private enum Copy {
     }
 
     static let pageTitle = key("Me")
-    static let close = key("Close")
     static let linkHint = key("Open")
 
     // 顶部个人名片头
@@ -1219,7 +1042,9 @@ private enum Copy {
 
     // 组标题
     static let groupAssets = key("Assets and node benefits")
-    static let groupSpace = key("Personal space and offline mesh")
+    /// 2026-11-20 换源文：这一组里原来那一行「离线组网」整块迁到厢语页，标题再说"离线组网"
+    /// 就是替别人占一个说法。旧 Key `"Personal space and offline mesh"` 在代码里残留 0。
+    static let groupSpace = key("Encrypted profile and card vault")
     static let groupGeneral = key("Everyday")
     static let groupSecurity = key("Privacy and security defences")
 
@@ -1248,13 +1073,8 @@ private enum Copy {
     static let redeemCode = key("Redeem a code")
     static let vouchersAvailableFormat = NSLocalizedString("%d available", comment: "Me: unused gift vouchers on this device")
     static let giftMenuHint = key("Lets you gift a badge card or redeem a code")
-    static let meshRow = key("Offline Bluetooth mesh")
-    static let meshRowOn = key("Fuse is open")
-    static let meshRowFusedOff = key("Closed by the fuse")
-    static let meshPrivacy = key("Offline mesh privacy and pairings")
 
     // 组 3 · 常用
-    static let addFriend = key("Add a friend")
     /// 刻意不叫 `"Chat preferences"`：那个 Key 在 16 个目录里已经属于别的页面，中文值是
     /// 「聊天偏好设置」。复用等于让本页这一行的说法由别人决定，所以源文唯一化（同算力点生态那条约定）。
     static let chatPreferences = key("Chat preferences for this identity")
@@ -1272,30 +1092,7 @@ private enum Copy {
     /// 在场核验的理由文案：它进的是系统生物识别提示框，所以同样是看得见的文案。
     static let presenceReasonPrivacy = key("Confirm this is you before opening privacy and security settings")
     static let presenceReasonSettings = key("Confirm this is you before opening settings")
-    static let meshFootnote = key("Closing the master switch stops Bluetooth scanning, advertising and relaying all at once; the other rows on this page stay readable but start no Bluetooth object.")
     static let commerceFootnote = key("Credits and badges live only in this device's keychain: no server keeps the ledger, and neither side can change it remotely.")
-    static let fuseRow = key("Offline mesh master switch")
-    static let fuseRowNote = key("Switching this off is the fuse: every mesh component stops together.")
-    static let verifyHeadline = key("Actual Bluetooth state")
-    /// 不叫 `"Verify"`：那个 Key 只在一个语种里已有译法，且中文是「验证」。这一格要说的是
-    /// "拿真实运行态核对一遍"，所以源文唯一、16 个目录由本页自己写齐。
-    static let verifyAgain = key("Verify actual state")
-    static let verifyPending = key("Not verified yet in this run. Tap Verify to read the real state.")
-    static let phaseOff = key("Stopped")
-    static let phaseStarting = key("Starting")
-    static let phaseOn = key("Running")
-    static let phaseStopping = key("Stopping")
-    static let quietSuffix = key(", with no component running")
-    static let busySuffixFormat = NSLocalizedString(", still running %1$d Bluetooth component(s) and %2$d interface component(s)", comment: "Me: verified activity counts")
-    static let subscribersSuffixFormat = NSLocalizedString(", %d event subscriptions", comment: "Me: verified event hub subscribers")
-    static let mismatchSuffix = key("; the switch and the running state do not agree yet")
-    static let pairingPolicy = key("Nearby pairing policy")
-    static let pairingSheetTitle = key("Nearby pairing policy")
-    static let pairingSheetSubtitle = key("Decides whether a nearby device's Bluetooth pairing needs your confirmation.")
-    static let policyManual = key("Ask me before pairing")
-    static let policyManualNote = key("A nearby pairing request shows a confirmation; nothing connects until you tap it.")
-    static let policyAuto = key("Pair silently")
-    static let policyAutoNote = key("Pairing completes on its own once the private Bluetooth session is up, without asking.")
 
     // 危险行
     static let panicRow = key("Erase offline mesh data now")
