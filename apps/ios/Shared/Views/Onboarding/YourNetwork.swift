@@ -79,22 +79,79 @@ struct YourNetworkView: View {
             footnote: PopopxOnboardingCopy.pushFootnote
         ) {
             ForEach(NotificationsMode.values, id: \.rawValue) { mode in
-                PopopxRadioRow(
-                    modeLabel(mode),
-                    note: modeNote(mode),
-                    selected: notificationMode == mode
-                ) {
-                    PopopxHaptics.selection()
-                    withAnimation(PopopxSpring.snappy) {
-                        notificationMode = mode
-                    }
-                }
-                if mode != .off {
-                    PopopxOnboardingHairline()
-                }
+                modeRow(mode)
+                    .padding(.vertical, PopopxMetrics.spaceXS)
             }
         }
         .popopxAnimation(PopopxSpring.snappy, value: notificationMode, reduceMotion: reduceMotion)
+    }
+
+    /// 推送模式三档：整行是一个按钮，选中态同时给四重信号（高亮底、加粗描边、
+    /// 「已选」微标、双层实心圆点），未选中态只留 0.5pt 发丝描边，让三档读起来是控件而不是文案。
+    /// 没有复用 `PopopxRadioRow`：那个原子的行尾只放圆点，插不进状态微标，
+    /// 而共享控件 `PopopxControls.swift` 不在本轮改动范围内。
+    private func modeRow(_ mode: NotificationsMode) -> some View {
+        let selected = notificationMode == mode
+        return Button {
+            guard !selected else { return }
+            PopopxHaptics.selection()
+            withAnimation(PopopxSpring.snappy) {
+                notificationMode = mode
+            }
+        } label: {
+            HStack(alignment: .center, spacing: PopopxMetrics.spaceS) {
+                VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
+                    Text(modeLabel(mode))
+                        .font(PopopxType.sectionHeader)
+                        .foregroundStyle(selected ? PopopxPalette.brand : PopopxPalette.label)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(modeNote(mode))
+                        .font(PopopxType.caption)
+                        .foregroundStyle(PopopxPalette.labelSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: PopopxMetrics.spaceXS)
+                if selected {
+                    PopopxOnboardingChip(PopopxOnboardingCopy.modeSelected)
+                }
+                radioMark(selected)
+            }
+            .padding(.horizontal, PopopxMetrics.spaceXS)
+            .padding(.vertical, PopopxMetrics.spaceS)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                selected ? PopopxPalette.brand.opacity(0.08) : Color.clear,
+                in: .rect(cornerRadius: PopopxMetrics.radiusControl, style: .continuous)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl, style: .continuous)
+                    .strokeBorder(
+                        selected ? PopopxPalette.brand : PopopxPalette.hairlineInner,
+                        lineWidth: selected ? PopopxMetrics.stroke : PopopxMetrics.hairline
+                    )
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PopopxPressButtonStyle(feedback: nil))
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    /// 双层单选标记：外环始终存在，选中时再填一颗实心内点。
+    private func radioMark(_ selected: Bool) -> some View {
+        ZStack {
+            Circle()
+                .strokeBorder(
+                    selected ? PopopxPalette.brand : PopopxPalette.labelHint,
+                    lineWidth: PopopxMetrics.stroke
+                )
+            if selected {
+                Circle()
+                    .fill(PopopxPalette.brand)
+                    .padding(PopopxMetrics.spaceXS)
+            }
+        }
+        .frame(width: PopopxMetrics.spaceM, height: PopopxMetrics.spaceM)
+        .accessibilityHidden(true)
     }
 
     private var meshCard: some View {
@@ -110,20 +167,63 @@ struct YourNetworkView: View {
     }
 
     private var relayCard: some View {
-        PopopxSectionCard {
-            PopopxPickerRow(
-                PopopxOnboardingCopy.relayNodes,
-                value: "\(selectedOperatorIds.count) / \(serverOperators.count)",
-                systemImage: "network",
-                tint: .neutral
-            ) {
-                showOperators = true
-            }
-            if !serverOperators.isEmpty {
+        PopopxSectionCard(
+            footnote: serverOperators.count > 1 ? nil : PopopxOnboardingCopy.operatorsNote
+        ) {
+            if serverOperators.count > 1 {
+                PopopxPickerRow(
+                    PopopxOnboardingCopy.relayNodes,
+                    value: "\(selectedOperatorIds.count) / \(serverOperators.count)",
+                    systemImage: "network",
+                    tint: .neutral
+                ) {
+                    showOperators = true
+                }
                 PopopxOnboardingHairline()
                 operatorLogos
+            } else {
+                relayReadyRow
             }
         }
+    }
+
+    /// 只有 1 个（或 0 个）可用运营商时，"1 / 1" 的多选切换只会让人以为必须去选一个；
+    /// 这里改成状态展示，整行仍通向同一个详情弹层，入口没有丢。
+    private var relayReadyRow: some View {
+        Button {
+            showOperators = true
+        } label: {
+            HStack(alignment: .center, spacing: PopopxMetrics.spaceS) {
+                PopopxOnboardingIconBadge(
+                    systemName: "point.3.connected.trianglepath.dotted",
+                    tint: .brand
+                )
+                VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
+                    Text(PopopxOnboardingCopy.relayReadyTitle)
+                        .font(PopopxType.sectionHeader)
+                        .foregroundStyle(PopopxPalette.label)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if let host = relayHost {
+                        Text(host)
+                            .font(PopopxType.caption)
+                            .foregroundStyle(PopopxPalette.labelSecondary)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                    }
+                }
+                Spacer(minLength: PopopxMetrics.spaceXS)
+                PopopxOnboardingChip(PopopxOnboardingCopy.relayAutoRouting)
+            }
+            .padding(.vertical, PopopxMetrics.spaceS)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PopopxPressButtonStyle(feedback: nil))
+    }
+
+    /// 唯一运营商的域名；一个都没配时返回 nil，卡片只留标题，不编造主机名。
+    private var relayHost: String? {
+        serverOperators.first?.serverDomains.first
     }
 
     private var operatorLogos: some View {

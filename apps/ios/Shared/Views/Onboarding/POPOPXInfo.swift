@@ -26,26 +26,36 @@ struct POPOPXInfo: View {
 
     private static let haloDuration = 2.6
     private static let wordmarkMaxWidth: CGFloat = 236
+    private static let wordmarkCompactWidth: CGFloat = 200
     private static let haloSize = CGSize(width: 268, height: 152)
 
+    /// 首屏必须一次看全两颗按钮：把双按钮钉在底部安全区之上（`safeAreaInset`），
+    /// 中间内容留在可滚动的 VStack 里，再按可用高度把 hero 与行距收一档。
+    /// 判据用 GeometryReader 给的实际可用高度，不是 `UIScreen.main`。
     var body: some View {
         GeometryReader { g in
+            let compact = g.size.height < 800
             ScrollView {
-                VStack(alignment: .center, spacing: PopopxMetrics.spaceL) {
-                    hero
-                        .padding(.top, PopopxMetrics.spaceXL)
+                VStack(alignment: .center, spacing: compact ? PopopxMetrics.spaceM : PopopxMetrics.spaceL) {
+                    hero(compact: compact)
+                        .padding(.top, compact ? PopopxMetrics.spaceL : PopopxMetrics.spaceXL)
                     headlines
                     pills
                     featureCard
-                    if onboarding {
-                        actions
-                    }
                 }
-                .padding(.bottom, PopopxMetrics.space2XL)
-                .frame(maxWidth: .infinity, minHeight: g.size.height)
+                .padding(.bottom, PopopxMetrics.spaceM)
+                .frame(maxWidth: .infinity)
             }
+            .scrollBounceBehavior(.basedOnSize)
+        }
+        .safeAreaInset(edge: .bottom, spacing: PopopxMetrics.spaceS) {
+            if onboarding { actions }
         }
         .background(PopopxPalette.base, ignoresSafeAreaEdges: .all)
+        .navigationDestination(isPresented: $createProfileNavLinkActive) {
+            CreateFirstProfile()
+                .modifier(ThemedBackground())
+        }
         .sheet(isPresented: Binding(
             get: { m.migrationState != nil && !createProfileNavLinkActive },
             set: { _ in
@@ -70,18 +80,18 @@ struct POPOPXInfo: View {
 
     // MARK: - 视觉
 
-    private var hero: some View {
+    private func hero(compact: Bool) -> some View {
         ZStack {
             Ellipse()
                 .fill(PopopxPalette.brand.opacity(0.20))
                 .frame(width: Self.haloSize.width, height: Self.haloSize.height)
-                .blur(radius: 38)
+                .blur(radius: compact ? 28 : 38)
                 .scaleEffect(haloBreathing ? 1.06 : 0.94)
                 .accessibilityHidden(true)
             Image(PopopxBrandAsset.wordmark(for: colorScheme))
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(maxWidth: Self.wordmarkMaxWidth)
+                .frame(maxWidth: compact ? Self.wordmarkCompactWidth : Self.wordmarkMaxWidth)
                 .accessibilityLabel(Text(verbatim: "POPOPX"))
         }
         .frame(maxWidth: .infinity)
@@ -195,6 +205,10 @@ struct POPOPXInfo: View {
 
     // MARK: - 操作
 
+    /// 底部固定栏：滚动内容会从它下面经过，所以底色必须是不透明的 `PopopxPalette.base`，
+    /// 顶边只给一根发丝线，别让按钮看起来"飘"在卖点卡片上。
+    /// 「设置 → 关于」复用同一份视图但 `onboarding == false`，那条路径不生成固定栏，
+    /// 也就不会占用滚动高度。
     private var actions: some View {
         VStack(alignment: .center, spacing: PopopxMetrics.spaceS) {
             PopopxButton(
@@ -212,10 +226,13 @@ struct POPOPXInfo: View {
             }
         }
         .padding(.horizontal, PopopxMetrics.gutter)
-        .padding(.top, PopopxMetrics.space2XS)
-        .navigationDestination(isPresented: $createProfileNavLinkActive) {
-            CreateFirstProfile()
-                .modifier(ThemedBackground())
+        .padding(.top, PopopxMetrics.spaceXS)
+        .padding(.bottom, PopopxMetrics.spaceXS)
+        .background(PopopxPalette.base)
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(PopopxPalette.separator)
+                .frame(height: PopopxMetrics.hairline)
         }
     }
 

@@ -3567,3 +3567,6 @@ server test failure */
 "How it helps privacy" = "Miten tämä edistää yksityisyyttä";
 "About operators" = "Tietoja operaattoreista";
 "OK" = "OK";
+"Selected" = "Valittu";
+"Default cluster is ready" = "Oletusryhmä on valmis";
+"Automatic routing" = "Automaattinen reititys";

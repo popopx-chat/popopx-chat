@@ -7207,3 +7207,6 @@ alert title */
 "Names and changes" = "Назви та зміни";
 "POPOPX and the POPOPX logo are the names of this build. These terms and the privacy statement may change; the app always shows the version you agreed to, and continuing to use POPOPX means you accept the change." = "POPOPX і логотип POPOPX — назви цієї збірки. Ці умови та політика конфіденційності можуть змінюватися; застосунок завжди показує версію, з якою ви погодилися, і подальше використання POPOPX означає прийняття зміни.";
 "I have read and agree to %1$@ and %2$@." = "Підтверджую згоду з документами: %1$@ та %2$@.";
+"Selected" = "Вибрано";
+"Default cluster is ready" = "Група за замовчуванням готова";
+"Automatic routing" = "Автоматична маршрутизація";

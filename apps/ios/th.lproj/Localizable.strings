@@ -3465,3 +3465,6 @@ server test failure */
 "How it helps privacy" = "สิ่งนี้ช่วยความเป็นส่วนตัวอย่างไร";
 "About operators" = "เกี่ยวกับผู้ให้บริการ";
 "OK" = "ตกลง";
+"Selected" = "เลือกแล้ว";
+"Default cluster is ready" = "กลุ่มเริ่มต้นพร้อมใช้งาน";
+"Automatic routing" = "การกำหนดเส้นทางอัตโนมัติ";

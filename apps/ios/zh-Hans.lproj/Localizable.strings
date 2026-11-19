@@ -8057,3 +8057,6 @@ alert title */
 "Names and changes" = "名称与变更";
 "POPOPX and the POPOPX logo are the names of this build. These terms and the privacy statement may change; the app always shows the version you agreed to, and continuing to use POPOPX means you accept the change." = "POPOPX 与 POPOPX 标志是本构建的名称。本条款与隐私说明可能修订，App 内始终展示你所同意的版本；继续使用 POPOPX 即视为接受变更。";
 "I have read and agree to %1$@ and %2$@." = "我已阅读并同意%1$@与%2$@。";
+"Selected" = "已选";
+"Default cluster is ready" = "默认集群已就绪";
+"Automatic routing" = "自动路由";

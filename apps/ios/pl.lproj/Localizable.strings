@@ -7260,3 +7260,6 @@ alert title */
 "Names and changes" = "Nazwy i zmiany";
 "POPOPX and the POPOPX logo are the names of this build. These terms and the privacy statement may change; the app always shows the version you agreed to, and continuing to use POPOPX means you accept the change." = "POPOPX i logo POPOPX to nazwy tej wersji. Niniejsze warunki i polityka prywatności mogą się zmieniać; aplikacja zawsze pokazuje wersję, którą zaakceptowałeś, a dalsze korzystanie z POPOPX oznacza akceptację zmiany.";
 "I have read and agree to %1$@ and %2$@." = "Przeczytałem i akceptuję dokumenty: %1$@ oraz %2$@.";
+"Selected" = "Wybrano";
+"Default cluster is ready" = "Domyślna grupa jest gotowa";
+"Automatic routing" = "Automatyczny routing";

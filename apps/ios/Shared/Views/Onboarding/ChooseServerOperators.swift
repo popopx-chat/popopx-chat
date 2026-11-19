@@ -120,15 +120,74 @@ struct OnboardingConditionsView: View {
 
     private var commitmentsCard: some View {
         PopopxSectionCard(PopopxOnboardingCopy.commitmentsCard) {
-            PopopxCheckbox(PopopxOnboardingCopy.commitmentRelay, isOn: tick($relayCommitted))
-                .popopxAnimation(PopopxSpring.snappy, value: relayCommitted, reduceMotion: reduceMotion)
-            PopopxOnboardingHairline()
-            PopopxCheckbox(PopopxOnboardingCopy.commitmentRouting, isOn: tick($routingCommitted))
-                .popopxAnimation(PopopxSpring.snappy, value: routingCommitted, reduceMotion: reduceMotion)
-            PopopxOnboardingHairline()
-            PopopxCheckbox(PopopxOnboardingCopy.commitmentWipe, isOn: tick($wipeCommitted))
-                .popopxAnimation(PopopxSpring.snappy, value: wipeCommitted, reduceMotion: reduceMotion)
+            commitmentRow(PopopxOnboardingCopy.commitmentRelay, isOn: $relayCommitted)
+                .padding(.vertical, PopopxMetrics.spaceXS)
+            commitmentRow(PopopxOnboardingCopy.commitmentRouting, isOn: $routingCommitted)
+                .padding(.vertical, PopopxMetrics.spaceXS)
+            commitmentRow(PopopxOnboardingCopy.commitmentWipe, isOn: $wipeCommitted)
+                .padding(.vertical, PopopxMetrics.spaceXS)
         }
+    }
+
+    /// 承诺行必须整行可点：`PopopxCheckbox` 走的是自定义 `ToggleStyle`，真机上命中区只有行尾
+    /// 那枚 16pt 方格，三句承诺读起来像纯文案（`agreementRow` 当初就因为同一件事在本文件里
+    /// 自己组合）。这里沿用那套写法，但不动共享的 `PopopxControls.swift`，其它调用点保持原样：
+    /// 外层 `Button` + `contentShape(Rectangle())` 铺满整行，选中态叠三重信号
+    /// （brand 8% 行底、1pt brand 描边、实心方格 + 纯白加粗勾），触觉仍在点击这一侧发。
+    private func commitmentRow(_ title: String, isOn: Binding<Bool>) -> some View {
+        let checked = isOn.wrappedValue
+        return Button {
+            PopopxHaptics.selection()
+            withAnimation(PopopxSpring.snappy) {
+                isOn.wrappedValue.toggle()
+            }
+        } label: {
+            HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.spaceS) {
+                Text(title)
+                    .font(PopopxType.sectionHeader)
+                    .foregroundStyle(checked ? PopopxPalette.brand : PopopxPalette.label)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: PopopxMetrics.spaceXS)
+                Image(systemName: "checkmark")
+                    .font(PopopxType.microTag)
+                    .fontWeight(.bold)
+                    .foregroundStyle(checked ? PopopxPalette.onBrand : Color.clear)
+                    .frame(width: PopopxMetrics.spaceM, height: PopopxMetrics.spaceM)
+                    .background(
+                        checked ? PopopxPalette.brand : Color.clear,
+                        in: .rect(cornerRadius: PopopxMetrics.radiusChip)
+                    )
+                    // 未选中的方格也要读得出是个方格：card 上 `separator` 只有 1.19:1，
+                    // `labelHint` 是 3.42:1。
+                    .overlay(
+                        RoundedRectangle(cornerRadius: PopopxMetrics.radiusChip)
+                            .strokeBorder(
+                                PopopxPalette.labelHint,
+                                lineWidth: PopopxMetrics.stroke
+                            )
+                            .opacity(checked ? 0 : 1)
+                    )
+            }
+            .padding(.horizontal, PopopxMetrics.spaceXS)
+            .padding(.vertical, PopopxMetrics.spaceS)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                checked ? PopopxPalette.brand.opacity(0.08) : Color.clear,
+                in: .rect(cornerRadius: PopopxMetrics.radiusControl, style: .continuous)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl, style: .continuous)
+                    .strokeBorder(
+                        checked ? PopopxPalette.brand : PopopxPalette.hairlineInner,
+                        lineWidth: checked ? PopopxMetrics.divider : PopopxMetrics.hairline
+                    )
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PopopxPressButtonStyle(feedback: nil))
+        .accessibilityLabel(title)
+        .accessibilityAddTraits(checked ? .isSelected : [])
+        .popopxAnimation(PopopxSpring.snappy, value: checked, reduceMotion: reduceMotion)
     }
 
     private var launchCard: some View {
@@ -250,20 +309,16 @@ struct OnboardingConditionsView: View {
 
     private var commitmentsMet: Bool { relayCommitted && routingCommitted && wipeCommitted }
 
-    private var canEnter: Bool { commitmentsMet && agreed && !selectedOperatorIds.isEmpty }
+    /// 闸门只看这页能改的两件事。`selectedOperatorIds` 不参与判定：它是从第 3 屏带过来的值，
+    /// 单运营商、或 conditions 里根本没有运营商时可能为空，而第 4 屏没有任何入口能改它
+    /// ——那会把「同意并进入」永久锁死（真机 P0 的第二条成因）。
+    private var canEnter: Bool { commitmentsMet && agreed }
 
-    /// 勾选回执：`PopopxCheckbox` 本身不带触觉（0.97 微缩只在 `PopopxButton` 的按压态里），
-    /// 所以在写入这一侧补一次 selection 轻震，动画由调用点的 `popopxAnimation` 负责。
-    private func tick(_ source: Binding<Bool>) -> Binding<Bool> {
-        Binding(
-            get: { source.wrappedValue },
-            set: { newValue in
-                if source.wrappedValue != newValue {
-                    PopopxHaptics.selection()
-                }
-                source.wrappedValue = newValue
-            }
-        )
+    /// 集合为空时回落到全部已知运营商，与上游同一条链一致：
+    /// `NetworkAndServers.swift:288` 直接把展示出来的 operators 整份 `map` 过去。
+    private var operatorIdsToSubmit: [Int64] {
+        let ids = Array(selectedOperatorIds)
+        return ids.isEmpty ? m.conditions.serverOperators.map { $0.operatorId } : ids
     }
 
     @ViewBuilder private var gateHint: some View {
@@ -293,7 +348,7 @@ struct OnboardingConditionsView: View {
     @MainActor private func finishOnboarding() async {
         do {
             let conditionsId = m.conditions.currentConditions.conditionsId
-            let r = try await acceptConditions(conditionsId: conditionsId, operatorIds: Array(selectedOperatorIds))
+            let r = try await acceptConditions(conditionsId: conditionsId, operatorIds: operatorIdsToSubmit)
             m.conditions = r
             if let enabledOps = enabledOperators(r.serverOperators) {
                 m.conditions = try await setServerOperators(operators: enabledOps)

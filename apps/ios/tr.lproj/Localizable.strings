@@ -7192,3 +7192,6 @@ alert title */
 "Names and changes" = "Adlar ve değişiklikler";
 "POPOPX and the POPOPX logo are the names of this build. These terms and the privacy statement may change; the app always shows the version you agreed to, and continuing to use POPOPX means you accept the change." = "POPOPX ve POPOPX logosu bu derlemenin adlarıdır. Bu koşullar ve gizlilik bildirimi değişebilir; uygulama her zaman onay verdiğin sürümü gösterir ve POPOPX'i kullanmaya devam etmek değişikliği kabul ettiğin anlamına gelir.";
 "I have read and agree to %1$@ and %2$@." = "%1$@'nı ve %2$@'nı okudum ve kabul ediyorum.";
+"Selected" = "Seçildi";
+"Default cluster is ready" = "Varsayılan küme hazır";
+"Automatic routing" = "Otomatik yönlendirme";

@@ -4858,3 +4858,6 @@ server test failure */
 "Server operators" = "Оператори на сървъри";
 "You can configure servers via settings." = "Можете да настроите сървърите в настройките.";
 "How it helps privacy" = "Как това помага на поверителността";
+"Selected" = "Избрано";
+"Default cluster is ready" = "Групата по подразбиране е готова";
+"Automatic routing" = "Автоматично насочване";

@@ -3903,3 +3903,6 @@ server test failure */
 "You can configure servers via settings." = "設定からサーバーを設定できます。";
 "How it helps privacy" = "プライバシー保護にどう役立つか";
 "OK" = "OK";
+"Selected" = "選択中";
+"Default cluster is ready" = "デフォルトクラスターの準備ができました";
+"Automatic routing" = "自動ルーティング";

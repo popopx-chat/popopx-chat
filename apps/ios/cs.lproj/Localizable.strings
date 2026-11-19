@@ -4024,3 +4024,6 @@ server test failure */
 "You can configure servers via settings." = "Servery můžete nastavit v nastavení.";
 "How it helps privacy" = "Jak to pomáhá soukromí";
 "OK" = "OK";
+"Selected" = "Vybráno";
+"Default cluster is ready" = "Výchozí skupina je připravena";
+"Automatic routing" = "Automatické směrování";
