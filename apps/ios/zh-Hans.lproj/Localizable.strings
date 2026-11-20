@@ -8301,13 +8301,10 @@ alert title */
 "Invite a nearby peer" = "邀请附近的节点";
 "Send to group" = "发送到群组";
 "%lld member(s) · epoch %lld" = "%lld 名成员 · 密钥第 %lld 代";
-"%lld member(s)" = "%lld 名成员";
 "A binding maps a Bluetooth key to a POPOPX contact. It lives in the Keychain and is never backed up. Clearing bindings does not delete any contact and does not touch your chat history." = "一条绑定把一个蓝牙公钥对应到一个 POPOPX 联系人。它存放在钥匙串里，从不参与备份。清除绑定不会删除任何联系人，也不会动你的聊天历史。";
-"A group exists only on the phones that are in it. Nothing on this screen is announced to a server." = "群组只存在于成员的手机里，这一屏的内容不会向任何服务器通报。";
 "Approve" = "通过";
 "Clear identity bindings" = "清除身份绑定";
 "Create an encrypted group" = "创建加密群组";
-"Create or join an offline group" = "创建或加入离线群组";
 "Decline" = "拒绝";
 "Discover" = "发现";
 "Enable offline Bluetooth mesh network" = "开启离线蓝牙组网";
@@ -8315,7 +8312,6 @@ alert title */
 "Erase offline mesh data?" = "抹掉离线组网数据？";
 "Forget" = "解除绑定";
 "Handshake" = "握手";
-"Lists the devices within Bluetooth reach and the offline groups on this phone" = "列出蓝牙射程内的设备与这台手机上的离线群组";
 "Local nickname" = "本机昵称";
 "Manual confirmation shows a banner and sends nothing until you approve it. Silent pairing finishes the Bluetooth handshake on its own." = "手动确认会先给出横幅，在你通过之前不发送任何内容；静默配对自行完成蓝牙握手。";
 "Mesh identity map" = "组网身份对照表";
@@ -8331,8 +8327,11 @@ alert title */
 "Revert" = "还原";
 "Say something to the room" = "对这一屋子人喊话";
 "Start one with the plus button in the top right corner." = "点右上角的 + 就可以建一个。";
-"The fuse is closed, so this phone has not read its group store yet." = "总闸关闭：这台手机还没有读取自己的群组存储。";
 "This square is local only: what is typed here floods the mesh and never leaves it." = "这个广场只在本机范围：这里发出去的内容只洪泛给同一张组网，永远不出这张网。";
 "Up to %lld members, and the name is not secret — the messages are." = "最多 %lld 名成员；群名不是秘密，消息才是。";
 "\nCurrently: " = "\n当前：";
 "Tap three times quickly to erase all offline mesh data" = "快速连点三次以抹掉全部离线组网数据";
+"Nearby mesh plaza" = "厢语附近广场";
+"Opens the nearby square: the broadcast stream and the nodes within Bluetooth reach" = "打开附近广场：广播流与蓝牙射程内的节点";
+"%lld days" = "%lld 天";
+"%lld days (Pioneer Trial)" = "%lld 天（先锋体验）";

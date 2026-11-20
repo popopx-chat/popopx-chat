@@ -7101,13 +7101,10 @@ server test failure */
 "Invite a nearby peer" = "Peer in de buurt uitnodigen";
 "Send to group" = "Naar groep sturen";
 "%lld member(s) · epoch %lld" = "%lld leden · epoch %lld";
-"%lld member(s)" = "%lld lid(len)";
 "A binding maps a Bluetooth key to a POPOPX contact. It lives in the Keychain and is never backed up. Clearing bindings does not delete any contact and does not touch your chat history." = "Een koppeling wijst een Bluetooth-sleutel toe aan een POPOPX-contact. Het staat in de sleutelhanger en wordt nooit geback-upt. Kopplingen wissen verwijdert geen contacten en komt je chatgeschiedenis niet aan.";
-"A group exists only on the phones that are in it. Nothing on this screen is announced to a server." = "Een groep bestaat alleen op de telefoons van haar leden. Er wordt vanaf dit scherm niets aan een server gemeld.";
 "Approve" = "Goedkeuren";
 "Clear identity bindings" = "Identiteitskoppelingen wissen";
 "Create an encrypted group" = "Versleutelde groep aanmaken";
-"Create or join an offline group" = "Offline groep aanmaken of deelnemen";
 "Decline" = "Weigeren";
 "Discover" = "Ontdekken";
 "Enable offline Bluetooth mesh network" = "Offline Bluetooth-meshnetwerk inschakelen";
@@ -7115,7 +7112,6 @@ server test failure */
 "Erase offline mesh data?" = "Offline meshgegevens wissen?";
 "Forget" = "Vergeten";
 "Handshake" = "Handdruk";
-"Lists the devices within Bluetooth reach and the offline groups on this phone" = "Toont de apparaten binnen Bluetooth-bereik en de offline groepen op deze telefoon";
 "Local nickname" = "Lokale bijnaam";
 "Manual confirmation shows a banner and sends nothing until you approve it. Silent pairing finishes the Bluetooth handshake on its own." = "Handmatige bevestiging toont eerst een banner en stuurt niets tot u goedkeurt; stil koppelen maakt de Bluetooth-handdruk zelf af.";
 "Mesh identity map" = "Mesh-identiteitenkaart";
@@ -7131,8 +7127,11 @@ server test failure */
 "Revert" = "Ongedaan maken";
 "Say something to the room" = "Zeg iets tegen de kamer";
 "Start one with the plus button in the top right corner." = "Begin met de plusknop rechtsboven.";
-"The fuse is closed, so this phone has not read its group store yet." = "De hoofdzekering is uitgeschakeld, dus deze telefoon heeft zijn groepsopslag nog niet gelezen.";
 "This square is local only: what is typed here floods the mesh and never leaves it." = "Dit plein is alleen lokaal: wat hier wordt getypt stroomt door het meshnetwerk en verlaat het nooit.";
 "Up to %lld members, and the name is not secret — the messages are." = "Tot %lld leden; de naam is geen geheim, de berichten wel.";
 "\nCurrently: " = "\nNu: ";
 "Tap three times quickly to erase all offline mesh data" = "Driemaal snel tikken wist alle offline meshgegevens";
+"Nearby mesh plaza" = "Plein van het offlinenetwerk in de buurt";
+"Opens the nearby square: the broadcast stream and the nodes within Bluetooth reach" = "Opent het plein in de buurt: de zendstroom en de knopen binnen Bluetooth-bereik";
+"%lld days" = "%lld dagen";
+"%lld days (Pioneer Trial)" = "%lld dagen (pioniersproef)";

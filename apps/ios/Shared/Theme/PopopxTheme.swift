@@ -183,7 +183,10 @@ enum PopopxMetrics {
     static let minHitTarget: CGFloat = 44
 
     /// 顶栏身份胶囊的宽度上限：留出状态胶囊与「+」的份额，375pt 窄屏也不会把两端挤出安全区。
-    static let headerIdentityMaxWidth: CGFloat = 120
+    /// 115 是按最坏情况定的 —— 名字占满上限时顶栏整行的最小和是 391，393 还剩 2pt；
+    /// 上一版 120 那一档是 396，负 3pt 由整行平摊，长昵称就是这么把两枚状态胶囊挤变形的
+    /// （逐件明细见 `Shared/Navigation/PopopxTelemetryHeader.swift` 文件头）。
+    static let headerIdentityMaxWidth: CGFloat = 115
 }
 
 // MARK: - Typography

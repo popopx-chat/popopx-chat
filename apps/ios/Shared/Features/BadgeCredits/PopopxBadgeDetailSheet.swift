@@ -88,7 +88,7 @@ struct PopopxBadgeDetailSheet: View {
         PopopxSectionCard(Copy.provenanceTitle) {
             VStack(spacing: PopopxMetrics.spaceXS) {
                 row(Copy.sourceRow, record.source.displayName)
-                row(Copy.periodRow, "\(record.period.days) 天")
+                row(Copy.periodRow, Copy.period(record))
                 row(Copy.issuedRow, PopopxCommerceFormat.date(record.issuedAtMs))
                 row(Copy.expiresRow, PopopxCommerceFormat.date(record.expiresAtMs))
                 if let digest = record.receiptDigest {
@@ -234,6 +234,25 @@ private extension PopopxBadgeDetailSheet {
         static let provenanceTitle = "本机记录"
         static let sourceRow = "来源"
         static let periodRow = "档位"
+
+        /// 「档位」那一格的值。源文是英文原句、英文原句就是 Key（写法同 `PopopxBadgeCapsuleView.swift`
+        /// 的 `PopopxBadgeCapsuleCopy`）：`en.lproj` 按约定不写，16 个译本目录各写各的。
+        ///
+        /// 判据用来源而不是天数 —— `PopopxBadgeManager.swift:152` 给先锋体验写下的 `period` 是
+        /// `.monthly`（体验只是借月度档那个形态登记，到期时刻另按 `PopopxCommerceLimits.trialSeconds`
+        /// 算），所以照 `record.period.days` 印出来就是把 3 天的体验说成 30 天，真机第 5 轮报的
+        /// 正是这一格。天数从 `trialSeconds` 现算，与到期时刻同一口径，不引入第二个数字。
+        static func period(_ record: PopopxBadgeRecord) -> String {
+            if record.source == .pioneerTrial {
+                let trialDays = max(1, Int(ceil(PopopxCommerceLimits.trialSeconds / 86_400)))
+                return String(format: key("%lld days (Pioneer Trial)"), trialDays)
+            }
+            return String(format: key("%lld days"), record.period.days)
+        }
+
+        private static func key(_ value: String) -> String {
+            NSLocalizedString(value, comment: "POPOPX badge detail")
+        }
         static let issuedRow = "生效"
         static let expiresRow = "到期"
         static let digestRow = "对账摘要"

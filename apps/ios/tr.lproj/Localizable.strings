@@ -7407,13 +7407,10 @@ alert title */
 "Invite a nearby peer" = "Yakındaki bir düğümü davet et";
 "Send to group" = "Gruba gönder";
 "%lld member(s) · epoch %lld" = "%lld üye · dönem %lld";
-"%lld member(s)" = "%lld üye";
 "A binding maps a Bluetooth key to a POPOPX contact. It lives in the Keychain and is never backed up. Clearing bindings does not delete any contact and does not touch your chat history." = "Bir bağlama, Bluetooth anahtarını bir POPOPX kişisine eşler. Anahtar zincirinde durur ve asla yedeklenmez. Bağlamaları temizlemek hiçbir kişiyi silmez ve sohbet geçmişinize dokunmaz.";
-"A group exists only on the phones that are in it. Nothing on this screen is announced to a server." = "Bir grup yalnızca üyelerinin telefonlarında var olur. Bu ekrandaki hiçbir şey bir sunucuya bildirilmez.";
 "Approve" = "Onayla";
 "Clear identity bindings" = "Kimlik bağlamalarını temizle";
 "Create an encrypted group" = "Şifreli grup oluştur";
-"Create or join an offline group" = "Çevrimdışı grup oluştur veya katıl";
 "Decline" = "Reddet";
 "Discover" = "Keşfet";
 "Enable offline Bluetooth mesh network" = "Çevrimdışı Bluetooth örgü ağını etkinleştir";
@@ -7421,7 +7418,6 @@ alert title */
 "Erase offline mesh data?" = "Çevrimdışı örgü verileri silinsin mi?";
 "Forget" = "Unut";
 "Handshake" = "Tokalaşma";
-"Lists the devices within Bluetooth reach and the offline groups on this phone" = "Bluetooth erişimindeki cihazları ve bu telefondaki çevrimdışı grupları listeler";
 "Local nickname" = "Yerel takma ad";
 "Manual confirmation shows a banner and sends nothing until you approve it. Silent pairing finishes the Bluetooth handshake on its own." = "Elle onay önce bir bayrak gösterir ve siz onaylayana dek hiçbir şey göndermez; sessiz eşleştirme Bluetooth tokalaşmasını kendi bitirir.";
 "Mesh identity map" = "Örgü kimlik haritası";
@@ -7437,8 +7433,11 @@ alert title */
 "Revert" = "Geri al";
 "Say something to the room" = "Odaya bir şey söyle";
 "Start one with the plus button in the top right corner." = "Sağ üstteki artı düğmesiyle başlayın.";
-"The fuse is closed, so this phone has not read its group store yet." = "Ana sigorta kapalı, bu yüzden bu telefon grup deposunu henüz okumadı.";
 "This square is local only: what is typed here floods the mesh and never leaves it." = "Bu meydan yalnızca yereldir: buraya yazılan örgüde taşar ve ondan asla çıkmaz.";
 "Up to %lld members, and the name is not secret — the messages are." = "En çok %lld üye; ad sır değil, mesajlar sır.";
 "\nCurrently: " = "\nŞimdi: ";
 "Tap three times quickly to erase all offline mesh data" = "Çevrimdışı örgü verilerinin tümünü silmek için üç kez hızlıca dokunun";
+"Nearby mesh plaza" = "Yakındaki çevrimdışı ağ meydanı";
+"Opens the nearby square: the broadcast stream and the nodes within Bluetooth reach" = "Yakındaki meydanı açar: yayın akışı ve Bluetooth erişim alanındaki düğümler";
+"%lld days" = "%lld gün";
+"%lld days (Pioneer Trial)" = "%lld gün (Öncü denemesi)";

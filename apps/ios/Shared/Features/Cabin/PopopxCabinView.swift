@@ -40,11 +40,13 @@
 //  附近节点的雷达；Reduce Motion 下退化成静态环 + 数字跳数，一次循环动画都不启动（§5）。
 //
 //  顶栏与设置中心（离线组网入口收口，七个决定）：
-//  1. 左上角「发现」= `path.append(.discovery)`，进的是本页新登记的 `PopopxCabinDiscoveryView`：一屏里
-//     给出周边节点雷达（`PopopxCabinNearbyCard`）与本机已加入的离线群（`groupsCard`）两张卡。这一枚原先
-//     是"直达大厅"，真机第 3 轮改成发现列表（2026-11-20）。大厅不因此失去入口 —— 内容区「附近频道」卡片
-//     `channelsCard` 的第一行仍是 #厢语大厅，大厅右上角另外还留着同一份雷达（`discoveryEntry` 的开关态）。
-//     这里从不新开第二份广场，两张卡读的都是本页 `refresh()` 已经拿到的那一份 `nodes` / `groups`。
+//  1. 左上角「发现」= `path.append(.plaza)`，进的是包内那一份 `MeshPlazaView`（厢语附近广场），挂载
+//     写法与 `PopopxAddFriendView.swift:118-128` 逐字相同，标题与它共用同一个 Key —— 真机第 5 轮的
+//     要求就是"两个入口打开完全一致的功能页面"。这一枚原先进的是本页自己写的「发现」页
+//     （`PopopxCabinNearbyCard` + `groupsCard` 两张卡），那一页随本轮删除，两件事都没有失去入口：
+//     雷达在大厅右上角「发现模式」里（`discoveryEntry` 的开关态，读同一份 `nodes`），本机离线群与
+//     创建入口在内容区「离线群聊」那一行里（`path.append(.groups)` → `MeshGroupsView`）。
+//     大厅本身归内容区「附近频道」卡片 `channelsCard` 的第一行，与这一枚互不顶掉。
 //  2. 右上角「离线组网设置」= `PopopxCabinMeshSettingsSheet`，三张卡依次是总闸与配对策略、节点身份与
 //     真实运行态、离线数据与清除。这四件事原先散在「我」页的离线组网分组与「全部设置」页的厢语卡片里，
 //     摘除时逐条等效搬来：`requestFuse(_:)` / `setPairingPolicy(_:)` / `verifiedActivitySnapshot()` /
@@ -81,8 +83,9 @@ import PopopxMeshUI
 private enum PopopxCabinRoute: Hashable {
     /// 「#厢语大厅」：完整广播流 + 广播输入 + 本机临时昵称。
     case hall
-    /// 「发现」：周边节点雷达 + 本机已加入的离线群 + 已加密的 1:1 频道，顶栏左上角的去处。
-    case discovery
+    /// 顶栏左上角的去处 = 包内那一份「厢语附近广场」（`PopopxMeshUI/MeshPlazaView`），与
+    /// 「添加朋友 → 进入厢语发现附近群组/频道（BLE Mesh）」推的是同一个视图、同一份标题词条。
+    case plaza
     /// 本地加密频道：本机已与蓝牙邻居建立的 1:1 加密会话清单。
     case encryptedChannels
     /// 本地加密群聊（包内 `MeshGroupsView`）：群名 + 名单 + 32 字节群密钥只活在这些手机上，
@@ -246,25 +249,18 @@ struct PopopxCabinView: View {
                     )
                     .navigationTitle(Copy.hallRow)
 
-                case .discovery:
-                    // 顶栏左上角的去处。三个回调与主页面 `nearbyCard` 给的是同一份闭包，
-                    // 差别只在页面自己不带设置中心：开群走 `.groups`（同一个栈，不套模态）。
-                    PopopxCabinDiscoveryView(
-                        fuseOn: meshRuntime.isFuseOn,
-                        radioState: radioState,
-                        nodes: nodes,
-                        groups: groups,
-                        directPeerCount: directPeerCount,
-                        openingNodeID: openingNodeID,
-                        onOpenChat: { node in await openBluetoothChat(with: node) },
-                        onRescan: { await refresh() },
-                        onTurnOnFuse: {
-                            await meshRuntime.setFuse(true)
-                            await refresh()
-                        },
-                        onOpenGroups: { path.append(.groups) }
+                case .plaza:
+                    // 顶栏左上角的去处。这一整块与 `PopopxAddFriendView.swift:118-128` 逐字相同：
+                    // 同一个 `MeshPlazaView`、同样三个依赖全给 runtime 的真对象（一个默认值都不走）、
+                    // 同一个标题 Key、同一个 `ThemedBackground(grouped: true)`。两个入口因此
+                    // 不可能翻出两屏不一样的东西 —— 真机第 5 轮要求的就是这一条。
+                    MeshPlazaView(
+                        outbound: meshRuntime.engineBackend,
+                        source: meshRuntime.stateSource,
+                        killSwitch: meshRuntime.killSwitch
                     )
-                    .navigationTitle(Copy.discoveryEntry)
+                    .navigationTitle(Copy.plazaTitle)
+                    .modifier(ThemedBackground(grouped: true))
 
                 case .encryptedChannels:
                     PopopxCabinChannelsView(
@@ -393,13 +389,15 @@ struct PopopxCabinView: View {
 
     // MARK: 顶栏两个入口
 
-    /// 左上角「发现」：一屏给出周边节点与本机离线群两张卡（`PopopxCabinDiscoveryView`）。
-    /// 真机第 3 轮之前这一枚写的是"附近厢语广场"、按下去进大厅；大厅现在归内容区那一行，
-    /// 顶栏只负责"发现附近有什么"，两个入口因此不会互相顶掉。
+    /// 左上角「发现」：包内那一份厢语附近广场，与「添加朋友 → 进入厢语发现附近群组/频道」同一屏。
+    /// 真机第 3 轮之前这一枚写的是"附近厢语广场"、按下去进大厅；大厅归内容区那一行之后，这一枚
+    /// 改开广场页。第 5 轮把它自己的那屏「发现」页（节点雷达 + 本机群两张卡）撤了：那两张卡
+    /// 在别处都还在 —— 雷达在大厅右上角「发现模式」里，群在内容区「离线群聊」那一行里，
+    /// 而广场页本身同时有广播流与周边节点，两个入口不该给出两个去处。
     private var nearbyDiscoveryEntry: some View {
         Button {
             PopopxHaptics.impact(.light)
-            path.append(.discovery)
+            path.append(.plaza)
         } label: {
             HStack(spacing: PopopxMetrics.space2XS) {
                 Image(systemName: "radar")
@@ -418,7 +416,7 @@ struct PopopxCabinView: View {
             .contentShape(.rect(cornerRadius: PopopxMetrics.radiusControl))
         }
         .buttonStyle(PopopxPressButtonStyle())
-        .accessibilityHint(Text(verbatim: Copy.discoveryHint))
+        .accessibilityHint(Text(Copy.plazaEntryHint))
         .accessibilityIdentifier("popopx.cabin.discovery")
     }
 
@@ -1339,63 +1337,66 @@ private struct PopopxCabinHallView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
-                if showsDiscovery {
-                    PopopxCabinNearbyCard(
-                        nodes: nodes,
-                        fuseOn: fuseOn,
-                        radioState: radioState,
-                        directPeerCount: directPeerCount,
-                        openingNodeID: openingNodeID,
-                        onOpenChat: { node in await onOpenChat(node) },
-                        onRescan: { await onRescan() },
-                        onTurnOnFuse: { await onTurnOnFuse() }
-                    )
-                }
+        // 容器结构与正式聊天页同构：`ChatView.swift:205` 的 `VStack(spacing: 0)` 里，消息列表是
+        // 唯一可伸缩的成员，输入栏是最后一名（同文件 `:237` 挂 `ComposeView`，而 `ComposeView.swift:575`
+        // 把 `popopxComposerBar(...)` 排在它自己那条 `VStack` 的末尾）。键盘升起时 SwiftUI 把安全区
+        // 往上收，列表自己变矮，输入栏原样贴在键盘上沿 —— 主聊天页多年来就是这么贴合的。
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
+                    if showsDiscovery {
+                        PopopxCabinNearbyCard(
+                            nodes: nodes,
+                            fuseOn: fuseOn,
+                            radioState: radioState,
+                            directPeerCount: directPeerCount,
+                            openingNodeID: openingNodeID,
+                            onOpenChat: { node in await onOpenChat(node) },
+                            onRescan: { await onRescan() },
+                            onTurnOnFuse: { await onTurnOnFuse() }
+                        )
+                    }
 
-                PopopxSectionCard(Copy.hallChannel(posts.count), footnote: Copy.hallFootnote) {
-                    feed
-                }
+                    PopopxSectionCard(Copy.hallChannel(posts.count), footnote: Copy.hallFootnote) {
+                        feed
+                    }
 
-                if fuseOn {
-                    nicknameCard
-                } else {
-                    PopopxSectionCard(Copy.fuseOffHeadline, footnote: Copy.fuseOffFootnote) {
-                        PopopxButton(Copy.fuseTurnOn, systemImage: "antenna.radiowaves.left.and.right") {
-                            await onTurnOnFuse()
+                    if fuseOn {
+                        nicknameCard
+                    } else {
+                        PopopxSectionCard(Copy.fuseOffHeadline, footnote: Copy.fuseOffFootnote) {
+                            PopopxButton(Copy.fuseTurnOn, systemImage: "antenna.radiowaves.left.and.right") {
+                                await onTurnOnFuse()
+                            }
                         }
                     }
                 }
+                .padding(.horizontal, PopopxMetrics.gutter)
+                .padding(.top, PopopxMetrics.spaceS)
+                // 点消息流的空白处收起键盘：`PopopxTextArea` 的 `@FocusState` 是控件私有的
+                // （`Shared/Components/PopopxControls.swift:260`、`:272`，红线文件不动），宿主拿不到
+                // 那份绑定，只能走标准 responder 链 —— 仓库里那句 `hideKeyboard()` 就是
+                // `UIApplication.sendAction(resignFirstResponder)`，主聊天页 `ChatView.swift:1094`
+                // 收键盘用的是同一个调用。
+                // 挂在 `.background` 而不是内容本身上：这一层只在命中的是空白时才赢，卡片、行、按钮
+                // 那些自己认领点击的控件一律不受影响（大厅昵称要能照常弹出操作菜单）。
+                .background(
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .onTapGesture { hideKeyboard() }
+                )
             }
-            .padding(.horizontal, PopopxMetrics.gutter)
-            .padding(.top, PopopxMetrics.spaceS)
-            .padding(.bottom, PopopxMetrics.space2XL)
-            // 点消息流的空白处收起键盘：真机第 4 轮。`PopopxTextArea` 的 `@FocusState` 是控件私有的
-            // （红线文件不动），所以焦点不靠它自己释放，靠标准 responder 链 —— 仓库里那句
-            // `hideKeyboard()`（`AddGroupView.swift:234`）就是 `UIApplication.sendAction(resignFirstResponder)`，
-            // 主聊天页 `ChatView.swift:1094` 已经在真机上用它收键盘多年。
-            // 挂在 `.background` 而不是内容本身上：这一层只在命中的是空白时才赢，卡片、行、按钮
-            // 那些自己认领点击的控件一律不受影响（大厅昵称要能照常弹出操作菜单）。
-            .background(
-                Color.clear
-                    .contentShape(Rectangle())
-                    .onTapGesture { hideKeyboard() }
-            )
-        }
-        // 广播输入栏是"常驻底栏"，不是流里的一段内容：真机第 3 轮它跟着 VStack 排在滚动区里，
-        // 键盘一抬就把输入框和「广播」按钮整个盖住，且没有任何收起路径。
-        // `.safeAreaInset(edge: .bottom)` 让系统把这一条算进安全区 —— 键盘弹起时底栏
-        // 正好悬在键盘上沿，滚动内容自动留出它的高度（iOS 15 起可用）。
-        .safeAreaInset(edge: .bottom, spacing: 0) {
             if fuseOn {
+                Divider()
                 composer
             }
         }
-        // 拖动列表即收起键盘：这一页原来是整个厢语里唯一没挂这条的滚动区（主页面 :210 有）。
-        // 点空白收起与它同行，见上面那块 `.background`：`hideKeyboard()` 走的是 UIKit 的
-        // resignFirstResponder 广播，不持有也不争抢 SwiftUI 的焦点绑定，所以那条"与 `.focused` 同用会冻住"
-        // 的上游警告在这里不适用 —— 这一页从头到尾没有第二份 `.focused`。
+        // 拖动列表即收起键盘。位置照正式聊天页：挂在整块内容上而不是某个 `ScrollView` 上
+        // （`ChatView.swift:159`，那边用的是 `.immediately`；这里按本轮要求用 `.interactively`，
+        // 键盘跟着手指走，松手才决定收起还是留下，与 `PopopxCabinView` 主页面 :217 同档）。
+        // 点空白收起与它同行：`hideKeyboard()` 走 UIKit 的 resignFirstResponder 广播，不持有也不
+        // 争抢 SwiftUI 的焦点绑定，所以那条"与 `.focused` 同用会冻住"的上游警告在这里不适用 ——
+        // 这一页从头到尾没有第二份 `.focused`。
         .scrollDismissesKeyboard(.interactively)
         .background(PopopxPalette.base)
         .toolbar {
@@ -1547,41 +1548,42 @@ private struct PopopxCabinHallView: View {
         }
     }
 
+    /// 广播输入栏：正式聊天页那条底栏的同构体（见 `body` 里 `VStack(spacing: 0)` 那段注释）。
+    /// 一排 = 输入框 + 「广播」按钮，不带标题与脚注：上一轮那整张 `PopopxSectionCard` 有标题、
+    /// 脚注、字数行和按钮行四层，键盘一抬就把最底下那层按钮顶到键盘后面去，而 `ChatView.swift:237`
+    /// 挂的 `ComposeView`/`PopopxInputBar.swift:632-642` 从来只是一条贴着键盘上沿的横排。
+    /// 只保留两种"必须当场说"的行：射频不可用与上一次发送失败。
     private var composer: some View {
-        PopopxSectionCard(
-            radioUsable ? Copy.composerTitle : Copy.composerTitleRadioOff,
-            footnote: Copy.composerFootnote(PopopxMeshPlazaModel.maxDraftCharacters)
-        ) {
-            PopopxTextArea(Copy.composerField, prompt: Copy.composerPrompt, text: $draft)
-            HStack(spacing: PopopxMetrics.spaceXS) {
+        VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
+            if !radioUsable {
+                Text(Copy.composerRadioOff)
+                    .font(PopopxType.meta)
+                    .foregroundStyle(PopopxPalette.labelSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if let failureNote {
+                Text(failureNote)
+                    .font(PopopxType.meta)
+                    .foregroundStyle(PopopxPalette.dangerInk)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if draft.count > PopopxMeshPlazaModel.maxDraftCharacters {
+                // 字数只在越界时出现：底栏常驻一行计数，是把"编辑器"的负担摊到每一次喊话上；
+                // 越界本身才是需要提前说的事（`send()` 也会拒绝，但那一跳要先按下按钮才知道）。
                 Text(Copy.draftCount(draft.count, PopopxMeshPlazaModel.maxDraftCharacters))
-                    .font(PopopxType.metricSmall)
-                    .foregroundStyle(
-                        draft.count > PopopxMeshPlazaModel.maxDraftCharacters
-                            ? PopopxPalette.dangerInk
-                            : PopopxPalette.labelSecondary
-                    )
-                Spacer(minLength: PopopxMetrics.spaceXS)
+                    .font(PopopxType.meta)
+                    .foregroundStyle(PopopxPalette.dangerInk)
+            }
+            HStack(alignment: .bottom, spacing: PopopxMetrics.spaceXS) {
+                PopopxTextArea(Copy.composerField, prompt: Copy.composerPrompt, text: $draft)
                 PopopxButton(Copy.broadcastSend, systemImage: "paperplane.fill", fullWidth: false) {
                     await send()
                 }
                 .disabled(!trimmedDraft)
             }
-            if let failureNote {
-                Text(failureNote)
-                    .font(PopopxType.caption)
-                    .foregroundStyle(PopopxPalette.dangerInk)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.top, PopopxMetrics.space2XS)
-            }
-            if !radioUsable {
-                Text(Copy.composerRadioNote)
-                    .font(PopopxType.caption)
-                    .foregroundStyle(PopopxPalette.labelSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.top, PopopxMetrics.space2XS)
-            }
         }
+        .padding(.horizontal, PopopxMetrics.gutter)
+        .padding(.vertical, PopopxMetrics.spaceS)
+        .background(PopopxPalette.base)
     }
 
     private var nicknameCard: some View {
@@ -1700,82 +1702,6 @@ private struct PopopxCabinChannelsView: View {
     }
 }
 
-// MARK: - 发现（顶栏左上角的去处）
-
-/// 顶栏「发现」那一枚的目的地：周边节点雷达 + 本机已加入的离线群，两张表同一屏。
-///
-/// 为什么不写成"发现附近群组"：群只存在于成员手机上（`PopopxMeshGroupModel.swift:182` 那条口径），
-/// 没加入的群在本机连一行都不存在，协议里也没有"群公告"这一帧。所以"发现"这件事只发生在节点表上，
-/// 群组这一张说的是本机已有的群，创建与邀请归 `MeshGroupsView` 那一页 —— 标题因此不提"附近"两个字，
-/// 免得界面承诺一件协议做不到的事。
-///
-/// 雷达整块复用主页面的 `PopopxCabinNearbyCard`：同一份 `nodes`、同一套行、同一个开私聊回调，
-/// 两处不可能说不一样。频道不在这里再列一遍：节点行上的按钮开的就是那条 1:1 加密频道，
-/// 已建立的清单在 `PopopxCabinChannelsView` 里，这一页只负责"发现"。
-private struct PopopxCabinDiscoveryView: View {
-    let fuseOn: Bool
-    let radioState: PopopxBluetoothState
-    let nodes: [PopopxCabinNode]
-    let groups: [PopopxMeshGroup]
-    let directPeerCount: Int
-    let openingNodeID: String?
-    let onOpenChat: (PopopxCabinNode) async -> Void
-    let onRescan: () async -> Void
-    let onTurnOnFuse: () async -> Void
-    let onOpenGroups: () -> Void
-
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
-                PopopxCabinNearbyCard(
-                    nodes: nodes,
-                    fuseOn: fuseOn,
-                    radioState: radioState,
-                    directPeerCount: directPeerCount,
-                    openingNodeID: openingNodeID,
-                    onOpenChat: onOpenChat,
-                    onRescan: onRescan,
-                    onTurnOnFuse: onTurnOnFuse
-                )
-                groupsCard
-            }
-            .padding(.horizontal, PopopxMetrics.gutter)
-            .padding(.top, PopopxMetrics.spaceS)
-            .padding(.bottom, PopopxMetrics.space2XL)
-        }
-        .background(PopopxPalette.base)
-    }
-
-    private var groupsCard: some View {
-        PopopxSectionCard(Copy.groupsRow, footnote: Copy.discoveryGroupsFootnote(fuseOn)) {
-            ForEach(Array(groups.enumerated()), id: \.element.id) { index, group in
-                PopopxPickerRow(
-                    group.name,
-                    value: Copy.discoveryGroupValue(group.members.count),
-                    systemImage: "person.3.fill",
-                    tint: .mesh,
-                    action: onOpenGroups
-                )
-                rowSeparator
-            }
-            // 创建与邀请只在包里那一页：这一行是入口，不是第二份实现。
-            PopopxPickerRow(
-                Copy.discoveryCreateGroup,
-                systemImage: "plus.circle.fill",
-                tint: .mesh,
-                action: onOpenGroups
-            )
-        }
-        .accessibilityIdentifier("popopx.cabin.discovery.groups")
-    }
-
-    private var rowSeparator: some View {
-        Rectangle()
-            .fill(PopopxPalette.separator)
-            .frame(height: PopopxMetrics.divider)
-            .padding(.vertical, PopopxMetrics.spaceXS)
-    }
-}
 
 // MARK: - 待决定的建联
 
@@ -2301,16 +2227,13 @@ private enum Copy {
     static let hallEmptyHeadline = "射程内还没有人说话。"
     static let hallEmptyDetail = "这里发出去的内容只洪泛给同一张 mesh 里的设备，不经过服务器，也不会留在公网。"
     static let localAuthor = "本机"
-    static let composerTitle = "对这一屋子人喊话"
-    static let composerTitleRadioOff = "喊话（射频当前不可用）"
     static let composerField = "广播内容"
     static let composerPrompt = "说点什么，只发给蓝牙射程内"
     static let broadcastSend = "广播"
-    static func composerFootnote(_ limit: Int) -> String {
-        "超过 \(limit) 字的部分会被截断。洪泛没有回执：发送成功只表示内容已经交给 mesh，不表示有人收到。"
-    }
+    /// 底栏只留这一句短提示：上一版的标题与脚注（`对这一屋子人喊话` / `超过 N 字的部分会被截断…`）
+    /// 已经随整张卡片一起撤下，"洪泛不确认"那条事实在上面那屏的 `hallFootnote` 里一直都在。
+    static let composerRadioOff = "射频当前不可用"
     static func draftCount(_ current: Int, _ limit: Int) -> String { "\(current) / \(limit)" }
-    static let composerRadioNote = "射频不可用：内容不会离开本机，但仍会作为本机记录出现在上面那屏里。"
     static let fuseOffHeadline = "总闸关闭，大厅只读"
 
     static let nicknameTitle = "本机临时昵称"
@@ -2449,19 +2372,13 @@ private enum Copy {
         NSLocalizedString(value, comment: "POPOPX cabin offline mesh settings")
     }
 
-    /// 顶栏左上角那一枚。2026-11-20 真机第 3 轮起它进的是「发现」页，不再是大厅。
-    /// 旧的提示句（`Opens the broadcast hall...`）Swift 引用为 0，随本轮从 16 个目录里删掉；
-    /// 旧的标题句仍被「全部设置 → 离线组网」那两行使用，因此留着不动。
+    /// 顶栏左上角那一枚。2026-11-20 真机第 3 轮起它不再是大厅；第 5 轮起它进包内广场页。
+    /// 旧的提示句（`Lists the devices within Bluetooth reach…`，说的是那一屏两张卡）Swift 引用为 0，
+    /// 随本轮从 16 个目录里删掉；发现页那三条（建群入口、成员数、群脚注）同批删除。
     static let discoveryEntry = key("Discover")
-    static let discoveryEntryHint = key("Lists the devices within Bluetooth reach and the offline groups on this phone")
-    static let discoveryCreateGroup = key("Create or join an offline group")
-    static func discoveryGroupValue(_ members: Int) -> String { String(format: key("%lld member(s)"), members) }
-    /// 总闸关着时这一屏没有群可读（引擎从未存在），所以脚注跟着开关说实话，不写"永远为空"。
-    static func discoveryGroupsFootnote(_ fuseOn: Bool) -> String {
-        fuseOn
-            ? key("A group exists only on the phones that are in it. Nothing on this screen is announced to a server.")
-            : key("The fuse is closed, so this phone has not read its group store yet.")
-    }
+    static let plazaEntryHint = key("Opens the nearby square: the broadcast stream and the nodes within Bluetooth reach")
+    /// 与 `PopopxAddFriendView.swift:718` 同一个 Key：两个入口的标题因此必然是同一句。
+    static let plazaTitle = key("Nearby mesh plaza")
     static let meshSettingsEntry = key("Offline mesh settings")
     static let meshRowOn = key("Fuse is open")
     static let meshRowFusedOff = key("Closed by the fuse")

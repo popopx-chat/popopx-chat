@@ -205,18 +205,25 @@ struct PopopxIdentitySwitcher: View {
                 Text(verbatim: user.displayName)
                     .lineLimit(1)
                     .truncationMode(.tail)
+                    .allowsTightening(false)
                     .tag(Optional(user.userId))
             }
         } label: {
             HStack(spacing: PopopxMetrics.spaceXS) {
                 Image(systemName: "person.crop.circle")
                     .font(PopopxType.secondary)
+                    .fixedSize()
                 Text(verbatim: currentName)
                     .font(PopopxType.secondary)
                     .lineLimit(1)
                     .truncationMode(.tail)
+                    // 不收紧字距、不缩字号：长名字只许截断。真机第 5 轮起这一枚在顶栏里的占有
+                    // 上限是 `headerIdentityMaxWidth`（115），三件套写全是为了让"折行"在这一层
+                    // 结构上不可能发生，而不依赖外层给宽。
+                    .allowsTightening(false)
                 Image(systemName: "chevron.down")
                     .font(PopopxType.microTag)
+                    .fixedSize()
                     .opacity(0.7)
             }
             .foregroundStyle(PopopxPalette.label)
@@ -251,14 +258,46 @@ struct PopopxStatusPill: View {
     @State private var dimmed = false
 
     var body: some View {
+        // 两档各有各的外圈形状。上一版只有一条 `.frame(height: 48)` 加 `minWidth: 32`：
+        // 圆点档因此恒是 32 宽 × 48 高的胶囊 —— 那不是"被挤压变形"，那个尺寸本身就是一枚竖椭圆。
+        // 这一档现在锁死 32×32 的正方（`.frame(width:height:)` 把 min/ideal/max 钉成同一个值，
+        // 父布局再怎么让步也改不了它），背景与描边跟着换成正圆。
+        Group {
+            if dotOnly {
+                cluster
+                    .frame(width: PopopxMetrics.spaceXL, height: PopopxMetrics.spaceXL)
+                    .background(PopopxPalette.card, in: .circle)
+                    .overlay {
+                        Circle().strokeBorder(PopopxPalette.hairlineInner, lineWidth: PopopxMetrics.hairline)
+                    }
+            } else {
+                cluster
+                    .padding(.horizontal, PopopxMetrics.spaceM)
+                    .frame(height: PopopxMetrics.space2XL)
+                    .background(PopopxPalette.card, in: .capsule)
+                    .overlay {
+                        Capsule().strokeBorder(PopopxPalette.hairlineInner, lineWidth: PopopxMetrics.hairline)
+                    }
+            }
+        }
+        .onAppear { restart() }
+        .onChange(of: pulsing) { _, _ in restart() }
+        .onChange(of: text) { _, _ in restart() }
+    }
+
+    /// 只有圆点的那一档（宽屏降级档），外圈是正圆。
+    private var dotOnly: Bool { text.isEmpty }
+
+    /// 两档共用的内容：状态点 + 符号 +（带字档才有）短句。
+    private var cluster: some View {
         HStack(spacing: PopopxMetrics.spaceXS) {
             Circle()
                 .fill(tint)
                 .frame(width: PopopxMetrics.spaceXS, height: PopopxMetrics.spaceXS)
                 // 顶栏被长昵称挤窄时，`frame(width:height:)` 只会夹到更小的提案，8×8 的圆点
                 // 于是被压成横向椭圆（真机第 3 轮：网络/蓝牙两枚的"外圈变形"）。
-                // `fixedSize` 只锁这一颗点，整簇仍按原规则让步 —— 见本文件顶栏那行
-                // 「中簇整体不 fixedSize」与 `PopopxDualStatusCapsule.body` 里的两条推论。
+                // `fixedSize` 只锁这一颗点，整簇仍按原规则让步 —— 见 `PopopxDualStatusCapsule.body`
+                // 里「调用方不能再对它 `.fixedSize()`」那两条推论。
                 .fixedSize()
                 .opacity(dimmed ? 0.45 : 1)
                 .scaleEffect(dimmed ? 0.8 : 1)
@@ -273,18 +312,6 @@ struct PopopxStatusPill: View {
             }
         }
         .foregroundStyle(tint)
-        .padding(.horizontal, text.isEmpty ? 0 : PopopxMetrics.spaceM)
-        .frame(height: PopopxMetrics.space2XL)
-        // 圆点档的最小宽度是 32 不是 48：这一枚不是按钮，宽度上不承载命中区，
-        // 高度 48 才是。顶栏第一行多出品牌标记之后，这 16pt 是"在线"那两个字能不能留下的差额。
-        .frame(minWidth: text.isEmpty ? PopopxMetrics.spaceXL : 0)
-        .background(PopopxPalette.card, in: .capsule)
-        .overlay {
-            Capsule().strokeBorder(PopopxPalette.hairlineInner, lineWidth: PopopxMetrics.hairline)
-        }
-        .onAppear { restart() }
-        .onChange(of: pulsing) { _, _ in restart() }
-        .onChange(of: text) { _, _ in restart() }
     }
 
     /// 呼吸只在"确实需要被注意"时开：Reduce Motion 下彻底静止，而不是缩短。
@@ -483,16 +510,20 @@ struct PopopxPanicWipeTrigger: View {
 /// 2026-11-20 真机第 2 轮：这一条就是消息页的**第一行**（原先占一行的「消息」标题与
 /// `.searchable` 抽屉一起撤掉，见 `ChatsListView.swift` 的 `chrome`），所以宽度按 iPhone 15 Pro 的
 /// 393pt 逐件算过一遍，口径是"取各件的最小档，最长的身份名按 3 个汉字算"：
-/// 内边距 16×2 = 32，标记 44，身份 104（`headerIdentityMaxWidth` 120 是上限不是占有），
+/// 内边距 16×2 = 32，标记 44，身份 104（`headerIdentityMaxWidth` 115 是上限不是占有），
 /// 徽章 48（`compact` 档 = 12+24+12，符号片自己 24），双模胶囊 76（两枚圆点档 32 + 内间距 12），
 /// 「+」44，六处行间距 4×6 = 24，两处 `Spacer(minLength: 4)` = 8 —— **合计 380，留 13pt 余量**。
+/// 真机第 5 轮把这三笔按最坏情况重算过：名字占满上限 115 时（上一版是 120）整行的最小和是
+/// 391，393 还剩 2pt —— 上一版这一档是 396，负 3pt，溢出的那 3pt 由整行平摊，正是"长昵称挤变形"
+/// 的那一步。圆点档从 32×48 的胶囊改成 32×32 的正圆（宽度占有不变，所以这笔预算不用重算）。
 ///
 /// 三条推论，都是这一版刻意的设计而不是妥协：
 /// 1. 顶栏第一行**放不下任何一句状态文字**：带"在线"两个字要再 +65（445），徽章带文字要再 +96（476），
 ///    393pt 都不够。所以状态一律走"符号 + 颜色 + 描边 + 光晕"四重线索，文字在点开的详情页里；
 ///    宽屏（iPad／横屏）由 `ViewThatFits` 自动升回带字的档位，这条降级就是徽章那两档。
-/// 2. 唯一可压缩的是身份名（它有 `lineLimit(1)` + 尾部省略），所以 `.layoutPriority(1)` 只给「+」
-///    那一枚 44 的命中区，不给身份胶囊。上一版把优先级给身份，在 375pt 上整行溢出、两端同时被推出
+/// 2. 唯一可压缩的是身份名（它有 `lineLimit(1)` + 尾部省略 + 不收紧字距），所以它的
+///    `.layoutPriority` 明写为 0，而标记、徽章、双模胶囊、「+」四枚一律给 2：让步的顺序由这里
+///    指定，不由宽度偶然决定。上一版把优先级给身份，在 375pt 上整行溢出、两端同时被推出
 ///    安全区（`PopopxDualStatusCapsule` 的注释记着 T0 那次同样的翻法）。
 /// 3. 行内间距从 `spaceS`(12) 降到 `space2XS`(4)、页边距从 `spaceL`(24) 收到 `gutter`(16)、
 ///    两处 `Spacer` 的下限同步降到 4：这三笔一共腾出 76pt，正好抵掉新加的品牌标记那 52pt
@@ -514,11 +545,14 @@ struct PopopxTelemetryHeader: View {
             // 紫色品牌标记 = 恐慌清除的第二入口。三击判定与确认弹窗都在状态机那一侧，
             // 保险丝断开时它只是个图案（`PopopxPanicWipeTrigger.isArmed` 的判据）。
             PopopxPanicWipeTrigger()
+                .layoutPriority(2)
                 .accessibilityIdentifier("popopx.header.mark")
-            // 不给 `layoutPriority`：这一行里唯一该被压缩的就是身份名（`lineLimit(1)` + 尾部省略）。
-            // 优先级给了它会换来整行溢出、两端被推出安全区，见上面第 2 条推论。
+            // 优先级 0 = 明写"这一枚就是该行该让步的那一个"：身份名自己会截断（`lineLimit(1)` +
+            // 尾部省略 + 不收紧字距），所以它先缩；上一版把优先级给它，在 375pt 上整行溢出、
+            // 两端被推出安全区，见上面第 2 条推论。
             PopopxIdentitySwitcher(userId: $currentUserId, identities: identities)
                 .frame(maxWidth: PopopxMetrics.headerIdentityMaxWidth, alignment: .leading)
+                .layoutPriority(0)
                 .accessibilityIdentifier("popopx.header.identity")
             Spacer(minLength: PopopxMetrics.space2XS)
             // 中簇整体不 fixedSize：把剩余宽度真的报给两枚胶囊，它们的档位才有得选。
@@ -529,12 +563,14 @@ struct PopopxTelemetryHeader: View {
                 PopopxBadgeCapsuleView(compact: false)
                 PopopxBadgeCapsuleView(compact: true)
             }
+            .layoutPriority(2)
             .accessibilityIdentifier("popopx.header.badge")
             PopopxDualStatusCapsule(network: signal, radio: radioState)
+                .layoutPriority(2)
             Spacer(minLength: PopopxMetrics.space2XS)
             PopopxPlusMenu(onAddFriend: onAddFriend, onStartGroupChat: onStartGroupChat, onScan: onScan)
                 .fixedSize()
-                .layoutPriority(1)
+                .layoutPriority(2)
                 .accessibilityIdentifier("popopx.header.plus")
         }
         // 16 而不是 24：与下面筛选条的 `gutter` 对齐，同时把 8pt 还给状态那一簇。

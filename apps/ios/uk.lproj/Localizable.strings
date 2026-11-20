@@ -7422,13 +7422,10 @@ alert title */
 "Invite a nearby peer" = "Запросити сусідній вузол";
 "Send to group" = "Надіслати до групи";
 "%lld member(s) · epoch %lld" = "учасників: %lld · епоха %lld";
-"%lld member(s)" = "%lld уч.";
 "A binding maps a Bluetooth key to a POPOPX contact. It lives in the Keychain and is never backed up. Clearing bindings does not delete any contact and does not touch your chat history." = "Прив'язка відображає ключ Bluetooth на контакт POPOPX. Вона живе у Keychain і ніколи не резервується. Видалення прив'язок не видаляє жодного контакту і не чіпає історію чатів.";
-"A group exists only on the phones that are in it. Nothing on this screen is announced to a server." = "Група існує лише на телефонах її учасників. З цього екрана нічого не повідомляється серверу.";
 "Approve" = "Затвердити";
 "Clear identity bindings" = "Очистити прив'язки особи";
 "Create an encrypted group" = "Створити шифровану групу";
-"Create or join an offline group" = "Створити або приєднатися до офлайн-групи";
 "Decline" = "Відхилити";
 "Discover" = "Знайти";
 "Enable offline Bluetooth mesh network" = "Увімкнути офлайн Bluetooth mesh-мережу";
@@ -7436,7 +7433,6 @@ alert title */
 "Erase offline mesh data?" = "Стерти дані офлайн mesh-мережі?";
 "Forget" = "Забути";
 "Handshake" = "Рукопотискання";
-"Lists the devices within Bluetooth reach and the offline groups on this phone" = "Показує пристрої в радіусі Bluetooth і офлайн-групи на цьому телефоні";
 "Local nickname" = "Локальне прізвисько";
 "Manual confirmation shows a banner and sends nothing until you approve it. Silent pairing finishes the Bluetooth handshake on its own." = "Ручне підтвердження спершу показує банер і нічого не надсилає, доки ви не затвердите; тихе сполучення саме завершує Bluetooth-рукопотискання.";
 "Mesh identity map" = "Мапа осіб mesh-мережі";
@@ -7452,8 +7448,11 @@ alert title */
 "Revert" = "Повернути";
 "Say something to the room" = "Скажіть щось цій кімнаті";
 "Start one with the plus button in the top right corner." = "Почніть із кнопки плюс у правому верхньому куті.";
-"The fuse is closed, so this phone has not read its group store yet." = "Головний запобіжник вимкнено, тому цей телефон ще не читав своє сховище груп.";
 "This square is local only: what is typed here floods the mesh and never leaves it." = "Цей майдан лише локальний: написане тут розливається mesh-мережею і ніколи її не покидає.";
 "Up to %lld members, and the name is not secret — the messages are." = "До %lld учасників; назва не таємниця, а повідомлення — так.";
 "\nCurrently: " = "\nЗараз: ";
 "Tap three times quickly to erase all offline mesh data" = "Швидко торкніться тричі, щоб стерти всі дані офлайн mesh-мережі";
+"Nearby mesh plaza" = "Площа офлайн-мережі поруч";
+"Opens the nearby square: the broadcast stream and the nodes within Bluetooth reach" = "Відкриває площу поруч: потік трансляцій і вузли в радіусі дії Bluetooth";
+"%lld days" = "%lld дн.";
+"%lld days (Pioneer Trial)" = "%lld дн. (пробний період піонера)";

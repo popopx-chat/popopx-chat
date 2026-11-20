@@ -715,7 +715,10 @@ private enum Copy {
 
     static let moreTitle = "更多方式"
     static let plazaRow = "进入厢语发现附近群组/频道（BLE Mesh）"
-    static let plazaNavigationTitle = "厢语附近广场"
+    /// 广场页的标题。本文件其余句子仍是中文直写（整页转 Key 另立一轮），这一句先收口：
+    /// 厢语左上角现在推的是同一个页面（`PopopxCabinView.swift` 的 `.plaza`），两处共用
+    /// Key `Nearby mesh plaza`，16 个译本目录里各有一句，非中文系统下不再漏出中文标题。
+    static let plazaNavigationTitle = NSLocalizedString("Nearby mesh plaza", comment: "POPOPX nearby mesh plaza")
     static let fuseOffValue = "熔断已关闭"
     static let scanRow = "扫一扫"
     static let shareRow = "分享我的安全邀请链接"

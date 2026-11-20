@@ -4241,13 +4241,10 @@ server test failure */
 "%lld member(s) · epoch %lld" = "%lld členů · epocha %lld";
 "Groups" = "Skupiny";
 "Create group" = "Vytvořit skupinu";
-"%lld member(s)" = "%lld členů";
 "A binding maps a Bluetooth key to a POPOPX contact. It lives in the Keychain and is never backed up. Clearing bindings does not delete any contact and does not touch your chat history." = "Vazba přiřazuje Bluetooth klíč ke kontaktu POPOPX. Žije v Keychainu a nikdy se nezálohuje. Vymazání vazeb nemaže žádný kontakt a nezasahuje do historie chatu.";
-"A group exists only on the phones that are in it. Nothing on this screen is announced to a server." = "Skupina existuje jen v telefonech svých členů. Nič z této obrazovky se žádnému serveru nehlásí.";
 "Approve" = "Schválit";
 "Clear identity bindings" = "Vymazat vazby identity";
 "Create an encrypted group" = "Vytvořit šifrovanou skupinu";
-"Create or join an offline group" = "Vytvořit nebo se připojit k offline skupině";
 "Decline" = "Odmítnout";
 "Discover" = "Objevit";
 "Enable offline Bluetooth mesh network" = "Zapnout offline Bluetooth mesh síť";
@@ -4255,7 +4252,6 @@ server test failure */
 "Erase offline mesh data?" = "Vymazat data offline mesh sítě?";
 "Forget" = "Zapomenout";
 "Handshake" = "Handshake";
-"Lists the devices within Bluetooth reach and the offline groups on this phone" = "Vypíše zařízení v dosahu Bluetooth a offline skupiny v tomto telefonu";
 "Local nickname" = "Místní přezdívka";
 "Manual confirmation shows a banner and sends nothing until you approve it. Silent pairing finishes the Bluetooth handshake on its own." = "Ruční potvrzení nejprve zobrazí banner a nic neodešle, dokud neschválíte; tiché párování dokončí Bluetooth handshake samo.";
 "Mesh identity map" = "Mapa identit mesh sítě";
@@ -4271,8 +4267,11 @@ server test failure */
 "Revert" = "Vrátit";
 "Say something to the room" = "Řekněte něco místnosti";
 "Start one with the plus button in the top right corner." = "Začněte tlačítkem plus vpravo nahoře.";
-"The fuse is closed, so this phone has not read its group store yet." = "Pojistka je vypnutá, tento telefon tedy zatím nepřečetl své úložiště skupin.";
 "This square is local only: what is typed here floods the mesh and never leaves it." = "Toto náměstí je pouze lokální: co se sem napíše, rozlije se po mesh síti a nikdy ji neopustí.";
 "Up to %lld members, and the name is not secret — the messages are." = "Až %lld členů; název není tajný, zprávy ano.";
 "\nCurrently: " = "\nNyní: ";
 "Tap three times quickly to erase all offline mesh data" = "Rychle třikněte třikrát, vymažete tak všechna data offline mesh sítě";
+"Nearby mesh plaza" = "Náměstí sítě v okolí";
+"Opens the nearby square: the broadcast stream and the nodes within Bluetooth reach" = "Otevře náměstí v okolí: proud vysílání a uzly v dosahu Bluetooth";
+"%lld days" = "%lld dní";
+"%lld days (Pioneer Trial)" = "%lld dní (zkušební verze pionýra)";

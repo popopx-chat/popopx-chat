@@ -8451,13 +8451,10 @@ alert title */
 "Invite a nearby peer" = "Inviter un pair à proximité";
 "Send to group" = "Envoyer au groupe";
 "%lld member(s) · epoch %lld" = "%lld membres · époque %lld";
-"%lld member(s)" = "%lld membre(s)";
 "A binding maps a Bluetooth key to a POPOPX contact. It lives in the Keychain and is never backed up. Clearing bindings does not delete any contact and does not touch your chat history." = "Une association fait correspondre une clé Bluetooth à un contact POPOPX. Elle est gardée dans le trousseau et n’est jamais sauvegardée. Effacer les associations ne supprime aucun contact et ne touche pas l’historique des discussions.";
-"A group exists only on the phones that are in it. Nothing on this screen is announced to a server." = "Un groupe n’existe que sur les téléphones de ses membres. Rien sur cet écran n’est signalé à un serveur.";
 "Approve" = "Approuver";
 "Clear identity bindings" = "Effacer les associations d’identité";
 "Create an encrypted group" = "Créer un groupe chiffré";
-"Create or join an offline group" = "Créer ou rejoindre un groupe hors ligne";
 "Decline" = "Refuser";
 "Discover" = "Découvrir";
 "Enable offline Bluetooth mesh network" = "Activer le maillage Bluetooth hors ligne";
@@ -8465,7 +8462,6 @@ alert title */
 "Erase offline mesh data?" = "Effacer les données du maillage hors ligne ?";
 "Forget" = "Dissocier";
 "Handshake" = "Poignée de main";
-"Lists the devices within Bluetooth reach and the offline groups on this phone" = "Liste les appareils à portée Bluetooth et les groupes hors ligne de ce téléphone";
 "Local nickname" = "Pseudo local";
 "Manual confirmation shows a banner and sends nothing until you approve it. Silent pairing finishes the Bluetooth handshake on its own." = "La vérification manuelle affiche d’abord une bannière et n’envoie rien avant votre approbation ; l’appariement silencieux termine seul la poignée de main Bluetooth.";
 "Mesh identity map" = "Table d’identité du maillage";
@@ -8481,8 +8477,11 @@ alert title */
 "Revert" = "Annuler";
 "Say something to the room" = "Dites quelque chose à cette salle";
 "Start one with the plus button in the top right corner." = "Utilisez le bouton + en haut à droite.";
-"The fuse is closed, so this phone has not read its group store yet." = "Le commutateur principal est fermé : ce téléphone n’a pas encore lu son stockage de groupes.";
 "This square is local only: what is typed here floods the mesh and never leaves it." = "Cette place est uniquement locale : ce qui y est envoyé inonde le maillage et n’en sort jamais.";
 "Up to %lld members, and the name is not secret — the messages are." = "Jusqu’à %lld membres ; le nom n’est pas secret, les messages le sont.";
 "\nCurrently: " = "\nActuellement : ";
 "Tap three times quickly to erase all offline mesh data" = "Touchez trois fois rapidement pour effacer toutes les données du maillage hors ligne";
+"Nearby mesh plaza" = "Place du réseau hors ligne à proximité";
+"Opens the nearby square: the broadcast stream and the nodes within Bluetooth reach" = "Ouvre la place à proximité : le flux des diffusions et les nœuds à portée Bluetooth";
+"%lld days" = "%lld jours";
+"%lld days (Pioneer Trial)" = "%lld jours (essai pionnier)";

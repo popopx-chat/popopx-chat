@@ -8484,13 +8484,10 @@ alert title */
 "Invite a nearby peer" = "Invita un peer nelle vicinanze";
 "Send to group" = "Invia al gruppo";
 "%lld member(s) · epoch %lld" = "%lld membri · epoca %lld";
-"%lld member(s)" = "%lld membro/i";
 "A binding maps a Bluetooth key to a POPOPX contact. It lives in the Keychain and is never backed up. Clearing bindings does not delete any contact and does not touch your chat history." = "Un’associazione collega una chiave Bluetooth a un contatto POPOPX. Si trova nel portachiavi e non viene mai inclusa nei backup. Cancellare le associazioni non elimina contatti e non tocca la cronologia delle chat.";
-"A group exists only on the phones that are in it. Nothing on this screen is announced to a server." = "Un gruppo esiste solo sui telefoni dei suoi membri. Nulla di questa schermata viene segnalato a un server.";
 "Approve" = "Approva";
 "Clear identity bindings" = "Cancella le associazioni di identità";
 "Create an encrypted group" = "Crea un gruppo cifrato";
-"Create or join an offline group" = "Crea o unisciti a un gruppo offline";
 "Decline" = "Rifiuta";
 "Discover" = "Scopri";
 "Enable offline Bluetooth mesh network" = "Attiva la mesh Bluetooth offline";
@@ -8498,7 +8495,6 @@ alert title */
 "Erase offline mesh data?" = "Cancellare i dati della mesh offline?";
 "Forget" = "Sciogli associazione";
 "Handshake" = "Handshake";
-"Lists the devices within Bluetooth reach and the offline groups on this phone" = "Elenca i dispositivi a portata Bluetooth e i gruppi offline di questo telefono";
 "Local nickname" = "Soprannome locale";
 "Manual confirmation shows a banner and sends nothing until you approve it. Silent pairing finishes the Bluetooth handshake on its own." = "La verifica manuale mostra prima un banner e non invia nulla finché non approvi; l abbinamento silenzioso completa da solo l’handshake Bluetooth.";
 "Mesh identity map" = "Tabella delle identità della mesh";
@@ -8514,8 +8510,11 @@ alert title */
 "Revert" = "Annulla";
 "Say something to the room" = "Dì qualcosa a questa stanza";
 "Start one with the plus button in the top right corner." = "Usa il pulsante + in alto a destra.";
-"The fuse is closed, so this phone has not read its group store yet." = "L’interruttore principale è chiuso: questo telefono non ha ancora letto il suo archivio dei gruppi.";
 "This square is local only: what is typed here floods the mesh and never leaves it." = "Questa piazza è solo locale: ciò che viene inviato qui inonda la mesh e non ne esce mai.";
 "Up to %lld members, and the name is not secret — the messages are." = "Fino a %lld membri; il nome non è segreto, i messaggi sì.";
 "\nCurrently: " = "\nOra: ";
 "Tap three times quickly to erase all offline mesh data" = "Tocca tre volte rapidamente per cancellare tutti i dati della mesh offline";
+"Nearby mesh plaza" = "Piazza della rete offline nelle vicinanze";
+"Opens the nearby square: the broadcast stream and the nodes within Bluetooth reach" = "Apre la piazza nelle vicinanze: il flusso delle diffusioni e i nodi entro la portata Bluetooth";
+"%lld days" = "%lld giorni";
+"%lld days (Pioneer Trial)" = "%lld giorni (prova pionieri)";
