@@ -37,6 +37,7 @@ struct CreateProfile: View {
     @State private var profileBio: String = ""
     @FocusState private var focusDisplayName
     @State private var alert: UserProfileAlert?
+    @State private var isCreatingProfile = false
     @State private var showChooseSource = false
     @State private var showImagePicker = false
     @State private var showTakePhoto = false
@@ -102,10 +103,12 @@ struct CreateProfile: View {
                     TextField("Bio", text: $profileBio)
                         .padding(.leading, 36)
                 }
-                Button(action: createProfile) {
+                Button {
+                    Task { await createProfile() }
+                } label: {
                     settingsRow("checkmark", color: theme.colors.primary) { Text("Create profile") }
                 }
-                .disabled(!canCreateProfile(displayName) || !bioFitsLimit())
+                .disabled(!canCreateProfile(displayName) || !bioFitsLimit() || isCreatingProfile)
             } footer: {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Your profile is stored on your device and only shared with your contacts.")
@@ -160,7 +163,15 @@ struct CreateProfile: View {
         chatJsonLength(profileBio) <= MAX_BIO_LENGTH_BYTES
     }
 
-    private func createProfile() {
+    // A-1（真机 0x8BADF00D 看门狗）：`chatSendCmdSync` 是同步 FFI，服务端不回话时主线程会一直挂住，
+    // 直到系统把进程判成无响应杀掉。这里只把「拿返回值」的那两个调用挪到后台，
+    // `startChat` / `getUserChatData` 会发布 ChatModel、ChatTagsModel、NtfManager 状态，必须留在主线程，
+    // 所以整个函数标 `@MainActor`：恢复续体一定回到主线程，不会出现后台改模型。
+    @MainActor
+    private func createProfile() async {
+        guard !isCreatingProfile else { return }
+        isCreatingProfile = true
+        defer { isCreatingProfile = false }
         hideKeyboard()
         let shortDescr: String? = if profileBio.isEmpty { nil } else { profileBio }
         let profile = Profile(
@@ -172,7 +183,10 @@ struct CreateProfile: View {
         let m = ChatModel.shared
         do {
             AppChatState.shared.set(.active)
-            m.currentUser = try apiCreateActiveUser(profile)
+            let created = await Task.detached(priority: .userInitiated) { () -> Result<User, Error> in
+                Result { try apiCreateActiveUser(profile) }
+            }.value
+            m.currentUser = try created.get()
             // .isEmpty check is redundant here, but it makes it clearer what is going on
             if m.users.isEmpty || m.users.allSatisfy({ $0.user.hidden }) {
                 try startChat()
@@ -184,7 +198,10 @@ struct CreateProfile: View {
                 onboardingStageDefault.set(.onboardingComplete)
                 m.onboardingStage = .onboardingComplete
                 dismiss()
-                m.users = try listUsers()
+                let users = await Task.detached(priority: .userInitiated) { () -> Result<[UserInfo], Error> in
+                    Result { try listUsers() }
+                }.value
+                m.users = try users.get()
                 try getUserChatData()
             }
         } catch let error {
@@ -209,6 +226,7 @@ struct CreateFirstProfile: View {
     @State private var showTakePhoto = false
     @State private var nextStepNavLinkActive = false
     @State private var showMigrateSheet = false
+    @State private var isCreatingProfile = false
 
     // 引导第 2 屏：创建第一个匿名身份。
     private static let avatarSize: CGFloat = 112
@@ -436,10 +454,10 @@ struct CreateFirstProfile: View {
     // MARK: - 下一步
 
     private var nextButton: some View {
-        PopopxButton(PopopxOnboardingCopy.next, systemImage: "arrow.right") {
-            createProfile()
+        PopopxButton(PopopxOnboardingCopy.next, systemImage: "arrow.right", isLoading: isCreatingProfile) {
+            await createProfile()
         }
-        .disabled(!nameIsUsable || !noteFitsLimit)
+        .disabled(!nameIsUsable || !noteFitsLimit || isCreatingProfile)
         .navigationDestination(isPresented: $nextStepNavLinkActive) {
             nextStepDestinationView()
         }
@@ -455,7 +473,15 @@ struct CreateFirstProfile: View {
             .modifier(ThemedBackground())
     }
 
-    private func createProfile() {
+    // A-1（真机 0x8BADF00D 看门狗）：`apiCreateActiveUser` 走同步 FFI，服务端不回话时主线程会一直挂住，
+    // 系统判定无响应直接杀进程 —— 引导第 2 屏点「下一步」崩溃就是这个。这里只把拿返回值的那次调用
+    // 放到后台队列，`startChat(onboarding:)` 会写 ChatModel / NtfManager 并带动画，必须留在主线程；
+    // 函数标 `@MainActor`，续体一定回主线程，不会出现「后台改模型」。
+    @MainActor
+    private func createProfile() async {
+        guard !isCreatingProfile else { return }
+        isCreatingProfile = true
+        defer { isCreatingProfile = false }
         hideKeyboard()
         let profile = Profile(
             displayName: trimmedName,
@@ -466,7 +492,10 @@ struct CreateFirstProfile: View {
         let m = ChatModel.shared
         do {
             AppChatState.shared.set(.active)
-            m.currentUser = try apiCreateActiveUser(profile)
+            let created = await Task.detached(priority: .userInitiated) { () -> Result<User, Error> in
+                Result { try apiCreateActiveUser(profile) }
+            }.value
+            m.currentUser = try created.get()
             // new users don't need the local file encryption indicator (all files are encrypted); existing users keep it on
             UserDefaults.standard.set(false, forKey: DEFAULT_PRIVACY_SHOW_FILE_ENCRYPTION)
             try startChat(onboarding: true)
