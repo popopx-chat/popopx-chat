@@ -1298,9 +1298,9 @@ struct ComposeView: View {
                 ttlSeconds: popopxTTLSeconds,
                 secureTTLSeconds: popopxSecureTTLSeconds,
                 isSendEnabled: popopxSendEnabled(disableSendButton),
-                // 旧链路在禁用态把占位文案置 nil（`sendMessageView` 的 `placeholder:` 那一行），
-                // 那句 `disabledText` 压在框上时不该再叠一层提示。
-                placeholder: disabledText == nil ? "发消息…" : "",
+                // 占位文案递的是 Key 本身（英文原句即 Key）：输入条那一侧会把它当
+                // `LocalizedStringKey` 查表，所以这里再写中文就变成 16 语种全漏的键。
+                placeholder: disabledText == nil ? "Message…" : "",
                 onSend: popopxComposerSend,
                 onHoldToTalk: popopxHoldToTalk,
                 onPlusTap: popopxPlusAction,

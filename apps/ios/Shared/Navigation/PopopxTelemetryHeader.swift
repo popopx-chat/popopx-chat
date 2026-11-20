@@ -221,6 +221,14 @@ struct PopopxIdentitySwitcher: View {
                     // 上限是 `headerIdentityMaxWidth`（115），三件套写全是为了让"折行"在这一层
                     // 结构上不可能发生，而不依赖外层给宽。
                     .allowsTightening(false)
+                    // 真机第 9 轮：光有上限拦不住折行。`Picker(.menu)` 的标签由 UIKit 那一侧排版，
+                    // 外层 115 的夹子传到 `HStack` 后还要再分给符号与 chevron，提案给文字时已经
+                    // 比名字窄，`lineLimit(1)` 在菜单标签里拦不住换行。这里把文字自己的宽度夹死：
+                    // 115 减去左右内边距 16×2、人形符号 18、chevron 11、两处间距 4×2 = 46pt，
+                    // 再钉 `fixedSize(horizontal: false, vertical: true)` —— 纵向只许占一行高，
+                    // 46pt 之外的名字一律截断，绝不撑高这一行。
+                    .frame(maxWidth: 46, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
                 Image(systemName: "chevron.down")
                     .font(PopopxType.microTag)
                     .fixedSize()
@@ -278,6 +286,13 @@ struct PopopxStatusPill: View {
                     .overlay {
                         Capsule().strokeBorder(PopopxPalette.hairlineInner, lineWidth: PopopxMetrics.hairline)
                     }
+                    // 真机第 9 轮"外圈变形"这一档：`.frame(height: 48)` 只钉住高，宽度仍按外层提案
+                    // 让步，于是 48 高的胶囊能被夹到比里面的圆点 + 符号还窄 —— 描边跟着压成横椭圆。
+                    // `fixedSize` 把这一枚夹回内容宽度：宁可整行溢出（`ViewThatFits` 会先降档到圆点，
+                    // 圆点档是 32×32 的 frame 锁死，不参与让步），也不让外圈小于它要包住的东西。
+                    // 与 `:349-350` 那条"调用方不能再对它 `.fixedSize()`"不冲突：那一条说的是别在
+                    // `PopopxDualStatusCapsule` 外面夹，会把三档钉在最宽一档；这里夹的是单个候选内部。
+                    .fixedSize(horizontal: true, vertical: false)
             }
         }
         .onAppear { restart() }
@@ -539,6 +554,10 @@ struct PopopxTelemetryHeader: View {
     var telemetry: PopopxTelemetryModel? = nil
     var network: PopopxHeaderSignal = .unknown
     var radio: PopopxBluetoothState = .unknown
+    /// 顶栏徽章那张 sheet 的载体绑定，一律由宿主页递进来（消息页传自己的 `$badgeSheet`）。
+    /// 这里不放 `@State`：宿主已经挂了 `.popopxBadgeSheets`，顶栏再挂一份就是同一条链上两张 sheet，
+    /// 抬着体验弹窗时再写 `.detail` 会被系统丢掉 —— 真机第 9 轮「点『看徽章详情』没反应」的根因。
+    @Binding var badgeSheet: PopopxBadgeSheet?
     var onAddFriend: (() -> Void)? = nil
     var onStartGroupChat: (() -> Void)? = nil
     var onCreateChannel: (() -> Void)? = nil
@@ -562,13 +581,15 @@ struct PopopxTelemetryHeader: View {
             // 中簇整体不 fixedSize：把剩余宽度真的报给两枚胶囊，它们的档位才有得选。
             // 徽章两档：带字那档要 144（短到"体验 3d 4h"也是），393pt 装不下，于是 iPhone 上恒定
             // 退到只留符号的 48；iPad／横屏自动升回带字档。状态语义由实心色片 + 描边 + 光晕承载，
-            // 见 `PopopxBadgeCapsuleView` 文件头。
-            ViewThatFits(in: .horizontal) {
-                PopopxBadgeCapsuleView(compact: false)
-                PopopxBadgeCapsuleView(compact: true)
-            }
-            .layoutPriority(2)
-            .accessibilityIdentifier("popopx.header.badge")
+            // 见 `PopopxBadgeCapsuleView.swift` 文件头。
+            // 档位选在这里（`ViewThatFits` 在两档之间选），sheet 载体不选在这里：`sheet` 往上递给
+            // 宿主页那唯一一份 `.popopxBadgeSheets`，顶栏自己不再挂第二张 sheet。
+            // 上一版两处都错过：把自带 `.sheet` 的包装件摆成两档候选 ⇒ 两档各一份呈现层；
+            // 只留一份又和宿主页并存 ⇒ 同一条链两张 sheet，体验弹窗里点「看徽章详情」被静默丢掉。
+            // 真机第 9 轮「点『看徽章详情』没反应」就是这后一条。
+            PopopxBadgeHeaderEntry(sheet: $badgeSheet)
+                .layoutPriority(2)
+                .accessibilityIdentifier("popopx.header.badge")
             PopopxDualStatusCapsule(network: signal, radio: radioState)
                 .layoutPriority(2)
             Spacer(minLength: PopopxMetrics.space2XS)
@@ -662,7 +683,8 @@ struct PopopxTelemetryHeaderOnline_Previews: PreviewProvider {
         PopopxTelemetryHeader(
             currentUserId: .constant(1),
             network: .online,
-            radio: .poweredOn
+            radio: .poweredOn,
+            badgeSheet: .constant(nil)
         )
         .padding(.vertical, PopopxMetrics.spaceS)
         .background(PopopxPalette.base)
@@ -676,7 +698,8 @@ struct PopopxTelemetryHeaderCellular_Previews: PreviewProvider {
             currentUserId: .constant(1),
             network: .resolve(proximityActive: false, directPeerCount: 0,
                               path: PopopxNetworkPath(isConnected: true, interface: .cellular, isExpensive: true)),
-            radio: .poweredOn
+            radio: .poweredOn,
+            badgeSheet: .constant(nil)
         )
         .padding(.vertical, PopopxMetrics.spaceS)
         .background(PopopxPalette.base)
@@ -688,7 +711,8 @@ struct PopopxTelemetryHeaderProximityOnly_Previews: PreviewProvider {
         PopopxTelemetryHeader(
             currentUserId: .constant(1),
             network: .resolve(proximityActive: true, directPeerCount: 2, path: .unknown),
-            radio: .poweredOn
+            radio: .poweredOn,
+            badgeSheet: .constant(nil)
         )
         .padding(.vertical, PopopxMetrics.spaceS)
         .background(PopopxPalette.base)
@@ -700,7 +724,8 @@ struct PopopxTelemetryHeaderBluetoothOff_Previews: PreviewProvider {
         PopopxTelemetryHeader(
             currentUserId: .constant(1),
             network: .offline,
-            radio: .unauthorized
+            radio: .unauthorized,
+            badgeSheet: .constant(nil)
         )
         .padding(.vertical, PopopxMetrics.spaceS)
         .background(PopopxPalette.base)

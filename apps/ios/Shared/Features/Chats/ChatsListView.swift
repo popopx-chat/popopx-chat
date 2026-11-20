@@ -43,7 +43,7 @@
 //
 
 import SwiftUI
-import UIKit   // `imageFromBase64` 返回的是 UIImage（ImageUtils.swift:431）；与 PopopxMeView.swift:28 同一写法
+import UIKit   // `imageFromBase64` 返回的是 UIImage（ImageUtils.swift:431）；与 PopopxMeView.swift:44 同一写法
 import POPOPXChat
 import PopopxMeshKit
 import PopopxMeshUI
@@ -132,7 +132,7 @@ private struct PopopxMeshBindingKey: Equatable {
 /// UserDefaults 的键要靠名字普查（自毁与迁移那几处按名字清点），散在装饰器里就搜不到归属。
 private let popopxTrialWelcomeAskedKey = "popopx.commerce.trialWelcomeAsked"
 
-/// 整页 `@MainActor`：与 `MainTabView.swift:77`、`PopopxMeView.swift:36`、
+/// 整页 `@MainActor`：与 `MainTabView.swift:113`、`PopopxMeView.swift:52`、
 /// `PopopxProximityAddContactView.swift:39` 同一写法，这样页内的同步小助手
 /// （判定通道、震动、写 @State）都不必再各自标注，也不会踩隔离相关的警告。
 @MainActor
@@ -301,6 +301,8 @@ struct ChatsListView: View {
         // 所以这一层只决定"要不要问这一次"，不替它领。
         // 三张徽章面板走同一个载体：弹窗里点「看徽章详情」要换到详情页，
         // 换 `item` 就行，不必在这一层再挂第二条 sheet。
+        // 顶栏那枚徽章也不挂自己的 sheet，用的是 `$badgeSheet` 递下去的同一份（`PopopxTelemetryHeader.badgeSheet`）：
+        // 真机第 9 轮「点『看徽章详情』没反应」第二次查出的就是"这一份 + 顶栏那一份"两张 sheet 挂在同一条链上。
         .popopxBadgeSheets($badgeSheet)
         .popopxToast(toast)
         .task { await startTelemetry() }
@@ -323,6 +325,7 @@ struct ChatsListView: View {
                 currentUserId: $currentUserId,
                 identities: switchableIdentities,
                 telemetry: telemetry,
+                badgeSheet: $badgeSheet,
                 onAddFriend: { showsAddFriend = true },
                 onStartGroupChat: { showsCreateGroup = true },
                 onCreateChannel: { showsCreateChannel = true },
@@ -539,7 +542,7 @@ struct ChatsListView: View {
         }
     }
 
-    /// 可切换的身份：与 UserPicker.swift:33-35（同 `PopopxMeView.swift:514-516`）一个口径 ——
+    /// 可切换的身份：与 UserPicker.swift:33-35（同 `PopopxMeView.swift:541-545`）一个口径 ——
     /// 加锁的身份（`user.hidden`，即有 `viewPwdHash`）不进切换器，因为这里传的是 `viewPwd: nil`，
     /// 带着 nil 去切加锁身份只会失败；加锁身份归「我」页的身份管理。
     /// 但当前身份必须在表里，否则顶栏会把自己的名字显示成"未选择"。顺序同 UserPicker

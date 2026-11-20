@@ -386,9 +386,9 @@ link validator (`scripts/ios/localizations.py`), and `plutil -lint` reports all 
    （`Shared/Features/AddFriend/PopopxQRCardSheet.swift:112-181`、:241-252）。
    **我没有改 brand-spec 文档**（红线之外还因为它是你的裁定件）；§2.4 要不要写这条例外，由你定。
 5. **付费墙多了一个无条件入口。** 需求的进入路径是顶栏胶囊；实测胶囊按状态分发
-   （`PopopxBadgeCapsuleView.swift:295-301`：`.activeLit → 徽章详情`），于是**已点亮徽章的人再也没有
+   （`PopopxBadgeCapsuleView.swift:353-358`：`.activeLit → 徽章详情`），于是**已点亮徽章的人再也没有
    任何购买入口**（买不了点数，也就兑不了续期）。已在"我的"页加一条常驻"充值算力点"
-   （`PopopxMeView.swift:130`）。这是修死路，不是加营销位。
+   （`PopopxMeView.swift:305`）。这是修死路，不是加营销位。
 6. **`popopx://channel` 这个 URI 整个是实现自定的**——需求只写了"订阅确认弹窗"（:86-88），没给任何线上传输形状。
    实现落在**一条可见消息**上：`?p=<点数>&t=<发布时间毫秒>&e=<发卡方 P-256 公钥 base64url>&s=<签名>`
    （`PopopxBadgeCreditsModels.swift:691`，字段名 :674，wireString :729），签名原文是

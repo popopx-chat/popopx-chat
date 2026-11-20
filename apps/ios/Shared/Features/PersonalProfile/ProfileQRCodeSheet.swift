@@ -26,7 +26,7 @@
 //  改写成 `https://popopx.chat//profile?…`（多出来的那一个斜杠就是它把 `popopx:/` 换成
 //  `https://popopx.chat/` 之后剩下的第二个 `/`），扫出来是一个本 app 路由不到的地址。所以本码承载
 //  `PopopxInviteLink.mintOneTime` 铸出的联系地址，主页由 `ProfileAutoSender` 在建连之后另发一条消息。
-//  传进去的那一枚已经是 `popopxChatLink` 处理过的形态（PopopxTelemetryHeader.swift:367），再过一次是恒等，
+//  传进去的那一枚已经是 `popopxChatLink` 处理过的形态（PopopxTelemetryHeader.swift:418），再过一次是恒等，
 //  这一点是这个复用能成立的前提，不是巧合。
 //
 //  ### 飞行模式下这张码能做什么、不能做什么（不假装有离线钩子）
@@ -454,7 +454,7 @@ struct ProfileQRCodeSheet: View {
 
     /// 铸一条一次性连接链接。**不自己拼串**：`PopopxInviteLink.mintOneTime` 底下就是
     /// `apiAddContact(incognito:)` + `popopxChatUri(short:)` + `popopxChatLink`
-    /// （PopopxTelemetryHeader.swift:365-368），返回的已经是 `https://popopx.chat/…` 形态。
+    /// （PopopxTelemetryHeader.swift:416-418），返回的已经是 `https://popopx.chat/…` 形态。
     /// 失败时 `apiAddContact` 不抛只返回 nil（POPOPXAPI.swift:1050），所以这里必须给可见反馈。
     private func mint() async {
         guard !isMinting else { return }

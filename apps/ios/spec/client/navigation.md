@@ -337,7 +337,7 @@ Migration state (`ChatModel.migrationState != nil`) takes precedence over onboar
 
 The live entry is the "Messages" tab "+" menu: [`PopopxPlusMenu`](../../Shared/Navigation/PopopxTelemetryHeader.swift)
 calls `onCreateChannel`, which sets `showsCreateChannel` in
-[`ChatsListView`](../../Shared/Features/Chats/ChatsListView.swift#L277) and pushes `AddChannelView` through
+[`ChatsListView`](../../Shared/Features/Chats/ChatsListView.swift#L281) and pushes `AddChannelView` through
 `navigationDestination(isPresented:)`. The same sentence still exists in the legacy
 [`NewChatMenuButton`](../../Shared/Views/NewChat/NewChatMenuButton.swift#L179), but its two hosts are not mounted by
 the current shell: `ChatListView` (which shows that menu when `chatModel.chatRunning` is

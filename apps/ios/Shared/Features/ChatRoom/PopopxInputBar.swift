@@ -9,7 +9,7 @@
 //  `$composeState`、`$showCommandsMenu`、`$keyboardVisible`、`$keyboardHiddenDate`、`$selectedRange`），
 //  而 `ComposeView.swift` 有 2253 行、`Shared/Views/Chat/ComposeMessage/` 目录内共 13 个文件；
 //  真正的文本框是 `NativeTextEditor`（`SendMessageView.swift:67`，结构体在 :16，由
-//  `ComposeView.swift:1106 sendMessageView(_:placeholder:sendToConnect:)` 造出来）。多选态下会话页
+//  `ComposeView.swift:1134 sendMessageView(_:placeholder:sendToConnect:)` 造出来）。多选态下会话页
 //  还会把它换成 `SelectedItemsBottomToolbar`（`ChatView.swift:247`）。所以本文件：
 //  ① 不 import 也不改写 `ComposeState`，只吃宿主折算进来的值；② 不改任何既有 initializer；
 //  ③ 所有副作用一律走闭包递出去。**"替换还是并挂"由人来裁定，本条两边都能接。**
@@ -17,14 +17,14 @@
 //  ── 宿主必须接的五根线 ────────────────────────────────────────────────────────────
 //  1. `text`：宿主自己的草稿绑定（`composeState.message` 也行）。
 //  2. `context`：把 `ComposeState` 的九个前提折算成 `PopopxComposerContext`（见该结构体的字段注释，
-//     对应 `ComposeView.swift:1861` mentions、`:1811`-`:1827` contextItem 四支、`:1829`-`:1834` preview 三支）。
+//     对应 `ComposeView.swift:1273` mentions、`:1272` contextItem 四支、`:1266-1271` preview 三支）。
 //  3. `ttlSeconds` / `onTTLChange`：阅后即焚。**真值在宿主那里**，本条只读只报，不存第二份。
 //  4. `onSend`：拿到 `PopopxComposerSend`，其中 `dispatch` 已经分好支：
 //     · `.routeViaMesh(message)` → 宿主做 `await PopopxMeshRuntime.shared.router.send(message)`
 //       （`PopopxMeshKit/…/Router/PopopxMessageRouter.swift:627`），返回的 `PopopxRoutedMessage`
 //       （:241）交给模块 7 的时间线；本条**自己不发**，也不碰 `router.start()`/`stop()`——那是保险丝的
 //       事（`Shared/Model/POPOPXAPI.swift:3818` 把 router 注册进 killSwitch）。
-//     · `.hostShouldSend(reason)` → 宿主走原链路（`ComposeView.swift:1793 sendMessage(ttl:sign:)` →
+//     · `.hostShouldSend(reason)` → 宿主走原链路（`ComposeView.swift:2073 sendMessage(ttl:sign:)` →
 //       `:1723 sendMessageAsync` → `:1752 send(.text…)` → `:1931`/`:1940 send(_ msgs:)` →
 //       `apiSendMessages`（`POPOPXAPI.swift:588`）→ `processSendMessageCmd`（:593）→ `chatApiSendCmd`）。
 //  5. 键盘避让、safe area、`keyboardVisible` 归宿主：本条只画自己那一条，不读屏幕常量。
@@ -100,15 +100,15 @@ struct PopopxComposerContext: Hashable {
     var isDirectContact = false
     /// 草稿挂了附件（图片 / 文件 / 语音 / 多媒体）。
     var hasAttachments = false
-    /// `composeState.preview != .noPreview`（`ComposeView.swift:1884`-`:1834`）：链接预览也是消息体的一部分。
+    /// `composeState.preview != .noPreview`（`ComposeView.swift:1266-1271`）：链接预览也是消息体的一部分。
     var hasLinkPreview = false
-    /// `contextItem` 是 quoted / editing / forwarding / reported 四支之一（`ComposeView.swift:1811`-`:1827`）。
+    /// `contextItem` 是 quoted / editing / forwarding / reported 四支之一（`ComposeView.swift:1272`）。
     var carriesContextItem = false
-    /// `composeState.memberMentions` 非空（`ComposeView.swift:1861`）。
+    /// `composeState.memberMentions` 非空（`ComposeView.swift:1273`）。
     var hasMentions = false
-    /// 即时消息（live），`ComposeView.swift:1862`-`:1809`。
+    /// 即时消息（live），`ComposeView.swift:1274`。
     var isLiveMessage = false
-    /// 需要签名，`ComposeView.swift:1793` 的 `send(sign:)`。
+    /// 需要签名，`ComposeView.swift:1275`（真值取 `groupInfo?.useRelays`，签名动作本身在 `:2095` 的 `send(…sign:)`）。
     var requiresSignature = false
 
     /// 最常用的一支：一个 active 的直聊联系人，纯文本，无 TTL、无签名。
@@ -180,12 +180,20 @@ enum PopopxHostSendReason: Hashable {
     case peerOutOfRange
 
     /// 只给用户看得懂的那两条附一句解释；其余是内部结论，不打扰。
+    ///
+    /// 这里刻意用 `NSLocalizedString` 而不是 `Text("…")`：`explanation` 的返回类型是 `String?`，
+    /// 宿主（`ProfileAutoSender.meshBlockText`）把它当字符串接走，落到 `Text(verbatim:)` 那一侧。
+    /// 键仍然是英文原句，与全 app 的 `Text("Send")` 约定同一张表。
     var explanation: String? {
         switch self {
-        case let .timedMessage(seconds): return "阅后即焚 · \(PopopxComposerRouting.durationText(seconds))"
-        case .richContent: return "附件与预览不经蓝牙 Mesh"
-        case .quotedOrEditing: return "引用与改写不经蓝牙 Mesh"
-        case .signedMessage: return "签名消息不经蓝牙 Mesh"
+        case let .timedMessage(seconds):
+            return String(
+                format: NSLocalizedString("Burn after reading · %@", comment: "composer channel strip"),
+                PopopxComposerRouting.durationText(seconds)
+            )
+        case .richContent: return NSLocalizedString("Attachments and previews do not go over Bluetooth Mesh", comment: "composer channel strip")
+        case .quotedOrEditing: return NSLocalizedString("Quotes and edits do not go over Bluetooth Mesh", comment: "composer channel strip")
+        case .signedMessage: return NSLocalizedString("Signed messages do not go over Bluetooth Mesh", comment: "composer channel strip")
         case .meshFuseOff, .bindingUnknown, .contactNotBoundToMesh, .radioUnavailable, .peerOutOfRange, .notDirectContact:
             return nil
         }
@@ -271,7 +279,8 @@ extension PopopxSecureTTLOption: PopopxDurationOption {}
 private struct PopopxDurationChips<Option>: View where Option: PopopxDurationOption & Identifiable {
     let options: [Option]
     let selectedSeconds: Int
-    let label: String
+    /// `LocalizedStringKey` 而不是 `String`：这一格是 VoiceOver 标签，裸 `String` 不进本地化表。
+    let label: LocalizedStringKey
     let onSelect: (Int) -> Void
 
     var body: some View {
@@ -282,7 +291,9 @@ private struct PopopxDurationChips<Option>: View where Option: PopopxDurationOpt
                     PopopxHaptics.selection()
                     onSelect(option.seconds)
                 } label: {
-                    Text(option.title)
+                    // `title` 的协议签名是 `String`（绝密那一档在载荷文件里也用它），
+                    // 所以这里显式把它当键查一次；查不到就是原样显示，行为与改前一致。
+                    Text(LocalizedStringKey(option.title))
                         .font(PopopxType.meta)
                         .foregroundStyle(isSelected ? PopopxPalette.onBrand : PopopxPalette.labelSecondary)
                         .lineLimit(1)
@@ -324,9 +335,9 @@ struct PopopxComposerDurationOption: Hashable, Identifiable {
 enum PopopxComposerRouting {
     /// 阅后即焚的档位，与旧 composer 发送键菜单里那三档一致（`SendMessageView.swift:199`-`:201`）。
     static let durationOptions: [PopopxComposerDurationOption] = [
-        .init(seconds: 30, title: "30 秒"),
-        .init(seconds: 60, title: "1 分钟"),
-        .init(seconds: 300, title: "5 分钟")
+        .init(seconds: 30, title: "30 seconds"),
+        .init(seconds: 60, title: "1 minute"),
+        .init(seconds: 300, title: "5 minutes")
     ]
 
     /// 宿主没选过时的默认档，直接取 app 已有的那个持久化值（`SettingsView.swift:230`）。
@@ -334,11 +345,13 @@ enum PopopxComposerRouting {
         customDisappearingMessageTimeDefault.get()
     }
 
+    /// 时长短语。返回 `String`（被 `explanation` 与宿主接走），所以这里用 `NSLocalizedString`
+    /// + `String(format:)` 查表，而不是 `Text("…")` 的隐式键。`%@`/`%lld` 的次序与全表一致。
     static func durationText(_ seconds: Int) -> String {
-        if seconds % 86_400 == 0 { return "\(seconds / 86_400) 天" }
-        if seconds % 3_600 == 0 { return "\(seconds / 3_600) 小时" }
-        if seconds % 60 == 0 { return "\(seconds / 60) 分钟" }
-        return "\(seconds) 秒"
+        if seconds % 86_400 == 0 { return String(format: NSLocalizedString("%lld days", comment: "composer duration"), seconds / 86_400) }
+        if seconds % 3_600 == 0 { return String(format: NSLocalizedString("%lld hours", comment: "composer duration"), seconds / 3_600) }
+        if seconds % 60 == 0 { return String(format: NSLocalizedString("%lld minutes", comment: "composer duration"), seconds / 60) }
+        return String(format: NSLocalizedString("%lld seconds", comment: "composer duration"), seconds)
     }
 
     /// 判定表的核心：这一刻这条草稿能不能交给模块 5。`nil` = 能。
@@ -439,7 +452,7 @@ final class PopopxInputBarModel: ObservableObject {
     var resolver: (@MainActor (Int64?) async -> PopopxMeshEligibility)?
 
     /// 5 秒一跳，只为了把"邻居静默超窗"这件事自己褪下去；和消息列表页同一个节奏
-    /// （`Shared/Features/Chats/ChatsListView.swift:452`-`:421`）。
+    /// （`Shared/Features/Chats/ChatsListView.swift:187`、`:502`）。
     static let pollIntervalSeconds: Double = 5
 
     func refresh(contactId: Int64?) async {
@@ -528,16 +541,18 @@ enum PopopxPlusAction: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var title: String {
+    /// 「+」面板格子的题字。类型是 `LocalizedStringKey` 而不是 `String`：裸 `String` 进 `Text`
+    /// 不查表，英文环境下会直接漏出中文。英文原句即键，16 张表里查已有的译文。
+    var title: LocalizedStringKey {
         switch self {
-        case .photo: return "相册"
-        case .camera: return "拍摄"
-        case .file: return "文件"
-        case .location: return "位置"
-        case .secure: return "绝密"
-        case .personalProfile: return "个人主页"
-        case .redPacket: return "红包"
-        case .giftCard: return "礼品卡"
+        case .photo: return "Album"
+        case .camera: return "Camera"
+        case .file: return "Files"
+        case .location: return "Location"
+        case .secure: return "Top secret"
+        case .personalProfile: return "Profile page"
+        case .redPacket: return "Red packet"
+        case .giftCard: return "Gift card"
         }
     }
 
@@ -594,7 +609,7 @@ struct PopopxInputBar: View {
 
     /// `@MainActor` 是为了在 init 里取那两个 `@MainActor` 单例（`PopopxMeshRuntime.shared`
     /// `POPOPXAPI.swift:3732`、`PopopxMeshStateSource.shared` `PopopxMeshStateSource.swift:158`）——
-    /// 和第四阶段那几页同一个写法（`Shared/Features/Chats/ChatsListView.swift:163`）。
+    /// 和第四阶段那几页同一个写法（`Shared/Features/Chats/ChatsListView.swift:189`）。
     @MainActor
     init(
         text: Binding<String>,
@@ -602,7 +617,7 @@ struct PopopxInputBar: View {
         ttlSeconds: Int? = nil,
         secureTTLSeconds: Int? = nil,
         isSendEnabled: Bool = true,
-        placeholder: String = "发消息…",
+        placeholder: String = "Message…",
         onSend: @escaping (PopopxComposerSend) -> Void,
         onVoiceTap: @escaping (Bool) -> Void = { _ in },
         onHoldToTalk: @escaping () -> Void = {},
@@ -692,10 +707,10 @@ struct PopopxInputBar: View {
                 channelBadge
                 if model.eligibility.queuedCount > 0 {
                     // 灰 clock 只说一件事：厢语中继积压。
-                    Label("待中继 \(model.eligibility.queuedCount)", systemImage: "clock")
+                    Label("Awaiting relay: \(model.eligibility.queuedCount)", systemImage: "clock")
                         .font(PopopxType.metricSmall)
                         .foregroundStyle(PopopxPalette.labelSecondary)
-                        .accessibilityLabel("厢语中继积压 \(model.eligibility.queuedCount) 条")
+                        .accessibilityLabel(Text("Mesh relay backlog: \(model.eligibility.queuedCount) messages"))
                 }
                 Spacer(minLength: PopopxMetrics.spaceXS)
             }
@@ -706,32 +721,38 @@ struct PopopxInputBar: View {
     @ViewBuilder private var channelBadge: some View {
         switch channel {
         case .smp:
-            Label("在线加密 · SMP", systemImage: "lock.shield.fill")
+            Label("Online encryption · SMP", systemImage: "lock.shield.fill")
                 .font(PopopxType.microTag)
                 .foregroundStyle(PopopxPalette.brand)
         case let .mesh(hops):
-            Label(hops.map { "厢语离线 · \($0) 跳" } ?? "厢语离线", systemImage: "antenna.radiowaves.left.and.right")
+            // 闭包显式返回 `LocalizedStringKey`：整支表达式的类型决定了 `Label` 取哪一枚重载，
+            // 落在 `String` 上就等于不本地化。
+            Label(
+                hops.map { (n: Int) -> LocalizedStringKey in "Mesh offline · \(n) hops" } ?? "Mesh offline",
+                systemImage: "antenna.radiowaves.left.and.right"
+            )
                 .font(PopopxType.microTag)
                 .foregroundStyle(PopopxPalette.meshInk)
         case .undetermined:
             // 不替用户猜通道，所以这里刻意不给图标、不给强调色。
-            Text(model.isResolving ? "正在读取厢语绑定" : "通道待定")
+            Text(model.isResolving ? "Reading mesh bindings…" : "Channel undetermined")
                 .font(PopopxType.microTag)
                 .foregroundStyle(PopopxPalette.labelSecondary)
         }
     }
 
     /// 强调色之外的那句解释（灰色，绝不与强调色抢同一个控件里的第二把颜色）。
+    /// 与 `PopopxHostSendReason.explanation` 同一个理由：返回 `String?`，所以查表走 `NSLocalizedString`。
     private var stripNote: String? {
         if let reason = hostSendReason { return reason.explanation }
         switch channel {
         case .smp:
             // 公网在、蓝牙也能直达时，说清 mesh 只是补发/兜底（模块 5 的 3 秒规则）。
             return model.eligibility.isMeshCapable && model.eligibility.networkConnected == true
-                ? "公网 3 秒未确认时同时经蓝牙补发"
+                ? NSLocalizedString("If the internet does not acknowledge within 3 seconds it is also sent over Bluetooth", comment: "composer channel strip")
                 : nil
         case .mesh:
-            return "无公网，这条将由蓝牙中继"
+            return NSLocalizedString("No internet connection; this message will be relayed over Bluetooth", comment: "composer channel strip")
         case .undetermined:
             return nil
         }
@@ -743,7 +764,7 @@ struct PopopxInputBar: View {
         HStack(alignment: .bottom, spacing: PopopxMetrics.spaceXS) {
             PopopxBarKey(
                 symbol: isVoiceMode ? "keyboard" : "mic",
-                label: isVoiceMode ? "切回键盘输入" : "切换语音输入",
+                label: isVoiceMode ? "Switch back to keyboard" : "Switch to voice input",
                 active: isVoiceMode
             ) {
                 isVoiceMode.toggle()
@@ -760,7 +781,7 @@ struct PopopxInputBar: View {
 
             PopopxBarKey(
                 symbol: "face.smiling",
-                label: "表情",
+                label: "Emoji",
                 active: showsEmojiTray
             ) {
                 showsPlusPanel = false
@@ -771,7 +792,7 @@ struct PopopxInputBar: View {
 
             PopopxBarKey(
                 symbol: showsPlusPanel ? "xmark" : "plus",
-                label: showsPlusPanel ? "收起功能面板" : "更多功能",
+                label: showsPlusPanel ? "Hide functions" : "More functions",
                 active: showsPlusPanel
             ) {
                 showsEmojiTray = false
@@ -786,7 +807,9 @@ struct PopopxInputBar: View {
     }
 
     private var composerField: some View {
-        TextField(placeholder, text: $text, axis: .vertical)
+        // `placeholder` 是宿主递进来的 `String`，所以这里显式把它当键查一次；
+        // `TextField(_:text:axis:)` 的裸 `String` 重载不查表。
+        TextField(LocalizedStringKey(placeholder), text: $text, axis: .vertical)
             .font(PopopxType.body)
             .foregroundStyle(PopopxPalette.label)
             .lineLimit(1...Self.maxComposerLines)
@@ -804,14 +827,14 @@ struct PopopxInputBar: View {
                         lineWidth: PopopxMetrics.hairline
                     )
             )
-            .accessibilityLabel(placeholder)
+            .accessibilityLabel(Text(LocalizedStringKey(placeholder)))
             .accessibilityIdentifier("popopx.inputBar.textField")
     }
 
     /// 录音不归本条所有：这里只把"按住说话"这个面切换出来，并把按下这件事递出去。
     private var holdToTalkBar: some View {
         Button(action: onHoldToTalk) {
-            Text("按住 说话")
+            Text("Hold to talk")
                 .font(PopopxType.emphasis)
                 .foregroundStyle(PopopxPalette.label)
                 .frame(maxWidth: .infinity, minHeight: PopopxMetrics.minHitTarget)
@@ -819,7 +842,7 @@ struct PopopxInputBar: View {
                 .contentShape(RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl))
         }
         .buttonStyle(PopopxPressButtonStyle(feedback: .medium))
-        .accessibilityHint("交给宿主的录音链路；本输入条不拥有录音器")
+        .accessibilityHint(Text("Handed to the host's recording pipeline; this input bar does not own the recorder"))
     }
 
     private var sendKey: some View {
@@ -836,7 +859,7 @@ struct PopopxInputBar: View {
         .buttonStyle(PopopxPressButtonStyle(feedback: nil))
         .disabled(!canFire)
         .opacity(canFire ? 1 : 0.45)
-        .accessibilityLabel("发送")
+        .accessibilityLabel(Text("Send"))
         .accessibilityValue(sendAccessoryLabel)
         .accessibilityIdentifier("popopx.inputBar.sendButton")
     }
@@ -850,11 +873,12 @@ struct PopopxInputBar: View {
         }
     }
 
-    private var sendAccessoryLabel: String {
+    /// VoiceOver 的 value：发送键本身没有文字，通道只能靠这句话讲出来。
+    private var sendAccessoryLabel: LocalizedStringKey {
         switch channel {
-        case .smp: return "将由在线加密 SMP 发送"
-        case .mesh: return "将由厢语蓝牙发送"
-        case .undetermined: return "发送通道待定"
+        case .smp: return "Will be sent over online encryption · SMP"
+        case .mesh: return "Will be sent over the mesh Bluetooth channel"
+        case .undetermined: return "Send channel undetermined"
         }
     }
 
@@ -876,7 +900,7 @@ struct PopopxInputBar: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(PopopxPressButtonStyle(feedback: nil))
-                .accessibilityLabel("插入表情 \(glyph)")
+                .accessibilityLabel(Text("Insert emoji \(glyph)"))
             }
             Button {
                 if !text.isEmpty { text.removeLast() }
@@ -889,7 +913,7 @@ struct PopopxInputBar: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(PopopxPressButtonStyle(feedback: nil))
-            .accessibilityLabel("删除前一个字符")
+            .accessibilityLabel(Text("Delete the previous character"))
         }
         .padding(.top, PopopxMetrics.space2XS)
     }
@@ -957,7 +981,7 @@ struct PopopxInputBar: View {
 
             secureBlock
 
-            Text("阅后即焚、附件与引用不由蓝牙中继，仍按原样从公网发送。")
+            Text("Burn after reading, attachments and quotes are not relayed over Bluetooth - they are still sent over the internet, unchanged.")
                 .font(PopopxType.microTag)
                 .foregroundStyle(PopopxPalette.labelSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -966,9 +990,11 @@ struct PopopxInputBar: View {
     }
 
     @ViewBuilder private var disappearingBlock: some View {
+        // `PopopxCheckbox` 收的是 `String`（`Shared/Components/PopopxControls.swift:412`），
+        // 它内部的 `Text(title)` 不查表，所以键的解析必须发生在递进去之前。
         PopopxCheckbox(
-            "阅后即焚",
-            note: "开启后这条只走在线加密，不经蓝牙中继",
+            NSLocalizedString("Burn after reading", comment: "composer option"),
+            note: NSLocalizedString("When this is on the message goes only over online encryption, never relayed by Bluetooth", comment: "composer option"),
             isOn: disappearingSwitch
         )
         if let ttlSeconds {
@@ -976,7 +1002,7 @@ struct PopopxInputBar: View {
             PopopxDurationChips(
                 options: PopopxComposerRouting.durationOptions,
                 selectedSeconds: ttlSeconds,
-                label: "阅后即焚时长",
+                label: "Burn-after-reading duration",
                 onSelect: onTTLChange
             )
         }
@@ -986,15 +1012,15 @@ struct PopopxInputBar: View {
     /// 一个管服务器留多久，一个管屏幕留多久，而且这一条可以走蓝牙（发出去的是密文）。
     @ViewBuilder private var secureBlock: some View {
         PopopxCheckbox(
-            "绝密阅后即焚",
-            note: "正文以密文发送，对方需生物识别后才能查看；可走蓝牙中继（中继只存密文）",
+            NSLocalizedString("Top-secret burn after reading", comment: "composer option"),
+            note: NSLocalizedString("The text is sent as ciphertext; the recipient must pass biometrics to view it. Can be relayed over Bluetooth (relays store ciphertext only)", comment: "composer option"),
             isOn: secureSwitch
         )
         if let secureTTLSeconds {
             PopopxDurationChips(
                 options: PopopxSecureCopy.ttlOptions,
                 selectedSeconds: secureTTLSeconds,
-                label: "绝密消息在对方屏幕上的停留时长",
+                label: "How long the top-secret message stays on the recipient's screen",
                 onSelect: onSecureTTLChange
             )
         }
@@ -1071,7 +1097,8 @@ struct PopopxInputBar: View {
 /// 那两把颜色在这个产品里是传输通道的语义，不能被"面板开着"这种事借用。
 private struct PopopxBarKey: View {
     let symbol: String
-    let label: String
+    /// `LocalizedStringKey`：这一格只有图标，题字是给 VoiceOver 的，裸 `String` 不进本地化表。
+    let label: LocalizedStringKey
     let active: Bool
     let action: () -> Void
 

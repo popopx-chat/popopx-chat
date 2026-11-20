@@ -378,7 +378,7 @@ struct PopopxBadgePaywallView: View {
         return String(format: PopopxCommerceCopy.savePercentFormat, Int(percent.rounded()))
     }
 
-    /// 五条利益点，每条都对应一个本模块真做出来的东西：徽章胶囊（`PopopxBadgeCapsuleView`）、
+    /// 五条利益点，每条都对应一个本模块真做出来的东西：徽章胶囊（`PopopxBadgeCapsule`）、
     /// 节点状态面板（`PopopxBadgeDetailSheet`）、礼品卡与红包（`PopopxCommerceCards` / 路由器）。
     /// 措辞红线两条：不出现任何 VPN/代理词汇，也**不再出现任何未落地的收益**
     /// （"高并发优先调度""动态轮换 IP""1GB 专属大文件"三项在 2026-11-19 的产品裁定里撤下——

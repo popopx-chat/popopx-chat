@@ -356,20 +356,20 @@ enum PopopxGuardObject: String, Hashable, Sendable, CaseIterable {
 /// 载荷/窗口共用的短句。集中一处，避免卡片、toast、回执三处各说一个版本。
 enum PopopxSecureCopy {
     static func duration(_ seconds: Int) -> String {
-        if seconds % 86_400 == 0 { return "\(seconds / 86_400) 天" }
-        if seconds % 3_600 == 0 { return "\(seconds / 3_600) 小时" }
-        if seconds % 60 == 0 { return "\(seconds / 60) 分钟" }
-        return "\(seconds) 秒"
+        if seconds % 86_400 == 0 { return String(format: NSLocalizedString("%lld days", comment: "secure duration"), seconds / 86_400) }
+        if seconds % 3_600 == 0 { return String(format: NSLocalizedString("%lld hours", comment: "secure duration"), seconds / 3_600) }
+        if seconds % 60 == 0 { return String(format: NSLocalizedString("%lld minutes", comment: "secure duration"), seconds / 60) }
+        return String(format: NSLocalizedString("%lld seconds", comment: "secure duration"), seconds)
     }
 
     /// 绝密档的可选时长。不复用 `PopopxComposerRouting.durationOptions`（30 秒/1 分钟/5 分钟）：
     /// 那一档是"阅后即焚"，语义是消息多久从**服务器**消失；这一档是明文允许停在**屏幕上**多久，
     /// 借同一组值会让两个时长在用户心里变成一个。
     static let ttlOptions: [PopopxSecureTTLOption] = [
-        .init(seconds: 15, title: "15 秒"),
-        .init(seconds: 30, title: "30 秒"),
-        .init(seconds: 60, title: "1 分钟"),
-        .init(seconds: 300, title: "5 分钟")
+        .init(seconds: 15, title: "15 seconds"),
+        .init(seconds: 30, title: "30 seconds"),
+        .init(seconds: 60, title: "1 minute"),
+        .init(seconds: 300, title: "5 minutes")
     ]
 
     /// 刚打开「绝密」那一档时的默认停留时长：60 秒。

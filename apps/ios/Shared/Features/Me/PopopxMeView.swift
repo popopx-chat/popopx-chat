@@ -23,14 +23,14 @@
 //  4. 这次重排只动"行住在哪个卡片里"，没有删掉任何一条既有路由：身份管理与主页名片码从行升格为
 //     名片头的整行热区与二维码微标，其余行全部落在上面四组之中。「充值算力点」仍然是一枚无条件
 //     入口（理由见下面 `badgeSheet` 那条注释）。2026-11-20 删掉的两行各有去处：「添加朋友」——
-//     消息栏右上角「+」挂着同一个 `PopopxAddFriendView`（ChatsListView.swift:271-292）；「离线组网」
+//     消息栏右上角「+」挂着同一个 `PopopxAddFriendView`（ChatsListView.swift:296-298）；「离线组网」
 //     一行——厢语页设置中心，见决定 3。
 //     真机走查 三.1/三.4 又动了常用组：「通知」与「版本」两行删掉，各有去处（全部设置 → 通知，
 //     与 `PopopxHelpView` 里的版本页）；「外观与图标」「显示语言」「帮助与关于」三行从「全部设置」
 //     那一二级页升上来。动的仍然只是"行住在哪个卡片里"，目的地一个都没新造，也没留第二个入口。
 //  5. 徽章那一行的三条出口不另立判据：它 switch 的是 `phase.capsuleState` 这个共享枚举本身，
-//     与顶栏胶囊 `PopopxBadgeCapsuleView.route()` 读同一份状态、同一套分支，将来加一档会在这里
-//     编译报错，而不是两处各说一套。
+//     与顶栏入口 `PopopxBadgeHeaderEntry`（`PopopxBadgeSheet.entry(for:)`）读同一份状态、同一套分支，
+//     将来加一档会在这里编译报错，而不是两处各说一套。
 //
 //  配色、字号、圆角、间距一律取 Shared/Theme/PopopxTheme.swift 的 token；控件只用
 //  Shared/Components 里已有的原子库，没有新造按钮、开关或输入框（`PopopxIconBadge` 在原子库里
@@ -130,7 +130,7 @@ struct PopopxMeView: View {
         .navigationTitle(Copy.pageTitle)
         // 「我」那一行大标题不再占首屏（真机第 6 轮追加项，微信式留白）：系统标题栏整条隐藏，
         // 标题本身仍然声明着，VoiceOver 报得出这一页叫什么，只是不再画出一行。
-        // 口径照消息页 `ChatsListView.swift:252`：隐藏只作用于栈的这一页，二级页自己声明可见 ——
+        // 口径照消息页 `ChatsListView.swift:256`：隐藏只作用于栈的这一页，二级页自己声明可见 ——
         // 全部行链都过 `PopopxMeRowLink`，那里补了一处 `.toolbar(.visible, for: .navigationBar)`
         // 覆盖它推送的每一页；`showsCreateIdentity` 那一跳另有一处（:152 下面）。
         .toolbar(.hidden, for: .navigationBar)
@@ -337,14 +337,10 @@ struct PopopxMeView: View {
         }
     }
 
-    /// 与顶栏胶囊 `route()` 同一份判据：分支挂在共享枚举 `PopopxBadgeCapsuleState` 上，
-    /// 而不是挂在"我以为的三态"上。胶囊将来加一档，这里就编译不过去。
+    /// 判据只有 `PopopxBadgeSheet.entry(for:)` 这一份，顶栏胶囊走的也是它：三态 → 三出口在这里
+    /// 收口，胶囊将来加一档，改那个函数会连带这里编译报错，而不是两处各说一套。
     private func routeBadge() {
-        switch badge.phase.capsuleState {
-        case .dormant: badgeSheet = .paywall
-        case .trialPulsing: badgeSheet = .trial
-        case .activeLit: badgeSheet = .detail
-        }
+        badgeSheet = PopopxBadgeSheet.entry(for: badge.phase.capsuleState)
     }
 
     // MARK: 组 2 · 加密主页与卡包
@@ -411,7 +407,7 @@ struct PopopxMeView: View {
     private var generalEntries: some View {
         PopopxSectionCard(Copy.groupGeneral) {
             // 「添加朋友」这一行原先在这里，2026-11-20 删：消息栏右上角「+」已经挂着同一个
-            // `PopopxAddFriendView`（ChatsListView.swift:271-292），同一件事不该在两处各有一个入口。
+            // `PopopxAddFriendView`（ChatsListView.swift:296-298），同一件事不该在两处各有一个入口。
             // 真机第 6 轮二.1：聊天偏好、外观与图标、显示语言三行落回「全部设置」，帮助与关于
             // 升成整页最后一张卡（下面 `helpEntries`）。这一组于是只剩一件事——进全部设置。
             // 三行的目的地与装饰（`PreferencesView`/`AppearanceSettings`/`PopopxDisplayLanguageView`
@@ -1051,7 +1047,7 @@ private struct PopopxMeRowLink<Destination: View>: View {
     var body: some View {
         NavigationLink {
             // 主页把整条标题栏收掉了（微信式首屏），而"隐藏"会随这一层的工具条偏好渗进推进去的页面 ——
-            // 消息页同一件事的做法是在目的地自己声明可见（`ChatsListView.swift:414`）。全部行链都过
+            // 消息页同一件事的做法是在目的地自己声明可见（`ChatsListView.swift:408`）。全部行链都过
             // 这里，所以一句就够：子页面各自的 `.navigationTitle` 照旧生效，返回按钮一个不少。
             destination()
                 .toolbar(.visible, for: .navigationBar)

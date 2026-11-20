@@ -17,7 +17,7 @@
 //
 //  ### 动效只在"真的有东西在变"时出现
 //  - 体验态呼吸：它是要被注意到的临时态，Reduce Motion 下彻底静止（判据同 `PopopxStatusPill.restart()`，
-//    `PopopxTelemetryHeader.swift:281-288`）；
+//    `PopopxTelemetryHeader.swift:333-339`）；
 //  - 点亮态旋转：只在**本机计数自增**那一次转满 360°（`onChange(of: rotationIndex)`），不做常驻自转 ——
 //    一个永远在转的图标在无障碍里等于噪音，而"轮换"本身是离散事件，转一次刚好对上一次事实。
 //
@@ -99,6 +99,10 @@ struct PopopxBadgeCapsule: View {
             // 深色模式下这圈同色光晕正是"已点亮"的主要线索。
             .shadow(color: isLive ? tint.opacity(0.35) : .clear, radius: PopopxMetrics.space2XS)
             .contentShape(.capsule)
+            // 同 `PopopxStatusPill` 带字档那一处：胶囊的宽不能被夹到小于里面的色片 + 短句，
+            // 否则 1.5pt 的激活描边连同光晕一起压成横椭圆。compact 档内容 40 加上 `minWidth` 48，
+            // 夹出来的仍是 48 正方，所以这一行对顶栏那笔 393pt 的预算没有影响。
+            .fixedSize(horizontal: true, vertical: false)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(accessibilityText)
@@ -109,7 +113,7 @@ struct PopopxBadgeCapsule: View {
     // MARK: 两段式（体验态 / 点亮态的购买出口）
 
     /// 只有**宽屏带字那一档**才加这一段：顶栏在 393pt 上恒定退到只留符号的 48pt
-    /// （实测判据见 `Shared/Navigation/PopopxTelemetryHeader.swift:562-565`），给 compact 档
+    /// （实测判据见 `Shared/Navigation/PopopxTelemetryHeader.swift:582-583`），给 compact 档
     /// 加宽就是去动那行已经溢出过的边界。所以 iPhone 上体验态/点亮态的购买出口落在
     /// 弹窗与详情页那两处（`PopopxTrialWelcomeModal` / `PopopxBadgeDetailSheet`），不是这里。
     /// 休眠态也不给：整枚胶囊点下去本来就是付费墙，再挂一段"买"是重复入口。
@@ -297,34 +301,35 @@ struct PopopxBadgeCapsule: View {
 
 // MARK: - 挂载件
 
-/// 读运行时单例、并把三态接到三条出口的那一层。顶栏（`PopopxTelemetryHeader`）与"我的"页都用它，
-/// 于是入口判据全国内只有一份。
-struct PopopxBadgeCapsuleView: View {
-    /// 顶栏在窄屏传 true：只留符号，中文不截断。
-    var compact: Bool = false
-
+/// 顶栏那一枚：两档视觉照旧由 `ViewThatFits` 选，档位和 sheet 载体都挂在候选**外面**。
+///
+/// 真机第 9 轮「点头部徽章、再点『看徽章详情』没反应」有两层成因：
+/// 1. 上一版把自带 `.popopxBadgeSheets` 的包装件（`PopopxBadgeCapsuleView`，本轮删掉）整个放进
+///    `ViewThatFits` 的两档候选里，于是候选一和候选二各有一份呈现层，`sheet` 写到哪一份由布局结果决定。
+/// 2. 就算只留一份，这一份和宿主页（`ChatsListView` 的 `.popopxBadgeSheets($badgeSheet)`）也是
+///    **同一条链上的两张 sheet**：体验弹窗由宿主抬起时，头部这一份再写 `.detail` 属于 sheet 套 sheet，
+///    系统静丢掉第二次呈现，看起来就是"点了没反应"。
+/// 所以载体不挂在这里，`sheet` 由宿主递进来：全页只有宿主那一份 `.popopxBadgeSheets`，
+/// 三态之间换面板永远只是改同一个值。
+struct PopopxBadgeHeaderEntry: View {
     @State private var badge = PopopxBadgeManager.shared
-    @State private var sheet: PopopxBadgeSheet?
+    @Binding var sheet: PopopxBadgeSheet?
 
     var body: some View {
+        ViewThatFits(in: .horizontal) {
+            capsule(compact: false)
+            capsule(compact: true)
+        }
+    }
+
+    private func capsule(compact: Bool) -> some View {
         PopopxBadgeCapsule(
             phase: badge.phase,
             rotationIndex: badge.record?.rotationIndex ?? 0,
             compact: compact,
-            // 第二条出口。挂在同一个 `sheet` 载体上换 item，所以不是 sheet 套 sheet：
-            // 体验弹窗与详情页里再点购买，走的也是这一份状态（见 `PopopxBadgeSheetHost`）。
             buyAction: { sheet = .paywall }
         ) {
-            route()
-        }
-        .popopxBadgeSheets($sheet)
-    }
-
-    private func route() {
-        switch badge.phase.capsuleState {
-        case .dormant: sheet = .paywall
-        case .trialPulsing: sheet = .trial
-        case .activeLit: sheet = .detail
+            sheet = PopopxBadgeSheet.entry(for: badge.phase.capsuleState)
         }
     }
 }
@@ -343,6 +348,15 @@ enum PopopxBadgeSheet: String, Identifiable {
     case detail
 
     var id: String { rawValue }
+
+    /// 三态 → 三出口的唯一判据：顶栏与"我的"页都读这一份，不再各自 switch。
+    static func entry(for state: PopopxBadgeCapsuleState) -> PopopxBadgeSheet {
+        switch state {
+        case .dormant: .paywall
+        case .trialPulsing: .trial
+        case .activeLit: .detail
+        }
+    }
 }
 
 /// 载体内容：`detents` 照原来那三张各档不动（付费墙和礼品卡一样吃 `.large`）。
@@ -370,7 +384,9 @@ struct PopopxBadgeSheetHost: View {
 }
 
 extension View {
-    /// 把徽章三条出口挂到调用方：宿主只需要一份 `PopopxBadgeSheet?` 状态。
+    /// 把徽章三条出口挂到调用方：宿主只需要一份 `PopopxBadgeSheet?` 状态，
+    /// 而且**全页只许挂一次** —— `PopopxBadgeHeaderEntry` 用的就是宿主那一份的绑定，
+    /// 顶栏再挂一份就成了同一条链上的两张 sheet（第二轮成因，见上面该件的说明）。
     /// 参数不能叫 `sheet`——那会盖掉 `View.sheet(item:)` 本身，编译器只会说"这不是函数"。
     func popopxBadgeSheets(_ badgeSheet: Binding<PopopxBadgeSheet?>) -> some View {
         sheet(item: badgeSheet) { _ in PopopxBadgeSheetHost(sheet: badgeSheet) }

@@ -5,7 +5,7 @@
 //  【第四阶段】设置树的 popopx 版本：替换 Shared/Views/UserSettings/SettingsView.swift:305。
 //  输入面与它逐字对齐（`showProgress`、`versionText`、`colorScheme`/`dismiss`/`ChatModel`/
 //  `SceneDelegate` 环境），所以两处调用点各改一个词就能挂载：
-//  Shared/Features/Me/PopopxMeView.swift:420 与 Shared/Views/ChatList/ChatListView.swift:112。
+//  Shared/Features/Me/PopopxMeView.swift:418 与 Shared/Views/ChatList/ChatListView.swift:112。
 //
 //  四条结构决定：
 //
@@ -740,7 +740,7 @@ struct PopopxHelpView: View {
         }
     }
 
-    /// 外部链接就是系统浏览器的事（口径同 PopopxCabinView.swift:2253 与
+    /// 外部链接就是系统浏览器的事（口径同 PopopxCabinView.swift:2318 的 `UIApplication.shared.open` 与
     /// PopopxLocationPickerSheet.swift:763 的 `UIApplication.shared.open`）。
     private func openRepository() {
         PopopxHaptics.impact(.light)

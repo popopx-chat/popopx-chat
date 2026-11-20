@@ -91,7 +91,7 @@ private enum PopopxContactsRoute: Hashable {
     case groups
     case channels
     /// 「加入频道」：落在既有的扫描／粘贴链接页（同一页在「消息」栏右上角的 + 里也已挂载，
-    /// `ChatsListView.swift:266-267`）。频道链接走的仍是 app 原有的 `planAndConnect` →
+    /// `ChatsListView.swift:270-275`）。频道链接走的仍是 app 原有的 `planAndConnect` →
     /// `apiConnectPlan` → `.groupLink` 那一条真路径（`NewChatView.swift:1320`、`:1522`）。
     case joinChannel
 }
@@ -182,7 +182,7 @@ struct PopopxContactsView: View {
                 case .channels:
                     PopopxChannelsPage()
                 case .joinChannel:
-                    // 与「消息」栏 + 菜单里「扫一扫」同一页、同一挂载写法（`ChatsListView.swift:266-272`），
+                    // 与「消息」栏 + 菜单里「扫一扫」同一页、同一挂载写法（`ChatsListView.swift:270-275`），
                     // 差别只在标题：这一枚的来意是"用链接或二维码加入一个频道"，标题要说清两件事。
                     NewChatView(selection: .connect, showQRCodeScanner: true)
                         .navigationTitle(Copy.joinChannelPageTitle)
@@ -1174,7 +1174,7 @@ private func isPopopxChannel(_ chat: Chat) -> Bool {
 @MainActor private struct PopopxChannelsPage: View {
     @EnvironmentObject private var chatModel: ChatModel
 
-    /// 预览开关与「消息」栏那一格是同一格（`ChatsListView.swift:142`）：用户关掉消息预览是为了
+    /// 预览开关与「消息」栏那一格是同一格（`ChatsListView.swift:146`）：用户关掉消息预览是为了
     /// "不在列表里读内容"，这一页不能绕过它自己去读一条，所以关掉时整行不给活动那一行。
     @AppStorage(DEFAULT_PRIVACY_SHOW_CHAT_PREVIEWS) private var showChatPreviews = true
 
@@ -1215,7 +1215,7 @@ private func isPopopxChannel(_ chat: Chat) -> Bool {
         }
     }
 
-    /// 顺序沿用 `chatModel.chats` 本身，与「消息」栏同一口径（`ChatsListView.swift:420` 也没另起一套排序）。
+    /// 顺序沿用 `chatModel.chats` 本身，与「消息」栏同一口径（`ChatsListView.swift:418` 也没另起一套排序）。
     private var channels: [Chat] { chatModel.chats.filter(isPopopxChannel) }
 }
 

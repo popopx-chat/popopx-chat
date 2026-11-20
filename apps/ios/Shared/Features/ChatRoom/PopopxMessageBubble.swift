@@ -30,7 +30,7 @@
 //  - 实底气泡里的角标退化成"同一支墨"，绝不在靛底上画靛、青底上画青
 //    （§1.1"同一条消息行、同一个气泡内不得混用紫与青"）。
 //  - `mesh` 在卡面上只有 2.98:1，所以卡面上的青色**文字/图形**一律 `meshInk`（6.03:1）；
-//    `mesh` 实底只用来做那块带 `onMesh` 数字的跳数贴片（§1.2 表 + PopopxCabinView.swift:883-895 同一画法）。
+//    `mesh` 实底只用来做那块带 `onMesh` 数字的跳数贴片（§1.2 表 + PopopxCabinView.swift:1530-1542 同一画法）。
 //  - `onBrand` 在 Dark 会翻成近黑（`#7D7AFF` 上白字只有 3.44:1，PopopxTheme.swift:66-71），所以本文件
 //    从不假设"品牌底上放白字"。
 //  - 红只出现在 SMP 投递失败那一枚符号上，取自现网同一判据（`CIItemStatus.statusIcon` 在这几个状态上
@@ -100,7 +100,7 @@ enum PopopxBubbleQueueReason: Hashable {
     case meshRefused
     case awaitingContactUpgrade
     /// 跳数超出 `PopopxMeshConfig.fragmentRelayTtlCap`，或发方这行所绑的邻居已经静默过窗：
-    /// 那串数字已经不能被这张网格承诺，退回灰时钟。判据同 ChatsListView.swift:418-419。
+    /// 那串数字已经不能被这张网格承诺，退回灰时钟。判据同 ChatsListView.swift:464-466。
     case hopCountUnverifiable(hops: Int, cap: Int)
     /// 模块 5 以后新增的档位，或者 host 没给出原因。
     case unknown
@@ -624,7 +624,7 @@ struct PopopxBadge: View {
     }
 
     /// 青色角标：符号走 `meshInk`（卡面上 `mesh` 只有 2.98:1，文字必须是 ink），
-    /// 数字走一块 `mesh` 贴片 + `onMesh`——和 `PopopxCabinHopBadge`（PopopxCabinView.swift:883-895）
+    /// 数字走一块 `mesh` 贴片 + `onMesh`——和 `PopopxCabinHopBadge`（PopopxCabinView.swift:1530-1542）
     /// 同一套画法，0 跳也照样把数字写出来（"0 跳 · 直连"）。
     @ViewBuilder private func meshBadge(_ hops: Int) -> some View {
         let words = PopopxBubbleCopy.hopsWords(hops)
@@ -690,7 +690,7 @@ struct PopopxBubbleRowAddress: Hashable {
     /// 这条消息是不是"发出去的"。发方才需要重新核验邻居跳数。
     var sent: Bool
     /// 是不是一条真的消息。系统行、本机笔记、读不懂的内容 = false，不给任何通道
-    /// （同 ChatsListView.swift:404-406 对 `.local/.contactRequest/.invalidJSON` 给 `.none` 的判据）。
+    /// （同 ChatsListView.swift:451-453 对 `.local/.contactRequest/.invalidJSON` 给 `.none` 的判据）。
     var isMessage: Bool = true
 }
 
@@ -793,7 +793,7 @@ enum PopopxBubbleTransportResolver {
         }
         sources.channels = channels
 
-        // 保险丝关着时，绑定表里的键一条都不作数（现网同一判据：ChatsListView.swift:412），
+        // 保险丝关着时，绑定表里的键一条都不作数（现网同一判据：ChatsListView.swift:458-459），
         // 所以那三次 hop 根本不发起。
         guard fuseOn else { return sources }
 
@@ -926,7 +926,7 @@ enum PopopxBubbleCopy {
         hops == 0 ? "厢语离线，直连（0 跳）" : "厢语离线，\(hops) 跳"
     }
 
-    /// 跳数徽章永远带数字（§1.4 第 3 条）；0 跳把"直连"一起写出来，同 PopopxCabinView.swift:1674。
+    /// 跳数徽章永远带数字（§1.4 第 3 条）；0 跳把"直连"一起写出来，同 PopopxCabinView.swift:2625。
     static func hopsWords(_ hops: Int) -> String { hops == 0 ? "0 跳 · 直连" : "\(hops) 跳" }
 
     static func awaitingRelay(_ reason: PopopxBubbleQueueReason) -> String { reason.words }

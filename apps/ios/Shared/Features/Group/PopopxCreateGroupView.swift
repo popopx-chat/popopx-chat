@@ -5,7 +5,7 @@
 //  「创建群组」的重写版，替代 Shared/Views/NewChat/AddGroupView.swift:13。
 //
 //  挂载点没动：两处仍然是零参构造（Shared/Views/NewChat/NewChatMenuButton.swift:93、
-//  Shared/Features/Chats/ChatsListView.swift:233），本类型因此保留全默认值的合成 `init()`，
+//  Shared/Features/Chats/ChatsListView.swift:264），本类型因此保留全默认值的合成 `init()`，
 //  并且照旧从环境里取 `ChatModel`（Shared/Model/ChatModel.swift:387、:491）。`ChatModel` 与
 //  旧主题对象都由 app 根注入，本文件不自己造第二个模型。
 //

@@ -5,7 +5,7 @@
 //  ### 这个面板只对一件事负责：把资格讲清楚，然后交出去
 //  领或不领的唯一判据是 `PopopxBadgeManager.canClaimPioneerTrial`（`record == nil` 且 Keychain 里没有
 //  `.trialGuard`）。没有资格时这里**不给一个只会报错的按钮**（本仓的既有规矩：能力未接线的入口一律禁用或
-//  整条不出现，同 `PopopxPlusMenu` 对三个闭包的处理，PopopxTelemetryHeader.swift:373-390），
+//  整条不出现，同 `PopopxPlusMenu` 对三个闭包的处理，PopopxTelemetryHeader.swift:425-444），
 //  而是把"为什么不能领"说出来。
 //
 //  ### 三行诚实边界
@@ -21,7 +21,7 @@
 //
 //  ### 第二条出口：档位与价格（`onOpenPaywall`）
 //  三态都在免费那一步下面常驻一个 `.secondary` 按钮进付费墙。这条腿的存在理由不是"多一个入口"：
-//  顶栏那枚胶囊在 iPhone 上恒定制（只留符号，见 `PopopxBadgeCapsuleView` 的 `showsBuySegment`），
+//  顶栏那枚胶囊在 iPhone 上恒定制（只留符号，见 `PopopxBadgeCapsule` 的 `showsBuySegment`），
 //  体验态里想买东西的用户如果只能靠猜，就会在这页读到"3 天后回落免费节点"却找不到下一步。
 //  换面板走的是宿主那一份 `.sheet(item:)` 载体，不是第二张 sheet —— 所以不存在 sheet 套 sheet。
 //
