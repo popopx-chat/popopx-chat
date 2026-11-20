@@ -2,7 +2,7 @@
 //  PopopxMessageRouterTests.swift
 //  PopopxMeshKitTests
 //
-//  模块 5: 全向无缝切换与 SMP 重路由中枢. Every case is a routing *rule*, not a timing accident: the
+//  Module 5: the seamless all-direction switch and the SMP re-routing hub. Every case is a routing *rule*, not a timing accident: the
 //  3-second and 15-second windows are driven through `PopopxRoutingClock`, the public channel through a
 //  fake `PopopxSMPChatCore`, the radio through a fake `PopopxBluetoothJudging`, and connectivity
 //  through a fake `PopopxConnectivitySource` — so "no ACK inside smpAckTimeout" is proved in
@@ -13,7 +13,7 @@
 //  peer's single `PopopxMeshDeduplicator` entry is the only thing that makes two copies one message.
 //  A router that re-minted on retry would deliver everything twice and look entirely healthy doing it.
 //
-//  The fakes here are internal rather than private: 模块 6's tests mount a real router on the same
+//  The fakes here are internal rather than private: module 6's tests mount a real router on the same
 //  fixtures, and a second copy of six fakes would be two chances for them to disagree.
 //
 
@@ -74,8 +74,8 @@ struct FakeSMPError: Error, CustomStringConvertible {
     let description: String
 }
 
-/// The chat core, seen through 模块 2's widened seam. `hold` keeps the ACK from arriving, which is how
-/// "3 秒内没有 SMP 服务器 ACK" is produced without waiting three seconds.
+/// The chat core, seen through module 2's widened seam. `hold` keeps the ACK from arriving, which is how
+/// "no SMP server ACK inside 3 seconds" is produced without waiting three seconds.
 actor FakeSMPCore: PopopxSMPChatCore {
     static let foreignMessageId = "ffffffff-ffff-ffff-ffff-ffffffffffff"
 
@@ -89,10 +89,10 @@ actor FakeSMPCore: PopopxSMPChatCore {
     func setHold(_ hold: Latch?) { self.hold = hold }
     func setRefuses(_ flag: Bool) { refuses = flag }
     func setWrongIdInAck(_ flag: Bool) { wrongIdInAck = flag }
-    /// The row ids the host's database would give these messages — what 裁定 1's ack field carries.
+    /// The row ids the host's database would give these messages — what ruling 1's ack field carries.
     func setAppChatItemIDs(_ ids: [String: Int64]) { appChatItemIDs = ids }
 
-    /// 模块 2's two methods are part of the same door; the router must never ring them.
+    /// Module 2's two methods are part of the same door; the router must never ring them.
     func createOfflineInvite(incognito: Bool) async throws -> PopopxOfflineInvite {
         pairingCalls += 1
         throw FakeSMPError(description: "the router must not start a pairing")
@@ -183,7 +183,7 @@ actor FakeConnectivity: PopopxConnectivitySource {
     }
 }
 
-/// 模块 4's three questions, answered from a dictionary. `reachabilityAsks` is what proves the router
+/// Module 4's three questions, answered from a dictionary. `reachabilityAsks` is what proves the router
 /// asked with `peerReachabilityTimeout` rather than with some other number.
 actor FakeBluetoothJudge: PopopxBluetoothJudging {
     private var radio: PopopxBluetoothState = .poweredOn
@@ -207,7 +207,7 @@ actor FakeBluetoothJudge: PopopxBluetoothJudging {
         if handler != nil { installCount += 1 }
     }
 
-    /// The callback 模块 4 fires when no `BLE_ACK` arrives inside `bleAckTimeout`.
+    /// The callback module 4 fires when no `BLE_ACK` arrives inside `bleAckTimeout`.
     func deliverFailure(_ failure: PopopxBluetoothDeliveryFailure) async {
         await handler?(failure)
     }
@@ -431,7 +431,7 @@ func makeRouterParts(
     return (router, parts)
 }
 
-/// Binds a mesh key to a pending connection and then upgrades it, which is the only way 模块 1's table
+/// Binds a mesh key to a pending connection and then upgrades it, which is the only way module 1's table
 /// can hold "this contactId is also this radio".
 func bindAsContact(
     _ store: IdentityMappingStore,
@@ -444,7 +444,7 @@ func bindAsContact(
     #expect(moved == 1)
 }
 
-/// 模块 4's failure value: no BLE_ACK inside `bleAckTimeout`.
+/// Module 4's failure value: no BLE_ACK inside `bleAckTimeout`.
 func meshFailure(messageId: String, peerHex: String? = nil) -> PopopxBluetoothDeliveryFailure {
     PopopxBluetoothDeliveryFailure(
         messageId: messageId,
@@ -467,9 +467,9 @@ func settled(_ check: () async -> Bool) async throws {
 
 @Suite(.serialized)
 struct PopopxMessageRouterTests {
-    // MARK: 场景 A: 有网 → 断网 / 弱网降级
+    // MARK: Scenario A: online → offline / weak-network downgrade
 
-    @Test("场景 A: online and bound goes over SMP and never touches the radio")
+    @Test("Scenario A: online and bound goes over SMP and never touches the radio")
     func onlineBoundUsesSMP() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -494,7 +494,7 @@ struct PopopxMessageRouterTests {
         #expect(await router.currentStatus() == .smpOnline)
     }
 
-    @Test("场景 A: offline and the peer is on the radio falls back to the mesh")
+    @Test("Scenario A: offline and the peer is on the radio falls back to the mesh")
     func offlineFallsBackToMesh() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -505,7 +505,7 @@ struct PopopxMessageRouterTests {
         defer { parts.openLatches() }
 
         let routed = await router.send(
-            PopopxOutboundMessage(messageId: "id-mesh", target: .contactId(78), text: "靠近了")
+            PopopxOutboundMessage(messageId: "id-mesh", target: .contactId(78), text: "moved closer")
         )
         #expect(routed.outcome == .meshSent(peerMeshPublicKeyHex: hex))
         #expect(await parts.outbound.sentMessageIds == ["id-mesh"])
@@ -513,7 +513,7 @@ struct PopopxMessageRouterTests {
         #expect(await router.currentStatus() == .meshOnly(peerMeshPublicKeyHex: hex))
     }
 
-    @Test("场景 A rule 1: no SMP ACK in 3s and a reachable peer puts the same id on the mesh too")
+    @Test("Scenario A rule 1: no SMP ACK in 3s and a reachable peer puts the same id on the mesh too")
     func slowSMPAddsParallelMesh() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -524,7 +524,7 @@ struct PopopxMessageRouterTests {
         defer { parts.openLatches() }
 
         let routed = await router.send(
-            PopopxOutboundMessage(messageId: "id-parallel", target: .contactId(79), text: "弱网")
+            PopopxOutboundMessage(messageId: "id-parallel", target: .contactId(79), text: "weak network")
         )
         #expect(
             routed.outcome == .smpUnacknowledgedMeshParallel(contactId: 79, peerMeshPublicKeyHex: hex),
@@ -537,7 +537,7 @@ struct PopopxMessageRouterTests {
         #expect(await router.pendingMessageCount == 0, "a parallel send is not a failure")
     }
 
-    @Test("场景 A: a slow SMP with no mesh to add is reported, not swallowed")
+    @Test("Scenario A: a slow SMP with no mesh to add is reported, not swallowed")
     func slowSMPWithoutMeshStaysUnacknowledged() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -549,14 +549,14 @@ struct PopopxMessageRouterTests {
         defer { parts.openLatches() }
 
         let routed = await router.send(
-            PopopxOutboundMessage(messageId: "id-slow", target: .contactId(80), text: "只有公网")
+            PopopxOutboundMessage(messageId: "id-slow", target: .contactId(80), text: "public network only")
         )
         #expect(routed.outcome == .smpUnacknowledgedNoMesh(contactId: 80))
         #expect(routed.bluetooth == .peerOutOfRange(peerMeshPublicKeyHex: hex))
         #expect(await parts.outbound.sent.isEmpty)
     }
 
-    @Test("场景 A: an ACK naming a different id is not an ACK")
+    @Test("Scenario A: an ACK naming a different id is not an ACK")
     func ackWithForeignIdIsNoAck() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -573,7 +573,7 @@ struct PopopxMessageRouterTests {
         defer { parts.openLatches() }
 
         let routed = await router.send(
-            PopopxOutboundMessage(messageId: "id-wrong", target: .contactId(81), text: "串号了")
+            PopopxOutboundMessage(messageId: "id-wrong", target: .contactId(81), text: "the wrong id")
         )
         #expect(routed.outcome == .smpUnacknowledgedMeshParallel(contactId: 81, peerMeshPublicKeyHex: hex))
         // The late ACK names somebody else's message: it cannot deliver ours, and must not queue it.
@@ -581,9 +581,9 @@ struct PopopxMessageRouterTests {
         #expect(await parts.core.sentMessageIds == ["id-wrong"])
     }
 
-    // MARK: 场景 B 事前预判
+    // MARK: Scenario B pre-send prediction
 
-    @Test("事前预判: a peer silent past peerReachabilityTimeout skips Bluetooth")
+    @Test("Pre-send prediction: a peer silent past peerReachabilityTimeout skips Bluetooth")
     func preJudgeSkipsOutOfRangePeer() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -594,16 +594,16 @@ struct PopopxMessageRouterTests {
         defer { parts.openLatches() }
 
         let routed = await router.send(
-            PopopxOutboundMessage(messageId: "id-silent", target: .contactId(88), text: "超出范围")
+            PopopxOutboundMessage(messageId: "id-silent", target: .contactId(88), text: "out of range")
         )
         #expect(routed.outcome == .smpAcknowledged(contactId: 88))
         #expect(routed.bluetooth == .peerOutOfRange(peerMeshPublicKeyHex: hex))
-        #expect(await parts.outbound.sent.isEmpty, "15 秒无响应的对方不能占用发送窗口")
+        #expect(await parts.outbound.sent.isEmpty, "a peer silent for 15 seconds cannot occupy the send window")
         #expect(await parts.judge.lastAskedTimeout == PopopxMeshConfig.default.peerReachabilityTimeout)
         #expect(await parts.judge.askedKeys == [hex])
     }
 
-    @Test("事前预判: our own radio off skips Bluetooth")
+    @Test("Pre-send prediction: our own radio off skips Bluetooth")
     func preJudgeSkipsWhenRadioIsOff() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -620,7 +620,7 @@ struct PopopxMessageRouterTests {
         defer { parts.openLatches() }
 
         let routed = await router.send(
-            PopopxOutboundMessage(messageId: "id-off", target: .contactId(89), text: "蓝牙关了")
+            PopopxOutboundMessage(messageId: "id-off", target: .contactId(89), text: "Bluetooth is off")
         )
         #expect(routed.outcome == .smpAcknowledged(contactId: 89))
         #expect(routed.bluetooth == .radioUnavailable(.poweredOff))
@@ -628,7 +628,7 @@ struct PopopxMessageRouterTests {
         #expect(await parts.outbound.sent.isEmpty)
     }
 
-    @Test("事前预判: an unknown mesh key is not bound, so there is no radio to predict about")
+    @Test("Pre-send prediction: an unknown mesh key is not bound, so there is no radio to predict about")
     func preJudgeHasNothingToPredictForAStranger() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -637,16 +637,16 @@ struct PopopxMessageRouterTests {
         defer { parts.openLatches() }
 
         let routed = await router.send(
-            PopopxOutboundMessage(messageId: "id-unknown", target: .meshPublicKeyHex(meshTestHex("bb03")), text: "陌生人")
+            PopopxOutboundMessage(messageId: "id-unknown", target: .meshPublicKeyHex(meshTestHex("bb03")), text: "stranger")
         )
         #expect(routed.bluetooth == .notBound)
         #expect(await parts.judge.askedKeys.isEmpty)
         #expect(routed.outcome == .refusedUnboundStranger(peerMeshPublicKeyHex: nil))
     }
 
-    // MARK: 场景 B 事中: onBluetoothDeliveryFailed
+    // MARK: Scenario B in flight: onBluetoothDeliveryFailed
 
-    @Test("事中超时重路由: a delivery failure re-sends over SMP with the original messageId")
+    @Test("In-flight timeout re-routing: a delivery failure re-sends over SMP with the original messageId")
     func deliveryFailureReroutesKeepingID() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -658,7 +658,7 @@ struct PopopxMessageRouterTests {
         defer { parts.openLatches() }
 
         let routed = await router.send(
-            PopopxOutboundMessage(messageId: "id-ble", target: .contactId(99), text: "先蓝牙")
+            PopopxOutboundMessage(messageId: "id-ble", target: .contactId(99), text: "Bluetooth first")
         )
         #expect(routed.outcome == .meshSent(peerMeshPublicKeyHex: hex))
         #expect(await parts.core.requests.isEmpty)
@@ -668,14 +668,14 @@ struct PopopxMessageRouterTests {
         let outcome = await router.onBluetoothDeliveryFailed(messageId: "id-ble", peerMeshKey: hex)
         #expect(outcome == .smpAcknowledged(contactId: 99))
         let requests = await parts.core.requests
-        #expect(requests.map(\.messageId) == ["id-ble"], "重路由必须保持原 messageId")
-        #expect(requests.map(\.text) == ["先蓝牙"])
+        #expect(requests.map(\.messageId) == ["id-ble"], "re-routing must keep the original messageId")
+        #expect(requests.map(\.text) == ["Bluetooth first"])
         #expect(requests.map(\.contactId) == [99])
-        #expect(await parts.outbound.sentMessageIds == ["id-ble"], "一份蓝牙副本、一份公网副本、同一个 id")
+        #expect(await parts.outbound.sentMessageIds == ["id-ble"], "one Bluetooth copy, one public-network copy, the same id")
         #expect(await router.pendingMessageCount == 0)
     }
 
-    @Test("事中重路由 is idempotent: the second failure of one id does not re-send")
+    @Test("In-flight re-routing is idempotent: the second failure of one id does not re-send")
     func secondFailureOfSameIDIsDuplicate() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -686,17 +686,17 @@ struct PopopxMessageRouterTests {
         defer { parts.openLatches() }
 
         _ = await router.send(
-            PopopxOutboundMessage(messageId: "id-twice", target: .contactId(100), text: "中继重复洪泛")
+            PopopxOutboundMessage(messageId: "id-twice", target: .contactId(100), text: "relay repeated flood")
         )
         await parts.network.setConnected(true)
         let first = await router.onBluetoothDeliveryFailed(messageId: "id-twice", peerMeshKey: hex)
         #expect(first == .smpUnacknowledgedNoMesh(contactId: 100))
         let second = await router.onBluetoothDeliveryFailed(messageId: "id-twice", peerMeshKey: hex)
         #expect(second == .duplicate(messageId: "id-twice"))
-        #expect(await parts.core.sentMessageIds == ["id-twice"], "一个 id 只允许补发一次公网副本")
+        #expect(await parts.core.sentMessageIds == ["id-twice"], "one id may be re-delivered over the public network only once")
     }
 
-    @Test("事中: a failure for an id this router never journaled re-sends nothing")
+    @Test("In flight: a failure for an id this router never journaled re-sends nothing")
     func failureForUnknownIDDoesNothing() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -711,7 +711,7 @@ struct PopopxMessageRouterTests {
         #expect(await router.pendingMessageCount == 0, "there is no text to queue either")
     }
 
-    @Test("事中: a failure while offline parks the message in unacknowledgedMeshMessages")
+    @Test("In flight: a failure while offline parks the message in unacknowledgedMeshMessages")
     func failureWhileOfflineQueues() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -721,20 +721,20 @@ struct PopopxMessageRouterTests {
         let (router, parts) = await makeRouterParts(store: store, online: false, reachable: [hex])
         defer { parts.openLatches() }
 
-        _ = await router.send(PopopxOutboundMessage(messageId: "id-park", target: .contactId(101), text: "离线"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "id-park", target: .contactId(101), text: "offline"))
         let outcome = await router.onBluetoothDeliveryFailed(messageId: "id-park", peerMeshKey: hex)
         #expect(outcome == .queuedOffline(.peerUnreachable))
         let queue = await router.unacknowledgedMeshMessages
         #expect(queue.count == 1)
         let parked = try #require(queue["id-park"])
         #expect(parked.messageId == "id-park", "the queue entry is addressed by the same id")
-        #expect(parked.text == "离线")
+        #expect(parked.text == "offline")
         #expect(parked.peerMeshPublicKeyHex == hex)
         #expect(parked.reason == .peerUnreachable)
         #expect(await parts.core.requests.isEmpty)
     }
 
-    @Test("模块 4 联动: start() installs the sink once, and one callback re-sends once")
+    @Test("Module 4 linkage: start() installs the sink once, and one callback re-sends once")
     func failureHandlerInstalledThroughModuleFour() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -750,7 +750,7 @@ struct PopopxMessageRouterTests {
         await router.start()
         await router.start()
 
-        _ = await router.send(PopopxOutboundMessage(messageId: "id-sink", target: .contactId(102), text: "联动"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "id-sink", target: .contactId(102), text: "linkage"))
         await parts.network.setConnected(true)
         await parts.judge.deliverFailure(meshFailure(messageId: "id-sink", peerHex: hex))
         #expect(await parts.core.sentMessageIds == ["id-sink"], "the sink reached the router at all")
@@ -759,7 +759,7 @@ struct PopopxMessageRouterTests {
         #expect(await parts.judge.hasHandler == false, "stop() retracts the sink")
     }
 
-    @Test("模块 4 联动: a failure that names no mesh key still re-sends to the bound contact")
+    @Test("Module 4 linkage: a failure that names no mesh key still re-sends to the bound contact")
     func failureWithoutPeerKeyStillResolvesContact() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -770,18 +770,18 @@ struct PopopxMessageRouterTests {
         defer { parts.openLatches() }
 
         _ = await router.send(
-            PopopxOutboundMessage(messageId: "id-nokey", target: .contactId(103), text: "中继只知道 wire id")
+            PopopxOutboundMessage(messageId: "id-nokey", target: .contactId(103), text: "the relay only knows the wire id")
         )
         await parts.network.setConnected(true)
-        // A relay can drop a flood before the sender's key is known, and 模块 4 still reports it.
+        // A relay can drop a flood before the sender's key is known, and module 4 still reports it.
         let outcome = await router.onBluetoothDeliveryFailed(messageId: "id-nokey", peerMeshKey: nil)
         #expect(outcome == .smpAcknowledged(contactId: 103))
         #expect(await parts.core.sentMessageIds == ["id-nokey"], "the id is kept even without the peer key")
     }
 
-    // MARK: 纯离线兜底与网络恢复冲刷
+    // MARK: The pure-offline fallback and the network-restore flush
 
-    @Test("纯离线兜底: neither channel can take it, so it waits in unacknowledgedMeshMessages")
+    @Test("Pure-offline fallback: neither channel can take it, so it waits in unacknowledgedMeshMessages")
     func offlineAndUnreachableQueues() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -793,7 +793,7 @@ struct PopopxMessageRouterTests {
         #expect(await router.currentStatus() == .pathUnknown, "no send has happened yet, so nothing is claimed")
 
         let routed = await router.send(
-            PopopxOutboundMessage(messageId: "id-queue", target: .contactId(110), text: "两条都不通")
+            PopopxOutboundMessage(messageId: "id-queue", target: .contactId(110), text: "neither path works")
         )
         #expect(routed.outcome == .queuedOffline(.peerUnreachable))
         #expect(await router.pendingMessageCount == 1)
@@ -802,13 +802,13 @@ struct PopopxMessageRouterTests {
 
         // The same id again must not grow a second entry: that is the retry-safety half of the rule.
         let again = await router.send(
-            PopopxOutboundMessage(messageId: "id-queue", target: .contactId(110), text: "两条都不通")
+            PopopxOutboundMessage(messageId: "id-queue", target: .contactId(110), text: "neither path works")
         )
         #expect(again.outcome == .duplicate(messageId: "id-queue"))
         #expect(await router.pendingMessageCount == 1)
     }
 
-    @Test("纯离线兜底: the mesh refusing the frame queues under meshRefused")
+    @Test("Pure-offline fallback: the mesh refusing the frame queues under meshRefused")
     func meshRefusalQueues() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -819,7 +819,7 @@ struct PopopxMessageRouterTests {
         defer { parts.openLatches() }
 
         let routed = await router.send(
-            PopopxOutboundMessage(messageId: "id-refused", target: .contactId(111), text: "帧被拒")
+            PopopxOutboundMessage(messageId: "id-refused", target: .contactId(111), text: "the frame was refused")
         )
         #expect(routed.outcome == .queuedOffline(.meshRefused))
         #expect(await router.pendingMessageCount == 1)
@@ -836,15 +836,15 @@ struct PopopxMessageRouterTests {
         let (router, parts) = await makeRouterParts(store: store, online: false, reachable: [], ackInTime: true)
         defer { parts.openLatches() }
 
-        _ = await router.send(PopopxOutboundMessage(messageId: "aaa-1", target: .contactId(112), text: "第一条"))
-        _ = await router.send(PopopxOutboundMessage(messageId: "aaa-2", target: .contactId(112), text: "第二条"))
-        _ = await router.send(PopopxOutboundMessage(messageId: "aaa-3", target: .contactId(112), text: "第三条"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "aaa-1", target: .contactId(112), text: "the first message"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "aaa-2", target: .contactId(112), text: "the second message"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "aaa-3", target: .contactId(112), text: "the third message"))
         #expect(await router.pendingMessageCount == 3)
 
         await parts.network.setConnected(true)
         #expect(await router.flushPendingMessagesOnNetworkRestore() == 3)
         #expect(await router.pendingMessageCount == 0)
-        #expect(await parts.core.sentMessageIds == ["aaa-1", "aaa-2", "aaa-3"], "冲刷顺序 = 输入顺序")
+        #expect(await parts.core.sentMessageIds == ["aaa-1", "aaa-2", "aaa-3"], "the flush order = the input order")
         #expect(await parts.core.contactIds == [112, 112, 112])
         #expect(await router.currentStatus() == .smpOnline)
     }
@@ -859,7 +859,7 @@ struct PopopxMessageRouterTests {
         let (router, parts) = await makeRouterParts(store: store, online: false, reachable: [])
         defer { parts.openLatches() }
 
-        _ = await router.send(PopopxOutboundMessage(messageId: "id-stay", target: .contactId(113), text: "等着"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "id-stay", target: .contactId(113), text: "wait here"))
         #expect(await router.flushPendingMessagesOnNetworkRestore() == 0)
         #expect(await router.pendingMessageCount == 1)
         #expect(await parts.core.requests.isEmpty, "a flush must not invent a public request")
@@ -881,7 +881,7 @@ struct PopopxMessageRouterTests {
         // Offline and the peer is out of range, with no contact behind it: queued, not refused — the
         // mesh key exists, so a flush could one day carry it.
         let queued = await router.send(
-            PopopxOutboundMessage(messageId: "id-pending", target: .tempConnId(805), text: "还没成为联系人")
+            PopopxOutboundMessage(messageId: "id-pending", target: .tempConnId(805), text: "not a contact yet")
         )
         // The blocker at send time is the radio, not the missing contact: `.awaitingContactUpgrade` is
         // reserved for a peer with no binding at all, and this one has a mesh key. The label only
@@ -894,11 +894,11 @@ struct PopopxMessageRouterTests {
         let entry = try #require(await router.unacknowledgedMeshMessages["id-pending"])
         #expect(entry.reason == .awaitingContactUpgrade)
         #expect(entry.target == .tempConnId(805))
-        #expect(entry.text == "还没成为联系人")
+        #expect(entry.text == "not a contact yet")
         #expect(await parts.core.requests.isEmpty)
     }
 
-    @Test("网络恢复冲刷: start()'s own subscription flushes on the restore edge, unasked")
+    @Test("Network-restore flush: start()'s own subscription flushes on the restore edge, unasked")
     func restoreEdgeFlushesAutomatically() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -910,12 +910,12 @@ struct PopopxMessageRouterTests {
         await router.start()
         defer { await router.stop() }
 
-        _ = await router.send(PopopxOutboundMessage(messageId: "id-edge", target: .contactId(114), text: "恢复了"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "id-edge", target: .contactId(114), text: "the network is back"))
         #expect(await router.pendingMessageCount == 1)
 
         await parts.network.setConnected(true)
         try await settled { await router.pendingMessageCount == 0 }
-        #expect(await parts.core.sentMessageIds == ["id-edge"], "一旦 NWPathMonitor 检测到网络恢复就自动冲刷")
+        #expect(await parts.core.sentMessageIds == ["id-edge"], "NWPathMonitor's restore edge flushes on its own")
     }
 
     @Test("a failing flush puts the message back with its original queuedAt and text")
@@ -928,7 +928,7 @@ struct PopopxMessageRouterTests {
         let (router, parts) = await makeRouterParts(store: store, online: false, reachable: [])
         defer { parts.openLatches() }
 
-        _ = await router.send(PopopxOutboundMessage(messageId: "id-back", target: .contactId(115), text: "再试"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "id-back", target: .contactId(115), text: "try again"))
         let before = try #require(await router.unacknowledgedMeshMessages["id-back"])
 
         // Now online, but the chat core throws: the entry must come back exactly as it was.
@@ -956,7 +956,7 @@ struct PopopxMessageRouterTests {
         defer { try? FileManager.default.removeItem(at: directory) }
 
         let (first, firstParts) = await makeRouterParts(store: store, online: false, reachable: [], queueURL: queueURL)
-        _ = await first.send(PopopxOutboundMessage(messageId: "id-disk", target: .contactId(116), text: "落盘"))
+        _ = await first.send(PopopxOutboundMessage(messageId: "id-disk", target: .contactId(116), text: "written to disk"))
         #expect(FileManager.default.fileExists(atPath: queueURL.path))
         firstParts.openLatches()
 
@@ -976,7 +976,7 @@ struct PopopxMessageRouterTests {
         await second.stop()
     }
 
-    // MARK: - 裁定 1: one message, two ids
+    // MARK: - Ruling 1: one message, two ids
 
     /// What the merged timeline can only learn from here: a flushed message also has a row id in the
     /// host's own database. Losing that pair is what makes the same text show twice after a restore.
@@ -991,17 +991,17 @@ struct PopopxMessageRouterTests {
         defer { parts.openLatches() }
         await parts.core.setAppChatItemIDs(["id-pair": 90_001])
 
-        _ = await router.send(PopopxOutboundMessage(messageId: "id-pair", target: .contactId(180), text: "补发"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "id-pair", target: .contactId(180), text: "re-delivered"))
         #expect(await router.pendingMessageCount == 1)
         await parts.network.setConnected(true)
         // `ackInTime` parks the router's SMP deadline so the fake's ACK is the only answer, which is
-        // how the other flush-count tests here (`flushReplaysBacklogInOrder`, the 落盘 one) stay
+        // how the other flush-count tests here (`flushReplaysBacklogInOrder`, the written-to-disk one) stay
         // deterministic. On the default 0-delay clock the deadline passes first: the flush reports 0 and
         // re-queues, the late ACK then delivers the message and records the pair, and the assertion
         // below measures the scheduler instead of the rule. That is what the two failures of this test
         // in a full-suite run were; the product behaviour was right both times.
         #expect(await router.flushPendingMessagesOnNetworkRestore() == 1)
-        #expect(await parts.core.sentMessageIds == ["id-pair"], "补发只能交出去一次")
+        #expect(await parts.core.sentMessageIds == ["id-pair"], "a re-delivery may be handed over only once")
         #expect(await router.recordedFlushedAppChatItemIDs() == ["id-pair": 90_001])
     }
 
@@ -1018,7 +1018,7 @@ struct PopopxMessageRouterTests {
         // can keep it out of the pairing is the router refusing an ack that named a different message.
         await parts.core.setAppChatItemIDs([FakeSMPCore.foreignMessageId: 90_002])
 
-        _ = await router.send(PopopxOutboundMessage(messageId: "id-foreign", target: .contactId(181), text: "张冠李戴"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "id-foreign", target: .contactId(181), text: "the wrong name"))
         #expect(await router.recordedFlushedAppChatItemIDs().isEmpty)
     }
 
@@ -1045,7 +1045,7 @@ struct PopopxMessageRouterTests {
         )
         defer { firstParts.openLatches() }
         await firstParts.core.setAppChatItemIDs(["id-keep": 90_003])
-        _ = await first.send(PopopxOutboundMessage(messageId: "id-keep", target: .contactId(182), text: "落盘配对"))
+        _ = await first.send(PopopxOutboundMessage(messageId: "id-keep", target: .contactId(182), text: "disk pair"))
         await firstParts.network.setConnected(true)
         #expect(await first.flushPendingMessagesOnNetworkRestore() == 1)
         #expect(await first.pendingMessageCount == 0)
@@ -1075,7 +1075,7 @@ struct PopopxMessageRouterTests {
         )
 
         for index in 0...cap {
-            _ = await router.send(PopopxOutboundMessage(messageId: "cap-\(index)", target: .contactId(183), text: "第 \(index) 条"))
+            _ = await router.send(PopopxOutboundMessage(messageId: "cap-\(index)", target: .contactId(183), text: "message \(index)"))
         }
         try await settled { await router.recordedFlushedAppChatItemIDs().count == cap }
         let kept = await router.recordedFlushedAppChatItemIDs()
@@ -1097,7 +1097,7 @@ struct PopopxMessageRouterTests {
         let overflow = PopopxMessageRouter.maxUnacknowledgedMessages + 8
         for index in 0..<overflow {
             _ = await router.send(
-                PopopxOutboundMessage(messageId: String(format: "q-%04d", index), target: .contactId(117), text: "积压")
+                PopopxOutboundMessage(messageId: String(format: "q-%04d", index), target: .contactId(117), text: "backlog")
             )
         }
         #expect(await router.pendingMessageCount == PopopxMessageRouter.maxUnacknowledgedMessages)
@@ -1106,9 +1106,9 @@ struct PopopxMessageRouterTests {
         #expect(pending.last?.messageId == String(format: "q-%04d", overflow - 1))
     }
 
-    // MARK: 未绑定陌生人提示
+    // MARK: The unbound-stranger prompt
 
-    @Test("未绑定陌生人: no card and no radio yields the prompt's sentence, and nothing was sent")
+    @Test("Unbound stranger: no card and no radio yields the prompt's sentence, and nothing was sent")
     func unboundStrangerRefusesWithItsSentence() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -1118,7 +1118,7 @@ struct PopopxMessageRouterTests {
         defer { parts.openLatches() }
 
         let routed = await router.send(
-            PopopxOutboundMessage(messageId: "id-stranger", target: .meshPublicKeyHex(stranger), text: "你是谁")
+            PopopxOutboundMessage(messageId: "id-stranger", target: .meshPublicKeyHex(stranger), text: "who are you?")
         )
         #expect(routed.outcome == .refusedUnboundStranger(peerMeshPublicKeyHex: nil))
         #expect(routed.bluetooth == .notBound)
@@ -1130,14 +1130,14 @@ struct PopopxMessageRouterTests {
         let status = await router.currentStatus()
         #expect(status == .unboundStranger)
         #expect(
-            status.displayText == "蓝牙已断开，尚未交换公网名片（重新靠近后可继续发送）",
+            status.displayText == PopopxMessageRouter.unboundStrangerStatusText,
             "the banner copy is the prompt's sentence, verbatim"
         )
         #expect(status.displayText == PopopxMessageRouter.unboundStrangerStatusText)
         #expect(await router.unboundStrangerStatus() == PopopxMessageRouter.unboundStrangerStatusText)
     }
 
-    @Test("the stranger banner lifts when 模块 6 says the card arrived")
+    @Test("the stranger banner lifts when module 6 says the card arrived")
     func strangerBannerLiftsAfterUpgrade() async throws {
         let sandbox = try MeshTestSandbox()
         defer { sandbox.reset() }
@@ -1147,7 +1147,7 @@ struct PopopxMessageRouterTests {
         defer { parts.openLatches() }
 
         _ = await router.send(
-            PopopxOutboundMessage(messageId: "id-stranger-off", target: .meshPublicKeyHex(stranger), text: "你是谁")
+            PopopxOutboundMessage(messageId: "id-stranger-off", target: .meshPublicKeyHex(stranger), text: "who are you?")
         )
         #expect(await router.currentStatus() == .unboundStranger)
 
@@ -1181,16 +1181,16 @@ struct PopopxMessageRouterTests {
         try await settled { seen.count >= 1 }
         #expect(seen.all.first == .pathUnknown, "the current value comes before anything has been sent")
 
-        _ = await router.send(PopopxOutboundMessage(messageId: "id-status", target: .contactId(120), text: "积压"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "id-status", target: .contactId(120), text: "backlog"))
         try await settled { seen.count >= 2 }
         #expect(seen.all.contains(.queued(messageCount: 1)))
 
-        _ = await router.send(PopopxOutboundMessage(messageId: "id-status-2", target: .contactId(120), text: "再积压"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "id-status-2", target: .contactId(120), text: "more backlog"))
         try await settled { collector.count >= 2 }
         let firstPayload = collector.payload(0)
         #expect(firstPayload[PopopxMessageRouter.statusCodeKey] as? String == "queued")
         #expect(
-            firstPayload[PopopxMessageRouter.statusTextKey] as? String == "蓝牙与公网均不可用，1 条消息待发送"
+            firstPayload[PopopxMessageRouter.statusTextKey] as? String == PopopxRoutingStatus.queued(messageCount: 1).displayText
         )
         reader.cancel()
         await router.stop()
@@ -1208,14 +1208,14 @@ struct PopopxMessageRouterTests {
         let (router, parts) = await makeRouterParts(store: store, online: true, reachable: [hex], ackInTime: true)
         defer { parts.openLatches() }
 
-        _ = await router.send(PopopxOutboundMessage(messageId: "id-quiet", target: .contactId(121), text: "正常"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "id-quiet", target: .contactId(121), text: "all clear"))
         let status = await router.currentStatus()
         #expect(status == .smpOnline)
         #expect(status.displayText == nil)
         #expect(await router.unboundStrangerStatus() == nil)
     }
 
-    // MARK: 全局唯一 messageId 幂等去重
+    // MARK: Idempotent dedup on the globally unique messageId
 
     @Test("shouldDeliver answers once per id, from the one deduplicator the system has")
     func shouldDeliverIsIdempotent() async throws {
@@ -1247,13 +1247,13 @@ struct PopopxMessageRouterTests {
             messageId: "in-1",
             target: .tempConnId(903),
             peerMeshPublicKeyHex: meshTestHex("ee04"),
-            text: "离线收到的"
+            text: "received while offline"
         )
         #expect(await router.recordIncoming(record))
-        #expect(await router.recordIncoming(record) == false, "同一条消息不能存两份")
+        #expect(await router.recordIncoming(record) == false, "the same message must not be stored twice")
         let records = await router.offlineRecords(for: .tempConnId(903))
         #expect(records.count == 1)
-        #expect(records.first?.text == "离线收到的")
+        #expect(records.first?.text == "received while offline")
         #expect(records.first?.receivedAt == record.receivedAt)
     }
 
@@ -1275,12 +1275,12 @@ struct PopopxMessageRouterTests {
         defer { parts.openLatches() }
 
         let routed = await router.send(
-            PopopxOutboundMessage(messageId: "id-both", target: .contactId(122), text: "并发")
+            PopopxOutboundMessage(messageId: "id-both", target: .contactId(122), text: "concurrent send")
         )
         #expect(routed.outcome == .smpUnacknowledgedMeshParallel(contactId: 122, peerMeshPublicKeyHex: hex))
         let meshIDs = await parts.outbound.sentMessageIds
         let smpIDs = await parts.core.sentMessageIds
-        #expect(meshIDs == smpIDs, "两条通道的 id 必须完全相同")
+        #expect(meshIDs == smpIDs, "both channels must use exactly the same ids")
         // The peer's side of the promise: whichever copy lands first is shown, the other is dropped.
         #expect(await dedup.noteMessage(id: "id-both"))
         #expect(await dedup.noteMessage(id: "id-both") == false)
@@ -1297,16 +1297,16 @@ struct PopopxMessageRouterTests {
         defer { parts.openLatches() }
 
         let routed = await router.send(
-            PopopxOutboundMessage(messageId: "id-envelope", target: .contactId(123), text: "信封")
+            PopopxOutboundMessage(messageId: "id-envelope", target: .contactId(123), text: "envelope")
         )
         #expect(routed.outcome == .meshSent(peerMeshPublicKeyHex: hex))
         let sent = await parts.outbound.sent
         #expect(sent.count == 1)
         #expect(sent.first?.id == "id-envelope")
-        #expect(sent.first?.body == "信封")
+        #expect(sent.first?.body == "envelope")
     }
 
-    // MARK: 模块 6 的迁移入口
+    // MARK: Module 6's migration entry point
 
     @Test("migrateQueuedMessages re-files the backlog and the records, and only the address moves")
     func migrationMovesQueueAndRecords() async throws {
@@ -1318,14 +1318,14 @@ struct PopopxMessageRouterTests {
         let (router, parts) = await makeRouterParts(store: store, online: false, reachable: [])
         defer { parts.openLatches() }
 
-        _ = await router.send(PopopxOutboundMessage(messageId: "mig-1", target: .tempConnId(905), text: "排队"))
-        _ = await router.send(PopopxOutboundMessage(messageId: "mig-2", target: .tempConnId(905), text: "也排队"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "mig-1", target: .tempConnId(905), text: "queued"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "mig-2", target: .tempConnId(905), text: "queued as well"))
         _ = await router.recordIncoming(
             PopopxMeshOfflineRecord(
                 messageId: "in-mig",
                 target: .tempConnId(905),
                 peerMeshPublicKeyHex: hex,
-                text: "对方来的"
+                text: "from the peer"
             )
         )
 
@@ -1342,7 +1342,7 @@ struct PopopxMessageRouterTests {
         #expect(await router.migrateQueuedMessages(fromTempConnId: 905, toContactId: 200).isEmpty)
     }
 
-    // MARK: 生命周期
+    // MARK: Lifecycle
 
     @Test("start() observes the path; stop() leaves no timer, no subscription and no hung send")
     func lifecycleRetractsEverything() async throws {
@@ -1359,10 +1359,10 @@ struct PopopxMessageRouterTests {
         #expect(await parts.network.startCalls >= 1, "the router boots its own connectivity source")
         #expect(await parts.network.subscriptionCount == 1)
 
-        let inflight = Task { await router.sendText("还在发", toContactId: 130) }
+        let inflight = Task { await router.sendText("still sending", toContactId: 130) }
         try await settled { await router.outstandingTimerCount == 1 }
         await router.stop()
-        #expect(await router.outstandingTimerCount == 0, "熔断后不得再唤醒定时器")
+        #expect(await router.outstandingTimerCount == 0, "no timer may be woken once the fuse is off")
         #expect(await router.isObservingNetwork == false)
         // `send` was parked in the ACK window; stop() must resume it rather than orphan it.
         let routed = await inflight.value
@@ -1418,7 +1418,7 @@ struct PopopxMessageRouterTests {
         let (router, parts) = await makeRouterParts(store: store, online: false, reachable: [hex])
         defer { parts.openLatches() }
 
-        let routed = await router.sendText("便利方法", toContactId: 140)
+        let routed = await router.sendText("the convenience method", toContactId: 140)
         #expect(routed.target == .contactId(140))
         #expect(routed.outcome == .meshSent(peerMeshPublicKeyHex: hex))
         let minted = routed.messageId

@@ -2,7 +2,7 @@
 //  PopopxMeshPrivateChatTests.swift
 //  PopopxMeshUITests
 //
-//  模块 7 的私聊界面, measured the way the plaza and the settings page are measured: through the view
+//  Module 7's private chat screen, measured the way the plaza and the settings page are measured: through the view
 //  model, with the core replaced by the doubles in `PopopxMeshUITestSupport.swift`.
 //
 //  What the suite insists on:
@@ -14,7 +14,7 @@
 //  - A send to a peer nobody is paired with is refused out loud. Refused means a row on screen plus a
 //    reason; silently dropped is a bug, and so is handing the frame to the mesh first and explaining
 //    afterwards.
-//  - 全局熔断 off (铁律 28) leaves nothing: no rows, no subscription, no mirror pump, no call that
+//  - the global fuse off (iron rule 28) leaves nothing: no rows, no subscription, no mirror pump, no call that
 //    could reach Bluetooth, and no eaten draft.
 //
 //  Peer messages and node facts are pushed in through `replaceIncomingMessages` / `replacePeer`
@@ -46,10 +46,10 @@ struct PopopxMeshPrivateChatModelTests {
     private let peer = PopopxMeshTestKeys.peerB
 
     /// - Parameters:
-    ///   - pairingStates: 模块 3's live answer. Empty is the 未绑定陌生人 case.
-    ///   - mappings: 模块 1's durable answer. A mapping with no paired state is the case where the
+    ///   - pairingStates: module 3's live answer. Empty is the unbound-stranger case.
+    ///   - mappings: module 1's durable answer. A mapping with no paired state is the case where the
     ///     settings page listed a peer the pairing manager has since forgotten.
-    ///   - fuseOn: the 总开关, driven through the real fuse object rather than a flag of my own.
+    ///   - fuseOn: the master switch, driven through the real fuse object rather than a flag of my own.
     private func makeHarness(
         label: String,
         pairingStates: [String: MeshPairingState] = [PopopxMeshTestKeys.peerB: .paired],
@@ -312,7 +312,7 @@ struct PopopxMeshPrivateChatModelTests {
         let messageId = try #require(model.messages.first?.id)
         #expect(model.messages.first?.delivery == .handedToMesh)
 
-        // 模块 2's own report that the frame never left the device is the routing layer's verdict, and
+        // Module 2's own report that the frame never left the device is the routing layer's verdict, and
         // it outranks whatever the transport said when the frame was handed over.
         made.source.ingest(.sendFailed(messageId: messageId, peer: nil, reason: .noLinkToPeer))
         try await popopxMeshWaitUntil("the owed relay to reach the row") {
@@ -340,7 +340,7 @@ struct PopopxMeshPrivateChatModelTests {
         #expect(row.delivery == .refused(.peerNotPaired(.unlinked)))
         #expect(row.showsChannelBadge == false)
         #expect(row.badge.symbolName == "antenna.radiowaves.left.and.right")
-        // 未绑定陌生人 in the sender's own words, not a paraphrase of them.
+        // The unbound stranger in the sender's own words, not a paraphrase of them.
         #expect(PopopxMeshPrivateChatModel.words(for: row.delivery)
             .contains(PopopxMessageRouter.unboundStrangerStatusText))
     }
@@ -399,12 +399,12 @@ struct PopopxMeshPrivateChatModelTests {
         #expect(row.text == "echo")
         #expect(row.delivery == .refused(.transport(.ttlExhausted)))
         #expect(model.lastRefusal == .transport(.ttlExhausted))
-        // The frame was offered to 模块 2, so the refusal is the mesh's answer, not this screen's.
+        // The frame was offered to module 2, so the refusal is the mesh's answer, not this screen's.
         #expect(sentJournalEntries(made.journal).count == 1)
         #expect(model.draft.isEmpty)
     }
 
-    // MARK: - The 未绑定陌生人 gate
+    // MARK: - The unbound-stranger gate
 
     @Test("A peer nobody is paired with is refused, and the text is not dropped")
     func unpairedPeerIsRefused() async throws {
@@ -437,7 +437,7 @@ struct PopopxMeshPrivateChatModelTests {
         #expect(model.lastRefusal == nil)
     }
 
-    @Test("A durable binding is a proof even when 模块 3 has forgotten the peer")
+    @Test("A durable binding is a proof even when module 3 has forgotten the peer")
     func bindingAloneIsEnough() async throws {
         let made = try await makeHarness(label: "chat-binding-only", pairingStates: [:])
         let model = made.model
@@ -502,7 +502,7 @@ struct PopopxMeshPrivateChatModelTests {
         #expect(state.detail.contains("nothing is queued"))
         #expect(state.detail.contains("public network"))
 
-        // Heard from again, inside 模块 4's window, and the same screen has nothing to apologise for.
+        // Heard from again, inside module 4's window, and the same screen has nothing to apologise for.
         model.replacePeer(PopopxMeshPrivateChatPeer(
             peerIDHex: try wireID(of: peer),
             nickname: "Ada",
@@ -516,7 +516,7 @@ struct PopopxMeshPrivateChatModelTests {
 
     @Test("Each kind of silence gets its own sentence")
     func everyEmptyReasonIsNamed() async throws {
-        // Not paired: 模块 5's stranger sentence, quoted rather than paraphrased.
+        // Not paired: module 5's stranger sentence, quoted rather than paraphrased.
         let stranger = try await makeHarness(label: "chat-empty-stranger", pairingStates: [:], mappings: [])
         defer { stranger.directory.remove() }
         #expect(stranger.model.emptyReason == .notPaired)
@@ -593,7 +593,7 @@ struct PopopxMeshPrivateChatModelTests {
         #expect(model.nickname == "Changed there")
     }
 
-    // MARK: - 全局熔断
+    // MARK: - The global fuse
 
     @Test("With the fuse off the screen holds no state and asks nothing of the mesh")
     func fuseOffLeavesNothing() async throws {

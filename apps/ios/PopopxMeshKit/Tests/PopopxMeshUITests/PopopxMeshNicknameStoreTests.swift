@@ -2,7 +2,7 @@
 //  PopopxMeshNicknameStoreTests.swift
 //
 //  The plaza's local nickname: where it is allowed to live, and what the plaza does with a broadcast
-//  the radio refused. The rule that decides the first is 模块 7's own — it is display state, so it is
+//  the radio refused. The rule that decides the first is module 7's own — it is display state, so it is
 //  a file in the mesh sandbox (which the panic wipe erases) and never a Keychain item (which it does
 //  not, per row) — and the rule that decides the second is that a plaza with no queue must never lose
 //  what the user typed.
@@ -72,7 +72,7 @@ struct PopopxMeshNicknameStoreTests {
         #expect(PopopxMeshNicknameStore.clamped(flags)?.contains("🇦🇩") == true)
     }
 
-    @Test("The store's file lives in 模块 1's directory constant")
+    @Test("The store's file lives in module 1's directory constant")
     func sandboxLocation() {
         #expect(PopopxMeshNicknameStore.fileName.hasSuffix(".json"))
         #expect(PopopxMeshPaths.meshDirectory().lastPathComponent == PopopxMeshPaths.directoryName)

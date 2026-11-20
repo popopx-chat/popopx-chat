@@ -2,12 +2,12 @@
 //  PopopxMeshKillSwitch.swift
 //  PopopxMeshUI
 //
-//  红线 28 — the 全局熔断开关. One object owns the decision "is the offline mesh allowed to exist
+//  Red line 28 — the global kill switch. One object owns the decision "is the offline mesh allowed to exist
 //  in this process at all", because that decision is the only thing standing between the feature
-//  and 铁律 5 (100% 零破坏). Three properties the rest of the package is built around:
+//  and iron rule 5 (100% zero breakage). Three properties the rest of the package is built around:
 //
 //  1. The setting is one `Bool` in `UserDefaults`, under `PopopxMeshKillSwitch.enabledDefaultsKey`,
-//     which is *the same key* 模块 1 already models as `IdentityMappingStore.meshEnabled`. There is
+//     which is *the same key* module 1 already models as `IdentityMappingStore.meshEnabled`. There is
 //     deliberately no second key: a fuse with two places to be true is a fuse that can be half on.
 //  2. Turning it off stops every component the fuse was given — the radio, the monitors, and the
 //     UI's own mirror of the event stream — so nothing keeps a `CBCentralManager` scanning, no
@@ -108,7 +108,7 @@ public struct PopopxMeshActivitySnapshot: Hashable, Sendable {
         phase != .off || !runningRadioWork.isEmpty || !runningInterfaceWork.isEmpty
     }
 
-    /// 蓝牙侧彻底安静：没有扫描、没有广播、没有链路、没有定时器。This is the property 红线 28 promises.
+    /// Bluetooth side completely quiet: no scanning, no broadcast, no links, no timers. This is the property red line 28 promises.
     public var isRadioQuiet: Bool {
         phase == .off && runningRadioWork.isEmpty
     }
@@ -121,15 +121,15 @@ public struct PopopxMeshActivitySnapshot: Hashable, Sendable {
 
 /// The plaza's local nickname: a display name the user chooses for the offline `#mesh` square, not
 /// a secret. That is exactly why it is a file in `Documents/popopx_mesh/` and not a Keychain item —
-/// and why 模块 7's panic wipe takes it out with the rest of the sandbox. It is carried only in the
+/// and why module 7's panic wipe takes it out with the rest of the sandbox. It is carried only in the
 /// mesh's own announce payload; nothing here hands it to the SMP path.
 public struct PopopxMeshNicknameStore: Sendable {
-    /// The mesh's own peer nicknames are clamped to 120 characters by 模块 1; a *display* name the
+    /// The mesh's own peer nicknames are clamped to 120 characters by module 1; a *display* name the
     /// user picks for a plaza bubble is kept shorter so it survives the announce payload's padding.
     public static let maxCharacters = 32
 
     /// File name inside the mesh sandbox, chosen by this layer; the sandbox directory itself is
-    /// 模块 1's (`PopopxMeshPaths.meshDirectory()`), so a panic wipe erases this with everything else.
+    /// module 1's (`PopopxMeshPaths.meshDirectory()`), so a panic wipe erases this with everything else.
     public static let fileName = "plaza_nickname.json"
 
     /// The fallback when the user has not chosen one: the same "no name" the plaza shows for peers.
@@ -181,11 +181,11 @@ public struct PopopxMeshNicknameStore: Sendable {
     }
 }
 
-/// 全局熔断开关.
+/// Global kill switch.
 @MainActor
 public final class PopopxMeshKillSwitch: ObservableObject {
     /// The one persisted key of the whole feature: `chat.popopx.mesh.enabled`, the same constant
-    /// 模块 1 exposes as `IdentityMappingStore.meshEnabledDefaultsKey` and reads back as
+    /// module 1 exposes as `IdentityMappingStore.meshEnabledDefaultsKey` and reads back as
     /// `meshEnabled`. Off by default, because `UserDefaults.bool` on an absent key is false and a
     /// fuse must not be on just because nobody decided yet.
     public static let enabledDefaultsKey = IdentityMappingStore.meshEnabledDefaultsKey
@@ -341,7 +341,7 @@ public final class PopopxMeshKillSwitch: ObservableObject {
         await restart()
     }
 
-    /// Same rule as 模块 1's `maxNicknameCharacters`: a nickname is clamped, never refused, so a
+    /// Same rule as module 1's `maxNicknameCharacters`: a nickname is clamped, never refused, so a
     /// peer can no longer grow the announce payload by typing.
     public func clearNickname() async {
         nicknameStore.clear()
@@ -405,10 +405,10 @@ public final class PopopxMeshKillSwitch: ObservableObject {
 
 // MARK: - Core conformances
 
-// The three actors 模块 3/4/6 already provide, told how to obey the fuse. These are the binding
+// The three actors module 3/4/6 already provide, told how to obey the fuse. These are the binding
 // points of this layer: nothing here adds state, each just calls the lifecycle method the actor
 // already has. `PopopxMeshEngine` and `BluetoothHealthMonitor` are the package's singletons;
-// `ManualPairingManager` has none (模块 3 needs the app's chat core), so the host constructs it and
+// `ManualPairingManager` has none (module 3 needs the app's chat core), so the host constructs it and
 // hands it to `PopopxMeshKillSwitch.init(pairing:)`.
 
 extension PopopxMeshEngine: PopopxMeshSwitchable {

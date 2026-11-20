@@ -1,45 +1,45 @@
 //  PopopxTrialWelcomeModal.swift
 //
-//  【第五阶段 · 2】先锋节点体验徽章的领取面板：3 天，一次，本机为限。
+//  [Phase 5 · 2] The pioneer-node trial badge claim panel: 3 days, once, limited to this device.
 //
-//  ### 这个面板只对一件事负责：把资格讲清楚，然后交出去
-//  领或不领的唯一判据是 `PopopxBadgeManager.canClaimPioneerTrial`（`record == nil` 且 Keychain 里没有
-//  `.trialGuard`）。没有资格时这里**不给一个只会报错的按钮**（本仓的既有规矩：能力未接线的入口一律禁用或
-//  整条不出现，同 `PopopxPlusMenu` 对三个闭包的处理，PopopxTelemetryHeader.swift:425-444），
-//  而是把"为什么不能领"说出来。
+//  ### This panel is responsible for exactly one thing: explain the eligibility, then hand over
+//  The one and only criterion for claiming or not claiming is `PopopxBadgeManager.canClaimPioneerTrial` (`record == nil` and no
+//  `.trialGuard` in the Keychain). Without eligibility this place **does not offer a button that can only report an error** (this repo's standing rule: an entry whose capability is not wired is either disabled or
+//  the whole row is absent, as in `PopopxPlusMenu`'s handling of the three closures, PopopxTelemetryHeader.swift:425-444),
+//  instead it says out loud "why it cannot be claimed".
 //
-//  ### 三行诚实边界
-//  - "每台设备限领一次"这件事由 DeviceCheck token 或本机安装指纹保证，**两者都只在本机生效**：
-//    重装系统、刷机、或指纹那格 Keychain 被清空后，本层没有第二种办法拒绝第二次领取——
-//    真的服务端黑名单要上传设备标识，与"零服务端账本、不收集标识符"的架构红线冲突。所以文案说
-//    "本机限领一次"，不说"不可能领第二次"。
-//  - 到期后的回落是"回到免费公共 SMP 节点"，不是断网：联系人、历史消息、群组、频道一概不动。
-//    这句必须写死在面板里，因为它是用户按"领取"之前唯一真正想知道的事。
-//  - 体验徽章与付费徽章是同一个 `PopopxBadgeRecord` 槽位：付费激活会**覆盖** source，
-//    到期时间取两者较晚的那一个（`PopopxBadgeManager.activate` 的合并规则），所以不存在
-//    "为了买正式徽章先浪费三天体验"的取舍。
+//  ### Three lines of honest boundaries
+//  - "one claim per device" is guaranteed by the DeviceCheck token or this device's install fingerprint; **both only ever apply on this device**:
+//    after a system reinstall, after flashing, or once that one Keychain slot holding the fingerprint is cleared, this layer has no second way to refuse a second claim —
+//    a real server-side denylist would require uploading a device identifier, which conflicts with the architectural red line of "zero server-side ledger, no identifiers collected". So the copy says
+//    "one claim per device", not "a second claim is impossible".
+//  - The fallback after expiry is "back to the free public SMP nodes", not being cut off: contacts, message history, groups and channels are all untouched.
+//    This sentence must be hard-written into the panel, because it is the one thing a user genuinely wants to know before pressing "claim".
+//  - The trial badge and the paid badge use the same `PopopxBadgeRecord` slot: a paid activation **overwrites** source,
+//    and the expiry takes whichever of the two is later (`PopopxBadgeManager.activate`'s merge rule), so there is no
+//    trade-off of "wasting three trial days first in order to buy the real badge".
 //
-//  ### 第二条出口：档位与价格（`onOpenPaywall`）
-//  三态都在免费那一步下面常驻一个 `.secondary` 按钮进付费墙。这条腿的存在理由不是"多一个入口"：
-//  顶栏那枚胶囊在 iPhone 上恒定制（只留符号，见 `PopopxBadgeCapsule` 的 `showsBuySegment`），
-//  体验态里想买东西的用户如果只能靠猜，就会在这页读到"3 天后回落免费节点"却找不到下一步。
-//  换面板走的是宿主那一份 `.sheet(item:)` 载体，不是第二张 sheet —— 所以不存在 sheet 套 sheet。
+//  ### The second exit: tiers and prices (`onOpenPaywall`)
+//  All three states keep a permanent `.secondary` button below the free step that opens the paywall. This leg exists not to be "one more entry":
+//  the capsule in the top bar has a fixed width on iPhone (only the symbol, see `PopopxBadgeCapsule`'s `showsBuySegment`),
+//  so a user in the trial state who wants to buy and can only guess would read "falls back to free nodes in 3 days" on this page and never find the next step.
+//  Swapping panels goes through the host's single `.sheet(item:)` carrier, not a second sheet — so there is no sheet nested in a sheet.
 //
-//  商业侧名词一律走 `PopopxCommerceCopy`（全语种目录），解释性长句留在本文件的文件私有 `Copy` 里
-//  用中文——这是本轮的本地化裁定：只有钱、退款、合规相关的字符串进 `.lproj`。
+//  Commerce-side nouns always go through `PopopxCommerceCopy` (all-language catalogues); the long explanatory sentences stay in this file's file-private `Copy`
+//  written in Chinese — this is this round's localisation ruling: only strings about money, refunds and compliance go into `.lproj`.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged by hand into the POPOPX (iOS) target. The red line forbids scripting changes to project.pbxproj.
 
 import SwiftUI
 import POPOPXChat
 
 struct PopopxTrialWelcomeModal: View {
-    /// 出口「看徽章详情」的去向。宿主给了它就换到详情面板（`PopopxBadgeSheetHost` 那条 `.sheet(item:)`），
-    /// 没给就退回原来的只关闭 —— 真机第 3 轮的 P0 是这个按钮以前只有 `dismiss()`，点了像没反应。
+    /// Where the "badge details" exit goes. If the host provides it, swap to the details panel (the `.sheet(item:)` of `PopopxBadgeSheetHost`),
+    /// and if it is not given, fall back to the original close-only — the P0 of device round 3 was that this button previously only had `dismiss()`, and tapping it looked like nothing happened.
     var onOpenDetail: (() -> Void)? = nil
-    /// 出口「看档位与价格」的去向。声明在 `onOpenDetail` **之后**：两个都是可选闭包，
-    /// 谁在前只影响调用点的书写顺序，而宿主那处（`PopopxBadgeSheetHost`）是带标签写的，
-    /// 所以这里加参数不会改变任何已有调用点的含义。默认 nil = 本面板只管免费那条腿。
+    /// Where the "tiers and prices" exit goes. Declared **after** `onOpenDetail`: both are optional closures,
+    /// and which comes first only affects how the call site is written, while the host site (`PopopxBadgeSheetHost`) is written with labels,
+    /// so adding a parameter here changes the meaning of no existing call site. Default nil = this panel only handles the free leg.
     var onOpenPaywall: (() -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
@@ -47,7 +47,7 @@ struct PopopxTrialWelcomeModal: View {
     @State private var badge = PopopxBadgeManager.shared
     @State private var toast = PopopxToastModel()
     @State private var isClaiming = false
-    /// 领取失败时的那一句原因。`nil` = 没失败过；不用布尔 + 字符串两个字段，避免"有布尔却没原因"的空态。
+    /// The one-sentence reason when the claim fails. `nil` = it never failed; not a boolean plus a string, to avoid the empty state of "a boolean but no reason".
     @State private var failure: String?
 
     private static let trialDays = Int(PopopxCommerceLimits.trialSeconds / 86_400)
@@ -74,9 +74,9 @@ struct PopopxTrialWelcomeModal: View {
         .popopxToast(toast)
     }
 
-    // MARK: 主视觉
+    // MARK: Hero visual
 
-    /// 一枚放大的胶囊态预览：让用户在按"领取"之前先看到顶栏会变成什么样。
+    /// An enlarged capsule-state preview: let the user see what the top bar will look like before pressing "claim".
     private var hero: some View {
         VStack(alignment: .leading, spacing: PopopxMetrics.spaceS) {
             PopopxBadgeCapsule(phase: badge.record?.source == .pioneerTrial
@@ -141,12 +141,12 @@ struct PopopxTrialWelcomeModal: View {
         .background(tint.fill.opacity(0.10), in: .rect(cornerRadius: PopopxMetrics.radiusControl))
     }
 
-    // MARK: 出口
+    // MARK: Exits
 
     @ViewBuilder private var footerRow: some View {
         VStack(spacing: PopopxMetrics.spaceXS) {
             if badge.record?.source == .pioneerTrial {
-                // 已经在这台设备上领到过：本面板的角色只剩"说清它还在跑"，出口是详情。
+                // Already claimed on this device: the only role left to this panel is "make clear it is still running", and the exit is the details.
                 PopopxButton(Copy.openDetail, systemImage: "eye", role: .secondary) {
                     if let onOpenDetail {
                         onOpenDetail()
@@ -159,16 +159,16 @@ struct PopopxTrialWelcomeModal: View {
                     await claim()
                 }
             } else {
-                // 没资格：不摆一个只会报错的按钮，只解释。
+                // No eligibility: do not place a button that can only report an error, only explain.
                 PopopxButton(Copy.close, role: .secondary) {
                     dismiss()
                 }
             }
 
-            // 付费出口在**三态都常驻**，而且永远排在免费那一步之后、用 `.secondary`：
-            // 体验还剩 3 天而档位选择已经存在，这一页不给出口就等于让用户去顶栏碰运气；
-            // 但把付费做成主按钮，就把这页从"讲清楚免费这条路"改成了收银台。
-            // 宿主没给 `onOpenPaywall` 时整条不出现（能力未接线的入口一律不摆，见文件头第 7-9 行那条规矩）。
+            // The paid exit is **permanent in all three states**, and always ordered after the free step, using `.secondary`:
+            // the trial still has 3 days left while the tier choice already exists; giving no exit on this page is the same as making the user gamble on the top bar;
+            // but making the paid action the primary button would turn this page from "explain the free road" into a checkout counter.
+            // When the host gives no `onOpenPaywall` the whole row is absent (entries whose capability is not wired are never placed; see the rule on lines 7-9 of the file header).
             if let onOpenPaywall {
                 PopopxButton(PopopxCommerceCopy.choosePlanAction, systemImage: "creditcard", role: .secondary) {
                     onOpenPaywall()
@@ -188,15 +188,15 @@ struct PopopxTrialWelcomeModal: View {
             try? await Task.sleep(nanoseconds: 600_000_000)
             dismiss()
         } else {
-            // 走到这里只剩两种可能：并发下已经写过 guard，或 Keychain 那一次写入失败。
-            // 两种都归一句"本机没能记下这次领取"，不假装知道是哪种，也不重试写第二遍。
+            // Reaching here leaves only two possibilities: the guard was already written under concurrency, or that one Keychain write failed.
+            // Both collapse into the single sentence "this device could not record the claim", without pretending to know which one, and without retrying the write a second time.
             failure = Copy.claimFailed
             PopopxHaptics.notice(.error)
         }
     }
 }
 
-// MARK: - 文案
+// MARK: - Copy
 
 private extension PopopxTrialWelcomeModal {
     enum Copy {
@@ -227,9 +227,9 @@ private extension PopopxTrialWelcomeModal {
 
 // MARK: - Previews
 
-/// 预览读的是真单例：`PopopxBadgeManager` 的 `init` 只从 Keychain 读那一条 `PopopxBadgeRecord`
-/// （`PopopxBadgeManager.swift:65-71`），不联网、不起心跳，所以在模拟器里它是惰性的——
-/// 显示哪一支取决于这台设备上有没有领过。真机上领过一次之后，本面板显示的是"已领"那一支。
+/// The preview reads the real singleton: `PopopxBadgeManager`'s `init` only reads that one `PopopxBadgeRecord` from the Keychain
+/// (`PopopxBadgeManager.swift:65-71`), no network and no heartbeat, so in the simulator it is inert —
+/// which branch is shown depends on whether this device has claimed. After one claim on a real device, this panel shows the "already claimed" branch.
 struct PopopxTrialWelcomeDormant_Previews: PreviewProvider {
     static var previews: some View {
         PopopxTrialWelcomeModal()

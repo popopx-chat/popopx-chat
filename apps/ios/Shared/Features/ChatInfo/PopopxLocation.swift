@@ -2,50 +2,50 @@
 //  PopopxLocation.swift
 //  POPOPX (iOS)
 //
-//  「发送位置」的载荷层：一条位置消息在网络上就是下面 `wireString` 那一行文本。
+//  Payload layer of "send location": on the network a location message is just the one line of text produced by `wireString` below.
 //
-//  这一层刻意不碰 MapKit，也不碰 CoreLocation：
+//  This layer deliberately touches neither MapKit nor CoreLocation:
 //
-//  1. 它要在发送（ComposeView）和渲染（PopopxMessageBubble）两端讲同一套字节，而这两端
-//     谁都不需要地图能力，只需要两个 Double 和它们对外的文本形式。
-//  2. `Map` / `CLLocationManager` 只会出现在 PopopxLocationPickerSheet.swift 一个文件里，
-//     少一个 import 就少一处能被误用的入口。
-//  3. 编解码是纯字符串算术，能脱离 UI 和系统框架单独验（macOS 上编译本文件跑的 31 项
-//     往返/拒绝试验：中文、`&`、`#`、`=`、引号、空格、emoji、换行、长得像载荷的地名都
-//     原样回来；邀请链接、越界/`nan`/`inf` 坐标、缺坐标、非法 UTF-8 转义、野 host 全部判死）。
-//  4. 本文件在 `Shared/Features/ChatInfo/`，已人工拖入 `POPOPX (iOS)` target（`.pbxproj`
-//     零脚本改动）。少拖一个，报错的是全工程，不会只报"少个文件"。
-//  5. 命名空间：`popopx:/` 和 `popopx://` 是邀请链接的前缀（PopopxOfflineBridge.swift:91、
-//     ChatUtils.swift:106、APITypes.swift:195），`popopx://loc?...` 因此**必须永远和邀请
-//     链接互斥**——host 只认 `loc`，坐标必须有限且在量程内，任一条不满足就整串判死。
-//     这是硬约束，不是风格问题：一个 `loc` 串被 `hasPopopxLink` 判成邀请链接，就会走建联，
-//     把一条位置消息变成一次加好友。
-//  6. 载荷是接收方会主动解析的输入，所以只走 `URLComponents`，不手工切字符串。
-//  7. 显示文案和地图渲染在 PopopxMessageBubble.swift 的 `PopopxLocationCardBubble`，
-//     选择器在 PopopxLocationPickerSheet.swift。
+//  1. It has to speak the same bytes at both the sending (ComposeView) and rendering (PopopxMessageBubble) ends, and neither of those ends
+//     needs any map capability, only the two Doubles and their outward text form.
+//  2. `Map` / `CLLocationManager` appear in one file only, PopopxLocationPickerSheet.swift,
+//     so one fewer import is one fewer entry point that can be misused.
+//  3. Encoding and decoding are pure string arithmetic and can be verified apart from the UI and the system frameworks (the 31 round-trip
+//     and rejection cases run by compiling this file on macOS: Chinese text, `&`, `#`, `=`, quotes, spaces, emoji, newlines and place names that look like payloads all
+//     come back unchanged; invite links, out-of-range/`nan`/`inf` coordinates, missing coordinates, illegal UTF-8 escapes and stray hosts are all rejected).
+//  4. This file lives in `Shared/Features/ChatInfo/` and was dragged into the `POPOPX (iOS)` target by hand (`.pbxproj`
+//     with zero script changes). Drag one file fewer in and it is the whole project that reports the error, not just "a file is missing".
+//  5. Namespace: `popopx:/` and `popopx://` are the prefixes of invite links (PopopxOfflineBridge.swift:91,
+//     ChatUtils.swift:106, APITypes.swift:195), so `popopx://loc?...` therefore **must stay forever mutually exclusive with invite
+//     links**: the host accepts only `loc`, the coordinates must be finite and inside range, and if any single condition fails the whole string is rejected.
+//     This is a hard constraint, not a style question: if a `loc` string were judged an invite link by `hasPopopxLink`, it would take the connection-building path
+//     and turn one location message into one add-a-contact.
+//  6. The payload is input the receiver parses on its own initiative, so only `URLComponents` is used, never hand-cut strings.
+//  7. The display copy and the map rendering are in `PopopxLocationCardBubble` of PopopxMessageBubble.swift,
+//     and the picker is in PopopxLocationPickerSheet.swift.
 //
 
 import Foundation
 
-/// 一条位置消息的载荷。
+/// The payload of one location message.
 ///
-/// 线上形态是两行文本，`messageContent` 发后者：
+/// The on-wire form is two lines of text, and `messageContent` sends the latter:
 ///
 /// ```text
-/// 📍 [位置] 深圳北站 (22.543096, 114.057865)
+/// 📍 [location] Shenzhen North Railway Station (22.543096, 114.057865)
 /// popopx://loc?lat=22.543096&lon=114.057865&name=%E6%B7%B1%E5%9C%B3%E5%8C%97%E7%AB%99
 /// ```
 ///
-/// 第一行给人看：接收方若不是 POPOPX（或这张卡还没渲染出来），看到的是一行读得懂的中文
-/// 加一串坐标，而不是裸 scheme。
+/// The first line is for people: if the receiver is not POPOPX (or this card has not rendered yet), what it sees is one readable line of Chinese
+/// plus a run of coordinates, not a bare scheme.
 struct PopopxLocationPayload: Hashable, Sendable {
-    /// 纬度，-90...90。
+    /// Latitude, -90...90.
     var latitude: Double
-    /// 经度，-180...180。
+    /// Longitude, -180...180.
     var longitude: Double
-    /// 地点名；缺省时界面用坐标本身当名字（`displayName`）。
+    /// Place name; when absent the UI uses the coordinates themselves as the name (`displayName`).
     var name: String?
-    /// 详细地址，只做展示，不参与任何决策。
+    /// Detailed address, for display only - it plays no part in any decision.
     var address: String?
 
     init(
@@ -60,28 +60,28 @@ struct PopopxLocationPayload: Hashable, Sendable {
         self.address = address?.popopxTrimmedOrNil
     }
 
-    /// 十进制度，6 位小数——约 0.11 m，比消费级 GPS 的精度还细，多写只是浪费字节。
-    /// 纬度在前、经度在后，和 Apple 地图、CoreLocation 的顺序一致。
+    /// Decimal degrees with 6 fractional digits - about 0.11 m, finer than consumer-grade GPS accuracy, so writing more only wastes bytes.
+    /// Latitude first, longitude second, the same order as Apple Maps and CoreLocation.
     var coordinateString: String {
         "(\(Self.degree(latitude)), \(Self.degree(longitude)))"
     }
 
-    /// 没有地名时用坐标顶上，卡片永远有第一行可显示。
+    /// When there is no place name the coordinates stand in, so the card always has a first line to show.
     var displayName: String {
         name ?? coordinateString
     }
 
-    /// 缓存键用的稳定坐标形式（`PopopxLocationCardBubble` 的快照按它去重）。
+    /// The stable coordinate form used for the cache key (`PopopxLocationCardBubble` dedupes its snapshots by it).
     var coordinateKey: String {
         "\(Self.degree(latitude)),\(Self.degree(longitude))"
     }
 
-    /// 机器读的那一行：`popopx://loc?lat=…&lon=…&name=…&addr=…`。
+    /// The machine-read line: `popopx://loc?lat=...&lon=...&name=...&addr=...`.
     ///
-    /// 查询串手工拼而不是 `URLComponents.queryItems`：后者编码时把空格写成 `+` 还是 `%20`
-    /// 取决于构造路径，这种差异会进到线上字节；这里的每一个值都必须显式走 `.alphanumerics`
-    /// 白名单（它把空格、`&`、`#`、换行全部转义掉——实测输出见会话记录），解析端才能安全地
-    /// 按空白切 token、按 `&` 切字段、按第一个 `=` 分键值。
+    /// The query string is assembled by hand rather than with `URLComponents.queryItems`: when encoding, the latter writes a space as `+` or `%20`
+    /// depending on the construction path, and that difference would reach the wire bytes; every value here must explicitly go through the `.alphanumerics`
+    /// allowlist (it escapes spaces, `&`, `#` and newlines - the measured output is in the session log), so only then can the parsing side safely
+    /// split tokens on whitespace, split fields on `&`, and split key/value on the first `=`.
     var wireString: String {
         var query = "lat=\(Self.degree(latitude))&lon=\(Self.degree(longitude))"
         if let name {
@@ -93,37 +93,37 @@ struct PopopxLocationPayload: Hashable, Sendable {
         return "popopx://loc?\(query)"
     }
 
-    /// 实际发出去的那条文本：可读的降级行 + 换行 + 机器行。
+    /// The text actually sent out: the readable degrade line + newline + the machine line.
     ///
-    /// 它是纯文本，所以天然满足 `PopopxComposerRouting` 的 mesh 前提（`hasAttachments
-    /// == false`、无 `quotedItem`、TTL off、1:1 直聊）——位置消息在双模路由面前和一条普通
-    /// 文本消息**完全同构**，不需要任何特判。
+    /// It is plain text, so it naturally satisfies the mesh preconditions of `PopopxComposerRouting` (`hasAttachments
+    /// == false`, no `quotedItem`, TTL off, 1:1 direct chat) - in front of dual-mode routing a location message and an ordinary
+    /// text message are **completely isomorphic**, and no special-casing is needed.
     var messageContent: String {
         degradeLine + "\n" + wireString
     }
 
-    /// 单独那一行降级文本。
+    /// That degrade line of text on its own.
     ///
-    /// 它必须正好是一行——`name` / `address` 在 `init` 里已经把空白收敛成单个空格，所以
-    /// 来自 `CLPlacemark` 的换行（邮政地址里很常见）不会把这条消息撑成三行，接收方的
-    /// 纯文本降级视图和 `PopopxLocationCardBubble` 的标题行拿到的永远是同一句完整的话。
+    /// It must be exactly one line - `name` / `address` already collapse whitespace into a single space inside `init`, so
+    /// newlines from `CLPlacemark` (very common in postal addresses) cannot stretch this message into three lines, and the receiver's
+    /// plain-text degrade view and `PopopxLocationCardBubble`'s title line always get one and the same complete sentence.
     var degradeLine: String {
-        "📍 [位置] \(displayName) \(coordinateString)"
+        "📍 " + NSLocalizedString("[Location]", comment: "POPOPX location message") + " \(displayName) \(coordinateString)"
     }
 
-    /// 从任意文本里把一条 `popopx://loc` 载荷读出来；读不到就返回 nil，调用方
-    /// （`PopopxBubbleMount`）把 nil 当"这不是位置消息"，交回原来的纯文本渲染。
+    /// Reads one `popopx://loc` payload out of arbitrary text; if it cannot be read it returns nil and the caller
+    /// (`PopopxBubbleMount`) treats nil as "this is not a location message" and hands back to the original plain-text rendering.
     ///
-    /// 输入是接收方主动送进解析器的东西，所以每一步都当它在试探边界：先按空白切出候选
-    /// token（载荷里永远不会有空白），再逐段判 scheme / host / 键名 / 数值 / 量程。
+    /// The input is what the receiver pushes into the parser on its own initiative, so every step assumes it is probing the boundaries: first split candidate
+    /// tokens on whitespace (a payload never contains whitespace), then judge scheme / host / key names / numbers / range segment by segment.
     ///
-    /// 非锚定的整串匹配是有意的：真机上一旦给载荷前后加了标点，位置卡片就会无声地退化成
-    /// 一行纯文本，比抛错难查得多。宁可多认，也不放过。
+    /// The unanchored whole-string match is deliberate: on a real device, once punctuation is added around the payload, the location card silently degrades
+    /// into one line of plain text, far harder to trace than a thrown error. Better to recognise too much than to let one slip.
     ///
-    /// 命中多个候选时取**最后一个**，因为生产端把机器行拼在可读行之后——人读的那行里若
-    /// 夹着一个长得像载荷的串（地名就叫 `popopx://loc?lat=0&lon=0`，或转发来的文本），
-    /// 取第一个会让卡片的动作坐标和它自己印出来的坐标各行其是。实测过这条：取首个时
-    /// `messageContent` 甚至回不到自己。
+    /// When several candidates hit, the **last one** is taken, because the producer appends the machine line after the readable line - if the line
+    /// people read carries a string that looks like a payload (a place name literally called `popopx://loc?lat=0&lon=0`, or forwarded text),
+    /// taking the first would make the card's action coordinates and the coordinates it prints itself go their separate ways. Measured: with the first one
+    /// `messageContent` would not even come back to itself.
     static func parse(from text: String) -> PopopxLocationPayload? {
         for token in text.split(whereSeparator: \.isWhitespace).reversed() {
             if let payload = parseToken(String(token)) {
@@ -140,21 +140,21 @@ struct PopopxLocationPayload: Hashable, Sendable {
         else { return nil }
 
         var fields: [String: String] = [:]
-        // 必须是 `percentEncodedQuery`，不能用 `query`：后者返回的是**已解码**的查询串，
-        // `name=a%26b` 到它手里先变成 `name=a&b`，再按 `&` 切就把地名截断成了 `a`（实测）。
-        // 在编码形式上切分、再逐个值解码，`&` / `#` / `=` / 换行才回得来。
+        // It must be `percentEncodedQuery`, not `query`: the latter returns the **already decoded** query string,
+        // `name=a%26b` becomes `name=a&b` in its hands first, and splitting on `&` then cuts the place name down to `a` (measured).
+        // Splitting on the encoded form and then decoding each value one by one is what lets `&` / `#` / `=` / newlines come back.
         for pair in components.percentEncodedQuery?.split(separator: "&") ?? [] {
             guard let separator = pair.firstIndex(of: "=") else { continue }
             let key = String(pair[..<separator])
-            // 只认这四个键，其余（包括来历不明的野键）一律丢掉，不让一条字符串借着
-            // 我们的 scheme 拿到界面。键名在这里按**编码原字节**比较，所以写成 `na%6De`
-            // 这种绕过形式的键也一并落不进白名单。
+            // Only these four keys are recognised; everything else (including stray keys of unknown origin) is dropped, so that no string gets into the UI
+            // by borrowing our scheme. Key names are compared here on their **raw encoded bytes**, so a bypass form like `na%6De`
+            // never lands inside the whitelist either.
             guard fieldNames.contains(key) else { continue }
             let rawValue = String(pair[pair.index(after: separator)...])
-            // `URLComponents` 会把非法转义先修好（`name=%zz` 交出来的是 `%25zz`，读回字面量
-            // `%zz`），所以这道 guard 挡的不是残缺的 `%`，而是**语法合法、字节不是 UTF-8**
-            // 的序列（`%C0%80`、`%FF` 实测返回 nil）：那种 token 整串判死，不 fallback 到
-            // 原串，也不让半个字段进来。
+            // `URLComponents` repairs illegal escapes beforehand (`name=%zz` is handed out as `%25zz`, reading back the literal
+            // `%zz`), so this guard blocks not a truncated `%` but sequences that are **syntactically legal yet not valid UTF-8**
+            // (`%C0%80`, `%FF` return nil in measurement): that kind of token kills the whole string, with no fallback to
+            // the original string and no half field let in either.
             guard let value = rawValue.removingPercentEncoding else { return nil }
             fields[key] = value
         }
@@ -163,8 +163,8 @@ struct PopopxLocationPayload: Hashable, Sendable {
               let rawLongitude = fields["lon"],
               let latitude = Double(rawLatitude),
               let longitude = Double(rawLongitude),
-              // `Double("inf")`、`Double("nan")`、`Double("1e9")` 都解析得成功，所以"能变成
-              // 数"离"能当坐标"还差两步：先判有限，再判量程。
+              // `Double("inf")`, `Double("nan")` and `Double("1e9")` all parse successfully, so "it becomes a
+              // number" is still two steps from "it can be a coordinate": first test finiteness, then test the range.
               latitude.isFinite, longitude.isFinite,
               (-90.0...90.0).contains(latitude),
               (-180.0...180.0).contains(longitude)
@@ -180,39 +180,39 @@ struct PopopxLocationPayload: Hashable, Sendable {
 
     private static let fieldNames: Set<String> = ["lat", "lon", "name", "addr"]
 
-    /// 定长坐标分量，`wireString`、`coordinateString`、`coordinateKey` 共用一处写法，
-    /// 保证三者永远一致（`%.6f` 会把 89.9999999 进位成 `90.000000`，那是可接受的：
-    /// 载荷的语义精度就是 6 位）。
+    /// Fixed-length coordinate component, with one shared way of writing it for `wireString`, `coordinateString` and `coordinateKey`,
+    /// so the three stay forever consistent (`%.6f` rounds 89.9999999 up to `90.000000`, which is acceptable:
+    /// the payload's semantic precision is 6 digits).
     private static func degree(_ value: Double) -> String {
         String(format: "%.6f", value)
     }
 }
 
-/// 定位那条链路上唯一会说清楚的失败原因：拿不到位置。渲染失败的提示文案由选择器
-/// （`PopopxLocationPickerSheet.swift`）自己拼，这里不藏句子；界面上也从不显示枚举本身，
-/// 所以成员只有语义、没有 `LocalizedError`。
+/// The one failure reason the locating chain spells out: no position could be obtained. The hint copy for a rendering failure is composed by
+/// the picker itself (`PopopxLocationPickerSheet.swift`); no sentences are hidden here, and the enum itself is never shown in the UI,
+/// so the cases carry semantics only and no `LocalizedError`.
 enum PopopxLocationError: Error {
-    /// 定位服务没开（`CLLocationManager.locationServicesEnabled()`）。
+    /// Location services are not on (`CLLocationManager.locationServicesEnabled()`).
     case locationUnavailable
-    /// 用户拒绝或尚未决定：只申请 When In Use，不追问 Always（`location-prompt.md:35`）。
+    /// The user refused or has not decided yet: only When In Use is requested, Always is never asked for (`location-prompt.md:35`).
     case permissionDenied
-    /// 请求被取消，或 `CLLocationManager` 自己结束了更新。
+    /// The request was cancelled, or `CLLocationManager` ended updates on its own.
     case cancelled
-    /// 系统返回 `kCLErrorDenied`（地理围栏权限被拒）。
+    /// The system returned `kCLErrorDenied` (geofencing permission denied).
     case regionDenied
 }
 
 extension String {
-    /// 载荷字段用的编码：只留字母数字，其余全转义。空格、`&`、`#`、换行因此不可能出现在
-    /// 字段值里，`parse` 的"按空白切 token、按 `&` 切字段"才是安全的。
+    /// The encoding used for payload fields: only alphanumerics are kept and everything else is escaped. Spaces, `&`, `#` and newlines therefore cannot appear
+    /// inside field values, which is what makes `parse`'s "split tokens on whitespace, split fields on `&`" safe.
     fileprivate var popopxLocationEncoded: String {
         addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? self
     }
 
-    /// 空白串当 nil：一个只有空格的地名不如没有，界面上会显示成一行空白。
+    /// A whitespace-only string counts as nil: a place name made only of spaces is worse than none, since the UI shows it as a blank line.
     ///
-    /// 顺手把内部的空白串收敛成一个空格，于是 `name` / `address` 里不可能留换行，
-    /// `degradeLine` 恒为一行（见上面那段）。
+    /// Runs of internal whitespace are collapsed to a single space along the way, so `name` / `address` cannot keep a newline and
+    /// `degradeLine` is always exactly one line (see the passage above).
     fileprivate var popopxTrimmedOrNil: String? {
         let collapsed = self
             .split(whereSeparator: \.isWhitespace)

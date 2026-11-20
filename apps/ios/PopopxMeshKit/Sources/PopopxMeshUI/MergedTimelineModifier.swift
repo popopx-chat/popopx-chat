@@ -2,12 +2,12 @@
 //  MergedTimelineModifier.swift
 //  PopopxMeshUI
 //
-//  模块 7's 合并渲染组件. The mesh's private messages have to appear in the same ordered timeline as
+//  module 7's merged-rendering component. The mesh's private messages have to appear in the same ordered timeline as
 //  the chat history, with control signalling (`SYS_POPOPX_REQ:`, `SYS_POPOPX_ACK:`, `BLE_ACK:`)
 //  filtered out, one row per global `messageId`, and a badge that says which way the text travelled:
-//  蓝色盾牌 = SMP 公网, 橙色波纹 + 跳数 = Bitchat 离线, 灰色时钟 = 待中继.
+//  Blue shield = SMP public network, orange ripple + hop count = Bitchat offline, grey clock = awaiting relay.
 //
-//  红线「UI 零破坏挂载」(POPOPX_MESH_PROMPT.md 一.5) forbids rewriting `ChatView`, so this is a
+//  red line "zero-breakage UI mounting" (POPOPX_MESH_PROMPT.md section 1.5) forbids rewriting `ChatView`, so this is a
 //  `ViewModifier`: the app's own list stays the
 //  app's own list, and the rows the app does not have yet are inserted through the safe area. The
 //  full merged order is still computed and published, so the day the app adopts the timeline
@@ -27,11 +27,11 @@ import SwiftUI
 
 /// Which way a message travelled, and therefore which badge it gets.
 public enum PopopxMeshTimelineChannel: Hashable, Sendable {
-    /// 蓝色盾牌: the POPOPX SMP server carried it.
+    /// Blue shield: the POPOPX SMP server carried it.
     case smpPublicNetwork
-    /// 橙色波纹 + 跳数: the offline Bluetooth mesh carried it, this many hops away.
+    /// Orange ripple + hop count: the offline Bluetooth mesh carried it, this many hops away.
     case offlineMesh(hopCount: Int)
-    /// 灰色时钟: handed off, no acknowledgement yet — waiting for a relay to take it.
+    /// Grey clock: handed off, no acknowledgement yet — waiting for a relay to take it.
     case awaitingRelay
 
     /// The hop count the badge shows, if the channel carries one.
@@ -41,7 +41,7 @@ public enum PopopxMeshTimelineChannel: Hashable, Sendable {
     }
 
     /// The order rows fall into when two messages share a timestamp: the one that has NOT arrived yet
-    /// is the one the user has to see first. 模块 7 sells the grey clock as the honest "待中继", and a
+    /// is the one the user has to see first. module 7 sells the grey clock as the honest "awaiting relay", and a
     /// same-instant mesh row that renders above it would put a delivered bubble where the pending one
     /// belongs. Between the two copies that did leave the device, the app's own (SMP) row goes first,
     /// because that is the one `ChatView` already renders and the overlay is inserted around it.
@@ -122,7 +122,7 @@ public struct PopopxMeshTimelineMessage: Identifiable, Hashable, Sendable {
     }
 
     /// The mesh side, from plain values. `PopopxMeshInbound`'s memberwise initialiser is internal to
-    /// 模块 2, so a host that decodes a flood itself — and every test of the merge rule — comes in
+    /// module 2, so a host that decodes a flood itself — and every test of the merge rule — comes in
     /// through here instead.
     public static func offline(
         messageID: String,
@@ -212,7 +212,7 @@ public struct PopopxMeshTimelineMergeResult: Hashable, Sendable {
 
 // MARK: - Merger
 
-/// The whole 合并/去重/排序 rule, with no SwiftUI in it and no state to leak: two sequences in, one
+/// The whole merge/dedup/sort rule, with no SwiftUI in it and no state to leak: two sequences in, one
 /// ordered sequence out. Everything the checklist asks about the timeline is answerable here.
 public struct PopopxMeshTimelineMerger: Hashable, Sendable {
     /// The pairs this merger uses when a caller does not hand its own. Empty by default, which is the
@@ -223,7 +223,7 @@ public struct PopopxMeshTimelineMerger: Hashable, Sendable {
         self.flushedAppChatItemIDs = flushedAppChatItemIDs
     }
 
-    /// Control prefixes are the wire protocol's own (`PopopxMeshControlFrame`), not a copy: if 模块 3
+    /// Control prefixes are the wire protocol's own (`PopopxMeshControlFrame`), not a copy: if module 3
     /// changes a prefix, this filter changes with it.
     public static let controlPrefixes: [String] = [
         PopopxMeshControlFrame.pairingRequestPrefix,
@@ -238,14 +238,14 @@ public struct PopopxMeshTimelineMerger: Hashable, Sendable {
         return PopopxMeshControlFrame(trimmed) != nil
     }
 
-    /// 严格以全局唯一 `messageId` 幂等去重: one row per id, no matter how many neighbours flooded it
+    /// Strictly idempotent dedup on the globally unique `messageId`: one row per id, no matter how many neighbours flooded it
     /// or how many times the router re-sent the same text over SMP with the id it already had.
     ///
     /// - The application stream wins an id both streams carry: that copy is in the chat database, so
     ///   the app renders it and the overlay must not duplicate it.
     /// - An id in `awaitingRelayMessageIDs` is re-badged to the grey clock, which is the routing
     ///   layer's verdict overriding the transport's: a message the router still owes an ACK for is
-    ///   "待中继" even if the engine once reported it as mesh-delivered.
+    ///   "awaiting relay" even if the engine once reported it as mesh-delivered.
     /// - A flushed offline message is the SAME message as the row the app stored, under two names. When
     ///   `flushedAppChatItemIDs` pairs a mesh id with a row id, both rows are looked up under the row id
     ///   and the application copy wins, so the bubble appears once. Without the pair the two streams
@@ -374,7 +374,7 @@ public struct PopopxMeshBadgeDescriptor: Hashable, Sendable {
     }
 }
 
-/// The bubble's channel badge. 蓝色盾牌 / 橙色波纹+跳数 / 灰色时钟, exactly as 模块 7 specifies.
+/// The bubble's channel badge. Blue shield / orange ripple + hop count / grey clock, exactly as module 7 specifies.
 @MainActor
 public struct PopopxMeshChannelBadge: View {
     private let descriptor: PopopxMeshBadgeDescriptor
@@ -443,7 +443,7 @@ public final class PopopxMeshTimelineModel: ObservableObject {
         self.source = source
         self.routing = routing
         // One pipeline, four inputs: the app's own stream, the mesh's stream, the ids either the mesh
-        // or 模块 5 still owes a relay for, and the mesh-id → stored-row-id pairs a flush left behind.
+        // or module 5 still owes a relay for, and the mesh-id → stored-row-id pairs a flush left behind.
         // `assign(to: &$…)` keeps the whole data flow in Combine with no closure that outlives the main
         // actor.
         Publishers.CombineLatest4(applicationStream, offlineStream, relayStream, flushedAppItemsStream)
@@ -552,7 +552,7 @@ public final class PopopxMeshTimelineModel: ObservableObject {
         relayStream.send([])
     }
 
-    /// 模块 5's pending-relay queue, pulled once per change. A host without a router gets the empty
+    /// Module 5's pending-relay queue, pulled once per change. A host without a router gets the empty
     /// set and still sees the engine's own `sendFailed` clocks, because the two sources are unioned.
     ///
     /// All three halves are pulled *here*: the router's queue, the pairs its flushes left, and the
@@ -709,7 +709,7 @@ public struct PopopxMeshOfflineTimelineStrip: View {
 }
 
 public extension View {
-    /// 零破坏挂载点: merge the mesh timeline into `self`. The wrapped view is not modified — no
+    /// Zero-breakage mount point: merge the mesh timeline into `self`. The wrapped view is not modified — no
     /// environment object, no initializer change, no rewrite of its body.
     ///
     /// Pass `chatID` whenever the wrapped view is one chat of several that can be alive at the same

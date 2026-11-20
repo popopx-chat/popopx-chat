@@ -86,10 +86,10 @@ struct NetworkAndServers: View {
                             }
                         }
                     }
-                    // 真机第 8 轮 · 任务六（层级重排）：「Advanced network settings」这一行上提到设置页
-                    // 「网络与服务器」那张卡（Shared/Features/Settings/PopopxSettingsViews.swift 的
-                    // `networkCard`），原处删除。目的地与它的 `navigationTitle`/`ThemedBackground`
-                    // 一起搬走，本页因此不再引用 `AdvancedNetworkSettings`；这一页只剩服务器本身的行。
+                    // Real device round 8, task six (hierarchy re-order): the Advanced network settings row moved up into the settings page's
+                    // Network and servers card (the one in Shared/Features/Settings/PopopxSettingsViews.swift,
+                    // `networkCard`), and was deleted from its original place. The destination moved together with its `navigationTitle`/`ThemedBackground`,
+                    // so this page no longer references `AdvancedNetworkSettings`; only the rows about the servers themselves remain here.
                 } header: {
                     Text("Messages & files")
                         .foregroundColor(theme.colors.secondary)
@@ -112,9 +112,9 @@ struct NetworkAndServers: View {
                     }
                 }
 
-                // 真机第 8 轮 · 任务六：这一段「Network connection」读数（类型 + 在线点）上提到设置页
-                // 「网络与服务器」那张卡，原处删除。它读的仍是同一份真值
-                // `ChatModel.networkInfo`（NetworkObserver.swift:34 每次路径变化写入），只是换了摆的位置。
+                // Real device round 8, task six: this Network connection readout (type + online dot) moved up into the settings page's
+                // Network and servers card, and was deleted from its original place. It still reads the same source of truth,
+                // `ChatModel.networkInfo` (NetworkObserver.swift:34 writes it on every path change), only its placement changed.
             }
         }
         .task {

@@ -43,9 +43,9 @@ private func shouldShowAvatar(_ current: ChatItem, _ older: ChatItem?) -> Bool {
     }
 }
 
-// 【B5】重算气泡通道表的触发量。必须是 `Equatable` 才能当 `.task(id:)` 的键——带标签的 tuple
-// 不合成 `==`，所以用显式结构体。四个成员都是 `Hashable`，比较代价与现网已有的
-// `.onChange(of: im.reversedChatItems)` 同一量级。
+// [B5] The trigger value for recomputing the bubble channel table. It must be `Equatable` to serve as the key of `.task(id:)` -- a labelled tuple
+// does not synthesise `==`, hence an explicit struct. All four members are `Hashable`, and the comparison cost is of the same order as
+// the `.onChange(of: im.reversedChatItems)` the live code already has.
 private struct PopopxBubbleTableKey: Equatable {
     var items: [ChatItem]
     var fuse: Bool
@@ -107,8 +107,8 @@ struct ChatView: View {
     @State private var supportChatMemberInfoLinkActive = false
     @State private var scrollView: EndlessScrollView<MergedItem> = EndlessScrollView(frame: .zero)
 
-    // 【B5】气泡的通道表。一次读齐、逐行查表：`PopopxBubbleTransportResolver` 那三次 actor hop
-    // 必须整批发起，一行一次 await 是那个组件明确禁止的画法（PopopxMessageBubble.swift:22）。
+    // [B5] The channel table of the bubbles. Read once, then look up row by row: the three actor hops in `PopopxBubbleTransportResolver`
+    // must be issued as one batch, and one await per row is the drawing that component explicitly forbids (PopopxMessageBubble.swift:22).
     @ObservedObject private var popopxMeshRuntime = PopopxMeshRuntime.shared
     @ObservedObject private var popopxMeshStateSource = PopopxMeshStateSource.shared
     @ObservedObject private var popopxMeshTimelineModel = PopopxMeshRuntime.shared.timelineModel
@@ -122,7 +122,7 @@ struct ChatView: View {
         chat.chatInfo.activeChatLayout(profileChatLayout(ChatModel.shared.currentUser)) == .terminal
     }
 
-    /// 重算通道表的全部触发量：换消息、开关保险丝、时间线定性、射频档位。
+    /// All the trigger values that recompute the channel table: messages changing, the fuse switching, the timeline being qualified, the radio tier.
     private var popopxBubbleTableKey: PopopxBubbleTableKey {
         PopopxBubbleTableKey(
             items: im.reversedChatItems,
@@ -147,7 +147,7 @@ struct ChatView: View {
             mappingStore: popopxMeshRuntime.mappingStore,
             router: popopxMeshRuntime.router
         )
-        // 读的同时又翻了页就不落这一版：下一次 `.task(id:)` 会带更新的答案重来。
+        // If the page moved again while reading, this version is not stored: the next `.task(id:)` starts over with a newer answer.
         guard popopxBubbleTableKey == key else { return }
         popopxBubbleTable = PopopxBubbleTransportResolver.table(sources, rows: addresses)
     }
@@ -1809,8 +1809,8 @@ struct ChatView: View {
         let olderRow: MergedItem?
         let listWidth: CGFloat
         let maxWidth: CGFloat
-        /// 【B5】整表在 ChatView 一次算好，行渲染只查字典（逐行 await 是气泡禁止的画法，
-        /// PopopxMessageBubble.swift:22）。声明位置决定 memberwise init 的参数次序，别往上挪。
+        /// [B5] The whole table is computed once in ChatView and row rendering only consults the dictionary (per-row await is the pattern the bubble forbids,
+        /// PopopxMessageBubble.swift:22). The declaration position decides the argument order of the memberwise init, so do not move it up.
         let channelTable: PopopxBubbleChannelTable
         @Binding var composeState: ComposeState
         @Binding var selectedMember: GMember?
@@ -2305,16 +2305,16 @@ struct ChatView: View {
             member.memberRole > .member ? member.memberRole.text(isChannel: groupInfo.isChannel) : nil
         }
 
-        /// 一行的入口：静默信令那一行在本机不画任何东西。
+        /// One row's entry point: the silent-signaling row draws nothing at all locally.
         ///
-        /// `::popopx_sys::` 开头的文本是算力点生态自己发出去的载荷（兑换请求/回执/核销通知），
-        /// 用户既不需要看见它，也不该能长按它。`PopopxSilentSignalingRouter.handle` 已经双侧删行，
-        /// 这一层守的是两件事：删除落地之前的那一瞬，以及删除失败时留下的那一行。
-        /// 判据与解析共用 `PopopxSysMarker.parse`——它要求**整串相等**，所以一句"看这段
-        /// ::popopx_sys:: 的截图"不会被当成信令（PopopxBadgeCreditsModels.swift:830-851）。
+        /// Text starting with `::popopx_sys::` is a payload the compute-credit ecosystem itself sent out (redemption request / receipt / write-off notice),
+        /// the user neither needs to see it nor should be able to long-press it. `PopopxSilentSignalingRouter.handle` already deletes the row on both sides,
+        /// and what this layer guards is two things: the instant before the deletion lands, and the row left behind when the deletion fails.
+        /// The test and the parsing share `PopopxSysMarker.parse` -- it requires **whole-string equality**, so a sentence like "look at this
+        /// ::popopx_sys:: screenshot" is not treated as signaling (PopopxBadgeCreditsModels.swift:830-851).
         ///
-        /// 为什么挂在行这一层而不是气泡那一层：气泡只在 `!terminal` 且非群/频道时才被问到，
-        /// 终端排版和群里的信令行会绕过它，直接由现网 `ChatItemView` 把签名念出来。
+        /// Why it mounts at the row layer rather than the bubble layer: the bubble is only asked when `!terminal` and not a group/channel,
+        /// so terminal layout and signaling rows in groups bypass it, and the live `ChatItemView` reads the signature out loud directly.
         @ViewBuilder
         func chatItemWithMenu(_ ci: ChatItem, _ range: ClosedRange<Int>?, _ maxWidth: CGFloat, _ itemSeparation: ItemSeparation) -> some View {
             if PopopxSysMarker.isSignalText(ci.content.msgContent?.text ?? "") {
@@ -2342,8 +2342,8 @@ struct ChatView: View {
                             goToItemButton(true)
                         }
                         if !terminal, let bubbleContent = PopopxBubbleMount.body(of: ci, chat: chat) {
-                            // 气泡自己用 `UnevenRoundedRectangle` 画底（PopopxMessageBubble.swift:163-174），
-                            // 所以这一支**不套** `ChatItemClipped`，也**不抹**无障碍标签（它自带合并后的整句）。
+                            // The bubble draws its own background with `UnevenRoundedRectangle` (PopopxMessageBubble.swift:163-174),
+                            // so this branch **does not wrap** `ChatItemClipped` and **does not erase** the accessibility label (it carries its own merged full sentence).
                             PopopxMessageBubble(
                                 PopopxBubbleMount.item(
                                     ci,

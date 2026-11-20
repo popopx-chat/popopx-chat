@@ -7920,8 +7920,8 @@ alert title */
 "Your subscription is cancelled. The badge stays until %@." = "Ваша подписка отменена. Значок действует до %@.";
 
 
-/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
-/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+/* === POPOPX compute-points economy (BadgeCredits) commercial copy: one-to-one with PopopxCommerceCopy === */
+/* These 37 rows correspond directly to the NSLocalizedString keys in PopopxBadgeCreditsModels.swift; en.lproj holds none of them (value == key). */
 
 /* product name */
 "POPOPX Dynamic Privacy Node Badge" = "Значок POPOPX динамического узла конфиденциальности";
@@ -8034,7 +8034,7 @@ alert title */
 /* error */
 "Your Compute Credits balance cannot go above %lld. Spend some credits first." = "Баланс вычислительных баллов не может превышать %lld. Сначала потратьте часть баллов.";
 
-/* ==== POPOPX onboarding v2 (2026-11-19) — 引导页四屏 + 隐私政策/使用条款 ==== */
+/* ==== POPOPX onboarding v2 (2026-11-19) - the four onboarding screens + privacy policy / terms of use ==== */
 /* POPOPX onboarding v2 — generated block, 2026-11-19 */
 
 /* Onboarding: header pills */
@@ -8046,12 +8046,10 @@ alert title */
 "Own your network." = "Ваша сеть принадлежит вам.";
 "Private messaging with no account and no user IDs." = "Приватные сообщения без аккаунта и без идентификаторов пользователей.";
 "SMP end-to-end encrypted" = "SMP со сквозным шифрованием";
-"厢语 Bluetooth Mesh relay" = "Ретранслятор Bluetooth Mesh 厢语";
 "What POPOPX gives you" = "Что даёт POPOPX";
 "No user IDs" = "Без идентификаторов пользователей";
 "No phone number, no email, no global public key. Nothing links your contacts to each other, and each anonymous identity stays separate." = "Ни номера телефона, ни электронной почты, ни глобального открытого ключа. Ничто не связывает ваши контакты между собой, и каждая анонимная идентичность остаётся отдельной.";
 "Dynamic relays and near-field" = "Динамические ретрансляторы и ближняя связь";
-"Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "В сети вы используете динамический кластер SMP-ретрансляционных узлов. Без сети 厢语 переключается на Bluetooth Mesh из 1–7 прыжков и связывается лицом к лицу через UWB или касание.";
 "Anti-peeping and local-only cards" = "Защита от подглядывания и карточки только локально";
 "Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "Снимки экрана и запись блокируются, совершенно секретные сообщения уничтожаются после прочтения, геолокация остаётся зашифрована в обоих режимах, и ваша шифрованная карточка профиля никогда не покидает это устройство.";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "Завершите настройку, чтобы получить пробный значок узла-пионера на 3 дня.";
@@ -8083,7 +8081,6 @@ alert title */
 "Higher privacy · balanced battery" = "Больше приватности · баланс батареи";
 "Maximum discretion · nothing pushed" = "Максимальная скрытность · push отключён";
 "Apple's push service carries only the signal that new data is waiting, never the content." = "Сервис push Apple передаёт только сигнал о новых данных и никогда их содержимое.";
-"厢语 offline mesh" = "Офлайн mesh 厢语";
 "When the internet is down, messages hop over nearby devices, up to 7 hops, with no server. Pair face to face with UWB or a tap." = "Без интернета сообщения передаются прыжками между соседними устройствами, до 7 прыжков, без сервера. Связывайтесь лицом к лицу через UWB или касание.";
 "Bluetooth permission is requested the first time the mesh starts." = "Разрешение Bluetooth запрашивается при первом запуске mesh.";
 
@@ -8127,13 +8124,11 @@ alert title */
 "The camera guard stays local" = "Наблюдатель камеры остаётся локальным";
 "The anti-peeping guard switches the front camera on only while a top-secret sheet is open, at the lowest resolution, processes every frame on this device and stops the stream when the sheet closes. Nothing is written to disk and nothing is uploaded." = "Наблюдатель против подглядывания включает фронтальную камеру, только пока открыт лист совершенно секретной папки, в наименьшем разрешении, обрабатывает каждый кадр на этом устройстве и останавливает поток при закрытии листа. Ничто не записывается на диск и не загружается.";
 "Screenshots, recordings and offline hops" = "Снимки, запись и офлайн-прыжки";
-"Protected screens are blocked from screenshots and screen recording by the system itself. In 厢语 mode messages hop over Bluetooth between nearby devices and never reach the public internet." = "Система сама блокирует снимки и запись экрана на защищённых экранах. В режиме 厢语 сообщения прыгают по Bluetooth между соседними устройствами и никогда не выходят в публичный интернет.";
 "Your controls" = "Управление у вас";
 "You can export or delete any identity, erase the local database or trigger Panic Wipe at any time. Deletion is irreversible because no server holds a copy." = "Вы можете в любой момент экспортировать или удалить любую идентичность, стереть локальную базу данных или запустить Panic Wipe. Удаление необратимо, потому что ни один сервер не хранит копию.";
 
 /* Legal: terms */
 "Acceptable use" = "Допустимое использование";
-"Use POPOPX within the laws of the country you are in. Public groups and 厢语 broadcasts must carry no unlawful content, no spam and no harassment of other users." = "Используйте POPOPX в рамках законов страны, в которой вы находитесь. Публичные группы и трансляции 厢语 не должны содержать незаконный контент, спам и преследование других пользователей.";
 "Your keys, your responsibility" = "Ваши ключи — ваша ответственность";
 "Your mnemonic phrase, identity keys, badges and POPOPX Compute Credits exist only on this device. If the device or the phrase is lost, they cannot be recovered, frozen or reissued by anyone." = "Ваша мнемоническая фраза, ключи идентичности, значки и вычислительные баллы POPOPX существуют только на этом устройстве. Если устройство или фраза утрачены, их никто не сможет восстановить, заморозить или выпустить заново.";
 "No guarantee of availability" = "Нет гарантии доступности";
@@ -8413,7 +8408,6 @@ alert title */
 "Badge lit for %lld more days." = "Значок активен ещё %lld дн.";
 "Choose a plan" = "Выберите тариф";
 "Renew or change plan" = "Продлить или сменить тариф";
-"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "Открывает панель 厢语: главный переключатель, каналы и ближайшие узлы";
 "Subscribed channels" = "Каналы с подпиской";
 "No channels yet" = "Каналов пока нет";
 "%d channels you follow" = "Каналов с подпиской: %d";
@@ -8454,13 +8448,13 @@ alert title */
 "Broadcast to #mesh" = "Отправить в #mesh";
 "Send over the offline mesh" = "Отправить через офлайн-сеть";
 
-/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+/* POPOPX round 19: keys added during the ninth pass over the three tabs */
 "Back to messages" = "Вернуться к сообщениям";
 "POPOPX Badge" = "Значок POPOPX";
 "Added %lld Compute Credits to your balance." = "В ваш баланс добавлено %lld вычислительных баллов.";
 "Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple ещё подтверждает эту покупку. Вычислительные баллы появятся в вашем балансе сразу после подтверждения.";
 "Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple принял оплату, но это устройство пока не смогло добавить баллы в ваш баланс. Они будут зачислены, когда защищённое хранилище снова станет доступным для записи.";
-/* POPOPX round 21 第 9 轮：厢语「发现」入口无障碍说明 + 7 条 zh-Hans 上游缺值 */
+/* POPOPX round 21, ninth pass: accessibility hint for the Cabin 'Discover' entry + 7 upstream values missing from zh-Hans */
 "Discover nearby groups and channels over the Bluetooth mesh" = "Найдите ближайшие группы и каналы через ячеистую сеть Bluetooth";
 "Album" = "Альбом";
 "Camera" = "Камера";
@@ -9846,3 +9840,25 @@ alert title */
 "🔒 [Channel subscription] %1$lld Compute Credits / %2$lld days" = "🔒 [Подписка на канал] %1$lld вычислительных баллов / %2$lld дн.";
 "🧧 [Compute Credits packet] %1$lld · split equally into %2$lld shares" = "🧧 [Конверт баллов] %1$lld · делится поровну на %2$lld частей";
 "🧧 [Compute Credits packet] %lld" = "🧧 [Конверт баллов] %lld";
+"Top-up %lld compute points" = "Пополнение баланса: %lld вычислительных баллов";
+"Exchange did not complete · returned automatically" = "Обмен не состоялся · автоматический возврат";
+"Redeemed a %lld-day privacy node badge" = "Активирован значок узла приватности на %lld дней";
+"Redeemed %lld × %lld-day gift-card vouchers" = "Активировано %lld подарочных ваучеров, каждый на %lld дней";
+"Sent a red packet of %lld compute points (%lld equal shares)" = "Отправлен красный конверт на %lld вычислительных баллов (поровну на %lld частей)";
+"Received a compute-point red packet" = "Получен красный конверт с вычислительными баллами";
+"Received a red packet: %@" = "Получен красный конверт: %@";
+"Red packet not fully claimed, %lld returned" = "Красный конверт разобран не до конца, возвращено %lld";
+"Subscribed to channel %@" = "Подписка на канал %@";
+"Unlocked a profile card" = "Разблокирована карточка профиля";
+"Extended the anti-peeping viewing window" = "Окно просмотра с защитой от подглядывания продлено";
+"Refund clawback (what was already spent is not recovered)" = "Списание при возврате средств (уже потраченное не изымается)";
+"Refund clawback" = "Списание при возврате средств";
+"Aurora shield avatar frame" = "Рамка аватара «Щит сияния»";
+"Dark gold QR card skin" = "Оформление QR-карточки «Тёмное золото»";
+"[Location]" = "[Геолокация]";
+"[Encrypted profile]" = "[Шифрованный профиль]";
+"[Encrypted profile · attachment]" = "[Шифрованный профиль · вложение]";
+"Unnamed profile" = "Профиль без названия";
+"[Top-secret view-once] Open after biometrics" = "[Совершенно секретно, однократный просмотр] Открыть после биометрии";
+"[Top-secret security alert] %@; that top-secret message was destroyed in place." = "[Совершенно секретно: предупреждение безопасности] %@; это совершенно секретное сообщение уничтожено на месте.";
+"Neither Bluetooth nor the public network is available — %lld messages waiting to send" = "Ни Bluetooth, ни публичная сеть недоступны — %lld сообщений ждут отправки";

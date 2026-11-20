@@ -22,7 +22,7 @@ public struct PopopxGroupSigningIdentity: Sendable {
     public static let keyByteCount = 32
     public static let signatureByteCount = 64
 
-    /// The mesh's group secrets live under one service, so 模块 7's panic wipe takes the signing
+    /// The mesh's group secrets live under one service, so module 7's panic wipe takes the signing
     /// key and every group key in one `removeAll(service:)`.
     public static let keychainService = "chat.popopx.mesh.groups"
     public static let keychainAccount = "group-signing-key"

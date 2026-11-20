@@ -299,9 +299,9 @@ struct ChatPreviewView: View {
     }
 
     func chatItemPreview(_ cItem: ChatItem) -> (Text, Bool) {
-        // 静默信令不做会话预览。这一行在聊天页已经不渲染（ChatView.swift 的行闸），但信令常常正是
-        // 这一会话的最后一条，列表里就会把 `::popopx_sys::…` 原样念出来；删行落地之前这里是它唯一
-        // 可见的时刻。判据与行闸、通知闸共用 `PopopxSysMarker`（要求整串相等），所以这里不多一次解析规则。
+        // Silent signalling gets no conversation preview. This row is no longer rendered on the chat page (the row gate in ChatView.swift), but a signal is often exactly
+        // the last message of that conversation, and the list would then read out `::popopx_sys::...` verbatim; until the row deletion lands this is its only
+        // visible moment. The test, the row gate and the notification gate share `PopopxSysMarker` (which requires whole-string equality), so no extra parsing rule is added here.
         if PopopxSysMarker.isSignalText(cItem.content.msgContent?.text ?? "") {
             return (Text(""), false)
         }

@@ -2,109 +2,109 @@
 //  PopopxSecureSheetView.swift
 //  POPOPX (iOS)
 //
-//  【模块五的内容面 + 模块六的阅读面】绝密窗口里用户实际看到的那一屏，
-//  以及会话列表里那张锁起来的知识卡片（`PopopxSecureCardBubble`）。
+//  [Module 5's content surface + module 6's reading surface] the screen a user actually sees inside the top-secret window,
+//  and the locked knowledge card in the conversation list (`PopopxSecureCardBubble`).
 //
-//  ### 这一屏的四条硬约束，以及它们如何决定了形状
-//  1. **永远只有黑底。** 不跟随浅色模式：`PopopxScreenCaptureShieldView` 给采集端画的是纯黑，
-//     而内容面在浅色模式下会变成接近白的底 —— 那意味着"护盾"和"内容"的边界本身就是一条可被
-//     录屏反推的信息（哪里亮，哪里就是字）。所以整个 surface 恒定深色，墨色也必须恒定：
-//     见 `PopopxSecureSurface.ink`，那里写清了为什么调色板的 `onBrand`/`label` 两族都不能用
-//     （它们随 colorScheme 翻转，深色模式下在本面上会得到一屏看不见的字）。
-//  2. **状态机只有四个相位**：`reading` / `locked` / `burned` / `closed`。加起来是因为"打开被拒"
-//     这一类**不在这个视图里表达**：`present` 在窗口建立之前就返回失败，反馈落点必须是用户
-//     刚点的那张卡片（气泡自己显示 toast），而不是一个还没出现的窗口。
-//  3. **明文不进 `Text` 之外的任何持久面**：不写日志、不进 `@State`、不做引用预览。
-//     `text` 是 `private(set)`，只有 `invalidate()` 能把它清空。
-//  4. **一切逐帧的东西在这里开、在这里关**：`PopopxAntiPhotoRenderView`、聚光/逐行、盲水印
-//     都挂在 `reading` 相位下面。相位一离开 `reading`，这些视图随 SwiftUI 一起消失，
-//     它们内部的 `PopopxFrameTicker` 也就 `stop()` 了 —— 这是"弹窗关闭立即停"在 UI 侧的落点，
-//     不需要在这里再写一遍 teardown。
+//  ### The four hard constraints of this screen, and how they decided its shape
+//  1. **Always a black background only.** It does not follow light mode: `PopopxScreenCaptureShieldView` draws pure black for the capture side,
+//     while the content surface in light mode turns into a near-white background — that would make the boundary between "shield" and "content" itself a piece of information
+//     a screen recording could infer back from (wherever it is bright, that is where the text is). So the whole surface is permanently dark, and the ink must be permanent too:
+//     see `PopopxSecureSurface.ink`, which spells out why neither the palette's `onBrand` nor its `label` family can be used
+//     (they flip with colorScheme, and in dark mode this surface would end up with a screen of invisible text).
+//  2. **The state machine has only four phases**: `reading` / `locked` / `burned` / `closed`. They add up because "opening refused"
+//     is a class **not expressed in this view**: `present` returns failure before the window is established, so the feedback must land on the card the user
+//     has just tapped (the bubble shows the toast itself), not on a window that has not appeared yet.
+//  3. **Plaintext enters no persistent surface outside `Text`**: no log writes, no `@State`, no quote preview.
+//     `text` is `private(set)`, and only `invalidate()` can clear it.
+//  4. **Everything frame-by-frame opens here and closes here**: `PopopxAntiPhotoRenderView`, spotlight/line-by-line, the blind watermark
+//     are all hung under the `reading` phase. The moment the phase leaves `reading`, these views disappear along with SwiftUI,
+//     and the `PopopxFrameTicker` inside them `stop()` — this is where "stop immediately when the sheet closes" lands on the UI side,
+//     so no teardown needs to be written a second time here.
 //
-//  ### 读屏（VoiceOver）这一条是有意的取舍，不是遗漏
-//  正文字体被 `.accessibilityHidden(true)` 排除在无障碍树之外。理由：VoiceOver 的朗读内容会进入
-//  系统无障碍通道，而这条通道不在本特性的任何控制范围内（字幕、第三方开关控制、录屏里的 AX 高亮
-//  都能把它带出屏幕）。代价同样明确：**读屏用户在这一条消息上读不到正文**。所以这一档必须在界面上
-//  说清楚（`PopopxSecureCopy.accessibilityNote`），不能默默关掉——而"要不要为读屏开一条例外"
-//  是产品裁定，不是这一层能自己定的默认值。
+//  ### The screen-reader (VoiceOver) rule is a deliberate trade-off, not an omission
+//  The body text is excluded from the accessibility tree by `.accessibilityHidden(true)`. Reason: what VoiceOver reads aloud enters
+//  the system's accessibility channel, and that channel is outside this feature's control entirely (captions, third-party switch control, the AX highlight in a recording
+//  can all carry it off the screen). The cost is equally explicit: **screen-reader users cannot read the body of this message**. So this setting must be stated
+//  in the interface (`PopopxSecureCopy.accessibilityNote`) and cannot be switched off silently — and whether to open an exception for screen readers
+//  is a product ruling, not a default this layer gets to set for itself.
 //
-//  ### 为什么 `close` 是闭包而不是让视图直接叫单例
-//  视图叫 `PopopxSecureWindowManager.shared` 也能跑，但那样这个文件就不能脱离单例做预览和断言。
-//  闭包作为**视图/模型的入参**是 SwiftUI 的正常形状（`Button` 的 action 同理）；被禁止的是把闭包
-//  存进 `Environment`（没有稳定身份，每次写入都会让整棵子树失效）。
+//  ### Why `close` is a closure instead of letting the view call the singleton directly
+//  The view calling `PopopxSecureWindowManager.shared` would also run, but then this file could not be previewed or asserted apart from the singleton.
+//  A closure as **a view/model input parameter** is an ordinary SwiftUI shape (`Button`'s action likewise); what is forbidden is storing a closure
+//  into `Environment` (it has no stable identity, and every write invalidates the whole subtree).
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. The red line forbids scripts from modifying project.pbxproj.
 //
 
 import SwiftUI
 
-// MARK: - 模型
+// MARK: - The model
 
-/// 绝密窗口的可见状态。`@MainActor @Observable`：只有主线程会写它，
-/// 而写它的四个入口（倒计时 tick、告警、销毁、断开）全在 `PopopxSecureWindowManager` 里。
+/// The top-secret window's visible state. `@MainActor @Observable`: only the main thread writes it,
+/// and all four entry points that write it (countdown tick, alert, destruction, disconnection) are inside `PopopxSecureWindowManager`.
 @MainActor
 @Observable
 final class PopopxSecureSheetModel {
-    /// 四个相位，互斥且覆盖全部可见状态。
+    /// Four phases, mutually exclusive and covering every visible state.
     enum Phase: Hashable {
-        /// 明文可读，倒计时在走，逐帧组件在跑。
+        /// Plaintext is readable, the countdown is running, the frame-by-frame components are running.
         case reading
-        /// 黑罩 + 原因，明文仍在内存里（只有 `leftForeground` 且关掉销毁时会停在这里）。
-        /// 这一档只有一个动作：关闭并销毁。"解锁继续看"需要再走一次生物识别，
-        /// 而那次应该由用户重新点卡片发起 —— 在视图里再造一条验证流程就等于造第二个状态机。
+        /// A black cover + the reason, with the plaintext still in memory (this is where it stops only when `leftForeground` and destruction is switched off).
+        /// This tier has one action only: close and destroy. "Unlock to keep reading" would need another biometric round,
+        /// and that one should be started by the user tapping the card again — building another verification flow in the view is building a second state machine.
         case locked(reason: String)
-        /// 明文已擦，窗口还留着是为了让用户看见**为什么**关。
-        /// `reason` 为 nil = 正常看完/正常到点，没有要解释的事。
-        /// 记录删没删、回执发没发，全由下面这两个值说，视图不替它们加任何保证。
-        /// `deleted` = false 时**必须**说出来：这一格是"焚毁"这个声明里唯一可能没做到的部分，
-        /// 蒙过去就等于让"这条已经被焚毁"变成一句不成立的声明。
+        /// The plaintext is already wiped; the window is kept so the user can see **why** it closed.
+        /// `reason` being nil = read to the end / expired normally, there is nothing to explain.
+        /// Whether the record was deleted and whether the receipt was sent are stated entirely by the two values below; the view adds no guarantee on their behalf.
+        /// When `deleted` = false it **must** be said: this field is the only part of the "burned" claim that may not have been carried out,
+        /// and glossing over it would turn "this one has already been burned" into a claim that does not hold.
         case burned(reason: String?, receiptCount: Int, deleted: Bool)
-        /// 收尾中：视图正在消失，任何回调都不该再生效。
+        /// Wrapping up: the view is disappearing, and no callback should take effect any more.
         case closed
     }
 
     private(set) var text: String?
     private(set) var phase: Phase = .reading
-    /// 这一档能被本机付费抬高（见 `extendTotal(by:)`），所以它不是 `let`；
-    /// 写入权仍然只在管理器手里，视图读不到setter之外的那一半。
+    /// This tier can be raised by local payment (see `extendTotal(by:)`), so it is not a `let`;
+    /// the write right still rests only with the manager, and the view cannot reach the half beyond the setter.
     private(set) var totalSeconds: Int
     private(set) var remainingSeconds: Int
 
-    /// 阅读模式（模块六）。默认聚光：它不需要用户先学会一个手势就能用。
+    /// Reading mode (module 6). Spotlight by default: it needs no gesture the user must learn before it can be used.
     var readMode: PopopxSecureReadMode = .spotlight
-    /// 防滚动快门（模块六）。
+    /// Anti rolling-shutter protection (module 6).
     var antiPhotoEnabled: Bool
-    /// 值守状态的一句话说明：少了哪一路、为什么少。`PopopxCameraGuardEngine` 与
-    /// `PopopxCameraGuardFailure` 都产这个字符串，这里只负责显示。
+    /// A one-sentence note on the guard state: which channel is missing and why. `PopopxCameraGuardEngine` and
+    /// `PopopxCameraGuardFailure` both produce this string; this only takes care of displaying it.
     var guardNote: String?
 
-    /// 盲水印里的会话号。一次窗口一个，销毁后不重用——它的取证价值正是"这一条是从哪一次查看出去的"。
+    /// The session number inside the blind watermark. One per window, never reused after destruction — its forensic value is exactly "which viewing did this one leak from".
     let sessionIdentifier: String
 
     private let close: () -> Void
-    /// 断开标记。`invalidate()` 置位之后，`requestClose()` 永久变成空操作。
+    /// The disconnection flag. Once `invalidate()` sets it, `requestClose()` becomes a permanent no-op.
     ///
-    /// 这一条是"双重清理"能安全成立的前提：`.onDisappear` 和 `dismissSecureWindow()` 会**都**触发，
-    /// 没有这个标志的话，窗口拆除时 SwiftUI 发出的 `onDisappear` 会在销毁之后
-    /// 再走一遍"用户主动关闭"，于是同一条消息被删两次、回执发两条。
+    /// This is the precondition on which "double cleanup" can hold safely: `.onDisappear` and `dismissSecureWindow()` **both** fire,
+    /// and without this flag the `onDisappear` SwiftUI emits when the window is torn down would, after destruction,
+    /// walk "the user closed it deliberately" a second time, so the same message would be deleted twice and two receipts sent.
     private var isDisconnected = false
 
-    /// DEBUG 专用的"明文已交出"凭据。
+    /// A DEBUG-only "plaintext has been handed over" credential.
     ///
-    /// 为什么不直接读 `text`：`@Observable` 把 `text` 换成带观察访问器的属性，访问器继承类的
-    /// `@MainActor` 隔离；而 `deinit` 在 Swift 5 模式下是非隔离的，读它就编译不过
+    /// Why `text` is not read directly: `@Observable` replaces `text` with a property carrying an observing accessor, and the accessor inherits the type's
+    /// `@MainActor` isolation; while `deinit` is nonisolated in Swift 5 mode, so reading it does not compile
     /// （`main actor-isolated property 'text' can not be referenced from a nonisolated context`）。
-    /// 下面这个盒子是**没有隔离的普通类**，而 `let` 引用不参与观察，所以 `deinit` 读得动。
+    /// The box below is **an ordinary class with no isolation**, and a `let` reference takes no part in observation, so `deinit` can read it.
     ///
-    /// 它只有 DEBUG 才存在，且只有一个写点（`erasePlaintext()`），写的一行就挨着真正的
-    /// `text = nil`，所以不会变成第二个判断口径；`deinit` 里读它也安全 —— 进到 `deinit`
-    /// 就意味着已经没有别人持有这个模型，也就没有别的线程正在写这个盒子。
+    /// It exists only in DEBUG and has exactly one write point (`erasePlaintext()`), on a line sitting right next to the real
+    /// `text = nil`, so it does not become a second verdict to read from; reading it in `deinit` is safe too — being in `deinit`
+    /// means nobody else holds this model any more, so no other thread is writing this box.
     #if DEBUG
     private final class EraseWitness { var plaintextGivenUp = false }
     private let eraseWitness = EraseWitness()
     #endif
 
-    /// 清明文只走这一个出口：绕过它直接写 `text = nil` 会让下面的回收断言说"没清过"。
+    /// Clearing the plaintext goes through this single exit: bypassing it to write `text = nil` directly would make the deallocation assertion below say "never cleared".
     private func erasePlaintext() {
         text = nil
         #if DEBUG
@@ -128,13 +128,13 @@ final class PopopxSecureSheetModel {
 
     deinit {
         #if DEBUG
-        // 回收断言：模型被释放时明文必须已经交出（`erasePlaintext()` 跑过）。
-        // false 就是销毁路径被跳过 —— 通常是 `burn(...)` 或 `invalidate()` 没被调到。
+        // Deallocation assertion: when the model is released the plaintext must already have been handed over (`erasePlaintext()` ran).
+        // false means the destruction path was skipped — usually `burn(...)` or `invalidate()` was never called.
         print("[popopx.secure] sheet model released, plaintext given up = \(eraseWitness.plaintextGivenUp)")
         #endif
     }
 
-    /// 倒计时归零/用户关闭之外，相位不会自己变。`progress` 给进度条，0...1。
+    /// Apart from the countdown reaching zero and the user closing it, the phase never changes on its own. `progress` feeds the progress bar, 0...1.
     var progress: Double {
         guard totalSeconds > 0 else { return 0 }
         return min(1, max(0, Double(remainingSeconds) / Double(totalSeconds)))
@@ -145,20 +145,20 @@ final class PopopxSecureSheetModel {
         return false
     }
 
-    // MARK: 由管理器写入
+    // MARK: Written by the manager
 
     func updateRemainingSeconds(_ seconds: Int) {
         guard isReading, !isDisconnected else { return }
         remainingSeconds = max(0, seconds)
     }
 
-    /// 本机付费延长时，把进度条的分母一起抬高。
+    /// When local payment extends the window, the progress bar's denominator is raised along with it.
     ///
-    /// 只有这一格需要动：`remainingSeconds` 归管理器的钟管，紧接着那次 `tick()` 会用挪过的
-    /// 截止时刻把它重写。分母不跟着抬的后果是条子一路满格到底、再也不缩短——`progress`
-    /// 那一格里有 `min(1, …)` 会把它压平，所以这个 bug 不会以"超过 100%"的形式暴露出来，
-    /// 只会让唯一那条可视化剩余时间的东西变成一根装饰条。
-    /// 与 `updateRemainingSeconds` 共用同一道 guard：已焚/已断开的时间段里没有东西可以延长。
+    /// Only this field needs to move: `remainingSeconds` belongs to the manager's clock, and the very next `tick()` rewrites it from the
+    /// moved deadline. If the denominator is not raised too, the bar stays full all the way down and never shortens — the `progress` field
+    /// has a `min(1, …)` that flattens it, so this bug never gets exposed as "over 100%",
+    /// it only turns the one visualisation of the remaining time into a decorative bar.
+    /// Shares the same guard as `updateRemainingSeconds`: in an already-burned / already-disconnected window there is nothing to extend.
     func extendTotal(by seconds: Int) {
         guard isReading, !isDisconnected else { return }
         totalSeconds += seconds
@@ -170,39 +170,39 @@ final class PopopxSecureSheetModel {
         PopopxHaptics.notice(.warning)
     }
 
-    /// 进入"已焚"相位。明文在这里就交出去，不等窗口拆除。
+    /// Enter the "burned" phase. The plaintext is handed over here, without waiting for the window to be torn down.
     ///
-    /// 参数由**管理器**给（见 `PopopxSecureWindowManager.burn`），模型不自己推断删除结果：
-    /// `deleted` 只可能是"宿主确实拿到 itemId 并发出了删除请求"这一种真值来源。
+    /// The parameters are given by the **manager** (see `PopopxSecureWindowManager.burn`); the model does not infer the deletion outcome:
+    /// `deleted` can only ever come from one source of truth, "the host really obtained the itemId and issued the delete request".
     func burn(reason: String?, receiptCount: Int, deleted: Bool) {
         erasePlaintext()
         guard !isDisconnected else { return }
         phase = .burned(reason: reason, receiptCount: receiptCount, deleted: deleted)
     }
 
-    /// 拆除前的最后一步：先断回调，再交明文。
+    /// The last step before teardown: cut the callbacks first, then hand over the plaintext.
     func invalidate() {
         isDisconnected = true
         erasePlaintext()
         phase = .closed
     }
 
-    // MARK: 由视图写入
+    // MARK: Written by the view
 
     func requestClose() {
-        // 单一出口：无论来自按钮、`onDisappear`、还是系统返回手势，都只走宿主那一条销毁路径。
+        // A single exit: whether it comes from the button, `onDisappear`, or the system back gesture, it only takes the host's one destruction path.
         guard !isDisconnected else { return }
         close()
     }
 }
 
-// MARK: - 视图
+// MARK: - The view
 
-/// 绝密窗口内容面。入参只有模型：没有 app 类型、没有宿主闭包，
-/// 因此本文件连同 `SecureEphemeral/` 整个目录都能脱离 Xcode 工程做类型检查。
+/// The top-secret window's content surface. Its only input is the model: no app type, no host closure,
+/// so this file, together with the whole `SecureEphemeral/` directory, can be type-checked outside the Xcode project.
 struct PopopxSecureSheetView: View {
     @Bindable private var model: PopopxSecureSheetModel
-    /// toast 模型是本视图私有的：绝密窗口不属于任何聊天页，拿不到宿主注进来的那一份。
+    /// The toast model belongs privately to this view: the top-secret window belongs to no chat page, so it cannot get the one the host injects.
     @State private var toastModel = PopopxToastModel()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -218,8 +218,8 @@ struct PopopxSecureSheetView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
         .popopxToast(toastModel)
-        // 窗口被外力拆掉（系统手势、scene 切换）也要走同一条销毁路径。
-        // 与 `dismissSecureWindow()` 的双重清理之所以安全，靠的是 `PopopxSecureSheetModel.isDisconnected`。
+        // When the window is torn down by outside forces (system gesture, scene switch) it must also take the same destruction path.
+        // The double cleanup with `dismissSecureWindow()` is safe precisely because of `PopopxSecureSheetModel.isDisconnected`.
         .onDisappear { model.requestClose() }
         .preferredColorScheme(.dark)
     }
@@ -241,12 +241,12 @@ struct PopopxSecureSheetView: View {
                 model.requestClose()
             }
         case .closed:
-            // 空视图：窗口正在被拆除，这里画任何东西都会在最后一帧闪一下。
+            // An empty view: the window is being torn down, and drawing anything here would flash for one last frame.
             Color.clear
         }
     }
 
-    // MARK: 阅读面
+    // MARK: The reading surface
 
     private var reading: some View {
         VStack(spacing: PopopxMetrics.spaceL) {
@@ -269,42 +269,42 @@ struct PopopxSecureSheetView: View {
                     .font(PopopxType.sectionHeader)
                     .foregroundStyle(PopopxSecureSurface.ink)
                 Spacer(minLength: PopopxMetrics.spaceS)
-                // 数字用 monospacedDigit：倒计时每秒换一位数时版面不跳，
-                // 而版面一跳用户的视线就会被吸引到"还剩几秒"上去读那行正在淡出的字。
+                // Numbers use monospacedDigit: the layout does not jump when the countdown changes digit each second,
+                // and a jumping layout would pull the user's gaze onto "how many seconds are left", straight into the line that is fading out.
                 Text(PopopxSecureCopy.duration(model.remainingSeconds))
                     .font(PopopxType.metric)
                     .foregroundStyle(remainingInk)
                     .accessibilityLabel(Text(verbatim: String(format: NSLocalizedString("%lld seconds remaining", comment: ""), model.remainingSeconds)))
             }
-            // `value:total:`（没有 `in:` 这个标签，`in:` 是 `Slider` 的写法）。
+            // `value:total:` (there is no `in:` label, `in:` is how `Slider` is written).
             ProgressView(value: Double(model.remainingSeconds), total: Double(max(1, model.totalSeconds)))
                 .progressViewStyle(.linear)
                 .tint(remainingInk)
                 .accessibilityHidden(true)
-                // 动画挂在进度条自己身上，而不是挂在整块 header 或控制区上：
-                // `value:` 要和"被动画的那个数"处在同一处，否则每秒一次的状态变更会连带
-                // 让标题、时间文案、图标一起做一次插值，而那是用户读字的地方。
-                // 关掉动效时传 nil：逐秒的 0.1 步长在 reduceMotion 下就是噪声。
+                // The animation hangs on the progress bar itself, not on the whole header or the control area:
+                // `value:` must live in the same place as "the number being animated", otherwise the once-per-second state change would also
+                // make the title, the time copy and the icons interpolate together, and that is where the user reads text.
+                // nil is passed when motion is switched off: a per-second 0.1 step is just noise under reduceMotion.
                 .animation(reduceMotion ? nil : PopopxSpring.fluid, value: model.remainingSeconds)
         }
     }
 
     private var remainingInk: Color {
-        // 最后 5 秒转红。阈值贴着 `PopopxSecurePayload.minimumTTLSeconds`(=5) 走：
-        // 最短的一档整个时长都落在"已经该提醒"的区间里，而不是让 15 秒的窗口只在最后 1/3 变脸。
+        // The last 5 seconds turn red. The threshold hugs `PopopxSecurePayload.minimumTTLSeconds` (=5):
+        // the shortest tier lies entirely inside the "should already be warning" range, instead of a 15-second window that only changes face in its last 1/3.
         model.remainingSeconds <= 5 ? PopopxPalette.danger : PopopxSecureSurface.ink
     }
 
-    /// 正文区。三种东西叠在这里：阅读模式视图、防滚动快门、盲水印。
-    /// 顺序是**由内到外**：水印叠在阅读层之上（它要覆盖的是"屏幕上的最终像素"），
-    /// 防拍照层叠在水印之上（它要打断的是卷帘快门对任何一行的采样，包括水印点阵）。
+    /// The body area. Three things are stacked here: the reading-mode view, the anti rolling-shutter layer, the blind watermark.
+    /// The order is **from inside outwards**: the watermark sits above the reading layer (what it must cover is "the final pixels on the screen"),
+    /// and the anti-photo layer sits above the watermark (what it must interrupt is the rolling shutter sampling any row at all, including the watermark dots).
     private var readerArea: some View {
         Group {
             if let text = model.text {
                 reader(for: text)
             } else {
-                // 明文没了却还在 `reading`：只有管理器漏了相位写入才会到这里。
-                // 留一个空的黑面而不是崩溃，也不显示任何提示——提示会把用户的注意力钉在"这里本该有字"。
+                // Plaintext is gone yet still in `reading`: only a manager that missed a phase write gets here.
+                // It keeps an empty black surface rather than crashing, and shows no hint either — a hint would nail the user's attention to "there should be text here".
                 Color.clear
             }
         }
@@ -318,8 +318,8 @@ struct PopopxSecureSheetView: View {
             PopopxAntiPhotoRenderView(isEnabled: model.antiPhotoEnabled)
                 .allowsHitTesting(false)
         }
-        // 明文整块不进无障碍树，理由见文件头"读屏"那一节：这一条是取舍，不是遗漏，
-        // 所以它同时必须在界面上说出来（`controls` 里那句 `accessibilityNote`）。
+        // The whole plaintext block stays out of the accessibility tree; see the "screen reader" section of the file header: this is a trade-off, not an omission,
+        // so it must at the same time be said in the interface (that `accessibilityNote` sentence inside `controls`).
         .accessibilityHidden(true)
     }
 
@@ -333,7 +333,7 @@ struct PopopxSecureSheetView: View {
         }
     }
 
-    // MARK: 控制面
+    // MARK: The control surface
 
     private var controls: some View {
         VStack(alignment: .leading, spacing: PopopxMetrics.spaceS) {
@@ -343,7 +343,7 @@ struct PopopxSecureSheetView: View {
                 selection: $model.readMode
             )
             .onChange(of: model.readMode) { _, mode in
-                // 换模式不说一句话，用户会以为是渲染坏了：两种模式的交互根本不同（一个跟手、一个要按住拖）。
+                // Switching modes without saying a word makes users think the rendering broke: the two modes interact completely differently (one follows the finger, one needs press-and-drag).
                 toastModel.show(mode.note, kind: .mesh)
             }
 
@@ -370,10 +370,10 @@ struct PopopxSecureSheetView: View {
                 .foregroundStyle(PopopxSecureSurface.inkTertiary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            // 「算力点延长防窥窗口」：点数由本地账本扣、钟由管理器挪，这一层只负责按一颗钮。
-            // 时长与价格都不写在文案里，两处都取自 `PopopxCommerceLimits`：前者决定挪多少秒，
-            // 后者就是扣款那一个数。算力点中心的用途表已经把这两个数显示过一次，
-            // 这里再各抄一遍就是第三个抄点。
+            // "Extend the anti-peep window with compute points": the points are deducted by the local ledger and the clock is moved by the manager, this layer only supplies a button to press.
+            // Neither the duration nor the price is written into the copy; both are taken from `PopopxCommerceLimits`: the first decides how many seconds to move,
+            // the second is exactly the amount deducted. The compute-point centre's use table already shows these two numbers once,
+            // and copying each again here would be a third place to copy from.
             PopopxButton(
                 PopopxSecureCopy.extendWindowTitle(
                     seconds: PopopxCommerceLimits.extendedSecureWindowSeconds,
@@ -383,8 +383,8 @@ struct PopopxSecureSheetView: View {
                 role: .secondary,
                 fullWidth: true
             ) {
-                // 失败一定要说出来：点数不足那一句由账本给，"没有可延长的会话"那一句由管理器给。
-                // 静默的付费按钮是这一族里最难看的东西——用户只知道按了没反应。
+                // A failure must always be said out loud: the insufficient-points sentence comes from the ledger, "no session available to extend" comes from the manager.
+                // A silent payment button is the ugliest thing in this family — all the user knows is that pressing it did nothing.
                 if let failure = PopopxSecureWindowManager.shared.extendViewingWindow() {
                     toastModel.show(failure, kind: .danger)
                 }
@@ -402,12 +402,12 @@ struct PopopxSecureSheetView: View {
     }
 }
 
-// MARK: - 遮罩
+// MARK: - The overlay
 
-/// 黑底遮罩：锁屏与已焚两相共用一套版面。
+/// The black-background overlay: the locked and burned phases share one layout.
 ///
-/// 刻意不用 `PopopxSectionCard`：那套卡有阴影、有浅色底，是为 app 内的内容层设计的。
-/// 这一屏是安全面，只留"一句话 + 一个动作"，多一个装饰就少一分"事情已经结束了"的确定感。
+/// `PopopxSectionCard` is deliberately not used: that card has shadows and a light background, it is designed for the content layer inside the app.
+/// This screen is a security surface and keeps only "one sentence + one action"; every extra decoration costs a little of the certainty that "this is over".
 private struct PopopxSecureMask: View {
     let text: String
     let footnote: String
@@ -443,55 +443,55 @@ private struct PopopxSecureMask: View {
     }
 }
 
-// MARK: - 版面常量
+// MARK: - Layout constants
 
-/// 安全面的几处视觉常量。放在一处而不是散进视图里：这一屏的底色与墨色必须在遮罩、正文、
-/// 列表卡片三处完全一致，否则"遮罩到底盖住了没有"就变成要肉眼去辨的差别。
+/// Several visual constants of the security surface, kept in one place instead of scattered through the views: this screen's background and ink must match exactly across the overlay, the body,
+/// and the list card, otherwise "did the overlay actually cover it" becomes a difference the eye has to judge.
 enum PopopxSecureSurface {
-    /// 整屏底：真黑，且**恒定**。两个理由：
-    /// 1. 护盾给采集端画的也是纯黑，两边不一致时录屏里能看出内容区的边界；
-    /// 2. 不用 `PopopxPalette.base`——它在深色模式确实是 `#000000`，但那是**跟随 colorScheme** 的，
-    ///    而这一屏的黑不允许被任何模式开关翻掉。
+    /// The whole-screen background: true black, and **constant**. Two reasons:
+    /// 1. The shield also draws pure black for the capture side, and when the two disagree the content area's boundary is visible in a recording;
+    /// 2. `PopopxPalette.base` is not used — in dark mode it really is `#000000`, but that **follows colorScheme**,
+    ///    and this screen's black may not be flipped by any mode switch.
     static let backdrop = Color.black
 
-    /// 安全面上的墨色**必须恒定**，所以这里不能直接用调色板里的 ink token：
-    /// `PopopxPalette.onBrand` 是 `Color.popopx(light: 0xFFFFFF, dark: 0x0A0A1F)`，
-    /// 在深色模式里它接近黑——放进本面就等于交出一屏"深色模式下看不见"的绝密内容，
-    /// 而深色模式才是多数人的默认。`label` 一族同理（浅色模式 `#111114`）。
+    /// The ink on a security surface **must be constant**, so the palette's ink tokens cannot be used directly here:
+    /// `PopopxPalette.onBrand` is `Color.popopx(light: 0xFFFFFF, dark: 0x0A0A1F)`,
+    /// and in dark mode it is close to black — putting it on this surface would hand over a screen of top-secret content "invisible in dark mode",
+    /// and dark mode is most people's default. The `label` family is the same (light mode `#111114`).
     ///
-    /// 所以走 `Color.popopx(_:UInt32)` 这个不随模式翻转的入口：仍然在设计系统内（同一条
-    /// 裁定要求"只用 `PopopxPalette`/`Color.popopx`，不手写十六进制"），取的是不翻转的那一个重载。
-    /// 数值与调色板的深色档对齐，避免安全面和 app 主体之间出现第二种白。
+    /// So it goes through `Color.popopx(_:UInt32)`, the entry that does not flip with the mode: still inside the design system (the same
+    /// ruling requires "only `PopopxPalette`/`Color.popopx`, no hand-written hex"), and it takes the non-flipping overload.
+    /// The values align with the palette's dark tier, avoiding a second kind of white between the security surface and the app body.
     static let ink = Color.popopx(0xF4F4F6)
     static let inkSecondary = Color.popopx(0xA6A6B0)
-    /// 只用于占位与已销毁态。对齐 `labelHint`，同样是为了不在安全面上出现第三种白。
+    /// Used only for placeholders and the destroyed state. Aligned with `labelHint`, again so that no third kind of white appears on the security surface.
     static let inkTertiary = Color.popopx(0x8A8A94)
 
-    /// 遮罩底：极深的靛紫，给"这不是普通页面"一点温度，但不构成第二套配色。
+    /// The overlay background: a very deep indigo violet, giving "this is not an ordinary page" a little warmth, but not forming a second palette.
     static let cardFill = Color.popopx(light: 0x1A1030, dark: 0x140C26)
-    /// 列表卡片底：和遮罩同族、浅一档，保证在会话列表里读得出层次。
+    /// The list card background: the same family as the overlay, one tier lighter, so that hierarchy stays readable inside the conversation list.
     static let cardBubbleFill = Color.popopx(light: 0x241640, dark: 0x1B1132)
 
-    /// 聚光模式的清晰区半径。45pt 是提示词指定的档位，也是单指腹能盖住、又读得下一行的尺寸
-    /// （`PopopxMetrics.minHitTarget` 的 44pt 是"可点"的下限，和"可读"的窗口直径不是同一件事）。
+    /// The clear-area radius of spotlight mode. 45pt is the tier the prompt specifies, and it is a size one fingertip can cover while a line stays readable
+    /// (`PopopxMetrics.minHitTarget`'s 44pt is the floor for "tappable", not the same thing as the diameter of the "readable" window).
     static let spotlightRadius: CGFloat = 45
 }
 
-// MARK: - 列表卡片
+// MARK: - The list card
 
-/// 会话列表里的绝密卡片（模块五的"以专用深度靛紫锁盾卡片渲染，严禁在列表中暴露明文"）。
+/// The top-secret card in the conversation list (module 5's "render as a dedicated deep indigo lock-shield card, exposing plaintext in the list is strictly forbidden").
 ///
-/// 颜色不接气泡那一套：`PopopxBubbleInk` 在 `PopopxMessageBubble.swift` 里是 `private`，
-/// 跨文件拿不到（这条是实测，不是猜的），而绝密卡片本来也不该跟着通道/发送方向换色——
-/// 它是这块屏幕上唯一一处"安全表面"，深浅两套固定墨（`PopopxSecureSurface`）。
+/// The colours do not take the bubble's scheme: `PopopxBubbleInk` is `private` inside `PopopxMessageBubble.swift`,
+/// so it cannot be reached across files (this was measured, not guessed), and a top-secret card should not change colour with channel or send direction anyway —
+/// it is the only "security surface" on this screen, with two fixed inks for light and dark (`PopopxSecureSurface`).
 struct PopopxSecureCardBubble: View {
     enum State: Hashable {
-        /// 可打开。
+        /// Can be opened.
         case locked
-        /// 载荷解析得出来但解不开（被改过/密钥不对）：留在列表里，但永远打不开。
+        /// The payload parses but cannot be decrypted (altered / wrong key): it stays in the list, but can never be opened.
         case damaged
-        /// 本机对不上这条记录的出处（会话 id 或消息 id 缺失）。它和"损坏"不是一回事：
-        /// 密文可能是完好的，只是这台设备不知道该去删哪一行，所以永远不给打开的入口。
+        /// This device cannot match the record's origin (the conversation id or the message id is missing). That is not the same thing as "corrupted":
+        /// the ciphertext may be intact, this device simply does not know which row to delete, so no entry point to open it is ever given.
         case unlocated
     }
 
@@ -548,8 +548,8 @@ struct PopopxSecureCardBubble: View {
     private var symbol: String {
         switch state {
         case .locked: "lock.shield.fill"
-        // 损坏 = 这是一次安全事件，盾牌上必须带惊叹号；找不到出处不是安全事件，
-        // 只是这台设备失忆了，所以它借用列表里那枚"不可用"的问号文件夹，不新造第三枚盾。
+        // Corrupted = this is a security event, so the shield must carry an exclamation mark; a missing origin is not a security event,
+        // the device has simply lost that memory, so it borrows the list's "unavailable" question-mark folder instead of minting a third shield.
         case .damaged: "exclamationmark.shield.fill"
         case .unlocated: "questionmark.folder"
         }
@@ -580,7 +580,7 @@ struct PopopxSecureCardBubble: View {
     }
 
     private var ink: Color {
-        // "损坏"要人读清楚，墨色不降；"不可打开"是一个既成事实，降一档免得和损坏抢注意力。
+        // "Corrupted" must be read clearly, so its ink is not lowered; "cannot be opened" is an accomplished fact, lowered one tier so it does not compete with corrupted for attention.
         state == .unlocated ? PopopxSecureSurface.inkTertiary : PopopxSecureSurface.ink
     }
 
@@ -598,29 +598,29 @@ struct PopopxSecureCardBubble: View {
 }
 
 private extension PopopxSecureCopy {
-    /// 这一句、`lockFootnote`、`burntWithReceipt`、`antiPhotoNote` 是这个文件独有的文案，
-    /// 不塞进载荷文件里：载荷那一层的文案要被卡片、回执、气泡三处共用，
-    /// 而这几条只属于"窗口已经打开之后"的世界。
+    /// This sentence, `lockFootnote`, `burntWithReceipt` and `antiPhotoNote` are copy unique to this file,
+    /// and are not stuffed into the payload file: the payload layer's copy has to be shared by the card, the receipt and the bubble,
+    /// while these few belong only to the world after the window has already opened.
     ///
-    /// 用 `private extension` 而不是直接写字符串常量：`PopopxSecureCopy` 的其它成员在
-    /// 载荷文件里，读代码的人在两处之间跳的时候，名字必须看起来是同一族。
+    /// A `private extension` is used rather than raw string constants: `PopopxSecureCopy`'s other members live in
+    /// the payload file, and when a reader jumps between the two places the names must look like the same family.
     static let accessibilityNote = NSLocalizedString("This message does not give its text to the screen reader (VoiceOver).", comment: "")
     static let lockFootnote = NSLocalizedString("The risk is still there. Closing destroys this message.", comment: "")
     static let burntQuietly = NSLocalizedString("The record on this device was deleted.", comment: "")
-    /// 唯一一句"这一条没做到"的话。它排在回执之前且互斥：既然记录没删成，
-    /// 通知对方"已销毁"就是一句假话，所以这一档连回执的措辞都不给。
+    /// The one sentence admitting "this one did not get done". It ranks before the receipt and is mutually exclusive with it: since the record was not deleted,
+    /// telling the other side "destroyed" would be a false statement, so this tier is not even given the receipt's wording.
     static let burntWithoutDeletion = NSLocalizedString("The plaintext was erased from memory, but this device could not locate the record: it was not deleted.", comment: "")
     static func burntWithReceipt(count: Int) -> String {
         count == 1 ? NSLocalizedString("The record on this device was deleted and the other side was notified.", comment: "") : String(format: NSLocalizedString("The record on this device was deleted, with %lld notifications sent.", comment: ""), count)
     }
-    /// 已焚相位的副标题：三种真实结果各说一种，不做乐观合并。
+    /// The burned phase's subtitle: each of the three real outcomes says its own, with no optimistic merging.
     static func burnFootnote(receipts: Int, deleted: Bool) -> String {
         guard deleted else { return burntWithoutDeletion }
         return receipts > 0 ? burntWithReceipt(count: receipts) : burntQuietly
     }
     static let antiPhotoNote = NSLocalizedString("Rapid vibration interferes with rolling-shutter re-photography. It also increases power use and heat.", comment: "")
-    /// 延长按钮的一行标签。时长走 `PopopxSecureCopy.duration`，所以将来把
-    /// `PopopxCommerceLimits.extendedSecureWindowSeconds` 改成 1800，这里会自动变成"30 分钟"。
+    /// The extend button's one-line label. The duration goes through `PopopxSecureCopy.duration`, so if
+    /// `PopopxCommerceLimits.extendedSecureWindowSeconds` is later changed to 1800, this automatically becomes "30 minutes".
     static func extendWindowTitle(seconds: Int, cost: Int) -> String {
         String(format: NSLocalizedString("Extend by %1$@ · %2$lld Compute Credits", comment: ""), duration(seconds), cost)
     }
@@ -628,8 +628,8 @@ private extension PopopxSecureCopy {
 
 struct PopopxSecureCardBubbleStates_Previews: PreviewProvider {
     static var previews: some View {
-        // 三档状态一次看全：能打开、解不开、本机定位不到。后两档都必须读得出"这不是可以重试的事"，
-        // 所以符号、墨色、副标题三处同时变，只靠降透明度是不够的。
+        // All three states visible at once: openable, undecryptable, unlocatable on this device. The last two must both read as "this is not something you can retry",
+        // so symbol, ink and subtitle change together in three places; lowering opacity alone is not enough.
         VStack(spacing: PopopxMetrics.spaceS) {
             PopopxSecureCardBubble(ttlText: PopopxSecureCopy.duration(60), state: .locked) {}
             PopopxSecureCardBubble(ttlText: PopopxSecureCopy.duration(60), state: .damaged) {}

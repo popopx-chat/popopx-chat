@@ -2,7 +2,7 @@
 //  PopopxMeshBannerModelTests.swift
 //
 //  The banner's rules live in the view model, so they are asserted here rather than as pixels: which
-//  banner wins when several could show, what each one says, and that an answer reaches 模块 3.
+//  banner wins when several could show, what each one says, and that an answer reaches module 3.
 //
 
 import Foundation
@@ -48,7 +48,7 @@ struct PopopxMeshBannerModelTests {
         #expect(presentation.actions == [.approve, .decline])
         #expect(presentation.peerMeshPublicKeyHex == PopopxMeshTestKeys.peerA)
         #expect(presentation.title.contains("pair"))
-        // The invite link is never in the banner: 模块 3's queue holds it, and 模块 2 is the only
+        // The invite link is never in the banner: module 3's queue holds it, and module 2 is the only
         // consumer. Saying so in the model is what keeps a future view from putting it on screen.
         #expect((presentation.detail ?? "").contains("popopx://") == false)
         #expect(made.model.requestAwaitingAnswer == request)
@@ -105,7 +105,7 @@ struct PopopxMeshBannerModelTests {
     @Test("Silent pairing is announced once, then stops announcing")
     func autoPairedNote() async throws {
         let made = makeHarness(policy: .autoSilent)
-        // The banner's gate is the policy 模块 1 holds, and that policy is read, not assumed: a mounted
+        // The banner's gate is the policy module 1 holds, and that policy is read, not assumed: a mounted
         // banner loads it on `start()`'s first tick. `refresh()` is the same read made now, so the note
         // below is judged against the store's `.autoSilent` rather than against the model's initial
         // `.manualConfirm`.
@@ -147,15 +147,15 @@ struct PopopxMeshBannerModelTests {
         ))
         #expect(routedCopy.detail?.contains("public network") == true)
 
-        // Unbound peer, no route: the 名片 was never exchanged, which is the case the 红线 cares about.
+        // Unbound peer, no route: the public card was never exchanged, which is the case the red line cares about.
         let stranded = makeHarness()
         await stranded.model.noteOutboundBlocked(peerMeshPublicKeyHex: PopopxMeshTestKeys.peerB)
         let strandedCopy = try #require(stranded.model.presentation)
-        #expect(strandedCopy.detail?.contains("尚未交换公网名片") == true)
+        #expect(strandedCopy.detail?.contains("public-network card") == true)
         #expect(strandedCopy.actions == [.dismiss])
     }
 
-    @Test("Approving hands 模块 3 the request it queued, not a copy of the text")
+    @Test("Approving hands module 3 the request it queued, not a copy of the text")
     func approveForwardsTheRequest() async throws {
         let request = PopopxMeshTestKeys.request(for: PopopxMeshTestKeys.peerA)
         let made = makeHarness(requests: [request])
@@ -169,7 +169,7 @@ struct PopopxMeshBannerModelTests {
         #expect(made.journal.all.contains(where: { $0.hasPrefix("approve:") }))
     }
 
-    @Test("Declining is enough on its own: 模块 3 records the refusal")
+    @Test("Declining is enough on its own: module 3 records the refusal")
     func declineForwardsTheRequest() async throws {
         let request = PopopxMeshTestKeys.request(for: PopopxMeshTestKeys.peerB)
         let made = makeHarness(requests: [request])
@@ -216,7 +216,7 @@ struct PopopxMeshBannerModelTests {
         try await popopxMeshWaitUntil("the mirror consumer to be released") { made.source.consumerCount == 0 }
     }
 
-    @Test("A key is shortened the same way 模块 3's logs quote it")
+    @Test("A key is shortened the same way module 3's logs quote it")
     func keyShortening() {
         #expect(PopopxMeshBannerModel.shorten(PopopxMeshTestKeys.peerA) == "\(String(repeating: "a", count: 16))…")
         #expect(PopopxMeshBannerModel.shorten("abc") == "abc")

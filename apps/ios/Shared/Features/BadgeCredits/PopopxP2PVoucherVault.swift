@@ -1,37 +1,37 @@
 //  PopopxP2PVoucherVault.swift
 //
-//  礼品卡券的本地保险柜 + 防双花仲裁者。
+//  The local vault for gift-card vouchers + the anti-double-spend arbiter.
 //
-//  ### 为什么是 actor 而不是 MainActor 类
-//  一张券的状态从 `unused` 翻到 `redeemed` 必须是**串行的、且在返回 grant 之前完成**的，
-//  否则同一张券的两条并发兑换请求会各自读到 `unused`、各自拿到一份授权。actor 的
-//  隔离正好把这件事变成语言保证：`authorizeRedemption(voucherId:)` 里"判状态 + 写状态 + 签名"
-//  三段之间不可能插入第二次调用。这是本特性唯一真正的双花防线（另一条在
-//  `PopopxSilentSignalingRouter`：兑换请求只可能回到铸券那一台设备上）。
+//  ### Why an actor rather than a MainActor class
+//  Flipping one voucher's state from `unused` to `redeemed` must be **serial and completed before the grant is returned**,
+//  otherwise two concurrent redemption requests for the same voucher would each read `unused` and each obtain a grant. The actor's
+//  isolation is exactly what turns this into a language guarantee: inside `authorizeRedemption(voucherId:)` the "check state + write state + sign"
+//  three steps can never have a second call interleaved between them. This is the only real double-spend defence in this feature (the other one is
+//  at `PopopxSilentSignalingRouter`: a redemption request can only ever come back to the device that minted the voucher).
 //
-//  ### 防双花的边界要说清楚（不夸称）
-//  守得住：同一台设备上的并发兑换、重放同一个码、ACK 丢包后的重复兑现。
-//  守不住：赠方把券码截图/转发给多人后**在另一台设备上**同时兑换——那需要一台全局记账的服务器，
-//  而零 Bot / 零服务器是本特性的前提。工程上把风险压到可接受的做法是：
-//  一张券只发一次、码在 ACK 后立即失效、券列表里"已兑出"状态对用户可见（`state == .redeemed`）。
-//  这句话同时是审核文档里"为什么没有服务器也能防双花"的答案。
+//  ### The anti-double-spend boundary stated plainly (no overclaiming)
+//  What it holds against: concurrent redemptions on the same device, replaying the same code, redeeming again after a lost ACK.
+//  What it does not: the giver screenshotting/forwarding the voucher code to several people and redeeming **on another device** at the same time — that would need a server
+//  keeping a global ledger, and zero bots / zero servers is the premise of this feature. The engineering practice that presses the risk down to what is acceptable is:
+//  a voucher is sent only once, the code expires immediately after the ACK, and the "redeemed" state is visible to the user in the voucher list (`state == .redeemed`).
+//  This sentence is at the same time the answer in the review documentation to "why double-spend is prevented without a server".
 //
-//  ### 不落 Keychain 的东西
-//  `PPX1-…` 兑换码本体不落盘（只落 `codeDigest`）：那串码是"提款凭据"，
-//  一次备份恢复就能把没送出去的券全部还原成可提现状态。
-//  码需要复现时由 `PopopxSilentSignalingRouter` 用 envelope 参数重新铸，不靠存原文。
+//  ### What does not go into the Keychain
+//  The `PPX1-…` redemption code itself is never written to disk (only `codeDigest` is): that string is a "withdrawal credential",
+//  and one backup restore would turn every voucher that was never sent back into a withdrawable state.
+//  When a code has to be reproduced, `PopopxSilentSignalingRouter` remints it from the envelope parameters instead of relying on storing the original text.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. A red line forbids scripts from modifying project.pbxproj.
 
 import Foundation
 
-// MARK: - 来源
+// MARK: - Origin
 
-/// 一张券的来源。决定它对账时用哪个标识，而不是决定它值多少——面值只由 `period` 决定。
+/// The origin of a voucher. It decides which identifier reconciliation uses, not how much the voucher is worth — the face value is decided only by `period`.
 enum PopopxVoucherSource: Hashable, Sendable {
-    /// 由一张已验签的 StoreKit 礼品卡收据铸出。
+    /// Minted from a signature-verified StoreKit gift-card receipt.
     case receipt(PopopxStoreReceipt)
-    /// 由一笔已扣减成功的算力点流水铸出（`giftVoucherExchange`）。
+    /// Minted from a credits ledger entry whose deduction succeeded (`giftVoucherExchange`).
     case creditEntry(id: String)
 
     var transactionId: String {
@@ -49,20 +49,20 @@ enum PopopxVoucherSource: Hashable, Sendable {
     }
 }
 
-// MARK: - 保险柜
+// MARK: - Vault
 
 actor PopopxP2PVoucherVault {
     static let shared = PopopxP2PVoucherVault()
 
     private var issued: [PopopxNodeVoucher] = []
-    /// 收件侧：ACK 里带回来的授权原文。键是 voucherId，值只在兑换成功后写，
-    /// 交给 `PopopxBadgeManager.activate(grant:)` 之后再保留一位用于对账。
+    /// Receiving side: the grant text brought back inside the ACK. The key is voucherId and the value is written only after a successful redemption,
+    /// then one copy is kept for reconciliation after it has been handed to `PopopxBadgeManager.activate(grant:)`.
     private var received: [String: PopopxBadgeGrant] = [:]
     private var loaded = false
 
     private init() {}
 
-    // MARK: 载入
+    // MARK: Loading
 
     func loadIfNeeded() {
         guard !loaded else { return }
@@ -71,11 +71,11 @@ actor PopopxP2PVoucherVault {
         received = PopopxCommerceKeychain.decode([String: PopopxBadgeGrant].self, .grants) ?? [:]
     }
 
-    // MARK: 铸券
+    // MARK: Minting vouchers
 
-    /// 一次性铸 `quantity` 张券。数量上限的存在只有一个理由：
-    /// 券表整个存在 Keychain 的一格里，200 张是"一次买 200 张礼品卡"这种真实批量
-    /// 与"把 5 万个随机数写进密码串"之间的分界。超量必须走多条收据，不是把上限调大。
+    /// Mint `quantity` vouchers in one go. The quantity cap exists for exactly one reason:
+    /// the whole voucher table lives in a single Keychain slot, and 200 is the dividing line between a real batch such as "buy 200 gift cards at once"
+    /// and "writing 50,000 random numbers into a password string". Exceeding the quantity must go through several receipts, not by raising the cap.
     func mint(period: PopopxNodeBadgePeriod, quantity: Int, source: PopopxVoucherSource) throws -> [PopopxNodeVoucher] {
         loadIfNeeded()
         guard quantity >= 1, quantity <= PopopxCommerceLimits.maximumVouchers else {
@@ -103,8 +103,8 @@ actor PopopxP2PVoucherVault {
             )
         }
         issued.append(contentsOf: minted)
-        // 先落盘再返回码：返回给 UI 的券如果没写进 Keychain，用户下一次进这个面板就看见它消失了，
-        // 而那张券的 StoreKit 收据已经 finish 掉——这是"付了钱什么都没得到"的确切形状。
+        // Persist first, then return the code: if a voucher returned to the UI was never written into the Keychain, the user would see it gone the next time they enter this panel,
+        // while that voucher's StoreKit receipt has already been finished — this is the exact shape of "paid and received nothing".
         guard PopopxCommerceKeychain.encode(issued, .vouchers) else {
             issued.removeAll(where: { minted.contains($0) })
             throw PopopxBadgeCreditsError.keychainUnavailable
@@ -123,7 +123,7 @@ actor PopopxP2PVoucherVault {
         return issued.first { $0.voucherId == voucherId }
     }
 
-    /// 记下落在码里的摘要，用于"这张券发出去过"。不存码本身，理由见文件头。
+    /// Record the digest carried inside the code, used for "this voucher was sent out". The code itself is not stored; the reason is in the file header.
     func recordCodeDigest(_ digest: String, forVoucherId voucherId: String) {
         loadIfNeeded()
         guard let index = issued.firstIndex(where: { $0.voucherId == voucherId }) else { return }
@@ -131,9 +131,9 @@ actor PopopxP2PVoucherVault {
         _ = PopopxCommerceKeychain.encode(issued, .vouchers)
     }
 
-    /// 赠方主动作废一张还没送出去的券（UI 上的"删除"）。
-    /// 已兑换的券**不能**删：那是别人花钱买下的权益，删掉记录不会让对方的徽章消失，
-    /// 只会让对账少一行。
+    /// The giver actively voids a voucher that has not been sent out yet ("Delete" in the UI).
+    /// A redeemed voucher **cannot** be deleted: that is an entitlement someone else paid for, and deleting the record would not make the other party's badge disappear,
+    /// it would only leave reconciliation one row short.
     func discard(voucherId: String) -> Bool {
         loadIfNeeded()
         guard let index = issued.firstIndex(where: { $0.voucherId == voucherId }), issued[index].state == .unused else {
@@ -143,16 +143,16 @@ actor PopopxP2PVoucherVault {
         return PopopxCommerceKeychain.encode(issued, .vouchers)
     }
 
-    // MARK: 防双花仲裁
+    // MARK: Anti-double-spend arbitration
 
-    /// 唯一的兑现入口。**同步**返回授权或 nil，因为 actor 的可重入点只在 `await` 上，
-    /// 而这个函数一次都不 await——判状态、翻状态、落盘、签名全在一次隔离执行里完成。
+    /// The only redemption entry point. Returns the grant or nil **synchronously**, because an actor's reentrancy points are only at `await`,
+    /// and this function never awaits — checking the state, flipping the state, persisting and signing all complete inside one isolated execution.
     ///
-    /// `codeDigestSource` 由调用方给：一次性链接兑换传"码里的 nonce + 邀请链接"，
-    /// 会话内礼品卡兑换传那条信令原文。两者都只是"这张券被哪个码兑掉"的证据，不参与判活。
+    /// `codeDigestSource` is supplied by the caller: a one-time-link redemption passes "the nonce in the code + the invite link",
+    /// an in-session gift-card redemption passes that signaling text verbatim. Both are only evidence of "which code redeemed this voucher"; neither takes part in the liveness decision.
     ///
-    /// 注意它不是 `async throws`：调用方（`PopopxSilentSignalingRouter`）拿到 nil 的语义
-    /// 就是"这张券已经被兑过了"，那不是异常，是一条需要如实回给对方的答复。
+    /// Note that it is not `async throws`: the meaning of nil for the caller (`PopopxSilentSignalingRouter`)
+    /// is "this voucher has already been redeemed", which is not an exception but an answer that has to be reported back to the other side honestly.
     func authorizeRedemption(voucherId: String, codeDigestSource: String) -> PopopxBadgeGrant? {
         loadIfNeeded()
         guard let index = issued.firstIndex(where: { $0.voucherId == voucherId }),
@@ -160,20 +160,20 @@ actor PopopxP2PVoucherVault {
         else { return nil }
         let nowMs = Int64(Date().timeIntervalSince1970 * 1_000)
         let period = issued[index].period
-        // 这一句算的是**赠送方**机器上的"现在 + N 天"，它进的是签名载荷，作用是"这张券承诺给多少天"
-        // （`PopopxCommerceSignature.canonical` 把 `expiresAtMs` 一起签了，所以载荷不能改）。
-        // 受赠方**不**用它当自己的到期时间：`PopopxBadgeManager.activate(grant:)` 会拿
-        // `grant.period` 在受赠方这一侧重算 `max(本机当前到期, 现在) + days`——
-        // 否则券在聊天里放三天，受赠人就少三天，而且他剩下的时长会被这张券的日期覆盖掉。
+        // This line computes "now + N days" on the **giver's** machine; what it enters is the signed payload, and its meaning is "how many days this voucher promises"
+        // (`PopopxCommerceSignature.canonical` signs `expiresAtMs` along with it, so the payload cannot be changed).
+        // The recipient does **not** use it as their own expiry time: `PopopxBadgeManager.activate(grant:)` takes
+        // `grant.period` and recomputes `max(this device's current expiry, now) + days` on the recipient's side —
+        // otherwise a voucher sitting in the chat for three days would leave the recipient three days short, and their remaining period would be overwritten by this voucher's date.
         let expiresAtMs = nowMs + Int64(period.days * 86_400) * 1_000
-        // 先把状态翻成 redeemed 并落盘，再签名返回。顺序反过来的话，
-        // 落盘失败会留下一张"已经授过权但状态还是 unused"的券——那才是双花。
+        // Flip the state to redeemed and persist it first, then sign and return. In the reverse order
+        // a failed write would leave behind a voucher that is "already granted but still unused" — that is what a double spend really is.
         issued[index].state = .redeemed
         issued[index].redeemedAtMs = nowMs
         issued[index].codeDigest = PopopxCommerceSignature.shortDigest(codeDigestSource)
         guard PopopxCommerceKeychain.encode(issued, .vouchers) else {
-            // 写不进去就撤销这次授权并返回 nil：宁可让收件方看到"兑换没成功、请重试"，
-            // 也不能让他拿到一份本地已经不认账的授权。
+            // If the write fails, revoke this grant and return nil: better that the recipient sees "the redemption did not go through, please retry"
+            // than that they hold a grant the local record no longer acknowledges.
             issued[index].state = .unused
             issued[index].redeemedAtMs = nil
             return nil
@@ -181,13 +181,13 @@ actor PopopxP2PVoucherVault {
         return grant(voucherId: voucherId, period: period, grantedAtMs: nowMs, expiresAtMs: expiresAtMs)
     }
 
-    /// 授权原文：`grant` 的规范串只含四个字段（券号 / 周期 / 发行时间 / 到期时间），
-    /// 免费文案和邀请链接永远不进 `parts`——签名一旦覆盖到可变文本，
-    /// 对方改一个字就对不上，而那是完全合法的内容变化。
+    /// The grant text: the canonical string of `grant` contains only four fields (voucher id / period / issued at / expires at),
+    /// free-form copy and invite links never enter `parts` — once a signature covers mutable text,
+    /// one character changed by the other party stops matching, and that is a perfectly legitimate content change.
     private func grant(voucherId: String, period: PopopxNodeBadgePeriod, grantedAtMs: Int64, expiresAtMs: Int64) -> PopopxBadgeGrant? {
-        // 公钥为空串 = 本机签名密钥没能从 Keychain 取出来（`localPublicKeyBase64URL` 的失败形态）。
-        // 这时绝不能签出一份"公钥字段是空的"授权：收件方那边 verify 会稳定失败，
-        // 用户看到的是一句"对方没有确认这次兑换"，而真正坏的是本机存储。
+        // An empty public-key string = this device's signing key could not be fetched from the Keychain (the failure shape of `localPublicKeyBase64URL`).
+        // At that point you must never sign a grant whose "public key field is empty": verification on the recipient's side fails every time,
+        // and the user sees only "the other party did not confirm this redemption", while what is actually broken is this device's storage.
         let publicKey = PopopxCommerceSignature.localPublicKeyBase64URL()
         guard !publicKey.isEmpty,
               let signature = PopopxCommerceSignature.signatureBase64URL(
@@ -207,10 +207,10 @@ actor PopopxP2PVoucherVault {
         )
     }
 
-    // MARK: 收件侧
+    // MARK: Receiving side
 
-    /// 收到 ACK 后先验签再存。验不过直接丢：一份伪造的 grant 如果进了本地记录，
-    /// 后面 `activate(grant:)` 就会点亮一枚没有人付过钱的徽章。
+    /// After the ACK arrives, verify the signature first and then store. If verification fails, drop it outright: a forged grant that entered the local record
+    /// would let the later `activate(grant:)` light up a badge nobody ever paid for.
     @discardableResult
     func record(_ grant: PopopxBadgeGrant) -> Bool {
         loadIfNeeded()
@@ -224,13 +224,13 @@ actor PopopxP2PVoucherVault {
         return received[voucherId]
     }
 
-    /// 收件侧的全部有效授权（已验签过一次，存进来就不再验，只为对账显示）。
+    /// All valid grants on the receiving side (verified once when they came in, never verified again, kept only for reconciliation display).
     func receivedGrants() -> [PopopxBadgeGrant] {
         loadIfNeeded()
         return received.values.sorted { $0.grantedAtMs > $1.grantedAtMs }
     }
 
-    /// 用 voucherId 找一张已兑入的授权，给"这枚徽章来自哪张券"那句对账文案用。
+    /// Find a redeemed-in grant by voucherId, for the reconciliation line that says "which voucher did this badge come from".
     func sourceOfBadge(voucherId: String) -> (period: PopopxNodeBadgePeriod, grantedAt: Date)? {
         guard let grant = received[voucherId] else { return nil }
         return (grant.period, Date(timeIntervalSince1970: Double(grant.grantedAtMs) / 1_000))

@@ -1,7 +1,7 @@
 //
 //  PopopxMeshKillSwitchTests.swift
 //
-//  红线 28: off means off. These four tests are the fuse's whole promise — launch off starts no BLE
+//  Red line 28: off means off. These four tests are the fuse's whole promise — launch off starts no BLE
 //  at all, turning it on mid-session starts cleanly, turning it off leaves nothing running, and a
 //  nickname change re-applies through the same path.
 //
@@ -195,7 +195,7 @@ struct PopopxMeshKillSwitchTests {
         #expect(!directory.exists(PopopxMeshNicknameStore.fileName))
     }
 
-    @Test("The persisted key is the one 模块 1 models, not a second one")
+    @Test("The persisted key is the one module 1 models, not a second one")
     func persistedKeyIsTheCoreKey() {
         #expect(PopopxMeshKillSwitch.enabledDefaultsKey == IdentityMappingStore.meshEnabledDefaultsKey)
     }

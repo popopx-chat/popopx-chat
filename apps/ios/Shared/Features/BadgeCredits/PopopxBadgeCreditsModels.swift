@@ -1,88 +1,88 @@
 //  PopopxBadgeCreditsModels.swift
 //
-//  POPOPX 动态隐私节点徽章 + 礼品卡转赠 + 算力点生态的唯一数据层。
+//  POPOPX dynamic privacy-node badges + gift-card transfer + the compute-credit ecosystem: the only data layer for them.
 //
-//  信任模型（写在这里，因为本目录里每一个"签名/验签/防双花/防重放"的判断都引用它）：
-//  POPOPX 没有账号、没有业务服务器、没有 Bot（见 AntiTheftDuress 与 mesh 那一轮的裁定）。
-//  因此本层的签名**不是身份链**——零服务端就不存在发证的 CA。它承担两件事，不多承诺：
-//  1) 篡改留痕：礼品券面额/周期、红包面额、兑换码内容一旦被改动，验签必失败；
-//  2) 来源校验：Apple 的 `Transaction.jwsRepresentation` 是唯一的外部锚点，券必须由一笔
-//     真实完成且未被核心拒付的 StoreKit 交易铸造（`PopopxStoreKitManager` 负责）。
-//  防双花的"花"字也只在本机成立：券的状态机是本地 Keychain 里的原子读改写，
-//  跨设备的一致性由"请求只会回到铸造这张券的那条一次性连接上"保证（见 Router）。
-//  任何把这套东西描述成"全局账本"的文案都不成立，注释和 UI 措辞都必须遵守上面这条边界。
+//  Trust model (written here, because every "signing / verification / double-spend prevention / replay prevention" judgement in this directory cites it):
+//  POPOPX has no accounts, no business server and no Bot (see the rulings of the AntiTheftDuress and mesh rounds).
+//  So the signatures of this layer are **not an identity chain** — with zero server side there is no CA that could issue certificates. They carry two things, and promise no more:
+//  1) Tamper trail: once a gift voucher's amount/period, a red packet's amount, or a redemption code's content is altered, verification must fail;
+//  2) Origin check: Apple's `Transaction.jwsRepresentation` is the only external anchor, and a voucher must be minted by a
+//     genuine StoreKit transaction that really completed and was not reversed by a chargeback (`PopopxStoreKitManager` owns that).
+//  The "spend" in double-spend prevention only holds on this device too: the voucher state machine is an atomic read-modify-write in the local Keychain,
+//  and cross-device consistency is guaranteed by "a request only ever returns on the one-time connection that minted this voucher" (see Router).
+//  Any copy that describes this as a "global ledger" is untrue; comments and UI wording must both respect that boundary above.
 //
-//  铁律：本文件不导入 UIKit/SwiftUI，不读 `UserDefaults.standard` 之外的宿主状态，
-//  不做任何网络请求。新增类型一律 `Popopx` 前缀——`Badge*` 那一族命名
+//  Iron rule: this file imports no UIKit/SwiftUI, reads no host state outside `UserDefaults.standard`,
+//  and makes no network requests. New types always take the `Popopx` prefix — the `Badge*` naming family
 //  （`BadgeType`/`BadgeState`/`BadgeStore`/`BadgeLevel`/`BadgePeriod`/`badgeProductIds` …）
-//  已被 `Shared/Views/Badges/`（SimpleX 支持者徽章）全局占用，复用等于改别人的语义。
+//  is already claimed globally by `Shared/Views/Badges/` (the upstream supporter badges), so reusing it means changing somebody else's semantics.
 
 import Foundation
 import CryptoKit
 import Security
 
-// MARK: - 限额与标定值
+// MARK: - Limits and calibrated values
 
-/// 全模块共用的标定数。放一处，是为了让"审核备注里的参数表"和代码里的数字
-/// 不可能各说一套：文档里的每一个数字都能回到这里被 grep 到。
+/// The calibration numbers shared by the whole module. Kept in one place so that "the parameter table in the review notes" and the numbers
+/// in the code cannot tell two different stories: every number in the docs can be grepped back to here.
 enum PopopxCommerceLimits {
-    /// 72 小时「3 天先锋节点体验徽章」的时长。
+    /// The duration of the 72-hour "3-day pioneer node trial badge".
     static let trialSeconds: TimeInterval = 72 * 60 * 60
-    /// 体验徽章到期后回退免费公共节点时，允许写入的最长时钟漂移（防止未来时间伪造）。
+    /// The longest clock drift allowed to be written when the trial badge expires and falls back to the free public node (guards against forged future times).
     static let maximumClockSkewMs: Int64 = 15 * 60 * 1000
-    /// 本地券包最多存多少张（Keychain 单项体积 + 二维码面板可读性的双重上限）。
+    /// The most vouchers the local voucher wallet may hold (a double ceiling: per-item Keychain size + QR panel readability).
     static let maximumVouchers = 200
-    /// 算力点流水最多保留多少条。超出即丢弃最旧的（余额本身永远不丢）。
+    /// How many compute-credit ledger rows are kept at most. Beyond that the oldest are dropped (the balance itself is never lost).
     static let maximumLedgerEntries = 240
-    /// 防重放集合的上限：领取过的红包 id / 已核销的券 id / 已入账的交易哈希。
+    /// The ceiling on the anti-replay sets: red packet ids already claimed / voucher ids already redeemed / transaction hashes already credited.
     static let maximumReplayIdentifiers = 2_000
-    /// 余额上限。超过它说明数据被改过，钱包直接进 `needsReconcile` 而不是静默截断。
+    /// The balance ceiling. Above it means the data was altered, so the wallet goes straight to `needsReconcile` instead of silently truncating.
     static let maximumCreditBalance = 100_000
-    /// 单个红包的最大面额。
+    /// The largest amount for a single red packet.
     static let maximumPacketAmount = 10_000
-    /// 红包/礼品卡赠言的最长字符数（以解码后的 Unicode 标量计，不是字节）。
+    /// The maximum character count of a red packet / gift-card message (counted as decoded Unicode scalars, not bytes).
     static let maximumNoteCharacters = 60
-    /// 一条信令的载荷上限。SMP 自己会分片，但本层拒绝解析超长载荷，
-    /// 免得把一段伪造的巨型 base64 交下去解码。
+    /// The payload ceiling for one signalling message. SMP shards on its own, but this layer refuses to parse oversized payloads,
+    /// so that a forged enormous base64 blob is never handed down to be decoded.
     static let maximumSignalPayloadCharacters = 1_024
-    /// 兑换码 checksum 的字节数。
+    /// The byte length of the redemption-code checksum.
     static let codeChecksumBytes = 2
-    /// 个人主页/频道自定义门槛的上限（算力点）。
+    /// The ceiling for a custom profile-page / channel threshold (compute credits).
     static let maximumCreditsThreshold = 100_000
-    /// 门槛输入允许的位数，与 `PopopxProfilePayload.maximumTTLDigits` 同一族约束。
+    /// The digits a threshold input may use, the same family of constraint as `PopopxProfilePayload.maximumTTLDigits`.
     static let maximumThresholdDigits = 6
-    /// 红包固定面额档位。苹果 3.1.1 的"不得随机金额"红线：这里只有确定档位，
-    /// UI 层不允许出现自由输入的金额字段。
+    /// Fixed red-packet amount tiers. Apple's 3.1.1 red line "no random amounts": only definite tiers live here,
+    /// and the UI layer is not allowed any free-entry amount field.
     static let redPacketAmounts: [Int] = [10, 50, 100, 500]
-    /// 群聊等额均分红包的单次最大领取人数（超过则拆开发）。
+    /// The most claimers in a single equal-split group-chat red packet (above that, split it into several).
     static let maximumPacketRecipients = 100
-    /// 未领完的红包在发送端悬多久才把余款退回去。没有服务端回收，只能由发送端按时间判结束；
-    /// 取 30 天是与徽章月档同长的"一个月"，也让退款不会发生在份额还可能被领走的时候——
-    /// 提前退就是凭空多出点数，这个特性里最坏的一种错账。
+    /// How long an unclaimed-out red packet hangs on the sender's side before the remainder is refunded. There is no server-side reclaim, so only the sender can call it over by time;
+    /// 30 days is chosen as the same "one month" as the badge monthly tier, and it also keeps a refund from happening while a share could still be claimed —
+    /// refunding early invents credits out of thin air, the worst kind of accounting error in this feature.
     static let packetClaimGraceSeconds = 30 * 86_400
-    /// 频道订阅凭证的有效期。取 30 天是与徽章月档同长的"一个月"，
-    /// 也让"每月 x 点"这句话在两个地方说的是同一个长度。
+    /// The validity period of a channel subscription credential. 30 days is the same "one month" as the badge monthly tier,
+    /// and it makes "x credits per month" mean the same length in both places.
     static let channelTicketSeconds = 30 * 86_400
-    /// 绝密"1 小时超长防窥窗口"的时长与价格。
+    /// The duration and price of the top-secret "1-hour ultra-long anti-peeping window".
     static let extendedSecureWindowSeconds = 3_600
     static let extendedSecureWindowCost = 20
-    /// 流光盾牌头像框 / 暗金二维码名片皮肤的价格。
+    /// The prices of the flowing-light shield avatar frame / dark-gold QR business-card skin.
     static let avatarFrameCost = 150
     static let qrCardSkinCost = 150
-    /// 本机计数与胶囊转圈的最小间隔；真正的检查节奏由 `PopopxBadgeManager` 的 30 秒心跳给出。
+    /// The minimum interval for the local counter and the capsule spinner; the real check cadence comes from `PopopxBadgeManager`'s 30-second heartbeat.
     static let nodeRotationSeconds: TimeInterval = 15
 }
 
 // MARK: - SKU
 
-/// 徽章周期。订阅、礼品券、算力点兑换三处都复用它，避免出现第二种"多久"的表示法。
+/// The badge period. Subscription, gift voucher and compute-credit redemption all reuse it, so no second spelling of "how long" can appear.
 enum PopopxNodeBadgePeriod: String, Codable, CaseIterable, Identifiable, Sendable {
     case monthly
     case annual
 
     var id: String { rawValue }
 
-    /// 自然日天数，用于本地签发时的到期推算（不是账单周期，账单周期归 Apple）。
+    /// Calendar-day count, used to derive the expiry when issuing locally (not the billing period — the billing period belongs to Apple).
     var days: Int {
         switch self {
         case .monthly: 30
@@ -90,9 +90,9 @@ enum PopopxNodeBadgePeriod: String, Codable, CaseIterable, Identifiable, Sendabl
         }
     }
 
-    /// 算力点兑换同周期的标定价。`100 算力点 = 1 天`：月度 30×20=600、年度 365×20=7300 会被
-    /// 读成"年度比 $49.99 贵"，所以标定值按人民币/美元实付价的点数化结果单独给定，
-    /// 并只在这里给一次——兑换页、商城页、审核文档三处必须回到这里取值。
+    /// The list price of the same period in compute credits. `100 compute credits = 1 day`: monthly 30×20=600 and yearly 365×20=7300 would be read
+    /// as "the yearly is more expensive than $49.99", so the calibrated values are given separately as the credit-denominated result of the actual CNY/USD paid prices,
+    /// and only once, here — the redemption page, the store page and the review docs must all come back here for the numbers.
     var creditsCost: Int {
         switch self {
         case .monthly: 600
@@ -100,7 +100,7 @@ enum PopopxNodeBadgePeriod: String, Codable, CaseIterable, Identifiable, Sendabl
         }
     }
 
-    /// 进 URI 的单字母形式。
+    /// The single-letter form that goes into the URI.
     var wireValue: String {
         switch self {
         case .monthly: "m"
@@ -124,21 +124,21 @@ enum PopopxNodeBadgePeriod: String, Codable, CaseIterable, Identifiable, Sendabl
     }
 }
 
-/// SKU 的语义分档。StoreKit 那边 `Product.productType` 有四档（consumable / nonConsumable /
-/// autoRenewable / nonRenewable），业务这边也有四种东西（自用续费、一次性时长包、可多购的礼品券、
-/// 点数充值），所以类型 + 周期/面额一起给，由本层自己说清"多久"——`Product` 自己不给答案：
-/// 非续订订阅 Apple 连到期时间都不算（`Transaction.expirationDate` 为 nil），
-/// "这一单给多少天"只能是本模块的事实。
+/// The semantic tiers of a SKU. On the StoreKit side `Product.productType` has four tiers (consumable / nonConsumable /
+/// autoRenewable / nonRenewable), and the business side has four kinds of thing too (self-use renewal, one-off time pack, multi-buy gift vouchers,
+/// credit top-ups), so the type is given together with the period/amount and this layer states "how long" itself — `Product` gives no answer of its own:
+/// for non-renewing subscriptions Apple does not even compute an expiry (`Transaction.expirationDate` is nil),
+/// so "how many days this order grants" can only be a fact owned by this module.
 enum PopopxNodeBadgeSkuKind: Hashable, Sendable {
     case subscription(PopopxNodeBadgePeriod)
-    /// 一次性时长包：付一次给 `period.days` 天，**永不自动续费**，也没有 Apple 那一侧的续费开关。
+    /// One-off time pack: pay once, get `period.days` days, **never auto-renews**, and there is no renewal switch on Apple's side either.
     case oneTimePass(PopopxNodeBadgePeriod)
     case giftCard(PopopxNodeBadgePeriod)
     case credits(Int)
 }
 
-/// 9 个内购商品。`productId` 是唯一真相源，`PopopxStoreKit.storekit` 与 App Store Connect
-/// 两边都必须逐字对上这 9 串。
+/// The 9 in-app purchase products. `productId` is the only source of truth, and `PopopxStoreKit.storekit` and App Store Connect
+/// both have to match these 9 strings character for character.
 enum PopopxNodeBadgeSku: String, CaseIterable, Identifiable, Sendable {
     case subscriptionAnnual
     case subscriptionMonthly
@@ -193,13 +193,13 @@ enum PopopxNodeBadgeSku: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    /// 一次性时长包的周期。付费与文案都只认这一处判据，避免 `kind` 之外再长出一个"哪些是通行证"。
+    /// The period of a one-off time pack. Both the payment path and the copy accept only this one criterion, so no second answer to "which ones are passes" can grow outside `kind`.
     var oneTimePassPeriod: PopopxNodeBadgePeriod? {
         if case let .oneTimePass(period) = kind { period } else { nil }
     }
 
-    /// 算力点充值包的**入账面额**。严格等于标定值，绝不加赠——
-    /// 一旦出现"赠送 XX 算力点"，苹果 3.1.1 的等额性与国内促销条款两边都踩。
+    /// The **credited amount** of a compute-credit top-up pack. Strictly equal to the calibrated value, never boosted with bonuses —
+    /// the moment "gift XX compute credits" appears it trips both Apple's 3.1.1 parity rule and the domestic promotion terms.
     var creditedAmount: Int? {
         if case let .credits(amount) = kind { amount } else { nil }
     }
@@ -209,10 +209,10 @@ enum PopopxNodeBadgeSku: String, CaseIterable, Identifiable, Sendable {
         return false
     }
 
-    /// 兜底价格文案。StoreKit 的 `displayPrice` 才是权威（区域货币不同），
-    /// 这里只在 `Product.products(for:)` 失败或还没返回时占位，占位期间不显示"立即购买"。
-    /// 通行证与同周期的订阅**同价**：同一件东西（30 天徽章）的两条付款路径不该有两个标价，
-    /// 差别只在"这一条会不会再来扣一次"。
+    /// Fallback price copy. StoreKit's `displayPrice` is the authority (regional currencies differ);
+    /// this only holds the place while `Product.products(for:)` has failed or not returned yet, and during that period "Buy now" is not shown.
+    /// A pass and the subscription for the same period are **priced the same**: two payment paths for the same thing (a 30-day badge) should not carry two list prices,
+    /// the only difference being "will this path charge again".
     var fallbackPriceText: String {
         switch self {
         case .subscriptionAnnual, .pass365Days, .giftAnnual: "$49.99"
@@ -224,22 +224,22 @@ enum PopopxNodeBadgeSku: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
-// MARK: - 算力点现金包
+// MARK: - Compute-credit cash packs
 
-/// 算力点充值那一族的商品。
+/// The products of the compute-credit top-up family.
 ///
-/// 2026-11-20 起它是**算力点那一页自己的表**：徽章付费墙（`PopopxBadgePaywallView`）不再卖现金包，
-/// 它的版面模型 `PopopxPaywallSection` 里 `.credits` 那一族也随之删掉——一页一种商品，
-/// 档位表就不该由另一页持有。
+/// Since 2026-11-20 this is **the compute-credits page's own table**: the badge paywall (`PopopxBadgePaywallView`) no longer sells cash packs,
+/// and the `.credits` family in its layout model `PopopxPaywallSection` was deleted along with it — one page, one kind of product,
+/// so a tier table should not be held by another page.
 ///
-/// 这里刻意**不写面额数字**：`amount` 取自 `PopopxNodeBadgeSku.creditedAmount`，而那是 SKU 的
-/// `kind` 里唯一的数字，也是 `PopopxCreditsManager` 真正入账的那一个。表上再写一遍
-/// "500"就多一处能和真实入账分叉的地方，而点数充值的分叉是要退钱的。
+/// The amount digits are deliberately **not written here**: `amount` comes from `PopopxNodeBadgeSku.creditedAmount`, and that is
+/// the only number inside the SKU's `kind`, and the one `PopopxCreditsManager` actually credits. Writing it again in the table
+/// as "500" adds one more place that can fork from the real crediting — and a fork in credit top-ups is money that has to be refunded.
 struct PopopxCreditPack: Identifiable, Hashable, Sendable {
     let sku: PopopxNodeBadgeSku
     let amount: Int
 
-    /// 只认 SKU 自己报出的面额：传进来的不是充值包就构造不出这一档（而不是得到一档"0 点"）。
+    /// Only the amount the SKU itself reports is accepted: pass in something that is not a top-up pack and the tier cannot be built at all (rather than yielding a "0 credit" tier).
     init?(sku: PopopxNodeBadgeSku) {
         guard let amount = sku.creditedAmount else { return nil }
         self.sku = sku
@@ -248,60 +248,60 @@ struct PopopxCreditPack: Identifiable, Hashable, Sendable {
 
     var id: String { sku.productId }
 
-    /// 上屏那一句与余额行、流水行共用同一个本地化格式串（`"%lld Compute Credits"`），
-    /// 于是"这一档叫什么"与"这一档有多少点"在目录里只有一种写法。
+    /// The line shown on screen shares one localized format string with the balance row and the ledger row (`"%lld Compute Credits"`),
+    /// so "what this tier is called" and "how many credits this tier has" have exactly one spelling in the catalogue.
     var title: String { String(format: PopopxCommerceCopy.creditsAmountFormat, amount) }
 }
 
 enum PopopxCreditPlan {
-    /// 三档现金包，从小到大。顺序是版面事实，写在这一行；面额是商品事实，写在 SKU。
-    /// `compactMap` 不是容错：万一将来 SKU 改了类别，这一档就从页面上消失而不是画出一个假数字。
+    /// Three cash-pack tiers, smallest first. The order is a layout fact and lives on this line; the amounts are product facts and live in the SKU.
+    /// `compactMap` is not error tolerance: if the SKU ever changes category, this tier disappears from the page instead of drawing a fake number.
     static let packs: [PopopxCreditPack] =
         [PopopxNodeBadgeSku.credits100, .credits500, .credits2000].compactMap(PopopxCreditPack.init)
 }
 
-// MARK: - 徽章状态
+// MARK: - Badge state
 
-/// 徽章的来源。体验、订阅、一次性时长包、算力点兑换、别人赠的券，五种来源点亮的是同一个徽章，
-/// 差别只在续费归谁、以及能不能被恢复购买找回来。
+/// Where a badge came from. Trial, subscription, one-off time pack, compute-credit redemption, a voucher gifted by someone else — the five sources light up the same badge,
+/// and differ only in who owns the renewal and whether restore-purchase can find it back.
 enum PopopxBadgeSource: String, Codable, CaseIterable, Sendable {
     case pioneerTrial
     case appleSubscription
-    /// 一次性时长包（非续订订阅）：付一次给一段时长，没有 Apple 侧的续费开关，也不进恢复购买。
+    /// One-off time pack (non-renewing subscription): pay once, get a stretch of time, no renewal switch on Apple's side, and it is not part of restore-purchase either.
     case storePass
     case creditsExchange
     case giftedVoucher
 
-    /// 只有订阅这一档由 Apple 自动续费；恢复购买（`AppStore.sync()`）也只对它有意义。
+    /// Only the subscription tier is auto-renewed by Apple; restore-purchase (`AppStore.sync()`) is meaningful for it alone.
     var renewsAutomatically: Bool { self == .appleSubscription }
 }
 
-/// 一条徽章记录的持久化形态。整个模块只有 `PopopxBadgeManager` 会写它。
+/// The persisted shape of one badge record. Only `PopopxBadgeManager` ever writes it in the whole module.
 struct PopopxBadgeRecord: Codable, Hashable, Sendable {
     var period: PopopxNodeBadgePeriod
     var source: PopopxBadgeSource
     var issuedAtMs: Int64
     var expiresAtMs: Int64
-    /// 节点路由轮换计数。真机上线前它只是本地计数，不代表任何服务端行为。
+    /// The node-route rotation counter. Before it runs on a real device it is only a local count and stands for no server-side behaviour.
     var rotationIndex: Int
-    /// 来源凭据的 SHA-256 前 16 位十六进制（JWS 原文/兑换流水），用于事后对账。
+    /// The first 16 hex characters of the source credential's SHA-256 (the JWS text / the redemption record), used for after-the-fact reconciliation.
     var receiptDigest: String?
-    /// 体验徽章的防重放指纹（DeviceCheck token 或本机安装指纹的摘要）。
+    /// The trial badge's anti-replay fingerprint (the digest of a DeviceCheck token or of this device's install fingerprint).
     var trialGuard: String?
 }
 
-/// 胶囊渲染要的那一档状态。和 `PopopxBadgePhase` 分开，是因为视图层不该拿到日期再自己比。
+/// The state capsule rendering needs. Kept separate from `PopopxBadgePhase` because the view layer should not be handed dates to compare by itself.
 enum PopopxBadgeCapsuleState: String, Hashable, Sendable {
-    /// 体验态：赛博青呼吸光晕。
+    /// Trial state: cyber-cyan breathing glow.
     case trialPulsing
-    /// 正式点亮态：翡翠绿 + 节点刷新旋转。
+    /// Fully lit state: emerald green + the node-refresh spin.
     case activeLit
-    /// 休眠态：冷雾灰。
+    /// Dormant state: cold-mist grey.
     case dormant
 }
 
-/// 徽章三态。`dormant` 不是"失败"，是"用免费公共 SMP 节点"这个正常态——
-/// UI 文案与无障碍描述都必须按这个措辞，不能写成"已过期/未激活"。
+/// The badge's three states. `dormant` is not "failure", it is the ordinary "using the free public SMP node" state —
+/// UI copy and accessibility descriptions must both use that wording and may not say "expired / not activated".
 enum PopopxBadgePhase: Hashable, Sendable {
     case dormant
     case trial(expiresAt: Date)
@@ -330,7 +330,7 @@ enum PopopxBadgePhase: Hashable, Sendable {
         }
     }
 
-    /// 到期日期；休眠态为 nil，调用方因此无法显示"0 秒"或"1970 年"这种假到期。
+    /// The expiry date; nil in the dormant state, so a caller cannot display a fake expiry such as "0 seconds" or "1970".
     var expiresAt: Date? {
         switch self {
         case .dormant: nil
@@ -338,7 +338,7 @@ enum PopopxBadgePhase: Hashable, Sendable {
         }
     }
 
-    /// 由记录推当前态。`now` 注入而不是内部 `Date()`，是为了让"到期回退"可被单测命中。
+    /// Derives the current state from the record. `now` is injected instead of an internal `Date()` so that the "expiry fallback" can be hit by unit tests.
     static func phase(for record: PopopxBadgeRecord?, now: Date = Date()) -> PopopxBadgePhase {
         guard let record else { return .dormant }
         let expiresAt = Date(timeIntervalSince1970: Double(record.expiresAtMs) / 1_000)
@@ -348,17 +348,17 @@ enum PopopxBadgePhase: Hashable, Sendable {
     }
 }
 
-// MARK: - 礼品券
+// MARK: - Gift voucher
 
-/// 券的生命周期。`consumed` 只给接收方：对方回传的 grant 已经点亮了本机徽章，这张券就此落地。
+/// The voucher's lifecycle. `consumed` exists only on the receiving side: the grant the peer returned has already lit this device's badge, so the voucher has landed.
 enum PopopxVoucherState: String, Codable, CaseIterable, Sendable {
     case unused
     case redeemed
     case consumed
 }
 
-/// 本地铸造的礼品徽章券。`jwsDigest` 是 Apple 收据的摘要——原文不落地，
-/// 因为那串东西里带 Apple ID 关联信息，留在 Keychain 里只是把风险搬进自己的备份。
+/// A gift badge voucher minted locally. `jwsDigest` is the digest of the Apple receipt — the text itself is never stored,
+/// because that string carries Apple ID linking information, and keeping it in the Keychain only moves the risk into your own backup.
 struct PopopxNodeVoucher: Codable, Hashable, Identifiable, Sendable {
     let voucherId: String
     var period: PopopxNodeBadgePeriod
@@ -366,10 +366,10 @@ struct PopopxNodeVoucher: Codable, Hashable, Identifiable, Sendable {
     let mintedAtMs: Int64
     let transactionId: String
     let jwsDigest: String
-    /// 兑换码（`PPX1-…`）的摘要，用于"这张券发出去过"的可追溯，不存码本身。
+    /// The digest of the redemption code (`PPX1-…`), for traceability that "this voucher was sent out"; the code itself is not stored.
     var codeDigest: String?
     var redeemedAtMs: Int64?
-    /// 接收方才会有的字段：对方 ACK 回来的授权原文。发送方保持 nil。
+    /// A field only the receiver has: the authorisation text the peer ACKed back. The sender keeps it nil.
     var grantBase64URL: String?
 
     var id: String { voucherId }
@@ -377,16 +377,16 @@ struct PopopxNodeVoucher: Codable, Hashable, Identifiable, Sendable {
     var isRedeemable: Bool { state == .unused }
 }
 
-/// 券的授权书：由赠方本地签名、随 ACK 回传给兑方、兑方据此点亮徽章并记入券包。
-/// 签名覆盖 `canonicalBytes`，所以 period 被人从 `m` 改成 `y` 会当场验不过。
+/// The voucher's letter of authorisation: signed locally by the giver, returned to the redeemer with the ACK, and the redeemer lights the badge from it and files it in the voucher wallet.
+/// The signature covers `canonicalBytes`, so if someone changes the period from `m` to `y` it fails verification on the spot.
 struct PopopxBadgeGrant: Codable, Hashable, Sendable {
     let voucherId: String
     let period: PopopxNodeBadgePeriod
     let grantedAtMs: Int64
     let expiresAtMs: Int64
-    /// 赠方本地密钥的 x963 公钥（无填充 base64url）。
+    /// The x963 public key of the giver's local key (unpadded base64url).
     let giverPublicKey: String
-    /// 对 `canonicalBytes` 的 ECDSA P-256 签名（DER，无填充 base64url）。
+    /// The ECDSA P-256 signature over `canonicalBytes` (DER, unpadded base64url).
     let signature: String
 
     var canonicalBytes: Data {
@@ -398,20 +398,20 @@ struct PopopxBadgeGrant: Codable, Hashable, Sendable {
     }
 }
 
-// MARK: - 一次性连接 + 徽章 的二合一兑换码
+// MARK: - One-time connection + badge, the two-in-one redemption code
 
-/// 兑换码里装的东西：一条一次性 SMP 连接链接 + 一张券的身份 + 赠方公钥。
+/// What the redemption code holds: a one-time SMP connection link + a voucher's identity + the giver's public key.
 struct PopopxRedeemEnvelope: Codable, Hashable, Sendable {
-    /// `popopx:/…` 形式的一次性连接链接（由 `PopopxInviteLink.mintOneTime` 那同一条接口铸出）。
+    /// A one-time connection link in `popopx:/…` form (minted by that same `PopopxInviteLink.mintOneTime` interface).
     let inviteLink: String
     let voucherId: String
     let period: PopopxNodeBadgePeriod
     let mintedAtMs: Int64
-    /// 16 字节随机数。同一张券重复出码（用户点"重新生成"）时用它区分前后两码。
+    /// 16 random bytes. When the same voucher is coded again (the user taps "Regenerate") it tells the two codes apart.
     let nonce: String
-    /// 赠方公钥（x963 base64url）。
+    /// The giver's public key (x963 base64url).
     let giverPublicKey: String
-    /// 赠方对 `canonicalBytes` 的签名。
+    /// The giver's signature over `canonicalBytes`.
     let signature: String
 
     var canonicalBytes: Data {
@@ -423,14 +423,14 @@ struct PopopxRedeemEnvelope: Codable, Hashable, Sendable {
     }
 }
 
-/// `PPX1-…` 兑换码的编解码。
+/// Codec for the `PPX1-…` redemption code.
 ///
-/// 为什么码里要有 checksum：`decode` 先验两个字节再解 JSON，是为了让手输错一位
-/// 直接落到"校验失败"而不是"解出一段看不懂的 JSON"——前者能提示用户重来，后者只能报内部错误。
+/// Why the code carries a checksum: `decode` verifies two bytes before parsing the JSON, so one mistyped character
+/// lands straight on "checksum failed" instead of "parsed some unreadable JSON" — the first can prompt the user to retry, the second can only report an internal error.
 enum PopopxRedeemCode {
     static let prefix = "PPX1-"
 
-    /// 分段展示用的组宽（每 8 个字符一段，共 5 段一屏正好）。
+    /// The group width used for split display (8 characters per group, 5 groups fit one screen exactly).
     static let displayGroupWidth = 8
 
     static func encode(_ envelope: PopopxRedeemEnvelope) -> String? {
@@ -455,8 +455,8 @@ enum PopopxRedeemCode {
         return try? JSONDecoder().decode(PopopxRedeemEnvelope.self, from: Data(json))
     }
 
-    /// 归一化。**只**去掉空白与前缀大小写差异：base64url 的字母表里就含 `-`，
-    /// 把 `-` 当分隔符删掉会静默改坏载荷，所以分隔符只能是空白，UI 也必须按这个约束展示。
+    /// Normalisation. It removes **only** whitespace and prefix case differences: the base64url alphabet itself contains `-`,
+    /// so deleting `-` as a separator would silently corrupt the payload; whitespace is therefore the only possible separator and the UI must display to that constraint.
     static func normalized(_ raw: String) -> String {
         let stripped = raw.unicodeScalars.filter { !CharacterSet.whitespacesAndNewlines.contains($0) }
         var text = String(String.UnicodeScalarView(stripped))
@@ -466,7 +466,7 @@ enum PopopxRedeemCode {
         return text
     }
 
-    /// 给人抄的分组形式（`PPX1-ABCD1234 EFGH…`）。
+    /// The grouped form a human copies by hand (`PPX1-ABCD1234 EFGH…`).
     static func grouped(_ code: String) -> String {
         let body = code.hasPrefix(prefix) ? String(code.dropFirst(prefix.count)) : code
         guard !body.isEmpty else { return code }
@@ -480,17 +480,17 @@ enum PopopxRedeemCode {
         return prefix + groups.joined(separator: " ")
     }
 
-    /// 复制给用户的整码：前缀 + 未分组原文（分组只给屏幕上看，复制要能直接粘）。
+    /// The whole code copied for the user: prefix + ungrouped original text (grouping is only for the screen, a copy must paste directly).
     static func clipboardValue(_ code: String) -> String { code }
 }
 
-// MARK: - 会话流 URI（popopx://gift、popopx://redpacket 与 popopx://channel）
+// MARK: - Conversation-stream URIs (popopx://gift, popopx://redpacket and popopx://channel)
 
-/// 礼品卡气泡的载荷。
+/// The payload of the gift-card bubble.
 ///
-/// 字段命名和 `loc`/`sec`/`profile` 三支保持同一族（单字母、值一律无需转义）：
-/// `note` 里可能有任何字符，所以它进 URI 前是 base64url，而不是 percent-encoding——
-/// 解析端因此可以始终按 `&` 切、按第一个 `=` 分，这一条前提和三支完全一致。
+/// Field naming stays in the same family as the `loc`/`sec`/`profile` branches (single letters, values that never need escaping):
+/// `note` may contain any character, so before it enters the URI it is base64url rather than percent-encoding —
+/// the parsing side can therefore always split on `&` and divide at the first `=`, exactly the same premise as those three branches.
 struct PopopxGiftCardPayload: Codable, Hashable, Sendable {
     static let scheme = "popopx"
     static let host = "gift"
@@ -509,8 +509,8 @@ struct PopopxGiftCardPayload: Codable, Hashable, Sendable {
     }
 
     var isSignatureValid: Bool {
-        // 卡片不带赠方公钥（会话流里公钥属于隐私面），所以这一支只在"本端就是赠方"时可判；
-        // 接收侧的真伪判定发生在 ACK 回来的 `PopopxBadgeGrant` 上，不在这里。
+        // The card does not carry the giver's public key (in a conversation stream a public key belongs to the privacy face), so this branch is only decidable when "this side is the giver";
+        // authenticity on the receiving side is judged on the `PopopxBadgeGrant` that comes back in the ACK, not here.
         PopopxCommerceSignature.verifySelfIssued(signatureBase64URL: signature, for: canonicalBytes)
     }
 
@@ -522,7 +522,7 @@ struct PopopxGiftCardPayload: Codable, Hashable, Sendable {
         self.signature = signature
     }
 
-    /// 铸造：签一次、编码一次。失败 = 本机身份密钥取不到，调用方必须给可见反馈。
+    /// Mint: sign once, encode once. Failure = this device's identity key could not be fetched, and the caller must give visible feedback.
     static func make(voucherId: String, period: PopopxNodeBadgePeriod, note: String, mintedAtMs: Int64) -> PopopxGiftCardPayload? {
         let trimmed = String(note.unicodeScalars.prefix(PopopxCommerceLimits.maximumNoteCharacters))
         let body = PopopxCommerceSignature.canonical(kind: "gift", parts: [voucherId, period.wireValue, String(mintedAtMs)]) + Data(trimmed.utf8)
@@ -535,8 +535,8 @@ struct PopopxGiftCardPayload: Codable, Hashable, Sendable {
         return "\(Self.scheme)://\(Self.host)?v=\(voucherId)&p=\(period.wireValue)&n=\(noteField)&t=\(mintedAtMs)&s=\(signature)"
     }
 
-    /// 与 `PopopxLocationPayload.parse` 同一判据：按空白切、从最后一个 token 试起、
-    /// scheme+host 双查、字段名白名单、必需字段齐备、长度封顶。
+    /// The same criteria as `PopopxLocationPayload.parse`: split on whitespace, start trying from the last token,
+    /// check scheme+host together, field-name allow-list, required fields present, length capped.
     static func parse(from text: String) -> PopopxGiftCardPayload? {
         for token in text.split(whereSeparator: \.isWhitespace).reversed() {
             if let payload = parseToken(String(token)) { return payload }
@@ -591,10 +591,10 @@ struct PopopxGiftCardPayload: Codable, Hashable, Sendable {
     }
 }
 
-/// 算力点红包气泡的载荷。规范列出的字段是 `id`/`amount`/`note`/`sig`，这里多出**一个** `n`（份数）：
-/// 群聊等额均分时，领取端必须知道自己那一份是多少，而那一格只有这张卡片可看——
-/// 没有 `n`，要么让收件人自己除以人数（别人能改），要么把份数写进 `note`（那是用户文本，不是账目）。
-/// 所以 `n` 进签名原文，改份数与改金额同样是"验签失败"。单聊即 `n=1`，缺省也按 1 解。
+/// The payload of the compute-credit red packet bubble. The spec lists the fields `id`/`amount`/`note`/`sig`; here there is exactly **one** extra `n` (share count):
+/// in an equal group-chat split the claiming side has to know how large its own share is, and only this card can show that field —
+/// without `n` you either make the recipient divide by the headcount itself (someone else can change that), or write the share count into `note` (that is user text, not an accounting entry).
+/// So `n` goes into the signed text, and altering the share count is just as much a "verification failed" as altering the amount. A 1:1 chat is `n=1`, and a missing value parses as 1 too.
 struct PopopxRedPacketPayload: Codable, Hashable, Sendable {
     static let scheme = "popopx"
     static let host = "redpacket"
@@ -618,14 +618,14 @@ struct PopopxRedPacketPayload: Codable, Hashable, Sendable {
         PopopxCommerceSignature.verifySelfIssued(signatureBase64URL: signature, for: canonicalBytes)
     }
 
-    /// 面额必须落回标定档位之一：UI 只给固定档位，但**判据不能只在 UI**——
-    /// 一条被改过 amount 的红包文本完全可以被粘贴进会话，这里必须拒绝。
+    /// The amount must land back on one of the calibrated tiers: the UI only offers fixed tiers, but **the criterion cannot live only in the UI** —
+    /// a red-packet text with an altered amount can perfectly well be pasted into a conversation, and this layer must refuse it.
     var isAmountAuthorized: Bool {
         PopopxCommerceLimits.redPacketAmounts.contains(amount)
     }
 
-    /// 单人应得额。除不尽的载荷一律当作伪造：它不可能是"等额均分"，
-    /// 而按向下取整去入账就是把差额悄悄吞掉，那笔钱谁也对不上。
+    /// The amount one person is owed. A payload that does not divide evenly is always treated as forged: it cannot be an "equal split",
+    /// and crediting it rounded down silently swallows the difference, money that nobody can reconcile.
     var amountPerRecipient: Int? {
         guard recipients >= 1, amount % recipients == 0 else { return nil }
         return amount / recipients
@@ -690,7 +690,7 @@ struct PopopxRedPacketPayload: Codable, Hashable, Sendable {
             !signature.isEmpty,
             signature.count <= maximumSignatureCharacters
         else { return nil }
-        // 份数缺省为 1：那是"单聊红包"的唯一合法取值，也是 `n` 出现之前铸出的载荷该有的样子。
+        // The share count defaults to 1: that is the only legal value for a "1:1 chat red packet", and also what a payload minted before `n` existed should look like.
         let rawRecipients = fields["n"] ?? "1"
         guard rawRecipients.allSatisfy(\.isNumber), !rawRecipients.isEmpty,
               rawRecipients.count <= maximumRecipientsDigits,
@@ -710,20 +710,20 @@ struct PopopxRedPacketPayload: Codable, Hashable, Sendable {
     }
 }
 
-/// 频道订阅门槛卡片气泡的载荷。它是一条**可见**消息，不是静默信令：
-/// 门槛是"频道主要让成员知道的那个价"，把它藏起来就等于让成员对一个看不见的数字付钱。
+/// The payload of the channel subscription threshold card bubble. It is a **visible** message, not silent signalling:
+/// the threshold is "the price the channel owner wants members to know", and hiding it would mean making members pay for a number they cannot see.
 ///
-/// ### 为什么必须走消息，而不是"本机存一份"
-/// 没有服务端，也没有频道主的地址簿：成员那台设备唯一的真值来源就是频道里发出来的这一行。
-/// 所以发布 = 发一条消息（`PopopxSilentSignalingRouter.sendChannelAccess`），
-/// 订阅面板的价格 = 从这条消息里解出来的 `p`。任何一侧都不自己编一个数。
+/// ### Why it must travel as a message rather than "keep a copy on this device"
+/// There is no server and no address book of the channel owner's: the only source of truth on a member's device is this line published in the channel.
+/// So publishing = sending a message (`PopopxSilentSignalingRouter.sendChannelAccess`),
+/// and the subscription panel's price = the `p` decoded out of that message. Neither side invents a number.
 ///
-/// ### 字段
-/// 与 `gift`/`redpacket` 同一族（单字母、值无需转义）：`p`=门槛（算力点/格，0 允许但发不出卡片，
-/// 见 `make`），`t`=发布时刻（毫秒），`e`=发布方公钥（x963 无填充 base64url），`s`=签名。
-/// 频道本身**不进载荷**：成员侧的凭证键是本机那个会话 id（`GroupInfo.id`），
-/// 它在一台设备上稳定，跨设备本来就不通用（凭证只写在本机钥匙串，第 4 节那句话）。
-/// 把本机 id 签进消息里，只会造出一个"对方那台设备上根本不存在"的键。
+/// ### Fields
+/// The same family as `gift`/`redpacket` (single letters, values need no escaping): `p` = threshold (compute credits per tile, 0 is allowed but no card can be sent,
+/// see `make`), `t` = publish moment (milliseconds), `e` = publisher's public key (x963 unpadded base64url), `s` = signature.
+/// The channel itself **does not go into the payload**: the credential key on the member's side is the local conversation id (`GroupInfo.id`),
+/// which is stable on one device and was never portable across devices (credentials are only written to this device's keychain — the sentence in section 4).
+/// Signing the local id into the message would only create a key that "does not exist at all on the other party's device".
 struct PopopxChannelAccessPayload: Codable, Hashable, Sendable {
     static let scheme = "popopx"
     static let host = "channel"
@@ -741,13 +741,13 @@ struct PopopxChannelAccessPayload: Codable, Hashable, Sendable {
         PopopxCommerceSignature.canonical(kind: "chan", parts: [String(price), String(publishedAtMs), issuerPublicKeyBase64URL])
     }
 
-    /// 签发方自己那台设备上的复核（与 `PopopxRedPacketPayload.isSelfSignatureValid` 同一档用途）。
+    /// The re-check on the issuing device itself (the same level of use as `PopopxRedPacketPayload.isSelfSignatureValid`).
     var isSelfSignatureValid: Bool {
         PopopxCommerceSignature.verifySelfIssued(signatureBase64URL: signature, for: canonicalBytes)
     }
 
-    /// 成员侧的真伪判定：公钥就在这条消息里，因此**不需要**双方是联系人，也不依赖本机钥匙。
-    /// 这一条不是装饰：改一次 `p` 就是一次验签失败，而门槛直接决定扣多少钱。
+    /// Authenticity on the member's side: the public key is right here in this message, so it **does not need** the two sides to be contacts and does not depend on a local key.
+    /// This is not decoration: altering `p` once is one failed verification, and the threshold directly decides how much money is deducted.
     var isIssuerSignatureValid: Bool {
         PopopxCommerceSignature.verify(
             signatureBase64URL: signature,
@@ -756,8 +756,8 @@ struct PopopxChannelAccessPayload: Codable, Hashable, Sendable {
         )
     }
 
-    /// 门槛必须是判据范围内的数：`0` 合法（免费的频道），负数、超过 100,000 都不合法，
-    /// 而判据放在这一层而不是只放在输入框，是因为这条 URI 可以被粘贴进任何会话。
+    /// The threshold must be a number inside the criterion's range: `0` is legal (a free channel), negatives and anything above 100,000 are not,
+    /// and the criterion sits in this layer rather than only in the input field because this URI can be pasted into any conversation.
     var isPriceAuthorized: Bool {
         price >= 0 && price <= PopopxCommerceLimits.maximumCreditsThreshold
     }
@@ -769,10 +769,10 @@ struct PopopxChannelAccessPayload: Codable, Hashable, Sendable {
         self.signature = signature
     }
 
-    /// 发布：签一次、编码一次。取不到本机密钥就返回 nil，调用方必须给可见反馈。
-    /// `make` 拒绝 `price == 0`：那一格既不扣点也不留流水，发出去只是一条噪音（面板里那一支说明过）。
-    /// `localPublicKeyBase64URL()` 在取不到密钥时返回**空串**，所以这里先排空再签——
-    /// 一把没有的钥匙签出来的卡片，成员那边只会得到"验不过"，而真实原因是"本机没密钥"。
+    /// Publish: sign once, encode once. If the local key cannot be fetched it returns nil, and the caller must give visible feedback.
+    /// `make` refuses `price == 0`: that tile neither deducts credits nor leaves a ledger row, so sending it is only noise (the branch in the panel already explained this).
+    /// `localPublicKeyBase64URL()` returns an **empty string** when the key cannot be fetched, so empties are screened out here before signing —
+    /// a card signed with a key that does not exist only gives the member a "verification failed", while the real reason is "this device has no key".
     static func make(price: Int, publishedAtMs: Int64) -> PopopxChannelAccessPayload? {
         guard price >= 1, price <= PopopxCommerceLimits.maximumCreditsThreshold else { return nil }
         let publicKey = PopopxCommerceSignature.localPublicKeyBase64URL()
@@ -786,8 +786,8 @@ struct PopopxChannelAccessPayload: Codable, Hashable, Sendable {
         "\(Self.scheme)://\(Self.host)?p=\(price)&t=\(publishedAtMs)&e=\(issuerPublicKeyBase64URL)&s=\(signature)"
     }
 
-    /// 与 `PopopxRedPacketPayload.parse` 同一判据：按空白切、从最后一个 token 试起、
-    /// scheme+host 双查、字段名白名单、必需字段齐备、长度封顶。
+    /// The same criteria as `PopopxRedPacketPayload.parse`: split on whitespace, start trying from the last token,
+    /// check scheme+host together, field-name allow-list, required fields present, length capped.
     static func parse(from text: String) -> PopopxChannelAccessPayload? {
         for token in text.split(whereSeparator: \.isWhitespace).reversed() {
             if let payload = parseToken(String(token)) { return payload }
@@ -836,37 +836,37 @@ struct PopopxChannelAccessPayload: Codable, Hashable, Sendable {
     }
 }
 
-// MARK: - 不可见信令
+// MARK: - Invisible signalling
 
-/// 信令种类。字符串与规范逐字对齐（`::popopx_sys::` + 大写名 + `::` + 载荷）。
+/// The kinds of signalling. The strings line up with the spec character for character (`::popopx_sys::` + upper-case name + `::` + payload).
 enum PopopxCommerceSignalKind: String, CaseIterable, Sendable {
     case externalRedeemRequest = "EXT_REDEEM_REQ"
     case externalRedeemAcknowledge = "EXT_REDEEM_ACK"
     case chatRedeemRequest = "CHAT_REDEEM_REQ"
     case chatRedeemAcknowledge = "CHAT_REDEEM_ACK"
     case redPacketClaimed = "REDPACKET_CLAIMED"
-    /// 资料卡解锁回执。提示词把它和频道核销回执写成"静默通知"，但五种名字里没有它们那一个，
-    /// 所以这一格是**按需求补的第六种**，`Docs/app-store-review-notes.md` 里单独一条说明它为什么存在。
-    /// 它只进不出：收到的一侧删行、不动任何界面，因为"谁看了你的主页"一旦变成持久记录就不再是静默。
+    /// The profile-card unlock receipt. The prompt writes it and the channel redemption receipt as "silent notifications", but none of the five names covers them,
+    /// so this entry is **the sixth kind added because the requirement asked for it**, and `Docs/app-store-review-notes.md` has a separate item on why it exists.
+    /// It only comes in and never goes out: the receiving side deletes the row and touches no UI, because "who viewed your profile page" stops being silent the moment it becomes a durable record.
     case profileUnlocked = "PROFILE_UNLOCKED"
-    /// 频道订阅的核销回执。载荷是 `{chatInfoId}::{expiresAtMs}` 两截，用**最后一对** `::` 分，
-    /// 因为会话键本身形如 `#<本机行号>`，只有末尾那一段保证是数字。
-    /// 名字由产品裁定给定（第 2 轮第 2 条），字段顺序也是：这台设备上"哪个频道、哪一期到期"。
+    /// The redemption receipt of a channel subscription. The payload is the two parts `{chatInfoId}::{expiresAtMs}`, split on the **last** pair of `::`,
+    /// because the conversation key itself looks like `#<local row number>` and only the trailing part is guaranteed to be a number.
+    /// The name was fixed by a product ruling (round 2, item 2), and so was the field order: on this device, "which channel, which period expires".
     case channelSubscriptionAcknowledge = "CHANNEL_SUB_ACK"
 
-    /// 只有这两种信令允许在群/频道里被接手。判据的原因不是"群里不能收信令"，
-    /// 而是 `awaitingAcks` 按 chatId 记账：群里第三个人发来的兑换 ACK 会把别人那一笔判掉
-    /// （路由器 `observeIncoming` 那一节）。红包回执与频道核销回执各自按 packetId / 会话键记，
-    /// 不经 `awaitingAcks`，所以它们在群里是安全的。
+    /// Only these two signalling kinds may be picked up inside a group/channel. The reason for the criterion is not "signalling cannot be received in a group",
+    /// but that `awaitingAcks` keeps its books per chatId: a redemption ACK from a third person in the group would settle somebody else's entry
+    /// (the router's `observeIncoming` section). Red packet receipts and channel redemption receipts are recorded per packetId / conversation key,
+    /// never through `awaitingAcks`, so they are safe in a group.
     var acceptedInGroup: Bool {
         self == .redPacketClaimed || self == .channelSubscriptionAcknowledge
     }
 }
 
-/// 一条已解析的信令。
+/// One parsed signalling message.
 struct PopopxCommerceSignal: Hashable, Sendable {
     let kind: PopopxCommerceSignalKind
-    /// 载荷：voucherId，或 grant 的 base64url，或 packetId。
+    /// Payload: a voucherId, or the grant's base64url, or a packetId.
     let payload: String
 
     var isRequest: Bool {
@@ -878,11 +878,11 @@ struct PopopxCommerceSignal: Hashable, Sendable {
     }
 }
 
-/// `::popopx_sys::` 的编解码。
+/// Codec for `::popopx_sys::`.
 ///
-/// 为什么 `parse` 要求整串相等而不是 contains：`contains` 会让一句
-/// "看这段 ::popopx_sys:: 的截图" 变成一条可执行信令。整串相等是唯一安全的解析边界，
-/// 渲染端的抑制逻辑也共用它——判据只有一份。
+/// Why `parse` requires whole-string equality rather than contains: `contains` would turn a sentence like
+/// "look at this screenshot of ::popopx_sys::" into an executable signalling message. Whole-string equality is the only safe parsing boundary,
+/// and the renderer's suppression logic shares it — there is only one copy of the criterion.
 enum PopopxSysMarker {
     static let marker = "::popopx_sys::"
 
@@ -894,9 +894,9 @@ enum PopopxSysMarker {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmed.hasPrefix(marker) else { return nil }
         let rest = String(trimmed.dropFirst(marker.count))
-        // 只按**第一个** `::` 切：类型名里不可能有冒号，grant 的 base64url 里也不可能。
-        // 用 split(maxSplits:) 会把 `EXT_REDEEM_REQ:abc`（单个冒号）也当成合法形式，
-        // 于是切出一个不存在的类型名之后，再把偏移硬算进载荷——那是最容易静默错位的地方。
+        // Split on the **first** `::` only: a type name can never contain a colon, nor can a grant's base64url.
+        // Using split(maxSplits:) would also accept `EXT_REDEEM_REQ:abc` (a single colon) as a legal form,
+        // and after slicing out a type name that does not exist the offset would then be forced into the payload — the easiest place to slip silently out of alignment.
         guard let separator = rest.range(of: "::") else { return nil }
         let kindText = String(rest[..<separator.lowerBound])
         let payload = String(rest[separator.upperBound...])
@@ -908,15 +908,15 @@ enum PopopxSysMarker {
         return PopopxCommerceSignal(kind: kind, payload: payload)
     }
 
-    /// 渲染抑制的入口：命中即整行不上气泡、不进预览、不朗读。
+    /// The entry point of render suppression: a hit means the whole line never reaches a bubble, a preview, or being read aloud.
     static func isSignalText(_ text: String) -> Bool {
         parse(wholeText: text) != nil
     }
 }
 
-// MARK: - 算力点值类型
+// MARK: - Compute-credit value types
 
-/// 流水类别。`sign` 只在这里定义一次，UI 的正负号与颜色都从它派生。
+/// The ledger categories. `sign` is defined once here, and the UI's plus/minus signs and colours both derive from it.
 enum PopopxCreditsEntryKind: String, Codable, CaseIterable, Identifiable, Sendable {
     case storePurchase
     case badgeExchange
@@ -932,7 +932,7 @@ enum PopopxCreditsEntryKind: String, Codable, CaseIterable, Identifiable, Sendab
 
     var id: String { rawValue }
 
-    /// 收入为正、支出为负。`adjustment` 两头都可能，所以它返回 nil 由条目自己带符号。
+    /// Income is positive, spending negative. `adjustment` can go either way, so it returns nil and the entry carries its own sign.
     var sign: Int? {
         switch self {
         case .storePurchase, .redPacketReceived, .adjustment: nil
@@ -951,30 +951,30 @@ enum PopopxCreditsEntryKind: String, Codable, CaseIterable, Identifiable, Sendab
     }
 }
 
-/// 一条流水。`id` 就是防重放用的交易哈希，所以它同时是账目主键和去重键。
+/// One ledger row. `id` is the transaction hash used for replay prevention, so it is at once the accounting primary key and the dedup key.
 struct PopopxCreditsEntry: Codable, Hashable, Identifiable, Sendable {
     let id: String
     let amount: Int
     let kind: PopopxCreditsEntryKind
     let note: String
     let timestampMs: Int64
-    /// 记账后的余额快照。缺省是旧条目（升级前写的），UI 对缺省不显示"余额"那一行。
+    /// The balance snapshot after the entry. The default is for older entries (written before the upgrade), and for the default the UI hides the "balance" line.
     var balanceAfter: Int?
 }
 
-/// 钱包本体。放 Keychain，不放文件：这台设备上的余额一旦被越狱工具改掉，
-/// 改的是一段 `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` 的密文，风险面比明文 plist 小。
+/// The wallet itself. It lives in the Keychain, not in a file: if the balance on this device is tampered with by a jailbreak tool,
+/// what is being tampered with is a blob of `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` ciphertext, a smaller risk surface than a plaintext plist.
 struct PopopxCreditsWallet: Codable, Hashable, Sendable {
     static let currentVersion = 1
 
     var version: Int
     var balance: Int
     var updatedAtMs: Int64
-    /// 余额与流水对不上时置真。宁可让用户看到"需要重新对账"，也不要静默把错账当余额花掉。
+    /// Set to true when the balance and the ledger disagree. Better to show the user "needs reconcile" than to silently spend a wrong book as a balance.
     var needsReconcile: Bool
 }
 
-/// 一条还没被领完的红包（发送方持有，用于校验 ACK 与退款）。
+/// A red packet that has not been fully claimed (held by the sender, used to check ACKs and refund).
 struct PopopxPendingRedPacket: Codable, Hashable, Identifiable, Sendable {
     let packetId: String
     let amount: Int
@@ -982,30 +982,30 @@ struct PopopxPendingRedPacket: Codable, Hashable, Identifiable, Sendable {
     let recipientCount: Int
     var claimedCount: Int
     let createdAtMs: Int64
-    /// 群聊均分时的单人应得额；单人红包等于 `amount`。
+    /// The amount one person is owed in an equal group split; for a one-person red packet it equals `amount`.
     let amountPerRecipient: Int
     var settled: Bool
-    /// 群红包里已经回执过的成员（`GroupMember.groupMemberId` 的字符串形态）。可选且默认 nil，
-    /// 是因为：一、direct 红包没有"成员"这个概念，一份份额天然由领取端账本去重；
-    /// 二、解码端对缺失键走 `decodeIfPresent`，将来加字段不会读到空数组就当"没人领过"。
-    /// 它只是**去重集**，退款金额算的是 `claimedCount`——两者在群里相等，在单聊里只有后者有值。
+    /// The group members who have already ACKed this red packet (the string form of `GroupMember.groupMemberId`). Optional and defaulting to nil
+    /// because: one, a direct red packet has no notion of a "member", and a single share is naturally deduped by the claiming side's ledger;
+    /// two, the decoding side uses `decodeIfPresent` for missing keys, so a field added later will not read an absent value as an empty array and conclude "nobody claimed".
+    /// It is only a **dedup set**; the refund amount is computed from `claimedCount` — the two are equal in a group, and in a 1:1 chat only the latter has a value.
     var claimKeys: [String]?
 
     var id: String { packetId }
 
     var isFullyClaimed: Bool { claimedCount >= recipientCount || settled }
 
-    /// 本端最早可以判定"这一单结束、余款退回"的时刻。领满之前绝不退款：
-    /// 余款一旦退回，群里剩下的份额仍可被领走，那一份点数就是无中生有的。
+    /// The earliest moment this side may decide "this order is over, refund the remainder". Never refund before it is claimed out:
+    /// once the remainder is refunded, the shares still left in the group can be claimed, and those credits would be created out of nothing.
     var claimGraceEndsAtMs: Int64 { createdAtMs + Int64(PopopxCommerceLimits.packetClaimGraceSeconds * 1_000) }
 
-    /// 未被领取部分的退款额（只有本端能算，因为没有服务器兜底账）。
+    /// The refund amount of the unclaimed part (only this side can compute it, because no server holds a fallback ledger).
     var refundableAmount: Int {
         max(0, amount - claimedCount * amountPerRecipient)
     }
 }
 
-/// 频道订阅凭证。频道主自定义门槛，成员本地入账后持有一张带到期时间的票。
+/// A channel subscription credential. The channel owner sets the threshold themselves, and a member who has credited locally holds a ticket with an expiry time.
 struct PopopxChannelSubscriptionTicket: Codable, Hashable, Identifiable, Sendable {
     let channelId: String
     let channelTitle: String
@@ -1013,9 +1013,9 @@ struct PopopxChannelSubscriptionTicket: Codable, Hashable, Identifiable, Sendabl
     let paidAtMs: Int64
     let expiresAtMs: Int64
     let transactionId: String
-    /// 签这张票时那条卡片的发布者公钥。**可选**是为了兼容升级前写好的票：那一代的 JSON 里没有这个键，
-    /// 非可选会让整个钥匙串数组解码失败，于是所有人的"已订阅"状态一夜之间变成就没订阅过。
-    /// 缺这一格的旧票一律不参与防冒充比对（判据见 `PopopxCreditsManager.channelIssuerConflict`）。
+    /// The publisher key of the card this ticket was signed against. **Optional** is for compatibility with tickets written before the upgrade: that generation's JSON has no such key,
+    /// and non-optional would fail decoding of the whole keychain array, so everybody's "subscribed" state would turn overnight into never having subscribed.
+    /// Old tickets missing this field never take part in the anti-impersonation comparison (criterion: `PopopxCreditsManager.channelIssuerConflict`).
     var issuerPublicKeyBase64URL: String?
 
     var id: String { transactionId }
@@ -1025,7 +1025,7 @@ struct PopopxChannelSubscriptionTicket: Codable, Hashable, Identifiable, Sendabl
     }
 }
 
-/// 解锁某个加密个人主页后留下的收据（付方持有，供"我看过谁"回看与对账）。
+/// The receipt left after unlocking an encrypted profile page (held by the payer, for looking back at "who I viewed" and for reconciliation).
 struct PopopxProfileUnlockReceipt: Codable, Hashable, Identifiable, Sendable {
     let profileId: String
     let chatId: Int64
@@ -1037,7 +1037,7 @@ struct PopopxProfileUnlockReceipt: Codable, Hashable, Identifiable, Sendable {
     var id: String { transactionId }
 }
 
-/// 高阶外观兑换。本地渲染生效，不上传、不校验，所以这里只需要"什么时候解锁的"。
+/// High-tier appearance redemptions. Applied by local rendering, never uploaded and never verified, so all that is needed here is "when it was unlocked".
 enum PopopxCosmetic: String, Codable, CaseIterable, Identifiable, Sendable {
     case auroraShieldAvatarFrame
     case darkGoldQRCardSkin
@@ -1052,8 +1052,8 @@ enum PopopxCosmetic: String, Codable, CaseIterable, Identifiable, Sendable {
     }
 }
 
-/// 防重放集合：领取过的红包 id、已核销的券 id、已入账的交易哈希。
-/// 三个集合共用一个上限，超限按 FIFO 丢最旧——最旧那条对应的事务早已结束。
+/// The anti-replay sets: red packet ids claimed, voucher ids redeemed, transaction hashes credited.
+/// The three sets share one ceiling; over the ceiling the oldest are dropped FIFO — the transaction that oldest row stands for finished long ago.
 struct PopopxReplayGuard: Codable, Hashable, Sendable {
     var claimedPacketIds: [String] = []
     var redeemedVoucherIds: [String] = []
@@ -1077,9 +1077,9 @@ struct PopopxReplayGuard: Codable, Hashable, Sendable {
 
 // MARK: - Keychain
 
-/// Keychain 条目分槽。命名全部带 `popopx.commerce.` 前缀，与
-/// `kcDatabasePassword`/`kcSelfDestructPassword` 那一族、以及 duress 自己的 `popopx.duress.*` 分开，
-/// 三套 account 空间互不覆盖。
+/// Keychain item slots. Every name carries the `popopx.commerce.` prefix, kept apart from
+/// the `kcDatabasePassword`/`kcSelfDestructPassword` family and duress's own `popopx.duress.*`,
+/// so the three account namespaces never overwrite each other.
 enum PopopxCommerceKeychainSlot: String, CaseIterable, Sendable {
     case badgeRecord = "popopx.commerce.badge"
     case trialGuard = "popopx.commerce.trial"
@@ -1093,21 +1093,21 @@ enum PopopxCommerceKeychainSlot: String, CaseIterable, Sendable {
     case profileReceipts = "popopx.commerce.profile-receipts"
     case cosmetics = "popopx.commerce.cosmetics"
     case ephemeralConnections = "popopx.commerce.ephemeral-connections"
-    /// 本机安装指纹（体验徽章防重放的第二半）。单独一格，不与临时连接混用：
-    /// 那一条会被兑换流程反复覆写，指纹被覆写一次就等于体验徽章可以无限重领。
+    /// This device's install fingerprint (the second half of the trial badge's replay prevention). Its own slot, never shared with the temporary connection:
+    /// that one gets overwritten repeatedly by the redemption flow, and overwriting the fingerprint once means the trial badge can be claimed without limit.
     case installIdentity = "popopx.commerce.install-identity"
-    /// 收件侧验签通过的授权原文（grant）。单独一格，不借用 `profileReceipts`：
-    /// 那一格是解锁资料卡的收据，兑换流程覆写它会把别人的解锁凭据一起抹掉。
+    /// The authorisation text (grant) whose signature the receiving side verified. Its own slot, not borrowing `profileReceipts`:
+    /// that slot holds the receipts for unlocking profile cards, and having the redemption flow overwrite it would wipe somebody else's unlock credentials along with it.
     case grants = "popopx.commerce.grants"
 }
 
-/// Keychain 读写。
+/// Keychain reads and writes.
 ///
-/// 可访问性用 `AfterFirstUnlockThisDeviceOnly`（规范点名要求）：徽章与余额要在锁屏收到信令时
-/// 就读得到，而 ThisDeviceOnly 又保证它不进 iCloud Keychain——一张别人设备上的券
-/// 如果被同步过来，双花就在两台上同时成立，那是最糟的结果。
-/// accessGroup 只在真机上带：模拟器里带 group 的 `SecItemAdd` 会直接失败，
-/// 这一条抄 `POPOPXChat/KeyChain.swift:112-120` 的既有做法。
+/// Accessibility uses `AfterFirstUnlockThisDeviceOnly` (named and required by the spec): badges and balance must be readable when signalling arrives on the lock screen,
+/// while ThisDeviceOnly also keeps it out of iCloud Keychain — a voucher sitting on somebody else's device,
+/// if it were synced over, would make a double spend true on two machines at once, which is the worst possible outcome.
+/// accessGroup is only attached on a real device: on the simulator a `SecItemAdd` carrying a group fails outright,
+/// and this copies the existing practice of `POPOPXChat/KeyChain.swift:112-120`.
 enum PopopxCommerceKeychain {
     static let service = "popopx.commerce"
     static let accessGroup = "PDBA6XRBQT.com.popopxchat.popopx"
@@ -1122,10 +1122,10 @@ enum PopopxCommerceKeychain {
         return data
     }
 
-    /// 写。先 `SecItemUpdate` 再 `SecItemAdd`，并且 **accessibility 只挂在 add 那一支**：
-    /// `SecItemUpdate` 改不了已存在条目的 accessibility，把它塞进查询条件反而会让
-    /// 旧条目（用别的 accessibility 写下的）匹配不上，于是更新静默失败、退化成"再加一份"。
-    /// 需要改 accessibility 的升级路径是"先删再写"，由调用方显式做，这里不假装能覆盖。
+    /// Write. `SecItemUpdate` first, then `SecItemAdd`, and **accessibility hangs only on the add branch**:
+    /// `SecItemUpdate` cannot change the accessibility of an existing item, and putting it into the query conditions instead
+    /// would make older items (written with a different accessibility) fail to match, so the update silently fails and degrades into "add another copy".
+    /// The upgrade path that needs an accessibility change is "delete first, then write", done explicitly by the caller; this does not pretend it can overwrite it.
     static func write(_ data: Data, _ slot: PopopxCommerceKeychainSlot) -> Bool {
         if SecItemUpdate(lookupQuery(slot) as CFDictionary, [kSecValueData as String: data] as CFDictionary) == errSecSuccess {
             return true
@@ -1157,12 +1157,12 @@ enum PopopxCommerceKeychain {
         return write(data, slot)
     }
 
-    /// 抹掉本模块在 Keychain 里的全部痕迹（紧急自毁与"清除我的数据"都调它）。
+    /// Wipes every trace this module left in the Keychain (both emergency self-destruct and "clear my data" call it).
     static func removeAll() {
         for slot in PopopxCommerceKeychainSlot.allCases { _ = remove(slot) }
     }
 
-    /// 定位用的一组属性：不含 accessibility，所以新旧条目都匹配得上。
+    /// The attribute set used for lookup: it contains no accessibility, so both new and old items match.
     private static func lookupQuery(_ slot: PopopxCommerceKeychainSlot) -> [String: Any] {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -1176,21 +1176,21 @@ enum PopopxCommerceKeychain {
     }
 }
 
-// MARK: - 本地签名身份
+// MARK: - Local signing identity
 
-/// CryptoKit P-256 签名的唯一入口。
+/// The single entry point for CryptoKit P-256 signatures.
 ///
-/// 为什么是 ECDSA P-256 而不是 Ed25519：本模块要和 `PopopxSecurePayload` 那支共用
-/// CryptoKit 的既有用法（AES-GCM + SHA256），而签名只需要"本机密钥 + 篡改留痕"，
-/// P-256 的 x963/DER 两个表示都是 iOS 13 起就稳定的 API；
-/// `compressedRepresentation` 在 `P256.Signing.PublicKey` 上不保证可用，所以选 x963。
+/// Why ECDSA P-256 rather than Ed25519: this module has to share CryptoKit's existing usage with the `PopopxSecurePayload` branch
+/// (AES-GCM + SHA256), and signing only needs "a local key + a tamper trail",
+/// while both P-256 representations, x963 and DER, are APIs that have been stable since iOS 13;
+/// `compressedRepresentation` is not guaranteed available on `P256.Signing.PublicKey`, so x963 was chosen.
 enum PopopxCommerceSignature {
-    /// 取（或首次铸造）本机签名密钥。私钥以 PEM 形式存 Keychain，
-    /// 每次调用都重新解析，密钥材料不进静态变量——静态变量会把它留在内存里到进程结束。
+    /// Fetch (or mint on first use) this device's signing key. The private key is stored in the Keychain as PEM,
+    /// and every call parses it again — key material never enters a static variable, because a static variable would keep it in memory until the process ends.
     ///
-    /// 存不进去就返回 nil，**不返回一把临时钥匙**：静默降级的话，上一次签发的兑换码
-    /// 会在下一次启动时因为"换了一把钥匙"而全部验不过，用户看到的是"我的码失效了"，
-    /// 而真实原因藏在一条没人会读的日志里。宁可当场报"安全存储不可用"。
+    /// If it cannot be stored, return nil, **do not return a throwaway key**: with a silent downgrade, the redemption codes issued last time
+    /// would all fail verification at the next launch because "the key was swapped", and what the user sees is "my code stopped working",
+    /// while the real reason hides in a log line nobody reads. Better to report "secure storage unavailable" on the spot.
     static func signingKey() -> P256.Signing.PrivateKey? {
         if let data = PopopxCommerceKeychain.read(.signingKey),
            let pem = String(data: data, encoding: .utf8),
@@ -1202,19 +1202,19 @@ enum PopopxCommerceSignature {
         return minted
     }
 
-    /// 本机公钥（x963，无填充 base64url）。兑换码与授权书里带的就是这一串。
+    /// This device's public key (x963, unpadded base64url). The redemption code and the letter of authorisation carry exactly this string.
     static func localPublicKeyBase64URL() -> String {
         signingKey()?.publicKey.x963Representation.popopxBase64URL ?? ""
     }
 
-    /// 签名一段规范化字节，返回 DER 的无填充 base64url。
+    /// Signs a stretch of canonicalised bytes and returns the DER signature as unpadded base64url.
     static func signatureBase64URL(for canonical: Data) -> String? {
         guard let key = signingKey() else { return nil }
         guard let signature = try? key.signature(for: canonical) else { return nil }
         return signature.derRepresentation.popopxBase64URL
     }
 
-    /// 严格验签：公钥解不出来、签名解不出来、验不过，三者都是 false，不区分原因。
+    /// Strict verification: a public key that will not decode, a signature that will not decode, and a failed check are all false, without distinguishing the reason.
     static func verify(signatureBase64URL: String, for canonical: Data, publicKeyBase64URL: String) -> Bool {
         guard
             !signatureBase64URL.isEmpty, !publicKeyBase64URL.isEmpty,
@@ -1226,19 +1226,19 @@ enum PopopxCommerceSignature {
         return publicKey.isValidSignature(signature, for: canonical)
     }
 
-    /// 自签校验：只在"这条载荷是本机铸造的"这一前提下有意义（赠方本地看自己发出去的卡片）。
-    /// 命名区别于 `verify`，是为了让调用侧不可能把"自签通过"读成"对方确认过了"。
+    /// Self-signature check: only meaningful under the premise "this payload was minted on this device" (the giver looking at their own outgoing card locally).
+    /// Named differently from `verify` so that a call site can never read "self-signed passed" as "the other side confirmed it".
     static func verifySelfIssued(signatureBase64URL: String, for canonical: Data) -> Bool {
         verify(signatureBase64URL: signatureBase64URL, for: canonical, publicKeyBase64URL: localPublicKeyBase64URL())
     }
 
-    /// 规范化字节。字段顺序固定、以 `|` 分隔、第一段是载荷类型名：
-    /// 把 gift 的规范化结果拿去当 redpacket 验，开头就比不上。
+    /// The canonical bytes. Field order is fixed, segments are separated by `|`, and the first segment is the payload type name:
+    /// take gift's canonical result and verify it as a redpacket and it fails to match right at the start.
     ///
-    /// 只保留**一种**入参形态（`[String]`），是刻意的：两种形态迟早会演化成
-    /// "同一个载荷两条规范化路径"，那正是"篡改留痕"这条承诺失效的地方。
-    /// 自由文本（赠言）不进 `parts`，而是像下面各处那样拼在末尾——
-    /// 赠言里允许出现 `|`，只要它永远是最后一段，就不可能把前面的字段挤位。
+    /// Keeping **only one** input shape (`[String]`) is deliberate: two shapes would sooner or later evolve into
+    /// "two canonicalisation paths for the same payload", which is exactly where the "tamper trail" promise breaks down.
+    /// Free text (the message) does not go into `parts` but is appended at the end as in the places below —
+    /// a message may contain `|`, and as long as it is always the last segment it cannot push the earlier fields out of position.
     static func canonical(kind: String, parts: [String]) -> Data {
         Data((["popopx", kind] + parts).joined(separator: "|").utf8)
     }
@@ -1247,7 +1247,7 @@ enum PopopxCommerceSignature {
 
     static func digest(_ text: String) -> Data { digest(Data(text.utf8)) }
 
-    /// 前 16 位十六进制，用于落账和对账展示。
+    /// The first 16 hex characters, used for posting entries and for reconciliation display.
     static func shortDigest(_ data: Data) -> String {
         digest(data).prefix(8).map { String(format: "%02x", $0) }.joined()
     }
@@ -1255,10 +1255,10 @@ enum PopopxCommerceSignature {
     static func shortDigest(_ text: String) -> String { shortDigest(Data(text.utf8)) }
 }
 
-// MARK: - 错误
+// MARK: - Errors
 
-/// 本模块的统一失败类型。集中在一处，是为了让 6 个视图文件里的 catch 分支
-/// 不会各自造出一套互不兼容的错误枚举。
+/// This module's unified failure type. Centralised in one place so that the catch branches
+/// in the 6 view files do not each invent an incompatible error enum.
 enum PopopxBadgeCreditsError: Error, LocalizedError, Hashable {
     case storeUnavailable
     case productNotFound(String)
@@ -1273,9 +1273,9 @@ enum PopopxBadgeCreditsError: Error, LocalizedError, Hashable {
     case connectionUnavailable
     case signalRejected
     case expiryInPast
-    /// 入账后会超过余额上限。**只有收入方向会走到这一格**（支出方向由 `insufficientCredits` 管）。
-    /// 单列而不是复用 `purchaseFailed`：那一句的言外之意是"付款出了问题"，
-    /// 而这里付款是成功的、钱到了，只是这台设备的钱包装不下——用户要做的是先花掉一部分再领。
+    /// Crediting would push past the balance ceiling. **Only the income direction can reach this case** (the spending direction is handled by `insufficientCredits`).
+    /// Listed separately instead of reusing `purchaseFailed`: that one implies "something went wrong with the payment",
+    /// whereas here the payment succeeded and the money arrived — this device's wallet simply cannot hold it, and what the user should do is spend some first before claiming.
     case creditBalanceTooHigh(maximum: Int)
 
     var errorDescription: String? {
@@ -1300,24 +1300,24 @@ enum PopopxBadgeCreditsError: Error, LocalizedError, Hashable {
     }
 }
 
-// MARK: - 商业文案（全语种）
+// MARK: - Commerce copy (all languages)
 
-/// 只有"涉钱的那几句"走 NSLocalizedString。目录现状：`apps/ios` 下 17 个 `.lproj`。
-/// `en.lproj` 一条都不加——它是开发区域（`developmentRegion = en`），本仓库的约定是那里只放
-/// value ≠ key 的条目，查不到 key 时 `NSLocalizedString` 返回源文，所以英文那一路本来就读源文。
-/// 真机第 8 轮 · 任务三之前，下面这些 key 全部在 16 个翻译目录里有值；本轮新写的 4 条源文
-/// （`"POPOPX Badge"` 与算力点充值那三句结果文案）还没进目录——本轮红线禁止改 `.lproj`，
-/// 补齐之前非英文语种会读到英文原句，那是已知且刻意留下的中间状态，不是漏翻。
-/// 其余功能内文案继续用各文件自己的 `private enum Copy` 中文常量，
-/// 和最近四个 POPOPX 功能保持一致；两套约定的分界线就是"这句话会不会出现在付款/退款/合规证据里"。
+/// Only "the few sentences that touch money" go through NSLocalizedString. Catalogue as it stands: 17 `.lproj` directories under `apps/ios`.
+/// `en.lproj` gets none of them — it is the development region (`developmentRegion = en`), and this repo's convention there is to store only
+/// entries whose value ≠ key; when a key is not found `NSLocalizedString` returns the source text, so the English path already reads the source.
+/// Before real-device round 8 · task three, all the keys below had values in the 16 translation directories; the 4 source lines newly written this round
+/// (`"POPOPX Badge"` and the three result sentences of compute-credit top-up) are not in the catalogues yet — this round's red line forbids touching `.lproj`,
+/// so until they are added non-English languages will read the English source sentence; that is a known, deliberately left intermediate state, not a missing translation.
+/// The remaining in-feature copy keeps using each file's own `private enum Copy` Chinese constants,
+/// consistent with the last four POPOPX features; the dividing line between the two conventions is "does this sentence appear in payment/refund/compliance evidence".
 ///
-/// 源文必须在本特性内唯一：目录是 app 级共享的一份，key 相同就必然共用同一条译文。
-/// 曾想复用 "History"（16 个语种都已有），实测 de 把它译成"Nachrichtenverlauf"（消息记录）、
-/// zh-Hans 把 "For me" 译成"仅自己"——都是别的页面的语义，于是这三条源文各自改成没有歧义的说法。
-/// 另有 "Credits" / "Fixed amounts only" / "History" 三条在普查（`PopopxCommerceCopy.<名>`
-/// 除声明外 0 处引用）后被删除：留着一句永远不会上屏的"合规文案"，比不写更糟。
-/// 同一判据的反方向也成立：源文与语义都相同的那一句允许直接复用既有词条——
-/// `"Top up Compute Credits"` 就是「我」页那一行已经在用的词条，这里不另开一条新说法。
+/// The source text must be unique inside this feature: the catalogue is one app-level shared table, and the same key necessarily shares one translation.
+/// There was an idea to reuse "History" (already present in all 16 languages); measured, de renders it as "Nachrichtenverlauf" (message history)
+/// and zh-Hans renders "For me" as "only myself" — both are another page's semantics, so these three source texts were each changed to an unambiguous wording.
+/// Three more, "Credits" / "Fixed amounts only" / "History", were deleted after a census (`PopopxCommerceCopy.<name>`
+/// 0 references outside its declaration): keeping a "compliance sentence" that can never reach the screen is worse than not writing it.
+/// The reverse of the same criterion holds too: a sentence identical in both source text and semantics may reuse an existing entry directly —
+/// `"Top up Compute Credits"` is exactly the entry the "me" page row already uses, so no new wording is opened here.
 enum PopopxCommerceCopy {
     static let badgeProductName = NSLocalizedString("POPOPX Dynamic Privacy Node Badge", comment: "product name")
     static let trialBadgeName = NSLocalizedString("3-Day Pioneer Node Trial Badge", comment: "trial product name")
@@ -1325,10 +1325,10 @@ enum PopopxCommerceCopy {
     static let nodeClusterTerm = NSLocalizedString("dynamic SMP relay node cluster", comment: "never VPN")
 
     static let paywallTitle = NSLocalizedString("Light up a privacy node", comment: "paywall title")
-    // 分段标题不再说"给谁"（源文原为 "For myself" / 「为自己」）：付费墙与算力点充值拆成两条
-    // 动线之后，这一页只卖徽章，标题必须说出卖的是哪一件商品，而不是含糊地指人。
-    // 刻意不叫 "For me" / "Restore purchases"：那两个 key 在 11 个语种的目录里已经属于别的页面，
-    // 复用它们等于让本特性的一句话由另一个页面的翻译决定。源文唯一 → 目录里只有一份，读到的就是这里写的。
+    // The section heading no longer says "for whom" (the source text used to be "For myself"): after the paywall and the compute-credit top-up were split into two
+    // flow paths, this page sells only badges, and the heading has to name which product it sells rather than point vaguely at a person.
+    // Deliberately not called "For me" / "Restore purchases": those two keys already belong to other pages in the catalogues of 11 languages,
+    // and reusing them means letting another page's translation decide this feature's sentence. Unique source text → one entry in the catalogue, and what is read is what is written here.
     static let paywallBadgeTab = NSLocalizedString("POPOPX Badge", comment: "segment: badge plans bought for this device")
     static let paywallGiftTab = NSLocalizedString("Gift badge", comment: "segment")
     static let paywallRestore = NSLocalizedString("Restore badge purchases", comment: "button")
@@ -1339,18 +1339,18 @@ enum PopopxCommerceCopy {
     static let savePercentFormat = NSLocalizedString("Save %lld%% off", comment: "annual badge savings, computed from the two live display prices")
     static let creditsAmountFormat = NSLocalizedString("%lld Compute Credits", comment: "credit pack amount")
 
-    // 一次性时长包（非续订订阅）那一组。两条购买路径必须在同一张页面上各自说清"会不会再来扣钱"，
-    // 所以这一族句子和上面那句 3.1.2(c) 是同一级别的合规文本，一起进全部 16 个译本目录。
+    // The group of one-off time packs (non-renewing subscriptions). The two purchase paths must each state clearly, on the same page, "will money be charged again",
+    // so this family of sentences is compliance text at the same level as the 3.1.2(c) sentence above, and goes into all 16 translation catalogues together.
     static let paywallAutoRenewGroupTitle = NSLocalizedString("Auto-renewing subscriptions", comment: "paywall section heading")
     static let paywallOneTimeGroupTitle = NSLocalizedString("One-time passes", comment: "paywall section heading")
     static let passTierTitleFormat = NSLocalizedString("%lld-day pass", comment: "one-time pass tier title")
     static let passActionTitle = NSLocalizedString("Buy pass", comment: "paywall button on a one-time pass tier")
-    /// 非续订的免责声明。位置与订阅档那句 3.1.2(c) 同格：两档各说各的续费事实。
+    /// The non-renewing disclaimer. Placed in the same slot as the 3.1.2(c) sentence of the subscription tier: each tier states its own renewal fact.
     static let oneTimePurchaseStatement = NSLocalizedString("This is a one-time purchase. It never renews automatically and no further payment is taken.", comment: "Apple non-renewing purchase disclosure")
-    /// 到账天数由调用方从 `PopopxNodeBadgePeriod.days` 传进来。说"more days"而不是"到某日到期"：
-    /// 通行证是叠在当前剩余时间之上的（`PopopxBadgeManager.activate` 的合并规则），天数才是稳定事实。
+    /// The granted day count is passed in by the caller from `PopopxNodeBadgePeriod.days`. It says "more days" rather than "expires on such-and-such date":
+    /// a pass stacks on top of the time currently left (`PopopxBadgeManager.activate`'s merge rule), so the day count is the stable fact.
     static let passGrantedFormat = NSLocalizedString("Badge lit for %lld more days.", comment: "purchase result")
-    /// 体验面板与详情页里"去挑一档"的出口：两处都只是把同一张付费墙换上来，措辞按各自语境给。
+    /// The "go pick a tier" exit in the trial panel and the detail page: both only bring up the same paywall, so the wording follows each context.
     static let choosePlanAction = NSLocalizedString("Choose a plan", comment: "trial panel exit into the paywall")
     static let renewOrChangePlanAction = NSLocalizedString("Renew or change plan", comment: "badge detail exit into the paywall")
     static let passSourceName = NSLocalizedString("One-time pass", comment: "badge provenance row")
@@ -1359,58 +1359,58 @@ enum PopopxCommerceCopy {
     static let noGiftBackStatement = NSLocalizedString("Compute Credits are added at the exact amount shown. No bonus credits are granted.", comment: "no promotional top-up")
 
     static let creditsBalance = NSLocalizedString("Compute Credits balance", comment: "wallet label")
-    // 算力点现金包那一组（真机第 8 轮 · 任务三：充值动线整组搬到算力点那一页）。
-    /// 卡面标题。源文与「我」页那一行（`PopopxMeView` 的 `"Top up Compute Credits"`）逐字相同：
-    /// 同一个去处、同一件事，目录里就该共用那一条已经有 16 个译本的词条，不另开一个新说法。
+    // The group of compute-credit cash packs (real-device round 8 · task three: the whole top-up flow moved to the compute-credits page).
+    /// The card title. The source text is character-identical to the "me" page row (`PopopxMeView`'s `"Top up Compute Credits"`):
+    /// same destination, same thing, so the catalogue should share that one entry which already has 16 translations rather than open a new wording.
     static let creditsTopUpTitle = NSLocalizedString("Top up Compute Credits", comment: "credits pack card title")
-    /// 面额由调用方从 `PopopxCreditPack.amount` 传进来——那取自 SKU 的 `creditedAmount`，
-    /// 也就是真正入账的那一个数。写死在句子里就成了第二处事实。
+    /// The amount is passed in by the caller from `PopopxCreditPack.amount` — which comes from the SKU's `creditedAmount`,
+    /// i.e. the number that is actually credited. Hard-coding it into the sentence would make it a second source of truth.
     static let creditsTopUpGrantedFormat = NSLocalizedString("Added %lld Compute Credits to your balance.", comment: "credits pack purchase result")
-    /// Ask to Buy / 家庭批准那一档：钱还没扣，点数也没到。这一句不能写成"已到账"。
+    /// The Ask to Buy / family-approval tier: no money charged yet and no credits arrived either. This sentence must not be written as "already credited".
     static let creditsTopUpPending = NSLocalizedString("Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed.", comment: "credits pack purchase pending")
-    /// 付款已完成、本机账本没写进去（Keychain 写失败、或余额超过上限被挡下）。
-    /// 这一句必须存在，否则"付了钱屏幕上什么都没变"就是这一族里最难复现也最难解释的一次事故。
+    /// The payment completed but this device's ledger was not written (Keychain write failed, or the balance ceiling blocked it).
+    /// This sentence must exist, otherwise "paid and nothing changed on screen" becomes the hardest incident in this family to reproduce and to explain.
     static let creditsTopUpNotCredited = NSLocalizedString("Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written.", comment: "credits pack paid but not credited locally")
     static let redPacketTitle = NSLocalizedString("Send Compute Credits", comment: "sheet title")
-    /// 合规声明：这一句要在全部 17 个语种里出现，审核读的就是它。
+    /// Compliance statement: this sentence has to appear in all 17 languages; it is what the review reads.
     static let redPacketFixedAmountsStatement = NSLocalizedString("Only the fixed amounts listed here can be sent. Nowhere in this feature can you type a custom amount.", comment: "Apple 3.1.1 no random amounts")
-    /// 退款承诺。天数不是写死的字符串：调用方必须把 `PopopxCommerceLimits.packetClaimGraceSeconds` 传进来，
-    /// 否则改了常量而文案还说 30 天，这就是一句假承诺。
+    /// The refund promise. The day count is not a hard-coded string: the caller must pass in `PopopxCommerceLimits.packetClaimGraceSeconds`,
+    /// otherwise the constant changes while the copy still says 30 days, and that is a false promise.
     static let redPacketRefundStatementFormat = NSLocalizedString("Credits nobody claims are returned to the sender %lld days after the packet was sent.", comment: "refund promise")
     static let channelSubscriptionTitle = NSLocalizedString("Subscribe to this channel", comment: "sheet title")
-    /// 一期多长由调用方从 `PopopxCommerceLimits.channelTicketSeconds` 传进来，不写在文案字符串里。
+    /// How long one period is gets passed in by the caller from `PopopxCommerceLimits.channelTicketSeconds` and is not written into the copy string.
     static let channelSubscriptionPeriodFormat = NSLocalizedString("Each purchase is valid for %lld days.", comment: "channel subscription period")
     static let channelSubscriptionStackFormat = NSLocalizedString("Subscribing again adds %lld days to the time you already have.", comment: "renewal is cumulative, money promise")
 
-    // MARK: 沙盒购买（只有 Debug 构建可能把这几句画上屏）
+    // MARK: Sandbox purchases (only Debug builds can ever put these sentences on screen)
     //
-    // 存在的理由：StoreKit 配置文件只随 Xcode 的 scheme 注入（`POPOPX (iOS).xcscheme`
-    // 的 `StoreKitConfigurationFileReference`）。用 `xcrun devicectl device install app`
-    // 装进真机、再从桌面图标启动的那一个包**不带**配置文件，`Product.products(for:)` 于是
-    // 打到真实/沙盒商店——App Store Connect 里这 9 个 SKU 一个都没建，返回空表，
-    // 付费墙的档位按钮全部退化成「该商品暂不可用」。真机上想走一遍
-    // 「付款 → 点亮 → 落 Keychain → 重启还在」这条商业主链路，就需要第二条入口。
+    // Why these exist: the StoreKit configuration file is only injected through Xcode's scheme (the `StoreKitConfigurationFileReference`
+    // of `POPOPX (iOS).xcscheme`). A package installed onto a real device with `xcrun devicectl device install app`
+    // and launched from the home-screen icon **does not carry** the configuration file, so `Product.products(for:)`
+    // hits the real/sandbox store instead — none of these 9 SKUs exists in App Store Connect, it returns an empty list,
+    // and every tier button on the paywall degrades to "this product is unavailable". To walk the commercial main path
+    // "payment → lit up → written to Keychain → still there after restart" on a real device, a second entry point is needed.
     //
-    // 这几句照样进 16 本目录，不因为"只在 Debug 出现"就省：真机截图会被拿去做排查证据，
-    // 一张写着未本地化英文的卡比一张没有卡更难解释；而"这笔没有真扣钱"是**涉钱的事实陈述**，
-    // 按本枚举开头的分界线（会不会出现在付款/退款证据里）本来就归这里管。
+    // These sentences still go into the 16 catalogues and are not skipped because they "only appear in Debug": real-device screenshots get used as troubleshooting evidence,
+    // and a card showing untranslated English is harder to explain than no card at all; while "this charge never really took money" is **a factual statement about money**,
+    // which by the dividing line at the top of this enum (whether it can appear in payment/refund evidence) belongs here anyway.
     //
-    // 整段包在 `#if DEBUG` 里，与它服务的代码同一个门禁：Release 归档里不仅没有那条通路，
-    // 连"存在一条沙盒通路"这件事的字样都不该留下——二进制里躺着一句没人能触发的
-    // "Sandbox purchase" 是下一次合规问询里最难解释的那一类残留。
-    // 目录侧不受影响：`.strings` 的键由源文字符串本身决定，本仓库的 16 本目录是手写的。
+    // The whole block is wrapped in `#if DEBUG`, the same gate as the code it serves: a Release archive has not only no such path,
+    // it should not even keep the wording that "a sandbox path exists" — a sentence lying in the binary that nobody can ever trigger,
+    // "Sandbox purchase", is the hardest kind of residue to explain in the next compliance enquiry.
+    // The catalogues are unaffected: the keys of `.strings` are determined by the source strings themselves, and this repo's 16 catalogues are hand-written.
     #if DEBUG
-    /// **复用**目录里已有的词条：`"Sandbox purchase"` 在 16 个译本里全有值（zh-Hans「沙盒购买」），
-    /// 普查本仓库 Swift 侧此前 0 处引用，所以不存在"另一页的译文决定这句话怎么写"的冲突。
-    /// 源文与语义与这里同一件事：一笔不走真实扣款的测试购买。因此不另开新说法。
+    /// **Reuses** an entry the catalogues already have: `"Sandbox purchase"` has a value in all 16 translations (zh-Hans "sandbox purchase"),
+    /// and a census found 0 references on this repo's Swift side before, so there is no conflict of "another page's translation decides how this sentence reads".
+    /// Same source text and same semantics as the thing here: a test purchase that does not take real money. Therefore no new wording is opened.
     static let sandboxPurchaseAction = NSLocalizedString("Sandbox purchase", comment: "DEBUG-only paywall button shown when the store did not return this item")
-    /// 一次性通行证沙盒到账。天数由调用方从 `PopopxNodeBadgePeriod.days` 传进来，
-    /// 与真实到账那一句（`passGrantedFormat`）同一个来源，不写第二份 30/365。
+    /// Sandbox delivery of a one-off pass. The day count is passed in by the caller from `PopopxNodeBadgePeriod.days`,
+    /// the same source as the real delivery sentence (`passGrantedFormat`), so 30/365 is not written a second time.
     static let sandboxPassGrantedFormat = NSLocalizedString("Sandbox purchase: the badge was lit for %lld more days on this device. No payment was taken.", comment: "DEBUG-only purchase result")
-    /// 其余档位（自动续费订阅、礼品券）的沙盒到账。那两族在真实路径上交付的不是"天数"，
-    /// 所以这里不承诺任何具体权益内容，只说"这台设备上记下了一笔测试购买、没有扣款"。
+    /// Sandbox delivery for the remaining tiers (auto-renewing subscriptions, gift vouchers). Those two families do not deliver "days" on the real path,
+    /// so this promises no concrete entitlement at all and only says "a test purchase was recorded on this device, no money charged".
     static let sandboxPurchaseGranted = NSLocalizedString("Sandbox purchase recorded on this device. No payment was taken by Apple.", comment: "DEBUG-only purchase result")
-    /// 付费墙顶部那一句说明：为什么会有第二条按钮，以及它和真购买是同一条落账代码。
+    /// The explanatory line at the top of the paywall: why a second button exists, and that it is the same crediting code as a real purchase.
     static let sandboxPaywallNote = NSLocalizedString("This build is not running with a StoreKit configuration, so the App Store did not return every item here. A sandbox purchase is minted on this device and runs the same delivery code as a real purchase. No payment is taken.", comment: "DEBUG-only paywall note")
     #endif
 

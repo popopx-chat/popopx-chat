@@ -163,10 +163,10 @@ struct CreateProfile: View {
         chatJsonLength(profileBio) <= MAX_BIO_LENGTH_BYTES
     }
 
-    // A-1（真机 0x8BADF00D 看门狗）：`chatSendCmdSync` 是同步 FFI，服务端不回话时主线程会一直挂住，
-    // 直到系统把进程判成无响应杀掉。这里只把「拿返回值」的那两个调用挪到后台，
-    // `startChat` / `getUserChatData` 会发布 ChatModel、ChatTagsModel、NtfManager 状态，必须留在主线程，
-    // 所以整个函数标 `@MainActor`：恢复续体一定回到主线程，不会出现后台改模型。
+    // A-1 (device 0x8BADF00D watchdog): `chatSendCmdSync` is a synchronous FFI, and when the server does not answer the main thread hangs the whole time,
+    // until the system declares the process unresponsive and kills it. Here only the two calls that "take the return value" are moved to the background,
+    // while `startChat` / `getUserChatData` publish ChatModel, ChatTagsModel and NtfManager state and must stay on the main thread,
+    // so the whole function is marked `@MainActor`: the resumed continuation always returns to the main thread, so no model is ever mutated in the background.
     @MainActor
     private func createProfile() async {
         guard !isCreatingProfile else { return }
@@ -228,7 +228,7 @@ struct CreateFirstProfile: View {
     @State private var showMigrateSheet = false
     @State private var isCreatingProfile = false
 
-    // 引导第 2 屏：创建第一个匿名身份。
+    // Onboarding screen 2: create the first anonymous identity.
     private static let avatarSize: CGFloat = 112
     private static let avatarTints: [Color] = [
         PopopxPalette.brand,
@@ -324,7 +324,7 @@ struct CreateFirstProfile: View {
         .frame(maxHeight: .infinity)
     }
 
-    // MARK: - 头像
+    // MARK: - Avatar
 
     private var avatarTint: Color { Self.avatarTints[avatarTintIndex % Self.avatarTints.count] }
 
@@ -380,7 +380,7 @@ struct CreateFirstProfile: View {
         .accessibilityElement(children: .contain)
     }
 
-    // MARK: - 字段
+    // MARK: - Fields
 
     private var trimmedName: String { displayName.trimmingCharacters(in: .whitespaces) }
 
@@ -451,7 +451,7 @@ struct CreateFirstProfile: View {
         }
     }
 
-    // MARK: - 下一步
+    // MARK: - Next step
 
     private var nextButton: some View {
         PopopxButton(PopopxOnboardingCopy.next, systemImage: "arrow.right", isLoading: isCreatingProfile) {
@@ -473,10 +473,10 @@ struct CreateFirstProfile: View {
             .modifier(ThemedBackground())
     }
 
-    // A-1（真机 0x8BADF00D 看门狗）：`apiCreateActiveUser` 走同步 FFI，服务端不回话时主线程会一直挂住，
-    // 系统判定无响应直接杀进程 —— 引导第 2 屏点「下一步」崩溃就是这个。这里只把拿返回值的那次调用
-    // 放到后台队列，`startChat(onboarding:)` 会写 ChatModel / NtfManager 并带动画，必须留在主线程；
-    // 函数标 `@MainActor`，续体一定回主线程，不会出现「后台改模型」。
+    // A-1 (device 0x8BADF00D watchdog): `apiCreateActiveUser` goes through synchronous FFI, and when the server does not answer the main thread hangs the whole time,
+    // and the system declares it unresponsive and kills the process outright — the crash when tapping "Next" on onboarding screen 2 was exactly this. Here only the one call that takes the return value
+    // is put on a background queue, while `startChat(onboarding:)` writes ChatModel / NtfManager and drives animations, so it must stay on the main thread;
+    // the function is marked `@MainActor`, so the continuation always returns to the main thread and "mutating models in the background" cannot happen.
     @MainActor
     private func createProfile() async {
         guard !isCreatingProfile else { return }

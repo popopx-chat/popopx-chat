@@ -2,49 +2,49 @@
 //  PersonalProfileModel.swift
 //  POPOPX (iOS)
 //
-//  【加密个人主页 · 模块一之一】主页的数据形状，和它在网络上那两行字节的编解码。
+//  [Encrypted personal profile - module one, part one] The data shape of a profile, and the codec for its two lines of bytes on the wire.
 //
-//  本文件是四个人共用的唯一契约：制作器只写 `PopopxProfileManifest`，发送器只读
-//  `PopopxProfilePayload.messageContent`，卡片与阅读器只吃 `parse` 交回来的载荷。
-//  谁都不许在别处自己拼 `popopx://profile` 那串字符——拼一次就多一处能和别人对不上的地方。
+//  This file is the single contract shared by four people: the maker only writes `PopopxProfileManifest`, the sender only reads
+//  `PopopxProfilePayload.messageContent`, and the card and the reader only eat the payload `parse` hands back.
+//  Nobody may assemble the `popopx://profile` string somewhere else - every extra assembly is one more place that can disagree with the others.
 //
-//  线上形态是两行文本，实际发出去的是第二行（和 `popopx://sec`、`popopx://loc` 完全同一个形状）：
+//  The wire form is two lines of text, and what is actually sent is the second one (exactly the same shape as `popopx://sec` and `popopx://loc`):
 //
 //  ```text
-//  👤 [加密个人主页] 张三 · 后端 / 摄影 (阅后即焚)
+//  👤 [Encrypted personal profile] Zhang San - backend / photography (view-once)
 //  popopx://profile?mode=ephemeral&ttl=300&delivery=full&credits=20&data=<base64url(JSON)>
 //  ```
 //
-//  ### `data=` 不额外加密，是有意的
-//  SMP 消息与 Mesh Noise 信道本身已经是端到端加密，这一格的职责是自描述而不是保密；主页的媒体
-//  原件除作为普通加密 XFTP 附件之外从不离开设备，`data=` 里只有编排骨架和文字块。
+//  ### Not encrypting `data=` a second time is deliberate
+//  SMP messages and the Mesh Noise channel are already end-to-end encrypted, so this slot's job is self-description, not secrecy; the profile's media
+//  originals never leave the device except as ordinary encrypted XFTP attachments, and `data=` holds only the assembly skeleton plus the text blocks.
 //
-//  ### 与邀请链接互斥（同 `PopopxLocation.swift:18`-`:22`、`PopopxSecurePayload.swift:37`-`:41`）
-//  `popopx:/` 和 `popopx://` 是邀请链接的前缀，`hasPopopxLink` 认的就是这个 scheme。所以 host
-//  只认 `profile`，`mode`/`ttl`/`delivery`/`data` 四格全部量死后才判活，任一条不满足就整串判死、
-//  退回纯文本渲染。第五格 `credits=`（收费门槛）是唯一可缺省的：老主页没有它，缺省就是免费看。
-//  一条主页消息被认成邀请链接 = 一次加好友，这条事故的形状和位置那版一模一样。
+//  ### Mutually exclusive with invite links (same as `PopopxLocation.swift:18`-`:22`, `PopopxSecurePayload.swift:37`-`:41`)
+//  `popopx:/` and `popopx://` are the invite-link prefixes, and `hasPopopxLink` recognises precisely this scheme. So the host
+//  accepts only `profile`, and all four slots `mode`/`ttl`/`delivery`/`data` are pinned dead before the string is judged alive; any one unmet kills the whole string and
+//  falls back to plain-text rendering. The fifth slot `credits=` (the paid gate) is the only one that may be absent: old profiles do not have it, and absent means free to read.
+//  One profile message read as an invite link = one accidental contact add, and the shape of that incident is exactly the location version's.
 //
-//  ### 两个方向的严格程度刻意不同
-//  `parse` 的输入是对方送过来的文本，所以它**永不抛错**：越界的块数、超长的标题、字母表外的
-//  `data=`、非法 UTF-8 转义、信封与正文不一致，一律返回 nil，调用方把 nil 当"这不是主页消息"。
-//  `make` 的输入是本端自己攒出来的 manifest，失败必须讲清是哪一条，所以它抛 `PopopxProfileError`。
+//  ### The two directions are deliberately strict to different degrees
+//  `parse`'s input is text the other side sent over, so it **never throws**: an out-of-range block count, an over-long title, a `data=` outside the alphabet,
+//  an illegal UTF-8 escape, an envelope that disagrees with the body - all return nil, and callers treat nil as "this is not a profile message".
+//  `make`'s input is a manifest this end assembled itself, and a failure must say which rule broke, so it throws `PopopxProfileError`.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. The red line forbids scripts from modifying project.pbxproj.
 //
 
 import Foundation
 
-// MARK: - 发送模式
+// MARK: - Send mode
 
-/// 这一份主页以哪种隐私语义送达。`ephemeral` = 收件人**首次打开**后计时销毁；`standard` = 常驻。
+/// Under which privacy semantics this profile is delivered. `ephemeral` = the countdown to destruction starts on the recipient's **first open**; `standard` = permanent.
 enum PopopxProfileSendMode: String, Codable, Hashable, Sendable, CaseIterable {
     case ephemeral
     case standard
 
-    /// 线上那格的写法。和 `rawValue` 恰好相同，但两者是两件事：`rawValue` 归 Codable 的本地存档
-    /// 格式管（改它会让用户已保存的主页读不出来），`wireValue` 归协议管（改它就是改协议）。
-    /// 所以这里逐条写死，不写 `rawValue`。
+    /// How that slot is written on the wire. It happens to equal `rawValue`, but the two are different things: `rawValue` is owned by the Codable local archive
+    /// format (changing it makes profiles the user already saved unreadable), `wireValue` is owned by the protocol (changing it changes the protocol).
+    /// So each case is written dead here instead of writing `rawValue`.
     var wireValue: String {
         switch self {
         case .ephemeral: return "ephemeral"
@@ -52,21 +52,21 @@ enum PopopxProfileSendMode: String, Codable, Hashable, Sendable, CaseIterable {
         }
     }
 
-    /// 线上字节 → 模式。只认 `wireValue` 的精确拼写，不认 `rawValue`、不认大小写变体、不认别名：
-    /// 对端多一个宽容度，本端就少一个能改协议的余地。
+    /// Wire bytes -> mode. Only the exact spelling of `wireValue` is accepted: no `rawValue`, no case variants, no aliases -
+    /// one more bit of leniency on the peer's side is one less bit of room for us to change the protocol.
     static func fromWire(_ raw: String) -> PopopxProfileSendMode? {
         allCases.first { $0.wireValue == raw }
     }
 
-    /// 卡片徽章上的短语。
+    /// The phrase on the card badge.
     var cardLabel: String {
         switch self {
-        case .ephemeral: return "阅后即焚"
-        case .standard: return "常驻名片"
+        case .ephemeral: return NSLocalizedString("Burn after reading", comment: "")
+        case .standard: return NSLocalizedString("Persistent card", comment: "")
         }
     }
 
-    /// 分段器只给一行，长标签在小屏 iPhone 上会被省略号截断，所以直接用卡片徽章那四个字的短标签。
+    /// The segmented control gets a single line, and long labels get truncated with an ellipsis on small iPhones, so the short label reuses the card badge wording itself.
     var sheetLabel: String {
         switch self {
         case .ephemeral, .standard:
@@ -75,10 +75,10 @@ enum PopopxProfileSendMode: String, Codable, Hashable, Sendable, CaseIterable {
     }
 }
 
-// MARK: - 送达方式
+// MARK: - Delivery mode
 
-/// 走公网 SMP（带图文视频）还是走蓝牙 Mesh（只剩文字）。与发送模式**正交**：
-/// 常驻名片也会被 Mesh 降级，阅后即焚也可以走公网。
+/// Public-network SMP (with images, text and video) or Bluetooth Mesh (text only). **Orthogonal** to the send mode:
+/// a permanent card gets downgraded by Mesh too, and view-once can go over the public network.
 enum PopopxProfileDelivery: String, Codable, Hashable, Sendable, CaseIterable {
     case fullMedia
     case meshTextOnly
@@ -94,8 +94,8 @@ enum PopopxProfileDelivery: String, Codable, Hashable, Sendable, CaseIterable {
         allCases.first { $0.wireValue == raw }
     }
 
-    /// 卡片角标。`mesh` 那一档在界面上配厢语的青绿，`full` 配品牌紫——颜色归 `PopopxTheme`，
-    /// 这一层只给字。
+    /// Card badge. The `mesh` tier is paired with Cabin's teal-green in the interface and `full` with the brand purple - colour belongs to `PopopxTheme`,
+    /// this layer only supplies the words.
     var badgeLabel: String {
         switch self {
         case .fullMedia: return NSLocalizedString("Online, full media", comment: "")
@@ -104,26 +104,26 @@ enum PopopxProfileDelivery: String, Codable, Hashable, Sendable, CaseIterable {
     }
 }
 
-// MARK: - 媒体块
+// MARK: - Media block
 
-/// 一个媒体块在 manifest 里的**描述**，不含字节：原件在 `ProfileStorageManager` 的沙盒目录里，
-/// 网络上只走这一小段元数据 + 普通 XFTP 附件。
+/// The **description** of one media block inside the manifest, without bytes: the originals live in `ProfileStorageManager`'s sandbox directory,
+/// and over the network only this little piece of metadata plus ordinary XFTP attachments travel.
 struct PopopxProfileMedia: Codable, Hashable, Sendable {
     enum Kind: String, Codable, Hashable, Sendable, CaseIterable {
         case image
         case video
     }
 
-    /// `UUID().uuidString.lowercased()`。它在沙盒里直接当文件名用，所以收件方给的那个值
-    /// 必须先过字符白名单（见 `ProfileStorageManager`）。
+    /// `UUID().uuidString.lowercased()`. It is used directly as a file name in the sandbox, so whatever value the recipient supplies
+    /// has to pass the character whitelist first (see `ProfileStorageManager`).
     let mediaId: String
     let kind: Kind
-    /// 落盘后的字节数（压缩/转码之后的实际大小，不是相册原图的大小）。
+    /// Byte count after landing on disk (the actual size after compression/transcoding, not the album original's size).
     let bytes: Int
-    /// 只有视频有；图片为 nil。已按 30 秒上限截断之后的时长。
+    /// Video only; images are nil. The duration after truncation to the 30 second cap.
     let durationSeconds: Int?
-    /// 图片/视频的说明文字。为保持全 `let`（媒体描述一旦进过网络就不该被就地改掉），
-    /// 需要写 caption 的调用方用成员初始化器重建一个值即可，`mediaId` 沿用旧的。
+    /// Caption for the image/video. Kept all `let` (once a media description has been over the network it should not be edited in place),
+    /// so a caller that needs a caption just rebuilds a value with the memberwise initialiser and reuses the old `mediaId`.
     let caption: String?
 
     init(
@@ -141,8 +141,8 @@ struct PopopxProfileMedia: Codable, Hashable, Sendable {
     }
 }
 
-/// 主页正文的一段。用带关联值的枚举而不是"一个 type 字段 + 三个可选字段"，
-/// 于是"文字块带 mediaId"、"视频块没有时长"这类组合在类型层面就拼不出来。
+/// One block of the profile body. An enum with associated values rather than "one type field + three optional fields",
+/// so combinations like "a text block carrying a mediaId" or "a video block with no duration" cannot be assembled at the type level.
 enum PopopxProfileBlock: Codable, Hashable, Sendable {
     case text(String)
     case image(PopopxProfileMedia)
@@ -156,7 +156,7 @@ enum PopopxProfileBlock: Codable, Hashable, Sendable {
         }
     }
 
-    /// 参与 `omittedMediaCount` 统计的口径：一个媒体块 = 1。
+    /// The counting rule that feeds `omittedMediaCount`: one media block = 1.
     var mediaCount: Int {
         switch self {
         case .text: return 0
@@ -165,44 +165,44 @@ enum PopopxProfileBlock: Codable, Hashable, Sendable {
     }
 }
 
-// MARK: - 主页清单
+// MARK: - Profile manifest
 
-/// 一份主页的全部内容。`Codable` 的形态就是 `data=` 里那段 JSON，也是本地
-/// `manifest.json` 的形态——两者共用一套编解码（`encodedJSON()` / `decoded(json:)`），
-/// 免得"存得下来但发不出去"或反过来。
+/// Everything one profile contains. The `Codable` shape is the JSON inside `data=`, and it is also the shape of the local
+/// `manifest.json` - the two share one codec (`encodedJSON()` / `decoded(json:)`)
+/// so that "it stores but cannot be sent", or the reverse, cannot happen.
 struct PopopxProfileManifest: Codable, Hashable, Sendable {
-    /// 协议版本。改字段含义必须换掉这个串，加可选字段不用。
+    /// Protocol version. Changing what a field means requires replacing this string; adding an optional field does not.
     static let version = "popopx_profile_v1"
 
     var profileVersion: String
-    /// `UUID().uuidString.lowercased()`。收件方的媒体目录按它分格。
+    /// `UUID().uuidString.lowercased()`. The recipient's media directory is partitioned by it.
     var profileId: String
     var title: String
     var subtitle: String?
     var sendMode: PopopxProfileSendMode
-    /// 秒。`sendMode == .standard` 时恒为 0（由 `normalized()` 保证）。
+    /// Seconds. Always 0 when `sendMode == .standard` (guaranteed by `normalized()`).
     var ttlSeconds: Int
     var deliveryMode: PopopxProfileDelivery
-    /// Mesh 降级时被剔除的图片/视频个数。`deliveryMode == .fullMedia` 时恒为 0。
+    /// How many images/videos were dropped by the Mesh downgrade. Always 0 when `deliveryMode == .fullMedia`.
     var omittedMediaCount: Int
-    /// 阅读时是否启动前置镜头的防窥防偷拍检测。只在 `.ephemeral` 一档有意义，但字段本身常驻。
+    /// Whether reading starts the front-camera peek/hidden-recording check. Only meaningful on the `.ephemeral` tier, but the field itself is permanent.
     var enableAntiSpyCamera: Bool
-    /// 查看这份主页要花的算力点。`nil` = 免费看，也是所有老主页解出来的值（信封里没有 `credits=`、
-    /// JSON 里没这个键，两处都判成 nil），所以 `version` 不用升：那句注释写的是"加可选字段不用换版本"。
+    /// The credit points this profile costs to view. `nil` = free to read, which is also what every old profile decodes to (no `credits=` in the envelope,
+    /// no such key in the JSON, both judged nil), so `version` needs no bump: that comment says "adding an optional field needs no version change".
     ///
-    /// 它既在信封（`credits=`）也在正文，和 `mode`/`ttl`/`delivery` 同一做法：信封那一格让"要不要先收钱"
-    /// 这个决定不必先解一段 base64 JSON，正文那一份则是唯一真值——两处不等就整串判死（见 `parseToken`）。
-    /// 上界不在这里夹：`PopopxCreditsManager.unlockProfile` 自己判 `1…maximumCreditsThreshold`，
-    /// 扣点那一侧才是钱的边界，展示与扣点之间不该有第二份真值。
+    /// It sits both in the envelope (`credits=`) and in the body, the same treatment as `mode`/`ttl`/`delivery`: the envelope slot lets the decision
+    /// of "charge first or not" happen without decoding a piece of base64 JSON, while the body copy is the single source of truth - unequal in the two places kills the whole string (see `parseToken`).
+    /// The upper bound is not clamped here: `PopopxCreditsManager.unlockProfile` judges `1...maximumCreditsThreshold` itself,
+    /// the debit side is where the money's boundary is, and there should not be a second source of truth between display and debit.
     ///
-    /// `= nil` 是写给编译器看的：可选属性"自动就是 nil"那条规则不会给成员初始化器带上默认实参，
-    /// 少了这两个字符，`blank()` 之外每一处手工造 manifest 的调用点都要多写一个参数。
+    /// The `= nil` is written for the compiler: the rule that an optional property "is already nil" does not hand the memberwise initialiser a default argument,
+    /// and without those two characters every call site outside `blank()` that builds a manifest by hand would have to pass one more parameter.
     var unlockCredits: Int? = nil
     var updatedAt: TimeInterval
     var blocks: [PopopxProfileBlock]
 
-    /// 制作器的起点。默认落在 `.standard`（常驻）而不是 `.ephemeral`：一份还没写内容的骨架
-    /// 不该默认带上"打开后 60 秒销毁"这种会改变收件方行为的属性，隐私档要由用户明确选一次。
+    /// The maker's starting point. The default lands on `.standard` (permanent) rather than `.ephemeral`: a skeleton with no content written yet
+    /// should not come with "destroyed 60 seconds after opening", a property that changes the recipient's behaviour; the privacy tier has to be chosen by the user explicitly once.
     static func blank() -> PopopxProfileManifest {
         PopopxProfileManifest(
             profileVersion: version,
@@ -223,8 +223,8 @@ struct PopopxProfileManifest: Codable, Hashable, Sendable {
         blocks.reduce(0) { $0 + $1.mediaCount }
     }
 
-    /// Mesh 那条路的投影：剔掉所有图片/视频块，记下剔了几个，送达方式改成 `.meshTextOnly`。
-    /// 发送模式、时长、`profileId` 全部原样保留——降级改变的是**内容量**，不是隐私语义。
+    /// The projection for the Mesh path: drop every image/video block, record how many were dropped, and switch the delivery mode to `.meshTextOnly`.
+    /// Send mode, duration and `profileId` are all kept exactly as they were - the downgrade changes the **amount of content**, not the privacy semantics.
     var textOnly: PopopxProfileManifest {
         var copy = self
         var texts: [PopopxProfileBlock] = []
@@ -236,18 +236,18 @@ struct PopopxProfileManifest: Codable, Hashable, Sendable {
             }
         }
         copy.blocks = texts
-        // 幂等：已经降级过一次的清单不能再算一遍（那时 `mediaCount` 是 0，会把真实省略数抹掉）。
+        // Idempotent: a manifest already downgraded once must not be computed again (by then `mediaCount` is 0, which would wipe the real omitted count).
         copy.omittedMediaCount = deliveryMode == .meshTextOnly ? omittedMediaCount : mediaCount
         copy.deliveryMode = .meshTextOnly
         return copy
     }
 
-    /// 把清单收敛回不变量。发送前的唯一入口是 `PopopxProfilePayload.make`，它先验后规范化，
-    /// 所以这里的每一条都对应一个"对端一定会拒绝"的形状。
+    /// Brings the manifest back to its invariants. The only entry point before sending is `PopopxProfilePayload.make`, which validates first and normalises after,
+    /// so every clause here corresponds to a shape the peer would certainly reject.
     ///
-    /// 注意 `.standard` 只抹 `ttlSeconds`，**不**抹 `omittedMediaCount`：常驻名片走 Mesh 一样要
-    /// 剔除媒体，把那个数归零会让阅读器报"已自动省去 0 个"——那是当着一对用户的面撒谎。
-    /// 跨模式的不变量是 `fullMedia ⇒ omitted == 0`，不是 `standard ⇒ omitted == 0`。
+    /// Note that `.standard` only wipes `ttlSeconds` and does **not** wipe `omittedMediaCount`: a permanent card over Mesh still
+    /// has to drop its media, and zeroing that number would make the reader report "0 items auto-omitted" - a lie told to a pair of users face to face.
+    /// The cross-mode invariant is `fullMedia => omitted == 0`, not `standard => omitted == 0`.
     func normalized() -> PopopxProfileManifest {
         var copy = self
         switch copy.sendMode {
@@ -276,9 +276,9 @@ struct PopopxProfileManifest: Codable, Hashable, Sendable {
 
     // MARK: JSON
 
-    /// 本地存档与 `data=` 共用的编码：键名排序、不缩进。排序是为了让同一份内容每次得到同样的字节
-    /// （测试可以直接比字符串，日志里的两段 `data=` 也能肉眼对比）；不缩进是因为整个清单要挤进
-    /// `maximumJSONBytes` 那一格预算。
+    /// The encoding shared by the local archive and `data=`: sorted keys, no indentation. Sorting is so that the same content yields the same bytes every time
+    /// (tests can compare strings directly, and two `data=` blocks in a log can be compared by eye); no indentation because the whole manifest has to squeeze into
+    /// the `maximumJSONBytes` budget.
     func encodedJSON() throws -> Data {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .sortedKeys
@@ -294,10 +294,10 @@ struct PopopxProfileManifest: Codable, Hashable, Sendable {
         return data
     }
 
-    /// 解码任意来路的一段 JSON。任何不合格都返回 nil，不抛：调用方有的是"整个 token 判死"的路径，
-    /// 而这里连"是不是主页"都还没确定。
+    /// Decodes a piece of JSON from any source. Anything unqualified returns nil instead of throwing: callers already have a "kill the whole token" path,
+    /// and at this point it is not even settled whether this is a profile at all.
     ///
-    /// 上限全部在**构造之前**判，因为 `JSONDecoder` 会照着 JSON 里的数组长度真的去分配内存。
+    /// Every cap is judged **before construction**, because `JSONDecoder` will go and really allocate memory according to the array lengths in the JSON.
     static func decoded(json data: Data) -> PopopxProfileManifest? {
         guard !data.isEmpty, data.count <= PopopxProfilePayload.maximumJSONBytes else { return nil }
         guard let manifest = try? JSONDecoder().decode(PopopxProfileManifest.self, from: data) else { return nil }
@@ -309,35 +309,35 @@ struct PopopxProfileManifest: Codable, Hashable, Sendable {
     }
 }
 
-// MARK: - 错误
+// MARK: - Errors
 
-/// 铸造一份载荷时会说出口的全部原因。界面显示的是下面这些句子，不显示枚举本身，所以没有
+/// All the reasons that can be voiced while minting a payload. The interface shows the sentences below, not the enum cases themselves, so there is no
 /// `LocalizedError`。
 ///
-/// `invalidMode` / `invalidDelivery` / `damagedBase64` 三条在本文件里**不会被抛出**：它们描述的是
-/// 接收方向上的失败，而 `parse` 的契约是返回 nil。留着是为了"先拿到字符串字段、再决定怎么报错"
-/// 的调用方（例如扫码那条路要给出一句人话），删掉的话那些调用点就只能自己造字符串了。
+/// need to localise the case names. `invalidMode` / `invalidDelivery` / `damagedBase64`, those three, **are never thrown** in this file: they describe
+/// failures on the receiving direction, while `parse`'s contract is to return nil. They are kept for callers that "first take the string field, then decide how to report the error"
+/// (the scan-a-code path, for instance, owes the user a plain sentence); deleting them would leave those call sites inventing their own strings.
 enum PopopxProfileError: Error, Hashable, Sendable {
-    /// 清单版本不认识。
+    /// The manifest version is not recognised.
     case unknownVersion(String)
-    /// `mode=` 那一格不是 `ephemeral`/`standard` 之一。
+    /// The `mode=` slot is not one of `ephemeral`/`standard`.
     case invalidMode(String)
-    /// `delivery=` 那一格不是 `full`/`mesh` 之一。
+    /// The `delivery=` slot is not one of `full`/`mesh`.
     case invalidDelivery(String)
-    /// 时长越界，或常驻档带了非 0 的时长。
+    /// The duration is out of range, or the permanent tier carries a non-0 duration.
     case invalidTTL(Int)
-    /// `data=` 不是合法的 base64url。
+    /// `data=` is not valid base64url.
     case damagedBase64
-    /// JSON 编不出来或读不出来。
+    /// The JSON could not be encoded or could not be read.
     case damagedJSON
-    /// 编码后的清单超过 `PopopxProfilePayload.maximumJSONBytes`。
+    /// The encoded manifest exceeds `PopopxProfilePayload.maximumJSONBytes`.
     case oversizedJSON(bytes: Int)
-    /// 标题超过 `PopopxProfilePayload.maximumTitleCharacters`。
+    /// The title exceeds `PopopxProfilePayload.maximumTitleCharacters`.
     case oversizedTitle(characters: Int)
-    /// 内容块超过 `PopopxProfilePayload.maximumBlocks`。
+    /// The content blocks exceed `PopopxProfilePayload.maximumBlocks`.
     case tooManyBlocks(count: Int)
 
-    /// 面向用户的一行中文：讲清"哪儿不行"，不承诺补救动作。
+    /// The user-facing line of Chinese: it says clearly "what is wrong" and promises no remedial action.
     var reasonText: String {
         switch self {
         case let .unknownVersion(version):
@@ -362,28 +362,28 @@ enum PopopxProfileError: Error, Hashable, Sendable {
     }
 }
 
-// MARK: - 载荷
+// MARK: - Payload
 
-/// 一条主页消息的载荷。它是 `manifest` 的纯投影：不缓存任何编码结果，所以不存在
-/// "改了 manifest 但线上字节还是旧的"这种状态，`Hashable` 也因此只需要比一个字段。
+/// The payload of one profile message. It is a pure projection of `manifest`: no encoding result is cached, so the state
+/// of "the manifest changed but the wire bytes are still the old ones" cannot exist, and `Hashable` therefore only has to compare one field.
 struct PopopxProfilePayload: Hashable, Sendable {
     static let scheme = "popopx"
-    /// 只认这一个 host；`sec` 和 `loc` 已经被另外两个特性占了。
+    /// Only this one host is accepted; `sec` and `loc` are already taken by the other two features.
     static let host = "profile"
 
-    /// 制作器里可选的三档。范围校验走 `minimum/maximumTTLSeconds`，这三档只是 UI 的取值集合。
+    /// The three choices offered in the maker. Range validation goes through `minimum/maximumTTLSeconds`; these three are just the UI's set of values.
     static let ttlOptions = [60, 300, 3600]
-    /// 下限 1 秒：再短就没有"打开"这个动作可言了，收件方会在内容画出来之前归零。
+    /// Lower bound 1 second: shorter and there is no "open" action left to speak of - the recipient would reach zero before the content is drawn.
     static let minimumTTLSeconds = 1
-    /// 上限 3600 秒：一小时的图文名片停在屏幕上不是产品，是事故。
+    /// Upper bound 3600 seconds: an hour of image-and-text card parked on the screen is not a product, it is an incident.
     static let maximumTTLSeconds = 3600
-    /// 清单 JSON 的字节预算。`6 KiB` 的由来：Mesh 一条消息的分片预算按 KB 计，而名片的文字量
-    /// 用不了这么多；把上限写死比让发送方在链路里撞上截断更便宜。
+    /// The byte budget for the manifest JSON. Where `6 KiB` comes from: Mesh's per-message fragmentation budget is counted in KB, and a card's text volume
+    /// never needs that much; pinning the cap is cheaper than letting the sender hit truncation somewhere in the link.
     static let maximumJSONBytes = 6_144
-    /// 内容块上限。挡住对端用 10 万个空块把收件方主线程喂死——解析发生在对方的设备上，
-    /// 成本必须由收件方说了算。
+    /// Content-block cap. It stops a peer from feeding the recipient's main thread dead with 10⁵ empty blocks - parsing happens on the other person's device,
+    /// so the cost has to be the recipient's call.
     static let maximumBlocks = 24
-    /// 标题上限（字素个数，不是字节）。降级行、卡片、通知预览都只放这一行标题。
+    /// Title cap (in grapheme counts, not bytes). The degradation line, the card and the notification preview all carry this one title line only.
     static let maximumTitleCharacters = 40
 
     var manifest: PopopxProfileManifest
@@ -392,12 +392,12 @@ struct PopopxProfilePayload: Hashable, Sendable {
         self.manifest = manifest
     }
 
-    // MARK: 铸造
+    // MARK: Minting
 
-    /// 发送侧唯一的构造入口：先验（抛错），再规范化（保证不变量），最后编码（判字节预算）。
+    /// The sending side's only construction entry point: validate first (throws), then normalise (guarantees the invariants), finally encode (judges the byte budget).
     ///
-    /// 校验放在规范化**之前**是故意的：`normalized()` 会把 3000 秒钳到 3600，静默钳值意味着
-    /// 用户选了 50 分钟、对端收到 1 小时，这一格必须当场拒。
+    /// Validation sitting **before** normalisation is deliberate: `normalized()` would clamp 3000 seconds to 3600, and silently clamping means
+    /// the user picked 50 minutes and the peer receives 1 hour; that has to be refused on the spot.
     static func make(_ manifest: PopopxProfileManifest) throws -> PopopxProfilePayload {
         guard manifest.profileVersion == PopopxProfileManifest.version else {
             throw PopopxProfileError.unknownVersion(manifest.profileVersion)
@@ -417,60 +417,60 @@ struct PopopxProfilePayload: Hashable, Sendable {
             }
         }
         let normalized = manifest.normalized()
-        // 编不出来就是清单本身有毛病（`encodedJSON` 会抛 `damagedJSON` / `oversizedJSON`）。
+        // If it cannot be encoded, the manifest itself is faulty (`encodedJSON` throws `damagedJSON` / `oversizedJSON`).
         _ = try normalized.encodedJSON()
         return PopopxProfilePayload(manifest: normalized)
     }
 
-    // MARK: 线上字节
+    // MARK: Wire bytes
 
-    /// 给人看的那一行。绝不包含任何 block 正文——会话列表、通知横幅、引用预览取的都是这条消息的
-    /// `text`，标题以外的内容只能从 `data=` 里解出来，而那几个视图拿到的是这一行，不是 JSON。
+    /// The line meant for humans. It never contains any block body - the chat list, the notification banner and the quote preview all take this message's
+    /// `text`; anything beyond the title can only be decoded out of `data=`, and those views get this line, not the JSON.
     ///
-    /// **恒为一行**：`title` 来自对端，里面完全可能有换行，所以这里把空白收敛成单个空格
-    /// （和 `PopopxLocation.swift:105`-`:112` 同一手法，只不过那边在 `init` 里收敛，
-    /// 这里必须在展示点收敛，因为载荷不接受"清洗过的副本"）。
+    /// **Always one line**: `title` comes from the peer and may perfectly well contain newlines, so whitespace is collapsed into a single space here
+    /// (the same technique as `PopopxLocation.swift:105`-`:112`, except that it collapses inside `init`,
+    /// while here it has to collapse at the display point, because the payload does not accept a "cleaned copy").
     var degradeLine: String {
-        "👤 [加密个人主页] \(Self.oneLine(manifest.title)) (\(manifest.sendMode.cardLabel))"
+        "👤 " + NSLocalizedString("[Encrypted profile]", comment: "POPOPX encrypted profile") + " \(Self.oneLine(manifest.title)) (\(manifest.sendMode.cardLabel))"
     }
 
-    /// 机器读的那一行。信封里的值全都只含 `[A-Za-z0-9-_]`：`mode`/`delivery` 是白名单词，`ttl` 与
-    /// `credits` 是十进制数字，`data` 是无填充 base64url（`+` `/` `=` 三个字符在字母表里就没有了）。
-    /// 所以这里既不需要 `PopopxLocation.swift:81`-`:84` 那套 `.alphanumerics` 转义，也不会出现
-    /// `PopopxSecurePayload.swift:131`-`:133` 说的"字段值里带空白/`&`/`=`"，解析端按空白切 token、
-    /// 按 `&` 切字段、按第一个 `=` 分键值才安全。
+    /// The line meant for machines. Every value in the envelope contains only `[A-Za-z0-9-_]`: `mode`/`delivery` are whitelisted words, `ttl` and
+    /// `credits` are decimal digits, and `data` is unpadded base64url (the three characters `+` `/` `=` are not in that alphabet at all).
+    /// So this needs neither the `.alphanumerics` escaping of `PopopxLocation.swift:81`-`:84`, nor can it produce
+    /// the "field value containing whitespace/`&`/`=" that `PopopxSecurePayload.swift:131`-`:133` warns about, which is what makes it safe for the parser to split tokens on whitespace,
+    /// fields on `&`, and key/value on the first `=`.
     ///
-    /// `credits=` 是唯一**可缺省**的一格：老主页发出去时还没有这个概念，缺省就是免费，
-    /// 而不是"这份载荷不完整"。其余四格缺任何一格都整串判死。
+    /// `credits=` is the single **optional** slot: old profiles went out before the concept existed, and its absence means free,
+    /// not "this payload is incomplete". Any of the other four slots missing kills the whole string.
     var wireString: String {
         let mode = manifest.sendMode.wireValue
         let ttl = manifest.ttlSeconds
         let delivery = manifest.deliveryMode.wireValue
-        // `make` 已经编过一次并保证编得出；这里的 `try?` 只兜住"手工塞进来一个畸形 manifest"
-        // 这一种情况，代价是一条空载荷——见 `init(manifest:)` 的说明。
+        // `make` has already encoded once and guarantees it encodes; the `try?` here only covers "a malformed manifest was stuffed in by hand",
+        // and the price is one empty payload - see the note on `init(manifest:)`.
         let data = (try? manifest.encodedJSON()).map { $0.popopxBase64URL } ?? ""
         var wire = "\(Self.scheme)://\(Self.host)?mode=\(mode)&ttl=\(ttl)&delivery=\(delivery)"
-        // 顺序：`credits` 排在 `data` 之前，和 `fieldNames` 那张白名单同一读序，也让人一眼能看见门槛。
+        // Order: `credits` comes before `data`, the same reading order as the `fieldNames` whitelist, and it also puts the gate in plain sight.
         if let credits = manifest.unlockCredits, credits > 0 {
             wire += "&credits=\(credits)"
         }
         return wire + "&data=\(data)"
     }
 
-    /// 实际发出去的那条文本。它是纯文本，所以和位置、绝密消息一样天然满足 `PopopxComposerRouting`
-    /// 的 mesh 前提（无附件、无引用、1:1 直聊），不需要为它多开一个判据格。
+    /// The text actually sent. It is plain text, so like location and secure messages it naturally satisfies the mesh preconditions of `PopopxComposerRouting`
+    /// (no attachment, no quote, 1:1 direct chat), so no extra test slot is needed for it.
     var messageContent: String {
         degradeLine + "\n" + wireString
     }
 
-    /// 这张卡片是不是"打开后按时销毁"的那一档。阅读时钟只在真的时候才该被问起（见
+    /// Whether this card is the "destroyed on a timer after opening" tier. The reading clock should only be asked when that is true (see
     /// `ProfileStorageManager.readState`）。
     var isEphemeral: Bool {
         manifest.sendMode == .ephemeral
     }
 
-    /// 把计时语义说成一句人话（卡片副标题、VoiceOver）。时长本身交给 `PopopxSecureCopy.duration`，
-    /// 全 app 只有两处时长格式化，不必出现第三处。
+    /// Putting the timing semantics into one plain sentence (card subtitle, VoiceOver). The duration itself is left to `PopopxSecureCopy.duration`:
+    /// the whole app has only two duration formatters, and no third one needs to appear.
     var ttlText: String {
         switch manifest.sendMode {
         case .standard:
@@ -480,15 +480,15 @@ struct PopopxProfilePayload: Hashable, Sendable {
         }
     }
 
-    // MARK: 解析
+    // MARK: Parsing
 
-    /// 从任意文本里读出一条主页载荷；读不到返回 nil，调用方（`PopopxBubbleMount`）
-    /// 把 nil 当"这不是主页消息"，交回原来的纯文本渲染。
+    /// Reads one profile payload out of arbitrary text; when it reads nothing it returns nil, and the caller (`PopopxBubbleMount`)
+    /// treats nil as "this is not a profile message" and hands it back to the original plain-text rendering.
     ///
-    /// 命中多个候选取**最后一个**：生产端把机器行拼在可读行之后，而标题里就可能夹着一个
-    /// 长得像载荷的串（`popopx://profile?mode=standard&ttl=0&delivery=full&data=` 被谁当昵称写了，
-    /// 或者是转发来的文本）。取第一个会让卡片渲染成用户自己打的那半行字。
-    /// 同 `PopopxSecurePayload.swift:163`-`:164`、`PopopxLocation.swift:123`-`:126`。
+    /// With several candidates hit, take **the last one**: the producer appends the machine line after the human line, and the title itself may contain
+    /// a string that looks like a payload (`popopx://profile?mode=standard&ttl=0&delivery=full&data=` written as somebody's nickname,
+    /// or forwarded text). Taking the first would render the card as the half line the user typed themselves.
+    /// Same as `PopopxSecurePayload.swift:163`-`:164`, `PopopxLocation.swift:123`-`:126`.
     static func parse(from text: String) -> PopopxProfilePayload? {
         for token in text.split(whereSeparator: \.isWhitespace).reversed() {
             if let payload = parseToken(String(token)) {
@@ -498,8 +498,8 @@ struct PopopxProfilePayload: Hashable, Sendable {
         return nil
     }
 
-    /// 单个 token 的判定。暴露出来是给"已经知道自己切好了一个候选串"的调用方（扫码那条路）复用，
-    /// 免得它们再抄一遍四格校验。
+    /// The verdict on a single token. Exposed so that callers that "already know they cut out a candidate string" (the scan-a-code path) can reuse it
+    /// instead of copying the four-slot validation again.
     static func parseToken(_ token: String) -> PopopxProfilePayload? {
         guard let components = URLComponents(string: token),
               components.scheme == scheme,
@@ -507,44 +507,44 @@ struct PopopxProfilePayload: Hashable, Sendable {
         else { return nil }
 
         var fields: [String: String] = [:]
-        // 必须走 `percentEncodedQuery`：`query` 给的是**已解码**的串，`data=eyJ%61` 在它手里先
-        // 变了形，再按 `&` 切就把清单截断成一格。同 `PopopxSecurePayload.swift:181`-`:182`。
+        // It has to go through `percentEncodedQuery`: `query` hands back an **already decoded** string, so `data=eyJ%61` would first
+        // change shape there, and splitting on `&` after that truncates the manifest down to one slot. Same as `PopopxSecurePayload.swift:181`-`:182`.
         for pair in components.percentEncodedQuery?.split(separator: "&") ?? [] {
             guard let separator = pair.firstIndex(of: "=") else { continue }
             let key = String(pair[..<separator])
-            // 白名单比较用**编码原字节**：写成 `d%61ta` 的键进不来（`PopopxLocation.swift:149`-`:151`
-            // 同判据）。野键一律丢掉，不让一条字符串借着我们的 scheme 拿到界面。
+            // The whitelist comparison uses the **encoded raw bytes**: a key written as `d%61ta` does not get in (`PopopxLocation.swift:149`-`:151`
+            // same test). Rogue keys are dropped without exception - a string must not reach the interface by borrowing our scheme.
             guard fieldNames.contains(key) else { continue }
             let rawValue = String(pair[pair.index(after: separator)...])
-            // `URLComponents` 会先把非法转义修好，所以这道 guard 挡的是"语法合法但字节不是 UTF-8"
-            // 的序列（`%C0%80`、`%FF`）。那种 token 整串判死，不 fallback 到原串。
-            // 同 `PopopxLocation.swift:154`-`:157`。
+            // `URLComponents` repairs illegal escapes first, so what this guard blocks are sequences that are "syntactically legal but whose bytes are not UTF-8"
+            // (`%C0%80`, `%FF`). Such a token is killed whole, with no fallback to the original string.
+            // Same as `PopopxLocation.swift:154`-`:157`.
             guard let value = rawValue.removingPercentEncoding else { return nil }
             fields[key] = value
         }
 
         guard let rawMode = fields["mode"], let mode = PopopxProfileSendMode.fromWire(rawMode),
               let rawDelivery = fields["delivery"], let delivery = PopopxProfileDelivery.fromWire(rawDelivery),
-              // `Int("+300")` 也解得成功，所以长度上限必须靠"整串只有数字"来卡，而不是靠值域。
+              // `Int("+300")` decodes successfully too, so the length cap has to be enforced by "the whole string is digits only", not by the value range.
               let rawTTL = fields["ttl"],
               rawTTL.allSatisfy(\.isNumber),
               rawTTL.count <= Self.maximumTTLDigits,
               let ttl = Int(rawTTL),
               let encodedJSON = fields["data"],
-              // 先按字符数卡住分配，再解码：一段 8 MB 的 `data=` 值得在变成 `Data` 之前就被拒掉。
+              // Cap the allocation by character count first, then decode: an 8 MB `data=` is worth rejecting before it becomes `Data`.
               encodedJSON.count <= Self.maximumEncodedJSONCharacters,
               let jsonData = Data(popopxBase64URL: encodedJSON),
               let manifest = PopopxProfileManifest.decoded(json: jsonData)
         else { return nil }
 
-        // 信封与正文必须讲同一件事。三格里任何一格和 JSON 里的字段不一致，就是这条路被人动过
-        // （或者是别家实现的另一种编码），不能挑一半信下来。
+        // Envelope and body must tell the same story. If any of the three slots disagrees with the field in the JSON, this path has been tampered with
+        // (or it is some other implementation's encoding), and we cannot believe half of it.
         guard manifest.sendMode == mode, manifest.deliveryMode == delivery, manifest.ttlSeconds == ttl else {
             return nil
         }
-        // `credits=` 是四格必填之外唯一可缺省的一格，所以它不进上面那道 `guard let` 链：
-        // 缺省 = 免费，那是老主页的正常形态，不是残缺。写着就必须是纯数字、不超位；
-        // 然后把信封那一份和 JSON 那一份比一次——钱的话两处各说各话是最不能忍的一种分歧。
+        // `credits=` is the only slot that may be absent besides the four mandatory ones, so it does not enter the `guard let` chain above:
+        // absent = free, which is the normal shape of the old profile page, not a defect; if it is written it must be pure digits and must not exceed the digit ceiling;
+        // then compare the copy in the envelope against the copy in the JSON -- for money, two places each telling their own story is the least tolerable kind of divergence.
         let rawCredits = fields["credits"]
         if let rawCredits {
             guard rawCredits.allSatisfy(\.isNumber), rawCredits.count <= Self.maximumThresholdDigits else { return nil }
@@ -562,22 +562,22 @@ struct PopopxProfilePayload: Hashable, Sendable {
 
     private static let fieldNames: Set<String> = ["mode", "ttl", "delivery", "credits", "data"]
 
-    /// `ttl=` 的位数上限。`maximumTTLSeconds` 是 3600，四位数够用；多出来的位数一律判死，
-    /// 免得有人拿 `99999999999` 去试探 `Int` 的边界。
+    /// digit ceiling for `ttl=`. `maximumTTLSeconds` is 3600, so four digits are enough; any extra digits are rejected outright,
+    /// so that nobody probes the boundary of `Int` with `99999999999`.
     private static let maximumTTLDigits = 4
 
-    /// `credits=` 的位数上限，直接取商业层那张表（`PopopxCommerceLimits.maximumThresholdDigits`，
-    /// 由 `maximumCreditsThreshold = 100_000` 推出来）。在这里抄一个数就是第二份真值，
-    /// 而两份真值迟早会在"门槛改大"那一天分开。
+    /// digit ceiling for `credits=`, taken straight from that table in the commerce layer (`PopopxCommerceLimits.maximumThresholdDigits`,
+    /// derived from `maximumCreditsThreshold = 100_000`). Copying a number here would be a second source of truth,
+    /// and two sources of truth will part company sooner or later on the day the threshold is raised.
     private static let maximumThresholdDigits = PopopxCommerceLimits.maximumThresholdDigits
 
-    /// base64url 后的最大字符数（含容忍带填充的写法）。`((bytes + 2) / 3) * 4` 是标准 base64
-    /// 的长度上界，从它反推就不必先把整段解成 `Data` 才知道超标。
+    /// maximum character count after base64url encoding (including the padding-carrying form). `((bytes + 2) / 3) * 4` is the standard base64
+    /// length upper bound, and working back from it means we do not have to decode the whole blob into `Data` before learning it is over budget.
     private static let maximumEncodedJSONCharacters = ((maximumJSONBytes + 2) / 3) * 4
 
-    /// 空白收敛成单个空格；空标题给一个占位词，免得降级行上出现两个连着的空格。
+    /// whitespace collapses into a single space; an empty title gets a placeholder word so that a degraded row never shows two adjacent spaces.
     private static func oneLine(_ text: String) -> String {
         let collapsed = text.split(whereSeparator: \.isWhitespace).joined(separator: " ")
-        return collapsed.isEmpty ? "未命名主页" : collapsed
+        return collapsed.isEmpty ? NSLocalizedString("Unnamed profile", comment: "POPOPX encrypted profile") : collapsed
     }
 }

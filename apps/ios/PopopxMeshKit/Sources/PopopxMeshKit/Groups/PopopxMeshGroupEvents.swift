@@ -4,7 +4,7 @@
 //
 //  The group layer's own event stream, on purpose separate from `PopopxMeshEvent`. Group traffic has
 //  a different lifecycle (a roster change is not a neighbour appearing) and a different consumer
-//  (厢语's group threads, not the 模块 4 health monitor), and adding cases to the existing enum would
+//  (Cabin's group threads, not the module 4 health monitor), and adding cases to the existing enum would
 //  make every app-side `switch` over mesh events a compile error in a target this package does not
 //  own. One publisher, many consumers, same fan-out shape as `PopopxMeshEventHub`.
 //

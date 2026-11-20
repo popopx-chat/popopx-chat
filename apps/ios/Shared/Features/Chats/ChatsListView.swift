@@ -2,72 +2,72 @@
 //  ChatsListView.swift
 //  POPOPX (iOS)
 //
-//  【第四阶段 · Tab 1 消息】新版会话列表。
+//  [Phase four - Tab 1 Chats] The new chat list.
 //
-//  三段结构：顶部嵌第三阶段的 `PopopxTelemetryHeader`（身份切换 / 双模状态 / 「+」菜单），
-//  中间是 全部 · 在线加密 · 厢语离线 · 频道 四枚胶囊过滤器，下面是每张卡片一行的会话列表。
+//  Three-section structure: the top embeds the third phase's `PopopxTelemetryHeader` (identity switch / dual-mode status / "+" menu),
+//  the middle is the four capsule filters All - Encrypted online - Cabin offline - Channels, below them the chat list with one card per row.
 //
-//  栈的归属（这里按**已落地的** `Shared/Navigation/MainTabView.swift` 来，而不是按任务书的假设）：
-//  MainTabView.swift:14-20 与 :76-79 明确决定"消息这一栏自己带 NavigationStack，其余三栏才由壳包"。
-//  理由是本工程把"打开会话"翻成"推送一页"的唯一一处，是 `ChatModel.chatId`
-//  （Shared/Model/ChatModel.swift:411）到栈路径的绑定（旧 ChatListView.swift:210-217）；
-//  而 `chatId` 的写入口是 `ItemsModel.loadOpenChat`（:113）/`loadOpenChatNoWait`（:139），
-//  调用方包括通知（Shared/Model/NtfManager.swift:81）、deep link／建连（Shared/Model/POPOPXAPI.swift:1091
-//  /:1825/:2182/:2849）、附件打开（ChatModel.swift:1303）与新建联系人。绑定一旦挪到壳里，
-//  通知点开会话就静默失效 —— 所以本页自己建栈，`.searchable`、`navigationDestination`、弹层归本页。
-//  若日后 MainTabView 改为给消息栏包栈，需要一起删掉本文件的 `NavigationStack(path: chatPath)`。
+//  Stack ownership (this follows the **landed** `Shared/Navigation/MainTabView.swift`, not the task brief's assumption):
+//  MainTabView.swift:14-20 and :76-79 decide explicitly that the Chats tab carries its own NavigationStack and only the other three tabs are wrapped by the shell.
+//  The reason is that the only place in this project that turns "open a chat" into "push a page" is the binding of `ChatModel.chatId`
+//  (Shared/Model/ChatModel.swift:411) to the stack path (old ChatListView.swift:210-217);
+//  and the write entries of `chatId` are `ItemsModel.loadOpenChat` (:113) / `loadOpenChatNoWait` (:139),
+//  whose callers include notifications (Shared/Model/NtfManager.swift:81), deep link / connection setup (Shared/Model/POPOPXAPI.swift:1091
+//  /:1825/:2182/:2849), opening attachments (ChatModel.swift:1303) and new contacts. Once that binding moves into the shell,
+//  opening a chat from a notification fails silently - so this page builds its own stack, and `.searchable`, `navigationDestination` and the overlays belong to it.
+//  If MainTabView later starts wrapping the Chats tab in a stack, `NavigationStack(path: chatPath)` in this file has to be deleted along with it.
 //
-//  通道徽章的判定表（Docs/popopx-brand-spec.md §2.2，一行只出现一枚，紫青绝不同行混用 §1.1）：
+//  The route-badge decision table (Docs/popopx-brand-spec.md §2.2, one badge per row, purple and cyan never mixed on the same row §1.1):
 //
-//  | 判定依据                                   | 徽章                                             |
+//  | Basis of the decision                              | Badge                                            |
 //  |--------------------------------------------|--------------------------------------------------|
-//  | 已绑定厢语 + 有邻居路由（15 秒内听到过）    | `meshInk` + `antenna.radiowaves.left.and.right` + `· N`（数字必出，§1.4 第 3 条）|
-//  | 已绑定厢语 + 无路由（射频关 / 无邻居 / 超窗）| `labelSecondary` + `clock` + 「待中继」            |
-//  | 未绑定厢语，SMP 连接已就绪（本机单聊与群组/频道）  | `brand` + `lock.shield.fill`                       |
-//  | 未绑定厢语，SMP 也未就绪（含只读观察的群）         | 「未连通」（无图标，`clock` 只留给「待中继」）      |
-//  | 绑定表尚未读完                               | 「读取中」（不替用户猜通道）                       |
-//  | 本机笔记 / 待接受的联系 / 无效数据                  | 不显示徽章（没有任何通道可说）                      |
+//  | Cabin-bound + neighbour route present (heard within 15 s) | `meshInk` + `antenna.radiowaves.left.and.right` + `· N` (the number must appear, §1.4 item 3) |
+//  | Cabin-bound + no route (radio off / no neighbour / past the window) | `labelSecondary` + `clock` + "Awaiting relay" |
+//  | Not Cabin-bound, SMP connection ready (local direct chats and groups/channels) | `brand` + `lock.shield.fill` |
+//  | Not Cabin-bound and SMP not ready either (incl. read-only observed groups) | "Not connected" (no icon; `clock` is reserved for "Awaiting relay") |
+//  | The binding table has not finished loading          | "Reading" (the channel is never guessed for the user) |
+//  | Local notes / contact awaiting acceptance / invalid data | no badge (there is no route to say anything about) |
 //
-//  唯一的一次 actor hop：`IdentityMappingStore` 是 actor，逐行 `await` 会把列表打成串行队列，
-//  所以只在 `reloadMeshBindings()` 里读一次 `allMappings()`，压成 `[contactId: meshPublicKeyHex]`
-//  （同一联系人多条绑定时取 `updatedAt` 最新的那条），跳数则从已观察的
-//  `PopopxMeshStateSource.state` 里同步查。刷新时机 = 保险丝、当前身份、邻居集合三者之一变化。
+//  The single actor hop: `IdentityMappingStore` is an actor, and awaiting it row by row would turn the list into a serial queue,
+//  so `allMappings()` is read exactly once inside `reloadMeshBindings()` and flattened into `[contactId: meshPublicKeyHex]`
+//  (when one contact has several bindings the one with the newest `updatedAt` wins); hop counts are looked up synchronously in the observed
+//  `PopopxMeshStateSource.state`. Refresh trigger = any of fuse, current identity, or the neighbour set changing.
 //
-//  守的红线：不碰 project.pbxproj（本文件需人工拖入 POPOPX (iOS) target）；颜色/间距/字号/弹簧
-//  只取 PopopxTheme 的 token；不复用 `ChatListNavLink` / `ChatPreviewView` 这两个**视图**（旧主题），
-//  但打开会话用的仍是真实的 `ChatView` 与它原有的五个入参（Shared/Views/ChatList/ChatListView.swift:637）。
+//  The red line kept: never touch project.pbxproj (this file must be dragged into the POPOPX (iOS) target by hand); colors/spacing/font sizes/springs
+//  come only from PopopxTheme tokens; the two **views** `ChatListNavLink` / `ChatPreviewView` are not reused (old theme),
+//  but opening a chat still uses the real `ChatView` with its original five parameters (Shared/Views/ChatList/ChatListView.swift:637).
 //
-//  会话行的左右滑动快捷操作（真机第 8 轮 · 任务七补回）：挂在这一行的 wrapper `PopopxChatRowSwipe` 上，
-//  按钮清单逐条对照上游 `ChatListNavLink.swift` 移植 —— 复用视图会连旧卡片一起带回来，所以移植的是
-//  清单与 API，画法走系统 `.swipeActions` + `Label`。
+//  The chat row's leading/trailing swipe shortcuts (real device round 8, added back by task seven): hung on this row's wrapper `PopopxChatRowSwipe`,
+//  with the button list ported item by item against upstream `ChatListNavLink.swift` - reusing the view would drag the old card back with it, so what is ported is
+//  the list and the API, while the drawing uses the system `.swipeActions` + `Label`.
 //
 
 import SwiftUI
-import UIKit   // `imageFromBase64` 返回的是 UIImage（ImageUtils.swift:431）；与 PopopxMeView.swift:44 同一写法
+import UIKit   // `imageFromBase64` returns a UIImage (ImageUtils.swift:431); same form as PopopxMeView.swift:44
 import POPOPXChat
 import PopopxMeshKit
 import PopopxMeshUI
 
-// MARK: - 通道判定值
+// MARK: - Route decision value
 
-/// 一行会话当前的通道结论。值类型，判定集中在 `ChatsListView.channel(for:)`，
-/// 徽章只负责把它画出来 —— 画法和结论不可能各说各话。
+/// The current route verdict for one chat row. A value type, with the verdicts concentrated in `ChatsListView.channel(for:)`,
+/// so the badge only draws it - rendering and verdict cannot tell different stories.
 enum PopopxRowChannel: Hashable {
-    /// SMP 公网在线（靛紫锁）。
+    /// SMP public-network online (indigo-violet lock).
     case smp
-    /// 厢语离线且有实时路由。`hops` 是网格最后测到的跳数，0 = 本机持有链路。
+    /// Cabin offline with a live route. `hops` is the hop count the mesh measured last, 0 = this device holds the link.
     case mesh(hops: Int)
-    /// 已绑定厢语，但这一刻没有可用路由：等邻居出现即可发。
+    /// Cabin-bound, but no usable route at this moment: sendable as soon as a neighbour appears.
     case awaitingRelay
-    /// 厢语未绑定、SMP 也没接通。
+    /// Not Cabin-bound and SMP not connected either.
     case unreachable
-    /// 绑定表还没读完，任何通道结论都为时过早。
+    /// The binding table has not finished loading, so any route verdict is premature.
     case checking
-    /// 这条会话没有任何通道（本机笔记、读不懂的数据）。
+    /// This conversation has no route at all (local notes, data that cannot be read).
     case none
 
-    /// 「厢语离线」这一档收的是**已绑定**的联系人，无论此刻有没有路由：
-    /// 过滤器回答"这条会话走不走厢语"，徽章才回答"这一刻走不走得通"。
+    /// The "Cabin offline" case collects **bound** contacts, whether or not there is a route right now:
+    /// the filter answers "does this conversation go over Cabin", only the badge answers "does it get through at this moment".
     var isMeshBound: Bool {
         switch self {
         case .mesh, .awaitingRelay: true
@@ -76,27 +76,27 @@ enum PopopxRowChannel: Hashable {
     }
 }
 
-// MARK: - 过滤器
+// MARK: - Filters
 
-/// 顶部四枚胶囊。刻意不带图标：`全部` 在 §6 的图标词汇表里没有对应符号，而半套图标的过滤器
-/// 比没有图标更像坏掉的设计；通道语义只由徽章承载。
+/// The four capsules at the top, deliberately without icons: `All` has no matching symbol in the §6 icon vocabulary, and a filter
+/// with half a set of icons looks more broken than one with none; route meaning is carried only by the badges.
 ///
-/// **为什么「列表」不是这个枚举的 case（真机第 10 轮 · 任务 A 的裁定）**
+/// **Why "Lists" is not a case of this enum (real device round 10, the ruling of task A)**
 ///
-/// 1. 两条轴语义正交：这一枚举回答"这条会话走哪条通道"，而列表回答"用户把这些会话归到哪一格"。
-///    合成一枚选择态会让"点频道"悄悄清掉用户正在看的列表 —— 上游没有这个问题，因为它只有
-///    一条轴（`ChatTagsModel.activeFilter`），这一 fork 的四枚胶囊是改版加出来的第二条。
-/// 2. 类型装不下：`ChatTag` 是带 `Int64` id 的动态数据，`PopopxChatFilter` 是 `Int, CaseIterable`
-///    的静态枚举。要塞进去就得把 `allCases` 改成"从模型现算"，一个 UI 枚举从此依赖运行时数据，
-///    `counts(of:)` 那本循环也不再穷尽。
-/// 3. 真值只该有一份：选中态已经住在 `ChatTagsModel.activeFilter`（@Published），
-///    并由 `clearActiveChatFilterIfNeeded()`（Shared/Model/ChatModel.swift:278）在列表被删掉时
-///    自动归零。再在页面 `@State` 里存一份就是第二份真值 —— 那正是任务 B 要修的毛病。
+/// 1. The two axes are semantically orthogonal: this enum answers "which route does this conversation take", while lists answer "which bucket the user put these conversations in".
+///    Merging them into one selection state would let "tap Channels" silently clear the list the user is reading - upstream has no such problem, because it has only
+///    one axis (`ChatTagsModel.activeFilter`); this fork's four capsules are a second axis added by the redesign.
+/// 2. The types do not fit: `ChatTag` is dynamic data with an `Int64` id, while `PopopxChatFilter` is a `Int, CaseIterable`
+///    static enum. Forcing it in would mean making `allCases` computed from the model, so a UI enum would depend on runtime data,
+///    and the loop behind `counts(of:)` would no longer be exhaustive.
+/// 3. Truth should exist only once: the selection already lives in `ChatTagsModel.activeFilter` (@Published),
+///    and `clearActiveChatFilterIfNeeded()` (Shared/Model/ChatModel.swift:278) zeroes it automatically when the list
+///    gets deleted. Keeping another copy in the page's `@State` would be a second truth - exactly the flaw task B fixes.
 ///
-/// 所以列表走旁边那一枚独立的菜单胶囊（`PopopxListOption` + `PopopxChatFilterBar` 的 `listsMenu`），
-/// 与上游 `TagsView` 在标签多于三枚时退化成 `Menu`（`collapsedTagsFilterView`，
-/// Shared/Views/ChatList/ChatListView.swift:1150）同一个手法：**列表数量无上限，
-/// 一行装得下的前提是它折叠**。
+/// So lists go through the separate menu capsule beside it (`PopopxListOption` + `listsMenu` of `PopopxChatFilterBar`),
+/// the same device upstream `TagsView` uses when there are more than three tags, degrading to a `Menu` (`collapsedTagsFilterView`,
+/// Shared/Views/ChatList/ChatListView.swift:1150): **the number of lists is unbounded,
+/// and one row fits only on the condition that it collapses**.
 enum PopopxChatFilter: Int, CaseIterable, Identifiable {
     case all
     case online
@@ -114,8 +114,8 @@ enum PopopxChatFilter: Int, CaseIterable, Identifiable {
         }
     }
 
-    /// `isChannel` 说的是"这条会话是不是公共频道"，与走哪条通道无关：频道和群组一样只有 SMP
-    /// 一条路（见 `channel(for:)` 里 `.group` 那一支），所以它不能从 `PopopxRowChannel` 推出来。
+    /// `isChannel` says whether this conversation is a public channel, which has nothing to do with the route it takes: like a group, a channel has only SMP
+    /// as one route (see the `.group` branch in `channel(for:)`), so it cannot be derived from `PopopxRowChannel`.
     func matches(_ channel: PopopxRowChannel, isChannel: Bool) -> Bool {
         switch self {
         case .all: true
@@ -126,73 +126,73 @@ enum PopopxChatFilter: Int, CaseIterable, Identifiable {
     }
 }
 
-// MARK: - 「列表」过滤器的一档
+// MARK: - One case of the "Lists" filter
 
-/// 「列表」那一枚菜单胶囊吃的一条候选档：`全部` · `未读` · 用户自建列表各一条。
+/// One candidate entry consumed by the "Lists" menu capsule: `All` · `Unread` · one per user-created list.
 ///
-/// 刻意是**值类型**、且由页面每帧从 `ChatTagsModel.shared.userTags` × 当前会话现算：
-/// 界面里不留第二份清单，新建或删除一条列表后，这一枚不可能停留在弹出面板那一刻的旧数据上
-/// （任务 B 的第 3 条要求）。`filter` 直接就是写回 `ChatTagsModel.activeFilter` 的那个值。
+/// Deliberately a **value type**, recomputed by the page every render from `ChatTagsModel.shared.userTags` x the current conversations:
+/// the UI keeps no second list, so after a list is created or deleted this capsule cannot stay on the stale data of the moment the sheet popped
+/// (task B's requirement 3). `filter` is exactly the value written back to `ChatTagsModel.activeFilter`.
 struct PopopxListOption: Identifiable, Equatable {
-    /// 选中它 = 把这一档写进 `ChatTagsModel.activeFilter`；`nil` 就是"没有列表过滤"（全部）。
+    /// Selecting it = writing this case into `ChatTagsModel.activeFilter`; `nil` means "no list filter" (All).
     let filter: ActiveFilter?
-    /// 用户自建列表的名字是数据，不是文案 —— 画出来一律走 `Text(verbatim:)`。
+    /// A user-created list name is data, not copy - it is always drawn through `Text(verbatim:)`.
     let title: String
     let emoji: String?
-    /// 落在这一档里的会话数，和四枚通道胶囊上那个数字同一个来源（`searchedEntries()` 的结果）。
-    /// `nil` = 这一档不在本页的菜单里（旧列表页把选中态停在某一枚内置档上时），宁可不报数。
+    /// How many conversations fall in this case, from the same source as the number on the four route capsules (the result of `searchedEntries()`).
+    /// `nil` = this case is not in this page's menu (when the old list page leaves the selection on some built-in case); better to report no number.
     let count: Int?
 
     var id: String { filter?.id ?? "list.all" }
 
-    /// `ActiveFilter` 自己是 Equatable，所以"这一档是不是当前档"直接比得动，不需要另存一份选中态。
+    /// `ActiveFilter` is itself Equatable, so "is this case the current one" compares directly, with no separately stored selection.
     func selected(_ active: ActiveFilter?) -> Bool { filter == active }
 }
 
-// MARK: - 列表项
+// MARK: - List item
 
 private struct PopopxChatEntry {
     let chat: Chat
     let channel: PopopxRowChannel
-    /// 会话自己是不是频道（`ChatInfo.isChannel` = 群组的 `useRelays`，POPOPXChat/ChatTypes.swift:2296）。
+    /// Whether the conversation itself is a channel (`ChatInfo.isChannel` = the group's `useRelays`, POPOPXChat/ChatTypes.swift:2296).
     let isChannel: Bool
 }
 
-/// 邻居集合的"身份签名"：只取 peer id，不取 `lastSeenAt`/`hopCount` —— 后者每次广播都在变，
-/// 拿它当 `.task(id:)` 的键会让绑定表每秒重读一遍 Keychain。
+/// The neighbour set's "identity signature": only peer ids, never `lastSeenAt`/`hopCount` - the latter change on every broadcast,
+/// and using one as the `.task(id:)` key would make the binding table reread the Keychain every second.
 private struct PopopxMeshBindingKey: Equatable {
     let fuseOn: Bool
     let userId: Int64?
     let peerIDs: [String]
 }
 
-// MARK: - 页面
+// MARK: - Page
 
-/// 先锋体验弹窗"问过没有"的那一格键名。写成文件级常量而不是 `@AppStorage("…")` 的字面量：
-/// UserDefaults 的键要靠名字普查（自毁与迁移那几处按名字清点），散在装饰器里就搜不到归属。
+/// The key name of the pioneer-trial dialog's "was it asked" flag. Written as a file-level constant instead of an `@AppStorage("...")` literal:
+/// UserDefaults keys have to be surveyed by name (the self-destruct and migration sites count them by name), and scattered inside decorators they become unsearchable.
 private let popopxTrialWelcomeAskedKey = "popopx.commerce.trialWelcomeAsked"
 
-/// 整页 `@MainActor`：与 `MainTabView.swift:113`、`PopopxMeView.swift:52`、
-/// `PopopxProximityAddContactView.swift:39` 同一写法，这样页内的同步小助手
-/// （判定通道、震动、写 @State）都不必再各自标注，也不会踩隔离相关的警告。
+/// The whole page is `@MainActor`, the same style as `MainTabView.swift:113`, `PopopxMeView.swift:52`,
+/// `PopopxProximityAddContactView.swift:39`, so the page's synchronous helpers
+/// (route verdict, haptics, writing @State) need no individual annotation and never trip isolation-related warnings.
 @MainActor
 struct ChatsListView: View {
     @EnvironmentObject private var chatModel: ChatModel
 
-    /// 「列表」那一枚胶囊的真值来源，**必须挂在页面上**而不是只挂在会话行上。
+    /// The source of truth for the "Lists" capsule, which **must be attached to the page** rather than only to the chat rows.
     ///
-    /// 任务 B 查出来的根因就在这里：改版前 `ChatTagsModel` 只被会话行的包装
-    /// `PopopxChatRowSwipe`（本文件靠后那一处同名 `@StateObject`）观察着，而筛选条画在页面的
-    /// `chrome` 里 —— 页面没有观察它，所以行滑动面板里新建一条列表、`userTags` 被写下之后，
-    /// `ChatsListView.body` 一次都不会重算，筛选条自然永远停在旧清单上，只能退出再进来。
-    /// `ChatModel` 也救不了这一架：`updateContact` 只改 `Chat` 这个 class 的 `chatInfo`
-    /// （Shared/Model/ChatModel.swift:617-650），`@Published var chats` 数组本身没动，
-    /// 页面的 `body` 同样不会失效。
+    /// The root cause task B found is right here: before the redesign `ChatTagsModel` was observed only by the chat row wrapper
+    /// `PopopxChatRowSwipe` (the same-named `@StateObject` later in this file), while the filter bar is drawn in the page's
+    /// `chrome` - the page observed neither, so after a list is created in the row's swipe panel and `userTags` gets written,
+    /// `ChatsListView.body` recomputes not even once, and the filter bar necessarily stays on the stale list until you leave and re-enter.
+    /// `ChatModel` cannot rescue this either: `updateContact` only changes the `chatInfo` of the `Chat` class
+    /// (Shared/Model/ChatModel.swift:617-650), the `@Published var chats` array itself does not move,
+    /// so the page's `body` is not invalidated either.
     ///
-    /// 用的是 `.shared` 单例（与会话行那一处同一个对象），所以两处观察不会各说各话。
+    /// It uses the `.shared` singleton (the same object as the chat row's), so the two observations cannot tell different stories.
     @StateObject private var chatTagsModel = ChatTagsModel.shared
 
-    /// 两个都是 runtime 的既有单例：`isFuseOn` 与 `stateSource.state` 才是徽章的真值来源。
+    /// Both are existing runtime singletons: `isFuseOn` and `stateSource.state` are the badge's real source of truth.
     @ObservedObject private var runtime: PopopxMeshRuntime
     @ObservedObject private var meshState: PopopxMeshStateSource
 
@@ -202,40 +202,40 @@ struct ChatsListView: View {
     @State private var toast = PopopxToastModel()
     @State private var filter: PopopxChatFilter = .all
     @State private var searchText = ""
-    /// 2026-11-20 真机第 2 轮裁定的「放大镜 + 可折叠搜索行」：默认收起，点开才占一行。
-    /// 收起时把 `searchText` 清掉，避免一个看不见却还在过滤列表的条件。
+    /// 2026-11-20 real device round 2's ruling on the magnifier + collapsible search row: collapsed by default, it occupies a row only once opened.
+    /// When collapsing, `searchText` is cleared, to avoid an invisible condition that keeps filtering the list.
     @State private var showsSearchRow = false
-    /// 身份切换器只**写**这个值，真正的切换由下面的 `switchIdentity` 做（顶栏刻意不自己切）。
+    /// The identity switcher only **writes** this value; the actual switch is done by `switchIdentity` below (the top bar deliberately does not switch itself).
     @State private var currentUserId: Int64?
     @State private var showsAddFriend = false
     @State private var showsCreateGroup = false
     @State private var showsCreateChannel = false
     @State private var showsScan = false
-    /// 创建频道页里「Configure relays」那一行按值推到 `NetworkAndServers`（`AddChannelView.swift:85`），
-    /// 与「我」栏那棵栈同一口径（`MainTabView.swift:121`）：谁承载栈，谁持有 `SaveableSettings`。
+    /// The "Configure relays" row in the create-channel page pushes `NetworkAndServers` by value (`AddChannelView.swift:85`),
+    /// the same policy as the Me tab's stack (`MainTabView.swift:121`): whoever hosts the stack holds the `SaveableSettings`.
     @StateObject private var serversSettings = SaveableSettings()
-    /// 3 天先锋体验徽章的告知弹窗：只问一次，关掉就不再打扰。
-    /// 这一格只表"问过没有"；"这台设备领过没有"在 Keychain 的 `trialGuard` 里
-    /// （`PopopxBadgeManager.canClaimPioneerTrial` 读的就是它），所以清掉这一格不会让人多领一次。
+    /// The notice dialog for the 3-day pioneer trial badge: asked once only, and closing it stops the interruption.
+    /// This flag only means "was it asked"; "has this device claimed it" lives in the Keychain's `trialGuard`
+    /// (which is what `PopopxBadgeManager.canClaimPioneerTrial` reads), so clearing this flag cannot grant anyone an extra claim.
     @AppStorage(popopxTrialWelcomeAskedKey) private var trialWelcomeAsked = false
-    /// 徽章三条出口的载体状态（体验说明 / 详情 / 付费墙）；这一页只会自己抬 `.trial`，
-    /// 另外两档由弹窗里的出口切换（`PopopxBadgeSheetHost`）。
+    /// Carrier state for the badge's three exits (trial note / detail / paywall); this page only raises `.trial` itself,
+    /// while the other two are switched by the exits inside the dialog (`PopopxBadgeSheetHost`).
     @State private var badgeSheet: PopopxBadgeSheet?
-    /// 切换进行中的身份 id：`changeActiveUserAsync_` 会重载会话，二次进入只会把状态搅乱。
+    /// The identity id being switched: `changeActiveUserAsync_` reloads the conversations, so re-entering only muddles the state.
     @State private var switchingUserId: Int64?
-    /// contactId → meshPublicKeyHex，一次 actor hop 读出来的整表。
+    /// contactId -> meshPublicKeyHex, the whole table read in a single actor hop.
     @State private var meshBindings: [Int64: String] = [:]
     @State private var meshBindingsLoaded = false
-    /// 徽章的"新鲜度"用的是渲染时的这个时刻，而不是 `Date.now`：只有状态变化才会重画视图，
-    /// 所以配一个 5 秒的轮询把静默超窗的邻居自己褪成「待中继」。
+    /// The badge's "freshness" uses this render-time instant rather than `Date.now`: only a state change redraws the view,
+    /// so a 5-second poll lets neighbours silent past the window fade to "Awaiting relay" on their own.
     @State private var clock = Date.now
 
-    // `fileprivate` 而不是 `private`：`maxMeshHops` 除了本页判定，还要被同文件的
-    // `PopopxChatFilterBar` 与 `PopopxChatsEmptyState` 引用，而 Swift 的 `private` 只覆盖
-    // 同一类型（含其同文件扩展）内部，跨类型引用会直接"inaccessible due to 'private'"。
-    /// 跳数上限直接引模块 5 的常量（`PopopxMeshConfig.fragmentRelayTtlCap`），不在此重写 7。
+    // `fileprivate` rather than `private`: besides this page's verdict, `maxMeshHops` is also referenced by
+    // `PopopxChatFilterBar` and `PopopxChatsEmptyState` in the same file, and Swift's `private` covers only
+    // the inside of one type (including its same-file extensions); a cross-type reference directly hits "inaccessible due to 'private'".
+    /// The hop cap references module 5's constant directly (`PopopxMeshConfig.fragmentRelayTtlCap`); 7 is not restated here.
     fileprivate static let maxMeshHops = Int(PopopxMeshConfig.default.fragmentRelayTtlCap)
-    /// 15 秒：与模块 4 判「蓝牙不可达」用的同一个窗口，读自配置。
+    /// 15 seconds: the same window module 4 uses to judge "Bluetooth unreachable", read from configuration.
     private static let reachabilityTimeout = PopopxMeshConfig.default.peerReachabilityTimeout
     private static let meshPollSeconds: Double = 5
 
@@ -244,7 +244,7 @@ struct ChatsListView: View {
         _runtime = ObservedObject(wrappedValue: runtime)
         _meshState = ObservedObject(wrappedValue: runtime.stateSource)
         _currentUserId = State(initialValue: ChatModel.shared.currentUser?.userId)
-        // 用 `.shared` 而不是新建：顶栏渲染在这里，而"近场在跑"由面对面页写进来（PopopxProximityAddContactView 的 begin/finish）。
+        // Use `.shared` rather than a new instance: the top bar renders here, while "nearby is running" is written in by the face-to-face page (the begin/finish of PopopxProximityAddContactView).
         _telemetry = State(initialValue: .shared)
     }
 
@@ -255,10 +255,10 @@ struct ChatsListView: View {
         .background(PopopxPalette.base)
     }
 
-    /// `ChatModel.chatId`（Shared/Model/ChatModel.swift:411）→ 栈路径。形与语义照抄旧
-    /// ChatListView.swift:210-217：字段非空即压上一页，返回即写回 nil。路径元素用 `Bool`
-    /// （旧代码同一个类型）：本页只需要"有没有打开的会话"这个信号，具体哪一条永远从 `chatId`
-    /// 现读，因此不存在两份真值。
+    /// `ChatModel.chatId` (Shared/Model/ChatModel.swift:411) -> the stack path. Shape and semantics copied from the old
+    /// ChatListView.swift:210-217: a non-empty field pushes one page, going back writes nil back. Path elements use `Bool`
+    /// (the same type as the old code): this page only needs the "is some chat open" signal, and which exact one is always read from `chatId`
+    /// at that moment, so there are never two truths.
     private var chatPath: Binding<[Bool]> {
         Binding(
             get: { chatModel.chatId != nil ? [true] : [] },
@@ -268,9 +268,9 @@ struct ChatsListView: View {
 
     @ViewBuilder private var chatList: some View {
         let entries = searchedEntries()
-        // 两条独立的轴，各筛一遍：通道（四枚胶囊，页面自己的 `@State`）与列表
-        // （`ChatTagsModel.activeFilter`，全 app 一份真值）。默认值都是"不过滤"，
-        // 所以第 8、9 轮定下来的那一屏一寸未动。
+        // Two independent axes, each filtering once: the route (four capsules, the page's own `@State`) and the list
+        // (`ChatTagsModel.activeFilter`, one truth for the whole app). Both defaults mean "no filtering",
+        // so the screen settled in rounds 8 and 9 has not moved by an inch.
         let listFilter = chatTagsModel.activeFilter
         let rows = entries.filter {
             filter.matches($0.channel, isChannel: $0.isChannel) && matchesList($0, listFilter)
@@ -297,7 +297,7 @@ struct ChatsListView: View {
                 emptyState(
                     searching: !searchText.trimmed.isEmpty,
                     hasAnyChat: !chatModel.chats.isEmpty,
-                    // 只在真的要画空状态时才算这一遍：它回答的是"列表本身有没有货"。
+                    // Computed only when the empty state is really drawn: it answers "does the list itself have anything in it".
                     listScoped: listFilter == nil
                         ? nil
                         : entries.filter { matchesList($0, listFilter) }.count
@@ -315,22 +315,22 @@ struct ChatsListView: View {
         .environment(\.defaultMinListRowHeight, PopopxMetrics.minHitTarget)
         .scrollContentBackground(.hidden)
         .background(PopopxPalette.base)
-        // 「消息」那一行大标题连同 `.searchable` 抽屉一起撤掉（真机第 2 轮第 1 项）：
-        // 系统标题栏整条隐藏，第一行改由 `chrome` 里的统一顶栏承担，搜索收进可折叠行。
-        // 隐藏只作用于栈的这一页 —— `PopopxChatRoomDestination` 自己声明标题栏可见，
-        // 返回按钮与页内导航不受影响。
+        // The large "Chats" title is withdrawn together with the `.searchable` drawer (real device round 2, item 1):
+        // the system title bar is hidden entirely, the first row is taken over by the unified top bar in `chrome`, and search is folded into a collapsible row.
+        // The hiding applies only to this page of the stack - `PopopxChatRoomDestination` declares the title bar visible itself,
+        // so the back button and in-page navigation are unaffected.
         .toolbar(.hidden, for: .navigationBar)
         .safeAreaInset(edge: .top, spacing: 0) { chrome }
-        // 打开会话：目的地类型与旧的五个入参一字不改照抄（见 `PopopxChatRoomDestination`）。
+        // Opening a chat: the destination type and the old five parameters are copied without a single change (see `PopopxChatRoomDestination`).
         .navigationDestination(for: Bool.self) { _ in chatRoom() }
-        // 「+」菜单里的两项，走 app 里已有的两个真实页面。
-        // `ThemedBackground` 是旧主题接口：被推送的是旧页面，让它按自己的主题铺底才不会糊成一片，
-        // 挂载方式照抄 Shared/Views/NewChat/NewChatMenuButton.swift:89 与 :93。
+        // The two items in the "+" menu go to two real pages that already exist in the app.
+        // `ThemedBackground` is the old theme's API: what gets pushed is an old page, and letting it lay its own theme underneath keeps it from blurring into one mass,
+        // so the mounting copies Shared/Views/NewChat/NewChatMenuButton.swift:89 and :93.
         .navigationDestination(isPresented: $showsCreateGroup) {
             PopopxCreateGroupView()
                 .navigationTitle(Copy.createGroupTitle)
                 .modifier(ThemedBackground(grouped: true))
-                // 新建对话框同样收起底栏（真机第 2 轮第 2 项，口径同 `chatRoom()`）。
+                // The new-chat dialog also collapses the bottom bar (real device round 2 item 2, same policy as `chatRoom()`).
                 .toolbar(.hidden, for: .tabBar)
         }
         .navigationDestination(isPresented: $showsScan) {
@@ -340,10 +340,10 @@ struct ChatsListView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar(.hidden, for: .tabBar)
         }
-        // 创建频道：同一个 `AddChannelView`（旧「新建聊天」菜单里那一枚，:97-101），挂载写法照抄上面
-        // `showsCreateGroup` 那一处 —— 同样的推页、同样的 `ThemedBackground`、同样收起底栏。
-        // 它内部那一行「Configure relays」是按 `ServersDestination` 值推的（AddChannelView.swift:85），
-        // 所以这三条登记必须挂在栈根（口径同 MainTabView.swift:159-167：同一类型只保留最靠近栈根的登记）。
+        // Create channel: the same `AddChannelView` (the one in the old "New chat" menu, :97-101), with the mounting copied from
+        // the `showsCreateGroup` site above - the same push, the same `ThemedBackground`, the same collapsed bottom bar.
+        // Its internal "Configure relays" row is pushed by `ServersDestination` value (AddChannelView.swift:85),
+        // so these three registrations must hang at the stack root (same policy as MainTabView.swift:159-167: for one type only the registration nearest the root is kept).
         .navigationDestination(isPresented: $showsCreateChannel) {
             AddChannelView()
                 .navigationTitle(Copy.createChannelTitle)
@@ -362,13 +362,13 @@ struct ChatsListView: View {
         .sheet(isPresented: $showsAddFriend) {
             PopopxAddFriendView()
         }
-        // 先锋体验徽章的告知弹窗。挂在这一页而不是 `POPOPXApp` 那一层：这里已经有会话栈，
-        // sheet 才挂得住；`PopopxTrialWelcomeModal` 自己带"领取"按钮和失败原因，
-        // 所以这一层只决定"要不要问这一次"，不替它领。
-        // 三张徽章面板走同一个载体：弹窗里点「看徽章详情」要换到详情页，
-        // 换 `item` 就行，不必在这一层再挂第二条 sheet。
-        // 顶栏那枚徽章也不挂自己的 sheet，用的是 `$badgeSheet` 递下去的同一份（`PopopxTelemetryHeader.badgeSheet`）：
-        // 真机第 9 轮「点『看徽章详情』没反应」第二次查出的就是"这一份 + 顶栏那一份"两张 sheet 挂在同一条链上。
+        // The pioneer trial badge notice dialog. Hung on this page rather than on the `POPOPXApp` layer: the chat stack already exists here,
+        // so the sheet has something to attach to; `PopopxTrialWelcomeModal` carries its own "claim" button and its failure reasons,
+        // so this layer only decides "should we ask this time" and does not claim on its behalf.
+        // The three badge panels share one carrier: tapping "view badge detail" inside the dialog has to switch to the detail page,
+        // and swapping `item` is enough - no second sheet needs to be attached at this layer.
+        // The top bar's badge does not attach its own sheet either; it uses the same one handed down through `$badgeSheet` (`PopopxTelemetryHeader.badgeSheet`):
+        // what the second investigation of "tapping 'view badge detail' does nothing" in real device round 9 turned up was exactly two sheets, this one plus the top bar's, attached on one chain.
         .popopxBadgeSheets($badgeSheet)
         .popopxToast(toast)
         .task { await startTelemetry() }
@@ -383,15 +383,15 @@ struct ChatsListView: View {
         }
     }
 
-    // MARK: 顶栏 + 过滤器
+    // MARK: Top bar + filters
 
     @ViewBuilder private var chrome: some View {
         let entries = searchedEntries()
         let active = chatTagsModel.activeFilter
-        // 两条轴互为对方那几个数字的分母：选中一条列表时，四枚通道胶囊报的是"这条列表里
-        // 有几条走 SMP / 走厢语 / 是频道"；选中厢语离线时，「列表」那一枚报的是"这一档里
-        // 每条列表各有几条"。任何一格都不报一个屏幕上看不到的数（真机第 2 轮定下的那条口径）。
-        // 两个名字各自说"这堆是喂给哪几个数字的"，不说"被哪一轴筛过"，否则正好读反。
+        // The two axes are each other's denominator for those numbers: with one list selected, the four route capsules report "how many in this list
+        // go over SMP / over Cabin / are channels"; with Cabin offline selected, the "Lists" capsule reports "how many conversations each list has
+        // in this case". No cell reports a number that is not visible on the screen (the rule set in real device round 2).
+        // The two names each say "which numbers this set feeds", not "which axis filtered it", otherwise the reading comes out exactly reversed.
         let entriesForChannelCounts = active == nil ? entries : entries.filter { matchesList($0, active) }
         let entriesForListCounts = filter == .all ? entries : entries.filter { filter.matches($0.channel, isChannel: $0.isChannel) }
         VStack(spacing: 0) {
@@ -425,25 +425,25 @@ struct ChatsListView: View {
         .background(PopopxMaterial.bar)
     }
 
-    /// 展开/收起搜索行。动画走品牌弹簧，Reduce Motion 由 `popopxAnimation` 那侧统一管。
+    /// Expand/collapse the search row. The animation uses the brand spring, and Reduce Motion is managed centrally on the `popopxAnimation` side.
     private func popopxToggleSearch(open: Bool) {
         withAnimation(PopopxSpring.snappy) { showsSearchRow = open }
         PopopxHaptics.selection()
     }
 
-    /// 收起一定要清条件：留着关键词，用户看到的是一条"莫名其妙少了几行"的列表。
+    /// Collapsing must clear the condition: keep the keyword and what the user sees is a list that lost a few rows for no apparent reason.
     private func closeSearchRow() {
         searchText = ""
         popopxToggleSearch(open: false)
     }
 
-    // MARK: 行
+    // MARK: Row
 
-    /// 一行 = `PopopxChatRowSwipe`（卡片本身 + 左右滑动快捷操作）+ 这一行的行内几何。
+    /// One row = `PopopxChatRowSwipe` (the card itself + the leading/trailing swipe shortcuts) + this row's inline geometry.
     ///
-    /// 行内边距、分隔线、行背景三句留在原处不动：滑动按钮挂在**行内容**上，改的是内容而不是行的几何，
-    /// `PopopxMetrics.gutter` 仍是唯一的 gutter 来源。为什么手势要下沉到 wrapper 而不是就地挂在
-    /// `Button` 上，见 `PopopxChatRowSwipe` 的类型注释。
+    /// The three statements on row padding, divider and row background stay where they are: the swipe buttons hang on the **row content**, so what changes is the content and not the row's geometry,
+    /// `PopopxMetrics.gutter` remains the only gutter source, and for why the gesture sinks into the wrapper instead of being attached in place on
+    /// the `Button`, see the type comment of `PopopxChatRowSwipe`.
     @ViewBuilder private func row(_ entry: PopopxChatEntry) -> some View {
         PopopxChatRowSwipe(
             chat: entry.chat,
@@ -460,9 +460,9 @@ struct ChatsListView: View {
         .listRowBackground(Color.clear)
     }
 
-    /// 目的地：id 从 `chatId` 现读，`PopopxChatRoomDestination` 再按 id 取会话。
-    /// 栈路径翻出来的那一页。两个分支都要挂到，所以包一层 `Group`：
-    /// "会话已经不在了"那一屏同样是对话框栈里的一页，底栏该收就得收。
+    /// Destination: the id is read fresh from `chatId`, and `PopopxChatRoomDestination` then fetches the conversation by id.
+    /// The page brought up by the stack path. Both branches have to carry the attachment, so they are wrapped in a `Group`:
+    /// the "conversation is gone" screen is equally a page inside the chat stack, and the bottom bar must collapse there when it should.
     @ViewBuilder private func chatRoom() -> some View {
         Group {
             if let chatId = chatModel.chatId {
@@ -475,19 +475,19 @@ struct ChatsListView: View {
                     .background(PopopxPalette.base)
             }
         }
-        // 真机第 2 轮第 2 项：进对话框就收起底部四栏。这一句挂在"被推入的那一页"上，
-        // 不是挂在列表上，所以返回时系统按作用域自己收回 —— 列表页底栏照旧四栏。
-        // 通讯录与厢语打开会话也走这里：它们都只写 `ChatModel.chatId`，
-        // 由 `MainTabView.swift:186` 把栏切到"消息"后由本页的栈呈现，全 app 只有这一个对话框出口。
+        // Real device round 2 item 2: entering a chat collapses the bottom four tabs. This statement hangs on "the page being pushed in",
+        // not on the list, so on return the system takes it back by scope - the list page's bottom bar keeps its four tabs as before.
+        // Opening a chat from the address book or from Cabin also comes through here: both only write `ChatModel.chatId`,
+        // after which `MainTabView.swift:186` switches the tab to "Chats" and this page's stack presents it, the only chat exit in the whole app.
         .toolbar(.hidden, for: .tabBar)
-        // 顶栏那一行在列表页被整条隐藏（上面 `chatList`），对话框必须自己声明可见，
-        // 否则返回按钮和 ChatView 的标题栏一起没了。
+        // The top bar row is hidden entirely on the list page (the `chatList` above), so the chat must declare it visible itself,
+        // otherwise the back button and ChatView's title bar disappear together.
         .toolbar(.visible, for: .navigationBar)
     }
 
-    // MARK: 数据
+    // MARK: Data
 
-    /// 与旧列表同一条排除规则（Shared/Views/ChatList/ChatListView.swift:661）。
+    /// The same exclusion rule as the old list (Shared/Views/ChatList/ChatListView.swift:661).
     private func searchedEntries() -> [PopopxChatEntry] {
         let query = searchText.trimmed.localizedLowercase
         var entries: [PopopxChatEntry] = []
@@ -513,20 +513,20 @@ struct ChatsListView: View {
         return counts
     }
 
-    // MARK: 「列表」这一轴
+    // MARK: The list axis
 
-    /// 筛选条里「列表」那一枚菜单胶囊的全部数据：`全部` · `未读` · 然后每条用户列表。
+    /// All the data of the "Lists" menu capsule in the filter bar: `All` · `Unread` · then one entry per user list.
     ///
-    /// 每次渲染从 `chatTagsModel.userTags` 现算，**不在 `@State` 里存副本** ——
-    /// 会话行的滑动面板新建一条列表走的正是 `tm.userTags = userTags`
-    /// （Shared/Views/ChatList/TagListView.swift 的 `createChatTag`），
-    /// 只要这里读的是那份 @Published，新列表就在同一次渲染里出现在筛选条上（任务 B 第 3 条）。
+    /// Recomputed every render from `chatTagsModel.userTags`, with **no copy stored in `@State`** -
+    /// creating a list in a chat row's swipe panel goes through exactly `tm.userTags = userTags`
+    /// (`createChatTag` in Shared/Views/ChatList/TagListView.swift),
+    /// so as long as this reads that @Published, the new list appears on the filter bar in the same render (task B item 3).
     ///
-    /// 数字也在这里现算，不读模型里的两张计数表：`ChatTagsModel.unreadTags` 记的是
-    /// "每条列表里有几条**未读**"（`updateChatTagRead` / `decTagsReadCount`，
-    /// Shared/Model/ChatModel.swift:252-270，给上游标签行那个 ● 点用），`presetTags` 只覆盖
-    /// `PresetTag` 那一套内置档（:193-210）—— 模型里根本没有"某条用户列表里有几条会话"这张表，
-    /// 而这一枚要的正是成员数，只能从会话自己身上的 `chatInfo.chatTags` 数出来。
+    /// The numbers are computed here too rather than read from the model's two count tables: `ChatTagsModel.unreadTags` records
+    /// "how many **unread** items each list has" (`updateChatTagRead` / `decTagsReadCount`,
+    /// Shared/Model/ChatModel.swift:252-270, for the ● dot on upstream's tag rows), and `presetTags` only covers
+    /// the built-in cases of `PresetTag` (:193-210) - the model simply has no table of "how many conversations a user list contains",
+    /// while what this capsule wants is precisely the member count, which can only be counted out of each conversation's own `chatInfo.chatTags`.
     private func listOptions(of entries: [PopopxChatEntry]) -> [PopopxListOption] {
         var options: [PopopxListOption] = [
             PopopxListOption(filter: nil, title: Copy.filterAll, emoji: nil, count: entries.count),
@@ -547,9 +547,9 @@ struct ChatsListView: View {
         return options
     }
 
-    /// 「列表」这一轴的判定，与旧列表 `filteredChats()` 里那个 `filtered(_:)`
-    /// （Shared/Views/ChatList/ChatListView.swift:682-688）逐条同形：
-    /// 两屏选同一档必须筛出同一批会话，不可能各说各话。
+    /// The list axis's decision matches, item by item, the `filtered(_:)` inside the old list's `filteredChats()`
+    /// (Shared/Views/ChatList/ChatListView.swift:682-688):
+    /// two screens selecting the same case must filter out the same conversations, so they cannot tell different stories.
     private func matchesList(_ entry: PopopxChatEntry, _ active: ActiveFilter?) -> Bool {
         switch active {
         case .none: true
@@ -559,43 +559,43 @@ struct ChatsListView: View {
         }
     }
 
-    /// 选中一档 = 写 `ChatTagsModel.activeFilter`（全 app 唯一一份列表选中态）。
-    /// 与旧屏的 `setActiveFilter`（:1207）刻意不同：那一处是"再点同一枚就取消"的开关语义，
-    /// 这里点的是菜单里的一行，再点它想要的就是这一行，取消归"全部"那一行。
+    /// Selecting a case = writing `ChatTagsModel.activeFilter` (the app's single list-selection state).
+    /// Deliberately different from the old screen's `setActiveFilter` (:1207): that one has toggle semantics, "tap the same capsule again to cancel",
+    /// while here the tap lands on a row of a menu, tapping it again still wants that row, and cancelling belongs to the "All" row.
     private func selectList(_ active: ActiveFilter?) {
-        // 先比后震：重复点同一行什么都不会变，那一次就不该有反馈（口径同 `capsule(_:)` 的
-        // `guard !selected else { return }`，它就排在震动之前）。
+        // Compare first, then haptic: tapping the same row twice changes nothing, so that tap deserves no feedback (same policy as
+        // `guard !selected else { return }` in `capsule(_:)`, which sits before the haptic).
         guard active != chatTagsModel.activeFilter else { return }
         PopopxHaptics.selection()
         chatTagsModel.activeFilter = active
     }
 
-    /// 通道判定。顺序即优先级：保险丝 → 绑定表 → 绑定 → 射频 → 邻居路由 → 新鲜度。
+    /// The route decision. The order is the priority: fuse -> binding table -> binding -> radio -> neighbour route -> freshness.
     private func channel(for chat: Chat) -> PopopxRowChannel {
-        // SMP 那一侧的判据取 `chatInfo.sndReady`（POPOPXChat/ChatTypes.swift:2156）：它的语义正是
-        // "这条会话现在能不能走 SMP"，且 contactRequest / contactConnection 天然为 false、
-        // 本机笔记天然为 true，不需要在本文件重写一遍各 case 的判定。
+        // The SMP side's criterion is `chatInfo.sndReady` (POPOPXChat/ChatTypes.swift:2156): its meaning is exactly
+        // "can this conversation go over SMP right now", and contactRequest / contactConnection are naturally false,
+        // Saved Notes are naturally true, so there is no need to restate the per-case decision in this file.
         let smpReady = chat.chatInfo.sndReady
         switch chat.chatInfo {
         case let .direct(contact):
             return directChannel(contactId: contact.contactId, smpReady: smpReady)
         case .group:
-            // 群组与频道只有 SMP 公网这一条路：厢语离线不中继群播，所以不给青色。
+            // Groups and channels have only the SMP public network path: Cabin offline does not relay group broadcasts, so they get no cyan.
             return smpReady ? .smp : .unreachable
         case .local, .contactRequest, .contactConnection, .invalidJSON:
-            // 本机笔记不过任何通道；还没建立的联系也没有任何通道可承诺。
+            // Saved Notes go through no channel at all; a contact not established yet has no channel it can promise either.
             return .none
         }
     }
 
     private func directChannel(contactId: Int64, smpReady: Bool) -> PopopxRowChannel {
-        // 保险丝关着：绑定表里的键一条都不作数，此刻真实的通道只有 SMP。
+        // The fuse is off: not one key in the binding table counts, and the only real channel right now is SMP.
         guard runtime.isFuseOn else { return smpReady ? .smp : .unreachable }
         guard meshBindingsLoaded else { return .checking }
         guard let hex = meshBindings[contactId] else { return smpReady ? .smp : .unreachable }
         guard meshState.state.radioState.isUsable else { return .awaitingRelay }
         guard let peer = meshState.state.peer(withHex: hex) else { return .awaitingRelay }
-        // 跳数超出 TTL 上限、或静默超过模块 4 的可达窗口，都不再是一张能承诺送达的跳数徽章。
+        // Hops past the TTL ceiling, or silence past module 4's reachability window, is no longer a hops badge that can promise delivery.
         guard peer.hopCount >= 0, peer.hopCount <= Self.maxMeshHops else { return .awaitingRelay }
         guard clock.timeIntervalSince(peer.lastSeenAt) <= Self.reachabilityTimeout else { return .awaitingRelay }
         return .mesh(hops: peer.hopCount)
@@ -611,16 +611,16 @@ struct ChatsListView: View {
         var newestUpdate: [Int64: Date] = [:]
         var bindings: [Int64: String] = [:]
         for mapping in mappings {
-            // 只认已经指向真实联系人的绑定：还在等配对结果的行 `contactId` 就是 nil
-            // （`isPending` 的定义，IdentityMappingStore.swift:62），它没有会话可对应。
+            // Only accept bindings that already point at a real contact: a row still waiting for the pairing result has `contactId` nil
+            // (that is how `isPending` is defined, IdentityMappingStore.swift:62), so it has no chat to match.
             guard let contactId = mapping.contactId else { continue }
-            // 同一联系人有多条绑定时只认最新一条（`allMappings()` 按 createdAt 排过序，
-            // 但同一联系人可能被改绑多次，所以这里再按 updatedAt 取新）。
+            // When one contact has several bindings only the newest one counts (`allMappings()` is already sorted by createdAt,
+            // but the same contact can be rebound more than once, so here the newest is taken again by updatedAt).
             if let seen = newestUpdate[contactId], seen >= mapping.updatedAt { continue }
             newestUpdate[contactId] = mapping.updatedAt
             bindings[contactId] = mapping.meshPublicKeyHex
         }
-        // 读表期间保险丝可能被拨断：那一局的结论不能再写回界面。
+        // The fuse can be pulled while the table is being read: that round's conclusion must not be written back to the UI.
         guard runtime.isFuseOn else {
             meshBindings = [:]
             meshBindingsLoaded = true
@@ -643,12 +643,12 @@ struct ChatsListView: View {
         await telemetry.start()
     }
 
-    /// 首启那一次体验徽章的告知：两个条件都成立才问，问完就落那一格 UserDefaults。
+    /// The one first-launch notice about the trial badge: ask only when both conditions hold, and once asked, persist it in that UserDefaults slot.
     ///
-    /// `canClaimPioneerTrial` 读的是"没有徽章记录 + Keychain 里没有 trialGuard"，
-    /// 而那份记录在 `PopopxBadgeManager` 的 `init()` 里就同步取好了（PopopxBadgeManager.swift:65-71），
-    /// 所以这里不必等 `start()`：`start()` 装的是 StoreKit 交付与心跳，和这一格判定无关。
-    /// 已经领过的人、已经到期降级的人、已经问过的人，都从这里直接返回，不弹窗、不读盘、不发东西。
+    /// `canClaimPioneerTrial` reads 'no badge record + no trialGuard in Keychain',
+    /// and that record is already fetched synchronously in `PopopxBadgeManager`'s `init()` (PopopxBadgeManager.swift:65-71),
+    /// so there is no need to wait for `start()` here: `start()` installs the StoreKit delivery and the heartbeat, which have nothing to do with this decision.
+    /// Those who already claimed it, those already downgraded at expiry, and those already asked all return straight from here: no sheet, no disk read, nothing sent.
     private func presentTrialWelcomeIfNeeded() {
         guard !trialWelcomeAsked else { return }
         guard PopopxBadgeManager.shared.canClaimPioneerTrial else { return }
@@ -656,8 +656,8 @@ struct ChatsListView: View {
         badgeSheet = .trial
     }
 
-    /// 顶栏只把选中的 userId 写回来，切换（api 层重载会话、重建整棵聊天视图树）归这里 ——
-    /// `Shared/Navigation/PopopxTelemetryHeader.swift:187-188` 就是按这个分工写的。
+    /// The top bar only writes the selected userId back; switching (the api layer reloading chats, rebuilding the whole chat view tree) belongs here -
+    /// `Shared/Navigation/PopopxTelemetryHeader.swift:187-188` is written to exactly this division of labour.
     private func switchIdentity(to userId: Int64?) async {
         guard let userId, userId != chatModel.currentUser?.userId, switchingUserId == nil else { return }
         switchingUserId = userId
@@ -668,7 +668,7 @@ struct ChatsListView: View {
             PopopxHaptics.notice(.success)
             toast.show(Copy.identitySwitched(name), kind: .encrypted)
         } catch {
-            // 失败要把切换器拨回真实身份，否则顶栏会一直显示一个没有生效的选择。
+            // On failure the switcher must be set back to the real identity, otherwise the top bar keeps showing a choice that never took effect.
             currentUserId = chatModel.currentUser?.userId
             logger.error("popopx chats: switching identity \(userId) failed: \(responseError(error))")
             PopopxHaptics.notice(.error)
@@ -676,11 +676,11 @@ struct ChatsListView: View {
         }
     }
 
-    /// 可切换的身份：与 UserPicker.swift:33-35（同 `PopopxMeView.swift:541-545`）一个口径 ——
-    /// 加锁的身份（`user.hidden`，即有 `viewPwdHash`）不进切换器，因为这里传的是 `viewPwd: nil`，
-    /// 带着 nil 去切加锁身份只会失败；加锁身份归「我」页的身份管理。
-    /// 但当前身份必须在表里，否则顶栏会把自己的名字显示成"未选择"。顺序同 UserPicker
-    /// （`activeOrder` 倒序），两处列表不会各说各话。
+    /// Switchable identities: the same rule as UserPicker.swift:33-35 (likewise `PopopxMeView.swift:541-545`) -
+    /// locked identities (`user.hidden`, i.e. having a `viewPwdHash`) do not enter the switcher, because what is passed here is `viewPwd: nil`,
+    /// and switching to a locked identity with nil can only fail; locked identities belong to identity management on the Me page.
+    /// but the current identity must be in the table, otherwise the top bar shows its own name as 'Not selected'. Order follows UserPicker
+    /// (`activeOrder` reversed), so the two lists never say different things.
     private var switchableIdentities: [User] {
         let current = chatModel.currentUser?.userId
         return chatModel.users
@@ -705,7 +705,7 @@ struct ChatsListView: View {
         }
     }
 
-    // MARK: 空状态
+    // MARK: Empty state
 
     private func emptyState(searching: Bool, hasAnyChat: Bool, listScoped: Int?) -> some View {
         PopopxChatsEmptyState(
@@ -721,37 +721,37 @@ struct ChatsListView: View {
     }
 }
 
-// MARK: - 胶囊过滤器
+// MARK: - Capsule filter
 
 @MainActor private struct PopopxChatFilterBar: View {
     @Binding var selection: PopopxChatFilter
     let counts: [PopopxChatFilter: Int]
-    /// 「列表」那一枚菜单胶囊的档位（`全部` · `未读` · 每条用户列表），由页面每帧现算。
+    /// The setting of the 'List' menu capsule (`All` . `Unread` . each user list), recomputed by the page every frame.
     let lists: [PopopxListOption]
-    /// 当前选中的那一档（`ChatTagsModel.activeFilter`）。选中态不在这里存 —— 存了就成第二份真值。
+    /// The currently selected setting (`ChatTagsModel.activeFilter`). The selection is not stored here - storing it would make a second source of truth.
     let listSelection: ActiveFilter?
     let onSelectList: (ActiveFilter?) -> Void
-    /// 行尾钉住的搜索入口，nil 就不画。刻意不放进横向滚动区：它在整行最右，
-    /// 滚到任何一个筛选胶囊时都点得到（真机第 2 轮裁定「放大镜 + 可折叠搜索行」）。
+    /// The search entry pinned at the end of the row, not drawn when nil. Deliberately kept out of the horizontal scroll area: it sits at the far right of the whole row,
+    /// so it is reachable whatever filter capsule is scrolled to (device round 2 ruled: magnifier + collapsible search row).
     var onSearch: (() -> Void)? = nil
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        // 横向滚动而不是换行：无障碍字号下筛选胶囊放不进一行，截断比滚动更糟。
-        // 四枚胶囊在 iPhone 15 Pro（393pt）Large 字号下的占有账（内边距 12×2=24、汉字按 1em≈17pt、
-        // 数字 metricSmall≈7pt、胶囊间距 spaceXS=8）：全部 69、在线加密 103、厢语离线 103、频道 69
-        // → 内容 344 + 间距 24 = 368，加滚动区内的 gutter 16 与尾部 8 = 392；放大镜那一枚钉在滚动区
-        // 外面（44 + 尾部 12 = 56），整行需要 448 —— 393 装不下，缺口 55pt，第四枚要横扫一下才全露。
-        // 三枚时同一笔账是 371，还留 22pt。结论：不换行、不加第二行，靠已有的横向滚动承载，
-        // 并且第四枚刻意取最短的正确说法（「频道」两个汉字，与「全部」同宽）。
-        // 第 10 轮补回的「列表」那一枚排在滚动区**最尾**，不是随便挑的：滚动区在 0 位时四枚胶囊
-        // 各自的落点与第 9 轮真机截图逐像素一致（缺口 55pt 那一本账只会更长，不会挪位置），
-        // 而这一枚本来就是靠那一次已经存在的横扫才露面的第五枚。它自己的名字按字符收口
-        // （`clampedName`），所以列表名再长也不会把这一行顶成两行。
-        // 行尾那枚放大镜钉在滚动区外面：HStack 先把固定宽度的一端排好，ScrollView 吃剩下的，
-        // 所以把搜索入口包在这一层外面不会让整行的档位测量出错（顶栏那一簇就是被
-        // `ViewThatFits` 之外的 `.fixedSize()` 坑过，同一个教训）。
+        // Horizontal scroll rather than wrapping: at accessibility font size the filter capsules do not fit on one row, and truncation is worse than scrolling.
+        // The four capsules' occupancy budget on iPhone 15 Pro (393pt) at Large font size (inner padding 12×2=24, Chinese glyphs counted as 1em≈17pt,
+        // digits metricSmall≈7pt, capsule spacing spaceXS=8): All 69, Online encrypted 103, Cabin offline 103, Channels 69
+        // → content 344 + spacing 24 = 368, plus the 16 gutter inside the scroll area and 8 at the tail = 392; the magnifier capsule is pinned
+        // outside the scroll area (44 + tail 12 = 56), so the whole row needs 448 - 393 cannot hold it, the shortfall is 55pt, and the fourth capsule only shows fully after a sideways swipe.
+        // With three capsules the same budget is 371, leaving 22pt. Conclusion: no wrapping, no second row, rely on the existing horizontal scroll,
+        // and the fourth capsule deliberately takes the shortest correct wording ('Channels', two Chinese glyphs, the same width as 'All').
+        // The 'List' capsule added back in round 10 sits at the **very end** of the scroll area, and that is not arbitrary: with the scroll area at position 0 the four capsules
+        // land pixel-for-pixel where the round 9 device screenshots show them (the 55pt-shortfall budget can only grow longer, it never moves position),
+        // and this capsule is the fifth one that only appears thanks to the swipe that already existed then. Its own name is clamped by characters
+        // (`clampedName`), so however long the list name is, it cannot push this row onto two lines.
+        // The magnifier at the row end is pinned outside the scroll area: HStack lays out the fixed-width end first and ScrollView takes what is left,
+        // so wrapping the search entry outside this layer cannot mis-measure the row's settings (the top-bar cluster was tripped by
+        // `.fixedSize()` outside `ViewThatFits`, the same lesson).
         HStack(spacing: 0) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: PopopxMetrics.spaceXS) {
@@ -815,11 +815,11 @@ struct ChatsListView: View {
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
-    // MARK: 「列表」那一枚
+    // MARK: The 'List' capsule
 
-    /// 当前那一档；**没有列表过滤时是 nil**，即便「全部」那一行也在 `lists` 里。
-    /// 「全部」不配高亮，是因为它左边第一枚通道胶囊就叫「全部」—— 两枚同时亮成「全部」
-    /// 只会让人以为自己把同一件事筛了两遍。
+    /// The current setting; **nil when there is no list filter**, even though the 'All' row is also in `lists`.
+    /// 'All' does not deserve a highlight because the first channel capsule to its left is also called 'All' - two capsules lit as 'All' at once
+    /// would only make people think they filtered the same thing twice.
     private var activeListOption: PopopxListOption? {
         guard let listSelection else { return nil }
         return lists.first { $0.selected(listSelection) }
@@ -835,21 +835,21 @@ struct ChatsListView: View {
         }
     }
 
-    /// 列表名收口到 12 个字符。为什么按字符而不是按宽度：给这一枚加 `.frame(maxWidth:)`
-    /// 会把不足宽的也撑满（`Text` 在 HStack 里是弹性视图，拿得到多少就吃多少），
-    /// 那一枚胶囊会比左右邻居宽出一截，第 9 轮定下来的那排等宽节奏就散了。
-    /// 全名在下面菜单的每一行里整条读得到，胶囊只负责"现在停在哪一条"。
+    /// The list name is clamped to 12 characters. Why by characters rather than by width: adding `.frame(maxWidth:)` to this capsule
+    /// would stretch even the narrower ones to full (`Text` is a flexible view inside an HStack and eats whatever width it gets),
+    /// so that capsule would end up a step wider than its neighbours and the even equal-width rhythm settled in round 9 would fall apart.
+    /// The full name is readable in one piece in every row of the menu below; the capsule only says which entry it currently rests on.
     private func clampedName(_ name: String) -> String {
         name.count > 12 ? String(name.prefix(12)) + "…" : name
     }
 
-    /// 「列表」那一枚：折叠成一个菜单，而不是排第五、第六……枚胶囊。两个理由：
-    /// 用户能建多少条列表没有上限，而这一行只有 393pt（上面那本宽度账本来就欠着 55pt）；
-    /// 上游在标签多于三枚时做的正是同一件事（`collapsedTagsFilterView`，
+    /// The 'List' capsule: folded into a menu instead of laying out a fifth, sixth and onward capsules. Two reasons:
+    /// there is no upper bound on how many lists a user can create, while this row is only 393pt (the width budget above already owes 55pt);
+    /// upstream does exactly the same thing once there are more than three tags (`collapsedTagsFilterView`,
     /// Shared/Views/ChatList/ChatListView.swift:1150）。
     ///
-    /// 画法（内边距 / 胶囊底 / 描边 / 选中换 `brand` / `minHitTarget`）与 `capsule(_:)`
-    /// 用的是同一套 token 与同一串修饰符顺序，所以它读起来是一家人而不是贴在旁边的另一个控件。
+    /// Its rendering (inner padding / capsule fill / stroke / `brand` on selection / `minHitTarget`) and `capsule(_:)`
+    /// use the same set of tokens and the same modifier order, so it reads as family rather than as another control pasted alongside.
     private func listsMenu() -> some View {
         let active = activeListOption
         return Menu {
@@ -857,7 +857,7 @@ struct ChatsListView: View {
                 listItem(option)
             }
             if !hasUserLists {
-                // 一条列表都还没有：菜单里说实话，并说清去哪儿建，不给一个莫名其妙的空档。
+                // Not a single list exists yet: the menu tells the truth and says where to create one, instead of offering a baffling blank setting.
                 Button {} label: {
                     Text(Copy.listsEmptyHint)
                 }
@@ -890,18 +890,18 @@ struct ChatsListView: View {
         .menuIndicator(.hidden)
         .popopxAnimation(PopopxSpring.snappy, value: active?.id ?? "none", reduceMotion: reduceMotion)
         .accessibilityLabel(Copy.listsGroupLabel)
-        // 有档可报时报成员数，没选档时报空：这一枚在没选档时那个数字没有可信的指代对象
-        // （它不是屏幕上几行，也不是列表条数），宁可不报。
+        // Report the member count when there is a setting to report, report nothing when none is selected: with no setting selected this capsule's number has no credible referent
+        // (it is neither the rows on screen nor the number of lists), so it is better not reported at all.
         .accessibilityValue(Text(verbatim: active?.count.map { "\($0)" } ?? ""))
         .accessibilityAddTraits(active == nil ? [] : .isSelected)
         .accessibilityIdentifier("popopx.chats.listsFilter")
     }
 
-    /// 菜单里的一行：选中那一行的图标换成 `checkmark`，没选中的列表显示它自己的表情，
-    /// 内置两档显示一枚通用标签符号。上游那一枚折叠菜单不标选中态（它靠外面那一行的
-    /// 字重表达），这一枚胶囊收起来了、看不见字重，所以选中态必须落到菜单行里 —— 这一条是
-    /// 本 fork 自己的选择，不是照抄。后面的 `· N` 沿用本文件跳数那个中点（`hopsSuffix`），
-    /// 数字本身不需要翻译。
+    /// A row in the menu: the selected row swaps its icon for `checkmark`, an unselected list shows its own emoji,
+    /// and the two built-in settings show one generic tag symbol. Upstream's collapsed menu does not mark the selection (it expresses it
+    /// through the font weight of the outer row); this capsule is collapsed and its weight is not visible, so the selection has to land in the menu rows - that choice is
+    /// this fork's own, not a copy. The trailing `· N` reuses this file's hops middle dot (`hopsSuffix`),
+    /// and the number itself needs no translation.
     private func listItem(_ option: PopopxListOption) -> some View {
         let selected = option.selected(listSelection)
         return Button {
@@ -922,11 +922,11 @@ struct ChatsListView: View {
     }
 }
 
-// MARK: - 可折叠搜索行
+// MARK: - Collapsible search row
 
-/// 顶栏第 2 轮裁定的那一行：放大镜点开才出现，绑定同一个 `searchText`，
-/// 所以过滤逻辑（`searchedEntries()`）一行都没改，只是从 `.searchable` 抽屉搬进了页面自己的一行。
-/// 输入框不设圆角卡片以外的装饰：44pt 命中、`gutter` 对齐列表内容，收起条件在右侧。
+/// The row the top bar round 2 ruled for: it appears only once the magnifier is tapped, and binds the same `searchText`,
+/// so the filtering logic (`searchedEntries()`) was not changed by a single line - it only moved from the `.searchable` drawer into the page's own row.
+/// The text field carries no decoration beyond the rounded card: 44pt hit target, `gutter` aligned with the list content, collapse condition on the right.
 @MainActor private struct PopopxChatSearchRow: View {
     @Binding var text: String
     let onClose: () -> Void
@@ -974,13 +974,13 @@ struct ChatsListView: View {
         .background(PopopxPalette.card, in: .rect(cornerRadius: PopopxMetrics.radiusControl))
         .padding(.horizontal, PopopxMetrics.gutter)
         .padding(.vertical, PopopxMetrics.space2XS)
-        // 展开即聚焦：这一步让"点开搜索"和"开始输入"合成一次操作，收起来时同步交还键盘。
+        // Expanding focuses it: that step turns 'open search' and 'start typing' into one operation, and the keyboard is handed back when it collapses.
         .onAppear { focused = true }
         .onDisappear { focused = false }
     }
 }
 
-// MARK: - 会话行
+// MARK: - Chat row
 
 @MainActor private struct PopopxChatRow: View {
     @ObservedObject var chat: Chat
@@ -990,10 +990,10 @@ struct ChatsListView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    /// 头像边长取 `space2XL`（48pt）：徽章在右栏，行高由内容决定，44pt 命中区由外层 `minHeight` 保证。
+    /// The avatar side is `space2XL` (48pt): the badge sits in the right column, the row height is decided by content, and the 44pt hit area is guaranteed by the outer `minHeight`.
     private var avatarSide: CGFloat { PopopxMetrics.space2XL }
 
-    /// 可访问性字号下预览让出第二行 —— 一行只显示一行的话，大字号用户看到的永远是截断。
+    /// At accessibility font size the preview yields the second row - if one row only ever shows one row, large-font users see nothing but truncation.
     private var previewLineLimit: Int { dynamicTypeSize.isAccessibilitySize ? 2 : 1 }
 
     var body: some View {
@@ -1030,8 +1030,8 @@ struct ChatsListView: View {
         }
         .popopxCardElevation(colorScheme: colorScheme)
         .contentShape(Rectangle())
-        // 验收锚点：行的 AX 形状会随屏宽和模态层变（375pt 冷启实测：列表画着两行，行标题只剩 staticText，
-        // 唯一带群名的"按钮"是导航标题 220x32），用例需要一个不随语言、不随形状变的把手。
+        // Acceptance anchor: the row's AX shape changes with screen width and modal layers (measured on a cold start at 375pt: the list draws two rows, the row title is left as staticText,
+        // and the only 'button' carrying the group name is the navigation title at 220x32), so the test case needs a handle that changes with neither language nor shape.
         .accessibilityIdentifier("popopx.row")
     }
 
@@ -1057,8 +1057,8 @@ struct ChatsListView: View {
 
     private var timestamp: Text {
         formatTimestampText(chat.chatItems.last?.meta.itemTs ?? chat.chatInfo.chatTs)
-            // 时间戳用 `metric`：PopopxTheme.swift:203-204 明确"跳数、时延、时间戳走等宽数字"，
-            // 列表每分钟刷新才不会左右抖动。
+            // The timestamp uses `metric`: PopopxTheme.swift:203-204 states plainly that 'hops, latency and timestamps use monospaced digits',
+            // so the list refreshing every minute does not jitter left and right.
             .font(PopopxType.metric)
             .foregroundStyle(PopopxPalette.labelSecondary)
     }
@@ -1080,50 +1080,50 @@ struct ChatsListView: View {
     }
 }
 
-// MARK: - 会话行的滑动快捷操作
+// MARK: - Chat row swipe actions
 
-/// 真机第 8 轮 · 任务七：把上一轮改版漏掉的左右滑动快捷操作**挂回来**。
+/// Device round 8, task seven: put the left/right swipe actions that the last round's redesign dropped back **on**.
 ///
-/// 功能面是逐条对照 `Shared/Views/ChatList/ChatListNavLink.swift` 移植的，不是新设计：
-/// 每个 `chatType` 有哪几枚、顺序如何、点下去走哪个既有 API、要不要确认框，都与上游一致。
+/// Its feature surface was ported item by item against `Shared/Views/ChatList/ChatListNavLink.swift`, it is not a new design:
+/// which buttons each `chatType` has, in what order, which existing API a tap takes, whether a confirmation is needed, all match upstream.
 ///
-/// 为什么要有这一层 wrapper，而不是在 `ChatsListView.row(_:)` 里就地挂 `.swipeActions`：
-/// 滑动按钮里有几样东西需要**每行一份**的呈现状态 —— `deleteContactDialog` 要求
-/// `SomeAlert` / `SomeActionSheet` / `SomeSheet` 三个回调通道（Shared/Views/Chat/ChatInfoView.swift:1139），
-/// 「List」那一枚要把 `TagSheetRoot` 开在本行的 sheet 上，contactConnection 的「Name」同理。
-/// 挂在页面上就变成全列表共用一格状态，两行不同的确认框会互相顶掉；上游同样是把状态留在
-/// 行内容自己身上（`ChatListNavLink` 的 `@State alert/actionSheet/sheet`），这里同形。
+/// Why this wrapper layer exists instead of attaching `.swipeActions` in place inside `ChatsListView.row(_:)`:
+/// a few of the swipe buttons need presentation state **one per row** - `deleteContactDialog` requires
+/// the three callback channels `SomeAlert` / `SomeActionSheet` / `SomeSheet` (Shared/Views/Chat/ChatInfoView.swift:1139),
+/// the 'List' button has to open `TagSheetRoot` on this row's sheet, and contactConnection's 'Name' works the same way.
+/// Attaching them to the page would make the whole list share one slot of state, and two rows' different confirmation sheets would knock each other out; upstream likewise keeps the state
+/// on the row content itself (`ChatListNavLink`'s `@State alert/actionSheet/sheet`), and this is the same shape.
 ///
-/// 行内容仍然是 `Button`，不换 `NavigationLink`：`Tests iOS/Tests_iOS.swift:428-454` 命中这一行靠的是
-/// 行内 `staticTexts` 与 `PopopxChatRow` 上的 `popopx.row` 锚点，换控件会改这一行的 AX 形状；
-/// 而且打开会话只有 `ChatModel.chatId` 一条路（见文件头"栈的归属"），换成值推送会切断通知点开。
+/// The row content is still a `Button`, not swapped for a `NavigationLink`: `Tests iOS/Tests_iOS.swift:428-454` hits this row through
+/// the inline `staticTexts` and the `popopx.row` anchor on `PopopxChatRow`, and changing the control would change this row's AX shape;
+/// besides, opening a chat has only the `ChatModel.chatId` route (see 'who owns the stack' at the head of the file), so switching to value navigation would cut off opening from a notification.
 ///
-/// `allowsFullSwipe: false`：本 fork 的删除/清空一律走确认框（上游也不用 `role:`，见
-/// `ChatListNavLink.swift:385-401`），整滑只是把最边上一枚"摔"下去，对一件还需要确认的事没有意义，
-/// 还会和卡片圆角打架。这是相对上游（`allowsFullSwipe: true`）唯一的一处手势收窄。
+/// `allowsFullSwipe: false`: in this fork delete/clear always go through a confirmation (upstream uses no `role:` either, see
+/// `ChatListNavLink.swift:385-401`); a full swipe would only drop the outermost button, which is meaningless for something that still needs confirming,
+/// and it would also fight the card's rounded corners. This is the single gesture restriction relative to upstream (`allowsFullSwipe: true`).
 @MainActor private struct PopopxChatRowSwipe: View {
     @EnvironmentObject private var chatModel: ChatModel
     @ObservedObject var chat: Chat
     let channel: PopopxRowChannel
     let showsPreview: Bool
 
-    /// 「List」按钮的承载页要读它；注入方式与旧列表同一处（ChatListView.swift:185）一致。
+    /// The 'List' button's host page reads it; the injection matches the old list's same place (ChatListView.swift:185).
     @StateObject private var chatTagsModel = ChatTagsModel.shared
 
-    /// 三样通道 + 一格 sheet，全是本行自己的。
-    /// `alert` / `actionSheet` / `sheet` 是 `deleteContactDialog` 要求的三个回调通道
-    /// （Shared/Views/Chat/ChatInfoView.swift:1139）；「More」的动作表和第二级确认走同一对通道。
-    /// `sheet` 同时承载 `DeleteActiveContactDialog` 与「List」的 `TagSheetRoot` —— 两者本来就
-    /// 互斥（同一行同一刻只会有一张），合并成一条 `.sheet` 是为了不在同一个视图上叠两个呈现层。
+    /// Three callback channels + one sheet slot, all belonging to this row alone.
+    /// `alert` / `actionSheet` / `sheet` are the three callback channels `deleteContactDialog` requires
+    /// (Shared/Views/Chat/ChatInfoView.swift:1139); the 'More' action sheet and the second-level confirmation share the same pair of channels.
+    /// `sheet` carries both `DeleteActiveContactDialog` and the 'List' `TagSheetRoot` - the two are already
+    /// mutually exclusive (only one can be up on the same row at the same moment), and merging them into one `.sheet` avoids stacking two presentation layers on the same view.
     @State private var alert: SomeAlert?
     @State private var actionSheet: SomeActionSheet?
     @State private var sheet: SomeSheet<AnyView>?
     @State private var showContactConnectionInfo = false
 
-    /// 滑动按钮的五档颜色，全部取 `PopopxPalette` 已有的语义 token（主题文件是红线，不新增颜色）。
-    /// 上游的 `.orange` / `.yellow` / `.mint` 在本 fork 没有对应 token，按语义就近映射：
-    /// `primary`→`brand`、`green`→`success`、`red`→`danger`、`orange`(清空，不可撤回但不删实体)→`dangerInk`、
-    /// 无 tint 与 `yellow`/`mint`/`indigo`（次要或中性）→`neutral`。
+    /// The five swipe-button tints all come from semantic tokens `PopopxPalette` already has (the theme file is a red line, no new colours).
+    /// Upstream's `.orange` / `.yellow` / `.mint` have no matching token in this fork, so they map to the nearest by meaning:
+    /// `primary`→`brand`, `green`→`success`, `red`→`danger`, `orange` (clear, irreversible but deletes no entity)→`dangerInk`,
+    /// and no tint plus `yellow`/`mint`/`indigo` (secondary or neutral)→`neutral`.
     private static let connect = PopopxPalette.brand
     private static let favorite = PopopxPalette.success
     private static let destructive = PopopxPalette.danger
@@ -1144,29 +1144,29 @@ struct ChatsListView: View {
             case let .contactConnection(cConn):
                 contactConnectionRow(cConn)
             case .invalidJSON:
-                // 读不懂的数据：上游这一行也没有滑动按钮，只有点开看原始 JSON
-                // （ChatListNavLink.swift:641-651），此处同形 —— 不给一枚点了什么都不知道的按钮。
+                // Data that cannot be interpreted: upstream gives this row no swipe buttons either, only opening the raw JSON
+                // (ChatListNavLink.swift:641-651), and this is the same shape - never hand out a button nobody knows what it does.
                 rowCard
             }
         }
         .alert(item: $alert) { $0.alert }
-        // 删除联系人的两级确认与「More」的动作表都是 ActionSheet —— 这是 `deleteContactDialog`
-        // 要求的接口形态，本 fork 的同一链路也是这么挂的（PopopxChatInfoView.swift:175）。
+        // The contact deletion's two-level confirmation and the 'More' action sheet are both ActionSheets - that is the interface shape
+        // `deleteContactDialog` requires, and this fork's same chain attaches it that way too (PopopxChatInfoView.swift:175).
         .actionSheet(item: $actionSheet) { $0.actionSheet }
-        // 一条 `.sheet` 同时承载 `DeleteActiveContactDialog`（第二级删除确认）与「List」的
-        // `TagSheetRoot`：这两张面板本来就互斥，叠两条 `.sheet` 只会多一个呈现层。
+        // One `.sheet` carries both `DeleteActiveContactDialog` (the second-level delete confirmation) and the 'List'
+        // `TagSheetRoot`: these two panels are mutually exclusive anyway, so stacking a second `.sheet` would only add a presentation layer.
         .sheet(item: $sheet) { someSheet in
             someSheet.content
                 .presentationDetents([.fraction(someSheet.fraction)])
         }
     }
 
-    // MARK: 卡片与打开
+    // MARK: Card and opening
 
-    /// 卡片本体与 tap 行为一行都没改：还是 `PopopxChatRow`，还是 `PopopxPressButtonStyle`，
-    /// 还是"点行只做既有约定那一件事"——`ItemsModel.loadOpenChat` 先读消息，250ms 后写
-    /// `ChatModel.chatId`（ChatModel.swift:113-139），栈路径绑定随即把它翻成一页；
-    /// 与通知点开走的是同一条路，本文件不维护第二份"打开了哪条会话"的状态。
+    /// The card body itself and its tap behaviour were not changed by one line: still `PopopxChatRow`, still `PopopxPressButtonStyle`,
+    /// still 'tapping a row does only the one thing the existing convention says' - `ItemsModel.loadOpenChat` reads the messages first and 250ms later writes
+    /// `ChatModel.chatId` (ChatModel.swift:113-139), and the stack-path binding immediately turns it into a page;
+    /// that is the same route opening from a notification takes, and this file keeps no second copy of the 'which chat is open' state.
     private var rowCard: some View {
         Button {
             open()
@@ -1178,8 +1178,8 @@ struct ChatsListView: View {
         .opacity(openable ? 1 : 0.5)
     }
 
-    /// 会话能不能打开，判据照抄旧列表同一处（Shared/Views/ChatList/ChatListView.swift:568），
-    /// 从 `ChatsListView` 原样搬进来，一个条件都没动。
+    /// Whether a chat can be opened copies the criterion from the old list's same place (Shared/Views/ChatList/ChatListView.swift:568),
+    /// moved out of `ChatsListView` as it stands, with not one condition changed.
     private var openable: Bool {
         chatModel.chatRunning == true && !chatModel.deletedChats.contains(chat.chatInfo.id)
     }
@@ -1190,16 +1190,16 @@ struct ChatsListView: View {
         ItemsModel.shared.loadOpenChat(chat.chatInfo.id)
     }
 
-    // MARK: 按 chatType 的挂载表
+    // MARK: Attachment table by chatType
 
-    /// 单聊。
+    /// One-to-one chat.
     ///
-    /// 联系人名片那一行不用特判：`searchedEntries()` 已把它连同 `chatDeleted` 一起摘掉
-    /// （本文件 :413 那一处 `!info.chatDeleted, !info.contactCard`），上游
-    /// `ChatListNavLink.swift:98-120` 那一支在这里没有对应物。
+    /// The contact-card row needs no special case: `searchedEntries()` already takes it out together with `chatDeleted`
+    /// (this file :413, that one `!info.chatDeleted, !info.contactCard`), and upstream
+    /// `ChatListNavLink.swift:98-120` has no counterpart here.
     ///
-    /// 有等待确认的入呼时左侧三枚整组撤掉（上游 `:128` 的 `.if(!contact.nextAcceptContactRequest)`）：
-    /// 还没接受的联系没有"已读/置顶/静音"可说。
+    /// When an incoming request waits for confirmation the three left-side buttons are withdrawn as a group (upstream `:128`'s `.if(!contact.nextAcceptContactRequest)`):
+    /// a contact not accepted yet has nothing to say about 'read / pin / mute'.
     @ViewBuilder private func directRow(_ contact: Contact) -> some View {
         rowCard
             .if(!contact.nextAcceptContactRequest) { v in
@@ -1218,8 +1218,8 @@ struct ChatsListView: View {
                         }
                         rejectContactRequestButton(contactRequestId)
                     } else if let groupDirectInv = contact.groupDirectInv, !groupDirectInv.memberRemoved {
-                        // 群成员递过来的直连邀请：接受/拒绝走的是 `acceptMemberContactRequest` 那一对，
-                        // 与联系请求那一对不是同一条 API（ComposeView.swift:567-570 同一分岔）。
+                        // A direct invitation handed over by a group member: accept/reject goes through the `acceptMemberContactRequest` pair,
+                        // which is not the same API as the contact-request pair (the same branch at ComposeView.swift:567-570).
                         acceptMemberContactRequestButton(contact)
                         rejectMemberContactRequestButton(contact)
                     } else {
@@ -1235,7 +1235,7 @@ struct ChatsListView: View {
             }
     }
 
-    /// 群组与频道：三档 `memberStatus` 各挂各的，与上游 `groupNavLink` 同一分岔。
+    /// Groups and channels: each of the three `memberStatus` settings attaches its own, the same branch as upstream's `groupNavLink`.
     @ViewBuilder private func groupRow(_ groupInfo: GroupInfo) -> some View {
         switch groupInfo.membership.memberStatus {
         case .memInvited:
@@ -1270,8 +1270,8 @@ struct ChatsListView: View {
         }
     }
 
-    /// 已加入群组的右侧按钮表。计数逻辑逐句照抄上游 `ChatListNavLink.swift:268-298`：
-    /// 超过 3 枚时 iOS 只画得下 3 枚（Apple FB25316763），多出来的收进「More」动作表里。
+    /// The right-side button table for a joined group. The counting logic copies upstream `ChatListNavLink.swift:268-298` sentence by sentence:
+    /// past 3 buttons iOS can only draw 3 (Apple FB25316763), and the extras are collected into the 'More' action sheet.
     @ViewBuilder private func groupTrailingButtons(_ groupInfo: GroupInfo) -> some View {
         tagChatButton()
         let showReportsButton = chat.chatStats.reportsCount > 0 && groupInfo.membership.memberRole >= .moderator
@@ -1294,7 +1294,7 @@ struct ChatsListView: View {
             deleteGroupChatButton(groupInfo)
         } else if totalNumberOfButtons > 3 {
             if showDeleteGroup && !groupInfo.membership.memberActive {
-                // 已经不在群里了：删除这一枚直接给，不再塞进「More」里等第二下。
+                // No longer in the group: the delete button is given directly, not tucked into 'More' to wait for a second tap.
                 deleteGroupChatButton(groupInfo)
                 moreOptionsButton(false, groupInfo)
             } else {
@@ -1303,9 +1303,9 @@ struct ChatsListView: View {
         }
     }
 
-    /// 私密笔记目录：左侧只有「已读/未读」，右侧只有「清空」——上游同两处
-    /// （`ChatListNavLink.swift:311-318`）。置顶/静音对只给自己看的目录没有意义，没有频道也没有
-    /// 可撤的入呼，所以这两组按钮少，不是漏挂。
+    /// Private note feed: the left side has only 'Read/Unread', the right side only 'Clear' - upstream's same two places
+    /// (`ChatListNavLink.swift:311-318`). Pin/mute means nothing for a feed only you read, and with no channel there is no
+    /// revocable incoming request either, so these two groups of buttons are fewer - nothing was left unattached.
     private func noteFolderRow() -> some View {
         rowCard
             .swipeActions(edge: .leading, allowsFullSwipe: false) {
@@ -1318,7 +1318,7 @@ struct ChatsListView: View {
             }
     }
 
-    /// 还没有接受的人：只有接受/隐身接受/拒绝。没有左侧 —— 还没建立的会话没有已读与静音。
+    /// Someone not accepted yet: only accept / accept incognito / reject. No left side - a chat not yet established has no read state and no mute.
     private func contactRequestRow(_ cReq: UserContactRequest) -> some View {
         rowCard.swipeActions(edge: .trailing, allowsFullSwipe: false) {
             acceptContactRequestButton(cReq.apiId, incognito: false)
@@ -1329,8 +1329,8 @@ struct ChatsListView: View {
         }
     }
 
-    /// 建连中：删除这条连接，外加打开它的详情（上游 `showContactConnectionInfo` 那一枚「Name」）。
-    /// sheet 挂在这一支而不是 `body` 上：只有这一类会话需要它，与上游 `:543` 同一位置。
+    /// Connecting: delete this connection, plus open its details (upstream's `showContactConnectionInfo` 'Name' button).
+    /// The sheet hangs on this branch rather than on `body`: only this kind of chat needs it, at the same position as upstream `:543`.
     private func contactConnectionRow(_ cConn: PendingContactConnection) -> some View {
         rowCard
             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
@@ -1345,10 +1345,10 @@ struct ChatsListView: View {
             }
     }
 
-    // MARK: 已读 / 置顶 / 静音
+    // MARK: Read / pin / mute
 
-    /// 已读 / 未读。判定与 `PopopxUnreadMark` 同一口径（`chatStats.unreadCount` / `unreadChat`），
-    /// 所以徽章亮着未读时这一枚必定写「已读」，反之必定写「未读」，两处不会各说各话。
+    /// Read / unread. The decision uses the same criterion as `PopopxUnreadMark` (`chatStats.unreadCount` / `unreadChat`),
+    /// so when the badge is lit as unread this button must read 'Read', and otherwise it must read 'Unread' - the two places cannot disagree.
     @ViewBuilder private func markReadButton() -> some View {
         if chat.chatStats.unreadCount > 0 || chat.chatStats.unreadChat {
             Button {
@@ -1369,8 +1369,8 @@ struct ChatsListView: View {
         }
     }
 
-    /// 置顶 == `favorite`（`apiSetChatSettings`，ChatView.swift:3460）。本 fork 的协议里没有
-    /// 「隐藏」这一档，所以只有开与关两枚，不发明第三种状态。
+    /// Pinning == `favorite` (`apiSetChatSettings`, ChatView.swift:3460). This fork's protocol has no
+    /// 'hide' setting, so there are only the on and off buttons, and no third state is invented.
     @ViewBuilder private func toggleFavoriteButton() -> some View {
         if chat.chatInfo.chatSettings?.favorite == true {
             Button {
@@ -1391,9 +1391,9 @@ struct ChatsListView: View {
         }
     }
 
-    /// 静音。档位与文案都不在这里重写：`chatInfo.nextNtfMode` 给下一档（all→mentions/none、
-    /// mentions→none、none→all），`MsgFilter.text(mentions:)` 给"静音 / 全部静音 / 取消静音"三种说法，
-    /// `iconFilled` 给图标；没有下一档（读不懂的设置）时这一枚不出现，与上游一致。
+    /// Mute. Neither the setting nor the wording is rewritten here: `chatInfo.nextNtfMode` gives the next one (all→mentions/none,
+    /// mentions→none, none→all), and `MsgFilter.text(mentions:)` gives the three wordings 'Mute / Mute all / Unmute'
+    /// while `iconFilled` gives the icon; when there is no next setting (configuration that cannot be read) this button does not appear, same as upstream.
     @ViewBuilder private func toggleNtfsButton() -> some View {
         if let nextMode = chat.chatInfo.nextNtfMode {
             Button {
@@ -1406,9 +1406,9 @@ struct ChatsListView: View {
         }
     }
 
-    // MARK: 列表 / 清空 / 删除
+    // MARK: List / clear / delete
 
-    /// 「列表」：把这枚会话归到哪个标签下，用的还是 app 原有的 `TagSheetRoot`（标签编辑器与列表都在里面）。
+    /// 'List': which tag this chat is filed under, still using the app's own `TagSheetRoot` (it holds both the tag editor and the lists).
     private func tagChatButton() -> some View {
         Button {
             PopopxHaptics.selection()
@@ -1419,8 +1419,8 @@ struct ChatsListView: View {
         .tint(Self.neutral)
     }
 
-    /// 分数高度照抄上游算法（`ChatListNavLink.swift:412-427`）：4 行留白 + 每枚标签 44pt，上限 0.62。
-    /// 屏高读宿主窗口而不是 `UIScreen.main`（iOS 16 起废弃）；拿不到就退回 0.62 这个上限本身。
+    /// The fractional height copies the upstream algorithm (`ChatListNavLink.swift:412-427`): 4 rows of slack + 44pt per tag, capped at 0.62.
+    /// Screen height is read from the host window rather than `UIScreen.main` (deprecated as of iOS 16); if it cannot be had, fall back to the 0.62 cap itself.
     private func setTagChatSheet() {
         let reservedSpace: Double = 4 * 44
         let tagsSpace = Double(max(chatTagsModel.userTags.count, 3)) * 44
@@ -1459,8 +1459,8 @@ struct ChatsListView: View {
         .tint(Self.irreversible)
     }
 
-    /// 删除联系人：两级确认，第二级是"保留会话/删除联系人 + 通知对方/不通知"那一屏。
-    /// 这条链路要求三个回调通道，所以下面三个 state 必须留在本行。
+    /// Delete contact: two-level confirmation, the second level being the 'keep the chats / delete the contact + notify them / do not notify' screen.
+    /// This chain requires three callback channels, so the three states below must stay on this row.
     private func deleteContactButton(_ contact: Contact) -> some View {
         Button {
             PopopxHaptics.selection()
@@ -1498,7 +1498,7 @@ struct ChatsListView: View {
         .tint(Self.neutral)
     }
 
-    /// 「加入」：invited 档的群与频道。隐身进来的那枚换面具图标，与上游同一判据。
+    /// 'Join': the group and channel at the invited setting. The one that joins incognito swaps to the mask icon, on upstream's same criterion.
     private func joinGroupButton(_ groupInfo: GroupInfo) -> some View {
         Button {
             PopopxHaptics.selection()
@@ -1522,7 +1522,7 @@ struct ChatsListView: View {
         .tint(Self.neutral)
     }
 
-    /// 「更多」：超过 3 枚时收进动作表。表内容与上游 `moreOptionsButton`（:429-460）逐句同形。
+    /// 'More': collected into the action sheet past 3 buttons. Its content matches upstream's `moreOptionsButton` (:429-460) sentence by sentence.
     private func moreOptionsButton(_ canShowGroupDelete: Bool, _ groupInfo: GroupInfo) -> some View {
         Button {
             PopopxHaptics.selection()
@@ -1556,7 +1556,7 @@ struct ChatsListView: View {
         .tint(Self.neutral)
     }
 
-    // MARK: 入呼与建连
+    // MARK: Incoming requests and connection setup
 
     private func acceptContactRequestButton(_ contactRequestId: Int64, incognito: Bool) -> some View {
         Button {
@@ -1621,10 +1621,10 @@ struct ChatsListView: View {
         .tint(Self.connect)
     }
 
-    // MARK: 确认框
+    // MARK: Confirmation dialogs
 
-    // 五段确认框的英文原句逐字照抄上游 `ChatListNavLink.swift:560-632`：这些 Key 在 16 个语种目录里
-    // 已经有译文，重写一遍只会多出一组没人翻的键，让同一件事在两个界面说两种话。
+    // The English source sentences of the five confirmation dialogs are copied word for word from upstream `ChatListNavLink.swift:560-632`: these Keys are in the 16 language catalogs
+    // with translations already, and writing them again would only add a set of keys nobody translated, making the same thing speak two ways in two screens.
 
     private func clearChatAlert() -> Alert {
         Alert(
@@ -1702,7 +1702,7 @@ struct ChatsListView: View {
     }
 }
 
-// MARK: - 通道徽章
+// MARK: - Channel badges
 
 @MainActor private struct PopopxChannelBadge: View {
     let channel: PopopxRowChannel
@@ -1712,7 +1712,7 @@ struct ChatsListView: View {
         case .smp:
             label(symbol: Copy.smpSymbol, text: nil, tint: PopopxPalette.brand, spoken: Copy.channelSmp)
         case let .mesh(hops):
-            // §1.4 第 3 条：跳数徽章永远带数字，颜色只是装饰。
+            // §1.4 item 3: a hops badge always carries the number; the colour is decoration only.
             label(
                 symbol: Copy.meshSymbol,
                 text: Copy.hopsSuffix(hops),
@@ -1730,11 +1730,11 @@ struct ChatsListView: View {
         }
     }
 
-    /// 只有一枚徽章的行元素：图标是装饰，语义一律由 `accessibilityLabel` 说清楚。
+    /// A row element with a single badge: the icon is decoration, and the meaning is always spelled out by `accessibilityLabel`.
     @ViewBuilder private func label(symbol: String?, text: String?, tint: Color, spoken: String) -> some View {
         HStack(spacing: PopopxMetrics.space2XS) {
             if let symbol {
-                // §6：徽章符号不低于 medium 重量；与 PopopxControls.swift:320-322 同一写法。
+                // §6: badge symbols are no lighter than medium weight; the same writing as PopopxControls.swift:320-322.
                 Image(systemName: symbol)
                     .font(PopopxType.microTag)
                     .imageScale(.medium)
@@ -1742,7 +1742,7 @@ struct ChatsListView: View {
                     .accessibilityHidden(true)
             }
             if let text {
-                // 数字用 `metric`（等宽），中文说明用 `microTag`。
+                // Digits use `metric` (monospaced), the Chinese caption uses `microTag`.
                 Text(verbatim: text)
                     .font(text.contains(where: \.isNumber) ? PopopxType.metric : PopopxType.microTag)
                     .foregroundStyle(tint)
@@ -1754,13 +1754,13 @@ struct ChatsListView: View {
     }
 }
 
-// MARK: - 未读标记
+// MARK: - Unread mark
 
 @MainActor private struct PopopxUnreadMark: View {
     @ObservedObject var chat: Chat
 
-    /// 未读不用 `brand`：一行里青紫不得同色（§1.1），而通道徽章才是这行的颜色承载者。
-    /// 反相的 `label` 底 + `card` 墨在两种模式下都远高于 4.5:1，且不携带任何通道语义。
+    /// Unread does not use `brand`: cyan and violet must not share a row (§1.1), and the channel badge is this row's colour bearer.
+    /// The inverted `label` fill + `card` ink is far above 4.5:1 in both modes and carries no channel semantics at all.
     private var fill: Color { PopopxPalette.label }
     private var ink: Color { PopopxPalette.card }
 
@@ -1786,16 +1786,16 @@ struct ChatsListView: View {
     }
 }
 
-// MARK: - 空状态
+// MARK: - Empty state
 
 @MainActor private struct PopopxChatsEmptyState: View {
     let searching: Bool
     let query: String
     let hasAnyChat: Bool
     let filter: PopopxChatFilter
-    /// 列表那一轴筛着时，"这一档里本来有几条会话"（还没过通道那一轴）；没筛着就是 nil。
-    /// 空状态要说清"为什么是空的"，而"这条列表本来就是空的"和"这一档里没有走厢语的会话"
-    /// 是两句话 —— 只有拿到这个数才分得开，也才不会把列表有货说成列表是空的。
+    /// With the list axis filtering: 'how many chats this setting has to begin with' (before the channel axis is applied); nil when it is not.
+    /// The empty state must make clear 'why it is empty', and 'this list is empty to begin with' versus 'this setting has no Cabin chats'
+    /// are two different statements - only with this number can they be told apart, and only then is a stocked list not described as an empty one.
     let listScoped: Int?
     let fuseOn: Bool
     let radioUsable: Bool
@@ -1829,12 +1829,12 @@ struct ChatsListView: View {
         return Copy.emptyFilteredTitle
     }
 
-    /// 空状态必须说清"为什么是空的"：这四档的解释各不相同，任何一档都不给"敬请期待"。
+    /// The empty state must say clearly 'why it is empty': the four settings have different explanations, and none of them gets a 'coming soon'.
     private var detail: String {
         if searching { return Copy.emptySearchDetail(query) }
         if !hasAnyChat { return Copy.emptyNoneDetail }
-        // 先答列表那一轴：这一档里本来就没有会话时，通道怎么筛都不会有结果，
-        // 这时候讲"已就绪的 SMP 连接都会带靛紫锁徽章"是把人往错的方向支使。
+        // Answer the list axis first: when this setting has no chats to begin with, no channel filter can produce a result, and
+        // at that point talking about 'ready SMP connections all carry an indigo-violet lock badge' sends people the wrong way.
         if let listScoped, listScoped == 0 { return Copy.emptyListDetail }
         switch filter {
         case .all:
@@ -1852,10 +1852,10 @@ struct ChatsListView: View {
     }
 }
 
-// MARK: - 聊天室目的页
+// MARK: - Chat room destination page
 
-/// 真实目的页：`ChatView` 与它的五个入参照抄 `Shared/Views/ChatList/ChatListView.swift:637`。
-/// 按 id 现取，会话在打开前被删掉时说实话，不给一个空壳聊天室。
+/// The real destination page: `ChatView` and its five inputs copy `Shared/Views/ChatList/ChatListView.swift:637` verbatim.
+/// Fetched by id at the moment of use, so it tells the truth when a chat is deleted before opening instead of giving an empty shell of a chat room.
 @MainActor private struct PopopxChatRoomDestination: View {
     @EnvironmentObject private var chatModel: ChatModel
     let chatId: ChatId
@@ -1886,12 +1886,12 @@ private extension String {
     var trimmed: String { trimmingCharacters(in: .whitespacesAndNewlines) }
 }
 
-// MARK: - 文案
+// MARK: - Copy
 
-/// 用户可见的中文一律在这里声明一次（§2.5 第 3 条：原子控件库不内置文案，页面自己给）。
+/// All user-visible Chinese is declared once here (§2.5 item 3: the atomic control library ships no copy, the page supplies its own).
 private enum Copy {
-    /// 顶栏那一行的文案在 `PopopxTelemetryCopy`；这里只剩筛选条与本页 own 的短句。
-    /// 源文是英文原句、英文原句就是 Key（`en.lproj` 按约定不写），16 个译本目录各写译法。
+    /// The top-bar row's copy lives in `PopopxTelemetryCopy`; only the filter bar and this page's own short sentences remain here.
+    /// The source is the English sentence itself and that English sentence is the Key (`en.lproj` writes none by convention); the 16 translation catalogs each write their own wording.
     static func key(_ value: String) -> String {
         NSLocalizedString(value, comment: "POPOPX chat list")
     }
@@ -1904,35 +1904,35 @@ private enum Copy {
     static let filterAll = key("All")
     static let filterOnline = key("Online encrypted")
     static let filterMeshOffline = key("Cabin offline")
-    /// 第四枚胶囊复用既有词条：`"Channels"` 在已有译文的 7 个目录（de/es/fr/hu/it/ru/zh-Hans，
-    /// zh-Hans 里就是「频道」，:1324）里都已经在，其余目录与 en 一样回落原句本身（英文）。
-    /// 而且它是本轮四枚里最短的正确说法（两个汉字，与「全部」同宽，见筛选条的宽度账）。
+    /// The fourth capsule reuses an existing entry: `"Channels"` is already in the 7 catalogs that have translations (de/es/fr/hu/it/ru/zh-Hans,
+    /// in zh-Hans it is 'Channels', :1324), and the remaining catalogs fall back to the source sentence itself (English) just like en.
+    /// Besides, it is the shortest correct wording among this round's four capsules (two Chinese glyphs, as wide as 'All' - see the filter bar's width budget).
     static let filterChannel = key("Channels")
 
-    // 「列表」那一枚（真机第 10 轮 · 任务 A 补回）。四句里只有两句是新 Key，另外两句
-    // 刻意复用目录里已经翻好的原句：`"Unread"` 就是本页滑动那一枚用的同一个词
-    // （`swipeUnread`），`Copy.filterAll` 与左边第一枚胶囊同字 —— 同一个意思在两处说两种话，
-    // 比少一个 Key 贵得多。
-    /// 没有列表过滤时这一枚的名子。选了某条列表后，胶囊上写的是列表自己的名字（那是用户数据，
-    /// 走 `Text(verbatim:)`，不进文案表）。
+    // The 'List' capsule (device round 10, task A, added back). Only two of the four sentences are new Keys, and the other two
+    // deliberately reuse source sentences already translated in the catalogs: `"Unread"` is the very word this page's swipe button uses
+    // (`swipeUnread`), and `Copy.filterAll` is the same wording as the first capsule on the left - saying one meaning two ways in two places
+    // costs far more than saving one Key.
+    /// This capsule's name when there is no list filter. Once a list is chosen the capsule shows the list's own name (that is user data,
+    /// rendered with `Text(verbatim:)` and kept out of the copy table).
     static let listsChip = key("Lists")
-    /// 整枚控件的可读名（VoiceOver 落在它身上时念的那一句）。
+    /// The readable name of the whole control (the sentence VoiceOver speaks when it lands on it).
     static let listsGroupLabel = key("Chat lists")
     static let listsUnread = key("Unread")
-    /// 一条列表都还没有时菜单里那一行老实的提示：既说"没有"，也说去哪儿建。
+    /// The honest line in the menu when not a single list exists yet: it says there is none and also where to create one.
     static let listsEmptyHint = key("No lists yet. Choose List from a chat's swipe actions to create one.")
-    /// 空状态里"这一档本来就是空的"那一句（与四枚通道档各自的解释分开）。
+    /// The empty-state sentence 'this setting is empty to begin with' (kept separate from the four channel settings' own explanations).
     static let emptyListDetail = key("This list has no chats yet.")
 
-    /// 与「通讯录 → 我的加密群组」右上角那一枚同一个目的地，因此共用同一个 Key：
-    /// 两处标题不可能再各说一句（`PopopxContactsView` 的 `createGroupEntry`）。
+    /// Same destination as the top-right button under 'Contacts → My encrypted groups', so the two share one Key:
+    /// the two titles cannot each say their own sentence (`PopopxContactsView`'s `createGroupEntry`).
     static let createGroupTitle = key("Create an encrypted group")
-    /// 创建频道页的标题。`AddChannelView` 自己那一行按钮与旧菜单的标题都是这一句
-    /// （`Shared/Views/NewChat/NewChatMenuButton.swift:99`），不再新造一句。
+    /// The title of the create-channel page. `AddChannelView`'s own row button and the old menu's title both use this sentence
+    /// (`Shared/Views/NewChat/NewChatMenuButton.swift:99`), so no new sentence is coined.
     static let createChannelTitle = key("Create public channel")
     static let scanTitle = key("Scan QR code")
 
-    // 徽章：图标词汇表固定下来的三个符号（§6），一行只出现一枚。
+    // Badges: the three symbols fixed by the icon vocabulary (§6); only one appears per row.
     static let smpSymbol = "lock.shield.fill"
     static let meshSymbol = "antenna.radiowaves.left.and.right"
     static let relaySymbol = "clock"
@@ -1980,16 +1980,16 @@ private enum Copy {
     static let serviceDisconnected = key("The encrypted service has stopped. Start it in Settings → Chat data, or restart the app; chats cannot be opened until it runs.")
     static let chatGone = key("This chat has been deleted, or it has not finished loading.")
 
-    // 滑动快捷操作。这十七个 Key 全部沿用上游 `ChatListNavLink.swift` 的英文原句：
-    // 它们已经在 16 个语种的目录里（zh-Hans 里分别是「已读 / 未读 / 最喜欢 / 取消最喜欢 / 清除 /
-    // 删除 / 加入 / 离开 / 接受 / 接受隐身聊天 / 拒绝 / 列表 / 更多 / 存档举报 / 名称 /
-    // 清除群组？/ 清除或删除群组？」），本页不另起一套说法。
-    // 静音那一枚不在这里：它的三种说法（Mute / Mute all / Unmute）由 `MsgFilter.text(mentions:)`
-    // 自己给，重写一遍只会让聊天信息页与列表各说一套。
-    // ⚠️ 已知瑕疵，不在这轮修：`"Favorite"` / `"Unfav."` 这两个 Key 的 zh 译法是上游带进来的
-    // 「最喜欢」/「取消最喜欢」，这一枚按钮做的事是**置顶**，该翻成「置顶」/「取消置顶」。
-    // 换一个新 Key 只会更糟（没有译文的键在中文界面里直接露出英文原句），所以要改的是目录里这两行的
-    // 值，不是这里的键名 —— 而 `.lproj/Localizable.strings` 本轮是红线。
+    // Swipe actions. All seventeen of these Keys follow upstream `ChatListNavLink.swift`'s English source sentences:
+    // they are already in the 16 language catalogs (in zh-Hans respectively: Read / Unread / Favorite / Unfav. / Clear /
+    // Delete / Join / Leave / Accept / Accept incognito chat / Reject / List / More / Archive report / Name /
+    // Clear group? / Clear or delete group?'), and this page starts no second set of wordings.
+    // The mute button is not here: its three wordings (Mute / Mute all / Unmute) are given by `MsgFilter.text(mentions:)` itself;
+    // writing them again would only leave the chat info page and the list each saying their own.
+    // ⚠️ Known defect, not fixed in this round: the zh translations of the two Keys `"Favorite"` / `"Unfav."` came in with upstream as
+    // 'most liked' / 'unmost liked', while what this button does is **pin the chat**, so it should read 'pin' / 'unpin'.
+    // Swapping in a new Key would only be worse (a key without a translation shows the bare English source in the Chinese UI), so what must change
+    // is the value of those two catalog rows, not the key name here - and `.lproj/Localizable.strings` is a red line this round.
     static let swipeRead = key("Read")
     static let swipeUnread = key("Unread")
     static let swipeFavorite = key("Favorite")
@@ -2016,7 +2016,7 @@ private enum Copy {
 // MARK: - Previews
 
 #if DEBUG
-// 栈由本页自己建（见文件头"栈的归属"），预览因此不再包 NavigationStack。
+// The stack is built by this page itself (see 'who owns the stack' at the head of the file), so the preview no longer wraps a NavigationStack.
 struct ChatsListView_Previews: PreviewProvider {
     static var previews: some View {
         ChatsListView()

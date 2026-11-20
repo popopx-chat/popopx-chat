@@ -1,56 +1,56 @@
 //  PopopxCreditsStoreView.swift
 //
-//  【第六阶段 · 1】算力点中心：余额、现金包充值、用途表、流水。
+//  [Phase 6 · 1] Compute Credits hub: balance, cash-pack top-up, uses table, ledger.
 //
-//  ### 这一页只有一种商品：POPOPX 算力点本身（真机第 8 轮 · 任务三）
-//  屏上是四件事——**余额**、**100 / 500 / 2000 三档现金包**、**点数能花在哪**、**流水**。
-//  徽章订阅、一次性通行证、礼品徽章券都不在这一页（它们归 `PopopxBadgePaywallView`，
-//  那一页反过来也不再画任何充值价目表）。在此之前两屏各自同时摆着"会员"和"点数"两种商品，
-//  用户在同一个列表里读就会买错：那是商业化的 P0，不是排版偏好。
-//  这一页保留的唯一"与徽章有关"的东西是**花已有余额**的那条路（用途表第一行与 footer 那枚
-//  `用算力点点亮徽章`，都开 `PopopxBadgeCreditExchangeSheet`）：它是这一页那一族消费场景的
-//  出口，不是一张卖徽章的卡片——它不收钱，只花用户已经付过一次的点数。
+//  ### This page has exactly one product: POPOPX compute credits themselves (real-device round 8 · task 3)
+//  On screen are four things — **balance**, **the three cash-pack tiers 100 / 500 / 2000**, **where credits can be spent**, **the ledger**.
+//  Badge subscriptions, one-off passes and gift badge vouchers are all off this page (they belong to `PopopxBadgePaywallView`,
+//  and that page in turn no longer draws any top-up price list). Before this, each of the two screens showed both the "membership" and "credits" products at the same time,
+//  a user reading them in one list would buy the wrong thing: that is a monetisation P0, not a layout preference.
+//  The only "badge-related" thing this page keeps is the **spend an existing balance** path (the first row of the uses table and the footer's
+//  `light up a badge with compute credits`, both open `PopopxBadgeCreditExchangeSheet`): it is the exit for that family of spending scenarios on this page,
+//  not a card that sells badges — it takes no money, it only spends credits the user has already paid for once.
 //
-//  ### 为什么充值挂在这一页而不是上一级
-//  它有两张进来的门：「我的 · 算力点钱包」那一行，以及付费墙 footer 的 `creditsName` 按钮。
-//  搬过来之前"这里一分钱都不收"的理由是"从付费墙进来会在下一层再画一张同价目表，两层注释
-//  一旦改写就分叉"。现在现金包只在这一页出现，那一张同价目表的上一层根本不存在了，
-//  分叉的可能性也随之消失——所以点数购买直接落在这里，用户在一个屏里看到余额和价目表，
-//  买完立刻在同一屏看到余额变多，这条动线上没有第二张价目表可走错。
-//  落账走 `PopopxCreditsManager.apply(storeReceipt:)`：那是后台交付流用的**同一个**入口，
-//  面额、流水行、防重放（`entryId = receipt.digest`）与"先写账本、后 `finish`"的顺序全在那一处，
-//  这一页不另写一套加钱逻辑。
-//  无条件打徽章付费墙的那条路仍归「我的」那一行（`PopopxMeView` 的 `badgeSheet = .paywall`）。
-//  ⚠️ 同一页那一行 `purchaseCredits`（"Top up Compute Credits"「充值算力点」）现在仍然指向
-//  `.paywall`，而付费墙已经不卖现金包了——它应该改成开这一页（`showsCreditsStore`）。
-//  `PopopxMeView.swift` 与 `PopopxBadgeCreditExchangeSheet.swift`（"去充值"同一处毛病）
-//  都不在本轮的文件所有权里，留给持有者收口；本轮先保证**页面内部**不再有第二种商品。
+//  ### Why top-up hangs on this page rather than one level up
+//  It has two doors in: the "Me · compute credits wallet" row, and the paywall footer's `creditsName` button.
+//  Before the move, the reason for "not a cent is taken here" was "entering from the paywall draws a second identical price list one level down, and the two levels of comments
+//  diverge as soon as either is rewritten". Now cash packs appear only on this page, and that upper level with the identical price list does not exist at all,
+//  so the possibility of divergence went with it — therefore credit purchases land right here: the user sees balance and price list on one screen,
+//  and immediately after buying sees the balance grow on the same screen; this flow has no second price list to take wrong.
+//  Booking goes through `PopopxCreditsManager.apply(storeReceipt:)`: that is the **same** entry the background delivery flow uses,
+//  face value, ledger row, replay prevention (`entryId = receipt.digest`) and the "write the ledger first, then `finish`" ordering all live in that one place,
+//  so this page does not write its own second add-money logic.
+//  The path that unconditionally opens the badge paywall still belongs to the "Me" row (`PopopxMeView`'s `badgeSheet = .paywall`).
+//  ⚠️ The `purchaseCredits` row on that same page ("Top up Compute Credits") still points to
+//  `.paywall`, while the paywall no longer sells cash packs — it should be changed to open this page (`showsCreditsStore`).
+//  `PopopxMeView.swift` and `PopopxBadgeCreditExchangeSheet.swift` (the same defect behind "go top up")
+//  are both outside this round's file ownership, so it is left to the owner to close off; this round first guarantees that **inside the page** there is no second product.
 //
-//  ### 余额与流水必须各自承认自己的不可靠
-//  `PopopxCreditsWallet.needsReconcile` 由 `verifyLedgerConsistency()` 在余额与流水求和不一致时置真
-//  （流水上限 240 条，所以老账被丢弃不算不一致，见那里的注释）。这一页把这个状态显示出来，
-//  而不是显示一个"看起来正常"的数字：把不可信的余额静默花掉是更坏的结局。
+//  ### Balance and ledger must each admit their own unreliability
+//  `PopopxCreditsWallet.needsReconcile` is set true by `verifyLedgerConsistency()` when the balance and the summed ledger disagree
+//  (the ledger is capped at 240 rows, so dropped old entries do not count as inconsistency — see the comment there). This page shows that state
+//  instead of showing a "looks fine" number: silently spending an untrusted balance is the worse outcome.
 //
-//  ### 用途表与充值表的数字全部取自代码里已有的那一份
-//  现金包的面额来自 `PopopxCreditPlan`（它由 `PopopxNodeBadgeSku.creditedAmount` 派生，
-//  也就是真正入账的那一个数）；600/4500 来自 `PopopxNodeBadgePeriod.creditsCost`，20 来自
-//  `PopopxCommerceLimits.extendedSecureWindowCost`，150 来自 `PopopxCosmetic.cost`，
-//  红包面额来自 `PopopxCommerceLimits.redPacketAmounts`。这一页不允许出现第四个"多少点"的字面量：
-//  表上的价格与真实扣款分叉是这类页面唯一致命的 bug。
-//  只有两处例外并且必须例外：频道订阅价与资料卡解锁价由对端自己定，页面上因此不写数字，只写"由对方设定"。
+//  ### Every number in the uses table and the top-up table comes from the one already in the code
+//  Cash-pack face values come from `PopopxCreditPlan` (derived from `PopopxNodeBadgeSku.creditedAmount`,
+//  that is the very number that is actually booked); 600/4500 come from `PopopxNodeBadgePeriod.creditsCost`, 20 from
+//  `PopopxCommerceLimits.extendedSecureWindowCost`, 150 from `PopopxCosmetic.cost`,
+//  red-packet face values come from `PopopxCommerceLimits.redPacketAmounts`. This page may not contain a fourth "how many credits" literal:
+//  a table price diverging from the real debit is the only fatal bug for a page like this.
+//  There are exactly two exceptions and they must be exceptions: the channel subscription price and the profile-card unlock price are set by the peer itself, so the page writes no number, only "set by the other side".
 //
-//  ### 用途表里只有外观那两行能按
-//  外观是这一页唯一"点数 → 本机效果"的一步到位：一档、一个价、一次扣完、没有下一步，
-//  所以做成一颗按钮不需要再造一个 sheet。徽章要选周期、红包要选份数与落点、
-//  频道与资料卡的门槛由对方定——这四样都有自己的面板，从这一页只能进不能在这儿办。
-//  已解锁的那一行不再是按钮：再按一次只会得到一句"你已经有了"，那是这一族里最没用的反馈。
+//  ### Only the two cosmetic rows in the uses table can be pressed
+//  Cosmetics are this page's only one-step "credits → on-device effect": one tier, one price, one debit, no next step,
+//  so making it a button needs no new sheet. Badges need a period chosen, red packets a number of shares and a destination,
+//  and the channel and profile-card thresholds are set by the other side — those four each have their own panel; from this page you can only enter, not settle them here.
+//  An already-unlocked row is no longer a button: pressing it again only yields "you already own this", the most useless feedback in that family.
 //
-//  ### 流水行只读存进去的那句 note
-//  `PopopxCreditsEntry.note` 是扣款/入账当时写下的中文句子（`PopopxCreditsCopy`），
-//  所以本页不需要第二套"类别 → 文案"映射；`kind.sign` 给方向，`kind.isIncome` 给颜色，
-//  两者都只在那一处定义。
+//  ### Ledger rows only read the note that was stored in
+//  `PopopxCreditsEntry.note` is the Chinese sentence written at the moment of the debit/credit (`PopopxCreditsCopy`),
+//  so this page needs no second "category → copy" mapping; `kind.sign` gives the direction, `kind.isIncome` the colour,
+//  and both are defined in that one place only.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. The red line forbids scripts from modifying project.pbxproj.
 
 import SwiftUI
 import POPOPXChat
@@ -59,18 +59,18 @@ struct PopopxCreditsStoreView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var credits = PopopxCreditsManager.shared
-    /// 现金包的价格与商品表。`@Observable` 的读侧就是这一页：拉到价格之前那一行显示
-    /// SKU 自带的 `fallbackPriceText`（App Store Connect 里的 face value），按钮同时禁用，
-    /// 于是"整页空白"和"按下去什么都没发生"两种失败都到不了用户手上（口径同付费墙）。
+    /// The cash packs' price and product table. The read side of the `@Observable` is this page: until prices load, a row shows
+    /// the SKU's own `fallbackPriceText` (the face value in App Store Connect), and the button is disabled at the same time,
+    /// so neither the "whole page blank" nor the "pressed and nothing happened" failure reaches the user (same standard as the paywall).
     @State private var store = PopopxStoreKitManager.shared
     @State private var showsExchange = false
-    /// 正在走 StoreKit 的那一枚现金包。同一时刻只允许一笔，否则两笔的到账顺序无法向用户解释。
+    /// The cash pack currently going through StoreKit. Only one at a time is allowed, otherwise the arrival order of two cannot be explained to the user.
     @State private var busySkuId: String?
-    /// 待确认的那一档外观。弹窗的可见性由它派生（下面那个 Binding），所以不存在
-    /// "弹窗还开着但已经没人被确认"的中间帧——和资料卡解锁那一处同一个形状。
+    /// The cosmetic tier awaiting confirmation. The dialog's visibility derives from it (the Binding below), so there is no
+    /// "dialog still open but nobody is being confirmed" intermediate frame — same shape as the profile-card unlock elsewhere.
     @State private var pendingCosmetic: PopopxCosmetic?
-    /// 上一次点数动作（充值或解锁外观）的结果，一句为止。它不叫"提示"也不自动消失：这一页是账本页，
-    /// 用户需要看见"刚刚那 150 点确实记上了"、"刚买的那 500 点确实到了"，而一句会自己没掉的话等于没说。
+    /// The result of the last credit action (top-up or cosmetic unlock), one sentence only. It is not called a "toast" and it does not auto-dismiss: this page is a ledger page,
+    /// the user needs to see "those 150 credits really were booked" and "the 500 credits just bought really did arrive", and a sentence that removes itself equals no sentence at all.
     @State private var spendNote: String?
 
     var body: some View {
@@ -140,10 +140,10 @@ struct PopopxCreditsStoreView: View {
         }
     }
 
-    // MARK: 余额
+    // // MARK: Balance
 
     private var balanceCard: some View {
-        // 品牌底上只用 onBrand 系：`label` 是那套深墨，压在 brand 上对比度会掉到不可读。
+        // On the brand background only the onBrand family is used: `label` is that deep ink, and pressed on brand its contrast drops to unreadable.
         VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
             Text(PopopxCommerceCopy.creditsBalance)
                 .font(PopopxType.caption)
@@ -176,20 +176,20 @@ struct PopopxCreditsStoreView: View {
         .accessibilityElement(children: .combine)
     }
 
-    // MARK: 充值（算力点现金包）
+    // // MARK: Top-up (compute-credit cash packs)
 
-    /// 三档现金包：100 / 500 / 2000。这一张卡是这一页唯一收钱的地方，而它卖的东西只有一种——
-    /// 算力点本身。档位表是 `PopopxCreditPlan`（面额由 SKU 的 `creditedAmount` 派生），
-    /// 价格由 StoreKit 给，所以"行上写的面额"与"真正入账的面额"之间没有第三处可以各说各话。
-    /// 脚注那句"绝不加赠"（`noGiftBackStatement`）原来常驻付费墙的充值档，整组搬过来之后它跟着搬。
+    /// Three cash-pack tiers: 100 / 500 / 2000. This card is the only place on the page that takes money, and it sells exactly one thing —
+    /// compute credits themselves. The tier table is `PopopxCreditPlan` (face value derived from the SKU's `creditedAmount`),
+    /// and prices come from StoreKit, so between "the face value written on the row" and "the face value actually booked" there is no third place that can say something different.
+    /// The footnote "never any bonus credit" (`noGiftBackStatement`) used to live permanently on the paywall's top-up tiers; after moving the whole group it moved along.
     private var topUpCard: some View {
         PopopxSectionCard(PopopxCommerceCopy.creditsTopUpTitle,
                           footnote: PopopxCommerceCopy.noGiftBackStatement) {
             VStack(spacing: 0) {
                 if !store.isStoreReady {
-                    // 商店读不到：档位照画（面额是本模块的事实），价格位显示 SKU 自带的标价，
-                    // 按钮禁用。这一句复用 `PopopxCommerceCopy.errorStoreUnavailable`——
-                    // 16 本目录里已经有译文，不再新开一条源文。
+                    // Store unreadable: the tiers are still drawn (face value is this module's fact), the price slot shows the SKU's own listed price,
+                    // and the button is disabled. This sentence reuses `PopopxCommerceCopy.errorStoreUnavailable` —
+                    // the 16 catalogues already have a translation for it, so no new source string is started.
                     Text(PopopxCommerceCopy.errorStoreUnavailable)
                         .font(PopopxType.caption)
                         .foregroundStyle(PopopxPalette.labelSecondary)
@@ -232,12 +232,12 @@ struct PopopxCreditsStoreView: View {
         .padding(.vertical, PopopxMetrics.spaceXS)
     }
 
-    /// 买一档现金包。**加钱不在这页写**：拿到收据后交给 `PopopxCreditsManager.apply(storeReceipt:)`——
-    /// 那是 StoreKit 后台交付流用的**同一个**入口，面额、流水行、防重放（`entryId = receipt.digest`）
-    /// 以及"先写账本、后 `finish`"的顺序全在那一处，这一页再写一套就是一个会和重投分叉的第二真相源。
-    /// 为什么前台这一笔要在这里直接调它：`PopopxStoreKitManager.purchase(_:)` 已经把交易 id 记进
-    /// "本次已结算"集合，随后 `Transaction.updates` 那一次投递会被去重挡掉——不在这里落账，
-    /// 用户看到的就是"钱付了、余额没动、什么都没有"，而下一层没有第二个人会来补。
+    /// Buy one cash-pack tier. **Adding money is not written on this page**: once the receipt is obtained it is handed to `PopopxCreditsManager.apply(storeReceipt:)` —
+    /// that is the **same** entry the StoreKit background delivery flow uses; face value, ledger row, replay prevention (`entryId = receipt.digest`)
+    /// and the "write the ledger first, then `finish`" ordering all live in that one place, and writing another set here would be a second source of truth that diverges from re-delivery.
+    /// Why this foreground transaction has to call it directly here: `PopopxStoreKitManager.purchase(_:)` has already recorded the transaction id into
+    /// the "already settled this session" set, so the later `Transaction.updates` delivery is blocked by dedup — not booking here
+    /// leaves the user seeing "money paid, balance unchanged, nothing at all", and one level down there is no second party who will come and make it up.
     private func buy(_ pack: PopopxCreditPack) async {
         guard busySkuId == nil else { return }
         busySkuId = pack.sku.productId
@@ -250,25 +250,25 @@ struct PopopxCreditsStoreView: View {
                 PopopxHaptics.notice(.success)
                 spendNote = String(format: PopopxCommerceCopy.creditsTopUpGrantedFormat, pack.amount)
             } else {
-                // 付款成了、本机没写进去（Keychain 写失败，或余额已经顶到上限被挡下）。
-                // 这句话必须说出来而不是静默：交易没被 finish，下一次重投会把点数补上。
+                // Payment succeeded but nothing was written on this device (Keychain write failed, or the balance was already at the cap and got blocked).
+                // This must be said out loud rather than left silent: the transaction was not finished, and the next re-delivery will add the credits.
                 PopopxHaptics.notice(.error)
                 spendNote = PopopxCommerceCopy.creditsTopUpNotCredited
             }
         case .success(.pending):
-            // Ask to Buy / 家庭批准：钱还没扣。说"已到账"是假话，说"失败"也是假话。
+            // Ask to Buy / family approval: no money has been taken. Saying "credited" is a lie, and saying "failed" is a lie too.
             spendNote = PopopxCommerceCopy.creditsTopUpPending
         case .success(.cancelled):
-            // 取消不是错误：不震动、不标红，也不留一句"失败"在账本本页上。
+            // Cancellation is not an error: no haptic, no red, and no "failed" sentence left on the ledger page.
             break
         case let .failure(error):
             PopopxHaptics.notice(.error)
-            // 真话原样说出去（`PopopxBadgeCreditsError` 那一句本来就已经是本地化的、带差额的）。
+            // The truth is said as it is (the `PopopxBadgeCreditsError` sentence already was localised and already carries the shortfall).
             spendNote = error.errorDescription ?? PopopxCommerceCopy.errorStoreUnavailable
         }
     }
 
-    // MARK: 用途表
+    // // MARK: Uses table
 
     private var usesCard: some View {
         PopopxSectionCard(Copy.usesTitle, footnote: Copy.usesFootnote) {
@@ -292,14 +292,14 @@ struct PopopxCreditsStoreView: View {
                 useRow("eye.slash", Copy.useWindowTitle, Copy.useWindowNote,
                        amount: "\(PopopxCommerceLimits.extendedSecureWindowCost)")
                 divider
-                // 逐条画分隔线而不是"每条前面都加一条"：新增一档外观时这里不会多出一条悬空的分隔线。
+                // Dividers are drawn per row rather than "prepend one to every row": adding a new cosmetic tier will not leave a dangling divider here.
                 ForEach(Array(PopopxCosmetic.allCases.enumerated()), id: \.element.id) { index, cosmetic in
                     if index > 0 { divider }
                     if credits.owns(cosmetic) {
                         useRow(cosmetic.symbol, cosmetic.displayName, Copy.owned, amount: "\(cosmetic.cost)")
                     } else {
-                        // 只有没解锁的那一行才是按钮：已解锁那一档再按一次只会得到"你已经有了"，
-                        // 而按下去只换来一句拒绝的按钮是这个 app 里最讨人嫌的一种东西。
+                        // Only the not-yet-unlocked row is a button: pressing an unlocked tier again only yields "you already own this",
+                        // and a button whose only answer is a refusal is one of the most annoying things in this app.
                         Button { pendingCosmetic = cosmetic } label: {
                             useRow(cosmetic.symbol, cosmetic.displayName, cosmetic.effectNote,
                                    amount: "\(cosmetic.cost)")
@@ -314,8 +314,8 @@ struct PopopxCreditsStoreView: View {
 
     private var divider: some View { Divider().overlay(PopopxPalette.separator) }
 
-    /// 弹窗的开关只由 `pendingCosmetic` 派生。不留一个独立的 `showsUnlock` 布尔：
-    /// 两处真值迟早分家，而分家之后的形状是"弹窗问着一档、按下去扣的是另一档"。
+    /// The dialog's on/off state derives only from `pendingCosmetic`. No separate `showsUnlock` boolean is kept:
+    /// two sources of truth part ways sooner or later, and the shape afterwards is "the dialog asks about one tier, the press debits another".
     private var unlockPrompt: Binding<Bool> {
         Binding(
             get: { pendingCosmetic != nil },
@@ -323,11 +323,11 @@ struct PopopxCreditsStoreView: View {
         )
     }
 
-    /// 外观的扣点：只在用户点头之后发生，成与不成都留下一句话。
+    /// The cosmetic's credit debit: happens only after the user nods, and both success and failure leave a sentence behind.
     ///
-    /// 这一页是账本页，一句不留的花费等于让用户自己去翻流水确认那 150 点有没有记上。
-    /// 解锁之后界面靠什么生效不在这里说：`owns(cosmetic)` 就是两处渲染读的那一个标志，
-    /// 流水行 + 用途表那一行变成"已解锁"两件事已经把"生效了"表达完。
+    /// This page is a ledger page, and a spend that leaves no sentence means the user has to leaf through the ledger to check whether those 150 credits were booked.
+    /// What makes the UI take effect after the unlock is not stated here: `owns(cosmetic)` is the one flag both render sites read,
+    /// and the ledger row plus the uses-table row turning to "unlocked" already express everything "it took effect" means.
     private func purchase(_ cosmetic: PopopxCosmetic) {
         pendingCosmetic = nil
         do {
@@ -336,14 +336,14 @@ struct PopopxCreditsStoreView: View {
             spendNote = Copy.unlockDone(cosmetic)
         } catch {
             PopopxHaptics.notice(.error)
-            // 点数不足那一句由 `PopopxBadgeCreditsError.errorDescription` 给（句子里带着差额），
-            // 这里不再补一个余额：两句话各说一个数时，用户不知道该信哪一个。
+            // The insufficient-credits sentence comes from `PopopxBadgeCreditsError.errorDescription` (it carries the shortfall in the sentence),
+            // so no balance is appended here: when two sentences each state a number, the user does not know which one to trust.
             spendNote = Copy.unlockFailed(error.localizedDescription)
         }
     }
 
-    /// 上一笔花费的结果。刻意不套 `reconcileNote` 那套红色：那一路说的是"账对不上"，
-    /// 这一句说的是"记上了"，两种颜色共用一个版面会让人分不清哪一条才是要紧的。
+    /// The result of the previous spend. Deliberately does not reuse `reconcileNote`'s red: that path says "the books do not add up",
+    /// while this sentence says "it was booked", and sharing one layout between two colours leaves people unable to tell which line is the important one.
     private func spendLine(_ text: String) -> some View {
         HStack(alignment: .top, spacing: PopopxMetrics.spaceXS) {
             Image(systemName: "checkmark.circle")
@@ -389,7 +389,7 @@ struct PopopxCreditsStoreView: View {
         .accessibilityElement(children: .combine)
     }
 
-    // MARK: 未领完的红包
+    // // MARK: Red packets not fully claimed
 
     @ViewBuilder private var pendingCard: some View {
         let total = credits.pendingPacketTotal
@@ -409,7 +409,7 @@ struct PopopxCreditsStoreView: View {
         }
     }
 
-    // MARK: 流水
+    // // MARK: Ledger
 
     private func ledgerRow(_ entry: PopopxCreditsEntry) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.spaceS) {
@@ -438,8 +438,8 @@ struct PopopxCreditsStoreView: View {
         .accessibilityElement(children: .combine)
     }
 
-    /// 符号只有一个来源：`kind.sign`。`adjustment` 的符号由条目自己带，所以那一条走 `amount` 正负。
-    /// 负号统一用 U+2212（排版用的减号），不用连字符：两行流水并排时两种"负号"宽度不同。
+    /// The sign has one source only: `kind.sign`. An `adjustment` carries its own sign, so that row goes by `amount`'s positive or negative.
+    /// The minus always uses U+2212 (the typographic minus sign), never a hyphen: with two ledger rows side by side the two "minus signs" have different widths.
     private func signedAmount(_ entry: PopopxCreditsEntry) -> String {
         guard let sign = entry.kind.sign else {
             return entry.amount >= 0 ? "+\(entry.amount)" : "−\(abs(entry.amount))"
@@ -457,10 +457,10 @@ struct PopopxCreditsStoreView: View {
     }
 }
 
-// MARK: - 外观行的符号与效果句
+// // MARK: - Cosmetic-row glyph and effect sentence
 
-/// 名字与价格都取自 `PopopxCosmetic` 自己；这里只补"页面上怎么画它"这一层，
-/// 因为那是本视图的呈现细节，不该写进值类型。
+/// Name and price both come from `PopopxCosmetic` itself; this only adds the "how the page draws it" layer,
+/// because that is this view's presentation detail and should not be written into a value type.
 private extension PopopxCosmetic {
     var symbol: String {
         switch self {
@@ -477,7 +477,7 @@ private extension PopopxCosmetic {
     }
 }
 
-// MARK: - 文案
+// // MARK: - Copy
 
 private extension PopopxCreditsStoreView {
     enum Copy {
@@ -503,8 +503,8 @@ private extension PopopxCreditsStoreView {
         static let unlockTitle = NSLocalizedString("Unlock this look", comment: "credits store")
         static func unlockConfirm(_ cosmetic: PopopxCosmetic) -> String { String(format: NSLocalizedString("Spend %lld Compute Credits", comment: "credits store unlock button"), cosmetic.cost) }
         static let unlockCancel = NSLocalizedString("Cancel", comment: "credits store")
-        /// 价、余额、效果三句在同一行里说完，因为这是点下"花费"之前唯一一次说明机会。
-        /// `effectNote` 取自下面那个私有扩展（"本机生效，不上传"），与列表里那句是同一句。
+        /// Price, balance and effect are said in one row, because this is the only chance to explain before "spend" is pressed.
+        /// `effectNote` comes from the private extension below ("takes effect on this device, never uploaded"), the same sentence as the one in the list.
         static func unlockMessage(cosmetic: PopopxCosmetic, balance: Int) -> String {
             String(format: NSLocalizedString("%1$@: %2$@ Current balance %3$lld Compute Credits; unlocking costs %4$lld credits once, with no refund.", comment: "credits store unlock alert"), cosmetic.displayName, cosmetic.effectNote, balance, cosmetic.cost)
         }

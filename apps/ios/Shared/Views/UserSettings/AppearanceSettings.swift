@@ -60,10 +60,10 @@ struct AppearanceSettings: View {
     var body: some View {
         VStack{
             List {
-                // 「Language」那一组 2026-11 删：按 app 的语言只有一个入口，
-                // 就是「我 → 常用 → 显示语言」（`PopopxDisplayLanguageView`，
-                // Shared/Features/Settings/PopopxSettingsViews.swift）。`appSettingsURL` 留着，
-                // 它不只这一处用。
+                // The 'Language' group was removed in 2026-11: the app language has only one entry point,
+                // namely 'Me → General → Display language' (`PopopxDisplayLanguageView`,
+                // Shared/Features/Settings/PopopxSettingsViews.swift), and `appSettingsURL` stays
+                // because it is used in more than this one place.
                 Section("Chat list") {
                     Toggle("Reachable chat toolbar", isOn: $oneHandUI)
                     Picker("Toolbar opacity", selection: $toolbarMaterial) {

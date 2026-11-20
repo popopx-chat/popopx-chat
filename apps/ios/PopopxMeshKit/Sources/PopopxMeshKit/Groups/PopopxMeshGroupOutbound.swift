@@ -2,11 +2,11 @@
 //  PopopxMeshGroupOutbound.swift
 //  PopopxMeshKit
 //
-//  The group send side as a protocol, for the same reason `PopopxMeshOutbound` exists: 模块 7's UI
+//  The group send side as a protocol, for the same reason `PopopxMeshOutbound` exists: module 7's UI
 //  and this package's tests drive it with a fake instead of a radio. `PopopxMeshEngine` conforms.
 //
 //  Note what is *not* here: no method returns "delivered". An invite that left the radio and went
-//  unanswered is an ACK timeout, which 模块 4 owns for envelope traffic; group state is not
+//  unanswered is an ACK timeout, which module 4 owns for envelope traffic; group state is not
 //  acknowledged, so the honest contract is "the frame was handed to Bluetooth or it was not", and
 //  `.deliveryFailed` names the peers for whom it was not.
 //

@@ -2,7 +2,7 @@
 //  PopopxOfflineBridgeTests.swift
 //  PopopxMeshKitTests
 //
-//  模块 1 and 模块 2 together: the mapping table under a fake Keychain (the real one would raise a
+//  Module 1 and module 2 together: the mapping table under a fake Keychain (the real one would raise a
 //  permission dialog on a CI Mac) and the offline door under a fake chat core. Every assertion that
 //  matters is about what is *not* left behind — a half-applied upgrade, a binding with no contact,
 //  a link that reached the FFI unvalidated, a wipe that stopped at the first error.
@@ -182,7 +182,7 @@ private func exists(_ url: URL) -> Bool { FileManager.default.fileExists(atPath:
 
 @Suite(.serialized)
 struct PopopxOfflineBridgeTests {
-    // MARK: - 模块 1: switches
+    // MARK: - Module 1: switches
 
     @Test("pairing policy and mesh fuse persist for the next instance")
     func switchesRoundTrip() async throws {
@@ -203,7 +203,7 @@ struct PopopxOfflineBridgeTests {
         #expect(try await sandbox.makeStore().meshEnabled == false)
     }
 
-    // MARK: - 模块 1: bind, look up, upgrade
+    // MARK: - Module 1: bind, look up, upgrade
 
     @Test("bind then look up both directions, then upgrade the pending row")
     func bindLookUpAndUpgrade() async throws {
@@ -255,7 +255,7 @@ struct PopopxOfflineBridgeTests {
         #expect(sandbox.secrets.storedItemCount == 0)
     }
 
-    // MARK: - 模块 1: atomic upgrade
+    // MARK: - Module 1: atomic upgrade
 
     @Test("a refused Keychain write rolls the payload back and leaves the row pending")
     func upgradeRollsBackOnRefusedWrite() async throws {
@@ -290,7 +290,7 @@ struct PopopxOfflineBridgeTests {
         }
     }
 
-    // MARK: - 模块 1: one-to-many consistency
+    // MARK: - Module 1: one-to-many consistency
 
     @Test("one contact with two radios: deleting either side updates both indexes")
     func oneToManyDeleteConsistency() async throws {
@@ -319,7 +319,7 @@ struct PopopxOfflineBridgeTests {
         #expect(try await store.unbind(meshPublicKeyHex: first) == false)
     }
 
-    // MARK: - 模块 1: panic wipe
+    // MARK: - Module 1: panic wipe
 
     @Test("panic wipe clears memory, Keychain, switches and cache files")
     func emergencyWipeClearsEverything() async throws {
@@ -374,7 +374,7 @@ struct PopopxOfflineBridgeTests {
         try FileManager.default.removeItem(at: documents)
     }
 
-    // MARK: - 模块 1: migration safety
+    // MARK: - Module 1: migration safety
 
     @Test("an undecodable payload is preserved, blocks writes, and is still wipeable")
     func undecodablePayloadIsPreserved() async throws {
@@ -405,7 +405,7 @@ struct PopopxOfflineBridgeTests {
         #expect(sandbox.secrets.storedItemCount == 0)
     }
 
-    // MARK: - 模块 2: prefix gate
+    // MARK: - Module 2: prefix gate
 
     @Test("normalizedInviteLink accepts and canonicalises our own links", arguments: [
         ("popopx:/contact#/?v=2&smp=smp%3A%2F%2FAA%40relay.example", "popopx:/contact#/?v=2&smp=smp%3A%2F%2FAA%40relay.example"),
@@ -437,7 +437,7 @@ struct PopopxOfflineBridgeTests {
         #expect(PopopxOfflineBridge.normalizedInviteLink(raw) == nil)
     }
 
-    // MARK: - 模块 2: outbound
+    // MARK: - Module 2: outbound
 
     @Test("generating an invite binds the temp connection id to the peer key")
     func generateInviteBindsMapping() async throws {
@@ -519,7 +519,7 @@ struct PopopxOfflineBridgeTests {
         #expect(await core.createdIncognito.count == 1)
     }
 
-    // MARK: - 模块 2: inbound
+    // MARK: - Module 2: inbound
 
     @Test("accepting a link normalises it for the core and binds the peer key")
     func acceptLinkNormalisesAndBinds() async throws {

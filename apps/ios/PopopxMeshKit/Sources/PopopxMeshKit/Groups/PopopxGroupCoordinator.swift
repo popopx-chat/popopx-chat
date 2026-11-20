@@ -261,7 +261,7 @@ public actor PopopxGroupCoordinator {
         }
         // The creator is the group's trust root: a roster without it is a state no member can
         // believe (`applyState` pins the creator), so removing it is not a roster change but a
-        // different operation — delete the group, which 模块 8 does not offer yet.
+        // different operation — delete the group, which module 8 does not offer yet.
         guard peer != group.creatorMeshPublicKeyHex else {
             throw PopopxMeshGroupError.cannotRemoveCreator(meshPublicKeyHex: peer)
         }
@@ -538,13 +538,13 @@ public actor PopopxGroupCoordinator {
 
     // MARK: - Housekeeping
 
-    /// Panic wipe (模块 7) without the identity change: metadata and keys go, the signing key stays
+    /// Panic wipe (module 7) without the identity change: metadata and keys go, the signing key stays
     /// because a node that keeps talking on the mesh must keep the roster rows that pinned it.
     public func wipe() async {
         await store.wipe()
     }
 
-    /// Panic wipe (模块 7), group half. `PopopxMeshEngine.destroyIdentity()` cannot fold this in: it
+    /// Panic wipe (module 7), group half. `PopopxMeshEngine.destroyIdentity()` cannot fold this in: it
     /// is synchronous and app-facing, and this is an actor hop plus a file removal.
     ///
     /// Order matters. The signing key is the last thing to leave, and only after every group is

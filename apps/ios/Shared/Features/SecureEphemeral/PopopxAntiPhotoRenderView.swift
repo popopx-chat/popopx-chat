@@ -2,85 +2,85 @@
 //  PopopxAntiPhotoRenderView.swift
 //  POPOPX (iOS)
 //
-//  【绝密阅后即焚 · 模块四·快门侧】对着屏幕拍照的那一路，这里给三件东西：
-//  1. `PopopxAntiPhotoRenderView`：分时复用点阵覆盖层，打的是相机快门的积分时间/滚动快门；
-//  2. `PopopxSpotlightTextView` / `PopopxTeleprompterTextView`：两种"要按住才读得清"的阅读模式，
-//     打的是"举着手机另一台机器还能顺手拍完一整页"这个动作；
-//  3. `PopopxBlindWatermarkOverlay`：肉眼看不见的盲水印，不防任何人，只负责事后能查出是谁漏的。
+//  [Top-secret view-once - module four, shutter side] The route taken by photographing the screen; this provides three things:
+//  1. `PopopxAntiPhotoRenderView`: a time-division-multiplexed dot-matrix overlay, aimed at the camera shutter's integration time / rolling shutter;
+//  2. `PopopxSpotlightTextView` / `PopopxTeleprompterTextView`: two reading modes that "read clearly only while held",
+//     aimed at the action of "holding the phone up while another device casually photographs a whole page";
+//  3. `PopopxBlindWatermarkOverlay`: a blind watermark invisible to the naked eye; it defends against nobody and only makes it possible to find out afterwards who leaked.
 //
-//  ### 点阵覆盖层的物理主张（写到能被反驳的程度，不写"绝对拍不清"）
-//  做的事：每帧在两副**逐像素互补**的二值灰度点阵之间切换（`PopopxShutterPattern`），由
-//  `PopopxFrameTicker` 驱动在 60Hz 上交替；同一块 tile 只生成一次并缓存，每帧换的只是一个引用。
-//  为什么肉眼还读得清、照片会坏：
-//  - 肉眼：单帧空间频率在 1 像素级（超出正常阅读距离下的分辨力），时间上 60Hz 交替被视觉暂留
-//    平均成一层约 5% 的灰雾；平均亮度不随相位变，所以看不到"闪"，只看到"糊了一层"。
-//  - 相机：CMOS 是**滚动快门**——每一行像素的曝光时刻不同，一帧里靠上的行采到相位 A、靠下的行
-//    采到相位 B、跨边界的行把 A+B 积分到一起。三种行各自拿到不同的点阵，输出就是横向带状 + 低频
-//    摩尔纹拍在文字上；再叠上镜头 MTFO 低通、Bayer 去马赛克与 JPEG 4:2:0 —— 因为点阵是**纯亮度**
-//    信号（灰度，无彩色），色度下采样没法把它和图像自身的亮度分开，也就没法靠去噪把它当噪声扔掉。
-//  不成立的条件（这几条是真的能被绕过，不许在界面文案里说满）：
-//  - 全局快门 / 机器视觉相机把整帧曝光压进一个显示帧内 → 只采到一副相位，交替这一条腿直接失效
-//    （这时还剩空间混叠那条腿，但幅度小得多）；
-//  - 慢速快门（≥2 个显示周期）把两相位完整积分 → 点阵自己抵消掉，只剩一层均匀的雾；
-//  - 纯黑或纯白表面上单边被削顶：0 值像素在纯黑背景上没作用，255 值像素在纯白背景上没作用，
-//    互补性只剩一半 —— 所以这层的最佳工作区间是**中间调**表面；
-//  - 长距离变焦 + 低分辨率，或干脆把照片送进多帧平均/深度学习复原 → 都能显著缓解。
-//  所以这一层的定位是"让随手拍的照片里那几行小字变得不可读/不可信"，不是"拍不下来"。
+//  ### The dot-matrix overlay's physical claims (written to the point of being refutable, never "absolutely uncapturable")
+//  What it does: each frame switches between two binary grayscale dot matrices that are **pixel-by-pixel complementary** (`PopopxShutterPattern`), driven by
+//  `PopopxFrameTicker` alternating at 60Hz; the same tile is generated only once and cached, and each frame swaps nothing but a reference.
+//  Why the eye still reads it while photos break:
+//  - The eye: a single frame's spatial frequency is at the 1-pixel level (beyond resolution at a normal reading distance), and the 60Hz temporal alternation is averaged
+//    by persistence of vision into a gray haze of about 5%; average brightness does not vary with phase, so no "flash" is seen, only "a layer smeared over".
+//  - The camera: CMOS is a **rolling shutter** - every row of pixels exposes at a different moment, so in one frame the upper rows sample phase A, the lower rows
+//    sample phase B, and the rows crossing the boundary integrate A+B together. The three kinds of rows each get a different dot matrix, so the output is horizontal banding + low-frequency
+//    moire patterns slapped onto the text; add the lens MTFO low-pass, Bayer demosaicing and JPEG 4:2:0 - because the dot matrix is a **pure luminance**
+//    signal (grayscale, no color), chroma subsampling cannot separate it from the image's own luminance, so denoising cannot throw it away as noise either.
+//  Conditions under which it does not hold (these really can be bypassed; the UI copy must not overstate them):
+//  - A global shutter / machine-vision camera squeezes the whole frame's exposure into one display frame -> only one phase is sampled, and the alternation leg fails outright
+//    (the spatial-aliasing leg remains, but with a much smaller amplitude);
+//  - A slow shutter (>= 2 display periods) integrates both phases completely -> the dot matrix cancels itself, leaving only a uniform haze;
+//  - Clipping on one side over a pure-black or pure-white surface: 0-valued pixels do nothing on a pure-black background, 255-valued pixels do nothing on a pure-white background,
+//    so only half of the complementarity is left - which is why this layer's best working range is **mid-tone** surfaces;
+//  - Long-distance zoom + low resolution, or simply feeding the photo into multi-frame averaging / deep-learning restoration -> both help considerably.
+//  So this layer's positioning is "make the few lines of small print in a casually taken photo unreadable / untrustworthy", not "impossible to photograph".
 //
-//  ### 光敏与可读性（这条不是可选的道德声明，是设计参数）
-//  全屏 60Hz 交替是**闪烁**。这里的缓解是四件：不透明度只有 0.05；两副点阵各自的亮/暗格数由构造
-//  保证严格 32/32（`PopopxShutterPattern.baseBit` 的中心对称配对），所以交替**不改变平均亮度**，
-//  屏上不存在 30Hz 的低频亮度分量，闪烁只落在空间-时间通道里；单帧亮暗跳变在 1 像素尺度上只占
-//  一半面积；`accessibilityReduceMotion` 为真时**停掉交替**，退化成一副静止点阵（保住空间混叠那条腿，
-//  放弃时间那条腿）。另外这一屏最长只存在 `ttlSeconds` 秒。即便如此，"上机后按 WCAG 2.3.1 复核过"
-//  仍然必须是发布前的人工步骤——本文件给不出这个证明。
+//  ### Photosensitivity and readability (this is not an optional moral statement, it is a design parameter)
+//  Full-screen 60Hz alternation is **flicker**. The mitigations here are four: opacity is only 0.05; the bright/dark cell counts of the two dot matrices are guaranteed by construction
+//  to be strictly 32/32 (the centre-symmetric pairing of `PopopxShutterPattern.baseBit`), so the alternation **does not change average brightness**,
+//  there is no 30Hz low-frequency luminance component on the screen and the flicker lands only in the spatial-temporal channel; the single-frame bright/dark jump at the 1-pixel scale covers only
+//  half the area; and when `accessibilityReduceMotion` is true the **alternation stops**, degrading to one static dot matrix (keeping the spatial-aliasing leg,
+//  giving up the temporal one). Also this screen exists for at most `ttlSeconds` seconds. Even so, "rechecked on device against WCAG 2.3.1"
+//  must still be a manual step before release - this file cannot supply that proof.
 //
-//  ### 两种阅读模式打的是动作，不是像素
-//  聚光灯：默认整屏糊，只有按住的那块圆里清晰；逐行：一次一个逻辑行，必须按住并纵向拖动才走。
-//  共同点是"手不能离开屏幕、而且每次只看一小块"——用另一台设备顺手拍完整页这个动作因此做不到
-//  （拍得到的只是一小块清晰区域，其余是糊的/别的行）。这两种模式**不防**把手机递出去给别人看，
-//  也不防长按不动把清晰窗口停在某一行再拍——那是物理防窥屏/摄像头检测那两路的活。
+//  ### The two reading modes attack the action, not the pixels
+//  Spotlight: the whole screen is blurred by default and only the circle being held is sharp; line-by-line: one logical line at a time, which advances only while held and dragged vertically.
+//  What they share is "the hand cannot leave the screen, and only a small patch is looked at each time" - so casually photographing a whole page with another device
+//  becomes impossible (what you capture is only a small sharp region, the rest blurred / other lines). These two modes do **not** defend against handing the phone to someone else,
+//  nor against holding still so the sharp window parks on one line and photographing that - that is the job of the physical privacy screen and camera-detection routes.
 //
-//  ### 盲水印防什么，一目了然
-//  什么都不防。它是**取证**：设备 `identifierForVendor` + 会话 id（超过 64 整字 / 128 UTF-8 字节
-//  会被截断，这是写明有损的一处）+ 毫秒时间戳编成点阵，两种颜色的对比是 1/255，肉眼看不见，只在一帧
-//  被拍下来或被系统截屏之后、丢进编辑器里拉亮度/对比度时才浮出来。它只在一件已经发生的事（图漏出去
-//  了）之后提供归因，因此：不要把"带水印"写进任何"防拍照"的文案里。
+//  ### What the blind watermark defends against, at a glance
+//  Nothing. It is **forensics**: the device's `identifierForVendor` + the session id (truncated past 64 grapheme clusters / 128 UTF-8 bytes,
+//  which is one lossy spot stated openly) + a millisecond timestamp encoded into a dot matrix; the contrast between the two colors is 1/255, invisible to the eye, surfacing only after a frame
+//  has been photographed or screenshotted by the system and pushed through an editor for brightness/contrast. It offers attribution only after something has already happened (the image
+//  leaked), therefore: never write "watermarked" into any "anti-photo" copy.
 //
-//  ### 线程与所有权契约
-//  - 三个视图都只读调用方传进来的值，不订阅任何东西，不持有对方对象；
-//  - 点阵驱动 `PopopxRollingShutterDriver` 只在 `isEnabled` 为真、且这层进了视图树之后才存在，
-//    `onDisappear` 里必停（`PopopxAntiPhotoRenderView` 关掉时是**真零开销**：不建 ticker、不进绘制）；
-//  - 两个缓存（tile / 水印矩阵）是进程级可变字典，只在主线程访问（视图 body 求值即主线程）。
-//    键是 `sessionIdentifier` / 缩放档位，容量都有上限，不因为缓存而延长任何一份明文的寿命。
+//  ### Threading and ownership contract
+//  - All three views only read the values the caller passes in, subscribe to nothing, and hold no reference to the other party's objects;
+//  - The dot-matrix driver `PopopxRollingShutterDriver` exists only when `isEnabled` is true and this layer has entered the view tree,
+//    and it must be stopped in `onDisappear` (when `PopopxAntiPhotoRenderView` is off it is **truly zero overhead**: no ticker built, no drawing entered);
+//  - The two caches (tile / watermark matrix) are process-level mutable dictionaries accessed only on the main thread (evaluating a view body is the main thread).
+//    The keys are `sessionIdentifier` / zoom level, capacities are bounded, and no plaintext's lifetime is extended because of caching.
 //
-//  ### 可验证的纯逻辑区
-//  下面 `POPUPX_PURE_CORE_BEGIN`/`END` 之间那一段**不引用任何 UIKit/SwiftUI 符号**，为的是能被整段
-//  切出去用 host 编译器跑往返试验（位编码 ↔ 解码、两相位逐像素互补且各 32/32、屏幕视觉行列 ↔ 比特
-//  下标互逆、切分不越预算也不丢字）。改这一段之后必须重跑那套断言；也正因为它只能被这样验，
-//  把它保持在一个连续区间里是硬性要求，不是排版偏好。
+//  ### The verifiable pure-logic region
+//  The section between `POPUPX_PURE_CORE_BEGIN`/`END` below **references no UIKit/SwiftUI symbol at all**, so that the whole block can be
+//  cut out and run through round-trip tests with the host compiler (bit encoding <-> decoding, the two phases pixel-by-pixel complementary and each 32/32, screen visual row/column <-> bit
+//  index being mutually inverse, the splitting neither exceeding its budget nor dropping characters). Any change to this section must rerun those assertions; and precisely because it can only be validated this way,
+//  keeping it in one contiguous range is a hard requirement, not a typesetting preference.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. The red line forbids scripts from modifying project.pbxproj.
 //
 
 import SwiftUI
 import UIKit
 
-// ================ POPUPX_PURE_CORE_BEGIN（这一段不许出现 UIKit/SwiftUI 符号） ================
+// ================ POPUPX_PURE_CORE_BEGIN (no UIKit/SwiftUI symbol may appear in this section) ================
 
-// MARK: - 阅读模式
+// MARK: - Reading modes
 
-/// 绝密弹窗的两种"要按住才读得清"的读法。
+/// The two ways of reading in the top-secret dialog that "read clearly only while held".
 enum PopopxSecureReadMode: String, CaseIterable, Identifiable, Sendable {
-    /// 聚光灯：整屏重度模糊，只有按住的那块圆清晰。
+    /// Spotlight: heavy blur over the whole screen, only the circle being held is sharp.
     case spotlight
-    /// 逐行：单行窗口，按住拖动才走。
+    /// Line-by-line: a single-line window that advances only while held and dragged.
     case teleprompter
 
-    /// `Identifiable` 要显式给：`CaseIterable` 只保证 `allCases`，不保证 id。
+    /// `Identifiable` has to be supplied explicitly: `CaseIterable` guarantees only `allCases`, not id.
     var id: String { rawValue }
 
-    /// 给 `PopopxSegmentedControl` 的短标签。
+    /// The short label for `PopopxSegmentedControl`.
     var title: String {
         switch self {
         case .spotlight: return NSLocalizedString("Spotlight", comment: "secure read mode")
@@ -88,7 +88,7 @@ enum PopopxSecureReadMode: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    /// 给 `PopopxSectionCard(footnote:)` 的一行说明：讲清楚"要按住"这个动作，不讲保证。
+    /// The one-line note for `PopopxSectionCard(footnote:)`: it explains the "must hold" action, it makes no guarantee.
     var note: String {
         switch self {
         case .spotlight:
@@ -99,27 +99,27 @@ enum PopopxSecureReadMode: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
-// MARK: - 分时复用点阵（纯逻辑）
+// MARK: - Time-division-multiplexed dot matrix (pure logic)
 
-/// 两副逐像素互补的二值点阵。tile 与 tile 之间在**每一个像素上**都相反，这是"积分互相抵消"这条
-/// 判据的来源；单块 tile 只有 64 字节，所以两副都只生成一次。
-/// 两副各自的亮格数由构造保证相等（见 `baseBit`），因此叠加层的平均亮度与相位无关 —— 不引入闪烁。
+/// The two binary dot matrices that are complementary pixel by pixel. Between tile and tile they are opposite at **every single pixel**, and that is the origin of
+/// the "integrals cancel each other out" criterion; a single tile is only 64 bytes, so both matrices are generated only once.
+/// The bright-cell count of each is guaranteed equal by construction (see `baseBit`), so the overlay's average brightness is independent of phase - no flicker is introduced.
 enum PopopxShutterPattern {
-    /// tile 边长（设备像素）。8 是刻意选的小于常见屏幕宽度的 2 的幂：平铺时不产生可见的大周期，
-    /// 摩尔纹因此是宽频的而不是几条固定带（固定带会被相机降噪当成规则噪声处理掉）。
+    /// The tile side length (device pixels). 8 is a deliberately chosen power of 2 smaller than common screen widths: tiling produces no visible large period,
+    /// so the moire is broadband rather than a few fixed bands (fixed bands would be handled away as regular noise by the camera's denoising).
     static let tilePixels = 8
 
-    /// 点阵只用这两个电平：只有两个取值，才能宣称"最高空间频率 + 最大幅度"。
+    /// The dot matrix uses only these two levels: only with two possible values can one claim "highest spatial frequency + maximum amplitude".
     static let darkValue: UInt8 = 0
     static let lightValue: UInt8 = 255
 
-    /// (x, y) 在某一相位下是亮格还是暗格。相位只做一次取反，别的什么都不做。
+    /// Whether (x, y) is a bright cell or a dark cell under a given phase. The phase does nothing but one inversion, nothing else at all.
     static func bit(x: Int, y: Int, phase: Int) -> Bool {
         let raw = baseBit(x: x, y: y)
         return phase & 1 == 0 ? raw : !raw
     }
 
-    /// 一副相位灰度平面（行优先，`tilePixels * tilePixels` 字节，每字节只可能是 dark/light）。
+    /// One phase's grayscale plane (row-major, `tilePixels * tilePixels` bytes, each byte only ever dark or light).
     static func grayPlane(phase: Int) -> [UInt8] {
         var plane = [UInt8](repeating: darkValue, count: tilePixels * tilePixels)
         for y in 0 ..< tilePixels {
@@ -130,13 +130,13 @@ enum PopopxShutterPattern {
         return plane
     }
 
-    /// 基准位：只由 (x, y) 决定，不含 phase —— 相位只做取反，所以互补性是结构性保证，不是巧合。
+    /// The base bit: decided by (x, y) alone, with no phase in it - the phase only inverts, so complementarity is a structural guarantee, not a coincidence.
     ///
-    /// **平衡是构造出来的**：每个像素与它的中心对称像素配成一对，一对里必出一亮一暗
-    /// （`tilePixels` 是偶数，所以不存在自配对的像素）。于是两相位在 tile 内都恰好 32 亮 32 暗，
-    /// 叠加层的平均亮度与相位无关 —— 屏幕上不会有任何低频闪烁，闪烁只存在于空间-时间通道里。
-    /// 若只靠哈希不保证计数平衡，实测会出 26/38 这种偏离，那 = 两相位之间多出一个约 18.8% ×
-    /// 不透明度的 30Hz 亮度分量；它对"相机积分抵消"没帮忙也没添乱，但没有任何理由留着它。
+    /// **The balance is built by construction**: each pixel is paired with its centre-symmetric pixel, and each pair must yield one bright and one dark
+    /// (`tilePixels` is even, so no pixel pairs with itself). Thus both phases have exactly 32 bright and 32 dark cells inside the tile,
+    /// the overlay's average brightness is independent of phase - there is no low-frequency flicker of any kind on the screen, and the flicker exists only in the spatial-temporal channel.
+    /// Relying on the hash alone without guaranteeing count balance measurably gives deviations like 26/38, which = an extra roughly 18.8% ×
+    /// opacity worth of 30Hz luminance component between the two phases; it neither helps nor hinders "camera integration cancellation", but there is no reason to keep it.
     private static func baseBit(x: Int, y: Int) -> Bool {
         let mirrorX = tilePixels - 1 - x
         let mirrorY = tilePixels - 1 - y
@@ -148,14 +148,14 @@ enum PopopxShutterPattern {
         return rawBit(x: mirrorX, y: mirrorY) == false
     }
 
-    /// 取 bit 13：低位被 `x &* 31 &+ y` 那一步的算术结构污染，实测同一行内会出现连续同值；
-    /// 换到中位之后相邻像素翻转率接近 50%、2×2 全同窗口数量跌到个位（`/tmp` 自测台有实测数字）。
+    /// Take bit 13: the low bits are polluted by the arithmetic structure of the `x &* 31 &+ y` step, and measurements show runs of equal values within one row;
+    /// after switching to the middle bit the adjacent-pixel flip rate is close to 50% and the number of all-identical 2×2 windows drops to single digits (the `/tmp` test bench has the measured numbers).
     private static func rawBit(x: Int, y: Int) -> Bool {
         (mix(x: x, y: y) >> 13) & 1 == 1
     }
 
-    /// 过程稳定的确定性哈希（FNV-1a 变体），不用 `Int.hashValue`：后者的种子每次进程启动都不同，
-    /// 那样"两副 tile 互补"仍然成立、但同一台设备两次生成的图案不一样，取证与上机复现都没法比对。
+    /// A process-stable deterministic hash (an FNV-1a variant), not `Int.hashValue`: the latter's seed differs at every process launch,
+    /// so "the two tiles are complementary" would still hold, but the same device would generate a different pattern each time, and neither forensics nor on-device reproduction could compare them.
     private static func mix(x: Int, y: Int) -> UInt64 {
         var hash: UInt64 = 0xcbf2_9ce4_8422_2325
         for value in [UInt64(x & 0xFF), UInt64(y & 0xFF), UInt64((x &* 31 &+ y) & 0xFF)] {
@@ -165,25 +165,25 @@ enum PopopxShutterPattern {
     }
 }
 
-// MARK: - 逐行阅读的切分（纯逻辑）
+// MARK: - Splitting for line-by-line reading (pure logic)
 
-/// 把一段正文切成"逐行模式"的逻辑行。
+/// Cut a piece of body text into the logical lines of "line-by-line mode".
 ///
-/// 为什么不能交给 SwiftUI 自己排版：这一档要的是**一次只出现一行**，而排版结果取决于宽度、
-/// 字体档位与文案，同一句话在 SE 档是一行、在 AX 档是三行。拿排版结果当"行"，用户拖一下
-/// 跳的就是两三行，且不同设备上跳的量不一样 —— 这个交互必须是可预期的，所以行由我们切。
+/// Why it cannot be left to SwiftUI's own typesetting: this mode wants **one line appearing at a time**, and the typesetting result depends on width,
+/// font size class and copy, so the same sentence is one line in the SE class and three lines in the AX class. Taking the typesetting result as "a line" means one drag
+/// jumps two or three lines, and the amount jumped differs between devices - this interaction must be predictable, so we cut the lines ourselves.
 enum PopopxReadingLines {
-    /// 一个逻辑行的字符预算（整字计数，CJK 与拉丁都按"一个字/一个字母"算）。
-    /// 24 是按"375pt 窄屏 + body 字号 + 不缩放"一行放得下的保守估计；宁可多切几行，
-    /// 也不能在窄屏上让一行绕成两行——那样窗口里会同时露出两行。
+    /// The character budget of one logical line (counted in grapheme clusters, CJK and Latin both counted as "one character / one letter").
+    /// 24 is a conservative estimate of what fits on one line for "a 375pt narrow screen + body font size + no scaling"; better to cut a few extra lines
+    /// than to let one line wrap into two on a narrow screen - that would expose two lines in the window at the same time.
     static let charactersPerLine = 24
 
-    /// 段落优先（换行的判定用 `Character.isNewline`，见下），段落内按字符预算贪心切：
-    /// 窗口后半段里能找到空格就在空格处下刀（英文词不被腰斩），找不到就硬切（CJK 无空格的正解）。
-    /// 全空白的段落被丢弃：一次按压换来一个空行，等于告诉用户"这个手势没用"。
+    /// Paragraphs first (the newline test uses `Character.isNewline`, see below), and inside a paragraph cut greedily by the character budget:
+    /// cut at a space if one is found in the second half of the window (English words are not bisected), otherwise cut hard (the right answer for spaceless CJK).
+    /// All-whitespace paragraphs are discarded: one press buying an empty line tells the user "this gesture does nothing".
     ///
-    /// 任何输入都必须返回**终止的、有界的**结果：`limit < 1` 不递归、4000 字符无空格的单"词"
-    /// 也只是多切几块，绝不可能变成一次 O(n²) 的扫描或死循环。
+    /// Any input must return a **terminating, bounded** result: `limit < 1` does not recurse, and a single 4000-character spaceless "word"
+    /// just produces a few more pieces; it can never become an O(n²) scan or an infinite loop.
     static func lines(from text: String, maxCharactersPerLine limit: Int = charactersPerLine) -> [String] {
         guard limit > 0 else { return text.isEmpty ? [] : [text] }
         let characters = Array(text)
@@ -191,11 +191,11 @@ enum PopopxReadingLines {
         var start = 0
         var index = 0
         while index <= characters.count {
-            // 这里**不能**写成 `characters[index] == "\n"`：Swift 的 `Character` 是字素簇，
-            // 跨平台传来的 "第一段\r\n第二段" 里那个 CRLF 是**一个**整字 "\r\n"，它不等于 "\n"，
-            // 于是整篇消息会被当成一个段落硬切，切出来的"行"里还带着 CR/CRLF 这种不可见整字 ——
-            // 交给 Text 排版时就是一行里突然折行，"一次只显示一行"当场失效。
-            // `isNewline` 认 \n、\r、\r\n 以及 U+000B/U+000C/U+0085/U+2028/U+2029，一次覆盖全部写法。
+            // This **cannot** be written as `characters[index] == "\n"`: Swift's `Character` is a grapheme cluster,
+            // and in a cross-platform "firstPart\r\nsecondPart" the CRLF is **one** whole grapheme "\r\n", which is not equal to "\n",
+            // so the whole message would be hard-cut as a single paragraph and the resulting "lines" would still carry invisible graphemes like CR/CRLF -
+            // once handed to Text for typesetting that is a line suddenly wrapping inside itself, and "show only one line at a time" fails on the spot.
+            // `isNewline` recognizes \n, \r, \r\n and U+000B/U+000C/U+0085/U+2028/U+2029, covering every spelling in one go.
             if index == characters.count || characters[index].isNewline {
                 appendWrapped(characters: characters, start: start, end: index, limit: limit, into: &result)
                 start = index + 1
@@ -205,8 +205,8 @@ enum PopopxReadingLines {
         return result
     }
 
-    /// 恒等式（被断言覆盖的那条）：把结果去掉空白拼回来，等于原文去掉全部空白。
-    /// 也就是说切分只**加**换行、只**删**空白，永远不丢字符、不改字符。
+    /// The identity (the one the assertions cover): strip the whitespace and join the result back, and it equals the original with all whitespace removed.
+    /// That is, the splitting only **adds** newlines and only **deletes** whitespace; it never loses a character and never changes one.
     static func isLossless(original: String, lines: [String]) -> Bool {
         withoutWhitespace(original) == withoutWhitespace(lines.joined())
     }
@@ -222,8 +222,8 @@ enum PopopxReadingLines {
         limit: Int,
         into result: inout [String]
     ) {
-        // 段落两端先各去掉空白：开头那圈空白让切出来的第一行以空格起头（缩进错觉），
-        // 结尾那圈让最后一行带着看不见的尾巴占掉字符预算。中间的空白原样保留。
+        // Whitespace is trimmed off both ends of the paragraph first: the leading run would make the first cut line start with a space (an illusion of indentation),
+        // the trailing run would leave the last line an invisible tail eating into the character budget. Whitespace in the middle is kept exactly as it is.
         var cursor = start
         while cursor < end, characters[cursor].isWhitespace { cursor += 1 }
         var paragraphEnd = end
@@ -231,13 +231,13 @@ enum PopopxReadingLines {
         while cursor < paragraphEnd {
             let windowEnd = min(cursor + limit, paragraphEnd)
             var cut = windowEnd
-            // 只有"窗口装不下"时才需要下刀；装得下的段落绝不因为里面有个空格就被拆成两行
-            // （那样一句短话会变成三次按压，而这一档的全部意义就是"一次只看一行"）。
+            // A cut is needed only when "the window cannot hold it"; a paragraph that fits is never split into two lines just because there is a space inside it
+            // (that would turn one short sentence into three presses, and the entire point of this mode is "one line at a time").
             if windowEnd < paragraphEnd {
                 var probe = windowEnd - 1
-                // 从窗口尾往回找第一个空格，且只认落在窗口**后半段**的空格：
-                // 在前一半下刀会让行宽突然掉到预算的一半，比腰斩一个长词更难看。
-                // 不许落在 cursor 上，否则这一轮不前进。
+                // Look back from the end of the window for the first space, and accept only a space falling in the window's **second half**:
+                // cutting in the first half would drop the line width suddenly to half the budget, which is uglier than bisecting a long word.
+                // It must not fall on cursor, otherwise this round makes no progress.
                 let floor = cursor + (windowEnd - cursor) / 2
                 while probe > cursor {
                     if characters[probe].isWhitespace, probe >= floor {
@@ -257,52 +257,52 @@ enum PopopxReadingLines {
     }
 }
 
-// MARK: - 盲水印编码（纯逻辑）
+// MARK: - Blind watermark encoding (pure logic)
 
-/// 一条盲水印的可解码内容。
+/// The decodable content of one blind watermark.
 struct PopopxWatermarkBits: Equatable, Sendable {
     let deviceIdentifier: String
     let sessionIdentifier: String
     let epochMillis: Int64
 }
 
-/// 点阵的格数、散布步长、两种颜色与编解码。全部是整数算术 —— 屏幕上那块 Canvas 只负责按这里
-/// 给出的 `onCells` 画格子，几何与编码的任何一处改动都会让已发出的图对不上号。
+/// The cell count of the dot matrix, the scatter stride, the two colors and the encode/decode. All of it is integer arithmetic - the Canvas on screen is only responsible
+/// for drawing the cells according to the `onCells` given here, and any change to the geometry or the encoding makes the images already sent out fail to line up.
 enum PopopxBlindWatermarkCodec {
-    /// 固定的 40×40 格。**不是**按屏幕尺寸算列数：取证时分析者必须能从图里数出格数才知道怎么读，
-    /// 而几何相关的布局在不同尺寸下解出的是不同的比特顺序，那等于把水印写成"只有同一台设备能解"。
+    /// A fixed 40×40 grid. The column count is **not** computed from the screen size: in forensics the analyst must be able to count the cells out of the image to know how to read it,
+    /// while a geometry-dependent layout decodes a different bit order at each size, which amounts to writing the watermark so that "only the same device can solve it".
     static let gridColumns = 40
     static let gridRows = 40
     static let cellCount = gridColumns * gridRows
 
-    /// 比特 i 放到格子 `(i * stride) % cellCount`。步长与格数必须互质，否则散布会提前循环、
-    /// 后半段比特全被覆盖掉（40×40 = 1600 = 2^5 × 5^2，31 与之互质 ✓）。
-    /// 散布的意义：载荷只有千把比特，若按格顺序铺就会在屏幕一角留一条高密度带子，
-    /// 既容易被当"纹理"注意到，也容易在被裁掉的图里整段丢失。
+    /// Bit i goes to cell `(i * stride) % cellCount`. Stride and cell count must be coprime, otherwise the scatter cycles early
+    /// and the second half of the bits are all overwritten (40×40 = 1600 = 2^5 × 5^2, and 31 is coprime with it ✓).
+    /// The point of scattering: the payload is only on the order of a thousand bits, and laying it out in cell order would leave a high-density band in one corner of the screen,
+    /// easy to notice as "texture" and easy to lose wholesale in a cropped image.
     static let scatterStride = 31
 
-    /// 载荷字节上限 = 格数 / 8。超出就是编码端的错，`encode` 直接返回 nil 而不是悄悄截断。
+    /// The payload byte cap = cell count / 8. Going over it is an encoding-side error, and `encode` returns nil outright instead of truncating quietly.
     static let maximumPayloadBytes = cellCount / 8
 
-    /// 会话 id 的**字符**上限。超过就截断 —— 这是**已知的信息损失**，写在这里而不是藏在代码里：
-    /// 载荷里另外还留着完整时间戳与设备号，截断只影响"这次查看"和会话表的对齐精度。
+    /// The **character** cap of the session id. Past it the value is truncated - this is **known information loss**, stated here rather than hidden in the code:
+    /// the payload additionally keeps the full timestamp and the device id, so truncation only affects "this view" and the precision of lining it up with the session table.
     static let maximumSessionCharacters = 64
 
-    /// 会话 id 的 **UTF-8 字节**上限，与上面那条**同时**生效，且对中文 id 才是实际起作用的那条：
-    /// 一个 CJK 整字占 3 字节，只按字符截会得到 64 字 = 192 字节，整帧载荷 247 > 200，
-    /// `encode` 返回 nil —— 结果是**水印整个不出现**，而这正是最难发现的一种失效。
-    /// 128 的取法：4(magic) + 1 + 36(设备 UUID) + 1 + 128 + 13 = 183 ≤ 200，留出设备号最长的现实情形。
+    /// The **UTF-8 byte** cap of the session id, which applies **together** with the one above and is the one that actually bites for Chinese ids:
+    /// one CJK grapheme occupies 3 bytes, so cutting by characters alone gives 64 characters = 192 bytes, a whole-frame payload of 247 > 200,
+    /// and `encode` returns nil - the result is that **the watermark never appears at all**, which is exactly the hardest kind of failure to spot.
+    /// How 128 is arrived at: 4(magic) + 1 + 36(device UUID) + 1 + 128 + 13 = 183 <= 200, leaving room for the longest realistic device id.
     static let maximumSessionBytes = 128
 
-    /// 规范要求的两种近黑色。整幅点阵除了这两个值不出现第三个值（`rgb(isOn:)` 是唯一出口）。
+    /// The two near-black colors the specification requires. Apart from these two values the whole dot matrix never shows a third one (`rgb(isOn:)` is the only outlet).
     static let offColorRGB: UInt32 = 0x0000_00
     static let onColorRGB: UInt32 = 0x0101_01
 
-    /// magic(4) | deviceLen(1) | device | sessionLen(1) | session | millis(13 个 ASCII 数字)
+    /// magic(4) | deviceLen(1) | device | sessionLen(1) | session | millis(13 ASCII digits)
     static let magicBytes: [UInt8] = [0x50, 0x58, 0x53, 0x31] // "PXS1"
     static let millisDigits = 13
 
-    /// 编成一帧载荷。`deviceIdentifier` 由调用方给（拿不到时传 ""，见视图侧的 nil 处理）。
+    /// Encoded into one frame's payload. `deviceIdentifier` is supplied by the caller (pass "" when it cannot be obtained; see the nil handling on the view side).
     static func encode(_ record: PopopxWatermarkBits) -> [UInt8]? {
         let device = Array(record.deviceIdentifier.utf8)
         let session = Array(clamp(record.sessionIdentifier).utf8)
@@ -331,12 +331,12 @@ enum PopopxBlindWatermarkCodec {
         let session = String(decoding: bytes[sessionStart ..< sessionStart + sessionLength], as: UTF8.self)
         let millisRange = sessionStart + sessionLength ..< sessionStart + sessionLength + millisDigits
         let millisText = String(decoding: bytes[millisRange], as: UTF8.self)
-        // 时间戳那一格只认数字：整串里出现任何一个非数字就说明这张图不是我们画的点阵。
+        // The timestamp field accepts digits only: a single non-digit anywhere in the string means this image is not a dot matrix we drew.
         guard millisText.allSatisfy(\.isNumber), let millis = Int64(millisText) else { return nil }
         return PopopxWatermarkBits(deviceIdentifier: device, sessionIdentifier: session, epochMillis: millis)
     }
 
-    /// 载荷 → 格子。返回长度恒为 `cellCount`，载荷之外的格子是 false。
+    /// Payload -> cells. The returned length is always `cellCount`, and the cells beyond the payload are false.
     static func cells(from bytes: [UInt8]) -> [Bool] {
         var cells = [Bool](repeating: false, count: cellCount)
         guard bytes.count <= maximumPayloadBytes else { return cells }
@@ -354,11 +354,11 @@ enum PopopxBlindWatermarkCodec {
         return cells
     }
 
-    /// 散布：第 i 比特落到格子 `(i * stride) % cellCount`。
+    /// Scatter: bit i lands on cell `(i * stride) % cellCount`.
     ///
-    /// 只搬运为 1 的比特就够了：目标是全 false 的新数组，而 `(i * stride) % cellCount` 在互质
-    /// 前提下是一个置换（不会有两个比特抢同一个格子），所以"只写 1"和"整段赋值"结果相同，
-    /// 前者少一半写入。
+    /// Moving only the bits that are 1 is enough: the target is a fresh all-false array, and `(i * stride) % cellCount`, under the coprime
+    /// premise, is a permutation (no two bits fight over the same cell), so "write only the 1s" and "assign the whole range" give the same result,
+    /// and the former does half as many writes.
     static func scatter(_ cells: [Bool]) -> [Bool] {
         precondition(cells.count == cellCount, "scatter input must be \(cellCount) cells, got \(cells.count)")
         var scattered = [Bool](repeating: false, count: cellCount)
@@ -368,8 +368,8 @@ enum PopopxBlindWatermarkCodec {
         return scattered
     }
 
-    /// 反散布：`gather` 的第 i 比特就是 `scatter` 放在格子 `(i * stride) % cellCount` 上的那一比特。
-    /// 也就是沿同一条公式正向走一遍 —— 反函数靠的是互质，不靠查表，因此取证端不需要任何附加数据。
+    /// Reverse scatter: bit i of `gather` is exactly the bit `scatter` placed on cell `(i * stride) % cellCount`.
+    /// that is, walking the same formula forward once - the inverse function relies on coprimality, not on a lookup table, so the forensic side needs no extra data.
     static func gather(_ scattered: [Bool]) -> [Bool] {
         precondition(scattered.count == cellCount, "gather input must be \(cellCount) cells, got \(scattered.count)")
         var cells = [Bool](repeating: false, count: cellCount)
@@ -379,12 +379,12 @@ enum PopopxBlindWatermarkCodec {
         return cells
     }
 
-    /// 唯一的颜色出口：任何格子都只可能是两种近黑色之一。
+    /// The only color outlet: any cell can only be one of the two near-black colors.
     static func rgb(isOn: Bool) -> UInt32 {
         isOn ? onColorRGB : offColorRGB
     }
 
-    /// 整条链：载荷 → 未散布格子 → 散布后的点阵。
+    /// The whole chain: payload -> cells before scattering -> the scattered dot matrix.
     static func matrix(for record: PopopxWatermarkBits) -> PopopxWatermarkMatrix? {
         guard let bytes = encode(record) else { return nil }
         let scattered = scatter(cells(from: bytes))
@@ -392,7 +392,7 @@ enum PopopxBlindWatermarkCodec {
         return PopopxWatermarkMatrix(record: record, cells: scattered, onCells: onCells)
     }
 
-    /// 从点阵读回来（取证/自测用；参数是**散布后**的格子）。
+    /// Read back from the dot matrix (for forensics / self-tests; the parameter is the **scattered** cells).
     static func record(from cells: [Bool]) -> PopopxWatermarkBits? {
         let gathered = gather(cells)
         var bytes: [UInt8] = []
@@ -410,9 +410,9 @@ enum PopopxBlindWatermarkCodec {
         return decode(bytes)
     }
 
-    /// 两个口径都无条件收窄（字符数 → `maximumSessionCharacters`，UTF-8 字节数 → `maximumSessionBytes`）。
-    /// 不写"长度不够就直接返回原串"的捷径：那条捷径正是让 64 个汉字（192 字节）漏过字节上限的原因。
-    /// 逐字 `removeLast` 退的是**整字**，因此结果永远是合法 UTF-8，`decode` 侧不会读到坏序列。
+    /// Both measures narrow unconditionally (character count -> `maximumSessionCharacters`, UTF-8 byte count -> `maximumSessionBytes`).
+    /// No shortcut of "return the original string when it is short enough": that shortcut is exactly what let 64 Chinese characters (192 bytes) slip past the byte cap.
+    /// `removeLast` one character at a time removes a **whole grapheme**, so the result is always valid UTF-8 and the `decode` side never reads a broken sequence.
     static func clamp(_ session: String) -> String {
         var candidate = session
         if candidate.count > maximumSessionCharacters {
@@ -425,8 +425,8 @@ enum PopopxBlindWatermarkCodec {
     }
 
     private static func millisecondDigits(_ millis: Int64) -> [UInt8] {
-        // 上限 13 位（≈ 公元 2286 年）：超出就钉死在最大值而不是截断前 13 位 ——
-        // 截断会让 `decode` 读回一个和写进去完全不同的时刻，而往返可逆是这一层唯一的正确性判据。
+        // The cap is 13 digits (≈ year 2286 AD): past it the value is pinned to the maximum rather than truncated to the first 13 digits -
+        // truncating would make `decode` read back a moment completely different from the one written in, and round-trip reversibility is this layer's only correctness criterion.
         let clamped = min(max(0, millis), 9_999_999_999_999)
         let text = String(clamped)
         let padded = String(repeating: "0", count: millisDigits - text.count) + text
@@ -434,22 +434,22 @@ enum PopopxBlindWatermarkCodec {
     }
 }
 
-/// 一帧画完的水印点阵。不可变 —— 时间戳必须在一次查看会话里只取一次，否则每次重绘都会换一套
-/// 比特，屏幕上的格子就会蠕动（肉眼可见），而取证读到的时间戳也不再代表"这次查看"。
+/// One frame's finished watermark dot matrix. Immutable - the timestamp must be taken only once per viewing session, otherwise every redraw would swap in a new set
+/// of bits, the cells on screen would crawl (visible to the naked eye), and the timestamp read back in forensics would no longer stand for "this view".
 ///
-/// 格子下标 → 屏幕位置用一个**逐行错开**的映射（不是行优先直铺）。原因在自测里量到了：
-/// 载荷以 ASCII/UUID 为主，比特下标 mod 8 的分布极不均匀，而 1600 = 40 × 40、40 = 8 × 5，
-/// 于是纯行优先的 `column = i % 40` 会把"同一个 mod-8 剩余类"的亮格全挤进固定的 5 列 ——
-/// 实测某典型载荷 244 个亮格只覆盖 34/40 列。列被整块裁掉时亮格会成片消失，
-/// 错开之后同样的载荷覆盖全部 40 列（见 /tmp 自测报告的数字）。
+/// Cell index -> screen position uses a **per-row offset** mapping (not a plain row-major tiling). The reason was measured in the self-tests:
+/// the payload is mostly ASCII/UUID, the distribution of bit indices mod 8 is very uneven, and 1600 = 40 × 40, 40 = 8 × 5,
+/// so a purely row-major `column = i % 40` squeezes all the bright cells of "the same mod-8 residue class" into a fixed 5 columns -
+/// measurements on a typical payload give 244 bright cells covering only 34/40 columns. When whole columns are cropped away the bright cells vanish in blocks,
+/// and after offsetting, the same payload covers all 40 columns (see the numbers in the /tmp self-test report).
 struct PopopxWatermarkMatrix: Equatable, Sendable {
     let record: PopopxWatermarkBits
-    /// 散布后的格子，长度恒为 `PopopxBlindWatermarkCodec.cellCount`。
+    /// The scattered cells, whose length is always `PopopxBlindWatermarkCodec.cellCount`.
     let cells: [Bool]
-    /// 需要着色的格子下标（比遍历 1600 格再判断便宜，也是 Canvas 那一侧唯一的绘制清单）。
+    /// The indices of the cells that need coloring (cheaper than walking 1600 cells and testing, and the only drawing list on the Canvas side).
     let onCells: [Int]
 
-    /// 每往下一行，整行往右挪这么多格。与 `gridColumns` 无公因子即可（这里 7 与 40 互质）。
+    /// For each row down, the whole row shifts right by this many cells. Having no common factor with `gridColumns` is enough (here 7 and 40 are coprime).
     static let rowStagger = 7
 
     func column(of index: Int) -> Int {
@@ -462,23 +462,23 @@ struct PopopxWatermarkMatrix: Equatable, Sendable {
         index / PopopxBlindWatermarkCodec.gridColumns
     }
 
-    /// 屏幕位置 → 格子下标：`column(of:)` 的逆，取证端从照片上数出行列之后调它拿回比特位置。
-    /// 这一对函数是水印唯一的几何契约，改动任意一条都必须同时改另一条。
+    /// Screen position -> cell index: the inverse of `column(of:)`; after counting rows and columns off a photo, the forensic side calls it to get the bit position back.
+    /// This pair of functions is the watermark's only geometry contract: changing either one must change the other at the same time.
     static func cellIndex(row: Int, column: Int) -> Int {
         let columns = PopopxBlindWatermarkCodec.gridColumns
         let unshifted = ((column - rowStagger * row) % columns + columns) % columns
         return row * columns + unshifted
     }
 
-    /// 从照片上读回来的 1600 格（按**视觉**行列排布，行优先）→ 载荷。
-    /// 与 `PopopxBlindWatermarkCodec.record(from:)` 的差别只是这里入参是屏幕上数到的格子，
-    /// 而那里的入参是散布域的数组。
+    /// The 1600 cells read back off a photo (laid out by **visual** rows and columns, row-major) -> payload.
+    /// The only difference from `PopopxBlindWatermarkCodec.record(from:)` is that the input here is the cells counted on the screen,
+    /// while there the input is an array in the scatter domain.
     static func record(visualCells: [Bool]) -> PopopxWatermarkBits? {
         let columns = PopopxBlindWatermarkCodec.gridColumns
         guard visualCells.count == columns * PopopxBlindWatermarkCodec.gridRows else { return nil }
         var scattered = [Bool](repeating: false, count: visualCells.count)
-        // 入参下标 = 屏幕上数到的 (行, 列)；`cellIndex` 把它送回散布域的下标。
-        // 方向不能反：`column(of:)` 是"下标→屏幕"，这里要的是"屏幕→下标"。
+        // The input index = the (row, column) counted on the screen; `cellIndex` sends it back to an index in the scatter domain.
+        // The direction must not be reversed: `column(of:)` is "index -> screen", while what is wanted here is "screen -> index".
         for visualIndex in visualCells.indices {
             scattered[cellIndex(row: visualIndex / columns, column: visualIndex % columns)] = visualCells[visualIndex]
         }
@@ -488,9 +488,9 @@ struct PopopxWatermarkMatrix: Equatable, Sendable {
 
 // ================ POPUPX_PURE_CORE_END ================
 
-// MARK: - 分时复用点阵覆盖层
+// MARK: - Time-division-multiplexed dot-matrix overlay
 
-/// 抗快门时分复用点阵覆盖层。`isEnabled` 为假时必须是真正的零开销（不建 ticker、不进绘制）。
+/// The anti-shutter time-division-multiplexed dot-matrix overlay. When `isEnabled` is false it must be genuinely zero overhead (no ticker built, no drawing entered).
 struct PopopxAntiPhotoRenderView: View {
     private let isEnabled: Bool
 
@@ -499,8 +499,8 @@ struct PopopxAntiPhotoRenderView: View {
     }
 
     var body: some View {
-        // `if` 而不是 `.opacity(0)`：关掉时这一支根本不存在 —— 不建驱动、不建 ticker、
-        // 不进 tile 缓存、不参与一次绘制。用透明度或 `hidden()` 都还在布局与合成里付钱。
+        // `if` rather than `.opacity(0)`: when it is off this branch does not exist at all - no driver built, no ticker built,
+        // no entering the tile cache, no participating in a single draw. Opacity or `hidden()` both still pay inside layout and compositing.
         Group {
             if isEnabled {
                 PopopxRollingShutterLayer()
@@ -511,8 +511,8 @@ struct PopopxAntiPhotoRenderView: View {
     }
 }
 
-/// 真干活那一层。相位由驱动回调写进 `@State`，body 因此每帧重算一次 —— 重算的内容只是
-/// 在两块已经缓存好的 `UIImage` 之间挑一个引用，没有分配、没有栅格化。
+/// The layer that actually does the work. The phase is written into `@State` by the driver's callback, so body recomputes once per frame - and what it recomputes is only
+/// picking one reference between the two already cached `UIImage`s, with no allocation and no rasterization.
 private struct PopopxRollingShutterLayer: View {
     @Environment(\.displayScale) private var displayScale
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -523,8 +523,8 @@ private struct PopopxRollingShutterLayer: View {
         Image(uiImage: PopopxShutterPatternAtlas.tile(forPhase: phase, displayScale: displayScale))
             .resizable(resizingMode: .tile)
             .opacity(PopopxShutterPatternAtlas.overlayOpacity)
-            // 不加 `.drawingGroup()`：这一层本来就是一次 pattern 填充，套上它等于把整棵子树
-            // 每帧光栅化到一张离屏 MTLTexture —— 我们要省的正是这个。要合并多层时再加，而这里没有。
+            // No `.drawingGroup()`: this layer is already a single pattern fill, and wrapping it would rasterize the whole subtree
+            // every frame into an offscreen MTLTexture - which is exactly what we are trying to save. Add it when merging several layers, and there are none here.
             .onAppear { installDriver() }
             .onDisappear { removeDriver() }
             .onChange(of: reduceMotion) { _, _ in installDriver() }
@@ -535,7 +535,7 @@ private struct PopopxRollingShutterLayer: View {
         if driver == nil {
             driver = PopopxRollingShutterDriver()
         }
-        // `@State` 的 setter 是 nonmutating，所以这里从逃逸闭包里写 `phase` 不需要可变 self。
+        // `@State`'s setter is nonmutating, so writing `phase` from an escaping closure here needs no mutable self.
         driver?.onPhaseChange = { nextPhase in phase = nextPhase }
         driver?.start(alternating: reduceMotion == false)
     }
@@ -547,18 +547,18 @@ private struct PopopxRollingShutterLayer: View {
     }
 }
 
-/// 60Hz 相位驱动。`PopopxFrameTicker` 的唯一使用者，也是这层唯一会挂 CADisplayLink 的对象。
+/// The 60Hz phase driver. The only user of `PopopxFrameTicker`, and the only object in this layer that hangs a CADisplayLink.
 ///
-/// 主线程约定来自 `PopopxFrameTicker` 本身（它挂在主 runloop 上），所以这个类不加 `@MainActor`：
-/// 加了只会让视图里那三个生命周期回调各自多一次跨 actor 跳转，而跳转的目的地还是同一条主线程。
+/// The main-thread convention comes from `PopopxFrameTicker` itself (it is attached to the main runloop), so this class does not add `@MainActor`:
+/// adding it would only give the three lifecycle callbacks in the view one extra cross-actor hop each, and the destination of that hop is still the same main thread.
 private final class PopopxRollingShutterDriver {
     var onPhaseChange: ((Int) -> Void)?
 
     private let ticker = PopopxFrameTicker(framesPerSecond: 60)
     private var frameIndex = 0
 
-    /// 幂等。`alternating == false`（Reduce Motion）时不启动 link，相位就停在 0：
-    /// 空间混叠那条腿留着，时间那条腿放弃 —— 这条取舍是本文件里少数"安全性让位于无障碍"的地方。
+    /// Idempotent. With `alternating == false` (Reduce Motion) the link is not started and the phase stays at 0:
+    /// the spatial-aliasing leg is kept and the temporal leg is given up - this trade-off is one of the few places in this file where safety yields to accessibility.
     func start(alternating: Bool) {
         guard alternating else {
             stop()
@@ -578,26 +578,26 @@ private final class PopopxRollingShutterDriver {
     }
 
     deinit {
-        // 本类不是 actor 隔离的，所以 deinit 里可以直接收尾；`ticker.stop()` 会 invalidate link
-        // 并断掉 onFrame，`link` 已经是 nil 时它是空操作，因此和 `stop()` 重复调用是安全的。
+        // This class is not actor-isolated, so deinit can clean up directly; `ticker.stop()` will invalidate the link
+        // and break onFrame, and it is a no-op when `link` is already nil, so calling it repeatedly together with `stop()` is safe.
         ticker.stop()
     }
 
     private func advance() {
-        // 只保留最低一位：两副 tile 就是两个相位，索引不需要（也不该）无限增长。
+        // Keep only the lowest digit: two tiles means two phases, so the index does not need (and should not) grow without bound.
         frameIndex = (frameIndex + 1) & 1
         onPhaseChange?(frameIndex)
     }
 }
 
-/// 两副 tile 的缓存。生成一次，进程内复用。
+/// Cache for the two tiles. Generated once, reused for the lifetime of the process.
 enum PopopxShutterPatternAtlas {
-    /// 覆盖层的不透明度。0.05 的取舍：再高就看得清是"雪花"、读长文累；再低就基本不影响照片。
-    /// 这条曲线只能上机调，本文件给不出跨设备的安全值 —— 所以它是**参数**而不是常量。
+    /// Opacity of the overlay. The trade-off at 0.05: any higher and it clearly reads as "snow" and tires the eyes on long text; any lower and it barely affects the photo.
+    /// This curve can only be tuned on a real device; this file cannot offer a safe value across devices, so it is a **parameter** rather than a constant.
     static let overlayOpacity: Double = 0.05
 
-    /// key = 设备像素比（取整）；value = [相位 0, 相位 1]。两副一起生成，因此"只生成一次"
-    /// 这件事由这个数组的形状保证，不依赖调用顺序。
+    /// key = device pixel ratio (rounded to an integer); value = [phase 0, phase 1]. Both tiles are generated together, so the fact that they are "generated only once"
+    /// is guaranteed by the shape of this array and does not depend on call order.
     private static var cache: [Int: [UIImage]] = [:]
 
     static func tile(forPhase phase: Int, displayScale: CGFloat) -> UIImage {
@@ -606,8 +606,8 @@ enum PopopxShutterPatternAtlas {
             return built[phase & 1]
         }
         let built = (0 ... 1).map { rasterize(phase: $0, pixelRatio: steps) }
-        // 上限：像素比只有 1/2/3 这几个现实取值，写死一条清理规则只是为了不让这个字典在
-        // 一次极长的进程生命周期里跟着什么奇怪的东西增长。
+        // Cap: the pixel ratio only ever takes the real values 1/2/3, so the eviction rule is hardcoded merely to keep this dictionary from
+        // growing alongside something odd over an extremely long process lifetime.
         if cache.count > 4 {
             cache.removeAll()
         }
@@ -633,26 +633,26 @@ enum PopopxShutterPatternAtlas {
                   intent: .defaultIntent
               )
         else {
-            // 造不出一块 8×8 灰度图 = CoreGraphics 这条路已经不通。返回空 image：覆盖层失效，
-            // 正文一个字都不受影响。
+            // Failing to build an 8x8 grayscale image = the CoreGraphics path is already dead. Return an empty image: the overlay stops working,
+            // and not a single character of the message body is affected.
             return UIImage()
         }
-        // scale = 像素比 → tile 的 point 尺寸正好等于它的像素尺寸，平铺时 1 图像像素 = 1 设备像素。
-        // 这一条不是审美问题：一旦不是 1:1，系统就会插值，而插值本身是一次低通 —— 我们要打的就是
-        // 那个低通，先把自已的高频抹掉就等于自我缴械。
+        // scale = pixel ratio, so the tile's point size equals exactly its pixel size: when tiled, 1 image pixel = 1 device pixel.
+        // This is not an aesthetic question: as soon as it is not 1:1 the system interpolates, and interpolation is itself a low pass, and the very thing
+        // we are fighting is that low pass, so wiping our own high frequencies first would be self-disarmament.
         return UIImage(cgImage: image, scale: CGFloat(pixelRatio), orientation: .up)
     }
 }
 
-// MARK: - 聚光灯阅读模式
+// MARK: - Spotlight reading mode
 
-/// 聚光灯阅读模式：默认全糊，手指按住处 `radius` 圆内清晰。
+/// Spotlight reading mode: everything is blurred by default, and inside the `radius` circle under the finger it is sharp.
 struct PopopxSpotlightTextView: View {
     private let text: String
     private let radius: CGFloat
 
-    /// 模糊到这个半径，正文在 4pt 之外就一个字符都拼不出来了；再大对可读性没有额外好处，
-    /// 只是多花 CoreImage 的模糊半径。
+    /// Blurred to this radius, the body text is unusable beyond 4pt, with not one character left to piece together; going larger brings no extra benefit
+    /// and only spends more CoreImage blur radius.
     private static let blurRadius: CGFloat = 14
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -672,8 +672,8 @@ struct PopopxSpotlightTextView: View {
                 .mask { spotlightWindow }
         }
         .contentShape(Rectangle())
-        // `simultaneousGesture` 而不是 `gesture`：调用方很可能把这层放进 ScrollView（长正文），
-        // 独占手势会把滚动吃掉；而聚光灯本来就不靠滑动前进，两者同时成立才对。
+        // `simultaneousGesture` rather than `gesture`: the caller will very likely put this layer inside a ScrollView (long message body),
+        // and an exclusive gesture would swallow scrolling, while the spotlight never advances by swiping anyway, so both must hold at once.
         .simultaneousGesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { value in
@@ -682,19 +682,19 @@ struct PopopxSpotlightTextView: View {
                 }
                 .onEnded { _ in isFingerDown = false }
         )
-        // 视觉上这块屏是一团糊，无障碍里它必须是整段正文：否则 VoiceOver 用户拿到的是一份
-        // 被刻意毁掉的替代品。
+        // Visually this screen is one blur, but in accessibility it must be the entire message body: otherwise VoiceOver users would get a
+        // deliberately ruined substitute.
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(text)
     }
 
-    /// 清晰窗口。半径在抬手时回到 0 —— 半径为 0 的 mask 画不出任何东西，顶下的清晰副本因此
-    /// 整块消失，屏幕上只剩糊的那一份（"restoring to full blur"就落在这里，不靠条件插入视图，
-    /// 那样每次按压都会重建整棵文本子树）。
+    /// The clear window. The radius returns to 0 when the finger lifts, and a mask with radius 0 draws nothing, so the sharp copy on top
+    /// vanishes as a whole, leaving only the blurred copy on screen ("restoring to full blur" lands here, rather than conditionally inserting views,
+    /// which would rebuild the entire text subtree on every press).
     ///
-    /// 动画只挂在**半径**上、而且挂在 `.position` 之前：跟着手指走的位置必须是即时的，
-    /// 给位置加弹簧就会出现"光圈比手指慢半拍"，那正是这个模式最刺眼的失败形状。
-    /// Reduce Motion 把这一段动画整条拿掉（半径瞬开瞬合），点阵与模糊本身都不受影响。
+    /// The animation hangs only off the **radius**, and off it before `.position`: the position that follows the finger must be immediate,
+    /// and springing the position would give a halo lagging half a step behind the finger, exactly the most glaring failure shape of this mode.
+    /// Reduce Motion takes this whole stretch of animation away (the radius opens and closes instantly); the dot matrix and the blur itself are unaffected.
     @ViewBuilder private var spotlightWindow: some View {
         let activeRadius = isFingerDown ? radius : 0
         Circle()
@@ -711,8 +711,8 @@ struct PopopxSpotlightTextView: View {
             .position(spotlightCenter)
     }
 
-    /// 两份**完全相同**的文本层。模糊底稿与清晰副本必须逐字重合，所以这个函数不许带任何
-    /// 只在其中一路出现的修饰；两处调用的差别只由外层（`.blur` / `.mask`）决定。
+    /// Two **exactly identical** text layers. The blurred draft and the clear copy must coincide word for word, so this function must not carry
+    /// any modifier that appears on only one of the two paths; the difference between the two call sites is decided only by the outer layers (`.blur` / `.mask`).
     private var textLayer: some View {
         Text(text)
             .font(PopopxType.body)
@@ -723,15 +723,15 @@ struct PopopxSpotlightTextView: View {
     }
 }
 
-// MARK: - 逐行阅读模式
+// MARK: - Line-by-line reading mode
 
-/// 逐行防构图阅读模式：一次只显示一行，必须按住并纵向拖动才前进。
+/// Line-by-line reading mode against framing the shot: one line shows at a time, and it advances only while held down and dragged vertically.
 struct PopopxTeleprompterTextView: View {
     private let text: String
     private let lines: [String]
 
-    /// 一格行进的拖动量。用 `minHitTarget` 这个 token 而不是拍一个数：44pt 是手指一次可靠做出的
-    /// 最小位移，也是 HIG 里"一次意图明确的动作"的距离下限。
+    /// The drag distance for one step of advance. Using the `minHitTarget` token instead of making up a number: 44pt is the smallest displacement
+    /// a finger can reliably make in one go, and also the HIG's lower bound on the distance of one clearly intended action.
     private static let pointsPerLine: CGFloat = PopopxMetrics.minHitTarget
 
     @State private var committedLine = 0
@@ -774,8 +774,8 @@ struct PopopxTeleprompterTextView: View {
                     state = value.translation.height
                 }
                 .onEnded { _ in
-                    // 松手停在当前行：把手势期间算出来的位置固化下来，`@GestureState` 同时归零，
-                    // 两者互相抵消 —— 所以既不回弹，也不额外跳一格。
+                    // Releasing rests on the current line: the position computed during the gesture is frozen, `@GestureState` returns to zero at the same moment,
+                    // and the two cancel each other out, so there is neither a snap back nor an extra step.
                     committedLine = displayedIndex
                 }
         )
@@ -788,8 +788,8 @@ struct PopopxTeleprompterTextView: View {
         return lines[displayedIndex]
     }
 
-    /// 行号推进只由"按住 + 纵向拖动"决定，且对称：向上拖满一格进一步，向下拖满一格退一步，
-    /// 半格都不算（`towardZero`），所以不存在"轻轻一碰就跳过一行"的误读。
+    /// Line advance is decided only by held-down plus vertical drag, and symmetrically: drag up one full step to move forward one, drag down one full step to move back one,
+    /// and half a step never counts (`towardZero`), so there is no misreading where a light touch skips a line.
     private var displayedIndex: Int {
         guard lines.isEmpty == false else { return 0 }
         let steps = Int((dragTranslation / Self.pointsPerLine).rounded(.towardZero))
@@ -806,19 +806,19 @@ struct PopopxTeleprompterTextView: View {
         return "\(displayedIndex + 1) / \(lines.count)"
     }
 
-    /// 空正文时这句提示比"按住向上拖"更诚实：不是手势不管用，是这条消息本来就没有内容。
+    /// With an empty body this hint is more honest than "hold and drag up": the gesture is not broken, this message simply has no content.
     private var hintText: String {
         lines.count > 1 ? NSLocalizedString("Hold and drag up · release stops at the current line", comment: "secure reading") : NSLocalizedString("This message has no more content", comment: "secure reading")
     }
 }
 
-// MARK: - 盲水印
+// MARK: - Blind watermark
 
-/// 隐形盲水印：设备 UUID + 会话 id + 毫秒时间戳编成极低对比点阵铺满全屏。
+/// Invisible blind watermark: device UUID + session id + millisecond timestamp encoded into a very low contrast dot matrix covering the whole screen.
 ///
-/// 它是**表面**，不是叠加滤镜：每个格子都会被填上两种近黑色之一，所以它必须画在正文**底下**
-/// （由窗口管理器/`PopopxSecureSheetView` 当作背景层用）。画在正文上面等于把整屏糊成近黑，
-/// 这不是保守，这是把消息藏起来谁都看不见。
+/// It is a **surface**, not an overlay filter: every cell gets filled with one of the two near-black colours, so it must be drawn **under** the message body
+/// (used as the background layer by the window manager / `PopopxSecureSheetView`). Drawing it above the body would wash the whole screen into near black,
+/// which is not conservatism, that is hiding the message so nobody can see it.
 struct PopopxBlindWatermarkOverlay: View {
     private let matrix: PopopxWatermarkMatrix?
 
@@ -835,10 +835,10 @@ struct PopopxBlindWatermarkOverlay: View {
             let rows = CGFloat(PopopxBlindWatermarkCodec.gridRows)
             let cellWidth = size.width / columns
             let cellHeight = size.height / rows
-            // 整块底色 = 0 号颜色，一次填充；下面只补 1 号格子的位。
-            // 底色**不依赖** matrix 是否存在：这一层的契约是"一块不透明的近黑表面"，
-            // matrix 为 nil（载荷超容量，编码端的错）时应当退化成"没有水印的底色"，
-            // 而不是退化成透明 —— 透明会让正文底下直接露出窗口背景，那是另一种更难发现的失效。
+            // Whole background = colour 0, one fill; below only the cells of colour 1 are added.
+            // The background does **not** depend on whether matrix exists: this layer's contract is "an opaque near-black surface",
+            // so when matrix is nil (payload over capacity, a fault on the encoding side) it should degrade to "a background without the watermark",
+            // not degrade to transparent, because transparency would let the window background show straight through under the body, a harder failure to notice.
             context.fill(
                 Path(CGRect(origin: .zero, size: size)),
                 with: .color(PopopxBlindWatermarkPalette.color(forRGB: PopopxBlindWatermarkCodec.rgb(isOn: false)))
@@ -851,9 +851,9 @@ struct PopopxBlindWatermarkOverlay: View {
                     width: cellWidth,
                     height: cellHeight
                 )
-                // 外扩半像素：Canvas 的填充是抗锯齿的，相邻格子之间会留下一条既不等于 0x010101
-                // 也不等于 0x000000 的插值缝 —— 那会让"整幅点阵只用两种颜色"这条主张在像素层面
-                // 不成立，也会给取证读数多一层噪声。同色重叠不改变颜色，只消掉这条缝。
+                // Expand outward by half a pixel: Canvas fills are antialiased, so between adjacent cells a seam remains that is neither 0x010101
+                // nor 0x000000, and that seam would make the claim "the whole matrix uses only two colours" untrue at the pixel level
+                // and would add another layer of noise to a forensic reading. Overlapping the same colour changes no colour and only removes the seam.
                 context.fill(
                     Path(rect.insetBy(dx: -0.5, dy: -0.5)),
                     with: .color(PopopxBlindWatermarkPalette.color(forRGB: PopopxBlindWatermarkCodec.rgb(isOn: true)))
@@ -865,16 +865,16 @@ struct PopopxBlindWatermarkOverlay: View {
     }
 }
 
-/// 两种近黑色到 `Color` 的映射。集中一处，避免绘制端和文档里说的数字对不上。
+/// The mapping from the two near-black values to `Color`. Kept in one place so the drawing code and the numbers quoted in the docs cannot disagree.
 enum PopopxBlindWatermarkPalette {
     static func color(forRGB rgb: UInt32) -> Color {
         Color.popopx(rgb)
     }
 }
 
-/// 会话 → 点阵的一次性缓存。存在的唯一理由是让时间戳**每个会话只取一次**：
-/// 视图值会被父级反复重建（倒计时每秒一次），没有这层缓存就等于每秒换一套比特，
-/// 屏幕上的格子会蠕动（肉眼可见，水印因此不再"隐形"），而解出来的时间戳也不再指向"这次查看"。
+/// One-shot cache from session to dot matrix. Its only reason to exist is that the timestamp is taken **once per session**:
+/// the view value is rebuilt repeatedly by its parent (the countdown fires once per second), and without this cache that means a new set of bits every second,
+/// the cells on screen would crawl (visible to the eye, so the watermark is no longer invisible), and the decoded timestamp would no longer point at "this viewing".
 enum PopopxBlindWatermarkCache {
     private static var matrices: [String: PopopxWatermarkMatrix] = [:]
 
@@ -885,7 +885,7 @@ enum PopopxBlindWatermarkCache {
         let record = PopopxWatermarkBits(
             deviceIdentifier: deviceIdentifier ?? "",
             sessionIdentifier: sessionIdentifier,
-            // 毫秒：这是水印里唯一"什么时候"的信息，也是事后归因时唯一能和服务器时间对表的量。
+            // Milliseconds: the only "when" inside the watermark, and the only quantity that can be lined up against server time during post-hoc attribution.
             epochMillis: Int64(Date().timeIntervalSince1970 * 1_000)
         )
         guard let built = PopopxBlindWatermarkCodec.matrix(for: record) else { return nil }

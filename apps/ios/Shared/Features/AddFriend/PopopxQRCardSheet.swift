@@ -2,8 +2,8 @@
 //  PopopxQRCardSheet.swift
 //  POPOPX (iOS)
 //
-//  我的加密名片 — the one-time encrypted-connection QR card, opened from the
-//  添加朋友 page and from the top-bar `+` menu.
+//  My encrypted card — the one-time encrypted-connection QR card, opened from the
+//  Add friend page and from the top-bar `+` menu.
 //
 //  A Wallet-style "physical object" pass: it is the one surface where the brand
 //  spec allows a gradient (Docs/popopx-brand-spec.md §2.4), so the fill is built
@@ -15,7 +15,7 @@
 //  the ramp is still one brand colour fading into itself — §2.4's ban on a two-hue
 //  wash is not relaxed, only its hue is. No skin ever touches the purple logo
 //  mark, and the ownership flag is read only here: the QR payload is identical
-//  either way, which is what "本机配色，不上传" means in code.
+//  either way, which is what "device-side colours, never uploaded" means in code.
 //  Red lines observed: the QR itself is the existing
 //  `POPOPXLinkQRCode` (no CIFilter written here), colour/spacing/type/material all
 //  come from PopopxTheme (except the two skin hues in `Pass`, documented above), the
@@ -34,7 +34,7 @@ struct PopopxQRCardSheet: View {
     @State private var toast = PopopxToastModel()
     /// The one cosmetic the owner may have bought for this surface. Read-only here:
     /// the sheet never spends, never loads a paywall and never explains the price —
-    /// that conversation happens in 算力点中心, and a card whose face depends on it
+    /// that conversation happens in the Compute Credits centre, and a card whose face depends on it
     /// only has to answer "worn or not".
     /// `.task` matters: `owns` reads a Keychain-backed set, and on a cold launch the
     /// sheet can be opened before the ledger has been read. Without the load the
@@ -281,7 +281,7 @@ struct PopopxQRCardSheet_Previews: PreviewProvider {
     static var previews: some View {
         PopopxQRCardSheet(
             uri: "popopx:/contact#lrdvu2d8A1GumSmoKb2krQmtKhWXq-tyGpHuM7aMwsw",
-            identityName: "墨蓝信使"
+            identityName: "Ink Courier"
         )
     }
 }

@@ -3334,8 +3334,8 @@ server test failure */
 "Your POPOPX address" = "POPOPX-osoitteesi";
 
 
-/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
-/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+/* === POPOPX compute-points economy (BadgeCredits) commercial copy: one-to-one with PopopxCommerceCopy === */
+/* These 37 rows correspond directly to the NSLocalizedString keys in PopopxBadgeCreditsModels.swift; en.lproj holds none of them (value == key). */
 
 /* product name */
 "POPOPX Dynamic Privacy Node Badge" = "POPOPX:n dynaamisen yksityisyyssolmun merkki";
@@ -3448,7 +3448,7 @@ server test failure */
 /* error */
 "Your Compute Credits balance cannot go above %lld. Spend some credits first." = "Laskentapisteiden saldo ei voi ylittää %lld. Käytä ensin osa pisteistä.";
 
-/* ==== POPOPX onboarding v2 (2026-11-19) — 引导页四屏 + 隐私政策/使用条款 ==== */
+/* ==== POPOPX onboarding v2 (2026-11-19) - the four onboarding screens + privacy policy / terms of use ==== */
 /* POPOPX onboarding v2 — generated block, 2026-11-19 */
 
 /* Onboarding: header pills */
@@ -3460,12 +3460,10 @@ server test failure */
 "Own your network." = "Verkkosi on sinun.";
 "Private messaging with no account and no user IDs." = "Yksityisviestintää ilman tiliä ja ilman käyttäjätunnisteita.";
 "SMP end-to-end encrypted" = "SMP päästä päähän salattu";
-"厢语 Bluetooth Mesh relay" = "厢语 Bluetooth Mesh -välityssolmu";
 "What POPOPX gives you" = "Mitä POPOPX antaa";
 "No user IDs" = "Ei käyttäjätunnisteita";
 "No phone number, no email, no global public key. Nothing links your contacts to each other, and each anonymous identity stays separate." = "Ei puhelinnumeroa, ei sähköpostia, ei globaalia julkista avainta. Mikään ei liitä kontaktejasi toisiinsa, ja jokainen anonyymi identiteetti pysyy erillään.";
 "Dynamic relays and near-field" = "Dynaamiset välityssolmut ja läheisyys";
-"Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "Verkossa käytät dynaamista SMP-välityssolmujen rykelmää. Ilman verkkoa 厢语 vaihtaa 1–7 hyppyn Bluetooth Mesh -verkkoon ja muodostaa parin kasvokkain UWB:llä tai napautuksella.";
 "Anti-peeping and local-only cards" = "Tirkistelyn esto ja kortit vain laitteella";
 "Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "Kuvakaappaukset ja tallennukset estetään, huippusalaiset viestit tuhoutuvat lukemisen jälkeen, sijainti pysyy salattuna molemmissa käyttötiloissa eikä salattu profiilikorttisi poistu tältä laitteelta.";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "Viimeistele tämä asennus saadaksesi 3 päivän kokeilumerkin pioneerisolmulta.";
@@ -3497,7 +3495,6 @@ server test failure */
 "Higher privacy · balanced battery" = "Enemmän yksityisyyttä · tasapainoinen akku";
 "Maximum discretion · nothing pushed" = "Maksimaalinen huomaamattomuus · ei pushia";
 "Apple's push service carries only the signal that new data is waiting, never the content." = "Appen push-palvelu välittää vain merkkin uudesta datasta, ei koskaan sisältöä.";
-"厢语 offline mesh" = "厢语 offline-mesh";
 "When the internet is down, messages hop over nearby devices, up to 7 hops, with no server. Pair face to face with UWB or a tap." = "Ilman internetiä viestit hyppivät lähilaitteiden kautta, enintään 7 hyppyä, ilman palvelinta. Muodosta pari kasvokkain UWB:llä tai napautuksella.";
 "Bluetooth permission is requested the first time the mesh starts." = "Bluetooth-lupa kysytään mesh-verkon ensimmäisellä käynnistyksellä.";
 
@@ -3541,13 +3538,11 @@ server test failure */
 "The camera guard stays local" = "Kameravalvonta pysyy laitteella";
 "The anti-peeping guard switches the front camera on only while a top-secret sheet is open, at the lowest resolution, processes every frame on this device and stops the stream when the sheet closes. Nothing is written to disk and nothing is uploaded." = "Tirkistelyn esto laskee etukameran päälle vain huippusalaisen näytön ollessa auki ja pienimmällä resoluutiolla, käsittelee jokaisen kuvan kehyksen tällä laitteella ja pysäyttää striimin näytön sulkeutuessa. Mitään ei kirjoiteta levylle eikä mitään ladata palvelimelle.";
 "Screenshots, recordings and offline hops" = "Kuvakaappaukset, tallennukset ja offline-hypyt";
-"Protected screens are blocked from screenshots and screen recording by the system itself. In 厢语 mode messages hop over Bluetooth between nearby devices and never reach the public internet." = "Järjestelmä itse estää suojatuilla näytöillä kuvakaappaukset ja näytön tallennukset. 厢语-tilassa viestit hyppivät Bluetoothin kautta lähilaitteiden välillä eivätkä koskaan saavuta julkista internetiä.";
 "Your controls" = "Sinulla on kontrolli";
 "You can export or delete any identity, erase the local database or trigger Panic Wipe at any time. Deletion is irreversible because no server holds a copy." = "Voit milloin tahansa viedä tai poistaa minkä tahansa identiteetin, tyhjentää paikallisen tietokannan tai käynnistää Panic Wipen. Poistaminen on peruuttamatonta, koska mikään palvelin ei säilytä kopiota.";
 
 /* Legal: terms */
 "Acceptable use" = "Hyväksyttävä käyttö";
-"Use POPOPX within the laws of the country you are in. Public groups and 厢语 broadcasts must carry no unlawful content, no spam and no harassment of other users." = "Käytä POPOPXia sen maan lakien mukaisesti, jossa olet. Julkiset ryhmät ja 厢语-lähetykset eivät saa sisältää laitonta sisältöä, roskapostia eikä muiden käyttäjien häirintää.";
 "Your keys, your responsibility" = "Avaimet, vastuusi";
 "Your mnemonic phrase, identity keys, badges and POPOPX Compute Credits exist only on this device. If the device or the phrase is lost, they cannot be recovered, frozen or reissued by anyone." = "Muistilause, identiteettiavaimet, merkit ja POPOPX-laskentapisteet ovat olemassa vain tällä laitteella. Jos laite tai lause katoaa, kukaan ei voi palauttaa, jäädyttää tai myöntää niitä uudelleen.";
 "No guarantee of availability" = "Ei saatavuustakuuta";
@@ -3558,7 +3553,7 @@ server test failure */
 "Relay operators set their own conditions for the servers they run. When an operator requires acceptance, the app shows that operator's conditions and records your acceptance before using them." = "Välityspalvelinten operaattorit määrittävät itse omat ehtonsa niille palvelimille, joita he ylläpitävät. Kun operaattori vaatii hyväksymisen, sovellus näyttää tämän operaattorin ehdot ja tallentaa hyväksyntäsi ennen niiden käyttöä.";
 "Names and changes" = "Nimet ja muutokset";
 "POPOPX and the POPOPX logo are the names of this build. These terms and the privacy statement may change; the app always shows the version you agreed to, and continuing to use POPOPX means you accept the change." = "POPOPX ja POPOPX-logo ovat tämän version nimet. Nämä ehdot ja tietosuojaseloste voivat muuttua; sovellus näyttää aina sen version, jonka olet hyväksynyt, ja POPOPXin jatkaminen tarkoittaa, että hyväksyt muutoksen.";
-/* POPOPX 引导页补录（第四轮：迁移入口标题与条款接受失败提示） */
+/* POPOPX onboarding follow-up rows (round 4: migration entry title, and the terms-acceptance failure notice) */
 "Migrate here" = "Siirrä tänne";
 "Error accepting conditions" = "Virhe ehtoja hyväksyttäessä";
 "I have read and agree to %1$@ and %2$@." = "Luin ja hyväksyn seuraavat dokumentit: %1$@ ja %2$@.";
@@ -3841,7 +3836,6 @@ server test failure */
 "Badge lit for %lld more days." = "Merkki aktiivinen %lld päivää kauemmin.";
 "Choose a plan" = "Valitse suunnitelma";
 "Renew or change plan" = "Jatka tai vaihda suunnitelmaa";
-"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "Avaa paneelin 厢语: pääkytkin, kanavat ja lähellä olevat solmut";
 "Channels" = "Kanavat";
 "Create public channel" = "Luo julkinen kanava";
 "Join channel" = "Liity kanavaan";
@@ -4640,13 +4634,13 @@ server test failure */
 "Your new channel %@ is connected to %d of %d relays.\nIf you cancel, the channel will be deleted - you can create it again." = "Uusi kanava %1$@ on yhdistetty %2$d/%3$d välityspalvelimeen.\nJos peruutat, kanava poistetaan – voit luoda sen uudelleen.";
 "server queue info: %@\n\nlast received msg: %@" = "palvelimen jonotiedot: %1$@\n\nviimeisin vastaanotettu viesti: %2$@";
 
-/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+/* POPOPX round 19: keys added during the ninth pass over the three tabs */
 "Back to messages" = "Takaisin viestien";
 "POPOPX Badge" = "POPOPX-merkki";
 "Added %lld Compute Credits to your balance." = "Lisätty %lld laskentapistettä saldoosi.";
 "Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple vahvistaa tämän oston vielä. Laskentapisteet näkyvät saldoosi, kun osto on vahvistettu.";
 "Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple otti maksun, mutta tämä laite ei vielä kyennyt lisäämään pisteitä saldoosi. Ne lisätään, kun suojattu tallennus voidaan jälleen kirjoittaa.";
-/* POPOPX round 21 第 9 轮：厢语「发现」入口无障碍说明 + 7 条 zh-Hans 上游缺值 */
+/* POPOPX round 21, ninth pass: accessibility hint for the Cabin 'Discover' entry + 7 upstream values missing from zh-Hans */
 "Discover nearby groups and channels over the Bluetooth mesh" = "Löydä lähiympäristön ryhmät ja kanavat Bluetooth-meshin kautta";
 "Album" = "Albumi";
 "Camera" = "Kamera";
@@ -6047,3 +6041,25 @@ server test failure */
 "author" = "tekijä";
 "moderator" = "moderaattori";
 "relay" = "välityssolmu";
+"Top-up %lld compute points" = "Ladattu %lld laskentapistettä";
+"Exchange did not complete · returned automatically" = "Vaihto ei toteutunut · palautettu automaattisesti";
+"Redeemed a %lld-day privacy node badge" = "Lunastettu %lld päivän yksityisyyden solumerkki";
+"Redeemed %lld × %lld-day gift-card vouchers" = "Lunastettu %lld × %lld päivän lahjakorttikupongia";
+"Sent a red packet of %lld compute points (%lld equal shares)" = "Lähetetty %lld laskentapisteen punainen kirjekuori (tasan %lld osaan)";
+"Received a compute-point red packet" = "Vastaanotettu laskentapisteiden punainen kirjekuori";
+"Received a red packet: %@" = "Vastaanotettu punainen kirjekuori: %@";
+"Red packet not fully claimed, %lld returned" = "Punainen kirjekuori jäi lunastamatta kokonaan, %lld palautettu";
+"Subscribed to channel %@" = "Tilattu kanava %@";
+"Unlocked a profile card" = "Profiilikortti avattu";
+"Extended the anti-peeping viewing window" = "Pidennetty tirkistelysuojan katseluaikaa";
+"Refund clawback (what was already spent is not recovered)" = "Palautuksen perintä (jo käytettyä ei peritä takaisin)";
+"Refund clawback" = "Palautuksen perintä";
+"Aurora shield avatar frame" = "Aurora-kilven hahmokehys";
+"Dark gold QR card skin" = "QR-kortin tumman kullan ulkoasu";
+"[Location]" = "[Sijainti]";
+"[Encrypted profile]" = "[Salattu profiilisivu]";
+"[Encrypted profile · attachment]" = "[Salattu profiilisivu · liite]";
+"Unnamed profile" = "Nimetön profiilisivu";
+"[Top-secret view-once] Open after biometrics" = "[Huippusalainen, tuhoutuu lukemisen jälkeen] Avautuu biometrisen tunnistuksen jälkeen";
+"[Top-secret security alert] %@; that top-secret message was destroyed in place." = "[Huippusalainen tietoturvahälytys] %@; tuo huippusalainen viesti tuhottiin paikan päällä.";
+"Neither Bluetooth nor the public network is available — %lld messages waiting to send" = "Ei Bluetooth-yhteyttä eikä julkista verkkoa — %lld viestiä odottaa lähettämistä";

@@ -2,116 +2,116 @@
 //  PopopxAppLockOverlayView.swift
 //  POPOPX (iOS)
 //
-//  【物理防抢夺 · 界面层】全屏磨砂密码遮罩 + 静默加载过渡层。它是 `PopopxAppLockState`
-//  唯一的"脸"：模块一（传感器/超时/后台）与模块二（行为判据）只负责把锁拉起来，
-//  模块三（双密码）只负责判码与擦除，中间这一层是两者唯一交汇的地方。
+//  [Physical anti-snatch · interface layer] A full-screen frosted passcode overlay plus a silent loading transition layer. It is `PopopxAppLockState`
+//  the only "face": module 1 (sensors/timeout/background) and module 2 (behaviour criteria) only raise the lock,
+//  module 3 (dual passcodes) only checks the code and wipes; this middle layer is the single place where they meet.
 //
-//  ### 与上游 `ContentView` 的 LA 门是两层不同的东西，不许合并
-//  `ContentView` 那套门（`DEFAULT_PERFORM_LA` + `contentViewAccessAuthenticated` +
-//  后台 `DEFAULT_LA_LOCK_DELAY`，见 `Shared/ContentView.swift` 的 `prefPerformLA`
-//  （:46）与 `contentViewAccessAuthenticated` 那两处判断）判的是
-//  **"谁可以进这个 app"**：它发生在 app 冷启动 / 从锁屏延迟回来时，界面是上游自己的
-//  `SetAppPasscodeView` / `LocalAuthView`，解锁动作走 `authorize()`。
-//  本遮罩判的是 **"手机此刻是不是在我手里"**：它发生在 app 已经开着、正在用的当中，
-//  由传感器/超时/后台事件在进程内拉起，界面上只有 6 位码和一把生物识别快捷。
-//  两层各自独立成立，顺序也固定：先有 LA 门放人进来，才谈得上遮罩。
-//  本文件**不调用也不修改** `authorize()`——它对 `.unavailable` 直接放权
-//  （LocalAuthenticationUtils.swift:20-24 的 `authorize`），那是"设备解锁便利性"的语义，安全遮罩不许继承。
-//  同理，本文件不新增任何 UserDefaults 键、不碰 Keychain、不读写上游那两条口令。
+//  ### The LA gate upstream in `ContentView` is a different layer; the two must not be merged
+//  The gate in `ContentView` (`DEFAULT_PERFORM_LA` + `contentViewAccessAuthenticated` +
+//  the background `DEFAULT_LA_LOCK_DELAY`, see `prefPerformLA` in `Shared/ContentView.swift`
+//  (:46) and those two `contentViewAccessAuthenticated` checks) decides
+//  **"who may enter this app"**: it happens on a cold start / when returning after the lock-screen delay, and the UI is upstream's own
+//  `SetAppPasscodeView` / `LocalAuthView`, with unlocking going through `authorize()`.
+//  This overlay decides **"is the phone in my hand right now"**: it happens while the app is already open and in use,
+//  raised in-process by sensor/timeout/background events; the UI has only a 6-digit code and one biometric shortcut.
+//  The two layers each stand on their own, and the order is fixed: first the LA gate lets people in, then the overlay is even on the table.
+//  This file **neither calls nor modifies** `authorize()` — it grants access outright for `.unavailable`
+//  (`authorize` in LocalAuthenticationUtils.swift:20-24): that is "device-unlock convenience" semantics, and a security overlay must not inherit it.
+//  Likewise, this file adds no UserDefaults keys, touches no Keychain, and neither reads nor writes the two upstream passphrases.
 //
-//  ### 遮罩的存在由 `coversContent` 判，键盘的显隐由 `showsLockUI` 判，谁都不许自己拼条件
-//  `PopopxAppLockState` 把两个问题分开了（`PopopxAntiTheftMotionGuard.swift` 里
-//  `PopopxAppLockState` 的类型注释与那两个计算属性）：
-//  **盖不盖**用 `coversContent`（= `isLocked`，整个锁定期恒真，包括静默自毁那 1.2 秒）；
-//  **遮罩上显示什么**用 `showsLockUI`（自毁进行中为假，那时只许呼吸，不许出现原因文案、
-//  键盘、报错或"正在销毁"）。把两件事合成一个判据是本模块真实出过的事故：
-//  遮罩在"开始擦除"那一瞬间消失，内容直接暴露给站在旁边的人。
-//  本层在这两个判据之上还要补一刀：`submit(pin:)` 命中胁迫码时的顺序是
-//  `beginDuressFlow()` → 擦除 → `endDuressFlow()` → **`unlock()`** → 最后才把不足
-//  `minimumFlowSeconds` 的时间补齐（`PopopxDuressAuthManager` 的 `submit(pin:)`）。
-//  也就是说 `await` 返回**之前** `isLocked` 已经翻过一次，只看上游判据会在补时那一段
-//  把遮罩掀掉一次——掀掉那一下就是穿帮。所以：
-//  - 存在性 = `lock.coversContent || model.silentFlow`；
-//  - 呼吸/键盘的取舍 = `model.silentFlow`，它同时吃本地 `phase` 和上游 `showsLockUI`，
-//    因为静默流程也可能由本层看不见的入口发起。
-//  两个判据都取并集，两个翻转点才都盖得住。
+//  ### The overlay's presence is decided by `coversContent`, the keyboard's visibility by `showsLockUI`; nobody may hand-assemble the conditions
+//  `PopopxAppLockState` keeps the two questions apart (`PopopxAntiTheftMotionGuard.swift`, in the
+//  `PopopxAppLockState` type comment and those two computed properties):
+//  **Whether it covers** uses `coversContent` (= `isLocked`, true throughout the lock period, including the 1.2 s of silent self-destruct);
+//  **What the overlay shows** uses `showsLockUI` (false while the wipe runs; then only breathing is allowed — no reason copy,
+//  keyboard, error or "destroying"). Collapsing the two into one criterion was a real incident in this module:
+//  the overlay vanished at the instant "erasing started", exposing the content straight to whoever was standing next to it.
+//  This layer adds one more safeguard on top of those two criteria: the order in `submit(pin:)` when the duress code is hit is
+//  `beginDuressFlow()` → wipe → `endDuressFlow()` → **`unlock()`** → and only then padding the time short of
+//  `minimumFlowSeconds` up to that floor (`submit(pin:)` of `PopopxDuressAuthManager`).
+//  That is, `isLocked` has already flipped once **before** `await` returns, and trusting only the upstream criterion would, during the padding stretch,
+//  tear the overlay off once — and that tearing-off is the exposure. Therefore:
+//  - presence = `lock.coversContent || model.silentFlow`;
+//  - the breathing/keyboard choice = `model.silentFlow`, which takes both the local `phase` and the upstream `showsLockUI`,
+//    because a silent flow may also be started from an entry this layer cannot see.
+//  Only by taking the union of both criteria are both flip points covered.
 //
-//  ### 不变量：`.unlocked` 与 `.duress` 必须逐字相同（改之前先读这一段）
-//  一次键盘提交只有四种结论，其中两种（常规码命中、胁迫码命中）**在界面上必须是同一件事**：
-//  同一个 `case`、同一段代码、同一次触觉、同一句文案、同一个时长。理由不是美学：
-//  如果 `.duress` 多震一下、晚 200ms、颜色深一点、或者蹦出"正在处理"四个字，
-//  胁迫者只要看一眼、或者拿秒表量一下，就知道自己按下的正是那把不该按下的码。
-//  这不是"体验不一致"，这是当着人的面自曝。所以：
-//  - 结论分支写成 `case .unlocked, .duress:`，一个 case 一支，不给编译器留拆开的余地；
-//  - 流程中**不**发任何完成触觉（`PopopxHaptics.notice(.success)` 一律不许出现在这一支）；
-//  - 呼吸层的文案与时长由 `PopopxDuressAuthManager.minimumFlowSeconds` 与
-//    `submit` 内部的补时决定，本文件只负责"动画持续到 `await` 返回"，不自己掐表；
-//  - 唯一允许出现差异的是 `.wrong`（码不对）与 `.notConfigured`（还没设码），
-//    它们按定义就不是胁迫路径。
-//  同一道理，`.wrong` 之后按原顺序重输同一个码，画面必须与第一次一模一样。
+//  ### Invariant: `.unlocked` and `.duress` must be word-for-word identical (read this before changing anything)
+//  One keypad submit has only four outcomes, and two of them (normal code hit, duress code hit) **must be the same thing on screen**:
+//  the same `case`, the same code, the same haptic, the same copy, the same duration. The reason is not aesthetics:
+//  If `.duress` buzzed one extra time, came 200ms later, was a shade darker, or popped out "processing",
+//  the coercer would know at a glance, or with a stopwatch, that the code pressed was exactly the one that should not be pressed.
+//  This is not "inconsistent experience", it is self-exposure in front of someone. Therefore:
+//  - the outcome branch is written `case .unlocked, .duress:`, both cases in one branch, leaving the compiler no room to split them;
+//  - **no** completion haptic is fired during the flow (`PopopxHaptics.notice(.success)` must never appear in this branch);
+//  - the breathing layer's copy and duration are decided by `PopopxDuressAuthManager.minimumFlowSeconds` and
+//    the padding inside `submit`; this file is only responsible for "the animation lasts until `await` returns", it does not keep its own time;
+//  - the only place a difference is allowed is `.wrong` (wrong code) and `.notConfigured` (no code set yet),
+//    which by definition are not the duress path.
+//  For the same reason, after `.wrong` retyping the same code in the original order must look exactly like the first time.
 //
-//  ### 呼吸动画为什么只能用 opacity / scale（以及为什么绝不用 Timer）
-//  `submit` 的擦除段（`PopopxStorageWipe.wipe`）里有几段**在主线程同步跑**的重活：
-//  `chatCloseStore()` 关 SQLite、`clearRenderedState` 清 ItemsModel、`resetChatCtrl()` +
-//  `initializeChat(start:)` 重建控制层——合计数百毫秒（删文件那一段已经刻意挪到后台，
-//  见 `PopopxStorageWipe` 里那段 `DispatchQueue.global(qos: .userInitiated)`；
-//  但剩下的仍在主 actor 上）。
-//  用 `Timer`/`DispatchSourceTimer` 逐帧推关键帧的动画，其回调排在主线程队列上，
-//  主线程一被占住就整段停住，恢复的那一帧是"跳"过去的——屏幕上留下一次可被看见的顿挫。
-//  而 `opacity` 与 `transform`（`scaleEffect` 落到 CALayer 上）是**可托管属性**：
-//  动画一经提交就由渲染进程自己推进，主线程卡死也照呼吸。
-//  所以本文件只改这两个属性，并且**在 `await` 之前**把动画提交出去
-//  （`send(reduceMotion:)` 里那一次 `withAnimation` 早于任何擦除代码；面板另有一条
-//  `onChange(of: silentFlow)` 兜住"自毁由本层之外的入口发起"那种情况）。
-//  Reduce Motion 下不动起来，但文案、时长、触觉一个都不改——差异只许出现在"有没有动"，
-//  而这对常规码与胁迫码是同一个值。
+//  ### Why the breathing animation may only use opacity / scale (and why never a Timer)
+//  The erase section of `submit` (`PopopxStorageWipe.wipe`) contains several heavy chunks **that run synchronously on the main thread**:
+//  `chatCloseStore()` closing SQLite, `clearRenderedState` clearing ItemsModel, `resetChatCtrl()` +
+//  `initializeChat(start:)` rebuilding the control layer — hundreds of milliseconds in total (the file-deletion part has deliberately been moved to the background,
+//  see that `DispatchQueue.global(qos: .userInitiated)` block in `PopopxStorageWipe`;
+//  but the rest still runs on the main actor).
+//  An animation that pushes keyframes frame by frame with `Timer`/`DispatchSourceTimer` has its callbacks queued on the main thread,
+//  so once the main thread is blocked it stops outright, and the first recovered frame "jumps" — leaving a visible stutter on screen.
+//  While `opacity` and `transform` (`scaleEffect` lands on a CALayer) are **properties the render process can take over**:
+//  once an animation is committed the render process advances it by itself, so it keeps breathing even if the main thread freezes.
+//  So this file changes only those two properties, and commits the animation **before `await`**
+//  (the one `withAnimation` in `send(reduceMotion:)` precedes any erase code; the panel has an extra
+//  `onChange(of: silentFlow)` covering the case where the wipe is started from an entry outside this layer).
+//  Under Reduce Motion nothing moves, but copy, duration and haptics are unchanged — the only permitted difference is "did it move",
+//  and for the normal code and the duress code that is the same value.
 //
-//  ### 命中测试：视觉遮挡不算挡住
-//  遮罩层自己吃掉点击与拖动（`contentShape` + 空 `onTapGesture` + `DragGesture(minimumDistance: 0)`），
-//  磨砂层在它们下面再兜一次。少了那条拖动手势，底下的会话列表在遮罩后面**仍然能被滚走**
-//  ——看见了遮罩却摸得着内容，是这个界面最不能犯的第二种错。
+//  ### Hit testing: visual occlusion does not count as blocking
+//  The overlay itself swallows taps and drags (`contentShape` + empty `onTapGesture` + `DragGesture(minimumDistance: 0)`),
+//  and the frosted layer catches them once more underneath. Without that drag gesture, the chat list below **can still be scrolled** behind the overlay
+//  — seeing an overlay but being able to touch the content is the second least forgivable mistake for this screen.
 //
-//  ### 宿主接线契约：只能挂 `popopxAppLockOverlay()`，不许在宿主里 `if coversContent`
-//  本类型自己判断盖不盖，宿主唯一要做的是**无条件**挂上（没锁时它是一个空 `ZStack`，
-//  不产生命中区、不参与布局、常态开销等于零）。在宿主那边写
-//  `if lock.coversContent { PopopxAppLockOverlayView() }` 是错的，而且错得很隐蔽：
-//  `submit(pin:)` 在补时**之前**就 `unlock()`，那一瞬间 `coversContent` 转假，
-//  宿主于是把整个遮罩从层级里**摘掉**——本层内部那条"流程在飞就不许撤"的保险
-//  根本来不及说话，视图已经没了，`@State` 里的相位也一起没了。剩下的最多 1.2 秒里
-//  内容直接摆在胁迫者眼前，正是本模块定义的那一次穿帮。
-//  判据装在视图里、而不是装在宿主里，为的就是这种时刻没有一个宿主能把它先摘掉。
+//  ### Host wiring contract: mount only `popopxAppLockOverlay()`; no `if coversContent` in the host
+//  This type decides for itself whether it covers; the host's only job is to mount it **unconditionally** (with no lock it is an empty `ZStack`,
+//  produces no hit area, takes no part in layout, and its steady-state cost is zero). Writing
+//  `if lock.coversContent { PopopxAppLockOverlayView() }` over in the host is wrong, and wrong in a hidden way:
+//  `submit(pin:)` calls `unlock()` **before** the padding, and in that instant `coversContent` turns false,
+//  so the host **plucks** the whole overlay out of the hierarchy — the internal "no removal while a flow is in flight" safeguard
+//  never gets a say: the view is already gone and the phase in `@State` went with it. For the remaining 1.2 s at most,
+//  the content sits directly in front of the coercer — exactly the exposure this module defines.
+//  The criterion lives in the view rather than in the host so that at such a moment no host can pluck it out first.
 //
-//  ### 本文件做不到的事（诚实边界，不许在文案里暗示做到了）
-//  1. `PopopxScreenCaptureShieldView` 只把**它自己承载的那部分内容**挪出屏幕采集 buffer
-//     （机理与私有画布的红线见 `PopopxScreenCaptureShieldView.swift` 文件头，
-//     以及它对 `UITextField.isSecureTextEntry` 的唯一开关约定）。
-//     被遮罩盖住的会话列表仍在主宿主那一层，录屏拿到的是**它们自己**那一份像素——
-//     磨砂只骗得过眼睛，骗不过 buffer。要真正做到"锁屏期间录不到列表"，得由窗口级方案
-//     （`PopopxSecureWindowManager` 那一类）或锁屏时把底层视图摘掉来承担，本文件不假称有。
-//  2. 遮罩挂在宿主视图的 `overlay` 上，因此**盖不住以 sheet / fullScreenCover 呈现的层**
-//     （它们在窗口层级里位于本视图之上）。宿主必须挂在最顶层窗口容器上，
-//     并且锁定时如果正有模态在飞，需要由宿主自己先收掉——这是接线侧的事。
-//  3. `PIN` 是 `String`，归 ARC 管、覆写不了，本层只承诺"流程结束立刻丢引用"。
-//     真正被清零的那一份拷贝在 `PopopxDuressAuthManager.derive(secret:salt:iterations:)` 里
-//     （`PopopxDuressAuthManager` 的 `derive(secret:salt:iterations:)`：派生出的那份 `Data`
-//     由 `defer { popopxSecureErase(&secret) }` 就地清零）。
-//  4. 口令派生要跑两次 PBKDF2，常规码也要等满 1.2 秒——这不是本层的 bug，
-//     是 `minimumFlowSeconds` 存在的原因：让真自毁藏在同一条下限里。
+//  ### What this file cannot do (honest limits; copy must not imply otherwise)
+//  1. `PopopxScreenCaptureShieldView` moves only **the content it hosts itself** out of the screen-capture buffer
+//     (for the mechanism and the private-canvas red lines see the header of `PopopxScreenCaptureShieldView.swift`,
+//     and its sole-switch arrangement for `UITextField.isSecureTextEntry`).
+//     The chat list covered by the overlay still lives in the main host layer, so a recording gets **their own** pixels —
+//     frosted glass fools the eye, not the buffer. To truly keep the list out of recordings while locked, a window-level solution
+//     (the `PopopxSecureWindowManager` kind) or removing the underlying views while locked has to carry that; this file does not pretend to have it.
+//  2. The overlay is mounted on the host view's `overlay`, so it **cannot cover layers presented as sheet / fullScreenCover**
+//     (they sit above this view in the window hierarchy). The host must mount it on the topmost window container,
+//     and if a modal is in flight when the lock comes up, the host has to dismiss it first — that is wiring-side work.
+//  3. `PIN` is a `String`, owned by ARC and not overwritable; this layer only promises to drop the reference as soon as the flow ends.
+//     The copy that is actually zeroed lives in `PopopxDuressAuthManager.derive(secret:salt:iterations:)`
+//     (`derive(secret:salt:iterations:)` of `PopopxDuressAuthManager`: the `Data` produced by the derivation
+//     is zeroed in place by `defer { popopxSecureErase(&secret) }`).
+//  4. Passphrase derivation runs PBKDF2 twice, so even the normal code waits the full 1.2 s — this is not a bug in this layer,
+//     it is the reason `minimumFlowSeconds` exists: so that a real self-destruct hides behind the same lower bound.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
-//  ⚠️ 本文件**不加** `#Preview` / `PreviewProvider`：CI 的快照比对会给新增预览判失败。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. The red line forbids scripts modifying project.pbxproj.
+//  ⚠️ This file **adds no** `#Preview` / `PreviewProvider`: CI snapshot comparison would rule a new preview a failure.
 //
 
 import SwiftUI
 import UIKit
 
-// MARK: - 文案
+// MARK: - Copy
 
-/// 遮罩上会出现的每一句话。集中一处，是为了让"两支必须逐字相同"这条不变量
-/// 在字面上就只有一份来源——散在布局里写字符串，迟早有一支被改掉一个字。
+/// Every sentence that appears on the overlay. Gathering them in one place is so that the invariant "the two branches must be word-for-word identical"
+/// has literally one source in the text itself — strings written all over the layout will sooner or later see one branch changed by a single word.
 ///
-/// 这里**不**插值 `PopopxDuressAuthManager.pinLength`：那是个 `@MainActor` 静态量，
-/// 从非隔离的全局初始化里读它是 Swift 6 的错。带位数的两句在面板的 `dotsLabel` 里现拼。
+/// This does **not** interpolate `PopopxDuressAuthManager.pinLength`: that is a `@MainActor` static value,
+/// and reading it from a non-isolated global initialiser is a Swift 6 error. The two sentences with the digit count are composed on the fly in the panel's `dotsLabel`.
 private enum PopopxLockCopy {
     static let headlineFallback = NSLocalizedString("Locked", comment: "")
     static let symbolFallback = "lock"
@@ -127,14 +127,14 @@ private enum PopopxLockCopy {
     static let minimalNote = NSLocalizedString("This device has no unlock passcode yet — unlock first, then turn it on under Settings.", comment: "")
     static let minimalUnlock = NSLocalizedString("Unlock", comment: "")
 
-    // 冷却层。`%@` 只吃 `PopopxLockoutSchedule.phrase(_:)` 那一种读法，别处不许另拼一套数字。
+    // Cooldown layer. `%@` accepts only the one reading of `PopopxLockoutSchedule.phrase(_:)`; no other place may assemble its own set of numbers.
     static let lockedOutPrompt = NSLocalizedString("Disabled", comment: "")
     static let lockedOutFormat = NSLocalizedString("POPOPX is disabled. Try again in %@.", comment: "")
     static let lockedOutFootnote = NSLocalizedString("During this cooldown the keypad, Face ID and the mnemonic phrase are all refused.", comment: "")
-    /// 读给 VoiceOver 的那一句**不含秒数**：理由见 `PopopxLockPanel.lockedOut`。
+    /// The sentence read to VoiceOver **contains no seconds**: see `PopopxLockPanel.lockedOut` for the reason.
     static let lockedOutVoiceOver = NSLocalizedString("POPOPX is disabled and cooling down. The keypad, Face ID and the mnemonic phrase are temporarily unavailable and come back automatically when the countdown ends.", comment: "")
 
-    // 助记词那一格。`mnemonicConsequence` 必须在**按下之前**就看得见：它说的是一次不可逆的删除。
+    // The mnemonic cell. `mnemonicConsequence` must be visible **before the press**: it describes an irreversible deletion.
     static let mnemonicEntry = NSLocalizedString("Forgot the passcode? Reset with the 12-word mnemonic phrase", comment: "")
     static let mnemonicPrompt = NSLocalizedString("Use the 12-word mnemonic phrase", comment: "")
     static let mnemonicPhraseField = NSLocalizedString("12 mnemonic words", comment: "")
@@ -147,12 +147,12 @@ private enum PopopxLockCopy {
     static let mnemonicFailed = NSLocalizedString("The reset did not complete; try again later", comment: "")
 }
 
-// MARK: - 尺寸与动效常量
+// MARK: - Size and motion constants
 
-/// 只有两种数字：由 `PopopxMetrics` 代币相加得到的尺寸，以及**不是间距**的归一化系数
-/// （透明度、缩放倍率、每步毫秒数）。写死一个间距或圆角就是返工，把它们称作"尺寸"也是。
+/// Only two kinds of numbers: sizes obtained by adding up `PopopxMetrics` tokens, and normalised factors that are **not spacing**
+/// (opacity, scale factor, milliseconds per step). Hard-coding a spacing or a corner radius is rework, and so is calling them "sizes".
 private enum PopopxLockLayout {
-    /// 单键边长：`minHitTarget`（44）是硬下限，再加一档 `spaceS` 才不挤。
+    /// Key side length: `minHitTarget` (44) is the hard floor, plus one `spaceS` step so it is not cramped.
     static let keySide: CGFloat = PopopxMetrics.minHitTarget + PopopxMetrics.spaceS
     static let keyGap: CGFloat = PopopxMetrics.spaceS
     static let dotSide: CGFloat = PopopxMetrics.spaceS
@@ -161,85 +161,85 @@ private enum PopopxLockLayout {
 }
 
 private enum PopopxLockMotion {
-    /// 呼吸的两个刻度。只有 opacity / scale——理由见文件头"呼吸动画"那一段。
+    /// The two breathing ticks. opacity / scale only — see the "breathing animation" paragraph in the file header for why.
     static let breathScaleSmall: CGFloat = 0.94
     static let breathScaleLarge: CGFloat = 1.06
     static let breathDim: Double = 0.35
     static let breathBright: Double = 0.85
-    /// 抖动幅度与每步时长。幅度取一档间距代币，时长不是间距，故允许写毫秒。
+    /// Shake amplitude and per-step duration. The amplitude takes one spacing token step; duration is not spacing, so milliseconds are allowed.
     static let shakeAmplitude: CGFloat = PopopxMetrics.spaceS
     static let shakeStep: Duration = .milliseconds(80)
-    /// 磨砂之上再压一层底色，让 `label` 站得住；留一点不完全遮住，磨砂才看得出是磨砂。
+    /// A base colour pressed on top of the frost so that `label` holds up; leaving it slightly un-opaque is what makes the frost read as frost.
     static let backdropWash: Double = 0.72
 }
 
-// MARK: - 遮罩状态机
+// MARK: - Overlay state machine
 
-/// 遮罩自己的那一格状态。**只有**流程相位、已输数字、显示用的文案与两个动效刻度。
+/// The overlay's own state cell. **Only** the flow phase, the digits typed, the display copy and the two motion ticks.
 ///
-/// 刻意不写 `isLocked`、也不写任何"这次是哪把码"的痕迹：`PopopxAppLockState` 是模块共用的
-/// 那一份，而"哪把码"这件事一旦在界面层留了副本（一个 `wasDuress` 之类的字段），
-/// 就迟早会有一行界面代码去读它——那正是不变量被破坏的方式。这里没有可读的东西。
+/// Deliberately no `isLocked` and no trace of "which code this time": `PopopxAppLockState` is the one shared by the modules,
+/// and once "which code" leaves a copy in the interface layer (a field like `wasDuress`),
+/// sooner or later some line of interface code will read it — that is exactly how the invariant gets broken. There is nothing readable here.
 @MainActor
 @Observable
 final class PopopxAppLockOverlayModel {
     enum Phase: Hashable {
-        /// 键盘等着输码。
+        /// The keypad waits for a code to be entered.
         case keypad
-        /// 已提交，呼吸中。常规码与胁迫码都停在这一格，且只有这一格。
+        /// Submitted, breathing. Both the normal code and the duress code stop in this cell, and only in this cell.
         case breathing
-        /// 还没设过双密码：只有一个"解锁"按钮的降级态。
+        /// No dual passcodes configured yet: the degraded state with a single "Unlock" button.
         case minimalUnlock
-        /// 防爆破冷却中。数字键、Face ID、助记词入口三样一起不接命中，
-        /// 画面中央只剩一个每秒一跳的倒计时。
+        /// Brute-force cooldown in progress. Digit keys, Face ID and the mnemonic entry all refuse hits together,
+        /// and the centre of the screen keeps only a countdown ticking once a second.
         case lockedOut
-        /// 「用 12 词助记词重置」那一格：词组 + 新码 + 再输一遍，提交后进 `completeUnlock()`。
+        /// The "reset with the 12-word mnemonic" cell: phrase + new code + retype, and after submit it goes into `completeUnlock()`.
         case mnemonicReset
     }
 
-    /// 锁状态、认证、传感器——三个共享单例。`let`：本类只读它们、只经由公开方法写它们。
+    /// Lock state, authentication, sensors — three shared singletons. `let`: this class only reads them and only writes them through public methods.
     let lock = PopopxAppLockState.shared
     let auth = PopopxDuressAuthManager.shared
     let motion = PopopxAntiTheftMotionGuard.shared
 
     private(set) var phase: Phase = .keypad
-    /// 顶部那一行：锁屏出现时就**抄死**，之后不跟 `lock.reason` 走。
-    /// 因为 `unlock()` 会把 `reason` 清成 nil，而遮罩还要继续呼吸 1.2 秒——
-    /// 直接绑定就是"文案在半空里自己消失"，那是一次肉眼可见的异常。
+    /// The top line: **copied and frozen** when the lock screen appears, afterwards it does not follow `lock.reason`.
+    /// Because `unlock()` clears `reason` to nil while the overlay still has to breathe for 1.2 s —
+    /// binding it directly would be "the copy vanishing in mid-air", which is a visibly noticeable anomaly.
     private(set) var headline: String = PopopxLockCopy.headlineFallback
     private(set) var headSymbol: String = PopopxLockCopy.symbolFallback
     private(set) var wrongHint: String?
-    /// 生物识别键是否显示。开局算一次存下来：`biometricsAvailable` 每次调用都要新建一个
-    /// `LAContext`，不能在 `body` 里逐帧问。
+    /// Whether the biometric key shows. Computed once at the start and stored: `biometricsAvailable` builds a new
+    /// `LAContext` on every call, so it cannot be asked frame by frame inside `body`.
     private(set) var showsBiometricKey = false
     var pin: String = ""
     private(set) var breath = false
     private(set) var shakeOffset: CGFloat = 0
-    /// 只当"错误发生了第几次"的触发器用；计数本身不进任何可见文案。
+    /// Used only as a trigger for "which failure this is"; the count itself never enters any visible copy.
     private(set) var wrongCount = 0
 
     private var submitTask: Task<Void, Never>?
     private var shakeTask: Task<Void, Never>?
     private var biometricRequested = false
-    /// 本轮流程是否已经把呼吸提交给动画系统。见 `setBreathing(_:reduceMotion:)`。
+    /// Whether this flow round has already committed the breathing animation to the animation system. See `setBreathing(_:reduceMotion:)`.
     private var breathStarted = false
-    /// 冷却到点的那**一次**唤醒。不是每秒心跳——每秒那一跳由面板的 `TimelineView` 自己负责，
-    /// 见 `startLockoutWatch()` 的理由。
+    /// The **single** wake-up when the cooldown expires. Not a per-second heartbeat — the per-second tick is owned by the panel's `TimelineView`,
+    /// see `startLockoutWatch()` for the reason.
     private var lockoutTask: Task<Void, Never>?
 
-    // MARK: 助记词那一格的三个输入
+    // MARK: The three inputs of the mnemonic cell
     //
-    // 这三个字段和设置页那两把码是同一类东西：**明文的界面副本**。管理器只在这一格
-    // 的一次 `resetEntryPinWithMnemonic` 调用里读它们，之后（提交、退回键盘、遮罩退场、
-    // 重新拉锁）一律由 `resetMnemonicForm()` 清掉。`mnemonicInput` 尤其要紧——
-    // 那 12 个词在安全存储里另有一份可读副本，界面上这一份不该比这一次机会活得更久。
+    // These three fields are the same kind of thing as the two codes on the settings page: **plaintext interface copies**. The manager reads them only in this cell,
+    // during the single `resetEntryPinWithMnemonic` call, and afterwards (submit, back to keypad, overlay exit,
+    // re-raising the lock) they are always cleared by `resetMnemonicForm()`. `mnemonicInput` matters most —
+    // those 12 words have another readable copy in secure storage, so the one on screen should not outlive this single opportunity.
     var mnemonicInput = ""
     var newPin = ""
     var newPinConfirm = ""
 
-    /// 「忘记密码？使用 12 词助记词重置」那一行给不给。三个条件缺一不可：
-    /// 词组真的在（不在就没有可校验的东西）、常规码记录还在（重置写的就是它）、
-    /// 并且当前不在冷却（冷却期内三样输入口一起关掉，这是那张表的定义）。
+    /// Whether to offer the "Forgot your code? Reset with the 12-word mnemonic" line. All three conditions are required:
+    /// the phrase really is there (without it there is nothing to verify), the normal-code record is still there (reset writes to it),
+    /// and we are not currently in cooldown (during cooldown all three input doors close together — that is the definition of that table).
     var canOfferMnemonicReset: Bool {
         auth.mnemonicConfigured && auth.normalConfigured && !auth.isLockedOut
     }
@@ -250,27 +250,27 @@ final class PopopxAppLockOverlayModel {
             && newPin == newPinConfirm
     }
 
-    /// 面板每秒问一次"还剩多久"。它读的是 `context.date`，不是 `Date()`：
-    /// 一个 `TimelineView` 的调度时刻和一次自行取来的当前时间可以差几十毫秒，
-    /// 显示的数字因此应当只来自那一个被调度的时刻。
+    /// The panel asks once a second "how much is left". It reads `context.date`, not `Date()`:
+    /// a `TimelineView`'s scheduled instant and a self-fetched current time can differ by tens of milliseconds,
+    /// so the displayed number should come only from that one scheduled instant.
     func lockoutRemaining(at date: Date) -> TimeInterval {
         guard let endsAt = auth.lockoutEndsAt else { return 0 }
         return max(0, endsAt.timeIntervalSince(date))
     }
 
-    /// 是否处于"只呼吸、什么都不显示"的那一格。两条来源，缺一不可：
-    /// 1. 本地 `phase == .breathing`——本层刚提交过密码，常规码也要静默满 1.2 秒；
-    /// 2. 上游静默自毁在飞（`lock.isLocked && !lock.showsLockUI`）——这条路可能由本层
-    ///    看不见的入口发起，只认本地状态就会在自毁中间把键盘端回去。
-    /// 见文件头那一段：`coversContent` 管盖不盖，`showsLockUI` 管键盘显不显，
-    /// 本层把它们和本地 `phase` 取并集，才盖得住 `unlock()` 与补时那两个翻转点。
+    /// Whether we are in the "breathe only, show nothing" cell. Two sources, both required:
+    /// 1. local `phase == .breathing` — this layer just submitted a password, and the normal code too must stay silent for the full 1.2 s;
+    /// 2. an upstream silent self-destruct in flight (`lock.isLocked && !lock.showsLockUI`) — this path may be started
+    ///    from an entry this layer cannot see, and trusting only local state would hand the keypad back mid-wipe.
+    /// See the file-header paragraph: `coversContent` governs whether it covers, `showsLockUI` governs whether the keypad shows,
+    /// and this layer unions them with the local `phase` so that both flip points, `unlock()` and the padding, are covered.
     var silentFlow: Bool {
         phase == .breathing || (lock.isLocked && !lock.showsLockUI)
     }
 
-    /// 遮罩在不在。`coversContent` 负责"锁着就必须盖住"，`silentFlow` 负责
-    /// "流程在飞的时候谁都不许把遮罩拿走"——`submit` 在补时之前就先 `unlock()` 了，
-    /// 少了后半句，遮罩会在自毁的最后几百毫秒自己掀掉。
+    /// Whether the overlay is present. `coversContent` is responsible for "locked means it must cover", `silentFlow` for
+    /// "nobody may take the overlay away while a flow is in flight" — `submit` calls `unlock()` before the padding,
+    /// and without the second half the overlay would tear itself off during the last few hundred milliseconds of the wipe.
     var presents: Bool {
         lock.coversContent || silentFlow
     }
@@ -279,10 +279,10 @@ final class PopopxAppLockOverlayModel {
         pin.count == PopopxDuressAuthManager.pinLength
     }
 
-    // MARK: 生命周期
+    // MARK: Lifecycle
 
-    /// 遮罩开始呈现。**幂等**，且被 `initial: true` 的 `onChange` 在挂载时调一次：
-    /// 冷启动恰好落在已锁状态上时，没有别的路径会把 `phase` 摆正。
+    /// The overlay starts presenting. **Idempotent**, and called once on mount by the `initial: true` `onChange`:
+    /// when a cold start happens to land on an already-locked state, no other path would put `phase` right.
     func begin() {
         guard phase != .breathing else { return }
         pin = ""
@@ -291,15 +291,15 @@ final class PopopxAppLockOverlayModel {
         stopBreathing()
         resetMnemonicForm()
         biometricRequested = false
-        // Keychain 可能在别的会话里被改过（自毁就是这种改动），每次进遮罩重问一遍。
+        // The Keychain may have been changed in another session (a self-destruct is such a change), so it is asked again on every entry to the overlay.
         auth.refreshConfiguration()
         if let reason = lock.reason {
             headline = reason.userText
             headSymbol = reason.symbolName
         }
         showsBiometricKey = auth.prefersBiometricUnlock
-        // 冷却的判断放在"有没有常规码"之前：这张表拦的是**输入口**，与拦下的是哪一把码无关。
-        // 冷启动落在冷却中段也走这一支——`lockoutEndsAt` 落盘在安全存储里，就是为了这一刻。
+        // The cooldown check comes before "is there a normal code": this table gates the **input doors**, regardless of which code it is stopping.
+        // A cold start landing mid-cooldown takes this branch too — `lockoutEndsAt` is persisted in secure storage precisely for this moment.
         if auth.isLockedOut {
             phase = .lockedOut
             startLockoutWatch()
@@ -309,12 +309,12 @@ final class PopopxAppLockOverlayModel {
         } else {
             phase = .minimalUnlock
         }
-        // 锁已经拉起来了，再确认一次停采。传感器侧的 `trigger` 自己会停，但模块二、
-        // 手动锁定、超时那几条路不经过模块一的停采点——`lockedDidChange()` 是唯一的统一出口。
+        // The lock is already raised, so confirm the sampling stop once more. The sensor-side `trigger` stops itself, but module 2,
+        // manual lock and timeout do not pass module 1's sampling-stop point — `lockedDidChange()` is the only unified exit.
         motion.lockedDidChange()
     }
 
-    /// 遮罩退场后收尾，下一次拉锁从干净的键盘开始。
+    /// Wrap-up after the overlay exits, so the next lock starts from a clean keypad.
     func endPresenting() {
         guard phase != .breathing else { return }
         pin = ""
@@ -328,16 +328,16 @@ final class PopopxAppLockOverlayModel {
         biometricRequested = false
     }
 
-    // MARK: 键盘
+    // MARK: Keypad
 
-    /// 键盘是否可交互。`phase` 之外还要问 `silentFlow`：静默自毁可能由本层看不见的入口
-    /// 发起，那一刻 `phase` 还停在 `.keypad`，而画面上已经没有键盘了——
-    /// 看不见却按得动的键，比按不动更糟。
+    /// Whether the keypad is interactive. Besides `phase` it also asks `silentFlow`: a silent self-destruct may be started from an entry
+    /// this layer cannot see, in which case `phase` still sits at `.keypad` while the screen has no keypad left —
+    /// an invisible but tappable key is worse than one that does not respond.
     var keypadLive: Bool { phase == .keypad && !silentFlow }
 
     func tapDigit(_ digit: Int) {
         guard keypadLive, pin.count < PopopxDuressAuthManager.pinLength else { return }
-        // 输码也是"人在操作"，给超时判据一个节拍，免得输到一半又被拉一次锁。
+        // Typing a code is also "a person acting", so it gives the timeout criterion a beat, lest the lock be raised again halfway through typing.
         lock.noteInteraction()
         wrongHint = nil
         pin += String(digit)
@@ -349,20 +349,20 @@ final class PopopxAppLockOverlayModel {
         pin.removeLast()
     }
 
-    /// 确认键。唯一的提交入口——不做"输满 6 位自动提交"，因为自动提交会把
-    /// 呼吸起点绑在最后一次按键上，而显式提交把它绑在一个确定发生过的动作上。
+    /// The confirm key. The only submit entry — there is no "auto-submit after 6 digits", because auto-submit would bind
+    /// the breathing start to the last keypress, whereas an explicit submit binds it to an action that certainly happened.
     func send(reduceMotion: Bool) {
         guard keypadLive, canSend else { return }
         lock.noteInteraction()
         let entered = pin
         phase = .breathing
-        // 动画**在这里**提交，不等 `onChange`：Task 体会被排到主 actor 队列上，
-        // 它和一次视图更新谁先跑没有保证，而这条动画必须赶在擦除段占住主线程之前交给
-        // 渲染进程（文件头"呼吸动画"那一段）。`setBreathing` 幂等，面板随后那次调用是空转。
+        // The animation is committed **here**, without waiting for `onChange`: the Task body is queued on the main actor,
+        // and there is no guarantee whether it or a view update runs first, while this animation must be handed to
+        // the render process before the erase section occupies the main thread (the "breathing animation" paragraph in the header). `setBreathing` is idempotent, so the panel's later call spins empty.
         setBreathing(true, reduceMotion: reduceMotion)
         submitTask = Task { [weak self] in
             guard let self else { return }
-            // 不自己掐表：`submit` 内部已经把不足 `minimumFlowSeconds` 的时间补到末尾。
+            // Does not keep its own time: `submit` already pads the shortfall below `minimumFlowSeconds` at the end.
             let outcome = await self.auth.submit(pin: entered)
             self.finish(outcome: outcome)
         }
@@ -375,7 +375,7 @@ final class PopopxAppLockOverlayModel {
         requestBiometricsIfNeeded()
     }
 
-    /// 降级态的那一个按钮：还没有任何密码可言，直接交回界面。
+    /// The single button of the degraded state: there is no password to speak of yet, so hand it straight back to the interface.
     func unlockWithoutPin() {
         pin = ""
         phase = .keypad
@@ -383,7 +383,7 @@ final class PopopxAppLockOverlayModel {
         motion.lockedDidChange()
     }
 
-    // MARK: 助记词重置
+    // MARK: Mnemonic reset
 
     func beginMnemonicReset() {
         guard keypadLive, canOfferMnemonicReset else { return }
@@ -400,16 +400,16 @@ final class PopopxAppLockOverlayModel {
         phase = .keypad
     }
 
-    /// 提交那 12 个词。校验、写新码、清应急擦除密码、清冷却计数全部在
-    /// `PopopxDuressAuthManager.resetEntryPinWithMnemonic` 里做完，本层只管界面。
+    /// Submitting those 12 words. Verification, writing the new code, clearing the emergency wipe password and clearing the cooldown counter are all done
+    /// inside `PopopxDuressAuthManager.resetEntryPinWithMnemonic`; this layer only handles the interface.
     ///
-    /// **先清界面副本、后 `await`**：这一次调用可能要走三百多毫秒（两次 10 万次派生），
-    /// 那期间键盘上还留着明文的风险比"失败后要重输一遍"大得多。失败时管理器会给出
-    /// 那十五句里的一句，机主照着再输一次就行。
+    /// **Clear the interface copies first, then `await`**: this call may take over three hundred milliseconds (two 100k-round derivations),
+    /// and during that time the risk of leaving plaintext on the keypad is far greater than "having to retype after a failure". On failure the manager returns
+    /// one of those fifteen sentences, and the owner just retypes accordingly.
     ///
-    /// 结构不合法（`mnemonicMalformed`）也在这一格解释：`canSubmitMnemonicReset` 只看
-    /// "有没有输过东西"，不看词数与拼法。把不合法的输入用"按钮按不动"来表达，
-    /// 机主读到的是"这个按钮坏了"；让管理器说出"需要 12 个标准英文词"才是一句能照着做的话。
+    /// Malformed structure (`mnemonicMalformed`) is also explained in this cell: `canSubmitMnemonicReset` only looks at
+    /// "was anything typed", not at word count or spelling. Expressing invalid input as "the button won't press"
+    /// makes the owner read "this button is broken"; only the manager saying "12 standard English words required" is a sentence one can act on.
     func submitMnemonicReset() async {
         guard phase == .mnemonicReset, canSubmitMnemonicReset else { return }
         lock.noteInteraction()
@@ -424,9 +424,9 @@ final class PopopxAppLockOverlayModel {
         } catch let error as PopopxDuressSetupError {
             wrongHint = error.errorDescription
             PopopxHaptics.notice(.error)
-            // 不问"抛出来的是不是 `lockedOut`"，直接问冷却表：这一次错的助记词可能刚好
-            // 把第 5 次踩出来（`settleWrongAttempt` 在抛 `.mnemonicIncorrect` 之前就跑过了），
-            // 那时错误句是"助记词不正确"，而输入口已经该关上了。
+            // Instead of asking "was the thrown error `lockedOut`", ask the cooldown table directly: this wrong mnemonic may well
+            // have just landed as the 5th attempt (`settleWrongAttempt` already ran before throwing `.mnemonicIncorrect`),
+            // in which case the error sentence is "mnemonic incorrect" while the input doors should already be shut.
             if auth.isLockedOut {
                 phase = .lockedOut
                 startLockoutWatch()
@@ -440,13 +440,13 @@ final class PopopxAppLockOverlayModel {
         }
     }
 
-    /// 重置成功之后的收尾，走的是与"一次成功解锁"完全相同的那一段。
+    /// The wrap-up after a successful reset runs exactly the same section as "one successful unlock".
     ///
-    /// 为什么可以直接进去、不再逼机主用刚设的码在键盘上验一遍：这一条路**在类型上就
-    /// 不可能是胁迫码**——`resetEntryPinWithMnemonic` 的末尾把应急擦除密码删了，
-    /// 交出那把码的人不会再抹掉任何数据，所以这里没有"替胁迫者念出结论"的风险。
-    /// 而逼一个刚丢过密码的人立刻盲打一把 3 秒前才设的码，只会把"重置到底成没成"
-    /// 变成第二个疑问。
+    /// Why it can go straight in without forcing the owner to verify the just-set code on the keypad: this path is
+    /// **impossible by type to be a duress code** — the end of `resetEntryPinWithMnemonic` deletes the emergency wipe password,
+    /// so whoever handed over that code can no longer wipe any data, and there is no risk here of "reading the verdict out for the coercer".
+    /// And forcing someone who just lost their password to blindly type a code set three seconds ago only turns "did the reset work at all"
+    /// into a second doubt.
     private func mnemonicResetSucceeded() {
         auth.refreshConfiguration()
         wrongHint = nil
@@ -454,21 +454,21 @@ final class PopopxAppLockOverlayModel {
         completeUnlock()
     }
 
-    /// 三个输入框一次性收回。凡是从 `phase == .mnemonicReset` 出去的路口都要过这里。
+    /// All three input fields are taken back at once. Every exit from `phase == .mnemonicReset` passes through here.
     private func resetMnemonicForm() {
         mnemonicInput = ""
         newPin = ""
         newPinConfirm = ""
     }
 
-    // MARK: 冷却
+    // MARK: Cooldown
 
-    /// 冷却到点时把画面交回键盘的**一次性**闹钟。
+    /// A **one-shot** alarm that hands the screen back to the keypad when the cooldown expires.
     ///
-    /// 为什么不是每秒一跳的心跳：那一跳由面板里的 `TimelineView` 负责，它自己会随剩余
-    /// 时间归零而停。两个都要，就有了两个"现在几点"的口径，而它们迟早会说不一样的话。
-    /// `+0.25` 是留给取整的余量：`phrase(_:)` 向上取整，界面上"0 秒"之后还剩几百毫秒是常态，
-    /// 到点再问一次 `isLockedOut`，还锁着就重挂一次闹钟。
+    /// Why it is not a per-second heartbeat: that tick is owned by the panel's `TimelineView`, which stops by itself as the remaining
+    /// time reaches zero. Wanting both gives two notions of "what time is it now", and they will sooner or later say different things.
+    /// `+0.25` is slack left for rounding: `phrase(_:)` rounds up, so a few hundred milliseconds left after the UI shows "0 s" is normal;
+    /// on expiry `isLockedOut` is asked once more, and if still locked the alarm is rearmed.
     private func startLockoutWatch() {
         lockoutTask?.cancel()
         let remaining = auth.lockoutRemainingSeconds
@@ -485,20 +485,20 @@ final class PopopxAppLockOverlayModel {
             } else {
                 self.wrongHint = nil
                 self.phase = .keypad
-                // 交回键盘的那一瞬间不重放 Face ID：机主刚被这道表拦下，
-                // 弹一条系统认证条只会让他以为"锁解了"。让他自己按。
+                // The instant the keypad is handed back does not replay Face ID: the owner was just stopped by this table,
+                // popping a system authentication sheet would only make him think "the lock is off". Let him press it himself.
             }
         }
     }
 
-    // MARK: 动效（由面板把 Reduce Motion 传进来：本类不是 View，拿不到 environment）
+    // MARK: Motion (the panel passes Reduce Motion in: this class is not a View and cannot reach the environment)
 
-    /// 起/停呼吸。**幂等**：一次提交流程里最多只有一次 `repeatForever` 被提交出去，
-    /// 中途重新 `withAnimation` 会让环在半路上重起一个周期——那是一次肉眼可见的顿。
+    /// Start/stop the breathing. **Idempotent**: at most one `repeatForever` is committed per submit flow,
+    /// re-issuing `withAnimation` halfway would restart the ring's cycle mid-flight — that is a visible stutter.
     ///
-    /// 启动只发生在 `send(reduceMotion:)` 里、任何 `await` 之前，于是动画一经提交就在
-    /// 渲染进程手上；随后主线程被 `chatCloseStore()` / `initializeChat()` 占住数百毫秒，
-    /// 呼吸照旧（见文件头：只有 opacity / scale 这类可托管属性撑得住那种时刻）。
+    /// Starting happens only inside `send(reduceMotion:)`, before any `await`, so once committed the animation is in
+    /// the render process's hands; afterwards the main thread is occupied by `chatCloseStore()` / `initializeChat()` for hundreds of milliseconds,
+    /// and the breathing goes on regardless (see the file header: only properties the render process can take over, like opacity / scale, survive that moment).
     func setBreathing(_ on: Bool, reduceMotion: Bool) {
         guard on else {
             stopBreathing()
@@ -514,14 +514,14 @@ final class PopopxAppLockOverlayModel {
         }
     }
 
-    /// 停呼吸：值和"已提交"标记一起收回。漏掉标记的话，下一次提交就不再起动画了。
+    /// Stopping the breathing: the value and the "committed" flag are withdrawn together. Missing the flag would leave the next submission without an animation.
     private func stopBreathing() {
         breathStarted = false
         breath = false
     }
 
-    /// 一次水平抖动。Reduce Motion 下整段不做——这是"差异"，但它在常规码与胁迫码上是
-    /// 同一个值（同一台设备、同一次 `.wrong`），因此不构成穿帮。
+    /// One horizontal shake. Under Reduce Motion the whole thing is skipped — this is a "difference", but it is the same value
+    /// for the normal code and the duress code (same device, same `.wrong`), so it does not constitute an exposure.
     func shake(reduceMotion: Bool) {
         guard !reduceMotion else { return }
         shakeTask?.cancel()
@@ -537,14 +537,14 @@ final class PopopxAppLockOverlayModel {
         }
     }
 
-    // MARK: 内部
+    // MARK: Internal
 
     private func requestBiometricsIfNeeded() {
         guard showsBiometricKey, !biometricRequested else { return }
         biometricRequested = true
         auth.requestBiometricUnlock(reason: PopopxLockCopy.biometricReason) { [weak self] granted in
-            // 回调线程由 LocalAuthentication 决定（管理器内部会跳回主 actor，但它的
-            // `completion` 类型不承诺这件事），这里再跳一次，不猜线程。
+            // The callback thread is decided by LocalAuthentication (the manager hops back to the main actor internally, but its
+            // `completion` type does not promise that), so we hop once more here rather than guessing the thread.
             Task { @MainActor [weak self] in
                 self?.biometricFinished(granted: granted)
             }
@@ -552,10 +552,10 @@ final class PopopxAppLockOverlayModel {
     }
 
     private func biometricFinished(granted: Bool) {
-        // false 只意味着"该把键盘交出来了"——键盘就在底下，什么都不必改。
+        // false only means "the keypad should be handed over" — the keypad is right underneath and nothing has to change.
         guard granted else { return }
-        // 成功时管理器**已经** `unlock()` 并把失败计数清零了（`PopopxDuressAuthManager` 的 `requestBiometricUnlock(reason:completion:)` 注释），
-        // 这里不重复改锁状态，只做界面收尾 + 恢复采样。
+        // On success the manager has **already** called `unlock()` and zeroed the failure counter (the comment on `requestBiometricUnlock(reason:completion:)` of `PopopxDuressAuthManager`),
+        // so this does not repeat the lock-state change; it only finishes the interface work and resumes sampling.
         pin = ""
         wrongHint = nil
         phase = .keypad
@@ -566,9 +566,9 @@ final class PopopxAppLockOverlayModel {
         submitTask = nil
         switch outcome {
         case .unlocked, .duress:
-            // ⚠️⚠️ 不变量（文件头有完整理由）：这两支**必须是同一个 case、同一段代码**。
-            // 不许在这里加 `if outcome == .duress`，不许加日志、触觉、文案、延时、颜色。
-            // 界面拿到的是"一次成功的解锁"，仅此而已。
+            // ⚠️⚠️ Invariant (full reasoning in the file header): these two branches **must be the same case, the same code**.
+            // No `if outcome == .duress` here, and no added logging, haptics, copy, delay or colour.
+            // The interface gets "a successful unlock", nothing more.
             completeUnlock()
         case .wrong:
             pin = ""
@@ -576,19 +576,19 @@ final class PopopxAppLockOverlayModel {
             phase = .keypad
             wrongHint = PopopxLockCopy.wrong
             PopopxHaptics.notice(.error)
-            // 抖动由面板在 `wrongCount` 变化时用它的 environment 发起。
+            // The shake is started by the panel, using its own environment, when `wrongCount` changes.
             wrongCount += 1
         case .notConfigured:
-            // 还没设双密码（或 Keychain 在别处被清了）。绝不把用户永久锁在门外。
+            // No dual passcodes set yet (or the Keychain was cleared elsewhere). The user must never be locked out permanently.
             pin = ""
             stopBreathing()
             wrongHint = nil
             phase = .minimalUnlock
         case .lockedOut:
-            // 第 5 次起走这一支（以及"已经在冷却里又按了一次确认"）。它**不是**一条错误提示：
-            // 键盘、面容、助记词那三个输入口一起收掉，中央只剩一个每秒一跳的倒计时。
-            // 触觉与 `.wrong` 那一次不同（那里是 `notice(.error)`），但两者在"这一把没开门"
-            // 这件事上完全一致，常规码与胁迫码走的是同一段代码，因此不构成穿帮。
+            // From the 5th attempt on this branch runs (also "confirm pressed again while already in cooldown"). It is **not** an error message:
+            // the keypad, Face ID and the mnemonic inputs all close together, leaving only a once-a-second countdown in the centre.
+            // The haptic differs from the `.wrong` one (there it is `notice(.error)`), but both agree entirely on "this attempt did not open the door",
+            // and the normal code and the duress code run the same code, so it does not constitute an exposure.
             pin = ""
             stopBreathing()
             wrongHint = nil
@@ -599,25 +599,25 @@ final class PopopxAppLockOverlayModel {
         }
     }
 
-    /// 顺序是承重的：先把失败计数清掉、再解铃、最后才告知传感器"锁没了"。
-    /// `lockedDidChange()` 读的是 `isLocked`，放在 `unlock()` 之前它就会照旧停采。
-    /// `unlock()` 自己也已经告知过一次（`PopopxAppLockState` 在解铃末尾直接调
-    /// `PopopxAntiTheftMotionGuard.shared.lockedDidChange()`）——这一句因此是显式的第二次，
-    /// 留着是为了让"锁的两条边缘都要告知传感器"这件事在本文件里也看得见，
-    /// 而不是寄在别人的实现细节上。
+    /// The order is load-bearing: clear the failure count first, then unlock, and only then tell the sensors "the lock is gone".
+    /// `lockedDidChange()` reads `isLocked`; placed before `unlock()` it would stop sampling as before.
+    /// `unlock()` itself has already notified once (`PopopxAppLockState` calls directly at the end of unlocking,
+    /// `PopopxAntiTheftMotionGuard.shared.lockedDidChange()`) — so this line is an explicit second time,
+    /// kept so that "both edges of the lock must notify the sensors" is also visible in this file,
+    /// rather than resting on someone else's implementation details.
     private func completeUnlock() {
         auth.resetBiometricFailures()
         lock.unlock()
         motion.lockedDidChange()
-        // 冷却闹钟与助记词那三个明文副本跟着这一次成功一起收掉。`endPresenting()` 也会做
-        // 同样的事，但那一句要等 `coversContent` 翻过来才跑，而 `submit` 在补时之前就 `unlock()`
-        // 了——中间那几百毫秒里闹钟仍在、词组仍在界面上。这一句把它提前。
+        // The cooldown alarm and the three plaintext mnemonic copies are cleared along with this success. `endPresenting()` would do
+        // the same thing, but that line waits for `coversContent` to flip, and `submit` calls `unlock()` before the padding —
+        // in those few hundred milliseconds the alarm is still armed and the phrase is still on screen. This line moves it earlier.
         lockoutTask?.cancel()
         lockoutTask = nil
         resetMnemonicForm()
-        // `submit` 的胁迫分支内部已经 unlock() 过一次（`submit(pin:)` 里那句 `PopopxAppLockState.shared.unlock()`），
-        // 上面那一句因此可能是第二次——`unlock()` 只是几个赋值，重复调用无副作用。
-        // 保留它，是为了让两支**共用同一段代码**这件事没有例外：常规码那一路不会自己解铃。
+        // `submit`'s duress branch has already called unlock() once internally (the `PopopxAppLockState.shared.unlock()` inside `submit(pin:)`),
+        // so the line above may be the second time — `unlock()` is just a few assignments, and repeated calls have no side effects.
+        // It is kept so that "the two branches **share the same code**" has no exception: the normal-code path does not unlock by itself.
         pin = ""
         stopBreathing()
         wrongHint = nil
@@ -625,10 +625,10 @@ final class PopopxAppLockOverlayModel {
     }
 }
 
-// MARK: - 遮罩本体
+// MARK: - The overlay itself
 
-/// 全屏磨砂遮罩。`init()` 无参：状态一律来自 `PopopxAppLockState.shared`，
-/// 宿主唯一要做的事就是把它挂在最顶层窗口容器上。
+/// A full-screen frosted overlay. `init()` takes no arguments: state always comes from `PopopxAppLockState.shared`,
+/// and the host's only job is to mount it on the topmost window container.
 struct PopopxAppLockOverlayView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -650,25 +650,25 @@ struct PopopxAppLockOverlayView: View {
             if covers {
                 model.begin()
             } else if !model.silentFlow {
-                // 锁放开 ≠ 流程结束：`submit` 在补时之前就先 `unlock()` 了，
-                // 这时候收状态会把还在呼吸的遮罩当场掀掉。见文件头那两个翻转点。
+                // Releasing the lock ≠ the flow being over: `submit` calls `unlock()` before the padding,
+                // and clearing state at that moment would tear off an overlay that is still breathing. See the two flip points in the file header.
                 model.endPresenting()
             }
         }
         .onChange(of: model.presents) { _, presenting in
             guard presenting else { return }
-            // 遮罩是"另一屏"。`argument: nil` 让 VoiceOver 落到新界面上的第一个元素，
-            // 而不是停在被盖住的列表那一行。
+            // The overlay is "another screen". `argument: nil` makes VoiceOver land on the first element of the new interface,
+            // instead of staying on the row of the list it covers.
             UIAccessibility.post(notification: .screenChanged, argument: nil)
         }
     }
 
-    /// 两层：磨砂底（在外层 SwiftUI 树里，material 一定能真的糊出背景）+
-    /// 被采集屏蔽保护的面板。为什么这么分，见文件头"诚实边界"第 1 条。
+    /// Two layers: the frosted base (in the outer SwiftUI tree, where the material really can blur the background) +
+    /// the panel protected by the capture shield. Why it is split this way: see item 1 of the "honest limits" in the file header.
     ///
-    /// `@MainActor`：面板要读 `PopopxDuressAuthManager` 上的隔离常量，而**只有**计算属性
-    /// 可以标隔离——本类型整体不标，是为了让 `init()` 保持非隔离，
-    /// 从而能被非隔离的 `popopxAppLockOverlay()` 直接构造。
+    /// `@MainActor`: the panel reads isolated constants on `PopopxDuressAuthManager`, and **only** computed properties
+    /// may be marked isolated — the type as a whole is unmarked so that `init()` stays non-isolated,
+    /// and can therefore be constructed directly by the non-isolated `popopxAppLockOverlay()`.
     @MainActor private var layers: some View {
         ZStack {
             backdrop
@@ -678,9 +678,9 @@ struct PopopxAppLockOverlayView: View {
         }
     }
 
-    /// 吃掉一切命中的底。三层保险，缺一层就有摸得着的内容：
-    /// material 与色洗本身、`contentShape`（把命中区从"有像素的地方"扩到整个矩形）、
-    /// 空点击 + 零距拖动两条手势（不给底下的滚动视图留任何机会）。
+    /// A base that swallows every hit. Three layers of insurance; miss one and content becomes reachable:
+    /// the material and the colour wash themselves, `contentShape` (widening the hit area from "where there are pixels" to the whole rectangle),
+    /// and the empty tap + zero-distance drag gestures (leaving the scrolling view underneath no chance at all).
     private var backdrop: some View {
         ZStack {
             Rectangle().fill(PopopxMaterial.bar)
@@ -694,13 +694,13 @@ struct PopopxAppLockOverlayView: View {
     }
 }
 
-// MARK: - 面板
+// MARK: - Panel
 
-/// 遮罩上唯一的一块内容：顶部那一行锁原因、6 个点、以及随相位切换的键盘/呼吸/降级态。
+/// The only content on the overlay: the lock-reason line at the top, 6 dots, and the keypad/breathing/degraded state switching with the phase.
 ///
-/// 版式的**反抖动**约定：键盘在呼吸期间只是 `opacity(0)` 占位、不卸载，
-/// 于是面板高度全程不变。任何一次 reflow 都会在胁迫者眼前动一下——而"动一下"
-/// 正是本模块唯一要避免的东西。
+/// The layout's **anti-reflow** convention: during breathing the keypad merely sits there at `opacity(0)`, it is not unmounted,
+/// so the panel height never changes. Any reflow moves something in front of the coercer — and "moving"
+/// is precisely the one thing this module must avoid.
 @MainActor
 private struct PopopxLockPanel: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -731,10 +731,10 @@ private struct PopopxLockPanel: View {
             model.shake(reduceMotion: reduceMotion)
         }
         .onChange(of: model.phase) { _, phase in
-            // 冷却那一格换掉的是整个舞台：键盘不在了，Face ID 也不接了。看不见的机主
-            // 只会得到"按不动了"这一个事实，所以推进去一次 `.layoutChanged`，让焦点落到
-            // 新格上、念 `lockedOut` 那句静态标签（不含秒数，理由见那里的说明）。
-            // 只报"进"不报"出"：出冷却换回键盘时上一句往往还没念完，再推一次会把自已完成的话掐断。
+            // The cooldown cell replaces the whole stage: the keypad is gone and Face ID no longer accepts hits. An owner who cannot see
+            // would get only the bare fact "nothing presses any more", so one `.layoutChanged` is pushed to let focus land on
+            // the new cell and read the static `lockedOut` label (no seconds; see the note there for why).
+            // Only "entering" is announced, not "leaving": when the cooldown ends and the keypad returns, the previous sentence has usually not finished, and pushing again would cut off the sentence it was still speaking.
             if phase == .lockedOut {
                 UIAccessibility.post(notification: .layoutChanged, argument: nil)
             }
@@ -742,7 +742,7 @@ private struct PopopxLockPanel: View {
         .accessibilityIdentifier("popopx.lock.panel")
     }
 
-    // MARK: 顶部
+    // MARK: Top
 
     private var header: some View {
         VStack(spacing: PopopxMetrics.spaceXS) {
@@ -774,10 +774,10 @@ private struct PopopxLockPanel: View {
         .frame(maxWidth: .infinity)
     }
 
-    /// 面板实际呈现的五种格。`breathing` 由 `model.silentFlow` 决定：它同时吃本地 `phase`
-    /// 和上游 `showsLockUI`，所以"自毁在飞、但本层没提交过密码"那种情况也落在这一格里。
-    /// 副标题、进度点朗读、舞台切换全部只读这一个判据——三个地方各拼一次条件，
-    /// 迟早拼出自相矛盾的画面。
+    /// The five cells the panel actually presents. `breathing` is decided by `model.silentFlow`, which takes both the local `phase`
+    /// and the upstream `showsLockUI`, so the case "a wipe is in flight but this layer never submitted a password" also lands in this cell.
+    /// Subtitle, progress-dot announcement and stage switching all read only this one criterion — assembling the condition
+    /// in three places will sooner or later produce a self-contradicting screen.
     enum StageKind: Hashable {
         case keypad
         case breathing
@@ -790,7 +790,7 @@ private struct PopopxLockPanel: View {
         if model.silentFlow { return .breathing }
         switch model.phase {
         case .keypad: return .keypad
-        // 被上一行吃掉，写在这里只为穷尽：本地 `.breathing` 一定让 `silentFlow` 为真。
+        // Consumed by the line above; written here only for exhaustiveness: local `.breathing` always makes `silentFlow` true.
         case .breathing: return .breathing
         case .minimalUnlock: return .minimal
         case .lockedOut: return .lockedOut
@@ -798,14 +798,14 @@ private struct PopopxLockPanel: View {
         }
     }
 
-    /// 冷却与助记词那两格不显示进度点：那六个点是"6 位数字里第几位"，
-    /// 而这两格一个没有输入、一个用文本框输入。隐藏而不是删掉，是为了让面板高度
-    /// 在这五格之间保持完全一致（文件头那条反抖动约定）。
+    /// The cooldown and mnemonic cells show no progress dots: those six dots mean "which of the 6 digits",
+    /// and of these two cells one has no input at all while the other types into text fields. Hidden rather than removed so that the panel height
+    /// stays exactly the same across all five cells (the anti-reflow convention in the file header).
     private var showsDots: Bool {
         stageKind == .keypad || stageKind == .breathing || stageKind == .minimal
     }
 
-    /// 三个相位各有一句副标题。呼吸那一句对常规码与胁迫码是同一句——见不变量。
+    /// Each of the three phases has its own subtitle. The breathing sentence is the same one for the normal code and the duress code — see the invariant.
     private var subline: String {
         switch stageKind {
         case .keypad: return PopopxLockCopy.prompt
@@ -816,7 +816,7 @@ private struct PopopxLockPanel: View {
         }
     }
 
-    // MARK: 进度点
+    // MARK: Progress dots
 
     private var dots: some View {
         HStack(spacing: PopopxLockLayout.dotGap) {
@@ -846,7 +846,7 @@ private struct PopopxLockPanel: View {
             )
     }
 
-    /// 点位说给 VoiceOver 听。里面**只有个数**，永远不含任何一位数字本身。
+    /// The dot positions spoken to VoiceOver. It contains **only a count** and never any of the digits themselves.
     private var dotsLabel: String {
         let total = PopopxDuressAuthManager.pinLength
         if stageKind == .breathing {
@@ -858,7 +858,7 @@ private struct PopopxLockPanel: View {
         return String(format: NSLocalizedString("%1$lld of %2$lld digits entered", comment: ""), model.pin.count, total)
     }
 
-    /// 占位常显：提示出现/消失不许让下面的键盘跳一下。
+    /// The placeholder always shows: a hint appearing or disappearing must not make the keypad below jump.
     private var hint: some View {
         Text(model.wrongHint ?? " ")
             .font(PopopxType.caption)
@@ -870,17 +870,17 @@ private struct PopopxLockPanel: View {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    // MARK: 舞台
+    // MARK: Stage
 
-    /// 键盘始终在场（必要时透明），呼吸层、降级层、冷却层与助记词层叠在它上面——
-    /// 高度因此恒定。`allowsHitTesting(stageKind == .keypad)` 这一句顺带完成了简报要的
-    /// "冷却期内禁用数字键盘、Face ID 与助记词按钮"：那三样全都长在键盘这一层里，
-    /// 层被关掉命中，三样一起关掉，不需要各写一个 `if`（各写一个就会漏写第四个）。
+    /// The keypad is always present (transparent when it must be), with the breathing, degraded, cooldown and mnemonic layers stacked on top —
+    /// so the height is constant. This `allowsHitTesting(stageKind == .keypad)` line also delivers what the brief asked for:
+    /// "disable the digit keypad, Face ID and the mnemonic button during cooldown" — all three live inside the keypad layer,
+    /// so turning off hits for the layer turns off all three with no `if` per item (one `if` each means the fourth gets missed).
     private var stage: some View {
         ZStack {
             keypad
                 .opacity(stageKind == .keypad ? 1 : 0)
-                // `opacity(0)` 不关掉命中：不写这一句，呼吸期间那 10 个看不见的键照样能按。
+                // `opacity(0)` does not disable hit testing: without this line the 10 invisible keys would still be pressable while breathing.
                 .allowsHitTesting(stageKind == .keypad)
                 .accessibilityHidden(stageKind != .keypad)
             if stageKind == .breathing {
@@ -913,15 +913,15 @@ private struct PopopxLockPanel: View {
                     .accessibilityIdentifier("popopx.lock.deleteKey")
             }
             sendButton
-            // 「忘记密码」那一行只在词组真的存在时占这一格。它会不会在会话中途出现/消失
-            // 进而顶动面板高度？不会：`mnemonicConfigured` 只在设置页与抹除流程里变，
-            // 而这两种时刻遮罩都不在 `.keypad` 这一格上。
+            // The "forgot password" line occupies this cell only when the phrase really exists. Could it appear or disappear mid-session
+            // and push the panel height about? No: `mnemonicConfigured` changes only on the settings page and in the wipe flow,
+            // and at both of those moments the overlay is not in the `.keypad` cell.
             if model.canOfferMnemonicReset {
                 mnemonicEntry
             }
         }
-        // 冷却、呼吸、降级、助记词那四格里键盘都不该被 VoiceOver 摸到（`stageKind != .keypad`
-        // 时它已整层不接命中）；`disabled` 再补一道，把"看不见却还能聚焦"这条路也关掉。
+        // In the cooldown, breathing, degraded and mnemonic cells the keypad should not be reachable by VoiceOver (when `stageKind != .keypad`
+        // the whole layer already refuses hits); `disabled` adds one more gate, closing the "invisible but still focusable" road too.
         .disabled(!model.keypadLive)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(PopopxLockCopy.keypad)
@@ -939,7 +939,7 @@ private struct PopopxLockPanel: View {
         }
     }
 
-    /// 左下那一格：能走生物识别就给它，否则留一个同尺寸的占位，`0` 才在中间。
+    /// The bottom-left cell: the biometric key if it can be used, otherwise a same-size placeholder, so that `0` sits in the middle.
     @ViewBuilder private var leadingSlot: some View {
         if model.showsBiometricKey {
             PopopxLockKey(model: model, kind: .biometric)
@@ -951,10 +951,10 @@ private struct PopopxLockPanel: View {
         }
     }
 
-    /// 确认键**不用** `PopopxButton`：那一个在动作返回时会闪一次绿色对勾并补一发
-    /// `notice(.success)`（`PopopxButton` 的 `flashSuccess()`）。给一次刚结束的**自毁**
-    /// 打勾，等于替胁迫者把结论念出来；给"码不对"打勾，则是当场自证按钮没在判码。
-    /// 样式照 `PopopxButton` 的 label 那一套代币来画，只是没有回执。
+    /// The confirm key does **not** use `PopopxButton`: that one flashes a green check when the action returns and adds one
+    /// `notice(.success)` (`flashSuccess()` of `PopopxButton`). Ticking a **self-destruct** that just ended
+    /// is reading the verdict out for the coercer; ticking "wrong code" would prove on the spot that the button is not judging codes.
+    /// The style is drawn from the same token set as `PopopxButton`'s label, only without the receipt.
     private var sendButton: some View {
         Button {
             model.send(reduceMotion: reduceMotion)
@@ -991,10 +991,10 @@ private struct PopopxLockPanel: View {
         model.canSend ? PopopxPalette.onBrand : PopopxPalette.labelSecondary
     }
 
-    // MARK: 呼吸层
+    // MARK: Breathing layer
 
-    /// 只有一个环（scale + opacity）和系统转圈。**没有**"正在处理""正在清除"之类的字：
-    /// 那些话对常规码是多余，对胁迫码是自首。
+    /// Only a ring (scale + opacity) and the system spinner. There are **no** words like "processing" or "clearing":
+    /// for the normal code they are redundant, for the duress code they are a confession.
     private var breathing: some View {
         ZStack {
             Circle()
@@ -1021,11 +1021,11 @@ private struct PopopxLockPanel: View {
         .accessibilityIdentifier("popopx.lock.breathing")
     }
 
-    // MARK: 降级层
+    // MARK: Degraded layer
 
-    /// `.notConfigured`：一个按钮，什么都不多做。这一支**不可能**是胁迫路径
-    /// （没设常规码就不会有胁迫码，见 `PopopxDuressAuthManager.setDuressPin` 的
-    /// `normalPinRequiredFirst`），所以这里可以放心用带回执的 `PopopxButton`。
+    /// `.notConfigured`: one button, nothing more done. This branch **cannot** be the duress path
+    /// (no normal code set means no duress code; see the
+    /// `normalPinRequiredFirst` of `PopopxDuressAuthManager.setDuressPin`), so a receipt-returning `PopopxButton` is safe to use here.
     private var minimalUnlock: some View {
         VStack(spacing: PopopxMetrics.spaceM) {
             Text(PopopxLockCopy.minimalNote)
@@ -1041,21 +1041,21 @@ private struct PopopxLockPanel: View {
         .frame(maxWidth: .infinity)
     }
 
-    // MARK: 冷却层
+    // MARK: Cooldown layer
 
-    /// 冷却期中央那一块。**每秒一跳由 `TimelineView` 提供**，不是本层的心跳任务：
-    /// 数字是 `auth.lockoutEndsAt` 与"这一帧被调度的时刻"之差，读的就是它自己那一份时间，
-    /// 因此遮罩被系统短暂挂起再回来也不会跳到错的秒数上。
+    /// The block in the centre during cooldown. **The per-second tick comes from `TimelineView`**, not from a heartbeat task in this layer:
+    /// the number is the difference between `auth.lockoutEndsAt` and "the instant this frame was scheduled", reading its own time,
+    /// so even if the system suspends the overlay briefly, it will not jump to a wrong number of seconds when it comes back.
     ///
-    /// 字体：`PopopxType.title`（`.title2` + semibold）再叠 `.monospacedDigit()`。
-    /// 任务要的是"等宽字体实时倒计时"，而 `PopopxType` 里没有更大的等宽档——
-    /// `metric` 是 `.footnote`、`metricSmall` 是 `.caption2`，都不该出现在屏幕正中。
-    /// 所以这里不改字号、只换数字形态：等宽在这个位置的作用只有一个，就是每秒跳一位时
-    /// 后面的汉字不许左右移动（那会是一次肉眼可见的 reflow，正是这一屏唯一要避免的事）。
+    /// Font: `PopopxType.title` (`.title2` + semibold) with `.monospacedDigit()` layered on top.
+    /// The task asked for "a monospaced live countdown font", and `PopopxType` has no larger monospaced step —
+    /// `metric` is `.footnote` and `metricSmall` is `.caption2`; neither belongs in the centre of the screen.
+    /// So the font size is not changed here, only the digit shape: monospacing at this position does exactly one thing, which is that as the digits tick each second
+    /// the characters behind them are not allowed to drift sideways (that would be a visible reflow, precisely the one thing this screen must avoid).
     ///
-    /// 那串数字对 VoiceOver 是隐藏的：每秒变化的标签会被反复朗读，而朗读一遍"4 分 59 秒"
-    /// 与朗读一遍"4 分 58 秒"对听的人没有任何区别。静态那一句 + 进这一格时的一次
-    /// `.layoutChanged`（见 `PopopxLockPanel.body`）才是读得懂的版本。
+    /// That number string is hidden from VoiceOver: a label changing every second gets reread over and over, and hearing "4 min 59 s" once
+    /// is no different for the listener from hearing "4 min 58 s" once. The static sentence plus, on entering this cell, a single
+    /// `.layoutChanged` (see `PopopxLockPanel.body`) is the version that is actually understandable.
     private var lockedOut: some View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             let remaining = model.lockoutRemaining(at: context.date)
@@ -1083,11 +1083,11 @@ private struct PopopxLockPanel: View {
         }
     }
 
-    // MARK: 助记词层
+    // MARK: Mnemonic layer
 
-    /// 「忘记密码」那一行。它是键盘的一部分（而不是键盘外面多出来的一块），
-    /// 为的是冷却期里那一层整块不接命中时，它跟着一起消失——
-    /// 单独挂在外面就要在这里再补一个 `if`，而补的那个 `if` 迟早会漏。
+    /// The "forgot password" line. It is part of the keypad (not an extra block outside it),
+    /// so that when the whole keypad layer refuses hits during cooldown, it disappears along with it —
+    /// mounted separately outside would need another `if` here, and that extra `if` will be missed sooner or later.
     private var mnemonicEntry: some View {
         Button {
             model.beginMnemonicReset()
@@ -1102,7 +1102,7 @@ private struct PopopxLockPanel: View {
         .accessibilityIdentifier("popopx.lock.mnemonicEntry")
     }
 
-    /// 那 12 个词的输入格 + 两遍新码。提交键不用 `PopopxButton`，理由见 `mnemonicSubmitKey`。
+    /// The input cell for those 12 words + the new code typed twice. The submit key does not use `PopopxButton`; see `mnemonicSubmitKey` for why.
     private var mnemonicReset: some View {
         VStack(spacing: PopopxMetrics.spaceS) {
             PopopxTextArea(
@@ -1142,20 +1142,20 @@ private struct PopopxLockPanel: View {
         .accessibilityIdentifier("popopx.lock.mnemonicForm")
     }
 
-    /// 位数提示现拼，不写死"6 位数字"：`PopopxDuressAuthManager.pinLength` 改了，
-    /// 这一句要跟着改（文件头那条"两支必须逐字相同"的不变量在这里同样成立）。
+    /// The digit-count hint is composed on the fly rather than hard-coding "6 digits": if `PopopxDuressAuthManager.pinLength` changes,
+    /// this sentence has to change with it (the "the two branches must be word-for-word identical" invariant from the file header holds here too).
     private var pinPrompt: String {
         String(format: NSLocalizedString("Enter exactly %lld digits", comment: ""), PopopxDuressAuthManager.pinLength)
     }
 
-    /// 数字格只留数字、只留 `pinLength` 位。过滤器是唯一防线而不是锦上添花：
-    /// `PopopxTextField(isSecure:)` 走的是 `SecureField` 那一支，它**不读** `keyboard:`
-    /// 参数（`PopopxControls.swift:237-241`——只有 `TextField` 那一支挂了 `.keyboardType`），
-    /// 所以这两格弹出的是全键盘，机主能敲进字母和标点。
+    /// The digit fields keep only digits and only `pinLength` of them. The filter is the only line of defence, not a nicety:
+    /// `PopopxTextField(isSecure:)` takes the `SecureField` branch, which **does not read** the `keyboard:`
+    /// argument (`PopopxControls.swift:237-241` — only the `TextField` branch attaches `.keyboardType`),
+    /// so these two cells bring up the full keyboard and the owner can type letters and punctuation.
     ///
-    /// 拿 `Binding` 而不是一个 `String` 参数：两格共用这一个函数，若按值传进来再写回
-    /// 同一个字段，"新码"和"确认码"就会互相覆盖。与设置页 `clampToDigits` 同形。
-    /// 只在确实滤掉了东西时才回写，避免每次输入都触发一次无谓的状态变更。
+    /// Taking a `Binding` rather than a `String` parameter: the two cells share this one function, and passing a value in then writing back to
+    /// the same field would make "new code" and "confirm code" overwrite each other. Same shape as `clampToDigits` on the settings page.
+    /// Writing back only when something really was filtered out, so that every keystroke does not trigger a pointless state change.
     private func clampPin(_ target: Binding<String>, _ entered: String) {
         let kept = String(
             entered
@@ -1165,10 +1165,10 @@ private struct PopopxLockPanel: View {
         if kept != entered { target.wrappedValue = kept }
     }
 
-    /// 提交那颗键。画法与 `sendButton` 共用同一套代币，也因此同样**不能**用 `PopopxButton`：
-    /// 那一个在动作返回时闪一次绿勾再补一发 `notice(.success)`，而"重置失败"也是一次
-    /// 动作返回。给一次没成功的重置打勾，机主会以为新码已经生效——
-    /// 走到键盘前按不动的那一刻才知道没有，比从一开始就不打勾糟糕得多。
+    /// The submit key. It shares the same token set as `sendButton`, and for that same reason it **must not** use `PopopxButton`:
+    /// that one flashes a green check when the action returns and adds a `notice(.success)`, and "reset failed" is also an
+    /// action returning. Ticking a reset that did not succeed makes the owner think the new code already took effect —
+    /// learning otherwise only when the keypad refuses to respond is far worse than never ticking at all.
     private var mnemonicSubmitKey: some View {
         Button {
             Task { await model.submitMnemonicReset() }
@@ -1201,10 +1201,10 @@ private struct PopopxLockPanel: View {
     }
 }
 
-// MARK: - 单个键
+// MARK: - A single key
 
-/// 键盘上的一颗圆键。`Kind` 说清"这是哪一颗"，符号、可达文案、动作都从它派生——
-/// 不拿符号字符串去判分支，那样改图标就会顺手改掉行为。
+/// One round key on the keypad. `Kind` states "which key this is", and the glyph, the accessible copy and the action all derive from it —
+/// the branch is never decided from the glyph string, because that would let changing the icon change the behaviour as a side effect.
 @MainActor
 private struct PopopxLockKey: View {
     enum Kind {
@@ -1233,8 +1233,8 @@ private struct PopopxLockKey: View {
                 )
                 .contentShape(Circle())
         }
-        // 按键反馈的唯一来源：按下即 `PopopxHaptics.impact(.light)` + 一次缩放
-        //（`PopopxPressButtonStyle` 的 `makeBody` / `PopopxPressBody`），命中区由 `keySide`（≥ `minHitTarget`）保证。
+        // The single source of key feedback: pressing gives `PopopxHaptics.impact(.light)` plus one scale
+        // (`makeBody` of `PopopxPressButtonStyle` / `PopopxPressBody`), with the hit area guaranteed by `keySide` (≥ `minHitTarget`).
         .buttonStyle(PopopxPressButtonStyle(feedback: .light))
         .accessibilityLabel(labelText)
     }
@@ -1247,10 +1247,10 @@ private struct PopopxLockKey: View {
             Image(systemName: "delete.left")
                 .imageScale(.large)
         case .biometric:
-            // 图标跟设置页那一行用同一个（`PopopxAntiTheftSettingsView` 的 `faceid`）。
-            // 管理器只给一个 `prefersBiometricUnlock` 布尔，没有把 `LAContext.biometryType`
-            // 透出来，所以本层分不出面容还是指纹——只能沿用仓库已经选定那个字形，
-            // 不自己再造一个"通用生物识别"图标，否则同一件事在两个页面上长得不一样。
+            // The icon is the same one the settings page row uses (`faceid` in `PopopxAntiTheftSettingsView`).
+            // The manager exposes only a `prefersBiometricUnlock` boolean and does not surface `LAContext.biometryType`,
+            // so this layer cannot tell Face ID from Touch ID — it can only reuse the glyph the repo has already chosen,
+            // rather than inventing a "generic biometric" icon of its own, otherwise the same thing would look different on two pages.
             Image(systemName: "faceid")
                 .imageScale(.large)
         }
@@ -1276,15 +1276,15 @@ private struct PopopxLockKey: View {
     }
 }
 
-// MARK: - 挂载
+// MARK: - Mounting
 
 extension View {
-    /// 挂在最顶层窗口容器上。锁着时盖住一切，没锁时不产生任何视图开销。
+    /// Mount it on the topmost window container. While locked it covers everything; when unlocked it produces no view cost at all.
     ///
-    /// **必须无条件挂**，不许在宿主外面再套一层 `if lock.coversContent`：
-    /// `submit(pin:)` 在补时之前就 `unlock()` 了，宿主那一层 `if` 会在自毁还剩
-    /// 几百毫秒时把遮罩整个摘掉（连带它的 `@State`），那一下就是穿帮。
-    /// 完整理由见文件头"宿主接线契约"。
+    /// **It must be mounted unconditionally**; do not wrap another `if lock.coversContent` around it in the host:
+    /// `submit(pin:)` calls `unlock()` before the padding, so the host's `if` would pluck the whole overlay away
+    /// with a few hundred milliseconds of the wipe left (its `@State` along with it), and that moment is the exposure.
+    /// For the full reasoning see the "host wiring contract" in the file header.
     func popopxAppLockOverlay() -> some View {
         overlay {
             PopopxAppLockOverlayView()

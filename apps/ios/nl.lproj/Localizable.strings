@@ -6661,8 +6661,8 @@ server test failure */
 "Your subscription is cancelled. The badge stays until %@." = "Uw abonnement is opgezegd. De badge blijft tot %@.";
 
 
-/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
-/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+/* === POPOPX compute-points economy (BadgeCredits) commercial copy: one-to-one with PopopxCommerceCopy === */
+/* These 37 rows correspond directly to the NSLocalizedString keys in PopopxBadgeCreditsModels.swift; en.lproj holds none of them (value == key). */
 
 /* product name */
 "POPOPX Dynamic Privacy Node Badge" = "POPOPX-badge voor dynamische privacyknooppunten";
@@ -6775,7 +6775,7 @@ server test failure */
 /* error */
 "Your Compute Credits balance cannot go above %lld. Spend some credits first." = "Uw saldo rekenpunten kan niet boven %lld komen. Gebruik eerst een deel van de punten.";
 
-/* ==== POPOPX onboarding v2 (2026-11-19) — 引导页四屏 + 隐私政策/使用条款 ==== */
+/* ==== POPOPX onboarding v2 (2026-11-19) - the four onboarding screens + privacy policy / terms of use ==== */
 /* POPOPX onboarding v2 — generated block, 2026-11-19 */
 
 /* Onboarding: header pills */
@@ -6787,12 +6787,10 @@ server test failure */
 "Own your network." = "Jouw netwerk is van jou.";
 "Private messaging with no account and no user IDs." = "Privé berichten zonder account en zonder gebruikers-ID's.";
 "SMP end-to-end encrypted" = "SMP end-to-end versleuteld";
-"厢语 Bluetooth Mesh relay" = "厢语 Bluetooth Mesh-relais";
 "What POPOPX gives you" = "Wat POPOPX je geeft";
 "No user IDs" = "Geen gebruikers-ID's";
 "No phone number, no email, no global public key. Nothing links your contacts to each other, and each anonymous identity stays separate." = "Geen telefoonnummer, geen e-mail, geen globale publieke sleutel. Niets koppelt je contacten aan elkaar, en elke anonieme identiteit blijft gescheiden.";
 "Dynamic relays and near-field" = "Dynamische relais en nabije verbinding";
-"Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "Online gebruik je het dynamisch cluster van SMP-relaisknooppunten. Offline schakelt 厢语 over naar een Bluetooth Mesh van 1–7 hops en koppelt face-to-face via UWB of een tik.";
 "Anti-peeping and local-only cards" = "Antispieden en kaarten alleen lokaal";
 "Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "Screenshots en schermopnames worden geblokkeerd, uiterst geheime berichten vernietigen zich na het lezen, de locatie blijft in beide modi versleuteld, en je versleutelde profielkaart verlaat dit apparaat nooit.";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "Rond deze set-up af om de 3 dagen proefbadge voor knooppionier te ontvangen.";
@@ -6824,7 +6822,6 @@ server test failure */
 "Higher privacy · balanced battery" = "Meer privacy · evenwichtige accu";
 "Maximum discretion · nothing pushed" = "Maximale discreetie · niets wordt gepusht";
 "Apple's push service carries only the signal that new data is waiting, never the content." = "Apples pushdienst draagt alleen het signaal dat er nieuwe data wacht, nooit de inhoud.";
-"厢语 offline mesh" = "厢语 offline-mesh";
 "When the internet is down, messages hop over nearby devices, up to 7 hops, with no server. Pair face to face with UWB or a tap." = "Zonder internet springen berichten over nabije apparaten, tot 7 hops, zonder server. Koppel face-to-face met UWB of een tik.";
 "Bluetooth permission is requested the first time the mesh starts." = "De Bluetooth-toestemming wordt gevraagd bij de eerste start van de mesh.";
 
@@ -6868,13 +6865,11 @@ server test failure */
 "The camera guard stays local" = "Camerabewaking blijft lokaal";
 "The anti-peeping guard switches the front camera on only while a top-secret sheet is open, at the lowest resolution, processes every frame on this device and stops the stream when the sheet closes. Nothing is written to disk and nothing is uploaded." = "De antispiedbewaking zet de voorcamera alleen aan zolang een uiterst geheim vel open is, op de laagste resolutie, verwerkt elk frame op dit apparaat en stopt de stream wanneer het vel sluit. Er wordt niets naar schijf geschreven en niets geüpload.";
 "Screenshots, recordings and offline hops" = "Screenshots, opnames en offline hops";
-"Protected screens are blocked from screenshots and screen recording by the system itself. In 厢语 mode messages hop over Bluetooth between nearby devices and never reach the public internet." = "Het systeem zelf blokkeert screenshots en schermopnames van beschermde schermen. In de 厢语-modus springen berichten via Bluetooth tussen nabije apparaten en bereiken nooit het openbare internet.";
 "Your controls" = "Jij houdt de controle";
 "You can export or delete any identity, erase the local database or trigger Panic Wipe at any time. Deletion is irreversible because no server holds a copy." = "Je kunt elke identiteit exporteren of verwijderen, de lokale database wissen of Panic Wipe activeren op elk moment. Verwijderen is onomkeerbaar omdat geen server een kopie bezit.";
 
 /* Legal: terms */
 "Acceptable use" = "Toegestaan gebruik";
-"Use POPOPX within the laws of the country you are in. Public groups and 厢语 broadcasts must carry no unlawful content, no spam and no harassment of other users." = "Gebruik POPOPX binnen de wetten van het land waar je bent. Openbare groepen en 厢语-uitzendingen mogen geen onwettige inhoud, spam of intimidatie van andere gebruikers bevatten.";
 "Your keys, your responsibility" = "Jouw sleutels, jouw verantwoordelijkheid";
 "Your mnemonic phrase, identity keys, badges and POPOPX Compute Credits exist only on this device. If the device or the phrase is lost, they cannot be recovered, frozen or reissued by anyone." = "Je mnemonische zin, identiteitssleutels, badges en POPOPX-rekenpunten bestaan alleen op dit apparaat. Als het apparaat of de zin verloren gaat, kan niemand ze herstellen, bevriezen of opnieuw uitgeven.";
 "No guarantee of availability" = "Geen beschikbaarheidsgarantie";
@@ -7155,7 +7150,6 @@ server test failure */
 "Badge lit for %lld more days." = "Badge actief voor %lld extra dagen.";
 "Choose a plan" = "Kies een abonnement";
 "Renew or change plan" = "Abonnement verlengen of wijzigen";
-"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "Opent het 厢语-paneel: de hoofdschakelaar, de kanalen en de knooppunten in de buurt";
 "Channels" = "Kanalen";
 "Create public channel" = "Openbaar kanaal maken";
 "Join channel" = "Word lid van kanaal";
@@ -7409,13 +7403,13 @@ server test failure */
 /* POPOPX round 18 tier C (escaped-newline keys) */
 "Your new channel %@ is connected to %d of %d relays.\nIf you cancel, the channel will be deleted - you can create it again." = "Je nieuwe kanaal %1$@ is verbonden met %2$d van de %3$d relais.\nAls je annuleert, wordt het kanaal verwijderd – je kunt het opnieuw aanmaken.";
 
-/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+/* POPOPX round 19: keys added during the ninth pass over the three tabs */
 "Back to messages" = "Terug naar berichten";
 "POPOPX Badge" = "POPOPX-badge";
 "Added %lld Compute Credits to your balance." = "Er zijn %lld rekenpunten aan je saldo toegevoegd.";
 "Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple bevestigt deze aankoop nog. De rekenpunten verschijnen in je saldo zodra ze is bevestigd.";
 "Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple heeft de betaling ontvangen, maar dit apparaat kon de punten nog niet aan je saldo toevoegen. Ze worden bijgeschreven zodra de beveiligde opslag weer beschreven kan worden.";
-/* POPOPX round 21 第 9 轮：厢语「发现」入口无障碍说明 + 7 条 zh-Hans 上游缺值 */
+/* POPOPX round 21, ninth pass: accessibility hint for the Cabin 'Discover' entry + 7 upstream values missing from zh-Hans */
 "Discover nearby groups and channels over the Bluetooth mesh" = "Ontdek nabije groepen en kanalen via het Bluetooth-mesh";
 "Album" = "Album";
 "Camera" = "Camera";
@@ -8805,3 +8799,25 @@ server test failure */
 "Owner" = "Eigenaar";
 "Relay" = "Relais";
 "relay" = "relais";
+"Top-up %lld compute points" = "Opwaardering van %lld rekenpunten";
+"Exchange did not complete · returned automatically" = "Owisseling niet doorgegaan · automatisch teruggestort";
+"Redeemed a %lld-day privacy node badge" = "Privacyknooppuntbadge van %lld dagen ingewisseld";
+"Redeemed %lld × %lld-day gift-card vouchers" = "%lld cadeaukaartvouchers van %lld dagen ingewisseld";
+"Sent a red packet of %lld compute points (%lld equal shares)" = "Rode envelop van %lld rekenpunten gestuurd (%lld gelijke delen)";
+"Received a compute-point red packet" = "Rode envelop met rekenpunten ontvangen";
+"Received a red packet: %@" = "Rode envelop ontvangen: %@";
+"Red packet not fully claimed, %lld returned" = "Rode envelop niet volledig opgenomen, %lld teruggestort";
+"Subscribed to channel %@" = "Geabonneerd op kanaal %@";
+"Unlocked a profile card" = "Profielkaart ontgrendeld";
+"Extended the anti-peeping viewing window" = "Leesvenster van de antispiedbewaking verlengd";
+"Refund clawback (what was already spent is not recovered)" = "Terugvordering bij terugbetaling (wat al besteed is, wordt niet teruggevorderd)";
+"Refund clawback" = "Terugvordering bij terugbetaling";
+"Aurora shield avatar frame" = "Avatarframe Auroraschild";
+"Dark gold QR card skin" = "Uiterlijk van de QR-kaart in donker goud";
+"[Location]" = "[Locatie]";
+"[Encrypted profile]" = "[Versleuteld profiel]";
+"[Encrypted profile · attachment]" = "[Versleuteld profiel · bijlage]";
+"Unnamed profile" = "Naamloos profiel";
+"[Top-secret view-once] Open after biometrics" = "[Topgeheim: vernietigen na lezen] Openen na biometrische verificatie";
+"[Top-secret security alert] %@; that top-secret message was destroyed in place." = "[Beveiligingsmelding topgeheim] %@; dat topgeheime bericht is ter plekke vernietigd.";
+"Neither Bluetooth nor the public network is available — %lld messages waiting to send" = "Noch Bluetooth noch het openbare netwerk is beschikbaar — %lld berichten wachten op verzending";

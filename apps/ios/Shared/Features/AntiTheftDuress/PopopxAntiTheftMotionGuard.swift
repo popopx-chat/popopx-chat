@@ -2,77 +2,77 @@
 //  PopopxAntiTheftMotionGuard.swift
 //  POPOPX (iOS)
 //
-//  【物理防抢夺 · 模块一】抢夺/跌落判据、超时无操作自动锁屏、切后台瞬时锁定，
-//  以及整个 AntiTheftDuress 模块共用的那一个锁状态机 `PopopxAppLockState`。
+//  [Physical anti-snatch - module 1] snatch/drop criteria, auto lock screen after a timeout with no interaction, instant lock on going to background,
+//  and the single lock state machine `PopopxAppLockState` shared by the whole AntiTheftDuress module.
 //
-//  本文件之所以承载"锁状态"而不只承载传感器：判据来自三处（传感器、行为、超时），
-//  界面在第四处（遮罩），设置页在第五处。若每个来源各自持有一份"是否锁定"，就必然出现
-//  "一处解锁、另一处仍锁"的半锁状态——那是能被绕开的那种锁，也是本模块唯一不能犯的错。
-//  所以锁状态只有一份，放在最先被依赖的文件里，其余各段只读它、只经由 `lock(reason:)` 写它。
+//  This file carries the 'lock state' and not only the sensors because the criteria come from three places (sensor, behaviour, timeout),
+//  the UI is a fourth place (the overlay) and the settings page a fifth. If every source held its own copy of 'is locked', there would inevitably be
+//  half-locked states — 'unlocked in one place, still locked in another'; that is the kind of lock that can be bypassed, and the one mistake this module may not make.
+//  So the lock state exists exactly once, in the file that is depended on first, and every other section only reads it and writes it only through `lock(reason:)`.
 //
-//  ### 传感器只锁、绝不擦
-//  抢夺/跌落/行为这三条判据的**唯一**后果是拉起锁屏。它们不触发任何擦除，也不通向
-//  `PopopxDuressAuthManager` 的自毁。理由是纯工程而非保守：20Hz 的加速度判据在车上、
-//  跑步、桌角磕碰、把手机扔进包里这些场景里都会误报，而误报的代价必须是可以承受的——
-//  重新输一次密码可以承受，数据没了不能。全模块只有"胁迫密码被正确键入"这一条路通向擦除，
-//  那需要胁迫者主动按键，不存在误触发；设置页的"一键演练"走的是 `PopopxMotionCriteria`
-//  的纯函数 + 合成样本，类型上就返回不了任何副作用。
+//  ### Sensors only lock, never wipe
+//  The **only** consequence of the three criteria snatch / drop / behaviour is raising the lock screen. They trigger no wipe, and they do not lead to
+//  `PopopxDuressAuthManager`'s self-destruct. The reason is pure engineering, not caution: a 20Hz acceleration criterion misfires in a car,
+//  while running, when the phone knocks against a table corner, or when it is thrown into a bag, and the cost of a false positive must be tolerable —
+//  typing the passphrase once more is tolerable, lost data is not. In the whole module only one road leads to a wipe, 'the duress passphrase was entered correctly',
+//  which requires the attacker to press keys deliberately, so it cannot misfire; the settings page's 'one-tap drill' runs `PopopxMotionCriteria`'s
+//  pure functions plus synthetic samples, which by type cannot return any side effect.
 //
-//  ### 与上游 POPOPX Lock 的分工（不是重复实现）
-//  `ContentView` 已经有一套完整的 LA 门：`DEFAULT_PERFORM_LA` + `contentViewAccessAuthenticated`
-//  + 后台 `DEFAULT_LA_LOCK_DELAY`（默认 30 秒）+ `SetAppPasscodeView`（见 ContentView.swift:77-83、
-//  :123-156）。那套门管的是"谁可以进 app"。本模块管的是"物理上手机已不在我手里"，
-//  判据来源不同、时机不同，且**只加一层，不改它一层**：我们不调用也不修改
-//  `authorize()`——它对 `.unavailable` 直接放权（LocalAuthenticationUtils.swift:24），
-//  那是为"设备解锁便利性"写的语义，安全遮罩不许继承。
+//  ### Division of labour with the upstream POPOPX Lock (not a duplicate implementation)
+//  `ContentView` already has a complete LA gate: `DEFAULT_PERFORM_LA` + `contentViewAccessAuthenticated`
+//  + the background `DEFAULT_LA_LOCK_DELAY` (30 seconds by default) + `SetAppPasscodeView` (see ContentView.swift:77-83,
+//  :123-156). That gate governs 'who may enter the app'. This module governs 'the phone is physically no longer in my hand',
+//  a different source of criteria and a different moment, and it **only adds one layer, it changes none of theirs**: we neither call nor modify
+//  `authorize()` — it grants access directly on `.unavailable` (LocalAuthenticationUtils.swift:24),
+//  and that semantics was written for 'device-unlock convenience'; the security overlay is not allowed to inherit it.
 //
-//  ### 采样率、坐标系与能耗
-//  20Hz（50ms 一帧）。$G$ 用**原始加速度计读数**（含重力），因为自由落体的特征恰恰是
-//  "含重力的合模长趋近 0"；若用 `deviceMotion.userAcceleration`（已减掉重力），失重段会读成
-//  约 1g，判据整个反过来。这是选择 `accelerometer` 而不是 `deviceMotion` 的唯一原因。
-//  分析跑在 `.main` 队列：20Hz × 几次浮点运算不足以卡帧，而 `PopopxAppLockState` 是
-//  `@MainActor` 的，换到专用 OperationQueue 之后仍要跳回主线程，只是多送一个竞态窗口。
-//  锁起来之后立刻停采（模块四节能要求），退后台也停——本模块零后台采样、零后台电量。
+//  ### Sample rate, coordinate system and power use
+//  20Hz (one frame every 50ms). $G$ uses the **raw accelerometer reading** (including gravity), because the signature of free fall is exactly
+//  'the gravity-inclusive vector magnitude approaches 0'; with `deviceMotion.userAcceleration` (gravity already subtracted) the weightless stretch would read
+//  as about 1g and the criterion would be turned completely upside down. That is the only reason for choosing `accelerometer` over `deviceMotion`.
+//  The analysis runs on the `.main` queue: 20Hz x a few floating-point operations is not enough to stall a frame, and `PopopxAppLockState` is
+//  `@MainActor`, so moving to a dedicated OperationQueue would still have to hop back to the main thread and only adds a race window.
+//  Sampling stops immediately once locked (module 4's power-saving requirement), and it stops on going to background too — this module has zero background sampling and zero background battery.
 //
-//  ### 为什么判据常数住在 `PopopxMotionCriteria` 而不是本类的 `static let`
-//  一个 `@MainActor` 类的 `static let` 是 main-actor 隔离的，非隔离的纯函数（演练入口、
-//  将来的单元测试）引用不到它，只能整类拉到主线程才能测。把门限和判定一起放进一个 enum，
-//  它们就天然是 nonisolated 的，判定函数可以拿一段样本数组直接断言结论。
+//  ### Why the criterion constants live in `PopopxMotionCriteria` instead of this class's `static let`
+//  A `static let` of a `@MainActor` class is main-actor isolated, so non-isolated pure functions (the drill entry,
+//  future unit tests) cannot reference it, and the whole class would have to be dragged onto the main thread to be testable. Putting the thresholds and the decision together in one enum
+//  makes them naturally nonisolated, so a decision function can take an array of samples and assert the conclusion directly.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. Red lines forbid a script from modifying project.pbxproj.
 //
 
 import SwiftUI
 import UIKit
 import CoreMotion
 
-// MARK: - 本模块的 UserDefaults 键
+// MARK: - This module's UserDefaults keys
 
-/// 键名口径跟仓库现状（裸 camelCase，无前缀，见 Shared/Views/UserSettings/SettingsView.swift:29-72
-/// 的 `DEFAULT_*` 块——那是上游同名文件，不是本模块的 `PopopxAntiTheftSettingsView.swift`），
-/// 但整套防盗键集中在**本文件**声明：一个模块的键散到宿主文件里，改名时就会漏掉一半。
+/// Key naming follows the repository's current practice (bare camelCase, no prefix, see Shared/Views/UserSettings/SettingsView.swift:29-72
+/// the `DEFAULT_*` block there — that is the upstream file of the same name, not this module's `PopopxAntiTheftSettingsView.swift`),
+/// but the whole anti-theft key set is declared in **this file**: if one module's keys scatter into host files, renaming misses half of them.
 let DEFAULT_ANTI_THEFT_ENABLED = "antiTheftEnabled"
 let DEFAULT_ANTI_THEFT_SENSITIVITY = "antiTheftSensitivity"
 let DEFAULT_ANTI_THEFT_INACTIVITY_SECONDS = "antiTheftInactivitySeconds"
 let DEFAULT_ANTI_THEFT_INSTANT_BG_LOCK = "antiTheftInstantBackgroundLock"
-/// 模块二（行为判据）用。
+/// Used by module 2 (behaviour criteria).
 let DEFAULT_ANTI_THEFT_BEHAVIOR_ENABLED = "antiTheftBehaviorEnabled"
 let DEFAULT_ANTI_THEFT_ANGLE_LIMIT = "antiTheftAngleLimitDegrees"
-/// 模块三（双密码）用。
+/// Used by module 3 (dual passcodes).
 let DEFAULT_ANTI_THEFT_DURESS_ENABLED = "antiTheftDuressEnabled"
 let DEFAULT_ANTI_THEFT_BIOMETRICS_ENABLED = "antiTheftBiometricsEnabled"
-/// 第 10 次连续错误是否直接抹数据。默认关（键不存在时读出来就是 `false`），
-/// 且必须由机主在设置页明确打开——这一格把"猜错十次"的代价从"锁一小时"换成"身份没了"。
-/// 它**只**存这个 bool，不存任何凭据，但它是一条"这台设备开启过极端自毁"的指纹，
-/// 所以和其余开关一样进下面那张清扫表。
+/// Whether the 10th consecutive error wipes the data outright. Off by default (when the key is absent it reads as `false`),
+/// and the owner must turn it on explicitly in the settings page — this one switch changes the cost of 'ten wrong guesses' from 'locked for an hour' to 'the identity is gone'.
+/// It stores **only** this bool and no credentials, but it is a digest that 'this device had extreme self-destruct enabled',
+/// so, like the other switches, it goes into the sweep table below.
 let DEFAULT_ANTI_THEFT_TEN_STRIKE_WIPE = "antiTheftTenStrikeWipe"
-/// 自毁后的重建模式（`.emptyProfile` / `.simulatedDecoy`）。
+/// The rebuild mode after self-destruct (`.emptyProfile` / `.simulatedDecoy`).
 let DEFAULT_ANTI_THEFT_RETENTION_STRATEGY = "antiTheftRetentionStrategy"
-/// 模块四（烟雾弹）用。
+/// Used by module 4 (the smokescreen).
 let DEFAULT_ANTI_THEFT_DECOY_ENABLED = "antiTheftDecoyEnabled"
 
-/// 本模块**全部** UserDefaults 键，一个不漏。自毁路径靠这一张表清扫痕迹，
-/// 所以新增键必须同时加进这里——散着写就会漏擦，而"漏擦的痕迹"正是本模块要消灭的东西。
+/// **All** UserDefaults keys of this module, none left out. The self-destruct path uses this table to sweep traces,
+/// so a new key must be added here too — writing them scattered means missing a wipe, and 'traces left un-wiped' is exactly what this module exists to destroy.
 let POPOPX_ANTI_THEFT_DEFAULT_KEYS: [String] = [
     DEFAULT_ANTI_THEFT_ENABLED,
     DEFAULT_ANTI_THEFT_SENSITIVITY,
@@ -87,22 +87,22 @@ let POPOPX_ANTI_THEFT_DEFAULT_KEYS: [String] = [
     DEFAULT_ANTI_THEFT_DECOY_ENABLED,
 ]
 
-// MARK: - 锁原因
+// MARK: - Lock reason
 
-/// 锁是谁拉的。锁屏上那一行字、VoiceOver、以及"解锁后要不要再提示一次"都读它，
-/// 所以它是一个封闭集合：加一个来源就是加一个 case，编译器会替我找出所有漏分支的地方。
+/// Who raised the lock. The line on the lock screen, VoiceOver, and 'whether to prompt once more after unlocking' all read it,
+/// so it is a closed set: adding a source means adding a case, and the compiler finds every missing branch for me.
 enum PopopxLockReason: String, Hashable, Sendable, CaseIterable {
-    /// 抢夺拽落：合加速度骤升 + 剧烈翻转。
+    /// Snatch pull-away: a sudden rise in combined acceleration plus a violent flip.
     case snatch
-    /// 自由落体后撞击。
+    /// Impact after free fall.
     case freeFall
-    /// 非本人操作的行为特征（模块二）。
+    /// Behaviour signature of someone who is not the owner (module 2).
     case behavior
-    /// 超时未触碰屏幕。
+    /// Timeout without touching the screen.
     case inactivity
-    /// 退过后台（`instantLockOnBackground`）。
+    /// Having gone to the background (`instantLockOnBackground`).
     case background
-    /// 用户手动，或模块二的强制重认证。
+    /// Manual by the user, or module 2's forced re-authentication.
     case manual
 
     var userText: String {
@@ -128,18 +128,18 @@ enum PopopxLockReason: String, Hashable, Sendable, CaseIterable {
     }
 }
 
-// MARK: - 锁状态机（全模块唯一一份）
+// MARK: - Lock state machine (the only one in the whole module)
 
-/// 锁的状态，以及"胁迫流程正在进行"这一格。
+/// The lock state, plus the 'duress flow in progress' slot.
 ///
-/// 这里有两个问题必须分开问，答错任何一个都是事故：
-/// 1. **遮罩在不在屏幕上** —— 只要 `isLocked` 就在，包括静默自毁那 1.2 秒在内。
-///    这是 `coversContent`。曾经把这两件事合成一个 `shielded = isLocked && !duress`，
-///    于是"开始擦除"那一瞬间遮罩消失、内容直接暴露给站在旁边的人——正好是要防的那件事。
-/// 2. **遮罩上显示什么** —— 平时是防盗文案加键盘；自毁进行中只许呼吸，
-///    不许出现文案变化、报错或"正在销毁"。这是 `showsLockUI`。
+/// Two questions must be asked separately here, and getting either one wrong is an accident:
+/// 1. **Is the overlay on screen** — as long as `isLocked` it is, including the 1.2 seconds of silent self-destruct.
+///    That is `coversContent`. These two were once merged into a single `shielded = isLocked && !duress`,
+///    so the instant 'wiping starts' the overlay vanished and the content was exposed straight to whoever stood next to it — exactly the thing that had to be prevented.
+/// 2. **What the overlay displays** — normally anti-theft copy plus the keyboard; while self-destruct is running only breathing is allowed,
+///    no change of copy, no error, no 'destroying' may appear. That is `showsLockUI`.
 ///
-/// 所以：盖内容用 `coversContent`，切界面内容用 `showsLockUI`，谁都不许自己拼条件。
+/// So: covering content uses `coversContent`, switching what the UI shows uses `showsLockUI`, and nobody may assemble the condition themselves.
 @MainActor
 @Observable
 final class PopopxAppLockState {
@@ -149,35 +149,35 @@ final class PopopxAppLockState {
     private(set) var reason: PopopxLockReason?
     private(set) var lockedAt: Date?
 
-    /// 胁迫自毁进行中：界面照常呼吸，不许出现任何异常反馈。
+    /// Duress self-destruct in progress: the UI keeps breathing as usual, and no abnormal feedback may appear.
     private(set) var duressSilentFlow = false
 
-    /// 内容是否被盖住（以及是否要屏蔽截屏/录屏）。整个锁定期都是 true。
-    /// 它的定义里**不能有 `duressSilentFlow`**，理由见类型注释。
+    /// Whether the content is covered (and whether screenshots / screen recording must be blocked). True for the whole locked period.
+    /// Its definition **must not contain `duressSilentFlow`**; see the type's comment for the reason.
     var coversContent: Bool { isLocked }
 
-    /// 遮罩上是否显示"为什么锁了 + 键盘"。静默自毁期间为 false，此时只有呼吸动画。
+    /// Whether the overlay shows 'why it locked + the keyboard'. False during the silent self-destruct, when only the breathing animation is left.
     var showsLockUI: Bool { isLocked && !duressSilentFlow }
 
-    /// 上一次交互的时刻。用 `Date` 而不是累计秒数，因为屏幕熄灭时定时器会被系统节流，
-    /// 累计会低估真实空闲时长。
+    /// The moment of the last interaction. A `Date` rather than accumulated seconds, because timers are throttled by the system while the screen is off,
+    /// and accumulation underestimates the real idle duration.
     private(set) var lastInteractionAt = Date()
 
     private init() {}
 
-    /// 拉锁。已经锁着时幂等：传感器在 50ms 内会连送多个命中样本，
-    /// 每次都改 `reason` 会让锁屏文案在两种说法之间跳。
+    /// Raise the lock. Idempotent when already locked: the sensor delivers several hit samples within 50ms,
+    /// and changing `reason` every time would make the lock-screen copy jump between two wordings.
     func lock(reason: PopopxLockReason) {
         guard !isLocked else { return }
         isLocked = true
         self.reason = reason
         lockedAt = Date()
-        // 由状态机自己通知传感器停采，而不是指望某个宿主视图记得调：
-        // 模块一要求"锁定后立即停止采样"，忘了这一步等于在锁屏后面继续跑 20Hz。
+        // The state machine tells the sensor to stop sampling itself, instead of hoping some host view remembers to call it:
+        // module 1 requires 'stop sampling immediately after locking', and forgetting this step means running 20Hz behind the lock screen.
         PopopxAntiTheftMotionGuard.shared.lockedDidChange()
     }
 
-    /// 解锁。只有认证模块（经遮罩）可以调它。
+    /// Unlock. Only the authentication module (through the overlay) may call it.
     func unlock() {
         isLocked = false
         reason = nil
@@ -187,14 +187,14 @@ final class PopopxAppLockState {
         PopopxAntiTheftMotionGuard.shared.lockedDidChange()
     }
 
-    /// 一次真实触碰。触摸监听器和键盘都调它。
+    /// One real touch. The touch watcher and the keyboard both call it.
     func noteInteraction() {
         lastInteractionAt = Date()
     }
 
-    /// 进入静默自毁流程。已在流程中时返回 false，调用方必须放弃这一次：
-    /// 两次并发擦除会把"stop → close → delete → init → start"这个顺序打乱，
-    /// 那条链不可重入。
+    /// Enter the silent self-destruct flow. Returns false when already in the flow, and the caller must give up this attempt:
+    /// two concurrent wipes would disorder the 'stop → close → delete → init → start' order,
+    /// and that chain is not reentrant.
     @discardableResult
     func beginDuressFlow() -> Bool {
         guard !duressSilentFlow else { return false }
@@ -211,10 +211,10 @@ final class PopopxAppLockState {
     }
 }
 
-// MARK: - 档位
+// MARK: - Levels
 
-/// 判据灵敏度。`wireValue` 是存进 UserDefaults 的字符串，与 `rawValue` 恰好相同但职责不同：
-/// `rawValue` 归本地存档，`wireValue` 归这套配置的对外口径，所以逐条写死而不是 `rawValue`。
+/// Criterion sensitivity. `wireValue` is the string stored in UserDefaults, exactly the same as `rawValue` but with a different duty:
+/// `rawValue` belongs to the local archive, `wireValue` to this configuration's outward wording, so each is written out literally instead of using `rawValue`.
 enum PopopxMotionSensitivity: String, CaseIterable, Hashable, Sendable {
     case low
     case medium
@@ -232,8 +232,8 @@ enum PopopxMotionSensitivity: String, CaseIterable, Hashable, Sendable {
         allCases.first { $0.wireValue == raw } ?? .medium
     }
 
-    /// 分段器标签。`PopopxSegmentedControl` 只给一行（PopopxControls.swift:589 的
-    /// `.lineLimit(1)`），长一点的中文在小屏上会被省略号截断。
+    /// Segmented control labels. `PopopxSegmentedControl` allows only one line (PopopxControls.swift:589's
+    /// `.lineLimit(1)`), so a longer Chinese label is truncated with an ellipsis on small screens.
     var label: String {
         switch self {
         case .low: return NSLocalizedString("Less sensitive", comment: "")
@@ -242,7 +242,7 @@ enum PopopxMotionSensitivity: String, CaseIterable, Hashable, Sendable {
         }
     }
 
-    /// 拽落峰值门限 $G$：较迟钝 3.8、标准 3.0、较灵敏 2.5。
+    /// Pull-away peak threshold $G$: sluggish 3.8, standard 3.0, sensitive 2.5.
     var spikeG: Double {
         switch self {
         case .low: return 3.8
@@ -251,15 +251,15 @@ enum PopopxMotionSensitivity: String, CaseIterable, Hashable, Sendable {
         }
     }
 
-    /// 翻转角速度门限 $\omega$，rad/s。三档共用一个值：拽落时手腕会翻，走路摆臂不会，
-    /// 这个量的区分度已经够用；跟着灵敏度一起缩只会把误报率一起放大。
+    /// Flip angular-velocity threshold $\omega$, rad/s. All three levels share one value: a snatch twists the wrist, an arm swing while walking does not,
+    /// and the discrimination this quantity gives is already enough; scaling it along with sensitivity would only inflate the false-positive rate too.
     var spinOmega: Double {
         6.5
     }
 }
 
-/// 无操作自动锁屏的档位。`never` 的秒数是 0，存进 UserDefaults 也是 0，
-/// 因此"永不"与"读不到键"必须靠 `object(forKey:) != nil` 区分——见下面的 getter。
+/// Levels of the no-interaction auto lock screen. `never` has 0 seconds, which is also 0 when stored in UserDefaults,
+/// so 'never' and 'key not readable' must be told apart by `object(forKey:) != nil` — see the getter below.
 enum PopopxInactivityTimeout: Int, CaseIterable, Hashable, Sendable {
     case oneMinute = 60
     case threeMinutes = 180
@@ -281,8 +281,8 @@ enum PopopxInactivityTimeout: Int, CaseIterable, Hashable, Sendable {
         rawValue
     }
 
-    /// 默认 3 分钟。不拿 `never` 当默认：这个开关的意义是"离开手机一会儿自动收起来"，
-    /// 默认关掉等于功能不存在。
+    /// 3 minutes by default. `never` is not the default: this switch means 'put the phone down for a while and it closes itself',
+    /// and defaulting it off is the same as the feature not existing.
     static let defaultValue: PopopxInactivityTimeout = .threeMinutes
 
     static func fromStored(seconds: Int?) -> PopopxInactivityTimeout {
@@ -291,18 +291,18 @@ enum PopopxInactivityTimeout: Int, CaseIterable, Hashable, Sendable {
     }
 }
 
-// MARK: - 样本与结论
+// MARK: - Samples and conclusions
 
-/// 一帧观测量。时刻用 `Date`：真实样本与演练样本因此可以进同一个判定函数。
+/// One frame of observations. The timestamp is a `Date`: real samples and drill samples can therefore enter the same decision function.
 struct PopopxMotionSample: Hashable, Sendable {
     let at: Date
-    /// 三轴合成加速度模长，单位 g，**含重力**。
+    /// Magnitude of the three-axis combined acceleration, in g, **including gravity**.
     let g: Double
-    /// 三轴角速度模长，单位 rad/s。
+    /// Magnitude of the three-axis angular velocity, in rad/s.
     let omega: Double
 }
 
-/// 一段样本的结论。
+/// The conclusion for a stretch of samples.
 enum PopopxMotionVerdict: Hashable, Sendable {
     case none
     case snatch(g: Double, omega: Double)
@@ -322,42 +322,42 @@ enum PopopxMotionVerdict: Hashable, Sendable {
     }
 }
 
-// MARK: - 判据本体（非隔离、无副作用：真实流与演练共用同一段代码）
+// MARK: - The criteria themselves (nonisolated, side-effect free: the real stream and the drill share the same code)
 
 enum PopopxMotionCriteria {
-    /// 采样率。20Hz = 50ms 一帧，够抓 120ms 的失重段（至少 2 帧），又不必上 100Hz 烧电。
+    /// Sample rate. 20Hz = one frame per 50ms, enough to catch a 120ms weightless stretch (at least 2 frames) without burning battery at 100Hz.
     static let sampleRateHz: Double = 20
 
-    /// 失重门限。静止时合模长≈1.0g，自由落体≈0g；0.25g 留出传感器零偏与轻微姿态抖动的
-    /// 余量，又不至于把"轻轻放下"读成失重。
+    /// Weightlessness threshold. At rest the vector magnitude is ≈1.0g, in free fall ≈0g; 0.25g leaves room for sensor zero-bias and slight pose jitter
+    /// while not reading 'set down gently' as weightlessness.
     static let weightlessG: Double = 0.25
 
-    /// 失重要连续多久才算数。短于三帧（含首尾）一律不算。
+    /// How long weightlessness must continue to count. Shorter than three frames (first and last included) never counts.
     static let weightlessMinimum: TimeInterval = 0.120
 
-    /// 失重段结束后，撞击必须在多久以内出现才算同一次跌落。
+    /// After the weightless stretch ends, within how long the impact must appear to count as the same fall.
     static let impactWindow: TimeInterval = 0.600
 
-    /// 撞击峰值门限。
+    /// Impact peak threshold.
     static let impactG: Double = 2.2
 
-    /// 拽落需要"骤升"：相邻两帧合模长至少要涨这么多。只比绝对值的话，
-    /// 把手机从桌上端起来那一下就到 2.5g 了。
+    /// A pull-away needs a 'spike': between two adjacent frames the vector magnitude must rise by at least this much. Comparing absolute values alone
+    /// would already reach 2.5g when lifting the phone off a table.
     static let spikeRiseG: Double = 1.2
 
-    /// 判定前的"平静"前提：命中帧往前数这段时间的平均合模长必须落在 0.85–1.20g，
-    /// 也就是此前手机大致处于正常持握。车过减速带、跑步摆臂的平均加速度本来就远离 1g，
-    /// 判据在这一步把它们挡掉。
+    /// The 'calm' precondition before a decision: over this span counting back from the hit frame the average vector magnitude must land in 0.85–1.20g,
+    /// that is, the phone was previously in roughly a normal hold. A car over a speed bump or an arm swinging while running already averages far from 1g,
+    /// and the criteria filter them out at this step.
     static let calmLookback: TimeInterval = 0.5
     static let calmLowerG: Double = 0.85
     static let calmUpperG: Double = 1.20
 
-    /// 分析窗口。2 秒覆盖 120ms 失重 + 600ms 撞击窗 + 拽落所需的 0.5s 平静回看。
+    /// Analysis window. 2 seconds covers 120ms of weightlessness + a 600ms impact window + the 0.5s calm look-back a pull-away needs.
     static let analysisWindow: TimeInterval = 2.0
     static let maxWindowSamples: Int = 40
 
-    /// 对一段样本做判定。跌落优先于拽落：手机正在落地时先按落地处理，
-    /// 因为落地那一记冲击同时也满足拽落的"骤升"，两条判据在同一次事件里并不互斥。
+    /// Judge a stretch of samples. A fall takes priority over a pull-away: while the phone is landing it is handled as a landing first,
+    /// because that landing impact also satisfies the pull-away 'spike', so the two criteria are not mutually exclusive within one event.
     static func evaluate(
         samples: [PopopxMotionSample],
         sensitivity: PopopxMotionSensitivity
@@ -415,7 +415,7 @@ enum PopopxMotionCriteria {
         return nil
     }
 
-    /// 命中帧之前的若干帧是否处于正常持握区间。
+    /// Whether the frames before the hit frame sit inside the normal-hold range.
     private static func calmBefore(samples: [PopopxMotionSample], upTo index: Int) -> Bool {
         guard index > 0 else { return false }
         let from = samples[index].at.addingTimeInterval(-calmLookback)
@@ -432,7 +432,7 @@ enum PopopxMotionCriteria {
         return mean >= calmLowerG && mean <= calmUpperG
     }
 
-    /// 演练用：一段合成的拽落样本。
+    /// For the drill: a synthetic pull-away sample stretch.
     static func syntheticSnatch(at start: Date = Date()) -> [PopopxMotionSample] {
         var samples: [PopopxMotionSample] = []
         for step in 0..<10 {
@@ -450,7 +450,7 @@ enum PopopxMotionCriteria {
         return samples
     }
 
-    /// 演练用：先 200ms 失重、再 3.1g 冲击的合成跌落样本。
+    /// For the drill: a synthetic fall sample, 200ms of weightlessness first, then a 3.1g impact.
     static func syntheticFreeFall(at start: Date = Date()) -> [PopopxMotionSample] {
         var samples: [PopopxMotionSample] = []
         for step in 0..<4 {
@@ -476,26 +476,26 @@ enum PopopxMotionCriteria {
     }
 }
 
-// MARK: - 传感器监护器
+// MARK: - Sensor watchdog
 
 @MainActor
 @Observable
 final class PopopxAntiTheftMotionGuard {
     static let shared = PopopxAntiTheftMotionGuard()
 
-    /// 命中之后的冷却。锁已拉起、传感器也已停采，这个窗口的真正作用是防止同一次事件
-    /// 在"解锁 → 立刻又命中"的循环里反复拉锁。
+    /// Cooldown after a hit. The lock is already raised and the sensor already stopped sampling; the real purpose of this window is to keep the same event from
+    /// raising the lock over and over in an 'unlock → hit again immediately' loop.
     static let triggerCooldown: TimeInterval = 5
 
-    // MARK: 对外状态
+    // MARK: Public state
 
     private(set) var isRunning = false
     private(set) var lastVerdict: PopopxMotionVerdict?
-    /// 诊断读数：窗口内的峰值。设置页拿它解释"刚才那一下为什么没触发"。
+    /// Diagnostic reading: the peak inside the window. The settings page uses it to explain 'why that last one did not trigger'.
     private(set) var peakG: Double = 0
     private(set) var peakOmega: Double = 0
-    /// 本机传感器是否可用。模拟器上 `isAccelerometerAvailable == false`，
-    /// 设置页据此显示"本机不可用"，而不是假装在跑。
+    /// Whether this device's sensor is available. On the simulator `isAccelerometerAvailable == false`,
+    /// so the settings page shows 'unavailable on this device' instead of pretending to run.
     private(set) var motionAvailable = false
 
     var enabled: Bool {
@@ -527,18 +527,18 @@ final class PopopxAntiTheftMotionGuard {
         }
     }
 
-    // MARK: 内部
+    // MARK: Internal
 
     private let manager = CMMotionManager()
     private var window: [PopopxMotionSample] = []
-    /// 两条流各自回调，把最近一次的角速度与当前这帧加速度配对：最大 50ms 错位，
-    /// 相对 6.5 rad/s 的门限影响可以忽略，换来的是不必自己维护重采样。
+    /// The two streams call back separately, pairing the most recent angular velocity with this frame's acceleration: at most 50ms of skew,
+    /// negligible against a 6.5 rad/s threshold, and in exchange there is no resampling to maintain by hand.
     private var latestOmega: Double = 0
     private var lastTriggerAt: Date?
     private var inactivityTimer: Timer?
     private var observers: [NSObjectProtocol] = []
-    /// 后台事件到前台之后才拉锁：退进后台时用户已经看不见遮罩，
-    /// 在后台改状态只会让回前台的第一帧闪一下内容。
+    /// Background events only raise the lock after coming back to the foreground: once in the background the user can no longer see the overlay,
+    /// and changing state in the background only makes the first foreground frame flash the content.
     private var lockPendingOnActive = false
 
     private init() {
@@ -556,9 +556,9 @@ final class PopopxAntiTheftMotionGuard {
         motionAvailable = manager.isAccelerometerAvailable && manager.isGyroAvailable
     }
 
-    // MARK: 生命周期
+    // MARK: Lifecycle
 
-    /// 由设置项决定开或停。幂等。
+    /// Starts or stops according to the setting. Idempotent.
     func sync() {
         if enabled { start() } else { stop() }
     }
@@ -572,7 +572,7 @@ final class PopopxAntiTheftMotionGuard {
         isRunning = true
     }
 
-    /// 停采 + 停表 + 摘通知。锁状态本身不在这里改：停表是因为不必再测，锁该继续锁。
+    /// Stop sampling + stop the timer + remove notifications. The lock state itself is not changed here: the timer stops because measuring is no longer needed, the lock should keep locking.
     func stop() {
         guard isRunning else { return }
         stopSampling()
@@ -584,7 +584,7 @@ final class PopopxAntiTheftMotionGuard {
         isRunning = false
     }
 
-    /// 锁状态变了要告知传感器：模块一要求"锁定后立即停止采样"。
+    /// A lock-state change must tell the sensor: module 1 requires 'stop sampling immediately after locking'.
     func lockedDidChange() {
         guard enabled, isRunning else { return }
         if PopopxAppLockState.shared.isLocked {
@@ -600,8 +600,8 @@ final class PopopxAntiTheftMotionGuard {
         manager.gyroUpdateInterval = interval
         manager.startAccelerometerUpdates(to: .main) { [weak self] data, _ in
             guard let self, let acceleration = data?.acceleration else { return }
-            // 回调已经在 `.main` 队列上，`assumeIsolated` 只是把这件事告诉类型系统，
-            // 不额外排队，因此 20Hz 的判定不会一帧一帧地往后推。
+            // The callback is already on the `.main` queue; `assumeIsolated` only tells the type system that fact,
+            // without enqueuing anything extra, so the 20Hz decisions are not pushed back frame by frame.
             MainActor.assumeIsolated {
                 self.receive(acceleration)
             }
@@ -620,7 +620,7 @@ final class PopopxAntiTheftMotionGuard {
         manager.stopGyroUpdates()
     }
 
-    // MARK: 判据入口
+    // MARK: Criterion entry
 
     private func receive(_ acceleration: CMAcceleration) {
         let g = sqrt(
@@ -628,8 +628,8 @@ final class PopopxAntiTheftMotionGuard {
                 + acceleration.y * acceleration.y
                 + acceleration.z * acceleration.z
         )
-        // `CMMotionManager` 的 timestamp 是开机以来的秒，与 `Date` 无公共原点；这里用回调
-        // 时刻作样本时刻。判定只看相邻样本的时间差，两套时钟不必互相换算。
+        // `CMMotionManager`'s timestamp counts seconds since boot and shares no origin with `Date`; here the callback
+        // moment is used as the sample moment. The decision only looks at the time difference between adjacent samples, so the two clocks never have to be converted.
         let sample = PopopxMotionSample(at: Date(), g: g, omega: latestOmega)
         append(sample)
         if g > peakG { peakG = g }
@@ -662,7 +662,7 @@ final class PopopxAntiTheftMotionGuard {
         stopSampling()
     }
 
-    // MARK: 超时与后台
+    // MARK: Timeout and background
 
     private func startInactivityTimer() {
         inactivityTimer?.invalidate()
@@ -672,8 +672,8 @@ final class PopopxAntiTheftMotionGuard {
                 self.checkInactivity()
             }
         }
-        // `.common` 模式：键盘弹出时主 runloop 处于 eventTracking 模式，不跑普通定时器，
-        // 而那正是最需要拉锁的时刻。
+        // `.common` mode: while the keyboard is up the main runloop is in eventTracking mode and does not fire ordinary timers,
+        // and that is exactly the moment the lock is needed most.
         RunLoop.main.add(timer, forMode: .common)
         inactivityTimer = timer
     }
@@ -723,7 +723,7 @@ final class PopopxAntiTheftMotionGuard {
     }
 
     private func handleDidEnterBackground() {
-        // 零后台耗电：无论是否开启瞬时锁定，进后台都停采。
+        // Zero background battery: whether or not instant locking is on, going to the background stops sampling.
         stopSampling()
         guard enabled, instantLockOnBackground else { return }
         lockPendingOnActive = true
@@ -742,28 +742,28 @@ final class PopopxAntiTheftMotionGuard {
     }
 }
 
-// MARK: - 全局触摸节拍
+// MARK: - Global touch heartbeat
 
-/// 一个只观察、永不参与识别的手势识别器：给超时判据提供"用户还在碰屏幕"这一事实。
+/// A gesture recogniser that only observes and never participates in recognition: it gives the timeout criterion the fact that 'the user is still touching the screen'.
 ///
-/// 为什么不用 SwiftUI 侧的方案：`.onTapGesture` 会吃掉点击，`DragGesture(minimumDistance: 0)`
-/// 同样与列表滚动争抢；交换 `UIApplication.sendEvent` 是苹果明令禁止的手法。
-/// 一个从不进入 `.began` 状态的识别器既拿得到 `touchesBegan`，又不会取消任何人的触摸。
+/// Why not a SwiftUI-side solution: `.onTapGesture` eats taps, and `DragGesture(minimumDistance: 0)`
+/// fights list scrolling just the same; swapping out `UIApplication.sendEvent` is a technique Apple explicitly forbids.
+/// A recogniser that never enters the `.began` state still gets `touchesBegan` and never cancels anyone else's touches.
 ///
-/// 挂在 `SceneDelegate.windowStatic`（AppDelegate.swift:135-145 已有这个静态句柄）上，
-/// 因此不需要新增 scene，也不需要动 project.pbxproj。
+/// Mounted on `SceneDelegate.windowStatic` (AppDelegate.swift:135-145 already has this static handle),
+/// so no new scene is needed and project.pbxproj does not have to be touched.
 final class PopopxTouchBeat: UIGestureRecognizer {
     private static weak var installedIn: UIWindow?
-    /// 边缘带判据：触点离屏幕中心的最长归一化分量。0.90 = 四边各 5% 的环带
-    /// （390pt 宽 ≈ 每边 20pt，844pt 高 ≈ 每边 42pt）。
-    /// 为什么不是更窄：抢夺时机主的手多半还握着边，太窄等于把模块二那一半判据关掉；
-    /// 为什么不更宽：状态栏与 Home 指示条是正常人天天点的地方，那半边一旦误报，
-    /// "姿态歪 + 边缘触摸"这两条就会在日常使用中自己凑齐。
+    /// Edge-band criterion: the longest normalised component of a touch point's distance from the screen centre. 0.90 = a ring band of 5% on each of the four sides
+    /// (390pt wide ≈ 20pt per side, 844pt high ≈ 42pt per side).
+    /// Why not narrower: during a snatch the owner's hand is usually still gripping an edge, and too narrow is the same as switching off half of module 2's criteria;
+    /// why not wider: the status bar and the Home indicator are places a normal person taps every day; once that half misfires,
+    /// the two conditions 'skewed posture + edge touch' will complete themselves in everyday use.
     static let edgeBandThreshold: Double = 0.90
     #if DEBUG
-    /// 验收用的「节点状态」读数：每喂这么多指打一行边缘占比，只计数、不参与任何判据。
-    /// Release 里整段不存在 —— 既不留刷屏，也不让 "telemetry" 这个词进入出厂二进制
-    /// （2c2b1d2dd 已把对外口径统一为「节点状态」）。
+    /// Acceptance 'node state' reading: every so many fingers fed in it logs one line of edge share; it only counts and takes no part in any criterion.
+    /// In Release the whole block does not exist — it neither leaves log spam nor lets the word "telemetry" into the shipped binary
+    /// (2c2b1d2dd already unified the outward wording to 'node state').
     private static let statusReadoutEvery = 25
     private static var statusReadoutTouches = 0
     private static var statusReadoutEdgeTouches = 0
@@ -771,13 +771,13 @@ final class PopopxTouchBeat: UIGestureRecognizer {
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesBegan(touches, with: event)
-        // 只记时刻、不改状态：状态保持 `.possible`，系统随后把它判为 `.failed`，
-        // 期间没有任何视图因为这个识别器收不到触摸。
+        // It only records the moment and never changes state: the state stays `.possible` and the system then decides it `.failed`,
+        // and in between no view fails to receive touches because of this recogniser.
         PopopxAppLockState.shared.noteInteraction()
-        // 逐指转交给模块二（倾斜 + 非常规触摸的组合判据）。它要的是 `UITouch.majorRadius`
-        // 和"这一下是不是打在边上"，两者都只有这里拿得到：模块二不知道视图尺寸，
-        // 也不该自己去读窗口。它内部第一行就 `guard enabled, isRunning`，
-        // 所以关闭状态下这条循环只是几次浮点除法。
+        // Handed off finger by finger to module 2 (the combined tilt + unusual-touch criterion). What it needs is `UITouch.majorRadius`
+        // and 'was this one on the edge', and only this place can get both: module 2 does not know the view's size,
+        // and should not go and read the window itself either. Its very first line is `guard enabled, isRunning`,
+        // so when switched off this loop is only a few floating-point divisions.
         guard let view = self.view else { return }
         let size = view.bounds.size
         let edgeReady = size.width > 0 && size.height > 0
@@ -805,7 +805,7 @@ final class PopopxTouchBeat: UIGestureRecognizer {
         }
     }
 
-    /// 幂等安装。窗口换了（例如分屏、重建）就重装一次。
+    /// Idempotent installation. If the window changes (split view, rebuild), install once more.
     @MainActor
     static func install(in window: UIWindow?) {
         guard let window else { return }

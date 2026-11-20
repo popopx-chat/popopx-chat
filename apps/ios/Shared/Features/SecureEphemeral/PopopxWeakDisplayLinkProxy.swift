@@ -2,30 +2,30 @@
 //  PopopxWeakDisplayLinkProxy.swift
 //  POPOPX (iOS)
 //
-//  `CADisplayLink` 的弱引用代理 + 一个可确定性销毁的逐帧驱动器。
+//  Weak-reference forwarder for `CADisplayLink` + a per-frame driver that can be destroyed deterministically.
 //
-//  为什么要这一层：`CADisplayLink(target:selector:)` **强引用** target。直接把一个
-//  SwiftUI 的宿主对象、或一个持有视图闭包的管理器交上去，就得到一条
-//  `displayLink -> target -> closure -> view` 的环：弹窗关了，60Hz 的回调还在跑，
-//  而且跑得比屏幕刷新还勤。这条环是"阅后即焚"这类短命容器最容易漏、又最难在泄漏检测器里
-//  认出来的一类（它不长，它是永远不结束）。
+//  Why this layer exists: `CADisplayLink(target:selector:)` holds the target with a **strong** reference. Handing over a
+//  SwiftUI host object directly, or a manager that holds view closures, yields a
+//  `displayLink -> target -> closure -> view` cycle: the sheet is closed and the 60Hz callback is still running,
+//  and it runs even more often than the screen refreshes. This cycle is the easiest one to miss in short-lived containers such as view-once, and at the same time the hardest
+//  to recognise in a leak detector (it is not long, it simply never ends).
 //
-//  代理只做一件事：把 `tick` 转发给一个 `weak` 目标，目标没了就顺手把自己从 runloop 上摘下来。
-//  `forwardingTarget(for:)` 必须一并转发，否则 `CADisplayLink` 在真正发消息前会先问
-//  `responds(to:)`，返回 nil 就等于"这个 target 不会处理 tick"，回调一次都不会来。
+//  The forwarder does one thing only: hand `tick` on to a `weak` target, and when the target is gone it detaches itself from the runloop.
+//  `forwardingTarget(for:)` must forward as well, otherwise `CADisplayLink` first asks, before it really sends the message,
+//  `responds(to:)`, and returning nil equals "this target will not handle tick", so not one callback arrives.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. The red line forbids scripts from modifying project.pbxproj.
 //
 
 import QuartzCore
 import UIKit
 
-/// `CADisplayLink` 的弱代理。
+/// Weak forwarder for `CADisplayLink`.
 final class PopopxWeakDisplayLinkProxy: NSObject {
-    /// 真正的接收者。`weak` 是这只类存在的全部理由。
+    /// The real receiver. `weak` is the entire reason this class exists.
     private weak var target: (any PopopxDisplayLinkTicker)?
 
-    /// 挂上去的那条 link，只为"目标没了能自己摘下来"而留。
+    /// The link it was attached to, kept only so that it can detach itself when the target is gone.
     fileprivate weak var link: CADisplayLink?
 
     init(target: any PopopxDisplayLinkTicker) {
@@ -33,24 +33,24 @@ final class PopopxWeakDisplayLinkProxy: NSObject {
         super.init()
     }
 
-    /// `CADisplayLink` 用 selector 派发，所以这个方法必须能被 `@objc` 找到。
+    /// `CADisplayLink` dispatches by selector, so this method must be findable through `@objc`.
     @objc func tick(_ link: CADisplayLink) {
         guard let target else {
-            // 目标已经释放。此刻不摘，下一次 tick 还是空转，而且 link 会一直把本代理
-            // 钉在 runloop 上——正是我们要修的那个环。
+            // The target has already been released. If we do not detach at this point, the next tick still spins for nothing, and the link keeps pinning this forwarder
+            // to the runloop -- exactly the cycle we are here to fix.
             invalidate()
             return
         }
         target.displayLinkDidTick(link)
     }
 
-    /// 代理必须替目标回答"我能不能转发这个 selector"，`CADisplayLink` 才肯把帧回调送过来。
+    /// The forwarder must answer "can I forward this selector" on the target's behalf before `CADisplayLink` is willing to deliver frame callbacks.
     ///
-    /// 只认 `tick` 这一个方法：协议只要求这一个，用 `target.responds(to:)` 反而要把协议挂到
-    /// `NSObjectProtocol` 上，而本文件的接收方是纯 Swift 类，不该为了转发问题变成 OC 类。
+    /// Only `tick` is recognised: the protocol requires nothing else, and using `target.responds(to:)` would instead require attaching the protocol to
+    /// `NSObjectProtocol`, while the receivers in this file are pure Swift classes that should not become OC classes just for a forwarding question.
     override func forwardingTarget(for aSelector: Selector!) -> Any? {
         guard aSelector == #selector(PopopxWeakDisplayLinkProxy.tick(_:)), target != nil else {
-            // 答不上来时顺手自杀：一个永远不会被转发的代理留在 runloop 上没有意义。
+            // Detach right away when the answer cannot be given: a forwarder that will never be forwarded from has no business staying on the runloop.
             invalidate()
             return nil
         }
@@ -63,41 +63,41 @@ final class PopopxWeakDisplayLinkProxy: NSObject {
     }
 }
 
-/// 逐帧回调的接收方。用协议而不是 `AnyObject` + `responds(to:)` 反射，是为了让"谁在收帧"
-/// 这件事在类型上看得出来。
+/// The receiver of the per-frame callback. A protocol rather than `AnyObject` + `responds(to:)` reflection, so that the fact of "who is receiving frames"
+/// can be seen in the types.
 protocol PopopxDisplayLinkTicker: AnyObject {
     func displayLinkDidTick(_ link: CADisplayLink)
 }
 
-// MARK: - 帧驱动器
+// MARK: - Frame driver
 
-/// 一条有明确生死的 `CADisplayLink`。
+/// A `CADisplayLink` with an explicit life and death.
 ///
-/// **线程约定**：本类不是 `@MainActor`，因为它要挂的正是主 runloop，而 `CADisplayLink` 的回调
-/// 由那个 runloop 直接派发——套上 actor 只会让"在回调里同步取一次状态"变成一次跨 actor 跳转。
-/// 约定改成写在文档里：只在主线程创建、`start`/`stop`；这个约定和它挂的 runloop 是同一件事，
-/// 不是一份额外的规矩。
+/// **Threading convention**: this class is not `@MainActor`, because what it has to attach to is precisely the main runloop, and the callbacks of `CADisplayLink`
+/// are dispatched directly by that runloop -- putting an actor around it would only turn "read state synchronously inside the callback" into a cross-actor hop.
+/// The convention is written into the documentation instead: create, `start`/`stop` only on the main thread; this convention and the runloop it attaches to are the same thing,
+/// not an extra rule.
 ///
-/// 三个约束决定了它的形状：
-/// 1. **必须挂到正确的 runloop mode**。挂在 `.default` 上的话，手指一按住滚动就再也不 tick
-///    ——而绝密弹窗里正有一个要按住的逐行阅读模式。所以默认 `.common`。
-/// 2. **必须能被幂等地停掉**。`start()` → `stop()` → `start()` 是用户来回切开关的正常序列，
-///    第二次 `start()` 绝不能造出第二条 link（那就是两个 60Hz 源，且第一条再也拿不到引用）。
-/// 3. **退出时必须断开对宿主的强引用链**。`onFrame` 闭包由宿主传进来，宿主几乎一定是
-///    `@MainActor` 对象，所以本类对它**只持 weak**，并且提供 `stop()` 让人能显式切断。
+/// Three constraints determine its shape:
+/// 1. **It must attach to the correct runloop mode**. Attached to `.default`, the moment a finger presses down for a scroll it never ticks again
+///    -- and the top-secret sheet has exactly a press-and-hold line-by-line reading mode. Hence `.common` by default.
+/// 2. **It must be stoppable idempotently**. `start()` -> `stop()` -> `start()` is the ordinary sequence when a user flips the switch back and forth,
+///    and the second `start()` must never produce a second link (that would be two 60Hz sources, and the first one could never be referenced again).
+/// 3. **On exit the strong reference chain to the host must be broken**. The `onFrame` closure is passed in by the host, which is almost certainly
+///    a `@MainActor` object, so this class **holds it weakly only**, and it offers `stop()` so that a person can cut it explicitly.
 final class PopopxFrameTicker: PopopxDisplayLinkTicker {
-    /// 每帧回调。参数是这一次与上一次的间隔（秒）——`CADisplayLink` 已经算好了，
-    /// 自己拿时间戳相减只会得到一份和屏幕不同步的近似值。
+    /// Per-frame callback. The parameter is the interval between this frame and the previous one (seconds) -- `CADisplayLink` has already computed it,
+    /// and subtracting timestamps ourselves would only yield an approximation that is out of step with the screen.
     var onFrame: ((TimeInterval) -> Void)?
 
-    /// 期望帧率上限。ProMotion 屏上 `preferredFrameRateRange` 让系统按内容自选 60/120；
-    /// 这里传 60 表示"每分钟 60 次足够，别为此把 120Hz 拉满"。
+    /// Expected frame-rate ceiling. On a ProMotion display `preferredFrameRateRange` lets the system pick 60/120 by content;
+    /// passing 60 here means "60 times per minute is enough, do not push 120Hz up for this".
     private let requestedFramesPerSecond: Int
 
     private var link: CADisplayLink?
     private var lastTimestamp: CFTimeInterval = 0
 
-    /// 当前是否在跑。测试和 `deinit` 断言都看这一个值。
+    /// Whether it is running right now. Both the tests and the `deinit` assertion look at this one value.
     var isRunning: Bool { link != nil }
 
     init(framesPerSecond: Int = 60) {
@@ -105,34 +105,34 @@ final class PopopxFrameTicker: PopopxDisplayLinkTicker {
     }
 
     deinit {
-        // 宿主松开本类之后这一步仍必须做：link 被 runloop 持有，会一直 tick 到进程结束。
-        // `invalidate()` 是 runloop 操作，而本类按上面的约定只在主线程创建，deinit 也就在主线程。
+        // This step is still required after the host lets go of the class: the link is held by the runloop and will tick until the process ends.
+        // `invalidate()` is a runloop operation, and since this class is created only on the main thread per the convention above, deinit happens on the main thread too.
         link?.invalidate()
     }
 
-    /// 幂等启动。已经在跑就直接返回，不造第二条。
+    /// Idempotent start. If it is already running, return immediately and do not build a second one.
     func start() {
         guard link == nil else { return }
         lastTimestamp = 0
         let proxy = PopopxWeakDisplayLinkProxy(target: self)
         let link = CADisplayLink(target: proxy, selector: #selector(PopopxWeakDisplayLinkProxy.tick(_:)))
         link.add(to: .main, forMode: .common)
-        // `preferredFrameRateRange` 是 iOS 15+；`frameInterval` 是它之前的等价物。
-        // 这里不写 `#available` 分支去兼容 iOS 14 及以下：app 的编译下限已经在 17 之上
-        // （`PopopxToast.swift:52` 的 `@Observable` 无门禁就是证据），多留一支死代码只会让
-        // 这行在未来变成"没人验证过的分支"。
+        // `preferredFrameRateRange` is iOS 15+; `frameInterval` is its equivalent before that.
+        // No `#available` branch here to support iOS 14 and below: the app's compilation floor is already above 17
+        // (the ungated `@Observable` at `PopopxToast.swift:52` is the evidence), and keeping one more dead branch would only turn
+        // this line in the future into "a branch nobody has verified".
         link.preferredFrameRateRange = CAFrameRateRange(
             minimum: Float(requestedFramesPerSecond) / 4,
             maximum: Float(requestedFramesPerSecond),
             preferred: Float(requestedFramesPerSecond)
         )
-        // 代理对 link 是 weak，link 对代理是 strong —— 唯一的强引用在 runloop 手里。
-        // 于是 `invalidate()` 之后没有任何人还留着代理，它随最后一个引用一起走。
+        // The forwarder is weak to the link and the link is strong to the forwarder -- the only strong reference is in the runloop's hands.
+        // So after `invalidate()` nobody still holds the forwarder, and it goes away with the last reference.
         proxy.link = link
         self.link = link
     }
 
-    /// 停掉并把闭包交出去，避免宿主已经没了还留着一个捕获它的闭包。
+    /// Stops and hands the closure back out, to avoid keeping a closure that captured the host after the host is already gone.
     func stop() {
         link?.invalidate()
         link = nil
@@ -140,7 +140,7 @@ final class PopopxFrameTicker: PopopxDisplayLinkTicker {
     }
 
     func displayLinkDidTick(_ link: CADisplayLink) {
-        // `stop()` 之后 runloop 可能还排着一帧。判据用同一份引用，不用 `isRunning` 再兜一层。
+        // After `stop()` the runloop may still have one frame queued. The test uses the very same reference, without falling back on `isRunning` as well.
         guard self.link === link else { return }
         let delta = lastTimestamp == 0 ? link.targetTimestamp - link.timestamp : link.timestamp - lastTimestamp
         lastTimestamp = link.timestamp

@@ -98,7 +98,7 @@ struct PopopxPanicWipeTests {
             #expect(firstStop < burn)
             #expect(burn < erase)
         }
-        // 蓝牙 first, then memory, then disk: nothing can still be receiving while the wipe is
+        // Bluetooth first, then memory, then disk: nothing can still be receiving while the wipe is
         // deleting what it received.
         let steps = made.recorder.all.compactMap { entry -> String? in
             entry.hasPrefix("start:") ? entry : nil

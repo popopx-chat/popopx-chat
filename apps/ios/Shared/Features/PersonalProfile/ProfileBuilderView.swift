@@ -2,88 +2,88 @@
 //  ProfileBuilderView.swift
 //  POPOPX (iOS)
 //
-//  【加密个人主页 · 模块二】制作器，和聊天「+」面板里那个轻量发送确认 Sheet。
+//  [Encrypted personal profile · module 2] The builder, and the lightweight send-confirmation sheet in the chat "+" panel.
 //
-//  三个类型，三种职责：
+//  Three types, three responsibilities:
 //
-//  1. `ProfileBuilderViewModel` —— 本机草稿的唯一可编辑状态。载入走 `loadEditable()`，写回走
-//     会抛错的 `saveEditable(_:)`；块的增删排序、图片/视频导入、失败原因的上屏都只在这一个类里。
-//  2. `ProfileBuilderView` —— 制作器的版式。自己不带栈（`PopopxMeView.swift:10` 那条同一条规矩：
-//     NavigationStack 由调用方统一包），底部那一横条是固定的：双模网络提示 + 保存 + 安全预览。
-//  3. `ProfileSendModeSheet` —— 发送前那一次选择。它只读已保存的主页，改的是**这一次**的模式，
-//     永远不回写 `manifest.json`。
+//  1. `ProfileBuilderViewModel` — the only editable state of the local draft. Loading goes through `loadEditable()`, writing back goes through
+//     the throwing `saveEditable(_:)`; adding, removing and reordering blocks, importing photos/videos and surfacing failure reasons all live in this one class.
+//  2. `ProfileBuilderView` — the builder's layout. It carries no stack of its own (the same rule as `PopopxMeView.swift:10`:
+//     the NavigationStack is wrapped uniformly by the caller), and the bottom bar is fixed: dual-mode network hint + save + safe preview.
+//  3. `ProfileSendModeSheet` — that one choice before sending. It only reads the saved profile, and changes the mode of **this send**,
+//     never writing back to `manifest.json`.
 //
-//  ### 这一页里三件不显眼但要紧的事
+//  ### Three unobtrusive but critical things on this page
 //
-//  1. **保存就是发送侧那道门**。`ProfileStorageManager.saveEditable(_:)` 先跑
-//     `PopopxProfilePayload.make`（ProfileStorageManager.swift:257-261），所以一份存得下来的草稿
-//     一定发得出去；反过来说，标题超限、块数超标、隐私档时长越界都会在这里以 `reasonText` 的
-//     原话弹回来，界面上不许自己再造第二套句子。
-//  2. **草稿的 `deliveryMode` 恒为 `.fullMedia`**。送达方式是发送那一刻由链路决定的，不是内容的
-//     属性；草稿一旦带上 `.meshTextOnly`，`normalized()` 就会把用户的图文视频整批抹掉
-//     （PersonalProfileModel.swift:247-261），而 `saveEditable` 写的正是传进去的那一份。
-//  3. **更新内容不需要重新生成任何二维码**。`profileId` 只在第一次制作时生成、之后每次保存都
-//     沿用同一个（见下面 `profileId` 那一行），而它是媒体目录的分格键、也是主页分发所指向的那个
-//     稳定标识（PersonalProfileModel.swift:177），所以内容改动不动它。
+//  1. **Saving is the gate on the sending side**. `ProfileStorageManager.saveEditable(_:)` first runs
+//     `PopopxProfilePayload.make` (ProfileStorageManager.swift:257-261), so a draft that can be saved
+//     can certainly be sent; conversely, an over-long title, too many blocks or an out-of-range privacy duration all bounce back here as the
+//     verbatim wording of `reasonText`, and the interface must not invent a second set of sentences.
+//  2. **The draft's `deliveryMode` is always `.fullMedia`**. The delivery mode is decided by the route at the moment of sending; it is not a property
+//     of the content; once a draft carries `.meshTextOnly`, `normalized()` wipes out the user's text, images and videos wholesale
+//     (PersonalProfileModel.swift:247-261), and what `saveEditable` writes is exactly the copy passed into it.
+//  3. **Updating content needs no QR code regenerated**. `profileId` is generated only at the first build and every later save reuses
+//     the same one (see the `profileId` line below), and it is both the media directory's partition key and the stable identifier
+//     that profile distribution points to (PersonalProfileModel.swift:177), so content edits do not touch it.
 //
-//  配色、字号、圆角、间距一律取 Shared/Theme/PopopxTheme.swift 的 token；控件只用
-//  Shared/Components 里已有的原子库。页面里每一句中文只在本文件的 `Copy` 出现一次。
+//  Colours, font sizes, corner radii and spacing all come from the tokens in Shared/Theme/PopopxTheme.swift; controls use only
+//  the atom library already in Shared/Components. Every Chinese sentence on the page appears exactly once, in this file's `Copy`.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖进 POPOPX (iOS) target —— 铁律禁止脚本改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand — the iron rule forbids scripts changing project.pbxproj.
 //
 
 import AVFoundation
 import SwiftUI
 import UIKit
 
-// MARK: - 块的稳定身份
+// MARK: - Stable block identity
 
-/// `ForEach` 用的一行快照：稳定 id + 当前下标 + 内容。
-/// id 不是下标也不是内容：下标在上下移动后会指向另一块内容，正在输入的那一格会跟着跳走；
-/// 用内容当 id 则每敲一个字就是一次换身份。
+/// A one-row snapshot used by `ForEach`: stable id + current index + content.
+/// The id is neither the index nor the content: after a move up or down an index points at different content, and the cell being typed into jumps away;
+/// while using content as the id means every keystroke is a change of identity.
 struct ProfileBuilderBlockEntry: Identifiable {
     let id: UUID
     let index: Int
     let block: PopopxProfileBlock
 }
 
-// MARK: - 制作器状态
+// MARK: - Builder state
 
 @MainActor
 @Observable
 final class ProfileBuilderViewModel {
-    /// 隐私档可选的三档时长。值只在 `PopopxProfilePayload.ttlOptions`
-    /// （PersonalProfileModel.swift:363）里定义一遍，这里不抄第二张表。
+    /// The three selectable durations of the privacy tier. The values are defined once, only in `PopopxProfilePayload.ttlOptions`
+    /// (PersonalProfileModel.swift:363); no second table is copied here.
     static let ttlChoices: [Int] = PopopxProfilePayload.ttlOptions
 
-    /// 隐私档的默认时长：三档的中间那一档；表被改空时退到协议下限，而不是硬编一个 300。
+    /// The default privacy-tier duration: the middle one of the three tiers; if the table is emptied it falls back to the protocol floor rather than hard-coding a 300.
     static var defaultEphemeralTTL: Int {
         ttlChoices.isEmpty ? PopopxProfilePayload.minimumTTLSeconds : ttlChoices[ttlChoices.count / 2]
     }
 
-    /// 相册交回来的 `UIImage` 先按这个质量编一次 JPEG。真正的压档（像素/质量两张梯子）在存储层，
-    /// 那一张表归 `ProfileStorageManager`，这里只是把 `UIImage` 变成它能吃的字节。
+    /// The `UIImage` handed back by the photo library is first JPEG-encoded at this quality. The real compression ladder (the pixel and quality ladders) lives in the storage layer,
+    /// and that table belongs to `ProfileStorageManager`; here we only turn a `UIImage` into bytes it can eat.
     private static let pickedImageJPEGQuality: CGFloat = 0.9
 
-    // MARK: 可编辑状态（视图直接绑这几格）
+    // MARK: Editable state (the view binds these cells directly)
 
     var title = ""
     var subtitle = ""
     var enableAntiSpyCamera = false
-    /// 查看这份主页要收的算力点，0 = 免费。视图直接绑它（和上面那格同一个做法），落进清单时 0 变 nil。
+    /// The credits charged to view this profile, 0 = free. The view binds it directly (same approach as the cell above), and 0 becomes nil when it lands in the manifest.
     ///
-    /// 这里没有"能不能收这个价"的校验：钱的边界在 `PopopxCreditsManager.unlockProfile` 那一侧，
-    /// 制作器只负责把用户选的数原样带出去。
+    /// There is no "may this price be charged" validation here: the money boundary is on the `PopopxCreditsManager.unlockProfile` side,
+    /// and the builder is only responsible for carrying the number the user chose out unchanged.
     var unlockCredits = 0
 
-    // MARK: 只读状态
+    // MARK: Read-only state
 
     private(set) var blocks: [PopopxProfileBlock] = []
     private(set) var blockIDs: [UUID] = []
     private(set) var sendMode: PopopxProfileSendMode = .standard
     private(set) var ttlSeconds = 0
-    /// 媒体块在本机的原件地址（key = `mediaId`）。导入时、载入时各填一次，于是渲染那一段代码
-    /// 不必为了拿一个路径而每帧去问一次 actor。
+    /// The on-device original-file addresses of the media blocks (key = `mediaId`). Filled once on import and once on load, so the rendering code
+    /// does not have to ask the actor once per frame just to get a path.
     private(set) var mediaURLs: [String: URL] = [:]
     private(set) var isReady = false
     private(set) var isSaving = false
@@ -91,41 +91,41 @@ final class ProfileBuilderViewModel {
     private(set) var errorText: String?
     private(set) var noticeText: String?
 
-    /// 回执由模型持有，视图只负责挂（`PopopxToast.swift:133` 那条要求挂在整屏最高处）。
+    /// The model holds the receipt and the view only mounts it (`PopopxToast.swift:133` requires mounting at the highest point of the whole screen).
     let toast = PopopxToastModel()
 
     private let store: ProfileStorageManager
-    /// 一生成就固定下来，之后每次保存都沿用同一个：内容改动不动它，
-    /// 所以按 `profileId` 分发的入口（主页二维码、媒体目录）不需要因为改内容而重建。
+    /// Once generated it is fixed and every later save reuses the same one: content edits do not move it,
+    /// so the entries distributed by `profileId` (the profile QR code, the media directory) need no rebuild because content changed.
     private var profileId: String
-    /// 切到常驻档会把 `ttlSeconds` 归零（协议只接受 0，PersonalProfileModel.swift:400-401），
-    /// 但用户上一次选的时长要留下来：反复切模式不该悄悄改掉他的隐私设置。
+    /// Switching to the permanent tier zeroes `ttlSeconds` (the protocol accepts only 0, PersonalProfileModel.swift:400-401),
+    /// but the duration the user last chose has to be kept: switching modes repeatedly must not quietly change their privacy setting.
     private var rememberedEphemeralTTL: Int
 
     init(store: ProfileStorageManager = .shared) {
         self.store = store
         self.profileId = PopopxProfileManifest.blank().profileId
         self.rememberedEphemeralTTL = Self.defaultEphemeralTTL
-        // 草稿在那枚 actor 上读，不占主线程。读完之前界面是加载态（`isReady`），
-        // 于是不存在"用户先敲了字、随后被盘上那一份覆盖掉"这一种竞态。
+        // The draft is read on that actor, so the main thread is not occupied. Until it is read the interface is in the loading state (`isReady`),
+        // so the race "the user typed first and was then overwritten by the copy on disk" cannot exist.
         Task { [weak self] in
             guard let self else { return }
             await self.loadDraft()
         }
     }
 
-    // MARK: 派生的话
+    // MARK: Derived copy
 
     var mediaCount: Int { blocks.reduce(0) { $0 + $1.mediaCount } }
     var imageCount: Int { blocks.filter { $0.media?.kind == .image }.count }
     var videoCount: Int { blocks.filter { $0.media?.kind == .video }.count }
 
-    /// 还能不能再加一块。上限 24 是 `make` 说了算的，界面先把门关上，让用户听见的是同一句话。
+    /// Whether another block may still be added. The 24 limit is `make`'s call; the interface closes the door first so that the user hears the same sentence.
     var canAddBlock: Bool { blocks.count < PopopxProfilePayload.maximumBlocks }
     var canSave: Bool { isReady && !isSaving && !mediaBusy }
 
-    /// 身份卡下面那一行。超限时直接把协议层的原话当提示，不另造一句更轻的：
-    /// 用户在这里看到的和保存失败时看到的是同一条。
+    /// The line under the identity card. When the limit is exceeded, the protocol layer's own wording is shown as the hint rather than a softer invented one:
+    /// what the user sees here and what they see when saving fails are the same message.
     var identityFootnote: String {
         let used = title.count
         guard used > PopopxProfilePayload.maximumTitleCharacters else {
@@ -144,8 +144,8 @@ final class ProfileBuilderViewModel {
         )
     }
 
-    /// 模式卡片里那一行说明。常驻档那一句是产品规定的原话；隐私档那一句把计时起点说死，
-    /// 因为"打开后才开始计时"正是这一档和常驻档唯一区别得清的地方。
+    /// The explanatory line inside the mode card. The permanent-tier sentence is the product's mandated wording; the privacy-tier sentence pins down where the clock starts,
+    /// because "the timer starts only once it is opened" is precisely the one thing that tells this tier apart from the permanent tier.
     var policyNote: String {
         switch sendMode {
         case .standard: return Copy.standardNote
@@ -153,13 +153,13 @@ final class ProfileBuilderViewModel {
         }
     }
 
-    /// 这一份草稿将来走 Mesh 会少掉什么。送达方式不在本页选（见 `draftManifest()` 那段注释），
-    /// 所以这里只报"会省几个"，不给用户一个其实由链路决定的开关。
+    /// What this draft would lose if it later goes over Mesh. The delivery mode is not chosen on this page (see the comment on `draftManifest()`),
+    /// so this only reports "how many would be dropped", rather than handing the user a switch that the route actually decides.
     var deliveryHint: String {
         mediaCount == 0 ? Copy.deliveryHintTextOnly : String(format: Copy.deliveryHintMediaFormat, mediaCount)
     }
 
-    // MARK: 载入
+    // MARK: Loading
 
     private func loadDraft() async {
         let saved = await store.loadEditable()
@@ -175,8 +175,8 @@ final class ProfileBuilderViewModel {
         sendMode = manifest.sendMode
         ttlSeconds = manifest.ttlSeconds
         enableAntiSpyCamera = manifest.enableAntiSpyCamera
-        // 原样带回来，不贴档位：门槛是自定义数字，选择表里没有的合法值（比如 37）也是用户设过的决定，
-        // 载入时悄悄改成 20 或 0 都是在改他的收费。真正的边界在扣点那一侧。
+        // Brought back as it is, without snapping to a tier: the threshold is a custom number, and a legal value missing from the picker table (say 37) is still a decision the user made,
+        // so quietly turning it into 20 or 0 while loading would be changing their price. The real boundary is on the debit side.
         unlockCredits = manifest.unlockCredits ?? 0
         blocks = manifest.blocks
         blockIDs = manifest.blocks.map { _ in UUID() }
@@ -190,10 +190,10 @@ final class ProfileBuilderViewModel {
         }
     }
 
-    // MARK: 模式与时长
+    // MARK: Mode and duration
 
-    /// 选发送模式。不直接暴露属性的写入权，是因为两档对 `ttlSeconds` 的要求是相反的：
-    /// 常驻档必须是 0（`make` 会拒任何非 0），隐私档必须落在三档里。
+    /// Choosing the send mode. The property's write access is not exposed directly because the two tiers demand opposite things of `ttlSeconds`:
+    /// the permanent tier must be 0 (`make` rejects any non-zero), and the privacy tier must fall within the three tiers.
     func select(sendMode mode: PopopxProfileSendMode) {
         guard mode != sendMode else { return }
         switch mode {
@@ -213,7 +213,7 @@ final class ProfileBuilderViewModel {
         errorText = nil
     }
 
-    // MARK: 块
+    // MARK: Blocks
 
     var entries: [ProfileBuilderBlockEntry] {
         zip(blockIDs, blocks).enumerated().map { pair in
@@ -221,7 +221,7 @@ final class ProfileBuilderViewModel {
         }
     }
 
-    /// 文字块的绑定。下标在每次读写时现算，所以上下移动之后这一格仍然指向它自己那块内容。
+    /// The binding of a text block. The index is recomputed on every read and write, so after a move up or down this cell still points at its own content.
     func textBinding(for id: UUID) -> Binding<String> {
         Binding(
             get: { self.text(of: id) },
@@ -254,9 +254,9 @@ final class ProfileBuilderViewModel {
         if let media = block.media {
             let mediaId = media.mediaId
             let profileId = self.profileId
-            // 删掉的原件必须立刻离开磁盘，哪怕代价是某一份**旧的**已保存清单可能指向一个已经不存在的
-            // mediaId：`PopopxProfileMediaLoad.missing` 那一支就是为这种情况存在的，
-            // 而"用户删了、原件还躺在沙盒里"在隐私功能里是更坏的那一种。
+            // A deleted original must leave the disk at once, even at the cost of some **older** saved manifest pointing at a
+            // mediaId that no longer exists: the `PopopxProfileMediaLoad.missing` branch exists for exactly this case,
+            // and "the user deleted it but the original still lies in the sandbox" is the worse kind for a privacy feature.
             Task { await store.removeMedia(profileId: profileId, ids: [mediaId]) }
             mediaURLs.removeValue(forKey: mediaId)
         }
@@ -281,7 +281,7 @@ final class ProfileBuilderViewModel {
         blockIDs.insert(UUID(), at: index)
     }
 
-    /// 块数没到上限才让动作继续。满了就把协议那句原话顶到界面上，不静默拒绝。
+    /// The action proceeds only while the block count is below the limit. When it is full, the protocol's own sentence is pushed onto the interface instead of refusing silently.
     private func reserveBlockSlot() -> Bool {
         guard isReady, !mediaBusy else { return false }
         guard canAddBlock else {
@@ -291,11 +291,11 @@ final class ProfileBuilderViewModel {
         return true
     }
 
-    // MARK: 相册
+    // MARK: Photo library
 
-    /// 选回来的东西。类型以真正选回来的 `UploadContent` 为准，而不是以按了哪个按钮为准：
-    /// app 唯一那枚相册包装件的默认 filter 同时放行图片与视频（ImagePicker.swift:37），
-    /// 所以"添加图片"和"添加视频"在实现上是同一个动作，摆两个按钮才是撒谎。
+    /// Whatever comes back selected. The type follows the `UploadContent` actually chosen, not the button that was pressed:
+    /// the default filter of the app's single photo-library wrapper lets through both images and videos (ImagePicker.swift:37),
+    /// so "add image" and "add video" are the same action in the implementation, and putting two buttons there would be lying.
     func receivePicked(_ content: UploadContent) async {
         guard reserveBlockSlot() else { return }
         errorText = nil
@@ -310,8 +310,8 @@ final class ProfileBuilderViewModel {
     private func importImage(_ image: UIImage) async {
         mediaBusy = true
         defer { mediaBusy = false }
-        // 只有 `UIImage` 可用：那条包装链路对任何能解码的图都回 `.animatedImage`
-        // （ComposeView.swift:337-352），原件 URL 拿不到，所以这里先编一次 JPEG 交给存储层。
+        // Only a `UIImage` is available: that wrapper chain returns `.animatedImage` for any image it can decode
+        // (ComposeView.swift:337-352), so the original URL cannot be had and a JPEG is encoded here first for the storage layer.
         guard let data = image.jpegData(compressionQuality: Self.pickedImageJPEGQuality) else {
             report(PopopxProfileMediaError.undecodableImage, context: "picked image")
             return
@@ -328,7 +328,7 @@ final class ProfileBuilderViewModel {
         mediaBusy = true
         defer { mediaBusy = false }
         do {
-            // 转码在那枚 actor 上跑，30 秒截断与 15 MB 预算都由它判；这里只等结果。
+            // Transcoding runs on that actor, which also decides the 30-second cut-off and the 15 MB budget; here we only wait for the result.
             let media = try await store.importVideo(from: url, profileId: profileId)
             await finishImport(media)
         } catch {
@@ -341,8 +341,8 @@ final class ProfileBuilderViewModel {
         let block: PopopxProfileBlock = media.kind == .image ? .image(media) : .video(media)
         insert(block, at: blocks.count)
         noticeText = nil
-        // 导入不是保存：原件已经落盘，但清单还没写。这一句必须说出来，否则用户会以为
-        // 关掉页面内容也留住了。haptic 走这里而不是走按钮：这条链路不在 `PopopxButton` 的动作里。
+        // Importing is not saving: the original is already on disk but the manifest is not written. This has to be said out loud, otherwise the user assumes
+        // closing the page kept the content too. The haptic fires here rather than on the button: this chain is not inside a `PopopxButton` action.
         PopopxHaptics.notice(.success)
         toast.show(
             String(format: Copy.mediaAddedFormat, Copy.kind(media.kind), Self.sizeText(media.bytes)),
@@ -350,10 +350,10 @@ final class ProfileBuilderViewModel {
         )
     }
 
-    // MARK: 保存
+    // MARK: Saving
 
-    /// 当前草稿的完整清单。`deliveryMode` 恒为 `.fullMedia`、`omittedMediaCount` 恒为 0：
-    /// 那两格是发送时的事，让 `normalized()` 在这一份上看到 `.meshTextOnly` 就等于删用户的内容。
+    /// The full manifest of the current draft. `deliveryMode` is always `.fullMedia` and `omittedMediaCount` is always 0:
+    /// those two cells are sending-time business, and letting `normalized()` see `.meshTextOnly` on this copy would be deleting the user's content.
     func draftManifest(updatedAt: TimeInterval) -> PopopxProfileManifest {
         let trimmedSubtitle = subtitle.trimmingCharacters(in: .whitespacesAndNewlines)
         return PopopxProfileManifest(
@@ -366,15 +366,15 @@ final class ProfileBuilderViewModel {
             deliveryMode: .fullMedia,
             omittedMediaCount: 0,
             enableAntiSpyCamera: enableAntiSpyCamera,
-            // 0 存成 nil，而不是 JSON 里写一个 `unlockCredits: 0`：门槛这格"没写过"和"写过但等于零"
-            // 在收件方那边必须给出完全相同的行为（直接打开），而所有老主页就是"没写过"那一档。
+            // 0 is stored as nil rather than writing `unlockCredits: 0` into the JSON: for the threshold, "never written" and "written but equal to zero"
+            // must give the receiving side exactly the same behaviour (open directly), and every older profile is the "never written" case.
             unlockCredits: unlockCredits > 0 ? unlockCredits : nil,
             updatedAt: updatedAt,
             blocks: blocks
         )
     }
 
-    /// 写回本机。失败一律以 typed error 的原话上屏。
+    /// Writing back to the device. Failures always surface with the typed error's own wording.
     func save() async {
         guard canSave else { return }
         errorText = nil
@@ -382,8 +382,8 @@ final class ProfileBuilderViewModel {
         let manifest = draftManifest(updatedAt: Date().timeIntervalSince1970).normalized()
         do {
             try await store.saveEditable(manifest)
-            // 成功这一路不再补 haptic：`PopopxButton` 在自己的 isBusy 落回 false 时已经
-            // `notice(.success)`（PopopxControls.swift:171-178），这里再发一次就是两次反馈。
+            // The success path adds no further haptic: `PopopxButton` has already, when its isBusy falls back to false,
+            // fired `notice(.success)` (PopopxControls.swift:171-178), so firing it again here would be two pieces of feedback.
             toast.show(Copy.savedToast, kind: .success)
         } catch {
             report(error, context: "saveEditable")
@@ -391,13 +391,13 @@ final class ProfileBuilderViewModel {
         isSaving = false
     }
 
-    // MARK: 安全预览
+    // MARK: Safe preview
 
-    /// 预览用的投影，**不动草稿**。
+    /// The projection used for the preview; it **does not touch the draft**.
     ///
-    /// Mesh 那一档走 `textOnly` 再走 `normalized()`，和真实发送完全同一条路径：剔掉所有图片/视频块、
-    /// 把剔掉的个数记进 `omittedMediaCount`、再按模式收敛一次不变量（PersonalProfileModel.swift:214-231）。
-    /// 顺序不能反：`normalized()` 只把 `omittedMediaCount` 钳进值域，不会替谁算出真实个数。
+    /// The Mesh tier goes through `textOnly` and then `normalized()`, exactly the same path as a real send: dropping every image/video block,
+    /// recording the dropped count in `omittedMediaCount`, then converging the invariants once more by mode (PersonalProfileModel.swift:214-231).
+    /// The order cannot be reversed: `normalized()` only clamps `omittedMediaCount` into range; it computes the real count for nobody.
     func previewManifest(
         sendMode mode: PopopxProfileSendMode,
         delivery: PopopxProfileDelivery
@@ -413,10 +413,10 @@ final class ProfileBuilderViewModel {
         return copy.normalized()
     }
 
-    // MARK: 失败上屏
+    // MARK: Surfacing failures
 
-    /// typed error 的原话。`PopopxProfileError` 说协议层，`PopopxProfileMediaError` 说本机加工层，
-    /// 两个都不许吞：吞掉一次失败，用户就会以为内容已经存好了。
+    /// The typed error's own wording. `PopopxProfileError` speaks for the protocol layer, `PopopxProfileMediaError` for the local processing layer,
+    /// and neither may be swallowed: swallow one failure and the user will think the content has been saved.
     private func report(_ error: Error, context: String) {
         let text: String
         switch error {
@@ -432,14 +432,14 @@ final class ProfileBuilderViewModel {
         PopopxHaptics.notice(.error)
     }
 
-    /// 体积只在这里格式化一次：全 app 的字节数都走 `ByteCountFormatter` 的 binary 档
-    /// （CIVideoView.swift:320、CIFileView.swift:41 同一口径），错误句子里那两处 `bytes / 1_024` 归存储层。
+    /// Sizes are formatted once, here: every byte count in the app goes through the binary mode of `ByteCountFormatter`
+    /// (the same convention as CIVideoView.swift:320 and CIFileView.swift:41); the two `bytes / 1_024` spots inside error sentences belong to the storage layer.
     static func sizeText(_ bytes: Int) -> String {
         ByteCountFormatter.string(fromByteCount: Int64(bytes), countStyle: .binary)
     }
 }
 
-// MARK: - 制作器页面
+// MARK: - Builder page
 
 @MainActor
 struct ProfileBuilderView: View {
@@ -469,7 +469,7 @@ struct ProfileBuilderView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top, PopopxMetrics.spaceS)
             .padding(.bottom, PopopxMetrics.spaceL)
-            // 展开/收起隐私档那一格、以及块的增减：Reduce Motion 下直接落位。
+            // Expanding/collapsing the privacy-tier cell, and adding or removing blocks: under Reduce Motion they land directly.
             .popopxAnimation(PopopxSpring.fluid, value: model.sendMode, reduceMotion: reduceMotion)
             .popopxAnimation(PopopxSpring.snappy, value: model.blocks.count, reduceMotion: reduceMotion)
         }
@@ -481,7 +481,7 @@ struct ProfileBuilderView: View {
         .popopxToast(model.toast)
     }
 
-    // MARK: 身份区
+    // MARK: Identity section
 
     private var identitySection: some View {
         @Bindable var model = model
@@ -504,7 +504,7 @@ struct ProfileBuilderView: View {
         }
     }
 
-    // MARK: 发送权限与销毁策略
+    // MARK: Send permission and destruction policy
 
     private var policySection: some View {
         @Bindable var model = model
@@ -542,8 +542,8 @@ struct ProfileBuilderView: View {
                 .accessibilityIdentifier("popopx.profile.builder.antiSpy")
             }
             PopopxBuilderDivider()
-            // 收费门槛这一档不属于"隐私"那一族（它改变的是收件人要不要付钱，不是内容留多久），
-            // 所以它不跟着 `sendMode == .ephemeral` 那一支走：常驻名片同样可以设门槛。
+            // The charge threshold does not belong to the "privacy" family (what it changes is whether the recipient pays, not how long content stays),
+            // so it does not follow the `sendMode == .ephemeral` branch: a permanent card may set a threshold just the same.
             Text(Copy.thresholdLabel)
                 .font(PopopxType.sectionHeader)
                 .foregroundStyle(PopopxPalette.label)
@@ -564,16 +564,16 @@ struct ProfileBuilderView: View {
         }
     }
 
-    /// 门槛数字框与模型之间只做一次换算：框里留空 = 模型里的 0 = 清单里的 nil。
+    /// Only one conversion between the threshold number field and the model: an empty field = 0 in the model = nil in the manifest.
     ///
-    /// 刻意不在模型里再存一格"要不要收费"的布尔：那两处真值迟早会分家，而分家之后的形状是
-    /// "开关说收费、数字是 0"——收件人那边就得到一个要点开却收不到钱的卡片。
+    /// Deliberately no extra "charge or not" boolean stored in the model: those two truths will sooner or later divorce, and the shape after the divorce is
+    /// "the switch says charge, the number is 0" — and the recipient gets a card they must unlock but that collects no money.
     private var unlockCreditsText: Binding<String> {
         Binding(
             get: { model.unlockCredits > 0 ? String(model.unlockCredits) : "" },
             set: { text in
-                // 只认数字：打字打到一半的 `-`、空格、误触的字母都当成还没写完，按 0（免费）处理，
-                // 而不是把半截输入解释成别的数。超出上限就贴到上限，那句话写在下面的注释里。
+                // Digits only: a mid-typing `-`, a space or a mistyped letter all count as not finished yet and are treated as 0 (free),
+                // rather than explaining a half-finished input as some other number. Past the cap it sticks to the cap, with that sentence written in the comment below.
                 let digits = text.filter(\.isNumber)
                 let entered = Int(digits) ?? 0
                 model.unlockCredits = min(entered, PopopxCommerceLimits.maximumCreditsThreshold)
@@ -581,7 +581,7 @@ struct ProfileBuilderView: View {
         )
     }
 
-    // MARK: 图文视频块
+    // MARK: Text, image and video blocks
 
     private var blocksSection: some View {
         PopopxSectionCard(Copy.blocksGroup, footnote: model.blocksFootnote) {
@@ -646,10 +646,10 @@ struct ProfileBuilderView: View {
             }
             switch entry.block {
             case .text:
-                // `PopopxTextArea` 有两个不显眼的事实，都在这里绕过去：它的 `label` 不上屏、只进
-                // `.accessibilityLabel`（PopopxControls.swift:283），所以块标题由上面那一行自己画；
-                // 而它的行数是写死的 `lineLimit(3...8)`（PopopxControls.swift:271），
-                // 长的自我介绍会在第 8 行之后开始内滚，这一页不打算为重抄一遍控件。
+                // Two unobtrusive facts about `PopopxTextArea` are routed around here: its `label` never renders, it only goes into
+                // `.accessibilityLabel` (PopopxControls.swift:283), so the block title is drawn by the row above;
+                // And its line count is hard-coded as `lineLimit(3...8)` (PopopxControls.swift:271),
+                // so a long bio starts scrolling internally after line 8; this page is not going to re-copy the control for it.
                 PopopxTextArea(
                     Copy.blockTextA11y(entry.index + 1),
                     prompt: Copy.textPrompt,
@@ -678,8 +678,8 @@ struct ProfileBuilderView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// 元信息只报 manifest 里真有的两格。缩略图解不出来时不写"原件缺失"：体积与时长都不依赖
-    /// 解码成功，报缺失就成了撒谎，而真正的缺失判定在阅读器那一侧走 `loadMedia`。
+    /// The meta info reports only the two fields that really exist in the manifest. When the thumbnail cannot be decoded it does not write "original missing": size and duration never depend
+    /// on a successful decode, so reporting a missing file would be a lie, and the real missing check runs on the reader side via `loadMedia`.
     private func mediaMetaLine(_ media: PopopxProfileMedia) -> String {
         var parts: [String] = []
         if let seconds = media.durationSeconds {
@@ -689,7 +689,7 @@ struct ProfileBuilderView: View {
         return parts.joined(separator: " · ")
     }
 
-    // MARK: 添加
+    // MARK: Add
 
     private var addSection: some View {
         HStack(spacing: PopopxMetrics.spaceXS) {
@@ -710,7 +710,7 @@ struct ProfileBuilderView: View {
         .padding(.horizontal, PopopxMetrics.gutter)
     }
 
-    // MARK: 底部固定条
+    // MARK: Bottom fixed bar
 
     private var bottomBar: some View {
         VStack(spacing: PopopxMetrics.spaceXS) {
@@ -766,7 +766,7 @@ struct ProfileBuilderView: View {
         showsPreview = true
     }
 
-    // MARK: 相册
+    // MARK: Photo album
 
     private var libraryPicker: some View {
         LibraryMediaListPicker(
@@ -777,7 +777,7 @@ struct ProfileBuilderView: View {
         }
     }
 
-    // MARK: 安全预览 Sheet
+    // MARK: Secure preview Sheet
 
     private var previewSheet: some View {
         let payload = PopopxProfilePayload(manifest: model.previewManifest(sendMode: previewMode, delivery: previewDelivery))
@@ -831,7 +831,7 @@ struct ProfileBuilderView: View {
         .presentationDetents([.medium, .large])
     }
 
-    /// 预览底部那一行：Mesh 就报省了几个，在线就报倒计时口径。两条都是清单里的真值，不是形容词。
+    /// The row at the bottom of the preview: over Mesh it reports how many were saved, online it reports the countdown basis. Both are real values from the manifest, not adjectives.
     private func footnote(for payload: PopopxProfilePayload) -> String {
         if payload.manifest.deliveryMode == .meshTextOnly {
             return String(format: Copy.previewOmittedFormat, payload.manifest.omittedMediaCount)
@@ -855,13 +855,13 @@ struct ProfileBuilderView: View {
     }
 }
 
-// MARK: - 发送确认 Sheet
+// MARK: - Send confirmation Sheet
 
-/// 聊天输入栏「+」面板里"个人主页"点开的那一枚轻量确认。
+/// The lightweight confirmation opened by "Personal profile" in the chat input bar's "+" panel.
 ///
-/// 它只读已保存的主页，改的只有**这一次**的 `sendMode`/`ttlSeconds`：绝不写 `manifest.json`，
-/// 所以从聊天里发一份阅后即焚版，不会把主页本身的常驻设置改掉（那归制作器）。
-/// dismiss 与 detents 都由调用方拥有（同 `PopopxQRCardSheet.swift:13-15` 那条裁定）。
+/// It only reads the saved profile, and the only thing it changes is **this one** send's `sendMode`/`ttlSeconds`: it never writes `manifest.json`,
+/// so sending a view-once copy from the chat does not alter the profile's own standing settings (those belong to the builder).
+/// dismiss and detents are both owned by the caller (the same ruling as `PopopxQRCardSheet.swift:13-15`).
 @MainActor
 struct ProfileSendModeSheet: View {
     @Environment(\.dismiss) private var dismiss
@@ -936,8 +936,8 @@ struct ProfileSendModeSheet: View {
             .disabled(!canSend)
             .padding(PopopxMetrics.spaceM)
         }
-        // 打开时才去读那一份已保存的主页：这枚 Sheet 由聊天输入栏在用户按下"个人主页"之后才建出来，
-        // 拿到的永远是按下那一刻磁盘上的内容。`.task` 随 Sheet 消失自动取消，不需要 onDisappear 收尾。
+        // The saved profile is read only when it opens: the chat input bar builds this Sheet only after the user presses "Personal profile",
+        // so it always gets whatever was on disk at the moment of the press. `.task` is cancelled automatically when the Sheet disappears, no onDisappear cleanup needed.
         .task { await load() }
     }
 
@@ -956,8 +956,8 @@ struct ProfileSendModeSheet: View {
         isLoading = false
     }
 
-    /// 当前主页那一格。没保存过时整格不出现：那句"先在「我 → 加密个人主页」里做好并保存"由下面
-    /// 「暂时发不了」那一格说一次就够，同一页两处说同一句话会让用户以为有两种不同的毛病。
+    /// The current profile cell. When nothing was ever saved the whole cell is absent: that "first build and save it in Me → Encrypted personal profile" line is said once by the
+    /// "Can't send for now" cell below; saying the same sentence in two places on one page makes users think there are two different problems.
     @ViewBuilder private var summaryCard: some View {
         if let draft {
             PopopxSectionCard(Copy.sendSummaryGroup) {
@@ -1006,7 +1006,7 @@ struct ProfileSendModeSheet: View {
         return !draft.blocks.isEmpty
     }
 
-    /// 禁用态那一行说明：两种"发不了"讲两种话，合成一句就等于让用户自己去猜差在哪。
+    /// The disabled-state explanation line: the two kinds of "can't send" get two different wordings, and merging them into one sentence makes the user guess what differs.
     private var blockedNote: String? {
         guard !isLoading else { return nil }
         guard let draft else { return Copy.sendMissingNote }
@@ -1029,7 +1029,7 @@ struct ProfileSendModeSheet: View {
             : 0
         copy.deliveryMode = .fullMedia
         do {
-            // 走发送侧那道唯一的门：`make` 先验后规范化，交出去的就是真正会上网络的那一份清单。
+            // It goes through the single gate on the send side: `make` validates first and then normalizes, so what is handed over is exactly the manifest that will hit the network.
             let payload = try PopopxProfilePayload.make(copy)
             onSend(payload.manifest)
         } catch {
@@ -1046,10 +1046,10 @@ struct ProfileSendModeSheet: View {
     }
 }
 
-// MARK: - 块的只读渲染
+// MARK: - Read-only rendering of the blocks
 
-/// 块内容 → 界面。安全预览用的就是这一段：同一份渲染逻辑，两种入参（草稿的块、对方送来的块），
-/// 不复制第二份 UI。原件地址由调用方给，这一层不认识存储。
+/// Block content → UI. The secure preview uses precisely this part: one rendering logic, two kinds of input (the draft's blocks, the blocks the peer sent),
+/// and no second copy of the UI. The original's address comes from the caller; this layer knows nothing about storage.
 private struct PopopxProfileBlockRenderer: View {
     let blocks: [PopopxProfileBlock]
     let mediaURLs: [String: URL]
@@ -1097,22 +1097,22 @@ private struct PopopxProfileBlockRenderer: View {
     }
 }
 
-// MARK: - 缩略图
+// MARK: - Thumbnails
 
-/// 一块媒体在本机看得见的那一小格。解码离开主线程：一张 2 MB 的 JPEG 与一段 640×480 的视频轨，
-/// 都不该在列表滚起来的时候占住那一帧。
+/// The little tile of a media block that is visible on this device. Decoding leaves the main thread: a 2 MB JPEG and a 640×480 video track
+/// should not occupy that frame while the list is scrolling.
 private struct PopopxProfileImageTile: View {
     enum Layout {
-        /// 编辑区里那一枚方形贴片。
+        /// The square patch inside the editing area.
         case thumb
-        /// 预览正文里按原图比例铺开的一格。
+        /// The tile in the preview body that spreads out at the original image's aspect ratio.
         case body
     }
 
     private static let thumbSide: CGFloat = PopopxMetrics.spaceXL * 3
     private static let bodyPlaceholderHeight: CGFloat = PopopxMetrics.space2XL * 3
     private static let bodyMaxPixelSide: CGFloat = 480
-    /// 视频取第几秒的一帧：0.5 秒既躲开了首帧黑场，也不要求素材长于半秒。
+    /// Which second of the video to take a frame from: 0.5 s dodges the black first frame and does not require the asset to be longer than half a second.
     private static let posterSeconds: Double = 0.5
 
     let url: URL?
@@ -1146,8 +1146,8 @@ private struct PopopxProfileImageTile: View {
             RoundedRectangle(cornerRadius: layout == .thumb ? PopopxMetrics.radiusChip : PopopxMetrics.radiusControl)
                 .strokeBorder(PopopxPalette.hairlineInner, lineWidth: PopopxMetrics.hairline)
         )
-        // 解码失败只留下一枚符号：体积与时长那些元信息来自清单，不依赖这一帧能不能画出来，
-        // 所以这里不宣称"原件缺失"。
+        // A decode failure leaves only an icon behind: the size and duration meta info comes from the manifest and does not depend on whether this frame can be drawn,
+        // so this does not claim "original missing".
         .task(id: url) { image = await Self.decode(url: url, kind: kind) }
         .accessibilityHidden(true)
     }
@@ -1190,8 +1190,8 @@ private struct PopopxProfileImageTile: View {
         }.value
     }
 
-    /// 视频封面：`AVAssetImageGenerator.image(at:)` 是 iOS 17 上那条不废弃的异步路，
-    /// 尺寸压到 480 以内 —— 贴片用不着原片的分辨率。
+    /// Video cover: `AVAssetImageGenerator.image(at:)` is the non-deprecated async path on iOS 17,
+    /// with the size squeezed to under 480 - the patch has no use for the original's resolution.
     private static func poster(of url: URL) async -> UIImage? {
         let generator = AVAssetImageGenerator(asset: AVURLAsset(url: url))
         generator.appliesPreferredTrackTransform = true
@@ -1202,21 +1202,21 @@ private struct PopopxProfileImageTile: View {
     }
 }
 
-// MARK: - 两个模式分段器
+// MARK: - The two-mode segmented control
 
-/// 顶层双模式分段器。
+/// The top-level dual-mode segmented control.
 ///
-/// ⚠️ 两个标签只从 `title:` 那个闭包里出来：`PopopxSegmentedControl` 画的是
-/// `Text(title(option.selection))`（PopopxControls.swift:581），`Option.title` 那一格从头到尾
-/// 没有被读过。所以 `Option.title` 只是给人看的备注，真正上屏的是闭包。
+/// ⚠ The two labels come only out of the `title:` closure: what `PopopxSegmentedControl` draws is
+/// `Text(title(option.selection))` (PopopxControls.swift:581), and the `Option.title` field is never
+/// read from start to finish. So `Option.title` is only a note for humans; what actually reaches the screen is the closure.
 private struct PopopxProfileModeSegment: View {
     let selection: Binding<PopopxProfileSendMode>
     let identifier: String
 
     var body: some View {
         PopopxSegmentedControl(
-            // 常驻在左：`PopopxProfileManifest.blank()` 默认落在那一档（PersonalProfileModel.swift:192-208），
-            // 一份还没写内容的骨架不该默认带上"打开后多久销毁"。
+            // Standing stays on the left: `PopopxProfileManifest.blank()` defaults to that tier (PersonalProfileModel.swift:192-208),
+            // and a skeleton with no content yet should not default to carrying "how long after opening it is destroyed".
             [PopopxProfileSendMode.standard, .ephemeral].map {
                 PopopxSegmentedControl<PopopxProfileSendMode>.Option(selection: $0, title: $0.sheetLabel)
             },
@@ -1227,8 +1227,8 @@ private struct PopopxProfileModeSegment: View {
     }
 }
 
-/// 阅读有效期分段器。三档的值和标签都不在本地重写：值来自 `PopopxProfilePayload.ttlOptions`，
-/// 标签来自 `PopopxSecureCopy.duration` —— 全 app 的时长格式化只有那一处。
+/// The read-validity segmented control. Neither the values nor the labels of the three tiers are rewritten locally: values come from `PopopxProfilePayload.ttlOptions`,
+/// and labels come from `PopopxSecureCopy.duration` - the only place in the whole app that formats durations.
 private struct PopopxProfileTTLSegment: View {
     let selection: Binding<Int>
     let identifier: String
@@ -1245,9 +1245,9 @@ private struct PopopxProfileTTLSegment: View {
     }
 }
 
-// MARK: - 行内小件
+// MARK: - Inline small parts
 
-/// 卡片内的分隔线。`PopopxControls.swift:853` 那条同名的只在 `#if DEBUG` 的画廊里，够不着。
+/// The divider inside the card. The identically named one at `PopopxControls.swift:853` sits only inside the `#if DEBUG` gallery, out of reach.
 private struct PopopxBuilderDivider: View {
     var body: some View {
         Rectangle()
@@ -1257,7 +1257,7 @@ private struct PopopxBuilderDivider: View {
     }
 }
 
-/// 块行头部的图标按钮。整颗是 `Button`，44pt 由 `minHitTarget` 兜住，无障碍标签用中文全称。
+/// The icon button in the block row header. The whole thing is a `Button`, 44pt is backed by `minHitTarget`, and the accessibility label uses the full Chinese wording.
 private struct PopopxBuilderIconButton: View {
     private let systemImage: String
     private let label: String
@@ -1293,7 +1293,7 @@ private struct PopopxBuilderIconButton: View {
         .accessibilityLabel(Text(verbatim: label))
     }
 
-    /// 中性那一档落在卡片上的墨色：`labelHint` 是 3.42:1，只够装饰；这一颗是要按的东西。
+    /// The ink color of the neutral tier as it lands on the card: `labelHint` is 3.42:1, enough only for decoration; this one is a thing you press.
     private var ink: Color {
         switch tint {
         case .brand: PopopxPalette.brand
@@ -1305,8 +1305,8 @@ private struct PopopxBuilderIconButton: View {
     }
 }
 
-/// Sheet 里那一枚关闭钮。`PopopxSheetContainer` 自己不带头部栏（PopopxControls.swift:715-717
-/// 那条裁定：dismissal 归调用方），所以本页自己给一颗，写法同 `PopopxQRCardSheet.swift:174-182`。
+/// The close button inside the Sheet. `PopopxSheetContainer` carries no header bar of its own (the ruling at PopopxControls.swift:715-717
+/// says dismissal belongs to the caller), so this page supplies its own button, written the same way as `PopopxQRCardSheet.swift:174-182`.
 private struct PopopxProfileCloseButton: View {
     private let action: () -> Void
 
@@ -1323,17 +1323,17 @@ private struct PopopxProfileCloseButton: View {
     }
 }
 
-// MARK: - 文案
+// MARK: - Copy
 
-/// 两个页面上每一句中文只在这里出现一次。两条产品规定的原话（`standardNote`、`meshNote`）
-/// 与 `PopopxProfileSendMode.sheetLabel` 的两个模式标签都只在这一处出现一次，
-/// 因此不会和载荷层那两行字分叉。
+/// Every Chinese sentence on the two pages appears exactly once, here. The two product-mandated verbatim lines (`standardNote`, `meshNote`)
+/// and the two mode labels of `PopopxProfileSendMode.sheetLabel` all appear only in this one place,
+/// so they cannot fork away from the payload layer's two lines of text.
 private enum Copy {
     static let pageTitle = NSLocalizedString("My encrypted profile page", comment: "")
     static let loading = NSLocalizedString("Reading the profile saved on this device…", comment: "")
     static let close = NSLocalizedString("Close", comment: "")
 
-    // 身份区
+    // Identity section
     static let identityGroup = NSLocalizedString("Identity", comment: "")
     static let titleLabel = NSLocalizedString("Profile title", comment: "")
     static let titlePrompt = NSLocalizedString("The big line on the card", comment: "")
@@ -1342,7 +1342,7 @@ private enum Copy {
     static let titleCountFormat = NSLocalizedString("Title %1$lld / %2$lld characters", comment: "")
     static let noticeNoDraft = NSLocalizedString("No profile has been saved on this device yet. What is below stays only after you tap Save profile for the first time.", comment: "")
 
-    // 发送权限与销毁策略
+    // Sending permission and destruction policy
     static let policyGroup = NSLocalizedString("Sending permission and destruction policy", comment: "")
     static let standardNote = NSLocalizedString("Friends keep no destruction timer: they can open your text, images and video as often as they like.", comment: "")
     static let ephemeralNote = NSLocalizedString("The reading window starts counting when the friend opens it; when it ends, the content on this device and the image and video originals are destroyed together.", comment: "")
@@ -1350,7 +1350,7 @@ private enum Copy {
     static let antiSpyToggle = NSLocalizedString("Force on the anti-peeping camera check", comment: "")
     static let antiSpyNote = NSLocalizedString("Only takes effect in burn-after-reading: the front camera check starts on their device when they open it, and the camera permission is requested by their device at that moment.", comment: "")
 
-    // 查看门槛（算力点）
+    // Viewing threshold (credits)
     static let thresholdLabel = NSLocalizedString("Viewing threshold", comment: "")
     static let thresholdField = NSLocalizedString("Compute Credits", comment: "")
     static let thresholdPrompt = NSLocalizedString("Empty = free to view", comment: "")
@@ -1358,7 +1358,7 @@ private enum Copy {
         String(format: NSLocalizedString("They see this number first when they open the card, and it is only then taken from the balance on their own device. Empty or 0 is free to view; the limit is %lld and a larger number snaps to it. The threshold travels with the card - neither side of POPOPX can change it for them.", comment: ""), maximum)
     }
 
-    // 图文与视频
+    // Images, text and video
     static let blocksGroup = NSLocalizedString("Text, images and video", comment: "")
     static let blocksCountFormat = NSLocalizedString("Blocks %1$lld / %2$lld · Images %3$lld · Videos %4$lld", comment: "")
     static let emptyBlocks = NSLocalizedString("No content blocks yet. Add a text block first, then images and video.", comment: "")
@@ -1375,7 +1375,7 @@ private enum Copy {
     static let kindVideo = NSLocalizedString("Video", comment: "")
     static let emptyTextBlock = NSLocalizedString("(Empty text block)", comment: "")
 
-    // 底部固定条
+    // Bottom fixed bar
     static let meshNote = NSLocalizedString("In offline Bluetooth Mesh mode images and video are filtered out automatically; only the fast text-only encrypted card is pushed.", comment: "")
     static let deliveryHintTextOnly = NSLocalizedString("This profile is text only, so the online and the offline Bluetooth Mesh paths send exactly the same thing.", comment: "")
     static let deliveryHintMediaFormat = NSLocalizedString("This profile has %lld image or video blocks: they are skipped automatically on the offline Bluetooth Mesh path, which sends the text-only version.", comment: "")
@@ -1384,7 +1384,7 @@ private enum Copy {
     static let savedToast = NSLocalizedString("Saved on this device", comment: "")
     static let mediaAddedFormat = NSLocalizedString("Added %1$@ (%2$@); it enters the manifest only when you tap Save profile", comment: "")
 
-    // 安全预览
+    // Secure preview
     static let previewTitle = NSLocalizedString("Safe preview", comment: "")
     static let previewSubtitle = NSLocalizedString("What the same content sends out under the four combinations; the draft is left untouched.", comment: "")
     static let previewModeGroup = NSLocalizedString("Sending mode", comment: "")
@@ -1397,7 +1397,7 @@ private enum Copy {
     static let previewOmittedFormat = NSLocalizedString("This send skips %lld image or video blocks and sends the text-only version.", comment: "")
     static let previewEmptyBody = NSLocalizedString("No content blocks to show in this combination.", comment: "")
 
-    // 发送确认 Sheet
+    // Send confirmation Sheet
     static let sendTitle = NSLocalizedString("Send your profile", comment: "")
     static let sendSubtitle = NSLocalizedString("Confirm these two settings before sending; the saved profile is not changed by this.", comment: "")
     static let sendSummaryGroup = NSLocalizedString("Current profile", comment: "")
@@ -1409,7 +1409,7 @@ private enum Copy {
     static let sendMissingNote = NSLocalizedString("No profile has been saved on this device yet. Make one in Me → My encrypted profile page and save it, then come back to send.", comment: "")
     static let sendEmptyNote = NSLocalizedString("This profile has no content blocks yet; add text, an image or a video before you can send it.", comment: "")
 
-    // 兜底句：只有真撞上非类型化错误才会说到它。
+    // Fallback sentence: it is only ever said when a non-typed error is actually hit.
     static let unexpectedFormat = NSLocalizedString("Action not completed: %@", comment: "")
 
     static func kind(_ kind: PopopxProfileMedia.Kind) -> String {

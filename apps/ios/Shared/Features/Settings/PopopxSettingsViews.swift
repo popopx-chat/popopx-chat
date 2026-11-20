@@ -2,45 +2,45 @@
 //  PopopxSettingsViews.swift
 //  POPOPX (iOS)
 //
-//  【第四阶段】设置树的 popopx 版本：替换 Shared/Views/UserSettings/SettingsView.swift:305。
-//  输入面与它逐字对齐（`showProgress`、`versionText`、`colorScheme`/`dismiss`/`ChatModel`/
-//  `SceneDelegate` 环境），所以两处调用点各改一个词就能挂载：
-//  Shared/Features/Me/PopopxMeView.swift:418 与 Shared/Views/ChatList/ChatListView.swift:112。
+//  [fourth phase] the popopx version of the settings tree: replaces Shared/Views/UserSettings/SettingsView.swift:305.
+//  Its input surface is aligned with it verbatim (`showProgress`, `versionText`, `colorScheme`/`dismiss`/`ChatModel`/
+//  `SceneDelegate` environments), so each of the two call sites only needs one word changed to mount it:
+//  Shared/Features/Me/PopopxMeView.swift:418 and Shared/Views/ChatList/ChatListView.swift:112.
 //
-//  四条结构决定：
+//  Four structural decisions:
 //
-//  1. 本页不用 List，而是 ScrollView + 分组卡片（`PopopxSectionCard`）。推进去的子页面（隐私的两个开关、
-//     通知、通话、服务器、数据、迁移）都在本次范围外，本页只负责入口：每行一律是真实 init、真实环境对象、
-//     真实 Binding，没有占位行。
-//     2026-11-20 起本页不再有「厢语离线组网」与「徽章与用量」两张卡：前者整块收进厢语页右上角
-//     的 `PopopxCabinMeshSettingsSheet`，后者由「我」页顶部的动态徽章行与算力点钱包承接。
-//     真机走查 三.1/三.4 再拿掉两张卡，本页只留入口，不留第二处同一个目的地：
-//       · 「外观」整组 2026-11 曾上移到「我」栏的常用组，真机第 6 轮二.1 又落回本页
-//         （`appearanceCard`，卡名与两行说法走英文原句 Key）；行尾那个主题名一直在本文件的
-//         `PopopxSettingsValues.themeName`，两边读同一份 `currentThemeDefault`，不分第二套读数。
-//       · 「帮助与关于」由卡片升格成真实页面 `PopopxHelpView`（同样只从「我」栏进），并补上
-//         开源地址与隐私协议两行；`PopopxDisplayLanguageView` 是同一次升格带出的「显示语言」页。
-//       · `privacyCard` 整卡 2026-11-20 删（真机第 6 轮二.2）：那张卡上剩的屏幕保护与链接去跟踪两枚
-//         开关与 `PrivacySettings.swift:75`/`:88` 是同一批状态，现在直接摆在「我」栏的防线卡上。
-//     · 真机第 8 轮 · 任务六（层级重排）：「网络与服务器」这张卡由一个入口变成三个平级入口。
-//         「高级网络设置」与「网络连接」原先埋在「中继与服务器」那一页（`NetworkAndServers`）内部，
-//         现在上提到这一级、原处删除；少一层，两条说法与那页剩下的行都没变（明细见 `networkCard`）。
-//  2. 配色、字号、圆角、间距只取 Shared/Theme/PopopxTheme.swift 的 token；行控件按
-//     Shared/Components 的原子库口径自己组，命中区由 `PopopxMetrics.minHitTarget` 兜住 44pt。
-//     本页因此不读全 app 的主题对象 —— 子页面仍带着它们自己的背景修饰，那一次收敛另开一刀。
-//  3. 「中继与服务器」那一行**不是**按值链接，而是普通 `Button`：点击只做一次
-//     `settingsTrack.path.append(ServersDestination.networkAndServers)`。真机走查第 2 轮（2026-11-20）
-//     的结论是登记位置不是那根杠杆 —— 登记写在本页（`8dea049d3` 之前）与上移到栈根（`8dea049d3`）
-//     症状逐字相同（点了只重画本页、按返回才推入），而 ProtocolServersView.swift:295-298 写明
-//     同一类型只保留最靠近栈根的那份登记，所以栈根才是正确位置；坏的是 `NavigationLink(value:)`
-//     这一跳的激活。路径持有者是 `PopopxSettingsNavTrack`（Shared/Navigation/MainTabView.swift），
-//     两个宿主各持一份并注入：MainTabView.swift:174 的「我」栏、ChatListView.swift:98 的
-//     UserPickerSheetView。三页本身的登记仍留在各自栈根（ServersDestination / ProtocolServerSelection /
-//     ChatRelaySelection），本页不再写登记，也不留注释误导下一个人。
-//  4. 三行 `@AppStorage` 开关写的就是子页面同一个 key，不是第二套状态：屏幕保护、链接去跟踪、
-//     通话强制中继。`@AppStorage` 自己跟随 UserDefaults 变化，两边永远同步。
+//  1. This page uses no List, but a ScrollView + grouped cards (`PopopxSectionCard`). The sub-pages pushed into it (the two privacy toggles,
+//     notifications, calls, servers, data, migration) are all outside this round's scope; this page is only responsible for the entries: every row is a real init, a real environment object,
+//     a real Binding, with no placeholder rows.
+//     From 2026-11-20 on, this page no longer has the 'Cabin offline meshing' and 'Badges and usage' cards: the first was folded whole into the top-right
+//     `PopopxCabinMeshSettingsSheet` of the Cabin page, and the second is carried by the dynamic badge row at the top of the 'Me' page and the compute-point wallet.
+//     Device walkthrough III.1/III.4 removed two more cards: this page keeps only entries, never a second route to the same destination:
+//       · the whole 'Appearance' group moved up to the 'Me' tab's frequent group in 2026-11, and device round 6 II.1 brought it back to this page
+//         (`appearanceCard`; the card name and the two row phrasings use the English source sentence as Key); the theme name at the row end has always lived in this file's
+//         `PopopxSettingsValues.themeName`, and both sides read the same `currentThemeDefault` -- no second set of readings.
+//       · 'Help and about' was upgraded from a card into a real page `PopopxHelpView` (likewise entered only from the 'Me' tab), and gained
+//         the open-source address and privacy policy rows; `PopopxDisplayLanguageView` is the 'display language' page brought out by that same upgrade.
+//       · `privacyCard` whole card deleted on 2026-11-20 (device round 6 II.2): the screen-protection and link-de-tracking toggles that were left on that card
+//         share the same batch of state as `PrivacySettings.swift:75`/`:88`, and now sit directly on the 'Me' tab's defence card.
+//     · Device round 8, task six (hierarchy rearrangement): the 'Network and servers' card went from one entry to three entries at the same level.
+//         'Advanced network settings' and 'Network connection' were originally buried inside that 'Relays and servers' page (`NetworkAndServers`);
+//         they are now raised to this level and deleted where they were; one level fewer, and both phrasings plus the rows left on that page are unchanged (see `networkCard` for the details).
+//  2. Colour, font size, corner radius and spacing come only from the tokens in Shared/Theme/PopopxTheme.swift; the row controls are
+//     assembled per the Shared/Components atom-library conventions, and the hit area is held at 44pt by `PopopxMetrics.minHitTarget`.
+//     This page therefore does not read the whole-app theme object -- the sub-pages still carry their own background modifiers, and that convergence is a separate cut.
+//  3. The 'Relays and servers' row is **not** a value-based link but a plain `Button`: the tap performs exactly one
+//     `settingsTrack.path.append(ServersDestination.networkAndServers)`. Device walkthrough round 2 (2026-11-20)
+//     concluded that the registration position is not that lever -- registration written on this page (before `8dea049d3`) versus raised to the stack root (`8dea049d3`)
+//     had verbatim identical symptoms (tapping only redraws this page; pressing Back is what pushes), and ProtocolServersView.swift:295-298 states
+//     that for a given type only the registration closest to the stack root is kept, so the stack root is the correct position; what is broken is the `NavigationLink(value:)`
+//     activation of this hop. The path is held by `PopopxSettingsNavTrack` (Shared/Navigation/MainTabView.swift),
+//     and the two hosts each hold a copy and inject it: MainTabView.swift:174's 'Me' tab and ChatListView.swift:98's
+//     UserPickerSheetView. The three pages' own registrations stay at their respective stack roots (ServersDestination / ProtocolServerSelection /
+//     ChatRelaySelection); this page writes no registration any more and leaves no comment to mislead the next person.
+//  4. The three `@AppStorage` toggles write the very same key as the sub-pages, not a second set of state: screen protection, link de-tracking,
+//     call forced relay. `@AppStorage` follows UserDefaults changes on its own, so the two sides are always in sync.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖进 POPOPX (iOS) target —— 铁律禁止脚本改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand -- the iron rule forbids scripts from changing project.pbxproj.
 //
 
 import SwiftUI
@@ -48,7 +48,7 @@ import UIKit
 import StoreKit
 import POPOPXChat
 
-// MARK: - 根页面
+// MARK: - Root page
 
 @MainActor
 struct PopopxSettingsView: View {
@@ -57,21 +57,21 @@ struct PopopxSettingsView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var chatModel: ChatModel
 
-    /// 宿主栈的路径。只用于「中继与服务器」那一跳的确定性推送，见文件头决定 3。
+    /// The host stack's path. Used only for the deterministic push of the 'Relays and servers' hop; see decision 3 in the file header.
     @Environment(PopopxSettingsNavTrack.self) private var settingsTrack
 
-    /// `MigrateFromDevice` 通过它把迁移中的进度报回本页并盖住整屏（旧 SettingsView.swift:312/318）。
+    /// `MigrateFromDevice` reports the migration's progress back to this page through it and covers the whole screen (old SettingsView.swift:312/318).
     @State private var showProgress: Bool = false
 
     var versionText: String? = appVersion
 
-    /// 真机第 6 轮二.2 之后这张树里只剩通话这一枚：打码与去跟踪两枚连同那张「隐私与安全」卡
-    /// 一起并进「我」栏的隐私与安全防线（`PopopxMeView.swift` 的 `securityEntries`，两个键本身不变）。
-    /// 与 CallSettings.swift:15/31 同一批 key。
+    /// After device round 6 II.2 this tree keeps only the call toggle: the screen-blur and de-tracking toggles, together with that 'Privacy and security' card,
+    /// were merged into the 'Me' tab's privacy and security defence (`securityEntries` in `PopopxMeView.swift`; the two keys themselves are unchanged).
+    /// The same batch of keys as CallSettings.swift:15/31.
     @AppStorage(DEFAULT_WEBRTC_POLICY_RELAY) private var webrtcPolicyRelay = true
 
-    /// 外部只认两种写法：`PopopxSettingsView()` 与 `PopopxSettingsView(versionText:)`。
-    /// 写显式 init 是为了让 `@State`/包装属性保持 private。
+    /// Externally only two forms are recognised: `PopopxSettingsView()` and `PopopxSettingsView(versionText:)`.
+    /// The explicit init is written so that the `@State`/wrapped properties can stay private.
     init(versionText: String? = appVersion) {
         self.versionText = versionText
     }
@@ -103,13 +103,13 @@ struct PopopxSettingsView: View {
         }
     }
 
-    // MARK: 顶部：版本与双色语言
+    // MARK: Top: version and the two-colour language
 
     private var headerCard: some View {
         PopopxSectionCard {
             HStack(alignment: .center, spacing: PopopxMetrics.spaceS) {
-                // 字标有浅色与深色两套图，这一行是全页唯一必须读 colorScheme 的地方；
-                // resizable 的图必须给外框上限，否则它会把整张卡撑开。
+                // the wordmark has separate light and dark image sets, and this row is the only place in the whole page that must read colorScheme;
+                // a resizable image must be given a frame upper bound, or it will stretch the entire card open.
                 Image(PopopxBrandAsset.wordmark(for: colorScheme))
                     .resizable()
                     .interpolation(.high)
@@ -167,12 +167,12 @@ struct PopopxSettingsView: View {
         }
     }
 
-    // MARK: 外观与语言
+    // MARK: Appearance and language
 
-    /// 真机第 6 轮二.1：这一组 2026-11 曾被整块升到「我」栏的常用组，现在落回设置树，位置就在
-    /// 顶部卡之后 —— 也就是它本来在的位置。目的地、`ThemedBackground`、可用性门（`AppearanceSettings`
-    /// 仍要求会话在跑）与行尾读数逐字照搬；`PopopxSettingsValues.themeName`/`languageName`
-    /// 两个读数回到它们的供应者同一个文件里，跨文件引用少了一处。
+    /// Device round 6 II.1: this group was raised whole to the 'Me' tab's frequent group in 2026-11 and now comes back down to the settings tree, in the position
+    /// right after the top card -- which is where it was to begin with. The destination, `ThemedBackground`, the availability gate (`AppearanceSettings`
+    /// still requiring a running session) and the row-end reading are copied verbatim; `PopopxSettingsValues.themeName`/`languageName`
+    /// those two readings are back in the same file as their provider, so there is one fewer cross-file reference.
     private var appearanceCard: some View {
         PopopxSectionCard(PopopxGeneralCopy.groupAppearance) {
             PopopxSettingsRowLink(
@@ -187,7 +187,7 @@ struct PopopxSettingsView: View {
                     .modifier(ThemedBackground(grouped: true))
             }
             PopopxSettingsDivider()
-            // 语言页不需要会话在跑：它开的是系统设置里本 app 的那一页，所以这一行既不 gating 也不禁用。
+            // the language page needs no running session: it opens this app's page inside the system settings, so this row neither gates nor disables.
             PopopxSettingsRowLink(
                 PopopxGeneralCopy.languageRow,
                 systemImage: "character.bubble",
@@ -199,12 +199,12 @@ struct PopopxSettingsView: View {
         }
     }
 
-    // MARK: 通知与通话
+    // MARK: Notifications and calls
 
     private var callsAndNtfsCard: some View {
         PopopxSectionCard(Copy.groupCalls) {
-            // 真机第 6 轮二.1：本身份聊天偏好从「我」栏的常用组落回这里，紧挨着它管的那两件事
-            // ——通知与通话。目的地与三个入参照旧，照 `ChatListView.swift:100-103` 的既有挂载点原样给。
+            // device round 6 II.1: the profile's chat preferences come back down here from the 'Me' tab's frequent group, right next to the two things they govern
+            // -- notifications and calls. The destination and the three entries are as before, given verbatim per the existing mount point at `ChatListView.swift:100-103`.
             if let user = chatModel.currentUser {
                 PopopxSettingsRowLink(
                     PopopxGeneralCopy.chatPreferences,
@@ -251,7 +251,7 @@ struct PopopxSettingsView: View {
         }
     }
 
-    /// 通知模式来自 `chatModel.notificationMode`（ChatModel.swift:435），三个 case 全覆盖。
+    /// The notification mode comes from `chatModel.notificationMode` (ChatModel.swift:435), covering all three cases.
     private var notificationValue: String {
         switch chatModel.notificationMode {
         case .off: return Copy.ntfsOff
@@ -260,8 +260,8 @@ struct PopopxSettingsView: View {
         }
     }
 
-    /// 图标跟着模式换，但不引入第二套配色：旧页那三处系统黄/绿（SettingsView.swift:606-610）
-    /// 不是 token，这里统一落回中性色。
+    /// The icon changes with the mode, but no second colour scheme is introduced: the old page's three system yellow/green spots (SettingsView.swift:606-610)
+    /// are not tokens, so here they fall back to the neutral colour uniformly.
     private var notificationIcon: String {
         switch chatModel.notificationMode {
         case .off: return "bell.slash"
@@ -270,23 +270,23 @@ struct PopopxSettingsView: View {
         }
     }
 
-    // MARK: 网络与服务器
+    // MARK: Network and servers
 
-    /// 真机第 8 轮 · 任务六（层级重排）：这张卡从一个入口变成三个平级入口。
-    /// 「Advanced network settings」与「Network connection」两行原先埋在「中继与服务器」那一页
-    /// （`NetworkAndServers`）的最后两个 Section 里，现在上提到这一级并从原处删除；那一页只剩
-    /// 服务器本身的行（预设服务器 / 你的服务器 / 保存）。
-    /// 三行的推进机制不是随手选的，各有一条理由：
-    /// · 「中继与服务器」= 普通 `Button` + 一次 `settingsTrack.path.append`（文件头决定 3）——
-    ///   换成 `NavigationLink(value:)` 在真机上点了只重画本页，按返回才推入。
-    /// · 「高级网络设置」= 目的地闭包的 `NavigationLink`（`PopopxSettingsRowLink`），与本页其余
-    ///   每一行同一个机制：它不往路径里写值、由登记解析，所以不吃决定 3 那根坏掉的杠杆，点了即时推入。
-    ///   可用性与原来一致：那一页要读写网络配置，会话没在跑就禁用（同 `callsAndNtfsCard` 的口径）。
-    /// · 「网络连接」= 只读状态行。它在原来那一页里也不是入口而是一段读数，扁平化不给它造一个
-    ///   不存在的去处，所以不给 chevron、不接点击。
+    /// Device round 8, task six (hierarchy rearrangement): this card went from one entry to three entries at the same level.
+    /// The 'Advanced network settings' and 'Network connection' rows were originally buried in that 'Relays and servers' page
+    /// (`NetworkAndServers`) as its last two Sections; they are now raised to this level and deleted from where they were, leaving that page only
+    /// the server rows themselves (preset servers / your servers / save).
+    /// The push mechanism of the three rows was not chosen casually; each has a reason:
+    /// · 'Relays and servers' = a plain `Button` + one `settingsTrack.path.append` (decision 3 in the file header) --
+    ///   changed to `NavigationLink(value:)`, a tap on a real device only redraws this page and Back is what pushes it.
+    /// · 'Advanced network settings' = a destination-closure `NavigationLink` (`PopopxSettingsRowLink`), the very same mechanism as every other
+    ///   row on this page: it writes no value into the path and is resolved by registration, so it does not depend on the broken lever of decision 3, and a tap pushes immediately.
+    ///   Availability matches the original: that page reads and writes network configuration, so it disables when no session is running (same rule as `callsAndNtfsCard`).
+    /// · 'Network connection' = a read-only status row. On its original page it was also not an entry but a stretch of reading, and flattening does not invent
+    ///   a destination that does not exist for it, so it gets no chevron and takes no tap.
     private var networkCard: some View {
         PopopxSectionCard(Copy.groupNetwork, footnote: Copy.networkFootnote) {
-            // 普通 Button + 一次路径赋值，不是 `NavigationLink(value:)`：真机上那一跳点了只重画本页。
+            // Plain Button + one path assignment, not `NavigationLink(value:)`: on a real device that hop only redraws this page when tapped.
             Button {
                 settingsTrack.path.append(ServersDestination.networkAndServers)
             } label: {
@@ -322,7 +322,7 @@ struct PopopxSettingsView: View {
         }
     }
 
-    // MARK: 数据与迁移
+    // MARK: Data and migration
 
     private var dataCard: some View {
         PopopxSectionCard(Copy.groupData, footnote: Copy.dataFootnote) {
@@ -347,7 +347,7 @@ struct PopopxSettingsView: View {
         }
     }
 
-    // MARK: 迁移进度遮罩
+    // MARK: Migration progress overlay
 
     private var progressOverlay: some View {
         ZStack {
@@ -364,14 +364,14 @@ struct PopopxSettingsView: View {
     }
 }
 
-// MARK: - 行尾的两个共享读数
+// MARK: - The two shared row-end readings
 
-/// 「我」栏的常用组与本页都要在行尾写同一个真值，所以读数只留这一份，不分两套状态。
-/// 词本身仍出自本文件的 `Copy`：那几个是设置树里既有的说法，换个页面读也是同一句，
-/// 不会出现同一件事两处各写一套。
+/// The 'Me' tab's frequent group and this page both have to write the same true value at the row end, so only this one reading is kept, not two sets of state.
+/// The words themselves still come from this file's `Copy`: those are phrasings already in the settings tree, and read from another page they are still the same sentence,
+/// so the same thing never ends up written two different ways in two places.
 enum PopopxSettingsValues {
-    /// 行尾写的就是 `currentThemeDefault` 里的真值（旧 SettingsView.swift:239 那个 `StringDefault`），
-    /// 不是某一页记住的某个布尔。
+    /// The row end writes exactly the true value inside `currentThemeDefault` (that `StringDefault` in old SettingsView.swift:239),
+    /// not some boolean that one page memorised.
     @MainActor static var themeName: String {
         switch currentThemeDefault.get() {
         case DefaultTheme.SYSTEM_THEME_NAME: return Copy.themeSystem
@@ -383,18 +383,18 @@ enum PopopxSettingsValues {
         }
     }
 
-    /// 本 app 当前用哪一种语言。推导与 `AppearanceSettings` 原先那一行逐字相同
-    /// （系统给这个 app 选定的第一个本地化 + 它的可读语言名），但这里是自己算的，
-    /// 不去读那个页面里的 private 计算属性。
+    /// Which language this app currently uses. The derivation is verbatim the same as `AppearanceSettings`' original line
+    /// (the first localization the system chose for this app + its readable language name), but here it is computed on its own
+    /// instead of reading that page's private computed property.
     @MainActor static var languageName: String {
         let lang = Bundle.main.preferredLocalizations.first ?? "en"
         return Locale.current.localizedString(forIdentifier: lang)?.localizedCapitalized ?? lang
     }
 }
 
-// MARK: - 行
+// MARK: - Row
 
-/// 一行的内容本体：不是 Button，链接与按钮各自决定点击归谁。
+/// The content body of a row: it is not a Button; the link and the button each decide who owns the tap.
 @MainActor
 struct PopopxSettingsRowLabel: View {
     let title: String
@@ -438,8 +438,8 @@ struct PopopxSettingsRowLabel: View {
         }
     }
 
-    /// 两种图形共用同一个 `spaceXL` 外框（PopopxTheme.swift:162），也和原子库的
-    /// `PopopxIconBadge` 同尺寸（PopopxControls.swift:315-327）：换图标不会让行高跳一下。
+    /// The two shapes share one `spaceXL` frame (PopopxTheme.swift:162) and are the same size as the atom library's
+    /// `PopopxIconBadge` (PopopxControls.swift:315-327): changing the icon does not make the row height jump.
     @ViewBuilder private var artwork: some View {
         if let assetImage {
             Image(assetImage)
@@ -462,7 +462,7 @@ struct PopopxSettingsRowLabel: View {
     }
 }
 
-/// 推一个既有页面。
+/// Pushes an existing page.
 @MainActor
 private struct PopopxSettingsRowLink<Destination: View>: View {
     private let label: PopopxSettingsRowLabel
@@ -470,8 +470,8 @@ private struct PopopxSettingsRowLink<Destination: View>: View {
     private let hint: String
     private let destination: () -> Destination
 
-    /// `hint` 是 VoiceOver 那一句"打开"：设置树里沿用本文件的中文常量，而升格出去的
-    /// `PopopxHelpView` 走 Key 口径，所以它由调用方给，不在这里替两个页面决定说法。
+    /// `hint` is the VoiceOver line "Open": the settings tree keeps using this file's Chinese constants, while the upgraded
+    /// `PopopxHelpView` goes by Keys, so it comes from the caller rather than this place deciding the wording for both pages.
     init(
         _ title: String,
         value: String? = nil,
@@ -511,8 +511,8 @@ private struct PopopxSettingsRowLink<Destination: View>: View {
     }
 }
 
-/// 不导航、只做事的一行（评分、开源地址、联系团队、弹出文书）。
-/// 它没有 `hint` 参数：这一行本来就不导航，去处由 `note` 自己说清。
+/// A row that does not navigate and only does something (rating, open-source address, contacting the team, presenting a document).
+/// It has no `hint` parameter: this row does not navigate in the first place, and `note` makes the destination clear by itself.
 @MainActor
 private struct PopopxSettingsActionButton: View {
     private let label: PopopxSettingsRowLabel
@@ -552,10 +552,10 @@ private struct PopopxSettingsActionButton: View {
     }
 }
 
-/// 只读的一行：不导航、不按钮，行尾写一份真值读数加状态点。
-/// 本轮带出它的是「网络连接」——那一行在 `NetworkAndServers` 里本来就不是入口，而是一段读数
-/// （类型 + 在线点），上提到这里也不给它编一个不存在的去处。
-/// 整行合成一个 VoiceOver 元素：读数与状态各归 `accessibilityValue` 与标题，不是一堆碎片。
+/// A read-only row: no navigation, no button; the row end writes one true reading plus a status dot.
+/// What brought it out this round is 'Network connection' -- that row was never an entry in `NetworkAndServers` but a stretch of reading
+/// (type + online dot), and raising it here does not invent a destination that does not exist for it.
+/// The whole row composes into a single VoiceOver element: the reading and the state go to `accessibilityValue` and to the title, not into a pile of fragments.
 @MainActor
 private struct PopopxNetworkStatusRow: View {
     let type: UserNetworkType
@@ -595,8 +595,8 @@ private struct PopopxNetworkStatusRow: View {
         )
     }
 
-    /// 图标跟着真实链路类型换：这份类型出自 `NetworkObserver.swift:44` 的接口判定，
-    /// 状态点也一样，不在这里另算一套"有没有网"。
+    /// The icon changes with the real link type: that type comes from the interface determination in `NetworkObserver.swift:44`,
+    /// and so does the status dot -- no second "is there a network" calculation here.
     private var symbol: String {
         switch type {
         case .wifi: "wifi"
@@ -608,7 +608,7 @@ private struct PopopxNetworkStatusRow: View {
     }
 }
 
-/// 卡片内的分隔线：一条 `PopopxMetrics.divider` 高的发丝线，上下各留 `spaceXS`。
+/// The divider inside a card: a hairline `PopopxMetrics.divider` high, with `spaceXS` left above and below.
 private struct PopopxSettingsDivider: View {
     var body: some View {
         Rectangle()
@@ -618,22 +618,22 @@ private struct PopopxSettingsDivider: View {
     }
 }
 
-// MARK: - 帮助与关于（三.4：由设置树里的一张卡升格成真实页面）
+// MARK: - Help and about (III.4: upgraded from a card in the settings tree into a real page)
 
-/// 原先那张 helpCard 的三个目的地原样搬过来，另加开源地址与隐私协议两行。
-/// 页面只从「我」栏的常用组进，设置树里不再有第二份 —— 本页自己不带 `navigationTitle`，
-/// 标题由推它的那一行给，避免两处写同一个说法。
+/// The three destinations of the original helpCard are moved over exactly as they were, plus two more rows for the open-source address and the privacy policy.
+/// The page is entered only from the 'Me' tab's frequent group and the settings tree no longer holds a second copy -- this page carries no `navigationTitle` of its own,
+/// the title is given by the row that pushes it, which avoids writing the same wording in two places.
 @MainActor
 struct PopopxHelpView: View {
     @EnvironmentObject private var chatModel: ChatModel
     @Environment(\.dismiss) private var dismiss
 
     @State private var toast = PopopxToastModel()
-    /// 隐私协议全文的开关。类型、Sheet、正文与引导第 4 屏逐字同一个：`PopopxLegalDocumentSheet`
-    /// 是离线内置文书，这里不加载任何网页，也不复制第二份正文。
+    /// The switch for the full privacy policy. Its type, Sheet, body text and onboarding screen 4 are verbatim the same one: `PopopxLegalDocumentSheet`
+    /// is an offline built-in document; no web page is loaded here and no second copy of the body text is made.
     @State private var document: PopopxLegalDocumentSheet.Document?
 
-    /// 仓库地址是事实，不是文案：这一串不进任何译本，两处用的都是同一个常量。
+    /// The repository address is a fact, not copy: this string enters no translation, and both places use the same constant.
     private static let repositoryURLString = "https://github.com/popopx-chat/popopx-chat"
     private static let repositoryURL = URL(string: PopopxHelpView.repositoryURLString)!
 
@@ -660,11 +660,11 @@ struct PopopxHelpView: View {
                             .navigationTitle(PopopxHelpCopy.versionRow)
                     }
                     PopopxSettingsDivider()
-                    // 「怎么使用」与「最近更新」两行 2026-11-20 删：前者推的 `ChatHelp` 与后者推的
-                    // `WhatsNewView` 都还在旧轨道上有人挂（消息栏与首次启动流程），设置树里这一份是第二个入口，
-                    // 说的同一件事却比原页面少一层上下文。关于/版本/评价三行留着。
-                    // 裁定 4：暂时隐藏"提问与提建议"入口（popopxTeamURL 当前指向上游默认中继，非 POPOPX 自有服务器）。
-                    // 后续接入 popopx 官方通道后再开放。askTeam() 函数保留，按钮注释掉。
+                    // 'How to use' and 'Recently updated' were deleted as rows on 2026-11-20: what the former pushes, `ChatHelp`, and what the latter pushes,
+                    // `WhatsNewView`, are both still mounted on the old track (the message tab and the first-launch flow); this copy in the settings tree was a second entry,
+                    // saying the same thing but with one level less context than the original page. The about/version/rate rows stay.
+                    // Ruling 4: the 'Ask a question and make a suggestion' entry is hidden for now (popopxTeamURL currently points at the upstream default relay, not a POPOPX-owned server).
+                    // It will be reopened once the official popopx channel is connected. The askTeam() function is kept; the button is commented out.
                     // PopopxSettingsActionButton(
                     //     Copy.askTeamRow,
                     //     note: Copy.askTeamNote,
@@ -684,7 +684,7 @@ struct PopopxHelpView: View {
                     PopopxSettingsDivider()
                     repositoryRow
                     PopopxSettingsDivider()
-                    // 隐私协议是一本文书，不是一个页面，所以这一行不画 chevron：点开是 Sheet。
+                    // The privacy policy is a document, not a page, so this row draws no chevron: opening it shows a Sheet.
                     PopopxSettingsActionButton(
                         PopopxOnboardingCopy.privacyPolicy,
                         note: PopopxHelpCopy.privacyNote,
@@ -708,10 +708,10 @@ struct PopopxHelpView: View {
         .popopxToast(toast)
     }
 
-    /// 开源地址：整行点开系统浏览器，右端一枚复制键把同一串地址放进剪贴板并回执一句。
-    /// 两个动作是并排的兄弟而不是藏起来的手势（长按/滑动手势在这一族行里没有任何提示）。
-    /// 行尾那一格就是地址本身；`PopopxSettingsRowLabel` 的 value 最多两行，窄语种下有可能
-    /// 被截断，所以完整值交给复制键兜住 —— 看不全也拿得走。
+    /// Open-source address: the whole row opens the system browser, and a copy key at the right end puts that same address string on the clipboard with a one-line receipt.
+    /// The two actions are side-by-side siblings rather than hidden gestures (long-press/swipe gestures carry no hint at all in this family of rows).
+    /// The slot at the row end is the address itself; the value of `PopopxSettingsRowLabel` takes at most two lines, so in a narrow language it may
+    /// get truncated, and the copy key backs up the full value -- even if you cannot read it all, you can still take it.
     private var repositoryRow: some View {
         HStack(spacing: PopopxMetrics.space2XS) {
             Button(action: openRepository) {
@@ -740,8 +740,8 @@ struct PopopxHelpView: View {
         }
     }
 
-    /// 外部链接就是系统浏览器的事（口径同 PopopxCabinView.swift:2318 的 `UIApplication.shared.open` 与
-    /// PopopxLocationPickerSheet.swift:763 的 `UIApplication.shared.open`）。
+    /// External links are the system browser's business (same convention as `UIApplication.shared.open` in PopopxCabinView.swift:2318 and
+    /// `UIApplication.shared.open` in PopopxLocationPickerSheet.swift:763).
     private func openRepository() {
         PopopxHaptics.impact(.light)
         UIApplication.shared.open(Self.repositoryURL)
@@ -753,19 +753,19 @@ struct PopopxHelpView: View {
         toast.show(PopopxHelpCopy.copiedAddress, kind: .success)
     }
 
-    /// 评分由系统弹窗提交；拿不到 windowScene 就安静退出，不弹第二个自制的框。
-    /// 这里不读 `@EnvironmentObject var sceneDelegate`（旧 SettingsView.swift:309 与 HEAD 那一行那样读）：
-    /// 全 app 没有任何一处把 `SceneDelegate` 注入环境（唯一的 `.environmentObject(SceneDelegate())`
-    /// 在本文件的预览里），环境对象读不到就是崩溃 —— 于是这一行了很久的风险不再跟着这一页搬过来。
-    /// 改读既有的静态窗口句柄（口径同 ThemeManager.swift:130-144 与 POPOPXApp.swift:162）。
+    /// The rating is submitted by the system dialog; if no windowScene can be obtained it exits quietly instead of presenting a second hand-made sheet.
+    /// This does not read `@EnvironmentObject var sceneDelegate` (the way old SettingsView.swift:309 and the HEAD line did):
+    /// nowhere in the whole app is `SceneDelegate` injected into the environment (the only `.environmentObject(SceneDelegate())`
+    /// is in this file's preview), and an unreadable environment object means a crash -- so the risk this row carried for a long time is not moved over with this page.
+    /// It reads the existing static window handle instead (same convention as ThemeManager.swift:130-144 and POPOPXApp.swift:162).
     private func requestReview() {
         guard let scene = SceneDelegate.windowStatic?.windowScene else { return }
         SKStoreReviewController.requestReview(in: scene)
     }
 
-    /// 团队联系方式是 app 自己的链接：前台 `UIApplication.open` 会被系统丢掉，所以照旧走应用内连接流程
-    /// （口径同旧 SettingsView.swift:516-523，`popopxTeamURL` 见 SettingsView.swift:23）。
-    /// 它随上面 parked 的那一行一起搬到这里；这一页是被推进来的，所以 `dismiss()` 现在弹的是这一页。
+    /// The team contact is the app's own link: a foreground `UIApplication.open` gets dropped by the system, so it still goes through the in-app connection flow
+    /// (same convention as old SettingsView.swift:516-523; `popopxTeamURL` is at SettingsView.swift:23).
+    /// It moved here along with the parked row above; this page is pushed onto the stack, so `dismiss()` now pops this page.
     private func askTeam() {
         dismiss()
         DispatchQueue.main.async {
@@ -774,10 +774,10 @@ struct PopopxHelpView: View {
     }
 }
 
-// MARK: - 显示语言（三.4：app 语言的唯一入口）
+// MARK: - Display language (III.4: the only entry for the app's language)
 
-/// iOS 把「这一个 app 用哪种语言」存在系统设置里，app 自己改不了，也不该自造一套语言选择器。
-/// 所以这一页只说三件事：现在用的是哪一种、去哪儿改、什么时候生效。
+/// iOS stores 'which language this one app uses' in the system settings; the app cannot change it itself and should not build its own language picker either.
+/// So this page says only three things: which one is in use now, where to change it, and when it takes effect.
 @MainActor
 struct PopopxDisplayLanguageView: View {
     var body: some View {
@@ -792,8 +792,8 @@ struct PopopxDisplayLanguageView: View {
                     )
                     .frame(maxWidth: .infinity, minHeight: PopopxMetrics.minHitTarget, alignment: .leading)
                     PopopxSettingsDivider()
-                    // 卡片内的行与行之间是 0 间距（`PopopxSectionCard` 的口径），三句正文与那一枚
-                    // 按钮之间要有呼吸，所以它们自成一格 VStack，而不是散在卡片里。
+                    // rows and rows inside a card have 0 spacing between them (`PopopxSectionCard`'s convention); the three body sentences and that one
+                    // button need breathing room, so they form their own VStack rather than being scattered through the card.
                     VStack(alignment: .leading, spacing: PopopxMetrics.spaceS) {
                         Text(PopopxLanguageCopy.systemNote)
                             .font(PopopxType.caption)
@@ -819,21 +819,21 @@ struct PopopxDisplayLanguageView: View {
     }
 }
 
-// MARK: - 文案
+// MARK: - Copy
 
-/// 页面上每一句中文只在这里出现一次。
+/// Every Chinese sentence on the page appears only once, here.
 private enum Copy {
     static let pageTitle = NSLocalizedString("Settings", comment: "POPOPX settings tree")
     static let openHint = NSLocalizedString("Open", comment: "POPOPX settings tree")
 
-    // 顶部
+    // Top
     static let legendOnline = NSLocalizedString("Online: over an SMP relay", comment: "POPOPX settings tree")
     static let legendMesh = NSLocalizedString("Offline: POPOPX Bluetooth mesh", comment: "POPOPX settings tree")
     static let legendNote = NSLocalizedString("Only one colour is used per row: you must be able to see at a glance which lane carried it.", comment: "POPOPX settings tree")
 
-    // 外观 —— 这一组的卡名与两行说法 2026-11-20 从「我」栏落回本页，改用英文原句 Key
-    // （见下面 `PopopxGeneralCopy`，16 个目录里早有译法）。这里只留主题本身的六个中文名，
-    // `PopopxSettingsValues.themeName` 行尾读的就是它们，那不是可译的界面说法而是取值。
+    // Appearance -- this group's card name and its two row phrasings came back to this page from the 'Me' tab on 2026-11-20 and switched to the English source sentence as Key
+    // (see `PopopxGeneralCopy` below; the 16 directories already have translations). Only the six Chinese names of the themes themselves are kept here,
+    // and `PopopxSettingsValues.themeName` reads exactly those at the row end -- they are values, not translatable UI wording.
     static let themeSystem = NSLocalizedString("Follow system", comment: "POPOPX settings tree")
     static let themeLight = NSLocalizedString("Light", comment: "POPOPX settings tree")
     static let themeDark = NSLocalizedString("Dark", comment: "POPOPX settings tree")
@@ -841,12 +841,12 @@ private enum Copy {
     static let themeBlack = NSLocalizedString("Pure black", comment: "POPOPX settings tree")
     static let themeCustom = NSLocalizedString("Customize theme", comment: "POPOPX settings tree")
 
-    // 隐私与安全 —— 整卡 2026-11-20 删（真机第 6 轮二.2）：这两枚开关与
-    // `PrivacySettings.swift:75`、`:88` 是同一批状态，现在直接摆在「我」栏那张防线卡上，
-    // 说法也随之改为那两个页面共用的英文 Key（见 `PopopxMeView.swift` 的 `protectScreenRow` 等）。
-    // 这里不再留任何无人挂的中文常量。
+    // Privacy and security -- the whole card deleted 2026-11-20 (device round 6 II.2): these two toggles and
+    // `PrivacySettings.swift:75`, `:88` are the same batch of state, and now sit directly on the 'Me' tab's defence card,
+    // so their wording moved to the English Keys shared by those two pages (see `protectScreenRow` and the rest in `PopopxMeView.swift`).
+    // No unmounted Chinese constant is left here at all.
 
-    // 通知与通话
+    // Notifications and calls
     static let groupCalls = NSLocalizedString("Notifications and calls", comment: "POPOPX settings tree")
     static let notificationsRow = NSLocalizedString("Notifications", comment: "POPOPX settings tree")
     static let ntfsOff = NSLocalizedString("No server", comment: "POPOPX settings tree")
@@ -857,94 +857,94 @@ private enum Copy {
     static let relayCallsNoteOn = NSLocalizedString("A relay protects your IP address, but it can see how long a call lasts.", comment: "POPOPX settings tree")
     static let relayCallsNoteOff = NSLocalizedString("The relay is used only when it is necessary; the other side may see your IP address.", comment: "POPOPX settings tree")
 
-    // 网络与服务器
+    // Network and servers
     static let groupNetwork = NSLocalizedString("Network and servers", comment: "POPOPX settings tree")
     static let serversRow = NSLocalizedString("Relays and servers", comment: "POPOPX settings tree")
     static let networkFootnote = NSLocalizedString("Going back asks you once whether to save; if you do not save, the last core configuration stays in effect.", comment: "POPOPX settings tree")
 
-    // 数据与迁移
+    // Data and migration
     static let groupData = NSLocalizedString("Data and migration", comment: "POPOPX settings tree")
     static let chatDataRow = NSLocalizedString("Chat data", comment: "POPOPX settings tree")
     static let dataFootnote = NSLocalizedString("Retention, export and encryption are all here; a migration hands your entire device identity to another device, so do not quit midway.", comment: "POPOPX settings tree")
     static let migrateRow = NSLocalizedString("Migrate to another device", comment: "POPOPX settings tree")
     static let migrateRunning = NSLocalizedString("Migration in progress", comment: "POPOPX settings tree")
 
-    // 帮助与关于 —— 整卡 2026-11 升格成 `PopopxHelpView`，标题与说明改为该页 `PopopxHelpCopy`
-    // 的英文原句 Key。这里只剩裁定 4 尚未裁定那一行的两条文案，所以它们暂时无人挂（见
-    // `PopopxHelpView` 里注释掉的那一行）；开放那一步要先把这两句改成 Key，
-    // 中文常量在这一页不再有用。
+    // Help and about -- the whole card was upgraded into `PopopxHelpView` in 2026-11, and the title and description moved to that page's `PopopxHelpCopy`
+    // English source sentences as Keys. Only the two strings of the row that ruling 4 has not ruled on remain here, so for now nothing mounts them (see
+    // the row commented out in `PopopxHelpView`); the reopening step must first turn these two sentences into Keys,
+    // and the Chinese constants are of no further use on that page.
     static let askTeamRow = NSLocalizedString("Questions and feedback", comment: "POPOPX settings tree")
     static let askTeamNote = NSLocalizedString("Connect to this account inside the app: no browser, no email.", comment: "POPOPX settings tree")
 }
 
-/// 真机第 6 轮二.1 从「我」栏常用组落回设置树的三行说法。口径与那一页一致：**英文原句就是 Key**。
-/// 七条里有六条是现成词条——整段从 `PopopxMeView.swift` 的 `Copy` 里原样搬来，源文一字未改，
-/// 译本一条都不用动；唯一新增的是这组的卡名。`en.lproj` 不写（读不到词条就回落 Key 本身，那就是英文）。
+/// The three row phrasings that came back down to the settings tree from the 'Me' tab's frequent group in device round 6 II.1. Same convention as that page: **the English source sentence is the Key**.
+/// Six of the seven are ready-made entries -- the whole block was moved over verbatim from `Copy` in `PopopxMeView.swift` without changing a word of the source,
+/// so not a single translation had to change; the only addition is this group's card name. `en.lproj` is not written (an entry that cannot be read falls back to the Key itself, which is English).
 private enum PopopxGeneralCopy {
     private static func key(_ value: String) -> String {
         NSLocalizedString(value, comment: "POPOPX settings tree")
     }
 
-    /// 只有这一枚是本轮新增的 Key；其余全部复用。
+    /// Only this one is a Key added this round; all the rest are reused.
     static let groupAppearance = key("Appearance and language")
     static let appearanceRow = key("Appearance and icons")
     static let languageRow = key("Display language")
-    /// 刻意不叫 `"Chat preferences"`：那个 Key 在 16 个目录里已经属于别的页面，中文值是
-    /// 「聊天偏好设置」。复用等于让这一行的说法由别人决定，所以源文唯一化（算力点生态同一条约定）。
+    /// Deliberately not named `"Chat preferences"`: that Key already belongs to another page in the 16 directories, and its Chinese value is
+    /// 'chat preferences'. Reusing it would let somebody else decide this row's wording, so the source text is made unique (the same convention as the compute-point ecosystem).
     static let chatPreferences = key("Chat preferences for this identity")
     static let notifyOn = key("Notifications on")
     static let notifyOff = key("This identity is muted")
-    /// 行尾的 VoiceOver 提示：中文值与上面那个中文 `Copy.openHint` 同为「打开」，说法不两样。
+    /// The row-end VoiceOver hint: its Chinese value is 'Open', the same as the Chinese `Copy.openHint` above, so the wording is not split two ways.
     static let openHint = key("Open")
 }
 
-// MARK: - 「网络与服务器」那张卡的新文案（英文原句即 Key）
+// MARK: - New copy for the 'Network and servers' card (the English source sentence is the Key)
 
-/// 真机第 8 轮 · 任务六上提来的两行。口径同 `PopopxGeneralCopy`：**英文原句就是 Key**，
-/// 而且这里五条引用全是现成词条——它们本来就是 `NetworkAndServers.swift` 那两段的原话，整段搬上来
-/// 时源文一字未改，所以 16 个目录一条都不用动（`en.lproj` 不写，读不到词条就回落 Key 本身）。
+/// The two rows raised up here in device round 8, task six. Same convention as `PopopxGeneralCopy`: **the English source sentence is the Key**,
+/// and all five references here are ready-made entries -- they were originally the very words of those two sections in `NetworkAndServers.swift`, and moving the whole block up
+/// changed not a word of the source, so not one of the 16 directories needs touching (`en.lproj` is not written; an entry that cannot be read falls back to the Key itself).
 private enum PopopxNetworkCopy {
-    /// 行标题：原先那一行 `Text("Advanced network settings")` 的说法（中文值「高级网络设置」）。
+    /// Row title: the wording of the original row `Text("Advanced network settings")` (Chinese value 'Advanced network settings').
     static let advancedRow = NSLocalizedString("Advanced network settings", comment: "POPOPX settings tree")
-    /// 被推页面的标题：原先给 `AdvancedNetworkSettings` 的 `.navigationTitle("Advanced settings")`
-    /// （中文值「高级设置」）——行与页的说法各一句，和上提之前逐字相同。
+    /// The pushed page's title: the `.navigationTitle("Advanced settings")` originally given to `AdvancedNetworkSettings`
+    /// (Chinese value 'Advanced settings') -- the row and the page each keep their own sentence, verbatim the same as before the raise.
     static let advancedTitle = NSLocalizedString("Advanced settings", comment: "POPOPX settings tree")
-    /// 状态行标题：原先那一段的 Section header `Text("Network connection")`（中文值「网络连接」）。
+    /// Status row title: the Section header `Text("Network connection")` of that original section (Chinese value 'Network connection').
     static let connectionRow = NSLocalizedString("Network connection", comment: "POPOPX settings tree")
-    /// 状态点的 VoiceOver 读数：链路类型那一半已经是现成词条（`UserNetworkType.text`：
-    /// "WiFi"/"Cellular"/"Wired ethernet"/"Other"/"No network connection"），这里只补在线与否
-    /// （中文值正是「在线」「离线」，与顶部图例那两行同一个说法）。
+    /// The status dot's VoiceOver reading: the link-type half is already a ready-made entry (`UserNetworkType.text`:
+    /// "WiFi"/"Cellular"/"Wired ethernet"/"Other"/"No network connection"), so only online or not is added here
+    /// (the Chinese values are exactly 'Online' and 'Offline', the same wording as those two rows of the top legend).
     static let online = NSLocalizedString("Online", comment: "POPOPX settings tree")
     static let offline = NSLocalizedString("Offline", comment: "POPOPX settings tree")
 }
 
-// MARK: - 两页的新文案（英文原句即 Key）
+// MARK: - New copy for the two pages (the English source sentence is the Key)
 
-/// `PopopxHelpView` 的文案。口径同「我」栏：英文原句就是 Key，新词条写进
-/// `bg/cs/de/es/fi/fr/hu/it/ja/nl/pl/ru/th/tr/uk/zh-Hans` 共 16 个目录，`en.lproj` 不写。
-/// 上面那个 `Copy` 是设置树的中文常量表，这一页不再往里加英文句子。
+/// The copy of `PopopxHelpView`. Same convention as the 'Me' tab: the English source sentence is the Key, and new entries are written into
+/// `bg/cs/de/es/fi/fr/hu/it/ja/nl/pl/ru/th/tr/uk/zh-Hans`, all 16 directories; `en.lproj` is not written.
+/// The `Copy` above is the settings tree's Chinese constant table, and this page no longer adds English sentences to it.
 private enum PopopxHelpCopy {
     private static func key(_ value: String) -> String {
         NSLocalizedString(value, comment: "POPOPX help")
     }
 
     static let aboutRow = key("About popopx")
-    /// 复用既有词条：这个 Key 在 16 个目录里都已经有译法，中文值正是「版本」。
+    /// Reuses an existing entry: this Key already has a translation in all 16 directories, and its Chinese value is exactly 'Version'.
     static let versionRow = key("Version and updates")
-    /// 导航行的 VoiceOver 提示：同样复用既有词条（中文值正是「打开」），
-    /// 因为这一页不像设置树那样有本文件的中文常量可借。
+    /// The navigation row's VoiceOver hint: again reusing an existing entry (its Chinese value is exactly 'Open'),
+    /// because this page, unlike the settings tree, has no Chinese constants in this file to borrow.
     static let openHint = NSLocalizedString("Open", comment: "Help: reuses the existing all-catalog term")
     static let rateRow = key("Rate the app")
     static let rateNote = key("The system shows this dialog only a few times a year. If nothing appears, nothing is broken.")
     static let repositoryRow = key("Source code")
-    /// 隐私协议那一行的标题直接取 `PopopxOnboardingCopy.privacyPolicy`：行与文书标题必须逐字同一句。
+    /// The privacy policy row's title takes `PopopxOnboardingCopy.privacyPolicy` directly: row and document title must be one and the same sentence verbatim.
     static let privacyNote = key("The full text is bundled with the app and opened here, offline.")
     static let openInBrowserHint = key("Opens in your browser")
     static let copyAddress = key("Copy address")
     static let copiedAddress = key("Repository address copied")
 }
 
-/// `PopopxDisplayLanguageView` 的文案，同一套 Key 口径。
+/// The copy of `PopopxDisplayLanguageView`, on the same Key convention.
 private enum PopopxLanguageCopy {
     private static func key(_ value: String) -> String {
         NSLocalizedString(value, comment: "POPOPX display language")
@@ -952,7 +952,7 @@ private enum PopopxLanguageCopy {
 
     static let currentRow = key("Current language")
     static let systemNote = key("iOS keeps the language of each app separately, in the system settings; POPOPX does not store it.")
-    /// 复用既有词条：这个 Key 在 16 个目录里都已经有译法。
+    /// Reuses an existing entry: this Key already has a translation in all 16 directories.
     static let openSettings = NSLocalizedString("Open Settings", comment: "Display language: reuses the existing all-catalog term")
     static let relaunchNote = key("Close POPOPX and open it again for the new language to take effect.")
 }
@@ -960,8 +960,8 @@ private enum PopopxLanguageCopy {
 // MARK: - Previews
 
 #if DEBUG
-/// 画布只呈现本页根视图：它自己读的环境就这两个。推进去的子页面另外要全 app 的主题对象，
-/// 那是那条红线名单禁止在本页出现的名字，也不该在预览里造一个假的 —— 所以预览不覆盖子页面。
+/// The canvas presents only this page's root view: those are the only two environments it reads itself. The sub-pages pushed into it additionally want the whole-app theme object,
+/// which is a name that red-line list forbids on this page, and a fake one should not be made in the preview either -- so the preview does not cover the sub-pages.
 struct PopopxSettingsView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
@@ -972,8 +972,8 @@ struct PopopxSettingsView_Previews: PreviewProvider {
     }
 }
 
-/// 升格出来的两页。它们只需要 `ChatModel`（应用根注入的那一个）：评分那一行读的是
-/// `SceneDelegate.windowStatic`，不是环境对象，所以画布里不必造一个假的委托。
+/// The two pages brought out by the upgrade. They need only `ChatModel` (the one injected at the app root): the rating row reads
+/// `SceneDelegate.windowStatic`, not an environment object, so the canvas does not have to make a fake delegate.
 struct PopopxHelpView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {

@@ -1,50 +1,50 @@
 //  PopopxCommerceCards.swift
 //
-//  【第六阶段 · 1】会话流里的三张卡片：礼品卡、红包与频道门槛。它们是这套生态唯一"会被点到第二次"的入口，
-//  所以判据一律读模型层，不在视图里留任何一份可自行改写的状态。
+//  [Phase 6 · 1] Three cards in the conversation flow: gift card, red packet and channel threshold. They are the only entries in this ecosystem that 'get tapped a second time',
+//  so their criteria always read the model layer, leaving no state in the view that could be rewritten on its own.
 //
-//  ### 卡片自带表面，不吃气泡的墨色
-//  与 `ProfileCardBubbleView` / `PopopxSecureBubbleMount` 同一处理
-//  （见 `Shared/Features/ChatRoom/PopopxMessageBubble.swift:426-444` 那两支的注释）：
-//  一条"能点的东西"必须和周围的普通文本明显不同，所以它自己带底色与细描边，
-//  而不是跟着气泡的收发两侧换字色——换了就跟气泡长在一起、看不出是个控件。
+//  ### Cards bring their own surface; they do not take the bubble's ink colour
+//  Handled the same way as `ProfileCardBubbleView` / `PopopxSecureBubbleMount`
+//  (see the comments on those two branches in `Shared/Features/ChatRoom/PopopxMessageBubble.swift:426-444`):
+//  'something you can tap' must look clearly different from the plain text around it, so it carries its own background and a hairline stroke,
+//  rather than swapping text colour with the bubble's sent/received sides — doing that grows it into the bubble and it no longer reads as a control.
 //
-//  ### 状态从哪儿来
-//  - 礼品卡：`PopopxCreditsManager.hasRedeemed(voucherId:)` 是本机核销过的长期事实；
-//    这一程的终态从 `PopopxSilentSignalingRouter.outcomesByVoucher[voucherId]` 读，
-//    **不**读全局那一份 `lastOutcome`——两张券同时挂在两个会话里时，全局那一份会串台。
-//  - 红包：`hasClaimed(packetId:)` 与 `pendingPacket(packetId:)` 都在账本里。
-//    前者是"我拆过了"，后者是"这一单是我发的"。
+//  ### Where the state comes from
+//  - Gift card: `PopopxCreditsManager.hasRedeemed(voucherId:)` is the long-lived fact of having been redeemed on this device;
+//    this round's final state is read from `PopopxSilentSignalingRouter.outcomesByVoucher[voucherId]`,
+//    **not** the global `lastOutcome` — with two vouchers hanging in two conversations at once, the global one crosses the wires.
+//  - Red packet: both `hasClaimed(packetId:)` and `pendingPacket(packetId:)` live in the ledger.
+//    The former is 'I have opened it', the latter is 'this one I sent'.
 //
-//  ### 自己发出去的红包不能自己拆
-//  发送时点数已经扣过。如果本机的时间线上那张卡片还能点"拆开"，同一个人就能既扣一次又入一份——
-//  这一条判据必须在视图这一层也存在，虽然 `claimRedPacket` 的重放保护也会挡住同一 packetId。
+//  ### A red packet you sent yourself cannot be opened by you
+//  Sending already deducted the credits. If the card on this device's timeline could still be tapped to 'open', the same person would both be charged once and receive a share —
+//  this criterion must also exist at the view layer, even though `claimRedPacket`'s replay protection would also block the same packetId.
 //
-//  ### 回执是尽力而为
-//  拆开后本机立刻入账（那份点数是拆的人的），随后补一条静默回执给发送方，只用来算退款。
-//  回执没送到时这一格会在本进程里留着"补发回执"的按钮；重启后不再提示，
-//  因为"回执是否送达"没有本地可持久化的判据——宁可少一次提示，也不假装知道。
+//  ### The receipt is best-effort
+//  After opening, this device credits immediately (that share of credits belongs to the opener), then sends a silent receipt to the sender, used only to compute a refund.
+//  When the receipt does not arrive, this cell keeps a 'resend receipt' button for the life of the process; after a restart it no longer prompts,
+//  because 'was the receipt delivered' has no locally persistable criterion — better one prompt fewer than pretending to know.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. Red lines forbid a script from modifying project.pbxproj.
 
 import SwiftUI
 
-// MARK: - 上下文与选路
+// MARK: - Context and routing
 
-/// 卡片需要的会话上下文，由挂载方一次给全。
+/// The conversation context the cards need, handed over complete by the mounting side in one go.
 struct PopopxCommerceCardContext: Hashable {
-    /// 卡片所在会话的落点。nil 时礼品卡与红包只读：兑换与拆开都要往这个会话里回一条消息。
+    /// The destination of the conversation the card sits in. With nil the gift card and the red packet are read-only: redemption and opening both reply a message into this conversation.
     let target: PopopxCommerceTarget?
-    /// 卡片是不是对方发过来的那一边。
+    /// Whether the card is on the side the other party sent it from.
     let incoming: Bool
-    /// 门槛卡片要给它所在会话签一张本机凭证，所以挂载方把会话的显示键与名字一起带下来。
-    /// 这两个字段只有 `channel` 那一支会读（礼品卡与红包不使用），默认空串是为了不惊动既有构造点。
+    /// The threshold card signs a local credential for the conversation it sits in, so the mounting side carries the conversation's display key and name down together.
+    /// Only the `channel` branch reads these two fields (the gift card and red packet do not use them); the empty-string default is so that existing construction sites are not disturbed.
     let chatId: String
     let chatTitle: String
-    /// 这个会话是不是频道。门槛卡片只有落在频道里才作数：判据与频道信息页那一格同一个数
-    /// （`GroupInfo.isChannel`），挂载方从 `chat.chatInfo.groupInfo` 原样搬。
-    /// 默认 false 是为了让"挂载方没给上下文"那一条兜底路径继续停在它原来那一格——
-    /// 那条路径的 `chatId` 也是空串，先被"这里只能看"挡住，轮不到这一条说话。
+    /// Whether this conversation is a channel. The threshold card only counts when it lands in a channel: the criterion uses the same value as the channel info page's cell
+    /// (`GroupInfo.isChannel`), which the mounting side copies over verbatim from `chat.chatInfo.groupInfo`.
+    /// The false default keeps the 'mounting side gave no context' fallback path parked in the cell it originally had —
+    /// that path's `chatId` is an empty string too, so 'here you can only read' blocks it first and this line never gets to speak.
     let isChannel: Bool
 
     init(target: PopopxCommerceTarget?, incoming: Bool, chatId: String = "", chatTitle: String = "",
@@ -57,14 +57,14 @@ struct PopopxCommerceCardContext: Hashable {
     }
 }
 
-/// 一条文本消息在会话流里应当渲染成哪张卡片。
+/// Which card a text message should render as inside the conversation flow.
 enum PopopxCommerceContent: Hashable {
     case gift(PopopxGiftCardPayload)
     case packet(PopopxRedPacketPayload)
     case channel(PopopxChannelAccessPayload)
 
-    /// 气泡选路用的一次判定：三个都不像就返回 nil，让这条消息走普通文本那一支。
-    /// 顺序无涉正确性（三个 host 互不相同），频道放在最后是因为它最不像"一条要点的卡片"。
+    /// One decision used for bubble routing: if it resembles none of the three, return nil and let the message take the plain-text branch.
+    /// The order has nothing to do with correctness (the three hosts differ from each other); the channel comes last because it looks least like 'a card you tap'.
     static func detect(in text: String) -> PopopxCommerceContent? {
         if let packet = PopopxRedPacketPayload.parse(from: text) { return .packet(packet) }
         if let gift = PopopxGiftCardPayload.parse(from: text) { return .gift(gift) }
@@ -72,9 +72,9 @@ enum PopopxCommerceContent: Hashable {
         return nil
     }
 
-    /// VoiceOver 的那一句由本文件拥有：措辞和卡片上写出来的那几个数必须同源，
-    /// 否则气泡与卡片会各说一套（`PopopxMessageBubble.swift:211-217` 那两支同一条理由）。
-    /// 只报名额与份数，不报签名、不报券号——那些串读出来只会变成噪音。
+    /// VoiceOver's sentence is owned by this file: the wording and the numbers printed on the card must come from one source,
+    /// otherwise the bubble and the card each tell a different story (the same reason holds for those two branches in `PopopxMessageBubble.swift:211-217`).
+    /// It reads out only the quota and the number of shares, no signature and no voucher id — those strings read aloud would only become noise.
     var spokenText: String {
         switch self {
         case let .gift(payload):
@@ -91,9 +91,9 @@ enum PopopxCommerceContent: Hashable {
     }
 }
 
-// MARK: - 卡片表面
+// MARK: - Card surface
 
-/// 这几张卡片共用的那一层：卡片底、细描边、左对齐的内容列。
+/// The layer these cards share: card background, hairline stroke, left-aligned content column.
 private struct PopopxCommerceCardSurface<Content: View>: View {
     private let content: Content
 
@@ -139,8 +139,8 @@ private struct PopopxCommerceCardHeader: View {
     }
 }
 
-/// 拒绝态那一行：一个图标加一句话，不做大面积红色块——卡片里最常见的失败是"过期/已用"，
-/// 那不是一个错误，用 danger 底会把普通状态喊成事故。
+/// The refused-state line: one icon plus one sentence, no large red block — the commonest failure in these cards is 'expired / used',
+/// which is not an error, and a danger background would shout an ordinary state as an incident.
 private struct PopopxCommerceCardNote: View {
     let systemImage: String
     let text: String
@@ -160,9 +160,9 @@ private struct PopopxCommerceCardNote: View {
     }
 }
 
-// MARK: - 礼品卡
+// MARK: - Gift card
 
-/// 会话里收到的一张徽章礼品卡。点"兑换"发出的是 `CHAT_REDEEM_REQ`，终态等 ACK。
+/// A badge gift card received in a conversation. Tapping 'redeem' emits a `CHAT_REDEEM_REQ`, and the final state waits for the ACK.
 struct PopopxGiftCardBubble: View {
     let payload: PopopxGiftCardPayload
     let context: PopopxCommerceCardContext
@@ -170,8 +170,8 @@ struct PopopxGiftCardBubble: View {
     @State private var credits = PopopxCreditsManager.shared
     @State private var router = PopopxSilentSignalingRouter.shared
     @State private var opening = false
-    /// 只装"当场就失败"那几种（验签不过、发不出去）。发起成功时它是 nil，
-    /// 于是终态一律来自 `outcomesByVoucher`，两个来源不会互相盖住对方。
+    /// It holds only the 'fails on the spot' kinds (signature check fails, cannot be sent out). When the request starts successfully it is nil,
+    /// so the final state always comes from `outcomesByVoucher`, and the two sources never cover each other up.
     @State private var immediate: PopopxRedemptionOutcome?
 
     var body: some View {
@@ -200,7 +200,7 @@ struct PopopxGiftCardBubble: View {
             case .none:
                 PopopxCommerceCardNote(systemImage: "eye", text: Copy.readOnly, ink: PopopxPalette.labelSecondary)
             case .some(.group):
-                // 礼品卡的 ACK 按 chatId 记账，群里的第二个人会把别人那一笔判掉，所以路由在入口就不放行。
+                // Gift-card ACKs are accounted by chatId, so a second person in the group would settle somebody else's entry; the router therefore refuses to pass it at the entry.
                 PopopxCommerceCardNote(systemImage: "person.2", text: Copy.groupUnsupported, ink: PopopxPalette.labelSecondary)
             case .some(.contact):
                 awaitingOrAction
@@ -255,9 +255,9 @@ struct PopopxGiftCardBubble: View {
     }
 }
 
-// MARK: - 红包
+// MARK: - Red packet
 
-/// 会话里的一个算力点红包。自己发出去的那一张显示份数，别人发来的那一张才给"拆开"。
+/// A credits red packet inside a conversation. The one you sent shows the number of shares; only the one someone else sent offers 'open'.
 struct PopopxRedPacketBubble: View {
     let payload: PopopxRedPacketPayload
     let context: PopopxCommerceCardContext
@@ -311,7 +311,7 @@ struct PopopxRedPacketBubble: View {
         }
     }
 
-    /// 已拆开那一格：金额来自载荷本身，不是本机临时记的一份数——重启后也要说得出一样的数。
+    /// The already-opened cell: the amount comes from the payload itself, not a number this device noted ad hoc — after a restart it must still tell the same number.
     private var claimedRow: some View {
         Group {
             PopopxCommerceCardNote(
@@ -328,7 +328,7 @@ struct PopopxRedPacketBubble: View {
         }
     }
 
-    /// 发送方视角：份数只在"这一单是我本机发的"时才显示，别人的 packetId 在这里没有意义。
+    /// Sender's view: the share count shows only when 'this one was sent from this device'; somebody else's packetId means nothing here.
     @ViewBuilder private var senderRow: some View {
         if let packet = credits.pendingPacket(packetId: payload.packetId) {
             PopopxCommerceCardNote(
@@ -341,7 +341,7 @@ struct PopopxRedPacketBubble: View {
         }
     }
 
-    // MARK: 动作
+    // MARK: Actions
 
     private func open() async {
         guard let share = payload.amountPerRecipient else {
@@ -350,7 +350,7 @@ struct PopopxRedPacketBubble: View {
         }
         opening = true
         do {
-            // 先入账再发回执：那份点数是拆的人的，回执只影响发送方退多少，不该反过来决定这一笔能不能到账。
+            // Credit first, then send the receipt: that share of credits belongs to the opener, and the receipt only affects how much the sender is refunded; it must not in turn decide whether this credit lands.
             let credited = try credits.claimRedPacket(
                 packetId: payload.packetId, amountPerRecipient: share, note: payload.note
             )
@@ -359,7 +359,7 @@ struct PopopxRedPacketBubble: View {
                 let delivered = await sendReceipt()
                 receiptStuck = !delivered
             } else {
-                // 重放保护挡下的（同一条 packetId 已经入过账）：显示已拆开，不再重复发回执。
+                // Blocked by replay protection (the same packetId was already credited): show it as opened and do not send the receipt again.
                 PopopxHaptics.notice(.warning)
             }
         } catch {
@@ -380,23 +380,23 @@ struct PopopxRedPacketBubble: View {
     }
 }
 
-// MARK: - 频道订阅门槛
+// MARK: - Channel subscription threshold
 
-/// 频道主在频道里发布的那一条门槛。成员看到的是价与"订阅"，频道主看到的是"你发布的门槛"。
+/// The threshold the channel owner publishes inside the channel. Members see the price and 'subscribe'; the owner sees 'the threshold you published'.
 ///
-/// 三件事在这张卡上是真的：价取自载荷、验签用载荷里带的公钥、扣点走
-/// `PopopxCreditsManager.subscribeToChannel`（判据 `1…maximumCreditsThreshold` 在那一侧也再查一遍）。
-/// 一件事不是：这张卡**不改变频道能广播给谁**（SimpleX 的频道是单向广播，Swift 侧没有按人过滤的接口），
-/// 所以它是本机的准入闸门，那句话写在订阅面板的边界条目里，这里不重复承诺。
+/// Three things are true on this card: the price comes from the payload, the signature is checked with the public key carried in the payload, and the deduction goes through
+/// `PopopxCreditsManager.subscribeToChannel` (the criterion `1…maximumCreditsThreshold` is checked once more on that side too).
+/// one thing it is not: this card **does not change whom the channel can broadcast to** (these channels are one-way broadcasts and the Swift side has no per-person filtering API),
+/// so it is the local admission gate; that sentence is written in the subscribe panel's boundary items, not promised again here.
 ///
-/// ### 防冒充能做到的是哪两半，做不到的是哪一半
-/// 做得到：卡片落在非频道的会话里就不作数（`context.isChannel`，这一支排在扣点之前），
-/// 以及"本机上一次付费记下的那把钥匙"与这一条的签名公钥对不上时不给订阅（`channelIssuerConflict`）。
-/// 做不到：**在这一条消息上认出"发它的人是不是这个频道的管理员"**。频道消息在成员侧的方向是
-/// `CIDirection.channelRcv`，那一个档不带 `GroupMember`（`ChatTypes.swift:4421-4422`，
-/// `groupMemberId` 对它是 nil：:4440-4442），核心也没把作者的权威公钥交给 Swift，
-/// 而本模块的签名密钥是另一套 P256 钥匙，两边没有可比的数。
-/// 所以角色只能判在发布侧那一半（`sendChannelAccess`），第一次付费之前的伪造窗口是记录在案的残留风险。
+/// ### Which two halves anti-impersonation can deliver, and which half it cannot
+/// Can do: the card does not count when it lands in a non-channel conversation (`context.isChannel`, and that branch sits before the deduction),
+/// and subscribing is refused when "the key recorded by this device's last payment" does not match this message's signing public key (`channelIssuerConflict`).
+/// Cannot do: **recognizing from this message whether the one who sent it is an admin of this channel**. On the member side the direction of a channel message is
+/// `CIDirection.channelRcv`, and that case carries no `GroupMember` (`ChatTypes.swift:4421-4422`,
+/// `groupMemberId` is nil for it: :4440-4442), and the core never hands the author's authoritative public key to Swift either,
+/// while this module's signing key is a different P256 key set, so the two sides have no comparable value.
+/// So the role can only be judged on the publishing half (`sendChannelAccess`); the forgery window before the first payment is a recorded residual risk.
 struct PopopxChannelAccessBubble: View {
     let payload: PopopxChannelAccessPayload
     let context: PopopxCommerceCardContext
@@ -418,8 +418,8 @@ struct PopopxChannelAccessBubble: View {
         }
         .onAppear { credits.loadIfNeeded() }
         .sheet(isPresented: $showSubscribe) {
-            // 面板自己查旧票、自己叠天数（`subscribeToChannel` 在到期时间之上再加一格），
-            // 所以这里只把"这个会话 + 这个价"交下去，不多带一个状态。
+            // the panel queries the old ticket and stacks the days itself (`subscribeToChannel` adds one more period on top of the expiry time),
+            // so here only "this conversation + this price" is handed down, without carrying an extra state.
             PopopxChannelSubscriptionSheet(
                 channelId: context.chatId,
                 channelTitle: context.chatTitle,
@@ -449,20 +449,20 @@ struct PopopxChannelAccessBubble: View {
         } else if !payload.isIssuerSignatureValid {
             PopopxCommerceCardNote(systemImage: "xmark.seal", text: Copy.channelRejected, ink: PopopxPalette.dangerInk)
         } else if !context.incoming {
-            // 频道主自己那一条：这一支不扣自己的点，也没有票可看。
+            // The channel owner's own copy: this branch does not deduct its own credits and has no ticket to look at.
             PopopxCommerceCardNote(systemImage: "arrow.up.right", text: Copy.published, ink: PopopxPalette.labelSecondary)
         } else if context.chatId.isEmpty {
-            // 挂载方没给会话键（默认那一条兜底路径）。这时"订阅"会签出一张键为空串的凭证，
-            // 而空串在所有频道之间是同一个键——扣一次点，别处也显示已订阅。宁可只读。
+            // The host gave no conversation key (the default fallback path). Then "subscribe" would sign a credential whose key is the empty string,
+            // and the empty string is the same key across all channels - one deduction and elsewhere it also shows subscribed. Read-only is preferable.
             PopopxCommerceCardNote(systemImage: "eye", text: Copy.readOnlyChannel, ink: PopopxPalette.labelSecondary)
         } else if !context.isChannel {
-            // 门槛卡片落在非频道的会话里（单聊、私人 group、转发的截图）。
-            // 这一支必须排在扣点之前：伪造一张 `popopx://channel` 粘进单聊，本来能在这里扣掉点数的。
+            // The threshold card lands in a non-channel conversation (direct chat, private group, forwarded screenshot).
+            // This branch must sit before the deduction: a forged `popopx://channel` pasted into a direct chat could have deducted credits right here.
             PopopxCommerceCardNote(systemImage: "xmark.seal", text: Copy.notAChannel, ink: PopopxPalette.dangerInk)
         } else if credits.channelIssuerConflict(channelId: context.chatId,
                                                 issuerPublicKeyBase64URL: payload.issuerPublicKeyBase64URL) {
-            // 与本机上一次付费记下的发布者不是同一把钥匙。覆盖面与判据都在
-            // `PopopxCreditsManager.channelIssuerConflict` 那一节，这里不重复承诺。
+            // Not the same key as the publisher recorded by this device's last payment. The coverage and the criterion are both in
+            // the `PopopxCreditsManager.channelIssuerConflict` section, not promised again here.
             PopopxCommerceCardNote(systemImage: "xmark.seal", text: Copy.issuerMismatch, ink: PopopxPalette.dangerInk)
         } else if let ticket = credits.ticket(forChannelId: context.chatId) {
             PopopxCommerceCardNote(
@@ -483,10 +483,10 @@ struct PopopxChannelAccessBubble: View {
     }
 }
 
-// MARK: - 文案
+// MARK: - Copy
 
 private enum Copy {
-    // 礼品卡
+    // gift card
     static func title(_ days: Int) -> String { String(format: NSLocalizedString("%1$lld-day %2$@", comment: "POPOPX gift card bubble title"), days, PopopxCommerceCopy.badgeProductName) }
     static let caption = NSLocalizedString("A badge voucher sent by the other person", comment: "POPOPX gift card bubble")
     static func note(_ text: String) -> String { String(format: NSLocalizedString("Message: %@", comment: "POPOPX commerce card note"), text) }
@@ -502,7 +502,7 @@ private enum Copy {
     static let glossAlready = NSLocalizedString("This voucher has already been redeemed.", comment: "POPOPX commerce card")
     static let glossGeneric = NSLocalizedString("This did not complete; you can try again later.", comment: "POPOPX commerce card")
 
-    // 红包
+    // red packet
     static let open = NSLocalizedString("Open the packet", comment: "POPOPX red packet button")
     static let title = NSLocalizedString("Compute Credits red packet", comment: "POPOPX red packet card")
     static func split(_ count: Int) -> String { count > 1 ? String(format: NSLocalizedString("Split evenly %lld ways", comment: "POPOPX red packet card"), count) : NSLocalizedString("Single recipient", comment: "POPOPX red packet card") }
@@ -510,7 +510,7 @@ private enum Copy {
     static func sent(_ claimed: Int, _ total: Int) -> String { String(format: NSLocalizedString("Claimed %1$lld of %2$lld shares", comment: "POPOPX red packet card"), claimed, total) }
     static let resendReceipt = NSLocalizedString("Send the receipt again", comment: "POPOPX red packet card")
 
-    // 频道订阅门槛
+    // channel subscription threshold
     static let channelHeadline = NSLocalizedString("Channel subscription threshold", comment: "POPOPX channel card")
     static func caption(_ date: String) -> String { String(format: NSLocalizedString("Published by the channel owner on %@", comment: "POPOPX channel card"), date) }
     static func perPeriod(_ days: Int) -> String { String(format: NSLocalizedString("/ %lld days", comment: "POPOPX channel card price suffix"), days) }
@@ -527,9 +527,9 @@ private enum Copy {
 
 // MARK: - Previews
 
-/// 预览里的签名一律是假串：卡片因此停在"验不过"那一格。
-/// 这一族卡片的状态全部来自钥匙串账本与运行时签名，预览造不出可信的那一份，
-/// 所以留这一格给眼睛看，其余状态在真机上验（见 `Docs/app-store-review-notes.md` 的自测清单）。
+/// Signatures in the previews are always fake strings: the card therefore stops at the "does not verify" case.
+/// Every state in this card family comes from the Keychain ledger and runtime signatures, and a preview cannot produce the trustworthy one,
+/// so this case is kept for the eye; the remaining states are verified on a real device (see the self-test checklist in `Docs/app-store-review-notes.md`).
 struct PopopxCommerceCardsDark_Previews: PreviewProvider {
     static var previews: some View {
         VStack(alignment: .leading, spacing: PopopxMetrics.spaceM) {

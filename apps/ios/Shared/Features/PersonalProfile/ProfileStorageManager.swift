@@ -2,90 +2,90 @@
 //  ProfileStorageManager.swift
 //  POPOPX (iOS)
 //
-//  【加密个人主页 · 模块一之二】原件在沙盒里的位置，和"收件人首次打开之后"那把钟。
+//  [Encrypted personal profile - module one, part two] where the originals sit in the sandbox, and the "after the recipient first opened it" clock.
 //
-//  制作器/发送器/阅读器三个文件都只通过这一个 actor 碰磁盘：本机草稿走 `loadEditable` /
-//  `saveEditable`，媒体走 `importImage` / `importVideo` / `loadMedia` / `removeMedia`，
-//  计时走 `readState` / `markFirstOpened` / `forgetRead`。没有第二条路径，就没有第二套语义。
+//  All three files - builder, sender, reader - touch the disk only through this one actor: local drafts go through `loadEditable` /
+//  `saveEditable`, media goes through `importImage` / `importVideo` / `loadMedia` / `removeMedia`,
+//  and timing goes through `readState` / `markFirstOpened` / `forgetRead`. No second path means no second set of semantics.
 //
-//  ### 硬边界
-//  1. 只碰 `Application Support/PersonalProfile/`。app 现有的 `getDocumentsDirectory()` /
-//     `getAppFilesDirectory()`（`FileUtils.swift:59`、`:253`）是 SimpleX 那套附件历史的领地，
-//     两份历史互相不认识，谁也不许往对方那里写。app target 里没有现成的 Application Support
-//     助手，所以这里自己从 `FileManager.default.urls(for:.applicationSupportDirectory,…)` 派生，
-//     并且自己建中间目录。
-//  2. 每个落盘文件都写 `[.atomic, .completeFileProtection]`，目录本身也补一遍
-//     `FileAttributeKey.protectionKey = .complete`（写法的先例是 `PopopxMeshStorage.swift:109`）。
-//     本文件是 app target 里第一处用到 `FileProtectionType` 的地方，所以"新写入"和"已存在的文件"
-//     两条都要管：写选项只作用于那一次新建的 inode，`moveItem` 进来的媒体和 `createDirectory`
-//     建出的目录各有各的默认属性。
-//  3. `profileId` / `mediaId` 在收件方那一侧是**对端给的字符串**（`data=` 里的 JSON 字段）。
-//     它们会进路径，也就会被 `removeMedia` 用来删文件，所以进路径之前必须过字符白名单——
-//     否则一个 `../../` 就把删除权交出了这个沙盒目录。
-//  4. 计时用的是墙钟（`Date().timeIntervalSince1970`），不是单调钟。绝密那条有 `PopopxSecureWindowManager`
-//     的窗口生命周期可以依靠，而这一把钟要跨启动、跨会话、跨反复打开，只能落墙钟。墙钟能被机主
-//     往回拨，所以 `now` 早于 `firstOpenedAt` 超过容差就判 `.clockRewound` 并按已销毁处理。
-//     本文件不声称自己扛得住改表，只声称改表会被发现。
-//  5. 计时记录按 `(chatId, itemId)` 键，不按 `profileId`：同一个人被重新发送一次就是一次全新的
-//     阅读，一条已经烧掉的卡片不能因为对端重发而复活。`forgetRead` 删掉整条记录，销毁路径必须调它，
-//     否则烧掉的行会因为记录还在而重新长出倒计时。
+//  ### Hard boundaries
+//  1. Touches only `Application Support/PersonalProfile/`. The app's existing `getDocumentsDirectory()` /
+//     `getAppFilesDirectory()` (`FileUtils.swift:59`, `:253`) are the territory of the upstream app's attachment history,
+//     the two histories do not know each other and neither may write into the other's. The app target has no ready-made Application Support
+//     helper, so this derives it itself from `FileManager.default.urls(for:.applicationSupportDirectory,...)`,
+//     and creates the intermediate directories itself.
+//  2. Every file written to disk is written with `[.atomic, .completeFileProtection]`, and the directory itself gets another pass of
+//     `FileAttributeKey.protectionKey = .complete` (the precedent for that form is `PopopxMeshStorage.swift:109`).
+//     This file is the first place in the app target that uses `FileProtectionType`, so both the "newly written" and the "already existing file"
+//     have to be handled: the write option only applies to the inode created in that one call, and media brought in by `moveItem` and directories
+//     created by `createDirectory` each carry their own default attributes.
+//  3. On the recipient side `profileId` / `mediaId` are **strings supplied by the peer** (JSON fields inside `data=`).
+//     They enter paths, and `removeMedia` therefore uses them to delete files, so they must pass a character whitelist before entering a path --
+//     otherwise a single `../../` hands the delete rights out of this sandbox directory.
+//  4. Timing uses the wall clock (`Date().timeIntervalSince1970`), not a monotonic clock. The top-secret path has the window lifecycle of
+//     `PopopxSecureWindowManager` to rely on, whereas this clock has to cross launches, sessions and repeated openings, so only a wall clock works. A wall clock can be wound back by the owner,
+//     so if `now` precedes `firstOpenedAt` by more than the tolerance it is judged `.clockRewound` and treated as already destroyed.
+//     This file claims no resistance to clock tampering, only that tampering gets detected.
+//  5. Timing records are keyed by `(chatId, itemId)`, not by `profileId`: the same card sent once more is a completely fresh
+//     read, and a card that has already burned cannot come back to life because the peer resent it. `forgetRead` deletes the whole record and the destruction path must call it,
+//     otherwise a burned row grows a fresh countdown again because its record is still there.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. The red line forbids scripts from modifying project.pbxproj.
 //
 
 import AVFoundation
 import Foundation
 import UIKit
 
-// MARK: - 阅读状态
+// MARK: - Read state
 
-/// 一张主页卡片在**某一条消息**上的阅读标识。
+/// The read identity of one profile card on **one particular message**.
 ///
-/// 键里带 chatId/itemId 而不是 profileId，理由见文件头第 5 条：重发的名片必须重新计时。
+/// The key carries chatId/itemId rather than profileId; see rule 5 in the file header: a resent business card must start its clock over.
 struct PopopxProfileReadKey: Hashable, Sendable, Codable {
     var chatId: Int64
     var itemId: Int64
 }
 
-/// 阅读时钟的四个相位。`firstOpenedAt` 在所有非 `unread` 分支里都带出来，界面因此可以
-/// 自己算进度条，而不必再问一次存储。
+/// The four phases of the read clock. `firstOpenedAt` is returned in every branch except `unread`, so the UI can
+/// compute its own progress bar without asking the storage layer a second time.
 enum PopopxProfileReadState: Hashable, Sendable {
-    /// 从来没点开过（`ephemeral` 的计时此刻还没开始）。
+    /// Never opened (the timing of an `ephemeral` card has not started at this point).
     case unread
-    /// 已点开，还在时限内。
+    /// Opened, still inside the time limit.
     case counting(firstOpenedAt: TimeInterval, remainingSeconds: Int)
-    /// 已点开且时限走完：内容必须按已销毁处理。
+    /// Opened and the time limit has run out: the content must be treated as destroyed.
     case expired(firstOpenedAt: TimeInterval)
-    /// 钟被往回拨过（或本机时间被时区/校时大幅改动）：内容同样按已销毁处理，宁可不给读。
+    /// The clock was wound back (or the device time moved a lot by a timezone/time-sync change): the content is likewise treated as destroyed, better to let it stay unread.
     case clockRewound(firstOpenedAt: TimeInterval)
 }
 
-/// 一个媒体块在本机的读取结果。三档而不是 `URL?`：卡片要能分清"没收到"和"收到了但读不出"，
-/// 前者是链路问题（可以提示重发），后者是本机文件问题（只能提示已损坏）。
+/// The local read result of one media block. Three cases rather than `URL?`: the card must distinguish "never received" from "received but unreadable",
+/// the first is a link problem (a resend can be offered), the second is a local file problem (only "corrupted" can be shown).
 enum PopopxProfileMediaLoad: Hashable, Sendable {
     case loaded(URL)
     case missing(mediaId: String)
     case unreadable(mediaId: String, reason: String)
 }
 
-/// 这一层（导入、压缩、转码）会说出口的原因。和 `PopopxProfileError` 分开是刻意的：那一个是
-/// 载荷/协议层的失败，改它等于改协议；这一个是本机加工环节的失败。两个枚举混在一起，
-/// 协议层的 case 就会被本机错误污染。
+/// The reasons this layer (import, compression, transcoding) is allowed to state out loud. Keeping it apart from `PopopxProfileError` is deliberate: that one is
+/// a payload/protocol layer failure, changing it means changing the protocol; this one is a failure in the local processing steps. Mixing the two enums
+/// would let local errors pollute the protocol-level cases.
 enum PopopxProfileMediaError: Error, Hashable, Sendable {
-    /// 给进来的字节根本不是一张能解码的图。
+    /// The bytes handed in are not a decodable image at all.
     case undecodableImage
-    /// 压到最小档位仍然超过 `ProfileStorageManager.maximumImageBytes`。
+    /// Still above `ProfileStorageManager.maximumImageBytes` after compressing down to the smallest setting.
     case oversizedImage(bytes: Int)
-    /// 给进来的文件根本不是一段能解码的视频（或时长读不出来）。
+    /// The file handed in is not a decodable video at all (or its duration cannot be read).
     case undecodableVideo
-    /// 转码没跑完，或设备给不出这个导出预设。
+    /// The transcode did not finish, or the device cannot provide this export preset.
     case exportFailed(reason: String)
-    /// 30 秒截断之后仍然超过 `ProfileStorageManager.maximumVideoBytes`。
+    /// Still above `ProfileStorageManager.maximumVideoBytes` after the 30 second truncation.
     case oversizedVideo(bytes: Int)
-    /// 标识不合法：`profileId` 过不了进路径前的字符白名单。
+    /// Illegal identifier: `profileId` does not pass the character whitelist checked before entering a path.
     case rejectedIdentifier
 
-    /// 面向用户的一行中文。
+    /// One line of Chinese text for the user.
     var reasonText: String {
         switch self {
         case .undecodableImage:
@@ -104,42 +104,42 @@ enum PopopxProfileMediaError: Error, Hashable, Sendable {
     }
 }
 
-// MARK: - 存储
+// MARK: - Storage
 
-/// 主页的本机存储与阅读时钟。`actor` 而不是 `@MainActor class`：媒体导入是几分钟量级的
-/// 编码工作（在后台线程跑），而阅读计时会被气泡每秒问一次，两者必须在同一个串行域里但都不该
-/// 占用主线程。
+/// Local storage and read clock for profiles. An `actor` rather than a `@MainActor class`: media import is encoding work
+/// on the order of minutes (it runs on background threads), while the read clock is asked by the bubble once a second; both must live in the same serial domain but neither should
+/// occupy the main thread.
 actor ProfileStorageManager {
     static let shared = ProfileStorageManager()
 
-    // MARK: 预算
+    // MARK: Budgets
 
-    /// 单张图片压缩后的字节上限（2 MiB）。相册原图动辄 8 MB 以上，而名片要一次会话里推好几张。
+    /// Byte ceiling for one compressed image (2 MiB). Library originals are routinely above 8 MB, and a card pushes several within one session.
     static let maximumImageBytes = 2 * 1024 * 1024
-    /// 单个视频导出后的字节上限（15 MiB）。Mesh 走的是纯文字，所以这个上限约束的是 XFTP 那一跳。
+    /// Byte ceiling for one exported video (15 MiB). Mesh carries plain text only, so this ceiling constrains the XFTP hop.
     static let maximumVideoBytes = 15 * 1024 * 1024
-    /// 视频时长上限（秒）。截断而不是拒绝：用户拍的 3 分钟视频里，名片用得上的就是开头那几秒。
+    /// Video duration ceiling (seconds). Truncate rather than reject: of a user's 3 minute video, the card can use only the first few seconds.
     static let maximumVideoSeconds = 30
 
-    /// 图片压缩的两张表：外层按最长边降档，内层按质量降档。
+    /// The two tables of image compression: the outer loop steps down the longest edge, the inner loop steps down the quality.
     ///
-    /// 先缩像素再降质量、而不是把 `jpegData(compressionQuality:)` 一路降到 0.05：低质量优先会先
-    /// 把图压成一团马赛克再抱怨体积，像素优先保住的是一张看得清的略小的图。
+    /// Shrink pixels first and lower quality second, rather than driving `jpegData(compressionQuality:)` all the way down to 0.05: quality-first would
+    /// first turn the image into a block of mosaic and then complain about the size, while pixel-first keeps a legible image that is only a little smaller.
     private static let imagePixelLadder: [Int] = [2_560, 1_920, 1_440, 1_080, 800, 600]
     private static let imageQualities: [CGFloat] = [0.85, 0.7, 0.55, 0.4]
 
-    /// 墙钟回拨的容差。2 秒盖得住自动校时的微调，又盖不住"把时间调回十分钟前"这种
-    /// 想让倒计时重新变长的操作——那种必须落到 `.clockRewound`。
+    /// Tolerance for wall-clock rewind. 2 seconds covers the fine adjustments of automatic time sync but not an operation like "set the time back ten minutes"
+    /// that is meant to make the countdown long again -- that must land on `.clockRewound`.
     private static let clockRewindTolerance: TimeInterval = 2
 
-    /// 进路径的标识允许的字符数上限（UUID 是 36，留一倍余量给别家实现）。
+    /// Upper bound on the allowed character count for an identifier that enters a path (a UUID is 36, with double headroom left for other implementations).
     private static let maximumIdentifierCharacters = 64
 
-    // MARK: 路径
+    // MARK: Paths
 
-    /// `Application Support/PersonalProfile/`。app target 里没有现成的 Application Support 助手，
-    /// 所以这里自己派生；拿不到就退回 `temporaryDirectory`——宁可不落永久区，也不 `!` 一个可能为
-    /// nil 的 URL（`FileUtils.swift:59` 那种写法在扩展卷没挂上时就是崩溃，本文件不重复这个错误）。
+    /// `Application Support/PersonalProfile/`. The app target has no ready-made Application Support helper,
+    /// so it is derived here; if it cannot be obtained we fall back to `temporaryDirectory` -- better not to land in the permanent area than to `!` a URL that may be
+    /// nil (the form at `FileUtils.swift:59` crashes outright when an external volume is not mounted, and this file does not repeat that mistake).
     static var rootDirectory: URL {
         let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
         return (support ?? FileManager.default.temporaryDirectory)
@@ -151,8 +151,8 @@ actor ProfileStorageManager {
     private static let readStateName = "read-state.json"
     private static let mediaDirectoryName = "media"
 
-    /// 过不了字符白名单的对端标识统统落到这个目录名里：那个目录永远是空的，于是读到的结果是
-    /// `.missing`、删掉的是零个文件。既不放行越界路径，也不为此多开一条能抛错的分支。
+    /// Peer identifiers that fail the character whitelist all land in this directory name: that directory is always empty, so the read result is
+    /// `.missing` and zero files get deleted. Neither is an out-of-bounds path allowed through, nor is another throwing branch opened for it.
     private static let rejectedIdentifierPlaceholder = "invalid"
 
     private static var editableURL: URL { rootDirectory.appendingPathComponent(editableName) }
@@ -171,8 +171,8 @@ actor ProfileStorageManager {
         }
     }
 
-    /// 路径里的一个组件。只允许 `[A-Za-z0-9-_]`：`.` 不在内，所以 `..`、`.`、以及任何带点的
-    /// 变体都会被整串顶替成 fallback，`/` 更不可能进来。
+    /// One component inside a path. Only `[A-Za-z0-9-_]` is allowed: `.` is not in it, so `..`, `.` and any dotted
+    /// variant are replaced wholesale by the fallback, and `/` can hardly get in at all.
     private static func safeComponent(_ raw: String, fallback: String) -> String {
         guard !raw.isEmpty, raw.count <= maximumIdentifierCharacters else { return fallback }
         var allowed = CharacterSet.alphanumerics
@@ -181,33 +181,33 @@ actor ProfileStorageManager {
         return raw
     }
 
-    /// 能不能原样当路径组件用。写得过的才允许往沙盒里落盘；读的一侧不需要这道门，
-    /// 因为 `safeComponent` 已经把越界值顶替成一个必然为空的目录名。
+    /// Whether a value can be used as a path component as-is. Only what passes here may be written into the sandbox; the reading side needs no such gate,
+    /// because `safeComponent` has already replaced out-of-bounds values with a directory name that is necessarily empty.
     private static func isSafeIdentifier(_ raw: String) -> Bool {
         !raw.isEmpty && safeComponent(raw, fallback: rejectedIdentifierPlaceholder) == raw
     }
 
-    // MARK: 落盘属性
+    // MARK: On-disk attributes
 
-    /// 建目录并给它 `.complete` 保护。已存在时 `createDirectory(withIntermediateDirectories:true)`
-    /// 是幂等的，属性也一样，所以每次写入前都可以无脑调一次。
+    /// Creates the directory and gives it `.complete` protection. When it already exists `createDirectory(withIntermediateDirectories:true)`
+    /// is idempotent, and so are the attributes, so it can be called blindly before every write.
     private static func ensureDirectory(_ url: URL) throws {
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         applyProtection(at: url)
     }
 
-    /// 原子写 + `.complete` 保护。`Data.write` 的 `.completeFileProtection` 只保证**这一次新建**的
-    /// inode 带上保护，覆盖不了"文件早就存在、属性是别的"这一种（`.atomic` 会换新 inode，但目录属性
-    /// 和 `moveItem` 进来的媒体仍要补），所以写完再显式补一遍属性。
+    /// Atomic write plus `.complete` protection. The `.completeFileProtection` of `Data.write` only guarantees that the inode **created this one time**
+    /// carries protection; it cannot cover the case of a file that existed long before with other attributes (`.atomic` swaps in a new inode, but directory attributes
+    /// and the media moved in by `moveItem` still need patching), so the attributes are set explicitly once more after the write.
     private static func write(_ data: Data, to url: URL) throws {
         try ensureDirectory(url.deletingLastPathComponent())
         try data.write(to: url, options: [.atomic, .completeFileProtection])
         applyProtection(at: url)
     }
 
-    /// 补设属性。失败只记日志、不抛：在不支持数据保护的卷上（模拟器、外接卷）这一句注定失败，
-    /// 而"因为设不上保护就拒绝保存主页"会让整条功能在开发机上看起来是坏的。真机上这一句必成，
-    /// 失败的那一次在日志里留痕。
+    /// Applies the attribute afterwards. Failure is only logged, never thrown: on a volume without data protection (simulator, external volume) this call is doomed to fail,
+    /// and "refuse to save the profile because protection cannot be set" would make the whole feature look broken on a development machine. On a real device this one always succeeds,
+    /// and the failed attempt leaves a trace in the log.
     private static func applyProtection(at url: URL) {
         do {
             try FileManager.default.setAttributes(
@@ -227,10 +227,10 @@ actor ProfileStorageManager {
         }
     }
 
-    // MARK: 本机草稿
+    // MARK: Local draft
 
-    /// 读本机的可编辑草稿。返回 nil 有两种情况：还没存过，或者文件读不得（版本不认识、JSON 坏了、
-    /// 超出预算）。**两种都不删文件**：一份解不开的草稿是取证线索，静默抹掉用户的图文是第二次事故。
+    /// Reads the local editable draft. Returning nil covers two situations: nothing has been stored yet, or the file cannot be read (unrecognised version, broken JSON,
+    /// over budget). **Neither case deletes the file**: an undecodable draft is forensic evidence, and silently wiping the user's text and images would be a second incident.
     func loadEditable() -> PopopxProfileManifest? {
         let url = Self.editableURL
         guard FileManager.default.isReadableFile(atPath: url.path) else { return nil }
@@ -248,25 +248,25 @@ actor ProfileStorageManager {
         return manifest
     }
 
-    /// 存本机草稿。
+    /// Stores the local draft.
     ///
-    /// 写入的是**传进来的那一份**、不是 `normalized()` 的副本：`deliveryMode` 是发送时的决定
-    /// 而不是内容的属性，规范化会因为 `.meshTextOnly` 抹掉所有媒体块——存一次就把用户做的图删了，
-    /// 是不能接受的。校验走 `PopopxProfilePayload.make` 这同一道门：草稿必须**发得出去**，
-    /// 在保存时就报错比在点发送时报错便宜得多。
+    /// What gets written is **the copy that was passed in**, not the `normalized()` one: `deliveryMode` is a decision made at send time
+    /// rather than a property of the content, and normalization would drop every media block because of `.meshTextOnly` -- saving once would delete the images the user made,
+    /// which is unacceptable. Validation goes through this same gate as `PopopxProfilePayload.make`: a draft must be **sendable**,
+    /// and failing at save time is far cheaper than failing when send is tapped.
     func saveEditable(_ manifest: PopopxProfileManifest) throws {
         _ = try PopopxProfilePayload.make(manifest)
         let data = try manifest.encodedJSON()
         try Self.write(data, to: Self.editableURL)
     }
 
-    // MARK: 媒体
+    // MARK: Media
 
-    /// 图片：解码 → 按像素/质量两张表压到 2 MiB 以内 → 落盘。
+    /// Image: decode -> compress inside 2 MiB following the two pixel/quality tables -> write to disk.
     ///
-    /// 一律 JPEG（不跟随 `ImageUtils.swift:97` 那个"有 alpha 就存 PNG"的判断）：名片要的是可预测
-    /// 的体积，而 PNG 对相册照片根本压不下去。**重新编码这一步顺带把 EXIF/GPS 全部丢掉**——这不是
-    /// 副作用而是目的：一张带拍摄坐标的原图进进主页，等于把用户的位置挂在他自己的名片上。
+    /// Always JPEG (not following the "store PNG when there is alpha" decision at `ImageUtils.swift:97`): a card wants a predictable
+    /// size, and PNG simply does not compress library photos. **Re-encoding drops all EXIF/GPS along the way** -- this is not
+    /// a side effect but the goal: letting an original with capture coordinates into the profile would hang the user's location on their own business card.
     func importImage(_ data: Data, profileId: String) throws -> PopopxProfileMedia {
         guard Self.isSafeIdentifier(profileId) else { throw PopopxProfileMediaError.rejectedIdentifier }
         guard let image = UIImage(data: data) else { throw PopopxProfileMediaError.undecodableImage }
@@ -282,7 +282,7 @@ actor ProfileStorageManager {
         return media
     }
 
-    /// 像素优先、质量其次的压缩循环。跑完所有档位仍超标才拒（见 `imagePixelLadder` 那段）。
+    /// The compression loop that puts pixels first and quality second. It only rejects when every rung has been run through and the size is still over (see the `imagePixelLadder` block).
     private static func compress(image: UIImage) throws -> Data {
         var current = image
         var lastBytes = 0
@@ -299,21 +299,21 @@ actor ProfileStorageManager {
         throw PopopxProfileMediaError.oversizedImage(bytes: lastBytes)
     }
 
-    /// 视频：截断到 30 秒 → 转码 → 15 MiB 预算内才留。
+    /// Video: truncate to 30 seconds -> transcode -> keep only if inside the 15 MiB budget.
     ///
-    /// 转码沿用 app 已有的那个选择（`ImageUtils.swift:350`-`:363` 的 `AVAssetExportSession` +
-    /// `AVAssetExportPreset640x480`）：那条预设输出 H.264，是全 app 唯一跑过实机验证的导出路径，
-    /// 换一份新的编码配置就等于在本特性里开第二条没人验过的链路。
-    /// `metadataItemFilter = .forSharing()` 同样是跟着它走的：创作者、设备型号、录制位置都在这段
-    /// 元数据里，主页视频不该带着它们出门。
+    /// The transcode reuses the choice the app already makes (the `AVAssetExportSession` at `ImageUtils.swift:350`-`:363` +
+    /// `AVAssetExportPreset640x480`): that preset outputs H.264 and is the only export path in the whole app verified on a real device,
+    /// so swapping in a new encoding configuration would open a second path inside this feature that nobody has validated.
+    /// The `metadataItemFilter = .forSharing()` follows it as well: the author, the device model and the recording location are all in that
+    /// metadata, and a profile video should not carry them out of the door.
     func importVideo(from url: URL, profileId: String) async throws -> PopopxProfileMedia {
         guard Self.isSafeIdentifier(profileId) else { throw PopopxProfileMediaError.rejectedIdentifier }
         let directory = Self.mediaDirectory(profileId: profileId)
         try Self.ensureDirectory(directory)
         let mediaId = UUID().uuidString.lowercased()
         let output = directory.appendingPathComponent("\(mediaId).\(Self.fileExtension(for: .video))")
-        // 导出器要求输出文件不存在，而且它自己写出来的文件不带我们要的保护属性，
-        // 所以先导到同目录的临时名、补设保护、再改名成正式名（同卷改名是原子的）。
+        // The exporter requires that the output file does not exist, and the file it writes itself does not carry the protection attributes we want,
+        // so it is first exported to a temporary name in the same directory, protection is applied, then it is renamed to the real name (renaming on the same volume is atomic).
         let temporary = directory.appendingPathComponent("\(mediaId).exporting.mp4")
         var committed = false
         defer { if !committed { Self.discard(temporary) } }
@@ -348,8 +348,8 @@ actor ProfileStorageManager {
             throw PopopxProfileMediaError.oversizedVideo(bytes: Int(bytes))
         }
         if FileManager.default.fileExists(atPath: output.path) {
-            // mediaId 是新生成的 UUID，撞不上；撞上了说明本机状态有问题，让新文件覆盖旧文件比
-            // 抛一个用户看不懂的错更有用。
+            // mediaId is a freshly generated UUID, so it cannot collide; if it does, local state is broken, and letting the new file overwrite the old one is more useful than
+            // throwing an error the user cannot read.
             Self.discard(output)
         }
         do {
@@ -368,15 +368,15 @@ actor ProfileStorageManager {
         )
     }
 
-    /// 某个媒体块在本机的路径。扩展名由 `kind` 决定、永远不来自网络上那段 JSON，所以路径的后缀
-    /// 这一侧也是不可控输入够不着的。
+    /// The local path of a given media block. The extension is decided by `kind` and never comes from that JSON off the wire, so the path suffix
+    /// is also out of reach of uncontrolled input on this side.
     func mediaURL(_ media: PopopxProfileMedia, profileId: String) -> URL {
         Self.mediaDirectory(profileId: profileId)
             .appendingPathComponent("\(Self.safeComponent(media.mediaId, fallback: Self.rejectedIdentifierPlaceholder)).\(Self.fileExtension(for: media.kind))")
     }
 
-    /// 只判"在不在、能不能读、是不是空的"，不把字节读进内存：一段 15 MiB 的视频由界面那一侧
-    /// 按需加载，这一层替它整块读一遍只会把内存花光而什么也没多证明。
+    /// Only checks "is it there, can it be read, is it empty" without reading bytes into memory: a 15 MiB video is loaded
+    /// on demand by the UI side, and reading the whole block here on its behalf would only spend all the memory while proving nothing extra.
     func loadMedia(_ media: PopopxProfileMedia, profileId: String) -> PopopxProfileMediaLoad {
         let url = mediaURL(media, profileId: profileId)
         guard FileManager.default.fileExists(atPath: url.path) else {
@@ -398,8 +398,8 @@ actor ProfileStorageManager {
         return .loaded(url)
     }
 
-    /// 按 id 删。签名里只有 id、没有 `kind`，所以正式名和 `.exporting.mp4` 那个临时名都要能命中：
-    /// 用 `id.` 前缀匹配而不是拼一个具体扩展名。
+    /// Deletes by id. The signature has only the id and no `kind`, so both the real name and that `.exporting.mp4` temporary name must be hit:
+    /// match on the `id.` prefix instead of assembling one specific extension.
     func removeMedia(profileId: String, ids: [String]) {
         let directory = Self.mediaDirectory(profileId: profileId)
         guard let entries = try? FileManager.default.contentsOfDirectory(
@@ -413,21 +413,21 @@ actor ProfileStorageManager {
         }
     }
 
-    /// 烧掉一整份主页的全部原件（阅后即焚到点、或 panic 清理）。连目录一起摘，
-    /// 省得留下一个空目录让 `removeAllMedia` 的调用方误以为还有东西在。
+    /// Burns all originals of a whole profile (view-once time up, or panic cleanup). The directory is removed with them,
+    /// so that no empty directory is left for the callers of `removeAllMedia` to mistake for something still being there.
     func removeAllMedia(profileId: String) {
         let directory = Self.mediaDirectory(profileId: profileId)
         guard FileManager.default.fileExists(atPath: directory.path) else { return }
         Self.discard(directory)
     }
 
-    // MARK: 阅读时钟
+    // MARK: Read clock
 
-    /// 一张卡片当前的阅读状态。
+    /// The current read state of one card.
     ///
-    /// 第一次问到某个 key 时，会把这一次给的 `ttlSeconds` **绑到记录上**：`markFirstOpened` 的
-    /// 签名里没有任何时长参数，它只能从这条绑定里取值。副作用落在这个方向上是有意的——
-    /// 气泡每次重绘都会调本函数，所以真正点开之前，绑定一定已经写好了。
+    /// The first time a key is asked about, the `ttlSeconds` given in that call are **bound to the record**: the
+    /// signature of `markFirstOpened` has no duration parameter at all, so it can only take the value from that binding. The side effect pointing in this direction is deliberate --
+    /// the bubble calls this function on every redraw, so before the card is really opened the binding is certainly already written.
     func readState(_ key: PopopxProfileReadKey, ttlSeconds: Int, now: Date) -> PopopxProfileReadState {
         let stored = stateTable()[Self.stateKey(key)] ?? Record(ttlSeconds: nil, firstOpenedAt: nil)
         guard let openedAt = stored.firstOpenedAt else {
@@ -439,8 +439,8 @@ actor ProfileStorageManager {
         return Self.deriveState(firstOpenedAt: openedAt, ttlSeconds: ttlSeconds, now: now)
     }
 
-    /// 记下"第一次打开"的时刻。重复调用是幂等的：已经记过的卡片**沿用原来的起始时间**，
-    /// 于是退出重进、切后台再回来都刷不出一个新的时限——这正是"打开后计时"要防的那件事。
+    /// Records the moment of the "first open". Repeated calls are idempotent: a card that has already been recorded **keeps its original start time**,
+    /// so quitting and re-entering, or backgrounding and coming back, cannot mint a fresh time limit -- which is exactly the thing "start the clock on open" is meant to prevent.
     func markFirstOpened(_ key: PopopxProfileReadKey) -> PopopxProfileReadState {
         let now = Date()
         let stored = stateTable()[Self.stateKey(key)] ?? Record(ttlSeconds: nil, firstOpenedAt: nil)
@@ -449,25 +449,25 @@ actor ProfileStorageManager {
         return Self.deriveState(firstOpenedAt: openedAt, ttlSeconds: stored.ttlSeconds, now: now)
     }
 
-    /// 抹掉一张卡片的阅读记录。销毁路径必须调它：记录留着，卡片就会在下次渲染时重新长出倒计时。
+    /// Erases the read record of a card. The destruction path must call it: while the record stays, the card grows a countdown again on the next render.
     func forgetRead(_ key: PopopxProfileReadKey) {
         guard stateTable()[Self.stateKey(key)] != nil else { return }
         setRecord(nil, for: key)
     }
 
-    // MARK: 阅读状态的持久化
+    // MARK: Persisting the read state
 
     private struct Record: Codable, Hashable {
         var ttlSeconds: Int?
         var firstOpenedAt: TimeInterval?
     }
 
-    /// 内存里的一份表，第一次用时从盘上拉。落盘是每次改完就写，所以这里的缓存和文件在成功路径上
-    /// 始终一致；例外见 `stateFileIsUnreadable`。
+    /// An in-memory table, pulled from disk the first time it is used. Writing out happens after every change, so the cache here and the file stay aligned on the success path;
+    /// for the exception see `stateFileIsUnreadable`.
     private var records: [String: Record]?
 
-    /// 盘上有一个**存在但解不开**的状态文件。那种文件是这份时钟唯一的残骸：本会话照常按内存计时，
-    /// 但不再往那个路径上写，免得把"用户已经烧掉过哪些卡片"的现场彻底换成一坨新数据。
+    /// There is a **present but undecodable** state file on disk. Such a file is the only wreckage of this clock: the session keeps timing from memory as usual,
+    /// but no longer writes to that path, so as not to turn the scene of "which cards the user has already burned" into a blob of brand-new data.
     private var stateFileIsUnreadable = false
 
     private static func stateKey(_ key: PopopxProfileReadKey) -> String {
@@ -483,7 +483,7 @@ actor ProfileStorageManager {
                let decoded = try? JSONDecoder().decode([String: Record].self, from: data) {
                 loaded = decoded
             } else {
-                // 文件在但整段解不开：合成 Codable 的字典是"全有或全无"的，救不出半条记录。
+                // The file is there but the whole thing fails to decode: the synthesised Codable dictionary is all-or-nothing, half a record cannot be rescued.
                 stateFileIsUnreadable = true
                 logger.error("POPOPX profile: the reading-state file cannot be decoded; this session starts from an empty table and will not overwrite that file")
             }
@@ -492,12 +492,12 @@ actor ProfileStorageManager {
         return loaded
     }
 
-    /// 改表并写盘。本层三个计时接口都不抛错（`readState` 每秒被气泡问一次，`markFirstOpened`
-    /// 点在用户手指下面），所以写盘失败只能记日志。
+    /// Mutates the table and writes it out. None of this layer's three timing interfaces throws (`readState` is asked by the bubble once a second, `markFirstOpened`
+    /// sits right under the user's finger), so a failed write can only be logged.
     ///
-    /// 这条弱点必须写出来：写盘失败后本会话仍以内存为准、一切正常，但**重启后计时会退回
-    /// `unread`**，收件人就又能读一次。这是墙钟 + 文件存储的固有代价，不假称自己有
-    /// 绝密那条链路的单调保证。
+    /// This weakness must be written out: after a failed write the session still follows memory and everything looks normal, but **after a restart the timing falls back to
+    /// `unread`**, and the recipient gets to read it once more. This is the inherent cost of a wall clock plus file storage; there is no false claim of
+    /// the monotonic guarantees of the top-secret link.
     private func setRecord(_ record: Record?, for key: PopopxProfileReadKey) {
         var table = stateTable()
         let id = Self.stateKey(key)
@@ -517,17 +517,17 @@ actor ProfileStorageManager {
         }
     }
 
-    /// 由起始时刻算出当前相位。
+    /// Computes the current phase from the start moment.
     ///
-    /// 这把钟只对 `ephemeral` 有意义：常驻名片不许走它（`PopopxProfilePayload.isEphemeral`
-    /// 是唯一门禁），因为这里任何一格答"时限已到"，界面那一侧的动作就是删内容。
+    /// This clock only means something for `ephemeral`: a permanent business card must not go through it (`PopopxProfilePayload.isEphemeral`
+    /// is the only gate), because any cell here answering "the time limit is reached" makes the action on the UI side delete the content.
     ///
-    /// `ttlSeconds` 传 nil 只在一条路径上可达：`markFirstOpened` 被冷调用（从没按
-    /// "先 `readState` 绑时长、再点开"的顺序走）。那种情况给 0 秒剩余而不是猜一个更长的时限——
-    /// 隐私语义上宁短勿长，而且下一次带真实时长的 `readState` 会立刻把正确的剩余秒数算回来。
+    /// Passing nil for `ttlSeconds` is reachable on only one path: `markFirstOpened` called cold (never following
+    /// the order "first `readState` to bind the duration, then open"). That case gives 0 seconds remaining rather than guessing a longer time limit --
+    /// for the privacy semantics shorter is preferred over longer, and the next `readState` carrying the real duration immediately computes the correct remaining seconds back.
     private static func deriveState(firstOpenedAt: TimeInterval, ttlSeconds: Int?, now: Date) -> PopopxProfileReadState {
-        // 记录本身可能是坏文件里剩下的值（0、负、NaN）。那种情况下不存在"还剩多久"可言，
-        // 按已到时限处理，而不是放行一次全新的完整时限。
+        // The record itself may hold values left over from a broken file (0, negative, NaN). In that case there is no "how much is left" to speak of,
+        // so it is handled as already at the limit instead of letting a brand-new full time limit through.
         guard firstOpenedAt.isFinite, firstOpenedAt > 0 else { return .expired(firstOpenedAt: 0) }
         let elapsed = now.timeIntervalSince1970 - firstOpenedAt
         guard elapsed.isFinite else { return .expired(firstOpenedAt: firstOpenedAt) }
@@ -538,20 +538,20 @@ actor ProfileStorageManager {
             return .counting(firstOpenedAt: firstOpenedAt, remainingSeconds: 0)
         }
         let passed = max(0, elapsed)
-        // 先按值域判死再转 `Int`：一个早到 1970 年之前的起点会让 `Int(passed)` 直接 trap，
-        // 而"早就过期"本来就是这个值域问题的正确答案。
+        // Judge it dead by value range first and only then convert to `Int`: a start earlier than 1970 would make `Int(passed)` trap outright,
+        // and "expired long ago" is the correct answer to that range problem anyway.
         guard passed < Double(ttl + 1) else { return .expired(firstOpenedAt: firstOpenedAt) }
-        // 上取整：向下取整等于每次跨秒都白送最多 1 秒，上取整则是提前判死。
+        // Round up: rounding down equals giving away up to 1 free second on every second boundary, rounding up declares death early.
         let remaining = ttl - Int(passed.rounded(.up))
         guard remaining > 0 else { return .expired(firstOpenedAt: firstOpenedAt) }
         return .counting(firstOpenedAt: firstOpenedAt, remainingSeconds: remaining)
     }
 }
 
-// MARK: - 图片缩放
+// MARK: - Image scaling
 
 extension UIImage {
-    /// 等比缩到最长边不超过 `side` 像素；已经够小就原样返回（不做一次毫无产出的重画）。
+    /// Scale proportionally until the longest edge is no more than `side` pixels; if it is already small enough return it as-is (no redraw that produces nothing).
     fileprivate func popopxProfileScaled(maximumPixelSide side: Int) -> UIImage {
         let pixels = CGSize(width: size.width * scale, height: size.height * scale)
         guard pixels.width > 1, pixels.height > 1, side > 0 else { return self }
@@ -563,7 +563,7 @@ extension UIImage {
             height: max(1, floor(pixels.height * factor))
         )
         let format = UIGraphicsImageRendererFormat.default()
-        // `scale = 1`：这里的目标尺寸就是像素尺寸，别让渲染器又按屏幕倍率乘一遍——那等于白缩。
+        // `scale = 1`: the target size here is already the pixel size, so let the renderer not multiply by the screen scale again -- that would amount to scaling for nothing.
         format.scale = 1
         return UIGraphicsImageRenderer(size: target, format: format).image { _ in
             self.draw(in: CGRect(origin: .zero, size: target))

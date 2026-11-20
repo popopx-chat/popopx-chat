@@ -2,50 +2,50 @@
 //  PopopxProximityAddContactView.swift
 //  POPOPX (iOS)
 //
-//  【第三阶段 · 3】面对面双引擎物理近场加友页面。
+//  [Phase 3 · 3] The face-to-face, dual-engine, physical near-field add-friend page.
 //
-//  引擎 A（自动）：`PopopxProximityEngine` 用 MultipeerConnectivity 发现并建链，握手时交换
-//  `NIDiscoveryToken` 后开启 UWB 精确测距；距离 < 0.15 m 触发 `.heavy` 震动，字典序单向发包仲裁，
-//  静默的一方收到链接后直接写 `IdentityMappingStore` 完成加友并自动关闭本页。
-//  引擎 B（手动兜底）：「轻触密传」—— 先 `stopProximityLinkEngine()` 让出测距，再用系统分享面板
-//  （`UIActivityViewController`，隔空投送）递出一次性连接链接，随后 `resume`。
+//  Engine A (automatic): `PopopxProximityEngine` uses MultipeerConnectivity to discover and link, and during the handshake it exchanges
+//  `NIDiscoveryToken`, then turns on UWB precise ranging; a distance < 0.15 m triggers a `.heavy` haptic, the lexicographically smaller side sends the packet one-way as arbitration,
+//  and the silent side, once it receives the link, writes `IdentityMappingStore` directly to complete the friend add and closes this page automatically.
+//  Engine B (manual fallback): the "tap-and-pass link" — first `stopProximityLinkEngine()` to yield the ranging, then use the system share sheet
+//  (`UIActivityViewController`, AirDrop) to hand over a one-time connection link, and afterwards `resume`.
 //
-//  射频互斥是真做的：`onAppear` 挂起 mesh 总闸（`PopopxMeshKillSwitch.setEnabled(false)` →
-//  `startEverything`/`stopEverything` 一路到 `PopopxBLETransport` 的 `stopScan()` / `stopAdvertising()`，
-//  PopopxMeshKit/BLE/PopopxBLETransport.swift:259、:263），`onDisappear` 里**只有进来之前总闸本来就是开的**
-//  才恢复。挂起之后再用 `verifiedActivitySnapshot().isRadioQuiet` 复核，并把结论直接显示在页面上 ——
-//  红线要的是"射频真的安静了"，不是"我们调用了一个方法"。
+//  The radio mutual exclusion is really implemented: `onAppear` suspends the mesh master switch (`PopopxMeshKillSwitch.setEnabled(false)` →
+//  `startEverything`/`stopEverything` all the way down to `PopopxBLETransport`'s `stopScan()` / `stopAdvertising()`,
+//  PopopxMeshKit/BLE/PopopxBLETransport.swift:259, :263), and in `onDisappear` **it is restored only if the master switch was already on before we entered**,
+//  only then is it restored. After suspending we re-verify with `verifiedActivitySnapshot().isRadioQuiet` and put the conclusion directly on the page —
+//  what the red line demands is "the radio really is quiet", not "we called a method".
 //
-//  设计取值全部来自 Shared/Theme/PopopxTheme.swift，控件来自 Shared/Components/；本文件没有裸色值、
-//  裸字号，也没有自造按钮。
+//  Every design value comes from Shared/Theme/PopopxTheme.swift and the controls from Shared/Components/; this file has no bare colour values,
+//  no bare font sizes, and no hand-made buttons.
 //
-//  ⚠️ 可用性：`PopopxProximityEngine` 在包里标了 `@available(iOS 17.0, *)`（裁定 A：Package.swift 保持
-//  .iOS(.v15)），所以本页同样带闸门；工程用 `$(RECOMMENDED_IPHONEOS_DEPLOYMENT_TARGET)`，不能假设 ≥17。
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target（铁律禁止脚本改 project.pbxproj）。
+//  ⚠️ Availability: `PopopxProximityEngine` is marked `@available(iOS 17.0, *)` in the package (ruling A: Package.swift stays
+//  .iOS(.v15)`), so this page carries the same gate; the project uses `$(RECOMMENDED_IPHONEOS_DEPLOYMENT_TARGET)` and must not assume ≥17.
+//  ⚠️ Xcode project integration: this file must be dragged by hand into the POPOPX (iOS) target (the iron rule forbids scripting changes to project.pbxproj).
 //
 
 import SwiftUI
 import PopopxMeshKit
 import PopopxMeshUI
 
-// MARK: - 视图模型
+// MARK: - View model
 
-/// 持有近场引擎，并负责 BLE 的让出与归还。
+/// Holds the near-field engine, and is responsible for yielding and returning the BLE.
 ///
-/// 两个射频闭包刻意不捕获 `PopopxMeshKillSwitch` 实例：`PopopxProximityRadioHooks` 的闭包是
-/// `@Sendable () async -> Void`，少捕获一个引用就少一处 Sendable 论证，所以在 `@MainActor` 的方法里
-/// 现取 `PopopxMeshRuntime.shared`。
+/// The two radio closures deliberately do not capture the `PopopxMeshKillSwitch` instance: the closures of `PopopxProximityRadioHooks` are
+/// `@Sendable () async -> Void`, and capturing one fewer reference is one fewer Sendable argument to make, so inside the `@MainActor` methods we
+/// take `PopopxMeshRuntime.shared` at the point of use.
 @available(iOS 17.0, *)
 @MainActor
 final class PopopxProximitySheetModel: ObservableObject {
-    /// 挂起后复核到的"射频已安静"结论。nil = 当前没有挂起过（还没进来，或已经归还）。
+    /// The "radio is quiet" conclusion re-verified after suspending. nil = nothing is suspended right now (not entered yet, or already returned).
     @Published private(set) var radioYielded: Bool?
-    /// 「轻触密传」正在让出测距并生成链接。
+    /// The "tap-and-pass link" is yielding the ranging and generating the link.
     @Published private(set) var isPreparingTapDrop = false
     @Published private(set) var tapDropError: String?
 
-    /// `lazy` 是为了让路闭包能捕获 `self`：`init` 里 `self.engine` 还没初始化完时不允许捕获 self。
-    /// 首次访问发生在视图 `init` 取出引擎时（见 `PopopxProximityAddContactView.init`），仍是主线程。
+    /// `lazy` is there so the yield closure can capture `self`: inside `init`, while `self.engine` is not yet initialised, capturing self is not allowed.
+    /// The first access happens when the view `init` takes the engine out (see `PopopxProximityAddContactView.init`), still on the main thread.
     lazy var engine: PopopxProximityEngine = PopopxProximityEngine(
         bridge: PopopxMeshRuntime.shared.bridge,
         radio: PopopxProximityRadioHooks(
@@ -77,21 +77,21 @@ final class PopopxProximitySheetModel: ObservableObject {
         await reportProximity(true)
     }
 
-    /// 顶栏「仅近场」档位的唯一写入点。报的是引擎的真实状态而不是页面的在场状态：
-    /// 进来 `start()` 成功后才 true，离场 `stop()` 之后才 false，让出测距期间也是 false。
-    /// 写的是 `PopopxTelemetryModel.shared` —— 渲染顶栏的是消息页，两端共用这一个对象，
-    /// 否则就得再编一条全局总线（`resolve` 的注释里明确拒绝过）。
+    /// The only write point of the top bar's "near field only" state. It reports the engine's real state rather than the page's presence:
+    /// true only after entering and `start()` succeeds, false only after leaving and `stop()`, and false for the whole time the ranging is yielded.
+    /// It writes `PopopxTelemetryModel.shared` — the message page renders the top bar, and both ends share this one object,
+    /// otherwise we would have to invent another global bus (the comment on `resolve` explicitly refused that).
     private func reportProximity(_ active: Bool) async {
         await PopopxTelemetryModel.shared.update(proximityActive: active)
     }
 
-    /// 引擎 B：让出测距 → 生成一次性链接 → 交给系统分享面板 → 恢复近场。
+    /// Engine B: yield the ranging → generate a one-time link → hand it to the system share sheet → restore the near field.
     ///
-    /// 顺序是硬要求：分享面板弹起时如果还在测距，UWB 会话会和面板抢时间片，而用户往往要在上面停留很久，
-    /// 那期间这台机器等于白占着射频。`defer` 保证分享失败也不会把近场永久停掉。
+    /// The order is a hard requirement: if the share sheet comes up while ranging is still running, the UWB session fights the sheet for time slices, and users typically linger there a long time,
+    /// during which this machine is effectively holding the radio for nothing. `defer` guarantees that a failed share never leaves the near field permanently stopped.
     ///
-    /// 链接是**本人名片**链接（`incognito: false`）：隔空投送是点对点的物理递交，对方要连的就是这台机器
-    /// 当前这个身份，匿名链接在这里只会让双方都认错人。
+    /// The link is a link to **my own card** (`incognito: false`): AirDrop is a point-to-point physical handoff, and what the other side is supposed to connect to is this machine's
+    /// current identity; an incognito link here would only make both sides connect to the wrong person.
     func shareByTapDrop() async {
         guard !isPreparingTapDrop else { return }
         isPreparingTapDrop = true
@@ -118,7 +118,7 @@ final class PopopxProximitySheetModel: ObservableObject {
         let fuse = PopopxMeshRuntime.shared.killSwitch
         meshWasOn = fuse.isEnabled
         guard meshWasOn else {
-            // 总闸本来就是关的：不需要挂起，但也不谎称"已让出"。
+            // The master switch was already off: nothing needs suspending, but we also do not falsely claim "already yielded".
             radioYielded = fuse.isActiveSnapshot.isRadioQuiet
             return
         }
@@ -133,16 +133,16 @@ final class PopopxProximitySheetModel: ObservableObject {
     }
 }
 
-// MARK: - 页面
+// MARK: - Page
 
-/// 面对面加友页面。作为 sheet 内容呈现，关闭按钮由自己负责。
+/// The face-to-face add-friend page. Presented as sheet content, and the close button is its own responsibility.
 @available(iOS 17.0, *)
 struct PopopxProximityAddContactView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @StateObject private var model: PopopxProximitySheetModel
-    /// 引擎自己就是 ObservableObject：只有 model 会被 SwiftUI 观察，所以两个都要持有。
+    /// The engine itself is an ObservableObject: only model is observed by SwiftUI, so both have to be held.
     @ObservedObject private var engine: PopopxProximityEngine
     @State private var toast = PopopxToastModel()
     @State private var dismissTask: Task<Void, Never>?
@@ -173,7 +173,7 @@ struct PopopxProximityAddContactView: View {
             Task { await model.finish() }
         }
         .onChange(of: engine.didCrossPreciseThreshold) { _, crossed in
-            // 引擎只在第一次跨过 0.15 m 时置位，所以这里天然不会每帧震一下。
+            // The engine sets it only the first time 0.15 m is crossed, so this naturally cannot buzz on every frame.
             guard crossed else { return }
             PopopxHaptics.impact(.heavy)
         }
@@ -196,7 +196,7 @@ struct PopopxProximityAddContactView: View {
         .accessibilityElement(children: .contain)
     }
 
-    // MARK: 标题
+    // MARK: Title
 
     private var header: some View {
         HStack(alignment: .top, spacing: PopopxMetrics.spaceM) {
@@ -222,7 +222,7 @@ struct PopopxProximityAddContactView: View {
         }
     }
 
-    // MARK: 雷达台
+    // MARK: Radar stage
 
     @ViewBuilder
     private var stage: some View {
@@ -233,7 +233,7 @@ struct PopopxProximityAddContactView: View {
         }
     }
 
-    /// 支持 UWB：同心环 + 对方按真实距离落在正上方，靠近 = 向上收拢。
+    /// UWB supported: concentric rings + the peer placed directly above at its real distance; closing in = converging upward.
     private var preciseStage: some View {
         GeometryReader { proxy in
             let reach = min(proxy.size.width, proxy.size.height) / 2
@@ -249,7 +249,7 @@ struct PopopxProximityAddContactView: View {
                     .frame(width: PopopxMetrics.spaceL, height: PopopxMetrics.spaceL)
                 if let ratio = peerRatio {
                     PeerMarker(label: peerLabel)
-                        // 不做平面外推：只有正上方一条轴，距离映射成半径比例。
+                        // No planar extrapolation: there is only the one straight-up axis, and distance is mapped to a radius ratio.
                         .offset(y: -reach * ratio)
                         .popopxAnimation(PopopxSpring.fluid, value: ratio, reduceMotion: reduceMotion)
                 }
@@ -261,7 +261,7 @@ struct PopopxProximityAddContactView: View {
         .accessibilityLabel(stageAccessibilityLabel)
     }
 
-    /// 不支持精确测距（U1 以前的机型、模拟器）：不给假距离，只给"正在找"的确定感。
+    /// Precise ranging unsupported (pre-U1 models, the simulator): no fake distance, only the certainty of "currently looking for you".
     private var coarseStage: some View {
         VStack(spacing: PopopxMetrics.spaceL) {
             Image(systemName: "dot.radiowaves.left.and.right")
@@ -280,7 +280,7 @@ struct PopopxProximityAddContactView: View {
         .accessibilityLabel(PopopxProximityCopy.coarseHint)
     }
 
-    /// 真实距离 → 环半径比例。超出 `farDistanceMeters` 就贴边显示，不假装更近或更远。
+    /// Real distance → ring radius ratio. Past `farDistanceMeters` it is shown against the edge, without pretending to be nearer or farther.
     private var peerRatio: CGFloat? {
         guard let distance = engine.distanceMeters else { return nil }
         let limit = max(engine.config.farDistanceMeters, PopopxProximityCopy.minimumReachMeters)
@@ -296,7 +296,7 @@ struct PopopxProximityAddContactView: View {
         return String(format: PopopxProximityCopy.distanceFormat, peerLabel, distance)
     }
 
-    // MARK: 状态区
+    // MARK: Status area
 
     private var statusBlock: some View {
         PopopxSectionCard(
@@ -353,7 +353,7 @@ struct PopopxProximityAddContactView: View {
         }
     }
 
-    /// 谁发包。"本机静默接收"必须说清楚，否则用户会以为卡住了并反复重开。
+    /// Who sends the packet. "This device receives it quietly" has to be said plainly, otherwise users think it is stuck and keep reopening it.
     private var roleWords: String? {
         switch engine.senderRole {
         case .some(.receiver): PopopxProximityCopy.roleReceiver
@@ -362,7 +362,7 @@ struct PopopxProximityAddContactView: View {
         }
     }
 
-    /// 测距因距离过远而暂停 —— 引擎里有这个状态，页面上就必须说。
+    /// Ranging paused because the distance is too great — the engine has this state, so the page has to state it too.
     private var rangingNote: String? {
         engine.rangingPausedForDistance ? PopopxProximityCopy.rangingPaused : nil
     }
@@ -400,7 +400,7 @@ struct PopopxProximityAddContactView: View {
         }
     }
 
-    // MARK: 引擎 B
+    // MARK: Engine B
 
     private var tapDrop: some View {
         VStack(spacing: PopopxMetrics.spaceS) {
@@ -421,7 +421,7 @@ struct PopopxProximityAddContactView: View {
     }
 }
 
-// MARK: - 雷达上的对方标记
+// MARK: - The peer marker on the radar
 
 @available(iOS 17.0, *)
 private struct PeerMarker: View {
@@ -444,8 +444,8 @@ private struct PeerMarker: View {
     }
 }
 
-/// Shared/Components 里的行标签是 `private`，所以本页自带一个同规格的行：
-/// 同样的图标尺寸、同样的三段间距，不新造视觉语言。
+/// The row label in Shared/Components is `private`, so this page ships its own row of the same specification:
+/// the same icon size, the same three-segment spacing, no new visual language invented.
 @available(iOS 17.0, *)
 private struct StatusRow: View {
     let symbol: String
@@ -478,10 +478,10 @@ private struct StatusRow: View {
     }
 }
 
-// MARK: - 阶段图标
+// MARK: - Stage icon
 
 extension PopopxProximityPhase {
-    /// 阶段对应的 SF Symbol。放在 app 侧而不是包里：包只负责状态机，图标是这一版视觉语言的决定。
+    /// The SF Symbol for each stage. Placed on the app side rather than in the package: the package only owns the state machine, the icon is this version's visual-language decision.
     fileprivate var popopxStageSymbol: String {
         switch self {
         case .idle: "circle"
@@ -496,7 +496,7 @@ extension PopopxProximityPhase {
     }
 }
 
-// MARK: - 文案与几何
+// MARK: - Copy and geometry
 
 private enum PopopxProximityCopy {
     static let title = NSLocalizedString("Add a friend face to face", comment: "")
@@ -546,19 +546,19 @@ private enum PopopxProximityCopy {
     static let fDuplicate = NSLocalizedString("The other device is the same identity as this one", comment: "")
     static let fLocalIdentity = NSLocalizedString("This device has no usable identity; turn on Cabin in Settings first", comment: "")
 
-    /// 环的半径比例（外 / 中 / 内），以及由外的。
+    /// The ring radius ratios (outer / middle / inner), plus the ones derived from the outer.
     static let ringScales: [Double] = [1.0, 0.66, 0.33]
 
-    /// 越靠内的环越实：读起来是"距离刻度"，不是装饰。
+    /// The further in a ring, the more solid it is: it reads as a "distance scale", not as decoration.
     static func ringOpacity(index: Int) -> Double { 0.3 + Double(index) * 0.2 }
 
-    /// `farDistanceMeters` 被配成 0 时的下限，避免比例除零。
+    /// The floor used when `farDistanceMeters` is configured as 0, to avoid dividing the ratio by zero.
     static let minimumReachMeters = 0.01
 }
 
 // MARK: - Preview
 
-/// 页面本体带 iOS 17 闸门，预览不能直接构造它：这里放一个非闸门的外壳，运行时再判。
+/// The page body carries an iOS 17 gate, so the preview cannot construct it directly: here is an ungated shell that decides at runtime.
 #if DEBUG
 struct PopopxProximityPreviewHost_Previews: PreviewProvider {
     static var previews: some View {

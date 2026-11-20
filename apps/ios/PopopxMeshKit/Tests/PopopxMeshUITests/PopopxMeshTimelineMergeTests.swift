@@ -1,9 +1,9 @@
 //
 //  PopopxMeshTimelineMergeTests.swift
 //
-//  模块 7's timeline rules, asserted on the merger rather than on a rendered view: 严格以全局唯一
-//  messageId 幂等去重, sort by timestamp, control signalling filtered, and the three badges
-//  (蓝色盾牌 / 橙色波纹+跳数 / 灰色时钟) classified from the channel, not from the text.
+//  Module 7's timeline rules, asserted on the merger rather than on a rendered view: dedup strictly on the
+//  globally unique messageId, sort by timestamp, control signalling filtered, and the three badges
+//  (blue shield / orange ripple + hop count / grey clock) classified from the channel, not from the text.
 //
 
 import Foundation
@@ -123,7 +123,7 @@ struct PopopxMeshTimelineMergeTests {
             awaitingRelayMessageIDs: ["owed", "also-owed"]
         )
         #expect(result.rows.map(\.channel) == [.awaitingRelay, .awaitingRelay])
-        // Sorting puts 待中继 before a delivered mesh row at the same instant: the honest "not yet
+        // Sorting puts awaiting relay before a delivered mesh row at the same instant: the honest "not yet
         // there" is the more urgent thing to show.
         let sameInstant = PopopxMeshTimelineMerger.merge(
             application: [],
@@ -245,8 +245,8 @@ struct PopopxMeshTimelineModelTests {
             )
         ])
         #expect(model.result.rows.count == 1)
-        // The overlay only ever draws what the app's list does not contain, so the 红线
-        // 「UI 零破坏挂载」("do not rewrite ChatView") cannot turn into "draw the same bubble twice".
+        // The overlay only ever draws what the app's list does not contain, so the red line
+        // "zero-breakage UI mounting" ("do not rewrite ChatView") cannot turn into "draw the same bubble twice".
         #expect(model.offlineOnlyRows.isEmpty)
 
         model.setAwaitingRelayMessageIDs(["app-1"])
@@ -275,7 +275,7 @@ struct PopopxMeshTimelineModelTests {
         await model.refreshRoutingState()
         #expect(model.result.rows.isEmpty)
 
-        // The mirror reports a send that never left the device; that id becomes 待中继.
+        // The mirror reports a send that never left the device; that id becomes awaiting relay.
         source.ingest(.sendFailed(messageId: "from-mesh", peer: nil, reason: .noLinkToPeer))
         await model.refreshRoutingState()
         model.replaceApplicationStream([

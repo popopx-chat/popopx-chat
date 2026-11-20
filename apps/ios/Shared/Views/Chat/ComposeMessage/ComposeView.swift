@@ -399,13 +399,13 @@ struct ComposeView: View {
     @State var chosenMedia: [UploadContent] = []
     @State private var showFileImporter = false
     @State private var showLocationPicker = false
-    /// 「+」面板里那一格「个人主页」按下后的本次发送确认表单（模式 + 时长只作用于这一次发送）。
+    /// The this-send confirmation form shown after pressing "Personal profile" in the "+" panel (mode + duration apply to this one send only).
     @State private var showProfileSendSheet = false
-    // 「+」面板里红包与礼品卡两格的开关。
+    // The switches for the red packet and gift card cells in the "+" panel.
     //
-    // 落点在按下那一刻快照进 `packetDestination` / `giftCardContactId`，而不是让 Sheet 每次刷新时
-    // 重新读当前会话：面板里"扣点 → 发可见行 → 发机器行"是三步，中途读到别的会话就会把红包发进
-    // 一个没预览过的位置。空的那一格只在 Sheet 收起时出现。
+    // The destination is snapshotted into `packetDestination` / `giftCardContactId` at the moment of the press, rather than letting the Sheet
+    // re-read the current chat on every refresh: "deduct credits -> post visible line -> post machine line" is three steps inside the panel, and reading another chat midway would send the red packet into
+    // a place that was never previewed. The empty cell only appears when the Sheet is collapsed.
     @State private var showRedPacketSheet = false
     @State private var packetDestination: PopopxPacketDestination?
     @State private var showGiftCardSheet = false
@@ -429,17 +429,17 @@ struct ComposeView: View {
     @State private var relayListExpanded = false
     @StateObject private var channelRelaysModel = ChannelRelaysModel.shared
 
-    // 【B6】下面三个是 `PopopxInputBar` 挂在会话页底部时新长的宿主状态，全部 private + 带默认值，
-    // 所以合成 memberwise init 的入参表一位没动（`ChatView.swift:237`-`:245` 那个唯一调用点照常）。
-    /// 阅后即焚的真值在宿主：输入条只读只报（`PopopxInputBar.swift:21`）。旧的 `SendMessageView`
-    /// 把它藏在发送键菜单的 `@State` 里（`SendMessageView.swift:48`-`:52`），换皮后必须有地方接。
+    // [B6] The three below are host state that grew when `PopopxInputBar` was mounted at the bottom of the chat page; all are private + with default values,
+    // so the synthesized memberwise init's parameter list is untouched (its only call site at `ChatView.swift:237`-`:245` carries on as usual).
+    /// The view-once truth lives in the host: the input bar only reads and reports (`PopopxInputBar.swift:21`). The old `SendMessageView`
+    /// hid it in the send key menu's `@State` (`SendMessageView.swift:48`-`:52`), so after the reskin there must be somewhere to catch it.
     @State private var popopxTTLSeconds: Int? = nil
-    /// 绝密档的真值同样在宿主，和上面那一格**互不影响**：`ttlSeconds` 管 SMP 侧留多久，
-    /// 这一格管明文在对方屏幕上留多久。两格同时非 nil 是合法组合（既走在线阅后即焚、又阅后即焚）。
-    /// 也全部 private + 带默认值，理由与上面那三格相同：不动 memberwise init 的入参表。
+    /// The top-secret tier's truth is likewise in the host, and it is **mutually independent** of the cell above: `ttlSeconds` governs how long it stays on the SMP side,
+    /// while this cell governs how long the plaintext stays on the peer's screen. Both being non-nil at once is a legal combination (online view-once plus view-once).
+    /// These are also all private + with default values, for the same reason as the three above: do not touch the memberwise init's parameter list.
     @State private var popopxSecureTTLSeconds: Int? = nil
     @FocusState private var popopxComposerFocused: Bool
-    /// 和 `SendMessageView.swift:51` 用同一个 UserDefaults 键：提醒只弹一次这件事不该有两份真值。
+    /// Uses the same UserDefaults key as `SendMessageView.swift:51`: the fact that the reminder pops only once should not have two sources of truth.
     @UserDefault(DEFAULT_LIVE_MESSAGE_ALERT_SHOWN) private var liveMessageAlertShown = false
 
     // Spec: spec/client/compose.md#body
@@ -569,9 +569,9 @@ struct ComposeView: View {
                 } else if let ct = contact, ct.nextAcceptContactRequest, let groupDirectInv = ct.groupDirectInv {
                     ContextMemberContactActionsView(contact: ct, groupDirectInv: groupDirectInv)
                 } else if popopxBarEligible {
-                    // 【B6】底部输入条换皮：引用条（`contextItemView()`）与附件预览条（`previewView()`）
-                    // 在上面原样呈现，这一支只替掉最底下那一条。为什么不是全部会话都换，见
-                    // `popopxBarEligible` 的注释。
+                    // [B6] Bottom input bar reskin: the quote bar (`contextItemView()`) and the attachment preview bar (`previewView()`)
+                    // render above exactly as before, and this branch only swaps out the bottom-most strip. For why not every chat is reskinned, see
+                    // the comment on `popopxBarEligible`.
                     popopxComposerBar(disableSendButton: disableSendButton)
                         .padding(.horizontal, 12)
                 } else {
@@ -701,8 +701,8 @@ struct ComposeView: View {
             }
         }
         .sheet(isPresented: $showLocationPicker) {
-            // 选择器只管选出坐标，发不发、走哪条通道归这里：它连 `chat` 都不知道。
-            // 关掉开关由宿主做，`onSend` 里先关再发，避免发送失败时表单还挂在那儿。
+            // The picker only picks coordinates; whether to send and which channel to take belong here: it does not even know `chat`.
+            // The host closes the switch, and `onSend` closes first then sends, so the form is not left hanging when the send fails.
             PopopxLocationPickerSheet { payload in
                 showLocationPicker = false
                 Task { await popopxSendLocation(payload) }
@@ -710,8 +710,8 @@ struct ComposeView: View {
             .presentationDetents([.fraction(0.8)])
         }
         .sheet(isPresented: $showProfileSendSheet) {
-            // 表单只决定"这一次怎么发"（模式 + 时长），已保存的主页草稿它一个字都不改；
-            // 关开关的时机抄上面那一支：先关再发，发送失败时表单不会还挂在那儿。
+            // The form only decides "how to send this time" (mode + duration); it does not change a single word of the saved profile draft;
+            // the timing of the switch-off copies the branch above: close first, then send, so the form is not still hanging when the send fails.
             ProfileSendModeSheet { manifest in
                 showProfileSendSheet = false
                 Task { await popopxSendProfile(manifest) }
@@ -719,17 +719,17 @@ struct ComposeView: View {
             .presentationDetents([.medium])
         }
         .sheet(isPresented: $showRedPacketSheet, onDismiss: { packetDestination = nil }) {
-            // 扣点、发可见行、发机器行三步全在面板里完成（`PopopxSendRedPacketSheet.send()`），
-            // 宿主这里只给落点。`if let` 那一层不是装饰： destination 为空时呈现一个空白面板，
-            // 用户只会看见一个发不出去红包的页面。
+            // Deducting credits, posting the visible line and posting the machine line are all three completed inside the panel (`PopopxSendRedPacketSheet.send()`),
+            // and the host here only supplies the destination. The `if let` layer is not decoration: presenting an empty panel when destination is nil
+            // would leave the user looking at a page that cannot send a red packet.
             if let packetDestination {
                 PopopxSendRedPacketSheet(destination: packetDestination)
                     .presentationDetents([.large])
             }
         }
         .sheet(isPresented: $showGiftCardSheet, onDismiss: { giftCardContactId = nil }) {
-            // 铸码、发卡片、发信令也全在面板里（它自己持有 `PopopxSilentSignalingRouter`）。
-            // `contactId` 是可选项：面板据此决定"发送给联系人"那颗按钮画不画。
+            // Minting the code, sending the card and sending the signalling also all happen inside the panel (it holds its own `PopopxSilentSignalingRouter`).
+            // `contactId` is optional: the panel uses it to decide whether to draw the "Send to contact" button.
             PopopxGiftBadgeCardSheet(contactId: giftCardContactId)
                 .presentationDetents([.large])
         }
@@ -1235,29 +1235,29 @@ struct ComposeView: View {
         }
     }
 
-    // MARK: - 【B6】`PopopxInputBar` 挂载（会话页底部输入条）
+    // MARK: - [B6] `PopopxInputBar` mount (chat page bottom input bar)
     //
-    //  口径和 B5 的气泡完全一致：新组件能完整表达的那部分换皮，表达不了的整支留在旧视图树里，
-    //  两边共用同一批宿主状态（`composeState`、`chosenMedia`、`audioRecorder`、`showCommandsMenu`）。
-    //  旧链路的 `attachmentAndCommandsButtons()` 与 `sendMessageView()` 一位没动，
-    //  引用条 `contextItemView()` 和附件预览条 `previewView()` 也原位不动 —— 它们本来就在输入条上方。
+    //  The approach matches B5's bubbles exactly: whatever the new component can express fully is reskinned, and what it cannot express stays wholesale in the old view tree,
+    //  with both sides sharing the same set of host state (`composeState`, `chosenMedia`, `audioRecorder`, `showCommandsMenu`).
+    //  The old chain's `attachmentAndCommandsButtons()` and `sendMessageView()` are untouched,
+    //  and so are the quote bar `contextItemView()` and the attachment preview bar `previewView()` - they were above the input bar to begin with.
 
-    /// 换皮范围三条边界，全部是**功能**边界不是审美边界：
-    /// - 只有 active 的 1:1 联系人：厢语路由只认 `.direct` 的 contactId（`PopopxRouteTarget`），
-    ///   `PopopxComposerContext` 也要求 active（`Contact.active`）。群 / 频道 / 待接受的联系留旧树。
-    /// - 有命令菜单的会话留旧树：命令唯一的入口是旧树里的 `commandsButton()`（"//" 键），
-    ///   `CommandsMenuView` 还要靠 `selectedRange` 在光标处插命令，而 `TextField` 不回写光标。
-    /// - 群 @提及同理：`GroupMentionsView` 拿 `selectedRange` 做字符串拼接（`insertMention`），
-    ///   群留在旧树里这个字段就还是真值。
-    /// live 消息的节拍，和 `SendMessageView.swift:13` 的 `liveMsgInterval` 同一个值。
+    /// Three boundaries define the reskin scope, and all of them are **functional** boundaries, not aesthetic ones:
+    /// - Only active 1:1 contacts: the Cabin routing recognizes only the contactId of `.direct` (`PopopxRouteTarget`),
+    ///   and `PopopxComposerContext` also requires active (`Contact.active`). Groups / channels / contacts awaiting acceptance stay in the old tree.
+    /// - Chats with a command menu stay in the old tree: the only entry point for commands is `commandsButton()` in the old tree (the "//" key),
+    ///   and `CommandsMenuView` still relies on `selectedRange` to insert a command at the cursor, while `TextField` does not write the cursor back.
+    /// - Group @mentions are the same: `GroupMentionsView` uses `selectedRange` for string splicing (`insertMention`),
+    ///   so as long as groups stay in the old tree that field remains the truth.
+    /// The cadence of live messages, the same value as `liveMsgInterval` in `SendMessageView.swift:13`.
     private static let popopxLiveMsgInterval: UInt64 = 3_000_000_000
 
     private var popopxBarEligible: Bool {
         chat.chatInfo.contact?.active == true && !chat.chatInfo.useCommands
     }
 
-    /// `ComposeState` → `PopopxComposerContext`。输入条故意不认识 `ComposeState`，
-    /// 折算这一步必须由宿主做，九个前提一个都不能漏：漏一个就是"静默丢掉阅后即焚 / 引用 / 附件"那一类事故。
+    /// `ComposeState` → `PopopxComposerContext`. The input bar deliberately does not know `ComposeState`,
+    /// so the host must perform this conversion step, and not one of the nine preconditions may be dropped: dropping one is the "silently loses view-once / quote / attachment" class of accident.
     private var popopxComposerContext: PopopxComposerContext {
         var ctx = PopopxComposerContext.outsideDirectContact
         if case let .direct(contact) = chat.chatInfo, contact.active {
@@ -1276,8 +1276,8 @@ struct ComposeView: View {
         return ctx
     }
 
-    /// 亮不亮发送键，条件抄 `SendMessageView.swift:186`-`:192`（旧发送键的 `.disabled`）。
-    /// "草稿非空"那一半归输入条自己判（它还要求挂了附件也能发，见 `PopopxComposerRouting.dispatch`）。
+    /// Whether the send key lights up copies the condition from `SendMessageView.swift:186`-`:192` (the old send key's `.disabled`).
+    /// The "draft is not empty" half is judged by the input bar itself (it also allows sending when an attachment is attached; see `PopopxComposerRouting.dispatch`).
     private func popopxSendEnabled(_ disableSendButton: Bool) -> Bool {
         chat.chatInfo.sendMsgEnabled
         && composeState.sendEnabled
@@ -1287,9 +1287,9 @@ struct ComposeView: View {
         && !disableSendButton
     }
 
-    /// 刻意做成独立函数而不是就地展开：会话页这一路 `if/else` 已经贴着 Swift 类型检查的
-    /// 表达式预算（B5 在 `ChatView` 为此连撞 5 次 `unable to type-check in reasonable time`），
-    /// `some View` 不透明返回类型把这一支单独算一份预算。
+    /// Deliberately a separate function rather than expanded in place: the chat page's `if/else` chain already sits right against Swift type checking's
+    /// expression budget (B5 hit `unable to type-check in reasonable time` 5 times in `ChatView` because of it),
+    /// and the opaque `some View` return type gives this branch its own budget.
     @ViewBuilder private func popopxComposerBar(disableSendButton: Bool) -> some View {
         let bar = ZStack(alignment: .leading) {
             PopopxInputBar(
@@ -1298,8 +1298,8 @@ struct ComposeView: View {
                 ttlSeconds: popopxTTLSeconds,
                 secureTTLSeconds: popopxSecureTTLSeconds,
                 isSendEnabled: popopxSendEnabled(disableSendButton),
-                // 占位文案递的是 Key 本身（英文原句即 Key）：输入条那一侧会把它当
-                // `LocalizedStringKey` 查表，所以这里再写中文就变成 16 语种全漏的键。
+                // The placeholder copy passes the Key itself (the English source sentence is the Key): the input bar side treats it as
+                // a `LocalizedStringKey` and looks it up, so writing Chinese here again would produce a key missing in all 16 languages.
                 placeholder: disabledText == nil ? "Message…" : "",
                 onSend: popopxComposerSend,
                 onHoldToTalk: popopxHoldToTalk,
@@ -1327,16 +1327,16 @@ struct ComposeView: View {
         }
     }
 
-    /// 发送键的落点：归谁发已经由 `PopopxComposerRouting.dispatch` 判完，这里只执行两支副作用。
-    /// - `.routeViaMesh`：交给模块 5，由它决定公网 / 蓝牙 / 兜底队列；草稿由输入条自己清。
-    /// - `.hostShouldSend`：原样走旧链路 `sendMessage(ttl:)`，草稿在 `sendMessageAsync` 末尾清；
-    ///   阅后即焚是一次性的发送选项（旧菜单每按一次重选），所以发完把档位放回 nil。
+    /// The send key's landing point: who owns the send was already decided by `PopopxComposerRouting.dispatch`; here only the two branches' side effects run.
+    /// - `.routeViaMesh`: handed to module 5, which decides public network / Bluetooth / fallback queue; the draft is cleared by the input bar itself.
+    /// - `.hostShouldSend`: goes through the old chain `sendMessage(ttl:)` as is, with the draft cleared at the end of `sendMessageAsync`;
+    ///   view-once is a one-shot send option (the old menu re-picks it on every press), so the tier goes back to nil after sending.
     private func popopxComposerSend(_ send: PopopxComposerSend) {
         if let secureTTL = send.secureTTLSeconds {
-            // 绝密这一支不走下面那张 switch：`send.dispatch` 是**用明文算出来的结论**，
-            // 而真正要发出去的是密文行，判定表要拿到的是最终落在路上的那串字节。
-            // 所以这里把明文交给载荷层重铸（`PopopxSecurePayload.make`），再按密文重新判定一次通道
-            // —— 和 `popopxSendLocation` 同一个形状：那条也是自带文本、自己重算 dispatch。
+            // The top-secret branch does not go through the switch below: `send.dispatch` is **a conclusion computed from the plaintext**,
+            // while what actually has to go out is the ciphertext line, and the decision table must receive the bytes that will finally be on the wire.
+            // So here the plaintext is handed to the payload layer to be recast (`PopopxSecurePayload.make`), then the channel is decided again against the ciphertext
+            // - the same shape as `popopxSendLocation`: that one also carries its own text and recomputes dispatch itself.
             Task {
                 await popopxSendSecure(
                     plaintext: send.text,
@@ -1358,9 +1358,9 @@ struct ComposeView: View {
         }
     }
 
-    /// 「按住说话」在新条里是一次**按下即回调**（`PopopxInputBar` 的 `holdToTalkBar`），
-    /// 所以桥接成点按开始 / 点按结束。`audioRecorder` 与 `voiceMessageRecordingState`
-    /// 那套状态机本身一位没动，计时也还是 `AudioRecorder.onTimer` 在推。
+    /// "Hold to talk" is a single **press-triggers-callback** in the new bar (`PopopxInputBar`'s `holdToTalkBar`),
+    /// so it is bridged into tap-to-start / tap-to-end. The `audioRecorder` and `voiceMessageRecordingState`
+    /// state machine itself is untouched, and the timing is still pushed by `AudioRecorder.onTimer`.
     private func popopxHoldToTalk() {
         if case .recording = composeState.voiceMessageRecordingState {
             finishVoiceMessageRecording()
@@ -1369,27 +1369,27 @@ struct ComposeView: View {
         }
     }
 
-    /// 「+」面板在当前会话里真正能用的格子。判据只有一条来源：`popopxPacketDestination`。
-    /// 之所以筛而不是画出来再拦 —— 见 `PopopxInputBar.plusActions` 那段注释。
+    /// The cells the "+" panel can really use in the current chat. The criterion has a single source: `popopxPacketDestination`.
+    /// The reason for filtering rather than drawing them and blocking afterwards - see the comment on `PopopxInputBar.plusActions`.
     private var popopxPlusActions: [PopopxPlusAction] {
         PopopxPlusAction.allCases.filter { action in
             switch action {
             case .redPacket: popopxPacketDestination != nil && chat.chatInfo.sendMsgEnabled
-            // 礼品卡的核销回执只有 `PopopxCommerceTarget.contact` 一条落点（路由器没有群组那一支），
-            // 所以这一格只在单聊出现；群里想要徽章请让对方把码抄给对方，或直接走「我的 · 兑换码」。
+            // The gift card's redemption receipt has only one destination, `PopopxCommerceTarget.contact` (the router has no group branch),
+            // so this cell appears only in one-to-one chats; in a group, if you want the badge, have the peer copy their code over to the other side, or go straight to Me - Redemption code.
             case .giftCard: chat.chatInfo.contact != nil && chat.chatInfo.sendMsgEnabled
             case .photo, .camera, .file, .location, .secure, .personalProfile: true
             }
         }
     }
 
-    /// 红包落点：**只有 1:1 单聊**。判据只有一条来源，`popopxPlusActions` 里那一格跟着它筛。
+    /// Red packet destination: **1:1 one-to-one chats only**. The criterion has a single source, and the cell in `popopxPlusActions` filters by it.
     ///
-    /// 裁定记录（2026-11-19）：群里不发红包。一份红包在群里由 N 个人各自"拆开"，
-    /// 而这一层没有服务端账本 —— 去重只存在于**各台设备自己的**流水里
-    /// （`PopopxCreditsManager.claimRedPacket` 按 packetId 夹一份，`recordClaim` 按成员记账），
-    /// 并发拆开时最坏能多到账。单聊没有这个形状：只有一台设备能拆，回执也只回它自己那一份。
-    /// 频道、私人笔记、连接中、请求这四类会话同样返回 nil（后三类本来就没有对面这个人）。
+    /// Ruling record (2026-11-19): no red packets in groups. One red packet in a group gets "opened" separately by N people,
+    /// and this layer has no server-side ledger - de-duplication exists only in **each device's own** transaction log
+    /// (`PopopxCreditsManager.claimRedPacket` keeps one copy per packetId, `recordClaim` books per member),
+    /// so with concurrent opens more can land at worst. A one-to-one chat has no such shape: only one device can open it, and the receipt only returns its own copy.
+    /// Channels, private notes, connecting and requests - these four kinds of chat also return nil (the last three have no counterpart person at all).
     private var popopxPacketDestination: PopopxPacketDestination? {
         if let contact = chat.chatInfo.contact {
             return .contact(id: contact.contactId, name: contact.displayName)
@@ -1397,17 +1397,17 @@ struct ComposeView: View {
         return nil
     }
 
-    /// 「+」面板每一格接回既有链路：相册 / 拍摄 / 文件是 `showMediaPicker` / `showTakePhoto` /
-    /// `showFileImporter` 三个开关；位置与个人主页各开一个确认 Sheet，绝密那格只翻武装开关。
-    /// 禁用条件抄 `attachmentButton()`：已有附件、改写 / 转发 / live / 举报中不给开，本会话禁文件时给同样的提示。
-    /// 红包与礼品卡是最后两支：它们不共用那条门 —— 格子本身只在有落点的会话里出现（`popopxPlusActions`），
-    /// 所以那两处的 `guard` 是给"筛完格子到按下之间会话变了"留的余量：宁可不发，也不把红包发进一个没有落点的会话。
+    /// Each cell of the "+" panel wires back into an existing chain: album / camera / file are the three switches `showMediaPicker` / `showTakePhoto` /
+    /// `showFileImporter`; location and personal profile each open a confirmation Sheet, and the top-secret cell only flips the arm switch.
+    /// The disable condition copies `attachmentButton()`: no opening when there is already an attachment or during edit / forward / live / report, and the same notice is given when this chat forbids files.
+    /// Red packet and gift card are the last two branches: they do not share that gate - the cells themselves appear only in chats that have a destination (`popopxPlusActions`),
+    /// so the `guard` in those two places is slack kept for "the chat changed between filtering the cells and the press": better not to send than to send a red packet into a chat with no destination.
     private func popopxPlusAction(_ action: PopopxPlusAction) {
         switch action {
         case .location:
-            // 位置和相册 / 拍摄 / 文件不是一条链路：它在线上就是一行纯文本，所以群里"禁用文件与媒体"
-            // 那条限制不该拦它；但改写 / 转发 / live / 举报 / 已挂附件的草稿会让这条独立消息和草稿
-            // 各说各话（发出去的是位置，留在框里的还是草稿），所以沿用旧链路那个现成的门。
+            // Location is not one chain with album / camera / file: on the wire it is just one plain text line, so the group's "disable files and media"
+            // restriction should not block it; but an edit / forward / live / report draft, or one with an attachment attached, would make this standalone message and the draft
+            // say different things (what goes out is the location, what stays in the box is still the draft), so it reuses the ready-made gate from the old chain.
             if composeState.attachmentDisabled {
                 AlertManager.shared.showAlertMsg(
                     title: "Cannot send a location right now",
@@ -1419,9 +1419,9 @@ struct ComposeView: View {
                 showLocationPicker = true
             }
         case .personalProfile:
-            // 和 `.location` 同一条门：主页在线上先是一行索引文本，媒体原件随后各自成行，
-            // 所以"群里禁用文件与媒体"那道限制（`.photo/.camera/.file` 那一支）不该拦它——
-            // 但改写 / 转发 / live / 举报 / 已挂附件的草稿会让主页和草稿各说各话，照旧拦。
+            // The same gate as `.location`: on the wire a profile is first one index text line, and the media originals each become their own lines afterwards,
+            // so the "disable files and media in groups" restriction (the `.photo/.camera/.file` branch) should not block it -
+            // but an edit / forward / live / report draft, or one with an attachment attached, would make the profile and the draft say different things, so it is still blocked.
             if composeState.attachmentDisabled {
                 AlertManager.shared.showAlertMsg(
                     title: "Cannot send your profile right now",
@@ -1433,9 +1433,9 @@ struct ComposeView: View {
                 showProfileSendSheet = true
             }
         case .secure:
-            // 「+」面板里那一格是**武装开关**，不是选择器：只翻宿主那一格真值，输入条不留副本。
-            // 这里的拒绝只是提前说一句人话；真正的门禁在 `popopxSendSecure` 里，
-            // 因为面板上那个复选框走的是另一条写入路径，挡不住它。
+            // The cell in the "+" panel is an **arm switch**, not a picker: it only flips the host's truth cell, and the input bar keeps no copy.
+            // The refusal here just says it in human words up front; the real gate is inside `popopxSendSecure`,
+            // because the checkbox on that panel writes through another path, and blocking it here would not hold.
             if composeState.attachmentDisabled {
                 AlertManager.shared.showAlertMsg(
                     title: "Cannot send a secure message right now",
@@ -1450,8 +1450,8 @@ struct ComposeView: View {
                     : nil
             }
         case .redPacket:
-            // 面板已经按会话筛过这一格（`popopxPlusActions`），能走到这里说明落点一定存在；
-            // 这一支只兜"面板开着时会话变成了不能发消息"那种极窄的窗口 —— 宁可不发，也不发进一个没有落点的会话。
+            // The panel already filtered this cell per chat (`popopxPlusActions`), so reaching here means the destination must exist;
+            // this branch only backs the extremely narrow window of "the chat turned into one that cannot send messages while the panel was open" - better not to send than to send into a chat with no destination.
             guard let destination = popopxPacketDestination else { return }
             packetDestination = destination
             showRedPacketSheet = true
@@ -1470,28 +1470,28 @@ struct ComposeView: View {
                 case .photo: showMediaPicker = true
                 case .camera: showTakePhoto = true
                 case .file: showFileImporter = true
-                // 这几格在 `.photo/.camera/.file` 这一支里到不了：外层 switch 已经把它们分出去了。
-                // 写 `break` 而不是删掉，是为了让这个 switch 保持穷尽 —— 加新的一格时
-                // 这里会编译不过，提醒两处都要改。
+                // These cells are unreachable in the `.photo/.camera/.file` branch: the outer switch has already split them off.
+                // Writing `break` instead of deleting them keeps this switch exhaustive - when a new cell is added
+                // this fails to compile, which reminds you that both places need changing.
                 case .location, .secure, .personalProfile, .redPacket, .giftCard: break
                 }
             }
         }
     }
 
-    /// 「发送位置」的落点。位置在线上就是一行纯文本，所以它和输入条里的普通文本共用**同一张判定表**
-    /// （`PopopxComposerRouting.dispatch`）：已绑定 + 射频开 + 邻居可达就交给模块 5，否则交回宿主的 SMP。
-    /// 判定表因此不需要为位置开新格 —— 它判的是"这条消息有没有路由带不动的东西"，位置一个都没有。
+    /// The destination of "Send location". On the wire a location is just one plain text line, so it shares **the same decision table** with ordinary text in the input bar
+    /// (`PopopxComposerRouting.dispatch`): already bound + radio on + a neighbour reachable means hand it to module 5, otherwise it goes back to the host's SMP.
+    /// So the decision table needs no new cell for location - what it judges is "does this message carry anything the routing cannot carry", and location has none of that.
     ///
-    /// 刻意不走 `sendMessageAsync`：那条链路会连草稿一起发（`composeState.preview` 的六支），末尾还
-    /// `clearState` 把用户没发完的草稿和链接预览清掉。位置是一条独立消息，草稿该原样留着。
+    /// Deliberately bypasses `sendMessageAsync`: that chain sends the draft along with it (the six branches of `composeState.preview`) and at the end also
+    /// calls `clearState`, wiping the user's unfinished draft and link preview. A location is a standalone message, so the draft should stay exactly as it is.
     ///
-    /// 同理它也不进 `checkComposeLinksAsync`：`popopx://loc` 和一次性邀请链接是同一个 scheme，
-    /// 被当成连接链接就会把一条位置消息变成一次加好友（`PopopxLocation.swift:17`-`:21`）。
+    /// Likewise it does not enter `checkComposeLinksAsync`: `popopx://loc` and one-time invite links share the same scheme,
+    /// and being treated as a connection link would turn a location message into adding a friend (`PopopxLocation.swift:17`-`:21`).
     @MainActor private func popopxSendLocation(_ payload: PopopxLocationPayload) async {
         let contactId = chat.chatInfo.contact?.contactId
-        // 这条消息自己的前提只有"直聊联系人"一条：草稿里挂着的附件、引用、@提及、live 都不属于它，
-        // 把它们算进来会让一条已经选好的位置因为框里有图而绕开蓝牙。阅后即焚是真档位，照旧参与判定。
+        // This message's only precondition is "a direct chat contact": the attachment, quote, @mention and live hanging in the draft do not belong to it,
+        // and counting them in would make an already-picked location bypass Bluetooth just because the box holds an image. View-once is a real tier and still takes part in the decision.
         let context: PopopxComposerContext
         if let contactId {
             context = .directContact(contactId)
@@ -1508,7 +1508,7 @@ struct ComposeView: View {
         case let .routeViaMesh(message):
             await PopopxMeshRuntime.shared.router.send(message)
         case .hostShouldSend:
-            // 档位和旧链路一样是一次性的：发完放回 nil，下一条回到"不阅后即焚"。
+            // The tier is one-shot as in the old chain: it goes back to nil after sending, and the next message returns to "not view-once".
             let ttl = popopxTTLSeconds
             popopxTTLSeconds = nil
             await popopxSendPlainViaSMP(payload.messageContent, ttl: ttl)
@@ -1517,14 +1517,14 @@ struct ComposeView: View {
         }
     }
 
-    /// 「发送个人主页」的落点。和上面两支不同，这里**不在本文件里判定通道**：一份主页同时牵着一行
-    /// 索引文本和 N 件媒体原件，原件永远不能走蓝牙（判定表的 `.richContent`），降级成纯文字又是产品
-    /// 要求的行为——两件事的先后次序（索引先落公网、原件随后排队、断网时整份改走厢语投影）属于发送器，
-    /// 放在这里会让 `ComposeView` 变成第二个真相源。所以本函数只做三件事：交出去、把结论说给用户、
-    /// 清掉那条 live dummy（判据抄 `popopxSendPlainViaSMP`，只在真的公网送达之后）。
+    /// The destination of "Send personal profile". Unlike the two branches above, this one **does not decide the channel in this file**: one profile simultaneously drags along one
+    /// index text line and N media originals, the originals can never go over Bluetooth (the decision table's `.richContent`), and downgrading to plain text is a product
+    /// requirement too - the ordering of the two things (the index lands on the public network first, the originals queue behind, and offline the whole thing goes through a Cabin projection) belongs to the sender,
+    /// and putting it here would make `ComposeView` a second source of truth. So this function only does three things: hand it over, tell the user the conclusion,
+    /// and clear that live dummy (the criterion copies `popopxSendPlainViaSMP`, only after genuine public-network delivery).
     ///
-    /// 它同样不进 `checkComposeLinksAsync`，也不走 `sendMessageAsync`：两条理由和位置那一份完全相同
-    /// （`popopx://profile` 与一次性邀请链接同 scheme；草稿必须原样留在框里）。
+    /// It likewise does not enter `checkComposeLinksAsync` and does not go through `sendMessageAsync`: both reasons are exactly the same as the location one's
+    /// (`popopx://profile` shares its scheme with one-time invite links; the draft must stay in the box untouched).
     @MainActor private func popopxSendProfile(_ manifest: PopopxProfileManifest) async {
         let outcome = await ProfileAutoSender.shared.send(manifest, to: chat)
         switch outcome {
@@ -1537,8 +1537,8 @@ struct ComposeView: View {
             PopopxHaptics.notice(.warning)
             AlertManager.shared.showAlertMsg(
                 title: "Cannot send your profile",
-                // 插值而不是直传：`showAlertMsg` 收的是 `LocalizedStringKey`（ContentView.swift:540），
-                // 一句运行期才算出来的拒绝理由只能用插值落进去。
+                // Interpolation rather than passing it directly: `showAlertMsg` takes a `LocalizedStringKey` (ContentView.swift:540),
+                // so a refusal reason only computed at runtime can only land through interpolation.
                 message: "\(refusal.explanation ?? refusal.description)"
             )
         case let .failed(reason):
@@ -1547,13 +1547,13 @@ struct ComposeView: View {
         }
     }
 
-    /// 交回宿主那一支，抄 `sendMessageAsync` 里嵌套的 `send(_ msgs:)`：`apiSendMessages` +
-    /// `removeLiveDummy` + `addChatItem`，一位不多 —— 位置和绝密都没有文件要回收，失败提示也在
-    /// `apiSendMessages` 自己那侧弹（`POPOPXAPI.swift:640`），这里不再叠第二层。
+    /// The branch back to the host copies the nested `send(_ msgs:)` inside `sendMessageAsync`: `apiSendMessages` +
+    /// `removeLiveDummy` + `addChatItem`, not one more - neither location nor top-secret has a file to reclaim, and the failure notice is also
+    /// popped by `apiSendMessages` on its own side (`POPOPXAPI.swift:640`), so no second layer is stacked here.
     ///
-    /// 名字从 `…LocationViaSMP` 改成了 `…PlainViaSMP`：这条链路对"线上一行纯文本"负责，
-    /// 位置是它第一个用户，绝密载荷是第二个（那两行文本在外形上完全同构，见
-    /// `PopopxSecurePayload.swift:9`-`:14`）。留着 Location 的名字会让下一个人再抄一遍。
+    /// The name changed from `...LocationViaSMP` to `...PlainViaSMP`: this chain is responsible for "one plain text line on the wire",
+    /// location is its first user and the top-secret payload is the second (those two text lines are completely isomorphic in shape, see
+    /// `PopopxSecurePayload.swift:9`-`:14`). Keeping the Location name would make the next person copy it all over again.
     @discardableResult
     private func popopxSendPlainViaSMP(_ text: String, ttl: Int?) async -> Bool {
         guard let chatItems = await apiSendMessages(
@@ -1575,23 +1575,23 @@ struct ComposeView: View {
         return true
     }
 
-    /// 「发送绝密消息」的落点。铸载荷排在**任何判定之前**：判定表、SMP、蓝牙中继队列拿到的
-    /// 都只能是密文行（`payload.messageContent`）。让明文穿过其中任何一站，"严禁在列表里暴露明文"
-    /// 就先在发送侧破了。
+    /// The destination of "Send top-secret message". Minting the payload comes **before any decision**: the decision table, SMP and the Bluetooth relay queue all receive
+    /// nothing but the ciphertext line (`payload.messageContent`). Letting plaintext pass through any one of those stations means "never expose plaintext in the list"
+    /// is already broken on the send side.
     ///
-    /// 和位置一样**不走** `sendMessageAsync`：那条链路会把草稿连同链接预览、引用一起发出去，
-    /// 末尾还 `clearState`；而 `popopx://sec` 与一次性邀请链接同 scheme，进了
-    /// `checkComposeLinksAsync` 就是一次误加好友（`PopopxSecurePayload.swift:37`-`:41`）。
+    /// As with location it **does not go through** `sendMessageAsync`: that chain would send the draft out together with the link preview and the quote,
+    /// and also `clearState` at the end; and `popopx://sec` shares its scheme with one-time invite links, so entering
+    /// `checkComposeLinksAsync` means adding a friend by mistake (`PopopxSecurePayload.swift:37`-`:41`).
     ///
-    /// 但绝密有一处和位置**必须**不同：位置的内容来自地图选择器，绝密的明文就停在输入框里，
-    /// 所以发送成功后必须把它清掉 —— 见 `popopxAfterSecureSend()`。
+    /// But top-secret **must** differ from location in one place: location's content comes from the map picker, while top-secret's plaintext sits right in the input box,
+    /// so it must be cleared once the send succeeds - see `popopxAfterSecureSend()`.
     @MainActor private func popopxSendSecure(
         plaintext: String,
         smpTTLSeconds: Int?,
         secureTTLSeconds: Int
     ) async {
-        // 门禁在这里，不在「+」面板那一格：面板上的复选框走的是另一条写入路径，
-        // 只挡按钮会留下"能武装、发不出、也不说为什么"的那种静默失败。
+        // The gate is here, not in the "+" panel cell: the checkbox on that panel writes through another path,
+        // and blocking only the button would leave the silent failure of "can arm, cannot send, and no reason given".
         guard !composeState.attachmentDisabled else {
             popopxSecureBlocked()
             return
@@ -1604,9 +1604,9 @@ struct ComposeView: View {
         do {
             payload = try PopopxSecurePayload.make(plaintext: plaintext, ttlSeconds: secureTTLSeconds)
         } catch let error as PopopxSecureError {
-            // 这一句走 `Text(verbatim:)` 而不是 `showAlertMsg`：后者的入参是 `LocalizedStringKey`
-            // （ContentView.swift:540），运行时拼出来的 String 根本转不过去，而且里面带着字节数，
-            // 当成格式化串去查本地化表是把话交给运气。
+            // This sentence goes through `Text(verbatim:)` instead of `showAlertMsg`: the latter's parameter is a `LocalizedStringKey`
+            // (ContentView.swift:540), a String assembled at runtime simply cannot convert, and it carries a byte count, so
+            // treating it as a format string to look up the localization table hands the wording over to luck.
             AlertManager.shared.showAlert(
                 Alert(title: Text(NSLocalizedString("Secure message not sent", comment: "")),
                       message: Text(verbatim: Self.popopxSecureSendReason(error)))
@@ -1621,8 +1621,8 @@ struct ComposeView: View {
         }
 
         let contactId = chat.chatInfo.contact?.contactId
-        // 同位置那条判定：这条消息自己的前提只有"直聊联系人"，框里挂着的附件/引用/live 不属于它。
-        // 阅后即焚（SMP 那一档）是真档位，照旧参与判定。
+        // The same judgement as the location one: this message's only precondition is "a direct chat contact", and the attachment/quote/live hanging in the box do not belong to it.
+        // View-once (the SMP tier) is a real tier and still takes part in the decision.
         let context: PopopxComposerContext
         if let contactId {
             context = .directContact(contactId)
@@ -1640,8 +1640,8 @@ struct ComposeView: View {
             await PopopxMeshRuntime.shared.router.send(message)
             popopxAfterSecureSend()
         case .hostShouldSend:
-            // 只有真发出去了才清草稿：`apiSendMessages` 返回 nil 时它自己已经弹过提示，
-            // 那时把明文清掉等于让用户白丢一条内容。
+            // The draft is cleared only when it really went out: when `apiSendMessages` returns nil it has already popped its own notice,
+            // and clearing the plaintext then would make the user lose a message for nothing.
             if await popopxSendPlainViaSMP(payload.messageContent, ttl: smpTTLSeconds) {
                 popopxAfterSecureSend()
             }
@@ -1650,12 +1650,12 @@ struct ComposeView: View {
         }
     }
 
-    /// 绝密发送成功后的收尾。三件事各有各的理由：
-    /// 1. **清草稿**：用户打的明文还在 `composeState.message` 里，不清就等于这条消息
-    ///    在发送方自己的屏幕上永久留着 —— 这是整个特性里唯一一处"发送侧"的明文残留。
-    /// 2. **关链接预览**：`composeState.preview` 是明文的第二种存法（它抄的就是这条草稿的文本）。
-    /// 3. **两档都归 nil**：绝密与阅后即焚都是"一次发送一次选择"，和旧发送键菜单同一语义；
-    ///    留着下一档会让下一条普通消息被误标成绝密，而那比反过来更糟。
+    /// The wrap-up after a successful top-secret send. The three things each have their own reason:
+    /// 1. **Clear the draft**: the plaintext the user typed is still in `composeState.message`, and not clearing it means this message
+    ///    stays on the sender's own screen permanently - the only "send side" plaintext residue in the whole feature.
+    /// 2. **Turn off the link preview**: `composeState.preview` is the plaintext's second way of being stored (it copies exactly this draft's text).
+    /// 3. **Both tiers back to nil**: top-secret and view-once are both "one send, one choice", the same semantics as the old send key menu;
+    ///    leaving a tier set would make the next ordinary message be mislabelled as top-secret, and that is worse than the other way round.
     private func popopxAfterSecureSend() {
         composeState.message = ""
         resetLinkPreview()
@@ -1670,8 +1670,8 @@ struct ComposeView: View {
         )
     }
 
-    /// 载荷层的错误到句人话。这里只做映射，不新增判断：长度上限的数字取自契约方，
-    /// 免得这句提示和 `maximumPlainBytes` 长成两个版本。
+    /// Turns payload-layer errors into a human sentence. This only maps, it adds no new judgement: the length-limit number is taken from the contract side,
+    /// so that this notice and `maximumPlainBytes` do not grow into two versions.
     private static func popopxSecureSendReason(_ error: PopopxSecureError) -> String {
         switch error {
         case .emptyPlaintext:
@@ -1681,17 +1681,17 @@ struct ComposeView: View {
         case .sealingFailed:
             return NSLocalizedString("Sealing failed on this device; not one byte of this content left it.", comment: "")
         case .unusablePlaintext, .wrongKeyLength, .wrongSealedLength, .decryptionFailed:
-            // 这三条只在接收侧解得开时才可能出，发送侧到不了；写出来是为了让这个 switch 穷尽，
-            // 也为了万一以后有人在这条路上调 `open()`，不会掉进 `default` 那句含糊话里。
+            // These three can only appear when the receiving side can decode them, and the send side never reaches them; they are written out to keep this switch exhaustive,
+            // and so that if someone later calls `open()` on this path, it will not fall into the vague `default` sentence.
             return NSLocalizedString("The payload was not usable, so nothing was sent.", comment: "")
         case .authenticationFailed, .biometricsUnavailable, .screenIsCaptured:
             return NSLocalizedString("This device does not allow opening secure messages right now.", comment: "")
         }
     }
 
-    /// live 消息的入口在旧链路里只长在发送键的长按菜单上（`SendMessageView.swift:194`-`:241`），
-    /// 新条没有可挂菜单的发送键，所以整条 composer 接同一个菜单，内容只有这一项：
-    /// 阅后即焚归「+」面板，签名那一支在上游就被注释掉了，而且它只属于群 / 频道，不在换皮范围内。
+    /// In the old chain the live message entry grew only on the send key's long-press menu (`SendMessageView.swift:194`-`:241`),
+    /// and the new bar has no send key to hang a menu on, so the whole composer attaches that same menu, whose content is only this one item:
+    /// view-once belongs to the "+" panel, the signing branch was commented out upstream, and it belongs only to groups / channels, so it is outside the reskin scope.
     private var popopxLiveMessageAllowed: Bool {
         composeState.liveMessage == nil
         && !composeState.editing
@@ -1709,10 +1709,10 @@ struct ComposeView: View {
         }
     }
 
-    /// 和 `SendMessageView.startLiveMessage` 同一条链路：先发一条 live，再按同一个节拍 `updateLiveMessage`。
-    /// 节拍常量 `liveMsgInterval` 在 `SendMessageView.swift:13` 是文件级 `private let`，取不过来，
-    /// 这里写死同一个 3 秒；只弹一次提醒用的是同一个 UserDefaults 键，不是第二份开关。
-    /// 旧键的脉冲动画（`sendButtonSize` / `sendButtonOpacity`）是旧发送键自己的皮，不跟过来。
+    /// The same chain as `SendMessageView.startLiveMessage`: send one live message first, then `updateLiveMessage` on the same cadence.
+    /// The cadence constant `liveMsgInterval` is a file-level `private let` in `SendMessageView.swift:13`, so it cannot be imported,
+    /// and the same 3 seconds is hard-coded here; the pop-once-only reminder uses that same UserDefaults key, it is not a second switch.
+    /// The old key's pulse animation (`sendButtonSize` / `sendButtonOpacity`) is the old send key's own skin and does not come along.
     private func startPopopxLiveMessage() {
         func start() {
             Task {

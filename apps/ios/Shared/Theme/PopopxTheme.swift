@@ -70,9 +70,9 @@ enum PopopxPalette {
     /// 5.67:1.
     static let onBrand = Color.popopx(light: 0xFFFFFF, dark: 0x0A0A1F)
 
-    // MARK: Mesh — offline BLE state (厢语)
+    // MARK: Mesh - offline BLE state (Cabin)
 
-    /// Mesh nodes, the 1–7 hop badge, the radar, `#厢语` channel affordances.
+    /// Mesh nodes, the 1–7 hop badge, the radar, `#Cabin` channel affordances.
     static let mesh = Color.popopx(light: 0x00A896, dark: 0x00D2B8)
 
     /// Teal used as text or as a hairline stroke on a card. `mesh` itself is 2.98:1
@@ -84,7 +84,7 @@ enum PopopxPalette {
     /// text (2.98:1 light, 1.92:1 dark), so mesh fills always carry a dark ink.
     static let onMesh = Color.popopx(light: 0x00251F, dark: 0x00211C)
 
-    // MARK: Danger — 清除记录 / PanicWipeManager
+    // MARK: Danger - clearing records / PanicWipeManager
 
     /// Icons, borders, swipe-action backgrounds. Not body text in light mode:
     /// `#FF3B30` on white is 3.55:1.
@@ -182,10 +182,10 @@ enum PopopxMetrics {
     /// HIG minimum, enforced rather than assumed.
     static let minHitTarget: CGFloat = 44
 
-    /// 顶栏身份胶囊的宽度上限：留出状态胶囊与「+」的份额，375pt 窄屏也不会把两端挤出安全区。
-    /// 115 是按最坏情况定的 —— 名字占满上限时顶栏整行的最小和是 391，393 还剩 2pt；
-    /// 上一版 120 那一档是 396，负 3pt 由整行平摊，长昵称就是这么把两枚状态胶囊挤变形的
-    /// （逐件明细见 `Shared/Navigation/PopopxTelemetryHeader.swift` 文件头）。
+    /// Width cap of the top bar identity pill: it leaves the share for the status pills and the "+", so even a 375pt narrow screen does not push either end out of the safe area.
+    /// 115 was set from the worst case - with the name filling the cap, the top bar row's minimum sum is 391, and 393 leaves 2pt;
+    /// the previous 120 tier came to 396, and the negative 3pt was spread over the whole row: that is how a long nickname squeezed the two status pills out of shape
+    /// (per-item details in the file head of `Shared/Navigation/PopopxTelemetryHeader.swift`).
     static let headerIdentityMaxWidth: CGFloat = 115
 }
 

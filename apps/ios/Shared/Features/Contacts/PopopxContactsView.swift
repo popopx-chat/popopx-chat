@@ -2,56 +2,56 @@
 //  PopopxContactsView.swift
 //  POPOPX (iOS)
 //
-//  【第四阶段】Tab 2「通讯录」：顶部四张常驻（pinned）功能卡 —— 新的加密连接 / 我的加密群组 /
-//  我关注的频道 / 按匿名身份分组 —— 下面是带 `.searchable`、右侧 A–Z 索引与 8pt 圆角头像的现代联系人列表。
+//  [Phase 4] Tab 2 "Contacts": four permanent (pinned) feature cards at the top — new encrypted connection / my encrypted groups /
+//  channels I follow / grouped by anonymous identity — below them a modern contacts list with `.searchable`, a right-hand A–Z index and 8pt rounded avatars.
 //
-//  数据来源（本工程没有 `ChatModel.contacts`，也没有 `ChatModel.invitations`，全部从会话列表派生）：
-//  · 联系人 = `ChatModel.chats`（Shared/Model/ChatModel.swift:408）里 `.direct` 且
-//    `contact.active` 的会话，排除规则照抄 ChatListView.swift:661 的
+//  Data sources (this project has neither `ChatModel.contacts` nor `ChatModel.invitations`, everything is derived from the chat list):
+//  · Contacts = the `.direct` chats in `ChatModel.chats` (Shared/Model/ChatModel.swift:408) that are
+//    `contact.active`, and the exclusion rules are copied verbatim from ChatListView.swift:661's
 //    `!chat.chatInfo.chatDeleted && !chat.chatInfo.contactCard`；
-//  · 群组 = `.group` 且 `businessChat == nil && !isChannel`（照抄 ChatListView.swift:1244 的 .groups 口径）；
-//  · 频道 = `.group` 且 `ChatInfo.isChannel`（= `groupInfo?.useRelays == true`，POPOPXChat/ChatTypes.swift:2296）
-//    且 `membership.memberCurrent`：群组那条口径按定义把频道排除在外，所以频道要自己的一页，
-//    判据只写在 `isPopopxChannel(_:)` 一处（置顶那行的数字与页面里的行共用它）。
-//  · 加密连接请求 = `chatType == .contactRequest`（ChatListView.swift:675），答复走
+//  · Groups = `.group` with `businessChat == nil && !isChannel` (copying the .groups definition from ChatListView.swift:1244);
+//  · Channels = `.group` with `ChatInfo.isChannel` (= `groupInfo?.useRelays == true`, POPOPXChat/ChatTypes.swift:2296)
+//    and `membership.memberCurrent`: the groups definition excludes channels by construction, so channels need their own page,
+//    and the test is written in `isPopopxChannel(_:)` in one place only (the pinned row's number and the rows inside the page share it).
+//  · Encrypted connection requests = `chatType == .contactRequest` (ChatListView.swift:675), answering goes through
 //    `acceptContactRequest` / `rejectContactRequest`（Shared/Model/POPOPXAPI.swift:1551 / :1574）；
-//  · 厢语待确认配对 = `PopopxMeshRuntime.shared.bannerModel.requests`（PopopxMeshUI 里
-//    `PopopxMeshBannerModel` 每 2 秒从 `ManualPairingManager.pendingRequests()` 读一次真值）。
+//  · Cabin pairings awaiting confirmation = `PopopxMeshRuntime.shared.bannerModel.requests` (in PopopxMeshUI
+//    `PopopxMeshBannerModel` reads the true value from `ManualPairingManager.pendingRequests()` every 2 seconds).
 //
-//  两个角标怎么算（互不串口径，且永远不同时出现在同一色行里）：
-//  · 靛紫实心徽章 = 未答复的在线加密连接请求条数（`contactRequestChats.count`）。它是「未读」而不是
-//    消息数：本卡对应的页面就是这些请求，请求答复完角标就归零，没有第二套计数。§1.4 第 4 条禁止绿色
-//    承载常驻状态，所以用 `brand`。
-//  · 青绿描边徽章 = `bannerModel.requests.count`，且只在 `PopopxMeshRuntime.isFuseOn` 为真时才参与计算
-//    —— 熔断关掉时 `bannerModel.stop()` 只清横幅不清队列镜像，读到的会是上一次开机的旧数字。
-//    两个数字各说一条通道，因此按 §1.1 末句「需要同时展示两种通道时，用两个独立徽章」拆成两枚，
-//    青绿那枚按 §2.2 永远带数字（`mesh` 实底在白卡上只有 2.98，不足以独立承载信息，故描边用 `meshInk`）。
-//    刷新只有一条路径：`.task` 里在熔断为开时 `await bannerModel.refresh()` 立刻读一次真值，此后由
-//    该模型自己的 2 秒轮询驱动（`@Published requests` → `@ObservedObject` → 本视图重算），
-//    本文件不自建定时器，也不调用 `start()`/`stop()`（那两个方法归 `PopopxMeshKillSwitch` 管）。
+//  How the two badges are counted (they never cross definitions, and never appear in the same coloured row at the same time):
+//  · Indigo solid badge = the number of unanswered online encrypted connection requests (`contactRequestChats.count`). It is "unread", not
+//    a message count: the page behind this card is exactly those requests, so once they are answered the badge goes to zero and there is no second count. §1.4 item 4 forbids green
+//    from carrying permanent state, so `brand` is used.
+//  · Teal outlined badge = `bannerModel.requests.count`, and it only takes part in the calculation when `PopopxMeshRuntime.isFuseOn` is true
+//    — with the fuse off, `bannerModel.stop()` clears only the banner and not the queue mirror, so what you read would be stale numbers from the last launch.
+//    The two numbers each speak of one channel, so per the last sentence of §1.1 ("when two kinds of channel must be shown at once, use two separate badges") they are split into two badges,
+//    and the teal one always carries a number per §2.2 (`mesh` solid on a white card is only 2.98, not enough to carry information on its own, hence the outline uses `meshInk`).
+//    There is one refresh path only: in `.task`, when the fuse is on, `await bannerModel.refresh()` reads the true value at once, and from then on it is driven by
+//    that model's own 2-second polling (`@Published requests` → `@ObservedObject` → this view recomputes),
+//    so this file starts no timer of its own and never calls `start()`/`stop()` (those two methods are `PopopxMeshKillSwitch`'s).
 //
-//  索引降级说明（本工程中文显示名是常态，所以这里不做「只支持拉丁字母」的假索引）：
-//  A–Z 取的是名字首个拉丁字母的大写，而中文先经 Foundation 的 `StringTransform.toLatin` 转成拼音、
-//  再用 `stripDiacritics` 去掉声调，「张三」因此落在 Z、「艾明」落在 A —— 这是系统自带的转写，
-//  不是内置拼音表。转写拿不到的字符（数字、标点、emoji、阿拉伯文/泰文等不转写的文字）全部落到
-//  明确标为「#」的一节，永不丢弃；转写返回 nil 时退回原始首字符再判一次。
+//  Index degradation note (Chinese display names are the norm in this project, so no fake "Latin letters only" index is done here):
+//  A–Z takes the uppercase of the name's first Latin letter, while Chinese is first turned into pinyin by Foundation's `StringTransform.toLatin`,
+//  then `stripDiacritics` removes the tone marks, so "Zhang San" lands on Z and "Ai Ming" on A — this is the system's own transcription,
+//  not a built-in pinyin table. Characters the transcription cannot get (digits, punctuation, emoji, Arabic/Thai and other non-transliterating scripts) all fall into
+//  the section explicitly marked "#", and are never dropped; when the transcription returns nil, the original first character is used for one more check.
 //
-//  无障碍：行与卡是真正的控件，一律 ≥ `PopopxMetrics.minHitTarget`(44pt)；右侧 A–Z 索引是系统通讯录
-//  同款的密集快捷条（27 个 44pt 段放不进一屏），因此它自己 `accessibilityHidden`，同一能力由导航栏
-//  「按字母跳转」菜单以标准 44pt 菜单项提供；两枚角标各自带中文 `accessibilityLabel`。
-//  Reduce Motion 走 `PopopxMotion`：开滚段/换组时弹簧直接换成瞬时值变化。
+//  Accessibility: rows and cards are real controls, all ≥ `PopopxMetrics.minHitTarget` (44pt); the right-hand A–Z index is the system Contacts'
+//  equally dense shortcut strip (27 44pt segments do not fit on one screen), so it is `accessibilityHidden` itself, and the same capability is provided by the navigation bar's
+//  "jump by letter" menu as standard 44pt menu items; the two badges each carry their own Chinese `accessibilityLabel`.
+//  Reduce Motion goes through `PopopxMotion`: with it on, the springs for scroll-strip jumps and group changes become instantaneous value changes.
 //
-//  守的红线：不碰 project.pbxproj（本文件由人手工拖进 target）；颜色/间距/字号/材质/弹簧只取
-//  PopopxTheme 的 token；控件优先复用 Shared/Components 的原子库，只有原子库形状不够时才用
-//  token 现拼（下面 `PopopxFunctionRowLabel` 之所以不是 `PopopxPickerRow`：栈路径由第四阶段的
-//  MainTabView 持有，卡片必须是 `NavigationLink(value:)`，而 `PopopxPickerRow` 只接受 action 闭包）；
-//  界面中文只在文件末尾的 `Copy` 里出现一次；没有 TODO，没有假数据。
+//  Red lines observed: project.pbxproj is not touched (this file is dragged into the target by hand); colour/spacing/font size/material/spring come only from
+//  PopopxTheme's tokens; controls reuse Shared/Components' atomic library first, and tokens are assembled on the spot only when the atomic library's shapes are not enough
+//  (which is why the `PopopxFunctionRowLabel` below is not a `PopopxPickerRow`: the stack path is held by phase 4's
+//  MainTabView, so the card must be a `NavigationLink(value:)`, while `PopopxPickerRow` only accepts an action closure);
+//  UI Chinese appears only once, in the `Copy` at the end of the file; no TODO, no fake data.
 //
-//  ⚠️ 交给 MainTabView 的一处集成点：会话页由 `ChatModel.chatId` 驱动（旧 ChatListView.swift:210-217
-//  用 `NavigationStack(path:)` 映射它），本文件按既有约定调 `ItemsModel.shared.loadOpenChat(_:)`
-//  打开会话；四栏壳的 `selection` 是私有 @State，通讯录这一栏无法把用户带到「消息」栏去。
-//  需要 MainTabView 补 `.onChange(of: chatModel.chatId) { _, id in if id != nil { selection = .chats } }`
-//  （或把 selection 暴露成 Binding），否则从通讯录点开会话只会在切到消息栏后才出现。
+//  ⚠️ One integration point handed to MainTabView: the conversation page is driven by `ChatModel.chatId` (the old ChatListView.swift:210-217
+//  mapped it with `NavigationStack(path:)`); this file follows the existing convention and calls `ItemsModel.shared.loadOpenChat(_:)`
+//  to open a chat; the four-tab shell's `selection` is a private @State, so the Contacts tab cannot take the user over to the "Messages" tab.
+//  MainTabView needs to add `.onChange(of: chatModel.chatId) { _, id in if id != nil { selection = .chats } }`
+//  (or expose selection as a Binding), otherwise opening a chat from Contacts only appears after switching to the Messages tab.
 //
 
 import Foundation
@@ -60,22 +60,22 @@ import POPOPXChat
 import PopopxMeshKit
 import PopopxMeshUI
 
-// MARK: - A–Z 分桶
+// // MARK: - A–Z bucketing
 
-/// 名字 → 索引键。唯一的一处「拼音/首字母」判定，列表分组与右侧索引条共用，二者不可能各说各话。
+/// Name → index key. The one and only "pinyin/first letter" test, shared by the list grouping and the right-hand index strip, so the two cannot say different things.
 private enum PopopxContactIndex {
-    /// 非拉丁可转写名字的落点，界面上直接以这个字符为节标题。
+    /// The landing point for names that cannot be transliterated to Latin; the UI uses this character directly as the section title.
     static let other = "#"
 
     static func key(forName name: String) -> String {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return other }
-        // 转写失败（返回 nil）时退回原串，保证「判不出来」只会落到 #，不会漏掉一条联系人。
+        // When the transcription fails (returns nil) it falls back to the original string, guaranteeing that "cannot decide" only ever lands in # and never drops a contact.
         let transliterated = trimmed
             .applyingTransform(.toLatin, reverse: false)?
             .applyingTransform(.stripDiacritics, reverse: false) ?? trimmed
         let source = transliterated.isEmpty ? trimmed : transliterated
-        // 只看首字符：数字/标点/emoji/不被转写的文字一律进 “#”，不会被「跳过几个字符找字母」误纳。
+        // Only the first character is looked at: digits/punctuation/emoji/non-transliterating scripts all go into the "#" section, never wrongly admitted by "skip a few characters until you find a letter".
         guard let first = source.first else { return other }
         let upper = String(first).uppercased()
         guard upper.count == 1, let scalar = upper.unicodeScalars.first,
@@ -84,21 +84,21 @@ private enum PopopxContactIndex {
     }
 }
 
-// MARK: - 路由与分组状态
+// // MARK: - Routing and grouping state
 
 private enum PopopxContactsRoute: Hashable {
     case newConnections
     case groups
     case channels
-    /// 「加入频道」：落在既有的扫描／粘贴链接页（同一页在「消息」栏右上角的 + 里也已挂载，
-    /// `ChatsListView.swift:270-275`）。频道链接走的仍是 app 原有的 `planAndConnect` →
-    /// `apiConnectPlan` → `.groupLink` 那一条真路径（`NewChatView.swift:1320`、`:1522`）。
+    /// "Join channel": lands on the existing scan/paste-link page (the same page is already mounted in the + at the top right of the "Messages" tab,
+    /// `ChatsListView.swift:270-275`). A channel link still goes through the app's existing `planAndConnect` →
+    /// `apiConnectPlan` → `.groupLink` real path (`NewChatView.swift:1320`, `:1522`).
     case joinChannel
 }
 
-/// 「按匿名身份分组」的实际口径：会话自己是匿名连接（`ChatInfo.incognito`）还是主身份直连。
-/// 这是本工程唯一真实存在的「身份 ↔ 联系人」数据：`ChatData` 上没有 userId 字段
-/// （POPOPXChat/ChatTypes.swift:2539），跨身份的联系人名下只能靠 `chatModel.users` 的未读数呈现。
+/// The actual definition of "group by anonymous identity": whether the chat itself is an anonymous connection (`ChatInfo.incognito`) or a direct connection on the main identity.
+/// This is the only "identity ↔ contact" data that really exists in this project: `ChatData` has no userId field
+/// (POPOPXChat/ChatTypes.swift:2539), so contacts across identities can only be presented through the unread counts under `chatModel.users`.
 private enum PopopxIdentityGrouping: Int, Hashable, CaseIterable {
     case all
     case main
@@ -121,8 +121,8 @@ struct PopopxContactsView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    /// 熔断真值在 runtime（Shared/Model/POPOPXAPI.swift:3640），配对队列在 bannerModel。
-    /// 两者都是进程级单例，和 Phase 3 一样在 `@MainActor init()` 里装进 `@ObservedObject`。
+    /// The fuse's true value lives in the runtime (Shared/Model/POPOPXAPI.swift:3640), the pairing queue in bannerModel.
+    /// Both are process-level singletons, and as in Phase 3 they are put into `@ObservedObject` inside `@MainActor init()`.
     @ObservedObject private var meshRuntime: PopopxMeshRuntime
     @ObservedObject private var meshBanner: PopopxMeshBannerModel
 
@@ -137,8 +137,8 @@ struct PopopxContactsView: View {
     }
 
     var body: some View {
-        // `ScrollViewReader` 包在最外层：右侧密集索引条和导航栏的「按字母跳转」菜单共用同一个 proxy
-        // 与同一份 keys，两条入口的跳转行为因此不可能不一致。
+        // `ScrollViewReader` wraps the outermost layer: the dense index strip on the right and the navigation bar's "jump by letter" menu share the same reader object
+        // and the same set of keys, so the two entry points cannot behave differently when jumping.
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
@@ -161,8 +161,8 @@ struct PopopxContactsView: View {
             .navigationTitle(Copy.pageTitle)
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: Copy.searchPrompt)
             .toolbar {
-                // 密集索引条（每段 ~16pt，27 段放不进 44pt 的要求）的无障碍等价物：
-                // 同一份 keys，系统菜单自带 44pt 命中区。
+                // The accessibility equivalent of the dense index strip (each segment ~16pt; 27 segments do not fit the 44pt requirement):
+                // the same set of keys, and the system menu brings its own 44pt hit area.
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         ForEach(sections.map(\.key), id: \.self) { key in
@@ -182,8 +182,8 @@ struct PopopxContactsView: View {
                 case .channels:
                     PopopxChannelsPage()
                 case .joinChannel:
-                    // 与「消息」栏 + 菜单里「扫一扫」同一页、同一挂载写法（`ChatsListView.swift:270-275`），
-                    // 差别只在标题：这一枚的来意是"用链接或二维码加入一个频道"，标题要说清两件事。
+                    // The same page and the same mounting style as the "scan" item in the Messages tab's + menu (`ChatsListView.swift:270-275`),
+                    // differing only in the title: this one is here to "join a channel with a link or a QR code", and the title must make both things clear.
                     NewChatView(selection: .connect, showQRCodeScanner: true)
                         .navigationTitle(Copy.joinChannelPageTitle)
                         .modifier(ThemedBackground(grouped: true))
@@ -237,8 +237,8 @@ struct PopopxContactsView: View {
                                 showAnonymousTag: grouping == .all,
                                 avatarSize: avatarSize
                             ) {
-                                // 旧通讯录同一手（Shared/Views/Contacts/ContactListNavLink.swift:56）：
-                                // 先收起整屏弹层，再把要开的会话交给既有的换栏入口。
+                                // The same move as the old Contacts (Shared/Views/Contacts/ContactListNavLink.swift:56):
+                                // dismiss the full-screen sheet first, then hand the chat to be opened to the existing tab-switch entry.
                                 dismissAllSheets(animated: true) {
                                     ItemsModel.shared.loadOpenChat(chat.id)
                                 }
@@ -257,11 +257,11 @@ struct PopopxContactsView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// 置顶的四张功能卡 + 当前分组状态。作为 pinned section header 常驻，列表从它下面滚过。
+    /// The four pinned feature cards + the current grouping state. It stays permanently as the pinned section header while the list scrolls beneath it.
     private var pinnedFunctions: some View {
         VStack(alignment: .leading, spacing: PopopxMetrics.spaceS) {
             PopopxSectionCard {
-                // 卡 1：新的加密连接。两枚独立徽章 = 两条通道（§1.1 末句、§2.2）。
+                // Card 1: new encrypted connection. Two separate badges = two channels (last sentence of §1.1, §2.2).
                 NavigationLink(value: PopopxContactsRoute.newConnections) {
                     PopopxFunctionRowLabel(
                         title: Copy.newConnectionsTitle,
@@ -283,7 +283,7 @@ struct PopopxContactsView: View {
 
                 PopopxRowSeparator(inset: 0)
 
-                // 卡 2：我的加密群组。
+                // Card 2: my encrypted groups.
                 NavigationLink(value: PopopxContactsRoute.groups) {
                     PopopxFunctionRowLabel(
                         title: Copy.groupsTitle,
@@ -298,9 +298,9 @@ struct PopopxContactsView: View {
 
                 PopopxRowSeparator(inset: 0)
 
-                // 卡 3：我关注的频道。频道在本工程就是"用中继转发的公开群组"
+                // Card 3: channels I follow. In this project a channel is simply "a public group forwarded through relays"
                 // （`ChatInfo.isChannel` = `groupInfo?.useRelays == true`，POPOPXChat/ChatTypes.swift:2296），
-                // 上一条 `contactChats` 的口径把它排除在通讯录与群组页之外，所以它需要自己的一行。
+                // and the definition of `contactChats` above excludes it from the contacts and groups pages, so it needs its own row.
                 NavigationLink(value: PopopxContactsRoute.channels) {
                     PopopxFunctionRowLabel(
                         title: Copy.channelsTitle,
@@ -315,7 +315,7 @@ struct PopopxContactsView: View {
 
                 PopopxRowSeparator(inset: 0)
 
-                // 卡 4：按匿名身份分组 —— 弹层，所以能用 action 闭包的原子控件。
+                // Card 4: group by anonymous identity — a sheet, so an atomic control that takes an action closure can be used.
                 PopopxPickerRow(
                     Copy.identitiesTitle,
                     value: identityValue,
@@ -350,7 +350,7 @@ struct PopopxContactsView: View {
         }
     }
 
-    // MARK: 计数与筛选
+    // // MARK: Counts and filtering
 
     private var searching: Bool {
         !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -360,7 +360,7 @@ struct PopopxContactsView: View {
         searchText.trimmingCharacters(in: .whitespacesAndNewlines).localizedLowercase
     }
 
-    /// 加密连接请求：`.contactRequest` 会话。排除规则与主列表同源，避免已删/名片会话混进角标。
+    /// Encrypted connection requests: `.contactRequest` chats. The exclusion rules come from the same source as the main list, so deleted/card chats cannot mix into the badge.
     private var contactRequestChats: [Chat] {
         chatModel.chats.filter { chat in
             !chat.chatInfo.chatDeleted
@@ -371,10 +371,10 @@ struct PopopxContactsView: View {
 
     private var contactRequestCount: Int { contactRequestChats.count }
 
-    /// 厢语待确认配对。熔断关闭时一律算 0：见文件头「两个角标怎么算」。
+    /// Cabin pairings awaiting confirmation. With the fuse off it always counts 0: see "How the two badges are counted" in the file header.
     private var meshPendingCount: Int { meshRuntime.isFuseOn ? meshBanner.requests.count : 0 }
 
-    /// 联系人 + 加密群组的统一口径（通讯录的主列表）。
+    /// The unified definition of contacts + encrypted groups (the main list of Contacts).
     private var contactChats: [Chat] {
         chatModel.chats.filter { chat in
             guard !chat.chatInfo.chatDeleted, !chat.chatInfo.contactCard else { return false }
@@ -393,7 +393,7 @@ struct PopopxContactsView: View {
         contactChats.filter { $0.chatInfo.chatType == .group }
     }
 
-    /// 频道：判据与下面的频道页共用同一个 `isPopopxChannel`，两处不可能各说各话。
+    /// Channels: the test shares the one `isPopopxChannel` with the channel page below, so the two places cannot say different things.
     private var channelChats: [Chat] {
         chatModel.chats.filter(isPopopxChannel)
     }
@@ -412,7 +412,7 @@ struct PopopxContactsView: View {
         }
     }
 
-    /// 搜索命中口径照抄 ChatListView.swift:663-672：视图名 / 昵称 / 全名，大小写不敏感。
+    /// The search-match definition copies ChatListView.swift:663-672 verbatim: view name / nickname / full name, case-insensitive.
     private func matchesSearch(_ chat: Chat) -> Bool {
         guard searching else { return true }
         let s = normalizedSearch
@@ -441,7 +441,7 @@ struct PopopxContactsView: View {
             }
     }
 
-    // MARK: 文案用的读数
+    // // MARK: Readings used by the copy
 
     private var requestNote: String {
         contactRequestCount == 0
@@ -461,8 +461,8 @@ struct PopopxContactsView: View {
         Copy.identitiesValue(visibleIdentities.count)
     }
 
-    /// 隐藏身份需要查看口令才能切换（`User.hidden` = `viewPwdHash != nil`），本页不收口令，
-    /// 所以按 `UserPicker` 的既有做法把它们排除在列表外，并在弹层里写明原因。
+    /// A hidden identity needs the viewing passphrase to switch (`User.hidden` = `viewPwdHash != nil`), and this page does not collect a passphrase,
+    /// so following `UserPicker`'s existing practice they are excluded from the list and the reason is written into the sheet.
     private var visibleIdentities: [UserInfo] {
         chatModel.users.filter { !$0.user.hidden }
     }
@@ -474,14 +474,14 @@ struct PopopxContactsView: View {
         return parts.joined(separator: Copy.badgeSeparator)
     }
 
-    /// 头像随 Dynamic Type 放大，`radiusAvatar` 恒为 8pt（本次规格点名的圆角）。
+    /// The avatar grows with Dynamic Type while `radiusAvatar` stays 8pt (the corner radius explicitly named by this spec).
     private var avatarSize: CGFloat {
         dynamicTypeSize.isAccessibilitySize
             ? PopopxMetrics.space2XL
             : PopopxMetrics.minHitTarget
     }
 
-    // MARK: 行为
+    // // MARK: Behaviour
 
     private func scroll(to key: String, in proxy: ScrollViewProxy) {
         PopopxHaptics.selection()
@@ -490,7 +490,7 @@ struct PopopxContactsView: View {
         }
     }
 
-    /// 只读一次真值；之后的更新由 `PopopxMeshBannerModel` 自己的 2 秒轮询负责（见文件头）。
+    /// Reads the true value once only; later updates are `PopopxMeshBannerModel`'s own 2-second polling's responsibility (see the file header).
     @MainActor private func refreshMeshPending() async {
         guard meshRuntime.isFuseOn else { return }
         await meshBanner.refresh()
@@ -502,10 +502,10 @@ private struct PopopxContactSection {
     let chats: [Chat]
 }
 
-// MARK: - 置顶功能卡的一行
+// // MARK: - A row of the pinned feature cards
 
-/// 与 `PopopxPickerRow` 同尺寸（32pt 方形图标徽章 + 标题 + 尾部 + `chevron.right`），
-/// 但尾部换成调用方的徽章，并且整行是 `NavigationLink` 的 label。
+/// The same dimensions as `PopopxPickerRow` (32pt square icon badge + title + trailing + `chevron.right`),
+/// but the trailing side is replaced by the caller's badge, and the whole row is a `NavigationLink`'s label.
 private struct PopopxFunctionRowLabel<Accessory: View>: View {
     let title: String
     let note: String
@@ -554,9 +554,9 @@ private struct PopopxRowSeparator: View {
     }
 }
 
-// MARK: - 两枚通道徽章
+// // MARK: - The two channel badges
 
-/// 在线加密（SMP）：`brand` 实底 + `onBrand`，永远带数字。
+/// Online encryption (SMP): `brand` solid + `onBrand`, always with a number.
 private struct PopopxOnlineCountBadge: View {
     let count: Int
 
@@ -574,7 +574,7 @@ private struct PopopxOnlineCountBadge: View {
     }
 }
 
-/// 离线厢语：`card` 底 + `meshInk` 描边与文字（§1.4 第 3 条：青绿实底不足 3.0，颜色不独立承载信息）。
+/// Offline Cabin: `card` background + `meshInk` outline and text (§1.4 item 3: teal solid is under 3.0, so colour must not carry information on its own).
 private struct PopopxMeshCountBadge: View {
     let count: Int
 
@@ -594,7 +594,7 @@ private struct PopopxMeshCountBadge: View {
     }
 }
 
-// MARK: - 联系人行
+// // MARK: - Contact row
 
 private struct PopopxContactRow: View {
     let chat: Chat
@@ -622,8 +622,8 @@ private struct PopopxContactRow: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
-                    // 匿名连接是「这条关系挂在哪个身份上」的事实，用中性色标注，
-                    // 不与 brand（未读）或 mesh（青绿专属通道）争色。
+                    // An anonymous connection is the fact of "which identity this relationship hangs on", marked in a neutral colour,
+                    // so it does not compete for colour with brand (unread) or mesh (the teal-exclusive channel).
                     if showAnonymousTag && chat.chatInfo.incognito {
                         Label(Copy.anonymousTag, systemImage: "eye.slash")
                             .font(PopopxType.microTag)
@@ -653,8 +653,8 @@ private struct PopopxContactRow: View {
         return nil
     }
 
-    /// 未读口径直接复用 `ChatStats`（既有字段），显示文本复用 `unreadCountText`（ChatPreviewView.swift:554），
-    /// 颜色按 §1.4 第 4 条取 `brand`，不用绿色。
+    /// The unread definition reuses `ChatStats` directly (an existing field) and the display text reuses `unreadCountText` (ChatPreviewView.swift:554),
+    /// and the colour is `brand` per §1.4 item 4, never green.
     @ViewBuilder private var unreadBadge: some View {
         let stats = chat.chatStats
         if stats.unreadCount > 0 || stats.unreadChat {
@@ -669,17 +669,17 @@ private struct PopopxContactRow: View {
     }
 }
 
-/// 8pt 圆角头像。本工程头像是 base64 串而不是文件，所以只能走既有的 `ProfileImage`；
-/// 它内部按用户自己的 `DEFAULT_PROFILE_IMAGE_CORNER_RADIUS` 偏好裁剪，本层再套一个 `radiusAvatar`
-/// 的方形容器：偏好更圆时容器不起作用（圆的图裁不出角），偏好更方时统一收到 8pt。
-/// 仓库里没有「身份 → 颜色」的助手函数（colorForProfile/identityColor/profileColor 全 0 命中），
-/// 而 §1.1 规定颜色只承载通道语义，因此这里刻意不做「每人一色」，占位图标一律 `brand`（在线 SMP 列表）。
+/// An 8pt rounded avatar. In this project avatars are base64 strings rather than files, so only the existing `ProfileImage` can be used;
+/// internally it crops by the user's own `DEFAULT_PROFILE_IMAGE_CORNER_RADIUS` preference, and this layer wraps another `radiusAvatar`
+/// square container on top: when the preference is rounder the container does nothing (a round image has no corner left to clip), when it is squarer everything is pulled back to 8pt.
+/// The repository has no "identity → colour" helper (colorForProfile/identityColor/profileColor all return 0 hits),
+/// and §1.1 says colour carries channel semantics only, so "one colour per person" is deliberately not done here and placeholder icons are always `brand` (the online SMP list).
 private struct PopopxAvatar: View {
     let chat: Chat
     let size: CGFloat
     var tint: Color = PopopxPalette.brand
-    /// 没有自定义头像时用哪个符号。默认 `nil` = 保持原样的人像符号；频道页传 `chatIconName`
-    /// （公共频道是天线条，`POPOPXChat/ChatTypes.swift:3091`），这样头像位说的就是会话自己的类型。
+    /// Which symbol to use when there is no custom avatar. The default `nil` = the original as-is person symbol; the channel page passes `chatIconName`
+    /// (a public channel gets the antenna, `POPOPXChat/ChatTypes.swift:3091`), so what the avatar slot says is the chat's own type.
     var icon: String? = nil
 
     var body: some View {
@@ -698,7 +698,7 @@ private struct PopopxAvatar: View {
     }
 }
 
-// MARK: - 右侧 A–Z 索引
+// // MARK: - Right-hand A–Z index
 
 private struct PopopxAlphabetIndex: View {
     let keys: [String]
@@ -724,12 +724,12 @@ private struct PopopxAlphabetIndex: View {
         }
         .padding(.vertical, PopopxMetrics.spaceXS)
         .background(PopopxMaterial.chip, in: .capsule)
-        // 密集快捷条不满足 44pt，因此对辅助技术隐藏，同一能力由导航栏的「按字母跳转」菜单承担。
+        // The dense shortcut strip does not meet 44pt, so it is hidden from assistive technology and the same capability is carried by the navigation bar's "jump by letter" menu.
         .accessibilityHidden(true)
     }
 }
 
-// MARK: - 通知条 / 空态
+// // MARK: - Notice bar / empty state
 
 private struct PopopxNotice<Trailing: View>: View {
     let text: String
@@ -785,7 +785,7 @@ private struct PopopxEmptyState: View {
     }
 }
 
-// MARK: - 新的加密连接页
+// // MARK: - The new encrypted connection page
 
 private struct PopopxNewConnectionsPage: View {
     @EnvironmentObject private var chatModel: ChatModel
@@ -877,8 +877,8 @@ private struct PopopxNewConnectionsPage: View {
         }
     }
 
-    /// 正在建立中的连接。它们的名字来自核心（`PendingContactConnection.displayName` 是本地化英文
-    /// 短语），本页不翻译它们，因此只以本机可说的状态呈现，且不可点开（会话还没成立）。
+    /// Connections being established. Their names come from the core (`PendingContactConnection.displayName` is a localised English
+    /// phrase), this page does not translate them, so they are presented only with a state this device can state, and are not tappable (the chat does not exist yet).
     private var pendingConnections: [Chat] {
         chatModel.chats.filter { $0.chatInfo.chatType == .contactConnection }
     }
@@ -916,7 +916,7 @@ private struct PopopxEmptyRow: View {
     }
 }
 
-/// 一条在线加密连接请求：三个动作都走既有 API，按钮形状用原子库的自适应网格。
+/// One online encrypted connection request: all three actions go through existing APIs, and the button shape uses the atomic library's adaptive grid.
 private struct PopopxContactRequestRow: View {
     @EnvironmentObject private var chatModel: ChatModel
 
@@ -968,8 +968,8 @@ private struct PopopxContactRequestRow: View {
         return Copy.requestNote
     }
 
-    /// `acceptContactRequest` 自带 `inProgress` 绑定（POPOPXAPI.swift:1551），成功后
-    /// `ChatModel` 会把这条请求换成联系人会话，本行随列表消失。
+    /// `acceptContactRequest` brings its own `inProgress` binding (POPOPXAPI.swift:1551), and on success
+    /// `ChatModel` turns this request into a contact chat, so the row disappears along with the list.
     @MainActor private func decide(incognito: Bool) async {
         guard chatModel.chatRunning == true else {
             toast.show(Copy.engineNotReadyToast, kind: .danger)
@@ -995,7 +995,7 @@ private struct PopopxContactRequestRow: View {
     }
 }
 
-/// 一条厢语待确认配对。这里的每一处颜色都是青绿家族，且不出现 `brand` —— 一行只说一条通道。
+/// One Cabin pairing awaiting confirmation. Every colour here is from the teal family and `brand` never appears — one row speaks of one channel only.
 private struct PopopxMeshPairingRow: View {
     let request: PopopxPairingRequest
     let toast: PopopxToastModel
@@ -1008,7 +1008,7 @@ private struct PopopxMeshPairingRow: View {
                 Image(systemName: "antenna.radiowaves.left.and.right")
                     .font(PopopxType.microTag)
                     .imageScale(.medium)
-                    // `mesh` 实底只能配 `onMesh`（亮青底放白字/深青字都读不出，见 PopopxTheme.swift:83）。
+                    // `mesh` solid can only be paired with `onMesh` (on the bright teal ground neither white nor dark teal text reads out, see PopopxTheme.swift:83).
                     .foregroundStyle(PopopxPalette.onMesh)
                     .frame(width: PopopxMetrics.spaceXL, height: PopopxMetrics.spaceXL)
                     .background(PopopxPalette.mesh, in: .rect(cornerRadius: PopopxMetrics.radiusChip))
@@ -1055,7 +1055,7 @@ private struct PopopxMeshPairingRow: View {
         inProgress = true
         defer { inProgress = false }
         do {
-            // 模块 3 是类型化抛出（`throws(PopopxPairingError)`）；失败绝不静默。
+            // Module 3 throws with a typed error (`throws(PopopxPairingError)`); a failure is never left silent.
             _ = try await PopopxMeshRuntime.shared.pairing.approve(request)
             toast.show(Copy.meshApprovedToast, kind: .mesh)
         } catch {
@@ -1074,13 +1074,13 @@ private struct PopopxMeshPairingRow: View {
     }
 }
 
-// MARK: - 我的加密群组页
+// // MARK: - My encrypted groups page
 
 private struct PopopxGroupsPage: View {
     @EnvironmentObject private var chatModel: ChatModel
 
-    /// 右上角「创建加密群组」的去处：与「消息」栏右上角那条同一个页面、同一个目的地
-    /// （`ChatsListView` 的 `showsCreateGroup`），挂载方式照抄 `NewChatMenuButton.swift:89-93`。
+    /// Where the top-right "create encrypted group" goes: the same page and the same destination as the one in the Messages tab's top-right corner
+    /// (`ChatsListView`'s `showsCreateGroup`), and the mounting style copies `NewChatMenuButton.swift:89-93` verbatim.
     @State private var showsCreateGroup = false
 
     private struct Row {
@@ -1109,9 +1109,9 @@ private struct PopopxGroupsPage: View {
         }
         .background(PopopxPalette.base)
         .navigationTitle(Copy.groupsTitle)
-        // 真机反馈：这一页只有"已有群组"，一个建群的入口都没有，要退回上一级去「消息」栏的 + 里找。
-        // 空态那一行原本也是这么说的（`groupsEmptyNote`），所以这一枚把那条路搬到眼前，
-        // 空态文案随之改成不再指路的说法。
+        // Real-device feedback: this page only had "existing groups", with not one entry to create a group, so you had to go back up a level and look in the Messages tab's +.
+        // The empty-state row originally said exactly that (`groupsEmptyNote`), so this button brings that path right in front of the user,
+        // and the empty-state copy was changed along with it into wording that no longer points elsewhere.
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
@@ -1151,7 +1151,7 @@ private struct PopopxGroupsPage: View {
                   groupInfo.businessChat == nil,
                   !groupInfo.isChannel,
                   groupInfo.membership.memberCurrent else { return nil }
-            // 「我创建的」用模型自己的谓词，不在此重算角色规则（POPOPXChat/ChatTypes.swift:3075）。
+            // "created by me" uses the model's own predicate, and the role rules are not recomputed here (POPOPXChat/ChatTypes.swift:3075).
             return Row(chat: chat, isOwner: groupInfo.isOwner)
         }
     }
@@ -1160,22 +1160,22 @@ private struct PopopxGroupsPage: View {
     private var joined: [Row] { groups.filter { !$0.isOwner } }
 }
 
-// MARK: - 我关注的频道页
+// // MARK: - Channels I follow page
 
-/// 频道判据只写一处：置顶那行的数字和这一页的行必须说同一件事，否则角标会和列表打脸。
+/// The channel test is written in one place only: the pinned row's number and this page's rows must say the same thing, otherwise the badge contradicts the list.
 private func isPopopxChannel(_ chat: Chat) -> Bool {
     guard !chat.chatInfo.chatDeleted, !chat.chatInfo.contactCard else { return false }
     guard let groupInfo = chat.chatInfo.groupInfo else { return false }
     // `ChatInfo.isChannel` = `groupInfo?.useRelays == true`（POPOPXChat/ChatTypes.swift:2296）；
-    // `memberCurrent` 与上面群组页 `groups` 同一条口径：已经退出的不再算"关注的频道"。
+    // `memberCurrent` follows the same definition as the `groups` of the groups page above: a channel already left is no longer a "channel I follow".
     return chat.chatInfo.isChannel && groupInfo.membership.memberCurrent
 }
 
 @MainActor private struct PopopxChannelsPage: View {
     @EnvironmentObject private var chatModel: ChatModel
 
-    /// 预览开关与「消息」栏那一格是同一格（`ChatsListView.swift:146`）：用户关掉消息预览是为了
-    /// "不在列表里读内容"，这一页不能绕过它自己去读一条，所以关掉时整行不给活动那一行。
+    /// The preview switch is the same cell as the Messages tab's (`ChatsListView.swift:146`): a user who turns message preview off does so to
+    /// "not read content in the list", and this page must not bypass it and read one anyway, so when it is off the whole row gets no activity line.
     @AppStorage(DEFAULT_PRIVACY_SHOW_CHAT_PREVIEWS) private var showChatPreviews = true
 
     var body: some View {
@@ -1203,9 +1203,9 @@ private func isPopopxChannel(_ chat: Chat) -> Bool {
         }
         .background(PopopxPalette.base)
         .navigationTitle(Copy.channelsTitle)
-        // 加入频道的真路径只有一条：频道链接／二维码 → `planAndConnect` → `apiConnectPlan` →
-        // `.groupLink` → `apiConnect`（`NewChatView.swift:1320`、`:1522`）。这一枚把那条已有的
-        // 扫描／粘贴页接到这里，不新造任何订阅机制。
+        // There is only one real path to join a channel: channel link / QR code → `planAndConnect` → `apiConnectPlan` →
+        // `.groupLink` → `apiConnect` (`NewChatView.swift:1320`, `:1522`). This button wires that existing
+        // scan/paste page to here, and creates no new subscription mechanism.
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink(value: PopopxContactsRoute.joinChannel) {
@@ -1215,13 +1215,13 @@ private func isPopopxChannel(_ chat: Chat) -> Bool {
         }
     }
 
-    /// 顺序沿用 `chatModel.chats` 本身，与「消息」栏同一口径（`ChatsListView.swift:418` 也没另起一套排序）。
+    /// The order follows `chatModel.chats` itself, the same definition as the Messages tab (`ChatsListView.swift:418` does not start a second sort either).
     private var channels: [Chat] { chatModel.chats.filter(isPopopxChannel) }
 }
 
-/// 一行频道：天线符号（身份）+ 名称 + 最新活动时间 + 未读，点开走群组页那同一条 `loadOpenChat`。
-/// `@MainActor` + `@ObservedObject`：未读与"最新一条"都是 `Chat` 自己的 `@Published`，
-/// 不观察就只有整页重算时才动（同 `ChatsListView.swift` 的 `PopopxChatRow`）。
+/// One channel row: antenna symbol (identity) + name + latest activity time + unread, and opening it goes through the same `loadOpenChat` the groups page uses.
+/// `@MainActor` + `@ObservedObject`: the unread count and the "latest item" are both `Chat`'s own `@Published`,
+/// and without observing them they only move when the whole page recomputes (same as `PopopxChatRow` in `ChatsListView.swift`).
 @MainActor private struct PopopxChannelRow: View {
     @ObservedObject var chat: Chat
     let showsPreview: Bool
@@ -1238,8 +1238,8 @@ private func isPopopxChannel(_ chat: Chat) -> Bool {
 
                 VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
                     HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.space2XS) {
-                        // 频道的身份符号：没有自定义头像时天线已经在头像位上，有自定义头像时
-                        // 由这一枚说"这是一路单向广播，不是群聊"（符号取自 ChatTypes.swift:5747）。
+                        // The channel's identity symbol: with no custom avatar the antenna is already in the avatar slot, and with a custom avatar
+                        // it is this one that says "this is a one-way broadcast, not a group chat" (the symbol comes from ChatTypes.swift:5747).
                         Image(systemName: "antenna.radiowaves.left.and.right")
                             .font(PopopxType.microTag)
                             .imageScale(.medium)
@@ -1280,8 +1280,8 @@ private func isPopopxChannel(_ chat: Chat) -> Bool {
             .foregroundStyle(PopopxPalette.labelSecondary)
     }
 
-    /// 关掉预览时返回 nil（整行不写那一行），而不是编一句"内容已隐藏"占位；
-    /// 撤回／过滤过的条目由 `ChatItem.text` 自己给出既有的本地化说法。
+    /// Returns nil when the preview is off (the row simply does not write that line), instead of inventing a "content hidden" placeholder;
+    /// recalled/filtered items get the existing localised wording from `ChatItem.text` itself.
     private var activity: String? {
         guard showsPreview else { return nil }
         guard let item = chat.chatItems.last else { return Copy.channelNoActivity }
@@ -1289,7 +1289,7 @@ private func isPopopxChannel(_ chat: Chat) -> Bool {
         return text.isEmpty ? Copy.channelNoActivity : text
     }
 
-    /// 未读口径与 `PopopxContactRow` 同一处：`ChatStats.unreadCount`，没有数字时也算一条未读。
+    /// The unread definition is the same place as `PopopxContactRow`'s: `ChatStats.unreadCount`, and with no number it still counts as one unread.
     @ViewBuilder private var unreadBadge: some View {
         let stats = chat.chatStats
         if stats.unreadCount > 0 || stats.unreadChat {
@@ -1304,7 +1304,7 @@ private func isPopopxChannel(_ chat: Chat) -> Bool {
     }
 }
 
-// MARK: - 按匿名身份分组弹层
+// // MARK: - Group-by-anonymous-identity sheet
 
 private struct PopopxIdentitySheet: View {
     @EnvironmentObject private var chatModel: ChatModel
@@ -1366,10 +1366,10 @@ private struct PopopxIdentitySheet: View {
         chatModel.users.filter { !$0.user.hidden }
     }
 
-    /// 未读口径照抄 `ChatModel.totalUnreadCountForAllUsers()`（Shared/Model/ChatModel.swift:1187）：
-    /// 当前身份从自己的会话累加（并按各会话的通知设置只数未读或未提及），其它身份读核心维护的
-    /// `UserInfo.unreadCount`（旧身份选择器同一口径，Shared/Views/ChatList/UserPicker.swift:181）。
-    /// 这里不另起一套计数，否则弹层里的数字和角标/图标徽标会互相打脸。
+    /// The unread definition copies `ChatModel.totalUnreadCountForAllUsers()` (Shared/Model/ChatModel.swift:1187):
+    /// the current identity sums from its own chats (respecting each chat's notification setting, counting only unread or only mentioned), and other identities read the core-maintained
+    /// `UserInfo.unreadCount` (the same definition as the old identity picker, Shared/Views/ChatList/UserPicker.swift:181).
+    /// No second counting scheme is started here, otherwise the numbers in the sheet would contradict the badge and the icon badge.
     private func unread(for info: UserInfo) -> Int {
         guard info.user.activeUser else { return info.unreadCount }
         return chatModel.chats.reduce(0) { total, chat in
@@ -1472,16 +1472,16 @@ private struct PopopxIdentityRow: View {
 
 // MARK: - Copy
 
-/// 页面上每一句中文只在这里出现一次。
+/// Every Chinese sentence on the page appears here exactly once.
 private enum Copy {
-    /// 本轮（真机第 3 轮）新增的两句话走「英文原句即 Key」：`en.lproj` 按约定不写，
-    /// 读不到词条就回落 Key 本身，那就是英文。其余成员仍是 Phase 4 的中文直写，本轮不动。
+    /// The two sentences added this round (real-device round 3) use "the English source sentence is the Key": by convention `en.lproj` is not written,
+    /// a missing entry falls back to the Key itself, which is English. The remaining members are still Phase 4's direct Chinese writes and this round does not touch them.
     private static func key(_ value: String) -> String {
         NSLocalizedString(value, comment: "POPOPX contacts groups")
     }
 
-    /// 带数字的句子一律只给一个占位符（`%d`），16 种语序不同不能靠位置排多个参数
-    /// （口径同 `PopopxTelemetryCopy.fmt`）。
+    /// A sentence carrying a number always gets exactly one placeholder (`%d`); with 16 languages the word order differs, so several parameters cannot be laid out by position
+    /// (same standard as `PopopxTelemetryCopy.fmt`).
     private static func fmt(_ value: String, _ argument: CVarArg) -> String {
         String(format: key(value), argument)
     }
@@ -1529,7 +1529,7 @@ private enum Copy {
     static let noMatchTitle = key("No matching people")
     static let noMatchNote = key("Try a different part of a name; groups and contacts are searched together.")
 
-    // 新的加密连接页
+    // // The new encrypted connection page
     static let onlineSectionTitle = key("Online encrypted connection requests")
     static let onlineSectionFootnote = key("Accepting adds the other person to your contacts; accepting anonymously builds this connection under another identity.")
     static let onlineEmptyTitle = key("No requests waiting for confirmation")
@@ -1565,31 +1565,31 @@ private enum Copy {
     static let pendingUnnamedConnection = key("Unnamed connection")
     static let pendingConnectionNote = key("Waiting for the other side to confirm")
 
-    // 群组页
+    // // Groups page
     static let groupsOwnedTitle = key("Groups you created")
     static let groupsJoinedTitle = key("Groups you joined")
     static let groupsSectionFootnote = key("Channels and shop groups are not part of Contacts; they appear only in their own lists.")
     static func memberCount(_ count: Int64) -> String { fmt("%lld members", count) }
     static let groupsEmptyTitle = key("No encrypted groups yet")
-    /// 这一句原来指路到「消息」栏右上角的 + ；这一页自己长出创建入口后那句话就成了假路，
-    /// 所以随本轮改词，并借这次改词转成 Key（英文系统下原来会露出中文）。
+    /// This sentence originally pointed to the + in the Messages tab's top-right corner; once this page grew its own create entry that sentence became a false path,
+    /// so it was reworded this round and, riding on that rewording, turned into a Key (under an English system it used to leak Chinese).
     static let groupsEmptyNote = key("Start one with the plus button in the top right corner.")
     static let groupsNoneTitle = key("None yet")
     static let groupsNoneNote = key("No groups in this category yet.")
 
-    // 频道页（本轮新增：置顶那一行 + 「我关注的频道」页 + 「加入频道」）
+    // // Channels page (added this round: the pinned row + the "channels I follow" page + "join channel")
     static let channelsTitle = key("Subscribed channels")
     static let channelsNoteEmpty = key("No channels yet")
     static func channelsNote(_ count: Int) -> String { fmt("%d channels you follow", count) }
     static let channelsEmptyNote = key("Use Join channel in the top right corner to open a channel from a link or a QR code, or create a public channel with the plus button on the Messages tab.")
     static let channelNoActivity = key("No messages in this channel yet")
-    /// 复用既有词条：`"Join channel"`（zh-Hans:3710「加入频道」）与 `"Paste link / Scan"`
-    /// （zh-Hans:4785「粘贴链接 / 扫描」）都已经在目录里 —— 各有 7 个目录（de/es/fr/hu/it/ru/zh-Hans），
-    /// 其余目录回落英文原句。上面六句新造的还哪本目录都没有，等集中补译。
+    /// Reusing existing entries: `"Join channel"` (zh-Hans:3710) and `"Paste link / Scan"`
+    /// (zh-Hans:4785) are already in the catalogues — each has 7 catalogues (de/es/fr/hu/it/ru/zh-Hans),
+    /// and the remaining catalogues fall back to the English source sentence. The six newly coined sentences above are in no catalogue at all yet, waiting for a batch translation pass.
     static let joinChannelEntry = key("Join channel")
     static let joinChannelPageTitle = key("Paste link / Scan")
 
-    // 身份弹层
+    // // Identity sheet
     static let identityListTitle = key("Anonymous identities on this device")
     static let identityHiddenNote = key("Hidden identities that carry a password are not listed here; unlock them with the password on the Me tab, then switch.")
     static let identityEmptyTitle = key("Only one identity")

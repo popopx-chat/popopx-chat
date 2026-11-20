@@ -2,59 +2,59 @@
 //  ProfileAutoSender.swift
 //  POPOPX (iOS)
 //
-//  【加密个人主页 · 模块四】双模智能感知与自动推送引擎。
+//  [Encrypted personal profile · module 4] the dual-mode intelligent sensing and automatic push engine.
 //
-//  这个文件只做一件事：把一份 `PopopxProfileManifest` 变成网络上真实的一条消息，并且说清楚
-//  它最终走了哪条路、丢了什么。它不画界面、不读相册、不碰磁盘布局（那三件分别归
+//  This file does one thing only: turn a `PopopxProfileManifest` into a real message on the network, and make clear
+//  which road it ended up taking and what it lost. It draws no interface, reads no photo library, and touches no on-disk layout (those three belong respectively to
 //  `ProfileBuilderView`、`ProfileStorageManager`、`PersonalProfileModel`）。
 //
-//  ### 两个触发源，一条发送链
-//  1. **触发源 B（聊天内手动）**：`ProfileSendModeSheet` 的 `onSend` 回调 → `send(_:to:)`
-//     （ProfileBuilderView.swift:818-836 交出 manifest，ComposeView 那一侧由 lead engineer 接线）。
-//  2. **触发源 A（扫码自动）**：连接事件总线 → `handleContactConnected(contactId:)`
-//     （现网点位 `Shared/Model/POPOPXAPI.swift:2651`-`:2665` 的 `case let .contactConnected(user, contact, _)`，
-//     lead engineer 在那里加一行调用）。没有武装场景时这个函数第一个 `guard` 就返回，
-//     不留日志、不建 Task、不读盘 —— 一次扫码都不该发生的事，不能在每一次建连时都发生一遍。
+//  ### Two trigger sources, one send chain
+//  1. **Trigger source B (manual, inside chat)**: the `onSend` callback of `ProfileSendModeSheet` → `send(_:to:)`
+//     (ProfileBuilderView.swift:818-836 hands over the manifest, and the ComposeView side is wired by the lead engineer).
+//  2. **Trigger source A (automatic after scanning)**: the connection event bus → `handleContactConnected(contactId:)`
+//     (the live location `Shared/Model/POPOPXAPI.swift:2651`-`:2665`, `case let .contactConnected(user, contact, _)`,
+//     where the lead engineer adds one call line). With no armed scenario this function returns at its first `guard`,
+//     leaving no log, creating no Task, reading no disk — something that should not happen for a single scan cannot be allowed to happen on every connection.
 //
-//  ### 为什么 `scene=personal_profile` 不在 URI 里（已定裁定，一句话版）
-//  `apiAddContact` 铸出来的串归 Rust 核心，Swift 侧没有往邀请链接里追加查询键的先例
-//  （`POPOPXAPI.swift:1050` 交回 `CreatedConnLink`，`APITypes.swift:185` 只做前缀替换）；
-//  `popopxChatLink()` 会把 `popopx:/` 前缀改写成 `https://popopx.chat/`；
-//  而离线那条 `PopopxOfflineBridge.forbiddenLinkCharacters`（:101）明令禁止 `$ \` " '`。
-//  所以这个标记只能是**本机武装元数据**，由已经在场的 `contactConnected` 事件消费 ——
-//  标记进 URI 要改协议，进本机状态只需要改这一个文件。
+//  ### Why `scene=personal_profile` is not in the URI (a settled ruling, one-sentence version)
+//  The string minted by `apiAddContact` belongs to the Rust core, and on the Swift side there is no precedent of appending query keys to an invite link
+//  (`POPOPXAPI.swift:1050` hands back `CreatedConnLink`, `APITypes.swift:185` only replaces the prefix);
+//  `popopxChatLink()` rewrites the `popopx:/` prefix into `https://popopx.chat/`;
+//  while on the offline road `PopopxOfflineBridge.forbiddenLinkCharacters` (:101) explicitly forbids `$ \ " '`.
+//  So this marker can only be **local arming metadata**, consumed by the `contactConnected` event that is already present —
+//  putting the marker into the URI would mean changing the protocol, putting it into local state only means changing this one file.
 //
-//  ### 送达方式不是用户选的，是链路决定的
-//  `deliveryMode` 在草稿里恒为 `.fullMedia`（ProfileBuilderView.swift:22-24 那条裁定）。本文件在
-//  发送那一刻问现网的决策器（`PopopxComposerRouting`，`Shared/Features/ChatRoom/PopopxInputBar.swift:324`）：
-//  它说蓝牙是唯一通路时，才做 `.meshTextOnly` 降级并写 `omittedMediaCount`。自己数信号强度、
-//  自己判 `NWPathMonitor`、自己猜邻居，都会在模块 5 之外多出第二张判定表 —— 那张表漂移一次，
-//  界面上"下一条会走哪条通道"和真正走的那条就从此各说各话。
+//  ### The delivery method is not chosen by the user, it is decided by the link
+//  `deliveryMode` is always `.fullMedia` in a draft (the ruling at ProfileBuilderView.swift:22-24). At the moment of sending, this file
+//  asks the live decision maker (`PopopxComposerRouting`, `Shared/Features/ChatRoom/PopopxInputBar.swift:324`):
+//  only when it says Bluetooth is the only path does it perform the `.meshTextOnly` downgrade and write `omittedMediaCount`. Counting signal strength ourselves,
+//  judging `NWPathMonitor` ourselves, guessing at neighbours ourselves, would all add a second decision table outside module 5 — and once that table drifts,
+//  "which channel the next one takes" in the interface and the channel actually taken talk past each other from then on.
 //
-//  判定表对"带媒体的内容"的结论永远是 `.richContent`（PopopxInputBar.swift:359-:361），所以本文件
-//  把 `hasAttachments` 如实报进去（一份挂着媒体原件的主页确实带不动），要降级时**先用
-//  `manifest.textOnly` 投影过一遍再重问一次判定表**，mesh 分支发出去的是降级后的纯文字索引载荷本身。
+//  The decision table's conclusion for "content carrying media" is always `.richContent` (PopopxInputBar.swift:359-:361), so this file
+//  reports `hasAttachments` truthfully (a profile hung with original media files really cannot be carried), and when downgrading it **first projects through
+//  `manifest.textOnly` and asks the decision table again**, and what the mesh branch sends out is the downgraded plain-text index payload itself.
 //
-//  `data=<base64url(JSON)>` 是**混淆**，不是加密：这一段清单自己不带任何密钥，保密的是传输 ——
-//  公网那一条 SMP 端到端，蓝牙那一条厢语在 Noise 通道上跑，两者都不是这里能加的东西。
+//  `data=<base64url(JSON)>` is **obfuscation**, not encryption: this manifest segment carries no key of its own; what keeps it secret is the transport —
+//  the public-network leg is SMP end-to-end, the Bluetooth leg is Cabin running over a Noise channel, and neither is something that can be added from here.
 //
-//  ### 媒体原件走的是普通 XFTP 附件
-//  索引载荷（那行 `popopx://profile?…`）先到，图片/视频随后按 manifest 的顺序逐条发。每条附件的
-//  文件名带上可关联回 profile 的标识（见 `attachmentFileName`）：**接收端靠这个文件名把已送达的
-//  附件归到 `profileId` 下**。⚠️ 发送端自定义的文件名能否原样出现在接收端的 `CIFile.fileName` 上，
-//  本文件未做端到端验证（依据只是 `fileName` 是网络上的一项且 `CIFile: Decodable`，
-//  `POPOPXChat/ChatTypes.swift:5181`），详见交付报告。
+//  ### The original media files go through ordinary XFTP attachments
+//  The index payload (that `popopx://profile?…` line) arrives first, then images/videos are sent one by one in the manifest's order. Each attachment's
+//  file name carries an identifier that can be correlated back to the profile (see `attachmentFileName`): **the receiving side uses this file name to group the delivered
+//  attachments under `profileId`**. ⚠️ Whether a sender-defined file name appears verbatim on the receiver's `CIFile.fileName`
+//  has not been verified end to end by this file (the only basis is that `fileName` is an item on the wire and that `CIFile: Decodable`,
+//  `POPOPXChat/ChatTypes.swift:5181`); see the delivery report for details.
 //
-//  ### 后台那一扇约 30 秒的窗
-//  APNs 静默推送与 `beginBGTask`（`POPOPXAPI.swift:71`-`:91`）给到的续作窗口按系统惯例只有约 30 秒，
-//  而且随时可能被 `expirationHandler` 提前掐掉。所以媒体队列每一发之前都问一次
-//  `UIApplication.shared.backgroundTimeRemaining`，窗不够就停手，把已经送达的 mediaId 记进
-//  `pendingMedia`（内存表，键 = profileId + contactId），下一次同一份主页再发给同一个人时跳过它们。
-//  这张表**不落盘**：`ProfileStorageManager` 已经是这个特性唯一的存储路径，为一次没发完的队列再开
-//  一条持久化通道，代价是"用户发过哪些媒体"在备份里留下一份索引副本。**重启即忘**，
-//  这是本实现的真实边界，不假称自己有断点续传。
+//  ### The background window of about 30 seconds
+//  The continuation window given by APNs silent pushes and `beginBGTask` (`POPOPXAPI.swift:71`-`:91`) is only about 30 seconds by system convention,
+//  and `expirationHandler` may cut it short at any moment. So before every send the media queue asks once about
+//  `UIApplication.shared.backgroundTimeRemaining`, stops when the window is too small, and records the already delivered mediaIds into
+//  `pendingMedia` (an in-memory table, key = profileId + contactId), skipping them the next time the same profile goes to the same person.
+//  This table **does not go to disk**: `ProfileStorageManager` is already this feature's only storage path, and opening a further
+//  persistence channel for one unfinished queue would cost an index copy of "which media the user has sent" left in the backup. **Forgotten on restart**,
+//  that is the real boundary of this implementation; it does not falsely claim resumable transfers.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. The red line forbids scripts from modifying project.pbxproj.
 //
 
 import POPOPXChat
@@ -62,46 +62,46 @@ import PopopxMeshKit
 import SwiftUI
 import UIKit
 
-// MARK: - 发送结果
+// MARK: - Send result
 
-/// 一次发送最终成了什么。四个分支互斥：发了全媒体、发了降级文字、被规则拒了、链路自己失败了。
+/// What a send finally became. The four branches are exclusive: full media sent, downgraded text sent, refused by the rules, the link itself failed.
 enum PopopxProfileSendOutcome: Hashable, Sendable {
-    /// 公网 SMP 那一支：索引载荷交进了发送链路，媒体随后排队。
-    /// - `indexSent`: 索引载荷那一条有没有被服务端收走（false = 一条都没出去，媒体自然也没发）。
-    /// - `mediaQueued`: 这一次实际排出去几件媒体原件。**不含**上一轮后台窗口里已送达的件数
-    ///   （那些被 `pendingMedia` 跳过，理由见文件头"30 秒窗"那一节）。
+    /// The public-network SMP branch: the index payload was handed into the send chain, and the media queue up behind it.
+    /// - `indexSent`: whether the index payload line was accepted by the server (false = not one line went out, so naturally no media either).
+    /// - `mediaQueued`: how many original media items were actually queued this time. It **excludes** the items already delivered in the previous background window
+    ///   (they are skipped by `pendingMedia`, the reason is in the file header's "30-second window" section).
     case sentFullMedia(indexSent: Bool, mediaQueued: Int)
-    /// 蓝牙 Mesh 那一支：只送了纯文字索引载荷。`omittedMediaCount` 取自降级后的清单。
+    /// The Bluetooth Mesh branch: only the plain-text index payload was sent. `omittedMediaCount` is taken from the downgraded manifest.
     case sentMeshTextOnly(omittedMediaCount: Int)
-    /// 规则层面的拒绝：内容没问题，但这次发送根本不该发生（会话不对、没保存主页、字节超预算…）。
+    /// A rule-level refusal: the content is fine, but this send should not have happened at all (wrong conversation, profile not saved, bytes over budget…).
     case refused(PopopxProfileSendRefusal)
-    /// 链路层面的失败：该发的都尝试了，是网络或核心没接住。`reason` 是给用户看的一行中文。
+    /// A link-level failure: everything that should be sent was attempted, and the network or the core did not catch it. `reason` is a one-line Chinese string for the user.
     case failed(reason: String)
 }
 
-/// 拒绝的原因。每一条都能被界面直接念出来，所以它自带一句话；`nil` = 这一条不该由这里说。
+/// The reason for refusing. Every one can be read out by the interface directly, so it carries its own sentence; `nil` = this one should not be said from here.
 enum PopopxProfileSendRefusal: Hashable, Sendable, CustomStringConvertible {
-    /// 本机没有已保存的主页（扫码自动那条路唯一可能的拒绝）。
+    /// There is no saved profile on this device (the only possible refusal on the scan-triggered automatic road).
     case noSavedProfile
-    /// 会话当前不允许发送（`ChatInfo.sendMsgEnabled` 为 false，ChatTypes.swift:2260）。
+    /// The conversation does not currently allow sending (`ChatInfo.sendMsgEnabled` is false, ChatTypes.swift:2260).
     case sendDisabled
-    /// 目标不是 1:1 直聊联系人：群、频道、本机笔记、待接受的连接都不行。
+    /// The target is not a 1:1 direct contact: groups, channels, this device's notes, and connections awaiting acceptance are all excluded.
     case notDirectContact
-    /// 降级后的纯文字名片仍超出 Mesh 单条消息的字节预算。
+    /// Even the downgraded plain-text card exceeds the byte budget of a single Mesh message.
     case payloadTooLarge(bytes: Int)
-    /// 公网不通且蓝牙也带不走（`reason` 抄自现网决策器，不是本文件自己猜的）。
+    /// The public network is unreachable and Bluetooth cannot carry it either (`reason` is copied from the live decision maker, not guessed by this file).
     case meshUnavailable(reason: String)
-    /// 宿主侧还没准备好（本机没有可用身份 / 载荷空得反常）。
+    /// The host side is not ready yet (no usable identity on this device / the payload is abnormally empty).
     case hostNotReady(reason: String)
 
-    /// 一行中文，可直接进 `PopopxToast`。`nil` 表示这句话由别的界面负责说。
+    /// A one-line Chinese string that can go straight into `PopopxToast`. `nil` means some other interface is responsible for saying it.
     var explanation: String? {
         switch self {
         case .noSavedProfile:
             return SenderCopy.refusalNoSavedProfile
         case .sendDisabled:
-            // 宿主对这一条已经有原话（ComposeView.swift:1375-1376 弹的就是「会话未就绪」），
-            // 同一次点击叠两层提示只会让用户以为是两件不同的事坏了。
+            // The host already has its own wording for this one (ComposeView.swift:1375-1376 pops exactly "conversation not ready"),
+            // and stacking two hints onto the same tap only makes the user think two different things broke.
             return nil
         case .notDirectContact:
             return SenderCopy.refusalNotDirectContact
@@ -118,8 +118,8 @@ enum PopopxProfileSendRefusal: Hashable, Sendable, CustomStringConvertible {
         }
     }
 
-    /// 日志用的稳定标识。永远不进界面：界面只读 `explanation`（这也是"不要 print 用户可见错误"
-    /// 这条要求在本文件里的落点 —— 用户听得见的那几句全部走返回值，`logger` 里只有这一列标识）。
+    /// A stable identifier for logging. It never enters the interface: the interface reads only `explanation` (this is also where the requirement
+    /// "do not print user-visible errors" lands in this file — the lines the user can hear all travel through return values, and `logger` holds only this identifier column).
     var description: String {
         switch self {
         case .noSavedProfile: return "noSavedProfile"
@@ -132,52 +132,52 @@ enum PopopxProfileSendRefusal: Hashable, Sendable, CustomStringConvertible {
     }
 }
 
-// MARK: - 武装场景
+// MARK: - Arming scenario
 
-/// 扫码建连之后要自动推送哪一档主页。它是**本机状态**，不是网络上的一部分（理由见文件头）。
+/// Which profile tier to push automatically after a scan establishes the connection. It is **local state**, not part of the network (reason in the file header).
 struct PopopxArmedProfileScene: Hashable, Sendable {
     let mode: PopopxProfileSendMode
-    /// 秒。`mode == .standard` 时恒为 0（协议那一侧的要求，PersonalProfileModel.swift:399-406）。
+    /// Seconds. Always 0 when `mode == .standard` (the requirement on the protocol side, PersonalProfileModel.swift:399-406).
     let ttlSeconds: Int
-    /// 这次武装什么时候作废。过期即清：不能留一个"随时可能因为一次毫不相干的建连而突然发出名片"的开关。
+    /// When this arming expires. Expired means cleared: no switch may be left that "could suddenly send out a card at any moment because of some wholly unrelated connection".
     let expiresAt: Date
 }
 
-// MARK: - 引擎
+// MARK: - The engine
 
-/// 单例线程安全的方式和这个特性的其它 UI 侧对象一致：`@MainActor final class`。
+/// The singleton's thread-safety approach matches this feature's other UI-side objects: `@MainActor final class`.
 ///
-/// 主 actor 上**没有**任何阻塞 I/O：读原件全部 `await` 到 `ProfileStorageManager`（那是 actor），
-/// 把字节变成待发附件那一次落盘放在 `Task.detached` 里（见 `stage(_:profileId:)`），
-/// 网络那侧本来就全是 async。
+/// There is **no** blocking I/O on the main actor: reading originals all `await`s into `ProfileStorageManager` (that is an actor),
+/// The one disk write that turns bytes into a pending attachment lives inside `Task.detached` (see `stage(_:profileId:)`),
+/// and the network side is entirely async anyway.
 @MainActor
 final class ProfileAutoSender {
     static let shared = ProfileAutoSender()
 
-    /// 武装场景的有效期。给 15 分钟：扫码 → 对方确认 → SMP 建连握手 → `contactConnected`，
-    /// 慢链路走完这四步用不了这么久，但对方在确认页上停几分钟完全正常。超过这个时间还没建连，
-    /// 说明那次扫码已经作废（用户退出、对方没按、网断了）—— 留着它只会在一次毫不相干的建连上
-    /// 突然发出一份名片，那比"没发出去"严重得多。
+    /// The validity period of the arming scenario. 15 minutes: scan → the other side confirms → SMP connection handshake → `contactConnected`,
+    /// a slow link does not need that long for these four steps, but the other side sitting on the confirmation page for a few minutes is perfectly normal. If no connection exists after this time,
+    /// then that scan is already void (the user left, the other side never pressed, the network dropped) — keeping it would only, on some wholly unrelated connection,
+    /// suddenly send out a card, which is far more serious than "it was not sent".
     static let armingWindowSeconds: TimeInterval = 900
 
-    /// 后台窗口低于这个秒数就不再开新的一发：一次 XFTP 上传 + SMP ACK 用不了 5 秒，但**开始**
-    /// 一发然后在中途被系统掐掉，会让用户看到一条永远停在"传输中"的附件。
+    /// When the background window drops below this many seconds, no new send is started: one XFTP upload + SMP ACK takes less than 5 seconds, but **starting**
+    /// a send and then having the system cut it mid-way leaves the user looking at an attachment stuck at "transferring" forever.
     static let backgroundResumeFloorSeconds: TimeInterval = 5
 
-    /// 武装的档位。`nil` = 没武装，`handleContactConnected` 因此可以直接返回。
+    /// The armed tier. `nil` = not armed, so `handleContactConnected` can return directly.
     private(set) var armedProfileScene: PopopxArmedProfileScene?
 
     private let store = ProfileStorageManager.shared
 
-    /// 这次武装的时长是不是"绑给对方"的。见 `armProfileScene(mode:ttlSeconds:ttlIsBoundToContact:)`。
+    /// Whether this arming's duration is "bound to that contact". See `armProfileScene(mode:ttlSeconds:ttlIsBoundToContact:)`.
     private var armedTTLIsBoundToContact = false
 
-    /// 上一轮（可能被后台窗口掐断的）媒体队列里**已经送达**的 mediaId。
-    /// 键 = profileId + contactId：同一份主页发给另一个人必须重新发全套，跳过只发生在同一个人身上。
+    /// The mediaIds **already delivered** from the previous round of the media queue (which the background window may have cut off).
+    /// Key = profileId + contactId: sending the same profile to another person must resend the full set, skipping only happens for the same person.
     private var pendingMedia: [MediaKey: Set<String>] = [:]
 
-    /// 已送达记录的主键。独立类型而不是 `"profileId:contactId"` 拼串：拼串那一侧要自己保证
-    /// 分隔符不会出现在成员里，而这里两个成员的类型已经把它们关死了。
+    /// The primary key of a delivered record. A standalone type rather than a `"profileId:contactId"` concatenation: a concatenation must itself guarantee
+    /// that the separator never appears inside a member, whereas here the two members' types have already locked them down.
     private struct MediaKey: Hashable {
         let profileId: String
         let contactId: Int64
@@ -185,24 +185,24 @@ final class ProfileAutoSender {
 
     private init() {}
 
-    // MARK: 武装与取消
+    // MARK: Arming and cancelling
 
-    /// 武装"扫码建连后自动推送"。标记存在本机而不是塞进邀请 URI —— 理由见文件头那一节
-    /// （`apiAddContact` 无追加查询键的先例、`popopxChatLink` 会改写前缀、离线桥禁 `$ \` " '`）。
+    /// Arm the "automatic push after a scan establishes the connection". The marker is stored on this device instead of being stuffed into the invite URI — reason in the file-header section
+    /// (`apiAddContact` has no precedent for appending query keys, `popopxChatLink` rewrites the prefix, and the offline bridge forbids `$ \ " '`).
     ///
-    /// - Parameter ttlIsBoundToContact: true = 这一次选的时长就是将来那个人拿到的时长；
-    ///   false = 只带模式，时长沿用已保存主页自己的那一格。`PopopxArmedProfileScene` 的三格是
-    ///   契约定死的（mode/ttlSeconds/expiresAt），所以这一格只能存在本类里，不进那个结构。
+    /// - Parameter ttlIsBoundToContact: true = the duration chosen this time is the duration that person will get;
+    ///   false = only the mode is carried, the duration keeps the saved profile's own field. `PopopxArmedProfileScene`'s three fields are
+    ///   fixed by the contract (mode/ttlSeconds/expiresAt), so this field can only live in this class and does not go into that struct.
     func armProfileScene(mode: PopopxProfileSendMode, ttlSeconds: Int, ttlIsBoundToContact: Bool) {
         let effectiveTTL: Int
         switch mode {
         case .standard:
             effectiveTTL = 0
         case .ephemeral:
-            // 越界的时长在这一格就收进协议允许的区间，而不是把 0 或 3000 交出去、
-            // 让 `PopopxProfilePayload.make` 在一次用户看不见的自动发送里拒掉它
-            // （PersonalProfileModel.swift:389-411）：武装那一刻没有人在等一个错误，夹住值是唯一
-            // 有意义的处理。三档 UI 取值本来就落在区间内，这条 clamp 兜的是别处传进来的野值。
+            // An out-of-range duration is pulled into the range the protocol allows right here, instead of handing out 0 or 3000 and
+            // letting `PopopxProfilePayload.make` refuse it inside an automatic send the user never sees
+            // (PersonalProfileModel.swift:389-411): at the moment of arming nobody is waiting for an error, so clamping the value is the only
+            // meaningful handling. The three UI tiers already fall inside the range, so this clamp catches stray values passed in from elsewhere.
             effectiveTTL = min(
                 max(ttlSeconds, PopopxProfilePayload.minimumTTLSeconds),
                 PopopxProfilePayload.maximumTTLSeconds
@@ -217,7 +217,7 @@ final class ProfileAutoSender {
         logger.notice("POPOPX profile: scan auto-push armed (\(mode.rawValue, privacy: .public), ttl=\(effectiveTTL, privacy: .public), boundToContact=\(ttlIsBoundToContact, privacy: .public))")
     }
 
-    /// 取消武装。幂等：没武装时调用什么都不会发生。
+    /// Cancel the arming. Idempotent: calling it while nothing is armed does nothing at all.
     func cancelArmedProfileScene() {
         guard armedProfileScene != nil else { return }
         armedProfileScene = nil
@@ -225,19 +225,19 @@ final class ProfileAutoSender {
         logger.notice("POPOPX profile: scan auto-push disarmed")
     }
 
-    // MARK: 触发源 A：扫码建连后自动推送
+    // MARK: Trigger source A: automatic push after a scan establishes the connection
 
-    /// 由连接事件总线调用（现网点位 `POPOPXAPI.swift:2640`-`:2665`）。
+    /// Called by the connection event bus (live location `POPOPXAPI.swift:2640`-`:2665`).
     ///
-    /// 三个硬要求，都写在这几行里：
-    /// 1. 没武装 → 第一个 `guard` 就返回：不读盘、不建 Task、不打日志。这条函数在**每一次**
-    ///    建连上都会被调用，把它变成一次副作用的起点等于给所有普通加好友的动作加一次静默发名片的机会。
-    /// 2. 武装过期 → 就地清掉再返回，不带着一个已经作废的档位继续走下去。
-    /// 3. 找到会话才发。找不到会话时**保留**武装（等有效期那一格自己收）：`contactConnected` 里
-    ///    `ChatModel.updateContact` 与这次调用在同一批主线程工作中，这次没排上未必下次也没有。
+    /// Three hard requirements, all written in these few lines:
+    /// 1. Not armed → return at the first `guard`: no disk read, no Task, no log. This function is called on **every single**
+    ///    connection, so making it the origin of a side effect is giving every ordinary friend-adding action a chance to silently send a card.
+    /// 2. Arming expired → clear it on the spot and return, never carrying a voided tier further down the road.
+    /// 3. Send only when the conversation is found. When it is not found the arming is **kept** (letting the validity field close itself): inside `contactConnected`,
+    ///    `ChatModel.updateContact` and this call are in the same batch of main-thread work, so missing it this time does not mean it misses next time.
     ///
-    /// 自动那一支的结果只进日志、不弹界面：这一条路径上没有用户在等答案，一次成功的推送本来就该
-    /// 只是聊天流里多出一张名片；要给它加回执的位置在事件总线那一侧（lead engineer 接线处）。
+    /// The result of the automatic branch only goes into the log, never into an interface: no user is waiting for an answer on this path, and a successful push should simply
+    /// be one more card appearing in the chat stream; the place to add a receipt for it is on the event-bus side (where the lead engineer wires it).
     func handleContactConnected(contactId: Int64) async {
         guard let scene = armedProfileScene else { return }
         guard scene.expiresAt > Date() else {
@@ -251,8 +251,8 @@ final class ProfileAutoSender {
             logger.notice("POPOPX profile: no saved profile on this device, auto-push cancelled (\(PopopxProfileSendRefusal.noSavedProfile.description, privacy: .public))")
             return
         }
-        // 一次扫码一次推送：不管结果如何都不留武装。失败了也不重试 —— 重试的时机（下一次建连）
-        // 根本不是同一次扫码的语义。
+        // One scan, one push: no arming is kept regardless of the outcome. A failure is not retried either — the retry moment (the next connection)
+        // is simply not the semantics of this same scan.
         cancelArmedProfileScene()
         let outcome = await send(applyScene(scene, to: saved), to: chat)
         switch outcome {
@@ -267,8 +267,8 @@ final class ProfileAutoSender {
         }
     }
 
-    /// 把武装档位盖到已保存的主页上。改的只有这一次发送的两格，草稿一动不动
-    /// （`ProfileSendModeSheet` 同一条规矩，ProfileBuilderView.swift:813-816）。
+    /// Overlay the armed tier onto the saved profile. Only the two fields of this send change, the draft stays untouched
+    /// (the same rule as `ProfileSendModeSheet`, ProfileBuilderView.swift:813-816).
     private func applyScene(_ scene: PopopxArmedProfileScene, to saved: PopopxProfileManifest) -> PopopxProfileManifest {
         var target = saved
         target.sendMode = scene.mode
@@ -279,8 +279,8 @@ final class ProfileAutoSender {
             if armedTTLIsBoundToContact {
                 target.ttlSeconds = scene.ttlSeconds
             } else {
-                // 不绑对方时沿用草稿自己那一格；草稿的 0（常驻档留下的）不能带进隐私档，
-                // 否则 `make` 会以 `invalidTTL(0)` 拒掉整次发送。
+                // When it is not bound to the contact, the draft's own field is kept; the draft's 0 (left over from the permanent tier) must not be carried into the privacy tier,
+                // otherwise `make` refuses the whole send with `invalidTTL(0)`.
                 target.ttlSeconds = saved.ttlSeconds >= PopopxProfilePayload.minimumTTLSeconds
                     ? min(saved.ttlSeconds, PopopxProfilePayload.maximumTTLSeconds)
                     : PopopxProfilePayload.ttlOptions.isEmpty
@@ -291,12 +291,12 @@ final class ProfileAutoSender {
         return target
     }
 
-    // MARK: 触发源 B：聊天内手动发送
+    // MARK: Trigger source B: manual send inside the chat
 
-    /// 把一份主页发给这个会话。`ProfileSendModeSheet` 交回来的 manifest 就是它的入参
+    /// Send a profile to this conversation. The manifest handed back by `ProfileSendModeSheet` is its input parameter
     /// （`onSend: (PopopxProfileManifest) -> Void`，ProfileBuilderView.swift:822）。
     func send(_ manifest: PopopxProfileManifest, to chat: Chat) async -> PopopxProfileSendOutcome {
-        // 会话形状：只有 1:1 直聊联系人在服务端有队列可写，也没有别的地址能把一条消息递过去。
+        // Conversation shape: only a 1:1 direct contact has a queue that can be written on the server side, and there is no other address through which a message could be delivered.
         guard let contactId = chat.chatInfo.contact?.contactId else {
             return .refused(.notDirectContact)
         }
@@ -307,17 +307,17 @@ final class ProfileAutoSender {
             return .refused(.hostNotReady(reason: SenderCopy.hostNoActiveUser))
         }
 
-        // 两份载荷一次铸好：公网那份带全媒体，蓝牙那份是 `textOnly` 投影。两者都过 `make` 那道门
-        // （先验后规范化，PersonalProfileModel.swift:389-411），所以 `delivery=mesh` 那一条
-        // 落到网络上时 `omittedMediaCount` 与块表一定自洽。
+        // Both payloads are minted in one go: the public-network one carries all media, the Bluetooth one is the `textOnly` projection. Both pass through the `make` gate
+        // (validate first, then normalise, PersonalProfileModel.swift:389-411), so by the time the `delivery=mesh` line
+        // reaches the network, `omittedMediaCount` and the block table are certainly self-consistent.
         let fullPayload: PopopxProfilePayload
         let meshPayload: PopopxProfilePayload
         do {
             fullPayload = try PopopxProfilePayload.make(manifest)
             meshPayload = try PopopxProfilePayload.make(manifest.textOnly)
         } catch let failure as PopopxProfileError {
-            // 载荷层的原话已经是中文、已经带上具体数字（PersonalProfileModel.swift:329-350），
-            // 这里不另造第二套句子。
+            // The payload layer's own wording is already Chinese and already carries the concrete numbers (PersonalProfileModel.swift:329-350),
+            // so no second set of sentences is invented here.
             return .failed(reason: failure.reasonText)
         } catch let failure as PopopxProfileMediaError {
             return .failed(reason: failure.reasonText)
@@ -335,16 +335,16 @@ final class ProfileAutoSender {
         }
     }
 
-    // MARK: 路由决策
+    // MARK: Routing decision
 
-    /// 本文件对链路的全部判断。两个分支都真实存在，而判定全部借现网那张表。
+    /// This file's entire judgement about the link. Both branches really exist, and every decision is borrowed from the live decision table.
     private enum RouteChoice {
-        /// 公网 SMP：索引载荷 + 媒体原件。快照只用于失败时说清是哪一条规则把蓝牙挡在门外的。
+        /// Public-network SMP: index payload + original media. The snapshot is only used, on failure, to say which rule kept Bluetooth outside the door.
         case viaSMP(PopopxMeshEligibility)
-        /// 蓝牙 Mesh：交给路由器的那条消息，文本必须是**降级后的纯文字索引载荷**
-        /// （`meshPayload.messageContent`，`delivery=mesh`），不是原始那份。
+        /// Bluetooth Mesh: the message handed to the router must have the **downgraded plain-text index payload** as its text
+        /// (`meshPayload.messageContent`, `delivery=mesh`), not the original one.
         case viaMesh(PopopxOutboundMessage, omittedMediaCount: Int)
-        /// 两条路都不通，或者超预算。
+        /// Neither road works, or the budget is exceeded.
         case refused(PopopxProfileSendRefusal)
     }
 
@@ -355,9 +355,9 @@ final class ProfileAutoSender {
     ) async -> RouteChoice {
         let eligibility = await PopopxInputBarModel.resolveFromRuntime(contactId: contactId)
         var context = PopopxComposerContext.directContact(contactId)
-        // 把"这份主页挂着媒体原件"如实报给判定表：带媒体的内容不该交给蓝牙
-        // （PopopxInputBar.swift:359-:361 那条 `.richContent`），于是第一次 dispatch 的答复
-        // 只反映"这份完整的名片能不能走蓝牙"，答案对带媒体的那份永远是"不能"。
+        // Report "this profile carries original media files" truthfully to the decision table: content carrying media should not be given to Bluetooth
+        // (the `.richContent` rule at PopopxInputBar.swift:359-:361), so the answer of the first dispatch
+        // only reflects "can this complete card go over Bluetooth", and for the one carrying media the answer is always "no".
         context.hasAttachments = fullPayload.manifest.mediaCount > 0
 
         switch PopopxComposerRouting.dispatch(
@@ -367,14 +367,14 @@ final class ProfileAutoSender {
             ttlSeconds: nil
         ) {
         case let .routeViaMesh(message):
-            // 一份只有文字的主页，判定表直接放行蓝牙。发出去仍然要用降级投影：它唯一的变化是
-            // `delivery=mesh` 那一格，而阅读器要靠这一格画出厢语那条青绿横幅。判定表铸好的那条
-            // 消息带着原始文本，这里换掉文本、留下 id 与地址 —— 重试幂等靠的就是那个 id。
+            // For a profile with only text, the decision table releases Bluetooth directly. What is sent must still be the downgraded projection: its only change is
+            // the `delivery=mesh` field, and the reader needs that field to draw Cabin's teal banner. The message the decision table minted
+            // carries the original text, so here the text is swapped while the id and the address stay — retry idempotence rests on exactly that id.
             return meshChoice(eligibility: eligibility, from: message, payload: meshPayload)
 
         case .hostShouldSend:
-            // 只有"公网确实断了"（`false`；`nil` = NWPathMonitor 还没报过，不猜成在线也不猜成断）
-            // 才值得降级重问一次。有网或状态未知都交回宿主那条正常链路（SMP + XFTP 媒体原件）。
+            // Only "the public network really is down" (`false`; `nil` = NWPathMonitor has not reported yet, so it is guessed neither online nor down)
+            // is worth asking once more with the downgrade. Having network, or an unknown state, both go back to the host's normal link (SMP + XFTP original media).
             guard eligibility.networkConnected == false else {
                 return .viaSMP(eligibility)
             }
@@ -389,36 +389,36 @@ final class ProfileAutoSender {
             case let .routeViaMesh(message):
                 return meshChoice(eligibility: eligibility, from: message, payload: meshPayload)
             case let .hostShouldSend(meshRefusal):
-                // 判定表在降级之后仍然把消息退回宿主 = 蓝牙也带不走。这时**不**假装 SMP 还能发：
-                // 断网状态下 `apiSendMessages` 只会以一次超时失败收尾，说清原因比试一次有用。
+                // If the decision table still returns the message to the host after the downgrade, Bluetooth cannot carry it either. Then do **not** pretend SMP can still send:
+                // offline, `apiSendMessages` only ends in one timeout failure, and stating the reason clearly is more useful than trying once.
                 return .refused(.meshUnavailable(reason: Self.meshBlockText(meshRefusal)))
             case .ignoreEmptyDraft:
                 return .refused(.hostNotReady(reason: SenderCopy.hostEmptyPayload))
             }
 
         case .ignoreEmptyDraft:
-            // `messageContent` 恒为非空（degradeLine 至少带 "👤 [加密个人主页]"，
-            // PersonalProfileModel.swift:441-:443）。走到这里只可能是载荷契约被改坏了，
-            // 按"宿主没准备好"报出去，不静默。
+            // `messageContent` is never empty (degradeLine carries at least "👤 [Encrypted personal profile]",
+            // PersonalProfileModel.swift:441-:443). Reaching here can only mean the payload contract was broken,
+            // so it is reported as "the host is not ready" rather than kept silent.
             return .refused(.hostNotReady(reason: SenderCopy.hostEmptyPayload))
         }
     }
 
-    /// 把判定表放行的一份降级载荷收进 mesh 分支：先量字节，超预算就在这里拒掉，
-    /// 不把一条注定刷爆中继的名片交出去。
+    /// Fold one decision-table-released downgraded payload into the mesh branch: measure the bytes first, and if it is over budget refuse it here,
+    /// rather than handing out a card that is certain to flood the relay.
     ///
-    /// 交给路由器的是判定表铸好的那条消息的**同一 id / 同一地址**，只有文本换成降级后的载荷 ——
-    /// id 是路由器去重与重试幂等的唯一依据（`PopopxMessageRouter.swift:627-:640`），换一个 id
-    /// 等于让对方收到两张一模一样的名片。
+    /// What goes to the router is the **same id / same address** of the message the decision table minted, with only the text replaced by the downgraded payload —
+    /// the id is the router's sole basis for deduplication and retry idempotence (`PopopxMessageRouter.swift:627-:640`), and swapping the id
+    /// means letting the other side receive two exactly identical cards.
     private func meshChoice(
         eligibility: PopopxMeshEligibility,
         from message: PopopxOutboundMessage,
         payload: PopopxProfilePayload
     ) -> RouteChoice {
         guard eligibility.fuseOn else {
-            // 熔断关着时绝不走 mesh。判定表在 `fuseOn == false` 时已经退回宿主，所以这一条
-            // 正常到不了；留着它是因为"fuse 关了不许走蓝牙"是硬要求，该在代码里有一道看得见的门，
-            // 而不是只在注释里。
+            // Never take mesh while the circuit breaker is off. The decision table already returns the message to the host when `fuseOn == false`, so this line
+            // is normally unreachable; it stays because "no Bluetooth while the fuse is off" is a hard requirement that deserves a visible gate in the code,
+            // rather than one only in a comment.
             return .refused(.meshUnavailable(reason: SenderCopy.meshFuseOff))
         }
         let text = payload.messageContent
@@ -432,12 +432,12 @@ final class ProfileAutoSender {
         )
     }
 
-    /// 降级之后仍然退回宿主时，那一条理由怎么说给用户听。
+    /// When the message still returns to the host after downgrading, how that one reason is worded for the user.
     ///
-    /// 判定表的 `explanation`（PopopxInputBar.swift:183-:192）故意只给"内容本身不该走蓝牙"那几条
-    /// 附一句人话，网格事实那几条返回 nil。这里把 nil 的那几条补全，是因为**断网 + 蓝牙带不走**
-    /// 是本文件独有的场景：宿主正常发送时用户不会关心总闸开没开，而在这里用户必须知道是哪一格
-    /// 拦住了这次推送，否则他只会看到一张没有动静的名片。
+    /// The decision table's `explanation` (PopopxInputBar.swift:183-:192) deliberately adds a human sentence only to the rules "the content itself should not go over Bluetooth"
+    /// and returns nil for the mesh-fact rules. The nil ones are filled in here because **offline + Bluetooth cannot carry it**
+    /// is a scenario unique to this file: during an ordinary host send the user does not care whether the master switch is on, but here the user must know which field
+    /// blocked this push, otherwise all they see is a card with nothing happening.
     private static func meshBlockText(_ reason: PopopxHostSendReason) -> String {
         switch reason {
         case .meshFuseOff: return SenderCopy.meshFuseOff
@@ -450,7 +450,7 @@ final class ProfileAutoSender {
         }
     }
 
-    // MARK: 分支 B：蓝牙 Mesh（厢语）
+    // MARK: Branch B: Bluetooth Mesh (Cabin)
 
     private func sendViaMesh(
         _ message: PopopxOutboundMessage,
@@ -458,30 +458,30 @@ final class ProfileAutoSender {
     ) async -> PopopxProfileSendOutcome {
         let bytes = message.text.utf8.count
         logger.notice("POPOPX profile: handed to the Bluetooth mesh (\(bytes, privacy: .public) bytes ≈ \(PopopxProfileMeshBudget.fragmentCount(forBytes: bytes), privacy: .public) fragments, \(omittedMediaCount, privacy: .public) media items omitted)")
-        // 不抛、不返回 nil：`PopopxMessageRouter.send(_:)` 交回一个带结论的 `PopopxRoutedMessage`
-        // （PopopxMessageRouter.swift:626-:686），全部可能都在这一个返回值里。
+        // Does not throw and does not return nil: `PopopxMessageRouter.send(_:)` hands back a `PopopxRoutedMessage` carrying a conclusion
+        // (PopopxMessageRouter.swift:626-:686), and every possibility is inside that one return value.
         let routed = await PopopxMeshRuntime.shared.router.send(message)
         switch routed.outcome {
         case let .smpAcknowledged(contactId):
-            // 路由器自己选了公网（有网时它的策略就是 SMP 优先，`PopopxMessageRouter.swift:650`-:657）。
-            // 交出去的那一条是纯文字投影，媒体原件一件都没排队 —— 按"只送了文字"报，不按
-            // "全媒体已发"报。⚠️ 结果枚举（契约定死的四支）里没有"文字走公网"这一支，通道这里
-            // 记在日志、用户能读到的那一支只说"文字出去了"，细节见交付报告。
+            // The router chose the public network itself (with network available its policy is SMP first, `PopopxMessageRouter.swift:650`-:657).
+            // The message handed out is the plain-text projection and not one original media file was queued — report it as "only text was sent", not as
+            // "full media sent". ⚠️ The result enum (the four branches fixed by the contract) has no branch for "text over the public network", so the channel is
+            // recorded in the log while the branch the user can read says only "the text went out"; details in the delivery report.
             logger.notice("POPOPX profile: Bluetooth allowed by the verdict, the router still delivers SMP-first (contact :\(contactId, privacy: .public); no media queued)")
             return .sentMeshTextOnly(omittedMediaCount: omittedMediaCount)
         case let .smpUnacknowledgedMeshParallel(contactId, peerMeshPublicKeyHex):
             logger.notice("POPOPX profile: the internet did not ACK within the limit, Bluetooth sent it concurrently (contact :\(contactId, privacy: .public) / neighbor \(peerMeshPublicKeyHex.prefix(8), privacy: .public))")
             return .sentMeshTextOnly(omittedMediaCount: omittedMediaCount)
         case let .smpUnacknowledgedNoMesh(contactId):
-            // 公网未确认、又没有第二条腿。这条尝试还在路由器手里飞行，之后可能进兜底队列。
+            // Unconfirmed on the public network and with no second leg. This attempt is still in flight inside the router and may later enter the fallback queue.
             logger.error("POPOPX profile: no ACK from the internet and no Bluetooth backup available (contact :\(contactId, privacy: .public))")
             return .failed(reason: SenderCopy.smpUnacknowledged)
         case let .meshSent(peerMeshPublicKeyHex):
             logger.notice("POPOPX profile: delivered over the mesh (neighbor \(peerMeshPublicKeyHex.prefix(8), privacy: .public))")
             return .sentMeshTextOnly(omittedMediaCount: omittedMediaCount)
         case let .queuedOffline(reason):
-            // 进了离线兜底队列，等邻居重新出现时由路由器补发同一 id。按"已送达纯文字"报出，
-            // 但队列那一侧才是真相 —— 已在交付说明里如实标为口径弱点。
+            // It entered the offline fallback queue, and when a neighbour reappears the router resends the same id. Reported as "plain text delivered",
+            // but the queue side is the truth — already marked honestly as a weak point of this reading in the delivery notes.
             logger.notice("POPOPX profile: neither path worked, the card went into the mesh fallback queue (\(reason.rawValue, privacy: .public))")
             return .sentMeshTextOnly(omittedMediaCount: omittedMediaCount)
         case .refusedUnboundStranger:
@@ -493,7 +493,7 @@ final class ProfileAutoSender {
         }
     }
 
-    // MARK: 分支 A：公网 SMP
+    // MARK: Branch A: public-network SMP
 
     private func sendViaSMP(
         _ payload: PopopxProfilePayload,
@@ -501,13 +501,13 @@ final class ProfileAutoSender {
         contactId: Int64,
         eligibility: PopopxMeshEligibility
     ) async -> PopopxProfileSendOutcome {
-        // 索引载荷：形状照 `popopxSendPlainViaSMP`（ComposeView.swift:1492-1507）——
-        // `apiSendMessages` + 把返回的 ChatItem 交回时间线。`apiSendMessages` 自己不抛错、
-        // 自己弹网络错误框（POPOPXAPI.swift:577-:613），所以这里不叠第二层提示。
+        // The index payload: shaped after `popopxSendPlainViaSMP` (ComposeView.swift:1492-1507) —
+        // `apiSendMessages` + handing the returned ChatItem back to the timeline. `apiSendMessages` itself throws no error and
+        // shows its own network error sheet (POPOPXAPI.swift:577-:613), so no second layer of prompting is stacked here.
         //
-        // `ttl` 一律传 nil：主页那一档"阅后即焚"是**收件方屏幕上**的销毁计时，不是 SMP 服务器上
-        // 消息的存活时间。把 300 塞进 `ttl` 会让索引消息从服务器消失，而"收件方读没读过"这件事
-        // 归 `ProfileStorageManager.readState` 那把钟管，两者混成一个参数就是两份语义互相覆盖。
+        // `ttl` is always passed nil: the profile's "view-once" tier is a destruction timer **on the recipient's screen**, not the lifetime of the
+        // message on the SMP server. Stuffing 300 into `ttl` would make the index message disappear from the server, while "whether the recipient read it"
+        // is governed by the clock at `ProfileStorageManager.readState`; mixing the two into one parameter is two semantics overwriting each other.
         let indexItems = await apiSendMessages(
             type: chat.chatInfo.chatType,
             id: chat.chatInfo.apiId,
@@ -529,15 +529,15 @@ final class ProfileAutoSender {
         return .sentFullMedia(indexSent: true, mediaQueued: queued)
     }
 
-    /// 按 manifest 的顺序逐件推送媒体原件。返回这一次实际排出去的件数。
+    /// Push the original media files one by one in the manifest's order. Returns how many items were actually queued this time.
     private func pushMedia(_ manifest: PopopxProfileManifest, to chat: Chat, contactId: Int64) async -> Int {
         let media = manifest.blocks.compactMap { $0.media }
         guard !media.isEmpty else { return 0 }
         let key = MediaKey(profileId: manifest.profileId, contactId: contactId)
         var delivered = pendingMedia[key] ?? []
         var queued = 0
-        // 后台保活：整段队列包在 `beginBGTask` 里（POPOPXAPI.swift:71-:91），`defer` 保证
-        // 无论走到哪一支都会把这次后台任务交回去 —— 漏一次 endTask 等于把 app 的后台额度长期占住。
+        // Background keep-alive: the whole queue is wrapped in `beginBGTask` (POPOPXAPI.swift:71-:91), and `defer` guarantees
+        // that whichever branch is taken, this background task is handed back — missing one endTask means holding the app's background allowance open for good.
         let endTask = beginBGTask(nil)
         defer { endTask() }
 
@@ -563,8 +563,8 @@ final class ProfileAutoSender {
                 )]
             )
             guard let items, !items.isEmpty else {
-                // `apiSendMessages` 已经把这一次的失败弹给用户了；这一件不进 delivered，
-                // 于是同一份主页下次发送时还会再试一次。
+                // `apiSendMessages` has already shown the failure of this one to the user; this item does not enter delivered,
+                // so the next send of the same profile will try it once more.
                 logger.error("POPOPX profile: the media original was not sent (media \(item.mediaId.prefix(8), privacy: .public))")
                 continue
             }
@@ -574,7 +574,7 @@ final class ProfileAutoSender {
             delivered.insert(item.mediaId)
             queued += 1
         }
-        // 这一份主页的全部媒体都在对方手里了就把这条记录抹掉：留着会让"再发一次"变成"一件都没发"。
+        // Once all the media of this profile is in the other side's hands, this record is wiped: keeping it would turn "send it again" into "nothing was sent at all".
         if delivered.isSuperset(of: Set(media.map { $0.mediaId })) {
             pendingMedia[key] = nil
         } else {
@@ -583,20 +583,20 @@ final class ProfileAutoSender {
         return queued
     }
 
-    // MARK: 媒体 → 待发附件
+    // MARK: Media → pending attachment
 
-    /// 一件媒体在本机的原件，和它作为待发附件的样子。
+    /// One medium's original file on this device, and what it looks like as a pending attachment.
     private struct StagedMedia {
         let file: CryptoFile
     }
 
-    /// 把沙盒里的主页原件变成一条待发附件。**这一段是整条链上唯一的重 I/O**：读最多 15 MB 的字节
-    /// 并写进 XFTP 的暂存目录，所以整块放在 `Task.detached` 里，主 actor 只 `await`。
+    /// Turn a profile original in the sandbox into a pending attachment. **This segment is the only heavy I/O in the whole chain**: reading up to 15 MB of bytes
+    /// and writing them into XFTP's staging directory, so the whole block sits in `Task.detached` while the main actor only `await`s.
     ///
-    /// 暂存用的是 app 已有的 `saveFile(_:fileName:encrypted:)`（`POPOPXChat/FileUtils.swift:271`）——
-    /// 那正是 `saveImage`/`saveFileFromURL` 底下的同一个函数（ImageUtils.swift:97-:104、:218-:241），
-    /// 所以主页没有新增第二条存储路径（红线：这个特性的原件存储只有 `ProfileStorageManager` 那一处，
-    /// 这里写的是发送侧的临时附件区，和用户在聊天里发一张图完全同一条路）。
+    /// Staging uses the app's existing `saveFile(_:fileName:encrypted:)` (`POPOPXChat/FileUtils.swift:271`) —
+    /// that is precisely the same function underneath `saveImage`/`saveFileFromURL` (ImageUtils.swift:97-:104, :218-:241),
+    /// so the profile adds no second storage path (red line: this feature's original-file storage is only the one place at `ProfileStorageManager`,
+    /// what is written here is the sender-side temporary attachment area, exactly the same road as a user sending an image in a chat).
     private func stage(_ media: PopopxProfileMedia, profileId: String) async -> StagedMedia? {
         let load = await store.loadMedia(media, profileId: profileId)
         let url: URL
@@ -623,48 +623,48 @@ final class ProfileAutoSender {
         return StagedMedia(file: staged)
     }
 
-    /// 附件文件名：`popopx-profile-<profileId>-<mediaId>.<ext>`。
+    /// Attachment file name: `popopx-profile-<profileId>-<mediaId>.<ext>`.
     ///
-    /// **接收端靠这个文件名把已送达的附件归到 `profileId` 下** —— `data=` 那段清单里只有编排骨架和
-    /// 字节数，媒体原件是普通 XFTP 附件，两者在网络上再无别的连接点。扩展名取自本机路径
-    /// （`ProfileStorageManager.mediaURL` 只可能给出 `jpg`/`mp4`，ProfileStorageManager.swift:167-:172、:373-:376），
-    /// 于是这里既不必复制那张扩展名表，也不可能拼出一个对端没见过的后缀。
+    /// **The receiving side uses this file name to group the delivered attachments under `profileId`** — the `data=` manifest segment holds only the arrangement skeleton and
+    /// byte counts, the media originals are ordinary XFTP attachments, and the two have no other connection point on the network. The extension is taken from the local path
+    /// (`ProfileStorageManager.mediaURL` can only yield `jpg`/`mp4`, ProfileStorageManager.swift:167-:172, :373-:376),
+    /// so this neither has to copy that extension table nor can it assemble a suffix the peer has never seen.
     ///
-    /// `profileId`/`mediaId` 都是 `UUID().uuidString.lowercased()`（PersonalProfileModel.swift:116-:118、:177），
-    /// 字符集是 `[a-z0-9-]`，直接进文件名是安全的。⚠️ 与 `saveFileFromURL` 那条不同，这里不经过
-    /// `uniqueCombine`：撞名会原地覆盖同名附件，而 UUID 级的 mediaId 决定它撞不上；
-    /// 真撞上了（同一份主页重发）覆盖的也是同样的字节。
+    /// `profileId`/`mediaId` are both `UUID().uuidString.lowercased()` (PersonalProfileModel.swift:116-:118, :177),
+    /// the character set is `[a-z0-9-]`, so putting them straight into a file name is safe. ⚠️ Unlike the `saveFileFromURL` road, this does not pass through
+    /// `uniqueCombine`: a name clash overwrites the same-named attachment in place, and a UUID-level mediaId decides that it cannot clash;
+    /// and if it really did clash (the same profile resent), the bytes overwritten are the same bytes anyway.
     static func attachmentFileName(profileId: String, media: PopopxProfileMedia, url: URL) -> String {
         "popopx-profile-\(profileId)-\(media.mediaId).\(url.pathExtension)"
     }
 
-    /// 附件那一条消息的可见文本。恒为一行（会话列表与通知横幅取的就是这一行），并且把关联标识
-    /// **也**写进文本：万一发送端自定义的文件名在对端被改写，这一行仍然能把附件认回它的主页。
+    /// The visible text of the attachment's message. Always one line (the conversation list and the notification banner take exactly this line), and the correlation identifier
+    /// is written into the text **as well**: should the sender-defined file name be rewritten on the peer, this line can still recognise the attachment back into its profile.
     private func attachmentLine(profileId: String, media: PopopxProfileMedia) -> String {
-        let head = "👤 [加密个人主页 · 附件] profile=\(profileId) media=\(media.mediaId)"
+        let head = "👤 " + NSLocalizedString("[Encrypted profile · attachment]", comment: "POPOPX profile share") + " profile=\(profileId) media=\(media.mediaId)"
         guard let caption = media.caption else { return head }
         let oneLine = caption.split(whereSeparator: \.isWhitespace).joined(separator: " ")
         return oneLine.isEmpty ? head : "\(head) · \(oneLine)"
     }
 }
 
-// MARK: - Mesh 字节预算
+// MARK: - Mesh byte budget
 
-/// 蓝牙那条路的字节上限，全部取自现网真实常量，本文件不新造任何一个数字。
+/// The byte ceiling of the Bluetooth road, all taken from real constants in the live app; this file invents no number whatsoever.
 ///
-/// - `PopopxProximityFrame.maxWireBytes = 8_192`（`PopopxProximityEngine.swift:110`）是 PopopxMeshKit
-///   里唯一公开的"一条载荷进核心之前能有多大"的上限。⚠️ 它写在**近场交换帧**的定义上，BLE 中继
-///   那一条并没有公开的等价常量（`PopopxMeshEngine` 会按链路的 `usablePayloadBytes` 自动分片，
-///   PopopxMeshEngine.swift:501-:455）。这里是**借用**，不是"BLE 真有这个硬上限"。借的理由：
-///   一份 6 KB 的清单 JSON 会被切成十几个 469 字节的分片，在 TTL 7 的洪泛里等于给自己制造一次
-///   广播风暴，而名片的文字量本来用不到那个量级 —— 超了就该让用户删字，而不是让中继替他扛。
-/// - `fragmentSize = 469` / `maxMTU = 512`（`PopopxMeshConfig.swift:27`、`:29`）只用来把"这份名片
-///   会切成几片"算出来写进日志，不参与拒绝判定。
+/// - `PopopxProximityFrame.maxWireBytes = 8_192` (`PopopxProximityEngine.swift:110`) is PopopxMeshKit's
+///   only public ceiling for "how big a payload may be before it enters the core". ⚠️ It is written on the definition of the **near-field exchange frame**, and the BLE relay
+///   road has no published equivalent constant (`PopopxMeshEngine` fragments automatically according to the link's `usablePayloadBytes`,
+///   PopopxMeshEngine.swift:501-:455). This is **borrowing**, not "BLE really has this hard ceiling". The reason for borrowing:
+///   a 6 KB manifest JSON would be cut into more than a dozen 469-byte fragments, which in a TTL 7 flood amounts to manufacturing
+///   a broadcast storm for yourself, and a card's amount of text never needs that magnitude anyway — over the limit, the user should delete text rather than the relay carrying it for them.
+/// - `fragmentSize = 469` / `maxMTU = 512` (`PopopxMeshConfig.swift:27`, `:29`) are only used to compute "how many fragments this card
+///   would be cut into" for the log, and take no part in the refusal decision.
 enum PopopxProfileMeshBudget {
-    /// 单条 mesh 名片消息（含给人看的那一行）允许的 UTF-8 字节上限。
+    /// The maximum UTF-8 bytes allowed for a single mesh card message (including the line shown to a person).
     static let maximumMessageBytes = PopopxProximityFrame.maxWireBytes
 
-    /// 按真实分片尺寸估算片数。只用于日志，不用于判定：判定只看 `maximumMessageBytes`。
+    /// Estimates the fragment count from the real fragment size. Used only for logging, not for deciding: the decision looks only at `maximumMessageBytes`.
     static func fragmentCount(forBytes bytes: Int) -> Int {
         let fragment = PopopxMeshConfig.default.fragmentSize
         guard fragment > 0 else { return 1 }
@@ -672,11 +672,11 @@ enum PopopxProfileMeshBudget {
     }
 }
 
-// MARK: - 文案
+// MARK: - Copy
 
-/// 本文件里所有会被用户听见的中文，只在这一处出现一次（`ProfileBuilderView.swift:1283` 那条
-/// `private enum Copy` 的规矩；这里因为要跨类型边界被 `PopopxProfileSendRefusal.explanation` 读，
-/// 所以是文件内可见的 `enum` 而不是某个类型里的私有成员）。
+/// All the Chinese in this file that a user can hear appears exactly once, here (ProfileBuilderView.swift:1283's
+/// `private enum Copy` rule; because here it must cross a type boundary and be read by `PopopxProfileSendRefusal.explanation`,
+/// it is a file-visible `enum` rather than a private member of some type).
 private enum SenderCopy {
     static let refusalNoSavedProfile = NSLocalizedString("No profile has been saved on this device yet. Build one under Me → Encrypted profile and save it, then scan or send.", comment: "")
     static let refusalNotDirectContact = NSLocalizedString("An encrypted profile can only be sent to a 1-to-1 contact.", comment: "")

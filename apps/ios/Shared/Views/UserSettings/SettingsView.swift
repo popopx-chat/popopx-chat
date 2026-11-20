@@ -387,13 +387,13 @@ struct SettingsView: View {
                     .foregroundColor(theme.colors.secondary)
             }
 
-            // 第二阶段 app 侧挂载的「离线组网」区块已在真机第 4 轮整块摘除（2026-11-20）：
-            // 总闸开关、配对策略、配对记录页入口三行与厢语右上角 `PopopxCabinMeshSettingsSheet` 说的是
-            // 同一批状态、写的也是同一个真值，两处并存等于给同一个开关做两套 UI —— 摘的是重复入口，
-            // 不是功能：熔断的唯一写入口仍是 `PopopxMeshRuntime.requestFuse(_:)`（kill switch 的镜像），
-            // 包里的 `MeshPrivacySettingsView` 用同名 UserDefaults key 写它，因此不会出现
-            // "开关是关的但蓝牙还在跑"或者反过来。广场页也从这里断开后仍有入口：
-            // `PopopxAddFriendView.swift:121`「更多方式 → 进入厢语」那一行仍挂 `MeshPlazaView`。
+            // The "offline mesh" block mounted on the app side in the second phase was removed wholesale in real-device round 4 (2026-11-20):
+            // the master switch, the pairing policy and the pairing records page entry - those three rows - and the `PopopxCabinMeshSettingsSheet` in the Cabin's top-right corner talk about
+            // the same set of states and write the same source of truth too, so keeping both would mean two UIs for one switch - what was removed is the duplicate entry,
+            // not a feature: the only write entry for the fuse is still `PopopxMeshRuntime.requestFuse(_:)` (the mirror of the kill switch),
+            // and `MeshPrivacySettingsView` in the package writes it through the UserDefaults key of the same name, so you never get
+            // "the switch is off but Bluetooth is still running", or the reverse. The plaza page is also disconnected from here and still has an entry:
+            // the "More ways → Enter the Cabin" row in `PopopxAddFriendView.swift:121` still mounts `MeshPlazaView`.
 
             Section(header: Text("Advanced settings").foregroundColor(theme.colors.secondary)) {
                 NavigationLink(value: ServersDestination.networkAndServers) {
@@ -586,10 +586,10 @@ struct SettingsView: View {
         return (icon, color)
     }
 
-    // 第二阶段 app 侧挂载的两条 mesh 绑定随上面那个区块一起摘除（真机第 4 轮，2026-11-20）：
-    // 这一页不再持有任何 mesh 状态，也不再需要 `PopopxMeshRuntime.shared`。
-    // 总闸与配对策略的唯一入口在厢语右上角那张 Sheet（`PopopxCabinMeshSettingsSheet`），
-    // 它写的仍是同一个协调者的 `requestFuse(_:)` / `setPairingPolicy(_:)`，状态源没有变成两份。
+    // The two mesh bindings mounted on the app side in the second phase were removed with the block above (real-device round 4, 2026-11-20):
+    // this page no longer holds any mesh state and no longer needs `PopopxMeshRuntime.shared`.
+    // The only entry for the master switch and the pairing policy is the sheet in the Cabin's top-right corner (`PopopxCabinMeshSettingsSheet`),
+    // and it still writes `requestFuse(_:)` / `setPairingPolicy(_:)` on the same coordinator, so the source of state did not become two.
 }
 
 func settingsRow<Content : View>(_ icon: String, color: Color/* = .secondary*/, content: @escaping () -> Content) -> some View {

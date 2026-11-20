@@ -6,7 +6,7 @@
 //  symmetric key in the Keychain, never together. Bitchat splits it the same way
 //  (`bitchat/Services/Groups/GroupStore.swift:56-230`), and for the same reason: the metadata is
 //  boring to an attacker, the key is the whole group, and only one of the two stores is
-//  `ThisDeviceOnly` and wiped by 模块 7's fuse.
+//  `ThisDeviceOnly` and wiped by module 7's fuse.
 //
 //  Two rules this type owns and enforces on every path, including the load from disk:
 //  * a group whose key is missing is not a group. `load()` drops it rather than keeping a shell the
@@ -29,8 +29,8 @@ public actor PopopxGroupStore {
     private var groups: [PopopxMeshGroup] = []
     private var didLoad = false
 
-    /// `directory` defaults to the mesh sandbox (`Documents/popopx_mesh/groups/`), which is 铁律 5's
-    /// rule for offline state and is what 模块 7's panic wipe already clears. A test injects a
+    /// `directory` defaults to the mesh sandbox (`Documents/popopx_mesh/groups/`), which is iron rule 5's
+    /// rule for offline state and is what module 7's panic wipe already clears. A test injects a
     /// temporary directory and never touches the real one.
     public init(
         secrets: any PopopxMeshSecretStoring = PopopxMeshKeychain.shared,
@@ -233,7 +233,7 @@ public actor PopopxGroupStore {
         try? persist()
     }
 
-    /// 模块 7's panic wipe calls this alongside `removeAll(service:)`: the metadata file goes too, so
+    /// Module 7's panic wipe calls this alongside `removeAll(service:)`: the metadata file goes too, so
     /// a restored backup cannot resurrect a group whose key no longer exists.
     public func wipe() {
         ensureLoaded()

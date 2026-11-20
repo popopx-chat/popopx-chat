@@ -2,7 +2,7 @@
 //  MeshGroupsView.swift
 //  PopopxMeshUI
 //
-//  厢语's private group surface (模块 8). Everything on this screen is Bluetooth-only traffic: a group
+//  Cabin's private group surface (module 8). Everything on this screen is Bluetooth-only traffic: a group
 //  is a name, a roster and a 32-byte key that live on these phones, and an invite is a blob the
 //  creator signs and sends 1:1 over the Noise session pairing already built. There is no server, no
 //  relay, no channel id and no passphrase — the creator's signature is what makes a membership real,
@@ -11,7 +11,7 @@
 //  Two things are added on top of the Kit: (1) a state object that folds the group event stream into
 //  one timeline — our own sealed messages and the neighbours' decrypted ones, by message id, oldest
 //  first — and (2) one view that is both the list and the thread. `NavigationView` is off the table
-//  and a push would need `NavigationStack`, which is iOS 16; this package's floor is iOS 15 (裁定 A),
+//  and a push would need `NavigationStack`, which is iOS 16; this package's floor is iOS 15 (ruling A),
 //  so selecting a group swaps the pane in place instead.
 //
 //  Style follows the rest of this target: system materials and semantic colours only, the same
@@ -46,7 +46,7 @@ public final class PopopxMeshGroupsModel: ObservableObject {
     @Published public private(set) var invitablePeers: [String] = []
     @Published public private(set) var radioState: PopopxBluetoothState = .unknown
     /// Our Ed25519 public key hex. Whether a group's creator row carries it is how this screen knows
-    /// the roster sheet should offer 邀请 / 移除 at all.
+    /// the roster sheet should offer Invite / Remove at all.
     @Published public private(set) var localSigningPublicKeyHex: String?
 
     /// The thread the detail pane shows. `nil` is the list pane, not "nothing selected".
@@ -267,7 +267,7 @@ public final class PopopxMeshGroupsModel: ObservableObject {
         }
     }
 
-    /// 模块 8's refusals in one line of copy each. `.peerNotResolved` is the one a host really hits —
+    /// Module 8's refusals, one line of copy each. `.peerNotResolved` is the one a host really hits —
     /// a peer whose signing key has never been announced cannot be pinned into a roster — so it says
     /// what to do about it rather than only what failed.
     /// The group layer's refusals go through the app's own table: `NSLocalizedString` resolves against

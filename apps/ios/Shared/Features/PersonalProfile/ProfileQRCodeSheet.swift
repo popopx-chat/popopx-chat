@@ -2,59 +2,59 @@
 //  ProfileQRCodeSheet.swift
 //  POPOPX (iOS)
 //
-//  【加密个人主页 · 模块三】专属主页名片码。一张 Wallet 质感的名片：紫色品牌底 + 当前匿名身份 +
-//  二维码 + 本张码分发的那一档模式，卡内可直接切换"常驻名片 / 打开后阅后即焚"，并把这一档**武装**
-//  给"扫码建连后自动推送"（`ProfileAutoSender.shared`）。
+//  [Encrypted personal profile · module 3] The dedicated profile card code. A card with a Wallet feel: purple brand background + the current anonymous identity +
+//  the QR code + the tier this code distributes; inside the card you can switch directly between "permanent card / view-once after opening", and this tier is **armed**
+//  for the "automatic push after a scan establishes the connection" (`ProfileAutoSender.shared`).
 //
-//  界面外形全部照 `Shared/Features/AddFriend/PopopxQRCardSheet.swift` 抄（它是本工程唯一一枚
-//  pass 卡）：`passCard` / `passSurface` / `passGradient` / `qrPlate` / `qrInk` / `linkPreview` /
-//  `securityNote` / `closeButton` / `actionRow` + `private enum Copy`。这里不重发明任何一件视觉规则，
-//  只多三样东西：模式分段、武装状态、相册保存。
+//  The interface's shape is copied wholesale from `Shared/Features/AddFriend/PopopxQRCardSheet.swift` (it is this project's only
+//  pass card): `passCard` / `passSurface` / `passGradient` / `qrPlate` / `qrInk` / `linkPreview` /
+//  `securityNote` / `closeButton` / `actionRow` + `private enum Copy`. No visual rule is reinvented here,
+//  only three things are added: the mode segments, the arming state, and saving to the photo library.
 //
-//  ### 红线（本文件必须遵守的那几条）
-//  - **本文件必须人工拖入 POPOPX (iOS) target；禁止用脚本修改 project.pbxproj。**
-//  - 二维码只用现成的 `POPOPXLinkQRCode`（`Shared/Views/NewChat/QRCode.swift:37`），这里不写一行
-//    CIFilter；颜色/间距/字体/材质全部来自 `PopopxTheme`；分享只用 `showShareSheet(items:)`
-//    （`Shared/Views/Helpers/ShareSheet.swift:27`），不新建 activityViewController 变体。
-//  - Sheet 自己不装导航容器、不自带头部栏；dismiss 归 `PopopxSheetContainer` 的调用方
-//    （PopopxQRCardSheet.swift:13-15 那条裁定），但关闭钮由本页给一颗（同 :174-182 的做法）。
-//  - 每一句中文只在 `Copy` 里出现一次。
+//  ### Red lines (the ones this file must obey)
+//  - **This file must be dragged into the POPOPX (iOS) target by hand; modifying project.pbxproj with a script is forbidden.**
+//  - The QR code only uses the existing `POPOPXLinkQRCode` (`Shared/Views/NewChat/QRCode.swift:37`), not one line of
+//    CIFilter is written here; colour/spacing/font/material all come from `PopopxTheme`; sharing only uses `showShareSheet(items:)`
+//    (`Shared/Views/Helpers/ShareSheet.swift:27`), with no new activityViewController variant.
+//  - The Sheet installs no navigation container of its own and brings no header bar; dismiss belongs to `PopopxSheetContainer`'s caller
+//    (the ruling at PopopxQRCardSheet.swift:13-15), but this page supplies one close button (same practice as :174-182).
+//  - Every Chinese sentence appears once only, inside `Copy`.
 //
-//  ### 二维码里装的是"联系地址"，不是主页本身（已实测的结论，WHY 就一行）
-//  `POPOPXLinkQRCode` 内部把 `uri` 再过一次 `popopxChatLink()`（QRCode.swift:44 →
-//  APITypes.swift:194-198），那个函数只替换 `popopx:/` 前缀；直接把 `popopx://profile?…` 喂进去会被
-//  改写成 `https://popopx.chat//profile?…`（多出来的那一个斜杠就是它把 `popopx:/` 换成
-//  `https://popopx.chat/` 之后剩下的第二个 `/`），扫出来是一个本 app 路由不到的地址。所以本码承载
-//  `PopopxInviteLink.mintOneTime` 铸出的联系地址，主页由 `ProfileAutoSender` 在建连之后另发一条消息。
-//  传进去的那一枚已经是 `popopxChatLink` 处理过的形态（PopopxTelemetryHeader.swift:418），再过一次是恒等，
-//  这一点是这个复用能成立的前提，不是巧合。
+//  ### The QR code carries a "contact address", not the profile itself (a conclusion already measured in practice, the WHY is one line)
+//  `POPOPXLinkQRCode` internally runs `uri` through `popopxChatLink()` once more (QRCode.swift:44 →
+//  APITypes.swift:194-198), and that function only replaces the `popopx:/` prefix; feeding `popopx://profile?…` in directly gets it
+//  rewritten into `https://popopx.chat//profile?…` (the extra slash is the second `/` left over after it swaps `popopx:/` for
+//  `https://popopx.chat/`), and scanning yields an address this app cannot route to. So this code carries
+//  the contact address minted by `PopopxInviteLink.mintOneTime`, while the profile is sent as another message by `ProfileAutoSender` after the connection.
+//  The one passed in is already in the form `popopxChatLink` produced (PopopxTelemetryHeader.swift:418), so running it through again is the identity,
+//  and that is the precondition on which this reuse holds, not a coincidence.
 //
-//  ### 飞行模式下这张码能做什么、不能做什么（不假装有离线钩子）
-//  它仍然是一条真的 `/_connect` 邀请：`PopopxInviteLink.mintOneTime` 底下就是
-//  `apiAddContact(incognito:)`（POPOPXAPI.swift:1050），与模块 6 离线配对的第一步同一个命令
-//  （`PopopxMeshChatCore.createOfflineInvite`，POPOPXAPI.swift:3470-3474 交回的就是
-//  `CreatedConnLink.connFullLink`）。**但它不能把主页从蓝牙递过去**：厢语那一条的邀请串要
+//  ### What this code can and cannot do in airplane mode (no pretending there is an offline hook)
+//  It is still a real `/_connect` invite: underneath `PopopxInviteLink.mintOneTime` is
+//  `apiAddContact(incognito:)` (POPOPXAPI.swift:1050), the same command as module 6's first offline-pairing step
+//  (`PopopxMeshChatCore.createOfflineInvite`, and what POPOPXAPI.swift:3470-3474 hands back is
+//  `CreatedConnLink.connFullLink`). **But it cannot deliver the profile over Bluetooth**: the invite string of the Cabin road needs the
 //  `PopopxOfflineBridge.generateOfflineInviteLink(meshPublicKeyHex:incognito:)`
-//  （PopopxOfflineBridge.swift:138）里的**对方厢语公钥**，而一枚摆在屏幕上等人扫的静态码不可能预先
-//  知道来扫的是哪台设备（现网每一个调用点都从一次真实的近场会话里拿到那颗公钥：
-//  ManualPairingManager.swift:133/:151、PopopxProximityEngine.swift:638/:643）。桥本身也不对 app 层
-//  开放：它只在 `PopopxMeshRuntime` 的私有 init 里被建出来一次（POPOPXAPI.swift:3777）。
-//  所以本卡片**不调用**离线桥，只在卡下把这一条如实写明；断网时主页发不出去由
-//  `ProfileAutoSender` 的降级分支（纯文字）负责，而不是靠这张码。
+//  (`PopopxOfflineBridge.swift:138`) **peer's Cabin public key**, and a static code sitting on a screen waiting to be scanned cannot know in advance
+//  which device will scan it (every call site in the live app obtains that public key from a real near-field session:
+//  ManualPairingManager.swift:133/:151, PopopxProximityEngine.swift:638/:643). Nor is the bridge itself open to the app layer:
+//  it is constructed exactly once inside `PopopxMeshRuntime`'s private init (POPOPXAPI.swift:3777).
+//  So this card **does not call** the offline bridge, it only states this honestly below the card; offline, the profile that cannot be sent is handled by
+//  `ProfileAutoSender`'s downgrade branch (plain text), not by this code.
 //
-//  ### 武装状态存在哪里（同一条裁定的另一半）
-//  `scene=personal_profile` 不进 URI：`apiAddContact` 交回的串归 Rust 核心、`popopxChatLink` 会改写
-//  前缀、离线桥又禁 `$ \` " '`（PopopxOfflineBridge.swift:101），所以它是**本机**的武装元数据，
-//  存在 `ProfileAutoSender.shared.armedProfileScene` 里，由 `contactConnected` 那一个既有钩子消费。
-//  页面上这一格只是那一份状态的一份**显示镜像**：真值永远在 sender 那一侧，本视图不写第二份。
+//  ### Where the arming state is stored (the other half of the same ruling)
+//  `scene=personal_profile` does not go into the URI: the string `apiAddContact` returns belongs to the Rust core, `popopxChatLink` rewrites
+//  the prefix, and the offline bridge again forbids `$ \ " '` (PopopxOfflineBridge.swift:101), so it is **local** arming metadata,
+//  stored in `ProfileAutoSender.shared.armedProfileScene` and consumed by the existing `contactConnected` hook.
+//  This field on the page is only a **display mirror** of that state: the true value always sits on the sender's side, and this view writes no second copy.
 //
 
 import POPOPXChat
 import SwiftUI
 import UIKit
 
-/// 主页名片码。标 `@MainActor` 是因为要读写 `ProfileAutoSender`（那是一枚主 actor 单例）——
-/// 与同特性的 `ProfileSendModeSheet`（ProfileBuilderView.swift:818）同一个写法。
+/// The profile card code. Marked `@MainActor` because it reads and writes `ProfileAutoSender` (that is a main-actor singleton) —
+/// the same approach as `ProfileSendModeSheet` (ProfileBuilderView.swift:818) in the same feature.
 @MainActor
 struct ProfileQRCodeSheet: View {
     @Environment(\.colorScheme) private var colorScheme
@@ -65,27 +65,27 @@ struct ProfileQRCodeSheet: View {
     private let identityName: String
     private let store: ProfileStorageManager
 
-    /// 铸好的联系地址（`https://popopx.chat/…` 形态）。`nil` = 还没铸好，QR 那一格是占位。
+    /// The minted contact address (in the `https://popopx.chat/…` form). `nil` = not minted yet, and the QR field is a placeholder.
     @State private var invite: String?
-    /// 预生成的二维码位图。存在的理由有两个：截图存档时必须有一张扫得开的码（`QRCode` 自己的
-    /// `.task` 在 `makeScreenshot` 那条离屏渲染路径上不会跑），以及重铸之后不留旧码的残影。
+    /// The pre-generated QR bitmap. It exists for two reasons: a screenshot archive must have a code that can be scanned (`QRCode`'s own
+    /// `.task` does not run on `makeScreenshot`'s off-screen rendering path), and no after-image of the old code remains after a re-mint.
     @State private var qrBitmap: UIImage?
-    /// 铸链的失败原因。`apiAddContact` 吞掉错误只返回 nil（POPOPXAPI.swift:1050），所以这一句
-    /// 只能由这里给；它同时是占位那一格里"重试"按钮存在的理由。
+    /// The failure reason of minting the link. `apiAddContact` swallows errors and returns only nil (POPOPXAPI.swift:1050), so this sentence
+    /// can only be given here; it is also the reason the "Retry" button exists in the placeholder field.
     @State private var mintFailure: String?
     @State private var isMinting = false
 
-    /// 本机已保存的主页。决定武装之后那一次自动推送有没有内容可发（没有则 sender 以
-    /// `.noSavedProfile` 拒掉），所以这里必须在卡上说清楚。
+    /// The profile saved on this device. It decides whether the automatic push after arming has any content to send (if not, the sender refuses with
+    /// `.noSavedProfile`), so this must be stated clearly on the card.
     @State private var saved: PopopxProfileManifest?
     @State private var isLoadingProfile = true
 
-    /// 本张码分发的那一档。初值取已保存主页自己的那一格（`ProfileSendModeSheet` 同一个来路，
-    /// ProfileBuilderView.swift:901-:908），没保存过时停在常驻档。
+    /// The tier this code distributes. The initial value is taken from the saved profile's own field (the same origin as `ProfileSendModeSheet`,
+    /// ProfileBuilderView.swift:901-:908), and when nothing was saved it rests on the permanent tier.
     @State private var sendMode: PopopxProfileSendMode = .standard
     @State private var ttlSeconds = ProfileBuilderViewModel.defaultEphemeralTTL
 
-    /// `armedProfileScene` 的显示镜像。见文件头那一节。
+    /// The display mirror of `armedProfileScene`. See the file-header section.
     @State private var armedScene: PopopxArmedProfileScene?
 
     init(identityName: String, store: ProfileStorageManager = .shared) {
@@ -103,16 +103,16 @@ struct ProfileQRCodeSheet: View {
             actionRow
         }
         .popopxToast(toast)
-        // 打开时才铸链、才读盘：一枚摆在屏幕上的码如果复用上一次打开时的那条链接，
-        // 它对应的 `PendingContactConnection` 可能早已被扫掉 —— 一次性链接的"一次性"归核心管，
-        // 这里能保证的是"每次打开都是一条新的"。`.task` 随 Sheet 消失自动取消，不需要 onDisappear 收尾。
+        // The link is minted and the disk read only when it opens: a code sitting on the screen that reused the link from the previous opening
+        // would have a `PendingContactConnection` long since consumed by a scan — the "one-time" of a one-time link is the core's business,
+        // and what can be guaranteed here is "a new one on every opening". `.task` cancels itself when the Sheet disappears, so no onDisappear tidy-up is needed.
         .task {
             await loadProfile()
             await mint()
         }
     }
 
-    // MARK: - Pass 卡体
+    // MARK: - The pass card body
 
     private var passCard: some View {
         VStack(alignment: .leading, spacing: PopopxMetrics.spaceM) {
@@ -152,8 +152,8 @@ struct ProfileQRCodeSheet: View {
         .padding(.horizontal, PopopxMetrics.gutter)
     }
 
-    /// 品牌底只用 `brand` 自身与它的暗一档，不画紫→蓝（`PopopxQRCardSheet.swift:93-111` 那一条
-    /// 渐变例外的原样照抄：`label` 垫底，`onBrand` 两端都还在 4.5:1 之上）。
+    /// The brand background uses only `brand` itself and its darker tier, with no purple→blue gradient (a verbatim copy of the gradient
+    /// exception at `PopopxQRCardSheet.swift:93-111`: `label` underneath, and `onBrand` still above 4.5:1 at both ends).
     private var passSurface: some View {
         ZStack {
             PopopxPalette.label
@@ -174,9 +174,9 @@ struct ProfileQRCodeSheet: View {
         )
     }
 
-    /// 卡上的模式标签：这一枚二维码将分发出去的是哪一档。文案取自载荷层
-    /// （`PopopxProfileSendMode.cardLabel`，PersonalProfileModel.swift:61），时长取自
-    /// `PopopxSecureCopy.duration`（PopopxSecurePayload.swift:357）—— 不在这里抄第二张表。
+    /// The mode label on the card: which tier this QR code will distribute. The copy comes from the payload layer
+    /// (`PopopxProfileSendMode.cardLabel`, PersonalProfileModel.swift:61), and the duration from
+    /// `PopopxSecureCopy.duration` (PopopxSecurePayload.swift:357) — no second table is copied here.
     private var modeBadge: some View {
         HStack(spacing: PopopxMetrics.space2XS) {
             Image(systemName: sendMode == .ephemeral ? "hourglass" : "person.badge.plus")
@@ -199,13 +199,13 @@ struct ProfileQRCodeSheet: View {
             : sendMode.cardLabel
     }
 
-    /// 真正会被武装出去的那一个时长。`standard` 档恒为 0（协议那一侧的口径，
-    /// PersonalProfileModel.swift:399-406），界面这一格选了也不算。
+    /// The duration that is really armed and sent out. The `standard` tier is always 0 (the reading on the protocol side,
+    /// PersonalProfileModel.swift:399-406), so choosing it in the interface does not count.
     private var effectiveTTLSeconds: Int {
         sendMode == .ephemeral ? ttlSeconds : 0
     }
 
-    // MARK: - QR 面板
+    // MARK: - The QR panel
 
     private var qrPlate: some View {
         VStack(spacing: PopopxMetrics.spaceS) {
@@ -235,7 +235,7 @@ struct ProfileQRCodeSheet: View {
         .accessibilityValue(invite ?? Copy.qrNotReadyValue)
     }
 
-    /// 没铸好时那一格。失败与还在铸说两种话（把"网络不通"和"稍等"混成一句会让用户白等一次）。
+    /// The field shown before minting completes. Failure and still-minting speak two different sentences (mixing "network unreachable" with "wait a moment" would make the user wait for nothing).
     private var qrPlaceholder: some View {
         VStack(spacing: PopopxMetrics.spaceS) {
             if let mintFailure {
@@ -265,8 +265,8 @@ struct ProfileQRCodeSheet: View {
         .frame(minHeight: Pass.qrPlaceholderHeight)
     }
 
-    /// 扫码读的是亮度差，不是品牌的抛光：码永远落在 `card` 面上（照抄
-    /// PopopxQRCardSheet.swift:115-117 那条结论）。
+    /// Scanning reads luminance difference, not brand polish: the code always sits on the `card` surface (a copy of
+    /// the conclusion at PopopxQRCardSheet.swift:115-117).
     private var qrInk: UIColor {
         UIColor(PopopxPalette.brand).resolvedColor(
             with: UITraitCollection(userInterfaceStyle: colorScheme == .dark ? .dark : .light)
@@ -279,7 +279,7 @@ struct ProfileQRCodeSheet: View {
             : uri
     }
 
-    // MARK: - 模式与武装
+    // MARK: - Mode and arming
 
     private var modeCard: some View {
         PopopxSectionCard(Copy.modeGroup, footnote: Copy.armFootnote) {
@@ -341,8 +341,8 @@ struct ProfileQRCodeSheet: View {
         }
     }
 
-    /// 武装状态那一句回显。读的是 sender 的真值快照，不是界面自己猜的：过期时间由那边定
-    /// （`ProfileAutoSender.armingWindowSeconds`），这里只把它念出来。
+    /// The arming-state echo line. It reads a snapshot of the sender's true value rather than the interface guessing: the expiry time is decided over there
+    /// (`ProfileAutoSender.armingWindowSeconds`), and this only reads it out.
     private var armedSummary: String {
         guard let armedScene else { return Copy.armIdle }
         let remaining = Int(armedScene.expiresAt.timeIntervalSinceNow)
@@ -359,8 +359,8 @@ struct ProfileQRCodeSheet: View {
         )
     }
 
-    /// 切换即武装。走 `Binding` 的 setter 而不是 `.onChange`：`.onChange` 会把 `loadProfile()`
-    /// 那一次**程序性**赋值也算成一次用户意图，于是打开这枚 Sheet 就静默武装了一次自动推送。
+    /// Switching is arming. It goes through the `Binding` setter rather than `.onChange`: `.onChange` would count that **programmatic**
+    /// assignment made by `loadProfile()` as a user intention too, so merely opening this Sheet would silently arm one automatic push.
     private var modeSelection: Binding<PopopxProfileSendMode> {
         Binding(get: { sendMode }, set: { arm(mode: $0, ttl: ttlSeconds) })
     }
@@ -372,11 +372,11 @@ struct ProfileQRCodeSheet: View {
     private func arm(mode: PopopxProfileSendMode, ttl: Int) {
         sendMode = mode
         ttlSeconds = ttl
-        // 为什么是 `ttlIsBoundToContact: true`：这张卡面上的那一格时长就是对方拿到的时长。
-        // 选了"5 分钟"却按已保存主页自己的 60 秒发出去，是让用户对着一枚码说谎。
+        // Why `ttlIsBoundToContact: true`: the duration shown on this card face is the duration the other side gets.
+        // Choosing "5 minutes" but sending it out with the saved profile's own 60 seconds would be making the user lie about a code.
         ProfileAutoSender.shared.armProfileScene(mode: mode, ttlSeconds: ttl, ttlIsBoundToContact: true)
         armedScene = ProfileAutoSender.shared.armedProfileScene
-        // `.success` 而不是 `.encrypted`/`.mesh`：武装是一次本机状态改动，两条链路都还没动过。
+        // `.success` rather than `.encrypted`/`.mesh`: arming is a local state change, and neither link has been touched yet.
         toast.show(Copy.armToast, kind: .success)
         PopopxHaptics.notice(.success)
     }
@@ -402,7 +402,7 @@ struct ProfileQRCodeSheet: View {
             .padding(.vertical, PopopxMetrics.spaceXS)
     }
 
-    // MARK: - 说明与动作
+    // MARK: - Notes and actions
 
     private var offlineNote: some View {
         HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.spaceXS) {
@@ -423,8 +423,8 @@ struct ProfileQRCodeSheet: View {
         HStack(spacing: PopopxMetrics.spaceXS) {
             Spacer(minLength: PopopxMetrics.spaceXS)
             PopopxButton(Copy.close, systemImage: "xmark", role: .secondary, fullWidth: false) {
-                // 关闭**不**取消武装：这枚卡片的用法就是"出示 → 收起 → 等对方扫"。
-                // 武装的两次收束只有 `cancelArmedProfileScene()` 和 sender 自己的有效期。
+                // Closing does **not** cancel the arming: this card's usage is "show → put away → wait for the other side to scan".
+                // The arming is only ever closed off in two places: `cancelArmedProfileScene()` and the sender's own validity period.
                 dismiss()
             }
         }
@@ -450,12 +450,12 @@ struct ProfileQRCodeSheet: View {
         .padding(PopopxMetrics.spaceM)
     }
 
-    // MARK: - 动作实现
+    // MARK: - Action implementations
 
-    /// 铸一条一次性连接链接。**不自己拼串**：`PopopxInviteLink.mintOneTime` 底下就是
+    /// Mint a one-time connection link. **It does not concatenate the string itself**: underneath `PopopxInviteLink.mintOneTime` is
     /// `apiAddContact(incognito:)` + `popopxChatUri(short:)` + `popopxChatLink`
-    /// （PopopxTelemetryHeader.swift:416-418），返回的已经是 `https://popopx.chat/…` 形态。
-    /// 失败时 `apiAddContact` 不抛只返回 nil（POPOPXAPI.swift:1050），所以这里必须给可见反馈。
+    /// (PopopxTelemetryHeader.swift:416-418), and what comes back is already in the `https://popopx.chat/…` form.
+    /// On failure `apiAddContact` does not throw, it only returns nil (POPOPXAPI.swift:1050), so visible feedback must be given here.
     private func mint() async {
         guard !isMinting else { return }
         isMinting = true
@@ -470,8 +470,8 @@ struct ProfileQRCodeSheet: View {
             return
         }
         invite = minted.uri
-        // 与 `POPOPXLinkQRCode` 同一条 errorLevel 规则（QRCode.swift:44 `small: uri.count < 200`
-        // → :105 `small ? "M" : "L"`），这样注入的那张位图和视图自己会画的完全是同一枚码。
+        // The same errorLevel rule as `POPOPXLinkQRCode` (QRCode.swift:44 `small: uri.count < 200`
+        // → :105 `small ? "M" : "L"`), so the injected bitmap and the one the view would draw itself are exactly the same code.
         qrBitmap = await generateImage(minted.uri, tintColor: qrInk, errorLevel: minted.uri.count < 200 ? "M" : "L")
         PopopxHaptics.notice(.success)
     }
@@ -491,31 +491,31 @@ struct ProfileQRCodeSheet: View {
         isLoadingProfile = false
     }
 
-    /// 名片卡的整张图。`fixedQRCode` 已经注入（:215），所以离屏渲染出来的是一张真码 ——
-    /// 没有这一步，`makeScreenshot` 抓到的会是 `QRCode` 那格还没生成的空白（QRCode.swift:105 的
-    /// `.task` 不在 UIHostingController 的这条绘制路径上跑）。
+    /// The whole card image. `fixedQRCode` has already been injected (:215), so the off-screen render is a real code —
+    /// without this step `makeScreenshot` would capture the blank of a `QRCode` field that was never generated (the
+    /// `.task` at QRCode.swift:105 does not run on UIHostingController's rendering path).
     private func cardImage() -> UIImage {
         passCard.makeScreenshot()
     }
 
-    /// 分享的是整张名片卡的图（身份 + 模式 + 码），不是裸链接。`PopopxQRCardSheet.swift:196-198`
-    /// 那一枚分享的是 uri 字符串，因为它整个界面就是一行链接；这里分享出去的东西如果转手一次就
-    /// 认不出是谁的码，一枚匿名邀请链接在聊天工具里传开比一句话更糟。
+    /// What is shared is the whole card image (identity + mode + code), not a bare link. The code at `PopopxQRCardSheet.swift:196-198`
+    /// shares a uri string, because its entire interface is one line of a link; if what is shared here, after being passed on once,
+    /// can no longer be recognised as whose code it is, an anonymous invite link spreading through a chat tool is worse than a sentence.
     private func share() {
         guard let invite else {
             toast.show(Copy.noLinkToast, kind: .danger)
             return
         }
-        // `makeScreenshot()` 不给尺寸时取的是 hosting controller 的 `intrinsicContentSize`
-        // （QRCode.swift:131-:136）；那个值为 0 时交回来的是零尺寸的图，分享出去只剩一个空白附件。
-        // 链接是同一枚码的另一种形态，拿它兜底不会让用户什么都发不出去。
+        // `makeScreenshot()`, given no size, takes the hosting controller's `intrinsicContentSize`
+        // (QRCode.swift:131-:136); when that value is 0 it hands back a zero-sized image, and sharing leaves nothing but a blank attachment.
+        // The link is the same code in another form, so using it as a fallback never leaves the user unable to send anything.
         let card = cardImage()
         showShareSheet(items: card.size.width > 1 ? [card] : [invite])
     }
 
-    /// 存相册用现网那一枚 `UIImageWriteToSavedPhotosAlbum`（ChatView.swift:2720 是本工程唯一的
-    /// 先例，没有 PHPhotoLibrary 的请求路径）。权限文案 `NSPhotoLibraryAddUsageDescription`
-    /// 已由 build setting 的 INFOPLIST_KEY_* 提供，本文件不动 Info.plist。
+    /// Saving to the photo library uses the live app's `UIImageWriteToSavedPhotosAlbum` (ChatView.swift:2720 is this project's only
+    /// precedent, there is no PHPhotoLibrary request path). The permission string `NSPhotoLibraryAddUsageDescription`
+    /// is already supplied by the build setting's INFOPLIST_KEY_*, and this file does not touch Info.plist.
     private func saveToAlbum() {
         guard invite != nil else { return }
         let card = cardImage()
@@ -529,23 +529,23 @@ struct ProfileQRCodeSheet: View {
     }
 }
 
-// MARK: - 卡片自己的几何
+// MARK: - The card's own geometry
 
-/// pass 卡需要、而设计系统没有的那两格数字（照 `PopopxQRCardSheet.swift:209-218` 的 `Pass` 写法）。
+/// The two numbers a pass card needs and the design system does not have (following the `Pass` style of `PopopxQRCardSheet.swift:209-218`).
 private enum Pass {
     static let linkPreviewCharacters = 28
-    /// 占位那一格与真码同高，铸链成功时卡片不会跳一下。
+    /// The placeholder field is the same height as the real code, so the card does not jump when the link mints successfully.
     static let qrPlaceholderHeight: CGFloat = 180
 
-    /// 浅色淡得更远（尾部要读作深靛蓝边），深色淡得少（那里墨色接近黑，尾部得是亮的一端）。
+    /// Light mode fades further (the tail must read as a deep indigo edge), dark mode fades less (there the ink is near black, so the tail has to be the bright end).
     static func dimOpacity(for scheme: ColorScheme) -> Double {
         scheme == .light ? 0.55 : 0.70
     }
 }
 
-// MARK: - 文案
+// MARK: - Copy
 
-/// 卡上每一句中文只在这里出现一次（`PopopxQRCardSheet.swift:223-233` 那条 `private enum Copy` 规矩）。
+/// Every Chinese sentence on the card appears exactly once, here (the `private enum Copy` rule at `PopopxQRCardSheet.swift:223-233`).
 private enum Copy {
     static let sheetTitle = NSLocalizedString("My profile card code", comment: "")
     static let sheetSubtitle = NSLocalizedString("Show this code: once they scan it and connect, they receive your encrypted profile automatically", comment: "")
@@ -589,7 +589,7 @@ private enum Copy {
 #if DEBUG
 struct ProfileQRCodeSheet_Previews: PreviewProvider {
     static var previews: some View {
-        ProfileQRCodeSheet(identityName: "墨蓝信使")
+        ProfileQRCodeSheet(identityName: "Ink Courier")
     }
 }
 #endif

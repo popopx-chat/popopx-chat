@@ -49,9 +49,9 @@ struct OnboardingButtonStyle: ButtonStyle {
 }
 
 // Spec: spec/client/navigation.md#OnboardingConditionsView
-// 引导第 4 屏：三条安全承诺 + 启动防护 + 两份内置法律文书。
-// 「同意并进入」的链路顺序不可调换：先落服务端条件接受，再做生物识别证明，
-// 最后幂等发放先锋徽章并等两条 Toast 走完，才拆掉引导栈。
+// Onboarding screen 4: three safety commitments + launch protection + two built-in legal documents.
+// The order of the "agree and enter" chain cannot be swapped: first persist the server-side conditions acceptance, then the biometric attestation,
+// and lastly the idempotent pioneer badge grant with both toasts awaited to the end; only then is the onboarding stack torn down.
 struct OnboardingConditionsView: View {
     @EnvironmentObject var m: ChatModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -72,8 +72,8 @@ struct OnboardingConditionsView: View {
     private static let toastHold: Duration = .seconds(1.3)
     private static let toastPair: Duration = .seconds(2.6)
 
-    /// 第 4 屏必须在 393×852 上一屏点完：主按钮钉进底部安全区，卡片间距与承诺行内边距按屏高收一档，
-    /// 三条承诺改为短句摘要，法务两本文档并排成双胶囊。判据同样是 GeometryReader 的可用高度。
+    /// Screen 4 has to be finished with one screen of taps at 393×852: the primary button is pinned into the bottom safe area, the card gap and the commitment row's inner padding each tighten one notch by screen height,
+    /// the three commitments become short-phrase summaries and the two legal documents sit side by side as two capsules. The deciding measure is again GeometryReader's available height.
     var body: some View {
         GeometryReader { g in
             let compact = g.size.height < 900
@@ -116,8 +116,8 @@ struct OnboardingConditionsView: View {
         .navigationBarHidden(true)
     }
 
-    /// 底部固定栏：主按钮 + 闸门提示，不透明底与发丝线同第 1、3 屏。
-    /// 提示语留在栏内，勾选进度变化时它就在按钮上方原地消失，不必下滑去找原因。
+    /// Fixed bottom bar: primary button + gate hint, with the same opaque background and hairline as screens 1 and 3.
+    /// The hint stays inside the bar: when the check progress changes it disappears in place above the button, so there is no need to swipe down hunting for the reason.
     private var enterBar: some View {
         VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
             enterButton
@@ -134,7 +134,7 @@ struct OnboardingConditionsView: View {
         }
     }
 
-    // MARK: - 卡片
+    // MARK: - Cards
 
     private func commitmentsCard(compact: Bool) -> some View {
         PopopxSectionCard(PopopxOnboardingCopy.commitmentsCard) {
@@ -147,11 +147,11 @@ struct OnboardingConditionsView: View {
         }
     }
 
-    /// 承诺行必须整行可点：`PopopxCheckbox` 走的是自定义 `ToggleStyle`，真机上命中区只有行尾
-    /// 那枚 16pt 方格，三句承诺读起来像纯文案（`agreementRow` 当初就因为同一件事在本文件里
-    /// 自己组合）。这里沿用那套写法，但不动共享的 `PopopxControls.swift`，其它调用点保持原样：
-    /// 外层 `Button` + `contentShape(Rectangle())` 铺满整行，选中态叠三重信号
-    /// （brand 8% 行底、1pt brand 描边、实心方格 + 纯白加粗勾），触觉仍在点击这一侧发。
+    /// The commitment row has to be tappable across the whole row: `PopopxCheckbox` uses a custom `ToggleStyle`, and on a real device the hit area is only
+    /// the 16pt square at the row's end, so the three commitments read like plain copy (`agreementRow` was composed inside this file for that very reason
+    /// in the first place). That same approach is reused here without touching the shared `PopopxControls.swift`, and other call sites stay as they were:
+    /// an outer `Button` + `contentShape(Rectangle())` spread over the whole row, and the selected state stacks three signals
+    /// (an 8% brand row background, a 1pt brand stroke, a filled square + a bold pure-white checkmark), while the haptic is still fired on the tap side.
     private func commitmentRow(_ title: String, isOn: Binding<Bool>, compact: Bool) -> some View {
         let checked = isOn.wrappedValue
         return Button {
@@ -175,8 +175,8 @@ struct OnboardingConditionsView: View {
                         checked ? PopopxPalette.brand : Color.clear,
                         in: .rect(cornerRadius: PopopxMetrics.radiusChip)
                     )
-                    // 未选中的方格也要读得出是个方格：card 上 `separator` 只有 1.19:1，
-                    // `labelHint` 是 3.42:1。
+                    // An unchecked square must still read as a square: on card `separator` is only 1.19:1,
+                    // while `labelHint` is 3.42:1.
                     .overlay(
                         RoundedRectangle(cornerRadius: PopopxMetrics.radiusChip)
                             .strokeBorder(
@@ -208,10 +208,10 @@ struct OnboardingConditionsView: View {
         .popopxAnimation(PopopxSpring.snappy, value: checked, reduceMotion: reduceMotion)
     }
 
-    /// Face ID 卡在本文件内组合，没有用 `PopopxToggleRow`：那个原子固定给 8pt 上下内边距，
-    /// 写在共享的 `PopopxControls.swift` 里，本轮不能改，而这 16pt 恰好是第 4 屏
-    /// 393×852 上要不要下滑的分界。这里逐条沿用它的几何（同一对字号、`spaceS` 间距、
-    /// `spaceXL` 徽章、`.switch` 样式与 brand 着色），只把垂直内边距按屏高收一档。
+    /// The Face ID card is composed inside this file and does not use `PopopxToggleRow`: that atom fixes 8pt of top and bottom padding,
+    /// it is written in the shared `PopopxControls.swift` and cannot be changed this round, and those 16pt are exactly the divide for screen 4 on
+    /// 393×852 between needing a swipe down and not needing one. Its geometry is followed item by item here (the same pair of font sizes, the `spaceS` gap,
+    /// the `spaceXL` badge, the `.switch` style and the brand tint), with only the vertical padding tightened one notch by screen height.
     private func launchCard(compact: Bool) -> some View {
         PopopxSectionCard(PopopxOnboardingCopy.launchProtection) {
             Toggle(isOn: $biometricOn) {
@@ -241,8 +241,8 @@ struct OnboardingConditionsView: View {
         }
     }
 
-    /// 法务卡：两本文档从"占两行的 Disclosure 行"改成左右并排的双胶囊，垂直空间省一行；
-    /// 胶囊下面紧跟整行可点的同意行。标题仍是同一对 Key，与离线阅读器的页头逐字一致。
+    /// Legal card: the two documents change from "Disclosure rows taking two lines" into two capsules side by side, saving one line of vertical space;
+    /// immediately below the capsules comes the whole-row-tappable agreement line. The titles are still the same pair of Keys, matching the offline reader's page header word for word.
     private func legalCard(compact: Bool) -> some View {
         PopopxSectionCard(
             PopopxOnboardingCopy.legalCard,
@@ -267,8 +267,8 @@ struct OnboardingConditionsView: View {
         }
     }
 
-    /// 单颗文档胶囊：整枚可点，命中高度不低于 `minHitTarget`；窄语种允许两行，
-    /// 绝不省略成 "POPOPX Privacy…"，法务入口的标题被截断就等于没给全。
+    /// One document capsule: the whole capsule is tappable and the hit height never falls below `minHitTarget`; narrow languages may use two lines,
+    /// but it is never truncated to "POPOPX Privacy...": a legal entry's title cut short is the same as not giving it in full.
     private func legalCapsule(
         _ title: String,
         systemImage: String,
@@ -300,19 +300,19 @@ struct OnboardingConditionsView: View {
         .buttonStyle(PopopxPressButtonStyle(feedback: nil))
     }
 
-    // MARK: - 同意行（勾选 + 行内热区）
+    // MARK: - Agreement row (checkbox + inline hot zone)
 
-    /// `PopopxCheckbox` 的标题收的是 `String`，装不下可点热区；而 `Text` 拼接出来的
-    /// 片段不能被单独点击。所以这一行在本文件内组合：左格沿用
-    /// `PopopxCheckboxToggleStyle` 的几何与配色（`spaceM` 方格、`radiusChip`、
-    /// brand/onBrand 填充、未选中用 `labelHint` 描边），右句整段走 `openURL` 拦截，
-    /// 命中本文件的 `popopx://legal/*` 才弹阅读器，其余 URL 仍交回系统。
+    /// `PopopxCheckbox`'s title takes a `String`, which cannot hold a tappable hot zone, and fragments glued together with `Text`
+    /// cannot be tapped on their own. So this row is composed inside this file: the left square keeps
+    /// `PopopxCheckboxToggleStyle`'s geometry and colours (the `spaceM` square, `radiusChip`,
+    /// brand/onBrand fill, the `labelHint` stroke when unchecked), and the whole right-hand sentence goes through an `openURL` interception,
+    /// so the reader opens only for this file's `popopx://legal/*` pattern; every other URL is still handed back to the system.
     private var agreementRow: some View {
         ZStack(alignment: .topLeading) {
-            // 整行热区放在最下层：SwiftUI 只对"挂了手势的视图"做命中，普通文字与空白不吃命中，
-            // 点击会落到这枚透明按钮上；《隐私政策》《使用条款》两个书名是可交互的 run，
-            // 命中留在它们身上，由下面的 openURL 拦截接走，不会被误勾选。
-            // 方格自己仍是独立按钮，VoiceOver 的控件也仍是它（这层透明按钮对无障碍隐藏）。
+            // The whole-row hot zone sits on the lowest layer: SwiftUI only hit-tests views that carry a gesture, and ordinary text and blank space take no hits,
+            // so taps land on this transparent button; the Privacy Policy and Terms of Use titles are interactive runs whose
+            // hits stay on them and are picked up by the openURL interception below, so they cannot be mis-checked.
+            // The square itself is still a standalone button and is still the VoiceOver control (this transparent button layer is hidden from accessibility).
             Button {
                 toggleAgreement()
             } label: {
@@ -378,8 +378,8 @@ struct OnboardingConditionsView: View {
         }
     }
 
-    /// 切句只认"标题在原句中出现"，且按隐私政策、使用条款的顺序各切一次。
-    /// 某语言没命中时那段原样留在正文里 —— 宁可不带链接，也不丢字。
+    /// The sentence is split only where "the title occurs in the original sentence", once each in the order Privacy Policy then Terms of Use.
+    /// If some language does not hit, that span stays in the body text exactly as it is - better to carry no link than to lose a word.
     private var agreementSentence: Text {
         let docs: [PopopxLegalDocumentSheet.Document] = [.privacy, .terms]
         let sentence = String(
@@ -400,17 +400,17 @@ struct OnboardingConditionsView: View {
         return result + Text(verbatim: String(rest))
     }
 
-    // MARK: - 闸门
+    // MARK: - Gate
 
     private var commitmentsMet: Bool { relayCommitted && routingCommitted && wipeCommitted }
 
-    /// 闸门只看这页能改的两件事。`selectedOperatorIds` 不参与判定：它是从第 3 屏带过来的值，
-    /// 单运营商、或 conditions 里根本没有运营商时可能为空，而第 4 屏没有任何入口能改它
-    /// ——那会把「同意并进入」永久锁死（真机 P0 的第二条成因）。
+    /// The gate looks only at the two things this page can change. `selectedOperatorIds` takes no part in the verdict: it is a value carried in from screen 3,
+    /// and it can be empty with a single operator or when conditions has no operators at all, while screen 4 has no entry that could change it
+    /// - that would lock "agree and enter" shut forever (the second cause of the P0 on a real device).
     private var canEnter: Bool { commitmentsMet && agreed }
 
-    /// 集合为空时回落到全部已知运营商，与上游同一条链一致：
-    /// `NetworkAndServers.swift:288` 直接把展示出来的 operators 整份 `map` 过去。
+    /// When the set is empty it falls back to every known operator, matching the same chain upstream:
+    /// `NetworkAndServers.swift:288` just `map`s the whole displayed operators list over.
     private var operatorIdsToSubmit: [Int64] {
         let ids = Array(selectedOperatorIds)
         return ids.isEmpty ? m.conditions.serverOperators.map { $0.operatorId } : ids
@@ -438,7 +438,7 @@ struct OnboardingConditionsView: View {
         .popopxAnimation(PopopxSpring.snappy, value: canEnter, reduceMotion: reduceMotion)
     }
 
-    // MARK: - 完成链
+    // MARK: - Completion chain
 
     @MainActor private func finishOnboarding() async {
         do {
@@ -460,8 +460,8 @@ struct OnboardingConditionsView: View {
             await enableLaunchLock()
         }
 
-        // 幂等：`PopopxBadgeManager` 先落 `.trialGuard` 再落徽章，重复调用只会返回 nil，
-        // 因此第四屏这条链不会烧掉第二次 72 小时（裁定 2）。
+        // Idempotent: `PopopxBadgeManager` persists `.trialGuard` before the badge, so a repeated call only returns nil,
+        // and therefore this chain on the fourth screen never burns a second 72 hours (ruling 2).
         _ = await PopopxBadgeManager.shared.issuePioneerTrialIfNeeded()
 
         toast.show(PopopxToastMessage(text: PopopxOnboardingCopy.readyToast, kind: .encrypted, duration: Self.toastHold))
@@ -471,9 +471,9 @@ struct OnboardingConditionsView: View {
         completeOnboarding()
     }
 
-    /// 与 `ContentView.initialEnableLA()`（ContentView.swift:416）同一套契约：
-    /// 模式回到 `.system` → 系统生物识别证明 → 成功才落 `prefPerformLA` 与 app group 镜像。
-    /// 失败或不可用一律写回 false，绝不留"开关是开的但没证明过"。
+    /// The same contract as `ContentView.initialEnableLA()` (ContentView.swift:416):
+    /// mode goes back to `.system` -> system biometric attestation -> only on success are `prefPerformLA` and the app group mirror written.
+    /// Failure or unavailability always writes false back, never leaving "the switch is on but was never proven".
     @MainActor private func enableLaunchLock() async {
         privacyLocalAuthModeDefault.set(.system)
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
@@ -539,7 +539,7 @@ struct OnboardingConditionsView: View {
     }
 }
 
-/// 同意行的行内热区：URL 只在本文件内解析，不交给系统、也不打开网页。
+/// The inline hot zone of the agreement row: URLs are resolved only inside this file, never handed to the system and never opened as web pages.
 private enum PopopxLegalLink {
     static func url(for document: PopopxLegalDocumentSheet.Document) -> URL {
         switch document {

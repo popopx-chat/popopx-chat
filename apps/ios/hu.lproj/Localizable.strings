@@ -8044,8 +8044,8 @@ alert title */
 "Your subscription is cancelled. The badge stays until %@." = "Az előfizetése meg lett szakítva. A kitűző eddig marad meg: %@.";
 
 
-/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
-/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+/* === POPOPX compute-points economy (BadgeCredits) commercial copy: one-to-one with PopopxCommerceCopy === */
+/* These 37 rows correspond directly to the NSLocalizedString keys in PopopxBadgeCreditsModels.swift; en.lproj holds none of them (value == key). */
 
 /* product name */
 "POPOPX Dynamic Privacy Node Badge" = "POPOPX dinamikus adatvédelmi csomópont jelvény";
@@ -8158,7 +8158,7 @@ alert title */
 /* error */
 "Your Compute Credits balance cannot go above %lld. Spend some credits first." = "A számítási kredit egyenleg nem haladhatja meg a %lld értéket. Először költsön el néhány kreditet.";
 
-/* ==== POPOPX onboarding v2 (2026-11-19) — 引导页四屏 + 隐私政策/使用条款 ==== */
+/* ==== POPOPX onboarding v2 (2026-11-19) - the four onboarding screens + privacy policy / terms of use ==== */
 /* POPOPX onboarding v2 — generated block, 2026-11-19 */
 
 /* Onboarding: header pills */
@@ -8170,12 +8170,10 @@ alert title */
 "Own your network." = "A háló a tiéd.";
 "Private messaging with no account and no user IDs." = "Privát üzenetküldés fiók és felhasználói azonosítók nélkül.";
 "SMP end-to-end encrypted" = "SMP végpontok között titkosítva";
-"厢语 Bluetooth Mesh relay" = "厢语 Bluetooth Mesh átjátszó";
 "What POPOPX gives you" = "Mit ad a POPOPX";
 "No user IDs" = "Nincsenek felhasználói azonosítók";
 "No phone number, no email, no global public key. Nothing links your contacts to each other, and each anonymous identity stays separate." = "Nincs telefonszám, nincs e-mail, nincs globális nyilvános kulcs. Semmi nem kapcsolja össze a névjegyeidet, és minden névtelen identitás külön marad.";
 "Dynamic relays and near-field" = "Dinamikus átjátszók és közeli kapcsolódás";
-"Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "Online a dinamikus SMP közvetítő csomópont klasztert használod. Offline a 厢语 1–7 ugrásos Bluetooth Mesh-re vált, és szemtől szemben párosít UWB-vel vagy érintéssel.";
 "Anti-peeping and local-only cards" = "A leselés elleni védelem és csak helyi kártyák";
 "Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "A képernyőképek és a felvételek blokkolva vannak, a fokozottan titkos üzenetek az olvasás után megsemmisülnek, a tartózkodási hely mindkét módban titkosított, és a titkosított profilkártyád soha nem hagyja el ezt az eszközt.";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "Fejezd be a beállítást, hogy megkapd a 3 napos próba jelvény úttörő csomóponthoz.";
@@ -8207,7 +8205,6 @@ alert title */
 "Higher privacy · balanced battery" = "Több magánszféra · kiegyensúlyozott akkumulátor";
 "Maximum discretion · nothing pushed" = "Maximális diszkréció · nincs push";
 "Apple's push service carries only the signal that new data is waiting, never the content." = "Az Apple push-szolgálata csak azt a jelet közvetíti, hogy új adat érhető el, a tartalmat soha.";
-"厢语 offline mesh" = "厢语 offline mesh";
 "When the internet is down, messages hop over nearby devices, up to 7 hops, with no server. Pair face to face with UWB or a tap." = "Ha nincs internet, az üzenetek közeli eszközökön át ugranak, max. 7 ugrásban, szerver nélkül. Párosíts szemtől szemben UWB-vel vagy érintéssel.";
 "Bluetooth permission is requested the first time the mesh starts." = "A Bluetooth-engedélyt a mesh első indításakor kell megadni.";
 
@@ -8251,13 +8248,11 @@ alert title */
 "The camera guard stays local" = "A kamerás védelem az eszközön marad";
 "The anti-peeping guard switches the front camera on only while a top-secret sheet is open, at the lowest resolution, processes every frame on this device and stops the stream when the sheet closes. Nothing is written to disk and nothing is uploaded." = "A leselés elleni védelem csak addig kapcsolja be az elülső kamerát, amíg a fokozottan titkos lap nyitva van, a legalacsonyabb felbontásban, minden képkockát ezen az eszközön dolgoz fel, és leállítja a streamet a lap bezárásakor. Semmit nem írunk a lemezre, és semmit nem töltünk fel.";
 "Screenshots, recordings and offline hops" = "Képernyőképek, felvételek és offline ugrások";
-"Protected screens are blocked from screenshots and screen recording by the system itself. In 厢语 mode messages hop over Bluetooth between nearby devices and never reach the public internet." = "A védett képernyőkön maga a rendszer tiltja a képernyőfotót és a felvételt. 厢语 módban az üzenetek közeli eszközök között Bluetoothon ugranak, és soha nem érik el a nyilvános internetet.";
 "Your controls" = "Az irányítás nálad van";
 "You can export or delete any identity, erase the local database or trigger Panic Wipe at any time. Deletion is irreversible because no server holds a copy." = "Bármikor exportálhatsz vagy törölhetsz egy identitást, törölheted a helyi adatbázist, vagy elindíthatod a Panic Wipe-ot. A törlés visszavonhatatlan, mert egyik szerver sem őriz másolatot.";
 
 /* Legal: terms */
 "Acceptable use" = "Megengedett használat";
-"Use POPOPX within the laws of the country you are in. Public groups and 厢语 broadcasts must carry no unlawful content, no spam and no harassment of other users." = "A POPOPX-t a tartózkodási helyed országának törvényein belül használd. A nyilvános csoportok és a 厢语 sugárzások nem tartalmazhatnak jogellenes tartalmat, spamet és más felhasználók zaklatását.";
 "Your keys, your responsibility" = "A kulcsaid, a felelősséged";
 "Your mnemonic phrase, identity keys, badges and POPOPX Compute Credits exist only on this device. If the device or the phrase is lost, they cannot be recovered, frozen or reissued by anyone." = "A visszaállító kifejezésed, az identitáskulcsaid, a jelvényeid és a POPOPX számítási kreditek csak ezen az eszközön léteznek. Ha az eszköz vagy a kifejezés elveszik, senki nem tudja őket visszaállítani, befagyasztani vagy újra kiadni.";
 "No guarantee of availability" = "Nincs elérhetőségi garancia";
@@ -8537,7 +8532,6 @@ alert title */
 "Badge lit for %lld more days." = "A kitűző %lld nappal tovább aktív.";
 "Choose a plan" = "Válassz csomagot";
 "Renew or change plan" = "Megújítás vagy csomagváltás";
-"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "Megnyitja a 厢语 panelt: a fő kapcsolót, a csatornákat és a közeli csomópontokat";
 "Subscribed channels" = "Feliratkozott csatornák";
 "No channels yet" = "Még nincs csatorna";
 "%d channels you follow" = "Feliratkozott csatornák: %d";
@@ -8553,13 +8547,13 @@ alert title */
 "Broadcast to #mesh" = "Küldés a #mesh hálózatba";
 "Send over the offline mesh" = "Küldés offline hálózaton keresztül";
 
-/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+/* POPOPX round 19: keys added during the ninth pass over the three tabs */
 "Back to messages" = "Vissza az üzenetekhez";
 "POPOPX Badge" = "POPOPX kitűző";
 "Added %lld Compute Credits to your balance." = "%lld számítási kredit került az egyenlegedre.";
 "Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Az Apple még erősíti ezt a vásárlást. A számítási kredit a megerősítés után megjelenik az egyenlegedben.";
 "Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Az Apple megkapta a fizetést, de ez az eszköz egyelőre nem tudta hozzáadni a krediteket az egyenlegedhez. A következő alkalommal kerülnek hozzáadásra, amikor a biztonságos tár írható.";
-/* POPOPX round 21 第 9 轮：厢语「发现」入口无障碍说明 + 7 条 zh-Hans 上游缺值 */
+/* POPOPX round 21, ninth pass: accessibility hint for the Cabin 'Discover' entry + 7 upstream values missing from zh-Hans */
 "Discover nearby groups and channels over the Bluetooth mesh" = "Fedezzen fel közeli csoportokat és csatornákat a Bluetooth-mesh hálózaton";
 "Album" = "Album";
 "Camera" = "Kamera";
@@ -9937,3 +9931,25 @@ alert title */
 "🔒 [Channel subscription] %1$lld Compute Credits / %2$lld days" = "🔒 [Csatorna-feliratkozás] %1$lld számítási kredit / %2$lld nap";
 "🧧 [Compute Credits packet] %1$lld · split equally into %2$lld shares" = "🧧 [Számítási kredit boríték] %1$lld · egyenlően %2$lld részre osztva";
 "🧧 [Compute Credits packet] %lld" = "🧧 [Számítási kredit boríték] %lld";
+"Top-up %lld compute points" = "%lld számítási kredit feltöltve";
+"Exchange did not complete · returned automatically" = "A beváltás nem történt meg · automatikusan visszautalva";
+"Redeemed a %lld-day privacy node badge" = "Beváltva %lld napos adatvédelmi csomójelvény";
+"Redeemed %lld × %lld-day gift-card vouchers" = "Beváltva %lld × %lld napos ajándékutalvány";
+"Sent a red packet of %lld compute points (%lld equal shares)" = "Piros boríték elküldve %lld számítási kredittel (%lld egyenlő részre osztva)";
+"Received a compute-point red packet" = "Piros boríték érkezett számítási kreditekkel";
+"Received a red packet: %@" = "Piros boríték érkezett: %@";
+"Red packet not fully claimed, %lld returned" = "A piros boríték nem fogyott el teljesen, %lld visszautalva";
+"Subscribed to channel %@" = "Feliratkozás a(z) %@ csatornára";
+"Unlocked a profile card" = "Profilkártya feloldva";
+"Extended the anti-peeping viewing window" = "A leselés elleni megtekintési ablak meghosszabbítva";
+"Refund clawback (what was already spent is not recovered)" = "Visszatérítés levonása (a már elköltött részt nem vonjuk vissza)";
+"Refund clawback" = "Visszatérítés levonása";
+"Aurora shield avatar frame" = "Aurora-pajzs avatar-keret";
+"Dark gold QR card skin" = "Sötétarany QR-kártya-felület";
+"[Location]" = "[Helyzet]";
+"[Encrypted profile]" = "[Titkosított profiloldal]";
+"[Encrypted profile · attachment]" = "[Titkosított profiloldal · csatolmány]";
+"Unnamed profile" = "Névtelen profiloldal";
+"[Top-secret view-once] Open after biometrics" = "[Szigorúan titkos, olvasás után megsemmisülő] Megtekinthető biometrikus ellenőrzés után";
+"[Top-secret security alert] %@; that top-secret message was destroyed in place." = "[Szigorúan titkos biztonsági riasztás] %@; az a szigorúan titkos üzenet a helyszínen megsemmisült.";
+"Neither Bluetooth nor the public network is available — %lld messages waiting to send" = "Sem a Bluetooth, sem a nyilvános hálózat nem érhető el — %lld üzenet vár küldésre";

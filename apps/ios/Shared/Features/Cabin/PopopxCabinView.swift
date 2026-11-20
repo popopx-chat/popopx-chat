@@ -2,97 +2,97 @@
 //  PopopxCabinView.swift
 //  POPOPX (iOS)
 //
-//  第四阶段 Tab 3「厢语」—— 这一栏现在有两屏，都在本文件里，都只讲物理射程内的事：广播流、
-//  周边节点、总闸；没有公网、没有 relay、没有 SMP。
-//  · `PopopxMeshPlazaRootView` = 这一栏的根，落地就是包内 `PopopxMeshUI/MeshPlazaView.swift`
-//    那一屏全屏（本轮起它不再是"点左上角才去的一页"）。包内那份保留不动，全仓三个挂载点：
-//    这一栏的根、本页的 `.plaza` 路由、`PopopxAddFriendView.swift:121`（`SettingsView.swift:396`
-//    那句是注释，它自己的挂载早在 71001954f 摘掉了）。
-//  · `PopopxCabinView` = 根顶栏**中间**那一枚胶囊唤起的满高抽屉，本地蓝牙状态的 app 侧重写版。
-//    抽屉里那一屏的东西一样没少：总闸、射频、频道三行、周边节点、私聊与配对。（设置中心那一屏第 10 轮
-//    起由根那一屏右上角那一枚直接摆出，抽屉顶栏那枚重复入口随之删干净 —— 见下面决定 2。）
+//  Phase 4 Tab 3 "Cabin" — this tab now has two screens, both inside this file, and both only about what is within physical range: the broadcast stream,
+//  nearby nodes, the master switch; no public internet, no relay, no SMP.
+//  - `PopopxMeshPlazaRootView` = the root of this tab, and in practice that is the package's `PopopxMeshUI/MeshPlazaView.swift`
+//    full screen (from this round it is no longer "a page you reach by tapping the top-left corner"). The package copy stays untouched; three mount points repo-wide:
+//    the root of this tab, this page's `.plaza` route, and `PopopxAddFriendView.swift:121` (the
+//    `SettingsView.swift:396` sentence is a comment, and its own mount was removed long ago in 71001954f).
+//  - `PopopxCabinView` = the full-height drawer summoned by the capsule in the **middle** of the root's top bar; the app-side rewrite of the local Bluetooth state.
+//    Nothing is missing from the screen inside the drawer: master switch, radio, the three channel rows, nearby nodes, private chat and pairing. (The settings-centre screen, from round 10
+//    onwards, is placed directly by the top-right capsule of the root screen, and the duplicate entry in the drawer's top bar was deleted outright — see decision 2 below.)
 //
-//  真机第 8 轮 · 任务一（根那一屏顶栏三段式 + 全屏沉浸）：`.topBarLeading` = 回「消息」栏的返回键
-//  （这一栏底部那四枚让开了，它是唯一出口，动作经宿主传进来的 `tabSelection` 绑定写 `MainTabView`
-//  的选中栏）；`.principal` = 原先站在左上角的旧厢语面板那枚青绿胶囊（周边节点雷达与离线群聊都在
-//  里面）；`.topBarTrailing` = 离线组网设置中心，位置不动，第 10 轮字样收成 "Settings"（宽度账见
-//  `meshDiscoveryEntry` 上面那一段）。抽屉与它推上去的每一页的顶栏
-//  一概不动。底栏那 49pt 的让开由根这一屏的内容自己声明 `.toolbar(.hidden, for: .tabBar)`，见
-//  `PopopxMeshPlazaRootView.body` 里那一段的两条理由。
+//  Device round 8 · task 1 (the root screen's top bar in three segments + full-screen immersion): `.topBarLeading` = the back key to the "Chat" tab
+//  (the four capsules at the bottom of this tab gave way to it, it is the only exit, and the action writes the selected tab of `MainTabView`
+//  through the `tabSelection` binding passed in by the host); `.principal` = the teal capsule of the old Cabin panel that used to stand in the top-left corner (the nearby-node radar and the offline group chats are both
+//  inside it); `.topBarTrailing` = the offline mesh settings centre, position unchanged, round 10 shortened the label to "Settings" (the width accounting is in
+//  the paragraph above `meshDiscoveryEntry`). The drawer and every page it pushes, their top bars,
+//  are all left alone. The 49pt give-way of the bottom bar is declared by the root screen's own content with `.toolbar(.hidden, for: .tabBar)`, see
+//  the two reasons given in that section of `PopopxMeshPlazaRootView.body`.
 //
-//  三条数据来源，全是包里的真对象，本文件不写第二条传输路径：
+//  Three data sources, all real objects from the package; this file writes no second transport path:
 //  1. `PopopxMeshStateSource.shared.state` —— `radioState / peers / broadcasts / latestBroadcastAt`。
-//     `@ObservedObject` 直接看这份镜像；body 里不 `await` 任何东西。
-//  2. `BluetoothHealthMonitor`（actor）—— `allNodes()` 是节点表与跳数徽章的唯一来源，在线判定用
-//     `PopopxPeerReachability.isReachable(now:radioOn:timeout:)`，窗口引模块 4 自己的常量
-//     `PopopxMeshConfig.default.peerReachabilityTimeout`（15 秒；`BluetoothHealthMonitor.swift:63`
-//     的 `defaultReachabilityTimeout` 就是它的别名）。actor 读数只在 `.task` 轮询与动作之后做。
-//  3. `ManualPairingManager` + `IdentityMappingStore`（两个 actor）—— `allStates()` /
-//     `pendingRequests()` / `initiatePairing(with:incognito:)` 给配对事实，`allMappings()` 给「已绑定」事实。
+//     `@ObservedObject` reads this mirror directly; nothing is `await`ed inside body.
+//  2. `BluetoothHealthMonitor` (actor) — `allNodes()` is the only source of the node table and the hop-count badges, and the online judgement uses
+//     `PopopxPeerReachability.isReachable(now:radioOn:timeout:)`, whose window cites module 4's own constant
+//     `PopopxMeshConfig.default.peerReachabilityTimeout` (15 seconds; the `defaultReachabilityTimeout` at `BluetoothHealthMonitor.swift:63`
+//     is just its alias). Actor readings are taken only in `.task` polling and after actions.
+//  3. `ManualPairingManager` + `IdentityMappingStore` (two actors) — `allStates()` /
+//     `pendingRequests()` / `initiatePairing(with:incognito:)` give the pairing facts, and `allMappings()` gives the "already bound" fact.
 //
-//  发包路径逐字照抄 `MeshPlazaView`：广播 = `PopopxMeshOutbound.sendBroadcast(text:)`，对象是
-//  `PopopxMeshRuntime.shared.engineBackend`（`Shared/Model/POPOPXAPI.swift:3748`），也就是
-//  `PopopxAddFriendView.swift:121-125` 挂载广场时传进去的同一个 backend；截断/上限/本机回声/去重的
-//  规则照抄 `PopopxMeshPlazaModel.broadcastDraft()`（`MeshPlazaView.swift:168-186`）、
-//  `rebuildPosts(from:)`（`:213-232`）与 `deduped(_:)`（`:255-265`）。昵称写入口 =
-//  `PopopxMeshKillSwitch.setNickname(_:)`（包内 `saveNickname()` 最终也就是它）。
-//  「点击直接开启蓝牙私聊」= `initiatePairing(with:incognito:)` 发一次离线建联邀请（这是唯一能让一条
-//  Noise 私聊会话存在的动作），然后 push 包里那条私聊面 `PopopxMeshPrivateChatView`，四个依赖全部显式
-//  给真对象——它的默认参数是 `PopopxMeshEngine.shared` / `.shared` 单例，会让总闸关着的一页顺手把引擎
-//  与射频建出来（`POPOPXAPI.swift:3557` 之后那段注释说的就是这件事），所以一个默认值都不走。
+//  The send path is copied verbatim from `MeshPlazaView`: broadcast = `PopopxMeshOutbound.sendBroadcast(text:)` on
+//  `PopopxMeshRuntime.shared.engineBackend` (`Shared/Model/POPOPXAPI.swift:3748`), which is to say the very same backend
+//  that `PopopxAddFriendView.swift:121-125` passes in when mounting the plaza; the truncation/limit/local-echo/dedup
+//  rules are copied from `PopopxMeshPlazaModel.broadcastDraft()` (`MeshPlazaView.swift:168-186`),
+//  `rebuildPosts(from:)` (`:213-232`) and `deduped(_:)` (`:255-265`). The nickname write entry =
+//  `PopopxMeshKillSwitch.setNickname(_:)` (inside the package `saveNickname()` ultimately does nothing but this).
+//  "Tap to start Bluetooth private chat directly" = `initiatePairing(with:incognito:)` sending one offline connection invitation (the only action that can make a
+//  Noise private-chat session exist), then pushing the package's private-chat screen `PopopxMeshPrivateChatView` with all four dependencies explicitly given
+//  as real objects — its default parameters are the `PopopxMeshEngine.shared` / `.shared` singletons, which would let a page with the master switch off casually build up the engine
+//  and the radio (the comment after `POPOPXAPI.swift:3557` is saying exactly this), so not one default value is used.
 //
-//  频道命名（裁定；包内是英文 `#mesh`，全仓 `Shared/` 里 `#mesh` 出现 0 次）：
-//  - 公共广播频道 = `Copy.hallRow`，第 10 轮起源文是 `#Cabin Hall`（品牌词同一口径走英文，zh 译本仍是
-//    「#厢语大厅」）。保留 `#`：它是「一个频道」的视觉记号，不是 `#mesh` 这个词；
-//    这条频道是无加密洪泛，只在蓝牙射程内，不经服务器，也不回显给发送者。
-//  - 本地加密频道（`Copy.encryptedChannelsRow`）= 本机与单个蓝牙邻居已经建立的 Noise_XX 1:1 会话集合（判据 = 模块 1 有映射行，
-//    或模块 3 报 `.paired`）。它走的是 mesh 而不是 SMP，所以整行只有青绿，不出现靛紫（§1.1）。
+//  Channel naming (ruling; inside the package it is English `#mesh`, and `#mesh` appears 0 times in repo-wide `Shared/`):
+//  - the public broadcast channel = `Copy.hallRow`; from round 10 the source text is `#Cabin Hall` (brand words follow the same English convention; the zh translation still is
+//    the Chinese form of "#Cabin Hall"). Keeping the `#`: it is the visual mark of "a channel", not the word `#mesh`;
+//    this channel is unencrypted flooding, only within Bluetooth range, it does not pass through a server, and it is not echoed back to the sender.
+//  - the local encrypted channel (`Copy.encryptedChannelsRow`) = the set of Noise_XX 1:1 sessions this device has already established with a single Bluetooth neighbour (criterion = a mapping row in module 1,
+//    or module 3 reporting `.paired`). It travels over the mesh rather than SMP, so the whole row is teal only and no indigo-violet appears (§1.1).
 //
-//  颜色纪律：青绿只出现在 mesh 事实的行上；`PopopxToggleRow` 的开关实底是原子库写死的
-//  `PopopxPalette.brand`（`PopopxControls.swift:400`），所以总闸那一行不放青色徽标——同一控件里
-//  紫青并存就是 §1.1 违规。青色徽章一律带跳数数字（§1.4 第 3 条）。本页那个 120% 签名细节是
-//  附近节点的雷达；Reduce Motion 下退化成静态环 + 数字跳数，一次循环动画都不启动（§5）。
+//  Colour discipline: teal appears only on rows that state mesh facts; the switch fill of `PopopxToggleRow` is hard-coded in the atomic library as
+//  `PopopxPalette.brand` (`PopopxControls.swift:400`), so the master-switch row carries no teal badge — purple and teal coexisting
+//  inside the same control is a §1.1 violation. Teal badges always carry the hop-count number (§1.4 rule 3). The 120% signature detail of this page is
+//  the nearby-node radar; under Reduce Motion it degrades to a static ring plus a numeric hop count, and not one looping animation starts (§5).
 //
-//  顶栏与设置中心（离线组网入口收口，七个决定）：
-//  1. 左上角这一枚有两种去处，按挂法二选一（`leadingBarEntry`）：单独成页时仍是「发现」=
-//     `path.append(.plaza)`，进包内那一份 `MeshPlazaView`，挂载写法与 `PopopxAddFriendView.swift:118-128`
-//     逐字相同、标题共用同一个 Key（真机第 5 轮要求的就是"两个入口打开完全一致的功能页面"）；
-//     作为「厢语」根之上的抽屉时换成收起抽屉 —— 根那一屏就是把广场当首页，抽屉不该再给一条
-//     回到把自己唤出来的那一屏的回路。这一枚原先（第 5 轮之前）进的是本页自己写的「发现」页
-//     （`PopopxCabinNearbyCard` + `groupsCard` 两张卡），那两张卡一件都没失去入口：雷达在大厅右上角
-//     「发现模式」里（`discoveryEntry` 的开关态，读同一份 `nodes`），本机离线群与创建入口在内容区
-//     「离线群聊」那一行里（`path.append(.groups)` → `MeshGroupsView`）。大厅本身归内容区
-//     「附近频道」卡片 `channelsCard` 的第一行，与这两枚都互不顶掉；`.plaza` 路由与它的登记一起留着。
-//  2. 「离线组网设置」= `PopopxCabinMeshSettingsSheet`，三张卡依次是总闸与配对策略、节点身份与
-//     真实运行态、离线数据与清除。这四件事原先散在「我」页的离线组网分组与「全部设置」页的厢语卡片里，
-//     摘除时逐条等效搬来：`requestFuse(_:)` / `setPairingPolicy(_:)` / `verifiedActivitySnapshot()` /
-//     `emergencyWipeAllMappings()`，绑定一个都没换来源，也没有新增第二套状态存储；
-//     真机第 10 轮起这张表由**根那一屏**在自己的 `.sheet` 里直接摆出，表里那九格数字的读数者跟着一起
-//     搬过去（`PopopxMeshPlazaRootView.refreshMeshSettingsFacts(waitingForSettle:)`，只在表开着的那一段
-//     跑）：呈现者与读数者仍然只有一个，只是不再是抽屉。抽屉这一屏顶栏那枚重复入口连同它那一套
-//     `showsMeshSettings` / 身份 / 核验读数一起删干净，节点表两边共用 `PopopxCabinNodeFold` 这唯一一处折法。
-//  3. 设置中心的视图内聚在本文件末尾，零新增文件、零 `project.pbxproj` 改动（铁律：不脚本改工程文件）；
-//  4. 栈由本页自己持有：`NavigationStack(path: $path)` 在这里，`MainTabView` 只放裸的根
-//     （本轮起是 `PopopxMeshPlazaRootView()`，它把本页整块压进抽屉，仍然不给外壳包栈）。
-//     `path` 若不是绑定在栈上的那一份，四处 `path.append` 一次也推不动，见 `PopopxCabinRoute` 上面那段；
-//     这条规则随本轮一起搬进抽屉：抽屉里那一页继续自己持有自己的栈，根栈一条都不碰它。
-//  5. 第一轮那句"100% 承接"经真机复查并不成立，四处漏在这张表外面，本轮逐条补回：配对记录页的入口
-//     （连同它行尾那枚随熔断改写的状态字）、总开关下面的动态副标题、翻闸后带 settle 窗口的二次核验、
-//     配对策略的当前值与它自己的解释句。补回来仍然只经 `PopopxMeshRuntime` 写回包里唯一的那几个对象。
-//  6. 配对记录页的入口住在这一张表里，所以它推的是根那一屏自己那条栈：行先收起这张表再 `append`。
-//     包里那一页自己不带栈（整张 `List`），而它的开关是 `@AppStorage(PopopxMeshKillSwitch.enabledDefaultsKey)`
-//     —— 与 runtime 镜像的同一个 key，所以两处翻的是同一道闸，没有第二份开关。
-//  7. 表里新增的唯一一行是射频与权限诊断：读数只认 `BluetoothHealthMonitor` 的 `currentRadioState`，
-//     与顶栏胶囊同一个读法（`PopopxTelemetryHeader.swift:177`），档位用词复用
-//     `PopopxDualStatusCapsule.words(for:)`（`PopopxTelemetryHeader.swift:391`），一个字的第三种说法都不造。
-//     只有档位落在 `unauthorized`/`poweredOff` 时这一行才给"打开系统设置"那一下：闸是好的时候按它
-//     只会跳到一个没东西可改的页面。
+//  Top bar and settings centre (the offline-mesh entries consolidated, seven decisions):
+//  1. This top-left capsule has two destinations, chosen by how it is mounted (`leadingBarEntry`): standing alone as a page it is still "Discover" =
+//     `path.append(.plaza)`, entering the package's own `MeshPlazaView`, written verbatim like the mount in `PopopxAddFriendView.swift:118-128`
+//     and sharing one title Key (what device round 5 demanded was precisely "two entries opening exactly the same functional page");
+//     as the drawer above the "Cabin" root it becomes dismiss-the-drawer instead — the root screen already treats the plaza as its home page, and the drawer must not offer another
+//     loop back to the screen that summoned it. This capsule used to (before round 5) enter this page's own "Discover" screen
+//     (`PopopxCabinNearbyCard` + `groupsCard`, two cards), and neither card lost an entry: the radar is in the hall's top-right
+//     "discovery mode" (the switch state of `discoveryEntry`, reading the same `nodes`), and this device's offline groups plus the create entry are in the content area's
+//     "offline group chat" row (`path.append(.groups)` → `MeshGroupsView`). The hall itself belongs to the content area's
+//     `channelsCard` first row, and neither of these two capsules displaces the other; the `.plaza` route and its registration stay as they were.
+//  2. "Offline mesh settings" = `PopopxCabinMeshSettingsSheet`, with three cards in order: master switch and pairing policy, node identity and
+//     real runtime state, offline data and clearing. These four things used to be scattered across the offline-mesh group on the "Me" page and the Cabin card on the "All settings" page,
+//     and when they were removed they were carried over item by item with full equivalence: `requestFuse(_:)` / `setPairingPolicy(_:)` / `verifiedActivitySnapshot()` /
+//     `emergencyWipeAllMappings()`; not one binding changed its source, and no second state store was added;
+//     from device round 10 this sheet is presented directly by **the root screen** in its own `.sheet`, and the reader of the nine numeric cells moved over with it
+//     (`PopopxMeshPlazaRootView.refreshMeshSettingsFacts(waitingForSettle:)`, running only during the stretch the sheet is open)
+//     : there is still only one presenter and one reader, it is simply no longer the drawer. The duplicate entry in the drawer screen's top bar, together with its set of
+//     `showsMeshSettings` / identity / verification readings, was deleted outright, and both sides of the node table share the single fold implementation `PopopxCabinNodeFold`.
+//  3. The settings centre's view is kept cohesive at the end of this file: zero new files, zero `project.pbxproj` changes (iron rule: do not script the project file);
+//  4. The stack is held by this page itself: `NavigationStack(path: $path)` lives here, and `MainTabView` holds only the bare root
+//     (from this round `PopopxMeshPlazaRootView()`, which presses this entire page into the drawer and still wraps no stack around the outside).
+//     If `path` is not the copy bound to the stack, the four `path.append` calls never push anything at all; see the paragraph above `PopopxCabinRoute`;
+//     this rule moves into the drawer together with this round: the page inside the drawer keeps holding its own stack, and the root stack never touches it.
+//  5. The first round's claim of "100% carried over" did not hold under a device re-check; four things leaked outside this sheet, and this round adds them back item by item: the entry to the pairing-records page
+//     (together with the state word at the end of its row that rewrites itself with the fuse), the dynamic subtitle under the master switch, the second verification with the settle window after flipping the switch,
+//     and the current value of the pairing policy plus its own explanation. Adding them back still writes through `PopopxMeshRuntime` into the few unique objects in the package.
+//  6. The entry to the pairing-records page lives in this sheet, so it pushes the root screen's own stack: the row first dismisses this sheet and then `append`s.
+//     That page inside the package carries no stack of its own (it is one whole `List`), and its switch is `@AppStorage(PopopxMeshKillSwitch.enabledDefaultsKey)`
+//     — the same key as the runtime mirror, so both places flip the same switch and there is no second toggle.
+//  7. The only new row added to the sheet is the radio-and-permissions diagnostic: the reading recognises only `BluetoothHealthMonitor`'s `currentRadioState`,
+//     the same reading as the top-bar capsule (`PopopxTelemetryHeader.swift:177`), and the state wording reuses
+//     `PopopxDualStatusCapsule.words(for:)` (`PopopxTelemetryHeader.swift:391`); not one third way of saying anything is invented.
+//     Only when the state lands on `unauthorized`/`poweredOff` does this row offer the "open system settings" tap: while the switch is healthy, tapping it
+//     only jumps to a page that has nothing to change.
 //
-//  本地化：这一屏的每一句源文都是英文原句、原句就是 Key，与 16 个译本目录的约定见下面 `Copy` 里那一节
-//  （真机第 10 轮把 Phase 4 那批中文直写整页转成了 Key，屏面上不再有一个中文字符）。注释里的中文是另一轮的事。
-//  品牌词同一口径：Key 的源文里写英文 Cabin，「厢语」不再出现在任何一句源文里（`Copy.tabTitle`、
-//  `Copy.hallRow`、`cabinPanelEntryHint` 三处随本轮改名，旧 Key 的译本要跟着换）。
-//  底栏那一格是另一码事：它住在 `MainTabView.swift:230`，本轮没动，也不归本文件。
+//  Localisation: every source sentence on this screen is an English original used as its own Key; the convention with the 16 translation catalogues is in the `Copy` section below
+//  (device round 10 turned that whole batch of Phase 4 hard-written Chinese into Keys, so the screen no longer shows a single Chinese character). Chinese inside comments is another round's business.
+//  Brand words follow the same convention: the Key source text writes Cabin in English, and the Chinese tab name no longer appears in any source sentence (`Copy.tabTitle`,
+//  `Copy.hallRow` and `cabinPanelEntryHint`, those three renamed in this round; the old Keys' translations have to follow).
+//  The bottom-bar cell is a different matter: it lives in `MainTabView.swift:230`, it was not touched this round, and it is not this file's business.
 //
 
 import Foundation
@@ -102,64 +102,64 @@ import PopopxMeshUI
 
 // MARK: - Push routes
 
-/// 栈由本页自己持有：`path` 必须是**绑定在栈上**的那一份 —— 本页作抽屉挂时也是同一份。
-/// 2026-11-20 之前它挂在 `@State` 上、栈却由 `MainTabView` 裸包一层，那几处 `path.append`
-/// 因此一次也推不动（绑定不存在）；把栈移进来才接上，第四阶段"消息栏自带栈"是同一写法。
+/// The stack is held by this page itself: `path` must be the very copy **bound to the stack** — the same copy when this page is mounted as a drawer.
+/// Before 2026-11-20 it sat on `@State` while `MainTabView` wrapped a bare stack around it, so those `path.append` calls
+/// never pushed anything (the binding did not exist); moving the stack in here connected it, and Phase 4's "the message tab owns its stack" is the same pattern.
 private enum PopopxCabinRoute: Hashable {
-    /// 「#厢语大厅」：完整广播流 + 广播输入 + 本机临时昵称。入口在内容区 `channelsCard` 第一行。
+    /// "#Cabin Hall": the full broadcast stream + broadcast input + this device's temporary nickname. The entry is the first row of the content area's `channelsCard`.
     case hall
-    /// 包内那一份「厢语附近广场」（`PopopxMeshUI/MeshPlazaView`），与「添加朋友 → 进入厢语发现
-    /// 附近群组/频道（BLE Mesh）」推的是同一个视图、同一份标题词条。本轮起这一栏的根直接就是
-    /// 那一屏，所以只有单独成页那一档的左上角还会推进这里；登记照旧留着（见上面那条决定 1）。
+    /// The package's own "Cabin nearby plaza" (`PopopxMeshUI/MeshPlazaView`), and "Add friend → enter Cabin discovery,
+    /// nearby groups/channels (BLE Mesh)" push the same view and the same title entry. From this round the root of this tab is directly
+    /// that screen, so only the standalone-page variant's top-left corner still pushes in here; the registration stays as before (see decision 1 above).
     case plaza
-    /// 本地加密频道：本机已与蓝牙邻居建立的 1:1 加密会话清单。
+    /// The local encrypted channel: the list of 1:1 encrypted sessions this device has already established with Bluetooth neighbours.
     case encryptedChannels
-    /// 本地加密群聊（包内 `MeshGroupsView`）：群名 + 名单 + 32 字节群密钥只活在这些手机上，
-    /// 成员资格由创建者的签名成立，不经服务器、不经中继、也没有口令。
+    /// Local encrypted group chat (the package's `MeshGroupsView`): the group name + member list + the 32-byte group key live only on these phones,
+    /// membership is established by the creator's signature, with no server, no relay, and no passphrase.
     case groups
-    /// 与某一个 mesh 公钥的私聊（包内 `PopopxMeshPrivateChatView`）。
+    /// Private chat with a specific mesh public key (the package's `PopopxMeshPrivateChatView`).
     case privateChat(peerMeshPublicKeyHex: String)
 }
 
 // MARK: - Label
 
-/// 公钥的读法：与包内横幅/私聊页同一规则，超过 16 位取前 16 位加省略号
+/// How a public key is read: the same rule as the package's banner/private-chat page; past 16 characters take the first 16 plus an ellipsis
 /// （`PopopxMeshBannerModel.shorten`，`ManualPairingBannerView.swift:355`；`PopopxMeshPrivateChatModel
-/// .peerLabel` 只是转发到它）。包内那两个宿主都是 `@MainActor` 类，非隔离的值类型里不能同步调，
-/// 所以这里逐字复刻同一规则，保证全仓一个公钥只有一种拼法。
+/// (`.peerLabel` only forwards to it). Both hosts inside the package are `@MainActor` classes, and a non-isolated value type cannot call them synchronously,
+/// so the same rule is replicated here verbatim, guaranteeing repo-wide that one public key has exactly one spelling.
 private enum PopopxCabinLabel {
     static func abbreviate(_ hex: String) -> String {
         hex.count > 16 ? "\(hex.prefix(16))…" : hex
     }
 }
 
-// MARK: - 顶栏那一栏的画法定数
+// MARK: - The fixed values of the top bar's rendering
 
-/// 顶栏四枚胶囊共用的两个定数。写在值类型里而不是散在四段 view 代码里：同一栏的淡底必须是同一个
-/// 不透明度，四枚各写一个数就是四种"淡青"。
+/// The two constants shared by the four top-bar capsules. Written in a value type instead of scattered across four view snippets: inside one bar the tinted background must be the same
+/// opacity, and four capsules each writing their own number would be four different "faint teals".
 private enum PopopxCabinBar {
-    /// 淡一档的青绿底：`mesh` 抽 12% 压在导航条底上，承载 `meshInk` 的字仍过 AA
-    /// （全仓这一档淡底的既有写法就是 `tint.opacity(0.10…0.12)`，与徽章胶囊、名片读法同一档）。
+    /// The fainter teal background: `mesh` extracted at 12% laid over the navigation bar background, and the `meshInk` text it carries still passes AA
+    /// (repo-wide the existing pattern for this level of tint is `tint.opacity(0.10…0.12)`, the same level as the badge capsule and the card reading).
     static let softTintOpacity: Double = 0.12
 }
 
 // MARK: - Node snapshot
 
-/// 一个周边节点在这一页上的全部事实：模块 4 的可达性 + 镜像的昵称/RSSI + 模块 1 的绑定 + 模块 3 的配对。
-/// 值类型，`refresh()` 一次算完；行视图只读它，不再碰 actor。
+/// All the facts about one nearby node on this page: module 4's reachability + the mirror's nickname/RSSI + module 1's binding + module 3's pairing.
+/// A value type, computed once by `refresh()`; the row view only reads it and no longer touches actors.
 private struct PopopxCabinNode: Identifiable, Hashable {
-    /// 绑定事实的三档，直接来自 `PopopxMeshContactMapping` 的字段。
+    /// The three tiers of the binding fact, straight from the fields of `PopopxMeshContactMapping`.
     enum Binding: Hashable {
-        /// `contactId != nil`：这条 mesh 公钥背后是一个真的 POPOPX 联系人。
+        /// `contactId != nil`: behind this mesh public key there is a real POPOPX contact.
         case contact
-        /// `contactId == nil` 且 `isPending`：离线建联已发出，还没成为联系人。
+        /// `contactId == nil` and `isPending`: the offline connection invitation has been sent, and it is not a contact yet.
         case pending
-        /// 映射表里没有这一行。
+        /// The mapping table has no row for this one.
         case none
     }
 
     let peerIDHex: String
-    /// announce 或握手解析出来的 64 位十六进制公钥；nil 时这一台还无法寻址，只能听到它的洪泛。
+    /// The 64-bit hexadecimal public key parsed from an announce or a handshake; when nil this node still cannot be addressed and only its flooding can be heard.
     let meshPublicKeyHex: String?
     let nickname: String?
     let hopCount: Int
@@ -172,7 +172,7 @@ private struct PopopxCabinNode: Identifiable, Hashable {
 
     var id: String { peerIDHex }
 
-    /// 名字的取法与包内私聊页一致：announce 昵称 → 公钥缩写 → 8 字节线 id 前缀。
+    /// How the name is taken, matching the package's private-chat page: announce nickname → public-key abbreviation → the 8-byte line id prefix.
     var label: String {
         if let nickname {
             let clean = nickname.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -182,47 +182,47 @@ private struct PopopxCabinNode: Identifiable, Hashable {
         return String(peerIDHex.prefix(8))
     }
 
-    /// 能不能开私聊：没有公钥就组不出会话，`SYS_POPOPX_*` 帧无处可去。
+    /// Whether a private chat can be opened: without a public key no session can be assembled, and `SYS_POPOPX_*` frames would have nowhere to go.
     var canOpenChat: Bool { meshPublicKeyHex != nil }
     var isBound: Bool { binding == .contact }
     var isPaired: Bool {
         if case .paired = pairingState { return true }
         return false
     }
-    /// 「本地加密频道」的判据 = 包内私聊页允许发一条消息的判据，逐字同源：模块 3 报 `.paired`
-    /// 或者模块 1 里有这一行（`PopopxMeshPrivateChatView.swift:311-314` 的 `peerIsPaired`）。
+    /// The criterion for the "local encrypted channel" = the criterion under which the package's private-chat page allows sending a message, verbatim the same source: module 3 reports `.paired`
+    /// or module 1 has this row (`peerIsPaired` at `PopopxMeshPrivateChatView.swift:311-314`).
     var hasEncryptedChannel: Bool { isBound || binding == .pending || isPaired }
 }
 
-// MARK: - 节点表的唯一折法
+// MARK: - The node table's single fold implementation
 
-/// 模块 4 的表 + 镜像的 peers 表 + 模块 1 的绑定 + 模块 3 的配对，折成一次算完的一屏值。
+/// Module 4's table + the mirror's peers table + module 1's bindings + module 3's pairings, folded into one screen of values computed in one pass.
 ///
-/// 抽出来只为一条纪律：**全仓只有一套折法**。抽屉那一屏（`PopopxCabinView.refresh()`）与根那一屏的
-/// 设置中心（`PopopxMeshPlazaRootView.refreshMeshSettingsFacts(waitingForSettle:)`，真机第 10 轮把表
-/// 搬到了那里）读的都是这同一个 `load()`，谁都不许再自己拼一份 —— 两张表数字对不上是这一页最贵的一种错。
-/// 只在 `.task` / `onChange` / 动作之后调用，绝不在 `body` 里问 actor。
+/// Extracted only for one discipline: **repo-wide there is one and only one fold implementation**. The drawer screen (`PopopxCabinView.refresh()`) and the root screen's
+/// settings centre (`PopopxMeshPlazaRootView.refreshMeshSettingsFacts(waitingForSettle:)`, device round 10 moved the table
+/// there) both read this very same `load()`, and nobody is allowed to assemble another copy — two tables whose numbers disagree is the most expensive kind of error on this page.
+/// Called only in `.task` / `onChange` / after an action; never ask an actor inside `body`.
 @MainActor
 private enum PopopxCabinNodeFold {
     struct Reading {
         let radio: PopopxBluetoothState
-        /// 折的那一刻的总闸状态。调用方要在同一个瞬间上决定要不要清自己那格表，
-        /// 不能在 await 之后再回头问 `isFuseOn` —— 中间翻了一次闸，表与判据就说的是两个时刻。
+        /// The master-switch state at the moment of folding. The caller has to decide, in that same instant, whether to clear its own table cell,
+        /// and must not go back and ask `isFuseOn` after the await — if the switch flipped in between, the table and the criterion would be talking about two different moments.
         let fuseOn: Bool
         let nodes: [PopopxCabinNode]
         let requests: [PopopxPairingRequest]
     }
 
-    /// 射频档位先读、读到就回：设置中心那一格诊断行在总闸关着时也要说得出当下的读数，不能被下面
-    /// 那个空表挡掉。这一跳只是问 actor 要它已经记着的那个值，不替谁把蓝牙叫醒。
-    /// `isUsable` 的出处是 `BluetoothHealthMonitor.swift:204`，所以一次读回来两用，
-    /// 诊断行与节点行说的必然是同一时刻的蓝牙。
+    /// The radio tier is read first and returned as soon as it is read: the settings centre's diagnostic cell has to state the current reading even while the master switch is closed, and must not be blocked by the
+    /// empty table below. This hop only asks the actor for the value it already remembers; it does not wake Bluetooth up on anyone's behalf.
+    /// The origin of `isUsable` is `BluetoothHealthMonitor.swift:204`, so one read serves two purposes,
+    /// and the diagnostic row and the node rows necessarily speak about Bluetooth at the same moment.
     static func load() async -> Reading {
         let runtime = PopopxMeshRuntime.shared
         let radio = await runtime.healthMonitor.currentRadioState
         let fuseOn = runtime.isFuseOn
         guard fuseOn else {
-            // 总闸关闭：不扫描、不广播、不中继，所以这两格只能是空的。留着旧表就是「看起来还活着」。
+            // The master switch is closed: no scanning, no broadcasting, no relaying, so these two cells can only be empty. Keeping the stale table would mean "looks like it is still alive".
             return Reading(radio: radio, fuseOn: false, nodes: [], requests: [])
         }
         let radioOn = radio.isUsable
@@ -247,7 +247,7 @@ private enum PopopxCabinNodeFold {
             }
         }
 
-        // 镜像的 peers 表按 8 字节线 id 提供昵称与 RSSI；模块 4 的表才是跳数与在线的裁判。
+        // The mirror's peers table provides nickname and RSSI keyed by the 8-byte line id; module 4's table is the judge of hop count and being online.
         let mirrorPeers = PopopxMeshStateSource.shared.state.peers
         var peerByID: [String: PopopxMeshPeer] = [:]
         for peer in mirrorPeers { peerByID[peer.peerID.hex] = peer }
@@ -273,9 +273,9 @@ private enum PopopxCabinNodeFold {
                 )
             )
         }
-        // 模块 4 没记到的邻居也要出现：镜像的 `peers` 表是连接层的真值。在线判定用与包内私聊页
-        // `peerIsInRange`（`PopopxMeshPrivateChatView.swift:317-321`）完全相同的公式——射频可用、
-        // 且静默不超过同一个窗口；跳数与静默时长按镜像自己的读数说（本机持有链路时 hopCount = 0）。
+        // Neighbours that module 4 never recorded must still appear: the mirror's `peers` table is the truth of the connection layer. The online judgement uses exactly the same formula as the package's private-chat page's
+        // `peerIsInRange` (`PopopxMeshPrivateChatView.swift:317-321`) — the radio usable,
+        // and the silence not exceeding the same window; the hop count and silence duration are stated from the mirror's own readings (hopCount = 0 when this device holds the link).
         var listed: Set<String> = Set(observed.map(\.peerIDHex))
         for peer in mirrorPeers where !listed.contains(peer.peerID.hex) {
             listed.insert(peer.peerID.hex)
@@ -298,8 +298,8 @@ private enum PopopxCabinNodeFold {
         return Reading(radio: radio, fuseOn: true, nodes: sortedForDisplay(built), requests: requests)
     }
 
-    /// 在线的在前，然后跳数近的，最后按听到的时间。`allNodes()` 里被 `sweep()` 清掉之前的旧行不会
-    /// 消失，所以每行都还要过一次 `isReachable`，用「超出射程」明说，而不是假装它不在了。
+    /// Ones that are online first, then ones with few hops, and finally by the time they were heard. The stale rows in `allNodes()` from before `sweep()` clears them do not
+    /// disappear, so every row still has to pass `isReachable`, which says so plainly as "out of range" instead of pretending it is gone.
     private static func sortedForDisplay(_ nodes: [PopopxCabinNode]) -> [PopopxCabinNode] {
         nodes.sorted { lhs, rhs in
             if lhs.isReachable != rhs.isReachable { return lhs.isReachable }
@@ -310,80 +310,80 @@ private enum PopopxCabinNodeFold {
     }
 }
 
-/// 根栈上的两跳：左上角那枚「群组」胶囊 → 周边蓝牙 Mesh 群组；设置中心里那一行「配对记录」→
-/// 包内配对记录与离线绑定页。
+/// The two hops on the root stack: the top-left "Groups" capsule → nearby Bluetooth Mesh groups; the "pairing records" row in the settings centre →
+/// the package's pairing-records and offline-binding page.
 ///
-/// 刻意不复用 `PopopxCabinRoute`：抽屉里那一页必须继续持有自己的 `path`（见下面那个视图的口径 4 ——
-/// 私聊那一跳是发出离线建联邀请之后再推一页，动作 async，只有绑在它自己栈上的 path 在那之后还推得动）。
-/// 根栈只登记自己真要去的这两格，不会把抽屉那五 case 的语义一起拖进来。
+/// Deliberately does not reuse `PopopxCabinRoute`: the page inside the drawer must keep holding its own `path` (see criterion 4 of the view below —
+/// the private-chat hop pushes a page after the offline connection invitation has been sent, the action is async, and only a path bound to its own stack can still push after that).
+/// The root stack registers only these two cells it actually goes to, and does not drag in the semantics of the drawer's five cases.
 private enum PopopxMeshPlazaRoute: Hashable {
     case nearbyGroups
     case privacyRecords
 }
 
-// MARK: - Tab 3 根（全屏广场 + 满高抽屉里的旧面板）
+// MARK: - Tab 3 root (full-screen plaza + the old panel inside a full-height drawer)
 
-/// 第四阶段 Tab 3「厢语」的落地页：一进来就是包内那一份全屏 `MeshPlazaView`，旧厢语面板收成中间
-/// 那一枚胶囊唤起的满高抽屉，离线组网设置中心由右上角那一枚在**这一屏**直接摆出（真机第 10 轮起
-/// 不再先开抽屉再摆表），左上角是回「消息」的返回键。
-/// 类型写在本文件而不是新文件（铁律：不脚本改 `project.pbxproj`），与 `PopopxCabinMeshSettingsSheet`
-/// 同一个办法。
+/// The landing page of Phase 4 Tab 3 "Cabin": you arrive straight into the package's full-screen `MeshPlazaView`, the old Cabin panel collapses into the
+/// full-height drawer summoned by the middle capsule, and the offline mesh settings centre is placed directly by the top-right capsule **on this screen** (from device round 10
+/// it no longer opens the drawer first and then the sheet), while the top-left is the back key to "Chat".
+/// The type is written in this file rather than in a new one (iron rule: do not script `project.pbxproj`) — as with `PopopxCabinMeshSettingsSheet`
+/// the same approach.
 ///
-/// 四条挂载口径：
-/// 1. 广场按"首页"那一档给两个新参数：`hidesTabBar: false` 说清这一屏的角色是首页、不是推进去的一页
-///    （因此离开时不 `stop()`），`keepsRunningWhenHidden: true` 让切栏不再清空广播历史 ——
-///    `PopopxMeshPlazaModel.stop()` 会清 `posts`（包内 `MeshPlazaView.swift:159-163`），
-///    本机喊出去的话不会因为按了「消息」就收回。⚠️ 本轮起**底部那四枚仍然让开**，但不是这两个参数
-///    申请的：底栏的隐藏由本视图在根栈那一屏的内容上单独声明 `.toolbar(.hidden, for: .tabBar)`
-///    （见 `body` 里那一段），包内 `hidesTabBar` 只管"这一屏是不是推进去的一页"这一件事。
-/// 2. 模型由本视图 `@StateObject` 持有，再走 `MeshPlazaView(model:)`：那条便利 init 每次 body 重算
-///    都会 new 一个 `PopopxMeshPlazaModel`，而 `@ObservedObject` 会跟着换成新那一份 —— 首页的 body
-///    比推上去的一页重算得勤（开一次抽屉就是两次），换模型等于把时间线换成空的且再没人 `start()`。
-///    对象身份要活下来只有 `@StateObject` 这一条路。三个依赖仍然逐字给 `PopopxMeshRuntime` 的真对象
-///    （与 `.plaza` 路由、`PopopxAddFriendView.swift:121-125` 同一份），一个默认值都不走 —— 默认值是
-///    `PopopxMeshEngine.shared`，总闸关着时也会被它把引擎与射频建出来（文件头那段红线）。
-/// 3. 不设标题：这条栏四个槽已经站满（左上角两枚 + 中间那枚青绿胶囊 + 右边一枚），393pt（iPhone 15
-///    Pro）上再叠一个居中标题就要开始截断 —— 中间那一槽本轮就是标题的位置，站的是旧厢语面板那枚胶囊。
-///    宽度账逐笔写在 `meshDiscoveryEntry` 上面（四枚全算）。这一屏的名字由底栏「厢语」与列表段头
-///    `#mesh` 说；`Copy.plazaTitle` 继续在 `.plaza` 那一处用，两处不会是两屏不一样的东西。
-/// 4. 抽屉里那一页自己持有 `NavigationStack(path:)`（文件头决定 4），所以整块压在根栈外面：挂成根栈
-///    的一页要么两条导航条，要么让那一个文件里四处 `path.append` 全部落空 —— 私聊那一跳是发出离线
-///    建联邀请之后再推一页，动作 async，只有绑在它自己栈上的 `path` 在那之后还推得动。
+/// Four mounting criteria:
+/// 1. The plaza gets two new parameters in its "home page" tier: `hidesTabBar: false` states that this screen's role is a home page and not a pushed page
+///    (so leaving it does not `stop()`), and `keepsRunningWhenHidden: true` makes tab switching stop clearing the broadcast history —
+///    `PopopxMeshPlazaModel.stop()` clears `posts` (package's `MeshPlazaView.swift:159-163`),
+///    so what this device shouted out is not retracted just because someone tapped "Chat". ⚠️ From this round **the bottom four capsules still give way**, but not because these two parameters
+///    requested it: hiding the bottom bar is declared by this view separately, on the root stack's screen content, with `.toolbar(.hidden, for: .tabBar)`
+///    (see that section in `body`), and the package's `hidesTabBar` handles only the one question "is this screen a pushed page".
+/// 2. The model is held by this view's `@StateObject`, then passed through `MeshPlazaView(model:)`: that convenience init would, on every body recompute,
+///    new a `PopopxMeshPlazaModel`, and `@ObservedObject` follows by switching to the new one — the home page's body
+///    recomputes more often than a pushed page does (opening the drawer once is twice), and swapping the model means the timeline becomes empty and nobody ever `start()`s it again.
+///    For the object identity to survive there is only the `@StateObject` route. The three dependencies are still given verbatim as `PopopxMeshRuntime`'s real objects
+///    (the same set as the `.plaza` route and `PopopxAddFriendView.swift:121-125`), and not one default value is used — the default value is
+///    `PopopxMeshEngine.shared`, which would build out the engine and the radio even while the master switch is closed (the red line in the file header).
+/// 3. No title is set: this bar's four slots are already standing full (two in the top-left + the teal capsule in the middle + one on the right), and on 393pt (iPhone 15
+///    Pro) stacking a centred title on top of that is where truncation begins — the middle slot is this round's title position, occupied by the old Cabin panel's capsule.
+///    The width accounting is written entry by entry above `meshDiscoveryEntry` (all four counted). This screen's name is stated by the bottom bar's "Cabin" and the list section header
+///    `#mesh`; `Copy.plazaTitle` continues to be used at the `.plaza` site, so the two can never be two different screens.
+/// 4. The page inside the drawer holds its own `NavigationStack(path:)` (decision 4 in the file header), so the whole block sits outside the root stack: mounted as a page of the root stack
+///    it would either show two navigation bars, or make that file's four `path.append` calls all miss — the private-chat hop pushes a page after the offline
+///    connection invitation is sent, the action is async, and only a `path` bound to its own stack can still push after that.
 @MainActor
 struct PopopxMeshPlazaRootView: View {
     @ObservedObject private var meshRuntime: PopopxMeshRuntime
     @StateObject private var plazaModel: PopopxMeshPlazaModel
 
-    /// `MainTabView` 选中栏的绑定，由宿主在挂载点给（`MainTabView.swift` 那一栏）。
-    /// 顶栏全屏沉浸之后，这一栏底下没有任何横切导航，唯一出口就是左上角那枚返回键 —— 它要写的
-    /// 就是这一份。走 `@Binding` 而不是新造一个 `@Observable` 路由对象注进环境：`MainTabView` 的
-    /// `selection` 本来就是那一份唯一事实（决定 3 的 `onChange(of: chatModel.chatId)` 写的也是它），
-    /// 再包一层就是第二个持有者；而 init 必填 ⇒ 少挂一个宿主直接编译不过，比"点了不动"好查
-    /// （同 `PopopxSettingsNavTrack` 刻意不给默认值那条理由）。
+    /// The binding of `MainTabView`'s selected tab, given by the host at the mount point (that tab in `MainTabView.swift`).
+    /// After the top bar went full-screen immersive there is no cross-cutting navigation beneath this tab at all, and the only exit is the top-left back key — what it has to write
+    /// is exactly this copy. Going through `@Binding` instead of inventing a new `@Observable` routing object injected into the environment: `MainTabView`'s
+    /// `selection` already is that single source of truth (decision 3's `onChange(of: chatModel.chatId)` writes it too),
+    /// and wrapping another layer would create a second holder; while a required init parameter ⇒ a host that forgets to mount it fails to compile outright, which is easier to find than "tapping does nothing"
+    /// (the same reasoning as `PopopxSettingsNavTrack` deliberately having no default value).
     @Binding private var tabSelection: PopopxTab
 
-    /// 旧厢语面板那一张满高抽屉（默认档 = 整屏，盖住底部四枚）。
+    /// The old Cabin panel's full-height drawer (default detent = full screen, covering the bottom four capsules).
     @State private var showsCabinPanel = false
-    /// 「厢语离线组网设置中心」：右上角那一枚直接在这一屏摆出这张表，中间不再经过抽屉。
+    /// The "Cabin offline mesh settings centre": the top-right capsule places this sheet directly on this screen, with the drawer no longer in between.
     @State private var showsMeshSettings = false
-    // 表里那九格数字。呈现者搬到这一屏，读数者就跟着搬到这一屏 —— 抽屉顶栏那枚重复入口与它那一套
-    // 读数一起删掉，全仓仍然只有一套折法：节点表走 `PopopxCabinNodeFold`（抽屉那一屏读的是同一个
-    // 实现），身份三格与核验只在表开着的那一段问。本视图之外没有第二个读数者。
+    // The nine numeric cells in the sheet. When the presenter moved to this screen, the reader moved to this screen with it — the duplicate entry in the drawer's top bar and its set of
+    // readings were deleted together, and repo-wide there is still only one fold implementation: the node table goes through `PopopxCabinNodeFold` (the drawer screen reads the same
+    // implementation), while the three identity cells and the verification are asked only during the stretch the sheet is open. Outside this view there is no second reader.
     @State private var meshSettingsNodes: [PopopxCabinNode] = []
     @State private var verifiedSnapshot: PopopxMeshActivitySnapshot?
     @State private var localKeyHex = ""
     @State private var bindingCount = 0
     @State private var queuedCount = 0
-    /// 模块 4 亲口报的射频档位；nil = 这一次运行还没读到过任何读数（不替它猜一个"未知"显示）。
+    /// The radio tier reported by module 4 itself; nil = this run has not read any value yet (we do not guess an "unknown" on its behalf to display).
     @State private var monitorRadioState: PopopxBluetoothState?
-    /// 抹除那一下的回执（清干净了 / 还有几项没清掉）由这一屏的 toast 说，与抽屉那一屏同一个控件。
+    /// The receipt of the wipe action (cleaned / a few items still not cleared) is spoken by this screen's toast, the same control as the drawer screen's.
     @State private var meshSettingsToast = PopopxToastModel()
 
-    /// 表开着时的那一拍。档位与抽屉那一屏同一个 2 秒：模块 4 的静默窗口是 15 秒，2 秒一次足够让
-    /// 「最近听到」这类读数不撒谎，又不会把三个 actor 的 hop 变成每秒几十次。
+    /// The cadence while the sheet is open. The tier uses the same 2 seconds as the drawer screen: module 4's silence window is 15 seconds, and once every 2 seconds is enough for
+    /// readings like "last heard" not to lie, without turning the three actors' hops into dozens per second.
     private static let meshSettingsRefreshInterval: Duration = .seconds(2)
 
-    /// 抽屉里那一页自己的 path —— 根栈不借用它，理由见 `PopopxMeshPlazaRoute` 上面那一段。
+    /// The path of the page inside the drawer itself — the root stack does not borrow it; the reason is in the paragraph above `PopopxMeshPlazaRoute`.
     @State private var rootPath: [PopopxMeshPlazaRoute] = []
 
     @MainActor init(tabSelection: Binding<PopopxTab>) {
@@ -406,27 +406,27 @@ struct PopopxMeshPlazaRootView: View {
                 hidesTabBar: false,
                 keepsRunningWhenHidden: true
             )
-            // 底与另两处挂载同一句（`PopopxCabinView` 的 `.plaza`、`PopopxAddFriendView.swift:127`）：
-            // 广场自己不带背景，宿主给一次分组底，三屏才是同一块布。
+            // The bottom matches the other two mount sites with the same sentence (`PopopxCabinView`'s `.plaza`, `PopopxAddFriendView.swift:127`):
+            // the plaza carries no background of its own, so the host gives the grouped background once, and only then are the three screens the same piece of cloth.
             .modifier(ThemedBackground(grouped: true))
-            // 本轮（真机第 8 轮）：这一栏全屏沉浸 —— 底部那四枚在根这一屏让开，49pt 还给内容。
-            // 挂在根栈的这一屏内容上，而不是挂在 `MainTabView` 的 `TabView` 上，两条理由：
-            // ① 深度与真机验证过的 `ChatsListView.swift:405` 那一处一致（同一栏、同一栈、同一层内容）
-            //    —— 底栏的可见性由 `TabView` 读它**选中那一栏的内容子树**递上来的偏好，写在
-            //    `TabView` 自己那一层就在这份读取的外侧，是赌一个没验过的口径；
-            // ② 声明在内容这一层，"这一屏可见"就是它的有效期：切到别的栏时这一屏不再可见，偏好
-            //    自动收回，另外三栏那一条栏不会被这一栏带走。挂在 `TabView` 上就得自己按 `selection`
-            //    算一个值，那又会压到 `ChatsListView.swift:268/275/285/405` 那四处按页声明的 `.hidden`。
-            // `hidesTabBar: false` 保持不动：那两个参数说的是这一屏在包里的**角色**（首页 ≠ 推进去的
-            // 一页，切栏不得清空广播流），不是底栏开关；底栏这一格现在由宿主自己申请让开。两处不冲突
-            // —— 包内 `meshHallTabBarHidden(_:)` 的 `false` 那一档刻意什么都不声明，不写
-            // `.toolbar(.visible, for: .tabBar)`（`MeshPlazaView.swift:516-531`），正是为了不把宿主
-            // 这一句顶掉。可见性重载本身是 iOS 16 起，app 的地板是 17.0，不需要 gate。
+            // This round (device round 8): this tab is full-screen immersive — the bottom four capsules give way on the root screen, and the 49pt is returned to the content.
+            // It is attached to the root stack's screen content rather than to `MainTabView`'s `TabView`, for two reasons:
+            // ① the depth matches the device-verified site at `ChatsListView.swift:405` (same tab, same stack, same content layer)
+            //    — the bottom bar's visibility is read by `TabView` from the preference bubbled up by the content subtree of **the tab it selects**, and writing it
+            //    at `TabView`'s own layer is outside that read, i.e. a bet on an unverified behaviour;
+            // ② declared at the content layer, "this screen is visible" is its validity window: when switching to another tab this screen stops being visible, the preference
+            //    withdraws itself automatically, and the other three tabs' bar is not dragged away by this tab. Attaching it to `TabView` would mean computing a value from `selection`,
+            //    which would then press down on the four per-page `.hidden` declarations at `ChatsListView.swift:268/275/285/405`.
+            // `hidesTabBar: false` stays untouched: those two parameters speak about this screen's **role** in the package (home page ≠ a pushed
+            // page, tab switching must not clear the broadcast stream), not about a bottom-bar switch; the bottom-bar cell is now asked to give way by the host itself. The two do not conflict
+            // — the package's `meshHallTabBarHidden(_:)`, in its `false` branch, deliberately declares nothing and does not write
+            // `.toolbar(.visible, for: .tabBar)` (`MeshPlazaView.swift:516-531`), precisely so as not to override
+            // this sentence of the host's. The visibility overload itself exists from iOS 16 onwards and the app's floor is 17.0, so no gate is needed.
             .toolbar(.hidden, for: .tabBar)
             .toolbar {
-                // 三段式：左 = 发现（周边离线群组）+ 返回「消息」，中 = 旧厢语面板（周边节点雷达与离线
-                // 群聊都在那一屏里），右 = 离线组网设置中心。工具条项仍然只属于声明它的那一层内容，抽屉
-                // 与它推上去的每一页有自己的条。四枚的宽度账逐笔写在 `meshDiscoveryEntry` 上面那一段。
+                // Three segments: left = Discover (nearby offline groups) + back to "Chat", middle = the old Cabin panel (the nearby-node radar and the offline
+                // group chats are both on that screen), right = the offline mesh settings centre. Toolbar items still belong only to the content layer that declares them, and the drawer
+                // and every page it pushes have their own bars. The four capsules' width accounting is written entry by entry in the paragraph above `meshDiscoveryEntry`.
                 ToolbarItem(placement: .topBarLeading) { meshDiscoveryEntry }
                 ToolbarItem(placement: .topBarLeading) { backToChatsEntry }
                 ToolbarItem(placement: .principal) { cabinPanelEntry }
@@ -435,10 +435,10 @@ struct PopopxMeshPlazaRootView: View {
             .navigationDestination(for: PopopxMeshPlazaRoute.self) { route in
                 switch route {
                 case .nearbyGroups:
-                    // 与抽屉 `.groups` 那一处（本文件 `PopopxCabinRoute.groups` 的登记）逐字相同：
-                    // 同一个 `MeshGroupsView`、同样三个真依赖、同一个标题 Key。两个入口不可能翻出
-                    // 两屏不一样的东西。三个依赖不能走默认值：默认是 `PopopxMeshEngine.shared`，
-                    // 总闸关着时也会被它把引擎与射频建出来（红线）。
+                    // Verbatim identical to the drawer's `.groups` site (the registration of `PopopxCabinRoute.groups` in this file):
+                    // the same `MeshGroupsView`, the same three real dependencies, the same title Key. Two entries cannot produce
+                    // two different screens. The three dependencies must not go through defaults: the default is `PopopxMeshEngine.shared`,
+                    // which would build out the engine and the radio even while the master switch is closed (red line).
                     MeshGroupsView(
                         outbound: meshRuntime.engineBackend,
                         source: meshRuntime.stateSource,
@@ -447,9 +447,9 @@ struct PopopxMeshPlazaRootView: View {
                     .navigationTitle(Copy.groupsRow)
 
                 case .privacyRecords:
-                    // 设置中心里那一行「配对记录」的去处：包内唯一的配对记录与离线绑定页。三个对象
-                    // 全部来自 runtime，与抽屉那一屏此前递给它的完全是同一份；它自己不带栈，所以套在
-                    // 根栈这一层里（`MeshPrivacySettingsView` 整张 `List`，没有自己的 `NavigationStack`）。
+                    // The destination of the settings centre's "pairing records" row: the package's one and only pairing-records and offline-binding page. All three objects
+                    // come from the runtime, exactly the same set the drawer screen used to hand it; it carries no stack of its own, so it is wrapped
+                    // at the root-stack level (`MeshPrivacySettingsView` is one whole `List`, with no `NavigationStack` of its own).
                     MeshPrivacySettingsView(
                         store: meshRuntime.mappingStore,
                         pairing: meshRuntime.pairing,
@@ -465,8 +465,8 @@ struct PopopxMeshPlazaRootView: View {
                     .presentationDragIndicator(.visible)
             }
         }
-        // 设置中心挂在外层这一条栈上，与抽屉那一张分属两层内容：两张表各自 present 自己那一张，
-        // 同一次事务里连着摆两张表只落地第一张那条限制就不会碰到这一处。
+        // The settings centre is mounted on this outer stack, and the drawer's sheet belongs to a separate content layer: each sheet presents its own,
+        // so the limitation where only the first of two sheets presented in one transaction lands is never hit here.
         .sheet(isPresented: $showsMeshSettings) {
             PopopxCabinMeshSettingsSheet(
                 fuseOn: meshRuntime.isFuseOn,
@@ -482,16 +482,16 @@ struct PopopxMeshPlazaRootView: View {
                 onVerify: { await refreshMeshSettingsVerification(waitingForSettle: false) },
                 onWipe: { await clearOfflineIdentity() },
                 onOpenPrivacyRecords: {
-                    // 先收表再推页：这一行的目的地是栈上的一页，不是第二层模态。
+                    // Dismiss the sheet first and then push: this row's destination is a page on the stack, not a second modal layer.
                     showsMeshSettings = false
                     rootPath.append(.privacyRecords)
                 },
                 onClose: { showsMeshSettings = false }
             )
         }
-        // 九格数字的节奏只在表开着的那一段跑：这一栏挂在 `TabView` 上长期存活，无期限的轮询会把
-        // 三个 actor 每 2 秒问一遍。表抬起来的那一次带 settle 窗口问核验（`starting`/`stopping`
-        // 期间拿到的快照说的是"上一刻"），之后每一拍只问当下。
+        // The nine-cell cadence runs only while the sheet is open: this tab lives long-term on `TabView`, and an unbounded poll would ask
+        // the three actors once every 2 seconds. The single time the sheet comes up, verification is asked with a settle window (a snapshot taken during `starting`/`stopping`
+        // speaks about "the previous moment"), and after that each tick asks only the present.
         .task(id: showsMeshSettings) {
             guard showsMeshSettings else { return }
             await refreshMeshSettingsFacts(waitingForSettle: true)
@@ -501,17 +501,17 @@ struct PopopxMeshPlazaRootView: View {
                 await refreshMeshSettingsFacts(waitingForSettle: false)
             }
         }
-        // 表开着的时候翻闸：那几百毫秒里读到的运行态最想说实话，带 settle 窗口重问一次。
+        // Flipping the switch while the sheet is open: during those few hundred milliseconds the runtime state that is read most wants to tell the truth, so ask again with a settle window.
         .onChange(of: meshRuntime.isFuseOn) { _, _ in
             guard showsMeshSettings else { return }
             Task { @MainActor in await refreshMeshSettingsFacts(waitingForSettle: true) }
         }
     }
 
-    // MARK: 设置中心的事实
+    // MARK: Facts for the settings centre
 
-    /// 表里那九格数字的唯一一次折法：节点表（射程内 / 经中继 / 最远跳三格读它）、身份三格、真实运行态。
-    /// 只在表开着的那一拍与翻闸、抹除之后调用，`body` 一次都不问 actor。
+    /// The single fold for the nine numeric cells in the sheet: the node table (the three cells within range / via relay / farthest hops read it), the three identity cells, the real runtime state.
+    /// Called only on the tick while the sheet is open and after flipping the switch or a wipe; `body` never asks an actor, not even once.
     @MainActor private func refreshMeshSettingsFacts(waitingForSettle: Bool) async {
         let reading = await PopopxCabinNodeFold.load()
         meshSettingsNodes = reading.nodes
@@ -520,19 +520,19 @@ struct PopopxMeshPlazaRootView: View {
         await refreshMeshSettingsVerification(waitingForSettle: waitingForSettle)
     }
 
-    /// 设置中心那三格身份事实：绑定表行数、离线队列条数、本机 mesh 静态公钥。三次 actor hop。
+    /// The settings centre's three identity fact cells: mapping-table row count, offline queue length, this device's mesh static public key. Three actor hops.
     @MainActor private func refreshMeshSettingsIdentityFacts() async {
         bindingCount = await meshRuntime.mappingStore.allMappings().count
         queuedCount = await meshRuntime.router.pendingMessageCount
-        // 引擎没起来时这一格是空串（`PopopxMeshEngineBackend` 不替谁造引擎），而空串不是
-        // "公钥没了"——它只是"这台机器还没答过"。所以只在读到真东西时改写，抹除也不动它：
-        // 抹除删的是 模块 1 的绑定表与缓存文件，本机自己的静态密钥在 Keychain 的另一个 service 里
-        // （`PopopxMeshEngine.swift:120-139`），删了它反而会让对方下次认不出这台。
+        // When the engine never started this cell is an empty string (`PopopxMeshEngineBackend` does not build an engine for anyone), and an empty string is not
+        // "the public key is gone" — it only means "this machine has not answered yet". So it is rewritten only when something real is read, and a wipe does not touch it either:
+        // a wipe deletes module 1's mapping table and the cache files, while this device's own static key sits in another Keychain service
+        // (`PopopxMeshEngine.swift:120-139`); deleting that would instead make the other side unable to recognise this machine next time.
         let hex = await meshRuntime.engineBackend.localMeshPublicKeyHex
         if !hex.isEmpty { localKeyHex = hex }
     }
 
-    /// 核验一次真实运行态。`waitingForSettle` 时给过渡态最多 5 × 250 ms 的等待窗口。
+    /// Verify the real runtime state once. With `waitingForSettle` the transitional state is given a waiting window of at most 5 × 250 ms.
     @MainActor private func refreshMeshSettingsVerification(waitingForSettle: Bool) async {
         var snapshot = await meshRuntime.killSwitch.verifiedActivitySnapshot()
         if waitingForSettle {
@@ -544,14 +544,14 @@ struct PopopxMeshPlazaRootView: View {
         verifiedSnapshot = snapshot
     }
 
-    /// 清除离线身份绑定与本机 mesh 缓存。唯一一次调用是 模块 1 的 `emergencyWipeAllMappings()`：
-    /// 它逐行清 Keychain 绑定、删两个开关偏好，并 `removeMeshCacheFiles()` 删掉
-    /// `Documents/popopx_mesh/` 里的每一个文件 —— 未确认队列（`unacknowledged_mesh.json`）、
-    /// 发件箱与本机昵称都在里面。包里没有任何"只清队列"的公开 API，所以这一格说的是整包删除，
-    /// 不假装能只删一半；报告里 `failures` 非空就照实报数，绝不粉饰成"已清除干净"。
+    /// Clear the offline identity bindings and this device's mesh cache. The one and only call is module 1's `emergencyWipeAllMappings()`:
+    /// it clears the Keychain bindings row by row, deletes two switch preferences, and `removeMeshCacheFiles()` deletes every file in
+    /// `Documents/popopx_mesh/` — the unacknowledged queue (`unacknowledged_mesh.json`),
+    /// the outbox and this device's nickname are all in there. The package has no public API for "clearing only the queue", so this cell speaks about deleting the whole lot,
+    /// and does not pretend that half of it can be deleted; if `failures` in the report is non-empty the count is reported as it is, never dressed up as "cleared clean".
     @MainActor private func clearOfflineIdentity() async {
-        // 顺序照包内 `MeshPrivacySettingsView.swift:211-214`：先拉闸再删。反过来会让还在跑的
-        // 组件把手上的队列重新写回磁盘，那一格"已清除"就是假话。
+        // The order follows the package's `MeshPrivacySettingsView.swift:211-214`: pull the switch first, then delete. The other way round lets the components still running
+        // write the queue they hold back to disk, and then the "already cleared" cell would be a lie.
         if meshRuntime.isFuseOn { await meshRuntime.setFuse(false) }
         let report = await meshRuntime.mappingStore.emergencyWipeAllMappings()
         await refreshMeshSettingsFacts(waitingForSettle: true)
@@ -564,13 +564,13 @@ struct PopopxMeshPlazaRootView: View {
         }
     }
 
-    // MARK: 顶栏三个入口
+    // MARK: The three top-bar entries
 
-    /// 左上角：回「消息」栏。这一栏全屏沉浸之后，屏幕底下没有任何横切导航，这一枚就是唯一的出口，
-    /// 所以它必须一直在、且一眼认得出。画法与抽屉的收起键同档（`cabinPanelCloseEntry`）：中性底、
-    /// 只有图标不带文字 —— 这一栏四枚的宽度账逐笔写在 `meshDiscoveryEntry` 上面，返回键那一枚
-    /// 只占 35pt 就是这么来的；再给它配一个字就是第四个截断点。`chevron.left` 是系统返回的方向词，
-    /// VoiceOver 读 `.accessibilityLabel` 那一句，不读图标。
+    /// Top-left: back to the "Chat" tab. After this tab went full-screen immersive there is no cross-cutting navigation at the bottom of the screen, so this capsule is the only exit,
+    /// and therefore it must always be present and be recognisable at a glance. Its drawing is the same tier as the drawer's dismiss key (`cabinPanelCloseEntry`): neutral background,
+    /// icon only with no text — this bar's width accounting for the four capsules is written entry by entry above `meshDiscoveryEntry`, and the back key taking
+    /// only 35pt comes from exactly that; giving it one more word would be a fourth truncation point. `chevron.left` is the system's direction word for "back",
+    /// and VoiceOver reads the `.accessibilityLabel` sentence rather than the icon.
     private var backToChatsEntry: some View {
         Button {
             PopopxHaptics.impact(.light)
@@ -591,41 +591,41 @@ struct PopopxMeshPlazaRootView: View {
         .accessibilityIdentifier("popopx.cabin.backToChats")
     }
 
-    /// 左上角第一枚：周边蓝牙 Mesh 群组。
+    /// The first capsule in the top-left: nearby Bluetooth Mesh groups.
     ///
-    /// 「添加朋友 → 更多方式 → 进入厢语发现附近群组/频道（BLE Mesh）」推的是包内 `MeshPlazaView`
-    /// （`PopopxAddFriendView.swift:118-128`），而这一栏的根直接就是那一屏（口径 3），从根上再推一次
-    /// 就是把自己这一屏推给自己。所以这一枚接的是那条入口缺的另一半 —— 群：同一个包内
-    /// `MeshGroupsView`、同一份 `Copy.groupsRow` 标题、抽屉里那一行同样的三个真依赖。
+    /// "Add friend → more ways → enter Cabin discovery, nearby groups/channels (BLE Mesh)" pushes the package's `MeshPlazaView`
+    /// (`PopopxAddFriendView.swift:118-128`), and the root of this tab already is that screen (criterion 3), so pushing it once more from the root
+    /// means pushing this very screen onto itself. So this capsule picks up the other half that entry lacks — groups: the same package
+    /// `MeshGroupsView`, the same `Copy.groupsRow` title, the same three real dependencies as the row inside the drawer.
     ///
-    /// 画法：与这一栏另两枚同一个骨架（`PopopxMetrics.radiusControl` 底、`PopopxPressButtonStyle`、
-    /// `contentShape`、`lineLimit(1)` + `minimumScaleFactor` + `PopopxMetrics.minHitTarget`），底换成
-    /// 淡一档的青绿 `mesh.opacity(0.12)` + `meshInk` 字（§"mesh 自己不能裸着承载文字"：`mesh` 在白卡上
-    /// 只有 2.98:1，`meshInk` 6.03:1）。刻意不是中间那一枚的实底青绿 —— 一栏里两枚一模一样的青绿胶囊，
-    /// 一眼分不出哪个是面板、哪个是群组；淡底把它降到"次要入口"那一档，图标仍是 `person.3.fill`，
-    /// 与抽屉内容区「离线群聊」那一行同一个记号、同一个去处。
+    /// Drawing: the same skeleton as this bar's other two capsules (`PopopxMetrics.radiusControl` background, `PopopxPressButtonStyle`,
+    /// `contentShape`, `lineLimit(1)` + `minimumScaleFactor` + `PopopxMetrics.minHitTarget`), with the background swapped to
+    /// the fainter teal `mesh.opacity(0.12)` + `meshInk` text (§"mesh must not carry text naked on its own": `mesh` on a white card
+    /// is only 2.98:1, `meshInk` is 6.03:1). Deliberately not the middle capsule's solid teal — two identical teal capsules in one bar
+    /// cannot be told apart at a glance as to which is the panel and which is the groups; the faint background drops it to the "secondary entry" tier, and the icon stays `person.3.fill`,
+    /// the same mark and the same destination as the drawer content area's "offline group chat" row.
     ///
-    /// 这一栏的宽度账（iPhone 15 Pro 393pt，默认字号；英文字宽是 CoreText 在 SF 15pt（= `PopopxType.meta`
-    /// = `.subheadline`）上逐串量出来的 typographic bounds，macOS/iOS 同一款字形，取整；图标按
-    /// `.caption` 12pt + `imageScale(.medium)` 估，档位在 11–20pt 之间。英文档 = 四枚里最坏的那一档）。
-    /// 可用宽度 = 393 − 导航条左右边距 16×2 = **361pt**，再留同组两枚之间那道 ≈8pt 间距
-    /// ⇒ 四枚合计的上限 **≈353pt**：
-    /// · 本枚：内边距 8×2 = 16 + 图标 ≈ 20 + 间距 4 + "Groups" 49.9 = **≈ 90pt**
-    ///   （zh 档这条 Key 目录里已有值是「群」14.9 → ≈ 55pt）；
-    /// · `backToChatsEntry`：内边距 12×2 = 24 + `chevron.left` ≈ 11 = **≈ 35pt**；
-    /// · `cabinPanelEntry`（`.principal`）：内边距 8×2 = 16 + 图标 ≈ 13 + 间距 4 + "Cabin" 39.5 = **≈ 73pt**
-    ///   （zh 档「厢语」29.8 → ≈ 63pt）；
-    /// · `meshSettingsEntry`：内边距 12×2 = 24 + 图标 ≈ 15 + 间距 4 + 圆点 8 + 间距 4 + "Settings" 56.6
-    ///   = **≈ 112pt**（zh 档这条 Key 目录里已有值是「设置」29.8 → ≈ 85pt）；
-    /// · 合计 90 + 35 + 73 + 112 = **310pt**，加同组那道 8pt = **318 ≤ 361 ⇒ 富余 43pt（12%）**，
-    ///   这一份富余就是留给 Dynamic Type 与最长译本的：字号再大一档（约 +20%）整栏就到 372pt，
-    ///   越线，所以四枚每一枚都带 `lineLimit(1)` + `minimumScaleFactor(0.85)`，先缩字再让位。
-    /// 右边那一枚本轮从「离线组网设置」（"Offline mesh settings" 实测 145.8pt，那一枚就要 201pt）收成
-    /// "Settings"：整栏原本已经吃到 389pt，不加这一下就是左上角这枚图标 + 字样无处可放。
-    /// 完整说法一个字没丢 —— 屏面上短词，VoiceOver 读 `.accessibilityLabel` 那一句完整的
-    /// 「离线组网设置」，表头 `PopopxSheetContainer` 仍是完整那句。
-    /// `.fixedSize()` 让本枚在挤的时候守住内在宽度、由 `minimumScaleFactor` 先缩字，
-    /// 缩不动才轮到左右让位；去处另有 `.accessibilityHint`。
+    /// This bar's width accounting (iPhone 15 Pro 393pt, default font size; the English word widths are typographic bounds measured string by string with CoreText on SF 15pt (= `PopopxType.meta`
+    /// = `.subheadline`), the same font face on macOS/iOS, rounded; icons are estimated at
+    /// `.caption` 12pt + `imageScale(.medium)`, with the tier between 11–20pt. The English tier = the worst of the four capsules).
+    /// Available width = 393 − the navigation bar's left/right margins 16×2 = **361pt**, minus the ≈8pt gap between the two capsules of the same group
+    /// ⇒ the ceiling for all four combined **≈353pt**:
+    /// · this capsule: padding 8×2 = 16 + icon ≈ 20 + gap 4 + "Groups" 49.9 = **≈ 90pt**
+    ///   (the zh tier of this Key already has a value in the catalogue: "Groups" 14.9 → ≈ 55pt);
+    /// · `backToChatsEntry`: padding 12×2 = 24 + `chevron.left` ≈ 11 = **≈ 35pt**;
+    /// · `cabinPanelEntry` (`.principal`): padding 8×2 = 16 + icon ≈ 13 + gap 4 + "Cabin" 39.5 = **≈ 73pt**
+    ///   (the zh tier "Cabin" 29.8 → ≈ 63pt);
+    /// · `meshSettingsEntry`: padding 12×2 = 24 + icon ≈ 15 + gap 4 + dot 8 + gap 4 + "Settings" 56.6
+    ///   = **≈ 112pt** (the zh tier of this Key already has a value in the catalogue: "Settings" 29.8 → ≈ 85pt);
+    /// · total 90 + 35 + 73 + 112 = **310pt**, plus that 8pt gap in the same group = **318 ≤ 361 ⇒ 43pt of slack (12%)**,
+    ///   and that slack is what is left for Dynamic Type and the longest translations: one font size larger (about +20%) and the whole bar reaches 372pt,
+    ///   crossing the line, so every one of the four capsules carries `lineLimit(1)` + `minimumScaleFactor(0.85)` — shrink the text first, then give way.
+    /// The right-hand capsule was shortened this round from the offline mesh settings label (with "Offline mesh settings" measured at 145.8pt, that capsule alone would need 201pt) to
+    /// "Settings": the whole bar was already eating 389pt, and without that change this top-left capsule's icon + word had nowhere to be placed.
+    /// Not one word of the full statement is lost — a short word on the screen, and VoiceOver reads the complete
+    /// "Offline mesh settings" sentence from `.accessibilityLabel`, while the sheet header `PopopxSheetContainer` still states the full sentence.
+    /// `.fixedSize()` makes this capsule hold its intrinsic width when squeezed and lets `minimumScaleFactor` shrink the text first,
+    /// and only when it cannot shrink further do the left and right give way; the destination has its own `.accessibilityHint`.
     private var meshDiscoveryEntry: some View {
         Button {
             PopopxHaptics.impact(.light)
@@ -652,19 +652,19 @@ struct PopopxMeshPlazaRootView: View {
             .fixedSize()
         }
         .buttonStyle(PopopxPressButtonStyle())
-        // VoiceOver 读的是去处（`Copy.groupsRow` = 推进去那一屏的标题本身），不是屏上那一个短词：
-        // 胶囊上只剩 "Groups"，把完整说法放在 label 里，Apple 那条「label 要以可见文字开头」也仍然成立。
+        // What VoiceOver reads is the destination (`Copy.groupsRow` = the title of the screen being pushed itself), not the one short word on screen:
+        // the capsule has only "Groups" left, so putting the full statement in the label keeps Apple's rule "the label must begin with the visible text" true as well.
         .accessibilityLabel(Text(Copy.groupsRow))
         .accessibilityHint(Text(Copy.meshGroupsHint))
         .accessibilityIdentifier("popopx.cabin.discovery")
     }
 
-    /// 中间（`.principal`）：旧厢语面板 —— 周边节点雷达与离线群聊都在那一屏里。原先站在左上角，
-    /// 真机第 8 轮把左上角让给返回键，它挪到中间，青色与图标一个都不改（同一枚入口换位置不换身份）。
-    /// 这一槽就是这条栏的"标题位"：整栏四枚的宽度账逐笔写在 `meshDiscoveryEntry` 上面，本枚占 73pt。
-    /// `.fixedSize()` 让它在挤的时候**自己缩**而不是被压断：守住内在宽度，`lineLimit(1)` 与
-    /// `minimumScaleFactor(0.85)` 再兜一层（大字号档下先缩字，缩不动才轮到左右让位）。
-    /// 完整说法在 `.accessibilityHint` 里，VoiceOver 不必挤在这一个词上。
+    /// Middle (`.principal`): the old Cabin panel — the nearby-node radar and the offline group chats are both on that screen. It used to stand in the top-left corner,
+    /// and device round 8 gave the top-left to the back key and moved it to the middle, changing neither the teal nor the icon (the same entry changing place, not identity).
+    /// This slot is this bar's "title position": the width accounting for all four capsules is written entry by entry above `meshDiscoveryEntry`, and this one takes 73pt.
+    /// `.fixedSize()` makes it **shrink itself** rather than get snapped when squeezed: it holds its intrinsic width, and
+    /// `minimumScaleFactor(0.85)` covers another layer (at large font sizes shrink the text first, and only then give way left and right).
+    /// The full statement lives in `.accessibilityHint`, so VoiceOver does not have to squeeze it into this one word.
     private var cabinPanelEntry: some View {
         Button {
             PopopxHaptics.impact(.light)
@@ -692,10 +692,10 @@ struct PopopxMeshPlazaRootView: View {
         .accessibilityIdentifier("popopx.cabin.panel")
     }
 
-    /// 右上角：离线组网设置中心 —— 在这一屏直接摆出 `PopopxCabinMeshSettingsSheet`，不再经过抽屉。
-    /// 那颗点是运行态，不是装饰：熔断关着就换成中性色，与表里第一张卡说的同一句话。
-    /// 屏面上只有 "Settings" 一个词（宽度账见 `meshDiscoveryEntry` 上面），完整说法在
-    /// `.accessibilityLabel` 里，VoiceOver 与表头都读到那一句全的。
+    /// Top-right: the offline mesh settings centre — this screen places `PopopxCabinMeshSettingsSheet` directly, without going through the drawer.
+    /// That dot is runtime state, not decoration: while the fuse is closed it switches to the neutral colour, saying the same thing as the first card in the sheet.
+    /// On screen there is only the one word "Settings" (width accounting above `meshDiscoveryEntry`); the full statement is in
+    /// `.accessibilityLabel`, so VoiceOver and the sheet header both read the complete sentence.
     private var meshSettingsEntry: some View {
         Button {
             PopopxHaptics.impact(.light)
@@ -737,7 +737,7 @@ struct PopopxCabinView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dismiss) private var dismiss
 
-    /// 熔断真值与四个 actor 句柄都在 runtime 上；`PopopxMeshStateSource` 是包里的镜像单例。
+    /// The fuse truth and the four actor handles all live on the runtime; `PopopxMeshStateSource` is the mirror singleton in the package.
     @ObservedObject private var meshRuntime: PopopxMeshRuntime
     @ObservedObject private var meshState: PopopxMeshStateSource
 
@@ -745,23 +745,23 @@ struct PopopxCabinView: View {
     @State private var path: [PopopxCabinRoute] = []
     @State private var nodes: [PopopxCabinNode] = []
     @State private var pendingRequests: [PopopxPairingRequest] = []
-    /// 本机发出去的广播：mesh 不会把洪泛回声给发送者，所以这一份要自己留着（包内同款）。
+    /// Broadcasts sent by this device: the mesh does not echo flooding back to the sender, so this copy has to be kept by ourselves (the same inside the package).
     @State private var localBroadcasts: [PopopxMeshPlazaPost] = []
     @State private var nicknameText = ""
     @State private var showsPairingRequests = false
-    /// 正在开私聊的那一台的 `peerIDHex`：只让那一行显示进度，不把整页变灰。
+    /// The `peerIDHex` of the machine whose private chat is being opened: only that row shows progress, the whole page is not greyed out.
     @State private var openingNodeID: String?
 
-    /// 本机已加入的离线群，来自 `PopopxGroupStore` 的一次本地读。顶栏「发现」那一页的群表、
-    /// 「离线群聊」那一行的数值格，读的都是这一份；总闸关着时引擎从未存在，这里就是空表。
+    /// The offline groups this device has joined, from one local read of `PopopxGroupStore`. The group table on the top-bar "Discover" page and
+    /// the numeric cell of the "offline group chat" row both read this copy; when the master switch is closed the engine never existed, so this is an empty table.
     @State private var groups: [PopopxMeshGroup] = []
 
-    /// 轮询节奏：模块 4 的静默窗口是 15 秒，2 秒一次足够让「最近听到」这类读数不撒谎，
-    /// 又不会把三个 actor 的 hop 变成每秒几十次。
+    /// The polling cadence: module 4's silence window is 15 seconds, and once every 2 seconds is enough for readings like "last heard" not to lie,
+    /// while not turning the three actors' hops into dozens per second.
     private static let refreshInterval: Duration = .seconds(2)
 
-    /// 挂法：`true` = 作为「厢语」根之上的满高抽屉。左上角那一枚随之从"进广场"换成"收起抽屉"
-    /// （`leadingBarEntry`），其余一张不少。`false` = 单独成页，即预览与本轮之前的那一档。
+    /// How it is mounted: `true` = as the full-height drawer above the "Cabin" root. The top-left capsule then switches from "enter the plaza" to "dismiss the drawer"
+    /// (`leadingBarEntry`), with every other row intact. `false` = standing alone as a page, i.e. the preview and the tier used before this round.
     private let hostedAsCabinPanel: Bool
 
     @MainActor init(hostedAsCabinPanel: Bool = false) {
@@ -787,9 +787,9 @@ struct PopopxCabinView: View {
             .background(PopopxPalette.base)
             .navigationTitle(Copy.tabTitle)
             .toolbar {
-                // 左上角 = 广场 / 收起抽屉，按挂法二选一，这一栏只有它一枚。离线组网设置中心不在
-                // 这一栏 —— 它由根那一屏右上角那一枚直接摆出（真机第 10 轮），这里再放一枚就是同一张
-                // 表两个入口。工具条项只属于声明它的那一层内容，推进大厅或私聊页就由那一页自己的条接管。
+                // Top-left = the plaza / dismiss the drawer, chosen by how it is mounted, and this bar has only that one capsule. The offline mesh settings centre is not
+                // in this bar — it is placed directly by the root screen's top-right capsule (device round 10), and putting another capsule here would be two entries for the same
+                // sheet. Toolbar items belong only to the content layer that declares them, so pushing the hall or the private-chat page hands the bar over to that page's own.
                 ToolbarItem(placement: .topBarLeading) { leadingBarEntry }
             }
             .navigationDestination(for: PopopxCabinRoute.self) { route in
@@ -816,13 +816,13 @@ struct PopopxCabinView: View {
                     .navigationTitle(Copy.hallRow)
 
                 case .plaza:
-                    // 单独成页时顶栏左上角的去处（抽屉那一档不再给它回路，见 `leadingBarEntry`），
-                    // 留着是因为 `PopopxCabinRoute.plaza` 与这一处登记是一个整体。这一整块与
-                    // `PopopxAddFriendView.swift:118-128` 逐字相同：同一个 `MeshPlazaView`、同样三个
-                    // 依赖全给 runtime 的真对象（一个默认值都不走）、同一个标题 Key、同一个
-                    // `ThemedBackground(grouped: true)`；两个参数走默认值，所以这一屏仍然按"推进去的一页"
-                    // 那一档行事（隐藏四枚 Tab、离开即清）。两个入口因此不可能翻出两屏不一样的东西
-                    // —— 真机第 5 轮要求的就是这一条。
+                    // The top-left destination when the page stands alone (the drawer tier no longer gives it a loop back; see `leadingBarEntry`),
+                    // kept because `PopopxCabinRoute.plaza` and this registration are one unit. This whole block is verbatim identical to
+                    // `PopopxAddFriendView.swift:118-128`: the same `MeshPlazaView`, the same three
+                    // dependencies all given as runtime's real objects (not one default value), the same title Key, the same
+                    // `ThemedBackground(grouped: true)`; the two parameters use their defaults, so this screen still behaves in the "pushed page"
+                    // tier (hide the four Tab capsules, clear on leaving). The two entries therefore cannot produce two different screens
+                    // — that is exactly what device round 5 demanded.
                     MeshPlazaView(
                         outbound: meshRuntime.engineBackend,
                         source: meshRuntime.stateSource,
@@ -843,9 +843,9 @@ struct PopopxCabinView: View {
                     .navigationTitle(Copy.encryptedChannelsRow)
 
                 case .groups:
-                    // 包内唯一的离线群聊面（创建者签名的群 + 群消息）。三个依赖全给真对象：默认值是
-                    // `PopopxMeshEngine.shared`，总闸关着时也会被它建出来，红线不允许。`engineBackend`
-                    // 在引擎从未起来时答"没有签名身份"，这一页就只显示空列表，不会凭空建出一个群。
+                    // The package's one and only offline group-chat surface (groups with a creator signature + group messages). All three dependencies given as real objects: the default is
+                    // `PopopxMeshEngine.shared`, which would be built out even while the master switch is closed, and the red line does not allow it. `engineBackend`
+                    // answers "no signing identity" when the engine never started, and then this page only shows an empty list without conjuring a group into existence.
                     MeshGroupsView(
                         outbound: meshRuntime.engineBackend,
                         source: meshRuntime.stateSource,
@@ -854,8 +854,8 @@ struct PopopxCabinView: View {
                     .navigationTitle(Copy.groupsRow)
 
                 case let .privateChat(peerMeshPublicKeyHex):
-                    // 包里唯一的那条 1:1 离线私聊面。四个依赖全给真对象，一个默认值都不走：默认值是
-                    // `PopopxMeshEngine.shared` / `PopopxMeshKillSwitch.shared`，总闸关着时也会被建出来。
+                    // The package's one and only 1:1 offline private-chat surface. All four dependencies given as real objects, not one default value: the defaults are
+                    // `PopopxMeshEngine.shared` / `PopopxMeshKillSwitch.shared`, which would be built out even while the master switch is closed.
                     PopopxMeshPrivateChatView(
                         peerMeshPublicKeyHex: peerMeshPublicKeyHex,
                         outbound: meshRuntime.engineBackend,
@@ -876,8 +876,8 @@ struct PopopxCabinView: View {
             }
             .popopxToast(toast)
             .task {
-                // 只有总闸开着才订阅镜像：`PopopxMeshStateSource` 是 kill switch 的组件，关着时由它启停；
-                // 本页在关闭态去 `start()` 会留下「开关关着但有人在订阅」的状态。
+                // Subscribe to the mirror only while the master switch is open: `PopopxMeshStateSource` is a component of the kill switch and is started and stopped by it;
+                // this page calling `start()` in the closed state would leave a state of "the switch is closed but somebody is subscribing".
                 if meshRuntime.isFuseOn { meshState.start() }
                 nicknameText = currentNickname()
                 await refresh()
@@ -887,8 +887,8 @@ struct PopopxCabinView: View {
                     await refresh()
                 }
             }
-            // 总闸一翻就重算：OFF 要清掉节点表（模块 4 的表在 stop 之后仍然留着旧数据，继续显示就是撒谎），
-            // ON 要立刻订阅并读一次，不等下一个 2 秒。
+            // Recompute the moment the master switch flips: OFF has to clear the node table (module 4's table keeps stale data even after stop, and continuing to show it is a lie),
+            // and ON has to subscribe and read once immediately, without waiting for the next 2 seconds.
             .onChange(of: meshRuntime.isFuseOn) { _, isOn in
                 nicknameText = currentNickname()
                 Task { @MainActor in
@@ -896,17 +896,17 @@ struct PopopxCabinView: View {
                     await refresh()
                 }
             }
-            // 射频刚翻面时镜像里只有广播，可达性还没算出来；补一次 actor 读数。
+            // Right after the radio flips the mirror holds only broadcasts, and reachability is not computed yet; add one actor read.
             .onChange(of: meshState.state.radioState) { _, _ in
                 Task { @MainActor in await refresh() }
             }
         }
     }
 
-    // MARK: 顶栏那一枚入口
+    // MARK: The top-bar entry capsule
 
-    /// 左上角这一枚按挂法二选一，位置与尺寸同一档，换的只是去处与配色：抽屉不该给一条回到
-    /// "把自己唤出来的那一屏"的回路（那一屏就是这一栏的根），所以抽屉那一档换成收起。
+    /// This top-left capsule is chosen by how it is mounted, with position and size in the same tier and only the destination and colour changing: a drawer must not offer a loop back to
+    /// "the screen that summoned it" (that screen is this tab's root), so the drawer tier switches it to dismiss.
     @ViewBuilder private var leadingBarEntry: some View {
         if hostedAsCabinPanel {
             cabinPanelCloseEntry
@@ -915,8 +915,8 @@ struct PopopxCabinView: View {
         }
     }
 
-    /// 抽屉的收起键。中性底：它是一条导航动作，不是一条 mesh 事实，青色只给内容区那些 mesh 事实
-    /// 那一档（§1.1）。抽屉还有 `.presentationDragIndicator(.visible)` 与下滑两条退路。
+    /// The drawer's dismiss key. Neutral background: it is a navigation action, not a mesh fact, and teal is reserved for the content area's mesh-fact
+    /// tier (§1.1). The drawer also has `.presentationDragIndicator(.visible)` and the swipe-down gesture as two escape routes.
     private var cabinPanelCloseEntry: some View {
         Button {
             PopopxHaptics.selection()
@@ -943,12 +943,12 @@ struct PopopxCabinView: View {
         .accessibilityIdentifier("popopx.cabin.panelClose")
     }
 
-    /// 单独成页时左上角「发现」：包内那一份厢语附近广场，与「添加朋友 → 进入厢语发现附近群组/频道」
-    /// 同一屏。真机第 3 轮之前这一枚写的是"附近厢语广场"、按下去进大厅；大厅归内容区那一行之后，
-    /// 这一枚改开广场页。第 5 轮把它自己的那屏「发现」页（节点雷达 + 本机群两张卡）撤了：那两张卡
-    /// 在别处都还在 —— 雷达在大厅右上角「发现模式」里，群在内容区「离线群聊」那一行里，
-    /// 而广场页本身同时有广播流与周边节点，两个入口不该给出两个去处。
-    /// 本轮起这一栏的根直接就是那一屏，所以这一枚只在单独成页（默认挂法）时出现。
+    /// The top-left "Discover" when the page stands alone: the package's own Cabin nearby plaza, and "Add friend → enter Cabin discovery, nearby groups/channels"
+    /// The same screen. Before device round 3 this capsule read "nearby Cabin plaza" and tapping it entered the hall; after the hall moved into a content-area row,
+    /// this capsule was changed to open the plaza page instead. Round 5 removed this page's own "Discover" screen (the node radar + this device's groups, two cards): those two cards
+    /// still exist everywhere they were — the radar is in the hall's top-right "discovery mode", the groups are in the content area's "offline group chat" row,
+    /// and the plaza page itself has both the broadcast stream and the nearby nodes, so two entries should not give two destinations.
+    /// From this round the root of this tab is directly that screen, so this capsule only appears when the page stands alone (the default mounting).
     private var nearbyDiscoveryEntry: some View {
         Button {
             PopopxHaptics.impact(.light)
@@ -975,21 +975,21 @@ struct PopopxCabinView: View {
         .accessibilityIdentifier("popopx.cabin.discovery")
     }
 
-    // MARK: 派生事实（纯计算，不碰 actor）
+    // MARK: Derived facts (pure computation, does not touch actors)
 
-    /// 跳数上限：引 `PopopxMeshConfig` 的常量，不写死 7（§1.1 记的就是这条出处）。
+    /// The hop ceiling: cites the `PopopxMeshConfig` constant instead of hard-coding 7 (§1.1 records exactly this origin).
     private var relayHopCap: Int { Int(PopopxMeshConfig.default.fragmentRelayTtlCap) }
-    /// 广播实际用的 TTL 上限，同样是常量。
+    /// The TTL ceiling the broadcast actually uses, again a constant.
     private var broadcastTTL: Int { Int(PopopxMeshConfig.default.ttlDefault) }
-    /// 在线判定的静默窗口，模块 4 的同一个常量。
+    /// The silence window for the online judgement, module 4's same constant.
     private var reachabilityWindow: TimeInterval { PopopxMeshConfig.default.peerReachabilityTimeout }
 
     private var radioState: PopopxBluetoothState { meshState.state.radioState }
     private var radioUsable: Bool { meshState.state.radioState.isUsable }
     private var directPeerCount: Int { meshState.state.peers.filter(\.isDirect).count }
 
-    /// 大厅的一屏流：mesh 收到的广播 + 本机发出去的回声，按全局 `messageId` 严格去重、旧的在前。
-    /// 字段映射照抄 `PopopxMeshPlazaModel.rebuildPosts(from:)`，去重规则照抄 `deduped(_:)`。
+    /// The hall's one screen of stream: broadcasts received by the mesh + the echo of what this device sent, strictly deduplicated by the global `messageId`, oldest first.
+    /// The field mapping is copied verbatim from `PopopxMeshPlazaModel.rebuildPosts(from:)`, and the dedup rule from `deduped(_:)`.
     private var mergedBroadcastPosts: [PopopxMeshPlazaPost] {
         var incoming: [PopopxMeshPlazaPost] = []
         incoming.reserveCapacity(meshState.state.broadcasts.count + localBroadcasts.count)
@@ -1020,7 +1020,7 @@ struct PopopxCabinView: View {
         }
     }
 
-    // MARK: 顶部
+    // MARK: Top
 
     private var header: some View {
         VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
@@ -1036,7 +1036,7 @@ struct PopopxCabinView: View {
         .accessibilityElement(children: .combine)
     }
 
-    /// 总闸 + 射频 + 最近一次在本机射程内听到广播的时间。三行都是事实，没有装饰。
+    /// The master switch + the radio + the time of the last broadcast heard within this device's range. All three rows are facts, with no decoration.
     private var statusCard: some View {
         PopopxSectionCard(
             Copy.statusTitle,
@@ -1044,8 +1044,8 @@ struct PopopxCabinView: View {
                 ? Copy.statusFootnote(Int(reachabilityWindow))
                 : Copy.fuseOffFootnote
         ) {
-            // 这一行不放青色徽标：`PopopxToggleRow` 的开关实底是原子库写死的 brand（紫），
-            // 同控件里紫青并存就是 §1.1 违规。mesh 的青色语义在下面两行与雷达上说话。
+            // No teal badge on this row: the switch fill of `PopopxToggleRow` is the brand (purple) hard-coded in the atomic library,
+            // and purple and teal coexisting inside one control is a §1.1 violation. The mesh teal semantics speak in the two rows below and on the radar.
             PopopxToggleRow(
                 Copy.fuseRowTitle,
                 note: meshRuntime.isFuseOn ? Copy.fuseOnNote : Copy.fuseOffNote,
@@ -1079,10 +1079,10 @@ struct PopopxCabinView: View {
         return Copy.lastBroadcastWords(PopopxCabinClock.since(latest))
     }
 
-    /// 熔断只有一个落点：`killSwitch.setEnabled(_:)`（POPOPXAPI.swift:3883 的 `setFuse` 是它唯一的生产调用者）。
-    /// Binding 的 setter 不能 await，所以开关一律走同步的 `requestFuse(_:)`（:3771，它转手起一个 `setFuse`）；
-    /// 而本页两个"开启总闸"按钮（:181、:417）本来就在 async 上下文里，直接 `await setFuse(true)` 再刷新。
-    /// 两条路都不是本页自己写 `UserDefaults`，否则会出现「开关是关的但蓝牙还在跑」或者反过来。
+    /// The fuse has only one landing point: `killSwitch.setEnabled(_:)` (the `setFuse` at POPOPXAPI.swift:3883 is its only production caller).
+    /// A Binding's setter cannot await, so the switch always goes through the synchronous `requestFuse(_:)` (:3771, which in turn starts a `setFuse`);
+    /// while this page's two "turn on the master switch" buttons (:181, :417) are already inside an async context, so they `await setFuse(true)` directly and then refresh.
+    /// Neither path writes `UserDefaults` from this page, otherwise we would get "the switch is closed but Bluetooth is still running", or the reverse.
     private var fuseBinding: Binding<Bool> {
         Binding(
             get: { meshRuntime.isFuseOn },
@@ -1090,7 +1090,7 @@ struct PopopxCabinView: View {
         )
     }
 
-    // MARK: 两个频道入口
+    // MARK: The two channel entries
 
     private var channelsCard: some View {
         PopopxSectionCard(Copy.channelsTitle, footnote: Copy.channelsFootnote) {
@@ -1112,8 +1112,8 @@ struct PopopxCabinView: View {
                 path.append(.encryptedChannels)
             }
             rowSeparator
-            // 离线群聊的数值只来自 `PopopxGroupStore` 的一次本地读；总闸关着时引擎从未存在，那一格
-            // 说的就是既有的"总闸关闭"，不另造第三种说法。
+            // The offline group chat's numbers come only from one local read of `PopopxGroupStore`; when the master switch is closed the engine never existed, and that cell
+            // states the existing "master switch closed" wording, without inventing a third way of saying it.
             PopopxPickerRow(
                 Copy.groupsRow,
                 value: meshRuntime.isFuseOn ? Copy.groupsValue(groups.count) : Copy.fuseOffValue,
@@ -1134,10 +1134,10 @@ struct PopopxCabinView: View {
     private var channelNodes: [PopopxCabinNode] { nodes.filter(\.hasEncryptedChannel) }
     private var strangerNodes: [PopopxCabinNode] { nodes.filter { !$0.hasEncryptedChannel } }
 
-    // MARK: 周边节点（本页唯一的 120% 细节）
+    // MARK: Nearby nodes (this page's only 120% detail)
 
-    /// 这一屏整块交给 `PopopxCabinNearbyCard`：大厅的「发现模式」要挂的是同一个视图、同一份 `nodes`，
-    /// 在这里留第二份写法就等于允许两处说不一样。
+    /// This screen is handed over wholesale to `PopopxCabinNearbyCard`: what the hall's "discovery mode" mounts is the very same view with the very same `nodes`,
+    /// and leaving a second implementation here would amount to allowing two places to say different things.
     private var nearbyCard: some View {
         PopopxCabinNearbyCard(
             nodes: nodes,
@@ -1161,31 +1161,31 @@ struct PopopxCabinView: View {
             .padding(.vertical, PopopxMetrics.spaceXS)
     }
 
-    // MARK: - actor 读数
+    // MARK: - actor readings
 
-    /// 把这一屏要的读数折成一屏值。只在 `.task` / `onChange` / 动作之后调用，绝不在 body 里。
-    /// 节点表与配对请求两格走 `PopopxCabinNodeFold` —— 根那一屏的设置中心读的是同一个折法，
-    /// 全仓只有这一处（那一屏只多要一份 `groups` 以外的数，都在它自己那边）。
+    /// Fold the readings this screen needs into one screen of values. Called only in `.task` / `onChange` / after an action, never inside body.
+    /// The node table and the pairing-request cells go through `PopopxCabinNodeFold` — the root screen's settings centre reads the very same fold,
+    /// and repo-wide there is only this one (that screen asks for a few extra numbers besides `groups`, all on its own side).
     @MainActor private func refresh() async {
         let reading = await PopopxCabinNodeFold.load()
         nodes = reading.nodes
         pendingRequests = reading.requests
-        // 总闸关闭：不扫描、不广播、不中继，所以这一页也不许留任何「看起来还活着」的旧表 ——
-        // `load()` 在这种情形下已经答空表与空请求，这里只补它不管的那一格群表。
+        // Master switch closed: no scanning, no broadcasting, no relaying, so this page must not keep any stale table that "looks like it is still alive" —
+        // `load()` already answers with empty tables and empty requests in that case, and here we only fill in the one groups cell it does not handle.
         guard reading.fuseOn else {
             groups = []
             return
         }
-        // 群的数量来自 `PopopxGroupStore` 的一次本地读，不碰射频；引擎从未起来时后端直接答空表，
-        // 于是这一格读到的 0 与"这台手机还没有群"是同一件事。
+        // The group count comes from one local read of `PopopxGroupStore` and does not touch the radio; when the engine never started the backend answers with an empty table directly,
+        // so the 0 read in this cell is the same statement as "this phone has no groups yet".
         groups = await meshRuntime.engineBackend.meshGroups()
     }
 
-    // MARK: - 动作
+    // MARK: - Actions
 
-    /// 「点击直接开启蓝牙私聊」的全部含义：先经模块 3 发一次离线建联邀请（唯一能让一条 Noise 私聊
-    /// 会话存在的动作），再把包里那条私聊页压进栈。每条失败都有中文实话说出来；只有「这个公钥还
-    /// 解析不出来」和「邀请链接本身不合法」两种情况不进私聊页——那里除了失败说明没有别的东西。
+    /// The full meaning of "tap to start Bluetooth private chat directly": first send one offline connection invitation through module 3 (the only action that can make a Noise private
+    /// session exist), then push the package's private-chat page onto the stack. Every failure is spoken out in a plain Chinese sentence; only the two cases "this public key
+    /// still cannot be parsed" and "the invitation link itself is not valid" do not enter the private-chat page — that page would hold nothing besides the failure notice.
     @MainActor private func openBluetoothChat(with node: PopopxCabinNode) async {
         guard meshRuntime.isFuseOn else {
             PopopxHaptics.notice(.warning)
@@ -1202,7 +1202,7 @@ struct PopopxCabinView: View {
         defer { openingNodeID = nil }
 
         if node.isPaired {
-            // 模块 3 已经证明配对：不再重发邀请（`initiatePairing` 对已配对会抛 `.alreadyPaired`），直接进会话。
+            // Module 3 has already proven the pairing: do not resend an invitation (`initiatePairing` throws `.alreadyPaired` for an already-paired peer), go straight into the session.
             path.append(.privateChat(peerMeshPublicKeyHex: hex))
             return
         }
@@ -1220,7 +1220,7 @@ struct PopopxCabinView: View {
                 refusedWithoutSession = true
             case .alreadyPaired, .declinedRecently, .requestUnknown, .requestSuperseded,
                  .sendFailed, .offlineBridge, .mappingStoreFailed:
-                // 会话仍然值得打开：私聊页自己会重读绑定与配对证据，并把发不出去的原因逐条说清楚。
+                // The session is still worth opening: the private-chat page re-reads the binding and the pairing evidence itself, and spells out one by one why nothing can be sent.
                 break
             }
         }
@@ -1229,9 +1229,9 @@ struct PopopxCabinView: View {
         path.append(.privateChat(peerMeshPublicKeyHex: hex))
     }
 
-    /// 大厅里点说话人名字的第二条出口：只发一次离线建联邀请，不把私聊页压进栈。调的还是模块 3 那一个
-    /// `initiatePairing(with:incognito:)` —— 全 app 只有这一条路能让一条离线好友关系存在，所以这里
-    /// 不写第二份"加好友"实现；两条路的每一句失败回执也是同一批词条，不会两处说两套。
+    /// The second exit when a speaker's name is tapped in the hall: send only one offline connection invitation, without pushing the private-chat page onto the stack. It still calls module 3's one and only
+    /// `initiatePairing(with:incognito:)` — repo-wide this is the only path that can make an offline friendship exist, so here
+    /// there is no second "add friend" implementation; the failure receipts of both paths are also the same batch of entries, so two places cannot say two different things.
     @MainActor private func sendFriendRequest(to node: PopopxCabinNode) async {
         guard meshRuntime.isFuseOn else {
             PopopxHaptics.notice(.warning)
@@ -1254,8 +1254,8 @@ struct PopopxCabinView: View {
         await refresh()
     }
 
-    /// 大厅的发送。语义逐字照抄 `PopopxMeshPlazaModel.broadcastDraft()`：先截断到上限，
-    /// 无论成败本机都留一行（洪泛不回声给发送者），失败只把一句话交回大厅显示。
+    /// The hall's send. The semantics are copied verbatim from `PopopxMeshPlazaModel.broadcastDraft()`: truncate to the limit first,
+    /// then, regardless of success or failure, this device keeps one row (flooding is not echoed back to the sender), while failure hands only one sentence back to the hall to display.
     @MainActor private func sendBroadcast(_ raw: String) async -> PopopxMeshSendFailure? {
         let text = String(raw.prefix(PopopxMeshPlazaModel.maxDraftCharacters))
         var failure: PopopxMeshSendFailure?
@@ -1283,7 +1283,7 @@ struct PopopxCabinView: View {
                 hopCount: 0
             )
         )
-        // 上限与包内状态镜像同一个常量，超出的从头部丢。
+        // The limit is the same constant as the package's state mirror, and whatever exceeds it is dropped from the head.
         if posts.count > PopopxMeshStateSource.defaultCapacity {
             posts.removeFirst(posts.count - PopopxMeshStateSource.defaultCapacity)
         }
@@ -1296,7 +1296,7 @@ struct PopopxCabinView: View {
             ?? ""
     }
 
-    /// 昵称唯一写入口 = 熔断开关自己（它 clamp、写沙盒文件、发布 `nickname`，开着时顺带重启本机 mesh）。
+    /// The nickname's only write entry = the fuse switch itself (it clamps, writes the sandbox file, publishes `nickname`, and while open restarts this device's mesh along the way).
     @MainActor private func saveNickname() async {
         await meshRuntime.killSwitch.setNickname(nicknameText)
         nicknameText = currentNickname()
@@ -1318,7 +1318,7 @@ struct PopopxCabinView: View {
     }
 
     @MainActor private func decline(_ request: PopopxPairingRequest) async {
-        // `decline` 不抛：它只把请求丢掉并记下 60 秒冷却（`ManualPairingManager.swift:229-235`）。
+        // `decline` does not throw: it only drops the request and records a 60-second cooldown (`ManualPairingManager.swift:229-235`).
         await meshRuntime.pairing.decline(request)
         PopopxHaptics.impact(.light)
         toast.show(Copy.declineToast, kind: .mesh)
@@ -1326,27 +1326,27 @@ struct PopopxCabinView: View {
     }
 }
 
-// MARK: - 周边节点那一屏（雷达 + 逐台行）
+// MARK: - The nearby-nodes screen (radar + per-device rows)
 
-/// 「周边 1–N 跳活跃设备」整屏：雷达、溢出说明、总闸关着时那一个真的开启按钮、逐台行。
+/// The whole "nearby active devices at 1–N hops" screen: the radar, the overflow note, the one real enable button when the master switch is closed, and the per-device rows.
 ///
-/// 抽成一个视图而不是在两处各写一遍，是为了大厅的「发现模式」——它要挂的就是这一屏，节点表仍然只有
-/// 宿主折出来的那一份（`PopopxCabinNode`），大厅不自建第二份列表。跳数上限、TTL、静默窗口、密集网络
-/// 阈值这四件事是 `PopopxMeshConfig` 的常量，所以视图自己引，不由调用方传数（传了就等于允许两处传歪）。
+/// It was extracted into one view instead of being written twice at two sites, for the sake of the hall's "discovery mode" — what it mounts is this very screen, and the node table is still
+/// only the one folded by the host (`PopopxCabinNode`); the hall does not build a second list. The hop ceiling, TTL, silence window and dense-network
+/// thresholds are these four `PopopxMeshConfig` constants, so the view cites them itself rather than taking numbers from callers (passing them would amount to allowing two places to pass them wrong).
 @MainActor
 private struct PopopxCabinNearbyCard: View {
     let nodes: [PopopxCabinNode]
     let fuseOn: Bool
-    /// 射频档位由宿主给（镜像的那一份），不在这里另问一次单例：两处问，就会有两处说不一样的时候。
+    /// The radio tier is given by the host (the mirror's copy) and the singleton is not asked a second time here: if two places ask, there will be two moments when they say different things.
     let radioState: PopopxBluetoothState
-    /// 直连邻居数取镜像的 `peers` 表（连接层的真值），不是这张表折出来的节点行，所以只能由宿主给。
+    /// The direct-neighbour count is taken from the mirror's `peers` table (the truth of the connection layer), not from the node rows folded out of this table, so only the host can supply it.
     let directPeerCount: Int
     let openingNodeID: String?
     let onOpenChat: (PopopxCabinNode) async -> Void
     let onRescan: () async -> Void
     let onTurnOnFuse: () async -> Void
 
-    /// 雷达一屏最多画这么多个点；多出来的仍然全列在下面的行里，一个都不藏。
+    /// The radar draws at most this many points on one screen; the extras are still listed in full in the rows below, not one of them hidden.
     static let markerLimit = 12
 
     private var radioUsable: Bool { radioState.isUsable }
@@ -1374,7 +1374,7 @@ private struct PopopxCabinNearbyCard: View {
             }
 
             if !fuseOn {
-                // 总闸关着就老实说没有扫描：这一屏只剩一个真的、能干活的开启按钮。
+                // When the master switch is closed it says honestly that nothing is scanning: this screen is then left with one real, working enable button.
                 PopopxButton(Copy.fuseTurnOn, systemImage: "antenna.radiowaves.left.and.right") {
                     await onTurnOnFuse()
                 }
@@ -1427,10 +1427,10 @@ private struct PopopxCabinNearbyCard: View {
     }
 }
 
-// MARK: - 雷达（本页的签名细节）
+// MARK: - The radar (this page's signature detail)
 
-/// 周边节点的同心雷达。静态部分是「环 + 数字跳数」，动的那圈只是一道由内向外的青色脉冲。
-/// Reduce Motion 下只画静止环与数字，一次循环动画都不启动（§5 对雷达/脉冲类动画的明确要求）。
+/// The concentric radar of nearby nodes. The static part is "rings + numeric hop counts", and the moving ring is only one teal pulse travelling from inside outwards.
+/// Under Reduce Motion only the static rings and numbers are drawn, and not one looping animation starts (§5's explicit requirement for radar/pulse-type animations).
 @MainActor
 private struct PopopxCabinRadar: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -1442,7 +1442,7 @@ private struct PopopxCabinRadar: View {
 
     @State private var pulseOutward = false
 
-    /// 尺寸只用 token 表达：一边 = 48 × 3。
+    /// The size is expressed only through tokens: one side = 48 × 3.
     private static let side: CGFloat = PopopxMetrics.space2XL * 3
     private static let dotSide: CGFloat = PopopxMetrics.spaceM + PopopxMetrics.space2XS
 
@@ -1473,7 +1473,7 @@ private struct PopopxCabinRadar: View {
     private var onlineCount: Int { nodes.filter(\.isReachable).count }
     private var shownNodes: [PopopxCabinNode] { Array(nodes.prefix(markerLimit)) }
 
-    /// 三圈同心环：线宽用 §4 的 `stroke`（1.5pt），越外圈越实，最外一圈就是跳数上限那一圈。
+    /// Three concentric rings: the line width uses §4's `stroke` (1.5pt), the further out the more solid, and the outermost ring is the hop-ceiling ring.
     private var rings: some View {
         ZStack {
             ForEach(0..<3, id: \.self) { index in
@@ -1494,7 +1494,7 @@ private struct PopopxCabinRadar: View {
             .opacity(pulseOutward ? 0.06 : 0.6)
     }
 
-    /// 点的位置只由两个真数决定：半径 = 跳数 / 上限，角度 = 序号均分。没有任何假数据。
+    /// The point position is decided by only two real numbers: radius = hops / ceiling, angle = the index spread evenly. There is no fake data at all.
     private var markers: some View {
         ZStack {
             ForEach(Array(shownNodes.enumerated()), id: \.element.id) { index, node in
@@ -1503,8 +1503,8 @@ private struct PopopxCabinRadar: View {
         }
     }
 
-    /// 位置只由两个真数决定：半径 = 跳数 / 上限（0 跳的那一台落在最内圈），角度 = 序号在圆上均分。
-    /// 三角函数一律在 `Double` 上算，再显式转回 `CGFloat`：不依赖任何隐式转换。
+    /// Position is decided by only two real numbers: radius = hops / ceiling (the 0-hop device lands on the innermost ring), angle = the index spread evenly around the circle.
+    /// Trigonometry is computed on `Double` throughout and then explicitly converted back to `CGFloat`: no implicit conversion is relied upon.
     private func marker(node: PopopxCabinNode, index: Int) -> some View {
         let hops = Double(min(max(node.hopCount, 0), max(hopCap, 1)))
         let radius = Double(Self.side / 2) * (0.18 + 0.74 * (hops / Double(max(hopCap, 1))))
@@ -1517,7 +1517,7 @@ private struct PopopxCabinRadar: View {
             )
     }
 
-    /// 中心是本机：青色 `meshInk` 描的语义（本机自己在 mesh 里），不是 SMP 的紫。
+    /// The centre is this device: the teal `meshInk` outline carries the semantics (this device is itself in the mesh), not SMP's purple.
     private var core: some View {
         ZStack {
             Circle()
@@ -1541,7 +1541,7 @@ private struct PopopxCabinRadar: View {
     }
 }
 
-/// 青色节点点一律打印跳数数字（§1.4 第 3 条）：掉线的点退成灰圈，数字还在。
+/// Teal node dots always print the hop-count number (§1.4 rule 3): a dot that drops offline degrades to a grey ring, and the number is still there.
 @MainActor
 private struct PopopxCabinHopDot: View {
     let hops: Int
@@ -1564,9 +1564,9 @@ private struct PopopxCabinHopDot: View {
     }
 }
 
-// MARK: - 徽章与节点行
+// MARK: - Badges and node rows
 
-/// 跳数徽章：`mesh` 实底 + `onMesh` 数字，永远带「N 跳」两个字（§2.2）。
+/// The hop-count badge: solid `mesh` + `onMesh` digits, and it always carries the two words "N hops" (§2.2).
 @MainActor
 private struct PopopxCabinHopBadge: View {
     let hops: Int
@@ -1582,7 +1582,7 @@ private struct PopopxCabinHopBadge: View {
     }
 }
 
-/// 关系徽章：只说绑定/配对事实，一律中性色，不与青色的跳数语义抢色。
+/// The relationship badge: it states only binding/pairing facts, always in neutral colours, and does not compete with the teal hop-count semantics for colour.
 @MainActor
 private struct PopopxCabinStateBadge: View {
     let text: String
@@ -1662,7 +1662,7 @@ private struct PopopxCabinNodeRow: View {
         .accessibilityLabel(Copy.rowLabel(node.label, detail, relationshipWords))
     }
 
-    /// 一行里的每个数字都来自模块 4 或镜像：直连/中继、静默时长、RSSI，以及「超出射程」这种难听话。
+    /// Every number in a row comes from module 4 or from the mirror: direct/relay, silence duration, RSSI, and unkind statements like "out of range".
     private var detail: String {
         var parts: [String] = [
             node.isDirect ? Copy.directLink : Copy.relayLink,
@@ -1687,19 +1687,19 @@ private struct PopopxCabinNodeRow: View {
     }
 }
 
-// MARK: - #厢语大厅
+// MARK: - #Cabin Hall
 
-/// 「#厢语大厅」整屏：完整广播流 + 广播输入 + 本机临时昵称。总闸关着时这一屏只读，
-/// 并给出一个真的开启按钮，不画任何看起来能发的输入框。
+/// The whole "#Cabin Hall" screen: the complete broadcast stream + broadcast input + this device's temporary nickname. When the master switch is closed this screen is read-only,
+/// and it offers one real enable button, without drawing any input field that looks as if it could send.
 ///
-/// 两件事住在这一个页面里，都不另建第二份数据：
-/// - 右上角「发现模式」开关的是主页面那一屏 `PopopxCabinNearbyCard`（同一个视图、同一份 `nodes`）；
-/// - 气泡上的说话人名字是一枚 `Menu`，两条动作分别落到既有的 `openBluetoothChat(with:)` 与
-///   `sendFriendRequest(to:)`，公钥的换算只认节点表那一份（见 `node(for:)`）。
+/// Two things live in this one page, and neither one builds a second copy of the data:
+/// - the top-right "discovery mode" toggles the main page's `PopopxCabinNearbyCard` screen (the same view, the same `nodes`);
+/// - the speaker name on a bubble is a `Menu`, whose two actions land on the existing `openBluetoothChat(with:)` and
+///   `sendFriendRequest(to:)`, and the public-key conversion is recognised only in the node table's one copy (see `node(for:)`).
 @MainActor
 private struct PopopxCabinHallView: View {
     let fuseOn: Bool
-    /// 整份档位传进来而不是一个 `Bool`：composer 只问"能不能发"，发现模式那一屏还要说得出"为什么不能"。
+    /// The whole tier is passed in rather than a `Bool`: the composer only asks "can I send", while the discovery-mode screen also has to be able to say "why it cannot".
     let radioState: PopopxBluetoothState
     @Binding var nickname: String
     let posts: [PopopxMeshPlazaPost]
@@ -1714,11 +1714,11 @@ private struct PopopxCabinHallView: View {
     let onRescan: () async -> Void
 
     @State private var draft = ""
-    /// 在途标记：`send()` 期间草稿仍留在框里（失败不吞字），所以按钮必须靠自己关门，
-    /// 而不是靠 `trimmedDraft` 变假 —— 后者在 await 之前那一帧就把点击丢掉了。
+    /// The in-flight marker: during `send()` the draft stays in the box (a failure does not swallow the text), so the button has to close its own gate,
+    /// and must not rely on `trimmedDraft` turning false — the latter drops the click one frame before the await.
     @State private var sending = false
     @State private var failureNote: String?
-    /// 发现模式默认收着：大厅是说话的地方，看周边是另一件事，但右上角一键就能翻上来。
+    /// Discovery mode defaults to collapsed: the hall is the place to talk, looking around is a separate matter, but one tap in the top-right brings it up.
     @State private var showsDiscovery = false
 
     private var radioUsable: Bool { radioState.isUsable }
@@ -1728,10 +1728,10 @@ private struct PopopxCabinHallView: View {
     }
 
     var body: some View {
-        // 容器结构与正式聊天页同构：`ChatView.swift:205` 的 `VStack(spacing: 0)` 里，消息列表是
-        // 唯一可伸缩的成员，输入栏是最后一名（同文件 `:237` 挂 `ComposeView`，而 `ComposeView.swift:575`
-        // 把 `popopxComposerBar(...)` 排在它自己那条 `VStack` 的末尾）。键盘升起时 SwiftUI 把安全区
-        // 往上收，列表自己变矮，输入栏原样贴在键盘上沿 —— 主聊天页多年来就是这么贴合的。
+        // The container structure is isomorphic to the real chat page: inside the `VStack(spacing: 0)` of `ChatView.swift:205` the message list is
+        // the only flexible member and the input bar is the last one (the same file, `:237` mounts `ComposeView`, and `ComposeView.swift:575`
+        // places `popopxComposerBar(...)` at the end of its own `VStack`). When the keyboard rises, SwiftUI pulls the safe area
+        // upwards, the list shrinks by itself, and the input bar stays flush against the keyboard's top edge — the main chat page has fitted like that for years.
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
@@ -1764,28 +1764,28 @@ private struct PopopxCabinHallView: View {
                 }
                 .padding(.horizontal, PopopxMetrics.gutter)
                 .padding(.top, PopopxMetrics.spaceS)
-                // 真机第 6 轮的根因：上一版把收起层挂在 `.background` 上，而那一层只有内容 `VStack`
-                // 那么大。屏幕下半截那块空白属于 `ScrollView` 自己（`UIScrollView` 对整块视口命中并把
-                // 点击吃掉），背景层够不着；卡片里那点留白同样被 `PopopxSectionCard` 自己的圆角底吃掉。
-                // 于是"点空白"点了个空 —— 不是手势没装，是那一块从来不是这层的。
-                // 现在把内容层本身撑满视口（顶部对齐，短内容时下方空白就落在这层上），`contentShape`
-                // 才有东西可命中；收起动作留在这一层。
-                // 用 `.onTapGesture` 而不是 `.simultaneousGesture`：后代控件优先命中，昵称那个 `Menu`
-                // （`authorControl`）与卡片里的按钮一律照常，不会出现"开菜单顺带把键盘也收了"；
-                // simultaneousGesture 恰恰会在那一枚昵称上一起触发，正是要避开的冲突。
-                // 收起走 `hideKeyboard()`：`PopopxTextArea` 的 `@FocusState` 是控件私有的
-                // （`Shared/Components/PopopxControls.swift:260`、`:272`，红线文件不动），宿主拿不到
-                // 那份绑定，只能走标准 responder 链，与主聊天页 `ChatView.swift:1094` 同一个调用。
+                // The root cause in device round 6: the previous version attached the dismiss layer to `.background`, and that layer is only as large as the content `VStack`.
+                // The blank lower half of the screen belongs to the `ScrollView` itself (`UIScrollView` hit-tests the whole viewport and
+                // eats the tap), so the background layer cannot reach it; the padding inside a card is likewise eaten by `PopopxSectionCard`'s own rounded background.
+                // So "tap the blank area" tapped nothing — it was not that the gesture was not installed, but that that region never belonged to this layer.
+                // Now the content layer itself is stretched to fill the viewport (top-aligned, so with short content the blank below lands on this layer) and only then does `contentShape`
+                // have something to hit; the dismiss action stays on this layer.
+                // `.onTapGesture` rather than `.simultaneousGesture`: descendant controls hit first, so the nickname `Menu`
+                // (`authorControl`) and the buttons inside cards behave as always, and there is no "opening the menu also dismissed the keyboard";
+                // simultaneousGesture would trigger on exactly that nickname capsule, which is precisely the conflict to avoid.
+                // Dismissing goes through `hideKeyboard()`: `PopopxTextArea`'s `@FocusState` is private to the control
+                // (`Shared/Components/PopopxControls.swift:260`, `:272`, a red-line file we do not touch), so the host cannot get
+                // that binding and can only go through the standard responder chain, the same call as the main chat page's `ChatView.swift:1094`.
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 .contentShape(Rectangle())
                 .onTapGesture { hideKeyboard() }
             }
-            // 真机第 9 轮：输入栏从"VStack 末位"改成贴在列表的下沿安全区内。上一版依赖键盘升起时
-            // SwiftUI 把整条栈往上收 —— 大厅是从抽屉里推进去、抽屉又挂在一层 sheet 上（见
-            // `PopopxCabinMeshSettingsSheet` 那条链），sheet 那一侧的贴合规则与根栈不同，实测就是
-            // 「广播」被键盘盖住半截。`.safeAreaInset` 让输入栏占的是下沿安全区，键盘抬高那一区时
-            // 它跟着抬，列表自己变矮，不再和"整条栈平移"这件事耦合。
-            // `if fuseOn` 留在 inset 内部：保险丝断开时这一格是空的， inset 不占位，列表照常到边。
+            // Device round 9: the input bar changed from "the last member of the VStack" to sitting inside the safe area below the list. The previous version relied on SwiftUI
+            // pushing the whole stack up when the keyboard rose — the hall is pushed from inside the drawer, and the drawer is itself mounted on a sheet layer (see
+            // the `PopopxCabinMeshSettingsSheet` chain), and the fitting rules on the sheet side differ from those of the root stack, so in practice
+            // "Broadcast" was left half covered by the keyboard. `.safeAreaInset` makes the input bar occupy the bottom safe-area region, and when the keyboard raises that region
+            // it rises with it, the list shrinks by itself, and it is no longer coupled to "translate the whole stack".
+            // `if fuseOn` stays inside the inset: when the fuse is broken this cell is empty, the inset takes no space, and the list still reaches the edge as usual.
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 if fuseOn {
                     VStack(spacing: 0) {
@@ -1795,31 +1795,31 @@ private struct PopopxCabinHallView: View {
                 }
             }
         }
-        // 拖动列表即收起键盘。位置照正式聊天页：挂在整块内容上而不是某个 `ScrollView` 上
-        // （`ChatView.swift:159`，那边用的是 `.immediately`；这里按本轮要求用 `.interactively`，
-        // 键盘跟着手指走，松手才决定收起还是留下，与 `PopopxCabinView` 主页面的 :388 同档）。
-        // 点空白收起与它同行：`hideKeyboard()` 走 UIKit 的 resignFirstResponder 广播，不持有也不
-        // 争抢 SwiftUI 的焦点绑定，所以那条"与 `.focused` 同用会冻住"的上游警告在这里不适用 ——
-        // 这一页从头到尾没有第二份 `.focused`。
+        // Dragging the list dismisses the keyboard. The position follows the real chat page: attached to the whole content block rather than to some `ScrollView`
+        // (`ChatView.swift:159`, which uses `.immediately` there; here `.interactively` is used as this round required,
+        // so the keyboard follows the finger and only decides on release whether to dismiss or stay, the same tier as `PopopxCabinView`'s main page :388).
+        // Tapping the blank area to dismiss sits alongside it: `hideKeyboard()` goes through UIKit's resignFirstResponder broadcast, holding no
+        // and contending for no SwiftUI focus binding, so that upstream warning about "freezing when used together with `.focused`" does not apply here —
+        // this page never had a second `.focused` from beginning to end.
         .scrollDismissesKeyboard(.interactively)
-        // 进了大厅就是说话的地方：底部那四枚 Tab 必须整条让开，退出这一页回厢语主页自动回来。
-        // 口径与消息页推入 `ChatView` 那一处相同（`ChatsListView.swift:405`）—— 声明在推进去的那
-        // 一层，不是声明在列表页上；主页自己不挂，所以主页那四枚一直是好的。
-        // 本轮起大厅只从抽屉里推进去，抽屉本来就盖住整块底栏，这一句在那条栈里落不到东西上：
-        // inert 而非有害（与包内 `meshHallTabBarHidden(_:)` 同一句判据），留着是因为这条规则
-        // 声明在"推进去的那一层"才成立，摘掉它就等于允许下一个把大厅挂进根栈的人漏掉它。
-        // 真机第 8 轮之后这一句更是落不到东西上：根那一屏自己把底栏让开了，抽屉里这条栈头顶着的是
-        // 一块本来就没有底栏的区域。
+        // Entering the hall means this is the place to talk: the bottom four Tab capsules must give way entirely, and leaving this page back to the Cabin main page brings them back automatically.
+        // The convention is the same as the site where the message page pushes `ChatView` (`ChatsListView.swift:405`) — it is declared on the layer
+        // that got pushed, not declared on the list page; the main page does not attach it, so the main page's four capsules have always been fine.
+        // From this round the hall is only pushed from inside the drawer, and the drawer already covers the whole bottom bar, so this sentence lands on nothing in that stack:
+        // inert rather than harmful (the same judgement as the package's `meshHallTabBarHidden(_:)`), and it stays because this rule
+        // only holds when declared "on the layer that got pushed"; removing it would amount to letting the next person who mounts the hall into the root stack miss it.
+        // After device round 8 this sentence lands on even less: the root screen itself gives the bottom bar away, and the stack inside the drawer has above it
+        // a region that never had a bottom bar in the first place.
         .toolbar(.hidden, for: .tabBar)
         .background(PopopxPalette.base)
         .toolbar {
-            // 工具条项跟着"声明它的那一层内容"走，所以主页面那两个入口不会跟到这一层来，这一枚也不会
-            // 留在主页面上 —— 与 `PopopxCabinView.meshSettingsEntry` 上面那条注释是同一个规则。
+            // Toolbar items follow "the content layer that declares them", so the main page's two entries do not follow into this layer, and this capsule does not
+            // stay behind on the main page either — the same rule as the comment above `PopopxCabinView.meshSettingsEntry`.
             ToolbarItem(placement: .topBarTrailing) { discoveryEntry }
         }
     }
 
-    /// 发现模式的开关。整枚芯片就是状态本身：开着的时候填青色（mesh 事实），收着的时候只留描边底色。
+    /// The discovery-mode switch. The whole chip is the state itself: filled teal when on (a mesh fact), and only the outlined background colour when collapsed.
     private var discoveryEntry: some View {
         Button {
             PopopxHaptics.selection()
@@ -1877,7 +1877,7 @@ private struct PopopxCabinHallView: View {
             VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
                 HStack(spacing: PopopxMetrics.space2XS) {
                     authorControl(post)
-                    // 本机自己发的没有跳数可言；收到的每一条都必须带上它走了几跳。
+                    // Broadcasts sent by this device have no hop count to speak of; every received one must carry how many hops it travelled.
                     if case .neighbour = post.author {
                         PopopxCabinHopBadge(hops: post.hopCount)
                     }
@@ -1886,8 +1886,8 @@ private struct PopopxCabinHallView: View {
                     .font(PopopxType.body)
                     .foregroundStyle(PopopxPalette.label)
                     .fixedSize(horizontal: false, vertical: true)
-                    // 整条气泡仍然一次读完 —— 但合并不再挂在最外层：外层一 `combine`，
-                    // 里面的说话人按钮就被读屏吞掉了，那一枚名字于是只剩下"按钮"两个字。
+                    // The whole bubble is still read in one pass — but the merge no longer hangs on the outermost layer: as soon as the outer layer `combine`s,
+                    // the speaker button inside it is swallowed by the screen reader, and that name capsule is left with nothing but the word "button".
                     .accessibilityLabel(Copy.bubbleLabel(authorWords(post), post.text, post.hopCount))
             }
             Spacer(minLength: PopopxMetrics.spaceS)
@@ -1898,9 +1898,9 @@ private struct PopopxCabinHallView: View {
         .padding(.vertical, PopopxMetrics.space2XS)
     }
 
-    /// 说话人名字 = 这一条广播的唯一入口。本机自己那一行没有什么可加的，所以只有邻居那一行是控件。
-    /// 用 `Menu` 而不是直接动作：同一个人身上有两条路（进私聊 / 只发一次加好友请求），点了才知道要哪条。
-    /// 公钥解析不出来时两条动作一律 `disabled` 并写出原因，而不是把空页推进栈。
+    /// The speaker's name = the one entry point of this broadcast. There is nothing to attach on this device's own row, so only the neighbour's row is a control.
+    /// Using `Menu` rather than a direct action: one and the same person has two paths (enter a private chat / send just one add-friend request), and you only know which one you want after tapping.
+    /// When the public key cannot be parsed both actions are always `disabled` and the reason is written out, instead of pushing an empty page onto the stack.
     @ViewBuilder private func authorControl(_ post: PopopxMeshPlazaPost) -> some View {
         let name = authorWords(post)
         if case .neighbour = post.author {
@@ -1937,17 +1937,17 @@ private struct PopopxCabinHallView: View {
         }
     }
 
-    /// 广播的作者只带 8 字节线 id，而私聊与配对两条路都要 mesh 公钥。换算只认节点表那一份：它就是
-    /// 模块 4 `allNodes()` 与镜像 `peers` 表折出来的 `PopopxCabinNode.meshPublicKeyHex`，与雷达、
-    /// 节点行同源。包里那个 `meshPublicKeyHex(forPeerIDHex:)`（`PopopxMeshEngine.swift:322`）住在
-    /// `PopopxMeshEngine` 这个 actor 上，而 app 侧只许 `PopopxMeshEngineBackend` 让那个单例存在
-    /// （`POPOPXAPI.swift:3587`）—— 在本页问它一次，就等于替总闸关着的机器造出引擎。
+    /// A broadcast's author carries only the 8-byte line id, while both the private-chat and the pairing paths need the mesh public key. The conversion is recognised only in the node table's copy: it is
+    /// the `PopopxCabinNode.meshPublicKeyHex` folded out of module 4's `allNodes()` and the mirror's `peers` table, the same source as the radar and
+    /// the node rows. The package's `meshPublicKeyHex(forPeerIDHex:)` (`PopopxMeshEngine.swift:322`) lives
+    /// on the actor `PopopxMeshEngine`, while the app side may only let `PopopxMeshEngineBackend` make that singleton exist
+    /// (`POPOPXAPI.swift:3587`) — asking it once from this page would mean building an engine for machines whose master switch is closed.
     private func node(for post: PopopxMeshPlazaPost) -> PopopxCabinNode? {
         guard case let .neighbour(_, peerIDHex) = post.author else { return nil }
         return nodes.first { $0.peerIDHex == peerIDHex }
     }
 
-    /// 包内 `PopopxMeshPlazaPost.Author.displayName` 是英文的 "You"；这一页的中文自己说。
+    /// The package's `PopopxMeshPlazaPost.Author.displayName` is the English "You"; this page states its own Chinese wording separately.
     private func authorWords(_ post: PopopxMeshPlazaPost) -> String {
         switch post.author {
         case .local:
@@ -1961,11 +1961,11 @@ private struct PopopxCabinHallView: View {
         }
     }
 
-    /// 广播输入栏：正式聊天页那条底栏的同构体（见 `body` 里 `VStack(spacing: 0)` 那段注释）。
-    /// 一排 = 输入框 + 「广播」按钮，不带标题与脚注：上一轮那整张 `PopopxSectionCard` 有标题、
-    /// 脚注、字数行和按钮行四层，键盘一抬就把最底下那层按钮顶到键盘后面去，而 `ChatView.swift:237`
-    /// 挂的 `ComposeView`/`PopopxInputBar.swift:632-642` 从来只是一条贴着键盘上沿的横排。
-    /// 只保留两种"必须当场说"的行：射频不可用与上一次发送失败。
+    /// The broadcast input bar: the isomorphic twin of the real chat page's bottom bar (see the `VStack(spacing: 0)` comment inside `body`).
+    /// One row = the input box + the "Broadcast" button, with no title and no footnote: the previous round's whole `PopopxSectionCard` had four layers — title,
+    /// footnote, character count and the button row — and the moment the keyboard rose it pushed the bottom-most button row behind the keyboard, while what `ChatView.swift:237`
+    /// mounts as `ComposeView`/`PopopxInputBar.swift:632-642` has always been only one horizontal row flush against the keyboard's top edge.
+    /// Only the two rows that "must be said on the spot" are kept: the radio being unavailable, and the last send failing.
     private var composer: some View {
         VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
             if !radioUsable {
@@ -1980,8 +1980,8 @@ private struct PopopxCabinHallView: View {
                     .foregroundStyle(PopopxPalette.dangerInk)
                     .fixedSize(horizontal: false, vertical: true)
             } else if draft.count > PopopxMeshPlazaModel.maxDraftCharacters {
-                // 字数只在越界时出现：底栏常驻一行计数，是把"编辑器"的负担摊到每一次喊话上；
-                // 越界本身才是需要提前说的事（`send()` 也会拒绝，但那一跳要先按下按钮才知道）。
+                // The character count appears only when out of bounds: keeping a count row permanently in the bottom bar spreads the burden of "an editor" onto every shout;
+                // being over the limit is itself the thing that needs saying in advance (`send()` also refuses, but that hop you only learn after pressing the button).
                 Text(Copy.draftCount(draft.count, PopopxMeshPlazaModel.maxDraftCharacters))
                     .font(PopopxType.meta)
                     .foregroundStyle(PopopxPalette.dangerInk)
@@ -2021,11 +2021,11 @@ private struct PopopxCabinHallView: View {
         }
     }
 
-    /// 发送：先广播，**成功之后**才清空草稿；失败时刚打的字留在框里，改一个字就能重发。
-    /// 顺序反过来会同时踩两个坑：清空在 await 之前 ⇒ `trimmedDraft` 同一帧变假，在途期间的
-    /// 点击被 `.disabled` 吞掉（连触觉都没有）；失败路径又会把用户的话销毁，而邻居那边
-    /// 本地广播气泡已经贴上去了（`appendLocalBroadcast`），屏幕上剩一条谁也没收到过的消息。
-    /// `sending` 是必须的：草稿现在会在途保留，`trimmedDraft` 就不再替我们关门。
+    /// Send: broadcast first, and clear the draft **only after success**; on failure the text just typed stays in the box, so changing one character is enough to resend.
+    /// Reversing the order steps on two landmines at once: clearing before the await ⇒ `trimmedDraft` turns false in the same frame, and during the in-flight window the
+    /// taps are swallowed by `.disabled` (not even a haptic); and the failure path would destroy the user's words while the neighbours'
+    /// local broadcast bubbles are already stuck on screen (`appendLocalBroadcast`), leaving a message on the screen that nobody ever received.
+    /// `sending` is necessary: the draft is now retained in flight, so `trimmedDraft` no longer closes the gate for us.
     @MainActor private func send() async {
         let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !sending else { return }
@@ -2050,9 +2050,9 @@ private struct PopopxCabinHallView: View {
     }
 }
 
-// MARK: - 本地加密频道
+// MARK: - Local encrypted channels
 
-/// 本机已经与蓝牙邻居建立的 1:1 加密会话。未绑定的邻居另开一段，说清楚点它会发生什么。
+/// The 1:1 encrypted sessions this device has already established with Bluetooth neighbours. Unbound neighbours get a separate section, spelling out what tapping one will do.
 @MainActor
 private struct PopopxCabinChannelsView: View {
     let fuseOn: Bool
@@ -2122,10 +2122,10 @@ private struct PopopxCabinChannelsView: View {
 }
 
 
-// MARK: - 待决定的建联
+// MARK: - Connections awaiting a decision
 
-/// 收到的建联请求：同意/拒绝都直接落到模块 3 的真方法上，与包内顶部横幅共用同一份状态，
-/// 两处决定互相看得见。
+/// Received connection requests: accept and decline both land straight on module 3's real methods, sharing the same state as the package's top banner,
+/// so the decisions made in the two places are visible to each other.
 @MainActor
 private struct PopopxCabinPairingRequestsSheet: View {
     @Environment(\.dismiss) private var dismiss
@@ -2179,14 +2179,14 @@ private struct PopopxCabinPairingRequestsSheet: View {
     }
 }
 
-// MARK: - 厢语离线组网设置中心
+// MARK: - Cabin offline mesh settings centre
 
-/// 「我」页的离线组网分组与「全部设置」页的厢语卡片整块搬进这里，落点一个都不换来源：
-/// 总闸 = `PopopxMeshRuntime.requestFuse(_:)`、配对策略 = `MeshPairingPolicy` 的两个 case 经
-/// `setPairingPolicy(_:)` 写进 `IdentityMappingStore`、运行态 = `PopopxMeshKillSwitch.verifiedActivitySnapshot()`、
-/// 清除 = `IdentityMappingStore.emergencyWipeAllMappings()`、配对记录页 = 包内 `MeshPrivacySettingsView`
-/// 的三个 runtime 对象。本视图只读宿主算好的事实、只回调，自己一次 actor 都不碰 —— 这样这张卡开着的
-/// 时候，页面那份 2 秒节奏仍然是唯一的读数来源。
+/// The "Me" page's offline-mesh group and the "All settings" page's Cabin card are moved in here wholesale, and not one landing point changed its source:
+/// master switch = `PopopxMeshRuntime.requestFuse(_:)`, pairing policy = `MeshPairingPolicy`'s two cases written through
+/// `setPairingPolicy(_:)` into `IdentityMappingStore`, runtime state = `PopopxMeshKillSwitch.verifiedActivitySnapshot()`,
+/// clearing = `IdentityMappingStore.emergencyWipeAllMappings()`, the pairing-records page = the package's `MeshPrivacySettingsView`
+/// and its three runtime objects. This view only reads the facts the host has folded and only calls back; it never touches an actor itself — that way, while this card is open,
+/// the page's 2-second cadence remains the only source of readings.
 @MainActor
 private struct PopopxCabinMeshSettingsSheet: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -2194,7 +2194,7 @@ private struct PopopxCabinMeshSettingsSheet: View {
     let fuseOn: Bool
     let pairingPolicy: MeshPairingPolicy
     let snapshot: PopopxMeshActivitySnapshot?
-    /// 模块 4 亲口报的射频档位，由宿主每 2 秒读一次；nil = 这一次运行还没读到过（不替它猜一个档位）。
+    /// The radio tier reported by module 4 itself, read once every 2 seconds by the host; nil = this run has not read one yet (we do not guess a tier on its behalf).
     let radioState: PopopxBluetoothState?
     let nodes: [PopopxCabinNode]
     let localKeyHex: String
@@ -2230,25 +2230,25 @@ private struct PopopxCabinMeshSettingsSheet: View {
         }
     }
 
-    // MARK: 卡 1 · 总闸与配对策略
+    // MARK: Card 1 · master switch and pairing policy
 
     private var switchCard: some View {
         PopopxSectionCard(Copy.cardSwitch, footnote: Copy.meshFootnote) {
-            // 这一行同样不给青色徽标：`PopopxToggleRow` 的开关实底是原子库写死的 brand 紫，
-            // 同一控件里紫青并存就是 §1.1 违规（与本页状态卡那行同一个理由）。
-            // 副标题随熔断改写，是「全部设置」页那张厢语卡原本的说法：闸关着的时候再说"扫描、广播与
-            // 中继都在运行"就是撒谎。哪一句都没必要静态地说两遍 —— 静态那句已经在这张卡的脚注里。
+            // This row likewise gets no teal badge: the switch fill of `PopopxToggleRow` is the brand purple hard-coded in the atomic library,
+            // and purple plus teal inside the same control is a §1.1 violation (the same reason as that row of this page's status card).
+            // The subtitle rewrites itself with the fuse, and that is the wording the Cabin card on the "All settings" page originally had: while the switch is closed, saying "scanning, broadcasting and
+            // relaying are all running" would be lying. No sentence needs to be said statically twice — the static one is already in this card's footnote.
             PopopxToggleRow(
                 Copy.fuseRow,
                 note: fuseOn ? Copy.fuseRowNoteOn : Copy.fuseRowNoteOff,
                 isOn: Binding(get: { fuseOn }, set: { onToggleFuse($0) })
             )
-            // 开关的回执归调用方：原子库那枚 `Toggle` 里没有触觉，翻闸这种动作必须有手感。
+            // The switch's receipt belongs to the caller: the atomic library's `Toggle` carries no haptics, and flipping a switch is an action that must have feel.
             .onChange(of: fuseOn) { _, _ in PopopxHaptics.selection() }
             rowSeparator
-            // 这一行在设置树里本来就带着"当前是哪一档"那一格值，第一轮收进来时内联成了单选，
-            // 那一格值连同它自己的解释句一起掉了。单选继续内联（这一层已经是一张表，不多开一层），
-            // 值与解释句在这里补回。
+            // This row already carried the "which tier is current" value cell in the settings tree, and when it was consolidated in the first round it was inlined into a radio group,
+            // so that value cell and its own explanation sentence both dropped out. The radio group stays inlined (this layer is already a sheet, so do not open another layer),
+            // and the value plus the explanation are added back here.
             HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.spaceS) {
                 Text(Copy.pairingPolicy)
                     .font(PopopxType.sectionHeader)
@@ -2264,8 +2264,8 @@ private struct PopopxCabinMeshSettingsSheet: View {
                 .foregroundStyle(PopopxPalette.labelSecondary)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.bottom, PopopxMetrics.space2XS)
-            // 只枚举 `MeshPairingPolicy` 真实存在的两个 case（IdentityMappingStore.swift:24-30）；
-            // 内联单选而不是再开一张表：这一层已经是一张表了。
+            // Enumerate only the two cases `MeshPairingPolicy` actually has (IdentityMappingStore.swift:24-30);
+            // an inlined radio group rather than opening another sheet: this layer already is a sheet.
             ForEach(Array(MeshPairingPolicy.allCases.enumerated()), id: \.element) { _, policy in
                 PopopxRadioRow(
                     policyTitle(policy),
@@ -2277,8 +2277,8 @@ private struct PopopxCabinMeshSettingsSheet: View {
                 }
             }
             rowSeparator
-            // 配对记录页的入口 —— 第一轮唯一整行漏掉的那一个。行尾那枚状态字是它当时就有的那一格，
-            // 两个词条都沿用「我」页早已发布的同一批 Key，所以这一行不必新写一句中文。
+            // The entry to the pairing-records page — the one row the first round missed outright. The state word at the end of the row is that cell it already had back then,
+            // and both entries reuse the same Keys already published on the "Me" page, so this row needs no newly written sentence.
             PopopxPickerRow(
                 Copy.privacyRecordsRow,
                 value: fuseOn ? Copy.meshRowOn : Copy.meshRowFusedOff,
@@ -2287,12 +2287,12 @@ private struct PopopxCabinMeshSettingsSheet: View {
                 action: onOpenPrivacyRecords
             )
         }
-        // 翻闸的这一下要改写这一张卡里的三处文字与行尾标签；Reduce Motion 下直接落位，不做过渡。
-        // 这是「全部设置」那张卡原本就有的绑定，第一轮迁移时漏在门外。
+        // This flip of the switch rewrites three pieces of text and the row-end labels inside this card; under Reduce Motion they land directly with no transition.
+        // This is the binding the "All settings" card originally had, and the first migration left it outside the door.
         .popopxAnimation(PopopxSpring.fluid, value: fuseOn, reduceMotion: reduceMotion)
     }
 
-    // MARK: 卡 2 · 节点身份与真实运行态
+    // MARK: Card 2 · node identity and real runtime state
 
     private var identityCard: some View {
         PopopxSectionCard(Copy.cardIdentity, footnote: Copy.keyFootnote) {
@@ -2300,8 +2300,8 @@ private struct PopopxCabinMeshSettingsSheet: View {
                 Text(Copy.localKeyRow)
                     .font(PopopxType.body)
                     .foregroundStyle(PopopxPalette.label)
-                // 整串 64 位十六进制照原样写出来并可选中：指纹要能拿到别的信道上去比对，
-                // 缩写过的串比对不出任何东西。空串说的是"这台机器还没跑过厢语"，不是"密钥丢了"。
+                // The whole 64-bit hexadecimal string is written out as it is and stays selectable: a fingerprint has to be portable to another channel for comparison,
+                // and an abbreviated string cannot be compared against anything. An empty string means "this machine has never run Cabin", not "the key is lost".
                 Text(localKeyHex.isEmpty ? Copy.localKeyAbsent : localKeyHex)
                     .font(PopopxType.metric)
                     .foregroundStyle(localKeyHex.isEmpty ? PopopxPalette.labelHint : PopopxPalette.labelSecondary)
@@ -2312,7 +2312,7 @@ private struct PopopxCabinMeshSettingsSheet: View {
             .padding(.vertical, PopopxMetrics.space2XS)
             .accessibilityElement(children: .combine)
             rowSeparator
-            // 五行数字是同一张账，行内不再画分隔线；只在与上面那串十六进制、下面那块核验之间画。
+            // The five rows of numbers are one and the same ledger, so no separator lines are drawn inside the row; lines are drawn only between the hexadecimal string above and the verification block below.
             VStack(spacing: PopopxMetrics.space2XS) {
                 factRow(Copy.bindingRow, "\(bindingCount)")
                 factRow(Copy.queueRow, "\(queuedCount)")
@@ -2328,12 +2328,12 @@ private struct PopopxCabinMeshSettingsSheet: View {
         }
     }
 
-    // MARK: 射频与权限诊断（本轮新增的唯一一行）
+    // MARK: Radio and permissions diagnostic (the only row added this round)
 
-    /// 只有档位落在 `unauthorized`/`poweredOff` 时这一行才是按钮：那两种情况下系统设置里确实有一项可改。
-    /// 档位好的时候给它一个能按的入口，跳过去只会让人对着一页没什么可动的设置发愣，所以那一格
-    /// 诚实地停在"不可点"。读数只有一个来源 —— 模块 4 亲口报的 `currentRadioState`，
-    /// 与顶栏胶囊同一个读法（`PopopxTelemetryHeader.swift:177`），档位用词复用
+    /// This row is a button only when the tier lands on `unauthorized`/`poweredOff`: in those two cases the system settings really do have one item to change.
+    /// Giving it a tappable entry while the tier is healthy would only send people to a settings page with nothing to move, so that cell
+    /// honestly stays "not tappable". The reading has a single source — module 4's own `currentRadioState`,
+    /// the same reading as the top-bar capsule (`PopopxTelemetryHeader.swift:177`), and the tier wording reuses
     /// `PopopxDualStatusCapsule.words(for:)`（`PopopxTelemetryHeader.swift:391`）。
     @ViewBuilder private var radioDiagnosisRow: some View {
         let state = radioState
@@ -2369,8 +2369,8 @@ private struct PopopxCabinMeshSettingsSheet: View {
                 .buttonStyle(PopopxPressButtonStyle())
                 .accessibilityIdentifier("popopx.cabin.mesh.openSettings")
             } else {
-                // 不可点的那一格只说话，不装成控件：一个档位，没有 chevron。勾只给"确实是好的"那一档 ——
-                // 给 `unknown` 画勾就是把"没读过"说成"读过了而且是好的"。
+                // The non-tappable cell only speaks and does not pose as a control: one tier and no chevron. The tick is given only to the tier that "really is healthy" —
+                // drawing a tick for `unknown` would be saying "not read yet" as "read, and it is fine".
                 VStack(alignment: .trailing, spacing: PopopxMetrics.space2XS) {
                     Text(verbatim: radioDiagnosisWords(state))
                         .font(PopopxType.meta)
@@ -2392,15 +2392,15 @@ private struct PopopxCabinMeshSettingsSheet: View {
         .popopxAnimation(PopopxSpring.fluid, value: state, reduceMotion: reduceMotion)
     }
 
-    /// 档位两个字直接引顶栏胶囊那一份词表，一个字的第三种说法都不在这里造。
+    /// The two words naming the tier cite the top-bar capsule's word table directly; a third way of saying anything is not invented here.
     private func radioDiagnosisWords(_ state: PopopxBluetoothState?) -> String {
         guard let state else { return Copy.radioUnknown }
         return PopopxDualStatusCapsule.words(for: state)
     }
 
-    /// 三句实话：好、要去系统设置里改、以及"这一次运行还没读到过任何读数"。最后这一档必须存在，
-    /// 因为总闸关着时模块 4 收不到任何射频事件，那一格只能停在它最后一次读到的值上 —— 说"未知"
-    /// 比替它编一个"蓝牙已关闭"诚实。
+    /// Three honest sentences: healthy, needing a change in the system settings, and "this run has not read any value yet". That last tier must exist,
+    /// because while the master switch is closed module 4 receives no radio events at all and that cell can only stay on the value it last read — saying "unknown"
+    /// is more honest than inventing a "Bluetooth is off" for it.
     private func radioDiagnosisNote(_ state: PopopxBluetoothState?) -> String {
         switch state {
         case nil: return Copy.radioDiagnosisPending
@@ -2411,12 +2411,12 @@ private struct PopopxCabinMeshSettingsSheet: View {
         }
     }
 
-    /// 射程内 / 经中继 / 最远跳：全部由页面已经折好的 `PopopxCabinNode` 现算，不再问任何 actor。
-    /// 判据与本页雷达与节点行完全同一份（`isReachable` 是模块 4 的 `PopopxPeerReachability` 结论）。
+    /// Within range / via relay / farthest hops: all computed on the spot from the `PopopxCabinNode` the page has already folded, without asking any actor again.
+    /// The criterion is exactly the same one used by this page's radar and node rows (`isReachable` is module 4's `PopopxPeerReachability` conclusion).
     private var onlineCount: Int { nodes.filter(\.isReachable).count }
     private var relayedCount: Int { nodes.filter { $0.isReachable && !$0.isDirect }.count }
     private var farthestHop: Int { nodes.filter(\.isReachable).map(\.hopCount).max() ?? 0 }
-    /// 跳数上限引配置常量，不写死 7（与本页 `relayHopCap` 同一出处）。
+    /// The hop ceiling cites the configuration constant instead of hard-coding 7 (the same origin as this page's `relayHopCap`).
     private var relayHopCap: Int { Int(PopopxMeshConfig.default.fragmentRelayTtlCap) }
 
     private func factRow(_ title: String, _ value: String) -> some View {
@@ -2431,9 +2431,9 @@ private struct PopopxCabinMeshSettingsSheet: View {
         }
     }
 
-    /// 熔断开关只是"意愿"。这一块写的是运行态：phase、真在跑的蓝牙/界面组件数、事件订阅数，
-    /// 全部来自 `PopopxMeshKillSwitch.verifiedActivitySnapshot()`（包里唯一的权威答案）。
-    /// 逐字承接「我」页原来那一块，事实来源与说法都没改。
+    /// The fuse switch only expresses "intent". This block writes the runtime state: phase, the number of Bluetooth/interface components actually running, the number of event subscriptions,
+    /// all from `PopopxMeshKillSwitch.verifiedActivitySnapshot()` (the one authoritative answer in the package).
+    /// Taken over verbatim from the block that used to sit on the "Me" page; neither the source of facts nor the wording changed.
     private var verificationBlock: some View {
         VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
             HStack(spacing: PopopxMetrics.space2XS) {
@@ -2461,7 +2461,7 @@ private struct PopopxCabinMeshSettingsSheet: View {
         .accessibilityLabel(Text(verbatim: Copy.verifyHeadline))
     }
 
-    /// 开关说的话与蓝牙真实状态的关系，全在这里说清楚：宁可写"仍在运行"也不粉饰。
+    /// The relation between what the switch says and Bluetooth's real state is spelled out entirely here: better to write "still running" than to dress it up.
     private var verifiedSentence: String {
         guard let snapshot else { return Copy.verifyPending }
         var text: String
@@ -2483,27 +2483,27 @@ private struct PopopxCabinMeshSettingsSheet: View {
         if let subscribers = snapshot.eventHubSubscribers {
             text += String(format: Copy.subscribersSuffixFormat, subscribers)
         }
-        // 磁盘开关说"开"而 phase 不是 on（或反过来）就是一次没走完的启停，也可能是崩在中间。
+        // The on-disk switch saying "on" while the phase is not on (or the reverse) is a start/stop that did not complete, and it may also be a crash in the middle.
         if snapshot.persistedSwitch != (snapshot.phase == .on) {
             text += Copy.mismatchSuffix
         }
         return text
     }
 
-    // MARK: 卡 3 · 离线数据与清除
+    // MARK: Card 3 · offline data and clearing
 
     private var dangerCard: some View {
         PopopxSectionCard(Copy.cardDanger, footnote: Copy.wipeDetail) {
-            // 按钮只做一件事：把二次确认抬起来。删除在那之后由宿主执行，结果由宿主的 toast 说。
-            // 这里不写"已清除"，也不在取消时说任何话；`PopopxButton` 那一下绿色回执是原子库按
-            // "这次 async 动作跑完了"给的，改不了（红线文件），而它被同一帧抬起来的确认框盖住。
+            // The button does one thing only: raise the second confirmation. The deletion is executed by the host afterwards, and the result is spoken by the host's toast.
+            // Nothing like "cleared" is written here, and nothing is said when the user cancels; that green receipt from `PopopxButton` is given by the atomic library as
+            // "this async action finished" (a red-line file, unchangeable), and it is covered by the confirmation dialog raised in the same frame.
             PopopxButton(Copy.wipeAction, systemImage: "trash", role: .destructive) {
                 confirmsWipe = true
             }
         }
     }
 
-    // MARK: 策略文案
+    // MARK: Policy copy
 
     private func policyTitle(_ policy: MeshPairingPolicy) -> String {
         switch policy {
@@ -2527,12 +2527,12 @@ private struct PopopxCabinMeshSettingsSheet: View {
     }
 }
 
-// MARK: - 时间
+// MARK: - Time
 
-/// 时间只有两种说法：气泡上的 `HH:mm`（模板与包内 plaza 一致）与说明行里的相对时间。
+/// Time has only two forms: the `HH:mm` on a bubble (the template matches the package's plaza) and the relative time in explanatory rows.
 private enum PopopxCabinClock {
-    /// 每次现建一个 formatter：`DateFormatter` 不是 `Sendable`，包内 `MeshPlazaView.clock(_:)`
-    /// （`MeshPlazaView.swift:448-453`）就是同样写法，这一页不把它变成 static 存属性。
+    /// A formatter is built fresh each time: `DateFormatter` is not `Sendable`, and the package's `MeshPlazaView.clock(_:)`
+    /// (`MeshPlazaView.swift:448-453`) is written the same way, and this page does not turn it into a static stored property.
     static func clock(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.setLocalizedDateFormatFromTemplate("HH:mm")
@@ -2541,9 +2541,9 @@ private enum PopopxCabinClock {
 
     private static func dated(_ date: Date) -> String {
         let formatter = DateFormatter()
-        // 模板一律写 locale 中性的 Unicode 模式（`MMM d HH:mm`），中文那档由
-        // `setLocalizedDateFormatFromTemplate` 自己排成「M月d日 HH:mm」。原先这里直接写
-        // `"M月d日 HH:mm"`：`月`/`日` 对 ICU 是字面量，于是英文档位也照样吐出中文来。
+        // The template is always written as a locale-neutral Unicode pattern (`MMM d HH:mm`), and for the Chinese tier
+        // `setLocalizedDateFormatFromTemplate` arranges the order itself. What used to be written here directly was
+        // a `"M<month>d<day> HH:mm"` pattern: to ICU those month and day characters are literals, so the English tier emitted them as Chinese as well.
         formatter.setLocalizedDateFormatFromTemplate("MMM d HH:mm")
         return formatter.string(from: date)
     }
@@ -2559,17 +2559,17 @@ private enum PopopxCabinClock {
         }
     }
 
-    /// 米说一遍：公里以上换单位，跟包内 `PopopxMeshReachEstimate.radius` 同一分界。
+    /// Say the metres once: above a kilometre the unit switches, using the same boundary as the package's `PopopxMeshReachEstimate.radius`.
     static func metres(_ value: Int) -> String {
         value >= 1_000 ? Copy.kilometresWords(Double(value) / 1_000) : Copy.metresWords(value)
     }
 }
 
-// MARK: - 图标徽章
+// MARK: - Icon badge
 
-/// `PopopxIconBadge` 是 `PopopxControls.swift:315` 里的 `private` 类型，页面外拿不到；
-/// 这里按同一套 token 逐字复刻（32pt 方块 / `radiusChip` / `microTag` + `imageScale(.medium)` / `.ink`），
-/// 不另立第三种画法。
+/// `PopopxIconBadge` is a `private` type at `PopopxControls.swift:315` and cannot be reached outside that file;
+/// The same set of tokens is replicated here verbatim (32pt square / `radiusChip` / `microTag` + `imageScale(.medium)` / `.ink`),
+/// and no third way of drawing it is established.
 @MainActor
 private struct PopopxIconBadgeView: View {
     let systemName: String
@@ -2588,12 +2588,12 @@ private struct PopopxIconBadgeView: View {
 
 // MARK: - Copy
 
-/// 这一页的每一句用户可见的话只在这里出现一次；源文是英文原句、原句就是 Key（约定见下面 `key(_:)`
-/// 那一节）。失败路径的每一条都有实话，穷尽三个枚举的全部 case。
+/// Every user-visible sentence on this page appears exactly once, here; the source text is an English original and the original is the Key (the convention is in the `key(_:)`
+/// section below). Every failure path has an honest sentence, exhausting all cases of the three enums.
 ///
-/// 带数字的句子一律走 `String(format:)`。参数次序与句子次序不一致时（`pageExplainer`、`radarLabel`
-/// 这几处）占位符写成位置的 `%1$lld` / `%2$lld`，译文把数字挪到句子里别的位置就只改序号、不改个数；
-/// 次序一致的直接写 `%lld` / `%@`，与 `PopopxTelemetryHeader.swift:625` 那条口径同一条。
+/// Sentences carrying numbers always go through `String(format:)`. Where the parameter order and the sentence order differ (`pageExplainer`, `radarLabel`
+/// and a few other places) the placeholders are written positionally as `%1$lld` / `%2$lld`, so a translation that moves a number elsewhere changes only the index, never the count;
+/// where the orders agree, plain `%lld` / `%@` is written, under the same convention as `PopopxTelemetryHeader.swift:625`.
 private enum Copy {
     static let tabTitle = key("Cabin")
     static let pageTitle = key("Cabin · Local Bluetooth")
@@ -2641,13 +2641,13 @@ private enum Copy {
     static let relayLink = key("Relayed")
     static func lastSeenWords(_ date: Date) -> String { String(format: key("Last heard %@"), PopopxCabinClock.since(date)) }
     static func rssiWords(_ value: Int) -> String { "\(value) dBm" }
-    /// 相对时间的四档。`PopopxCabinClock.since(_:)` 是它们唯一的调用者：那是个纯静态工具，够不着
-    /// `Text`，只能拿到已经译好的串，所以句子在这里成文、由它挑档。
+    /// The four tiers of relative time. `PopopxCabinClock.since(_:)` is their only caller: that is a pure static utility which cannot reach
+    /// `Text` and can only take an already-translated string, so the sentences are written here and it picks the tier.
     static let justNow = key("just now")
     static func secondsAgo(_ seconds: Int) -> String { String(format: key("%lld seconds ago"), seconds) }
     static func minutesAgo(_ minutes: Int) -> String { String(format: key("%lld minutes ago"), minutes) }
     static func hoursAgo(_ hours: Int) -> String { String(format: key("%lld hours ago"), hours) }
-    /// 距离两档：分界与包内 `PopopxMeshReachEstimate.radius` 同一条（公里以上换单位）。
+    /// The two distance tiers: the boundary is the same one as the package's `PopopxMeshReachEstimate.radius` (above a kilometre the unit switches).
     static func metresWords(_ value: Int) -> String { String(format: key("%lld metres"), value) }
     static func kilometresWords(_ value: Double) -> String { String(format: key("%.1f kilometres"), value) }
     static let outOfRangeMark = key("Out of reach")
@@ -2657,7 +2657,7 @@ private enum Copy {
 
     static let privateChatTitle = key("Bluetooth private chat")
 
-    // 大厅那一屏
+    // The hall screen
     static func hallChannel(_ posts: Int) -> String { String(format: key("#Cabin Hall · %lld posts"), posts) }
     static let hallFootnote = key("The flood is not encrypted and not acknowledged, and it never leaves Bluetooth reach; the same text relayed by several devices is still shown once.")
     static let hallEmptyHeadline = key("Nobody has spoken inside this reach yet.")
@@ -2666,8 +2666,8 @@ private enum Copy {
     static let composerField = key("Broadcast text")
     static let composerPrompt = key("Say something; it goes only to devices inside Bluetooth reach")
     static let broadcastSend = key("Broadcast")
-    /// 底栏只留这一句短提示：上一版的标题与脚注（`对这一屋子人喊话` / `超过 N 字的部分会被截断…`）
-    /// 已经随整张卡片一起撤下，"洪泛不确认"那条事实在上面那屏的 `hallFootnote` 里一直都在。
+    /// The bottom bar keeps only this one short hint: the previous version's title and footnote (`shout to everyone in this room` / `whatever passes N characters is truncated…`)
+    /// were withdrawn together with the whole card, and the fact "flooding is not acknowledged" has been in `hallFootnote` on the screen above all along.
     static let composerRadioOff = key("The radio is not usable right now")
     static func draftCount(_ current: Int, _ limit: Int) -> String { "\(current) / \(limit)" }
     static let fuseOffHeadline = key("The master switch is closed, so the hall is read-only")
@@ -2679,7 +2679,7 @@ private enum Copy {
     static func nicknameFootnote(_ fallback: String, _ limit: Int) -> String {
         String(format: key("It lives in the mesh sandbox folder and it is not a key; leave it empty to fall back to %@, and keep it under %lld characters. Changing it restarts the mesh on this device."), fallback, limit)
     }
-    /// 徽章永远带数字（§1.4 第 3 条）；0 跳就是本机持有这条链路，把「直连」一起写出来。
+    /// The badge always carries the number (§1.4 rule 3); 0 hops means this device holds the link, so "direct" is written out too.
     static func hopsWords(_ hops: Int) -> String { hops == 0 ? key("0 hops · direct") : String(format: key("%lld hops"), hops) }
     static func radarOverflow(_ total: Int, _ drawn: Int) -> String {
         String(format: key("The radar draws only %2$lld dots on this screen; the %1$lld rows below still list every one of them."), total, drawn)
@@ -2688,23 +2688,23 @@ private enum Copy {
         String(format: key("%1$@, received on hop %2$lld: %3$@"), author, hops, text)
     }
 
-    // 大厅气泡上的说话人菜单。2026-11-20 真机第 2 轮起转 Key：这四处是本轮新增的动作，红线四要求
-    // 新增文案全语种落地，所以它们不再走文件头"本页其余字面量是 Phase 4 中文直写"那条豁免。
+    // The speaker menu on a hall bubble. Keyed since device round 2 on 2026-11-20: these four are actions added in this round, and red line four requires
+    // new copy to land in every language, so they no longer take the file header's exemption "the remaining literals on this page are Phase 4 Chinese written directly".
     static let authorChat = key("Initiate an offline Bluetooth chat")
     static let authorPair = key("Send a face-to-face or offline friend request")
-    /// 只带线 id、公钥还没解析出来的那一档：两条动作都 disabled，这一句就是它的原因。
+    /// The tier that carries only the line id with the public key not yet parsed: both actions are disabled, and this sentence is the reason.
     static let authorNoKey = key("This device has not resolved this peer's mesh key yet; both actions need it first")
     static let authorMenuHint = key("Open this person's offline actions")
 
-    // 本地加密频道
+    // The local encrypted channel
     static func channelListTitle(_ count: Int) -> String { String(format: key("Private chats established · %lld"), count) }
     static func channelFootnote(_ fuseOn: Bool) -> String {
         fuseOn
             ? key("One channel = this device has a row for it in the binding table, or the pairing state reports paired. Tap a row to go straight into the Bluetooth private chat.")
             : key("While the master switch is closed the binding table is not read and no channel is listed.")
     }
-    /// 原文里那个「1–7」是 `nearbyTitle(hopCap)` 抄下来的第二份数字：跳数上限一改它就说谎，
-    /// 而这一屏拿不到 hopCap。指名字不抄数字。
+    /// The `1–7` in the original text was a second copy of the number transcribed from `nearbyTitle(hopCap)`: change the hop ceiling and it starts lying,
+    /// and this screen cannot reach hopCap. Name the identifier, do not copy the number.
     static func channelEmpty(_ fuseOn: Bool) -> String {
         fuseOn
             ? key("This device has no encrypted channel with any Bluetooth neighbour yet. Tap a device in the nearby list and it sends an offline pairing invitation first.")
@@ -2716,7 +2716,7 @@ private enum Copy {
     static let pendingRow = key("Pairing requests received")
     static func pendingValue(_ count: Int) -> String { count == 0 ? key("None") : String(format: key("%lld waiting"), count) }
     static let pendingFootnote = key("This reads the same pairing state as the banner at the top of the page, so the two places see each other's decision.")
-    /// 与 `pendingRow` 同一句 Key（原文两处本来就是同一句话），不是第二个词条。
+    /// The same Key as `pendingRow` (the two places were the identical sentence in the original text), not a second entry.
     static let pendingSheetTitle = key("Pairing requests received")
     static let pendingSheetSubtitle = key("Accepting is what binds this mesh key as an offline contact; declining keeps this device quiet about the peer for 60 seconds.")
     static let pendingSheetEmpty = key("Nothing is waiting for your decision right now.")
@@ -2728,19 +2728,19 @@ private enum Copy {
     static let approveToast = key("Pairing accepted; the peer is now an offline contact")
     static let declineToast = key("This pairing request was declined")
 
-    // 动作回执
+    // Action receipts
     static func pairingSentToast(_ label: String) -> String { String(format: key("Offline pairing invitation sent to %@"), label) }
     static func noKeyToast(_ label: String) -> String { String(format: key("%@ has no resolved mesh key yet, so this device cannot start a private chat with it"), label) }
     static let fuseOffToast = key("The Cabin master switch is closed, so nothing goes out over Bluetooth")
     static let nicknameSavedToast = key("The nickname was written into this device's mesh sandbox")
 
-    /// VoiceOver 那一行是把三段既有说法串起来的，串法本身也是句子：分隔符交给译本，不硬写全角逗号。
+    /// The VoiceOver line concatenates three existing statements, and the concatenation itself is a sentence too: the separator is left to the translations, and a full-width comma is not hard-written.
     static func rowLabel(_ name: String, _ detail: String, _ relationship: String?) -> String {
         if let relationship { return String(format: key("%1$@, %2$@, %3$@"), name, detail, relationship) }
         return String(format: key("%1$@, %2$@"), name, detail)
     }
 
-    /// 射频六态，穷尽 `PopopxBluetoothState`。
+    /// The six radio states, exhausting `PopopxBluetoothState`.
     static func radioWords(_ state: PopopxBluetoothState) -> String {
         switch state {
         case .unknown: return key("Bluetooth status unknown")
@@ -2752,7 +2752,7 @@ private enum Copy {
         }
     }
 
-    /// 配对四态，穷尽 `MeshPairingState`。
+    /// The four pairing states, exhausting `MeshPairingState`.
     static func pairingStateWords(_ state: MeshPairingState) -> String {
         switch state {
         case .unlinked: return key("Not paired")
@@ -2762,8 +2762,8 @@ private enum Copy {
         }
     }
 
-    /// 洪泛失败六态，穷尽 `PopopxMeshSendFailure`（包内 `MeshPlazaView.words(for:)` 是 internal，
-    /// 这一处够不着它，说的仍是同一批事实）。
+    /// The six flooding failure states, exhausting `PopopxMeshSendFailure` (the package's `MeshPlazaView.words(for:)` is internal,
+    /// and this place cannot reach it, but it still states the same batch of facts).
     static func broadcastWords(for failure: PopopxMeshSendFailure) -> String {
         switch failure {
         case .noLinkToPeer: return key("No link to use: no device inside reach picked this broadcast up")
@@ -2776,8 +2776,8 @@ private enum Copy {
         }
     }
 
-    /// 建联九态全给出路，穷尽 `PopopxPairingError`。`requestUnknown` / `requestSuperseded` 只有
-    /// `approve` 会抛（`ManualPairingManager.swift:189-215`），发邀请那条路只会遇到前七种。
+    /// All nine connection states are given an exit, exhausting `PopopxPairingError`. `requestUnknown` / `requestSuperseded` are thrown only by
+    /// `approve` (`ManualPairingManager.swift:189-215`), and the invitation-sending path only ever meets the first seven.
     static func pairingWords(for error: PopopxPairingError, label: String) -> String {
         switch error {
         case .peerKeyRejected:
@@ -2801,65 +2801,65 @@ private enum Copy {
         }
     }
 
-    // MARK: 顶栏入口与离线组网设置中心
+    // MARK: Top-bar entries and the offline mesh settings centre
     //
-    // 上面这一段在本轮之前还是中文直写字面量（Phase 4 那一版的写法），现在整段转成了 Key：这一屏的
-    // 源文与 Key 同句，屏面上不再有一个中文字符（口径见文件头那两条）。从这里起是更早几轮新增的入口
-    // 与设置中心，写法本来就已经是 Key。`en.lproj` 按约定不写（读不到词条就回落 Key 本身，那就是英文）。
-    // 从「我」页整块迁来的那几行刻意复用「我」页早已发布的同一批 Key：同一个 Key 由目录里已有的
-    // 译法决定说法，两处永远同一句，这也是这次迁移唯一能保证「摘掉的那行与留下的那行说的是同一件事」的办法。
+    // The section above was still hard-written Chinese literals before this round (the Phase 4 way of writing), and now the whole section is turned into Keys: this screen's
+    // source text and Key are the same sentence, and no Chinese character remains on the screen (the conventions are the two in the file header). From here on it is the entries added
+    // in earlier rounds plus the settings centre, whose writing was already Keys. `en.lproj` is not written by convention (a missing entry falls back to the Key itself, which is English).
+    // The rows migrated wholesale from the "Me" page deliberately reuse the same Keys the "Me" page published long ago: one Key whose wording is decided by the translation already in
+    // the catalogue means the two places always say the same sentence, and that is the only way this migration can guarantee "the row removed and the row left behind state the same thing".
     private static func key(_ value: String) -> String {
         NSLocalizedString(value, comment: "POPOPX cabin offline mesh settings")
     }
 
-    /// 顶栏左上角那一枚。2026-11-20 真机第 3 轮起它不再是大厅；第 5 轮起它进包内广场页。
-    /// 旧的提示句（`Lists the devices within Bluetooth reach…`，说的是那一屏两张卡）Swift 引用为 0，
-    /// 随本轮从 16 个目录里删掉；发现页那三条（建群入口、成员数、群脚注）同批删除。
+    /// The top-left capsule of the top bar. Since device round 3 on 2026-11-20 it is no longer the hall; since round 5 it enters the package's plaza page.
+    /// The old hint sentence (`Lists the devices within Bluetooth reach…`, which described that screen's two cards) has 0 Swift references,
+    /// and was deleted from the 16 catalogues in this round; the three discovery-page entries (create-group entry, member count, group footnote) were deleted in the same batch.
     static let discoveryEntry = key("Discover")
     static let plazaEntryHint = key("Opens the nearby square: the broadcast stream and the nodes within Bluetooth reach")
-    /// 「厢语」根那一屏左上角那一枚：面上只有两个字（面板的名字就是这一栏的名字，复用 `Copy.tabTitle`，
-    /// 不另造第三种说法），这一句把它实际开出来的东西说全。抽屉的收起键同理只用既有那句「关闭」。
-    /// 品牌词按既有口径写英文 Cabin：第 10 轮起「厢语」不再出现在任何 Key 的源文里 —— Key 里夹中文，
-    /// `en` 那一档读到的是没译过的字，16 个目录里也没人能照着一条中英混排的 Key 写译法。
-    /// 底栏那一格（`MainTabView.swift:230`，本轮没动、也不归本文件）是另一码事。
+    /// The top-left capsule on the "Cabin" root screen: only two characters on its face (the panel's name is this tab's name, reusing `Copy.tabTitle`
+    /// instead of inventing a third way of saying it), and this sentence spells out what it actually opens. The drawer's dismiss key likewise uses only the existing "Close".
+    /// Brand words write Cabin in English per the existing convention: from round 10 the Chinese tab name no longer appears in the source text of any Key — with Chinese inside a Key,
+    /// the `en` tier reads characters that were never translated, and nobody in the 16 catalogues can write a translation against a Key that mixes two languages.
+    /// The bottom-bar cell (`MainTabView.swift:230`, untouched this round and not this file's business) is a different matter.
     static let cabinPanelEntryHint = key("Opens the Cabin panel: the master switch, the channels and the nearby nodes")
-    /// 顶栏左上角那枚返回键的 VoiceOver 说法（屏面上只有图标，一个字都不占宽度）。这一栏全屏沉浸之后
-    /// 它就是这一栏唯一的出口，所以这一句说的是去处，不是动作方向。
+    /// The VoiceOver wording of the top-left back key (the screen shows only an icon, taking up not one character of width). After this tab went full-screen immersive
+    /// it is this tab's only exit, so this sentence states the destination rather than the direction of the action.
     static let backToMessages = key("Back to messages")
-    /// 与 `PopopxAddFriendView.swift:718` 同一个 Key：两个入口的标题因此必然是同一句。
+    /// The same Key as `PopopxAddFriendView.swift:718`: the titles of the two entries are therefore necessarily the same sentence.
     static let plazaTitle = key("Nearby mesh plaza")
     static let meshSettingsEntry = key("Offline mesh settings")
-    /// 顶栏两枚胶囊屏面上那几个短词。两条都是**既有 Key**（`Groups`、`Settings` 在 16 个目录里早就有
-    /// 译法，口径同 `PopopxMeView.swift` 那一处 "Settings"），本轮不新增词条：胶囊只放得下一个词，
-    /// 完整说法在 VoiceOver 里 —— 左那枚读 `.accessibilityLabel(meshGroupsHint)`、右那枚读
-    /// `.accessibilityLabel(meshSettingsEntry)`，设置中心表头仍是全句那一条。宽度账见
-    /// `meshDiscoveryEntry` 上面那一段。
+    /// The short words on the faces of the two top-bar capsules. Both are **existing Keys** (`Groups` and `Settings` already have
+    /// translations in the 16 catalogues, with the same convention as that "Settings" in `PopopxMeView.swift`), so this round adds no new entry: the capsule fits only one word,
+    /// and the full statement is in VoiceOver — the left one reads `.accessibilityLabel(meshGroupsHint)` and the right one reads
+    /// `.accessibilityLabel(meshSettingsEntry)`, while the settings-centre header is still the full sentence. The width accounting is in
+    /// the paragraph above `meshDiscoveryEntry`.
     static let groupsPill = key("Groups")
     static let meshSettingsPill = key("Settings")
     static let meshRowOn = key("Fuse is open")
     static let meshRowFusedOff = key("Closed by the fuse")
-    /// 大厅右上角那一枚开关。它开与关的是主页面已有的那一屏，不是第二份清单，所以话只说这一层。
+    /// The top-right capsule of the hall. What it switches is the screen the main page already has, not a second list, so the wording says only that layer.
     static let discoveryMode = key("Discovery mode")
     static let discoveryHint = key("Shows or hides the nearby radar and its node list above the hall")
     static let groupsRow = key("Offline groups")
-    /// 左上角那一枚「发现」的无障碍说明：说清这一按下去的是周边蓝牙 Mesh 群组，不是公网频道。
+    /// The accessibility hint of the top-left "Discover" capsule: make clear that what this opens is nearby Bluetooth Mesh groups, not public-internet channels.
     static let meshGroupsHint = key("Discover nearby groups and channels over the Bluetooth mesh")
     static func groupsValue(_ groups: Int) -> String { String(format: key("%lld groups"), groups) }
-    /// 复用既有词条：这两个 Key 在 16 个目录里都已经有译法（「我」页那一串开关用的就是它们）。
+    /// Reusing existing entries: both Keys already have translations in the 16 catalogues (the "Me" page's row of switches uses precisely them).
     static let switchOn = key("Turned on")
     static let switchOff = key("Turned off")
     static let sheetSubtitle = key("The switch, the pairing policy, this device's mesh identity and the data it keeps, in one place.")
-    /// 复用既有词条：这个 Key 在 16 个目录里都已经有译法（口径同 `PopopxMeView.swift` 的 `"Settings"`）。
+    /// Reusing an existing entry: this Key already has a translation in all 16 catalogues (the same convention as `PopopxMeView.swift`'s `"Settings"`).
     static let cancel = NSLocalizedString("Cancel", comment: "Cabin: cancelling the offline mesh wipe")
 
     static let cardSwitch = key("Mesh switch and pairing")
     static let meshFootnote = key("Closing the master switch stops Bluetooth scanning, advertising and relaying all at once; the other rows on this page stay readable but start no Bluetooth object.")
     static let fuseRow = key("Offline mesh master switch")
-    /// 总开关那行的副标题随熔断改写。静态那一句"关闭即熔断"由上面这张卡的脚注说，两处分文不重复占格。
+    /// The subtitle of the master-switch row rewrites itself with the fuse. The static sentence "closing it is the fuse" is stated by this card's footnote above, so the two halves do not repeat into the same cell.
     static let fuseRowNoteOn = key("Running: Bluetooth scanning, advertising and relaying are all live on this device.")
     static let fuseRowNoteOff = key("Closed by the fuse: every mesh component stopped together and Bluetooth is scanning nothing.")
     static let pairingPolicy = key("Nearby pairing policy")
-    /// 配对策略的解释句：原「我」页与「全部设置」页那张策略 Sheet 的副标题，同一个 Key，同一句译法。
+    /// The explanation of the pairing policy: the subtitle of the policy sheet on the original "Me" page and the "All settings" page, the same Key, the same translated sentence.
     static let pairingSheetSubtitle = key("Decides whether a nearby device's Bluetooth pairing needs your confirmation.")
     static let privacyRecordsRow = key("Offline mesh privacy and pairings")
     static let policyManual = key("Ask me before pairing")
@@ -2867,7 +2867,7 @@ private enum Copy {
     static let policyAuto = key("Pair silently")
     static let policyAutoNote = key("Pairing completes on its own once the private Bluetooth session is up, without asking.")
 
-    // 射频与权限诊断（本轮新增的唯一一行：读数只有一个来源，档位用词复用顶栏胶囊那一份词表）
+    // Radio and permissions diagnostic (the only row added this round: the reading has one source, and the tier wording reuses the top-bar capsule's word table)
     static let radioDiagnosisRow = key("Bluetooth permission and radio")
     static let radioOpenSettings = key("Open Settings")
     static let radioUnknown = key("Not read yet")
@@ -2911,20 +2911,20 @@ private enum Copy {
 // MARK: - Previews
 
 #if DEBUG
-// mesh 的类型（`PopopxMeshPeer`、`PopopxPeerReachability`）没有 public init，伪造不出数据；
-// 下面每个预览都挂真单例，`bootstrap()` 就是 `Shared/POPOPXApp.swift` 启动时走的那条路径。
+// The mesh types (`PopopxMeshPeer`, `PopopxPeerReachability`) have no public init, so fake data cannot be produced;
+// every preview below mounts the real singletons, and `bootstrap()` is the very path `Shared/POPOPXApp.swift` takes at launch.
 struct PopopxCabinView_Previews: PreviewProvider {
     static var previews: some View {
-        // 栈由本页自己持有（文件头决定 4），这里再包一层就是第二个栈，`path.append` 会推到错的上面去。
+        // The stack is held by this page itself (decision 4 in the file header), and wrapping another layer here would be a second stack, onto which `path.append` would push.
         PopopxCabinView()
             .task { await PopopxMeshRuntime.shared.bootstrap() }
     }
 }
 
-// Reduce Motion 那条预览删了：`EnvironmentValues.accessibilityReduceMotion` 在这个 SDK 里是只读的
-// （SwiftUICore.swiftinterface:23758 `public var … : Bool { get }`），`.environment(\.…)` 要的是
-// WritableKeyPath，写不进去，也没有受支持的替身。本页三处雷达/徽章动效都读同一个环境值
-// （:127、:690、:856），要验证静态雷达就把系统的开关打开：设置 → 辅助功能 → 动态效果 → 减少动态效果。
+// The Reduce Motion preview was deleted: `EnvironmentValues.accessibilityReduceMotion` is read-only in this SDK
+// (SwiftUICore.swiftinterface:23758 `public var … : Bool { get }`), and `.environment(\.…)` wants a
+// WritableKeyPath, so it cannot be written, and there is no supported substitute. This page's three radar/badge animations all read the same environment value
+// (:127, :690, :856); to verify the static radar, turn the system switch on: Settings → Accessibility → Motion → Reduce Motion.
 
 struct PopopxCabinHallView_Previews: PreviewProvider {
     static var previews: some View {

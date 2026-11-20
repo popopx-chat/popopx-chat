@@ -1,36 +1,36 @@
 //  PopopxCreditsManager.swift
 //
-//  POPOPX 算力点（Compute Credits）：钱包、流水、防重放，以及六个消费场景。
+//  POPOPX Compute Credits: wallet, ledger, replay protection, and the six spending scenarios.
 //
-//  ### 余额是真账，流水是历史窗口
-//  `PopopxCreditsWallet.balance` 是花钱时唯一依据的数；`PopopxCreditsEntry` 那条队列有上限
-//  （`maximumLedgerEntries` = 240），满了就丢最旧的。于是"用流水求和校验余额"只在
-//  队列没满时成立。`reconcileOnLoad()` 按这条区分处理：
-//  - 队列不满（历史完整）而对不上 → 以流水求和为准改写余额，这是唯一能自愈的情形；
-//  - 队列已满而对不上 → 只置 `needsReconcile`，绝不改写余额。
-//  静默把一段被截断的历史当成真账来"修正"余额，是最容易把用户余额清零的那种自动修复。
+//  The balance is the real account; the ledger is a history window
+//  `PopopxCreditsWallet.balance` is the only number spending ever relies on; the `PopopxCreditsEntry` queue has a cap
+//  (`maximumLedgerEntries` = 240) and drops the oldest when full. So "verify the balance by summing the ledger" only
+//  holds while the queue is not full. `reconcileOnLoad()` handles the two cases apart:
+//  - queue not full (history complete) yet mismatched → rewrite the balance from the ledger sum, the only self-healing case;
+//  - queue full and mismatched → only set `needsReconcile`, never rewrite the balance.
+//  Silently "correcting" the balance by treating a truncated history as the real account is the kind of auto-repair most likely to zero out a user's balance.
 //
-//  ### 记账写入的顺序（这不是风格问题）
-//  收入方向：判重放 → 改余额并落盘 → 记流水 → 写防重放标记 → `finish` 交易。
-//  支出方向：判余额 → 改余额并落盘 → 记流水。
-//  共同点是把"钱的变化"放在第一步落盘、把"标记/历史"放在后面，因为两头的坏情况不对称：
-//  标记先落而余额没落 = 交易被 finish 或用户重试时判成"已入账"，钱永久丢了；
-//  余额先落而标记没落 = 重试时多入一次账，但交易仍未 finish，StoreKit 会再投一次，
-//  而那一条路径上的判重是在 `hasCredited` 上——它此时还没写。所以真正的护栏是
-//  "未 finish 的交易会重投"+"主 actor 串行"，因此标记必须写在余额之后、`finish` 之前，
-//  并且这个类的所有入口都在 `@MainActor` 上（不存在并发重入）。
+//  The order of ledger writes (this is not a style question)
+//  Income direction: judge replay → change the balance and persist → record the ledger → write the replay-protection marker → `finish` the transaction.
+//  Expense direction: judge the balance → change the balance and persist → record the ledger.
+//  The common point is persisting "the money change" as the first step and putting "markers/history" after it, because the bad cases on the two ends are asymmetric:
+//  marker persisted before the balance = when the transaction gets finished or the user retries, it is judged "already credited" and the money is lost forever;
+//  balance persisted before the marker = a retry credits one extra time, but the transaction is still not finished, StoreKit will re-deliver,
+//  and the dedup check on that path is on `hasCredited` — which has not been written at that point. So the real guardrail is
+//  "unfinished transactions get re-delivered" + "main-actor serialization", therefore the marker must be written after the balance and before `finish`,
+//  and every entry point of this class is on the `@MainActor` (concurrent re-entry does not exist).
 //
-//  ### 严格等额，零赠送
-//  充值包入账只认 `PopopxNodeBadgeSku.creditedAmount`（100 / 500 / 2000），
-//  没有任何倍率、首日加成、"额外赠送"。国内促销条款与苹果 3.1.1 的等额性两头都踩在同一处，
-//  所以这条是硬约束而不是文案偏好；`PopopxCommerceCopy.noGiftBackStatement` 是它在 UI 上的唯一表述。
+//  Strictly equal value, zero gifting
+//  Top-up pack crediting only honors `PopopxNodeBadgeSku.creditedAmount` (100 / 500 / 2000);
+//  there is no multiplier, no first-day bonus, no "extra gift". Domestic promotional terms and Apple's 3.1.1 equal-value rule both press on the same point,
+//  so this is a hard constraint rather than a copy preference; `PopopxCommerceCopy.noGiftBackStatement` is its only expression in the UI.
 //
-//  ### 随机金额红包不存在
-//  红包只允许固定面额（`PopopxCommerceLimits.redPacketAmounts`）与**均分**，
-//  领取时按 `amountPerRecipient` 逐份入账。随机金额=带赌博属性，那一档在本特性里从类型层面就没有入口：
-//  `sendRedPacket` 不收金额参数以外的自由度，面额判据在 `PopopxRedPacketPayload` 解析端还会再判一次。
+//  Random-amount red packets do not exist
+//  Red packets allow only fixed denominations (`PopopxCommerceLimits.redPacketAmounts`) and **even splits**;
+//  on claim, each share is credited per `amountPerRecipient`. Random amounts = gambling-like mechanics, and that tier has no entry even at the type level in this feature:
+//  `sendRedPacket` accepts no degrees of freedom beyond the amount parameters, and the denomination check runs once more at the `PopopxRedPacketPayload` parsing end.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. A red line forbids scripts from modifying project.pbxproj.
 
 import Foundation
 import os
@@ -43,7 +43,7 @@ final class PopopxCreditsManager {
     private(set) var wallet = PopopxCreditsWallet(version: PopopxCreditsWallet.currentVersion, balance: 0, updatedAtMs: 0, needsReconcile: false)
     private(set) var ledger: [PopopxCreditsEntry] = []
     private(set) var replay = PopopxReplayGuard()
-    /// 发送方持有的未领完红包（用于校验 ACK、退款）。
+    /// Red packets held by the sender that are not fully claimed (for ACK verification and refunds).
     private(set) var pendingPackets: [PopopxPendingRedPacket] = []
     private(set) var channelTickets: [PopopxChannelSubscriptionTicket] = []
     private(set) var profileReceipts: [PopopxProfileUnlockReceipt] = []
@@ -58,9 +58,9 @@ final class PopopxCreditsManager {
 
     var balance: Int { wallet.balance }
 
-    // MARK: 载入
+    // MARK: loading
 
-    /// 从 Keychain 恢复全部状态。幂等，可在任何入口调用。
+    /// Restores all state from the Keychain. Idempotent; callable from any entry point.
     func loadIfNeeded() {
         guard !loaded else { return }
         loaded = true
@@ -75,7 +75,7 @@ final class PopopxCreditsManager {
         reconcileOnLoad()
     }
 
-    /// 由 app 启动路径调用：接住充值包与礼品卡收据的交付。
+    /// Called from the app launch path: catches the delivery of top-up pack and gift card receipts.
     func start() async {
         guard deliveryToken == nil else { return }
         loadIfNeeded()
@@ -92,23 +92,23 @@ final class PopopxCreditsManager {
         }
     }
 
-    // MARK: 对账
+    // MARK: reconciliation
 
     private func reconcileOnLoad() {
         guard ledger.count < PopopxCommerceLimits.maximumLedgerEntries else { return }
         let sum = ledger.reduce(0) { $0 + $1.amount }
         guard sum != wallet.balance else { return }
-        // 先取差值再改写：写在后面就永远打印 0，那行日志等于自毁证据。
+        // Take the difference before rewriting: writing it afterwards would forever print 0, and that log line would destroy its own evidence.
         let delta = sum - wallet.balance
-        // 历史完整却对不上：以流水为准，并把这一条写在日志里（不是屏幕上）。
-        // 走到这里通常意味着上一次写盘被中断，或者用户装过修改余额的工具。
+        // History complete yet mismatched: the ledger is the authority, and this fact is written into the log (not onto the screen).
+        // Reaching here usually means the last persist was interrupted, or the user installed a tool that modifies balances.
         wallet.balance = max(0, min(sum, PopopxCommerceLimits.maximumCreditBalance))
         wallet.needsReconcile = false
         log.info("credits: balance rebuilt from a complete ledger; delta was \(delta)")
         _ = saveWallet()
     }
 
-    /// 详情页的"重新检查"：余额与流水对不上且历史被截断时才置标记。
+    /// The detail page's "re-check": the marker is set only when the balance and the ledger disagree and the history was truncated.
     func verifyLedgerConsistency() {
         loadIfNeeded()
         guard ledger.count >= PopopxCommerceLimits.maximumLedgerEntries else { return }
@@ -117,9 +117,9 @@ final class PopopxCreditsManager {
         _ = saveWallet()
     }
 
-    // MARK: 记账原语
+    // MARK: ledger primitives
 
-    /// 收入。`amount` 必须为正；上限判据在这里，任何调用方都绕不过去。
+    /// Income. `amount` must be positive; the upper-bound check lives here, and no caller can route around it.
     @discardableResult
     private func credit(_ amount: Int, kind: PopopxCreditsEntryKind, note: String, entryId: String? = nil) throws -> PopopxCreditsEntry {
         loadIfNeeded()
@@ -146,7 +146,7 @@ final class PopopxCreditsManager {
         )
     }
 
-    /// 支出。`amount` 传正数，符号由 `kind.sign` 决定，所以一笔钱的正负在工程里只有一个来源。
+    /// Expense. `amount` is passed as a positive number and the sign is decided by `kind.sign`, so an amount's polarity has exactly one source in the whole project.
     @discardableResult
     private func debit(_ amount: Int, kind: PopopxCreditsEntryKind, note: String, entryId: String? = nil) throws -> PopopxCreditsEntry {
         loadIfNeeded()
@@ -190,15 +190,15 @@ final class PopopxCreditsManager {
     private func saveProfileReceipts() { _ = PopopxCommerceKeychain.encode(profileReceipts, .profileReceipts) }
     private func saveCosmetics() { _ = PopopxCommerceKeychain.encode(Array(ownedCosmetics), .cosmetics) }
 
-    // MARK: 收据入账（StoreKit 交付）
+    // MARK: receipt crediting (StoreKit delivery)
 
-    /// 只处理充值包与礼品卡两类 SKU；订阅类由 `PopopxBadgeManager` 负责，这里一次都不碰徽章。
+    /// Handles only the top-up pack and gift card SKU families; subscription SKUs are `PopopxBadgeManager`'s responsibility, and badges are never touched here.
     func apply(storeReceipt receipt: PopopxStoreReceipt) async {
         loadIfNeeded()
         guard let sku = receipt.sku else { return }
         if receipt.isRevoked {
-            // 退款的算力点必须追溯（那是没花掉的余额）；已经花掉的部分不追回，
-            // 记录一条 `adjustment` 说明原因，而不是悄悄改数字。
+            // Refunded credits must be clawed back (that is unspent balance); what has already been spent is not chased,
+            // and one `adjustment` entry records the reason instead of silently changing numbers.
             await clawBack(receipt)
             return
         }
@@ -208,8 +208,8 @@ final class PopopxCreditsManager {
         }
         switch sku.kind {
         case let .credits(amount):
-            // 失败就不 finish：`Transaction.unfinished` 会重投，钱还在 Apple 手里，
-            // 这比"扣了钱什么都没得到"或"什么都没得到但交易已结"都体面。
+            // On failure nothing is finished: `Transaction.unfinished` re-delivers, the money is still in Apple's hands,
+            // which is more decent than either "money charged, nothing received" or "nothing received but the transaction closed".
             do {
                 _ = try credit(amount, kind: .storePurchase, note: PopopxCreditsCopy.purchasedPack(amount), entryId: receipt.digest)
             } catch {
@@ -217,8 +217,8 @@ final class PopopxCreditsManager {
                 return
             }
         case let .giftCard(period):
-            // 礼品卡是"付钱买券"，钱由 Apple 收，本端不碰余额——这里绝不做任何 debit。
-            // 铸券失败与充值包失败同理：不 finish，等重投。
+            // A gift card is "paying for a voucher"; Apple collects the money and this end does not touch the balance — no debit is ever done here.
+            // A failed voucher mint follows the same rule as a failed top-up: do not finish, wait for re-delivery.
             do {
                 _ = try await PopopxP2PVoucherVault.shared.mint(period: period, quantity: 1, source: .receipt(receipt))
             } catch {
@@ -226,9 +226,9 @@ final class PopopxCreditsManager {
                 return
             }
         case .subscription, .oneTimePass:
-            // 订阅由 `PopopxBadgeManager` 的交付回调点亮；一次性时长包由付费墙那一侧当场点亮
-            // （它不经券、也不动余额，本函数一格都不该碰）。两处都挂同一个流，
-            // 各自只认自己那一族 SKU，所以一笔收据只会被一个管理者落账。
+            // Subscriptions are lit up by `PopopxBadgeManager`'s delivery callback; one-off duration packs are lit up on the spot by the paywall side
+            // (it goes through no voucher and moves no balance; this function should not touch it at all). Both attach to the same stream,
+            // each recognizing only its own SKU family, so one receipt is ever credited by exactly one manager.
             return
         }
         replay.credit(transactionHash: receipt.digest)
@@ -236,7 +236,7 @@ final class PopopxCreditsManager {
         await PopopxStoreKitManager.shared.finish(receipt)
     }
 
-    /// 退款追溯：从余额里扣回那笔入账，扣不完就扣到零，并留一条 `adjustment`。
+    /// Refund clawback: deduct that credited amount back out of the balance; if it cannot be fully recovered, deduct down to zero, and leave an `adjustment` entry.
     private func clawBack(_ receipt: PopopxStoreReceipt) async {
         guard let sku = receipt.sku, let amount = sku.creditedAmount,
               ledger.contains(where: { $0.id == receipt.digest })
@@ -262,10 +262,10 @@ final class PopopxCreditsManager {
         log.info("credits: clawed back a refunded pack")
     }
 
-    // MARK: 场景一 · 算力点兑换徽章
+    // MARK: scenario 1 · exchanging credits for a badge
 
-    /// 600 点 / 30 天，4500 点 / 365 天。先扣点、后点亮：
-    /// 点亮失败时点数原样退回，避免"点花了、徽章没亮"这种两头不认的状态。
+    /// 600 points / 30 days, 4500 points / 365 days. Deduct the points first, light up afterwards:
+    /// if lighting up fails, the points are refunded as they were, avoiding the nobody-owns-it state of "points spent, badge not lit".
     func exchangeCreditsForBadge(period: PopopxNodeBadgePeriod) throws {
         loadIfNeeded()
         let entry = try debit(period.creditsCost, kind: .badgeExchange, note: PopopxCreditsCopy.badgeExchange(period))
@@ -277,10 +277,10 @@ final class PopopxCreditsManager {
         }
     }
 
-    // MARK: 场景二 · 算力点兑换礼品卡券
+    // MARK: scenario 2 · exchanging credits for a gift card voucher
 
-    /// 扣点成功后才铸券；铸券失败立刻退点。券的码由 `PopopxSilentSignalingRouter` 现铸，
-    /// 本函数只负责"这张券值不值钱"。
+    /// The voucher is minted only after the deduction succeeds; a failed mint refunds the points immediately. The voucher's code is freshly minted by `PopopxSilentSignalingRouter`;
+    /// this function only governs "whether this voucher is worth anything".
     func exchangeCreditsForVoucher(period: PopopxNodeBadgePeriod, quantity: Int) async throws -> [PopopxNodeVoucher] {
         loadIfNeeded()
         let total = period.creditsCost * max(1, quantity)
@@ -294,13 +294,13 @@ final class PopopxCreditsManager {
         }
     }
 
-    // MARK: 场景三 · 算力点红包（固定面额、均分）
+    // MARK: scenario 3 · credit red packets (fixed denominations, even split)
 
-    /// 发一个红包：一次扣全额，逐份领取时才真正落到对方账上，
-    /// 本端留下 `PopopxPendingRedPacket` 用于对账与退款。
+    /// Send a red packet: the full amount is deducted in one go, and it only truly lands on the other party's account share by share as they claim;
+    /// this side keeps a `PopopxPendingRedPacket` for reconciliation and refunds.
     ///
-    /// `recipientCount` 是**均分份数**：`amount` 必须能被它整除，否则这份红包在类型层面就造不出来——
-    /// 与其在领取时出现"最后一份多一块"的舍入，不如在发送时就拒绝这个组合。
+    /// `recipientCount` is the **number of even shares**: `amount` must divide cleanly by it, otherwise this red packet cannot even be constructed at the type level —
+    /// better to reject this combination at send time than to face a "one extra in the last share" rounding at claim time.
     func sendRedPacket(amount: Int, recipientCount: Int, note: String) throws -> PopopxPendingRedPacket {
         loadIfNeeded()
         guard PopopxCommerceLimits.redPacketAmounts.contains(amount),
@@ -326,8 +326,8 @@ final class PopopxCreditsManager {
         return packet
     }
 
-    /// 领一份红包。防重放以 `packetId` 为准：同一条 ACK 重投、或对方重复推送，都只会入账一次。
-    /// 领取方是"每个收件人各自领自己那一份"，所以这里记的是本设备的领取历史，不是全局份额。
+    /// Claim one red-packet share. Replay protection keys on `packetId`: the same ACK re-delivered, or a duplicate push from the other side, both credit at most once.
+    /// Claiming is "each recipient claims their own share", so what is recorded here is this device's claim history, not a global share.
     func claimRedPacket(packetId: String, amountPerRecipient: Int, note: String) throws -> Bool {
         loadIfNeeded()
         guard !replay.hasClaimed(packetId: packetId) else { return false }
@@ -337,16 +337,16 @@ final class PopopxCreditsManager {
         return true
     }
 
-    /// 本机是否已经拆开过这一份。气泡用它决定显示"拆开"还是"已领取"：
-    /// 判据与 `claimRedPacket` 是同一条（重放保护那一份），视图自己记状态会在进程重启后退回"可拆"。
+    /// Whether this device has already opened this share. The bubble uses it to decide between showing "open" and "claimed":
+    /// the check is the same one as `claimRedPacket`'s (the replay-protection record); a view keeping its own state would fall back to "openable" after a process restart.
     func hasClaimed(packetId: String) -> Bool {
         loadIfNeeded()
         return replay.hasClaimed(packetId: packetId)
     }
 
-    /// 这张礼品卡是否已在本机核销过。写在兑换成功的那一步（`PopopxSilentSignalingRouter` 收到 ACK 之后），
-    /// 于是气泡能长期停在"已兑换"，也不会再对同一枚券发第二次请求——赠方那边有 `redeemed` 状态兜底，
-    /// 但让对方替你挡掉一次无谓的往返不是这一层的办法。
+    /// Whether this gift card has already been redeemed on this device. Written at the successful-redeem step (after `PopopxSilentSignalingRouter` receives the ACK),
+    /// so the bubble can stay at "redeemed" long-term, and a second request is never sent for the same voucher — the gifter's side has a `redeemed` state as fallback,
+    /// but letting the other side block a needless round-trip for you is not this layer's approach.
     func markRedeemed(voucherId: String) {
         loadIfNeeded()
         guard !replay.hasRedeemed(voucherId: voucherId) else { return }
@@ -359,19 +359,19 @@ final class PopopxCreditsManager {
         return replay.hasRedeemed(voucherId: voucherId)
     }
 
-    /// 发送方视角的那一笔挂起单（气泡上的"已领 n/N 份"）。不是本机的单子返回 nil——
-    /// 同一条 packetId 出现在别人的聊天里时，这里不该显示出任何份数。
+    /// The pending record from the sender's perspective (the bubble's "claimed n/N shares"). Returns nil for packets not sent by this device —
+    /// when the same packetId shows up in somebody else's chat, no share counts should be displayed from here.
     func pendingPacket(packetId: String) -> PopopxPendingRedPacket? {
         loadIfNeeded()
         return pendingPackets.first { $0.packetId == packetId }
     }
 
-    /// 发送侧收到 `REDPACKET_CLAIMED` 回执时调用：只累加份数，不碰余额（钱在发送时已经扣掉了）。
+    /// Called when the sender side receives the `REDPACKET_CLAIMED` receipt: only increments the share count, never touches the balance (the money was already deducted at send time).
     ///
-    /// 群红包必须按成员去重：回执是一串可重放的文本，同一个人再发一条就会把 `claimedCount`
-    /// 顶到份数以上，退款被算成 0——被坑的是发送方，而他没有任何办法察觉。
-    /// 份数也一并夹在 `recipientCount`：超出的回执不改变任何金额，就不该改变任何账目显示。
-    /// `memberKey` 为 nil（direct）时无从去重，那一侧由领取端自己的重放保护兜底。
+    /// Group red packets must dedup by member: the receipt is replayable text, and one more message from the same person would push `claimedCount`
+    /// above the share count, and the refund would be computed as 0 — the one harmed is the sender, who has no way to notice.
+    /// The count is also clamped to `recipientCount`: an excess receipt changes no amount, so it should change no accounting display either.
+    /// When `memberKey` is nil (direct) there is nothing to dedup on; that side is backed by the claimer's own replay protection.
     func recordClaim(packetId: String, memberKey: String? = nil) {
         loadIfNeeded()
         guard let index = pendingPackets.firstIndex(where: { $0.packetId == packetId }) else { return }
@@ -388,10 +388,10 @@ final class PopopxCreditsManager {
         savePackets()
     }
 
-    /// 未领完的红包退款。两个触发点：**份数领满**，或**宽限期已过**（`claimGraceEndsAtMs`）。
-    /// 差额必须退，否则发送方永远悬着一笔钱——那是这个特性里最容易变成投诉的一处。
-    /// 但领满之前不能退：退了之后群里剩下的份额仍会被领走，那一份点数是谁也没出的。
-    /// 群红包没人领、单份红包对方一直没上线，都走宽限期那一条。
+    /// Refund of an unclaimed-out red packet. Two triggers: **all shares claimed**, or the **grace period passed** (`claimGraceEndsAtMs`).
+    /// The difference must be refunded, otherwise the sender is left with money forever hanging — the thing in this feature most likely to turn into a complaint.
+    /// But it cannot be refunded before all shares are claimed: after a refund the group's remaining shares would still be claimed, and those points would have been paid by nobody.
+    /// A group packet nobody claims and a single-share packet whose recipient never comes online both go through the grace-period path.
     @discardableResult
     func refundSettledPackets(now: Date) async -> Int {
         loadIfNeeded()
@@ -411,16 +411,16 @@ final class PopopxCreditsManager {
         return refunded
     }
 
-    // MARK: 场景四 · 频道订阅
+    // MARK: scenario 4 · channel subscription
 
-    /// 订阅一个频道：点数由频道主定价，有效期一格 `channelTicketSeconds`（30 天，与徽章月档同长，
-    /// 免得用户在两处看到两种"一个月"）。
+    /// Subscribe to a channel: the points price is set by the channel owner, and the validity is one unit of `channelTicketSeconds` (30 days, the same length as the badge's monthly tier,
+    /// so users never see two kinds of "one month" in two places).
     ///
-    /// 已有有效票时是**叠加**而不是替换：提前续费的人不该把没用完的天数白丢掉——点数已经扣了。
-    /// 与徽章激活同一句话："取更晚到期"。
-    /// `price == 0` 不进这里：那是"这个频道免费"，由调用方直接放行，扣 0 点只会留下一条假流水。
-    /// `issuerPublicKeyBase64URL` 是这条卡片的签名公钥，原样存进票里：它是防冒充比对的那一半本机记录
-    /// （判据在 `channelIssuerConflict`），不参与任何签名验证——签名的真伪在渲染侧已经判过了。
+    /// With an existing valid ticket this **stacks** rather than replaces: people who renew early should not forfeit their unused days — the points were already deducted.
+    /// The same sentence as badge activation: "take the later expiry".
+    /// `price == 0` does not enter here: that means "this channel is free", and the caller passes it directly; deducting 0 points would only leave a fake ledger entry.
+    /// `issuerPublicKeyBase64URL` is this card's signing public key, stored into the ticket verbatim: it is the local half of the anti-impersonation comparison record
+    /// (the check lives in `channelIssuerConflict`); it takes part in no signature verification — the signature's authenticity was already judged on the rendering side.
     func subscribeToChannel(channelId: String, channelTitle: String, price: Int,
                             issuerPublicKeyBase64URL: String) throws -> PopopxChannelSubscriptionTicket {
         loadIfNeeded()
@@ -442,18 +442,18 @@ final class PopopxCreditsManager {
         return ticket
     }
 
-    /// 这台设备在这个频道**付过一次钱**的发布者，与眼前这条卡片的签名公钥对不对得上。
+    /// Whether the publisher this device **paid once** in this channel matches the signing public key of the card at hand.
     ///
-    /// 为什么只能这样判：频道的消息在成员侧是 `CIDirection.channelRcv`，那一个档**不带** `GroupMember`
-    /// （`ChatTypes.swift:4421-4422`，`groupMemberId` 对它是 nil，:4440-4442），所以"发这条的人是什么角色"
-    /// 在 Swift 层没有任何可读的数；`ChatInfo.id` 又是本机行号（`"#"+groupId`，:3059），跨设备不通用，
-    /// 把它签进卡片也只能签出一个对方设备上不存在的东西。核心侧没有可比的权威公钥——本模块的签名密钥
-    /// 是 P256 的商业密钥，和 SMP 连接不是同一套钥匙。
+    /// Why it can only be checked this way: on the member side a channel message is `CIDirection.channelRcv`, and that tier carries **no** `GroupMember`
+    /// (`ChatTypes.swift:4421-4422`, `groupMemberId` is nil for it, :4440-4442), so "what role the sender of this has"
+    /// at the Swift layer has no readable number whatsoever; `ChatInfo.id` is again a local row number (`"#"+groupId`, :3059), not portable across devices,
+    /// and signing it into the card could only sign out something that does not exist on the other party's device. The core side has no comparable authoritative public key — this module's signing key
+    /// is a P256 business key, not the same set of keys as the SMP connections.
     ///
-    /// 于是这一条判据的实际覆盖面是诚实的：**已经付过一次的那个人**不会被第二把钥匙的卡片再烧一次点。
-    /// 第一次付费之前无从比对（没有可比的那一份记录），那一个窗口要靠发布侧的角色闸
-    /// （`sendChannelAccess`）+ 界面只把订阅按钮给验得过签名的卡片，剩下的是本模块记录在案的残留风险。
-    /// 旧票没有记公钥，一律返回"不冲突"：不能因为升级前的账本缺字段就把人挡在外面。
+    /// So the actual coverage of this check is honest: **the person who has already paid once** will not have points burned again by a card from a second key.
+    /// Before the first payment there is nothing to compare against (no comparable record exists); that window relies on the publisher-side role gate
+    /// (`sendChannelAccess`) + the interface giving the subscribe button only to cards whose signature verifies; what remains is this module's documented residual risk.
+    /// Old tickets never recorded the public key, so they uniformly return "no conflict": people must not be locked out because a pre-upgrade ledger is missing a field.
     func channelIssuerConflict(channelId: String, issuerPublicKeyBase64URL: String) -> Bool {
         loadIfNeeded()
         guard let pinned = channelTickets.first(where: { $0.channelId == channelId })?.issuerPublicKeyBase64URL,
@@ -467,7 +467,7 @@ final class PopopxCreditsManager {
         return channelTickets.first { $0.channelId == channelId && $0.isValid(at: Date()) }
     }
 
-    // MARK: 场景五 · 解锁受保护的资料卡
+    // MARK: scenario 5 · unlocking a protected profile card
 
     func unlockProfile(profileId: String, chatId: Int64, itemId: Int64, price: Int) throws -> PopopxProfileUnlockReceipt {
         loadIfNeeded()
@@ -489,17 +489,17 @@ final class PopopxCreditsManager {
         return receipt
     }
 
-    /// 三个字段一起判：资料卡可以转发、也可以在同一条会话里多次出现，
-    /// 只按 `profileId` 判会让"在 A 会话解锁过"变成"B 会话也免费"。
+    /// The three fields are judged together: profile cards can be forwarded and can appear multiple times in the same conversation,
+    /// and judging on `profileId` alone would turn "unlocked in conversation A" into "free in conversation B".
     func hasUnlocked(profileId: String, chatId: Int64, itemId: Int64) -> Bool {
         loadIfNeeded()
         return profileReceipts.contains { $0.profileId == profileId && $0.chatId == chatId && $0.itemId == itemId }
     }
 
-    // MARK: 场景六 · 高级兑换（扩展防窥窗 / 装饰）
+    // MARK: scenario 6 · premium redemption (extended anti-peep window / decoration)
 
-    /// 20 点换 1 小时的扩展防窥窗口。返回秒数给 `PopopxSecureWindowManager`，
-    /// 本函数不 import 那一层——窗口怎么计时是它的契约，这里只卖时长。
+    /// 20 points exchange for 1 hour of the extended anti-peep window. The seconds are returned to `PopopxSecureWindowManager`;
+    /// this function does not import that layer — how the window counts time is its contract, and here we only sell the duration.
     func purchaseExtendedSecureWindow() throws -> Int {
         loadIfNeeded()
         _ = try debit(PopopxCommerceLimits.extendedSecureWindowCost, kind: .secureWindow, note: PopopxCreditsCopy.secureWindow)
@@ -519,9 +519,9 @@ final class PopopxCreditsManager {
         return ownedCosmetics.contains(cosmetic)
     }
 
-    // MARK: 展示
+    // MARK: display
 
-    /// 流水按时间倒序给 UI；不做分页——上限就是 240 条。
+    /// The ledger is handed to the UI in reverse time order; no pagination — the cap is 240 entries.
     var recentEntries: [PopopxCreditsEntry] {
         loadIfNeeded()
         return ledger.reversed()
@@ -533,34 +533,34 @@ final class PopopxCreditsManager {
     }
 }
 
-// MARK: - 文案
+// MARK: - copy
 
-/// 流水与提示里的短语。涉钱承诺那一批在 `PopopxCommerceCopy`（进全部 17 个 `.lproj`），
-/// 这一批是流水备注，与前面几个 POPOPX 特性一样留在文件内。
+/// The short phrases in the ledger and the notices. The money-promise batch lives in `PopopxCommerceCopy` (into all 17 `.lproj`),
+/// while this batch is ledger remarks, kept inside the file like the previous POPOPX features.
 private enum PopopxCreditsCopy {
-    static func purchasedPack(_ amount: Int) -> String { "充值 \(amount) 算力点" }
-    static let reversedExchange = "兑换未成立 · 自动退回"
-    static func badgeExchange(_ period: PopopxNodeBadgePeriod) -> String { "兑换 \(period.days) 天隐私节点徽章" }
-    static func voucherExchange(period: PopopxNodeBadgePeriod, quantity: Int) -> String { "兑换 \(quantity) 张 \(period.days) 天礼品卡券" }
-    static func packetSent(amount: Int, recipients: Int) -> String { "发出算力点红包 \(amount)（\(recipients) 份均分）" }
-    static func packetReceived(note: String) -> String { note.isEmpty ? "收到算力点红包" : "收到红包：\(note)" }
-    static func packetRefund(_ amount: Int) -> String { "红包未领完，退回 \(amount)" }
-    static func channelSubscribed(_ title: String) -> String { "订阅频道 \(title)" }
-    static let profileUnlocked = "解锁资料卡"
-    static let secureWindow = "扩展防窥查看窗口"
+    static func purchasedPack(_ amount: Int) -> String { String(format: NSLocalizedString("Top-up %lld compute points", comment: "POPOPX credits ledger"), amount) }
+    static let reversedExchange = NSLocalizedString("Exchange did not complete · returned automatically", comment: "POPOPX credits ledger")
+    static func badgeExchange(_ period: PopopxNodeBadgePeriod) -> String { String(format: NSLocalizedString("Redeemed a %lld-day privacy node badge", comment: "POPOPX credits ledger"), period.days) }
+    static func voucherExchange(period: PopopxNodeBadgePeriod, quantity: Int) -> String { String(format: NSLocalizedString("Redeemed %lld × %lld-day gift-card vouchers", comment: "POPOPX credits ledger"), quantity, period.days) }
+    static func packetSent(amount: Int, recipients: Int) -> String { String(format: NSLocalizedString("Sent a red packet of %lld compute points (%lld equal shares)", comment: "POPOPX credits ledger"), amount, recipients) }
+    static func packetReceived(note: String) -> String { note.isEmpty ? NSLocalizedString("Received a compute-point red packet", comment: "POPOPX credits ledger") : String(format: NSLocalizedString("Received a red packet: %@", comment: "POPOPX credits ledger"), note) }
+    static func packetRefund(_ amount: Int) -> String { String(format: NSLocalizedString("Red packet not fully claimed, %lld returned", comment: "POPOPX credits ledger"), amount) }
+    static func channelSubscribed(_ title: String) -> String { String(format: NSLocalizedString("Subscribed to channel %@", comment: "POPOPX credits ledger"), title) }
+    static let profileUnlocked = NSLocalizedString("Unlocked a profile card", comment: "POPOPX credits ledger")
+    static let secureWindow = NSLocalizedString("Extended the anti-peeping viewing window", comment: "POPOPX credits ledger")
     static func cosmetic(_ item: PopopxCosmetic) -> String { item.displayName }
     static func refundClawback(shortfall: Int) -> String {
-        shortfall > 0 ? "退款扣回（已花掉的部分不追回）" : "退款扣回"
+        shortfall > 0 ? NSLocalizedString("Refund clawback (what was already spent is not recovered)", comment: "POPOPX credits ledger") : NSLocalizedString("Refund clawback", comment: "POPOPX credits ledger")
     }
 }
 
-/// 内部可见而不是文件私有：算力点中心要列出"这两样东西叫什么价"，
-/// 名字在这里给一次，别处再写一份就会出现两种叫法。
+/// Internal rather than file-private: the credits center has to list "what these two things are priced",
+/// so the names are given once here; writing another copy elsewhere would produce two ways of calling them.
 extension PopopxCosmetic {
     var displayName: String {
         switch self {
-        case .auroraShieldAvatarFrame: return "极光盾头像边框"
-        case .darkGoldQRCardSkin: return "暗金二维码卡面"
+        case .auroraShieldAvatarFrame: return NSLocalizedString("Aurora shield avatar frame", comment: "POPOPX cosmetic")
+        case .darkGoldQRCardSkin: return NSLocalizedString("Dark gold QR card skin", comment: "POPOPX cosmetic")
         }
     }
 }

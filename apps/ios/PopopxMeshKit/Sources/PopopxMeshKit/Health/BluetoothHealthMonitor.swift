@@ -1,10 +1,10 @@
 //
 //  BluetoothHealthMonitor.swift
-//  PopopxMeshKit  —  模块 4
+//  PopopxMeshKit  —  module 4
 //
 //  Watches the radio and every Bluetooth node's freshness, and guards the delivery of each
 //  outbound Bluetooth private message with a BLE_ACK timeout. It never decides where a message
-//  goes: it reports, and 模块 5 (PopopxMessageRouter) reroutes.
+//  goes: it reports, and module 5 (PopopxMessageRouter) reroutes.
 //
 
 import Foundation
@@ -179,7 +179,7 @@ public actor BluetoothHealthMonitor {
     // MARK: - Reachability
 
     /// True when the peer was heard from (directly or relayed) within `timeout` and our own radio
-    /// is up. This is the 事前预判 the router asks before choosing Bluetooth over SMP.
+    /// is up. This is the advance prediction the router asks before choosing Bluetooth over SMP.
     public func isPeerReachable(
         publicKey meshPublicKeyHex: String,
         timeout: TimeInterval = BluetoothHealthMonitor.defaultReachabilityTimeout

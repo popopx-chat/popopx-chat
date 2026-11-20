@@ -1,63 +1,63 @@
 //  PopopxChannelSubscriptionSheet.swift
 //
-//  【第五阶段 · 8】付费频道的订阅确认弹窗：一次本机扣点，换一张带到期时间的本地准入凭证。
+//  [Phase 5 · 8] The subscription confirmation sheet for paid channels: one local credit deduction in exchange for a local admission ticket carrying an expiry time.
 //
-//  ### 这一页签的是本机凭证，它拦不住频道的分发，也不拦内容页
-//  SimpleX 的频道是单向广播：能成为成员就收得到内容，Swift 侧没有"这条消息只发给付过点的人"
-//  的接口，所以任何"付费才收得到"的说法都做不到。这一页做的是：按频道主发布的价扣一次点，
-//  在本机钥匙串里签一张带到期时间的凭证，凭证决定的是**这台设备上**这一格算不算已订阅。
+//  ### This page signs a local ticket; it cannot stop the channel's distribution, and it does not gate the content page
+//  The chat core's channels are one-way broadcast: whoever can be a member receives the content, and the Swift side has no interface where
+//  "this message goes only to people who paid", so any claim of "only paid members receive it" is unachievable. What this page does is: deduct points once at the price the channel owner published,
+//  and sign a ticket with an expiry time into this device's keychain; the ticket decides whether this one slot counts as subscribed **on this device**.
 //
-//  内容页也不拦：拦的话会走进死结——门槛只在频道里那条卡片上（没有服务端，成员这边唯一的价
-//  来源就是那条消息），把频道内容挡住就等于把"如何知道要付多少、去哪儿付"一起挡住。
-//  这一条与它的两种可能的出路都写在 `Docs/app-store-review-notes.md` 第 9 节第 7 条。
+//  The content page is not gated either: gating it would walk into a deadlock — the threshold lives only on that card inside the channel (with no server side,
+//  that message is the members' only price source), and blocking the channel content would block "how to learn the price and where to pay" along with it.
+//  This item and both of its possible ways out are written in `Docs/app-store-review-notes.md` section 9 item 7.
 //
-//  ### 频道主收不到核销回执
-//  提示词还有一句"向频道同步已核销凭证回执"。要做这件事得新增一种跨端信令名，
-//  而规范列出的只有 `EXT_REDEEM_REQ/ACK`、`CHAT_REDEEM_REQ/ACK`、`REDPACKET_CLAIMED` 五种
-//  （见 `PopopxCommerceSignalKind`）。自己编一个第六种线上传输名，比不做更容易出问题：
-//  对端旧版本会把它当普通文本显示在时间线上。所以本文件不做回执，并在边界文案里明说。
-//  需要它的话，先定名，再在 `PopopxSilentSignalingRouter.observeIncoming` 里加一条分支。
+//  ### The channel owner receives no redemption receipt
+//  The prompt had one more line, "sync the redeemed-ticket receipt back to the channel". Doing that would require a new cross-end signaling name,
+//  while the specification lists only these (`EXT_REDEEM_REQ/ACK`, `CHAT_REDEEM_REQ/ACK`, `REDPACKET_CLAIMED`, five in total)
+//  (see `PopopxCommerceSignalKind`). Inventing a sixth wire name ourselves is riskier than not doing it at all:
+//  older peers would display it as ordinary text in the timeline. So this file sends no receipt, and says so plainly in the boundary copy.
+//  If it is needed, fix the name first, then add one branch in `PopopxSilentSignalingRouter.observeIncoming`.
 //
-//  ### 续订是叠加的
-//  `subscribeToChannel` 在旧票的到期时间之上再加一格 `channelTicketSeconds`。
-//  提前续费不该把没用完的天数丢掉——点数已经扣了，天数就是这笔钱对应的东西。
-//  也因此这一页在凭证还有效时**不提供**续订按钮以外的任何"再买一次"入口：
-//  已订阅状态下先看有效期，想续再续。
+//  ### Renewal stacks
+//  `subscribeToChannel` adds one more `channelTicketSeconds` on top of the old ticket's expiry time.
+//  Renewing early must not throw away the days that were not used — the points are already deducted, and the days are what that money corresponds to.
+//  For the same reason this page, while the ticket is still valid, offers **no** "buy again" entry other than the renew button:
+//  in the subscribed state you read the validity period first, and renew only if you want to.
 //
-//  ### "免费频道"不发卡片
-//  门槛的合法区间是 1 … `maximumCreditsThreshold`：发布页要 `price >= 1` 才可点（`canPublish`），
-//  `PopopxChannelAccessPayload.make` 也拒绝 0，所以**这张卡片永远代表一笔真实的扣点**。
-//  解析侧仍接受 `p=0`（`isPriceAuthorized` 的下界是 0），那是给"对方客户端发来一张 0 价卡"留的
-//  兼容判据：这种卡照常渲染，这一页走 `price == 0` 那一格（"本频道免费"），既不扣点也不签票；
-//  即便有人绕过界面直接调 `subscribeToChannel(price: 0)`，它的 `price >= 1` 守卫也会抛 `signalRejected`。
-//  一个频道要免费，正确做法是不发卡片，而不是发一张 0 价卡。
+//  ### "Free channels" publish no card
+//  The threshold's legal range is 1 … `maximumCreditsThreshold`: the publish page requires `price >= 1` to be tappable (`canPublish`),
+//  and `PopopxChannelAccessPayload.make` also rejects 0, so **this card always represents one real deduction**.
+//  The parsing side still accepts `p=0` (the lower bound of `isPriceAuthorized` is 0); that is a compatibility criterion kept for "the other client sent a 0-price card":
+//  such a card renders as usual, and this page takes the `price == 0` slot ("this channel is free"), deducting no points and signing no ticket;
+//  and even if someone bypasses the UI and calls `subscribeToChannel(price: 0)` directly, its `price >= 1` guard throws `signalRejected`.
+//  For a channel to be free, the correct approach is to publish no card, not to publish a 0-price card.
 //
-//  ### 宿主入口（2026-11-19 裁定：必须接上，不留孤立面板）
-//  到达这一页有两条真路径：① 频道里那条门槛卡片的"订阅/续订"（`PopopxChannelAccessBubble`）；
-//  ② 频道详情页对频道主给的那一格发布页（本文件下半部的 `PopopxChannelThresholdView`，
-//  挂载在 `PopopxGroupChatInfoView.subscriptionCard`，判据 `isChannel && isOwner`）。
-//  成员那一侧的详情页只显示本机凭证，不给按钮：价格不在本机，在这里点"订阅"就是扣一笔没宣布过的钱。
+//  ### Host entries (2026-11-19 ruling: they must be wired up, no orphan panels)
+//  There are two real paths to this page: ① the threshold card's "subscribe/renew" inside the channel (`PopopxChannelAccessBubble`);
+//  ② the slot the channel detail page gives the channel owner as a publish page (the lower half of this file, `PopopxChannelThresholdView`,
+//  mounted at `PopopxGroupChatInfoView.subscriptionCard`, criterion `isChannel && isOwner`).
+//  On the member's side the detail page shows only the local ticket and gives no button: the price is not on this device, and tapping "subscribe" here would deduct money that was never announced.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. The red line forbids scripts from modifying project.pbxproj.
 
 import SwiftUI
 
 struct PopopxChannelSubscriptionSheet: View {
     let channelId: String
     let channelTitle: String
-    /// 频道主定的门槛（算力点/格）。0 表示免费。
+    /// The threshold set by the channel owner (compute points per slot). 0 means free.
     let price: Int
-    /// 这条卡片的签名公钥，随票一起存本机：下一次遇到别的钥匙签的同频道卡片时用来判冲突
-    /// （判据与它的覆盖面都写在 `PopopxCreditsManager.channelIssuerConflict`）。
+    /// This card's signing public key, stored locally together with the ticket: used to judge a conflict when a card for the same channel signed by another key is next seen
+    /// (the criterion and its coverage are written in `PopopxCreditsManager.channelIssuerConflict`).
     let issuerPublicKeyBase64URL: String
-    /// 回执要回到哪个会话。nil 时不发回执——票据照旧成立，只是这程没人可通知。
+    /// Which conversation the receipt should return to. With nil no receipt is sent — the ticket still stands, there is simply nobody to notify on that leg.
     let receiptTarget: PopopxCommerceTarget?
 
     @Environment(\.dismiss) private var dismiss
 
     @State private var credits = PopopxCreditsManager.shared
     @State private var router = PopopxSilentSignalingRouter.shared
-    /// 载入时取一次，订阅成功后换成新票。不每帧查：`ticket(forChannelId:)` 每次都要 `loadIfNeeded`。
+    /// Read once when loading, and replaced with the new ticket after a successful subscription. Not queried every frame: `ticket(forChannelId:)` needs `loadIfNeeded` each time.
     @State private var ticket: PopopxChannelSubscriptionTicket?
     @State private var stage: PopopxSubscriptionStage = .idle
 
@@ -73,7 +73,7 @@ struct PopopxChannelSubscriptionSheet: View {
         }
     }
 
-    // MARK: 版面
+    // MARK: Layout
 
     private var content: some View {
         ScrollView {
@@ -222,7 +222,7 @@ struct PopopxChannelSubscriptionSheet: View {
         }
     }
 
-    // MARK: 底栏
+    // MARK: Bottom bar
 
     private var footer: some View {
         VStack(spacing: PopopxMetrics.spaceXS) {
@@ -233,8 +233,8 @@ struct PopopxChannelSubscriptionSheet: View {
                 }
                 .disabled(!canSubscribe)
                 if credits.balance < price {
-                    // 不在这一页里塞充值面板：那一套价格表只在购买页有一份，两个地方各写一次就会各错一次。
-                    // 所以"去充值"只是把这一页关掉——它下面就是购买页。
+                    // No top-up panel is stuffed into this page: that price table exists once on the purchase page, and writing it in two places means each one goes wrong on its own.
+                    // So "go to top-up" only closes this page — the purchase page is right underneath it.
                     PopopxButton(Copy.topUp, role: .ghost) { dismiss() }
                 }
             }
@@ -242,7 +242,7 @@ struct PopopxChannelSubscriptionSheet: View {
         }
     }
 
-    // MARK: 动作
+    // MARK: Actions
 
     private var canSubscribe: Bool {
         price > 0 && stage != .busy && credits.balance >= price
@@ -259,9 +259,9 @@ struct PopopxChannelSubscriptionSheet: View {
             ticket = issued
             stage = .subscribed(issued)
             PopopxHaptics.notice(.success)
-            // 回执排在票据之后：点数已经扣了、凭证已经写进钥匙串了，这一条发不发得出去都不再改变结果。
-            // 频道里订阅者能不能发言由核心的群设置决定，Swift 侧没有那个判据，所以这一条是尽力而为，
-            // 失败也只留在日志里（`sendChannelSubscriptionAck`）。
+            // The receipt is scheduled after the ticket: the points are already deducted and the credential already written into the keychain, so whether this line gets sent no longer changes the outcome.
+            // Whether a subscriber may speak in the channel is decided by the core's group settings, and the Swift side has no such criterion, so this line is best-effort,
+            // and a failure stays only in the log (`sendChannelSubscriptionAck`).
             if let receiptTarget {
                 _ = await router.sendChannelSubscriptionAck(
                     chatInfoId: channelId, expiresAtMs: issued.expiresAtMs, to: receiptTarget
@@ -286,17 +286,17 @@ struct PopopxChannelSubscriptionSheet: View {
     }
 }
 
-// MARK: - 阶段
+// MARK: - Stages
 
 enum PopopxSubscriptionStage: Hashable {
     case idle
     case busy
-    /// 已签发的那张票：面板因此能把真实的到期时间念给用户，而不是"30 天"这种约数。
+    /// The ticket already issued: so the panel can read the user a real expiry time instead of an approximation like "30 days".
     case subscribed(PopopxChannelSubscriptionTicket)
     case refused(PopopxBadgeCreditsError)
 }
 
-// MARK: - 文案
+// MARK: - Copy
 
 private extension PopopxChannelSubscriptionSheet {
     enum Copy {
@@ -326,20 +326,20 @@ private extension PopopxChannelSubscriptionSheet {
     }
 }
 
-// MARK: - 频道主：发布门槛
+// MARK: - Channel owner: publish the threshold
 
-/// 频道主这一侧的发布页。它存在的唯一理由：**成员那台设备上的价只能从频道里那一条消息来**。
-/// 没有这一页，`PopopxChannelSubscriptionSheet` 的 `price` 就只能由客户端自己编，
-/// 那就是"对着一个不存在的价扣钱"。所以这一页做的事只有一件：签一条门槛卡片发进频道。
+/// The publish page on the channel owner's side. The only reason it exists: **on a member's device the price can only come from that one message in the channel**.
+/// Without this page, `PopopxChannelSubscriptionSheet`'s `price` could only be invented by the client,
+/// and that would be "deducting money against a price that does not exist". So this page does exactly one thing: sign a threshold card and send it into the channel.
 ///
-/// 三条边界，界面上也照写：
-/// - 发布 = 往频道里发一条**可见**消息（`PopopxSilentSignalingRouter.sendChannelAccess`），
-///   不是静默信令，不删行；成员看得见价，才谈得上"知情"。
-/// - 门槛改一次就发一条新卡片：本特性没有"更新已发出去的那一条"的机制，
-///   旧卡片仍然指向旧价。成员点开哪一条，就按那一条的价扣点，那一条的签名也确实在保护这个价。
-/// - 免费不发布：`price == 0` 时既没有扣款也没有流水，发一条"0 点"卡片只会多一条噪音。
+/// Three boundaries, and the UI states them the same way:
+/// - Publishing = sending a **visible** message into the channel (`PopopxSilentSignalingRouter.sendChannelAccess`),
+///   not silent signaling, and no row is deleted; only if members can see the price does "informed" mean anything.
+/// - Each change of the threshold publishes one new card: this feature has no mechanism to "update the one already sent",
+///   and old cards still point at the old price. Whichever card a member opens, the deduction follows that card's price, and that card's signature really does protect that price.
+/// - Free publishes nothing: with `price == 0` there is neither a charge nor a ledger entry, so publishing a "0 points" card only adds noise.
 struct PopopxChannelThresholdView: View {
-    /// 门槛卡片发进哪个会话。频道在模型里就是 `useRelays` 的群会话，所以落点是 `.group`。
+    /// Which conversation the threshold card is sent into. In the model a channel is just a group conversation with `useRelays`, so the landing point is `.group`.
     let groupId: Int64
     let channelTitle: String
 
@@ -365,7 +365,7 @@ struct PopopxChannelThresholdView: View {
         .toolbar(.hidden, for: .tabBar)
     }
 
-    // MARK: 版面
+    // MARK: Layout
 
     private var editorCard: some View {
         PopopxSectionCard(Copy.editorTitle, footnote: Copy.editorFootnote(channelTitle)) {
@@ -443,8 +443,8 @@ struct PopopxChannelThresholdView: View {
         }
     }
 
-    /// 一行结论：图标 + 一句话。`PopopxCommerceCardNote` 是卡片那个文件私有的，
-    /// 为了复用一行的排版而把它的访问级别放开，会让两张卡片和这一页从此共享一个不能各自改的形状。
+    /// One conclusion row: icon + one sentence. `PopopxCommerceCardNote` is private to that card's file,
+    /// and widening its access level merely to reuse one row's typography would make two cards and this page share a shape they can no longer change separately.
     private func note(systemImage: String, text: String, ink: Color) -> some View {
         HStack(alignment: .top, spacing: PopopxMetrics.spaceXS) {
             Image(systemName: systemImage)
@@ -459,18 +459,18 @@ struct PopopxChannelThresholdView: View {
         }
     }
 
-    // MARK: 动作
+    // MARK: Actions
 
-    /// 框里的字到数字只有一次换算：只认数字、超上限就贴到上限。
-    /// 这与名片门槛那一格同一判据（`ProfileBuilderView` 的 `unlockCreditsText`），
-    /// 两处各写一个数就会各错一次。
+    /// The text in the field converts to a number exactly once: digits only, and anything over the cap sticks to the cap.
+    /// This is the same criterion as the business-card threshold slot (`ProfileBuilderView`'s `unlockCreditsText`),
+    /// because two places each writing their own number means each goes wrong on its own.
     private var price: Int {
         let entered = Int(priceText.filter(\.isNumber)) ?? 0
         return min(entered, PopopxCommerceLimits.maximumCreditsThreshold)
     }
 
-    /// 角色判据走路由器那一份（`canPublishChannelThreshold`）：这一页的按钮和 `sendChannelAccess`
-    /// 的守卫必须是同一个数，否则会出现"按得下去、发不出去"的第三种状态。
+    /// The role criterion comes from the router's copy (`canPublishChannelThreshold`): this page's button and the `sendChannelAccess`
+    /// guard must be the same number, otherwise a third state appears: "tappable, but nothing gets sent".
     private var canPublish: Bool {
         stage != .busy && price >= 1 && PopopxSilentSignalingRouter.canPublishChannelThreshold(groupId: groupId)
     }
@@ -482,7 +482,7 @@ struct PopopxChannelThresholdView: View {
             price: price,
             publishedAtMs: Int64(Date().timeIntervalSince1970 * 1_000)
         ) else {
-            // 本机签名密钥取不到。这里没扣任何人的点，也不需要留什么待重投的单子。
+            // The local signing key could not be obtained. Nothing here deducted anybody's points, and no pending re-send record needs to be left.
             stage = .refused
             PopopxHaptics.notice(.error)
             return
@@ -497,20 +497,20 @@ struct PopopxChannelThresholdView: View {
     }
 }
 
-// MARK: - 发布阶段
+// MARK: - Publish stages
 
 enum PopopxThresholdStage: Hashable {
     case idle
     case busy
-    /// 发出去的那张卡片：状态格里把真实的价念出来，而不是"已发布"三个字。
+    /// The card that was sent: the status row reads the real price out loud instead of just saying "published".
     case published(PopopxChannelAccessPayload)
-    /// 消息没出去（SMP 那一侧没返回会话项）。门槛没有被改写，因为对端从没收到新价。
+    /// The message did not go out (the SMP side returned no conversation item). The threshold was not rewritten, because the peer never received a new price.
     case undelivered
-    /// 本机签名密钥取不到，卡片根本没能签出来。
+    /// The local signing key could not be obtained, so the card was never signed at all.
     case refused
 }
 
-// MARK: - 文案（发布页）
+// MARK: - Copy (publish page)
 
 private extension PopopxChannelThresholdView {
     enum Copy {
@@ -541,7 +541,7 @@ private extension PopopxChannelThresholdView {
 
 struct PopopxChannelSubscriptionSheetDark_Previews: PreviewProvider {
     static var previews: some View {
-        PopopxChannelSubscriptionSheet(channelId: "channel.preview", channelTitle: "夜航随笔", price: 200,
+        PopopxChannelSubscriptionSheet(channelId: "channel.preview", channelTitle: "Nightfall Notes", price: 200,
                                        issuerPublicKeyBase64URL: "preview.key", receiptTarget: nil)
             .preferredColorScheme(.dark)
     }
@@ -549,18 +549,18 @@ struct PopopxChannelSubscriptionSheetDark_Previews: PreviewProvider {
 
 struct PopopxChannelSubscriptionSheetLight_Previews: PreviewProvider {
     static var previews: some View {
-        PopopxChannelSubscriptionSheet(channelId: "channel.preview", channelTitle: "夜航随笔", price: 0,
+        PopopxChannelSubscriptionSheet(channelId: "channel.preview", channelTitle: "Nightfall Notes", price: 0,
                                        issuerPublicKeyBase64URL: "preview.key", receiptTarget: nil)
             .preferredColorScheme(.light)
     }
 }
 
-/// 发布页的预览停在 `.idle`：`stage` 是 `@State`，预览里没有钥匙串也没有 SMP，
-/// 所以能给的只有版面本身（那三个结论格在真机上验，见审核说明的自测清单）。
+/// The publish page's preview stays at `.idle`: `stage` is `@State`, and a preview has neither keychain nor SMP,
+/// so the only thing it can offer is the layout itself (the three conclusion rows are verified on a real device, see the self-test checklist in the review notes).
 struct PopopxChannelThresholdViewDark_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
-            PopopxChannelThresholdView(groupId: 2, channelTitle: "夜航随笔")
+            PopopxChannelThresholdView(groupId: 2, channelTitle: "Nightfall Notes")
         }
         .preferredColorScheme(.dark)
     }
@@ -569,7 +569,7 @@ struct PopopxChannelThresholdViewDark_Previews: PreviewProvider {
 struct PopopxChannelThresholdViewLight_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
-            PopopxChannelThresholdView(groupId: 2, channelTitle: "夜航随笔")
+            PopopxChannelThresholdView(groupId: 2, channelTitle: "Nightfall Notes")
         }
         .preferredColorScheme(.light)
     }

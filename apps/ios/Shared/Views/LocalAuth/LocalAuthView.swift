@@ -47,13 +47,13 @@ struct LocalAuthView: View {
 
     private func deleteStorageAndRestart(_ password: String, completed: @escaping (LAResult) -> Void) {
         /**
-         * 这里原本是 56 行手写的"关库 → 删文件 → 清内存 → 重建"序列。它被抽到
+         * This used to be a hand-written 56-line "close the store → delete the files → clear memory → rebuild" sequence. It was extracted into
          * `PopopxStorageWipe`（Shared/Features/AntiTheftDuress/PopopxDuressAuthManager.swift），
-         * 因为双密码胁迫自毁要做的是**同一件事**；复制一份的代价是将来只改了一边。
+         * because the dual-passphrase duress self-destruct has to do **the same thing**; the price of a copy is that one side alone gets changed later.
          *
-         * `displayName` 必须在调用**之前**读出来：抽出去的那段序列会先清掉
-         * `DEFAULT_LA_SELF_DESTRUCT*` 两个键再建新用户，等到建用户时再读就永远是 nil，
-         * 机主预设的重建后显示名会静默丢失。
+         * `displayName` must be read **before** the call: the extracted sequence first clears
+         * the two `DEFAULT_LA_SELF_DESTRUCT*` keys and then creates the new user, so reading it only at user-creation time would always give nil,
+         * and the owner's preset post-rebuild display name would be silently lost.
          */
         PopopxStorageWipe.run(
             options: PopopxStorageWipe.Options(

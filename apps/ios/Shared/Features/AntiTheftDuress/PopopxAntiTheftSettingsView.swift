@@ -2,176 +2,176 @@
 //  PopopxAntiTheftSettingsView.swift
 //  POPOPX (iOS)
 //
-//  【物理防抢夺 + 双密码自毁 · 设置页】模块一（传感器/超时/后台锁）与模块三（常规码 +
-//  胁迫码 + 自毁后重建）唯一的配置入口，外加一页"一键模拟演练"。
-//  挂载位置：我 → 隐私与安全设置 → 本页（宿主写 `PopopxAntiTheftSettingsView()`）。
+//  [Physical anti-snatch + dual-password self-destruct · settings page] Module 1 (sensor/timeout/background lock) and module 3 (regular code +
+//  duress code + post-self-destruct rebuild), the one and only configuration entry, plus a "one-tap rehearsal" page.
+//  Mount point: Me → Privacy & security settings → this page (the host writes `PopopxAntiTheftSettingsView()`).
 //
-//  ### 为什么这一页住在"我 → 隐私与安全"下面，而不是新开一个入口
-//  机主要找这个功能的时候，脑子里的问题是"谁能进这个 app、什么情况下它会自我了断"，而这两
-//  句话在本 app 里已经各有答案住在那一格里了：`DEFAULT_PERFORM_LA`（ContentView.swift:46 读它、
-//  PrivacySettings.swift:28 写它）管"谁能进"，`DEFAULT_LA_SELF_DESTRUCT` + `SetAppPasscodeView`
-//  （PrivacySettings.swift:512、:595、:665 起）管"哪把码会触发自我了断"。模块一与模块三就是这两
-//  件事的新增量，不是第三件新事。新开一个顶层入口会产生第二个"安全设置"，而第二个入口的代价在
-//  这里比在别的页面大得多：胁迫场景下人是被逼着在几秒内找到那个开关的，两处都有 = 两处都找不到，
-//  而"机主自己找不到"就是这个功能最坏的一种失效。模块一头注那条"只加一层，不改它一层"因此
-//  在界面上同样成立：本页加在隐私与安全之后，既不动上游那道 LA 门，也不复制它的开关。
+//  ### Why this page lives under "Me → Privacy & security" instead of opening a new entry point
+//  When the owner looks for this feature, the questions in their head are "who can get into this app, and under what circumstances does it end itself", and these
+//  two questions each already have their answers living in that one cell: `DEFAULT_PERFORM_LA` (ContentView.swift:46 reads it,
+//  PrivacySettings.swift:28 writes it) governs "who can get in"; `DEFAULT_LA_SELF_DESTRUCT` + `SetAppPasscodeView`
+//  (PrivacySettings.swift:512, :595, from :665 on) govern "which code triggers ending itself". Modules 1 and 3 are just the new increments of those two
+//  things, not a third new thing. Opening a new top-level entry would create a second "security settings", and the cost of a second entry
+//  here is far larger than on other pages: in a duress scenario the person is forced to find that switch within seconds, present in two places = found in neither,
+//  and "the owner cannot find it themselves" is this feature's worst kind of failure. Module 1's bet "only add a layer, never change one" therefore
+//  holds on the interface too: this page is added after Privacy & security, neither touching the upstream LA gate nor duplicating its switches.
 //
-//  ### 为什么演练页吃纯函数，而不是"真的模拟一次"
-//  "真的模拟一次"在这两个功能上是自相矛盾的：拽落的真实模拟必须真的把屏幕锁掉（把机主手里正在
-//  用的 app 打断），而胁迫码的真实模拟必须真的把数据擦掉——后者不可撤销，一次演练就是一次事故。
-//  所以演练页只走 `PopopxMotionCriteria.evaluate(samples:sensitivity:)` 配两串合成样本
-//  （`syntheticSnatch()` / `syntheticFreeFall()`），以及 `PopopxDuressAuthManager.verify(pin:)`：
-//  前两者是 nonisolated 静态纯函数，返回值 `PopopxMotionVerdict` 是值类型，类型上就携带不了任何
-//  副作用；后者的文档注释（`PopopxDuressAuthManager.verify(pin:)`）写明"纯校验，零副作用"，通向擦除的那条
-//  路是 `submit`，而本页从不调用它。真实流用的也是同一个 `evaluate`（模块一 receive() 里那一行），
-//  所以演练报出来的门限不是"给看的那一套"，就是运行时用的那一套——这是这一页能自证的前提。
+//  ### Why the rehearsal page eats pure functions instead of "really simulating once"
+//  "Really simulating once" is self-contradictory for these two features: a real simulation of the snatch must really lock the screen (interrupting the app
+//  the owner is using right then), while a real simulation of the duress code must really wipe the data — the latter is irreversible, one rehearsal would be one accident.
+//  So the rehearsal page only goes through `PopopxMotionCriteria.evaluate(samples:sensitivity:)` with two synthetic sample strings
+//  (`syntheticSnatch()` / `syntheticFreeFall()`), and `PopopxDuressAuthManager.verify(pin:)`:
+//  the first two are nonisolated static pure functions, the return value `PopopxMotionVerdict` is a value type, so the type itself cannot carry any
+//  side effects; the latter's doc comment (`PopopxDuressAuthManager.verify(pin:)`) states "pure verification, zero side effects", and the road leading to erasure is
+//  `submit`, which this page never calls. The real flow uses the very same `evaluate` (the one line in module 1's receive()),
+//  so the threshold the rehearsal reports is not "the set shown for display", it is the set used at runtime — this is the precondition that lets the page prove itself.
 //
-//  ### 为什么危险操作全部走二次确认，而不是滑动手势
-//  本页唯一的不可逆动作是把两把码写进 Keychain（写错并忘记时，唯一出路是手上抄存的那 12 个
-//  英文词；助记词本身没有任何找回通道，且创建身份不要求手机号/邮箱）与删除这两把码。
-//  滑动手势是肌肉记忆动作，快、连续、没有停顿点，一次兜里的滑动就足以构成"确认"；而这两个后果都不接受这种触发概率。
-//  所以这里一律是 `PopopxButton(role: .destructive)` + `confirmationDialog` 两段式：第一段是明确的
-//  红色 CTA（它自己还带一次 `.medium` 触觉），第二段是系统级、必须再点一次、且带"取消"的独立弹窗。
-//  两次输入之间屏幕内容不变，机主有整段时间反悔。第三处不可逆动作是「重新生成一组」——它作废的是
-//  机主手上抄存的那一张纸，所以它在这两段**之前**还多一段：先在 Keychain 里过一次身份门
-//  （`proveIdentityForRegenerate()`，与「查看」同一对方法），验过了才轮到那枚红色 CTA。
-//  关掉双密码那一格也走同一条门：它的 `didSet` 会
-//  删除胁迫码记录（`PopopxDuressAuthManager.duressEnabled` 的 `didSet`），所以本页把它包成"先问一次"的绑定，
-//  而不是让开关一滑就生效。
+//  ### Why dangerous operations all go through double confirmation instead of swipe gestures
+//  The only irreversible actions on this page are writing the two codes into the Keychain (if you miswrite them and forget, the only way out is the 12 words
+//  hand-copied on paper; the mnemonic itself has no recovery channel at all, and creating an identity requires no phone number/email) and deleting those two codes.
+//  A swipe is a muscle-memory action — fast, continuous, no pause point — one accidental swipe in a pocket is enough to constitute "confirmation"; and neither consequence accepts that trigger probability.
+//  So here it is uniformly the two-stage `PopopxButton(role: .destructive)` + `confirmationDialog`: the first stage is the explicit
+//  red CTA (which itself carries one `.medium` haptic), the second stage is a system-level standalone dialog that must be tapped again and comes with a "Cancel".
+//  Between the two inputs the screen content does not change, so the owner has all the time to change their mind. The third irreversible action is "regenerate a set" — what it voids is
+//  the very sheet the owner hand-copied, so before those two stages it has one more: first pass an identity gate in the Keychain
+//  (`proveIdentityForRegenerate()`, the same pair of methods as "view"), and only after that passes does the red CTA get its turn.
+//  The "turn off dual passwords" cell goes through the same gate: its `didSet` will
+//  delete the duress-code record (the `didSet` of `PopopxDuressAuthManager.duressEnabled`), so this page wraps it into an "ask once first" binding
+//  instead of letting the switch take effect the moment it slides.
 //
-//  ### 助记词是这一页新开的唯一一扇"明文门"，所以它的三件事都带成本说明
-//  12 个英文词是本模块唯一一处可明文恢复的凭据：查看它要先当场验一次机主本人——输对进入密码，
-//  或在「生物识别快捷解锁」开着时过一次 Face ID，而抄在纸上的
-//  那一份等价于"知道这 12 个词的人可以重新设一把进入密码"。本页因此只做三件事——
-//  生成（随进入密码一起，或自己按一次）、查看（每次都要重新验一次，不缓存）、重新生成
-//  （红色二次确认：旧那张纸当场作废，而机主很可能正拿着它）。并且把后果写在明面上：
-//  **用助记词重置进入密码会把应急擦除密码一并清成"未设置"**
-//  （`PopopxDuressAuthManager.resetEntryPinWithMnemonic`）。这一句不是提示而是设计——能重置密码的人
-//  不该同时保有一把他不知道的自毁入口。重置也**不消耗**助记词，想要"用后即焚"要自己按重新生成。
-//  这三条在页面上各有一句人话，不靠实现细节替它们说话。
+//  ### The mnemonic is the only "cleartext gate" this page opens, so all three of its actions carry cost explanations
+//  The 12 English words are this module's only credential recoverable in cleartext: viewing it first requires verifying the owner in person, on the spot — entering the correct entry password,
+//  or passing one Face ID while "Biometric quick unlock" is on — and the copy
+//  on paper is equivalent to "whoever knows these 12 words can set a new entry password". So this page does only three things —
+//  generate (together with the entry password, or by pressing once yourself), view (re-verified every single time, never cached), regenerate
+//  (red double confirmation: the old sheet is voided on the spot, and the owner may well be holding it right then). And the consequences are stated in the open:
+//  **resetting the entry password with the mnemonic also clears the emergency-erasure password to "not set"**
+//  (`PopopxDuressAuthManager.resetEntryPinWithMnemonic`). That sentence is not a hint but a design decision — someone who can reset the password
+//  should not simultaneously hold a self-destruct entry they do not know about. Resetting also does **not consume** the mnemonic; for "burn after use" you must press regenerate yourself.
+//  Each of these three has one plain-language sentence on the page; implementation details are not left to speak for them.
 //
-//  ### 版式与依赖
-//  骨架照抄 Shared/Features/Me/PopopxMeView.swift：ScrollView + `PopopxSectionCard` 分组、
-//  卡片内 `PopopxPickerRow`/`PopopxToggleRow`/`PopopxRadioRow`、页脚一句诚实说明，页面自身
-//  **不装 NavigationStack**（栈由宿主给，见 PopopxMeView.swift:10-12 那条同样的裁定）。
-//  配色、字号、圆角、间距只取 Shared/Theme/PopopxTheme.swift 的 token；提示只走 `PopopxToastModel`，
-//  触觉只走 `PopopxHaptics`；本页不写死一处颜色与间距，也没有新造按钮或输入框。
+//  ### Layout and dependencies
+//  The skeleton copies Shared/Features/Me/PopopxMeView.swift: ScrollView + `PopopxSectionCard` grouping,
+//  `PopopxPickerRow`/`PopopxToggleRow`/`PopopxRadioRow` inside the cards, one honest footer sentence, and the page itself
+//  **does not install a NavigationStack** (the stack comes from the host, see the same ruling at PopopxMeView.swift:10-12).
+//  Colors, font sizes, corner radii, spacing take only tokens from Shared/Theme/PopopxTheme.swift; notices only go through `PopopxToastModel`,
+//  haptics only through `PopopxHaptics`; this page hardcodes no color or spacing anywhere and invents no new button or input field.
 //
-//  ### 两行开关的接线方式（第二轮改造后已经接通，写清楚各自的生效路径）
-//  "行为判据"与"仿真烟雾弹"这两格落的还是模块一里那两把键
-//  （`DEFAULT_ANTI_THEFT_BEHAVIOR_ENABLED`、`DEFAULT_ANTI_THEFT_DECOY_ENABLED`），但两格各自的
-//  生效方式不一样，混成一种写法就会有一格当场不生效：
-//  - 行为判据：绑的是 `PopopxBehaviorGuard.shared.enabled` 本体（`@Bindable`），它自己的 `didSet`
-//    写同一把键**并**调 `sync()`，所以翻完立即起停传感器。早先那一版绑 `@AppStorage`，
-//    键写了、单例没收到，要等下次启动——一个看着拨了实际没生效的安全开关比没有开关更坏。
-//  - 仿真烟雾弹：模块四在它内部现读那把键、**不订阅** UserDefaults 变更通知，并在注释里点名要求
-//    "这一行的 action 必须调 `refreshFromDisk()`"。所以它仍是 `@AppStorage`（模块四没有可绑的
-//    `@Observable` 属性），配一条 `onChange` 补上那一句调用。
-//  两处的键都是本模块唯一的口径，不会出现第二份状态。
+//  ### Wiring of the two switch rows (connected after the second refactor; each one's path to taking effect written out)
+//  The "behavior criteria" and "simulated smoke bomb" cells still land on the same two keys from module 1
+//  (`DEFAULT_ANTI_THEFT_BEHAVIOR_ENABLED`, `DEFAULT_ANTI_THEFT_DECOY_ENABLED`), but the two cells' respective
+//  ways of taking effect differ, and mixing them into one pattern would leave one cell inert on the spot:
+//  - Behavior criteria: binds the `PopopxBehaviorGuard.shared.enabled` instance itself (`@Bindable`), whose own `didSet`
+//    writes the same key **and** calls `sync()`, so flipping it starts/stops the sensors immediately. An earlier version bound `@AppStorage`,
+//    the key got written but the singleton never heard about it, waiting until the next launch — a security switch that looks on but is actually inert is worse than no switch.
+//  - Simulated smoke bomb: module 4 reads that key fresh inside itself, does **not subscribe** to UserDefaults change notifications, and names the requirement in its comments:
+//    "this row's action must call `refreshFromDisk()`". So it stays on `@AppStorage` (module 4 has no bindable
+//    `@Observable` property), with one `onChange` added to make that one call.
+//  Both keys are this module's single source of truth, so no second copy of the state can appear.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖进 POPOPX (iOS) target —— 铁律禁止脚本改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand — an iron rule forbids scripts from editing project.pbxproj.
 //
 
 import Foundation
 import SwiftUI
 
-// MARK: - 设置页
+// MARK: - Settings page
 
 @MainActor
 struct PopopxAntiTheftSettingsView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    /// 模块一的全部状态：开关、灵敏度、超时时档、后台即时锁，以及传感器自己的诊断读数。
-    /// 这里是全仓唯一一处绑定它的界面，写它就走 `didSet` 落 UserDefaults，本页不另存一份布尔。
+    /// All of module 1's state: the switch, sensitivity, timeout tier, background instant lock, and the sensors' own diagnostic readouts.
+    /// This is the only UI in the whole repo bound to it; writing it goes through `didSet` into UserDefaults, and this page stores no extra copy of the booleans.
     @Bindable private var motion = PopopxAntiTheftMotionGuard.shared
 
-    /// 模块三的全部状态：两把码的配置情况、生物识别开关、自毁后的重建模式。
+    /// All of module 3's state: the configuration status of the two codes, the biometrics switch, and the post-self-destruct rebuild mode.
     @Bindable private var duress = PopopxDuressAuthManager.shared
 
     @State private var toast = PopopxToastModel()
 
-    /// 本机有没有生物识别能力。`biometricsAvailable` 每次读都会新建一个 `LAContext`
-    /// （`PopopxDuressAuthManager.biometricsAvailable` 每次读都新建一个 `LAContext`），所以它是"进来问一次"而不是"每帧都问"。
+    /// Whether this device has biometric capability. `biometricsAvailable` creates a new `LAContext` on every read
+    /// (`PopopxDuressAuthManager.biometricsAvailable` builds a fresh `LAContext` per read), so it is "ask once on entry" rather than "ask every frame".
     @State private var biometricsAvailable = false
 
     @State private var showsPinSheet = false
     @State private var showsTimeoutSheet = false
 
-    /// 两段式确认的两个弹窗。
+    /// The two dialogs of the two-stage confirmation.
     @State private var showsCommitDialog = false
     @State private var showsClearDialog = false
     @State private var showsDuressOffDialog = false
 
-    /// 四格口令输入。值只存在于这个 `@State` 里：写入成功、弹窗取消、离开本页时都会被清掉。
-    /// 全页没有任何一处把它们的值送进 `logger`、`toast` 或 `UIPasteboard`。
+    /// Four passphrase input cells. The values exist only in this `@State`: they are cleared on a successful write, on dialog cancel, and on leaving this page.
+    /// Nowhere on the whole page are their values sent into `logger`, `toast`, or `UIPasteboard`.
     @State private var normalPin = ""
     @State private var normalConfirm = ""
     @State private var duressPin = ""
     @State private var duressConfirm = ""
 
-    /// 原生入口码迁移：那两个 `...Active` 是进本页时现问 Keychain 得到的事实，都不为真时下面
-    /// 那一整段卡片根本不渲染，本机没开过原生凭据的人不会莫名其妙被要一个密码。两者按构造互斥
-    ///（`nativeSelfDestructGhostActive` 的定义里带着"入口码已经不在"），所以同一时刻只会出现一格。
+    /// Native entry-code migration: those two `...Active` flags are facts obtained by asking the Keychain when entering this page; when neither is true the entire
+    /// card section below simply does not render, so someone who never enabled native credentials on this device is not randomly asked for a password. The two are mutually exclusive by construction
+    /// (`nativeSelfDestructGhostActive`'s definition carries "the entry code is already gone"), so only one cell can ever appear at a time.
     ///
-    /// 它们不能复用 `pinField`：原生那两道码是**纯数字、4 到 16 位**——键盘只有 0-9 且写死
+    /// They cannot reuse `pinField`: the two native codes are **digits only, 4 to 16 long** — the keyboard offers only 0-9 and hardwires
     /// `password.count < 16`（Shared/Views/LocalAuth/PasscodeEntry.swift:122-131），
-    /// 提交键还额外要求不少于 4 位（同目录 PasscodeView.swift:81）；`pinField` 截到 6 位，
-    /// 套上去会让一条 7 到 16 位的旧码永远输不完整、机主撞上"我明明输对了"那次拒绝。
-    /// 存进去的是原文（Shared/Views/LocalAuth/SetAppPasscodeView.swift:37 `set(passcode)`），
-    /// 所以比对必须由机主重新输一遍，无法从别处推导。
+    /// the submit key to additionally require no fewer than 4 digits (PasscodeView.swift:81 in the same directory); `pinField` truncates to 6 digits,
+    /// and reusing it would make a 7-to-16-digit old code impossible to type in full, and the owner would run into that "but I definitely typed it right" rejection.
+    /// What gets stored is the raw text (Shared/Views/LocalAuth/SetAppPasscodeView.swift:37 `set(passcode)`),
+    /// so the comparison must be done by the owner typing it again; it cannot be derived from anywhere else.
     @State private var nativeEntryPasswordActive = false
     @State private var nativeSelfDestructGhostActive = false
     @State private var nativePasscode = ""
     @State private var nativeSelfDestructCode = ""
 
-    /// 写入过程中的错误文案：只装 `PopopxDuressSetupError.errorDescription` 原样那十五句，
-    /// 本页不另写一份同义文案。
+    /// Error text during the write: holds only the fifteen verbatim sentences of `PopopxDuressSetupError.errorDescription`,
+    /// this page writes no synonymous copy of its own.
     @State private var pinFeedback: String?
     @State private var isWritingPins = false
 
-    /// 模块二、模块四那两行的开关。两行各自怎么当场生效，见文件头"两行开关的接线方式"那一节：
-    /// 行为判据直接绑单例（它的 `didSet` 负责写键 + `sync()`），仿真内容绑 `@AppStorage` 再配
-    /// 一条 `onChange` 去叫模块四重读磁盘。
+    /// The switches for the module 2 and module 4 rows. How each row takes effect on the spot: see the "Wiring of the two switch rows" section at the file head:
+    /// behavior criteria binds the singleton directly (its `didSet` is responsible for writing the key + `sync()`), the simulated content binds `@AppStorage` plus
+    /// one `onChange` that calls module 4 to re-read from disk.
     ///
-    /// 自毁方向是安全的：`PopopxAntiTheftSwitches.eraseAllTraces()` 先把两个单例的 `enabled` 拨假、
-    /// 再删这批键，所以 `didSet` 回写的那一下不会让开关复活。
+    /// The self-destruct direction is safe: `PopopxAntiTheftSwitches.eraseAllTraces()` first flips both singletons' `enabled` to false,
+    /// then deletes this batch of keys, so the `didSet` write-back cannot resurrect the switches.
     @Bindable private var behavior = PopopxBehaviorGuard.shared
     @AppStorage(DEFAULT_ANTI_THEFT_DECOY_ENABLED) private var decoyEnabled = false
 
-    // MARK: 「保留指定昵称」的身份点名（第二轮改造新增）
+    // MARK: identity roll-call for "keep specified nicknames" (added in the second refactor)
     //
-    // 这一档存的是 `profileId` + `displayName` —— 身份信息，不是偏好，所以绝不能由界面凭空造一个
-    // 0 号糊过去。列表的唯一真相来源是底层 `listUsersAsync()`，不是 `ChatModel.users`：后者可能还是
-    // 启动时读的那份，而本页点错一个名字，自毁时就少删/多删一个真实身份。
+    // This tier stores `profileId` + `displayName` — identity information, not a preference, so the UI must never invent one
+    // out of thin air as profile 0 to fudge past it. The list's only source of truth is the underlying `listUsersAsync()`, not `ChatModel.users`: the latter may still be
+    // the copy read at launch, and getting one name wrong on this page means one real identity wrongly kept or wrongly deleted at self-destruct time.
     @State private var retainCandidates: [PopopxRetainCandidate] = []
-    /// 拉过一次的标记。失败与"确实只有 0/1 个身份"在这一版里合并成同一个显示（防呆那一行），
-    /// 理由见 `loadRetainCandidates()` 的注释——那是安全方向上的合并，不是偷懒。
+    /// The fetched-once flag. Failure and "really only 0/1 identities" are merged into the same display in this version (the fool-proofing row),
+    /// reason in the comments of `loadRetainCandidates()` — that is a merge in the safe direction, not laziness.
     @State private var retainLoaded = false
     @State private var showsRetainSheet = false
 
-    // MARK: 助记词的三份界面副本（值只活在这里，离开本页/查看成功后立刻清）
+    // MARK: the mnemonic's three interface copies (values live only here, cleared on leaving the page / after a successful view)
     //
-    // 12 个英文词是**明文**，比那两把码更需要"用完就丢"：它不像 `PopopxDuressVerifier` 那样
-    // 只有派生值，它本身就是能直接开门的东西。所以本页没有任何一处把它写进 `logger`、
-    // `UIPasteboard`、`toast` 或任何持久化位置，也不在卡片上默认显示——必须过一次身份门
-    // （输对当前进入密码，或在「生物识别快捷解锁」开着时让 Face ID 认出机主），
-    // 才在这一个 `@State` 里出现一次。「重新生成一组」走的是同一对门，但它只取"证明"、
-    // 不取词组：作废旧的那一张不需要先把旧的那一张摆到屏幕上。
+    // The 12 English words are **cleartext** and need "use and discard" even more than the two codes: unlike `PopopxDuressVerifier`,
+    // which holds only derived values, this itself is the thing that directly opens the door. So nowhere on this page is it written into `logger`,
+    // `UIPasteboard`, `toast`, or any persistent location, nor displayed on the card by default — it must first pass an identity gate
+    // (type the current entry password correctly, or let Face ID recognize the owner while "Biometric quick unlock" is on),
+    // before it appears once in this single `@State`. "Regenerate a set" goes through the same pair of gates, but it takes only the "proof",
+    // not the words: voiding the old sheet does not require first putting the old sheet on the screen.
     @State private var showsMnemonicSheet = false
-    /// 「查看」与「重新生成」那一次性的进入密码输入。
+    /// The one-off entry-password inputs for "view" and "regenerate".
     @State private var mnemonicUnlockPin = ""
-    /// 验过之后拿到的那 12 个词（`revealMnemonic` 返回的已规范化单词数组，只为带序号显示；
-    /// 比对从来不用这一份）。空数组 = 当前没有显示。
+    /// The 12 words obtained after verification (the normalized word array returned by `revealMnemonic`, only for numbered display;
+    /// comparison never uses this copy). Empty array = nothing currently displayed.
     @State private var mnemonicWords: [String] = []
     @State private var mnemonicFeedback: String?
-    /// 这一格唯一的单飞开关：三问（密码查看、Face ID 查看、重新生成的证明）共用它，
-    /// 所以任何一问在跑时其余两枚按钮自己变灰——一次只该有一个证明在飞行中。
+    /// This cell's only single-flight switch: the three asks (password view, Face ID view, regenerate proof) share it,
+    /// so while any one is running the other two buttons grey out on their own — only one proof should ever be in flight.
     @State private var isReadingMnemonic = false
-    /// 重新生成 = 旧那张纸当场作废，所以它和"写入两把码"一样是红色二次确认。
-    /// 那一次确认只在身份门验过之后才出现，见 `proveIdentityForRegenerate()`。
+    /// Regenerate = the old sheet is voided on the spot, so like "write the two codes" it is a red double confirmation.
+    /// That confirmation only appears after the identity gate has passed; see `proveIdentityForRegenerate()`.
     @State private var showsMnemonicRegenDialog = false
-    /// 随进入密码一起生成的那一份新词组：设置成功后留在 sheet 上，等机主亲手点"我已抄存"。
-    /// 不自动关 sheet —— 一弹出来就关掉，等于把唯一的抄存机会扔了。
+    /// The new word set generated together with the entry password: after a successful setup it stays on the sheet, waiting for the owner to personally tap "I have copied it down".
+    /// The sheet does not auto-close — closing it the moment it pops up would throw away the only chance to copy it down.
     @State private var freshMnemonic: [String]?
 
     init() {}
@@ -180,10 +180,10 @@ struct PopopxAntiTheftSettingsView: View {
         wrapped
     }
 
-    /// 卡片本身。与下面 `wrapped` 分开写，是为了给类型检查器两个独立的推断上下文：
-    /// 九张卡 + 四只 sheet + 四个确认框 + `task`/`onChange` 挂在同一条链上时，Swift 报的是
-    /// "unable to type-check this expression in reasonable time"，而落点指向中间某行无辜的
-    /// `Text(...)`——拆表达式是唯一修法，行为一行都不改。
+    /// The cards themselves. Written separately from `wrapped` below in order to give the type checker two independent inference contexts:
+    /// with nine cards + four sheets + four confirmation dialogs + `task`/`onChange` hung on the same chain, Swift reports
+    /// "unable to type-check this expression in reasonable time", and the reported location points at some innocent line in the middle, a
+    /// `Text(...)` — splitting the expression is the only fix, and not one line of behavior changes.
     private var pageContent: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
@@ -200,18 +200,18 @@ struct PopopxAntiTheftSettingsView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top, PopopxMetrics.spaceS)
             .padding(.bottom, PopopxMetrics.space2XL)
-            // 灵敏度、档位、双密码配置状态都会改写这几张卡的说明文字。Reduce Motion 下直接落位。
+            // Sensitivity, tier, and the dual-password configuration state all rewrite these cards' explanatory text. Under Reduce Motion it lands directly.
             .popopxAnimation(PopopxSpring.fluid, value: animationKey, reduceMotion: reduceMotion)
         }
         .background(PopopxPalette.base)
         .navigationTitle(Copy.pageTitle)
-        // 本页是被推进来的一级子页（我 → 隐私与安全 → 本页），标题走 inline 才不会把第一张卡顶出屏。
+        // This page is a pushed first-level subpage (Me → Privacy & security → this page); the title goes inline so the first card is not pushed off screen.
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    /// 弹层与生命周期钩子。这一层里 `pageContent` 已经是一个敲定的不透明类型，所以下面这条长链
-    /// 不必再把六张卡的类型一起推——上面 `pageContent` 记的那次 "unable to type-check this expression in reasonable
-    /// time" 报在一行无辜的 `Text(...)` 上，病根是整条链只有一个推断上下文。行为一行都没改。
+    /// Sheets and lifecycle hooks. At this layer `pageContent` is already a settled opaque type, so the long chain below
+    /// does not have to infer the six cards' types along with it — the "unable to type-check this expression in reasonable
+    /// time" recorded above for `pageContent` was reported on an innocent `Text(...)` line; the root cause was the whole chain having a single inference context. Not one line of behavior changed.
     private var wrapped: some View {
         pageContent
         .sheet(isPresented: $showsPinSheet) {
@@ -226,12 +226,12 @@ struct PopopxAntiTheftSettingsView: View {
         .sheet(isPresented: $showsMnemonicSheet) {
             mnemonicSheet
         }
-        // 模块四现读那把键、不订阅变更通知，所以撤销/装载仿真内容必须由这一句去叫它重读磁盘。
-        // 只挂在 `decoyEnabled` 上：另一格（行为判据）绑的是单例本体，它的 `didSet` 自己 `sync()`。
+        // Module 4 reads that key fresh and does not subscribe to change notifications, so undoing/loading the simulated content must go through this line telling it to re-read from disk.
+        // Attached only to `decoyEnabled`: the other cell (behavior criteria) binds the singleton instance itself, and its `didSet` calls `sync()` on its own.
         .onChange(of: decoyEnabled) { _, _ in
             PopopxDecoyProfileGenerator.shared.refreshFromDisk()
         }
-        // 写入前的红色二次确认。这个后果不可恢复，所以它必须由一次独立的、带"取消"的点击构成。
+        // The red double confirmation before the write. This consequence is unrecoverable, so it must consist of a separate click with a "Cancel".
         .confirmationDialog(Copy.commitDialogTitle, isPresented: $showsCommitDialog, titleVisibility: .visible) {
             Button(Copy.commitDialogConfirm, role: .destructive) {
                 Task { @MainActor in
@@ -261,10 +261,10 @@ struct PopopxAntiTheftSettingsView: View {
         } message: {
             Text(Copy.duressOffDialogMessage)
         }
-        // 「重新生成」毁掉的是机主手上那张纸，而这个动作在页面上看起来只是点了一下按钮。
-        // 所以它必须有一次独立、带"取消"、且把后果念一遍的第二击——与"写入两把码"同一道题。
-        // 这一击排在身份验证**之后**：`proveIdentityForRegenerate()` 先证明按的人有机主的
-        // 凭据，这里再证明他知道自己要作废什么。两道都不给缓存，所以取消之后再按会重新问一遍。
+        // What "regenerate" destroys is the sheet in the owner's hands, yet on the page the action looks like nothing but a button tap.
+        // So it needs a second, independent click with a "Cancel" that reads the consequences aloud — the same question as "write the two codes".
+        // This click is ordered **after** identity verification: `proveIdentityForRegenerate()` first proves the person pressing it holds the owner's
+        // credentials, then this proves they know what they are about to void. Neither gate caches, so pressing again after a cancel asks all over again.
         .confirmationDialog(Copy.mnemonicRegenTitle, isPresented: $showsMnemonicRegenDialog, titleVisibility: .visible) {
             Button(Copy.mnemonicRegenConfirm, role: .destructive) {
                 Task { @MainActor in
@@ -277,42 +277,42 @@ struct PopopxAntiTheftSettingsView: View {
         }
         .popopxToast(toast)
         .task {
-            // 每次进本页都问一次 Keychain 真实配置，而不是相信内存里那次缓存
-            //（`refreshConfiguration` 自己的文档注释写明了为什么要重新读，而不是信内存那份缓存）。
+            // Every time this page is entered, ask the Keychain for the true configuration instead of trusting the cached one in memory
+            // (`refreshConfiguration`'s own doc comment states why it must re-read rather than trust the in-memory cache).
             duress.refreshConfiguration()
             biometricsAvailable = duress.biometricsAvailable
-            // 原生入口码 / 幽灵自毁码是否还在，同样只在这一句里问一次：它们是 Keychain 读数，
-            // 放进 body 会让每次重绘都去访问一次 Keychain。
+            // Whether the native entry code / ghost self-destruct code still exists is likewise asked only once, in this line: they are Keychain reads,
+            // and putting them in body would make every redraw hit the Keychain once.
             nativeEntryPasswordActive = PopopxDuressAuthManager.nativeEntryPasswordActive
             nativeSelfDestructGhostActive = PopopxDuressAuthManager.nativeSelfDestructGhostActive
-            // 身份列表同理：机主很可能就是"先去首页建一个马甲、再进来点这一档"，
-            // 用上次那份列表判"只有一个身份"会把他挡在门外。
+            // Same for the identity list: the owner may well be exactly the person who "first creates an alternate profile on the home page, then comes in and picks this tier",
+            // and judging "only one identity" from the previous list would lock them out.
             await loadRetainCandidates()
         }
         .onChange(of: showsPinSheet) { _, opened in
             if !opened { clearPinFields() }
         }
-        // 关掉查看弹层 = 那 12 个明文词从界面上消失。下一次要看必须重新验一次进入密码，
-        // 本页没有任何一处把词组缓存到 `didSet`、UserDefaults 或"上次看过"的状态里。
+        // Closing the view sheet = the 12 cleartext words disappear from the interface. The next view requires verifying the entry password all over again;
+        // nowhere on this page is the word set cached into a `didSet`, UserDefaults, or any "seen before" state.
         .onChange(of: showsMnemonicSheet) { _, opened in
             if !opened { clearMnemonicFields() }
         }
     }
 
-    /// 动画的触发键：把会影响卡片文字的几个状态并成一个字符串，避免为每个状态各挂一次动画。
+    /// The animation's trigger key: several states that affect the cards' text are merged into one string, avoiding hanging one animation per state.
     ///
-    /// 后三项是这一轮加的：助记词的"已设置/未设置"、十次抹除开关、当前失败次数，
-    /// 三个都会改写卡片里的说明句子。漏掉任何一项，那一格会在状态已经变了之后仍留着上一句
-    /// ——本页没有别的刷新时机（`task` 只在进场时跑一次），所以这个键就是唯一的驱动。
+    /// The last three items were added this round: mnemonic "set / not set", the ten-strike wipe switch, the current failure count,
+    /// and all three rewrite the explanatory sentences inside the cards. Miss any one and that cell keeps the previous sentence after its state has already changed
+    /// — this page has no other refresh moment (`task` runs only once on entry), so this key is the only driver.
     ///
-    /// **冷却剩余秒数故意不进这个键**：它是 `Date` 与存下来那个时刻的差，只有墙钟在动、
-    /// 状态没动，放进键里既不会真的每秒变化（没有东西驱动重绘），又会误导后来人以为它在跳。
-    /// 那一行的每秒刷新由 `cooldownRow` 自己的 `TimelineView` 负责。
+    /// **The remaining cooldown seconds are deliberately kept out of this key**: they are the difference between `Date` and the stored moment — only the wall clock moves,
+    /// the state does not; putting it in the key would neither actually change every second (nothing drives a redraw) nor stop misleading later readers into thinking it ticks.
+    /// That row's per-second refresh is handled by `cooldownRow`'s own `TimelineView`.
     private var animationKey: String {
         "\(motion.enabled)-\(motion.sensitivity.wireValue)-\(duress.normalConfigured)-\(duress.duressConfigured)-\(duress.retentionStrategy.segmentIndex)-\(duress.retentionStrategy.retainedProfileId ?? -1)-\(duress.mnemonicConfigured)-\(duress.wipeOnTenthFailure)-\(duress.failedAttemptCount)"
     }
 
-    // MARK: 总开关
+    // MARK: master switch
 
     private var masterCard: some View {
         PopopxSectionCard(Copy.groupMaster, footnote: Copy.masterFootnote) {
@@ -333,8 +333,8 @@ struct PopopxAntiTheftSettingsView: View {
                 isOn: $motion.instantLockOnBackground
             )
             AntiTheftDivider()
-            // 生物识别不可用时这一行必须看得见但点不动，并且当场说明为什么：只把它藏起来，
-            // 机主会以为这个功能不存在，然后在最需要它的时候找不到它。
+            // When biometrics are unavailable this row must stay visible but untappable, and say why on the spot: simply hiding it
+            // would make the owner think the feature does not exist, and then fail to find it exactly when they need it most.
             PopopxToggleRow(
                 Copy.biometricsRow,
                 note: biometricsNote,
@@ -365,7 +365,7 @@ struct PopopxAntiTheftSettingsView: View {
         }
     }
 
-    /// 连续失败降级的那一句用的是管理器自己的常数，不在这里另写一个 2。
+    /// The consecutive-failure downgrade sentence uses the manager's own constant; no second literal 2 is written here.
     private var biometricsNote: String {
         if !biometricsAvailable {
             return Copy.biometricsNoteUnavailable
@@ -376,19 +376,19 @@ struct PopopxAntiTheftSettingsView: View {
         )
     }
 
-    /// 手动锁一次。`PopopxLockReason.manual` 的后果就是"再认证一次"，与传感器判据同级，
-    /// 所以这一枚按钮不需要确认弹窗：它不通向任何擦除。
+    /// Lock once manually. The consequence of `PopopxLockReason.manual` is "re-authenticate once", at the same level as the sensor criteria,
+    /// So this button needs no confirmation dialog: it leads to no erasure whatsoever.
     private func lockManually() {
         PopopxAppLockState.shared.lock(reason: .manual)
         PopopxHaptics.impact(.light)
         toast.show(Copy.lockNowDone, kind: .encrypted)
     }
 
-    // MARK: 灵敏度
+    // MARK: sensitivity
 
-    /// 分段器的三个档就是枚举自己的 `allCases`，标签就是它自带的 `label`（三枚都是 ≤4 个汉字，
-    /// `PopopxSegmentedControl` 内部那一行 `.lineLimit(1)` 在小屏上截不下更长的说法）。
-    /// 元素类型写全是为了让 `Selection` 这个泛型参数当场定下来，不靠整段表达式反推。
+    /// The segmented picker's three tiers are the enum's own `allCases`, and the labels are its built-in `label` (all three are ≤4 Chinese characters,
+    /// the `.lineLimit(1)` line inside `PopopxSegmentedControl` cannot fit longer wording on small screens).
+    /// Writing the element type out in full is to pin the `Selection` generic parameter on the spot, instead of inferring it back from the whole expression.
     private var sensitivityOptions: [PopopxSegmentedControl<PopopxMotionSensitivity>.Option] {
         PopopxMotionSensitivity.allCases.map { .init(selection: $0, title: $0.label) }
     }
@@ -403,9 +403,9 @@ struct PopopxAntiTheftSettingsView: View {
             .accessibilityIdentifier("popopx.antiTheft.sensitivity")
             .padding(.bottom, PopopxMetrics.spaceXS)
 
-            // 这两行是本页"自证在做什么"的那一半：门限直接从 `PopopxMotionCriteria` 与档位的
-            // `spikeG`/`spinOmega` 读出来，改判据常数这一页立刻跟着改写，不会出现界面与运行时
-            // 各说一套门限。
+            // These two lines are the half of this page that "proves what it is doing": the thresholds are read straight from `PopopxMotionCriteria` and from the tier's
+            // `spikeG`/`spinOmega`; change a criteria constant and this page rewrites along with it immediately, so the interface and the runtime
+            // never each tell a different story about the thresholds.
             VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
                 thresholdLine(
                     Copy.thresholdHeadline,
@@ -435,8 +435,8 @@ struct PopopxAntiTheftSettingsView: View {
                 tint: .neutral,
                 isOn: $behavior.enabled
             )
-            // 倾角门限：模块二唯一的数值判据。滑到多小都仍在它的 `sanitize` 区间内（15~75），
-            // 越界值由它自己夹回来，本页不复算第二套上下限。
+            // Tilt-angle threshold: module 2's only numeric criterion. However small you slide it, it stays inside its `sanitize` range (15~75),
+            // out-of-range values are clamped back by itself, and this page does not recompute a second set of upper/lower bounds.
             AntiTheftDivider()
             PopopxSliderRow(
                 Copy.angleRow,
@@ -452,9 +452,9 @@ struct PopopxAntiTheftSettingsView: View {
         }
     }
 
-    /// 判据全文，四个数字全部取模块二自己的常数：本页自己复述一遍数字，就是给将来改常数的人留一个
-    /// 会说谎的文案。方向口径也照 `PopopxBehaviorCriteria.evaluate` 的原样（严格大于门限，
-    /// 持续秒数与触摸次数各自"达到即算"），不为了读起来顺而写成 ≥ / >。
+    /// The full criteria text; all four numbers come from module 2's own constants: if this page restated the numbers itself, it would leave whoever changes the constants later
+    /// a copy that can lie. The directional convention also follows `PopopxBehaviorCriteria.evaluate` as-is (strictly greater than the threshold,
+    /// duration seconds and touch counts each counting "once reached"), not written as ≥ / > just to read more smoothly.
     private var angleNoteText: String {
         String(
             format: Copy.angleFormat,
@@ -477,14 +477,14 @@ struct PopopxAntiTheftSettingsView: View {
         }
     }
 
-    // MARK: 无操作锁屏时长
+    // MARK: idle auto-lock duration
     //
-    // 选 `PopopxPickerRow` + Sheet 内 `PopopxRadioRow`，而不是把五行 RadioRow 直接铺在页面上，
-    // 理由有两层：一是仓库现状——所有"N 选一且每项都带解释"的档位（附近配对策略
-    // `PopopxMeView.pairingPolicySheet` 与 `PopopxSettingsViews` 里同名的那一个）走的都是"入口行 + radio 表"这一条，
-    // 沿用它是为了这一页看起来本来就是这个 app 的一部分；二是这一格一共五个档，铺在页面上会
-    // 让"锁屏时长"这一组比它上面的双密码还长，排版重心就歪了。入口行尾还多带一个当前档位的标签，
-    // 铺开来反而看不到"现在选的是哪个"。
+    // Chose `PopopxPickerRow` + `PopopxRadioRow` inside the sheet, rather than spreading five RadioRow lines directly on the page,
+    // for two layers of reasons: first the repo's status quo — every "N-choose-one with an explanation per item" tier (the nearby pairing policy in
+    // `PopopxMeView.pairingPolicySheet` and the same-named one in `PopopxSettingsViews`) all go the "entry row + radio table" route;
+    // following it makes this page look like it was always part of this app; second, this cell has five tiers in total, and spreading them on the page would
+    // make the "lock screen duration" group longer than the dual passwords above it, and the layout's center of gravity would tip. The entry row's tail also carries a current-tier label;
+    // spread out, you would actually lose sight of "which one is selected now".
 
     private var inactivityCard: some View {
         PopopxSectionCard(Copy.groupInactivity, footnote: Copy.inactivityFootnote) {
@@ -531,7 +531,7 @@ struct PopopxAntiTheftSettingsView: View {
         .presentationDragIndicator(.visible)
     }
 
-    /// 五个档各有自己的后果说明，`never` 那一档必须把风险写出来而不是只写"永不"。
+    /// Each of the five tiers has its own consequence note, and the `never` tier must spell out the risk rather than only writing "never".
     private func timeoutNote(_ timeout: PopopxInactivityTimeout) -> String {
         switch timeout {
         case .oneMinute: return Copy.timeoutNoteOne
@@ -542,7 +542,7 @@ struct PopopxAntiTheftSettingsView: View {
         }
     }
 
-    // MARK: 双密码
+    // MARK: dual passwords
 
     private var duressCard: some View {
         PopopxSectionCard(Copy.groupDuress, footnote: Copy.duressFootnote) {
@@ -569,13 +569,13 @@ struct PopopxAntiTheftSettingsView: View {
             .accessibilityIdentifier("popopx.antiTheft.duressEntry")
             .accessibilityValue(duressStatusValue)
             AntiTheftDivider()
-            // 应急擦除密码单独那一行的状态，按简报口径只说两种话：已设置 / 未设置。
-            // 它是 `duressConfigured` 的直接读数，而后者每次都由 `refreshConfiguration()`
-            // 现问 Keychain——所以触发过一次应急擦除、再回到本页，这里会自己变成"未设置"，
-            // 本页不需要额外记"刚刚自毁过"这种状态（记了反而会与 Keychain 打架）。
+            // The state of the emergency-erasure password's own row, speaking only the two wordings the brief allows: set / not set.
+            // It is a direct reading of `duressConfigured`, and the latter each time goes through `refreshConfiguration()`
+            // asking the Keychain fresh — so once an emergency erasure has been triggered, returning to this page this turns into "not set" on its own,
+            // and the page needs no extra bookkeeping of a "just self-destructed" state (keeping one would only quarrel with the Keychain).
             thresholdLine(Copy.duressStateHeadline, duressStateValue)
             AntiTheftDivider()
-            // 不可恢复的动作留成一行红 + 一次系统弹窗；`PopopxButton` 自己会读 isEnabled 降到 0.45。
+            // Unrecoverable actions stay as one red row + one system dialog; `PopopxButton` itself reads isEnabled and drops it to 0.45.
             PopopxButton(
                 Copy.duressClearRow,
                 systemImage: "trash",
@@ -587,8 +587,8 @@ struct PopopxAntiTheftSettingsView: View {
         }
     }
 
-    /// 关掉这一格会删掉胁迫码记录（`PopopxDuressAuthManager.duressEnabled` 的 `didSet`），所以 `set` 只开弹窗、
-    /// 不写值：真正的写入在 `confirmationDialog` 的红色那一支里。开的那一方向没有副作用，直接写。
+    /// Turning this cell off deletes the duress-code record (the `didSet` of `PopopxDuressAuthManager.duressEnabled`), so `set` only opens the dialog
+    /// and writes no value: the real write happens in the red branch of the `confirmationDialog`. The turning-on direction has no side effects and writes directly.
     private var duressEnabledBinding: Binding<Bool> {
         Binding(
             get: { duress.duressEnabled },
@@ -608,7 +608,7 @@ struct PopopxAntiTheftSettingsView: View {
             : Copy.duressSwitchNoteOff
     }
 
-    /// 行尾写的是 Keychain 里现在真的有什么，不是"我刚才设过了吧"。
+    /// What the row's tail states is what is really in the Keychain right now, not "I did set it just now, right?".
     private var duressStatusValue: String {
         if !duress.normalConfigured {
             return Copy.duressStatusNone
@@ -616,51 +616,51 @@ struct PopopxAntiTheftSettingsView: View {
         return duress.duressConfigured ? Copy.duressStatusBoth : Copy.duressStatusNormalOnly
     }
 
-    /// 应急擦除密码这一件事本身的状态。它的一切写入点都在模块三内部，且每一处都是跟着
-    /// Keychain 的实际读数走的（`refreshConfiguration()` 现问、`setDuressPin` 写成功后置真、
-    /// `clearDuressPin`/`duressEnabled` 的 `didSet`/降级那一步 `runDuressFlow` 置假）。
-    /// 所以"触发过一次应急擦除、再回本页显示未设置"不是本页的判断，而是把 Keychain 的事实原样念出来。
+    /// The state of the emergency-erasure-password matter itself. All of its write points are inside module 3, and every one of them follows
+    /// the Keychain's actual readings (`refreshConfiguration()` asks fresh, `setDuressPin` sets true after a successful write,
+    /// `clearDuressPin`/the `didSet` of `duressEnabled`/the downgrade step in `runDuressFlow` set it false).
+    /// So "once an emergency erasure was triggered, returning here shows not set" is not this page's judgement; it reads the Keychain's facts out verbatim.
     private var duressStateValue: String {
         duress.duressConfigured ? Copy.duressStateSet : Copy.duressStateUnset
     }
 
-    // MARK: 12 词助记词
+    // MARK: 12-word mnemonic
 
-    /// 助记词那一格的状态，与 `duressStateValue` 同一个口径：**现问 Keychain**。
-    /// `mnemonicConfigured` 要求"派生哈希 + 可回看明文"两条记录都在（管理器里那条与运算），
-    /// 所以半新一旧的助记词在这里读作"未设置"，而不是显示一句"可以查看"再把机主送去撞一次失败。
+    /// The state of the mnemonic cell, on the same convention as `duressStateValue`: **ask the Keychain fresh**.
+    /// `mnemonicConfigured` requires both the "derived hash + viewable cleartext" records to exist (that AND in the manager),
+    /// so a half-new-half-stale mnemonic reads as "not set" here, instead of showing a "viewable" line and then sending the owner into a failure.
     private var mnemonicStateValue: String {
         duress.mnemonicConfigured ? Copy.mnemonicStateSet : Copy.mnemonicStateUnset
     }
 
-    /// Face ID 那道门现在能不能用。三条缺一不可，且与
-    /// `PopopxDuressAuthManager.verifyIdentityWithBiometrics` 开头那三道 `guard` 一一对应：
-    /// 少一条，弹层里那枚「用 Face ID 验证并显示」与那枚「用 Face ID 验证并重新生成」
-    /// 按下去就只会得到一句"未通过"——两问共用这一道门，所以也共用这一条判断。
-    /// - `duress.biometricsEnabled`：本页那个总开关。
-    /// - `!duress.keypadRequired`：遮罩上刚连着失败两次，本次会话降级成"只认键盘码"。
-    ///   这条降级同样管到设置页——它是"这段时间内生物识别不可信"，不是"锁屏那一面暂时不给"。
-    /// - `biometricsAvailable`：本机现在判得出可用。这里用的是本页 `@State` 那份"进来问一次"的
-    ///   读数；管理器那一版每次读都新建一个 `LAContext`，放进 body 就是每次重绘问一次。
-    /// 冷却状态故意不在这里问，理由与那边相同：这两问都不吃失败计数，也就没有可归零的东西。
+    /// Whether the Face ID gate can be used right now. All three conditions are required, corresponding one-to-one with
+    /// the three `guard`s at the head of `PopopxDuressAuthManager.verifyIdentityWithBiometrics`:
+    /// miss one, and the sheet's "verify with Face ID and show" button and the "verify with Face ID and regenerate" button
+    /// would only yield a "not passed" once pressed — both asks share this gate, so they also share this check.
+    /// - `duress.biometricsEnabled`: that master switch on this page.
+    /// - `!duress.keypadRequired`: two consecutive failures just happened on the overlay, so this session is downgraded to "keypad code only".
+    ///   This downgrade also reaches the settings page — it means "biometrics are untrusted during this period", not "the lock screen side temporarily withholds it".
+    /// - `biometricsAvailable`: this device currently judges them available. What is used here is this page's `@State` copy of the "ask once on entry"
+    ///   reading; the manager's version builds a new `LAContext` on every read, and putting that in body would mean asking on every redraw.
+    /// The cooldown state is deliberately not asked here, for the same reason as over there: neither of these two asks consumes the failure count, so there is nothing to zero out.
     private var mnemonicFaceIDOffered: Bool {
         duress.biometricsEnabled && !duress.keypadRequired && biometricsAvailable
     }
 
-    /// 助记词那一行的行尾值。三个值而不是"已配置/未配置"两个：那道门开不开，机主在
-    /// 这一行就该看见，而不是点进弹层才发现少了一枚按钮。
+    /// The tail value of the mnemonic row. Three values rather than the two "configured/not configured": whether that gate is open, the owner should
+    /// see it on this very row, rather than tap into the sheet only to discover a button is missing.
     private var mnemonicRowValue: String {
         guard duress.mnemonicConfigured else { return Copy.mnemonicRowGenerate }
         return mnemonicFaceIDOffered ? Copy.mnemonicRowRevealEither : Copy.mnemonicRowReveal
     }
 
-    /// 「重新生成一组」这一问走哪道门，取值规则与上面那两枚「查看」按钮是同一套：
-    /// - `.entryPin`：密码框里已经填够 6 位——走 `verifyEntryPin`，与「验证并显示」同一半实现。
-    /// - `.biometric`：没填够，但 Face ID 那道门开着——走 `verifyIdentityWithBiometrics`。
-    /// - `.unavailable`：两条都不满足，没有门可走。这一支**禁用**按钮，理由与 Face ID
-    ///   那一枚只在真能通过时出现是同一条：一枚按下去只会报错的按钮不该存在于页面上。
-    /// 填了 3 位、Face ID 又开着时算 `.biometric`：那半截密码不构成一条能走的路，
-    /// 而"用 Face ID 也一样能过"是真的，机主随时可以改成打满 6 位换回密码那一道路。
+    /// Which gate the "regenerate a set" ask takes; the value rules are the same set as the two "view" buttons above:
+    /// - `.entryPin`: the password field already holds a full 6 digits — goes through `verifyEntryPin`, the same half of the implementation as "verify and show".
+    /// - `.biometric`: not filled enough, but the Face ID gate is open — goes through `verifyIdentityWithBiometrics`.
+    /// - `.unavailable`: neither holds, no gate to walk. This branch **disables** the button, for the same reason as the Face ID
+    ///   button only appearing when it can truly pass: a button that would only raise an error when pressed should not exist on the page.
+    /// With 3 digits typed and Face ID open it counts as `.biometric`: that half-length password does not constitute a walkable path,
+    /// while "Face ID passes just as well" is true, and the owner can switch back to the password path at any time by typing the full 6 digits.
     private enum MnemonicRegenDoor {
         case entryPin
         case biometric
@@ -672,8 +672,8 @@ struct PopopxAntiTheftSettingsView: View {
         return mnemonicFaceIDOffered ? .biometric : .unavailable
     }
 
-    /// 门写在按钮名字上，机主按下去之前就知道这一次要交的是什么。词法与「验证并显示」/
-    /// 「用 Face ID 验证并显示」那一对齐：不带定语的"验证"就是指上面那个密码框。
+    /// The gate is written into the button's name, so before pressing the owner knows what this one hands over. The wording aligns with the "verify and show" /
+    /// "verify with Face ID and show" pair: a bare "verify", with no qualifier, means the password field above.
     private var mnemonicRegenLabel: String {
         guard duress.mnemonicConfigured else { return Copy.mnemonicSheetGenerate }
         switch mnemonicRegenDoor {
@@ -702,29 +702,29 @@ struct PopopxAntiTheftSettingsView: View {
             .accessibilityIdentifier("popopx.antiTheft.mnemonicEntry")
             .accessibilityValue(mnemonicRowValue)
             .disabled(!duress.normalConfigured)
-            // 后果写在明面上，而不是等机主在锁屏上撞见：重置会把应急擦除密码清成"未设置"。
-            // 这一句与 `lockoutCard` 那句红是本页仅有的两处 dangerInk 说明，两处都是不可逆方向。
+            // The consequence is stated in the open instead of waiting for the owner to run into it on the lock screen: resetting clears the emergency-erasure password to "not set".
+            // This sentence and the red sentence in `lockoutCard` are this page's only two dangerInk notes, and both point in irreversible directions.
             AntiTheftDivider()
             warningLine(Copy.mnemonicConsequence)
         }
     }
 
-    /// 助记词的查看/生成弹层。
+    /// The mnemonic's view/generate sheet.
     ///
-    /// 四条实现约定，都是这一格特有的：
-    /// 1. **不给 `.textSelection(.enabled)`**：一选中就可能进系统剪贴板，而剪贴板会被其他 app
-    ///    读到、也可能随 iCloud 同步到别的设备上。一张能明文恢复身份的词组不该被系统复制到
-    ///    本模块管不着的地方，所以这一格只能"用眼睛抄"。
-    /// 2. **关掉弹层即清空**（`onChange(of: showsMnemonicSheet)` → `clearMnemonicFields()`），
-    ///    下一次要看必须重新验一次——进入密码或 Face ID，两道门都一样只当场有效。
-    ///    本页不留"上次看过"的状态。
-    /// 3. 那两枚按钮都不是"一点就亮"：密码那一道路要走一次约 355 ms 的 PBKDF2 派生，
-    ///    Face ID 那一道路要等系统弹层收结果，所以两枚都带 `isLoading`；
-    ///    不靠转场动画盖这段等待。
-    /// 4. **「重新生成一组」先过同一对门**（`proveIdentityForRegenerate()`）：这一问作废的是
-    ///    机主手上那张纸，旁人拿到已解锁的手机顺手点一下就够糟，所以那一次红色二次确认
-    ///    只在身份验过之后才出现。顺序是"先验身份、再问确认"，两问各管一件事：
-    ///    前者证明有权，后者证明有意。这一问不读取、不显示旧词组。
+    /// Four implementation conventions, all specific to this cell:
+    /// 1. **No `.textSelection(.enabled)`**: once selected, text can enter the system clipboard, and the clipboard can be read by other apps
+    ///    and may also sync to other devices via iCloud. A word set that can recover the identity in cleartext should not be copied by the system to
+    ///    places this module cannot govern, so this cell can only be "copied down with the eyes".
+    /// 2. **Closing the sheet clears everything** (`onChange(of: showsMnemonicSheet)` → `clearMnemonicFields()`);
+    ///    the next view must verify all over again — entry password or Face ID, both gates are valid only in the moment.
+    ///    This page keeps no "seen before" state.
+    /// 3. Neither of those two buttons is "instant on tap": the password path runs one ~355 ms PBKDF2 derivation,
+    ///    the Face ID path waits for the system sheet's result, so both carry `isLoading`;
+    ///    the transition animation is not used to paper over this wait.
+    /// 4. **"Regenerate a set" first passes the same pair of gates** (`proveIdentityForRegenerate()`): what this ask voids is
+    ///    the sheet in the owner's hands; a bystander with an unlocked phone casually tapping it is bad enough, so that red double confirmation
+    ///    only appears after the identity has been verified. The order is "verify identity first, ask confirmation second"; the two asks each govern one thing:
+    ///    the first proves authority, the second proves intent. This ask neither reads nor displays the old word set.
     private var mnemonicSheet: some View {
         NavigationStack {
             PopopxSheetContainer(Copy.mnemonicSheetTitle, subtitle: mnemonicSheetHint) {
@@ -748,11 +748,11 @@ struct PopopxAntiTheftSettingsView: View {
                             }
                             .disabled(!PopopxDuressAuthManager.isValidPin(mnemonicUnlockPin))
                             .accessibilityIdentifier("popopx.antiTheft.mnemonicReveal")
-                            // 另一道门只在它真能通过的时候出现。三个条件与
-                            // `PopopxDuressAuthManager.verifyIdentityWithBiometrics` 那三道前置门
-                            // 逐字对应——少一条，这里就是一枚按下去只会报错的按钮。
-                            // 两枚按钮共用 `isReadingMnemonic`，所以任一条路在跑时另一枚自己变灰：
-                            // 同一次点击只该交出去一份明文。
+                            // The other gate appears only when it can truly pass. Its three conditions, with
+                            // the three precondition gates of `PopopxDuressAuthManager.verifyIdentityWithBiometrics`
+                            // correspond word for word — miss one and this would be a button that can only raise an error when pressed.
+                            // The two buttons share `isReadingMnemonic`, so while either path runs the other greys out on its own:
+                            // one click should hand out only one copy of cleartext.
                             if mnemonicFaceIDOffered {
                                 AntiTheftDivider()
                                 PopopxButton(
@@ -773,9 +773,9 @@ struct PopopxAntiTheftSettingsView: View {
                             role: duress.mnemonicConfigured ? .destructive : .primary,
                             isLoading: isReadingMnemonic
                         ) {
-                            // 还没有词组时这一次点击不毁掉任何东西，直接生成；已有词组时它毁掉的是
-                            // 机主手上那张纸，所以先过一次与「查看」完全相同的身份门，
-                            // 验过了才轮到那一次红色二次确认。
+                            // When no word set exists yet, this click destroys nothing and generates directly; when one exists, what it destroys is
+                            // the sheet in the owner's hands, so it first passes the exactly same identity gate as "view",
+                            // and only after verification does the red double confirmation get its turn.
                             if duress.mnemonicConfigured {
                                 await proveIdentityForRegenerate()
                             } else {
@@ -814,12 +814,12 @@ struct PopopxAntiTheftSettingsView: View {
         .presentationDragIndicator(.visible)
     }
 
-    /// 写盘成功后那一张抄存页。它不提供任何输入框，也不提供"重新生成"：机主刚点过一次
-    /// 「写入这两把码」，这一屏唯一要完成的事是把 12 个词抄到纸上。想换一组词，
-    /// 关掉之后回到助记词那一格重做。
+    /// The copy-down page after a successful write. It offers no input field and no "regenerate": the owner just tapped
+    /// "write these two codes", and the only thing this screen must accomplish is copying the 12 words onto paper. To get a different set,
+    /// close it and redo it from the mnemonic cell.
     ///
-    /// 只提供 `.large` 一档 detent：那 12 个格子加两句说明在 `.medium` 上会被裁掉一半，
-    /// 而一张裁掉了词的抄存页比没有这一屏更糟——机主会以为自已抄完了。
+    /// Offers only the `.large` detent: those 12 cells plus two explanation lines would be half clipped at `.medium`,
+    /// and a copy-down page with words clipped off is worse than no such screen at all — the owner would think they have copied everything.
     private func mnemonicCaptureSheet(_ words: [String]) -> some View {
         NavigationStack {
             PopopxSheetContainer(Copy.mnemonicCaptureTitle, subtitle: Copy.mnemonicCaptureSubtitle) {
@@ -845,13 +845,13 @@ struct PopopxAntiTheftSettingsView: View {
         .presentationDragIndicator(.visible)
     }
 
-    /// 12 个词、带序号、两列。序号是必要的，不是装饰：抄错位置（把第 7 个词抄到第 6 格）
-    /// 与抄错字母一样会让整条词组失效，而 BIP-39 的校验和只有 4 bit，挡不住这种错位。
-    /// 两列用 `.flexible()`，不写最小宽度——`PopopxMetrics` 里没有这一类代币，
-    /// 编一个数出来就是这一页承诺过的"不写死一处尺寸"的反面。
+    /// 12 words, numbered, two columns. The numbering is necessary, not decorative: copying into the wrong slot (word 7 into cell 6)
+    /// invalidates the whole word set just like a mistyped letter, and BIP-39's checksum is only 4 bit — it cannot block this kind of misplacement.
+    /// The two columns use `.flexible()`, with no written minimum width — `PopopxMetrics` has no token of this kind,
+    /// and making up a number would be the opposite of what this page promised: "hardcode not one dimension".
     ///
-    /// 参数而不是直接读 `mnemonicWords`：回看那一屏与抄存那一屏用的是两份不同的 `@State`
-    /// （前者用完即丢，后者要撑到机主亲手点「我已抄存」），排版这一段则必须完全一样。
+    /// takes a parameter instead of reading `mnemonicWords` directly: the re-view screen and the copy-down screen use two different `@State` copies
+    /// (the former is discarded right after use, the latter must hold until the owner personally taps "I have copied it down"), while this typesetting section must be exactly the same.
     private func mnemonicWordGrid(_ words: [String]) -> some View {
         LazyVGrid(
             columns: [GridItem(.flexible(), spacing: PopopxMetrics.spaceXS), GridItem(.flexible(), spacing: PopopxMetrics.spaceXS)],
@@ -880,14 +880,14 @@ struct PopopxAntiTheftSettingsView: View {
         .accessibilityIdentifier("popopx.antiTheft.mnemonicWords")
     }
 
-    /// 弹层副标题要说的是"这一格现在真的能用什么"：Face ID 那道门没开时不许写"或 Face ID"，
-    /// 否则机主会在一排按钮里找一个不存在的。
+    /// The sheet's subtitle must say "what this cell can really use right now": when the Face ID gate is not open it must not write "or Face ID",
+    /// otherwise the owner would hunt for a nonexistent button among the row of buttons.
     private var mnemonicSheetHint: String {
         guard duress.mnemonicConfigured else { return Copy.mnemonicSheetHintNone }
         return mnemonicFaceIDOffered ? Copy.mnemonicSheetHintHaveBiometric : Copy.mnemonicSheetHintHave
     }
 
-    // MARK: 渐进式防爆破
+    // MARK: progressive anti-brute-force
 
     private var lockoutStrikesValue: String {
         let strikes = duress.failedAttemptCount
@@ -901,8 +901,8 @@ struct PopopxAntiTheftSettingsView: View {
         )
     }
 
-    /// 那张表**从表本体读出来**，不在这里另抄一遍数字：`PopopxLockoutSchedule` 改了，
-    /// 这一句跟着改。抄一份就是给将来那个改表的人留一处会说不成立的话的文案。
+    /// That schedule is **read out of the schedule itself**; no re-copying of the numbers here: when `PopopxLockoutSchedule` changes,
+    /// this sentence changes with it. Copying it would leave, for whoever edits the table later, one spot of copy that can say things that no longer hold.
     private var lockoutScheduleValue: String {
         let steps = [5, 6, 7, 8].map { attempt in
             String(
@@ -914,8 +914,8 @@ struct PopopxAntiTheftSettingsView: View {
         return String(format: Copy.lockoutScheduleFormat, steps.joined(separator: " · "))
     }
 
-    /// 冷却那一行每秒都要动，而"剩余秒数"是 `Date` 与存下来那个时刻的差、没有任何状态在变，
-    /// 所以它不能靠 `animationKey` 驱动（见那里那条注释）。`TimelineView` 是这一格自己的心跳。
+    /// The cooldown row must move every second, but "seconds remaining" is the difference between `Date` and the stored moment, with no state changing at all,
+    /// so it cannot be driven by `animationKey` (see the comment there). `TimelineView` is this cell's own heartbeat.
     private var cooldownRow: some View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             let remaining = duress.lockoutEndsAt.map { $0.timeIntervalSince(context.date) } ?? 0
@@ -949,13 +949,13 @@ struct PopopxAntiTheftSettingsView: View {
         }
     }
 
-    /// 开与关说的是两件相反的事，所以两句分开写，不玩"前缀 + 共用后半句"那种拼接：
-    /// 关掉那一档意味着第 10 次只是"再多锁一小时"，这一句必须让机主知道自己是**主动**放弃了抹除。
+    /// On and off say two opposite things, so the two sentences are written separately, with no "prefix + shared second half" splicing:
+    /// turning that tier off means the 10th failure is just "lock for one more hour", and this sentence must let the owner know they are **actively** giving up the wipe.
     private var lockoutTenStrikeNote: String {
         duress.wipeOnTenthFailure ? Copy.lockoutTenStrikeNoteOn : Copy.lockoutTenStrikeNoteOff
     }
 
-    /// `riskLine` 的红色版本：本页只有"会被执行到的破坏性后果"配得上这个颜色。
+    /// The red version of `riskLine`: on this page only "a destructive consequence that will actually be executed" deserves this color.
     private func warningLine(_ text: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.spaceXS) {
             Image(systemName: "exclamationmark.octagon.fill")
@@ -971,11 +971,11 @@ struct PopopxAntiTheftSettingsView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// 查看助记词：交一次进入密码，换 12 个词。
+    /// View the mnemonic: hand over the entry password once, exchange for the 12 words.
     ///
-    /// 密码在这一句之后立刻从界面上清掉（`mnemonicUnlockPin = ""`），**成功与失败都一样**：
-    /// 这一格的目的只是"当场证明机主知道进入密码"，证明完那一份副本就该没了。
-    /// 失败只把 `errorDescription` 原样显示，不做任何"第几位不对"之类的提示。
+    /// The password is cleared from the interface right after this line (`mnemonicUnlockPin = ""`), **the same whether it succeeds or fails**:
+    /// this cell's only purpose is "prove on the spot that the owner knows the entry password", and once proved, that copy should be gone.
+    /// On failure only `errorDescription` is displayed verbatim, with no hint like "which digit was wrong".
     private func revealMnemonicNow() async {
         let pin = mnemonicUnlockPin
         mnemonicUnlockPin = ""
@@ -1005,12 +1005,12 @@ struct PopopxAntiTheftSettingsView: View {
         }
     }
 
-    /// 查看助记词的第二道门：Face ID。要交出去的东西与 `revealMnemonicNow` 完全相同，
-    /// 所以收尾纪律也完全相同——先清掉上一屏残留（反馈文案与可能还亮着的词组），
-    /// 失败只把 `errorDescription` 原样说一句，然后 `clearMnemonicFields()`。
+    /// The second gate for viewing the mnemonic: Face ID. What it hands over is exactly the same as `revealMnemonicNow`,
+    /// so the closing discipline is also exactly the same — first clear leftovers from the previous screen (the feedback copy and any word set possibly still showing),
+    /// and on failure say `errorDescription` once verbatim, then `clearMnemonicFields()`.
     ///
-    /// 这一条没有明文副本要清：密码不进这一路，`mnemonicUnlockPin` 保持原样，机主刚打的字
-    /// 不该被另一枚按钮的失败没收。派生也不走这一路，所以这一次等待是系统弹层，不是三百毫秒。
+    /// This one has no cleartext copy to clear: the password does not enter this path, `mnemonicUnlockPin` stays as is — characters the owner just typed
+    /// should not be confiscated by another button's failure. Derivation also does not run on this path, so this wait is the system sheet, not three hundred milliseconds.
     private func revealMnemonicWithFaceID() async {
         mnemonicFeedback = nil
         mnemonicWords = []
@@ -1033,19 +1033,19 @@ struct PopopxAntiTheftSettingsView: View {
         }
     }
 
-    /// 「重新生成一组」那一次点击：先按 `mnemonicRegenDoor` 指定的那一道路证明机主本人，
-    /// 验过了才把红色二次确认放出来。顺序是刻意的——先验身份、再问"你确定要作废那张纸吗"：
-    /// 这一问要防的是旁人拿到已解锁的手机顺手点一下，而那一次点击连一次证明都不该拿到。
+    /// The "regenerate a set" click: first prove the owner in person along the path `mnemonicRegenDoor` designates,
+    /// and only after verification is the red double confirmation released. The order is deliberate — verify identity first, then ask "are you sure you want to void that sheet":
+    /// what this ask guards against is a bystander with an unlocked phone casually tapping it, and that click should not even earn a single proof.
     ///
-    /// 两道门调的是管理器里与「查看」同一对方法，所以两问的放行条件不许有差别。这里**不**读取、
-    /// 也不显示旧词组：证明过就等于有权作废它，没有必要把上一张纸再摆到屏幕上来。
+    /// Both gates call the same pair of manager methods as "view", so the passing conditions of the two asks must not differ. This **does not** read
+    /// or display the old word set: having proved itself equals the right to void it, and there is no need to put the previous sheet back on the screen.
     ///
-    /// 证明不缓存，与 `revealMnemonicNow` 同一条收尾纪律：密码当场从界面上清掉，成功与失败都一样。
-    /// 所以取消那一次红色确认之后再按，会重新问一遍——上一次"我已经验过了"的状态不在这里留着。
+    /// The proof is not cached, the same closing discipline as `revealMnemonicNow`: the password is cleared from the interface on the spot, success and failure alike.
+    /// So pressing again after cancelling that red confirmation asks all over again — the "I already verified" state is not kept here.
     private func proveIdentityForRegenerate() async {
         mnemonicFeedback = nil
-        // 与那两枚「查看」按钮同一件事：问之前重新读一遍 Keychain 的真实状态，
-        // 别信内存里那份缓存——中途发生过自毁时，这里的 `mnemonicConfigured` 必须说得上话。
+        // The same thing as those two "view" buttons: before asking, re-read the Keychain's true state,
+        // do not trust the in-memory cache — if a self-destruct happened midway, the `mnemonicConfigured` here must still have the final say.
         duress.refreshConfiguration()
         isReadingMnemonic = true
         defer { isReadingMnemonic = false }
@@ -1058,8 +1058,8 @@ struct PopopxAntiTheftSettingsView: View {
             case .biometric:
                 try await duress.verifyIdentityWithBiometrics(reason: Copy.mnemonicRegenFaceIDReason)
             case .unavailable:
-                // 这一支的按钮是禁用的（见 `mnemonicRegenDoor`），正常到不了；真到了也直接返回，
-                // 宁可什么都不做，也不"没有证明就放行"。
+                // This branch's button is disabled (see `mnemonicRegenDoor`), so it is normally unreachable; if truly reached it returns right away —
+                // prefer doing nothing over "passing through without proof".
                 return
             }
         } catch let error as PopopxDuressSetupError {
@@ -1079,15 +1079,15 @@ struct PopopxAntiTheftSettingsView: View {
         showsMnemonicRegenDialog = true
     }
 
-    /// 生成 / 重新生成助记词。成功就把新词组显示出来——这是机主唯一一次能抄到它的机会。
+    /// Generate / regenerate the mnemonic. On success the new word set is displayed — this is the owner's only chance to copy it down.
     ///
-    /// 失败分支不重试、也不留半成品：管理器那边（`storeMnemonic`）任一半失败就整对回滚，
-    /// 所以这里只需要照实说一句"没有生成"，不必判断"是不是只写进去了一半"。
+    /// The failure branch neither retries nor leaves a half-finished product: on the manager side (`storeMnemonic`) any half failing rolls back the whole pair,
+    /// so here we only need to state honestly "nothing was generated", without judging "was only half of it written".
     ///
-    /// 调用它之前该已经过一次证明：`showsMnemonicRegenDialog` 那一支由
-    /// `proveIdentityForRegenerate` 在验过身份之后才打开；`mnemonicConfigured` 还是 false 时
-    /// 这一次点击不毁掉任何东西，所以那一条路不需要门。写入本身在管理器里不设门——
-    /// 随进入密码一起生成第一组词组的那条路也走同一个方法，那道门在那边是无意义的。
+    /// Before calling it, a proof should already have passed: the `showsMnemonicRegenDialog` branch is opened by
+    /// `proveIdentityForRegenerate` only after the identity verifies; when `mnemonicConfigured` is still false
+    /// this click destroys nothing, so that path needs no gate. The write itself sets no gate inside the manager —
+    /// the path that generates the first word set together with the entry password goes through the same method, and that gate would be meaningless over there.
     private func regenerateMnemonic() async {
         showsMnemonicRegenDialog = false
         mnemonicFeedback = nil
@@ -1106,8 +1106,8 @@ struct PopopxAntiTheftSettingsView: View {
         duress.refreshConfiguration()
     }
 
-    /// 助记词与密码那三格一次性清空。与 `clearPinFields` 同一个理由：明文副本不该比
-    /// 它的使用场合活得更久——这里甚至比那两把码更要紧，因为这一份是**可读的原文**。
+    /// Clears the three mnemonic-and-password cells in one go. Same reason as `clearPinFields`: a cleartext copy should not
+    /// outlive the occasion it is used for — here it matters even more than for the two codes, because this copy is **readable plaintext**.
     private func clearMnemonicFields() {
         mnemonicUnlockPin = ""
         mnemonicWords = []
@@ -1115,13 +1115,13 @@ struct PopopxAntiTheftSettingsView: View {
         isReadingMnemonic = false
     }
 
-    // MARK: 双密码设置 Sheet
+    // MARK: dual-password setup sheet
 
-    /// 同一个 sheet 位置上的两种互斥界面：填那两把码的表，与写盘成功后紧接着出现的抄存页。
+    /// Two mutually exclusive interfaces at the same sheet position: the form that fills in the two codes, and the copy-down page that appears right after a successful write.
     ///
-    /// 分成两张、而不是在那张表里插一段 `if`：写入成功后那六个输入框已经没有任何待办，
-    /// 把它们留着只等于再给一次「写入这两把码」的点击机会——那一次点击会用一把新盐把刚写进去的
-    /// 东西再覆盖一遍，界面上却是一片"我刚才到底写了什么"。
+    /// Split into two screens rather than inserting an `if` into that form: after a successful write the six input fields have nothing left to do,
+    /// and keeping them only hands out one more chance to click "write these two codes" — that click would overwrite what was just written
+    /// with a brand-new salt, while the interface would say nothing but "what on earth did I just write".
     @ViewBuilder
     private var pinSetupSheet: some View {
         if let words = freshMnemonic {
@@ -1141,12 +1141,12 @@ struct PopopxAntiTheftSettingsView: View {
                     AntiTheftDivider()
                     pinStateLine(normalPin, confirming: normalConfirm)
                 }
-                // 这一段只在原生那两道旧凭据确实还留着时出现，且紧跟常规密码那一组：迁移就发生在
-                // `setNormalPin` 里、任何写入之前（PopopxDuressAuthManager.swift:1358），
-                // 放在胁迫码之后会让"先填旧密码"这个先后关系在页面上读不出来。
-                // 两格互斥，由模块三那两个读数保证：入口码还在 → 要入口码；入口码已经没了、
-                // 只剩一把按不动的自毁码 → 要那把自毁码。
-                // 与 `pinField` 一样不送 `systemImage`/`keyboard:`——`isSecure` 那条分支不读它。
+                // This section appears only when those two native old credentials truly still exist, and it follows right after the regular-password group: the migration happens
+                // inside `setNormalPin`, before any write (PopopxDuressAuthManager.swift:1358),
+                // and placing it after the duress code would make the "fill the old password first" ordering unreadable on the page.
+                // The two cells are mutually exclusive, guaranteed by module 3's two readings: entry code still there → ask for the entry code; entry code already gone,
+                // only an unpressable self-destruct code left → ask for that self-destruct code.
+                // Like `pinField`, no `systemImage`/`keyboard:` is passed here — the `isSecure` branch does not read them.
                 if nativeEntryPasswordActive {
                     PopopxSectionCard(Copy.pinNativeGroup, footnote: Copy.pinNativeFootnote) {
                         nativePasscodeField(Copy.pinNativeLabel, prompt: Copy.pinNativePrompt, text: $nativePasscode)
@@ -1209,10 +1209,10 @@ struct PopopxAntiTheftSettingsView: View {
         .presentationDragIndicator(.visible)
     }
 
-    /// 六格数字码的输入框。用 `PopopxTextField(isSecure:)`：它内部是 `SecureField`，
-    /// 因此不带历史候选、不自动纠错、也不参与系统的密码自动填充建议
-    ///（PopopxControls.swift:237-241 那一条分支）。这里刻意不送 `systemImage`，也不给
-    /// `keyboard:`：那条分支不读它，给了也是个不起眼的假承诺（详见提交说明）。
+    /// The input field for the six-cell numeric code. Uses `PopopxTextField(isSecure:)`: internally it is a `SecureField`,
+    /// so it brings no history candidates, no auto-correction, and does not take part in the system's password autofill suggestions
+    /// (the branch at PopopxControls.swift:237-241). Deliberately no `systemImage` is passed here, and no
+    /// `keyboard:` either: that branch does not read it, and passing it would be a quiet false promise (see the commit message).
     private func pinField(_ label: String, prompt: String, text: Binding<String>) -> some View {
         PopopxTextField(label, prompt: prompt, text: text, isSecure: true)
             .onChange(of: text.wrappedValue) { _, newValue in
@@ -1220,14 +1220,14 @@ struct PopopxAntiTheftSettingsView: View {
             }
     }
 
-    /// 只留 ASCII 数字、长度截到 `maxLength`。这是纯过滤，不回显：任何一格的值都不会出现在
-    /// 文案里，界面上最多出现"填了几格 / 两格是否一致"这类与内容无关的事实。
+    /// Keeps only ASCII digits, truncating the length to `maxLength`. This is pure filtering with no echo-back: no cell's value ever appears
+    /// in any copy; the most the interface shows are content-irrelevant facts like "how many cells are filled / whether the two match".
     ///
-    /// `maxLength` 必须是显式入参、不能写成默认值：默认参数表达式在 Swift 里于非隔离上下文求值，
-    /// 而 `PopopxDuressAuthManager.pinLength` 随整个 `@MainActor` 类隔离，写成
-    /// `maxLength: Int = PopopxDuressAuthManager.pinLength` 会当场报
+    /// `maxLength` must be an explicit parameter, never a default value: default-argument expressions evaluate in a nonisolated context in Swift,
+    /// while `PopopxDuressAuthManager.pinLength` is isolated with the whole `@MainActor` class, so writing
+    /// `maxLength: Int = PopopxDuressAuthManager.pinLength` would report on the spot
     /// "main actor-isolated static property can not be referenced from a nonisolated context"
-    /// （Swift 6 语言模式下直接是 error）。
+    /// (a direct error under the Swift 6 language mode).
     private func clampToDigits(_ target: Binding<String>, _ newValue: String, maxLength: Int) {
         let filtered = String(
             newValue
@@ -1237,13 +1237,13 @@ struct PopopxAntiTheftSettingsView: View {
         if filtered != newValue { target.wrappedValue = filtered }
     }
 
-    /// 原生键盘写死的上限（Shared/Views/LocalAuth/PasscodeEntry.swift:125 `password.count < 16`，
-    /// 同一件事还在 :131 把按键整个禁用掉）。
+    /// The native keyboard's hardcoded upper bound (Shared/Views/LocalAuth/PasscodeEntry.swift:125 `password.count < 16`,
+    /// and the same thing fully disables the keys at :131).
     private static let nativePasscodeMaxLength = 16
 
-    /// 原生那两道旧码共用的输入格：同一个 `PopopxTextField(isSecure:)`，但截到原生键盘自己的
-    /// 16 位上限，而不是双密码的 6 位。入口码与自毁码出自同一台键盘（同一个 `PasscodeEntry`），
-    /// 所以长度与字符集完全同规，只有标签和说明不同。
+    /// The shared input cell for the two native old codes: the same `PopopxTextField(isSecure:)`, but truncated to the native keyboard's own
+    /// 16-digit bound rather than the dual-password 6. The entry code and the self-destruct code come from the same keyboard (the same `PasscodeEntry`),
+    /// so length and character set follow exactly the same rules; only the labels and notes differ.
     private func nativePasscodeField(_ label: String, prompt: String, text: Binding<String>) -> some View {
         PopopxTextField(label, prompt: prompt, text: text, isSecure: true)
             .onChange(of: text.wrappedValue) { _, newValue in
@@ -1251,8 +1251,8 @@ struct PopopxAntiTheftSettingsView: View {
             }
     }
 
-    /// 两格之间的即时一致性：只说"一致/不一致"，不说值。误触是这一页最贵的错误，
-    /// 让它在校验之前就可见。
+    /// Live consistency between the two cells: says only "match / mismatch", never the values. A mistap is this page's costliest mistake,
+    /// so make it visible before validation even runs.
     private func pinStateLine(_ first: String, confirming second: String) -> some View {
         HStack(spacing: PopopxMetrics.spaceXS) {
             Image(systemName: stateSymbol(first: first, confirming: second))
@@ -1291,12 +1291,12 @@ struct PopopxAntiTheftSettingsView: View {
         return first == second ? Copy.pinStateMatched : Copy.pinStateMismatched
     }
 
-    /// 写入两把码。校验顺序照模块三的约束来：先本地判格式与"两把码相同"（这一层能当场给出
-    /// `pinsMustDiffer` 的文案），再交给 `setNormalPin`/`setDuressPin`，让派生值层面那一道
-    /// 真正的闸门（`setDuressPin` 里那次"用常规记录自己的盐再派生一遍"的常量时间比较）做最后一次判定。
+    /// Write the two codes. The validation order follows module 3's constraints: first locally judge the format and "the two codes are identical" (this layer can produce
+    /// the `pinsMustDiffer` wording on the spot), then hand off to `setNormalPin`/`setDuressPin`, letting the true gate at the derived-value level
+    /// make the final verdict (the constant-time comparison inside `setDuressPin` that "re-derives once more with the regular record's own salt").
     ///
-    /// 原生入口码的迁移不用本页操心：它在 `setNormalPin` 内部、本地这两道校验之后、任何 Keychain
-    /// 写入之前（PopopxDuressAuthManager.swift:1358-1363），所以旧码输错那一次连常规码都不会落盘。
+    /// The native entry code's migration is not this page's concern: it lives inside `setNormalPin`, after these two local checks and before any Keychain
+    /// write (PopopxDuressAuthManager.swift:1358-1363), so on a mistyped old code not even the regular code hits disk.
     private func writePins() async {
         pinFeedback = nil
         guard PopopxDuressAuthManager.isValidPin(normalPin),
@@ -1306,8 +1306,8 @@ struct PopopxAntiTheftSettingsView: View {
             toast.show(Copy.pinToastRejected, kind: .danger)
             return
         }
-        // 本地这一道是"当场就能说的话"；管理器那一道是"最终算出来的话"。两句用的是同一个
-        // enum 的同一个 case，所以不存在两份文案。
+        // The local check is "what can be said on the spot"; the manager's check is "what is finally computed". Both sentences use the
+        // same case of the same enum, so there are not two copies of the wording.
         guard normalPin != duressPin else {
             pinFeedback = PopopxDuressSetupError.pinsMustDiffer.errorDescription
             PopopxHaptics.notice(.warning)
@@ -1325,10 +1325,10 @@ struct PopopxAntiTheftSettingsView: View {
             )
             try await duress.setDuressPin(duressPin, confirming: duressConfirm)
             clearPinFields()
-            // 这一次调用可能顺手生成了 12 个词（`setNormalPin` 只在"原本没有助记词"时生成，
-            // 有则返回 nil，绝不覆盖手上那张纸）。返回了词组就**不关 sheet**：这一份数组是
-            // 它们唯一一次以可读形式出现在界面上，一关掉就再也拼不回来——管理器那边留着派生值
-            // 与可读原文两条记录，但"回看"那一条要重新过一次验证（进入密码或 Face ID）才走得到。
+            // This call may have generated the 12 words along the way (`setNormalPin` generates only when "no mnemonic existed before",
+            // returns nil if one exists, and never overwrites the sheet in hand). If words come back, the sheet **does not close**: this array is
+            // their only appearance on the interface in readable form; close it and they can never be reassembled — the manager keeps
+            // both the derived value and the readable plaintext as two records, but "re-viewing" requires passing verification again (entry password or Face ID) to reach.
             if let generated, !generated.isEmpty {
                 freshMnemonic = generated
             } else {
@@ -1337,13 +1337,13 @@ struct PopopxAntiTheftSettingsView: View {
             PopopxHaptics.notice(.success)
             toast.show(Copy.pinToastWritten, kind: .encrypted)
         } catch let setup as PopopxDuressSetupError {
-            // 十五句 `errorDescription` 原样显示，不重写、不加工。
+            // The fifteen `errorDescription` sentences are displayed verbatim, not rewritten or processed.
             pinFeedback = setup.errorDescription
             clearPinFields()
             PopopxHaptics.notice(.error)
             toast.show(Copy.pinToastRejected, kind: .danger)
         } catch {
-            // 到这里只剩非本模块的错误（理论上不该出现）。这一句同样不回显任何输入。
+            // At this point only errors from outside this module remain (which theoretically should not occur). This sentence likewise echoes back no input.
             pinFeedback = Copy.pinUnexpectedFailure
             clearPinFields()
             PopopxHaptics.notice(.error)
@@ -1357,15 +1357,15 @@ struct PopopxAntiTheftSettingsView: View {
         toast.show(Copy.duressCleared, kind: .danger)
     }
 
-    /// 六个输入字段、那一句反馈，外加"顺手生成的 12 个词"一次性清空。口令的界面副本不该
-    /// 比它的使用场合活得更久。
-    /// 原生那两格（入口码、幽灵自毁码）也在其中，包括"旧码输错"那一次（两个
-    /// `...Incorrect` 走同一个 catch）：宁可让机主重输一遍旧码，也不让它在页面上多活一次重绘。
-    /// 两格在同一页上互斥（`nativeEntryPasswordActive` 与 `nativeSelfDestructGhostActive`
-    /// 不可能同时为真），但清空不看这个条件——少写一行判断就多一个以后改错的机会。
+    /// Clears the six input fields, that feedback sentence, and the "incidentally generated 12 words" in one go. A passphrase's interface copy should not
+    /// outlive the occasion it is used for.
+    /// The two native cells (entry code, ghost self-destruct code) are included, covering the "old code typed wrong" case too (both
+    /// `...Incorrect` go through the same catch): better to make the owner retype the old code than let it survive one more redraw on the page.
+    /// The two cells are mutually exclusive on the same page (`nativeEntryPasswordActive` and `nativeSelfDestructGhostActive`
+    /// can never both be true), but the clearing does not check this condition — one fewer line of judgement is one more chance to break it later.
     ///
-    /// `freshMnemonic` 也在其中，因此 `writePins` 的成功分支必须是"先清、后赋值"：
-    /// 反过来写等于刚抄下来就自己抹掉。
+    /// `freshMnemonic` is in it too, so `writePins`' success branch must be "clear first, then assign":
+    /// the other order amounts to wiping the words the moment they were copied down.
     private func clearPinFields() {
         normalPin = ""
         normalConfirm = ""
@@ -1377,20 +1377,20 @@ struct PopopxAntiTheftSettingsView: View {
         freshMnemonic = nil
     }
 
-    // MARK: 自毁后交出什么账号（保留策略，三选一）
+    // MARK: what account to hand over after self-destruct (retention strategy, choose one of three)
     //
-    // 模块三在这一版把两选一的 `PopopxDuressRebuildMode` 换成了带关联值的
-    // `PopopxDuressRetentionStrategy`：带关联值就不能 `CaseIterable`，所以它自己的注释把口径写死了
-    // ——"分段器由界面按 `segmentTitles` 的顺序拼，`segmentIndex` 是唯一的映射口径"。这里就照这一条做：
-    // 分段器的 `Selection` 是下标 Int，三格标题一格不改地用模块三给的，回来只经
-    // `fromSegmentIndex(_:)` 那一道闸（越界它自己回到默认档，本页不猜）。
+    // In this version module 3 replaced the two-choice `PopopxDuressRebuildMode` with the associated-value-bearing
+    // `PopopxDuressRetentionStrategy`: with associated values it cannot be `CaseIterable`, so its own comments fix the convention hard
+    // — "the segmented picker is assembled by the UI in the order of `segmentTitles`, and `segmentIndex` is the only mapping convention". This page does exactly as that says:
+    // the picker's `Selection` is the subscript Int, the three tier titles are used from module 3 unchanged, and coming back only passes
+    // through the `fromSegmentIndex(_:)` gate (out of range it falls back to the default tier itself; this page does not guess).
 
     private var retentionOptions: [PopopxSegmentedControl<Int>.Option] {
         PopopxDuressRetentionStrategy.segmentTitles.enumerated()
             .map { .init(selection: $0.offset, title: $0.element) }
     }
 
-    /// 界面下标 ⇄ 策略本体。写这条 `Binding` 是本页唯一改保留策略的地方。
+    /// UI subscript ⇄ the strategy itself. Writing this `Binding` is the only place on this page that changes the retention strategy.
     private var retentionBinding: Binding<Int> {
         Binding(
             get: { duress.retentionStrategy.segmentIndex },
@@ -1407,12 +1407,12 @@ struct PopopxAntiTheftSettingsView: View {
             )
             .accessibilityIdentifier("popopx.antiTheft.rebuild")
             .padding(.bottom, PopopxMetrics.spaceXS)
-            // 当前那一档的 `note` 直接来自枚举本身，本页不改写它。
+            // The current tier's `note` comes directly from the enum itself; this page does not rewrite it.
             thresholdLine(Copy.rebuildCurrentHeadline, duress.retentionStrategy.note)
-            // `.retainExistingProfile` 带着 `profileId` 与 `displayName` —— 那是身份信息，不是偏好，
-            // 所以这一档必须由机主从**底层真实身份列表**里点一个名字才算数。列表来源是
-            // `listUsersAsync()`（模块三自毁路径读的是同一个接口，两边看到同一份身份才是对的），
-            // 不是 `ChatModel.users` 那份可能是启动时读的缓存。
+            // `.retainExistingProfile` carries `profileId` and `displayName` — that is identity information, not a preference,
+            // so this tier only counts once the owner taps a name from the **underlying real identity list**. The list's source is
+            // `listUsersAsync()` (module 3's self-destruct path reads the very same interface; both sides seeing the same identities is what is correct),
+            // not that `ChatModel.users` copy which may have been read at launch.
             if duress.retentionStrategy.isRetainExisting {
                 AntiTheftDivider()
                 PopopxPickerRow(
@@ -1429,10 +1429,10 @@ struct PopopxAntiTheftSettingsView: View {
                 }
                 .accessibilityIdentifier("popopx.antiTheft.retainEntry")
                 .accessibilityValue(retainValueText)
-                // 防呆：只有一个身份时"保留指定昵称"和"什么都不保留"实际是同一件事，
-                // 而机主以为他留了后手。所以这一条必须出现在他点入口行之前，不是之后。
-                // 只在真的拉到过列表之后判：`retainCandidates.count` 在没加载过时是 0，
-                // 拿它当"只有一个身份"会说谎。
+                // Fool-proofing: when there is only one identity, "keep the specified nickname" and "keep nothing" are actually the same thing,
+                // while the owner thinks they left themselves a fallback. So this line must appear before they tap the entry row, not after.
+                // Judge only after the list has truly been fetched: `retainCandidates.count` is 0 when it was never loaded,
+                // and treating that as "only one identity" would lie.
                 if retainLoaded, retainCandidates.count < 2 {
                     thresholdLine(Copy.retainFoolproofHeadline, Copy.retainFoolproofNote)
                 }
@@ -1448,14 +1448,14 @@ struct PopopxAntiTheftSettingsView: View {
         }
     }
 
-    // MARK: 保留身份点名（选择器 + 数据源）
+    // MARK: retained-identity roll-call (picker + data source)
     //
-    // 形状照 `timeoutSheet`：入口行 + sheet 内 radio 表 + 一个"关闭"，本页唯一的"N 选一"交互口径。
-    // 与档位表的区别只有一处：这里的数据来自底层异步接口，所以"空列表"必须自己说一句人话，
-    // 不能留一块空白让人以为功能坏了。
+    // Shape follows `timeoutSheet`: entry row + radio table inside the sheet + one "close" — this page's only "N-choose-one" interaction convention.
+    // The only difference from the tier table: the data here comes from an underlying async interface, so an "empty list" must say a plain-language line itself,
+    // and never leave a blank patch that makes people think the feature is broken.
 
-    /// 入口行行尾的当前值。没点名时明确写"尚未点名"，绝不回退成第一个身份的名字——
-    /// 那会让机主以为已经选好了，而实际存的是 `profileId: 0` 那个空壳。
+    /// The entry row's tail value. When no identity has been named it clearly says "not yet named", and never falls back to the first identity's name —
+    /// that would make the owner think a choice was already made while what is actually stored is the empty shell `profileId: 0`.
     private var retainValueText: String {
         if case .retainExistingProfile(_, let displayName) = duress.retentionStrategy,
            !displayName.isEmpty {
@@ -1464,8 +1464,8 @@ struct PopopxAntiTheftSettingsView: View {
         return Copy.retainUnchosen
     }
 
-    /// 表头那一句：只有一个身份时换成防呆那句，两者互斥、不会同时出现。
-    /// 名字刻意与 `Copy.retainSheetSubtitle` 错开——同名计算属性最容易在下一次改动里写成自我引用。
+    /// The header sentence: with only one identity it swaps to the fool-proofing line; the two are mutually exclusive and never appear together.
+    /// The name deliberately differs from `Copy.retainSheetSubtitle` — same-named computed properties are the easiest thing to turn into a self-reference in the next edit.
     private var retainSheetHint: String {
         retainLoaded && retainCandidates.count < 2 ? Copy.retainFoolproofNote : Copy.retainSheetSubtitle
     }
@@ -1511,15 +1511,15 @@ struct PopopxAntiTheftSettingsView: View {
         .presentationDragIndicator(.visible)
     }
 
-    /// 读一次底层身份列表。**只读**，不动任何配置。
+    /// Reads the underlying identity list once. **Read-only**; touches no configuration.
     ///
-    /// 为什么用 `listUsersAsync()` 而不是 `ChatModel.shared.users`：后者是模型里那份可能还是启动时
-    /// 读的缓存，而这一格点下去的后果是"物理删除其余身份"——界面上少一行、底层就多删一个真人身份。
-    /// 模块三自毁时执行的也是同一个接口，两边读同一个真相，选中的 id 到擦除那一刻仍然存在的概率才最高。
+    /// Why `listUsersAsync()` rather than `ChatModel.shared.users`: the latter is that copy in the model which may still be the one
+    /// read at launch, and the consequence of tapping this cell is "physically delete the remaining identities" — one row missing on screen means one more real identity deleted underneath.
+    /// Module 3 executes that same interface at self-destruct time; both sides reading the same truth is what maximizes the chance that the selected id still exists at the moment of erasure.
     ///
-    /// 失败与"真的一个身份都没有"合并成同一个界面结论（空表文案 + 防呆那一行）：这里的正确行为是
-    /// **让人选不了**，而不是弹一条错误横幅。真正的兜底在自毁那一侧——`profileId` 到那时已不存在，
-    /// 模块三按简报要求安全降级为 `.simulatedDecoy` 全量重建，绝不卡白屏。
+    /// Failure and "truly not a single identity" are merged into the same interface conclusion (empty-table copy + the fool-proofing line): the correct behavior here is
+    /// **to make it unselectable**, not to throw up an error banner. The real fallback lives on the self-destruct side — when `profileId` no longer exists by then,
+    /// module 3, per the brief, safely downgrades to a full `.simulatedDecoy` rebuild and never sticks on a white screen.
     private func loadRetainCandidates() async {
         do {
             let users = try await listUsersAsync()
@@ -1532,7 +1532,7 @@ struct PopopxAntiTheftSettingsView: View {
         retainLoaded = true
     }
 
-    // MARK: 演练入口
+    // MARK: rehearsal entry
 
     private var drillCard: some View {
         PopopxSectionCard(Copy.groupDrill, footnote: Copy.drillFootnote) {
@@ -1544,10 +1544,10 @@ struct PopopxAntiTheftSettingsView: View {
         }
     }
 
-    // MARK: 页脚风险说明
+    // MARK: footer risk notes
 
-    /// 三句都是坏消息，三句都是真的。这一格的作用不是免责，而是让机主在按下"写入两把码"之前
-    /// 已经知道自己放弃了什么、留下了什么。
+    /// All three sentences are bad news, and all three are true. This cell's purpose is not a disclaimer but letting the owner, before pressing "write the two codes",
+    /// already know what they are giving up and what they are keeping.
     private var riskCard: some View {
         PopopxSectionCard(Copy.groupRisk) {
             VStack(alignment: .leading, spacing: PopopxMetrics.spaceS) {
@@ -1574,42 +1574,42 @@ struct PopopxAntiTheftSettingsView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    // MARK: 格式化
+    // MARK: formatting
 
-    /// 门限与读数一律用同一套格式化，`PopopxType.metric` 是等宽数字，跳动不会推挤排版。
+    /// Thresholds and readings always use the same formatting; `PopopxType.metric` is monospaced digits, so ticking numbers never shove the layout around.
     private func fixed(_ value: Double, digits: Int = 1) -> String {
         String(format: "%.\(digits)f", value)
     }
 }
 
-// MARK: - 演练子页
+// MARK: - Rehearsal subpage
 
-/// 一键模拟演练。
+/// One-tap simulation rehearsal.
 ///
-/// **这一页的不变量（承重，不是装饰）**：本页只调用 `PopopxMotionCriteria` 的静态纯函数
-/// （`evaluate(samples:sensitivity:)`、`syntheticSnatch()`、`syntheticFreeFall()`）与
-/// `PopopxDuressAuthManager.verify(pin:)`。它没有任何一处引用 `PopopxAppLockState.lock(reason:)`、
-/// `PopopxDuressAuthManager.submit(pin:)`、`PopopxStorageWipe`，也没有任何一处启动或停止传感器。
-/// 类型层面这是可以检查的：`evaluate` 返回 `PopopxMotionVerdict`（值类型，携带不了副作用），
-/// `verify` 的注释写明"纯校验，零副作用"，而通向抹除的那条路只有 `submit`
-///（`submit(pin:)` 里命中 `.duress` 才走 `runDuressWipe(mode:)`）。拽落/跌落判据即使在真实流里命中，后果也只是
-/// `lock(reason:)`，永远不通向擦除（模块一头注那一节）——演练连那一步都不做。
-/// 所以：演练不锁屏、不擦数据、不动 Keychain、不读真实传感器。
+/// **The invariant of this page (load-bearing, not decoration)**: this page only calls `PopopxMotionCriteria`'s static pure functions
+/// (`evaluate(samples:sensitivity:)`, `syntheticSnatch()`, `syntheticFreeFall()`) and
+/// `PopopxDuressAuthManager.verify(pin:)`. Nowhere does it reference `PopopxAppLockState.lock(reason:)`,
+/// `PopopxDuressAuthManager.submit(pin:)`, or `PopopxStorageWipe`, and nowhere does it start or stop sensors.
+/// At the type level this is checkable: `evaluate` returns `PopopxMotionVerdict` (a value type, which cannot carry side effects),
+/// `verify`'s comment states "pure verification, zero side effects", and the only road to the wipe is `submit`
+/// (inside `submit(pin:)`, only a `.duress` hit runs `runDuressWipe(mode:)`). Even when the snatch/free-fall criteria hit in the real flow, the consequence is only
+/// `lock(reason:)`, which never leads to erasure (see the section on module 1's bet) — the rehearsal does not even do that step.
+/// So: the rehearsal does not lock the screen, does not wipe data, does not touch the Keychain, and does not read the real sensors.
 @MainActor
 private struct PopopxAntiTheftDrillView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    /// 结果面板自己画一层卡面，所以要按模式决定它带影子还是带发丝高亮（`popopxCardElevation`
-    /// 的那一条裁定）。
+    /// The result panel draws its own card surface, so whether it carries a shadow or a hairline highlight must be decided by mode (that ruling of `popopxCardElevation`
+    /// ).
     @Environment(\.colorScheme) private var colorScheme
 
-    /// 只读它，不写它：演练页没有一处在改模块一的开关或判据。
+    /// Read-only on it, never written: nowhere on the rehearsal page does anything change module 1's switches or criteria.
     @Bindable private var motion = PopopxAntiTheftMotionGuard.shared
     @Bindable private var duress = PopopxDuressAuthManager.shared
 
     @State private var toast = PopopxToastModel()
 
-    /// 两串合成样本的判定结果。存的是 `PopopxMotionVerdict` 本体而不是写好的一句话，
-    /// 所以屏幕上那句话永远是刚刚算出来的那一个。
+    /// The verdicts of the two synthetic sample strings. What is stored is the `PopopxMotionVerdict` itself rather than a pre-written sentence,
+    /// so the sentence on screen is always the one just computed.
     @State private var snatchRun: AntiTheftDrillRun?
     @State private var freeFallRun: AntiTheftDrillRun?
 
@@ -1637,12 +1637,12 @@ private struct PopopxAntiTheftDrillView: View {
     }
 
     private var animationKey: String {
-        // `?? 0` 把两个 Optional 钉成 Int：直接插 Optional 得到的是调试描述（编译器当场警告），
-        // 那串东西每轮演练都可能变，动画键就会自己抖。没跑过的槽位固定读作 0。
+        // `?? 0` pins the two Optionals down to Int: interpolating an Optional directly yields the debug description (a compiler warning on the spot),
+        // and that string could change every round of rehearsal, making the animation key shake by itself. Slots never run read as a fixed 0.
         "\(snatchRun?.verdict.hashValue ?? 0)-\(freeFallRun?.verdict.hashValue ?? 0)-\(motion.sensitivity.wireValue)-\(drillOutcome != nil)"
     }
 
-    // MARK: 不变量声明
+    // MARK: invariant declaration
 
     private var invariantCard: some View {
         PopopxSectionCard(Copy.drillInvariantGroup, footnote: Copy.drillInvariantFootnote) {
@@ -1661,7 +1661,7 @@ private struct PopopxAntiTheftDrillView: View {
         }
     }
 
-    // MARK: 本机传感器
+    // MARK: this device's sensors
 
     private var sensorCard: some View {
         PopopxSectionCard(Copy.drillSensorGroup, footnote: Copy.drillSensorFootnote) {
@@ -1688,7 +1688,7 @@ private struct PopopxAntiTheftDrillView: View {
         return verdictSentence(verdict)
     }
 
-    // MARK: 拽落演练
+    // MARK: snatch rehearsal
 
     private var snatchCard: some View {
         PopopxSectionCard(Copy.drillSnatchGroup, footnote: Copy.drillSnatchFootnote) {
@@ -1703,7 +1703,7 @@ private struct PopopxAntiTheftDrillView: View {
     }
 
     private func runSnatchDrill() {
-        // 合成样本 + 静态纯函数。这里没有、也不允许出现任何 `lock(reason:)`。
+        // Synthetic samples + static pure functions. There is no `lock(reason:)` here, and none would be allowed.
         let samples = PopopxMotionCriteria.syntheticSnatch()
         let verdict = PopopxMotionCriteria.evaluate(samples: samples, sensitivity: motion.sensitivity)
         snatchRun = AntiTheftDrillRun(
@@ -1714,11 +1714,11 @@ private struct PopopxAntiTheftDrillView: View {
             thresholdG: motion.sensitivity.spikeG,
             thresholdOmega: motion.sensitivity.spinOmega
         )
-        // 触觉只是这一行字出来的那一下的收据，不是"手机在震=已锁定"的那种暗示。
+        // The haptic is just the receipt for this line of text appearing, not the hint that "the phone is vibrating = it is locked".
         PopopxHaptics.notice(verdict.isHit ? .warning : .success)
     }
 
-    // MARK: 跌落演练
+    // MARK: free-fall rehearsal
 
     private var freeFallCard: some View {
         PopopxSectionCard(Copy.drillFreeFallGroup, footnote: Copy.drillFreeFallFootnote) {
@@ -1735,8 +1735,8 @@ private struct PopopxAntiTheftDrillView: View {
     private func runFreeFallDrill() {
         let samples = PopopxMotionCriteria.syntheticFreeFall()
         let verdict = PopopxMotionCriteria.evaluate(samples: samples, sensitivity: motion.sensitivity)
-        // 跌落的门限是 `PopopxMotionCriteria` 的固定常数，与灵敏度档位无关，所以这里报的
-        // 门限直接取那几个 static，而不是档位值。
+        // The free-fall threshold is one of `PopopxMotionCriteria`'s fixed constants, unrelated to the sensitivity tier, so what is reported here
+        // takes those statics directly rather than a tier value.
         freeFallRun = AntiTheftDrillRun(
             verdict: verdict,
             sampleCount: samples.count,
@@ -1748,9 +1748,9 @@ private struct PopopxAntiTheftDrillView: View {
         PopopxHaptics.notice(verdict.isHit ? .warning : .success)
     }
 
-    // MARK: 结果面板
+    // MARK: result panel
 
-    /// 一次演练的结果：结论、峰值对门限、以及"当前档位是否会触发"。
+    /// One rehearsal's result: the verdict, the peak against the threshold, and "whether the current tier would trigger".
     private func resultPlate(for run: AntiTheftDrillRun) -> some View {
         VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
             Text(run.verdict.isHit ? Copy.drillWillTrigger : Copy.drillWillNotTrigger)
@@ -1766,8 +1766,8 @@ private struct PopopxAntiTheftDrillView: View {
                 value: "\(fixed(run.peakG, digits: 2)) / \(fixed(run.thresholdG, digits: 2))",
                 fraction: run.peakG / run.thresholdG
             )
-            // `thresholdOmega == nil` 说的是"这一条判据根本不看角速度"。那就只报峰值，
-            // 不画一条自己造出来的比例条——跌落的判定里没有任何 ω 门限（见 `freeFallVerdict`）。
+            // `thresholdOmega == nil` says "this criterion does not look at angular velocity at all". Then only the peak is reported,
+            // and no made-up ratio bar is drawn — the free-fall verdict contains no ω threshold at all (see `freeFallVerdict`).
             if let thresholdOmega = run.thresholdOmega {
                 gauge(
                     Copy.drillGaugeOmega,
@@ -1793,8 +1793,8 @@ private struct PopopxAntiTheftDrillView: View {
         .accessibilityElement(children: .combine)
     }
 
-    /// 门限对照条。超过门限只是"会再认证一次"，所以用品牌色而不是危险红：
-    /// 这个 app 里红色只说不可恢复的那几件事。
+    /// The threshold comparison bar. Exceeding the threshold only means "will re-authenticate once", so the brand color is used rather than danger red:
+    /// in this app red speaks only of the unrecoverable things.
     private func gauge(_ label: String, value: String, fraction: Double) -> some View {
         let clamped = min(max(fraction, 0), 1)
         return VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
@@ -1834,7 +1834,7 @@ private struct PopopxAntiTheftDrillView: View {
         }
     }
 
-    // MARK: 胁迫码演练
+    // MARK: duress-code rehearsal
 
     private var duressDrillCard: some View {
         PopopxSectionCard(Copy.drillDuressGroup, footnote: Copy.drillDuressFootnote) {
@@ -1868,8 +1868,8 @@ private struct PopopxAntiTheftDrillView: View {
         }
     }
 
-    /// 只调 `verify(pin:)`。它不会擦除、不会装烟雾弹、也不会解掉任何锁；通向抹除的那一条
-    /// 是 `submit(pin:)`，本页不引用它。校验之后立刻清掉输入框里的那一份副本。
+    /// Only `verify(pin:)` is called. It wipes nothing, plants no smoke bomb, and releases no lock; the road to the wipe is
+    /// `submit(pin:)`, which this page never references. Right after verification, the copy in the input field is cleared.
     private func runDuressDrill() async {
         let pin = drillPin
         drillPin = ""
@@ -1886,7 +1886,7 @@ private struct PopopxAntiTheftDrillView: View {
         }
         let outcome = await duress.verify(pin: pin)
         drillOutcome = outcome
-        // 命中胁迫码时不庆祝：那一格说的是"这串码会抹掉你的数据"。
+        // When the duress code hits there is no celebrating: that cell says "this code wipes your data".
         PopopxHaptics.notice(outcome == .duress ? .warning : .success)
         toast.show(Copy.drillDuressNoEraseToast, kind: .success)
     }
@@ -1901,7 +1901,7 @@ private struct PopopxAntiTheftDrillView: View {
         }
     }
 
-    /// 结论那一句话：数字来自判据本体，句式来自本页。
+    /// The verdict sentence: the numbers come from the criteria themselves, the sentence pattern from this page.
     private func verdictSentence(_ verdict: PopopxMotionVerdict) -> String {
         switch verdict {
         case .none:
@@ -1922,26 +1922,26 @@ private struct PopopxAntiTheftDrillView: View {
     }
 }
 
-// MARK: - 一次演练的判定
+// MARK: - one rehearsal's verdict
 
-/// 存判定的输入与输出，不存结论文案：结论每次从 `verdict` 现推，所以档位一改，
-/// 上一次的演练结果不会以一句话的形式留在屏幕上说不成立的话。
+/// Stores the verdict's inputs and outputs, not the verdict copy: the conclusion is re-derived from `verdict` every time, so once the tier changes,
+/// the previous rehearsal result does not linger on screen as a sentence saying things that no longer hold.
 private struct AntiTheftDrillRun {
     let verdict: PopopxMotionVerdict
     let sampleCount: Int
     let peakG: Double
     let peakOmega: Double
-    /// 对照用的门限：拽落是当前档位的 `spikeG`/`spinOmega`，跌落只有固定常数 `impactG`，
-    /// 那一条判据不看角速度，所以 `thresholdOmega` 给 nil。
+    /// Thresholds for comparison: for the snatch it is the current tier's `spikeG`/`spinOmega`; for free fall there is only the fixed constant `impactG`,
+    /// and that criterion does not look at angular velocity, so `thresholdOmega` gets nil.
     let thresholdG: Double
     let thresholdOmega: Double?
 }
 
-// MARK: - 行
+// MARK: - row
 
-/// 推一个既有页面。形状照 `PopopxMeRowLink`（PopopxMeView.swift）那一个：外观复用 `PopopxPickerRow`，
-/// 但点击归外层 `NavigationLink`——原子库那一行自己是个 `Button`，嵌套按钮会把链接的点击吃掉，
-/// 所以整行设为不可命中、也不进无障碍树，由链接自己带上同名的 label 与 hint。
+/// Pushes an existing page. The shape follows `PopopxMeRowLink` (PopopxMeView.swift): the appearance reuses `PopopxPickerRow`,
+/// but the tap belongs to the outer `NavigationLink` — the atom-library row is itself a `Button`, and nested buttons would swallow the link's tap,
+/// so the whole row is made unhittable and kept out of the accessibility tree, with the link itself carrying the same-named label and hint.
 @MainActor
 private struct AntiTheftRowLink<Destination: View>: View {
     private let title: String
@@ -1980,11 +1980,11 @@ private struct AntiTheftRowLink<Destination: View>: View {
     }
 }
 
-/// 卡片内的分隔线。`PopopxControls.swift:853` 里那条同名的只在 `#if DEBUG` 的画廊作用域里，
-/// 而 `PopopxMeDivider`、`PopopxSettingsDivider` 各自带了一枚私有的，本页照同一口径。
-/// 「点名保留哪个匿名身份」这一格里的一行：底层 `users` 的一次投影，只带界面需要的两样东西。
-/// id 用底层的 `Int64` 原样，不自造 UUID、不做任何换算——这张表与 `PopopxDuressRetentionStrategy`
-/// 里存的 `profileId` 必须是同一个数，中间隔一层映射就是出错的地方。
+/// The divider inside cards. The same-named one at `PopopxControls.swift:853` sits only inside the `#if DEBUG` gallery scope,
+/// while `PopopxMeDivider` and `PopopxSettingsDivider` each carry a private one; this page follows the same convention.
+/// One row inside the "name which anonymous identity to retain" cell: a projection of the underlying `users`, carrying only the two things the interface needs.
+/// The id stays the underlying raw `Int64`; no self-made UUID and no conversion — this table and the `profileId` stored in `PopopxDuressRetentionStrategy`
+/// must use the same number; a mapping layer in between is exactly where errors would appear.
 private struct PopopxRetainCandidate: Identifiable, Hashable {
     let id: Int64
     let name: String
@@ -1999,17 +1999,17 @@ private struct AntiTheftDivider: View {
     }
 }
 
-// MARK: - 文案
+// MARK: - copy
 
-/// 页面上每一句中文只在这里出现一次。双密码写入与助记词查看那十五句失败文案不在这里：那十五句是
-/// `PopopxDuressSetupError.errorDescription` 原样引用的，抄一份过来就会出现两套说法。
+/// Every Chinese sentence on the page appears exactly once here. The fifteen failure sentences for dual-password writing and mnemonic viewing are not here: those fifteen are
+/// quoted verbatim from `PopopxDuressSetupError.errorDescription`; copying them over would produce two sets of wording.
 private enum Copy {
     static let pageTitle = NSLocalizedString("Anti-theft lock & self-destruct", comment: "")
     static let close = NSLocalizedString("Close", comment: "")
-    /// 与 `close` 是两件事：`close` 是"离开这个弹层"，`cancel` 是"不要执行这一步不可恢复的操作"。
+    /// and `close` are two different things: `close` means "leave this sheet"; `cancel` means "do not execute this unrecoverable step".
     static let cancel = NSLocalizedString("Cancel", comment: "")
 
-    // 总开关
+    // master switch
     static let groupMaster = NSLocalizedString("Anti-theft lock", comment: "")
     static let masterFootnote = NSLocalizedString("All three switches on this page only talk about locking; not one of them leads to erasing data. Turning anything here on can never make the phone wipe itself.", comment: "")
     static let enabledRow = NSLocalizedString("Enable anti-theft lock", comment: "")
@@ -2025,7 +2025,7 @@ private enum Copy {
     static let lockNowNote = NSLocalizedString("Brings up the lock screen at once and requires re-authentication, with exactly the same consequence as a sensor hit. It erases nothing.", comment: "")
     static let lockNowDone = NSLocalizedString("Locked. Returning to the app requires re-authentication.", comment: "")
 
-    // 灵敏度
+    // sensitivity
     static let groupSensitivity = NSLocalizedString("Detection sensitivity", comment: "")
     static let sensitivityFootnote = NSLocalizedString("The level only changes the two snatch-and-drop thresholds. The free-fall test, the impact after weightlessness, uses fixed constants, so switching levels does not change it.", comment: "")
     static let thresholdHeadline = NSLocalizedString("Thresholds", comment: "")
@@ -2038,7 +2038,7 @@ private enum Copy {
     static let angleHeadline = NSLocalizedString("Criterion", comment: "")
     static let angleFormat = NSLocalizedString("The screen is judged suspicious and locked only when the angle stays past the chosen threshold for at least %1$@ s and there are at least %3$@ irregular touches inside %2$@ s. Smaller is more sensitive, and the price of a wrong call is one extra authentication.", comment: "")
 
-    // 无操作时长
+    // idle duration
     static let groupInactivity = NSLocalizedString("Auto-lock after inactivity", comment: "")
     static let inactivityRow = NSLocalizedString("Idle wait before locking", comment: "")
     static let inactivityFootnote = NSLocalizedString("The timer only looks at whether anything touches the screen. Once it is locked the timer stops; it does not keep counting behind the lock screen.", comment: "")
@@ -2050,7 +2050,7 @@ private enum Copy {
     static let timeoutNoteFifteen = NSLocalizedString("Close to never locking: it only closes when you have clearly left.", comment: "")
     static let timeoutNoteNever = NSLocalizedString("Never: this test stops applying altogether, leaving only the sensor and the background one.", comment: "")
 
-    // 双密码
+    // dual passwords
     static let groupDuress = NSLocalizedString("Dual-code self-destruct", comment: "")
     static let duressFootnote = NSLocalizedString("The normal code opens the door; the duress code opens it and immediately erases the identities on this device. The two codes must be different, otherwise which code you hand over is the same question either way.", comment: "")
     static let duressSwitchRow = NSLocalizedString("Enable dual-code self-destruct", comment: "")
@@ -2084,13 +2084,13 @@ private enum Copy {
     static let pinDuressLabel = NSLocalizedString("Duress passcode", comment: "")
     static let pinDuressConfirmLabel = NSLocalizedString("Type the duress passcode again", comment: "")
     static let pinPrompt = NSLocalizedString("6 digits", comment: "")
-    // 原生入口码那一段：只有 Keychain 里确实还留着旧码时才会渲染，所以这三句平时看不见。
+    // The native entry-code section: it renders only when the Keychain truly still holds an old code, so these three lines are normally invisible.
     static let pinNativeGroup = NSLocalizedString("Turn off the app's own entry passcode", comment: "")
     static let pinNativeLabel = NSLocalizedString("Existing entry passcode", comment: "")
     static let pinNativePrompt = NSLocalizedString("4 to 16 digits", comment: "")
     static let pinNativeFootnote = NSLocalizedString("This device still has the app's own entry passcode switched on: when unlocking it shows its keypad once first and POPOPX shows its keypad again, and the two keypads do the same job. Enter it correctly and we turn it off, so from now on only the normal code above is accepted. What goes off with it is the self-destruct code that only that old keypad could accept: once the old keypad is gone it has no way in, and keeping it would only make the row in Privacy and Security read enabled. This step does not rebuild the database keys and not one character of chat data moves; getting it back means setting it up again on the Privacy and Security page.", comment: "")
-    // 幽灵自毁码那一段：入口码已经不在了、只剩一把输不进去的自毁码时才会渲染，和上面三段互斥。
-    // 提示语共用 `pinNativePrompt`——两把码出自同一台键盘（同一个 `PasscodeEntry`），格式同规。
+    // The ghost self-destruct-code section: it renders only when the entry code is already gone and just an untypeable self-destruct code remains, mutually exclusive with the three sections above.
+    // The prompt line shares `pinNativePrompt` — the two codes come from the same keyboard (the same `PasscodeEntry`), and the format rules are the same.
     static let pinNativeSDGroup = NSLocalizedString("Turn off the leftover self-destruct passcode", comment: "")
     static let pinNativeSDLabel = NSLocalizedString("Existing self-destruct passcode", comment: "")
     static let pinNativeSDFootnote = NSLocalizedString("An old self-destruct passcode is still on this device, but only the app's own keypad could take it and that keypad no longer appears: it can neither be triggered nor seen now, and it only makes the row in Privacy and Security read enabled. Enter it correctly and we turn it off together with that row; enter it wrong and nothing changes this time, and the two new codes above are not written either. If the authentication method is still on the app passcode level it also falls back to system authentication. This step does not rebuild the database keys and not one character of chat data moves.", comment: "")
@@ -2108,7 +2108,7 @@ private enum Copy {
     static let commitDialogConfirm = NSLocalizedString("Confirm and write", comment: "")
     static let commitDialogMessage = NSLocalizedString("Overwriting an existing normal or duress code cannot be undone and cannot be recovered. Check both entries once more, in particular whether a fingertip was dragged one digit off by oil on the screen.", comment: "")
 
-    // 12 词助记词
+    // 12-word mnemonic
     static let groupMnemonic = NSLocalizedString("12-word recovery mnemonic phrase", comment: "")
     static let mnemonicFootnote = NSLocalizedString("The only way out when you forget the entry passcode: type these 12 English words correctly on the lock screen and you can set a new entry passcode. The phrase is generated on this device, and secure storage keeps both its derived value for the lock screen to compare and the readable text, which exists only so this page can show it again.", comment: "")
     static let mnemonicStateHeadline = NSLocalizedString("Mnemonic phrase", comment: "")
@@ -2116,7 +2116,7 @@ private enum Copy {
     static let mnemonicStateUnset = NSLocalizedString("Not generated", comment: "")
     static let mnemonicRow = NSLocalizedString("View or regenerate", comment: "")
     static let mnemonicRowReveal = NSLocalizedString("Needs the entry passcode", comment: "")
-    /// 只有 `mnemonicFaceIDOffered` 为真时才用得上这一句：那道门没开时行尾不许提 Face ID。
+    /// This line is only used when `mnemonicFaceIDOffered` is true: when that gate is not open the row's tail must not mention Face ID.
     static let mnemonicRowRevealEither = NSLocalizedString("Needs the entry passcode or Face ID", comment: "")
     static let mnemonicRowGenerate = NSLocalizedString("Generate now", comment: "")
     static let mnemonicConsequence = NSLocalizedString("Resetting the entry passcode with the mnemonic phrase on the lock screen also clears the emergency erase passcode back to not set: that code then no longer exists, and handing it over would erase no data either. After the reset, come back to the previous page and set the emergency erase passcode once more.", comment: "")
@@ -2128,20 +2128,20 @@ private enum Copy {
     static let mnemonicSheetFootnote = NSLocalizedString("The word list is the standard BIP-39 English list of 2048 words, and the 12 words are derived from 16 random bytes plus a 4-bit checksum, so the order and the spelling both have to be copied exactly. The derivation uses PBKDF2-HMAC-SHA256 with 100,000 iterations, so one tap waits about a third of a second and that is not a hang; the Face ID button waits for the system sheet, which is not a hang either.", comment: "")
     static let mnemonicSheetPinLabel = NSLocalizedString("Current entry passcode", comment: "")
     static let mnemonicSheetReveal = NSLocalizedString("Verify and show", comment: "")
-    /// 与上面那一句成对：两枚按钮各写清自己用的是哪道门，机主才知道按的是哪一问。
+    /// Paired with the line above: each of the two buttons states which gate it uses, so the owner knows which ask they are pressing.
     static let mnemonicSheetRevealFaceID = NSLocalizedString("Verify with Face ID and show", comment: "")
-    /// 系统 Face ID 弹层上那一句说明。按苹果的写法不写 app 名（系统自己带），
-    /// 只说这一问要干什么：不是"解锁"，是"把 12 个词显示出来"。
+    /// The explanation line on the system Face ID sheet. Following Apple's convention the app name is not written (the system supplies it),
+    /// and it says only what this ask does: not "unlock", but "show the 12 words".
     static let mnemonicSheetFaceIDReason = NSLocalizedString("Show your 12-word recovery mnemonic phrase", comment: "")
     static let mnemonicSheetHide = NSLocalizedString("Hide the phrase", comment: "")
     static let mnemonicSheetGenerate = NSLocalizedString("Generate the 12-word mnemonic phrase", comment: "")
-    /// 没有一道门能走时的那一句（按钮此时是禁用的）。
+    /// The line for when no gate can be walked (the button is disabled then).
     static let mnemonicSheetRegenerate = NSLocalizedString("Regenerate a new phrase", comment: "")
-    /// 上面那两枚「查看」按钮的同一套词法：不带定语的"验证"就是指那个密码框。
+    /// The same vocabulary as the two "view" buttons above: a bare "verify", without a qualifier, means that password field.
     static let mnemonicSheetRegenerateVerified = NSLocalizedString("Verify and regenerate", comment: "")
     static let mnemonicSheetRegenerateFaceID = NSLocalizedString("Verify with Face ID and regenerate", comment: "")
-    /// 系统 Face ID 弹层上那一句说明，与「查看」那一问成对：这一问要干的事不是"把词显示出来"，
-    /// 是"作废旧的、换一组新的"。同样不写 app 名。
+    /// The explanation line on the system Face ID sheet, paired with the "view" ask: what this ask does is not "show the words",
+    /// but "void the old one and get a new set". Likewise without the app name.
     static let mnemonicRegenFaceIDReason = NSLocalizedString("Regenerate your 12-word recovery mnemonic phrase", comment: "")
     static let mnemonicSheetPaperGroup = NSLocalizedString("Copy it down", comment: "")
     static let mnemonicSheetPaperNote = NSLocalizedString("Once this panel is closed there is no way left on this device to show these 12 words again, unless next time you still pass the verification gate: type the current entry passcode correctly, or, while biometric quick unlock is on, let the machine recognise you. Please copy them onto paper right now: no screenshot, no typing them into any cloud note, and no relying on the system clipboard. For that reason this panel does not allow selecting the text, because a selection may end up in the clipboard, and the clipboard can be read by other apps and can sync to other devices through iCloud.", comment: "")
@@ -2153,11 +2153,11 @@ private enum Copy {
     static let mnemonicGridLabel = NSLocalizedString("12 English mnemonic words in two numbered columns", comment: "")
     static let mnemonicToastShown = NSLocalizedString("Phrase shown; it disappears as soon as you close this panel", comment: "")
     static let mnemonicToastRejected = NSLocalizedString("Nothing was shown, see the reason above", comment: "")
-    /// 「重新生成」那一问的失败播报与上面那句不许共用：这一问失败时没有"没显示出来的东西"，
-    /// 只有一桩没做成的生成。
+    /// The "regenerate" ask's failure announcement must not share the line above: when this ask fails there is no "thing that did not get shown",
+    /// only a generation that did not come off.
     static let mnemonicRegenToastRejected = NSLocalizedString("Nothing was regenerated, see the reason above", comment: "")
-    /// 与 `mnemonicUnexpectedFailure` 分成两句：那一句说的是"把词组读回来"，
-    /// 这一句说的是"过身份门"，而这一条路连读都没开始读。
+    /// Split into two sentences from `mnemonicUnexpectedFailure`: that one speaks of "reading the word set back",
+    /// while this one speaks of "passing the identity gate", and this path has not even begun to read.
     static let mnemonicRegenUnexpectedFailure = NSLocalizedString("Verification failed, please try again later", comment: "")
     static let mnemonicToastGenerated = NSLocalizedString("Mnemonic phrase generated, please copy it down now", comment: "")
     static let mnemonicGenerateFailed = NSLocalizedString("Nothing generated: the write to secure storage failed, and this device is still in the state of having no mnemonic phrase", comment: "")
@@ -2166,7 +2166,7 @@ private enum Copy {
     static let mnemonicCaptureSubtitle = NSLocalizedString("Both codes have been written. This screen is the first, and possibly the last, time their mnemonic phrase is shown in full.", comment: "")
     static let mnemonicCaptureDone = NSLocalizedString("I have copied it down. Close", comment: "")
 
-    // 渐进式防爆破
+    // progressive anti-brute-force
     static let groupLockout = NSLocalizedString("Cool-down after wrong entries", comment: "")
     static let lockoutFootnote = NSLocalizedString("This one table governs the numeric keypad, Face ID and the mnemonic phrase together, because all three verify the same thing: the owner in person. The first 4 failures only buzz and do not lock; a slip of the finger, or one digit off because of oil on the screen, should not be treated as an attack. The counter lives in secure storage, so it is still there after the process is killed and reopened.", comment: "")
     static let lockoutStrikesHeadline = NSLocalizedString("Current failure count", comment: "")
@@ -2183,7 +2183,7 @@ private enum Copy {
     static let lockoutTenStrikeNoteOff = NSLocalizedString("Off (default): the 10th and every later failure only locks for 1 hour and the data stays untouched.", comment: "")
     static let lockoutTenStrikeWarning = NSLocalizedString("With this level on you accept two things: someone who has an unlocked phone and 10 chances may wipe your identities for you, and you may count to 10 in the dark yourself. The price of an accidental touch, a family member pressing around, a child playing with it, or typing your own mnemonic phrase wrong ten times in a row, is carried by this one deliberate tap.", comment: "")
 
-    // 重建模式
+    // rebuild mode
     static let groupRebuild = NSLocalizedString("After self-destruct", comment: "")
     static let rebuildFootnote = NSLocalizedString("This row decides what kind of account you hand over once the wipe is done. The first option only counts when you name which anonymous identity to keep, and that is identity information, not a preference.", comment: "")
     static let rebuildCurrentHeadline = NSLocalizedString("Current choice", comment: "")
@@ -2197,13 +2197,13 @@ private enum Copy {
     static let decoyRow = NSLocalizedString("Simulated decoy content", comment: "")
     static let decoyNote = NSLocalizedString("This row only decides which kind of account you hand over; it does not affect the wipe itself. Flipping it makes the simulated decoy generator re-read immediately instead of waiting for its own refresh.", comment: "")
 
-    // 演练入口
+    // rehearsal entry
     static let groupDrill = NSLocalizedString("One-tap simulated drill", comment: "")
     static let drillRow = NSLocalizedString("Drill: snatch-and-drop, free fall, duress code", comment: "")
     static let drillOpenHint = NSLocalizedString("Open", comment: "")
     static let drillFootnote = NSLocalizedString("The drill only feeds fixed synthetic samples into the very same detection code the real runtime uses. It does not lock the screen, does not wipe, and does not read the sensors on the phone in your hand.", comment: "")
 
-    // 演练子页
+    // rehearsal subpage
     static let drillPageTitle = NSLocalizedString("Simulated drill", comment: "")
     static let drillInvariantGroup = NSLocalizedString("What this page will not do", comment: "")
     static let drillInvariantLine = NSLocalizedString("No lock, no data wipe, no Keychain write, no stopping or starting sensors.", comment: "")
@@ -2249,7 +2249,7 @@ private enum Copy {
     static let drillOutcomeNotConfigured = NSLocalizedString("This device has no normal code set yet, so there is no record to compare against.", comment: "")
     static let drillOutcomeLockedOut = NSLocalizedString("The drill uses a read-only comparison and does not consult the cool-down table, so this sentence can never appear on this page: it exists only because that result has one more possibility and the compiler requires the cases to be exhaustive. The row on the lock screen is where the cool-down actually lands.", comment: "")
 
-    // 页脚风险说明
+    // footer risk notes
     static let groupRisk = NSLocalizedString("What this cannot protect you from", comment: "")
     static let riskIrreversible = NSLocalizedString("Once data is wiped by the duress code it cannot be recovered: no backup prompt, no undo, no recovery channel. The drill page will not let you try it once, and cannot.", comment: "")
     static let riskForensics = NSLocalizedString("Self-destruct relies on this app closing the database and deleting the files itself. Whatever the operating system once rendered of these pages into caches is not guaranteed to be beyond forensic recovery; this module pushes recoverable content down to very little, but it does not promise zero.", comment: "")

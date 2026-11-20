@@ -36,51 +36,51 @@ struct POPOPXApp: App {
         installSecureEphemeralHost()
         installAntiTheftDuress()
         installCommerceRuntime()
-        // 反调试只在 Release 里真正 `PT_DENY_ATTACH`；Debug 下这行只置一个标志位
-        // （PopopxAntiDebug.swift:41），否则 Xcode 挂不上去，整个特性在开发期就没法验。
+        // Anti-debug only really performs `PT_DENY_ATTACH` in Release; under Debug this line only sets a flag
+        // (`PopopxAntiDebug.swift:41`), otherwise Xcode cannot attach and the whole feature could not be verified during development.
         PopopxAntiDebug.enableProtection()
     }
 
-    /// 算力点生态的两台常驻机：徽章状态机与点数账本。
+    /// The two resident machines of the credits ecosystem: the badge state machine and the credits ledger.
     ///
-    /// 为什么装在 `init()` 而不是某个视图的 `.task`：`start()` 各自做三件不能在用户点开面板之后
-    /// 才做的事——接管 StoreKit 交付（未结算的交易在启动时就会推过来）、起时间心跳、与 Apple 权益对账
-    /// （PopopxBadgeManager.swift:76-84 / PopopxCreditsManager.swift:79-86）。装晚了不会崩，
-    /// 但那一晚里买到的点数没有人来入账。
+    /// Why it is installed in `init()` rather than in some view's `.task`: each `start()` does three things that cannot be done
+    /// only after the user opens the panel - taking over StoreKit delivery (unsettled transactions are pushed at launch), starting the time heartbeat, and reconciling with Apple entitlements
+    /// (`PopopxBadgeManager.swift:76-84` / `PopopxCreditsManager.swift:79-86`). Installing late does not crash,
+    /// but during that delay nobody comes to credit the points that were bought.
     ///
-    /// 两个 `Task` 都不许 `await`：`App.init()` 在主 actor 上，等它们就是把启动画面卡在钥匙串读盘上。
-    /// 两处都是幂等的（`guard deliveryToken == nil`），重复调用等于什么都没发生。
-    /// StoreKit 的交易观察者由 `PopopxBadgeManager.start()` 那一步顺带装好，这里不再叫第二次。
+    /// Neither of the two `Task`s may `await`: `App.init()` is on the main actor, and waiting for them would stall the launch screen on a Keychain read.
+    /// Both places are idempotent (`guard deliveryToken == nil`), so a repeated call amounts to nothing happening.
+    /// StoreKit's transaction observer is installed along the way by the `PopopxBadgeManager.start()` step, so it is not called a second time here.
     private func installCommerceRuntime() {
         Task { await PopopxBadgeManager.shared.start() }
         Task { await PopopxCreditsManager.shared.start() }
     }
 
-    /// 绝密阅后即焚的宿主侧两只钩子：物理删除本机记录、把销毁回执发回给对方。
+    /// The two host-side hooks of top-secret view-once: physically deleting this device's record, and sending the destruction receipt back to the other side.
     ///
-    /// 为什么装在 `init()` 而不是某个视图的 `.task`：`PopopxSecureWindowManager` 是 fail-closed 的
-    /// （钩子为空时直接拒开窗口），装配必须排在任何卡片出现之前，否则用户会碰到"卡片在、点了没反应"
-    /// 那一格。`App.init()` 本身就在主 actor 上（SwiftUI 的 `App` 协议是 `@MainActor` 的），
-    /// 所以这里可以直接调那个 `@MainActor` 单例。
+    /// Why it is installed in `init()` rather than in some view's `.task`: `PopopxSecureWindowManager` is fail-closed
+    /// (with empty hooks it refuses to open the window outright), so the assembly must come before any card appears, or the user runs into
+    /// that "the card is there, tapping does nothing" case. `App.init()` itself is on the main actor (SwiftUI's `App` protocol is `@MainActor`),
+    /// so that `@MainActor` singleton can be called directly here.
     ///
-    /// `target.chatId` 只用来查现网会话（`ChatModel.getChat(_:)`，ChatModel.swift:548），
-    /// 传进去的就是 `ChatInfo.id` 原样；这两个值不在这里二次拼装（理由见 `PopopxSecureChatTarget`）。
-    /// 查不到就只记一条 error：宁可这一条没删成，也不能拿猜出来的键去删别人的行。
+    /// `target.chatId` is only used to look up the live chat (`ChatModel.getChat(_:)`, ChatModel.swift:548),
+    /// and what is passed in is `ChatInfo.id` exactly as it is; these two values are not assembled a second time here (see `PopopxSecureChatTarget` for the reason).
+    /// When the lookup finds nothing, log one error only: better that this one row fails to delete than using a guessed key to delete someone else's row.
     private func installSecureEphemeralHost() {
         PopopxSecureWindowManager.shared.install(
             host: PopopxSecureHostHooks(
                 deleteItem: { target in
                     guard let itemId = target.itemId else { return }
-                    // 整段跑在主 actor 上：`getChat` 读的是 `ChatModel.chats`，
-                    // 在别的线程读它等于和 UI 抢一份没有锁的数组。两个 await 只是让出，不占主线程。
+                    // The whole section runs on the main actor: `getChat` reads `ChatModel.chats`,
+                    // and reading it on another thread is racing the UI over an array with no lock. The two awaits only yield, they do not occupy the main thread.
                     Task { @MainActor in
                         guard let chat = ChatModel.shared.getChat(target.chatId) else {
                             logger.error("secure burn: chat not found for \(target.chatId)")
                             return
                         }
                         do {
-                            // `.cidmInternal` = 只删本机这一份，不向对方广播删除。对方的知情路径
-                            // 只有下面那条回执文本：一条"我看完了并销毁了"的话，而不是一条协议事件。
+                            // `.cidmInternal` = delete only this device's copy, do not broadcast the deletion to the other side. The other side's path to knowing
+                            // is only the receipt text below: a sentence saying "I finished reading it and destroyed it", not a protocol event.
                             let deletions = try await apiDeleteChatItems(
                                 type: chat.chatInfo.chatType,
                                 id: chat.chatInfo.apiId,
@@ -98,7 +98,7 @@ struct POPOPXApp: App {
                                 model.updateChatInfo(deletion.deletedChatItem.chatInfo)
                             }
                         } catch {
-                            // 这条日志是验收口径："看完但没删掉"的全部发生次数都由它统计。
+                            // This log line is the acceptance measure: every occurrence of "read but not deleted" is counted by it.
                             logger.error("secure burn: apiDeleteChatItems failed \(responseError(error))")
                         }
                     }
@@ -109,8 +109,8 @@ struct POPOPXApp: App {
                             logger.error("secure receipt: chat not found for \(target.chatId)")
                             return
                         }
-                        // 回执是**普通明文消息**：它说的是"那条绝密已经销毁了"这件事，
-                        // 本身不含任何正文，所以不需要再走一次载荷封装，对方也永远收得到。
+                        // The receipt is **an ordinary plaintext message**: what it states is the fact "that top-secret message has been destroyed",
+                        // and it carries no body text itself, so it needs no second payload wrap and the other side always receives it.
                         guard let items = await apiSendMessages(
                             type: chat.chatInfo.chatType,
                             id: chat.chatInfo.apiId,
@@ -132,12 +132,12 @@ struct POPOPXApp: App {
         )
     }
 
-    /// 防盗与双密码模块的宿主侧装配。
+    /// Host-side assembly for the anti-theft and dual-password modules.
     ///
-    /// `enabled` 默认 false（fail-closed：没在设置页开过就没有 20Hz 采样），`sync()` 幂等，
-    /// 所以设置页拨完开关再调一次也不会重复启动。这里只做这一件事：
-    /// Keychain 探测（`refreshConfiguration()`）是一次同步 `SecItemCopyMatching`，
-    /// 不排在冷启动关键路径上，改由根视图的 `.task` 在首帧之后取。
+    /// `enabled` defaults to false (fail-closed: never switched on in the settings page, so no 20Hz sampling), and `sync()` is idempotent,
+    /// so calling it again after the settings switch is flipped will not start it twice. This does only that one thing here:
+    /// the Keychain probe (`refreshConfiguration()`) is one synchronous `SecItemCopyMatching`,
+    /// so it is not put on the cold-start critical path; the root view's `.task` takes it after the first frame instead.
     private func installAntiTheftDuress() {
         PopopxAntiTheftMotionGuard.shared.sync()
         PopopxBehaviorGuard.shared.sync()
@@ -150,15 +150,15 @@ struct POPOPXApp: App {
             ContentView(contentAccessAuthenticationExtended: !authenticationExpired())
                 .environmentObject(chatModel)
                 .environmentObject(AppTheme.shared)
-                // 第二阶段 app 侧挂载：离线网格的两条挂载。两行都只影响 app 自己新加的修饰符，熔断关闭时
-                // `PopopxMeshPanicWipeMount` 的 overlay 里什么都不放（连 44pt 的角落都不是命中区），
-                // `bootstrap()` 也不会建出任何蓝牙对象 —— 见 Shared/Model/POPOPXAPI.swift 末尾。
+                // Stage-two app-side mounting: the two offline-mesh mounts. Both lines only affect the modifiers the app itself added, and with the kill switch off
+                // `PopopxMeshPanicWipeMount`'s overlay puts nothing in it (not even the 44pt corner is a hit area),
+                // and `bootstrap()` does not build any Bluetooth object either - see the end of Shared/Model/POPOPXAPI.swift.
                 .modifier(PopopxMeshPanicWipeMount())
                 .task {
                     await PopopxMeshRuntime.shared.bootstrap()
-                    // 触摸节拍：给"多久没动就锁"提供真实交互时间戳。窗口句柄由 SceneDelegate
-                    // 在 willConnectTo 里存好（AppDelegate.swift:145），`.task` 排在首帧之后，
-                    // 此时它必定已就绪；挂不上也只是不刷新空闲计时，不会锁错人。
+                    // The touch heartbeat: supplies real interaction timestamps for "how long without movement before locking". The window handle is stored by SceneDelegate
+                    // in willConnectTo (AppDelegate.swift:145), and `.task` comes after the first frame,
+                    // so by then it must be ready; failing to mount only means the idle timer stops being refreshed, it never locks the wrong person.
                     PopopxTouchBeat.install(in: SceneDelegate.windowStatic)
                     PopopxDuressAuthManager.shared.refreshConfiguration()
                 }
@@ -240,14 +240,14 @@ struct POPOPXApp: App {
                         break
                     }
                 }
-                // 防盗遮罩：必须是这条内容链上的**最后一条**修饰符，才压得住上面所有业务页。
-                // 只能无条件挂，不许在宿主外面再套一层 `if lock.coversContent`：
-                // `submit(pin:)` 的顺序是 beginDuressFlow → 擦除 → endDuressFlow → unlock() → 补时，
-                // `unlock()` 落在补时**之前**，宿主那一层 `if` 会在自毁还剩最多 1.2 秒时把遮罩连带
-                // 它的 `@State` 整个从层级里摘掉——那一下"画面突然变了"正是整条静默路径要避免的暴露。
-                // 遮罩自己在未锁时是空 `ZStack`（零命中区、零动画），所以常态开销等于不挂。
-                // 失效范围也不在这里：`PopopxAppLockOverlayView` 自己是视图、就是失效边界，
-                // App 的 body 不读锁状态，因此拉锁不会重跑上面那个 `!authenticationExpired()`。
+                // The anti-theft shield: it must be the **last** modifier on this content chain, or it cannot cover all the business pages above it.
+                // It may only be mounted unconditionally; do not wrap another `if lock.coversContent` outside the host:
+                // `submit(pin:)` goes beginDuressFlow → wipe → endDuressFlow → unlock() → time top-up, in that order,
+                // and `unlock()` lands **before** the top-up, so the host's `if` layer would, with at most 1.2 seconds of self-destruction left, take the shield
+                // and its whole `@State` out of the hierarchy - that one moment of "the picture suddenly changed" is exactly the exposure the entire silent path avoids.
+                // The shield itself is an empty `ZStack` when unlocked (zero hit area, zero animation), so the steady-state cost equals not mounting it.
+                // The invalidation scope is not here either: `PopopxAppLockOverlayView` is itself a view, so it is the invalidation boundary,
+                // and the App's body does not read the lock state, so raising the lock never re-runs that `!authenticationExpired()` above.
                 .popopxAppLockOverlay()
         }
     }

@@ -1,79 +1,79 @@
 //  PopopxBadgePaywallView.swift
 //
-//  【第五阶段 · 4】付费墙：徽章的两条付款路径 + 礼品徽章券。这一页只卖徽章。
+//  [Phase 5 · 4] The paywall: the badge's two payment paths + gift badge vouchers. This page sells only badges.
 //
-//  ### 这一页只有一种商品（真机第 8 轮 · 任务三）
-//  算力点现金包（100 / 500 / 2000）整组搬到了「POPOPX 算力点」那一页
-//  （`PopopxCreditsStoreView`，档位表现在是 `PopopxCreditPlan`）。搬走之前这一屏同时摆着
-//  "订阅/通行证"（会再来扣钱或给一段时长）与"充值包"（换成可花的点数）两种互相冲突的商品，
-//  用户在同一个列表里读到它们就会买错东西——那是商业化的 P0 事故，不是审美问题。
-//  这一页只留一条与算力点有关的通路：**用已有算力点兑换徽章**（footer 那枚
-//  `paywallUseCredits` → `PopopxBadgeCreditExchangeSheet`）。它是花掉已有余额的出口，
-//  不是收钱的入口，所以永远摆在次要操作那一格；另有一枚 `creditsName` 按钮只是把用户送到
-//  算力点那一页去充值，本页面上一张充值价目表都不画。
+//  ### This page has only one kind of product (device round 8 · task three)
+//  The compute-point cash packs (100 / 500 / 2000) moved as a whole group to the "POPOPX compute points" page
+//  (`PopopxCreditsStoreView`, the tier table is now `PopopxCreditPlan`). Before the move this screen displayed at the same time
+//  two conflicting products, "subscription/pass" (charges again or grants a period) and "top-up pack" (converts into spendable points),
+//  and users reading them in the same list would buy the wrong thing — that is a monetization P0 incident, not an aesthetics problem.
+//  This page keeps only one path involving compute points: **exchange existing compute points for a badge** (the footer's
+//  `paywallUseCredits` → `PopopxBadgeCreditExchangeSheet`). It is the exit for spending an existing balance,
+//  not a money-in entry, so it always sits in the secondary-action slot; a separate `creditsName` button only sends the user to
+//  the compute-points page to top up, and this page draws not a single top-up price table.
 //
-//  ### 页面骨架是这个模块的财产，不是 StoreKit 的附属品
-//  提示词指定的结构是"标题 + 副标题 + 分段卡片 + 利益点 + 价格行 + CTA + 次要操作"，
-//  并且明令禁止 `if storeKitManager.products.isEmpty { ForEach(…) }` 这种"拿商品数组当页面骨架"的写法。
-//  所以这里先把版面写成 `PopopxPaywallPlan.sections(tab:)` 那张固定的表（档位、顺序、标题、注释
-//  全部由代码决定），StoreKit 只回答一个价格字符串；`PopopxNodeBadgeSku.allCases` 在本文件里
-//  一次都没有出现。
-//  商店还没准备好（离线、StoreKit 故障、首次加载在途）时，卡片照画、按钮照禁用，
-//  价格位显示各 SKU 自带的 `fallbackPriceText` —— 那是**已知的标价**，不是猜的：
-//  它等于 App Store Connect 里配置的 face value，一旦取到真价格就被 `displayPrice` 顶掉。
-//  这样就不会出现"整页空白"或"按钮能点但什么都没发生"两种常见失败。
+//  ### The page skeleton is this module's property, not an accessory of StoreKit
+//  The structure the prompt specified is "title + subtitle + segmented cards + benefit points + price rows + CTA + secondary action",
+//  and it explicitly forbids the `if storeKitManager.products.isEmpty { ForEach(…) }` style of "using the products array as the page skeleton".
+//  So the layout here is first written as the fixed table `PopopxPaywallPlan.sections(tab:)` (tiers, order, titles, notes
+//  are all decided by code), and StoreKit only answers a price string; `PopopxNodeBadgeSku.allCases` appears in this file
+//  not even once.
+//  When the store is not ready yet (offline, StoreKit failure, first load in flight), cards are still drawn and buttons still disabled,
+//  and the price slot shows each SKU's own `fallbackPriceText` — that is a **known list price**, not a guess:
+//  it equals the face value configured in App Store Connect, and once a real price is fetched it is displaced by `displayPrice`.
+//  This way the two common failures, "a completely blank page" or "a button that taps but does nothing", cannot occur.
 //
-//  ### 三件必须说清的事，一件都不许含糊
-//  1. **自动续费**：`PopopxCommerceCopy.renewalStatement`（3.1.2(c) 全文口径）只在订阅档出现，
-//     挂在档位脚注上，不塞进 CTA 下面当装饰。一次性时长档在**同一格**给
-//     `PopopxCommerceCopy.oneTimePurchaseStatement`（一次付清、永不自动续费）：这两条付款路径的
-//     续费事实相反，各说各的才不会被读成同一件事，所以「POPOPX 徽章」那一分段也按这两条各成一组。
-//  2. **零赠送**：`PopopxCommerceCopy.noGiftBackStatement` 现在常驻**算力点那一页**的充值卡脚注
-//     （见 `PopopxCreditsStoreView`），这一页已经没有充值档可挂；全页没有任何"加赠 X 算力点"的字样
-//     （提示词的"纯净充值"红线）。
-//  3. **虚拟币不跨平台**：算力点只能在本 app 内消耗，不提供任何形式的外部转移
-//     （礼品卡是徽章券，不是算力点转账；红包是算力点，但只在双方会话内等额均分）。
+//  ### Three things that must be said clearly, none of them allowed to be vague
+//  1. **Auto-renewal**: `PopopxCommerceCopy.renewalStatement` (the full 3.1.2(c) wording) appears only on subscription tiers,
+//     attached as the tier footnote, not stuffed under the CTA as decoration. One-time duration tiers give, in the **same slot**,
+//     `PopopxCommerceCopy.oneTimePurchaseStatement` (paid once, never auto-renews): these two payment paths have
+//     opposite renewal facts, so each must say its own or they read as one and the same thing; that is why the "POPOPX badge" section also groups by these two.
+//  2. **Zero bonuses**: `PopopxCommerceCopy.noGiftBackStatement` now lives permanently in the **compute-points page**'s top-up card footnote
+//     (see `PopopxCreditsStoreView`); this page no longer has a top-up tier to attach it to, and there is no "get X extra compute points" text anywhere
+//     (the prompt's "pure top-up" red line).
+//  3. **Virtual currency does not cross platforms**: compute points can only be consumed inside this app, with no form of external transfer
+//     (the gift card is a badge voucher, not a compute-point transfer; red packets are compute points, but split equally only within the two parties' conversation).
 //
-//  ### 恢复购买的语义
-//  `AppStore.sync()` 让 Apple 弹它自己的确认，本层只统计"这次实际恢复到了什么"
+//  ### The semantics of restoring purchases
+//  `AppStore.sync()` lets Apple show its own confirmation, and this layer only counts "what was actually restored this time";
 //  （`PopopxRestoreOutcome`：`restored(Int)` / `nothingToRestore` / `cancelled`）。
-//  数字用 `%lld`（`String(format:)`），不写 `%d`： NSInteger/Int 的宽度在 32 位设备上会变。
+//  numbers use `%lld` (`String(format:)`), never `%d`: the width of NSInteger/Int changes on 32-bit devices.
 //
-//  ### 「用算力点兑换徽章」为什么留在这页
-//  它是唯一一条"不经过 Apple"的徽章获取路径（资金来源是此前已经付费兑换过的点数），
-//  因此必须走 `PopopxBadgeManager.activate(withCredits:)` 那唯一一处写 `.badgeRecord` 的入口，
-//  并且和它一起被门禁覆盖。它放在**次要操作**那一格：它是"花掉已有余额"的出口，
-//  不是"新的收入"的入口，摆成主 CTA 会误导用户以为算力点可以凭空获得。
+//  ### Why "exchange compute points for a badge" stays on this page
+//  It is the only badge-acquisition path that does not go through Apple (the funding source is points already paid for and exchanged),
+//  so it must go through `PopopxBadgeManager.activate(withCredits:)`, the single entry that writes `.badgeRecord`,
+//  and be covered by the gate together with it. It sits in the **secondary action** slot: it is the exit for "spending an existing balance",
+//  not the entry for "new revenue", and presenting it as the main CTA would mislead users into thinking compute points can be gained out of thin air.
 //
-//  ### 沙盒购买那一格（只在 Debug 构建存在）
-//  `.storekit` 配置文件只随 Xcode 的 scheme 注入，用 `xcrun devicectl device install app`
-//  装到真机、再从桌面启动的包不带它，于是 `Product.products(for:)` 打到真实商店、9 个 SKU
-//  一个都取不到，这一屏每一颗 CTA 都是死的（`.disabled(!store.isStoreReady)`），
-//  点得到的那一颗只会说「该商品暂不可用（…）」。真机上想走完「付款 → 点亮 → 落 Keychain →
-//  重启还在」这条商业主链路，就必须有第二条入口：`sandboxRow` 那枚虚线按钮 →
-//  `PopopxStoreKitManager.purchaseSimulated(_:)` 本机铸收据 → **同一个** `settle` →
-//  同一条 `grantPass → PopopxBadgeManager.activate`。整段被 `#if DEBUG` 包住，
-//  Release 归档里这些符号根本不存在（`Debug.xcconfig` 才有 `SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG`）。
-//  生产那颗 CTA 的判据与语义一个字都没改：沙盒是多出来的一条路，不是把死按钮改活。
+//  ### The sandbox purchase slot (exists only in Debug builds)
+//  The `.storekit` configuration file is injected only through Xcode's scheme; a package installed onto a real device with `xcrun devicectl device install app`
+//  and launched from the home screen does not carry it, so `Product.products(for:)` hits the real store and none of the 9 SKUs
+//  can be fetched, which makes every CTA on this screen dead (`.disabled(!store.isStoreReady)`),
+//  and the only tappable one just says "this product is temporarily unavailable (…)". To walk the commercial main path on a real device — pay → light up → land in Keychain →
+//  still present after a restart — there must be a second entry: `sandboxRow`'s dashed button →
+//  `PopopxStoreKitManager.purchaseSimulated(_:)` mints a receipt locally → the **same** `settle` →
+//  the same `grantPass → PopopxBadgeManager.activate`. The whole block is wrapped in `#if DEBUG`,
+//  so in the Release archive these symbols do not exist at all (only `Debug.xcconfig` has `SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG`).
+//  The production CTA's criterion and semantics are unchanged to the letter: the sandbox is an extra path, not a dead button made live.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. The red line forbids scripts from modifying project.pbxproj.
 
 import SwiftUI
 import POPOPXChat
 
-// MARK: - 版面模型
+// MARK: - Layout model
 
-/// 付费墙的一个档位。刻意不带价格字段：价格属于运行时，档位属于设计。
+/// One tier of the paywall. Deliberately without a price field: the price belongs to the runtime, the tier belongs to the design.
 ///
-/// 这里没有 `.credits` 那一族了（真机第 8 轮 · 任务三）：徽章页的版面模型如果还能装下一个
-/// 充值包，"这一页只卖徽章"就只是一句注释而不是一个类型约束。删掉 case 之后，
-/// 任何想把价目表搬回来的写法都会在 `switch` 上编译不过去。
+/// There is no `.credits` family here anymore (device round 8 · task three): if the badge page's layout model could still hold a
+/// top-up pack, then "this page sells only badges" would be just a comment rather than a type constraint. After deleting the case,
+/// any writing that tries to move the price table back will not compile at the `switch`.
 struct PopopxPaywallSection: Identifiable, Hashable {
     enum Kind: Hashable {
         case subscription(PopopxNodeBadgePeriod)
-        /// 一次性时长包：付一次给 `period.days` 天，**永不自动续费**。
-        /// 与 `.subscription` 分开成两个 case（而不是订阅上加个 bool），是因为这两族的
-        /// 续费文案、恢复语义、落账路径都不一样——用类型区分才会在漏写那一支时编译报错。
+        /// One-time duration pack: pay once, get `period.days` days, **never auto-renews**.
+        /// It is a separate case from `.subscription` (rather than a bool on the subscription) because these two families'
+        /// renewal wording, restore semantics and accounting paths all differ — only distinguishing them by type makes a missing branch a compile error.
         case oneTimePass(PopopxNodeBadgePeriod)
         case giftCard(PopopxNodeBadgePeriod)
     }
@@ -94,10 +94,10 @@ struct PopopxPaywallSection: Identifiable, Hashable {
         }
     }
 
-    /// 按钮动词按档位分：订阅是"点亮"，通行证是"买一次时长"，礼品是"买一张券"。
-    /// 三个动作对用户来说是三件不同的事，共用一个"立即购买"会把"给他人买"读成"给自己买"。
-    /// 通行证那一格走本地化 key：它是一条**新的付款路径**，不能借用上面任何一句中文常量
-    /// （那三处是这一页既有文案，收口到 key 需要一并动 16 本目录，超出本轮范围）。
+    /// The button verb is chosen per tier: subscription is "light up", the pass is "buy one duration", the gift is "buy one voucher".
+    /// Three actions are three different things for the user, and sharing one "buy now" would make "buy for someone else" read as "buy for yourself".
+    /// The pass slot goes through a localization key: it is a **new payment path**, and cannot borrow any of the Chinese constants above
+    /// (those three are this page's existing copy; closing them off into keys would mean touching all 16 directories, beyond this round's scope).
     var actionTitle: String {
         switch kind {
         case .subscription: NSLocalizedString("Light up", comment: "")
@@ -107,28 +107,28 @@ struct PopopxPaywallSection: Identifiable, Hashable {
     }
 }
 
-/// 付费墙的**档位组**：一个组标题 + 它下面那几张卡。
+/// The paywall's **tier groups**: one group title + the cards under it.
 ///
-/// 徽章那一分段分成两组，是因为那一屏同时摆着两条付款路径，而它们的续费事实**相反**：
-/// 订阅到点自动扣下一次，通行证付一次就结束。混在一张无标题的列表里，用户很容易把
-/// "按年点亮"和"365 天通行证"读成同一件事的两种写法，等到账单上出现第二次扣款才发现不是。
-/// 组标题只说这一件需要说清的事，卡面上的脚注（`renewalStatement` /
-/// `oneTimePurchaseStatement`）仍在各自卡内重复一次——标题管"分组"，脚注管"这一张卡"。
+/// The badge section is split into two groups because that one screen holds two payment paths at once, and their renewal facts are **opposite**:
+/// a subscription charges again automatically when it expires, a pass ends after one payment. Mixed in one untitled list, users easily read
+/// "light up yearly" and "365-day pass" as two spellings of the same thing, and only discover otherwise when a second charge appears on the bill.
+/// The group title says only this one thing that needs saying, while the card footnotes (`renewalStatement` /
+/// `oneTimePurchaseStatement`) still repeat it once inside each card — the title governs "grouping", the footnote governs "this card".
 struct PopopxPaywallGroup: Identifiable {
     let id: String
-    /// `nil` = 这一组不需要标题（礼品 tab 整组同一族，加标题反而是噪音）。
+    /// `nil` = this group needs no title (the gift tab is one family throughout the group, and a title would be noise).
     let title: String?
     let sections: [PopopxPaywallSection]
 }
 
-/// 那张固定的表。
+/// That fixed table.
 enum PopopxPaywallPlan {
-    /// 分组视图的唯一来源。`sections(tab:)` 是它的摊平版本，留给"只关心有哪些档位"的读法。
+    /// The single source for the grouped view. `sections(tab:)` is its flattened version, kept for readings that only care about which tiers exist.
     static func groups(tab: PopopxPaywallTab) -> [PopopxPaywallGroup] {
         switch tab {
         case .badge:
             [
-                // 第一组：会到点自动扣钱的那两档。
+                // First group: the two tiers that charge automatically when they expire.
                 PopopxPaywallGroup(id: "recurring",
                                    title: PopopxCommerceCopy.paywallAutoRenewGroupTitle,
                                    sections: [
@@ -143,9 +143,9 @@ enum PopopxPaywallPlan {
                                                             badge: nil,
                                                             sku: .subscriptionAnnual)
                                    ]),
-                // 第二组：付一次结束的那两档。标题与上一组相反，卡面脚注也相反（见 `tierCard`）。
-                // 时长与订阅组同周期（30/365 天），价格也是同一档 $6.99 / $49.99 ——
-                // 两条路径的差别只在"会不会自动续费"，不在能拿到什么。
+                // Second group: the two tiers that end after one payment. Its title is the opposite of the first group's, and so is the card footnote (see `tierCard`).
+                // The durations share the subscription group's cycle (30/365 days) and the prices are the same tiers $6.99 / $49.99 —
+                // the two paths differ only in "will it charge again", not in what you get.
                 PopopxPaywallGroup(id: "oneTime",
                                    title: PopopxCommerceCopy.paywallOneTimeGroupTitle,
                                    sections: [
@@ -171,8 +171,8 @@ enum PopopxPaywallPlan {
         }
     }
 
-    /// 通行证档位卡：标题由本地化格式串生成（"30-day pass" / "365-day pass"），
-    /// 天数只有 `PopopxNodeBadgePeriod` 那一处来源，行上写的与真正发放的不可能分叉。
+    /// The pass tier card: the title is generated from a localized format string ("30-day pass" / "365-day pass"),
+    /// and the day count has only one source, `PopopxNodeBadgePeriod`, so what the row writes and what is actually granted cannot diverge.
     private static func passSection(_ period: PopopxNodeBadgePeriod, _ sku: PopopxNodeBadgeSku) -> PopopxPaywallSection {
         PopopxPaywallSection(kind: .oneTimePass(period),
                              title: String(format: PopopxCommerceCopy.passTierTitleFormat, period.days),
@@ -185,16 +185,16 @@ enum PopopxPaywallPlan {
         groups(tab: tab).flatMap(\.sections)
     }
 
-    // 算力点现金包那张表原来就在 `PopopxPaywallPlan` 里（`creditPacks` / `creditsPack(_:_:)`）。
-    // 真机第 8 轮 · 任务三把它整组搬到算力点那一页，现在它的家是 `PopopxCreditPlan`
-    // （`PopopxBadgeCreditsModels.swift`）：徽章页的模型里再留一份充值档位，
-    // 就是下一次"两种商品混在同一屏"的起点。
+    // The compute-point cash pack table used to live in `PopopxPaywallPlan` itself (`creditPacks` / `creditsPack(_:_:)`).
+    // Device round 8 · task three moved the whole group to the compute-points page, and its home is now `PopopxCreditPlan`
+    // (`PopopxBadgeCreditsModels.swift`): keeping another set of top-up tiers in the badge page's model
+    // is the starting point of the next "two products on one screen".
 }
 
-/// 付费墙的两个分段。名字跟着商品走，不跟着"给谁"走：
-/// `.badge` 是给自己这台设备买徽章，`.giftCard` 是买一张送给别人的券。
-/// 原来那一个 case 叫 `myself`、标题是 "For myself"（「为自己」），在屏幕上既不说明卖什么、
-/// 也不说明买到之后归谁——真机第 8 轮 · 任务三把它连同充值档一起收掉了。
+/// The paywall's two segments. The names follow the product, not "for whom":
+/// `.badge` buys a badge for this device, `.giftCard` buys a voucher to give to somebody else.
+/// The old case was named `myself` with the title "For myself" — on screen it explained neither what was sold
+/// nor who owns what was bought, and device round 8 · task three closed it off together with the top-up tiers.
 enum PopopxPaywallTab: String, CaseIterable, Hashable {
     case badge
     case giftCard
@@ -207,14 +207,14 @@ enum PopopxPaywallTab: String, CaseIterable, Hashable {
     }
 }
 
-// MARK: - 面板
+// MARK: - Panel
 
 struct PopopxBadgePaywallView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var store = PopopxStoreKitManager.shared
-    /// 通行证落账要用它（`activate` 是"唯一一处写 `.badgeRecord`"的那个入口），
-    /// 同时它也让这一页在点亮之后立刻读到新的 phase —— `@Observable` 的读侧就是这一页自己。
+    /// The pass accounting needs it (`activate` is the entry that is "the single place writing `.badgeRecord`"),
+    /// and it also lets this page read the new phase immediately after lighting up — the read side of `@Observable` is this page itself.
     @State private var badge = PopopxBadgeManager.shared
     @State private var toast = PopopxToastModel()
 
@@ -223,7 +223,7 @@ struct PopopxBadgePaywallView: View {
     @State private var showsRedeem = false
     @State private var showsCreditExchange = false
     @State private var showsWallet = false
-    /// 礼品档买完之后自动去的那一页，以及该页要预填的档位（用户不用重新选）。
+    /// The page the gift tier automatically goes to after purchase, plus the tier that page should prefill (so the user need not choose again).
     @State private var showsGiftQueue = false
     @State private var giftQueuePeriod: PopopxNodeBadgePeriod = .monthly
     @State private var isRestoring = false
@@ -278,11 +278,11 @@ struct PopopxBadgePaywallView: View {
         }
     }
 
-    // MARK: 档位卡
+    // MARK: Tier cards
 
-    /// 组标题。刻意**不**进 `PopopxSectionCard`：那是给"浅色卡里几行"用的，
-    /// 把两张品牌色档卡塞进一张浅色卡会再套一层圆角，读起来像设置页而不是价目表。
-    /// 这里只做一件事——把"会不会自动续费"这一族区别提到卡片之上，让扫视顺序先遇到它。
+    /// The group title. Deliberately **not** inside `PopopxSectionCard`: that one is for "a few rows inside a light card",
+    /// and stuffing two brand-colored tier cards into a light card would add another layer of rounded corners, reading like a settings page rather than a price list.
+    /// Here it does one thing only — lift the "will it charge again" family distinction above the cards, so the scanning order meets it first.
     private func groupHeader(_ title: String) -> some View {
         HStack(spacing: PopopxMetrics.spaceXS) {
             Text(verbatim: title)
@@ -320,8 +320,8 @@ struct PopopxBadgePaywallView: View {
             }
 
             HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.spaceXS) {
-                // 价格与"/月 · /年"后缀由 `priceText(for:periodSuffix:)` 一次给出：
-                // `suffix(for:)` 是 PopopxStoreKitManager 的私有方法，本面板不复制它那套措辞。
+                // The price and the "/mo · /yr" suffix come at once from `priceText(for:periodSuffix:)`:
+                // `suffix(for:)` is a private method of PopopxStoreKitManager, and this panel does not copy its wording.
                 Text(verbatim: store.priceText(for: section.sku, periodSuffix: section.sku.isSubscription))
                     .font(PopopxType.display)
                     .foregroundStyle(PopopxPalette.onBrand)
@@ -357,9 +357,9 @@ struct PopopxBadgePaywallView: View {
         .background(PopopxPalette.brand, in: .rect(cornerRadius: PopopxMetrics.radiusCard))
     }
 
-    /// 卡面那一格"这一档到底会不会再来扣钱"。两句话占**同一个位置**、用同一套排版，
-    /// 于是两条付款路径并排扫视时，唯一的差别就是这句话本身——这是 3.1.2(c) 要的形态。
-    /// 按 `kind` 穷尽而不是问 `sku.isSubscription`：将来再加一族时，编译器会逼着这里表态。
+    /// The card's one slot for "does this tier really charge again". Two sentences occupy **the same position** with the same typography,
+    /// so when the two payment paths are scanned side by side the only difference is that sentence itself — that is the shape 3.1.2(c) asks for.
+    /// Exhaustive over `kind` rather than asking `sku.isSubscription`: when another family is added later, the compiler forces this place to take a position.
     private func renewalStatement(for section: PopopxPaywallSection) -> String? {
         switch section.kind {
         case .subscription: PopopxCommerceCopy.renewalStatement
@@ -368,11 +368,11 @@ struct PopopxBadgePaywallView: View {
         }
     }
 
-    /// 折扣徽章。年档那一句"省 X%"是**按两份实时标价算出来的**，不是写死的数字：
-    /// 一旦调价，写死的 "33%" 立刻变成一句假话（当前配置 6.99×12 对 49.99 实际是 40%），
-    /// 而"省多少"是审核与广告 both 会核对的陈述。价格还没读到时宁可不显示徽章 —— 宁缺毋假。
-    /// 订阅年档与**通行证年档**走同一条算法（见 `percentSaved`）：两族都是"一次覆盖一整年 vs
-    /// 按月买十二次"的对比，基准一样，所以徽章口径也必须一样。
+    /// The discount badge. The annual tier's "save X%" is **computed from two live prices**, not a fixed number:
+    /// once prices change, a fixed "33%" immediately becomes a false statement (the current configuration 6.99×12 vs 49.99 is actually 40%),
+    /// and "how much is saved" is a statement that both review and advertising check. While prices have not been read the badge is simply not shown — missing rather than false.
+    /// The subscription annual tier and the **pass annual tier** go through the same algorithm (see `percentSaved`): both families are
+    /// "twelve monthly buys" against "one buy covering a whole year", the baseline is the same, so the badge's wording must be the same too.
     private func savingBadge(for section: PopopxPaywallSection) -> String? {
         switch section.kind {
         case .subscription(.annual):
@@ -384,9 +384,9 @@ struct PopopxBadgePaywallView: View {
         }
     }
 
-    /// 「按月买 12 次」对「一次买一年」省下的百分比文案。`months` 固定取 12：
-    /// 两个 SKU 的周期都是 30 天与 365 天，而 30×12=360 天略少于 365 天，
-    /// 因此这句话是**保守**的（把多出来的 5 天算进"省"里，是这一类对比的通行口径，不是夸大）。
+    /// The percentage saved by "buying monthly 12 times" against "buying one year at once". `months` is fixed at 12:
+    /// both SKUs have cycles of 30 days and 365 days, and 30×12=360 days is slightly fewer than 365 days,
+    /// so this statement is **conservative** (counting the extra 5 days into "saved" is the usual convention for this kind of comparison, not an exaggeration).
     private func percentSaved(monthly monthlySku: PopopxNodeBadgeSku, annual annualSku: PopopxNodeBadgeSku) -> String? {
         guard let monthly = store.product(for: monthlySku)?.price,
               let annual = store.product(for: annualSku)?.price,
@@ -399,11 +399,11 @@ struct PopopxBadgePaywallView: View {
         return String(format: PopopxCommerceCopy.savePercentFormat, Int(percent.rounded()))
     }
 
-    /// 五条利益点，每条都对应一个本模块真做出来的东西：徽章胶囊（`PopopxBadgeCapsule`）、
-    /// 节点状态面板（`PopopxBadgeDetailSheet`）、礼品卡与红包（`PopopxCommerceCards` / 路由器）。
-    /// 措辞红线两条：不出现任何 VPN/代理词汇，也**不再出现任何未落地的收益**
-    /// （"高并发优先调度""动态轮换 IP""1GB 专属大文件"三项在 2026-11-19 的产品裁定里撤下——
-    /// 判据与残留风险见 `Docs/app-store-review-notes.md` 第 1 节那张表）。
+    /// Five benefit lines, each corresponding to something this module actually built: the badge capsule (`PopopxBadgeCapsule`),
+    /// the node status panel (`PopopxBadgeDetailSheet`), gift cards and red packets (`PopopxCommerceCards` / the router).
+    /// Two wording red lines: no encrypted-tunnel vocabulary may appear, and **no unshipped benefit may appear either**
+    /// ("high-concurrency priority scheduling", "dynamic IP rotation" and "1GB dedicated large files" were withdrawn in the 2026-11-19 product ruling —
+    /// the criterion and residual risk are in the table at `Docs/app-store-review-notes.md` section 1).
     private var benefitStrip: some View {
         PopopxSectionCard(Copy.benefitsTitle) {
             VStack(alignment: .leading, spacing: PopopxMetrics.spaceS) {
@@ -429,7 +429,7 @@ struct PopopxBadgePaywallView: View {
         }
     }
 
-    // MARK: 商店未就绪
+    // MARK: Store not ready
 
     private var storeUnavailableNote: some View {
         HStack(spacing: PopopxMetrics.spaceXS) {
@@ -442,13 +442,13 @@ struct PopopxBadgePaywallView: View {
         .background(PopopxPalette.separator.opacity(0.5), in: .rect(cornerRadius: PopopxMetrics.radiusControl))
     }
 
-    // MARK: 沙盒购买（只有 Debug 构建编译进这一整段）
+    // MARK: Sandbox purchase (only Debug builds compile this whole section)
 
     #if DEBUG
-    /// 顶部那一条说明。判据与档位上那枚按钮**同一个函数**（`isMissingFromStore`），
-    /// 所以不会出现"条上说有沙盒、卡上却没有按钮"这种自相矛盾的中间态。
-    /// 按当前分段的档位看，两族里只要有任何一件没回来就出这一条——它解释的是"为什么读不到商品"，
-    /// 与具体哪一件无关，逐件解释会让这一段变成日志转储。
+    /// The explanation line at the top. Its criterion and the tier's button use **the same function** (`isMissingFromStore`),
+    /// so an inconsistent middle state like "the line says there is a sandbox but the card has no button" cannot appear.
+    /// Judged over the current segment's tiers: this line appears if any item in either family failed to come back — it explains "why the products cannot be read",
+    /// which is independent of which particular item; explaining item by item would turn this segment into a log dump.
     private var showsSandboxStrip: Bool {
         PopopxPaywallPlan.sections(tab: tab).contains { store.isMissingFromStore($0.sku) }
     }
@@ -464,8 +464,8 @@ struct PopopxBadgePaywallView: View {
                     .foregroundStyle(PopopxPalette.labelSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            // 诊断行不是文案，是给排查者读的标识符，所以逐字渲染、不进任何目录，
-            // 也允许长按选中复制——把它贴进工单比复述"暂不可用"有用得多。
+            // The diagnostic line is not copy, it is an identifier for whoever is troubleshooting, so it renders verbatim, goes into no directory,
+            // and allows long-press select and copy — pasting it into a ticket is far more useful than restating "temporarily unavailable".
             Text(verbatim: storeDiagnostics)
                 .font(PopopxType.metricSmall)
                 .foregroundStyle(PopopxPalette.labelHint)
@@ -481,10 +481,10 @@ struct PopopxBadgePaywallView: View {
         }
     }
 
-    /// 这一次商品加载的结论，原样摊在屏上。三种病因在真机上要能当面分开看：
-    /// `0/9 loaded` = 商店整批没给（没挂配置文件、离线），`7/9 · missing: …pass.30d, …pass.365d`
-    /// = 只有非续订那一族没回来（商品类型/ASC 配置问题），`load error: …` = Apple 抛错。
-    /// 只靠 `missingProductIDs`（日志里那一条）排查要连 Console，真机上不现实。
+    /// The conclusion of this product load, spread verbatim on screen. The three causes must be tellable apart face to face on a real device:
+    /// `0/9 loaded` = the store gave nothing for the whole batch (no configuration file attached, offline), `7/9 · missing: …pass.30d, …pass.365d`
+    /// = only the non-renewing family failed to come back (product type / ASC configuration problem), `load error: …` = Apple threw an error.
+    /// Troubleshooting from `missingProductIDs` alone (that one log line) needs Console, which is unrealistic on a real device.
     private var storeDiagnostics: String {
         if let error = store.lastLoadError { return "load error: \(error)" }
         var line = "\(store.products.count)/\(PopopxNodeBadgeSku.productIds.count) loaded"
@@ -493,14 +493,14 @@ struct PopopxBadgePaywallView: View {
         return line
     }
 
-    /// 档位上的沙盒出口：只在**这一件**商品商店没给时画，且永远画在生产 CTA 下面一格。
+    /// The sandbox exit on the tier card: drawn only when the store failed to give **this one** product, and always one slot below the production CTA.
     ///
-    /// 生产那颗按钮的可用性判据（`!store.isStoreReady || busySkuId != nil`）一个字都不改——
-    /// 沙盒是"多出来的第二条路"，不是"把死按钮改活"。后者会让 Debug 与 Release 的同一种手势
-    /// 指向两件不同的事，而这正是真机上最难复现的那类分歧。
+    /// The production button's usability criterion (`!store.isStoreReady || busySkuId != nil`) is not changed by one word —
+    /// the sandbox is "an extra second path", not "a dead button made live". The latter would make the same gesture on Debug and Release
+    /// point at two different things, and that is exactly the kind of divergence hardest to reproduce on a real device.
     ///
-    /// 虚线外框 + 锤子图标是刻意的视觉隔离：真机截图会被拿去当审核证据，
-    /// 一枚和「点亮」长得一样的实心胶囊在这里就是一个商业事故。
+    /// The dashed outline + hammer icon is deliberate visual separation: real-device screenshots get used as review evidence,
+    /// and a solid capsule that looks the same as "light up" would here be a commercial incident.
     @ViewBuilder
     private func sandboxRow(_ section: PopopxPaywallSection) -> some View {
         if store.isMissingFromStore(section.sku) {
@@ -528,14 +528,14 @@ struct PopopxBadgePaywallView: View {
             .buttonStyle(.plain)
             .disabled(busySkuId != nil)
             .accessibilityLabel(Text(verbatim: "\(PopopxCommerceCopy.sandboxPurchaseAction) \(section.title)"))
-            // XCUITest 的落点。整条沙盒通路只在 Debug 编译，所以 Release 归档里根本没有这一格，
-            // 测试脚本要拿它做断言也就只能在调试构建上跑——这正是想要的效果。
+            // The XCUITest landing point. The whole sandbox path compiles only in Debug, so the Release archive does not contain this slot at all,
+            // and a test script asserting on it can therefore run only on debug builds — which is exactly the wanted effect.
             .accessibilityIdentifier("popopx.badge.paywall.sandbox.\(section.sku.rawValue)")
         }
     }
     #endif
 
-    // MARK: 次要操作
+    // MARK: Secondary actions
 
     private var footer: some View {
         VStack(spacing: PopopxMetrics.spaceXS) {
@@ -554,9 +554,9 @@ struct PopopxBadgePaywallView: View {
                     Task { await restore() }
                 }
                 .disabled(isRestoring)
-                // 这一枚是本页通往「POPOPX 算力点」那一页的唯一入口，所以用商品全名而不是裸的
-                // "算力点"三个字：名字与那一页的标题逐字相同，用户才知道点下去会落到哪一屏。
-                // 现金价目表本身不在这一页（真机第 8 轮 · 任务三）。
+                // This button is this page's only entry to the "POPOPX compute points" page, so it uses the product's full name rather than the bare
+                // "compute points" phrase: the name is character-for-character the same as that page's title, so users know which screen they will land on.
+                // The cash price list itself is not on this page (device round 8 · task three).
                 Button(PopopxCommerceCopy.creditsName) { showsWallet = true }
                 Button(Copy.close) { dismiss() }
             }
@@ -566,7 +566,7 @@ struct PopopxBadgePaywallView: View {
         }
     }
 
-    // MARK: 动作
+    // MARK: Actions
 
     private func buy(_ sku: PopopxNodeBadgeSku) async {
         guard busySkuId == nil else { return }
@@ -577,11 +577,11 @@ struct PopopxBadgePaywallView: View {
     }
 
     #if DEBUG
-    /// 沙盒那颗按钮的入口。与 `buy` 的差别**只在取收据那一步**（`purchaseSimulated` 在本机铸一张），
-    /// 拿到收据之后走的是同一个 `settle`：通行证仍由 `grantPass → PopopxBadgeManager.activate`
-    /// 点亮，仍写同一格 Keychain，仍是那一声震动、同一格 toast。
+    /// The entry for the sandbox button. Its difference from `buy` is **only in the step that obtains the receipt** (`purchaseSimulated` mints one locally),
+    /// and once the receipt is in hand it goes through the same `settle`: the pass is still lit by `grantPass → PopopxBadgeManager.activate`,
+    /// it still writes the same Keychain slot, still the same single haptic and the same toast slot.
     ///
-    /// 这里刻意不新写一套"沙盒落账"：一旦有两套，真机测过的就不是上线的那一套。
+    /// Deliberately no second "sandbox accounting" written here: once there are two sets, what was tested on the device is no longer the set that ships.
     private func buySandboxed(_ sku: PopopxNodeBadgeSku) async {
         guard busySkuId == nil else { return }
         busySkuId = sku.productId
@@ -591,23 +591,23 @@ struct PopopxBadgePaywallView: View {
     }
     #endif
 
-    /// 一次购买（真实的、或 Debug 沙盒的）的上屏收口。
+    /// The on-screen close-off of one purchase (a real one, or the Debug sandbox one).
     ///
-    /// `simulated` 只改一件事：到账那一句怎么说——"这笔没有真扣钱"是必须说出口的事实，
-    /// 让测试者在真机上把一次本机模拟读成一次 Apple 成交，比什么都读不到更糟。
-    /// 落账、震动、成功后跳礼品队列这三步，两种来源完全同码。
+    /// `simulated` changes exactly one thing: how the credit line is said — "this charge was not real" is a fact that must be spoken,
+    /// and letting a tester read a local simulation on a real device as an Apple transaction is worse than reading nothing at all.
+    /// The three steps of accounting, haptic, and jumping to the gift queue after success are the same code for both sources.
     private func settle(_ result: Result<PopopxStorePurchaseOutcome, PopopxBadgeCreditsError>,
                         for sku: PopopxNodeBadgeSku,
                         simulated: Bool) async {
         switch result {
         case let .success(.purchased(receipt)):
-            // 一次性时长包**必须在这一笔的返回路径上当场点亮**。判据是这一族的交付路径本身：
-            // 管理器的两条落账腿都不接它（`PopopxBadgeManager.apply(storeReceipt:)` 按
-            // `isSubscription` 过滤，`PopopxCreditsManager.apply(storeReceipt:)` 对 `.oneTimePass`
-            // 直接 return），恢复流程也把它排除在重投之外（Apple 对非续订订阅不承诺"恢复"语义，
-            // 按时长重投一次就是白送一段时长）。也就是说：这笔钱付完之后，除了这里没有第二处会点亮它。
-            // 等一个不存在的回调 = 用户白付一次钱，那是这个模块复盘过三次的原罪。
-            // 点亮仍只走唯一入口 `PopopxBadgeManager.activate`；这里只负责算到期时刻（见 `grantPass`）。
+            // The one-time duration pack **must be lit on this transaction's return path, in the moment**. The criterion is this family's delivery path itself:
+            // neither of the manager's two accounting legs accepts it (`PopopxBadgeManager.apply(storeReceipt:)` filters by
+            // `isSubscription`, and `PopopxCreditsManager.apply(storeReceipt:)` returns directly for `.oneTimePass`),
+            // and the restore flow also excludes it from re-granting (Apple gives no "restore" semantics for non-renewing subscriptions,
+            // and re-granting by duration would simply give a period away). In other words: once this money is paid, nothing but here will light it.
+            // Waiting for a callback that does not exist = the user paid for nothing, and that is this module's original sin, reviewed three times.
+            // Lighting up still goes only through the single entry `PopopxBadgeManager.activate`; here the job is only to compute the expiry moment (see `grantPass`).
             if let period = sku.oneTimePassPeriod, await grantPass(period, receipt: receipt) == false {
                 return
             }
@@ -622,7 +622,7 @@ struct PopopxBadgePaywallView: View {
             toast.show(Copy.purchased(sku), kind: .encrypted)
             #endif
             if case let .giftCard(period) = sku.kind {
-                // 礼品档：券在交付回调里铸好，这一页直接把用户送到能看见它的那一页。
+                // The gift tier: the voucher is minted in the delivery callback, and this page takes the user directly to the page where it can be seen.
                 giftQueuePeriod = period
                 showsGiftQueue = true
             }
@@ -631,30 +631,30 @@ struct PopopxBadgePaywallView: View {
         case .success(.cancelled):
             break
         case let .failure(error):
-            // 取消不是错误，不震动、不标红；真失败才把 `PopopxBadgeCreditsError` 那句话原样说出去。
+            // Cancellation is not an error: no haptic, no red marking; only a real failure says `PopopxBadgeCreditsError`'s sentence exactly as it is.
             toast.show(error.errorDescription ?? Copy.genericFailure, kind: .danger)
         }
     }
 
-    /// 时长包落账。**唯一写 `.badgeRecord` 的入口仍然是 `PopopxBadgeManager.activate`**，
-    /// 这一层只负责取到期时刻：`badge.stackedExpiryMs(period:)` = `max(now, 本机当前到期) + period.days`。
-    /// 取 `max(now, 当前到期)` 而不是 `now` 起步，是为了让通行证永远**叠加**在剩余时间之上——
-    /// 徽章还剩 200 天时买 30 天通行证，到期是 230 天后，不是 30 天后。
-    /// 这个算式在工程里只有一份：通行证、算力点兑换、礼品券三条腿都调它
-    /// （`PopopxBadgeManager.stackedExpiryMs`），界面上"再加 N 天"和落账用的是同一个数。
-    /// （`activate` 内部那一句 `max(传入, 现有)` 的合并语义一个字都不动；这里传的是已经算好的时刻，
-    /// 两道 max 叠在一起只会得到同一个结果，不会重复计时。）
-    /// 顺序是本模块对"钱付了但什么都没发生"唯一的防线：**先点亮，后 `finish`**。
-    /// 点亮失败就不 finish，那笔交易留在 Apple 侧，用户下次还能再拿到它。
+    /// The duration pack's accounting. **The only entry writing `.badgeRecord` remains `PopopxBadgeManager.activate`**;
+    /// this layer is responsible only for the expiry moment: `badge.stackedExpiryMs(period:)` = `max(now, this device's current expiry) + period.days`.
+    /// Taking `max(now, current expiry)` instead of starting from `now` is so that a pass always **stacks** on top of the remaining time —
+    /// with 200 days left on the badge, buying a 30-day pass expires at 230 days, not at 30.
+    /// This formula exists exactly once in the project: the pass, the compute-point exchange and the gift voucher legs all call it
+    /// (`PopopxBadgeManager.stackedExpiryMs`), and the UI's "add N days" and the accounting use the same number.
+    /// (the merge semantics of the `max(incoming, existing)` line inside `activate` are not changed by a word; what is passed here is an already computed moment,
+    /// so two maxes stacked can only yield the same result and never count the time twice.)
+    /// The order is this module's only defence against "money paid but nothing happened": **light up first, then `finish`**.
+    /// If lighting up fails there is no finish, the transaction stays on Apple's side, and the user can get it again next time.
     private func grantPass(_ period: PopopxNodeBadgePeriod, receipt: PopopxStoreReceipt) async -> Bool {
         do {
             try badge.activate(period: period, source: .storePass,
                                expiresAtMs: badge.stackedExpiryMs(period: period),
                                receiptDigest: receipt.digest)
         } catch {
-            // 把真话原样说出去（Keychain 写不进去、时钟被拨到过去，是两句不同的话）。
-            // `catch` 绑定的是 `any Error`，`errorDescription` 只能经 `LocalizedError` 取到；
-            // 上面 `case let .failure(error)` 那两处不用绕，是因为 Result 的失败类型已经是具体的。
+            // Say the truth exactly as it is (Keychain cannot be written, and the clock was set to the past, are two different sentences).
+            // The `catch` binding is `any Error`, so `errorDescription` can only be reached through `LocalizedError`;
+            // the two `case let .failure(error)` places above need no such detour because Result's failure type is already concrete.
             PopopxHaptics.notice(.error)
             toast.show((error as? LocalizedError)?.errorDescription ?? Copy.genericFailure, kind: .danger)
             return false
@@ -669,8 +669,8 @@ struct PopopxBadgePaywallView: View {
         defer { isRestoring = false }
         switch await store.restorePurchases() {
         case let .success(outcome):
-            // 计数只用来选语气：`restored(Int)` 走"恢复到了"那一份文案，
-            // 零恢复与用户取消各说各的，不合成一句"完成"。
+            // The count is only used to pick the tone: `restored(Int)` uses the "restored" copy,
+            // and a zero restore and a user cancellation each say their own thing, never merged into one "done".
             if case .restored = outcome {
                 toast.show(outcome.announcementText, kind: .encrypted)
             } else {
@@ -692,8 +692,8 @@ private extension PopopxBadgePaywallView {
         static let benefitCards = NSLocalizedString("A badge can be turned into a QR-code gift card and passed peer to peer; Compute Credits go to a friend as a red packet they open on their own device.", comment: "")
         static let benefitNoRead = NSLocalizedString("Relay nodes only move ciphertext: they cannot see chat content and cannot get your contact list.", comment: "")
         static let benefitNoAccount = NSLocalizedString("No account and no central ledger: badges, vouchers and Compute Credits all live in this device's Keychain.", comment: "")
-        // 原来这里还有 `wallet = "算力点"` 与 `creditsTitle = creditsName` 两条，服务于充值卡；
-        // 充值整组搬走之后它们没有读者了（`Copy` 里留一句没人读的中文常量就是下一轮漏翻的来源）。
+        // There used to be two more lines here, `wallet = "compute points"` and `creditsTitle = creditsName`, serving the top-up cards;
+        // after the whole top-up group moved away they had no readers (leaving an unread Chinese constant in `Copy` is the source of the next round's missing translations).
         static let storeUnavailable = NSLocalizedString("The store cannot be read right now: cards still show their list prices, and buying works again once the network is back.", comment: "")
         static let pending = NSLocalizedString("Apple is still confirming this purchase; the badge lights up automatically once it is approved.", comment: "")
         static let genericFailure = NSLocalizedString("That did not complete.", comment: "")
@@ -702,22 +702,22 @@ private extension PopopxBadgePaywallView {
             case let .subscription(period):
                 String(format: NSLocalizedString("Purchased · badge lit for %lld days", comment: ""), period.days)
             case let .oneTimePass(period):
-                // 通行证到账那一句走本地化 key（新句子，不进上面那组中文常量）。
+                // The pass credit line goes through a localization key (a new sentence, not added to that group of Chinese constants above).
                 String(format: PopopxCommerceCopy.passGrantedFormat, period.days)
             case let .giftCard(period):
                 String(format: NSLocalizedString("Gift voucher created · %lld days", comment: ""), period.days)
             case let .credits(amount):
-                // 这一页已经没有充值档，所以这一支在当前版面下走不到；留着是因为 `switch`
-                // 必须对 `PopopxNodeBadgeSkuKind` 穷尽——真到账的那一句在算力点那一页
-                // （`PopopxCreditsStoreView.topUpCard`），它读的是本地化 key，不是这里。
+                // This page has no top-up tier anymore, so this branch is unreachable under the current layout; it stays because the `switch`
+                // must be exhaustive over `PopopxNodeBadgeSkuKind` — the sentence for a real credit lives on the compute-points page
+                // (`PopopxCreditsStoreView.topUpCard`), and it reads a localization key, not this one.
                 String(format: PopopxCommerceCopy.creditsTopUpGrantedFormat, amount)
             }
         }
         #if DEBUG
-        /// 沙盒到账那一句。**每一句都自带"没有扣款"**：这一格 toast 与真实成交长得一模一样，
-        /// 唯一能把两者分开的是这句话本身，所以它不许被省成"已购买"。
-        /// 通行证那一句带天数（与 `purchased(_:)` 同一来源：`PopopxNodeBadgePeriod.days`），
-        /// 其余两族到账的不是"天数"，只说"这台设备上记下了一笔测试购买"。
+        /// The sandbox credit line. **Every sentence carries "no money was charged"**: this toast slot looks exactly like a real transaction,
+        /// and the sentence itself is the only thing that separates the two, so it must not be shortened to "purchased".
+        /// The pass sentence carries the day count (the same source as `purchased(_:)`: `PopopxNodeBadgePeriod.days`),
+        /// while the other two families do not credit "days", so they only say "a test purchase was recorded on this device".
         static func sandboxPurchased(_ sku: PopopxNodeBadgeSku) -> String {
             guard let period = sku.oneTimePassPeriod else { return PopopxCommerceCopy.sandboxPurchaseGranted }
             return String(format: PopopxCommerceCopy.sandboxPassGrantedFormat, period.days)

@@ -3232,8 +3232,8 @@ server test failure */
 "Your POPOPX address" = "ที่อยู่ POPOPX ของคุณ";
 
 
-/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
-/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+/* === POPOPX compute-points economy (BadgeCredits) commercial copy: one-to-one with PopopxCommerceCopy === */
+/* These 37 rows correspond directly to the NSLocalizedString keys in PopopxBadgeCreditsModels.swift; en.lproj holds none of them (value == key). */
 
 /* product name */
 "POPOPX Dynamic Privacy Node Badge" = "ป้าย POPOPX ของโหนดความเป็นส่วนตัวแบบไดนามิก";
@@ -3346,7 +3346,7 @@ server test failure */
 /* error */
 "Your Compute Credits balance cannot go above %lld. Spend some credits first." = "ยอดเครดิตการประมวลผลของคุณต้องไม่เกิน %lld ใช้เครดิตบางส่วนก่อน";
 
-/* ==== POPOPX onboarding v2 (2026-11-19) — 引导页四屏 + 隐私政策/使用条款 ==== */
+/* ==== POPOPX onboarding v2 (2026-11-19) - the four onboarding screens + privacy policy / terms of use ==== */
 /* POPOPX onboarding v2 — generated block, 2026-11-19 */
 
 /* Onboarding: header pills */
@@ -3358,12 +3358,10 @@ server test failure */
 "Own your network." = "เครือข่ายเป็นของคุณ";
 "Private messaging with no account and no user IDs." = "ข้อความส่วนตัวโดยไม่ต้องมีบัญชีและไม่มีรหัสผู้ใช้";
 "SMP end-to-end encrypted" = "SMP เข้ารหัสแบบต้นทางถึงปลายทาง";
-"厢语 Bluetooth Mesh relay" = "รีเลย์ Bluetooth Mesh ของ 厢语";
 "What POPOPX gives you" = "สิ่งที่ POPOPX มอบให้คุณ";
 "No user IDs" = "ไม่มีรหัสผู้ใช้";
 "No phone number, no email, no global public key. Nothing links your contacts to each other, and each anonymous identity stays separate." = "ไม่มีหมายเลขโทรศัพท์ ไม่มีอีเมล ไม่มีกุญแจสาธารณะส่วนกลาง ไม่มีสิ่งใดเชื่อมโยงผู้ติดต่อของคุณเข้าหากัน และแต่ละตัวตนนิรนามจะแยกจากกันเสมอ";
 "Dynamic relays and near-field" = "รีเลย์ไดนามิกและการเชื่อมต่อระยะใกล้";
-"Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "เมื่อออนไลน์คุณใช้กลุ่มโหนดรีเลย์ SMP แบบไดนามิก เมื่อออฟไลน์ 厢语 จะสลับไปใช้ Bluetooth Mesh 1–7 ฮอป และจับคู่แบบตัวต่อตัวผ่าน UWB หรือการแตะ";
 "Anti-peeping and local-only cards" = "ป้องกันการแอบมอง และเก็บบัตรไว้ในเครื่องเท่านั้น";
 "Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "บล็อกทั้งภาพหน้าจอและการบันทึกหน้าจอ ข้อความลับมากจะสลายหลังอ่าน ตำแหน่งยังคงถูกเข้ารหัสทั้งสองโหมด และบัตรโปรไฟล์ที่เข้ารหัสของคุณจะไม่ออกจากเครื่องนี้";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "ตั้งค่าให้เสร็จเพื่อรับป้ายทดลองโหนดผู้บุกเบิก 3 วัน";
@@ -3395,7 +3393,6 @@ server test failure */
 "Higher privacy · balanced battery" = "ความเป็นส่วนตัวสูงกว่า · แบตสมดุล";
 "Maximum discretion · nothing pushed" = "เก็บตัวสูงสุด · ไม่มีการพุช";
 "Apple's push service carries only the signal that new data is waiting, never the content." = "บริการพุชของแอปเปิลส่งเฉพาะสัญญาณว่ามีข้อมูลใหม่เท่านั้น ไม่ส่งเนื้อหา";
-"厢语 offline mesh" = "mesh ออฟไลน์ของ 厢语";
 "When the internet is down, messages hop over nearby devices, up to 7 hops, with no server. Pair face to face with UWB or a tap." = "เมื่อไม่มีอินเทอร์เน็ต ข้อความจะฮอปไปบนเครื่องใกล้เคียงสูงสุด 7 ฮอปโดยไม่ต้องใช้เซิร์ฟเวอร์ จับคู่แบบตัวต่อตัวด้วย UWB หรือการแตะ";
 "Bluetooth permission is requested the first time the mesh starts." = "จะขออนุญาต Bluetooth เมื่อ mesh เริ่มทำงานครั้งแรก";
 
@@ -3439,13 +3436,11 @@ server test failure */
 "The camera guard stays local" = "ตัวเฝ้ากล้องอยู่ในเครื่องเท่านั้น";
 "The anti-peeping guard switches the front camera on only while a top-secret sheet is open, at the lowest resolution, processes every frame on this device and stops the stream when the sheet closes. Nothing is written to disk and nothing is uploaded." = "ตัวป้องกันการแอบมองจะเปิดกล้องหน้าเฉพาะขณะที่แผ่นพับความลับมากเปิดอยู่ ที่ความละเอียดต่ำสุด ประมวลผลทุกเฟรมบนเครื่องนี้ และหยุดสตรีมเมื่อแผ่นพับปิดลง ไม่เขียนลงดิสก์และไม่อัปโหลดสิ่งใด";
 "Screenshots, recordings and offline hops" = "ภาพหน้าจอ การบันทึก และการฮอปแบบออฟไลน์";
-"Protected screens are blocked from screenshots and screen recording by the system itself. In 厢语 mode messages hop over Bluetooth between nearby devices and never reach the public internet." = "ระบบเป็นผู้บล็อกภาพหน้าจอและการบันทึกหน้าจอของหน้าจอที่ได้รับการป้องกันเอง ในโหมด 厢语 ข้อความจะฮอปผ่าน Bluetooth ระหว่างเครื่องใกล้เคียงและไม่ออกสู่อินเทอร์เน็ตสาธารณะ";
 "Your controls" = "คุณเป็นผู้ควบคุม";
 "You can export or delete any identity, erase the local database or trigger Panic Wipe at any time. Deletion is irreversible because no server holds a copy." = "คุณส่งออกหรือลบตัวตนใดก็ได้ ล้างฐานข้อมูลในเครื่อง หรือทริกเกอร์ Panic Wipe ได้ตลอดเวลา การลบย้อนกลับไม่ได้เพราะไม่มีเซิร์ฟเวอร์ใดถือสำเนา";
 
 /* Legal: terms */
 "Acceptable use" = "การใช้งานที่ยอมรับได้";
-"Use POPOPX within the laws of the country you are in. Public groups and 厢语 broadcasts must carry no unlawful content, no spam and no harassment of other users." = "ใช้ POPOPX ภายในกฎหมายของประเทศที่คุณอยู่ กลุ่มสาธารณะและการออกอากาศของ 厢语 ต้องไม่มีเนื้อหาที่ผิดกฎหมาย สแปม หรือการกลั่นแกล้งผู้ใช้อื่น";
 "Your keys, your responsibility" = "กุญแจของคุณ ความรับผิดชอบของคุณ";
 "Your mnemonic phrase, identity keys, badges and POPOPX Compute Credits exist only on this device. If the device or the phrase is lost, they cannot be recovered, frozen or reissued by anyone." = "วลีช่วยจำ กุญแจตัวตน ป้าย และเครดิตการประมวลผล POPOPX มีอยู่บนเครื่องนี้เท่านั้น หากเครื่องหรือวลีหายไป ก็ไม่มีใครกู้คืน ระงับ หรือออกใหม่ให้ได้";
 "No guarantee of availability" = "ไม่รับประกันความพร้อมใช้งาน";
@@ -3456,7 +3451,7 @@ server test failure */
 "Relay operators set their own conditions for the servers they run. When an operator requires acceptance, the app shows that operator's conditions and records your acceptance before using them." = "ผู้ปฏิบัติการรีเลย์กำหนดเงื่อนไขของตนเองสำหรับเซิร์ฟเวอร์ที่ดำเนินการ เมื่อผู้ปฏิบัติการขอการยอมรับ แอปจะแสดงเงื่อนไขนั้นและบันทึกการยอมรับของคุณก่อนใช้งาน";
 "Names and changes" = "ชื่อและการเปลี่ยนแปลง";
 "POPOPX and the POPOPX logo are the names of this build. These terms and the privacy statement may change; the app always shows the version you agreed to, and continuing to use POPOPX means you accept the change." = "POPOPX และโลโก้ POPOPX เป็นชื่อของบิลด์นี้ ข้อกำหนดและคำแถลงความเป็นส่วนตัวอาจเปลี่ยนแปลงได้ แอปจะแสดงเวอร์ชันที่คุณยอมรับเสมอ และการใช้ POPOPX ต่อหมายความว่าคุณยอมรับการเปลี่ยนแปลงนั้น";
-/* POPOPX 引导页补录（第四轮：迁移入口标题与条款接受失败提示） */
+/* POPOPX onboarding follow-up rows (round 4: migration entry title, and the terms-acceptance failure notice) */
 "Migrate here" = "ย้ายมายังที่นี่";
 "Error accepting conditions" = "เกิดข้อผิดพลาดในการยอมรับข้อกำหนด";
 "I have read and agree to %1$@ and %2$@." = "ฉันอ่านและยอมรับ%1$@ และ%2$@";
@@ -3739,7 +3734,6 @@ server test failure */
 "Badge lit for %lld more days." = "เปิดใช้ป้ายต่ออีก %lld วัน";
 "Choose a plan" = "เลือกแผน";
 "Renew or change plan" = "ต่ออายุหรือเปลี่ยนแผน";
-"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "เปิดแผง 厢语: สวิตช์หลัก ช่อง และโหนดใกล้เคียง";
 "Channels" = "ช่อง";
 "Create public channel" = "สร้างช่องสาธารณะ";
 "Join channel" = "เข้าร่วมช่อง";
@@ -4556,13 +4550,13 @@ server test failure */
 "Your new channel %@ is connected to %d of %d relays.\nIf you cancel, the channel will be deleted - you can create it again." = "ช่องใหม่ของคุณ %1$@ เชื่อมต่อกับรีเลย์ %2$d จาก %3$d ตัว\nถ้ายกเลิก ช่องจะถูกลบ - คุณสร้างใหม่ได้";
 "server queue info: %@\n\nlast received msg: %@" = "ข้อมูลคิวของเซิร์ฟเวอร์: %1$@\n\nข้อความล่าสุดที่ได้รับ: %2$@";
 
-/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+/* POPOPX round 19: keys added during the ninth pass over the three tabs */
 "Back to messages" = "กลับไปหาข้อความ";
 "POPOPX Badge" = "ป้าย POPOPX";
 "Added %lld Compute Credits to your balance." = "เพิ่มเครดิตการประมวลผล %lld ลงในยอดของคุณแล้ว";
 "Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple ยังกำลังยืนยันการซื้อนี้ เครดิตการประมวลผลจะแสดงในยอดของคุณทันทีที่ยืนยันเสร็จ";
 "Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple รับการชำระแล้ว แต่เครื่องนี้ยังเพิ่มเครดิตลงในยอดของคุณไม่ได้ จะเครดิตในการเขียนคลังปลอดภัยครั้งถัดไป";
-/* POPOPX round 21 第 9 轮：厢语「发现」入口无障碍说明 + 7 条 zh-Hans 上游缺值 */
+/* POPOPX round 21, ninth pass: accessibility hint for the Cabin 'Discover' entry + 7 upstream values missing from zh-Hans */
 "Discover nearby groups and channels over the Bluetooth mesh" = "ค้นพบกลุ่มและช่องใกล้เคียงผ่านเครือข่าย Bluetooth mesh";
 "Album" = "อัลบั้ม";
 "Camera" = "กล้อง";
@@ -5963,3 +5957,25 @@ server test failure */
 "author" = "ผู้สร้าง";
 "moderator" = "ผู้ดูแล";
 "relay" = "รีเลย์";
+"Top-up %lld compute points" = "เติม %lld เครดิตการประมวลผล";
+"Exchange did not complete · returned automatically" = "การแลกไม่สำเร็จ · คืนให้อัตโนมัติ";
+"Redeemed a %lld-day privacy node badge" = "แลกป้ายโหนดความเป็นส่วนตัว %lld วันแล้ว";
+"Redeemed %lld × %lld-day gift-card vouchers" = "แลกคูปองบัตรของขวัญ %lld ใบ × ใบละ %lld วันแล้ว";
+"Sent a red packet of %lld compute points (%lld equal shares)" = "ส่งอั่งเปาเครดิตการประมวลผล %lld (แบ่งเท่ากัน %lld ส่วน)";
+"Received a compute-point red packet" = "ได้รับอั่งเปาเครดิตการประมวลผลแล้ว";
+"Received a red packet: %@" = "ได้รับอั่งเปา: %@";
+"Red packet not fully claimed, %lld returned" = "รับอั่งเปาไม่ครบ คืน %lld";
+"Subscribed to channel %@" = "สมัครสมาชิกช่อง %@";
+"Unlocked a profile card" = "ปลดล็อกบัตรโปรไฟล์แล้ว";
+"Extended the anti-peeping viewing window" = "ขยายเวลาเปิดดูเพื่อป้องกันการแอบมอง";
+"Refund clawback (what was already spent is not recovered)" = "เรียกคืนเงินที่คืนไป (ไม่เรียกคืนส่วนที่ใช้ไปแล้ว)";
+"Refund clawback" = "เรียกคืนเงินที่คืนไป";
+"Aurora shield avatar frame" = "กรอบอวตารโล่ออโรรา";
+"Dark gold QR card skin" = "ธีมบัตร QR สีทองหม่น";
+"[Location]" = "[ตำแหน่ง]";
+"[Encrypted profile]" = "[หน้าโปรไฟล์เข้ารหัส]";
+"[Encrypted profile · attachment]" = "[หน้าโปรไฟล์เข้ารหัส · ไฟล์แนบ]";
+"Unnamed profile" = "หน้าโปรไฟล์ไม่มีชื่อ";
+"[Top-secret view-once] Open after biometrics" = "[ลับที่สุด ทำลายหลังอ่าน] ดูได้หลังยืนยันชีวมิติ";
+"[Top-secret security alert] %@; that top-secret message was destroyed in place." = "[แจ้งเตือนความปลอดภัยลับที่สุด] %@; ข้อความลับที่สุดนั้นถูกทำลายทิ้ง ณ ที่นั้นแล้ว";
+"Neither Bluetooth nor the public network is available — %lld messages waiting to send" = "ไม่มีทั้ง Bluetooth และเครือข่ายสาธารณะ — ข้อความรอส่ง %lld รายการ";

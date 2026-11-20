@@ -1,36 +1,36 @@
 //  PopopxBadgeManager.swift
 //
-//  POPOPX 动态隐私节点徽章的唯一真相：三态状态机、72 小时先锋体验徽章、
-//  本地加密中继路由的轮换计数，以及到期后的平滑降级。
+//  The single source of truth for the POPOPX dynamic privacy node badge: the three-state machine, the 72-hour pioneer trial badge,
+//  the rotation count of the local encrypted relay route, and the smooth downgrade after expiry.
 //
-//  ### 状态只有三个，而且不落在 UI 里
-//  `PopopxBadgePhase`（休眠 / 72h 体验 / 正式点亮）由 `PopopxBadgeRecord` + 当前时间推导。
-//  推导只在本文件发生（`recompute(now:)`），视图只读 `phase`：任何视图自己算"还剩几天"
-//  都会因为取时间的时刻不同而漂移，两个视图给出两个答案是这类特性最难看的一种 bug。
+//  ### There are only three states, and they do not live in the UI
+//  `PopopxBadgePhase` (dormant / 72h trial / formally lit) is derived from `PopopxBadgeRecord` + the current time.
+//  Derivation happens only in this file (`recompute(now:)`) and views only read `phase`: any view that computes 'how many days left' itself
+//  will drift because the moment it took the time differs, and two views giving two answers is the ugliest kind of bug for a feature like this.
 //
-//  ### 到期降级做什么、不做什么
-//  做：清除徽章记录、顶栏胶囊转灰、停止本地轮换计数。
-//  不做：不动 SMP 连接、不动联系人、不动聊天记录、不动 SQLite 的任何一行。
-//  徽章从来不是"加密开关"——降级前后消息走的还是同一条 SMP 连接，
-//  变化的只有 UI 上"动态路由已开启"这一句。所以降级是无损的：
-//  把付费墙建在用户已有的聊天记录后面是 App Store 3.1.1 里最难看的一种形态，
-//  这一条同时写进了 Docs/app-store-review-notes.md，两处措辞必须一致。
+//  ### What the expiry downgrade does and does not do
+//  Does: clear the badge record, grey out the top bar capsule, stop the local rotation counting.
+//  Does not: no touching SMP connections, contacts, chat history, or any single row of SQLite.
+//  The badge was never an 'encryption switch' — before and after the downgrade messages still travel over the same SMP connection,
+//  and only the UI line 'dynamic routing is on' changes. So the downgrade is lossless:
+//  building a paywall behind chat history the user already has is the ugliest form of App Store 3.1.1,
+//  and this rule is also written into Docs/app-store-review-notes.md, where the two wordings must match.
 //
-//  ### DeviceCheck 在这套架构里能做什么（改下面那 40 行之前务必读完）
-//  提示词要求以 `DCDevice.current.generateToken()` 作为体验徽章的设备唯一性证明。本文件确实调它，
-//  但作用边界要写清楚，不能含混地叫"设备指纹"：
-//  - token 是**给 Apple 服务器验的**（需要服务端持 Team ID 私钥）。POPOPX 零服务器、零账号，
-//    没有任何一方能验证它，也就没有任何一方能因此吊销一次已发出的领取。
-//  - 所以在纯端到端形态下它的真实作用是留证据：`trialGuard` 记下 token 摘要，
-//    将来回答审核问询时能说清"这次领取绑到一台 Apple 认可的硬件上"。
-//  - 真正拦住重复领取的是 Keychain：`trialGuard` 槽 + `installIdentity` 槽都带
-//    `ThisDeviceOnly`，卸载重装仍在（同 team ID）。这一条才是防刷的全部。
-//  取不到 token（模拟器、Capability 未开、无网络、系统不支持）时**不阻塞领取**，
-//  退回本机安装指纹；降级理由只进日志，不进用户界面。
-//  ⚠️ 要拿真实 token 需在 Xcode 里为本 App ID 勾上 DeviceCheck capability；
-//  红线禁止脚本改工程文件，所以这一步归人做，本文件不假装它已经生效。
+//  ### What DeviceCheck can do in this architecture (read this before changing the 40 lines below)
+//  The prompt asks for `DCDevice.current.generateToken()` as the proof of device uniqueness for the trial badge. This file does call it,
+//  but its boundary of effect must be stated clearly, not vaguely called a 'device digest':
+//  - the token is **for Apple's servers to verify** (the server side holds the Team ID private key). POPOPX has zero servers and zero accounts,
+//    so nobody can verify it, and therefore nobody can revoke an already issued claim because of it.
+//  - so in a pure end-to-end form its real role is leaving evidence: `trialGuard` records the token digest,
+//    so that a future answer to a review enquiry can state clearly 'this claim is bound to hardware Apple vouched for'.
+//  - what actually stops a repeated claim is the Keychain: the `trialGuard` slot + the `installIdentity` slot both carry
+//    `ThisDeviceOnly`, so they survive an uninstall and reinstall (same team ID). That is the whole of the anti-abuse defence.
+//  When no token can be obtained (simulator, capability not enabled, no network, system unsupported) the claim is **not blocked**;
+//  it falls back to the local install digest, and the reason for the fallback goes only into the log, never into the user interface.
+//  ⚠️ Getting a real token requires ticking the DeviceCheck capability for this App ID in Xcode;
+//  red lines forbid a script from changing project files, so this step belongs to a human, and this file does not pretend it already applies.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. Red lines forbid a script from modifying project.pbxproj.
 
 import Foundation
 import os
@@ -39,10 +39,10 @@ import os
 import DeviceCheck
 #endif
 
-/// DeviceCheck 的墙钟上限（2 秒）。它走网络，没有这一条，
-/// 首次进入主界面的领取路径会被一次 Apple 侧超时拖住整个首屏。
-/// 文件级常量而不是 `@MainActor` 类型成员：取 token 的子任务不在主 actor 上，
-/// 从那里读一个主 actor 隔离的静态量在严格并发下是要报错的。
+/// The wall-clock cap for DeviceCheck (2 seconds). It goes over the network; without this line
+/// the claim path on the first entry to the main screen would have the whole first screen dragged behind an Apple-side timeout.
+/// A file-level constant rather than a `@MainActor` type member: the child task that fetches the token is not on the main actor,
+/// and reading a main-actor-isolated static value from there would be an error under strict concurrency.
 private let popopxDeviceCheckTimeoutNanoseconds: UInt64 = 2_000_000_000
 
 @MainActor
@@ -50,18 +50,18 @@ private let popopxDeviceCheckTimeoutNanoseconds: UInt64 = 2_000_000_000
 final class PopopxBadgeManager {
     static let shared = PopopxBadgeManager()
 
-    /// 当前生效的徽章记录；nil = 从未领取，或已到期降级。
+    /// The badge record currently in force; nil = never claimed, or downgraded after expiry.
     private(set) var record: PopopxBadgeRecord?
-    /// 视图唯一该读的东西，与 `record` 同帧更新，因此不会出现"有记录但显示休眠"的中间帧。
+    /// The only thing a view should read; it updates in the same frame as `record`, so there is no intermediate frame of 'a record exists but the UI says dormant'.
     private(set) var phase: PopopxBadgePhase = .dormant
-    /// Apple 侧的真实续费状态。nil 是"还没查过"，UI 不许把它显示成"已取消"。
+    /// The real renewal state on Apple's side. nil means 'not queried yet', and the UI must not display it as 'cancelled'.
     private(set) var subscriptionSnapshot: PopopxSubscriptionSnapshot?
     private(set) var lastReconcileAt: Date?
 
     private var ticker: Task<Void, Never>?
     private var deliveryToken: UUID?
-    /// 本进程内已经点亮过的一次性通行证收据摘要。防同一张通行证被投两次就加两次时长
-    /// （`applyPass` 的注释里写了它和 `record.receiptDigest` 那道是怎么分工的）。
+    /// Digests of one-time pass receipts already lit inside this process. It stops the same pass being delivered twice and adding the time twice
+    /// (the comment on `applyPass` states how it divides the work with the `record.receiptDigest` guard).
     private var appliedPassDigests: Set<String> = []
     private let log = Logger(subsystem: "com.popopxchat.popopx", category: "badge")
 
@@ -73,9 +73,9 @@ final class PopopxBadgeManager {
         }
     }
 
-    // MARK: 生命周期
+    // MARK: Lifecycle
 
-    /// 由 app 启动路径调用：接管 StoreKit 交付、起时间心跳、与 Apple 权益对账。
+    /// Called from the app launch path: takes over StoreKit delivery, starts the time heartbeat, reconciles with Apple entitlements.
     func start() async {
         guard deliveryToken == nil else { return }
         deliveryToken = PopopxStoreKitManager.shared.attachDelivery { [weak self] receipt in
@@ -83,9 +83,9 @@ final class PopopxBadgeManager {
         }
         PopopxStoreKitManager.shared.startObservingTransactions()
         startTicker()
-        // 顺序：先把"付了钱没落账"的通行证捞回来（只看 unfinished，见 `recoverUnsettledPasses`），
-        // 再与 Apple 的订阅权益对账——后者会按 Apple 给的到期时间覆盖式点亮，两步都对同一个徽章
-        // 记录写入时都取"更晚到期"，所以先后只影响日志读起来顺不顺，不会吞掉任何一段时长。
+        // Order: first recover the passes that were 'paid but not credited' (only unfinished, see `recoverUnsettledPasses`),
+        // then reconcile with Apple's subscription entitlements — the latter lights overwritingly by the expiry time Apple gives; both steps, when writing the same badge
+        // record, take the 'later expiry', so the order only affects how smoothly the log reads and never swallows any stretch of time.
         await recoverUnsettledPasses()
         await reconcileWithStore()
     }
@@ -99,8 +99,8 @@ final class PopopxBadgeManager {
         }
     }
 
-    /// 30 秒一次而不是 1 秒：徽章上最短显示粒度是"剩余 X 小时"，
-    /// 1 秒心跳等于每天让顶栏白刷 86400 次；真正的秒级倒计时由视图自己渲染。
+    /// Every 30 seconds rather than 1: the finest display granularity on the badge is 'X hours left',
+    /// and a 1-second heartbeat would needlessly redraw the top bar 86400 times a day; the real second-level countdown is rendered by the view itself.
     private func startTicker() {
         guard ticker == nil else { return }
         ticker = Task { [weak self] in
@@ -113,9 +113,9 @@ final class PopopxBadgeManager {
         }
     }
 
-    // MARK: 状态推导
+    // MARK: State derivation
 
-    /// 唯一推导入口。到期时执行降级，并且只在到期时清 Keychain。
+    /// The only derivation entry. On expiry it performs the downgrade, and it clears the Keychain only on expiry.
     func recompute(now: Date = Date()) {
         guard let existing = record else {
             if phase != .dormant { phase = .dormant }
@@ -134,22 +134,22 @@ final class PopopxBadgeManager {
         phase = .dormant
         subscriptionSnapshot = nil
         _ = PopopxCommerceKeychain.remove(.badgeRecord)
-        // `trialGuard` 保留：它的唯一作用就是"这台设备领过了"，跟着徽章一起删等于允许重领。
+        // `trialGuard` is kept: its only purpose is 'this device has claimed it', and deleting it along with the badge would amount to allowing a re-claim.
         log.info("badge: demoted to free public relays; expired source was \(String(describing: expired.source))")
     }
 
-    // MARK: 领取与点亮
+    // MARK: Claiming and lighting
 
-    /// 领取 72 小时先锋节点体验徽章。只在"这台设备从未领取过"时成功一次。
+    /// Claim the 72-hour pioneer node trial badge. Succeeds once, only when 'this device has never claimed it'.
     ///
-    /// 调用点唯一：主界面的 `.task`。资格判定在这里而不是弹窗视图里，
-    /// 因为"领没领过"是写过 Keychain 级别的事实，视图猜它一定会出第二次弹窗。
+    /// One call site: the main screen's `.task`. The eligibility decision lives here rather than in the popup view,
+    /// because 'claimed or not' is a Keychain-level fact, and a view guessing it is sure to produce a second popup.
     func issuePioneerTrialIfNeeded(now: Date = Date()) async -> PopopxBadgeRecord? {
         guard record == nil, !PopopxCommerceKeychain.contains(.trialGuard) else { return nil }
 
         let guardToken = Data(await Self.pioneerTrialGuardToken().utf8)
-        // 先落防重放标记，再落徽章。反过来会出现"徽章点亮但标记没写上"，
-        // 那一次如果紧接着崩溃或写盘失败，重启后就是第二个 72 小时——这条顺序就是防刷本身。
+        // Write the anti-replay marker first, then the badge. The other way round gives 'badge lit but the marker never written',
+        // and if that crashes right after or the write fails, a restart yields a second 72 hours — this ordering is the anti-abuse defence itself.
         guard PopopxCommerceKeychain.write(guardToken, .trialGuard) else {
             log.error("badge: pioneer trial refused — replay guard could not be written")
             return nil
@@ -165,31 +165,31 @@ final class PopopxBadgeManager {
                 now: now
             )
         } catch {
-            // 徽章没发出去但标记已经写上：宁可让用户这次领不到体验（他本来就还没得到过），
-            // 也不留一条"重试到成功"的口子。
+            // The badge was not issued but the marker was already written: better that the user misses the trial this time (they had not received it anyway),
+            // than leaving a 'retry until it succeeds' hole.
             log.error("badge: pioneer trial guard written but activation failed")
             return nil
         }
     }
 
-    /// 叠加时长用的到期时刻：`max(本机当前到期, 现在) + period.days`。
+    /// The expiry instant used for stacking time: `max(this device's current expiry, now) + period.days`.
     ///
-    /// 三条"再买一段"的腿（一次性时长包 / 算力点兑换 / 收到礼品券）共用这一处，因为界面上那句
-    /// "再兑这一档会加 N 天"必须是同一个算式的结果，而不是三处各写各的近似。起点取
-    /// `max(现有, 现在)` 而不是 `现在`：还剩 200 天时买 30 天，到期在 230 天后；
-    /// 徽章已经过期（或本机从没点亮过）时 `现有` 不成立，才退回从当下起算。
+    /// The three 'buy another stretch' legs (one-time time pack / credit redemption / received gift voucher) share this one place, because the UI line
+    /// 'redeeming this tier again adds N days' must be the result of one and the same formula, not three approximations written separately. The start takes
+    /// `max(existing, now)` rather than `now`: buying 30 days while 200 days remain expires 230 days from now;
+    /// only when the badge has already expired (or this device never lit one) does `existing` not hold, and it falls back to counting from now.
     func stackedExpiryMs(period: PopopxNodeBadgePeriod, now: Date = Date()) -> Int64 {
         let nowMs = Int64(now.timeIntervalSince1970 * 1_000)
         return max(nowMs, record?.expiresAtMs ?? 0) + Int64(period.days) * 86_400_000
     }
 
-    /// 点亮徽章。五种来源（体验 / Apple 订阅 / 一次性时长包 / 算力点兑换 / 收到礼品券）
-    /// 全汇到这里，写 `.badgeRecord` 也只有这一处。
+    /// Light the badge. Five sources (trial / Apple subscription / one-time time pack / credit redemption / received gift voucher)
+    /// all converge here, and this is also the only place that writes `.badgeRecord`.
     ///
-    /// "有效期从哪一天算起"在这里有两个答案，而且必须有两个：订阅那一族听 Apple 的
-    /// （`apply(storeReceipt:)` 直接用收据里的到期时间），其余三条"再买一段"的腿听
-    /// `stackedExpiryMs` 的。下面那句 `max(传入, 现有)` 不是第三个答案，它只是兜住
-    /// "传入比现有更早"的调用（体验那一支就是），保证没有任何一条腿能把已购时长改短。
+    /// 'From which day the validity counts' has two answers here, and must have two: the subscription family listens to Apple
+    /// (`apply(storeReceipt:)` uses the expiry time from the receipt directly), while the other three 'buy another stretch' legs listen to
+    /// `stackedExpiryMs`. The `max(passed-in, existing)` below is not a third answer, it only covers
+    /// calls where the passed-in expiry is earlier than the existing one (the trial branch is exactly that), guaranteeing that no leg can shorten already bought time.
     @discardableResult
     func activate(
         period: PopopxNodeBadgePeriod,
@@ -201,8 +201,8 @@ final class PopopxBadgeManager {
     ) throws -> PopopxBadgeRecord {
         let issuedAtMs = Int64(now.timeIntervalSince1970 * 1_000)
         guard expiresAtMs > issuedAtMs else { throw PopopxBadgeCreditsError.expiryInPast }
-        // 叠加权益取"更晚到期"而不是"更晚发行"：用户拿 4500 点再续一年时，
-        // 上一张年费券剩下的 200 天不能被抹掉。这条规则让"提前续费"永远是赚而不是亏。
+        // Stacking entitlements takes the 'later expiry', not the 'later issue': when the user spends 4500 credits to renew another year,
+        // the 200 days left by the previous annual voucher must not be wiped out. This rule makes 'renewing early' always a gain, never a loss.
         let candidate = PopopxBadgeRecord(
             period: period,
             source: source,
@@ -221,14 +221,14 @@ final class PopopxBadgeManager {
         return candidate
     }
 
-    /// StoreKit 交付回调：按 `kind` 穷尽，一次问清"这笔收据归谁点亮"。
+    /// StoreKit delivery callback: exhaustive over `kind`, settling in one place 'whose badge does this receipt light'.
     ///
-    /// 券与算力点充值包由 `PopopxCreditsManager.apply(storeReceipt:)` 落账，这里一格都不碰；
-    /// 订阅与一次性通行证点亮徽章。通行证这一族**必须**在这里也有分支：付费墙那条当场点亮的腿
-    /// 只在 `purchase()` 同步返回 `.purchased` 时才走，而真机上还有两条成交路径根本不经过它——
-    /// Ask to Buy / 家庭审批延后批准（那一次调用返回的是 `.pending`），以及付款成功后、点亮之前
-    /// 进程被杀（收据留在 `Transaction.unfinished`）。这两笔钱付完之后除了这里没有第二处会点亮它，
-    /// 缺这一支就是"能扣款、不发货"。
+    /// Vouchers and credit top-up packs are credited by `PopopxCreditsManager.apply(storeReceipt:)`; this touches not one of those cells;
+    /// subscriptions and one-time passes light the badge. The pass family **must** also have a branch here: the paywall's leg that lights on the spot
+    /// runs only when `purchase()` returns `.purchased` synchronously, and on a real device two settlement paths never pass through it at all —
+    /// Ask to Buy / family-approval decisions granted later (that call returns `.pending`), and the process being killed after payment succeeded but before lighting
+    /// (the receipt stays in `Transaction.unfinished`). After either of those is paid, nothing but this place lights it,
+    /// and missing this branch means 'the money can be taken, the goods never ship'.
     func apply(storeReceipt receipt: PopopxStoreReceipt) async {
         if receipt.isRevoked {
             await handleRevocation(receipt)
@@ -237,7 +237,7 @@ final class PopopxBadgeManager {
         guard let sku = receipt.sku else { return }
         switch sku.kind {
         case let .subscription(period):
-            // 订阅优先用 Apple 给的到期时间；拿不到（理论上不该发生）才按周期天数兜底。
+            // Subscriptions prefer the expiry time Apple gives; only when it cannot be obtained (theoretically it should not happen) does it fall back to the period's days.
             let expiresAtMs = receipt.expiresAtMs
                 ?? Int64(nowAddingDays(period.days).timeIntervalSince1970 * 1_000)
             do {
@@ -253,20 +253,20 @@ final class PopopxBadgeManager {
         }
     }
 
-    /// 一次性通行证（非续订订阅）点亮。时长走 `stackedExpiryMs`，与算力点兑换、礼品券同一个算式：
-    /// `max(本机当前到期, 现在) + period.days`，绝不把剩下的时长覆盖掉。
+    /// Lighting from a one-time pass (non-renewing subscription). The time goes through `stackedExpiryMs`, the same formula as credit redemption and gift vouchers:
+    /// `max(this device's current expiry, now) + period.days`, and it never overwrites the time that is left.
     ///
-    /// 两道防重投，缺一不可：
-    /// 1. `PopopxStoreKitManager.deliver` 已按交易 id 去过一次重（同进程内 `Transaction.updates`
-    ///    与一次前台购买给出同一笔时只交付一次），付费墙当场点亮那一笔因此不会在这里再来一遍。
-    /// 2. 本函数的 `appliedPassDigests` + `record.receiptDigest` 比对：前者挡本进程重复投递，
-    ///    后者挡"点亮成功但 `finish` 没落下去、冷启动又从 unfinished 重投同一张收据"。
-    ///    取当前徽章记录上的摘要而不是自建一份账本，是因为 `PopopxCommerceKeychainSlot`
-    ///    不归本文件扩：为这一条兜底再开一格密码串存储，代价是整个模块的密钥盘多一个必须备份的格子。
+    /// Two guards against re-delivery, both indispensable:
+    /// 1. `PopopxStoreKitManager.deliver` already de-duplicates by transaction id (within the same process, when `Transaction.updates`
+    ///    and a foreground purchase give the same transaction it is delivered only once), so the paywall's on-the-spot lighting will not run again here.
+    /// 2. This function's `appliedPassDigests` + a comparison against `record.receiptDigest`: the former blocks repeat deliveries inside this process,
+    ///    the latter blocks 'lighting succeeded but `finish` never landed, so a cold start re-delivers the same receipt from unfinished'.
+    ///    Taking the digest on the current badge record instead of building a ledger of our own is because `PopopxCommerceKeychainSlot`
+    ///    is not this file's to extend: opening one more secret-string slot for this fallback would cost the whole module's keyring one more slot that must be backed up.
     private func applyPass(_ receipt: PopopxStoreReceipt, period: PopopxNodeBadgePeriod) async {
         let digest = receipt.digest
         guard !appliedPassDigests.contains(digest), record?.receiptDigest != digest else {
-            // 已经点过的这一张：不再加时长，但要把交易收尾，别让它一直留在 unfinished 里重投。
+            // This one already lit: add no more time, but finish the transaction so it does not stay in unfinished being re-delivered forever.
             await PopopxStoreKitManager.shared.finish(receipt)
             return
         }
@@ -279,11 +279,11 @@ final class PopopxBadgeManager {
         }
     }
 
-    /// 冷启动兜底：把"钱已付、本地没落账"的通行证收据捞回来点亮。
+    /// Cold-start fallback: recover and light the pass receipts where 'the money was paid but nothing was credited locally'.
     ///
-    /// 只捞 `Transaction.unfinished` 那一条序列，**绝不**把通行证放进 `reconcileWithStore()`：
-    /// 非消耗品在 `currentEntitlements` 里是长住的（Apple 不按时长收回非续订订阅），
-    /// 拿它当对账依据 = 每次冷启动白送 30/365 天。那条路径只留给订阅（到期由 Apple 说了算）。
+    /// It only drains the `Transaction.unfinished` sequence and **never** puts passes into `reconcileWithStore()`:
+    /// non-consumables stay long in `currentEntitlements` (Apple does not reclaim non-renewing subscriptions by elapsed time),
+    /// so using them as the basis for reconciliation = giving away 30/365 days on every cold start. That path stays reserved for subscriptions (Apple decides the expiry).
     private func recoverUnsettledPasses() async {
         for receipt in await PopopxStoreKitManager.shared.unfinishedReceipts() {
             guard !receipt.isRevoked, let sku = receipt.sku, case let .oneTimePass(period) = sku.kind else { continue }
@@ -291,8 +291,8 @@ final class PopopxBadgeManager {
         }
     }
 
-    /// 退款/撤销：徽章按到期处理——已经享受过的服务不追溯，
-    /// 但这张收据的摘要不再允许点亮任何一次（下次对账会把它当陌生收据 finish 掉）。
+    /// Refund / revocation: the badge is treated as expired — services already enjoyed are not retroactive,
+    /// but this receipt's digest is no longer allowed to light anything (the next reconciliation will finish it as an unfamiliar receipt).
     private func handleRevocation(_ receipt: PopopxStoreReceipt) async {
         guard record?.receiptDigest == receipt.digest else { return }
         record = nil
@@ -302,14 +302,14 @@ final class PopopxBadgeManager {
         log.info("badge: cleared because its source receipt was revoked")
     }
 
-    /// 收到礼品卡、验签通过后点亮。券的状态机在 `PopopxP2PVoucherVault`，
-    /// 本函数只回答"这次点亮写不写得下"。
+    /// Lighting after a gift card is received and its signature verifies. The voucher's state machine lives in `PopopxP2PVoucherVault`;
+    /// this function only answers 'can this lighting be written down'.
     ///
-    /// 这里刻意**不**用 `grant.expiresAtMs`：那个时刻是在**赠送方**的设备上算的
-    /// （`authorizeRedemption` 的 `现在 + period.days`），它只是"这张券给多少天"的签名承诺，
-    /// 不是受赠方的到期日。直接拿它点亮会有两个错：券在聊天里放三天就少三天，
-    /// 而且它会绕开受赠方自己剩下的时长。天数由 `stackedExpiryMs` 在受赠方这一侧重新落地，
-    /// 签名字节一个字都不用改。
+    /// Here `grant.expiresAtMs` is deliberately **not** used: that instant was computed on the **giver**'s device
+    /// (`authorizeRedemption`'s `now + period.days`); it is only a signed promise of 'how many days this voucher gives',
+    /// not the recipient's expiry date. Lighting directly from it produces two errors: a voucher lying in the chat for three days loses three days,
+    /// and it bypasses the time the recipient has left of their own. The days are re-landed by `stackedExpiryMs` on the recipient's side,
+    /// and not one signed byte has to change.
     func activate(grant: PopopxBadgeGrant) throws -> PopopxBadgeRecord {
         try activate(
             period: grant.period,
@@ -319,9 +319,9 @@ final class PopopxBadgeManager {
         )
     }
 
-    /// 算力点兑换点亮。天数由周期自己给，避免两处各写一份 30/365；
-    /// 起点走 `stackedExpiryMs`，和通行证、礼品券是同一个算式——花点数的按钮上写着"加 N 天"，
-    /// 就只能是加 N 天，不能是"把剩余时间重置成 N 天"。
+    /// Lighting from a credit redemption. The days come from the period itself, avoiding two places each writing their own 30/365;
+    /// the start goes through `stackedExpiryMs`, the same formula as passes and gift vouchers — a button that spends credits says 'add N days',
+    /// so it can only ever add N days, never 'reset the remaining time to N days'.
     @discardableResult
     func activate(withCredits period: PopopxNodeBadgePeriod, now: Date = Date()) throws -> PopopxBadgeRecord {
         try activate(
@@ -337,12 +337,12 @@ final class PopopxBadgeManager {
         Date().addingTimeInterval(TimeInterval(days * 86_400))
     }
 
-    // MARK: 对账
+    // MARK: Reconciliation
 
-    /// 以 Apple 权益为准重算徽章：换设备、另一台机器续费、恢复购买之后都走这里。
+    /// Recompute the badge with Apple's entitlements as the truth: a device change, a renewal on another machine, a restore of purchases all come here.
     func reconcileWithStore() async {
         let receipts = await PopopxStoreKitManager.shared.currentEntitlementReceipts()
-        // `for … where` 只接一个条件（逗号分开的多重条件在这里是语法错误），所以判据放进循环体。
+        // `for … where` takes only one condition (comma-separated multiple conditions are a syntax error here), so the criteria go inside the loop body.
         for receipt in receipts {
             guard receipt.sku?.isSubscription == true, !receipt.isRevoked else { continue }
             await apply(storeReceipt: receipt)
@@ -352,7 +352,7 @@ final class PopopxBadgeManager {
         recompute()
     }
 
-    /// 徽章详情页"重新检查续费状态"按钮。
+    /// The badge detail page's 'check the renewal state again' button.
     func refreshSubscriptionStatus() async {
         guard let existing = record, existing.source == .appleSubscription else {
             subscriptionSnapshot = nil
@@ -361,13 +361,13 @@ final class PopopxBadgeManager {
         subscriptionSnapshot = await PopopxStoreKitManager.shared.subscriptionSnapshot(for: existing.period)
     }
 
-    // MARK: 本地路由轮换（展示层语义）
+    // MARK: Local route rotation (presentation-layer semantics)
 
-    /// 每 `nodeRotationSeconds` **至多**递增一次计数（判定只发生在 30 秒的心跳里）。
+    /// The counter increments **at most** once every `nodeRotationSeconds` (the decision only happens inside the 30-second heartbeat).
     ///
-    /// 它今天**只是本地计数**：真正把一条 SMP 连接换到另一台中继节点要在 Haskell 侧
-    /// 走 connection 的 invited/AD 流程，那一步未上机验证前不能声称"已切换"。
-    /// 因此视图把它渲染成"节点刷新"动画，而所有文案不得出现"已切换至新节点"这类完成时断言。
+    /// Today it is **only a local count**: actually moving one SMP connection to another relay node takes the Haskell side's
+    /// invited/AD flow for connections, and until that step is verified on hardware nobody may claim 'switched'.
+    /// So views render it as a 'node refresh' animation, and no copy may contain perfect-tense assertions like 'switched to a new node'.
     func rotateNodeIfNeeded(now: Date) {
         guard var existing = record, PopopxBadgePhase.phase(for: existing, now: now).isLit else { return }
         let due = TimeInterval(existing.rotationIndex) * PopopxCommerceLimits.nodeRotationSeconds
@@ -378,33 +378,33 @@ final class PopopxBadgeManager {
         record = existing
     }
 
-    // MARK: 供 UI 读取的短句
+    // MARK: Short lines for the UI to read
 
-    /// 剩余时间一句话。休眠态返回 nil，调用方就不显示倒计时，而不是显示"0 秒"。
+    /// One sentence of remaining time. The dormant state returns nil, so the caller shows no countdown instead of showing '0 seconds'.
     var remainingDescription: String? {
         guard let expiresAt = phase.expiresAt else { return nil }
         return PopopxBadgeCopy.remaining(expiresAt: expiresAt, source: record?.source)
     }
 
-    /// 体验徽章是否还可领取——弹窗的唯一资格来源。
+    /// Whether the trial badge can still be claimed — the popup's only source of eligibility.
     var canClaimPioneerTrial: Bool { record == nil && !PopopxCommerceKeychain.contains(.trialGuard) }
 
-    // MARK: 清场
+    // MARK: Clearing the field
 
-    /// 抹掉本模块全部本地状态（徽章、券、算力点、流水、签名密钥、体验标记）。
+    /// Wipe all of this module's local state (badge, vouchers, credits, transaction log, signing keys, trial marker).
     ///
-    /// **故意不接任何自动触发点**，包括三击 Logo 的紧急自毁：那条路径会连带删掉未花的算力点余额，
-    /// 等于把"紧急避险"和"财产损失"绑在一起。要接必须由用户明确决定，并单独设计一次不可撤销确认。
+    /// It is **deliberately not wired to any automatic trigger**, including the triple-tap-Logo emergency self-destruct: that path would also delete unspent credit balances,
+    /// which binds 'emergency escape' to 'property loss'. Wiring it would require an explicit user decision plus a separately designed irrevocable confirmation.
     static func eraseAllCommerceState() {
         PopopxCommerceKeychain.removeAll()
     }
 }
 
-// MARK: - 设备证明
+// MARK: - Device attestation
 
 private extension PopopxBadgeManager {
-    /// 体验徽章防重放指纹的原文：真机且 DeviceCheck 可用时取 Apple token，否则取本机安装指纹。
-    /// 返回值一律是可读文本——落 Keychain 的这一段永远不含正文，只含标识。
+    /// The raw text of the trial badge's anti-replay digest: on a real device with DeviceCheck available it takes the Apple token, otherwise the local install digest.
+    /// The return value is always readable text — the part that lands in the Keychain never contains message bodies, only identifiers.
     static func pioneerTrialGuardToken() async -> String {
         if let token = await deviceCheckToken() {
             return "dc.\(token.popopxBase64URL)"
@@ -412,8 +412,8 @@ private extension PopopxBadgeManager {
         return localInstallFingerprint()
     }
 
-    /// 带墙钟上限的 `generateToken`。失败原因（不支持 / capability 未开 / 超时 / 无网络）
-    /// 全部合并成 nil：上层唯一的正确行为都是"改用本机指纹"，区分原因只会多一条没人读的日志。
+    /// `generateToken` with a wall-clock cap. All failure reasons (unsupported / capability not enabled / timeout / no network)
+    /// collapse into nil: the only correct behaviour at every level above is 'use the local digest', and telling the reasons apart only adds a log nobody reads.
     nonisolated private static func deviceCheckToken() async -> Data? {
         #if canImport(DeviceCheck) && os(iOS)
         guard DCDevice.current.isSupported else { return nil }
@@ -435,13 +435,13 @@ private extension PopopxBadgeManager {
         #endif
     }
 
-    /// 本机安装指纹：一个自己铸的 UUID，存在 Keychain 的 `installIdentity` 格。
+    /// The local install digest: a self-minted UUID stored in the Keychain's `installIdentity` slot.
     ///
-    /// 不用 `identifierForVendor`：那个标识在"同厂商所有 App 都被删除"之后会变，
-    /// 而它变不变对我们毫无价值——真正需要的性质是"卸载重装之后还是同一个值"，
-    /// Keychain（ThisDeviceOnly）恰好提供它。读不到就铸一个新的并写下去；
-    /// 写盘失败也照常返回，因为把"一次 Keychain 抖动"变成"永远领不到体验"是更坏的结局，
-    /// 而防重放的第一道（`trialGuard`）在那条路径上已经先判过一次。
+    /// `identifierForVendor` is not used: that identifier changes once 'every app from the same vendor has been deleted',
+    /// and whether it changes is worth nothing to us — the property we actually need is 'still the same value after an uninstall and reinstall',
+    /// and the Keychain (ThisDeviceOnly) provides exactly that. If it cannot be read, mint a new one and write it down;
+    /// a failed write still returns as normal, because turning 'one Keychain hiccup' into 'never able to claim the trial' would be the worse outcome,
+    /// and the first anti-replay guard (`trialGuard`) has already decided once earlier on that path.
     static func localInstallFingerprint() -> String {
         if let stored = PopopxCommerceKeychain.read(.installIdentity),
            let text = String(data: stored, encoding: .utf8),
@@ -454,18 +454,18 @@ private extension PopopxBadgeManager {
     }
 }
 
-// MARK: - 文案
+// MARK: - Copy
 
-/// 徽章特性内部的短 UI 短语。金额、退款、续费承诺那一批在 `PopopxCommerceCopy`
-/// （那一批要写进全部 17 个 `.lproj` 目录）；这一批与本特性其余文件一样留在文件内，
-/// 与前面几个 POPOPX 特性保持同一套做法。
+/// Short UI phrases inside the badge feature. The batch of amounts, refunds and renewal promises lives in `PopopxCommerceCopy`
+/// (that batch has to be written into all 17 `.lproj` directories); this batch stays inside the file like the rest of this feature's files,
+/// keeping the same practice as the earlier POPOPX features.
 enum PopopxBadgeCopy {
     static let capsuleTitle = NSLocalizedString("Privacy node", comment: "badge capsule title")
     static let trialBadgeName = NSLocalizedString("Pioneer Node Trial Badge", comment: "trial badge display name")
     static let formalBadgeName = PopopxCommerceCopy.badgeProductName
 
-    /// 剩余时间一句话。体验态说"体验"，正式态说"到期"，两档不共用"剩余"这个词，
-    /// 免得用户以为体验徽章和订阅是同一种东西。
+    /// One sentence of remaining time. The trial state says 'trial', the formal state says 'expires'; the two levels do not share the word 'remaining',
+    /// so that users do not take the trial badge and a subscription for the same kind of thing.
     static func remaining(expiresAt: Date, source: PopopxBadgeSource?) -> String {
         let clock = remainingClock(expiresAt.timeIntervalSinceNow)
         if source == .pioneerTrial { return String(format: NSLocalizedString("Pioneer trial · %@ left", comment: "badge remaining, trial tier"), clock) }
@@ -484,7 +484,7 @@ enum PopopxBadgeCopy {
 }
 
 private extension Date {
-    /// 到期日期按系统区域格式渲染；写死 `yyyy-MM-dd` 在德语和中文环境里都是错的样式。
+    /// The expiry date renders in the system locale format; hard-coding `yyyy-MM-dd` is the wrong style in both German and Chinese locales.
     var popopxBadgeExpiresText: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium

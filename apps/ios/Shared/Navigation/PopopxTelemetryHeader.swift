@@ -2,28 +2,28 @@
 //  PopopxTelemetryHeader.swift
 //  POPOPX (iOS)
 //
-//  【第三阶段 · 1】顶部三段式导航。
+//  [Phase 3 · 1] The three-segment top bar navigation.
 //
-//  左：身份切换胶囊 + 品牌标记（连点三次 = 恐慌清除的第二入口）。
-//  中：网络 / 蓝牙 双模状态胶囊。
-//  右：微信式「+」菜单 —— 添加朋友、发起群聊或加密频道、创建公开频道、扫一扫、生成一次性连接链接。
+//  Left: identity switcher capsule + brand mark (triple-tap = the second entry point of the panic wipe).
+//  Center: the network / Bluetooth dual-mode status capsule.
+//  Right: a WeChat-style "+" menu — add friend, start a group chat or encrypted channel, create a public channel, scan, generate a one-time connection link.
 //
-//  这一层只负责呈现与分派：真实的清场、建连、URL 规划都在被调用方里，本文件不碰。
-//  设计取值一律来自 Shared/Theme/PopopxTheme.swift（PopopxPalette / PopopxMetrics / PopopxType /
-//  PopopxMaterial），此文件内没有任何裸色值或裸字号。
+//  This layer only renders and dispatches: the real clearing, connection setup, and URL planning all live inside the callees, and this file touches none of them.
+//  Design values come uniformly from Shared/Theme/PopopxTheme.swift (PopopxPalette / PopopxMetrics / PopopxType /
+//  PopopxMaterial); this file contains no raw color value and no raw font size.
 //
-//  恐慌清除不重复实现：三击判定、确认弹窗与抹除顺序都在 `PopopxPanicWipeArming`
-//  （PopopxMeshKit/Sources/PopopxMeshUI/PanicWipeManager.swift:357）里，app 根部已经用
-//  `PopopxMeshPanicWipeMount`（Shared/Model/POPOPXAPI.swift:4053）挂载过一次。本文件的标记只是
-//  **第二个入口**：把点击转发进同一台状态机，确认弹窗仍只由根部那一处呈现 —— 不会出现两个 alert
-//  抢同一次武装。
+//  Panic wipe is not reimplemented: the triple-tap detection, the confirmation dialog, and the wipe order all live in `PopopxPanicWipeArming`
+//  (PopopxMeshKit/Sources/PopopxMeshUI/PanicWipeManager.swift:357), and the app root has already mounted it once with
+//  `PopopxMeshPanicWipeMount` (Shared/Model/POPOPXAPI.swift:4053). The mark in this file merely
+//  **second entry point**: forwards the tap into the same state machine, and the confirmation dialog is still presented from that one place at the root - never two alerts
+//  competing for the same arming.
 //
-//  网络档位刻意不读 `UserNetworkInfo.networkType`：那个枚举在 POPOPXChat/ChatTypes.swift 里标了
-//  `@available(*, deprecated, 4.0)`，而且第一个 case 自己写着 "should not happen"。这里用包里的
-//  `NetworkStateMonitor`（PopopxMeshKit/Router/NetworkStateMonitor.swift:287）—— 它是 NWPath 的真值
-//  来源，`PopopxNetworkPath.displayText` 已经是中文，不需要第二套措辞。
+//  The network tier deliberately does not read `UserNetworkInfo.networkType`: that enum is marked in POPOPXChat/ChatTypes.swift as
+//  `@available(*, deprecated, 4.0)`, and its first case itself says "should not happen". Here we use the package's
+//  `NetworkStateMonitor` (PopopxMeshKit/Router/NetworkStateMonitor.swift:287) - it is the source of truth for NWPath,
+//  and `PopopxNetworkPath.displayText` is already in Chinese, so no second set of wording is needed.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。铁律禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. The iron rule forbids scripts from modifying project.pbxproj.
 //
 
 import SwiftUI
@@ -31,19 +31,19 @@ import PopopxMeshKit
 import PopopxMeshUI
 import POPOPXChat
 
-// MARK: - 状态档位
+// MARK: - Status tiers
 
-/// 中间胶囊的语义档位，以及那张判定表。
+/// The semantic tiers of the middle capsule, plus that decision table.
 enum PopopxHeaderSignal: Hashable {
-    /// 还没有任何一次路径读数：中性点，不替用户猜。
+    /// No path reading yet: a neutral point, we do not guess on the user's behalf.
     case unknown
-    /// 公网可用，且路径干净（Wi-Fi／有线）。
+    /// The public network is available and the path is clean (Wi-Fi / wired).
     case online
-    /// 公网可用，但打了折扣：蜂窝、受限（低数据模式）或个人热点。
+    /// The public network is available but discounted: cellular, restricted (low data mode) or a personal hotspot.
     case degraded(reason: String)
-    /// 只剩 BLE 近场 —— 在线通道断了也照实说。
+    /// Only BLE near-field is left - it says plainly that the online channel is down.
     case meshOnly(note: String)
-    /// 两头都不通。
+    /// Neither side is reachable.
     case offline
 
     var label: String {
@@ -66,8 +66,8 @@ enum PopopxHeaderSignal: Hashable {
         }
     }
 
-    /// 色只承载通道语义（§1.1）：在线与降质都是 SMP，同用 `brand`，"蜂窝/受限"由文字区分；
-    /// §1.4 第 4 条禁止绿色常驻，故在线档不用 `successInk`，也不存在 warning 色。
+    /// Colour carries only the channel semantics (§1.1): online and degraded are both SMP and share `brand`, "cellular/restricted" is told apart by the text;
+    /// §1.4 clause 4 forbids a permanent green, so the online tier does not use `successInk`, and there is no warning colour at all.
     var tint: Color {
         switch self {
         case .unknown: PopopxPalette.labelHint
@@ -78,20 +78,20 @@ enum PopopxHeaderSignal: Hashable {
         }
     }
 
-    /// 只有"近场"这一档呼吸：它是降级态，需要被注意到；其余档位是静态事实。
+    /// Only the "near-field" tier breathes: it is a degraded state and needs to be noticed; the other tiers are static facts.
     var isBreathing: Bool {
         if case .meshOnly = self { return true }
         return false
     }
 
-    /// 判定优先级：近场链路 > 无读数 > 不可用 > 打折的在线 > 干净的在线。
+    /// Decision priority: near-field link > no reading > unavailable > discounted online > clean online.
     ///
-    /// - Parameter proximityActive: 由挂载方报告"近场引擎当前在跑"。刻意不编一条全局信号总线：
-    ///   `PopopxProximityEngine` 是面对面页自己持有的 `ObservableObject`，头部拿不到也不该猜，
-    ///   所以这个档位只能由持有两端的宿主在页面上／下场时调 `PopopxTelemetryModel.update(proximityActive:)`。
-    ///   接线已在第四阶段完成：`PopopxProximitySheetModel.begin()`/`finish()`（:64/:69）与
-    ///   `shareByTapDrop()`（:101 让出测距期间）写的就是 `PopopxTelemetryModel.shared`。
-    /// - Parameter path: nil = 还没读到过任何一次 NWPath。
+    /// - Parameter proximityActive: reported by whoever mounts this as "the proximity engine is running right now". Deliberately no global signal bus is built:
+    ///   `PopopxProximityEngine` is an `ObservableObject` held by the face-to-face page itself, the header cannot reach it and should not guess,
+    ///   so this tier can only be set by the host that holds both ends, calling `PopopxTelemetryModel.update(proximityActive:)` when that page appears/disappears.
+    ///   The wiring was completed in the fourth phase: `PopopxProximitySheetModel.begin()`/`finish()` (:64/:69) and
+    ///   `shareByTapDrop()` (:101, handing over the period while ranging) write to `PopopxTelemetryModel.shared`.
+    /// - Parameter path: nil = not a single NWPath has been read yet.
     static func resolve(proximityActive: Bool, directPeerCount: Int, path: PopopxNetworkPath?) -> PopopxHeaderSignal {
         if proximityActive {
             return .meshOnly(note: directPeerCount > 0
@@ -118,19 +118,19 @@ enum PopopxHeaderSignal: Hashable {
     }
 }
 
-// MARK: - 状态来源
+// MARK: - Status sources
 
-/// 把三个真实来源拧成一个档位：`NetworkStateMonitor`（公网路径）、`BluetoothHealthMonitor`（射频）、
-/// `PopopxMeshStateSource`（直连节点数），外加宿主报告"近场引擎在跑"。
+/// Twists three real sources into a single tier: `NetworkStateMonitor` (public network path), `BluetoothHealthMonitor` (radio),
+/// `PopopxMeshStateSource` (direct node count), plus the host reporting that "the proximity engine is running".
 ///
-/// 纯判定在 `PopopxHeaderSignal.resolve` 里，这个类只做订阅与缓存，所以那张表能脱离 SwiftUI 单独验证。
+/// The pure decision lives in `PopopxHeaderSignal.resolve`; this class only subscribes and caches, so that table can be verified on its own, outside SwiftUI.
 @MainActor
 @Observable
 final class PopopxTelemetryModel {
-    /// 顶栏档位的全进程唯一实例。存在的理由只有一个：报告"近场在跑"的那一端（面对面页）和渲染顶栏的那一端
-    /// （消息页）不是同一个宿主 —— 消息页 `ChatsListView.swift:189` 渲染它，`PopopxProximityAddContactView`
-    /// 的 `begin()`/`finish()` 写它。给它单独再编一条总线才是多余，`resolve` 注释要的"持有两端的宿主"
-    /// 因此就是这一个对象。`start()` 幂等（`pathStream == nil` 才订阅），所以重复挂载不会双订阅。
+    /// The single process-wide instance of the top bar tier. It exists for exactly one reason: the end that reports "near-field is running" (the face-to-face page) and the end that renders the top bar
+    /// (the messages page) are not the same host - the messages page `ChatsListView.swift:189` renders it, while `PopopxProximityAddContactView`
+    /// writes it from its `begin()`/`finish()`. Building yet another bus just for it would be the redundant part; the "host that holds both ends" the `resolve` comment asks for
+    /// is therefore this one object. `start()` is idempotent (it subscribes only when `pathStream == nil`), so repeated mounts cannot double-subscribe.
     static let shared = PopopxTelemetryModel()
 
     private(set) var signal: PopopxHeaderSignal = .unknown
@@ -141,10 +141,10 @@ final class PopopxTelemetryModel {
     private var directPeerCount = 0
     private var pathStream: Task<Void, Never>?
 
-    /// 写在方法体而不是默认参数上：`= .shared` 按非隔离上下文求值，会命中 `@MainActor` 的 Swift 6 隔离错误。
+    /// Written in the method body rather than on a default parameter: `= .shared` evaluates in a non-isolated context and would hit the `@MainActor` Swift 6 isolation error.
     private var mesh: PopopxMeshRuntime { .shared }
 
-    /// 订阅公网路径变化。幂等：已经在订阅就直接返回，避免一条流被消费两次。
+    /// Subscribes to public network path changes. Idempotent: if already subscribed it returns straight away, so one stream is never consumed twice.
     func start(runtime: PopopxMeshRuntime? = nil) async {
         guard pathStream == nil else { return }
         let runtime = runtime ?? mesh
@@ -161,17 +161,17 @@ final class PopopxTelemetryModel {
         pathStream = nil
     }
 
-    /// 近场档位入口：由同时持有顶栏与面对面页的宿主在页面上／下场时调用（见 `resolve` 的说明）。
+    /// Entry point for the near-field tier: called by the host that holds both the top bar and the face-to-face page when that page appears/disappears (see the notes on `resolve`).
     func update(proximityActive: Bool, runtime: PopopxMeshRuntime? = nil) async {
         self.proximityActive = proximityActive
         await refresh(runtime: runtime)
     }
 
-    /// 重读射频与直连节点数。
+    /// Re-reads the radio and the direct node count.
     ///
-    /// `directPeerCount` 只在这里与路径变化时刷新：`PopopxMeshStateSource.state` 虽然是可观察的，
-    /// 但为一个胶囊再挂一层订阅会让整棵视图树跟着失效，不划算。
-    /// `BluetoothHealthMonitor` 是 actor（`:59`），所以这里必须 async。
+    /// `directPeerCount` refreshes only here and on path changes: `PopopxMeshStateSource.state` is observable, it is true,
+    /// but attaching another layer of subscription for one capsule would invalidate the whole view tree along with it, which is not worth it.
+    /// `BluetoothHealthMonitor` is an actor (`:59`), so this has to be async.
     func refresh(runtime: PopopxMeshRuntime? = nil) async {
         let runtime = runtime ?? mesh
         radioState = await runtime.healthMonitor.currentRadioState
@@ -189,12 +189,12 @@ final class PopopxTelemetryModel {
     }
 }
 
-// MARK: - 左：身份切换
+// MARK: - Left: identity switching
 
-/// 身份切换胶囊：一个纯 `Picker`，只把选中的 userId 写回宿主的绑定。
+/// Identity-switch capsule: a plain `Picker` that only writes the selected userId back into the host's binding.
 ///
-/// 刻意不在这里调 `changeActiveUserAsync_`：切换当前用户会让 api 层重载会话并重建整棵聊天视图树，
-/// 那是宿主的职责。`identities` 传 `chatModel.users.map(\.user)`。
+/// Deliberately does not call `changeActiveUserAsync_` here: switching the current user makes the api layer reload sessions and rebuild the whole chat view tree,
+/// and that is the host's job. `identities` is passed `chatModel.users.map(\.user)`.
 struct PopopxIdentitySwitcher: View {
     @Binding var userId: Int64?
     var identities: [User] = []
@@ -217,16 +217,16 @@ struct PopopxIdentitySwitcher: View {
                     .font(PopopxType.secondary)
                     .lineLimit(1)
                     .truncationMode(.tail)
-                    // 不收紧字距、不缩字号：长名字只许截断。真机第 5 轮起这一枚在顶栏里的占有
-                    // 上限是 `headerIdentityMaxWidth`（115），三件套写全是为了让"折行"在这一层
-                    // 结构上不可能发生，而不依赖外层给宽。
+                    // No letter-spacing tightening, no font-size reduction: a long name may only be truncated. From real-device round 5 onwards this element's footprint in the top bar
+                    // is capped by `headerIdentityMaxWidth` (115); the trio is written out in full so that "wrapping" is impossible
+                    // structurally at this layer, instead of depending on the width the outer layer hands out.
                     .allowsTightening(false)
-                    // 真机第 9 轮：光有上限拦不住折行。`Picker(.menu)` 的标签由 UIKit 那一侧排版，
-                    // 外层 115 的夹子传到 `HStack` 后还要再分给符号与 chevron，提案给文字时已经
-                    // 比名字窄，`lineLimit(1)` 在菜单标签里拦不住换行。这里把文字自己的宽度夹死：
-                    // 115 减去左右内边距 16×2、人形符号 18、chevron 11、两处间距 4×2 = 46pt，
-                    // 再钉 `fixedSize(horizontal: false, vertical: true)` —— 纵向只许占一行高，
-                    // 46pt 之外的名字一律截断，绝不撑高这一行。
+                    // Real-device round 9: a cap alone does not stop wrapping. The label of `Picker(.menu)` is laid out on the UIKit side,
+                    // so once the outer clamp of 115 reaches the `HStack` it still has to be shared with the symbol and the chevron, and by the time the proposal reaches the text it is already
+                    // narrower than the name, while `lineLimit(1)` does not stop line breaks inside a menu label. Here the text's own width is clamped hard:
+                    // 115 minus the left/right insets 16×2, the person symbol 18, the chevron 11, two gaps 4×2 = 46pt,
+                    // then pinning `fixedSize(horizontal: false, vertical: true)` - vertically it may occupy only one line height,
+                    // and any name beyond 46pt is truncated instead of ever making this row taller.
                     .frame(maxWidth: 46, alignment: .leading)
                     .fixedSize(horizontal: false, vertical: true)
                 Image(systemName: "chevron.down")
@@ -253,9 +253,9 @@ struct PopopxIdentitySwitcher: View {
     }
 }
 
-// MARK: - 中：胶囊
+// MARK: - Middle: capsules
 
-/// 单个状态胶囊。也单独复用，例如蓝牙健康页拿它显示射频档位。
+/// A single status capsule. Also reused on its own, e.g. the Bluetooth health page uses it to show the radio tier.
 struct PopopxStatusPill: View {
     let symbol: String
     let text: String
@@ -266,10 +266,10 @@ struct PopopxStatusPill: View {
     @State private var dimmed = false
 
     var body: some View {
-        // 两档各有各的外圈形状。上一版只有一条 `.frame(height: 48)` 加 `minWidth: 32`：
-        // 圆点档因此恒是 32 宽 × 48 高的胶囊 —— 那不是"被挤压变形"，那个尺寸本身就是一枚竖椭圆。
-        // 这一档现在锁死 32×32 的正方（`.frame(width:height:)` 把 min/ideal/max 钉成同一个值，
-        // 父布局再怎么让步也改不了它），背景与描边跟着换成正圆。
+        // The two tiers each have their own outer shape. The previous version had only a single `.frame(height: 48)` plus `minWidth: 32`:
+        // so the dot tier was always a capsule 32 wide × 48 high - that is not "squashed out of shape", those dimensions are themselves a vertical ellipse.
+        // This tier is now locked to a 32×32 square (`.frame(width:height:)` pins min/ideal/max to the same value,
+        // no matter how much the parent layout yields), and the background and stroke switch to a true circle with it.
         Group {
             if dotOnly {
                 cluster
@@ -286,12 +286,12 @@ struct PopopxStatusPill: View {
                     .overlay {
                         Capsule().strokeBorder(PopopxPalette.hairlineInner, lineWidth: PopopxMetrics.hairline)
                     }
-                    // 真机第 9 轮"外圈变形"这一档：`.frame(height: 48)` 只钉住高，宽度仍按外层提案
-                    // 让步，于是 48 高的胶囊能被夹到比里面的圆点 + 符号还窄 —— 描边跟着压成横椭圆。
-                    // `fixedSize` 把这一枚夹回内容宽度：宁可整行溢出（`ViewThatFits` 会先降档到圆点，
-                    // 圆点档是 32×32 的 frame 锁死，不参与让步），也不让外圈小于它要包住的东西。
-                    // 与 `:364-365` 那条"调用方不能再对它 `.fixedSize()`"不冲突：那一条说的是别在
-                    // `PopopxDualStatusCapsule` 外面夹，会把三档钉在最宽一档；这里夹的是单个候选内部。
+                    // Real-device round 9, the "outer ring deformed" tier: `.frame(height: 48)` pins only the height while the width still yields to the outer
+                    // proposal, so a 48-high capsule could be clamped narrower than the dot + symbol inside it, and the stroke was crushed into a horizontal ellipse.
+                    // `fixedSize` clamps this one back to its content width: better that the whole row overflows (`ViewThatFits` first downshifts to the dot tier,
+                    // whose 32×32 frame is locked and takes no part in yielding) than that the outer ring be smaller than what it has to enclose.
+                    // Does not conflict with the `:364-365` line about "callers must not apply `.fixedSize()` to it again": that one says do not clamp
+                    // outside `PopopxDualStatusCapsule`, which would pin the three tiers to the widest one; what is clamped here is inside a single candidate.
                     .fixedSize(horizontal: true, vertical: false)
             }
         }
@@ -300,19 +300,19 @@ struct PopopxStatusPill: View {
         .onChange(of: text) { _, _ in restart() }
     }
 
-    /// 只有圆点的那一档（宽屏降级档），外圈是正圆。
+    /// The dot-only tier (the wide-screen downgrade tier), whose outer ring is a true circle.
     private var dotOnly: Bool { text.isEmpty }
 
-    /// 两档共用的内容：状态点 + 符号 +（带字档才有）短句。
+    /// Content shared by both tiers: status dot + symbol + (only in the labelled tier) a short phrase.
     private var cluster: some View {
         HStack(spacing: PopopxMetrics.spaceXS) {
             Circle()
                 .fill(tint)
                 .frame(width: PopopxMetrics.spaceXS, height: PopopxMetrics.spaceXS)
-                // 顶栏被长昵称挤窄时，`frame(width:height:)` 只会夹到更小的提案，8×8 的圆点
-                // 于是被压成横向椭圆（真机第 3 轮：网络/蓝牙两枚的"外圈变形"）。
-                // `fixedSize` 只锁这一颗点，整簇仍按原规则让步 —— 见 `PopopxDualStatusCapsule.body`
-                // 里「调用方不能再对它 `.fixedSize()`」那两条推论。
+                // When the top bar is squeezed narrow by a long nickname, `frame(width:height:)` only clamps down to the smaller proposal, and the 8×8 dot
+                // gets crushed into a horizontal ellipse (real-device round 3: the "outer ring deformed" on the network and Bluetooth capsules).
+                // `fixedSize` locks only this one dot; the whole cluster still yields under the original rules - see the two corollaries in
+                // `PopopxDualStatusCapsule.body` about callers not applying `.fixedSize()` to it again.
                 .fixedSize()
                 .opacity(dimmed ? 0.45 : 1)
                 .scaleEffect(dimmed ? 0.8 : 1)
@@ -329,7 +329,7 @@ struct PopopxStatusPill: View {
         .foregroundStyle(tint)
     }
 
-    /// 呼吸只在"确实需要被注意"时开：Reduce Motion 下彻底静止，而不是缩短。
+    /// The breathing is on only when it genuinely needs to be noticed: under Reduce Motion it goes completely still, not merely shorter.
     private func restart() {
         guard pulsing, !reduceMotion else {
             dimmed = false
@@ -339,7 +339,7 @@ struct PopopxStatusPill: View {
     }
 }
 
-/// 网络胶囊 + 蓝牙胶囊。窄屏靠 `ViewThatFits` 退回"只留圆点"的版本，**不截断中文**。
+/// Network capsule + Bluetooth capsule. On narrow screens `ViewThatFits` falls back to the "dots only" version, **the Chinese wording is never truncated**.
 struct PopopxDualStatusCapsule: View {
     let network: PopopxHeaderSignal
     let bluetooth: PopopxStatusPill
@@ -357,12 +357,12 @@ struct PopopxDualStatusCapsule: View {
     }
 
     var body: some View {
-        // 三档：两端全文字 → 射频退回圆点 → 两端都退回圆点。降级靠换档，不靠截断中文。
-        // 2026-11-20 顶栏并到第一行后重算过占有：全文字档 206、混合档 141、双圆点档 76，
-        // 而 393pt 留给这一簇的只有 76 那档（整行明细见 `PopopxTelemetryHeader` 文件头），
-        // 所以 iPhone 竖屏恒定停在双圆点 —— 这不是这三档白写，宽屏与 iPad 会升档。
-        // 调用方不能再对它 `.fixedSize()`：那会把 proposal 变成 nil，三档永远停在最宽一档，
-        // 溢出的 HStack 以中心对齐，于是两端同时被推出安全区（T0 就是先在这里红的）。
+        // Three tiers: both ends fully labelled → radio falls back to a dot → both ends fall back to dots. The downgrade comes from switching tiers, not from truncating the Chinese wording.
+        // The footprints were recomputed on 2026-11-20 after the top bar merged into the first row: fully labelled tier 206, mixed tier 141, double-dot tier 76,
+        // and out of 393pt only the 76 tier is left for this cluster (the full row breakdown is in the `PopopxTelemetryHeader` file header),
+        // so iPhone portrait always stays on the double dots - the three tiers are not written in vain, wide screens and iPad step back up.
+        // Callers must not apply `.fixedSize()` to it again: that turns the proposal into nil, the three tiers always sit on the widest one,
+        // and the overflowing HStack is centre-aligned, so both ends get pushed out of the safe area at once (that is where T0 first went red).
         ViewThatFits(in: .horizontal) {
             HStack(spacing: PopopxMetrics.spaceS) { networkPill; bluetooth }
             HStack(spacing: PopopxMetrics.spaceS) { networkPill; bluetoothDot }
@@ -387,7 +387,7 @@ struct PopopxDualStatusCapsule: View {
             .accessibilityLabel(PopopxTelemetryCopy.bluetoothSpoken(bluetoothSpoken))
     }
 
-    /// 射频档位说人话。`unknown` 与 `resetting` 还不能下结论，所以不给危险色。
+    /// Plain wording for the radio tiers. `unknown` and `resetting` cannot support a conclusion yet, so they get no danger colour.
     static func words(for radio: PopopxBluetoothState) -> String {
         switch radio {
         case .poweredOn: PopopxTelemetryCopy.radioOn
@@ -400,27 +400,27 @@ struct PopopxDualStatusCapsule: View {
     }
 }
 
-// MARK: - 右：一次性链接
+// MARK: - Right: one-time link
 
-/// 一次性连接链接。
+/// One-time connection link.
 struct PopopxMintedInvite: Hashable {
     let uri: String
 }
 
-/// 生成一次性连接链接。
+/// Creates the one-time connection link.
 enum PopopxInviteLink {
-    /// 走 app 的真实接口 `apiAddContact(incognito:)` 建一条一次性连接，再套上本 app 的路由前缀。
+    /// Uses the app's real interface `apiAddContact(incognito:)` to create a one-time connection, then wraps it in this app's route prefix.
     ///
-    /// 刻意不调 `PopopxOfflineBridge.normalizedInviteLink`：它只校验与规范化，不生成链接。
-    /// - Returns: nil = 建连失败（`apiAddContact` 自己吞掉错误并返回 nil，不抛）。调用方必须给出可见反馈，不得伪造链接。
+    /// Deliberately does not call `PopopxOfflineBridge.normalizedInviteLink`: it only validates and normalises, it does not generate links.
+    /// - Returns: nil = the connection failed (`apiAddContact` swallows its own errors and returns nil instead of throwing). Callers must give visible feedback and must never fake a link.
     static func mintOneTime(incognito: Bool) async -> PopopxMintedInvite? {
         guard let (link, _) = await apiAddContact(incognito: incognito) else { return nil }
         return PopopxMintedInvite(uri: popopxChatLink(link.popopxChatUri(short: true)))
     }
 }
 
-/// 「+」菜单。五项全部实名：需要宿主上下文的四项由闭包注入，未接线时**禁用**，
-/// 不摆一个看起来能点的空按钮；第五项（一次性连接链接）自己就能干活，不挂闭包。
+/// The "+" menu. All five items are real: the four that need host context are injected as closures and are **disabled** while unwired,
+/// rather than an empty button that looks tappable; the fifth item (the one-time connection link) works on its own and carries no closure.
 struct PopopxPlusMenu: View {
     var onAddFriend: (() -> Void)? = nil
     var onStartGroupChat: (() -> Void)? = nil
@@ -488,15 +488,15 @@ struct PopopxPlusMenu: View {
     }
 }
 
-// MARK: - 品牌标记（恐慌清除第二入口）
+// MARK: - Brand mark (second entry point for panic wipe)
 
-/// 连点三次把点击转发进恐慌清除状态机；本身不做任何抹除。
+/// Three taps in a row forward the tap into the panic-wipe state machine; it performs no wipe itself.
 ///
-/// 命中三击只补一次 `.heavy` 强震动作为"已武装"的确认，真正的清除必须等用户在根部的确认弹窗里按下
-/// destructive 按钮（那条路径归 `PopopxPanicWipeGate`）。保险丝断开时不转发 —— 那时根部没挂确认框，
-/// 武装会变成一个没有出口的中间态。
+/// A completed triple only adds one `.heavy` haptic as the confirmation of "armed"; the real wipe must wait for the user to press the
+/// destructive button in the confirmation dialog at the root (that path belongs to `PopopxPanicWipeGate`). Nothing is forwarded while the fuse is off - the root has no confirmation dialog mounted then,
+/// so arming would become an intermediate state with no way out.
 struct PopopxPanicWipeTrigger: View {
-    /// 只在保险丝打开时才是入口。
+    /// It is an entry point only while the fuse is on.
     var isArmed: Bool = PopopxMeshRuntime.shared.isFuseOn
 
     var body: some View {
@@ -509,8 +509,8 @@ struct PopopxPanicWipeTrigger: View {
             Image(PopopxBrandAsset.mark)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                // 24 视觉 + 44 命中。上一版写的是 48 视觉套 44 命中：外层给 44，内层仍按 48 排版，
-                // 标记会左右各溢出 2pt 挤进行间距里，而这一行的行间距只有 4。
+                // 24 visual + 44 hit target. The previous version had 48 visual wrapping a 44 hit target: the outer layer gave 44 while the inner one still laid out at 48,
+                // so the mark overflowed 2pt on each side into the row gap, and this row's gap is only 4.
                 .frame(width: PopopxMetrics.spaceL, height: PopopxMetrics.spaceL)
                 .frame(width: PopopxMetrics.minHitTarget, height: PopopxMetrics.minHitTarget)
                 .contentShape(.rect)
@@ -521,42 +521,42 @@ struct PopopxPanicWipeTrigger: View {
     }
 }
 
-// MARK: - 三段式头部
+// MARK: - Three-section header
 
-/// 顶部三段式导航。放在宿主的 `NavigationStack` 里（或任何工具栏位置）使用。
+/// The three-section top navigation. Use it inside the host's `NavigationStack` (or in any toolbar position).
 ///
-/// 2026-11-20 真机第 2 轮：这一条就是消息页的**第一行**（原先占一行的「消息」标题与
-/// `.searchable` 抽屉一起撤掉，见 `ChatsListView.swift` 的 `chrome`），所以宽度按 iPhone 15 Pro 的
-/// 393pt 逐件算过一遍，口径是"取各件的最小档，最长的身份名按 3 个汉字算"：
-/// 内边距 16×2 = 32，标记 44，身份 104（`headerIdentityMaxWidth` 115 是上限不是占有），
-/// 徽章 48（`compact` 档 = 12+24+12，符号片自己 24），双模胶囊 76（两枚圆点档 32 + 内间距 12），
-/// 「+」44，六处行间距 4×6 = 24，两处 `Spacer(minLength: 4)` = 8 —— **合计 380，留 13pt 余量**。
-/// 真机第 5 轮把这三笔按最坏情况重算过：名字占满上限 115 时（上一版是 120）整行的最小和是
-/// 391，393 还剩 2pt —— 上一版这一档是 396，负 3pt，溢出的那 3pt 由整行平摊，正是"长昵称挤变形"
-/// 的那一步。圆点档从 32×48 的胶囊改成 32×32 的正圆（宽度占有不变，所以这笔预算不用重算）。
+/// 2026-11-20 real-device round 2: this row is the messages page's **first row** (the "Messages" title that used to take a whole row and
+/// the `.searchable` drawer were both withdrawn with it, see `chrome` in `ChatsListView.swift`), so the width was computed item by item against iPhone 15 Pro's
+/// 393pt, with the rule "take each item's minimum tier, and count the longest identity name as 3 Chinese characters":
+/// insets 16×2 = 32, mark 44, identity 104 (`headerIdentityMaxWidth` 115 is a cap, not a footprint),
+/// badge 48 (the `compact` tier = 12+24+12, the symbol chip itself 24), dual-mode capsules 76 (the two-dot tier 32 + inner gap 12),
+/// "+" 44, six row gaps 4×6 = 24, two `Spacer(minLength: 4)` = 8 - **380 in total, leaving 13pt of slack**.
+/// Real-device round 5 recomputed these three figures for the worst case: with the name filling its 115 cap (the previous version used 120) the row's minimum sum is
+/// 391, so 393 still has 2pt left - the previous version's figure for this tier was 396, negative 3pt, and those overflowing 3pt were spread over the whole row, which is exactly
+/// the step that deformed long nicknames. The dot tier changed from a 32×48 capsule into a 32×32 true circle (its width footprint is unchanged, so this budget needs no recompute).
 ///
-/// 三条推论，都是这一版刻意的设计而不是妥协：
-/// 1. 顶栏第一行**放不下任何一句状态文字**：带"在线"两个字要再 +65（445），徽章带文字要再 +96（476），
-///    393pt 都不够。所以状态一律走"符号 + 颜色 + 描边 + 光晕"四重线索，文字在点开的详情页里；
-///    宽屏（iPad／横屏）由 `ViewThatFits` 自动升回带字的档位，这条降级就是徽章那两档。
-/// 2. 唯一可压缩的是身份名（它有 `lineLimit(1)` + 尾部省略 + 不收紧字距），所以它的
-///    `.layoutPriority` 明写为 0，而标记、徽章、双模胶囊、「+」四枚一律给 2：让步的顺序由这里
-///    指定，不由宽度偶然决定。上一版把优先级给身份，在 375pt 上整行溢出、两端同时被推出
-///    安全区（`PopopxDualStatusCapsule` 的注释记着 T0 那次同样的翻法）。
-/// 3. 行内间距从 `spaceS`(12) 降到 `space2XS`(4)、页边距从 `spaceL`(24) 收到 `gutter`(16)、
-///    两处 `Spacer` 的下限同步降到 4：这三笔一共腾出 76pt，正好抵掉新加的品牌标记那 52pt
-///    （同一口径算上一版无标记的那一行是 404：393 从来就不够，缺口当时被身份名的截断吃掉了，看不出来）。
-///    16 还恰好和下面筛选条的 `gutter` 对齐，第一行不再比列表内容缩进 8pt。
+/// Three corollaries, all deliberate design in this version rather than compromises:
+/// 1. The top bar's first row **cannot fit any status wording at all**: carrying the word "Online" would need another +65 (445), a labelled badge another +96 (476),
+///    and 393pt is not enough for either. So status always travels on the four cues "symbol + colour + stroke + glow", and the words live on the detail page it opens;
+///    on wide screens (iPad / landscape) `ViewThatFits` automatically steps back up to the labelled tiers, and this downgrade is exactly the badge's two tiers.
+/// 2. The only compressible item is the identity name (it has `lineLimit(1)` + trailing truncation + no letter-spacing tightening), so its
+///    `.layoutPriority` is explicitly written as 0, while the mark, the badge, the dual-mode capsules and the "+" all get 2: the order of yielding is
+///    declared here rather than decided by accident of width. The previous version gave the priority to the identity, and at 375pt the whole row overflowed with
+///    both ends pushed out of the safe area at once (`PopopxDualStatusCapsule`'s comment records the same kind of blow-up at T0).
+/// 3. Row gaps drop from `spaceS`(12) to `space2XS`(4), page margins tighten from `spaceL`(24) to `gutter`(16),
+///    and the floor of the two `Spacer`s comes down to 4 as well: these three together free 76pt, exactly paying for the 52pt of the newly added brand mark
+///    (by the same measure the previous version's row without the mark was 404: 393 was never enough, and the gap was swallowed by the identity name's truncation, so it stayed invisible).
+///    16 also happens to line up with the filter bar's `gutter` below, so the first row no longer sits 8pt inside the list content.
 struct PopopxTelemetryHeader: View {
     @Binding var currentUserId: Int64?
     var identities: [User] = []
-    /// 给了 `telemetry` 就完全由它驱动；`network`／`radio` 是脱离运行时单测与预览用的显式入口。
+    /// When `telemetry` is supplied it drives everything; `network`/`radio` are the explicit entry points for unit tests and previews without the runtime.
     var telemetry: PopopxTelemetryModel? = nil
     var network: PopopxHeaderSignal = .unknown
     var radio: PopopxBluetoothState = .unknown
-    /// 顶栏徽章那张 sheet 的载体绑定，一律由宿主页递进来（消息页传自己的 `$badgeSheet`）。
-    /// 这里不放 `@State`：宿主已经挂了 `.popopxBadgeSheets`，顶栏再挂一份就是同一条链上两张 sheet，
-    /// 抬着体验弹窗时再写 `.detail` 会被系统丢掉 —— 真机第 9 轮「点『看徽章详情』没反应」的根因。
+    /// The presentation binding for the top-bar badge sheet always comes in from the host page (the messages page passes its own `$badgeSheet`).
+    /// No `@State` here: the host already mounts `.popopxBadgeSheets`, and mounting another copy on the top bar would be two sheets on the same chain,
+    /// so writing `.detail` while the trial dialog is up gets dropped by the system - the root cause of real-device round 9's "tapping 'Badge details' did nothing".
     @Binding var badgeSheet: PopopxBadgeSheet?
     var onAddFriend: (() -> Void)? = nil
     var onStartGroupChat: (() -> Void)? = nil
@@ -565,28 +565,28 @@ struct PopopxTelemetryHeader: View {
 
     var body: some View {
         HStack(spacing: PopopxMetrics.space2XS) {
-            // 紫色品牌标记 = 恐慌清除的第二入口。三击判定与确认弹窗都在状态机那一侧，
-            // 保险丝断开时它只是个图案（`PopopxPanicWipeTrigger.isArmed` 的判据）。
+            // The purple brand mark = the second entry point into the panic wipe. The triple-tap detection and the confirmation dialog both live on the state machine side,
+            // and while the fuse is off it is just a graphic (the condition behind `PopopxPanicWipeTrigger.isArmed`).
             PopopxPanicWipeTrigger()
                 .layoutPriority(2)
                 .accessibilityIdentifier("popopx.header.mark")
-            // 优先级 0 = 明写"这一枚就是该行该让步的那一个"：身份名自己会截断（`lineLimit(1)` +
-            // 尾部省略 + 不收紧字距），所以它先缩；上一版把优先级给它，在 375pt 上整行溢出、
-            // 两端被推出安全区，见上面第 2 条推论。
+            // Priority 0 = an explicit "this is the item in the row that must yield": the identity name truncates itself (`lineLimit(1)` +
+            // trailing ellipsis + no letter-spacing tightening), so it shrinks first; the previous version gave it the priority, and at 375pt the whole row overflowed with
+            // both ends pushed out of the safe area, see corollary 2 above.
             PopopxIdentitySwitcher(userId: $currentUserId, identities: identities)
                 .frame(maxWidth: PopopxMetrics.headerIdentityMaxWidth, alignment: .leading)
                 .layoutPriority(0)
                 .accessibilityIdentifier("popopx.header.identity")
             Spacer(minLength: PopopxMetrics.space2XS)
-            // 中簇整体不 fixedSize：把剩余宽度真的报给两枚胶囊，它们的档位才有得选。
-            // 徽章两档：带字那档要 144（短到"体验 3d 4h"也是），393pt 装不下，于是 iPhone 上恒定
-            // 退到只留符号的 48；iPad／横屏自动升回带字档。状态语义由实心色片 + 描边 + 光晕承载，
-            // 见 `PopopxBadgeCapsuleView.swift` 文件头。
-            // 档位选在这里（`ViewThatFits` 在两档之间选），sheet 载体不选在这里：`sheet` 往上递给
-            // 宿主页那唯一一份 `.popopxBadgeSheets`，顶栏自己不再挂第二张 sheet。
-            // 上一版两处都错过：把自带 `.sheet` 的包装件摆成两档候选 ⇒ 两档各一份呈现层；
-            // 只留一份又和宿主页并存 ⇒ 同一条链两张 sheet，体验弹窗里点「看徽章详情」被静默丢掉。
-            // 真机第 9 轮「点『看徽章详情』没反应」就是这后一条。
+            // The middle cluster as a whole is not fixedSize: only when the remaining width really reaches both capsules do their tiers have something to choose between.
+            // The badge's two tiers: the labelled one needs 144 (even shortened to "trial 3d 4h"), which 393pt cannot hold, so on iPhone it always
+            // falls back to the symbol-only 48; iPad / landscape steps back up to the labelled tier automatically. The status meaning is carried by the solid colour chip + stroke + glow,
+            // see the `PopopxBadgeCapsuleView.swift` file header.
+            // The tier is chosen here (`ViewThatFits` picks between the two tiers), the sheet presentation is not: `sheet` is passed up to
+            // the host page's single `.popopxBadgeSheets`, and the top bar no longer mounts a second sheet of its own.
+            // The previous version got both places wrong: a wrapper carrying its own `.sheet` was staged as two candidates, so each tier had its own presentation layer;
+            // and keeping only one still coexisted with the host page's, so two sheets sat on the same chain and tapping "Badge details" inside the trial dialog was silently dropped.
+            // Real-device round 9's "tapping 'Badge details' did nothing" was exactly this second case.
             PopopxBadgeHeaderEntry(sheet: $badgeSheet)
                 .layoutPriority(2)
                 .accessibilityIdentifier("popopx.header.badge")
@@ -598,9 +598,9 @@ struct PopopxTelemetryHeader: View {
                 .layoutPriority(2)
                 .accessibilityIdentifier("popopx.header.plus")
         }
-        // 16 而不是 24：与下面筛选条的 `gutter` 对齐，同时把 8pt 还给状态那一簇。
+        // 16 rather than 24: lines up with the filter bar's `gutter` below and hands 8pt back to the status cluster.
         .padding(.horizontal, PopopxMetrics.gutter)
-        // 两枚胶囊自己要 48：原来按 44 夹，画出来只剩 34，点按热区跟着缩水。
+        // The two capsules want 48 themselves: clamping them at 44 left only 34 on screen, and the tap targets shrank with it.
         .frame(height: PopopxMetrics.space2XL)
         .background(PopopxMaterial.bar)
         .accessibilityElement(children: .contain)
@@ -614,16 +614,16 @@ struct PopopxTelemetryHeader: View {
     }
 }
 
-// MARK: - 文案
+// MARK: - Copy
 
-/// 顶栏的全部措辞。源文是英文原句，英文原句就是 Key（写法同 `PopopxCabinView.swift` 的 `key(_:)`）：
-/// `en.lproj` 按约定不写，读不到词条就回落 Key 本身，那正好是英文；16 个译本目录各写各的译法。
+/// All of the top bar's wording. The source text is the English sentence, and the English sentence is the Key (same convention as `key(_:)` in `PopopxCabinView.swift`):
+/// `en.lproj` is not written by convention, a missing entry falls back to the Key itself, which is exactly English; the 16 translation directories each carry their own translation.
 ///
-/// 2026-11-20 真机第 2 轮对"中文残留"的裁定是**只翻顶栏这一处**，所以本文件与
-/// `PopopxBadgeCapsuleView.swift` 里顶栏会用到的短句走词条，BadgeCredits 其余模块的中文 Copy 保持原样。
+/// The 2026-11-20 real-device round 2 ruling on leftover Chinese was to **translate only this top bar**, so this file and
+/// the short phrases used by the top bar in `PopopxBadgeCapsuleView.swift` go through entries, while the Chinese copy in the rest of the BadgeCredits modules stays as it is.
 ///
-/// 带数字的句子一律只给一个占位符（`%@` 或 `%d`）；确实需要两个的写成 `%1$d … %2$d`。
-/// 16 种语序不同，靠出现顺序排参数会在某一语种里把"3 天 2 小时"念成"2 小时 3 天"。
+/// Sentences carrying numbers get exactly one placeholder (`%@` or `%d`); where two really are needed they are written as `%1$d ... %2$d`.
+/// 16 languages order things differently, so laying out arguments by order of appearance would read "3 days 2 hours" as "2 hours 3 days" in some language.
 enum PopopxTelemetryCopy {
     private static func key(_ value: String) -> String {
         NSLocalizedString(value, comment: "POPOPX telemetry header")
@@ -661,8 +661,8 @@ enum PopopxTelemetryCopy {
 
     static let addFriends = key("Add friends")
     static let startGroup = key("Start a group chat or an encrypted channel")
-    /// 复用既有词条：`"Create public channel"` 就是 `AddChannelView` 那一行按钮与旧菜单标题的同一句
-    /// （`zh-Hans` 里已译作「创建公开频道」），本页只是把它从旧菜单搬到「+」里。
+    /// Reuses an existing entry: `"Create public channel"` is the same sentence as the `AddChannelView` row button and the old menu title
+    /// (already translated as "Create public channel" in `zh-Hans`); this page only moves it from the old menu into the "+".
     static let createChannel = key("Create public channel")
     static let scan = key("Scan")
     static let minting = key("Generating…")
@@ -671,8 +671,8 @@ enum PopopxTelemetryCopy {
     static let moreActions = key("More actions")
     static let mintFailedTitle = key("The link could not be created")
     static let mintFailedBody = key("Not connected: check the network or try again later.")
-    /// 复用既有词条：`"OK"` 在 17 个目录里都已经有译法，不再新造一句
-    /// （口径同 `PopopxCabinView.swift` 里直接 `NSLocalizedString("Cancel", …)` 的复用行）。
+    /// Reuses an existing entry: `"OK"` already has a translation in all 17 directories, so no new sentence is invented
+    /// (same rule as the reuse lines in `PopopxCabinView.swift` that call `NSLocalizedString("Cancel", ...)` directly).
     static let dismiss = NSLocalizedString("OK", comment: "Telemetry: dismissing the failed invite link")
 }
 

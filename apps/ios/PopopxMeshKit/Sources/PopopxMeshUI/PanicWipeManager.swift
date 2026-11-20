@@ -2,7 +2,7 @@
 //  PanicWipeManager.swift
 //  PopopxMeshUI
 //
-//  红线 27/28 的应急清除: three taps, one confirmation, then everything this feature ever wrote is
+//  Emergency wipe for red lines 27/28: three taps, one confirmation, then everything this feature ever wrote is
 //  gone and the process dies so no key can survive in memory.
 //
 //  The order is the security property, and it is not negotiable:
@@ -15,7 +15,7 @@
 //      6. terminate                 — the process ends, so nothing re-derives state afterwards
 //
 //  Step 5 exists as an option and not as a default. The app's real SQLCipher database belongs to the
-//  chat, and the 红线 forbids any part of this feature from touching it unless a caller deliberately
+//  chat, and the red line forbids any part of this feature from touching it unless a caller deliberately
 //  asks for it; even then this package cannot know the path, so the host must hand one over. A
 //  request for step 5 without a URL is reported as a refusal, never as a success.
 //
@@ -95,7 +95,7 @@ public struct PopopxPanicWipeJournal: Hashable, Sendable {
     public var steps: [PopopxPanicWipeStep] = []
     public var erasedFiles: [String] = []
     public var failures: [PopopxPanicWipeFailure] = []
-    /// Whether the app's own database file was opened for writing. `false` is the 红线-mandated
+    /// Whether the app's own database file was opened for writing. `false` is the red-line-mandated
     /// default, and the tests hold the manager to it.
     public var didTouchApplicationDatabase = false
 
@@ -182,11 +182,11 @@ public struct PopopxPanicWipeSilentRecorder: PopopxPanicWipeRecording {
     public func panicWipeDidFail(_ failure: PopopxPanicWipeFailure, at step: PopopxPanicWipeStep) {}
 }
 
-// MARK: - Contracts with 模块 1 and 模块 2
+// // MARK: - Contracts with module 1 and module 2
 
 /// How the panic route destroys the mesh's own key material. `PopopxMeshEngine.destroyIdentity()`
 /// already regenerates the static key, drops every peer table and removes the Keychain item, and
-/// `destroyGroupState()` takes 模块 8's half with it — every group key, the roster file and the
+/// `destroyGroupState()` takes module 8's half with it — every group key, the roster file and the
 /// Ed25519 signing key — the conformance below is the whole binding, and no core file is edited.
 public protocol PopopxMeshKeyBurning: Sendable {
     func burnMeshKeys() async
@@ -466,7 +466,7 @@ public final class PopopxPanicWipeManager: ObservableObject {
     ///   - inMemoryMirrors: the UI-side state sources whose published content *is* mesh traffic. They
     ///     are cleared with the keys, not with the radio, because a banner that still shows a peer
     ///     after a wipe is a leak the user can see.
-    ///   - meshDirectory: 模块 1's sandbox, `Documents/popopx_mesh/`. Injectable so tests write to a
+    ///   - meshDirectory: module 1's sandbox, `Documents/popopx_mesh/`. Injectable so tests write to a
     ///     temporary directory instead of a real container.
     ///   - applicationDatabaseURL: the app's SQLCipher file, if the host is willing to let it be
     ///     erased at all. Held here rather than passed per call, so "the caller knew the path" is a
@@ -523,7 +523,7 @@ public final class PopopxPanicWipeManager: ObservableObject {
     /// wipe that stopped halfway would report success for the part it did.
     ///
     /// The report is built AFTER step 6 has been asked for. `terminate` is one of the promised steps
-    /// (铁律: 停止蓝牙 → 清内存 → 抹 Keychain → 覆写沙盒 → 退出), so a report that left it out would
+    /// (iron rule: stop Bluetooth → clear memory → wipe Keychain → overwrite sandbox → exit), so a report that left it out would
     /// describe a wipe that never ended — and a host that supplied no termination has to be told, in
     /// that same report, that its keys are still resident in a live process.
     @discardableResult
@@ -693,7 +693,7 @@ public final class PopopxPanicWipeManager: ObservableObject {
 /// The hidden three-tap target, and the confirmation it raises.
 ///
 /// It is a sibling overlay, never a rewrite: `content` is passed through untouched, so mounting the
-/// panic route on the chat view costs that view nothing (红线「UI 零破坏挂载」, POPOPX_MESH_PROMPT.md 一.5). The hit target is a 44 pt square in
+/// panic route on the chat view costs that view nothing (red line "zero-disruption UI mounting", POPOPX_MESH_PROMPT.md 1.5). The hit target is a 44 pt square in
 /// a corner, deliberately not the whole screen — an overlay that swallowed taps over a chat list would
 /// be a bug the user feels before the wipe ever happens.
 @MainActor

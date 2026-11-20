@@ -2,18 +2,18 @@
 //  PopopxAddFriendView.swift
 //  POPOPX (iOS)
 //
-//  第三阶段 2. — 类微信「添加朋友」页面。顶部一个会实时判类的链接输入框，下面并排两个快捷
-//  按钮（粘贴加友 / 面对面加友）、我的加密名片条，再下面是厢语广场、扫一扫、分享邀请链接三行。
+//  Phase 3 item 2. — a WeChat-style 'Add friends' page. At the top a link input field that classifies in real time, below it two shortcut
+//  buttons (paste to add / face-to-face add), my encrypted card bar, and below that three rows: Cabin plaza, Scan, Share invite link.
 //
-//  路由只有一条规矩：`popopx:/`（含手打的 `popopx://` 与分享形式 `https://popopx.chat/`）走
-//  `PopopxMeshRuntime.shared.bridge` 的离线门 —— 模块 2 的 `normalizedInviteLink` 是唯一的前缀
-//  闸口，命令行安全字符检查在它里面，所以贴进来的字符串永远不会不打招呼就进到 `/_connect`；
-//  `simplex:/` 一类在线/遗留链接交回 app 原有的 `planAndConnect`。链接本身永不伪造：名片二维码
-//  与分享都用 `PopopxInviteLink.mintOneTime` 现生成的真链接，拿到 nil 就报失败。
+//  Routing has exactly one rule: `popopx:/` (including the hand-typed `popopx://` and the share form `https://popopx.chat/`) goes
+//  through the offline gate of `PopopxMeshRuntime.shared.bridge` — module 2's `normalizedInviteLink` is the only prefix
+//  gate, the command-line safe-character check lives inside it, so a pasted string can never enter `/_connect` without being greeted;
+//  `simplex:/` and other online/legacy links are handed back to the app's existing `planAndConnect`. The link itself is never fabricated: the card QR code
+//  and the share both use a real link freshly minted by `PopopxInviteLink.mintOneTime`; getting nil reports failure.
 //
-//  守的红线：不碰 project.pbxproj（本文件由人手工拖进 target）；颜色/间距/字体/材质/弹簧只取
-//  PopopxTheme 的 token；控件只用 Shared/Components 里已有的原子库，不新造第二个按钮或输入框；
-//  面对面入口在 iOS 17 之下给出真实降级页而不是一句"稍后再试"。
+//  Red lines kept: do not touch project.pbxproj (this file is dragged into the target by hand); colours/spacing/fonts/materials/springs take only
+//  tokens from PopopxTheme; controls use only the atom library already in Shared/Components, never a second button or text field;
+//  the face-to-face entry gives a real degraded page below iOS 17 instead of a 'try again later'.
 //
 
 import SwiftUI
@@ -26,16 +26,16 @@ import PopopxMeshUI
 
 // MARK: - Link classification
 
-/// 输入框、剪贴板、扫一扫三个入口共用同一份判类结果 —— 三处的路由因此不可能各说各话。
+/// The input field, the clipboard and Scan all share one classification result — the routing in the three places therefore cannot tell a different story.
 private enum PopopxAddFriendLink: Hashable {
-    /// 离线门收的形式。`normalizedInviteLink` 顺手把 `popopx://` 与分享形式规范化成 `popopx:/`。
+    /// The form the offline gate accepts. `normalizedInviteLink` also normalises `popopx://` and the share form into `popopx:/`.
     case offline
-    /// 核心认识的旧 scheme，交回 `planAndConnect` 的在线路径。
+    /// Old schemes the core recognises, handed back to `planAndConnect`'s online path.
     case online
-    /// 其余一切：不添加。
+    /// Everything else: do not add.
     case unknown
 
-    /// 在线/遗留链接的前缀。这是协议字符串判断，不是界面文案 —— 界面上永远不出现这两个词。
+    /// Prefixes of online/legacy links. This is a protocol-string check, not UI copy — the UI never shows these two words.
     private static let onlinePrefixes = [
         "simplex:/",
         "simplex://",
@@ -53,7 +53,7 @@ private enum PopopxAddFriendLink: Hashable {
 
     var canAdd: Bool { self != .unknown }
 
-    /// 去掉首尾空白后的链接本体；发往门里和在线路径的都是这一个值。
+    /// The link body with leading and trailing whitespace removed; the same single value is sent into the gate and to the online path.
     static func normalized(_ raw: String) -> String {
         raw.trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -66,12 +66,12 @@ struct PopopxAddFriendView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.isPresented) private var isPresented
 
-    /// 熔断开关的真值要在厢语那一行说出来，所以观察 runtime 而不是在按下时读一次。
+    /// The true value of the kill switch has to be spoken on the Cabin row, so the runtime is observed instead of read once when pressing.
     @ObservedObject private var meshRuntime: PopopxMeshRuntime
 
     @State private var toast = PopopxToastModel()
     @State private var linkText = ""
-    /// nil = 剪贴板里没有能判成链接的内容；非 nil 已是去掉空白的规范化字符串。
+    /// nil = nothing on the clipboard that can be classified as a link; non-nil is already a whitespace-trimmed normalised string.
     @State private var clipboardLink: String?
     @State private var showsScanner = false
     @State private var showsFaceToFace = false
@@ -116,8 +116,8 @@ struct PopopxAddFriendView: View {
             .navigationDestination(for: PopopxAddFriendRoute.self) { route in
                 switch route {
                 case .meshPlaza:
-                    // 挂载方式照抄 SettingsView 那一行：三个对象全部来自 runtime，页面自己在熔断
-                    // 关闭时渲染"已关闭"状态，所以这一行永远可以点。
+                    // The mounting copies that line in SettingsView: all three objects come from the runtime, and the page itself, when the fuse
+                    // is closed, renders the 'closed' state, so this row is always tappable.
                     MeshPlazaView(
                         outbound: meshRuntime.engineBackend,
                         source: meshRuntime.stateSource,
@@ -164,7 +164,7 @@ struct PopopxAddFriendView: View {
             }
         }
         .onAppear { refreshClipboard() }
-        // 用户很可能在别的 app 里复制完再切回来，只有回前台那一刻的剪贴板才算数。
+        // The user most likely copies in another app and then switches back, so only the clipboard at the moment of returning to the foreground counts.
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             refreshClipboard()
         }
@@ -173,7 +173,7 @@ struct PopopxAddFriendView: View {
         }
     }
 
-    /// 名片条与二维码卡片共用的身份名：空昵称不猜，直接落到「未命名身份」。
+    /// The identity name shared by the card bar and the QR card: an empty nickname is not guessed, it falls straight back to 'Unnamed identity'.
     private var identityName: String {
         let name = PopopxAddFriendLink.normalized(chatModel.currentUser?.displayName ?? "")
         return name.isEmpty ? Copy.unnamedIdentity : name
@@ -181,7 +181,7 @@ struct PopopxAddFriendView: View {
 
     // MARK: Routing
 
-    /// 唯一的加友入口：输入框、粘贴、扫一扫三条路都汇到这里。
+    /// The single add-friend entry: the input field, paste and Scan paths all converge here.
     @MainActor private func submit(_ raw: String) async {
         let link = PopopxAddFriendLink.normalized(raw)
         switch PopopxAddFriendLink.classify(link) {
@@ -203,17 +203,17 @@ struct PopopxAddFriendView: View {
             PopopxHaptics.notice(.success)
             switch acceptance.kind {
             case .confirmation:
-                // 我们吃下的是对方的邀请：这一侧现在等对方通过。
+                // What we consumed is the other side's invite: this side now waits for them to accept.
                 toast.show(Copy.offlineConfirmationToast, kind: .mesh)
             case .invitation:
-                // 我们带着邀请走到对方的联系人地址上：连接由对方那边确认。
+                // We take an invite to the other side's contact address: the connection is confirmed on their end.
                 toast.show(Copy.offlineInvitationToast, kind: .mesh)
             }
         } catch let bridgeError {
-            // `acceptOfflineInviteLink` 是类型化抛出（`throws(PopopxOfflineBridgeError)`），
-            // 这里拿到的就是它本身，不再下转。
+            // `acceptOfflineInviteLink` is a typed throw (`throws(PopopxOfflineBridgeError)`),
+            // so what we get here is that error itself, with no further downcast.
             if case .inviteLinkRejected = bridgeError {
-                // 门里拒绝的一律不是我们铸的链接，交回在线路径而不是就地报错。
+                // What the gate rejects is never a link we minted, so it goes back to the online path instead of erroring in place.
                 planAndConnect(link, theme: AppTheme.shared, dismiss: false)
                 toast.show(Copy.onlineHandoffToast, kind: .encrypted)
             } else {
@@ -225,7 +225,7 @@ struct PopopxAddFriendView: View {
     }
 
     @MainActor private func pasteAndConnect() async {
-        // 按下这一刻再读一次：剪贴板可能在亮起点之后就被改掉了。
+        // Read once more at the moment of the press: the clipboard may have changed after the button lit up.
         refreshClipboard()
         guard let link = clipboardLink else {
             PopopxHaptics.notice(.warning)
@@ -247,7 +247,7 @@ struct PopopxAddFriendView: View {
 
     // MARK: Minting
 
-    /// 现用现铸：一次性链接被复用就没有意义，所以名片和分享各自 mint 一次，拿不到就是失败。
+    /// Mint on use: a one-time link reused is meaningless, so the card and the share each mint once; not getting one is a failure.
     @MainActor private func mintInvite() async -> PopopxMintedInvite? {
         guard !mintingInvite else { return nil }
         mintingInvite = true
@@ -327,7 +327,7 @@ private struct PopopxLinkSearchBlock: View {
         }
     }
 
-    /// 判类结果同时是"能不能添加"的说明，所以三档各有各的颜色，不给灰色兜底。
+    /// The classification result doubles as the 'can this be added' explanation, so the three levels each have their own colour, with no grey fallback.
     @ViewBuilder private var verdict: some View {
         switch link {
         case .offline:
@@ -387,8 +387,8 @@ private struct PopopxQuickActionsBlock: View {
     }
 }
 
-/// 青绿呼吸光点：剪贴板里确实有一条能加的链接时才亮。Reduce Motion 下画静止点 ——
-/// 一个不会动的点仍然是点，一次不会停的呼吸才是问题。
+/// Teal breathing dot: it lights only when the clipboard really holds an addable link. Under Reduce Motion a still dot is drawn —
+/// a dot that never moves is still a dot; a breath that never stops is the problem.
 private struct PopopxBreathingDot: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -450,7 +450,7 @@ private struct PopopxNameCardBar: View {
         }
     }
 
-    /// 两个圆钮左右对称，中间的身份名因此是真的居中而不是被推到一边。
+    /// The two round buttons are mirror-symmetric, so the identity name in the middle is truly centred rather than pushed to one side.
     private func circleButton(
         systemImage: String,
         tint: PopopxIconTint,
@@ -491,7 +491,7 @@ private struct PopopxFeatureRows: View {
 
     var body: some View {
         PopopxSectionCard(Copy.moreTitle) {
-            // 熔断关掉只改变这一行说了什么，不改变它能不能点开：广场页自己会渲染关闭状态。
+            // Turning the fuse off only changes what this row says, not whether it opens: the plaza page renders the closed state itself.
             PopopxPickerRow(
                 Copy.plazaRow,
                 value: fuseOn ? nil : Copy.fuseOffValue,
@@ -522,7 +522,7 @@ private struct PopopxScannerSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var cameraStatus: AVAuthorizationStatus?
-    /// 换一次 id 就是重建 `CodeScannerView`：会话已经结束的失败（badInput 等）只能这样重试。
+    /// Changing the id once rebuilds `CodeScannerView`: failures where the session has already ended (badInput etc.) can only be retried this way.
     @State private var scanAttempt = 0
     @State private var failureNote: String?
 
@@ -553,7 +553,7 @@ private struct PopopxScannerSheet: View {
                 .clipShape(.rect(cornerRadius: PopopxMetrics.radiusCard))
                 .id(scanAttempt)
         case .notDetermined:
-            // `.task` 已经把系统授权弹窗发出去了，这一格就是弹窗后面的那几帧。
+            // `.task` has already presented the system permission sheet, so this cell is the few frames behind that sheet.
             placeholder(systemImage: "camera", text: Copy.cameraStarting)
         case .denied:
             placeholder(
@@ -565,7 +565,7 @@ private struct PopopxScannerSheet: View {
         case .restricted:
             placeholder(systemImage: "nosign", text: Copy.cameraRestricted)
         default:
-            // 还没读到状态（nil）与系统将来新增的状态都落在这里，而不是留一个空格子。
+            // A status not read yet (nil) and any status the system adds in the future both land here, instead of leaving an empty cell.
             placeholder(systemImage: "questionmark", text: Copy.cameraUnknown)
         }
     }
@@ -603,10 +603,10 @@ private struct PopopxScannerSheet: View {
             failureNote = String(format: Copy.scanFailedFormat, error.localizedDescription)
             switch error {
             case .permissionDenied:
-                // 用户在相机会话里拒了权限：交回上面的 switch 说"去系统设置"，重试没有意义。
+                // The user denied permission inside the camera session: handed back to the switch above, which says 'go to system settings'; retrying is pointless.
                 cameraStatus = AVCaptureDevice.authorizationStatus(for: .video)
             default:
-                // badInput / badOutput / initError 都是会话本身没起来，重建一次比报错有用。
+                // badInput / badOutput / initError all mean the session itself never started; rebuilding it once is more useful than an error.
                 scanAttempt += 1
             }
         }
@@ -648,8 +648,8 @@ private struct PopopxScannerPlaceholder: View {
 
 // MARK: - Face to face, below iOS 17
 
-/// 面对面加友的双引擎（`PopopxProximityAddContactView`）要 iOS 17 的 NearbyInteraction。降级页
-/// 给的是能走通的另一条路，不是一句"不支持"。
+/// The face-to-face add's two engines (`PopopxProximityAddContactView`) need iOS 17's NearbyInteraction. The degraded page
+/// offers another road that works, not a 'not supported'.
 private struct PopopxFaceToFaceUnsupportedSheet: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -660,7 +660,7 @@ private struct PopopxFaceToFaceUnsupportedSheet: View {
                 .foregroundStyle(PopopxPalette.labelSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         } footer: {
-            // 关掉这一张，扫一扫那一行就在页面下面，不用替用户抢一次展示机会。
+            // Dismiss this one and the Scan row sits right below on the page; no need to grab a presentation slot on the user's behalf.
             PopopxButton(Copy.gotIt, role: .secondary) { dismiss() }
                 .padding(PopopxMetrics.spaceM)
         }
@@ -669,7 +669,7 @@ private struct PopopxFaceToFaceUnsupportedSheet: View {
 
 // MARK: - Identity picker
 
-/// 复用已有的 `UserPicker`：切身份的 `changeActiveUserAsync_` 只活在那一处，这里不重写第二份。
+/// Reuses the existing `UserPicker`: `changeActiveUserAsync_`, which switches identity, lives only in that one place; no second copy is rewritten here.
 private struct PopopxIdentityPickerSheet: View {
     @Binding var showsPicker: Bool
 
@@ -685,7 +685,7 @@ private struct PopopxIdentityPickerSheet: View {
 
 // MARK: - Copy
 
-/// 页面上每一句中文只在这里出现一次。
+/// Every Chinese sentence on the page appears exactly once, here.
 private enum Copy {
     static let pageTitle = NSLocalizedString("Add Friend", comment: "")
     static let pageExplainer = NSLocalizedString("An invitation link is a one-time encrypted address: whoever opens it can start a connection with you. Links starting with popopx: reach the other side over the Bluetooth mesh relay when there is no internet.", comment: "")
@@ -715,9 +715,9 @@ private enum Copy {
 
     static let moreTitle = NSLocalizedString("More ways", comment: "")
     static let plazaRow = NSLocalizedString("Find nearby groups and channels over the Bluetooth mesh", comment: "")
-    /// 广场页的标题。本文件其余句子仍是中文直写（整页转 Key 另立一轮），这一句先收口：
-    /// 厢语左上角现在推的是同一个页面（`PopopxCabinView.swift` 的 `.plaza`），两处共用
-    /// Key `Nearby mesh plaza`，16 个译本目录里各有一句，非中文系统下不再漏出中文标题。
+    /// The plaza page's title. The rest of the sentences in this file are still written directly in Chinese (turning the whole page into keys is a separate round); this one is closed off first:
+    /// The Cabin's top-left corner now pushes the same page (`PopopxCabinView.swift`'s `.plaza`); both places share
+    /// key `Nearby mesh plaza`, with one sentence in each of the 16 translation directories, so a non-Chinese system no longer leaks a Chinese title.
     static let plazaNavigationTitle = NSLocalizedString("Nearby mesh plaza", comment: "POPOPX nearby mesh plaza")
     static let fuseOffValue = NSLocalizedString("Closed by the fuse", comment: "")
     static let scanRow = NSLocalizedString("Scan QR code", comment: "")

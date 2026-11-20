@@ -2,19 +2,19 @@
 //  PopopxGroupChatInfoView.swift
 //  POPOPX (iOS)
 //
-//  【重设计】群聊信息页。顶部一张群卡（共享头像、群名、全称、成员数），下面分组的卡片：
-//  群资料 / 消息 / 成员 / 危险操作。输入接口与旧的 `Shared/Views/Chat/Group/GroupChatInfoView.swift`
-//  完全一致（同样的属性、同样的参数标签与顺序），所以之后只需在 ChatView.swift 里把类型名改一个词即可挂载。
+//  [Redesign] The group chat info page. One group card at the top (shared avatar, group name, full name, member count), then grouped cards below:
+//  Group profile / Messages / Members / Dangerous actions. The input interface matches the old `Shared/Views/Chat/Group/GroupChatInfoView.swift`
+//  exactly (same properties, same argument labels and order), so mounting it later only needs one word changed in ChatView.swift — the type name.
 //
-//  三条设计决定：
-//  1. 只保留"群"这条路径的真实动作。旧页里属于频道/relay（useRelays）、成员支持、举报、
-//     businessChat 的分支一律不带过来（清单见交付报告，都标了旧行号）。
-//  2. 每一行推的都是真实存在、逐个核对过 init 的页面；破坏性动作都有真实确认步骤，
-//     没有占位按钮、没有用注释代替代码。
-//  3. 配色、字号、圆角、间距只取 Shared/Theme/PopopxTheme.swift 的 token；控件只用
-//     Shared/Components 里已有的原子库。文案是硬编码简体中文，集中在文件末尾的 `Copy`。
+//  Three design decisions:
+//  1. Only the real actions belonging to the "group" path are kept. In the old page the branches belonging to channel/relay (useRelays), member support, reporting,
+//     businessChat are not carried over at all (the list is in the delivery report, all with the old line numbers).
+//  2. Every row pushes a page that really exists, whose init was checked one by one; destructive actions all have a real confirmation step,
+//     no placeholder buttons, and no comments standing in for code.
+//  3. Colour, font size, corner radius and spacing only come from the tokens in Shared/Theme/PopopxTheme.swift; controls only use
+//     the atom library already in Shared/Components. The copy is hard-coded Simplified Chinese, collected in the `Copy` at the end of the file.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖进 POPOPX (iOS) target —— 铁律禁止脚本改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand — the iron rule forbids scripts from modifying project.pbxproj.
 //
 
 import SwiftUI
@@ -33,7 +33,7 @@ struct PopopxGroupChatInfoView: View {
     var onSearch: () -> Void
     @State private var localAlias: String
 
-    /// 群链接；nil = 尚未创建。onAppear 经 `apiGetGroupLink` 读真实状态。
+    /// Group link; nil = not created yet. onAppear reads the real state via `apiGetGroupLink`.
     @State private var groupLink: GroupLink?
     @State private var groupLinkMemberRole: GroupMemberRole = .member
     @State private var groupPreferences: FullGroupPreferences
@@ -45,7 +45,7 @@ struct PopopxGroupChatInfoView: View {
     @State private var removeTarget: GroupMember?
     @State private var toast = PopopxToastModel()
 
-    /// 与旧页同一口径：活跃成员超过这个数就不再发已读回执。
+    /// The same rule as the old page: once active members exceed this number, read receipts are no longer sent.
     private static let receiptsMemberLimit = 20
 
     init(
@@ -65,9 +65,9 @@ struct PopopxGroupChatInfoView: View {
         _groupPreferences = State(initialValue: groupInfo.wrappedValue.fullGroupPreferences)
     }
 
-    // MARK: 成员
+    // MARK: Members
 
-    /// 活跃成员（未离开、未被移出），按角色从高到低。口径同旧页 :74-76。
+    /// Active members (not left, not removed), ordered by role from highest to lowest. Same criterion as the old page :74-76.
     private var members: [GMember] {
         chatModel.groupMembers
             .filter { let s = $0.wrapped.memberStatus; return s != .memLeft && s != .memRemoved }
@@ -131,7 +131,7 @@ struct PopopxGroupChatInfoView: View {
         .popopxToast(toast)
     }
 
-    // MARK: 顶部群卡
+    // MARK: Top group card
 
     private var headerCard: some View {
         PopopxSectionCard {
@@ -189,7 +189,7 @@ struct PopopxGroupChatInfoView: View {
         }
     }
 
-    // MARK: 群备注名
+    // MARK: Group note name
 
     private var renameCard: some View {
         PopopxSectionCard(Copy.renameGroup, footnote: Copy.renameFootnote) {
@@ -199,7 +199,7 @@ struct PopopxGroupChatInfoView: View {
         }
     }
 
-    // MARK: 群资料
+    // MARK: Group profile
 
     @ViewBuilder private var groupCard: some View {
         PopopxSectionCard(Copy.sectionGroup) {
@@ -258,15 +258,15 @@ struct PopopxGroupChatInfoView: View {
         }
     }
 
-    // MARK: 频道订阅门槛
+    // MARK: Channel subscription threshold
 
-    /// 只有频道画这一格（判据 `GroupInfo.isChannel` = `publicGroup?.groupType == .channel`，
-    /// ChatTypes.swift:3064、:3233）。私人群不给：订阅这个语义需要一个"定价的人"，而群里的成员彼此都是主人。
+    /// Only channels draw this cell (the criterion `GroupInfo.isChannel` = `publicGroup?.groupType == .channel`,
+    /// ChatTypes.swift:3064, :3233). Private groups do not get it: the subscription semantics need someone who sets the price, and in a group the members are all masters to each other.
     ///
-    /// 频道主这一支推的是真正的发布页，**管理员也能进**（判据与 `sendChannelAccess` 的守卫同一份：
-    /// `popopxCanPublishChannelThreshold`）；成员这一支只读，显示本机那张凭证。
-    /// 成员**不在这里**订阅或续订，原因是价格不在本机：门槛只有频道里那条卡片带着，
-    /// 在这一页凭空摆一个数字，扣的就是没人宣布过的钱。所以文案把入口指回那条卡片。
+    /// The channel-owner branch pushes the real publishing page, **admins can enter too** (the criterion is the same one as the guard in `sendChannelAccess`:
+    /// `popopxCanPublishChannelThreshold`); the member branch is read-only and shows the credential held on this device.
+    /// Members do **not** subscribe or renew here, because the price is not on this device: the threshold is carried only by that card inside the channel,
+    /// so putting a made-up number on this page would charge money nobody ever announced. That is why the copy points the entry back at that card.
     @ViewBuilder private var subscriptionCard: some View {
         if groupInfo.isChannel {
             PopopxSectionCard(Copy.sectionSubscription,
@@ -288,15 +288,15 @@ struct PopopxGroupChatInfoView: View {
         }
     }
 
-    /// 成员侧那一格右边的数：有效期，或 nil = 本机没有这张凭证。
-    /// 键用 `GroupInfo.id`，与卡片签凭证时用的 `ChatInfo.id` 同一个串（`ChatInfo` 的 group 那一档
-    /// 就是转发给 `groupInfo.id`），所以"在频道里订阅"与"在这一页看到状态"必然指向同一张票。
+    /// The number on the right of the member side's cell: the validity date, or nil = this device holds no such credential.
+    /// The key is `GroupInfo.id`, the same string that `ChatInfo.id` used when the card signed the credential (the group case of `ChatInfo`
+    /// just forwards to `groupInfo.id`), so "subscribe in the channel" and "see the status on this page" necessarily point at the same ticket.
     private var memberTicketValue: String? {
         guard let ticket = PopopxCreditsManager.shared.ticket(forChannelId: groupInfo.id) else { return nil }
         return String(format: Copy.subscriptionValidFormat, PopopxCommerceFormat.date(ticket.expiresAtMs))
     }
 
-    // MARK: 消息
+    // MARK: Messages
 
     @ViewBuilder private var messageCard: some View {
         PopopxSectionCard(Copy.sectionMessage, footnote: Copy.retentionFootnote) {
@@ -338,7 +338,7 @@ struct PopopxGroupChatInfoView: View {
         }
     }
 
-    // MARK: 成员
+    // MARK: Members
 
     @ViewBuilder private var membersCard: some View {
         PopopxSectionCard(Copy.sectionMembers(String(format: Copy.memberCountSuffixFormat, members.count + 1))) {
@@ -363,7 +363,7 @@ struct PopopxGroupChatInfoView: View {
         }
     }
 
-    /// 自己这一行：不导航、不显示操作菜单，只有角色。
+    /// Own row: no navigation, no action menu, only the role.
     private var selfMemberRow: some View {
         let member = groupInfo.membership
         return HStack(spacing: PopopxMetrics.spaceS) {
@@ -484,7 +484,7 @@ struct PopopxGroupChatInfoView: View {
         .buttonStyle(PopopxPressButtonStyle())
     }
 
-    // MARK: 危险操作
+    // MARK: Dangerous actions
 
     @ViewBuilder private var dangerCard: some View {
         PopopxSectionCard(Copy.sectionDanger, footnote: Copy.dangerFootnote) {
@@ -506,13 +506,13 @@ struct PopopxGroupChatInfoView: View {
         }
     }
 
-    /// 与旧页 :249-250 同口径：群主且群里没有别的 owner 时不给退出。
+    /// Same criterion as the old page :249-250: when you are the owner and the group has no other owner, leaving is not offered.
     private var leaveAllowed: Bool {
         !groupInfo.isOwner
             || members.contains { $0.wrapped.memberRole == .owner && $0.wrapped.groupMemberId != groupInfo.membership.groupMemberId }
     }
 
-    // MARK: 行为
+    // MARK: Behaviour
 
     private func loadInitialState() {
         if let currentUser = chatModel.currentUser {
@@ -623,7 +623,7 @@ struct PopopxGroupChatInfoView: View {
         toast.show(Copy.memberUnblockedForAll, kind: .success)
     }
 
-    // MARK: 文本派生
+    // MARK: Text derivation
 
     private func roleText(_ role: GroupMemberRole) -> String {
         switch role {
@@ -706,9 +706,9 @@ struct PopopxGroupChatInfoView: View {
     }
 }
 
-// MARK: - 确认状态
+// // MARK: - Confirmation state
 
-/// 一个待确认的动作。破坏性的（删除/清空/移出/屏蔽）都经它走真实的确认弹窗。
+/// One action awaiting confirmation. The destructive ones (delete / clear / remove / block) all go through it to a real confirmation dialog.
 private enum PopopxGroupConfirm: Identifiable, Hashable {
     case deleteGroup
     case clearChat
@@ -733,9 +733,9 @@ private enum PopopxGroupConfirm: Identifiable, Hashable {
     }
 }
 
-// MARK: - 局部组件
+// // MARK: - Local components
 
-/// 卡片内的分隔线。名字唯一，避开与并行文件里同名 helper 的冲突。
+/// The divider inside the card. The name is unique, to avoid clashing with a same-named helper in a parallel file.
 private struct PopopxGroupDivider: View {
     var body: some View {
         Rectangle()
@@ -745,7 +745,7 @@ private struct PopopxGroupDivider: View {
     }
 }
 
-/// 头部两个轻操作：搜索、静音。整颗是 Button，44pt 命中区。
+/// The two light actions in the header: search, mute. The whole thing is a Button with a 44pt hit target.
 @MainActor
 private struct PopopxGroupQuickAction: View {
     private let title: String
@@ -781,7 +781,7 @@ private struct PopopxGroupQuickAction: View {
     }
 }
 
-/// 推进一个既有页面的行。行本体设为不可命中，由外层 NavigationLink 接管点击（同 PopopxMeView 的写法）。
+/// A row that pushes an existing page. The row body is made non-hittable and the outer NavigationLink takes the tap (the same writing as PopopxMeView).
 @MainActor
 private struct PopopxGroupRowLink<Destination: View>: View {
     private let title: String
@@ -820,7 +820,7 @@ private struct PopopxGroupRowLink<Destination: View>: View {
     }
 }
 
-/// 成员角色 chip。owner/admin 用 brand 强调，其余用中性底色 —— 不用 mesh，免得伪造一条传输通道。
+/// Member role chip. owner/admin use the brand accent, the rest a neutral ground — no mesh, so as not to fake a transmission channel.
 private struct PopopxGroupRoleChip: View {
     private let text: String
     private let emphasized: Bool
@@ -844,7 +844,7 @@ private struct PopopxGroupRoleChip: View {
     }
 }
 
-/// Menu 顶部的角色说明（菜单项里放一个非按钮的文本行）。
+/// The role explanation at the top of the Menu (a non-button text line inside the menu items).
 private struct PopopxGroupRoleChipHeader: View {
     private let text: String
     init(text: String) { self.text = text }
@@ -853,7 +853,7 @@ private struct PopopxGroupRoleChipHeader: View {
     }
 }
 
-/// 已屏蔽的小圆点，叠在角色 chip 右上角。
+/// The blocked dot, overlaid on the top-right corner of the role chip.
 private struct PopopxBlockedDot: View {
     var body: some View {
         Circle()
@@ -865,7 +865,7 @@ private struct PopopxBlockedDot: View {
     }
 }
 
-/// 危险行。文字与图标都用 dangerInk，点击后由调用方弹真实确认。
+/// A dangerous row. Text and icon both use dangerInk; after the tap the caller shows a real confirmation.
 @MainActor
 private struct PopopxDangerRow: View {
     private let title: String
@@ -897,34 +897,34 @@ private struct PopopxDangerRow: View {
     }
 }
 
-// MARK: - 文案
+// // MARK: - Copy
 
-/// 页面上每一句中文只在这里出现一次。
+/// Every Chinese sentence on the page appears exactly once, here.
 private enum Copy {
     static let pageTitle = NSLocalizedString("Group info", comment: "")
     static let cancel = NSLocalizedString("Cancel", comment: "")
     static let linkHint = NSLocalizedString("Open", comment: "")
 
-    // 顶部群卡
+    // // Top group card
     static let memberCountFormat = NSLocalizedString("%lld members", comment: "")
     static let search = NSLocalizedString("Search", comment: "")
     static let muteToggle = NSLocalizedString("Mute", comment: "")
 
-    // 备注名
+    // // Note name
     static let renameGroup = NSLocalizedString("Group alias", comment: "")
     static let renameField = NSLocalizedString("Set group alias", comment: "")
     static let renameFootnote = NSLocalizedString("The alias is stored only on this device; other members are not notified.", comment: "")
     static let renamed = NSLocalizedString("Group alias updated", comment: "")
     static let renameFailed = NSLocalizedString("Renaming failed, please try again later", comment: "")
 
-    // 分组标题
+    // // Section titles
     static let sectionGroup = NSLocalizedString("Group details", comment: "")
     static func sectionMembers(_ suffix: String) -> String { String(format: NSLocalizedString("Members %@", comment: ""), suffix) }
     static let memberCountSuffixFormat = NSLocalizedString("(%lld)", comment: "")
     static let sectionMessage = NSLocalizedString("Messages", comment: "")
     static let sectionDanger = NSLocalizedString("Dangerous actions", comment: "")
 
-    // 群资料
+    // // Group profile
     static let editProfile = NSLocalizedString("Edit group details", comment: "")
     static let addWelcome = NSLocalizedString("Add welcome message", comment: "")
     static let welcome = NSLocalizedString("Welcome message", comment: "")
@@ -936,14 +936,14 @@ private enum Copy {
     static let linkAbsent = NSLocalizedString("Not created", comment: "")
     static let linkPresent = NSLocalizedString("Created", comment: "")
 
-    // 频道订阅门槛
+    // // Channel subscription threshold
     static let sectionSubscription = NSLocalizedString("Channel subscription", comment: "")
     static let memberFootnote = NSLocalizedString("Subscribing happens on the gate card in the channel: the channel owner publishes the price, this device has no say in it.", comment: "")
     static let publishThreshold = NSLocalizedString("Publish subscription gate", comment: "")
     static let subscriptionState = NSLocalizedString("Subscription ticket", comment: "")
     static let subscriptionValidFormat = NSLocalizedString("Valid until %@", comment: "")
 
-    // 消息
+    // // Messages
     static let retentionFootnote = NSLocalizedString("Sets when messages are deleted automatically on this device.", comment: "")
     static let receipts = NSLocalizedString("Read receipts", comment: "")
     static let receiptsYes = NSLocalizedString("Send", comment: "")
@@ -951,7 +951,7 @@ private enum Copy {
     static let receiptsDefault = NSLocalizedString("Follow default", comment: "")
     static let receiptsDisabled = NSLocalizedString("Turned off because this group has many members", comment: "")
 
-    // 成员
+    // // Members
     static let inviteMembers = NSLocalizedString("Invite members", comment: "")
     static let searchMembers = NSLocalizedString("Search members", comment: "")
     static let youPrefix = NSLocalizedString("You:", comment: "")
@@ -970,7 +970,7 @@ private enum Copy {
     static let statusPending = NSLocalizedString("Waiting to join", comment: "")
     static let statusNotJoined = NSLocalizedString("Not joined yet", comment: "")
 
-    // 成员操作
+    // // Member actions
     static let blockMember = NSLocalizedString("Block this member", comment: "")
     static let unblockMember = NSLocalizedString("Unblock", comment: "")
     static let blockForAll = NSLocalizedString("Block for everyone", comment: "")
@@ -981,13 +981,13 @@ private enum Copy {
     static let memberBlockedForAll = NSLocalizedString("Member blocked for everyone", comment: "")
     static let memberUnblockedForAll = NSLocalizedString("Member unblocked for everyone", comment: "")
 
-    // 移出确认
+    // // Removal confirmation
     static let removeTitle = NSLocalizedString("Remove member?", comment: "")
     static let removeWithMessages = NSLocalizedString("Remove and delete messages", comment: "")
     static let removeOnly = NSLocalizedString("Remove only", comment: "")
     static let removeMessageFormat = NSLocalizedString("%@ will be removed from this group; this cannot be undone.", comment: "")
 
-    // 危险操作
+    // // Dangerous actions
     static let clearChat = NSLocalizedString("Clear conversation", comment: "")
     static let leaveGroup = NSLocalizedString("Leave group", comment: "")
     static let deleteGroup = NSLocalizedString("Delete group", comment: "")

@@ -3671,8 +3671,8 @@ server test failure */
 "Your POPOPX address" = "あなたのPOPOPXアドレス";
 
 
-/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
-/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+/* === POPOPX compute-points economy (BadgeCredits) commercial copy: one-to-one with PopopxCommerceCopy === */
+/* These 37 rows correspond directly to the NSLocalizedString keys in PopopxBadgeCreditsModels.swift; en.lproj holds none of them (value == key). */
 
 /* product name */
 "POPOPX Dynamic Privacy Node Badge" = "POPOPX 動的プライバシーノードバッジ";
@@ -3785,7 +3785,7 @@ server test failure */
 /* error */
 "Your Compute Credits balance cannot go above %lld. Spend some credits first." = "計算クレジットの残高は %lld を超えられません。先に一部をご利用ください。";
 
-/* ==== POPOPX onboarding v2 (2026-11-19) — 引导页四屏 + 隐私政策/使用条款 ==== */
+/* ==== POPOPX onboarding v2 (2026-11-19) - the four onboarding screens + privacy policy / terms of use ==== */
 /* POPOPX onboarding v2 — generated block, 2026-11-19 */
 
 /* Onboarding: header pills */
@@ -3797,12 +3797,10 @@ server test failure */
 "Own your network." = "ネットワークはあなたのもの。";
 "Private messaging with no account and no user IDs." = "アカウントもユーザーIDも不要のプライベートメッセージ。";
 "SMP end-to-end encrypted" = "SMP エンドツーエンド暗号化";
-"厢语 Bluetooth Mesh relay" = "厢语 Bluetooth Mesh リレー";
 "What POPOPX gives you" = "POPOPX が提供するもの";
 "No user IDs" = "ユーザーIDなし";
 "No phone number, no email, no global public key. Nothing links your contacts to each other, and each anonymous identity stays separate." = "電話番号もメールもグローバルな公開鍵もありません。連絡先どうしが結ばれることはなく、匿名のアイデンティティはそれぞれ分離されたままです。";
 "Dynamic relays and near-field" = "動的中継と至近接続";
-"Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "オンラインでは動的な SMP 中継ノードクラスタを利用します。オフラインでは厢语が 1〜7 ホップの Bluetooth Mesh に切り替わり、UWB またはタップで向かい合わせのペアリングを行います。";
 "Anti-peeping and local-only cards" = "覗き見防止とカードの完全ローカル";
 "Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "スクリーンショットと画面収録はブロックされ、最高機密メッセージは読み取り後に破棄され、位置情報は両モードとも暗号化されたまま、暗号化されたプロフィールカードがこの端末から出ることはありません。";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "この設定を完了すると、パイオニアノード3日間体験バッジを受け取れます。";
@@ -3834,7 +3832,6 @@ server test failure */
 "Higher privacy · balanced battery" = "より高いプライバシー · バッテリーとの均衡";
 "Maximum discretion · nothing pushed" = "最大限の慎重さ · push は行いません";
 "Apple's push service carries only the signal that new data is waiting, never the content." = "Apple のプッシュサービスは新しいデータが届いたという合図のみを届け、内容が届くことはありません。";
-"厢语 offline mesh" = "厢语 オフラインメッシュ";
 "When the internet is down, messages hop over nearby devices, up to 7 hops, with no server. Pair face to face with UWB or a tap." = "インターネットが無い状態では、メッセージは近くの端末の間を最大 7 ホップで中継され、サーバーは使いません。UWB またはタップで向かい合わせのペアリングを行ってください。";
 "Bluetooth permission is requested the first time the mesh starts." = "Bluetooth の許可はメッシュの初回起動時に要求されます。";
 
@@ -3878,13 +3875,11 @@ server test failure */
 "The camera guard stays local" = "カメラ監視は端末内のみ";
 "The anti-peeping guard switches the front camera on only while a top-secret sheet is open, at the lowest resolution, processes every frame on this device and stops the stream when the sheet closes. Nothing is written to disk and nothing is uploaded." = "覗き見防止の監視は、最高機密シートを開いている間だけ前面カメラを最低解像度でオンにし、各フレームをこの端末で処理して、シートを閉じると映像を停止します。ディスクに書き込むものも、送信するものもありません。";
 "Screenshots, recordings and offline hops" = "スクリーンショット、画面収録、オフラインホップ";
-"Protected screens are blocked from screenshots and screen recording by the system itself. In 厢语 mode messages hop over Bluetooth between nearby devices and never reach the public internet." = "保護された画面はシステム自体がスクリーンショットと画面収録をブロックします。厢语モードでは、メッセージは近くの端末の間を Bluetooth でホップし、公衆インターネットに到達することは決してありません。";
 "Your controls" = "管理はあなたが行います";
 "You can export or delete any identity, erase the local database or trigger Panic Wipe at any time. Deletion is irreversible because no server holds a copy." = "いつでも、任意のアイデンティティのエクスポートや削除、ローカルデータベースの消去、Panic Wipe の実行ができます。どのサーバーもコピーを持っていないため、削除は元に戻せません。";
 
 /* Legal: terms */
 "Acceptable use" = "許容される利用";
-"Use POPOPX within the laws of the country you are in. Public groups and 厢语 broadcasts must carry no unlawful content, no spam and no harassment of other users." = "あなたが所在する国の法律の範囲内で POPOPX を利用してください。公開グループと厢语のブロードキャストに、違法な内容、スパム、他のユーザーへの嫌がらせを含めてはなりません。";
 "Your keys, your responsibility" = "あなたの鍵、あなたの責任";
 "Your mnemonic phrase, identity keys, badges and POPOPX Compute Credits exist only on this device. If the device or the phrase is lost, they cannot be recovered, frozen or reissued by anyone." = "復元フレーズ、アイデンティティ鍵、バッジ、POPOPX 計算クレジットは、この端末にのみ存在します。端末またはフレーズを失くした場合、誰でも復元・凍結・再発行を依頼することはできません。";
 "No guarantee of availability" = "可用性の保証はありません";
@@ -3895,7 +3890,7 @@ server test failure */
 "Relay operators set their own conditions for the servers they run. When an operator requires acceptance, the app shows that operator's conditions and records your acceptance before using them." = "中継ノードの運営者は、自身が運営するサーバーについての条件を独自に定めます。運営者が同意を要求する場合、アプリはその運営者の条件を表示し、使用の前にあなたの同意を記録します。";
 "Names and changes" = "名称と変更";
 "POPOPX and the POPOPX logo are the names of this build. These terms and the privacy statement may change; the app always shows the version you agreed to, and continuing to use POPOPX means you accept the change." = "POPOPX と POPOPX ロゴはこのビルドの名称です。本規約とプライバシーポリシーは変更される可能性があります。アプリはあなたが同意した版を常に表示し、POPOPX を使い続けることは変更に同意することを意味します。";
-/* POPOPX 引导页补录（第四轮：迁移入口标题与条款接受失败提示） */
+/* POPOPX onboarding follow-up rows (round 4: migration entry title, and the terms-acceptance failure notice) */
 "Migrate here" = "ここに移行";
 "Error accepting conditions" = "条件の承認中にエラーが発生しました";
 "I have read and agree to %1$@ and %2$@." = "%1$@と %2$@を読み、同意します。";
@@ -3950,10 +3945,10 @@ server test failure */
 "Redeem a code" = "コードを引き換える";
 "%d available" = "利用可能 %d 枚";
 "Lets you gift a badge card or redeem a code" = "ギフトバッジカードを送るか、コードを引き換えられます";
-"Offline Bluetooth mesh" = "厢语 オフライン Bluetooth Mesh";
+"Offline Bluetooth mesh" = "Cabin オフライン Bluetooth Mesh";
 "Fuse is open" = "オンになっています";
 "Closed by the fuse" = "遮断で停止中";
-"Offline mesh privacy and pairings" = "厢语 のプライバシーとペアリング記録";
+"Offline mesh privacy and pairings" = "Cabin のプライバシーとペアリング記録";
 "Add a friend" = "友人を追加";
 "Chat preferences for this identity" = "この身分の会話設定";
 "Notifications on" = "通知オン";
@@ -3967,8 +3962,8 @@ server test failure */
 "Confirm this is you before opening settings" = "設定を開く前に、本人であることを確認してください";
 "Closing the master switch stops Bluetooth scanning, advertising and relaying all at once; the other rows on this page stay readable but start no Bluetooth object." = "メインスイッチを切ると、Bluetooth のスキャン・アドバタイズ・中継がすべて停止します。このページ他の行はそのまま読めますが、Bluetooth オブジェクトは起動しません。";
 "Credits and badges live only in this device's keychain: no server keeps the ledger, and neither side can change it remotely." = "ポイントもバッジもこの端末のキーチェーンにのみ存在します。台帳を持つサーバーはなく、どの側からリモートで変更することもできません。";
-"Offline mesh master switch" = "厢语 オフラインネットワークのメインスイッチ";
-"Switching this off is the fuse: every mesh component stops together." = "切ると遮断です。厢语 の全コンポーネントが同時に停止します。";
+"Offline mesh master switch" = "Cabin オフラインネットワークのメインスイッチ";
+"Switching this off is the fuse: every mesh component stops together." = "切ると遮断です。Cabin の全コンポーネントが同時に停止します。";
 "Actual Bluetooth state" = "Bluetooth の実際の状態";
 "Verify actual state" = "検証";
 "Not verified yet in this run. Tap Verify to read the real state." = "この起動ではまだ検証していません。「検証」をタップして実際の状態を読み取ってください。";
@@ -3986,7 +3981,7 @@ server test failure */
 "A nearby pairing request shows a confirmation; nothing connects until you tap it." = "附近デバイスからペアリング要求があると確認表示が出ます。あなたがタップする限り接続されません。";
 "Pair silently" = "サイレントペアリング";
 "Pairing completes on its own once the private Bluetooth session is up, without asking." = "プライベート Bluetooth セッションの確立後、自動的にペアリングを完了し、尋ねません。";
-"Erase offline mesh data now" = "厢语 のデータを緊急消去";
+"Erase offline mesh data now" = "Cabin のデータを緊急消去";
 "Triple tap" = "3 回連続タップ";
 "%d/3 taps counted" = "%d/3 回カウント済み";
 "Waiting for confirmation" = "確認を待っています";
@@ -4175,7 +4170,6 @@ server test failure */
 "Badge lit for %lld more days." = "バッジを %lld 日延長しました。";
 "Choose a plan" = "プランを選択";
 "Renew or change plan" = "更新またはプラン変更";
-"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "厢语 パネルを開きます：メインスイッチ、チャンネル、近くのノード";
 "Channels" = "チャンネル";
 "Create public channel" = "公開チャンネルを作成";
 "Join channel" = "チャンネルに参加";
@@ -4914,13 +4908,13 @@ server test failure */
 "Your new channel %@ is connected to %d of %d relays.\nIf you cancel, the channel will be deleted - you can create it again." = "新しいチャンネル %1$@ は %3$d 個中 %2$d 個のリレーに接続しています。\nキャンセルするとチャンネルは削除されますが、あとで再度作成できます。";
 "server queue info: %@\n\nlast received msg: %@" = "サーバーのキュー情報: %1$@\n\n最後に受信したメッセージ: %2$@";
 
-/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+/* POPOPX round 19: keys added during the ninth pass over the three tabs */
 "Back to messages" = "メッセージに戻る";
 "POPOPX Badge" = "POPOPX バッジ";
 "Added %lld Compute Credits to your balance." = "残高に %lld 計算クレジットを追加しました。";
 "Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple はこの購入をまだ確認しています。確認が完了すると、計算クレジットはすぐに残高に反映されます。";
 "Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple は支払いを受け取りましたが、このデバイスはまだクレジットを残高に追加できません。安全なストレージに書き込める次のタイミングで加算されます。";
-/* POPOPX round 21 第 9 轮：厢语「发现」入口无障碍说明 + 7 条 zh-Hans 上游缺值 */
+/* POPOPX round 21, ninth pass: accessibility hint for the Cabin 'Discover' entry + 7 upstream values missing from zh-Hans */
 "Discover nearby groups and channels over the Bluetooth mesh" = "Bluetooth Mesh を介して近くのグループとチャンネルを検出";
 "Album" = "アルバム";
 "Camera" = "カメラ";
@@ -6318,3 +6312,25 @@ server test failure */
 "author" = "作成者";
 "moderator" = "モデレーター";
 "relay" = "リレー";
+"Top-up %lld compute points" = "%lld 計算クレジットをチャージ";
+"Exchange did not complete · returned automatically" = "交換は成立せず · 自動的に返還";
+"Redeemed a %lld-day privacy node badge" = "%lld 日間のプライバシーノードバッジを引き換え";
+"Redeemed %lld × %lld-day gift-card vouchers" = "ギフトカード引換券を %lld 枚 × %lld 日間分 引き換え";
+"Sent a red packet of %lld compute points (%lld equal shares)" = "計算クレジット %lld の紅包を送信（%lld 口に均等分割）";
+"Received a compute-point red packet" = "計算クレジットの紅包を受け取り";
+"Received a red packet: %@" = "紅包を受け取り：%@";
+"Red packet not fully claimed, %lld returned" = "紅包を受け取り切れず、%lld を返還";
+"Subscribed to channel %@" = "チャンネル %@ を購読";
+"Unlocked a profile card" = "プロフィールカードのロックを解除";
+"Extended the anti-peeping viewing window" = "覗き見防止の閲覧時間を延長";
+"Refund clawback (what was already spent is not recovered)" = "返金の回収（すでに使った分は回収しません）";
+"Refund clawback" = "返金の回収";
+"Aurora shield avatar frame" = "オーロラシールドのアバター枠";
+"Dark gold QR card skin" = "ダークゴールドの QR カード面";
+"[Location]" = "[位置情報]";
+"[Encrypted profile]" = "[暗号化プロフィールページ]";
+"[Encrypted profile · attachment]" = "[暗号化プロフィールページ · 添付]";
+"Unnamed profile" = "名称未設定のプロフィールページ";
+"[Top-secret view-once] Open after biometrics" = "[最高機密・閲覧後消滅] 生体認証後に閲覧できます";
+"[Top-secret security alert] %@; that top-secret message was destroyed in place." = "[最高機密のセキュリティ警告] %@; その最高機密メッセージはその場で破棄されました。";
+"Neither Bluetooth nor the public network is available — %lld messages waiting to send" = "Bluetooth も公衆ネットワークも利用できません — 送信待ちのメッセージ %lld 件";

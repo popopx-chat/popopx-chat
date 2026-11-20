@@ -1,32 +1,32 @@
 //  PopopxBadgeDetailSheet.swift
 //
-//  【第五阶段 · 3】点亮态徽章的详情：这台设备凭什么说自己的流量在动态中继上，
-//  以及订阅那一档唯一合法的出口（App 内"管理订阅"）。
+//  [phase five · 3] The detail of a lit-up badge: on what grounds this device says its traffic rides the dynamic relay,
+//  and the only legal exit for the subscription tier inside the app ("Manage subscriptions").
 //
-//  ### 为什么这个面板里没有"刷新状态""连接测试"这类按钮
-//  本徽章的真相只有两份：Keychain 里那条 `PopopxBadgeRecord`，和 StoreKit 给出的权益
-//  （`PopopxBadgeManager.subscriptionSnapshot`）。没有任何服务端可以问。所以这里只呈现，
-//  不假装检测——一个"测试节点连通性"的按钮要么是真的去测（本层没有可测的对象），
-//  就是一个装饰，而装饰在合规上是要被追问的。
+//  ### Why this panel has no "refresh status" or "connection test" button
+//  This badge's truth comes in only two copies: the `PopopxBadgeRecord` row in the Keychain, and the entitlement StoreKit reports
+//  (`PopopxBadgeManager.subscriptionSnapshot`). There is no server anywhere to ask. So this only presents,
+//  and never pretends to probe — a "test node connectivity" button either really goes and tests (this layer has no testable object),
+//  or it is decoration, and decoration is what compliance asks about.
 //
-//  ### 对账摘要不是装饰
-//  `receiptDigest` 是来源凭据（订阅 JWS 原文 / 兑换流水）的短摘要。它能对上的范围只有一件事：
-//  本机记录的这一条徽章**当时**来自哪一份凭据。它不含凭据原文，也不可反查，
-//  所以展示它是安全的；用户拿它跟自己的 App 购买记录核对时，比"来源：Apple 订阅"这句空话有用。
+//  ### The reconciliation digest is not decoration
+//  `receiptDigest` is a short digest of the source credential (the subscription JWS text / the redemption record). The range it can match is one thing only:
+//  which credential this badge record on this device **at the time** came from. It contains no credential text and cannot be reverse-looked-up,
+//  so displaying it is safe; when a user checks it against their own App purchase records it is more useful than the empty sentence "source: Apple subscription".
 //
-//  ### 订阅那一档的两条硬约束（审核口径）
-//  - 续费状态只从 `Transaction`/`Product.SubscriptionInfo.Status` 读，不写、不猜；
-//    读不到就明说"暂时读不到"，不显示"已续费"（`PopopxSubscriptionRenewalState.unknown`）。
-//  - 取消续费只能走 `AppStore.showManageSubscriptions`（`PopopxStoreKitManager.manageSubscriptions()`），
-//    app 内不自建取消入口、不自建退款入口。恢复购买同理走 `AppStore.sync()`，在付费墙那一页。
+//  ### The two hard constraints on the subscription tier (review stance)
+//  - Renewal state is only read from `Transaction`/`Product.SubscriptionInfo.Status`, never written and never guessed;
+//    if it cannot be read, say plainly "cannot be read right now" and do not show "renewed" (`PopopxSubscriptionRenewalState.unknown`).
+//  - Cancelling a renewal can only go through `AppStore.showManageSubscriptions` (`PopopxStoreKitManager.manageSubscriptions()`),
+//    the app builds no cancel entry of its own and no refund entry of its own. Restore-purchase likewise goes through `AppStore.sync()`, on the paywall page.
 //
-//  ### 这一页的第一按钮是「续或换档」，不是「关闭」
-//  subtitle 那一行本来就在报剩余天数，读完的下一步只有两个：把这一段接上、或换一条路走。
-//  所以 `onOpenPaywall` 给到时它排第一，且**不分来源**（订阅 / 通行证 / 券 / 点数兑换 / 体验都一样）；
-//  上面那条"只能走 Apple 的管理页"的约束管的是**取消与退款**，与"再买一档"是两件事，
-//  所以「管理订阅」仍留在第二排，两条都不退让。
+//  ### This page's first button is "renew or switch tier", not "close"
+//  The subtitle line is already reporting the days left, and after reading it there are only two next steps: continue this stretch, or take another path.
+//  So when `onOpenPaywall` is supplied it ranks first, and **regardless of source** (subscription / pass / voucher / credit redemption / trial are all the same);
+//  the constraint above about "only Apple's management page" governs **cancelling and refunds**, which is a different thing from "buy one more tier",
+//  so "Manage subscriptions" stays in the second row and neither of the two gives way.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. The red line forbids scripts modifying project.pbxproj.
 
 import SwiftUI
 import POPOPXChat
@@ -38,8 +38,8 @@ struct PopopxBadgeDetailSheet: View {
     @State private var statusBusy = false
     @State private var statusFailure: String?
 
-    /// 「档位与价格」那一条主操作的去处，由宿主（`PopopxBadgeSheetHost`）给。
-    /// 给不到就整条不摆：一个只会报错的按钮比没有按钮更坏，理由同 `PopopxTrialWelcomeModal` 那一处。
+    /// Where the main action of the "tiers and prices" row goes, supplied by the host (`PopopxBadgeSheetHost`).
+    /// If it cannot be supplied the whole row is omitted: a button that can only raise an error is worse than no button, for the same reason as in `PopopxTrialWelcomeModal`.
     var onOpenPaywall: (() -> Void)? = nil
 
     var body: some View {
@@ -65,7 +65,7 @@ struct PopopxBadgeDetailSheet: View {
         .task { await refreshSubscription() }
     }
 
-    // MARK: 状态
+    // MARK: State
 
     private var statusCard: some View {
         HStack(spacing: PopopxMetrics.spaceS) {
@@ -93,7 +93,7 @@ struct PopopxBadgeDetailSheet: View {
         )
     }
 
-    /// 来源与到期。全部取自本机那一条记录，一次网络请求都不发。
+    /// Source and expiry. Everything comes from this device's own record, and not one network request is made.
     private func provenance(_ record: PopopxBadgeRecord) -> some View {
         PopopxSectionCard(Copy.provenanceTitle) {
             VStack(spacing: PopopxMetrics.spaceXS) {
@@ -118,7 +118,7 @@ struct PopopxBadgeDetailSheet: View {
         }
     }
 
-    // MARK: 订阅
+    // MARK: Subscription
 
     @ViewBuilder private var subscriptionCard: some View {
         let snapshot = badge.subscriptionSnapshot
@@ -153,10 +153,10 @@ struct PopopxBadgeDetailSheet: View {
 
     @ViewBuilder private var footerRow: some View {
         VStack(spacing: PopopxMetrics.spaceXS) {
-            // 主操作：进付费墙「续或换档」。这一条**按来源不分叉**（订阅 / 通行证 / 礼品券 /
-            // 点数兑换 / 体验都给它），理由是这一页的 subtitle 已经在报剩余天数，而"接下来怎么办"
-            // 在五种来源上是同一个问题：要么把这一段接上，要么换一条路走。
-            // 以前这页对非订阅来源只有一个「关闭」——用户读完"还剩 3 天"之后没有任何下一步。
+            // The main action: enter the paywall to "renew or switch tier". This one does **not fork by source** (subscription / pass / gift voucher /
+            // credit redemption / trial all get it), because this page's subtitle already reports the days left and "what to do next"
+            // is the same question across all five sources: either continue this stretch, or take another path.
+            // This page used to have only a "close" button for non-subscription sources — no next step at all after reading "3 days left".
             if let onOpenPaywall {
                 PopopxButton(PopopxCommerceCopy.renewOrChangePlanAction,
                              systemImage: "arrow.triangle.2.circlepath") {
@@ -164,8 +164,8 @@ struct PopopxBadgeDetailSheet: View {
                 }
             }
             if badge.record?.source == .appleSubscription {
-                // 自动续费那一族的"关掉/改档"在 Apple 那边，这条留在第二排而不是换成主操作：
-                // 取消续费与换套餐是两件事，前者不需要重新付费，混成一句会误导。
+                // The auto-renewal family's "turn it off / change tier" lives on Apple's side, so this stays in the second row instead of becoming the main action:
+                // cancelling a renewal and switching plans are two different things, the first needs no new payment, and merging them into one sentence misleads.
                 PopopxButton(Copy.manageSubscriptions, systemImage: "creditcard",
                              role: .secondary, isLoading: statusBusy) {
                     await PopopxStoreKitManager.shared.manageSubscriptions()
@@ -178,7 +178,7 @@ struct PopopxBadgeDetailSheet: View {
         }
     }
 
-    // MARK: 组成件
+    // MARK: Building blocks
 
     private func row(_ label: String, _ value: String, monospaced: Bool = false) -> some View {
         HStack(alignment: .top, spacing: PopopxMetrics.spaceS) {
@@ -206,7 +206,7 @@ struct PopopxBadgeDetailSheet: View {
         }
     }
 
-    /// 续费档位说人话。`unknown` 不是"没续费"，是"这次没读到"，措辞必须分开。
+    /// The renewal tier in plain words. `unknown` is not "not renewed", it is "not read this time", and the wording must keep them apart.
     private func renewalWords(_ state: PopopxSubscriptionRenewalState?) -> String {
         switch state ?? .unknown {
         case .renewing: Copy.renewing
@@ -222,17 +222,17 @@ struct PopopxBadgeDetailSheet: View {
         statusBusy = true
         defer { statusBusy = false }
         await badge.refreshSubscriptionStatus()
-        // 读回来是 nil 也照样说清楚：这条腿的失败不是报错，是"暂时读不到"。
+        // Even when it reads back nil it is still said clearly: failure on this leg is not an error, it is "cannot be read right now".
         statusFailure = badge.subscriptionSnapshot == nil ? Copy.statusUnavailable : nil
     }
 }
 
-// MARK: - 来源的中文名
+// MARK: - Display names of the sources
 
 private extension PopopxBadgeSource {
-    /// 五档来源的措辞。判据与 `PopopxBadgeManager` 的写入一一对应，不另造第六种说法。
-    /// 通行证那一格走 `PopopxCommerceCopy`：它是这一轮新增的来源，本轮红线禁止在代码里落新的裸中文
-    /// （上面四格是既有文案，收口到 key 要一并动 16 本目录，不在本轮范围）。
+    /// The wording of the five source tiers. The criteria correspond one-to-one with what `PopopxBadgeManager` writes; no sixth phrasing is invented.
+    /// The pass cell goes through `PopopxCommerceCopy`: it is a source added this round, and this round's red line forbids new bare Chinese literals in code
+    /// (the four cells above are existing copy; closing them up into keys would also require touching 16 catalogues, which is out of this round's scope).
     var displayName: String {
         switch self {
         case .pioneerTrial: NSLocalizedString("Pioneer Node Trial badge", comment: "")
@@ -244,7 +244,7 @@ private extension PopopxBadgeSource {
     }
 }
 
-// MARK: - 文案
+// MARK: - Copy
 
 private extension PopopxBadgeDetailSheet {
     enum Copy {
@@ -263,13 +263,13 @@ private extension PopopxBadgeDetailSheet {
         static let sourceRow = key("Source")
         static let periodRow = key("Plan")
 
-        /// 「档位」那一格的值。源文是英文原句、英文原句就是 Key（写法同 `PopopxBadgeCapsuleView.swift`
-        /// 的 `PopopxBadgeCapsuleCopy`）：`en.lproj` 按约定不写，16 个译本目录各写各的。
+        /// The value of the "tier" cell. The source text is an English sentence and the English sentence is the Key (written the same way as
+        /// `PopopxBadgeCapsuleCopy` in `PopopxBadgeCapsuleView.swift`): `en.lproj` is not written by convention, and the 16 translation catalogues each write their own.
         ///
-        /// 判据用来源而不是天数 —— `PopopxBadgeManager.swift:152` 给先锋体验写下的 `period` 是
-        /// `.monthly`（体验只是借月度档那个形态登记，到期时刻另按 `PopopxCommerceLimits.trialSeconds`
-        /// 算），所以照 `record.period.days` 印出来就是把 3 天的体验说成 30 天，真机第 5 轮报的
-        /// 正是这一格。天数从 `trialSeconds` 现算，与到期时刻同一口径，不引入第二个数字。
+        /// The criterion uses the source rather than the day count —— `PopopxBadgeManager.swift:152` writes the `period` of the pioneer trial as
+        /// `.monthly` (the trial merely borrows the monthly tier's shape for registration, its expiry moment is computed separately from `PopopxCommerceLimits.trialSeconds`
+        /// ), so printing `record.period.days` would describe a 3-day trial as 30 days, and that is exactly the cell reported on real-device round 5.
+        /// The day count is computed on the spot from `trialSeconds`, the same basis as the expiry moment, so no second number is introduced.
         static func period(_ record: PopopxBadgeRecord) -> String {
             if record.source == .pioneerTrial {
                 let trialDays = max(1, Int(ceil(PopopxCommerceLimits.trialSeconds / 86_400)))
@@ -314,11 +314,11 @@ private extension PopopxBadgeDetailSheet {
     }
 }
 
-// MARK: - 时间格式
+// MARK: - Time format
 
-/// 详情页的时间一律到日，不带秒：用户在这里要核对的是"哪天到期"，不是"几点几分"。
-/// `PopopxBadgeManager` 里那个同用途的格式化是私有的，本模块不共用一份可变 formatter，
-/// 所以每个视图文件各留一份只读的（`DateFormatter` 在这里不是热点，一天最多渲染几条）。
+/// Times on the detail page always go down to the day and carry no seconds: what a user wants to check here is "which day it expires", not "at what minute".
+/// The formatter for the same purpose in `PopopxBadgeManager` is private, and this module does not share one mutable formatter,
+/// so each view file keeps its own read-only copy (`DateFormatter` is not a hotspot here, at most a few rows render per day).
 enum PopopxCommerceFormat {
     private static let dayMonth: DateFormatter = {
         let formatter = DateFormatter()
@@ -331,7 +331,7 @@ enum PopopxCommerceFormat {
         dayMonth.string(from: Date(timeIntervalSince1970: Double(milliseconds) / 1_000))
     }
 
-    /// 倒计时到分。红包、券这类"要当场看还剩多少"的场合用它。
+    /// Countdown down to the minute. Used where a red packet or voucher has to show "how much is left" on the spot.
     static func countdown(_ seconds: TimeInterval) -> String {
         let total = max(0, Int(seconds))
         let days = total / 86_400

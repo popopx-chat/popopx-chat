@@ -1,6 +1,6 @@
 //
 //  IdentityMappingStore.swift
-//  PopopxMeshKit  —  模块 1
+//  PopopxMeshKit  —  module 1
 //
 //  The bridge between two id spaces that otherwise never meet: a 64-hex Bluetooth mesh public key
 //  (which only exists while a radio is in range) and a POPOPX `contactId` / pending-connection id
@@ -19,7 +19,7 @@ import Foundation
 // place that can know the mapping table is the thing that consumes it.
 extension PopopxMeshKeychain: PopopxMeshSecretStoring {}
 
-/// What the app does when an offline peer asks to become a contact. Read by 模块 3 before it
+/// What the app does when an offline peer asks to become a contact. Read by module 3 before it
 /// touches the FFI, so the switch has one owner and one persisted value.
 public enum MeshPairingPolicy: String, Codable, CaseIterable, Sendable {
     /// The default, and the safe answer for a radio anyone can switch on: an inbound request only
@@ -58,7 +58,7 @@ public struct PopopxMeshContactMapping: Codable, Hashable, Sendable {
         self.nickname = nickname
     }
 
-    /// Bound to a pending connection only — 模块 6 lists these as "offline pairing, not yet a contact".
+    /// Bound to a pending connection only — module 6 lists these as "offline pairing, not yet a contact".
     public var isPending: Bool { contactId == nil && tempConnId != nil }
 }
 
@@ -95,7 +95,7 @@ public enum IdentityMappingError: Error, Hashable, Sendable {
     /// empty on a device that still shows bindings, which is the one case the user must hear about.
     case keychainRollbackFailed(reason: String)
     case payloadRejected(reason: String)
-    /// Refusing to write is not a storage fault: 旧 JSON 读不懂时原始 payload 必须原样留着。
+    /// Refusing to write is not a storage fault: when the old JSON cannot be read, the original payload must stay exactly as it was.
     case writeBlocked(issue: PopopxMappingPayloadIssue)
 }
 
@@ -155,7 +155,7 @@ public actor IdentityMappingStore {
     }
 
     /// Assigning an actor's property from outside is not allowed and the switches are read by other
-    /// actors, so the settings screen and 模块 3 go through these; they are the setters, callable.
+    /// actors, so the settings screen and module 3 go through these; they are the setters, callable.
     public func updatePairingPolicy(_ policy: MeshPairingPolicy) {
         pairingPolicy = policy
     }
@@ -190,7 +190,7 @@ public actor IdentityMappingStore {
         return mappings[hex]
     }
 
-    /// The pending half of the table: what 模块 6 shows until `contactConnected` arrives.
+    /// The pending half of the table: what module 6 shows until `contactConnected` arrives.
     public func pendingMappings(forTempConnId tempConnId: Int64) -> [PopopxMeshContactMapping] {
         loadIfNeeded()
         return (pendingIndex[tempConnId] ?? [])
@@ -250,7 +250,7 @@ public actor IdentityMappingStore {
         return mapping
     }
 
-    /// 模块 6 calls this when `contactConnected` (`Shared/Model/AppAPITypes.swift:1240`,
+    /// module 6 calls this when `contactConnected` (`Shared/Model/AppAPITypes.swift:1240`,
     /// `Contact.contactId`) names the pending connection: the row survives, the temporary id does not.
     /// - Returns: how many mesh keys moved onto the contact — more than one when the peer has
     ///  several radios.

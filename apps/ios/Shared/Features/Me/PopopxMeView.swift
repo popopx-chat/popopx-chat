@@ -2,42 +2,42 @@
 //  PopopxMeView.swift
 //  POPOPX (iOS)
 //
-//  【第四阶段】Tab 4「我」。微信式信息架构：顶部一枚个人名片头，下面四组分卡片
-//  资产与节点权益 / 加密主页与卡包 / 常用 / 隐私与安全防线（2026-11-20 重构裁定）。
+//  [Phase 4] Tab 4 "Me". A WeChat-style information architecture: one personal card header at the top, then four card groups
+//  assets and node entitlements / encrypted home page and card wallet / frequently used / privacy and security defences (2026-11-20 refactor ruling).
 //
-//  结构上的五条决定：
+//  Five structural decisions:
 //
-//  1. 页面自己不放 NavigationStack —— 栈由 Shared/Navigation/MainTabView.swift:152-171 统一包好，
-//     「中继与服务器」那三个值的 `navigationDestination` 也登记在那一层（值链接会被提到栈根，
-//     写在「全部设置」自己身上一行都不生效）。
-//     这里只往外推既有页面（`NavigationLink { 页面 }`，与 SettingsView.swift:405-424 同一种写法）。
-//  2. 每一行都推到真实存在、且逐个核对过 init 与环境依赖的页面，没有占位行、没有 TODO。
-//     `UserProfile` 依赖 `SaveableSettings`（见 PopopxProfileHost 的注释），所以照 app 现有的
-//     挂载方式包一层再注入，避免 EnvironmentObject 缺失。
-//  3. 本页只留与蓝牙无关的三击紧急抹除。离线组网的总闸、真实核验块与配对策略原先都在这第四张卡上，
-//     2026-11-20 整块迁到厢语页右上角的设置中心（`PopopxCabinMeshSettingsSheet`，
-//     `Shared/Features/Cabin/PopopxCabinView.swift`）；迁移是逐条等效的，四个落点都还经
-//     `PopopxMeshRuntime.shared` 写回包里唯一的 kill switch / store / 绑定表，本页不分第二套状态。
-//     紧急抹除留在这里：它抹的正是那一整套，而它只往既有的布防状态机里送轻触，确认弹窗仍由全 app
-//     已挂载的那道门呈现，本页不写第二个 alert。
-//  4. 这次重排只动"行住在哪个卡片里"，没有删掉任何一条既有路由：身份管理与主页名片码从行升格为
-//     名片头的整行热区与二维码微标，其余行全部落在上面四组之中。「充值算力点」仍然是一枚无条件
-//     入口（理由见下面 `badgeSheet` 那条注释）。2026-11-20 删掉的两行各有去处：「添加朋友」——
-//     消息栏右上角「+」挂着同一个 `PopopxAddFriendView`（ChatsListView.swift:296-298）；「离线组网」
-//     一行——厢语页设置中心，见决定 3。
-//     真机走查 三.1/三.4 又动了常用组：「通知」与「版本」两行删掉，各有去处（全部设置 → 通知，
-//     与 `PopopxHelpView` 里的版本页）；「外观与图标」「显示语言」「帮助与关于」三行从「全部设置」
-//     那一二级页升上来。动的仍然只是"行住在哪个卡片里"，目的地一个都没新造，也没留第二个入口。
-//  5. 徽章那一行的三条出口不另立判据：它 switch 的是 `phase.capsuleState` 这个共享枚举本身，
-//     与顶栏入口 `PopopxBadgeHeaderEntry`（`PopopxBadgeSheet.entry(for:)`）读同一份状态、同一套分支，
-//     将来加一档会在这里编译报错，而不是两处各说一套。
+//  1. The page does not place its own NavigationStack — the stack is wrapped centrally by Shared/Navigation/MainTabView.swift:152-171,
+//     and the `navigationDestination` for those three "relay and server" values is registered in that layer too (value links get hoisted to the stack root,
+//     so writing it on "All settings" itself has not one line of effect).
+//     Here we only push existing pages outward (`NavigationLink { page }`, the same style as SettingsView.swift:405-424).
+//  2. Every row pushes to a page that really exists and whose init and environment dependencies were checked one by one — no placeholder rows, no TODO.
+//     `UserProfile` depends on `SaveableSettings` (see the PopopxProfileHost comment), so it is wrapped one layer following the app's existing
+//     mounting style before injecting, to avoid a missing EnvironmentObject.
+//  3. This page keeps only the triple-tap emergency wipe, which has nothing to do with Bluetooth. The offline-mesh master switch, the real verification block and the pairing policy all used to sit on this fourth card,
+//     and on 2026-11-20 the whole block moved to the settings center at the top-right of the Cabin page (`PopopxCabinMeshSettingsSheet`,
+//     `Shared/Features/Cabin/PopopxCabinView.swift`); the migration is equivalent item by item, and all four landing points still go through
+//     `PopopxMeshRuntime.shared` to write back into the package's only kill switch / store / binding table, so this page keeps no second set of state.
+//     The emergency wipe stays here: what it wipes is exactly that whole set, and it only feeds taps into the existing arming state machine, while the confirmation sheet is still presented by the gate
+//     already mounted for the whole app — this page does not write a second alert.
+//  4. This rearrangement only moved "which card a row lives in" and deleted not one existing route: identity management and the home-page card QR were promoted from rows into
+//     a whole hot area of the card header plus a QR micro-badge, and all other rows land in the four groups above. "Top up compute credits" is still an unconditional
+//     entry (the reason is in the `badgeSheet` comment below). The two rows deleted on 2026-11-20 each went somewhere: "Add friends" —
+//     the same `PopopxAddFriendView` hangs on the "+" at the top-right of the message tab (ChatsListView.swift:296-298); the "Offline mesh"
+//     row — the Cabin page's settings center, see decision 3.
+//     Real-device walkthrough three.1/three.4 also moved the frequently-used group: the "Notifications" and "Version" rows were deleted and each went somewhere (All settings → Notifications,
+//     and the version page inside `PopopxHelpView`); the "Appearance & icon", "Display language" and "Help & about" rows were lifted up from the
+//     "All settings" second-level page. Still only "which card a row lives in" moved, not one destination was newly invented, and no second entry was left behind.
+//  5. The badge row's three exits do not establish their own criterion: it switches on the shared enum `phase.capsuleState` itself,
+//     and reads the same state and the same branches as the top bar entry `PopopxBadgeHeaderEntry` (`PopopxBadgeSheet.entry(for:)`),
+//     so a future extra tier fails to compile here instead of two places each telling their own story.
 //
-//  配色、字号、圆角、间距一律取 Shared/Theme/PopopxTheme.swift 的 token；控件只用
-//  Shared/Components 里已有的原子库，没有新造按钮、开关或输入框（`PopopxIconBadge` 在原子库里
-//  是 private，本页需要的辅助件全部内聚在这一个文件内）。文案一律英文原句即 Key，
-//  新词条写进 16 个译本目录，`en.lproj` 不写冗余词条（读到 Key 本身就是英文）。
+//  Colors, font sizes, corner radii and spacing all take tokens from Shared/Theme/PopopxTheme.swift; controls use only
+//  the existing atomic library in Shared/Components, with no new button, switch or text field invented (`PopopxIconBadge` is
+//  private inside the atomic library, and every helper this page needs is cohesive inside this one file). All copy is the English original sentence as the Key,
+//  new entries are written into the 16 translation directories, and `en.lproj` gets no redundant entry (the Key it reads is already English).
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖进 POPOPX (iOS) target —— 铁律禁止脚本改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand — the iron rule forbids scripts from modifying project.pbxproj.
 //
 
 import SwiftUI
@@ -47,58 +47,58 @@ import POPOPXChat
 import PopopxMeshKit
 import PopopxMeshUI
 
-// MARK: - 页面
+// MARK: - The page
 
 @MainActor
 struct PopopxMeView: View {
     @EnvironmentObject private var chatModel: ChatModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    /// 熔断、配对策略、抹除的唯一状态源就是 app 侧这个协调者（SettingsView.swift:627 同一个写法）。
+    /// The single state source for the fuse, pairing policy and wipe is this coordinator on the app side (the same pattern as SettingsView.swift:627).
     @ObservedObject private var meshRuntime = PopopxMeshRuntime.shared
 
-    /// 紧急抹除的布防状态机本体：本页只往里送轻触，确认由既有的门弹。
+    /// The emergency wipe's arming state machine itself: this page only feeds taps into it, and the confirmation is raised by the existing gate.
     @ObservedObject private var panicWipe: PopopxPanicWipeManager
     @ObservedObject private var panicArming: PopopxPanicWipeArming
 
-    /// 算力点账本：`@Observable` 单例，本页只读一格余额给入口行当副标题。
+    /// The compute-credits ledger: an `@Observable` singleton, and this page reads only one balance value to serve as the entry row's subtitle.
     @State private var credits = PopopxCreditsManager.shared
 
     @State private var toast = PopopxToastModel()
-    /// 「主页名片码」那张 Sheet 的开关。入口是名片头右端的二维码微标（裁定 4：不再单占一行）。
+    /// The switch for the "Home card QR" sheet. The entry is the QR micro-badge at the right end of the card header (ruling 4: it no longer occupies a row of its own).
     @State private var showsProfileQR = false
-    /// 算力点生态的三张面板。徽章**详情**与**升级**现在也在本页有一行（微信式分组要求资产
-    /// 直达），但它不自带判据，见上面结构决定 5 与下面 `routeBadge()`。
+    /// The three panels of the compute-credits ecosystem. Badge **details** and **upgrade** now also have a row on this page (WeChat-style grouping requires assets
+    /// to be reachable directly), but it carries no criterion of its own — see structural decision 5 above and `routeBadge()` below.
     @State private var showsCreditsStore = false
     @State private var showsRedeemCode = false
     @State private var showsGiftCard = false
-    /// 付费墙在这里必须有第二个开关，尽管胶囊已经挂过它：胶囊按状态分发，
-    /// `.activeLit` 那一档把点击交给徽章详情，于是**已经点亮的人再也没有地方买点数**。
-    /// 而算力点中心那一页按它自己的文件头不挂付费墙。所以这一行是唯一的无条件入口。
+    /// The paywall must have a second switch here even though the capsule already attaches it: the capsule dispatches by state,
+    /// and the `.activeLit` tier hands the tap to the badge details, so **people already lit have nowhere left to buy credits**.
+    /// And the compute-credits center page does not attach a paywall, per its own file header. So this row is the only unconditional entry.
     ///
-    /// 三条出口（付费墙 / 体验说明 / 详情）收在一份 `PopopxBadgeSheet?` 里，与顶栏胶囊共用那个
-    /// 载体（`PopopxBadgeSheetHost`）：以前这里是三条并列的 `.sheet(isPresented:)`，
-    /// 体验弹窗点「看徽章详情」要在弹窗里再抬一张 sheet，系统直接丢掉，真机上就是"点了没反应"。
+    /// The three exits (paywall / trial explanation / details) are collected into one `PopopxBadgeSheet?`, sharing the top bar capsule's
+    /// carrier (`PopopxBadgeSheetHost`): this used to be three parallel `.sheet(isPresented:)`,
+    /// and tapping "see badge details" from the trial modal had to raise another sheet inside the sheet, which the system simply dropped — on a real device that is "tapping did nothing".
     @State private var badgeSheet: PopopxBadgeSheet?
-    /// 名片卡右下角「添加新身份」那条快捷入口：走 push（本页就在 `NavigationStack(path:)` 里，
-    /// `MainTabView.swift:152`），不弹 sheet —— 与 `UserProfilesView.swift:112-114` 那条同一写法。
+    /// The "add a new identity" shortcut entry at the bottom-right of the card: it goes by push (this page is inside `NavigationStack(path:)`,
+    /// `MainTabView.swift:152`), not a sheet — the same pattern as the one at `UserProfilesView.swift:112-114`.
     @State private var showsCreateIdentity = false
-    /// 徽章运行时：`@Observable` 单例，与顶栏胶囊、徽章详情读同一份 `phase`，本页不分第二套状态。
+    /// The badge runtime: an `@Observable` singleton, reading the same `phase` as the top bar capsule and the badge details, so this page keeps no second set of state.
     @State private var badge = PopopxBadgeManager.shared
-    /// 本机未使用的礼品券张数。`PopopxP2PVoucherVault` 是 actor，只能在 `.task` 里 await 读，
-    /// 不能在 body 里同步问它；读不到就留 0，这一行因此不会假装"有券"。
+    /// The number of gift vouchers unused on this device. `PopopxP2PVoucherVault` is an actor and can only be awaited inside `.task`,
+    /// never asked synchronously in the body; if the read fails it stays 0, so this row never pretends there "are vouchers".
     @State private var unusedVouchers = 0
-    /// 本机加密个人主页的当前档位，形如「已配置 · 常驻名片」；`nil` = 还没读出来（首帧不给假状态）。
+    /// The current tier of this device's encrypted personal home page, shaped like "configured · resident card"; `nil` = not read yet (no fake state on the first frame).
     @State private var profileStatusValue: String?
 
-    /// 正在切换的身份编号；nil = 此刻没有切换在跑。切换期间不接受第二次点击，否则两次
-    /// `setActiveUser` 会互相抢 `ChatModel.currentUser`。
+    /// The identity number currently being switched to; nil = no switch is running right now. While switching, a second tap is not accepted, otherwise two
+    /// `setActiveUser` calls would race for `ChatModel.currentUser`.
     @State private var busyUserID: Int64?
 
-    /// 真机第 6 轮二.2 并进这张防线卡的两枚开关。键与设置页原先那两个绑定、与
-    /// `PrivacySettings.swift:27`/`:18` 完全同一批（不是复制品）：打码那一枚
-    /// `AppSettings.swift:45`、`:86` 导出与恢复配置时读的还是它，去跟踪那一枚由
-    /// `ComposeView.swift:425` 在发消息前读。换宿主不换数据。
+    /// The two switches merged into this defence card by device round 6 two.2. The keys are exactly the same batch as the settings page's original two bindings and as
+    /// `PrivacySettings.swift:27`/`:18` (not copies): the masking one is still what
+    /// `AppSettings.swift:45`, `:86` read when exporting and restoring configuration, and the tracking-removal one is read by
+    /// `ComposeView.swift:425` before sending a message. Changing the host does not change the data.
     @AppStorage(DEFAULT_PRIVACY_PROTECT_SCREEN) private var protectScreen = false
     @AppStorage(GROUP_DEFAULT_PRIVACY_SANITIZE_LINKS, store: groupDefaults) private var sanitizeLinks = false
 
@@ -119,30 +119,30 @@ struct PopopxMeView: View {
                 helpEntries
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            // 标题栏收掉之后，这一页的第一行就是名片卡本身。留白改由内容自己给：上边从 8 升到 24
-            // （`spaceL`），让名片与状态栏之间是刻意的一段呼吸，而不是少了一行的空缺。
+            // After the title bar was closed off, the first row of this page is the card itself. The whitespace is now given by the content: the top inset rises from 8 to 24
+            // (`spaceL`), so between the card and the status bar there is a deliberate stretch of breathing room rather than the gap left by a missing row.
             .padding(.top, PopopxMetrics.spaceL)
             .padding(.bottom, PopopxMetrics.space2XL)
-            // 换身份、创建身份之后整组卡片会重排。Reduce Motion 下直接落位，不做弹簧。
+            // After switching or creating an identity the whole group of cards rearranges. Under Reduce Motion it lands directly, with no spring.
             .popopxAnimation(PopopxSpring.fluid, value: chatModel.currentUser?.userId, reduceMotion: reduceMotion)
         }
         .background(PopopxPalette.base)
         .navigationTitle(Copy.pageTitle)
-        // 「我」那一行大标题不再占首屏（真机第 6 轮追加项，微信式留白）：系统标题栏整条隐藏，
-        // 标题本身仍然声明着，VoiceOver 报得出这一页叫什么，只是不再画出一行。
-        // 口径照消息页 `ChatsListView.swift:256`：隐藏只作用于栈的这一页，二级页自己声明可见 ——
-        // 全部行链都过 `PopopxMeRowLink`，那里补了一处 `.toolbar(.visible, for: .navigationBar)`
-        // 覆盖它推送的每一页；`showsCreateIdentity` 那一跳另有一处（:152 下面）。
+        // The large "Me" title row no longer occupies the first screen (device round 6 additional item, WeChat-style whitespace): the system title bar is hidden entirely,
+        // and the title itself is still declared, so VoiceOver can announce what this page is called — it simply no longer draws a row.
+        // The wording follows the message page `ChatsListView.swift:256`: the hiding applies only to this page of the stack, and second-level pages declare themselves visible —
+        // every row link passes through `PopopxMeRowLink`, which adds one `.toolbar(.visible, for: .navigationBar)` there
+        // covering every page it pushes; the `showsCreateIdentity` hop has its own separate one (below :152).
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showsProfileQR) {
-            // detents 归调用方（`ProfileQRCodeSheet.swift:19` 那条约定）。这张卡的内容是
-            // 名片 + 模式选择 + 动作行，比聊天里那张位置卡高得多，0.8 是它与 `nameCard`
-            // 同屏时不挤掉自己动作行的那一档。
+            // The detents belong to the caller (the convention at `ProfileQRCodeSheet.swift:19`). This card's content is
+            // card + mode picker + action rows, much taller than the location card in chat, and 0.8 is the tier at which, sharing the screen with `nameCard`,
+            // it does not squeeze out its own action rows.
             ProfileQRCodeSheet(identityName: chatModel.currentUser?.displayName ?? Copy.profileQRIdentityFallback)
                 .presentationDetents([.fraction(0.8)])
         }
-        // 算力点生态的第二入口。detents 同样归调用方（上面那条约定）：购买页那一张要装下七档价格表，
-        // 给 `.medium` 会让它在自己的表上滚动；兑换码最短，中档即可。
+        // The second entry of the compute-credits ecosystem. The detents likewise belong to the caller (the convention above): the purchase page's sheet must hold a seven-tier price table,
+        // and giving it `.medium` would make it scroll inside its own table; the redemption code is the shortest, so the middle tier is enough.
         .sheet(isPresented: $showsCreditsStore) {
             PopopxCreditsStoreView()
                 .presentationDetents([.large])
@@ -155,26 +155,26 @@ struct PopopxMeView: View {
             PopopxGiftBadgeCardSheet()
                 .presentationDetents([.large])
         }
-        // 徽章三条出口（付费墙 / 体验说明 / 详情）走顶栏胶囊那一个载体，detents 归载体。
-        // 付费墙与算力点中心仍是两张平行的 Sheet，不是套娃：算力点中心那一行独立开（上面
-        // `showsCreditsStore`），打开付费墙时它自己再挂「算力点中心」那一层
+        // The badge's three exits (paywall / trial explanation / details) go through the top bar capsule's one carrier, and the detents belong to the carrier.
+        // The paywall and the compute-credits center remain two parallel Sheets, not nesting: the compute-credits center row opens independently (above
+        // `showsCreditsStore`), and when the paywall is open it attaches the "compute-credits center" layer itself.
         // （`PopopxBadgePaywallView.swift:226`）。
         .popopxBadgeSheets($badgeSheet)
-        // 「添加新身份」快捷入口的目标页：`CreateProfile` 自带标题与主题背景
-        // （`Shared/Views/Onboarding/CreateProfile.swift:121`、`:122`），这里不重复装饰，
-        // 只把主页收掉的那条标题栏在自己身上要回来 —— 这一跳不走 `PopopxMeRowLink`，
-        // 所以可见性得单独声明，否则推进去是一页没有返回按钮的创建表单。
+        // The destination page of the "add a new identity" shortcut: `CreateProfile` carries its own title and themed background
+        // (`Shared/Views/Onboarding/CreateProfile.swift:121`, `:122`), so nothing is decorated twice here;
+        // it only reclaims on itself the title bar the home page hid — this hop does not go through `PopopxMeRowLink`,
+        // so visibility has to be declared separately, otherwise you push into a creation form with no back button.
         .navigationDestination(isPresented: $showsCreateIdentity) {
             CreateProfile()
                 .toolbar(.visible, for: .navigationBar)
         }
         .onChange(of: showsProfileQR) { _, opened in
-            // 关掉名片码就重读一次档位：那张 Sheet 里的模式开关会改本机那份武装记录，
-            // 入口行上那一格说的必须是现在真实的那一档。
+            // Closing the card QR re-reads the tier once: the mode switch inside that sheet changes this device's arming record,
+            // and the slot on the entry row must state the tier that is true right now.
             if !opened { Task { await refreshProfileStatus() } }
         }
-        // 卡包那一行说的是"此刻还剩几张能用"，所以两张会动券的 Sheet 一关就重读一次：
-        // 兑换把券写成已用、转赠把券交给对方，两者都不回调本页，只能回去问保险柜。
+        // The card-wallet row says "how many are still usable right now", so both sheets that move vouchers trigger a re-read as soon as they close:
+        // redemption writes a voucher as used and transfer hands a voucher to the peer; neither calls back into this page, so the only option is to ask the vault again.
         .onChange(of: showsRedeemCode) { _, opened in
             if !opened { Task { await refreshVoucherCount() } }
         }
@@ -182,19 +182,19 @@ struct PopopxMeView: View {
             if !opened { Task { await refreshVoucherCount() } }
         }
         .popopxToast(toast)
-        // 入口行那一格的初值：进本页读一次，换身份再读一次。读不到就是"还没制作"，
-        // 这一句必须是读出来的而不是猜的——`ProfileStorageManager.loadEditable()` 返回 nil
-        // 才是唯一能说"未配置"的依据。
+        // The initial value of the entry row's slot: read once on entering this page, and again after switching identity. If the read fails it is "not created yet",
+        // and that sentence must be read rather than guessed — `ProfileStorageManager.loadEditable()` returning nil
+        // is the only evidence that can support saying "not configured".
         .task(id: chatModel.currentUser?.userId) {
             await refreshProfileStatus()
         }
-        // 券是本机钥匙串里的东西，与切哪个身份无关，所以它只跟"进过这一页"绑定一次。
+        // Vouchers are things inside this device's keychain, unrelated to which identity is active, so the read is bound only once to "having entered this page".
         .task {
             await refreshVoucherCount()
         }
     }
 
-    // MARK: 顶部个人名片头
+    // MARK: The top personal card header
 
     @ViewBuilder private var nameCard: some View {
         if let user = chatModel.currentUser {
@@ -217,7 +217,7 @@ struct PopopxMeView: View {
         }
     }
 
-    /// 真·空状态：没有 `currentUser` 时不摆假名片，只说明身份是什么，并给一个既有的创建页。
+    /// The genuinely empty state: without `currentUser` it does not display a fake card, it only explains what an identity is and offers an existing creation page.
     private var emptyIdentityCard: some View {
         PopopxSectionCard(footnote: Copy.emptyFootnote) {
             HStack(alignment: .top, spacing: PopopxMetrics.spaceS) {
@@ -241,12 +241,12 @@ struct PopopxMeView: View {
         }
     }
 
-    /// 入口行那一格读出来的档位。优先级和这张主页实际的发送行为一致：
-    /// **名片码留下的武装记录压过已保存的主页**——扫码自动推送用的就是那一档
+    /// The tier read into the entry row's slot. Its precedence matches this home page's actual sending behaviour:
+    /// **the arming record left by the card QR outranks the saved home page** — scan-to-auto-push uses exactly that tier,
     ///（`ProfileAutoSender.handleContactConnected(contactId:)`，ProfileAutoSender.swift:241），
-    /// 所以标签跟着它说，而不是说一份这次并不会发出去的档位。
-    /// 只认**还在有效期内**的那一份：`armingWindowSeconds` 一过它就推不出去了（ProfileAutoSender.swift:161 那一格会被清），
-    /// 把过期显示成一个档位只会让人去关一个已经不存在的开关。
+    /// so the label says that, rather than a tier that would not be sent this time.
+    /// Only the copy **still within its validity window** counts: once `armingWindowSeconds` passes it can no longer be pushed (ProfileAutoSender.swift:161 that slot gets cleared),
+    /// and showing an expired one as a tier would only make people go and turn off a switch that no longer exists.
     private func refreshProfileStatus() async {
         let armed = ProfileAutoSender.shared.armedProfileScene
         if let armed, armed.expiresAt > Date() {
@@ -260,8 +260,8 @@ struct PopopxMeView: View {
         profileStatusValue = "\(Copy.profileConfigured) · \(profileModeLabel(manifest.sendMode))"
     }
 
-    /// 档位怎么说归本页：`PersonalProfileModel.cardLabel` 是那两个模块内的中文常量，而本页要进
-    /// 16 个语种，所以照同一个 `mode` 自己映射。两处读的是同一份档位，不会读出两种状态。
+    /// How the tier is worded belongs to this page: `PersonalProfileModel.cardLabel` was a Chinese constant outside the 16 catalogs, so this page maps the same
+    /// `mode` itself through `Copy`; cardLabel now reads those same two keys, so the two places cannot word one tier differently.
     private func profileModeLabel(_ mode: PopopxProfileSendMode) -> String {
         switch mode {
         case .ephemeral: return Copy.profileModeEphemeral
@@ -269,7 +269,7 @@ struct PopopxMeView: View {
         }
     }
 
-    // MARK: 组 1 · 资产与节点权益
+    // MARK: Group 1 · assets and node entitlements
 
     private var assetEntries: some View {
         PopopxSectionCard(Copy.groupAssets, footnote: Copy.commerceFootnote) {
@@ -285,12 +285,12 @@ struct PopopxMeView: View {
                 routeBadge()
             }
             .accessibilityIdentifier("popopx.me.badge")
-            // 一步直达购买页的那枚胶囊。为什么不并进上面那一行：`PopopxPickerRow` 没有右侧插槽
-            //（共享原子库是红线文件，它内部那枚图标底座 `PopopxIconBadge` 还是 file-private，
-            // `PopopxControls.swift:315`），自己拼一行就等于重画原子，16 语种一拉长标题就露馅。
-            // 所以它贴着同一张卡片、右对齐独立成行，用 `PopopxButton(fullWidth: false)` 拿到
-            // 现成的品牌底色与 44pt 命中区。休眠态这一枚和整行的去处相同（都进购买页），
-            // 差别只在于不用先猜"整行可点"。
+            // The capsule that reaches the purchase page directly in one step. Why it is not merged into the row above: `PopopxPickerRow` has no trailing slot
+            // (the shared atomic library is a red-line file, and the icon base inside it, `PopopxIconBadge`, is still file-private,
+            // `PopopxControls.swift:315`), so assembling a row by hand means redrawing an atom, which shows as soon as a title stretches across 16 languages.
+            // So it hugs the same card, right-aligned as its own row, and uses `PopopxButton(fullWidth: false)` to get
+            // the ready-made brand background and 44pt hit area. In the dormant state this one goes where the whole row goes (both into the purchase page),
+            // the only difference being you need not first guess that "the whole row is tappable".
             HStack(spacing: 0) {
                 Spacer(minLength: 0)
                 PopopxButton(badgeActionTitle, role: .primary, fullWidth: false) {
@@ -299,9 +299,9 @@ struct PopopxMeView: View {
             }
             .padding(.top, PopopxMetrics.spaceS)
             PopopxMeDivider()
-            // 无条件入口：整页只有这一行不看徽章状态就能打开面板，理由见上面 `badgeSheet`。
-            // 真机第 8 轮拆页后它开的是**算力点中心**，不再是付费墙 —— 这一行的源文就是
-            // "Top up Compute Credits"，商品动线拆分后还把它送进卖徽章的那一屏，正是本轮要修的混淆。
+            // An unconditional entry: this is the only row on the whole page that can open a panel without looking at the badge state, for the reason see `badgeSheet` above.
+            // After the device round 8 page split it opens the **compute-credits center**, no longer the paywall — this row's source text is
+            // "Top up Compute Credits", and after the product flow was split, still sending it to the screen that sells badges is exactly the confusion this round fixes.
             PopopxPickerRow(Copy.purchaseCredits, systemImage: "cart.fill", tint: .brand) {
                 PopopxHaptics.selection()
                 showsCreditsStore = true
@@ -310,8 +310,8 @@ struct PopopxMeView: View {
         }
     }
 
-    /// 徽章那一格说三档真话：休眠不写"0 天"，体验与正式不共用"剩余"这个词（口径同
-    /// `PopopxBadgeCopy.remaining`）。天数一律向上取整，还剩一分钟不能说"0 天"。
+    /// The badge slot tells the truth for all three tiers: dormant does not write "0 days", and trial and formal do not share the word "remaining" (wording same as
+    /// `PopopxBadgeCopy.remaining`). Day counts always round up; with one minute left you cannot say "0 days".
     private var badgeRowValue: String {
         switch badge.phase {
         case .dormant:
@@ -327,9 +327,9 @@ struct PopopxMeView: View {
         max(1, Int(ceil(max(0, expiresAt.timeIntervalSinceNow) / 86_400)))
     }
 
-    /// 只有正式点亮态才配得上"续费"：体验期和休眠都还没开始扣费，对它们说"续费"是在编造
-    /// 一段并不存在的订阅。判据用共享枚举 `capsuleState`，和 `routeBadge()` 同一份 —— 不能用
-    /// `isLit`，它把体验期也算成"亮着"（`PopopxBadgeCreditsModels.swift:262`）。
+    /// Only the formally lit tier deserves "renew": during the trial and while dormant charging has not begun, so saying "renew" to them is inventing
+    /// a subscription that does not exist. The criterion is the shared enum `capsuleState`, the same one as `routeBadge()` — it cannot use
+    /// `isLit`, which also counts the trial period as "lit" (`PopopxBadgeCreditsModels.swift:262`).
     private var badgeActionTitle: String {
         switch badge.phase.capsuleState {
         case .activeLit: Copy.badgeRenew
@@ -337,20 +337,20 @@ struct PopopxMeView: View {
         }
     }
 
-    /// 判据只有 `PopopxBadgeSheet.entry(for:)` 这一份，顶栏胶囊走的也是它：三态 → 三出口在这里
-    /// 收口，胶囊将来加一档，改那个函数会连带这里编译报错，而不是两处各说一套。
+    /// The criterion is `PopopxBadgeSheet.entry(for:)` alone, and the top bar capsule goes through it too: three states → three exits are closed off here,
+    /// and if the capsule gains a tier later, changing that function makes this fail to compile instead of two places each telling their own story.
     private func routeBadge() {
         badgeSheet = PopopxBadgeSheet.entry(for: badge.phase.capsuleState)
     }
 
-    // MARK: 组 2 · 加密主页与卡包
+    // MARK: Group 2 · encrypted home page and card wallet
 
     private var spaceEntries: some View {
         PopopxSectionCard(Copy.groupSpace) {
-            // 加密个人主页：制作器用 `NavigationLink` 推上去，不是 Sheet —— 它自己不带导航容器
-            //（`ProfileBuilderView.swift:434` 那一层的约定），推上去就白拿现成的返回键。
-            // `value` 那一格是这台机器上主页的当前档位；读盘是 actor hop，放在 `.task` 里，
-            // 不在 body 里同步读，否则每次重排这组卡片都会去问一次磁盘。
+            // The encrypted personal home page: the builder is pushed with a `NavigationLink`, not a Sheet — it does not carry its own navigation container
+            // (the convention of the layer at `ProfileBuilderView.swift:434`), so pushing it gets the ready-made back button for free.
+            // The `value` slot is this machine's current home-page tier; reading the disk is an actor hop, so it lives in `.task`
+            // and is not read synchronously in the body, otherwise every rearrangement of these cards would ask the disk once.
             PopopxMeRowLink(Copy.personalProfile, value: profileStatusValue, systemImage: "person.text.rectangle.fill", tint: .brand) {
                 ProfileBuilderView()
                     .navigationTitle(Copy.personalProfile)
@@ -364,10 +364,10 @@ struct PopopxMeView: View {
         }
     }
 
-    /// 卡包那一行是一条 `Menu`，不是一个页面：仓库里没有"卡包浏览页"这个视图，
-    /// 只有转赠与兑换两张 Sheet，所以这一行把两个动作并成一次长按式的选择，
-    /// 而不是再造一个只列本机券的第四页。行本体仍由 `PopopxPickerRow` 画，
-    /// 但它自带的 `Button` 会吃掉菜单的点击，所以整行设为不可命中、交给外层 `Menu`。
+    /// The card-wallet row is a `Menu`, not a page: the repository has no "card wallet browsing page" view,
+    /// only the transfer and redemption sheets, so this row merges the two actions into one long-press-style choice
+    /// instead of inventing a fourth page that merely lists the local vouchers. The row body is still drawn by `PopopxPickerRow`,
+    /// but its own `Button` would swallow the menu's tap, so the whole row is made unhittable and handed to the outer `Menu`.
     private var giftVaultRow: some View {
         Menu {
             Button(Copy.giftSend) {
@@ -393,7 +393,7 @@ struct PopopxMeView: View {
         .accessibilityIdentifier("popopx.me.giftVault")
     }
 
-    /// 一格都没有就不显示数字：空卡包写"0 张可用"会让人以为系统里有个"张"的概念在等着凑。
+    /// With not a single slot, no number is shown: an empty wallet saying "0 available" would make people think some concept of "cards" in the system is waiting to be filled up.
     private var voucherValueTitle: String? {
         unusedVouchers > 0 ? String(format: Copy.vouchersAvailableFormat, unusedVouchers) : nil
     }
@@ -402,17 +402,17 @@ struct PopopxMeView: View {
         unusedVouchers = await PopopxP2PVoucherVault.shared.vouchers(state: .unused).count
     }
 
-    // MARK: 组 3 · 常用
+    // MARK: Group 3 · frequently used
 
     private var generalEntries: some View {
         PopopxSectionCard(Copy.groupGeneral) {
-            // 「添加朋友」这一行原先在这里，2026-11-20 删：消息栏右上角「+」已经挂着同一个
-            // `PopopxAddFriendView`（ChatsListView.swift:296-298），同一件事不该在两处各有一个入口。
-            // 真机第 6 轮二.1：聊天偏好、外观与图标、显示语言三行落回「全部设置」，帮助与关于
-            // 升成整页最后一张卡（下面 `helpEntries`）。这一组于是只剩一件事——进全部设置。
-            // 三行的目的地与装饰（`PreferencesView`/`AppearanceSettings`/`PopopxDisplayLanguageView`
-            // 加各自的 `.navigationTitle` 与 `ThemedBackground`）原样搬走，一处参数没改，
-            // 行尾那两个读数也回到它们本来的供应者 `PopopxSettingsValues` 同一个文件里。
+            // The "Add friends" row used to be here; deleted on 2026-11-20: the "+" at the top-right of the message tab already hangs the same
+            // `PopopxAddFriendView` (ChatsListView.swift:296-298), and the same thing should not have an entry in two places.
+            // Device round 6 two.1: chat preferences, appearance & icon and display language fall back into "All settings", while help & about
+            // was promoted into the page's last card (`helpEntries` below). This group therefore has only one job left — entering All settings.
+            // The three rows' destinations and decoration (`PreferencesView`/`AppearanceSettings`/`PopopxDisplayLanguageView`
+            // plus their own `.navigationTitle` and `ThemedBackground`) moved exactly as they were, not one parameter changed,
+            // and the two values at the row ends went back into the same file as their original supplier `PopopxSettingsValues`.
             PopopxMeRowLink(Copy.settings, systemImage: "gearshape.fill") {
                 PopopxPresenceGated(reason: Copy.presenceReasonSettings) {
                     PopopxSettingsView()
@@ -423,12 +423,12 @@ struct PopopxMeView: View {
         }
     }
 
-    // MARK: 组 5 · 帮助与关于（整页最后一张卡）
+    // MARK: Group 5 · help and about (the page's last card)
 
-    /// 真机第 6 轮二.3：它原先是「常用」组里的尾行，头上还压着隐私防线，找开源地址与隐私政策
-    /// 要往页面中间翻。现在它是最后一张卡——读完这一页，才是要不要相信它的地方。
-    /// 卡片不给标题：组名与行名会是同一句话，微信那一页的最后一段也是这样只有一行。
-    /// 目的地 `PopopxHelpView` 一字未动（开源地址与离线《POPOPX 隐私政策》阅读器都在那一页里）。
+    /// Device round 6 two.3: it used to be the tail row of the "frequently used" group, still with the privacy defences pressing above it, so looking for the open-source address and the privacy policy
+    /// meant scrolling back to the middle of the page. Now it is the last card — after reading this page is where you decide whether to trust it.
+    /// The card gives no title: the group name and the row name would be the same sentence, and the last section of WeChat's page is also just a single row.
+    /// The destination `PopopxHelpView` is unchanged by one word (both the open-source address and the offline "POPOPX Privacy Policy" reader are in that page).
     private var helpEntries: some View {
         PopopxSectionCard {
             PopopxMeRowLink(Copy.helpRow, systemImage: "questionmark.circle") {
@@ -438,11 +438,11 @@ struct PopopxMeView: View {
         }
     }
 
-    // MARK: 组 4 · 隐私与安全防线
+    // MARK: Group 4 · privacy and security defences
 
-    /// 裁定 6：不把四件事压成一行。一行写"应用锁、双密码、防录屏、三击抹除"是不诚实的——
-    /// 前两项分别在 `PrivacySettings` 与 `PopopxAntiTheftSettingsView` 两个页面里，最后一项
-    /// 只活在本页这块卡上，任何一行都到不了另一行的目的地。所以拆成两行，各说各的去处。
+    /// Ruling 6: do not compress four things into one row. A row saying "app lock, dual password, screen-recording guard, triple-tap wipe" would be dishonest —
+    /// the first two live on the `PrivacySettings` and `PopopxAntiTheftSettingsView` pages respectively, and the last one
+    /// only lives on this card here, so no row can reach another row's destination. Hence two rows, each saying where it goes.
     private var securityEntries: some View {
         PopopxSectionCard(Copy.groupSecurity) {
             PopopxMeRowLink(Copy.privacySettings, systemImage: "lock.shield.fill", tint: .brand) {
@@ -453,16 +453,16 @@ struct PopopxMeView: View {
                 }
             }
             PopopxMeDivider()
-            // 真机第 6 轮二.2：这两枚原先在「全部设置 → 隐私与安全」那张卡里。它们绑的两个键在
-            // `PrivacySettings.swift:75`、`:88` 本来就各有一枚 `Toggle`，设置页那张卡只是同一批状态的
-            // 第二处；本轮把它并进这张防线卡，两处于是变成「防线卡 + 隐私设置页」，能直接拨的不再藏在
-            // 一次 push 后面。（要不要连隐私设置页里那两枚一起收口，已上报待裁定：那是上游的页面。）
-            // 标题复用 16 个目录里已有的英文原句（`"Protect app screen"` / `"Remove link tracking"`），
-            // 于是这一行与隐私设置页里那一枚说的是同一句话；两条说明是 POPOPX 自己的措辞，
-            // 本轮转成 Key 并补齐 16 个译本（中文值就是设置页原来那两句）。
-            // 应用锁（`PopopxLockView`）仍在隐私设置那一页里：它要 `prefPerformLA` 与
-            // `currentLAMode` 两份绑定（`PrivacySettings.swift:60`），那些只有那一页自己造得出来，
-            // 不在这里复刻第二套。
+            // Device round 6 two.2: these two used to be in the "All settings → Privacy and security" card. The two keys they bind already had
+            // one `Toggle` each at `PrivacySettings.swift:75`, `:88`, and the settings-page card was only the second place for the same batch of state;
+            // this round merges it into this defence card, so the two become "defence card + privacy settings page", and the ones you can flip directly are no longer hidden
+            // behind one push. (Whether to also close off those two inside the privacy settings page has been escalated for a ruling: that is an upstream page.)
+            // The titles reuse English original sentences already present in the 16 directories (`"Protect app screen"` / `"Remove link tracking"`),
+            // so this row and that switch in the privacy settings page say the same sentence; the two descriptions are POPOPX's own wording,
+            // and this round turned them into Keys and filled in the 16 translations (the Chinese values are the settings page's original two sentences).
+            // The app lock (`PopopxLockView`) is still on the privacy settings page: it needs the two bindings `prefPerformLA` and
+            // `currentLAMode` (`PrivacySettings.swift:60`), which only that page itself can produce,
+            // so no second set is replicated here.
             PopopxToggleRow(
                 Copy.protectScreenRow,
                 note: Copy.protectScreenNote,
@@ -479,8 +479,8 @@ struct PopopxMeView: View {
                 isOn: $sanitizeLinks
             )
             PopopxMeDivider()
-            // 右侧的值只报"传感器那半边开没开"，不报双密码配没配：后者本身就是不想让旁人
-            // 一眼看出来的信息，摆在第一层页面上等于替胁迫者做了排查。
+            // The value on the right reports only "is the sensor half switched on", not whether the dual password is configured: the latter is itself information
+            // you would not want a bystander to see at a glance, and putting it on a first-level page amounts to doing the coercer's triage for them.
             PopopxMeRowLink(
                 Copy.antiTheft,
                 value: PopopxAntiTheftMotionGuard.shared.enabled ? Copy.antiTheftOn : Copy.antiTheftOff,
@@ -493,21 +493,21 @@ struct PopopxMeView: View {
             }
             .accessibilityIdentifier("popopx.me.antiTheft")
             PopopxMeDivider()
-            // 离线组网的总闸、真实核验块与配对策略原先都在这张卡上，2026-11-20 整块迁到
-            // 厢语页右上角的设置中心（`PopopxCabinMeshSettingsSheet`）。这一张卡留的是与蓝牙
-            // 无关的三道防线；三击抹除留在最后，因为它抹的正是迁走的那套 mesh 数据。
+            // The offline-mesh master switch, the real verification block and the pairing policy all used to be on this card; on 2026-11-20 the whole block moved to
+            // the settings center at the top-right of the Cabin page (`PopopxCabinMeshSettingsSheet`). What this card keeps are the three defences unrelated
+            // to Bluetooth; the triple-tap wipe stays last, because what it wipes is exactly the mesh data that moved away.
             panicBlock
         }
     }
 
-    /// 余额这一格读账本本身，不读某一次购买回调里的数：面板关掉之后这一行必须自己变对。
-    /// 装载不必在这里做——`PopopxCreditsManager.start()` 的第一行就是 `loadIfNeeded()`
-    /// （PopopxCreditsManager.swift:79-86），而那一跳排在 `POPOPXApp.init()` 里。
+    /// The balance slot reads the ledger itself, not a number from some purchase callback: after the panel closes, this row must become correct by itself.
+    /// Loading need not happen here — the first line of `PopopxCreditsManager.start()` is `loadIfNeeded()`
+    /// (PopopxCreditsManager.swift:79-86), and that hop is scheduled inside `POPOPXApp.init()`.
     private var creditsBalanceTitle: String {
         String(format: PopopxCommerceCopy.creditsAmountFormat, credits.balance)
     }
 
-    /// 危险行 + 它自己的说明合成一块，卡片里只占一个位置。
+    /// A danger row plus its own explanation form one block, occupying a single position inside the card.
     private var panicBlock: some View {
         VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
             panicWipeRow
@@ -519,7 +519,7 @@ struct PopopxMeView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// 唯一一行红色（§1.1 危险 = 系统红）：紧急抹除。它不自己弹确认。
+    /// The only red row (§1.1 danger = system red): the emergency wipe. It does not raise its own confirmation.
     private var panicWipeRow: some View {
         PopopxPickerRow(
             Copy.panicRow,
@@ -534,10 +534,10 @@ struct PopopxMeView: View {
         .accessibilityHint(Text(verbatim: Copy.panicRowHint))
     }
 
-    /// 可切换的其它身份：与 UserPicker.swift:33-35 同一口径 —— 加锁（`user.hidden`，即有
-    /// `viewPwdHash`）的身份不进切换器，因为这里传的是 `viewPwd: nil`，带着 nil 去切加锁身份只会
-    /// 失败。加锁身份由「身份管理」页处理：它把搜索框当密码框用，走
-    /// `changeActiveUserAsync_(_:viewPwd:)` 的真密码分支（UserProfilesView.swift:338 + :221）。
+    /// The other switchable identities: the same criterion as UserPicker.swift:33-35 — identities that are locked (`user.hidden`, i.e. with a
+    /// `viewPwdHash`) do not enter the switcher, because what is passed here is `viewPwd: nil`, and switching to a locked identity carrying nil would only
+    /// fail. Locked identities are handled by the "Identity management" page: it uses the search field as a password field and goes through
+    /// `changeActiveUserAsync_(_:viewPwd:)`'s real-password branch (UserProfilesView.swift:338 + :221).
     private func switchableOthers(of user: User) -> [UserInfo] {
         chatModel.users
             .filter { !$0.user.hidden && $0.user.userId != user.userId }
@@ -571,19 +571,19 @@ struct PopopxMeView: View {
         toast.show(Copy.copiedUserID, kind: .success)
     }
 
-    /// 只往既有的布防状态机里送一次轻触：`PopopxPanicWipeArming.tap` 自己判定"一秒内正好三次"。
-    /// 确认弹窗是 `PopopxPanicWipeGate` 的职责，而它已经由 `PopopxMeshPanicWipeMount`
-    /// （POPOPXApp.swift:48 → POPOPXAPI.swift:4013-4030）挂在 app 根上、绑定同一个
-    /// `isAwaitingConfirmation`。所以这里绝不写第二个 alert：写了就有两道确认抢同一个状态机，
-    /// 而铁律要的是一次、且只有那一次确认。熔断关闭时那道门根本不存在
-    /// （POPOPXAPI.swift:4022 的 `if runtime.isFuseOn`），所以这一行同时被禁用。
+    /// Feeds exactly one tap into the existing arming state machine: `PopopxPanicWipeArming.tap` decides "exactly three times within one second" by itself.
+    /// The confirmation sheet is `PopopxPanicWipeGate`'s responsibility, and it is already mounted
+    /// (POPOPXApp.swift:48 → POPOPXAPI.swift:4013-4030) at the app root by `PopopxMeshPanicWipeMount`, bound to the same
+    /// `isAwaitingConfirmation`. So a second alert is never written here: writing one would have two confirmations fighting over the same state machine,
+    /// and what the iron rule requires is one confirmation, and only that one. When the fuse is off, that gate does not exist at all
+    /// (the `if runtime.isFuseOn` at POPOPXAPI.swift:4022), so this row is disabled at the same time.
     @MainActor private func armPanicWipe() {
         guard meshRuntime.isFuseOn else { return }
         PopopxHaptics.impact(.light)
         _ = panicWipe.tap()
     }
 
-    /// 行尾的值就是状态机此刻的真话，不是"我按过了吧"。
+    /// The value at the row end is the state machine's truth at this moment, not "I suppose I pressed it".
     private var panicValue: String {
         if panicWipe.isWiping { return Copy.panicWiping }
         if panicArming.isAwaitingConfirmation { return Copy.panicAwaiting }
@@ -593,11 +593,11 @@ struct PopopxMeView: View {
     }
 }
 
-// MARK: - 顶部个人名片头
+// MARK: - The top personal card header
 
-/// 微信式名片头：64pt 头像 + 粗体身份名 + 双模状态条，右端二维码微标与 `chevron.right`。
-/// 整行（头像到状态条）推「身份管理」，二维码微标是并列的第二个按钮 —— 所以这两个按钮必须是
-/// **兄弟**而不是嵌套：`Button` 套 `Button` 只会让外层吃掉点击，名片码就打不开了。
+/// A WeChat-style card header: 64pt avatar + bold identity name + dual-mode status bar, with a QR micro-badge and `chevron.right` at the right end.
+/// The whole row (avatar to status bar) pushes "Identity management", and the QR micro-badge is a parallel second button — so these two buttons must be
+/// **siblings** rather than nested: a `Button` inside a `Button` only lets the outer one eat the tap, and the card QR would never open.
 @MainActor
 private struct PopopxIdentityCard: View {
     private let user: User
@@ -632,7 +632,7 @@ private struct PopopxIdentityCard: View {
         self.onAddIdentity = onAddIdentity
     }
 
-    /// 边长不写裸数字：大头像 = spaceXL × 2（64pt），切换器里的小头像 = spaceXL。
+    /// The side length is not a bare number: the large avatar = spaceXL × 2 (64pt), the small avatars in the switcher = spaceXL.
     private static let avatarSide: CGFloat = PopopxMetrics.spaceXL * 2
     private static let chipAvatarSide: CGFloat = PopopxMetrics.spaceXL
 
@@ -654,11 +654,11 @@ private struct PopopxIdentityCard: View {
         }
     }
 
-    /// 「添加新身份」快捷入口，收在名片底部操作条的右端。真机反馈是这条路由太难找：原来要先推
-    /// 「身份管理」、再点「添加档案」两步（`UserProfilesView.swift:87-97`），这一枚把它压成一步。
-    /// 措辞复用既有词条 `Copy.createIdentity`（"Create a new identity"，16 个目录都已有译法），
-    /// 所以本轮不新增 Key。动作走宿主登记的 push：`CreateProfile` 是一张 Form，
-    /// 塞进 sheet 会丢返回手势，也与 `UserProfilesView.swift:112-114` 那条同一写法。
+    /// The "add a new identity" shortcut, tucked at the right end of the card's bottom action bar. Real-device feedback was that this route was too hard to find: you first had to push
+    /// "Identity management" and then tap "Add profile", two steps (`UserProfilesView.swift:87-97`); this one compresses it into one step.
+    /// The wording reuses the existing entry `Copy.createIdentity` ("Create a new identity", already translated in all 16 directories),
+    /// so this round adds no Key. The action goes through the push registered by the host: `CreateProfile` is a Form,
+    /// and putting it into a sheet would lose the back gesture; it is also the same pattern as `UserProfilesView.swift:112-114`.
     private var addIdentityRow: some View {
         HStack(spacing: PopopxMetrics.spaceS) {
             Spacer(minLength: PopopxMetrics.spaceXS)
@@ -704,7 +704,7 @@ private struct PopopxIdentityCard: View {
         .accessibilityHint(Text(verbatim: Copy.manageIdentitiesHint))
     }
 
-    /// 名片码微标。44×44 的命框由 `minHitTarget` 兜住，图标本身只有 `spaceM`。
+    /// The card QR micro-badge. The 44×44 hit box is held by `minHitTarget`, while the icon itself is only `spaceM`.
     private var profileQRButton: some View {
         Button(action: onShowProfileQR) {
             Image(systemName: "qrcode")
@@ -721,7 +721,7 @@ private struct PopopxIdentityCard: View {
         .accessibilityIdentifier("popopx.me.profileQR")
     }
 
-    /// 装饰用的箭头：命框在左边的 `nameRow` 上，所以它自己不进无障碍树。
+    /// A decorative arrow: its hit box is on the `nameRow` to the left, so it does not enter the accessibility tree itself.
     private var disclosureChevron: some View {
         Image(systemName: "chevron.right")
             .font(PopopxType.microTag)
@@ -753,7 +753,7 @@ private struct PopopxIdentityCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// 昵称与全名相同（或全名为空）时不重复念一遍 —— 口径同 SettingsView.swift:690 的 `profileName`。
+    /// When the nickname equals the full name (or the full name is empty) it is not read out twice — the same criterion as `profileName` at SettingsView.swift:690.
     private var showsFullName: Bool {
         !user.fullName.isEmpty && user.fullName != user.displayName
     }
@@ -795,10 +795,10 @@ private struct PopopxIdentityCard: View {
     }
 }
 
-/// 名片头部的双模状态条：左段是在线传输（SMP），右段是节点权益档位。
-/// 两段各读各的唯一真值源（传输口径沿用引导页那条已译好的 Key，权益读 `PopopxBadgeManager.phase`），
-/// 本页不再判第三条通道。着色只用 `successInk` / `labelSecondary`：
-/// §1.1 里青绿专指离线厢语，拿它给在线权益上色会伪造一条并不存在的传输通道。
+/// The dual-mode status bar of the card header: the left segment is online transport (SMP), the right segment is the node-entitlement tier.
+/// Each segment reads its own single source of truth (the transport wording reuses the already-translated Key from the onboarding page, and entitlement reads `PopopxBadgeManager.phase`),
+/// and this page no longer judges a third channel. Coloring uses only `successInk` / `labelSecondary`:
+/// in §1.1 cyan-green means offline Cabin exclusively, and using it to color an online entitlement would fabricate a transport channel that does not exist.
 private struct PopopxMeStatusCapsule: View {
     private let phase: PopopxBadgePhase
 
@@ -829,7 +829,7 @@ private struct PopopxMeStatusCapsule: View {
         .accessibilityLabel(Text(verbatim: "\(Copy.smpEncrypted), \(badgeWords)"))
     }
 
-    /// 短到能跟在身份名后面不换行：休眠只说"未激活"，点亮与体验各说自己的天数。
+    /// Short enough to follow the identity name without wrapping: dormant only says "not activated", lit and trial each say their own day count.
     private var badgeWords: String {
         switch phase {
         case .dormant:
@@ -846,7 +846,7 @@ private struct PopopxMeStatusCapsule: View {
     }
 }
 
-/// 一枚可点的其它身份。整颗就是 `Button`，44pt 高，VoiceOver 念名字 + "以这个身份继续"。
+/// A tappable other identity. The whole thing is a `Button`, 44pt high, VoiceOver reads the name + "continue as this identity".
 @MainActor
 private struct PopopxIdentityChip: View {
     private let name: String
@@ -883,7 +883,7 @@ private struct PopopxIdentityChip: View {
                 }
             }
             .padding(.horizontal, PopopxMetrics.spaceS)
-            // 44pt 是下限而不是定值：大号动态字体下这颗 chip 要能长高，不能裁掉名字。
+            // 44pt is a floor rather than a fixed value: under large dynamic type this chip must be able to grow taller, and must not clip the name.
             .frame(minHeight: PopopxMetrics.minHitTarget)
             .background(PopopxPalette.separator, in: .rect(cornerRadius: PopopxMetrics.radiusControl))
             .overlay(
@@ -899,8 +899,8 @@ private struct PopopxIdentityChip: View {
         .accessibilityHint(Text(verbatim: Copy.switchHint))
     }
 
-    /// 未读口径直接取 `UserInfo.unreadCount`（ChatTypes.swift:104），本文件不再算第二套。
-    /// 数字本身不进无障碍树：整颗 chip 已经把它念成 value。
+    /// The unread count is taken directly from `UserInfo.unreadCount` (ChatTypes.swift:104); this file does not compute a second set.
+    /// The number itself does not enter the accessibility tree: the whole chip already reads it out as the value.
     private var unreadBadge: some View {
         Text(verbatim: "\(unread)")
             .font(PopopxType.metricSmall)
@@ -914,22 +914,22 @@ private struct PopopxIdentityChip: View {
     private static let chipAvatarSide: CGFloat = PopopxMetrics.spaceXL
 }
 
-/// 头像。有 base64 就用既有的 `ProfileImage`，没有就落到品牌标记 —— 不画占位人形，
-/// 也不画"按身份派生色相的几何渐变首字母"（裁定 5）：全仓没有 `colorForProfile` 这一类
-/// 按身份给色相的 helper（0 命中），而 §1.1 里靛紫只说"在线身份"、青绿只说"离线厢语"，
-/// 拿色相当纯装饰就会伪造一条并不存在的传输通道。宁可空着，不猜。
+/// The avatar. With base64 it uses the existing `ProfileImage`, without it falls back to the brand mark — no placeholder figure is drawn,
+/// and no "geometric gradient initial whose hue is derived from the identity" either (ruling 5): the whole repository has no `colorForProfile`-style
+/// hue-per-identity helper (0 hits), and in §1.1 indigo-violet means only "online identity" while cyan-green means only "offline Cabin",
+/// so using hue as pure decoration would fabricate a transport channel that does not exist. Rather leave it empty than guess.
 @MainActor
 private struct PopopxMeAvatar: View {
     private let image: String?
     private let side: CGFloat
 
-    /// 本机已解锁的外观。与外层同一个单例，不是第二份状态：这里只读 `owns`，
-    /// 花费仍然只在算力点中心那一页发生。
+    /// The appearance unlocked on this device. The same singleton as the outer layer, not a second piece of state: only `owns` is read here,
+    /// and spending still happens only on the compute-credits center page.
     @State private var credits = PopopxCreditsManager.shared
 
-    /// 只有大头像那一档描边：芯片档的 `side` 是 `spaceXL`，1.5pt 的双色环在那个尺寸上
-    /// 糊成一圈脏边，看不出"外观"反而看出"渲染坏了"。阈值写成两倍而不是直接比 `avatarSide`，
-    /// 是为了不在同一个类型里再抄一遍外层那两个尺寸常量。
+    /// The stroke applies only to the large-avatar tier: the chip tier's `side` is `spaceXL`, and a 1.5pt two-colour ring at that size
+    /// smears into a dirty circle, showing "appearance" not at all and "broken rendering" instead. The threshold is written as double rather than comparing `avatarSide` directly,
+    /// so as not to copy those two size constants a second time inside the same type.
     private static let ringMinimumSide: CGFloat = PopopxMetrics.spaceXL * 2
 
     private var wearsAuroraFrame: Bool {
@@ -944,8 +944,8 @@ private struct PopopxMeAvatar: View {
     var body: some View {
         Group {
             if imageFromBase64(image) != nil {
-                // `color:` 走 UserPicker.swift:44 同一个值：`ProfileImage` 内部按
-                // `asAnotherColorFromSecondaryVariant` 映射这张图在分组背景上的深浅，换掉它就错。
+                // The `color:` value is the same one as UserPicker.swift:44: inside, `ProfileImage` maps
+                // this image's lightness/darkness on the group background via `asAnotherColorFromSecondaryVariant`, and replacing it would be wrong.
                 ProfileImage(imageStr: image, size: side, color: Color(uiColor: .tertiarySystemGroupedBackground))
             } else {
                 Image(PopopxBrandAsset.mark)
@@ -957,12 +957,12 @@ private struct PopopxMeAvatar: View {
             }
         }
         .frame(width: side, height: side)
-        // 「极光盾头像框」：只描在本机自己的头像外面。这一族头像类型只画本机身份
-        // （联系人和群的头像各有各的类型），所以算力点中心那句"本机头像渲染生效，不上传"
-        // 在这里是结构成立的，不需要再判一次方向。
-        // `strokeBorder` 而不是 `stroke`：前者向内吃线宽，头像尺寸不会被撑大，
-        // 同一张卡上的身份名与地址不会因为买了外观而挪一行。
-        // 两个色停在环上对角走，起点仍是 `PopopxPalette.brand`：这一档不替换品牌色，只加一圈。
+        // The "aurora shield avatar frame": drawn only around this device's own avatar. This family of avatar types draws only the local identity
+        // (contacts and group avatars each have their own types), so the compute-credits center's sentence "rendered on the local avatar, never uploaded"
+        // holds structurally here, and the direction need not be judged a second time.
+        // `strokeBorder` rather than `stroke`: the former eats the line width inward, so the avatar size is not stretched,
+        // and the identity name and address on the same card will not shift by a row because an appearance was bought.
+        // The two colours travel diagonally around the ring, and the start point remains `PopopxPalette.brand`: this tier does not replace the brand colour, it only adds one ring.
         .overlay {
             if wearsAuroraFrame {
                 RoundedRectangle(cornerRadius: PopopxMetrics.radiusAvatar, style: .continuous)
@@ -976,25 +976,25 @@ private struct PopopxMeAvatar: View {
                     )
             }
         }
-        // 头像在这页永远是装饰：身份名就在同一张卡上，不让 VoiceOver 念两遍。
+        // The avatar is always decoration on this page: the identity name is on the same card, so VoiceOver is not asked to read it twice.
         .accessibilityHidden(true)
     }
 
-    /// 极光盾的终点色（青）。这一档唯一不在 `PopopxPalette` 里的值，也是整个商业特性里
-    /// 装饰色就该待处的位置：只有这一处读它，别处要用就得先解锁再描边，而不是一份共享 token。
+    /// The aurora shield's end colour (cyan). The only value in this tier that is not in `PopopxPalette`, and also, within the whole commercial feature, exactly where a decorative colour belongs:
+    /// only this one place reads it; anywhere else that wants it must unlock first and then stroke, rather than sharing a token.
     private static let auroraFrameEnd = Color.popopx(light: 0x1F8A70, dark: 0x4FD8B6)
 }
 
-/// 「推一个既有页面」的一行。外观直接复用 `PopopxPickerRow`，但点击交给外层 `NavigationLink`：
-/// 原子库里的行本身是个 `Button`，嵌套按钮会把链接的点击吃掉，所以这一行整体设为不可命中、
-/// 也不进无障碍树，由链接自己带上同名的 label 与 hint（44pt 由 `minHitTarget` 兜住）。
+/// A row that "pushes an existing page". The appearance reuses `PopopxPickerRow` directly, but the tap is handed to the outer `NavigationLink`:
+/// the row in the atomic library is itself a `Button`, and a nested button would eat the link's tap, so the whole row is made unhittable
+/// and stays out of the accessibility tree, while the link itself carries the same-named label and hint (44pt is held by `minHitTarget`).
 @MainActor
-/// 敏感页面的"在场核验"外壳（防盗模块二）。通不过就**一帧正文都不画**。
+/// The "presence verification" shell for sensitive pages (anti-theft module two). If it does not pass, **not one frame of body content is drawn**.
 ///
-/// 为什么不拦在 `NavigationLink` 上：这一族的行是目标式链接，拦推送要改整个 Me 页的
-/// 导航结构；而 `.suspicious` 的语义是"手机可能正握在别人手里"，晚一帧渲染正文就是泄露。
-/// 被拒时模块二已经把用户落到全屏遮罩上，所以这里只需要 `dismiss()` 把自己退掉，
-/// 不必再画一条"已拒绝"——多一个提示就多一个可被胁迫者读到的信号。
+/// Why the interception is not on the `NavigationLink`: the rows of this family are destination-style links, and intercepting the push would mean changing the whole Me page's
+/// navigation structure; whereas the semantics of `.suspicious` are "the phone may be in someone else's hands right now", so rendering the body one frame late is a leak.
+/// when it is refused, module two has already landed the user on the full-screen overlay, so all this needs is `dismiss()` to close itself,
+/// no need to draw an extra "declined" line: one more hint is one more signal a coercer can read.
 private struct PopopxPresenceGated<Content: View>: View {
     private let reason: String
     private let content: () -> Content
@@ -1010,7 +1010,7 @@ private struct PopopxPresenceGated<Content: View>: View {
         if allowed {
             content()
         } else {
-            // 与页面底色同色的空壳：不能是空白页，也不能是转圈——两者都在传递"被拦下了"。
+            // An empty shell in the same colour as the page background: it may not be a blank page and it may not be a spinner, because both of them communicate "you were stopped".
             Color.clear
                 .task {
                     if await PopopxBehaviorGuard.shared.authorized(reason: reason) {
@@ -1046,9 +1046,9 @@ private struct PopopxMeRowLink<Destination: View>: View {
 
     var body: some View {
         NavigationLink {
-            // 主页把整条标题栏收掉了（微信式首屏），而"隐藏"会随这一层的工具条偏好渗进推进去的页面 ——
-            // 消息页同一件事的做法是在目的地自己声明可见（`ChatsListView.swift:408`）。全部行链都过
-            // 这里，所以一句就够：子页面各自的 `.navigationTitle` 照旧生效，返回按钮一个不少。
+            // The home page has closed off the whole title bar (a WeChat-style first screen), and "hidden" seeps into the pages pushed from here along with this layer's toolbar preference -
+            // the messages page does the same thing by having the destination declare itself visible (`ChatsListView.swift:408`). Every row link passes
+            // through here, so one sentence is enough: each sub-page's own `.navigationTitle` still takes effect and not one back button is missing.
             destination()
                 .toolbar(.visible, for: .navigationBar)
         } label: {
@@ -1064,7 +1064,7 @@ private struct PopopxMeRowLink<Destination: View>: View {
     }
 }
 
-/// 卡片内的分隔线。`PopopxControls.swift:853` 里那条同名的只在 `#if DEBUG` 的画廊里，够不着。
+/// Divider inside the card. The one of the same name at `PopopxControls.swift:853` lives only inside the `#if DEBUG` gallery, out of reach.
 private struct PopopxMeDivider: View {
     var body: some View {
         Rectangle()
@@ -1074,9 +1074,9 @@ private struct PopopxMeDivider: View {
     }
 }
 
-/// `UserProfile` 需要环境里的 `SaveableSettings`（UserProfile.swift:16，body 里写 `ss.profileSave`），
-/// 而那个对象只在挂载它的子树里现造（ChatListView.swift:81 建、:159 注入）。照同一个做法包一层，
-/// 否则推进去就是 EnvironmentObject 缺失。
+/// `UserProfile` needs `SaveableSettings` from the environment (UserProfile.swift:16, its body writes `ss.profileSave`),
+/// and that object is only built on the spot inside the subtree that mounts it (ChatListView.swift:81 creates it, :159 injects it). Wrapping a layer the same way,
+/// otherwise pushing it in means a missing EnvironmentObject.
 private struct PopopxProfileHost: View {
     @StateObject private var settings = SaveableSettings()
 
@@ -1088,14 +1088,14 @@ private struct PopopxProfileHost: View {
     }
 }
 
-// MARK: - 文案
+// MARK: - Copy
 
-/// 页面上每一句看得见的（或 VoiceOver 念得出的）话都只在这里出现一次，并且一律走
-/// `NSLocalizedString`：**英文原句就是 Key**，与引导页、算力点生态同一套做法。
-/// 新词条写进 `bg/cs/de/es/fi/fr/hu/it/ja/nl/pl/ru/th/tr/uk/zh-Hans` 共 16 个译本目录，
-/// `en.lproj` 不写（读不到词条就回落 Key 本身，那就是英文）。
-/// 两个 Key 是刻意复用的既有词条 —— `"Settings"`、`"SMP end-to-end encrypted"`：
-/// 它们在 16 个目录里都已经有译法，且中文值正是本页要显示的那句。
+/// Every sentence on this page that is visible (or that VoiceOver can read out) appears exactly once here, and always through
+/// `NSLocalizedString`: **the English source sentence is the Key**, the same approach as the onboarding pages and the compute-point ecosystem.
+/// New entries go into the 16 translation directories `bg/cs/de/es/fi/fr/hu/it/ja/nl/pl/ru/th/tr/uk/zh-Hans`,
+/// and `en.lproj` is not written (an unreadable entry falls back to the Key itself, which is English).
+/// Two Keys deliberately reuse existing entries - `"Settings"`, `"SMP end-to-end encrypted"`:
+/// they already have translations in all 16 directories, and the Chinese values are exactly the sentences this page shows.
 private enum Copy {
     private static func key(_ value: String) -> String {
         NSLocalizedString(value, comment: "POPOPX Me tab")
@@ -1104,7 +1104,7 @@ private enum Copy {
     static let pageTitle = key("Me")
     static let linkHint = key("Open")
 
-    // 顶部个人名片头
+    // Personal card header at the top
     static let identityNumberLabel = key("Identity number")
     static let copyUserID = key("Copy number")
     static let copiedUserID = key("Identity number copied")
@@ -1124,15 +1124,15 @@ private enum Copy {
     static let emptyFootnote = key("Creating an identity asks for no phone number and no email.")
     static let createIdentity = key("Create a new identity")
 
-    // 组标题
+    // Section title
     static let groupAssets = key("Assets and node benefits")
-    /// 2026-11-20 换源文：这一组里原来那一行「离线组网」整块迁到厢语页，标题再说"离线组网"
-    /// 就是替别人占一个说法。旧 Key `"Personal space and offline mesh"` 在代码里残留 0。
+    /// 2026-11-20 source sentence replaced: the whole "offline mesh" row that used to sit in this section moved to the Cabin page, so the title saying "offline mesh" again
+    /// would be reserving a phrase for someone else. The old Key `"Personal space and offline mesh"` has 0 leftovers in the code.
     static let groupSpace = key("Encrypted profile and card vault")
     static let groupGeneral = key("Preferences & Settings")
     static let groupSecurity = key("Privacy and security defences")
 
-    // 组 1 · 算力点与徽章
+    // Section 1 · compute points and badges
     static let creditsWallet = key("Compute Credits wallet")
     static let badgeRow = key("Dynamic privacy node badge")
     static let badgeDormant = key("Not activated")
@@ -1140,14 +1140,14 @@ private enum Copy {
     static let badgeRunningFormat = NSLocalizedString("Running: %d days left", comment: "Me: badge row value, active badge")
     static let badgeTrialShortFormat = NSLocalizedString("Trial %d days", comment: "Me: name card capsule, pioneer trial")
     static let badgeActiveShortFormat = NSLocalizedString("Routing %d days", comment: "Me: name card capsule, active badge")
-    /// 「充值」而不是「购买算力点礼包」：这一档没有任何赠送，句子也不能暗示有。
+    /// "Top up" rather than "buy a compute-point gift pack": this tier carries no bonus at all, and the sentence may not hint that it does.
     static let purchaseCredits = key("Top up Compute Credits")
-    /// 徽章行右侧那一枚直达购买/续费的胶囊。词要短到能压在 393pt 宽度里，
-    /// 所以是「购买」「续费」两个词，不是「立即购买正式徽章」那一句（那一句在弹窗里）。
+    /// The capsule on the right of the badge row that goes straight to purchase/renew. The wording has to be short enough to fit inside 393pt of width,
+    /// hence the two words "Buy" and "Renew", not the sentence "Buy the official badge now" (that one lives in the alert).
     static let badgeBuy = key("Buy")
     static let badgeRenew = key("Renew")
 
-    // 组 2 · 加密个人主页与卡包
+    // Section 2 · encrypted profile page and card wallet
     static let myProfile = key("My profile")
     static let personalProfile = key("My encrypted profile page")
     static let personalProfileQR = key("Profile card code")
@@ -1162,38 +1162,38 @@ private enum Copy {
     static let vouchersAvailableFormat = NSLocalizedString("%d available", comment: "Me: unused gift vouchers on this device")
     static let giftMenuHint = key("Lets you gift a badge card or redeem a code")
 
-    // 组 3 · 常用
-    // 「聊天偏好」「外观与图标」「显示语言」三行 2026-11-20 落回「全部设置」（真机第 6 轮二.1）：
-    // 源文与 `notifyOn`/`notifyOff` 两个值说法一起搬进
-    // `Shared/Features/Settings/PopopxSettingsViews.swift` 的 `PopopxGeneralCopy`，Key 一字未改，
-    // 16 个译本原地不动，所以这一页不再引用这四条。刻意不叫 `"Chat preferences"` 那条理由跟着
-    // 那一行走：`"Chat preferences"` 这个 Key 在 16 个目录里属于别的页面，中文值是「聊天偏好设置」，
-    // 源文必须保持唯一化。
+    // Section 3 · commonly used
+    // The three rows "Chat preferences", "Appearance and icon" and "Display language" fell back into "All settings" on 2026-11-20 (on-device round 6, part two.1):
+    // their source sentences and the wording of the two values `notifyOn`/`notifyOff` moved together into
+    // `PopopxGeneralCopy` in `Shared/Features/Settings/PopopxSettingsViews.swift`, Keys unchanged character for character,
+    // the 16 translations untouched in place, so this page no longer references those four entries. The reason for deliberately not calling it `"Chat preferences"` goes
+    // with that row: the Key `"Chat preferences"` belongs to other pages in the 16 directories, its Chinese value is "Chat preferences settings",
+    // and the source sentence has to stay unique.
     static let settings = NSLocalizedString("Settings", comment: "Me: reuses the existing all-catalog term")
-    // 「通知」那一行 2026-11 删：唯一入口收在 常用 → 全部设置 → 通知；「版本」那一行随
-    // `PopopxHelpView` 升格 —— 旧 Key `"Notifications"` 与 `"Version and updates"` 在本页不再有引用，
-    // 两个词条本身仍属于别的页面，译本不动。
-    /// 「帮助与关于」现在是整页最后一张卡的唯一一行（见上面 `helpEntries`），说法没变。
+    // The "Notifications" row was deleted in 2026-11: its only entry point is now closed off into commonly used -> All settings -> Notifications; the "Version" row went
+    // up with the promotion of `PopopxHelpView` - the old Keys `"Notifications"` and `"Version and updates"` are no longer referenced on this page,
+    // while the two entries themselves still belong to other pages and their translations stay untouched.
+    /// "Help and about" is now the only row of the last card on the page (see `helpEntries` above); the wording did not change.
     static let helpRow = key("Help and about")
 
-    // 组 4 · 隐私与安全防线
+    // Section 4 · privacy and the security lines
     static let privacySettings = key("Privacy and security settings")
-    /// 两枚开关的标题复用 16 个目录里已有的原句 —— 它们与 `PrivacySettings.swift:75`/`:88`
-    /// 那两枚 `Toggle` 是同一个开关，说法必须同一个 Key，不再由这一页另起一句中文。
+    /// The titles of the two switches reuse source sentences that already exist in the 16 directories - they and the two `Toggle`s at `PrivacySettings.swift:75`/`:88`
+    /// are the very same switch, so the wording must share one Key and this page no longer coins a sentence of its own.
     static let protectScreenRow = key("Protect app screen")
     static let sanitizeLinksRow = key("Remove link tracking")
-    /// 两条说明是设置页原来那两句中文，本轮转成 Key 并补齐 16 个译本（中文值逐字沿用）。
+    /// The two captions are the two sentences the settings page originally carried; this round they became Keys and 16 translations were filled in (the Chinese values are reused verbatim).
     static let protectScreenNote = key("While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content.")
     static let sanitizeLinksNote = key("Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source.")
     static let antiTheft = key("Anti-theft lock")
     static let antiTheftOn = key("Turned on")
     static let antiTheftOff = key("Turned off")
-    /// 在场核验的理由文案：它进的是系统生物识别提示框，所以同样是看得见的文案。
+    /// The reason string for presence verification: it goes into the system biometric prompt, so it is visible copy too.
     static let presenceReasonPrivacy = key("Confirm this is you before opening privacy and security settings")
     static let presenceReasonSettings = key("Confirm this is you before opening settings")
     static let commerceFootnote = key("Credits and badges live only in this device's keychain: no server keeps the ledger, and neither side can change it remotely.")
 
-    // 危险行
+    // Dangerous row
     static let panicRow = key("Erase offline mesh data now")
     static let panicReady = key("Triple tap")
     static let panicTapsFormat = NSLocalizedString("%d/3 taps counted", comment: "Me: panic wipe arming progress")
@@ -1225,8 +1225,8 @@ struct PopopxMeViewPopulated_Previews: PreviewProvider {
         .environmentObject(ChatModel.shared)
         .environmentObject(AppTheme.shared)
         .onAppear {
-            // 预览可以没有活数据：这里只把既有的 sampleData 交给共享模型，
-            // 空状态那张卡本身没有造假数据（上一张预览就是它的真实样子）。
+            // A preview may do without live data: all this does is hand the existing sampleData to the shared model,
+            // and the empty-state card itself holds no fabricated data (the preview above is exactly how it really looks).
             if ChatModel.shared.currentUser == nil {
                 ChatModel.shared.currentUser = User.sampleData
                 ChatModel.shared.users = [UserInfo.sampleData]

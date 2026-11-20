@@ -2,41 +2,41 @@
 //  PopopxMessageBubble.swift
 //  POPOPX (iOS)
 //
-//  【第五阶段 · 1】现代对话流气泡 + 通道角标。
+//  [phase 5 · 1] modern chat-flow bubble + channel badge.
 //
-//  这个文件干三件事：
-//  1. 把一条**已经定好性**的会话项画成一枚气泡：左（收方）`card` 卡面、右（发方在线）`brand` 实底，
-//     外侧 16pt（`PopopxMetrics.radiusCard`），同发送者连续的那一角收紧为 4pt
+//  This file does three things:
+//  1. Draws one **already-classified** chat item as a bubble: left (receiver) on a `card` surface, right (sender, online) on solid `brand`,
+//     outer 16pt (`PopopxMetrics.radiusCard`), the corner adjacent to the consecutive message from the same sender tightened to 4pt
 //     （`PopopxMetrics.radiusBubbleTucked`）——Docs/popopx-brand-spec.md §2.1、§4。
-//  2. 说清"这一条是经过哪条通道送达的"：靛紫 = SMP 公网，青绿 = 厢语离线 BLE Mesh（**必带跳数**），
-//     灰时钟 = 还躺在 Mesh 中继队列里。语义分工是硬规则（§1.1），不是装饰。
-//  3. 【发送位置】的渲染半边：本文件末尾的 `PopopxLocationCardBubble`——地图快照卡片，列表行里
-//     只放**位图**，绝不放活的 `Map`/`MKMapView`（`location-prompt.md:72` 那条性能红线）。
-//     载荷 `PopopxLocationPayload` 在 `Shared/Features/ChatInfo/PopopxLocation.swift`：发送侧（ComposeView）也要用它，
-//     而那个文件一个 MapKit/CoreLocation 符号都不 import。两半边对同一串字节的一致性是
-//     `wireString` ↔ `parse(from:)` 这一对函数的事，改任何一边都必须同时看另一边。
+//  2. Makes clear "which channel delivered this one": indigo-violet = SMP public network, teal = Cabin offline BLE Mesh (**hop count mandatory**),
+//     grey clock = still sitting in the Mesh relay queue. The semantic split is a hard rule (§1.1), not decoration.
+//  3. The rendering half of "send location": `PopopxLocationCardBubble` at the end of this file — a map-snapshot card; list rows
+//     hold only a **bitmap**, never a live `Map`/`MKMapView` (the performance red line at `location-prompt.md:72`).
+//     The payload `PopopxLocationPayload` lives in `Shared/Features/ChatInfo/PopopxLocation.swift`: the sending side (ComposeView) needs it too,
+//     and that file imports not a single MapKit/CoreLocation symbol. The consistency of the two halves over the same byte string is
+//     the business of the `wireString` ↔ `parse(from:)` pair — changing either side means looking at the other at the same time.
 //
-//  刻意不认识 `ChatItem`：所有值从入参进来（`PopopxBubbleItem`），环境不读全局。通道真值也不在这一层取——
-//  `PopopxBubbleTransportResolver` 是挂载缝：host 一次读齐（`allMappings` + `pendingMessages` +
-//  `recordedFlushedAppChatItemIDs` 共 3 个 actor hop，其余取自己已经在观察的 `@Published` 快照），
-//  压成一张按 message key 索引的表，再逐行喂给气泡。**一行一次 await 是不允许的**
-//  （ui-prompt.md 第五阶段"防参数丢失机制"：组件接口必须只吃调用方手里已有的值）。
+//  Deliberately knows nothing about `ChatItem`: every value comes in through parameters (`PopopxBubbleItem`), the environment reads no globals. The channel truth is not taken at this layer either —
+//  `PopopxBubbleTransportResolver` is the mounting seam: the host reads everything once (`allMappings` + `pendingMessages` +
+//  `recordedFlushedAppChatItemIDs`, 3 actor hops in total; the rest are `@Published` snapshots it is already observing),
+//  compresses them into a table indexed by message key, then feeds it row by row to the bubbles. **One await per row is not allowed**
+//  (ui-prompt.md phase 5 "anti-parameter-loss mechanism": a component's interface must consume only values the caller already holds).
 //
-//  配色契约（本文件逐条自查）：
-//  - 发方气泡统一 `brand` 实底 + `onBrand` 墨；收方气泡统一 `card` 卡面 + `label` 墨。
-//    通道区分交给右下角徽章：SMP = 靛紫锁，Mesh = 青绿波纹 + 跳数贴片，待中继 = 灰时钟。
-//    外侧 16pt（`PopopxMetrics.radiusCard`），同发送者连续的那一角收紧为 4pt
+//  Color contract (self-checked item by item in this file):
+//  - Sender bubbles are always solid `brand` + `onBrand` ink; receiver bubbles are always `card` surface + `label` ink.
+//    Channel distinction is left to the bottom-right badge: SMP = indigo-violet lock, Mesh = teal ripples + hop chip, awaiting relay = grey clock.
+//    outer 16pt (`PopopxMetrics.radiusCard`), the corner adjacent to the consecutive message from the same sender tightened to 4pt
 //    （`PopopxMetrics.radiusBubbleTucked`）——Docs/popopx-brand-spec.md §2.1、§4。
-//  - 实底气泡里的角标退化成"同一支墨"，绝不在靛底上画靛、青底上画青
-//    （§1.1"同一条消息行、同一个气泡内不得混用紫与青"）。
-//  - `mesh` 在卡面上只有 2.98:1，所以卡面上的青色**文字/图形**一律 `meshInk`（6.03:1）；
-//    `mesh` 实底只用来做那块带 `onMesh` 数字的跳数贴片（§1.2 表 + PopopxCabinView.swift:1530-1542 同一画法）。
-//  - `onBrand` 在 Dark 会翻成近黑（`#7D7AFF` 上白字只有 3.44:1，PopopxTheme.swift:66-71），所以本文件
-//    从不假设"品牌底上放白字"。
-//  - 红只出现在 SMP 投递失败那一枚符号上，取自现网同一判据（`CIItemStatus.statusIcon` 在这几个状态上
-//    就给 `.red`，POPOPXChat/ChatTypes.swift:4622-4624）；撤回/待中继都不上红。
+//  - Inside a solid bubble the badge degrades to "the same ink" — never draw indigo on an indigo ground or teal on a teal ground
+//    (§1.1 "within one message row, inside one bubble, violet and teal must not be mixed").
+//  - `mesh` reaches only 2.98:1 on a card surface, so teal **text/graphics** on a card are always `meshInk` (6.03:1);
+//    solid `mesh` is used only for the hop chip carrying the `onMesh` number (§1.2 table + the same drawing at PopopxCabinView.swift:1530-1542).
+//  - `onBrand` flips to near-black in Dark (white text on `#7D7AFF` is only 3.44:1, PopopxTheme.swift:66-71), so this file
+//    never assumes "white ink on a brand background".
+//  - Red appears only on the SMP delivery-failure symbol, taken from the same predicate in the live app (`CIItemStatus.statusIcon` returns
+//    `.red` for exactly these states, POPOPXChat/ChatTypes.swift:4622-4624); recalled / awaiting relay never go red.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged manually into the POPOPX (iOS) target. The red line forbids scripts from modifying project.pbxproj.
 //
 
 import SwiftUI
@@ -47,24 +47,24 @@ import POPOPXChat
 import PopopxMeshKit
 import PopopxMeshUI
 
-// MARK: - 通道值
+// MARK: - Channel values
 
-/// 这一条消息是经过哪条通道送达的。一行一个结论，画出来就是 `PopopxBadge`。
+/// Which channel delivered this message. One row, one conclusion; drawn out it becomes `PopopxBadge`.
 enum PopopxBubbleChannel: Hashable {
-    /// SMP 公网承载：靛紫锁。
+    /// Carried over the SMP public network: indigo-violet lock.
     case smp
-    /// 厢语离线 BLE Mesh 承载。`hops` 是这条消息**当时**测到的跳数，0 = 邻居直接持有链路；
-    /// 徽章必须把这个数打出来（§1.4 第 3 条），没有数字的青色贴片是违规画法。
+    /// Carried over the Cabin offline BLE Mesh. `hops` is the hop count measured for this message **at that moment**; 0 = a neighbour holds the link directly;
+    /// the badge must print that number (§1.4 item 3); a teal chip with no number is a violating drawing.
     case mesh(hops: Int)
-    /// 还压在 Mesh 中继队列里，一条都没出去：灰时钟。`reason` 是有就说的原因。
+    /// Still sitting in the Mesh relay queue, not one message out: grey clock. `reason` is the reason, when there is one.
     case awaitingRelay(reason: PopopxBubbleQueueReason?)
-    /// 这一行没有任何通道可承诺：系统行、本机笔记、表还没读出来。不画徽章，也不猜。
+    /// This row can promise no channel: system rows, local notes, the table not read out yet. No badge is drawn, and nothing is guessed.
     case none
 
-    /// 包里的合并时间线已经给这一行定过性，这里只换一套颜色语义的壳。
-    /// 入口用 public 的 `PopopxMeshTimelineChannel`（MergedTimelineModifier.swift:29），
-    /// 也就是 `PopopxMeshBadgeDescriptor.init(channel:)`（同文件 :354）的同一个输入；不用
-    /// `PopopxMeshChannelBadge.color(of:)`，因为那个是 internal（brand-spec §0.1 已记录）。
+    /// The merged timeline in the package has already classified this row; here it only gets a new colour-semantics shell.
+    /// The entry point is the public `PopopxMeshTimelineChannel` (MergedTimelineModifier.swift:29),
+    /// i.e. the same input as `PopopxMeshBadgeDescriptor.init(channel:)` (:354 in the same file); not
+    /// `PopopxMeshChannelBadge.color(of:)`, because that one is internal (already recorded in brand-spec §0.1).
     init(_ channel: PopopxMeshTimelineChannel) {
         switch channel {
         case .smpPublicNetwork: self = .smp
@@ -74,13 +74,13 @@ enum PopopxBubbleChannel: Hashable {
         }
     }
 
-    /// 这一支通道是不是青色。发方据此决定气泡底色，也据此决定角标是不是退化成同墨。
+    /// Is this channel teal. The sender uses it to decide the bubble fill, and also to decide whether the badge degrades to the same ink.
     var isMesh: Bool {
         if case .mesh = self { return true }
         return false
     }
 
-    /// VoiceOver 的一句话说清通道，图标一律 `accessibilityHidden`。
+    /// One VoiceOver sentence that spells out the channel; icons are always `accessibilityHidden`.
     var spoken: String {
         switch self {
         case .smp: PopopxBubbleCopy.channelSmp
@@ -91,18 +91,18 @@ enum PopopxBubbleChannel: Hashable {
     }
 }
 
-/// 待中继的具体原因。前 5 个是模块 5 队列里那几个真值，一字不改地搬过来
-/// （`PopopxQueueReason`，PopopxMessageRouter.swift:141-152）；后 2 个是本组件自己发现的。
+/// The concrete reason for awaiting relay. The first 5 are those real values in the module 5 queue, moved over verbatim, word for word
+/// (`PopopxQueueReason`, PopopxMessageRouter.swift:141-152); the last 2 are discovered by this component itself.
 enum PopopxBubbleQueueReason: Hashable {
     case noNetwork
     case peerUnreachable
     case smpUnacknowledged
     case meshRefused
     case awaitingContactUpgrade
-    /// 跳数超出 `PopopxMeshConfig.fragmentRelayTtlCap`，或发方这行所绑的邻居已经静默过窗：
-    /// 那串数字已经不能被这张网格承诺，退回灰时钟。判据同 ChatsListView.swift:464-466。
+    /// The hop count exceeds `PopopxMeshConfig.fragmentRelayTtlCap`, or the neighbour this sender row is bound to has already been silent past the window:
+    /// that number can no longer be promised by this mesh, so it falls back to a grey clock. Same predicate as ChatsListView.swift:464-466.
     case hopCountUnverifiable(hops: Int, cap: Int)
-    /// 模块 5 以后新增的档位，或者 host 没给出原因。
+    /// A tier added later by module 5, or the host gave no reason.
     case unknown
 
     init(_ reason: PopopxQueueReason) {
@@ -129,10 +129,10 @@ enum PopopxBubbleQueueReason: Hashable {
     }
 }
 
-// MARK: - 版式值
+// MARK: - Layout values
 
-/// 气泡的朝向。收方在左、发方在右——判据与现网同一处（`ChatView.swift:2252` 的
-/// `ci.chatDir.sent && !terminal`），由 host 传进来，本文件不读会话模型。
+/// The bubble's orientation. Receiver on the left, sender on the right — the predicate is the same one in the live app (`ChatView.swift:2252`'s
+/// `ci.chatDir.sent && !terminal`), passed in by the host; this file does not read the chat model.
 enum PopopxBubbleSide: Hashable {
     case received
     case sent
@@ -140,27 +140,27 @@ enum PopopxBubbleSide: Hashable {
     var alignment: Alignment { self == .sent ? .trailing : .leading }
 }
 
-/// 收紧哪一个角。简报的口径是"靠近上一条同发送者消息的那个角"，也就是发送者一侧的**上**角；
-/// 现网 `ChatItemClipped` 把 tail 画在**下**沿（ChatItemClipShape.swift:130-141）。
-/// 默认按简报（`.top`）；要回到现网视觉记忆，挂载点改一行 `.bottom` 就够。
+/// Which corner gets tightened. The brief's wording is "the corner adjacent to the previous message from the same sender", i.e. the **top** corner on the sender's side;
+/// the live app's `ChatItemClipped` draws the tail on the **bottom** edge (ChatItemClipShape.swift:130-141).
+/// Default follows the brief (`.top`); to return to the live app's visual memory, the mount point changes one line to `.bottom`.
 enum PopopxBubbleTuckCorner: Hashable {
     case top
     case bottom
 }
 
-/// 气泡的圆角几何。四角外圈一律 `radiusCard`，只有 `tucked` 那一角换 `radiusBubbleTucked`。
+/// The bubble's corner-radius geometry. All four outer corners are `radiusCard`; only the `tucked` corner becomes `radiusBubbleTucked`.
 struct PopopxBubbleTail: Hashable {
     var side: PopopxBubbleSide = .received
-    /// 上一行是同一个发送者 → 收紧。host 的判据就是它现在用来决定 tail 的那一个
-    /// （`ChatView.swift:2280` 的 `tailVisible`）。
+    /// The previous row is the same sender → tighten. The host's predicate is exactly the one it now uses to decide the tail
+    /// (`tailVisible` at `ChatView.swift:2280`).
     var tucked: Bool = false
     var corner: PopopxBubbleTuckCorner = .top
-    /// `DEFAULT_CHAT_ITEM_TAIL` 关掉、或 terminal 布局时不合并圆角：四角齐 16pt。
-    /// 现网同一条开关在 ChatItemClipShape.swift:49（`tailEnabled && !terminal`）。
+    /// When `DEFAULT_CHAT_ITEM_TAIL` is off, or in terminal layout, corners are not merged: all four at 16pt.
+    /// The same switch in the live app is at ChatItemClipShape.swift:49 (`tailEnabled && !terminal`).
     var enabled: Bool = true
 
-    /// 具体半径由 `UnevenRoundedRectangle` 自己在高度不足时夹到 h/2，所以 Dynamic Type 拉到
-    /// 120% 也不会像现网那样把气泡画变形（ChatItemClipShape.swift:103-109 是手工夹的同一件事）。
+    /// The concrete radius is clamped to h/2 by `UnevenRoundedRectangle` itself when the height is insufficient, so stretching Dynamic Type to
+    /// 120% will not distort the bubble the way the live app does (ChatItemClipShape.swift:103-109 is the same thing clamped manually).
     var shape: UnevenRoundedRectangle {
         let outer = PopopxMetrics.radiusCard
         let near = tucked && enabled ? PopopxMetrics.radiusBubbleTucked : outer
@@ -175,36 +175,36 @@ struct PopopxBubbleTail: Hashable {
     }
 }
 
-/// 一条会话项要画的内容。前五个档覆盖现网这一行真正会出现的五种东西，第六档（`.location`）
-/// 是【发送位置】带来的：挂载点只需做一次 `ChatItem.content` → 本枚举的映射，不在气泡里读 `ChatItem`。
+/// What a chat item row needs to draw. The first five tiers cover the five things that actually appear on this row in the live app; the sixth tier (`.location`)
+/// comes from "send location": the mount point only maps `ChatItem.content` → this enum once, and the bubble never reads `ChatItem`.
 enum PopopxBubbleBody: Hashable {
-    /// 正文。
+    /// Body text.
     case text(String)
-    /// 图/视/语音/文件：名字 + 一行说明（尺寸、时长）。缩略图由 host 继续拥有——
-    /// 本组件不接管 `CIFileView`/`CIVoiceView` 的那套播放控件。
+    /// Image/video/voice/file: name + one line of description (size, duration). Thumbnails stay owned by the host —
+    /// this component does not take over the playback controls of `CIFileView`/`CIVoiceView`.
     case media(name: String, detail: String?)
-    /// 撤回/被审核掉留下的那句（现网 `MarkedDeletedItemView`，ChatItemView.swift:79-80）。
-    /// 中性墨 + 斜体：红在本色板里只属于"危险动作"（§1.1），一条已经撤回的历史不是危险动作。
+    /// The sentence left behind by a recall or a moderation removal (live app `MarkedDeletedItemView`, ChatItemView.swift:79-80).
+    /// Neutral ink + italic: in this palette red belongs only to "dangerous actions" (§1.1), and an already-recalled history entry is not a dangerous action.
     case withdrawn(String)
-    /// 系统/协议行：整行文字，不上气泡底。
+    /// System/protocol row: whole-row text, no bubble fill.
     case event(String)
-    /// 读不懂的内容（`invalidJSON`、解密失败）。
+    /// Content that could not be read (`invalidJSON`, decryption failure).
     case unavailable(String)
-    /// 一条位置消息。载荷本身带着经纬度、地名和地址，渲染成地图卡片（本文件末 `PopopxLocationCardBubble`）。
+    /// A location message. The payload itself carries latitude/longitude, place name and address; rendered as a map card (`PopopxLocationCardBubble` at the end of this file).
     case location(PopopxLocationPayload)
-    /// 一条绝密消息。这一档**只带密文**：载荷里的 `sealed`/`key` 是 `Data`，渲染只用 `ttlSeconds`
-    /// 说时长，正文明细只在绝密窗口里存在，永不出现在气泡、`spokenText` 或列表预览里。
+    /// A top-secret message. This tier **carries ciphertext only**: the payload's `sealed`/`key` are `Data`, and rendering uses only `ttlSeconds`
+    /// to state the duration; the body details exist only inside the secret window and never appear in the bubble, `spokenText` or the list preview.
     case secure(PopopxSecurePayload)
-    /// 一条加密个人主页的**索引载荷**。和 `.location`/`.secure` 同一族：这一档带的是结构化清单而不是
-    /// 正文，渲染成一张可点开的名片卡片（`ProfileCardBubbleView`）。图文原件是普通附件行，不进这一档。
+    /// The **index payload** of an encrypted profile. Same family as `.location`/`.secure`: this tier carries a structured manifest rather than
+    /// body text, rendered as a clickable business-card view (`ProfileCardBubbleView`). The image/text originals are ordinary attachment rows and do not enter this tier.
     case profile(PopopxProfilePayload)
-    /// 一条算力点生态的消息：徽章礼品卡或红包。挂载点用 `PopopxCommerceContent.detect(in:)`
-    /// 从同一条正文里判一次，判不出来就还是 `.text`——这一档不带任何本机状态，
-    /// 卡片自己从钥匙串账本读，所以 `PopopxBubbleBody` 仍然 `Hashable` 且可比较。
+    /// A message of the compute-points ecosystem: a badge gift card or a red packet. The mount point uses `PopopxCommerceContent.detect(in:)`
+    /// to judge once from the same body text; if it detects nothing it stays `.text` — this tier carries no local state,
+    /// the card reads from the keychain ledger itself, so `PopopxBubbleBody` remains `Hashable` and comparable.
     case commerce(PopopxCommerceContent)
 
-    /// VoiceOver 要说的那句正文。`.event` 由 `PopopxMessageBubble.body` 分给 `eventLine`，
-    /// 不上气泡底——判据只写在那一处分流里。
+    /// The body sentence VoiceOver should say. `.event` is routed by `PopopxMessageBubble.body` to `eventLine`,
+    /// and gets no bubble fill — the predicate is written only in that one routing place.
     var spokenText: String {
         switch self {
         case let .text(text): text
@@ -213,36 +213,36 @@ enum PopopxBubbleBody: Hashable {
         case let .event(text): text
         case let .unavailable(text): text
         case let .location(payload): PopopxLocationCopy.spoken(payload)
-        // 绝密这一句只说"这是一条要生物识别的绝密消息，时长多少"。它和卡片自己的
-        // `accessibilityText` 同一族措辞：两处各说一套的话，读屏用户会得到两个不一致的事实。
+        // The secret sentence says only "this is a top-secret message requiring biometrics, with what duration". It and the card's own
+        // `accessibilityText` belong to the same wording family: if the two places each say something different, screen-reader users get two inconsistent facts.
         case let .secure(payload): String(format: NSLocalizedString("Top-secret burn-after-reading message, %@, tap it and pass biometrics to view", comment: ""), payload.summaryText)
-        // 措辞和卡片自己的 `accessibilityText` 同一族（:211 那条理由在两处都成立）：主页的图文正文
-        // 不在气泡里，所以这里只说"这是一份什么样的主页"，不报块数、不报标题之外的任何东西。
+        // The wording belongs to the same family as the card's own `accessibilityText` (the reason at :211 holds in both places): the profile's image/text body
+        // is not in the bubble, so this only says "what kind of profile this is" — no block counts, nothing beyond the title.
         case let .profile(payload): String(format: NSLocalizedString("Encrypted profile card, %1$@, %2$@", comment: ""), payload.manifest.title, payload.isEphemeral ? String(format: NSLocalizedString("Burn after reading · %@", comment: ""), payload.ttlText) : NSLocalizedString("Permanent card, view it as often as you like", comment: ""))
-        // 措辞归卡片那一侧（`PopopxCommerceCards.swift`），这里只转发：同一枚红包，气泡要说的事
-        // 和卡片上写的数必须来自同一处，否则改一处漏一处。
+        // The wording lives on the card side (`PopopxCommerceCards.swift`); this only forwards: for the same red packet, what the bubble says
+        // and the numbers written on the card must come from the same place, otherwise one side gets changed and the other forgotten.
         case let .commerce(content): content.spokenText
         }
     }
 }
 
-/// 投递回执。本枚举只表意，不复制现网那两枚资产勾（`checkmark.wide` / `checkmark.2`，
-/// `CIItemStatus.statusIcon`，POPOPXChat/ChatTypes.swift:4614-4627）：挂载时二选一，
-/// 要么把 `statusIcon` 的结果映射成这里的档位由气泡画，要么 `receipt = nil` 让 `CIMetaView` 继续画。
+/// Delivery receipt. This enum only expresses meaning; it does not copy the live app's two asset checkmarks (`checkmark.wide` / `checkmark.2`,
+/// `CIItemStatus.statusIcon`, POPOPXChat/ChatTypes.swift:4614-4627): at mount time choose one of two,
+/// either map the `statusIcon` result onto the tiers here for the bubble to draw, or pass `receipt = nil` and let `CIMetaView` keep drawing.
 enum PopopxBubbleReceipt: Hashable {
-    /// 已发出、还没等到任何确认（`sndNew`/`sndSent`）。
+    /// Sent, no confirmation waited back yet (`sndNew`/`sndSent`).
     case inFlight
-    /// 服务器收下（`sndSent` 完整进度）。
+    /// Accepted by the server (the full progress of `sndSent`).
     case delivered
-    /// 对端已读（`sndRcvd(.ok)`）。
+    /// Read by the peer (`sndRcvd(.ok)`).
     case read
-    /// 收方这条还没被本端读完（`rcvNew`）。
+    /// This receiver row has not been read by the local side yet (`rcvNew`).
     case received
-    /// 投递失败或警告（`sndError`/`sndErrorAuth`/`sndWarning`/`invalid`）。
+    /// Delivery failed or warning (`sndError`/`sndErrorAuth`/`sndWarning`/`invalid`).
     case failed(String?)
 
-    /// 全用真的 SF Symbol：现网那两枚勾（`checkmark.wide`、`checkmark.2`）是资产图，
-    /// 归 `CIMetaView`，本文件不复制资产、也不假装系统里有同名符号。
+    /// All use real SF Symbols: the live app's two checkmarks (`checkmark.wide`, `checkmark.2`) are asset images,
+    /// owned by `CIMetaView`; this file copies no assets and does not pretend a same-named symbol exists in the system.
     var symbolName: String {
         switch self {
         case .inFlight: "circle.dashed"
@@ -264,49 +264,49 @@ enum PopopxBubbleReceipt: Hashable {
     }
 }
 
-/// 一枚气泡要的全部输入值。字段都有默认值，挂载点按名字填。
+/// All the input values one bubble needs. Every field has a default, so the mount point fills them by name.
 struct PopopxBubbleItem: Hashable {
-    /// 通道表用的键：现网 app 行就是 `String(ChatItem.id)`（`PopopxMeshApplicationStream.rows(from:)`
-    /// 在 Shared/Model/POPOPXAPI.swift:3990 就是这么喂时间线的），mesh 行是 envelope 的 `messageId`。
+    /// The key used by the channel table: for app rows in the live app it is `String(ChatItem.id)` (`PopopxMeshApplicationStream.rows(from:)`
+    /// feeds the timeline exactly that way at Shared/Model/POPOPXAPI.swift:3990); for mesh rows it is the envelope's `messageId`.
     var messageKey: String
     var content: PopopxBubbleBody = .text("")
     var tail: PopopxBubbleTail = PopopxBubbleTail()
     var channel: PopopxBubbleChannel = .none
-    /// 群/频道里那条消息是谁发的（现网 `senderRole`，ChatView.swift:2247）。
+    /// Who sent that message in a group/channel (live app `senderRole`, ChatView.swift:2247).
     var author: String?
-    /// host 格式化好的时间；`nil` 就不画——现网那一刀是 `.environment(\.showTimestamp)`
-    /// （ChatView.swift:2279），这里换成值，组件不读环境开关。
+    /// The time formatted by the host; `nil` means don't draw — the live app cuts it with `.environment(\.showTimestamp)`
+    /// (ChatView.swift:2279); here it becomes a value instead, and the component reads no environment switch.
     var timeText: String?
     var receipt: PopopxBubbleReceipt?
-    /// 会话对象的 id，只用来让判定表能把"这个联系人的邻居"和这一行对上；nil = 广播/未知。
+    /// The chat object's id, used only so the decision table can match "this contact's neighbour" to this row; nil = broadcast/unknown.
     var contactId: Int64?
-    /// 这一行绝密消息的定位（会话 id + 消息 id），点开绝密窗口时原样交给管理器去删和回执。
-    /// **只有 `PopopxBubbleBody.secure` 用得上**，其它正文一律 `nil`。取不到就留 `nil`：
-    /// 卡片会退化成"不可点开"，也比拿猜出来的 id 去删别人家的消息好。
+    /// The locator of this row's secret message (chat id + message id), handed verbatim to the manager to delete and acknowledge when the secret window opens.
+    /// **Only `PopopxBubbleBody.secure` can use it**; every other body is `nil`. If it cannot be obtained, leave `nil`:
+    /// the card degrades to "not clickable", which is still better than using a guessed id to delete somebody else's message.
     var secureTarget: PopopxSecureChatTarget?
-    /// 这一行加密主页的定位（会话 id + 消息 id），点开阅读器时原样交给 `ProfileReaderHost` 去计时、
-    /// 删除与回执。**只有 `PopopxBubbleBody.profile` 用得上**，其它正文一律 `nil`；取不到就留 `nil`，
-    /// 卡片会退化成"不可点开"——`secureTarget` 上面那两条理由是同一条，不重复一遍。
+    /// The locator of this row's encrypted profile (chat id + message id), handed verbatim to `ProfileReaderHost` to time, delete
+    /// and acknowledge when the reader opens. **Only `PopopxBubbleBody.profile` can use it**; every other body is `nil`; if it cannot be obtained leave `nil`,
+    /// the card degrades to "not clickable" — the two reasons above for `secureTarget` are one and the same reason, not repeated here.
     var profileTarget: PopopxProfileReadKey?
-    /// 这一行礼品卡/红包所在的会话落点。**只有 `PopopxBubbleBody.commerce` 用得上**，其它正文一律 `nil`。
-    /// 取不到就留 `nil`：礼品卡与红包会退化成只读——拆开与兑换都要往这个会话里回一条静默消息，
-    /// 拿猜出来的 chatId 去回，回的就是别人家的会话。
+    /// The conversation landing point of this row's gift card/red packet. **Only `PopopxBubbleBody.commerce` can use it**; every other body is `nil`.
+    /// If it cannot be obtained, leave `nil`: gift cards and red packets degrade to read-only — both opening and redeeming reply a silent message into this conversation,
+    /// and replying with a guessed chatId means replying into somebody else's conversation.
     var commerceContext: PopopxCommerceCardContext?
-    /// 这一行的消息时间，只服务于加密主页那张卡的"发出后 24 小时无人点开"兜底。
-    /// 默认 `Date()`（= 现在）而不是 1970：拿不到时间时宁可**不提前销毁**一张阅后即焚的名片，
-    /// 也不要在一行历史消息上凭空画出"已过期"。
+    /// The message time of this row, serving only the encrypted-profile card's "nobody opened it within 24 hours after sending" fallback.
+    /// Default `Date()` (= now) rather than 1970: when the time is unavailable, better **not to destroy early** a view-once business card
+    /// than to draw "expired" out of thin air on a row of historical messages.
     var createdAt: Date = Date()
-    /// 行宽上限，挂载点现成的那个 `maxWidth`（ChatView.swift:2251 的入参）。
+    /// Upper bound of the row width, the mount point's ready-made `maxWidth` (the argument at ChatView.swift:2251).
     var maxWidth: CGFloat = .infinity
 
     var side: PopopxBubbleSide { tail.side }
 }
 
-// MARK: - 气泡本体
+// MARK: - The bubble itself
 
-/// 一条会话项 = 一枚气泡 + 一枚角标。
+/// One chat item = one bubble + one badge.
 ///
-/// 用法（唯一入口）：
+/// Usage (the only entry point):
 /// ```swift
 /// PopopxMessageBubble(
 ///     PopopxBubbleItem(
@@ -321,8 +321,8 @@ struct PopopxBubbleItem: Hashable {
 ///     )
 /// )
 /// ```
-/// `contextMenu`、滑动回复、多选、反应条那些行交互**留在挂载点**（ChatView.swift:2281-2321），
-/// 本组件只提供内容视图与几何，不去抢宿主的手势。
+/// `contextMenu`, swipe-to-reply, multi-select and the reaction bar — those row interactions **stay at the mount point** (ChatView.swift:2281-2321);
+/// this component only provides the content view and the geometry, it does not grab the host's gestures.
 @MainActor
 struct PopopxMessageBubble: View {
     @Environment(\.colorScheme) private var colorScheme
@@ -346,10 +346,10 @@ struct PopopxMessageBubble: View {
         .frame(maxWidth: item.maxWidth, alignment: item.side.alignment)
         switch item.content {
         case .location, .secure, .profile, .commerce:
-            // 这几张卡片里各有一枚真按钮（打开地图 / 轻触查看 / 点开名片 / 拆开与兑换）。
-            // `.combine` 会把子树的点击动作
-            // 并进整行，VoiceOver 就再也打不开它们了，所以改成 `.contain`：容器还在，children
-            // 各自保留自己的标签与动作（位置卡片与名片卡片的那一句在卡片内部说）。
+            // Each of these cards contains one real button (open the map / tap to view / open the card / open and redeem).
+            // `.combine` would merge the subtree's tap action
+            // into the whole row, and VoiceOver could never open them again, so this is changed to `.contain`: the container stays, and the children
+            // each keep their own label and action (the location card's and the business card's sentence is spoken inside the card).
             row.accessibilityElement(children: .contain)
         default:
             row.accessibilityElement(children: .combine)
@@ -357,7 +357,7 @@ struct PopopxMessageBubble: View {
         }
     }
 
-    // MARK: 气泡
+    // MARK: bubble
 
     private var bubble: some View {
         let ink = PopopxBubbleInk(channel: item.channel, side: item.side)
@@ -375,21 +375,21 @@ struct PopopxMessageBubble: View {
         .padding(.vertical, PopopxMetrics.spaceXS)
         .fixedSize(horizontal: false, vertical: true)
         .background(ink.fill, in: item.tail.shape)
-        // 卡面气泡在纯黑底上需要一点边缘信息（§2.3 同一判据）；实底气泡不描边，免得又生出一支色。
+        // A card-surface bubble needs a bit of edge information on a pure-black ground (same predicate as §2.3); a solid bubble gets no stroke, lest yet another colour spring up.
         .overlay {
             if ink.onCard {
                 item.tail.shape.strokeBorder(PopopxPalette.hairlineInner, lineWidth: PopopxMetrics.hairline)
             }
         }
-        // Light 叠阴影、Dark 自动是 `.clear`：`popopxCardElevation` 自己按 colorScheme 选好了，
-        // 实底气泡在 Light 下那点阴影本来就是卡片该有的。
+        // Light layers on a shadow, Dark is automatically `.clear`: `popopxCardElevation` already picks by colorScheme,
+        // and that little shadow under a solid bubble in Light is what a card should have anyway.
         .popopxCardElevation(colorScheme: colorScheme)
-        // 通道迁移是"用户没碰的东西自己变了"，所以走 `fluid`；Reduce Motion 下直接落定
-        // （§5，PopopxTheme.swift:242-264 的同一个入口）。
+        // A channel migration is "something the user never touched changed by itself", so it goes through `fluid`; under Reduce Motion it lands directly
+        // (§5, the same entry at PopopxTheme.swift:242-264).
         .popopxAnimation(PopopxSpring.fluid, value: item.channel, reduceMotion: reduceMotion)
     }
 
-    /// 正文。`withdrawn` / `unavailable` 与正文同字号，只换墨与字体倾斜——撤回不是危险动作。
+    /// Body text. `withdrawn` / `unavailable` share the body's font size and only swap the ink and the italic slant — a recall is not a dangerous action.
     @ViewBuilder private func contentText(_ ink: PopopxBubbleInk) -> some View {
         switch item.content {
         case let .text(text):
@@ -418,7 +418,7 @@ struct PopopxMessageBubble: View {
                 .italic()
                 .foregroundStyle(ink.meta)
         case let .event(text):
-            // `.event` 在 `body` 里就被分给 `eventLine` 了，到不了这里；这一支只为 switch 完备而留。
+            // `.event` is routed to `eventLine` back in `body` and never reaches here; this branch exists only for switch completeness.
             Text(text)
                 .font(PopopxType.caption)
                 .foregroundStyle(ink.meta)
@@ -433,25 +433,25 @@ struct PopopxMessageBubble: View {
                     .foregroundStyle(ink.meta)
             }
         case let .location(payload):
-            // 气泡的内边距就是这张地图卡与气泡边缘的呼吸，所以缩略图自己圆角、不另描边。
-            // 时间 / 回执 / 通道角标由下面那个 `footer` 出，卡片只出地图、地名、地址。
+            // The bubble's inner padding is the breathing room between this map card and the bubble edge, so the thumbnail rounds itself and adds no separate stroke.
+            // Time / receipt / channel badge come from the `footer` below; the card only contributes the map, the place name and the address.
             PopopxLocationCardBubble(payload: payload, ink: ink, channel: item.channel)
         case let .secure(payload):
-            // 这一支不吃 `ink`：绝密卡片自带固定的深靛紫表面（见 PopopxSecureSheetView.swift:413），
-            // 换成 SMP 那支实底紫就分不出"一条能点的消息"和"一个保险柜的门"了。
+            // This branch does not consume `ink`: the secret card carries its own fixed deep indigo-violet surface (see PopopxSecureSheetView.swift:413);
+            // switching to the SMP solid violet would make "a clickable message" and "a vault door" indistinguishable.
             PopopxSecureBubbleMount(payload: payload,
                                     target: item.secureTarget,
                                     incoming: item.side == .received)
         case let .profile(payload):
-            // 和绝密那一支同一理由：名片卡片自带固定表面（深靛紫 / 厢语青绿两色按 delivery 分），
-            // 吃 `ink` 就会把"一条能点的消息"和"一扇保险柜的门"画成同一个东西。
+            // Same reason as the secret branch: the business card carries its own fixed surface (deep indigo-violet / Cabin teal, chosen by delivery),
+            // consuming `ink` would draw "a clickable message" and "a vault door" as the same thing.
             ProfileCardBubbleView(payload: payload,
                                   target: item.profileTarget,
                                   incoming: item.side == .received,
                                   channel: item.channel,
                                   createdAt: item.createdAt)
         case let .commerce(content):
-            // 同一族：这两张卡片自带表面，不吃 `ink`（`PopopxCommerceCards.swift` 顶部那一节写了为什么）。
+            // Same family: these two cards carry their own surfaces and do not consume `ink` (the opening section of `PopopxCommerceCards.swift` says why).
             switch content {
             case let .gift(payload):
                 PopopxGiftCardBubble(payload: payload, context: commerceContext)
@@ -463,14 +463,14 @@ struct PopopxMessageBubble: View {
         }
     }
 
-    /// 挂载点没给落点时的兜底：`target` 与 `chatId` 都留空，三张卡片因此停在只读那一格。
-    /// 宁可少一个能点的按钮，也不要拿猜出来的 chatId 往别的会话里回一条信令、签一张凭证。
+    /// Fallback when the mount point gives no landing target: `target` and `chatId` both stay empty, so the three cards stop in the read-only slot.
+    /// Better one clickable button fewer than using a guessed chatId to reply a signal into another conversation or sign a credential there.
     private var commerceContext: PopopxCommerceCardContext {
         item.commerceContext ?? PopopxCommerceCardContext(target: nil, incoming: item.side == .received)
     }
 
-    /// 下沿一行：时间 + 回执 + 角标。三个都是次要信息，所以同一支 `meta` 墨，
-    /// 只有角标自己带通道色——一行一支主色。
+    /// Bottom line: time + receipt + badge. All three are secondary information, so they share one `meta` ink,
+    /// and only the badge carries a channel colour of its own — one primary colour per row.
     @ViewBuilder private func footer(_ ink: PopopxBubbleInk) -> some View {
         HStack(spacing: PopopxMetrics.space2XS) {
             if let timeText = item.timeText {
@@ -491,7 +491,7 @@ struct PopopxMessageBubble: View {
         .font(PopopxType.caption)
     }
 
-    /// 系统行：居中、无底、不上角标——它不过任何通道。
+    /// System row: centred, no ground, no badge — it never passed through any channel.
     private func eventLine(_ text: String) -> some View {
         Text(text)
             .font(PopopxType.caption)
@@ -502,7 +502,7 @@ struct PopopxMessageBubble: View {
             .accessibilityLabel(text)
     }
 
-    /// 一行只说一句"谁发的什么，走哪条通道"。图标全部 hidden，语义由文字承载。
+    /// A row says only "who sent what, over which channel". All icons are hidden; the semantics are carried by the text.
     private var spoken: String {
         var parts: [String] = []
         if let author = item.author { parts.append(author) }
@@ -513,26 +513,26 @@ struct PopopxMessageBubble: View {
         return parts.joined(separator: "，")
     }
 
-    /// 失败态才上红，而且只在卡面上上红：`dangerInk` 在 `brand`/`mesh` 实底上不保证对比，
-    /// 那种情况下同一枚符号用气泡自己的墨。判据沿用现网 `statusIcon` 给 `.red` 的那几个状态。
+    /// Red appears only in the failure state, and only on a card surface: `dangerInk` has no guaranteed contrast on a solid `brand`/`mesh`,
+    /// in which case the same symbol uses the bubble's own ink. The predicate follows the states where the live app's `statusIcon` gives `.red`.
     private func receiptIsDanger(_ receipt: PopopxBubbleReceipt) -> Bool {
         if case .failed = receipt { return true }
         return false
     }
 }
 
-/// 气泡的一整套墨。把"底 + 正文 + 次要 + 角标画法"绑成一个值，避免出现第 3 种组合。
+/// The bubble's whole set of inks. It binds "ground + body + secondary + badge drawing" into one value, so a 3rd combination cannot appear.
 private struct PopopxBubbleInk {
     let fill: Color
     let text: Color
     let meta: Color
-    /// 卡面 → 角标可以用通道色；实底 → 角标退化成同墨，见 `PopopxBadge`。
+    /// Card surface → the badge may use the channel colour; solid → the badge degrades to the same ink, see `PopopxBadge`.
     let onCard: Bool
-    /// 只在卡面上是红，实底上退回本墨。
+    /// Red only on a card surface; on a solid ground it falls back to the bubble's own ink.
     let failure: Color
     let caution: Color
 
-    /// 角标要不要退化成"同一支墨"：实底 = 要，卡面 = 不要（用通道色）。
+    /// Whether the badge must degrade to "the same ink": solid = yes, card surface = no (use the channel colour).
     var monochromeBadgeInk: Color? { onCard ? nil : text }
 
     init(channel: PopopxBubbleChannel, side: PopopxBubbleSide) {
@@ -545,7 +545,7 @@ private struct PopopxBubbleInk {
             failure = PopopxPalette.onBrand
             caution = PopopxPalette.onBrand
         case (.sent, .mesh):
-            // 裁定 3：发送方气泡统一使用现代深靛紫主色（brand），离线 Mesh 通过右下角青绿蓝牙波纹 + 跳数微标区分。
+            // Ruling 3: sender bubbles uniformly use the modern deep indigo-violet primary (brand); offline Mesh is distinguished by the teal Bluetooth ripples + hop micro-badge at the bottom right.
             fill = PopopxPalette.brand
             text = PopopxPalette.onBrand
             meta = PopopxPalette.onBrand
@@ -553,7 +553,7 @@ private struct PopopxBubbleInk {
             failure = PopopxPalette.onBrand
             caution = PopopxPalette.onBrand
         case (.sent, .awaitingRelay), (.sent, .none):
-            // 裁定 3：发送方气泡统一使用现代深靛紫主色（brand），待中继/未发送通过右下角灰时钟徽章区分。
+            // Ruling 3: sender bubbles uniformly use the modern deep indigo-violet primary (brand); awaiting-relay / not-sent is distinguished by the grey clock badge at the bottom right.
             fill = PopopxPalette.brand
             text = PopopxPalette.onBrand
             meta = PopopxPalette.onBrand
@@ -561,7 +561,7 @@ private struct PopopxBubbleInk {
             failure = PopopxPalette.onBrand
             caution = PopopxPalette.onBrand
         case (.received, _):
-            // 收方永远是卡面：通道信息归角标（§2.1 第 2、3 行）。
+            // The receiver is always a card surface: channel information belongs to the badge (§2.1 rows 2 and 3).
             fill = PopopxPalette.card
             text = PopopxPalette.label
             meta = PopopxPalette.labelSecondary
@@ -572,21 +572,21 @@ private struct PopopxBubbleInk {
     }
 }
 
-// MARK: - 角标
+// MARK: - Badge
 
-/// 通道角标。一行一枚，图标是装饰，数字与 `accessibilityLabel` 才是信息。
+/// Channel badge. One per row; the icon is decoration, the number and the `accessibilityLabel` are the information.
 ///
-/// 画法表（Docs/popopx-brand-spec.md §2.2）：
-/// | 通道 | 卡面上 | 实底上 |
+/// Drawing table (Docs/popopx-brand-spec.md §2.2):
+/// | channel | on a card surface | on a solid ground |
 /// |---|---|---|
-/// | SMP | `lock.shield.fill` · `brand` | 同墨符号 |
-/// | Mesh | `antenna.radiowaves.left.and.right` · `meshInk` + 一块 `mesh` 贴片写着「N 跳」(`onMesh`) | 同墨符号 + 同墨数字 |
-/// | 待中继 | `clock` · `labelSecondary` + 原因 | 同墨符号 + 原因 |
-/// | 无通道 | 什么都不画 | 同 |
+/// | SMP | `lock.shield.fill` · `brand` | same-ink symbol |
+/// | Mesh | `antenna.radiowaves.left.and.right` · `meshInk` + a `mesh` chip reading "N hops" (`onMesh`) | same-ink symbol + same-ink number |
+/// | awaiting relay | `clock` · `labelSecondary` + reason | same-ink symbol + reason |
+/// | no channel | nothing is drawn | same |
 @MainActor
 struct PopopxBadge: View {
     let channel: PopopxBubbleChannel
-    /// 非 nil = 气泡是实底，角标退化成这一支墨，绝不在靛底上画靛、青底上画青（§1.1）。
+    /// Non-nil = the bubble is solid, the badge degrades to this ink, and never draws indigo on indigo or teal on teal (§1.1).
     var monochromeInk: Color? = nil
 
     var body: some View {
@@ -618,14 +618,14 @@ struct PopopxBadge: View {
         }
     }
 
-    /// `.none` 不占一个无障碍元素：没有通道可说，就不要凭空生出一个可聚焦点。
+    /// `.none` does not occupy an accessibility element: if there is no channel to tell, do not conjure a focusable point out of nothing.
     private var spoken: String? {
         channel == .none ? nil : channel.spoken
     }
 
-    /// 青色角标：符号走 `meshInk`（卡面上 `mesh` 只有 2.98:1，文字必须是 ink），
-    /// 数字走一块 `mesh` 贴片 + `onMesh`——和 `PopopxCabinHopBadge`（PopopxCabinView.swift:1530-1542）
-    /// 同一套画法，0 跳也照样把数字写出来（"0 跳 · 直连"）。
+    /// The teal badge: the symbol uses `meshInk` (on a card surface `mesh` is only 2.98:1, text must be ink),
+    /// the number uses a `mesh` chip + `onMesh` — the same drawing as `PopopxCabinHopBadge` (PopopxCabinView.swift:1530-1542),
+    /// and the number is written out even at 0 hops ("0 hops · direct").
     @ViewBuilder private func meshBadge(_ hops: Int) -> some View {
         let words = PopopxBubbleCopy.hopsWords(hops)
         HStack(spacing: PopopxMetrics.space2XS) {
@@ -655,13 +655,13 @@ struct PopopxBadge: View {
             .accessibilityHidden(true)
     }
 
-    /// 实底上任何通道色都不再出现第二支：一切退回气泡自己的墨。
+    /// On a solid ground no channel colour ever appears as a second ink: everything falls back to the bubble's own ink.
     private func accent(_ token: Color) -> Color { monochromeInk ?? token }
 }
 
-// MARK: - 批量通道判定（挂载缝）
+// MARK: - Batch channel decision (mounting seam)
 
-/// 一个邻居能承诺什么。只取 `PopopxMeshPeer` 真实存在的那四个字段
+/// What one neighbour can promise. Only the four fields that actually exist on `PopopxMeshPeer` are taken
 /// （hopCount / lastSeenAt / rssi / isDirect，PopopxMeshEvents.swift:34-38）。
 struct PopopxBubblePeerFact: Hashable {
     var hops: Int
@@ -681,47 +681,47 @@ struct PopopxBubblePeerFact: Hashable {
     }
 }
 
-/// 判定表的一行输入。host 从会话项里就能凑齐，不需要 await 任何东西。
+/// One row of the decision table's input. The host can assemble it from the chat item alone, no await needed anywhere.
 struct PopopxBubbleRowAddress: Hashable {
-    /// 与 `PopopxBubbleItem.messageKey` 同一个键。
+    /// The same key as `PopopxBubbleItem.messageKey`.
     var messageKey: String
-    /// 这条会话的联系人 id；广播行、未知对象为 nil。
+    /// The contact id of this conversation; broadcast rows and unknown objects are nil.
     var contactId: Int64?
-    /// 这条消息是不是"发出去的"。发方才需要重新核验邻居跳数。
+    /// Whether this message was "sent out". Only the sender needs the neighbour hop count re-verified.
     var sent: Bool
-    /// 是不是一条真的消息。系统行、本机笔记、读不懂的内容 = false，不给任何通道
-    /// （同 ChatsListView.swift:451-453 对 `.local/.contactRequest/.invalidJSON` 给 `.none` 的判据）。
+    /// Whether it is a real message. System rows, local notes, unreadable content = false, and get no channel at all
+    /// (the same predicate as ChatsListView.swift:451-453 giving `.none` to `.local/.contactRequest/.invalidJSON`).
     var isMessage: Bool = true
 }
 
-/// 判定表的全部真值，一次读齐之后的快照。字段都可以直接传值，没有一个是环境或单例。
+/// All the decision table's truth values, a snapshot after one complete read. Every field can be passed by value; none is an environment or a singleton.
 struct PopopxBubbleTransportSources: Hashable {
-    /// 全局熔断（`PopopxMeshRuntime.isFuseOn`，Shared/Model/POPOPXAPI.swift:3740）。
+    /// The global fuse (`PopopxMeshRuntime.isFuseOn`, Shared/Model/POPOPXAPI.swift:3740).
     var fuseOn = false
-    /// 射频档位（`PopopxMeshStreamState.radioState`，PopopxMeshStateSource.swift:24 + `isUsable`，PopopxMeshEvents.swift:22）。
+    /// The radio tier (`PopopxMeshStreamState.radioState`, PopopxMeshStateSource.swift:24 + `isUsable`, PopopxMeshEvents.swift:22).
     var radioUsable = false
-    /// 跳数上限：`PopopxMeshConfig.default.fragmentRelayTtlCap`（Core/PopopxMeshConfig.swift:21，7）。
+    /// Hop cap: `PopopxMeshConfig.default.fragmentRelayTtlCap` (Core/PopopxMeshConfig.swift:21, 7).
     var hopCap = 1
-    /// 静默窗口：`peerReachabilityTimeout`（同文件 :65，15 秒）。
+    /// The silence window: `peerReachabilityTimeout` (:65 in the same file, 15 seconds).
     var reachabilityWindow: TimeInterval = 15
-    /// contactId → meshPublicKeyHex，整表一次读完（IdentityMappingStore.swift:201 `allMappings()`）。
+    /// contactId → meshPublicKeyHex, the whole table read in one pass (IdentityMappingStore.swift:201 `allMappings()`).
     var bindings: [Int64: String] = [:]
-    /// meshPublicKeyHex → 邻居事实。
+    /// meshPublicKeyHex → neighbour facts.
     var peers: [String: PopopxBubblePeerFact] = [:]
-    /// message key → 合并时间线/射频状态已经定性的通道。
+    /// message key → the channel already classified by the merged timeline / radio state.
     var channels: [String: PopopxBubbleChannel] = [:]
-    /// mesh message id → 队列原因（`PopopxMessageRouter.pendingMessages()`，Router/PopopxMessageRouter.swift:863）。
+    /// mesh message id → queue reason (`PopopxMessageRouter.pendingMessages()`, Router/PopopxMessageRouter.swift:863).
     var queueReasons: [String: PopopxQueueReason] = [:]
-    /// app 行 id → mesh message id，来自裁定 1 的双 id 表
-    /// （`recordedFlushedAppChatItemIDs()`，同文件 :878；app 行键的写法见 POPOPXAPI.swift:3990）。
+    /// app row id → mesh message id, from ruling 1's dual-id table
+    /// (`recordedFlushedAppChatItemIDs()`, :878 in the same file; the app row key form is documented at POPOPXAPI.swift:3990).
     var meshKeyByRowKey: [String: String] = [:]
-    /// 这批值读出来的时刻。新鲜度一律用它，不用 `Date.now`：重画不等于重新判定。
+    /// The moment these values were read out. Freshness always uses it, never `Date.now`: redraw does not mean re-decision.
     var readAt = Date.now
-    /// `false` = 表还没读出来。这时候不猜通道。
+    /// `false` = the table has not been read out yet. In that case no channel is guessed.
     var isLoaded = false
 }
 
-/// 一次 pass 出来的结果。行渲染只是查字典。
+/// The result of one pass. Row rendering is only a dictionary lookup.
 struct PopopxBubbleChannelTable: Hashable {
     private var channels: [String: PopopxBubbleChannel]
     var sourceReadAt: Date = Date.now
@@ -731,7 +731,7 @@ struct PopopxBubbleChannelTable: Hashable {
         self.sourceReadAt = sourceReadAt
     }
 
-    /// 查不到就给 `.none`：不画角标，也不编一条通道。
+    /// Not found → give `.none`: no badge drawn, and no channel invented.
     func channel(for address: PopopxBubbleRowAddress) -> PopopxBubbleChannel {
         channels[address.messageKey] ?? .none
     }
@@ -744,9 +744,9 @@ struct PopopxBubbleChannelTable: Hashable {
     var isEmpty: Bool { channels.isEmpty }
 }
 
-/// 挂载缝：读一次、成一次表。
+/// The mounting seam: read once, build the table once.
 ///
-/// host 的用法（一个 `.task(id:)` 里跑完，行渲染零 await）：
+/// The host's usage (finished inside one `.task(id:)`, zero awaits in row rendering):
 /// ```swift
 /// let sources = await PopopxBubbleTransportResolver.loadSources(
 ///     fuseOn: runtime.isFuseOn,
@@ -759,7 +759,7 @@ struct PopopxBubbleChannelTable: Hashable {
 /// ```
 @MainActor
 enum PopopxBubbleTransportResolver {
-    /// 三次 actor hop 读完全部来源，其余都是 host 手里已经在观察的快照值。除此之外没有任何 await。
+    /// Three actor hops read out all sources; everything else is a snapshot value the host is already observing. Beyond that there is no await at all.
     static func loadSources(
         fuseOn: Bool,
         state: PopopxMeshStreamState,
@@ -777,14 +777,14 @@ enum PopopxBubbleTransportResolver {
         sources.reachabilityWindow = config.peerReachabilityTimeout
         sources.radioUsable = state.radioState.isUsable
 
-        // 邻居表：一次 pass，按 hex 索引（`peerID.hex`，Protocol/PopopxMeshProtocol.swift:68）。
+        // Neighbour table: one pass, indexed by hex (`peerID.hex`, Protocol/PopopxMeshProtocol.swift:68).
         var peers: [String: PopopxBubblePeerFact] = [:]
         peers.reserveCapacity(state.peers.count)
         for peer in state.peers { peers[peer.peerID.hex] = PopopxBubblePeerFact(peer) }
         sources.peers = peers
 
-        // 时间线行的定性（MergedTimelineModifier.swift:185 的 `channel`），再用射频自己报过的
-        // `awaitingRelayMessageIDs`（PopopxMeshStateSource.swift:37）补上时间线没覆盖到的 id。
+        // The classification of timeline rows (`channel` at MergedTimelineModifier.swift:185), then the radio's own reported
+        // `awaitingRelayMessageIDs` (PopopxMeshStateSource.swift:37) fills in the ids the timeline did not cover.
         var channels: [String: PopopxBubbleChannel] = [:]
         channels.reserveCapacity(timelineRows.count + state.awaitingRelayMessageIDs.count)
         for row in timelineRows { channels[row.messageID] = PopopxBubbleChannel(row.channel) }
@@ -793,15 +793,15 @@ enum PopopxBubbleTransportResolver {
         }
         sources.channels = channels
 
-        // 保险丝关着时，绑定表里的键一条都不作数（现网同一判据：ChatsListView.swift:458-459），
-        // 所以那三次 hop 根本不发起。
+        // When the fuse is off, not one key in the binding table counts (the live app uses the same predicate: ChatsListView.swift:458-459),
+        // so those three hops are not initiated at all.
         guard fuseOn else { return sources }
 
         var bindings: [Int64: String] = [:]
         var newestUpdate: [Int64: Date] = [:]
         let mappings = await mappingStore.allMappings()          // hop 1
         for mapping in mappings {
-            // 只认已经指向真实联系人的绑定（`contactId` 的语义，IdentityMappingStore.swift:35-42）。
+            // Only bindings that already point at a real contact are accepted (the meaning of `contactId`, IdentityMappingStore.swift:35-42).
             guard let contactId = mapping.contactId else { continue }
             if let seen = newestUpdate[contactId], seen >= mapping.updatedAt { continue }
             newestUpdate[contactId] = mapping.updatedAt
@@ -823,7 +823,7 @@ enum PopopxBubbleTransportResolver {
         return sources
     }
 
-    /// 纯函数：一趟过完所有行，不开任务、不读环境、不碰 actor。
+    /// Pure function: one pass finishes all rows — no task started, no environment read, no actor touched.
     static func table(
         _ sources: PopopxBubbleTransportSources,
         rows: [PopopxBubbleRowAddress]
@@ -834,11 +834,11 @@ enum PopopxBubbleTransportResolver {
         return PopopxBubbleChannelTable(channels: resolved, sourceReadAt: sources.readAt)
     }
 
-    /// 单行的判定。顺序即优先级，前一条命中就不再往下走：
-    /// 1. 不是消息 → `.none`；2. 保险丝关 → 只有公网这一条真相 → `.smp`；
-    /// 3. 队列里有它 → 灰时钟（带模块 5 的原因）；4. 时间线定过性 → 按定性的走，
-    /// 青色那条再核验跳数还能不能被承诺；5. 谁都没认领的 app 行 → `.smp`
-    /// （现网同一口径：app 自己流里的行按定义就是 SMP，MergedTimelineModifier.swift:118）。
+    /// The decision for a single row. The order is the priority; once an earlier rule hits, nothing below runs:
+    /// 1. not a message → `.none`; 2. fuse off → the public network is the only truth → `.smp`;
+    /// 3. it is in the queue → grey clock (with module 5's reason); 4. the timeline classified it → follow the classification,
+    /// and for the teal one re-verify whether the hop count can still be promised; 5. an app row nobody claimed → `.smp`
+    /// (the live app's same rule: rows in the app's own stream are by definition SMP, MergedTimelineModifier.swift:118).
     static func channel(
         for address: PopopxBubbleRowAddress,
         sources: PopopxBubbleTransportSources
@@ -862,8 +862,8 @@ enum PopopxBubbleTransportResolver {
             guard hops >= 0, hops <= sources.hopCap else {
                 return .awaitingRelay(reason: .hopCountUnverifiable(hops: hops, cap: sources.hopCap))
             }
-            // 发方这一行是在说"我刚刚经邻居送出去了"，所以邻居必须还在模块 4 的可达窗口里、
-            // 射频还得开着；收方那一行是历史事实，不重新核验。
+            // The sender's row says "I just sent this out through a neighbour", so the neighbour must still be inside module 4's reachability window
+            // and the radio must still be on; the receiver's row is a historical fact and is not re-verified.
             if address.sent, !sources.radioUsable {
                 return .awaitingRelay(reason: .peerUnreachable)
             }
@@ -879,16 +879,16 @@ enum PopopxBubbleTransportResolver {
     }
 }
 
-// MARK: - 顶部同意横幅的挂载位
+// MARK: - Mount point of the top approval banner
 
-/// 手动建联同意横幅：只**引用**包里那一条真横幅（`ManualPairingBannerView(model:)`，
-/// PopopxMeshKit/Sources/PopopxMeshUI/ManualPairingBannerView.swift:365），不复制它的文案与判定，
-/// 也不改那个文件。
+/// Manual-connection approval banner: it only **references** the one real banner in the package (`ManualPairingBannerView(model:)`,
+/// PopopxMeshKit/Sources/PopopxMeshUI/ManualPairingBannerView.swift:365); it does not copy its wording or its decisions,
+/// and it does not change that file either.
 ///
-/// 现网已经有一处挂载：`ChatView.swift:119/127` 的 `.popopxMeshBanner(...)`（包里的
-/// `popopxMeshBanner(_:)`，ManualPairingBannerView.swift:466），它挂在安全区上。
-/// **两者只能存在一个**：同时在，用户会看到两条一模一样的同意横幅、两个 approve 按钮。
-/// 整体替换对话流时，用下面这一个把横幅放进流水顶部，并把那两行 modifier 去掉。
+/// The live app already mounts it in one place: `.popopxMeshBanner(...)` at `ChatView.swift:119/127` (the package's
+/// `popopxMeshBanner(_:)`, ManualPairingBannerView.swift:466), and that one sits on the safe area.
+/// **Only one of the two may exist**: with both on, the user sees two identical approval banners and two approve buttons.
+/// When the conversation flow is replaced wholesale, use the one below to put the banner at the top of the flow and remove those two modifier lines.
 @MainActor
 struct PopopxBubbleConsentBanner: View {
     let model: PopopxMeshBannerModel
@@ -898,10 +898,10 @@ struct PopopxBubbleConsentBanner: View {
     }
 }
 
-// MARK: - 文案
+// MARK: - Wording
 
-/// 本文件的用户可见文字。和其他阶段的新视图一样：字面量集中在这里，符号表也集中在这里，
-/// 好让"一行只出现一枚徽章符号"这种规则可查（§6 图标词汇表）。
+/// The user-visible text of this file. As with the new views of the other phases: the literals are gathered here, the symbol table is gathered here too,
+/// so that a rule like "only one badge symbol per line" can be checked (§6 icon glossary).
 enum PopopxBubbleCopy {
     static let smpSymbol = "lock.shield.fill"
     static let meshSymbol = "antenna.radiowaves.left.and.right"
@@ -926,7 +926,7 @@ enum PopopxBubbleCopy {
         hops == 0 ? NSLocalizedString("Cabin offline, direct (0 hops)", comment: "") : String(format: NSLocalizedString("Cabin offline, %lld hops", comment: ""), hops)
     }
 
-    /// 跳数徽章永远带数字（§1.4 第 3 条）；0 跳把"直连"一起写出来，同 PopopxCabinView.swift:2625。
+    /// The hop-count badge always carries a number (§1.4 item 3); at 0 hops "direct" is spelled out too, same as PopopxCabinView.swift:2625.
     static func hopsWords(_ hops: Int) -> String { hops == 0 ? NSLocalizedString("0 hops · direct", comment: "") : String(format: NSLocalizedString("%lld hops", comment: ""), hops) }
 
     static func awaitingRelay(_ reason: PopopxBubbleQueueReason) -> String { reason.words }
@@ -936,27 +936,27 @@ enum PopopxBubbleCopy {
     }
 }
 
-// MARK: - B5 挂载适配（ChatItem → PopopxBubbleItem）
+// MARK: - B5 mount adapter (ChatItem -> PopopxBubbleItem)
 
-/// 现网 `ChatItem` 到气泡入参的唯一映射入口。
+/// The single mapping entry point from the live app's `ChatItem` to the bubble's input parameters.
 ///
-/// `CIContent`（POPOPXChat/ChatTypes.swift:4862，**33 个 case**）在这里是**穷尽枚举**的：`switch` 没有
-/// `default`，Haskell 端以后加一个 case 就编译不过，映射表不会悄悄落后于协议。
+/// `CIContent` (POPOPXChat/ChatTypes.swift:4862, **33 cases**) is **enumerated exhaustively** here: the `switch` has no
+/// `default`, so if the Haskell side adds a case later the build fails, and the mapping table cannot quietly fall behind the protocol.
 ///
-/// 但"覆盖"不等于"交给气泡画"。`PopopxBubbleBody` 只有 5 个档（本文件 :172），而缩略图、播放器、
-/// 文件下载控件、链接预览卡、引用回复条、通话回拨、入群接受/拒绝都不在它的能力之内——本文件 :174-176
-/// 写明了这条边界。这些行一律返回 `nil`，挂载点据此把**整行**继续交给现网 `ChatItemView`，
-/// 而不是压成 `.media(name:detail:)` 之后把控件悄悄画没（裁定 A：分层挂载，零回归优先于全覆盖）。
+/// But "covered" is not the same as "handed to the bubble to draw". `PopopxBubbleBody` has only 5 tiers (this file :172), and thumbnails, players,
+/// file download controls, link preview cards, quoted reply bars, call callbacks, join-group accept/reject are all beyond it - this file :174-176
+/// spells that boundary out. Those rows all return `nil`, and on that basis the mount point keeps handing the **whole row** to the live app's `ChatItemView`,
+/// instead of squashing it into `.media(name:detail:)` and quietly drawing the controls away (ruling A: tiered mounting, zero regression outranks full coverage).
 @MainActor
 enum PopopxBubbleMount {
-    /// `nil` = 这一行现网 `ChatItemView` 继续负责。
+    /// `nil` = the live app's `ChatItemView` stays responsible for this row.
     ///
-    /// 本轮接管**直接会话**：群/频道的内容行由现网画头像和成员名（`CIMemberNameView`），
-    /// 气泡只有一个 `author: String?`，接管就等于把头像画没了。系统行（`.event`）本来就没头像，
-    /// 扩到群/频道只差去掉这一条 guard——留作后续单独一轮，因为它要重新核对 `eventItemViewText`
-    /// 里拼进去的发送者。
+    /// This round takes over **direct chats**: group/channel content rows get their avatar and member name drawn by the live app (`CIMemberNameView`),
+    /// and the bubble has only one `author: String?`, so taking over would draw the avatar away. System rows (`.event`) never had an avatar,
+    /// so extending to groups/channels only takes removing this one guard - left for a separate later round, because it means re-checking the sender
+    /// that `eventItemViewText` splices in.
     ///
-    /// 唯一的例外是群里的礼品卡与红包（下面 `groupCommerceBody`），那条边界写在那一处。
+    /// The only exception is the gift card and the red packet in groups (`groupCommerceBody` below); that boundary is written at that place.
     static func body(of ci: ChatItem, chat: Chat) -> PopopxBubbleBody? {
         guard !ci.isLiveDummy, !ci.localNote else { return nil }
         guard chat.chatInfo.chatType == .direct else { return groupCommerceBody(ci, chat: chat) }
@@ -983,14 +983,14 @@ enum PopopxBubbleMount {
         }
     }
 
-    /// 群聊那一侧唯一的接管：只有礼品卡和红包这两条正文，其它仍交回现网 `ChatItemView`。
+    /// The only takeover on the group-chat side: just the gift card and red packet bodies; everything else still goes back to the live app's `ChatItemView`.
     ///
-    /// 为什么非要接管：红包那条正文是 `popopx://redpacket?id=…&n=…&sig=…`，交给现网就是把一枚
-    /// 签名原样念给用户看，而发红包的人本来就在群里@了大家来拆。
-    /// 为什么只此两条：接管整行就要把头像和成员名一起画没（上面那条裁定），
-    /// 成员名这一支由 `item` 里的 `author: ci.memberDisplayName` 补回现网同一个来源，头像补不回来。
-    /// 频道（`isChannel`）不在这一支里：SimpleX 的频道也是 group，但拆开时要往这个会话回一条回执，
-    /// 那会变成对全部订阅者的广播——红包按提示词只做"单人定向或群聊均分"，没有频道这一档。
+    /// Why the takeover is needed: the red packet body is `popopx://redpacket?id=...&n=...&sig=...`, and handing that to the live app means reading a
+    /// signature verbatim to the user, while the person sending the packet already @-mentioned everyone in the group to open it.
+    /// Why only these two: taking over the whole row would draw the avatar and the member name away with it (the ruling above);
+    /// the member name branch is restored in `item` by `author: ci.memberDisplayName` from the same live-app source, the avatar cannot be restored.
+    /// Channels (`isChannel`) are not in this branch: a channel in the underlying chat app is also a group, but opening one here would send a receipt back into this chat,
+    /// which becomes a broadcast to all subscribers - per the prompt a red packet only does targeted-single or split-across-group, there is no channel tier.
     private static func groupCommerceBody(_ ci: ChatItem, chat: Chat) -> PopopxBubbleBody? {
         guard chat.chatInfo.chatType == .group, !chat.chatInfo.isChannel else { return nil }
         let mc: MsgContent
@@ -1002,38 +1002,38 @@ enum PopopxBubbleMount {
         return PopopxCommerceContent.detect(in: mc.text).map(PopopxBubbleBody.commerce)
     }
 
-    /// 内容行。文本之外的 7 个 `MsgContent` 档都有现网专属控件，一个都不接管。
+    /// Content rows. The 7 `MsgContent` tiers other than text all have dedicated live-app controls; not one is taken over.
     private static func msgBody(_ mc: MsgContent, ci: ChatItem) -> PopopxBubbleBody? {
         switch mc {
         case .text:
-            // 位置卡片排在最前面，而且必须压过下面那三道 guard：载荷里带 `popopx://loc`，
-            // 现网的 `formattedText`/`markdownBlocks` 会把它认成链接，于是这一行永远走不到
-            // 卡片这一支——真机上表现成"位置消息静默退化成一行纯文本"，比崩还难查。
+            // Location cards are listed first, and they must outrank the three guards below: the payload carries `popopx://loc`,
+            // which the live app's `formattedText`/`markdownBlocks` would read as a link, so this row would never reach
+            // the card branch - on a real device it shows as "a location message silently degrading into one line of plain text", harder to catch than a crash.
             if let location = PopopxLocationPayload.parse(from: mc.text) {
                 return .location(location)
             }
-            // 绝密载荷同一条理由，而且更硬：`PopopxSecurePayload.parse` 认的是 `popopx://sec?...`，
-            // 邀请链接的前缀也是 `popopx:/`。这一支落在下面那三道 guard 之后，现网就会把一条
-            // 绝密消息当成"对方发来的加好友邀请"来渲染——那是一次误加好友，不只是一行难看。
+            // The secure payload has the same reason, and a harder one: what `PopopxSecurePayload.parse` recognises is `popopx://sec?...`,
+            // and the invite-link prefix is `popopx:/` as well. If this branch sat after the three guards below, the live app would render a
+            // secure message as "an add-contact invite from the peer" - that is a mistaken contact add, not merely an ugly line.
             if let secure = PopopxSecurePayload.parse(from: mc.text) {
                 return .secure(secure)
             }
-            // 加密主页同样必须压过下面那三道 guard，理由和上面两支一样：`popopx://profile?...`
-            // 会被现网的 `formattedText`/`markdownBlocks` 认成链接，那一行就永远只是一条纯文本了。
-            // 三支的先后不敏感——三个 host（`loc`/`sec`/`profile`）互不重叠，各自的 `parse` 只认自己那一格。
+            // The encrypted profile must also outrank the three guards below, for the same reason as the two branches above: `popopx://profile?...`
+            // would be read as a link by the live app's `formattedText`/`markdownBlocks`, and that line would stay plain text forever.
+            // The order of the three branches does not matter - the three hosts (`loc`/`sec`/`profile`) never overlap, and each `parse` only recognises its own.
             if let profile = PopopxProfilePayload.parse(from: mc.text) {
                 return .profile(profile)
             }
-            // 礼品卡与红包是同一族判据，也必须压过下面那三道 guard：`popopx://voucher`/`popopx://redpacket`
-            // 会被现网认成链接，那一行就永远只是一串带签名的纯文本。
+            // Gift cards and red packets are one family of tests and must also outrank the three guards below: `popopx://voucher`/`popopx://redpacket`
+            // would be read as links by the live app, and that line would forever be nothing but a signed string of plain text.
             if let commerce = PopopxCommerceContent.detect(in: mc.text) {
                 return .commerce(commerce)
             }
-            // 带富文本/提及/markdown 的行交给现网：气泡只画纯 `Text`，链接和 @ 就不再可点。
+            // Rows with rich text/mentions/markdown go to the live app: the bubble only draws plain `Text`, so links and @ would no longer be tappable.
             guard ci.formattedText == nil, ci.mentions == nil, ci.markdownBlocks == nil else { return nil }
-            // 引用回复条和附件都不在 `PopopxBubbleBody` 的 6 个档里。
+            // Quoted reply bars and attachments are both outside the 6 tiers of `PopopxBubbleBody`.
             guard ci.quotedItem == nil, ci.file == nil else { return nil }
-            // 下面这些标记现网画在 `CIMetaView` 里，气泡的下沿没有对应位置（本文件 :199 的"挂载时二选一"）。
+            // The markers below are drawn by the live app inside `CIMetaView`; the bubble's lower edge has no place for them (this file :199 "choose one of the two when mounting").
             guard ci.meta.itemDeleted == nil, !ci.meta.itemEdited, ci.meta.itemTimed == nil,
                   ci.meta.itemForwarded == nil, ci.meta.sentViaProxy != true,
                   ci.meta.msgVerified == nil, !ci.meta.isLive
@@ -1046,7 +1046,7 @@ enum PopopxBubbleMount {
         }
     }
 
-    /// 组装气泡入参；只在 `body(of:)` 已经给出内容之后调用。
+    /// Assembles the bubble's input parameters; only called after `body(of:)` has already produced content.
     static func item(
         _ ci: ChatItem,
         content: PopopxBubbleBody,
@@ -1056,47 +1056,47 @@ enum PopopxBubbleMount {
         tailVisible: Bool,
         table: PopopxBubbleChannelTable
     ) -> PopopxBubbleItem {
-        // 撤回/不可读/系统行现网不画 tail（ChatItemClipShape.swift:55-60），气泡也就不收紧任何角。
+        // For retracted/unreadable/system rows the live app draws no tail (ChatItemClipShape.swift:55-60), so the bubble tightens no corner either.
         let tucked: Bool
         switch content {
         case .withdrawn, .unavailable, .event: tucked = false
         case .text, .media, .location, .secure, .profile, .commerce: tucked = tailVisible
         }
-        // 绝密那一格要能回答"关掉之后去删哪一行"。两个 id 都只从现网对象上原样读，不拼、不猜：
-        // `chat.chatInfo.id` = `ChatInfo.id`（ChatTypes.swift:2104-2112 的按档生成），`ci.id` = 消息 id。
-        // 自己拼一份键（`"@" + contactId` 那种）等于再造一个真相源——它和 `ChatInfo.id` 一旦漂移，
-        // 删的就是别人家的消息，而且 SMP 那边不会报错。所以这里只搬运，不加工；非 `.secure` 留 nil。
+        // The secure slot has to be able to answer "which row to delete after it closes". Both ids are read off live-app objects verbatim only, never built, never guessed:
+        // `chat.chatInfo.id` = `ChatInfo.id` (generated per case at ChatTypes.swift:2104-2112), `ci.id` = the message id.
+        // Building our own key (something like `"@" + contactId`) means creating a second source of truth - once it drifts from `ChatInfo.id`,
+        // what gets deleted is somebody else's message, and SMP will not raise an error. So here values are only carried, never manufactured; non-`.secure` stays nil.
         let secureTarget: PopopxSecureChatTarget?
         if case .secure = content {
             secureTarget = PopopxSecureChatTarget(chatId: chat.chatInfo.id, itemId: ci.id)
         } else {
             secureTarget = nil
         }
-        // 加密主页那一格和绝密那一格**不同键**：绝密用的是 `ChatInfo.id` 那个字符串（`getChat(_:)` 反查），
-        // 而 `PopopxProfileReadKey.chatId` 是 `Int64`，取的是 `ChatInfo.apiId`（ProfileReaderView.swift:745-752
-        // 的删除路径就是按 apiId 找回会话的）。计时仍然**按这一行**算：同一个人收到两份同名主页，
-        // 各有各的焚毁钟，所以键里必须带 `ci.id`，不能只带 profileId。两个 id 都只从现网对象上原样读。
+        // The encrypted-profile slot keys **differently** from the secure slot: secure uses the `ChatInfo.id` string (`getChat(_:)` looks it up),
+        // while `PopopxProfileReadKey.chatId` is an `Int64` taken from `ChatInfo.apiId` (ProfileReaderView.swift:745-752
+        // the delete path there finds the chat back by apiId). Timing is still counted **per row**: if the same person receives two profiles with the same name,
+        // each has its own burn clock, so the key must carry `ci.id` and not profileId alone. Both ids are read off live-app objects verbatim only.
         let profileTarget: PopopxProfileReadKey?
         if case .profile = content {
             profileTarget = PopopxProfileReadKey(chatId: chat.chatInfo.apiId, itemId: ci.id)
         } else {
             profileTarget = nil
         }
-        // 礼品卡/红包那一格要往哪个会话回信令。`apiId` 就是路由那一次 `apiSendMessages` 用的同一个数
-        // （`getContactChat`/`getGroupChat` 找的也是它，ChatModel.swift:551-568），所以这两处不会各说一套；
-        // `.invalidJSON` 那一档 `apiId` 是凭空的 0，所以只认 direct/group，其余留 nil 让卡片停在只读。
+        // Which chat the gift card/red packet slot signals back into. `apiId` is the very same number the routed `apiSendMessages` call used
+        // (`getContactChat`/`getGroupChat` look it up too, ChatModel.swift:551-568), so these two places cannot each tell their own story;
+        // for the `.invalidJSON` tier `apiId` is a made-up 0, so only direct/group are accepted and the rest stay nil, leaving the card read-only.
         let commerceContext: PopopxCommerceCardContext?
         if case .commerce = content {
             commerceContext = PopopxCommerceCardContext(
                 target: PopopxCommerceTarget.commerceTarget(chatType: chat.chatInfo.chatType,
                                                              chatId: chat.chatInfo.apiId),
                 incoming: !ci.chatDir.sent,
-                // 门槛卡片给本机签凭证用的会话键与名字：`ChatInfo.id` 原样搬（与 `secureTarget` 同一句话），
-                // 凭证因此和"这台设备上这个频道"同生同死，跨设备本来就不通用（钥匙串那一格说明过）。
+                // The chat key and name the gate card signs the local credential with: `ChatInfo.id` carried verbatim (same statement as `secureTarget`),
+                // so the credential lives and dies with "this channel on this device" and was never portable across devices (explained in the keychain slot).
                 chatId: chat.chatInfo.id,
                 chatTitle: chat.chatInfo.displayName,
-                // 门槛卡片只认频道。判据与频道信息页那一格同一个数（`GroupInfo.isChannel`），
-                // 拿不到 groupInfo 的会话一律 false，卡片因此停在"这一条不在频道里"。
+                // The gate card only recognises channels. Its test uses the same value as the channel info page slot (`GroupInfo.isChannel`),
+                // and a chat whose groupInfo cannot be reached is always false, so the card stays at "this one is not in a channel".
                 isChannel: chat.chatInfo.groupInfo?.isChannel == true
             )
         } else {
@@ -1119,8 +1119,8 @@ enum PopopxBubbleMount {
         )
     }
 
-    /// 投递回执。判据和现网 `CIStatus.statusIcon` 同一处（ChatTypes.swift:4614-4627），
-    /// 只是把那两枚资产勾换成 `PopopxBubbleReceipt` 的档位。
+    /// Delivery receipt. The test is the same place as the live app's `CIStatus.statusIcon` (ChatTypes.swift:4614-4627),
+    /// only those two asset checkmarks are swapped for the tiers of `PopopxBubbleReceipt`.
     static func receipt(of ci: ChatItem) -> PopopxBubbleReceipt? {
         switch ci.meta.itemStatus {
         case .sndNew: .inFlight
@@ -1138,8 +1138,8 @@ enum PopopxBubbleMount {
         return nil
     }
 
-    /// 建通道表要的全部行地址。**只在 ChatView 层调用一次**——逐行 await 是本组件禁止的画法
-    /// （本文件 :17）。
+    /// All row addresses needed to build the channel table. **Called exactly once, at the ChatView layer** - awaiting row by row is a pattern forbidden in this component
+    /// (this file :17).
     static func addresses(for items: [ChatItem], chat: Chat) -> [PopopxBubbleRowAddress] {
         let contact = contactId(of: chat)
         var rows: [PopopxBubbleRowAddress] = []
@@ -1158,12 +1158,12 @@ enum PopopxBubbleMount {
     }
 }
 
-// MARK: - 位置卡片
+// MARK: - Location card
 
-/// 位置卡片的全部文案。和载荷、渲染同文件，理由见文件头第 7 条。
+/// All the wording of the location card. It shares its file with the payload and the rendering; see item 7 of the file header for the reason.
 enum PopopxLocationCopy {
-    /// VoiceOver 说这一条气泡的一句话正文。**不含通道**——通道由
-    /// `PopopxMessageBubble.spoken` 在前面拼好，这里重复一次就会念两遍。
+    /// The one-sentence body VoiceOver says for this bubble. **Without the channel** - the channel is
+    /// spliced in front by `PopopxMessageBubble.spoken`, repeating it here would be read out twice.
     static func spoken(_ payload: PopopxLocationPayload) -> String {
         var parts = [NSLocalizedString("Location", comment: "")]
         if let name = payload.name { parts.append(name) }
@@ -1172,7 +1172,7 @@ enum PopopxLocationCopy {
         return parts.joined(separator: "，")
     }
 
-    /// 卡片自己的动作提示。SwiftUI 会自己补"按钮"，所以这里只说点了会怎样。
+    /// The card's own action hint. SwiftUI appends "button" by itself, so this only says what happens on tap.
     static let hint = NSLocalizedString("Open the location menu", comment: "")
     static let openNavigation = NSLocalizedString("Open navigation in Apple Maps", comment: "")
     static let copyCoordinates = NSLocalizedString("Copy the coordinates", comment: "")
@@ -1180,28 +1180,28 @@ enum PopopxLocationCopy {
     static let cancel = NSLocalizedString("Cancel", comment: "")
 }
 
-/// 一条位置消息的渲染。
+/// Rendering of one location message.
 ///
-/// 红线（`location-prompt.md:72`）：**列表里的气泡绝不内嵌可交互的 `MKMapView`**——那是一整条
-/// GL 渲染管线，一屏七八行就是七八条。这里只有一张 `MKMapSnapshotter` 渲出来的静态位图，配
-/// 一个进程内 LRU（`PopopxLocationSnapshotCache`）。图没到、渲染失败、或这个坐标正被别人渲，
-/// 一律退回品牌色占位块：地名、地址、坐标永远在，缺的只是那张图。
+/// Red line (`location-prompt.md:72`): **a bubble in a list never embeds an interactive `MKMapView`** - that is a whole
+/// GL rendering pipeline, and seven or eight rows on a screen means seven or eight of them. Here there is only a static bitmap rendered by `MKMapSnapshotter`, with
+/// an in-process LRU (`PopopxLocationSnapshotCache`). If the image has not arrived, rendering failed, or this coordinate is being rendered by someone else,
+/// it always falls back to the brand-coloured placeholder block: place name, address and coordinates are always there, only the image is missing.
 ///
-/// 整张卡片是一枚无边框按钮，点了弹 `confirmationDialog`（导航 / 复制坐标）。通道角标不在这里
-/// 画——`PopopxMessageBubble.footer` 本来就负责时间、回执、角标那一行。
+/// The whole card is one borderless button that opens a `confirmationDialog` (navigate / copy coordinates). The channel badge is not drawn
+/// here - `PopopxMessageBubble.footer` already owns the line with the time, the receipt and the badge.
 private struct PopopxLocationCardBubble: View {
     let payload: PopopxLocationPayload
     let ink: PopopxBubbleInk
-    /// 针的颜色要跟右下角那枚角标讲同一条通道，而 `PopopxBubbleInk` 只留颜色不留结论，
-    /// 所以通道自己传进来。
+    /// The pin's colour has to tell the same channel as the badge in the bottom-right corner, and `PopopxBubbleInk` keeps the colour but not the conclusion,
+    /// so the channel is passed in by itself.
     let channel: PopopxBubbleChannel
 
     @Environment(\.colorScheme) private var colorScheme
     @State private var snapshot: UIImage?
     @State private var showMenu = false
-    /// 聊天列表这一层没有屏幕级的 toast 宿主：`.popopxToast` 的契约是"一屏挂一次、贴在最上面"
-    /// （PopopxToast.swift:131），而我不打算为一句回执去改 ChatView。所以它挂在卡片自己头顶——
-    /// 离动作最近，也不越界。
+    /// The chat-list layer has no screen-level toast host: the `.popopxToast` contract is "mounted once per screen, pinned on top"
+    /// (PopopxToast.swift:131), and I am not going to change ChatView for one receipt line. So it hangs above the card's own head -
+    /// closest to the action, and not overstepping.
     @State private var toast = PopopxToastModel()
 
     var body: some View {
@@ -1227,7 +1227,7 @@ private struct PopopxLocationCardBubble: View {
         .buttonStyle(.plain)
         .accessibilityLabel(PopopxLocationCopy.spoken(payload))
         .accessibilityHint(PopopxLocationCopy.hint)
-        // 标题用坐标而不是地名：一个会话里发过两个"家"，菜单得说清是哪一个。
+        // The title uses coordinates instead of the place name: a chat may have sent "home" twice, and the menu has to say which one it is.
         .confirmationDialog(
             payload.coordinateString,
             isPresented: $showMenu,
@@ -1245,40 +1245,40 @@ private struct PopopxLocationCardBubble: View {
                 tint: markerTintColor,
                 style: interfaceStyle
             )
-            // 取不到（没网、被限流、这个坐标正有人在渲）就保留现状：已经画出来的地图不该
-            // 因为一次失败的取数被抹回占位块。键变了会再跑一次，命中缓存的那条路径是纯查表。
+            // If it cannot be fetched (no network, rate limited, this coordinate is being rendered by someone) keep things as they are: a map already drawn should not
+            // be wiped back to the placeholder by one failed fetch. A changed key runs it again, and the cache-hit path is a plain table lookup.
             if let image { snapshot = image }
         }
     }
 
-    // MARK: 图
+    // MARK: Image
 
-    /// 载荷自己不认识 CoreLocation（PopopxLocation.swift 文件头第 1 条），坐标在这一层现拼。
+    /// The payload itself does not know CoreLocation (PopopxLocation.swift file header item 1); coordinates are assembled at this layer.
     private var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: payload.latitude, longitude: payload.longitude)
     }
 
-    /// SwiftUI 的 `ColorScheme` 翻成 UIKit 的 trait：底图样式、针的颜色解析、缓存键三处都
-    /// 要它，只在这里翻一次。
+    /// Turning SwiftUI's `ColorScheme` into the UIKit trait: the base-map style, the pin colour resolution and the cache key, three places, all
+    /// need it, and it is turned exactly once, here.
     private var interfaceStyle: UIUserInterfaceStyle { colorScheme == .dark ? .dark : .light }
 
-    /// 缓存键要带三样：坐标、针的通道色、深浅色。通道色进键是因为它真的会画进位图里——
-    /// 同一个坐标，SMP 那枚是靛针、Mesh 那枚是青针，省掉这一段就会串色。深浅色换的是底图
-    /// 样式（苹果给深色底图另有一套瓦片）。
+    /// The cache key carries three things: coordinates, the pin's channel colour, light/dark. The channel colour is in the key because it really does get drawn into the bitmap -
+    /// at the same coordinate SMP's is an indigo pin and Mesh's is a teal pin, dropping that part would cross-contaminate colours. Light/dark changes the base-map
+    /// style (Apple ships a separate tile set for the dark base map).
     private var cacheKey: String {
         "\(payload.coordinateKey)|\(channel.isMesh ? "mesh" : "smp")|\(interfaceStyle == .dark ? "d" : "l")"
     }
 
-    /// 针的颜色跟右下角那枚角标讲同一条通道：靛紫 = SMP，青绿 = Mesh（§1.1 第 2 条：
-    /// 色相不跨通道借用，所以青色通路的消息在地图上继续用青）。
+    /// The pin colour tells the same channel as the badge in the bottom-right corner: indigo-violet = SMP, teal-green = Mesh (§1.1 item 2:
+    /// hue is not borrowed across channels, so messages on the teal path keep teal on the map as well).
     private var markerColor: Color { channel.isMesh ? PopopxPalette.mesh : PopopxPalette.brand }
 
-    /// 占位块的墨：卡面（收方）可以用通道色，实底（发方）必须退成本墨——判据和角标那条
-    /// 一模一样（`PopopxBubbleInk.onCard` / `monochromeBadgeInk`）。
+    /// Placeholder ink: the card surface (receiver) may use the channel colour, solid fill (sender) must fall back to the local ink - the test is the badge one,
+    /// exactly (`PopopxBubbleInk.onCard` / `monochromeBadgeInk`).
     private var placeholderInk: Color { ink.onCard ? markerColor : ink.text }
 
-    /// `UIColor(_:) + resolvedColor(with:)` 是 SwiftUI `Color` 落到 UIKit 侧唯一站得住的写法
-    /// （PopopxQRCardSheet.swift:145-149 同一先例）。
+    /// `UIColor(_:) + resolvedColor(with:)` is the only defensible way for a SwiftUI `Color` to land on the UIKit side
+    /// (PopopxQRCardSheet.swift:145-149 is the same precedent).
     private var markerTintColor: UIColor {
         UIColor(markerColor).resolvedColor(with: UITraitCollection(userInterfaceStyle: interfaceStyle))
     }
@@ -1290,12 +1290,12 @@ private struct PopopxLocationCardBubble: View {
                     .resizable()
                     .scaledToFill()
             } else {
-                // 占位块：一层极淡的底色 + 一枚针。它不是"加载失败"的红色告警——图缺了
-                // 这条消息照样读得懂，也不该在历史消息里长期挂着一个报错。
+                // Placeholder: a very faint background layer + one pin. It is not the red "load failed" warning - with the image missing
+                // this message is still readable, and an error should not sit in the message history long-term.
                 //
-                // 底色和针**都不许用通道色本身**：发方气泡是 `brand` 实底，靛底画靛针等于没画
-                // （§1.1 同一条禁令，`PopopxBubbleInk.monochromeBadgeInk` 在角标上做的就是这件事）。
-                // 快照里那枚针不受这条限制——它有整张底图给它做对比度。
+                // Neither the background nor the pin **may use the channel colour itself**: the sender bubble is solid `brand`, drawing an indigo pin on indigo is the same as not drawing it
+                // (§1.1, the same prohibition; what `PopopxBubbleInk.monochromeBadgeInk` does on the badge is exactly this).
+                // The pin inside the snapshot is not bound by that restriction - it has the whole base map to give it contrast.
                 placeholderInk.opacity(colorScheme == .dark ? 0.16 : 0.08)
                 Image(systemName: "mappin.and.ellipse")
                     .font(.system(size: 20, weight: .semibold))
@@ -1310,18 +1310,18 @@ private struct PopopxLocationCardBubble: View {
             RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl, style: .continuous)
                 .strokeBorder(PopopxPalette.hairlineInner, lineWidth: PopopxMetrics.hairline)
         }
-        // 图不单独播报：坐标、地名、地址都在下面那两行和整张卡片的 label 里。
+        // The image is not announced separately: coordinates, place name and address are all in the two lines below and in the card's overall label.
         .accessibilityHidden(true)
     }
 
-    // MARK: 动作
+    // MARK: Actions
 
     private func presentMenu() {
         PopopxHaptics.selection()
         showMenu = true
     }
 
-    /// 交给 Apple 地图并直接进步行导航态——发位置的场景几乎总是"我要过来"。
+    /// Handed to Apple Maps straight into walking-navigation state - the reason people send a location is almost always "I am coming to you".
     private func openInMaps() {
         let item = MKMapItem(placemark: MKPlacemark(coordinate: coordinate))
         item.name = payload.displayName
@@ -1335,22 +1335,22 @@ private struct PopopxLocationCardBubble: View {
     }
 }
 
-/// 进程内的地图快照缓存：`坐标 + 深浅色` → 位图，LRU。
+/// In-process map-snapshot cache: `coordinates + light/dark` -> bitmap, LRU.
 ///
-/// 上限是照着内存算的：一张 `size`（244×140 pt）@2x 的位图约 0.5 MB，24 张最坏 ≈ 13 MB，
-/// 换来的是翻回上半屏不必重渲；再往上就是拿整个 App 的内存换几行已经滚过去的图。
+/// The cap is sized against memory: one `size` (244x140 pt) bitmap at @2x is about 0.5 MB, 24 of them worst case is about 13 MB,
+/// and what it buys is not re-rendering when you scroll back to the top half; beyond that you are trading the whole app's memory for a few rows already scrolled past.
 ///
-/// 这个类**永不 import Metal/GL，也不持有任何 `MKMapView`**：它只是把 `MKMapSnapshotter`
-/// 的一次性输出存起来（`location-prompt.md:72` 那条红线的另一半）。
+/// This class **never imports Metal/GL and never holds an `MKMapView`**: it only stores
+/// the one-shot output of `MKMapSnapshotter` (the other half of the red line at `location-prompt.md:72`).
 @MainActor
 final class PopopxLocationSnapshotCache {
     static let shared = PopopxLocationSnapshotCache()
 
-    /// 缩略图尺寸（pt）。卡片的排版宽度和快照的渲染尺寸是同一个数，改一处两处一起变。
+    /// Thumbnail size (pt). The card's layout width and the snapshot's render size are the same number, so changing one changes both.
     static let size = CGSize(width: 244, height: 140)
 
-    /// 快照视野的**整幅宽度**（米）：800 m 就是中心点向东西各 400 m，够看清一个路口，
-    /// 又不会糊到只剩街区色块。它比选择器那张工作面的视野（`PopopxLocationPickerSheet.swift:443`）宽得多——卡片是缩略图，选择器要认得出单个门牌。
+    /// The **full width** of the snapshot viewport (metres): 800 m means 400 m east and west of the centre, enough to make out an intersection
+    /// without blurring down to mere block colouring. It is far wider than the picker's working-surface viewport (`PopopxLocationPickerSheet.swift:443`) - the card is a thumbnail, the picker has to recognise a single house number.
     static let spanMeters: Double = 800
 
     private static let capacity = 24
@@ -1360,11 +1360,11 @@ final class PopopxLocationSnapshotCache {
     private var order: [String] = []
     private var inFlight: Set<String> = []
 
-    /// 取一张快照：命中就返回，没命中就现渲。
+    /// Take one snapshot: a hit returns it, a miss renders it now.
     ///
-    /// 同一个 key 已经有别人在渲时直接返回 nil——这一支先退回占位块，等这张卡片下次
-    /// `.task(id:)` 重跑（翻回上半屏、换深浅色都会重跑）。不做等待队列：一个会话里的
-    /// 位置消息是个位数的量，为它排队不值这套复杂度。
+    /// If someone is already rendering the same key, return nil straight away - this branch falls back to the placeholder first and waits for the card's next
+    /// `.task(id:)` re-run (scrolling back to the top half or switching light/dark both re-run it). No waiting queue: a chat holds
+    /// a single-digit number of location messages, so queueing them is not worth this complexity.
     func image(
         forKey key: String,
         coordinate: CLLocationCoordinate2D,
@@ -1402,17 +1402,17 @@ final class PopopxLocationSnapshotCache {
         tint: UIColor,
         style: UIUserInterfaceStyle
     ) async -> UIImage? {
-        // 这个类型的 ObjC 名是 `MKMapSnapshotOptions`，Swift 侧只认嵌套写法（探针实测：
-        // 直接写 ObjC 名会报 "has been renamed to 'MKMapSnapshotter.Options'"）。
+        // This type's ObjC name is `MKMapSnapshotOptions`, but the Swift side only accepts the nested spelling (measured with a probe:
+        // writing the ObjC name directly errors with "has been renamed to 'MKMapSnapshotter.Options'").
         let options = MKMapSnapshotter.Options()
         options.size = size
-        // 倍率和深浅色一次写进同一个 trait：`scale` 这个属性在本 SDK 已经标了
-        // deprecated（"Use traitCollection.displayScale"），碰它就破 0 警告门禁。
+        // Scale and light/dark are written into the same trait at once: the `scale` property is already marked
+        // deprecated in this SDK ("Use traitCollection.displayScale"), and touching it breaks the 0-warning gate.
         options.traitCollection = UITraitCollection { traits in
             traits.displayScale = renderScale
             traits.userInterfaceStyle = style
         }
-        // 视野用 `region` 而不是 `cameraBoundary`：后者在本 SDK 的 Options 上不存在（探针实测）。
+        // The viewport uses `region` rather than `cameraBoundary`: the latter does not exist on this SDK's Options (measured with a probe).
         options.region = MKCoordinateRegion(center: coordinate, span: span(around: coordinate))
         guard let snapshot = try? await MKMapSnapshotter(options: options).start() else { return nil }
         let base = snapshot.image
@@ -1421,8 +1421,8 @@ final class PopopxLocationSnapshotCache {
         format.opaque = true
         return UIGraphicsImageRenderer(size: base.size, format: format).image { _ in
             base.draw(at: .zero)
-            // 针画在正中央：`region` 本来就是绕着目标点要的视野，所以"画面中心 = 坐标"这一步
-            // 不需要 `point(for:)`，也就不必为一张静态位图去造一个 `MKAnnotation`。
+            // The pin is drawn dead centre: `region` was asked for around the target point anyway, so the step "picture centre = coordinate"
+            // needs no `point(for:)`, and there is no need to manufacture an `MKAnnotation` for a static bitmap.
             if let pin = pin(tint: tint) {
                 pin.draw(at: CGPoint(
                     x: (base.size.width - pin.size.width) / 2,
@@ -1432,19 +1432,19 @@ final class PopopxLocationSnapshotCache {
         }
     }
 
-    /// 一枚通道色的针。这里没有用 `MKMarkerAnnotationView`：本 SDK 的 `MKMapSnapshotOptions`
-    /// 已经没有 `annotationViews` 这个属性，而 marker 那套默认还会带一只白色标题框——
-    /// "除角标那两块贴片之外不得再引入第三种蓝"这条红线在地图上同样成立。
+    /// One channel-coloured pin. `MKMarkerAnnotationView` is not used here: this SDK's `MKMapSnapshotOptions`
+    /// no longer has an `annotationViews` property, and the marker defaults would also drag in a white title box -
+    /// the red line "no third shade of blue beyond the two badge patches" holds on the map just the same.
     private static func pin(tint: UIColor) -> UIImage? {
         let configuration = UIImage.SymbolConfiguration(pointSize: 22, weight: .semibold)
         return UIImage(systemName: "mappin.circle.fill", withConfiguration: configuration)
             .map { $0.withTintColor(tint, renderingMode: .alwaysTemplate) }
     }
 
-    /// 把"米"换算成经纬度 delta：纬度 1°≈111.32 km，经度还要除 cos(纬度)，否则中高纬度
-    /// 的视野会被压扁。两个 delta 按卡片的长宽比分配，好让 `region` 的比画率和位图一致
-    /// （不一致时苹果会自己凑，代价是实际视野比名义值宽或窄一截）。
-    /// 极地附近 cos→0，这时退回用纬度那一档：宁可视野窄一点，也不要算出 inf 递进 MapKit。
+    /// Converting "metres" into latitude/longitude deltas: latitude 1 deg is about 111.32 km, and longitude has to be divided by cos(latitude), otherwise
+    /// mid-to-high latitude viewports get squashed flat. The two deltas are apportioned by the card's aspect ratio so that `region`'s aspect matches the bitmap
+    /// (when they disagree Apple makes it up itself, at the cost of an actual viewport a stretch wider or narrower than the nominal one).
+    /// Near the poles cos -> 0, and there it falls back to the latitude tier: a narrower viewport is better than handing MapKit an inf.
     private static func span(around coordinate: CLLocationCoordinate2D) -> MKCoordinateSpan {
         let degreesPerMeter = 1.0 / 111_320.0
         let width = spanMeters * degreesPerMeter
@@ -1457,19 +1457,19 @@ final class PopopxLocationSnapshotCache {
     }
 }
 
-// MARK: - 绝密卡片
+// MARK: - Secure card
 
-/// 绝密卡片 + "点开它的那一次跳转"。
+/// The secure card plus "the one jump that opens it".
 ///
-/// 卡片本体在 `PopopxSecureSheetView.swift`（`PopopxSecureCardBubble`），这一层只做两件事：
-/// 把 `PopopxSecureChatTarget` 递给窗口管理器，以及把"这一条再也解不开"记在自己的状态里。
-/// 之所以要有这么一层而不是在 `contentText` 里直接调：`present` 是异步的（中间隔着一次生物识别），
-/// 而 body 是同步的——失败之后卡片要变色，那个事实必须住在一个 View 的 `@State` 里才重画得动。
+/// The card itself lives in `PopopxSecureSheetView.swift` (`PopopxSecureCardBubble`); this layer does only two things:
+/// hand `PopopxSecureChatTarget` to the window manager, and record "this one can never be opened again" in its own state.
+/// Why this layer exists instead of calling directly from `contentText`: `present` is asynchronous (a biometric wait sits in the middle),
+/// while body is synchronous - after a failure the card changes colour, and that fact has to live in a View's `@State` for the redraw to reach it.
 @MainActor
 private struct PopopxSecureBubbleMount: View {
     let payload: PopopxSecurePayload
-    /// 本机这条记录的出处。`nil` 不是"未知所以赌一把"：卡片直接落到不可打开那一档。
-    /// 赌错的代价是删掉别人的消息，而这条消息还在用户眼前——两笔账都还不回来。
+    /// Where this local record came from. `nil` is not "unknown, so take a gamble": the card drops straight into the cannot-be-opened tier.
+    /// A wrong gamble costs somebody else's deleted message while this message is still in front of the user - neither debt can be paid back.
     let target: PopopxSecureChatTarget?
     let incoming: Bool
 
@@ -1492,17 +1492,17 @@ private struct PopopxSecureBubbleMount: View {
 
     private func open() {
         guard let target else { return }
-        // 不存这个 Task：它中间隔着一次生物识别等待，列表回收、切后台都不该替用户取消掉
-        // 他已经按下的一次"查看"。真要收尾的是窗口自己（模块五的生命周期那一条）。
+        // This Task is not stored: a biometric wait sits in the middle, and neither list recycling nor going to background should cancel
+        // a "view" the user already pressed. The thing that has to clean up is the window itself (the lifecycle clause of anti-theft module five).
         Task { @MainActor in
-            // 在场核验门（防盗模块二）：绝密卡片是"看一眼就销毁"的内容，正是旁人抢着
-            // 按指纹要拿到的那一格。放行才开窗；被拦时这里**什么都不弹**——模块二已经把
-            // 用户落到全屏遮罩上，再叠一条"操作已取消"反而是多出来的信号。
+            // Presence check gate (anti-theft module two): the secure card holds "look once and it is destroyed" content, exactly the slot
+            // a bystander hammering the fingerprint sensor is trying to get. The window opens only once it passes; when blocked this place **pops nothing** - module two has already
+            // put the user behind the full-screen cover, and layering "operation cancelled" on top would only add a spurious signal.
             guard await PopopxBehaviorGuard.shared.authorized(reason: NSLocalizedString("Confirm this is you before opening the top-secret message", comment: "")) else { return }
             if let failure = await PopopxSecureWindowManager.shared.present(payload: payload, target: target) {
                 if failure.marksCardDamaged { damaged = true }
-                // 走 `Text(verbatim:)`：`showAlertMsg` 的入参是 `LocalizedStringKey`
-                // （ContentView.swift:540），运行时字符串转不过去，也不该拿去查格式化表。
+                // Goes through `Text(verbatim:)`: `showAlertMsg` takes a `LocalizedStringKey`
+                // (ContentView.swift:540), a runtime string does not convert to it, and it should not be looked up in the format table either.
                 AlertManager.shared.showAlert(
                     Alert(title: Text(verbatim: NSLocalizedString("This top-secret message will not open", comment: "")),
                           message: Text(verbatim: failure.userText))
@@ -1512,13 +1512,13 @@ private struct PopopxSecureBubbleMount: View {
     }
 }
 
-// MARK: - 预览
+// MARK: - Preview
 
 #if DEBUG
 @MainActor
 private struct PopopxBubbleGallery: View {
-    /// 预览用的绝密载荷：`make` 只在本机做一次 AES-GCM，不碰网络，所以它是自包含的模拟数据。
-    /// 这里的 `try!` 成立是因为入参是写死的字面量——`make` 只在"空正文"和"超过 32 KiB"两档抛错。
+    /// The secure payload used for previews: `make` runs AES-GCM once on this device and never touches the network, so it is self-contained mock data.
+    /// The `try!` here holds because the input is a hard-written literal - `make` only throws for "empty body" and "over 32 KiB".
     private static let previewPayload = try! PopopxSecurePayload.make(
         plaintext: "Top-secret preview text. It never shows in the list.",
         ttlSeconds: 30
@@ -1584,8 +1584,8 @@ private struct PopopxBubbleGallery: View {
             receipt: .delivered
         ),
         PopopxBubbleItem(
-            // 只有坐标、没有地名：卡片第一行退化成 `coordinateString`，这条退化路径要能在
-            // 画布里一眼看到。
+            // Coordinates only, no place name: the card's first line degrades to `coordinateString`, and this degradation path has to be
+            // visible at a glance inside the canvas.
             messageKey: "8",
             content: .location(PopopxLocationPayload(latitude: 31.230416, longitude: 121.473701)),
             tail: PopopxBubbleTail(side: .received, tucked: true),
@@ -1593,12 +1593,12 @@ private struct PopopxBubbleGallery: View {
             timeText: "09:20"
         ),
         PopopxBubbleItem(
-            // 绝密那一格。载荷走真封装（`make` = 本机一次 AES-GCM，不碰网络），正文写什么都不重要：
-            // 它在列表里永远不会显示，能显示的只有那枚锁盾卡片和时长。
+            // The secure slot. The payload goes through real encapsulation (`make` = one local AES-GCM, no network), and what the body says does not matter:
+            // it is never shown in the list - all that can show is that lock-shield card and the duration.
             //
-            // 这里的 `chatId: "preview"` 是**惰性**的，不是"猜一个 id"那件被禁止的事：预览进程里
-            // 没人 `install(host:)`，`present` 在第一步就返回 `.hostNotInstalled`，删不到任何一行。
-            // 真机上这两个值只从 `chat.chatInfo.id` / `ci.id` 原样搬（见上面 `item(...)`）。
+            // The `chatId: "preview"` here is **lazy**, not the forbidden "guess an id": inside the preview process
+            // nobody calls `install(host:)`, so `present` returns `.hostNotInstalled` at the very first step and cannot delete any row.
+            // On a real device these two values are carried verbatim from `chat.chatInfo.id` / `ci.id` only (see `item(...)` above).
             messageKey: "9",
             content: .secure(PopopxBubbleGallery.previewPayload),
             tail: PopopxBubbleTail(side: .received),

@@ -1,9 +1,9 @@
 //
 //  PopopxMeshSettingsModelTests.swift
 //
-//  The three rules of the settings page: the 总开关 writes the one key the fuse reads, the 建联策略
-//  picker writes where 模块 3 reads, and 清除身份绑定 goes through the store's own unbind path and then
-//  reports what actually disappeared — not what it hoped would.
+//  The three rules of the settings page: the master switch writes the one key the fuse reads, the
+//  connection policy picker writes where module 3 reads, and clearing identity bindings goes through
+//  the store's own unbind path, then reports what actually disappeared — not what it hoped would.
 //
 
 import Foundation
@@ -68,7 +68,7 @@ struct PopopxMeshSettingsModelTests {
         #expect(made.model.bindings.count == 2)
         #expect(made.model.bindings.first(where: { $0.meshPublicKeyHex == PopopxMeshTestKeys.peerA })?.status
             == "contact :7")
-        // A binding that only has a pending connection is 模块 6's "not yet a contact" row.
+        // A binding that only has a pending connection is module 6's "not yet a contact" row.
         #expect(made.model.bindings.first(where: { $0.meshPublicKeyHex == PopopxMeshTestKeys.peerB })?.status
             == "pending :11")
     }
@@ -89,7 +89,7 @@ struct PopopxMeshSettingsModelTests {
         #expect(made.journal.all.contains("policy:autoSilent"))
     }
 
-    @Test("The 总开关 goes through the fuse, and the fuse is the only thing that starts a radio")
+    @Test("The master switch goes through the fuse, and the fuse is the only thing that starts a radio")
     func fuseWriteThrough() async throws {
         let made = try makeHarness(label: "settings-fuse")
         await made.model.refresh()
@@ -123,7 +123,7 @@ struct PopopxMeshSettingsModelTests {
         #expect(MeshPrivacySettingsView.words(for: made.model.activity).contains("on"))
     }
 
-    @Test("清除身份绑定 forgets every peer and reports how many actually went")
+    @Test("Clearing identity bindings forgets every peer and reports how many actually went")
     func clearAllBindings() async throws {
         let made = try makeHarness(
             label: "settings-clear",
@@ -145,7 +145,7 @@ struct PopopxMeshSettingsModelTests {
         #expect(Set(forgotten.forgotten) == Set([
             PopopxMeshTestKeys.peerA, PopopxMeshTestKeys.peerB, PopopxMeshTestKeys.peerC
         ]))
-        // 清除 takes the fuse down first: unbinding a live peer would leave the engine re-pairing it
+        // Clearing takes the fuse down first: unbinding a live peer would leave the engine re-pairing it
         // on the next announce, which reads as the button not working.
         #expect(made.fuse.isEnabled == false)
     }

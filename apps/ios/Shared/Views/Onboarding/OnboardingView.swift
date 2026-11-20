@@ -57,22 +57,22 @@ enum OnboardingStage: String, Identifiable {
     public var id: Self { self }
 }
 
-// MARK: - 引导页共用文案（第一阶段录入的本地化 Key）
+// MARK: - Shared onboarding copy (the localization Keys entered in the first phase)
 
-/// 四屏所有用户可见文案都在此解析：`PopopxButton` / `PopopxSectionCard` /
-/// `PopopxToggleRow` 这些原子控件收的是 `String`，拿不到 `LocalizedStringKey`，
-/// 所以 Key 在此查一次表，四个页面与阅读器共用同一份，绝不落裸 Key。
+/// All user-visible copy of the four screens resolves here: the atomic controls such as `PopopxButton` / `PopopxSectionCard` /
+/// `PopopxToggleRow` take a `String` and cannot get a `LocalizedStringKey`,
+/// so each Key is looked up once here and the four pages and the reader share that same copy; a bare Key never escapes.
 enum PopopxOnboardingCopy {
     private static func key(_ value: String) -> String {
         NSLocalizedString(value, comment: "POPOPX onboarding v2")
     }
 
-    // 顶栏进度胶囊的阶段标签
+    // Stage labels of the top-bar progress capsule
     static let stageIdentity = key("Identity isolation")
     static let stageRouting = key("Routing & notifications")
     static let stageCommitments = key("Commitments & launch")
 
-    // 第 1 屏 · 宣言页
+    // Screen 1 · manifesto page
     static let heroTitle = key("Own your network.")
     static let heroNote = key("Private messaging with no account and no user IDs.")
     static let pillSMP = key("SMP end-to-end encrypted")
@@ -94,7 +94,7 @@ enum PopopxOnboardingCopy {
     static let createIdentity = key("Create encrypted identity")
     static let restoreBackup = key("Restore from encrypted backup")
 
-    // 第 2 屏 · 创建匿名身份
+    // Screen 2 · create the anonymous identity
     static let identityTitle = key("Create your first anonymous identity")
     static let identityNote = key(
         "Identity, keys, POPOPX Compute Credits and your profile card are encrypted on this device only. Servers cannot see them."
@@ -115,17 +115,17 @@ enum PopopxOnboardingCopy {
     )
     static let next = key("Next")
 
-    // 第 3 屏 · 双模路由与通知
+    // Screen 3 · dual-mode routing and notifications
     static let modesTitle = key("Choose how POPOPX connects and wakes")
     static let onlineChannel = key("Online encrypted channel")
-    // 三档标题沿用 AppAPITypes.swift:1701 `NotificationsMode.label` 已有的 Key，不另立词条。
+    // The three tier titles reuse the Keys already in AppAPITypes.swift:1701 `NotificationsMode.label`; no separate entries are created.
     static let modeInstant = key("Instant")
     static let modePeriodic = key("Periodic")
     static let modeNoPush = key("No push server")
     static let instantNote = key("Low latency · minor metadata exposure")
     static let periodicNote = key("Higher privacy · balanced battery")
     static let noPushNote = key("Maximum discretion · nothing pushed")
-    /// 三档选中态的右侧微标：光靠一个小圆点在真机上读不出"这档已经选中"。
+    /// The trailing chip for a tier's selected state: a small dot alone does not read as "this tier is selected" on a real device.
     static let modeSelected = key("Selected")
     static let pushFootnote = key(
         "Apple's push service carries only the signal that new data is waiting, never the content."
@@ -136,12 +136,12 @@ enum PopopxOnboardingCopy {
     )
     static let bluetoothPermissionNote = key("Bluetooth permission is requested the first time the mesh starts.")
     static let relayNodes = key("Dynamic SMP relay nodes")
-    /// 可用运营商只有 1 个（或还没有）时，"1 / 1" 的选择器会让人以为必须去选一个，
-    /// 所以第 3 屏那张卡在这种数量下改成状态展示，详情弹层入口保留。
+    /// When there is only 1 available operator (or none yet), a "1 / 1" picker makes people think they must go and choose one,
+    /// so at that count the card on screen 3 turns into a status display while the entry to the detail sheet is kept.
     static let relayReadyTitle = key("Default cluster is ready")
     static let relayAutoRouting = key("Automatic routing")
-    // 「中继运营商」弹层：Key 全部沿用上游既有句子，只是改由本枚举解析，
-    // 这样弹层里的每个字都和其他三屏走同一条本地化通道。
+    // The "relay operator" sheet: its Keys all reuse existing upstream sentences and are only resolved by this enum now,
+    // so every word in the sheet goes through the same localization channel as the other three screens.
     static let operatorsTitle = key("Server operators")
     static let operatorsNote = key("You can configure servers via settings.")
     static let operatorsHowItHelps = key("How it helps privacy")
@@ -150,12 +150,12 @@ enum PopopxOnboardingCopy {
     static let back = key("Back")
     static let continueButton = key("Continue")
 
-    // 第 4 屏 · 安全承诺、启动防护与法务
+    // Screen 4 · security promises, launch protection and legal
     static let commitmentsTitle = key("Security commitments and local protection")
     static let commitmentsCard = key("Network and security commitments")
-    // 三条承诺在 393×852 上必须各占一行：原句把三条从句塞进一句，任何语种都要 3 行以上，
-    // 第 4 屏必然要下滑。这里只保留可执行的核心断言，完整表述仍由离线阅读器的正文承担
-    // （英文原句即 Key，所以 16 个语种目录里对应的行是整行改写，不是新增）。
+    // The three promises must each take one row on 393×852: the original sentence crammed three clauses into one, which needs more than 3 rows in any language,
+    // so screen 4 would inevitably require scrolling. Only the actionable core assertions stay here; the full statement is still carried by the offline reader's body text
+    // (the English sentence is the Key, so the matching lines in the 16 language directories are whole-line rewrites, not additions).
     static let commitmentRelay = key("Asynchronous SMP relaying; deleting here is irreversible.")
     static let commitmentRouting = key("Private routing hides your IP; finishing grants the 3-day trial badge.")
     static let commitmentWipe = key("Three taps on the logo erase local data; screenshots are blocked.")
@@ -170,11 +170,11 @@ enum PopopxOnboardingCopy {
     static let legalAgreement = key(
         "I have read and agree to the POPOPX Privacy Policy and the POPOPX Terms of Use."
     )
-    /// 同意句的可链接版本：两个文档标题由 `%1$@` / `%2$@` 注入，行内热区取的就是
-    /// `privacyPolicy` / `termsOfUse` 的译文，与阅读器标题逐字一致。
-    /// 不能拿原句找子串切分：16 个译本里 bg cs fi hu pl ru uk 这 7 个给标题加了变格或
-    /// 冠词，逐字包含不成立，链接会静默掉回纯文本；其余 9 个的译文就是照原句替换标题
-    /// 生成的。`legalAgreement` 保留作无障碍标签。
+    /// The linkable version of the agreement sentence: the two document titles are injected via `%1$@` / `%2$@`, and the inline hot spots use exactly
+    /// the translations of `privacyPolicy` / `termsOfUse`, verbatim identical to the reader's titles.
+    /// The original sentence cannot be split by substring search: of the 16 translations, the 7 in bg cs fi hu pl ru uk add case inflection or
+    /// articles, so verbatim containment fails and the link silently drops back to plain text; the remaining 9 translations were built by replacing the titles into
+    /// the original sentence. `legalAgreement` is kept as the accessibility label.
     static let legalAgreementLinks = key("I have read and agree to %1$@ and %2$@.")
     static let readAndClose = key("I have read it")
     static let agreeAndEnter = key("Agree and enter POPOPX")
@@ -183,11 +183,11 @@ enum PopopxOnboardingCopy {
     static let readyToast = key("Encrypted queue, Bluetooth Mesh and the privacy shield are ready.")
     static let badgeToast = key("The 3-Day Pioneer Node Trial Badge is active.")
 
-    // 阅读器共用
+    // Shared by the reader
     static let legalEffective = key("Effective: November 2026")
     static let legalPublished = key("The full published statement is at popopx.chat/privacy.")
 
-    // 隐私政策正文
+    // Privacy policy body text
     static let privacySections: [(String, String)] = [
         (key("No account, no collection"), key(
             "POPOPX creates no accounts. Your profiles, contacts, groups, messages and settings exist only in the encrypted database on this device, and nothing here links who talks to whom."
@@ -215,7 +215,7 @@ enum PopopxOnboardingCopy {
         ))
     ]
 
-    // 使用条款正文
+    // Terms of use body text
     static let termsSections: [(String, String)] = [
         (key("Acceptable use"), key(
             "Use POPOPX within the laws of the country you are in. Public groups and Cabin broadcasts must carry no unlawful content, no spam and no harassment of other users."
@@ -238,10 +238,10 @@ enum PopopxOnboardingCopy {
     ]
 }
 
-// MARK: - 引导页共用视觉原子
+// MARK: - Shared onboarding visual atoms
 
-/// 0.5pt 极细分隔线。`PopopxControls` 里那个同名分隔线在 `#if DEBUG` 内且是 private，
-///  Release 构建拿不到，所以引导页自带一条，颜色与描边宽度都取自色板 token。
+/// A 0.5pt hairline divider. The identically named divider in `PopopxControls` sits inside `#if DEBUG` and is private,
+///  so a Release build cannot reach it; onboarding therefore ships its own, with colour and stroke width both taken from the palette tokens.
 struct PopopxOnboardingHairline: View {
     var body: some View {
         Rectangle()
@@ -252,8 +252,8 @@ struct PopopxOnboardingHairline: View {
     }
 }
 
-/// 行首的圆角彩色 SF Symbol 徽章：`PopopxIconBadge` 同样是 private 的，
-/// 这里用公开的 `PopopxIconTint` 组合同一对 fill/ink，颜色不可能配错。
+/// The rounded coloured SF Symbol badge at the head of a row: `PopopxIconBadge` is private as well,
+/// so this uses the public `PopopxIconTint` to combine the same pair of fill/ink, which makes a colour mismatch impossible.
 struct PopopxOnboardingIconBadge: View {
     let systemName: String
     let tint: PopopxIconTint
@@ -269,8 +269,8 @@ struct PopopxOnboardingIconBadge: View {
     }
 }
 
-/// 行尾的状态微标（「已选」/「自动路由」）：淡 brand 底 + brand 字，
-/// 只作视觉确认，朗读交给所在行本身，所以整枚对无障碍隐藏。
+/// The trailing status chip ("Selected" / "Automatic routing"): light brand background + brand text,
+/// a visual confirmation only; the reading is left to the row it sits in, so the whole chip is hidden from accessibility.
 struct PopopxOnboardingChip: View {
     private let text: String
 
@@ -292,9 +292,9 @@ struct PopopxOnboardingChip: View {
     }
 }
 
-// MARK: - 统一顶栏进度胶囊
-/// 四屏共用的页头：`1 / 3` 计数 + 阶段标签胶囊、主副标题与三段进度轨。
-/// 第 1 屏（宣言页）不带它，那里是 Logo 光晕的构图。
+// MARK: - Unified top-bar progress capsule
+/// The page header shared by the four screens: a `1 / 3` counter + stage label capsule, main and sub title, and a three-segment progress track.
+/// Screen 1 (the manifesto page) does not carry it; there the composition is the Logo glow.
 struct PopopxOnboardingHeader: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -365,10 +365,10 @@ struct PopopxOnboardingHeader: View {
     }
 }
 
-// MARK: - 隐私政策 / 使用条款离线阅读器
+// MARK: - Privacy policy / terms of use offline reader
 
-/// 第 4 屏的内置法律文书：正文全部来自 `PopopxOnboardingCopy`，不联网、不加载
-/// `popopx.chat/privacy`，那句话只是告诉用户完整对外文本的所在。
+/// The built-in legal documents of screen 4: the body text comes entirely from `PopopxOnboardingCopy`, with no network access and nothing loaded from
+/// `popopx.chat/privacy`; that sentence only tells the user where the full outward-facing text lives.
 struct PopopxLegalDocumentSheet: View {
     enum Document: Identifiable, Hashable {
         case privacy, terms

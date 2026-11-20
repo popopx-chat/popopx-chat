@@ -2,14 +2,14 @@
 //  PopopxMeshStateSource.swift
 //  PopopxMeshUI
 //
-//  The one place the mesh's event stream becomes interface state. 模块 1~4 publish
+//  The one place the mesh's event stream becomes interface state. Modules 1-4 publish
 //  `PopopxMeshEvent`s; every view in this target reads the reduced snapshot below instead of
 //  inventing its own listener, so that "how many subscribers does the hub have" stays a number the
 //  fuse can reason about (`PopopxMeshKillSwitch.verifiedActivitySnapshot`) and so a view that
 //  disappears cannot leave a pump running.
 //
 //  Deliberately absent: Nostr, relays, geohash, WebSockets. The plaza's neighbourhood is Bluetooth
-//  range and nothing else (铁律 1).
+//  range and nothing else (iron rule 1).
 //
 
 import Combine
@@ -19,7 +19,7 @@ import PopopxMeshKit
 /// What the mesh currently looks like from inside the app. A value, so views diff it and tests can
 /// assert on it without a window.
 public struct PopopxMeshStreamState: Hashable, Sendable {
-    /// The radio, as the last `bluetoothState` event reported it (模块 4 keeps its own copy in the
+    /// The radio, as the last `bluetoothState` event reported it (module 4 keeps its own copy in the
     /// monitor; this is the UI's).
     public let radioState: PopopxBluetoothState
 
@@ -60,11 +60,11 @@ public struct PopopxMeshStreamState: Hashable, Sendable {
     }
 }
 
-/// Routing state the interface would like to know but must not require: 模块 5 owns it, and 模块 5
+/// Routing state the interface would like to know but must not require: module 5 owns it, and module 5
 /// is not part of this target. Three members, nothing else, so the app-side router can conform to
 /// it in one extension without revealing its internals.
 public protocol PopopxMeshRoutingObserving: Sendable {
-    /// 本机有没有公网（SMP）通路。The banner's "蓝牙已断开，尚未交换公网名片" copy needs this to be
+    /// Whether this device has a public-internet (SMP) route. The banner's "Bluetooth disconnected, public contact not yet exchanged" copy needs this to be
     /// honest about whether re-sending over SMP is even possible.
     func isPublicNetworkAvailable() async -> Bool
 
@@ -85,12 +85,12 @@ public protocol PopopxMeshRoutingObserving: Sendable {
 }
 
 public extension PopopxMeshRoutingObserving {
-    /// The answer a host that has not wired 模块 5 gets: no pairs, which is the behaviour before the
+    /// The answer a host that has not wired module 5 gets: no pairs, which is the behaviour before the
     /// dual-id mapping — a flushed message is drawn once by the app and once by the mesh strip.
     func flushedAppChatItemIDs() async -> [String: Int64] { [:] }
 }
 
-/// The default when the host has not wired 模块 5 in yet: offline only, which is exactly what a
+/// The default when the host has not wired module 5 in yet: offline only, which is exactly what a
 /// build with no router must claim.
 public struct PopopxMeshNoRoutingObserver: PopopxMeshRoutingObserving {
     public init() {}

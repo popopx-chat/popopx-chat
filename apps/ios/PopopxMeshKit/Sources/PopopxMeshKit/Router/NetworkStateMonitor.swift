@@ -1,13 +1,13 @@
 //
 //  NetworkStateMonitor.swift
-//  PopopxMeshKit  —  模块 5
+//  PopopxMeshKit  —  Module 5
 //
-//  The public-internet half of 全向无缝切换: what `NWPathMonitor` says about the device, turned into
+//  The public-internet half of seamless switching in every direction: what `NWPathMonitor` says about the device, turned into
 //  one Sendable value that `PopopxMessageRouter` reads before it chooses a channel and streams to
-//  whenever the choice changes. Nothing here decides where a message goes — 模块 5's router does —
+//  whenever the choice changes. Nothing here decides where a message goes — module 5's router does —
 //  and nothing here reaches the network: this is a listener on the operating system's own path
 //  state, which is the only public-network fact this package is allowed to know without going
-//  through 模块 2's seam.
+//  through module 2's seam.
 //
 //  Two rules shape the file. The value is a *snapshot plus a stream*, because the router needs an
 //  answer now (`currentPath()`) and also needs to react when the answer changes
@@ -21,7 +21,7 @@ import Network
 
 // MARK: - Time
 
-/// The two places 模块 5 waits — the SMP ACK window in the router and the first-report watchdog
+/// The two places module 5 waits — the SMP ACK window in the router and the first-report watchdog
 /// here — read time through this one value, so a test can substitute a scaled clock and prove a
 /// 3-second rule in 3 milliseconds instead of sleeping.
 ///
@@ -70,8 +70,8 @@ public enum PopopxNetworkInterface: String, Hashable, Sendable {
     }
 }
 
-/// Why a path is not usable, as `NWPath.unsatisfiedReason` spells it. The banner can say "蜂窝权限被
-/// 拒绝" instead of the useless "无网络" when the system, not the radio, is the one refusing.
+/// Why a path is not usable, as `NWPath.unsatisfiedReason` spells it. The banner can say "Cellular permission
+/// denied" instead of the useless "No network" when the system, not the radio, is the one refusing.
 public enum PopopxPathBlockage: String, Hashable, Sendable {
     case none
     case notAvailable
@@ -110,7 +110,7 @@ public enum PopopxPathBlockage: String, Hashable, Sendable {
 /// iOS 17 while this package still deploys to iOS 15.
 public struct PopopxNetworkPath: Hashable, Sendable {
     /// `NWPath.status == .satisfied`. False also covers `.requiresConnection`: a path that needs a
-    /// login portal cannot carry an SMP request, which is exactly the 弱网 case the router treats as
+    /// login portal cannot carry an SMP request, which is exactly the weak-network case the router treats as
     /// offline.
     public let isConnected: Bool
     public let interface: PopopxNetworkInterface
@@ -250,7 +250,7 @@ public final class PopopxNWPathSource: PopopxPathProviding, @unchecked Sendable 
     }
 }
 
-/// What 模块 5 needs from a connectivity source, and the only way anything in this package learns
+/// What module 5 needs from a connectivity source, and the only way anything in this package learns
 /// whether the public network is up. `NetworkStateMonitor` is the production implementation; a test
 /// substitutes its own so a network restore can be produced without a radio.
 public protocol PopopxConnectivitySource: Sendable {
@@ -318,7 +318,7 @@ public actor NetworkStateMonitor: PopopxConnectivitySource {
 
     // MARK: Lifecycle
 
-    /// Idempotent, like 模块 4's monitor: the global switch may be toggled repeatedly.
+    /// Idempotent, like module 4's monitor: the global switch may be toggled repeatedly.
     public func start() async {
         guard !started else { return }
         started = true

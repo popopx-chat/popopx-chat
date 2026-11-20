@@ -2,8 +2,8 @@
 //  PopopxMeshPrivateChatView.swift
 //  PopopxMeshUI
 //
-//  模块 7 的私聊界面 — the 1:1 offline conversation with ONE paired mesh neighbour. Phase 2 asks for
-//  「新增独立的 #mesh 本地离线广场与私聊界面（支持本地临时昵称设置）」: the plaza is the broadcast half
+//  module 7's private-chat screen — the 1:1 offline conversation with ONE paired mesh neighbour. Phase 2 asks for
+//  "add a standalone #mesh local offline plaza and private-chat screen (with local temporary nickname setting)": the plaza is the broadcast half
 //  (`MeshPlazaView`), this is the private half, and it is a separate screen rather than a filter on
 //  the plaza because the two have different guarantees — a flood is unencrypted, unacknowledged and
 //  for whoever is standing nearby, while a private message is Noise_XX keyed, BLE_ACK guarded and
@@ -13,21 +13,21 @@
 //
 //  1. It is the OFFLINE surface. One envelope goes to `PopopxMeshOutbound.send(envelope:to:)` and
 //     nothing else: no SMP request is built, no `PopopxMessageRouter` is contacted, no connectivity
-//     question is asked. Choosing the public network is 模块 5's job — it owns the 3-second window,
+//     question is asked. Choosing the public network is module 5's job — it owns the 3-second window,
 //     the re-route that keeps the `messageId`, and the offline backlog. A screen that reached for SMP
 //     underneath the router would be a second sender of the same text, and the peer's deduplicator
 //     is the only thing that makes two senders one message.
-//  2. 零破坏 (铁律 27). Nothing here rewrites `ChatView` or mounts into it: this is its own
+//  2. Zero-breakage (iron rule 27). Nothing here rewrites `ChatView` or mounts into it: this is its own
 //     destination view, reached from `MeshPrivacySettingsView`'s binding list, and it badges rows
 //     with the same `PopopxMeshChannelBadge` the merged timeline uses, so a bubble means the same
 //     thing on both screens.
-//  3. 全局熔断 (铁律 28). `meshIsEnabled` mirrors the fuse's own `@Published` switch, so with the
+//  3. Global circuit-breaker (iron rule 28). `meshIsEnabled` mirrors the fuse's own `@Published` switch, so with the
 //     switch off this view is an `EmptyView`, the mirror is never subscribed, the peer table is never
 //     read, and `sendDraft()` returns before it asks anyone anything. Off means off, including here.
 //
 //  The nickname is the plaza's: one local display name in `Documents/popopx_mesh/`, editable on this
 //  screen too, because it is the name a peer sees on the other side of a private session as well as
-//  on a broadcast. 临时 in the only sense the spec means — device-local display state, never bound to
+//  on a broadcast. "Temporary" in the only sense the spec means — device-local display state, never bound to
 //  a contact, erased with the rest of the sandbox by a panic wipe.
 //
 
@@ -40,7 +40,7 @@ import SwiftUI
 
 /// One peer's radio facts, in the shape this screen can draw.
 ///
-/// `PopopxMeshPeer` (模块 7's mirror) and `PopopxPeerReachability` (模块 4) are the core's own types
+/// `PopopxMeshPeer` (module 7's mirror) and `PopopxPeerReachability` (module 4) are the core's own types
 /// and neither has a public initialiser, so a host that already holds a node table — and every test
 /// of the reachability rule — states the situation through this value instead of through a radio.
 public struct PopopxMeshPrivateChatPeer: Hashable, Sendable {
@@ -80,11 +80,11 @@ public struct PopopxMeshPrivateChatPeer: Hashable, Sendable {
 /// value so the two reasons a user has to be told apart — "nobody is paired with you" and "the radio
 /// refused it" — cannot be collapsed by a later caller.
 public enum PopopxMeshPrivateChatRefusal: Hashable, Sendable {
-    /// 未绑定陌生人: no proof this key belongs to anyone, with the state that said so attached so the
+    /// Unbound stranger: no proof this key belongs to anyone, with the state that said so attached so the
     /// line can distinguish "never paired" from "waiting on their approval". The sentence itself is
-    /// 模块 5's own (`PopopxMessageRouter.unboundStrangerStatusText`), quoted rather than paraphrased.
+    /// Module 5's own (`PopopxMessageRouter.unboundStrangerStatusText`), quoted rather than paraphrased.
     case peerNotPaired(MeshPairingState)
-    /// The frame reached the send path and 模块 2's engine refused it before the radio.
+    /// The frame reached the send path and module 2's engine refused it before the radio.
     case transport(PopopxMeshSendFailure)
 }
 
@@ -95,7 +95,7 @@ public enum PopopxMeshPrivateChatDelivery: Hashable, Sendable {
     case received
     /// Handed to the mesh; no acknowledgement recorded for the id yet.
     case handedToMesh
-    /// 灰色时钟 — the mesh could not put it on the radio, or still owes a relay for it.
+    /// Grey clock — the mesh could not put it on the radio, or still owes a relay for it.
     case awaitingRelay
     /// A `BLE_ACK` for this id arrived: the peer confirmed it.
     case acknowledged
@@ -164,11 +164,11 @@ public struct PopopxMeshPrivateChatMessage: Identifiable, Hashable, Sendable {
 /// Why an empty conversation is empty, decided by the view model so the copy is testable and a
 /// future `body` cannot guess.
 public enum PopopxMeshPrivateChatEmptyReason: Hashable, Sendable {
-    /// Not paired with this key at all: 模块 5's stranger sentence is the honest answer.
+    /// Not paired with this key at all: module 5's stranger sentence is the honest answer.
     case notPaired
     /// Our own radio cannot carry anything.
     case radioUnavailable(PopopxBluetoothState)
-    /// Paired, and silent for longer than 模块 4's reachability window — the spec's out-of-range case.
+    /// Paired, and silent for longer than module 4's reachability window — the spec's out-of-range case.
     case peerOutOfRange(hops: Int, lastSeenAt: Date)
     /// Paired and the radio is up, but this device has never heard the node since Bluetooth came up.
     case peerNeverHeard
@@ -206,7 +206,7 @@ public final class PopopxMeshPrivateChatModel: ObservableObject {
     /// turns the typed text into persisted, clamped state.
     @Published public var nickname: String
 
-    /// Mirrored from the fuse, so flipping 总开关 off collapses this screen without waiting for a
+    /// Mirrored from the fuse, so flipping the master switch off collapses this screen without waiting for a
     /// packet that may never come.
     @Published public private(set) var meshIsEnabled: Bool
 
@@ -215,10 +215,10 @@ public final class PopopxMeshPrivateChatModel: ObservableObject {
     /// The peer's radio facts, as the mirror last reported them or as a host pushed them in.
     @Published public private(set) var peer: PopopxMeshPrivateChatPeer?
 
-    /// 模块 3's live state for this key, as of the last `refresh()` or `sendDraft()`.
+    /// Module 3's live state for this key, as of the last `refresh()` or `sendDraft()`.
     @Published public private(set) var pairingState: MeshPairingState = .unlinked
 
-    /// 模块 1's row for this key, if this device has one.
+    /// Module 1's row for this key, if this device has one.
     @Published public private(set) var binding: PopopxMeshBindingSummary?
 
     /// The last reason a send did not go out, so the composer can say it in one line.
@@ -231,13 +231,13 @@ public final class PopopxMeshPrivateChatModel: ObservableObject {
     private let source: PopopxMeshStateSource
     private let nicknameStore: PopopxMeshNicknameStore
     private let nicknameApplier: (any PopopxMeshNicknameApplying)?
-    /// 模块 3's seam for the live answer to "is this peer paired". 模块 3 has no singleton — it needs
+    /// Module 3's seam for the live answer to "is this peer paired". module 3 has no singleton — it needs
     /// the app's chat core — so a host that has a manager hands one over, and a host that has none is
-    /// judged on 模块 1's durable row instead.
+    /// judged on module 1's durable row instead.
     private let pairing: (any PopopxMeshPairingControlling)?
     private let bindings: (any PopopxMeshBindingObserving)?
     private let killSwitch: PopopxMeshKillSwitch?
-    /// 15 秒, the same window 模块 4 measures 「蓝牙不可达」 against, read from the config rather than
+    /// 15 seconds, the same window module 4 measures "Bluetooth unreachable" against, read from the config rather than
     /// retyped here.
     private let reachabilityTimeout: TimeInterval
     private var ownRecords: [PopopxMeshTimelineMessage] = []
@@ -254,9 +254,9 @@ public final class PopopxMeshPrivateChatModel: ObservableObject {
     ///   - peerMeshPublicKeyHex: the ONE peer this screen talks to, in the 64-hex spelling
     ///     `SYS_POPOPX_ACK:` carries. Spelled differently it is canonicalised rather than refused, so
     ///     a host that read a key out of a frame in upper case still lands on one conversation.
-    ///   - pairing: 模块 3's seam, the live proof.
-    ///   - bindings: 模块 1's seam, the durable proof. With neither seam there is no proof of a peer
-    ///     and every send is refused — which is the 未绑定陌生人 rule, not a limitation.
+    ///   - pairing: module 3's seam, the live proof.
+    ///   - bindings: module 1's seam, the durable proof. With neither seam there is no proof of a peer
+    ///     and every send is refused — which is the unbound-stranger rule, not a limitation.
     ///   - killSwitch: the fuse. `nil` falls back to the persisted key, exactly as
     ///     `PopopxMeshSettingsModel` does, so there is still one value and one owner of it.
     public init(
@@ -306,15 +306,15 @@ public final class PopopxMeshPrivateChatModel: ObservableObject {
         return PopopxMeshPrivateChatModel.peerLabel(peerMeshPublicKeyHex)
     }
 
-    /// Whether this key may be handed a message at all: 模块 3's live `paired`, or a durable 模块 1
+    /// Whether this key may be handed a message at all: module 3's live `paired`, or a durable module 1
     /// row — which is what the settings page listed to open this screen in the first place.
     public var peerIsPaired: Bool {
         if case .paired = pairingState { return true }
         return binding != nil
     }
 
-    /// Our radio up, the node known, and heard from inside 模块 4's window — the same three facts
-    /// 模块 5 asks as 事前预判, stated here only to describe what is on this screen.
+    /// Our radio up, the node known, and heard from inside module 4's window — the same three facts
+    /// module 5 asks as an up-front prediction, stated here only to describe what is on this screen.
     public var peerIsInRange: Bool {
         guard radioState.isUsable, let peer else { return false }
         return Date.now.timeIntervalSince(peer.lastSeenAt) <= reachabilityTimeout
@@ -336,7 +336,7 @@ public final class PopopxMeshPrivateChatModel: ObservableObject {
         return line
     }
 
-    /// The pairing state in one line, so the header can say what 模块 3 thinks of this key.
+    /// The pairing state in one line, so the header can say what module 3 thinks of this key.
     public var pairingStateDescription: String { Self.words(for: pairingState) }
 
     public var emptyReason: PopopxMeshPrivateChatEmptyReason? {
@@ -393,7 +393,7 @@ public final class PopopxMeshPrivateChatModel: ObservableObject {
     }
 
     /// The composer's send. Three gates, then one envelope — and either way the text stays on screen.
-    /// This screen has no queue of its own, because 模块 5 owns the backlog, so losing what the user
+    /// This screen has no queue of its own, because module 5 owns the backlog, so losing what the user
     /// typed is the one thing a refusal must never do.
     public func sendDraft() async {
         guard meshIsEnabled else { return }
@@ -455,7 +455,7 @@ public final class PopopxMeshPrivateChatModel: ObservableObject {
         nickname = nicknameStore.read() ?? PopopxMeshNicknameStore.defaultNickname
     }
 
-    /// Feed this screen the peer's messages from outside the mirror — a host that already holds 模块 5's
+    /// Feed this screen the peer's messages from outside the mirror — a host that already holds module 5's
     /// offline records for this key pushes them here. The merge collapses them with what the mirror
     /// reports on the global `messageId`, so a host-fed copy and a mesh-fed copy become one row.
     public func replaceIncomingMessages(_ messages: [PopopxMeshTimelineMessage]) {
@@ -464,7 +464,7 @@ public final class PopopxMeshPrivateChatModel: ObservableObject {
         rebuild()
     }
 
-    /// Feed this screen the node table it is describing, for a host that reads 模块 4 rather than the
+    /// Feed this screen the node table it is describing, for a host that reads module 4 rather than the
     /// mirror. The mirror wins whenever it holds the peer, so this cannot become a second source.
     public func replacePeer(_ peer: PopopxMeshPrivateChatPeer?) {
         guard meshIsEnabled else { return }
@@ -489,7 +489,7 @@ public final class PopopxMeshPrivateChatModel: ObservableObject {
     /// The only thing that removes an id from the mirror's owed-relay set is a `BLE_ACK:` naming it
     /// (`PopopxMeshStateSource.ingest`), so an id this screen handed over that has left the set was
     /// acknowledged. Anything else stays "no BLE_ACK recorded", which is the honest label rather than
-    /// a "delivered" one: 模块 4's ack guard runs inside the core and never reaches 模块 7's state, so
+    /// a "delivered" one: module 4's ack guard runs inside the core and never reaches module 7's state, so
     /// a send the mesh accepted without complaint has no evidence this layer is allowed to read as
     /// delivered. Saying "on the mesh — no BLE_ACK recorded yet" for it is the ceiling of what an
     /// offline screen can promise, and promising more would be the bug.
@@ -517,7 +517,7 @@ public final class PopopxMeshPrivateChatModel: ObservableObject {
     }
 
     /// The merge, the badge and the delivery line all come from here, so ordering and dedup stay
-    /// 模块 7's existing rules rather than a second copy of them. Also the fuse's second gate: off,
+    /// Module 7's existing rules rather than a second copy of them. Also the fuse's second gate: off,
     /// this screen holds no conversation.
     private func rebuild() {
         guard meshIsEnabled else {
@@ -595,7 +595,7 @@ public final class PopopxMeshPrivateChatModel: ObservableObject {
 
     // MARK: - Copy
 
-    /// A 64-character key is not a title. The same abbreviation 模块 3's logs and the pairing banner
+    /// A 64-character key is not a title. The same abbreviation module 3's logs and the pairing banner
     /// use, so a peer is spelled alike wherever it appears.
     public static func peerLabel(_ meshPublicKeyHex: String) -> String {
         PopopxMeshBannerModel.shorten(meshPublicKeyHex)
@@ -603,7 +603,7 @@ public final class PopopxMeshPrivateChatModel: ObservableObject {
 
     // MARK: - Derivation
 
-    /// The peer's 8-byte wire id, derived from the key this screen was handed — the id 模块 2 puts in
+    /// The peer's 8-byte wire id, derived from the key this screen was handed — the id module 2 puts in
     /// front of every frame, and the only thing an inbound record carries to say who sent it.
     public static func wireIDHex(ofMeshPublicKeyHex hex: String) -> String? {
         guard let bytes = meshPublicKeyBytes(ofMeshPublicKeyHex: hex) else { return nil }
@@ -698,7 +698,7 @@ public final class PopopxMeshPrivateChatModel: ObservableObject {
 }
 
 /// The screen is a fuse component too: a host that registers it gets an immediate tear-down when
-/// 总开关 goes off, rather than a pump that only notices on the next packet.
+/// The master switch goes off, rather than a pump that only notices on the next packet.
 extension PopopxMeshPrivateChatModel: PopopxMeshSwitchable {
     public func meshSwitchDidTurnOn(nickname: String?) async {
         // The name is read from the sandbox rather than taken from the fuse's copy, so this screen has
@@ -715,7 +715,7 @@ extension PopopxMeshPrivateChatModel: PopopxMeshSwitchable {
 
 // MARK: - View
 
-/// 独立的离线私聊界面 — one paired neighbour, one conversation, Bluetooth only.
+/// Standalone offline private-chat screen — one paired neighbour, one conversation, Bluetooth only.
 @MainActor
 public struct PopopxMeshPrivateChatView: View {
     @ObservedObject private var model: PopopxMeshPrivateChatModel
@@ -725,7 +725,7 @@ public struct PopopxMeshPrivateChatView: View {
     }
 
     /// The one-line mount for the settings page's row: the real engine as the send path, the real
-    /// mirror, the real store as the durable pairing proof, and the real fuse. 模块 3 has no
+    /// mirror, the real store as the durable pairing proof, and the real fuse. module 3 has no
     /// singleton, so a host that has a pairing manager hands its model one directly.
     public init(
         peerMeshPublicKeyHex: String,
@@ -746,7 +746,7 @@ public struct PopopxMeshPrivateChatView: View {
     }
 
     public var body: some View {
-        // 红线 28, stated once: with the switch off there is nothing to show, not a greyed-out version
+        // Red line 28, stated once: with the switch off there is nothing to show, not a greyed-out version
         // of it. `onAppear` sits in the other branch, so an off fuse also never starts a pump, never
         // subscribes to the mirror and never reads the node table.
         if model.meshIsEnabled {

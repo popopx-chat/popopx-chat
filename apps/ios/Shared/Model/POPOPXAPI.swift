@@ -493,10 +493,10 @@ func loadChat(chat: Chat, im: ItemsModel, contentTag: MsgContentTag? = nil, sear
 }
 
 func loadChat(chatId: ChatId, im: ItemsModel, contentTag: MsgContentTag? = nil, search: String = "", openAroundItemId: ChatItem.ID? = nil, clearItems: Bool = true) async {
-    // POPOPX 防盗模块四（仿真烟雾弹）的接管点。必须排在下面那次清空之前：
-    // `apiLoadMessages` 会先把 `reversedChatItems` 清空再从库里取，而假消息根本不在库里，
-    // 一取就等于当场把这层抹平。返回 false（未装载、开关关了、这个 chatId 不是它造的）
-    // 时这一行什么都不是，正常路径一个字节的行为都没变。
+    // The takeover point of the POPOPX anti-theft module four (the simulated smoke bomb). It must sit before the clearing below:
+    // `apiLoadMessages` first empties `reversedChatItems` and then fetches from the database, and the fake messages are not in the database at all,
+    // so fetching once levels this layer flat on the spot. When it returns false (not loaded, the switch is off, this chatId is not one it created)
+    // this line is nothing at all, and the normal path does not change by a single byte.
     if await PopopxDecoyProfileGenerator.hostTakeover(
         chatId: chatId,
         im: im,
@@ -2661,20 +2661,20 @@ func processReceivedMsg(_ res: ChatEvent) async {
                     m.chatSubStatus = .active
                 }
             }
-            // 模块 6 的只读旁路：它不改变、不延迟、不重排、不吞掉上面任何一行 —— 熔断关着时它连一个
-            // Task 都不生成（`PopopxMeshRuntime.feedSessionEvent`）。
+            // The read-only bypass of module 6: it changes nothing, delays nothing, reorders nothing, swallows none of the lines above it -- while the fuse is off it does not even produce a single
+            // `Task` (`PopopxMeshRuntime.feedSessionEvent`).
             PopopxMeshRuntime.feedSessionEvent(kind: .contactConnected, user: user, contact: contact)
-            // 加密个人主页的触发源 A（扫码建连后自动推送）。同样是旁路：主线程那一跳交给 Task，
-            // 消息循环不等它。只把 `contactId` 带过去，不带整个 `contact`（`Contact` 不是 Sendable，
-            // 闭包捕获它会撞上严格并发告警）。没武装时它第一行就返回，不读盘也不发东西，
-            // 所以普通加好友不会被这张名片码蹭出一张主页。
+            // Trigger source A of the encrypted personal profile (the automatic push after a QR scan builds the connection). Also a bypass: the hop to the main thread is handed to a Task,
+            // and the message loop does not wait for it. Only `contactId` is carried across, not the whole `contact` (`Contact` is not Sendable,
+            // and capturing it in a closure would run into the strict concurrency warning). When unarmed it returns on its first line, reading no disk and sending nothing,
+            // so an ordinary add-friend flow cannot pick up a profile page as a side effect of this business card's QR code.
             let autoProfileContactId = contact.contactId
             Task { await ProfileAutoSender.shared.handleContactConnected(contactId: autoProfileContactId) }
-            // 徽章兑换信令的挂载点 1：那条一次性链接建成连接了，才把攒着的 `EXT_REDEEM_REQ` 发出去。
-            // 同样是旁路，只带两个标量。键的同一性是现网自己证的：上面那行 `replaceConnReqView(conn.id, …)`
-            // 拿 `Connection.id`（`":\(connId)"`）去比 `pcc.id`（`":\(pccConnId)"`），两者相等才谈得上"换掉那一屏"
-            // （ChatModel.swift:1303-1310），所以这里传的 `connId` 就是 `startExternalRedeem` 存进去的那个。
-            // 没有攒着的 REQ 时它第一行查表即返回，不读盘也不发东西。
+            // Mount point 1 of the badge redemption signaling: only once that one-time link has built a connection is the accumulating `EXT_REDEEM_REQ` sent out.
+            // Likewise a bypass, carrying only two scalars. The identity of the key is proven by the live code itself: the line above, `replaceConnReqView(conn.id, ...)`,
+            // takes `Connection.id` (`":\(connId)"`) to compare against `pcc.id` (`":\(pccConnId)"`), and only when the two are equal is there any question of "replacing that screen"
+            // (ChatModel.swift:1303-1310), so the `connId` passed here is exactly the one `startExternalRedeem` stored.
+            // When there is no queued REQ it looks the table up on its first line and returns, reading no disk and sending nothing.
             if let connectionId = contact.activeConn?.connId {
                 Task { @MainActor in
                     PopopxSilentSignalingRouter.shared.contactConnected(connectionId: connectionId,
@@ -2704,7 +2704,7 @@ func processReceivedMsg(_ res: ChatEvent) async {
                     m.removeChat(conn.id)
                 }
             }
-            // 模块 6 的第二条边：第一条消息落到公网 = 这个离线配对已经是一个真实联系人。
+            // The second edge of module 6: the first message landing on the public network = this offline pairing is already a real contact.
             PopopxMeshRuntime.feedSessionEvent(kind: .contactSndReady, user: user, contact: contact)
         }
     case let .receivedContactRequest(user, contactRequest, chat_):
@@ -2776,12 +2776,12 @@ func processReceivedMsg(_ res: ChatEvent) async {
                     await receiveFile(user: user, fileId: file.fileId, auto: true)
                 }
             }
-            // 徽章兑换信令的挂载点 2：这一行是不是一条 `::popopx_sys::` 载荷。
-            // 旁路同上一条，判据只有一份（`PopopxSysMarker.parse` 要求整串相等，见
-            // `Shared/Features/BadgeCredits/PopopxBadgeCreditsModels.swift:830` 那一节），
-            // 所以普通消息在这里只是多一次前缀比较就返回。`apiId` 是发信令那一侧用的同一个数
-            // （`getContactChat`/`getGroupChat` 按它找会话），`chatDir.groupMemberId`
-            // 只有群消息才非空，用来把"谁领了这份红包"记到人头（ChatTypes.swift:4440）。
+            // Mount point 2 of the badge redemption signaling: whether this line is a `::popopx_sys::` payload.
+            // The bypass is the same as the previous one, and there is only one test (`PopopxSysMarker.parse` requires whole-string equality, see
+            // the section at `Shared/Features/BadgeCredits/PopopxBadgeCreditsModels.swift:830`),
+            // so an ordinary message only costs one extra prefix comparison here before returning. `apiId` is the same number used on the side that sends the signaling
+            // (`getContactChat`/`getGroupChat` locate the session by it), and `chatDir.groupMemberId`
+            // is non-empty only for group messages, used to attribute "who claimed this red packet" to a person (ChatTypes.swift:4440).
             if active(user), let text = cItem.content.msgContent?.text, !text.isEmpty {
                 let signalChatType = cInfo.chatType
                 let signalChatId = cInfo.apiId
@@ -3406,23 +3406,23 @@ private func showClientNotice(_ server: String, _ preset: Bool, _ expiresAt: Dat
     }
 }
 
-// MARK: - 第二阶段 app 侧集成层: the app-target integration for the offline Bluetooth mesh
+// MARK: - Phase two app-side integration layer: the app-target integration for the offline Bluetooth mesh
 
 //  This is the glue between the finished `PopopxMeshKit` / `PopopxMeshUI` package and this target:
-//  the coordinator that owns 模块 1–7's host-side objects, the chat-core adapters the package's seams
+//  the coordinator that owns module 1-7's host-side objects, the chat-core adapters the package's seams
 //  ask for, the backend that keeps `PopopxMeshEngine.shared` from ever existing while the fuse is off,
-//  模块 6's read-only bypass, and the three mount points the views call.
+//  module 6's read-only bypass, and the three mount points the views call.
 //
 //  Why it is appended here instead of in a new file: this wave may not edit `POPOPX.xcodeproj`
-//  (严禁用脚本修改 .pbxproj), and a file that is not in a PBXSourcesBuildPhase is never compiled — a
+//  (scripting the .pbxproj is strictly forbidden), and a file that is not in a PBXSourcesBuildPhase is never compiled -- a
 //  brand-new file would simply not exist to the build. `POPOPXAPI.swift` is compiled by the
 //  "POPOPX (iOS)" target (the only target that compiles it — the NSE, the SE, the framework and both
 //  test targets have their own file lists), and it is the file that already owns the three chat-core
 //  calls the adapters below forward to: `apiAddContact` (:1036), `apiConnect` (:1074) and
-//  `apiSendMessages` (:574). That is the point of 模块 2's seam — the package says "use the functions
+//  `apiSendMessages` (:574). That is the point of module 2's seam -- the package says "use the functions
 //  that already exist", so no FFI call is added here and no C symbol is invented.
 
-/// 全局熔断开关（the fuse）as the app sees it: the one persisted key of the whole feature.
+/// The global kill switch (the fuse) as the app sees it: the one persisted key of the whole feature.
 enum PopopxMeshFuse {
     /// The key, written by `IdentityMappingStore.meshEnabled` and read by the package's
     /// `PopopxMeshKillSwitch.enabledDefaultsKey` — the same string, which is
@@ -3445,26 +3445,26 @@ enum PopopxMeshFuse {
 // MARK: The chat core, seen from the mesh
 
 /// Why the app-side chat core refused a mesh request. The package's own `throws(PopopxOfflineBridgeError)`
-/// is produced by 模块 2; these are only the failures this layer can see, and they are wrapped by the
+/// is produced by module 2; these are only the failures this layer can see, and they are wrapped by the
 /// bridge as `.coreFailed`.
 enum PopopxMeshChatCoreError: Error, Hashable, Sendable {
     /// `apiAddContact` returned nothing: no active user, or the core answered an error the app
     /// already alerted about.
     case inviteUnavailable(reason: String)
-    /// `apiConnect` returned nothing for a link that passed 模块 2's prefix rules.
+    /// `apiConnect` returned nothing for a link that passed module 2's prefix rules.
     case acceptanceUnavailable(reason: String)
     /// `apiSendMessages` came back empty — the SMP queue refused the item, or there is no contact.
     case smpSendFailed(messageId: String, contactId: Int64)
 }
 
-/// 模块 2's `PopopxOfflineChatCore` and 模块 5's `PopopxSMPChatCore`, implemented on top of the chat
+/// Module 2's `PopopxOfflineChatCore` and module 5's `PopopxSMPChatCore`, implemented on top of the chat
 /// core functions this file already exports.
 ///
 /// It is a struct with no stored properties, so `Sendable` is free and there is no state to leak
 /// between the mesh's actors and the app's.
 struct PopopxMeshChatCore: PopopxSMPChatCore {
-    /// 离线 pairing 的第一步: 创建联系人邀请. `apiAddContact(incognito:)` is the app's own path — the
-    /// same one "Add contact" uses — so the link it returns carries the real `popopx:/` prefix 模块 2
+    /// The first step of offline pairing: create the contact invitation. `apiAddContact(incognito:)` is the app's own path -- the
+    /// same one "Add contact" uses -- so the link it returns carries the real `popopx:/` prefix module 2
     /// validates, the pending connection is a real `PendingContactConnection`, and the incognito flag
     /// means what it means everywhere else in the app.
     func createOfflineInvite(incognito: Bool) async throws -> PopopxOfflineInvite {
@@ -3474,7 +3474,7 @@ struct PopopxMeshChatCore: PopopxSMPChatCore {
         return PopopxOfflineInvite(inviteLink: link.connFullLink, tempConnId: connection.pccConnId)
     }
 
-    /// 离线 pairing 的第二步: 吃掉对方的链接. `apiConnect(incognito:connLink:)` is the app's existing
+    /// The second step of offline pairing: consume the other side's link. `apiConnect(incognito:connLink:)` is the app's existing
     /// `/_connect` call, so consuming a mesh-carried invite does what consuming a pasted one does.
     ///
     /// The two enums name the same exchange from opposite ends, and the mapping is the package's, not
@@ -3499,7 +3499,7 @@ struct PopopxMeshChatCore: PopopxSMPChatCore {
         return PopopxOfflineAcceptance(tempConnId: connection.pccConnId, kind: kind)
     }
 
-    /// 公网回退路径: 模块 5 asks for a text send when the radio could not deliver. This is the app's
+    /// Public-network fallback path: module 5 asks for a text send when the radio could not deliver. This is the app's
     /// normal direct-message send (`apiSendMessages`, which never throws and alerts on failure itself),
     /// and the row is inserted into the open conversation exactly the way `ComposeView` inserts it after
     /// a send of its own — a fallback that silently disappears from the timeline is worse than one that
@@ -3521,11 +3521,11 @@ struct PopopxMeshChatCore: PopopxSMPChatCore {
                 m.addChatItem(chat.chatInfo, item)
             }
         }
-        // The ack carries both names of the same message: 模块 5's `messageId`, which is what the mesh
+        // The ack carries both names of the same message: module 5's `messageId`, which is what the mesh
         // knows (the id never travels in the SMP payload — `ComposedMessage` carries only the content),
-        // and the local row this send just created, which is what the app's own list knows. 模块 5 keeps
-        // the pair and 模块 7's merger collapses the offline copy against this row when the fallback
-        // lands, so the recovered message is one bubble, not a bubble plus a strip row (裁定 1).
+        // and the local row this send just created, which is what the app's own list knows. module 5 keeps
+        // the pair and module 7's merger collapses the offline copy against this row when the fallback
+        // lands, so the recovered message is one bubble, not a bubble plus a strip row (ruling 1).
         return PopopxSMPAck(
             messageId: request.messageId,
             contactId: request.contactId,
@@ -3535,12 +3535,12 @@ struct PopopxMeshChatCore: PopopxSMPChatCore {
     }
 }
 
-/// 模块 6's event feed, app side. `PopopxEventObserver` takes a *fresh* subscription per
+/// Module 6's event feed, app side. `PopopxEventObserver` takes a *fresh* subscription per
 /// `startObserving()` and reads it on its own task, so mounting it can never take events away from the
 /// app's pump — and it is the pump's own protection that this class only ever `yield`s into an
 /// unbounded buffer, which cannot suspend the caller.
 final class PopopxMeshChatEventFeed: PopopxChatEventFeeding, @unchecked Sendable {
-    /// One mailbox, lock-confined: the same shape 模块 7 uses for its own fan-out, and `@unchecked
+    /// One mailbox, lock-confined: the same shape module 7 uses for its own fan-out, and `@unchecked
     /// Sendable` there means the same thing it means here — every mutation happens under the lock.
     private let lock = NSLock()
     private var subscriptions: [UUID: AsyncStream<PopopxChatSessionEvent>.Continuation] = [:]
@@ -3589,7 +3589,7 @@ final class PopopxMeshChatEventFeed: PopopxChatEventFeeding, @unchecked Sendable
 /// The engine is a singleton whose `init` does two things the fuse's red line forbids in the off
 /// state: it writes the mesh's static key to the Keychain (`loadOrMakeIdentity`), and its default
 /// `transport:` argument builds a `CBCentralManager` and a `CBPeripheralManager`. So nothing here
-/// references `.shared` directly — the fuse's `engine:` component, 模块 3's `outbound:`, 模块 5's
+/// references `.shared` directly -- the fuse's `engine:` component, module 3's `outbound:`, module 5's
 /// `outbound:`, the plaza's `outbound:` and the panic wipe's `keys:` all get this instead, and the
 /// singleton is only brought up on the path that the fuse has already switched on.
 ///
@@ -3718,9 +3718,9 @@ final class PopopxMeshEngineBackend: PopopxMeshSwitchable, PopopxMeshOutbound, P
 
 // MARK: - The coordinator
 
-/// The app-side coordinator: one object that owns the engine backend, the offline bridge, 模块 3's
-/// pairing manager, 模块 5's router, 模块 6's observer, the fuse, and the two UI models the views mount
-/// against. `start`/`stop` are not its API — the fuse is, and 全局熔断开关 is the only thing that drives
+/// The app-side coordinator: one object that owns the engine backend, the offline bridge, module 3's
+/// pairing manager, module 5's router, module 6's observer, the fuse, and the two UI models the views mount
+/// against. `start`/`stop` are not its API -- the fuse is, and the global kill switch is the only thing that drives
 /// them.
 ///
 /// Every object it holds is built in `init` and every one of them is inert: no Bluetooth object, no
@@ -3731,16 +3731,16 @@ final class PopopxMeshEngineBackend: PopopxMeshSwitchable, PopopxMeshOutbound, P
 final class PopopxMeshRuntime: ObservableObject {
     static let shared = PopopxMeshRuntime()
 
-    /// The file 模块 5 keeps its 离线兜底记录 in. 名字是这个层选的：包里只给了
-    /// `PopopxMeshPaths.unacknowledgedQueueURL()`，没有 offline-records 的 URL helper，而 `recordsURL`
-    /// 为 nil 时那些记录就只在内存里。见交付说明里的 API gap 一条。
+    /// The file module 5 keeps its offline fallback records in. The name is this layer's choice: the package only gives
+    /// `PopopxMeshPaths.unacknowledgedQueueURL()`, no URL helper for offline-records, and when `recordsURL`
+    /// is nil those records live only in memory. See the API gap item in the delivery notes.
     static let offlineRecordsFileName = "offline_mesh_records.json"
 
     /// What the fuse says, mirrored from the kill switch so the app's views have one object to observe.
     @Published private(set) var isFuseOn = false
 
-    /// 配对策略的可见镜像。真值在 `IdentityMappingStore`（UserDefaults 里的
-    /// `chat.popopx.mesh.pairingPolicy`）；这里只是让 `SettingsView` 的 Picker 能观察到变化。
+    /// The observable mirror of the pairing policy. The truth is in `IdentityMappingStore` (the
+    /// `chat.popopx.mesh.pairingPolicy` in UserDefaults); this only lets the Picker in `SettingsView` observe the change.
     @Published private(set) var pairingPolicy: MeshPairingPolicy = .manualConfirm
 
     let core: PopopxMeshChatCore
@@ -3762,7 +3762,7 @@ final class PopopxMeshRuntime: ObservableObject {
     private var bootstrapped = false
 
     private init() {
-        // 模块 1 cannot know this app's container, so it leaves the Documents directory to the host —
+        // Module 1 cannot know this app's container, so it leaves the Documents directory to the host --
         // and the injection has to happen before anything below computes a URL from it. The
         // FileManager form (rather than `URL.documentsDirectory`, which is iOS 16) is the same
         // directory and keeps this file's iOS 15 floor.
@@ -3799,8 +3799,8 @@ final class PopopxMeshRuntime: ObservableObject {
             source: stateSource
         )
         let timelineModel = PopopxMeshTimelineModel(source: stateSource, routing: router)
-        // 红线「零数据库修改」（POPOPX_MESH_PROMPT.md 一.5）的承诺在这里是可见的：`applicationDatabaseURL` 留成 nil，
-        // SQLCipher 聊天库的路径从未被交给这个 manager，所以它连被读一次大小都不会。
+        // The promise of the red line "zero database modifications" (POPOPX_MESH_PROMPT.md clause I.5) is visible here: `applicationDatabaseURL` is left nil,
+        // so the SQLCipher chat database path is never handed to this manager, and not even its size is ever read.
         let panicWipe = PopopxPanicWipeManager(
             radio: [backend, healthMonitor, pairing],
             keys: backend,
@@ -3827,8 +3827,8 @@ final class PopopxMeshRuntime: ObservableObject {
         self.panicWipe = panicWipe
         self.isFuseOn = killSwitch.persistedIsEnabled
 
-        // 镜像熔断。任何路径翻这个开关 —— 本页的 Toggle、`MeshPrivacySettingsView` 自己的
-        // @AppStorage + `setFuseEnabled`、plaza 的昵称重启 —— 都只更新同一个真值。
+        // Mirrors the fuse. Any path that flips this switch -- the Toggle on this page, `MeshPrivacySettingsView`'s own
+        // @AppStorage + `setFuseEnabled`, the plaza's nickname restart -- all update one and the same truth.
         self.fuseMirror = killSwitch.$isEnabled.removeDuplicates().sink { [weak self] enabled in
             Task { @MainActor in self?.isFuseOn = enabled }
         }
@@ -3873,34 +3873,34 @@ final class PopopxMeshRuntime: ObservableObject {
 
     /// The settings page's Toggle writes through this. It is synchronous because a SwiftUI `Binding`
     /// setter cannot await; the transition it schedules is the kill switch's own, which is where this
-    /// app-side layer persists the key (包里的 `MeshPrivacySettingsView` 用同名 `@AppStorage` 落到同一个开关).
+    /// app-side layer persists the key (the package's `MeshPrivacySettingsView` lands on the same switch with an `@AppStorage` of the same name).
     func requestFuse(_ enabled: Bool) {
         guard enabled != killSwitch.isEnabled else { return }
         Task { await self.setFuse(enabled) }
     }
 
-    /// 直接开或关。ON 走一条干净的启动；OFF 走一次完整的停止，并且可以再来一遍。
+    /// Turn it on or off directly. ON takes a clean start; OFF takes a complete stop, and it can be done over again.
     func setFuse(_ enabled: Bool) async {
         await killSwitch.setEnabled(enabled)
         isFuseOn = killSwitch.isEnabled
     }
 
-    /// 配对策略。写入走 模块 1 自己的 setter（它同时更新 UserDefaults 与日志），镜像先更新，所以
-    /// Picker 不会因为一次 actor hop 而回弹。
+    /// The pairing policy. Writes go through module 1's own setter (it updates UserDefaults and the log together), and the mirror updates first, so
+    /// the Picker does not bounce back because of one actor hop.
     func setPairingPolicy(_ policy: MeshPairingPolicy) {
         pairingPolicy = policy
         Task { await self.mappingStore.updatePairingPolicy(policy) }
     }
 
-    // MARK: 模块 6 的只读旁路
+    // MARK: The read-only bypass of module 6
 
-    /// `processReceivedMsg` 唯一的 mesh 入口：`.contactConnected` 与 `.contactSndReady` 各调用一次。
+    /// The only mesh entry into `processReceivedMsg`: called once each by `.contactConnected` and `.contactSndReady`.
     ///
     /// **Nonisolated, and synchronous on purpose.** It runs on the chat core's receive pump, so it must
     /// not await the observer (that would let a slow store stall message delivery for the whole app) and
     /// must not change, delay, reorder or swallow anything the pump already does. It therefore: reads
     /// the fuse key synchronously (with the fuse off it does not even create a `Task`), reduces the
-    /// event to the four facts 模块 6 needs, and hops into its own `Task`. The observer consumes them
+    /// event to the four facts module 6 needs, and hops into its own `Task`. The observer consumes them
     /// from its own subscription, in the order the core sent them.
     nonisolated static func feedSessionEvent(kind: PopopxChatSessionEventKind, user: UserRef, contact: Contact) {
         guard PopopxMeshFuse.isOn else { return }
@@ -3908,7 +3908,7 @@ final class PopopxMeshRuntime: ObservableObject {
         // *finished* connection, and in SimpleX's id space that number can collide with a pending
         // connection's; handing it over would let the observer upgrade somebody else's pairing. The
         // observer's own tie-break — mesh key, then the sole pending row, refuse when there is more
-        // than one — is the safe path, and it is 模块 6's documented one.
+        // than one -- is the safe path, and it is module 6's documented one.
         let event = PopopxChatSessionEvent(
             kind: kind,
             contactId: contact.contactId,
@@ -3929,10 +3929,10 @@ final class PopopxMeshRuntime: ObservableObject {
 
 // MARK: - The host-built components as fuse components
 
-// 包把 `PopopxMeshSwitchable` 的绑定写在了它自己的单例上（模块 1/3/4/7）。宿主建的那三个 —— 模块 5 的
-// router、模块 6 的 observer、banner 的模型 —— 不在包里，所以绑定在这一层；它们只调用各自已经有的生命周期
-// 方法，不增加任何状态。banner 模型是 @MainActor 的，而协议的要求都是 `async` 的，所以隔离在这里可以跳
-// —— 和包里 `PopopxMeshStateSource` 自己的写法是同一个模式。
+// The package wrote the bindings of `PopopxMeshSwitchable` onto its own singletons (module 1/3/4/7). The three the host creates -- module 5's
+// router, module 6's observer and the banner's model -- are not in the package, so the bindings live in this layer; they only call the lifecycle methods each one already has
+// and add no state. The banner model is @MainActor while all the protocol's requirements are `async`, so the isolation can be skipped here
+// -- the very same pattern as the one `PopopxMeshStateSource` itself uses in the package.
 
 extension PopopxMessageRouter: @retroactive PopopxMeshSwitchable {
     public func meshSwitchDidTurnOn(nickname: String?) async {
@@ -3974,9 +3974,9 @@ extension PopopxMeshTimelineModel: @retroactive PopopxMeshSwitchable {
     }
 }
 
-/// 模块 7 要的三件路由事实。包说宿主"可以在一个 extension 里"满足它，但 模块 5 把 `network`/`store`
-/// 都留成了 private let，所以这里只能是实现而不是转发。用的对象和 router 构造时用的是同一批单例，
-/// 所以答案不会和它自己的判断分叉。
+/// The three routing facts module 7 needs. The package says the host "can satisfy it in an extension", but module 5 left both `network`/`store`
+/// as private lets, so this can only be an implementation rather than a forward. The objects used are the same singletons the router was constructed with,
+/// so the answers will not fork away from its own judgement.
 extension PopopxMessageRouter: @retroactive PopopxMeshRoutingObserving {
     public func isPublicNetworkAvailable() async -> Bool {
         await NetworkStateMonitor.shared.isConnectedNow()
@@ -3990,7 +3990,7 @@ extension PopopxMessageRouter: @retroactive PopopxMeshRoutingObserving {
         await IdentityMappingStore.shared.mapping(forMeshPublicKeyHex: meshPublicKeyHex)?.contactId != nil
     }
 
-    /// 裁定 1's read side: the pairs the flushes left behind, so 模块 7 can collapse an offline copy
+    /// Ruling 1's read side: the pairs the flushes left behind, so module 7 can collapse an offline copy
     /// against the row the app stored. The router's accessor is named `recorded…` for exactly this
     /// call: written as `flushedAppChatItemIDs()` it resolves to the requirement this function is, and
     /// the compile of the harness copy caught the recursion before any device could.
@@ -3999,7 +3999,7 @@ extension PopopxMessageRouter: @retroactive PopopxMeshRoutingObserving {
     }
 }
 
-/// The app's own rendered rows, in the shape 模块 7's merge takes (裁定 1).
+/// The app's own rendered rows, in the shape module 7's merge takes (ruling 1).
 ///
 /// The strip deduplicates against this: a mesh row whose pair points at one of these ids is the same
 /// message the list already draws, so it is not drawn again. Without it the app stream is empty, every
@@ -4009,7 +4009,7 @@ extension PopopxMessageRouter: @retroactive PopopxMeshRoutingObserving {
 /// hides rows behind the reveal state, and an item the user has collapsed is still an item the app has,
 /// which is the only property the merge cares about.
 ///
-/// Lives here rather than in a new file because 红线「严禁直接用脚本修改 .pbxproj 工程文件」means a file
+/// Lives here rather than in a new file because the red line "scripts are strictly forbidden from modifying the .pbxproj project file directly" means a file
 /// the package does not own only compiles if the project already lists it.
 @MainActor enum PopopxMeshApplicationStream {
     /// How many of a chat's newest rows it contributes. The strip draws three mesh-only rows and the
@@ -4040,7 +4040,7 @@ extension PopopxMessageRouter: @retroactive PopopxMeshRoutingObserving {
 
 // MARK: - The mounts
 
-/// 红线「UI 零破坏挂载」（POPOPX_MESH_PROMPT.md 一.5）要的隐藏路径，mounted once on the app's root view.
+/// The hidden path required by the red line "zero-disruption UI mounting" (POPOPX_MESH_PROMPT.md clause I.5), mounted once on the app's root view.
 ///
 /// The package's own `popopxPanicWipeTrigger(_:)` would be the one-line mount, and it is not used here
 /// for one reason: it has to be either present or absent, and branching on the fuse *outside* the
@@ -4048,19 +4048,19 @@ extension PopopxMessageRouter: @retroactive PopopxMeshRoutingObserving {
 /// away every `@State` in the app. So the modifier is always attached, and the condition sits inside
 /// its `overlay`: with the fuse off nothing is drawn, the 44 pt corner is not a hit target, and the
 /// three-tap gesture cannot arm. The package's `PopopxPanicWipeGate` still owns the gesture, the
-/// 1 秒三击的判定、确认弹窗和抹除的顺序 —— 这里只决定它存不存在。
+/// The 1-second triple-tap test, the confirmation sheet and the wipe order -- here only its existence is decided.
 ///
 /// `PopopxKeyboardObserver.isVisible` is the second half of that condition, and it is load-bearing.
 /// The overlay is the frontmost view of the whole app and `Color.clear` + a tap gesture CLAIMS its
 /// square; when the keyboard rises, the root's bottom-trailing corner rises with it and lands exactly
-/// on the composer's send button (`PopopxCabinView` 的「发射」、聊天室的发送键都在那一格里)。
-/// With the fuse on, the first tap of every send was being eaten by the wipe counter —— 真机报的
-/// 「厢语点发射没反应」「私密笔记点发送没反应」是同一个根因，两处都不是各自的 composer 坏了。
-/// 现在键盘抬起期间角上不接管点击，保险丝三击在键盘收起后的同一个角照常可用，
-/// 三击 Logo（顶栏与「我」页两处）任何时刻都不受影响。
+/// on the composer's send button (the "Launch" of `PopopxCabinView` and the send key of the chat room are both in that one cell).
+/// With the fuse on, the first tap of every send was being eaten by the wipe counter -- the real-device reports
+/// "Cabin: tapping Launch does nothing" and "private note: tapping send does nothing" are one and the same root cause; neither composer was broken.
+/// Now the corner does not take over taps while the keyboard is raised, the fuse's triple-tap stays usable in the same corner after the keyboard drops,
+/// and the triple-tap on the logo (both the top bar and the Me page) is unaffected at any moment.
 @MainActor
 struct PopopxMeshPanicWipeMount: ViewModifier {
-    /// The corner's side, copied from 模块 7's own trigger so the hidden target is the size the
+    /// The corner's side, copied from module 7's own trigger so the hidden target is the size the
     /// package documents and nothing larger.
     static let hitTargetSide: CGFloat = 44
 
@@ -4078,9 +4078,9 @@ struct PopopxMeshPanicWipeMount: ViewModifier {
     }
 }
 
-/// 键盘在不在，用一个进程内的观察者回答；SwiftUI 没有这个环境值，而它必须能在一次布局内翻。
-/// 只观察 will-show/will-hide/did-hide 三条通知 —— 我们只需要"正被键盘占用"这个布尔量，
-/// 不需要高度，也不需要和任何视图的动画同步。
+/// Whether the keyboard is present, answered with an in-process observer; SwiftUI has no such environment value, and it must be able to flip within one layout pass.
+/// Only the three will-show/will-hide/did-hide notifications are observed -- all we need is the boolean "currently occupied by the keyboard",
+/// not the height, and no synchronisation with any view's animation.
 @MainActor
 final class PopopxKeyboardObserver: ObservableObject {
     static let shared = PopopxKeyboardObserver()

@@ -1,55 +1,55 @@
 //  PopopxBadgeCapsuleView.swift
 //
-//  【第五阶段 · 1】顶栏的徽章胶囊，以及它的三态与三条出口。
+//  [Phase 5 · 1] The badge capsule in the top bar, with its three states and three exits.
 //
-//  ### 颜色为什么不是提示词里那三个裸值
-//  提示词点了赛博青 #00F0FF / 翡翠绿 #10B981 / 冷雾灰 #6B7280。本仓的红线是"设计取值一律来自
-//  `Shared/Theme/PopopxTheme.swift`，此文件内没有任何裸色值或裸字号"（同 `PopopxTelemetryHeader.swift:12-13`
-//  的自述），而且裸青绿在深色模式下对比度不达标。所以按语义就近落进品牌档：
-//  - 体验态 → `PopopxPalette.meshInk`（0x00705F / 0x00D2B8，近场青绿）：它是"还没走上正路"的那一档，
-//    和近场/临时同一族，呼吸光晕由它承载；
-//  - 点亮态 → `PopopxPalette.successInk`（0x1E7A34 / 0x30D158，翡翠绿墨）：即提示词要的"翡翠绿"，
-//    取带暗色适配的那一档而不是裸 #10B981；
-//  - 休眠态 → `PopopxPalette.labelSecondary` + `card` 底：休眠不是失败，措辞与配色都不给危险色
-//    （`PopopxBadgePhase` 的注释就是这条判据的出处）。
-//  这样三态在浅色与深色下都是"能读的同族色"，代价是不再逐位等于提示词的 HEX —— 这条取舍写在
-//  验收报告里，由用户裁定要不要改回裸值。
+//  ### Why the colors are not the three raw values from the prompt
+//  The prompt named cyber cyan #00F0FF / emerald green #10B981 / cold mist gray #6B7280. This repo's red line is "every design value comes from
+//  `Shared/Theme/PopopxTheme.swift`, and this file contains no raw color value or raw font size" (same as the self-description at `PopopxTelemetryHeader.swift:12-13`
+//  ), and raw cyan-green does not meet the contrast bar in dark mode. So each value lands on the nearest brand tier by meaning:
+//  - trial state → `PopopxPalette.meshInk` (0x00705F / 0x00D2B8, near-field cyan-green): it is the tier for "not yet on the proper path",
+//    the same family as near-field/temporary, and it carries the breathing glow;
+//  - lit state → `PopopxPalette.successInk` (0x1E7A34 / 0x30D158, emerald-green ink): the "emerald green" the prompt asked for,
+//    taking the tier that comes with dark-mode adaptation rather than raw #10B981;
+//  - dormant state → `PopopxPalette.labelSecondary` + `card` background: dormant is not a failure, so neither the wording nor the colors give a danger color
+//    (the comment on `PopopxBadgePhase` is where this criterion comes from).
+//  This way all three states are "readable same-family colors" in both light and dark; the cost is that they no longer equal the prompt's HEX digit for digit — that trade-off is written
+//  into the acceptance report, and the user decides whether to go back to raw values.
 //
-//  ### 动效只在"真的有东西在变"时出现
-//  - 体验态呼吸：它是要被注意到的临时态，Reduce Motion 下彻底静止（判据同 `PopopxStatusPill.restart()`，
+//  ### Motion appears only when something really is changing
+//  - trial-state breathing: it is a temporary state that must be noticed, and it goes completely still under Reduce Motion (criterion same as `PopopxStatusPill.restart()`,
 //    `PopopxTelemetryHeader.swift:333-339`）；
-//  - 点亮态旋转：只在**本机计数自增**那一次转满 360°（`onChange(of: rotationIndex)`），不做常驻自转 ——
-//    一个永远在转的图标在无障碍里等于噪音，而"轮换"本身是离散事件，转一次刚好对上一次事实。
+//  - lit-state rotation: it turns a full 360° only on the one **local counter increment** (`onChange(of: rotationIndex)`), with no permanent spin —
+//    an icon that is always turning is noise in accessibility terms, and "rotating" is itself a discrete event, so one turn lines up with exactly one fact.
 //
-//  ### 三条出口，互不重叠
-//  体验态 → 先锋体验弹窗（`PopopxTrialWelcomeModal`）；点亮态 → 徽章详情（`PopopxBadgeDetailSheet`）；
-//  休眠态 → 购买页（`PopopxBadgePaywallView`）。判据只有 `phase` 一处，所以"过期了还能打开详情看倒计时"
-//  这种自相矛盾的入口不可能出现。
+//  ### Three exits, never overlapping
+//  trial state → the pioneer trial modal (`PopopxTrialWelcomeModal`); lit state → badge details (`PopopxBadgeDetailSheet`);
+//  dormant state → the purchase page (`PopopxBadgePaywallView`). The criterion is `phase` alone, in one place, so an entry as self-contradictory as "expired, yet details still open to show a countdown"
+//  is impossible.
 //
-//  ### 宽屏那一档多挂的右半段（第二条出口，不是第三条状态）
-//  体验态与点亮态在**非 compact** 时右边多一段实心靛蓝小块："Buy" / "Renew"，点它进付费墙。
-//  三条出口的判据仍然只有 `phase` 一处（`route()` 一个字没改），这一段只是把"付费墙"这个目的地
-//  在两种非休眠状态下**提前露出来**，省掉"先开弹窗再找购买按钮"那一步。
-//  compact 档不加：顶栏在 393pt 上恒定取只留符号那 48pt，加宽它是去动那行实测过的溢出边界；
-//  iPhone 上这两态的购买出口因此在弹窗与详情页里（各自都有直达付费墙的主操作）。
+//  ### The extra right half in the wide-screen tier (a second exit, not a third state)
+//  In the trial and lit states, when **not compact**, a solid indigo block is added on the right: "Buy" / "Renew", tapping it goes to the paywall.
+//  The criterion for the three exits is still `phase` alone (`route()` not one word changed); this segment merely shows the "paywall" destination
+//  **early** in the two non-dormant states, saving the step of "open the modal first, then look for the buy button".
+//  Not added in the compact tier: on 393pt the top bar constantly takes the symbol-only 48pt, and widening it means touching that row's measured overflow boundary;
+//  so on iPhone the purchase exit for these two states therefore lives in the modal and the detail page (each has a primary action straight to the paywall).
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. The red line forbids scripts from modifying project.pbxproj.
 
 import SwiftUI
 import POPOPXChat
 
-// MARK: - 纯呈现
+// MARK: - Pure presentation
 
-/// 徽章胶囊本体：只吃 `phase` 与 `rotationIndex`，不读任何单例，因此可以脱离运行时单独预览与验证。
+/// The badge capsule body: takes only `phase` and `rotationIndex`, reads no singleton, so it can be previewed and verified apart from the runtime.
 struct PopopxBadgeCapsule: View {
     let phase: PopopxBadgePhase
     var rotationIndex: Int = 0
-    /// 顶栏宽度不够时退回"只留符号"，判据同 `PopopxDualStatusCapsule` 的 `ViewThatFits` 三档。
+    /// Falls back to "symbol only" when the top bar lacks width, criterion same as `PopopxDualStatusCapsule`'s three `ViewThatFits` tiers.
     var compact: Bool = false
-    /// 第二条出口：胶囊右侧那一段"买 / 续费"。**声明位置必须在 `action` 之前，这是硬约束**：
-    /// 现有调用点全部写成 `PopopxBadgeCapsule(phase: …) { … }`，尾随闭包绑的是最后一个函数型参数，
-    /// 把 `buyAction` 放到 `action` 后面，那些调用点会把"打开详情/体验说明"静默接到"买"上。
-    /// 默认 nil，所以顶栏与"我"页那两处宿主（本轮不可改）一行都不用动。
+    /// The second exit: the "buy / renew" segment on the capsule's right. **Its declaration must come before `action`, this is a hard constraint**:
+    /// every existing call site is written as `PopopxBadgeCapsule(phase: …) { … }`, and the trailing closure binds to the last function-typed parameter,
+    /// so putting `buyAction` after `action` would silently wire "open details / trial explanation" to "buy" at those call sites.
+    /// It defaults to nil, so the two hosts in the top bar and the "Me" page (not changeable this round) need not change a single line.
     var buyAction: (() -> Void)? = nil
     let action: () -> Void
 
@@ -70,8 +70,8 @@ struct PopopxBadgeCapsule: View {
         .onChange(of: rotationIndex) { _, _ in rotateOnce() }
     }
 
-    /// 原来那一枚整粒可点的胶囊：一个字都没改。`showsBuySegment` 为假时走的就是这条路径，
-    /// 顶栏那套实测过的尺寸（48 高、`spaceM` 横 padding、实心色片、描边与光晕分档）全部原样。
+    /// The original whole-capsule-tappable capsule: not one word changed. When `showsBuySegment` is false this is the path taken,
+    /// and the top bar's measured sizes (48 high, `spaceM` horizontal padding, solid color chip, tiered stroke and glow) stay exactly as they were.
     private var singlePill: some View {
         Button(action: tapped) {
             HStack(spacing: PopopxMetrics.spaceXS) {
@@ -89,19 +89,19 @@ struct PopopxBadgeCapsule: View {
             .frame(minWidth: compact ? PopopxMetrics.space2XL : 0)
             .background(isLive ? tint.opacity(0.10) : PopopxPalette.card, in: .capsule)
             .overlay {
-                // 描边分两档：休眠是 0.5pt 的灰边，两枚"活着"的档位是 1.5pt 的同色实边
-                // （`PopopxMetrics.stroke`）。宽度与不透明度一起分档，才够顶栏那条 48pt 高、
-                // 挤着五个元素的行里一眼分出"这枚有东西在跑"。
+                // Stroke comes in two tiers: dormant is a 0.5pt gray edge, the two "alive" tiers are a 1.5pt solid edge in the same color
+                // (`PopopxMetrics.stroke`). Width and opacity are tiered together, which is what lets a 48pt-high top bar row
+                // crowded with five elements tell at a glance that "this one has something running".
                 Capsule().strokeBorder(tint.opacity(isLive ? 0.85 : 0.25),
                                        lineWidth: isLive ? PopopxMetrics.stroke : PopopxMetrics.hairline)
             }
-            // 微弱外发光：只给两档激活态，半径一格 `space2XS`。休眠不发光，
-            // 深色模式下这圈同色光晕正是"已点亮"的主要线索。
+            // Faint outer glow: only for the two active tiers, radius one step of `space2XS`. Dormant does not glow,
+            // and in dark mode this same-color halo is exactly the main cue for "lit up".
             .shadow(color: isLive ? tint.opacity(0.35) : .clear, radius: PopopxMetrics.space2XS)
             .contentShape(.capsule)
-            // 同 `PopopxStatusPill` 带字档那一处：胶囊的宽不能被夹到小于里面的色片 + 短句，
-            // 否则 1.5pt 的激活描边连同光晕一起压成横椭圆。compact 档内容 40 加上 `minWidth` 48，
-            // 夹出来的仍是 48 正方，所以这一行对顶栏那笔 393pt 的预算没有影响。
+            // Same as the text-bearing tier in `PopopxStatusPill`: the capsule's width must not be clamped below the color chip + short phrase inside it,
+            // otherwise the 1.5pt active stroke together with the glow gets pressed into a horizontal ellipse. The compact tier's content 40 plus `minWidth` 48
+            // still clamps out as a 48 square, so this row has no effect on the top bar's 393pt budget.
             .fixedSize(horizontal: true, vertical: false)
         }
         .buttonStyle(.plain)
@@ -110,20 +110,20 @@ struct PopopxBadgeCapsule: View {
         .accessibilityIdentifier("popopx.header.badge")
     }
 
-    // MARK: 两段式（体验态 / 点亮态的购买出口）
+    // MARK: Two-segment form (the purchase exit for the trial / lit states)
 
-    /// 只有**宽屏带字那一档**才加这一段：顶栏在 393pt 上恒定退到只留符号的 48pt
-    /// （实测判据见 `Shared/Navigation/PopopxTelemetryHeader.swift:582-583`），给 compact 档
-    /// 加宽就是去动那行已经溢出过的边界。所以 iPhone 上体验态/点亮态的购买出口落在
-    /// 弹窗与详情页那两处（`PopopxTrialWelcomeModal` / `PopopxBadgeDetailSheet`），不是这里。
-    /// 休眠态也不给：整枚胶囊点下去本来就是付费墙，再挂一段"买"是重复入口。
+    /// This segment is added only in the **wide-screen tier with text**: on 393pt the top bar constantly retreats to the symbol-only 48pt
+    /// (the measured criterion is at `Shared/Navigation/PopopxTelemetryHeader.swift:582-583`), so widening the compact tier
+    /// means touching that boundary line which has already overflowed. That is why the trial/lit purchase exit on iPhone lands
+    /// in the modal and the detail page (`PopopxTrialWelcomeModal` / `PopopxBadgeDetailSheet`), not here.
+    /// Dormant state gets none either: tapping the whole capsule already is the paywall, so hanging another "buy" segment would be a duplicate entry.
     private var showsBuySegment: Bool {
         !compact && buyAction != nil && phase.capsuleState != .dormant
     }
 
-    /// 一段胶囊、两块点击区：左半还是原来的"看说明 / 看详情"，右半是品牌靛蓝实心的"买 / 续费"。
-    /// 右半刻意用 `brand`（顶栏那三档的 tint 都不是它）而不是把 `tint` 加深一档——同一枚胶囊里
-    /// "钱"和"状态"必须一眼分成两件事，绿色加深只会读成"更绿的状态"。
+    /// One capsule, two tap areas: the left half is still the original "see the explanation / see the details", the right half is the brand-indigo solid "buy / renew".
+    /// The right half deliberately uses `brand` (none of the top bar's three tiers tint with it) instead of darkening `tint` one step — inside one capsule
+    /// "money" and "status" must split into two things at a glance, and a darker green only reads as "a greener status".
     private var twoPartPill: some View {
         HStack(spacing: 0) {
             Button(action: tapped) {
@@ -160,7 +160,7 @@ struct PopopxBadgeCapsule: View {
             .padding(.trailing, PopopxMetrics.space2XS)
         }
         .frame(height: PopopxMetrics.space2XL)
-        // 走到这一档时必是两档激活态（`showsBuySegment` 已排除休眠），底与边都不用再分档。
+        // Reaching this tier means it must be one of the two active tiers (`showsBuySegment` already excludes dormant), so neither background nor edge needs tiering again.
         .background(tint.opacity(0.10), in: .capsule)
         .overlay {
             Capsule().strokeBorder(tint.opacity(0.85), lineWidth: PopopxMetrics.stroke)
@@ -168,8 +168,8 @@ struct PopopxBadgeCapsule: View {
         .shadow(color: tint.opacity(0.35), radius: PopopxMetrics.space2XS)
     }
 
-    /// 体验态那句是"买"，点亮态那句是"续费"：同一个位置、同一个动作（都进付费墙），
-    /// 但两种状态下要读到的不是同一个词——体验还剩 2 天时"买"读起来像现在就得放弃体验。
+    /// The trial-state phrase is "buy", the lit-state phrase is "renew": same position, same action (both go to the paywall),
+    /// but the word to read is not the same in the two states — with 2 days of trial left, "buy" reads as if you must give up the trial right now.
     private var buyLabel: String {
         switch phase.capsuleState {
         case .trialPulsing: PopopxBadgeCapsuleCopy.buy
@@ -178,11 +178,11 @@ struct PopopxBadgeCapsule: View {
         }
     }
 
-    // MARK: 呈现片段
+    // MARK: Presentation fragments
 
-    /// 两档激活态把符号收进实心圆片：`mesh`+`onMesh`、`success`+`onSuccess` 是品牌档里
-    /// 唯一两组"亮底深墨"的配对（浅色下白字压在 `#00A896` 上只有 2.98:1，文件头记过这条实测），
-    /// 所以实心片上的墨色必须用这两组，不能沿用胶囊自身的 `*Ink`。
+    /// The two active tiers put the symbol inside a solid disc: `mesh`+`onMesh`, `success`+`onSuccess` are, within the brand tiers,
+    /// the only two "bright ground / dark ink" pairings (in light mode white text over `#00A896` is only 2.98:1, a measurement the file header records),
+    /// so the ink on the solid disc must come from those two pairs and cannot reuse the capsule's own `*Ink`.
     @ViewBuilder private var symbol: some View {
         Group {
             switch phase.capsuleState {
@@ -201,16 +201,16 @@ struct PopopxBadgeCapsule: View {
         .font(PopopxType.microTag)
         .symbolRenderingMode(.hierarchical)
         .foregroundStyle(isLive ? chipInk : tint)
-        // nil 而不是 0：`.frame(width: 0)` 会把休眠态那枚 `circle.dashed` 直接压没。
+        // nil rather than 0: `.frame(width: 0)` would squash the dormant `circle.dashed` out of existence.
         .frame(width: isLive ? PopopxMetrics.spaceL : nil, height: isLive ? PopopxMetrics.spaceL : nil)
-        // 顶栏被长昵称挤窄时这个 frame 只会夹到更小的提案，实心色片连同下面的 `.circle` 底
-        // 会一起变成横椭圆（真机第 3 轮的"外圈变形"）。锁死这一枚正方，文字档该让路仍由
-        // `ViewThatFits` 决定，不改变顶栏的降级规则。
+        // When a long nickname squeezes the top bar narrow, this frame only clamps to a smaller proposal, and the solid chip together with the `.circle` background below it
+        // would both turn into a horizontal ellipse (the "outer ring deformation" of device round 3). Lock this one square; whether the text tier should yield is still decided by
+        // `ViewThatFits`, and the top bar's degradation rules are unchanged.
         .fixedSize()
         .background(isLive ? chipFill : Color.clear, in: .circle)
     }
 
-    /// 休眠不是失败：不给危险色，只给中性墨（判据同文件头第三条）。
+    /// Dormant is not a failure: no danger color, only neutral ink (criterion same as the file header's third item).
     private var isLive: Bool { phase.capsuleState != .dormant }
 
     private var tint: Color {
@@ -237,9 +237,9 @@ struct PopopxBadgeCapsule: View {
         }
     }
 
-    /// 顶栏只放短句：体验态是时钟，点亮态是天数，休眠态说"免费节点"而不是"未激活"。
-    /// 2026-11-20 真机第 2 轮起走词条（源文即 Key，16 译本，口径同 `PopopxTelemetryCopy`）；
-    /// 顶栏在 393pt 上取的是只留符号那档，这两句只在宽屏出现，但 VoiceOver 与宽屏都必须能读。
+    /// The top bar holds only short phrases: trial state shows a clock, lit state shows days, dormant state says "free node" rather than "not activated".
+    /// Since device round 2 on 2026-11-20 these go through terminology entries (source text is the Key, 16 translations, wording same as `PopopxTelemetryCopy`);
+    /// on 393pt the top bar takes the symbol-only tier, so these two phrases appear only on wide screens, but VoiceOver and wide screens must both be able to read them.
     private var label: String {
         switch phase {
         case .dormant:
@@ -247,7 +247,7 @@ struct PopopxBadgeCapsule: View {
         case let .trial(expiresAt):
             return PopopxBadgeCapsuleCopy.trial(PopopxBadgeCapsuleCopy.clock(expiresAt.timeIntervalSinceNow))
         case let .active(_, expiresAt):
-            // 向上取整：还剩 1 分钟不能说"0 天"，那读起来像已经到期。
+            // Round up: with 1 minute left you cannot say "0 days", that reads as if it already expired.
             let days = max(1, Int(ceil(max(0, expiresAt.timeIntervalSinceNow) / 86_400)))
             return PopopxBadgeCapsuleCopy.active(PopopxBadgeCapsuleCopy.daysClock(days))
         }
@@ -276,13 +276,13 @@ struct PopopxBadgeCapsule: View {
         action()
     }
 
-    /// 右半段：震动与左半同一档（这是选择，不是确认），动作只有一条——进付费墙。
+    /// Right half: the haptic is the same tier as the left half (that is a choice, not a confirmation), and there is only one action — go to the paywall.
     private func buyTapped() {
         PopopxHaptics.selection()
         buyAction?()
     }
 
-    /// 呼吸只属于体验态；其余两态进页面即归位，不留上一条状态的残留。
+    /// Breathing belongs only to the trial state; the other two states return to their resting position as soon as the page appears, leaving no residue of the previous state.
     private func restartBreathing() {
         guard phase.capsuleState == .trialPulsing, !reduceMotion else {
             breathing = false
@@ -291,26 +291,26 @@ struct PopopxBadgeCapsule: View {
         withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) { breathing = true }
     }
 
-    /// 一次 360°：只改 `spin`，动画挂在符号的 `.animation(_:value:)` 上。
-    /// 在同一次事务里"先减 360 再 withAnimation 归零"会被合并成一次赋值，圈就丢了。
+    /// One 360°: change only `spin`, with the animation attached to the symbol's `.animation(_:value:)`.
+    /// "Subtract 360 first, then zero it with withAnimation" inside the same transaction gets merged into a single assignment, and the turn is lost.
     private func rotateOnce() {
         guard !reduceMotion else { return }
         spin -= 360
     }
 }
 
-// MARK: - 挂载件
+// MARK: - Mounting components
 
-/// 顶栏那一枚：两档视觉照旧由 `ViewThatFits` 选，档位和 sheet 载体都挂在候选**外面**。
+/// The one in the top bar: the two visual tiers are still chosen by `ViewThatFits`, while the tier and the sheet carrier are attached **outside** the candidates.
 ///
-/// 真机第 9 轮「点头部徽章、再点『看徽章详情』没反应」有两层成因：
-/// 1. 上一版把自带 `.popopxBadgeSheets` 的包装件（`PopopxBadgeCapsuleView`，本轮删掉）整个放进
-///    `ViewThatFits` 的两档候选里，于是候选一和候选二各有一份呈现层，`sheet` 写到哪一份由布局结果决定。
-/// 2. 就算只留一份，这一份和宿主页（`ChatsListView` 的 `.popopxBadgeSheets($badgeSheet)`）也是
-///    **同一条链上的两张 sheet**：体验弹窗由宿主抬起时，头部这一份再写 `.detail` 属于 sheet 套 sheet，
-///    系统静丢掉第二次呈现，看起来就是"点了没反应"。
-/// 所以载体不挂在这里，`sheet` 由宿主递进来：全页只有宿主那一份 `.popopxBadgeSheets`，
-/// 三态之间换面板永远只是改同一个值。
+/// Device round 9's "tap the header badge, then tap 'see badge details' with no response" had two layers of causes:
+/// 1. The previous version put the wrapper carrying its own `.popopxBadgeSheets` (`PopopxBadgeCapsuleView`, deleted this round) entirely inside
+///    the two `ViewThatFits` candidates, so candidate one and candidate two each had a presentation layer, and which one `sheet` wrote to was decided by the layout result.
+/// 2. Even keeping only one copy, that copy and the host page (`ChatsListView`'s `.popopxBadgeSheets($badgeSheet)`) were still
+///    **two sheets on the same chain**: when the host raises the trial modal, the header copy writing `.detail` again is a sheet inside a sheet,
+///    and the system silently drops the second presentation, which looks exactly like "tapping did nothing".
+/// So the carrier is not attached here, and `sheet` is handed in by the host: the whole page has only the host's single `.popopxBadgeSheets`,
+/// and switching panels among the three states is always just changing that same value.
 struct PopopxBadgeHeaderEntry: View {
     @State private var badge = PopopxBadgeManager.shared
     @Binding var sheet: PopopxBadgeSheet?
@@ -334,14 +334,14 @@ struct PopopxBadgeHeaderEntry: View {
     }
 }
 
-// MARK: - 三条出口的单一 sheet 载体
+// MARK: - The single sheet carrier for the three exits
 
-/// 徽章的三条出口（付费墙 / 体验说明 / 详情）。
+/// The badge's three exits (paywall / trial explanation / details).
 ///
-/// 以前这三张是挂在同一层上的三个 `.sheet(isPresented:)`：真机第 3 轮点「看徽章详情」没反应，
-/// 就是因为体验弹窗里那个按钮只能 `dismiss()` —— 在同一层再抬一张 sheet 属于 sheet 套 sheet，
-/// 系统会静默丢掉第二次呈现，界面看起来就是"点了没反应"。收成一个 `.sheet(item:)` 之后，
-/// 换面板只是改 `item`，sheet 不关不换、内容原地切到详情页。
+/// Previously these three were three `.sheet(isPresented:)` attached at the same level: in device round 3 tapping "see badge details" did nothing,
+/// because that button inside the trial modal could only `dismiss()` — raising another sheet at the same level is a sheet inside a sheet,
+/// and the system silently drops the second presentation, so the UI looked like "tapping did nothing". After consolidating into one `.sheet(item:)`,
+/// switching panels is just changing `item`: the sheet neither closes nor swaps, and its content switches in place to the detail page.
 enum PopopxBadgeSheet: String, Identifiable {
     case paywall
     case trial
@@ -349,7 +349,7 @@ enum PopopxBadgeSheet: String, Identifiable {
 
     var id: String { rawValue }
 
-    /// 三态 → 三出口的唯一判据：顶栏与"我的"页都读这一份，不再各自 switch。
+    /// The single criterion mapping three states → three exits: both the top bar and the "Me" page read this one, and no longer switch on their own.
     static func entry(for state: PopopxBadgeCapsuleState) -> PopopxBadgeSheet {
         switch state {
         case .dormant: .paywall
@@ -359,7 +359,7 @@ enum PopopxBadgeSheet: String, Identifiable {
     }
 }
 
-/// 载体内容：`detents` 照原来那三张各档不动（付费墙和礼品卡一样吃 `.large`）。
+/// Carrier content: `detents` keeps each of the original three sheets' tier unchanged (the paywall takes `.large` just like the gift card).
 struct PopopxBadgeSheetHost: View {
     @Binding var sheet: PopopxBadgeSheet?
 
@@ -369,8 +369,8 @@ struct PopopxBadgeSheetHost: View {
             PopopxBadgePaywallView()
                 .presentationDetents([.large])
         case .trial:
-            // 体验弹窗里那句"看档位与价格"直接换 `item`：同一张 sheet 不关不换、内容原地切到付费墙。
-            // 这就是真机第 3 轮"点『看徽章详情』没反应"那次收口换来的能力，别退回第二个 `.sheet`。
+            // The trial modal's "see tiers and prices" line changes `item` directly: the same sheet stays open and unswapped, content switching in place to the paywall.
+            // This is the capability bought by closing off device round 3's "tapping 'see badge details' did nothing" — do not retreat to a second `.sheet`.
             PopopxTrialWelcomeModal(onOpenDetail: { sheet = .detail },
                                     onOpenPaywall: { sheet = .paywall })
                 .presentationDetents([.medium, .large])
@@ -384,10 +384,10 @@ struct PopopxBadgeSheetHost: View {
 }
 
 extension View {
-    /// 把徽章三条出口挂到调用方：宿主只需要一份 `PopopxBadgeSheet?` 状态，
-    /// 而且**全页只许挂一次** —— `PopopxBadgeHeaderEntry` 用的就是宿主那一份的绑定，
-    /// 顶栏再挂一份就成了同一条链上的两张 sheet（第二轮成因，见上面该件的说明）。
-    /// 参数不能叫 `sheet`——那会盖掉 `View.sheet(item:)` 本身，编译器只会说"这不是函数"。
+    /// Attach the badge's three exits to the caller: the host needs only one `PopopxBadgeSheet?` state,
+    /// and **the whole page may attach it only once** — `PopopxBadgeHeaderEntry` uses the binding of that host copy,
+    /// so attaching another copy in the top bar would make two sheets on the same chain (the second cause, see that component's notes above).
+    /// The parameter must not be named `sheet` — that would shadow `View.sheet(item:)` itself, and the compiler would only say "this is not a function".
     func popopxBadgeSheets(_ badgeSheet: Binding<PopopxBadgeSheet?>) -> some View {
         sheet(item: badgeSheet) { _ in PopopxBadgeSheetHost(sheet: badgeSheet) }
     }
@@ -406,8 +406,8 @@ private struct PopopxBadgeCapsuleGallery: View {
             PopopxBadgeCapsule(phase: .active(source: .creditsExchange,
                                               expiresAt: Date().addingTimeInterval(3_600)),
                                compact: true) {}
-            // 两段式那档的两个状态：预览里必须能一眼看到左半/右半的分界与配色差，
-            // 否则这条路径只能等真机才发现"右半段根本没渲染"。
+            // The two states of the two-segment tier: the preview must show the left/right boundary and the color difference at a glance,
+            // otherwise this path could only wait for a real device to reveal "the right half never rendered at all".
             PopopxBadgeCapsule(phase: .trial(expiresAt: Date().addingTimeInterval(82_000)),
                                buyAction: {}) {}
             PopopxBadgeCapsule(phase: .active(source: .storePass,
@@ -433,14 +433,14 @@ struct PopopxBadgeCapsuleLight_Previews: PreviewProvider {
     }
 }
 
-// MARK: - 顶栏短句
+// MARK: - Top bar short phrases
 
-/// 顶栏这一枚胶囊的全部措辞。源文是英文原句，英文原句就是 Key（写法同 `PopopxTelemetryCopy`）：
-/// `en.lproj` 按约定不写，回落 Key 本身就是英文，16 个译本目录各写各的译法。
+/// All the wording of this capsule in the top bar. The source is the English original sentence, and the English original sentence is the Key (written the same way as `PopopxTelemetryCopy`):
+/// `en.lproj` is not written by convention, the fallback Key is already English, and each of the 16 translation directories writes its own translation.
 ///
-/// 2026-11-20 真机第 2 轮对"中文残留"的裁定是**只翻顶栏这一处**，所以这里只收顶栏会读到的
-/// 三句状态、三句 VoiceOver、三句提示和那个剩余时间；BadgeCredits 其余模块（扣点弹窗、详情页）
-/// 的中文 Copy 一律保持原样，`PopopxBadgeCopy.remainingClock` 也照旧服务详情页。
+/// The 2026-11-20 device round 2 ruling on "residual Chinese" was **translate only this one place in the top bar**, so this collects only what the top bar reads:
+/// three status phrases, three VoiceOver phrases, three hints and that remaining time; the other BadgeCredits modules (the credit-deduction modal, the detail page)
+/// keep their Chinese Copy exactly as they are, and `PopopxBadgeCopy.remainingClock` still serves the detail page as before.
 private enum PopopxBadgeCapsuleCopy {
     private static func key(_ value: String) -> String {
         NSLocalizedString(value, comment: "POPOPX badge capsule")
@@ -462,15 +462,15 @@ private enum PopopxBadgeCapsuleCopy {
     static let hintTrial = key("Tap to read what the trial includes")
     static let hintActive = key("Tap to open badge details")
 
-    /// 两段式右半那三个字。短到只有两个词是刻意的：这一段住在顶栏那一行里，
-    /// 而这一行的宽度是实测过的（见 `showsBuySegment` 的注释）——句子越长，越先把整枚胶囊挤回 compact。
+    /// The words on the two-segment right half. Short to the point of two words is deliberate: this segment lives inside the top bar's row,
+    /// and that row's width is measured (see the `showsBuySegment` comment) — the longer the phrase, the sooner it squeezes the whole capsule back to compact.
     static let buy = key("Buy")
     static let renew = key("Renew")
     static let hintBuy = key("Tap to open plans and prices")
 
-    /// 顶栏的剩余时间只留两个最大单位，且每个组合都是一个完整 Key：`"3 d 2 h"` 这种两段拼接
-    /// 在 16 种语序里会翻车（俄语、匈牙利语会把它倒过来），所以宁可五句短句。
-    /// 单位写在词条里而不是代码里，译本可以自己的缩写规则为准。
+    /// The top bar's remaining time keeps only the two largest units, and every combination is one complete Key: a two-part join like `"3 d 2 h"`
+    /// would break across 16 word orders (Russian and Hungarian would invert it), so five short phrases are preferable.
+    /// Units are written into the entries rather than the code, so each translation can follow its own abbreviation rules.
     static func clock(_ interval: TimeInterval) -> String {
         let minutes = max(1, Int(ceil(max(0, interval) / 60)))
         let days = minutes / 1_440

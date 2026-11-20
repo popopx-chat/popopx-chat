@@ -1,27 +1,27 @@
 //
 //  PopopxMessageRouter.swift
-//  PopopxMeshKit  —  模块 5
+//  PopopxMeshKit  —  module 5
 //
-//  全向无缝切换与 SMP 重路由中枢. One entry point for "send this text to this peer" that always picks
+//  Seamless all-direction switching and SMP re-routing hub. One entry point for "send this text to this peer" that always picks
 //  the channel that can carry it right now, and one exit for the two ways a channel can disappoint:
 //  the public network does not answer inside `PopopxMeshConfig.smpAckTimeout` (3 s), or Bluetooth
 //  reports `onBluetoothDeliveryFailed` after `bleAckTimeout` (5 s) without a BLE_ACK.
 //
-//  场景 A (有网 → 断网 / 弱网降级): SMP is the default while `NetworkStateMonitor` says the path is
+//  Scenario A (online → offline / weak-network downgrade): SMP is the default while `NetworkStateMonitor` says the path is
 //  up. When the window runs out and the peer is reachable on the mesh, the same message goes out on
 //  the mesh too — concurrently, never instead, because cancelling a live SMP send to go look at a
 //  radio would lose a message that was already leaving the device.
 //
-//  场景 B (蓝牙 → SMP): the same rules read the other way. 事前预判 skips Bluetooth when the peer left
+//  Scenario B (Bluetooth → SMP): the same rules read the other way. Pre-send prediction skips Bluetooth when the peer left
 //  range (`peerReachabilityTimeout`, 15 s) or the radio is off while this device is online and bound;
-//  事中 re-routing turns a delivery failure into an SMP re-send that keeps the original `messageId`;
-//  and 纯离线兜底 parks what neither channel could take in `unacknowledgedMeshMessages` until
+//  In-flight re-routing turns a delivery failure into an SMP re-send that keeps the original `messageId`;
+//  and the pure-offline fallback parks what neither channel could take in `unacknowledgedMeshMessages` until
 //  `flushPendingMessagesOnNetworkRestore()` runs on the restore edge.
 //
 //  Two invariants. `messageId` is minted once and never replaced — it is the only thing that makes a
 //  parallel re-send and a re-route safe to look at twice, and the peer's single
 //  `PopopxMeshDeduplicator` entry is what collapses both copies into one message. And nothing here
-//  reaches the network on its own: the public channel goes through 模块 2's seam
+//  reaches the network on its own: the public channel goes through module 2's seam
 //  (`PopopxSMPChatCore` refines `PopopxOfflineChatCore`), so the app target keeps the FFI and this
 //  package keeps the rules.
 //
@@ -75,7 +75,7 @@ public struct PopopxSMPAck: Hashable, Sendable {
     }
 }
 
-/// What 模块 5 needs on top of 模块 2's seam, so the router's public channel is the *same* door the
+/// What module 5 needs on top of module 2's seam, so the router's public channel is the *same* door the
 /// offline pairing already uses rather than a second one the host has to wire twice.
 ///
 /// The app's adapter implements this with the send path that already exists —
@@ -95,7 +95,7 @@ public protocol PopopxSMPChatCore: PopopxOfflineChatCore {
 /// Who a message is for, in whichever id space the caller holds. The three spellings are the three
 /// moments of a pairing: a mesh key alone (a neighbour no card was exchanged with), a temporary
 /// `connId` (an offline `/_connect` that is not a contact yet), and a real `contactId` (the SMP
-/// address). 模块 6 turns the second into the third.
+/// address). Module 6 turns the second into the third.
 public enum PopopxRouteTarget: Hashable, Sendable, Codable {
     case contactId(Int64)
     case tempConnId(Int64)
@@ -139,7 +139,7 @@ public struct PopopxOutboundMessage: Hashable, Sendable {
 
 /// Why a message is sitting in `unacknowledgedMeshMessages`.
 public enum PopopxQueueReason: String, Codable, Hashable, Sendable {
-    /// 纯离线兜底: no path, and nothing on the radio to take it either.
+    /// Pure-offline fallback: no path, and nothing on the radio to take it either.
     case noNetwork
     /// The bound peer has not been heard of inside `peerReachabilityTimeout`, or our radio is off.
     case peerUnreachable
@@ -147,7 +147,7 @@ public enum PopopxQueueReason: String, Codable, Hashable, Sendable {
     case smpUnacknowledged
     /// The mesh refused the frame before it reached the radio.
     case meshRefused
-    /// Still addressed to a temporary `connId`; flushable once 模块 6 upgrades that connection.
+    /// Still addressed to a temporary `connId`; flushable once module 6 upgrades that connection.
     case awaitingContactUpgrade
 }
 
@@ -193,7 +193,7 @@ public struct PopopxPendingMeshMessage: Codable, Hashable, Sendable, Identifiabl
     }
 }
 
-/// 事前预判's answer, kept in the decision so the UI can say *why* a channel was not used and a test
+/// The pre-send prediction's answer, kept in the decision so the UI can say *why* a channel was not used and a test
 /// can assert the prediction instead of a timing accident.
 public enum PopopxBluetoothPrediction: Hashable, Sendable {
     case reachable(peerMeshPublicKeyHex: String)
@@ -215,19 +215,19 @@ public enum PopopxBluetoothPrediction: Hashable, Sendable {
 
 /// What the router actually did with one message.
 public enum PopopxRouteOutcome: Hashable, Sendable {
-    /// 场景 A, the normal case: the SMP server took the message inside the window.
+    /// Scenario A, the normal case: the SMP server took the message inside the window.
     case smpAcknowledged(contactId: Int64)
-    /// 场景 A rule 1's tail: no SMP ACK inside `smpAckTimeout` and the peer is reachable, so the same
+    /// Scenario A rule 1's tail: no SMP ACK inside `smpAckTimeout` and the peer is reachable, so the same
     /// `messageId` went out on the mesh as well, concurrently.
     case smpUnacknowledgedMeshParallel(contactId: Int64, peerMeshPublicKeyHex: String)
     /// No SMP ACK and no second channel to add. The attempt stays in flight; its later failure queues
     /// the message.
     case smpUnacknowledgedNoMesh(contactId: Int64)
-    /// Bluetooth carried it, because there is no path (断网降级) or because 事前预判 chose it.
+    /// Bluetooth carried it, because there is no path (offline downgrade) or because pre-send prediction chose it.
     case meshSent(peerMeshPublicKeyHex: String)
-    /// 纯离线兜底: the message is in `unacknowledgedMeshMessages`.
+    /// Pure-offline fallback: the message is in `unacknowledgedMeshMessages`.
     case queuedOffline(PopopxQueueReason)
-    /// 未绑定陌生人: no SMP address exists and nothing on the radio can take it, so nothing was sent.
+    /// Unbound stranger: no SMP address exists and nothing on the radio can take it, so nothing was sent.
     case refusedUnboundStranger(peerMeshPublicKeyHex: String?)
     /// This `messageId` is already being routed, or was already re-routed. The second request was
     /// ignored on purpose — that is what makes a retry idempotent.
@@ -258,17 +258,17 @@ public struct PopopxRoutedMessage: Hashable, Sendable {
 }
 
 /// What one chat page's status bar should say right now. `unboundStranger` is the prompt's
-/// 未绑定陌生人提示 and carries its wording verbatim in `displayText`.
+/// Unbound-stranger notice and carries its wording verbatim in `displayText`.
 public enum PopopxRoutingStatus: Hashable, Sendable {
-    /// 公网在，SMP 是默认通道。
+    /// Public network is up; SMP is the default channel.
     case smpOnline
-    /// 断网，蓝牙在：消息走 Mesh。
+    /// Offline, Bluetooth up: the message goes over Mesh.
     case meshOnly(peerMeshPublicKeyHex: String?)
-    /// 公网勉强（3 秒未 ACK），Mesh 在并发补发。
+    /// Public network marginal (no ACK in 3 s), Mesh is re-sending concurrently.
     case dualChannel(peerMeshPublicKeyHex: String)
-    /// 两条路都不通，积压消息数。
+    /// Neither path works; the backlog message count.
     case queued(messageCount: Int)
-    /// 「蓝牙已断开，尚未交换公网名片（重新靠近后可继续发送）」
+    /// "Bluetooth has disconnected; no public card exchanged yet (move closer again to continue sending)"
     case unboundStranger
     /// `NWPathMonitor` has not reported yet — deliberately not guessed as "online".
     case pathUnknown
@@ -296,7 +296,7 @@ public enum PopopxRoutingStatus: Hashable, Sendable {
         case let .dualChannel(peer):
             String(format: NSLocalizedString("The public network is slow — also sending over Bluetooth mesh (%@)", comment: ""), String(peer.prefix(8)))
         case let .queued(count):
-            "蓝牙与公网均不可用，\(count) 条消息待发送"
+            String(format: NSLocalizedString("Neither Bluetooth nor the public network is available — %lld messages waiting to send", comment: ""), count)
         case .unboundStranger:
             PopopxMessageRouter.unboundStrangerStatusText
         case .pathUnknown:
@@ -305,7 +305,7 @@ public enum PopopxRoutingStatus: Hashable, Sendable {
     }
 }
 
-/// How many things moved when 模块 6 upgraded a temporary connection.
+/// How many things moved when module 6 upgraded a temporary connection.
 public struct PopopxMigrationReport: Hashable, Sendable {
     public let movedQueuedMessages: Int
     public let movedOfflineRecords: Int
@@ -359,8 +359,8 @@ public struct PopopxMeshOfflineRecord: Codable, Hashable, Sendable, Identifiable
 
 // MARK: - The Bluetooth seam this router reads
 
-/// What 模块 5 needs from 模块 4: the 事前预判 question, the radio state it is answered against, and the
-/// failure sink 事中 re-routing installs itself into.
+/// What module 5 needs from module 4: the pre-send prediction question, the radio state it is answered against, and the
+/// failure sink in-flight re-routing installs itself into.
 ///
 /// `BluetoothHealthMonitor` is the only production answer — see `PopopxBluetoothHealthJudge` — and the
 /// protocol exists because the monitor's own state is written by CoreBluetooth callbacks and mesh
@@ -368,21 +368,21 @@ public struct PopopxMeshOfflineRecord: Codable, Hashable, Sendable, Identifiable
 /// the radio facts come in through a seam a fixture can hold, exactly like
 /// `PopopxPathProviding` does for connectivity.
 public protocol PopopxBluetoothJudging: Sendable {
-    /// Our own radio, as 模块 4 sees it. `isUsable` false is the prompt's 「蓝牙关闭」 case.
+    /// Our own radio, as module 4 sees it. `isUsable` false is the prompt's "Bluetooth off" case.
     var radioState: PopopxBluetoothState { get async }
 
-    /// 对方是否还在蓝牙范围内: heard from within `timeout`, which the router always takes from
+    /// Whether the peer is still in Bluetooth range: heard from within `timeout`, which the router always takes from
     /// `PopopxMeshConfig.peerReachabilityTimeout` (15 s).
     func isPeerReachable(publicKey meshPublicKeyHex: String, timeout: TimeInterval) async -> Bool
 
     /// Installs the re-routing sink, or retracts it. `nil` must mean "no callback", the same contract
-    /// 模块 4 documents.
+    /// module 4 documents.
     func setDeliveryFailureHandler(
         _ handler: (@Sendable (PopopxBluetoothDeliveryFailure) async -> Void)?
     ) async
 }
 
-/// The production judge: 模块 4's `BluetoothHealthMonitor`, reached through the three calls that
+/// The production judge: module 4's `BluetoothHealthMonitor`, reached through the three calls that
 /// already exist on it. Nothing here adds behaviour to the monitor — the module stays the only owner
 /// of radio state, node sightings and the 5-second BLE_ACK guard.
 public struct PopopxBluetoothHealthJudge: PopopxBluetoothJudging {
@@ -412,16 +412,16 @@ public struct PopopxBluetoothHealthJudge: PopopxBluetoothJudging {
 // MARK: - The router
 
 public actor PopopxMessageRouter {
-    // No `shared`, like 模块 3: this type needs the app's chat core, which only the host target can
-    // supply. The host builds one router, hands it to the send path and to 模块 6, and starts it with
+    // No `shared`, like module 3: this type needs the app's chat core, which only the host target can
+    // supply. The host builds one router, hands it to the send path and to module 6, and starts it with
     // the global fuse.
 
-    /// 未绑定陌生人提示, exactly as 模块 5 writes it. Reachable from `PopopxRoutingStatus
+    /// Unbound-stranger notice, exactly as module 5 writes it. Reachable from `PopopxRoutingStatus
     /// .unboundStranger.displayText`, from the status stream and from the notification's `userInfo`,
     /// so no chat page has to rebuild the sentence.
-    public static let unboundStrangerStatusText = "蓝牙已断开，尚未交换公网名片（重新靠近后可继续发送）"
+    public static let unboundStrangerStatusText = NSLocalizedString("Bluetooth is down and no POPOPX public-network card has been exchanged yet — move closer to continue sending.", comment: "")
 
-    /// Posted whenever the routing status changes — including the 名片 upgraded notification 模块 6
+    /// Posted whenever the routing status changes — including the card-upgraded notification module 6
     /// forwards. `userInfo` carries `statusCode`, and `statusText` only when there is something to
     /// show. No app-side `Notification.Name` carried this meaning before, so this package declares it.
     public static let statusNotification = Notification.Name("chat.popopx.mesh.routingStatus")
@@ -437,7 +437,7 @@ public actor PopopxMessageRouter {
     /// proven, so the cap only bites on a device that keeps failing.
     public static let maxTrackedAttempts = 512
 
-    /// Offline messages remembered per recipient, for the 模块 6 migration. The "already delivered"
+    /// Offline messages remembered per recipient, for the module 6 migration. The "already delivered"
     /// question is answered by the deduplicator, not by this list.
     public static let maxOfflineRecords = 512
 
@@ -510,7 +510,7 @@ public actor PopopxMessageRouter {
     private let queueURL: URL?
     private let recordsURL: URL?
 
-    /// 纯离线兜底队列, the prompt's `unacknowledgedMeshMessages`: what neither channel could take.
+    /// Pure-offline fallback queue, the prompt's `unacknowledgedMeshMessages`: what neither channel could take.
     public internal(set) var unacknowledgedMeshMessages: [String: PopopxPendingMeshMessage] = [:]
 
     private var attempts: [String: Attempt] = [:]
@@ -524,7 +524,7 @@ public actor PopopxMessageRouter {
     private var observationTask: Task<Void, Never>?
     private var inFlightFlush: Task<Int, Never>?
 
-    /// 裁定 1: the mesh `messageId` → main-database `ChatItem` id pairs, for the messages this router
+    /// Ruling 1: the mesh `messageId` → main-database `ChatItem` id pairs, for the messages this router
     /// flushed over SMP. The merged timeline needs them because the two ids name one message, and the
     /// offline row is the only copy that carries the mesh id.
     private var appChatItemIDs: [String: Int64] = [:]
@@ -561,7 +561,7 @@ public actor PopopxMessageRouter {
     // MARK: - Lifecycle
 
     /// Subscribes to connectivity (starting the shared `NetworkStateMonitor` if nothing else has),
-    /// installs itself as 模块 4's delivery-failure sink, and takes back whatever the last run left on
+    /// installs itself as module 4's delivery-failure sink, and takes back whatever the last run left on
     /// disk. Idempotent.
     public func start() async {
         loadQueueFromDisk()
@@ -587,7 +587,7 @@ public actor PopopxMessageRouter {
 
     /// Stops the pipeline and retracts every timer this router owns. It deliberately does **not**
     /// cancel SMP sends already handed to the chat core: killing a user's in-flight public send would
-    /// break the 零破坏 red line, and the message is already on its way.
+    /// break the zero-breakage red line, and the message is already on its way.
     public func stop() async {
         observationTask?.cancel()
         observationTask = nil
@@ -620,7 +620,7 @@ public actor PopopxMessageRouter {
 
     // MARK: - The one entry point
 
-    /// 场景 A and 场景 B in the order the prompt writes them: online means SMP; no SMP ACK in time
+    /// Scenario A and scenario B in the order the prompt writes them: online means SMP; no SMP ACK in time
     /// means Bluetooth in parallel; Bluetooth being the only way means the mesh; neither means the
     /// queue — unless there is no public card behind the peer at all, which is the stranger refusal.
     @discardableResult
@@ -648,18 +648,18 @@ public actor PopopxMessageRouter {
         let prediction = await predictBluetooth(for: binding)
 
         if await isConnected(), let contactId = binding.contactId {
-            // 场景 A 1: 有网默认走 POPOPX SMP.
+            // Scenario A rule 1: when online, default to POPOPX SMP.
             return await routeOverSMP(
                 messageId: message.messageId,
                 contactId: contactId,
                 text: message.text,
                 binding: binding,
                 prediction: prediction,
-                // 3 秒未 ACK 才允许并发蓝牙补发.
+                // Only after 3 s without an ACK is a concurrent Bluetooth re-send allowed.
                 allowParallelMesh: true
             )
         }
-        // Offline, or no SMP address to write to: the mesh is the only candidate (断网降级).
+        // Offline, or no SMP address to write to: the mesh is the only candidate (offline downgrade).
         if case let .reachable(peerMeshPublicKeyHex) = prediction,
            let outcome = await sendOverMesh(
                 messageId: message.messageId,
@@ -689,9 +689,9 @@ public actor PopopxMessageRouter {
         )
     }
 
-    // MARK: - 场景 B 事中: the delivery-failure callback
+    // MARK: - Scenario B in-flight: the delivery-failure callback
 
-    /// 模块 4's `onBluetoothDeliveryFailed(messageId:peerMeshKey:)`.
+    /// Module 4's `onBluetoothDeliveryFailed(messageId:peerMeshKey:)`.
     ///
     /// The network is checked the moment this is called: online and bound means the very same
     /// `messageId` goes out over SMP — it is never replaced, because a new id would show the message
@@ -719,13 +719,13 @@ public actor PopopxMessageRouter {
         let binding = await resolveBinding(for: attempt.target)
         var contactId = binding.contactId
         if contactId == nil, let peerMeshPublicKeyHex = peerMeshKey {
-            // The failure callback only knows the mesh key; 模块 1 turns it into the SMP address.
+            // The failure callback only knows the mesh key; module 1 turns it into the SMP address.
             contactId = await store.contactId(forMeshPublicKeyHex: peerMeshPublicKeyHex)
         }
         let online = await isConnected()
 
         guard online else {
-            // 蓝牙不通且本机也无网 → 待发队列, with the id kept.
+            // Bluetooth unreachable and this device offline too → pending-send queue, with the id kept.
             let parked = await parkOrRefuse(
                 messageId: messageId,
                 binding: binding.withContactId(contactId),
@@ -734,7 +734,7 @@ public actor PopopxMessageRouter {
             return parked.outcome
         }
         guard let resolvedContactId = contactId else {
-            // 未绑定陌生人: online, but no public card to re-send behind.
+            // Unbound stranger: online, but no public card to re-send behind.
             let refused: PopopxRouteOutcome = .refusedUnboundStranger(peerMeshPublicKeyHex: attempt.peerMeshPublicKeyHex)
             publishStatus(for: refused)
             return refused
@@ -756,13 +756,13 @@ public actor PopopxMessageRouter {
         ).outcome
     }
 
-    /// The same callback in the value 模块 4 actually produces.
+    /// The same callback in the value module 4 actually produces.
     @discardableResult
     public func onBluetoothDeliveryFailed(_ failure: PopopxBluetoothDeliveryFailure) async -> PopopxRouteOutcome {
         await onBluetoothDeliveryFailed(messageId: failure.messageId, peerMeshKey: failure.peerMeshPublicKeyHex)
     }
 
-    /// Installs the router as 模块 4's failure sink. `start()` does it; a host that would rather wire
+    /// Installs the router as module 4's failure sink. `start()` does it; a host that would rather wire
     /// the two by hand can call this instead.
     public func installBluetoothFailureHandler() async {
         await health.setDeliveryFailureHandler { [weak self] failure in
@@ -771,13 +771,13 @@ public actor PopopxMessageRouter {
         }
     }
 
-    // MARK: - 场景 B 纯离线兜底 / 网络恢复冲刷
+    // MARK: - Scenario B pure-offline fallback / network-restore flush
 
     /// Every queued message goes out over SMP with the id it was queued under.
     ///
     /// `start()`'s own connectivity subscription calls this on the restore edge, and the host may pull
     /// it after the user turns the mesh back on. A message still addressed to a temporary `connId`
-    /// stays queued — it has no SMP address until 模块 6 upgrades that connection — and a message whose
+    /// stays queued — it has no SMP address until module 6 upgrades that connection — and a message whose
     /// send failed again goes back with its original `queuedAt`, so the order the user typed in is the
     /// order a restore replays.
     ///
@@ -868,7 +868,7 @@ public actor PopopxMessageRouter {
     }
 
     /// Every flush this router can still name: the mesh id it minted and the row id the host stored it
-    /// under. 模块 7's merged timeline is the only reader, and it uses the pair to replace an offline
+    /// under. Module 7's merged timeline is the only reader, and it uses the pair to replace an offline
     /// row with the stored copy instead of drawing both.
     ///
     /// Named `recorded…`, not the name `PopopxMeshRoutingObserving` gives its requirement: a host that
@@ -914,14 +914,14 @@ public actor PopopxMessageRouter {
         return stream
     }
 
-    /// The 未绑定陌生人 sentence on its own, so a caller that only needs to know whether to show it does
+    /// The unbound-stranger sentence on its own, so a caller that only needs to know whether to show it does
     /// not have to switch over the status.
     public func unboundStrangerStatus() async -> String? {
         status == .unboundStranger ? Self.unboundStrangerStatusText : nil
     }
 
-    /// 模块 6 calls this after a pairing upgrade. A banner that only ever changes on a send decision
-    /// would go on promising 「尚未交换公网名片」 after the card arrived, which is the one moment the
+    /// Module 6 calls this after a pairing upgrade. A banner that only ever changes on a send decision
+    /// would go on promising "no public card exchanged yet" after the card arrived, which is the one moment the
     /// user most needs the status bar to be right. Only the stranger banner is rewritten: anything
     /// else on screen came from a real attempt and stays until the next one.
     public func refreshStatus(afterUpgradeContact contactId: Int64) async {
@@ -943,7 +943,7 @@ public actor PopopxMessageRouter {
         }
     }
 
-    // MARK: - 全局唯一 messageId 幂等去重
+    // MARK: - global-unique messageId idempotent dedup
 
     /// The one message-id memory in the system, asked instead of duplicated: `true` means "show or
     /// store this id", `false` means another channel already delivered it. This router keeps no second
@@ -975,7 +975,7 @@ public actor PopopxMessageRouter {
             .sorted { $0.receivedAt < $1.receivedAt }
     }
 
-    // MARK: - 模块 6 的迁移
+    // MARK: - module 6's migration
 
     /// Moves everything hung on a temporary `connId` — the offline records, the
     /// `unacknowledgedMeshMessages` queue and any live attempt — onto the real `contactId`, so a
@@ -1018,7 +1018,7 @@ public actor PopopxMessageRouter {
 
     // MARK: - Channel choice
 
-    /// Both identities of one peer, from 模块 1's store, whichever way the caller addressed it.
+    /// Both identities of one peer, from module 1's store, whichever way the caller addressed it.
     private func resolveBinding(for target: PopopxRouteTarget) async -> Binding {
         switch target {
         case let .contactId(contactId):
@@ -1044,8 +1044,8 @@ public actor PopopxMessageRouter {
         }
     }
 
-    /// 事前预判: could Bluetooth carry anything right now? The two refusals the prompt names are the
-    /// peer's silence (`peerReachabilityTimeout`, 15 s — the window 模块 4 measures against) and our
+    /// Pre-send prediction: could Bluetooth carry anything right now? The two refusals the prompt names are the
+    /// peer's silence (`peerReachabilityTimeout`, 15 s — the window module 4 measures against) and our
     /// own radio being down. `PopopxOfflineBridge`'s second rule is the same one, stated from the
     /// pairing side.
     private func predictBluetooth(for binding: Binding) async -> PopopxBluetoothPrediction {
@@ -1069,7 +1069,7 @@ public actor PopopxMessageRouter {
         let wasConnected = lastStatusPath?.isConnected
         lastStatusPath = path
         if path.isConnected {
-            // 一旦 NWPathMonitor 检测到网络恢复，立即调用 flushPendingMessagesOnNetworkRestore().
+            // Once NWPathMonitor detects the network is back, immediately call flushPendingMessagesOnNetworkRestore().
             guard wasConnected != true else { return }
             if unacknowledgedMeshMessages.isEmpty {
                 publishStatus(.smpOnline)
@@ -1079,7 +1079,7 @@ public actor PopopxMessageRouter {
             return
         }
         guard wasConnected == true else { return }
-        // 断网: say what carries the next message instead of leaving the old "online" banner up.
+        // Offline: say what carries the next message instead of leaving the old "online" banner up.
         let radioUsable = await health.radioState.isUsable
         publishStatus(
             radioUsable
@@ -1092,7 +1092,7 @@ public actor PopopxMessageRouter {
         observationTask = nil
     }
 
-    /// 场景 A's first choice, shared by `send`, the failure re-route and the restore flush.
+    /// Scenario A's first choice, shared by `send`, the failure re-route and the restore flush.
     private func routeOverSMP(
         messageId: String,
         contactId: Int64,
@@ -1111,7 +1111,7 @@ public actor PopopxMessageRouter {
                 messageId: messageId, target: target, outcome: outcome, bluetooth: prediction
             )
         }
-        // 3 秒内没有 SMP 服务器 ACK. The send is still live — the window measures a *reply*, not a
+        // No SMP server ACK within 3 s. The send is still live — the window measures a *reply*, not a
         // request — so the mesh copy goes out alongside it rather than replacing it.
         if allowParallelMesh, case let .reachable(peerMeshPublicKeyHex) = prediction,
            await sendOverMesh(
@@ -1135,7 +1135,7 @@ public actor PopopxMessageRouter {
         )
     }
 
-    /// Hands one envelope to the mesh, keeping the id. `PopopxMeshEngine` arms 模块 4's 5-second
+    /// Hands one envelope to the mesh, keeping the id. `PopopxMeshEngine` arms module 4's 5-second
     /// BLE_ACK guard for us, so a *successful* return here is only "the frame went out": the failure
     /// callback is what says whether it landed. A throw means it never reached the radio, so no
     /// callback is coming and this router must park the message itself.
@@ -1162,7 +1162,7 @@ public actor PopopxMessageRouter {
         return .meshSent(peerMeshPublicKeyHex: peerMeshPublicKeyHex)
     }
 
-    /// 纯离线兜底, or the 未绑定陌生人 refusal when there is no public card behind the peer at all.
+    /// Pure-offline fallback, or the unbound-stranger refusal when there is no public card behind the peer at all.
     private func parkOrRefuse(
         messageId: String,
         binding: Binding,

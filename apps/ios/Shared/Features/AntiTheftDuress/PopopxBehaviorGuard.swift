@@ -2,100 +2,100 @@
 //  PopopxBehaviorGuard.swift
 //  POPOPX (iOS)
 //
-//  【非本人操作 · 模块二】机主的握持姿态 + 机主的触摸手感 = 两条记忆；
-//  当这两条记忆同时被打破，就把手机锁起来。
+//  [Not-the-owner operation · module 2] the owner's grip posture + the owner's touch feel = two memories;
+//  when these two memories are broken at the same time, the phone is locked.
 //
-//  判据两条，**必须同时成立**才拉锁：
-//  1. 握持倾角相对 EMA 基线**持续**偏移超过门限（默认 45°，设置页可调，存
+//  Two criteria, they **must both hold** before the lock is raised:
+//  1. The grip tilt deviates **persistently** past the threshold relative to the EMA baseline (default 45°, adjustable on the settings page, stored
 //     `DEFAULT_ANTI_THEFT_ANGLE_LIMIT`）；
-//  2. 同期出现高频不规则触摸（`UITouch.majorRadius` 相对机主本人异常偏大，或连续打在屏幕边缘）。
-//  后果只有一个：`PopopxAppLockState.shared.lock(reason: .behavior)`
-//  （`PopopxAntiTheftMotionGuard.swift:99-100` 把这个 case 的用途写成了"模块二"，本文件是它唯一的作者）。
+//  2. In the same period high-frequency irregular touching appears (`UITouch.majorRadius` abnormally large versus the owner himself, or repeated hits on the screen edge).
+//  The consequence is only one: `PopopxAppLockState.shared.lock(reason: .behavior)`
+//  (`PopopxAntiTheftMotionGuard.swift:99-100` writes this case's purpose as "module 2", and this file is its only author).
 //
-//  ### 误判代价的边界：只能是"重新认证一次"，不能是"丢数据"
-//  模块一头注（`PopopxAntiTheftMotionGuard.swift:13-19`）已经把分工写死：传感器判据只锁、绝不擦。
-//  本文件严格遵守这条边界，并且**在调用图上根本不指向擦除**——全文件对模块三只有一句读调用
+//  ### The boundary of the misjudgement cost: it can only be "authenticate once more", never "lose data"
+//  Module 1's header note (`PopopxAntiTheftMotionGuard.swift:13-19`) already fixes the division of labour: sensor criteria only lock, they never wipe.
+//  This file keeps strictly to that boundary and **points at wiping nowhere in the call graph** — across the whole file there is a single read call to module 3,
 //  （`PopopxDuressAuthManager.shared.requestBiometricUnlock`，`PopopxDuressAuthManager.swift:2070`），
-//  那条路自己也只通向"解锁"（成功时它已经 `unlock()`，见 `PopopxDuressAuthManager.swift:2088-2092`）。
-//  行为判据比拽落/跌落更容易误报：拽落的误报需要一次 3g 冲击，而"姿势不对 + 手滑乱点"
-//  在地铁上每天都能凑齐。所以本模块宁可把自己写得"只锁"——一次锁屏的代价是两秒钟，
-//  一次误擦的代价是整个人的聊天记录，两者根本不在同一个数量级上，不值得交换。
+//  and that road itself only leads to "unlock" (on success it has already called `unlock()`, see `PopopxDuressAuthManager.swift:2088-2092`).
+//  Behaviour criteria are far easier to misreport than grab-and-drop/fall: a false grab-and-drop needs a 3g shock, whereas "wrong posture + slipping random taps"
+//  come together every day on the metro. So this module prefers to write itself as "lock only" — one lock screen costs two seconds,
+//  a wrong wipe costs a whole person's chat history; the two are not in the same order of magnitude at all and are not worth trading.
 //
-//  ### EMA 基线为什么是 α=0.004（≈8.7 秒半衰期），而不是别的窗口
-//  20Hz 沿用模块一同一档采样率（`PopopxMotionCriteria.sampleRateHz`，:328）。一阶低通的半衰期
-//  是 `ln2 / α` 帧：α=0.004 → 173 帧 ≈ 8.7 秒。这个数是被两头夹出来的：
-//  - 必须**明显慢于一次姿势变化**（人从坐到躺是 1–3 秒的事，约 20–60 帧）。若 α 取 0.05，
-//    半衰期不到 0.7 秒，躺下的过程本身就把基线拖着走，偏差永远长不起来——判据自己吃掉自己。
-//  - 必须**明显快于机主一天的习惯漂移**（手臂酸了慢慢换姿势，分钟级）。若 α 取 0.0002，
-//    半衰期三分钟，机主自己会在半小时内被锁两次。
-//  - 真正让这两头不矛盾的是**冻结条件**：偏差一旦超过 `0.6 × 门限`，基线停止学习
-//    （`baselineFreezeFactor`）。小偷举着手机翻找的那几十秒里基线纹丝不动，
-//    所以他永远学不成"新的机主"；而机主慢慢塌下去的那几度始终在冻结线以下，照样被学进去。
+//  ### Why the EMA baseline is α=0.004 (≈8.7 second half-life), and not some other window
+//  20Hz reuses module 1's same sampling-rate tier (`PopopxMotionCriteria.sampleRateHz`, :328). The half-life of a first-order low-pass
+//  is `ln2 / α` frames: α=0.004 → 173 frames ≈ 8.7 seconds. This number is squeezed out from both ends:
+//  - it must be **clearly slower than a single posture change** (a person going from sitting to lying takes 1–3 seconds, about 20–60 frames). With α=0.05
+//    the half-life is under 0.7 seconds, lying down itself drags the baseline along, and the deviation never grows — the criterion eats itself.
+//  - it must be **clearly faster than the owner's habit drift over a whole day** (an achy arm slowly changing posture, minutes). With α=0.0002
+//    the half-life is three minutes, and the owner would be locked out twice within half an hour.
+//  - what really keeps the two ends from clashing is the **freeze condition**: once the deviation exceeds `0.6 × threshold` the baseline stops learning
+//    (`baselineFreezeFactor`). During the tens of seconds a thief holds the phone up rummaging through things, the baseline does not move at all,
+//    so he can never be learned as the "new owner"; while the few degrees the owner slowly sinks by stay below the freeze line and are learned all the same.
 //
-//  ### 为什么 45° 必须被"持续 6 秒"约束，光有角度一定会误锁
-//  单看瞬时角度，横屏看视频、把手机竖起来贴耳朵、躺床上举着天花板，全都能在 1–2 秒内做出
-//  >45° 的偏移，而这些都是最普通的用法——只用角度门限等于做一个"躺着就不能用"的功能。
-//  加上"连续超过门限 ≥6 秒"之后：路过一次的姿势变化不够长；把手机抢过来翻看必然维持新姿势
-//  几十秒以上，一定够。再叠加"触摸必须同时不正常"这一条（AND，不是 OR），
-//  留下的误报窗口只有"用奇怪姿势稳定地盲打 6 秒以上"——那本来也是该问一次的情形。
-//  反过来，角度够久但触摸正常，只升到 `.watching`（`evaluate` 里明写了这一档），不拦任何人。
+//  ### Why 45° must be constrained by "lasting 6 seconds": with angle alone it will certainly mis-lock
+//  Looking only at the instantaneous angle, watching a video in landscape, raising the phone upright to the ear, lying in bed pointing at the ceiling, all can produce
+//  a deviation of >45° within 1–2 seconds, and these are the most ordinary usages — an angle threshold alone makes a feature that "cannot be used while lying down".
+//  Add "above the threshold for ≥6 seconds continuously" and: one passing posture change is not long enough; snatching the phone and browsing it necessarily holds the new posture
+//  for tens of seconds or more, which is certainly enough. Stack on the further rule "the touching must be abnormal at the same time" (AND, not OR),
+//  and the only false-positive window left is "blindly typing steadily for over 6 seconds in a strange posture" — that was already a case worth asking about once.
+//  Conversely, an angle that lasts long enough but normal touching only rises to `.watching` (`evaluate` spells that tier out explicitly), and stops nobody.
 //
-//  ### 45 秒"稳定新姿势"自愈，以及它换来的代价（写清楚，不藏）
-//  偏差很大但姿态本身很稳、且这 2 秒内没有任何异常触摸，连续 45 秒后把基线搬到当前姿态。
-//  没有这一条，横屏看完一段视频之后，任何一次边缘误触都会立刻凑齐两个条件把人锁住——
-//  那种功能用户会关掉，而关掉的功能安全性是零。代价要坦白：一个肯把手机在桌上稳放 45 秒
-//  再动手的人，可以让基线跟着他的姿势走。但他跟着的只是**姿态**，触摸判据那条闸门一点没松，
-//  而真正决定要不要拦人的是那条闸门；`authorizeSensitiveAction` 也只看 `suspicion`，
-//  不看"基线是不是被谁搬过"。
+//  ### The 45-second "stable new posture" self-heal, and the price paid for it (stated plainly, not hidden)
+//  Deviation is large but the posture itself is very steady, and there is no abnormal touch within these 2 seconds: after 45 continuous seconds the baseline moves to the current posture.
+//  Without this rule, after finishing a video in landscape any single edge mistouch would immediately complete both criteria and lock the person out —
+//  users switch that kind of feature off, and a switched-off feature has zero security. The cost must be admitted: someone willing to hold the phone steady on the table for 45 seconds
+//  before acting can make the baseline follow his posture. But what he follows is only the **posture**; the gate of the touch criterion has not loosened in the least,
+//  and it is that gate which really decides whether to stop a person; `authorizeSensitiveAction` also looks only at `suspicion`,
+//  not at "whether someone moved the baseline".
 //
-//  ### 为什么用 `userAcceleration` 而不是原始加速度（和模块一恰好相反）
-//  模块一量失重，必须用**含重力**的原始读数（`PopopxAntiTheftMotionGuard.swift:30-32` 解释了原因）。
-//  本模块量"晃动"，要的是**减掉重力**的那一份：手机平放不动时原始合模长≈1g
-//  （字段语义见 `PopopxAntiTheftMotionGuard.swift:299`），用原始值就会把"静止"读成"一直在晃"，判据反过来。
-//  也正因为字段含义相反，这里**不复用** `PopopxMotionSample`：把 `userAcceleration` 塞进一个
-//  文档写明"含重力"的 `g` 字段里，下一个读代码的人会按 1g 静置去理解它，那是个埋好的坑。
-//  姿态角本身用 `gravity` 分量算（不含离心力，比 `attitude` 更稳，也不受航向漂移影响）。
+//  ### Why `userAcceleration` is used instead of raw acceleration (exactly the opposite of module 1)
+//  Module 1 measures weightlessness, so it must use raw readings **including gravity** (`PopopxAntiTheftMotionGuard.swift:30-32` explains the reason).
+//  This module measures "shaking", and wants the part **with gravity subtracted**: with the phone lying flat and unmoving the raw resultant magnitude is ≈1g
+//  (for the field semantics see `PopopxAntiTheftMotionGuard.swift:299`), so raw values would read "at rest" as "shaking all the time" and invert the criterion.
+//  And precisely because the field meanings are opposite, `PopopxMotionSample` is **not reused** here: stuffing `userAcceleration` into a
+//  `g` field whose documentation says "including gravity" means the next person to read the code understands it as standing still at 1g, which is a planted trap.
+//  The posture angles themselves are computed from the `gravity` component (no centrifugal force, steadier than `attitude`, and unaffected by heading drift).
 //
-//  ### 为什么另起一台 `CMMotionManager`
-//  模块一那台（:531）已经占着 accelerometer + gyro 两路，而且它的 start/stop 跟着"锁定"走，
-//  本文件的 start/stop 跟着"前台 + 锁定"走，时机不同。两件事塞进同一台机器上只会互相打断，
-//  还要替对方操心副作用范围。两台实例各自 20Hz，合计仍远低于系统的功耗上限。
+//  ### Why a separate `CMMotionManager` is started
+//  Module 1's instance (:531) already occupies the accelerometer + gyro channels, and its start/stop follows "locked",
+//  while this file's start/stop follows "foreground + locked", a different moment. Cramming the two into one instance would only interrupt each other,
+//  and each would have to worry about the other's side-effect scope. Two instances at 20Hz each still sum to far below the system's power ceiling.
 //
-//  ### 为什么用 1Hz 心跳读锁状态，而不是让状态机叫我
-//  `PopopxAppLockState` 是 `@Observable` 的，跨对象观察它要手写 `withObservationTracking` 递归
-//  （等于在传感器类里塞一套 SwiftUI 的机制，而且重入时机不可控）。模块一走的是另一条路：
-//  `lock`/`unlock` 里显式调 `PopopxAntiTheftMotionGuard.shared.lockedDidChange()`
-//  （`PopopxAntiTheftMotionGuard.swift:175-177`、:187）。本模块同样需要"解锁沿"——那是重建
-//  基线的唯一时机——但挂进那两个方法要改模块一，越界了。所以这里改成 1Hz 自轮询：
-//  读一个 Bool 的成本低于一次触觉反馈，代价是解锁后最多 1 秒才开始重学，可以接受。
+//  ### Why a 1Hz heartbeat reads the lock state instead of the state machine calling us
+//  `PopopxAppLockState` is `@Observable`, and observing it across objects means hand-writing recursive `withObservationTracking`
+//  (which is stuffing a whole SwiftUI mechanism into a sensor class, and the re-entry timing is uncontrolled). Module 1 takes another route:
+//  `lock`/`unlock` explicitly call `PopopxAntiTheftMotionGuard.shared.lockedDidChange()`
+//  (`PopopxAntiTheftMotionGuard.swift:175-177`, :187). This module also needs the "unlock edge" — that is the only moment to rebuild
+//  the baseline — but hooking into those two methods would mean changing module 1, which is out of bounds. So this becomes 1Hz self-polling:
+//  reading a Bool costs less than one haptic feedback, and the price is at most 1 second after unlocking before relearning begins, which is acceptable.
 //
-//  ### `.unavailable` 一律按"不放行"
-//  上游的 `authorize()` 把 `.unavailable` 直接当认证成功（`LocalAuthenticationUtils.swift:24`），
-//  那是为"设备解锁便利性"写的语义，本模块的在场核验不许继承它：生物识别不可用、被关掉、
-//  或者已连续失败两次降级（`PopopxDuressAuthManager.swift:2073-2075`）时，一律 `completion(false)`
-//  并且拉一次 `.manual` 锁（`PopopxAntiTheftMotionGuard.swift:105-106` 把"模块二的强制重认证"
-//  明确划给了这个 case），让人从遮罩的键盘走——降级方向只能是更强的证明。
-//  同理也不借用 `authenticate(reason:)`：它的 `.passcode` 分支把请求挂到
-//  `ChatModel.shared.laRequest`（:47），那是"谁能进 app"的门，不是"此刻拿手机的是不是本人"的门。
+//  ### `.unavailable` is always treated as "do not release"
+//  The upstream `authorize()` treats `.unavailable` directly as authentication success (`LocalAuthenticationUtils.swift:24`),
+//  but those are semantics written for "device unlock convenience"; this module's presence check must not inherit them: when biometrics are unavailable, are turned off,
+//  or have downgraded after two consecutive failures (`PopopxDuressAuthManager.swift:2073-2075`), always `completion(false)`
+//  and raise one `.manual` lock (`PopopxAntiTheftMotionGuard.swift:105-106` explicitly assigns "module 2's forced re-authentication"
+//  to this case), so the person goes through the overlay's keyboard — the downgrade direction can only be a stronger proof.
+//  For the same reason `authenticate(reason:)` is not borrowed either: its `.passcode` branch hangs the request on
+//  `ChatModel.shared.laRequest` (:47), which is the door for "who may enter the app", not the door for "is the one holding the phone right now the owner".
 //
-//  ### 没有预览
-//  本文件刻意不放 `#Preview` / `PreviewProvider`：新加预览会被 CI 的快照比对判失败，这是决定，不是遗漏。
+//  ### No previews
+//  This file deliberately carries no `#Preview` / `PreviewProvider`: a newly added preview would be judged a failure by CI's snapshot comparison, that is a decision, not an omission.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. The red line forbids scripts from modifying project.pbxproj.
 //
 
 import SwiftUI
 import UIKit
 import CoreMotion
 
-// MARK: - 怀疑度
+// MARK: - Suspicion level
 
-/// 本模块对"现在拿手机的是不是机主"的唯一结论。三段而不是一个 0–1 的分：
-/// 分段器、徽章、宿主的门都要一个能一眼读懂的说法，而连续分数最后一定会被
-/// 谁随手 `> 0.5` 这样切掉，切在哪儿还没人负责。
+/// This module's single conclusion about "is the person holding the phone right now the owner". Three tiers rather than a 0–1 score:
+/// the segmented control, the badge and the host's gate all want a wording that can be read at a glance, and a continuous score will in the end
+/// be cut away by someone casually with something like `> 0.5`, with nobody responsible for where the cut sits.
 ///
-/// `label` 短到 2 个汉字是给 `PopopxSegmentedControl` 用的——那里只有 `.lineLimit(1)`
-/// （`PopopxControls.swift:589`），长文案在小屏上会被省略号截成半句。
+/// `label` being as short as 2 Chinese characters is for `PopopxSegmentedControl` — that place only has `.lineLimit(1)`
+/// (`PopopxControls.swift:589`), and long copy on a small screen gets cut into half a sentence by the ellipsis.
 enum PopopxSuspicion: String, CaseIterable, Hashable, Sendable {
     case calm
     case watching
@@ -117,8 +117,8 @@ enum PopopxSuspicion: String, CaseIterable, Hashable, Sendable {
         }
     }
 
-    /// 只在本文件内部用来"取更严重的那一个"。不对外：对外暴露分数排序只会引来
-    /// `rank >= 1` 这种绕过枚举的写法。
+    /// Used only inside this file to "take the more severe one". Not exposed: publishing a score ordering only invites
+    /// writes like `rank >= 1` that bypass the enum.
     private var rank: Int {
         switch self {
         case .calm: 0
@@ -132,16 +132,16 @@ enum PopopxSuspicion: String, CaseIterable, Hashable, Sendable {
     }
 }
 
-// MARK: - 姿态读数
+// MARK: - Posture reading
 
-/// 握持姿态的两个分量，单位：度。
+/// The two components of the grip posture, unit: degrees.
 ///
-/// 本模块从不解释"绝对角度是多少度"，只量**与自己的基线差了多少**：CoreMotion 各分量在
-/// 不同机型、不同 `CMAttitudeReferenceFrame` 下的正负号差异，因此不会传染到判据上。
+/// This module never interprets "what the absolute angle is in degrees", it only measures **how far it differs from its own baseline**: the sign differences of CoreMotion's components
+/// across device models and across `CMAttitudeReferenceFrame` values therefore never infect the criteria.
 struct PopopxAttitude: Hashable, Sendable {
-    /// 绕 x 轴：前后仰。
+    /// Around the x axis: pitching forward and back.
     var pitchDegrees: Double
-    /// 绕 y 轴：左右歪。
+    /// Around the y axis: leaning left and right.
     var rollDegrees: Double
 
     static let zero = PopopxAttitude(pitchDegrees: 0, rollDegrees: 0)
@@ -158,17 +158,17 @@ struct PopopxAttitude: Hashable, Sendable {
         )
     }
 
-    /// 与基线的偏差，度。两个分量各自绕回 (-180°, 180°] 再取欧氏长度：
-    /// 握持是二维量，前后 32° + 左右 32° 合起来就是 45°，这比"任一分量超 45"更贴人的直觉，
-    /// 也不会被单一分量的高频抖动带偏。
+    /// The deviation from the baseline, in degrees. Each component is wrapped back into (-180°, 180°] and then the Euclidean length is taken:
+    /// gripping is a two-dimensional quantity, 32° front-back + 32° left-right together make 45°, which fits human intuition better than "any single component over 45",
+    /// and it is not led astray by high-frequency jitter of a single component.
     func deviationDegrees(from other: PopopxAttitude) -> Double {
         let pitch = Self.wrappedDegrees(pitchDegrees - other.pitchDegrees)
         let roll = Self.wrappedDegrees(rollDegrees - other.rollDegrees)
         return sqrt(pitch * pitch + roll * roll)
     }
 
-    /// 把角度差折进 (-180, 180]。不做这一步的话，从 +179° 到 -179° 会算出 358° 的"巨大变化"，
-    /// 而它其实只转了 2°。
+    /// Fold the angle difference into (-180, 180]. Without this step, going from +179° to -179° computes as a "huge change" of 358°,
+    /// while it actually rotated only 2°.
     static func wrappedDegrees(_ degrees: Double) -> Double {
         guard degrees.isFinite else { return 0 }
         var value = degrees.truncatingRemainder(dividingBy: 360)
@@ -178,97 +178,97 @@ struct PopopxAttitude: Hashable, Sendable {
     }
 }
 
-// MARK: - 一帧姿态偏差（内部诊断样本）
+// MARK: - One frame of posture deviation (internal diagnostic sample)
 
-/// 只住在本文件里：给"持续了多少秒"提供可以倒着数的窗口。
+/// Lives only in this file: gives "how many seconds it lasted" a window that can be counted backwards.
 private struct PopopxAngleSample {
     let at: Date
     let deviationDegrees: Double
 }
 
-// MARK: - 判据本体（非隔离、无副作用：真实流、演练、将来的单测共用同一段代码）
+// MARK: - The criteria themselves (nonisolated, side-effect-free: the live stream, the drill and future unit tests share the same code)
 
-/// 常量和判定都放这里，理由与模块一相同（`PopopxAntiTheftMotionGuard.swift:37-40`）：
-/// `@MainActor` 类的 `static let` 是主 actor 隔离的，非隔离的纯函数与演练入口引用不到。
+/// Constants and decisions all live here, for the same reason as module 1 (`PopopxAntiTheftMotionGuard.swift:37-40`):
+/// `static let` on a `@MainActor` type is main-actor isolated, so nonisolated pure functions and the drill entry point cannot reference them.
 enum PopopxBehaviorCriteria {
-    // MARK: 门限
+    // MARK: Thresholds
 
-    /// 默认 45°。写在这里而不是散在设置页里，是为了让"读不到键"有一个唯一答案。
+    /// Default 45°. Written here rather than scattered through the settings page so that "the key could not be read" has one single answer.
     static let defaultAngleLimitDegrees: Double = 45
-    /// 滑块区间。低于 15° 时正常走路摆臂就能触发；高于 75° 时手机已被抢到手反向握着也不报。
+    /// The slider range. Below 15° the arm swing of normal walking can trigger it; above 75° nothing is reported even when the phone has been grabbed and is held reversed.
     static let minimumAngleLimitDegrees: Double = 15
     static let maximumAngleLimitDegrees: Double = 75
 
-    /// 偏移要连续多久才算"疑似"。见头注《为什么 45° 必须被"持续 6 秒"约束》。
+    /// How long the deviation must persist to count as "suspected". See the header note "Why 45° must be constrained by lasting 6 seconds".
     static let minimumSustainedSeconds: Double = 6
 
-    /// 迟滞：回落但仍在此比例之上时不算断开，手一抖就把计时归零的话，
-    /// 6 秒的持续条件永远凑不齐——那正好是本判据唯一不能犯的错（永不触发）。
+    /// Hysteresis: a fall-back that is still above this ratio does not count as a break; if one tremble of the hand reset the timer to zero,
+    /// the 6-second persistence condition would never be assembled — which is exactly the one error this criterion must not commit (never triggering).
     static let releaseFactor: Double = 0.85
 
-    /// 基线冻结线：偏差超过 `门限 × 此比例` 后不再学习（头注《EMA 基线》第三条）。
+    /// The baseline freeze line: no more learning once the deviation exceeds `threshold × this ratio` (header note "EMA baseline", third item).
     static let baselineFreezeFactor: Double = 0.6
 
-    /// 升到 `.watching` 的"接近"比例。低于门限也先攒着证据，不给用户看任何东西。
+    /// The "approach" ratio for rising to `.watching`. Below the threshold evidence is still banked, and nothing is shown to the user.
     static let approachingFactor: Double = 0.6
 
-    // MARK: 基线学习
+    // MARK: Baseline learning
 
-    /// 姿态 EMA 系数。半衰期 = ln2 / α 帧 ≈ 173 帧 ≈ 8.7 秒（推导见头注）。
+    /// The posture EMA coefficient. Half-life = ln2 / α frames ≈ 173 frames ≈ 8.7 seconds (derivation in the header note).
     static let baselineAlpha: Double = 0.004
 
-    /// 触摸半径 EMA 系数。触摸是Hz 级的人类事件，取 0.25 表示"大约四次之前的手感还有一半权重"。
+    /// The touch-radius EMA coefficient. Touching is a Hz-scale human event, and 0.25 means "the feel from about four events ago still carries half the weight".
     static let radiusAlpha: Double = 0.25
 
-    /// 自愈：偏差大、姿态稳、且这 2 秒内零异常触摸，连续这么多秒后把基线搬到当前姿态。
+    /// Self-heal: the deviation is large, the posture is steady, and there are zero abnormal touches within these 2 seconds; after this many continuous seconds the baseline moves to the current posture.
     static let relearnHoldSeconds: Double = 45
-    /// "姿态稳"的判据：相邻两帧的偏差不再变化超过这个数。
+    /// The criterion for "posture steady": the deviation between adjacent frames no longer changes by more than this number.
     static let relearnDriftDegrees: Double = 2.0
 
-    // MARK: 触摸动力学
+    // MARK: Touch dynamics
 
-    /// 不规则触摸的计数窗口。2 秒内 4 次 = 2Hz 的乱点，人手正常翻聊天不会这样。
+    /// The counting window for irregular touching. 4 times in 2 seconds = 2Hz of erratic tapping; a human hand browsing chats normally does not do this.
     static let irregularTouchWindow: Double = 2
     static let minimumIrregularTouches: Int = 4
-    /// 相对判据：比机主自己的指腹半径大这么多倍就算异常（戴手套、湿手会整体变大，所以要有基线）。
+    /// Relative criterion: being this many times larger than the owner's own fingertip-pulp radius counts as abnormal (gloves and wet hands enlarge everything, hence the baseline).
     static let radiusAnomalyFactor: Double = 1.6
-    /// 绝对兜底：掌根、大腿、口袋内壁的读数能到 15pt 以上。纯相对判据在"基线本身被大半径污染"
-    /// 时会失效，所以留一条不看基线的硬线。
+    /// Absolute fallback: palm heel, thigh and pocket-lining readings can reach above 15pt. A purely relative criterion, when "the baseline itself is polluted by large radii",
+    /// stops working, so one hard line that does not look at the baseline is kept.
     static let minimumRadiusAnomalyPoints: Double = 9.5
-    /// 超过这个值的东西不当手指，不参与学习（耳机线、纸巾、屏幕贴膜翘边）。
+    /// Above this value a thing is not treated as a finger and takes no part in learning (earphone cables, tissues, a lifting screen-protector edge).
     static let maximumPlausibleRadiusPoints: Double = 20
 
-    // MARK: 晃动与离手（只提级到"留意"，永远不单独拉锁）
+    // MARK: Shaking and hands-off (only escalate to "watching", never raise a lock on their own)
 
-    /// `userAcceleration` 合模长超过此值算一次剧烈晃动。走路约 0.2g、跑步约 0.6g、
-    /// 甩手拽包能到 2g，1.6 落在"有意晃动"这一侧。
+    /// A `userAcceleration` resultant magnitude above this value counts as one violent shake. Walking is about 0.2g, running about 0.6g,
+    /// a jerking arm snatching a bag can reach 2g, so 1.6 sits on the "deliberate shaking" side.
     static let shakeG: Double = 1.6
-    /// 合模长小于此值算静止（含手机平放桌面）。
+    /// A resultant magnitude below this value counts as at rest (including the phone lying flat on a table).
     static let stillG: Double = 0.08
-    /// 静止之后重新超过此值 = 又被拿起来，落手事件在这一刻成立。
+    /// After rest, exceeding this value again = it has been picked up again; the hands-off event is established at that moment.
     static let resumeG: Double = 0.35
-    /// 静止且无人触碰屏幕多久算"短暂离手"。
+    /// How long at rest with nobody touching the screen counts as a "brief hands-off".
     static let handOffStillSeconds: Double = 4
-    /// 事件之后多长时间内至少保持"留意"。25 秒 ≈ 抢手机、解屏、开始翻这一串的合理时长。
+    /// How long after an event at least "watching" is kept. 25 seconds ≈ the reasonable length of grabbing the phone, unlocking the screen and starting to browse.
     static let armHoldSeconds: Double = 25
 
-    // MARK: 缓冲
+    // MARK: Buffer
 
-    /// 倒着数持续时长的窗口。比 `minimumSustainedSeconds` 宽得多，但内存封顶（20Hz × 13 秒）。
+    /// The window the sustained duration is counted backwards through. Much wider than `minimumSustainedSeconds`, but memory-capped (20Hz × 13 seconds).
     static let trendSeconds: Double = 13
     static let maxTrendSamples: Int = 260
 
-    // MARK: 纯函数
+    // MARK: Pure functions
 
-    /// 把任意输入折进合法区间。NaN / 负数 / 被改坏的存档都从这一条路变成可用值，
-    /// 而不是让 0 门限把功能变成"一直锁"。
+    /// Fold any input into the legal range. NaN / negative numbers / a corrupted archive all become usable values through this one path,
+    /// rather than letting a 0 threshold turn the feature into "locking all the time".
     static func sanitize(_ degrees: Double) -> Double {
         guard degrees.isFinite else { return defaultAngleLimitDegrees }
         return min(max(degrees, minimumAngleLimitDegrees), maximumAngleLimitDegrees)
     }
 
-    /// 三轴合成模长。写成 `Double(...)` 是为了不依赖 SDK 把 CoreMotion 的字段声明成
-    /// `Double` 还是 `Float`——两种情况下这个泛型初始化都存在。
+    /// The three-axis combined magnitude. Written as `Double(...)` so as not to depend on the SDK declaring CoreMotion's fields as
+    /// `Double` or `Float` — this generic initialiser exists in both cases.
     static func magnitude(_ acceleration: CMAcceleration) -> Double {
         let x = Double(acceleration.x)
         let y = Double(acceleration.y)
@@ -276,12 +276,12 @@ enum PopopxBehaviorCriteria {
         return sqrt(x * x + y * y + z * z)
     }
 
-    /// 从最新一帧往回数"倾角连续超过门限"的秒数。
+    /// Counts the seconds of "the tilt stayed continuously above the threshold" backwards from the newest frame.
     ///
-    /// 这是持续时长的**唯一**算法：真实流和演练共用它，所以不会出现"演练里会触发、
-    /// 真机上不触发"。它只认均匀采样（20Hz，见 `PopopxMotionCriteria.sampleRateHz`），
-    /// 调用方保证缓冲区里是连续帧——停采时缓冲区会被清空。
-    /// 另外，从数组倒着数而不是自己累加，意味着"停帧"只会让时长不变或回落，绝不会凭空上涨。
+    /// This is the **only** algorithm for the sustained duration: the live stream and the drill share it, so there is no "it triggers in the drill,
+    /// but not on a real device". It only accepts uniform sampling (20Hz, see `PopopxMotionCriteria.sampleRateHz`),
+    /// and the caller guarantees the buffer holds consecutive frames — the buffer is emptied when sampling stops.
+    /// Also, counting backwards through the array instead of accumulating on our own means a "frame gap" only leaves the duration unchanged or lowers it, never lets it climb out of thin air.
     static func trailingSustainedSeconds(
         deviations: [Double],
         sampleInterval: Double,
@@ -298,21 +298,21 @@ enum PopopxBehaviorCriteria {
                 cursor -= 1
                 continue
             }
-            // 落在迟滞带里：不算断，也不计入时长。
+            // It lands in the hysteresis band: not counted as a break, and not added to the duration either.
             if value > release {
                 cursor -= 1
                 continue
             }
-            // 真的回落了（NaN 也走这条，坏样本只会让判据变保守）。
+            // It really fell back (NaN takes this road too; a bad sample only makes the criterion more conservative).
             break
         }
         return Double(overLimitSamples) * sampleInterval
     }
 
-    /// 判定本体。三条输入全是标量，所以可以拿一段数字直接断言结论，零副作用。
+    /// The decision itself. All three inputs are scalars, so a handful of numbers can assert the conclusion directly, with zero side effects.
     ///
-    /// 单调性说明（给演练页解释结果用）：抬高 `angleLimit` 只会让结论变轻，
-    /// 加长 `sustainedSeconds` 或 `irregularTouches` 只会让结论变重，不存在第三条路。
+    /// Monotonicity note (for explaining results on the drill page): raising `angleLimit` only makes the conclusion lighter,
+    /// lengthening `sustainedSeconds` or `irregularTouches` only makes it heavier; there is no third road.
     static func evaluate(
         deviationDegrees: Double,
         sustainedSeconds: Double,
@@ -320,7 +320,7 @@ enum PopopxBehaviorCriteria {
         angleLimit: Double
     ) -> PopopxSuspicion {
         guard deviationDegrees.isFinite, deviationDegrees > 0 else {
-            // 没有角度证据。光有乱触最多"留意"：小孩玩游戏、口袋误触都不该被当成抢夺者。
+            // No angle evidence. Erratic touching alone yields at most "watching": a child playing a game or a pocket mistouch should not be treated as a snatcher.
             return irregularTouches >= minimumIrregularTouches ? .watching : .calm
         }
         let limit = sanitize(angleLimit)
@@ -328,33 +328,33 @@ enum PopopxBehaviorCriteria {
         let over = deviationDegrees > limit
         let sustained = over && sustainedSeconds >= minimumSustainedSeconds
         if sustained, noisy { return .suspicious }
-        // 偏得够久但触摸正常：大概率是机主自己换了姿势，只观察，不拦人。
+        // Deviating long enough but touching normally: most likely the owner changed posture on their own, so only observe, do not stop anyone.
         if sustained { return .watching }
         if over || noisy || deviationDegrees >= limit * approachingFactor { return .watching }
         return .calm
     }
 }
 
-// MARK: - 行为监护器
+// MARK: - The behaviour monitor
 
 @MainActor
 @Observable
 final class PopopxBehaviorGuard {
     static let shared = PopopxBehaviorGuard()
 
-    /// 命中后的冷却。与 `PopopxAntiTheftMotionGuard.swift:488` 同值，是为了让
-    /// "解锁之后 5 秒内不再拉锁"在全模块只有一口径。真正防"解锁—立刻又锁"的是
-    /// `updateSampling()` 里那次基线重建，这里只是第二道保险。
+    /// The cooldown after a hit. The same value as `PopopxAntiTheftMotionGuard.swift:488` so that
+    /// "no new lock within 5 seconds after unlocking" has one single reading across the modules. What really prevents "unlock — immediately locked again" is
+    /// that baseline rebuild inside `updateSampling()`; this here is only the second safety.
     static let triggerCooldown: TimeInterval = 5
 
-    // MARK: 对外状态
+    // MARK: Outward state
 
-    /// 行为判据总开关。默认关闭，口径同模块一的 `DEFAULT_ANTI_THEFT_ENABLED`
-    /// （`PopopxAntiTheftMotionGuard.swift:546`：读不到键就是 false）——
-    /// 不像 `instantLockOnBackground`（:553-555）默认开：那条没有误判成本，这条有。
+    /// The master switch of the behaviour criteria. Off by default, same reading as module 1's `DEFAULT_ANTI_THEFT_ENABLED`
+    /// (`PopopxAntiTheftMotionGuard.swift:546`: if the key cannot be read it is false) —
+    /// unlike `instantLockOnBackground` (:553-555) which is on by default: that one carries no misjudgement cost, this one does.
     ///
-    /// ⚠️ `didSet` 会把值写回 UserDefaults，所以自毁清扫必须"先拨开关、再删键"
-    /// （见 `PopopxDuressAuthManager.swift` 里的 `PopopxAntiTheftSwitches.eraseAllTraces()`，那里正是这么调本属性的）。
+    /// ⚠️ `didSet` writes the value back to UserDefaults, so the self-destruct sweep must "flip the switch first, then delete the keys"
+    /// (see `PopopxAntiTheftSwitches.eraseAllTraces()` in `PopopxDuressAuthManager.swift`, which touches this property in exactly that order).
     var enabled: Bool {
         didSet {
             guard oldValue != enabled else { return }
@@ -363,7 +363,7 @@ final class PopopxBehaviorGuard {
         }
     }
 
-    /// 设置页滑块的取值。越界输入会被夹回来（夹回来那一次重入 `didSet` 时两值相等，直接落盘）。
+    /// The value of the settings-page slider. Out-of-range input is clamped back (when the clamp re-enters `didSet` the two values are equal, so it goes straight to disk).
     var angleLimitDegrees: Double {
         didSet {
             let clamped = PopopxBehaviorCriteria.sanitize(angleLimitDegrees)
@@ -373,54 +373,54 @@ final class PopopxBehaviorGuard {
             }
             guard oldValue != clamped else { return }
             UserDefaults.standard.set(clamped, forKey: DEFAULT_ANTI_THEFT_ANGLE_LIMIT)
-            // 门限变了，之前那段"持续"是按旧尺子量的，不作数。
+            // The threshold changed, and the earlier stretch of "persistence" was measured with the old ruler, so it does not count.
             resetDeviationRun()
         }
     }
 
     private(set) var suspicion: PopopxSuspicion = .calm
     private(set) var isBaselineCaptured = false
-    /// 诊断读数：当前握持姿态 / 基线 / 两者之差。
+    /// Diagnostic readings: the current grip posture / the baseline / the difference between the two.
     private(set) var currentAngle = PopopxAttitude.zero
     private(set) var baselineAngle = PopopxAttitude.zero
     private(set) var deviationDegrees: Double = 0
-    /// 倾角已连续超过门限多久。0 表示"没在超"。
+    /// How long the tilt has been continuously above the threshold. 0 means "not above it".
     private(set) var sustainedDeviationSeconds: Double = 0
-    /// 当前 2 秒窗口里的不规则触摸数。
+    /// The number of irregular touches inside the current 2-second window.
     private(set) var irregularTouchCount: Int = 0
     private(set) var isRunning = false
-    /// 模拟器上 `isDeviceMotionAvailable == false`，设置页据此显示"本机不可用"，而不是假装在跑。
+    /// On the simulator `isDeviceMotionAvailable == false`, and the settings page shows "not available on this device" accordingly, instead of pretending to run.
     private(set) var motionAvailable = false
-    // 事件记录：模块二的两条辅助判据，只提级、不拉锁。
+    // Event records: module 2's two auxiliary criteria, escalation only, never a lock.
     private(set) var peakWobbleG: Double = 0
     private(set) var lastViolentShakeAt: Date?
     private(set) var lastHandOffAt: Date?
     private(set) var lastTriggerAt: Date?
 
-    // MARK: 内部
+    // MARK: Internal
 
     private let manager = CMMotionManager()
     private var trend: [PopopxAngleSample] = []
     private var irregularTouchMoments: [Date] = []
-    /// 机主自己的指腹半径 EMA。0 = 还没学过。
+    /// The owner's own fingertip-pulp radius EMA. 0 = not learned yet.
     private var typicalRadius: Double = 0
     private var previousDeviation: Double = 0
     private var settledSeconds: Double = 0
     private var stillRunSeconds: Double = 0
-    /// 已经静止够久、正在等"又被拿起来"这一动作来确认落手事件。
+    /// Already at rest long enough, waiting for the motion of "picked up again" to confirm the hands-off event.
     private var setDownPending = false
     private var lastTouchAt = Date()
     private var lastSampleAt: Date?
     private var samplingActive = false
-    /// 上一拍锁着没锁着。用来抓"由锁到不锁"那一沿——重建基线的唯一时机。
+    /// Whether the previous tick was locked. Used to catch the "locked to not locked" edge — the only moment to rebuild the baseline.
     private var wasLocked = false
-    /// 前台标志。`scenePhase` 是 SwiftUI 侧的量，这个类不是 View，
-    /// 所以用 `UIApplication.didBecomeActive/didEnterBackground` 两条通知实现同一条硬约束
-    /// （照 `PopopxAntiTheftMotionGuard.swift:691-742` 的写法）。
+    /// The foreground flag. `scenePhase` is a SwiftUI-side quantity, and this class is not a View,
+    /// so two notifications, `UIApplication.didBecomeActive/didEnterBackground`, implement the same hard constraint
+    /// (following the style of `PopopxAntiTheftMotionGuard.swift:691-742`).
     private var appIsActive = true
     private var heartbeat: Timer?
     private var observers: [NSObjectProtocol] = []
-    /// 一次只许有一个认证弹窗。叠两次 Face ID 不是"更保险"，是让宿主拿到两个互相矛盾的回调。
+    /// Only one authentication sheet at a time is allowed. Stacking two Face IDs is not "safer", it makes the host receive two contradictory callbacks.
     private var awaitingAuthorization = false
 
     private init() {
@@ -436,9 +436,9 @@ final class PopopxBehaviorGuard {
         motionAvailable = manager.isDeviceMotionAvailable
     }
 
-    // MARK: 生命周期
+    // MARK: Lifecycle
 
-    /// 由设置项决定开或停。幂等。
+    /// Whether to start or stop is decided by the setting. Idempotent.
     func sync() {
         if enabled { start() } else { stop() }
     }
@@ -453,12 +453,12 @@ final class PopopxBehaviorGuard {
         updateSampling()
     }
 
-    /// 停采 + 停表 + 摘通知。基线**不清**：退一次后台就该重新学握姿，
-    /// 等于这个功能在每个 app 切换之后都失效几十秒。
+    /// Stop sampling + stop the timer + remove the notifications. The baseline is **not** cleared: if one trip to the background meant relearning the grip posture,
+    /// that is the feature being out of action for tens of seconds after every app switch.
     ///
-    /// 锁状态本身不在这里改（模块一 :574-584 同理）：停表是因为不必再测，锁该继续锁。
+    /// The lock state itself is not changed here (module 1's :574-584 does the same): the timer stops because measuring is no longer needed, and the lock keeps locking.
     func stop() {
-        // 关掉之后不许留着一道"看不见"的门：宿主的敏感动作核验必须回到放行状态。
+        // Once switched off, no "invisible" gate may be left behind: the host's sensitive-action check must return to the releasing state.
         suspicion = .calm
         awaitingAuthorization = false
         guard isRunning else { return }
@@ -479,12 +479,12 @@ final class PopopxBehaviorGuard {
         isRunning = false
     }
 
-    /// 忘掉关于机主的全部记忆（握姿基线 + 指腹手感），从下一帧重新学。
+    /// Forget every memory about the owner (grip-posture baseline + fingertip feel) and relearn from the next frame.
     ///
-    /// 只允许在"本人刚刚证明过在场"的时刻调：设置页的按钮、解锁的那一沿、
-    /// `authorizeSensitiveAction` 成功的那一次。它把 `suspicion` 清零，所以如果有人
-    /// 在没被拦的情况下拿到手机，进设置页按这个键就能关掉判据——而进设置页正是被这道
-    /// 判据守着的高危动作，链条在这里是闭合的。
+    /// May only be called at moments when the person has just proved their presence: the settings-page button, the unlock edge,
+    /// the successful run of `authorizeSensitiveAction`. It zeroes `suspicion`, so if someone
+    /// got the phone without being stopped, entering settings and pressing this key would switch the criteria off — yet entering settings is itself the high-risk action guarded by these very
+    /// criteria, so the chain is closed here.
     func resetBaseline() {
         isBaselineCaptured = false
         baselineAngle = .zero
@@ -500,25 +500,25 @@ final class PopopxBehaviorGuard {
         suspicion = .calm
     }
 
-    // MARK: 触摸动力学入口
+    // MARK: Touch-dynamics entry point
 
-    /// `UITouch.majorRadius` 的喂入口。由 `PopopxTouchBeat`（模块一 :754——它在 `touchesBegan`
-    /// 里既喂 `noteInteraction()`（:771），也逐指算出边缘占比后转交本模块（:788））
-    /// 或宿主在自己的 `touchesBegan` 里调用。
+    /// The feed-in point for `UITouch.majorRadius`. Fed by `PopopxTouchBeat` (module 1 :754 — inside `touchesBegan`
+    /// it both feeds `noteInteraction()` (:771) and computes the edge share finger by finger before handing it to this module (:788))
+    /// or by the host, called from its own `touchesBegan`.
     ///
-    /// 本文件只消费参数，不改那个识别器：它的定位是"只观察、永不参与识别"，
-    /// 往里加识别逻辑会把两个模块的生死绑在一起。
+    /// This file only consumes the parameters and does not change that recogniser: its position is "observe only, never take part in recognition",
+    /// and putting recognition logic into it would tie the life and death of the two modules together.
     ///
     /// - Parameters:
-    ///   - majorRadius: 触点半径（点）。传 0 表示宿主拿不到这个值——此时只用边缘判据，
-    ///     绝不因为"半径异常"误判，缺数据只可能让判据变松、不可能变紧。
-    ///   - edge: 触点是否落在屏幕边缘带内（由宿主判定，本模块不知道视图尺寸）。
+    ///   - majorRadius: the contact radius (points). Passing 0 means the host cannot obtain this value — then only the edge criterion is used,
+    ///     never misjudging because of an "abnormal radius"; missing data can only loosen the criteria, never tighten them.
+    ///   - edge: whether the contact falls inside the screen's edge band (decided by the host, this module does not know the view size).
     func noteTouch(majorRadius: Double, edge: Bool) {
         guard enabled, isRunning, !PopopxAppLockState.shared.isLocked else { return }
         let now = Date()
         lastTouchAt = now
         let radius = majorRadius.isFinite ? max(0, majorRadius) : 0
-        // 学"这根手指多大"：只学落在合理区间内的读数，掌根/大腿不进基线。
+        // Learn "how big this finger is": only readings inside the reasonable range are learned, palm heel/thigh never enter the baseline.
         if radius > 0, radius <= PopopxBehaviorCriteria.maximumPlausibleRadiusPoints {
             if typicalRadius > 0 {
                 typicalRadius += PopopxBehaviorCriteria.radiusAlpha * (radius - typicalRadius)
@@ -538,15 +538,15 @@ final class PopopxBehaviorGuard {
         refreshSuspicion(now: now)
     }
 
-    // MARK: 高危动作在场核验门
+    // MARK: Presence-check gate for high-risk actions
 
-    /// 宿主在"进入设置页 / 导出密钥 / 查看绝密消息"之前调用。
+    /// Called by the host before "entering settings / exporting keys / viewing top-secret messages".
     ///
-    /// 只有 `.suspicious` 才拦；`.calm`、`.watching` 一律立刻放行——
-    /// 一道需要思考要不要调用的门，最后一定被跳过，所以它必须几乎不添麻烦。
-    /// `completion(true)` 只意味着"可以做了"，认证本身已经在这里做完（生物识别成功时
-    /// 模块二顺手解掉了锁，见 `PopopxDuressAuthManager.swift:2088-2092`）。
-    /// 返回 `false` 时宿主应当**什么都不做**：人已经落到遮罩上，会从键盘走一遍。
+    /// Only `.suspicious` is stopped; `.calm` and `.watching` are released immediately, every time —
+    /// a gate that requires thinking about whether to call it will in the end be skipped, so it must add almost no trouble.
+    /// `completion(true)` only means "you may proceed"; the authentication itself has already been done here (when biometrics succeed
+    /// module 2 unlocks along the way, see `PopopxDuressAuthManager.swift:2088-2092`).
+    /// When `false` is returned the host should **do nothing at all**: the person has already landed on the overlay and will go through the keyboard.
     func authorizeSensitiveAction(
         reason: String,
         completion: @escaping @MainActor (Bool) -> Void
@@ -556,15 +556,15 @@ final class PopopxBehaviorGuard {
             return
         }
         let state = PopopxAppLockState.shared
-        // 已经锁着、或正在静默自毁：不要再叠一层认证。遮罩才是那道门，
-        // 而 `duressSilentFlow` 期间任何额外弹窗都是当着胁迫者面喊"这密码不对劲"。
+        // Already locked, or in the middle of a silent self-destruct: do not stack another layer of authentication. The overlay is that door,
+        // and during `duressSilentFlow` any extra sheet is shouting "this password is not right" right in front of the coercer.
         guard !state.isLocked, !state.duressSilentFlow, !awaitingAuthorization else {
             completion(false)
             return
         }
         let auth = PopopxDuressAuthManager.shared
-        // `.unavailable` 按不放行处理（见头注）。`prefersBiometricUnlock` 已经把
-        // "关了生物识别 / 连续失败降级 / 没配常规码"三种情况都折进去了
+        // `.unavailable` is handled as do-not-release (see the header note). `prefersBiometricUnlock` has already folded
+        // the three cases "biometrics switched off / downgrade after consecutive failures / no regular passcode set" into it
         // （`PopopxDuressAuthManager.swift:1159-1164`）。
         guard auth.prefersBiometricUnlock, auth.biometricsAvailable else {
             denyAndLock()
@@ -573,14 +573,14 @@ final class PopopxBehaviorGuard {
         }
         awaitingAuthorization = true
         auth.requestBiometricUnlock(reason: reason) { granted in
-            // 模块二两条 completion 路径都在主线程上：guard 那条在 `@MainActor` 方法里同步调，
-            // 另一条包在 `Task { @MainActor in }` 里（`PopopxDuressAuthManager.swift:2078-2094`）。
-            // `assumeIsolated` 只是把这件事告诉类型系统，不额外排队
-            // （同模块一 `PopopxAntiTheftMotionGuard.swift:603-605`、`AudioRecPlay.swift:53`）。
+            // Both of module 2's completion paths are on the main thread: the guard one is called synchronously inside a `@MainActor` method,
+            // the other is wrapped in `Task { @MainActor in }` (`PopopxDuressAuthManager.swift:2078-2094`).
+            // `assumeIsolated` only tells the type system about this and does not enqueue anything extra
+            // (same as module 1's `PopopxAntiTheftMotionGuard.swift:603-605`, `AudioRecPlay.swift:53`).
             MainActor.assumeIsolated {
                 self.awaitingAuthorization = false
                 if granted {
-                    // 本人已当面证明在场：怀疑清零，并按此刻的握姿重新学。
+                    // The person has proved their presence face to face: suspicion is zeroed, and learning restarts from the grip posture of this moment.
                     self.resetBaseline()
                 } else {
                     self.denyAndLock()
@@ -590,9 +590,9 @@ final class PopopxBehaviorGuard {
         }
     }
 
-    /// `authorizeSensitiveAction` 的 async 外形，给已经在 `async` 流程里的宿主用
-    /// （`exportArchive()`、绝密卡片那两处）。语义与回调版**逐字相同**，包括"只有
-    /// `.suspicious` 才拦"和"返回 false 时宿主什么都不做"——本方法只换外形，不加判断。
+    /// The async shape of `authorizeSensitiveAction`, for hosts already inside an `async` flow
+    /// (`exportArchive()` and the two top-secret card places). Its semantics are **word for word identical** to the callback version, including "only
+    /// `.suspicious` is stopped" and "when false is returned the host does nothing" — this method only changes the shape, it adds no judgement.
     func authorized(reason: String) async -> Bool {
         await withCheckedContinuation { (continuation: CheckedContinuation<Bool, Never>) in
             authorizeSensitiveAction(reason: reason) { granted in
@@ -601,8 +601,8 @@ final class PopopxBehaviorGuard {
         }
     }
 
-    /// 设置页"一键演练"的唯一入口。**只吃数字、只回结论**：不碰锁状态、不触发认证、
-    /// 不通向任何擦除。判据本体在 `PopopxBehaviorCriteria.evaluate`，与真实流同一段代码。
+    /// The only entry point for the settings page's "one-tap drill". **Takes only numbers, returns only a conclusion**: it does not touch lock state, does not trigger authentication,
+    /// and leads to no wiping whatsoever. The criteria themselves are in `PopopxBehaviorCriteria.evaluate`, the same code the live stream uses.
     nonisolated static func evaluate(
         deviationDegrees: Double,
         sustainedSeconds: Double,
@@ -617,10 +617,10 @@ final class PopopxBehaviorGuard {
         )
     }
 
-    // MARK: 采样开关
+    // MARK: Sampling switch
 
-    /// 唯一的采样闸门：总开关开着、在跑、传感器可用、在前台、没被锁——五件事同时成立才真的采。
-    /// 任一条件不成立立刻停采（零后台耗电，模块一 :35 的节能要求在这里同样成立）。
+    /// The single sampling gate: the master switch on, running, the sensor available, in the foreground, not locked — only when all five hold is anything really sampled.
+    /// If any condition fails, sampling stops at once (zero background power drain; module 1's :35 energy requirement holds here just the same).
     private func updateSampling() {
         let state = PopopxAppLockState.shared
         let shouldSample = enabled
@@ -635,8 +635,8 @@ final class PopopxBehaviorGuard {
             stopSampling()
         }
         if wasLocked, !state.isLocked {
-            // 遮罩刚被解开 = 本人刚当面证明过一次身份。按此刻的握姿重建基线，
-            // 否则"躺着解锁 → 6 秒后又锁"会把人逼到把功能关掉。
+            // The overlay has just been unlocked = the person has just proved their identity face to face once. Rebuild the baseline from the grip posture of this moment,
+            // otherwise "unlock lying down → locked again 6 seconds later" would drive people to switch the feature off.
             resetBaseline()
         }
         wasLocked = state.isLocked
@@ -647,7 +647,7 @@ final class PopopxBehaviorGuard {
         manager.deviceMotionUpdateInterval = 1.0 / PopopxMotionCriteria.sampleRateHz
         manager.startDeviceMotionUpdates(to: .main) { [weak self] data, _ in
             guard let self, let motion = data else { return }
-            // 回调已经在 `.main` 队列上，`assumeIsolated` 只是把这件事告诉类型系统。
+            // The callback is already on the `.main` queue; `assumeIsolated` merely tells the type system about that.
             MainActor.assumeIsolated {
                 self.receive(motion)
             }
@@ -661,25 +661,25 @@ final class PopopxBehaviorGuard {
         samplingActive = false
         trend.removeAll()
         lastSampleAt = nil
-        // 停采期间的时长不能算进"持续偏移"，所以整个偏移状态一起归零。
+        // Duration spent while sampling was stopped must not count toward "sustained deviation", so the whole deviation state is zeroed together.
         resetDeviationRun()
         settledSeconds = 0
         setDownPending = false
         stillRunSeconds = 0
     }
 
-    // MARK: 每帧
+    // MARK: Per frame
 
     private func receive(_ motion: CMDeviceMotion) {
         let now = Date()
         let interval = min(max(lastSampleAt.map { now.timeIntervalSince($0) } ?? sampleInterval, 0), 0.5)
         lastSampleAt = now
 
-        // 1) 触摸证据先过期，再参与本轮判定：陈旧的乱触不该拉锁。
+        // 1) Touch evidence ages out first, then takes part in this round of deciding: stale erratic touching should not raise a lock.
         pruneTouchMoments(now: now)
 
-        // 2) 剧烈晃动与短暂离手。两者都只提级到"留意"，永不单独拉锁，
-        //    所以这里的门槛做得偏敏感是安全的。
+        // 2) Violent shaking and the brief hands-off. Both only escalate to "watching" and never raise a lock on their own,
+        //    so making the thresholds here rather sensitive is safe.
         let wobble = PopopxBehaviorCriteria.magnitude(motion.userAcceleration)
         if wobble.isFinite {
             if wobble > peakWobbleG { peakWobbleG = wobble }
@@ -695,7 +695,7 @@ final class PopopxBehaviorGuard {
                 }
             } else {
                 if setDownPending, wobble >= PopopxBehaviorCriteria.resumeG {
-                    // 静置之后又动了：刚才那一段"手机不在手里"结束，现在拿着它的人需要多看看。
+                    // It moved again after resting: the earlier stretch of "the phone was not in a hand" has ended, and whoever holds it now needs a closer look.
                     lastHandOffAt = now
                     setDownPending = false
                 }
@@ -703,21 +703,21 @@ final class PopopxBehaviorGuard {
             }
         }
 
-        // 3) 握持姿态。用 `gravity` 而不是 `attitude`：前者直接来自加速度计，不受航向漂移影响。
+        // 3) Grip posture. Using `gravity` rather than `attitude`: the former comes directly from the accelerometer and is unaffected by heading drift.
         let gravity = motion.gravity
         let gx = Double(gravity.x)
         let gy = Double(gravity.y)
         let gz = Double(gravity.z)
         guard gx.isFinite, gy.isFinite, gz.isFinite else { return }
-        // `atan2` 在全象限有界连续（手机竖直朝天时 gz→0 也不出 NaN），
-        // 换成 asin 或在 gz 上除法就会在姿态奇点上炸出假的大偏差。
+        // `atan2` is bounded and continuous across all quadrants (even with the phone pointing straight up, gz→0 produces no NaN),
+        // whereas switching to asin or dividing by gz would blow up a fake large deviation at posture singularities.
         let angle = PopopxAttitude(
             radiansPitch: atan2(-gy, gz),
             radiansRoll: atan2(gx, gz)
         )
         currentAngle = angle
         guard isBaselineCaptured else {
-            // 第一帧只当种子。此刻一定还在前台且没锁，所以拿到手机的就是机主本人。
+            // The first frame only acts as a seed. At this moment we must still be in the foreground and unlocked, so whoever holds the phone is the owner.
             baselineAngle = angle
             isBaselineCaptured = true
             previousDeviation = 0
@@ -728,7 +728,7 @@ final class PopopxBehaviorGuard {
         let deviation = angle.deviationDegrees(from: baselineAngle)
         deviationDegrees = deviation
 
-        // 4) 基线学习：只在"看起来还是本人"的小偏差区里慢慢跟（大偏差区冻结，见头注）。
+        // 4) Baseline learning: following slowly only inside the small-deviation zone where it "still looks like the owner" (the large-deviation zone is frozen, see the header note).
         if deviation < limit * PopopxBehaviorCriteria.baselineFreezeFactor {
             baselineAngle = blended(
                 from: baselineAngle,
@@ -737,7 +737,7 @@ final class PopopxBehaviorGuard {
             )
         }
 
-        // 5) 持续时长：从环形缓冲倒着数，唯一算法（见 `trailingSustainedSeconds`）。
+        // 5) Sustained duration: counted backwards from the ring buffer, the only algorithm (see `trailingSustainedSeconds`).
         trend.append(PopopxAngleSample(at: now, deviationDegrees: deviation))
         pruneTrend(now: now)
         sustainedDeviationSeconds = PopopxBehaviorCriteria.trailingSustainedSeconds(
@@ -746,7 +746,7 @@ final class PopopxBehaviorGuard {
             limit: limit
         )
 
-        // 6) 45 秒"稳定新姿势"自愈（代价与理由见头注，写得很直白）。
+        // 6) The 45-second "stable new posture" self-heal (its cost and reasons are in the header note, written very plainly).
         let steady = abs(deviation - previousDeviation) <= PopopxBehaviorCriteria.relearnDriftDegrees
         if deviation >= limit * PopopxBehaviorCriteria.baselineFreezeFactor,
            steady,
@@ -762,20 +762,20 @@ final class PopopxBehaviorGuard {
         }
         previousDeviation = deviation
 
-        // 7) 结论，以及唯一允许的副作用。
+        // 7) The conclusion, and the only permitted side effect.
         refreshSuspicion(now: now)
         guard suspicion == .suspicious else { return }
         let state = PopopxAppLockState.shared
         guard !state.isLocked, !state.duressSilentFlow else { return }
         if let at = lastTriggerAt, now.timeIntervalSince(at) < Self.triggerCooldown { return }
         lastTriggerAt = now
-        // 传感器只锁。这里能调到的、以及本文件允许调到的，到此为止。
+        // Sensors only lock. What can be reached from here, and what this file is allowed to call, ends right here.
         state.lock(reason: .behavior)
         PopopxHaptics.notice(.warning)
-        // 字符串必须是一条字面量：`os` 的 `debug` 重载走 `OSLogMessage`，
-        // 中间出现 `+` 拼接就退化成 `StaticString?` 那次重载，编译不过。而 `debug` 的参数是
-        // `@autoclosure`，所以插值里的属性必须写 `self.`（模块一 :660 没插值属性，碰不到这条）。
-        // 日志里没有个人信息，只有三个数字——它们足够解释"刚才为什么锁了"。
+        // The string must be one single literal: `os`'s `debug` overload goes through `OSLogMessage`,
+        // so if a `+` concatenation appears in the middle it degrades to the `StaticString?` overload and does not compile. And `debug`'s parameter is
+        // `@autoclosure`, so properties inside the interpolation must be written as `self.` (module 1's :660 has no interpolated properties, so it never hits this).
+        // The log contains no personal information, only three numbers — enough to explain "why it just locked".
         logger.debug(
             "behavior: locked, deviation \(Int(deviation)) over limit \(Int(limit)), \(self.irregularTouchCount) irregular touches"
         )
@@ -786,7 +786,7 @@ final class PopopxBehaviorGuard {
         1.0 / PopopxMotionCriteria.sampleRateHz
     }
 
-    /// 逐分量 EMA，差值先绕回 (-180, 180] 再加权：直接对角度做加权平均会在 ±180° 附近炸飞。
+    /// Per-component EMA, with the difference wrapped back into (-180, 180] before weighting: a weighted average taken directly over angles flies apart near ±180°.
     private func blended(
         from base: PopopxAttitude,
         toward angle: PopopxAttitude,
@@ -822,8 +822,8 @@ final class PopopxBehaviorGuard {
         trend.removeAll()
     }
 
-    /// 纯函数的结论 + 事件（晃动/离手）的提级。事件只往上抬，绝不往下压：
-    /// 一次剧烈晃动不该让已经成立的角度判据变松。
+    /// The pure function's conclusion + the escalation from events (shaking / hands-off). Events only lift it up, never push it down:
+    /// one violent shake should not loosen an angle criterion that has already been met.
     private func refreshSuspicion(now: Date) {
         let evaluated = Self.evaluate(
             deviationDegrees: deviationDegrees,
@@ -847,16 +847,16 @@ final class PopopxBehaviorGuard {
         return false
     }
 
-    /// 拦下高危动作，并把人交给遮罩上的键盘。仍然是"只锁"：不碰任何数据。
+    /// Stops the high-risk action and hands the person to the overlay's keyboard. Still "lock only": no data is touched.
     private func denyAndLock() {
         let state = PopopxAppLockState.shared
         guard !state.duressSilentFlow else { return }
         guard !state.isLocked else { return }
-        // `.manual` 而不是 `.behavior`：模块一 :104-105 把"模块二的强制重认证"划给了它。
+        // `.manual` rather than `.behavior`: module 1's :104-105 assigns "module 2's forced re-authentication" to it.
         state.lock(reason: .manual)
     }
 
-    // MARK: 心跳
+    // MARK: Heartbeat
 
     private func startHeartbeat() {
         heartbeat?.invalidate()
@@ -866,13 +866,13 @@ final class PopopxBehaviorGuard {
                 self.beat()
             }
         }
-        // `.common` 模式：键盘弹出时主 runloop 在 eventTracking 模式，不跑普通定时器，
-        // 而那正是最需要看住锁状态的时候（同模块一 :674-676）。
+        // `.common` mode: while the keyboard is up the main runloop sits in eventTracking mode and does not run ordinary timers,
+        // and that is exactly when the lock state most needs watching (same as module 1's :674-676).
         RunLoop.main.add(timer, forMode: .common)
         heartbeat = timer
     }
 
-    /// 1Hz 一拍。传感器停摆时（锁屏、掉帧、系统节流）由它保证证据会过期、状态会复位。
+    /// One beat per second at 1Hz. When the sensor stalls (screen locked, dropped frames, system throttling) it guarantees that evidence ages out and state resets.
     private func beat() {
         updateSampling()
         guard enabled, isRunning, samplingActive else { return }
@@ -887,7 +887,7 @@ final class PopopxBehaviorGuard {
         refreshSuspicion(now: now)
     }
 
-    // MARK: 通知（add 在 start、remove 在 stop，与模块一 :684-716 同一纪律）
+    // MARK: Notifications (add in start, remove in stop, the same discipline as module 1's :684-716)
 
     private func installObserversIfNeeded() {
         guard observers.isEmpty else { return }
@@ -912,7 +912,7 @@ final class PopopxBehaviorGuard {
                 self.handleDidBecomeActive()
             }
         }
-        // 锁屏/来电也会走这一条：那时用户已经看不见界面，不该再攒触摸证据。
+        // Screen lock/incoming calls also come through here: by then the user can no longer see the interface, so touch evidence should not keep being banked.
         let resign = center.addObserver(
             forName: UIApplication.willResignActiveNotification,
             object: nil,
@@ -935,7 +935,7 @@ final class PopopxBehaviorGuard {
     }
 
     private func handleDidEnterBackground() {
-        // 零后台耗电：无论锁没锁，离开前台立刻停采。
+        // Zero background power drain: locked or not, sampling stops the moment the foreground is left.
         appIsActive = false
         awaitingAuthorization = false
         updateSampling()

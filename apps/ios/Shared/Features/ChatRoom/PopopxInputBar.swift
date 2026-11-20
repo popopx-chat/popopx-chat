@@ -2,81 +2,81 @@
 //  PopopxInputBar.swift
 //  POPOPX (iOS)
 //
-//  【第五阶段 · 会话输入条】磨砂玻璃底的弹起式输入条 + "智能路由"接缝。
+//  [Phase 5 · conversation input bar] A frosted-glass-backed pop-up input bar + the "smart routing" seam.
 //
-//  这是一个**宿主所有（host-owned）**的图层，不是 `ComposeView` 的替代品。今天会话页把 composer
-//  挂在 `Shared/Views/Chat/ChatView.swift:237`-`:245`，实传 7 个入参（`chat`、`im`、
+//  This is a **host-owned** layer, not a replacement for `ComposeView`. Today the conversation page hangs the composer
+//  on it at `Shared/Views/Chat/ChatView.swift:237`-`:245`, with 7 arguments actually passed (`chat`, `im`,
 //  `$composeState`、`$showCommandsMenu`、`$keyboardVisible`、`$keyboardHiddenDate`、`$selectedRange`），
-//  而 `ComposeView.swift` 有 2253 行、`Shared/Views/Chat/ComposeMessage/` 目录内共 13 个文件；
-//  真正的文本框是 `NativeTextEditor`（`SendMessageView.swift:67`，结构体在 :16，由
-//  `ComposeView.swift:1134 sendMessageView(_:placeholder:sendToConnect:)` 造出来）。多选态下会话页
-//  还会把它换成 `SelectedItemsBottomToolbar`（`ChatView.swift:247`）。所以本文件：
-//  ① 不 import 也不改写 `ComposeState`，只吃宿主折算进来的值；② 不改任何既有 initializer；
-//  ③ 所有副作用一律走闭包递出去。**"替换还是并挂"由人来裁定，本条两边都能接。**
+//  while `ComposeView.swift` is 2253 lines and the `Shared/Views/Chat/ComposeMessage/` directory holds 13 files in total;
+//  the real text field is `NativeTextEditor` (`SendMessageView.swift:67`, the struct at :16, built by
+//  `ComposeView.swift:1134 sendMessageView(_:placeholder:sendToConnect:)`). In multi-selection mode the conversation page
+//  also swaps it for `SelectedItemsBottomToolbar` (`ChatView.swift:247`). So this file:
+//  ① neither imports nor rewrites `ComposeState`, it only takes the values the host folded in; ② changes no existing initializer;
+//  ③ hands every side effect out through closures. **"Replace it or mount it alongside" is for a human to rule on; this bar can serve either.**
 //
-//  ── 宿主必须接的五根线 ────────────────────────────────────────────────────────────
-//  1. `text`：宿主自己的草稿绑定（`composeState.message` 也行）。
-//  2. `context`：把 `ComposeState` 的九个前提折算成 `PopopxComposerContext`（见该结构体的字段注释，
-//     对应 `ComposeView.swift:1273` mentions、`:1272` contextItem 四支、`:1266-1271` preview 三支）。
-//  3. `ttlSeconds` / `onTTLChange`：阅后即焚。**真值在宿主那里**，本条只读只报，不存第二份。
-//  4. `onSend`：拿到 `PopopxComposerSend`，其中 `dispatch` 已经分好支：
-//     · `.routeViaMesh(message)` → 宿主做 `await PopopxMeshRuntime.shared.router.send(message)`
-//       （`PopopxMeshKit/…/Router/PopopxMessageRouter.swift:627`），返回的 `PopopxRoutedMessage`
-//       （:241）交给模块 7 的时间线；本条**自己不发**，也不碰 `router.start()`/`stop()`——那是保险丝的
-//       事（`Shared/Model/POPOPXAPI.swift:3818` 把 router 注册进 killSwitch）。
-//     · `.hostShouldSend(reason)` → 宿主走原链路（`ComposeView.swift:2073 sendMessage(ttl:sign:)` →
+//  ── The five wires the host must connect ────────────────────────────────────────────────────────────
+//  1. `text`: the host's own draft binding (`composeState.message` works too).
+//  2. `context`: fold the nine preconditions of `ComposeState` into a `PopopxComposerContext` (see the field comments of that struct,
+//     matching `ComposeView.swift:1273` mentions, the four `:1272` contextItem branches and the three `:1266-1271` preview branches).
+//  3. `ttlSeconds` / `onTTLChange`: view-once. **The true value lives with the host**; this bar only reads and reports, it keeps no second copy.
+//  4. `onSend`: receives a `PopopxComposerSend` whose `dispatch` has already picked the branch:
+//     · `.routeViaMesh(message)` → the host runs `await PopopxMeshRuntime.shared.router.send(message)`
+//       (`PopopxMeshKit/…/Router/PopopxMessageRouter.swift:627`); the returned `PopopxRoutedMessage`
+//       (:241) is handed to module 7's timeline; this bar **sends nothing itself** and never touches `router.start()`/`stop()` — that is the fuse's
+//       business (`Shared/Model/POPOPXAPI.swift:3818` registers the router into killSwitch).
+//     · `.hostShouldSend(reason)` → the host takes the original chain (`ComposeView.swift:2073 sendMessage(ttl:sign:)` →
 //       `:1723 sendMessageAsync` → `:1752 send(.text…)` → `:1931`/`:1940 send(_ msgs:)` →
 //       `apiSendMessages`（`POPOPXAPI.swift:588`）→ `processSendMessageCmd`（:593）→ `chatApiSendCmd`）。
-//  5. 键盘避让、safe area、`keyboardVisible` 归宿主：本条只画自己那一条，不读屏幕常量。
+//  5. Keyboard avoidance, the safe area and `keyboardVisible` belong to the host: this bar only draws its own strip and reads no screen constants.
 //
-//  ── 为什么必须存在 `hostShouldSend` 这一支（TTL / sign 限制，红线级事实）────────────
-//  模块 5 的公网腿**就是 app 自己的发送**：`PopopxSMPSendRequest`（`PopopxMessageRouter.swift:36`）只有
-//  `messageId / contactId / text / sentAt` 四个字段，app 侧的实现把 `.text(request.text)` 组成
-//  `ComposedMessage` 后调 `apiSendMessages(type: .direct, id: contactId, …)` 并自己 `addChatItem`
-//  （`POPOPXAPI.swift:3467`-`:3480`）。所以路由一条直聊纯文本**不会分叉出第二条网线**；
-//  但那条腿上**没有 `ttl` 也没有 `sign`**（`apiSendMessages` 的这两个入参在 `POPOPXAPI.swift:588`），
-//  且只支持 `.direct` 的 contactId。于是"全部交给路由"会静默丢掉阅后即焚、签名、群组 scope、引用、
-//  附件、@提及与 live 消息。这个限制因此被写进判定表，而不是藏在视图代码里。
+//  ── Why the `hostShouldSend` branch must exist (TTL / sign limits, red-line-grade facts)────────────
+//  Module 5's public-network leg **is the app's own send**: `PopopxSMPSendRequest` (`PopopxMessageRouter.swift:36`) has only
+//  the four fields `messageId / contactId / text / sentAt`, and the app-side implementation composes `.text(request.text)` into a
+//  `ComposedMessage`, then calls `apiSendMessages(type: .direct, id: contactId, …)` and does its own `addChatItem`
+//  (`POPOPXAPI.swift:3467`-`:3480`). So routing a plain-text direct chat message **does not fork a second network line**;
+//  but that leg carries **neither `ttl` nor `sign`** (those two `apiSendMessages` parameters are at `POPOPXAPI.swift:588`),
+//  and supports only the contactId of `.direct`. So "hand everything to the router" would silently drop view-once, signatures, group scope, quotes,
+//  attachments, @mentions and live messages. That limit is therefore written into the decision table instead of being hidden in view code.
 //
-//  ── 判定表（`PopopxComposerRouting.dispatch`，纯函数，可单测）───────────────────────
-//  | 输入 | 结论 | 为什么 |
+//  ── Decision table (`PopopxComposerRouting.dispatch`, pure function, unit-testable)───────────────────────
+//  | input | verdict | why |
 //  |---|---|---|
-//  | 草稿全空白、且没挂附件 | `.ignoreEmptyDraft` | 既不发也不交回，宿主不会被叫两次；挂了附件的空文本框照发（`.richContent` → 交回宿主） |
-//  | `ttlSeconds != nil` | `.hostShouldSend(.timedMessage)` | 路由腿不带 ttl，阅后即焚会被丢掉 |
-//  | `requiresSignature` | `.hostShouldSend(.signedMessage)` | 同上，腿上没有 sign |
-//  | 非直聊联系人（群 / 本机笔记 / 待接受 / 无效 / 非 active） | `.hostShouldSend(.notDirectContact)` | `PopopxRouteTarget`（:99）只有 `.contactId` 能被公网写到；群的 scope/sendAsGroup 在请求体里没有位置 |
-//  | 引用 / 编辑 / 转发 / 举报 | `.hostShouldSend(.quotedOrEditing)` | 这些都不在 `.text` 那一条消息里 |
-//  | 附件 / 链接预览 / @提及 / live | `.hostShouldSend(.richContent)` | 同上 |
-//  | 厢语总闸关 | `.hostShouldSend(.meshFuseOff)` | 整条网格是关的，不该把消息交给网格的路由器 |
-//  | 绑定表还没读完 | `.hostShouldSend(.bindingUnknown)` | 不替用户猜通道 |
-//  | 没有厢语绑定 | `.hostShouldSend(.contactNotBoundToMesh)` | 路由只会得出 `.notBound` 再回到 SMP，白多一跳 |
-//  | 射频不可用 | `.hostShouldSend(.radioUnavailable)` | 同上：`.radioUnavailable` 时没有 mesh 可发 |
-//  | 邻居超窗 | `.hostShouldSend(.peerOutOfRange)` | 唯一能带走它的还是宿主那条 SMP |
-//  | 以上全不成立：纯文本 + 直聊 + 已绑定 + 射频开 + 邻居可达 | `.routeViaMesh(message)` | 这一刻 mesh 真能带走，而只有模块 5 知道"公网 3 秒不 ACK 就并发补发""送达失败按原 id 重路由""两条都不通进离线兜底队列" |
+//  | draft all whitespace and no attachment carried | `.ignoreEmptyDraft` | neither sends nor hands back, so the host is never called twice; an empty text box that carries an attachment is still sent (`.richContent` → hand back to the host) |
+//  | `ttlSeconds != nil` | `.hostShouldSend(.timedMessage)` | the routed leg carries no ttl, so view-once would be dropped |
+//  | `requiresSignature` | `.hostShouldSend(.signedMessage)` | same as above, the leg has no sign |
+//  | not a direct-chat contact (group / this device's notes / pending acceptance / invalid / not active) | `.hostShouldSend(.notDirectContact)` | of `PopopxRouteTarget` (:99) only `.contactId` can be written to by the public network; a group's scope/sendAsGroup has no place in the request body |
+//  | quote / edit / forward / report | `.hostShouldSend(.quotedOrEditing)` | none of these live in the `.text` message |
+//  | attachment / link preview / @mention / live | `.hostShouldSend(.richContent)` | same as above |
+//  | Cabin master fuse off | `.hostShouldSend(.meshFuseOff)` | the whole mesh is switched off, so a message should not be handed to the mesh router |
+//  | binding table not read to the end yet | `.hostShouldSend(.bindingUnknown)` | do not guess the channel on the user's behalf |
+//  | no Cabin binding | `.hostShouldSend(.contactNotBoundToMesh)` | the router would only conclude `.notBound` and fall back to SMP, one hop wasted |
+//  | radio unavailable | `.hostShouldSend(.radioUnavailable)` | same as above: with `.radioUnavailable` there is no mesh to send over |
+//  | neighbour out of window | `.hostShouldSend(.peerOutOfRange)` | the only thing that can still carry it is the host's SMP line |
+//  | none of the above holds: plain text + direct chat + bound + radio on + neighbour reachable | `.routeViaMesh(message)` | at this moment the mesh really can carry it, and only module 5 knows "retransmit concurrently when the public network does not ACK within 3 seconds", "reroute by the original id when delivery fails", "enter the offline fallback queue when both lines are down" |
 //
-//  ── 通道配色（`Docs/popopx-brand-spec.md` §1.1，一个控件里靛紫与青绿永不对等并存）──────
-//  `PopopxComposerChannel` 三取一：`.smp` = `brand` + `lock.shield.fill`；`.mesh` = `mesh` 底 +
-//  `onMesh` 字（发丝级青绿做字要用 `meshInk`）；`.undetermined` = `labelSecondary` 灰且**不给图标**。
-//  灰 `clock` 只表示厢语中继积压（`待中继 N`，数字来自 `router.pendingMessageCount`，
-//  `PopopxMessageRouter.swift:860`）。阅后即焚在这里只有字、没有图形：会话气泡那侧已经占了
-//  `timer` 这个符号（`Shared/Views/Chat/ChatItem/CIMetaView.swift:135`），本条不抢它第二份语义。
-//  绿色不在这个条上出现——它是一次性的回执色。
-//  「+」面板里唯一出现的强调色是靛紫的"选中态"（沿用 `PopopxCheckbox` 自己的 tint），面板内不出现青绿。
+//  ── Channel colours (`Docs/popopx-brand-spec.md` §1.1; inside one control indigo and teal are never both present as equals)──────
+//  `PopopxComposerChannel` picks one of three: `.smp` = `brand` + `lock.shield.fill`; `.mesh` = `mesh` background +
+//  `onMesh` text (hairline teal used as text has to be drawn with `meshInk`); `.undetermined` = `labelSecondary` grey and **no icon at all**.
+//  The grey `clock` means only Cabin relay backlog (`Awaiting relay: N`, the number comes from `router.pendingMessageCount`,
+//  `PopopxMessageRouter.swift:860`). Here view-once has words but no glyph: the chat-bubble side already owns
+//  the `timer` symbol (`Shared/Views/Chat/ChatItem/CIMetaView.swift:135`), so this bar does not claim a second meaning for it.
+//  Green never appears on this bar — it is a one-shot acknowledgement colour.
+//  The only accent colour that appears in the "+" panel is indigo's "selected" state (reusing `PopopxCheckbox`'s own tint); no teal appears inside the panel.
 //
-//  ── 读网格事实的时机（不许逐键、逐行 await）────────────────────────────────────────
-//  `PopopxInputBarModel.refresh(contactId:)` 一次批量读四样：`IdentityMappingStore
+//  ── When mesh facts are read (no per-keystroke, per-line await allowed)────────────────────────────────────────
+//  `PopopxInputBarModel.refresh(contactId:)` reads four things in one batch: `IdentityMappingStore
 //  .meshPublicKeyHexes(forContactId:)`（`Identity/IdentityMappingStore.swift:182`）、
-//  `PopopxBluetoothHealthJudge` 的 `radioState` 与 `isPeerReachable`（`PopopxMessageRouter.swift:388`，
-//  判定的先后次序与模块 5 自己的 `predictBluetooth`（:1051-:1060）逐行对齐，超时同取
-//  `PopopxMeshConfig.default.peerReachabilityTimeout`），以及 `NetworkStateMonitor.shared.currentPath()`
-//  （`Router/NetworkStateMonitor.swift:362`，nil = 未报，**不猜成"在线"**）。结果缓存成
-//  `PopopxMeshEligibility` 值；刷新时机 = 打开会话 + 总闸翻转 + 5 秒一跳（跳数从已观察的
-//  `PopopxMeshStateSource.state` 同步读，不产生 hop）。
+//  `PopopxBluetoothHealthJudge`'s `radioState` and `isPeerReachable` (`PopopxMessageRouter.swift:388`,
+//  the order of those checks is aligned line by line with module 5's own `predictBluetooth` (:1051-:1060), and the timeout is likewise taken from
+//  `PopopxMeshConfig.default.peerReachabilityTimeout`), plus `NetworkStateMonitor.shared.currentPath()`
+//  (`Router/NetworkStateMonitor.swift:362`, nil = not reported yet, **never guessed as "online"**). The result is cached as a
+//  `PopopxMeshEligibility` value; refresh moments = opening the conversation + the master fuse flipping + one hop every 5 seconds (the hop count is read
+//  from the already observed `PopopxMeshStateSource.state` synchronously, which produces no hop).
 //
-//  设计取值全部来自 Shared/Theme/PopopxTheme.swift，控件来自 Shared/Components/；本文件没有裸色值、
-//  没有 AppTheme 样式、没有自造按钮样式，也没有裸 `UIScreen` 常量。
+//  All design values come from Shared/Theme/PopopxTheme.swift and the controls from Shared/Components/; this file has no bare colour values,
+//  no AppTheme styles, no home-grown button styles, and no bare `UIScreen` constants.
 //
-//  ⚠️ Xcode 工程集成：本文件需人工拖入 POPOPX (iOS) target（铁律禁止脚本改 project.pbxproj）。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand (the iron rule forbids scripts from touching project.pbxproj).
 //
 
 import Combine
@@ -85,33 +85,33 @@ import POPOPXChat
 import PopopxMeshKit
 import PopopxMeshUI
 
-// MARK: - 宿主折算进来的发送前提
+// MARK: - Send preconditions folded in by the host
 
-/// 「这一条将要发出去的东西」除文本以外的全部前提。
+/// All preconditions of "what this line is about to send" other than the text.
 ///
-/// 故意不做成 `ComposeState` 的包装：那个结构体（`ComposeView.swift:47`）带着 `parsedMessage`、
-/// `preview`、`contextItem`、`voiceMessageRecordingState` 等一整套只有旧 composer 才懂的东西，
-/// 本条只想知道"能不能交给模块 5"。
+/// Deliberately not a wrapper around `ComposeState`: that struct (`ComposeView.swift:47`) carries `parsedMessage`,
+/// `preview`, `contextItem`, `voiceMessageRecordingState` and a whole set of things only the old composer understands,
+/// while this bar only wants to know "can this be handed to module 5".
 struct PopopxComposerContext: Hashable {
-    /// 直聊联系人的 SMP 地址。`nil` = 这条会话没有 contactId（群 / 本机笔记 / 待接受的联系 / 无效数据）。
+    /// The SMP address of the direct-chat contact. `nil` = this conversation has no contactId (group / this device's notes / a contact pending acceptance / invalid data).
     var contactId: Int64?
-    /// `ChatInfo.direct(contact:)` 且联系人 `active`（`POPOPXChat/ChatTypes.swift:1995`）——
-    /// 只有这种会话在服务端有队列可写。
+    /// `ChatInfo.direct(contact:)` with the contact `active` (`POPOPXChat/ChatTypes.swift:1995`) —
+    /// only this kind of conversation has a queue on the server that can be written to.
     var isDirectContact = false
-    /// 草稿挂了附件（图片 / 文件 / 语音 / 多媒体）。
+    /// The draft carries an attachment (image / file / voice / multimedia).
     var hasAttachments = false
-    /// `composeState.preview != .noPreview`（`ComposeView.swift:1266-1271`）：链接预览也是消息体的一部分。
+    /// `composeState.preview != .noPreview` (`ComposeView.swift:1266-1271`): a link preview is part of the message body too.
     var hasLinkPreview = false
-    /// `contextItem` 是 quoted / editing / forwarding / reported 四支之一（`ComposeView.swift:1272`）。
+    /// `contextItem` is one of the four branches quoted / editing / forwarding / reported (`ComposeView.swift:1272`).
     var carriesContextItem = false
-    /// `composeState.memberMentions` 非空（`ComposeView.swift:1273`）。
+    /// `composeState.memberMentions` is not empty (`ComposeView.swift:1273`).
     var hasMentions = false
-    /// 即时消息（live），`ComposeView.swift:1274`。
+    /// Live message (live), `ComposeView.swift:1274`.
     var isLiveMessage = false
-    /// 需要签名，`ComposeView.swift:1275`（真值取 `groupInfo?.useRelays`，签名动作本身在 `:2095` 的 `send(…sign:)`）。
+    /// A signature is required, `ComposeView.swift:1275` (the true value comes from `groupInfo?.useRelays`, the signing action itself is the `send(…sign:)` at `:2095`).
     var requiresSignature = false
 
-    /// 最常用的一支：一个 active 的直聊联系人，纯文本，无 TTL、无签名。
+    /// The most frequently used case: an active direct-chat contact, plain text, no TTL, no signature.
     static func directContact(_ contactId: Int64) -> PopopxComposerContext {
         var context = PopopxComposerContext()
         context.contactId = contactId
@@ -119,71 +119,71 @@ struct PopopxComposerContext: Hashable {
         return context
     }
 
-    /// 会话不是 active 直聊（群、本机笔记、待接受的联系、读不懂的数据）。
+    /// The conversation is not an active direct chat (group, this device's notes, a contact pending acceptance, data that cannot be read).
     static let outsideDirectContact = PopopxComposerContext()
 }
 
-// MARK: - 网格事实的快照
+// MARK: - A snapshot of the mesh facts
 
-/// 一次批量读出来的网格事实。值类型，判定表只读它，视图不在渲染路径上 await 它。
+/// The mesh facts read in one batch. A value type: the decision table only reads it, and the view never awaits it on the render path.
 struct PopopxMeshEligibility: Equatable {
-    /// 厢语总闸（`PopopxMeshRuntime.isFuseOn`，`POPOPXAPI.swift:3740`）。
+    /// The Cabin master fuse (`PopopxMeshRuntime.isFuseOn`, `POPOPXAPI.swift:3740`).
     var fuseOn = false
-    /// 绑定表读完没有。没读完时任何通道结论都为时过早。
+    /// Whether the binding table has been read to the end. While it has not, any channel conclusion is premature.
     var bindingLoaded = false
-    /// 这个联系人的厢语公钥（多条绑定时取第一条，与模块 5 的 `resolveBinding` 同一个取法）。
+    /// This contact's Cabin public key (with several bindings the first one is taken, the same choice module 5's `resolveBinding` makes).
     var meshPublicKeyHex: String?
-    /// 本机射频，模块 4 的结论。
+    /// This device's radio, module 4's conclusion.
     var radioState: PopopxBluetoothState = .unknown
-    /// 事前预判 —— 与模块 5 `predictBluetooth` 同一条规则的结论。
+    /// The advance prediction — the conclusion of the same rule module 5's `predictBluetooth` uses.
     var prediction: PopopxBluetoothPrediction = .notBound
-    /// 公网：`true` 连通、`false` 断开、`nil` = `NWPathMonitor` 还没报过（模块 5 也不猜"在线"）。
+    /// The public network: `true` connected, `false` disconnected, `nil` = `NWPathMonitor` has not reported yet (module 5 does not guess "online" either).
     var networkConnected: Bool?
-    /// 已进离线兜底队列、还没等到 ACK 的条数 —— 灰 `clock` 的唯一数据来源。
+    /// The number of messages already in the offline fallback queue that have not received an ACK — the only data source of the grey `clock`.
     var queuedCount = 0
 
-    /// 这一刻蓝牙能不能带走一条消息。
+    /// Whether Bluetooth can carry a message away at this moment.
     var isMeshCapable: Bool {
         if case .reachable = prediction { return true }
         return false
     }
 
-    /// 预判点名的那颗邻居公钥（`.reachable` / `.peerOutOfRange` 都带，`peerKey` 在 :208）。
+    /// The neighbour public key the prediction names (carried by both `.reachable` and `.peerOutOfRange`, `peerKey` at :208).
     var reachableMeshKey: String? { prediction.peerKey }
 
     static let notLoaded = PopopxMeshEligibility()
 }
 
-// MARK: - 判定结果
+// MARK: - The verdict
 
-/// 交回宿主的理由。每条都对应模块 5 的公网腿上真实缺的一个入参，或者一个真实的网格事实。
+/// The reasons for handing back to the host. Each one corresponds to a parameter genuinely missing on module 5's public-network leg, or to a real mesh fact.
 enum PopopxHostSendReason: Hashable {
-    /// 阅后即焚：`apiSendMessages` 的 `ttl`（`POPOPXAPI.swift:588`）在 `PopopxSMPSendRequest` 里没有位置。
+    /// View-once: the `ttl` of `apiSendMessages` (`POPOPXAPI.swift:588`) has no place in `PopopxSMPSendRequest`.
     case timedMessage(seconds: Int)
-    /// 签名消息：同上，腿上没有 `sign`。
+    /// Signed message: same as above, the leg carries no `sign`.
     case signedMessage
-    /// 不是 active 直聊联系人：只有 `.contactId` 这一个地址能被公网写到。
+    /// Not an active direct-chat contact: only the one address `.contactId` can be written to by the public network.
     case notDirectContact
-    /// 引用 / 编辑 / 转发 / 举报。
+    /// Quote / edit / forward / report.
     case quotedOrEditing
-    /// 附件 / 链接预览 / @提及 / live 消息。
+    /// Attachment / link preview / @mention / live message.
     case richContent
-    /// 厢语总闸关着。
+    /// The Cabin master fuse is off.
     case meshFuseOff
-    /// 绑定表尚未读完。
+    /// The binding table has not been read to the end yet.
     case bindingUnknown
-    /// 这个联系人没有厢语绑定。
+    /// This contact has no Cabin binding.
     case contactNotBoundToMesh
-    /// 本机射频不可用。
+    /// This device's radio is unavailable.
     case radioUnavailable(PopopxBluetoothState)
-    /// 绑定了，但 15 秒窗口内没听到过邻居。
+    /// Bound, but no neighbour has been heard inside the 15-second window.
     case peerOutOfRange
 
-    /// 只给用户看得懂的那两条附一句解释；其余是内部结论，不打扰。
+    /// Only the two the user can make sense of come with an explanation; the rest are internal conclusions and do not disturb them.
     ///
-    /// 这里刻意用 `NSLocalizedString` 而不是 `Text("…")`：`explanation` 的返回类型是 `String?`，
-    /// 宿主（`ProfileAutoSender.meshBlockText`）把它当字符串接走，落到 `Text(verbatim:)` 那一侧。
-    /// 键仍然是英文原句，与全 app 的 `Text("Send")` 约定同一张表。
+    /// `NSLocalizedString` is used here deliberately instead of `Text("…")`: `explanation` returns `String?`,
+    /// the host (`ProfileAutoSender.meshBlockText`) takes it away as a plain string, and it lands on the `Text(verbatim:)` side.
+    /// The keys are still the English source sentences, the same table as the app-wide `Text("Send")` convention.
     var explanation: String? {
         switch self {
         case let .timedMessage(seconds):
@@ -200,13 +200,13 @@ enum PopopxHostSendReason: Hashable {
     }
 }
 
-/// 一次发送最终归谁。这个枚举就是"接缝"本身：判定与副作用分开，判定可单测。
+/// Who a send ultimately belongs to. This enum is the "seam" itself: verdicts are kept apart from side effects, and the verdict is unit-testable.
 enum PopopxComposerDispatch: Hashable {
-    /// 交给模块 5：宿主 `await router.send(message)`（`PopopxMessageRouter.swift:627`）。
+    /// Handed to module 5: the host runs `await router.send(message)` (`PopopxMessageRouter.swift:627`).
     case routeViaMesh(PopopxOutboundMessage)
-    /// 原样交回宿主，并说明为什么不能路由。
+    /// Handed back to the host unchanged, with the reason why it cannot be routed.
     case hostShouldSend(reason: PopopxHostSendReason)
-    /// 空草稿：什么都不做。
+    /// Empty draft: nothing happens.
     case ignoreEmptyDraft
 
     var isRouted: Bool {
@@ -214,34 +214,34 @@ enum PopopxComposerDispatch: Hashable {
         return false
     }
 
-    /// 交回宿主时的理由；其余两支为 nil。
+    /// The reason for handing back to the host; nil for the other two cases.
     var hostReason: PopopxHostSendReason? {
         if case let .hostShouldSend(reason) = self { return reason }
         return nil
     }
 }
 
-/// 下一条消息会被哪条通道带走 —— 发送键唯一的强调色来源。
+/// Which channel will carry the next message away — the only source of the send key's accent colour.
 enum PopopxComposerChannel: Hashable {
-    /// 公网 SMP（靛紫）。
+    /// Public-network SMP (indigo).
     case smp
-    /// 厢语蓝牙（青绿）。`hops` 是网格测到的跳数，nil = 还不知道跳数。
+    /// Cabin Bluetooth (teal). `hops` is the hop count the mesh measured, nil = the hop count is not known yet.
     case mesh(hops: Int?)
-    /// 公网状态未报，且蓝牙已是候选 —— 不替用户猜。
+    /// The public-network state has not been reported and Bluetooth is already a candidate — no guessing on the user's behalf.
     case undetermined
 }
 
-/// `onSend` 的载荷：判定结果 + 判定时的前提，宿主拿它可以原样复现这次结论。
+/// The payload of `onSend`: the verdict plus the preconditions at the moment of the verdict, so the host can reproduce this conclusion exactly.
 struct PopopxComposerSend: Hashable {
     let text: String
     let context: PopopxComposerContext
     let ttlSeconds: Int?
-    /// 绝密档的屏幕停留时长，秒；nil = 这条不是绝密消息。
+    /// The top-secret tier's on-screen dwell time in seconds; nil = this is not a top-secret message.
     ///
-    /// 与 `ttlSeconds` **是两个独立的值，不能合并**：那一格是 SMP 侧"消息多久从服务器消失"，
-    /// 这一格是"明文允许停在收件方屏幕上多久"。它们由不同的模块执行，也可以同时开着
-    /// （一条既走公网阅后即焚、又在屏幕上阅后即焚的消息是合法组合）。
-    /// 载荷文件里 `PopopxSecureCopy.ttlOptions` 拒绝复用 `durationOptions` 是同一条理由的另一侧。
+    /// and `ttlSeconds` **are two independent values that must not be merged**: that field is "how long until the message disappears from the server" on the SMP side,
+    /// this one is "how long plaintext is allowed to stay on the recipient's screen". They are enforced by different modules and can be on at the same time
+    /// (a message that is both view-once over the public network and view-once on screen is a legitimate combination).
+    /// In the payload file, `PopopxSecureCopy.ttlOptions` refusing to reuse `durationOptions` is the same reason seen from the other side.
     let secureTTLSeconds: Int?
     let dispatch: PopopxComposerDispatch
     let channel: PopopxComposerChannel
@@ -263,9 +263,9 @@ struct PopopxComposerSend: Hashable {
     }
 }
 
-/// 时长档位要能被同一排 chips 画出来：阅后即焚与绝密用的是同一个控件，只有数据和落点不同。
-/// 两个类型各自留在自己的文件里（`PopopxComposerDurationOption` 在本文件、
-/// `PopopxSecureTTLOption` 在绝密载荷文件），这个协议是它们唯一的交集。
+/// Duration tiers must be drawable by the same row of chips: view-once and top-secret use the same control, only the data and the landing point differ.
+/// The two types each stay in their own file (`PopopxComposerDurationOption` in this file,
+/// `PopopxSecureTTLOption` in the top-secret payload file); this protocol is their only intersection.
 protocol PopopxDurationOption {
     var seconds: Int { get }
     var title: String { get }
@@ -274,12 +274,12 @@ protocol PopopxDurationOption {
 extension PopopxComposerDurationOption: PopopxDurationOption {}
 extension PopopxSecureTTLOption: PopopxDurationOption {}
 
-/// 一排时长 chip。从 `disappearingBlock` 里原样搬出来（逐条修饰符未改），
-/// 目的是让绝密那一档不必抄第二遍——两排 chip 长得不一样才是更难查的 bug。
+/// A row of duration chips. Moved out of `disappearingBlock` verbatim (every modifier unchanged),
+/// so that the top-secret tier does not have to be copied a second time — two rows of chips looking different is the harder bug to track down.
 private struct PopopxDurationChips<Option>: View where Option: PopopxDurationOption & Identifiable {
     let options: [Option]
     let selectedSeconds: Int
-    /// `LocalizedStringKey` 而不是 `String`：这一格是 VoiceOver 标签，裸 `String` 不进本地化表。
+    /// `LocalizedStringKey` rather than `String`: this field is a VoiceOver label, and a bare `String` does not enter the localisation tables.
     let label: LocalizedStringKey
     let onSelect: (Int) -> Void
 
@@ -291,8 +291,8 @@ private struct PopopxDurationChips<Option>: View where Option: PopopxDurationOpt
                     PopopxHaptics.selection()
                     onSelect(option.seconds)
                 } label: {
-                    // `title` 的协议签名是 `String`（绝密那一档在载荷文件里也用它），
-                    // 所以这里显式把它当键查一次；查不到就是原样显示，行为与改前一致。
+                    // `title`'s protocol signature is `String` (the top-secret tier in the payload file uses it too),
+                    // so it is looked up explicitly as a key here; a miss just shows it verbatim, the same behaviour as before the change.
                     Text(LocalizedStringKey(option.title))
                         .font(PopopxType.meta)
                         .foregroundStyle(isSelected ? PopopxPalette.onBrand : PopopxPalette.labelSecondary)
@@ -321,7 +321,7 @@ private struct PopopxDurationChips<Option>: View where Option: PopopxDurationOpt
     }
 }
 
-/// 阅后即焚的一档。做成结构体而不是带标签的元组：`ForEach(…, id: \.seconds)` 的键路径取不了元组成员。
+/// One view-once tier. Made a struct rather than a labelled tuple: the key path of `ForEach(…, id: \.seconds)` cannot reach tuple members.
 struct PopopxComposerDurationOption: Hashable, Identifiable {
     let seconds: Int
     let title: String
@@ -329,24 +329,24 @@ struct PopopxComposerDurationOption: Hashable, Identifiable {
     var id: Int { seconds }
 }
 
-// MARK: - 判定表（纯函数）
+// MARK: - The decision table (pure function)
 
-/// 没有状态、没有副作用：整张判定表住在这里，视图只负责把它画出来。
+/// No state, no side effects: the entire decision table lives here, and the view only draws it.
 enum PopopxComposerRouting {
-    /// 阅后即焚的档位，与旧 composer 发送键菜单里那三档一致（`SendMessageView.swift:199`-`:201`）。
+    /// The view-once tiers, identical to the three tiers in the old composer's send-key menu (`SendMessageView.swift:199`-`:201`).
     static let durationOptions: [PopopxComposerDurationOption] = [
         .init(seconds: 30, title: "30 seconds"),
         .init(seconds: 60, title: "1 minute"),
         .init(seconds: 300, title: "5 minutes")
     ]
 
-    /// 宿主没选过时的默认档，直接取 app 已有的那个持久化值（`SettingsView.swift:230`）。
+    /// The default tier when the host has never chosen one, taken straight from the persisted value the app already has (`SettingsView.swift:230`).
     static var fallbackDurationSeconds: Int {
         customDisappearingMessageTimeDefault.get()
     }
 
-    /// 时长短语。返回 `String`（被 `explanation` 与宿主接走），所以这里用 `NSLocalizedString`
-    /// + `String(format:)` 查表，而不是 `Text("…")` 的隐式键。`%@`/`%lld` 的次序与全表一致。
+    /// The duration phrase. It returns `String` (taken away by `explanation` and by the host), so the table is queried with `NSLocalizedString`
+    /// + `String(format:)` here, not the implicit key of `Text("…")`. The order of `%@`/`%lld` matches the whole table.
     static func durationText(_ seconds: Int) -> String {
         if seconds % 86_400 == 0 { return String(format: NSLocalizedString("%lld days", comment: "composer duration"), seconds / 86_400) }
         if seconds % 3_600 == 0 { return String(format: NSLocalizedString("%lld hours", comment: "composer duration"), seconds / 3_600) }
@@ -354,10 +354,10 @@ enum PopopxComposerRouting {
         return String(format: NSLocalizedString("%lld seconds", comment: "composer duration"), seconds)
     }
 
-    /// 判定表的核心：这一刻这条草稿能不能交给模块 5。`nil` = 能。
+    /// The core of the decision table: whether this draft can be handed to module 5 at this moment. `nil` = it can.
     ///
-    /// 它和 `dispatch` 分开是有原因的：通道条每次重绘都要问一遍，而铸造 `messageId` 只该发生在
-    /// 真的要把一条消息交出去的时候。
+    /// Its separation from `dispatch` has a reason: the channel strip asks this on every redraw, while minting a `messageId` should only happen
+    /// When a message is really being handed off.
     static func hostReason(
         context: PopopxComposerContext,
         eligibility: PopopxMeshEligibility,
@@ -392,8 +392,8 @@ enum PopopxComposerRouting {
         }
     }
 
-    /// 判定。**顺序是有意义的**：先排除"路由会静默丢东西"的（TTL、签名、非直聊、富内容），
-    /// 再看网格本身的事实。反过来排会让一条阅后即焚的消息先进 mesh 队列。
+    /// the verdict. **The order is meaningful**: first rule out the cases where "the router silently drops things" (TTL, signing, non-direct chat, rich content),
+    /// then look at the mesh facts themselves. Reversing the order would let a view-once message enter the mesh queue first.
     static func dispatch(
         text: String,
         context: PopopxComposerContext,
@@ -402,16 +402,16 @@ enum PopopxComposerRouting {
         messageId: String = PopopxOutboundMessage.newMessageId()
     ) -> PopopxComposerDispatch {
         let blankDraft = text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        // 空草稿不等于"没东西可发"：挂了附件（图片 / 文件 / 语音）的草稿文本框本来就是空的，
-        // 而旧链路的 `ComposeState.sendEnabled` 对这几支都返回 true。一律 ignore 的话，
-        // 这条接缝上永远发不出不带文字的附件。
+        // An empty draft is not the same as "nothing to send": a draft carrying an attachment (image / file / voice) has an empty text box by nature,
+        // while the old path's `ComposeState.sendEnabled` returns true for every one of these. Ignoring them across the board would mean
+        // that this seam can never send an attachment without text.
         if blankDraft && !context.hasAttachments {
             return .ignoreEmptyDraft
         }
         if let reason = hostReason(context: context, eligibility: eligibility, ttlSeconds: ttlSeconds) {
             return .hostShouldSend(reason: reason)
         }
-        // `hostReason` 已经确认过 contactId 非空，这里只是把可选值落地，不是一条新分支。
+        // `hostReason` has already confirmed contactId is non-empty; this only unwraps the optional value, it is not a new branch.
         guard let contactId = context.contactId else {
             return .hostShouldSend(reason: .notDirectContact)
         }
@@ -424,8 +424,8 @@ enum PopopxComposerRouting {
         )
     }
 
-    /// 通道结论。注意它比 `dispatch` 宽：草稿为空时也要能回答"这一刻发出去会走哪条"，
-    /// 因为这条信息是状态，不是对某一条消息的判定。
+    /// The channel verdict. Note that it is wider than `dispatch`: with an empty draft it still has to answer "which route would a send right now take",
+    /// because that information is a state, not a verdict about one particular message.
     static func channel(eligibility: PopopxMeshEligibility, ttlSeconds: Int?, hops: Int?) -> PopopxComposerChannel {
         guard ttlSeconds == nil, eligibility.fuseOn, eligibility.isMeshCapable else { return .smp }
         switch eligibility.networkConnected {
@@ -436,22 +436,22 @@ enum PopopxComposerRouting {
     }
 }
 
-// MARK: - 批量读取网格事实
+// MARK: - Batch reading the mesh facts
 
-/// 输入条的状态层：只干两件事 —— 一次批量读网格事实并缓存，以及把结论交给判定表。
+/// The input bar's state layer: it does only two things - read the mesh facts once in a batch and cache them, and hand the conclusion to the decision table.
 ///
-/// 可测性在这里：把 `resolver` 换成一个闭包就能喂任意快照，不需要射频、不需要会话、不需要路由器。
+/// Testability lives here: replacing `resolver` with a closure lets you feed any snapshot, with no radio, no session and no router needed.
 @MainActor
 final class PopopxInputBarModel: ObservableObject {
-    /// 缓存下来的那一份网格事实。
+    /// The one cached copy of the mesh facts.
     @Published private(set) var eligibility = PopopxMeshEligibility.notLoaded
-    /// 正在读表（只用于把「通道待定」画出来，不参与判定 —— 判定看 `bindingLoaded`）。
+    /// Whether the table is being read (used only to draw "channel pending"; it takes no part in the verdict - the verdict looks at `bindingLoaded`).
     @Published private(set) var isResolving = false
 
-    /// 注入点。`nil` = 用真运行时（`resolveFromRuntime`）。
+    /// Injection point. `nil` = use the real runtime (`resolveFromRuntime`).
     var resolver: (@MainActor (Int64?) async -> PopopxMeshEligibility)?
 
-    /// 5 秒一跳，只为了把"邻居静默超窗"这件事自己褪下去；和消息列表页同一个节奏
+    /// One tick every 5 s, only so that "a neighbour has gone quiet past the window" fades away on its own; the same cadence as the message list page
     /// （`Shared/Features/Chats/ChatsListView.swift:187`、`:502`）。
     static let pollIntervalSeconds: Double = 5
 
@@ -467,7 +467,7 @@ final class PopopxInputBarModel: ObservableObject {
         isResolving = false
     }
 
-    /// 反复刷新，直到这次 `Task` 被取消（换了会话、总闸翻了、输入条离开了屏幕）。
+    /// Refreshes repeatedly until this `Task` is cancelled (session switched, master kill switch flipped, input bar left the screen).
     func poll(contactId: Int64?) async {
         while !Task.isCancelled {
             try? await Task.sleep(for: .seconds(Self.pollIntervalSeconds))
@@ -476,18 +476,18 @@ final class PopopxInputBarModel: ObservableObject {
         }
     }
 
-    /// 一次批量读，四跳封顶，只在打开会话与 5 秒一跳时发生 —— 不在按键路径上。
+    /// One batched read, four hops at most, happening only when the session opens and on the 5 s tick - never on the keypress path.
     ///
-    /// 判定的先后次序照抄模块 5 的 `predictBluetooth`（`PopopxMessageRouter.swift:1051`-`:1060`）：
-    /// 没绑定 → `.notBound`；射频不可用 → `.radioUnavailable`；逐个问可达性，问到第一个真的可达就收；
-    /// 全不可达 → `.peerOutOfRange(第一条)`。用的也是**同一个 judge 与同一个超时**，
-    /// 所以这条接缝的结论不会和路由器自己的结论各说各话。
+    /// The ordering of the verdicts copies module 5's `predictBluetooth` (`PopopxMessageRouter.swift:1051`-`:1060`) exactly:
+    /// no binding → `.notBound`; radio unavailable → `.radioUnavailable`; ask reachability one by one and stop at the first one that is really reachable;
+    /// all unreachable → `.peerOutOfRange(first)`. It also uses **the same judge and the same timeout**,
+    /// so this seam's conclusion cannot tell a different story from the router's own conclusion.
     static func resolveFromRuntime(contactId: Int64?) async -> PopopxMeshEligibility {
         let runtime = PopopxMeshRuntime.shared
         var snapshot = PopopxMeshEligibility()
         snapshot.fuseOn = runtime.isFuseOn
         guard runtime.isFuseOn, let contactId else {
-            // 总闸关着或这条会话没有联系人：绑定表不去读，`bindingLoaded` 保持 false。
+            // Master switch off, or this session has no contact: the binding table is not read and `bindingLoaded` stays false.
             return snapshot
         }
         let judge = PopopxBluetoothHealthJudge(monitor: runtime.healthMonitor)
@@ -509,40 +509,40 @@ final class PopopxInputBarModel: ObservableObject {
             }
             snapshot.prediction = answer
         }
-        // nil 原样留着：那是"还没报"，不是"断开"。
+        // nil is left exactly as it is: that means "not reported yet", not "disconnected".
         snapshot.networkConnected = await NetworkStateMonitor.shared.currentPath()?.isConnected
         snapshot.queuedCount = await runtime.router.pendingMessageCount
         return snapshot
     }
 }
 
-// MARK: - 「+」面板的动作
+// MARK: - Actions of the "+" panel
 
-/// 微信式功能面板里的格子。本条只负责"哪一种被按下"，实现全在宿主。
+/// A cell in the WeChat-style function panel. This bar is only responsible for "which one was pressed"; the implementation is entirely in the host.
 enum PopopxPlusAction: String, CaseIterable, Identifiable {
     case photo
     case camera
     case file
     case location
-    /// 绝密这一格是**武装开关**，不是选择器：它把这条草稿标成绝密，时长在同一条面板里那排 chip 上调。
-    /// 因此它和其余四格不一样 —— 按下去不关面板（见 `plusPanel` 里那一处 `action != .secure`）。
+    /// The top-secret cell is an **arm switch**, not a picker: it marks this draft as top-secret, and the duration is tuned on the row of chips in that same panel.
+    /// So it differs from the other four cells - pressing it does not close the panel (see the one `action != .secure` inside `plusPanel`).
     case secure
-    /// 加密个人主页那一格是**发送入口**，和 `.location` 同一族：按下即关面板、由宿主弹出本次发送的
-    /// 模式确认 Sheet（`ProfileSendModeSheet`），面板本身不承载时长——主页的时长是"这一次发送"的属性，
-    /// 不是这条草稿的属性，所以它不能像 `.secure` 那样做成常驻武装开关。
+    /// The encrypted profile cell is a **send entry**, in the same family as `.location`: pressing it closes the panel and the host presents this send's
+    /// mode confirmation sheet (`ProfileSendModeSheet`); the panel itself carries no duration - the profile's duration is a property of "this send",
+    /// not of this draft, so it cannot be built as a standing arm switch the way `.secure` is.
     case personalProfile
-    /// 算力点红包：按下即关面板，宿主弹 `PopopxSendRedPacketSheet`。它在单聊与群聊都成立，
-    /// 因为落点由会话自己给（`PopopxPacketDestination` 从 `ChatInfo` 算），份数上限跟着成员数走。
+    /// Compute-point red packet: pressing it closes the panel and the host presents `PopopxSendRedPacketSheet`. It holds in both direct chats and groups,
+    /// because the destination is supplied by the session itself (`PopopxPacketDestination` computes it from `ChatInfo`), and the cap on the share count follows the member count.
     case redPacket
-    /// 徽章礼品卡：按下即关面板，宿主弹 `PopopxGiftBadgeCardSheet(contactId:)`。
-    /// **只有单聊该出现这一格** —— 礼品卡的核销回执走单聊那条连接，群组与频道没有对应落点，
-    /// 所以宿主用 `plusActions` 把它筛掉，而不是摆一个只会报错的按钮（见 init 里那个参数）。
+    /// Badge gift card: pressing it closes the panel and the host presents `PopopxGiftBadgeCardSheet(contactId:)`.
+    /// **Only direct chats should show this cell** - the gift card's redemption receipt travels over the direct-chat connection, and groups and channels have no matching destination,
+    /// so the host filters it out with `plusActions` instead of putting up a button that can only report an error (see that parameter in init).
     case giftCard
 
     var id: String { rawValue }
 
-    /// 「+」面板格子的题字。类型是 `LocalizedStringKey` 而不是 `String`：裸 `String` 进 `Text`
-    /// 不查表，英文环境下会直接漏出中文。英文原句即键，16 张表里查已有的译文。
+    /// The caption of a "+" panel cell. Its type is `LocalizedStringKey` rather than `String`: a bare `String` going into `Text`
+    /// does not consult the table, so an English locale would leak Chinese straight through. The English source sentence is the key; the existing translations are looked up in the 16 tables.
     var title: LocalizedStringKey {
         switch self {
         case .photo: return "Album"
@@ -570,9 +570,9 @@ enum PopopxPlusAction: String, CaseIterable, Identifiable {
     }
 }
 
-// MARK: - 输入条
+// MARK: - Input bar
 
-/// 磨砂玻璃底的会话输入条：语音键 · 自增高文本框 · 表情 · 「+」功能面板（内含阅后即焚）· 发送键。
+/// The conversation input bar on a frosted-glass base: voice key · self-growing text box · emoji · the "+" function panel (which contains view-once) · send key.
 struct PopopxInputBar: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
@@ -595,21 +595,21 @@ struct PopopxInputBar: View {
     private let onPlusTap: (PopopxPlusAction) -> Void
     private let onTTLChange: (Int?) -> Void
     private let onSecureTTLChange: (Int?) -> Void
-    /// 「+」面板里实际画哪几格。默认是全部；宿主按会话筛掉**在这个会话里根本发不出去**的那些
-    /// （礼品卡只在单聊成立）。刻意不做成"画出来、按下去再弹提示"：少一格只是少一个入口，
-    /// 而一格点了只换来一句"这里不行"，是在骗用户按它。
+    /// Which cells are actually drawn in the "+" panel. The default is all of them; the host filters out, per session, the ones that **cannot be sent at all in this session**
+    /// (the gift card only holds in direct chats). Deliberately not built as "draw it, then show a hint when it is pressed": one cell fewer is just one entry point fewer,
+    /// whereas a cell whose tap buys nothing but a "not possible here" is tricking the user into pressing it.
     private let plusActions: [PopopxPlusAction]
 
     @State private var showsPlusPanel = false
     @State private var showsEmojiTray = false
     @State private var isVoiceMode = false
 
-    /// 文本框最多长到几行，再长就自己滚。
+    /// How many lines the text box grows to at most; beyond that it scrolls on its own.
     private static let maxComposerLines = 5
 
-    /// `@MainActor` 是为了在 init 里取那两个 `@MainActor` 单例（`PopopxMeshRuntime.shared`
+    /// `@MainActor` is there so that init can obtain those two `@MainActor` singletons (`PopopxMeshRuntime.shared`
     /// `POPOPXAPI.swift:3732`、`PopopxMeshStateSource.shared` `PopopxMeshStateSource.swift:158`）——
-    /// 和第四阶段那几页同一个写法（`Shared/Features/Chats/ChatsListView.swift:189`）。
+    /// and the same spelling used by the phase four pages (`Shared/Features/Chats/ChatsListView.swift:189`).
     @MainActor
     init(
         text: Binding<String>,
@@ -663,12 +663,12 @@ struct PopopxInputBar: View {
         .popopxAnimation(PopopxSpring.snappy, value: showsPlusPanel, reduceMotion: reduceMotion)
         .popopxAnimation(PopopxSpring.snappy, value: showsEmojiTray, reduceMotion: reduceMotion)
         .popopxAnimation(PopopxSpring.fluid, value: channel, reduceMotion: reduceMotion)
-        // 打开会话读一次；总闸翻转时重开这一对 task（`refresh` 自己会先把旧结论清成未读）。
+        // Read once when the session opens; when the master switch flips this pair of tasks is restarted (`refresh` itself first clears the old verdict to unread).
         .task(id: context.contactId) { await model.refresh(contactId: context.contactId) }
         .task(id: runtime.isFuseOn) { await model.poll(contactId: context.contactId) }
     }
 
-    // MARK: 通道条
+    // MARK: Channel strip
 
     private var channel: PopopxComposerChannel {
         PopopxComposerRouting.channel(
@@ -678,13 +678,13 @@ struct PopopxInputBar: View {
         )
     }
 
-    /// 跳数从已观察的网格快照同步读，不产生 actor hop（`peer(withHex:)` 在 PopopxMeshStateSource.swift:53）。
+    /// The hop count is read synchronously from the already observed mesh snapshot, so it produces no actor hop (`peer(withHex:)` is at PopopxMeshStateSource.swift:53).
     private var currentHops: Int? {
         guard let hex = model.eligibility.reachableMeshKey else { return nil }
         return meshState.state.peer(withHex: hex)?.hopCount
     }
 
-    /// 通道条每次重绘都要问的那一半判定（不铸造 messageId —— 还没有"这一条消息"）。
+    /// The half of the verdict that the channel strip asks on every redraw (no messageId is minted - there is no "this message" yet).
     private var hostSendReason: PopopxHostSendReason? {
         PopopxComposerRouting.hostReason(
             context: context,
@@ -693,8 +693,8 @@ struct PopopxInputBar: View {
         )
     }
 
-    /// 发送键的图形只跟着**通道**走，不跟着"归谁发"走：这个产品里青绿的意思从来都是"蓝牙带走了这条"，
-    /// 而不是"模块 5 拿到了它"（判定结果在 `onSend` 的 `dispatch` 里，宿主自己看）。
+    /// The send key's graphic follows only the **channel**, not "who gets to send it": in this product teal has always meant "Bluetooth took this one away",
+    /// not "module 5 got hold of it" (the verdict is in the `dispatch` of `onSend`, for the host to read itself).
     private var sendSymbolName: String {
         if case .mesh = channel { return "antenna.radiowaves.left.and.right" }
         return "arrow.up"
@@ -706,7 +706,7 @@ struct PopopxInputBar: View {
             HStack(spacing: PopopxMetrics.spaceXS) {
                 channelBadge
                 if model.eligibility.queuedCount > 0 {
-                    // 灰 clock 只说一件事：厢语中继积压。
+                    // A grey clock says exactly one thing: Cabin relay backlog.
                     Label("Awaiting relay: \(model.eligibility.queuedCount)", systemImage: "clock")
                         .font(PopopxType.metricSmall)
                         .foregroundStyle(PopopxPalette.labelSecondary)
@@ -725,8 +725,8 @@ struct PopopxInputBar: View {
                 .font(PopopxType.microTag)
                 .foregroundStyle(PopopxPalette.brand)
         case let .mesh(hops):
-            // 闭包显式返回 `LocalizedStringKey`：整支表达式的类型决定了 `Label` 取哪一枚重载，
-            // 落在 `String` 上就等于不本地化。
+            // The closure returns `LocalizedStringKey` explicitly: the type of the whole expression decides which `Label` overload is taken,
+            // and landing on `String` is the same as not localizing.
             Label(
                 hops.map { (n: Int) -> LocalizedStringKey in "Mesh offline · \(n) hops" } ?? "Mesh offline",
                 systemImage: "antenna.radiowaves.left.and.right"
@@ -734,20 +734,20 @@ struct PopopxInputBar: View {
                 .font(PopopxType.microTag)
                 .foregroundStyle(PopopxPalette.meshInk)
         case .undetermined:
-            // 不替用户猜通道，所以这里刻意不给图标、不给强调色。
+            // We do not guess the channel on the user's behalf, so this deliberately gets no icon and no accent color.
             Text(model.isResolving ? "Reading mesh bindings…" : "Channel undetermined")
                 .font(PopopxType.microTag)
                 .foregroundStyle(PopopxPalette.labelSecondary)
         }
     }
 
-    /// 强调色之外的那句解释（灰色，绝不与强调色抢同一个控件里的第二把颜色）。
-    /// 与 `PopopxHostSendReason.explanation` 同一个理由：返回 `String?`，所以查表走 `NSLocalizedString`。
+    /// The one line of explanation beyond the accent color (grey, never competing with the accent color for the second color inside the same control).
+    /// The same reason as `PopopxHostSendReason.explanation`: it returns `String?`, so the table lookup goes through `NSLocalizedString`.
     private var stripNote: String? {
         if let reason = hostSendReason { return reason.explanation }
         switch channel {
         case .smp:
-            // 公网在、蓝牙也能直达时，说清 mesh 只是补发/兜底（模块 5 的 3 秒规则）。
+            // When the public network is up and Bluetooth can also reach directly, say clearly that mesh is only a resend / fallback (module 5's 3 second rule).
             return model.eligibility.isMeshCapable && model.eligibility.networkConnected == true
                 ? NSLocalizedString("If the internet does not acknowledge within 3 seconds it is also sent over Bluetooth", comment: "composer channel strip")
                 : nil
@@ -758,7 +758,7 @@ struct PopopxInputBar: View {
         }
     }
 
-    // MARK: 主行
+    // MARK: Main row
 
     private var inputRow: some View {
         HStack(alignment: .bottom, spacing: PopopxMetrics.spaceXS) {
@@ -807,8 +807,8 @@ struct PopopxInputBar: View {
     }
 
     private var composerField: some View {
-        // `placeholder` 是宿主递进来的 `String`，所以这里显式把它当键查一次；
-        // `TextField(_:text:axis:)` 的裸 `String` 重载不查表。
+        // `placeholder` is a `String` handed in by the host, so here it is explicitly looked up once as a key;
+        // the bare `String` overload of `TextField(_:text:axis:)` does not consult the table.
         TextField(LocalizedStringKey(placeholder), text: $text, axis: .vertical)
             .font(PopopxType.body)
             .foregroundStyle(PopopxPalette.label)
@@ -831,7 +831,7 @@ struct PopopxInputBar: View {
             .accessibilityIdentifier("popopx.inputBar.textField")
     }
 
-    /// 录音不归本条所有：这里只把"按住说话"这个面切换出来，并把按下这件事递出去。
+    /// Recording is not owned by this bar: here it only switches the "hold to talk" surface in and hands the press itself out.
     private var holdToTalkBar: some View {
         Button(action: onHoldToTalk) {
             Text("Hold to talk")
@@ -864,7 +864,7 @@ struct PopopxInputBar: View {
         .accessibilityIdentifier("popopx.inputBar.sendButton")
     }
 
-    /// 一个控件里只可能有一把强调色：靛紫（SMP）或青绿（mesh），或两者都不是的中性灰。
+    /// Only one accent color is possible inside a single control: indigo (SMP) or teal (mesh), or a neutral gray that is neither.
     private var sendAccent: (fill: Color, ink: Color) {
         switch channel {
         case .smp: (PopopxPalette.brand, PopopxPalette.onBrand)
@@ -873,7 +873,7 @@ struct PopopxInputBar: View {
         }
     }
 
-    /// VoiceOver 的 value：发送键本身没有文字，通道只能靠这句话讲出来。
+    /// The VoiceOver value: the send key itself carries no text, so the channel can only be told through this sentence.
     private var sendAccessoryLabel: LocalizedStringKey {
         switch channel {
         case .smp: return "Will be sent over online encryption · SMP"
@@ -882,7 +882,7 @@ struct PopopxInputBar: View {
         }
     }
 
-    // MARK: 表情托盘
+    // MARK: Emoji tray
 
     private var emojiTray: some View {
         LazyVGrid(
@@ -918,8 +918,8 @@ struct PopopxInputBar: View {
         .padding(.top, PopopxMetrics.space2XS)
     }
 
-    /// 常用 24 枚。要更全的表情归系统的表情键盘（切回键盘即可），本条不自建第二套选表器 ——
-    /// 旧 composer 的 `ElegantEmojiPicker` 只在列表页选标签图标时挂过（`TagListView.swift:250`）。
+    /// The 24 most frequently used ones. A fuller emoji set belongs to the system emoji keyboard (switch back to the keyboard); this bar does not build a second picker -
+    /// the old composer's `ElegantEmojiPicker` was only ever hooked in when choosing a tag icon on the list page (`TagListView.swift:250`).
     private static let quickEmoji: [String] = [
         "😀", "😄", "😂", "🥰", "😍", "😉",
         "😊", "😎", "🤔", "😴", "😭", "😱",
@@ -927,7 +927,7 @@ struct PopopxInputBar: View {
         "❤️", "🔥", "🎉", "✨", "🌙", "⚡️"
     ]
 
-    // MARK: 「+」功能面板
+    // MARK: "+" function panel
 
     private var plusPanel: some View {
         VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
@@ -940,15 +940,15 @@ struct PopopxInputBar: View {
                 spacing: PopopxMetrics.spaceXS
             ) {
                 ForEach(plusActions) { action in
-                    // 有"已武装"态的格子目前只有绝密：按普通一次性动作画的话，
-                    // 用户看不出这条草稿到底是不是绝密消息 —— 那是发送前唯一的可见线索。
-                    // 声明必须放在 `Button` 之前而不是 `label:` 里：下面的 `.accessibilityAddTraits`
-                    // 挂在 Button 的返回值上，看不见 label 闭包内部的作用域。
+                    // So far the only cell with an "armed" state is top secret: drawn as an ordinary one-shot action,
+                    // the user cannot tell whether this draft is in fact a top-secret message - and that is the only visible clue before sending.
+                    // The declaration must go before `Button` rather than inside `label:`: the `.accessibilityAddTraits` below
+                    // hangs off Button's return value, so it cannot see the scope inside the label closure.
                     let armed = action == .secure && secureTTLSeconds != nil
                     Button {
-                        // 绝密这一格按下去**不关面板**：它是个武装开关，关掉之后用户只会看见
-                        // 面板消失、什么也没发生；留在面板里才能立刻看见那排时长 chip 亮起来。
-                        // 其余四格是一次性动作（开选择器/系统面板），必须关。
+                        // The top-secret cell **does not close the panel** when pressed: it is an arm switch, and once closed the user would only see
+                        // the panel vanish with nothing happening; staying inside the panel is what lets the row of duration chips light up immediately.
+                        // The other four cells are one-shot actions (open a picker / system panel) and must close it.
                         if action != .secure { closeTrays() }
                         onPlusTap(action)
                     } label: {
@@ -990,15 +990,15 @@ struct PopopxInputBar: View {
     }
 
     @ViewBuilder private var disappearingBlock: some View {
-        // `PopopxCheckbox` 收的是 `String`（`Shared/Components/PopopxControls.swift:412`），
-        // 它内部的 `Text(title)` 不查表，所以键的解析必须发生在递进去之前。
+        // `PopopxCheckbox` takes a `String` (`Shared/Components/PopopxControls.swift:412`),
+        // and the `Text(title)` inside it does not consult the table, so the key has to be resolved before it is handed in.
         PopopxCheckbox(
             NSLocalizedString("Burn after reading", comment: "composer option"),
             note: NSLocalizedString("When this is on the message goes only over online encryption, never relayed by Bluetooth", comment: "composer option"),
             isOn: disappearingSwitch
         )
         if let ttlSeconds {
-            // 三档就是旧发送键菜单里的那三档（`SendMessageView.swift:199`-`:201`），这里不另立时长。
+            // The three tiers are exactly the three tiers of the old send-key menu (`SendMessageView.swift:199`-`:201`); no separate duration is set up here.
             PopopxDurationChips(
                 options: PopopxComposerRouting.durationOptions,
                 selectedSeconds: ttlSeconds,
@@ -1008,8 +1008,8 @@ struct PopopxInputBar: View {
         }
     }
 
-    /// 绝密那一档。它和上面那一档在版面上挨着，所以两处文案必须把**区别**说出来：
-    /// 一个管服务器留多久，一个管屏幕留多久，而且这一条可以走蓝牙（发出去的是密文）。
+    /// The top-secret tier. It sits adjacent to the tier above in the layout, so the two pieces of copy must state the **difference**:
+    /// one governs how long the server keeps it, the other how long the screen keeps it, and this one may travel over Bluetooth (what goes out is ciphertext).
     @ViewBuilder private var secureBlock: some View {
         PopopxCheckbox(
             NSLocalizedString("Top-secret burn after reading", comment: "composer option"),
@@ -1026,7 +1026,7 @@ struct PopopxInputBar: View {
         }
     }
 
-    /// 只有一份真值：读进来的 `ttlSeconds`，写出去的 `onTTLChange`。本条不存"上一次选的时长"。
+    /// There is only one source of truth: `ttlSeconds` read in, `onTTLChange` written out. This bar does not store "the duration chosen last time".
     private var disappearingSwitch: Binding<Bool> {
         Binding(
             get: { ttlSeconds != nil },
@@ -1041,8 +1041,8 @@ struct PopopxInputBar: View {
         )
     }
 
-    /// 绝密那一档的同一个规矩：读 `secureTTLSeconds`、写 `onSecureTTLChange`，本地不留副本。
-    /// 默认档取自载荷层（`PopopxSecureCopy.defaultTTLSeconds`），理由见那里。
+    /// The same rule for the top-secret tier: read `secureTTLSeconds`, write `onSecureTTLChange`, keep no local copy.
+    /// The default tier comes from the payload layer (`PopopxSecureCopy.defaultTTLSeconds`); see there for the reason.
     private var secureSwitch: Binding<Bool> {
         Binding(
             get: { secureTTLSeconds != nil },
@@ -1055,7 +1055,7 @@ struct PopopxInputBar: View {
         )
     }
 
-    // MARK: 动作
+    // MARK: Actions
 
     private func closeTrays() {
         showsPlusPanel = false
@@ -1069,7 +1069,7 @@ struct PopopxInputBar: View {
             eligibility: model.eligibility,
             ttlSeconds: ttlSeconds
         )
-        // 空草稿：不发，也不叫宿主。
+        // Empty draft: do not send, and do not call the host either.
         if case .ignoreEmptyDraft = dispatch { return }
         PopopxHaptics.impact(dispatch.isRouted ? .medium : .light)
         onSend(
@@ -1082,22 +1082,22 @@ struct PopopxInputBar: View {
                 channel: channel
             )
         )
-        // 只有路由这一支由本条负责清草稿：模块 5 的 SMP 腿自己把行插进时间线
-        // （`POPOPXAPI.swift:3467`-`:3480`），除了这里没有第二个人会清 `text`。
-        // 交回宿主的那一支沿用宿主原有的清空时机（`SendMessageView.swift:152`），本条不去动它，
-        // 否则宿主的失败回填、改写草稿会被抹掉。
+        // Only the router branch is this bar's job to clear the draft: module 5's SMP leg inserts the row into the timeline itself
+        // (`POPOPXAPI.swift:3467`-`:3480`), and apart from here nobody else clears `text`.
+        // The branch handed back to the host keeps the host's own clearing timing (`SendMessageView.swift:152`); this bar does not touch it,
+        // otherwise the host's failure refill and draft rewriting would be wiped out.
         if dispatch.isRouted { text = "" }
         closeTrays()
     }
 }
 
-// MARK: - 键位（44pt 起跳，全部走原子控件）
+// MARK: - Keys (starting at 44pt, all through atomic controls)
 
-/// 输入条上的一个图标键。选中态用墨色 + 一层卡片底，**不用靛紫也不用青绿**：
-/// 那两把颜色在这个产品里是传输通道的语义，不能被"面板开着"这种事借用。
+/// An icon key on the input bar. The selected state uses ink color + a card backing, **neither indigo nor teal**:
+/// those two colors carry the semantics of the transport channel in this product and cannot be borrowed for something like "the panel is open".
 private struct PopopxBarKey: View {
     let symbol: String
-    /// `LocalizedStringKey`：这一格只有图标，题字是给 VoiceOver 的，裸 `String` 不进本地化表。
+    /// `LocalizedStringKey`: this cell has only an icon, the caption is for VoiceOver, and a bare `String` does not enter the localization table.
     let label: LocalizedStringKey
     let active: Bool
     let action: () -> Void

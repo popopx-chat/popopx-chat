@@ -2,54 +2,54 @@
 //  PopopxChatInfoView.swift
 //  POPOPX (iOS)
 //
-//  【第五阶段】1:1 联系人会话信息页重写，替代 Shared/Views/Chat/ChatInfoView.swift:94。
-//  挂载方式：把 Shared/Views/Chat/ChatView.swift:476 的 `ChatInfoView(` 改成
-//  `PopopxChatInfoView(` 就够了 —— 六个外部参数标签、类型与顺序和旧页逐字一致
+//  [phase five] The 1:1 contact conversation info page rewrite, replacing Shared/Views/Chat/ChatInfoView.swift:94.
+//  Mounting method: changing `ChatInfoView(` at Shared/Views/Chat/ChatView.swift:476 into
+//  `PopopxChatInfoView(` is enough —— the six external parameter labels, their types and their order are character-identical to the old page,
 //  （chat / contact / localAlias / featuresAllowed / currentFeaturesAllowed / onSearch），
-//  环境依赖也照旧声明：ChatModel、AppTheme、\.dismiss。
+//  and the environment dependencies are declared as before: ChatModel, AppTheme, \.dismiss.
 //
-//  AppTheme 这一行只保留声明、不读它的任何颜色（裁定 B：颜色只来自 PopopxTheme）：
-//  本页推进去的旧目的地各自有 `@EnvironmentObject var theme: AppTheme`
+//  The AppTheme line keeps only the declaration and reads none of its colours (ruling B: colours come only from PopopxTheme):
+//  the old destinations this page pushes to each have their own `@EnvironmentObject var theme: AppTheme`
 //  （VerifyCodeView.swift:14、ContactPreferencesView.swift:17、ChatInfoView.swift:931、
-//  ChatInfoView.swift:1291），环境由根上注入（Shared/POPOPXApp.swift:44）自动向下传递，
-//  保留声明只是为了这份输入面与旧页完全同形。
+//  (ChatInfoView.swift:1291), the environment is injected at the root (Shared/POPOPXApp.swift:44) and flows down automatically,
+//  and keeping the declaration is only so that this input surface stays exactly the same shape as the old page.
 //
-//  版式：顶部一枚联系人卡（头像 + 校验盾 + 名字/全名 + popopx 名 + 简介 + 连接状态 +
-//  本机备注名输入），下面 ScrollView 里六组 PopopxSectionCard：连接与安全 / 聊天 /
-//  自动删除 / 地址 / 服务器 / 危险操作。旧页是 List + 8 段，这里改成与新品牌其它页面
-//  （PopopxMeView、PopopxContactsView）同一族的卡片滚动布局。
+//  Layout: one contact card at the top (avatar + verification shield + name/full name + popopx name + bio + connection state +
+//  a local note-name field), and below it in a ScrollView six groups of PopopxSectionCard: connection and security / chat /
+//  auto-delete / addresses / server / dangerous operations. The old page was a List + 8 sections; here it becomes the same family of card-scroll layout
+//  as the new brand's other pages (PopopxMeView, PopopxContactsView).
 //
-//  数据来源全是既有函数，本页不写第二条链路：
-//  · 进页面一次读三份事实 —— apiContactInfo（Shared/Model/POPOPXAPI.swift:947）给
-//    ConnectionStats 与这条连接所用的随机身份，apiGetContactCode（:1013）给校验码与最新
-//    Contact；两份事实不一致时用后者回写 chat.chatInfo。
-//  · 备注名 apiSetContactAlias（:1448）、偏好 apiSetContactPrefs（:1442）、校验码
-//    apiVerifyContact（:1025）、更换/中止更换接收地址 apiSwitchContact（:977）/
-//    apiAbortSwitchContact（:989）、清除记录 clearChat（:1363）、静音与回执
+//  Every piece of data comes from existing functions, and this page writes no second path:
+//  · on entering the page three facts are read once —— apiContactInfo (Shared/Model/POPOPXAPI.swift:947) gives
+//    the ConnectionStats and the random identity this connection uses, apiGetContactCode (:1013) gives the verification code and the latest
+//    Contact; where the two facts disagree the latter is written back into chat.chatInfo.
+//  · note name apiSetContactAlias (:1448), preferences apiSetContactPrefs (:1442), verification code
+//    apiVerifyContact (:1025), switch / abort switching the receiving address apiSwitchContact (:977) /
+//    apiAbortSwitchContact (:989), clear history clearChat (:1363), muting and receipts
 //    toggleNotifications / updateChatSettings（Shared/Views/Chat/ChatView.swift:3361 / :3373）；
-//  · 修复连接走 syncContactConnection（Shared/Views/Chat/ChatInfoView.swift:726），
-//    删除联系人走 deleteContactDialog（:1139，两级确认，第二级是 DeleteActiveContactDialog :1289）；
-//  · 订阅状态只读 ChatModel.chatSubStatus（Shared/Model/ChatModel.swift:413），服务器地址读
-//    ConnectionStats（POPOPXChat/APITypes.swift:568）的 rcv/sndQueuesInfo，主机名走
+//  · repairing the connection goes through syncContactConnection (Shared/Views/Chat/ChatInfoView.swift:726),
+//    deleting a contact goes through deleteContactDialog (:1139, two-step confirmation, the second step being DeleteActiveContactDialog :1289);
+//  · subscription state only reads ChatModel.chatSubStatus (Shared/Model/ChatModel.swift:413), and server addresses read
+//    the rcv/sndQueuesInfo of ConnectionStats (POPOPXChat/APITypes.swift:568), host names go through
 //    serverHost（Shared/Views/Chat/ChatInfoView.swift:54）；
-//  · 头像与简介复用 ProfileImage（Shared/Views/Helpers/ProfileImage.swift:13）、
-//    NameWithBadge（Shared/Views/Helpers/NameBadge.swift:23）、contactPopopxNameView 与
+//  · the avatar and bio reuse ProfileImage (Shared/Views/Helpers/ProfileImage.swift:13),
+//    NameWithBadge (Shared/Views/Helpers/NameBadge.swift:23), contactPopopxNameView and
 //    ProfileDescriptionView（Shared/Views/Chat/ChatItem/MsgContentView.swift:382）。
 //
-//  配色纪律（§1.1）：这一页讲的只有在线 SMP 通道，靛紫就是"在线加密"，所以全页不出现青绿；
-//  绿色不承载常驻状态（§1.4 第 4 条），"已连接"用 brand，错误用 dangerInk。
-//  破坏性行（清除记录 / 删除联系人）一律 dangerInk 标题 + danger 徽章，并且各自保留真实确认：
-//  清除 = Alert 二次确认；删除 = ActionSheet + 第二张表单页，没有任何一步是静默的。
-//  签名细节（§2.4 每屏一个）：头像右下角那枚校验盾，只有 contact.verified 为真才出现，
-//  实底 brand + 墨 onBrand（§1.4 第 1 条），带一圈 card 色描边把它从照片里剥出来；静态，无动画。
+//  Colour discipline (§1.1): this page speaks only of online SMP channels, and indigo-violet is "online encrypted", so no teal appears anywhere on the page;
+//  green carries no standing state (§1.4 item 4), so "connected" uses brand and errors use dangerInk.
+//  Destructive rows (clear history / delete contact) always use a dangerInk title + a danger badge, and each keeps its real confirmation:
+//  clear = a second Alert confirmation; delete = an ActionSheet + a second form page, and not one step is silent.
+//  Signature detail (§2.4 one per screen): the verification shield at the avatar's bottom-right corner only appears when contact.verified is true,
+//  a solid brand fill + ink onBrand (§1.4 item 1), with a ring of card-coloured stroke that peels it out of the photo; static, no animation.
 //
-//  未搬过来的旧行（都是 developer tools 门后的调试分支，逐条见交付说明）：
-//  「For console」整段（旧 :274-293，含 Local name / Database ID / Debug delivery）、
-//  强制重新协商加密（旧 :532-539 与其 alert 分支 :335-343 和 :1114-1121）、
-//  队列调试信息（旧 :281-291 与 :1123-1137）、以及一个声明后从未被读写的死状态
-//  showConnectContactViaAddressDialog（旧 :111）。
+//  The old rows that were not brought over (all of them debug branches behind the developer tools gate, itemised in the delivery notes):
+//  the whole "For console" block (old :274-293, including Local name / Database ID / Debug delivery),
+//  force re-negotiating encryption (old :532-539 with its alert branches :335-343 and :1114-1121),
+//  the queue debug info (old :281-291 and :1123-1137), and one dead state declared but never read or written,
+//  showConnectContactViaAddressDialog (old :111).
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖进 POPOPX (iOS) target —— 铁律禁止脚本改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand —— the iron rule forbids scripts from touching project.pbxproj.
 //
 
 import Foundation
@@ -57,9 +57,9 @@ import SwiftUI
 import UIKit
 import POPOPXChat
 
-// MARK: - 页内提示
+// MARK: - In-page prompts
 
-/// 本页会弹的五种东西。删除联系人链路要求 `SomeAlert`，所以它作为其中一支原样接住。
+/// The five things this page can pop up. The delete-contact path requires `SomeAlert`, so it is taken in unchanged as one of its branches.
 private enum PopopxChatInfoAlert: Identifiable {
     case clearChat
     case networkStatus(SubscriptionStatus)
@@ -78,11 +78,11 @@ private enum PopopxChatInfoAlert: Identifiable {
     }
 }
 
-// MARK: - 页面
+// MARK: - Page
 
 @MainActor
 struct PopopxChatInfoView: View {
-    // MARK: 输入面（与 ChatInfoView 同形，一个词即可挂载）
+    // MARK: Input surface (same shape as ChatInfoView, one word is enough to mount)
 
     @EnvironmentObject var chatModel: ChatModel
     @EnvironmentObject var theme: AppTheme
@@ -94,7 +94,7 @@ struct PopopxChatInfoView: View {
     @State var currentFeaturesAllowed: ContactFeaturesAllowed
     var onSearch: () -> Void
 
-    // MARK: 本页自己的状态
+    // MARK: This page's own state
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var connectionStats: ConnectionStats? = nil
@@ -109,10 +109,10 @@ struct PopopxChatInfoView: View {
     @State private var toast = PopopxToastModel()
     @FocusState private var aliasFocused: Bool
 
-    /// 头像边长取 4pt 格子上的一档：space2XL × 2 = 96。
+    /// The avatar side length takes one step on the 4pt grid: space2XL × 2 = 96.
     private static let avatarSide: CGFloat = PopopxMetrics.space2XL * 2
 
-    /// 只有连接可用时这些行才谈得上生效（旧页 :207 同一条门）。
+    /// These rows can only talk about taking effect when the connection is usable (the same gate as old page :207).
     private var connectionUsable: Bool { contact.ready && contact.active }
 
     var body: some View {
@@ -191,7 +191,7 @@ struct PopopxChatInfoView: View {
         .popopxToast(toast)
     }
 
-    // MARK: 顶部联系人卡
+    // MARK: Top contact card
 
     private var headerCard: some View {
         PopopxSectionCard {
@@ -212,8 +212,8 @@ struct PopopxChatInfoView: View {
         }
     }
 
-    /// 头像。有 base64 就走既有 `ProfileImage`，没有就落到品牌标记；校验盾只挂在有图的情况之外
-    /// 也一律挂右下角，因为它说的是连接，不是照片。
+    /// The avatar. With base64 it goes through the existing `ProfileImage`, without it falls back to the brand mark; the verification shield is attached outside the has-image case only
+    /// and it always hangs at the bottom-right corner, because what it speaks of is the connection, not the photo.
     private var avatar: some View {
         PopopxChatInfoAvatar(image: chat.chatInfo.image, side: Self.avatarSide)
             .overlay(alignment: .bottomTrailing) {
@@ -273,8 +273,8 @@ struct PopopxChatInfoView: View {
             && fullName != contact.profile.displayName
     }
 
-    /// 连接状态。措辞只说这份 Contact 真具备的事实：`ready`/`sndReady` 来自 activeConn 的
-    /// connStatus（POPOPXChat/ChatTypes.swift:2657-2660），失败来自 connFailedErr（:2813）。
+    /// The connection state. The wording only states facts this Contact genuinely has: `ready`/`sndReady` come from activeConn's
+    /// connStatus (POPOPXChat/ChatTypes.swift:2657-2660), failure comes from connFailedErr (:2813).
     private var statusLine: some View {
         let state = connectionState
         return HStack(spacing: PopopxMetrics.space2XS) {
@@ -307,7 +307,7 @@ struct PopopxChatInfoView: View {
         return (Copy.stateConnecting, PopopxPalette.labelSecondary, PopopxPalette.labelHint)
     }
 
-    /// 本机备注名。失焦即写回，和旧页 :408-415 同一条落库时机（不改焦点就不发请求）。
+    /// The local note name. Written back as soon as focus is lost, the same store timing as old page :408-415 (no focus change, no request sent).
     private var aliasField: some View {
         HStack(spacing: PopopxMetrics.spaceXS) {
             Image(systemName: "pencil")
@@ -345,7 +345,7 @@ struct PopopxChatInfoView: View {
         .accessibilityLabel(Text(verbatim: Copy.aliasLabel))
     }
 
-    // MARK: 快捷动作
+    // MARK: Quick actions
 
     private var quickActionsCard: some View {
         PopopxSectionCard {
@@ -390,7 +390,7 @@ struct PopopxChatInfoView: View {
         }
     }
 
-    // MARK: 连接与安全
+    // MARK: Connection and security
 
     private var securityCard: some View {
         PopopxSectionCard(Copy.groupSecurity, footnote: Copy.securityFootnote) {
@@ -451,7 +451,7 @@ struct PopopxChatInfoView: View {
         .opacity(connectionUsable ? 1 : 0.45)
     }
 
-    // MARK: 聊天
+    // MARK: Chat
 
     private var chatCard: some View {
         PopopxSectionCard(Copy.groupChat) {
@@ -478,9 +478,9 @@ struct PopopxChatInfoView: View {
         .opacity(connectionUsable ? 1 : 0.45)
     }
 
-    /// 已读回执三档。选项就是 `SendReceipts`（Shared/Views/Chat/ChatInfoView.swift:62）本身，
-    /// 第三档的默认值读的是当前身份的 `sendRcptsContacts`（POPOPXChat/ChatTypes.swift:48），
-    /// 所以它显示的是"跟的是哪条默认"，不是猜的。
+    /// The three read-receipt tiers. The options are `SendReceipts` itself (Shared/Views/Chat/ChatInfoView.swift:62),
+    /// and the third tier's default reads the current identity's `sendRcptsContacts` (POPOPXChat/ChatTypes.swift:48),
+    /// so what it shows is "which default is being followed", not a guess.
     private var receiptsBlock: some View {
         VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
             HStack(spacing: PopopxMetrics.spaceS) {
@@ -521,10 +521,10 @@ struct PopopxChatInfoView: View {
         }
     }
 
-    // MARK: 自动删除
+    // MARK: Auto-delete
 
-    /// 这一行的控件与确认逻辑是旧页那颗 `ChatTTLOption`（Shared/Views/Chat/ChatInfoView.swift:664）：
-    /// 它自己会先弹确认，再 `setChatTTL` + 重载会话，失败回滚。中文说明由本页 footnote 给。
+    /// This row's control and confirmation logic is the old page's `ChatTTLOption` (Shared/Views/Chat/ChatInfoView.swift:664):
+    /// It pops its own confirmation first, then `setChatTTL` + reloads the conversation, and rolls back on failure. The Chinese explanation is given by this page's footnote.
     private var ttlCard: some View {
         PopopxSectionCard(Copy.groupTTL, footnote: Copy.ttlFootnote) {
             ChatTTLOption(chat: chat, progressIndicator: $progressIndicator)
@@ -532,7 +532,7 @@ struct PopopxChatInfoView: View {
         }
     }
 
-    // MARK: 地址
+    // MARK: Addresses
 
     private func addressCard(_ contactLink: String) -> some View {
         PopopxSectionCard(Copy.groupAddress, footnote: Copy.addressFootnote(contact.displayName)) {
@@ -550,7 +550,7 @@ struct PopopxChatInfoView: View {
         }
     }
 
-    // MARK: 服务器
+    // MARK: Server
 
     private var serversCard: some View {
         PopopxSectionCard(Copy.groupServers, footnote: Copy.serversFootnote) {
@@ -606,8 +606,8 @@ struct PopopxChatInfoView: View {
         }
     }
 
-    /// 服务器行：显示第一个中继主机名，点击把整份列表复制走（旧页 :41-52 的 `smpServers`
-    /// 就是这个动作，只是版式换了）。主机名走 `serverHost`（旧 :54），去掉前缀不自己拼规则。
+    /// The server row: displays the first relay host name, and tapping copies the whole list away (the old page :41-52's `smpServers`
+    /// was exactly this action, only the layout changed). Host names go through `serverHost` (old :54), the prefix is not stripped by our own rule.
     private func serverRow(_ title: String, _ servers: [String], _ systemImage: String) -> some View {
         PopopxChatInfoRow(
             title: title,
@@ -638,7 +638,7 @@ struct PopopxChatInfoView: View {
             && !stats.ratchetSyncSendProhibited
     }
 
-    // MARK: 危险操作
+    // MARK: Dangerous operations
 
     private var dangerCard: some View {
         PopopxSectionCard(Copy.groupDanger, footnote: Copy.dangerFootnote) {
@@ -673,7 +673,7 @@ struct PopopxChatInfoView: View {
         }
     }
 
-    // MARK: 行为
+    // MARK: Behaviour
 
     private func loadContactInfo() {
         if let currentUser = chatModel.currentUser {
@@ -789,7 +789,7 @@ struct PopopxChatInfoView: View {
         toast.show(Copy.copiedServers, kind: .encrypted)
     }
 
-    // MARK: 提示
+    // MARK: Prompts
 
     private func clearChatAlert() -> Alert {
         Alert(
@@ -813,9 +813,9 @@ struct PopopxChatInfoView: View {
     }
 }
 
-// MARK: - 行与卡内原子件
+// MARK: - Rows and the atomic pieces inside a card
 
-/// 卡片内分隔线。原子库里那条同名的只在 `#if DEBUG` 画廊里（Shared/Components/PopopxControls.swift:853）。
+/// The divider inside a card. The atom library's namesake only lives in the `#if DEBUG` gallery (Shared/Components/PopopxControls.swift:853).
 private struct PopopxChatInfoDivider: View {
     var body: some View {
         Rectangle()
@@ -825,8 +825,8 @@ private struct PopopxChatInfoDivider: View {
     }
 }
 
-/// 行首的 SF Symbol 徽章：实底与压在它上面的墨成对取自 `PopopxIconTint`（§2.5 第 2 条），
-/// 库里的同枚徽章是私有的（PopopxControls.swift:315），这里按同一形状现拼。
+/// The SF Symbol badge at the head of a row: the solid fill and the ink pressed on top of it are taken as a pair from `PopopxIconTint` (§2.5 item 2),
+/// and the same badge in the library is private (PopopxControls.swift:315), so it is assembled here from scratch in the same shape.
 private struct PopopxChatInfoRowBadge: View {
     let systemName: String
     let tint: PopopxIconTint
@@ -842,8 +842,8 @@ private struct PopopxChatInfoRowBadge: View {
     }
 }
 
-/// 画在卡面上的墨：`PopopxIconTint.ink` 说的是"压在实底上的墨"，两者不能混用，
-/// 否则 light 模式下白压在白卡上等于看不见。
+/// The ink drawn on the card face: `PopopxIconTint.ink` means "the ink that sits on a solid fill", and the two must not be mixed,
+/// otherwise in light mode white pressed on a white card amounts to invisible.
 private enum PopopxChatInfoInk {
     static func onCard(_ tint: PopopxIconTint) -> Color {
         switch tint {
@@ -859,7 +859,7 @@ private enum PopopxChatInfoInk {
 private struct PopopxChatInfoRowLabel: View {
     let title: String
     var note: String?
-    /// 危险行的标题要一眼看见，所以墨由调用方给：普通行 label，危险行 dangerInk。
+    /// A dangerous row's title has to be seen at a glance, so the ink comes from the caller: label for an ordinary row, dangerInk for a dangerous one.
     var titleInk: Color = PopopxPalette.label
 
     var body: some View {
@@ -878,7 +878,7 @@ private struct PopopxChatInfoRowLabel: View {
     }
 }
 
-/// 一行。有 action 才是按钮，没有就是纯读数 —— 不存在"点了没反应"的行。
+/// One row. With an action it is a button, without one it is a pure readout — there is no "tapped and nothing happens" row.
 private struct PopopxChatInfoRow: View {
     let title: String
     var value: String?
@@ -925,8 +925,8 @@ private struct PopopxChatInfoRow: View {
     }
 }
 
-/// 推到既有页面的一行。导航由 `NavigationLink` 拥有，所以整行不是 Button：
-/// 原子库那枚 `PopopxPickerRow` 自身是 Button，嵌进链接会把点击吃掉。
+/// A row that pushes to an existing page. `NavigationLink` owns the navigation, so the whole row is not a Button:
+/// the atom library's `PopopxPickerRow` is itself a Button, and nesting it inside a link would swallow the tap.
 private struct PopopxChatInfoRowLink<Destination: View>: View {
     let title: String
     var value: String?
@@ -967,7 +967,7 @@ private struct PopopxChatInfoRowLink<Destination: View>: View {
     }
 }
 
-/// 快捷动作那一格：图标在上、字在下，整格 44pt 起跳。
+/// The quick-action cell: icon on top, text below, and the whole cell takes off from 44pt.
 private struct PopopxChatInfoTile: View {
     let title: String
     let systemImage: String
@@ -1002,8 +1002,8 @@ private struct PopopxChatInfoTile: View {
     }
 }
 
-/// 通话格。判定树与旧页那颗 `CallButton`（Shared/Views/Chat/ChatInfoView.swift:784-899）逐条对应，
-/// 只是把版式换成 popopx 的格子：能不能打、为什么不能打、要不要先修复连接，说的都是真判断。
+/// The call cell. Its decision tree corresponds item by item to the old page's `CallButton` (Shared/Views/Chat/ChatInfoView.swift:784-899),
+/// only the layout becomes a popopx cell: whether a call is possible, why it is not, and whether to repair the connection first are all real judgements.
 @MainActor
 private struct PopopxChatInfoCallTile: View {
     let chat: Chat
@@ -1073,7 +1073,7 @@ private struct PopopxChatInfoCallTile: View {
             if CallController.useCallKit() {
                 CallController.shared.startCall(contact, media)
             } else {
-                // 不走 CallKit 时配色会被通话改掉，先把弹层收掉再发起，理由同旧页 :804-807。
+                // When not going through CallKit the colour scheme gets changed by the call, so the sheet is dismissed first and the call started after; same reason as old page :804-807.
                 dismissAllSheets(animated: true) {
                     CallController.shared.startCall(contact, media)
                 }
@@ -1107,7 +1107,7 @@ private struct PopopxChatInfoCallTile: View {
     }
 }
 
-/// 头像。有 base64 就用既有 `ProfileImage`，没有就落到品牌标记 —— 不画占位人形。
+/// The avatar. With base64 the existing `ProfileImage` is used, without it falls back to the brand mark — no placeholder silhouette is drawn.
 @MainActor
 private struct PopopxChatInfoAvatar: View {
     let image: String?
@@ -1116,8 +1116,8 @@ private struct PopopxChatInfoAvatar: View {
     var body: some View {
         Group {
             if imageFromBase64(image) != nil {
-                // `color:` 与 PopopxMeView.swift:947-949 同一个值：`ProfileImage` 内部按
-                // asAnotherColorFromSecondaryVariant 映射这张图在分组背景上的深浅。
+                // `color:` takes the same value as PopopxMeView.swift:947-949: inside, `ProfileImage` maps
+                // this image's lightness on the grouped background via asAnotherColorFromSecondaryVariant.
                 ProfileImage(imageStr: image, size: side, color: Color(uiColor: .tertiarySystemGroupedBackground))
             } else {
                 Image(PopopxBrandAsset.mark)
@@ -1133,9 +1133,9 @@ private struct PopopxChatInfoAvatar: View {
     }
 }
 
-// MARK: - 文案
+// MARK: - Copy
 
-/// 页面上每一句中文只在这里出现一次。
+/// Every Chinese sentence on the page appears exactly once, here.
 private enum Copy {
     static let pageTitle = NSLocalizedString("Contact", comment: "")
     static let close = NSLocalizedString("Done", comment: "")
@@ -1143,7 +1143,7 @@ private enum Copy {
     static let opensHint = NSLocalizedString("Open", comment: "")
     static let verifiedOn = NSLocalizedString("Verified", comment: "")
 
-    // 顶部卡
+    // Top card
     static let verifiedShieldHint = NSLocalizedString("This connection has been verified by its security code", comment: "")
     static let aliasLabel = NSLocalizedString("Local alias", comment: "")
     static let aliasPrompt = NSLocalizedString("Give this contact a name on this device", comment: "")
@@ -1154,14 +1154,14 @@ private enum Copy {
     static let stateFailed = NSLocalizedString("Connection failed", comment: "")
     static let stateDeleted = NSLocalizedString("Contact deleted", comment: "")
 
-    // 快捷动作
+    // Quick actions
     static let search = NSLocalizedString("Search", comment: "")
     static let callAudio = NSLocalizedString("Audio", comment: "")
     static let callVideo = NSLocalizedString("Video", comment: "")
     static let mute = NSLocalizedString("Mute", comment: "")
     static let unmute = NSLocalizedString("Unmute", comment: "")
 
-    // 连接与安全
+    // Connection and security
     static let groupSecurity = NSLocalizedString("Connection & security", comment: "")
     static let securityFootnote = NSLocalizedString("Compare the security codes on both devices in person; the connection counts as verified only when they match.", comment: "")
     static let verifyCode = NSLocalizedString("Verify security code", comment: "")
@@ -1175,7 +1175,7 @@ private enum Copy {
     static let fixConnection = NSLocalizedString("Fix connection", comment: "")
     static let fixConnectionNote = NSLocalizedString("Re-negotiates the encryption, then returns you to the chat.", comment: "")
 
-    // 聊天
+    // Chat
     static let groupChat = NSLocalizedString("Chat", comment: "")
     static let contactPreferences = NSLocalizedString("Contact preferences", comment: "")
     static let wallpaper = NSLocalizedString("Chat wallpaper", comment: "")
@@ -1186,18 +1186,18 @@ private enum Copy {
     static let receiptDefaultOn = NSLocalizedString("Follow default (on)", comment: "")
     static let receiptDefaultOff = NSLocalizedString("Follow default (off)", comment: "")
 
-    // 自动删除
+    // Auto-delete
     static let groupTTL = NSLocalizedString("Automatic deletion", comment: "")
     static let ttlFootnote = NSLocalizedString("Deletes this chat's messages from this device; the chat reloads after the change.", comment: "")
 
-    // 地址
+    // Addresses
     static let groupAddress = NSLocalizedString("Connection address", comment: "")
     static func addressFootnote(_ name: String) -> String {
         String(format: NSLocalizedString("Send this address to the other person so they can start a connection with %@", comment: ""), name)
     }
     static let shareAddress = NSLocalizedString("Share address", comment: "")
 
-    // 服务器
+    // Server
     static let groupServers = NSLocalizedString("Servers", comment: "")
     static let serversFootnote = NSLocalizedString("The relay host names can be copied to troubleshoot connection problems.", comment: "")
     static let networkStatus = NSLocalizedString("Network status", comment: "")
@@ -1216,7 +1216,7 @@ private enum Copy {
     static let errorSwitchAddress = NSLocalizedString("Failed to change the receiving address", comment: "")
     static let errorAbortSwitch = NSLocalizedString("Failed to abort changing the address", comment: "")
 
-    // 危险操作
+    // Dangerous operations
     static let groupDanger = NSLocalizedString("Dangerous actions", comment: "")
     static let dangerFootnote = NSLocalizedString("Deleting and clearing affect only you on this device, unless you chose to notify the other side in the second step.", comment: "")
     static let clearHistory = NSLocalizedString("Clear chat history", comment: "")
@@ -1229,12 +1229,12 @@ private enum Copy {
     static let deleteContact = NSLocalizedString("Delete contact", comment: "")
     static let deleteContactNote = NSLocalizedString("The next step asks whether to delete only the chat or the contact as well.", comment: "")
 
-    // 离开本页时未保存的偏好
+    // Preferences left unsaved when leaving this page
     static let savePrefsTitle = NSLocalizedString("Save preferences?", comment: "")
     static let savePrefsMessage = NSLocalizedString("Your changes have not been sent yet; your contact is notified only when they are sent.", comment: "")
     static let savePrefsButton = NSLocalizedString("Save and notify contact", comment: "")
 
-    // 通话判定
+    // Call decision
     static let cantCallTitle = NSLocalizedString("Cannot start a call", comment: "")
     static let sendMsgToEnable = NSLocalizedString("Send your contact a message first; calls stay closed until you do.", comment: "")
     static let contactDeleted = NSLocalizedString("Your contact was deleted.", comment: "")

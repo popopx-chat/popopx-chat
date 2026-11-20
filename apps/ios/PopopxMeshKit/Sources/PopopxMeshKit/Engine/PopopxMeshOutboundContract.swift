@@ -2,7 +2,7 @@
 //  PopopxMeshOutboundContract.swift
 //  PopopxMeshKit
 //
-//  The engine's send side, described as a protocol so 模块 3 (pairing) and 模块 5 (router) can be
+//  The engine's send side, described as a protocol so module 3 (pairing) and module 5 (router) can be
 //  built and tested against a fake instead of a live radio.
 //
 
@@ -27,7 +27,7 @@ public protocol PopopxMeshOutbound: Sendable {
 
     /// Sends one envelope to one peer, over the Noise session with that peer. `throws` means the
     /// frame never reached the radio — a frame that reached the radio and went unanswered is an
-    /// ACK timeout, which 模块 4 reports.
+    /// ACK timeout, which module 4 reports.
     func send(envelope: PopopxMeshEnvelope, to meshPublicKeyHex: String) async throws(PopopxMeshSendError)
 
     /// The local `#mesh` plaza: unencrypted, flooded, never acknowledged.

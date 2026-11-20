@@ -1,8 +1,8 @@
 //
 //  ManualPairingManager.swift
-//  PopopxMeshKit  —  模块 3
+//  PopopxMeshKit  —  module 3
 //
-//  Turns a Bluetooth neighbour into a POPOPX contact. Two policies, chosen in 模块 1: manual
+//  Turns a Bluetooth neighbour into a POPOPX contact. Two policies, chosen in module 1: manual
 //  confirmation (the default — an inbound request only raises the chat banner and nothing is bound
 //  until the user approves) and auto-silent (the exchange completes on its own once the Bluetooth
 //  private session exists).
@@ -42,7 +42,7 @@ public enum PopopxPairingError: Error, Hashable, Sendable {
     case declinedRecently(peerMeshPublicKeyHex: String)
     case requestUnknown(peerMeshPublicKeyHex: String)
     case requestSuperseded(peerMeshPublicKeyHex: String)
-    /// The link inside the frame failed 模块 2's prefix rules; that keeps it out of the FFI.
+    /// The link inside the frame failed module 2's prefix rules; that keeps it out of the FFI.
     case inviteLinkRejected
     case sendFailed(PopopxMeshSendFailure)
     case offlineBridge(String)
@@ -53,7 +53,7 @@ public enum PopopxPairingError: Error, Hashable, Sendable {
 }
 
 public actor ManualPairingManager {
-    // No `shared`: this type needs 模块 2, and 模块 2 needs the app's chat core, which only the host
+    // No `shared`: this type needs module 2, and module 2 needs the app's chat core, which only the host
     // target can supply. Phase 2 constructs one and hands it to the UI and to the event pump.
 
     /// Posted when a manual-mode request needs the user. The banner (phase 2) observes it; the
@@ -184,7 +184,7 @@ public actor ManualPairingManager {
 
     // MARK: - Inbound: the user decides
 
-    /// Approving is the only path that reaches 模块 2 in manual mode: the link becomes a pending
+    /// Approving is the only path that reaches module 2 in manual mode: the link becomes a pending
     /// contact, then the peer is told which key accepted it.
     @discardableResult
     public func approve(_ request: PopopxPairingRequest, incognito: Bool = false)
@@ -321,7 +321,7 @@ public actor ManualPairingManager {
         peers[peerMeshPublicKeyHex, default: PeerLink(state: .unlinked)].state =
             .requestReceived(inviteLink: inviteLink)
 
-        // Manual mode stops here: the link is never handed to 模块 2 without the user.
+        // Manual mode stops here: the link is never handed to module 2 without the user.
         guard await store.pairingPolicy == .autoSilent else {
             NotificationCenter.default.post(
                 name: Self.bannerNotification,

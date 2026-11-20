@@ -11,8 +11,8 @@ import SwiftUI
 import POPOPXChat
 
 // Spec: spec/client/navigation.md#YourNetworkView
-// 引导第 3 屏：在线推送模式与厢语离线网格的两条总闸。
-// 通知模式不再跳二级页，三档就地单选；中继运营商仍走原来的 `ChooseServerOperators` 弹层。
+// Onboarding screen 3: the two master switches for online push mode and the Cabin offline grid.
+// Notification mode no longer jumps to a second-level page, the three tiers are chosen in place; relay operators still go through the original `ChooseServerOperators` sheet.
 struct YourNetworkView: View {
     @Environment(\.colorScheme) var colorScheme: ColorScheme
     @Environment(\.dismiss) private var dismiss
@@ -27,8 +27,8 @@ struct YourNetworkView: View {
     @State private var nextStepNavLinkActive = false
     @State private var justOpened = true
 
-    /// 与第 1 屏同一套做法：「继续 / 返回」钉在底部安全区之上，卡片之间的间距按屏高收一档，
-    /// 393×852 上三张卡与两颗按钮一次看全，不必下滑。判据仍是 GeometryReader 的可用高度。
+    /// The same approach as screen 1: "Continue / Back" pinned above the bottom safe area, and the spacing between cards tightened one tier by screen height,
+    /// so on 393×852 the three cards and both buttons are all visible at once with no scrolling. The basis is still GeometryReader's available height.
     var body: some View {
         GeometryReader { g in
             let compact = g.size.height < 900
@@ -79,7 +79,7 @@ struct YourNetworkView: View {
         .navigationBarHidden(true)
     }
 
-    // MARK: - 卡片
+    // MARK: - Cards
 
     private func modesCard(compact: Bool) -> some View {
         PopopxSectionCard(
@@ -94,10 +94,10 @@ struct YourNetworkView: View {
         .popopxAnimation(PopopxSpring.snappy, value: notificationMode, reduceMotion: reduceMotion)
     }
 
-    /// 推送模式三档：整行是一个按钮，选中态同时给四重信号（高亮底、加粗描边、
-    /// 「已选」微标、双层实心圆点），未选中态只留 0.5pt 发丝描边，让三档读起来是控件而不是文案。
-    /// 没有复用 `PopopxRadioRow`：那个原子的行尾只放圆点，插不进状态微标，
-    /// 而共享控件 `PopopxControls.swift` 不在本轮改动范围内。
+    /// The three push-mode tiers: the whole row is one button, and the selected state gives four signals at once (highlighted background, bolded stroke,
+    /// a "selected" micro-badge, a two-layer solid dot), while the unselected state keeps only a 0.5pt hairline stroke, so the three tiers read as controls rather than copy.
+    /// `PopopxRadioRow` is not reused: that atomic row only puts a dot at the end of the line and cannot take a state micro-badge,
+    /// and the shared control `PopopxControls.swift` is not within this round's scope of changes.
     private func modeRow(_ mode: NotificationsMode, compact: Bool) -> some View {
         let selected = notificationMode == mode
         return Button {
@@ -144,7 +144,7 @@ struct YourNetworkView: View {
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
-    /// 双层单选标记：外环始终存在，选中时再填一颗实心内点。
+    /// The two-layer single-choice marker: the outer ring is always there, and when selected a solid inner dot is filled in.
     private func radioMark(_ selected: Bool) -> some View {
         ZStack {
             Circle()
@@ -195,8 +195,8 @@ struct YourNetworkView: View {
         }
     }
 
-    /// 只有 1 个（或 0 个）可用运营商时，"1 / 1" 的多选切换只会让人以为必须去选一个；
-    /// 这里改成状态展示，整行仍通向同一个详情弹层，入口没有丢。
+    /// When there is only 1 (or 0) available operator, a "1 / 1" multi-select toggle only makes people think they have to pick one;
+    /// this becomes a state display instead, and the whole row still leads to the same detail sheet, so the entry point is not lost.
     private func relayReadyRow(compact: Bool) -> some View {
         Button {
             showOperators = true
@@ -229,7 +229,7 @@ struct YourNetworkView: View {
         .buttonStyle(PopopxPressButtonStyle(feedback: nil))
     }
 
-    /// 唯一运营商的域名；一个都没配时返回 nil，卡片只留标题，不编造主机名。
+    /// The domain of the only operator; when none is configured it returns nil and the card keeps only its title, inventing no host name.
     private var relayHost: String? {
         serverOperators.first?.serverDomains.first
     }
@@ -251,10 +251,10 @@ struct YourNetworkView: View {
         .padding(.vertical, PopopxMetrics.space2XS)
     }
 
-    // MARK: - 底部操作
+    // MARK: - Bottom actions
 
-    /// 底部固定栏：与第 1 屏同一套（不透明底 + 顶部发丝线）。横向内边距从调用点挪到这里，
-    /// 钉住之后已经没有外层 VStack 替它补 gutter。
+    /// The bottom fixed bar: the same set as screen 1 (opaque background + a hairline at the top). The horizontal padding moved from the call site to here,
+    /// because once pinned there is no outer VStack left to supply its gutter.
     private var actions: some View {
         VStack(alignment: .center, spacing: PopopxMetrics.spaceS) {
             PopopxButton(PopopxOnboardingCopy.continueButton, systemImage: "arrow.right") {
@@ -277,9 +277,9 @@ struct YourNetworkView: View {
         }
     }
 
-    // MARK: - 文案与绑定
+    // MARK: - Copy and bindings
 
-    /// 三档标题复用 `NotificationsMode.label`（AppAPITypes.swift:1701）已有的 Key，16 个语种齐全。
+    /// The three tier titles reuse the keys already provided by `NotificationsMode.label` (AppAPITypes.swift:1701), complete across 16 languages.
     private func modeLabel(_ mode: NotificationsMode) -> String {
         switch mode {
         case .instant: PopopxOnboardingCopy.modeInstant
@@ -296,8 +296,8 @@ struct YourNetworkView: View {
         }
     }
 
-    /// 熔断只经由 `requestFuse(_:)` 翻转：那是唯一会带着全部厢语组件一起启停的路径，
-    /// 与设置页、舱页、隐私页写的是同一个 `chat.popopx.mesh.enabled`。
+    /// The fuse flips only through `requestFuse(_:)`: that is the only path that starts and stops all Cabin components together,
+    /// and it writes the same `chat.popopx.mesh.enabled` as the settings page, the cabin page and the privacy page.
     private var meshFuseBinding: Binding<Bool> {
         Binding(
             get: { meshRuntime.isFuseOn },

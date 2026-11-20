@@ -1,12 +1,12 @@
 //
 //  PopopxEventObserver.swift
-//  PopopxMeshKit  —  模块 6
+//  PopopxMeshKit  —  module 6
 //
-//  联网后会话自动升级. A read-only bypass mounted on the chat core's *existing* event bus, watching
+//  Automatic session upgrade once online. A read-only bypass mounted on the chat core's *existing* event bus, watching
 //  for the two events that say an offline pairing has become a real contact:
 //  `contactConnected` (`Shared/Model/AppAPITypes.swift:1240`) and `contactSndReady`
 //  (`AppAPITypes.swift:1242`, the first send landing on the server side). When one arrives, the
-//  pending connection the offline `/_connect` created (模块 2's `tempConnId`, recorded by 模块 1's
+//  pending connection the offline `/_connect` created (module 2's `tempConnId`, recorded by module 1's
 //  `bind`) is upgraded to the contact id the event carries, the router moves everything filed under
 //  the temporary id onto the real one, and a `NotificationCenter` posting lets the open chat page
 //  swap its status bar without a reload.
@@ -22,14 +22,14 @@
 //
 //  What it deliberately does not do: no SMP call, no FFI, no second identity store. The one atomic
 //  write is `IdentityMappingStore.upgradePendingConnection(tempConnId:toFinalContactId:)`, which is
-//  模块 1's own transaction — 模块 6 only decides *when* it runs.
+//  module 1's own transaction — module 6 only decides *when* it runs.
 //
 
 import Foundation
 
 // MARK: - The event, as the package can see it
 
-/// The two events 模块 6 acts on, plus the honest "something else" arm.
+/// The two events module 6 acts on, plus the honest "something else" arm.
 ///
 /// The app's bus carries a few hundred cases (`AppAPIEvent`); the adapter is expected to forward the
 /// whole stream rather than pre-filter it, so that what this observer ignores is visible in its own
@@ -65,7 +65,7 @@ public enum PopopxChatSessionEventKind: Hashable, Sendable {
 ///
 /// The adapter builds these from `AppAPIEvent`: `contactId` is `Contact.id`
 /// (`POPOPXChat/ChatTypes.swift`), `tempConnId` is the `PendingContactConnection.pccConnId`
-/// (`ChatTypes.swift:2911`) that 模块 2's `PopopxOfflineInvite` returned, and
+/// (`ChatTypes.swift:2911`) that module 2's `PopopxOfflineInvite` returned, and
 /// `peerMeshPublicKeyHex` is the mesh key the invite was bound to. Either of the two optional fields
 /// is enough for the upgrade: `tempConnId` when the app still has the pending connection at hand, the
 /// mesh key when only the mesh remembers it. `userRef` is `UserRef`'s display string — quoted back in
@@ -119,7 +119,7 @@ public protocol PopopxChatEventFeeding: Sendable {
 /// What one event did. Every arm is a fact about the mesh's own records, never an error thrown at a
 /// bus that does not know this observer exists.
 public enum PopopxSessionUpgradeResult: Hashable, Sendable {
-    /// 原子升级完成: `movedBindings` mesh keys now resolve to the contact, and the router moved
+    /// Atomic upgrade complete: `movedBindings` mesh keys now resolve to the contact, and the router moved
     /// `migration`'s worth of offline records and queued messages onto it. `flushedMessages` is how
     /// many of those the public network took right away — 0 while offline, where they wait in
     /// `unacknowledgedMeshMessages` for the restore edge instead.
@@ -166,12 +166,12 @@ public enum PopopxSessionUpgradeResult: Hashable, Sendable {
 // MARK: - The observer
 
 public actor PopopxEventObserver {
-    // No `shared`, like 模块 3/5: this type needs a router, and a router needs the app's chat core.
+    // No `shared`, like module 3/5: this type needs a router, and a router needs the app's chat core.
     // Phase 2 constructs one observer, mounts it on the event pump and on the UI, and stops it with
     // the global fuse.
 
     /// Posted after a real upgrade so the open chat page can swap its status bar without a reload —
-    /// the prompt's 让当前聊天页面平滑升级状态栏. `userInfo` carries `statusCode`, `contactId`,
+    /// the prompt's "let the current chat page smoothly upgrade its status bar". `userInfo` carries `statusCode`, `contactId`,
     /// `tempConnId`, `movedBindings`, `movedQueuedMessages`, `movedOfflineRecords`,
     /// `flushedMessages`, `meshPublicKeyHexes` and `statusText` (the banner copy the router now
     /// believes, which is the field a status-bar view can show as-is). Nothing is posted for an event
@@ -277,7 +277,7 @@ public actor PopopxEventObserver {
 
     private func decide(_ event: PopopxChatSessionEvent) async -> PopopxSessionUpgradeResult {
         guard event.kind.isUpgradeCandidate else {
-            // 只读旁路: everything that is not one of the two events is looked at and passed over.
+            // Read-only bypass: everything that is not one of the two events is looked at and passed over.
             return .ignored(kind: event.kind)
         }
         guard let contactId = event.contactId, contactId > 0 else {
@@ -340,7 +340,7 @@ public actor PopopxEventObserver {
         return .ambiguous(pending.count)
     }
 
-    /// 调用 `IdentityMappingStore` 完成原子升级, then 通知 `PopopxMessageRouter` 迁移. The store write
+    /// Call `IdentityMappingStore` to complete the atomic upgrade, then notify `PopopxMessageRouter` to migrate. The store write
     /// happens first and alone: if it moves nothing, the router is not asked to move anything either,
     /// so a failed or redundant upgrade cannot re-file queue entries under a contact that never was
     /// ours.
@@ -367,7 +367,7 @@ public actor PopopxEventObserver {
         guard movedBindings > 0 else {
             return .noPendingConnection(contactId: contactId)
         }
-        // 模块 6 → 模块 5: the ids themselves never change, only the address they are filed under.
+        // Module 6 → module 5: the ids themselves never change, only the address they are filed under.
         let migration = await router.migrateQueuedMessages(
             fromTempConnId: tempConnId,
             toContactId: contactId
@@ -377,7 +377,7 @@ public actor PopopxEventObserver {
         // answers 0 when there is no path, so offline peers keep their backlog for
         // `flushPendingMessagesOnNetworkRestore()`.
         let flushed = migration.isEmpty ? 0 : await router.flushPendingMessagesOnNetworkRestore()
-        // 未绑定陌生人提示 just stopped being true for this peer.
+        // The unbound-stranger hint just stopped being true for this peer.
         await router.refreshStatus(afterUpgradeContact: contactId)
         let meshPublicKeyHexes = await store.meshPublicKeyHexes(forContactId: contactId)
         await postUpgradeNotification(

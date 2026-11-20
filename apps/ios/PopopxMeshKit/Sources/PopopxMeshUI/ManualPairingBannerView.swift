@@ -2,13 +2,13 @@
 //  ManualPairingBannerView.swift
 //  PopopxMeshUI
 //
-//  模块 3 的顶部叠加层. In 手动确认 mode an inbound `SYS_POPOPX_REQ:` does nothing but raise this
-//  banner (红线: nothing reaches the FFI until the user says so); in 自动静默 mode the exchange
+//  Module 3's top overlay. In manual-confirm mode an inbound `SYS_POPOPX_REQ:` does nothing but raise this
+//  banner (red line: nothing reaches the FFI until the user says so); in auto-silent mode the exchange
 //  completes on its own and the banner only reports what happened. The second job it has is the
-//  radio: 模块 4's "蓝牙不可达" and 模块 5's "尚未交换公网名片" copy belongs here, at the top of the
+//  radio: module 4's "Bluetooth unreachable" and module 5's "public card not yet exchanged" copy belongs here, at the top of the
 //  chat, because that is where the user is about to press send.
 //
-//  零破坏: the banner is a sibling of the chat list, never a rewrite of it, and `host(_:)` /
+//  Zero breakage: the banner is a sibling of the chat list, never a rewrite of it, and `host(_:)` /
 //  `popopxMeshBanner(_:)` mount it through the safe area so the wrapped view's own code does not
 //  change by a line. When there is nothing to say it draws nothing at all.
 //
@@ -18,12 +18,12 @@ import Foundation
 import PopopxMeshKit
 import SwiftUI
 
-// MARK: - Contract with 模块 3
+// MARK: - Contract with module 3
 
-/// What the banner needs from 模块 3, and nothing more: the queue the user is being asked about, the
+/// What the banner needs from module 3, and nothing more: the queue the user is being asked about, the
 /// state of one peer, and the two answers. `ManualPairingManager` already has exactly these methods,
 /// so the conformance below is the whole binding — no core file is edited and no singleton assumed
-/// (模块 3 has none; the host builds one and hands it here).
+/// (module 3 has none; the host builds one and hands it here).
 public protocol PopopxMeshPairingControlling: Sendable {
     func pendingRequests() async -> [PopopxPairingRequest]
 
@@ -35,7 +35,7 @@ public protocol PopopxMeshPairingControlling: Sendable {
     func decline(_ request: PopopxPairingRequest) async
 }
 
-// `approve` needs a witness: 模块 3's method takes `incognito:` with a default, and a defaulted
+// `approve` needs a witness: module 3's method takes `incognito:` with a default, and a defaulted
 // parameter does not satisfy a protocol requirement. Nothing else here adds behaviour.
 extension ManualPairingManager: PopopxMeshPairingControlling {
     public func approve(_ request: PopopxPairingRequest) async throws(PopopxPairingError) -> PopopxOfflineAcceptance {
@@ -47,21 +47,21 @@ extension ManualPairingManager: PopopxMeshPairingControlling {
 
 /// Which banner is showing, decided by the view model rather than by `body`, so the rule is testable.
 public enum PopopxMeshBannerContent: Hashable, Sendable {
-    /// 无事可报.
+    /// Nothing to report.
     case silent
 
-    /// 手动确认: one peer is waiting on the user, and `waitingPeers` more behind it. The invite link
-    /// is deliberately absent — it lives in 模块 3's queue and only the manager may hand it to 模块 2.
+    /// Manual confirm: one peer is waiting on the user, and `waitingPeers` more behind it. The invite link
+    /// is deliberately absent — it lives in module 3's queue and only the manager may hand it to module 2.
     case awaitingConfirmation(PopopxPairingRequest, waitingPeers: Int)
 
-    /// 自动静默: a pairing completed without asking, said once so the user is not surprised by a
+    /// Auto-silent: a pairing completed without asking, said once so the user is not surprised by a
     /// contact they never added.
     case autoPaired(peerMeshPublicKeyHex: String)
 
-    /// The radio cannot carry a message: 蓝牙关闭 / 未授权 / 重置中.
+    /// The radio cannot carry a message: Bluetooth off / not authorized / resetting.
     case radioUnavailable(PopopxBluetoothState)
 
-    /// 蓝牙不可达: reported by the host when a send to this peer could not leave the device.
+    /// Bluetooth unreachable: reported by the host when a send to this peer could not leave the device.
     case peerOutOfRange(peerMeshPublicKeyHex: String, hasPublicRoute: Bool)
 
     /// True when the banner is asking something, as opposed to informing.
@@ -104,10 +104,10 @@ public struct PopopxMeshBannerPresentation: Hashable, Sendable {
 
 // MARK: - View model
 
-/// Polls 模块 3's queue and mirrors 模块 4's radio, and turns both into one presentation.
+/// Polls module 3's queue and mirrors module 4's radio, and turns both into one presentation.
 ///
 /// Polling rather than observing `ManualPairingManager.bannerNotification` is a deliberate choice,
-/// and the reason is in 模块 3's own comment: the notification's `userInfo` carries only the peer key
+/// and the reason is in module 3's own comment: the notification's `userInfo` carries only the peer key
 /// and the arrival time, because the invite link must stay inside the manager. A listener that woke
 /// on the notification would still have to ask the manager for the request, so the notification could
 /// only ever be a hint; this reads the truth on a fixed interval instead, and two seconds is
@@ -119,13 +119,13 @@ public final class PopopxMeshBannerModel: ObservableObject {
     /// How often the queue is re-read while the banner is mounted.
     public static let pollInterval: TimeInterval = 2
 
-    /// How long an 自动静默 confirmation stays up: long enough to read, short enough that a banner the
+    /// How long an auto-silent confirmation stays up: long enough to read, short enough that a banner the
     /// user ignored cannot hide a pairing request that arrives after it.
     public static let informativeLifetime: TimeInterval = 8
 
     @Published public private(set) var presentation: PopopxMeshBannerPresentation?
 
-    /// The last queue read from 模块 3, exposed for the settings page's diagnostics and for tests.
+    /// The last queue read from module 3, exposed for the settings page's diagnostics and for tests.
     @Published public private(set) var requests: [PopopxPairingRequest] = []
 
     @Published public private(set) var policy: MeshPairingPolicy = .manualConfirm
@@ -140,8 +140,8 @@ public final class PopopxMeshBannerModel: ObservableObject {
     private var pollTask: Task<Void, Never>?
     private var autoPairedPeer: String?
     private var autoPairedAt: Date?
-    /// Peers 模块 3 reported as paired on the previous poll, so "newly paired" is a fact rather than
-    /// a guess. 模块 3's own `markPaired` is synchronous and un-notified, and the app may be
+    /// Peers module 3 reported as paired on the previous poll, so "newly paired" is a fact rather than
+    /// a guess. Module 3's own `markPaired` is synchronous and un-notified, and the app may be
     /// backgrounded when an ACK lands.
     private var knownPairedPeers: Set<String> = []
 
@@ -197,7 +197,7 @@ public final class PopopxMeshBannerModel: ObservableObject {
         recompute()
     }
 
-    /// The user said yes. 模块 3 does the FFI work; the banner only decides what replaces it.
+    /// The user said yes. Module 3 does the FFI work; the banner only decides what replaces it.
     public func approve() async {
         guard let request = requestAwaitingAnswer else { return }
         do {
@@ -224,8 +224,8 @@ public final class PopopxMeshBannerModel: ObservableObject {
         presentation = nil
     }
 
-    /// The host calls this when a send to a peer could not leave the device, which is 模块 5's
-    /// moment to say 蓝牙已断开，尚未交换公网名片. It is an input rather than something this model
+    /// The host calls this when a send to a peer could not leave the device, which is module 5's
+    /// moment to say "Bluetooth disconnected, public card not yet exchanged". It is an input rather than something this model
     /// detects, because only the router knows whether a send was attempted.
     public func noteOutboundBlocked(peerMeshPublicKeyHex: String) async {
         let hasPublicRoute = await routing.isPublicNetworkAvailable()
@@ -250,8 +250,8 @@ public final class PopopxMeshBannerModel: ObservableObject {
         )
     }
 
-    /// The one banner 模块 3 can announce directly: a pairing that completed without asking. Reading
-    /// the peer table for it (see `detectAutoPairedPeers`) is the fallback, and the worse one — 模块 3
+    /// The one banner module 3 can announce directly: a pairing that completed without asking. Reading
+    /// the peer table for it (see `detectAutoPairedPeers`) is the fallback, and the worse one — module 3
     /// knows the moment it happened, the mirror only knows the fact afterwards, and a fact noticed two
     /// seconds late is a banner that says "paired" about a peer the user already wondered about.
     public func noteAutoPaired(peerMeshPublicKeyHex: String) {
@@ -300,7 +300,7 @@ public final class PopopxMeshBannerModel: ObservableObject {
         presentation = nil
     }
 
-    /// 蓝牙不可用 as a fact, not as "not yet known". `.unknown` is the state before the engine has
+    /// Bluetooth unavailable as a fact, not as "not yet known". `.unknown` is the state before the engine has
     /// published anything — a mesh that was never switched on — and a banner that complains about it is
     /// a banner that lies about the radio at launch.
     private var radioIsBlocked: Bool {
@@ -351,7 +351,7 @@ public final class PopopxMeshBannerModel: ObservableObject {
         }
     }
 
-    /// A 64-character key is not readable in a banner; the first 16 are what 模块 3's own logs quote.
+    /// A 64-character key is not readable in a banner; the first 16 are what module 3's own logs quote.
     static func shorten(_ hex: String) -> String {
         hex.count > 16 ? "\(hex.prefix(16))…" : hex
     }
@@ -359,7 +359,7 @@ public final class PopopxMeshBannerModel: ObservableObject {
 
 // MARK: - View
 
-/// The 顶部叠加层 itself, drawn through the safe area so the chat under it keeps its own scroll
+/// The top overlay itself, drawn through the safe area so the chat under it keeps its own scroll
 /// behaviour and its own code.
 @MainActor
 public struct ManualPairingBannerView: View {
@@ -455,13 +455,13 @@ public extension ManualPairingBannerView {
 }
 
 public extension View {
-    /// 零破坏挂载 — one line, and `self` is not touched:
+    /// Zero-breakage mount — one line, and `self` is not touched:
     ///
     /// ```swift
     /// ExistingChatView().popopxMeshBanner(bannerModel)
     /// ```
     ///
-    /// `edge: .bottom` puts it above the compose bar, which is where 模块 5's "cannot deliver" line
+    /// `edge: .bottom` puts it above the compose bar, which is where module 5's "cannot deliver" line
     /// belongs; `.top` is the default, matching where `ChatView` puts its own status strips.
     func popopxMeshBanner(
         _ model: PopopxMeshBannerModel,

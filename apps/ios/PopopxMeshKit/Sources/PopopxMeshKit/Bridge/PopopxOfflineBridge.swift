@@ -1,6 +1,6 @@
 //
 //  PopopxOfflineBridge.swift
-//  PopopxMeshKit  —  模块 2
+//  PopopxMeshKit  —  module 2
 //
 //  Everything the mesh needs from the chat core while there is no network at all. The core speaks
 //  C through a bridging header this package cannot see, so the dependency points the other way:

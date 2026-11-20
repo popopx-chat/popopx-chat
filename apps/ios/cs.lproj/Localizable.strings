@@ -3792,8 +3792,8 @@ server test failure */
 "Your POPOPX address" = "Vaše POPOPX adresa";
 
 
-/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
-/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+/* === POPOPX compute-points economy (BadgeCredits) commercial copy: one-to-one with PopopxCommerceCopy === */
+/* These 37 rows correspond directly to the NSLocalizedString keys in PopopxBadgeCreditsModels.swift; en.lproj holds none of them (value == key). */
 
 /* product name */
 "POPOPX Dynamic Privacy Node Badge" = "Odznak POPOPX dynamického soukromého uzlu";
@@ -3906,7 +3906,7 @@ server test failure */
 /* error */
 "Your Compute Credits balance cannot go above %lld. Spend some credits first." = "Zůstatek výpočetních bodů nemůže překročit %lld. Nejdřív část bodů utraťte.";
 
-/* ==== POPOPX onboarding v2 (2026-11-19) — 引导页四屏 + 隐私政策/使用条款 ==== */
+/* ==== POPOPX onboarding v2 (2026-11-19) - the four onboarding screens + privacy policy / terms of use ==== */
 /* POPOPX onboarding v2 — generated block, 2026-11-19 */
 
 /* Onboarding: header pills */
@@ -3918,12 +3918,10 @@ server test failure */
 "Own your network." = "Vaše síť patří vám.";
 "Private messaging with no account and no user IDs." = "Soukromé zprávy bez účtu a bez uživatelských identifikátorů.";
 "SMP end-to-end encrypted" = "SMP šifrováno end-to-end";
-"厢语 Bluetooth Mesh relay" = "Relé Bluetooth Mesh 厢语";
 "What POPOPX gives you" = "Co POPOPX dává";
 "No user IDs" = "Žádné uživatelské identifikátory";
 "No phone number, no email, no global public key. Nothing links your contacts to each other, and each anonymous identity stays separate." = "Žádné telefonní číslo, žádný e-mail, žádný globální veřejný klíč. Nic nepropojuje vaše kontakty navzájem a každá anonymní identita zůstává oddělená.";
 "Dynamic relays and near-field" = "Dynamická relé a blízké spojení";
-"Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "Online používáte dynamický cluster relé uzlů SMP. Offline přejde 厢语 na Bluetooth Mesh o 1–7 skocích a páruje se tváří v tvář přes UWB nebo klepnutím.";
 "Anti-peeping and local-only cards" = "Ochrana proti nahlížení a karty pouze lokálně";
 "Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "Snímky obrazovky a nahrávky jsou blokovány, nejpřísněji utajené zprávy se po přečtení zničí, poloha zůstává šifrovaná v obou režimech a vaše šifrovaná profilová karta nikdy neopustí toto zařízení.";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "Dokončete nastavení a obdržíte zkušební odznak pionýrského uzlu na 3 dny.";
@@ -3955,7 +3953,6 @@ server test failure */
 "Higher privacy · balanced battery" = "Více soukromí · vyvážená baterie";
 "Maximum discretion · nothing pushed" = "Maximální diskrétnost · nic se neposílá push";
 "Apple's push service carries only the signal that new data is waiting, never the content." = "Push služba Apple přenáší pouze signál, že čekají nová data, nikdy jejich obsah.";
-"厢语 offline mesh" = "Offline mesh 厢语";
 "When the internet is down, messages hop over nearby devices, up to 7 hops, with no server. Pair face to face with UWB or a tap." = "Když není internet, zprávy skáčou mezi blízkými zařízeními, až 7 skoků, bez serveru. Párujte se tváří v tvář přes UWB nebo klepnutím.";
 "Bluetooth permission is requested the first time the mesh starts." = "Oprávnění k Bluetooth se žádá při prvním spuštění mesh.";
 
@@ -3999,13 +3996,11 @@ server test failure */
 "The camera guard stays local" = "Hlídač kamery zůstává lokální";
 "The anti-peeping guard switches the front camera on only while a top-secret sheet is open, at the lowest resolution, processes every frame on this device and stops the stream when the sheet closes. Nothing is written to disk and nothing is uploaded." = "Hlídač proti nahlížení zapne přední kameru jen dokud je otevřený list nejpřísněji utajené schránky, v nejnižším rozlišení, každý snímek zpracovává na tomto zařízení a po zavření listu tok zastaví. Nic se nezapisuje na disk ani nenahrává.";
 "Screenshots, recordings and offline hops" = "Snímky, nahrávky a offline skoky";
-"Protected screens are blocked from screenshots and screen recording by the system itself. In 厢语 mode messages hop over Bluetooth between nearby devices and never reach the public internet." = "Systém sám blokuje snímky obrazovky a nahrávání obrazovky u chráněných obrazovek. V režimu 厢语 zprávy skáčou přes Bluetooth mezi blízkými zařízeními a nikdy se nedostanou do veřejného internetu.";
 "Your controls" = "Máte to pod kontrolou";
 "You can export or delete any identity, erase the local database or trigger Panic Wipe at any time. Deletion is irreversible because no server holds a copy." = "Kdykoli můžete exportovat nebo smazat kteroukoli identitu, vymazat lokální databázi nebo spustit Panic Wipe. Smazání je nevratné, protože žádný server nedrží kopii.";
 
 /* Legal: terms */
 "Acceptable use" = "Přijatelné použití";
-"Use POPOPX within the laws of the country you are in. Public groups and 厢语 broadcasts must carry no unlawful content, no spam and no harassment of other users." = "POPOPX používejte v souladu se zákony země, ve které jste. Veřejné skupiny a vysílání 厢语 nesmí obsahovat nezákonný obsah, spam ani obtěžování ostatních uživatelů.";
 "Your keys, your responsibility" = "Vaše klíče, vaše odpovědnost";
 "Your mnemonic phrase, identity keys, badges and POPOPX Compute Credits exist only on this device. If the device or the phrase is lost, they cannot be recovered, frozen or reissued by anyone." = "Vaše obnovovací fráze, klíče identit, odznaky a výpočetní body POPOPX existují pouze v tomto zařízení. Když zařízení nebo frázi ztratíte, nikdo je nemůže obnovit, zmrazit ani znovu vydat.";
 "No guarantee of availability" = "Žádná záruka dostupnosti";
@@ -4016,7 +4011,7 @@ server test failure */
 "Relay operators set their own conditions for the servers they run. When an operator requires acceptance, the app shows that operator's conditions and records your acceptance before using them." = "Provozovatelé relé si určují vlastní podmínky pro servery, které provozují. Když provozovatel vyžaduje souhlas, aplikace zobrazí jeho podmínky a zaznamená váš souhlas dřív, než servery použije.";
 "Names and changes" = "Názvy a změny";
 "POPOPX and the POPOPX logo are the names of this build. These terms and the privacy statement may change; the app always shows the version you agreed to, and continuing to use POPOPX means you accept the change." = "POPOPX a logo POPOPX jsou názvy tohoto buildu. Tyto podmínky a zásady ochrany osobních údajů se mohou změnit; aplikace vždy zobrazuje verzi, se kterou jste souhlasili, a další používání POPOPX znamená, že změnu přijímáte.";
-/* POPOPX 引导页补录（第四轮：迁移入口标题与条款接受失败提示） */
+/* POPOPX onboarding follow-up rows (round 4: migration entry title, and the terms-acceptance failure notice) */
 "Migrate here" = "Migrovat sem";
 "Error accepting conditions" = "Chyba při přijímání podmínek";
 "I have read and agree to %1$@ and %2$@." = "Přečetl(a) jsem si a přijímám dokumenty: %1$@ a %2$@.";
@@ -4295,7 +4290,6 @@ server test failure */
 "Badge lit for %lld more days." = "Odznak aktivní o %lld dní déle.";
 "Choose a plan" = "Vyberte předplatné";
 "Renew or change plan" = "Obnovit nebo změnit předplatné";
-"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "Otevře panel 厢语: hlavní přepínač, kanály a blízké uzly";
 "Channels" = "Kanály";
 "Create public channel" = "Vytvořit veřejný kanál";
 "Join channel" = "Připojit se ke kanálu";
@@ -5013,13 +5007,13 @@ server test failure */
 "Your new channel %@ is connected to %d of %d relays.\nIf you cancel, the channel will be deleted - you can create it again." = "Váš nový kanál %1$@ je připojen ke %2$d ze %3$d relé.\nPokud akci zrušíte, kanál bude smazán – můžete ho vytvořit znovu.";
 "server queue info: %@\n\nlast received msg: %@" = "informace o frontě serveru: %1$@\n\nnaposledy přijatá zpráva: %2$@";
 
-/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+/* POPOPX round 19: keys added during the ninth pass over the three tabs */
 "Back to messages" = "Zpět na zprávy";
 "POPOPX Badge" = "Odznak POPOPX";
 "Added %lld Compute Credits to your balance." = "Do vašeho zůstatku bylo přidáno %lld výpočetních bodů.";
 "Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple tento nákup stále potvrzuje. Výpočetní body se ve vašem zůstatku objeví, jakmile bude potvrzen.";
 "Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple platbu strhl, ale toto zařízení zatím nedokázalo body přidat do vašeho zůstatku. Přidají se, až bude možné znovu zapsat do zabezpečeného úložiště.";
-/* POPOPX round 21 第 9 轮：厢语「发现」入口无障碍说明 + 7 条 zh-Hans 上游缺值 */
+/* POPOPX round 21, ninth pass: accessibility hint for the Cabin 'Discover' entry + 7 upstream values missing from zh-Hans */
 "Discover nearby groups and channels over the Bluetooth mesh" = "Objevujte nedaleké skupiny a kanály přes síť Bluetooth mesh";
 "Album" = "Album";
 "Camera" = "Kamera";
@@ -6419,3 +6413,25 @@ server test failure */
 "author" = "autor";
 "moderator" = "moderátor";
 "relay" = "relé";
+"Top-up %lld compute points" = "Nabití %lld výpočetních bodů";
+"Exchange did not complete · returned automatically" = "Výměna se neuskutečnila · automatické vrácení";
+"Redeemed a %lld-day privacy node badge" = "Uplatněn odznak uzlu soukromí na %lld dní";
+"Redeemed %lld × %lld-day gift-card vouchers" = "Uplatněno %lld dárkových voucherů, každý na %lld dní";
+"Sent a red packet of %lld compute points (%lld equal shares)" = "Odeslána červená obálka s %lld výpočetními body, rozdělená stejně na %lld dílů";
+"Received a compute-point red packet" = "Přijata červená obálka výpočetních bodů";
+"Received a red packet: %@" = "Přijata červená obálka: %@";
+"Red packet not fully claimed, %lld returned" = "Červená obálka nebyla vybrána celá, vráceno %lld";
+"Subscribed to channel %@" = "Odebírán kanál %@";
+"Unlocked a profile card" = "Odemknuta profilová karta";
+"Extended the anti-peeping viewing window" = "Prodlouženo okno zobrazení s ochranou proti nahlížení";
+"Refund clawback (what was already spent is not recovered)" = "Stažení zpět po vrácení peněz (již utracené se nevymáhá)";
+"Refund clawback" = "Stažení zpět po vrácení peněz";
+"Aurora shield avatar frame" = "Rámeček avataru „Štít záře“";
+"Dark gold QR card skin" = "Vzhled QR karty „Tmavé zlato“";
+"[Location]" = "[Poloha]";
+"[Encrypted profile]" = "[Šifrovaný profil]";
+"[Encrypted profile · attachment]" = "[Šifrovaný profil · příloha]";
+"Unnamed profile" = "Profil bez názvu";
+"[Top-secret view-once] Open after biometrics" = "[Přísně tajné, jednorázové] Otevřít po biometrickém ověření";
+"[Top-secret security alert] %@; that top-secret message was destroyed in place." = "[Přísně tajné: bezpečnostní výstraha] %@; tato přísně tajná zpráva byla zničena na místě.";
+"Neither Bluetooth nor the public network is available — %lld messages waiting to send" = "Ani Bluetooth, ani veřejná síť nejsou dostupné — %lld zpráv čeká na odeslání";

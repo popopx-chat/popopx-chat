@@ -1,36 +1,36 @@
 //  PopopxVoucherRedeemSheet.swift
 //
-//  【第五阶段 · 6】兑换面板：把一串 `PPX1-…` 变成一次本机建连 + 一次等待对方确认。
+//  [Phase 5 · 6] Redeem panel: turns a `PPX1-…` string into one on-device connection setup + one wait for the peer's confirmation.
 //
-//  ### 点"兑换"返回的不是结果，是"已发起"
-//  `router.startExternalRedeem(code:)` 只做三件事：验码、验签、建一条 incognito connection。
-//  REQ 要等 `contactConnected` 才发得出去（连接被对方接受之前载不动消息），ACK 更在后面，
-//  所以本面板**订阅** `router.lastOutcome` 而不是把返回值当终态。把 `.initiated` 显示成
-//  "兑换成功"是这个特性最容易被写错、也最容易被审核当成误导的地方。
+//  ### Pressing "redeem" returns not a result but "initiated"
+//  `router.startExternalRedeem(code:)` does only three things: check the code, check the signature, create one incognito connection.
+//  The REQ can only go out after `contactConnected` (before the peer accepts the connection it cannot carry messages), and the ACK is later still,
+//  so this panel **subscribes** to `router.lastOutcome` instead of treating the return value as the final state. Showing `.initiated` as
+//  "redeemed successfully" is the thing in this feature most easily written wrong, and most easily read by review as misleading.
 //
-//  ### 终态可能永远不来
-//  对方可能已经不在这台设备上、可能删了 app、可能网络断了很久。因此：
-//  - 这一页允许随时关掉，"等待对方确认"那一句必须说清**关掉不影响结果**；
-//  - 不做超时、不承诺重试、不显示进度条。一次没有回音的兑换，诚实的答案就是"没有回音"。
+//  ### The final state may never arrive
+//  The other side may no longer be on that device, may have deleted the app, may have been offline for a long time. Therefore:
+//  - this page may be closed at any time, and the "waiting for the other side to confirm" sentence must make clear **closing it does not affect the result**;
+//  - no timeout, no promise of retry, no progress bar. For a redemption with no answer, the honest answer is "no answer".
 //
-//  ### 粘贴优先于手抄
-//  `PopopxRedeemCode.normalized` 只去掉空白并修正前缀大小写——载荷本身是 base64url，
-//  **大小写敏感**。所以界面上把"粘贴"做成一等按钮，并明写"请不要逐字符手抄"。
-//  展示用 `grouped` 分段（可读），提交用原文（可解）。
+//  ### Paste takes priority over copying by hand
+//  `PopopxRedeemCode.normalized` only strips whitespace and fixes the prefix's case — the payload itself is base64url,
+//  **case sensitive**. So the UI makes "paste" a first-class button and states plainly "please do not copy it out character by character".
+//  Display uses the `grouped` segmentation (readable), submission uses the raw text (decodable).
 //
-//  ### 扫一扫为什么在本模块又写一遍
-//  `PopopxAddFriendView.swift:519` 已有 `PopopxScannerSheet`，但它是 `private` 且把结果交给
-//  "链接分类"那条路（离线门 / 在线邀请），兑换码既不是链接也不该走那个判类。
-//  这里需要的只是"把相机取景框交给系统权限状态机"，所以按同一套授权/失败/重建流程写了第二份，
-//  并在下面 `PopopxRedeemScanner` 的注释里写清它与第一份的差别（不共用是为了不改动已上机验证过的加好友页，
-//  不是为了省一次 import）。
-//  相机会话由本文件自持（`PopopxQRScannerView`），不用 `CodeScanner` 包：包里的
-//  `ScannerViewController` 只在 `viewDidDisappear` 异步 `stopRunning()`，**从不放掉会话引用**，
-//  而本项目的红线要求"识别成功与页面消失两处都必须 stopRunning 且置 nil"。
-//  停止顺序抄 `Shared/Features/SecureEphemeral/PopopxCameraGuardEngine.swift:43`：
-//  摘 delegate → stopRunning → 放引用；`dismantleUIView` 就是页面消失那一路的落点。
+//  ### Why the scanner is written again in this module
+//  `PopopxAddFriendView.swift:519` already has `PopopxScannerSheet`, but it is `private` and hands the result to
+//  the "link classification" path (offline gate / online invite), and a redemption code is neither a link nor should it go through that classification.
+//  All that is needed here is "hand a camera viewfinder to the system permission state machine", so a second copy was written following the same authorisation/failure/rebuild flow,
+//  and the comment on `PopopxRedeemScanner` below states its difference from the first one (not sharing it is to avoid changing the already device-verified add-friend page,
+//  not to save one import).
+//  The camera session is self-owned by this file (`PopopxQRScannerView`), and the `CodeScanner` package is not used: the package's
+//  `ScannerViewController` only calls `stopRunning()` asynchronously in `viewDidDisappear` and **never releases the session reference**,
+//  while this project's red line requires "both on successful recognition and on page disappearance must stopRunning and set to nil".
+//  The stop order is copied from `Shared/Features/SecureEphemeral/PopopxCameraGuardEngine.swift:43`:
+//  detach delegate → stopRunning → release the reference; `dismantleUIView` is the landing point of the page-disappearance path.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. The red line forbids scripts from modifying project.pbxproj.
 
 import SwiftUI
 import AVFoundation
@@ -58,13 +58,13 @@ struct PopopxVoucherRedeemSheet: View {
                 Task { await submit() }
             }
         }
-        // 终态由路由器异步写入：这里只跟随，不推断。
+        // The final state is written asynchronously by the router: here we only follow it, never infer it.
         .onChange(of: router.lastOutcome) { _, outcome in
             if let outcome { stage = .initiated(outcome) }
         }
     }
 
-    // MARK: 版面
+    // // MARK: Layout
 
     private var content: some View {
         ScrollView {
@@ -198,7 +198,7 @@ struct PopopxVoucherRedeemSheet: View {
         }
     }
 
-    // MARK: 动作
+    // // MARK: Actions
 
     private func submit() async {
         let code = codeText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -220,8 +220,8 @@ struct PopopxVoucherRedeemSheet: View {
         }
         let normalized = PopopxRedeemCode.normalized(raw)
         guard PopopxRedeemCode.decode(normalized) != nil else {
-            // 剪贴板里确实有文本，但它不是这一版本的码：先把内容放进去（用户可以自己核对），
-            // 再说明为什么不接受，而不是把用户刚粘的东西丢掉。
+            // The clipboard does hold text, but it is not this version of the code: put the content in first (so the user can check it themselves),
+            // then explain why it is not accepted, rather than throwing away what the user just pasted.
             codeText = normalized
             stage = .localNote(Copy.clipboardNotCode)
             return
@@ -230,7 +230,7 @@ struct PopopxVoucherRedeemSheet: View {
         stage = .idle
     }
 
-    // MARK: 呈现细节
+    // // MARK: Presentation details
 
     private func symbol(for outcome: PopopxRedemptionOutcome) -> String {
         switch outcome {
@@ -248,7 +248,7 @@ struct PopopxVoucherRedeemSheet: View {
         }
     }
 
-    /// 每一种终态都补一句"接下来会怎样"，而不只给一个词。
+    /// Every final state gets one more sentence about "what happens next", instead of only a single word.
     private func gloss(_ outcome: PopopxRedemptionOutcome) -> String {
         switch outcome {
         case .initiated:
@@ -261,16 +261,16 @@ struct PopopxVoucherRedeemSheet: View {
     }
 }
 
-// MARK: - 阶段
+// // MARK: - Stage
 
-/// 面板自己的四格状态。`.busy` 与 `.result` 分开，是因为"这一台机器已经回答完了"
-/// 和"还在等对方那台机器回答"是两件不同的事，混成一格就会在等待期间显示旧结果。
+/// The panel's own four-cell state. `.busy` and `.result` are kept apart because "this machine has finished answering"
+/// and "still waiting for the other side's machine to answer" are two different things, and merging them into one cell would show a stale result while waiting.
 enum PopopxRedeemStage: Hashable {
     case idle
     case busy
     case initiated(PopopxRedemptionOutcome)
-    /// 本机就能判掉的拒绝（剪贴板是空的）：不借用 `PopopxBadgeCreditsError` 的措辞，
-    /// 因为那几句都假设"有一串码"，而这里根本没有码。
+    /// A refusal the local machine can settle on its own (the clipboard is empty): it does not borrow `PopopxBadgeCreditsError`'s wording,
+    /// because those sentences all assume "there is a code", and here there is no code at all.
     case localNote(String)
 
     var canSubmit: Bool {
@@ -281,17 +281,17 @@ enum PopopxRedeemStage: Hashable {
     }
 }
 
-// MARK: - 扫一扫
+// // MARK: - Scan
 
-/// 兑换码取景框。与 `PopopxAddFriendView` 里那份的差别只有一处：这里不做链接分类，
-/// 扫到什么就原样交给调用方（理由见文件头）。授权状态机、失败重建与占位保持一致。
+/// The redemption-code viewfinder. It differs from the one in `PopopxAddFriendView` in exactly one place: no link classification here,
+/// whatever is scanned is handed to the caller as it is (reason in the file header). The authorisation state machine, failure rebuild and placeholder stay consistent.
 struct PopopxRedeemScanner: View {
     let onScan: (String) -> Void
 
     @Environment(\.dismiss) private var dismiss
 
     @State private var cameraStatus: AVAuthorizationStatus?
-    /// 换一次 id 就是重建取景框（`makeUIView`/`dismantleUIView` 各走一遍）：会话起不来只能这样重试。
+    /// Changing the id once means rebuilding the viewfinder (`makeUIView`/`dismantleUIView` each run once): that is the only way to retry a session that will not start.
     @State private var scanAttempt = 0
     @State private var failureNote: String?
 
@@ -322,7 +322,7 @@ struct PopopxRedeemScanner: View {
                 .clipShape(.rect(cornerRadius: PopopxMetrics.radiusCard))
                 .id(scanAttempt)
         case .notDetermined:
-            // `.task` 已经把系统授权弹窗发出去了，这一格就是弹窗后面的那几帧。
+            // `.task` has already raised the system authorisation sheet, so this cell is the few frames behind that sheet.
             placeholder(systemImage: "camera", text: ScannerCopy.cameraStarting)
         case .denied:
             placeholder(systemImage: "video.slash",
@@ -373,20 +373,20 @@ struct PopopxRedeemScanner: View {
     }
 
     private func receiveScan(_ text: String) {
-        // 会话已经在回调里停掉并放掉了（见 `PopopxQRScannerView`），这里只负责把取景框从层级里摘走，
-        // 再把原文交出去。顺序反过来会让 `onScan` 那一路在相机还开着的时候跑。
+        // The session has already been stopped and released inside the callback (see `PopopxQRScannerView`); this only takes the viewfinder out of the hierarchy
+        // and then hands over the raw text. Reversing the order would run the `onScan` path while the camera is still on.
         dismiss()
         onScan(text)
     }
 
-    /// 起不来（无后置摄像头 / 会话被占用）只留一句话与**至多两次**重建：换 `scanAttempt` 会让 SwiftUI
-    /// 先 dismantle 再 make，旧会话在那一步就已经停了，不会攒出第二个。
-    /// 不设上限的话，一台永远起不了相机的设备会在这儿无限循环——每一圈都是一次授权检查加一次会话构造。
+    /// When it will not start (no rear camera / session in use) only one sentence and **at most two** rebuilds are kept: changing `scanAttempt` makes SwiftUI
+    /// dismantle first and then make, and the old session is already stopped at that step, so a second one never piles up.
+    /// Without a cap, a device that can never start the camera would loop here forever — each turn is one authorisation check plus one session construction.
     private func reportScannerFailure(_ reason: String) {
         failureNote = String(format: ScannerCopy.scanFailedFormat, reason)
         let status = AVCaptureDevice.authorizationStatus(for: .video)
         guard status == cameraStatus else {
-            // 权限在这一刻没了（用户在设置里关掉，或系统撤销）：让取景框整块下台，别再去重建它。
+            // The permission is gone at this moment (the user turned it off in Settings, or the system revoked it): take the whole viewfinder off stage instead of rebuilding it.
             cameraStatus = status
             return
         }
@@ -398,12 +398,12 @@ struct PopopxRedeemScanner: View {
     private static let maximumScannerRebuilds = 2
 }
 
-// MARK: - 自持的取景框
+// // MARK: - Self-owned viewfinder
 
-/// `UIViewRepresentable` 包一个 `AVCaptureSession`，只做 QR。写这一层而不是用第三方包，
-/// 是为了让红线里那两条时刻（识别成功、页面消失）都有**本文件里看得见**的停止代码。
-/// 生命周期只有一条路径会漏：`makeUIView` 起了会话、`dismantleUIView` 停下并放引用，
-/// SwiftUI 在换 `id` 与卸载视图时都会走后者，所以页面消失不需要再补一个手动 stop。
+/// A `UIViewRepresentable` wrapping one `AVCaptureSession`, QR only. This layer was written instead of using a third-party package
+/// so that both moments named in the red line (recognition succeeded, page disappeared) have stop code **visible inside this file**.
+/// The lifecycle has only one path that could leak: `makeUIView` starts the session and `dismantleUIView` stops it and releases the reference,
+/// and SwiftUI takes the latter both when the `id` changes and when the view is unloaded, so page disappearance needs no extra manual stop.
 private struct PopopxQRScannerView: UIViewRepresentable {
     let onScan: (String) -> Void
     let onFailure: (String) -> Void
@@ -418,8 +418,8 @@ private struct PopopxQRScannerView: UIViewRepresentable {
         return view
     }
 
-    /// 没有要往下传的会话期状态，所以这里是空的。两个回调只在 `makeUIView` 那一次被协调者记住：
-    /// 它们捕获的是 `@State` 的存储引用，父视图重渲染换出的新闭包指向同一格，旧闭包不会写错地方。
+    /// There is no session-lifetime state to pass down, so this is empty. The two callbacks are remembered by the coordinator only at the one `makeUIView` call:
+    /// they capture `@State`'s storage reference, and the new closures swapped in by a parent re-render point at the same cell, so an old closure cannot write to the wrong place.
     func updateUIView(_ uiView: PopopxQRPreviewView, context: Context) {}
 
     static func dismantleUIView(_ view: PopopxQRPreviewView, coordinator: PopopxQRScannerCoordinator) {
@@ -428,7 +428,7 @@ private struct PopopxQRScannerView: UIViewRepresentable {
     }
 }
 
-/// 预览层由 `layerClass` 提供，所以这个视图本身不持有会话，只提供挂/摘两个口。
+/// The preview layer is provided by `layerClass`, so this view itself does not hold the session, it only offers the attach and detach two hooks.
 private final class PopopxQRPreviewView: UIView {
     override static var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
 
@@ -447,7 +447,7 @@ private final class PopopxQRScannerCoordinator: NSObject, AVCaptureMetadataOutpu
     private let onScan: (String) -> Void
     private let onFailure: (String) -> Void
     private var session: AVCaptureSession?
-    /// 一次取景只交一次结果：`AVCaptureMetadataOutput` 每帧都回调，不拦住会把兑换码交好几遍。
+    /// One capture delivers a result once only: `AVCaptureMetadataOutput` calls back every frame, and without a gate the redemption code would be handed over several times.
     private var handled = false
 
     init(onScan: @escaping (String) -> Void, onFailure: @escaping (String) -> Void) {
@@ -470,20 +470,20 @@ private final class PopopxQRScannerCoordinator: NSObject, AVCaptureMetadataOutpu
         built.beginConfiguration()
         built.addInput(input)
         built.addOutput(output)
-        // 只认 QR：兑换码是 `PPX1-…` 长串，其它码制在这里没有对应物，多认一种只是多一条会出错的解码路。
+        // QR only: the redemption code is a long `PPX1-…` string, other symbologies have nothing to map to here, and recognising one more just adds a decoding path that can go wrong.
         output.metadataObjectTypes = [.qr]
         output.setMetadataObjectsDelegate(self, queue: .main)
         built.commitConfiguration()
         preview.attach(built)
         session = built
-        // `startRunning()` 是阻塞调用，放主线程会卡住这一帧的布局（本项目其它相机路径同一个理由）。
+        // `startRunning()` is a blocking call, so putting it on the main thread would stall this frame's layout (the same reason as this project's other camera paths).
         DispatchQueue.global(qos: .userInitiated).async {
             built.startRunning()
         }
     }
 
-    /// 停止顺序：先摘 delegate（回调从此不会再进来），再 `stopRunning`，最后放掉引用。
-    /// 顺序反过来的话，`stopRunning` 期间迟到的那一帧会拿着一个已经开始拆的会话回调。
+    /// Stop order: detach the delegate first (from then on no callback can come in), then `stopRunning`, then release the reference.
+    /// Reversed, the late frame arriving during `stopRunning` would call back holding a session that has already begun being torn down.
     func stop() {
         guard let session else { return }
         self.session = nil
@@ -503,14 +503,14 @@ private final class PopopxQRScannerCoordinator: NSObject, AVCaptureMetadataOutpu
               let text = object.stringValue, !text.isEmpty
         else { return }
         handled = true
-        // 红线：识别成功这一路也必须先停会话、再交结果。
+        // Red line: the successful-recognition path must also stop the session first, then deliver the result.
         stop()
         onScan(text)
     }
 }
 
 
-// MARK: - 文案
+// // MARK: - Copy
 
 private extension PopopxVoucherRedeemSheet {
     enum Copy {

@@ -2,7 +2,7 @@
 //  MeshPrivacySettingsView.swift
 //  PopopxMeshUI
 //
-//  The mesh's own settings page: 全局熔断开关, 建联策略 (手动确认 vs 自动静默) and 清除身份绑定. It is
+//  The mesh's own settings page: global kill switch, connection policy (manual confirmation vs automatic silent) and clearing identity bindings. It is
 //  a `List` of `settingsRow`-shaped rows with a `Toggle` bound through `@AppStorage`, because that is
 //  how `Shared/Views/UserSettings/PrivacySettings.swift` builds every row: a symbol, a control, a
 //  footer that explains the consequence. The mesh should read like part of this app.
@@ -10,7 +10,7 @@
 //  Two rules decide the whole file. The switch writes the key the fuse reads
 //  (`PopopxMeshKillSwitch.enabledDefaultsKey`, which *is* `IdentityMappingStore.meshEnabledDefaultsKey`)
 //  and nothing else, so `@AppStorage` and `PopopxMeshKillSwitch.isEnabled` cannot disagree; and the
-//  policy picker writes where 模块 3 reads (`IdentityMappingStore.pairingPolicy`), before it touches
+//  policy picker writes where module 3 reads (`IdentityMappingStore.pairingPolicy`), before it touches
 //  the FFI, so this page can never become a second source of truth.
 //
 
@@ -21,7 +21,7 @@ import SwiftUI
 
 // MARK: - Contracts
 
-/// What this page needs from 模块 1. `IdentityMappingStore` has all four already with these exact
+/// What this page needs from module 1. `IdentityMappingStore` has all four already with these exact
 /// names, so the conformance below only adapts the two computed properties to `async` method calls —
 /// no core file is edited, and the page binds to the real store instead of to a copy of its state.
 public protocol PopopxMeshBindingObserving: Sendable {
@@ -54,7 +54,7 @@ extension IdentityMappingStore: PopopxMeshBindingObserving {
     }
 }
 
-/// 模块 3's own way of dropping a peer: `forget` clears the manager's in-memory state *and* the
+/// Module 3's own way of dropping a peer: `forget` clears the manager's in-memory state *and* the
 /// durable binding, so a page that unbound the key behind its back would resurrect a peer the user
 /// removed. `ManualPairingManager` already has this method, so the conformance below is empty. It is
 /// a separate protocol from `PopopxMeshPairingControlling` because the banner must not be able to
@@ -76,7 +76,7 @@ public struct PopopxMeshBindingSummary: Identifiable, Hashable, Sendable {
     public var id: String { meshPublicKeyHex }
 
     /// What the user needs to know at a glance: whether this neighbour is a contact yet, or still a
-    /// pending connection 模块 6 has not upgraded.
+    /// pending connection module 6 has not upgraded.
     public var status: String {
         if let contactId { return "contact :\(contactId)" }
         if let tempConnId { return "pending :\(tempConnId)" }
@@ -116,7 +116,7 @@ public final class PopopxMeshSettingsModel: ObservableObject {
 
     @Published public private(set) var isClearing = false
 
-    /// What the last 清除身份绑定 left behind, so the page can name the number that survived instead
+    /// What the last clear-identity-bindings left behind, so the page can name the number that survived instead
     /// of claiming a clean sweep it did not get. nil until a clear has run.
     @Published public private(set) var bindingsLeftAfterClear: Int?
 
@@ -133,10 +133,10 @@ public final class PopopxMeshSettingsModel: ObservableObject {
     private let killSwitch: PopopxMeshKillSwitch?
 
     /// - Parameters:
-    ///   - pairing: when the host built a 模块 3 manager, 清除 goes through its `forget`, which also
+    ///   - pairing: when the host built a module 3 manager, clearing goes through its `forget`, which also
     ///     drops the manager's own peer state. Without it the page still clears the mapping, because
     ///     that is the half that survives a restart.
-    ///   - killSwitch: the fuse the 总开关 writes through. nil is only useful in tests that never
+    ///   - killSwitch: the fuse the master switch writes through. nil is only useful in tests that never
     ///     touch the switch.
     public init(
         store: any PopopxMeshBindingObserving,
@@ -183,7 +183,7 @@ public final class PopopxMeshSettingsModel: ObservableObject {
         }
     }
 
-    /// Writes the policy where 模块 3 reads it. This is the only path that changes 自动静默.
+    /// Writes the policy where module 3 reads it. This is the only path that changes automatic silent.
     public func updatePairingPolicy(_ policy: MeshPairingPolicy) async {
         await store.setPairingPolicy(policy)
         pairingPolicy = policy
@@ -191,13 +191,13 @@ public final class PopopxMeshSettingsModel: ObservableObject {
         await refresh()
     }
 
-    /// 全局熔断开关, through the fuse — the only component allowed to start or stop a radio.
+    /// Global kill switch, through the fuse — the only component allowed to start or stop a radio.
     public func setFuseEnabled(_ enabled: Bool) async {
         await killSwitch?.setEnabled(enabled)
         await refresh()
     }
 
-    /// 清除身份绑定. Every row goes down the same path the user would use in the chat: the manager's
+    /// Clear identity bindings. Every row goes down the same path the user would use in the chat: the manager's
     /// `forget` when there is a manager (it unbinds too), otherwise the store's `unbind`. Deliberately
     /// *not* `emergencyWipeAllMappings()` — that is the panic route, and it also takes the fuse and
     /// the offline cache with it, which this page has no business deciding.
@@ -236,7 +236,7 @@ public final class PopopxMeshSettingsModel: ObservableObject {
         return removed
     }
 
-    /// One row's 忘记, for a user who wants to drop a single neighbour. Same path, same measurement.
+    /// One row's Forget, for a user who wants to drop a single neighbour. Same path, same measurement.
     @discardableResult
     public func forgetBinding(_ meshPublicKeyHex: String) async -> Bool {
         let wasListed = bindings.contains(where: { $0.meshPublicKeyHex == meshPublicKeyHex })
@@ -273,7 +273,7 @@ public struct MeshPrivacySettingsView: View {
     }
 
     /// The one-line mount for the app's settings stack: the real store, the real fuse, and — when the
-    /// host has a 模块 3 manager — its forget path.
+    /// host has a module 3 manager — its forget path.
     public init(
         store: IdentityMappingStore = .shared,
         pairing: (any PopopxMeshPairingForgetting)? = nil,
@@ -364,7 +364,7 @@ public struct MeshPrivacySettingsView: View {
         .task { await model.refresh() }
     }
 
-    /// The 总开关, as a binding that writes the key and then tells the fuse.
+    /// The master switch, as a binding that writes the key and then tells the fuse.
     ///
     /// A `set` side effect rather than `.onChange`: `onChange(of:perform:)` is deprecated at this
     /// package's macOS 14 floor (and the two-parameter form needs iOS 17), and a Toggle's action is
@@ -399,14 +399,14 @@ public struct MeshPrivacySettingsView: View {
         }
     }
 
-    /// 模块 7 的私聊界面, one entry per bound peer: the binding is the only proof this device has that
+    /// Module 7's private-chat view, one entry per bound peer: the binding is the only proof this device has that
     /// a mesh key belongs to someone, so the row that lists it is the row that opens its
     /// conversation. `NavigationLink(destination:label:)` rather than the closure form because that
     /// form is iOS 16 and this package still builds for iOS 15.
     ///
-    /// The entry exists only while the 总开关 is on. The private view's one-line mount hands the engine
+    /// The entry exists only while the master switch is on. The private view's one-line mount hands the engine
     /// singleton to its model, and a settings page that built one while the switch was off would be
-    /// creating a Bluetooth central from the very screen that just promised not to (红线 28): off is
+    /// creating a Bluetooth central from the very screen that just promised not to (red line 28): off is
     /// not a greyed-out door, it is no door.
     @ViewBuilder private func privateChatRow(_ binding: PopopxMeshBindingSummary) -> some View {
         if fuseEnabled {
@@ -439,7 +439,7 @@ public struct MeshPrivacySettingsView: View {
         }
     }
 
-    /// 手动确认 vs 自动静默, in the store's own enum, so this page cannot offer a policy that does
+    /// Manual confirmation vs automatic silent, in the store's own enum, so this page cannot offer a policy that does
     /// not exist.
     static let policies: [MeshPairingPolicy] = [.manualConfirm, .autoSilent]
 

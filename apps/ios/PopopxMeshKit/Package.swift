@@ -17,7 +17,7 @@ let package = Package(
         .target(name: "PopopxMeshKit"),
         .testTarget(name: "PopopxMeshKitTests", dependencies: ["PopopxMeshKit"]),
 
-        // 模块 7: the SwiftUI surface. A separate target, so a host that wants the protocol stack
+        // Module 7: the SwiftUI surface. A separate target, so a host that wants the protocol stack
         // without a view layer still links only `PopopxMeshKit`, and so `PopopxMeshKit`'s own
         // warning count cannot be paid for by UI code.
         .target(

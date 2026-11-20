@@ -253,8 +253,8 @@ class NtfManager: NSObject, UNUserNotificationCenterDelegate, ObservableObject {
     // Spec: spec/services/notifications.md#notifyMessageReceived
     func notifyMessageReceived(_ user: any UserLike, _ cInfo: ChatInfo, _ cItem: ChatItem) {
         logger.debug("NtfManager.notifyMessageReceived")
-        // 算力点生态的静默信令不叫醒用户：这一行在会话里本来就不渲染，通知先于本机删行发出，
-        // 于是横幅是它唯一会被看见的时刻。判据与渲染层共用 `PopopxSysMarker`（整串相等）。
+        // Silent signalling in the compute-points economy must not wake the user: this line is never rendered in the session anyway, and the
+        // notification goes out before this device deletes the row, so the banner is the only moment it can ever be seen. The test shares `PopopxSysMarker` with the rendering layer (whole-string equality).
         if PopopxSysMarker.isSignalText(cItem.content.msgContent?.text ?? "") { return }
         if cInfo.ntfsEnabled(chatItem: cItem) {
             addNotification(createMessageReceivedNtf(user, cInfo, cItem, 0))

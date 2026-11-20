@@ -1,63 +1,63 @@
 //  PopopxSendRedPacketSheet.swift
 //
-//  【第五阶段 · 7】发一个算力点红包：本机扣点 → 签一张卡片 → 把它送进当前会话。
+//  [Phase 5 · 7] Sending a credit red packet: debit on this device → sign a card → deliver it into the current chat.
 //
-//  ### 面额只有四档，份数只有约数
-//  苹果 3.1.1 对虚拟货币赠予的读法很硬：**随机金额带赌博属性**。所以这一页从头到尾
-//  不存在"输入金额"的入口，只有 `PopopxCommerceLimits.redPacketAmounts` 那四个档。
-//  份数同理不放开自由输入：它只列**面额的约数**，于是每份天然是整数点，
-//  而 `PopopxCreditsManager.sendRedPacket` 里那条 `amount % recipientCount == 0` 判据
-//  在本面板这一侧就不可达——不会出现一个只能报错的按钮。
+//  ### Only four face values, and only divisors for the share count
+//  Apple's 3.1.1 reading of virtual-currency gifting is hard: **random amounts carry a gambling character**. So from end to end this page
+//  has no "enter an amount" entry at all, only the four tiers in `PopopxCommerceLimits.redPacketAmounts`.
+//  The share count is likewise not free-form: it lists only **divisors of the face value**, so each share is a whole number of points by construction,
+//  and the `amount % recipientCount == 0` criterion in `PopopxCreditsManager.sendRedPacket`
+//  becomes unreachable from this panel's side — there is never a button that can only report an error.
 //
-//  ### 群聊均分为什么必须往载荷里加一个字段
-//  规范写的 URI 是 `popopx://redpacket?id=&amount=&note=&sig=`。这四个字段能表达单聊红包
-//  （`amount` 就是那一份），表达不了群聊均分：领取端只有这张卡片可看，它必须知道自己那一份
-//  是多少。要么让收件人自己除以"他以为的人数"（谁都能改），要么把人数塞进 `note`
-//  （那是用户文本，不是账目）。所以载荷多一个 `n`，并且**进签名原文**：
-//  改份数与改金额同样是"验签失败"。这一处偏离规范已写进 `Docs/app-store-review-notes.md`。
+//  ### Why an even group split must add a field to the payload
+//  The URI written in the spec is `popopx://redpacket?id=&amount=&note=&sig=`. Those four fields express a one-to-one red packet
+//  (`amount` being that one share) but not an even group split: the claiming side only has this card to look at, and it must know how big its own share
+//  is. Either let the recipient divide by "the head count he assumes" (which anyone can alter), or stuff the count into `note`
+//  (that is user text, not an account entry). So the payload gains an `n`, and it **enters the signed original**:
+//  altering the share count is just as much a "signature check failed" as altering the amount. This deviation from the spec is written up in `Docs/app-store-review-notes.md`.
 //
-//  ### 发不出去不退款，只重发
-//  点数在 `sendRedPacket` 那一步就扣了。SMP 发送失败时钱已经在这一单里，
-//  此刻退钱再让用户重发 = 同一条 packetId 可能被两次扣款、或者第一份被领走而第二份又发出去。
-//  所以这一页把失败的单子留着：载荷不变、packetId 不变，"再发一次"只是重投同一条消息。
-//  真正的兜底在 `refundSettledPackets`：领满即退，或宽限期（`packetClaimGraceSeconds`）到点退余款。
+//  ### A packet that cannot be sent is not refunded, only resent
+//  The points are already debited at the `sendRedPacket` step. When the SMP send fails the money is already in this order,
+//  and refunding now then letting the user resend equals the same packetId being debited twice, or the first share being claimed while a second copy goes out.
+//  So this page keeps the failed order: payload unchanged, packetId unchanged, and "send again" just redelivers the same message.
+//  The real fallback is in `refundSettledPackets`: refund once every share is claimed, or refund the remainder when the grace period (`packetClaimGraceSeconds`) expires.
 //
-//  ### 这一层不能保证的事，界面上也不假称
-//  没有服务端账本，**领取端的防重放只存在于领取者自己的账本里**（同一个 packetId 只入账一次）。
-//  发送方收到的回执只用来算退款，不是确权。因此：
-//  - 群红包的回执按成员去重（`recordClaim(packetId:memberKey:)`），一个人重投不会挤掉别人的份数；
-//  - 这一页承诺的只有"发出"与"没人领会退回"，不承诺"对方一定收到"。
+//  ### What this layer cannot guarantee, the interface must not pretend it does
+//  There is no server-side ledger, so **replay protection on the claiming side exists only in the claimer's own ledger** (the same packetId is credited once).
+//  The receipts the sender receives are used only to compute refunds, not to establish title. Therefore:
+//  - group packet receipts are deduplicated per member (`recordClaim(packetId:memberKey:)`), so one person resending does not push others out of their shares;
+//  - this page promises only "sent" and "returned if nobody claims it"; it does not promise "the other side certainly received it".
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. The red line forbids scripts modifying project.pbxproj.
 
 import SwiftUI
 
-// MARK: - 落点
+// MARK: - Destination
 
-/// 红包发到哪儿，以及那儿最多能分给几个人。
+/// Where the red packet is sent, and how many people it can be split among at most there.
 ///
-/// 三个字段全是标量：宿主从 `ChatInfo` 算好交进来，本面板因此不认识 SMP 的会话类型
-/// （`ChatInfo` 是带关联值的 enum，在这里 pattern-match 会把这个文件钉死在 POPOPXChat 上，
-/// 也让预览必须造一个真会话）。
+/// All three fields are scalars: the host computes them from `ChatInfo` and hands them in, so this panel never knows SMP's chat types
+/// (`ChatInfo` is an enum with associated values; pattern-matching here would nail this file to POPOPXChat,
+/// and would also force previews to build a real chat).
 struct PopopxPacketDestination: Hashable {
     let displayName: String
     let target: PopopxCommerceTarget
-    /// 这个会话最多能收几份。单聊恒为 1；群聊是成员数减自己。
+    /// How many shares this chat can receive at most. Always 1 for a one-to-one chat; for a group it is the member count minus yourself.
     let recipientCap: Int
 
     static func contact(id: Int64, name: String) -> PopopxPacketDestination {
         PopopxPacketDestination(displayName: name, target: .contact(id), recipientCap: 1)
     }
 
-    /// `memberCount` 含自己。**减一是因为自己是发的人**；拿不到成员数时按 1 处理，
-    /// 宁可发成一个单份红包，也不要发出一份没人领得完、要悬三十天的单子。
+    /// `memberCount` includes yourself. **The minus one is because you are the one sending**; when the member count is unavailable it is treated as 1,
+    /// better to send a single-share packet than to send an order nobody can finish claiming and that hangs for thirty days.
     ///
-    /// 2026-11-19 裁定后，**发送入口不再给群聊造落点**（`ComposeView` 的 `popopxPacketDestination`
-    /// 只认单聊，理由写在那一格的注释里：没有服务端账本，群里并发拆开最坏会多到账）。
-    /// 这一支保留有两个原因，都不是"以后可能用得上"：
-    /// ① 份数这一族账目仍然要被读懂 —— 别人那台设备铸出的 `n>1` 卡片会进来，
-    ///    `PopopxPendingRedPacket.recipientCount` 与退款判据按它算，删掉这一段就等于把收到的红包算错；
-    /// ② 预览用它展示"均分 N 份"那一格，否则那一格在 CI 的版面证据里永远不会出现。
+    /// After the 2026-11-19 ruling, **the send entry no longer builds destinations for group chats** (`popopxPacketDestination` in `ComposeView`
+    /// accepts only one-to-one chats, for the reasons written in that cell's comment: with no server-side ledger, concurrent splitting in a group could at worst credit too much).
+    /// This case is kept for two reasons, neither of which is "might be useful later":
+    /// ① the share-count family of entries still has to be understood — a card with `n>1` minted on someone else's device comes in,
+    ///    `PopopxPendingRedPacket.recipientCount` and the refund criterion are computed from it, and deleting this branch would mean miscounting a received packet;
+    /// ② previews use it to show the "split evenly into N shares" cell, which would otherwise never appear in CI's layout evidence.
     static func group(id: Int64, name: String, memberCount: Int) -> PopopxPacketDestination {
         PopopxPacketDestination(
             displayName: name,
@@ -66,7 +66,7 @@ struct PopopxPacketDestination: Hashable {
         )
     }
 
-    /// 可选份数：面额的约数、且不超过这个会话的人数上限。升序，第一个总是 1。
+    /// Selectable share counts: divisors of the face value that do not exceed this chat's head-count limit. Ascending, and the first is always 1.
     func recipientOptions(for amount: Int) -> [Int] {
         guard amount > 0 else { return [1] }
         let ceiling = max(1, min(recipientCap, PopopxCommerceLimits.maximumPacketRecipients))
@@ -78,7 +78,7 @@ struct PopopxPacketDestination: Hashable {
     }
 }
 
-// MARK: - 面板
+// MARK: - Panel
 
 struct PopopxSendRedPacketSheet: View {
     let destination: PopopxPacketDestination
@@ -101,7 +101,7 @@ struct PopopxSendRedPacketSheet: View {
         .task { credits.loadIfNeeded() }
     }
 
-    // MARK: 版面
+    // MARK: Layout
 
     private var content: some View {
         ScrollView {
@@ -118,7 +118,7 @@ struct PopopxSendRedPacketSheet: View {
             .padding(.bottom, PopopxMetrics.spaceL)
         }
         .onChange(of: amount) { _, newValue in
-            // 换档要把份数收回合法域：原来选的 5 份在 50 点这一档还成立，在 10 点那档就不成立了。
+            // Changing tier has to pull the share count back into the legal domain: the 5 shares chosen on the 50-point tier still hold there but not on the 10-point tier.
             let options = destination.recipientOptions(for: newValue)
             recipients = options.contains(recipients) ? recipients : 1
         }
@@ -253,7 +253,7 @@ struct PopopxSendRedPacketSheet: View {
         }
     }
 
-    // MARK: 底栏
+    // MARK: Footer
 
     private var footer: some View {
         VStack(spacing: PopopxMetrics.spaceXS) {
@@ -274,7 +274,7 @@ struct PopopxSendRedPacketSheet: View {
         }
     }
 
-    // MARK: 动作
+    // MARK: Actions
 
     private var recipientOptions: [Int] { destination.recipientOptions(for: amount) }
     private var total: Int { amount }
@@ -297,8 +297,8 @@ struct PopopxSendRedPacketSheet: View {
             PopopxHaptics.notice(.error)
             return
         }
-        // 载荷造不出来＝本机签名密钥这会儿取不到。点数已经扣了，绝不能把这一单忘掉：
-        // 它留在 `pendingPackets` 里，宽限期到点由 `refundSettledPackets` 退回。
+        // A payload that cannot be built = this device's signing key is unavailable right now. The points are already debited, so this order must never be forgotten:
+        // it stays in `pendingPackets`, and when the grace period expires `refundSettledPackets` returns it.
         guard let payload = PopopxRedPacketPayload.make(
             packetId: packet.packetId, amount: packet.amount,
             recipients: packet.recipientCount, note: packet.note
@@ -310,7 +310,7 @@ struct PopopxSendRedPacketSheet: View {
         await deliver(packet, payload)
     }
 
-    /// 重投同一条载荷：不重新扣点，也不换 packetId。
+    /// Redelivering the same payload: no new debit and no change of packetId.
     private func resend(_ payload: PopopxRedPacketPayload) async {
         guard case let .undelivered(packet, _) = stage else { return }
         stage = .busy
@@ -343,19 +343,19 @@ struct PopopxSendRedPacketSheet: View {
     }
 }
 
-// MARK: - 阶段
+// MARK: - Stages
 
-/// 「已发出」与「已被领」是两件事，所以 `.sent` 带的是本地那一单，而不是一个勾。
+/// "sent" and "claimed" are two different things, so `.sent` carries the local order rather than a tick mark.
 enum PopopxPacketStage: Hashable {
     case idle
     case busy
     case sent(PopopxPendingRedPacket)
-    /// 扣了点、消息没出去：留着载荷等用户重投。
+    /// Points debited, message not delivered: the payload is kept for the user to redeliver.
     case undelivered(PopopxPendingRedPacket, PopopxRedPacketPayload)
     case refused(PopopxBadgeCreditsError)
 }
 
-// MARK: - 文案
+// MARK: - Copy
 
 private extension PopopxSendRedPacketSheet {
     enum Copy {

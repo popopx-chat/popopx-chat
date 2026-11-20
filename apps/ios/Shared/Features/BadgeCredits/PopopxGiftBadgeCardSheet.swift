@@ -1,34 +1,34 @@
 //  PopopxGiftBadgeCardSheet.swift
 //
-//  【第五阶段 · 5】礼品徽章：把一枚徽章变成一张可以递出去的券，再把券变成 `PPX1-…` 码。
+//  [Phase 5 · 5] Gift badges: turn a badge into a voucher you can hand over, then turn the voucher into a `PPX1-…` code.
 //
-//  ### 两条来源，一个券包
-//  - **Apple 礼品档**（`com.popopx.gift.*`）：钱由 Apple 收，交付回调里铸券
-//    （`PopopxCreditsManager.apply(storeReceipt:)`），本面板只负责把已经存在的券出码；
-//  - **算力点兑换**：`exchangeCreditsForVoucher(period:quantity:)` 同步扣点铸券。
-//  两条腿都只在本地留一份 `PopopxNodeVoucher`，没有"券服务器"，所以界面与文案都不承诺
-//  挂失、远程作废、送达回执——能被兑一次的判据是赠方设备上那一格 `state`
-//  （`PopopxP2PVoucherVault.authorizeRedemption`）。这句写进"对方怎么用"下面，不藏在脚注里。
+//  ### Two sources, one voucher wallet
+//  - **Apple gift tiers** (`com.popopx.gift.*`): Apple collects the money, the voucher is minted in the delivery callback
+//    (`PopopxCreditsManager.apply(storeReceipt:)`), so this panel only issues codes for vouchers that already exist;
+//  - **Compute-credit exchange**: `exchangeCreditsForVoucher(period:quantity:)` deducts credits and mints the voucher synchronously.
+//  Both legs keep only one local copy of a `PopopxNodeVoucher`; there is no "voucher server", so neither the UI nor the copy promises
+//  reporting a loss, remote revocation or a delivery receipt — the criterion for a voucher that can be redeemed once is the `state` cell
+//  on the giver's device (`PopopxP2PVoucherVault.authorizeRedemption`). That sentence goes under "How the other side redeems it", not hidden in a footnote.
 //
-//  ### 出码 = 一次性 SMP 邀请链接 + 券号 + 赠方签名
-//  `router.mintCode(for:)` 每次调用都新建一条 incognito connection（一条链接只能被 accept 一次），
-//  所以"重新生成"会得到新码、作废旧码。列表里的按钮就叫"生成兑换码"，脚注把代价说清楚。
+//  ### Minting a code = one-time SMP invite link + voucher number + giver's signature
+//  Every `router.mintCode(for:)` call creates a new incognito connection (a link can only be accepted once),
+//  so "regenerate" yields a new code and voids the old one. The button in the list is called "Generate redemption code", and the footnote states the price plainly.
 //
-//  ### QR 位图为什么自己画、为什么是白底黑码
-//  仓库里的 `POPOPXLinkQRCode`（Shared/Views/NewChat/QRCode.swift:37）把二维码画成一整块带 logo、
-//  圆角内衬和分享按钮的视图，尺寸配色都归它自己管。礼品卡上的 QR 是**卡面的一部分**，
-//  需要与券面同一个圆角、并且整卡可被截图/分享，所以这里用 `CIFilter.qrCodeGenerator()` 画纯位图。
-//  配色刻意保持黑码白底：`CIQRCodeGenerator` 只能出黑码，要染色得再走一层 mask 合成，
-//  而翻拍/低光下"深底浅码"的识读率明显低于纸质白底黑码 —— 券是拿给对方扫的，
-//  这里不为配色牺牲识读。整数倍放大（10 倍）后再 `createCGImage`，边缘不发虚。
-//  纠错档 M：码里含 base64url 的 JSON，S 档在翻拍时容错不够。
+//  ### Why we draw the QR bitmap ourselves, and why it is black on white
+//  The repository's `POPOPXLinkQRCode` (Shared/Views/NewChat/QRCode.swift:37) draws the QR code as one whole view with a logo,
+//  rounded inner padding and a share button, and it manages its own size and colours. The QR on a gift card is **part of the card face**,
+//  it has to carry the same corner radius as the voucher face and the whole card must be screenshot/share-able, so here a pure bitmap is drawn with `CIFilter.qrCodeGenerator()`.
+//  The palette is deliberately kept black code on white: `CIQRCodeGenerator` can only emit black codes, tinting them would need another mask-compositing layer,
+//  and under re-photographing / low light the read rate of "light code on dark ground" is clearly lower than paper-style black-on-white — the voucher is handed over for the other side to scan,
+//  so readability is not sacrificed for colour here. Integer-multiple upscaling (10x) before `createCGImage` keeps the edges from going soft.
+//  Error-correction level M: the code carries base64url JSON; level S does not tolerate enough damage when re-photographed.
 //
-//  ### 分享走系统面板，不发任何服务器
-//  `showShareSheet(items:)`（Shared/Views/Helpers/ShareSheet.swift:27）分享的是本地图与本地文本；
-//  复制走 `UIPasteboard.general.string`，与 `PopopxQRCardSheet.swift:201` 同一做法。
-//  本文件不出现任何上传、短链、二维码托管。
+//  ### Sharing goes through the system sheet, nothing is sent to any server
+//  `showShareSheet(items:)` (Shared/Views/Helpers/ShareSheet.swift:27) shares a local image and local text;
+//  copying uses `UIPasteboard.general.string`, the same approach as `PopopxQRCardSheet.swift:201`.
+//  This file contains no upload, no short link, no QR hosting.
 //
-//  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
+//  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. The red line forbids scripts from modifying project.pbxproj.
 
 import SwiftUI
 import CoreImage.CIFilterBuiltins
@@ -36,9 +36,9 @@ import UIKit
 import POPOPXChat
 
 struct PopopxGiftBadgeCardSheet: View {
-    /// 从付费墙买完礼品档进来时预填的档位；从券包直接进来时只是默认值。
+    /// The tier prefilled when coming in after buying a gift tier from the paywall; coming straight from the voucher wallet it is only a default value.
     var period: PopopxNodeBadgePeriod = .monthly
-    /// 从某个会话里进来时带上联系人：这时多一个"在会话里发出"的出口，其余仍走系统分享。
+    /// When coming in from a conversation the contact comes along: then there is one extra "send in the conversation" exit, everything else still goes through the system share sheet.
     var contactId: Int64? = nil
 
     @Environment(\.dismiss) private var dismiss
@@ -68,7 +68,7 @@ struct PopopxGiftBadgeCardSheet: View {
         .task { await load() }
     }
 
-    // MARK: 版面
+    // MARK: Layout
 
     private var content: some View {
         ScrollView {
@@ -267,7 +267,7 @@ struct PopopxGiftBadgeCardSheet: View {
         }
     }
 
-    // MARK: 动作
+    // MARK: Actions
 
     private func load() async {
         credits.loadIfNeeded()
@@ -307,8 +307,8 @@ struct PopopxGiftBadgeCardSheet: View {
         let before = Set(pendingVouchers.map(\.voucherId))
         switch await store.purchase(giftSku) {
         case .success(.purchased):
-            // 券在 StoreKit 交付回调里铸，回调可能略晚于这次返回。轮询几次只为"把刚出现的这张直接摊开"；
-            // 读不到也不假装成功，交给下面的列表刷新后由用户自己点。
+            // The voucher is minted in the StoreKit delivery callback, which may land slightly after this call returns. Polling a few times only serves to "lay out the card that just appeared";
+            // if it cannot be read we do not pretend success — the list refresh below leaves the user to tap it themselves.
             for _ in 0..<4 {
                 try? await Task.sleep(nanoseconds: 250_000_000)
                 await reloadVouchers()
@@ -341,25 +341,25 @@ struct PopopxGiftBadgeCardSheet: View {
     }
 }
 
-// MARK: - 工作态
+// // MARK: - Working state
 
-/// 三件事共用一个"正在忙"字段：用 `enum` 而不是三个布尔，是为了让"同时忙两件事"这种状态不存在。
+/// Three things share one "busy" field: an `enum` is used rather than three booleans so that a state like "busy with two things at once" cannot exist.
 enum PopopxBadgeCardSheetWork: Hashable {
     case credits
     case apple
     case code(String)
 }
 
-/// 已经出好码的一张卡。`Identifiable` 是给 `.sheet(item:)` 用的。
+/// A card whose code has already been minted. `Identifiable` is there for `.sheet(item:)`.
 struct PopopxMintedGiftCard: Identifiable, Hashable {
     let voucher: PopopxNodeVoucher
     let note: String
     var id: String { voucher.voucherId }
 }
 
-// MARK: - 卡面
+// // MARK: - Card face
 
-/// 一张礼品卡的呈现：QR + 分组码 + 复制 / 分享 /（可选）在会话里发出。
+/// The presentation of one gift card: QR + grouped code + copy / share / (optionally) send in the conversation.
 struct PopopxGiftCardPresenter: View {
     let card: PopopxMintedGiftCard
     let contactId: Int64?
@@ -414,7 +414,7 @@ struct PopopxGiftCardPresenter: View {
                     .frame(width: PopopxCommerceQR.side, height: PopopxCommerceQR.side)
                     .accessibilityLabel(PopopxGiftCardPresenter.Copy.qrLabel)
             } else {
-                // 位图生成失败时不给一张假图，也不给空白：明说读不出来，让用户改用下面那串文本码。
+                // When bitmap generation fails we show neither a fake image nor a blank: say plainly that it cannot be read and point the user to the textual code below.
                 Text(verbatim: PopopxGiftCardPresenter.Copy.qrUnreadable)
                     .font(PopopxType.caption)
                     .foregroundStyle(PopopxPalette.labelSecondary)
@@ -521,12 +521,12 @@ struct PopopxGiftCardPresenter: View {
 
 // MARK: - QR
 
-/// 卡面用的纯位图 QR。整数倍缩放 + `CIContext` 直出，保证翻拍时边缘不虚。
-/// 刻意黑码白底，理由见文件头。
+/// A pure bitmap QR for the card face. Integer-multiple scaling + direct `CIContext` output, so edges stay sharp when re-photographed.
+/// Deliberately black code on white; the reason is in the file header.
 enum PopopxCommerceQR {
-    /// 显示边长：48 的倍数，正好落进 `PopopxMetrics` 的节奏（192 = 4 × space2XL）。
+    /// Display side length: a multiple of 48, which lands exactly in `PopopxMetrics`' rhythm (192 = 4 × space2XL).
     static let side: CGFloat = PopopxMetrics.space2XL * 4
-    /// 每个模块放大 10 像素。5 倍在 3x 屏上会糊，20 倍只是把体积白给一倍。
+    /// Each module enlarged by 10 pixels. 5x goes soft on 3x screens, 20x just gives away twice the size for nothing.
     static let moduleScale: CGFloat = 10
 
     static func image(for text: String) -> UIImage? {
@@ -539,11 +539,11 @@ enum PopopxCommerceQR {
     }
 }
 
-// MARK: - 文案
+// // MARK: - Copy
 
 extension PopopxGiftBadgeCardSheet {
-    /// 一次最多出 10 张：券包本身的上限是 200（`maximumVouchers`），但"一次点 200 张"
-    /// 既没有真实用法，也会把下面的列表顶到屏幕外。
+    /// At most 10 codes at a time: the voucher wallet itself caps at 200 (`maximumVouchers`), but "tapping for 200 at once"
+    /// has no real use case and would push the list below off the screen.
     static let quantityCap = 10
 
     enum Copy {
@@ -603,8 +603,8 @@ extension PopopxGiftCardPresenter {
 
 // MARK: - Previews
 //
-// 卡面（`PopopxGiftCardPresenter`）刻意不给预览：它一进来就调 `router.mintCode(for:)`，
-// 那条路会 `apiAddContact` 打到未初始化的 SMP 后端。预览只出这一页——它读的全是 Keychain 与 StoreKit。
+// The card face (`PopopxGiftCardPresenter`) deliberately has no preview: as soon as it appears it calls `router.mintCode(for:)`,
+// and that path reaches `apiAddContact` against an uninitialised SMP backend. The preview only shows this page — everything it reads is Keychain and StoreKit.
 
 struct PopopxGiftBadgeCardSheetDark_Previews: PreviewProvider {
     static var previews: some View {

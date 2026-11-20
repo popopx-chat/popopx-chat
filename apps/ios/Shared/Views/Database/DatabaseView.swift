@@ -462,10 +462,10 @@ struct DatabaseView: View {
     }
 
     private func exportArchive() async -> Bool {
-        // 在场核验门（防盗模块二）：整库归档导出是本 fork 里最接近"导出密钥"的动作——
-        // 它交出去的是完整的本机聊天库文件。门放在函数最外层而不是按钮上，是因为这条
-        // 路径还有第二个出口（导出部分失败时 alert 里那个"Continue"，:302），
-        // 拦在函数里两个都盖住；`authorized` 在不怀疑时立刻返回 true，日常零打扰。
+        // Presence verification gate (anti-theft module two): exporting the whole database archive is the closest action in this fork to "exporting the keys" --
+        // what it hands over is the complete local chat database file. The gate sits at the outermost level of the function rather than on the button, because this
+        // path has a second exit (that "Continue" in the alert when the export fails partially, :302),
+        // and blocking inside the function covers both; `authorized` returns true immediately when nothing is suspected, so everyday use is untouched.
         guard await PopopxBehaviorGuard.shared.authorized(reason: NSLocalizedString("Confirm this is you before exporting the chat database", comment: "")) else {
             return false
         }

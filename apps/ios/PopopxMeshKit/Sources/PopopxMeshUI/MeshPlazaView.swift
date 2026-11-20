@@ -2,14 +2,14 @@
 //  MeshPlazaView.swift
 //  PopopxMeshUI
 //
-//  物理半径内的 `#mesh` 本地离线广场 (铁律 1, 模块 7). Everything on this screen is Bluetooth
-//  broadcast traffic and nothing else: no Nostr, no keypair, no geohash 同城频道, no relay, and no
+//  The `#mesh` local offline plaza inside the physical radius (iron rule 1, module 7). Everything on this screen is Bluetooth
+//  broadcast traffic and nothing else: no Nostr, no keypair, no geohash same-city channel, no relay, and no
 //  public network at all — the plaza is what a room of phones can say to itself when the internet
 //  cannot. `PopopxMeshEngine.sendBroadcast(text:)` floods the text unencrypted at the mesh's own TTL
 //  and never acknowledges it, which is exactly Bitchat's plaza semantics minus the Nostr half.
 //
 //  The nickname is local display state: a name the user picks for their own broadcast bubbles. It
-//  lives as a file in `Documents/popopx_mesh/` — 铁律 5's sandbox — because it is not a secret and
+//  lives as a file in `Documents/popopx_mesh/` — iron rule 5's sandbox — because it is not a secret and
 //  must not become a Keychain item, and because a panic wipe has to take it with the rest of the
 //  sandbox. It is handed to the mesh only as the announce payload's display name; nothing on this
 //  screen puts it, or any plaza text, on the SMP path.
@@ -112,7 +112,7 @@ public final class PopopxMeshPlazaModel: ObservableObject {
     private let source: PopopxMeshStateSource
     private let nicknameStore: PopopxMeshNicknameStore
     private let nicknameApplier: (any PopopxMeshNicknameApplying)?
-    /// 模块 2's engine floods at `config.ttlDefault`; the plaza shows that as a radius, so the number
+    /// Module 2's engine floods at `config.ttlDefault`; the plaza shows that as a radius, so the number
     /// comes from the config rather than being retyped here.
     private let ttlHops: Int
     private var pumpTask: Task<Void, Never>?
@@ -279,7 +279,7 @@ extension PopopxMeshKillSwitch: PopopxMeshNicknameApplying {
     }
 }
 
-/// The 本地 `#mesh` 广场.
+/// The local `#mesh` plaza.
 @MainActor
 public struct MeshPlazaView: View {
     @ObservedObject private var model: PopopxMeshPlazaModel
@@ -350,15 +350,15 @@ public struct MeshPlazaView: View {
             composer
         }
         // Two roles mount this screen now, and the two flags above are what tells them apart:
-        // a home tab (厢语's tab 3 lands here, so the four bottom tabs stay and leaving must not
-        // wipe the timeline) and a pushed square (厢语's old panel and 添加朋友 both navigate into
+        // a home tab (Cabin's tab 3 lands here, so the four bottom tabs stay and leaving must not
+        // wipe the timeline) and a pushed square (Cabin's old panel and Add friend both navigate into
         // it, and a page you navigate into is where the tabs stop existing). Both flags are still
         // declared on this view rather than on any host, because that is the only way to keep the
         // next host from forgetting them. Outside a TabView (a preview, a sheet's own stack) hiding
         // is inert, not harmful — and `hidesTabBar == false` asks for neither, it leaves the bar
         // exactly as the `TabView` handed it over.
         // Gated, because the visibility overload of `toolbar(_:for:)` is iOS 16 while this package
-        // still declares `.iOS(.v15)` (`PopopxMeshKit/Package.swift:8-10`, and 裁定 A: the package
+        // still declares `.iOS(.v15)` (`PopopxMeshKit/Package.swift:8-10`, and ruling A: the package
         // does not move, new code guards in place). Below iOS 16 this screen keeps the tabs.
         .meshHallTabBarHidden(hidesTabBar)
         .onAppear { model.start() }
@@ -485,7 +485,7 @@ public struct MeshPlazaView: View {
         return formatter.string(from: date)
     }
 
-    /// 模块 4 and 模块 5 speak in failure values; the plaza says them in one line of copy.
+    /// Module 4 and module 5 speak in failure values; the plaza says them in one line of copy.
     static func words(for failure: PopopxMeshSendFailure) -> String {
         switch failure {
         case .noLinkToPeer: "No link — nothing in range"

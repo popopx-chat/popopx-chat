@@ -3,8 +3,8 @@
 //  PopopxMeshKit
 //
 //  The mesh's only façade: it owns the radio, the per-peer Noise sessions, the fragment path, the
-//  flood decisions and the identity key. Everything above it — 模块 3 pairing, 模块 4 health,
-//  模块 5 routing — talks to either `PopopxMeshOutbound` or the event hub, never to CoreBluetooth.
+//  flood decisions and the identity key. Everything above it — module 3 pairing, module 4 health,
+//  module 5 routing — talks to either `PopopxMeshOutbound` or the event hub, never to CoreBluetooth.
 //
 //  Two invariants hold this file together. A peer is only ever addressed by a public key that a
 //  handshake or an announce proved, never by the 8-byte wire id alone; and every packet that is
@@ -67,7 +67,7 @@ public actor PopopxMeshEngine {
     private var recentPackets: PopopxMeshDeduplicator
     private var fragments: PopopxMeshFragmentAssembler
 
-    /// 模块 8: the private-group state machine. It does no I/O — this type is the only thing that
+    /// module 8: the private-group state machine. It does no I/O — this type is the only thing that
     /// touches the radio, and the group layer is handed bytes that already arrived.
     private let groups: PopopxGroupCoordinator
 
@@ -83,7 +83,7 @@ public actor PopopxMeshEngine {
     public static let announceNicknameField = "nickname"
     /// The Ed25519 signing key, in the same dictionary. This is an added *key in the JSON*, not a
     /// change to the packet or to the dictionary's shape: every reader here decodes `[String: String]`
-    /// and picks the fields it knows, so a build without 模块 8 keeps parsing our announce exactly as
+    /// and picks the fields it knows, so a build without module 8 keeps parsing our announce exactly as
     /// before and simply does not learn our signing key. Bitchat's roster rows carry a signing key
     /// sourced from the announce for the same reason (`GroupProtocol.swift:23`).
     public static let announceSigningKeyField = "signpub"
@@ -141,15 +141,15 @@ public actor PopopxMeshEngine {
 
     public var localMeshPublicKeyHex: String { identity.meshPublicKeyHex }
 
-    /// Panic wipe (模块 7), the group half. `destroyIdentity()` cannot call this: it is synchronous
+    /// Panic wipe (module 7), the group half. `destroyIdentity()` cannot call this: it is synchronous
     /// and app-facing, while burning group state is an actor hop, a Keychain `removeAll` and a file
-    /// removal. Kept separate so the app can burn the mesh identity alone (the existing 模块 7
+    /// removal. Kept separate so the app can burn the mesh identity alone (the existing module 7
     /// contract) and add this to the same call site.
     public func destroyGroupState() async {
         await groups.destroyAll()
     }
 
-    /// Panic wipe (模块 7) calls this after it has cleared the mapping table: the static key leaves
+    /// Panic wipe (module 7) calls this after it has cleared the mapping table: the static key leaves
     /// the Keychain and memory, and every session dies with it.
     public func destroyIdentity() {
         identity = PopopxMeshIdentity.generate()
@@ -162,7 +162,7 @@ public actor PopopxMeshEngine {
 
     // MARK: - Lifecycle
 
-    /// Opens the radio. The global switch (模块 1 `meshEnabled`) is read by the host, so a Mesh that
+    /// Opens the radio. The global switch (module 1 `meshEnabled`) is read by the host, so a Mesh that
     /// is off never leaves a manager scanning.
     public func start(nickname: String? = nil) async {
         guard !running else { return }
@@ -208,7 +208,7 @@ public actor PopopxMeshEngine {
 
     public var isRunning: Bool { running }
 
-    /// What the radio is doing, for the UI's "蓝牙不可用" copy (模块 4 rule 2).
+    /// What the radio is doing, for the UI's "Bluetooth unavailable" copy (module 4 rule 2).
     public var bluetoothState: PopopxBluetoothState { radioState }
 
     // MARK: - Outbound
@@ -259,7 +259,7 @@ public actor PopopxMeshEngine {
             payload: ciphertext
         )
         await deliver(packet, messageId: messageId, peer: peer, origin: nil)
-        // 模块 4's ACK watchdog only ever sees envelope traffic: it tracks `PopopxMeshEnvelope.id`,
+        // module 4's ACK watchdog only ever sees envelope traffic: it tracks `PopopxMeshEnvelope.id`,
         // and a group state blob is not an envelope. Saying so here rather than letting a group send
         // look like it had an acknowledgement it would never receive.
         if type == .noiseEncrypted {
@@ -288,7 +288,7 @@ public actor PopopxMeshEngine {
     }
 
     /// Asks a peer to identify itself again. The reply refreshes its reachability, so a ping is how
-    /// 模块 4's 15-second window gets evidence for a silent contact.
+    /// module 4's 15-second window gets evidence for a silent contact.
     public func ping(_ meshPublicKeyHex: String) async {
         guard running, let peer = peersByHex[meshPublicKeyHex] else { return }
         let nonce = Data((0..<8).map { _ in UInt8.random(in: 0...255) })
@@ -745,7 +745,7 @@ public actor PopopxMeshEngine {
             return
         }
         guard packet.recipientPeerID == identity.peerID else {
-            // Directed at someone else: 模块 4 must not credit a neighbour for traffic that was not
+            // Directed at someone else: module 4 must not credit a neighbour for traffic that was not
             // ours, and we cannot read it anyway.
             return
         }
@@ -792,7 +792,7 @@ public actor PopopxMeshEngine {
             )
         )
         // Everything we can read and that is not itself an acknowledgement gets acknowledged:
-        // 模块 4's 5-second guard is waiting on exactly this reply.
+        // module 4's 5-second guard is waiting on exactly this reply.
         if case let .control(frame) = body, case .deliveryAck = frame { return }
         await acknowledge(messageId: envelope.id, to: meshHex)
     }
@@ -880,7 +880,7 @@ public actor PopopxMeshEngine {
         touch(hopCount: hopCount, linkID: linkID, into: &record)
         peersByHex[meshHex] = record
         meshHexByPeerID[sender.hex] = meshHex
-        // 模块 8: the same key-by-key read the announce already does. A peer whose announce carries
+        // module 8: the same key-by-key read the announce already does. A peer whose announce carries
         // no `signpub` — an older build, or one that has not started its group layer — is simply not
         // invitable into a group yet, and `invite` reports that rather than guessing a key.
         if let signingHex = fields[Self.announceSigningKeyField] {
@@ -936,7 +936,7 @@ public actor PopopxMeshEngine {
     /// jittered so that two neighbours that heard the frame at once do not collide on the link.
     private func relay(_ packet: PopopxMeshPacket, incoming linkID: UUID) async {
         guard packet.ttl > 1 else {
-            // A frame that dies at our door is not a delivery failure of ours: 模块 4 owns that
+            // A frame that dies at our door is not a delivery failure of ours: module 4 owns that
             // verdict for traffic we sent, and this traffic belongs to someone else.
             PopopxMeshLog.route.debug(
                 "⏳ ttl spent, \(packet.decodedType.map { String($0.rawValue) } ?? "?", privacy: .public) not forwarded"
@@ -952,7 +952,7 @@ public actor PopopxMeshEngine {
         await deliver(forwarded, messageId: packet.packetID.popopxHex, peer: peer, origin: linkID)
     }
 
-    // MARK: - Private groups (模块 8)
+    // MARK: - Private groups (module 8)
 
     /// The group layer's outbound half. Everything here is a thin wrapper: the decisions — who to
     /// believe, what a roster means, whether a message is ours to read — live in
@@ -1141,7 +1141,7 @@ public actor PopopxMeshEngine {
                 settleHandshakeWaiters(meshHex)
                 PopopxMeshLog.noise.warning("⌛ handshake with \(meshHex.prefix(8), privacy: .public) went nowhere")
             }
-            // A peer we could not reach for four of 模块 4's windows, on no link of ours, is dropped;
+            // A peer we could not reach for four of module 4's windows, on no link of ours, is dropped;
             // its record is not the evidence a delivery failure is drawn from, that is the monitor.
             if record.linkIDs.isEmpty,
                record.session == nil,
@@ -1181,7 +1181,7 @@ public actor PopopxMeshEngine {
     /// Cost, stated plainly: a third long-term public key per node, visible to anyone in Bluetooth
     /// range, which is one more value that can be used to recognise the same device across days.
     /// Bitchat pays it for the same reason (`GroupProtocol.swift:23`), and unlike its announce the
-    /// field is additive inside a JSON dictionary, so a node that does not know 模块 8 ignores it.
+    /// field is additive inside a JSON dictionary, so a node that does not know module 8 ignores it.
     private func announcePayload() async -> Data {
         var fields: [String: String] = [Self.announcePublicKeyField: identity.meshPublicKeyHex]
         if let nickname, !nickname.isEmpty { fields[Self.announceNicknameField] = nickname }
@@ -1293,7 +1293,7 @@ extension PopopxMeshEngine: PopopxBLETransportDelegate {
         if peer.linkIDs.isEmpty {
             peer.isDirect = false
             peersByHex[meshHex] = peer
-            // 模块 4 turns this into onBluetoothDeliveryFailed for everything still in flight.
+            // module 4 turns this into onBluetoothDeliveryFailed for everything still in flight.
             await publish(.peerDisappeared(peer.peerID))
         }
         PopopxMeshLog.ble.debug(

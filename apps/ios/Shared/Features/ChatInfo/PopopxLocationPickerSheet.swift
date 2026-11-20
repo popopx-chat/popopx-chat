@@ -2,41 +2,41 @@
 //  PopopxLocationPickerSheet.swift
 //  POPOPX (iOS)
 //
-//  「发送位置」的选择器：一枚定在画面中央的针、一片可以拖的地图、一串搜出来的地点。
+//  The "send location" picker: a pin fixed in the centre of the view, a draggable map, and a list of searched places.
 //
-//  这个文件干三件事：
+//  This file does three things:
 //
-//  1. `PopopxLocationPickerModel` —— 权限、定位、反向地理编码、搜索。视图只读它。
-//     `CLLocationManager` 只出现在这个文件里，"只申请 When In Use、永不申请 Always"
-//     （`location-prompt.md:35`）因此是一条 grep 得着的规则，而不是一句口头承诺。
-//  2. `PopopxLocationPickerSheet` —— 版式。地图舞台高度固定，搜索与列表吃掉剩下的空间，
-//     底部发送栏不参与压缩。
-//  3. `PopopxLocationLookup` —— 把 `CLGeocoder` / `MKLocalSearch` 的 completion 形态收进来，
-//     外面只看见 async。
+//  1. `PopopxLocationPickerModel` — permissions, positioning, reverse geocoding, search. The view only reads it.
+//     `CLLocationManager` appears only in this file, so "ask for When In Use only, never Always"
+//     (`location-prompt.md:35`) is therefore a rule you can grep for, not a verbal promise.
+//  2. `PopopxLocationPickerSheet` — the layout. The map stage has a fixed height, search and the list take the remaining space,
+//     and the send bar at the bottom does not participate in compression.
+//  3. `PopopxLocationLookup` — brings the completion style of `CLGeocoder` / `MKLocalSearch` inside,
+//     so the outside only sees async.
 //
-//  四件必须先说清的事：
+//  Four things that must be made clear up front:
 //
-//  1. **没有用 `PopopxSheetContainer`**。它把 content 整个塞进 `ScrollView`
-//     （`PopopxControls.swift:758-763`），而一张可拖的地图放进竖向滚动容器里，两个手势会抢
-//     同一根轴。这里复刻了它的把手、标题栏、底色和圆角，中间换成一整块不滚动的手势区。
-//  2. **图针是浮层，不是 annotation**。`camera` 的 `region` 是绕着 `center` 要的，所以
-//     "画面正中央 = 已选坐标"这一步不需要 `MKAnnotation`、不需要 `MapProxy.convert`，
-//     也不需要为选点引入 UIKit。
-//  3. **相机是自己写的还是用户拖的，必须分得清**（`programmaticCenter` + 1e-6 度 ≈ 0.1 m
-//     的容差）。分不清，选中一个 POI、地图停稳之后那一次反向地理编码会把刚选好的地名冲掉。
-//  4. **定位回调会一直来**。第一次决定画面，之后只更新"当前精确位置"那一行——用户正在拖
-//     地图时镜头被抢回去，是这类选择器最常见也最讨厌的失败。
+//  1. **`PopopxSheetContainer` is not used**. It stuffs the whole content into a `ScrollView`
+//     (`PopopxControls.swift:758-763`), and putting a draggable map into a vertical scroll container means two gestures fighting over
+//     the same axis. This replicates its grabber, title bar, base colour and corner radius, replacing the middle with one non-scrolling gesture area.
+//  2. **The pin is an overlay, not an annotation**. `camera`'s `region` is requested around `center`, so
+//     "dead centre of the view = the selected coordinate" needs no `MKAnnotation` and no `MapProxy.convert`,
+//     nor does picking a point have to bring in UIKit.
+//  3. **Whether the camera was written by us or dragged by the user must be distinguishable** (`programmaticCenter` + 1e-6 degrees ≈ 0.1 m
+//     tolerance). Without that distinction, the reverse geocode that fires after a POI is chosen and the map settles would wipe out the name just chosen.
+//  4. **Location callbacks keep coming.** The first one decides the view; afterwards only the "current exact location" row updates — the camera being
+//     snatched back while the user is dragging the map is the most common and most annoying failure of this kind of picker.
 //
 
 import CoreLocation
 import MapKit
 import SwiftUI
 
-// MARK: - 选中的地点
+// MARK: - The selected place
 
-/// 用户在页面上选定了一个点。比 `PopopxLocationPayload` 多两样只在这一页有意义的东西：
-/// 用户在页面上选定了一个点。比 `PopopxLocationPayload` 多一样只在这一页有意义的东西：
-/// 精度——而且只有针还停在 GPS 点上时它才成立，那时模型才会把 `accuracyMeters` 填进来。
+/// The point the user selected on the page. Two things more than `PopopxLocationPayload`, meaningful only on this page:
+/// The point the user selected on the page. One thing more than `PopopxLocationPayload`, meaningful only on this page:
+/// accuracy — and it holds only while the pin still sits on the GPS point, which is the only time the model fills in `accuracyMeters`.
 struct PopopxPickedLocation: Equatable {
     var latitude: Double
     var longitude: Double
@@ -48,14 +48,14 @@ struct PopopxPickedLocation: Equatable {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
 
-    /// 交给发送链路的那两行文本。地名缺失时 `PopopxLocationPayload` 自己退回坐标串，
-    /// 这里不替它编一个"未知位置"。
+    /// The two lines of text handed to the send chain. When the place name is missing, `PopopxLocationPayload` falls back to the coordinate string itself,
+    /// and nothing here invents an "unknown location" on its behalf.
     var payload: PopopxLocationPayload {
         PopopxLocationPayload(latitude: latitude, longitude: longitude, name: name, address: address)
     }
 }
 
-/// 列表里的一行：反向地理编码得到的当前点，或一次搜索得到的候选点。
+/// One row in the list: the current point from reverse geocoding, or a candidate point from a search.
 struct PopopxNearbyPlace: Identifiable, Equatable {
     var title: String
     var subtitle: String?
@@ -68,11 +68,11 @@ struct PopopxNearbyPlace: Identifiable, Equatable {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
 
-    /// 针停下后系统告诉我们的那个点。坐标由调用方带进来：`CLPlacemark` 自己没有
-    /// `coordinate`（它在 `CLLocation` 上，而反向地理编码回来的 `location` 可空），
-    /// 而我们本来就在问一个确定的点。
+    /// The point the system tells us after the pin stops. The coordinate is brought in by the caller: `CLPlacemark` has no
+    /// `coordinate` of its own (it sits on `CLLocation`, and the `location` returned by reverse geocoding is optional),
+    /// and we were asking about one definite point anyway.
     ///
-    /// `name` 和 `thoroughfare` 都空时这一行没有意义，判 nil 让界面继续显示坐标，不显示空白行。
+    /// When both `name` and `thoroughfare` are empty the row means nothing; returning nil keeps the UI showing coordinates instead of a blank row.
     init?(placemark: CLPlacemark, coordinate: CLLocationCoordinate2D) {
         guard CLLocationCoordinate2DIsValid(coordinate) else { return nil }
         let title = [placemark.name, placemark.thoroughfare, placemark.locality]
@@ -85,8 +85,8 @@ struct PopopxNearbyPlace: Identifiable, Equatable {
         longitude = coordinate.longitude
     }
 
-    /// 搜索结果里的一条。没有名字也没有坐标的 `MKMapItem` 直接丢掉——列表里出现一行
-    /// "(0.000000, 0.000000)" 比搜不到更糟。
+    /// One entry among the search results. An `MKMapItem` with neither a name nor a coordinate is dropped outright — a row in the list reading
+    /// "(0.000000, 0.000000)" is worse than no results at all.
     init?(mapItem: MKMapItem) {
         let coordinate = mapItem.placemark.coordinate
         guard CLLocationCoordinate2DIsValid(coordinate) else { return nil }
@@ -102,11 +102,11 @@ struct PopopxNearbyPlace: Identifiable, Equatable {
 }
 
 private extension CLPlacemark {
-    /// 由行政区字段拼一行副标题，去掉和地名重复的那一段。
+    /// Assembles a subtitle line from the administrative fields, dropping the part that repeats the place name.
     ///
-    /// `CLPlacemark` 没有现成的整行地址（`title` 在 `MKAnnotation` 上，而它不遵守那个协议），
-    /// 所以只能自己拼：从大到小，和中国地址的阅读顺序一致；邮编、省、国家不进这一行，
-    /// 约个人用不上。
+    /// `CLPlacemark` has no ready-made full address line (`title` is on `MKAnnotation`, which it does not conform to),
+    /// so it has to be assembled by hand: large to small, matching the reading order of Chinese addresses; postcode, province and country stay out of this line,
+    /// because arranging to meet someone does not need them.
     func popopxAddress(excluding name: String?) -> String? {
         let candidates = [subAdministrativeArea, locality, subLocality, thoroughfare]
         var parts: [String] = []
@@ -119,12 +119,12 @@ private extension CLPlacemark {
     }
 }
 
-// MARK: - 系统查询
+// MARK: - System queries
 
-/// `CLGeocoder` / `MKLocalSearch` 只有 completion 形态；包一层 async 是外面能干净的唯一办法。
+/// `CLGeocoder` / `MKLocalSearch` only come in completion form; wrapping a layer of async is the only way the outside can stay clean.
 ///
-/// 两者都不抛错给界面：拿不到就用界面上已有的东西（坐标、空白结果）继续走，位置这件事
-/// 大部分时候是"网络慢"，不是"用户做错了什么"。
+/// Neither throws an error at the interface: when nothing can be had, carry on with what the interface already shows (coordinates, empty results), because with location
+/// it is mostly "the network is slow", not "the user did something wrong".
 enum PopopxLocationLookup {
     static func place(at coordinate: CLLocationCoordinate2D) async -> PopopxNearbyPlace? {
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
@@ -135,7 +135,7 @@ enum PopopxLocationLookup {
         return nil
     }
 
-    /// 关键词搜索。`near` 只是把结果收窄到当前视野附近，不是硬过滤——系统说了算。
+    /// Keyword search. `near` only narrows the results to the vicinity of the current view; it is not a hard filter — the system decides.
     static func search(_ query: String, near coordinate: CLLocationCoordinate2D?) async -> [PopopxNearbyPlace] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return [] }
@@ -152,12 +152,12 @@ enum PopopxLocationLookup {
     }
 }
 
-// MARK: - 定位
+// MARK: - Location
 
-/// `CLLocationManager` 的薄壳：delegate 回调搬到主 actor 上的三个闭包。
+/// A thin shell over `CLLocationManager`: the delegate callbacks moved onto three closures on the main actor.
 ///
-/// 单独一个类，是因为 `CLLocationManagerDelegate` 的方法不能直接长在 `@Observable` +
-/// `@MainActor` 的模型上；这层壳同时把"只问 When In Use"收在一个入口。
+/// A separate class, because `CLLocationManagerDelegate` methods cannot grow directly on an `@Observable` +
+/// `@MainActor` model; this shell also closes "ask for When In Use only" into a single entry point.
 final class PopopxLocationTracker: NSObject, CLLocationManagerDelegate {
     struct Update {
         var coordinate: CLLocationCoordinate2D
@@ -173,14 +173,14 @@ final class PopopxLocationTracker: NSObject, CLLocationManagerDelegate {
     override init() {
         super.init()
         manager.delegate = self
-        // 聊天里发位置要的是"哪个路口"，不是测绘级精度：百米档已经够把针放对，再细只是耗电。
+        // Sending a location in chat wants "which intersection", not survey-grade accuracy: a hundred-metre band already places the pin correctly, and finer only burns battery.
         manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
         manager.pausesLocationUpdatesAutomatically = true
     }
 
     var authorizationStatus: CLAuthorizationStatus { manager.authorizationStatus }
 
-    /// 全工程唯一一次申请位置权限的地方，且永远只问 When In Use。
+    /// The only place in the whole project that requests location permission, and it always asks for When In Use only.
     func requestWhenInUse() { manager.requestWhenInUseAuthorization() }
 
     func startUpdating() { manager.startUpdatingLocation() }
@@ -190,7 +190,7 @@ final class PopopxLocationTracker: NSObject, CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
         let accuracy = location.horizontalAccuracy
-        // 负数 = 这次定不上（室内、冷启动），拿它去显示"精度 ±-1m"是给自己找 bug。
+        // A negative number = this fix failed (indoors, cold start); using it to display "accuracy ±-1m" is just looking for a bug.
         guard accuracy.isFinite, accuracy >= 0 else { return }
         onUpdate?(Update(coordinate: location.coordinate, accuracyMeters: Int(accuracy.rounded())))
     }
@@ -205,7 +205,7 @@ final class PopopxLocationTracker: NSObject, CLLocationManagerDelegate {
     }
 }
 
-// MARK: - 状态
+// MARK: - State
 
 @MainActor
 @Observable
@@ -214,15 +214,15 @@ final class PopopxLocationPickerModel {
         case idle
         case locating
         case ready
-        /// 权限被拒或被限制：地图区换成一张引导卡片。
+        /// Permission denied or restricted: the map area is replaced by a guidance card.
         case denied
-        /// 系统定位服务整体关着，弹窗都没得弹。
+        /// The system location service is off entirely, so there is not even a dialog to show.
         case unavailable
     }
 
     private(set) var stage: Stage = .idle
-    /// 不做 `private(set)`：`Map(position:)` 要的是一个可写绑定。中心点的真正来源是
-    /// `onMapCameraChange`（`cameraChanged`），这里只是被它借去当绑定用。
+    /// No `private(set)`: `Map(position:)` wants a writable binding. The real source of the centre point is
+    /// `onMapCameraChange` (`cameraChanged`); this is merely borrowed by it to serve as the binding.
     var camera: MapCameraPosition = .automatic
     private(set) var center: CLLocationCoordinate2D?
     private(set) var accuracyMeters: Int?
@@ -231,7 +231,7 @@ final class PopopxLocationPickerModel {
     private(set) var results: [PopopxNearbyPlace] = []
     private(set) var isSearching = false
 
-    /// 搜索框。视图直接用 `$model.query` 绑它——其余全是 `private(set)`。
+    /// The search field. The view binds it directly with `$model.query` — everything else is `private(set)`.
     var query = ""
 
     private let tracker = PopopxLocationTracker()
@@ -254,8 +254,8 @@ final class PopopxLocationPickerModel {
         }
     }
 
-    /// 针当前指向的点。坐标、地名、精度三样必须一起说，拆开传给别人早晚对不上——
-    /// 尤其是"精度"：只有针还停在 GPS 点上时它才成立。
+    /// The point the pin currently points at. Coordinate, place name and accuracy have to be stated together; passing them apart to someone else will sooner or later mismatch —
+    /// especially "accuracy": it holds only while the pin still sits on the GPS point.
     var selection: PopopxPickedLocation? {
         guard let center else { return nil }
         let onFix = onCurrentFix
@@ -268,9 +268,9 @@ final class PopopxLocationPickerModel {
         )
     }
 
-    /// 「发送当前精确位置」那一行用的点：地图不动，直接把手里最新的 GPS 点交出去。
+    /// The point used by the "send my exact current location" row: the map does not move, the newest GPS point in hand is handed straight over.
     ///
-    /// 针被拖走之后这一行不带地名——那是别的地点的名字，贴在一个 GPS 点上会撒谎。
+    /// Once the pin has been dragged away this row carries no place name — that is another place's name, and sticking it onto a GPS point would lie.
     var exactLocation: PopopxPickedLocation? {
         guard let fix = currentFix else { return nil }
         return PopopxPickedLocation(
@@ -282,7 +282,7 @@ final class PopopxLocationPickerModel {
         )
     }
 
-    /// 交给发送链路的载荷；还没定上位就没有可发的东西，发送按钮因此是灰的。
+    /// The payload handed to the send chain; while nothing is fixed yet there is nothing to send, so the send button is greyed out.
     var payload: PopopxLocationPayload? { selection?.payload }
 
     private var onCurrentFix: Bool {
@@ -290,7 +290,7 @@ final class PopopxLocationPickerModel {
         return Self.nearlyEqual(center, fix)
     }
 
-    // MARK: 生命周期
+    // MARK: Lifecycle
 
     func start() {
         guard stage == .idle else { return }
@@ -302,7 +302,7 @@ final class PopopxLocationPickerModel {
         apply(status: tracker.authorizationStatus)
     }
 
-    /// 页面关掉时必须走到这里：定位不停，耗电就一直算在这条会话上。
+    /// Closing the page must reach here: if location never stops, the battery cost keeps being charged to this session.
     func stop() {
         settleTask?.cancel()
         labelTask?.cancel()
@@ -312,7 +312,7 @@ final class PopopxLocationPickerModel {
     private func apply(status: CLAuthorizationStatus) {
         switch status {
         case .authorizedWhenInUse, .authorizedAlways:
-            // `.authorizedAlways` 是用户在别处给过的，本页面从不主动追问，照单用即可。
+            // `.authorizedAlways` was granted by the user elsewhere; this page never asks for it, so using it as granted is enough.
             if stage != .ready { stage = .locating }
             failure = nil
             tracker.startUpdating()
@@ -337,7 +337,7 @@ final class PopopxLocationPickerModel {
         let fix = update.coordinate
         let isFirstFix = currentFix == nil
         currentFix = fix
-        // 之后的定位只挪"当前精确位置"那一行，不去抢用户正在看的画面。
+        // Later fixes only move the "current exact location" row; they do not snatch away the view the user is looking at.
         guard isFirstFix || center == nil else { return }
         setCenter(fix, name: nil, address: nil, span: Self.span(forAccuracy: update.accuracyMeters))
         refreshLabel()
@@ -350,21 +350,21 @@ final class PopopxLocationPickerModel {
         failure = .permissionDenied
     }
 
-    // MARK: 画面
+    // MARK: Camera
 
-    /// `onMapCameraChange(frequency: .continuous)` 的每一帧都会进来。
+    /// Every frame of `onMapCameraChange(frequency: .continuous)` comes in here.
     func cameraChanged(to center: CLLocationCoordinate2D) {
         if let target = programmaticCenter {
             programmaticCenter = nil
-            // 是我们自己写的相机，地图停回原点：不要把刚选好的地名冲掉。
+            // It is the camera we wrote ourselves and the map is settling back to the origin: do not wipe out the place name just chosen.
             if Self.nearlyEqual(center, target) { return }
         }
         isPanning = true
         setCenter(center, name: nil, address: nil, span: nil)
         settleTask?.cancel()
         settleTask = Task { [weak self] in
-            // 停稳之后再问地址：连续拖动的每一帧都打一次 `CLGeocoder`，除了把系统限流撞响
-            // 之外没有别的好处。
+            // Ask for the address only after it settles: hitting `CLGeocoder` on every frame of a continuous drag has no benefit beyond
+            // setting off the system's rate limit.
             try? await Task.sleep(for: .milliseconds(320))
             guard let self, !Task.isCancelled else { return }
             self.isPanning = false
@@ -399,7 +399,7 @@ final class PopopxLocationPickerModel {
         return Self.nearlyEqual(center, place.coordinate)
     }
 
-    /// 搜索由视图的 `.task(id: model.query)` 防抖后调进来。
+    /// Search is called in after the view's `.task(id: model.query)` debounce.
     func runSearch() async {
         let text = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else {
@@ -442,21 +442,21 @@ final class PopopxLocationPickerModel {
 
     private static let focusSpan = MKCoordinateSpan(latitudeDelta: 0.0025, longitudeDelta: 0.0025)
 
-    /// 首次定位给一个刚好装下精度圈的视野，之后不随定位变化——画面每次自己改比例，
-    /// 看起来就像地图在呼吸。
+    /// The first fix gives a region just large enough for the accuracy circle, and later fixes do not change it — every time the view rescales itself,
+    /// the map looks as though it were breathing.
     private static func span(forAccuracy meters: Int?) -> MKCoordinateSpan {
         let width = Double(meters ?? 30) * 3.0 / 111_320.0
         let delta = min(max(width, 0.002), 0.02)
         return MKCoordinateSpan(latitudeDelta: delta, longitudeDelta: delta)
     }
 
-    /// 1e-6 度 ≈ 0.1 m。程序写的相机和用户手里的拖动，就靠这个容差分开。
+    /// 1e-6 degrees ≈ 0.1 m. This tolerance is what separates a programmatically written camera from the user's drag.
     static func nearlyEqual(_ lhs: CLLocationCoordinate2D, _ rhs: CLLocationCoordinate2D) -> Bool {
         abs(lhs.latitude - rhs.latitude) < 0.000001 && abs(lhs.longitude - rhs.longitude) < 0.000001
     }
 }
 
-// MARK: - 文案
+// MARK: - Copy
 
 enum PopopxLocationPickerCopy {
     static let title = NSLocalizedString("Location", comment: "")
@@ -484,10 +484,10 @@ enum PopopxLocationPickerCopy {
     }
 }
 
-// MARK: - 选择器
+// MARK: - Picker
 
 struct PopopxLocationPickerSheet: View {
-    /// 把载荷交给宿主：谁来发、走哪条通道，是 ComposeView 的事，这里一概不知。
+    /// Handing the payload to the host: who sends it and over which channel is ComposeView's business, and nothing here knows it.
     var onSend: (PopopxLocationPayload) -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -532,7 +532,7 @@ struct PopopxLocationPickerSheet: View {
         .padding(.vertical, PopopxMetrics.spaceS)
     }
 
-    // MARK: 地图舞台
+    // MARK: Map stage
 
     @ViewBuilder
     private var mapStage: some View {
@@ -576,7 +576,7 @@ struct PopopxLocationPickerSheet: View {
         }
         .overlay {
             if model.stage == .locating {
-                // 第一次定位之前地图是一片默认视野，得说清楚"还在找"，不然用户以为已经定上了。
+                // Before the first fix the map is a plain default region, so "still looking" has to be said clearly, otherwise the user thinks it is already fixed.
                 PopopxPalette.base
                     .opacity(0.55)
                     .overlay(alignment: .center) {
@@ -598,7 +598,7 @@ struct PopopxLocationPickerSheet: View {
         .accessibilityLabel(PopopxLocationPickerCopy.pin)
     }
 
-    /// 中心针：针尖压在画面正中，也就是压在 `model.center` 上。
+    /// The centre pin: the pin tip sits in the exact centre of the view, which is to say on `model.center`.
     private var pin: some View {
         Image(systemName: "mappin.circle.fill")
             .font(.system(size: 34))
@@ -628,7 +628,7 @@ struct PopopxLocationPickerSheet: View {
         .accessibilityLabel(PopopxLocationPickerCopy.recenter)
     }
 
-    // MARK: 搜索与列表
+    // MARK: Search and list
 
     private var places: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -731,12 +731,12 @@ struct PopopxLocationPickerSheet: View {
         .listRowSeparatorTint(PopopxPalette.separator)
     }
 
-    // MARK: 发送栏
+    // MARK: Send bar
 
     private var footer: some View {
         VStack(spacing: PopopxMetrics.spaceXS) {
             if let payload = model.payload {
-                // 发送前把最终要发出去的东西念一遍：地名可能没解析出来，那就必须看得见坐标。
+                // Before sending, read back what will actually go out: the place name may not have resolved, in which case the coordinates must be visible.
                 Text(payload.displayName)
                     .font(PopopxType.microTag)
                     .foregroundStyle(PopopxPalette.labelHint)
@@ -764,11 +764,11 @@ struct PopopxLocationPickerSheet: View {
     }
 }
 
-// MARK: - 搜索防抖
+// MARK: - Search debounce
 
 private extension View {
-    /// 输入停下 280 ms 再查：`MKLocalSearch` 每敲一个字发一次请求，前一次的结果会盖掉
-    /// 后一次，用户在列表里看到的是自己三个字母之前的输入。
+    /// Query only 280 ms after typing stops: `MKLocalSearch` firing a request per keystroke means an earlier result overwrites
+    /// a later one, and the user sees in the list what they typed three letters ago.
     func searchableText(_ text: Binding<String>, search: @escaping () async -> Void) -> some View {
         task(id: text.wrappedValue) {
             try? await Task.sleep(for: .milliseconds(280))
@@ -778,7 +778,7 @@ private extension View {
     }
 }
 
-// MARK: - 预览
+// MARK: - Previews
 
 #if DEBUG
 struct PopopxLocationPickerSheet_Previews: PreviewProvider {

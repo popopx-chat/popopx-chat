@@ -12,8 +12,8 @@ import SwiftUI
 import POPOPXChat
 
 // Spec: spec/client/navigation.md#POPOPXInfo
-// 引导第 1 屏：品牌宣言页。同一份视图也被「设置 → 关于」以 `onboarding: false` 复用，
-// 所以只有 CTA 与徽章脚注受 `onboarding` 控制，其余两态共用。
+// Onboarding screen 1: the brand statement page. The same view is also reused by 'Settings -> About' with `onboarding: false`,
+// so only the CTA and the badge footnote are controlled by `onboarding`; the rest is shared by both states.
 struct POPOPXInfo: View {
     @EnvironmentObject var m: ChatModel
     @Environment(\.colorScheme) var colorScheme: ColorScheme
@@ -29,9 +29,9 @@ struct POPOPXInfo: View {
     private static let wordmarkCompactWidth: CGFloat = 200
     private static let haloSize = CGSize(width: 268, height: 152)
 
-    /// 首屏必须一次看全两颗按钮：把双按钮钉在底部安全区之上（`safeAreaInset`），
-    /// 中间内容留在可滚动的 VStack 里，再按可用高度把 hero 与行距收一档。
-    /// 判据用 GeometryReader 给的实际可用高度，不是 `UIScreen.main`。
+    /// The first screen must show both buttons at a glance: the pair of buttons is pinned above the bottom safe area (`safeAreaInset`),
+    /// the middle content stays in a scrollable VStack, and the hero and the line spacing are tightened one step according to the available height.
+    /// The criterion is the actual available height given by GeometryReader, not `UIScreen.main`.
     var body: some View {
         GeometryReader { g in
             let compact = g.size.height < 800
@@ -78,7 +78,7 @@ struct POPOPXInfo: View {
         .navigationBarHidden(onboarding)
     }
 
-    // MARK: - 视觉
+    // MARK: - Visuals
 
     private func hero(compact: Bool) -> some View {
         ZStack {
@@ -203,12 +203,12 @@ struct POPOPXInfo: View {
         .accessibilityElement(children: .combine)
     }
 
-    // MARK: - 操作
+    // MARK: - Actions
 
-    /// 底部固定栏：滚动内容会从它下面经过，所以底色必须是不透明的 `PopopxPalette.base`，
-    /// 顶边只给一根发丝线，别让按钮看起来"飘"在卖点卡片上。
-    /// 「设置 → 关于」复用同一份视图但 `onboarding == false`，那条路径不生成固定栏，
-    /// 也就不会占用滚动高度。
+    /// Bottom fixed bar: the scrolling content passes underneath it, so the base colour must be the opaque `PopopxPalette.base`,
+    /// and the top edge gets only a single hairline, so the buttons do not look as though they "float" over the selling-point cards.
+    /// 'Settings -> About' reuses the same view but with `onboarding == false`; that path generates no fixed bar,
+    /// so it also takes up no scrolling height.
     private var actions: some View {
         VStack(alignment: .center, spacing: PopopxMetrics.spaceS) {
             PopopxButton(
@@ -236,8 +236,8 @@ struct POPOPXInfo: View {
         }
     }
 
-    /// 备份导入入口：只把 `migrationState` 置为「粘贴或扫码」，
-    /// 页面顶部的迁移 sheet 绑定会立刻把它呈现出来（与原版同一条链路）。
+    /// The backup-import entry: it only sets `migrationState` to "paste or scan a code",
+    /// and the migration sheet binding at the top of the page presents it immediately (the same chain as the original version).
     private func openRestoreEntry() {
         if m.migrationState == nil {
             m.migrationState = .pasteOrScanLink

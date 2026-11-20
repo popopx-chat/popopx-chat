@@ -2,8 +2,8 @@
 //  PopopxEventObserverTests.swift
 //  PopopxMeshKitTests
 //
-//  模块 6: 联网后会话自动升级. The bypass is mounted on a fake of the app's event bus and a real 模块 5
-//  router over a real 模块 1 store, so what these cases prove is the three things that actually matter
+//  Module 6: the automatic session upgrade once online. The bypass is mounted on a fake of the app's event bus and a real module 5
+//  router over a real module 1 store, so what these cases prove is the three things that actually matter
 //  about a read-only observer: it upgrades the right pending connection and only that one, it moves
 //  what the router had filed under the temporary id, and it changes nothing about the events the
 //  app's own consumer is still receiving.
@@ -17,7 +17,7 @@ import Foundation
 import PopopxMeshKit
 import Testing
 
-/// The app's event bus, as 模块 6 sees it: every consumer gets its own stream, and pushing an event
+/// The app's event bus, as module 6 sees it: every consumer gets its own stream, and pushing an event
 /// reaches all of them. That is the property the read-only claim rests on.
 actor FakeChatFeed: PopopxChatEventFeeding {
     private var continuations: [AsyncStream<PopopxChatSessionEvent>.Continuation] = []
@@ -44,7 +44,7 @@ actor FakeChatFeed: PopopxChatEventFeeding {
 struct PopopxEventObserverTests {
     // MARK: - The upgrade itself
 
-    @Test("contactConnected upgrades the pending connection 模块 2 created")
+    @Test("contactConnected upgrades the pending connection module 2 created")
     func contactConnectedUpgradesBinding() async throws {
         let sandbox = try MeshTestSandbox(label: "observer")
         defer { sandbox.reset() }
@@ -65,7 +65,7 @@ struct PopopxEventObserverTests {
             migration: PopopxMigrationReport(),
             flushedMessages: 0
         ))
-        // 模块 1's row: the mesh key now resolves to a contact, and the temporary id is gone.
+        // Module 1's row: the mesh key now resolves to a contact, and the temporary id is gone.
         let row = try #require(await store.mapping(forMeshPublicKeyHex: hex))
         #expect(row.contactId == 900)
         #expect(row.tempConnId == nil)
@@ -88,8 +88,8 @@ struct PopopxEventObserverTests {
         defer { parts.openLatches() }
         let observer = PopopxEventObserver(feed: FakeChatFeed(), store: store, router: router)
 
-        _ = await router.send(PopopxOutboundMessage(messageId: "wait-1", target: .tempConnId(401), text: "第一条"))
-        _ = await router.send(PopopxOutboundMessage(messageId: "wait-2", target: .tempConnId(401), text: "第二条"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "wait-1", target: .tempConnId(401), text: "the first message"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "wait-2", target: .tempConnId(401), text: "the second message"))
         #expect(await router.pendingMessageCount == 2)
 
         await parts.network.setConnected(true)
@@ -106,7 +106,7 @@ struct PopopxEventObserverTests {
         // The contact exists now, and the path is up, so the backlog goes out on the spot.
         #expect(flushed == 2)
         #expect(await router.pendingMessageCount == 0)
-        #expect(await parts.core.sentMessageIds == ["wait-1", "wait-2"], "迁移不能换 id")
+        #expect(await parts.core.sentMessageIds == ["wait-1", "wait-2"], "migration must not change the ids")
         #expect(await parts.core.contactIds == [901, 901])
     }
 
@@ -121,7 +121,7 @@ struct PopopxEventObserverTests {
         defer { parts.openLatches() }
         let observer = PopopxEventObserver(feed: FakeChatFeed(), store: store, router: router)
 
-        _ = await router.send(PopopxOutboundMessage(messageId: "off-1", target: .tempConnId(402), text: "离线积压"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "off-1", target: .tempConnId(402), text: "offline backlog"))
         let result = await observer.observe(
             PopopxChatSessionEvent(kind: .contactConnected, contactId: 902, tempConnId: 402, peerMeshPublicKeyHex: hex)
         )
@@ -130,7 +130,7 @@ struct PopopxEventObserverTests {
             return
         }
         #expect(migration.movedQueuedMessages == 1)
-        #expect(flushed == 0, "无网时升级不能假装发出去了")
+        #expect(flushed == 0, "an upgrade with no network must not pretend it sent anything")
         #expect(await parts.core.requests.isEmpty)
         let entry = try #require(await router.unacknowledgedMeshMessages["off-1"])
         #expect(entry.target == .contactId(902))
@@ -150,7 +150,7 @@ struct PopopxEventObserverTests {
         let observer = PopopxEventObserver(feed: FakeChatFeed(), store: store, router: router)
 
         #expect(await router.recordIncoming(
-            PopopxMeshOfflineRecord(messageId: "rec-1", target: .tempConnId(403), peerMeshPublicKeyHex: hex, text: "对方离线发来的")
+            PopopxMeshOfflineRecord(messageId: "rec-1", target: .tempConnId(403), peerMeshPublicKeyHex: hex, text: "offline peer note")
         ))
         let result = await observer.observe(
             PopopxChatSessionEvent(kind: .contactConnected, contactId: 903, tempConnId: 403, peerMeshPublicKeyHex: hex)
@@ -165,7 +165,7 @@ struct PopopxEventObserverTests {
         #expect(await router.offlineRecords(for: .contactId(903)).first?.messageId == "rec-1")
     }
 
-    // MARK: - 只读旁路
+    // MARK: - The read-only bypass
 
     @Test("the bypass takes its own subscription and leaves the app's consumer untouched")
     func observerDoesNotStealEvents() async throws {
@@ -259,7 +259,7 @@ struct PopopxEventObserverTests {
         #expect(await router.pendingMessageCount == 0)
     }
 
-    // MARK: - 幂等
+    // MARK: - Idempotence
 
     @Test("contactSndReady after contactConnected is answered, not re-run")
     func secondEventIsAlreadyUpgraded() async throws {
@@ -279,7 +279,7 @@ struct PopopxEventObserverTests {
         #expect(await observer.observe(connected).statusCode == "upgraded")
         let sndReady = PopopxChatSessionEvent(kind: .contactSndReady, contactId: 906, tempConnId: 406, peerMeshPublicKeyHex: hex)
         #expect(await observer.observe(sndReady) == .alreadyUpgraded(contactId: 906))
-        #expect(collector.count == 1, "一次升级, 一条状态栏通知")
+        #expect(collector.count == 1, "one upgrade, one status bar notification")
         // A re-delivery of the very same event is answered with the same verdict, not a new upgrade.
         #expect(await observer.observe(connected) == .alreadyUpgraded(contactId: 906))
         #expect(collector.count == 1)
@@ -309,7 +309,7 @@ struct PopopxEventObserverTests {
         #expect(rows.first?.isPending == true, "a malformed event must not consume the pending pairing")
     }
 
-    // MARK: - 提取 connId 与正式 contactId
+    // MARK: - Extracting connId and the real contactId
 
     @Test("the mesh key alone resolves the pending connection when the bus names no connId")
     func resolvesByMeshKey() async throws {
@@ -391,7 +391,7 @@ struct PopopxEventObserverTests {
         #expect(await store.allMappings().isEmpty)
     }
 
-    // MARK: - 状态栏通知
+    // MARK: - The status bar notification
 
     @Test("the upgrade notification carries the numbers a chat page needs, and the router's banner")
     func upgradeNotificationPayload() async throws {
@@ -407,7 +407,7 @@ struct PopopxEventObserverTests {
         defer { collector.stop() }
         let observer = PopopxEventObserver(feed: FakeChatFeed(), store: store, router: router)
 
-        _ = await router.send(PopopxOutboundMessage(messageId: "n-1", target: .tempConnId(412), text: "一条"))
+        _ = await router.send(PopopxOutboundMessage(messageId: "n-1", target: .tempConnId(412), text: "one message"))
         #expect(await router.currentStatus() == .queued(messageCount: 1))
 
         _ = await observer.observe(
@@ -432,7 +432,7 @@ struct PopopxEventObserverTests {
         #expect(payload[PopopxEventObserver.userRefKey] as? String == "@phone")
         // Offline AND nobody in range, so the router's banner is the queued one — the same status the
         // test asserted two lines above, quoted as the page would show it.
-        #expect(payload[PopopxEventObserver.statusTextKey] as? String == "蓝牙与公网均不可用，1 条消息待发送")
+        #expect(payload[PopopxEventObserver.statusTextKey] as? String == PopopxRoutingStatus.queued(messageCount: 1).displayText)
     }
 
     @Test("the stranger banner lifts once the card has arrived")
@@ -446,7 +446,7 @@ struct PopopxEventObserverTests {
         let observer = PopopxEventObserver(feed: FakeChatFeed(), store: store, router: router)
 
         _ = await router.send(
-            PopopxOutboundMessage(messageId: "s-1", target: .meshPublicKeyHex(stranger), text: "陌生人")
+            PopopxOutboundMessage(messageId: "s-1", target: .meshPublicKeyHex(stranger), text: "stranger")
         )
         #expect(await router.unboundStrangerStatus() == PopopxMessageRouter.unboundStrangerStatusText)
 

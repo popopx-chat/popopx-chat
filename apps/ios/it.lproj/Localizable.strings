@@ -8044,8 +8044,8 @@ alert title */
 "Your subscription is cancelled. The badge stays until %@." = "Il tuo abbonamento è stato annullato. Il distintivo resta fino al %@.";
 
 
-/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
-/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+/* === POPOPX compute-points economy (BadgeCredits) commercial copy: one-to-one with PopopxCommerceCopy === */
+/* These 37 rows correspond directly to the NSLocalizedString keys in PopopxBadgeCreditsModels.swift; en.lproj holds none of them (value == key). */
 
 /* product name */
 "POPOPX Dynamic Privacy Node Badge" = "Badge POPOPX per nodo di riservatezza dinamico";
@@ -8158,7 +8158,7 @@ alert title */
 /* error */
 "Your Compute Credits balance cannot go above %lld. Spend some credits first." = "Il tuo saldo di crediti di calcolo non può superare %lld. Spendi prima alcuni crediti.";
 
-/* ==== POPOPX onboarding v2 (2026-11-19) — 引导页四屏 + 隐私政策/使用条款 ==== */
+/* ==== POPOPX onboarding v2 (2026-11-19) - the four onboarding screens + privacy policy / terms of use ==== */
 /* POPOPX onboarding v2 — generated block, 2026-11-19 */
 
 /* Onboarding: header pills */
@@ -8170,12 +8170,10 @@ alert title */
 "Own your network." = "La tua rete è tua.";
 "Private messaging with no account and no user IDs." = "Messaggistica privata senza account e senza ID utente.";
 "SMP end-to-end encrypted" = "SMP cifrato end-to-end";
-"厢语 Bluetooth Mesh relay" = "Relè Bluetooth Mesh 厢语";
 "What POPOPX gives you" = "Cosa ti dà POPOPX";
 "No user IDs" = "Nessun ID utente";
 "No phone number, no email, no global public key. Nothing links your contacts to each other, and each anonymous identity stays separate." = "Niente numero di telefono, niente email, nessuna chiave pubblica globale. Nulla collega i tuoi contatti tra loro, e ogni identità anonima resta separata.";
 "Dynamic relays and near-field" = "Relè dinamici e prossimità";
-"Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "Online usi il cluster dinamico di nodi relay SMP. Offline, 厢语 passa a una mesh Bluetooth da 1 a 7 hop e si associa faccia a faccia via UWB o un tocco.";
 "Anti-peeping and local-only cards" = "Anti-sguardo e card solo locali";
 "Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "Screenshot e registrazioni sono bloccati, i messaggi ultra-segreti si autodistruggono dopo la lettura, la posizione resta cifrata in entrambe le modalità e la card del tuo profilo cifrato non lascia mai questo dispositivo.";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "Completa la configurazione per ricevere il badge di prova di 3 giorni per nodo pioniere.";
@@ -8207,7 +8205,6 @@ alert title */
 "Higher privacy · balanced battery" = "Privacy più alta · batteria equilibrata";
 "Maximum discretion · nothing pushed" = "Massima discrezione · nulla viene spinto";
 "Apple's push service carries only the signal that new data is waiting, never the content." = "Il servizio di notifica di Apple trasporta solo il segnale che ci sono nuovi dati, mai il contenuto.";
-"厢语 offline mesh" = "Mesh offline 厢语";
 "When the internet is down, messages hop over nearby devices, up to 7 hops, with no server. Pair face to face with UWB or a tap." = "Senza internet i messaggi passano di dispositivo in dispositivo, fino a 7 hop, senza server. Associa faccia a faccia con UWB o un tocco.";
 "Bluetooth permission is requested the first time the mesh starts." = "Il permesso Bluetooth viene richiesto al primo avvio della mesh.";
 
@@ -8251,13 +8248,11 @@ alert title */
 "The camera guard stays local" = "La guardia della fotocamera resta locale";
 "The anti-peeping guard switches the front camera on only while a top-secret sheet is open, at the lowest resolution, processes every frame on this device and stops the stream when the sheet closes. Nothing is written to disk and nothing is uploaded." = "La guardia anti-sguardo accende la fotocamera frontale solo mentre è aperta una scheda ultra-segreta, alla risoluzione minima, elabora ogni fotogramma su questo dispositivo e interrompe il flusso alla chiusura. Nulla viene scritto su disco e nulla viene caricato.";
 "Screenshots, recordings and offline hops" = "Screenshot, registrazioni e hop offline";
-"Protected screens are blocked from screenshots and screen recording by the system itself. In 厢语 mode messages hop over Bluetooth between nearby devices and never reach the public internet." = "Il sistema stesso blocca screenshot e registrazioni dello schermo nelle interfacce protette. In modalità 厢语 i messaggi passano via Bluetooth tra dispositivi vicini e non raggiungono mai l'internet pubblico.";
 "Your controls" = "Il controllo è tuo";
 "You can export or delete any identity, erase the local database or trigger Panic Wipe at any time. Deletion is irreversible because no server holds a copy." = "Puoi esportare o eliminare qualsiasi identità, cancellare il database locale o attivare la cancellazione di panico in qualsiasi momento. L'eliminazione è irreversibile perché nessun server ne conserva una copia.";
 
 /* Legal: terms */
 "Acceptable use" = "Uso consentito";
-"Use POPOPX within the laws of the country you are in. Public groups and 厢语 broadcasts must carry no unlawful content, no spam and no harassment of other users." = "Usa POPOPX entro le leggi del paese in cui ti trovi. Gruppi pubblici e trasmissioni 厢语 non devono contenere contenuti illeciti, spam né molestie verso altri utenti.";
 "Your keys, your responsibility" = "Le tue chiavi, la tua responsabilità";
 "Your mnemonic phrase, identity keys, badges and POPOPX Compute Credits exist only on this device. If the device or the phrase is lost, they cannot be recovered, frozen or reissued by anyone." = "La tua frase mnemonica, le chiavi di identità, i badge e i Crediti di calcolo POPOPX esistono solo su questo dispositivo. Se perdi il dispositivo o la frase, nessuno può recuperarli, congelarli o riemetterli.";
 "No guarantee of availability" = "Nessuna garanzia di disponibilità";
@@ -8316,10 +8311,10 @@ alert title */
 "Redeem a code" = "Riscatta un codice";
 "%d available" = "%d disponibili";
 "Lets you gift a badge card or redeem a code" = "Permette di regalare una carta distintivo o riscattare un codice";
-"Offline Bluetooth mesh" = "Mesh Bluetooth offline 厢语";
+"Offline Bluetooth mesh" = "Mesh Bluetooth offline Cabin";
 "Fuse is open" = "Attivo";
 "Closed by the fuse" = "Disattivato dal fusibile";
-"Offline mesh privacy and pairings" = "Privacy e accoppiamenti di 厢语";
+"Offline mesh privacy and pairings" = "Privacy e accoppiamenti di Cabin";
 "Add a friend" = "Aggiungi un amico";
 "Chat preferences for this identity" = "Preferenze chat per questa identità";
 "Notifications on" = "Notifiche attive";
@@ -8333,8 +8328,8 @@ alert title */
 "Confirm this is you before opening settings" = "Conferma che sei tu prima di aprire le impostazioni";
 "Closing the master switch stops Bluetooth scanning, advertising and relaying all at once; the other rows on this page stay readable but start no Bluetooth object." = "Chiudendo l’interruttore generale si fermano insieme scansione, pubblicità e inoltro Bluetooth; le altre righe di questa pagina restano leggibili ma non avviano alcun oggetto Bluetooth.";
 "Credits and badges live only in this device's keychain: no server keeps the ledger, and neither side can change it remotely." = "Crediti e distintivi esistono solo nel portachiavi di questo dispositivo: nessun server tiene il registro e nessuno può modificarli da remoto.";
-"Offline mesh master switch" = "Interruttore generale della rete offline 厢语";
-"Switching this off is the fuse: every mesh component stops together." = "Spegnerlo è il fusibile: tutti i componenti di 厢语 si fermano insieme.";
+"Offline mesh master switch" = "Interruttore generale della rete offline Cabin";
+"Switching this off is the fuse: every mesh component stops together." = "Spegnerlo è il fusibile: tutti i componenti di Cabin si fermano insieme.";
 "Actual Bluetooth state" = "Stato reale del Bluetooth";
 "Verify actual state" = "Verifica";
 "Not verified yet in this run. Tap Verify to read the real state." = "Non ancora verificato in questa sessione. Tocca «Verifica» per leggere lo stato reale.";
@@ -8352,7 +8347,7 @@ alert title */
 "A nearby pairing request shows a confirmation; nothing connects until you tap it." = "Una richiesta di accoppiamento nelle vicinanze mostra una conferma; nulla si connette finché non la tocchi.";
 "Pair silently" = "Accoppia in silenzio";
 "Pairing completes on its own once the private Bluetooth session is up, without asking." = "L’accoppiamento si completa da solo una volta stabilita la sessione Bluetooth privata, senza chiedere.";
-"Erase offline mesh data now" = "Cancella subito i dati offline di 厢语";
+"Erase offline mesh data now" = "Cancella subito i dati offline di Cabin";
 "Triple tap" = "Triplo tocco";
 "%d/3 taps counted" = "%d/3 tocchi contati";
 "Waiting for confirmation" = "In attesa di conferma";
@@ -8537,7 +8532,6 @@ alert title */
 "Badge lit for %lld more days." = "Badge attivo per %lld giorni in più.";
 "Choose a plan" = "Scegli un piano";
 "Renew or change plan" = "Rinnova o cambia piano";
-"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "Apre il pannello 厢语: l’interruttore principale, i canali e i nodi nelle vicinanze";
 "Subscribed channels" = "Canali seguiti";
 "No channels yet" = "Nessun canale ancora";
 "%d channels you follow" = "Canali seguiti: %d";
@@ -8553,13 +8547,13 @@ alert title */
 "Broadcast to #mesh" = "Invia a #mesh";
 "Send over the offline mesh" = "Invia tramite la rete offline";
 
-/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+/* POPOPX round 19: keys added during the ninth pass over the three tabs */
 "Back to messages" = "Torna ai messaggi";
 "POPOPX Badge" = "Distintivo POPOPX";
 "Added %lld Compute Credits to your balance." = "Aggiunti %lld crediti di calcolo al tuo saldo.";
 "Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple sta ancora confermando questo acquisto. I crediti di calcolo appariranno nel tuo saldo non appena sarà confermato.";
 "Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple ha ricevuto il pagamento, ma questo dispositivo non ha ancora potuto aggiungere i crediti al tuo saldo. Verranno accreditati alla prossima scrittura disponibile nel deposito sicuro.";
-/* POPOPX round 21 第 9 轮：厢语「发现」入口无障碍说明 + 7 条 zh-Hans 上游缺值 */
+/* POPOPX round 21, ninth pass: accessibility hint for the Cabin 'Discover' entry + 7 upstream values missing from zh-Hans */
 "Discover nearby groups and channels over the Bluetooth mesh" = "Individua gruppi e canali nelle vicinanze tramite la rete mesh Bluetooth";
 "Album" = "Album";
 "Camera" = "Fotocamera";
@@ -9937,3 +9931,25 @@ alert title */
 "🔒 [Channel subscription] %1$lld Compute Credits / %2$lld days" = "🔒 [Abbonamento al canale] %1$lld Compute Credits / %2$lld giorni";
 "🧧 [Compute Credits packet] %1$lld · split equally into %2$lld shares" = "🧧 [Pacchetto Compute Credits] %1$lld · diviso in parti uguali tra %2$lld";
 "🧧 [Compute Credits packet] %lld" = "🧧 [Pacchetto Compute Credits] %lld";
+"Top-up %lld compute points" = "Ricarica di %lld crediti di calcolo";
+"Exchange did not complete · returned automatically" = "Scambio non riuscito · restituito automaticamente";
+"Redeemed a %lld-day privacy node badge" = "Badge del nodo di riservatezza di %lld giorni riscattato";
+"Redeemed %lld × %lld-day gift-card vouchers" = "%lld buoni di carta regalo da %lld giorni riscattati";
+"Sent a red packet of %lld compute points (%lld equal shares)" = "Inviata una busta rossa da %lld crediti di calcolo (%lld parti uguali)";
+"Received a compute-point red packet" = "Ricevuta una busta rossa di crediti di calcolo";
+"Received a red packet: %@" = "Busta rossa ricevuta: %@";
+"Red packet not fully claimed, %lld returned" = "Busta rossa non riscattata del tutto, restituiti %lld";
+"Subscribed to channel %@" = "Abbonato al canale %@";
+"Unlocked a profile card" = "Card del profilo sbloccata";
+"Extended the anti-peeping viewing window" = "Finestra di lettura anti-sguardo estesa";
+"Refund clawback (what was already spent is not recovered)" = "Recupero sul rimborso (quanto già speso non viene recuperato)";
+"Refund clawback" = "Recupero sul rimborso";
+"Aurora shield avatar frame" = "Cornice avatar Scudo aurora";
+"Dark gold QR card skin" = "Grafica della carta QR in oro scuro";
+"[Location]" = "[Posizione]";
+"[Encrypted profile]" = "[Profilo cifrato]";
+"[Encrypted profile · attachment]" = "[Profilo cifrato · allegato]";
+"Unnamed profile" = "Profilo senza nome";
+"[Top-secret view-once] Open after biometrics" = "[Segretissimo: distruzione dopo la lettura] Apri dopo la verifica biometrica";
+"[Top-secret security alert] %@; that top-secret message was destroyed in place." = "[Avviso di sicurezza segretissimo] %@; quel messaggio segretissimo è stato distrutto sul posto.";
+"Neither Bluetooth nor the public network is available — %lld messages waiting to send" = "Né Bluetooth né rete pubblica disponibili — %lld messaggi in attesa di invio";

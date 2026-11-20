@@ -41,18 +41,18 @@ class Tests_iOS: XCTestCase {
     }
 }
 
-// MARK: - B5 / B6 对话室挂载回归
+// MARK: - B5 / B6 chat room mount regression
 
-/// 钉住三条契约：
-/// ① 直聊里的纯文本行走新气泡，并带通道角标；② 只有附件、没有文字的草稿发得出去；
-/// ③ 引用回复条与附件预览条画在输入栏上方、且不与输入栏重叠。
+/// Pins three contracts:
+/// (a) a plain-text row in a direct chat uses the new bubble and carries the channel badge; (b) a draft with only an attachment and no text still sends;
+/// (c) the reply quote strip and the attachment preview strip draw above the input bar and never overlap it.
 ///
-/// 定位只认 accessibilityIdentifier：语言无关，换皮不换锚点。
-/// `popopx.inputBar.textField` / `.sendButton` / `.plusButton`、`popopx.bubble.channel`。
+/// Locators trust accessibilityIdentifier only: language-independent, a reskin never moves an anchor.
+/// `popopx.inputBar.textField` / `.sendButton` / `.plusButton`, `popopx.bubble.channel`.
 ///
-/// 跑之前要知道的：① 至 ④ 需要一台上有「活跃联系人的 1:1 会话」的设备——加好友是一次真实的 SMP
-/// 握手，对端在另一台设备上，本机建不出这个联系人。没有这样的会话时那四条腿 `XCTSkip` 说实话，
-/// 不给假绿；T0 不需要任何会话，永远真跑（壳层锚点 + B6 对群聊的排除项）。
+/// Before running them: legs one through four need a device holding a 1:1 chat with an active contact -- adding a friend is a real SMP
+/// handshake, the peer lives on another device, and this device cannot create that contact. With no such chat those four legs call `XCTSkip` and tell the truth,
+/// never a false green; T0 needs no chat at all and always really runs (shell anchors + the B6 carve-out for group chats).
 @MainActor
 final class PopopxChatRoomRegressionTests: XCTestCase {
 
@@ -66,7 +66,7 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
     }
 
     private let groupTitle = "B6 Carveout"
-    /// 会话列表每一行的验收锚点（`ChatsListView.swift:600`）—— 行的 AX 形状会随屏幕和挂载点变，锚点不会。
+    /// The acceptance anchor for every row of the chat list (`ChatsListView.swift:784`) -- the row's AX shape varies with the screen and the mount point, the anchor never does.
     private let rowAnchor = "popopx.row"
     private let markerPrefix = "popopx-regression"
     private let profileName = "CI Room Test"
@@ -78,26 +78,26 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
         app = XCUIApplication()
     }
 
-    // MARK: - T0 壳层锚点 + 群聊排除项（不需要任何会话）
+    // MARK: - T0 shell anchors + the group-chat carve-out (needs no chat at all)
 
     func testT0ShellAnchorsAndGroupKeepsLegacyComposer() throws {
         launchToShell()
         XCTAssertTrue(anchor(Anchor.headerPlus).waitForExistence(timeout: 10),
-                      "T0 壳层上没有 popopx.header.plus —— 顶栏没挂上，锚点全部无从谈起")
+                      "T0 has no popopx.header.plus on the shell -- the top bar never mounted, so every anchor is moot")
         assertHeaderFits(tag: "T0")
-        XCTAssertFalse(anchorOnScreen(Anchor.field), "T0 会话列表上出现了输入条锚点，作用域泄漏了")
+        XCTAssertFalse(anchorOnScreen(Anchor.field), "T0 shows an input-bar anchor on the chat list -- the scope leaked")
 
         let title = try ensureGroupChat()
         openChat(titled: title)
         XCTAssertFalse(anchor(Anchor.field).waitForExistence(timeout: 4),
-                       "T0 群聊「\(title)」里出现了 popopx.inputBar.textField —— B6 的排除项漏了群聊")
+                       "T0 group chat '\(title)' shows popopx.inputBar.textField -- the B6 carve-out missed group chats")
         let legacy = legacyComposerProbe()
         XCTAssertNotNil(legacy,
-                        "T0 群聊「\(title)」里新条旧条都没有：composer 整条没渲染，上一条断言是假的绿")
+                        "T0 group chat '\(title)' has neither the new bar nor the old one: no composer rendered at all, so the assertion above is a false green")
         NSLog("POPREG[T0] group '%@' keeps the legacy composer (%@)", title, legacy ?? "-")
     }
 
-    // MARK: - T1 ① 纯文本气泡 + 通道角标
+    // MARK: - T1 (a) plain-text bubble + channel badge
 
     func testT1PlainBubbleCarriesChannelBadge() throws {
         let chat = try openEligibleDirectChat(tag: "T1")
@@ -105,129 +105,129 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
         try typeAndSend(text)
 
         let bubble = try waited(app.staticTexts.matching(NSPredicate(format: "label == %@", text)).firstMatch,
-                                15, "T1 发出去的「\(text)」没出现在会话「\(chat)」里")
+                                15, "T1 the sent '\(text)' never appeared in chat '\(chat)'")
         let badges = anchors(Anchor.badge)
         XCTAssertFalse(badges.isEmpty,
-                       "T1 气泡画出来了，但整屏没有 popopx.bubble.channel —— B5 的 resolver 没给任何一行定到通道")
+                       "T1 drew the bubble, but the whole screen has no popopx.bubble.channel -- the B5 resolver resolved a channel for no row at all")
         guard let badge = badges.min(by: { abs($0.frame.midY - bubble.frame.maxY) < abs($1.frame.midY - bubble.frame.maxY) }) else { return }
-        XCTAssertTrue(hit(badge), "T1 通道角标存在但点不到：它不在当前那一屏上")
+        XCTAssertTrue(hit(badge), "T1 the channel badge exists but is not hittable: it is not on the screen you are looking at")
         XCTAssertGreaterThanOrEqual(badge.frame.midY, bubble.frame.midY,
-                                    "T1 角标在正文之上——它不该画在气泡上沿")
+                                    "T1 the badge sits above the body text -- it must not draw at the bubble's top edge")
         XCTAssertLessThanOrEqual(badge.frame.midY, bubble.frame.maxY + 44,
-                                 "T1 角标离这一行太远（\(Int(badge.frame.midY)) vs 行底 \(Int(bubble.frame.maxY))），不是这一行的角标")
+                                 "T1 the badge is too far from this row (\(Int(badge.frame.midY)) vs row bottom \(Int(bubble.frame.maxY))) -- it is not this row's badge")
         NSLog("POPREG[T1] chat=%@ text='%@' bubble=%@ badge=%@ label='%@'",
               chat, text, rect(bubble.frame), rect(badge.frame), badge.label)
     }
 
-    // MARK: - T2 ② 仅附件、无文字的草稿
+    // MARK: - T2 (b) attachment-only draft, no text
 
     func testT2AttachmentOnlyDraftSends() throws {
         _ = try openEligibleDirectChat(tag: "T2")
         let rowsBefore = app.cells.count
         let plus = anchor(Anchor.plus)
-        XCTAssertTrue(plus.waitForExistence(timeout: 8), "T2 没有 popopx.inputBar.plusButton")
-        XCTAssertTrue(hit(plus), "T2 「+」锚点在但点不到")
+        XCTAssertTrue(plus.waitForExistence(timeout: 8), "T2 has no popopx.inputBar.plusButton")
+        XCTAssertTrue(hit(plus), "T2 the '+' anchor is there but not hittable")
         plus.tap()
         guard pickOnePhoto() else {
-            throw XCTSkip("T2 驱动不到系统选图器（「+」面板里的相册项或选图器本身没在这台模拟器上起来），仅附件草稿发不发得出去未被验证")
+            throw XCTSkip("T2 cannot drive the system photo picker (neither the album entry in the '+' panel nor the picker itself came up on this simulator), so whether an attachment-only draft sends is unverified")
         }
-        let preview = try waitedOn(attachmentPreview, 10, "T2 选完图后输入栏上方没有附件预览")
+        let preview = try waitedOn(attachmentPreview, 10, "T2 no attachment preview above the input bar after picking the photo")
         let send = anchor(Anchor.send)
-        XCTAssertTrue(send.waitForExistence(timeout: 5), "T2 选完图后发送锚点没了")
+        XCTAssertTrue(send.waitForExistence(timeout: 5), "T2 the send anchor is gone after picking the photo")
         XCTAssertTrue(send.isEnabled,
-                      "T2 有附件、无文字时发送键仍 disabled —— 空草稿判据又把附件吃掉了（B6 修过的那一条）")
+                      "T2 with an attachment and no text the send button is still disabled -- the empty-draft check ate the attachment again (the one B6 fixed)")
         send.tap()
         XCTAssertTrue(waitUntil(25) { attachmentPreview() == nil },
-                      "T2 点了发送，附件预览还在：这条草稿没被消费")
+                      "T2 tapped send and the attachment preview is still up: this draft was not consumed")
         XCTAssertTrue(waitUntil(10) { !anchor(Anchor.send).isEnabled },
-                      "T2 发送之后发送键仍是可用态：草稿没清空")
-        // 不拿行数当判据：ChatView 的消息流是 ScrollView+LazyVStack，行不是 cell，`app.cells` 恒为 0，
-        // 用它断言"发出去了"会永远假失败。真判据在上面两条：预览被消费、发送键回到不可用。
+                      "T2 after sending the send button is still enabled: the draft was not cleared")
+        // Do not judge by the row count: ChatView's message stream is ScrollView+LazyVStack, its rows are not cells and `app.cells` stays 0,
+        // so asserting "it sent" from that fails falsely forever. The real criteria are the two above: the preview got consumed, the send button went back to disabled.
         NSLog("POPREG[T2] attachment-only draft sent; preview was %@, cells %d → %d, images now %d",
               rect(preview.frame), rowsBefore, app.cells.count, app.images.count)
     }
 
-    // MARK: - T3 ③ 引用回复条在输入栏上方
+    // MARK: - T3 (c) reply quote strip above the input bar
 
     func testT3ReplyStripSitsAboveInputBar() throws {
         _ = try openEligibleDirectChat(tag: "T3")
         let text = "\(markerPrefix)-quote-\(UUID().uuidString.prefix(6))"
         try typeAndSend(text)
         let bubble = try waitedOn({ self.app.staticTexts.matching(NSPredicate(format: "label == %@", text))
-            .allElementsBoundByIndex.first { onScreen($0) } }, 15, "T3 发出的消息没出现")
+            .allElementsBoundByIndex.first { onScreen($0) } }, 15, "T3 the message that was sent never appeared")
         bubble.press(forDuration: 1.2)
-        guard tapAny(["Reply", "回复"]) != nil else {
-            throw XCTSkip("T3 长按消息后没有「回复」项（这台设备的消息菜单里没找到），遮挡校验没跑")
+        guard tapAny(["Reply", "Reply"]) != nil else {
+            throw XCTSkip("T3 after the long press there was no 'Reply' item (this device's message menu did not carry one), so the occlusion check did not run")
         }
         let bar = try waitedOn({ hit(self.anchor(Anchor.field)) ? self.anchor(Anchor.field) : nil },
-                               6, "T3 点完回复后输入条锚点不可点")
+                               6, "T3 after tapping Reply the input-bar anchor is not hittable")
         let strip = app.staticTexts.matching(NSPredicate(format: "label == %@", text))
             .allElementsBoundByIndex.first { onScreen($0) && $0.frame.maxY <= bar.frame.minY + 0.5 }
         XCTAssertNotNil(strip,
-                        "T3 引用回复条没出现在输入栏上沿之上（「\(text)」只剩气泡那一处）")
+                        "T3 the reply quote strip did not appear above the input bar's top edge ('\(text)' is left only at the bubble)")
         guard let strip else { return }
-        assertNoOcclusion(strip, bar, tag: "T3", what: "引用回复条")
+        assertNoOcclusion(strip, bar, tag: "T3", what: "reply quote strip")
     }
 
-    // MARK: - T4 ③ 附件预览条在输入栏上方
+    // MARK: - T4 (c) attachment preview strip above the input bar
 
     func testT4AttachmentPreviewSitsAboveInputBar() throws {
         _ = try openEligibleDirectChat(tag: "T4")
         let plus = anchor(Anchor.plus)
-        XCTAssertTrue(plus.waitForExistence(timeout: 8), "T4 没有 popopx.inputBar.plusButton")
+        XCTAssertTrue(plus.waitForExistence(timeout: 8), "T4 has no popopx.inputBar.plusButton")
         plus.tap()
         guard pickOnePhoto() else {
-            throw XCTSkip("T4 驱动不到系统选图器，附件预览条的几何校验没跑")
+            throw XCTSkip("T4 cannot drive the system photo picker, so the attachment preview strip's geometry check did not run")
         }
-        let preview = try waitedOn(attachmentPreview, 10, "T4 附件预览条没出现")
+        let preview = try waitedOn(attachmentPreview, 10, "T4 the attachment preview strip never appeared")
         let bar = anchor(Anchor.field)
-        XCTAssertTrue(bar.waitForExistence(timeout: 5), "T4 选完图后输入条锚点没了")
-        assertNoOcclusion(preview, bar, tag: "T4", what: "附件预览条")
+        XCTAssertTrue(bar.waitForExistence(timeout: 5), "T4 the input-bar anchor is gone after picking the photo")
+        assertNoOcclusion(preview, bar, tag: "T4", what: "attachment preview strip")
     }
 
-    // MARK: - 几何断言
+    // MARK: - Geometry assertions
 
-    /// 发现 A 的直接断言：顶栏两端的锚点必须整颗落在窗口里，「+」的热区还得 ≥44x44。
-    /// 中间的状态胶囊夹在这两段之间，两端都在界内它就必然在界内 —— 不靠"能不能点到"反推。
+    /// Finding A asserted directly: the anchors at both ends of the top bar must land wholly inside the window, and the '+' hit area must still be >= 44x44.
+    /// The status capsule sits between those two segments, so when both ends are in bounds it must be too -- nothing inferred from "is it hittable".
     private func assertHeaderFits(tag: String) {
         let w = app.windows.firstMatch.frame
         var measured: [String] = []
         for id in [Anchor.identity, Anchor.headerPlus] {
             let e = app.descendants(matching: .any).matching(identifier: id).firstMatch
-            XCTAssertTrue(e.waitForExistence(timeout: 8), "\(tag) 顶栏缺锚点 \(id)")
+            XCTAssertTrue(e.waitForExistence(timeout: 8), "\(tag) top bar is missing the anchor \(id)")
             let f = e.frame
             measured.append("\(id)=\(rect(f))")
             XCTAssertGreaterThanOrEqual(f.minX, w.minX,
-                                        "\(tag) \(id) 越过左边界：\(rect(f)) window=\(rect(w))")
+                                        "\(tag) \(id) crosses the left edge: \(rect(f)) window=\(rect(w))")
             XCTAssertLessThanOrEqual(f.maxX, w.maxX,
-                                     "\(tag) \(id) 越过右边界：\(rect(f)) window=\(rect(w)) 内容比屏宽，顶栏又溢出了")
-            XCTAssertGreaterThanOrEqual(f.minY, 0, "\(tag) \(id) 顶到状态条之上：\(rect(f))")
-            XCTAssertLessThanOrEqual(f.maxY, w.maxY, "\(tag) \(id) 掉出下边界：\(rect(f))")
+                                     "\(tag) \(id) crosses the right edge: \(rect(f)) window=\(rect(w)) content is wider than the screen, the top bar overflowed again")
+            XCTAssertGreaterThanOrEqual(f.minY, 0, "\(tag) \(id) sits above the status bar: \(rect(f))")
+            XCTAssertLessThanOrEqual(f.maxY, w.maxY, "\(tag) \(id) fell out of the bottom edge: \(rect(f))")
         }
         let plus = app.descendants(matching: .any).matching(identifier: Anchor.headerPlus).firstMatch.frame
-        XCTAssertGreaterThanOrEqual(plus.width, 44, "\(tag) 「+」热区宽度 \(Int(plus.width)) < 44")
-        XCTAssertGreaterThanOrEqual(plus.height, 44, "\(tag) 「+」热区高度 \(Int(plus.height)) < 44")
+        XCTAssertGreaterThanOrEqual(plus.width, 44, "\(tag) the '+' hit area is \(Int(plus.width)) wide < 44")
+        XCTAssertGreaterThanOrEqual(plus.height, 44, "\(tag) the '+' hit area is \(Int(plus.height)) tall < 44")
         NSLog("%@", "\(tag) header fits window=\(rect(w)) \(measured.joined(separator: " "))")
     }
 
-    /// "在某条栏的上方"有两层：它自己点得到，且下沿压在该栏上沿之上、x 区间又真的重叠 ——
-    /// 只比 y 会把"同一高度但跑到屏幕另一侧"的元素也判成通过。
+    /// "Above some bar" has two layers: the element is hittable itself, and its bottom edge stays above that bar's top edge while the x ranges really overlap --
+    /// comparing y alone would also pass an element that is "at the same height but on the other side of the screen".
     private func assertNoOcclusion(_ strip: XCUIElement, _ bar: XCUIElement, tag: String, what: String) {
-        XCTAssertTrue(hit(strip), "\(tag) \(what) 存在但不可点")
+        XCTAssertTrue(hit(strip), "\(tag) \(what) exists but is not hittable")
         XCTAssertLessThanOrEqual(strip.frame.maxY, bar.frame.minY + 0.5,
-                                 "\(tag) \(what) 压到了输入栏上沿：strip=\(rect(strip.frame)) bar=\(rect(bar.frame))")
+                                 "\(tag) \(what) presses onto the input bar's top edge: strip=\(rect(strip.frame)) bar=\(rect(bar.frame))")
         XCTAssertGreaterThan(strip.frame.maxX, bar.frame.minX,
-                             "\(tag) \(what) 与输入栏 x 上不相交：strip=\(rect(strip.frame)) bar=\(rect(bar.frame))")
+                             "\(tag) \(what) does not intersect the input bar on x: strip=\(rect(strip.frame)) bar=\(rect(bar.frame))")
         XCTAssertLessThan(strip.frame.minX, bar.frame.maxX,
-                          "\(tag) \(what) 与输入栏 x 上不相交：strip=\(rect(strip.frame)) bar=\(rect(bar.frame))")
+                          "\(tag) \(what) does not intersect the input bar on x: strip=\(rect(strip.frame)) bar=\(rect(bar.frame))")
         NSLog("POPREG[%@] %@ strip=%@ bar=%@ gap=%.1f", tag, what,
               rect(strip.frame), rect(bar.frame), bar.frame.minY - strip.frame.maxY)
     }
 
-    // MARK: - 进入被测现场
+    // MARK: - Getting into the scene under test
 
-    /// 从冷启动走到壳层。新装容器上的第一屏是「Network commitments / Accept」条款页，
-    /// 它不在欢迎页之前、也不在导航栈里，所以逐个阶段试，且每一步都把点掉了什么写进日志。
+    /// Walk from a cold start to the shell. On a fresh container the first screen is the "Network commitments / Accept" terms page,
+    /// which is neither ahead of the welcome page nor in the navigation stack, so try every stage and log what each step tapped off.
     private func launchToShell() {
         app.launch()
         let sb = XCUIApplication(bundleIdentifier: "com.apple.springboard")
@@ -244,29 +244,29 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
                 NSLog("POPREG[step %d] tapped '%@' on: %@", step, hitLabel, screenSignature())
                 continue
             }
-            // 连着六步无事可做 = 这一屏需要被看清，而不是再等 84 步。把整棵树里能点的东西
-            // 连同 enabled 和 frame 打出来：是"CTA 被键盘盖住"还是"CTA 因为名字没打进而 disabled"，
-            // 只有这两种，日志里一眼分得开。
+            // Six steps in a row with nothing to tap means this screen has to be looked at, not waited out for 84 more steps. Print everything tappable in the tree,
+            // with its enabled state and frame: whether the CTA is "covered by the keyboard" or "disabled because the name never went in" --
+            // those are the only two possibilities, and one line of log tells them apart at a glance.
             stalled += 1
             if stalled == 6 { NSLog("POPREG[stall@%d] %@", step, axDump()) }
             usleep(700_000)
         }
         NSLog("POPREG[shell] UNREACHABLE after 90 steps: %@ | %@", screenSignature(), axDump())
-        XCTFail("走完 onboarding 仍到不了主界面（锚点 popopx.header.plus / 「消息」页都没出现）：见上一条 POPREG[shell] 现场")
+        XCTFail("onboarding ran to the end but the main interface never appeared (neither the popopx.header.plus anchor nor the 'Messages' page): see the POPREG[shell] scene just above")
     }
 
-    /// 一次只做一个动作；没有已知动作就返回 nil，让调用方等一等再扫一遍。
+    /// One action at a time; when no known action is left it returns nil so the caller waits a moment and scans again.
     private func tapOnboardingAction(nameTyped: inout Bool) -> String? {
-        if tapAny(["Create profile", "创建档案", "创建个人资料"]) != nil { return "create-profile" }
+        if tapAny(["Create profile", "Create profile", "Create profile"]) != nil { return "create-profile" }
         if !nameTyped, let field = profileNameField() {
             field.tap()
-            // 无条件输入：SwiftUI 空 TextField 的 `value` 里装的是占位文案（实测 value='Enter profile name...'），
-            // 拿"value 非空"当"已经填过"，就永远填不进去，「Create profile」也就永远 en=0。
+            // Type unconditionally: an empty SwiftUI TextField carries its placeholder text in `value` (measured value='Enter profile name...'),
+            // so treating "value is not empty" as "already filled" never fills anything, and "Create profile" stays en=0 forever.
             field.typeText(profileName)
             nameTyped = true
-            // 打完名字键盘还开着：375x812 上实测「Create profile」画在 y=701，正好在键盘底下。
-            // 收键盘用这一页自己的开关（CreateProfile.swift:267 的 `.onTapGesture { focusDisplayName = false }`）
-            // —— 点标题就是点空白，比往屏幕上乱点稳。
+            // The keyboard is still up after typing the name: on 375x812 "Create profile" measured at y=701, right underneath the keyboard.
+            // Dismiss the keyboard with this page's own switch (`.onTapGesture { focusDisplayName = false }` at CreateProfile.swift:267)
+            // -- tapping the title is tapping blank space, which beats tapping around the screen blindly.
             if let title = app.staticTexts.matching(NSPredicate(format: "label == %@", "Your profile"))
                 .allElementsBoundByIndex.first(where: { onScreen($0) }) {
                 title.tap()
@@ -274,20 +274,20 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
             usleep(800_000)
             return "profile-name"
         }
-        return tapAny(["Accept", "同意", "接受",
-                       "Get started", "开始使用",
-                       "Skip", "跳过", "Not now", "Later",
+        return tapAny(["Accept", "Agree", "Accept",
+                       "Get started", "Get started",
+                       "Skip", "Skip", "Not now", "Later",
                        "Continue", "Next", "Done", "OK"])
     }
 
-    /// 只在「这一屏确实是建档案」时认它的输入框，避免把名字打进别的表单。
-    /// 判据只用在屏幕上真实存在的那两句：标题 `Your profile`（CreateProfile.swift:234）与
-    /// 输入框占位 `Enter profile name...`（:309）。`Create profile` 是 Button 的标签，
-    /// 不是 staticText，拿它当屏据永远匹配不上（375pt 上就是这么空转 90 步的）。
+    /// Recognise the field only when this screen really is the create-profile page, so the name never goes into some other form.
+    /// The criterion uses only the two sentences that are truly on screen: the title `Your profile` (CreateProfile.swift:234) and
+    /// the field placeholder `Enter profile name...` (:309). `Create profile` is the Button's label,
+    /// not a staticText, so using it as proof of the screen never matches (on 375pt that is how 90 steps spun idle).
     private func profileNameField() -> XCUIElement? {
         guard screenHas(anyOf: ["Your profile", "Enter profile name",
-                                "Your personal name", "创建档案", "local profile"]) else { return nil }
-        return firstField(prompting: ["Enter profile name", "Your personal name", "你的名字"])
+                                "Your personal name", "Create profile", "local profile"]) else { return nil }
+        return firstField(prompting: ["Enter profile name", "Your personal name", "Your name"])
     }
 
     private func screenHas(anyOf words: [String]) -> Bool {
@@ -302,8 +302,8 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
         return "btn=\(buttons) txt=\(texts) \(fields)"
     }
 
-    /// 空转时把"屏上能点的东西、各自 enabled 与否、画在哪"整张打出来。
-    /// "CTA 被键盘盖住"与"CTA 因为名字没打进而 disabled"是两种完全不同的修法，只有这一行分得开。
+    /// When nothing moves, print the whole card: "what is tappable on screen, whether each one is enabled, and where it draws".
+    /// "The CTA is covered by the keyboard" and "the CTA is disabled because the name never went in" need opposite fixes; only this line separates them.
     private func axDump() -> String {
         let keyboard = app.keyboards.firstMatch.exists ? "keyboard=up" : "keyboard=down"
         let buttons = app.buttons.allElementsBoundByIndex.filter { onScreen($0) }.prefix(12).map { b in
@@ -318,94 +318,94 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
 
     private func atShell() -> Bool {
         guard !onboardingPending() else { return false }
-        return anchorOnScreen(Anchor.headerPlus) || app.staticTexts["消息"].exists || app.buttons["消息"].exists
+        return anchorOnScreen(Anchor.headerPlus) || app.staticTexts["Messages"].exists || app.buttons["Messages"].exists
     }
 
-    /// 条款页/建档案页是盖在壳层上的整屏层：`消息` 那一排 tab 标签在它下面照样 exists。
-    /// 所以「到没到壳层」不能只看背后那层有没有画出来，还要看前面这一层收没收掉。
+    /// The terms page and the create-profile page are full-screen layers laid over the shell: the row of `Messages` tab labels still exists underneath them.
+    /// So "did we reach the shell" cannot be judged from the layer behind being drawn alone -- the layer in front has to be dismissed as well.
     private func onboardingPending() -> Bool {
-        for label in ["Accept", "Create profile", "Get started", "同意", "创建档案", "开始使用"]
+        for label in ["Accept", "Create profile", "Get started", "Agree", "Create profile", "Get started"]
         where app.buttons.matching(NSPredicate(format: "label == %@", label)).firstMatch.exists { return true }
         return false
     }
 
-    /// 找一个群聊；没有就照 CI 那条路子本地建一个（建群不出网）。都失败才 skip。
+    /// Find a group chat; if there is none, create one locally the way CI does (creating a group stays off the network). Skip only when both fail.
     private func ensureGroupChat() throws -> String {
         if let existing = chatRows(matching: groupTitle).first { return rowTitle(existing) }
         let plus = anchor(Anchor.headerPlus)
-        XCTAssertTrue(plus.waitForExistence(timeout: 8), "建群前找不到 popopx.header.plus")
-        // 先量它在不在屏上再点：画到屏外时 tap() 会走 AXScrollToVisible，抛 kAXErrorFailure，
-        // 把一条真实的"顶栏溢出"回归写成一句看不懂的仪器错误。
+        XCTAssertTrue(plus.waitForExistence(timeout: 8), "no popopx.header.plus found before creating the group")
+        // Measure whether it is on screen before tapping: drawn outside the screen, tap() runs AXScrollToVisible and throws kAXErrorFailure,
+        // rewriting a real "top bar overflow" regression into an unreadable instrumentation error.
         guard onScreen(plus) else {
-            let why = "顶栏「+」画在屏外：plus=\(rect(plus.frame)) window=\(rect(app.windows.firstMatch.frame))"
-                + " —— 三段并排比屏宽，溢出的 HStack 居中，两端同时出界（测过的成因：中间胶囊被宿主 `fixedSize()`，ViewThatFits 收不到 proposal 停在最宽一档，见 PopopxTelemetryHeader.swift:477-490）"
+            let why = "the top bar's '+' drew outside the screen: plus=\(rect(plus.frame)) window=\(rect(app.windows.firstMatch.frame))"
+                + " -- the three segments side by side are wider than the screen, the overflowing HStack centres, so both ends leave the bounds at once (measured cause: the middle capsule is `fixedSize()` by its host, ViewThatFits receives no proposal and stops at the widest tier, see PopopxTelemetryHeader.swift:577-581)"
             XCTFail(why)
             throw NSError(domain: "PopopxChatRoomRegression", code: 2, userInfo: [NSLocalizedDescriptionKey: why])
         }
         plus.tap()
         usleep(1_500_000)
-        guard tapAny(["发起群聊或加密频道", "Create group", "New group"]) != nil else {
-            throw XCTSkip("T0 的「+」菜单里没有建群项，群聊排除项与角标两条断言之外的部分未验证")
+        guard tapAny(["Start a group chat or an encrypted channel", "Create group", "New group"]) != nil else {
+            throw XCTSkip("T0 the '+' menu had no create-group item, so everything beyond the group-chat carve-out and the badge assertions is unverified")
         }
         usleep(2_500_000)
-        let name = firstField(prompting: ["输入群名", "Enter group name"])
+        let name = firstField(prompting: ["Enter the group name", "Enter group name"])
         guard let name, name.waitForExistence(timeout: 6) else {
-            throw XCTSkip("T0 建群页上找不到群名输入框，群聊排除项未验证")
+            throw XCTSkip("T0 the create-group screen has no group-name field, the group-chat carve-out is unverified")
         }
         name.tap()
         name.typeText(groupTitle)
         usleep(800_000)
-        guard tapAny(["创建群组", "Create group"]) != nil else {
-            throw XCTSkip("T0 建群页上没有创建按钮，群聊排除项未验证")
+        guard tapAny(["Create group", "Create group"]) != nil else {
+            throw XCTSkip("T0 the create-group screen has no create button, the group-chat carve-out is unverified")
         }
         usleep(4_000_000)
-        // 建完群落在哪一层，两台机器给出过两种答案：402pt 回到列表（T0 直接过），375pt 停在
-        // 「This group is missing servers」这张后到的卡片上 —— 卡片在场时三档定位全为空，
-        // 屏上唯一带群名的元素是导航标题（实测 'B6 Carveout' 59,56 220x32）。
-        // 先按卡片自己的文案点掉；点完还看不见行就重开应用：那条断言要测的是"列表里的群行走旧 composer"，
-        // 重开之后列表是唯一在场的一层，比跟一张卡片的出现时序抢值得多。
+        // Which layer you land on after creating the group drew two different answers on two machines: 402pt returns to the list (T0 passes straight through), 375pt stops
+        // on the late-arriving "This group is missing servers" card -- while that card is up all three locator tiers come back empty,
+        // and the only element on screen carrying the group name is the navigation title (measured 'B6 Carveout' 59,56 220x32).
+        // Dismiss it first with the card's own copy; if the row is still invisible afterwards, relaunch the app: that assertion measures "group rows in the list keep the legacy composer",
+        // and after a relaunch the list is the only layer present, which is worth far more than racing one card's arrival timing.
         dismissGroupServerPrompt()
         if chatRows(matching: groupTitle).isEmpty {
-            NSLog("POPREG[T0] 建群后列表里看不到新行，重开应用再测一次；当时屏上：%@", listShape(lookingFor: groupTitle))
-            launchToShell()   // 它自己的第一步就是 app.launch()
+            NSLog("POPREG[T0] the new row is not in the list after creating the group, relaunching the app to measure once more; on screen at that moment: %@", listShape(lookingFor: groupTitle))
+            launchToShell()   // its very first step is app.launch()
         }
         XCTAssertTrue(waitUntil(20) { !self.chatRows(matching: self.groupTitle).isEmpty },
-                      "T0 建完群在会话列表里找不到「\(groupTitle)」—— \(listShape(lookingFor: groupTitle))")
-        // XCTAssert 失败不中止用例，所以这里不能回头去 `!` 那一行：直接交回自己起的名字，
-        // 找不到由 openChat 那条断言来说，消息里带屏上实测。
-        // 行标签整串是"标题, 副标题, 时间, 通道"，攥着它去重找等于每分钟抖一次。
+                      "T0 after creating the group the chat list has no '\(groupTitle)' -- \(listShape(lookingFor: groupTitle))")
+        // XCTAssert failing does not abort the test, so this must not fall through to the `!` line: hand back the name we started with,
+        // and let openChat's assertion report the miss, with what was actually on screen in its message.
+        // A row label is the whole "title, subtitle, time, channel" string, and holding on to it to re-find the row jitters once a minute.
         return groupTitle
     }
 
-    /// 「This group is missing servers」是建群完成后**晚到**的现场确认层（冷启 375pt 实测：卡片压在列表上时
-    /// Back 不存在、边缘滑动只拖动卡片本身，列表行只剩 staticText，唯一带群名的按钮是 59,56 的导航标题）。
-    /// `app.sheets` 全程报 0，所以只能按卡片自己的文案等；等不到就继续 —— 有的配置根本不弹这一层。
+    /// "This group is missing servers" is the on-device confirmation layer that arrives **late**, after the group is created (cold start at 375pt measured: while the card sits over the list
+    /// Back does not exist, the edge swipe only drags the card itself, list rows are nothing but staticText, and the only button carrying the group name is the navigation title at 59,56).
+    /// `app.sheets` reports 0 the whole time, so the only option is to wait on the card's own copy; if it never shows, carry on -- some configurations do not put up this layer at all.
     private func dismissGroupServerPrompt() {
-        let title = ["This group is missing servers", "该群组缺少服务器"]
+        let title = ["This group is missing servers", "This group is missing servers"]
         let appeared = waitUntil(12) { self.screenHas(anyOf: title) }
         guard appeared else { return }
         XCTAssertTrue(waitUntil(10) {
-            _ = self.tapAny(["Skip", "跳过", "Use current server", "使用当前服务器"])
+            _ = self.tapAny(["Skip", "Skip", "Use current server", "Use current server"])
             return !self.screenHas(anyOf: title)
-        }, "T0 建群后的服务器卡片 10 秒内点不掉 —— \(listShape(lookingFor: groupTitle))")
+        }, "T0 the servers card that follows group creation could not be dismissed within 10 seconds -- \(listShape(lookingFor: groupTitle))")
     }
 
-    /// 逐行点开列表里的会话，直到遇见一条挂上新输入条的（= 活跃联系人 1:1）。
+    /// Open the chats in the list row by row until one carries the new input bar (= a 1:1 chat with an active contact).
     private func openEligibleDirectChat(tag: String) throws -> String {
         launchToShell()
-        // 行标签是"标题, 副标题, 时间, 通道"拼出来的（实测：
-        // "B6 Carveout, Chat with admins: on, 19:28, SMP 在线加密"），时间那一段会走。
-        // 所以只取第一段当标题，回到列表时按前缀重找，不攥着上一屏的元素句柄；标题再去重。
+        // A row label is assembled from "title, subtitle, time, channel" (measured:
+        // "B6 Carveout, Chat with admins: on, 19:28, SMP online encrypted"), and the time segment moves.
+        // So keep only the first segment as the title, re-find it by prefix once back in the list instead of holding a handle from the previous screen, and de-duplicate the titles.
         var titles: [String] = []
         for row in chatRows() where titles.count < 6 {
             let title = rowTitle(row)
-            if !title.isEmpty, !titles.contains(title) { titles.append(title) }   // 同一行会翻出两个同前缀句柄
+            if !title.isEmpty, !titles.contains(title) { titles.append(title) }   // one row yields two handles sharing a prefix
         }
         var opened: [String] = []
         var lost: [String] = []
         for title in titles {
             guard let row = chatRows(matching: title).first else {
-                // 退回来时列表停在别的滚动位置 —— "这一屏没有"不是回归，记一笔继续下一行。
+                // Coming back, the list can rest at a different scroll position -- "not on this screen" is not a regression: note it and take the next row.
                 lost.append(title)
                 continue
             }
@@ -418,30 +418,30 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
             }
             backToShell()
         }
-        let tried = opened.isEmpty ? "0 行" : "\(opened.count) 行（\(opened.joined(separator: "、"))）"
-        let lostNote = lost.isEmpty ? "" : "；再找时已不在屏上：\(lost.joined(separator: "、"))"
-        throw XCTSkip("\(tag) 这台设备上找不到挂了新输入条的 1:1 会话：列表里试过 " + tried + lostNote
-            + "。需要一个活跃联系人才会有这条现场——加好友是一次真实的 SMP 握手，对端在另一台设备上。"
-            + "（当时屏上：\(listShape(lookingFor: groupTitle))）")
+        let tried = opened.isEmpty ? "0 rows" : "\(opened.count) rows (\(opened.joined(separator: ", ")))"
+        let lostNote = lost.isEmpty ? "" : "; already off screen when re-finding: \(lost.joined(separator: ", "))"
+        throw XCTSkip("\(tag) no 1:1 chat carrying the new input bar on this device: tried in the list " + tried + lostNote
+            + ". This scene needs an active contact -- adding a friend is a real SMP handshake and the peer is on another device."
+            + " (on screen at that moment: \(listShape(lookingFor: groupTitle)))")
     }
 
-    /// 这一版会话列表不把行翻译成 cell（402pt iPhone 18 Pro 上实测 cells=0），
-    /// 每一行是一个整宽的 Button。tab bar、顶栏胶囊、筛选 chip 都远窄于此，所以"宽度 ≥ 六成屏宽"
-    /// 就是"这是一行会话"的判据 —— 换成 label 匹配会在中文/英文界面之间各测一遍。
-    /// 三种屏上形状都接住，按可靠性排：
-    /// 1) `popopx.row` 锚点（`ChatsListView.swift:600`）—— 不随语言、不随行的 AX 形状变；
-    /// 2) List 翻译出的 cell；
-    /// 3) 整宽 Button —— 没有锚点的旧列表：402pt 实测行是整宽 Button，而 tab bar / 顶栏胶囊 / 筛选 chip
-    ///    都远窄于此，"宽度 ≥ 六成屏宽"就是"这是一行会话"；375pt 冷启实测同一行只剩包住标题的窄按钮
-    ///    （'B6 Carveout' 220x32 @59,56），那条判据会把真行筛掉，所以它只排在最后。
-    /// 行标签是"标题, 副标题, 时间, 通道"拼出来的，时间那一段会走 —— 匹配一律按前缀，不攥整串。
+    /// This build of the chat list does not translate rows into cells (402pt iPhone 18 Pro, measured cells=0):
+    /// every row is a full-width Button. The tab bar, the top bar capsule and the filter chips are all far narrower, so "width >= sixty percent of the screen width"
+    /// is the criterion for "this is a chat row" -- matching by label instead would mean one measurement per locale, Chinese and English.
+    /// All three on-screen shapes are handled, ranked by reliability:
+    /// 1) the `popopx.row` anchor (`ChatsListView.swift:784`) -- unchanged by language and by the row's AX shape;
+    /// 2) the cells that List translates to;
+    /// 3) full-width Buttons -- the old list without anchors: at 402pt rows measured as full-width Buttons, while the tab bar / top bar capsule / filter chips
+    ///    are all far narrower, so "width >= sixty percent of the screen width" means "this is a chat row"; at 375pt cold start the same row leaves only a narrow button around the title
+    ///    ('B6 Carveout' 220x32 @59,56), and that criterion filters real rows out, so it ranks last.
+    /// Row labels are assembled from "title, subtitle, time, channel" and the time segment moves -- always match by prefix, never hold the whole string.
     private func chatRows() -> [XCUIElement] {
         let anchored = anchors(rowAnchor)
         if !anchored.isEmpty {
             var seen: [String] = []
             return anchored.filter { row in
                 let key = rect(row.frame)
-                if seen.contains(key) { return false }   // 同一行会翻出两个同框句柄
+                if seen.contains(key) { return false }   // one row yields two handles with the same frame
                 seen.append(key)
                 return true
             }
@@ -453,10 +453,10 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
             .filter { onScreen($0) && $0.frame.width >= w.width * 0.6 && !$0.label.isEmpty }
     }
 
-    /// 一行叫什么。`accessibilityIdentifier` 加在行容器上时，那一行的 AX `label` 是**空的**
-    /// （容器不合并子元素；375pt 冷启实测：锚点找到了两行，`$0.label.contains(群名)` 仍全 false，
-    /// 白跑一轮）。所以容器档从行框内部取标题：行里有头像、正文列和时间列，正主是左上角那条 ——
-    /// 时间戳在右列、预览在它下面，先按 y 再按 x 排序就只剩标题。
+    /// What a row is called. With `accessibilityIdentifier` on the row container, that row's AX `label` is **empty**
+    /// (a container does not merge its children; measured at 375pt cold start: the anchor found two rows, yet `$0.label.contains(groupName)` was false for both,
+    /// burning a whole round). So the container tier takes the title from inside the row's frame: a row holds an avatar, a body column and a time column, and the real one is the top-left --
+    /// the timestamp is in the right column and the preview under it, so sorting by y and then by x leaves only the title.
     private func rowTitle(_ row: XCUIElement) -> String {
         let label = row.label
         if !label.isEmpty { return String(label.prefix(while: { $0 != "," })) }
@@ -472,10 +472,10 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
         chatRows().filter { rowTitle($0).contains(title) }
     }
 
-    /// 列表行"找不到"时，把这一屏上真实有什么打成一行：SwiftUI 会把同一行翻译成 cell、button
-    /// 还是两组 staticText，只有实测知道。没有这句，每次都要重跑一遍才知道该改哪个定位器。
-    /// 末尾那段是**带标题的按钮的几何**（不做 onScreen/宽度筛）：chatRows 是"标签命中 + 宽度达标 +
-    /// 在屏内"三个条件与，只报"命中 0"分不清是哪种元素、还是被哪个筛子筛掉了 —— 375pt 上就是这么空转了一轮。
+    /// When a list row "cannot be found", print one line with what is really on this screen: SwiftUI turns the same row into a cell, a button
+    /// or two groups of staticText, and only measurement knows which. Without this line every rerun is spent discovering which locator to change.
+    /// The final segment is the **geometry of the buttons carrying the title** (no onScreen/width filter): chatRows ANDs "label hit + wide enough +
+    /// inside the screen", so reporting only "0 hits" cannot tell which kind of element it was or which filter dropped it -- at 375pt that is exactly how a round spun idle.
     private func listShape(lookingFor title: String) -> String {
         let cells = app.cells.allElementsBoundByIndex.filter { onScreen($0) }
         let buttons = app.buttons.allElementsBoundByIndex.filter { onScreen($0) }
@@ -488,11 +488,11 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
         let anchored = anchors(rowAnchor)
         return "cells=\(cells.count){\(cells.prefix(4).map { $0.label }.joined(separator: " | "))} "
             + "buttons=\(buttons.count){\(buttons.prefix(6).map { $0.label }.joined(separator: " | "))} "
-            + "staticTexts=\(texts.count)，「\(title)」命中 staticText x\(hits)、命中 cell x\(cells.filter { $0.label.contains(title) }.count)"
-            + "；屏宽 \(rect(app.windows.firstMatch.frame)) 标题按钮 {\(titled)}"
-            // 容器档单独报：锚点找到几行 + 每行从内部解析出的标题。上一轮就是在这里失明 ——
-            // 日志只说"按钮命中 1、cell 命中 0"，看不出锚点档拿到了空 label 的行。
-            + "；\(rowAnchor)=\(anchored.count)"
+            + "staticTexts=\(texts.count), '\(title)' hit staticText x\(hits), hit cell x\(cells.filter { $0.label.contains(title) }.count)"
+            + "; screen width \(rect(app.windows.firstMatch.frame)) titled buttons {\(titled)}"
+            // The container tier reports on its own: how many rows the anchor found + the title parsed from inside each row. The last round went blind right here --
+            // the log only said "button hits 1, cell hits 0", so nothing showed that the anchor tier had rows with empty labels.
+            + "; \(rowAnchor)=\(anchored.count)"
             + "{\(anchored.prefix(4).map { "'\(rowTitle($0))' \(rect($0.frame))" }.joined(separator: " ; "))}"
     }
 
@@ -500,14 +500,14 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
         let row = chatRows(matching: title).first
             ?? app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", title))
                 .allElementsBoundByIndex.first { onScreen($0) }
-        XCTAssertNotNil(row, "会话列表里找不到「\(title)」那一行 —— \(listShape(lookingFor: title))")
+        XCTAssertNotNil(row, "no row for '\(title)' in the chat list -- \(listShape(lookingFor: title))")
         guard let row else { return }
         row.tap()
         usleep(2_500_000)
     }
 
     private func backToShell() {
-        if tapAny(["Back", "返回"]) == nil {
+        if tapAny(["Back", "Back"]) == nil {
             let w = app.windows.firstMatch.frame
             app.coordinate(withNormalizedOffset: CGVector(dx: 8 / w.width, dy: (w.height * 0.45) / w.height))
                 .press(forDuration: 0.2, thenDragTo:
@@ -517,32 +517,32 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
         _ = waitUntil(10) { self.atShell() }
     }
 
-    // MARK: - 输入条上的动作
+    // MARK: - Actions on the input bar
 
     @discardableResult private func typeAndSend(_ text: String) throws -> XCUIElement {
         let field = anchor(Anchor.field)
-        XCTAssertTrue(field.waitForExistence(timeout: 8), "会话里没有 popopx.inputBar.textField")
-        XCTAssertTrue(hit(field), "输入框在树里但点不到（被键盘或弹层挡住了？）")
+        XCTAssertTrue(field.waitForExistence(timeout: 8), "no popopx.inputBar.textField in the chat")
+        XCTAssertTrue(hit(field), "the field is in the tree but not hittable (covered by the keyboard or a sheet?)")
         field.tap()
         field.typeText(text)
         let send = anchor(Anchor.send)
         XCTAssertTrue(waitUntil(8) { send.exists && send.isEnabled },
-                      "打了字以后 popopx.inputBar.sendButton 仍是不可用态")
+                      "after typing, popopx.inputBar.sendButton is still disabled")
         send.tap()
         XCTAssertTrue(waitUntil(8) { self.anchor(Anchor.send).isEnabled == false },
-                      "发送之后发送键仍可用：这条文本没发出去")
+                      "the send button is still enabled after sending: this text never went out")
         return app.staticTexts.matching(NSPredicate(format: "label == %@", text)).firstMatch
     }
 
-    /// 「+」面板 → 相册 → 系统选图器里选第一张 → Done/Add。任一步走不到就返回 false，由调用方 skip。
+    /// The '+' panel -> Album -> the first photo in the system picker -> Done/Add. Whichever step it cannot reach returns false and the caller skips.
     private func pickOnePhoto() -> Bool {
-        if tapAny(["相册", "Photo", "Photos"]) == nil { return false }
+        if tapAny(["Album", "Photo", "Photos"]) == nil { return false }
         let photo = app.collectionViews.buttons.element(boundBy: 0)
-        let pickerButtons = app.buttons.matching(NSPredicate(format: "label IN %@", ["Done", "Add", "允许完全访问"]))
+        let pickerButtons = app.buttons.matching(NSPredicate(format: "label IN %@", ["Done", "Add", "Allow Full Access"]))
         let deadline = Date().addingTimeInterval(15)
         while Date() < deadline {
             if pickerButtons.element(boundBy: 0).exists {
-                let ok = pickerButtons.matching(NSPredicate(format: "label == %@", "允许完全访问")).element(boundBy: 0)
+                let ok = pickerButtons.matching(NSPredicate(format: "label == %@", "Allow Full Access")).element(boundBy: 0)
                 if ok.exists { ok.tap(); usleep(1_500_000); continue }
                 break
             }
@@ -556,7 +556,7 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
         return true
     }
 
-    /// 输入栏上方那一块附件预览（缩略图），按几何认，不按标签认。
+    /// The attachment preview (the thumbnail) above the input bar: recognised by geometry, never by label.
     private func attachmentPreview() -> XCUIElement? {
         let bar = anchor(Anchor.field)
         guard bar.exists else { return nil }
@@ -570,13 +570,13 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
         }
     }
 
-    /// 旧输入条的探针：底部那一块 UITextView（`NativeTextEditor`）或它的附件键。
+    /// Probe for the legacy input bar: the UITextView near the bottom (`NativeTextEditor`) or its attachments button.
     private func legacyComposerProbe() -> String? {
         let h = app.windows.firstMatch.frame.height
         if let tv = app.textViews.allElementsBoundByIndex.first(where: { onScreen($0) && $0.frame.midY > h * 0.6 }) {
             return "textView \(rect(tv.frame))"
         }
-        for label in ["Attachements", "Attachments", "附件"] where app.buttons[label].exists && onScreen(app.buttons[label]) {
+        for label in ["Attachements", "Attachments", "Attach"] where app.buttons[label].exists && onScreen(app.buttons[label]) {
             return "button '\(label)'"
         }
         return nil
@@ -593,7 +593,7 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
             ?? app.textViews.allElementsBoundByIndex.first(where: { onScreen($0) })
     }
 
-    // MARK: - 小工具
+    // MARK: - Small tools
 
     private func anchor(_ id: String) -> XCUIElement {
         app.descendants(matching: .any).matching(identifier: id).firstMatch
@@ -611,8 +611,8 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
         element.exists && element.isHittable
     }
 
-    /// 批量扫描时不用 `isHittable`：被裁切/半滚出的元素（列表里的「全部」筛选键）会直接抛
-    /// `Activation point invalid`，把整条用例判死。这里只要"画在屏上"这一件事。
+    /// Batch scans avoid `isHittable`: a clipped or half-scrolled element (the "All" filter button in the list) throws outright,
+    /// `Activation point invalid`, which condemns the whole test. All that matters here is "drawn on screen".
     private func onScreen(_ element: XCUIElement) -> Bool {
         guard element.exists else { return false }
         let f = element.frame
@@ -635,7 +635,7 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
         return query
     }
 
-    /// 轮询到某个元素出现为止。等不到就是 failed，不是 skipped —— 现场已经在，是东西没画出来。
+    /// Poll until an element shows up. Not getting one is a failure, not a skip -- the scene is already there, something just did not draw.
     private func waitedOn(_ read: () -> XCUIElement?, _ seconds: Int, _ why: String) throws -> XCUIElement {
         var found: XCUIElement?
         _ = waitUntil(seconds) {
@@ -655,7 +655,7 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
                 .allElementsBoundByIndex.filter { $0.isEnabled && onScreen($0) }
                 + app.staticTexts.matching(NSPredicate(format: "label == %@", label))
                     .allElementsBoundByIndex.filter { onScreen($0) }
-            // isHittable 只对这几个同名元素问：整棵树问会撞上被裁切的键，抛异常误判用例。
+            // Ask isHittable only of these same-named elements: asking the whole tree runs into clipped buttons, throws, and misjudges the test.
             if let target = candidates.first(where: { hit($0) }) {
                 target.tap()
                 return label
@@ -670,5 +670,262 @@ final class PopopxChatRoomRegressionTests: XCTestCase {
 
     private func rect(_ frame: CGRect) -> String {
         String(format: "%.0f,%.0f %.0fx%.0f", frame.origin.x, frame.origin.y, frame.size.width, frame.size.height)
+    }
+}
+
+// MARK: - Onboarding screens 3 and 4, fit-on-one-screen criterion (iPhone 15 Pro 393x852)
+
+/// The criterion trusts geometry, never locale: the bottom edge of the scroll container is the line "you see the end without scrolling",
+/// so the lowest element in the container crossing it means this screen still needs a swipe down; how far that edge moves up after `swipeUp`
+/// is the page's real scrollable distance. Print both together and any change to the padding has a basis.
+/// The page number lands straight on the screen under test through the `-onboardingStage` launch argument: `EnumDefault.get()` reads
+/// `UserDefaults.string(forKey:)`, and the argument domain outranks the persistent domain, so screens 3 and 4 can each be started alone.
+/// Fewer than 12 elements counts as "asserting before the tree finished building" -- a gap is better than a false green.
+@MainActor
+final class PopopxOnboardingFitTests: XCTestCase {
+    private struct Edge {
+        let maxY: CGFloat
+        let count: Int
+        let culprit: String
+    }
+
+    private var app: XCUIApplication!
+
+    override func setUpWithError() throws {
+        // Both legs need their own numbers: the first failure must not cancel the second leg's measurement.
+        continueAfterFailure = true
+        app = XCUIApplication()
+    }
+
+    func testA1Page3FitsOneScreen() throws {
+        try measurePage(stage: "step3_ChooseServerOperators", tag: "P3")
+    }
+
+    func testA2Page4FitsOneScreen() throws {
+        try measurePage(stage: "step4_NetworkCommitments", tag: "P4")
+    }
+
+    private func measurePage(stage: String, tag: String) throws {
+        app.launchArguments = ["-onboardingStage", stage]
+        app.launch()
+        let scroll = app.scrollViews.firstMatch
+        XCTAssertTrue(scroll.waitForExistence(timeout: 25),
+                      "\(tag) launched with -onboardingStage \(stage) and there is no scroll container: \(signature())")
+        XCTAssertTrue(waitUntil(20) { edge(of: scroll).count >= 12 },
+                      "\(tag) fewer than 12 elements inside the container, so the edge that was measured does not count: \(signature())")
+        let viewport = scroll.frame
+        let before = edge(of: scroll)
+        attach(tag: tag)
+        scroll.swipeUp()
+        usleep(800_000)
+        let after = edge(of: scroll)
+        let line = String(format: "POPFIT[%@] viewport=%@ before=%@ after=%@ elements=%d overflow=%.1f scrollable=%.1f",
+                          tag, box(viewport), y(before.maxY), y(after.maxY), before.count,
+                          before.maxY - viewport.maxY, before.maxY - after.maxY)
+        NSLog("%@ culprit=%@", line, before.culprit)
+        XCTAssertLessThanOrEqual(before.maxY, viewport.maxY + 2,
+                                 "\(tag) has \(String(format: "%.0f", before.maxY - viewport.maxY))pt"
+                                 + " of content drawn below the viewport (content maxY \(y(before.maxY)) vs viewport maxY \(y(viewport.maxY))), "
+                                 + "the lowest element is '\(before.culprit)' -- this screen still needs a swipe down")
+    }
+
+    private func edge(of scroll: XCUIElement) -> Edge {
+        var maxY: CGFloat = -10_000
+        var count = 0
+        var culprit = "-"
+        for element in scroll.descendants(matching: .any).allElementsBoundByIndex {
+            let frame = element.frame
+            guard frame != .infinite, frame.width > 0, frame.height > 0, frame.maxY < 100_000 else { continue }
+            count += 1
+            if frame.maxY > maxY {
+                maxY = frame.maxY
+                culprit = "\(element.elementType.rawValue) '\(element.label.prefix(36))' \(box(frame))"
+            }
+        }
+        return Edge(maxY: maxY, count: count, culprit: culprit)
+    }
+
+    private func attach(tag: String) {
+        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        attachment.name = "onboarding-\(tag)"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
+    private func signature() -> String {
+        let buttons = app.buttons.allElementsBoundByIndex.prefix(8)
+            .map { "'\($0.label.prefix(24))' en=\($0.isEnabled ? 1 : 0)" }
+        let texts = app.staticTexts.allElementsBoundByIndex.prefix(8).map { "'\($0.label.prefix(24))'" }
+        return "scrollViews=\(app.scrollViews.count) win=\(box(app.windows.firstMatch.frame))"
+            + " btn=[\(buttons.joined(separator: " ; "))] txt=[\(texts.joined(separator: " ; "))]"
+    }
+
+    private func waitUntil(_ seconds: Int, _ condition: () -> Bool) -> Bool {
+        let deadline = Date().addingTimeInterval(TimeInterval(seconds))
+        while Date() < deadline {
+            if condition() { return true }
+            usleep(400_000)
+        }
+        return condition()
+    }
+
+    private func box(_ frame: CGRect) -> String {
+        String(format: "%.0f,%.0f %.0fx%.0f", frame.origin.x, frame.origin.y, frame.size.width, frame.size.height)
+    }
+
+    private func y(_ value: CGFloat) -> String {
+        String(format: "%.0f", value)
+    }
+}
+
+// MARK: - On-device round 5: top bar geometry self-check (temporary probe, ruled out of the repo)
+
+/// Every criterion comes from the three numbers hard-coded in the code, trusting neither locale nor screenshots:
+/// - the identity capsule's height is `.frame(height: PopopxMetrics.space2XL)` = 48 (`PopopxTelemetryHeader.swift:239`),
+///   wrapping cannot move that number structurally, so "measured 48" is the evidence of a single line; the width ceiling is
+///   `PopopxMetrics.headerIdentityMaxWidth` = 115 (`PopopxTheme.swift:189`).
+/// - this round the outer ring of the dot tier is locked to a 32x32 square (`.frame(width: spaceXL, height: spaceXL)` + `.circle`),
+///   the previous build used a "width 32 + height 48" capsule, so besides counting the circles it asserts on its own that tall 32x48 ovals in the band are 0.
+/// - the row does not overflow: the mark at the left end and the '+' at the right end must both be inside the window (the worst budget at the 393pt tier is 391).
+/// Two phases: measure the current identity first, then pick the longest name out of the identity switcher and measure it again. When there is no longer name
+/// the second phase skips itself and says so -- a skip is a conclusion too, not a green light.
+final class PopopxHeaderR15Tests: XCTestCase {
+    private var app: XCUIApplication!
+
+    override func setUpWithError() throws {
+        continueAfterFailure = true
+        app = XCUIApplication()
+    }
+
+    func testH1TopBarGeometryAndScreenshot() throws {
+        app.launch()
+        let identity = any("popopx.header.identity")
+        XCTAssertTrue(identity.waitForExistence(timeout: 25),
+                      "H1 the top bar has no popopx.header.identity -- the app is not parked on the 'Messages' page (onboarding / lock screen / some other page), so this round's geometry cannot be measured")
+        usleep(1_500_000)
+        let window = app.windows.firstMatch.frame
+        measure(tag: "now", window: window, identity: identity, shot: "R15-tab1-now")
+
+        // Re-measure the longest display name: the switcher is a `.menu` style Picker that opens as a column of identity names.
+        let current = displayName(identity)
+        identity.tap()
+        usleep(900_000)
+        let names = app.descendants(matching: .button).allElementsBoundByIndex
+            .map { $0.label.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { $0.count >= 2 && $0 != current }
+        guard let longest = names.max(by: { $0.count < $1.count }), longest.count > current.count else {
+            NSLog("%@", "POPHDR[R15] LONG-SKIP the switcher has no identity name longer than the current one (now '\(current)' "
+                        + "\(current.count) characters, candidates=\(names.prefix(6).joined(separator: " / ")))"
+                        + " -- the longest-name tier was never walked on real hardware, leaving only the structural evidence above: the 115 ceiling and the fixed 48 height")
+            return
+        }
+        app.descendants(matching: .button).matching(NSPredicate(format: "label == %@", longest)).firstMatch.tap()
+        XCTAssertTrue(waitUntil(12) { displayName(any("popopx.header.identity")) == longest },
+                      "H1 after switching to '\(longest)' (\(longest.count) characters) the top bar still reads"
+                      + "'\(displayName(any("popopx.header.identity")))' -- the switch never landed, so the numbers below do not count")
+        usleep(600_000)
+        measure(tag: "long", window: window, identity: any("popopx.header.identity"), shot: "R15-tab1-long")
+
+        // Switching over obliges switching back: this leg reads the user's own phone, so a re-test starts from the identity he had.
+        let back = any("popopx.header.identity")
+        back.tap()
+        usleep(900_000)
+        let original = app.descendants(matching: .button).matching(NSPredicate(format: "label == %@", current)).firstMatch
+        XCTAssertTrue(original.waitForExistence(timeout: 8), "H1 the switcher has no original identity '\(current)', so nothing was switched back")
+        original.tap()
+        XCTAssertTrue(waitUntil(12) { displayName(any("popopx.header.identity")) == current },
+                      "H1 could not switch back to the original identity '\(current)' (the top bar now reads '\(displayName(any("popopx.header.identity")))') -- switch back by hand before re-testing")
+        NSLog("POPHDR[R15] restored identity='%@' on top bar", current)
+    }
+
+    private func measure(tag: String, window: CGRect, identity: XCUIElement, shot: String) {
+        let idf = identity.frame
+        let name = displayName(identity)
+        XCTAssertGreaterThanOrEqual(idf.height, 46, "H1[\(tag)] the identity capsule is \(Int(idf.height)) tall < 46: the 48 tier got pushed out of true")
+        XCTAssertLessThanOrEqual(idf.height, 50,
+                                "H1[\(tag)] the identity capsule is \(Int(idf.height)) tall > 50: beyond the fixed height 48 only wrapping can move this")
+        XCTAssertLessThanOrEqual(idf.width, 116,
+                                 "H1[\(tag)] the identity capsule is \(Int(idf.width)) wide, past the ceiling 115 -- "
+                                 + "the name '\(name)' (\(name.count) characters) was not truncated")
+        XCTAssertGreaterThanOrEqual(idf.minX, window.minX, "H1[\(tag)] the identity capsule is past the window's left edge: \(rect(idf)) window=\(rect(window))")
+
+        let mark = any("popopx.header.mark")
+        let plus = any("popopx.header.plus")
+        XCTAssertTrue(mark.waitForExistence(timeout: 8) && plus.waitForExistence(timeout: 8),
+                      "H1[\(tag)] missing popopx.header.mark / popopx.header.plus, so the budget for the whole row cannot be judged")
+        let mf = mark.frame
+        let pf = plus.frame
+        XCTAssertGreaterThanOrEqual(mf.minX, window.minX, "H1[\(tag)] the brand mark is past the left edge: \(rect(mf))")
+        XCTAssertLessThanOrEqual(pf.maxX, window.maxX + 0.5,
+                                 "H1[\(tag)] the '+' right edge \(Int(pf.maxX)) is past the window's right edge \(Int(window.maxX)) -- this top bar row still overflowed")
+        XCTAssertGreaterThanOrEqual(pf.width, 44, "H1[\(tag)] the '+' hit area \(Int(pf.width))x\(Int(pf.height)) is under 44 wide")
+        XCTAssertGreaterThanOrEqual(pf.height, 44, "H1[\(tag)] the '+' hit area \(Int(pf.width))x\(Int(pf.height)) is under 44 tall")
+
+        var rounds: [String] = []
+        var ovals: [String] = []
+        for element in headerBand(around: idf) {
+            let f = element.frame
+            if abs(f.width - 32) <= 1.5 && abs(f.height - 32) <= 1.5 {
+                rounds.append("\(element.elementType.rawValue) '\(clip(element.label))' \(rect(f))")
+            } else if abs(f.width - 32) <= 1.5 && f.height >= 46 {
+                ovals.append("\(element.elementType.rawValue) '\(clip(element.label))' \(rect(f))")
+            }
+        }
+        XCTAssertGreaterThanOrEqual(rounds.count, 2,
+                                    "H1[\(tag)] the top bar band measured only \(rounds.count) of the 32x32 circles (network + Bluetooth, both expected): \(rounds)")
+        XCTAssertTrue(ovals.isEmpty,
+                      "H1[\(tag)] the top bar band still holds tall ovals 32 wide x >=46 high (the shape of the previous tier): \(ovals)")
+        NSLog("%@", "POPHDR[R15][\(tag)] name='\(name)'(\(name.count)) window=\(rect(window)) "
+                    + "identity=\(rect(idf)) mark=\(rect(mf)) badge=\(rect(any("popopx.header.badge").frame)) "
+                    + "plus=\(rect(pf)) rounds=\(rounds.count) [\(rounds.joined(separator: " ; "))] "
+                    + "ovals=\(ovals.count) [\(ovals.joined(separator: " ; "))]")
+
+        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        attachment.name = shot
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
+    /// The horizontal top bar band: 8pt above and below the identity capsule's edges, keeping only elements that fall inside the band and really drew.
+    private func headerBand(around idf: CGRect) -> [XCUIElement] {
+        var seen: [XCUIElement] = []
+        for query in [app.otherElements, app.buttons, app.groups, app.images] {
+            for element in query.allElementsBoundByIndex {
+                let f = element.frame
+                guard f != .infinite, f.width > 0, f.height > 0, f.maxY < 100_000 else { continue }
+                guard f.midY >= idf.minY - 8, f.midY <= idf.maxY + 8 else { continue }
+                seen.append(element)
+            }
+        }
+        return seen
+    }
+
+    private func any(_ id: String) -> XCUIElement {
+        app.descendants(matching: .any).matching(identifier: id).firstMatch
+    }
+
+    /// The top bar one is a `.menu` style `Picker`: its `accessibilityLabel` holds the "switch identity" sentence,
+    /// while the real display name lives in `accessibilityValue` (`PopopxTelemetryHeader.swift:247-248`).
+    /// Read the wrong slot and the "longest name" leg compares the length of a fixed sentence, which can never produce a winner.
+    private func displayName(_ element: XCUIElement) -> String {
+        if let value = element.value as? String, !value.isEmpty { return value }
+        return element.label
+    }
+
+    private func clip(_ value: String) -> String {
+        String(value.prefix(18))
+    }
+
+    private func waitUntil(_ seconds: Int, _ condition: () -> Bool) -> Bool {
+        let deadline = Date().addingTimeInterval(TimeInterval(seconds))
+        while Date() < deadline {
+            if condition() { return true }
+            usleep(400_000)
+        }
+        return condition()
+    }
+
+    private func rect(_ frame: CGRect) -> String {
+        String(format: "%.0f,%.0f %.0fx%.0f", frame.origin.x, frame.origin.y, frame.size.width, frame.height)
     }
 }

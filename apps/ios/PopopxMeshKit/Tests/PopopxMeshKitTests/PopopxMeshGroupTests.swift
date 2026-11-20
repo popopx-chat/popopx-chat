@@ -2,7 +2,7 @@
 //  PopopxMeshGroupTests.swift
 //  PopopxMeshKitTests
 //
-//  模块 8's trust boundaries, tested where they are decided: the AEAD (an epoch key that is not the
+//  Module 8's trust boundaries, tested where they are decided: the AEAD (an epoch key that is not the
 //  group's opens nothing, and so does a moved epoch or a flipped byte), the creator-signed state (who
 //  may change a roster, whether its signature came from the creator the roster pins, and which
 //  creator a known group id keeps), the rotation (a removed member stops reading on the very next

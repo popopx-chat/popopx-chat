@@ -7832,8 +7832,8 @@ alert title */
 "Your subscription is cancelled. The badge stays until %@." = "你的订阅已取消。徽章将保留到 %@。";
 
 
-/* === POPOPX 算力点生态（BadgeCredits）商业文案：与 PopopxCommerceCopy 一一对应 === */
-/* 这 37 条由 PopopxBadgeCreditsModels.swift 的 NSLocalizedString 键直接对应；en.lproj 不放（value == key）。 */
+/* === POPOPX compute-points economy (BadgeCredits) commercial copy: one-to-one with PopopxCommerceCopy === */
+/* These 37 rows correspond directly to the NSLocalizedString keys in PopopxBadgeCreditsModels.swift; en.lproj holds none of them (value == key). */
 
 /* product name */
 "POPOPX Dynamic Privacy Node Badge" = "POPOPX 动态隐私节点徽章";
@@ -7946,7 +7946,7 @@ alert title */
 /* error */
 "Your Compute Credits balance cannot go above %lld. Spend some credits first." = "算力点余额不能超过 %lld，请先花掉一部分。";
 
-/* ==== POPOPX onboarding v2 (2026-11-19) — 引导页四屏 + 隐私政策/使用条款 ==== */
+/* ==== POPOPX onboarding v2 (2026-11-19) - the four onboarding screens + privacy policy / terms of use ==== */
 /* POPOPX onboarding v2 — generated block, 2026-11-19 */
 
 /* Onboarding: header pills */
@@ -7958,12 +7958,10 @@ alert title */
 "Own your network." = "网络归你所有。";
 "Private messaging with no account and no user IDs." = "无账号、无用户 ID 的私密通讯。";
 "SMP end-to-end encrypted" = "SMP 端到端加密";
-"厢语 Bluetooth Mesh relay" = "厢语蓝牙 Mesh 无网中继";
 "What POPOPX gives you" = "POPOPX 给你的";
 "No user IDs" = "零用户 ID";
 "No phone number, no email, no global public key. Nothing links your contacts to each other, and each anonymous identity stays separate." = "不要手机号、不要邮箱、没有全局公钥。任何数据都无法把你的联系人彼此关联，每个匿名身份都相互隔离。";
 "Dynamic relays and near-field" = "动态中继与近场建连";
-"Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap." = "有网时走动态 SMP 中继节点集群；断网时厢语切换到 1–7 跳蓝牙 Mesh，并用 UWB 或轻触完成面对面建连。";
 "Anti-peeping and local-only cards" = "防偷窥与纯本地名片";
 "Screenshots and recordings are blocked, top-secret messages burn after reading, location stays encrypted in both modes, and your encrypted profile card never leaves this device." = "禁止截屏与录屏，绝密消息阅后即焚，双模加密定位，加密个人名片永不离开本机。";
 "Complete this setup to receive the 3-Day Pioneer Node Trial Badge." = "完成本引导即可获得 3 天先锋节点体验徽章。";
@@ -7995,7 +7993,6 @@ alert title */
 "Higher privacy · balanced battery" = "更高隐私 · 均衡续航";
 "Maximum discretion · nothing pushed" = "极致隐身 · 零服务器推送";
 "Apple's push service carries only the signal that new data is waiting, never the content." = "Apple 推送只传递「有新数据」的信号，绝不传递消息内容。";
-"厢语 offline mesh" = "厢语离线 Mesh 与近场";
 "When the internet is down, messages hop over nearby devices, up to 7 hops, with no server. Pair face to face with UWB or a tap." = "断网时消息经附近设备中继，最多 7 跳、不经服务器；面对面可用 UWB 或轻触配对。";
 "Bluetooth permission is requested the first time the mesh starts." = "首次启动 Mesh 时会请求蓝牙权限。";
 
@@ -8039,13 +8036,11 @@ alert title */
 "The camera guard stays local" = "防偷窥相机仅本地处理";
 "The anti-peeping guard switches the front camera on only while a top-secret sheet is open, at the lowest resolution, processes every frame on this device and stops the stream when the sheet closes. Nothing is written to disk and nothing is uploaded." = "防旁观引擎只在绝密弹窗打开期间启用前置摄像头，取最低分辨率，每一帧只在本机处理，弹窗关闭立即停止采集。不写盘，也不上传。";
 "Screenshots, recordings and offline hops" = "截屏、录屏与离线跳数";
-"Protected screens are blocked from screenshots and screen recording by the system itself. In 厢语 mode messages hop over Bluetooth between nearby devices and never reach the public internet." = "受保护界面由系统层面禁止截屏与录屏。厢语模式下消息在附近设备间经蓝牙中继，全程不经公网。";
 "Your controls" = "控制权在你";
 "You can export or delete any identity, erase the local database or trigger Panic Wipe at any time. Deletion is irreversible because no server holds a copy." = "你可以随时导出或删除任一身份、抹除本地数据库或触发紧急物理擦除。任何服务器都不持有副本，所以删除不可恢复。";
 
 /* Legal: terms */
 "Acceptable use" = "使用规范";
-"Use POPOPX within the laws of the country you are in. Public groups and 厢语 broadcasts must carry no unlawful content, no spam and no harassment of other users." = "请在所在国家与地区的法律范围内使用 POPOPX。公开群组与厢语广播不得包含违法内容、垃圾信息或对他人的骚扰。";
 "Your keys, your responsibility" = "密钥自担责任";
 "Your mnemonic phrase, identity keys, badges and POPOPX Compute Credits exist only on this device. If the device or the phrase is lost, they cannot be recovered, frozen or reissued by anyone." = "助记词、身份密钥、徽章与 POPOPX 算力点只存在于本机。设备或助记词遗失后，任何人都无法找回、冻结或补发。";
 "No guarantee of availability" = "不保证可用性";
@@ -8354,7 +8349,6 @@ alert title */
 "Badge lit for %lld more days." = "徽章再多点亮 %lld 天。";
 "Choose a plan" = "选择套餐";
 "Renew or change plan" = "续费或更换套餐";
-"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "打开厢语面板：总开关、频道与附近节点";
 "Subscribed channels" = "已订阅的频道";
 "No channels yet" = "还没有频道";
 "%d channels you follow" = "已订阅频道：%d";
@@ -8376,13 +8370,13 @@ alert title */
 "Broadcast to #mesh" = "向 #mesh 广播";
 "Send over the offline mesh" = "通过离线组网发送";
 
-/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+/* POPOPX round 19: keys added during the ninth pass over the three tabs */
 "Back to messages" = "返回消息";
 "POPOPX Badge" = "POPOPX 徽章";
 "Added %lld Compute Credits to your balance." = "已向你的余额添加 %lld 算力点。";
 "Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple 仍在确认此购买。确认后，算力点会立即显示在你的余额中。";
 "Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple 已完成扣款，但此设备暂时无法将算力点加入你的余额。下一次能够写入安全存储时会自动到账。";
-/* POPOPX round 21 第 9 轮：厢语「发现」入口无障碍说明 + 7 条 zh-Hans 上游缺值 */
+/* POPOPX round 21, ninth pass: accessibility hint for the Cabin 'Discover' entry + 7 upstream values missing from zh-Hans */
 "Discover nearby groups and channels over the Bluetooth mesh" = "通过蓝牙 Mesh 发现附近的群组与频道";
 "Files larger than %@ cannot be sent in incognito chats." = "无法在无痕聊天中发送大于 %@ 的文件。";
 "Classic" = "经典";
@@ -9769,3 +9763,25 @@ alert title */
 "🔒 [Channel subscription] %1$lld Compute Credits / %2$lld days" = "🔒 [频道订阅] %1$lld 算力点 / %2$lld 天";
 "🧧 [Compute Credits packet] %1$lld · split equally into %2$lld shares" = "🧧 [算力点红包] %1$lld · 平均分成 %2$lld 份";
 "🧧 [Compute Credits packet] %lld" = "🧧 [算力点红包] %lld";
+"Top-up %lld compute points" = "充值 %lld 算力点";
+"Exchange did not complete · returned automatically" = "兑换未成立 · 自动退回";
+"Redeemed a %lld-day privacy node badge" = "兑换 %lld 天隐私节点徽章";
+"Redeemed %lld × %lld-day gift-card vouchers" = "兑换 %lld 张 %lld 天礼品卡券";
+"Sent a red packet of %lld compute points (%lld equal shares)" = "发出算力点红包 %lld（%lld 份均分）";
+"Received a compute-point red packet" = "收到算力点红包";
+"Received a red packet: %@" = "收到红包：%@";
+"Red packet not fully claimed, %lld returned" = "红包未领完，退回 %lld";
+"Subscribed to channel %@" = "订阅频道 %@";
+"Unlocked a profile card" = "解锁资料卡";
+"Extended the anti-peeping viewing window" = "扩展防窥查看窗口";
+"Refund clawback (what was already spent is not recovered)" = "退款扣回（已花掉的部分不追回）";
+"Refund clawback" = "退款扣回";
+"Aurora shield avatar frame" = "极光盾头像边框";
+"Dark gold QR card skin" = "暗金二维码卡面";
+"[Location]" = "[位置]";
+"[Encrypted profile]" = "[加密个人主页]";
+"[Encrypted profile · attachment]" = "[加密个人主页 · 附件]";
+"Unnamed profile" = "未命名主页";
+"[Top-secret view-once] Open after biometrics" = "[绝密阅后即焚] 生物识别后查看";
+"[Top-secret security alert] %@; that top-secret message was destroyed in place." = "[绝密安全告警] %@；该条绝密消息已就地销毁。";
+"Neither Bluetooth nor the public network is available — %lld messages waiting to send" = "蓝牙与公网均不可用，%lld 条消息待发送";
