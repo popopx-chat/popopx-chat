@@ -9,12 +9,14 @@
 //    这一栏的根、本页的 `.plaza` 路由、`PopopxAddFriendView.swift:121`（`SettingsView.swift:396`
 //    那句是注释，它自己的挂载早在 71001954f 摘掉了）。
 //  · `PopopxCabinView` = 根顶栏**中间**那一枚胶囊唤起的满高抽屉，本地蓝牙状态的 app 侧重写版。
-//    抽屉里那一屏的东西一样没少：总闸、射频、频道三行、周边节点、设置中心、私聊与配对。
+//    抽屉里那一屏的东西一样没少：总闸、射频、频道三行、周边节点、私聊与配对。（设置中心那一屏第 10 轮
+//    起由根那一屏右上角那一枚直接摆出，抽屉顶栏那枚重复入口随之删干净 —— 见下面决定 2。）
 //
 //  真机第 8 轮 · 任务一（根那一屏顶栏三段式 + 全屏沉浸）：`.topBarLeading` = 回「消息」栏的返回键
 //  （这一栏底部那四枚让开了，它是唯一出口，动作经宿主传进来的 `tabSelection` 绑定写 `MainTabView`
 //  的选中栏）；`.principal` = 原先站在左上角的旧厢语面板那枚青绿胶囊（周边节点雷达与离线群聊都在
-//  里面）；`.topBarTrailing` = 离线组网设置中心，位置与画法不动。抽屉与它推上去的每一页的顶栏
+//  里面）；`.topBarTrailing` = 离线组网设置中心，位置不动，第 10 轮字样收成 "Settings"（宽度账见
+//  `meshDiscoveryEntry` 上面那一段）。抽屉与它推上去的每一页的顶栏
 //  一概不动。底栏那 49pt 的让开由根这一屏的内容自己声明 `.toolbar(.hidden, for: .tabBar)`，见
 //  `PopopxMeshPlazaRootView.body` 里那一段的两条理由。
 //
@@ -40,9 +42,10 @@
 //  与射频建出来（`POPOPXAPI.swift:3557` 之后那段注释说的就是这件事），所以一个默认值都不走。
 //
 //  频道命名（裁定；包内是英文 `#mesh`，全仓 `Shared/` 里 `#mesh` 出现 0 次）：
-//  - 公共广播频道 = 「#厢语大厅」。保留 `#`：它是「一个频道」的视觉记号，不是 `#mesh` 这个词；
+//  - 公共广播频道 = `Copy.hallRow`，第 10 轮起源文是 `#Cabin Hall`（品牌词同一口径走英文，zh 译本仍是
+//    「#厢语大厅」）。保留 `#`：它是「一个频道」的视觉记号，不是 `#mesh` 这个词；
 //    这条频道是无加密洪泛，只在蓝牙射程内，不经服务器，也不回显给发送者。
-//  - 「本地加密频道」= 本机与单个蓝牙邻居已经建立的 Noise_XX 1:1 会话集合（判据 = 模块 1 有映射行，
+//  - 本地加密频道（`Copy.encryptedChannelsRow`）= 本机与单个蓝牙邻居已经建立的 Noise_XX 1:1 会话集合（判据 = 模块 1 有映射行，
 //    或模块 3 报 `.paired`）。它走的是 mesh 而不是 SMP，所以整行只有青绿，不出现靛紫（§1.1）。
 //
 //  颜色纪律：青绿只出现在 mesh 事实的行上；`PopopxToggleRow` 的开关实底是原子库写死的
@@ -60,12 +63,14 @@
 //     「发现模式」里（`discoveryEntry` 的开关态，读同一份 `nodes`），本机离线群与创建入口在内容区
 //     「离线群聊」那一行里（`path.append(.groups)` → `MeshGroupsView`）。大厅本身归内容区
 //     「附近频道」卡片 `channelsCard` 的第一行，与这两枚都互不顶掉；`.plaza` 路由与它的登记一起留着。
-//  2. 右上角「离线组网设置」= `PopopxCabinMeshSettingsSheet`，三张卡依次是总闸与配对策略、节点身份与
+//  2. 「离线组网设置」= `PopopxCabinMeshSettingsSheet`，三张卡依次是总闸与配对策略、节点身份与
 //     真实运行态、离线数据与清除。这四件事原先散在「我」页的离线组网分组与「全部设置」页的厢语卡片里，
 //     摘除时逐条等效搬来：`requestFuse(_:)` / `setPairingPolicy(_:)` / `verifiedActivitySnapshot()` /
 //     `emergencyWipeAllMappings()`，绑定一个都没换来源，也没有新增第二套状态存储；
-//     根那一屏的右上角那一枚开的是同一张表、同一个呈现者（见 `init(opensMeshSettingsOnPresent:)`）：
-//     表里九格数字只有本页那条 2 秒节奏折得出来，所以呈现者也只有一个；
+//     真机第 10 轮起这张表由**根那一屏**在自己的 `.sheet` 里直接摆出，表里那九格数字的读数者跟着一起
+//     搬过去（`PopopxMeshPlazaRootView.refreshMeshSettingsFacts(waitingForSettle:)`，只在表开着的那一段
+//     跑）：呈现者与读数者仍然只有一个，只是不再是抽屉。抽屉这一屏顶栏那枚重复入口连同它那一套
+//     `showsMeshSettings` / 身份 / 核验读数一起删干净，节点表两边共用 `PopopxCabinNodeFold` 这唯一一处折法。
 //  3. 设置中心的视图内聚在本文件末尾，零新增文件、零 `project.pbxproj` 改动（铁律：不脚本改工程文件）；
 //  4. 栈由本页自己持有：`NavigationStack(path: $path)` 在这里，`MainTabView` 只放裸的根
 //     （本轮起是 `PopopxMeshPlazaRootView()`，它把本页整块压进抽屉，仍然不给外壳包栈）。
@@ -74,7 +79,7 @@
 //  5. 第一轮那句"100% 承接"经真机复查并不成立，四处漏在这张表外面，本轮逐条补回：配对记录页的入口
 //     （连同它行尾那枚随熔断改写的状态字）、总开关下面的动态副标题、翻闸后带 settle 窗口的二次核验、
 //     配对策略的当前值与它自己的解释句。补回来仍然只经 `PopopxMeshRuntime` 写回包里唯一的那几个对象。
-//  6. 配对记录页的入口住在这一张表里，所以它推的是本页既有的栈：行先收起这张表再 `path.append`。
+//  6. 配对记录页的入口住在这一张表里，所以它推的是根那一屏自己那条栈：行先收起这张表再 `append`。
 //     包里那一页自己不带栈（整张 `List`），而它的开关是 `@AppStorage(PopopxMeshKillSwitch.enabledDefaultsKey)`
 //     —— 与 runtime 镜像的同一个 key，所以两处翻的是同一道闸，没有第二份开关。
 //  7. 表里新增的唯一一行是射频与权限诊断：读数只认 `BluetoothHealthMonitor` 的 `currentRadioState`，
@@ -83,8 +88,11 @@
 //     只有档位落在 `unauthorized`/`poweredOff` 时这一行才给"打开系统设置"那一下：闸是好的时候按它
 //     只会跳到一个没东西可改的页面。
 //
-//  本地化：设置中心新增的源文是英文原句即 Key，与 16 个译本目录的约定见下面 `Copy` 里那一节；
-//  本页其余字面量是 Phase 4 的中文直写，本次不动，整页转 Key 另立一轮。
+//  本地化：这一屏的每一句源文都是英文原句、原句就是 Key，与 16 个译本目录的约定见下面 `Copy` 里那一节
+//  （真机第 10 轮把 Phase 4 那批中文直写整页转成了 Key，屏面上不再有一个中文字符）。注释里的中文是另一轮的事。
+//  品牌词同一口径：Key 的源文里写英文 Cabin，「厢语」不再出现在任何一句源文里（`Copy.tabTitle`、
+//  `Copy.hallRow`、`cabinPanelEntryHint` 三处随本轮改名，旧 Key 的译本要跟着换）。
+//  底栏那一格是另一码事：它住在 `MainTabView.swift:230`，本轮没动，也不归本文件。
 //
 
 import Foundation
@@ -95,7 +103,7 @@ import PopopxMeshUI
 // MARK: - Push routes
 
 /// 栈由本页自己持有：`path` 必须是**绑定在栈上**的那一份 —— 本页作抽屉挂时也是同一份。
-/// 2026-11-20 之前它挂在 `@State` 上、栈却由 `MainTabView` 裸包一层，四处 `path.append`
+/// 2026-11-20 之前它挂在 `@State` 上、栈却由 `MainTabView` 裸包一层，那几处 `path.append`
 /// 因此一次也推不动（绑定不存在）；把栈移进来才接上，第四阶段"消息栏自带栈"是同一写法。
 private enum PopopxCabinRoute: Hashable {
     /// 「#厢语大厅」：完整广播流 + 广播输入 + 本机临时昵称。入口在内容区 `channelsCard` 第一行。
@@ -111,8 +119,6 @@ private enum PopopxCabinRoute: Hashable {
     case groups
     /// 与某一个 mesh 公钥的私聊（包内 `PopopxMeshPrivateChatView`）。
     case privateChat(peerMeshPublicKeyHex: String)
-    /// 配对记录与离线绑定（包内 `MeshPrivacySettingsView`）——「我」页那一行原来的去处。
-    case privacyRecords
 }
 
 // MARK: - Label
@@ -125,6 +131,16 @@ private enum PopopxCabinLabel {
     static func abbreviate(_ hex: String) -> String {
         hex.count > 16 ? "\(hex.prefix(16))…" : hex
     }
+}
+
+// MARK: - 顶栏那一栏的画法定数
+
+/// 顶栏四枚胶囊共用的两个定数。写在值类型里而不是散在四段 view 代码里：同一栏的淡底必须是同一个
+/// 不透明度，四枚各写一个数就是四种"淡青"。
+private enum PopopxCabinBar {
+    /// 淡一档的青绿底：`mesh` 抽 12% 压在导航条底上，承载 `meshInk` 的字仍过 AA
+    /// （全仓这一档淡底的既有写法就是 `tint.opacity(0.10…0.12)`，与徽章胶囊、名片读法同一档）。
+    static let softTintOpacity: Double = 0.12
 }
 
 // MARK: - Node snapshot
@@ -178,19 +194,138 @@ private struct PopopxCabinNode: Identifiable, Hashable {
     var hasEncryptedChannel: Bool { isBound || binding == .pending || isPaired }
 }
 
-/// 根栈上唯一的一跳：左上角「发现」→ 周边蓝牙 Mesh 群组。
+// MARK: - 节点表的唯一折法
+
+/// 模块 4 的表 + 镜像的 peers 表 + 模块 1 的绑定 + 模块 3 的配对，折成一次算完的一屏值。
+///
+/// 抽出来只为一条纪律：**全仓只有一套折法**。抽屉那一屏（`PopopxCabinView.refresh()`）与根那一屏的
+/// 设置中心（`PopopxMeshPlazaRootView.refreshMeshSettingsFacts(waitingForSettle:)`，真机第 10 轮把表
+/// 搬到了那里）读的都是这同一个 `load()`，谁都不许再自己拼一份 —— 两张表数字对不上是这一页最贵的一种错。
+/// 只在 `.task` / `onChange` / 动作之后调用，绝不在 `body` 里问 actor。
+@MainActor
+private enum PopopxCabinNodeFold {
+    struct Reading {
+        let radio: PopopxBluetoothState
+        /// 折的那一刻的总闸状态。调用方要在同一个瞬间上决定要不要清自己那格表，
+        /// 不能在 await 之后再回头问 `isFuseOn` —— 中间翻了一次闸，表与判据就说的是两个时刻。
+        let fuseOn: Bool
+        let nodes: [PopopxCabinNode]
+        let requests: [PopopxPairingRequest]
+    }
+
+    /// 射频档位先读、读到就回：设置中心那一格诊断行在总闸关着时也要说得出当下的读数，不能被下面
+    /// 那个空表挡掉。这一跳只是问 actor 要它已经记着的那个值，不替谁把蓝牙叫醒。
+    /// `isUsable` 的出处是 `BluetoothHealthMonitor.swift:204`，所以一次读回来两用，
+    /// 诊断行与节点行说的必然是同一时刻的蓝牙。
+    static func load() async -> Reading {
+        let runtime = PopopxMeshRuntime.shared
+        let radio = await runtime.healthMonitor.currentRadioState
+        let fuseOn = runtime.isFuseOn
+        guard fuseOn else {
+            // 总闸关闭：不扫描、不广播、不中继，所以这两格只能是空的。留着旧表就是「看起来还活着」。
+            return Reading(radio: radio, fuseOn: false, nodes: [], requests: [])
+        }
+        let radioOn = radio.isUsable
+        let observed = await runtime.healthMonitor.allNodes()
+        let states = await runtime.pairing.allStates()
+        let requests = await runtime.pairing.pendingRequests()
+        let mappings = await runtime.mappingStore.allMappings()
+
+        var pairingByHex: [String: MeshPairingState] = [:]
+        pairingByHex.reserveCapacity(states.count)
+        for entry in states { pairingByHex[entry.peerMeshPublicKeyHex] = entry.state }
+
+        var bindingByHex: [String: PopopxCabinNode.Binding] = [:]
+        bindingByHex.reserveCapacity(mappings.count)
+        for row in mappings {
+            if row.contactId != nil {
+                bindingByHex[row.meshPublicKeyHex] = .contact
+            } else if row.isPending {
+                bindingByHex[row.meshPublicKeyHex] = .pending
+            } else {
+                bindingByHex[row.meshPublicKeyHex] = PopopxCabinNode.Binding.none
+            }
+        }
+
+        // 镜像的 peers 表按 8 字节线 id 提供昵称与 RSSI；模块 4 的表才是跳数与在线的裁判。
+        let mirrorPeers = PopopxMeshStateSource.shared.state.peers
+        var peerByID: [String: PopopxMeshPeer] = [:]
+        for peer in mirrorPeers { peerByID[peer.peerID.hex] = peer }
+
+        let window = PopopxMeshConfig.default.peerReachabilityTimeout
+        var built: [PopopxCabinNode] = []
+        built.reserveCapacity(observed.count)
+        for entry in observed {
+            let peer = peerByID[entry.peerIDHex]
+            let hex = entry.meshPublicKeyHex ?? peer?.meshPublicKey?.popopxHex
+            built.append(
+                PopopxCabinNode(
+                    peerIDHex: entry.peerIDHex,
+                    meshPublicKeyHex: hex,
+                    nickname: peer?.nickname,
+                    hopCount: entry.hopCount,
+                    lastSeenAt: entry.lastSeenAt,
+                    rssi: peer?.rssi,
+                    isDirect: entry.isDirect,
+                    isReachable: entry.isReachable(now: .now, radioOn: radioOn, timeout: window),
+                    binding: hex.flatMap { bindingByHex[$0] } ?? PopopxCabinNode.Binding.none,
+                    pairingState: hex.flatMap { pairingByHex[$0] } ?? .unlinked
+                )
+            )
+        }
+        // 模块 4 没记到的邻居也要出现：镜像的 `peers` 表是连接层的真值。在线判定用与包内私聊页
+        // `peerIsInRange`（`PopopxMeshPrivateChatView.swift:317-321`）完全相同的公式——射频可用、
+        // 且静默不超过同一个窗口；跳数与静默时长按镜像自己的读数说（本机持有链路时 hopCount = 0）。
+        var listed: Set<String> = Set(observed.map(\.peerIDHex))
+        for peer in mirrorPeers where !listed.contains(peer.peerID.hex) {
+            listed.insert(peer.peerID.hex)
+            let hex = peer.meshPublicKey?.popopxHex
+            built.append(
+                PopopxCabinNode(
+                    peerIDHex: peer.peerID.hex,
+                    meshPublicKeyHex: hex,
+                    nickname: peer.nickname,
+                    hopCount: peer.hopCount,
+                    lastSeenAt: peer.lastSeenAt,
+                    rssi: peer.rssi,
+                    isDirect: peer.isDirect,
+                    isReachable: radioOn && Date.now.timeIntervalSince(peer.lastSeenAt) <= window,
+                    binding: hex.flatMap { bindingByHex[$0] } ?? PopopxCabinNode.Binding.none,
+                    pairingState: hex.flatMap { pairingByHex[$0] } ?? .unlinked
+                )
+            )
+        }
+        return Reading(radio: radio, fuseOn: true, nodes: sortedForDisplay(built), requests: requests)
+    }
+
+    /// 在线的在前，然后跳数近的，最后按听到的时间。`allNodes()` 里被 `sweep()` 清掉之前的旧行不会
+    /// 消失，所以每行都还要过一次 `isReachable`，用「超出射程」明说，而不是假装它不在了。
+    private static func sortedForDisplay(_ nodes: [PopopxCabinNode]) -> [PopopxCabinNode] {
+        nodes.sorted { lhs, rhs in
+            if lhs.isReachable != rhs.isReachable { return lhs.isReachable }
+            if lhs.hopCount != rhs.hopCount { return lhs.hopCount < rhs.hopCount }
+            if lhs.lastSeenAt != rhs.lastSeenAt { return lhs.lastSeenAt > rhs.lastSeenAt }
+            return lhs.peerIDHex < rhs.peerIDHex
+        }
+    }
+}
+
+/// 根栈上的两跳：左上角那枚「群组」胶囊 → 周边蓝牙 Mesh 群组；设置中心里那一行「配对记录」→
+/// 包内配对记录与离线绑定页。
 ///
 /// 刻意不复用 `PopopxCabinRoute`：抽屉里那一页必须继续持有自己的 `path`（见下面那个视图的口径 4 ——
 /// 私聊那一跳是发出离线建联邀请之后再推一页，动作 async，只有绑在它自己栈上的 path 在那之后还推得动）。
-/// 根栈只用这一格，登记就不会把抽屉那四个 case 的语义一起拖进来。
+/// 根栈只登记自己真要去的这两格，不会把抽屉那五 case 的语义一起拖进来。
 private enum PopopxMeshPlazaRoute: Hashable {
     case nearbyGroups
+    case privacyRecords
 }
 
 // MARK: - Tab 3 根（全屏广场 + 满高抽屉里的旧面板）
 
 /// 第四阶段 Tab 3「厢语」的落地页：一进来就是包内那一份全屏 `MeshPlazaView`，旧厢语面板收成中间
-/// 那一枚胶囊唤起的满高抽屉，离线组网设置中心仍从右上角那一枚开，左上角是回「消息」的返回键。
+/// 那一枚胶囊唤起的满高抽屉，离线组网设置中心由右上角那一枚在**这一屏**直接摆出（真机第 10 轮起
+/// 不再先开抽屉再摆表），左上角是回「消息」的返回键。
 /// 类型写在本文件而不是新文件（铁律：不脚本改 `project.pbxproj`），与 `PopopxCabinMeshSettingsSheet`
 /// 同一个办法。
 ///
@@ -207,10 +342,10 @@ private enum PopopxMeshPlazaRoute: Hashable {
 ///    对象身份要活下来只有 `@StateObject` 这一条路。三个依赖仍然逐字给 `PopopxMeshRuntime` 的真对象
 ///    （与 `.plaza` 路由、`PopopxAddFriendView.swift:121-125` 同一份），一个默认值都不走 —— 默认值是
 ///    `PopopxMeshEngine.shared`，总闸关着时也会被它把引擎与射频建出来（文件头那段红线）。
-/// 3. 不设标题：这条栏三段各有一枚（返回键 + 中间 2 字 + 右边 6 字），393pt（iPhone 15 Pro）上再加
-///    一枚居中标题就要开始截断 —— 中间那一槽本轮就是标题的位置，站的是旧厢语面板那枚胶囊。宽度账
-///    逐笔写在 `cabinPanelEntry` 上面。这一屏的名字由底栏「厢语」与列表段头 `#mesh` 说；
-///    `Copy.plazaTitle` 继续在 `.plaza` 那一处用，两处不会是两屏不一样的东西。
+/// 3. 不设标题：这条栏四个槽已经站满（左上角两枚 + 中间那枚青绿胶囊 + 右边一枚），393pt（iPhone 15
+///    Pro）上再叠一个居中标题就要开始截断 —— 中间那一槽本轮就是标题的位置，站的是旧厢语面板那枚胶囊。
+///    宽度账逐笔写在 `meshDiscoveryEntry` 上面（四枚全算）。这一屏的名字由底栏「厢语」与列表段头
+///    `#mesh` 说；`Copy.plazaTitle` 继续在 `.plaza` 那一处用，两处不会是两屏不一样的东西。
 /// 4. 抽屉里那一页自己持有 `NavigationStack(path:)`（文件头决定 4），所以整块压在根栈外面：挂成根栈
 ///    的一页要么两条导航条，要么让那一个文件里四处 `path.append` 全部落空 —— 私聊那一跳是发出离线
 ///    建联邀请之后再推一页，动作 async，只有绑在它自己栈上的 `path` 在那之后还推得动。
@@ -229,10 +364,24 @@ struct PopopxMeshPlazaRootView: View {
 
     /// 旧厢语面板那一张满高抽屉（默认档 = 整屏，盖住底部四枚）。
     @State private var showsCabinPanel = false
-    /// 右上角那一枚按下去时先记一笔，等抽屉现身再交给抽屉里那一页呈现：同一次事务里连着摆两张表
-    /// （抽屉 + 抽屉里的设置中心）只落地第一张。表里那九格数字由 `PopopxCabinView` 的 2 秒节奏折，
-    /// 本视图一份都不再算 —— 见 `init(opensMeshSettingsOnPresent:)`。
-    @State private var opensSettingsOnPresent = false
+    /// 「厢语离线组网设置中心」：右上角那一枚直接在这一屏摆出这张表，中间不再经过抽屉。
+    @State private var showsMeshSettings = false
+    // 表里那九格数字。呈现者搬到这一屏，读数者就跟着搬到这一屏 —— 抽屉顶栏那枚重复入口与它那一套
+    // 读数一起删掉，全仓仍然只有一套折法：节点表走 `PopopxCabinNodeFold`（抽屉那一屏读的是同一个
+    // 实现），身份三格与核验只在表开着的那一段问。本视图之外没有第二个读数者。
+    @State private var meshSettingsNodes: [PopopxCabinNode] = []
+    @State private var verifiedSnapshot: PopopxMeshActivitySnapshot?
+    @State private var localKeyHex = ""
+    @State private var bindingCount = 0
+    @State private var queuedCount = 0
+    /// 模块 4 亲口报的射频档位；nil = 这一次运行还没读到过任何读数（不替它猜一个"未知"显示）。
+    @State private var monitorRadioState: PopopxBluetoothState?
+    /// 抹除那一下的回执（清干净了 / 还有几项没清掉）由这一屏的 toast 说，与抽屉那一屏同一个控件。
+    @State private var meshSettingsToast = PopopxToastModel()
+
+    /// 表开着时的那一拍。档位与抽屉那一屏同一个 2 秒：模块 4 的静默窗口是 15 秒，2 秒一次足够让
+    /// 「最近听到」这类读数不撒谎，又不会把三个 actor 的 hop 变成每秒几十次。
+    private static let meshSettingsRefreshInterval: Duration = .seconds(2)
 
     /// 抽屉里那一页自己的 path —— 根栈不借用它，理由见 `PopopxMeshPlazaRoute` 上面那一段。
     @State private var rootPath: [PopopxMeshPlazaRoute] = []
@@ -275,12 +424,9 @@ struct PopopxMeshPlazaRootView: View {
             // 这一句顶掉。可见性重载本身是 iOS 16 起，app 的地板是 17.0，不需要 gate。
             .toolbar(.hidden, for: .tabBar)
             .toolbar {
-                // 三段式：左 = 发现 + 返回「消息」，中 = 旧厢语面板（周边节点雷达与离线群聊都在那一屏里），
-                // 右 = 离线组网设置中心。工具条项仍然只属于声明它的那一层内容，抽屉与它推上去的每一页
-                // 有自己的条。宽度账见 `cabinPanelEntry` 上面那一段。
-                // 真机第 9 轮在左上角前面加一枚"发现"：返回键不能被顶掉 —— 这一栏全屏沉浸、底栏让开，
-                // 那枚返回键是唯一出口（见 `backToChatsEntry` 上面那段）。左上角两枚都是纯图标，
-                // 各占 ≈40pt，`cabinPanelEntry` 那笔 361pt 的账重算过，仍在线内。
+                // 三段式：左 = 发现（周边离线群组）+ 返回「消息」，中 = 旧厢语面板（周边节点雷达与离线
+                // 群聊都在那一屏里），右 = 离线组网设置中心。工具条项仍然只属于声明它的那一层内容，抽屉
+                // 与它推上去的每一页有自己的条。四枚的宽度账逐笔写在 `meshDiscoveryEntry` 上面那一段。
                 ToolbarItem(placement: .topBarLeading) { meshDiscoveryEntry }
                 ToolbarItem(placement: .topBarLeading) { backToChatsEntry }
                 ToolbarItem(placement: .principal) { cabinPanelEntry }
@@ -299,19 +445,122 @@ struct PopopxMeshPlazaRootView: View {
                         hub: PopopxMeshGroupEventHub.shared
                     )
                     .navigationTitle(Copy.groupsRow)
+
+                case .privacyRecords:
+                    // 设置中心里那一行「配对记录」的去处：包内唯一的配对记录与离线绑定页。三个对象
+                    // 全部来自 runtime，与抽屉那一屏此前递给它的完全是同一份；它自己不带栈，所以套在
+                    // 根栈这一层里（`MeshPrivacySettingsView` 整张 `List`，没有自己的 `NavigationStack`）。
+                    MeshPrivacySettingsView(
+                        store: meshRuntime.mappingStore,
+                        pairing: meshRuntime.pairing,
+                        killSwitch: meshRuntime.killSwitch
+                    )
+                    .navigationTitle(Copy.privacyRecordsRow)
+                    .modifier(ThemedBackground(grouped: true))
                 }
             }
+            .popopxToast(meshSettingsToast)
             .sheet(isPresented: $showsCabinPanel) {
-                PopopxCabinView(
-                    hostedAsCabinPanel: true,
-                    opensMeshSettingsOnPresent: opensSettingsOnPresent
-                )
-                .presentationDragIndicator(.visible)
+                PopopxCabinView(hostedAsCabinPanel: true)
+                    .presentationDragIndicator(.visible)
             }
         }
-        // 抽屉落下就把这一笔收回，下一次只开左上角那一枚时不会又带上设置中心。
-        .onChange(of: showsCabinPanel) { _, opened in
-            if !opened { opensSettingsOnPresent = false }
+        // 设置中心挂在外层这一条栈上，与抽屉那一张分属两层内容：两张表各自 present 自己那一张，
+        // 同一次事务里连着摆两张表只落地第一张那条限制就不会碰到这一处。
+        .sheet(isPresented: $showsMeshSettings) {
+            PopopxCabinMeshSettingsSheet(
+                fuseOn: meshRuntime.isFuseOn,
+                pairingPolicy: meshRuntime.pairingPolicy,
+                snapshot: verifiedSnapshot,
+                radioState: monitorRadioState,
+                nodes: meshSettingsNodes,
+                localKeyHex: localKeyHex,
+                bindingCount: bindingCount,
+                queuedCount: queuedCount,
+                onToggleFuse: { meshRuntime.requestFuse($0) },
+                onSelectPolicy: { meshRuntime.setPairingPolicy($0) },
+                onVerify: { await refreshMeshSettingsVerification(waitingForSettle: false) },
+                onWipe: { await clearOfflineIdentity() },
+                onOpenPrivacyRecords: {
+                    // 先收表再推页：这一行的目的地是栈上的一页，不是第二层模态。
+                    showsMeshSettings = false
+                    rootPath.append(.privacyRecords)
+                },
+                onClose: { showsMeshSettings = false }
+            )
+        }
+        // 九格数字的节奏只在表开着的那一段跑：这一栏挂在 `TabView` 上长期存活，无期限的轮询会把
+        // 三个 actor 每 2 秒问一遍。表抬起来的那一次带 settle 窗口问核验（`starting`/`stopping`
+        // 期间拿到的快照说的是"上一刻"），之后每一拍只问当下。
+        .task(id: showsMeshSettings) {
+            guard showsMeshSettings else { return }
+            await refreshMeshSettingsFacts(waitingForSettle: true)
+            while !Task.isCancelled {
+                try? await Task.sleep(for: Self.meshSettingsRefreshInterval)
+                if Task.isCancelled { break }
+                await refreshMeshSettingsFacts(waitingForSettle: false)
+            }
+        }
+        // 表开着的时候翻闸：那几百毫秒里读到的运行态最想说实话，带 settle 窗口重问一次。
+        .onChange(of: meshRuntime.isFuseOn) { _, _ in
+            guard showsMeshSettings else { return }
+            Task { @MainActor in await refreshMeshSettingsFacts(waitingForSettle: true) }
+        }
+    }
+
+    // MARK: 设置中心的事实
+
+    /// 表里那九格数字的唯一一次折法：节点表（射程内 / 经中继 / 最远跳三格读它）、身份三格、真实运行态。
+    /// 只在表开着的那一拍与翻闸、抹除之后调用，`body` 一次都不问 actor。
+    @MainActor private func refreshMeshSettingsFacts(waitingForSettle: Bool) async {
+        let reading = await PopopxCabinNodeFold.load()
+        meshSettingsNodes = reading.nodes
+        monitorRadioState = reading.radio
+        await refreshMeshSettingsIdentityFacts()
+        await refreshMeshSettingsVerification(waitingForSettle: waitingForSettle)
+    }
+
+    /// 设置中心那三格身份事实：绑定表行数、离线队列条数、本机 mesh 静态公钥。三次 actor hop。
+    @MainActor private func refreshMeshSettingsIdentityFacts() async {
+        bindingCount = await meshRuntime.mappingStore.allMappings().count
+        queuedCount = await meshRuntime.router.pendingMessageCount
+        // 引擎没起来时这一格是空串（`PopopxMeshEngineBackend` 不替谁造引擎），而空串不是
+        // "公钥没了"——它只是"这台机器还没答过"。所以只在读到真东西时改写，抹除也不动它：
+        // 抹除删的是 模块 1 的绑定表与缓存文件，本机自己的静态密钥在 Keychain 的另一个 service 里
+        // （`PopopxMeshEngine.swift:120-139`），删了它反而会让对方下次认不出这台。
+        let hex = await meshRuntime.engineBackend.localMeshPublicKeyHex
+        if !hex.isEmpty { localKeyHex = hex }
+    }
+
+    /// 核验一次真实运行态。`waitingForSettle` 时给过渡态最多 5 × 250 ms 的等待窗口。
+    @MainActor private func refreshMeshSettingsVerification(waitingForSettle: Bool) async {
+        var snapshot = await meshRuntime.killSwitch.verifiedActivitySnapshot()
+        if waitingForSettle {
+            for _ in 0..<5 where snapshot.phase == .starting || snapshot.phase == .stopping {
+                try? await Task.sleep(for: .milliseconds(250))
+                snapshot = await meshRuntime.killSwitch.verifiedActivitySnapshot()
+            }
+        }
+        verifiedSnapshot = snapshot
+    }
+
+    /// 清除离线身份绑定与本机 mesh 缓存。唯一一次调用是 模块 1 的 `emergencyWipeAllMappings()`：
+    /// 它逐行清 Keychain 绑定、删两个开关偏好，并 `removeMeshCacheFiles()` 删掉
+    /// `Documents/popopx_mesh/` 里的每一个文件 —— 未确认队列（`unacknowledged_mesh.json`）、
+    /// 发件箱与本机昵称都在里面。包里没有任何"只清队列"的公开 API，所以这一格说的是整包删除，
+    /// 不假装能只删一半；报告里 `failures` 非空就照实报数，绝不粉饰成"已清除干净"。
+    @MainActor private func clearOfflineIdentity() async {
+        // 顺序照包内 `MeshPrivacySettingsView.swift:211-214`：先拉闸再删。反过来会让还在跑的
+        // 组件把手上的队列重新写回磁盘，那一格"已清除"就是假话。
+        if meshRuntime.isFuseOn { await meshRuntime.setFuse(false) }
+        let report = await meshRuntime.mappingStore.emergencyWipeAllMappings()
+        await refreshMeshSettingsFacts(waitingForSettle: true)
+        if report.isClean {
+            PopopxHaptics.notice(.success)
+            meshSettingsToast.show(Copy.wipeCleanToast, kind: .mesh)
+        } else {
+            PopopxHaptics.notice(.error)
+            meshSettingsToast.show(Copy.wipeFailedToast(report.failures.count), kind: .danger)
         }
     }
 
@@ -319,9 +568,9 @@ struct PopopxMeshPlazaRootView: View {
 
     /// 左上角：回「消息」栏。这一栏全屏沉浸之后，屏幕底下没有任何横切导航，这一枚就是唯一的出口，
     /// 所以它必须一直在、且一眼认得出。画法与抽屉的收起键同档（`cabinPanelCloseEntry`）：中性底、
-    /// 只有图标不带文字 —— 这条栏中间与右边那两枚已经把宽度占掉大半（账在下面那枚的注释里），
-    /// 再给返回键配一个字就是第四个截断点。`chevron.left` 是系统返回的方向词，VoiceOver 读
-    /// `.accessibilityLabel` 那一句，不读图标。
+    /// 只有图标不带文字 —— 这一栏四枚的宽度账逐笔写在 `meshDiscoveryEntry` 上面，返回键那一枚
+    /// 只占 35pt 就是这么来的；再给它配一个字就是第四个截断点。`chevron.left` 是系统返回的方向词，
+    /// VoiceOver 读 `.accessibilityLabel` 那一句，不读图标。
     private var backToChatsEntry: some View {
         Button {
             PopopxHaptics.impact(.light)
@@ -348,41 +597,74 @@ struct PopopxMeshPlazaRootView: View {
     /// （`PopopxAddFriendView.swift:118-128`），而这一栏的根直接就是那一屏（口径 3），从根上再推一次
     /// 就是把自己这一屏推给自己。所以这一枚接的是那条入口缺的另一半 —— 群：同一个包内
     /// `MeshGroupsView`、同一份 `Copy.groupsRow` 标题、抽屉里那一行同样的三个真依赖。
-    /// 纯图标，与返回键同档：这条栏三段已经占掉大半宽度（账在 `cabinPanelEntry` 上面），
-    /// VoiceOver 读 `Copy.discoveryEntry`，去处由 hint 说。
+    ///
+    /// 画法：与这一栏另两枚同一个骨架（`PopopxMetrics.radiusControl` 底、`PopopxPressButtonStyle`、
+    /// `contentShape`、`lineLimit(1)` + `minimumScaleFactor` + `PopopxMetrics.minHitTarget`），底换成
+    /// 淡一档的青绿 `mesh.opacity(0.12)` + `meshInk` 字（§"mesh 自己不能裸着承载文字"：`mesh` 在白卡上
+    /// 只有 2.98:1，`meshInk` 6.03:1）。刻意不是中间那一枚的实底青绿 —— 一栏里两枚一模一样的青绿胶囊，
+    /// 一眼分不出哪个是面板、哪个是群组；淡底把它降到"次要入口"那一档，图标仍是 `person.3.fill`，
+    /// 与抽屉内容区「离线群聊」那一行同一个记号、同一个去处。
+    ///
+    /// 这一栏的宽度账（iPhone 15 Pro 393pt，默认字号；英文字宽是 CoreText 在 SF 15pt（= `PopopxType.meta`
+    /// = `.subheadline`）上逐串量出来的 typographic bounds，macOS/iOS 同一款字形，取整；图标按
+    /// `.caption` 12pt + `imageScale(.medium)` 估，档位在 11–20pt 之间。英文档 = 四枚里最坏的那一档）。
+    /// 可用宽度 = 393 − 导航条左右边距 16×2 = **361pt**，再留同组两枚之间那道 ≈8pt 间距
+    /// ⇒ 四枚合计的上限 **≈353pt**：
+    /// · 本枚：内边距 8×2 = 16 + 图标 ≈ 20 + 间距 4 + "Groups" 49.9 = **≈ 90pt**
+    ///   （zh 档这条 Key 目录里已有值是「群」14.9 → ≈ 55pt）；
+    /// · `backToChatsEntry`：内边距 12×2 = 24 + `chevron.left` ≈ 11 = **≈ 35pt**；
+    /// · `cabinPanelEntry`（`.principal`）：内边距 8×2 = 16 + 图标 ≈ 13 + 间距 4 + "Cabin" 39.5 = **≈ 73pt**
+    ///   （zh 档「厢语」29.8 → ≈ 63pt）；
+    /// · `meshSettingsEntry`：内边距 12×2 = 24 + 图标 ≈ 15 + 间距 4 + 圆点 8 + 间距 4 + "Settings" 56.6
+    ///   = **≈ 112pt**（zh 档这条 Key 目录里已有值是「设置」29.8 → ≈ 85pt）；
+    /// · 合计 90 + 35 + 73 + 112 = **310pt**，加同组那道 8pt = **318 ≤ 361 ⇒ 富余 43pt（12%）**，
+    ///   这一份富余就是留给 Dynamic Type 与最长译本的：字号再大一档（约 +20%）整栏就到 372pt，
+    ///   越线，所以四枚每一枚都带 `lineLimit(1)` + `minimumScaleFactor(0.85)`，先缩字再让位。
+    /// 右边那一枚本轮从「离线组网设置」（"Offline mesh settings" 实测 145.8pt，那一枚就要 201pt）收成
+    /// "Settings"：整栏原本已经吃到 389pt，不加这一下就是左上角这枚图标 + 字样无处可放。
+    /// 完整说法一个字没丢 —— 屏面上短词，VoiceOver 读 `.accessibilityLabel` 那一句完整的
+    /// 「离线组网设置」，表头 `PopopxSheetContainer` 仍是完整那句。
+    /// `.fixedSize()` 让本枚在挤的时候守住内在宽度、由 `minimumScaleFactor` 先缩字，
+    /// 缩不动才轮到左右让位；去处另有 `.accessibilityHint`。
     private var meshDiscoveryEntry: some View {
         Button {
             PopopxHaptics.impact(.light)
             rootPath.append(.nearbyGroups)
         } label: {
-            Image(systemName: "radar")
-                .font(PopopxType.microTag)
-                .imageScale(.medium)
-                .foregroundStyle(PopopxPalette.meshInk)
-                .accessibilityHidden(true)
-                .padding(.horizontal, PopopxMetrics.spaceS)
-                .frame(minHeight: PopopxMetrics.minHitTarget)
-                .background(PopopxPalette.card, in: .rect(cornerRadius: PopopxMetrics.radiusControl))
-                .contentShape(.rect(cornerRadius: PopopxMetrics.radiusControl))
+            HStack(spacing: PopopxMetrics.space2XS) {
+                Image(systemName: "person.3.fill")
+                    .font(PopopxType.microTag)
+                    .imageScale(.medium)
+                    .accessibilityHidden(true)
+                Text(Copy.groupsPill)
+                    .font(PopopxType.meta)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+            }
+            .foregroundStyle(PopopxPalette.meshInk)
+            .padding(.horizontal, PopopxMetrics.spaceXS)
+            .frame(minHeight: PopopxMetrics.minHitTarget)
+            .background(
+                PopopxPalette.mesh.opacity(PopopxCabinBar.softTintOpacity),
+                in: .rect(cornerRadius: PopopxMetrics.radiusControl)
+            )
+            .contentShape(.rect(cornerRadius: PopopxMetrics.radiusControl))
+            .fixedSize()
         }
         .buttonStyle(PopopxPressButtonStyle())
-        .accessibilityLabel(Text(Copy.discoveryEntry))
+        // VoiceOver 读的是去处（`Copy.groupsRow` = 推进去那一屏的标题本身），不是屏上那一个短词：
+        // 胶囊上只剩 "Groups"，把完整说法放在 label 里，Apple 那条「label 要以可见文字开头」也仍然成立。
+        .accessibilityLabel(Text(Copy.groupsRow))
         .accessibilityHint(Text(Copy.meshGroupsHint))
         .accessibilityIdentifier("popopx.cabin.discovery")
     }
 
     /// 中间（`.principal`）：旧厢语面板 —— 周边节点雷达与离线群聊都在那一屏里。原先站在左上角，
-    /// 本轮把左上角让给返回键，它挪到中间，青色与图标一个都不改（同一枚入口换位置不换身份）。
-    ///
-    /// 宽度账（iPhone 15 Pro 393pt，默认字号，导航条左右各留 16pt 边距 ⇒ 可用 ≈ 361pt）：
-    /// · 左：`chevron.left` 12pt 档约 11pt + 内边距 12×2 = **≈ 35pt**；
-    /// · 右：内边距 12×2 + 图标 ≈ 15 + 间距 4 + 圆点 8 + 间距 4 + 「Offline mesh settings」
-    ///   15pt（`.subheadline`）21 字符 ≈ 145 = **≈ 200pt**；
-    /// · 两头合计 ≈ 235pt，中间这条 `principal` 槽还剩 ≈ 126pt；
-    /// · 本枚：内边距 8×2 + 图标 ≈ 13 + 间距 4 + 「厢语」15pt 两字 ≈ 30 = **≈ 63pt**，富余一倍。
-    /// `.fixedSize()` 是让中间这一枚在挤的时候**自己缩**而不是被压断：它守住内在宽度，`lineLimit(1)`
-    /// 与 `minimumScaleFactor(0.85)` 再兜一层（大字号辅助功能档下先缩字，缩不动才轮到左右让位）。
-    /// 完整说法在 `.accessibilityHint` 里，VoiceOver 不必挤在那两个字上。
+    /// 真机第 8 轮把左上角让给返回键，它挪到中间，青色与图标一个都不改（同一枚入口换位置不换身份）。
+    /// 这一槽就是这条栏的"标题位"：整栏四枚的宽度账逐笔写在 `meshDiscoveryEntry` 上面，本枚占 73pt。
+    /// `.fixedSize()` 让它在挤的时候**自己缩**而不是被压断：守住内在宽度，`lineLimit(1)` 与
+    /// `minimumScaleFactor(0.85)` 再兜一层（大字号档下先缩字，缩不动才轮到左右让位）。
+    /// 完整说法在 `.accessibilityHint` 里，VoiceOver 不必挤在这一个词上。
     private var cabinPanelEntry: some View {
         Button {
             PopopxHaptics.impact(.light)
@@ -410,13 +692,14 @@ struct PopopxMeshPlazaRootView: View {
         .accessibilityIdentifier("popopx.cabin.panel")
     }
 
-    /// 右上角：离线组网设置中心。画法与圆点跟抽屉里那一枚逐字相同（同一档闸的同一个镜像读数，
-    /// 关着就换中性色），差别只在动作 —— 那张表由抽屉里那一页呈现。
+    /// 右上角：离线组网设置中心 —— 在这一屏直接摆出 `PopopxCabinMeshSettingsSheet`，不再经过抽屉。
+    /// 那颗点是运行态，不是装饰：熔断关着就换成中性色，与表里第一张卡说的同一句话。
+    /// 屏面上只有 "Settings" 一个词（宽度账见 `meshDiscoveryEntry` 上面），完整说法在
+    /// `.accessibilityLabel` 里，VoiceOver 与表头都读到那一句全的。
     private var meshSettingsEntry: some View {
         Button {
             PopopxHaptics.impact(.light)
-            opensSettingsOnPresent = true
-            showsCabinPanel = true
+            showsMeshSettings = true
         } label: {
             HStack(spacing: PopopxMetrics.space2XS) {
                 Image(systemName: "slider.horizontal.3")
@@ -428,7 +711,7 @@ struct PopopxMeshPlazaRootView: View {
                     .fill(meshRuntime.isFuseOn ? PopopxPalette.mesh : PopopxPalette.labelHint)
                     .frame(width: PopopxMetrics.spaceXS, height: PopopxMetrics.spaceXS)
                     .accessibilityHidden(true)
-                Text(Copy.meshSettingsEntry)
+                Text(Copy.meshSettingsPill)
                     .font(PopopxType.meta)
                     .foregroundStyle(PopopxPalette.label)
                     .lineLimit(1)
@@ -438,8 +721,10 @@ struct PopopxMeshPlazaRootView: View {
             .frame(minHeight: PopopxMetrics.minHitTarget)
             .background(PopopxPalette.card, in: .rect(cornerRadius: PopopxMetrics.radiusControl))
             .contentShape(.rect(cornerRadius: PopopxMetrics.radiusControl))
+            .fixedSize()
         }
         .buttonStyle(PopopxPressButtonStyle())
+        .accessibilityLabel(Text(Copy.meshSettingsEntry))
         .accessibilityValue(Text(verbatim: meshRuntime.isFuseOn ? Copy.meshRowOn : Copy.meshRowFusedOff))
         .accessibilityIdentifier("popopx.cabin.root.meshSettings")
     }
@@ -464,22 +749,12 @@ struct PopopxCabinView: View {
     @State private var localBroadcasts: [PopopxMeshPlazaPost] = []
     @State private var nicknameText = ""
     @State private var showsPairingRequests = false
-    /// 「厢语离线组网设置中心」——全 app 唯一一处离线组网设置（2026-11-20 收口裁定）。
-    @State private var showsMeshSettings = false
     /// 正在开私聊的那一台的 `peerIDHex`：只让那一行显示进度，不把整页变灰。
     @State private var openingNodeID: String?
 
-    // 设置中心要的三份事实，全部是 actor 读出来的，页面不自己猜：
-    // 模块 7 亲口回答的运行态快照、本机 mesh 静态公钥、绑定表与离线队列的行数。
-    @State private var verifiedSnapshot: PopopxMeshActivitySnapshot?
-    @State private var localKeyHex = ""
-    @State private var bindingCount = 0
-    @State private var queuedCount = 0
     /// 本机已加入的离线群，来自 `PopopxGroupStore` 的一次本地读。顶栏「发现」那一页的群表、
     /// 「离线群聊」那一行的数值格，读的都是这一份；总闸关着时引擎从未存在，这里就是空表。
     @State private var groups: [PopopxMeshGroup] = []
-    /// 模块 4 亲口报的射频档位；nil = 这一次运行还没读到过任何读数（不替它猜一个"未知"显示）。
-    @State private var monitorRadioState: PopopxBluetoothState?
 
     /// 轮询节奏：模块 4 的静默窗口是 15 秒，2 秒一次足够让「最近听到」这类读数不撒谎，
     /// 又不会把三个 actor 的 hop 变成每秒几十次。
@@ -488,19 +763,11 @@ struct PopopxCabinView: View {
     /// 挂法：`true` = 作为「厢语」根之上的满高抽屉。左上角那一枚随之从"进广场"换成"收起抽屉"
     /// （`leadingBarEntry`），其余一张不少。`false` = 单独成页，即预览与本轮之前的那一档。
     private let hostedAsCabinPanel: Bool
-    /// 根那屏右上角那一枚「离线组网设置」的请求：本页现身时把它落成自己那张 `.sheet`。
-    ///
-    /// 为什么不由根呈现：这张表要九格数字（节点表、绑定/队列行数、本机公钥、核验快照、射频档位），
-    /// 全部由本页那条 2 秒节奏从三个 actor 折出来（`refresh()` / `refreshIdentityFacts()` /
-    /// `refreshVerification(waitingForSettle:)`）。根自己再折一遍就是全仓第二套读数 —— 文件头决定 2
-    /// 与 `PopopxCabinNearbyCard` 上面那段写的就是"不许有第二份"。所以呈现者永远只有一个：本页。
-    private let opensMeshSettingsOnPresent: Bool
 
-    @MainActor init(hostedAsCabinPanel: Bool = false, opensMeshSettingsOnPresent: Bool = false) {
+    @MainActor init(hostedAsCabinPanel: Bool = false) {
         _meshRuntime = ObservedObject(wrappedValue: PopopxMeshRuntime.shared)
         _meshState = ObservedObject(wrappedValue: PopopxMeshStateSource.shared)
         self.hostedAsCabinPanel = hostedAsCabinPanel
-        self.opensMeshSettingsOnPresent = opensMeshSettingsOnPresent
     }
 
     var body: some View {
@@ -520,10 +787,10 @@ struct PopopxCabinView: View {
             .background(PopopxPalette.base)
             .navigationTitle(Copy.tabTitle)
             .toolbar {
-                // 左上角 = 广场 / 收起抽屉，按挂法二选一；右上角 = 离线组网设置中心。两个入口都只在
-                // 这一栏出现：工具条项属于声明它的这一层内容，推进大厅或私聊页就由那一页自己的条接管。
+                // 左上角 = 广场 / 收起抽屉，按挂法二选一，这一栏只有它一枚。离线组网设置中心不在
+                // 这一栏 —— 它由根那一屏右上角那一枚直接摆出（真机第 10 轮），这里再放一枚就是同一张
+                // 表两个入口。工具条项只属于声明它的那一层内容，推进大厅或私聊页就由那一页自己的条接管。
                 ToolbarItem(placement: .topBarLeading) { leadingBarEntry }
-                ToolbarItem(placement: .topBarTrailing) { meshSettingsEntry }
             }
             .navigationDestination(for: PopopxCabinRoute.self) { route in
                 switch route {
@@ -597,17 +864,6 @@ struct PopopxCabinView: View {
                         killSwitch: meshRuntime.killSwitch
                     )
                     .navigationTitle(Copy.privateChatTitle)
-
-                case .privacyRecords:
-                    // 包内唯一的配对记录与离线绑定页。三个对象全部来自 runtime，与「我」页那一行
-                    // 迁移前递给它的完全是同一份；它自己不带栈，所以套在本页这一层 `NavigationStack` 里。
-                    MeshPrivacySettingsView(
-                        store: meshRuntime.mappingStore,
-                        pairing: meshRuntime.pairing,
-                        killSwitch: meshRuntime.killSwitch
-                    )
-                    .navigationTitle(Copy.privacyRecordsRow)
-                    .modifier(ThemedBackground(grouped: true))
                 }
             }
             .sheet(isPresented: $showsPairingRequests) {
@@ -618,29 +874,6 @@ struct PopopxCabinView: View {
                     onDecline: { request in await decline(request) }
                 )
             }
-            .sheet(isPresented: $showsMeshSettings) {
-                PopopxCabinMeshSettingsSheet(
-                    fuseOn: meshRuntime.isFuseOn,
-                    pairingPolicy: meshRuntime.pairingPolicy,
-                    snapshot: verifiedSnapshot,
-                    radioState: monitorRadioState,
-                    nodes: nodes,
-                    localKeyHex: localKeyHex,
-                    bindingCount: bindingCount,
-                    queuedCount: queuedCount,
-                    onToggleFuse: { meshRuntime.requestFuse($0) },
-                    onSelectPolicy: { meshRuntime.setPairingPolicy($0) },
-                    onVerify: { await refreshVerification(waitingForSettle: false) },
-                    onWipe: { await clearOfflineIdentity() },
-                    onOpenPrivacyRecords: {
-                        // 先收表再推页：这一行的目的地是栈上的一页，不是第二层模态。表还盖着的时候
-                        // 改 `path` 是安全的（栈一直在挂载，只是被压住），推上去的那一页在表落下后就露出来。
-                        showsMeshSettings = false
-                        path.append(.privacyRecords)
-                    },
-                    onClose: { showsMeshSettings = false }
-                )
-            }
             .popopxToast(toast)
             .task {
                 // 只有总闸开着才订阅镜像：`PopopxMeshStateSource` 是 kill switch 的组件，关着时由它启停；
@@ -648,27 +881,11 @@ struct PopopxCabinView: View {
                 if meshRuntime.isFuseOn { meshState.start() }
                 nicknameText = currentNickname()
                 await refresh()
-                await refreshIdentityFacts()
                 while !Task.isCancelled {
                     try? await Task.sleep(for: Self.refreshInterval)
                     if Task.isCancelled { break }
                     await refresh()
-                    // 设置中心开着时，身份三格必须跟页面同一个节奏；关着就不问，省三次 actor hop。
-                    if showsMeshSettings { await refreshIdentityFacts() }
                 }
-            }
-            // 翻闸之后二次核验真实运行态：`starting`/`stopping` 期间拿到的快照说的是"上一刻"，
-            // 所以要带 settle 窗口重问。这块随「我」页的离线组网分组一起迁过来时漏掉了 ——
-            // 只有 `.onChange` 里那一次不带窗口的读数，闸刚翻完的那几百毫秒正好是全 app 最需要
-            // 一句实话的时候。`.task(id:)` 在进本页与翻闸时各跑一次，稳定态下只多一次 actor hop。
-            .task(id: meshRuntime.isFuseOn) {
-                await refreshVerification(waitingForSettle: true)
-            }
-            // 根那屏右上角那一枚按下去时，那张表要等本页真的现身之后才摆得出来（同一次事务里连着摆
-            // 两张表只落地第一张），见 `init(opensMeshSettingsOnPresent:)`。下面那个
-            // `.onChange(of: showsMeshSettings)` 会照常补一次核验，与从右上角直接点开同一笔。
-            .onAppear {
-                if opensMeshSettingsOnPresent { showsMeshSettings = true }
             }
             // 总闸一翻就重算：OFF 要清掉节点表（模块 4 的表在 stop 之后仍然留着旧数据，继续显示就是撒谎），
             // ON 要立刻订阅并读一次，不等下一个 2 秒。
@@ -677,25 +894,16 @@ struct PopopxCabinView: View {
                 Task { @MainActor in
                     if isOn { meshState.start() }
                     await refresh()
-                    await refreshIdentityFacts()
                 }
             }
             // 射频刚翻面时镜像里只有广播，可达性还没算出来；补一次 actor 读数。
             .onChange(of: meshState.state.radioState) { _, _ in
                 Task { @MainActor in await refresh() }
             }
-            // 打开设置中心先补一次核验：熔断镜像的 phase 与真在跑的组件数只有问了 模块 7 才是当下的事实。
-            .onChange(of: showsMeshSettings) { _, opened in
-                guard opened else { return }
-                Task { @MainActor in
-                    await refreshIdentityFacts()
-                    await refreshVerification(waitingForSettle: false)
-                }
-            }
         }
     }
 
-    // MARK: 顶栏两个入口
+    // MARK: 顶栏那一枚入口
 
     /// 左上角这一枚按挂法二选一，位置与尺寸同一档，换的只是去处与配色：抽屉不该给一条回到
     /// "把自己唤出来的那一屏"的回路（那一屏就是这一栏的根），所以抽屉那一档换成收起。
@@ -707,8 +915,8 @@ struct PopopxCabinView: View {
         }
     }
 
-    /// 抽屉的收起键。中性色：它是一条导航动作，不是一条 mesh 事实，青色归右边那颗运行态点
-    /// 与下面那几行（§1.1）。抽屉还有 `.presentationDragIndicator(.visible)` 与下滑两条退路。
+    /// 抽屉的收起键。中性底：它是一条导航动作，不是一条 mesh 事实，青色只给内容区那些 mesh 事实
+    /// 那一档（§1.1）。抽屉还有 `.presentationDragIndicator(.visible)` 与下滑两条退路。
     private var cabinPanelCloseEntry: some View {
         Button {
             PopopxHaptics.selection()
@@ -765,38 +973,6 @@ struct PopopxCabinView: View {
         .buttonStyle(PopopxPressButtonStyle())
         .accessibilityHint(Text(Copy.plazaEntryHint))
         .accessibilityIdentifier("popopx.cabin.discovery")
-    }
-
-    /// 「离线组网设置」：那颗点是运行态，不是装饰 —— 熔断关着就换成中性色，与设置中心第一张卡说的同一句话。
-    private var meshSettingsEntry: some View {
-        Button {
-            PopopxHaptics.impact(.light)
-            showsMeshSettings = true
-        } label: {
-            HStack(spacing: PopopxMetrics.space2XS) {
-                Image(systemName: "slider.horizontal.3")
-                    .font(PopopxType.microTag)
-                    .imageScale(.medium)
-                    .foregroundStyle(PopopxPalette.meshInk)
-                    .accessibilityHidden(true)
-                Circle()
-                    .fill(meshRuntime.isFuseOn ? PopopxPalette.mesh : PopopxPalette.labelHint)
-                    .frame(width: PopopxMetrics.spaceXS, height: PopopxMetrics.spaceXS)
-                    .accessibilityHidden(true)
-                Text(Copy.meshSettingsEntry)
-                    .font(PopopxType.meta)
-                    .foregroundStyle(PopopxPalette.label)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.85)
-            }
-            .padding(.horizontal, PopopxMetrics.spaceS)
-            .frame(minHeight: PopopxMetrics.minHitTarget)
-            .background(PopopxPalette.card, in: .rect(cornerRadius: PopopxMetrics.radiusControl))
-            .contentShape(.rect(cornerRadius: PopopxMetrics.radiusControl))
-        }
-        .buttonStyle(PopopxPressButtonStyle())
-        .accessibilityValue(Text(verbatim: meshRuntime.isFuseOn ? Copy.meshRowOn : Copy.meshRowFusedOff))
-        .accessibilityIdentifier("popopx.cabin.meshSettings")
     }
 
     // MARK: 派生事实（纯计算，不碰 actor）
@@ -987,106 +1163,22 @@ struct PopopxCabinView: View {
 
     // MARK: - actor 读数
 
-    /// 把三个 actor 的读数折成一屏值。只在 `.task` / `onChange` / 动作之后调用，绝不在 body 里。
+    /// 把这一屏要的读数折成一屏值。只在 `.task` / `onChange` / 动作之后调用，绝不在 body 里。
+    /// 节点表与配对请求两格走 `PopopxCabinNodeFold` —— 根那一屏的设置中心读的是同一个折法，
+    /// 全仓只有这一处（那一屏只多要一份 `groups` 以外的数，都在它自己那边）。
     @MainActor private func refresh() async {
-        // 射频档位先读、读到就存：设置中心那一格诊断行在总闸关着时也要说得出当下的读数，不能被下面
-        // 那个 guard 挡掉。这一跳只是问 actor 要它已经记着的那个值，不替谁把蓝牙叫醒。
-        // `isRadioUsable` 就是 `currentRadioState.isUsable`（`BluetoothHealthMonitor.swift:202`），
-        // 所以一次读回来两用，诊断行与节点行说的必然是同一时刻的蓝牙。
-        let radio = await meshRuntime.healthMonitor.currentRadioState
-        monitorRadioState = radio
-        guard meshRuntime.isFuseOn else {
-            // 总闸关闭：不扫描、不广播、不中继，所以这一页也不许留任何「看起来还活着」的旧表。
-            nodes = []
-            pendingRequests = []
+        let reading = await PopopxCabinNodeFold.load()
+        nodes = reading.nodes
+        pendingRequests = reading.requests
+        // 总闸关闭：不扫描、不广播、不中继，所以这一页也不许留任何「看起来还活着」的旧表 ——
+        // `load()` 在这种情形下已经答空表与空请求，这里只补它不管的那一格群表。
+        guard reading.fuseOn else {
             groups = []
             return
         }
-        let radioOn = radio.isUsable
-        let observed = await meshRuntime.healthMonitor.allNodes()
-        let states = await meshRuntime.pairing.allStates()
-        let requests = await meshRuntime.pairing.pendingRequests()
-        let mappings = await meshRuntime.mappingStore.allMappings()
         // 群的数量来自 `PopopxGroupStore` 的一次本地读，不碰射频；引擎从未起来时后端直接答空表，
         // 于是这一格读到的 0 与"这台手机还没有群"是同一件事。
         groups = await meshRuntime.engineBackend.meshGroups()
-
-        var pairingByHex: [String: MeshPairingState] = [:]
-        pairingByHex.reserveCapacity(states.count)
-        for entry in states { pairingByHex[entry.peerMeshPublicKeyHex] = entry.state }
-
-        var bindingByHex: [String: PopopxCabinNode.Binding] = [:]
-        bindingByHex.reserveCapacity(mappings.count)
-        for row in mappings {
-            if row.contactId != nil {
-                bindingByHex[row.meshPublicKeyHex] = .contact
-            } else if row.isPending {
-                bindingByHex[row.meshPublicKeyHex] = .pending
-            } else {
-                bindingByHex[row.meshPublicKeyHex] = PopopxCabinNode.Binding.none
-            }
-        }
-
-        // 镜像的 peers 表按 8 字节线 id 提供昵称与 RSSI；模块 4 的表才是跳数与在线的裁判。
-        var peerByID: [String: PopopxMeshPeer] = [:]
-        for peer in meshState.state.peers { peerByID[peer.peerID.hex] = peer }
-
-        let window = PopopxMeshConfig.default.peerReachabilityTimeout
-        var built: [PopopxCabinNode] = []
-        built.reserveCapacity(observed.count)
-        for entry in observed {
-            let peer = peerByID[entry.peerIDHex]
-            let hex = entry.meshPublicKeyHex ?? peer?.meshPublicKey?.popopxHex
-            built.append(
-                PopopxCabinNode(
-                    peerIDHex: entry.peerIDHex,
-                    meshPublicKeyHex: hex,
-                    nickname: peer?.nickname,
-                    hopCount: entry.hopCount,
-                    lastSeenAt: entry.lastSeenAt,
-                    rssi: peer?.rssi,
-                    isDirect: entry.isDirect,
-                    isReachable: entry.isReachable(now: .now, radioOn: radioOn, timeout: window),
-                    binding: hex.flatMap { bindingByHex[$0] } ?? PopopxCabinNode.Binding.none,
-                    pairingState: hex.flatMap { pairingByHex[$0] } ?? .unlinked
-                )
-            )
-        }
-        // 模块 4 没记到的邻居也要出现：镜像的 `peers` 表是连接层的真值。在线判定用与包内私聊页
-        // `peerIsInRange`（`PopopxMeshPrivateChatView.swift:317-321`）完全相同的公式——射频可用、
-        // 且静默不超过同一个窗口；跳数与静默时长按镜像自己的读数说（本机持有链路时 hopCount = 0）。
-        var listed: Set<String> = Set(observed.map(\.peerIDHex))
-        for peer in meshState.state.peers where !listed.contains(peer.peerID.hex) {
-            listed.insert(peer.peerID.hex)
-            let hex = peer.meshPublicKey?.popopxHex
-            built.append(
-                PopopxCabinNode(
-                    peerIDHex: peer.peerID.hex,
-                    meshPublicKeyHex: hex,
-                    nickname: peer.nickname,
-                    hopCount: peer.hopCount,
-                    lastSeenAt: peer.lastSeenAt,
-                    rssi: peer.rssi,
-                    isDirect: peer.isDirect,
-                    isReachable: radioOn && Date.now.timeIntervalSince(peer.lastSeenAt) <= window,
-                    binding: hex.flatMap { bindingByHex[$0] } ?? PopopxCabinNode.Binding.none,
-                    pairingState: hex.flatMap { pairingByHex[$0] } ?? .unlinked
-                )
-            )
-        }
-        nodes = Self.sortedForDisplay(built)
-        pendingRequests = requests
-    }
-
-    /// 在线的在前，然后跳数近的，最后按听到的时间。`allNodes()` 里被 `sweep()` 清掉之前的旧行不会
-    /// 消失，所以每行都还要过一次 `isReachable`，用「超出射程」明说，而不是假装它不在了。
-    private static func sortedForDisplay(_ nodes: [PopopxCabinNode]) -> [PopopxCabinNode] {
-        nodes.sorted { lhs, rhs in
-            if lhs.isReachable != rhs.isReachable { return lhs.isReachable }
-            if lhs.hopCount != rhs.hopCount { return lhs.hopCount < rhs.hopCount }
-            if lhs.lastSeenAt != rhs.lastSeenAt { return lhs.lastSeenAt > rhs.lastSeenAt }
-            return lhs.peerIDHex < rhs.peerIDHex
-        }
     }
 
     // MARK: - 动作
@@ -1171,7 +1263,7 @@ struct PopopxCabinView: View {
             try await meshRuntime.engineBackend.sendBroadcast(text: text)
         } catch let sendError {
             PopopxMeshLog.route.warning(
-                "📡 厢语大厅广播被拒: \(String(describing: sendError.failure), privacy: .public)"
+                "📡 Cabin hall broadcast rejected: \(String(describing: sendError.failure), privacy: .public)"
             )
             failure = sendError.failure
         }
@@ -1231,57 +1323,6 @@ struct PopopxCabinView: View {
         PopopxHaptics.impact(.light)
         toast.show(Copy.declineToast, kind: .mesh)
         await refresh()
-    }
-
-    // MARK: - 设置中心的事实与危险动作
-
-    /// 设置中心那三格身份事实：绑定表行数、离线队列条数、本机 mesh 静态公钥。三次 actor hop，
-    /// 只在进出设置中心、翻闸、抹除之后与设置中心开着的那 2 秒一拍里做，body 一次都不问。
-    @MainActor private func refreshIdentityFacts() async {
-        bindingCount = await meshRuntime.mappingStore.allMappings().count
-        queuedCount = await meshRuntime.router.pendingMessageCount
-        // 引擎没起来时这一格是空串（`PopopxMeshEngineBackend` 不替谁造引擎），而空串不是
-        // "公钥没了"——它只是"这台机器还没答过"。所以只在读到真东西时改写，抹除也不动它：
-        // 抹除删的是 模块 1 的绑定表与缓存文件，本机自己的静态密钥在 Keychain 的另一个 service 里
-        // （`PopopxMeshEngine.swift:120-139`），删了它反而会让对方下次认不出这台。
-        let hex = await meshRuntime.engineBackend.localMeshPublicKeyHex
-        if !hex.isEmpty { localKeyHex = hex }
-    }
-
-    /// 核验一次真实运行态。`waitingForSettle` 时给过渡态最多 5 × 250 ms 的等待窗口：
-    /// `starting`/`stopping` 期间拿到的快照说的是"上一刻"，等它落到 on/off 才算答案。
-    /// 逐字承接「我」页原来那块核验（`PopopxMeView.swift` 迁移前 :601-610），事实来源没换过。
-    @MainActor private func refreshVerification(waitingForSettle: Bool) async {
-        var snapshot = await meshRuntime.killSwitch.verifiedActivitySnapshot()
-        if waitingForSettle {
-            for _ in 0..<5 where snapshot.phase == .starting || snapshot.phase == .stopping {
-                try? await Task.sleep(for: .milliseconds(250))
-                snapshot = await meshRuntime.killSwitch.verifiedActivitySnapshot()
-            }
-        }
-        verifiedSnapshot = snapshot
-    }
-
-    /// 清除离线身份绑定与本机 mesh 缓存。唯一一次调用是 模块 1 的 `emergencyWipeAllMappings()`：
-    /// 它逐行清 Keychain 绑定、删两个开关偏好，并 `removeMeshCacheFiles()` 删掉
-    /// `Documents/popopx_mesh/` 里的每一个文件 —— 未确认队列（`unacknowledged_mesh.json`）、
-    /// 发件箱与本机昵称都在里面。包里没有任何"只清队列"的公开 API，所以这一格说的是整包删除，
-    /// 不假装能只删一半；报告里 `failures` 非空就照实报数，绝不粉饰成"已清除干净"。
-    @MainActor private func clearOfflineIdentity() async {
-        // 顺序照包内 `MeshPrivacySettingsView.swift:211-214`：先拉闸再删。反过来会让还在跑的
-        // 组件把手上的队列重新写回磁盘，那一格"已清除"就是假话。
-        if meshRuntime.isFuseOn { await meshRuntime.setFuse(false) }
-        let report = await meshRuntime.mappingStore.emergencyWipeAllMappings()
-        await refresh()
-        await refreshIdentityFacts()
-        await refreshVerification(waitingForSettle: true)
-        if report.isClean {
-            PopopxHaptics.notice(.success)
-            toast.show(Copy.wipeCleanToast, kind: .mesh)
-        } else {
-            PopopxHaptics.notice(.error)
-            toast.show(Copy.wipeFailedToast(report.failures.count), kind: .danger)
-        }
     }
 }
 
@@ -2500,24 +2541,27 @@ private enum PopopxCabinClock {
 
     private static func dated(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.setLocalizedDateFormatFromTemplate("M月d日 HH:mm")
+        // 模板一律写 locale 中性的 Unicode 模式（`MMM d HH:mm`），中文那档由
+        // `setLocalizedDateFormatFromTemplate` 自己排成「M月d日 HH:mm」。原先这里直接写
+        // `"M月d日 HH:mm"`：`月`/`日` 对 ICU 是字面量，于是英文档位也照样吐出中文来。
+        formatter.setLocalizedDateFormatFromTemplate("MMM d HH:mm")
         return formatter.string(from: date)
     }
 
     static func since(_ date: Date) -> String {
         let seconds = max(0, Int(Date.now.timeIntervalSince(date)))
         switch seconds {
-        case ..<5: return "刚刚"
-        case ..<60: return "\(seconds) 秒前"
-        case ..<3_600: return "\(seconds / 60) 分钟前"
-        case ..<86_400: return "\(seconds / 3_600) 小时前"
+        case ..<5: return Copy.justNow
+        case ..<60: return Copy.secondsAgo(seconds)
+        case ..<3_600: return Copy.minutesAgo(seconds / 60)
+        case ..<86_400: return Copy.hoursAgo(seconds / 3_600)
         default: return dated(date)
         }
     }
 
     /// 米说一遍：公里以上换单位，跟包内 `PopopxMeshReachEstimate.radius` 同一分界。
     static func metres(_ value: Int) -> String {
-        value >= 1_000 ? String(format: "%.1f 公里", Double(value) / 1_000) : "\(value) 米"
+        value >= 1_000 ? Copy.kilometresWords(Double(value) / 1_000) : Copy.metresWords(value)
     }
 }
 
@@ -2544,90 +2588,104 @@ private struct PopopxIconBadgeView: View {
 
 // MARK: - Copy
 
-/// 这一页的每一句中文只在这里出现一次；失败路径的每一条都有实话，穷尽三个枚举的全部 case。
+/// 这一页的每一句用户可见的话只在这里出现一次；源文是英文原句、原句就是 Key（约定见下面 `key(_:)`
+/// 那一节）。失败路径的每一条都有实话，穷尽三个枚举的全部 case。
+///
+/// 带数字的句子一律走 `String(format:)`。参数次序与句子次序不一致时（`pageExplainer`、`radarLabel`
+/// 这几处）占位符写成位置的 `%1$lld` / `%2$lld`，译文把数字挪到句子里别的位置就只改序号、不改个数；
+/// 次序一致的直接写 `%lld` / `%@`，与 `PopopxTelemetryHeader.swift:625` 那条口径同一条。
 private enum Copy {
-    static let tabTitle = "厢语"
-    static let pageTitle = "厢语 · 本地蓝牙"
+    static let tabTitle = key("Cabin")
+    static let pageTitle = key("Cabin · Local Bluetooth")
 
     static func pageExplainer(_ hopCap: Int, _ ttl: Int) -> String {
-        "这一页只有本机蓝牙射程内的事：广播在 #厢语大厅 里不加密地散开，私聊走与邻居的 Noise 加密链路。广播最多走 \(ttl) 跳，中继的跳数上限 \(hopCap) 跳，全程不经公网。"
+        String(format: key("Everything on this page is inside this device's Bluetooth reach: broadcasts spread unencrypted through the Cabin hall, while private chat runs over the encrypted Noise link with a neighbour. A broadcast travels at most %2$lld hops, relaying caps at %1$lld hops, and none of it crosses the public internet."), hopCap, ttl)
     }
 
-    static let statusTitle = "总闸与射频"
-    static let fuseRowTitle = "厢语离线组网"
-    static let fuseOnNote = "开启后本机会扫描、广播，并替别台中继"
-    static let fuseOffNote = "关闭后不扫描、不广播、不中继，下面所有数字都是空的"
-    static let fuseOffFootnote = "总闸关闭：本机没有向蓝牙发出过一个字节。"
-    static let fuseOffRadioNote = "总闸关着时射频不启动，这一行不会有读数。"
-    static let fuseOffValue = "总闸关闭"
-    static let fuseTurnOn = "开启厢语"
-    static let noBroadcastYet = "还没有在本机射程内听到任何广播。"
-    static func lastBroadcastWords(_ words: String) -> String { "最近一次听到广播：\(words)" }
+    static let statusTitle = key("Master switch and radio")
+    static let fuseRowTitle = key("Cabin offline mesh")
+    static let fuseOnNote = key("When it is open this device scans, advertises itself and relays for other devices")
+    static let fuseOffNote = key("When it is closed there is no scanning, no advertising and no relaying, and every number below is empty")
+    static let fuseOffFootnote = key("The master switch is closed: this device has not sent a single byte over Bluetooth.")
+    static let fuseOffRadioNote = key("While the master switch is closed the radio is never started, so this row has no reading.")
+    static let fuseOffValue = key("Master switch closed")
+    static let fuseTurnOn = key("Turn on Cabin")
+    static let noBroadcastYet = key("No broadcast has been heard within this device's reach yet.")
+    static func lastBroadcastWords(_ words: String) -> String { String(format: key("Last broadcast heard: %@"), words) }
     static func statusFootnote(_ window: Int) -> String {
-        "在线 = 最近 \(window) 秒内听到过这台设备。总闸只写它的真值来源，这一页不自己存状态。"
+        String(format: key("Online means this device heard from that device within the last %lld seconds. The master switch row only names where its truth comes from; this page keeps no state of its own."), window)
     }
 
-    static let channelsTitle = "频道"
-    static let channelsFootnote = "大厅是不加密的洪泛；本地加密频道是本机与单个邻居的 Noise 链路，两条都不经服务器。"
-    static let hallRow = "#厢语大厅"
-    static let hallEmpty = "暂无广播"
-    static func hallCount(_ posts: Int) -> String { "\(posts) 条广播" }
-    static let encryptedChannelsRow = "本地加密频道"
-    static func encryptedChannelsValue(_ count: Int) -> String { "\(count) 条已建立" }
+    static let channelsTitle = key("Channels")
+    static let channelsFootnote = key("The hall is an unencrypted flood; a local encrypted channel is the Noise link between this device and one neighbour. Neither of them goes through a server.")
+    static let hallRow = key("#Cabin Hall")
+    static let hallEmpty = key("No broadcasts yet")
+    static func hallCount(_ posts: Int) -> String { String(format: key("%lld broadcasts"), posts) }
+    static let encryptedChannelsRow = key("Local encrypted channels")
+    static func encryptedChannelsValue(_ count: Int) -> String { String(format: key("%lld established"), count) }
 
-    static func nearbyTitle(_ hopCap: Int) -> String { "周边 1–\(hopCap) 跳活跃设备" }
+    static func nearbyTitle(_ hopCap: Int) -> String { String(format: key("Active devices within 1–%lld hops"), hopCap) }
     static func nearbyFootnote(_ window: Int, _ metresPerHop: Int, _ ttl: Int, _ radius: String) -> String {
-        "跳数 = 发送时的上限减去收到时的剩余值；\(window) 秒静默即判离线。一圈按每跳约 \(metresPerHop) 米估算，\(ttl) 跳最远约 \(radius)。"
+        String(format: key("Hops = the limit set when the frame was sent minus the value left when it was received; %1$lld seconds of silence counts as offline. One ring assumes about %2$lld metres per hop, so %3$lld hops reach roughly %4$@."), window, metresPerHop, ttl, radius)
     }
     static func denseNetworkNote(_ threshold: Int, _ cap: Int) -> String {
-        "直连邻居已超过 \(threshold) 台：广播的跳数上限自动收紧为 \(cap) 跳，覆盖范围随之变小。"
+        String(format: key("More than %1$lld direct neighbours: the broadcast hop cap tightens itself to %2$lld hops, and the covered area shrinks with it."), threshold, cap)
     }
-    static let nearbyEmptyScanning = "射程内暂时没有可听到的设备。走近一台已开启厢语的设备，再重新扫描。"
-    static let rescan = "重新扫描"
+    static let nearbyEmptyScanning = key("There is nothing to hear inside this reach right now. Walk closer to a device that has Cabin switched on, then scan again.")
+    static let rescan = key("Scan again")
     static func radarLabel(_ online: Int, _ total: Int) -> String {
-        "雷达图：\(total) 台已知设备，\(online) 台在线；每个点里的数字是它的跳数。"
+        String(format: key("Radar: %2$lld devices known, %1$lld of them online. The number inside each dot is that device's hop count."), online, total)
     }
 
-    static let directLink = "直连"
-    static let relayLink = "中继"
-    static func lastSeenWords(_ date: Date) -> String { "最近听到 \(PopopxCabinClock.since(date))" }
+    static let directLink = key("Direct")
+    static let relayLink = key("Relayed")
+    static func lastSeenWords(_ date: Date) -> String { String(format: key("Last heard %@"), PopopxCabinClock.since(date)) }
     static func rssiWords(_ value: Int) -> String { "\(value) dBm" }
-    static let outOfRangeMark = "已超出射程"
-    static let noKeyMark = "公钥未解析"
-    static let boundBadge = "已绑定"
-    static let pendingBadge = "待确认"
+    /// 相对时间的四档。`PopopxCabinClock.since(_:)` 是它们唯一的调用者：那是个纯静态工具，够不着
+    /// `Text`，只能拿到已经译好的串，所以句子在这里成文、由它挑档。
+    static let justNow = key("just now")
+    static func secondsAgo(_ seconds: Int) -> String { String(format: key("%lld seconds ago"), seconds) }
+    static func minutesAgo(_ minutes: Int) -> String { String(format: key("%lld minutes ago"), minutes) }
+    static func hoursAgo(_ hours: Int) -> String { String(format: key("%lld hours ago"), hours) }
+    /// 距离两档：分界与包内 `PopopxMeshReachEstimate.radius` 同一条（公里以上换单位）。
+    static func metresWords(_ value: Int) -> String { String(format: key("%lld metres"), value) }
+    static func kilometresWords(_ value: Double) -> String { String(format: key("%.1f kilometres"), value) }
+    static let outOfRangeMark = key("Out of reach")
+    static let noKeyMark = key("Key not resolved")
+    static let boundBadge = key("Bound")
+    static let pendingBadge = key("Pending")
 
-    static let privateChatTitle = "蓝牙私聊"
+    static let privateChatTitle = key("Bluetooth private chat")
 
-    // #厢语大厅
-    static func hallChannel(_ posts: Int) -> String { "#厢语大厅 · \(posts) 条" }
-    static let hallFootnote = "洪泛不加密、不确认、只在蓝牙射程内；同一段文字被几台中继多次也只显示一次。"
-    static let hallEmptyHeadline = "射程内还没有人说话。"
-    static let hallEmptyDetail = "这里发出去的内容只洪泛给同一张 mesh 里的设备，不经过服务器，也不会留在公网。"
-    static let localAuthor = "本机"
-    static let composerField = "广播内容"
-    static let composerPrompt = "说点什么，只发给蓝牙射程内"
-    static let broadcastSend = "广播"
+    // 大厅那一屏
+    static func hallChannel(_ posts: Int) -> String { String(format: key("#Cabin Hall · %lld posts"), posts) }
+    static let hallFootnote = key("The flood is not encrypted and not acknowledged, and it never leaves Bluetooth reach; the same text relayed by several devices is still shown once.")
+    static let hallEmptyHeadline = key("Nobody has spoken inside this reach yet.")
+    static let hallEmptyDetail = key("Anything sent here floods only to devices on the same mesh. It does not go through a server and it never stays on the public internet.")
+    static let localAuthor = key("This device")
+    static let composerField = key("Broadcast text")
+    static let composerPrompt = key("Say something; it goes only to devices inside Bluetooth reach")
+    static let broadcastSend = key("Broadcast")
     /// 底栏只留这一句短提示：上一版的标题与脚注（`对这一屋子人喊话` / `超过 N 字的部分会被截断…`）
     /// 已经随整张卡片一起撤下，"洪泛不确认"那条事实在上面那屏的 `hallFootnote` 里一直都在。
-    static let composerRadioOff = "射频当前不可用"
+    static let composerRadioOff = key("The radio is not usable right now")
     static func draftCount(_ current: Int, _ limit: Int) -> String { "\(current) / \(limit)" }
-    static let fuseOffHeadline = "总闸关闭，大厅只读"
+    static let fuseOffHeadline = key("The master switch is closed, so the hall is read-only")
 
-    static let nicknameTitle = "本机临时昵称"
-    static let nicknameField = "昵称"
-    static let nicknamePrompt = "广播气泡上显示的名字"
-    static let nicknameSave = "保存"
+    static let nicknameTitle = key("This device's temporary nickname")
+    static let nicknameField = key("Nickname")
+    static let nicknamePrompt = key("The name shown on this device's broadcast bubbles")
+    static let nicknameSave = key("Save")
     static func nicknameFootnote(_ fallback: String, _ limit: Int) -> String {
-        "存在 mesh 沙盒目录里，不是密钥；留空就用默认名 \(fallback)，最长 \(limit) 字。改名会重启本机 mesh。"
+        String(format: key("It lives in the mesh sandbox folder and it is not a key; leave it empty to fall back to %@, and keep it under %lld characters. Changing it restarts the mesh on this device."), fallback, limit)
     }
     /// 徽章永远带数字（§1.4 第 3 条）；0 跳就是本机持有这条链路，把「直连」一起写出来。
-    static func hopsWords(_ hops: Int) -> String { hops == 0 ? "0 跳 · 直连" : "\(hops) 跳" }
+    static func hopsWords(_ hops: Int) -> String { hops == 0 ? key("0 hops · direct") : String(format: key("%lld hops"), hops) }
     static func radarOverflow(_ total: Int, _ drawn: Int) -> String {
-        "雷达一屏只画 \(drawn) 个点；下面 \(total) 行一台不少。"
+        String(format: key("The radar draws only %2$lld dots on this screen; the %1$lld rows below still list every one of them."), total, drawn)
     }
     static func bubbleLabel(_ author: String, _ text: String, _ hops: Int) -> String {
-        "\(author)，第 \(hops) 跳收到：\(text)"
+        String(format: key("%1$@, received on hop %2$lld: %3$@"), author, hops, text)
     }
 
     // 大厅气泡上的说话人菜单。2026-11-20 真机第 2 轮起转 Key：这四处是本轮新增的动作，红线四要求
@@ -2639,78 +2697,82 @@ private enum Copy {
     static let authorMenuHint = key("Open this person's offline actions")
 
     // 本地加密频道
-    static func channelListTitle(_ count: Int) -> String { "已建立的私聊 · \(count)" }
+    static func channelListTitle(_ count: Int) -> String { String(format: key("Private chats established · %lld"), count) }
     static func channelFootnote(_ fuseOn: Bool) -> String {
         fuseOn
-            ? "一条频道 = 本机的绑定表里有这一行，或配对状态报已配对。点一行直接进入蓝牙私聊。"
-            : "总闸关闭时不读绑定表，也不列出任何频道。"
+            ? key("One channel = this device has a row for it in the binding table, or the pairing state reports paired. Tap a row to go straight into the Bluetooth private chat.")
+            : key("While the master switch is closed the binding table is not read and no channel is listed.")
     }
+    /// 原文里那个「1–7」是 `nearbyTitle(hopCap)` 抄下来的第二份数字：跳数上限一改它就说谎，
+    /// 而这一屏拿不到 hopCap。指名字不抄数字。
     static func channelEmpty(_ fuseOn: Bool) -> String {
         fuseOn
-            ? "本机还没有与任何蓝牙邻居建立加密频道。到「周边 1–7 跳活跃设备」里点一台，就会发出离线建联邀请。"
-            : "总闸关着，这一页没有任何可打开的会话。"
+            ? key("This device has no encrypted channel with any Bluetooth neighbour yet. Tap a device in the nearby list and it sends an offline pairing invitation first.")
+            : key("The master switch is closed, so this page has no session that could be opened.")
     }
-    static func strangerTitle(_ count: Int) -> String { "未绑定的邻居 · \(count)" }
-    static let strangerFootnote = "这些设备只是在射程内被听到，背后还没有联系人；点一行的结果是先发一次离线建联邀请，再进私聊页。"
-    static let pendingTitle = "待你决定的建联"
-    static let pendingRow = "收到的建联请求"
-    static func pendingValue(_ count: Int) -> String { count == 0 ? "无" : "\(count) 条待通过" }
-    static let pendingFootnote = "与顶部那条建联横幅读的是同一份配对状态，两处的决定互相看得见。"
-    static let pendingSheetTitle = "收到的建联请求"
-    static let pendingSheetSubtitle = "通过之后这条 mesh 公钥才会绑成离线联系人；拒绝后 60 秒内不再重复打扰。"
-    static let pendingSheetEmpty = "暂时没有等待你决定的请求。"
-    static let pendingInviteHint = "同意 = 接受这条邀请链接并绑定对方公钥；拒绝 = 只丢掉请求，不删任何已有联系人。"
-    static func pendingSince(_ words: String) -> String { "收到于 \(words)" }
-    static let approve = "同意"
-    static let decline = "拒绝"
-    static let close = "关闭"
-    static let approveToast = "已通过建联，对方成为离线联系人"
-    static let declineToast = "已拒绝这条建联请求"
+    static func strangerTitle(_ count: Int) -> String { String(format: key("Unbound neighbours · %lld"), count) }
+    static let strangerFootnote = key("These devices were only heard inside reach and there is no contact behind them yet; tapping a row first sends an offline pairing invitation, then opens the private chat page.")
+    static let pendingTitle = key("Pairing invitations waiting for your decision")
+    static let pendingRow = key("Pairing requests received")
+    static func pendingValue(_ count: Int) -> String { count == 0 ? key("None") : String(format: key("%lld waiting"), count) }
+    static let pendingFootnote = key("This reads the same pairing state as the banner at the top of the page, so the two places see each other's decision.")
+    /// 与 `pendingRow` 同一句 Key（原文两处本来就是同一句话），不是第二个词条。
+    static let pendingSheetTitle = key("Pairing requests received")
+    static let pendingSheetSubtitle = key("Accepting is what binds this mesh key as an offline contact; declining keeps this device quiet about the peer for 60 seconds.")
+    static let pendingSheetEmpty = key("Nothing is waiting for your decision right now.")
+    static let pendingInviteHint = key("Accept takes the invitation link and binds the peer's mesh key; decline only drops the request and deletes no existing contact.")
+    static func pendingSince(_ words: String) -> String { String(format: key("Received %@"), words) }
+    static let approve = key("Accept")
+    static let decline = key("Decline")
+    static let close = key("Close")
+    static let approveToast = key("Pairing accepted; the peer is now an offline contact")
+    static let declineToast = key("This pairing request was declined")
 
     // 动作回执
-    static func pairingSentToast(_ label: String) -> String { "已向 \(label) 发出离线建联邀请" }
-    static func noKeyToast(_ label: String) -> String { "\(label) 的公钥还没解析出来，本机暂时无法与它私聊" }
-    static let fuseOffToast = "厢语总闸关闭中，不会向蓝牙发出任何内容"
-    static let nicknameSavedToast = "昵称已写入本机 mesh 沙盒"
+    static func pairingSentToast(_ label: String) -> String { String(format: key("Offline pairing invitation sent to %@"), label) }
+    static func noKeyToast(_ label: String) -> String { String(format: key("%@ has no resolved mesh key yet, so this device cannot start a private chat with it"), label) }
+    static let fuseOffToast = key("The Cabin master switch is closed, so nothing goes out over Bluetooth")
+    static let nicknameSavedToast = key("The nickname was written into this device's mesh sandbox")
 
+    /// VoiceOver 那一行是把三段既有说法串起来的，串法本身也是句子：分隔符交给译本，不硬写全角逗号。
     static func rowLabel(_ name: String, _ detail: String, _ relationship: String?) -> String {
-        if let relationship { return "\(name)，\(detail)，\(relationship)" }
-        return "\(name)，\(detail)"
+        if let relationship { return String(format: key("%1$@, %2$@, %3$@"), name, detail, relationship) }
+        return String(format: key("%1$@, %2$@"), name, detail)
     }
 
     /// 射频六态，穷尽 `PopopxBluetoothState`。
     static func radioWords(_ state: PopopxBluetoothState) -> String {
         switch state {
-        case .unknown: return "蓝牙状态未知"
-        case .resetting: return "蓝牙正在重置"
-        case .unsupported: return "这台设备没有可用的蓝牙 Mesh"
-        case .unauthorized: return "蓝牙权限未授予"
-        case .poweredOff: return "蓝牙已关闭"
-        case .poweredOn: return "蓝牙已开启，正在监听射程内"
+        case .unknown: return key("Bluetooth status unknown")
+        case .resetting: return key("Bluetooth is resetting")
+        case .unsupported: return key("This device has no usable Bluetooth mesh")
+        case .unauthorized: return key("Bluetooth permission is not granted")
+        case .poweredOff: return key("Bluetooth is switched off")
+        case .poweredOn: return key("Bluetooth is on and listening inside reach")
         }
     }
 
     /// 配对四态，穷尽 `MeshPairingState`。
     static func pairingStateWords(_ state: MeshPairingState) -> String {
         switch state {
-        case .unlinked: return "未配对"
-        case .requestSent: return "已发出邀请，等对方通过"
-        case .requestReceived: return "对方请求建联"
-        case .paired: return "已配对"
+        case .unlinked: return key("Not paired")
+        case .requestSent: return key("Invitation sent, waiting for the peer to accept")
+        case .requestReceived: return key("The peer is asking to pair")
+        case .paired: return key("Paired")
         }
     }
 
-    /// 洪泛失败六态，穷尽 `PopopxMeshSendFailure`（包内 `MeshPlazaView.words(for:)` 是 internal 且英文的，
-    /// 这里说中文，事实一致）。
+    /// 洪泛失败六态，穷尽 `PopopxMeshSendFailure`（包内 `MeshPlazaView.words(for:)` 是 internal，
+    /// 这一处够不着它，说的仍是同一批事实）。
     static func broadcastWords(for failure: PopopxMeshSendFailure) -> String {
         switch failure {
-        case .noLinkToPeer: return "没有链路可走：射程内没有设备接住这条广播"
-        case .linkDropped: return "链路中断：内容没能放到蓝牙上"
-        case .ttlExhausted: return "跳数用尽：这条广播走完了 TTL 还没被接住"
+        case .noLinkToPeer: return key("No link to use: no device inside reach picked this broadcast up")
+        case .linkDropped: return key("The link dropped: the content never made it onto Bluetooth")
+        case .ttlExhausted: return key("Hops exhausted: this broadcast spent its whole hop limit before any device picked it up")
         case let .oversized(payloadBytes, limitBytes):
-            return "超过单帧上限（\(payloadBytes) > \(limitBytes) 字节），这段内容没被分片发出去"
-        case .noSessionWithPeer: return "与这台设备还没有加密会话，私聊内容发不出去"
-        case let .radioUnavailable(state): return "射频不可用：\(radioWords(state))"
+            return String(format: key("Over the single-frame limit (%1$lld > %2$lld bytes), so this content was not sent in fragments."), payloadBytes, limitBytes)
+        case .noSessionWithPeer: return key("There is no encrypted session with this device yet, so the private message cannot go out")
+        case let .radioUnavailable(state): return String(format: key("The radio is not usable: %@"), radioWords(state))
         }
     }
 
@@ -2719,31 +2781,31 @@ private enum Copy {
     static func pairingWords(for error: PopopxPairingError, label: String) -> String {
         switch error {
         case .peerKeyRejected:
-            return "这条 mesh 公钥不合法，本机不会向它发任何东西"
+            return key("This mesh key is not valid; this device will not send anything to it")
         case .alreadyPaired:
-            return "\(label) 已经是绑定过的联系人，直接进私聊就行"
+            return String(format: key("%@ is already a bound contact, so just open the private chat"), label)
         case .declinedRecently:
-            return "刚刚拒绝过 \(label) 的建联，60 秒冷却期内不再重复邀请"
+            return String(format: key("A pairing invitation to %@ was declined just now, and the 60 second cooldown blocks another one"), label)
         case .requestUnknown:
-            return "这条请求已经不在等待列表里了"
+            return key("This request is no longer on the waiting list")
         case .requestSuperseded:
-            return "对方换了一条新的邀请链接，旧的那条不会被绑定"
+            return key("The peer replaced this invitation with a new link, so the old one is not bound")
         case .inviteLinkRejected:
-            return "邀请链接不符合本机离线门的格式，已丢弃"
+            return key("The invitation link does not match this device's offline gate format, and it was dropped")
         case let .sendFailed(failure):
-            return "邀请已生成，但没能放到蓝牙上：\(broadcastWords(for: failure))"
+            return String(format: key("The invitation was created but never made it onto Bluetooth: %@"), broadcastWords(for: failure))
         case let .offlineBridge(reason):
-            return "本机离线邀请生成失败：\(reason)"
+            return String(format: key("This device could not create the offline invitation: %@"), reason)
         case let .mappingStoreFailed(reason):
-            return "绑定表写入失败：\(reason)；会话已经存在，但本机暂时认不出它是谁的"
+            return String(format: key("Writing the binding table failed: %@. The session exists, but this device cannot yet tell whose it is"), reason)
         }
     }
 
-    // MARK: 顶栏两个入口与离线组网设置中心
+    // MARK: 顶栏入口与离线组网设置中心
     //
-    // 上面这一段仍是本页原有的中文直写字面量（Phase 4 那一版的写法，本次不动它，见文件头）。
-    // 从这里起是新增的入口与设置中心：源文是英文原句，英文原句就是 Key，16 个译本目录里各写各的
-    // 译法，`en.lproj` 按约定不写（读不到词条就回落 Key 本身，那就是英文）。
+    // 上面这一段在本轮之前还是中文直写字面量（Phase 4 那一版的写法），现在整段转成了 Key：这一屏的
+    // 源文与 Key 同句，屏面上不再有一个中文字符（口径见文件头那两条）。从这里起是更早几轮新增的入口
+    // 与设置中心，写法本来就已经是 Key。`en.lproj` 按约定不写（读不到词条就回落 Key 本身，那就是英文）。
     // 从「我」页整块迁来的那几行刻意复用「我」页早已发布的同一批 Key：同一个 Key 由目录里已有的
     // 译法决定说法，两处永远同一句，这也是这次迁移唯一能保证「摘掉的那行与留下的那行说的是同一件事」的办法。
     private static func key(_ value: String) -> String {
@@ -2757,16 +2819,23 @@ private enum Copy {
     static let plazaEntryHint = key("Opens the nearby square: the broadcast stream and the nodes within Bluetooth reach")
     /// 「厢语」根那一屏左上角那一枚：面上只有两个字（面板的名字就是这一栏的名字，复用 `Copy.tabTitle`，
     /// 不另造第三种说法），这一句把它实际开出来的东西说全。抽屉的收起键同理只用既有那句「关闭」。
-    /// 这一句里写「厢语」而不是 "cabin"：底栏那一格在 16 种语言里都显示「厢语」
-    ///（`MainTabView.swift:222`，本轮没动它），英语用户从没见过 "cabin" 这个词；库内也早有把
-    /// 「厢语」写进 Key 的先例（`厢语 offline mesh`、`厢语 Bluetooth Mesh relay`）。
-    static let cabinPanelEntryHint = key("Opens the 厢语 panel: the master switch, the channels and the nearby nodes")
+    /// 品牌词按既有口径写英文 Cabin：第 10 轮起「厢语」不再出现在任何 Key 的源文里 —— Key 里夹中文，
+    /// `en` 那一档读到的是没译过的字，16 个目录里也没人能照着一条中英混排的 Key 写译法。
+    /// 底栏那一格（`MainTabView.swift:230`，本轮没动、也不归本文件）是另一码事。
+    static let cabinPanelEntryHint = key("Opens the Cabin panel: the master switch, the channels and the nearby nodes")
     /// 顶栏左上角那枚返回键的 VoiceOver 说法（屏面上只有图标，一个字都不占宽度）。这一栏全屏沉浸之后
     /// 它就是这一栏唯一的出口，所以这一句说的是去处，不是动作方向。
     static let backToMessages = key("Back to messages")
     /// 与 `PopopxAddFriendView.swift:718` 同一个 Key：两个入口的标题因此必然是同一句。
     static let plazaTitle = key("Nearby mesh plaza")
     static let meshSettingsEntry = key("Offline mesh settings")
+    /// 顶栏两枚胶囊屏面上那几个短词。两条都是**既有 Key**（`Groups`、`Settings` 在 16 个目录里早就有
+    /// 译法，口径同 `PopopxMeView.swift` 那一处 "Settings"），本轮不新增词条：胶囊只放得下一个词，
+    /// 完整说法在 VoiceOver 里 —— 左那枚读 `.accessibilityLabel(meshGroupsHint)`、右那枚读
+    /// `.accessibilityLabel(meshSettingsEntry)`，设置中心表头仍是全句那一条。宽度账见
+    /// `meshDiscoveryEntry` 上面那一段。
+    static let groupsPill = key("Groups")
+    static let meshSettingsPill = key("Settings")
     static let meshRowOn = key("Fuse is open")
     static let meshRowFusedOff = key("Closed by the fuse")
     /// 大厅右上角那一枚开关。它开与关的是主页面已有的那一屏，不是第二份清单，所以话只说这一层。

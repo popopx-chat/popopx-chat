@@ -45,6 +45,17 @@
 //  并且和它一起被门禁覆盖。它放在**次要操作**那一格：它是"花掉已有余额"的出口，
 //  不是"新的收入"的入口，摆成主 CTA 会误导用户以为算力点可以凭空获得。
 //
+//  ### 沙盒购买那一格（只在 Debug 构建存在）
+//  `.storekit` 配置文件只随 Xcode 的 scheme 注入，用 `xcrun devicectl device install app`
+//  装到真机、再从桌面启动的包不带它，于是 `Product.products(for:)` 打到真实商店、9 个 SKU
+//  一个都取不到，这一屏每一颗 CTA 都是死的（`.disabled(!store.isStoreReady)`），
+//  点得到的那一颗只会说「该商品暂不可用（…）」。真机上想走完「付款 → 点亮 → 落 Keychain →
+//  重启还在」这条商业主链路，就必须有第二条入口：`sandboxRow` 那枚虚线按钮 →
+//  `PopopxStoreKitManager.purchaseSimulated(_:)` 本机铸收据 → **同一个** `settle` →
+//  同一条 `grantPass → PopopxBadgeManager.activate`。整段被 `#if DEBUG` 包住，
+//  Release 归档里这些符号根本不存在（`Debug.xcconfig` 才有 `SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG`）。
+//  生产那颗 CTA 的判据与语义一个字都没改：沙盒是多出来的一条路，不是把死按钮改活。
+//
 //  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
 
 import SwiftUI
@@ -245,6 +256,12 @@ struct PopopxBadgePaywallView: View {
                     storeUnavailableNote
                 }
 
+                #if DEBUG
+                if showsSandboxStrip {
+                    sandboxStrip
+                }
+                #endif
+
                 ForEach(PopopxPaywallPlan.groups(tab: tab)) { group in
                     if let title = group.title {
                         groupHeader(title)
@@ -330,6 +347,10 @@ struct PopopxBadgePaywallView: View {
                     .foregroundStyle(PopopxPalette.onBrand.opacity(0.80))
                     .fixedSize(horizontal: false, vertical: true)
             }
+
+            #if DEBUG
+            sandboxRow(section)
+            #endif
         }
         .padding(PopopxMetrics.spaceM)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -421,6 +442,99 @@ struct PopopxBadgePaywallView: View {
         .background(PopopxPalette.separator.opacity(0.5), in: .rect(cornerRadius: PopopxMetrics.radiusControl))
     }
 
+    // MARK: 沙盒购买（只有 Debug 构建编译进这一整段）
+
+    #if DEBUG
+    /// 顶部那一条说明。判据与档位上那枚按钮**同一个函数**（`isMissingFromStore`），
+    /// 所以不会出现"条上说有沙盒、卡上却没有按钮"这种自相矛盾的中间态。
+    /// 按当前分段的档位看，两族里只要有任何一件没回来就出这一条——它解释的是"为什么读不到商品"，
+    /// 与具体哪一件无关，逐件解释会让这一段变成日志转储。
+    private var showsSandboxStrip: Bool {
+        PopopxPaywallPlan.sections(tab: tab).contains { store.isMissingFromStore($0.sku) }
+    }
+
+    private var sandboxStrip: some View {
+        VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
+            HStack(alignment: .top, spacing: PopopxMetrics.spaceXS) {
+                Image(systemName: "hammer.fill")
+                    .font(PopopxType.secondary)
+                    .foregroundStyle(PopopxPalette.meshInk)
+                Text(PopopxCommerceCopy.sandboxPaywallNote)
+                    .font(PopopxType.caption)
+                    .foregroundStyle(PopopxPalette.labelSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            // 诊断行不是文案，是给排查者读的标识符，所以逐字渲染、不进任何目录，
+            // 也允许长按选中复制——把它贴进工单比复述"暂不可用"有用得多。
+            Text(verbatim: storeDiagnostics)
+                .font(PopopxType.metricSmall)
+                .foregroundStyle(PopopxPalette.labelHint)
+                .textSelection(.enabled)
+                .accessibilityHidden(true)
+        }
+        .padding(PopopxMetrics.spaceS)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(PopopxPalette.card, in: .rect(cornerRadius: PopopxMetrics.radiusControl))
+        .overlay {
+            RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl)
+                .strokeBorder(PopopxPalette.meshInk.opacity(0.55), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
+        }
+    }
+
+    /// 这一次商品加载的结论，原样摊在屏上。三种病因在真机上要能当面分开看：
+    /// `0/9 loaded` = 商店整批没给（没挂配置文件、离线），`7/9 · missing: …pass.30d, …pass.365d`
+    /// = 只有非续订那一族没回来（商品类型/ASC 配置问题），`load error: …` = Apple 抛错。
+    /// 只靠 `missingProductIDs`（日志里那一条）排查要连 Console，真机上不现实。
+    private var storeDiagnostics: String {
+        if let error = store.lastLoadError { return "load error: \(error)" }
+        var line = "\(store.products.count)/\(PopopxNodeBadgeSku.productIds.count) loaded"
+        let missing = store.missingProductIDs
+        if !missing.isEmpty { line += " · missing: \(missing.joined(separator: ", "))" }
+        return line
+    }
+
+    /// 档位上的沙盒出口：只在**这一件**商品商店没给时画，且永远画在生产 CTA 下面一格。
+    ///
+    /// 生产那颗按钮的可用性判据（`!store.isStoreReady || busySkuId != nil`）一个字都不改——
+    /// 沙盒是"多出来的第二条路"，不是"把死按钮改活"。后者会让 Debug 与 Release 的同一种手势
+    /// 指向两件不同的事，而这正是真机上最难复现的那类分歧。
+    ///
+    /// 虚线外框 + 锤子图标是刻意的视觉隔离：真机截图会被拿去当审核证据，
+    /// 一枚和「点亮」长得一样的实心胶囊在这里就是一个商业事故。
+    @ViewBuilder
+    private func sandboxRow(_ section: PopopxPaywallSection) -> some View {
+        if store.isMissingFromStore(section.sku) {
+            Button {
+                Task { await buySandboxed(section.sku) }
+            } label: {
+                HStack(spacing: PopopxMetrics.space2XS) {
+                    Image(systemName: "hammer.fill")
+                    Text(PopopxCommerceCopy.sandboxPurchaseAction)
+                    if busySkuId == section.sku.productId {
+                        ProgressView().controlSize(.small)
+                    }
+                }
+                .font(PopopxType.microTag)
+                .foregroundStyle(PopopxPalette.onBrand)
+                .padding(.horizontal, PopopxMetrics.spaceS)
+                .frame(height: PopopxMetrics.minHitTarget)
+                .frame(maxWidth: .infinity)
+                .overlay {
+                    RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl)
+                        .strokeBorder(PopopxPalette.onBrand.opacity(0.55), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
+                }
+                .contentShape(.rect(cornerRadius: PopopxMetrics.radiusControl))
+            }
+            .buttonStyle(.plain)
+            .disabled(busySkuId != nil)
+            .accessibilityLabel(Text(verbatim: "\(PopopxCommerceCopy.sandboxPurchaseAction) \(section.title)"))
+            // XCUITest 的落点。整条沙盒通路只在 Debug 编译，所以 Release 归档里根本没有这一格，
+            // 测试脚本要拿它做断言也就只能在调试构建上跑——这正是想要的效果。
+            .accessibilityIdentifier("popopx.badge.paywall.sandbox.\(section.sku.rawValue)")
+        }
+    }
+    #endif
+
     // MARK: 次要操作
 
     private var footer: some View {
@@ -459,6 +573,32 @@ struct PopopxBadgePaywallView: View {
         busySkuId = sku.productId
         defer { busySkuId = nil }
         let result = await store.purchase(sku)
+        await settle(result, for: sku, simulated: false)
+    }
+
+    #if DEBUG
+    /// 沙盒那颗按钮的入口。与 `buy` 的差别**只在取收据那一步**（`purchaseSimulated` 在本机铸一张），
+    /// 拿到收据之后走的是同一个 `settle`：通行证仍由 `grantPass → PopopxBadgeManager.activate`
+    /// 点亮，仍写同一格 Keychain，仍是那一声震动、同一格 toast。
+    ///
+    /// 这里刻意不新写一套"沙盒落账"：一旦有两套，真机测过的就不是上线的那一套。
+    private func buySandboxed(_ sku: PopopxNodeBadgeSku) async {
+        guard busySkuId == nil else { return }
+        busySkuId = sku.productId
+        defer { busySkuId = nil }
+        let result = await store.purchaseSimulated(sku)
+        await settle(result, for: sku, simulated: true)
+    }
+    #endif
+
+    /// 一次购买（真实的、或 Debug 沙盒的）的上屏收口。
+    ///
+    /// `simulated` 只改一件事：到账那一句怎么说——"这笔没有真扣钱"是必须说出口的事实，
+    /// 让测试者在真机上把一次本机模拟读成一次 Apple 成交，比什么都读不到更糟。
+    /// 落账、震动、成功后跳礼品队列这三步，两种来源完全同码。
+    private func settle(_ result: Result<PopopxStorePurchaseOutcome, PopopxBadgeCreditsError>,
+                        for sku: PopopxNodeBadgeSku,
+                        simulated: Bool) async {
         switch result {
         case let .success(.purchased(receipt)):
             // 一次性时长包**必须在这一笔的返回路径上当场点亮**。判据是这一族的交付路径本身：
@@ -472,7 +612,15 @@ struct PopopxBadgePaywallView: View {
                 return
             }
             PopopxHaptics.notice(.success)
+            #if DEBUG
+            if simulated {
+                toast.show(Copy.sandboxPurchased(sku), kind: .encrypted)
+            } else {
+                toast.show(Copy.purchased(sku), kind: .encrypted)
+            }
+            #else
             toast.show(Copy.purchased(sku), kind: .encrypted)
+            #endif
             if case let .giftCard(period) = sku.kind {
                 // 礼品档：券在交付回调里铸好，这一页直接把用户送到能看见它的那一页。
                 giftQueuePeriod = period
@@ -565,6 +713,16 @@ private extension PopopxBadgePaywallView {
                 "已到账 \(amount) 算力点"
             }
         }
+        #if DEBUG
+        /// 沙盒到账那一句。**每一句都自带"没有扣款"**：这一格 toast 与真实成交长得一模一样，
+        /// 唯一能把两者分开的是这句话本身，所以它不许被省成"已购买"。
+        /// 通行证那一句带天数（与 `purchased(_:)` 同一来源：`PopopxNodeBadgePeriod.days`），
+        /// 其余两族到账的不是"天数"，只说"这台设备上记下了一笔测试购买"。
+        static func sandboxPurchased(_ sku: PopopxNodeBadgeSku) -> String {
+            guard let period = sku.oneTimePassPeriod else { return PopopxCommerceCopy.sandboxPurchaseGranted }
+            return String(format: PopopxCommerceCopy.sandboxPassGrantedFormat, period.days)
+        }
+        #endif
     }
 }
 

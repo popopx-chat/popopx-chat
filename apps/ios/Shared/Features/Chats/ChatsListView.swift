@@ -80,6 +80,23 @@ enum PopopxRowChannel: Hashable {
 
 /// 顶部四枚胶囊。刻意不带图标：`全部` 在 §6 的图标词汇表里没有对应符号，而半套图标的过滤器
 /// 比没有图标更像坏掉的设计；通道语义只由徽章承载。
+///
+/// **为什么「列表」不是这个枚举的 case（真机第 10 轮 · 任务 A 的裁定）**
+///
+/// 1. 两条轴语义正交：这一枚举回答"这条会话走哪条通道"，而列表回答"用户把这些会话归到哪一格"。
+///    合成一枚选择态会让"点频道"悄悄清掉用户正在看的列表 —— 上游没有这个问题，因为它只有
+///    一条轴（`ChatTagsModel.activeFilter`），这一 fork 的四枚胶囊是改版加出来的第二条。
+/// 2. 类型装不下：`ChatTag` 是带 `Int64` id 的动态数据，`PopopxChatFilter` 是 `Int, CaseIterable`
+///    的静态枚举。要塞进去就得把 `allCases` 改成"从模型现算"，一个 UI 枚举从此依赖运行时数据，
+///    `counts(of:)` 那本循环也不再穷尽。
+/// 3. 真值只该有一份：选中态已经住在 `ChatTagsModel.activeFilter`（@Published），
+///    并由 `clearActiveChatFilterIfNeeded()`（Shared/Model/ChatModel.swift:278）在列表被删掉时
+///    自动归零。再在页面 `@State` 里存一份就是第二份真值 —— 那正是任务 B 要修的毛病。
+///
+/// 所以列表走旁边那一枚独立的菜单胶囊（`PopopxListOption` + `PopopxChatFilterBar` 的 `listsMenu`），
+/// 与上游 `TagsView` 在标签多于三枚时退化成 `Menu`（`collapsedTagsFilterView`，
+/// Shared/Views/ChatList/ChatListView.swift:1150）同一个手法：**列表数量无上限，
+/// 一行装得下的前提是它折叠**。
 enum PopopxChatFilter: Int, CaseIterable, Identifiable {
     case all
     case online
@@ -107,6 +124,29 @@ enum PopopxChatFilter: Int, CaseIterable, Identifiable {
         case .channel: isChannel
         }
     }
+}
+
+// MARK: - 「列表」过滤器的一档
+
+/// 「列表」那一枚菜单胶囊吃的一条候选档：`全部` · `未读` · 用户自建列表各一条。
+///
+/// 刻意是**值类型**、且由页面每帧从 `ChatTagsModel.shared.userTags` × 当前会话现算：
+/// 界面里不留第二份清单，新建或删除一条列表后，这一枚不可能停留在弹出面板那一刻的旧数据上
+/// （任务 B 的第 3 条要求）。`filter` 直接就是写回 `ChatTagsModel.activeFilter` 的那个值。
+struct PopopxListOption: Identifiable, Equatable {
+    /// 选中它 = 把这一档写进 `ChatTagsModel.activeFilter`；`nil` 就是"没有列表过滤"（全部）。
+    let filter: ActiveFilter?
+    /// 用户自建列表的名字是数据，不是文案 —— 画出来一律走 `Text(verbatim:)`。
+    let title: String
+    let emoji: String?
+    /// 落在这一档里的会话数，和四枚通道胶囊上那个数字同一个来源（`searchedEntries()` 的结果）。
+    /// `nil` = 这一档不在本页的菜单里（旧列表页把选中态停在某一枚内置档上时），宁可不报数。
+    let count: Int?
+
+    var id: String { filter?.id ?? "list.all" }
+
+    /// `ActiveFilter` 自己是 Equatable，所以"这一档是不是当前档"直接比得动，不需要另存一份选中态。
+    func selected(_ active: ActiveFilter?) -> Bool { filter == active }
 }
 
 // MARK: - 列表项
@@ -138,6 +178,19 @@ private let popopxTrialWelcomeAskedKey = "popopx.commerce.trialWelcomeAsked"
 @MainActor
 struct ChatsListView: View {
     @EnvironmentObject private var chatModel: ChatModel
+
+    /// 「列表」那一枚胶囊的真值来源，**必须挂在页面上**而不是只挂在会话行上。
+    ///
+    /// 任务 B 查出来的根因就在这里：改版前 `ChatTagsModel` 只被会话行的包装
+    /// `PopopxChatRowSwipe`（本文件靠后那一处同名 `@StateObject`）观察着，而筛选条画在页面的
+    /// `chrome` 里 —— 页面没有观察它，所以行滑动面板里新建一条列表、`userTags` 被写下之后，
+    /// `ChatsListView.body` 一次都不会重算，筛选条自然永远停在旧清单上，只能退出再进来。
+    /// `ChatModel` 也救不了这一架：`updateContact` 只改 `Chat` 这个 class 的 `chatInfo`
+    /// （Shared/Model/ChatModel.swift:617-650），`@Published var chats` 数组本身没动，
+    /// 页面的 `body` 同样不会失效。
+    ///
+    /// 用的是 `.shared` 单例（与会话行那一处同一个对象），所以两处观察不会各说各话。
+    @StateObject private var chatTagsModel = ChatTagsModel.shared
 
     /// 两个都是 runtime 的既有单例：`isFuseOn` 与 `stateSource.state` 才是徽章的真值来源。
     @ObservedObject private var runtime: PopopxMeshRuntime
@@ -215,7 +268,13 @@ struct ChatsListView: View {
 
     @ViewBuilder private var chatList: some View {
         let entries = searchedEntries()
-        let rows = entries.filter { filter.matches($0.channel, isChannel: $0.isChannel) }
+        // 两条独立的轴，各筛一遍：通道（四枚胶囊，页面自己的 `@State`）与列表
+        // （`ChatTagsModel.activeFilter`，全 app 一份真值）。默认值都是"不过滤"，
+        // 所以第 8、9 轮定下来的那一屏一寸未动。
+        let listFilter = chatTagsModel.activeFilter
+        let rows = entries.filter {
+            filter.matches($0.channel, isChannel: $0.isChannel) && matchesList($0, listFilter)
+        }
         List {
             if let notice = serviceNotice {
                 Text(notice)
@@ -235,7 +294,14 @@ struct ChatsListView: View {
                     .accessibilityIdentifier("popopx.chats.serviceNotice")
             }
             if rows.isEmpty {
-                emptyState(searching: !searchText.trimmed.isEmpty, hasAnyChat: !chatModel.chats.isEmpty)
+                emptyState(
+                    searching: !searchText.trimmed.isEmpty,
+                    hasAnyChat: !chatModel.chats.isEmpty,
+                    // 只在真的要画空状态时才算这一遍：它回答的是"列表本身有没有货"。
+                    listScoped: listFilter == nil
+                        ? nil
+                        : entries.filter { matchesList($0, listFilter) }.count
+                )
                     .listRowInsets(EdgeInsets())
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
@@ -319,7 +385,15 @@ struct ChatsListView: View {
 
     // MARK: 顶栏 + 过滤器
 
-    private var chrome: some View {
+    @ViewBuilder private var chrome: some View {
+        let entries = searchedEntries()
+        let active = chatTagsModel.activeFilter
+        // 两条轴互为对方那几个数字的分母：选中一条列表时，四枚通道胶囊报的是"这条列表里
+        // 有几条走 SMP / 走厢语 / 是频道"；选中厢语离线时，「列表」那一枚报的是"这一档里
+        // 每条列表各有几条"。任何一格都不报一个屏幕上看不到的数（真机第 2 轮定下的那条口径）。
+        // 两个名字各自说"这堆是喂给哪几个数字的"，不说"被哪一轴筛过"，否则正好读反。
+        let entriesForChannelCounts = active == nil ? entries : entries.filter { matchesList($0, active) }
+        let entriesForListCounts = filter == .all ? entries : entries.filter { filter.matches($0.channel, isChannel: $0.isChannel) }
         VStack(spacing: 0) {
             PopopxTelemetryHeader(
                 currentUserId: $currentUserId,
@@ -337,7 +411,10 @@ struct ChatsListView: View {
             } else {
                 PopopxChatFilterBar(
                     selection: $filter,
-                    counts: counts(of: searchedEntries()),
+                    counts: counts(of: entriesForChannelCounts),
+                    lists: listOptions(of: entriesForListCounts),
+                    listSelection: active,
+                    onSelectList: { selectList($0) },
                     onSearch: { popopxToggleSearch(open: true) }
                 )
             }
@@ -434,6 +511,63 @@ struct ChatsListView: View {
             counts[option] = entries.filter { option.matches($0.channel, isChannel: $0.isChannel) }.count
         }
         return counts
+    }
+
+    // MARK: 「列表」这一轴
+
+    /// 筛选条里「列表」那一枚菜单胶囊的全部数据：`全部` · `未读` · 然后每条用户列表。
+    ///
+    /// 每次渲染从 `chatTagsModel.userTags` 现算，**不在 `@State` 里存副本** ——
+    /// 会话行的滑动面板新建一条列表走的正是 `tm.userTags = userTags`
+    /// （Shared/Views/ChatList/TagListView.swift 的 `createChatTag`），
+    /// 只要这里读的是那份 @Published，新列表就在同一次渲染里出现在筛选条上（任务 B 第 3 条）。
+    ///
+    /// 数字也在这里现算，不读模型里的两张计数表：`ChatTagsModel.unreadTags` 记的是
+    /// "每条列表里有几条**未读**"（`updateChatTagRead` / `decTagsReadCount`，
+    /// Shared/Model/ChatModel.swift:252-270，给上游标签行那个 ● 点用），`presetTags` 只覆盖
+    /// `PresetTag` 那一套内置档（:193-210）—— 模型里根本没有"某条用户列表里有几条会话"这张表，
+    /// 而这一枚要的正是成员数，只能从会话自己身上的 `chatInfo.chatTags` 数出来。
+    private func listOptions(of entries: [PopopxChatEntry]) -> [PopopxListOption] {
+        var options: [PopopxListOption] = [
+            PopopxListOption(filter: nil, title: Copy.filterAll, emoji: nil, count: entries.count),
+            PopopxListOption(
+                filter: .unread, title: Copy.listsUnread, emoji: nil,
+                count: entries.filter { $0.chat.unreadTag }.count
+            ),
+        ]
+        options.reserveCapacity(options.count + chatTagsModel.userTags.count)
+        for tag in chatTagsModel.userTags {
+            options.append(PopopxListOption(
+                filter: .userTag(tag),
+                title: tag.chatTagText,
+                emoji: tag.chatTagEmoji,
+                count: entries.filter { $0.chat.chatInfo.chatTags?.contains(tag.chatTagId) == true }.count
+            ))
+        }
+        return options
+    }
+
+    /// 「列表」这一轴的判定，与旧列表 `filteredChats()` 里那个 `filtered(_:)`
+    /// （Shared/Views/ChatList/ChatListView.swift:682-688）逐条同形：
+    /// 两屏选同一档必须筛出同一批会话，不可能各说各话。
+    private func matchesList(_ entry: PopopxChatEntry, _ active: ActiveFilter?) -> Bool {
+        switch active {
+        case .none: true
+        case .some(.unread): entry.chat.unreadTag
+        case let .some(.userTag(tag)): entry.chat.chatInfo.chatTags?.contains(tag.chatTagId) == true
+        case let .some(.presetTag(tag)): presetTagMatchesChat(tag, entry.chat.chatInfo, entry.chat.chatStats)
+        }
+    }
+
+    /// 选中一档 = 写 `ChatTagsModel.activeFilter`（全 app 唯一一份列表选中态）。
+    /// 与旧屏的 `setActiveFilter`（:1207）刻意不同：那一处是"再点同一枚就取消"的开关语义，
+    /// 这里点的是菜单里的一行，再点它想要的就是这一行，取消归"全部"那一行。
+    private func selectList(_ active: ActiveFilter?) {
+        // 先比后震：重复点同一行什么都不会变，那一次就不该有反馈（口径同 `capsule(_:)` 的
+        // `guard !selected else { return }`，它就排在震动之前）。
+        guard active != chatTagsModel.activeFilter else { return }
+        PopopxHaptics.selection()
+        chatTagsModel.activeFilter = active
     }
 
     /// 通道判定。顺序即优先级：保险丝 → 绑定表 → 绑定 → 射频 → 邻居路由 → 新鲜度。
@@ -573,12 +707,13 @@ struct ChatsListView: View {
 
     // MARK: 空状态
 
-    private func emptyState(searching: Bool, hasAnyChat: Bool) -> some View {
+    private func emptyState(searching: Bool, hasAnyChat: Bool, listScoped: Int?) -> some View {
         PopopxChatsEmptyState(
             searching: searching,
             query: searchText.trimmed,
             hasAnyChat: hasAnyChat,
             filter: filter,
+            listScoped: listScoped,
             fuseOn: runtime.isFuseOn,
             radioUsable: meshState.state.radioState.isUsable,
             bindingsLoaded: meshBindingsLoaded
@@ -591,6 +726,11 @@ struct ChatsListView: View {
 @MainActor private struct PopopxChatFilterBar: View {
     @Binding var selection: PopopxChatFilter
     let counts: [PopopxChatFilter: Int]
+    /// 「列表」那一枚菜单胶囊的档位（`全部` · `未读` · 每条用户列表），由页面每帧现算。
+    let lists: [PopopxListOption]
+    /// 当前选中的那一档（`ChatTagsModel.activeFilter`）。选中态不在这里存 —— 存了就成第二份真值。
+    let listSelection: ActiveFilter?
+    let onSelectList: (ActiveFilter?) -> Void
     /// 行尾钉住的搜索入口，nil 就不画。刻意不放进横向滚动区：它在整行最右，
     /// 滚到任何一个筛选胶囊时都点得到（真机第 2 轮裁定「放大镜 + 可折叠搜索行」）。
     var onSearch: (() -> Void)? = nil
@@ -605,6 +745,10 @@ struct ChatsListView: View {
         // 外面（44 + 尾部 12 = 56），整行需要 448 —— 393 装不下，缺口 55pt，第四枚要横扫一下才全露。
         // 三枚时同一笔账是 371，还留 22pt。结论：不换行、不加第二行，靠已有的横向滚动承载，
         // 并且第四枚刻意取最短的正确说法（「频道」两个汉字，与「全部」同宽）。
+        // 第 10 轮补回的「列表」那一枚排在滚动区**最尾**，不是随便挑的：滚动区在 0 位时四枚胶囊
+        // 各自的落点与第 9 轮真机截图逐像素一致（缺口 55pt 那一本账只会更长，不会挪位置），
+        // 而这一枚本来就是靠那一次已经存在的横扫才露面的第五枚。它自己的名字按字符收口
+        // （`clampedName`），所以列表名再长也不会把这一行顶成两行。
         // 行尾那枚放大镜钉在滚动区外面：HStack 先把固定宽度的一端排好，ScrollView 吃剩下的，
         // 所以把搜索入口包在这一层外面不会让整行的档位测量出错（顶栏那一簇就是被
         // `ViewThatFits` 之外的 `.fixedSize()` 坑过，同一个教训）。
@@ -614,6 +758,7 @@ struct ChatsListView: View {
                     ForEach(PopopxChatFilter.allCases) { option in
                         capsule(option)
                     }
+                    listsMenu()
                 }
                 .padding(.leading, PopopxMetrics.gutter)
                 .padding(.trailing, onSearch == nil ? PopopxMetrics.gutter : PopopxMetrics.spaceXS)
@@ -668,6 +813,112 @@ struct ChatsListView: View {
         .accessibilityLabel(option.title)
         .accessibilityValue(Copy.filterValue(count, hopCap: ChatsListView.maxMeshHops, isMesh: option == .meshOffline))
         .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    // MARK: 「列表」那一枚
+
+    /// 当前那一档；**没有列表过滤时是 nil**，即便「全部」那一行也在 `lists` 里。
+    /// 「全部」不配高亮，是因为它左边第一枚通道胶囊就叫「全部」—— 两枚同时亮成「全部」
+    /// 只会让人以为自己把同一件事筛了两遍。
+    private var activeListOption: PopopxListOption? {
+        guard let listSelection else { return nil }
+        return lists.first { $0.selected(listSelection) }
+            ?? PopopxListOption(filter: listSelection, title: Copy.listsChip, emoji: nil, count: nil)
+    }
+
+    private var hasUserLists: Bool {
+        lists.contains {
+            switch $0.filter {
+            case .some(.userTag): true
+            default: false
+            }
+        }
+    }
+
+    /// 列表名收口到 12 个字符。为什么按字符而不是按宽度：给这一枚加 `.frame(maxWidth:)`
+    /// 会把不足宽的也撑满（`Text` 在 HStack 里是弹性视图，拿得到多少就吃多少），
+    /// 那一枚胶囊会比左右邻居宽出一截，第 9 轮定下来的那排等宽节奏就散了。
+    /// 全名在下面菜单的每一行里整条读得到，胶囊只负责"现在停在哪一条"。
+    private func clampedName(_ name: String) -> String {
+        name.count > 12 ? String(name.prefix(12)) + "…" : name
+    }
+
+    /// 「列表」那一枚：折叠成一个菜单，而不是排第五、第六……枚胶囊。两个理由：
+    /// 用户能建多少条列表没有上限，而这一行只有 393pt（上面那本宽度账本来就欠着 55pt）；
+    /// 上游在标签多于三枚时做的正是同一件事（`collapsedTagsFilterView`，
+    /// Shared/Views/ChatList/ChatListView.swift:1150）。
+    ///
+    /// 画法（内边距 / 胶囊底 / 描边 / 选中换 `brand` / `minHitTarget`）与 `capsule(_:)`
+    /// 用的是同一套 token 与同一串修饰符顺序，所以它读起来是一家人而不是贴在旁边的另一个控件。
+    private func listsMenu() -> some View {
+        let active = activeListOption
+        return Menu {
+            ForEach(lists) { option in
+                listItem(option)
+            }
+            if !hasUserLists {
+                // 一条列表都还没有：菜单里说实话，并说清去哪儿建，不给一个莫名其妙的空档。
+                Button {} label: {
+                    Text(Copy.listsEmptyHint)
+                }
+                .disabled(true)
+            }
+        } label: {
+            HStack(spacing: PopopxMetrics.space2XS) {
+                Image(systemName: active == nil ? "line.3.horizontal.decrease.circle" : "tag.fill")
+                    .font(PopopxType.metricSmall)
+                Text(verbatim: clampedName(active?.title ?? Copy.listsChip))
+                    .font(PopopxType.emphasis)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                if let count = active?.count {
+                    Text(verbatim: "\(count)")
+                        .font(PopopxType.metricSmall)
+                }
+            }
+            .foregroundStyle(active == nil ? PopopxPalette.labelSecondary : PopopxPalette.onBrand)
+            .padding(.horizontal, PopopxMetrics.spaceS)
+            .frame(minHeight: PopopxMetrics.minHitTarget)
+            .background(active == nil ? PopopxPalette.card : PopopxPalette.brand, in: .capsule)
+            .overlay {
+                if active == nil {
+                    Capsule().strokeBorder(PopopxPalette.labelHint, lineWidth: PopopxMetrics.divider)
+                }
+            }
+            .contentShape(.capsule)
+        }
+        .menuIndicator(.hidden)
+        .popopxAnimation(PopopxSpring.snappy, value: active?.id ?? "none", reduceMotion: reduceMotion)
+        .accessibilityLabel(Copy.listsGroupLabel)
+        // 有档可报时报成员数，没选档时报空：这一枚在没选档时那个数字没有可信的指代对象
+        // （它不是屏幕上几行，也不是列表条数），宁可不报。
+        .accessibilityValue(Text(verbatim: active?.count.map { "\($0)" } ?? ""))
+        .accessibilityAddTraits(active == nil ? [] : .isSelected)
+        .accessibilityIdentifier("popopx.chats.listsFilter")
+    }
+
+    /// 菜单里的一行：选中那一行的图标换成 `checkmark`，没选中的列表显示它自己的表情，
+    /// 内置两档显示一枚通用标签符号。上游那一枚折叠菜单不标选中态（它靠外面那一行的
+    /// 字重表达），这一枚胶囊收起来了、看不见字重，所以选中态必须落到菜单行里 —— 这一条是
+    /// 本 fork 自己的选择，不是照抄。后面的 `· N` 沿用本文件跳数那个中点（`hopsSuffix`），
+    /// 数字本身不需要翻译。
+    private func listItem(_ option: PopopxListOption) -> some View {
+        let selected = option.selected(listSelection)
+        return Button {
+            onSelectList(option.filter)
+        } label: {
+            Label {
+                Text(verbatim: option.count.map { "\(option.title) · \($0)" } ?? option.title)
+            } icon: {
+                if selected {
+                    Image(systemName: "checkmark")
+                } else if let emoji = option.emoji {
+                    Text(verbatim: emoji)
+                } else {
+                    Image(systemName: "tag")
+                }
+            }
+        }
     }
 }
 
@@ -1542,6 +1793,10 @@ struct ChatsListView: View {
     let query: String
     let hasAnyChat: Bool
     let filter: PopopxChatFilter
+    /// 列表那一轴筛着时，"这一档里本来有几条会话"（还没过通道那一轴）；没筛着就是 nil。
+    /// 空状态要说清"为什么是空的"，而"这条列表本来就是空的"和"这一档里没有走厢语的会话"
+    /// 是两句话 —— 只有拿到这个数才分得开，也才不会把列表有货说成列表是空的。
+    let listScoped: Int?
     let fuseOn: Bool
     let radioUsable: Bool
     let bindingsLoaded: Bool
@@ -1578,6 +1833,9 @@ struct ChatsListView: View {
     private var detail: String {
         if searching { return Copy.emptySearchDetail(query) }
         if !hasAnyChat { return Copy.emptyNoneDetail }
+        // 先答列表那一轴：这一档里本来就没有会话时，通道怎么筛都不会有结果，
+        // 这时候讲"已就绪的 SMP 连接都会带靛紫锁徽章"是把人往错的方向支使。
+        if let listScoped, listScoped == 0 { return Copy.emptyListDetail }
         switch filter {
         case .all:
             return Copy.emptyAllDetail
@@ -1650,6 +1908,21 @@ private enum Copy {
     /// zh-Hans 里就是「频道」，:1324）里都已经在，其余目录与 en 一样回落原句本身（英文）。
     /// 而且它是本轮四枚里最短的正确说法（两个汉字，与「全部」同宽，见筛选条的宽度账）。
     static let filterChannel = key("Channels")
+
+    // 「列表」那一枚（真机第 10 轮 · 任务 A 补回）。四句里只有两句是新 Key，另外两句
+    // 刻意复用目录里已经翻好的原句：`"Unread"` 就是本页滑动那一枚用的同一个词
+    // （`swipeUnread`），`Copy.filterAll` 与左边第一枚胶囊同字 —— 同一个意思在两处说两种话，
+    // 比少一个 Key 贵得多。
+    /// 没有列表过滤时这一枚的名子。选了某条列表后，胶囊上写的是列表自己的名字（那是用户数据，
+    /// 走 `Text(verbatim:)`，不进文案表）。
+    static let listsChip = key("Lists")
+    /// 整枚控件的可读名（VoiceOver 落在它身上时念的那一句）。
+    static let listsGroupLabel = key("Chat lists")
+    static let listsUnread = key("Unread")
+    /// 一条列表都还没有时菜单里那一行老实的提示：既说"没有"，也说去哪儿建。
+    static let listsEmptyHint = key("No lists yet. Choose List from a chat's swipe actions to create one.")
+    /// 空状态里"这一档本来就是空的"那一句（与四枚通道档各自的解释分开）。
+    static let emptyListDetail = key("This list has no chats yet.")
 
     /// 与「通讯录 → 我的加密群组」右上角那一枚同一个目的地，因此共用同一个 Key：
     /// 两处标题不可能再各说一句（`PopopxContactsView` 的 `createGroupEntry`）。

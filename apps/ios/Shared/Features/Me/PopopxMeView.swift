@@ -1129,7 +1129,7 @@ private enum Copy {
     /// 2026-11-20 换源文：这一组里原来那一行「离线组网」整块迁到厢语页，标题再说"离线组网"
     /// 就是替别人占一个说法。旧 Key `"Personal space and offline mesh"` 在代码里残留 0。
     static let groupSpace = key("Encrypted profile and card vault")
-    static let groupGeneral = key("Everyday")
+    static let groupGeneral = key("Preferences & Settings")
     static let groupSecurity = key("Privacy and security defences")
 
     // 组 1 · 算力点与徽章

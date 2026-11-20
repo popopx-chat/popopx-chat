@@ -1382,6 +1382,38 @@ enum PopopxCommerceCopy {
     static let channelSubscriptionPeriodFormat = NSLocalizedString("Each purchase is valid for %lld days.", comment: "channel subscription period")
     static let channelSubscriptionStackFormat = NSLocalizedString("Subscribing again adds %lld days to the time you already have.", comment: "renewal is cumulative, money promise")
 
+    // MARK: 沙盒购买（只有 Debug 构建可能把这几句画上屏）
+    //
+    // 存在的理由：StoreKit 配置文件只随 Xcode 的 scheme 注入（`POPOPX (iOS).xcscheme`
+    // 的 `StoreKitConfigurationFileReference`）。用 `xcrun devicectl device install app`
+    // 装进真机、再从桌面图标启动的那一个包**不带**配置文件，`Product.products(for:)` 于是
+    // 打到真实/沙盒商店——App Store Connect 里这 9 个 SKU 一个都没建，返回空表，
+    // 付费墙的档位按钮全部退化成「该商品暂不可用」。真机上想走一遍
+    // 「付款 → 点亮 → 落 Keychain → 重启还在」这条商业主链路，就需要第二条入口。
+    //
+    // 这几句照样进 16 本目录，不因为"只在 Debug 出现"就省：真机截图会被拿去做排查证据，
+    // 一张写着未本地化英文的卡比一张没有卡更难解释；而"这笔没有真扣钱"是**涉钱的事实陈述**，
+    // 按本枚举开头的分界线（会不会出现在付款/退款证据里）本来就归这里管。
+    //
+    // 整段包在 `#if DEBUG` 里，与它服务的代码同一个门禁：Release 归档里不仅没有那条通路，
+    // 连"存在一条沙盒通路"这件事的字样都不该留下——二进制里躺着一句没人能触发的
+    // "Sandbox purchase" 是下一次合规问询里最难解释的那一类残留。
+    // 目录侧不受影响：`.strings` 的键由源文字符串本身决定，本仓库的 16 本目录是手写的。
+    #if DEBUG
+    /// **复用**目录里已有的词条：`"Sandbox purchase"` 在 16 个译本里全有值（zh-Hans「沙盒购买」），
+    /// 普查本仓库 Swift 侧此前 0 处引用，所以不存在"另一页的译文决定这句话怎么写"的冲突。
+    /// 源文与语义与这里同一件事：一笔不走真实扣款的测试购买。因此不另开新说法。
+    static let sandboxPurchaseAction = NSLocalizedString("Sandbox purchase", comment: "DEBUG-only paywall button shown when the store did not return this item")
+    /// 一次性通行证沙盒到账。天数由调用方从 `PopopxNodeBadgePeriod.days` 传进来，
+    /// 与真实到账那一句（`passGrantedFormat`）同一个来源，不写第二份 30/365。
+    static let sandboxPassGrantedFormat = NSLocalizedString("Sandbox purchase: the badge was lit for %lld more days on this device. No payment was taken.", comment: "DEBUG-only purchase result")
+    /// 其余档位（自动续费订阅、礼品券）的沙盒到账。那两族在真实路径上交付的不是"天数"，
+    /// 所以这里不承诺任何具体权益内容，只说"这台设备上记下了一笔测试购买、没有扣款"。
+    static let sandboxPurchaseGranted = NSLocalizedString("Sandbox purchase recorded on this device. No payment was taken by Apple.", comment: "DEBUG-only purchase result")
+    /// 付费墙顶部那一句说明：为什么会有第二条按钮，以及它和真购买是同一条落账代码。
+    static let sandboxPaywallNote = NSLocalizedString("This build is not running with a StoreKit configuration, so the App Store did not return every item here. A sandbox purchase is minted on this device and runs the same delivery code as a real purchase. No payment is taken.", comment: "DEBUG-only paywall note")
+    #endif
+
     static let errorStoreUnavailable = NSLocalizedString("The store is not available right now.", comment: "error")
     static let errorProductUnavailableFormat = NSLocalizedString("This item is not available (%@).", comment: "error")
     static let errorPurchaseFailedFormat = NSLocalizedString("Purchase failed: %@", comment: "error")

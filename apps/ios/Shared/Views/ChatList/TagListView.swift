@@ -16,10 +16,14 @@ enum TagEditorRoute: Hashable {
     case edit(tagId: Int64, emoji: String?, name: String)
 }
 
-@ViewBuilder func tagEditorDestination(_ route: TagEditorRoute, chat: Chat?) -> some View {
+@ViewBuilder func tagEditorDestination(
+    _ route: TagEditorRoute,
+    chat: Chat?,
+    onListAssigned: @escaping () -> Void = {}
+) -> some View {
     switch route {
     case .create:
-        TagListEditor(chat: chat)
+        TagListEditor(chat: chat, onListAssigned: onListAssigned)
     case let .edit(tagId, emoji, name):
         // Editing a list's definition is independent of the chat the sheet was opened from.
         TagListEditor(chat: nil, tagId: tagId, emoji: emoji, name: name)
@@ -32,20 +36,38 @@ enum TagEditorRoute: Hashable {
 struct TagSheetRoot: View {
     var chat: Chat? = nil
     var editorAsRoot: Bool = false
+    /// Observing the model here is the fix for "the sheet does not refresh after creating a list".
+    /// `editorAsRoot` is a value the caller snapshots when it builds this sheet, so it says what the
+    /// lists were like at presentation time and can never change afterwards: create the very first
+    /// list and the editor stayed the root of the sheet forever. Before the root of this sheet was
+    /// factored out into `TagSheetRoot`, the condition was read *inside* the presented view body
+    /// (`ChatListNavLink.setTagChatSheet` in the pre-refactor shape), so it re-evaluated on every
+    /// `@Published` write and the root swapped itself from editor to list as soon as the first list
+    /// existed. Reading the model here restores exactly that.
+    @ObservedObject private var chatTagsModel = ChatTagsModel.shared
     @State private var path = NavigationPath()
 
     var body: some View {
         NavigationStack(path: $path) {
             rootContent
                 .navigationDestination(for: TagEditorRoute.self) { route in
-                    tagEditorDestination(route, chat: chat)
+                    tagEditorDestination(route, chat: chat) { path = NavigationPath() }
                 }
         }
     }
 
+    /// `editorAsRoot` is honoured on its own only when the sheet was opened *to* add a list
+    /// (no chat: the "Add list" entry point). When a chat came along, the editor is only the right
+    /// root while the user still has no lists to choose from — the moment one exists there is a
+    /// list view worth showing, and it is the one place the new list can be seen and re-ticked
+    /// without leaving the sheet.
+    private var showsEditorAsRoot: Bool {
+        editorAsRoot && (chat == nil || chatTagsModel.userTags.isEmpty)
+    }
+
     @ViewBuilder private var rootContent: some View {
-        if editorAsRoot {
-            TagListEditor(chat: chat)
+        if showsEditorAsRoot {
+            TagListEditor(chat: chat) { path = NavigationPath() }
         } else {
             TagListView(chat: chat, path: $path)
         }
@@ -132,6 +154,15 @@ struct TagListView: View {
             } header: {
                 if chat == nil {
                     editTagsButton()
+                    .textCase(nil)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                } else {
+                    // Opening the sheet from a chat used to always close it again on the last tap,
+                    // so it never needed an exit of its own. Creating a list now lands back on this
+                    // screen with the new list ticked (see `TagListEditor.onListAssigned`), so the
+                    // sheet has to be closable by a button and not only by dragging it down.
+                    // "Done" is the key `editTagsButton` above already uses.
+                    Button("Done") { dismiss() }
                     .textCase(nil)
                     .frame(maxWidth: .infinity, alignment: .trailing)
                 }
@@ -299,6 +330,11 @@ struct TagListEditor: View {
     var tagId: Int64? = nil
     var emoji: String?
     var name: String = ""
+    /// What to do after this editor has created a list AND put the chat it was opened from into it.
+    /// `TagSheetRoot` passes "go back to the top of this sheet", so the new list is immediately
+    /// visible and ticked for that chat — the two things the sheet is for. Left nil (a host that did
+    /// not come through `TagSheetRoot`), the behaviour is unchanged: `dismiss()` as before.
+    var onListAssigned: (() -> Void)? = nil
     @State private var newEmoji: String?
     @State private var newName: String = ""
     @State private var isPickerPresented = false
@@ -381,7 +417,18 @@ struct TagListEditor: View {
                     chatTagsModel.userTags = userTags
                 }
                 if let chat, let tag = userTags.first(where: { $0.chatTagText == text && $0.chatTagEmoji == newEmoji}) {
-                    setChatTag(tagId: tag.chatTagId, chat: chat) { dismiss() }
+                    setChatTag(tagId: tag.chatTagId, chat: chat) {
+                        // Stay in the sheet when the host asked for it: the list view at its root is
+                        // where the new list becomes visible and ticked. `dismiss()` from a page that
+                        // was pushed inside the sheet's own stack only pops one level, which is why
+                        // landing on the list needed an explicit reset of the path rather than
+                        // another dismiss.
+                        if let onListAssigned {
+                            onListAssigned()
+                        } else {
+                            dismiss()
+                        }
+                    }
                 } else {
                     await MainActor.run { dismiss() }
                 }

@@ -192,6 +192,10 @@ final class PopopxStoreKitManager {
             let loadBroke = productsLoadFailed || lastLoadError != nil
             let missing = self.missingProductIDs.joined(separator: " ")
             log.error("storekit: purchase refused for \(sku.productId, privacy: .public); loadBroke=\(loadBroke, privacy: .public) lastLoadError=\(self.lastLoadError ?? "none", privacy: .public) missing=[\(missing, privacy: .public)]")
+            // 这一句拒绝在 Debug 构建上不是死路：付费墙在拿到 `.productNotFound` 之前就已经按
+            // `isMissingFromStore(_:)` 摆出了沙盒那颗按钮（见下面"沙盒购买"那一节）。
+            // 这里**不**自动降级成沙盒成交——真实 CTA 在 Debug 与 Release 必须指同一件事，
+            // 否则"点了买、其实没付钱"这件事只有翻代码的人才知道。
             return .failure(loadBroke ? .storeUnavailable : .productNotFound(sku.productId))
         }
         return await purchaseResolved(reloaded)
@@ -221,6 +225,89 @@ final class PopopxStoreKitManager {
             return .failure(.purchaseFailed(error.localizedDescription))
         }
     }
+
+    // MARK: 沙盒购买（只有 Debug 构建会编译进这一整段）
+
+    #if DEBUG
+    /// 模拟交易的标识前缀：高 4 位恒为 `0xF`，因此它必然大于任何一笔真实 Apple 交易号
+    /// （现网交易号不超过 2^61）。防碰撞靠的是下面那个 `UUID`，不是这一位——
+    /// 它的作用是让用户在 Console 里、在 `settledTransactionIds` 里、在断点里一眼认出
+    /// "这一笔是本机铸的，Apple 那侧根本不存在"，不必再靠反推摘要来分类。
+    private static let simulatedTransactionPrefix: UInt64 = 0xF000_0000_0000_0000
+
+    /// 「商店确实没有这一件」与「还没问过商店」是两件事，混起来的代价是付费墙一进来
+    /// 就闪一下沙盒按钮、然后在 0.3 秒后消失。
+    ///
+    /// `lastLoadError != nil` 也算"问过了"：`lastLoadAt` 只在**成功**分支赋值，所以
+    /// "整批抛错"这一种形态（真机没挂配置文件时很常见：商店直接回一个 Store 内部错误）
+    /// 只认 `lastLoadAt` 的话就永远不出按钮，而这恰好是最需要它的一次。
+    func isMissingFromStore(_ sku: PopopxNodeBadgeSku) -> Bool {
+        guard !isLoadingProducts else { return false }
+        guard lastLoadAt != nil || lastLoadError != nil else { return false }
+        return product(for: sku) == nil
+    }
+
+    /// Debug 构建的第二条购买通路：**本机铸一张收据**，落账一行都不新写。
+    ///
+    /// 为什么要它（真机实测的病因，不是假想）：`.storekit` 配置文件只随 Xcode 的 scheme
+    /// 启动注入，`xcrun devicectl device install app` 装到真机的那个包不带它，
+    /// 于是 `Product.products(for:)` 打到真实/沙盒商店，9 个 SKU 一个都取不到，
+    /// 付费墙与算力点页的每一颗按钮都是死的——整条商业主链路在真机上下一步都测不了。
+    ///
+    /// 与真实路径逐条对齐（这是这个函数存在的全部意义，任何一处偏离都得写在这上面）：
+    /// - **收据同形**：走的是与 `receipt(of:)` 完全一样的字段语义。`expiresAtMs` 也按同一族规则给——
+    ///   订阅给到期时刻（真实路径上那一位由 Apple 填），非续订通行证与消耗型给 `nil`
+    ///   （Apple 对非续订订阅根本不算到期，"给多少天"本来就是这个模块的事实）。
+    /// - **落账同一条代码**：通行证由调用方（付费墙 `grantPass`）当场点亮，与真实购买同一条腿；
+    ///   订阅与礼品券在真实路径上由 `Transaction.updates → deliver` 落账，模拟通路没有 Apple 那条流，
+    ///   所以这里补一次**同一个** `deliver`：交付回调仍是 `PopopxBadgeManager.apply(storeReceipt:)`
+    ///   与 `PopopxCreditsManager.apply(storeReceipt:)`，时长叠加（`stackedExpiryMs`）、
+    ///   Keychain 写入（`.badgeRecord` / `.wallet` / `.vouchers`）、防重投门禁、成功后震动，一道不少。
+    /// - **通行证那一族不补投递**：付费墙已经当场点亮过一次。`applyPass` 的摘要门禁会挡掉第二遍，
+    ///   但"靠门禁兜住"和"根本不投"是两种顺序，前者让 Debug 的落账次序与真实路径不同——不投更诚实。
+    /// - **`finish` 是空转**：调用方照例会 `finish(receipt)`，它只在真实交易序列里找那个高 4 位为
+    ///   `0xF` 的号，找不到就什么都不做。不存在"假装 finish 了一笔 Apple 交易"。
+    ///
+    /// 不可逆的东西一个都不碰：不写 `Transaction.*`（本机铸的收据进不了 Apple 的账本，
+    /// 因此冷启动那三条腿 `recoverUnsettledPasses` / `reconcileWithStore` / `restorePurchases`
+    /// 都看不见它），于是重启既不会白送第二段时长，也不会冒出一笔"恢复到的"幽灵交易；
+    /// 而点亮的那个徽章就是真实的那一格 `.badgeRecord`，所以它重启还在——测的就是要上线的那一份状态。
+    func purchaseSimulated(_ sku: PopopxNodeBadgeSku) async -> Result<PopopxStorePurchaseOutcome, PopopxBadgeCreditsError> {
+        let mintedAtMs = Int64(Date().timeIntervalSince1970 * 1_000)
+        // 每次一张新码。摘要（`PopopxStoreReceipt.digest` = JWS 原文的短摘要）正是通行证与券
+        // 两条腿上的防重投键：复用同一个摘要 = 第二次沙盒购买被门禁吃掉，测试会得到
+        // "加了钱却没加时长"的假象，而那假象看起来像一个真 bug。
+        let nonce = UUID().uuidString
+        let transactionId = Self.simulatedTransactionPrefix | UInt64.random(in: 0 ..< Self.simulatedTransactionPrefix)
+        let expiresAtMs: Int64? = switch sku.kind {
+        case let .subscription(period): mintedAtMs + Int64(period.days) * 86_400_000
+        case .oneTimePass, .giftCard, .credits: nil
+        }
+        let receipt = PopopxStoreReceipt(
+            transactionId: transactionId,
+            originalTransactionId: transactionId,
+            productId: sku.productId,
+            jwsRepresentation: "POPOPX-SANDBOX|\(sku.productId)|\(nonce)|\(mintedAtMs)",
+            purchasedAtMs: mintedAtMs,
+            expiresAtMs: expiresAtMs,
+            isRevoked: false
+        )
+        // 与真实路径同一条去重表，但**顺序**不能照抄 `purchaseResolved`：见下面 if/else 的注释。
+        if sku.oneTimePassPeriod == nil {
+            // 订阅与礼品券：走与 `Transaction.updates` 完全同一个入口 `deliver`，
+            // 由它自己去重（`guard settledTransactionIds.insert(...).inserted else { return }`）再投递。
+            // 这里若先登记一次，`deliver` 那一道门禁会把它自己挡在门外——症状是"点了沙盒、
+            // 什么都不到账"，而这条腿恰恰是这两族在真实路径上唯一的落账处，绝不会有人补。
+            await deliver(receipt, sku: sku)
+        } else {
+            // 通行证：真实路径由付费墙当场点亮（`grantPass`），本函数不投递，只做
+            // 与 `purchaseResolved` 等价的那一步登记，让去重语义在两种来源之间不分叉。
+            settledTransactionIds.insert(transactionId)
+        }
+        log.notice("storekit: SANDBOX purchase minted on device for \(sku.productId, privacy: .public); no Apple transaction exists")
+        return .success(.purchased(receipt))
+    }
+    #endif
 
     /// 落账：把交易标记为已完成。**只在本地写入成功之后调用**，
     /// 这是"消耗型商品不被重复兑现"与"付款后什么都没发生"之间唯一的分界线。
