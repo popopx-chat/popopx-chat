@@ -7714,3 +7714,11 @@ alert title */
 "How long the top-secret message stays on the recipient's screen" = "Як довго цілком таємне повідомлення залишається на екрані отримувача";
 "Message…" = "Повідомлення…";
 "15 seconds" = "15 секунд";
+"Classic" = "Класичний";
+"Flat" = "Плоский";
+"Sandbox purchase" = "Тестова покупка";
+"Files larger than %@ cannot be sent in incognito chats." = "Файли розміром понад %@ не можна надсилати в чатах інкогніто.";
+"Sent before the channel started signing, or fake." = "Надіслано до ввімкнення підпису каналу або підробка.";
+"Sign messages" = "Підписувати повідомлення";
+"message rejected: bad signature" = "повідомлення відхилено: недійсний підпис";
+"Chat layout" = "Оформлення чата";

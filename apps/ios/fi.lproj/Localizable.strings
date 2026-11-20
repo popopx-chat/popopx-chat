@@ -4689,3 +4689,11 @@ server test failure */
 "How long the top-secret message stays on the recipient's screen" = "Kuinka kauan salaisinviesti pysyy vastaanottajan näytöllä";
 "Message…" = "Viesti…";
 "15 seconds" = "15 sekuntia";
+"Classic" = "Klassinen";
+"Flat" = "Laakea";
+"Sandbox purchase" = "Testosto";
+"Files larger than %@ cannot be sent in incognito chats." = "Y %@ suurempia tiedostoja ei voi lähettää incognito-keskusteluissa.";
+"Sent before the channel started signing, or fake." = "Lähetetty ennen kuin kanava alkoi allekirjoittaa, tai väärennetty.";
+"Sign messages" = "Allekirjoita viestit";
+"message rejected: bad signature" = "viesti hylätty: virheellinen allekirjoitus";
+"Chat layout" = "Keskustelun asettelu";

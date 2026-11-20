@@ -8503,3 +8503,10 @@ alert title */
 "How long the top-secret message stays on the recipient's screen" = "Как долго совершенно секретное сообщение остаётся на экране получателя";
 "Message…" = "Сообщение…";
 "15 seconds" = "15 секунд";
+"Classic" = "Классический";
+"Flat" = "Плоский";
+"Sandbox purchase" = "Тестовая покупка";
+"Files larger than %@ cannot be sent in incognito chats." = "Файлы размером более %@ нельзя отправлять в чатах инкогнито.";
+"Sent before the channel started signing, or fake." = "Отправлено до включения подписи канала или подделка.";
+"message rejected: bad signature" = "сообщение отклонено: недействительная подпись";
+"Chat layout" = "Оформление чата";

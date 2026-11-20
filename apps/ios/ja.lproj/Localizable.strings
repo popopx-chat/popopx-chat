@@ -4963,3 +4963,11 @@ server test failure */
 "How long the top-secret message stays on the recipient's screen" = "機密メッセージが受信者の画面に留まる時間";
 "Message…" = "メッセージ…";
 "15 seconds" = "15秒";
+"Classic" = "クラシック";
+"Flat" = "フラット";
+"Sandbox purchase" = "サンドボックス購入";
+"Files larger than %@ cannot be sent in incognito chats." = "%@ より大きいファイルはシークレットモードのチャットに送信できません。";
+"Sent before the channel started signing, or fake." = "チャンネルの署名開始前に送信されたか、偽造です。";
+"Sign messages" = "メッセージに署名";
+"message rejected: bad signature" = "メッセージを拒否しました：署名が無効です";
+"Chat layout" = "チャットのレイアウト";

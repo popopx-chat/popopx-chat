@@ -5062,3 +5062,11 @@ server test failure */
 "How long the top-secret message stays on the recipient's screen" = "Jak dlouho přísně tajná zpráva zůstane na obrazovce příjemce";
 "Message…" = "Zpráva…";
 "15 seconds" = "15 vteřin";
+"Classic" = "Klasický";
+"Flat" = "Plochý";
+"Sandbox purchase" = "Testovací nákup";
+"Files larger than %@ cannot be sent in incognito chats." = "Soubory větší než %@ nelze odesílat v inkognito chatech.";
+"Sent before the channel started signing, or fake." = "Odesláno předtím, než kanál začal podepisovat, nebo paděláno.";
+"Sign messages" = "Podepisovat zprávy";
+"message rejected: bad signature" = "zpráva zamítnuta: nesprávný podpis";
+"Chat layout" = "Rozvržení chatu";

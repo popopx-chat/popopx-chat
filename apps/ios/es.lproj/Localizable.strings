@@ -8512,3 +8512,10 @@ alert title */
 "How long the top-secret message stays on the recipient's screen" = "Cuánto tiempo permanece el mensaje de alto secreto en la pantalla del destinatario";
 "Message…" = "Mensaje…";
 "15 seconds" = "15 segundos";
+"Classic" = "Clásico";
+"Flat" = "Plano";
+"Sandbox purchase" = "Compra de pruebas";
+"Files larger than %@ cannot be sent in incognito chats." = "Los archivos de más de %@ no se pueden enviar en chats en modo incógnito.";
+"Sent before the channel started signing, or fake." = "Enviado antes de que el canal empezara a firmar, o es falso.";
+"message rejected: bad signature" = "mensaje rechazado: firma no válida";
+"Chat layout" = "Diseño del chat";

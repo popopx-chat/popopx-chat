@@ -5774,3 +5774,11 @@ server test failure */
 "How long the top-secret message stays on the recipient's screen" = "Колко време съобщението от клас „съвършено поверително“ остава на екрана на получателя";
 "Message…" = "Съобщение…";
 "15 seconds" = "15 секунди";
+"Classic" = "Класически";
+"Flat" = "Плосък";
+"Sandbox purchase" = "Тестова покупка";
+"Files larger than %@ cannot be sent in incognito chats." = "Файлове, по-големи от %@, не могат да се изпращат в чатове в режим инкогнито.";
+"Sent before the channel started signing, or fake." = "Изпратено преди каналът да започне да подписва, или е фалшиво.";
+"Sign messages" = "Подписване на съобщения";
+"message rejected: bad signature" = "съобщение отхвърлено: невалиден подпис";
+"Chat layout" = "Формат на чата";

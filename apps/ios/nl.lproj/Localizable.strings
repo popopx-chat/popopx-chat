@@ -7458,3 +7458,11 @@ server test failure */
 "How long the top-secret message stays on the recipient's screen" = "Hoe lang het zeer geheime bericht op het scherm van de ontvanger blijft";
 "Message…" = "Bericht…";
 "15 seconds" = "15 seconden";
+"Classic" = "Klassiek";
+"Flat" = "Plat";
+"Sandbox purchase" = "Testaankoop";
+"Files larger than %@ cannot be sent in incognito chats." = "Bestanden groter dan %@ kunnen niet worden verzonden in incognito-chats.";
+"Sent before the channel started signing, or fake." = "Verzonden voordat het kanaal begon te ondertekenen, of nep.";
+"Sign messages" = "Berichten ondertekenen";
+"message rejected: bad signature" = "bericht geweigerd: ongeldige handtekening";
+"Chat layout" = "Chatlay-out";

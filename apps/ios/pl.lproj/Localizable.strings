@@ -7767,3 +7767,11 @@ alert title */
 "How long the top-secret message stays on the recipient's screen" = "Jak długo ściśle tajna wiadomość pozostaje na ekranie odbiorcy";
 "Message…" = "Wiadomość…";
 "15 seconds" = "15 sekund";
+"Classic" = "Klasyczny";
+"Flat" = "Płaski";
+"Sandbox purchase" = "Zakup testowy";
+"Files larger than %@ cannot be sent in incognito chats." = "Plików większych niż %@ nie można wysyłać w czatach incognito.";
+"Sent before the channel started signing, or fake." = "Wysłane przed rozpoczęciem podpisywania kanału lub sfałszowane.";
+"Sign messages" = "Podpisywać wiadomości";
+"message rejected: bad signature" = "odrzucono wiadomość: nieprawidłowy podpis";
+"Chat layout" = "Układ czatu";

@@ -7705,3 +7705,11 @@ alert title */
 "How long the top-secret message stays on the recipient's screen" = "Çok gizli mesaj alıcının ekranında ne kadar kalır";
 "Message…" = "Mesaj…";
 "15 seconds" = "15 saniye";
+"Classic" = "Klasik";
+"Flat" = "Düz";
+"Sandbox purchase" = "Test satın alma";
+"Files larger than %@ cannot be sent in incognito chats." = "%@ boyutundan büyük dosyalar gizli sohbetlere gönderilemez.";
+"Sent before the channel started signing, or fake." = "Kanal imzalamaya başlamadan önce gönderilmiş veya sahte.";
+"Sign messages" = "Mesajları imzala";
+"message rejected: bad signature" = "mesaj reddedildi: geçersiz imza";
+"Chat layout" = "Sohbet düzeni";

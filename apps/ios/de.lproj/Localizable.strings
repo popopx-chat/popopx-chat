@@ -8574,3 +8574,7 @@ alert title */
 "How long the top-secret message stays on the recipient's screen" = "Wie lange die streng geheime Nachricht auf dem Bildschirm des Empfängers bleibt";
 "Message…" = "Nachricht …";
 "15 seconds" = "15 Sekunden";
+"Classic" = "Klassisch";
+"Flat" = "Flach";
+"Sent before the channel started signing, or fake." = "Gesendet, bevor der Kanal mit dem Signieren begann, oder gefälscht.";
+"Chat layout" = "Chat-Layout";

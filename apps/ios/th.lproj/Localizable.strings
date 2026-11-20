@@ -4605,3 +4605,11 @@ server test failure */
 "How long the top-secret message stays on the recipient's screen" = "ข้อความลับที่สุดจะค้างบนหน้าจอผู้รับนานเพียงใด";
 "Message…" = "ข้อความ…";
 "15 seconds" = "15 วินาที";
+"Classic" = "คลาสสิก";
+"Flat" = "แบน";
+"Sandbox purchase" = "การซื้อทดสอบ";
+"Files larger than %@ cannot be sent in incognito chats." = "ไม่สามารถส่งไฟล์ที่ใหญ่กว่า %@ ในการสนทนาแบบไม่ระบุตัวตนได้";
+"Sent before the channel started signing, or fake." = "ส่งก่อนที่ช่องจะเริ่มลงนาม หรือเป็นของปลอม";
+"Sign messages" = "ลงนามข้อความ";
+"message rejected: bad signature" = "ปฏิเสธข้อความ: ลายเซ็นไม่ถูกต้อง";
+"Chat layout" = "รูปแบบการสนทนา";
