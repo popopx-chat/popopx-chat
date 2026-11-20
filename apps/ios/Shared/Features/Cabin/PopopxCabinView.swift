@@ -41,10 +41,10 @@
 //
 //  顶栏与设置中心（离线组网入口收口，七个决定）：
 //  1. 左上角「发现」= `path.append(.discovery)`，进的是本页新登记的 `PopopxCabinDiscoveryView`：一屏里
-//     给出周边节点雷达、本机已加入的离线群、已加密的 1:1 频道三张表。这一枚原先是"直达大厅"，
-//     真机第 3 轮改成发现列表（2026-11-20）。大厅不因此失去入口 —— 内容区「附近频道」卡片
+//     给出周边节点雷达（`PopopxCabinNearbyCard`）与本机已加入的离线群（`groupsCard`）两张卡。这一枚原先
+//     是"直达大厅"，真机第 3 轮改成发现列表（2026-11-20）。大厅不因此失去入口 —— 内容区「附近频道」卡片
 //     `channelsCard` 的第一行仍是 #厢语大厅，大厅右上角另外还留着同一份雷达（`discoveryEntry` 的开关态）。
-//     这里从不新开第二份广场，三张表读的都是本页 `refresh()` 已经拿到的那一份 `nodes` / `groups`。
+//     这里从不新开第二份广场，两张卡读的都是本页 `refresh()` 已经拿到的那一份 `nodes` / `groups`。
 //  2. 右上角「离线组网设置」= `PopopxCabinMeshSettingsSheet`，三张卡依次是总闸与配对策略、节点身份与
 //     真实运行态、离线数据与清除。这四件事原先散在「我」页的离线组网分组与「全部设置」页的厢语卡片里，
 //     摘除时逐条等效搬来：`requestFuse(_:)` / `setPairingPolicy(_:)` / `verifiedActivitySnapshot()` /
@@ -393,7 +393,7 @@ struct PopopxCabinView: View {
 
     // MARK: 顶栏两个入口
 
-    /// 左上角「发现」：一屏给出周边节点、离线群与加密频道三张表（`PopopxCabinDiscoveryView`）。
+    /// 左上角「发现」：一屏给出周边节点与本机离线群两张卡（`PopopxCabinDiscoveryView`）。
     /// 真机第 3 轮之前这一枚写的是"附近厢语广场"、按下去进大厅；大厅现在归内容区那一行，
     /// 顶栏只负责"发现附近有什么"，两个入口因此不会互相顶掉。
     private var nearbyDiscoveryEntry: some View {
