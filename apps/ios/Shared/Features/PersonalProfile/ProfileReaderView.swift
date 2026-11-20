@@ -78,12 +78,12 @@ enum PopopxProfilePresentFailure: Hashable, Sendable {
     /// 不预测后果、不承诺补救。
     var reasonText: String {
         switch self {
-        case .sessionAlreadyOpen: return "已经有一份主页打开着，先关掉它"
-        case .screenCaptured: return "屏幕正在被录制或镜像，已拒绝打开"
-        case .antiDebugBlocked: return "本机正被调试器跟踪，已拒绝打开"
-        case .cameraPermissionDenied: return "这份主页要求防偷拍值守，需要先允许摄像头权限"
-        case .noPresentationContext: return "现在没有可以显示这份主页的界面"
-        case .readClockExpired: return "这份主页已经过了阅读时限"
+        case .sessionAlreadyOpen: return NSLocalizedString("A profile page is already open — close it first", comment: "profile open refusal")
+        case .screenCaptured: return NSLocalizedString("The screen is being recorded or mirrored, so opening was refused", comment: "profile open refusal")
+        case .antiDebugBlocked: return NSLocalizedString("This device is being traced by a debugger, so opening was refused", comment: "profile open refusal")
+        case .cameraPermissionDenied: return NSLocalizedString("This profile page requires camera watch; allow camera access first", comment: "profile open refusal")
+        case .noPresentationContext: return NSLocalizedString("There is no interface available to show this profile page in", comment: "profile open refusal")
+        case .readClockExpired: return NSLocalizedString("The reading window for this profile page has expired", comment: "profile open refusal")
         case let .payloadRejected(reason): return reason
         }
     }
@@ -252,7 +252,7 @@ final class PopopxProfileReaderModel {
         // 回收断言：模型被释放时明文必须已经交出。false 说明销毁/关闭路径被跳过了——
         // 通常是宿主拆窗口时漏调 `eraseForClose()`。
         if !eraseWitness.plaintextGivenUp {
-            assertionFailure("PopopxProfileReaderModel 释放时明文未交出：销毁或关闭路径被跳过")
+            assertionFailure("PopopxProfileReaderModel was released without giving up the plaintext: the destroy or close path was skipped")
         }
         #endif
     }
@@ -750,7 +750,7 @@ final class ProfileReaderHost {
     private static func deleteChatRow(target: PopopxProfileReadKey) async -> Bool {
         let model = ChatModel.shared
         guard let chat = model.chats.first(where: { $0.chatInfo.apiId == target.chatId }) else {
-            logger.error("POPOPX profile: 找不到 apiId 为 \(target.chatId) 的会话，本机记录未删除")
+            logger.error("POPOPX profile: no chat found for apiId \(target.chatId); the local record was not deleted")
             return false
         }
         do {
@@ -1258,27 +1258,27 @@ private struct PopopxProfileMediaTile: View {
 // MARK: - 文案
 
 private enum Copy {
-    static let untitled = "未命名主页"
-    static let close = "关闭"
-    static let emptyProfile = "这份主页没有可显示的内容"
-    static let emptyBody = "这份主页没有内容块。"
-    static let emptyTextBlock = "（空文字块）"
-    static let loadingMedia = "正在读取本机留存的原件…"
-    static let mediaMissing = "媒体未随本机留存：这一格在收件时就没有落到本机"
-    static let mediaUnreadable = "媒体未随本机留存：本机文件读不出来"
-    static let cleaning = "正在删除本机记录与原件…"
-    static let burnedTitle = "已阅后即焚"
-    static let closingTitle = "正在关闭"
-    static let burnedWithoutDeletion = "明文与原件已清除，但本机那一条消息没删成，请重新进入会话确认"
-    static let burnedByClockRewound = "检测到本机时间被改动，已按销毁处理"
-    static let antiSpyOffNote = "这份主页未开启前置镜头值守，只保留截屏与录屏检测。"
+    static let untitled = NSLocalizedString("Untitled profile page", comment: "reader title fallback")
+    static let close = NSLocalizedString("Close", comment: "reader close button")
+    static let emptyProfile = NSLocalizedString("This profile page has nothing to show", comment: "reader empty state")
+    static let emptyBody = NSLocalizedString("This profile page has no content blocks.", comment: "reader empty state")
+    static let emptyTextBlock = NSLocalizedString("(empty text block)", comment: "reader empty block placeholder")
+    static let loadingMedia = NSLocalizedString("Reading the original kept on this device…", comment: "reader media placeholder")
+    static let mediaMissing = NSLocalizedString("Media not kept on this device: this slot was never written here when the message arrived", comment: "reader media placeholder")
+    static let mediaUnreadable = NSLocalizedString("Media not kept on this device: the local file cannot be read", comment: "reader media placeholder")
+    static let cleaning = NSLocalizedString("Deleting the local record and the originals…", comment: "reader burn progress")
+    static let burnedTitle = NSLocalizedString("Burned after reading", comment: "reader closing sheet title")
+    static let closingTitle = NSLocalizedString("Closing", comment: "reader closing sheet title")
+    static let burnedWithoutDeletion = NSLocalizedString("The plaintext and the originals were cleared, but this device's message row could not be deleted; open the chat again to confirm", comment: "reader burn warning")
+    static let burnedByClockRewound = NSLocalizedString("This device's clock was changed; the content was destroyed", comment: "reader burn reason")
+    static let antiSpyOffNote = NSLocalizedString("This profile page does not use the front camera watch; only screenshot and screen recording detection stay on.", comment: "reader privacy note")
 
     /// 厢语降级那一句是逐字文案，只允许这一处出现。
     static func meshOmitted(_ count: Int) -> String {
-        "当前通过厢语蓝牙 Mesh 离线接收，已自动省去 \(count) 个图片/视频以保障无网极速送达"
+        String(format: NSLocalizedString("Received offline over the Bluetooth mesh; %lld images or videos were skipped automatically to keep delivery fast with no network", comment: "reader degraded delivery banner"), count)
     }
 
-    static func countdown(_ seconds: Int) -> String { "阅后即焚 · 剩余 \(seconds) 秒" }
-    static func countdownSpoken(_ seconds: Int) -> String { "阅后即焚倒计时，剩余 \(seconds) 秒" }
-    static func countdownTotal(_ seconds: Int) -> String { "打开后 \(PopopxSecureCopy.duration(seconds)) 内可读" }
+    static func countdown(_ seconds: Int) -> String { String(format: NSLocalizedString("Burn after reading · %lld seconds left", comment: "reader countdown"), seconds) }
+    static func countdownSpoken(_ seconds: Int) -> String { String(format: NSLocalizedString("Burn-after-reading countdown, %lld seconds left", comment: "reader countdown, spoken"), seconds) }
+    static func countdownTotal(_ seconds: Int) -> String { String(format: NSLocalizedString("Readable for %@ after opening", comment: "reader countdown total"), PopopxSecureCopy.duration(seconds)) }
 }

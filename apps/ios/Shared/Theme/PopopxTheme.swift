@@ -310,7 +310,7 @@ private struct PopopxThemeGallery: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: PopopxMetrics.spaceM) {
-                Text("popopx 双模色板").font(PopopxType.title)
+                Text(NSLocalizedString("popopx dual-mode palette", comment: "")).font(PopopxType.title)
 
                 LazyVGrid(
                     columns: [GridItem(.adaptive(minimum: 108), spacing: PopopxMetrics.spaceS)],
@@ -324,14 +324,14 @@ private struct PopopxThemeGallery: View {
                 }
 
                 Text("Typography").font(PopopxType.sectionHeader)
-                Text("厢语离线频道").font(PopopxType.display)
-                Text("离线消息将走蓝牙 Mesh 中继，最多 7 跳。").font(PopopxType.body)
+                Text(NSLocalizedString("Offline mesh channel", comment: "")).font(PopopxType.display)
+                Text(NSLocalizedString("Offline messages go over the Bluetooth mesh relay, up to 7 hops.", comment: "")).font(PopopxType.body)
                 Text("Hop 3 · 128 ms").font(PopopxType.metric).foregroundStyle(PopopxPalette.labelSecondary)
 
                 VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
-                    Label("SMP 在线加密", systemImage: "lock.shield.fill")
+                    Label(NSLocalizedString("SMP online encryption", comment: ""), systemImage: "lock.shield.fill")
                         .foregroundStyle(PopopxPalette.brand)
-                    Label("厢语无网组网中", systemImage: "antenna.radiowaves.left.and.right")
+                    Label(NSLocalizedString("Offline mesh networking", comment: ""), systemImage: "antenna.radiowaves.left.and.right")
                         .foregroundStyle(PopopxPalette.meshInk)
                 }
                 .font(PopopxType.caption)

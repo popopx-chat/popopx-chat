@@ -107,12 +107,12 @@ enum PopopxLockReason: String, Hashable, Sendable, CaseIterable {
 
     var userText: String {
         switch self {
-        case .snatch: return "检测到剧烈拉扯，已锁定"
-        case .freeFall: return "检测到跌落，已锁定"
-        case .behavior: return "操作特征与平时不符，已锁定"
-        case .inactivity: return "长时间无操作，已锁定"
-        case .background: return "应用曾退入后台，已锁定"
-        case .manual: return "已手动锁定"
+        case .snatch: return NSLocalizedString("Snatching motion detected, locked", comment: "")
+        case .freeFall: return NSLocalizedString("Fall detected, locked", comment: "")
+        case .behavior: return NSLocalizedString("The way it is being handled does not match you, locked", comment: "")
+        case .inactivity: return NSLocalizedString("No touch for a long time, locked", comment: "")
+        case .background: return NSLocalizedString("The app went to the background, locked", comment: "")
+        case .manual: return NSLocalizedString("Locked manually", comment: "")
         }
     }
 
@@ -236,9 +236,9 @@ enum PopopxMotionSensitivity: String, CaseIterable, Hashable, Sendable {
     /// `.lineLimit(1)`），长一点的中文在小屏上会被省略号截断。
     var label: String {
         switch self {
-        case .low: return "较迟钝"
-        case .medium: return "标准"
-        case .high: return "较灵敏"
+        case .low: return NSLocalizedString("Less sensitive", comment: "")
+        case .medium: return NSLocalizedString("Standard", comment: "")
+        case .high: return NSLocalizedString("More sensitive", comment: "")
         }
     }
 
@@ -269,11 +269,11 @@ enum PopopxInactivityTimeout: Int, CaseIterable, Hashable, Sendable {
 
     var label: String {
         switch self {
-        case .oneMinute: return "1 分钟"
-        case .threeMinutes: return "3 分钟"
-        case .fiveMinutes: return "5 分钟"
-        case .fifteenMinutes: return "15 分钟"
-        case .never: return "永不"
+        case .oneMinute: return NSLocalizedString("1 minute", comment: "")
+        case .threeMinutes: return NSLocalizedString("3 minutes", comment: "")
+        case .fiveMinutes: return NSLocalizedString("5 minutes", comment: "")
+        case .fifteenMinutes: return NSLocalizedString("15 minutes", comment: "")
+        case .never: return NSLocalizedString("Never", comment: "")
         }
     }
 

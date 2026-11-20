@@ -460,16 +460,16 @@ private extension PopopxBadgeManager {
 /// （那一批要写进全部 17 个 `.lproj` 目录）；这一批与本特性其余文件一样留在文件内，
 /// 与前面几个 POPOPX 特性保持同一套做法。
 enum PopopxBadgeCopy {
-    static let capsuleTitle = "隐私节点"
-    static let trialBadgeName = "先锋节点体验徽章"
+    static let capsuleTitle = NSLocalizedString("Privacy node", comment: "badge capsule title")
+    static let trialBadgeName = NSLocalizedString("Pioneer Node Trial Badge", comment: "trial badge display name")
     static let formalBadgeName = PopopxCommerceCopy.badgeProductName
 
     /// 剩余时间一句话。体验态说"体验"，正式态说"到期"，两档不共用"剩余"这个词，
     /// 免得用户以为体验徽章和订阅是同一种东西。
     static func remaining(expiresAt: Date, source: PopopxBadgeSource?) -> String {
         let clock = remainingClock(expiresAt.timeIntervalSinceNow)
-        if source == .pioneerTrial { return "先锋体验剩余 \(clock)" }
-        return "动态加密路由开启中 · \(expiresAt.popopxBadgeExpiresText) 到期（剩 \(clock)）"
+        if source == .pioneerTrial { return String(format: NSLocalizedString("Pioneer trial · %@ left", comment: "badge remaining, trial tier"), clock) }
+        return String(format: NSLocalizedString("Encrypted routing is on · expires %1$@ (%2$@ left)", comment: "badge remaining, paid tier"), expiresAt.popopxBadgeExpiresText, clock)
     }
 
     static func remainingClock(_ seconds: TimeInterval) -> String {
@@ -477,9 +477,9 @@ enum PopopxBadgeCopy {
         let days = total / 86_400
         let hours = total % 86_400 / 3_600
         let minutes = total % 3_600 / 60
-        if days > 0 { return "\(days) 天 \(hours) 小时" }
-        if hours > 0 { return "\(hours) 小时 \(minutes) 分" }
-        return "\(minutes) 分"
+        if days > 0 { return String(format: NSLocalizedString("%1$lld days %2$lld hours", comment: "badge remaining clock"), days, hours) }
+        if hours > 0 { return String(format: NSLocalizedString("%1$lld hours %2$lld minutes", comment: "badge remaining clock"), hours, minutes) }
+        return String(format: NSLocalizedString("%lld minutes", comment: "badge remaining clock"), minutes)
     }
 }
 

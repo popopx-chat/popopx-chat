@@ -79,14 +79,14 @@ enum PopopxCommerceContent: Hashable {
         switch self {
         case let .gift(payload):
             payload.note.isEmpty
-                ? "徽章礼品卡，\(payload.period.days) 天，需点兑换"
-                : "徽章礼品卡，\(payload.period.days) 天，留言\(payload.note)，需点兑换"
+                ? String(format: NSLocalizedString("Badge gift card, %lld days, tap to redeem.", comment: "POPOPX commerce VoiceOver"), payload.period.days)
+                : String(format: NSLocalizedString("Badge gift card, %1$lld days, message: %2$@. Tap to redeem.", comment: "POPOPX commerce VoiceOver"), payload.period.days, payload.note)
         case let .packet(payload):
             payload.recipients > 1
-                ? "算力点红包，\(payload.amount) 点，均分 \(payload.recipients) 份，需点拆开"
-                : "算力点红包，\(payload.amount) 点，需点拆开"
+                ? String(format: NSLocalizedString("Compute Credits red packet, %1$lld credits split %2$lld ways. Tap to open.", comment: "POPOPX commerce VoiceOver"), payload.amount, payload.recipients)
+                : String(format: NSLocalizedString("Compute Credits red packet, %lld credits. Tap to open.", comment: "POPOPX commerce VoiceOver"), payload.amount)
         case let .channel(payload):
-            "频道订阅门槛，\(payload.price) 点一格，需点订阅"
+            String(format: NSLocalizedString("Channel subscription threshold, %lld Compute Credits per period. Tap to subscribe.", comment: "POPOPX commerce VoiceOver"), payload.price)
         }
     }
 }
@@ -487,42 +487,42 @@ struct PopopxChannelAccessBubble: View {
 
 private enum Copy {
     // 礼品卡
-    static func title(_ days: Int) -> String { "\(days) 天" + PopopxCommerceCopy.badgeProductName }
-    static let caption = "对方送出的一枚徽章券"
-    static func note(_ text: String) -> String { "留言：\(text)" }
-    static let redeem = "兑换"
-    static let sending = "等待对方确认…"
-    static let redeemedHere = "这张券已在本机兑换过。"
-    static let sentByYou = "这是你送出去的那一张。"
-    static let readOnly = "这里只能看：兑换要回到你和对方的会话里。"
-    static let groupUnsupported = "徽章券只能在两个人的会话里兑换。"
-    static let rejected = "签名验不过：这不是发出来的那张券。"
-    static func redeemed(_ days: Int) -> String { "已点亮 \(days) 天。" }
-    static let glossUnreachable = "连不上对方那台设备：链接可能已经过期。"
-    static let glossAlready = "这张券已经被兑过了。"
-    static let glossGeneric = "这次没有完成，可以稍后再试一次。"
+    static func title(_ days: Int) -> String { String(format: NSLocalizedString("%1$lld-day %2$@", comment: "POPOPX gift card bubble title"), days, PopopxCommerceCopy.badgeProductName) }
+    static let caption = NSLocalizedString("A badge voucher sent by the other person", comment: "POPOPX gift card bubble")
+    static func note(_ text: String) -> String { String(format: NSLocalizedString("Message: %@", comment: "POPOPX commerce card note"), text) }
+    static let redeem = NSLocalizedString("Redeem", comment: "POPOPX gift card bubble")
+    static let sending = NSLocalizedString("Waiting for the other side…", comment: "POPOPX gift card bubble")
+    static let redeemedHere = NSLocalizedString("This voucher has already been redeemed on this device.", comment: "POPOPX gift card bubble")
+    static let sentByYou = NSLocalizedString("This is the one you sent.", comment: "POPOPX commerce card")
+    static let readOnly = NSLocalizedString("Read only here: redeeming has to happen in the chat with this contact.", comment: "POPOPX commerce card")
+    static let groupUnsupported = NSLocalizedString("Badge vouchers can only be redeemed in a one-to-one chat.", comment: "POPOPX commerce card")
+    static let rejected = NSLocalizedString("The signature does not verify: this is not the voucher that was issued.", comment: "POPOPX commerce card")
+    static func redeemed(_ days: Int) -> String { String(format: NSLocalizedString("Badge lit for %lld days.", comment: "POPOPX gift card bubble"), days) }
+    static let glossUnreachable = NSLocalizedString("Cannot reach the other device: the link may already have expired.", comment: "POPOPX commerce card")
+    static let glossAlready = NSLocalizedString("This voucher has already been redeemed.", comment: "POPOPX commerce card")
+    static let glossGeneric = NSLocalizedString("This did not complete; you can try again later.", comment: "POPOPX commerce card")
 
     // 红包
-    static let open = "拆开"
-    static let title = "算力点红包"
-    static func split(_ count: Int) -> String { count > 1 ? "均分 \(count) 份" : "定向一份" }
-    static func claimed(_ share: Int) -> String { "已拆开 · 到账 \(share) 点" }
-    static func sent(_ claimed: Int, _ total: Int) -> String { "已领 \(claimed)/\(total) 份" }
-    static let resendReceipt = "补发回执"
+    static let open = NSLocalizedString("Open the packet", comment: "POPOPX red packet button")
+    static let title = NSLocalizedString("Compute Credits red packet", comment: "POPOPX red packet card")
+    static func split(_ count: Int) -> String { count > 1 ? String(format: NSLocalizedString("Split evenly %lld ways", comment: "POPOPX red packet card"), count) : NSLocalizedString("Single recipient", comment: "POPOPX red packet card") }
+    static func claimed(_ share: Int) -> String { String(format: NSLocalizedString("Opened · %lld credits credited", comment: "POPOPX red packet card"), share) }
+    static func sent(_ claimed: Int, _ total: Int) -> String { String(format: NSLocalizedString("Claimed %1$lld of %2$lld shares", comment: "POPOPX red packet card"), claimed, total) }
+    static let resendReceipt = NSLocalizedString("Send the receipt again", comment: "POPOPX red packet card")
 
     // 频道订阅门槛
-    static let channelHeadline = "频道订阅门槛"
-    static func caption(_ date: String) -> String { "频道主于 \(date) 发布" }
-    static func perPeriod(_ days: Int) -> String { "/ \(days) 天" }
-    static let subscribe = "订阅"
-    static let renew = "续订"
-    static func activeUntil(_ date: String) -> String { "凭证有效至 \(date)" }
-    static let published = "这是你发布的门槛：成员那边点它才扣点。"
-    static let channelRejected = "签名验不过：这不是频道主发出来的那一条。"
-    static let notAChannel = "这一条不在频道里：门槛卡片只在频道内作数，这里不会扣你的点。"
-    static let issuerMismatch = "签名密钥与本机上一次付费记下的发布者不一致：可能是别人转发的卡片，也可能频道主换过设备。"
-    static let priceRejected = "这个门槛不在允许范围内（1 到上限，或免费就不必发布）。"
-    static let readOnlyChannel = "这里只能看：这一条没能认出所在的频道，扣点要回到频道里那一条。"
+    static let channelHeadline = NSLocalizedString("Channel subscription threshold", comment: "POPOPX channel card")
+    static func caption(_ date: String) -> String { String(format: NSLocalizedString("Published by the channel owner on %@", comment: "POPOPX channel card"), date) }
+    static func perPeriod(_ days: Int) -> String { String(format: NSLocalizedString("/ %lld days", comment: "POPOPX channel card price suffix"), days) }
+    static let subscribe = NSLocalizedString("Subscribe", comment: "POPOPX channel card")
+    static let renew = NSLocalizedString("Renew", comment: "POPOPX channel card")
+    static func activeUntil(_ date: String) -> String { String(format: NSLocalizedString("Access valid until %@", comment: "POPOPX channel card"), date) }
+    static let published = NSLocalizedString("This is the threshold you published: credits are charged only when a member taps it.", comment: "POPOPX channel card")
+    static let channelRejected = NSLocalizedString("The signature does not verify: this is not the entry published by the channel owner.", comment: "POPOPX channel card")
+    static let notAChannel = NSLocalizedString("This is not in a channel: a threshold card only counts inside a channel, so no credits are charged here.", comment: "POPOPX channel card")
+    static let issuerMismatch = NSLocalizedString("The signing key does not match the publisher recorded on this device from your last payment: either someone forwarded this card, or the channel owner changed devices.", comment: "POPOPX channel card")
+    static let priceRejected = NSLocalizedString("This threshold is outside the allowed range (from 1 to the maximum; free needs no published threshold).", comment: "POPOPX channel card")
+    static let readOnlyChannel = NSLocalizedString("Read only here: this entry could not be matched to the channel it is in, so credits have to be charged in that channel.", comment: "POPOPX channel card")
 }
 
 // MARK: - Previews
@@ -535,19 +535,19 @@ struct PopopxCommerceCardsDark_Previews: PreviewProvider {
         VStack(alignment: .leading, spacing: PopopxMetrics.spaceM) {
             PopopxGiftCardBubble(
                 payload: PopopxGiftCardPayload(voucherId: "voucher.preview", period: .monthly,
-                                               note: "先替你挡一个月", mintedAtMs: 0, signature: "invalid"),
+                                               note: "Shielding you for a month", mintedAtMs: 0, signature: "invalid"),
                 context: PopopxCommerceCardContext(target: .contact(1), incoming: true)
             )
             PopopxRedPacketBubble(
                 payload: PopopxRedPacketPayload(packetId: "packet.preview", amount: 50, recipients: 5,
-                                                note: "新年快乐", signature: "invalid"),
+                                                note: "Happy new year", signature: "invalid"),
                 context: PopopxCommerceCardContext(target: .group(2), incoming: true)
             )
             PopopxChannelAccessBubble(
                 payload: PopopxChannelAccessPayload(price: 200, publishedAtMs: 0,
                                                     issuerPublicKeyBase64URL: "preview", signature: "invalid"),
                 context: PopopxCommerceCardContext(target: .group(2), incoming: true,
-                                                   chatId: "#2", chatTitle: "夜航随笔", isChannel: true)
+                                                   chatId: "#2", chatTitle: "Night flight notes", isChannel: true)
             )
         }
         .padding(PopopxMetrics.gutter)

@@ -687,57 +687,57 @@ private struct PopopxIdentityPickerSheet: View {
 
 /// 页面上每一句中文只在这里出现一次。
 private enum Copy {
-    static let pageTitle = "添加朋友"
-    static let pageExplainer = "邀请链接是一段一次性加密地址，对方打开它就能向你发起连接。以 popopx: 开头的链接在没有网络时经厢语蓝牙中继送达。"
-    static let close = "关闭"
-    static let gotIt = "知道了"
+    static let pageTitle = NSLocalizedString("Add Friend", comment: "")
+    static let pageExplainer = NSLocalizedString("An invitation link is a one-time encrypted address: whoever opens it can start a connection with you. Links starting with popopx: reach the other side over the Bluetooth mesh relay when there is no internet.", comment: "")
+    static let close = NSLocalizedString("Close", comment: "")
+    static let gotIt = NSLocalizedString("Got it", comment: "")
 
-    static let searchTitle = "邀请链接"
-    static let linkHint = "粘贴或输入 POPOPX 邀请链接"
-    static let searchFootnote = "可添加=本机离线门直接建连；在线邀请=交给加密服务器建连。"
-    static let add = "添加"
-    static let addableVerdict = "可添加"
-    static let onlineVerdict = "在线邀请"
+    static let searchTitle = NSLocalizedString("Invitation link", comment: "")
+    static let linkHint = NSLocalizedString("Paste or type a POPOPX invitation link", comment: "")
+    static let searchFootnote = NSLocalizedString("Addable = this device's offline gate opens the connection directly; online invitation = handed to the encrypted server.", comment: "")
+    static let add = NSLocalizedString("Add", comment: "")
+    static let addableVerdict = NSLocalizedString("Addable", comment: "")
+    static let onlineVerdict = NSLocalizedString("Online invitation", comment: "")
 
-    static let quickActionsTitle = "快捷加友"
-    static let pasteAction = "粘贴加友"
-    static let pasteNoteReady = "剪贴板里有可添加链接"
-    static let pasteNoteEmpty = "剪贴板暂无邀请链接"
-    static let faceToFaceAction = "面对面加友"
-    static let faceToFaceSubtitle = "靠近自动感应，或顶部轻触连接"
-    static let faceToFaceUnsupported = "当前系统不支持面对面加友，请使用扫一扫"
+    static let quickActionsTitle = NSLocalizedString("Quick ways to add", comment: "")
+    static let pasteAction = NSLocalizedString("Paste to add", comment: "")
+    static let pasteNoteReady = NSLocalizedString("The clipboard holds an addable link", comment: "")
+    static let pasteNoteEmpty = NSLocalizedString("No invitation link in the clipboard yet", comment: "")
+    static let faceToFaceAction = NSLocalizedString("Add face to face", comment: "")
+    static let faceToFaceSubtitle = NSLocalizedString("Move close and it senses automatically, or tap the top to connect", comment: "")
+    static let faceToFaceUnsupported = NSLocalizedString("This system version does not support face-to-face adding; use Scan QR code instead", comment: "")
 
-    static let nameCardTitle = "我的加密名片"
-    static let nameCardNote = "以当前匿名身份发出"
-    static let unnamedIdentity = "未命名身份"
-    static let switchIdentityLabel = "切换匿名身份"
-    static let qrCardLabel = "展示我的二维码名片"
+    static let nameCardTitle = NSLocalizedString("My encrypted card", comment: "")
+    static let nameCardNote = NSLocalizedString("Sent from the current anonymous identity", comment: "")
+    static let unnamedIdentity = NSLocalizedString("Unnamed identity", comment: "")
+    static let switchIdentityLabel = NSLocalizedString("Switch anonymous identity", comment: "")
+    static let qrCardLabel = NSLocalizedString("Show my QR code card", comment: "")
 
-    static let moreTitle = "更多方式"
-    static let plazaRow = "进入厢语发现附近群组/频道（BLE Mesh）"
+    static let moreTitle = NSLocalizedString("More ways", comment: "")
+    static let plazaRow = NSLocalizedString("Find nearby groups and channels over the Bluetooth mesh", comment: "")
     /// 广场页的标题。本文件其余句子仍是中文直写（整页转 Key 另立一轮），这一句先收口：
     /// 厢语左上角现在推的是同一个页面（`PopopxCabinView.swift` 的 `.plaza`），两处共用
     /// Key `Nearby mesh plaza`，16 个译本目录里各有一句，非中文系统下不再漏出中文标题。
     static let plazaNavigationTitle = NSLocalizedString("Nearby mesh plaza", comment: "POPOPX nearby mesh plaza")
-    static let fuseOffValue = "熔断已关闭"
-    static let scanRow = "扫一扫"
-    static let shareRow = "分享我的安全邀请链接"
+    static let fuseOffValue = NSLocalizedString("Closed by the fuse", comment: "")
+    static let scanRow = NSLocalizedString("Scan QR code", comment: "")
+    static let shareRow = NSLocalizedString("Share my secure invitation link", comment: "")
 
-    static let scannerSubtitle = "只解析二维码里的邀请链接，其余内容不会离开本机。"
-    static let cameraStarting = "正在准备相机…"
-    static let cameraDenied = "相机权限已关闭，请在系统设置里开启"
-    static let cameraRestricted = "这台设备的相机不可用"
-    static let cameraUnknown = "这台设备的相机状态未知"
-    static let openSettings = "打开系统设置"
-    static let scanFailedFormat = "没读出来，请对准二维码重试：%@"
+    static let scannerSubtitle = NSLocalizedString("Only the invitation link inside the code is read; nothing else leaves this device.", comment: "")
+    static let cameraStarting = NSLocalizedString("Preparing the camera…", comment: "")
+    static let cameraDenied = NSLocalizedString("Camera access is turned off; enable it in the system settings", comment: "")
+    static let cameraRestricted = NSLocalizedString("The camera is not available on this device", comment: "")
+    static let cameraUnknown = NSLocalizedString("This device's camera status is unknown", comment: "")
+    static let openSettings = NSLocalizedString("Open Settings", comment: "")
+    static let scanFailedFormat = NSLocalizedString("Nothing read; aim at the QR code and try again: %@", comment: "")
 
-    static let offlineConfirmationToast = "已接受对方邀请，等待对方通过"
-    static let offlineInvitationToast = "已向对方发起连接，可在联系人详情查看"
-    static let onlineHandoffToast = "已交给在线加密通道建连"
-    static let unrecognizedToast = "这不是 POPOPX 链接，也不是在线邀请链接"
-    static let offlineFailedToast = "离线建连失败，请稍后重试"
-    static let mintFailedToast = "链接生成失败"
-    static let clipboardEmptyToast = "剪贴板里没有可用链接"
+    static let offlineConfirmationToast = NSLocalizedString("Their invitation was accepted; waiting for them to let you in", comment: "")
+    static let offlineInvitationToast = NSLocalizedString("A connection has been started; see the contact's details", comment: "")
+    static let onlineHandoffToast = NSLocalizedString("Handed to the online encrypted channel to connect", comment: "")
+    static let unrecognizedToast = NSLocalizedString("This is neither a POPOPX link nor an online invitation link", comment: "")
+    static let offlineFailedToast = NSLocalizedString("The offline connection failed; please try again later", comment: "")
+    static let mintFailedToast = NSLocalizedString("Could not create the link", comment: "")
+    static let clipboardEmptyToast = NSLocalizedString("No usable link in the clipboard", comment: "")
 }
 
 struct PopopxAddFriendView_Previews: PreviewProvider {

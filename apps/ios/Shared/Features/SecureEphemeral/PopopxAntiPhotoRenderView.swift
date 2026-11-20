@@ -83,8 +83,8 @@ enum PopopxSecureReadMode: String, CaseIterable, Identifiable, Sendable {
     /// 给 `PopopxSegmentedControl` 的短标签。
     var title: String {
         switch self {
-        case .spotlight: return "聚光灯"
-        case .teleprompter: return "逐行"
+        case .spotlight: return NSLocalizedString("Spotlight", comment: "secure read mode")
+        case .teleprompter: return NSLocalizedString("Line by line", comment: "secure read mode")
         }
     }
 
@@ -92,9 +92,9 @@ enum PopopxSecureReadMode: String, CaseIterable, Identifiable, Sendable {
     var note: String {
         switch self {
         case .spotlight:
-            return "整屏重度模糊，只有手指按住的那块圆里清晰；抬手就全部糊回去。"
+            return NSLocalizedString("The whole screen is heavily blurred; only the circle under your finger stays sharp. Let go and it all blurs back.", comment: "secure read mode")
         case .teleprompter:
-            return "一次只出现一个逻辑行，按住并向上拖动才往下走，松手停在当前位置。"
+            return NSLocalizedString("One logical line at a time: hold and drag up to move down, release to stop where you are.", comment: "secure read mode")
         }
     }
 }
@@ -360,7 +360,7 @@ enum PopopxBlindWatermarkCodec {
     /// 前提下是一个置换（不会有两个比特抢同一个格子），所以"只写 1"和"整段赋值"结果相同，
     /// 前者少一半写入。
     static func scatter(_ cells: [Bool]) -> [Bool] {
-        precondition(cells.count == cellCount, "散布的输入必须是 \(cellCount) 格，实到 \(cells.count)")
+        precondition(cells.count == cellCount, "scatter input must be \(cellCount) cells, got \(cells.count)")
         var scattered = [Bool](repeating: false, count: cellCount)
         for (bitIndex, isOn) in cells.enumerated() where isOn {
             scattered[(bitIndex * scatterStride) % cellCount] = true
@@ -371,7 +371,7 @@ enum PopopxBlindWatermarkCodec {
     /// 反散布：`gather` 的第 i 比特就是 `scatter` 放在格子 `(i * stride) % cellCount` 上的那一比特。
     /// 也就是沿同一条公式正向走一遍 —— 反函数靠的是互质，不靠查表，因此取证端不需要任何附加数据。
     static func gather(_ scattered: [Bool]) -> [Bool] {
-        precondition(scattered.count == cellCount, "反散布的输入必须是 \(cellCount) 格，实到 \(scattered.count)")
+        precondition(scattered.count == cellCount, "gather input must be \(cellCount) cells, got \(scattered.count)")
         var cells = [Bool](repeating: false, count: cellCount)
         for bitIndex in 0 ..< cellCount {
             cells[bitIndex] = scattered[(bitIndex * scatterStride) % cellCount]
@@ -808,7 +808,7 @@ struct PopopxTeleprompterTextView: View {
 
     /// 空正文时这句提示比"按住向上拖"更诚实：不是手势不管用，是这条消息本来就没有内容。
     private var hintText: String {
-        lines.count > 1 ? "按住并向上拖动 · 松手停在当前行" : "这条消息没有更多内容"
+        lines.count > 1 ? NSLocalizedString("Hold and drag up · release stops at the current line", comment: "secure reading") : NSLocalizedString("This message has no more content", comment: "secure reading")
     }
 }
 
@@ -903,23 +903,23 @@ private struct PopopxAntiPhotoGallery: View {
     @State private var overlayOn = true
 
     private let sample = """
-    深圳北站 · 第三站台 · 18:42 那趟车
-    接头的人是穿灰外套的那个，他手里有一张纸，纸上是你要的东西。
-    不要在任何设备上留下这段文字的副本，也不要转发。
+    Shenzhen North Station · Platform 3 · the 18:42 service
+    The contact is the one in the grey coat; he holds a sheet of paper and what you need is on it.
+    Leave no copy of this text on any device, and do not forward it.
     """
 
     var body: some View {
-        PopopxSheetContainer("抗拍读取预览", subtitle: "PopopxAntiPhotoRenderView") {
-            PopopxSectionCard("阅读模式", footnote: mode.note) {
+        PopopxSheetContainer(NSLocalizedString("Anti-photo reading preview", comment: "secure reading preview"), subtitle: "PopopxAntiPhotoRenderView") {
+            PopopxSectionCard(NSLocalizedString("Reading mode", comment: "secure reading preview"), footnote: mode.note) {
                 PopopxSegmentedControl(
                     PopopxSecureReadMode.allCases.map { .init(selection: $0, title: $0.title) },
                     title: \.title,
                     selection: $mode
                 )
                 PopopxDividerRow()
-                PopopxToggleRow("点阵覆盖层", note: "关掉时不建 ticker，也不进绘制", isOn: $overlayOn)
+                PopopxToggleRow(NSLocalizedString("Dot-matrix overlay", comment: "secure reading preview"), note: NSLocalizedString("When it is off, no ticker is created and nothing is drawn", comment: "secure reading preview"), isOn: $overlayOn)
             }
-            PopopxSectionCard("正文") {
+            PopopxSectionCard(NSLocalizedString("Message body", comment: "secure reading preview")) {
                 ZStack {
                     PopopxBlindWatermarkOverlay(sessionIdentifier: "preview-session")
                     Group {

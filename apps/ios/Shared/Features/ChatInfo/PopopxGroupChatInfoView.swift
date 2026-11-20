@@ -370,7 +370,7 @@ struct PopopxGroupChatInfoView: View {
             MemberProfileImage(member, size: PopopxMetrics.space2XL)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
-                Text("\(Copy.youPrefix)\(member.chatViewName)")
+                Text("\(Copy.youPrefix) \(member.chatViewName)")
                     .font(PopopxType.body)
                     .foregroundStyle(member.memberIncognito ? PopopxPalette.brand : PopopxPalette.label)
                     .lineLimit(1)
@@ -901,117 +901,117 @@ private struct PopopxDangerRow: View {
 
 /// 页面上每一句中文只在这里出现一次。
 private enum Copy {
-    static let pageTitle = "群信息"
-    static let cancel = "取消"
-    static let linkHint = "打开"
+    static let pageTitle = NSLocalizedString("Group info", comment: "")
+    static let cancel = NSLocalizedString("Cancel", comment: "")
+    static let linkHint = NSLocalizedString("Open", comment: "")
 
     // 顶部群卡
-    static let memberCountFormat = "%d 位成员"
-    static let search = "搜索"
-    static let muteToggle = "静音"
+    static let memberCountFormat = NSLocalizedString("%lld members", comment: "")
+    static let search = NSLocalizedString("Search", comment: "")
+    static let muteToggle = NSLocalizedString("Mute", comment: "")
 
     // 备注名
-    static let renameGroup = "群备注名"
-    static let renameField = "设置群备注名"
-    static let renameFootnote = "备注名只保存在你这台设备上，不会通知其它成员。"
-    static let renamed = "群备注名已更新"
-    static let renameFailed = "改名失败，请稍后再试"
+    static let renameGroup = NSLocalizedString("Group alias", comment: "")
+    static let renameField = NSLocalizedString("Set group alias", comment: "")
+    static let renameFootnote = NSLocalizedString("The alias is stored only on this device; other members are not notified.", comment: "")
+    static let renamed = NSLocalizedString("Group alias updated", comment: "")
+    static let renameFailed = NSLocalizedString("Renaming failed, please try again later", comment: "")
 
     // 分组标题
-    static let sectionGroup = "群资料"
-    static func sectionMembers(_ suffix: String) -> String { "成员\(suffix)" }
-    static let memberCountSuffixFormat = "（%d）"
-    static let sectionMessage = "消息"
-    static let sectionDanger = "危险操作"
+    static let sectionGroup = NSLocalizedString("Group details", comment: "")
+    static func sectionMembers(_ suffix: String) -> String { String(format: NSLocalizedString("Members %@", comment: ""), suffix) }
+    static let memberCountSuffixFormat = NSLocalizedString("(%lld)", comment: "")
+    static let sectionMessage = NSLocalizedString("Messages", comment: "")
+    static let sectionDanger = NSLocalizedString("Dangerous actions", comment: "")
 
     // 群资料
-    static let editProfile = "编辑群资料"
-    static let addWelcome = "添加欢迎消息"
-    static let welcome = "欢迎消息"
-    static let preferences = "群偏好设置"
-    static let preferencesSaved = "群偏好已保存"
-    static let preferencesFailed = "保存失败，请稍后再试"
-    static let createLink = "创建群链接"
-    static let groupLink = "群链接"
-    static let linkAbsent = "未创建"
-    static let linkPresent = "已创建"
+    static let editProfile = NSLocalizedString("Edit group details", comment: "")
+    static let addWelcome = NSLocalizedString("Add welcome message", comment: "")
+    static let welcome = NSLocalizedString("Welcome message", comment: "")
+    static let preferences = NSLocalizedString("Group preferences", comment: "")
+    static let preferencesSaved = NSLocalizedString("Group preferences saved", comment: "")
+    static let preferencesFailed = NSLocalizedString("Saving failed, please try again later", comment: "")
+    static let createLink = NSLocalizedString("Create group link", comment: "")
+    static let groupLink = NSLocalizedString("Group link", comment: "")
+    static let linkAbsent = NSLocalizedString("Not created", comment: "")
+    static let linkPresent = NSLocalizedString("Created", comment: "")
 
     // 频道订阅门槛
-    static let sectionSubscription = "频道订阅"
-    static let memberFootnote = "订阅在频道里那条门槛卡片上完成：价格由频道主发布，本机没有定价权。"
-    static let publishThreshold = "发布订阅门槛"
-    static let subscriptionState = "订阅凭证"
-    static let subscriptionValidFormat = "有效至 %@"
+    static let sectionSubscription = NSLocalizedString("Channel subscription", comment: "")
+    static let memberFootnote = NSLocalizedString("Subscribing happens on the gate card in the channel: the channel owner publishes the price, this device has no say in it.", comment: "")
+    static let publishThreshold = NSLocalizedString("Publish subscription gate", comment: "")
+    static let subscriptionState = NSLocalizedString("Subscription ticket", comment: "")
+    static let subscriptionValidFormat = NSLocalizedString("Valid until %@", comment: "")
 
     // 消息
-    static let retentionFootnote = "设置消息在这台设备上自动删除的时间。"
-    static let receipts = "已读回执"
-    static let receiptsYes = "发送"
-    static let receiptsNo = "不发送"
-    static let receiptsDefault = "跟随默认"
-    static let receiptsDisabled = "成员较多，已关闭"
+    static let retentionFootnote = NSLocalizedString("Sets when messages are deleted automatically on this device.", comment: "")
+    static let receipts = NSLocalizedString("Read receipts", comment: "")
+    static let receiptsYes = NSLocalizedString("Send", comment: "")
+    static let receiptsNo = NSLocalizedString("Do not send", comment: "")
+    static let receiptsDefault = NSLocalizedString("Follow default", comment: "")
+    static let receiptsDisabled = NSLocalizedString("Turned off because this group has many members", comment: "")
 
     // 成员
-    static let inviteMembers = "邀请成员"
-    static let searchMembers = "搜索成员"
-    static let youPrefix = "你："
-    static let youStatus = "此设备"
+    static let inviteMembers = NSLocalizedString("Invite members", comment: "")
+    static let searchMembers = NSLocalizedString("Search members", comment: "")
+    static let youPrefix = NSLocalizedString("You:", comment: "")
+    static let youStatus = NSLocalizedString("This device", comment: "")
 
-    static let roleOwner = "群主"
-    static let roleAdmin = "管理员"
-    static let roleModerator = "协管员"
-    static let roleMember = "成员"
-    static let roleObserver = "只读"
-    static let roleAuthor = "作者"
-    static let roleRelay = "中继"
+    static let roleOwner = NSLocalizedString("Owner", comment: "")
+    static let roleAdmin = NSLocalizedString("Admin", comment: "")
+    static let roleModerator = NSLocalizedString("Moderator", comment: "")
+    static let roleMember = NSLocalizedString("Member", comment: "")
+    static let roleObserver = NSLocalizedString("Read-only", comment: "")
+    static let roleAuthor = NSLocalizedString("Author", comment: "")
+    static let roleRelay = NSLocalizedString("Relay", comment: "")
 
-    static let statusBlockedAdmin = "已被管理员屏蔽"
-    static let statusBlockedMe = "已对你屏蔽"
-    static let statusPending = "等待加入"
-    static let statusNotJoined = "尚未加入"
+    static let statusBlockedAdmin = NSLocalizedString("Blocked by an admin", comment: "")
+    static let statusBlockedMe = NSLocalizedString("Blocked for you", comment: "")
+    static let statusPending = NSLocalizedString("Waiting to join", comment: "")
+    static let statusNotJoined = NSLocalizedString("Not joined yet", comment: "")
 
     // 成员操作
-    static let blockMember = "屏蔽此人"
-    static let unblockMember = "取消屏蔽"
-    static let blockForAll = "对所有人屏蔽"
-    static let unblockForAll = "对所有人取消屏蔽"
-    static let removeMember = "移出群聊"
-    static let memberBlocked = "已屏蔽该成员"
-    static let memberUnblocked = "已取消屏蔽"
-    static let memberBlockedForAll = "已对所有人屏蔽该成员"
-    static let memberUnblockedForAll = "已对所有人取消屏蔽"
+    static let blockMember = NSLocalizedString("Block this member", comment: "")
+    static let unblockMember = NSLocalizedString("Unblock", comment: "")
+    static let blockForAll = NSLocalizedString("Block for everyone", comment: "")
+    static let unblockForAll = NSLocalizedString("Unblock for everyone", comment: "")
+    static let removeMember = NSLocalizedString("Remove from group", comment: "")
+    static let memberBlocked = NSLocalizedString("Member blocked", comment: "")
+    static let memberUnblocked = NSLocalizedString("Member unblocked", comment: "")
+    static let memberBlockedForAll = NSLocalizedString("Member blocked for everyone", comment: "")
+    static let memberUnblockedForAll = NSLocalizedString("Member unblocked for everyone", comment: "")
 
     // 移出确认
-    static let removeTitle = "移出成员？"
-    static let removeWithMessages = "移出并删除消息"
-    static let removeOnly = "仅移出"
-    static let removeMessageFormat = "%@ 将被移出群聊，此操作无法撤销。"
+    static let removeTitle = NSLocalizedString("Remove member?", comment: "")
+    static let removeWithMessages = NSLocalizedString("Remove and delete messages", comment: "")
+    static let removeOnly = NSLocalizedString("Remove only", comment: "")
+    static let removeMessageFormat = NSLocalizedString("%@ will be removed from this group; this cannot be undone.", comment: "")
 
     // 危险操作
-    static let clearChat = "清空对话"
-    static let leaveGroup = "退出群聊"
-    static let deleteGroup = "删除群聊"
-    static let dangerFootnote = "以下操作都会先让你确认一次。"
+    static let clearChat = NSLocalizedString("Clear conversation", comment: "")
+    static let leaveGroup = NSLocalizedString("Leave group", comment: "")
+    static let deleteGroup = NSLocalizedString("Delete group", comment: "")
+    static let dangerFootnote = NSLocalizedString("Every action below asks you to confirm once first.", comment: "")
 
-    static let deleteConfirmTitle = "删除群聊？"
-    static let deleteConfirmMessage = "群聊将为所有成员删除，此操作无法撤销。"
-    static let delete = "删除"
-    static let deleteFailed = "删除失败，请稍后再试"
+    static let deleteConfirmTitle = NSLocalizedString("Delete group?", comment: "")
+    static let deleteConfirmMessage = NSLocalizedString("The group is deleted for every member; this cannot be undone.", comment: "")
+    static let delete = NSLocalizedString("Delete", comment: "")
+    static let deleteFailed = NSLocalizedString("Delete failed, please try again later", comment: "")
 
-    static let clearConfirmTitle = "清空对话？"
-    static let clearConfirmMessage = "所有消息将从你这台设备删除，此操作无法撤销，且只影响你自己。"
-    static let clear = "清空"
+    static let clearConfirmTitle = NSLocalizedString("Clear conversation?", comment: "")
+    static let clearConfirmMessage = NSLocalizedString("All messages are deleted from this device; this cannot be undone and affects only you.", comment: "")
+    static let clear = NSLocalizedString("Clear", comment: "")
 
-    static let leaveConfirmTitle = "退出群聊？"
-    static let leaveConfirmMessage = "你将不再收到这个群的消息，聊天历史会保留。"
-    static let leave = "退出"
+    static let leaveConfirmTitle = NSLocalizedString("Leave group?", comment: "")
+    static let leaveConfirmMessage = NSLocalizedString("You will no longer receive this group's messages; the chat history is kept.", comment: "")
+    static let leave = NSLocalizedString("Leave", comment: "")
 
-    static let blockConfirmTitleFormat = "屏蔽 %@？"
-    static let unblockConfirmTitleFormat = "取消屏蔽 %@？"
-    static let blockConfirmMessage = "此人的新消息将被隐藏。"
-    static let unblockConfirmMessage = "此人的消息将重新显示。"
-    static let block = "屏蔽"
-    static let unblock = "取消屏蔽"
+    static let blockConfirmTitleFormat = NSLocalizedString("Block %@?", comment: "")
+    static let unblockConfirmTitleFormat = NSLocalizedString("Unblock %@?", comment: "")
+    static let blockConfirmMessage = NSLocalizedString("This person's new messages will be hidden.", comment: "")
+    static let unblockConfirmMessage = NSLocalizedString("This person's messages will be shown again.", comment: "")
+    static let block = NSLocalizedString("Block", comment: "")
+    static let unblock = NSLocalizedString("Unblock", comment: "")
 }
 
 // MARK: - Previews

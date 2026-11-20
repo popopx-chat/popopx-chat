@@ -499,52 +499,52 @@ extension PopopxProximityPhase {
 // MARK: - 文案与几何
 
 private enum PopopxProximityCopy {
-    static let title = "面对面加友"
-    static let subtitle = "靠近自动感应，或底部轻触连接"
-    static let close = "关闭"
-    static let nearbyPeer = "附近的人"
-    static let searching = "正在寻找附近的 POPOPX"
-    static let distanceFormat = "%1$@，距离约 %2$.2f 米"
-    static let coarseHint = "本机不支持精确测距：请保持在 1 米内，连上后会自动交换名片"
+    static let title = NSLocalizedString("Add a friend face to face", comment: "")
+    static let subtitle = NSLocalizedString("Get close and it senses the other phone automatically, or tap to link at the bottom", comment: "")
+    static let close = NSLocalizedString("Close", comment: "")
+    static let nearbyPeer = NSLocalizedString("Nearby person", comment: "")
+    static let searching = NSLocalizedString("Looking for a POPOPX nearby", comment: "")
+    static let distanceFormat = NSLocalizedString("%1$@, about %2$.2f m away", comment: "")
+    static let coarseHint = NSLocalizedString("This device has no precise ranging: stay within 1 metre and the cards exchange themselves once linked", comment: "")
     static let autoCloseDelay = Duration.seconds(1.4)
 
-    static let idle = "准备中"
-    static let starting = "正在开启近场"
-    static let linking = "已连上 %@"
-    static let exchanging = "正在交换加密名片"
-    static let paired = "已加为好友"
-    static let stopped = "近场已停止"
-    static let failed = "未能完成"
-    static let exchangeDone = "名片已交换"
+    static let idle = NSLocalizedString("Getting ready", comment: "")
+    static let starting = NSLocalizedString("Turning on the near field", comment: "")
+    static let linking = NSLocalizedString("Linked to %@", comment: "")
+    static let exchanging = NSLocalizedString("Exchanging encrypted cards", comment: "")
+    static let paired = NSLocalizedString("Added as a friend", comment: "")
+    static let stopped = NSLocalizedString("Near field stopped", comment: "")
+    static let failed = NSLocalizedString("Did not complete", comment: "")
+    static let exchangeDone = NSLocalizedString("Cards exchanged", comment: "")
 
-    static let roleSender = "由本机发出邀请"
-    static let roleReceiver = "本机静默接收，无需操作"
-    static let rangingPaused = "距离过远，测距已暂停"
+    static let roleSender = NSLocalizedString("This device sends the invitation", comment: "")
+    static let roleReceiver = NSLocalizedString("This device only receives it quietly, nothing to do", comment: "")
+    static let rangingPaused = NSLocalizedString("Too far apart, ranging paused", comment: "")
 
-    static let radioIdle = "蓝牙未被本页占用"
-    static let radioYielded = "蓝牙已让出给近场加友"
-    static let radioYieldUnconfirmed = "蓝牙让出未确认：若长时间无反应，请关闭本页重试"
+    static let radioIdle = NSLocalizedString("Bluetooth is not being used by this page", comment: "")
+    static let radioYielded = NSLocalizedString("Bluetooth handed over to face-to-face friend adding", comment: "")
+    static let radioYieldUnconfirmed = NSLocalizedString("Handing over Bluetooth is unconfirmed: if nothing happens for a while, close this page and try again", comment: "")
 
-    static let failureHeadline = "近场加友未完成"
-    static let retry = "重试"
-    static let tapDrop = "轻触密传"
-    static let tapDropBusy = "正在生成链接…"
-    static let tapDropErrorHeadline = "轻触密传未发出"
-    static let tapDropMintFailed = "未能生成连接链接，请检查网络后重试"
-    static let tapDropFootnote = "距离太远，或对方机型不支持近场时：用系统分享面板（隔空投送）把链接直接递给对方"
+    static let failureHeadline = NSLocalizedString("Face-to-face friend adding did not complete", comment: "")
+    static let retry = NSLocalizedString("Retry", comment: "")
+    static let tapDrop = NSLocalizedString("Tap-and-pass link", comment: "")
+    static let tapDropBusy = NSLocalizedString("Creating the link…", comment: "")
+    static let tapDropErrorHeadline = NSLocalizedString("The tap-and-pass link did not go out", comment: "")
+    static let tapDropMintFailed = NSLocalizedString("Could not create the link; check your network and try again", comment: "")
+    static let tapDropFootnote = NSLocalizedString("When you are too far apart, or the other device has no near field: hand the link over directly with the system share sheet (AirDrop)", comment: "")
 
-    static let fPermission = "缺少蓝牙权限：请到「设置 › 隐私与安全 › 蓝牙」开启后重试"
-    static func fDiscovery(_ reason: String) -> String { "近场发现不可用：\(reason)" }
-    static func fLink(_ reason: String) -> String { "近场链路未能建立：\(reason)" }
-    static let fRemoteClosed = "对方已退出近场"
-    static let fNobody = "没有找到其他开启近场的 POPOPX"
-    static let fExchangeTimeout = "名片交换超时，请重新靠近一次"
-    static func fFrame(_ byteCount: Int) -> String { "收到无法识别的数据（\(byteCount) 字节），已丢弃" }
-    static func fPayload(_ reason: String) -> String { "名片内容被拒绝：\(reason)" }
-    static func fMint(_ reason: String) -> String { "链接生成失败：\(reason)" }
-    static func fAccept(_ reason: String) -> String { "接受邀请失败：\(reason)" }
-    static let fDuplicate = "对方与本机是同一身份"
-    static let fLocalIdentity = "本机身份不可用，请先在设置里开启厢语"
+    static let fPermission = NSLocalizedString("Bluetooth permission is missing: turn it on in Settings › Privacy & Security › Bluetooth, then try again", comment: "")
+    static func fDiscovery(_ reason: String) -> String { String(format: NSLocalizedString("Nearby discovery is unavailable: %@", comment: ""), reason) }
+    static func fLink(_ reason: String) -> String { String(format: NSLocalizedString("The near-field link could not be established: %@", comment: ""), reason) }
+    static let fRemoteClosed = NSLocalizedString("The other side left the near field", comment: "")
+    static let fNobody = NSLocalizedString("No other POPOPX with the near field switched on was found", comment: "")
+    static let fExchangeTimeout = NSLocalizedString("The card exchange timed out, move close again", comment: "")
+    static func fFrame(_ byteCount: Int) -> String { String(format: NSLocalizedString("Received data it cannot recognise (%lld bytes), discarded", comment: ""), byteCount) }
+    static func fPayload(_ reason: String) -> String { String(format: NSLocalizedString("The card content was rejected: %@", comment: ""), reason) }
+    static func fMint(_ reason: String) -> String { String(format: NSLocalizedString("Link creation failed: %@", comment: ""), reason) }
+    static func fAccept(_ reason: String) -> String { String(format: NSLocalizedString("Accepting the invitation failed: %@", comment: ""), reason) }
+    static let fDuplicate = NSLocalizedString("The other device is the same identity as this one", comment: "")
+    static let fLocalIdentity = NSLocalizedString("This device has no usable identity; turn on Cabin in Settings first", comment: "")
 
     /// 环的半径比例（外 / 中 / 内），以及由外的。
     static let ringScales: [Double] = [1.0, 0.66, 0.33]
@@ -571,7 +571,7 @@ private struct PopopxProximityPreviewHost: View {
         if #available(iOS 17.0, *) {
             PopopxProximityAddContactView(nickname: nil)
         } else {
-            Text("需要 iOS 17 以上")
+            Text(NSLocalizedString("Requires iOS 17 or later", comment: ""))
                 .font(PopopxType.body)
                 .padding(PopopxMetrics.spaceXL)
         }

@@ -471,8 +471,8 @@ private extension PopopxCosmetic {
 
     var effectNote: String {
         switch self {
-        case .auroraShieldAvatarFrame: "本机头像渲染生效，不上传。"
-        case .darkGoldQRCardSkin: "本机二维码卡面配色，不上传。"
+        case .auroraShieldAvatarFrame: NSLocalizedString("Applied to this device's avatar rendering; nothing is uploaded.", comment: "cosmetic effect")
+        case .darkGoldQRCardSkin: NSLocalizedString("Applied to this device's QR card face; nothing is uploaded.", comment: "cosmetic effect")
         }
     }
 }
@@ -482,43 +482,43 @@ private extension PopopxCosmetic {
 private extension PopopxCreditsStoreView {
     enum Copy {
         static let title = PopopxCommerceCopy.creditsName
-        static func updated(_ date: String) -> String { "更新于 \(date)" }
-        static let reconcileBody = "这台设备上的流水与余额对不上。余额仍然按流水求和给出，但先不要大额兑换：等一次对账完成后再看。"
-        static let usesTitle = "算力点能花在哪"
-        static let usesFootnote = "价格全部取自代码里已有的那一处，这一页不另写一份。频道与资料卡的门槛由对方设定，所以这里不写数字。"
-        static let setByPeer = "由对方设定"
-        static let useBadgeTitle = "点亮徽章"
-        static let useBadgeNote = "30 天 / 365 天两档，与已有剩余时间取更晚到期。"
-        static let useVoucherTitle = "兑换礼品卡券"
-        static let useVoucherNote = "同一价格换算成一张可送出的券，可一次换多张。"
-        static let usePacketTitle = "发算力点红包"
-        static let usePacketNote = "只有固定面额，均分给领取的人；未领完的部分自动退回。"
-        static let useChannelTitle = "订阅频道"
-        static let useChannelNote = "每个频道自己定价，价格由频道主设定。"
-        static let useProfileTitle = "解锁加密资料卡"
-        static let useProfileNote = "门槛由号主在资料卡上设定，解锁后本机留收据。"
-        static let useWindowTitle = "绝密消息延长防窥窗口"
-        static let useWindowNote = "把默认查看窗口延长 1 小时，只影响本机渲染。"
-        static let owned = "已解锁 · 本机生效"
-        static let unlockTitle = "解锁这一档外观"
-        static func unlockConfirm(_ cosmetic: PopopxCosmetic) -> String { "花费 \(cosmetic.cost) 点" }
-        static let unlockCancel = "取消"
+        static func updated(_ date: String) -> String { String(format: NSLocalizedString("Updated at %@", comment: "credits wallet stamp"), date) }
+        static let reconcileBody = NSLocalizedString("The ledger and the balance on this device do not add up. The balance is still the sum of the ledger, but hold off on large exchanges until a reconciliation has run.", comment: "credits store")
+        static let usesTitle = NSLocalizedString("What Compute Credits can be spent on", comment: "credits store")
+        static let usesFootnote = NSLocalizedString("Every price comes from the one place the code already defines it, so this page keeps no second copy. Channel and profile-card thresholds are set by the other side, so no number is shown for them.", comment: "credits store")
+        static let setByPeer = NSLocalizedString("Set by the other side", comment: "credits store")
+        static let useBadgeTitle = NSLocalizedString("Light up a badge", comment: "credits store")
+        static let useBadgeNote = NSLocalizedString("Two tiers, 30 days and 365 days; whichever expires later wins over the time you already have.", comment: "credits store")
+        static let useVoucherTitle = NSLocalizedString("Exchange for a gift voucher", comment: "credits store")
+        static let useVoucherNote = NSLocalizedString("The same price turned into a voucher you can send away; exchange several at once if you want.", comment: "credits store")
+        static let usePacketTitle = NSLocalizedString("Send a Compute Credits red packet", comment: "credits store")
+        static let usePacketNote = NSLocalizedString("Fixed amounts only, split evenly between whoever claims them; anything unclaimed comes back on its own.", comment: "credits store")
+        static let useChannelTitle = NSLocalizedString("Subscribe to a channel", comment: "credits store")
+        static let useChannelNote = NSLocalizedString("Every channel is priced by its own owner.", comment: "credits store")
+        static let useProfileTitle = NSLocalizedString("Unlock an encrypted profile card", comment: "credits store")
+        static let useProfileNote = NSLocalizedString("The threshold is set by the owner on their profile card; the unlock keeps a receipt on this device.", comment: "credits store")
+        static let useWindowTitle = NSLocalizedString("Extend a top-secret message's viewing window", comment: "credits store")
+        static let useWindowNote = NSLocalizedString("Extends the default viewing window by 1 hour; changes only how this device renders it.", comment: "credits store")
+        static let owned = NSLocalizedString("Unlocked — active on this device", comment: "credits store")
+        static let unlockTitle = NSLocalizedString("Unlock this look", comment: "credits store")
+        static func unlockConfirm(_ cosmetic: PopopxCosmetic) -> String { String(format: NSLocalizedString("Spend %lld Compute Credits", comment: "credits store unlock button"), cosmetic.cost) }
+        static let unlockCancel = NSLocalizedString("Cancel", comment: "credits store")
         /// 价、余额、效果三句在同一行里说完，因为这是点下"花费"之前唯一一次说明机会。
         /// `effectNote` 取自下面那个私有扩展（"本机生效，不上传"），与列表里那句是同一句。
         static func unlockMessage(cosmetic: PopopxCosmetic, balance: Int) -> String {
-            "\(cosmetic.displayName)：\(cosmetic.effectNote) 当前余额 \(balance) 点，解锁一次性扣 \(cosmetic.cost) 点，不退。"
+            String(format: NSLocalizedString("%1$@: %2$@ Current balance %3$lld Compute Credits; unlocking costs %4$lld credits once, with no refund.", comment: "credits store unlock alert"), cosmetic.displayName, cosmetic.effectNote, balance, cosmetic.cost)
         }
-        static func unlockHint(_ cosmetic: PopopxCosmetic) -> String { "解锁这一档外观，\(cosmetic.cost) 算力点" }
-        static func unlockDone(_ cosmetic: PopopxCosmetic) -> String { "已解锁\(cosmetic.displayName)，本机生效。" }
-        static func unlockFailed(_ reason: String) -> String { "没有解锁：\(reason)" }
-        static let ledgerTitle = "流水"
-        static let ledgerFootnote = "最近 240 条；更早的记录会被丢弃，余额本身不丢。"
-        static let ledgerEmpty = "还没有任何一笔。"
-        static let pendingTitle = "没领完的红包"
-        static let pendingFootnote = "这部分点数仍记在你名下；过期未领的部分自动退回余额。"
-        static func pendingCount(_ n: Int) -> String { "\(n) 个红包" }
-        static let exchange = "用算力点点亮徽章"
-        static let close = "关闭"
+        static func unlockHint(_ cosmetic: PopopxCosmetic) -> String { String(format: NSLocalizedString("Unlock this look for %lld Compute Credits", comment: "credits store"), cosmetic.cost) }
+        static func unlockDone(_ cosmetic: PopopxCosmetic) -> String { String(format: NSLocalizedString("%@ is unlocked on this device.", comment: "credits store"), cosmetic.displayName) }
+        static func unlockFailed(_ reason: String) -> String { String(format: NSLocalizedString("Not unlocked: %@", comment: "credits store"), reason) }
+        static let ledgerTitle = NSLocalizedString("Ledger", comment: "credits store")
+        static let ledgerFootnote = NSLocalizedString("The 240 most recent entries; older ones are dropped, the balance itself is not.", comment: "credits store")
+        static let ledgerEmpty = NSLocalizedString("No entries yet.", comment: "credits store")
+        static let pendingTitle = NSLocalizedString("Red packets nobody finished claiming", comment: "credits store")
+        static let pendingFootnote = NSLocalizedString("These credits are still recorded in your name; whatever is unclaimed when a packet expires goes back to your balance.", comment: "credits store")
+        static func pendingCount(_ n: Int) -> String { String(format: NSLocalizedString("%lld red packets", comment: "credits store"), n) }
+        static let exchange = NSLocalizedString("Light up a badge with Compute Credits", comment: "credits store")
+        static let close = NSLocalizedString("Close", comment: "credits store")
     }
 }
 

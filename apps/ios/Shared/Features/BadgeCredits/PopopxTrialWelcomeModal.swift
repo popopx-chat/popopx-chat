@@ -201,27 +201,27 @@ struct PopopxTrialWelcomeModal: View {
 private extension PopopxTrialWelcomeModal {
     enum Copy {
         static let title = PopopxCommerceCopy.trialBadgeName
-        static let subtitle = "先跑三天：不建账号、不绑卡，也不需要任何付费。"
+        static let subtitle = NSLocalizedString("Run it for three days first: no account, no card, nothing to pay.", comment: "trial welcome modal")
 
-        static func heroNote(_ days: Int) -> String { "领取后顶栏会长出这枚胶囊，\(days) 天内它一直呼吸。" }
+        static func heroNote(_ days: Int) -> String { String(format: NSLocalizedString("Once claimed, this capsule grows in the top bar and keeps breathing for %lld days.", comment: "trial welcome modal"), days) }
 
-        static let benefitsTitle = "这三天里会怎样"
-        static let benefitStatusPanel = "徽章详情是一台只读本机的节点状态面板：档位、到期、对账摘要、本机计数。"
-        static let benefitRoute = "加密中继路由：中继节点看不到会话内容，只搬运密文。"
-        static func benefitFallback(_ days: Int) -> String { "第 \(days) 天到期后自动回到免费公共 SMP 节点，不会断线。" }
-        static let benefitKeepHistory = "联系人、历史消息、群组、频道一概不动。"
+        static let benefitsTitle = NSLocalizedString("What these three days look like", comment: "trial welcome modal")
+        static let benefitStatusPanel = NSLocalizedString("Badge details is a read-only node status panel on this device: tier, expiry, reconciliation summary, local counters.", comment: "trial welcome modal")
+        static let benefitRoute = NSLocalizedString("Encrypted relay routing: relay nodes never see the conversation, they only carry ciphertext.", comment: "trial welcome modal")
+        static func benefitFallback(_ days: Int) -> String { String(format: NSLocalizedString("When it expires on day %lld the badge falls back to the free public SMP relay automatically and the connection stays up.", comment: "trial welcome modal"), days) }
+        static let benefitKeepHistory = NSLocalizedString("Contacts, message history, groups and channels are all left untouched.", comment: "trial welcome modal")
 
-        static let boundaryTitle = "边界"
-        static let boundaryFootnote = "只说本层真能做到的那部分。"
-        static let boundaryDevice = "领取记录只存在本机 Keychain 的独立一格（仅本机可读、首次解锁后有效），不上传任何设备标识。"
-        static let boundaryNoAccount = "不需要账号，也不需要 Apple 付款。"
-        static let boundaryOneTime = "本机限领一次。"
+        static let boundaryTitle = NSLocalizedString("Boundaries", comment: "trial welcome modal")
+        static let boundaryFootnote = NSLocalizedString("Only what this layer really guarantees.", comment: "trial welcome modal")
+        static let boundaryDevice = NSLocalizedString("The claim is kept in its own Keychain item on this device (readable only here, valid after the first unlock). No device identifier is uploaded.", comment: "trial welcome modal")
+        static let boundaryNoAccount = NSLocalizedString("No account needed, and no Apple payment.", comment: "trial welcome modal")
+        static let boundaryOneTime = NSLocalizedString("One claim per device.", comment: "trial welcome modal")
 
-        static func claim(_ days: Int) -> String { "领取 \(days) 天体验徽章" }
-        static let openDetail = "看徽章详情"
-        static let close = "知道了"
-        static let toastClaimed = "体验徽章已点亮"
-        static let claimFailed = "本机没能记下这次领取，请稍后重试或检查设备存储空间。"
+        static func claim(_ days: Int) -> String { String(format: NSLocalizedString("Claim the %lld-day trial badge", comment: "trial welcome modal"), days) }
+        static let openDetail = NSLocalizedString("See badge details", comment: "trial welcome modal")
+        static let close = NSLocalizedString("Got it", comment: "trial welcome modal")
+        static let toastClaimed = NSLocalizedString("Trial badge lit", comment: "trial welcome modal")
+        static let claimFailed = NSLocalizedString("This device could not record the claim — try again later, or check the device's free storage.", comment: "trial welcome modal")
     }
 }
 

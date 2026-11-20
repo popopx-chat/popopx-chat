@@ -278,7 +278,7 @@ struct PopopxChannelSubscriptionSheet: View {
 
     private func gloss(_ error: PopopxBadgeCreditsError) -> String {
         switch error {
-        case let .insufficientCredits(balance, required): "还差 \(required - balance) 点。先去充值，充完再回这一页。"
+        case let .insufficientCredits(balance, required): String(format: NSLocalizedString("Short by %lld Compute Credits. Top up first, then come back to this page.", comment: ""), required - balance)
         case .keychainUnavailable: Copy.glossKeychain
         case .signalRejected: Copy.glossRejected
         default: error.errorDescription ?? Copy.glossGeneric
@@ -300,29 +300,29 @@ enum PopopxSubscriptionStage: Hashable {
 
 private extension PopopxChannelSubscriptionSheet {
     enum Copy {
-        static func subtitle(_ name: String) -> String { "为「\(name)」订阅一次，凭证写在本机，到期前随时可看。" }
-        static let freeTitle = "这个频道免费"
-        static let freeFootnote = "这一条卡片上写的门槛是 0。"
-        static let freeBody = "免费频道不需要点数，也不会留下任何流水——直接打开即可。"
-        static let priceTitle = "订阅门槛"
-        static let balanceTitle = "本机余额"
-        static let activeTitle = "已订阅"
-        static func activeFootnote(_ date: String) -> String { "凭证到 \(date) 到期，到期后这一页会重新要点数。" }
-        static func activeUntil(_ date: String) -> String { "有效期至 \(date)" }
-        static let subscribedHeadline = "凭证已签发"
-        static func subscribedUntil(_ date: String) -> String { "有效期到 \(date)。历史记录与已收到的消息都不会因为到期而消失。" }
-        static let boundariesTitle = "这几点先说清"
-        static let boundariesFootnote = "只说这一层真能做到的部分。"
-        static let boundaryOne = "凭证只存在这台设备的钥匙串里：没有服务端来核验它，也不需要。"
-        static let boundaryTwo = "订阅成功会向频道补一条静默核销回执：它不显示、不弹提示，也没有点数进到频道主账上。"
-        static let boundaryThree = "门槛守的是本机的准入，不改变频道本身能广播给谁。"
-        static func subscribe(_ value: Int) -> String { "订阅 · 扣 \(value) 点" }
-        static let topUp = "去充值"
-        static let close = "关闭"
-        static let refusedHeadline = "订阅没有成立"
-        static let glossKeychain = "本机安全存储取不到，点数没有动过。"
-        static let glossRejected = "这个门槛本机不接受（要么为 0，要么超出上限），点数没有动过。"
-        static let glossGeneric = "这次没有完成，点数没有被扣走。"
+        static func subtitle(_ name: String) -> String { String(format: NSLocalizedString("Subscribe once to %@. The ticket is written on this device and stays visible here until it expires.", comment: ""), name) }
+        static let freeTitle = NSLocalizedString("This channel is free", comment: "")
+        static let freeFootnote = NSLocalizedString("The threshold written on this card is 0.", comment: "")
+        static let freeBody = NSLocalizedString("A free channel needs no credits and leaves no ledger entries — just open it.", comment: "")
+        static let priceTitle = NSLocalizedString("Subscription threshold", comment: "")
+        static let balanceTitle = NSLocalizedString("Balance on this device", comment: "")
+        static let activeTitle = NSLocalizedString("Subscribed", comment: "")
+        static func activeFootnote(_ date: String) -> String { String(format: NSLocalizedString("The ticket expires on %@. After that, this page will ask for credits again.", comment: ""), date) }
+        static func activeUntil(_ date: String) -> String { String(format: NSLocalizedString("Valid until %@", comment: ""), date) }
+        static let subscribedHeadline = NSLocalizedString("Ticket issued", comment: "")
+        static func subscribedUntil(_ date: String) -> String { String(format: NSLocalizedString("Valid until %@. History and received messages never disappear when the ticket expires.", comment: ""), date) }
+        static let boundariesTitle = NSLocalizedString("What this screen promises, and what it does not", comment: "")
+        static let boundariesFootnote = NSLocalizedString("Only what this layer can actually deliver.", comment: "")
+        static let boundaryOne = NSLocalizedString("The ticket lives only in this device's Keychain: no server validates it, and none is needed.", comment: "")
+        static let boundaryTwo = NSLocalizedString("A successful subscription posts a silent redemption receipt into the channel: it is not displayed, prompts nothing, and no credits reach the channel owner's balance.", comment: "")
+        static let boundaryThree = NSLocalizedString("The threshold guards admission on this device only; it does not change who the channel itself can broadcast to.", comment: "")
+        static func subscribe(_ value: Int) -> String { String(format: NSLocalizedString("Subscribe · spend %lld Compute Credits", comment: ""), value) }
+        static let topUp = NSLocalizedString("Go to top up", comment: "")
+        static let close = NSLocalizedString("Close", comment: "")
+        static let refusedHeadline = NSLocalizedString("The subscription did not go through", comment: "")
+        static let glossKeychain = NSLocalizedString("The device's secure storage was unavailable; no credits moved.", comment: "")
+        static let glossRejected = NSLocalizedString("This device rejects that threshold (it is 0 or above the allowed maximum); no credits moved.", comment: "")
+        static let glossGeneric = NSLocalizedString("That did not complete; no credits were taken.", comment: "")
     }
 }
 
@@ -514,26 +514,26 @@ enum PopopxThresholdStage: Hashable {
 
 private extension PopopxChannelThresholdView {
     enum Copy {
-        static let publishTitle = "订阅门槛"
-        static let editorTitle = "成员订阅一次要多少算力点"
-        static func editorFootnote(_ name: String) -> String { "发布到「\(name)」，成员在那条卡片上点订阅才扣点。" }
-        static let field = "算力点"
-        static let fieldPrompt = "留空 = 免费，不发布"
+        static let publishTitle = NSLocalizedString("Subscription threshold", comment: "")
+        static let editorTitle = NSLocalizedString("How many Compute Credits a member pays to subscribe once", comment: "")
+        static func editorFootnote(_ name: String) -> String { String(format: NSLocalizedString("Publishing to %@. Credits are only spent when a member taps Subscribe on that card.", comment: ""), name) }
+        static let field = NSLocalizedString("Compute Credits", comment: "")
+        static let fieldPrompt = NSLocalizedString("Empty = free, nothing is published", comment: "")
         static func fieldNote(_ maximum: Int, _ days: Int) -> String {
-            "1 到 \(maximum) 之间的整数，一格 \(days) 天。留空或 0 表示免费：免费不必发卡片，也不会扣任何人的点。"
+            String(format: NSLocalizedString("A whole number from 1 to %1$lld, with one slot lasting %2$lld days. Empty or 0 means free: a free channel needs no card and charges nobody any credits.", comment: ""), maximum, days)
         }
-        static let publish = "发布门槛"
-        static let boundariesTitle = "这几点先说清"
-        static let boundariesFootnote = "只说这一层真能做到的部分。"
-        static let boundaryOne = "发布 = 往频道里发一条看得见的消息：价要让人看见，才谈得上知情。"
-        static let boundaryTwo = "改一次就发一条新卡片，旧的不会跟着变：成员点到哪一条，就按那一条的价扣点。"
-        static let boundaryThree = "成员订阅时频道里会多一条静默核销回执：它不显示，也不会给你转来任何点数。"
-        static let publishedTitle = "已发布"
-        static func publishedBody(_ price: Int) -> String { "门槛 \(price) 算力点 / 格已经发进频道。" }
-        static let publishedHint = "成员那侧点这条卡片才会扣点；这一步不产生你的任何花费。"
-        static let failedTitle = "没有发布成功"
-        static let undeliveredBody = "消息没送出去：门槛没有被改写，因为对端从没收到新价。可以再按一次。"
-        static let refusedBody = "本机签名密钥取不到，这张卡片没能签出来；点数没有动过。"
+        static let publish = NSLocalizedString("Publish the threshold", comment: "")
+        static let boundariesTitle = NSLocalizedString("What this screen promises, and what it does not", comment: "")
+        static let boundariesFootnote = NSLocalizedString("Only what this layer can actually deliver.", comment: "")
+        static let boundaryOne = NSLocalizedString("Publishing sends a visible message into the channel: the price has to be seen before anyone can agree to it.", comment: "")
+        static let boundaryTwo = NSLocalizedString("Every change publishes a new card and old cards never update: a member is charged the price on the card they tap.", comment: "")
+        static let boundaryThree = NSLocalizedString("When a member subscribes, a silent redemption receipt is posted into the channel: it is not displayed and transfers no credits to you.", comment: "")
+        static let publishedTitle = NSLocalizedString("Published", comment: "")
+        static func publishedBody(_ price: Int) -> String { String(format: NSLocalizedString("A threshold of %lld Compute Credits per slot has been published into the channel.", comment: ""), price) }
+        static let publishedHint = NSLocalizedString("Credits are only spent when a member taps this card; this step costs you nothing.", comment: "")
+        static let failedTitle = NSLocalizedString("The publication did not go through", comment: "")
+        static let undeliveredBody = NSLocalizedString("The message was not delivered, so the threshold was not rewritten — the peer never received the new price. You can press again.", comment: "")
+        static let refusedBody = NSLocalizedString("The device's signing key was unavailable, so this card could not be signed; no credits moved.", comment: "")
     }
 }
 

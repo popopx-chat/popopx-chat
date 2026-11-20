@@ -378,9 +378,9 @@ struct ProfileCardBubbleView: View {
     /// 跳数不进这一句：角标已经在气泡的下沿把它打出来了，这里只说承载方式。
     private var channelSpoken: String? {
         switch channel {
-        case .smp: return "在线加密送达"
-        case .mesh: return "厢语离线送达"
-        case .awaitingRelay: return "还在中继队列里"
+        case .smp: return NSLocalizedString("Delivered online over the encrypted route", comment: "card accessibility, delivery channel")
+        case .mesh: return NSLocalizedString("Delivered offline over the mesh", comment: "card accessibility, delivery channel")
+        case .awaitingRelay: return NSLocalizedString("Still waiting in the relay queue", comment: "card accessibility, delivery channel")
         case .none: return nil
         }
     }
@@ -554,35 +554,35 @@ private enum PopopxSurface {
 // MARK: - 文案
 
 private enum Copy {
-    static let untitled = "未命名主页"
-    static let loading = "正在读取本机状态…"
-    static let unlocated = "无法定位所属会话"
-    static let destroyed = "名片已焚毁，本机不留内容"
-    static let destroyedBadge = "已焚毁"
-    static let ephemeralBadge = "阅后即焚"
-    static let standardHint = "常驻个人主页 · 点击随时查阅"
-    static let modeEphemeral = "阅后即焚名片"
-    static let modeStandard = "常驻名片"
-    static let hintOpen = "轻触打开阅读"
-    static let hintOpenOutgoing = "轻触查看你发出的这一份"
+    static let untitled = NSLocalizedString("Untitled profile page", comment: "card title fallback")
+    static let loading = NSLocalizedString("Reading this device's state…", comment: "card placeholder line")
+    static let unlocated = NSLocalizedString("Cannot locate the chat this card belongs to", comment: "card state line")
+    static let destroyed = NSLocalizedString("This card was destroyed; nothing is kept on this device", comment: "card state line")
+    static let destroyedBadge = NSLocalizedString("Destroyed", comment: "card badge")
+    static let ephemeralBadge = NSLocalizedString("Burn after reading", comment: "card badge")
+    static let standardHint = NSLocalizedString("Permanent profile page · tap to read any time", comment: "card hint line")
+    static let modeEphemeral = NSLocalizedString("Burn-after-reading card", comment: "card accessibility mode")
+    static let modeStandard = NSLocalizedString("Permanent card", comment: "card accessibility mode")
+    static let hintOpen = NSLocalizedString("Tap to open and read", comment: "card accessibility hint")
+    static let hintOpenOutgoing = NSLocalizedString("Tap to view the copy you sent", comment: "card accessibility hint, outgoing")
 
     static func ephemeralUnopened(_ ttlText: String) -> String {
-        "阅后即焚 · 打开后限时 \(ttlText)"
+        String(format: NSLocalizedString("Burn after reading · open for %@", comment: "card state line"), ttlText)
     }
 
-    static func counting(_ seconds: Int) -> String { "本次阅读剩余 \(seconds) 秒" }
-    static func countingSpoken(_ seconds: Int) -> String { "计时中，剩余 \(seconds) 秒" }
+    static func counting(_ seconds: Int) -> String { String(format: NSLocalizedString("%lld seconds left for this read", comment: "card countdown"), seconds) }
+    static func countingSpoken(_ seconds: Int) -> String { String(format: NSLocalizedString("Counting down, %lld seconds left", comment: "card countdown, spoken"), seconds) }
 
     // 收费那一档。数字直接插进句子里，不套 `PopopxCommerceCopy.creditsAmountFormat`：那一句是给
     // 全语种目录里的钱话用的，这两句按本地化裁定留在文件内，两处各抄一遍迟早对不上。
-    static func price(_ value: Int) -> String { "查看需 \(value) 算力点" }
-    static let unlockTitle = "解锁这份个人主页"
-    static func unlockConfirm(_ value: Int) -> String { "花费 \(value) 点" }
-    static let unlockCancel = "取消"
+    static func price(_ value: Int) -> String { String(format: NSLocalizedString("Reading this costs %lld Compute Credits", comment: "card price line"), value) }
+    static let unlockTitle = NSLocalizedString("Unlock this profile page", comment: "unlock alert title")
+    static func unlockConfirm(_ value: Int) -> String { String(format: NSLocalizedString("Spend %lld Compute Credits", comment: "unlock alert button"), value) }
+    static let unlockCancel = NSLocalizedString("Cancel", comment: "unlock alert button")
     static func unlockMessage(price: Int, balance: Int) -> String {
-        "发送方给这一份设了 \(price) 点的门槛；你的余额是 \(balance) 点。解锁记录只写在这台设备的钥匙串里。"
+        String(format: NSLocalizedString("The sender set a gate of %1$lld Compute Credits on this copy; your balance is %2$lld Compute Credits. The unlock record is written only into this device's keychain.", comment: "unlock alert body"), price, balance)
     }
-    static func unlockFailed(_ reason: String) -> String { "没有解锁：\(reason)" }
+    static func unlockFailed(_ reason: String) -> String { String(format: NSLocalizedString("Not unlocked: %@", comment: "card refusal line"), reason) }
 }
 
 // MARK: - 预览

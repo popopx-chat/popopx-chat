@@ -100,9 +100,9 @@ struct PopopxPaywallSection: Identifiable, Hashable {
     /// （那三处是这一页既有文案，收口到 key 需要一并动 16 本目录，超出本轮范围）。
     var actionTitle: String {
         switch kind {
-        case .subscription: "点亮"
+        case .subscription: NSLocalizedString("Light up", comment: "")
         case .oneTimePass: PopopxCommerceCopy.passActionTitle
-        case .giftCard: "购买礼品券"
+        case .giftCard: NSLocalizedString("Buy gift voucher", comment: "")
         }
     }
 }
@@ -133,13 +133,13 @@ enum PopopxPaywallPlan {
                                    title: PopopxCommerceCopy.paywallAutoRenewGroupTitle,
                                    sections: [
                                        PopopxPaywallSection(kind: .subscription(.monthly),
-                                                            title: "按月点亮",
+                                                            title: NSLocalizedString("Light up monthly", comment: ""),
                                                             note: nil,
                                                             badge: nil,
                                                             sku: .subscriptionMonthly),
                                        PopopxPaywallSection(kind: .subscription(.annual),
-                                                            title: "按年点亮",
-                                                            note: "一年一档，中途到期前随时续",
+                                                            title: NSLocalizedString("Light up annually", comment: ""),
+                                                            note: NSLocalizedString("One annual tier; renew any time before it expires", comment: ""),
                                                             badge: nil,
                                                             sku: .subscriptionAnnual)
                                    ]),
@@ -157,13 +157,13 @@ enum PopopxPaywallPlan {
             [
                 PopopxPaywallGroup(id: "gift", title: nil, sections: [
                     PopopxPaywallSection(kind: .giftCard(.monthly),
-                                         title: "送 30 天徽章券",
-                                         note: "生成一张券，对方凭码兑换；兑之前它可以一直留着。",
+                                         title: NSLocalizedString("Send a 30-day badge voucher", comment: ""),
+                                         note: NSLocalizedString("A voucher is created; they redeem it with the code, and it stays valid until it is redeemed.", comment: ""),
                                          badge: nil,
                                          sku: .giftMonthly),
                     PopopxPaywallSection(kind: .giftCard(.annual),
-                                         title: "送 365 天徽章券",
-                                         note: "同一张券只能兑一次，兑换由对方设备本机确认。",
+                                         title: NSLocalizedString("Send a 365-day badge voucher", comment: ""),
+                                         note: NSLocalizedString("Each voucher can be redeemed once; the redemption is confirmed on their own device.", comment: ""),
                                          badge: nil,
                                          sku: .giftAnnual)
                 ])
@@ -684,33 +684,33 @@ struct PopopxBadgePaywallView: View {
 
 private extension PopopxBadgePaywallView {
     enum Copy {
-        static let working = "处理中…"
-        static let close = "关闭"
-        static let benefitsTitle = "点亮之后"
-        static let benefitBadge = "顶栏点亮这枚专属徽章：它只在徽章有效期内出现，到期自动收回。"
-        static let benefitStatusPanel = "徽章详情是本机的节点状态面板：档位、到期、对账摘要、本机计数，只读、不上传。"
-        static let benefitCards = "徽章可以做成二维码礼品卡点对点转赠；算力点红包发给好友，对方在本机拆开。"
-        static let benefitNoRead = "中继节点只搬运密文：它看不到会话内容，也拿不到联系人列表。"
-        static let benefitNoAccount = "没有账号、没有中心账本：徽章、券、算力点全部存在这台设备的 Keychain 里。"
+        static let working = NSLocalizedString("Working…", comment: "")
+        static let close = NSLocalizedString("Close", comment: "")
+        static let benefitsTitle = NSLocalizedString("After you light it up", comment: "")
+        static let benefitBadge = NSLocalizedString("The top bar shows this badge: it appears only while the badge is active and is withdrawn when it expires.", comment: "")
+        static let benefitStatusPanel = NSLocalizedString("Badge details is a local node status panel: tier, expiry, reconciliation summary, local counts. Read-only, never uploaded.", comment: "")
+        static let benefitCards = NSLocalizedString("A badge can be turned into a QR-code gift card and passed peer to peer; Compute Credits go to a friend as a red packet they open on their own device.", comment: "")
+        static let benefitNoRead = NSLocalizedString("Relay nodes only move ciphertext: they cannot see chat content and cannot get your contact list.", comment: "")
+        static let benefitNoAccount = NSLocalizedString("No account and no central ledger: badges, vouchers and Compute Credits all live in this device's Keychain.", comment: "")
         // 原来这里还有 `wallet = "算力点"` 与 `creditsTitle = creditsName` 两条，服务于充值卡；
         // 充值整组搬走之后它们没有读者了（`Copy` 里留一句没人读的中文常量就是下一轮漏翻的来源）。
-        static let storeUnavailable = "商店暂时读不到：卡片照旧显示为标价，恢复网络后可以购买。"
-        static let pending = "等待 Apple 确认这笔购买，完成后徽章会自动点亮。"
-        static let genericFailure = "这次没有完成。"
+        static let storeUnavailable = NSLocalizedString("The store cannot be read right now: cards still show their list prices, and buying works again once the network is back.", comment: "")
+        static let pending = NSLocalizedString("Apple is still confirming this purchase; the badge lights up automatically once it is approved.", comment: "")
+        static let genericFailure = NSLocalizedString("That did not complete.", comment: "")
         static func purchased(_ sku: PopopxNodeBadgeSku) -> String {
             switch sku.kind {
             case let .subscription(period):
-                "已购买 · 徽章点亮 \(period.days) 天"
+                String(format: NSLocalizedString("Purchased · badge lit for %lld days", comment: ""), period.days)
             case let .oneTimePass(period):
                 // 通行证到账那一句走本地化 key（新句子，不进上面那组中文常量）。
                 String(format: PopopxCommerceCopy.passGrantedFormat, period.days)
             case let .giftCard(period):
-                "礼品券已生成 · \(period.days) 天"
+                String(format: NSLocalizedString("Gift voucher created · %lld days", comment: ""), period.days)
             case let .credits(amount):
                 // 这一页已经没有充值档，所以这一支在当前版面下走不到；留着是因为 `switch`
                 // 必须对 `PopopxNodeBadgeSkuKind` 穷尽——真到账的那一句在算力点那一页
                 // （`PopopxCreditsStoreView.topUpCard`），它读的是本地化 key，不是这里。
-                "已到账 \(amount) 算力点"
+                String(format: PopopxCommerceCopy.creditsTopUpGrantedFormat, amount)
             }
         }
         #if DEBUG

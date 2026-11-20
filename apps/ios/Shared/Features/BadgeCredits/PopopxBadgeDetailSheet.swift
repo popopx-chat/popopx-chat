@@ -113,7 +113,7 @@ struct PopopxBadgeDetailSheet: View {
             VStack(spacing: PopopxMetrics.spaceXS) {
                 row(Copy.rotationCountRow, "\(record.rotationIndex)")
                 row(Copy.rotationEveryRow,
-                    "≥ \(Int(PopopxCommerceLimits.nodeRotationSeconds)) 秒")
+                    String(format: NSLocalizedString("≥ %lld s", comment: ""), Int(PopopxCommerceLimits.nodeRotationSeconds)))
             }
         }
     }
@@ -235,11 +235,11 @@ private extension PopopxBadgeSource {
     /// （上面四格是既有文案，收口到 key 要一并动 16 本目录，不在本轮范围）。
     var displayName: String {
         switch self {
-        case .pioneerTrial: "先锋节点体验徽章"
-        case .appleSubscription: "App Store 订阅"
+        case .pioneerTrial: NSLocalizedString("Pioneer Node Trial badge", comment: "")
+        case .appleSubscription: NSLocalizedString("App Store subscription", comment: "")
         case .storePass: PopopxCommerceCopy.passSourceName
-        case .creditsExchange: "算力点兑换"
-        case .giftedVoucher: "收到的礼品卡"
+        case .creditsExchange: NSLocalizedString("Compute Credits exchange", comment: "")
+        case .giftedVoucher: NSLocalizedString("Received gift card", comment: "")
         }
     }
 }
@@ -249,19 +249,19 @@ private extension PopopxBadgeSource {
 private extension PopopxBadgeDetailSheet {
     enum Copy {
         static let title = PopopxCommerceCopy.badgeProductName
-        static let dormantSubtitle = "当前使用免费公共 SMP 节点。"
+        static let dormantSubtitle = key("Currently using the free public SMP nodes.")
 
         static func stateTitle(_ state: PopopxBadgeCapsuleState) -> String {
             switch state {
-            case .trialPulsing: "体验中"
-            case .activeLit: "徽章已点亮"
-            case .dormant: "未点亮"
+            case .trialPulsing: key("On trial")
+            case .activeLit: key("Badge lit")
+            case .dormant: key("Not lit")
             }
         }
 
-        static let provenanceTitle = "本机记录"
-        static let sourceRow = "来源"
-        static let periodRow = "档位"
+        static let provenanceTitle = key("This device's record")
+        static let sourceRow = key("Source")
+        static let periodRow = key("Plan")
 
         /// 「档位」那一格的值。源文是英文原句、英文原句就是 Key（写法同 `PopopxBadgeCapsuleView.swift`
         /// 的 `PopopxBadgeCapsuleCopy`）：`en.lproj` 按约定不写，16 个译本目录各写各的。
@@ -281,36 +281,36 @@ private extension PopopxBadgeDetailSheet {
         private static func key(_ value: String) -> String {
             NSLocalizedString(value, comment: "POPOPX badge detail")
         }
-        static let issuedRow = "生效"
-        static let expiresRow = "到期"
-        static let digestRow = "对账摘要"
+        static let issuedRow = key("Issued")
+        static let expiresRow = key("Expires")
+        static let digestRow = key("Reconciliation digest")
 
-        static let rotationTitle = "节点状态面板"
-        static let rotationFootnote = "这一格只是本机计数：徽章点亮期间每固定间隔自增一次，没有任何中继节点因为它而改变。"
-        static let rotationCountRow = "本机计数"
-        static let rotationEveryRow = "间隔"
+        static let rotationTitle = key("Node status panel")
+        static let rotationFootnote = key("This row is only a count kept on this device: while the badge is lit it increases once per fixed interval, and no relay node changes because of it.")
+        static let rotationCountRow = key("Local count")
+        static let rotationEveryRow = key("Interval")
 
-        static let subscriptionTitle = "订阅"
+        static let subscriptionTitle = key("Subscription")
         static let subscriptionFootnote = PopopxCommerceCopy.renewalStatement
-        static let renewalRow = "续费状态"
-        static let autoRenewRow = "自动续费"
-        static let renewsAtRow = "下一次"
-        static let renewing = "自动续费中"
-        static let cancelledAtPeriodEnd = "已取消，本期末了后不再续费"
-        static let billingRetry = "扣款待重试"
-        static let ended = "已结束"
-        static let unknown = "暂时读不到"
-        static let yes = "开"
-        static let no = "关"
-        static let statusUnavailable = "这一次没能读到 Apple 的续费状态；下面的档位是按本机记录显示的。"
-        static let manageSubscriptions = "管理订阅"
+        static let renewalRow = key("Renewal state")
+        static let autoRenewRow = key("Auto-renew")
+        static let renewsAtRow = key("Next")
+        static let renewing = key("Auto-renewing")
+        static let cancelledAtPeriodEnd = key("Cancelled, no renewal after this period ends")
+        static let billingRetry = key("Payment awaiting a retry")
+        static let ended = key("Ended")
+        static let unknown = key("Not readable right now")
+        static let yes = key("On")
+        static let no = key("Off")
+        static let statusUnavailable = key("Apple's renewal status could not be read this time; the plan below is shown from this device's own record.")
+        static let manageSubscriptions = key("Manage subscriptions")
 
-        static let boundaryTitle = "这块徽章的边界"
-        static let boundaryLocal = "徽章、券、算力点都只存在本机；没有任何服务器可以查询或撤销它。"
-        static let boundaryFallback = "到期后自动回到免费公共 SMP 节点，联系人和历史消息都不动。"
-        static let boundaryNoProbe = "本页不做连通性测试：没有可问的服务器，所以也不摆一个装饰性的检测按钮。"
+        static let boundaryTitle = key("The boundaries of this badge")
+        static let boundaryLocal = key("Badges, vouchers and Compute Credits exist only on this device; no server can look them up or revoke them.")
+        static let boundaryFallback = key("When it expires the app drops back to the free public SMP nodes; contacts and message history stay untouched.")
+        static let boundaryNoProbe = key("This page runs no connectivity test: there is no server to ask, so there is no decorative check button either.")
 
-        static let close = "关闭"
+        static let close = key("Close")
     }
 }
 
@@ -337,9 +337,9 @@ enum PopopxCommerceFormat {
         let days = total / 86_400
         let hours = total % 86_400 / 3_600
         let minutes = total % 3_600 / 60
-        if days > 0 { return "\(days) 天 \(hours) 小时" }
-        if hours > 0 { return "\(hours) 小时 \(minutes) 分" }
-        return "\(minutes) 分"
+        if days > 0 { return String(format: NSLocalizedString("%1$d d %2$d h", comment: ""), days, hours) }
+        if hours > 0 { return String(format: NSLocalizedString("%1$d h %2$d min", comment: ""), hours, minutes) }
+        return String(format: NSLocalizedString("%d min", comment: ""), minutes)
     }
 }
 

@@ -103,9 +103,9 @@ enum PopopxSuspicion: String, CaseIterable, Hashable, Sendable {
 
     var label: String {
         switch self {
-        case .calm: "正常"
-        case .watching: "留意"
-        case .suspicious: "可疑"
+        case .calm: NSLocalizedString("Normal", comment: "")
+        case .watching: NSLocalizedString("Watchful", comment: "")
+        case .suspicious: NSLocalizedString("Suspicious", comment: "")
         }
     }
 

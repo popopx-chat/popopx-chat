@@ -248,39 +248,39 @@ struct PopopxCreditExchangeResult: Hashable {
 
 private extension PopopxBadgeCreditExchangeSheet {
     enum Copy {
-        static let title = "用算力点点亮徽章"
-        static let subtitle = "算力点花在这一页就变成开启中的加密中继路由。"
-        static let tiersTitle = "换哪一档"
-        static let stackFootnote = "已有剩余时间不会被抹掉：兑换后到期时间取两者中更晚的那个。"
+        static let title = NSLocalizedString("Light up a badge with Compute Credits", comment: "")
+        static let subtitle = NSLocalizedString("Compute Credits spent on this page turn into an active encrypted relay route.", comment: "")
+        static let tiersTitle = NSLocalizedString("Which tier to exchange for", comment: "")
+        static let stackFootnote = NSLocalizedString("Remaining time is never erased: after an exchange the expiry is the later of the two.", comment: "")
         static func tierTitle(period: PopopxNodeBadgePeriod) -> String {
-            "\(period.days) 天 · \(period.creditsCost) 点"
+            String(format: NSLocalizedString("%1$lld days · %2$lld Compute Credits", comment: ""), period.days, period.creditsCost)
         }
         static func tierNote(period: PopopxNodeBadgePeriod) -> String {
             switch period {
-            case .monthly: "按 30 天计，到期前随时可再兑。"
-            case .annual: "按 365 天计，同样与已有剩余合并。"
+            case .monthly: String(format: NSLocalizedString("Counted as %lld days; you can exchange again any time before expiry.", comment: ""), period.days)
+            case .annual: String(format: NSLocalizedString("Counted as %lld days; this also merges with any remaining time.", comment: ""), period.days)
             }
         }
-        static let currentTitle = "当前徽章"
-        static func currentFootnote(_ days: Int) -> String { "再兑这一档会加 \(days) 天，而不是从今天重算。" }
+        static let currentTitle = NSLocalizedString("Current badge", comment: "")
+        static func currentFootnote(_ days: Int) -> String { String(format: NSLocalizedString("Exchanging this tier again adds %lld days instead of restarting from today.", comment: ""), days) }
         static func exchange(period: PopopxNodeBadgePeriod, cost: Int) -> String {
-            "花 \(cost) 点 · 点亮 \(period.days) 天"
+            String(format: NSLocalizedString("Spend %1$lld Compute Credits · light up %2$lld days", comment: ""), cost, period.days)
         }
-        static func topUp(_ shortfall: Int) -> String { "还差 \(shortfall) 点 · 去充值" }
-        static let close = "关闭"
-        static func exchanged(_ period: PopopxNodeBadgePeriod) -> String { "已点亮 \(period.days) 天" }
+        static func topUp(_ shortfall: Int) -> String { String(format: NSLocalizedString("%lld Compute Credits short · go to top up", comment: ""), shortfall) }
+        static let close = NSLocalizedString("Close", comment: "")
+        static func exchanged(_ period: PopopxNodeBadgePeriod) -> String { String(format: NSLocalizedString("Lit up %lld days", comment: ""), period.days) }
         static func exchangedDetail(_ period: PopopxNodeBadgePeriod) -> String {
-            "点数已扣，徽章已写入本机 Keychain。"
+            NSLocalizedString("The credits were deducted and the badge was written to this device's Keychain.", comment: "")
         }
         static func reversedDetail(_ period: PopopxNodeBadgePeriod) -> String {
-            "这次兑换没有生效，\(period.creditsCost) 点原样退回，余额不变。"
+            String(format: NSLocalizedString("This exchange did not take effect; %lld Compute Credits were refunded exactly, and the balance is unchanged.", comment: ""), period.creditsCost)
         }
-        static let genericFailure = "这次没有完成。"
-        static let boundariesTitle = "这几点先说清"
-        static let boundariesFootnote = "兑换不经过 Apple，所以它比任何一句广告都要说得实。"
-        static let boundaryOne = "算力点只能在本 app 内花掉，不能转赠、不能提现、不能转到另一台设备。"
-        static let boundaryTwo = "点数一经兑换不再退还；点亮失败时代码会原额退回，本页不会自己扣第二次。"
-        static let boundaryThree = "徽章到期只回退到免费公共中继：联系人、会话记录、群组与频道全部保留。"
+        static let genericFailure = NSLocalizedString("That did not complete.", comment: "")
+        static let boundariesTitle = NSLocalizedString("What this screen promises, and what it does not", comment: "")
+        static let boundariesFootnote = NSLocalizedString("Exchanges do not go through Apple, so this page has to say things more plainly than any advertisement.", comment: "")
+        static let boundaryOne = NSLocalizedString("Compute Credits can only be spent inside this app — they cannot be gifted, cashed out or moved to another device.", comment: "")
+        static let boundaryTwo = NSLocalizedString("Credits are not refundable once exchanged; if lighting up fails, the code refunds the full amount, and this page never charges a second time on its own.", comment: "")
+        static let boundaryThree = NSLocalizedString("When a badge expires you only fall back to the free public relay: contacts, conversation history, groups and channels are all kept.", comment: "")
     }
 }
 

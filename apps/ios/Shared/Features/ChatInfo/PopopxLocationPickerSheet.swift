@@ -459,26 +459,26 @@ final class PopopxLocationPickerModel {
 // MARK: - 文案
 
 enum PopopxLocationPickerCopy {
-    static let title = "位置"
-    static let subtitle = "拖动画布微调，或直接搜索一个地点"
-    static let recenter = "回到当前位置"
-    static let search = "搜索地点"
-    static let searchPrompt = "街道、地标或商铺"
-    static let exact = "发送当前精确位置"
-    static let searching = "搜索中…"
-    static let empty = "没有匹配的地点。"
-    static let send = "发送位置"
-    static let pin = "已选位置"
-    static let deniedTitle = "没有位置权限"
-    static let openSettings = "打开系统设置"
+    static let title = NSLocalizedString("Location", comment: "")
+    static let subtitle = NSLocalizedString("Drag the map to fine-tune, or search a place directly", comment: "")
+    static let recenter = NSLocalizedString("Recenter on current location", comment: "")
+    static let search = NSLocalizedString("Search places", comment: "")
+    static let searchPrompt = NSLocalizedString("Street, landmark, or shop", comment: "")
+    static let exact = NSLocalizedString("Send current precise location", comment: "")
+    static let searching = NSLocalizedString("Searching…", comment: "")
+    static let empty = NSLocalizedString("No matching places.", comment: "")
+    static let send = NSLocalizedString("Send location", comment: "")
+    static let pin = NSLocalizedString("Selected location", comment: "")
+    static let deniedTitle = NSLocalizedString("No location permission", comment: "")
+    static let openSettings = NSLocalizedString("Open System Settings", comment: "")
 
-    static func accuracy(_ meters: Int) -> String { "精度 ±\(meters)m" }
+    static func accuracy(_ meters: Int) -> String { String(format: NSLocalizedString("Accuracy ±%lld m", comment: ""), meters) }
 
     static func hint(_ stage: PopopxLocationPickerModel.Stage) -> String? {
         switch stage {
-        case .locating: "正在获取当前位置…"
-        case .denied: "位置权限被拒绝，可在系统设置里打开。"
-        case .unavailable: "系统定位服务已关闭，打开后才能发送位置。"
+        case .locating: NSLocalizedString("Getting your current location…", comment: "")
+        case .denied: NSLocalizedString("Location access is denied. You can turn it on in System Settings.", comment: "")
+        case .unavailable: NSLocalizedString("Location services are off on this device. Turn them on to send a location.", comment: "")
         case .idle, .ready: nil
         }
     }

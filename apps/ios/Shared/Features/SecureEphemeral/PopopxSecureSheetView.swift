@@ -274,7 +274,7 @@ struct PopopxSecureSheetView: View {
                 Text(PopopxSecureCopy.duration(model.remainingSeconds))
                     .font(PopopxType.metric)
                     .foregroundStyle(remainingInk)
-                    .accessibilityLabel("剩余 \(model.remainingSeconds) 秒")
+                    .accessibilityLabel(Text(verbatim: String(format: NSLocalizedString("%lld seconds remaining", comment: ""), model.remainingSeconds)))
             }
             // `value:total:`（没有 `in:` 这个标签，`in:` 是 `Slider` 的写法）。
             ProgressView(value: Double(model.remainingSeconds), total: Double(max(1, model.totalSeconds)))
@@ -348,7 +348,7 @@ struct PopopxSecureSheetView: View {
             }
 
             PopopxToggleRow(
-                "防拍照抖动",
+                NSLocalizedString("Anti-rephoto vibration", comment: ""),
                 note: PopopxSecureCopy.antiPhotoNote,
                 systemImage: "camera.viewfinder",
                 tint: .brand,
@@ -391,7 +391,7 @@ struct PopopxSecureSheetView: View {
             }
 
             PopopxButton(
-                "关闭并销毁",
+                NSLocalizedString("Close and destroy", comment: ""),
                 systemImage: "lock.rectangle.stack",
                 role: .destructive,
                 fullWidth: true
@@ -429,7 +429,7 @@ private struct PopopxSecureMask: View {
                 .foregroundStyle(PopopxSecureSurface.inkSecondary)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
-            PopopxButton("好", systemImage: nil, role: .secondary, fullWidth: false) {
+            PopopxButton(NSLocalizedString("OK", comment: ""), systemImage: nil, role: .secondary, fullWidth: false) {
                 action()
             }
             .padding(.top, PopopxMetrics.space2XS)
@@ -558,24 +558,24 @@ struct PopopxSecureCardBubble: View {
     private var title: String {
         switch state {
         case .locked: return PopopxSecureCopy.cardTitle
-        case .damaged: return "绝密消息已损坏"
-        case .unlocated: return "绝密消息不可打开"
+        case .damaged: return NSLocalizedString("Top secret message is damaged", comment: "")
+        case .unlocated: return NSLocalizedString("Top secret message cannot be opened", comment: "")
         }
     }
 
     private var subtitle: String {
         switch state {
         case .locked: return PopopxSecureCopy.cardLockedHint + " · " + ttlText
-        case .damaged: return "密文或密钥不完整，无法解密"
-        case .unlocated: return "本机没有这条记录的出处，无法定位到消息"
+        case .damaged: return NSLocalizedString("The ciphertext or the key is incomplete, so it cannot be decrypted", comment: "")
+        case .unlocated: return NSLocalizedString("This device has no trace of where the record was stored, so the message cannot be located", comment: "")
         }
     }
 
     private var accessibilityText: String {
         switch state {
-        case .locked: return "绝密阅后即焚，\(ttlText)，轻触后需生物识别"
-        case .damaged: return "绝密消息已损坏，无法打开"
-        case .unlocated: return "绝密消息不可打开，本机定位不到这条记录"
+        case .locked: return String(format: NSLocalizedString("Top secret, burn after reading, %@, a tap needs biometric unlock", comment: ""), ttlText)
+        case .damaged: return NSLocalizedString("The top secret message is damaged and cannot be opened", comment: "")
+        case .unlocated: return NSLocalizedString("The top secret message cannot be opened; this device cannot locate the record", comment: "")
         }
     }
 
@@ -604,25 +604,25 @@ private extension PopopxSecureCopy {
     ///
     /// 用 `private extension` 而不是直接写字符串常量：`PopopxSecureCopy` 的其它成员在
     /// 载荷文件里，读代码的人在两处之间跳的时候，名字必须看起来是同一族。
-    static let accessibilityNote = "本条消息不向读屏（VoiceOver）提供正文。"
-    static let lockFootnote = "风险仍在。关闭会销毁这条消息。"
-    static let burntQuietly = "本机记录已删除。"
+    static let accessibilityNote = NSLocalizedString("This message does not give its text to the screen reader (VoiceOver).", comment: "")
+    static let lockFootnote = NSLocalizedString("The risk is still there. Closing destroys this message.", comment: "")
+    static let burntQuietly = NSLocalizedString("The record on this device was deleted.", comment: "")
     /// 唯一一句"这一条没做到"的话。它排在回执之前且互斥：既然记录没删成，
     /// 通知对方"已销毁"就是一句假话，所以这一档连回执的措辞都不给。
-    static let burntWithoutDeletion = "明文已从内存擦除，但本机没能定位到这条记录：未删除。"
+    static let burntWithoutDeletion = NSLocalizedString("The plaintext was erased from memory, but this device could not locate the record: it was not deleted.", comment: "")
     static func burntWithReceipt(count: Int) -> String {
-        count == 1 ? "本机记录已删除，并已通知对方。" : "本机记录已删除，已发出 \(count) 条通知。"
+        count == 1 ? NSLocalizedString("The record on this device was deleted and the other side was notified.", comment: "") : String(format: NSLocalizedString("The record on this device was deleted, with %lld notifications sent.", comment: ""), count)
     }
     /// 已焚相位的副标题：三种真实结果各说一种，不做乐观合并。
     static func burnFootnote(receipts: Int, deleted: Bool) -> String {
         guard deleted else { return burntWithoutDeletion }
         return receipts > 0 ? burntWithReceipt(count: receipts) : burntQuietly
     }
-    static let antiPhotoNote = "高频抖动可干扰卷帘快门翻拍，会增加功耗与发热。"
+    static let antiPhotoNote = NSLocalizedString("Rapid vibration interferes with rolling-shutter re-photography. It also increases power use and heat.", comment: "")
     /// 延长按钮的一行标签。时长走 `PopopxSecureCopy.duration`，所以将来把
     /// `PopopxCommerceLimits.extendedSecureWindowSeconds` 改成 1800，这里会自动变成"30 分钟"。
     static func extendWindowTitle(seconds: Int, cost: Int) -> String {
-        "延长 \(duration(seconds)) · \(cost) 算力点"
+        String(format: NSLocalizedString("Extend by %1$@ · %2$lld Compute Credits", comment: ""), duration(seconds), cost)
     }
 }
 

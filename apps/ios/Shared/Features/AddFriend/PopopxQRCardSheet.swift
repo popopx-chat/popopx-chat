@@ -263,15 +263,15 @@ private enum Pass {
 
 /// Every user-visible string on the card, Chinese, declared once.
 private enum Copy {
-    static let sheetTitle = "我的加密名片"
-    static let sheetSubtitle = "出示此码，对方扫码即可向你发起连接"
-    static let issuerOverline = "匿名身份"
-    static let close = "关闭"
-    static let share = "分享"
-    static let copy = "复制链接"
-    static let copiedToast = "已复制到剪贴板"
-    static let securityNote = "该链接仅用于建立一次性加密连接，任何人得到它都可以向你发起连接（不要公开传播）。"
-    static let qrAccessibilityLabel = "加密名片二维码"
+    static let sheetTitle = NSLocalizedString("My encrypted card", comment: "")
+    static let sheetSubtitle = NSLocalizedString("Show this code — once they scan it, they can start a connection with you", comment: "")
+    static let issuerOverline = NSLocalizedString("Anonymous identity", comment: "")
+    static let close = NSLocalizedString("Close", comment: "")
+    static let share = NSLocalizedString("Share", comment: "")
+    static let copy = NSLocalizedString("Copy link", comment: "")
+    static let copiedToast = NSLocalizedString("Copied to clipboard", comment: "")
+    static let securityNote = NSLocalizedString("This link only sets up a one-time encrypted connection — anyone who gets it can start a connection with you, so do not publish it.", comment: "")
+    static let qrAccessibilityLabel = NSLocalizedString("Encrypted card QR code", comment: "")
 }
 
 // MARK: - Preview

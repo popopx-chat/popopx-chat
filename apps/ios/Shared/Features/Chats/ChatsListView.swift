@@ -1900,10 +1900,10 @@ private enum Copy {
     static let searchOpen = key("Search")
     static let searchClear = key("Clear the search text")
     static let searchClose = key("Close search")
-    static let filterGroupLabel = "会话通道过滤"
-    static let filterAll = "全部"
-    static let filterOnline = "在线加密"
-    static let filterMeshOffline = "厢语离线"
+    static let filterGroupLabel = key("Chat channel filter")
+    static let filterAll = key("All")
+    static let filterOnline = key("Online encrypted")
+    static let filterMeshOffline = key("Cabin offline")
     /// 第四枚胶囊复用既有词条：`"Channels"` 在已有译文的 7 个目录（de/es/fr/hu/it/ru/zh-Hans，
     /// zh-Hans 里就是「频道」，:1324）里都已经在，其余目录与 en 一样回落原句本身（英文）。
     /// 而且它是本轮四枚里最短的正确说法（两个汉字，与「全部」同宽，见筛选条的宽度账）。
@@ -1930,55 +1930,55 @@ private enum Copy {
     /// 创建频道页的标题。`AddChannelView` 自己那一行按钮与旧菜单的标题都是这一句
     /// （`Shared/Views/NewChat/NewChatMenuButton.swift:99`），不再新造一句。
     static let createChannelTitle = key("Create public channel")
-    static let scanTitle = "扫一扫"
+    static let scanTitle = key("Scan QR code")
 
     // 徽章：图标词汇表固定下来的三个符号（§6），一行只出现一枚。
     static let smpSymbol = "lock.shield.fill"
     static let meshSymbol = "antenna.radiowaves.left.and.right"
     static let relaySymbol = "clock"
 
-    static let channelSmp = "SMP 在线加密"
-    static let awaitingRelay = "待中继"
-    static let unreachable = "未连通"
-    static let checking = "读取中"
+    static let channelSmp = key("Online encryption · SMP")
+    static let awaitingRelay = key("Awaiting relay")
+    static let unreachable = key("Unreachable")
+    static let checking = key("Loading…")
 
     static func hopsSuffix(_ hops: Int) -> String { "· \(hops)" }
     static func channelMesh(_ hops: Int) -> String {
-        hops == 0 ? "厢语离线，直连（0 跳）" : "厢语离线，\(hops) 跳"
+        hops == 0 ? key("Cabin offline, direct (0 hops)") : String(format: key("Cabin offline, %lld hops"), hops)
     }
     static func filterValue(_ count: Int, hopCap: Int, isMesh: Bool) -> String {
         isMesh
-            ? "\(count) 个已绑定会话，中继上限 \(hopCap) 跳"
-            : "\(count) 个会话"
+            ? String(format: key("%1$lld bound chats, relay limit %2$lld hops"), count, hopCap)
+            : String(format: key("%lld chats"), count)
     }
 
-    static func unreadCount(_ count: Int) -> String { "未读 \(count) 条" }
-    static let unreadDot = "有未读消息"
+    static func unreadCount(_ count: Int) -> String { String(format: key("%lld unread"), count) }
+    static let unreadDot = key("Has unread messages")
 
-    static let previewHidden = "已关闭消息预览"
-    static let noMessagesYet = "还没有消息"
-    static let noNotesYet = "还没有笔记"
-    static let deletedContent = "这条消息已撤回"
-    static let noTextContent = "（无文字内容）"
+    static let previewHidden = key("Message previews are off")
+    static let noMessagesYet = key("No messages yet")
+    static let noNotesYet = key("No notes yet")
+    static let deletedContent = key("This message was deleted")
+    static let noTextContent = key("(No text content)")
     static let monogramFallback = "？"
 
-    static let emptySearchTitle = "没有匹配的会话"
-    static let emptyNoneTitle = "还没有会话"
-    static let emptyFilteredTitle = "这一档里暂时没有会话"
+    static let emptySearchTitle = key("No matching chats")
+    static let emptyNoneTitle = key("No chats yet")
+    static let emptyFilteredTitle = key("No chats in this filter yet")
 
-    static func emptySearchDetail(_ query: String) -> String { "没有名字里带「\(query)」的会话。换个词，或切回「全部」。" }
-    static let emptyNoneDetail = "点右上角「+」添加朋友、发起群聊或扫一扫，第一条会话会出现在这里。"
-    static let emptyAllDetail = "会话都在回收中，稍后刷新。"
-    static let emptyOnlineDetail = "已就绪的 SMP 连接都会带靛紫锁徽章；未接通的联系只出现在「全部」。"
-    static let emptyMeshFuseOffDetail = "厢语离线组网已关闭。打开顶部的总开关后，已绑定蓝牙身份的联系人才会回到这一档。"
-    static let emptyMeshLoadingDetail = "正在读取本机保存的厢语身份绑定表。"
-    static let emptyMeshRadioOffDetail = "蓝牙当前不可用，已绑定的联系人会以「待中继」等待；射频恢复后自动给出跳数。"
-    static func emptyMeshDetail(_ hopCap: Int) -> String { "还没有绑定厢语蓝牙身份的联系人。面对面加友或扫一扫建连后，这里会出现最多 \(hopCap) 跳的离线会话。" }
+    static func emptySearchDetail(_ query: String) -> String { String(format: key("No chat is named %@. Try another word, or switch back to All."), query) }
+    static let emptyNoneDetail = key("Tap the plus button at the top right to add a friend, start a group, or scan a QR code; your first chat appears here.")
+    static let emptyAllDetail = key("All your chats are being recycled. Refresh in a moment.")
+    static let emptyOnlineDetail = key("Ready SMP connections carry the indigo lock badge; connections that are not up appear only under All.")
+    static let emptyMeshFuseOffDetail = key("Cabin offline mesh is switched off. Turn on the master switch at the top, and contacts bound to a Bluetooth identity come back to this filter.")
+    static let emptyMeshLoadingDetail = key("Reading the Cabin identity bindings saved on this device.")
+    static let emptyMeshRadioOffDetail = key("Bluetooth is unavailable right now, so bound contacts wait as awaiting relay; hop counts appear once the radio is back.")
+    static func emptyMeshDetail(_ hopCap: Int) -> String { String(format: key("No contacts are bound to a Cabin Bluetooth identity yet. After a face-to-face add or a QR scan, offline chats of up to %lld hops appear here."), hopCap) }
     static let emptyChannelDetail = key("No channels yet. Create a public channel with the plus button above, or join one from a link or a QR code.")
 
-    static let serviceStarting = "加密服务正在启动，稍候即可打开会话。"
-    static let serviceDisconnected = "加密服务已停止：可在「设置 → 聊天数据」启动，或直接重启应用；期间会话打不开。"
-    static let chatGone = "这条会话已被删除，或还没加载完成。"
+    static let serviceStarting = key("The encrypted service is starting; chats open in a moment.")
+    static let serviceDisconnected = key("The encrypted service has stopped. Start it in Settings → Chat data, or restart the app; chats cannot be opened until it runs.")
+    static let chatGone = key("This chat has been deleted, or it has not finished loading.")
 
     // 滑动快捷操作。这十七个 Key 全部沿用上游 `ChatListNavLink.swift` 的英文原句：
     // 它们已经在 16 个语种的目录里（zh-Hans 里分别是「已读 / 未读 / 最喜欢 / 取消最喜欢 / 清除 /
@@ -2008,9 +2008,9 @@ private enum Copy {
     static let swipeMoreTitle = key("Clear group?")
     static let swipeMoreDeleteTitle = key("Clear or delete group?")
 
-    static let unnamedIdentity = "未命名身份"
-    static func identitySwitched(_ name: String) -> String { "已切换到身份 \(name)" }
-    static let identitySwitchFailed = "身份切换失败，请重试"
+    static let unnamedIdentity = key("Unnamed identity")
+    static func identitySwitched(_ name: String) -> String { String(format: key("Switched to identity %@"), name) }
+    static let identitySwitchFailed = key("Switching identity failed. Try again.")
 }
 
 // MARK: - Previews

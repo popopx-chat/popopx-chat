@@ -465,7 +465,7 @@ struct ProfileQRCodeSheet: View {
         mintFailure = nil
         guard let minted = await PopopxInviteLink.mintOneTime(incognito: incognitoGroupDefault.get()) else {
             mintFailure = Copy.mintFailedNote
-            logger.error("POPOPX profile QR: 一次性连接链接铸不出来（apiAddContact 返回 nil）")
+            logger.error("POPOPX profile QR: the one-time connection link could not be created (apiAddContact returned nil)")
             PopopxHaptics.notice(.error)
             return
         }
@@ -547,41 +547,41 @@ private enum Pass {
 
 /// 卡上每一句中文只在这里出现一次（`PopopxQRCardSheet.swift:223-233` 那条 `private enum Copy` 规矩）。
 private enum Copy {
-    static let sheetTitle = "我的主页名片码"
-    static let sheetSubtitle = "出示此码，对方扫码与你建连后自动收到你的加密主页"
-    static let issuerOverline = "匿名身份"
+    static let sheetTitle = NSLocalizedString("My profile card code", comment: "")
+    static let sheetSubtitle = NSLocalizedString("Show this code: once they scan it and connect, they receive your encrypted profile automatically", comment: "")
+    static let issuerOverline = NSLocalizedString("Anonymous identity", comment: "")
 
-    static let qrAccessibilityLabel = "主页名片二维码"
-    static let qrNotReadyValue = "尚未生成"
-    static let badgeAccessibility = "本张码将分发的主页模式"
+    static let qrAccessibilityLabel = NSLocalizedString("Profile card QR code", comment: "")
+    static let qrNotReadyValue = NSLocalizedString("Not generated yet", comment: "")
+    static let badgeAccessibility = NSLocalizedString("The profile mode this code will distribute", comment: "")
 
-    static let minting = "正在铸一次性连接链接…"
-    static let retry = "重试"
-    static let mintFailedNote = "链接没铸出来：请检查网络后点重试。"
+    static let minting = NSLocalizedString("Creating the one-time connection link…", comment: "")
+    static let retry = NSLocalizedString("Retry", comment: "")
+    static let mintFailedNote = NSLocalizedString("The link was not created: check your network and tap Retry.", comment: "")
 
-    static let modeGroup = "这张码分发哪一档"
-    static let standardNote = "常驻名片：好友接收后不设销毁时间，可随时打开查看图文与视频。"
-    static let ephemeralNote = "打开后阅后即焚：有效期从好友点开那一下起计，到点后本机内容与原件一并销毁。"
-    static let noSavedProfileNote = "本机还没有保存过的主页。现在武装好也不会推送任何内容，先去「我 → 加密个人主页」做好并保存。"
+    static let modeGroup = NSLocalizedString("Which tier this code distributes", comment: "")
+    static let standardNote = NSLocalizedString("Standing card: no destruction time once your contact receives it, and the text, images and video stay openable at any time.", comment: "")
+    static let ephemeralNote = NSLocalizedString("Burn after reading: the window starts the moment your contact opens it, and at the deadline this device's copy and the original are destroyed together.", comment: "")
+    static let noSavedProfileNote = NSLocalizedString("No profile has been saved on this device yet. Arming it now would push nothing — build and save one under Me → Encrypted profile first.", comment: "")
 
-    static let armFootnote = "切换即武装：扫码建连之后由本机自动发出这一档，不需要你在聊天里再点一次。"
-    static let armIdle = "当前没有武装自动推送。"
-    static let armExpired = "武装已过期：切换一次模式或时长即可重新武装。"
-    static let armActiveStandardFormat = "已武装：扫码建连后自动推送「%@」，约 %d 分钟内有效"
-    static let armActiveEphemeralFormat = "已武装：扫码建连后自动推送「%@」，约 %d 分钟内有效，焚化时长 %@"
-    static let armToast = "已武装本张码：对方扫码建连后自动推送这一档"
-    static let cancelArmed = "取消自动推送"
-    static let cancelArmedToast = "已取消扫码自动推送"
+    static let armFootnote = NSLocalizedString("Switching arms it: after the scan connects, this device sends that tier on its own, with no extra tap in the chat.", comment: "")
+    static let armIdle = NSLocalizedString("No auto-push is armed right now.", comment: "")
+    static let armExpired = NSLocalizedString("The arming has expired: switch the mode or the duration once to arm it again.", comment: "")
+    static let armActiveStandardFormat = NSLocalizedString("Armed: after the scan connects, %1$@ is pushed automatically, valid for about %2$lld minutes", comment: "")
+    static let armActiveEphemeralFormat = NSLocalizedString("Armed: after the scan connects, %1$@ is pushed automatically, valid for about %2$lld minutes, burn-after-read time %3$@", comment: "")
+    static let armToast = NSLocalizedString("This code is armed: they get this tier automatically once the scan connects", comment: "")
+    static let cancelArmed = NSLocalizedString("Cancel auto-push", comment: "")
+    static let cancelArmedToast = NSLocalizedString("Scan auto-push cancelled", comment: "")
 
-    static let securityNote = "该链接仅用于建立一次性加密连接，任何人得到它都可以向你发起连接（不要公开传播）。二维码里不含主页内容，内容只在建连之后作为一条消息发出。"
+    static let securityNote = NSLocalizedString("This link only sets up a one-time encrypted connection — anyone who gets it can start a connection with you, so do not publish it. The QR code carries no profile content: the content goes out as a single message only after the connection exists.", comment: "")
 
-    static let close = "关闭"
-    static let share = "分享"
-    static let saveAlbum = "存相册"
-    static let regen = "换新码"
-    static let savedToast = "已存入相册（首次会请求写入权限）"
-    static let noLinkToast = "链接还没铸好，暂时分享不了。"
-    static let blankCardToast = "名片还没排好版，稍一下再存。"
+    static let close = NSLocalizedString("Close", comment: "")
+    static let share = NSLocalizedString("Share", comment: "")
+    static let saveAlbum = NSLocalizedString("Save to Photos", comment: "")
+    static let regen = NSLocalizedString("New code", comment: "")
+    static let savedToast = NSLocalizedString("Saved to Photos (the first time it asks for write access)", comment: "")
+    static let noLinkToast = NSLocalizedString("The link is not ready yet, so there is nothing to share.", comment: "")
+    static let blankCardToast = NSLocalizedString("The card is not laid out yet; wait a moment and save again.", comment: "")
 }
 
 // MARK: - Preview

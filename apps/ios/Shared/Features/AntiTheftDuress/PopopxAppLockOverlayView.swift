@@ -113,38 +113,38 @@ import UIKit
 /// 这里**不**插值 `PopopxDuressAuthManager.pinLength`：那是个 `@MainActor` 静态量，
 /// 从非隔离的全局初始化里读它是 Swift 6 的错。带位数的两句在面板的 `dotsLabel` 里现拼。
 private enum PopopxLockCopy {
-    static let headlineFallback = "已锁定"
+    static let headlineFallback = NSLocalizedString("Locked", comment: "")
     static let symbolFallback = "lock"
-    static let prompt = "输入解锁密码"
-    static let breathing = "正在解锁…"
-    static let wrong = "密码不对，请重新输入"
-    static let send = "确认"
-    static let keypad = "数字密码键盘"
-    static let delete = "删除最后一位"
-    static let biometric = "用面容或指纹解锁"
-    static let biometricReason = "解锁 POPOPX"
-    static let minimalPrompt = "本机还没有解锁密码"
-    static let minimalNote = "这台设备尚未设置解锁密码，先解锁，再到设置里开启。"
-    static let minimalUnlock = "解锁"
+    static let prompt = NSLocalizedString("Enter your unlock passcode", comment: "")
+    static let breathing = NSLocalizedString("Unlocking…", comment: "")
+    static let wrong = NSLocalizedString("Wrong passcode, please enter it again", comment: "")
+    static let send = NSLocalizedString("Confirm", comment: "")
+    static let keypad = NSLocalizedString("Numeric passcode keypad", comment: "")
+    static let delete = NSLocalizedString("Delete the last digit", comment: "")
+    static let biometric = NSLocalizedString("Unlock with Face ID or Touch ID", comment: "")
+    static let biometricReason = NSLocalizedString("Unlock POPOPX", comment: "")
+    static let minimalPrompt = NSLocalizedString("No unlock passcode is set on this device yet", comment: "")
+    static let minimalNote = NSLocalizedString("This device has no unlock passcode yet — unlock first, then turn it on under Settings.", comment: "")
+    static let minimalUnlock = NSLocalizedString("Unlock", comment: "")
 
     // 冷却层。`%@` 只吃 `PopopxLockoutSchedule.phrase(_:)` 那一种读法，别处不许另拼一套数字。
-    static let lockedOutPrompt = "已停用"
-    static let lockedOutFormat = "POPOPX 已停用，请 %@后再试"
-    static let lockedOutFootnote = "这段时间里键盘、面容与助记词那三样都不会被接受。"
+    static let lockedOutPrompt = NSLocalizedString("Disabled", comment: "")
+    static let lockedOutFormat = NSLocalizedString("POPOPX is disabled. Try again in %@.", comment: "")
+    static let lockedOutFootnote = NSLocalizedString("During this cooldown the keypad, Face ID and the mnemonic phrase are all refused.", comment: "")
     /// 读给 VoiceOver 的那一句**不含秒数**：理由见 `PopopxLockPanel.lockedOut`。
-    static let lockedOutVoiceOver = "POPOPX 已停用，正在冷却。键盘、面容与助记词都暂时不可用，倒计时结束后会自动恢复。"
+    static let lockedOutVoiceOver = NSLocalizedString("POPOPX is disabled and cooling down. The keypad, Face ID and the mnemonic phrase are temporarily unavailable and come back automatically when the countdown ends.", comment: "")
 
     // 助记词那一格。`mnemonicConsequence` 必须在**按下之前**就看得见：它说的是一次不可逆的删除。
-    static let mnemonicEntry = "忘记密码？使用 12 词助记词重置"
-    static let mnemonicPrompt = "使用 12 词助记词"
-    static let mnemonicPhraseField = "12 个助记词"
-    static let mnemonicPhrasePrompt = "按顺序输入，词之间用空格或换行都可以"
-    static let mnemonicNewPinField = "新的进入密码"
-    static let mnemonicConfirmField = "再输一遍新的进入密码"
-    static let mnemonicConsequence = "重置会同时把应急擦除密码清成「未设置」，之后那把码不再存在。"
-    static let mnemonicSubmit = "重置进入密码"
-    static let mnemonicCancel = "返回键盘"
-    static let mnemonicFailed = "重置没有完成，请稍后再试"
+    static let mnemonicEntry = NSLocalizedString("Forgot the passcode? Reset with the 12-word mnemonic phrase", comment: "")
+    static let mnemonicPrompt = NSLocalizedString("Use the 12-word mnemonic phrase", comment: "")
+    static let mnemonicPhraseField = NSLocalizedString("12 mnemonic words", comment: "")
+    static let mnemonicPhrasePrompt = NSLocalizedString("Type them in order; spaces or newlines between the words both work", comment: "")
+    static let mnemonicNewPinField = NSLocalizedString("New entry passcode", comment: "")
+    static let mnemonicConfirmField = NSLocalizedString("Re-enter the new entry passcode", comment: "")
+    static let mnemonicConsequence = NSLocalizedString("Resetting also clears the emergency wipe passcode to unset — after that, that code no longer exists.", comment: "")
+    static let mnemonicSubmit = NSLocalizedString("Reset the entry passcode", comment: "")
+    static let mnemonicCancel = NSLocalizedString("Back to the keypad", comment: "")
+    static let mnemonicFailed = NSLocalizedString("The reset did not complete; try again later", comment: "")
 }
 
 // MARK: - 尺寸与动效常量
@@ -853,9 +853,9 @@ private struct PopopxLockPanel: View {
             return PopopxLockCopy.breathing
         }
         if model.pin.count == total {
-            return "已输满 \(total) 位"
+            return String(format: NSLocalizedString("All %lld digits entered", comment: ""), total)
         }
-        return "已输入 \(model.pin.count) 位，共 \(total) 位"
+        return String(format: NSLocalizedString("%1$lld of %2$lld digits entered", comment: ""), model.pin.count, total)
     }
 
     /// 占位常显：提示出现/消失不许让下面的键盘跳一下。
@@ -1145,7 +1145,7 @@ private struct PopopxLockPanel: View {
     /// 位数提示现拼，不写死"6 位数字"：`PopopxDuressAuthManager.pinLength` 改了，
     /// 这一句要跟着改（文件头那条"两支必须逐字相同"的不变量在这里同样成立）。
     private var pinPrompt: String {
-        "需恰好 \(PopopxDuressAuthManager.pinLength) 位数字"
+        String(format: NSLocalizedString("Enter exactly %lld digits", comment: ""), PopopxDuressAuthManager.pinLength)
     }
 
     /// 数字格只留数字、只留 `pinLength` 位。过滤器是唯一防线而不是锦上添花：

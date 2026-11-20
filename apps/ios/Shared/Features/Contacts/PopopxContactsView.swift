@@ -1487,95 +1487,95 @@ private enum Copy {
     }
 
     static let createGroupEntry = key("Create an encrypted group")
-    static let pageTitle = "通讯录"
-    static let searchPrompt = "搜索联系人或群组"
-    static let done = "完成"
+    static let pageTitle = key("Contacts")
+    static let searchPrompt = key("Search contacts or groups")
+    static let done = key("Done")
 
-    static let newConnectionsTitle = "新的加密连接"
-    static let newConnectionsNoteEmpty = "暂无待确认的连接请求"
-    static func newConnectionsNote(_ count: Int) -> String { "\(count) 个请求等你确认" }
+    static let newConnectionsTitle = key("New encrypted connections")
+    static let newConnectionsNoteEmpty = key("No connection requests waiting for you")
+    static func newConnectionsNote(_ count: Int) -> String { fmt("%lld requests waiting for you", count) }
 
-    static let groupsTitle = "我的加密群组"
-    static let groupsNoteEmpty = "还没有加密群组"
-    static func groupsNote(_ count: Int) -> String { "\(count) 个加密群组" }
+    static let groupsTitle = key("My encrypted groups")
+    static let groupsNoteEmpty = key("No encrypted groups yet")
+    static func groupsNote(_ count: Int) -> String { fmt("%lld encrypted groups", count) }
 
-    static let identitiesTitle = "按匿名身份分组"
-    static let identitiesSubtitle = "切换本机匿名身份，或按连接身份筛选联系人"
-    static func identitiesValue(_ count: Int) -> String { "\(count) 个身份" }
+    static let identitiesTitle = key("Group by anonymous identity")
+    static let identitiesSubtitle = key("Switch the anonymous identity this device uses, or filter contacts by the identity a connection was made with")
+    static func identitiesValue(_ count: Int) -> String { fmt("%lld identities", count) }
 
-    static func badgeOnlineA11y(_ count: Int) -> String { "\(count) 个待确认的在线加密连接请求" }
-    static func badgeMeshA11y(_ count: Int) -> String { "\(count) 个待确认的厢语蓝牙配对" }
-    static func unreadA11y(_ count: Int) -> String { "\(count) 条未读" }
+    static func badgeOnlineA11y(_ count: Int) -> String { fmt("%lld online encrypted connection requests waiting for you", count) }
+    static func badgeMeshA11y(_ count: Int) -> String { fmt("%lld Bluetooth mesh pairings waiting for you", count) }
+    static func unreadA11y(_ count: Int) -> String { fmt("%d unread", count) }
     static let badgeSeparator = "，"
 
-    static let engineNotReadyNote = "加密会话尚未就绪，可先浏览列表，打开会话稍后重试"
-    static let engineNotReadyToast = "加密会话尚未就绪"
+    static let engineNotReadyNote = key("The encrypted session is not ready yet — browse the lists for now and open a chat again later")
+    static let engineNotReadyToast = key("The encrypted session is not ready yet")
 
-    static let groupingAll = "全部联系人"
-    static let groupingMain = "主身份直连"
-    static let groupingAnonymous = "匿名身份连接"
-    static func groupingActiveNote(_ label: String) -> String { "正在按「\(label)」分组" }
-    static let groupingClear = "清除"
-    static let groupingTitle = "按连接身份分组"
-    static let groupingFootnote = "口径来自会话自己的连接记录：以匿名身份建立的连接归入「匿名身份连接」"
-    static func groupingCount(_ count: Int) -> String { "\(count) 位" }
-    static let anonymousTag = "匿名身份"
+    static let groupingAll = key("All contacts")
+    static let groupingMain = key("Main identity connections")
+    static let groupingAnonymous = key("Anonymous identity connections")
+    static func groupingActiveNote(_ label: String) -> String { fmt("Grouped by %@", label) }
+    static let groupingClear = key("Clear")
+    static let groupingTitle = key("Group by connection identity")
+    static let groupingFootnote = key("Taken from each chat's own connection record: a connection made with an anonymous identity is listed under Anonymous identity connections")
+    static func groupingCount(_ count: Int) -> String { fmt("%lld contacts", count) }
+    static let anonymousTag = key("Anonymous identity")
 
-    static let indexMenuLabel = "按字母跳转"
-    static func indexJumpLabel(_ key: String) -> String { "跳到 \(key) 区" }
+    static let indexMenuLabel = key("Jump to a letter")
+    static func indexJumpLabel(_ key: String) -> String { fmt("Jump to %@", key) }
 
-    static let emptyTitle = "通讯录还是空的"
-    static let emptyNote = "在「添加朋友」里粘贴邀请链接、扫一扫或靠近对方，就能收到第一条加密连接。"
-    static let noMatchTitle = "没有找到匹配的人"
-    static let noMatchNote = "换个名字片段试试；群组与联系人一起被搜索。"
+    static let emptyTitle = key("Contacts are still empty")
+    static let emptyNote = key("Paste an invitation link, scan a code, or come close to the other person in Add friends to get your first encrypted connection.")
+    static let noMatchTitle = key("No matching people")
+    static let noMatchNote = key("Try a different part of a name; groups and contacts are searched together.")
 
     // 新的加密连接页
-    static let onlineSectionTitle = "在线加密连接请求"
-    static let onlineSectionFootnote = "接受后对方进入你的联系人；匿名接受会以另一个身份建立这条关系。"
-    static let onlineEmptyTitle = "没有待确认的请求"
-    static let onlineEmptyNote = "收到新的加密连接请求时，会出现在这里。"
-    static let requestNote = "想与你建立加密连接"
-    static let accept = "接受"
-    static let acceptIncognito = "匿名接受"
-    static let reject = "拒绝"
-    static let acceptedToast = "已接受，正在建立加密连接"
-    static let acceptedIncognitoToast = "已以匿名身份接受"
-    static let rejectedToast = "已拒绝这个连接请求"
+    static let onlineSectionTitle = key("Online encrypted connection requests")
+    static let onlineSectionFootnote = key("Accepting adds the other person to your contacts; accepting anonymously builds this connection under another identity.")
+    static let onlineEmptyTitle = key("No requests waiting for confirmation")
+    static let onlineEmptyNote = key("New encrypted connection requests appear here.")
+    static let requestNote = key("Wants to set up an encrypted connection with you")
+    static let accept = key("Accept")
+    static let acceptIncognito = key("Accept anonymously")
+    static let reject = key("Reject")
+    static let acceptedToast = key("Accepted — setting up the encrypted connection")
+    static let acceptedIncognitoToast = key("Accepted with an anonymous identity")
+    static let rejectedToast = key("Rejected this connection request")
 
-    static let meshSectionTitle = "厢语蓝牙待确认配对"
-    static let meshFootnoteManual = "确认之后这台设备的蓝牙密钥才会绑定到一个 POPOPX 联系人。"
-    static let meshFootnoteAuto = "配对策略是自动静默：近距离交换完成后会自动绑定，这里只列尚未落定的请求。"
-    static let meshFootnoteOff = "蓝牙组网开关已关闭，因此没有待确认的配对。"
-    static let meshFuseOffTitle = "厢语未开启"
-    static let meshFuseOffNote = "在设置里打开蓝牙组网后，附近设备的配对请求会出现在这里。"
-    static let meshEmptyTitle = "没有待确认的配对"
-    static let meshEmptyNote = "对方在同一空间里发出厢语配对请求后，会出现在这里。"
-    static func meshPeerTitle(_ key: String) -> String { "设备 \(key)…" }
-    static let meshReceivedA11y = "请求到达时间"
-    static let meshApprove = "确认绑定"
-    static let meshDecline = "拒绝"
-    static let meshApprovedToast = "已绑定这台设备的蓝牙密钥"
-    static let meshApproveFailedToast = "绑定失败，请让对方重新发起"
-    static let meshDeclinedToast = "已拒绝这次配对"
+    static let meshSectionTitle = key("Bluetooth mesh pairings waiting for confirmation")
+    static let meshFootnoteManual = key("Confirming is what binds this device's Bluetooth key to a POPOPX contact.")
+    static let meshFootnoteAuto = key("The pairing policy is silent: the nearby exchange binds on its own when it finishes, so only requests that have not settled are listed here.")
+    static let meshFootnoteOff = key("The Bluetooth mesh switch is off, so there are no pairings waiting for confirmation.")
+    static let meshFuseOffTitle = key("Bluetooth mesh is off")
+    static let meshFuseOffNote = key("Turn Bluetooth mesh on in Settings and pairing requests from nearby devices will appear here.")
+    static let meshEmptyTitle = key("No pairings waiting for confirmation")
+    static let meshEmptyNote = key("A mesh pairing request from a device in the same room appears here.")
+    static func meshPeerTitle(_ key: String) -> String { fmt("Device %@", key) }
+    static let meshReceivedA11y = key("Request received")
+    static let meshApprove = key("Confirm binding")
+    static let meshDecline = key("Decline")
+    static let meshApprovedToast = key("This device's Bluetooth key is now bound")
+    static let meshApproveFailedToast = key("Binding failed — ask the other device to send the request again")
+    static let meshDeclinedToast = key("Pairing declined")
 
-    static let pendingSectionTitle = "正在建立的连接"
-    static let pendingSectionFootnote = "这些连接还没有成为联系人，因此不进入通讯录列表，也不能点开。"
-    static let pendingEmptyTitle = "没有进行中的连接"
-    static let pendingEmptyNote = "发出或接受邀请链接后，进行中的连接会显示在这里。"
-    static let pendingUnnamedConnection = "未命名的连接"
-    static let pendingConnectionNote = "正在等待对方确认"
+    static let pendingSectionTitle = key("Connections being set up")
+    static let pendingSectionFootnote = key("These connections are not contacts yet, so they stay out of the contacts list and cannot be opened.")
+    static let pendingEmptyTitle = key("No connections in progress")
+    static let pendingEmptyNote = key("Connections in progress show up here after you send or accept an invitation link.")
+    static let pendingUnnamedConnection = key("Unnamed connection")
+    static let pendingConnectionNote = key("Waiting for the other side to confirm")
 
     // 群组页
-    static let groupsOwnedTitle = "我创建的群组"
-    static let groupsJoinedTitle = "我加入的群组"
-    static let groupsSectionFootnote = "频道与商家群不属于通讯录，只在各自的列表里出现。"
-    static func memberCount(_ count: Int64) -> String { "\(count) 位成员" }
-    static let groupsEmptyTitle = "还没有加密群组"
+    static let groupsOwnedTitle = key("Groups you created")
+    static let groupsJoinedTitle = key("Groups you joined")
+    static let groupsSectionFootnote = key("Channels and shop groups are not part of Contacts; they appear only in their own lists.")
+    static func memberCount(_ count: Int64) -> String { fmt("%lld members", count) }
+    static let groupsEmptyTitle = key("No encrypted groups yet")
     /// 这一句原来指路到「消息」栏右上角的 + ；这一页自己长出创建入口后那句话就成了假路，
     /// 所以随本轮改词，并借这次改词转成 Key（英文系统下原来会露出中文）。
     static let groupsEmptyNote = key("Start one with the plus button in the top right corner.")
-    static let groupsNoneTitle = "暂无"
-    static let groupsNoneNote = "这一类里还没有群组。"
+    static let groupsNoneTitle = key("None yet")
+    static let groupsNoneNote = key("No groups in this category yet.")
 
     // 频道页（本轮新增：置顶那一行 + 「我关注的频道」页 + 「加入频道」）
     static let channelsTitle = key("Subscribed channels")
@@ -1590,15 +1590,15 @@ private enum Copy {
     static let joinChannelPageTitle = key("Paste link / Scan")
 
     // 身份弹层
-    static let identityListTitle = "本机匿名身份"
-    static let identityHiddenNote = "带口令的隐藏身份不在这里列出，请在「我的」里用口令解锁后切换。"
-    static let identityEmptyTitle = "只有一个身份"
-    static let identityEmptyNote = "加密会话尚未就绪，身份列表会在就绪后出现。"
-    static let identityActiveNote = "正在使用"
-    static let identitySwitchNote = "点按切换到此身份"
-    static let identitySwitchingA11y = "正在切换身份"
-    static func identitySwitchedToast(_ name: String) -> String { "已切换到「\(name)」" }
-    static let identitySwitchFailedToast = "切换身份失败，请稍后重试"
+    static let identityListTitle = key("Anonymous identities on this device")
+    static let identityHiddenNote = key("Hidden identities that carry a password are not listed here; unlock them with the password on the Me tab, then switch.")
+    static let identityEmptyTitle = key("Only one identity")
+    static let identityEmptyNote = key("The encrypted session is not ready yet; the identity list appears once it is.")
+    static let identityActiveNote = key("In use")
+    static let identitySwitchNote = key("Tap to switch to this identity")
+    static let identitySwitchingA11y = key("Switching identity")
+    static func identitySwitchedToast(_ name: String) -> String { fmt("Switched to %@", name) }
+    static let identitySwitchFailedToast = key("Switching identity failed — try again later")
 }
 
 // MARK: - Preview

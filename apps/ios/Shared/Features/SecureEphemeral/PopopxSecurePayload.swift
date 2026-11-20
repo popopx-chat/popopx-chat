@@ -273,13 +273,13 @@ enum PopopxSecurityAlert: Hashable, Sendable {
     /// 界面/toast 上的短语。一句话说清"哪一类风险"，不声称抓到了谁、也不预测后果。
     var reasonText: String {
         switch self {
-        case .screenshotTaken: return "检测到截屏"
-        case .screenCaptured: return "检测到屏幕正在被录制或镜像"
-        case .leftForeground: return "绝密消息未读完即退出前台"
-        case .secondaryFaceDetected: return "检测到画面中出现第二个人"
-        case .primaryViewerLost: return "机主离开视角"
-        case .lensGlareDetected: return "检测到镜头反光热点"
-        case let .recordingDevice(object): return "检测到\(object.displayName)"
+        case .screenshotTaken: return NSLocalizedString("Screenshot detected", comment: "POPOPX top-secret alert")
+        case .screenCaptured: return NSLocalizedString("The screen is being recorded or mirrored", comment: "POPOPX top-secret alert")
+        case .leftForeground: return NSLocalizedString("The app left the foreground before the top-secret message was read", comment: "POPOPX top-secret alert")
+        case .secondaryFaceDetected: return NSLocalizedString("A second person appeared on screen", comment: "POPOPX top-secret alert")
+        case .primaryViewerLost: return NSLocalizedString("The device owner left the view", comment: "POPOPX top-secret alert")
+        case .lensGlareDetected: return NSLocalizedString("Lens glare detected", comment: "POPOPX top-secret alert")
+        case let .recordingDevice(object): return String(format: NSLocalizedString("Detected a %@", comment: "POPOPX top-secret alert"), object.displayName)
         }
     }
 
@@ -318,12 +318,12 @@ enum PopopxGuardObject: String, Hashable, Sendable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .cellPhone, .mobilePhone: return "手机"
-        case .camera: return "相机"
-        case .lens: return "镜头"
-        case .laptop: return "笔记本电脑"
-        case .television: return "屏幕"
-        case .remote: return "遥控器"
+        case .cellPhone, .mobilePhone: return NSLocalizedString("phone", comment: "POPOPX top-secret alert: object")
+        case .camera: return NSLocalizedString("camera", comment: "POPOPX top-secret alert: object")
+        case .lens: return NSLocalizedString("lens", comment: "POPOPX top-secret alert: object")
+        case .laptop: return NSLocalizedString("laptop", comment: "POPOPX top-secret alert: object")
+        case .television: return NSLocalizedString("screen", comment: "POPOPX top-secret alert: object")
+        case .remote: return NSLocalizedString("remote control", comment: "POPOPX top-secret alert: object")
         }
     }
 
@@ -380,11 +380,11 @@ enum PopopxSecureCopy {
     /// 免得两处各写一个 60 然后各自漂移。
     static let defaultTTLSeconds = 60
 
-    static let cardTitle = "绝密阅后即焚"
-    static let cardLockedHint = "轻触后通过生物识别查看"
-    static let cardDestroyed = "已销毁"
-    static let cardDamaged = "载荷已损坏，无法打开"
-    static let biometricReason = "查看绝密消息"
+    static let cardTitle = NSLocalizedString("Top-secret burn after reading", comment: "POPOPX top-secret card")
+    static let cardLockedHint = NSLocalizedString("Tap to view with biometric authentication", comment: "POPOPX top-secret card")
+    static let cardDestroyed = NSLocalizedString("Destroyed", comment: "POPOPX top-secret card")
+    static let cardDamaged = NSLocalizedString("The payload is damaged and cannot be opened", comment: "POPOPX top-secret card")
+    static let biometricReason = NSLocalizedString("View the top-secret message", comment: "POPOPX top-secret card")
 }
 
 /// 绝密时长档位。独立类型而不是复用 composer 那一档，理由见上面那条注释。

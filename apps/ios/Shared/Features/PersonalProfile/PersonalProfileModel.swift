@@ -98,8 +98,8 @@ enum PopopxProfileDelivery: String, Codable, Hashable, Sendable, CaseIterable {
     /// 这一层只给字。
     var badgeLabel: String {
         switch self {
-        case .fullMedia: return "在线全媒体"
-        case .meshTextOnly: return "厢语 · 离线纯文字"
+        case .fullMedia: return NSLocalizedString("Online, full media", comment: "")
+        case .meshTextOnly: return NSLocalizedString("Cabin · offline text only", comment: "")
         }
     }
 }
@@ -341,23 +341,23 @@ enum PopopxProfileError: Error, Hashable, Sendable {
     var reasonText: String {
         switch self {
         case let .unknownVersion(version):
-            return "这份主页的数据版本不认识（\(version)），需要更新 POPOPX 才能打开"
+            return String(format: NSLocalizedString("This profile's data version is not recognised (%@); POPOPX has to be updated before it can open", comment: ""), version)
         case let .invalidMode(mode):
-            return "这份主页的发送方式不认识（\(mode)）"
+            return String(format: NSLocalizedString("This profile's send mode is not recognised (%@)", comment: ""), mode)
         case let .invalidDelivery(delivery):
-            return "这份主页的送达方式不认识（\(delivery)）"
+            return String(format: NSLocalizedString("This profile's delivery mode is not recognised (%@)", comment: ""), delivery)
         case let .invalidTTL(ttl):
-            return "这份主页的阅后即焚时长不合法（\(ttl) 秒）"
+            return String(format: NSLocalizedString("This profile's burn-after-reading time is not valid (%lld seconds)", comment: ""), ttl)
         case .damagedBase64:
-            return "这份主页的内容编码已损坏，无法读取"
+            return NSLocalizedString("This profile's content encoding is damaged and cannot be read", comment: "")
         case .damagedJSON:
-            return "这份主页的内容结构已损坏，无法读取"
+            return NSLocalizedString("This profile's content structure is damaged and cannot be read", comment: "")
         case let .oversizedJSON(bytes):
-            return "这份主页内容太多（\(bytes) 字节，上限 \(PopopxProfilePayload.maximumJSONBytes) 字节），请删减文字或媒体"
+            return String(format: NSLocalizedString("This profile holds too much (%1$lld bytes, limit %2$lld): cut some text or media", comment: ""), bytes, PopopxProfilePayload.maximumJSONBytes)
         case let .oversizedTitle(characters):
-            return "标题太长（\(characters) 个字，上限 \(PopopxProfilePayload.maximumTitleCharacters) 个字）"
+            return String(format: NSLocalizedString("The title is too long (%1$lld characters, limit %2$lld)", comment: ""), characters, PopopxProfilePayload.maximumTitleCharacters)
         case let .tooManyBlocks(count):
-            return "内容块太多（\(count) 个，上限 \(PopopxProfilePayload.maximumBlocks) 个）"
+            return String(format: NSLocalizedString("Too many content blocks (%1$lld, limit %2$lld)", comment: ""), count, PopopxProfilePayload.maximumBlocks)
         }
     }
 }
@@ -474,9 +474,9 @@ struct PopopxProfilePayload: Hashable, Sendable {
     var ttlText: String {
         switch manifest.sendMode {
         case .standard:
-            return "不设销毁时间"
+            return NSLocalizedString("No destruction timer", comment: "")
         case .ephemeral:
-            return "\(PopopxSecureCopy.duration(manifest.ttlSeconds)) · 打开后起计"
+            return String(format: NSLocalizedString("%@ · counted from the first open", comment: ""), PopopxSecureCopy.duration(manifest.ttlSeconds))
         }
     }
 

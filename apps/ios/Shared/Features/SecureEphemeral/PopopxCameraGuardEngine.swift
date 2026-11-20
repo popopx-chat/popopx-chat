@@ -101,11 +101,11 @@ enum PopopxCameraGuardFailure: Error, Hashable, Sendable {
 
     var reasonText: String {
         switch self {
-        case .permissionNotDetermined: return "尚未授权摄像头"
-        case .permissionDenied: return "摄像头权限已关闭，请到系统设置开启"
-        case .noFrontCamera: return "这台设备没有前置摄像头"
-        case .sessionUnavailable: return "摄像头正被其它 App 使用"
-        case .notRequired: return "值守已按设置关闭"
+        case .permissionNotDetermined: return NSLocalizedString("The camera has not been authorised yet", comment: "")
+        case .permissionDenied: return NSLocalizedString("Camera access is switched off; turn it on in the system settings", comment: "")
+        case .noFrontCamera: return NSLocalizedString("This device has no front camera", comment: "")
+        case .sessionUnavailable: return NSLocalizedString("Another app is using the camera right now", comment: "")
+        case .notRequired: return NSLocalizedString("The guard is switched off in settings", comment: "")
         }
     }
 }
@@ -156,7 +156,7 @@ final class PopopxCameraGuardEngine {
     /// 而且第一条再也拿不到引用，`stopRunning` 无从调起）。
     @discardableResult
     func startMonitoring() -> PopopxCameraGuardFailure? {
-        precondition(Thread.isMainThread, "PopopxCameraGuardEngine.startMonitoring 只允许在主线程调用")
+        precondition(Thread.isMainThread, "PopopxCameraGuardEngine.startMonitoring may only be called on the main thread")
         guard !isMonitoring else { return nil }
         let snapshot = settings
         guard snapshot.requiresCameraAccess else { return .notRequired }
@@ -199,7 +199,7 @@ final class PopopxCameraGuardEngine {
 
     /// 停止值守并**确定性地**释放。顺序见文件头。
     func stopMonitoring() {
-        precondition(Thread.isMainThread, "PopopxCameraGuardEngine.stopMonitoring 只允许在主线程调用")
+        precondition(Thread.isMainThread, "PopopxCameraGuardEngine.stopMonitoring may only be called on the main thread")
         stateLock.lock()
         sessionActive = false
         let closing = session
@@ -264,13 +264,13 @@ final class PopopxGuardPipeline: NSObject, AVCaptureVideoDataOutputSampleBufferD
         self.glareDetector = settings.glareDetectionEnabled ? PopopxGlareDetector() : nil
 
         if !settings.objectDetectionEnabled {
-            startupNote = "目标检测已按设置关闭。"
+            startupNote = NSLocalizedString("Object detection is switched off in settings.", comment: "")
         } else if objectRequest == nil {
-            startupNote = "未找到 POPOPXAntiSpyDetector 模型，目标检测未启用，仅高光反射兜底在工作。"
+            startupNote = NSLocalizedString("The POPOPXAntiSpyDetector model was not found, so object detection is off and only the glare reflection fallback is working.", comment: "")
         } else if settings.glareDetectionEnabled {
             startupNote = nil
         } else {
-            startupNote = "高光反射兜底已按设置关闭。"
+            startupNote = NSLocalizedString("The glare reflection fallback is switched off in settings.", comment: "")
         }
         super.init()
     }
@@ -501,7 +501,7 @@ final class PopopxCameraGuardSession {
         #if DEBUG
         // 回收断言：会话被 ARC 放掉时流必须已经停了。还在跑 = 有人漏了 `stopMonitoring()`，
         // 真机上的表现是"绝密弹窗早关了，摄像头绿点还亮着"。
-        precondition(!captureSession.isRunning, "PopopxCameraGuardSession 释放时采集流仍在运行：stopMonitoring() 漏调")
+        precondition(!captureSession.isRunning, "PopopxCameraGuardSession is released while the capture stream is still running: stopMonitoring() was never called")
         #endif
         // deinit 里只做无需主线程保证的收尾；带 `precondition(Thread.isMainThread)` 的
         // `teardown()` 只能由 `stopMonitoring()` 调，ARC 落在哪个线程不由我们决定。

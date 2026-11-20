@@ -215,10 +215,10 @@ enum PopopxBubbleBody: Hashable {
         case let .location(payload): PopopxLocationCopy.spoken(payload)
         // 绝密这一句只说"这是一条要生物识别的绝密消息，时长多少"。它和卡片自己的
         // `accessibilityText` 同一族措辞：两处各说一套的话，读屏用户会得到两个不一致的事实。
-        case let .secure(payload): "绝密阅后即焚，\(payload.summaryText)，轻触后需生物识别查看"
+        case let .secure(payload): String(format: NSLocalizedString("Top-secret burn-after-reading message, %@, tap it and pass biometrics to view", comment: ""), payload.summaryText)
         // 措辞和卡片自己的 `accessibilityText` 同一族（:211 那条理由在两处都成立）：主页的图文正文
         // 不在气泡里，所以这里只说"这是一份什么样的主页"，不报块数、不报标题之外的任何东西。
-        case let .profile(payload): "加密个人主页，\(payload.manifest.title)，\(payload.isEphemeral ? "阅后即焚 · \(payload.ttlText)" : "常驻名片，可反复查看")"
+        case let .profile(payload): String(format: NSLocalizedString("Encrypted profile card, %1$@, %2$@", comment: ""), payload.manifest.title, payload.isEphemeral ? String(format: NSLocalizedString("Burn after reading · %@", comment: ""), payload.ttlText) : NSLocalizedString("Permanent card, view it as often as you like", comment: ""))
         // 措辞归卡片那一侧（`PopopxCommerceCards.swift`），这里只转发：同一枚红包，气泡要说的事
         // 和卡片上写的数必须来自同一处，否则改一处漏一处。
         case let .commerce(content): content.spokenText
@@ -907,32 +907,32 @@ enum PopopxBubbleCopy {
     static let meshSymbol = "antenna.radiowaves.left.and.right"
     static let relaySymbol = "clock"
 
-    static let channelSmp = "SMP 在线加密"
-    static let channelNone = "不经过任何通道"
-    static let awaitingRelayPlain = "待中继"
+    static let channelSmp = NSLocalizedString("SMP online encryption", comment: "")
+    static let channelNone = NSLocalizedString("No channel used", comment: "")
+    static let awaitingRelayPlain = NSLocalizedString("Awaiting relay", comment: "")
 
-    static let reasonNoNetwork = "待中继 · 无公网"
-    static let reasonPeerUnreachable = "待中继 · 邻居不在射程"
-    static let reasonSmpUnacknowledged = "待中继 · 公网未确认"
-    static let reasonMeshRefused = "待中继 · Mesh 拒收"
-    static let reasonAwaitingUpgrade = "待中继 · 等名片升级"
-    static let receiptInFlight = "发送中"
-    static let receiptDelivered = "已送达"
-    static let receiptRead = "已读"
-    static let receiptReceived = "未读"
-    static let receiptFailed = "投递失败"
+    static let reasonNoNetwork = NSLocalizedString("Awaiting relay · no internet", comment: "")
+    static let reasonPeerUnreachable = NSLocalizedString("Awaiting relay · the neighbour is out of reach", comment: "")
+    static let reasonSmpUnacknowledged = NSLocalizedString("Awaiting relay · not acknowledged over the internet", comment: "")
+    static let reasonMeshRefused = NSLocalizedString("Awaiting relay · the mesh refused it", comment: "")
+    static let reasonAwaitingUpgrade = NSLocalizedString("Awaiting relay · waiting for the card to upgrade", comment: "")
+    static let receiptInFlight = NSLocalizedString("Sending", comment: "")
+    static let receiptDelivered = NSLocalizedString("Delivered", comment: "")
+    static let receiptRead = NSLocalizedString("Read", comment: "")
+    static let receiptReceived = NSLocalizedString("Unread", comment: "")
+    static let receiptFailed = NSLocalizedString("Delivery failed", comment: "")
 
     static func channelMesh(_ hops: Int) -> String {
-        hops == 0 ? "厢语离线，直连（0 跳）" : "厢语离线，\(hops) 跳"
+        hops == 0 ? NSLocalizedString("Cabin offline, direct (0 hops)", comment: "") : String(format: NSLocalizedString("Cabin offline, %lld hops", comment: ""), hops)
     }
 
     /// 跳数徽章永远带数字（§1.4 第 3 条）；0 跳把"直连"一起写出来，同 PopopxCabinView.swift:2625。
-    static func hopsWords(_ hops: Int) -> String { hops == 0 ? "0 跳 · 直连" : "\(hops) 跳" }
+    static func hopsWords(_ hops: Int) -> String { hops == 0 ? NSLocalizedString("0 hops · direct", comment: "") : String(format: NSLocalizedString("%lld hops", comment: ""), hops) }
 
     static func awaitingRelay(_ reason: PopopxBubbleQueueReason) -> String { reason.words }
 
     static func reasonHopUnverifiable(_ hops: Int, _ cap: Int) -> String {
-        "待中继 · 跳数 \(hops) 超上限 \(cap)"
+        String(format: NSLocalizedString("Awaiting relay · %1$lld hops is over the limit of %2$lld", comment: ""), hops, cap)
     }
 }
 
@@ -1165,7 +1165,7 @@ enum PopopxLocationCopy {
     /// VoiceOver 说这一条气泡的一句话正文。**不含通道**——通道由
     /// `PopopxMessageBubble.spoken` 在前面拼好，这里重复一次就会念两遍。
     static func spoken(_ payload: PopopxLocationPayload) -> String {
-        var parts = ["位置"]
+        var parts = [NSLocalizedString("Location", comment: "")]
         if let name = payload.name { parts.append(name) }
         if let address = payload.address { parts.append(address) }
         parts.append(payload.coordinateString)
@@ -1173,11 +1173,11 @@ enum PopopxLocationCopy {
     }
 
     /// 卡片自己的动作提示。SwiftUI 会自己补"按钮"，所以这里只说点了会怎样。
-    static let hint = "打开位置菜单"
-    static let openNavigation = "在 Apple 地图中打开导航"
-    static let copyCoordinates = "复制经纬度坐标"
-    static let copied = "已复制经纬度坐标"
-    static let cancel = "取消"
+    static let hint = NSLocalizedString("Open the location menu", comment: "")
+    static let openNavigation = NSLocalizedString("Open navigation in Apple Maps", comment: "")
+    static let copyCoordinates = NSLocalizedString("Copy the coordinates", comment: "")
+    static let copied = NSLocalizedString("Coordinates copied", comment: "")
+    static let cancel = NSLocalizedString("Cancel", comment: "")
 }
 
 /// 一条位置消息的渲染。
@@ -1498,13 +1498,13 @@ private struct PopopxSecureBubbleMount: View {
             // 在场核验门（防盗模块二）：绝密卡片是"看一眼就销毁"的内容，正是旁人抢着
             // 按指纹要拿到的那一格。放行才开窗；被拦时这里**什么都不弹**——模块二已经把
             // 用户落到全屏遮罩上，再叠一条"操作已取消"反而是多出来的信号。
-            guard await PopopxBehaviorGuard.shared.authorized(reason: "查看绝密消息前请确认是本人操作") else { return }
+            guard await PopopxBehaviorGuard.shared.authorized(reason: NSLocalizedString("Confirm this is you before opening the top-secret message", comment: "")) else { return }
             if let failure = await PopopxSecureWindowManager.shared.present(payload: payload, target: target) {
                 if failure.marksCardDamaged { damaged = true }
                 // 走 `Text(verbatim:)`：`showAlertMsg` 的入参是 `LocalizedStringKey`
                 // （ContentView.swift:540），运行时字符串转不过去，也不该拿去查格式化表。
                 AlertManager.shared.showAlert(
-                    Alert(title: Text(verbatim: "打不开这条绝密消息"),
+                    Alert(title: Text(verbatim: NSLocalizedString("This top-secret message will not open", comment: "")),
                           message: Text(verbatim: failure.userText))
                 )
             }
@@ -1520,14 +1520,14 @@ private struct PopopxBubbleGallery: View {
     /// 预览用的绝密载荷：`make` 只在本机做一次 AES-GCM，不碰网络，所以它是自包含的模拟数据。
     /// 这里的 `try!` 成立是因为入参是写死的字面量——`make` 只在"空正文"和"超过 32 KiB"两档抛错。
     private static let previewPayload = try! PopopxSecurePayload.make(
-        plaintext: "预览用的绝密正文，它在列表里永远不会显示。",
+        plaintext: "Top-secret preview text. It never shows in the list.",
         ttlSeconds: 30
     )
 
     private static let rows: [PopopxBubbleItem] = [
         PopopxBubbleItem(
             messageKey: "1",
-            content: .text("周六上午十点老地方见，我把图纸一起带上。"),
+            content: .text("Saturday at ten, same place as always. I will bring the drawings."),
             tail: PopopxBubbleTail(side: .received),
             channel: .smp,
             timeText: "09:12",
@@ -1535,7 +1535,7 @@ private struct PopopxBubbleGallery: View {
         ),
         PopopxBubbleItem(
             messageKey: "2",
-            content: .text("好，到了给你发消息。"),
+            content: .text("Sure, I will message you when I get there."),
             tail: PopopxBubbleTail(side: .sent, tucked: true),
             channel: .mesh(hops: 3),
             timeText: "09:13",
@@ -1543,7 +1543,7 @@ private struct PopopxBubbleGallery: View {
         ),
         PopopxBubbleItem(
             messageKey: "3",
-            content: .text("图纸在附件里。"),
+            content: .text("The drawings are in the attachment."),
             tail: PopopxBubbleTail(side: .sent, tucked: false),
             channel: .awaitingRelay(reason: .peerUnreachable),
             timeText: "09:14"
@@ -1558,12 +1558,12 @@ private struct PopopxBubbleGallery: View {
         ),
         PopopxBubbleItem(
             messageKey: "5",
-            content: .event("对方开启了阅后即焚"),
+            content: .event("The other side switched on burn after reading"),
             channel: .none
         ),
         PopopxBubbleItem(
             messageKey: "6",
-            content: .withdrawn("这条消息已撤回"),
+            content: .withdrawn("This message was retracted"),
             tail: PopopxBubbleTail(side: .sent),
             channel: .none,
             timeText: "09:16"
@@ -1574,8 +1574,8 @@ private struct PopopxBubbleGallery: View {
                 PopopxLocationPayload(
                     latitude: 22.543096,
                     longitude: 114.057865,
-                    name: "深圳北站",
-                    address: "深圳市龙华区民治街道留仙大道"
+                    name: "Shenzhen North Station",
+                    address: "Liuxian Avenue, Minzhi Subdistrict, Longhua District, Shenzhen"
                 )
             ),
             tail: PopopxBubbleTail(side: .sent),

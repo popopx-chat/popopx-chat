@@ -1410,11 +1410,11 @@ struct ComposeView: View {
             // 各说各话（发出去的是位置，留在框里的还是草稿），所以沿用旧链路那个现成的门。
             if composeState.attachmentDisabled {
                 AlertManager.shared.showAlertMsg(
-                    title: "暂不能发送位置",
-                    message: "正在改写、转发、录制即时消息或已挂载附件时，不能插入位置消息。"
+                    title: "Cannot send a location right now",
+                    message: "A location message cannot be added while the draft is being rewritten, forwarded, recorded as a live message or already has an attachment."
                 )
             } else if !chat.chatInfo.sendMsgEnabled {
-                AlertManager.shared.showAlertMsg(title: "会话未就绪", message: "该会话当前不允许发送消息。")
+                AlertManager.shared.showAlertMsg(title: "Chat not ready", message: "This chat does not allow sending messages right now.")
             } else {
                 showLocationPicker = true
             }
@@ -1424,11 +1424,11 @@ struct ComposeView: View {
             // 但改写 / 转发 / live / 举报 / 已挂附件的草稿会让主页和草稿各说各话，照旧拦。
             if composeState.attachmentDisabled {
                 AlertManager.shared.showAlertMsg(
-                    title: "暂不能发送个人主页",
-                    message: "正在改写、转发、录制即时消息或已挂载附件时，不能另外发送一份个人主页。"
+                    title: "Cannot send your profile right now",
+                    message: "A separate profile card cannot be sent while the draft is being rewritten, forwarded, recorded as a live message or already has an attachment."
                 )
             } else if !chat.chatInfo.sendMsgEnabled {
-                AlertManager.shared.showAlertMsg(title: "会话未就绪", message: "该会话当前不允许发送消息。")
+                AlertManager.shared.showAlertMsg(title: "Chat not ready", message: "This chat does not allow sending messages right now.")
             } else {
                 showProfileSendSheet = true
             }
@@ -1438,11 +1438,11 @@ struct ComposeView: View {
             // 因为面板上那个复选框走的是另一条写入路径，挡不住它。
             if composeState.attachmentDisabled {
                 AlertManager.shared.showAlertMsg(
-                    title: "暂不能发送绝密消息",
-                    message: "正在改写、转发、录制即时消息或已挂载附件时，不能把这条草稿标成绝密。"
+                    title: "Cannot send a secure message right now",
+                    message: "This draft cannot be marked secure while it is being rewritten, forwarded, recorded as a live message or already has an attachment."
                 )
             } else if !chat.chatInfo.sendMsgEnabled {
-                AlertManager.shared.showAlertMsg(title: "会话未就绪", message: "该会话当前不允许发送消息。")
+                AlertManager.shared.showAlertMsg(title: "Chat not ready", message: "This chat does not allow sending messages right now.")
             } else {
                 PopopxHaptics.impact(.light)
                 popopxSecureTTLSeconds = popopxSecureTTLSeconds == nil
@@ -1530,20 +1530,20 @@ struct ComposeView: View {
         switch outcome {
         case let .sentFullMedia(indexSent, mediaQueued):
             if indexSent { chatModel.removeLiveDummy(animated: false) }
-            logger.notice("POPOPX profile: 本机手动发送走公网（媒体排队 \(mediaQueued, privacy: .public) 件）")
+            logger.notice("POPOPX profile: manual local send went over the public network (\(mediaQueued, privacy: .public) media items queued)")
         case let .sentMeshTextOnly(omitted):
-            logger.notice("POPOPX profile: 本机手动发送走厢语纯文字（省去 \(omitted, privacy: .public) 件媒体）")
+            logger.notice("POPOPX profile: manual local send went over the offline mesh as text only (\(omitted, privacy: .public) media items omitted)")
         case let .refused(refusal):
             PopopxHaptics.notice(.warning)
             AlertManager.shared.showAlertMsg(
-                title: "无法发送个人主页",
+                title: "Cannot send your profile",
                 // 插值而不是直传：`showAlertMsg` 收的是 `LocalizedStringKey`（ContentView.swift:540），
                 // 一句运行期才算出来的拒绝理由只能用插值落进去。
                 message: "\(refusal.explanation ?? refusal.description)"
             )
         case let .failed(reason):
             PopopxHaptics.notice(.error)
-            AlertManager.shared.showAlertMsg(title: "发送失败", message: "\(reason)")
+            AlertManager.shared.showAlertMsg(title: "Sending failed", message: "\(reason)")
         }
     }
 
@@ -1597,7 +1597,7 @@ struct ComposeView: View {
             return
         }
         guard chat.chatInfo.sendMsgEnabled else {
-            AlertManager.shared.showAlertMsg(title: "会话未就绪", message: "该会话当前不允许发送消息。")
+            AlertManager.shared.showAlertMsg(title: "Chat not ready", message: "This chat does not allow sending messages right now.")
             return
         }
         let payload: PopopxSecurePayload
@@ -1608,14 +1608,14 @@ struct ComposeView: View {
             // （ContentView.swift:540），运行时拼出来的 String 根本转不过去，而且里面带着字节数，
             // 当成格式化串去查本地化表是把话交给运气。
             AlertManager.shared.showAlert(
-                Alert(title: Text(verbatim: "绝密消息未发出"),
+                Alert(title: Text(NSLocalizedString("Secure message not sent", comment: "")),
                       message: Text(verbatim: Self.popopxSecureSendReason(error)))
             )
             return
         } catch {
             AlertManager.shared.showAlertMsg(
-                title: "绝密消息未发出",
-                message: "本机封装失败，这条内容一个字节都没离开这台设备。"
+                title: "Secure message not sent",
+                message: "Sealing failed on this device; not one byte of this content left it."
             )
             return
         }
@@ -1665,8 +1665,8 @@ struct ComposeView: View {
 
     private func popopxSecureBlocked() {
         AlertManager.shared.showAlertMsg(
-            title: "暂不能发送绝密消息",
-            message: "正在改写、转发、录制即时消息或已挂载附件时，不能把这条草稿标成绝密。"
+            title: "Cannot send a secure message right now",
+            message: "This draft cannot be marked secure while it is being rewritten, forwarded, recorded as a live message or already has an attachment."
         )
     }
 
@@ -1675,17 +1675,17 @@ struct ComposeView: View {
     private static func popopxSecureSendReason(_ error: PopopxSecureError) -> String {
         switch error {
         case .emptyPlaintext:
-            return "内容为空。"
+            return NSLocalizedString("The content is empty.", comment: "")
         case let .plaintextTooLong(bytes):
-            return "绝密消息最长 \(PopopxSecurePayload.maximumPlainBytes / 1024) KiB，当前 \(bytes) 字节。"
+            return String(format: NSLocalizedString("Secure messages are at most %1$lld KiB; this one is %2$lld bytes.", comment: ""), PopopxSecurePayload.maximumPlainBytes / 1024, bytes)
         case .sealingFailed:
-            return "本机封装失败，这条内容一个字节都没离开这台设备。"
+            return NSLocalizedString("Sealing failed on this device; not one byte of this content left it.", comment: "")
         case .unusablePlaintext, .wrongKeyLength, .wrongSealedLength, .decryptionFailed:
             // 这三条只在接收侧解得开时才可能出，发送侧到不了；写出来是为了让这个 switch 穷尽，
             // 也为了万一以后有人在这条路上调 `open()`，不会掉进 `default` 那句含糊话里。
-            return "载荷不可用，未发送。"
+            return NSLocalizedString("The payload was not usable, so nothing was sent.", comment: "")
         case .authenticationFailed, .biometricsUnavailable, .screenIsCaptured:
-            return "这台设备当前不允许打开绝密消息。"
+            return NSLocalizedString("This device does not allow opening secure messages right now.", comment: "")
         }
     }
 

@@ -514,52 +514,52 @@ private final class PopopxQRScannerCoordinator: NSObject, AVCaptureMetadataOutpu
 
 private extension PopopxVoucherRedeemSheet {
     enum Copy {
-        static let title = "兑换徽章券"
-        static let subtitle = "凭一串兑换码，在本机点亮对方送出的徽章。"
-        static let inputTitle = "兑换码"
-        static let inputFootnote = "以 PPX1- 开头的一长串。粘贴可以，逐字符手抄不行：大小写敏感，抄错一位就是「校验失败」。"
-        static let codeLabel = "兑换码"
+        static let title = NSLocalizedString("Redeem a badge voucher", comment: "")
+        static let subtitle = NSLocalizedString("With a redemption code, light up on this device the badge the other side gifted.", comment: "")
+        static let inputTitle = NSLocalizedString("Redemption code", comment: "")
+        static let inputFootnote = NSLocalizedString("A long string that starts with PPX1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails.", comment: "")
+        static let codeLabel = NSLocalizedString("Redemption code", comment: "")
         static let codePrompt = "PPX1-…"
-        static let paste = "粘贴"
-        static let scan = "扫一扫"
-        static let redeem = "兑换"
-        static let close = "关闭"
-        static let howTitle = "会发生什么"
-        static let howOne = "本机先用码里的签名验一次，再连上赠方那台设备发出兑换请求。"
-        static let howTwo = "对方确认这张券还没被兑过，签一份授权送回来。"
-        static let howThree = "授权验过之后徽章在本机点亮，这条一次性连接随即删除。"
-        static let boundariesTitle = "这几点先说清"
-        static let boundariesFootnote = "只说本层真能做到的部分。"
-        static let boundaryOne = "需要网络：兑换要和对方那一台设备来回两条消息。"
-        static let boundaryTwo = "一张券只能兑一次；兑过之后再提交会提示已被兑换。"
-        static let boundaryThree = "成功的那一下会自动点亮，即使这一页已经关掉。"
-        static let glossInitiated = "请求已经发出。等对方那台设备确认，这一页可以先关掉，回来后胶囊会自动亮。"
-        static func glossRedeemed(_ days: Int) -> String { "已点亮 \(days) 天，写进本机的徽章记录，与已有的剩余时间合并计算。" }
+        static let paste = NSLocalizedString("Paste", comment: "")
+        static let scan = NSLocalizedString("Scan", comment: "")
+        static let redeem = NSLocalizedString("Redeem", comment: "")
+        static let close = NSLocalizedString("Close", comment: "")
+        static let howTitle = NSLocalizedString("What happens", comment: "")
+        static let howOne = NSLocalizedString("This device first verifies the signature inside the code, then connects to the gifter's device and sends the redemption request.", comment: "")
+        static let howTwo = NSLocalizedString("The other side confirms the voucher has not been redeemed yet, then signs an authorization and sends it back.", comment: "")
+        static let howThree = NSLocalizedString("Once that authorization checks out, the badge lights up on this device and the one-time connection is deleted.", comment: "")
+        static let boundariesTitle = NSLocalizedString("What this screen promises, and what it does not", comment: "")
+        static let boundariesFootnote = NSLocalizedString("Only what this layer can actually deliver.", comment: "")
+        static let boundaryOne = NSLocalizedString("Network needed: redeeming exchanges two messages with the gifter's device.", comment: "")
+        static let boundaryTwo = NSLocalizedString("A voucher redeems once; submitting it again reports it as already redeemed.", comment: "")
+        static let boundaryThree = NSLocalizedString("On success the badge lights up automatically, even if this page has already been closed.", comment: "")
+        static let glossInitiated = NSLocalizedString("The request is on its way. Wait for the gifter's device to confirm — you can close this page, and the capsule lights up by itself once it lands.", comment: "")
+        static func glossRedeemed(_ days: Int) -> String { String(format: NSLocalizedString("Lit up %lld days, written into this device's badge record and merged with any remaining time.", comment: ""), days) }
         static func glossFailure(_ error: PopopxBadgeCreditsError) -> String {
             switch error {
-            case .codeMalformed: "这串码解不开：可能被截断、抄错，或不是本版本的码。"
-            case .signalRejected: "签名验不过：这串码不是发出来的那张券。"
-            case .connectionUnavailable: "连不上对方那台设备：链接可能已经过期，向对方要一张新的。"
-            case .voucherAlreadyRedeemed: "这张券已经被兑过了。"
-            default: "这次没有完成，可以稍后再试一次。"
+            case .codeMalformed: NSLocalizedString("This code cannot be decoded: it may be truncated, mistyped, or not from this version.", comment: "")
+            case .signalRejected: NSLocalizedString("The signature does not verify: this code is not the voucher that was issued.", comment: "")
+            case .connectionUnavailable: NSLocalizedString("Cannot reach the gifter's device: the link may have expired — ask the other side for a new voucher.", comment: "")
+            case .voucherAlreadyRedeemed: NSLocalizedString("This voucher has already been redeemed.", comment: "")
+            default: NSLocalizedString("That did not complete; you can try again later.", comment: "")
             }
         }
-        static let clipboardEmpty = "剪贴板里没有内容。"
-        static let clipboardNotCode = "剪贴板里这段话不像兑换码（要以 PPX1- 开头）。已经放进输入框，核对后可以再点兑换。"
+        static let clipboardEmpty = NSLocalizedString("The clipboard is empty.", comment: "")
+        static let clipboardNotCode = NSLocalizedString("The clipboard text does not look like a redemption code (it must start with PPX1-). It has been placed in the field — check it, then tap Redeem again.", comment: "")
     }
 }
 
 private enum ScannerCopy {
-    static let scan = "扫一扫"
-    static let subtitle = "把兑换码的二维码放进取景框。"
-    static let close = "关闭"
-    static let cameraStarting = "正在请求相机权限…"
-    static let cameraDenied = "相机权限已关闭，请到系统设置里打开。"
-    static let cameraRestricted = "这台设备的相机不可用。"
-    static let cameraUnknown = "暂时读不到相机状态。"
-    static let openSettings = "打开系统设置"
-    static let scanFailedFormat = "扫码没成功：%@。可以改用粘贴。"
-    static let cameraUnavailable = "取景会话起不来（相机被占用或没有后置摄像头）"
+    static let scan = NSLocalizedString("Scan", comment: "")
+    static let subtitle = NSLocalizedString("Put the redemption code's QR code inside the viewfinder.", comment: "")
+    static let close = NSLocalizedString("Close", comment: "")
+    static let cameraStarting = NSLocalizedString("Requesting camera access…", comment: "")
+    static let cameraDenied = NSLocalizedString("Camera access is turned off; enable it in the system settings", comment: "")
+    static let cameraRestricted = NSLocalizedString("The camera is not available on this device.", comment: "")
+    static let cameraUnknown = NSLocalizedString("The camera status cannot be read right now.", comment: "")
+    static let openSettings = NSLocalizedString("Open System Settings", comment: "")
+    static let scanFailedFormat = NSLocalizedString("Scan failed: %@. You can paste the code instead.", comment: "")
+    static let cameraUnavailable = NSLocalizedString("The capture session cannot start (the camera is busy or there is no rear camera)", comment: "")
 }
 
 // MARK: - Previews

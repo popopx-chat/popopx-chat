@@ -96,11 +96,11 @@ public enum PopopxPathBlockage: String, Hashable, Sendable {
     public var displayText: String? {
         switch self {
         case .none: nil
-        case .notAvailable: "网络不可用"
-        case .cellularDenied: "蜂窝网络权限被拒绝"
-        case .wifiDenied: "Wi-Fi 权限被拒绝"
-        case .localNetworkDenied: "本地网络权限被拒绝"
-        case .vpnInactive: "加密通道未就绪"
+        case .notAvailable: NSLocalizedString("No network connection", comment: "")
+        case .cellularDenied: NSLocalizedString("Cellular data access has been denied", comment: "")
+        case .wifiDenied: NSLocalizedString("Wi-Fi access has been denied", comment: "")
+        case .localNetworkDenied: NSLocalizedString("Local network access has been denied", comment: "")
+        case .vpnInactive: NSLocalizedString("The encrypted tunnel is not ready", comment: "")
         }
     }
 }
@@ -172,16 +172,16 @@ public struct PopopxNetworkPath: Hashable, Sendable {
     public var displayText: String {
         if isConnected {
             switch interface {
-            case .cellular: return "公网可用（蜂窝网络）"
-            case .wifi: return "公网可用（Wi-Fi）"
-            case .wiredEthernet: return "公网可用（有线网络）"
-            case .loopback: return "公网可用（本地回环）"
-            case .other: return "公网可用"
-            case .none: return "公网可用（接口未知）"
+            case .cellular: return NSLocalizedString("Internet available (cellular)", comment: "")
+            case .wifi: return NSLocalizedString("Internet available (Wi-Fi)", comment: "")
+            case .wiredEthernet: return NSLocalizedString("Internet available (wired network)", comment: "")
+            case .loopback: return NSLocalizedString("Internet available (loopback)", comment: "")
+            case .other: return NSLocalizedString("Internet available", comment: "")
+            case .none: return NSLocalizedString("Internet available (interface unknown)", comment: "")
             }
         }
         if let blockage = blockage.displayText { return blockage }
-        return "公网不可用"
+        return NSLocalizedString("Internet unavailable", comment: "")
     }
 }
 

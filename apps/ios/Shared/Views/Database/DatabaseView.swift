@@ -466,7 +466,7 @@ struct DatabaseView: View {
         // 它交出去的是完整的本机聊天库文件。门放在函数最外层而不是按钮上，是因为这条
         // 路径还有第二个出口（导出部分失败时 alert 里那个"Continue"，:302），
         // 拦在函数里两个都盖住；`authorized` 在不怀疑时立刻返回 true，日常零打扰。
-        guard await PopopxBehaviorGuard.shared.authorized(reason: "导出聊天数据库前请确认是本人操作") else {
+        guard await PopopxBehaviorGuard.shared.authorized(reason: NSLocalizedString("Confirm this is you before exporting the chat database", comment: "")) else {
             return false
         }
         await MainActor.run {

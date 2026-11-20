@@ -823,23 +823,23 @@ struct PopopxDisplayLanguageView: View {
 
 /// 页面上每一句中文只在这里出现一次。
 private enum Copy {
-    static let pageTitle = "设置"
-    static let openHint = "打开"
+    static let pageTitle = NSLocalizedString("Settings", comment: "POPOPX settings tree")
+    static let openHint = NSLocalizedString("Open", comment: "POPOPX settings tree")
 
     // 顶部
-    static let legendOnline = "在线：走 SMP 中继"
-    static let legendMesh = "离线：厢语蓝牙组网"
-    static let legendNote = "同一行只会用一种颜色：哪条通道搬运了它，这一点必须一眼分得清。"
+    static let legendOnline = NSLocalizedString("Online: over an SMP relay", comment: "POPOPX settings tree")
+    static let legendMesh = NSLocalizedString("Offline: POPOPX Bluetooth mesh", comment: "POPOPX settings tree")
+    static let legendNote = NSLocalizedString("Only one colour is used per row: you must be able to see at a glance which lane carried it.", comment: "POPOPX settings tree")
 
     // 外观 —— 这一组的卡名与两行说法 2026-11-20 从「我」栏落回本页，改用英文原句 Key
     // （见下面 `PopopxGeneralCopy`，16 个目录里早有译法）。这里只留主题本身的六个中文名，
     // `PopopxSettingsValues.themeName` 行尾读的就是它们，那不是可译的界面说法而是取值。
-    static let themeSystem = "跟随系统"
-    static let themeLight = "浅色"
-    static let themeDark = "深色"
+    static let themeSystem = NSLocalizedString("Follow system", comment: "POPOPX settings tree")
+    static let themeLight = NSLocalizedString("Light", comment: "POPOPX settings tree")
+    static let themeDark = NSLocalizedString("Dark", comment: "POPOPX settings tree")
     static let themePopopx = "popopx"
-    static let themeBlack = "纯黑"
-    static let themeCustom = "自定义主题"
+    static let themeBlack = NSLocalizedString("Pure black", comment: "POPOPX settings tree")
+    static let themeCustom = NSLocalizedString("Customize theme", comment: "POPOPX settings tree")
 
     // 隐私与安全 —— 整卡 2026-11-20 删（真机第 6 轮二.2）：这两枚开关与
     // `PrivacySettings.swift:75`、`:88` 是同一批状态，现在直接摆在「我」栏那张防线卡上，
@@ -847,34 +847,34 @@ private enum Copy {
     // 这里不再留任何无人挂的中文常量。
 
     // 通知与通话
-    static let groupCalls = "通知与通话"
-    static let notificationsRow = "通知"
-    static let ntfsOff = "不经服务器"
-    static let ntfsPeriodic = "定时唤醒"
-    static let ntfsInstant = "即时推送"
-    static let callsRow = "音频与视频通话"
-    static let relayCallsRow = "通话强制走中继"
-    static let relayCallsNoteOn = "中继保护你的 IP，但它能看到通话时长。"
-    static let relayCallsNoteOff = "只在必要时用中继，对方有可能看到你的 IP。"
+    static let groupCalls = NSLocalizedString("Notifications and calls", comment: "POPOPX settings tree")
+    static let notificationsRow = NSLocalizedString("Notifications", comment: "POPOPX settings tree")
+    static let ntfsOff = NSLocalizedString("No server", comment: "POPOPX settings tree")
+    static let ntfsPeriodic = NSLocalizedString("Periodic checks", comment: "POPOPX settings tree")
+    static let ntfsInstant = NSLocalizedString("Instant notifications", comment: "POPOPX settings tree")
+    static let callsRow = NSLocalizedString("Audio and video calls", comment: "POPOPX settings tree")
+    static let relayCallsRow = NSLocalizedString("Force calls through a relay", comment: "POPOPX settings tree")
+    static let relayCallsNoteOn = NSLocalizedString("A relay protects your IP address, but it can see how long a call lasts.", comment: "POPOPX settings tree")
+    static let relayCallsNoteOff = NSLocalizedString("The relay is used only when it is necessary; the other side may see your IP address.", comment: "POPOPX settings tree")
 
     // 网络与服务器
-    static let groupNetwork = "网络与服务器"
-    static let serversRow = "中继与服务器"
-    static let networkFootnote = "改完在返回时问一次要不要保存；不保存就沿用上一次的核心配置。"
+    static let groupNetwork = NSLocalizedString("Network and servers", comment: "POPOPX settings tree")
+    static let serversRow = NSLocalizedString("Relays and servers", comment: "POPOPX settings tree")
+    static let networkFootnote = NSLocalizedString("Going back asks you once whether to save; if you do not save, the last core configuration stays in effect.", comment: "POPOPX settings tree")
 
     // 数据与迁移
-    static let groupData = "数据与迁移"
-    static let chatDataRow = "聊天数据"
-    static let dataFootnote = "保留期、导出与加密都在这里；迁移会把整个本机身份交给另一台设备，中途不要退出。"
-    static let migrateRow = "迁移到另一台设备"
-    static let migrateRunning = "迁移进行中"
+    static let groupData = NSLocalizedString("Data and migration", comment: "POPOPX settings tree")
+    static let chatDataRow = NSLocalizedString("Chat data", comment: "POPOPX settings tree")
+    static let dataFootnote = NSLocalizedString("Retention, export and encryption are all here; a migration hands your entire device identity to another device, so do not quit midway.", comment: "POPOPX settings tree")
+    static let migrateRow = NSLocalizedString("Migrate to another device", comment: "POPOPX settings tree")
+    static let migrateRunning = NSLocalizedString("Migration in progress", comment: "POPOPX settings tree")
 
     // 帮助与关于 —— 整卡 2026-11 升格成 `PopopxHelpView`，标题与说明改为该页 `PopopxHelpCopy`
     // 的英文原句 Key。这里只剩裁定 4 尚未裁定那一行的两条文案，所以它们暂时无人挂（见
     // `PopopxHelpView` 里注释掉的那一行）；开放那一步要先把这两句改成 Key，
     // 中文常量在这一页不再有用。
-    static let askTeamRow = "提问与提建议"
-    static let askTeamNote = "在应用内连接这个账号，不开浏览器，也不走邮件。"
+    static let askTeamRow = NSLocalizedString("Questions and feedback", comment: "POPOPX settings tree")
+    static let askTeamNote = NSLocalizedString("Connect to this account inside the app: no browser, no email.", comment: "POPOPX settings tree")
 }
 
 /// 真机第 6 轮二.1 从「我」栏常用组落回设置树的三行说法。口径与那一页一致：**英文原句就是 Key**。

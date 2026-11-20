@@ -428,7 +428,7 @@ final class ProfileBuilderViewModel {
             text = String(format: Copy.unexpectedFormat, error.localizedDescription)
         }
         errorText = text
-        logger.error("POPOPX profile builder: \(context, privacy: .public) 失败：\(text, privacy: .public)")
+        logger.error("POPOPX profile builder: \(context, privacy: .public) failed: \(text, privacy: .public)")
         PopopxHaptics.notice(.error)
     }
 
@@ -1040,7 +1040,7 @@ struct ProfileSendModeSheet: View {
             default: reason = String(format: Copy.unexpectedFormat, error.localizedDescription)
             }
             errorText = reason
-            logger.error("POPOPX profile send sheet: 组装载荷失败：\(reason, privacy: .public)")
+            logger.error("POPOPX profile send sheet: failed to build payload: \(reason, privacy: .public)")
             PopopxHaptics.notice(.error)
         }
     }
@@ -1329,88 +1329,88 @@ private struct PopopxProfileCloseButton: View {
 /// 与 `PopopxProfileSendMode.sheetLabel` 的两个模式标签都只在这一处出现一次，
 /// 因此不会和载荷层那两行字分叉。
 private enum Copy {
-    static let pageTitle = "加密个人主页"
-    static let loading = "正在读取本机主页…"
-    static let close = "关闭"
+    static let pageTitle = NSLocalizedString("My encrypted profile page", comment: "")
+    static let loading = NSLocalizedString("Reading the profile saved on this device…", comment: "")
+    static let close = NSLocalizedString("Close", comment: "")
 
     // 身份区
-    static let identityGroup = "身份"
-    static let titleLabel = "主页标题"
-    static let titlePrompt = "名片上那一行大字"
-    static let subtitleLabel = "副标题"
-    static let subtitlePrompt = "可留空：一句话说明你自己"
-    static let titleCountFormat = "标题 %d / %d 个字"
-    static let noticeNoDraft = "本机还没有保存过的主页。下面的内容第一次点「保存主页」之后才会留下来。"
+    static let identityGroup = NSLocalizedString("Identity", comment: "")
+    static let titleLabel = NSLocalizedString("Profile title", comment: "")
+    static let titlePrompt = NSLocalizedString("The big line on the card", comment: "")
+    static let subtitleLabel = NSLocalizedString("Subtitle", comment: "")
+    static let subtitlePrompt = NSLocalizedString("Optional: one line about yourself", comment: "")
+    static let titleCountFormat = NSLocalizedString("Title %1$lld / %2$lld characters", comment: "")
+    static let noticeNoDraft = NSLocalizedString("No profile has been saved on this device yet. What is below stays only after you tap Save profile for the first time.", comment: "")
 
     // 发送权限与销毁策略
-    static let policyGroup = "发送权限与销毁策略"
-    static let standardNote = "好友接收后不设销毁时间，可随时频繁打开查看你的图文与视频。"
-    static let ephemeralNote = "阅读有效期在好友点击打开后起计，到点后本机内容与图片、视频原件一并销毁。"
-    static let ttlLabel = "阅读有效期"
-    static let antiSpyToggle = "强制开启防窥防偷拍镜头检测"
-    static let antiSpyNote = "只在阅后即焚时生效：对方打开阅读时才在其设备上启用前置镜头检测，摄像头权限由对方设备届时请求。"
+    static let policyGroup = NSLocalizedString("Sending permission and destruction policy", comment: "")
+    static let standardNote = NSLocalizedString("Friends keep no destruction timer: they can open your text, images and video as often as they like.", comment: "")
+    static let ephemeralNote = NSLocalizedString("The reading window starts counting when the friend opens it; when it ends, the content on this device and the image and video originals are destroyed together.", comment: "")
+    static let ttlLabel = NSLocalizedString("Reading window", comment: "")
+    static let antiSpyToggle = NSLocalizedString("Force on the anti-peeping camera check", comment: "")
+    static let antiSpyNote = NSLocalizedString("Only takes effect in burn-after-reading: the front camera check starts on their device when they open it, and the camera permission is requested by their device at that moment.", comment: "")
 
     // 查看门槛（算力点）
-    static let thresholdLabel = "查看门槛"
-    static let thresholdField = "算力点"
-    static let thresholdPrompt = "留空 = 免费查看"
+    static let thresholdLabel = NSLocalizedString("Viewing threshold", comment: "")
+    static let thresholdField = NSLocalizedString("Compute Credits", comment: "")
+    static let thresholdPrompt = NSLocalizedString("Empty = free to view", comment: "")
     static func thresholdNote(_ maximum: Int) -> String {
-        "对方点开这张名片时会先看见这个数，确认后才从他自己那台设备的余额里扣。留空或 0 就是免费看；上限 \(maximum) 点，写了更大的数会贴到上限。门槛跟着名片走，POPOPX 没有任何一侧能替对方改它。"
+        String(format: NSLocalizedString("They see this number first when they open the card, and it is only then taken from the balance on their own device. Empty or 0 is free to view; the limit is %lld and a larger number snaps to it. The threshold travels with the card - neither side of POPOPX can change it for them.", comment: ""), maximum)
     }
 
     // 图文与视频
-    static let blocksGroup = "图文与视频"
-    static let blocksCountFormat = "内容块 %d / %d · 图片 %d 张 · 视频 %d 段"
-    static let emptyBlocks = "还没有内容块。可以先加一段文字，再补图片和视频。"
-    static let addText = "文字"
-    static let addMedia = "图片 / 视频"
-    static let addTextFull = "添加文字块"
-    static let addMediaFull = "添加图片或视频块"
-    static let textPrompt = "写一段自我介绍"
-    static let mediaBusy = "正在压缩图片、转码视频…"
-    static let moveUp = "上移"
-    static let moveDown = "下移"
-    static let removeBlock = "删除此块"
-    static let kindImage = "图片"
-    static let kindVideo = "视频"
-    static let emptyTextBlock = "（空文字块）"
+    static let blocksGroup = NSLocalizedString("Text, images and video", comment: "")
+    static let blocksCountFormat = NSLocalizedString("Blocks %1$lld / %2$lld · Images %3$lld · Videos %4$lld", comment: "")
+    static let emptyBlocks = NSLocalizedString("No content blocks yet. Add a text block first, then images and video.", comment: "")
+    static let addText = NSLocalizedString("Text", comment: "")
+    static let addMedia = NSLocalizedString("Image / video", comment: "")
+    static let addTextFull = NSLocalizedString("Add text block", comment: "")
+    static let addMediaFull = NSLocalizedString("Add image or video block", comment: "")
+    static let textPrompt = NSLocalizedString("Write a short introduction", comment: "")
+    static let mediaBusy = NSLocalizedString("Compressing images and converting video…", comment: "")
+    static let moveUp = NSLocalizedString("Move up", comment: "")
+    static let moveDown = NSLocalizedString("Move down", comment: "")
+    static let removeBlock = NSLocalizedString("Delete this block", comment: "")
+    static let kindImage = NSLocalizedString("Image", comment: "")
+    static let kindVideo = NSLocalizedString("Video", comment: "")
+    static let emptyTextBlock = NSLocalizedString("(Empty text block)", comment: "")
 
     // 底部固定条
-    static let meshNote = "无网蓝牙 Mesh 模式下将自动过滤图片与视频，仅极速推送纯文字版加密名片。"
-    static let deliveryHintTextOnly = "这份主页只有文字，在线与无网蓝牙 Mesh 送出的内容是同一份。"
-    static let deliveryHintMediaFormat = "这份主页有 %d 个图片/视频块：走无网蓝牙 Mesh 时会被自动省去，只送纯文字版。"
-    static let save = "保存主页"
-    static let preview = "安全预览"
-    static let savedToast = "已保存到本机"
-    static let mediaAddedFormat = "已添加%@（%@），点「保存主页」才会写进清单"
+    static let meshNote = NSLocalizedString("In offline Bluetooth Mesh mode images and video are filtered out automatically; only the fast text-only encrypted card is pushed.", comment: "")
+    static let deliveryHintTextOnly = NSLocalizedString("This profile is text only, so the online and the offline Bluetooth Mesh paths send exactly the same thing.", comment: "")
+    static let deliveryHintMediaFormat = NSLocalizedString("This profile has %lld image or video blocks: they are skipped automatically on the offline Bluetooth Mesh path, which sends the text-only version.", comment: "")
+    static let save = NSLocalizedString("Save profile", comment: "")
+    static let preview = NSLocalizedString("Safe preview", comment: "")
+    static let savedToast = NSLocalizedString("Saved on this device", comment: "")
+    static let mediaAddedFormat = NSLocalizedString("Added %1$@ (%2$@); it enters the manifest only when you tap Save profile", comment: "")
 
     // 安全预览
-    static let previewTitle = "安全预览"
-    static let previewSubtitle = "同一份内容在四种组合下会送出去什么；草稿不会被动。"
-    static let previewModeGroup = "发送模式"
-    static let previewDeliveryGroup = "网络模式"
-    static let previewBodyGroup = "对方看得到的内容"
+    static let previewTitle = NSLocalizedString("Safe preview", comment: "")
+    static let previewSubtitle = NSLocalizedString("What the same content sends out under the four combinations; the draft is left untouched.", comment: "")
+    static let previewModeGroup = NSLocalizedString("Sending mode", comment: "")
+    static let previewDeliveryGroup = NSLocalizedString("Network mode", comment: "")
+    static let previewBodyGroup = NSLocalizedString("What they can see", comment: "")
     static func previewTTL(_ duration: String) -> String {
-        "对方点击打开后起计 \(duration)，到点销毁本机这一份。"
+        String(format: NSLocalizedString("Counting %@ from the moment they open it; when it ends, this local copy is destroyed.", comment: ""), duration)
     }
-    static let previewStandard = "常驻名片：对方可反复打开，不启动倒计时，也不启动镜头检测。"
-    static let previewOmittedFormat = "本次将省去 %d 个图片/视频块，只送出纯文字版。"
-    static let previewEmptyBody = "这一档下没有可显示的内容块。"
+    static let previewStandard = NSLocalizedString("Standing card: they can open it again and again, with no countdown and no camera check.", comment: "")
+    static let previewOmittedFormat = NSLocalizedString("This send skips %lld image or video blocks and sends the text-only version.", comment: "")
+    static let previewEmptyBody = NSLocalizedString("No content blocks to show in this combination.", comment: "")
 
     // 发送确认 Sheet
-    static let sendTitle = "发送个人主页"
-    static let sendSubtitle = "发送前确认这两档；已保存的主页不会因此改动。"
-    static let sendSummaryGroup = "当前主页"
-    static let sendModeGroup = "本次发送"
-    static let sendBlockedGroup = "暂时发不了"
-    static let sendAction = "发送"
-    static let untitled = "未命名主页"
-    static let sendSummaryFormat = "内容块 %d 个 · 图片 %d 张 · 视频 %d 段"
-    static let sendMissingNote = "本机还没有保存过的主页。先在「我 → 加密个人主页」里做好并保存，再回来发送。"
-    static let sendEmptyNote = "这份主页还没有任何内容块，加了文字、图片或视频之后才能发送。"
+    static let sendTitle = NSLocalizedString("Send your profile", comment: "")
+    static let sendSubtitle = NSLocalizedString("Confirm these two settings before sending; the saved profile is not changed by this.", comment: "")
+    static let sendSummaryGroup = NSLocalizedString("Current profile", comment: "")
+    static let sendModeGroup = NSLocalizedString("This send", comment: "")
+    static let sendBlockedGroup = NSLocalizedString("Cannot send right now", comment: "")
+    static let sendAction = NSLocalizedString("Send", comment: "")
+    static let untitled = NSLocalizedString("Untitled profile", comment: "")
+    static let sendSummaryFormat = NSLocalizedString("Blocks %1$lld · Images %2$lld · Videos %3$lld", comment: "")
+    static let sendMissingNote = NSLocalizedString("No profile has been saved on this device yet. Make one in Me → My encrypted profile page and save it, then come back to send.", comment: "")
+    static let sendEmptyNote = NSLocalizedString("This profile has no content blocks yet; add text, an image or a video before you can send it.", comment: "")
 
     // 兜底句：只有真撞上非类型化错误才会说到它。
-    static let unexpectedFormat = "操作未完成：%@"
+    static let unexpectedFormat = NSLocalizedString("Action not completed: %@", comment: "")
 
     static func kind(_ kind: PopopxProfileMedia.Kind) -> String {
         switch kind {
@@ -1422,14 +1422,14 @@ private enum Copy {
     static func blockTitle(_ entry: ProfileBuilderBlockEntry) -> String {
         let position = entry.index + 1
         switch entry.block {
-        case .text: return String(format: "文字块 %d", position)
-        case .image: return String(format: "图片 %d", position)
-        case .video: return String(format: "视频 %d", position)
+        case .text: return String(format: NSLocalizedString("Text block %lld", comment: ""), position)
+        case .image: return String(format: NSLocalizedString("Image %lld", comment: ""), position)
+        case .video: return String(format: NSLocalizedString("Video %lld", comment: ""), position)
         }
     }
 
     static func blockTextA11y(_ position: Int) -> String {
-        "文字块 \(position) 正文"
+        String(format: NSLocalizedString("Body of text block %lld", comment: ""), position)
     }
 }
 

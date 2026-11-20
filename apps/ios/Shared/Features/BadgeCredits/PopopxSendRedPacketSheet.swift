@@ -359,46 +359,46 @@ enum PopopxPacketStage: Hashable {
 
 private extension PopopxSendRedPacketSheet {
     enum Copy {
-        static func subtitle(_ name: String) -> String { "把算力点作为红包发给「\(name)」。面额固定，等额均分。" }
-        static let balanceTitle = "本机余额"
-        static let balanceFootnote = "点数只存在这台设备上，扣与退都记在本机流水里。"
-        static let amountTitle = "面额（总额）"
-        static func tierTitle(_ value: Int) -> String { "\(value) 点" }
-        static let recipientsTitle = "分给几个人"
-        static let recipientsFootnote = "只列出能整除面额的份数，每份都是整数点。"
-        static func splitTitle(_ count: Int) -> String { count == 1 ? "不拆分，一份" : "均分 \(count) 份" }
-        static func splitNote(_ each: Int) -> String { "每人 \(each) 点" }
-        static let noteTitle = "留言"
-        static let noteLabel = "祝福语"
-        static let notePrompt = "恭喜发财"
-        static var noteFootnote: String { "最多 \(PopopxCommerceLimits.maximumNoteCharacters) 个字，会跟着红包一起发出去。" }
-        static let boundariesTitle = "这几点先说清"
+        static func subtitle(_ name: String) -> String { String(format: NSLocalizedString("Send Compute Credits to %@ as a red packet. The amount is fixed and split evenly.", comment: ""), name) }
+        static let balanceTitle = NSLocalizedString("Balance on this device", comment: "")
+        static let balanceFootnote = NSLocalizedString("The credits exist only on this device; every debit and every refund is written to the ledger on it.", comment: "")
+        static let amountTitle = NSLocalizedString("Amount (total)", comment: "")
+        static func tierTitle(_ value: Int) -> String { String(format: NSLocalizedString("%lld credits", comment: ""), value) }
+        static let recipientsTitle = NSLocalizedString("How many people to split between", comment: "")
+        static let recipientsFootnote = NSLocalizedString("Only the counts that divide the amount are listed, so every part is a whole number of credits.", comment: "")
+        static func splitTitle(_ count: Int) -> String { count == 1 ? NSLocalizedString("Not split, one part", comment: "") : String(format: NSLocalizedString("Split evenly into %lld parts", comment: ""), count) }
+        static func splitNote(_ each: Int) -> String { String(format: NSLocalizedString("%lld credits each", comment: ""), each) }
+        static let noteTitle = NSLocalizedString("Note", comment: "")
+        static let noteLabel = NSLocalizedString("Greeting", comment: "")
+        static let notePrompt = NSLocalizedString("Wishing you prosperity", comment: "")
+        static var noteFootnote: String { String(format: NSLocalizedString("Up to %lld characters. It travels with the red packet.", comment: ""), PopopxCommerceLimits.maximumNoteCharacters) }
+        static let boundariesTitle = NSLocalizedString("What this screen promises, and what it does not", comment: "")
         static var boundariesFootnote: String {
             String(format: PopopxCommerceCopy.redPacketRefundStatementFormat,
                    PopopxCommerceLimits.packetClaimGraceSeconds / 86_400)
         }
-        static let boundaryOne = "只有固定面额，没有随机金额；这一页不提供自填金额的入口。"
-        static let boundaryTwo = "红包要发到对方那台设备：没送达时点数仍挂在你的流水里，可原样重发。"
+        static let boundaryOne = PopopxCommerceCopy.redPacketFixedAmountsStatement
+        static let boundaryTwo = NSLocalizedString("The packet has to reach the other device: while it is undelivered the credits stay on your entry here and can be resent unchanged.", comment: "")
         static var boundaryThree: String {
-            "没有人领的余款在 \(PopopxCommerceLimits.packetClaimGraceSeconds / 86_400) 天后自动退回你的余额。"
+            String(format: PopopxCommerceCopy.redPacketRefundStatementFormat, PopopxCommerceLimits.packetClaimGraceSeconds / 86_400)
         }
-        static let close = "关闭"
-        static let again = "再发一个"
-        static let retry = "再发一次"
-        static func send(_ value: Int) -> String { "发出 \(value) 点红包" }
-        static func sentHeadline(_ value: Int, _ count: Int) -> String { "已发出 \(value) 点 · \(count) 份" }
+        static let close = NSLocalizedString("Close", comment: "")
+        static let again = NSLocalizedString("Send another", comment: "")
+        static let retry = NSLocalizedString("Send again", comment: "")
+        static func send(_ value: Int) -> String { String(format: NSLocalizedString("Send a red packet of %lld credits", comment: ""), value) }
+        static func sentHeadline(_ value: Int, _ count: Int) -> String { String(format: NSLocalizedString("Sent %1$lld credits · %2$lld parts", comment: ""), value, count) }
         static func sentDetail(_ count: Int, _ claimed: Int) -> String {
-            "已领 \(claimed)/\(count) 份。份数随回执更新，关掉这一页也会继续记。"
+            String(format: NSLocalizedString("Claimed %1$lld of %2$lld parts. The count follows the receipts and keeps updating after you close this screen.", comment: ""), claimed, count)
         }
-        static let undeliveredHeadline = "这一单没有送达"
-        static let undeliveredDetail = "点数已扣在这一单上，没有另开第二单。可以原样重发，也可以稍后再试。"
-        static let refusedHeadline = "这一单没有成立"
+        static let undeliveredHeadline = NSLocalizedString("This packet was not delivered", comment: "")
+        static let undeliveredDetail = NSLocalizedString("The credits were taken for this packet and no second one was opened. Resend it unchanged, or try again later.", comment: "")
+        static let refusedHeadline = NSLocalizedString("This packet did not go through", comment: "")
         static func glossShortfall(_ required: Int, _ balance: Int) -> String {
-            "还差 \(required - balance) 点。先去充值，充完再回这一页。"
+            String(format: NSLocalizedString("You are short %lld credits. Top up first, then come back to this screen.", comment: ""), required - balance)
         }
-        static let glossKeychain = "本机安全存储取不到，点数没有动过。"
-        static let glossSigning = "签名没能取到：点数留在这一单里，宽限期到点会自动退回。"
-        static let glossGeneric = "这次没有完成，点数没有被扣走。"
+        static let glossKeychain = NSLocalizedString("The secure store on this device could not be reached, and no credits moved.", comment: "")
+        static let glossSigning = NSLocalizedString("The signature could not be obtained: the credits stay with this packet and are returned automatically when the grace period ends.", comment: "")
+        static let glossGeneric = NSLocalizedString("This did not complete, and no credits were taken.", comment: "")
     }
 }
 
@@ -406,14 +406,14 @@ private extension PopopxSendRedPacketSheet {
 
 struct PopopxSendRedPacketSheetDark_Previews: PreviewProvider {
     static var previews: some View {
-        PopopxSendRedPacketSheet(destination: .contact(id: 1, name: "阿巡"))
+        PopopxSendRedPacketSheet(destination: .contact(id: 1, name: "Ah Xun"))
             .preferredColorScheme(.dark)
     }
 }
 
 struct PopopxSendRedPacketSheetLight_Previews: PreviewProvider {
     static var previews: some View {
-        PopopxSendRedPacketSheet(destination: .group(id: 2, name: "周末骑行", memberCount: 9))
+        PopopxSendRedPacketSheet(destination: .group(id: 2, name: "Weekend Ride", memberCount: 9))
             .preferredColorScheme(.light)
     }
 }

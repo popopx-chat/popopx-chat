@@ -225,10 +225,10 @@ private extension View {
 // MARK: - 文案
 
 enum PopopxMainTabCopy {
-    static let chats = "消息"
-    static let contacts = "通讯录"
-    static let cabin = "厢语"
-    static let me = "我"
+    static let chats = NSLocalizedString("Messages", comment: "")
+    static let contacts = NSLocalizedString("Contacts", comment: "")
+    static let cabin = NSLocalizedString("Cabin", comment: "")
+    static let me = NSLocalizedString("Me", comment: "")
 }
 
 // MARK: - Previews

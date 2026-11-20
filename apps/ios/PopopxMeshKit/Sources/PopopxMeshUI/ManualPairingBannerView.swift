@@ -236,7 +236,7 @@ public final class PopopxMeshBannerModel: ObservableObject {
         } else if bound {
             detail = "Bluetooth is down and there is no network — move closer to continue sending."
         } else {
-            detail = "蓝牙已断开，尚未交换公网名片（重新靠近后可继续发送）"
+            detail = NSLocalizedString("Bluetooth is down and no POPOPX public-network card has been exchanged yet — move closer to continue sending.", comment: "POPOPX mesh pairing banner")
         }
         presentation = PopopxMeshBannerPresentation(
             content: .peerOutOfRange(

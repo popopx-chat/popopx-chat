@@ -214,7 +214,7 @@ final class ProfileAutoSender {
             ttlSeconds: effectiveTTL,
             expiresAt: Date().addingTimeInterval(Self.armingWindowSeconds)
         )
-        logger.notice("POPOPX profile: 已武装扫码自动推送（\(mode.rawValue, privacy: .public), ttl=\(effectiveTTL, privacy: .public), boundToContact=\(ttlIsBoundToContact, privacy: .public)）")
+        logger.notice("POPOPX profile: scan auto-push armed (\(mode.rawValue, privacy: .public), ttl=\(effectiveTTL, privacy: .public), boundToContact=\(ttlIsBoundToContact, privacy: .public))")
     }
 
     /// 取消武装。幂等：没武装时调用什么都不会发生。
@@ -222,7 +222,7 @@ final class ProfileAutoSender {
         guard armedProfileScene != nil else { return }
         armedProfileScene = nil
         armedTTLIsBoundToContact = false
-        logger.notice("POPOPX profile: 已取消扫码自动推送的武装")
+        logger.notice("POPOPX profile: scan auto-push disarmed")
     }
 
     // MARK: 触发源 A：扫码建连后自动推送
@@ -242,13 +242,13 @@ final class ProfileAutoSender {
         guard let scene = armedProfileScene else { return }
         guard scene.expiresAt > Date() else {
             cancelArmedProfileScene()
-            logger.notice("POPOPX profile: 武装已过期，自动推送取消")
+            logger.notice("POPOPX profile: arming expired, auto-push cancelled")
             return
         }
         guard let chat = ChatModel.shared.getContactChat(contactId) else { return }
         guard let saved = await store.loadEditable() else {
             cancelArmedProfileScene()
-            logger.notice("POPOPX profile: 本机没有已保存的主页，自动推送取消（\(PopopxProfileSendRefusal.noSavedProfile.description, privacy: .public)）")
+            logger.notice("POPOPX profile: no saved profile on this device, auto-push cancelled (\(PopopxProfileSendRefusal.noSavedProfile.description, privacy: .public))")
             return
         }
         // 一次扫码一次推送：不管结果如何都不留武装。失败了也不重试 —— 重试的时机（下一次建连）
@@ -257,13 +257,13 @@ final class ProfileAutoSender {
         let outcome = await send(applyScene(scene, to: saved), to: chat)
         switch outcome {
         case let .sentFullMedia(indexSent, mediaQueued):
-            logger.notice("POPOPX profile: 扫码自动推送走公网（索引送达=\(indexSent, privacy: .public)，媒体 \(mediaQueued, privacy: .public) 件）")
+            logger.notice("POPOPX profile: scan auto-push went over the internet (index delivered=\(indexSent, privacy: .public), \(mediaQueued, privacy: .public) media items queued)")
         case let .sentMeshTextOnly(omitted):
-            logger.notice("POPOPX profile: 扫码自动推送走厢语纯文字（省去 \(omitted, privacy: .public) 件媒体）")
+            logger.notice("POPOPX profile: scan auto-push went as mesh text only (\(omitted, privacy: .public) media items omitted)")
         case let .refused(refusal):
-            logger.error("POPOPX profile: 扫码自动推送被拒（\(refusal.description, privacy: .public)）")
+            logger.error("POPOPX profile: scan auto-push refused (\(refusal.description, privacy: .public))")
         case let .failed(reason):
-            logger.error("POPOPX profile: 扫码自动推送失败（\(reason, privacy: .public)）")
+            logger.error("POPOPX profile: scan auto-push failed (\(reason, privacy: .public))")
         }
     }
 
@@ -457,7 +457,7 @@ final class ProfileAutoSender {
         omittedMediaCount: Int
     ) async -> PopopxProfileSendOutcome {
         let bytes = message.text.utf8.count
-        logger.notice("POPOPX profile: 交给厢语蓝牙（\(bytes, privacy: .public) 字节 ≈ \(PopopxProfileMeshBudget.fragmentCount(forBytes: bytes), privacy: .public) 个分片，省去 \(omittedMediaCount, privacy: .public) 件媒体）")
+        logger.notice("POPOPX profile: handed to the Bluetooth mesh (\(bytes, privacy: .public) bytes ≈ \(PopopxProfileMeshBudget.fragmentCount(forBytes: bytes), privacy: .public) fragments, \(omittedMediaCount, privacy: .public) media items omitted)")
         // 不抛、不返回 nil：`PopopxMessageRouter.send(_:)` 交回一个带结论的 `PopopxRoutedMessage`
         // （PopopxMessageRouter.swift:626-:686），全部可能都在这一个返回值里。
         let routed = await PopopxMeshRuntime.shared.router.send(message)
@@ -467,22 +467,22 @@ final class ProfileAutoSender {
             // 交出去的那一条是纯文字投影，媒体原件一件都没排队 —— 按"只送了文字"报，不按
             // "全媒体已发"报。⚠️ 结果枚举（契约定死的四支）里没有"文字走公网"这一支，通道这里
             // 记在日志、用户能读到的那一支只说"文字出去了"，细节见交付报告。
-            logger.notice("POPOPX profile: 判定放行蓝牙，路由器仍按 SMP 优先送达（contact :\(contactId, privacy: .public)；媒体未排队）")
+            logger.notice("POPOPX profile: Bluetooth allowed by the verdict, the router still delivers SMP-first (contact :\(contactId, privacy: .public); no media queued)")
             return .sentMeshTextOnly(omittedMediaCount: omittedMediaCount)
         case let .smpUnacknowledgedMeshParallel(contactId, peerMeshPublicKeyHex):
-            logger.notice("POPOPX profile: 公网未在时限内 ACK，蓝牙并发补发（contact :\(contactId, privacy: .public) / 邻居 \(peerMeshPublicKeyHex.prefix(8), privacy: .public)）")
+            logger.notice("POPOPX profile: the internet did not ACK within the limit, Bluetooth sent it concurrently (contact :\(contactId, privacy: .public) / neighbor \(peerMeshPublicKeyHex.prefix(8), privacy: .public))")
             return .sentMeshTextOnly(omittedMediaCount: omittedMediaCount)
         case let .smpUnacknowledgedNoMesh(contactId):
             // 公网未确认、又没有第二条腿。这条尝试还在路由器手里飞行，之后可能进兜底队列。
-            logger.error("POPOPX profile: 公网未 ACK 且无蓝牙可补（contact :\(contactId, privacy: .public)）")
+            logger.error("POPOPX profile: no ACK from the internet and no Bluetooth backup available (contact :\(contactId, privacy: .public))")
             return .failed(reason: SenderCopy.smpUnacknowledged)
         case let .meshSent(peerMeshPublicKeyHex):
-            logger.notice("POPOPX profile: 厢语已送达（邻居 \(peerMeshPublicKeyHex.prefix(8), privacy: .public)）")
+            logger.notice("POPOPX profile: delivered over the mesh (neighbor \(peerMeshPublicKeyHex.prefix(8), privacy: .public))")
             return .sentMeshTextOnly(omittedMediaCount: omittedMediaCount)
         case let .queuedOffline(reason):
             // 进了离线兜底队列，等邻居重新出现时由路由器补发同一 id。按"已送达纯文字"报出，
             // 但队列那一侧才是真相 —— 已在交付说明里如实标为口径弱点。
-            logger.notice("POPOPX profile: 两条路都不通，名片进了厢语兜底队列（\(reason.rawValue, privacy: .public)）")
+            logger.notice("POPOPX profile: neither path worked, the card went into the mesh fallback queue (\(reason.rawValue, privacy: .public))")
             return .sentMeshTextOnly(omittedMediaCount: omittedMediaCount)
         case .refusedUnboundStranger:
             return .refused(.meshUnavailable(reason: SenderCopy.meshUnboundStranger))
@@ -519,7 +519,7 @@ final class ProfileAutoSender {
             composedMessages: [ComposedMessage(msgContent: .text(payload.messageContent))]
         )
         guard let indexItems, !indexItems.isEmpty else {
-            logger.error("POPOPX profile: 索引载荷没进公网（contact :\(contactId, privacy: .public)，厢语预判=\(String(describing: eligibility.prediction), privacy: .public)）")
+            logger.error("POPOPX profile: the index payload did not reach the internet (contact :\(contactId, privacy: .public), mesh prediction=\(String(describing: eligibility.prediction), privacy: .public))")
             return .failed(reason: SenderCopy.smpIndexFailed)
         }
         for item in indexItems {
@@ -545,7 +545,7 @@ final class ProfileAutoSender {
             guard !delivered.contains(item.mediaId) else { continue }
             if UIApplication.shared.backgroundTimeRemaining < Self.backgroundResumeFloorSeconds {
                 pendingMedia[key] = delivered
-                logger.error("POPOPX profile: 后台窗口用完，媒体队列停在已送达 \(delivered.count, privacy: .public) 件之后（profile \(manifest.profileId.prefix(8), privacy: .public)）；这张表不落盘，重启后不认得这些件")
+                logger.error("POPOPX profile: the background window ran out, the media queue stops after \(delivered.count, privacy: .public) delivered items (profile \(manifest.profileId.prefix(8), privacy: .public)); this table is not persisted, so a restart does not recognize these items")
                 return queued
             }
             guard let staged = await stage(item, profileId: manifest.profileId) else { continue }
@@ -565,7 +565,7 @@ final class ProfileAutoSender {
             guard let items, !items.isEmpty else {
                 // `apiSendMessages` 已经把这一次的失败弹给用户了；这一件不进 delivered，
                 // 于是同一份主页下次发送时还会再试一次。
-                logger.error("POPOPX profile: 媒体原件没发出去（media \(item.mediaId.prefix(8), privacy: .public)）")
+                logger.error("POPOPX profile: the media original was not sent (media \(item.mediaId.prefix(8), privacy: .public))")
                 continue
             }
             for chatItem in items {
@@ -604,10 +604,10 @@ final class ProfileAutoSender {
         case let .loaded(loaded):
             url = loaded
         case let .missing(mediaId):
-            logger.error("POPOPX profile: 本机没有这件媒体的原件（media \(mediaId.prefix(8), privacy: .public)），已跳过")
+            logger.error("POPOPX profile: this device has no original for this media item (media \(mediaId.prefix(8), privacy: .public)); skipped")
             return nil
         case let .unreadable(mediaId, reason):
-            logger.error("POPOPX profile: 本机原件读不得（media \(mediaId.prefix(8), privacy: .public)：\(reason, privacy: .public)），已跳过")
+            logger.error("POPOPX profile: the original on this device cannot be read (media \(mediaId.prefix(8), privacy: .public): \(reason, privacy: .public)); skipped")
             return nil
         }
         let wireName = Self.attachmentFileName(profileId: profileId, media: media, url: url)
@@ -617,7 +617,7 @@ final class ProfileAutoSender {
             return saveFile(data, wireName, encrypted: encrypted)
         }.value
         guard let staged else {
-            logger.error("POPOPX profile: 原件没能暂存成待发附件（media \(media.mediaId.prefix(8), privacy: .public)）")
+            logger.error("POPOPX profile: the original could not be staged as an outgoing attachment (media \(media.mediaId.prefix(8), privacy: .public))")
             return nil
         }
         return StagedMedia(file: staged)
@@ -678,24 +678,24 @@ enum PopopxProfileMeshBudget {
 /// `private enum Copy` 的规矩；这里因为要跨类型边界被 `PopopxProfileSendRefusal.explanation` 读，
 /// 所以是文件内可见的 `enum` 而不是某个类型里的私有成员）。
 private enum SenderCopy {
-    static let refusalNoSavedProfile = "本机还没有保存过的主页。先在「我 → 加密个人主页」里做好并保存，再扫码或发送。"
-    static let refusalNotDirectContact = "加密个人主页只能发给 1 对 1 的联系人。"
-    static let refusalTooLargeFormat = "降级后的纯文字名片有 %d 字节，超出蓝牙 Mesh 单条 %d 字节的上限，请删减文字后重试。"
-    static let refusalMeshUnavailableFormat = "当前没有公网，厢语蓝牙也带不走这份名片：%@"
-    static let refusalHostNotReadyFormat = "暂时发不了这份主页：%@"
-    static let hostNoActiveUser = "本机还没有可用的身份"
-    static let hostEmptyPayload = "这份主页的内容是空的"
-    static let smpIndexFailed = "名片没有进入公网，请检查网络后重试。"
-    static let smpUnacknowledged = "名片已交进发送队列，但公网没有在时限内确认收走；网络恢复后厢语会自动补发。"
-    static let meshFuseOff = "厢语总闸是关着的"
-    static let meshBindingUnknown = "厢语绑定表还没读完"
-    static let meshNotBound = "这个联系人还没有厢语绑定"
-    static let meshRadioOff = "本机蓝牙当前不可用"
-    static let meshPeerOutOfRange = "对方的设备太久没出现在厢语里"
-    static let meshNotDirectContact = "这个会话不是 1 对 1 直聊"
-    static let meshUnboundStranger = "对方还没有和你的设备交换过厢语名片，先靠近一次或走公网"
-    static let meshReasonUnknown = "蓝牙当前不可用"
-    static let failedDuplicateFormat = "这张名片（%@）已经在中继队列里，这一次没有重复提交。"
-    static let failedNothingToRerouteFormat = "这张名片（%@）的投递记录已不在路由器里，请重新发送一次。"
-    static let unexpectedFormat = "这份主页发不出去：%@"
+    static let refusalNoSavedProfile = NSLocalizedString("No profile has been saved on this device yet. Build one under Me → Encrypted profile and save it, then scan or send.", comment: "")
+    static let refusalNotDirectContact = NSLocalizedString("An encrypted profile can only be sent to a 1-to-1 contact.", comment: "")
+    static let refusalTooLargeFormat = NSLocalizedString("The plain-text card is %1$lld bytes, over the %2$lld byte limit for a single Bluetooth Mesh message; trim the text and try again.", comment: "")
+    static let refusalMeshUnavailableFormat = NSLocalizedString("There is no internet right now and the Bluetooth mesh cannot carry this card either: %@", comment: "")
+    static let refusalHostNotReadyFormat = NSLocalizedString("This profile cannot be sent for now: %@", comment: "")
+    static let hostNoActiveUser = NSLocalizedString("No usable identity on this device yet", comment: "")
+    static let hostEmptyPayload = NSLocalizedString("This profile has no content", comment: "")
+    static let smpIndexFailed = NSLocalizedString("The card did not reach the internet; check your connection and try again.", comment: "")
+    static let smpUnacknowledged = NSLocalizedString("The card was handed to the send queue, but the internet did not confirm it within the time limit; the mesh will resend it once the connection is back.", comment: "")
+    static let meshFuseOff = NSLocalizedString("The mesh master switch is closed", comment: "")
+    static let meshBindingUnknown = NSLocalizedString("The mesh binding table has not finished loading", comment: "")
+    static let meshNotBound = NSLocalizedString("This contact has no mesh binding yet", comment: "")
+    static let meshRadioOff = NSLocalizedString("Bluetooth is not available on this device right now", comment: "")
+    static let meshPeerOutOfRange = NSLocalizedString("Their device has not appeared in the mesh for a long time", comment: "")
+    static let meshNotDirectContact = NSLocalizedString("This chat is not a 1-to-1 direct chat", comment: "")
+    static let meshUnboundStranger = NSLocalizedString("Their device has not exchanged mesh cards with yours; move closer once, or send over the internet", comment: "")
+    static let meshReasonUnknown = NSLocalizedString("Bluetooth is not available right now", comment: "")
+    static let failedDuplicateFormat = NSLocalizedString("This card (%@) is already in the relay queue, so it was not submitted twice.", comment: "")
+    static let failedNothingToRerouteFormat = NSLocalizedString("The router no longer has a delivery record for this card (%@); please send it again.", comment: "")
+    static let unexpectedFormat = NSLocalizedString("This profile cannot be sent: %@", comment: "")
 }

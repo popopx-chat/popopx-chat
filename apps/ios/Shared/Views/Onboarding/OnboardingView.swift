@@ -76,7 +76,7 @@ enum PopopxOnboardingCopy {
     static let heroTitle = key("Own your network.")
     static let heroNote = key("Private messaging with no account and no user IDs.")
     static let pillSMP = key("SMP end-to-end encrypted")
-    static let pillMesh = key("厢语 Bluetooth Mesh relay")
+    static let pillMesh = key("Cabin Bluetooth Mesh relay")
     static let givesYou = key("What POPOPX gives you")
     static let noUserIDsTitle = key("No user IDs")
     static let noUserIDsNote = key(
@@ -84,7 +84,7 @@ enum PopopxOnboardingCopy {
     )
     static let relaysTitle = key("Dynamic relays and near-field")
     static let relaysNote = key(
-        "Online you use the dynamic SMP relay node cluster. Offline, 厢语 switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap."
+        "Online you use the dynamic SMP relay node cluster. Offline, Cabin switches to a 1–7 hop Bluetooth Mesh and pairs face to face over UWB or a tap."
     )
     static let shieldTitle = key("Anti-peeping and local-only cards")
     static let shieldNote = key(
@@ -130,7 +130,7 @@ enum PopopxOnboardingCopy {
     static let pushFootnote = key(
         "Apple's push service carries only the signal that new data is waiting, never the content."
     )
-    static let offlineMesh = key("厢语 offline mesh")
+    static let offlineMesh = key("Cabin offline mesh")
     static let offlineMeshNote = key(
         "When the internet is down, messages hop over nearby devices, up to 7 hops, with no server. Pair face to face with UWB or a tap."
     )
@@ -208,7 +208,7 @@ enum PopopxOnboardingCopy {
             "The anti-peeping guard switches the front camera on only while a top-secret sheet is open, at the lowest resolution, processes every frame on this device and stops the stream when the sheet closes. Nothing is written to disk and nothing is uploaded."
         )),
         (key("Screenshots, recordings and offline hops"), key(
-            "Protected screens are blocked from screenshots and screen recording by the system itself. In 厢语 mode messages hop over Bluetooth between nearby devices and never reach the public internet."
+            "Protected screens are blocked from screenshots and screen recording by the system itself. In Cabin mode messages hop over Bluetooth between nearby devices and never reach the public internet."
         )),
         (key("Your controls"), key(
             "You can export or delete any identity, erase the local database or trigger Panic Wipe at any time. Deletion is irreversible because no server holds a copy."
@@ -218,7 +218,7 @@ enum PopopxOnboardingCopy {
     // 使用条款正文
     static let termsSections: [(String, String)] = [
         (key("Acceptable use"), key(
-            "Use POPOPX within the laws of the country you are in. Public groups and 厢语 broadcasts must carry no unlawful content, no spam and no harassment of other users."
+            "Use POPOPX within the laws of the country you are in. Public groups and Cabin broadcasts must carry no unlawful content, no spam and no harassment of other users."
         )),
         (key("Your keys, your responsibility"), key(
             "Your mnemonic phrase, identity keys, badges and POPOPX Compute Credits exist only on this device. If the device or the phrase is lost, they cannot be recovered, frozen or reissued by anyone."

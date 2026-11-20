@@ -102,7 +102,7 @@ enum PopopxDuressRetentionStrategy: Codable, Hashable, Sendable {
 
     /// 分段器的三格标题，顺序即 `segmentIndex` 的定义。每格 5 个汉字以内
     /// （`PopopxSegmentedControl` 只给一行，超了就截断）。
-    static let segmentTitles: [String] = ["保留指定昵称", "仿真烟雾弹号", "全新空白号"]
+    static let segmentTitles: [String] = [NSLocalizedString("Keep one profile", comment: ""), NSLocalizedString("Simulated decoy", comment: ""), NSLocalizedString("Empty account", comment: "")]
 
     static let defaultValue = PopopxDuressRetentionStrategy.emptyProfile
 
@@ -140,11 +140,11 @@ enum PopopxDuressRetentionStrategy: Codable, Hashable, Sendable {
     var note: String {
         switch self {
         case .retainExistingProfile:
-            return "只保留你选定的那一个匿名身份，其余身份、厢语蓝牙映射与全部会话痕迹物理删除。"
+            return NSLocalizedString("Keeps only the anonymous profile you chose; every other profile, the offline mesh Bluetooth mappings and every chat trace are physically deleted.", comment: "")
         case .simulatedDecoy:
-            return "抹除后重建一个带生活化昵称、少量熟人与 24 小时内日常对话的仿真账号。"
+            return NSLocalizedString("Rebuilds a lifelike account with an everyday nickname, a few familiar contacts and routine conversations from the last 24 hours.", comment: "")
         case .emptyProfile:
-            return "抹除后进入一个刚安装好的空 app，不生成任何伪造内容。"
+            return NSLocalizedString("Opens an app as if it had just been installed, with nothing fabricated in it.", comment: "")
         }
     }
 
@@ -235,21 +235,21 @@ enum PopopxDuressSetupError: Error, Equatable, LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .malformedPin: return "请输入恰好 6 位数字"
-        case .pinsMustDiffer: return "胁迫密码不能与常规密码相同"
-        case .normalPinRequiredFirst: return "请先设置常规密码"
-        case .keychainWriteFailed: return "安全存储写入失败，请稍后重试"
-        case .nativePasscodeRequired: return "请先输入设备原有的入口密码，以关闭重复的解锁键盘"
-        case .nativePasscodeIncorrect: return "原有入口密码不正确，本次未做任何修改"
-        case .nativeSelfDestructCodeRequired: return "请先输入设备原有的自毁密码，才能把它一并关掉"
-        case .nativeSelfDestructCodeIncorrect: return "原有自毁密码不正确，本次未做任何修改"
-        case .mnemonicMissing: return "还没有生成恢复助记词，请先生成并抄存"
-        case .mnemonicMalformed: return "助记词需要 12 个标准英文词，请逐字核对后重试"
-        case .mnemonicIncorrect: return "助记词不正确"
-        case .entryPinRequired: return "请先输入当前进入密码"
-        case .entryPinIncorrect: return "进入密码不正确，未显示助记词"
-        case .biometricDenied: return "Face ID 未通过，未显示助记词"
-        case let .lockedOut(remaining): return "尝试过多，请 \(PopopxLockoutSchedule.phrase(remaining))后再试"
+        case .malformedPin: return NSLocalizedString("Enter exactly 6 digits", comment: "")
+        case .pinsMustDiffer: return NSLocalizedString("The duress code cannot be the same as the normal code", comment: "")
+        case .normalPinRequiredFirst: return NSLocalizedString("Set the normal code first", comment: "")
+        case .keychainWriteFailed: return NSLocalizedString("Cannot write to secure storage, please try again later", comment: "")
+        case .nativePasscodeRequired: return NSLocalizedString("Enter the entry passcode this device already uses, so the duplicate unlock keyboard can be removed", comment: "")
+        case .nativePasscodeIncorrect: return NSLocalizedString("The existing entry passcode is incorrect; nothing was changed", comment: "")
+        case .nativeSelfDestructCodeRequired: return NSLocalizedString("Enter the self-destruct code this device already uses, so it can be removed as well", comment: "")
+        case .nativeSelfDestructCodeIncorrect: return NSLocalizedString("The existing self-destruct code is incorrect; nothing was changed", comment: "")
+        case .mnemonicMissing: return NSLocalizedString("No recovery phrase has been generated yet; create one and write it down first", comment: "")
+        case .mnemonicMalformed: return NSLocalizedString("The recovery phrase needs 12 standard English words; check them word by word and try again", comment: "")
+        case .mnemonicIncorrect: return NSLocalizedString("The recovery phrase is incorrect", comment: "")
+        case .entryPinRequired: return NSLocalizedString("Enter the current entry code first", comment: "")
+        case .entryPinIncorrect: return NSLocalizedString("The entry code is incorrect; the recovery phrase was not shown", comment: "")
+        case .biometricDenied: return NSLocalizedString("Face ID did not pass; the recovery phrase was not shown", comment: "")
+        case let .lockedOut(remaining): return String(format: NSLocalizedString("Too many attempts, try again in %@", comment: ""), PopopxLockoutSchedule.phrase(remaining))
         }
     }
 }
@@ -648,9 +648,9 @@ enum PopopxLockoutSchedule {
         let hours = whole / 3_600
         let minutes = (whole % 3_600) / 60
         let rest = whole % 60
-        if hours > 0 { return minutes > 0 ? "\(hours) 小时 \(minutes) 分" : "\(hours) 小时" }
-        if minutes > 0 { return rest > 0 ? "\(minutes) 分 \(rest) 秒" : "\(minutes) 分钟" }
-        return "\(rest) 秒"
+        if hours > 0 { return minutes > 0 ? String(format: NSLocalizedString("%1$lld h %2$lld min", comment: ""), hours, minutes) : String(format: NSLocalizedString("%lld h", comment: ""), hours) }
+        if minutes > 0 { return rest > 0 ? String(format: NSLocalizedString("%1$lld min %2$lld s", comment: ""), minutes, rest) : String(format: NSLocalizedString("%lld min", comment: ""), minutes) }
+        return String(format: NSLocalizedString("%lld s", comment: ""), rest)
     }
 }
 

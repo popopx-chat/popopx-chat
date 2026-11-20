@@ -138,15 +138,15 @@ enum PopopxSecurePresentationFailure: Error, Hashable, Sendable {
 
     var userText: String {
         switch self {
-        case .hostNotInstalled: return "安全模块未就绪，已拒绝显示绝密内容"
-        case .screenCaptured: return "检测到屏幕正在被录制或镜像，已拒绝显示"
-        case .debuggerAttached: return "检测到调试环境，已拒绝显示绝密内容"
-        case .biometricsUnavailable: return "这台设备没有可用的生物识别，无法打开绝密消息"
-        case .biometricsCancelled: return "已取消验证"
-        case .biometricsFailed: return "生物识别未通过"
+        case .hostNotInstalled: return NSLocalizedString("The secure module is not ready, so the secure content was refused", comment: "")
+        case .screenCaptured: return NSLocalizedString("The screen is being recorded or mirrored, so it was refused", comment: "")
+        case .debuggerAttached: return NSLocalizedString("A debugging environment was detected, so the secure content was refused", comment: "")
+        case .biometricsUnavailable: return NSLocalizedString("This device has no usable biometrics, so secure messages cannot be opened", comment: "")
+        case .biometricsCancelled: return NSLocalizedString("Verification cancelled", comment: "")
+        case .biometricsFailed: return NSLocalizedString("Biometric verification did not pass", comment: "")
         case .payloadDamaged: return PopopxSecureCopy.cardDamaged
-        case .noPresentationContext: return "当前界面状态无法打开绝密窗口"
-        case .sessionAlreadyOpen: return "已有一条绝密消息在查看中"
+        case .noPresentationContext: return NSLocalizedString("The current interface state cannot host a secure window", comment: "")
+        case .sessionAlreadyOpen: return NSLocalizedString("A secure message is already being viewed", comment: "")
         }
     }
 
@@ -505,7 +505,7 @@ final class PopopxSecureWindowManager {
         }
 
         guard settings.cameraGuardEnabled else {
-            model.guardNote = "摄像头值守已按设置关闭，仅截屏/录屏检测在工作。"
+            model.guardNote = NSLocalizedString("Camera guard is switched off in settings; only screenshot and screen-recording detection is running.", comment: "")
             return
         }
         let engine = PopopxCameraGuardEngine()
@@ -630,7 +630,7 @@ final class PopopxSecureWindowManager {
 private extension PopopxSecureCopy {
     /// 没有可延长的会话时那一句。它只在"窗口还开着、会话已经死了"那段 lingering 里出现，
     /// 所以不写成"延长失败"：失败会让人以为重试有用，而这里重试永远没有用。
-    static let extendWindowClosed = "这条消息已经没有可延长的时间了。"
+    static let extendWindowClosed = NSLocalizedString("This message has no time left to extend.", comment: "")
 }
 
 // MARK: - 窗口内容

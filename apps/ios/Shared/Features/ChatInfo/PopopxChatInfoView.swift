@@ -1137,118 +1137,118 @@ private struct PopopxChatInfoAvatar: View {
 
 /// 页面上每一句中文只在这里出现一次。
 private enum Copy {
-    static let pageTitle = "联系人"
-    static let close = "完成"
-    static let working = "正在处理"
-    static let opensHint = "打开"
-    static let verifiedOn = "已校验"
+    static let pageTitle = NSLocalizedString("Contact", comment: "")
+    static let close = NSLocalizedString("Done", comment: "")
+    static let working = NSLocalizedString("Working…", comment: "")
+    static let opensHint = NSLocalizedString("Open", comment: "")
+    static let verifiedOn = NSLocalizedString("Verified", comment: "")
 
     // 顶部卡
-    static let verifiedShieldHint = "这条连接已通过安全码校验"
-    static let aliasLabel = "本机备注名"
-    static let aliasPrompt = "给这个联系人起个本机名字"
-    static let stateReady = "已连接"
-    static let stateSndReady = "发送通道已就绪"
-    static let stateConnecting = "连接中，稍后再来看"
-    static let stateNoConnection = "还没有可用连接"
-    static let stateFailed = "连接失败"
-    static let stateDeleted = "联系人已删除"
+    static let verifiedShieldHint = NSLocalizedString("This connection has been verified by its security code", comment: "")
+    static let aliasLabel = NSLocalizedString("Local alias", comment: "")
+    static let aliasPrompt = NSLocalizedString("Give this contact a name on this device", comment: "")
+    static let stateReady = NSLocalizedString("Connected", comment: "")
+    static let stateSndReady = NSLocalizedString("Sending queue ready", comment: "")
+    static let stateConnecting = NSLocalizedString("Connecting, check again later", comment: "")
+    static let stateNoConnection = NSLocalizedString("No connection yet", comment: "")
+    static let stateFailed = NSLocalizedString("Connection failed", comment: "")
+    static let stateDeleted = NSLocalizedString("Contact deleted", comment: "")
 
     // 快捷动作
-    static let search = "搜索"
-    static let callAudio = "语音"
-    static let callVideo = "视频"
-    static let mute = "静音"
-    static let unmute = "取消静音"
+    static let search = NSLocalizedString("Search", comment: "")
+    static let callAudio = NSLocalizedString("Audio", comment: "")
+    static let callVideo = NSLocalizedString("Video", comment: "")
+    static let mute = NSLocalizedString("Mute", comment: "")
+    static let unmute = NSLocalizedString("Unmute", comment: "")
 
     // 连接与安全
-    static let groupSecurity = "连接与安全"
-    static let securityFootnote = "安全码要两台设备当面比对，比对上了才算校验完成。"
-    static let verifyCode = "校验安全码"
-    static let viewCode = "查看安全码"
-    static let securityCodePage = "安全码"
-    static let e2e = "端到端加密"
-    static let pqResistant = "抗量子"
-    static let pqStandard = "标准"
-    static let incognitoProfile = "本次连接用的身份"
-    static let incognitoNote = "这条连接不是用你的主身份建立的。"
-    static let fixConnection = "修复连接"
-    static let fixConnectionNote = "重新协商加密，完成后回到会话。"
+    static let groupSecurity = NSLocalizedString("Connection & security", comment: "")
+    static let securityFootnote = NSLocalizedString("Compare the security codes on both devices in person; the connection counts as verified only when they match.", comment: "")
+    static let verifyCode = NSLocalizedString("Verify security code", comment: "")
+    static let viewCode = NSLocalizedString("View security code", comment: "")
+    static let securityCodePage = NSLocalizedString("Security code", comment: "")
+    static let e2e = NSLocalizedString("End-to-end encrypted", comment: "")
+    static let pqResistant = NSLocalizedString("Post-quantum", comment: "")
+    static let pqStandard = NSLocalizedString("Standard", comment: "")
+    static let incognitoProfile = NSLocalizedString("Profile used for this connection", comment: "")
+    static let incognitoNote = NSLocalizedString("This connection was not made with your main profile.", comment: "")
+    static let fixConnection = NSLocalizedString("Fix connection", comment: "")
+    static let fixConnectionNote = NSLocalizedString("Re-negotiates the encryption, then returns you to the chat.", comment: "")
 
     // 聊天
-    static let groupChat = "聊天"
-    static let contactPreferences = "联系人偏好"
-    static let wallpaper = "聊天背景"
-    static let sendReceipts = "已读回执"
-    static let sendReceiptsNote = "只影响这个会话，不改全局设置。"
-    static let receiptYes = "发送"
-    static let receiptNo = "不发送"
-    static let receiptDefaultOn = "跟随默认（开）"
-    static let receiptDefaultOff = "跟随默认（关）"
+    static let groupChat = NSLocalizedString("Chat", comment: "")
+    static let contactPreferences = NSLocalizedString("Contact preferences", comment: "")
+    static let wallpaper = NSLocalizedString("Chat wallpaper", comment: "")
+    static let sendReceipts = NSLocalizedString("Read receipts", comment: "")
+    static let sendReceiptsNote = NSLocalizedString("Applies to this chat only; it does not change the global setting.", comment: "")
+    static let receiptYes = NSLocalizedString("Send", comment: "")
+    static let receiptNo = NSLocalizedString("Do not send", comment: "")
+    static let receiptDefaultOn = NSLocalizedString("Follow default (on)", comment: "")
+    static let receiptDefaultOff = NSLocalizedString("Follow default (off)", comment: "")
 
     // 自动删除
-    static let groupTTL = "自动删除"
-    static let ttlFootnote = "把本会话的消息从这台设备上删掉，改完之后会重新载入会话。"
+    static let groupTTL = NSLocalizedString("Automatic deletion", comment: "")
+    static let ttlFootnote = NSLocalizedString("Deletes this chat's messages from this device; the chat reloads after the change.", comment: "")
 
     // 地址
-    static let groupAddress = "连接地址"
+    static let groupAddress = NSLocalizedString("Connection address", comment: "")
     static func addressFootnote(_ name: String) -> String {
-        "把这个地址发给对方，对方就能与「\(name)」建立连接。"
+        String(format: NSLocalizedString("Send this address to the other person so they can start a connection with %@", comment: ""), name)
     }
-    static let shareAddress = "分享地址"
+    static let shareAddress = NSLocalizedString("Share address", comment: "")
 
     // 服务器
-    static let groupServers = "服务器"
-    static let serversFootnote = "中继主机名可复制，用于排查连接问题。"
-    static let networkStatus = "网络状态"
-    static let netActive = "已订阅"
-    static let netPending = "连接中"
-    static let netRemoved = "已出错"
-    static let netNoSub = "未订阅"
-    static let networkStatusTitle = "网络状态"
-    static let switchAddress = "更换接收地址"
-    static let switchAddressNote = "换一个服务器接收，对方上线后完成。"
-    static let abortSwitch = "中止更换地址"
-    static let receivingVia = "接收中继"
-    static let sendingVia = "发送中继"
-    static let moreServersFormat = "共 %d 个，点击复制全部"
-    static let copiedServers = "服务器地址已复制"
-    static let errorSwitchAddress = "更换接收地址失败"
-    static let errorAbortSwitch = "中止更换地址失败"
+    static let groupServers = NSLocalizedString("Servers", comment: "")
+    static let serversFootnote = NSLocalizedString("The relay host names can be copied to troubleshoot connection problems.", comment: "")
+    static let networkStatus = NSLocalizedString("Network status", comment: "")
+    static let netActive = NSLocalizedString("Subscribed", comment: "")
+    static let netPending = NSLocalizedString("Connecting", comment: "")
+    static let netRemoved = NSLocalizedString("Error", comment: "")
+    static let netNoSub = NSLocalizedString("Not subscribed", comment: "")
+    static let networkStatusTitle = NSLocalizedString("Network status", comment: "")
+    static let switchAddress = NSLocalizedString("Change receiving address", comment: "")
+    static let switchAddressNote = NSLocalizedString("Receives from another server; it completes once your contact is online.", comment: "")
+    static let abortSwitch = NSLocalizedString("Abort changing address", comment: "")
+    static let receivingVia = NSLocalizedString("Receiving relay", comment: "")
+    static let sendingVia = NSLocalizedString("Sending relay", comment: "")
+    static let moreServersFormat = NSLocalizedString("%lld total, tap to copy all", comment: "")
+    static let copiedServers = NSLocalizedString("Server address copied", comment: "")
+    static let errorSwitchAddress = NSLocalizedString("Failed to change the receiving address", comment: "")
+    static let errorAbortSwitch = NSLocalizedString("Failed to abort changing the address", comment: "")
 
     // 危险操作
-    static let groupDanger = "危险操作"
-    static let dangerFootnote = "删除与清除都只影响这台设备上的你自己，除非你在第二步选择了通知对方。"
-    static let clearHistory = "清除会话记录"
-    static let clearHistoryNote = "只删本机这一侧，对方仍保留。"
-    static let clearConfirmTitle = "清除会话记录？"
+    static let groupDanger = NSLocalizedString("Dangerous actions", comment: "")
+    static let dangerFootnote = NSLocalizedString("Deleting and clearing affect only you on this device, unless you chose to notify the other side in the second step.", comment: "")
+    static let clearHistory = NSLocalizedString("Clear chat history", comment: "")
+    static let clearHistoryNote = NSLocalizedString("Deletes only your side on this device; your contact keeps theirs.", comment: "")
+    static let clearConfirmTitle = NSLocalizedString("Clear chat history?", comment: "")
     static func clearConfirmMessage(_ name: String) -> String {
-        "「\(name)」的全部消息会从这台设备上删除，无法撤销；对方那一份不受影响。"
+        String(format: NSLocalizedString("Every message with %@ will be deleted from this device and cannot be undone; the copy on your contact's device is not affected.", comment: ""), name)
     }
-    static let clearConfirmButton = "清除"
-    static let deleteContact = "删除联系人"
-    static let deleteContactNote = "下一步会问你只删会话，还是连联系人一起删。"
+    static let clearConfirmButton = NSLocalizedString("Clear", comment: "")
+    static let deleteContact = NSLocalizedString("Delete contact", comment: "")
+    static let deleteContactNote = NSLocalizedString("The next step asks whether to delete only the chat or the contact as well.", comment: "")
 
     // 离开本页时未保存的偏好
-    static let savePrefsTitle = "保存偏好？"
-    static let savePrefsMessage = "改动还没发出去，发出去才会通知对方。"
-    static let savePrefsButton = "保存并通知联系人"
+    static let savePrefsTitle = NSLocalizedString("Save preferences?", comment: "")
+    static let savePrefsMessage = NSLocalizedString("Your changes have not been sent yet; your contact is notified only when they are sent.", comment: "")
+    static let savePrefsButton = NSLocalizedString("Save and notify contact", comment: "")
 
     // 通话判定
-    static let cantCallTitle = "无法发起通话"
-    static let sendMsgToEnable = "先给对方发一条消息，通话才会打开。"
-    static let contactDeleted = "联系人已删除。"
-    static let contactNotReady = "正在建立连接，请稍后再试。"
-    static let allowCallsTitle = "允许通话？"
-    static let allowCallsMessage = "需要允许联系人向你发起通话，你才能打过去。"
-    static let allow = "允许"
-    static let callsProhibited = "通话被禁止"
-    static let callsAskContact = "请让对方先开启通话。"
-    static let callsCheckBoth = "请检查你与对方的偏好。"
-    static let fixConnectionTitle = "先修复连接？"
-    static let fixConnectionMessage = "这条连接的加密需要重新协商。"
-    static let fix = "修复"
-    static let renegotiationInProgress = "加密正在重新协商，稍后再试。"
+    static let cantCallTitle = NSLocalizedString("Cannot start a call", comment: "")
+    static let sendMsgToEnable = NSLocalizedString("Send your contact a message first; calls stay closed until you do.", comment: "")
+    static let contactDeleted = NSLocalizedString("Your contact was deleted.", comment: "")
+    static let contactNotReady = NSLocalizedString("The connection is still being made, please try again later.", comment: "")
+    static let allowCallsTitle = NSLocalizedString("Allow calls?", comment: "")
+    static let allowCallsMessage = NSLocalizedString("Your contact must be allowed to call you before you can call them.", comment: "")
+    static let allow = NSLocalizedString("Allow", comment: "")
+    static let callsProhibited = NSLocalizedString("Calls prohibited!", comment: "")
+    static let callsAskContact = NSLocalizedString("Ask your contact to enable calls first.", comment: "")
+    static let callsCheckBoth = NSLocalizedString("Please check yours and your contact preferences.", comment: "")
+    static let fixConnectionTitle = NSLocalizedString("Fix connection first?", comment: "")
+    static let fixConnectionMessage = NSLocalizedString("The encryption for this connection needs to be re-negotiated.", comment: "")
+    static let fix = NSLocalizedString("Fix", comment: "")
+    static let renegotiationInProgress = NSLocalizedString("The encryption is being re-negotiated, please try again later.", comment: "")
 }
 
 // MARK: - Previews

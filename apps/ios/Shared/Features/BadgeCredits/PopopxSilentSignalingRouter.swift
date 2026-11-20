@@ -542,9 +542,9 @@ struct PopopxInflightRedeem: Hashable, Sendable {
 }
 
 private enum PopopxSignalingCopy {
-    static let waitingForPeer = "已发出兑换请求，等待对方确认"
-    static let genericFailure = "兑换未完成"
-    static func redeemed(_ days: Int) -> String { "兑换成功 · 徽章点亮 \(days) 天" }
+    static let waitingForPeer = NSLocalizedString("Redeem request sent — waiting for the other side to confirm", comment: "signaling toast")
+    static let genericFailure = NSLocalizedString("Redemption did not complete", comment: "signaling fallback")
+    static func redeemed(_ days: Int) -> String { String(format: NSLocalizedString("Redeemed · badge lit for %lld days", comment: "signaling toast"), days) }
 }
 
 /// 出站文本里的那一句人话。卡片本身的渲染在 `PopopxCommerceCards.swift`（第 9 项），
@@ -553,16 +553,16 @@ private enum PopopxSignalingCopy {
 enum PopopxCommerceCardText {
     static func messageText(gift payload: PopopxGiftCardPayload, note: String) -> String {
         let line = note.isEmpty
-            ? "🎁 [礼物徽章] \(payload.period.days) 天"
-            : "🎁 [礼物徽章] \(payload.period.days) 天 · \(note)"
+            ? String(format: NSLocalizedString("🎁 [Gift badge] %lld days", comment: "outgoing gift card line"), payload.period.days)
+            : String(format: NSLocalizedString("🎁 [Gift badge] %1$lld days · %2$@", comment: "outgoing gift card line with note"), payload.period.days, note)
         return line + "\n" + payload.wireString
     }
 
     static func messageText(packet payload: PopopxRedPacketPayload) -> String {
         // 人类那一行必须与机器那一行说同一个数：份数写在卡片上，拆开时才对得上账。
         let head = payload.recipients > 1
-            ? "🧧 [算力点红包] \(payload.amount) · 均分 \(payload.recipients) 份"
-            : "🧧 [算力点红包] \(payload.amount)"
+            ? String(format: NSLocalizedString("🧧 [Compute Credits packet] %1$lld · split equally into %2$lld shares", comment: "outgoing red packet line"), payload.amount, payload.recipients)
+            : String(format: NSLocalizedString("🧧 [Compute Credits packet] %lld", comment: "outgoing red packet line"), payload.amount)
         return payload.note.isEmpty ? head + "\n" + payload.wireString : head + " · " + payload.note + "\n" + payload.wireString
     }
 
@@ -570,6 +570,6 @@ enum PopopxCommerceCardText {
     /// 时长同源：这里写"30 天"、那边签出别的天数，就是两张嘴说一个价。
     static func messageText(channel payload: PopopxChannelAccessPayload) -> String {
         let days = PopopxCommerceLimits.channelTicketSeconds / 86_400
-        return "🔒 [频道订阅门槛] \(payload.price) 算力点 / \(days) 天\n" + payload.wireString
+        return String(format: NSLocalizedString("🔒 [Channel subscription] %1$lld Compute Credits / %2$lld days", comment: "outgoing channel gate line"), payload.price, days) + "\n" + payload.wireString
     }
 }

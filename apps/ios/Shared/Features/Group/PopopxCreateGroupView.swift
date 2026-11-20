@@ -827,9 +827,9 @@ private struct PopopxFormDivider: View {
 /// 共享模型就是伪造运行状态。
 private struct PopopxCreateGroupFormPreviewHost: View {
     @State private var profile = GroupProfile(
-        displayName: "周末骑行",
+        displayName: "Weekend Riders",
         fullName: "Weekend Ride",
-        shortDescr: "同城骑行，周六早上出发"
+        shortDescr: "City rides, Saturday mornings"
     )
     @State private var incognito = false
     @State private var historyEnabled = true
@@ -843,12 +843,12 @@ private struct PopopxCreateGroupFormPreviewHost: View {
             historyEnabled: $historyEnabled,
             selectedContacts: $selected,
             selectedRole: $role,
-            currentIdentityName: "阿青",
+            currentIdentityName: "Ah Qing",
             contacts: [
-                PopopxInvitableContact(id: 1, name: "小舟", imageStr: nil, inviteProhibited: false),
-                PopopxInvitableContact(id: 2, name: "阿禾", imageStr: nil, inviteProhibited: false),
-                PopopxInvitableContact(id: 3, name: "林二", imageStr: nil, inviteProhibited: true),
-                PopopxInvitableContact(id: 4, name: "老周", imageStr: nil, inviteProhibited: false),
+                PopopxInvitableContact(id: 1, name: "Xiao Zhou", imageStr: nil, inviteProhibited: false),
+                PopopxInvitableContact(id: 2, name: "Ah He", imageStr: nil, inviteProhibited: false),
+                PopopxInvitableContact(id: 3, name: "Lin Er", imageStr: nil, inviteProhibited: true),
+                PopopxInvitableContact(id: 4, name: "Lao Zhou", imageStr: nil, inviteProhibited: false),
             ],
             onSubmit: { }
         )
@@ -868,87 +868,87 @@ struct PopopxCreateGroupView_Previews: PreviewProvider {
 
 /// 页面上每一句中文只在这里出现一次。
 private enum Copy {
-    static let pageTitle = "创建群组"
-    static let pageExplainer = "群组没有服务器上的档案：它只存在于成员的设备里。先把名字和头像定下来，再决定请谁进来。"
+    static let pageTitle = NSLocalizedString("Create group", comment: "")
+    static let pageExplainer = NSLocalizedString("A group has no profile on any server: it exists only on its members' devices. Set the name and the avatar first, then decide who to invite.", comment: "")
 
-    static let avatarTitle = "群头像"
-    static let avatarFootnote = "头像只在本机与成员设备之间同步，不上传到任何服务器。"
-    static let avatarPickLabel = "选择群头像"
-    static let avatarRemove = "移除头像"
-    static let avatarEmptyState = "还没选头像，现在用的是 popopx 的默认标记。"
-    static let avatarChosenState = "已选好，保存时会先裁成方形再压缩。"
-    static let avatarDialogTitle = "群头像"
-    static let takePicture = "拍照"
-    static let chooseFromLibrary = "从照片库选择"
-    static let cancel = "取消"
+    static let avatarTitle = NSLocalizedString("Group avatar", comment: "")
+    static let avatarFootnote = NSLocalizedString("The avatar syncs only between this device and the members' devices. It is uploaded to no server.", comment: "")
+    static let avatarPickLabel = NSLocalizedString("Choose the group avatar", comment: "")
+    static let avatarRemove = NSLocalizedString("Remove the avatar", comment: "")
+    static let avatarEmptyState = NSLocalizedString("No avatar has been chosen; the popopx mark is in use.", comment: "")
+    static let avatarChosenState = NSLocalizedString("Chosen. It is cropped to a square and compressed before saving.", comment: "")
+    static let avatarDialogTitle = NSLocalizedString("Group avatar", comment: "")
+    static let takePicture = NSLocalizedString("Take picture", comment: "")
+    static let chooseFromLibrary = NSLocalizedString("Choose from library", comment: "")
+    static let cancel = NSLocalizedString("Cancel", comment: "")
 
-    static let nameTitle = "名字"
-    static let nameFootnote = "群名是会话列表上显示的那一行；展示名与一句话简介只在点开群档案时出现。"
-    static let nameFieldLabel = "群名"
-    static let nameFieldPrompt = "输入群名"
-    static let fullNameFieldLabel = "展示名"
-    static let fullNameFieldPrompt = "可选，群档案里的全称"
-    static let shortDescrFieldLabel = "一句话简介"
-    static let shortDescrFieldPrompt = "可选"
-    static let nameFixRow = "群名含非法字符"
-    static let nameFixHint = "点一下改正"
-    static let invalidNameTitle = "名字不合法"
-    static let invalidNameBody = "群名里有些字符核心不接受，改正后会去掉它们。"
-    static let fixName = "改正"
+    static let nameTitle = NSLocalizedString("Name", comment: "")
+    static let nameFootnote = NSLocalizedString("The group name is the line shown in the chat list; the display name and the one-line summary appear only when you open the group profile.", comment: "")
+    static let nameFieldLabel = NSLocalizedString("Group name", comment: "")
+    static let nameFieldPrompt = NSLocalizedString("Enter the group name", comment: "")
+    static let fullNameFieldLabel = NSLocalizedString("Display name", comment: "")
+    static let fullNameFieldPrompt = NSLocalizedString("Optional, the full name in the group profile", comment: "")
+    static let shortDescrFieldLabel = NSLocalizedString("One-line summary", comment: "")
+    static let shortDescrFieldPrompt = NSLocalizedString("Optional", comment: "")
+    static let nameFixRow = NSLocalizedString("The group name contains illegal characters", comment: "")
+    static let nameFixHint = NSLocalizedString("Tap to fix", comment: "")
+    static let invalidNameTitle = NSLocalizedString("The name is not valid", comment: "")
+    static let invalidNameBody = NSLocalizedString("The core does not accept some of the characters in the group name. Fixing it removes them.", comment: "")
+    static let fixName = NSLocalizedString("Fix", comment: "")
 
-    static let identityTitle = "名片与历史"
-    static let incognitoRow = "隐身建群"
-    static let incognitoNote = "用一个新的随机名片进群，本机的常用名片不出现在成员列表里。"
-    static let sharedRandomProfileNote = "新的随机名片会被分享。"
-    static let sharedNamedProfileFormat = "你的名片 %@ 会被分享。"
-    static let decentralizedNote = "完全去中心化，只有成员看得见。"
-    static let historyRow = "向新成员开放历史消息"
-    static let historyNote = "关闭后，刚进群的人只能看到之后的消息。"
+    static let identityTitle = NSLocalizedString("Profile card and history", comment: "")
+    static let incognitoRow = NSLocalizedString("Create the group incognito", comment: "")
+    static let incognitoNote = NSLocalizedString("A new random profile card joins the group, and the usual profile card of this device does not appear in the member list.", comment: "")
+    static let sharedRandomProfileNote = NSLocalizedString("The new random profile card will be shared.", comment: "")
+    static let sharedNamedProfileFormat = NSLocalizedString("Your profile card %@ will be shared.", comment: "")
+    static let decentralizedNote = NSLocalizedString("Completely decentralized; only members can see it.", comment: "")
+    static let historyRow = NSLocalizedString("Share message history with new members", comment: "")
+    static let historyNote = NSLocalizedString("When this is off, someone who just joined sees only the messages that come after.", comment: "")
 
-    static let membersTitleFormat = "请谁进来（本机可邀请 %d 位）"
-    static let membersTitleIncognito = "请谁进来"
-    static let membersFootnoteInvite = "点一下就选上。在这里选好的，创建时当场发出邀请；一个都不选，下一步进挑选页。"
-    static let membersFootnoteIncognito = "隐身建群不发定向邀请：群建好之后直接给你一条群组链接，谁拿到链接谁进群。"
-    static let membersEmpty = "本机还没有联系人。可以先建群，之后用群组链接让别人自己加进来。"
-    static let membersEmptyFootnote = "还没有可邀请的联系人。建群之后可以用群组链接让人自己加进来。"
-    static let membersIncognitoNote = "隐身群靠群组链接招人，这一步不定向邀请联系人。"
-    static let selectedCountFormat = "已选 %d 位"
-    static let prohibitedTitle = "不能邀请这位联系人"
-    static let prohibitedBody = "你和这位联系人之间用的是隐身名片，把他请进用主名片建的群会把两条线连起来。改用它建群，或者用群组链接。"
-    static let gotIt = "知道了"
+    static let membersTitleFormat = NSLocalizedString("Who to invite (%lld contacts can be invited on this device)", comment: "")
+    static let membersTitleIncognito = NSLocalizedString("Who to invite", comment: "")
+    static let membersFootnoteInvite = NSLocalizedString("Tap a contact to select them. Whoever is selected here is invited as soon as the group is created; select no one and the next step is the picker page.", comment: "")
+    static let membersFootnoteIncognito = NSLocalizedString("Creating a group incognito sends no directed invitations: once the group exists you get a group link, and whoever has the link joins.", comment: "")
+    static let membersEmpty = NSLocalizedString("There are no contacts on this device yet. Create the group first, then let people join through the group link.", comment: "")
+    static let membersEmptyFootnote = NSLocalizedString("There are no contacts to invite yet. After the group exists you can let people join through the group link.", comment: "")
+    static let membersIncognitoNote = NSLocalizedString("An incognito group grows through its group link; this step sends no directed invitations.", comment: "")
+    static let selectedCountFormat = NSLocalizedString("%lld selected", comment: "")
+    static let prohibitedTitle = NSLocalizedString("This contact cannot be invited", comment: "")
+    static let prohibitedBody = NSLocalizedString("You and this contact use an incognito profile card between you. Inviting them into a group created with your main profile card would connect the two lines. Create the group with that card instead, or use a group link.", comment: "")
+    static let gotIt = NSLocalizedString("OK", comment: "")
 
-    static let roleRow = "新成员角色"
-    static let roleSheetTitle = "新成员角色"
-    static let roleSheetSubtitle = "他进群之后能做什么。建群的人是群主，可以授下面任意一档。"
-    static let done = "完成"
-    static let roleRelay = "中继"
-    static let roleObserver = "观察者"
-    static let roleAuthor = "作者"
-    static let roleMember = "成员"
-    static let roleModerator = "主持人"
-    static let roleAdmin = "管理员"
-    static let roleOwner = "群主"
-    static let roleNoteRelay = "只在群内转发，不参与聊天。"
-    static let roleNoteObserver = "只能看，不能发消息。"
-    static let roleNoteAuthor = "能发消息，管不了别人。"
-    static let roleNoteMember = "能发消息，也能邀请新的成员。"
-    static let roleNoteModerator = "在成员之上，可以删别人的消息、踢人。"
-    static let roleNoteAdmin = "在主持人之上，可以改群档案和角色。"
-    static let roleNoteOwner = "群里的最高一档，只有你建群时自己拿着。"
+    static let roleRow = NSLocalizedString("New member role", comment: "")
+    static let roleSheetTitle = NSLocalizedString("New member role", comment: "")
+    static let roleSheetSubtitle = NSLocalizedString("What they can do once they have joined. Whoever creates the group is the owner and can grant any of the tiers below.", comment: "")
+    static let done = NSLocalizedString("Done", comment: "")
+    static let roleRelay = NSLocalizedString("relay", comment: "")
+    static let roleObserver = NSLocalizedString("observer", comment: "")
+    static let roleAuthor = NSLocalizedString("author", comment: "")
+    static let roleMember = NSLocalizedString("member", comment: "")
+    static let roleModerator = NSLocalizedString("moderator", comment: "")
+    static let roleAdmin = NSLocalizedString("admin", comment: "")
+    static let roleOwner = NSLocalizedString("owner", comment: "")
+    static let roleNoteRelay = NSLocalizedString("Only relays inside the group and takes no part in the chat.", comment: "")
+    static let roleNoteObserver = NSLocalizedString("Can read, cannot send messages.", comment: "")
+    static let roleNoteAuthor = NSLocalizedString("Can send messages, cannot manage anyone else.", comment: "")
+    static let roleNoteMember = NSLocalizedString("Can send messages and invite new members.", comment: "")
+    static let roleNoteModerator = NSLocalizedString("Above members: can delete other people's messages and remove them.", comment: "")
+    static let roleNoteAdmin = NSLocalizedString("Above moderators: can change the group profile and the roles.", comment: "")
+    static let roleNoteOwner = NSLocalizedString("The highest tier in the group; you hold it yourself because you created the group.", comment: "")
 
-    static let createCTA = "创建群组"
-    static let nextStepMembers = "下一步：进挑选页选人，或直接跳过。"
-    static let nextStepInviteInline = "下一步：建群并当场向已选的联系人发邀请，然后进群。"
-    static let nextStepNoContacts = "下一步：建群，然后生成可用的群组入口。"
-    static let nextStepLink = "隐身建群：下一步直接生成群组链接。"
-    static let unnamedIdentity = "未命名身份"
+    static let createCTA = NSLocalizedString("Create group", comment: "")
+    static let nextStepMembers = NSLocalizedString("Next: pick people on the members page, or skip it.", comment: "")
+    static let nextStepInviteInline = NSLocalizedString("Next: create the group, invite the contacts you selected here right away, then open the group.", comment: "")
+    static let nextStepNoContacts = NSLocalizedString("Next: create the group, then produce a group entry you can share.", comment: "")
+    static let nextStepLink = NSLocalizedString("Incognito group: the next step produces the group link directly.", comment: "")
+    static let unnamedIdentity = NSLocalizedString("Unnamed identity", comment: "")
 
-    static let errorTitle = "创建群组失败"
-    static let inviteErrorTitle = "添加成员失败"
-    static let linkStageTitle = "群组链接"
+    static let errorTitle = NSLocalizedString("Creating the group failed", comment: "")
+    static let inviteErrorTitle = NSLocalizedString("Adding members failed", comment: "")
+    static let linkStageTitle = NSLocalizedString("Group link", comment: "")
 
-    static let a11ySelected = "已选中"
-    static let a11yUnselected = "未选中"
-    static let a11yToggleHint = "加入或移出邀请名单"
-    static let a11yProhibitedHint = "这位联系人不能请进群"
+    static let a11ySelected = NSLocalizedString("Selected", comment: "")
+    static let a11yUnselected = NSLocalizedString("Not selected", comment: "")
+    static let a11yToggleHint = NSLocalizedString("Add to or remove from the invitation list", comment: "")
+    static let a11yProhibitedHint = NSLocalizedString("This contact cannot be invited into the group", comment: "")
 }

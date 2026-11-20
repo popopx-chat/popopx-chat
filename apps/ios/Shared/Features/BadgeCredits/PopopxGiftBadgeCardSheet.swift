@@ -231,7 +231,7 @@ struct PopopxGiftBadgeCardSheet: View {
                 .frame(minHeight: PopopxMetrics.minHitTarget)
             }
             .disabled(busy != nil)
-            .accessibilityLabel(Text(verbatim: "\(PopopxGiftBadgeCardSheet.Copy.generate) \(voucher.period.days) 天券"))
+            .accessibilityLabel(Text(verbatim: String(format: NSLocalizedString("%1$@ — %2$lld-day voucher", comment: "POPOPX gift badge sheet: generate button"), PopopxGiftBadgeCardSheet.Copy.generate, voucher.period.days)))
         }
         .padding(.vertical, PopopxMetrics.spaceXS)
     }
@@ -547,57 +547,57 @@ extension PopopxGiftBadgeCardSheet {
     static let quantityCap = 10
 
     enum Copy {
-        static let title = "送出一枚徽章"
-        static func subtitle(_ days: Int) -> String { "一张 \(days) 天的券，对方凭码兑换。" }
-        static let sourceTitle = "得到这张券"
-        static let sourceFootnote = "券只存在这台设备的 Keychain 里，能被兑一次的判据也在本机。没有券服务器，所以没有挂失、远程作废或送达回执。"
-        static let quantityTitle = "份数"
-        static let noteTitle = "留言"
-        static let notePrompt = "随券带一句话"
-        static let noteHint = "留言最多 60 字，超出会被截断"
+        static let title = NSLocalizedString("Send a badge", comment: "POPOPX gift badge sheet")
+        static func subtitle(_ days: Int) -> String { String(format: NSLocalizedString("A %lld-day voucher the recipient redeems with a code.", comment: "POPOPX gift badge sheet"), days) }
+        static let sourceTitle = NSLocalizedString("How to get this voucher", comment: "POPOPX gift badge sheet")
+        static let sourceFootnote = NSLocalizedString("The voucher lives in this device's Keychain, and the check that it can be redeemed only once is on this device too. There is no voucher server, so there is no loss report, no remote revocation and no delivery receipt.", comment: "POPOPX gift badge sheet")
+        static let quantityTitle = NSLocalizedString("Quantity", comment: "POPOPX gift badge sheet")
+        static let noteTitle = NSLocalizedString("Message", comment: "POPOPX gift badge sheet")
+        static let notePrompt = NSLocalizedString("Add a line to go with the voucher", comment: "POPOPX gift badge sheet")
+        static let noteHint = NSLocalizedString("The message is up to 60 characters; anything longer is cut off.", comment: "POPOPX gift badge sheet")
         static func mintWithCredits(period: PopopxNodeBadgePeriod, quantity: Int, cost: Int) -> String {
-            "用算力点兑换 \(quantity) 张 · \(period.days) 天 · \(cost) 点"
+            String(format: NSLocalizedString("Redeem with Compute Credits · %1$lld vouchers · %2$lld days each · %3$lld credits", comment: "POPOPX gift badge sheet"), quantity, period.days, cost)
         }
-        static func buyWithApple(price: String) -> String { "用 Apple 购买礼品券 · \(price)" }
-        static func pendingTitle(quantity: Int) -> String { "待出码的券 · \(quantity)" }
-        static let pendingFootnote = "每次出码都会新建一条一次性连接，旧码同时失效；一张券只能兑一次。"
-        static func voucherTitle(_ days: Int) -> String { "\(days) 天徽章券" }
-        static let generate = "生成兑换码"
-        static let emptyTitle = "这个档位还没有券"
-        static let emptyFootnote = "先用上面任一方式得到一张券。"
-        static let appleDelivering = "付款已完成，券正在到账。稍后回到这一页，它会出现在下面的列表里。"
-        static let applePending = "等待 Apple 确认这笔购买，确认后券会自动到账。"
-        static let howTitle = "对方怎么用"
-        static let howOne = "把码或二维码交给对方：面对面扫码、截图、聊天里发文本都可以。"
-        static let howTwo = "对方在 app 里输入这串码或扫码，本机自动建一条一次性 SMP 连接。"
-        static let howThree = "对方接受后，本机确认这张券还没被兑过，签一份授权送回去。"
-        static let howFour = "这条一次性连接随后删除，双方都不留下联系人记录。"
-        static let close = "关闭"
-        static let genericFailure = "这次没有完成。"
+        static func buyWithApple(price: String) -> String { String(format: NSLocalizedString("Buy a gift voucher with Apple · %@", comment: "POPOPX gift badge sheet"), price) }
+        static func pendingTitle(quantity: Int) -> String { String(format: NSLocalizedString("Vouchers waiting for a code · %lld", comment: "POPOPX gift badge sheet"), quantity) }
+        static let pendingFootnote = NSLocalizedString("Every new code creates a fresh one-time connection and invalidates the old one at the same time; a voucher can be redeemed only once.", comment: "POPOPX gift badge sheet")
+        static func voucherTitle(_ days: Int) -> String { String(format: NSLocalizedString("%lld-day badge voucher", comment: "POPOPX gift badge sheet"), days) }
+        static let generate = NSLocalizedString("Generate a redemption code", comment: "POPOPX gift badge sheet")
+        static let emptyTitle = NSLocalizedString("No vouchers in this tier yet", comment: "POPOPX gift badge sheet")
+        static let emptyFootnote = NSLocalizedString("Get a voucher first with either option above.", comment: "POPOPX gift badge sheet")
+        static let appleDelivering = NSLocalizedString("Payment is complete and the voucher is on its way. Come back to this page later and it will be in the list below.", comment: "POPOPX gift badge sheet")
+        static let applePending = NSLocalizedString("Waiting for Apple to confirm this purchase; once it is confirmed the voucher arrives by itself.", comment: "POPOPX gift badge sheet")
+        static let howTitle = NSLocalizedString("How the recipient uses it", comment: "POPOPX gift badge sheet")
+        static let howOne = NSLocalizedString("Give the code or the QR image to the other person: scan it face to face, send a screenshot, or paste the text in a chat.", comment: "POPOPX gift badge sheet")
+        static let howTwo = NSLocalizedString("They type this code into the app or scan it, and this device creates a one-time SMP connection by itself.", comment: "POPOPX gift badge sheet")
+        static let howThree = NSLocalizedString("Once they accept, this device checks that the voucher has not been redeemed yet and signs an authorization back.", comment: "POPOPX gift badge sheet")
+        static let howFour = NSLocalizedString("The one-time connection is deleted right after; neither device keeps a contact record.", comment: "POPOPX gift badge sheet")
+        static let close = NSLocalizedString("Close", comment: "POPOPX gift badge sheet")
+        static let genericFailure = NSLocalizedString("This did not complete.", comment: "POPOPX gift badge sheet")
     }
 }
 
 extension PopopxGiftCardPresenter {
     enum Copy {
-        static func cardTitle(_ days: Int) -> String { "\(days) 天徽章券" }
+        static func cardTitle(_ days: Int) -> String { String(format: NSLocalizedString("%lld-day badge voucher", comment: "POPOPX gift card"), days) }
         static func subtitle(_ ready: Bool) -> String {
-            ready ? "把这串码交给对方即可" : "正在生成兑换码…"
+            ready ? NSLocalizedString("Hand this code to the other person", comment: "POPOPX gift card") : NSLocalizedString("Generating a redemption code…", comment: "POPOPX gift card")
         }
-        static let codeLabel = "兑换码"
-        static let codeFootnote = "对方在「兑换徽章券」里粘贴这一串即可：分段只为了好读，空格无所谓，但大小写敏感 —— 请粘贴或扫码，不要逐字符抄。"
-        static let qrLabel = "兑换码二维码"
-        static let qrUnreadable = "二维码读不出来，请改用下面的兑换码文本"
-        static let qrWaiting = "兑换码生成中"
-        static let copy = "复制"
-        static let share = "分享"
-        static let sendToContact = "在会话里发出"
-        static let copied = "已复制"
-        static let sent = "已发出"
-        static let close = "完成"
-        static let mintFailed = "兑换码没能生成：这条一次性连接没建起来。关掉重开可以再试一次。"
-        static let signFailed = "这张券的签名没能生成：本机签名密钥不可用。"
-        static let sendFailed = "消息没发出去：这条会话连接当前不可用。"
-        static func noteLine(_ note: String) -> String { "留言：\(note)" }
+        static let codeLabel = NSLocalizedString("Redemption code", comment: "POPOPX gift card")
+        static let codeFootnote = NSLocalizedString("Paste this whole string where the app asks for a badge voucher code: the grouping is only for readability and spaces make no difference, but it is case-sensitive — paste or scan it, do not retype it character by character.", comment: "POPOPX gift card")
+        static let qrLabel = NSLocalizedString("Redemption code QR", comment: "POPOPX gift card")
+        static let qrUnreadable = NSLocalizedString("The QR image could not be read; use the redemption code text below instead.", comment: "POPOPX gift card")
+        static let qrWaiting = NSLocalizedString("Redemption code being generated", comment: "POPOPX gift card")
+        static let copy = NSLocalizedString("Copy", comment: "POPOPX gift card")
+        static let share = NSLocalizedString("Share", comment: "POPOPX gift card")
+        static let sendToContact = NSLocalizedString("Send in this chat", comment: "POPOPX gift card")
+        static let copied = NSLocalizedString("Copied", comment: "POPOPX gift card")
+        static let sent = NSLocalizedString("Sent", comment: "POPOPX gift card")
+        static let close = NSLocalizedString("Done", comment: "POPOPX gift card")
+        static let mintFailed = NSLocalizedString("No redemption code was created: the one-time connection could not be established. Close this card and open it again to try once more.", comment: "POPOPX gift card")
+        static let signFailed = NSLocalizedString("The signature for this voucher was not created: this device's signing key is unavailable.", comment: "POPOPX gift card")
+        static let sendFailed = NSLocalizedString("The message was not sent: this chat connection is not available right now.", comment: "POPOPX gift card")
+        static func noteLine(_ note: String) -> String { String(format: NSLocalizedString("Message: %@", comment: "POPOPX gift card"), note) }
     }
 }
 

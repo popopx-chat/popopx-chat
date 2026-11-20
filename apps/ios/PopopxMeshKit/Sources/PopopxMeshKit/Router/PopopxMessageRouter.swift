@@ -292,15 +292,15 @@ public enum PopopxRoutingStatus: Hashable, Sendable {
         case .smpOnline:
             nil
         case .meshOnly:
-            "公网不可用，消息改走蓝牙 Mesh"
+            NSLocalizedString("The public network is unavailable — messages go over Bluetooth mesh", comment: "")
         case let .dualChannel(peer):
-            "公网响应慢，同时通过蓝牙 Mesh 发送（\(peer.prefix(8))）"
+            String(format: NSLocalizedString("The public network is slow — also sending over Bluetooth mesh (%@)", comment: ""), String(peer.prefix(8)))
         case let .queued(count):
             "蓝牙与公网均不可用，\(count) 条消息待发送"
         case .unboundStranger:
             PopopxMessageRouter.unboundStrangerStatusText
         case .pathUnknown:
-            "正在检测公网状态"
+            NSLocalizedString("Checking the public network status", comment: "")
         }
     }
 }

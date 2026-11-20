@@ -89,17 +89,17 @@ enum PopopxProfileMediaError: Error, Hashable, Sendable {
     var reasonText: String {
         switch self {
         case .undecodableImage:
-            return "这张图片无法读取，换一张试试"
+            return NSLocalizedString("This image cannot be read; try another one.", comment: "")
         case let .oversizedImage(bytes):
-            return "这张图片压到最小仍有 \(bytes / 1_024) KB，超出单图 \(ProfileStorageManager.maximumImageBytes / 1_024 / 1_024) MB 上限"
+            return String(format: NSLocalizedString("Compressed to its smallest setting this image is still %1$lld KB, over the %2$lld MB limit for a single image.", comment: ""), bytes / 1_024, ProfileStorageManager.maximumImageBytes / 1_024 / 1_024)
         case .undecodableVideo:
-            return "这段视频无法读取，换一段试试"
+            return NSLocalizedString("This video cannot be read; try another one.", comment: "")
         case let .exportFailed(reason):
-            return "视频转码未完成（\(reason)）"
+            return String(format: NSLocalizedString("Video transcoding did not finish (%@)", comment: ""), reason)
         case let .oversizedVideo(bytes):
-            return "这段视频压到 \(ProfileStorageManager.maximumVideoSeconds) 秒后仍有 \(bytes / 1_024) KB，超出 \(ProfileStorageManager.maximumVideoBytes / 1_024 / 1_024) MB 上限"
+            return String(format: NSLocalizedString("Trimmed to %1$lld seconds, this video is still %2$lld KB, over the %3$lld MB limit.", comment: ""), ProfileStorageManager.maximumVideoSeconds, bytes / 1_024, ProfileStorageManager.maximumVideoBytes / 1_024 / 1_024)
         case .rejectedIdentifier:
-            return "主页标识不合法，已拒绝写入"
+            return NSLocalizedString("The profile identifier is not valid; the write was refused.", comment: "")
         }
     }
 }
@@ -215,7 +215,7 @@ actor ProfileStorageManager {
                 ofItemAtPath: url.path
             )
         } catch {
-            logger.error("POPOPX profile: 无法为 \(url.lastPathComponent, privacy: .public) 设置 complete 文件保护：\(error.localizedDescription, privacy: .public)")
+            logger.error("POPOPX profile: could not set complete file protection for \(url.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -223,7 +223,7 @@ actor ProfileStorageManager {
         do {
             try FileManager.default.removeItem(at: url)
         } catch {
-            logger.error("POPOPX profile: 临时文件没删掉 \(url.lastPathComponent, privacy: .public)：\(error.localizedDescription, privacy: .public)")
+            logger.error("POPOPX profile: the temporary file was not deleted \(url.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -238,11 +238,11 @@ actor ProfileStorageManager {
         do {
             data = try Data(contentsOf: url)
         } catch {
-            logger.error("POPOPX profile: 草稿读不出来（\(error.localizedDescription, privacy: .public)）")
+            logger.error("POPOPX profile: the draft could not be read (\(error.localizedDescription, privacy: .public))")
             return nil
         }
         guard let manifest = PopopxProfileManifest.decoded(json: data) else {
-            logger.error("POPOPX profile: 草稿内容不合法，保留原文件不覆盖")
+            logger.error("POPOPX profile: the draft content is not valid; the original file is kept and not overwritten")
             return nil
         }
         return manifest
@@ -330,7 +330,7 @@ actor ProfileStorageManager {
         }
         let seconds = min(duration.seconds, Double(Self.maximumVideoSeconds))
         guard let session = AVAssetExportSession(asset: asset, presetName: AVAssetExportPreset640x480) else {
-            throw PopopxProfileMediaError.exportFailed(reason: "设备不支持 640×480 导出预设")
+            throw PopopxProfileMediaError.exportFailed(reason: NSLocalizedString("This device does not support the 640×480 export preset", comment: ""))
         }
         session.outputURL = temporary
         session.outputFileType = .mp4
@@ -338,11 +338,11 @@ actor ProfileStorageManager {
         session.timeRange = CMTimeRange(start: .zero, duration: CMTime(seconds: seconds, preferredTimescale: 600))
         await session.export()
         guard session.status == .completed else {
-            throw PopopxProfileMediaError.exportFailed(reason: session.error?.localizedDescription ?? "导出状态未完成")
+            throw PopopxProfileMediaError.exportFailed(reason: session.error?.localizedDescription ?? NSLocalizedString("The export did not reach a completed state", comment: ""))
         }
         let exported = (try? FileManager.default.attributesOfItem(atPath: temporary.path)) ?? [:]
         guard let bytes = (exported[.size] as? NSNumber)?.int64Value, bytes > 0 else {
-            throw PopopxProfileMediaError.exportFailed(reason: "导出结果为空")
+            throw PopopxProfileMediaError.exportFailed(reason: NSLocalizedString("The export produced no result", comment: ""))
         }
         guard bytes <= Int64(Self.maximumVideoBytes) else {
             throw PopopxProfileMediaError.oversizedVideo(bytes: Int(bytes))
@@ -383,17 +383,17 @@ actor ProfileStorageManager {
             return .missing(mediaId: media.mediaId)
         }
         guard FileManager.default.isReadableFile(atPath: url.path) else {
-            return .unreadable(mediaId: media.mediaId, reason: "文件不可读")
+            return .unreadable(mediaId: media.mediaId, reason: NSLocalizedString("The file is not readable", comment: ""))
         }
         let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
         guard let attributes else {
-            return .unreadable(mediaId: media.mediaId, reason: "读不到文件属性")
+            return .unreadable(mediaId: media.mediaId, reason: NSLocalizedString("The file attributes could not be read", comment: ""))
         }
         guard let size = (attributes[.size] as? NSNumber)?.int64Value else {
-            return .unreadable(mediaId: media.mediaId, reason: "读不到文件大小")
+            return .unreadable(mediaId: media.mediaId, reason: NSLocalizedString("The file size could not be read", comment: ""))
         }
         guard size > 0 else {
-            return .unreadable(mediaId: media.mediaId, reason: "文件内容为空")
+            return .unreadable(mediaId: media.mediaId, reason: NSLocalizedString("The file content is empty", comment: ""))
         }
         return .loaded(url)
     }
@@ -485,7 +485,7 @@ actor ProfileStorageManager {
             } else {
                 // 文件在但整段解不开：合成 Codable 的字典是"全有或全无"的，救不出半条记录。
                 stateFileIsUnreadable = true
-                logger.error("POPOPX profile: 阅读状态文件解不开，本会话从空表开始且不再覆写该文件")
+                logger.error("POPOPX profile: the reading-state file cannot be decoded; this session starts from an empty table and will not overwrite that file")
             }
         }
         records = loaded
@@ -513,7 +513,7 @@ actor ProfileStorageManager {
         do {
             try Self.write(try encoder.encode(table), to: Self.readStateURL)
         } catch {
-            logger.error("POPOPX profile: 阅读状态写盘失败（\(error.localizedDescription, privacy: .public)）；重启后计时可能退回未读")
+            logger.error("POPOPX profile: writing the reading state failed (\(error.localizedDescription, privacy: .public)); after a restart the timers may fall back to unread")
         }
     }
 
