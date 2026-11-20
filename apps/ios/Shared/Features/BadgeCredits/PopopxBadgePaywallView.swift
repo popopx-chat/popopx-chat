@@ -15,7 +15,9 @@
 //
 //  ### 三件必须说清的事，一件都不许含糊
 //  1. **自动续费**：`PopopxCommerceCopy.renewalStatement`（3.1.2(c) 全文口径）只在订阅档出现，
-//     挂在档位脚注上，不塞进 CTA 下面当装饰。
+//     挂在档位脚注上，不塞进 CTA 下面当装饰。一次性时长档在**同一格**给
+//     `PopopxCommerceCopy.oneTimePurchaseStatement`（一次付清、永不自动续费）：这两条付款路径的
+//     续费事实相反，各说各的才不会被读成同一件事，所以自用 tab 也按这两条各成一组。
 //  2. **零赠送**：`PopopxCommerceCopy.noGiftBackStatement` 常驻充值档脚注；
 //     全页没有任何"加赠 X 算力点"的字样（提示词的"纯净充值"红线）。
 //  3. **虚拟币不跨平台**：算力点只能在本 app 内消耗，不提供任何形式的外部转移
@@ -43,6 +45,10 @@ import POPOPXChat
 struct PopopxPaywallSection: Identifiable, Hashable {
     enum Kind: Hashable {
         case subscription(PopopxNodeBadgePeriod)
+        /// 一次性时长包：付一次给 `period.days` 天，**永不自动续费**。
+        /// 与 `.subscription` 分开成两个 case（而不是订阅上加个 bool），是因为这两族的
+        /// 续费文案、恢复语义、落账路径都不一样——用类型区分才会在漏写那一支时编译报错。
+        case oneTimePass(PopopxNodeBadgePeriod)
         case giftCard(PopopxNodeBadgePeriod)
         case credits(Int)
     }
@@ -58,6 +64,7 @@ struct PopopxPaywallSection: Identifiable, Hashable {
     var period: PopopxNodeBadgePeriod? {
         switch kind {
         case let .subscription(period): period
+        case let .oneTimePass(period): period
         case let .giftCard(period): period
         case .credits: nil
         }
@@ -65,46 +72,94 @@ struct PopopxPaywallSection: Identifiable, Hashable {
 
     /// 按钮动词按档位分：订阅是"点亮"，礼品是"买一张券"，充值是"购买"。
     /// 三个动作对用户来说是三件不同的事，共用一个"立即购买"会把"给他人买"读成"给自己买"。
+    /// 通行证那一格走本地化 key：它是一条**新的付款路径**，不能借用上面任何一句中文常量
+    /// （那三处是这一页既有文案，收口到 key 需要一并动 16 本目录，超出本轮范围）。
     var actionTitle: String {
         switch kind {
         case .subscription: "点亮"
+        case .oneTimePass: PopopxCommerceCopy.passActionTitle
         case .giftCard: "购买礼品券"
         case .credits: "购买"
         }
     }
 }
 
+/// 付费墙的**档位组**：一个组标题 + 它下面那几张卡。
+///
+/// 自用 tab 分成两组，是因为那一页同时摆着两条付款路径，而它们的续费事实**相反**：
+/// 订阅到点自动扣下一次，通行证付一次就结束。混在一张无标题的列表里，用户很容易把
+/// "按年点亮"和"365 天通行证"读成同一件事的两种写法，等到账单上出现第二次扣款才发现不是。
+/// 组标题只说这一件需要说清的事，卡面上的脚注（`renewalStatement` /
+/// `oneTimePurchaseStatement`）仍在各自卡内重复一次——标题管"分组"，脚注管"这一张卡"。
+struct PopopxPaywallGroup: Identifiable {
+    let id: String
+    /// `nil` = 这一组不需要标题（礼品 tab 整组同一族，加标题反而是噪音）。
+    let title: String?
+    let sections: [PopopxPaywallSection]
+}
+
 /// 那张固定的表。
 enum PopopxPaywallPlan {
-    static func sections(tab: PopopxPaywallTab) -> [PopopxPaywallSection] {
+    /// 分组视图的唯一来源。`sections(tab:)` 是它的摊平版本，留给"只关心有哪些档位"的读法。
+    static func groups(tab: PopopxPaywallTab) -> [PopopxPaywallGroup] {
         switch tab {
         case .myself:
             [
-                PopopxPaywallSection(kind: .subscription(.monthly),
-                                     title: "按月点亮",
-                                     note: nil,
-                                     badge: nil,
-                                     sku: .subscriptionMonthly),
-                PopopxPaywallSection(kind: .subscription(.annual),
-                                     title: "按年点亮",
-                                     note: "一年一档，中途到期前随时续",
-                                     badge: nil,
-                                     sku: .subscriptionAnnual)
+                // 第一组：会到点自动扣钱的那两档。
+                PopopxPaywallGroup(id: "recurring",
+                                   title: PopopxCommerceCopy.paywallAutoRenewGroupTitle,
+                                   sections: [
+                                       PopopxPaywallSection(kind: .subscription(.monthly),
+                                                            title: "按月点亮",
+                                                            note: nil,
+                                                            badge: nil,
+                                                            sku: .subscriptionMonthly),
+                                       PopopxPaywallSection(kind: .subscription(.annual),
+                                                            title: "按年点亮",
+                                                            note: "一年一档，中途到期前随时续",
+                                                            badge: nil,
+                                                            sku: .subscriptionAnnual)
+                                   ]),
+                // 第二组：付一次结束的那两档。标题与上一组相反，卡面脚注也相反（见 `tierCard`）。
+                // 时长与订阅组同周期（30/365 天），价格也是同一档 $6.99 / $49.99 ——
+                // 两条路径的差别只在"会不会自动续费"，不在能拿到什么。
+                PopopxPaywallGroup(id: "oneTime",
+                                   title: PopopxCommerceCopy.paywallOneTimeGroupTitle,
+                                   sections: [
+                                       passSection(.monthly, .pass30Days),
+                                       passSection(.annual, .pass365Days)
+                                   ])
             ]
         case .giftCard:
             [
-                PopopxPaywallSection(kind: .giftCard(.monthly),
-                                     title: "送 30 天徽章券",
-                                     note: "生成一张券，对方凭码兑换；兑之前它可以一直留着。",
-                                     badge: nil,
-                                     sku: .giftMonthly),
-                PopopxPaywallSection(kind: .giftCard(.annual),
-                                     title: "送 365 天徽章券",
-                                     note: "同一张券只能兑一次，兑换由对方设备本机确认。",
-                                     badge: nil,
-                                     sku: .giftAnnual)
+                PopopxPaywallGroup(id: "gift", title: nil, sections: [
+                    PopopxPaywallSection(kind: .giftCard(.monthly),
+                                         title: "送 30 天徽章券",
+                                         note: "生成一张券，对方凭码兑换；兑之前它可以一直留着。",
+                                         badge: nil,
+                                         sku: .giftMonthly),
+                    PopopxPaywallSection(kind: .giftCard(.annual),
+                                         title: "送 365 天徽章券",
+                                         note: "同一张券只能兑一次，兑换由对方设备本机确认。",
+                                         badge: nil,
+                                         sku: .giftAnnual)
+                ])
             ]
         }
+    }
+
+    /// 通行证档位卡：标题由本地化格式串生成（"30-day pass" / "365-day pass"），
+    /// 天数只有 `PopopxNodeBadgePeriod` 那一处来源，行上写的与真正发放的不可能分叉。
+    private static func passSection(_ period: PopopxNodeBadgePeriod, _ sku: PopopxNodeBadgeSku) -> PopopxPaywallSection {
+        PopopxPaywallSection(kind: .oneTimePass(period),
+                             title: String(format: PopopxCommerceCopy.passTierTitleFormat, period.days),
+                             note: nil,
+                             badge: nil,
+                             sku: sku)
+    }
+
+    static func sections(tab: PopopxPaywallTab) -> [PopopxPaywallSection] {
+        groups(tab: tab).flatMap(\.sections)
     }
 
     /// 充值档位永远排在订阅/礼品之后，跨 tab 不变 —— 它是"补充余额"，不是"选一种会员"。
@@ -143,6 +198,9 @@ struct PopopxBadgePaywallView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var store = PopopxStoreKitManager.shared
+    /// 通行证落账要用它（`activate` 是"唯一一处写 `.badgeRecord`"的那个入口），
+    /// 同时它也让这一页在点亮之后立刻读到新的 phase —— `@Observable` 的读侧就是这一页自己。
+    @State private var badge = PopopxBadgeManager.shared
     @State private var toast = PopopxToastModel()
 
     @State private var tab: PopopxPaywallTab = .myself
@@ -183,8 +241,13 @@ struct PopopxBadgePaywallView: View {
                     storeUnavailableNote
                 }
 
-                ForEach(PopopxPaywallPlan.sections(tab: tab)) { section in
-                    tierCard(section)
+                ForEach(PopopxPaywallPlan.groups(tab: tab)) { group in
+                    if let title = group.title {
+                        groupHeader(title)
+                    }
+                    ForEach(group.sections) { section in
+                        tierCard(section)
+                    }
                 }
 
                 benefitStrip
@@ -197,6 +260,20 @@ struct PopopxBadgePaywallView: View {
     }
 
     // MARK: 档位卡
+
+    /// 组标题。刻意**不**进 `PopopxSectionCard`：那是给"浅色卡里几行"用的，
+    /// 把两张品牌色档卡塞进一张浅色卡会再套一层圆角，读起来像设置页而不是价目表。
+    /// 这里只做一件事——把"会不会自动续费"这一族区别提到卡片之上，让扫视顺序先遇到它。
+    private func groupHeader(_ title: String) -> some View {
+        HStack(spacing: PopopxMetrics.spaceXS) {
+            Text(verbatim: title)
+                .font(PopopxType.emphasis)
+                .foregroundStyle(PopopxPalette.label)
+            Spacer(minLength: PopopxMetrics.spaceS)
+        }
+        .padding(.top, PopopxMetrics.spaceXS)
+        .accessibilityAddTraits(.isHeader)
+    }
 
     private func tierCard(_ section: PopopxPaywallSection) -> some View {
         VStack(alignment: .leading, spacing: PopopxMetrics.spaceS) {
@@ -245,8 +322,8 @@ struct PopopxBadgePaywallView: View {
                 .accessibilityLabel(Text(verbatim: "\(section.actionTitle) \(section.title)"))
             }
 
-            if section.sku.isSubscription {
-                Text(PopopxCommerceCopy.renewalStatement)
+            if let statement = renewalStatement(for: section) {
+                Text(verbatim: statement)
                     .font(PopopxType.microTag)
                     .foregroundStyle(PopopxPalette.onBrand.opacity(0.80))
                     .fixedSize(horizontal: false, vertical: true)
@@ -257,22 +334,46 @@ struct PopopxBadgePaywallView: View {
         .background(PopopxPalette.brand, in: .rect(cornerRadius: PopopxMetrics.radiusCard))
     }
 
+    /// 卡面那一格"这一档到底会不会再来扣钱"。两句话占**同一个位置**、用同一套排版，
+    /// 于是两条付款路径并排扫视时，唯一的差别就是这句话本身——这是 3.1.2(c) 要的形态。
+    /// 按 `kind` 穷尽而不是问 `sku.isSubscription`：将来再加一族时，编译器会逼着这里表态。
+    private func renewalStatement(for section: PopopxPaywallSection) -> String? {
+        switch section.kind {
+        case .subscription: PopopxCommerceCopy.renewalStatement
+        case .oneTimePass: PopopxCommerceCopy.oneTimePurchaseStatement
+        case .giftCard, .credits: nil
+        }
+    }
+
     /// 折扣徽章。年档那一句"省 X%"是**按两份实时标价算出来的**，不是写死的数字：
     /// 一旦调价，写死的 "33%" 立刻变成一句假话（当前配置 6.99×12 对 49.99 实际是 40%），
     /// 而"省多少"是审核与广告 both 会核对的陈述。价格还没读到时宁可不显示徽章 —— 宁缺毋假。
+    /// 订阅年档与**通行证年档**走同一条算法（见 `percentSaved`）：两族都是"一次覆盖一整年 vs
+    /// 按月买十二次"的对比，基准一样，所以徽章口径也必须一样。
     private func savingBadge(for section: PopopxPaywallSection) -> String? {
-        if case .subscription(.annual) = section.kind {
-            guard let monthly = store.product(for: .subscriptionMonthly)?.price,
-                  let annual = store.product(for: .subscriptionAnnual)?.price,
-                  monthly > 0 else { return nil }
-            let fullPrice = monthly * 12
-            let saved = fullPrice - annual
-            guard saved > 0 else { return nil }
-            let percent = NSDecimalNumber(decimal: saved / fullPrice).doubleValue * 100
-            guard percent >= 1 else { return nil }
-            return String(format: PopopxCommerceCopy.savePercentFormat, Int(percent.rounded()))
+        switch section.kind {
+        case .subscription(.annual):
+            percentSaved(monthly: .subscriptionMonthly, annual: .subscriptionAnnual)
+        case .oneTimePass(.annual):
+            percentSaved(monthly: .pass30Days, annual: .pass365Days)
+        default:
+            section.badge
         }
-        return section.badge
+    }
+
+    /// 「按月买 12 次」对「一次买一年」省下的百分比文案。`months` 固定取 12：
+    /// 两个 SKU 的周期都是 30 天与 365 天，而 30×12=360 天略少于 365 天，
+    /// 因此这句话是**保守**的（把多出来的 5 天算进"省"里，是这一类对比的通行口径，不是夸大）。
+    private func percentSaved(monthly monthlySku: PopopxNodeBadgeSku, annual annualSku: PopopxNodeBadgeSku) -> String? {
+        guard let monthly = store.product(for: monthlySku)?.price,
+              let annual = store.product(for: annualSku)?.price,
+              monthly > 0 else { return nil }
+        let fullPrice = monthly * 12
+        let saved = fullPrice - annual
+        guard saved > 0 else { return nil }
+        let percent = NSDecimalNumber(decimal: saved / fullPrice).doubleValue * 100
+        guard percent >= 1 else { return nil }
+        return String(format: PopopxCommerceCopy.savePercentFormat, Int(percent.rounded()))
     }
 
     /// 五条利益点，每条都对应一个本模块真做出来的东西：徽章胶囊（`PopopxBadgeCapsuleView`）、
@@ -387,10 +488,17 @@ struct PopopxBadgePaywallView: View {
         defer { busySkuId = nil }
         let result = await store.purchase(sku)
         switch result {
-        case .success(.purchased):
-            // 到账这件事由交付回调（`PopopxCreditsManager.apply(storeReceipt:)` 与
-            // `PopopxBadgeManager.apply(storeReceipt:)`）负责，本面板只报告"这一笔付过了"。
-            // 所以这里绝不写余额、绝不写 `.badgeRecord`：写了就会和回调那一份互相覆盖。
+        case let .success(.purchased(receipt)):
+            // 一次性时长包**必须在这一笔的返回路径上当场点亮**。判据是这一族的交付路径本身：
+            // 管理器的两条落账腿都不接它（`PopopxBadgeManager.apply(storeReceipt:)` 按
+            // `isSubscription` 过滤，`PopopxCreditsManager.apply(storeReceipt:)` 对 `.oneTimePass`
+            // 直接 return），恢复流程也把它排除在重投之外（Apple 对非续订订阅不承诺"恢复"语义，
+            // 按时长重投一次就是白送一段时长）。也就是说：这笔钱付完之后，除了这里没有第二处会点亮它。
+            // 等一个不存在的回调 = 用户白付一次钱，那是这个模块复盘过三次的原罪。
+            // 点亮仍只走唯一入口 `PopopxBadgeManager.activate`；这里只负责算到期时刻（见 `grantPass`）。
+            if let period = sku.oneTimePassPeriod, await grantPass(period, receipt: receipt) == false {
+                return
+            }
             PopopxHaptics.notice(.success)
             toast.show(Copy.purchased(sku), kind: .encrypted)
             if case let .giftCard(period) = sku.kind {
@@ -406,6 +514,33 @@ struct PopopxBadgePaywallView: View {
             // 取消不是错误，不震动、不标红；真失败才把 `PopopxBadgeCreditsError` 那句话原样说出去。
             toast.show(error.errorDescription ?? Copy.genericFailure, kind: .danger)
         }
+    }
+
+    /// 时长包落账。**唯一写 `.badgeRecord` 的入口仍然是 `PopopxBadgeManager.activate`**，
+    /// 这一层只负责取到期时刻：`badge.stackedExpiryMs(period:)` = `max(now, 本机当前到期) + period.days`。
+    /// 取 `max(now, 当前到期)` 而不是 `now` 起步，是为了让通行证永远**叠加**在剩余时间之上——
+    /// 徽章还剩 200 天时买 30 天通行证，到期是 230 天后，不是 30 天后。
+    /// 这个算式在工程里只有一份：通行证、算力点兑换、礼品券三条腿都调它
+    /// （`PopopxBadgeManager.stackedExpiryMs`），界面上"再加 N 天"和落账用的是同一个数。
+    /// （`activate` 内部那一句 `max(传入, 现有)` 的合并语义一个字都不动；这里传的是已经算好的时刻，
+    /// 两道 max 叠在一起只会得到同一个结果，不会重复计时。）
+    /// 顺序是本模块对"钱付了但什么都没发生"唯一的防线：**先点亮，后 `finish`**。
+    /// 点亮失败就不 finish，那笔交易留在 Apple 侧，用户下次还能再拿到它。
+    private func grantPass(_ period: PopopxNodeBadgePeriod, receipt: PopopxStoreReceipt) async -> Bool {
+        do {
+            try badge.activate(period: period, source: .storePass,
+                               expiresAtMs: badge.stackedExpiryMs(period: period),
+                               receiptDigest: receipt.digest)
+        } catch {
+            // 把真话原样说出去（Keychain 写不进去、时钟被拨到过去，是两句不同的话）。
+            // `catch` 绑定的是 `any Error`，`errorDescription` 只能经 `LocalizedError` 取到；
+            // 上面 `case let .failure(error)` 那两处不用绕，是因为 Result 的失败类型已经是具体的。
+            PopopxHaptics.notice(.error)
+            toast.show((error as? LocalizedError)?.errorDescription ?? Copy.genericFailure, kind: .danger)
+            return false
+        }
+        await store.finish(receipt)
+        return true
     }
 
     private func restore() async {
@@ -446,6 +581,9 @@ private extension PopopxBadgePaywallView {
             switch sku.kind {
             case let .subscription(period):
                 "已购买 · 徽章点亮 \(period.days) 天"
+            case let .oneTimePass(period):
+                // 通行证到账那一句走本地化 key（新句子，不进上面那组中文常量）。
+                String(format: PopopxCommerceCopy.passGrantedFormat, period.days)
             case let .giftCard(period):
                 "礼品券已生成 · \(period.days) 天"
             case let .credits(amount):

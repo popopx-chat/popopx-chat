@@ -3725,3 +3725,31 @@ server test failure */
 "While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content." = "เมื่อแอปไม่ได้อยู่เบื้องหน้า ทั้งหน้าจอจะถูกแทนที่ด้วยภาพปิดบัง ตัวสลับแอปและภาพหน้าจอ จึงไม่มีเนื้อหาแชตปรากฏ";
 "Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source." = "ฟิลด์ติดตามจะถูกตัดออกจากลิงก์ขณะที่คุณเขียนข้อความ สิ่งที่อีกฝ่ายได้รับจึงไม่มีร่องรอย ต้นทางของคุณ";
 "Remove link tracking" = "ลบการติดตามในลิงก์";
+
+/* POPOPX round 7 */
+"Buy" = "ซื้อ";
+"Renew" = "ต่ออายุ";
+"Tap to open plans and prices" = "แตะเพื่อดูแผนและราคา";
+"Auto-renewing subscriptions" = "การเป็นสมาชิกที่ต่ออายุอัตโนมัติ";
+"One-time passes" = "สิทธิ์ใช้งานครั้งเดียว";
+"One-time pass" = "สิทธิ์ใช้งานครั้งเดียว";
+"%lld-day pass" = "สิทธิ์ใช้งาน %lld วัน";
+"Buy pass" = "ซื้อสิทธิ์ใช้งาน";
+"This is a one-time purchase. It never renews automatically and no further payment is taken." = "นี่คือการซื้อครั้งเดียว ไม่ต่ออายุอัตโนมัติ และไม่มีการเรียกเก็บเงินเพิ่มเติม";
+"Badge lit for %lld more days." = "เปิดใช้ป้ายต่ออีก %lld วัน";
+"Choose a plan" = "เลือกแผน";
+"Renew or change plan" = "ต่ออายุหรือเปลี่ยนแผน";
+"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "เปิดแผง 厢语: สวิตช์หลัก ช่อง และโหนดใกล้เคียง";
+"Channels" = "ช่อง";
+"Create public channel" = "สร้างช่องสาธารณะ";
+"Join channel" = "เข้าร่วมช่อง";
+"Paste link / Scan" = "วางลิงก์ / สแกน";
+"Subscribed channels" = "ช่องที่ติดตาม";
+"No channels yet" = "ยังไม่มีช่อง";
+"%d channels you follow" = "ช่องที่ติดตาม: %d";
+"No messages in this channel yet" = "ยังไม่มีข้อความในช่องนี้";
+"No channels yet. Create a public channel with the plus button above, or join one from a link or a QR code." = "ยังไม่มีช่อง สร้างช่องสาธารณะด้วยปุ่ม “+” ข้างบน หรือเข้าร่วมจากลิงก์หรือคิวอาร์โค้ด";
+"Use Join channel in the top right corner to open a channel from a link or a QR code, or create a public channel with the plus button on the Messages tab." = "ใช้ “เข้าร่วมช่อง” ที่มุมขวาบนเพื่อเปิดช่องจากลิงก์หรือคิวอาร์โค้ด หรือสร้างช่องสาธารณะด้วยปุ่ม “+” ในแท็บแชท";
+"%lld purchases were restored." = "กู้คืน %lld การซื้อแล้ว";
+"Nothing to restore for this item." = "ไม่มีสิ่งต้องกู้คืนสำหรับรายการนี้";
+"Your subscription was restored." = "การเป็นสมาชิกของคุณถูกกู้คืนแล้ว";

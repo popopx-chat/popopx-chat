@@ -1,6 +1,6 @@
 //  PopopxStoreKitManager.swift
 //
-//  StoreKit 2 引擎：7 个 SKU 的加载、购买、后台续费监听、权益核对与恢复购买。
+//  StoreKit 2 引擎：9 个 SKU 的加载、购买、后台续费监听、权益核对与恢复购买。
 //
 //  与 `Shared/Views/Badges/BadgeStore.swift`（SimpleX 支持者徽章）的分工必须说清楚，
 //  因为两者都在同一个 app 里用 StoreKit，语义却相反：
@@ -137,7 +137,8 @@ final class PopopxStoreKitManager {
         switch sku.kind {
         case .subscription(.annual): PopopxCommerceCopy.pricePerYear
         case .subscription(.monthly): PopopxCommerceCopy.pricePerMonth
-        case .giftCard, .credits: nil
+        // 通行证不给周期后缀：它不是"每月/每年"，那一句话由档位上的非续订声明说。
+        case .oneTimePass, .giftCard, .credits: nil
         }
     }
 
@@ -382,7 +383,9 @@ final class PopopxStoreKitManager {
             switch sku.kind {
             case .subscription: subscriptionReceipts.append(receipt)
             case .giftCard: giftReceipts.append(receipt)
-            case .credits: break   // 消耗型点数充值不进恢复流程，见上面那条注释。
+            // 一次性时长包（非续订订阅）不进恢复流程：Apple 那侧就没有"恢复非续订"这条承诺，
+            // 而且它点亮过的时长已经落在这台设备的徽章记录里，重投一次就是白送一段时长。
+            case .oneTimePass, .credits: break   // 消耗型点数充值同理，见上面那条注释。
             }
         }
         for receipt in subscriptionReceipts + giftReceipts { await notifyDeliveries(receipt) }

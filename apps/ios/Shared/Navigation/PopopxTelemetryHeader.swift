@@ -6,7 +6,7 @@
 //
 //  左：身份切换胶囊 + 品牌标记（连点三次 = 恐慌清除的第二入口）。
 //  中：网络 / 蓝牙 双模状态胶囊。
-//  右：微信式「+」菜单 —— 添加朋友、发起群聊或加密频道、扫一扫、生成一次性连接链接。
+//  右：微信式「+」菜单 —— 添加朋友、发起群聊或加密频道、创建公开频道、扫一扫、生成一次性连接链接。
 //
 //  这一层只负责呈现与分派：真实的清场、建连、URL 规划都在被调用方里，本文件不碰。
 //  设计取值一律来自 Shared/Theme/PopopxTheme.swift（PopopxPalette / PopopxMetrics / PopopxType /
@@ -128,7 +128,7 @@ enum PopopxHeaderSignal: Hashable {
 @Observable
 final class PopopxTelemetryModel {
     /// 顶栏档位的全进程唯一实例。存在的理由只有一个：报告"近场在跑"的那一端（面对面页）和渲染顶栏的那一端
-    /// （消息页）不是同一个宿主 —— 消息页 `ChatsListView.swift:178` 渲染它，`PopopxProximityAddContactView`
+    /// （消息页）不是同一个宿主 —— 消息页 `ChatsListView.swift:189` 渲染它，`PopopxProximityAddContactView`
     /// 的 `begin()`/`finish()` 写它。给它单独再编一条总线才是多余，`resolve` 注释要的"持有两端的宿主"
     /// 因此就是这一个对象。`start()` 幂等（`pathStream == nil` 才订阅），所以重复挂载不会双订阅。
     static let shared = PopopxTelemetryModel()
@@ -404,11 +404,12 @@ enum PopopxInviteLink {
     }
 }
 
-/// 「+」菜单。四项全部实名：需要宿主上下文的两项由闭包注入，未接线时**禁用**，
-/// 不摆一个看起来能点的空按钮。
+/// 「+」菜单。五项全部实名：需要宿主上下文的四项由闭包注入，未接线时**禁用**，
+/// 不摆一个看起来能点的空按钮；第五项（一次性连接链接）自己就能干活，不挂闭包。
 struct PopopxPlusMenu: View {
     var onAddFriend: (() -> Void)? = nil
     var onStartGroupChat: (() -> Void)? = nil
+    var onCreateChannel: (() -> Void)? = nil
     var onScan: (() -> Void)? = nil
 
     @State private var invite: PopopxMintedInvite?
@@ -422,6 +423,8 @@ struct PopopxPlusMenu: View {
                 .disabled(onAddFriend == nil)
             Button(PopopxTelemetryCopy.startGroup, systemImage: "person.3") { onStartGroupChat?() }
                 .disabled(onStartGroupChat == nil)
+            Button(PopopxTelemetryCopy.createChannel, systemImage: "antenna.radiowaves.left.and.right") { onCreateChannel?() }
+                .disabled(onCreateChannel == nil)
             Button(PopopxTelemetryCopy.scan, systemImage: "qrcode.viewfinder") { onScan?() }
                 .disabled(onScan == nil)
             Divider()
@@ -538,6 +541,7 @@ struct PopopxTelemetryHeader: View {
     var radio: PopopxBluetoothState = .unknown
     var onAddFriend: (() -> Void)? = nil
     var onStartGroupChat: (() -> Void)? = nil
+    var onCreateChannel: (() -> Void)? = nil
     var onScan: (() -> Void)? = nil
 
     var body: some View {
@@ -568,7 +572,7 @@ struct PopopxTelemetryHeader: View {
             PopopxDualStatusCapsule(network: signal, radio: radioState)
                 .layoutPriority(2)
             Spacer(minLength: PopopxMetrics.space2XS)
-            PopopxPlusMenu(onAddFriend: onAddFriend, onStartGroupChat: onStartGroupChat, onScan: onScan)
+            PopopxPlusMenu(onAddFriend: onAddFriend, onStartGroupChat: onStartGroupChat, onCreateChannel: onCreateChannel, onScan: onScan)
                 .fixedSize()
                 .layoutPriority(2)
                 .accessibilityIdentifier("popopx.header.plus")
@@ -636,6 +640,9 @@ enum PopopxTelemetryCopy {
 
     static let addFriends = key("Add friends")
     static let startGroup = key("Start a group chat or an encrypted channel")
+    /// 复用既有词条：`"Create public channel"` 就是 `AddChannelView` 那一行按钮与旧菜单标题的同一句
+    /// （`zh-Hans` 里已译作「创建公开频道」），本页只是把它从旧菜单搬到「+」里。
+    static let createChannel = key("Create public channel")
     static let scan = key("Scan")
     static let minting = key("Generating…")
     static let mintLink = key("Create a one-time connection link")

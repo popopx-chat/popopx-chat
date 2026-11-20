@@ -2,14 +2,17 @@
 //  PopopxContactsView.swift
 //  POPOPX (iOS)
 //
-//  【第四阶段】Tab 2「通讯录」：顶部三张常驻（pinned）功能卡 —— 新的加密连接 / 我的加密群组 /
-//  按匿名身份分组 —— 下面是带 `.searchable`、右侧 A–Z 索引与 8pt 圆角头像的现代联系人列表。
+//  【第四阶段】Tab 2「通讯录」：顶部四张常驻（pinned）功能卡 —— 新的加密连接 / 我的加密群组 /
+//  我关注的频道 / 按匿名身份分组 —— 下面是带 `.searchable`、右侧 A–Z 索引与 8pt 圆角头像的现代联系人列表。
 //
 //  数据来源（本工程没有 `ChatModel.contacts`，也没有 `ChatModel.invitations`，全部从会话列表派生）：
 //  · 联系人 = `ChatModel.chats`（Shared/Model/ChatModel.swift:408）里 `.direct` 且
 //    `contact.active` 的会话，排除规则照抄 ChatListView.swift:661 的
 //    `!chat.chatInfo.chatDeleted && !chat.chatInfo.contactCard`；
 //  · 群组 = `.group` 且 `businessChat == nil && !isChannel`（照抄 ChatListView.swift:1244 的 .groups 口径）；
+//  · 频道 = `.group` 且 `ChatInfo.isChannel`（= `groupInfo?.useRelays == true`，POPOPXChat/ChatTypes.swift:2296）
+//    且 `membership.memberCurrent`：群组那条口径按定义把频道排除在外，所以频道要自己的一页，
+//    判据只写在 `isPopopxChannel(_:)` 一处（置顶那行的数字与页面里的行共用它）。
 //  · 加密连接请求 = `chatType == .contactRequest`（ChatListView.swift:675），答复走
 //    `acceptContactRequest` / `rejectContactRequest`（Shared/Model/POPOPXAPI.swift:1551 / :1574）；
 //  · 厢语待确认配对 = `PopopxMeshRuntime.shared.bannerModel.requests`（PopopxMeshUI 里
@@ -86,6 +89,11 @@ private enum PopopxContactIndex {
 private enum PopopxContactsRoute: Hashable {
     case newConnections
     case groups
+    case channels
+    /// 「加入频道」：落在既有的扫描／粘贴链接页（同一页在「消息」栏右上角的 + 里也已挂载，
+    /// `ChatsListView.swift:266-267`）。频道链接走的仍是 app 原有的 `planAndConnect` →
+    /// `apiConnectPlan` → `.groupLink` 那一条真路径（`NewChatView.swift:1320`、`:1522`）。
+    case joinChannel
 }
 
 /// 「按匿名身份分组」的实际口径：会话自己是匿名连接（`ChatInfo.incognito`）还是主身份直连。
@@ -171,6 +179,15 @@ struct PopopxContactsView: View {
                     PopopxNewConnectionsPage()
                 case .groups:
                     PopopxGroupsPage()
+                case .channels:
+                    PopopxChannelsPage()
+                case .joinChannel:
+                    // 与「消息」栏 + 菜单里「扫一扫」同一页、同一挂载写法（`ChatsListView.swift:266-272`），
+                    // 差别只在标题：这一枚的来意是"用链接或二维码加入一个频道"，标题要说清两件事。
+                    NewChatView(selection: .connect, showQRCodeScanner: true)
+                        .navigationTitle(Copy.joinChannelPageTitle)
+                        .modifier(ThemedBackground(grouped: true))
+                        .navigationBarTitleDisplayMode(.inline)
                 }
             }
             .sheet(isPresented: $showsIdentitySheet) {
@@ -240,7 +257,7 @@ struct PopopxContactsView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// 置顶的三张功能卡 + 当前分组状态。作为 pinned section header 常驻，列表从它下面滚过。
+    /// 置顶的四张功能卡 + 当前分组状态。作为 pinned section header 常驻，列表从它下面滚过。
     private var pinnedFunctions: some View {
         VStack(alignment: .leading, spacing: PopopxMetrics.spaceS) {
             PopopxSectionCard {
@@ -281,7 +298,24 @@ struct PopopxContactsView: View {
 
                 PopopxRowSeparator(inset: 0)
 
-                // 卡 3：按匿名身份分组 —— 弹层，所以能用 action 闭包的原子控件。
+                // 卡 3：我关注的频道。频道在本工程就是"用中继转发的公开群组"
+                // （`ChatInfo.isChannel` = `groupInfo?.useRelays == true`，POPOPXChat/ChatTypes.swift:2296），
+                // 上一条 `contactChats` 的口径把它排除在通讯录与群组页之外，所以它需要自己的一行。
+                NavigationLink(value: PopopxContactsRoute.channels) {
+                    PopopxFunctionRowLabel(
+                        title: Copy.channelsTitle,
+                        note: channelNote,
+                        systemImage: "antenna.radiowaves.left.and.right"
+                    ) {
+                        EmptyView()
+                    }
+                }
+                .buttonStyle(PopopxPressButtonStyle())
+                .accessibilityElement(children: .combine)
+
+                PopopxRowSeparator(inset: 0)
+
+                // 卡 4：按匿名身份分组 —— 弹层，所以能用 action 闭包的原子控件。
                 PopopxPickerRow(
                     Copy.identitiesTitle,
                     value: identityValue,
@@ -359,6 +393,11 @@ struct PopopxContactsView: View {
         contactChats.filter { $0.chatInfo.chatType == .group }
     }
 
+    /// 频道：判据与下面的频道页共用同一个 `isPopopxChannel`，两处不可能各说各话。
+    private var channelChats: [Chat] {
+        chatModel.chats.filter(isPopopxChannel)
+    }
+
     private var visibleChats: [Chat] {
         contactChats.filter { chat in
             matchesGrouping(chat) && matchesSearch(chat)
@@ -412,6 +451,10 @@ struct PopopxContactsView: View {
 
     private var groupNote: String {
         groupChats.isEmpty ? Copy.groupsNoteEmpty : Copy.groupsNote(groupChats.count)
+    }
+
+    private var channelNote: String {
+        channelChats.isEmpty ? Copy.channelsNoteEmpty : Copy.channelsNote(channelChats.count)
     }
 
     private var identityValue: String {
@@ -635,9 +678,15 @@ private struct PopopxAvatar: View {
     let chat: Chat
     let size: CGFloat
     var tint: Color = PopopxPalette.brand
+    /// 没有自定义头像时用哪个符号。默认 `nil` = 保持原样的人像符号；频道页传 `chatIconName`
+    /// （公共频道是天线条，`POPOPXChat/ChatTypes.swift:3091`），这样头像位说的就是会话自己的类型。
+    var icon: String? = nil
 
     var body: some View {
-        ProfileImage(imageStr: chat.chatInfo.image, size: size, color: tint)
+        ProfileImage(imageStr: chat.chatInfo.image,
+                     icon: Image(systemName: icon ?? "person.crop.circle.fill"),
+                     size: size,
+                     color: tint)
             .frame(width: size, height: size)
             .background(PopopxPalette.cardHigh, in: .rect(cornerRadius: PopopxMetrics.radiusAvatar))
             .clipShape(.rect(cornerRadius: PopopxMetrics.radiusAvatar, style: .continuous))
@@ -1111,6 +1160,150 @@ private struct PopopxGroupsPage: View {
     private var joined: [Row] { groups.filter { !$0.isOwner } }
 }
 
+// MARK: - 我关注的频道页
+
+/// 频道判据只写一处：置顶那行的数字和这一页的行必须说同一件事，否则角标会和列表打脸。
+private func isPopopxChannel(_ chat: Chat) -> Bool {
+    guard !chat.chatInfo.chatDeleted, !chat.chatInfo.contactCard else { return false }
+    guard let groupInfo = chat.chatInfo.groupInfo else { return false }
+    // `ChatInfo.isChannel` = `groupInfo?.useRelays == true`（POPOPXChat/ChatTypes.swift:2296）；
+    // `memberCurrent` 与上面群组页 `groups` 同一条口径：已经退出的不再算"关注的频道"。
+    return chat.chatInfo.isChannel && groupInfo.membership.memberCurrent
+}
+
+@MainActor private struct PopopxChannelsPage: View {
+    @EnvironmentObject private var chatModel: ChatModel
+
+    /// 预览开关与「消息」栏那一格是同一格（`ChatsListView.swift:142`）：用户关掉消息预览是为了
+    /// "不在列表里读内容"，这一页不能绕过它自己去读一条，所以关掉时整行不给活动那一行。
+    @AppStorage(DEFAULT_PRIVACY_SHOW_CHAT_PREVIEWS) private var showChatPreviews = true
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
+                if channels.isEmpty {
+                    PopopxSectionCard {
+                        PopopxEmptyRow(title: Copy.channelsNoteEmpty, note: Copy.channelsEmptyNote)
+                    }
+                } else {
+                    PopopxSectionCard(Copy.channelsTitle) {
+                        ForEach(channels) { chat in
+                            PopopxChannelRow(chat: chat, showsPreview: showChatPreviews) {
+                                ItemsModel.shared.loadOpenChat(chat.id)
+                            }
+                            if chat.id != channels.last?.id {
+                                PopopxRowSeparator(inset: PopopxMetrics.minHitTarget + PopopxMetrics.spaceS)
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(.top, PopopxMetrics.spaceS)
+            .padding(.bottom, PopopxMetrics.space2XL)
+        }
+        .background(PopopxPalette.base)
+        .navigationTitle(Copy.channelsTitle)
+        // 加入频道的真路径只有一条：频道链接／二维码 → `planAndConnect` → `apiConnectPlan` →
+        // `.groupLink` → `apiConnect`（`NewChatView.swift:1320`、`:1522`）。这一枚把那条已有的
+        // 扫描／粘贴页接到这里，不新造任何订阅机制。
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink(value: PopopxContactsRoute.joinChannel) {
+                    Label(Copy.joinChannelEntry, systemImage: "qrcode.viewfinder")
+                }
+            }
+        }
+    }
+
+    /// 顺序沿用 `chatModel.chats` 本身，与「消息」栏同一口径（`ChatsListView.swift:420` 也没另起一套排序）。
+    private var channels: [Chat] { chatModel.chats.filter(isPopopxChannel) }
+}
+
+/// 一行频道：天线符号（身份）+ 名称 + 最新活动时间 + 未读，点开走群组页那同一条 `loadOpenChat`。
+/// `@MainActor` + `@ObservedObject`：未读与"最新一条"都是 `Chat` 自己的 `@Published`，
+/// 不观察就只有整页重算时才动（同 `ChatsListView.swift` 的 `PopopxChatRow`）。
+@MainActor private struct PopopxChannelRow: View {
+    @ObservedObject var chat: Chat
+    let showsPreview: Bool
+    let open: () -> Void
+
+    var body: some View {
+        Button(action: open) {
+            HStack(spacing: PopopxMetrics.spaceS) {
+                PopopxAvatar(
+                    chat: chat,
+                    size: PopopxMetrics.minHitTarget,
+                    icon: chat.chatInfo.groupInfo?.chatIconName
+                )
+
+                VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
+                    HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.space2XS) {
+                        // 频道的身份符号：没有自定义头像时天线已经在头像位上，有自定义头像时
+                        // 由这一枚说"这是一路单向广播，不是群聊"（符号取自 ChatTypes.swift:5747）。
+                        Image(systemName: "antenna.radiowaves.left.and.right")
+                            .font(PopopxType.microTag)
+                            .imageScale(.medium)
+                            .foregroundStyle(PopopxPalette.labelSecondary)
+                            .accessibilityHidden(true)
+                        Text(chat.chatInfo.chatViewName)
+                            .font(PopopxType.emphasis)
+                            .foregroundStyle(PopopxPalette.label)
+                            .lineLimit(1)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: PopopxMetrics.spaceXS)
+                        timestamp
+                    }
+
+                    if let activity {
+                        Text(activity)
+                            .font(PopopxType.caption)
+                            .foregroundStyle(PopopxPalette.labelSecondary)
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                unreadBadge
+            }
+            .padding(.vertical, PopopxMetrics.spaceS)
+            .frame(minHeight: PopopxMetrics.minHitTarget)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PopopxPressButtonStyle())
+        .accessibilityElement(children: .combine)
+    }
+
+    private var timestamp: Text {
+        formatTimestampText(chat.chatItems.last?.meta.itemTs ?? chat.chatInfo.chatTs)
+            .font(PopopxType.metric)
+            .foregroundStyle(PopopxPalette.labelSecondary)
+    }
+
+    /// 关掉预览时返回 nil（整行不写那一行），而不是编一句"内容已隐藏"占位；
+    /// 撤回／过滤过的条目由 `ChatItem.text` 自己给出既有的本地化说法。
+    private var activity: String? {
+        guard showsPreview else { return nil }
+        guard let item = chat.chatItems.last else { return Copy.channelNoActivity }
+        let text = item.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        return text.isEmpty ? Copy.channelNoActivity : text
+    }
+
+    /// 未读口径与 `PopopxContactRow` 同一处：`ChatStats.unreadCount`，没有数字时也算一条未读。
+    @ViewBuilder private var unreadBadge: some View {
+        let stats = chat.chatStats
+        if stats.unreadCount > 0 || stats.unreadChat {
+            unreadCountText(stats.unreadCount > 0 ? stats.unreadCount : 1)
+                .font(PopopxType.metricSmall)
+                .foregroundStyle(PopopxPalette.onBrand)
+                .padding(.horizontal, PopopxMetrics.spaceXS)
+                .frame(minWidth: PopopxMetrics.spaceXL, minHeight: PopopxMetrics.spaceXL)
+                .background(PopopxPalette.brand, in: .capsule)
+                .accessibilityLabel(Copy.unreadA11y(max(stats.unreadCount, 1)))
+        }
+    }
+}
+
 // MARK: - 按匿名身份分组弹层
 
 private struct PopopxIdentitySheet: View {
@@ -1287,6 +1480,12 @@ private enum Copy {
         NSLocalizedString(value, comment: "POPOPX contacts groups")
     }
 
+    /// 带数字的句子一律只给一个占位符（`%d`），16 种语序不同不能靠位置排多个参数
+    /// （口径同 `PopopxTelemetryCopy.fmt`）。
+    private static func fmt(_ value: String, _ argument: CVarArg) -> String {
+        String(format: key(value), argument)
+    }
+
     static let createGroupEntry = key("Create an encrypted group")
     static let pageTitle = "通讯录"
     static let searchPrompt = "搜索联系人或群组"
@@ -1377,6 +1576,18 @@ private enum Copy {
     static let groupsEmptyNote = key("Start one with the plus button in the top right corner.")
     static let groupsNoneTitle = "暂无"
     static let groupsNoneNote = "这一类里还没有群组。"
+
+    // 频道页（本轮新增：置顶那一行 + 「我关注的频道」页 + 「加入频道」）
+    static let channelsTitle = key("Subscribed channels")
+    static let channelsNoteEmpty = key("No channels yet")
+    static func channelsNote(_ count: Int) -> String { fmt("%d channels you follow", count) }
+    static let channelsEmptyNote = key("Use Join channel in the top right corner to open a channel from a link or a QR code, or create a public channel with the plus button on the Messages tab.")
+    static let channelNoActivity = key("No messages in this channel yet")
+    /// 复用既有词条：`"Join channel"`（zh-Hans:3710「加入频道」）与 `"Paste link / Scan"`
+    /// （zh-Hans:4785「粘贴链接 / 扫描」）都已经在目录里 —— 各有 7 个目录（de/es/fr/hu/it/ru/zh-Hans），
+    /// 其余目录回落英文原句。上面六句新造的还哪本目录都没有，等集中补译。
+    static let joinChannelEntry = key("Join channel")
+    static let joinChannelPageTitle = key("Paste link / Scan")
 
     // 身份弹层
     static let identityListTitle = "本机匿名身份"

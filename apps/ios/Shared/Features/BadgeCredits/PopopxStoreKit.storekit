@@ -11,7 +11,36 @@
   },
   "identifier" : "PPXNODEBADGE01",
   "nonRenewingSubscriptions" : [
-
+    {
+      "displayPrice" : "6.99",
+      "familyShareable" : false,
+      "internalID" : "3030000001",
+      "localizations" : [
+        {
+          "description" : "Node badge lit for 30 days from purchase. One-time purchase: it never renews automatically and no further payment is taken.",
+          "displayName" : "POPOPX Node Badge Pass (30 Days)",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.popopx.badge.node.pass.30d",
+      "referenceName" : "POPOPX Node Badge Pass (30 Days)",
+      "type" : "NonRenewingSubscription"
+    },
+    {
+      "displayPrice" : "49.99",
+      "familyShareable" : false,
+      "internalID" : "3030000002",
+      "localizations" : [
+        {
+          "description" : "Node badge lit for 365 days from purchase. One-time purchase: it never renews automatically and no further payment is taken.",
+          "displayName" : "POPOPX Node Badge Pass (1 Year)",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.popopx.badge.node.pass.365d",
+      "referenceName" : "POPOPX Node Badge Pass (365 Days)",
+      "type" : "NonRenewingSubscription"
+    }
   ],
   "products" : [
     {

@@ -8523,3 +8523,27 @@ alert title */
 "Appearance and language" = "Megjelenés és nyelv";
 "While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content." = "Ha az alkalmazás nincs az előtérben, a teljes felületet egy takarónézet váltja fel, így az alkalmazásváltó és a képernyőképek nem mutatnak chat-tartalmat.";
 "Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source." = "A követési mezőket az üzenet írása közben eltávolítjuk a hivatkozásokból, így a másik fél által kapott üzenetben nem marad nyoma a forrásodnak.";
+
+/* POPOPX round 7 */
+"Buy" = "Vásárlás";
+"Renew" = "Megújítás";
+"Tap to open plans and prices" = "Érintsd meg a csomagokat és árakat";
+"Auto-renewing subscriptions" = "Automatikusan megújuló előfizetések";
+"One-time passes" = "Egyszeri bérletek";
+"One-time pass" = "Egyszeri bérlet";
+"%lld-day pass" = "Egyszeri bérlet %lld napra";
+"Buy pass" = "Bérlet megvétele";
+"This is a one-time purchase. It never renews automatically and no further payment is taken." = "Ez egyszeri vásárlás. Nem újul meg automatikusan, és további fizetés nem történik.";
+"Badge lit for %lld more days." = "A kitűző %lld nappal tovább aktív.";
+"Choose a plan" = "Válassz csomagot";
+"Renew or change plan" = "Megújítás vagy csomagváltás";
+"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "Megnyitja a 厢语 panelt: a fő kapcsolót, a csatornákat és a közeli csomópontokat";
+"Subscribed channels" = "Feliratkozott csatornák";
+"No channels yet" = "Még nincs csatorna";
+"%d channels you follow" = "Feliratkozott csatornák: %d";
+"No messages in this channel yet" = "Ebben a csatornában még nincs üzenet";
+"No channels yet. Create a public channel with the plus button above, or join one from a link or a QR code." = "Még nincs csatorna. Hozz létre nyilvános csatornát a fenti „+” gombbal, vagy csatlakozz hivatkozással vagy QR-kóddal.";
+"Use Join channel in the top right corner to open a channel from a link or a QR code, or create a public channel with the plus button on the Messages tab." = "A jobb felső sarokban lévő „Csatlakozás a csatornához” lehetőséggel hivatkozással vagy QR-kóddal nyithatsz meg csatornát, vagy nyilvánosat hozhatsz létre a „+” gombbal a Csevegések fülön.";
+"%lld purchases were restored." = "%lld vásárlás visszaállítva.";
+"Nothing to restore for this item." = "Ehhez a termékhez nincs mit visszaállítani.";
+"Your subscription was restored." = "Az előfizetésed visszaállítva.";

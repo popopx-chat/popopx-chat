@@ -3827,3 +3827,31 @@ server test failure */
 "While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content." = "Kun sovellus ei ole edustalla, koko käyttöliittymä korvataan peittokuvalla, joten sovellusvalitsin ja kuvakaappaukset eivät näytä keskustelusisältöä.";
 "Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source." = "Seurantakentät poistetaan lenkeistä jo viestiä kirjoittaessasi, joten toiselle osapuolelle saapuvassa viestissä ei ole jälkeäkään lähteestäsi.";
 "Remove link tracking" = "Poista linkkien seuranta";
+
+/* POPOPX round 7 */
+"Buy" = "Osta";
+"Renew" = "Jatka";
+"Tap to open plans and prices" = "Napauta avataksesi suunnitelmat ja hinnat";
+"Auto-renewing subscriptions" = "Automaattisesti uusiutuvat tilaukset";
+"One-time passes" = "Kertaliput";
+"One-time pass" = "Kertalippu";
+"%lld-day pass" = "Kertalippu %lld päiväksi";
+"Buy pass" = "Osta kertalippu";
+"This is a one-time purchase. It never renews automatically and no further payment is taken." = "Tämä on kertaluonteinen ostos. Se ei uusiudu automaattisesti eikä uusia laskuja tule.";
+"Badge lit for %lld more days." = "Merkki aktiivinen %lld päivää kauemmin.";
+"Choose a plan" = "Valitse suunnitelma";
+"Renew or change plan" = "Jatka tai vaihda suunnitelmaa";
+"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "Avaa paneelin 厢语: pääkytkin, kanavat ja lähellä olevat solmut";
+"Channels" = "Kanavat";
+"Create public channel" = "Luo julkinen kanava";
+"Join channel" = "Liity kanavaan";
+"Paste link / Scan" = "Liitä linkki / Skannaa";
+"Subscribed channels" = "Tilaamat kanavat";
+"No channels yet" = "Ei kanavia vielä";
+"%d channels you follow" = "Tilaamat kanavat: %d";
+"No messages in this channel yet" = "Ei viestejä tässä kanavassa vielä";
+"No channels yet. Create a public channel with the plus button above, or join one from a link or a QR code." = "Ei kanavia vielä. Luo julkinen kanava yläpuolisella + -painikkeella tai liity linkin tai QR-koodin kautta.";
+"Use Join channel in the top right corner to open a channel from a link or a QR code, or create a public channel with the plus button on the Messages tab." = "Avaa kanava linkin tai QR-koodin kautta valitsemalla ”Liity kanavaan” oikeasta yläkulmasta, tai luo julkinen kanava + -painikkeella Keskustelut-välilehdellä.";
+"%lld purchases were restored." = "%lld ostoa palautettu.";
+"Nothing to restore for this item." = "Tälle tuotteelle ei ole palautettavaa.";
+"Your subscription was restored." = "Tilauksesi palautettiin.";

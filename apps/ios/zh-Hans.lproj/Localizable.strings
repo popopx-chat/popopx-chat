@@ -8340,3 +8340,24 @@ alert title */
 "Appearance and language" = "外观与语言";
 "While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content." = "应用不在前台时，整个界面替换成占位条：切换器预览与截图里读不到聊天内容。";
 "Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source." = "编辑消息时就把要发出去的链接去掉已知的跟踪字段，对方收到的那条不再带着你的来源。";
+
+/* POPOPX round 7 */
+"Buy" = "购买";
+"Renew" = "续费";
+"Tap to open plans and prices" = "点按打开套餐与价格";
+"Auto-renewing subscriptions" = "自动续订订阅";
+"One-time passes" = "一次性通行证";
+"One-time pass" = "一次性通行证";
+"%lld-day pass" = "%lld 天通行证";
+"Buy pass" = "购买通行证";
+"This is a one-time purchase. It never renews automatically and no further payment is taken." = "这是一次性购买，不会自动续订，也不会再扣款。";
+"Badge lit for %lld more days." = "徽章再多点亮 %lld 天。";
+"Choose a plan" = "选择套餐";
+"Renew or change plan" = "续费或更换套餐";
+"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "打开厢语面板：总开关、频道与附近节点";
+"Subscribed channels" = "已订阅的频道";
+"No channels yet" = "还没有频道";
+"%d channels you follow" = "已订阅频道：%d";
+"No messages in this channel yet" = "这个频道还没有消息";
+"No channels yet. Create a public channel with the plus button above, or join one from a link or a QR code." = "还没有频道。用上方的「+」按钮创建公开频道，或从链接或二维码加入一个。";
+"Use Join channel in the top right corner to open a channel from a link or a QR code, or create a public channel with the plus button on the Messages tab." = "用右上角的「加入频道」从链接或二维码打开一个频道，或在「消息」页用「+」按钮创建公开频道。";

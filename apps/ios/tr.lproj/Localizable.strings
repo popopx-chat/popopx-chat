@@ -7446,3 +7446,31 @@ alert title */
 "Appearance and language" = "Görünüm ve dil";
 "While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content." = "Uygulama ön planda olmadığında tüm arayüz sahte bir ekranla değiştirilir; böylece uygulama değiştirici ve ekran görüntüleri sohbet içeriği göstermez.";
 "Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source." = "İzleme alanları mesajı yazarken bağlantılardan temizlenir; böylece karşı tarafın aldığı mesajda kaynağınızın izi kalmaz.";
+
+/* POPOPX round 7 */
+"Buy" = "Satın al";
+"Renew" = "Yenile";
+"Tap to open plans and prices" = "Planları ve fiyatları açmak için dokunun";
+"Auto-renewing subscriptions" = "Otomatik yenilenen abonelikler";
+"One-time passes" = "Tek seferlik paketler";
+"One-time pass" = "Tek seferlik paket";
+"%lld-day pass" = "%lld günlük tek seferlik paket";
+"Buy pass" = "Paket satın al";
+"This is a one-time purchase. It never renews automatically and no further payment is taken." = "Bu tek seferlik bir satın almadır. Otomatik olarak yenilenmez ve başka ödeme alınmaz.";
+"Badge lit for %lld more days." = "Rozet %lld gün daha etkin.";
+"Choose a plan" = "Bir plan seçin";
+"Renew or change plan" = "Planı yenile veya değiştir";
+"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "厢语 panelini açar: ana anahtar, kanallar ve yakındaki düğümler";
+"Channels" = "Kanallar";
+"Create public channel" = "Herkese açık kanal oluştur";
+"Join channel" = "Kanala katıl";
+"Paste link / Scan" = "Bağlantıyı yapıştır / Tara";
+"Subscribed channels" = "Abone olunan kanallar";
+"No channels yet" = "Henüz kanal yok";
+"%d channels you follow" = "Abone olunan kanallar: %d";
+"No messages in this channel yet" = "Bu kanalda henüz mesaj yok";
+"No channels yet. Create a public channel with the plus button above, or join one from a link or a QR code." = "Henüz kanal yok. Yukarıdaki “+” düğmesiyle herkese açık bir kanal oluşturun ya da bir bağlantı veya QR kodu üzerinden katılın.";
+"Use Join channel in the top right corner to open a channel from a link or a QR code, or create a public channel with the plus button on the Messages tab." = "Bir kanal bağlantısını veya QR kodunu kullanarak bir kanalı açmak için sağ üstteki “Kanala katıl” seçeneğini kullanın ya da Sohbetler sekmesindeki “+” düğmesiyle herkese açık bir kanal oluşturun.";
+"%lld purchases were restored." = "%lld satın alma geri yüklendi.";
+"Nothing to restore for this item." = "Bu öge için geri yüklenecek bir şey yok.";
+"Your subscription was restored." = "Aboneliğiniz geri yüklendi.";

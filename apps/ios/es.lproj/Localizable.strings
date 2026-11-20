@@ -8410,3 +8410,27 @@ alert title */
 "Appearance and language" = "Apariencia e idioma";
 "While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content." = "Cuando la app no está en primer plano, toda la interfaz se sustituye por un marcador de posición, así que el selector de apps y las capturas no muestran contenido de chats.";
 "Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source." = "Los campos de seguimiento se quitan de los enlaces mientras escribes el mensaje, así lo que recibe la otra parte no lleva rastro de tu origen.";
+
+/* POPOPX round 7 */
+"Buy" = "Comprar";
+"Renew" = "Renovar";
+"Tap to open plans and prices" = "Toca para abrir los planes y precios";
+"Auto-renewing subscriptions" = "Suscripciones de renovación automática";
+"One-time passes" = "Pases de pago único";
+"One-time pass" = "Pase de pago único";
+"%lld-day pass" = "Pase de %lld días";
+"Buy pass" = "Comprar pase";
+"This is a one-time purchase. It never renews automatically and no further payment is taken." = "Es una compra de pago único. No se renueva automáticamente y no se realizará ningún otro cobro.";
+"Badge lit for %lld more days." = "Insignia activa durante %lld días más.";
+"Choose a plan" = "Elige un plan";
+"Renew or change plan" = "Renovar o cambiar de plan";
+"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "Abre el panel 厢语: el interruptor principal, los canales y los nodos cercanos";
+"Subscribed channels" = "Canales suscritos";
+"No channels yet" = "Aún no hay canales";
+"%d channels you follow" = "Canales suscritos: %d";
+"No messages in this channel yet" = "Aún no hay mensajes en este canal";
+"No channels yet. Create a public channel with the plus button above, or join one from a link or a QR code." = "Aún no hay canales. Crea un canal público con el botón «+» de arriba, o únete desde un enlace o un código QR.";
+"Use Join channel in the top right corner to open a channel from a link or a QR code, or create a public channel with the plus button on the Messages tab." = "Usa «Unirme al canal» en la esquina superior derecha para abrir un canal desde un enlace o un código QR, o crea un canal público con el botón «+» en la sección de chats.";
+"%lld purchases were restored." = "Se restauraron %lld compras.";
+"Nothing to restore for this item." = "No hay nada que restaurar para este elemento.";
+"Your subscription was restored." = "Se ha restaurado tu suscripción.";

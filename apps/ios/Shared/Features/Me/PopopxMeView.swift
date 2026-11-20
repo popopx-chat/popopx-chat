@@ -7,7 +7,7 @@
 //
 //  结构上的五条决定：
 //
-//  1. 页面自己不放 NavigationStack —— 栈由 Shared/Navigation/MainTabView.swift:145-164 统一包好，
+//  1. 页面自己不放 NavigationStack —— 栈由 Shared/Navigation/MainTabView.swift:152-171 统一包好，
 //     「中继与服务器」那三个值的 `navigationDestination` 也登记在那一层（值链接会被提到栈根，
 //     写在「全部设置」自己身上一行都不生效）。
 //     这里只往外推既有页面（`NavigationLink { 页面 }`，与 SettingsView.swift:405-424 同一种写法）。
@@ -23,7 +23,7 @@
 //  4. 这次重排只动"行住在哪个卡片里"，没有删掉任何一条既有路由：身份管理与主页名片码从行升格为
 //     名片头的整行热区与二维码微标，其余行全部落在上面四组之中。「充值算力点」仍然是一枚无条件
 //     入口（理由见下面 `badgeSheet` 那条注释）。2026-11-20 删掉的两行各有去处：「添加朋友」——
-//     消息栏右上角「+」挂着同一个 `PopopxAddFriendView`（ChatsListView.swift:260-262）；「离线组网」
+//     消息栏右上角「+」挂着同一个 `PopopxAddFriendView`（ChatsListView.swift:271-292）；「离线组网」
 //     一行——厢语页设置中心，见决定 3。
 //     真机走查 三.1/三.4 又动了常用组：「通知」与「版本」两行删掉，各有去处（全部设置 → 通知，
 //     与 `PopopxHelpView` 里的版本页）；「外观与图标」「显示语言」「帮助与关于」三行从「全部设置」
@@ -81,7 +81,7 @@ struct PopopxMeView: View {
     /// 体验弹窗点「看徽章详情」要在弹窗里再抬一张 sheet，系统直接丢掉，真机上就是"点了没反应"。
     @State private var badgeSheet: PopopxBadgeSheet?
     /// 名片卡右下角「添加新身份」那条快捷入口：走 push（本页就在 `NavigationStack(path:)` 里，
-    /// `MainTabView.swift:145`），不弹 sheet —— 与 `UserProfilesView.swift:112-114` 那条同一写法。
+    /// `MainTabView.swift:152`），不弹 sheet —— 与 `UserProfilesView.swift:112-114` 那条同一写法。
     @State private var showsCreateIdentity = false
     /// 徽章运行时：`@Observable` 单例，与顶栏胶囊、徽章详情读同一份 `phase`，本页不分第二套状态。
     @State private var badge = PopopxBadgeManager.shared
@@ -130,7 +130,7 @@ struct PopopxMeView: View {
         .navigationTitle(Copy.pageTitle)
         // 「我」那一行大标题不再占首屏（真机第 6 轮追加项，微信式留白）：系统标题栏整条隐藏，
         // 标题本身仍然声明着，VoiceOver 报得出这一页叫什么，只是不再画出一行。
-        // 口径照消息页 `ChatsListView.swift:241`：隐藏只作用于栈的这一页，二级页自己声明可见 ——
+        // 口径照消息页 `ChatsListView.swift:252`：隐藏只作用于栈的这一页，二级页自己声明可见 ——
         // 全部行链都过 `PopopxMeRowLink`，那里补了一处 `.toolbar(.visible, for: .navigationBar)`
         // 覆盖它推送的每一页；`showsCreateIdentity` 那一跳另有一处（:152 下面）。
         .toolbar(.hidden, for: .navigationBar)
@@ -158,7 +158,7 @@ struct PopopxMeView: View {
         // 徽章三条出口（付费墙 / 体验说明 / 详情）走顶栏胶囊那一个载体，detents 归载体。
         // 付费墙与算力点中心仍是两张平行的 Sheet，不是套娃：算力点中心那一行独立开（上面
         // `showsCreditsStore`），打开付费墙时它自己再挂「算力点中心」那一层
-        // （`PopopxBadgePaywallView.swift:168`）。
+        // （`PopopxBadgePaywallView.swift:226`）。
         .popopxBadgeSheets($badgeSheet)
         // 「添加新身份」快捷入口的目标页：`CreateProfile` 自带标题与主题背景
         // （`Shared/Views/Onboarding/CreateProfile.swift:121`、`:122`），这里不重复装饰，
@@ -285,6 +285,19 @@ struct PopopxMeView: View {
                 routeBadge()
             }
             .accessibilityIdentifier("popopx.me.badge")
+            // 一步直达购买页的那枚胶囊。为什么不并进上面那一行：`PopopxPickerRow` 没有右侧插槽
+            //（共享原子库是红线文件，它内部那枚图标底座 `PopopxIconBadge` 还是 file-private，
+            // `PopopxControls.swift:315`），自己拼一行就等于重画原子，16 语种一拉长标题就露馅。
+            // 所以它贴着同一张卡片、右对齐独立成行，用 `PopopxButton(fullWidth: false)` 拿到
+            // 现成的品牌底色与 44pt 命中区。休眠态这一枚和整行的去处相同（都进购买页），
+            // 差别只在于不用先猜"整行可点"。
+            HStack(spacing: 0) {
+                Spacer(minLength: 0)
+                PopopxButton(badgeActionTitle, role: .primary, fullWidth: false) {
+                    badgeSheet = .paywall
+                }
+            }
+            .padding(.top, PopopxMetrics.spaceS)
             PopopxMeDivider()
             // 无条件付费墙入口：整页只有这一行不看徽章状态就能打开购买面板，理由见上面 `badgeSheet`。
             PopopxPickerRow(Copy.purchaseCredits, systemImage: "cart.fill", tint: .brand) {
@@ -310,6 +323,16 @@ struct PopopxMeView: View {
 
     private func badgeDaysLeft(_ expiresAt: Date) -> Int {
         max(1, Int(ceil(max(0, expiresAt.timeIntervalSinceNow) / 86_400)))
+    }
+
+    /// 只有正式点亮态才配得上"续费"：体验期和休眠都还没开始扣费，对它们说"续费"是在编造
+    /// 一段并不存在的订阅。判据用共享枚举 `capsuleState`，和 `routeBadge()` 同一份 —— 不能用
+    /// `isLit`，它把体验期也算成"亮着"（`PopopxBadgeCreditsModels.swift:262`）。
+    private var badgeActionTitle: String {
+        switch badge.phase.capsuleState {
+        case .activeLit: Copy.badgeRenew
+        case .trialPulsing, .dormant: Copy.badgeBuy
+        }
     }
 
     /// 与顶栏胶囊 `route()` 同一份判据：分支挂在共享枚举 `PopopxBadgeCapsuleState` 上，
@@ -386,7 +409,7 @@ struct PopopxMeView: View {
     private var generalEntries: some View {
         PopopxSectionCard(Copy.groupGeneral) {
             // 「添加朋友」这一行原先在这里，2026-11-20 删：消息栏右上角「+」已经挂着同一个
-            // `PopopxAddFriendView`（ChatsListView.swift:260-262），同一件事不该在两处各有一个入口。
+            // `PopopxAddFriendView`（ChatsListView.swift:271-292），同一件事不该在两处各有一个入口。
             // 真机第 6 轮二.1：聊天偏好、外观与图标、显示语言三行落回「全部设置」，帮助与关于
             // 升成整页最后一张卡（下面 `helpEntries`）。这一组于是只剩一件事——进全部设置。
             // 三行的目的地与装饰（`PreferencesView`/`AppearanceSettings`/`PopopxDisplayLanguageView`
@@ -1026,7 +1049,7 @@ private struct PopopxMeRowLink<Destination: View>: View {
     var body: some View {
         NavigationLink {
             // 主页把整条标题栏收掉了（微信式首屏），而"隐藏"会随这一层的工具条偏好渗进推进去的页面 ——
-            // 消息页同一件事的做法是在目的地自己声明可见（`ChatsListView.swift:383`）。全部行链都过
+            // 消息页同一件事的做法是在目的地自己声明可见（`ChatsListView.swift:414`）。全部行链都过
             // 这里，所以一句就够：子页面各自的 `.navigationTitle` 照旧生效，返回按钮一个不少。
             destination()
                 .toolbar(.visible, for: .navigationBar)
@@ -1121,6 +1144,10 @@ private enum Copy {
     static let badgeActiveShortFormat = NSLocalizedString("Routing %d days", comment: "Me: name card capsule, active badge")
     /// 「充值」而不是「购买算力点礼包」：这一档没有任何赠送，句子也不能暗示有。
     static let purchaseCredits = key("Top up Compute Credits")
+    /// 徽章行右侧那一枚直达购买/续费的胶囊。词要短到能压在 393pt 宽度里，
+    /// 所以是「购买」「续费」两个词，不是「立即购买正式徽章」那一句（那一句在弹窗里）。
+    static let badgeBuy = key("Buy")
+    static let badgeRenew = key("Renew")
 
     // 组 2 · 加密个人主页与卡包
     static let myProfile = key("My profile")

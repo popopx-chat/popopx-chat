@@ -124,19 +124,26 @@ enum PopopxNodeBadgePeriod: String, Codable, CaseIterable, Identifiable, Sendabl
     }
 }
 
-/// SKU 的语义分档。StoreKit 的 `Product` 只有 `Subscription/Consumable` 两型，
-/// 而业务上有三种东西（自用续费、可多购的礼品券、点数充值），所以类型 + 周期/面额一起给。
+/// SKU 的语义分档。StoreKit 那边 `Product.productType` 有四档（consumable / nonConsumable /
+/// autoRenewable / nonRenewable），业务这边也有四种东西（自用续费、一次性时长包、可多购的礼品券、
+/// 点数充值），所以类型 + 周期/面额一起给，由本层自己说清"多久"——`Product` 自己不给答案：
+/// 非续订订阅 Apple 连到期时间都不算（`Transaction.expirationDate` 为 nil），
+/// "这一单给多少天"只能是本模块的事实。
 enum PopopxNodeBadgeSkuKind: Hashable, Sendable {
     case subscription(PopopxNodeBadgePeriod)
+    /// 一次性时长包：付一次给 `period.days` 天，**永不自动续费**，也没有 Apple 那一侧的续费开关。
+    case oneTimePass(PopopxNodeBadgePeriod)
     case giftCard(PopopxNodeBadgePeriod)
     case credits(Int)
 }
 
-/// 7 个内购商品。`productId` 是唯一真相源，`PopopxStoreKit.storekit` 与 App Store Connect
-/// 两边都必须逐字对上这 7 串。
+/// 9 个内购商品。`productId` 是唯一真相源，`PopopxStoreKit.storekit` 与 App Store Connect
+/// 两边都必须逐字对上这 9 串。
 enum PopopxNodeBadgeSku: String, CaseIterable, Identifiable, Sendable {
     case subscriptionAnnual
     case subscriptionMonthly
+    case pass30Days
+    case pass365Days
     case giftAnnual
     case giftMonthly
     case credits100
@@ -149,6 +156,8 @@ enum PopopxNodeBadgeSku: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .subscriptionAnnual: "com.popopx.badge.node.annual"
         case .subscriptionMonthly: "com.popopx.badge.node.monthly"
+        case .pass30Days: "com.popopx.badge.node.pass.30d"
+        case .pass365Days: "com.popopx.badge.node.pass.365d"
         case .giftAnnual: "com.popopx.gift.node.annual"
         case .giftMonthly: "com.popopx.gift.node.monthly"
         case .credits100: "com.popopx.credits.100"
@@ -167,6 +176,8 @@ enum PopopxNodeBadgeSku: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .subscriptionAnnual: .subscription(.annual)
         case .subscriptionMonthly: .subscription(.monthly)
+        case .pass30Days: .oneTimePass(.monthly)
+        case .pass365Days: .oneTimePass(.annual)
         case .giftAnnual: .giftCard(.annual)
         case .giftMonthly: .giftCard(.monthly)
         case .credits100: .credits(100)
@@ -177,9 +188,14 @@ enum PopopxNodeBadgeSku: String, CaseIterable, Identifiable, Sendable {
 
     var badgePeriod: PopopxNodeBadgePeriod? {
         switch kind {
-        case let .subscription(period), let .giftCard(period): period
+        case let .subscription(period), let .giftCard(period), let .oneTimePass(period): period
         case .credits: nil
         }
+    }
+
+    /// 一次性时长包的周期。付费与文案都只认这一处判据，避免 `kind` 之外再长出一个"哪些是通行证"。
+    var oneTimePassPeriod: PopopxNodeBadgePeriod? {
+        if case let .oneTimePass(period) = kind { period } else { nil }
     }
 
     /// 算力点充值包的**入账面额**。严格等于标定值，绝不加赠——
@@ -195,10 +211,12 @@ enum PopopxNodeBadgeSku: String, CaseIterable, Identifiable, Sendable {
 
     /// 兜底价格文案。StoreKit 的 `displayPrice` 才是权威（区域货币不同），
     /// 这里只在 `Product.products(for:)` 失败或还没返回时占位，占位期间不显示"立即购买"。
+    /// 通行证与同周期的订阅**同价**：同一件东西（30 天徽章）的两条付款路径不该有两个标价，
+    /// 差别只在"这一条会不会再来扣一次"。
     var fallbackPriceText: String {
         switch self {
-        case .subscriptionAnnual, .giftAnnual: "$49.99"
-        case .subscriptionMonthly, .giftMonthly: "$6.99"
+        case .subscriptionAnnual, .pass365Days, .giftAnnual: "$49.99"
+        case .subscriptionMonthly, .pass30Days, .giftMonthly: "$6.99"
         case .credits100: "$1.99"
         case .credits500: "$8.99"
         case .credits2000: "$29.99"
@@ -208,11 +226,13 @@ enum PopopxNodeBadgeSku: String, CaseIterable, Identifiable, Sendable {
 
 // MARK: - 徽章状态
 
-/// 徽章的来源。体验、订阅、算力点兑换、别人赠的券，四种来源点亮的是同一个徽章，
+/// 徽章的来源。体验、订阅、一次性时长包、算力点兑换、别人赠的券，五种来源点亮的是同一个徽章，
 /// 差别只在续费归谁、以及能不能被恢复购买找回来。
 enum PopopxBadgeSource: String, Codable, CaseIterable, Sendable {
     case pioneerTrial
     case appleSubscription
+    /// 一次性时长包（非续订订阅）：付一次给一段时长，没有 Apple 侧的续费开关，也不进恢复购买。
+    case storePass
     case creditsExchange
     case giftedVoucher
 
@@ -1247,7 +1267,7 @@ enum PopopxBadgeCreditsError: Error, LocalizedError, Hashable {
 // MARK: - 商业文案（全语种）
 
 /// 只有"涉钱的那几句"走 NSLocalizedString。目录现状（本轮实测）：`apps/ios` 下 17 个 `.lproj`，
-/// 下面的 37 个 key 全部写进 16 个翻译目录；`en.lproj` 一条都不加——它是开发区域
+/// 下面的 46 个 key 全部写进 16 个翻译目录；`en.lproj` 一条都不加——它是开发区域
 /// （`developmentRegion = en`），本仓库的约定是那里只放 value ≠ key 的条目，
 /// 查不到 key 时 NSLocalizedString 返回源文，英文用户读到的就是这里写的原句。
 /// 其余功能内文案继续用各文件自己的 `private enum Copy` 中文常量，
@@ -1276,6 +1296,22 @@ enum PopopxCommerceCopy {
     static let pricePerMonth = NSLocalizedString("/ month", comment: "price suffix")
     static let savePercentFormat = NSLocalizedString("Save %lld%% off", comment: "annual badge savings, computed from the two live display prices")
     static let creditsAmountFormat = NSLocalizedString("%lld Compute Credits", comment: "credit pack amount")
+
+    // 一次性时长包（非续订订阅）那一组。两条购买路径必须在同一张页面上各自说清"会不会再来扣钱"，
+    // 所以这一族句子和上面那句 3.1.2(c) 是同一级别的合规文本，一起进全部 16 个译本目录。
+    static let paywallAutoRenewGroupTitle = NSLocalizedString("Auto-renewing subscriptions", comment: "paywall section heading")
+    static let paywallOneTimeGroupTitle = NSLocalizedString("One-time passes", comment: "paywall section heading")
+    static let passTierTitleFormat = NSLocalizedString("%lld-day pass", comment: "one-time pass tier title")
+    static let passActionTitle = NSLocalizedString("Buy pass", comment: "paywall button on a one-time pass tier")
+    /// 非续订的免责声明。位置与订阅档那句 3.1.2(c) 同格：两档各说各的续费事实。
+    static let oneTimePurchaseStatement = NSLocalizedString("This is a one-time purchase. It never renews automatically and no further payment is taken.", comment: "Apple non-renewing purchase disclosure")
+    /// 到账天数由调用方从 `PopopxNodeBadgePeriod.days` 传进来。说"more days"而不是"到某日到期"：
+    /// 通行证是叠在当前剩余时间之上的（`PopopxBadgeManager.activate` 的合并规则），天数才是稳定事实。
+    static let passGrantedFormat = NSLocalizedString("Badge lit for %lld more days.", comment: "purchase result")
+    /// 体验面板与详情页里"去挑一档"的出口：两处都只是把同一张付费墙换上来，措辞按各自语境给。
+    static let choosePlanAction = NSLocalizedString("Choose a plan", comment: "trial panel exit into the paywall")
+    static let renewOrChangePlanAction = NSLocalizedString("Renew or change plan", comment: "badge detail exit into the paywall")
+    static let passSourceName = NSLocalizedString("One-time pass", comment: "badge provenance row")
 
     static let renewalStatement = NSLocalizedString("Payment will be charged to your Apple Account at confirmation of purchase. Subscriptions renew automatically unless they are cancelled at least 24 hours before the end of the current period. You can manage or cancel subscriptions in App Store settings at any time.", comment: "Apple 3.1.2(c) auto-renewable disclosure")
     static let noGiftBackStatement = NSLocalizedString("Compute Credits are added at the exact amount shown. No bonus credits are granted.", comment: "no promotional top-up")

@@ -8399,3 +8399,27 @@ alert title */
 "Appearance and language" = "Оформление и язык";
 "While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content." = "Когда приложение не на переднем плане, весь интерфейс заменяется заставкой, поэтому переключатель приложений и снимки экрана не показывают содержимое чатов.";
 "Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source." = "Параметры отслеживания удаляются из ссылок ещё при наборе сообщения, поэтому в тексте, который получает собеседник, нет следа вашего источника.";
+
+/* POPOPX round 7 */
+"Buy" = "Купить";
+"Renew" = "Продлить";
+"Tap to open plans and prices" = "Нажмите, чтобы открыть тарифы и цены";
+"Auto-renewing subscriptions" = "Подписки с автоматическим продлением";
+"One-time passes" = "Разовые абонементы";
+"One-time pass" = "Разовый абонемент";
+"%lld-day pass" = "Разовый абонемент на %lld дн.";
+"Buy pass" = "Купить абонемент";
+"This is a one-time purchase. It never renews automatically and no further payment is taken." = "Это разовая покупка. Она не продлевается автоматически и никаких дальнейших списаний не производится.";
+"Badge lit for %lld more days." = "Значок активен ещё %lld дн.";
+"Choose a plan" = "Выберите тариф";
+"Renew or change plan" = "Продлить или сменить тариф";
+"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "Открывает панель 厢语: главный переключатель, каналы и ближайшие узлы";
+"Subscribed channels" = "Каналы с подпиской";
+"No channels yet" = "Каналов пока нет";
+"%d channels you follow" = "Каналов с подпиской: %d";
+"No messages in this channel yet" = "В этом канале пока нет сообщений";
+"No channels yet. Create a public channel with the plus button above, or join one from a link or a QR code." = "Каналов пока нет. Создайте публичный канал кнопкой «+» выше или присоединитесь по ссылке или QR-коду.";
+"Use Join channel in the top right corner to open a channel from a link or a QR code, or create a public channel with the plus button on the Messages tab." = "Используйте «Вступить в канал» в правом верхнем углу, чтобы открыть канал по ссылке или QR-коду, или создайте публичный канал кнопкой «+» на вкладке «Чаты».";
+"%lld purchases were restored." = "Восстановлено покупок: %lld.";
+"Nothing to restore for this item." = "Нет ничего доступного для восстановления по этому пункту.";
+"Your subscription was restored." = "Ваша подписка восстановлена.";

@@ -4281,3 +4281,31 @@ server test failure */
 "While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content." = "Když aplikace není v popředí, celé rozhraní se nahradí zastupující obrazovkou, takže přepínač aplikací ani snímky obrazovky nezobrazují obsah chatů.";
 "Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source." = "Parametry sledování se z odkazů odstraní už při psaní zprávy, takže to, co dostane protistrana, v sobě nemá žádnou stopu vedoucí k vám.";
 "Remove link tracking" = "Odstranit sledování z odkazů";
+
+/* POPOPX round 7 */
+"Buy" = "Koupit";
+"Renew" = "Obnovit";
+"Tap to open plans and prices" = "Klepnutím otevřete plány a ceny";
+"Auto-renewing subscriptions" = "Předplatné s automatickým obnovením";
+"One-time passes" = "Jednorázové nákupy";
+"One-time pass" = "Jednorázový nákup";
+"%lld-day pass" = "Nákup na %lld dní";
+"Buy pass" = "Koupit jednorázově";
+"This is a one-time purchase. It never renews automatically and no further payment is taken." = "Jedná se o jednorázový nákup. Neobnovuje se automaticky a žádné další platby nebudou strženy.";
+"Badge lit for %lld more days." = "Odznak aktivní o %lld dní déle.";
+"Choose a plan" = "Vyberte předplatné";
+"Renew or change plan" = "Obnovit nebo změnit předplatné";
+"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "Otevře panel 厢语: hlavní přepínač, kanály a blízké uzly";
+"Channels" = "Kanály";
+"Create public channel" = "Vytvořit veřejný kanál";
+"Join channel" = "Připojit se ke kanálu";
+"Paste link / Scan" = "Vložit odkaz / Skenovat";
+"Subscribed channels" = "Odebírané kanály";
+"No channels yet" = "Zatím žádné kanály";
+"%d channels you follow" = "Kanály s odběrem: %d";
+"No messages in this channel yet" = "V tomto kanálu zatím nejsou žádné zprávy";
+"No channels yet. Create a public channel with the plus button above, or join one from a link or a QR code." = "Zatím žádné kanály. Veřejný kanál vytvoříte tlačítkem „+“ výše, nebo se připojte pomocí odkazu či QR kódu.";
+"Use Join channel in the top right corner to open a channel from a link or a QR code, or create a public channel with the plus button on the Messages tab." = "Pomocí „Připojit se ke kanálu“ vpravo nahoře otevřete kanál přes odkaz nebo QR kód, anebo veřejný kanál vytvořte tlačítkem „+“ v sekci Chat.";
+"%lld purchases were restored." = "Obnoveno %lld nákupů.";
+"Nothing to restore for this item." = "Pro tuto položku není co obnovit.";
+"Your subscription was restored." = "Vaše předplatné bylo obnoveno.";

@@ -113,7 +113,7 @@ The anchors the suite navigates by (declared in the mounted view files, language
 | `popopx.header.identity`, `popopx.header.plus` | `Shared/Navigation/PopopxTelemetryHeader.swift` |
 | `popopx.inputBar.textField`, `.sendButton`, `.plusButton` | `Shared/Features/ChatRoom/PopopxInputBar.swift` |
 | `popopx.bubble.channel` | `Shared/Features/ChatRoom/PopopxMessageBubble.swift` |
-| `popopx.row` | `Shared/Features/Chats/ChatsListView.swift:748` |
+| `popopx.row` | `Shared/Features/Chats/ChatsListView.swift:790` |
 
 ## 5. Locator rules proven on device
 

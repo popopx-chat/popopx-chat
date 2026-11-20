@@ -7141,3 +7141,31 @@ server test failure */
 "While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content." = "Wanneer de app niet op de voorgrond is, wordt de gehele interface vervangen door een schermafdanker, zodat de app-wisselaar en screenshots geen chatinhoud tonen.";
 "Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source." = "Volgvelden worden uit koppelingen verwijderd terwijl je een bericht schrijft, dus wat de andere partij ontvangt bevat geen spoor van je bron.";
 "Remove link tracking" = "Linktracking verwijderen";
+
+/* POPOPX round 7 */
+"Buy" = "Kopen";
+"Renew" = "Verlengen";
+"Tap to open plans and prices" = "Tik om abonnementen en prijzen te openen";
+"Auto-renewing subscriptions" = "Abonnementen met automatische verlenging";
+"One-time passes" = "Eenmalige passes";
+"One-time pass" = "Eenmalige pass";
+"%lld-day pass" = "Eenmalige pass van %lld dagen";
+"Buy pass" = "Pass kopen";
+"This is a one-time purchase. It never renews automatically and no further payment is taken." = "Dit is een eenmalige aankoop. Deze wordt niet automatisch verlengd en er wordt niets meer in rekening gebracht.";
+"Badge lit for %lld more days." = "Badge actief voor %lld extra dagen.";
+"Choose a plan" = "Kies een abonnement";
+"Renew or change plan" = "Abonnement verlengen of wijzigen";
+"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "Opent het 厢语-paneel: de hoofdschakelaar, de kanalen en de knooppunten in de buurt";
+"Channels" = "Kanalen";
+"Create public channel" = "Openbaar kanaal maken";
+"Join channel" = "Word lid van kanaal";
+"Paste link / Scan" = "Plak link / Scan";
+"Subscribed channels" = "Geabonneerde kanalen";
+"No channels yet" = "Nog geen kanalen";
+"%d channels you follow" = "Geabonneerde kanalen: %d";
+"No messages in this channel yet" = "Nog geen berichten in dit kanaal";
+"No channels yet. Create a public channel with the plus button above, or join one from a link or a QR code." = "Nog geen kanalen. Maak een openbaar kanaal met de knop “+” hierboven, of word lid via een link of QR-code.";
+"Use Join channel in the top right corner to open a channel from a link or a QR code, or create a public channel with the plus button on the Messages tab." = "Gebruik “Word lid van kanaal” rechtsboven om een kanaal te openen via een link of QR-code, of maak een openbaar kanaal met de knop “+” op het Chat-tabblad.";
+"%lld purchases were restored." = "%lld aankopen hersteld.";
+"Nothing to restore for this item." = "Er is niets te herstellen voor dit item.";
+"Your subscription was restored." = "Uw abonnement is hersteld.";

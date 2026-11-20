@@ -7462,3 +7462,31 @@ alert title */
 "While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content." = "Коли застосунок не на передньому плані, весь інтерфейс замінюється заставкою, тому перемикач застосунків і знімки екрана не показують вміст чатів.";
 "Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source." = "Поля відстеження прибираються з посилань ще під час набору повідомлення, тому в тому, що отримує інша сторона, не залишається сліду вашого джерела.";
 "Remove link tracking" = "Прибрати відстеження з посилань";
+
+/* POPOPX round 7 */
+"Buy" = "Купити";
+"Renew" = "Поновити";
+"Tap to open plans and prices" = "Торкніться, щоб відкрити плани та ціни";
+"Auto-renewing subscriptions" = "Підписки з автоматичним поновленням";
+"One-time passes" = "Одноразові абонементи";
+"One-time pass" = "Одноразовий абонемент";
+"%lld-day pass" = "Одноразовий абонемент на %lld дн.";
+"Buy pass" = "Купити абонемент";
+"This is a one-time purchase. It never renews automatically and no further payment is taken." = "Це одноразова покупка. Вона не поновлюється автоматично й жодних подальших списань не буде.";
+"Badge lit for %lld more days." = "Значок активовий ще на %lld дн.";
+"Choose a plan" = "Виберіть план";
+"Renew or change plan" = "Поновити або змінити план";
+"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "Відкрива панель 厢语: головний перемикач, канали й найближчі вузли";
+"Channels" = "Канали";
+"Create public channel" = "Створити публічний канал";
+"Join channel" = "Приєднатися до каналу";
+"Paste link / Scan" = "Вставити посилання / Сканувати";
+"Subscribed channels" = "Підписані канали";
+"No channels yet" = "Каналів ще немає";
+"%d channels you follow" = "Каналів із підпискою: %d";
+"No messages in this channel yet" = "У цьому каналі ще немає повідомлень";
+"No channels yet. Create a public channel with the plus button above, or join one from a link or a QR code." = "Каналів ще немає. Створіть публічний канал кнопкою «+» вище або приєднайтеся за посиланням чи QR-кодом.";
+"Use Join channel in the top right corner to open a channel from a link or a QR code, or create a public channel with the plus button on the Messages tab." = "Використайте «Приєднатися до каналу» у правому верхньому куті, щоб відкрити канал за посиланням чи QR-кодом, або створіть публічний канал кнопкою «+» на вкладці «Чати».";
+"%lld purchases were restored." = "Відновлено покупок: %lld.";
+"Nothing to restore for this item." = "Немає чого відновлювати для цього пункту.";
+"Your subscription was restored." = "Вашу підписку відновлено.";

@@ -225,8 +225,9 @@ final class PopopxCreditsManager {
                 log.error("credits: gift voucher minting failed; leaving the transaction unfinished")
                 return
             }
-        case .subscription:
-            // 订阅由 `PopopxBadgeManager` 的交付回调点亮。两处都挂同一个流，
+        case .subscription, .oneTimePass:
+            // 订阅由 `PopopxBadgeManager` 的交付回调点亮；一次性时长包由付费墙那一侧当场点亮
+            // （它不经券、也不动余额，本函数一格都不该碰）。两处都挂同一个流，
             // 各自只认自己那一族 SKU，所以一笔收据只会被一个管理者落账。
             return
         }

@@ -284,6 +284,15 @@ extension PopopxMeshKillSwitch: PopopxMeshNicknameApplying {
 public struct MeshPlazaView: View {
     @ObservedObject private var model: PopopxMeshPlazaModel
 
+    /// Whether the four bottom tabs stop existing under this screen. `true` is the pushed square
+    /// (a page you navigate into), `false` is the home tab that *is* this screen — see `body`.
+    private let hidesTabBar: Bool
+
+    /// Whether leaving this screen keeps the mirror pumped and the timeline standing. `true` is the
+    /// home tab: `stop()` clears `posts`, and losing what this device broadcast because the person
+    /// tapped another tab would be a lie about a flood that is still on the air.
+    private let keepsRunningWhenHidden: Bool
+
     /// The only cursor on this screen. The plaza lives in a module that deliberately does not import
     /// UIKit (`PopopxProximityEngine.swift:318` states the rule), so dismissing the keyboard here goes
     /// through SwiftUI's own focus binding: clearing this resigns both fields. That is also the only
@@ -298,22 +307,38 @@ public struct MeshPlazaView: View {
 
     @FocusState private var focusedField: Field?
 
-    public init(model: PopopxMeshPlazaModel) {
+    /// - Parameters:
+    ///   - model: the plaza's own state.
+    ///   - hidesTabBar: pass `false` when this screen is a home tab, so the four bottom tabs stay.
+    ///   - keepsRunningWhenHidden: pass `true` for the same reason — a tab switch is not leaving the
+    ///     mesh, and `stop()` would empty the timeline the person was just reading.
+    public init(
+        model: PopopxMeshPlazaModel,
+        hidesTabBar: Bool = true,
+        keepsRunningWhenHidden: Bool = false
+    ) {
         self.model = model
+        self.hidesTabBar = hidesTabBar
+        self.keepsRunningWhenHidden = keepsRunningWhenHidden
     }
 
-    /// The one-line mount for a host that has an engine and a fuse at hand.
+    /// The one-line mount for a host that has an engine and a fuse at hand. The two role flags
+    /// default to the pushed square, which is what every host until now asked for.
     public init(
         outbound: any PopopxMeshOutbound = PopopxMeshEngine.shared,
         source: PopopxMeshStateSource = .shared,
-        killSwitch: PopopxMeshKillSwitch = .shared
+        killSwitch: PopopxMeshKillSwitch = .shared,
+        hidesTabBar: Bool = true,
+        keepsRunningWhenHidden: Bool = false
     ) {
         self.init(
             model: PopopxMeshPlazaModel(
                 outbound: outbound,
                 source: source,
                 nicknameApplier: killSwitch
-            )
+            ),
+            hidesTabBar: hidesTabBar,
+            keepsRunningWhenHidden: keepsRunningWhenHidden
         )
     }
 
@@ -324,16 +349,22 @@ public struct MeshPlazaView: View {
             footer
             composer
         }
-        // A hall is where the four bottom tabs stop existing. Declared on this view rather than on
-        // any host, because 厢语's top-left entry and 添加朋友's plaza entry mount the *same*
-        // `MeshPlazaView` — an app-side destination would leave the next host free to forget it.
-        // Outside a TabView (a preview, a sheet's own stack) the modifier is inert, not harmful.
+        // Two roles mount this screen now, and the two flags above are what tells them apart:
+        // a home tab (厢语's tab 3 lands here, so the four bottom tabs stay and leaving must not
+        // wipe the timeline) and a pushed square (厢语's old panel and 添加朋友 both navigate into
+        // it, and a page you navigate into is where the tabs stop existing). Both flags are still
+        // declared on this view rather than on any host, because that is the only way to keep the
+        // next host from forgetting them. Outside a TabView (a preview, a sheet's own stack) hiding
+        // is inert, not harmful — and `hidesTabBar == false` asks for neither, it leaves the bar
+        // exactly as the `TabView` handed it over.
         // Gated, because the visibility overload of `toolbar(_:for:)` is iOS 16 while this package
         // still declares `.iOS(.v15)` (`PopopxMeshKit/Package.swift:8-10`, and 裁定 A: the package
         // does not move, new code guards in place). Below iOS 16 this screen keeps the tabs.
-        .meshHallTabBarHidden()
+        .meshHallTabBarHidden(hidesTabBar)
         .onAppear { model.start() }
-        .onDisappear { model.stop() }
+        // The home tab keeps pumping: `stop()` clears `posts`, and a flood this device sent does
+        // not unsend itself because another tab was tapped.
+        .onDisappear { if !keepsRunningWhenHidden { model.stop() } }
     }
 
     private var timeline: some View {
@@ -470,7 +501,7 @@ public struct MeshPlazaView: View {
 
 /// The drag-to-dismiss half of the keyboard contract. `.scrollDismissesKeyboard` is iOS 16 while this
 /// package still declares `.iOS(.v15)` (`PopopxMeshKit/Package.swift:8-10`), so this and
-/// `meshHallTabBarHidden()` below are the two places in the module that have to ask at run time — and
+/// `meshHallTabBarHidden(_:)` below are the two places in the module that have to ask at run time — and
 /// the only `#available` its files carry. Below iOS 16 the view comes back untouched and tapping the
 /// list still closes the keyboard: that gesture is iOS 15 API.
 extension View {
@@ -483,9 +514,18 @@ extension View {
     }
 
     /// Same reason, other half of the hall contract: the tab bar only hides from iOS 16.
-    @ViewBuilder func meshHallTabBarHidden() -> some View {
-        if #available(iOS 16.0, macOS 13.0, *) {
-            self.toolbar(.hidden, for: .tabBar)
+    /// `hides == false` — the home tab — leaves the view untouched instead of asserting
+    /// `.toolbar(.visible, for: .tabBar)`: those four tabs are what a `TabView` hands its root
+    /// anyway, and a second, positive claim from this screen would be one more thing for a pushed
+    /// page to have to overturn. Nothing in the module asks for the visible form, and it stays that
+    /// way on purpose.
+    @ViewBuilder func meshHallTabBarHidden(_ hides: Bool = true) -> some View {
+        if hides {
+            if #available(iOS 16.0, macOS 13.0, *) {
+                self.toolbar(.hidden, for: .tabBar)
+            } else {
+                self
+            }
         } else {
             self
         }

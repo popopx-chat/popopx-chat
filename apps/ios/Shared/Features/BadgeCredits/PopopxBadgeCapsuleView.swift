@@ -26,6 +26,13 @@
 //  休眠态 → 购买页（`PopopxBadgePaywallView`）。判据只有 `phase` 一处，所以"过期了还能打开详情看倒计时"
 //  这种自相矛盾的入口不可能出现。
 //
+//  ### 宽屏那一档多挂的右半段（第二条出口，不是第三条状态）
+//  体验态与点亮态在**非 compact** 时右边多一段实心靛蓝小块："Buy" / "Renew"，点它进付费墙。
+//  三条出口的判据仍然只有 `phase` 一处（`route()` 一个字没改），这一段只是把"付费墙"这个目的地
+//  在两种非休眠状态下**提前露出来**，省掉"先开弹窗再找购买按钮"那一步。
+//  compact 档不加：顶栏在 393pt 上恒定取只留符号那 48pt，加宽它是去动那行实测过的溢出边界；
+//  iPhone 上这两态的购买出口因此在弹窗与详情页里（各自都有直达付费墙的主操作）。
+//
 //  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
 
 import SwiftUI
@@ -39,6 +46,11 @@ struct PopopxBadgeCapsule: View {
     var rotationIndex: Int = 0
     /// 顶栏宽度不够时退回"只留符号"，判据同 `PopopxDualStatusCapsule` 的 `ViewThatFits` 三档。
     var compact: Bool = false
+    /// 第二条出口：胶囊右侧那一段"买 / 续费"。**声明位置必须在 `action` 之前，这是硬约束**：
+    /// 现有调用点全部写成 `PopopxBadgeCapsule(phase: …) { … }`，尾随闭包绑的是最后一个函数型参数，
+    /// 把 `buyAction` 放到 `action` 后面，那些调用点会把"打开详情/体验说明"静默接到"买"上。
+    /// 默认 nil，所以顶栏与"我"页那两处宿主（本轮不可改）一行都不用动。
+    var buyAction: (() -> Void)? = nil
     let action: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -46,6 +58,21 @@ struct PopopxBadgeCapsule: View {
     @State private var spin: Double = 0
 
     var body: some View {
+        Group {
+            if showsBuySegment {
+                twoPartPill
+            } else {
+                singlePill
+            }
+        }
+        .onAppear { restartBreathing() }
+        .onChange(of: phase) { _, _ in restartBreathing() }
+        .onChange(of: rotationIndex) { _, _ in rotateOnce() }
+    }
+
+    /// 原来那一枚整粒可点的胶囊：一个字都没改。`showsBuySegment` 为假时走的就是这条路径，
+    /// 顶栏那套实测过的尺寸（48 高、`spaceM` 横 padding、实心色片、描边与光晕分档）全部原样。
+    private var singlePill: some View {
         Button(action: tapped) {
             HStack(spacing: PopopxMetrics.spaceXS) {
                 symbol
@@ -77,9 +104,74 @@ struct PopopxBadgeCapsule: View {
         .accessibilityLabel(accessibilityText)
         .accessibilityHint(hint)
         .accessibilityIdentifier("popopx.header.badge")
-        .onAppear { restartBreathing() }
-        .onChange(of: phase) { _, _ in restartBreathing() }
-        .onChange(of: rotationIndex) { _, _ in rotateOnce() }
+    }
+
+    // MARK: 两段式（体验态 / 点亮态的购买出口）
+
+    /// 只有**宽屏带字那一档**才加这一段：顶栏在 393pt 上恒定退到只留符号的 48pt
+    /// （实测判据见 `Shared/Navigation/PopopxTelemetryHeader.swift:562-565`），给 compact 档
+    /// 加宽就是去动那行已经溢出过的边界。所以 iPhone 上体验态/点亮态的购买出口落在
+    /// 弹窗与详情页那两处（`PopopxTrialWelcomeModal` / `PopopxBadgeDetailSheet`），不是这里。
+    /// 休眠态也不给：整枚胶囊点下去本来就是付费墙，再挂一段"买"是重复入口。
+    private var showsBuySegment: Bool {
+        !compact && buyAction != nil && phase.capsuleState != .dormant
+    }
+
+    /// 一段胶囊、两块点击区：左半还是原来的"看说明 / 看详情"，右半是品牌靛蓝实心的"买 / 续费"。
+    /// 右半刻意用 `brand`（顶栏那三档的 tint 都不是它）而不是把 `tint` 加深一档——同一枚胶囊里
+    /// "钱"和"状态"必须一眼分成两件事，绿色加深只会读成"更绿的状态"。
+    private var twoPartPill: some View {
+        HStack(spacing: 0) {
+            Button(action: tapped) {
+                HStack(spacing: PopopxMetrics.spaceXS) {
+                    symbol
+                    Text(verbatim: label)
+                        .font(PopopxType.secondary.weight(isLive ? .semibold : .regular))
+                        .lineLimit(1)
+                        .layoutPriority(1)
+                }
+                .foregroundStyle(tint)
+                .padding(.leading, PopopxMetrics.spaceM)
+                .padding(.trailing, PopopxMetrics.spaceS)
+                .frame(height: PopopxMetrics.space2XL)
+                .contentShape(.rect)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(accessibilityText)
+            .accessibilityHint(hint)
+            .accessibilityIdentifier("popopx.header.badge")
+
+            Button(action: buyTapped) {
+                Text(verbatim: buyLabel)
+                    .font(PopopxType.microTag.weight(.semibold))
+                    .foregroundStyle(PopopxPalette.onBrand)
+                    .padding(.horizontal, PopopxMetrics.spaceS)
+                    .frame(height: PopopxMetrics.spaceXL)
+                    .background(PopopxPalette.brand, in: .capsule)
+                    .contentShape(.capsule)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(buyLabel)
+            .accessibilityHint(PopopxBadgeCapsuleCopy.hintBuy)
+            .padding(.trailing, PopopxMetrics.space2XS)
+        }
+        .frame(height: PopopxMetrics.space2XL)
+        // 走到这一档时必是两档激活态（`showsBuySegment` 已排除休眠），底与边都不用再分档。
+        .background(tint.opacity(0.10), in: .capsule)
+        .overlay {
+            Capsule().strokeBorder(tint.opacity(0.85), lineWidth: PopopxMetrics.stroke)
+        }
+        .shadow(color: tint.opacity(0.35), radius: PopopxMetrics.space2XS)
+    }
+
+    /// 体验态那句是"买"，点亮态那句是"续费"：同一个位置、同一个动作（都进付费墙），
+    /// 但两种状态下要读到的不是同一个词——体验还剩 2 天时"买"读起来像现在就得放弃体验。
+    private var buyLabel: String {
+        switch phase.capsuleState {
+        case .trialPulsing: PopopxBadgeCapsuleCopy.buy
+        case .activeLit: PopopxBadgeCapsuleCopy.renew
+        case .dormant: PopopxBadgeCapsuleCopy.buy
+        }
     }
 
     // MARK: 呈现片段
@@ -180,6 +272,12 @@ struct PopopxBadgeCapsule: View {
         action()
     }
 
+    /// 右半段：震动与左半同一档（这是选择，不是确认），动作只有一条——进付费墙。
+    private func buyTapped() {
+        PopopxHaptics.selection()
+        buyAction?()
+    }
+
     /// 呼吸只属于体验态；其余两态进页面即归位，不留上一条状态的残留。
     private func restartBreathing() {
         guard phase.capsuleState == .trialPulsing, !reduceMotion else {
@@ -212,7 +310,10 @@ struct PopopxBadgeCapsuleView: View {
         PopopxBadgeCapsule(
             phase: badge.phase,
             rotationIndex: badge.record?.rotationIndex ?? 0,
-            compact: compact
+            compact: compact,
+            // 第二条出口。挂在同一个 `sheet` 载体上换 item，所以不是 sheet 套 sheet：
+            // 体验弹窗与详情页里再点购买，走的也是这一份状态（见 `PopopxBadgeSheetHost`）。
+            buyAction: { sheet = .paywall }
         ) {
             route()
         }
@@ -254,10 +355,13 @@ struct PopopxBadgeSheetHost: View {
             PopopxBadgePaywallView()
                 .presentationDetents([.large])
         case .trial:
-            PopopxTrialWelcomeModal(onOpenDetail: { sheet = .detail })
+            // 体验弹窗里那句"看档位与价格"直接换 `item`：同一张 sheet 不关不换、内容原地切到付费墙。
+            // 这就是真机第 3 轮"点『看徽章详情』没反应"那次收口换来的能力，别退回第二个 `.sheet`。
+            PopopxTrialWelcomeModal(onOpenDetail: { sheet = .detail },
+                                    onOpenPaywall: { sheet = .paywall })
                 .presentationDetents([.medium, .large])
         case .detail:
-            PopopxBadgeDetailSheet()
+            PopopxBadgeDetailSheet(onOpenPaywall: { sheet = .paywall })
                 .presentationDetents([.medium, .large])
         case .none:
             EmptyView()
@@ -286,6 +390,13 @@ private struct PopopxBadgeCapsuleGallery: View {
             PopopxBadgeCapsule(phase: .active(source: .creditsExchange,
                                               expiresAt: Date().addingTimeInterval(3_600)),
                                compact: true) {}
+            // 两段式那档的两个状态：预览里必须能一眼看到左半/右半的分界与配色差，
+            // 否则这条路径只能等真机才发现"右半段根本没渲染"。
+            PopopxBadgeCapsule(phase: .trial(expiresAt: Date().addingTimeInterval(82_000)),
+                               buyAction: {}) {}
+            PopopxBadgeCapsule(phase: .active(source: .storePass,
+                                              expiresAt: Date().addingTimeInterval(1_200_000)),
+                               buyAction: {}) {}
         }
         .padding(PopopxMetrics.spaceM)
         .background(PopopxPalette.base)
@@ -334,6 +445,12 @@ private enum PopopxBadgeCapsuleCopy {
     static let hintDormant = key("Tap to see how to turn it on")
     static let hintTrial = key("Tap to read what the trial includes")
     static let hintActive = key("Tap to open badge details")
+
+    /// 两段式右半那三个字。短到只有两个词是刻意的：这一段住在顶栏那一行里，
+    /// 而这一行的宽度是实测过的（见 `showsBuySegment` 的注释）——句子越长，越先把整枚胶囊挤回 compact。
+    static let buy = key("Buy")
+    static let renew = key("Renew")
+    static let hintBuy = key("Tap to open plans and prices")
 
     /// 顶栏的剩余时间只留两个最大单位，且每个组合都是一个完整 Key：`"3 d 2 h"` 这种两段拼接
     /// 在 16 种语序里会翻车（俄语、匈牙利语会把它倒过来），所以宁可五句短句。

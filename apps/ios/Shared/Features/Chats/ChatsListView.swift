@@ -5,7 +5,7 @@
 //  【第四阶段 · Tab 1 消息】新版会话列表。
 //
 //  三段结构：顶部嵌第三阶段的 `PopopxTelemetryHeader`（身份切换 / 双模状态 / 「+」菜单），
-//  中间是 全部 · 在线加密 · 厢语离线 三枚胶囊过滤器，下面是每张卡片一行的会话列表。
+//  中间是 全部 · 在线加密 · 厢语离线 · 频道 四枚胶囊过滤器，下面是每张卡片一行的会话列表。
 //
 //  栈的归属（这里按**已落地的** `Shared/Navigation/MainTabView.swift` 来，而不是按任务书的假设）：
 //  MainTabView.swift:14-20 与 :76-79 明确决定"消息这一栏自己带 NavigationStack，其余三栏才由壳包"。
@@ -74,12 +74,13 @@ enum PopopxRowChannel: Hashable {
 
 // MARK: - 过滤器
 
-/// 顶部三枚胶囊。刻意不带图标：`全部` 在 §6 的图标词汇表里没有对应符号，而半套图标的过滤器
+/// 顶部四枚胶囊。刻意不带图标：`全部` 在 §6 的图标词汇表里没有对应符号，而半套图标的过滤器
 /// 比没有图标更像坏掉的设计；通道语义只由徽章承载。
 enum PopopxChatFilter: Int, CaseIterable, Identifiable {
     case all
     case online
     case meshOffline
+    case channel
 
     var id: Int { rawValue }
 
@@ -88,14 +89,18 @@ enum PopopxChatFilter: Int, CaseIterable, Identifiable {
         case .all: Copy.filterAll
         case .online: Copy.filterOnline
         case .meshOffline: Copy.filterMeshOffline
+        case .channel: Copy.filterChannel
         }
     }
 
-    func matches(_ channel: PopopxRowChannel) -> Bool {
+    /// `isChannel` 说的是"这条会话是不是公共频道"，与走哪条通道无关：频道和群组一样只有 SMP
+    /// 一条路（见 `channel(for:)` 里 `.group` 那一支），所以它不能从 `PopopxRowChannel` 推出来。
+    func matches(_ channel: PopopxRowChannel, isChannel: Bool) -> Bool {
         switch self {
         case .all: true
         case .online: channel == .smp
         case .meshOffline: channel.isMeshBound
+        case .channel: isChannel
         }
     }
 }
@@ -105,6 +110,8 @@ enum PopopxChatFilter: Int, CaseIterable, Identifiable {
 private struct PopopxChatEntry {
     let chat: Chat
     let channel: PopopxRowChannel
+    /// 会话自己是不是频道（`ChatInfo.isChannel` = 群组的 `useRelays`，POPOPXChat/ChatTypes.swift:2296）。
+    let isChannel: Bool
 }
 
 /// 邻居集合的"身份签名"：只取 peer id，不取 `lastSeenAt`/`hopCount` —— 后者每次广播都在变，
@@ -121,7 +128,7 @@ private struct PopopxMeshBindingKey: Equatable {
 /// UserDefaults 的键要靠名字普查（自毁与迁移那几处按名字清点），散在装饰器里就搜不到归属。
 private let popopxTrialWelcomeAskedKey = "popopx.commerce.trialWelcomeAsked"
 
-/// 整页 `@MainActor`：与 `MainTabView.swift:76`、`PopopxMeView.swift:36`、
+/// 整页 `@MainActor`：与 `MainTabView.swift:77`、`PopopxMeView.swift:36`、
 /// `PopopxProximityAddContactView.swift:39` 同一写法，这样页内的同步小助手
 /// （判定通道、震动、写 @State）都不必再各自标注，也不会踩隔离相关的警告。
 @MainActor
@@ -145,7 +152,11 @@ struct ChatsListView: View {
     @State private var currentUserId: Int64?
     @State private var showsAddFriend = false
     @State private var showsCreateGroup = false
+    @State private var showsCreateChannel = false
     @State private var showsScan = false
+    /// 创建频道页里「Configure relays」那一行按值推到 `NetworkAndServers`（`AddChannelView.swift:85`），
+    /// 与「我」栏那棵栈同一口径（`MainTabView.swift:121`）：谁承载栈，谁持有 `SaveableSettings`。
+    @StateObject private var serversSettings = SaveableSettings()
     /// 3 天先锋体验徽章的告知弹窗：只问一次，关掉就不再打扰。
     /// 这一格只表"问过没有"；"这台设备领过没有"在 Keychain 的 `trialGuard` 里
     /// （`PopopxBadgeManager.canClaimPioneerTrial` 读的就是它），所以清掉这一格不会让人多领一次。
@@ -200,7 +211,7 @@ struct ChatsListView: View {
 
     @ViewBuilder private var chatList: some View {
         let entries = searchedEntries()
-        let rows = entries.filter { filter.matches($0.channel) }
+        let rows = entries.filter { filter.matches($0.channel, isChannel: $0.isChannel) }
         List {
             if let notice = serviceNotice {
                 Text(notice)
@@ -259,6 +270,25 @@ struct ChatsListView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar(.hidden, for: .tabBar)
         }
+        // 创建频道：同一个 `AddChannelView`（旧「新建聊天」菜单里那一枚，:97-101），挂载写法照抄上面
+        // `showsCreateGroup` 那一处 —— 同样的推页、同样的 `ThemedBackground`、同样收起底栏。
+        // 它内部那一行「Configure relays」是按 `ServersDestination` 值推的（AddChannelView.swift:85），
+        // 所以这三条登记必须挂在栈根（口径同 MainTabView.swift:159-167：同一类型只保留最靠近栈根的登记）。
+        .navigationDestination(isPresented: $showsCreateChannel) {
+            AddChannelView()
+                .navigationTitle(Copy.createChannelTitle)
+                .modifier(ThemedBackground(grouped: true))
+                .toolbar(.hidden, for: .tabBar)
+        }
+        .navigationDestination(for: ServersDestination.self) { destination in
+            serversDestination(destination, ss: serversSettings, servers: $serversSettings.servers)
+        }
+        .navigationDestination(for: ProtocolServerSelection.self) { selection in
+            protocolServerDestination(selection, servers: $serversSettings.servers)
+        }
+        .navigationDestination(for: ChatRelaySelection.self) { selection in
+            chatRelayDestination(selection, servers: $serversSettings.servers)
+        }
         .sheet(isPresented: $showsAddFriend) {
             PopopxAddFriendView()
         }
@@ -291,6 +321,7 @@ struct ChatsListView: View {
                 telemetry: telemetry,
                 onAddFriend: { showsAddFriend = true },
                 onStartGroupChat: { showsCreateGroup = true },
+                onCreateChannel: { showsCreateChannel = true },
                 onScan: { showsScan = true }
             )
             if showsSearchRow {
@@ -376,7 +407,7 @@ struct ChatsListView: View {
         // 真机第 2 轮第 2 项：进对话框就收起底部四栏。这一句挂在"被推入的那一页"上，
         // 不是挂在列表上，所以返回时系统按作用域自己收回 —— 列表页底栏照旧四栏。
         // 通讯录与厢语打开会话也走这里：它们都只写 `ChatModel.chatId`，
-        // 由 `MainTabView.swift:179` 把栏切到"消息"后由本页的栈呈现，全 app 只有这一个对话框出口。
+        // 由 `MainTabView.swift:186` 把栏切到"消息"后由本页的栈呈现，全 app 只有这一个对话框出口。
         .toolbar(.hidden, for: .tabBar)
         // 顶栏那一行在列表页被整条隐藏（上面 `chatList`），对话框必须自己声明可见，
         // 否则返回按钮和 ChatView 的标题栏一起没了。
@@ -394,7 +425,11 @@ struct ChatsListView: View {
             let info = chat.chatInfo
             guard !info.chatDeleted, !info.contactCard else { continue }
             if !query.isEmpty, !info.chatViewName.localizedLowercase.contains(query) { continue }
-            entries.append(PopopxChatEntry(chat: chat, channel: channel(for: chat)))
+            entries.append(PopopxChatEntry(
+                chat: chat,
+                channel: channel(for: chat),
+                isChannel: info.isChannel
+            ))
         }
         return entries
     }
@@ -402,7 +437,7 @@ struct ChatsListView: View {
     private func counts(of entries: [PopopxChatEntry]) -> [PopopxChatFilter: Int] {
         var counts: [PopopxChatFilter: Int] = [:]
         for option in PopopxChatFilter.allCases {
-            counts[option] = entries.filter { option.matches($0.channel) }.count
+            counts[option] = entries.filter { option.matches($0.channel, isChannel: $0.isChannel) }.count
         }
         return counts
     }
@@ -513,7 +548,7 @@ struct ChatsListView: View {
         }
     }
 
-    /// 可切换的身份：与 UserPicker.swift:33-35（同 `PopopxMeView.swift:491-493`）一个口径 ——
+    /// 可切换的身份：与 UserPicker.swift:33-35（同 `PopopxMeView.swift:514-516`）一个口径 ——
     /// 加锁的身份（`user.hidden`，即有 `viewPwdHash`）不进切换器，因为这里传的是 `viewPwd: nil`，
     /// 带着 nil 去切加锁身份只会失败；加锁身份归「我」页的身份管理。
     /// 但当前身份必须在表里，否则顶栏会把自己的名字显示成"未选择"。顺序同 UserPicker
@@ -569,7 +604,13 @@ struct ChatsListView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        // 横向滚动而不是换行：无障碍字号下三枚筛选胶囊放不进一行，截断比滚动更糟。
+        // 横向滚动而不是换行：无障碍字号下筛选胶囊放不进一行，截断比滚动更糟。
+        // 四枚胶囊在 iPhone 15 Pro（393pt）Large 字号下的占有账（内边距 12×2=24、汉字按 1em≈17pt、
+        // 数字 metricSmall≈7pt、胶囊间距 spaceXS=8）：全部 69、在线加密 103、厢语离线 103、频道 69
+        // → 内容 344 + 间距 24 = 368，加滚动区内的 gutter 16 与尾部 8 = 392；放大镜那一枚钉在滚动区
+        // 外面（44 + 尾部 12 = 56），整行需要 448 —— 393 装不下，缺口 55pt，第四枚要横扫一下才全露。
+        // 三枚时同一笔账是 371，还留 22pt。结论：不换行、不加第二行，靠已有的横向滚动承载，
+        // 并且第四枚刻意取最短的正确说法（「频道」两个汉字，与「全部」同宽）。
         // 行尾那枚放大镜钉在滚动区外面：HStack 先把固定宽度的一端排好，ScrollView 吃剩下的，
         // 所以把搜索入口包在这一层外面不会让整行的档位测量出错（顶栏那一簇就是被
         // `ViewThatFits` 之外的 `.fixedSize()` 坑过，同一个教训）。
@@ -917,7 +958,7 @@ struct ChatsListView: View {
         return Copy.emptyFilteredTitle
     }
 
-    /// 空状态必须说清"为什么是空的"：这三档的解释各不相同，任何一档都不给"敬请期待"。
+    /// 空状态必须说清"为什么是空的"：这四档的解释各不相同，任何一档都不给"敬请期待"。
     private var detail: String {
         if searching { return Copy.emptySearchDetail(query) }
         if !hasAnyChat { return Copy.emptyNoneDetail }
@@ -931,6 +972,8 @@ struct ChatsListView: View {
             if !bindingsLoaded { return Copy.emptyMeshLoadingDetail }
             if !radioUsable { return Copy.emptyMeshRadioOffDetail }
             return Copy.emptyMeshDetail(ChatsListView.maxMeshHops)
+        case .channel:
+            return Copy.emptyChannelDetail
         }
     }
 }
@@ -987,10 +1030,17 @@ private enum Copy {
     static let filterAll = "全部"
     static let filterOnline = "在线加密"
     static let filterMeshOffline = "厢语离线"
+    /// 第四枚胶囊复用既有词条：`"Channels"` 在已有译文的 7 个目录（de/es/fr/hu/it/ru/zh-Hans，
+    /// zh-Hans 里就是「频道」，:1324）里都已经在，其余目录与 en 一样回落原句本身（英文）。
+    /// 而且它是本轮四枚里最短的正确说法（两个汉字，与「全部」同宽，见筛选条的宽度账）。
+    static let filterChannel = key("Channels")
 
     /// 与「通讯录 → 我的加密群组」右上角那一枚同一个目的地，因此共用同一个 Key：
     /// 两处标题不可能再各说一句（`PopopxContactsView` 的 `createGroupEntry`）。
     static let createGroupTitle = key("Create an encrypted group")
+    /// 创建频道页的标题。`AddChannelView` 自己那一行按钮与旧菜单的标题都是这一句
+    /// （`Shared/Views/NewChat/NewChatMenuButton.swift:99`），不再新造一句。
+    static let createChannelTitle = key("Create public channel")
     static let scanTitle = "扫一扫"
 
     // 徽章：图标词汇表固定下来的三个符号（§6），一行只出现一枚。
@@ -1035,6 +1085,7 @@ private enum Copy {
     static let emptyMeshLoadingDetail = "正在读取本机保存的厢语身份绑定表。"
     static let emptyMeshRadioOffDetail = "蓝牙当前不可用，已绑定的联系人会以「待中继」等待；射频恢复后自动给出跳数。"
     static func emptyMeshDetail(_ hopCap: Int) -> String { "还没有绑定厢语蓝牙身份的联系人。面对面加友或扫一扫建连后，这里会出现最多 \(hopCap) 跳的离线会话。" }
+    static let emptyChannelDetail = key("No channels yet. Create a public channel with the plus button above, or join one from a link or a QR code.")
 
     static let serviceStarting = "加密服务正在启动，稍候即可打开会话。"
     static let serviceDisconnected = "加密服务已停止：可在「设置 → 聊天数据」启动，或直接重启应用；期间会话打不开。"

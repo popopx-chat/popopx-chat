@@ -165,8 +165,24 @@ final class PopopxBadgeManager {
         }
     }
 
-    /// 点亮徽章。三条来源（Apple 订阅 / 算力点兑换 / 收到礼品卡）全汇到这里，
-    /// 于是"有效期从哪一天算起"这件事在工程里只有一个答案。
+    /// 叠加时长用的到期时刻：`max(本机当前到期, 现在) + period.days`。
+    ///
+    /// 三条"再买一段"的腿（一次性时长包 / 算力点兑换 / 收到礼品券）共用这一处，因为界面上那句
+    /// "再兑这一档会加 N 天"必须是同一个算式的结果，而不是三处各写各的近似。起点取
+    /// `max(现有, 现在)` 而不是 `现在`：还剩 200 天时买 30 天，到期在 230 天后；
+    /// 徽章已经过期（或本机从没点亮过）时 `现有` 不成立，才退回从当下起算。
+    func stackedExpiryMs(period: PopopxNodeBadgePeriod, now: Date = Date()) -> Int64 {
+        let nowMs = Int64(now.timeIntervalSince1970 * 1_000)
+        return max(nowMs, record?.expiresAtMs ?? 0) + Int64(period.days) * 86_400_000
+    }
+
+    /// 点亮徽章。五种来源（体验 / Apple 订阅 / 一次性时长包 / 算力点兑换 / 收到礼品券）
+    /// 全汇到这里，写 `.badgeRecord` 也只有这一处。
+    ///
+    /// "有效期从哪一天算起"在这里有两个答案，而且必须有两个：订阅那一族听 Apple 的
+    /// （`apply(storeReceipt:)` 直接用收据里的到期时间），其余三条"再买一段"的腿听
+    /// `stackedExpiryMs` 的。下面那句 `max(传入, 现有)` 不是第三个答案，它只是兜住
+    /// "传入比现有更早"的调用（体验那一支就是），保证没有任何一条腿能把已购时长改短。
     @discardableResult
     func activate(
         period: PopopxNodeBadgePeriod,
@@ -229,22 +245,30 @@ final class PopopxBadgeManager {
 
     /// 收到礼品卡、验签通过后点亮。券的状态机在 `PopopxP2PVoucherVault`，
     /// 本函数只回答"这次点亮写不写得下"。
+    ///
+    /// 这里刻意**不**用 `grant.expiresAtMs`：那个时刻是在**赠送方**的设备上算的
+    /// （`authorizeRedemption` 的 `现在 + period.days`），它只是"这张券给多少天"的签名承诺，
+    /// 不是受赠方的到期日。直接拿它点亮会有两个错：券在聊天里放三天就少三天，
+    /// 而且它会绕开受赠方自己剩下的时长。天数由 `stackedExpiryMs` 在受赠方这一侧重新落地，
+    /// 签名字节一个字都不用改。
     func activate(grant: PopopxBadgeGrant) throws -> PopopxBadgeRecord {
         try activate(
             period: grant.period,
             source: .giftedVoucher,
-            expiresAtMs: grant.expiresAtMs,
+            expiresAtMs: stackedExpiryMs(period: grant.period),
             receiptDigest: PopopxCommerceSignature.shortDigest(grant.voucherId)
         )
     }
 
-    /// 算力点兑换点亮。天数由周期自己给，避免两处各写一份 30/365。
+    /// 算力点兑换点亮。天数由周期自己给，避免两处各写一份 30/365；
+    /// 起点走 `stackedExpiryMs`，和通行证、礼品券是同一个算式——花点数的按钮上写着"加 N 天"，
+    /// 就只能是加 N 天，不能是"把剩余时间重置成 N 天"。
     @discardableResult
     func activate(withCredits period: PopopxNodeBadgePeriod, now: Date = Date()) throws -> PopopxBadgeRecord {
         try activate(
             period: period,
             source: .creditsExchange,
-            expiresAtMs: Int64(now.addingTimeInterval(TimeInterval(period.days * 86_400)).timeIntervalSince1970 * 1_000),
+            expiresAtMs: stackedExpiryMs(period: period, now: now),
             receiptDigest: nil,
             now: now
         )

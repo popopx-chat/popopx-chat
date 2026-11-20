@@ -4161,3 +4161,31 @@ server test failure */
 "While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content." = "アプリがフォアグラウンドにない間、画面全体が仮の表示に置き換わるため、アプリスイッチャーや スクリーンショットにチャットの内容が写りません。";
 "Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source." = "メッセージを作成している間にリンクから追跡用の項目が取り除かれるため、相手が受け取る内容に あなたの送信元は残りません。";
 "Remove link tracking" = "リンクの追跡を削除";
+
+/* POPOPX round 7 */
+"Buy" = "購入";
+"Renew" = "更新";
+"Tap to open plans and prices" = "タップしてプランと価格を開く";
+"Auto-renewing subscriptions" = "自動更新のサブスクリプション";
+"One-time passes" = "買い切りの期間パス";
+"One-time pass" = "買い切りパス";
+"%lld-day pass" = "%lld日間パス";
+"Buy pass" = "パスを購入";
+"This is a one-time purchase. It never renews automatically and no further payment is taken." = "これは買い切りです。自動更新されず、以後請求されることはありません。";
+"Badge lit for %lld more days." = "バッジを %lld 日延長しました。";
+"Choose a plan" = "プランを選択";
+"Renew or change plan" = "更新またはプラン変更";
+"Opens the 厢语 panel: the master switch, the channels and the nearby nodes" = "厢语 パネルを開きます：メインスイッチ、チャンネル、近くのノード";
+"Channels" = "チャンネル";
+"Create public channel" = "公開チャンネルを作成";
+"Join channel" = "チャンネルに参加";
+"Paste link / Scan" = "リンクを貼り付け / スキャン";
+"Subscribed channels" = "購読中のチャンネル";
+"No channels yet" = "チャンネルはまだありません";
+"%d channels you follow" = "購読中のチャンネル：%d";
+"No messages in this channel yet" = "このチャンネルにはまだメッセージがありません";
+"No channels yet. Create a public channel with the plus button above, or join one from a link or a QR code." = "チャンネルはまだありません。上の「+」ボタンで公開チャンネルを作成するか、リンクまたはQRコードから参加できます。";
+"Use Join channel in the top right corner to open a channel from a link or a QR code, or create a public channel with the plus button on the Messages tab." = "右上の「チャンネルに参加」でリンクまたはQRコードからチャンネルを開くか、チャットタブの「+」ボタンで公開チャンネルを作成してください。";
+"%lld purchases were restored." = "%lld 件の購入を復元しました。";
+"Nothing to restore for this item." = "この項目を復元するものはありません。";
+"Your subscription was restored." = "サブスクリプションを復元しました。";

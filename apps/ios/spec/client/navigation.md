@@ -146,7 +146,7 @@ message-server rows on the pages below push `ChatRelaySelection` / `ProtocolServ
 `navigationDestination(for:)` declarations live on the stacks that host them -
 [`UserPickerSheetView`](../../Shared/Views/ChatList/ChatListView.swift#L120) (settings sheet),
 [`NewChatSheet`](../../Shared/Views/NewChat/NewChatMenuButton.swift#L106) (new chat sheet) and the Me tab's stack in
-[`MainTabView`](../../Shared/Navigation/MainTabView.swift#L152) - and never on the page that
+[`MainTabView`](../../Shared/Navigation/MainTabView.swift#L159) - and never on the page that
 shows the rows: for one value type SwiftUI keeps only the registration nearest the stack root, so a per-page
 declaration is inert and the row tap navigates nowhere. Each of those stacks owns the `SaveableSettings` whose
 `servers` the destination closures bind ([ChatListView.swift#L83](../../Shared/Views/ChatList/ChatListView.swift#L83),
@@ -158,7 +158,7 @@ registration layout but does not use a `NavigationLink(value:)` for its own row.
 redrew the settings page and only released the pending value on the next navigation event (back), identically whether
 the declarations lived on the settings page or on the stack root - the registration depth is not the variable. The row
 is a plain `Button` that appends the value to an explicit `NavigationStack(path:)` owned by the hosting stack
-([`PopopxSettingsNavTrack`](../../Shared/Navigation/MainTabView.swift#L106), injected by both live hosts), the same
+([`PopopxSettingsNavTrack`](../../Shared/Navigation/MainTabView.swift#L107), injected by both live hosts), the same
 deterministic mechanism `ChatModel.chatId` uses to open a chat. Pages below it still push by value.
 
 ### Navigation Trigger
@@ -335,7 +335,20 @@ Migration state (`ChatModel.migrationState != nil`) takes precedence over onboar
 
 ### Entry Point
 
-`NewChatMenuButton` includes a NavigationLink "Create public channel" with antenna icon, navigating to `AddChannelView`.
+The live entry is the "Messages" tab "+" menu: [`PopopxPlusMenu`](../../Shared/Navigation/PopopxTelemetryHeader.swift)
+calls `onCreateChannel`, which sets `showsCreateChannel` in
+[`ChatsListView`](../../Shared/Features/Chats/ChatsListView.swift#L277) and pushes `AddChannelView` through
+`navigationDestination(isPresented:)`. The same sentence still exists in the legacy
+[`NewChatMenuButton`](../../Shared/Views/NewChat/NewChatMenuButton.swift#L179), but its two hosts are not mounted by
+the current shell: `ChatListView` (which shows that menu when `chatModel.chatRunning` is
+`true` [`#L386`](../../Shared/Views/ChatList/ChatListView.swift#L386)) has no call site outside its own previews, and
+`ChatHelp` is only pushed by `SettingsView` [`#L456`](../../Shared/Views/UserSettings/SettingsView.swift#L456), which
+likewise has no call site.
+
+The "Contacts" tab has the read side: the pinned
+[`Subscribed channels` row](../../Shared/Features/Contacts/PopopxContactsView.swift#L304) pushes
+`PopopxChannelsPage`, whose top-right entry pushes `NewChatView(selection: .connect, showQRCodeScanner: true)`
+(the existing scan/paste page) for joining a channel by link or QR code.
 
 ### Three-Step Wizard
 

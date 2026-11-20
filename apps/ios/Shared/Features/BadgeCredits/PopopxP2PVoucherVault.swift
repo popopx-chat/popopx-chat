@@ -160,6 +160,11 @@ actor PopopxP2PVoucherVault {
         else { return nil }
         let nowMs = Int64(Date().timeIntervalSince1970 * 1_000)
         let period = issued[index].period
+        // 这一句算的是**赠送方**机器上的"现在 + N 天"，它进的是签名载荷，作用是"这张券承诺给多少天"
+        // （`PopopxCommerceSignature.canonical` 把 `expiresAtMs` 一起签了，所以载荷不能改）。
+        // 受赠方**不**用它当自己的到期时间：`PopopxBadgeManager.activate(grant:)` 会拿
+        // `grant.period` 在受赠方这一侧重算 `max(本机当前到期, 现在) + days`——
+        // 否则券在聊天里放三天，受赠人就少三天，而且他剩下的时长会被这张券的日期覆盖掉。
         let expiresAtMs = nowMs + Int64(period.days * 86_400) * 1_000
         // 先把状态翻成 redeemed 并落盘，再签名返回。顺序反过来的话，
         // 落盘失败会留下一张"已经授过权但状态还是 unused"的券——那才是双花。

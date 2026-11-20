@@ -20,6 +20,12 @@
 //  - 取消续费只能走 `AppStore.showManageSubscriptions`（`PopopxStoreKitManager.manageSubscriptions()`），
 //    app 内不自建取消入口、不自建退款入口。恢复购买同理走 `AppStore.sync()`，在付费墙那一页。
 //
+//  ### 这一页的第一按钮是「续或换档」，不是「关闭」
+//  subtitle 那一行本来就在报剩余天数，读完的下一步只有两个：把这一段接上、或换一条路走。
+//  所以 `onOpenPaywall` 给到时它排第一，且**不分来源**（订阅 / 通行证 / 券 / 点数兑换 / 体验都一样）；
+//  上面那条"只能走 Apple 的管理页"的约束管的是**取消与退款**，与"再买一档"是两件事，
+//  所以「管理订阅」仍留在第二排，两条都不退让。
+//
 //  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
 
 import SwiftUI
@@ -31,6 +37,10 @@ struct PopopxBadgeDetailSheet: View {
     @State private var badge = PopopxBadgeManager.shared
     @State private var statusBusy = false
     @State private var statusFailure: String?
+
+    /// 「档位与价格」那一条主操作的去处，由宿主（`PopopxBadgeSheetHost`）给。
+    /// 给不到就整条不摆：一个只会报错的按钮比没有按钮更坏，理由同 `PopopxTrialWelcomeModal` 那一处。
+    var onOpenPaywall: (() -> Void)? = nil
 
     var body: some View {
         PopopxSheetContainer(Copy.title, subtitle: badge.remainingDescription ?? Copy.dormantSubtitle) {
@@ -142,13 +152,28 @@ struct PopopxBadgeDetailSheet: View {
     }
 
     @ViewBuilder private var footerRow: some View {
-        if badge.record?.source == .appleSubscription {
-            PopopxButton(Copy.manageSubscriptions, systemImage: "creditcard", role: .secondary, isLoading: statusBusy) {
-                await PopopxStoreKitManager.shared.manageSubscriptions()
+        VStack(spacing: PopopxMetrics.spaceXS) {
+            // 主操作：进付费墙「续或换档」。这一条**按来源不分叉**（订阅 / 通行证 / 礼品券 /
+            // 点数兑换 / 体验都给它），理由是这一页的 subtitle 已经在报剩余天数，而"接下来怎么办"
+            // 在五种来源上是同一个问题：要么把这一段接上，要么换一条路走。
+            // 以前这页对非订阅来源只有一个「关闭」——用户读完"还剩 3 天"之后没有任何下一步。
+            if let onOpenPaywall {
+                PopopxButton(PopopxCommerceCopy.renewOrChangePlanAction,
+                             systemImage: "arrow.triangle.2.circlepath") {
+                    onOpenPaywall()
+                }
             }
-        } else {
-            PopopxButton(Copy.close, role: .secondary) {
-                dismiss()
+            if badge.record?.source == .appleSubscription {
+                // 自动续费那一族的"关掉/改档"在 Apple 那边，这条留在第二排而不是换成主操作：
+                // 取消续费与换套餐是两件事，前者不需要重新付费，混成一句会误导。
+                PopopxButton(Copy.manageSubscriptions, systemImage: "creditcard",
+                             role: .secondary, isLoading: statusBusy) {
+                    await PopopxStoreKitManager.shared.manageSubscriptions()
+                }
+            } else {
+                PopopxButton(Copy.close, role: .secondary) {
+                    dismiss()
+                }
             }
         }
     }
@@ -205,11 +230,14 @@ struct PopopxBadgeDetailSheet: View {
 // MARK: - 来源的中文名
 
 private extension PopopxBadgeSource {
-    /// 四档来源的措辞。判据与 `PopopxBadgeManager` 的写入一一对应，不另造第五种说法。
+    /// 五档来源的措辞。判据与 `PopopxBadgeManager` 的写入一一对应，不另造第六种说法。
+    /// 通行证那一格走 `PopopxCommerceCopy`：它是这一轮新增的来源，本轮红线禁止在代码里落新的裸中文
+    /// （上面四格是既有文案，收口到 key 要一并动 16 本目录，不在本轮范围）。
     var displayName: String {
         switch self {
         case .pioneerTrial: "先锋节点体验徽章"
         case .appleSubscription: "App Store 订阅"
+        case .storePass: PopopxCommerceCopy.passSourceName
         case .creditsExchange: "算力点兑换"
         case .giftedVoucher: "收到的礼品卡"
         }

@@ -19,6 +19,12 @@
 //    到期时间取两者较晚的那一个（`PopopxBadgeManager.activate` 的合并规则），所以不存在
 //    "为了买正式徽章先浪费三天体验"的取舍。
 //
+//  ### 第二条出口：档位与价格（`onOpenPaywall`）
+//  三态都在免费那一步下面常驻一个 `.secondary` 按钮进付费墙。这条腿的存在理由不是"多一个入口"：
+//  顶栏那枚胶囊在 iPhone 上恒定制（只留符号，见 `PopopxBadgeCapsuleView` 的 `showsBuySegment`），
+//  体验态里想买东西的用户如果只能靠猜，就会在这页读到"3 天后回落免费节点"却找不到下一步。
+//  换面板走的是宿主那一份 `.sheet(item:)` 载体，不是第二张 sheet —— 所以不存在 sheet 套 sheet。
+//
 //  商业侧名词一律走 `PopopxCommerceCopy`（全语种目录），解释性长句留在本文件的文件私有 `Copy` 里
 //  用中文——这是本轮的本地化裁定：只有钱、退款、合规相关的字符串进 `.lproj`。
 //
@@ -31,6 +37,10 @@ struct PopopxTrialWelcomeModal: View {
     /// 出口「看徽章详情」的去向。宿主给了它就换到详情面板（`PopopxBadgeSheetHost` 那条 `.sheet(item:)`），
     /// 没给就退回原来的只关闭 —— 真机第 3 轮的 P0 是这个按钮以前只有 `dismiss()`，点了像没反应。
     var onOpenDetail: (() -> Void)? = nil
+    /// 出口「看档位与价格」的去向。声明在 `onOpenDetail` **之后**：两个都是可选闭包，
+    /// 谁在前只影响调用点的书写顺序，而宿主那处（`PopopxBadgeSheetHost`）是带标签写的，
+    /// 所以这里加参数不会改变任何已有调用点的含义。默认 nil = 本面板只管免费那条腿。
+    var onOpenPaywall: (() -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
 
@@ -134,23 +144,35 @@ struct PopopxTrialWelcomeModal: View {
     // MARK: 出口
 
     @ViewBuilder private var footerRow: some View {
-        if badge.record?.source == .pioneerTrial {
-            // 已经在这台设备上领到过：本面板的角色只剩"说清它还在跑"，出口是详情。
-            PopopxButton(Copy.openDetail, systemImage: "eye", role: .secondary) {
-                if let onOpenDetail {
-                    onOpenDetail()
-                } else {
+        VStack(spacing: PopopxMetrics.spaceXS) {
+            if badge.record?.source == .pioneerTrial {
+                // 已经在这台设备上领到过：本面板的角色只剩"说清它还在跑"，出口是详情。
+                PopopxButton(Copy.openDetail, systemImage: "eye", role: .secondary) {
+                    if let onOpenDetail {
+                        onOpenDetail()
+                    } else {
+                        dismiss()
+                    }
+                }
+            } else if badge.canClaimPioneerTrial {
+                PopopxButton(Copy.claim(Self.trialDays), systemImage: "sparkles", isLoading: isClaiming) {
+                    await claim()
+                }
+            } else {
+                // 没资格：不摆一个只会报错的按钮，只解释。
+                PopopxButton(Copy.close, role: .secondary) {
                     dismiss()
                 }
             }
-        } else if badge.canClaimPioneerTrial {
-            PopopxButton(Copy.claim(Self.trialDays), systemImage: "sparkles", isLoading: isClaiming) {
-                await claim()
-            }
-        } else {
-            // 没资格：不摆一个只会报错的按钮，只解释。
-            PopopxButton(Copy.close, role: .secondary) {
-                dismiss()
+
+            // 付费出口在**三态都常驻**，而且永远排在免费那一步之后、用 `.secondary`：
+            // 体验还剩 3 天而档位选择已经存在，这一页不给出口就等于让用户去顶栏碰运气；
+            // 但把付费做成主按钮，就把这页从"讲清楚免费这条路"改成了收银台。
+            // 宿主没给 `onOpenPaywall` 时整条不出现（能力未接线的入口一律不摆，见文件头第 7-9 行那条规矩）。
+            if let onOpenPaywall {
+                PopopxButton(PopopxCommerceCopy.choosePlanAction, systemImage: "creditcard", role: .secondary) {
+                    onOpenPaywall()
+                }
             }
         }
     }

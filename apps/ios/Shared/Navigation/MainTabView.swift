@@ -18,10 +18,11 @@
 //     附件打开（ChatModel.swift:1303）与新建联系人（CIMemberCreatedContactView.swift:29）。
 //     而把该字段翻成"推送一页"的地方全工程只有一处：旧 ChatListView 的栈路径绑定
 //     （ChatListView.swift:210-217）。这条绑定必须留在消息页内部，四栏壳才不会切断通知点开会话。
-//     其余三栏里：通讯录与「我」只带行内 Sheet，由壳统一包 NavigationStack（:99、:111）；厢语
-//     2026-11-20 起自己持有 `NavigationStack(path:)`（PopopxCabinView.swift:198），壳这里只放裸页面
-//     （:107），因为它的广场频道页要靠自己的路径栈做程序化返回。
-//     「我 → 全部设置」那三个服务器子页的 `navigationDestination` 登记也挂在本栏的栈根（:119-127）：
+//     其余三栏里：通讯录与「我」只带行内 Sheet，由壳统一包 NavigationStack（:134、:152）；厢语
+//     2026-11-20 起自己持有 `NavigationStack(path:)`，本轮起这一栏的根换成 `PopopxMeshPlazaRootView`
+//     （自带根栈，落地即包内那份全屏广场，`PopopxCabinView.swift:198`），旧面板成了它的满高抽屉 ——
+//     壳这里因此仍然只放裸页面（:148）：那条 async 推送要绑的 `path` 在抽屉里那一页自己身上。
+//     「我 → 全部设置」那三个服务器子页的 `navigationDestination` 登记也挂在本栏的栈根（:159-165）：
 //     按值的链接只认承载它的那个栈，而设置页是从本页用目标闭包推进去的，闭包推进的页面自己写登记
 //     一行都不生效 —— 这就是「中继服务器」点了只重画「全部设置」的根因。
 //
@@ -98,7 +99,7 @@ enum PopopxTab: String, Hashable, CaseIterable {
 /// 绑在同一次点击里，点击一旦被行重建吃掉，值就留在待提交的事务里，下一次导航事件（返回）才冲出来。
 /// 修法是把这一跳换成消息栏那条真机验证过的轨道同款的确定性推送：栈根持有显式路径
 /// （`NavigationStack(path:)`），行体是普通 `Button`，点击只做一次状态赋值 —— 与
-/// `ChatsListView.swift:192-197` 拿 `chatModel.chatId` 推开会话是同一个机制。
+/// `ChatsListView.swift:203-208` 拿 `chatModel.chatId` 推开会话是同一个机制。
 /// 再往下的四跳（yourServers / serverOperator / 协议服务器 / 聊天中继）仍是按值链接，由栈根那三个登记
 /// 解析，它们与 `NetworkAndServers` 同处一个栈，是这条轨道唯一的按值段。
 @MainActor
@@ -136,9 +137,15 @@ struct MainTabView: View {
             .tabItem { tabLabel(.contacts) }
             .tag(PopopxTab.contacts)
 
-            // 厢语自带推送栈：这一页的私聊是"发出离线建联邀请之后再推一页"，动作是 async 的，
-            // 只有绑定在自己栈上的 `path` 能在那之后推着走（`PopopxCabinView.swift:198`）。
-            PopopxCabinView()
+            // 厢语这一栏本轮起直接落在包内那一份全屏广场上：根是 `PopopxMeshPlazaRootView`
+            // （`PopopxCabinView.swift`），它自己带根栈，壳这里仍然只放裸页面。旧厢语面板
+            // （`PopopxCabinView`）不再是这一栏的根，而是根左上角那一枚胶囊唤起的满高抽屉；
+            // 抽屉里那一页继续自己持有 `NavigationStack(path:)`，理由没变，只是搬进了抽屉 ——
+            // 它的私聊是"发出离线建联邀请之后再推一页"，动作是 async 的，只有绑在它自己栈上的
+            // `path` 能在那之后推着走（`PopopxCabinView.swift:376` 那行 `NavigationStack(path: $path)`）；
+            // 把它挂成根栈的一页要么两条导航条、要么那四处 `path.append` 全部落空，所以整块压在外面
+            // 而不推进去。
+            PopopxMeshPlazaRootView()
                 .tabItem { tabLabel(.cabin) }
                 .tag(PopopxTab.cabin)
 
@@ -174,7 +181,7 @@ struct MainTabView: View {
         // 决定 3：任何一栏点了会话，都要落到"消息"栏去呈现。
         // 会话页由 `ChatModel.chatId` 驱动，而把它翻成推送页的栈在消息页内部（文件头决定 1）；
         // 通讯录页按同一约定调 `ItemsModel.shared.loadOpenChat(_:)`
-        // （PopopxContactsView.swift:226、:1067 → ChatModel.swift:113 写 :120），
+        // （PopopxContactsView.swift:243、:1067 → ChatModel.swift:113 写 :120），
         // 若消息栏还没被访问过，那棵栈还不存在，这个 onChange 就是唯一的接住点。
         .onChange(of: chatModel.chatId) { _, chatId in
             if chatId != nil { selection = .chats }
