@@ -473,7 +473,7 @@ public struct MeshPlazaView: View {
                     }
                 }
                 .disabled(!model.canBroadcast)
-                .accessibilityLabel(Text(verbatim: "Broadcast to #mesh"))
+                .accessibilityLabel(Text("Broadcast to #mesh"))
             }
         }
         .padding(12)

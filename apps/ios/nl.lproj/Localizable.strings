@@ -7169,3 +7169,8 @@ server test failure */
 "%lld purchases were restored." = "%lld aankopen hersteld.";
 "Nothing to restore for this item." = "Er is niets te herstellen voor dit item.";
 "Your subscription was restored." = "Uw abonnement is hersteld.";
+
+/* POPOPX round 18 tier A */
+"If you were charged but have no badge, this adds it. A subscription bought with this App Store account moves to this profile, and the device or profile that had it loses its badge at its next renewal." = "Als je wel betaald hebt maar geen badge hebt, voegt dit die toe. Een abonnement dat met dit App Store-account is gekocht, verhuist naar dit profiel, en het apparaat of profiel dat het had verliest zijn badge bij de volgende verlenging.";
+"Broadcast to #mesh" = "Verzenden naar #mesh";
+"Send over the offline mesh" = "Verzenden via het offlinenetwerk";

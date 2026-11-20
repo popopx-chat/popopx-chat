@@ -3855,3 +3855,8 @@ server test failure */
 "%lld purchases were restored." = "%lld ostoa palautettu.";
 "Nothing to restore for this item." = "Tälle tuotteelle ei ole palautettavaa.";
 "Your subscription was restored." = "Tilauksesi palautettiin.";
+
+/* POPOPX round 18 tier A */
+"If you were charged but have no badge, this adds it. A subscription bought with this App Store account moves to this profile, and the device or profile that had it loses its badge at its next renewal." = "Jos sinulta on veloitettu mutta merkkiä ei näy, tämä lisää sen. Tällä App Store -tilillä ostettu tilaus siirtyy tälle profiilille, ja laite tai profiili, jolla se oli, menettää merkkinsä seuraavan uudistumisen yhteydessä.";
+"Broadcast to #mesh" = "Lähetä verkkoon #mesh";
+"Send over the offline mesh" = "Lähetä offline-verkon kautta";

@@ -7490,3 +7490,8 @@ alert title */
 "%lld purchases were restored." = "Відновлено покупок: %lld.";
 "Nothing to restore for this item." = "Немає чого відновлювати для цього пункту.";
 "Your subscription was restored." = "Вашу підписку відновлено.";
+
+/* POPOPX round 18 tier A */
+"If you were charged but have no badge, this adds it. A subscription bought with this App Store account moves to this profile, and the device or profile that had it loses its badge at its next renewal." = "Якщо з вас стягнули оплату, але значка немає, цей крок його додасть. Передплату, куплений з цього облікового запису App Store, переноситься на цей профіль, а пристрій або профіль, у якого він був, втратить значок при наступному поновленні.";
+"Broadcast to #mesh" = "Надіслати до #mesh";
+"Send over the offline mesh" = "Надіслати через офлайн-мережу";

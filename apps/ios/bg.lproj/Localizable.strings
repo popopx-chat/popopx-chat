@@ -5142,3 +5142,8 @@ server test failure */
 "%lld purchases were restored." = "%lld покупки бяха възстановени.";
 "Nothing to restore for this item." = "Няма какво да се възстанови за този елемент.";
 "Your subscription was restored." = "Абонаментът ви беше възстановен.";
+
+/* POPOPX round 18 tier A */
+"If you were charged but have no badge, this adds it. A subscription bought with this App Store account moves to this profile, and the device or profile that had it loses its badge at its next renewal." = "Ако сте таксувани, но нямате значка, това я добавя. Абонамент, купен с този App Store акаунт, се прехвърля към този профил, а устройството или профилът, който го е имал, губи значката при следващото подновяване.";
+"Broadcast to #mesh" = "Изпращане към #mesh";
+"Send over the offline mesh" = "Изпращане през офлайн мрежата";

@@ -8514,3 +8514,13 @@ alert title */
 "%lld purchases were restored." = "%lld achats ont été restaurés.";
 "Nothing to restore for this item." = "Rien à restaurer pour cet élément.";
 "Your subscription was restored." = "Votre abonnement a été restauré.";
+
+/* POPOPX round 18 tier A */
+"(chat)" = "(conversation)";
+"(default)" = "(par défaut)";
+"Learn more." = "En savoir plus.";
+"New subscribers will see earlier messages as unsigned." = "Les nouveaux abonnés verront les messages antérieurs comme non signés.";
+"Sign messages?" = "Signer les messages ?";
+"If you were charged but have no badge, this adds it. A subscription bought with this App Store account moves to this profile, and the device or profile that had it loses its badge at its next renewal." = "Si vous avez été facturé mais que vous ne voyez pas de badge, cette action l’ajoute. Un abonnement acheté avec ce compte App Store est transféré sur ce profil, et l’appareil ou le profil qui le possédait perd son badge à son prochain renouvellement.";
+"Broadcast to #mesh" = "Envoyer vers #mesh";
+"Send over the offline mesh" = "Envoyer via le réseau hors ligne";

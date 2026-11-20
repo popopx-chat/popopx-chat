@@ -4189,3 +4189,8 @@ server test failure */
 "%lld purchases were restored." = "%lld 件の購入を復元しました。";
 "Nothing to restore for this item." = "この項目を復元するものはありません。";
 "Your subscription was restored." = "サブスクリプションを復元しました。";
+
+/* POPOPX round 18 tier A */
+"If you were charged but have no badge, this adds it. A subscription bought with this App Store account moves to this profile, and the device or profile that had it loses its badge at its next renewal." = "課金されているのにバッジが表示されない場合は、ここで追加できます。この App Store アカウントで購入したサブスクリプションはこのプロフィールに移動し、以前それを持っていたデバイスまたはプロフィールは次の更新時にバッジを失います。";
+"Broadcast to #mesh" = "「#mesh」にブロードキャスト";
+"Send over the offline mesh" = "オフラインメッシュ経由で送信";

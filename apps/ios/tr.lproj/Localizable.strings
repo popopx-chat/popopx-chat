@@ -7474,3 +7474,8 @@ alert title */
 "%lld purchases were restored." = "%lld satın alma geri yüklendi.";
 "Nothing to restore for this item." = "Bu öge için geri yüklenecek bir şey yok.";
 "Your subscription was restored." = "Aboneliğiniz geri yüklendi.";
+
+/* POPOPX round 18 tier A */
+"If you were charged but have no badge, this adds it. A subscription bought with this App Store account moves to this profile, and the device or profile that had it loses its badge at its next renewal." = "Ücretlendirildiniz ancak rozetiniz yoksa bu işlem onu ekler. Bu App Store hesabıyla satın alınan bir abonelik bu profile taşınır; daha önce onu kullanan cihaz veya profil, sonraki yenilemede rozetini kaybeder.";
+"Broadcast to #mesh" = "#mesh ağına yayınla";
+"Send over the offline mesh" = "Çevrimdışı ağ üzerinden gönder";

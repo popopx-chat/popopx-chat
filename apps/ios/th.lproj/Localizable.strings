@@ -3753,3 +3753,8 @@ server test failure */
 "%lld purchases were restored." = "กู้คืน %lld การซื้อแล้ว";
 "Nothing to restore for this item." = "ไม่มีสิ่งต้องกู้คืนสำหรับรายการนี้";
 "Your subscription was restored." = "การเป็นสมาชิกของคุณถูกกู้คืนแล้ว";
+
+/* POPOPX round 18 tier A */
+"If you were charged but have no badge, this adds it. A subscription bought with this App Store account moves to this profile, and the device or profile that had it loses its badge at its next renewal." = "หากถูกเรียกเก็บเงินแล้วแต่ไม่มีป้ายกำกับ ขั้นตอนนี้จะเพิ่มให้ การสมัครใช้งานที่ซื้อด้วยบัญชี App Store นี้จะย้ายมายังโพรไฟล์นี้ ส่วนอุปกรณ์หรือโพรไฟล์เดิมที่เคยมีจะสูญเสียป้ายกำกับในการต่ออายุครั้งถัดไป";
+"Broadcast to #mesh" = "ออกอากาศไปยัง #mesh";
+"Send over the offline mesh" = "ส่งผ่านเครือข่ายออฟไลน์";

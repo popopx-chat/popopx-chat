@@ -8361,3 +8361,17 @@ alert title */
 "No messages in this channel yet" = "这个频道还没有消息";
 "No channels yet. Create a public channel with the plus button above, or join one from a link or a QR code." = "还没有频道。用上方的「+」按钮创建公开频道，或从链接或二维码加入一个。";
 "Use Join channel in the top right corner to open a channel from a link or a QR code, or create a public channel with the plus button on the Messages tab." = "用右上角的「加入频道」从链接或二维码打开一个频道，或在「消息」页用「+」按钮创建公开频道。";
+
+/* POPOPX round 18 tier A */
+"Delete temp data" = "删除临时数据";
+"Group invitations" = "群组邀请";
+"Learn more." = "了解更多。";
+"Show encryption" = "显示加密";
+"Sign message" = "为消息签名";
+"Signing proves you authored this message and can't be denied later." = "签名可证明这条消息由你发出，且事后无法抵赖。";
+"Stop chat in Settings → Chat data → Database passphrase & export to delete temp data." = "请在「设置 → 聊天数据 → 数据库口令与导出」中停止聊天，以删除临时数据。";
+"This file has text direction characters. The text can be shown in a different order than it is written." = "此文件包含文字方向控制字符，显示顺序可能与书写顺序不同。";
+"Update the app to open this link." = "请更新 App 后再打开此链接。";
+"If you were charged but have no badge, this adds it. A subscription bought with this App Store account moves to this profile, and the device or profile that had it loses its badge at its next renewal." = "如果你已被扣款但没有看到徽章，点此补发。用这个 App Store 账号购买的订阅会转到当前身份，原先持有它的设备或身份会在下一次续费时失去徽章。";
+"Broadcast to #mesh" = "向 #mesh 广播";
+"Send over the offline mesh" = "通过离线组网发送";

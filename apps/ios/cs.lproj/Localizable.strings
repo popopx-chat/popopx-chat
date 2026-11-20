@@ -4309,3 +4309,8 @@ server test failure */
 "%lld purchases were restored." = "Obnoveno %lld nákupů.";
 "Nothing to restore for this item." = "Pro tuto položku není co obnovit.";
 "Your subscription was restored." = "Vaše předplatné bylo obnoveno.";
+
+/* POPOPX round 18 tier A */
+"If you were charged but have no badge, this adds it. A subscription bought with this App Store account moves to this profile, and the device or profile that had it loses its badge at its next renewal." = "Pokud vám bylo účtováno, ale odznak nemáte, tímhle se přidá. Předplatné koupené tímto účtem App Store se přesune do tohoto profilu a zařízení nebo profil, které ho mělo, odznak při dalším obnovování ztratí.";
+"Broadcast to #mesh" = "Odeslat do #mesh";
+"Send over the offline mesh" = "Odeslat přes offline síť";

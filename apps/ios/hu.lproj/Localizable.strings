@@ -8547,3 +8547,8 @@ alert title */
 "%lld purchases were restored." = "%lld vásárlás visszaállítva.";
 "Nothing to restore for this item." = "Ehhez a termékhez nincs mit visszaállítani.";
 "Your subscription was restored." = "Az előfizetésed visszaállítva.";
+
+/* POPOPX round 18 tier A */
+"If you were charged but have no badge, this adds it. A subscription bought with this App Store account moves to this profile, and the device or profile that had it loses its badge at its next renewal." = "Ha már levették a díjat, de nincs jelvényed, ezzel hozzáadjuk. Az ezen az App Store-fiókon vásárolt előfizetés erre a profilra kerül, és az a készülék vagy profil, amelyik korábban birtokolta, a következő megújításkor elveszíti a jelvényt.";
+"Broadcast to #mesh" = "Küldés a #mesh hálózatba";
+"Send over the offline mesh" = "Küldés offline hálózaton keresztül";

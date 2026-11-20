@@ -897,7 +897,7 @@ public struct PopopxMeshPrivateChatView: View {
                     }
                 }
                 .disabled(!model.canSend)
-                .accessibilityLabel(Text(verbatim: "Send over the offline mesh"))
+                .accessibilityLabel(Text("Send over the offline mesh"))
             }
         }
         .padding(12)

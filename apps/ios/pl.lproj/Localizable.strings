@@ -7542,3 +7542,8 @@ alert title */
 "%lld purchases were restored." = "Przywrócono %lld zakupów.";
 "Nothing to restore for this item." = "Brak czego przywracać dla tej pozycji.";
 "Your subscription was restored." = "Twoja subskrypcja została przywrócona.";
+
+/* POPOPX round 18 tier A */
+"If you were charged but have no badge, this adds it. A subscription bought with this App Store account moves to this profile, and the device or profile that had it loses its badge at its next renewal." = "Jeśli opłata została naliczona, ale nie masz odznaki, to ją doda. Subskrypcja kupiona na tym koncie App Store przechodzi na ten profil, a urządzenie lub profil, który ją miał, straci odznakę przy następnym odnowieniu.";
+"Broadcast to #mesh" = "Wyślij do #mesh";
+"Send over the offline mesh" = "Wyślij przez sieć offline";

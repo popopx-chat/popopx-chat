@@ -8434,3 +8434,31 @@ alert title */
 "%lld purchases were restored." = "Se restauraron %lld compras.";
 "Nothing to restore for this item." = "No hay nada que restaurar para este elemento.";
 "Your subscription was restored." = "Se ha restaurado tu suscripción.";
+
+/* POPOPX round 18 tier A */
+"%@ accepted the call without end-to-end encryption." = "%@ aceptó la llamada sin cifrado de extremo a extremo.";
+"(chat)" = "(chat)";
+"(default)" = "(predeterminado)";
+"Call is not encrypted" = "La llamada no está cifrada";
+"Cannot generate random database passphrase" = "No se pudo generar una contraseña aleatoria de la base de datos";
+"Delete temp data" = "Eliminar datos temporales";
+"Delete temp data?" = "¿Eliminar datos temporales?";
+"End call" = "Finalizar llamada";
+"Error reading file" = "Error al leer el archivo";
+"Error saving profile" = "Error al guardar el perfil";
+"File expired" = "El archivo ha caducado";
+"File was available until %@." = "El archivo estuvo disponible hasta %@.";
+"Files being sent or received will never complete. Videos in unsent drafts will be sent without the file." = "Los archivos que se estén enviando o recibiendo no se completarán. Los vídeos de los borradores sin enviar se enviarán sin el archivo.";
+"For %@ only" = "Solo para %@";
+"For you only" = "Solo para ti";
+"Learn more." = "Más información.";
+"New subscribers will see earlier messages as unsigned." = "Los nuevos suscriptores verán los mensajes anteriores como no firmados.";
+"Server %@ has more than two host names." = "El servidor %@ tiene más de dos nombres de host.";
+"Sign messages?" = "¿Firmar mensajes?";
+"Stop chat in Settings → Chat data → Database passphrase & export to delete temp data." = "Detén el chat en Ajustes → Datos del chat → Contraseña y exportación de la base de datos para eliminar los datos temporales.";
+"The service did not respond. Please try again." = "El servicio no respondió. Inténtalo de nuevo.";
+"This file has text direction characters. The text can be shown in a different order than it is written." = "Este archivo contiene caracteres de dirección del texto. El texto puede mostrarse en un orden distinto al que está escrito.";
+"Update the app to open this link." = "Actualiza la app para abrir este enlace.";
+"If you were charged but have no badge, this adds it. A subscription bought with this App Store account moves to this profile, and the device or profile that had it loses its badge at its next renewal." = "Si te han cobrado pero no tienes ninguna insignia, esto la añade. Una suscripción comprada con esta cuenta de App Store pasa a este perfil, y el dispositivo o perfil que la tenía pierde su insignia en su próxima renovación.";
+"Broadcast to #mesh" = "Enviar a #mesh";
+"Send over the offline mesh" = "Enviar por la red sin conexión";

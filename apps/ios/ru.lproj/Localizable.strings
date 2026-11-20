@@ -8423,3 +8423,33 @@ alert title */
 "%lld purchases were restored." = "Восстановлено покупок: %lld.";
 "Nothing to restore for this item." = "Нет ничего доступного для восстановления по этому пункту.";
 "Your subscription was restored." = "Ваша подписка восстановлена.";
+
+/* POPOPX round 18 tier A */
+"%02d hrs %02d min %02d sec" = "%1$02d ч %2$02d мин %3$02d с";
+"%@ accepted the call without end-to-end encryption." = "%@ принял вызов без сквозного шифрования.";
+"(chat)" = "(чат)";
+"(default)" = "(по умолчанию)";
+"Call is not encrypted" = "Вызов не шифруется";
+"Cannot generate random database passphrase" = "Не удалось сгенерировать случайную фразу базы данных";
+"Delete temp data" = "Удалить временные данные";
+"Delete temp data?" = "Удалить временные данные?";
+"End call" = "Завершить вызов";
+"Error reading file" = "Ошибка чтения файла";
+"Error saving profile" = "Ошибка сохранения профиля";
+"File expired" = "Срок действия файла истёк";
+"File was available until %@." = "Файл был доступен до %@.";
+"Files being sent or received will never complete. Videos in unsent drafts will be sent without the file." = "Файлы, которые передаются или принимаются, не будут завершены. Видео из неотправленных черновиков будут отправлены без файла.";
+"For %@ only" = "Только для %@";
+"For you only" = "Только для вас";
+"Group invitations" = "Приглашения в группы";
+"Learn more." = "Узнать больше.";
+"New subscribers will see earlier messages as unsigned." = "Новые подписчики увидят предыдущие сообщения как неподписанные.";
+"Server %@ has more than two host names." = "У сервера %@ более двух имён хоста.";
+"Sign messages?" = "Подписывать сообщения?";
+"Stop chat in Settings → Chat data → Database passphrase & export to delete temp data." = "Остановите чат в «Настройки → Данные чата → Фраза и экспорт базы данных», чтобы удалить временные данные.";
+"The service did not respond. Please try again." = "Сервис не ответил. Повторите попытку.";
+"This file has text direction characters. The text can be shown in a different order than it is written." = "В этом файле есть символы направления текста. Текст может отображаться в порядке, отличном от того, в котором он написан.";
+"Update the app to open this link." = "Обновите приложение, чтобы открыть эту ссылку.";
+"If you were charged but have no badge, this adds it. A subscription bought with this App Store account moves to this profile, and the device or profile that had it loses its badge at its next renewal." = "Если с вас списали оплату, но значка нет, этот шаг добавит его. Подписка, купленная с этого аккаунта App Store, переносится на этот профиль, а устройство или профиль, где она была, теряет значок при следующем продлении.";
+"Broadcast to #mesh" = "Отправить в #mesh";
+"Send over the offline mesh" = "Отправить через офлайн-сеть";
