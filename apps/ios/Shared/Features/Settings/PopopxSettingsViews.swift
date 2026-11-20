@@ -15,12 +15,13 @@
 //     2026-11-20 起本页不再有「厢语离线组网」与「徽章与用量」两张卡：前者整块收进厢语页右上角
 //     的 `PopopxCabinMeshSettingsSheet`，后者由「我」页顶部的动态徽章行与算力点钱包承接。
 //     真机走查 三.1/三.4 再拿掉两张卡，本页只留入口，不留第二处同一个目的地：
-//       · 「外观」整组上移到「我」栏的常用组；行尾那个主题名留在本文件的
+//       · 「外观」整组 2026-11 曾上移到「我」栏的常用组，真机第 6 轮二.1 又落回本页
+//         （`appearanceCard`，卡名与两行说法走英文原句 Key）；行尾那个主题名一直在本文件的
 //         `PopopxSettingsValues.themeName`，两边读同一份 `currentThemeDefault`，不分第二套读数。
 //       · 「帮助与关于」由卡片升格成真实页面 `PopopxHelpView`（同样只从「我」栏进），并补上
 //         开源地址与隐私协议两行；`PopopxDisplayLanguageView` 是同一次升格带出的「显示语言」页。
-//       · `privacyCard` 里那行重复的「隐私设置」删掉 —— 隐私页在「我」栏第 4 组已有唯一入口，
-//         这张卡只剩屏幕保护与链接去跟踪两个别处没有的开关。
+//       · `privacyCard` 整卡 2026-11-20 删（真机第 6 轮二.2）：那张卡上剩的屏幕保护与链接去跟踪两枚
+//         开关与 `PrivacySettings.swift:75`/`:88` 是同一批状态，现在直接摆在「我」栏的防线卡上。
 //  2. 配色、字号、圆角、间距只取 Shared/Theme/PopopxTheme.swift 的 token；行控件按
 //     Shared/Components 的原子库口径自己组，命中区由 `PopopxMetrics.minHitTarget` 兜住 44pt。
 //     本页因此不读全 app 的主题对象 —— 子页面仍带着它们自己的背景修饰，那一次收敛另开一刀。
@@ -61,9 +62,9 @@ struct PopopxSettingsView: View {
 
     var versionText: String? = appVersion
 
-    /// 与 PrivacySettings.swift:27/75、:18/88、CallSettings.swift:15/31 同一批 key。
-    @AppStorage(DEFAULT_PRIVACY_PROTECT_SCREEN) private var protectScreen = false
-    @AppStorage(GROUP_DEFAULT_PRIVACY_SANITIZE_LINKS, store: groupDefaults) private var sanitizeLinks = false
+    /// 真机第 6 轮二.2 之后这张树里只剩通话这一枚：打码与去跟踪两枚连同那张「隐私与安全」卡
+    /// 一起并进「我」栏的隐私与安全防线（`PopopxMeView.swift` 的 `securityEntries`，两个键本身不变）。
+    /// 与 CallSettings.swift:15/31 同一批 key。
     @AppStorage(DEFAULT_WEBRTC_POLICY_RELAY) private var webrtcPolicyRelay = true
 
     /// 外部只认两种写法：`PopopxSettingsView()` 与 `PopopxSettingsView(versionText:)`。
@@ -88,7 +89,7 @@ struct PopopxSettingsView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
                 headerCard
-                privacyCard
+                appearanceCard
                 callsAndNtfsCard
                 networkCard
                 dataCard
@@ -163,25 +164,35 @@ struct PopopxSettingsView: View {
         }
     }
 
-    // MARK: 隐私与安全
+    // MARK: 外观与语言
 
-    private var privacyCard: some View {
-        PopopxSectionCard(Copy.groupPrivacy) {
-            PopopxToggleRow(
-                Copy.protectScreenRow,
-                note: Copy.protectScreenNote,
-                systemImage: "eye.slash",
-                tint: .neutral,
-                isOn: $protectScreen
-            )
+    /// 真机第 6 轮二.1：这一组 2026-11 曾被整块升到「我」栏的常用组，现在落回设置树，位置就在
+    /// 顶部卡之后 —— 也就是它本来在的位置。目的地、`ThemedBackground`、可用性门（`AppearanceSettings`
+    /// 仍要求会话在跑）与行尾读数逐字照搬；`PopopxSettingsValues.themeName`/`languageName`
+    /// 两个读数回到它们的供应者同一个文件里，跨文件引用少了一处。
+    private var appearanceCard: some View {
+        PopopxSectionCard(PopopxGeneralCopy.groupAppearance) {
+            PopopxSettingsRowLink(
+                PopopxGeneralCopy.appearanceRow,
+                value: PopopxSettingsValues.themeName,
+                systemImage: "sun.max",
+                enabled: chatModel.chatRunning == true,
+                hint: PopopxGeneralCopy.openHint
+            ) {
+                AppearanceSettings()
+                    .navigationTitle(PopopxGeneralCopy.appearanceRow)
+                    .modifier(ThemedBackground(grouped: true))
+            }
             PopopxSettingsDivider()
-            PopopxToggleRow(
-                Copy.sanitizeLinksRow,
-                note: Copy.sanitizeLinksNote,
-                systemImage: "link.badge.plus",
-                tint: .neutral,
-                isOn: $sanitizeLinks
-            )
+            // 语言页不需要会话在跑：它开的是系统设置里本 app 的那一页，所以这一行既不 gating 也不禁用。
+            PopopxSettingsRowLink(
+                PopopxGeneralCopy.languageRow,
+                systemImage: "character.bubble",
+                hint: PopopxGeneralCopy.openHint
+            ) {
+                PopopxDisplayLanguageView()
+                    .navigationTitle(PopopxGeneralCopy.languageRow)
+            }
         }
     }
 
@@ -189,6 +200,25 @@ struct PopopxSettingsView: View {
 
     private var callsAndNtfsCard: some View {
         PopopxSectionCard(Copy.groupCalls) {
+            // 真机第 6 轮二.1：本身份聊天偏好从「我」栏的常用组落回这里，紧挨着它管的那两件事
+            // ——通知与通话。目的地与三个入参照旧，照 `ChatListView.swift:100-103` 的既有挂载点原样给。
+            if let user = chatModel.currentUser {
+                PopopxSettingsRowLink(
+                    PopopxGeneralCopy.chatPreferences,
+                    value: user.showNtfs ? PopopxGeneralCopy.notifyOn : PopopxGeneralCopy.notifyOff,
+                    systemImage: "slider.horizontal.3",
+                    hint: PopopxGeneralCopy.openHint
+                ) {
+                    PreferencesView(
+                        profile: user.profile,
+                        preferences: user.fullPreferences,
+                        currentPreferences: user.fullPreferences
+                    )
+                    .navigationTitle(PopopxGeneralCopy.chatPreferences)
+                    .modifier(ThemedBackground(grouped: true))
+                }
+                PopopxSettingsDivider()
+            }
             PopopxSettingsRowLink(
                 Copy.notificationsRow,
                 value: notificationValue,
@@ -713,8 +743,9 @@ private enum Copy {
     static let legendMesh = "离线：厢语蓝牙组网"
     static let legendNote = "同一行只会用一种颜色：哪条通道搬运了它，这一点必须一眼分得清。"
 
-    // 外观 —— 整组 2026-11 上移到「我」栏的常用组，行尾那几个词由
-    // `PopopxSettingsValues.themeName` 继续供那一行读，所以只留取值，不留已无人挂的标题行。
+    // 外观 —— 这一组的卡名与两行说法 2026-11-20 从「我」栏落回本页，改用英文原句 Key
+    // （见下面 `PopopxGeneralCopy`，16 个目录里早有译法）。这里只留主题本身的六个中文名，
+    // `PopopxSettingsValues.themeName` 行尾读的就是它们，那不是可译的界面说法而是取值。
     static let themeSystem = "跟随系统"
     static let themeLight = "浅色"
     static let themeDark = "深色"
@@ -722,13 +753,10 @@ private enum Copy {
     static let themeBlack = "纯黑"
     static let themeCustom = "自定义主题"
 
-    // 隐私与安全 —— 「隐私设置」那一行 2026-11 删：隐私页在「我」栏第 4 组已有唯一入口，
-    // 这张卡留着的是下面两个别处没有的开关。
-    static let groupPrivacy = "隐私与安全"
-    static let protectScreenRow = "退到后台时打码"
-    static let protectScreenNote = "应用不在前台时，整个界面替换成占位条：切换器预览与截图里读不到聊天内容，切回来即恢复。"
-    static let sanitizeLinksRow = "去掉链接里的跟踪参数"
-    static let sanitizeLinksNote = "编辑消息时就把要发出去的链接去掉已知的跟踪字段，对方收到的那条不再带着你的来源。"
+    // 隐私与安全 —— 整卡 2026-11-20 删（真机第 6 轮二.2）：这两枚开关与
+    // `PrivacySettings.swift:75`、`:88` 是同一批状态，现在直接摆在「我」栏那张防线卡上，
+    // 说法也随之改为那两个页面共用的英文 Key（见 `PopopxMeView.swift` 的 `protectScreenRow` 等）。
+    // 这里不再留任何无人挂的中文常量。
 
     // 通知与通话
     static let groupCalls = "通知与通话"
@@ -759,6 +787,27 @@ private enum Copy {
     // 中文常量在这一页不再有用。
     static let askTeamRow = "提问与提建议"
     static let askTeamNote = "在应用内连接这个账号，不开浏览器，也不走邮件。"
+}
+
+/// 真机第 6 轮二.1 从「我」栏常用组落回设置树的三行说法。口径与那一页一致：**英文原句就是 Key**。
+/// 七条里有六条是现成词条——整段从 `PopopxMeView.swift` 的 `Copy` 里原样搬来，源文一字未改，
+/// 译本一条都不用动；唯一新增的是这组的卡名。`en.lproj` 不写（读不到词条就回落 Key 本身，那就是英文）。
+private enum PopopxGeneralCopy {
+    private static func key(_ value: String) -> String {
+        NSLocalizedString(value, comment: "POPOPX settings tree")
+    }
+
+    /// 只有这一枚是本轮新增的 Key；其余全部复用。
+    static let groupAppearance = key("Appearance and language")
+    static let appearanceRow = key("Appearance and icons")
+    static let languageRow = key("Display language")
+    /// 刻意不叫 `"Chat preferences"`：那个 Key 在 16 个目录里已经属于别的页面，中文值是
+    /// 「聊天偏好设置」。复用等于让这一行的说法由别人决定，所以源文唯一化（算力点生态同一条约定）。
+    static let chatPreferences = key("Chat preferences for this identity")
+    static let notifyOn = key("Notifications on")
+    static let notifyOff = key("This identity is muted")
+    /// 行尾的 VoiceOver 提示：中文值与上面那个中文 `Copy.openHint` 同为「打开」，说法不两样。
+    static let openHint = key("Open")
 }
 
 // MARK: - 两页的新文案（英文原句即 Key）

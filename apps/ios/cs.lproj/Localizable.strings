@@ -4275,3 +4275,9 @@ server test failure */
 "Opens the nearby square: the broadcast stream and the nodes within Bluetooth reach" = "Otevře náměstí v okolí: proud vysílání a uzly v dosahu Bluetooth";
 "%lld days" = "%lld dní";
 "%lld days (Pioneer Trial)" = "%lld dní (zkušební verze pionýra)";
+
+/* POPOPX round 6: settings tree regroup + the two privacy switches on the Me defences card. */
+"Appearance and language" = "Vzhled a jazyk";
+"While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content." = "Když aplikace není v popředí, celé rozhraní se nahradí zastupující obrazovkou, takže přepínač aplikací ani snímky obrazovky nezobrazují obsah chatů.";
+"Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source." = "Parametry sledování se z odkazů odstraní už při psaní zprávy, takže to, co dostane protistrana, v sobě nemá žádnou stopu vedoucí k vám.";
+"Remove link tracking" = "Odstranit sledování z odkazů";

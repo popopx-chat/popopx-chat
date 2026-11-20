@@ -4155,3 +4155,9 @@ server test failure */
 "Opens the nearby square: the broadcast stream and the nodes within Bluetooth reach" = "近くの広場を開きます：配信ストリームとBluetooth到達範囲内のノード";
 "%lld days" = "%lld日";
 "%lld days (Pioneer Trial)" = "%lld日（パイオニア体験）";
+
+/* POPOPX round 6: settings tree regroup + the two privacy switches on the Me defences card. */
+"Appearance and language" = "外観と言語";
+"While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content." = "アプリがフォアグラウンドにない間、画面全体が仮の表示に置き換わるため、アプリスイッチャーや スクリーンショットにチャットの内容が写りません。";
+"Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source." = "メッセージを作成している間にリンクから追跡用の項目が取り除かれるため、相手が受け取る内容に あなたの送信元は残りません。";
+"Remove link tracking" = "リンクの追跡を削除";

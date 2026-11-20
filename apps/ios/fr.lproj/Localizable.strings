@@ -8485,3 +8485,8 @@ alert title */
 "Opens the nearby square: the broadcast stream and the nodes within Bluetooth reach" = "Ouvre la place à proximité : le flux des diffusions et les nœuds à portée Bluetooth";
 "%lld days" = "%lld jours";
 "%lld days (Pioneer Trial)" = "%lld jours (essai pionnier)";
+
+/* POPOPX round 6: settings tree regroup + the two privacy switches on the Me defences card. */
+"Appearance and language" = "Apparence et langue";
+"While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content." = "Hors du premier plan, toute l’interface est remplacée par un leurre : le sélecteur d’apps et les captures d’écran ne montrent plus le contenu des discussions.";
+"Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source." = "Les paramètres de suivi sont retirés des liens pendant la rédaction du message : ce que reçoit l’autre partie ne porte aucune trace de votre source.";

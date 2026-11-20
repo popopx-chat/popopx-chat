@@ -1373,18 +1373,21 @@ private struct PopopxCabinHallView: View {
                 }
                 .padding(.horizontal, PopopxMetrics.gutter)
                 .padding(.top, PopopxMetrics.spaceS)
-                // 点消息流的空白处收起键盘：`PopopxTextArea` 的 `@FocusState` 是控件私有的
+                // 真机第 6 轮的根因：上一版把收起层挂在 `.background` 上，而那一层只有内容 `VStack`
+                // 那么大。屏幕下半截那块空白属于 `ScrollView` 自己（`UIScrollView` 对整块视口命中并把
+                // 点击吃掉），背景层够不着；卡片里那点留白同样被 `PopopxSectionCard` 自己的圆角底吃掉。
+                // 于是"点空白"点了个空 —— 不是手势没装，是那一块从来不是这层的。
+                // 现在把内容层本身撑满视口（顶部对齐，短内容时下方空白就落在这层上），`contentShape`
+                // 才有东西可命中；收起动作留在这一层。
+                // 用 `.onTapGesture` 而不是 `.simultaneousGesture`：后代控件优先命中，昵称那个 `Menu`
+                // （`authorControl`）与卡片里的按钮一律照常，不会出现"开菜单顺带把键盘也收了"；
+                // simultaneousGesture 恰恰会在那一枚昵称上一起触发，正是要避开的冲突。
+                // 收起走 `hideKeyboard()`：`PopopxTextArea` 的 `@FocusState` 是控件私有的
                 // （`Shared/Components/PopopxControls.swift:260`、`:272`，红线文件不动），宿主拿不到
-                // 那份绑定，只能走标准 responder 链 —— 仓库里那句 `hideKeyboard()` 就是
-                // `UIApplication.sendAction(resignFirstResponder)`，主聊天页 `ChatView.swift:1094`
-                // 收键盘用的是同一个调用。
-                // 挂在 `.background` 而不是内容本身上：这一层只在命中的是空白时才赢，卡片、行、按钮
-                // 那些自己认领点击的控件一律不受影响（大厅昵称要能照常弹出操作菜单）。
-                .background(
-                    Color.clear
-                        .contentShape(Rectangle())
-                        .onTapGesture { hideKeyboard() }
-                )
+                // 那份绑定，只能走标准 responder 链，与主聊天页 `ChatView.swift:1094` 同一个调用。
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .contentShape(Rectangle())
+                .onTapGesture { hideKeyboard() }
             }
             if fuseOn {
                 Divider()
@@ -1393,11 +1396,15 @@ private struct PopopxCabinHallView: View {
         }
         // 拖动列表即收起键盘。位置照正式聊天页：挂在整块内容上而不是某个 `ScrollView` 上
         // （`ChatView.swift:159`，那边用的是 `.immediately`；这里按本轮要求用 `.interactively`，
-        // 键盘跟着手指走，松手才决定收起还是留下，与 `PopopxCabinView` 主页面 :217 同档）。
+        // 键盘跟着手指走，松手才决定收起还是留下，与 `PopopxCabinView` 主页面 :220 同档）。
         // 点空白收起与它同行：`hideKeyboard()` 走 UIKit 的 resignFirstResponder 广播，不持有也不
         // 争抢 SwiftUI 的焦点绑定，所以那条"与 `.focused` 同用会冻住"的上游警告在这里不适用 ——
         // 这一页从头到尾没有第二份 `.focused`。
         .scrollDismissesKeyboard(.interactively)
+        // 进了大厅就是说话的地方：底部那四枚 Tab 必须整条让开，退出这一页回厢语主页自动回来。
+        // 口径与消息页推入 `ChatView` 那一处相同（`ChatsListView.swift:380`）—— 声明在推进去的那
+        // 一层，不是声明在列表页上；主页自己不挂，所以主页那四枚一直是好的。
+        .toolbar(.hidden, for: .tabBar)
         .background(PopopxPalette.base)
         .toolbar {
             // 工具条项跟着"声明它的那一层内容"走，所以主页面那两个入口不会跟到这一层来，这一枚也不会

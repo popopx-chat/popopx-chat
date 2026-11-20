@@ -7135,3 +7135,9 @@ server test failure */
 "Opens the nearby square: the broadcast stream and the nodes within Bluetooth reach" = "Opent het plein in de buurt: de zendstroom en de knopen binnen Bluetooth-bereik";
 "%lld days" = "%lld dagen";
 "%lld days (Pioneer Trial)" = "%lld dagen (pioniersproef)";
+
+/* POPOPX round 6: settings tree regroup + the two privacy switches on the Me defences card. */
+"Appearance and language" = "Weergave en taal";
+"While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content." = "Wanneer de app niet op de voorgrond is, wordt de gehele interface vervangen door een schermafdanker, zodat de app-wisselaar en screenshots geen chatinhoud tonen.";
+"Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source." = "Volgvelden worden uit koppelingen verwijderd terwijl je een bericht schrijft, dus wat de andere partij ontvangt bevat geen spoor van je bron.";
+"Remove link tracking" = "Linktracking verwijderen";

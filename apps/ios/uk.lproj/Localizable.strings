@@ -7456,3 +7456,9 @@ alert title */
 "Opens the nearby square: the broadcast stream and the nodes within Bluetooth reach" = "Відкриває площу поруч: потік трансляцій і вузли в радіусі дії Bluetooth";
 "%lld days" = "%lld дн.";
 "%lld days (Pioneer Trial)" = "%lld дн. (пробний період піонера)";
+
+/* POPOPX round 6: settings tree regroup + the two privacy switches on the Me defences card. */
+"Appearance and language" = "Зовнішній вигляд та мова";
+"While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content." = "Коли застосунок не на передньому плані, весь інтерфейс замінюється заставкою, тому перемикач застосунків і знімки екрана не показують вміст чатів.";
+"Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source." = "Поля відстеження прибираються з посилань ще під час набору повідомлення, тому в тому, що отримує інша сторона, не залишається сліду вашого джерела.";
+"Remove link tracking" = "Прибрати відстеження з посилань";

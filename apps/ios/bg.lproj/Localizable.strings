@@ -5108,3 +5108,9 @@ server test failure */
 "Opens the nearby square: the broadcast stream and the nodes within Bluetooth reach" = "Отваря площа наблизо: потокът на излъчванията и възлите в обхвата на Bluetooth";
 "%lld days" = "%lld дн.";
 "%lld days (Pioneer Trial)" = "%lld дн. (пробен период на пионер)";
+
+/* POPOPX round 6: settings tree regroup + the two privacy switches on the Me defences card. */
+"Appearance and language" = "Облик и език";
+"While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content." = "Когато приложението не е на преден план, целият интерфейс се замества с екран-заглушка, така че превключвателят на приложения и екранните снимки не показват съдържание от чатовете.";
+"Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source." = "Полетата за проследяване се премахват от връзките, докато пишете съобщението, така че полученото от другата страна не носи следа от източника ви.";
+"Remove link tracking" = "Премахване на проследяването от връзките";

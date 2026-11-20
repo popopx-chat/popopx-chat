@@ -284,6 +284,20 @@ extension PopopxMeshKillSwitch: PopopxMeshNicknameApplying {
 public struct MeshPlazaView: View {
     @ObservedObject private var model: PopopxMeshPlazaModel
 
+    /// The only cursor on this screen. The plaza lives in a module that deliberately does not import
+    /// UIKit (`PopopxProximityEngine.swift:318` states the rule), so dismissing the keyboard here goes
+    /// through SwiftUI's own focus binding: clearing this resigns both fields. That is also the only
+    /// half of the app-side pattern that is safe in a package — the host's
+    /// `UIApplication.sendAction(resignFirstResponder)` (`Shared/Views/NewChat/AddGroupView.swift:234`)
+    /// is not reachable from here, and mixing the two is what that helper's own comment warns can
+    /// freeze the app.
+    private enum Field {
+        case nickname
+        case draft
+    }
+
+    @FocusState private var focusedField: Field?
+
     public init(model: PopopxMeshPlazaModel) {
         self.model = model
     }
@@ -310,6 +324,14 @@ public struct MeshPlazaView: View {
             footer
             composer
         }
+        // A hall is where the four bottom tabs stop existing. Declared on this view rather than on
+        // any host, because 厢语's top-left entry and 添加朋友's plaza entry mount the *same*
+        // `MeshPlazaView` — an app-side destination would leave the next host free to forget it.
+        // Outside a TabView (a preview, a sheet's own stack) the modifier is inert, not harmful.
+        // Gated, because the visibility overload of `toolbar(_:for:)` is iOS 16 while this package
+        // still declares `.iOS(.v15)` (`PopopxMeshKit/Package.swift:8-10`, and 裁定 A: the package
+        // does not move, new code guards in place). Below iOS 16 this screen keeps the tabs.
+        .meshHallTabBarHidden()
         .onAppear { model.start() }
         .onDisappear { model.stop() }
     }
@@ -340,6 +362,16 @@ public struct MeshPlazaView: View {
                     }
                 }
             }
+            // The list is the blank space on this screen, so it is what has to answer the tap: a post
+            // row, or the empty area under a short timeline. `contentShape(Rectangle())` makes the
+            // gaps between rows hit-testable too — a List is transparent to taps where it draws nothing.
+            .contentShape(Rectangle())
+            // `simultaneousGesture` is the right tool here and the wrong one on the app-side hall:
+            // nothing inside this list claims a tap (posts are text; the composer and nickname Save
+            // button live below the divider), whereas the hall's speaker name is a `Menu` and a
+            // simultaneous tap would close the keyboard underneath an opening menu.
+            .simultaneousGesture(TapGesture().onEnded { focusedField = nil })
+            .meshScrollDismissesKeyboard()
         }
 
     private func bubble(_ post: PopopxMeshPlazaPost) -> some View {
@@ -391,6 +423,7 @@ public struct MeshPlazaView: View {
                     .foregroundStyle(.secondary)
                 TextField("Local nickname", text: $model.nickname)
                     .textFieldStyle(.plain)
+                    .focused($focusedField, equals: .nickname)
                 Button("Save") {
                     Task { await model.saveNickname() }
                 }
@@ -398,6 +431,7 @@ public struct MeshPlazaView: View {
             HStack(spacing: 8) {
                 TextField("Say something to the room", text: $model.draft)
                     .disabled(!model.radioState.isUsable)
+                    .focused($focusedField, equals: .draft)
                 Button {
                     Task { await model.broadcastDraft() }
                 } label: {
@@ -430,6 +464,30 @@ public struct MeshPlazaView: View {
             "Too long for one frame (\(payloadBytes) > \(limitBytes))"
         case .noSessionWithPeer: "No session with peer"
         case let .radioUnavailable(state): PopopxMeshBannerModel.radioTitle(state)
+        }
+    }
+}
+
+/// The drag-to-dismiss half of the keyboard contract. `.scrollDismissesKeyboard` is iOS 16 while this
+/// package still declares `.iOS(.v15)` (`PopopxMeshKit/Package.swift:8-10`), so this and
+/// `meshHallTabBarHidden()` below are the two places in the module that have to ask at run time — and
+/// the only `#available` its files carry. Below iOS 16 the view comes back untouched and tapping the
+/// list still closes the keyboard: that gesture is iOS 15 API.
+extension View {
+    @ViewBuilder func meshScrollDismissesKeyboard() -> some View {
+        if #available(iOS 16.0, macOS 13.0, *) {
+            self.scrollDismissesKeyboard(.interactively)
+        } else {
+            self
+        }
+    }
+
+    /// Same reason, other half of the hall contract: the tab bar only hides from iOS 16.
+    @ViewBuilder func meshHallTabBarHidden() -> some View {
+        if #available(iOS 16.0, macOS 13.0, *) {
+            self.toolbar(.hidden, for: .tabBar)
+        } else {
+            self
         }
     }
 }

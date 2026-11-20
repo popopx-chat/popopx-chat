@@ -95,6 +95,13 @@ struct PopopxMeView: View {
     /// `setActiveUser` 会互相抢 `ChatModel.currentUser`。
     @State private var busyUserID: Int64?
 
+    /// 真机第 6 轮二.2 并进这张防线卡的两枚开关。键与设置页原先那两个绑定、与
+    /// `PrivacySettings.swift:27`/`:18` 完全同一批（不是复制品）：打码那一枚
+    /// `AppSettings.swift:45`、`:86` 导出与恢复配置时读的还是它，去跟踪那一枚由
+    /// `ComposeView.swift:425` 在发消息前读。换宿主不换数据。
+    @AppStorage(DEFAULT_PRIVACY_PROTECT_SCREEN) private var protectScreen = false
+    @AppStorage(GROUP_DEFAULT_PRIVACY_SANITIZE_LINKS, store: groupDefaults) private var sanitizeLinks = false
+
     @MainActor init() {
         let runtime = PopopxMeshRuntime.shared
         _panicWipe = ObservedObject(wrappedValue: runtime.panicWipe)
@@ -109,15 +116,24 @@ struct PopopxMeView: View {
                 spaceEntries
                 generalEntries
                 securityEntries
+                helpEntries
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.top, PopopxMetrics.spaceS)
+            // 标题栏收掉之后，这一页的第一行就是名片卡本身。留白改由内容自己给：上边从 8 升到 24
+            // （`spaceL`），让名片与状态栏之间是刻意的一段呼吸，而不是少了一行的空缺。
+            .padding(.top, PopopxMetrics.spaceL)
             .padding(.bottom, PopopxMetrics.space2XL)
             // 换身份、创建身份之后整组卡片会重排。Reduce Motion 下直接落位，不做弹簧。
             .popopxAnimation(PopopxSpring.fluid, value: chatModel.currentUser?.userId, reduceMotion: reduceMotion)
         }
         .background(PopopxPalette.base)
         .navigationTitle(Copy.pageTitle)
+        // 「我」那一行大标题不再占首屏（真机第 6 轮追加项，微信式留白）：系统标题栏整条隐藏，
+        // 标题本身仍然声明着，VoiceOver 报得出这一页叫什么，只是不再画出一行。
+        // 口径照消息页 `ChatsListView.swift:241`：隐藏只作用于栈的这一页，二级页自己声明可见 ——
+        // 全部行链都过 `PopopxMeRowLink`，那里补了一处 `.toolbar(.visible, for: .navigationBar)`
+        // 覆盖它推送的每一页；`showsCreateIdentity` 那一跳另有一处（:152 下面）。
+        .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showsProfileQR) {
             // detents 归调用方（`ProfileQRCodeSheet.swift:19` 那条约定）。这张卡的内容是
             // 名片 + 模式选择 + 动作行，比聊天里那张位置卡高得多，0.8 是它与 `nameCard`
@@ -144,10 +160,13 @@ struct PopopxMeView: View {
         // `showsCreditsStore`），打开付费墙时它自己再挂「算力点中心」那一层
         // （`PopopxBadgePaywallView.swift:168`）。
         .popopxBadgeSheets($badgeSheet)
-        // 「添加新身份」快捷入口的目标页：`CreateProfile` 自带标题与主题背景（:118、:119），
-        // 这里只登记路由，不重复装饰。
+        // 「添加新身份」快捷入口的目标页：`CreateProfile` 自带标题与主题背景
+        // （`Shared/Views/Onboarding/CreateProfile.swift:121`、`:122`），这里不重复装饰，
+        // 只把主页收掉的那条标题栏在自己身上要回来 —— 这一跳不走 `PopopxMeRowLink`，
+        // 所以可见性得单独声明，否则推进去是一页没有返回按钮的创建表单。
         .navigationDestination(isPresented: $showsCreateIdentity) {
             CreateProfile()
+                .toolbar(.visible, for: .navigationBar)
         }
         .onChange(of: showsProfileQR) { _, opened in
             // 关掉名片码就重读一次档位：那张 Sheet 里的模式开关会改本机那份武装记录，
@@ -368,53 +387,11 @@ struct PopopxMeView: View {
         PopopxSectionCard(Copy.groupGeneral) {
             // 「添加朋友」这一行原先在这里，2026-11-20 删：消息栏右上角「+」已经挂着同一个
             // `PopopxAddFriendView`（ChatsListView.swift:260-262），同一件事不该在两处各有一个入口。
-            if let user = chatModel.currentUser {
-                PopopxMeRowLink(
-                    Copy.chatPreferences,
-                    value: user.showNtfs ? Copy.notifyOn : Copy.notifyOff,
-                    systemImage: "slider.horizontal.3"
-                ) {
-                    // 三个入参照 ChatListView.swift:100-103 的既有挂载点原样给。
-                    PreferencesView(
-                        profile: user.profile,
-                        preferences: user.fullPreferences,
-                        currentPreferences: user.fullPreferences
-                    )
-                    .navigationTitle(Copy.chatPreferences)
-                    .modifier(ThemedBackground(grouped: true))
-                }
-                // 分隔线跟着这一行走：没有 `currentUser` 时这一组的第一行就是外观，
-                // 卡片顶上不该先落一条孤线。
-                PopopxMeDivider()
-            }
-            // 外观与显示语言从「全部设置」里升上来（真机走查 三.1/三.4）：设置树是二级页，
-            // 而换主题、换语言是打开 app 头几天就要做的事。行尾那两个值是 `PopopxSettingsValues`
-            // 现读的，本页不记第二份状态。
-            // 可用性与「全部设置」里那张卡原样一致：`AppearanceSettings` 仍要求会话在跑，
-            // 所以这一行仍然禁用 + 降透明度（口径同上面熔断那一行）。
-            PopopxMeRowLink(
-                Copy.appearanceRow,
-                value: PopopxSettingsValues.themeName,
-                systemImage: "sun.max"
-            ) {
-                AppearanceSettings()
-                    .navigationTitle(Copy.appearanceRow)
-                    .modifier(ThemedBackground(grouped: true))
-            }
-            .disabled(chatModel.chatRunning != true)
-            .opacity(chatModel.chatRunning == true ? 1 : 0.45)
-            PopopxMeDivider()
-            // 语言页与帮助页都不需要会话在跑：一个开的是系统设置里本 app 的那一页，
-            // 一个读的是内置文书，所以两行既不 gating 也不禁用。
-            PopopxMeRowLink(
-                Copy.languageRow,
-                value: PopopxSettingsValues.languageName,
-                systemImage: "character.bubble"
-            ) {
-                PopopxDisplayLanguageView()
-                    .navigationTitle(Copy.languageRow)
-            }
-            PopopxMeDivider()
+            // 真机第 6 轮二.1：聊天偏好、外观与图标、显示语言三行落回「全部设置」，帮助与关于
+            // 升成整页最后一张卡（下面 `helpEntries`）。这一组于是只剩一件事——进全部设置。
+            // 三行的目的地与装饰（`PreferencesView`/`AppearanceSettings`/`PopopxDisplayLanguageView`
+            // 加各自的 `.navigationTitle` 与 `ThemedBackground`）原样搬走，一处参数没改，
+            // 行尾那两个读数也回到它们本来的供应者 `PopopxSettingsValues` 同一个文件里。
             PopopxMeRowLink(Copy.settings, systemImage: "gearshape.fill") {
                 PopopxPresenceGated(reason: Copy.presenceReasonSettings) {
                     PopopxSettingsView()
@@ -422,9 +399,17 @@ struct PopopxMeView: View {
                         .modifier(ThemedBackground(grouped: true))
                 }
             }
-            PopopxMeDivider()
-            // 「通知」与「版本」两行 2026-11 删：通知的唯一入口收在 常用 → 全部设置 → 通知，
-            // 版本随「帮助与关于」升格成真实页面（`PopopxHelpView`）的一行，两件事都不再有两处入口。
+        }
+    }
+
+    // MARK: 组 5 · 帮助与关于（整页最后一张卡）
+
+    /// 真机第 6 轮二.3：它原先是「常用」组里的尾行，头上还压着隐私防线，找开源地址与隐私政策
+    /// 要往页面中间翻。现在它是最后一张卡——读完这一页，才是要不要相信它的地方。
+    /// 卡片不给标题：组名与行名会是同一句话，微信那一页的最后一段也是这样只有一行。
+    /// 目的地 `PopopxHelpView` 一字未动（开源地址与离线《POPOPX 隐私政策》阅读器都在那一页里）。
+    private var helpEntries: some View {
+        PopopxSectionCard {
             PopopxMeRowLink(Copy.helpRow, systemImage: "questionmark.circle") {
                 PopopxHelpView()
                     .navigationTitle(Copy.helpRow)
@@ -446,6 +431,32 @@ struct PopopxMeView: View {
                         .modifier(ThemedBackground(grouped: true))
                 }
             }
+            PopopxMeDivider()
+            // 真机第 6 轮二.2：这两枚原先在「全部设置 → 隐私与安全」那张卡里。它们绑的两个键在
+            // `PrivacySettings.swift:75`、`:88` 本来就各有一枚 `Toggle`，设置页那张卡只是同一批状态的
+            // 第二处；本轮把它并进这张防线卡，两处于是变成「防线卡 + 隐私设置页」，能直接拨的不再藏在
+            // 一次 push 后面。（要不要连隐私设置页里那两枚一起收口，已上报待裁定：那是上游的页面。）
+            // 标题复用 16 个目录里已有的英文原句（`"Protect app screen"` / `"Remove link tracking"`），
+            // 于是这一行与隐私设置页里那一枚说的是同一句话；两条说明是 POPOPX 自己的措辞，
+            // 本轮转成 Key 并补齐 16 个译本（中文值就是设置页原来那两句）。
+            // 应用锁（`PopopxLockView`）仍在隐私设置那一页里：它要 `prefPerformLA` 与
+            // `currentLAMode` 两份绑定（`PrivacySettings.swift:60`），那些只有那一页自己造得出来，
+            // 不在这里复刻第二套。
+            PopopxToggleRow(
+                Copy.protectScreenRow,
+                note: Copy.protectScreenNote,
+                systemImage: "eye.slash",
+                tint: .neutral,
+                isOn: $protectScreen
+            )
+            PopopxMeDivider()
+            PopopxToggleRow(
+                Copy.sanitizeLinksRow,
+                note: Copy.sanitizeLinksNote,
+                systemImage: "link.badge.plus",
+                tint: .neutral,
+                isOn: $sanitizeLinks
+            )
             PopopxMeDivider()
             // 右侧的值只报"传感器那半边开没开"，不报双密码配没配：后者本身就是不想让旁人
             // 一眼看出来的信息，摆在第一层页面上等于替胁迫者做了排查。
@@ -1014,7 +1025,11 @@ private struct PopopxMeRowLink<Destination: View>: View {
 
     var body: some View {
         NavigationLink {
+            // 主页把整条标题栏收掉了（微信式首屏），而"隐藏"会随这一层的工具条偏好渗进推进去的页面 ——
+            // 消息页同一件事的做法是在目的地自己声明可见（`ChatsListView.swift:383`）。全部行链都过
+            // 这里，所以一句就够：子页面各自的 `.navigationTitle` 照旧生效，返回按钮一个不少。
             destination()
+                .toolbar(.visible, for: .navigationBar)
         } label: {
             PopopxPickerRow(title, value: value, systemImage: systemImage, tint: tint) { }
                 .allowsHitTesting(false)
@@ -1123,22 +1138,28 @@ private enum Copy {
     static let giftMenuHint = key("Lets you gift a badge card or redeem a code")
 
     // 组 3 · 常用
-    /// 刻意不叫 `"Chat preferences"`：那个 Key 在 16 个目录里已经属于别的页面，中文值是
-    /// 「聊天偏好设置」。复用等于让本页这一行的说法由别人决定，所以源文唯一化（同算力点生态那条约定）。
-    static let chatPreferences = key("Chat preferences for this identity")
-    static let notifyOn = key("Notifications on")
-    static let notifyOff = key("This identity is muted")
+    // 「聊天偏好」「外观与图标」「显示语言」三行 2026-11-20 落回「全部设置」（真机第 6 轮二.1）：
+    // 源文与 `notifyOn`/`notifyOff` 两个值说法一起搬进
+    // `Shared/Features/Settings/PopopxSettingsViews.swift` 的 `PopopxGeneralCopy`，Key 一字未改，
+    // 16 个译本原地不动，所以这一页不再引用这四条。刻意不叫 `"Chat preferences"` 那条理由跟着
+    // 那一行走：`"Chat preferences"` 这个 Key 在 16 个目录里属于别的页面，中文值是「聊天偏好设置」，
+    // 源文必须保持唯一化。
     static let settings = NSLocalizedString("Settings", comment: "Me: reuses the existing all-catalog term")
     // 「通知」那一行 2026-11 删：唯一入口收在 常用 → 全部设置 → 通知；「版本」那一行随
     // `PopopxHelpView` 升格 —— 旧 Key `"Notifications"` 与 `"Version and updates"` 在本页不再有引用，
     // 两个词条本身仍属于别的页面，译本不动。
-    /// 下面三行的值出自 `PopopxSettingsValues`（设置树那个文件里的共享读数），这里只管说法。
-    static let appearanceRow = key("Appearance and icons")
-    static let languageRow = key("Display language")
+    /// 「帮助与关于」现在是整页最后一张卡的唯一一行（见上面 `helpEntries`），说法没变。
     static let helpRow = key("Help and about")
 
     // 组 4 · 隐私与安全防线
     static let privacySettings = key("Privacy and security settings")
+    /// 两枚开关的标题复用 16 个目录里已有的原句 —— 它们与 `PrivacySettings.swift:75`/`:88`
+    /// 那两枚 `Toggle` 是同一个开关，说法必须同一个 Key，不再由这一页另起一句中文。
+    static let protectScreenRow = key("Protect app screen")
+    static let sanitizeLinksRow = key("Remove link tracking")
+    /// 两条说明是设置页原来那两句中文，本轮转成 Key 并补齐 16 个译本（中文值逐字沿用）。
+    static let protectScreenNote = key("While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content.")
+    static let sanitizeLinksNote = key("Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source.")
     static let antiTheft = key("Anti-theft lock")
     static let antiTheftOn = key("Turned on")
     static let antiTheftOff = key("Turned off")
