@@ -290,7 +290,7 @@ struct PopopxStatusPill: View {
                     // 让步，于是 48 高的胶囊能被夹到比里面的圆点 + 符号还窄 —— 描边跟着压成横椭圆。
                     // `fixedSize` 把这一枚夹回内容宽度：宁可整行溢出（`ViewThatFits` 会先降档到圆点，
                     // 圆点档是 32×32 的 frame 锁死，不参与让步），也不让外圈小于它要包住的东西。
-                    // 与 `:349-350` 那条"调用方不能再对它 `.fixedSize()`"不冲突：那一条说的是别在
+                    // 与 `:364-365` 那条"调用方不能再对它 `.fixedSize()`"不冲突：那一条说的是别在
                     // `PopopxDualStatusCapsule` 外面夹，会把三档钉在最宽一档；这里夹的是单个候选内部。
                     .fixedSize(horizontal: true, vertical: false)
             }
