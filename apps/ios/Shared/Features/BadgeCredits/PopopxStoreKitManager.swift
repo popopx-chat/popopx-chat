@@ -15,6 +15,7 @@
 //  未验签的载荷仍可读但绝不可信，这一条判据在两处必须完全一致。
 
 import Foundation
+import os
 import StoreKit
 #if canImport(UIKit)
 import UIKit
@@ -87,6 +88,19 @@ final class PopopxStoreKitManager {
     private(set) var isLoadingProducts = false
     private(set) var productsLoadFailed = false
     private(set) var lastLoadAt: Date?
+    /// 请求了但 Apple 一次都没返回的 product id（仅在最近一次拉取**成功**时有意义）。
+    ///
+    /// 这条差集是把"暂不可用"这句 toast 变成可诊断信息的那一处：整批为空 = 商店连不上 /
+    /// 配置文件没挂上；只缺 `com.popopx.badge.node.pass.30d` 这一个 = 这个 identifier 在
+    /// App Store Connect（或 `.storekit`）里根本不存在。两种病因在 UI 上是同一句话，
+    /// 只有这里能分开，所以它必须被记下来、被日志说出来。
+    private(set) var missingProductIDs: [String] = []
+    /// 最近一次拉取抛出的错误（`String(describing:)`）。只进日志与控制台，不进用户界面：
+    /// Apple 的错误描述是英文技术语句，直接抛给用户是另一种不体面。
+    private(set) var lastLoadError: String?
+    /// 日志。product id 不是秘密（它就在 App Store 的收据里），缺了它这次排查就只能靠猜。
+    /// `let` 而不是 `var`：`@Observable` 只跟踪可变存储属性，这一条因此不进视图依赖。
+    private let log = Logger(subsystem: "com.popopxchat.popopx", category: "storekit")
 
     /// 已经处理过的交易 id。`Transaction.updates` 与一次前台购买可能给出同一笔交易两次，
     /// 落账两次 = 白送一份算力点，所以去重键必须是交易 id 而不是 product id。
@@ -98,7 +112,10 @@ final class PopopxStoreKitManager {
 
     // MARK: 加载
 
-    /// 动态拉取 7 个 SKU。价格永远以 `displayPrice` 为准（区域货币由 Apple 决定），
+    /// 动态拉取全部 9 个 SKU（含两个 non-renewing 通行证：`Product.products(for:)` 一次调用
+    /// 混着传 consumable / autoRenewable / nonRenewable 三类 id 是 Apple 支持的用法，
+    /// 通行证**不**需要单独再拉一次——真出问题时"漏了哪几个 id"看 `missingProductIDs`）。
+    /// 价格永远以 `displayPrice` 为准（区域货币由 Apple 决定），
     /// `PopopxNodeBadgeSku.fallbackPriceText` 只在拉取失败时占位。
     func loadProducts(force: Bool = false) async {
         if !force, !products.isEmpty, let lastLoadAt, Date().timeIntervalSince(lastLoadAt) < 600 { return }
@@ -111,11 +128,25 @@ final class PopopxStoreKitManager {
                 table[product.id] = product
             }
             products = table
+            // 差集按请求顺序算，日志里读出来的顺序与枚举、与 `.storekit` 一致，便于逐字比对。
+            missingProductIDs = PopopxNodeBadgeSku.productIds.filter { table[$0] == nil }
+            lastLoadError = nil
             productsLoadFailed = table.isEmpty
             lastLoadAt = Date()
+            if missingProductIDs.isEmpty {
+                log.notice("storekit: all \(PopopxNodeBadgeSku.productIds.count, privacy: .public) SKUs loaded")
+            } else {
+                let missing = self.missingProductIDs.joined(separator: " ")
+                self.log.notice("storekit: loaded \(table.count, privacy: .public)/\(PopopxNodeBadgeSku.productIds.count, privacy: .public) SKUs; missing: \(missing, privacy: .public)")
+            }
         } catch {
             // 拉不到商品时保留旧表：一次网络抖动不该把已经显示出来的价格全部抹成兜底文案。
             productsLoadFailed = products.isEmpty
+            // 抛错这一次没有"缺哪几个"这个事实（Apple 一个字都没回），所以差集清空、错误留下，
+            // 让 `purchase` 那侧能把"整批失败"和"只缺这一个"分成两种答复。
+            missingProductIDs = []
+            lastLoadError = String(describing: error)
+            log.error("storekit: load products failed: \(String(describing: error), privacy: .public)")
         }
     }
 
@@ -152,14 +183,18 @@ final class PopopxStoreKitManager {
     /// 购买。成功返回**已验签**的收据；本函数只负责 StoreKit 这一段，
     /// 落账（写徽章 / 铸券 / 加算力点）由调用方在同一事务里完成后才会 `finish`。
     func purchase(_ sku: PopopxNodeBadgeSku) async -> Result<PopopxStorePurchaseOutcome, PopopxBadgeCreditsError> {
-        guard let product = product(for: sku) else {
-            await loadProducts(force: true)
-            guard let reloaded = product(for: sku) else {
-                return .failure(productsLoadFailed ? .storeUnavailable : .productNotFound(sku.productId))
-            }
-            return await purchaseResolved(reloaded)
+        if product(for: sku) == nil { await loadProducts(force: true) }
+        guard let reloaded = product(for: sku) else {
+            // 三种病因要说三种话，否则"该商品暂不可用（com.popopx.badge.node.pass.30d）"这一句
+            // 在真机上永远查不下去：整批拉不到 / 拉取抛错 / 只缺这一个。
+            // `lastLoadError != nil` 优先于 `productsLoadFailed`：强制重拉那一次如果抛了错，
+            // 表里留下的可能是上一次的旧货，此时"商品不存在"是句假话。
+            let loadBroke = productsLoadFailed || lastLoadError != nil
+            let missing = self.missingProductIDs.joined(separator: " ")
+            log.error("storekit: purchase refused for \(sku.productId, privacy: .public); loadBroke=\(loadBroke, privacy: .public) lastLoadError=\(self.lastLoadError ?? "none", privacy: .public) missing=[\(missing, privacy: .public)]")
+            return .failure(loadBroke ? .storeUnavailable : .productNotFound(sku.productId))
         }
-        return await purchaseResolved(product)
+        return await purchaseResolved(reloaded)
     }
 
     private func purchaseResolved(_ product: Product) async -> Result<PopopxStorePurchaseOutcome, PopopxBadgeCreditsError> {
@@ -305,6 +340,25 @@ final class PopopxStoreKitManager {
                 else { continue }
                 collected.append(receipt)
             }
+        }
+        return collected
+    }
+
+    /// 还没 finish 的交易里本模块认得的那些。
+    ///
+    /// 这一条序列是"钱已付、本地没落账"的唯一硬证据：本模块的铁律是**先落账、后 finish**
+    /// （见 `purchase` 与两个管理器的 `apply(storeReceipt:)`），所以还留在 `Transaction.unfinished`
+    /// 里的收据，一定是上一次进程死在"付款成功 → 本地写入"之间的那一笔。
+    /// 冷启动把它交回交付回调，就是"能扣款、不发货"唯一的兜底通道；一旦落账成功并 finish，
+    /// 它立刻从这条序列里消失，因此这条腿天然不会白送第二份权益。
+    func unfinishedReceipts() async -> [PopopxStoreReceipt] {
+        var collected: [PopopxStoreReceipt] = []
+        var seen: Set<UInt64> = []
+        for await verification in Transaction.unfinished {
+            guard let receipt = Self.receipt(of: verification), receipt.sku != nil,
+                  seen.insert(receipt.transactionId).inserted
+            else { continue }
+            collected.append(receipt)
         }
         return collected
     }

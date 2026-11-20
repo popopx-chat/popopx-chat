@@ -224,6 +224,42 @@ enum PopopxNodeBadgeSku: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
+// MARK: - 算力点现金包
+
+/// 算力点充值那一族的商品。
+///
+/// 2026-11-20 起它是**算力点那一页自己的表**：徽章付费墙（`PopopxBadgePaywallView`）不再卖现金包，
+/// 它的版面模型 `PopopxPaywallSection` 里 `.credits` 那一族也随之删掉——一页一种商品，
+/// 档位表就不该由另一页持有。
+///
+/// 这里刻意**不写面额数字**：`amount` 取自 `PopopxNodeBadgeSku.creditedAmount`，而那是 SKU 的
+/// `kind` 里唯一的数字，也是 `PopopxCreditsManager` 真正入账的那一个。表上再写一遍
+/// "500"就多一处能和真实入账分叉的地方，而点数充值的分叉是要退钱的。
+struct PopopxCreditPack: Identifiable, Hashable, Sendable {
+    let sku: PopopxNodeBadgeSku
+    let amount: Int
+
+    /// 只认 SKU 自己报出的面额：传进来的不是充值包就构造不出这一档（而不是得到一档"0 点"）。
+    init?(sku: PopopxNodeBadgeSku) {
+        guard let amount = sku.creditedAmount else { return nil }
+        self.sku = sku
+        self.amount = amount
+    }
+
+    var id: String { sku.productId }
+
+    /// 上屏那一句与余额行、流水行共用同一个本地化格式串（`"%lld Compute Credits"`），
+    /// 于是"这一档叫什么"与"这一档有多少点"在目录里只有一种写法。
+    var title: String { String(format: PopopxCommerceCopy.creditsAmountFormat, amount) }
+}
+
+enum PopopxCreditPlan {
+    /// 三档现金包，从小到大。顺序是版面事实，写在这一行；面额是商品事实，写在 SKU。
+    /// `compactMap` 不是容错：万一将来 SKU 改了类别，这一档就从页面上消失而不是画出一个假数字。
+    static let packs: [PopopxCreditPack] =
+        [PopopxNodeBadgeSku.credits100, .credits500, .credits2000].compactMap(PopopxCreditPack.init)
+}
+
 // MARK: - 徽章状态
 
 /// 徽章的来源。体验、订阅、一次性时长包、算力点兑换、别人赠的券，五种来源点亮的是同一个徽章，
@@ -1266,10 +1302,12 @@ enum PopopxBadgeCreditsError: Error, LocalizedError, Hashable {
 
 // MARK: - 商业文案（全语种）
 
-/// 只有"涉钱的那几句"走 NSLocalizedString。目录现状（本轮实测）：`apps/ios` 下 17 个 `.lproj`，
-/// 下面的 46 个 key 全部写进 16 个翻译目录；`en.lproj` 一条都不加——它是开发区域
-/// （`developmentRegion = en`），本仓库的约定是那里只放 value ≠ key 的条目，
-/// 查不到 key 时 NSLocalizedString 返回源文，英文用户读到的就是这里写的原句。
+/// 只有"涉钱的那几句"走 NSLocalizedString。目录现状：`apps/ios` 下 17 个 `.lproj`。
+/// `en.lproj` 一条都不加——它是开发区域（`developmentRegion = en`），本仓库的约定是那里只放
+/// value ≠ key 的条目，查不到 key 时 `NSLocalizedString` 返回源文，所以英文那一路本来就读源文。
+/// 真机第 8 轮 · 任务三之前，下面这些 key 全部在 16 个翻译目录里有值；本轮新写的 4 条源文
+/// （`"POPOPX Badge"` 与算力点充值那三句结果文案）还没进目录——本轮红线禁止改 `.lproj`，
+/// 补齐之前非英文语种会读到英文原句，那是已知且刻意留下的中间状态，不是漏翻。
 /// 其余功能内文案继续用各文件自己的 `private enum Copy` 中文常量，
 /// 和最近四个 POPOPX 功能保持一致；两套约定的分界线就是"这句话会不会出现在付款/退款/合规证据里"。
 ///
@@ -1278,6 +1316,8 @@ enum PopopxBadgeCreditsError: Error, LocalizedError, Hashable {
 /// zh-Hans 把 "For me" 译成"仅自己"——都是别的页面的语义，于是这三条源文各自改成没有歧义的说法。
 /// 另有 "Credits" / "Fixed amounts only" / "History" 三条在普查（`PopopxCommerceCopy.<名>`
 /// 除声明外 0 处引用）后被删除：留着一句永远不会上屏的"合规文案"，比不写更糟。
+/// 同一判据的反方向也成立：源文与语义都相同的那一句允许直接复用既有词条——
+/// `"Top up Compute Credits"` 就是「我」页那一行已经在用的词条，这里不另开一条新说法。
 enum PopopxCommerceCopy {
     static let badgeProductName = NSLocalizedString("POPOPX Dynamic Privacy Node Badge", comment: "product name")
     static let trialBadgeName = NSLocalizedString("3-Day Pioneer Node Trial Badge", comment: "trial product name")
@@ -1285,9 +1325,11 @@ enum PopopxCommerceCopy {
     static let nodeClusterTerm = NSLocalizedString("dynamic SMP relay node cluster", comment: "never VPN")
 
     static let paywallTitle = NSLocalizedString("Light up a privacy node", comment: "paywall title")
+    // 分段标题不再说"给谁"（源文原为 "For myself" / 「为自己」）：付费墙与算力点充值拆成两条
+    // 动线之后，这一页只卖徽章，标题必须说出卖的是哪一件商品，而不是含糊地指人。
     // 刻意不叫 "For me" / "Restore purchases"：那两个 key 在 11 个语种的目录里已经属于别的页面，
     // 复用它们等于让本特性的一句话由另一个页面的翻译决定。源文唯一 → 目录里只有一份，读到的就是这里写的。
-    static let paywallSelfTab = NSLocalizedString("For myself", comment: "segment")
+    static let paywallBadgeTab = NSLocalizedString("POPOPX Badge", comment: "segment: badge plans bought for this device")
     static let paywallGiftTab = NSLocalizedString("Gift badge", comment: "segment")
     static let paywallRestore = NSLocalizedString("Restore badge purchases", comment: "button")
     static let paywallRedeemEntry = NSLocalizedString("Enter a code or scan", comment: "button")
@@ -1317,6 +1359,18 @@ enum PopopxCommerceCopy {
     static let noGiftBackStatement = NSLocalizedString("Compute Credits are added at the exact amount shown. No bonus credits are granted.", comment: "no promotional top-up")
 
     static let creditsBalance = NSLocalizedString("Compute Credits balance", comment: "wallet label")
+    // 算力点现金包那一组（真机第 8 轮 · 任务三：充值动线整组搬到算力点那一页）。
+    /// 卡面标题。源文与「我」页那一行（`PopopxMeView` 的 `"Top up Compute Credits"`）逐字相同：
+    /// 同一个去处、同一件事，目录里就该共用那一条已经有 16 个译本的词条，不另开一个新说法。
+    static let creditsTopUpTitle = NSLocalizedString("Top up Compute Credits", comment: "credits pack card title")
+    /// 面额由调用方从 `PopopxCreditPack.amount` 传进来——那取自 SKU 的 `creditedAmount`，
+    /// 也就是真正入账的那一个数。写死在句子里就成了第二处事实。
+    static let creditsTopUpGrantedFormat = NSLocalizedString("Added %lld Compute Credits to your balance.", comment: "credits pack purchase result")
+    /// Ask to Buy / 家庭批准那一档：钱还没扣，点数也没到。这一句不能写成"已到账"。
+    static let creditsTopUpPending = NSLocalizedString("Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed.", comment: "credits pack purchase pending")
+    /// 付款已完成、本机账本没写进去（Keychain 写失败、或余额超过上限被挡下）。
+    /// 这一句必须存在，否则"付了钱屏幕上什么都没变"就是这一族里最难复现也最难解释的一次事故。
+    static let creditsTopUpNotCredited = NSLocalizedString("Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written.", comment: "credits pack paid but not credited locally")
     static let redPacketTitle = NSLocalizedString("Send Compute Credits", comment: "sheet title")
     /// 合规声明：这一句要在全部 17 个语种里出现，审核读的就是它。
     static let redPacketFixedAmountsStatement = NSLocalizedString("Only the fixed amounts listed here can be sent. Nowhere in this feature can you type a custom amount.", comment: "Apple 3.1.1 no random amounts")

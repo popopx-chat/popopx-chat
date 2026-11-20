@@ -22,6 +22,9 @@
 //         开源地址与隐私协议两行；`PopopxDisplayLanguageView` 是同一次升格带出的「显示语言」页。
 //       · `privacyCard` 整卡 2026-11-20 删（真机第 6 轮二.2）：那张卡上剩的屏幕保护与链接去跟踪两枚
 //         开关与 `PrivacySettings.swift:75`/`:88` 是同一批状态，现在直接摆在「我」栏的防线卡上。
+//     · 真机第 8 轮 · 任务六（层级重排）：「网络与服务器」这张卡由一个入口变成三个平级入口。
+//         「高级网络设置」与「网络连接」原先埋在「中继与服务器」那一页（`NetworkAndServers`）内部，
+//         现在上提到这一级、原处删除；少一层，两条说法与那页剩下的行都没变（明细见 `networkCard`）。
 //  2. 配色、字号、圆角、间距只取 Shared/Theme/PopopxTheme.swift 的 token；行控件按
 //     Shared/Components 的原子库口径自己组，命中区由 `PopopxMetrics.minHitTarget` 兜住 44pt。
 //     本页因此不读全 app 的主题对象 —— 子页面仍带着它们自己的背景修饰，那一次收敛另开一刀。
@@ -269,6 +272,18 @@ struct PopopxSettingsView: View {
 
     // MARK: 网络与服务器
 
+    /// 真机第 8 轮 · 任务六（层级重排）：这张卡从一个入口变成三个平级入口。
+    /// 「Advanced network settings」与「Network connection」两行原先埋在「中继与服务器」那一页
+    /// （`NetworkAndServers`）的最后两个 Section 里，现在上提到这一级并从原处删除；那一页只剩
+    /// 服务器本身的行（预设服务器 / 你的服务器 / 保存）。
+    /// 三行的推进机制不是随手选的，各有一条理由：
+    /// · 「中继与服务器」= 普通 `Button` + 一次 `settingsTrack.path.append`（文件头决定 3）——
+    ///   换成 `NavigationLink(value:)` 在真机上点了只重画本页，按返回才推入。
+    /// · 「高级网络设置」= 目的地闭包的 `NavigationLink`（`PopopxSettingsRowLink`），与本页其余
+    ///   每一行同一个机制：它不往路径里写值、由登记解析，所以不吃决定 3 那根坏掉的杠杆，点了即时推入。
+    ///   可用性与原来一致：那一页要读写网络配置，会话没在跑就禁用（同 `callsAndNtfsCard` 的口径）。
+    /// · 「网络连接」= 只读状态行。它在原来那一页里也不是入口而是一段读数，扁平化不给它造一个
+    ///   不存在的去处，所以不给 chevron、不接点击。
     private var networkCard: some View {
         PopopxSectionCard(Copy.groupNetwork, footnote: Copy.networkFootnote) {
             // 普通 Button + 一次路径赋值，不是 `NavigationLink(value:)`：真机上那一跳点了只重画本页。
@@ -287,6 +302,23 @@ struct PopopxSettingsView: View {
             .accessibilityHint(Text(verbatim: Copy.openHint))
             .disabled(chatModel.chatRunning != true)
             .opacity(chatModel.chatRunning == true ? 1 : 0.45)
+            PopopxSettingsDivider()
+            PopopxSettingsRowLink(
+                PopopxNetworkCopy.advancedRow,
+                systemImage: "network",
+                tint: .brand,
+                enabled: chatModel.chatRunning == true,
+                hint: PopopxGeneralCopy.openHint
+            ) {
+                AdvancedNetworkSettings()
+                    .navigationTitle(PopopxNetworkCopy.advancedTitle)
+                    .modifier(ThemedBackground(grouped: true))
+            }
+            PopopxSettingsDivider()
+            PopopxNetworkStatusRow(
+                type: chatModel.networkInfo.networkType,
+                online: chatModel.networkInfo.online
+            )
         }
     }
 
@@ -517,6 +549,62 @@ private struct PopopxSettingsActionButton: View {
         .buttonStyle(PopopxPressButtonStyle())
         .disabled(!enabled)
         .opacity(enabled ? 1 : 0.45)
+    }
+}
+
+/// 只读的一行：不导航、不按钮，行尾写一份真值读数加状态点。
+/// 本轮带出它的是「网络连接」——那一行在 `NetworkAndServers` 里本来就不是入口，而是一段读数
+/// （类型 + 在线点），上提到这里也不给它编一个不存在的去处。
+/// 整行合成一个 VoiceOver 元素：读数与状态各归 `accessibilityValue` 与标题，不是一堆碎片。
+@MainActor
+private struct PopopxNetworkStatusRow: View {
+    let type: UserNetworkType
+    let online: Bool
+
+    var body: some View {
+        HStack(spacing: PopopxMetrics.spaceS) {
+            Image(systemName: symbol)
+                .font(PopopxType.microTag)
+                .imageScale(.medium)
+                .foregroundStyle(PopopxIconTint.neutral.ink)
+                .frame(width: PopopxMetrics.spaceXL, height: PopopxMetrics.spaceXL)
+                .background(PopopxIconTint.neutral.fill, in: .rect(cornerRadius: PopopxMetrics.radiusChip))
+                .accessibilityHidden(true)
+            Text(PopopxNetworkCopy.connectionRow)
+                .font(PopopxType.sectionHeader)
+                .foregroundStyle(PopopxPalette.label)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: PopopxMetrics.spaceXS)
+            Text(type.text)
+                .font(PopopxType.meta)
+                .foregroundStyle(PopopxPalette.labelSecondary)
+                .multilineTextAlignment(.trailing)
+                .lineLimit(2)
+            Circle()
+                .fill(online ? PopopxIconTint.success.fill : PopopxIconTint.danger.fill)
+                .frame(width: PopopxMetrics.spaceXS, height: PopopxMetrics.spaceXS)
+                .accessibilityHidden(true)
+        }
+        .frame(maxWidth: .infinity, minHeight: PopopxMetrics.minHitTarget, alignment: .leading)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(PopopxNetworkCopy.connectionRow))
+        .accessibilityValue(
+            Text(type.text)
+                + Text(verbatim: " · ")
+                + Text(verbatim: online ? PopopxNetworkCopy.online : PopopxNetworkCopy.offline)
+        )
+    }
+
+    /// 图标跟着真实链路类型换：这份类型出自 `NetworkObserver.swift:44` 的接口判定，
+    /// 状态点也一样，不在这里另算一套"有没有网"。
+    private var symbol: String {
+        switch type {
+        case .wifi: "wifi"
+        case .cellular: "antenna.radiowaves.left.and.right"
+        case .ethernet: "cable.connector"
+        case .other: "network"
+        case .none: "wifi.slash"
+        }
     }
 }
 
@@ -808,6 +896,26 @@ private enum PopopxGeneralCopy {
     static let notifyOff = key("This identity is muted")
     /// 行尾的 VoiceOver 提示：中文值与上面那个中文 `Copy.openHint` 同为「打开」，说法不两样。
     static let openHint = key("Open")
+}
+
+// MARK: - 「网络与服务器」那张卡的新文案（英文原句即 Key）
+
+/// 真机第 8 轮 · 任务六上提来的两行。口径同 `PopopxGeneralCopy`：**英文原句就是 Key**，
+/// 而且这里五条引用全是现成词条——它们本来就是 `NetworkAndServers.swift` 那两段的原话，整段搬上来
+/// 时源文一字未改，所以 16 个目录一条都不用动（`en.lproj` 不写，读不到词条就回落 Key 本身）。
+private enum PopopxNetworkCopy {
+    /// 行标题：原先那一行 `Text("Advanced network settings")` 的说法（中文值「高级网络设置」）。
+    static let advancedRow = NSLocalizedString("Advanced network settings", comment: "POPOPX settings tree")
+    /// 被推页面的标题：原先给 `AdvancedNetworkSettings` 的 `.navigationTitle("Advanced settings")`
+    /// （中文值「高级设置」）——行与页的说法各一句，和上提之前逐字相同。
+    static let advancedTitle = NSLocalizedString("Advanced settings", comment: "POPOPX settings tree")
+    /// 状态行标题：原先那一段的 Section header `Text("Network connection")`（中文值「网络连接」）。
+    static let connectionRow = NSLocalizedString("Network connection", comment: "POPOPX settings tree")
+    /// 状态点的 VoiceOver 读数：链路类型那一半已经是现成词条（`UserNetworkType.text`：
+    /// "WiFi"/"Cellular"/"Wired ethernet"/"Other"/"No network connection"），这里只补在线与否
+    /// （中文值正是「在线」「离线」，与顶部图例那两行同一个说法）。
+    static let online = NSLocalizedString("Online", comment: "POPOPX settings tree")
+    static let offline = NSLocalizedString("Offline", comment: "POPOPX settings tree")
 }
 
 // MARK: - 两页的新文案（英文原句即 Key）

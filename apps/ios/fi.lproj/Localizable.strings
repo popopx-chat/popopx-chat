@@ -4639,3 +4639,10 @@ server test failure */
 "You have already requested connection!\nRepeat connection request?" = "Olet jo pyytänyt yhteyttä!\nToistetaanko yhteyspyyntö?";
 "Your new channel %@ is connected to %d of %d relays.\nIf you cancel, the channel will be deleted - you can create it again." = "Uusi kanava %1$@ on yhdistetty %2$d/%3$d välityspalvelimeen.\nJos peruutat, kanava poistetaan – voit luoda sen uudelleen.";
 "server queue info: %@\n\nlast received msg: %@" = "palvelimen jonotiedot: %1$@\n\nviimeisin vastaanotettu viesti: %2$@";
+
+/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+"Back to messages" = "Takaisin viestien";
+"POPOPX Badge" = "POPOPX-merkki";
+"Added %lld Compute Credits to your balance." = "Lisätty %lld laskentapistettä saldoosi.";
+"Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple vahvistaa tämän oston vielä. Laskentapisteet näkyvät saldoosi, kun osto on vahvistettu.";
+"Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple otti maksun, mutta tämä laite ei vielä kyennyt lisäämään pisteitä saldoosi. Ne lisätään, kun suojattu tallennus voidaan jälleen kirjoittaa.";

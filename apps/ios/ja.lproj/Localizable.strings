@@ -4913,3 +4913,10 @@ server test failure */
 "You have already requested connection!\nRepeat connection request?" = "すでに接続をリクエストしています！\n接続リクエストを繰り返しますか？";
 "Your new channel %@ is connected to %d of %d relays.\nIf you cancel, the channel will be deleted - you can create it again." = "新しいチャンネル %1$@ は %3$d 個中 %2$d 個のリレーに接続しています。\nキャンセルするとチャンネルは削除されますが、あとで再度作成できます。";
 "server queue info: %@\n\nlast received msg: %@" = "サーバーのキュー情報: %1$@\n\n最後に受信したメッセージ: %2$@";
+
+/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+"Back to messages" = "メッセージに戻る";
+"POPOPX Badge" = "POPOPX バッジ";
+"Added %lld Compute Credits to your balance." = "残高に %lld 計算クレジットを追加しました。";
+"Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple はこの購入をまだ確認しています。確認が完了すると、計算クレジットはすぐに残高に反映されます。";
+"Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple は支払いを受け取りましたが、このデバイスはまだクレジットを残高に追加できません。安全なストレージに書き込める次のタイミングで加算されます。";

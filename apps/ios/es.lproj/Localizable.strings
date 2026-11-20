@@ -8462,3 +8462,10 @@ alert title */
 "If you were charged but have no badge, this adds it. A subscription bought with this App Store account moves to this profile, and the device or profile that had it loses its badge at its next renewal." = "Si te han cobrado pero no tienes ninguna insignia, esto la añade. Una suscripción comprada con esta cuenta de App Store pasa a este perfil, y el dispositivo o perfil que la tenía pierde su insignia en su próxima renovación.";
 "Broadcast to #mesh" = "Enviar a #mesh";
 "Send over the offline mesh" = "Enviar por la red sin conexión";
+
+/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+"Back to messages" = "Volver a los mensajes";
+"POPOPX Badge" = "Insignia POPOPX";
+"Added %lld Compute Credits to your balance." = "Se han añadido %lld créditos de cálculo a tu saldo.";
+"Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple todavía está confirmando esta compra. Los créditos de cálculo aparecerán en tu saldo en cuanto se confirme.";
+"Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple recibió el pago, pero este dispositivo aún no pudo añadir los créditos a tu saldo. Se añadirán la próxima vez que se pueda escribir en el almacén seguro.";

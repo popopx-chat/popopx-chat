@@ -60,6 +60,9 @@ final class PopopxBadgeManager {
 
     private var ticker: Task<Void, Never>?
     private var deliveryToken: UUID?
+    /// 本进程内已经点亮过的一次性通行证收据摘要。防同一张通行证被投两次就加两次时长
+    /// （`applyPass` 的注释里写了它和 `record.receiptDigest` 那道是怎么分工的）。
+    private var appliedPassDigests: Set<String> = []
     private let log = Logger(subsystem: "com.popopxchat.popopx", category: "badge")
 
     private init() {
@@ -80,6 +83,10 @@ final class PopopxBadgeManager {
         }
         PopopxStoreKitManager.shared.startObservingTransactions()
         startTicker()
+        // 顺序：先把"付了钱没落账"的通行证捞回来（只看 unfinished，见 `recoverUnsettledPasses`），
+        // 再与 Apple 的订阅权益对账——后者会按 Apple 给的到期时间覆盖式点亮，两步都对同一个徽章
+        // 记录写入时都取"更晚到期"，所以先后只影响日志读起来顺不顺，不会吞掉任何一段时长。
+        await recoverUnsettledPasses()
         await reconcileWithStore()
     }
 
@@ -214,21 +221,73 @@ final class PopopxBadgeManager {
         return candidate
     }
 
-    /// StoreKit 交付回调：本文件只认订阅类 SKU，算力点与礼品卡由各自的管理器落账。
+    /// StoreKit 交付回调：按 `kind` 穷尽，一次问清"这笔收据归谁点亮"。
+    ///
+    /// 券与算力点充值包由 `PopopxCreditsManager.apply(storeReceipt:)` 落账，这里一格都不碰；
+    /// 订阅与一次性通行证点亮徽章。通行证这一族**必须**在这里也有分支：付费墙那条当场点亮的腿
+    /// 只在 `purchase()` 同步返回 `.purchased` 时才走，而真机上还有两条成交路径根本不经过它——
+    /// Ask to Buy / 家庭审批延后批准（那一次调用返回的是 `.pending`），以及付款成功后、点亮之前
+    /// 进程被杀（收据留在 `Transaction.unfinished`）。这两笔钱付完之后除了这里没有第二处会点亮它，
+    /// 缺这一支就是"能扣款、不发货"。
     func apply(storeReceipt receipt: PopopxStoreReceipt) async {
         if receipt.isRevoked {
             await handleRevocation(receipt)
             return
         }
-        guard let sku = receipt.sku, sku.isSubscription, let period = sku.badgePeriod else { return }
-        // 订阅优先用 Apple 给的到期时间；拿不到（理论上不该发生）才按周期天数兜底。
-        let expiresAtMs = receipt.expiresAtMs
-            ?? Int64(nowAddingDays(period.days).timeIntervalSince1970 * 1_000)
+        guard let sku = receipt.sku else { return }
+        switch sku.kind {
+        case let .subscription(period):
+            // 订阅优先用 Apple 给的到期时间；拿不到（理论上不该发生）才按周期天数兜底。
+            let expiresAtMs = receipt.expiresAtMs
+                ?? Int64(nowAddingDays(period.days).timeIntervalSince1970 * 1_000)
+            do {
+                try activate(period: period, source: .appleSubscription, expiresAtMs: expiresAtMs, receiptDigest: receipt.digest)
+                await PopopxStoreKitManager.shared.finish(receipt)
+            } catch {
+                log.error("badge: subscription activation failed; leaving the transaction unfinished for redelivery")
+            }
+        case let .oneTimePass(period):
+            await applyPass(receipt, period: period)
+        case .giftCard, .credits:
+            return
+        }
+    }
+
+    /// 一次性通行证（非续订订阅）点亮。时长走 `stackedExpiryMs`，与算力点兑换、礼品券同一个算式：
+    /// `max(本机当前到期, 现在) + period.days`，绝不把剩下的时长覆盖掉。
+    ///
+    /// 两道防重投，缺一不可：
+    /// 1. `PopopxStoreKitManager.deliver` 已按交易 id 去过一次重（同进程内 `Transaction.updates`
+    ///    与一次前台购买给出同一笔时只交付一次），付费墙当场点亮那一笔因此不会在这里再来一遍。
+    /// 2. 本函数的 `appliedPassDigests` + `record.receiptDigest` 比对：前者挡本进程重复投递，
+    ///    后者挡"点亮成功但 `finish` 没落下去、冷启动又从 unfinished 重投同一张收据"。
+    ///    取当前徽章记录上的摘要而不是自建一份账本，是因为 `PopopxCommerceKeychainSlot`
+    ///    不归本文件扩：为这一条兜底再开一格密码串存储，代价是整个模块的密钥盘多一个必须备份的格子。
+    private func applyPass(_ receipt: PopopxStoreReceipt, period: PopopxNodeBadgePeriod) async {
+        let digest = receipt.digest
+        guard !appliedPassDigests.contains(digest), record?.receiptDigest != digest else {
+            // 已经点过的这一张：不再加时长，但要把交易收尾，别让它一直留在 unfinished 里重投。
+            await PopopxStoreKitManager.shared.finish(receipt)
+            return
+        }
         do {
-            try activate(period: period, source: .appleSubscription, expiresAtMs: expiresAtMs, receiptDigest: receipt.digest)
+            try activate(period: period, source: .storePass, expiresAtMs: stackedExpiryMs(period: period), receiptDigest: digest)
+            appliedPassDigests.insert(digest)
             await PopopxStoreKitManager.shared.finish(receipt)
         } catch {
-            log.error("badge: subscription activation failed; leaving the transaction unfinished for redelivery")
+            log.error("badge: one-time pass activation failed; leaving the transaction unfinished for redelivery")
+        }
+    }
+
+    /// 冷启动兜底：把"钱已付、本地没落账"的通行证收据捞回来点亮。
+    ///
+    /// 只捞 `Transaction.unfinished` 那一条序列，**绝不**把通行证放进 `reconcileWithStore()`：
+    /// 非消耗品在 `currentEntitlements` 里是长住的（Apple 不按时长收回非续订订阅），
+    /// 拿它当对账依据 = 每次冷启动白送 30/365 天。那条路径只留给订阅（到期由 Apple 说了算）。
+    private func recoverUnsettledPasses() async {
+        for receipt in await PopopxStoreKitManager.shared.unfinishedReceipts() {
+            guard !receipt.isRevoked, let sku = receipt.sku, case let .oneTimePass(period) = sku.kind else { continue }
+            await applyPass(receipt, period: period)
         }
     }
 

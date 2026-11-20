@@ -7408,3 +7408,10 @@ server test failure */
 
 /* POPOPX round 18 tier C (escaped-newline keys) */
 "Your new channel %@ is connected to %d of %d relays.\nIf you cancel, the channel will be deleted - you can create it again." = "Je nieuwe kanaal %1$@ is verbonden met %2$d van de %3$d relais.\nAls je annuleert, wordt het kanaal verwijderd – je kunt het opnieuw aanmaken.";
+
+/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+"Back to messages" = "Terug naar berichten";
+"POPOPX Badge" = "POPOPX-badge";
+"Added %lld Compute Credits to your balance." = "Er zijn %lld rekenpunten aan je saldo toegevoegd.";
+"Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple bevestigt deze aankoop nog. De rekenpunten verschijnen in je saldo zodra ze is bevestigd.";
+"Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple heeft de betaling ontvangen, maar dit apparaat kon de punten nog niet aan je saldo toevoegen. Ze worden bijgeschreven zodra de beveiligde opslag weer beschreven kan worden.";

@@ -4555,3 +4555,10 @@ server test failure */
 "You have already requested connection!\nRepeat connection request?" = "คุณขอเชื่อมต่อไปแล้ว!\nขอเชื่อมต่อซ้ำอีกครั้ง?";
 "Your new channel %@ is connected to %d of %d relays.\nIf you cancel, the channel will be deleted - you can create it again." = "ช่องใหม่ของคุณ %1$@ เชื่อมต่อกับรีเลย์ %2$d จาก %3$d ตัว\nถ้ายกเลิก ช่องจะถูกลบ - คุณสร้างใหม่ได้";
 "server queue info: %@\n\nlast received msg: %@" = "ข้อมูลคิวของเซิร์ฟเวอร์: %1$@\n\nข้อความล่าสุดที่ได้รับ: %2$@";
+
+/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+"Back to messages" = "กลับไปหาข้อความ";
+"POPOPX Badge" = "ป้าย POPOPX";
+"Added %lld Compute Credits to your balance." = "เพิ่มเครดิตการประมวลผล %lld ลงในยอดของคุณแล้ว";
+"Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple ยังกำลังยืนยันการซื้อนี้ เครดิตการประมวลผลจะแสดงในยอดของคุณทันทีที่ยืนยันเสร็จ";
+"Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple รับการชำระแล้ว แต่เครื่องนี้ยังเพิ่มเครดิตลงในยอดของคุณไม่ได้ จะเครดิตในการเขียนคลังปลอดภัยครั้งถัดไป";

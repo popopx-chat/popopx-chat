@@ -8453,3 +8453,10 @@ alert title */
 "If you were charged but have no badge, this adds it. A subscription bought with this App Store account moves to this profile, and the device or profile that had it loses its badge at its next renewal." = "Если с вас списали оплату, но значка нет, этот шаг добавит его. Подписка, купленная с этого аккаунта App Store, переносится на этот профиль, а устройство или профиль, где она была, теряет значок при следующем продлении.";
 "Broadcast to #mesh" = "Отправить в #mesh";
 "Send over the offline mesh" = "Отправить через офлайн-сеть";
+
+/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+"Back to messages" = "Вернуться к сообщениям";
+"POPOPX Badge" = "Значок POPOPX";
+"Added %lld Compute Credits to your balance." = "В ваш баланс добавлено %lld вычислительных баллов.";
+"Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple ещё подтверждает эту покупку. Вычислительные баллы появятся в вашем балансе сразу после подтверждения.";
+"Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple принял оплату, но это устройство пока не смогло добавить баллы в ваш баланс. Они будут зачислены, когда защищённое хранилище снова станет доступным для записи.";

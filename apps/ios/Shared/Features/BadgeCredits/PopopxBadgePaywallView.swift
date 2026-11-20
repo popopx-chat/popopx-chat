@@ -1,6 +1,16 @@
 //  PopopxBadgePaywallView.swift
 //
-//  【第五阶段 · 4】付费墙：订阅、礼品徽章、算力点充值，三条腿各自诚实。
+//  【第五阶段 · 4】付费墙：徽章的两条付款路径 + 礼品徽章券。这一页只卖徽章。
+//
+//  ### 这一页只有一种商品（真机第 8 轮 · 任务三）
+//  算力点现金包（100 / 500 / 2000）整组搬到了「POPOPX 算力点」那一页
+//  （`PopopxCreditsStoreView`，档位表现在是 `PopopxCreditPlan`）。搬走之前这一屏同时摆着
+//  "订阅/通行证"（会再来扣钱或给一段时长）与"充值包"（换成可花的点数）两种互相冲突的商品，
+//  用户在同一个列表里读到它们就会买错东西——那是商业化的 P0 事故，不是审美问题。
+//  这一页只留一条与算力点有关的通路：**用已有算力点兑换徽章**（footer 那枚
+//  `paywallUseCredits` → `PopopxBadgeCreditExchangeSheet`）。它是花掉已有余额的出口，
+//  不是收钱的入口，所以永远摆在次要操作那一格；另有一枚 `creditsName` 按钮只是把用户送到
+//  算力点那一页去充值，本页面上一张充值价目表都不画。
 //
 //  ### 页面骨架是这个模块的财产，不是 StoreKit 的附属品
 //  提示词指定的结构是"标题 + 副标题 + 分段卡片 + 利益点 + 价格行 + CTA + 次要操作"，
@@ -17,9 +27,10 @@
 //  1. **自动续费**：`PopopxCommerceCopy.renewalStatement`（3.1.2(c) 全文口径）只在订阅档出现，
 //     挂在档位脚注上，不塞进 CTA 下面当装饰。一次性时长档在**同一格**给
 //     `PopopxCommerceCopy.oneTimePurchaseStatement`（一次付清、永不自动续费）：这两条付款路径的
-//     续费事实相反，各说各的才不会被读成同一件事，所以自用 tab 也按这两条各成一组。
-//  2. **零赠送**：`PopopxCommerceCopy.noGiftBackStatement` 常驻充值档脚注；
-//     全页没有任何"加赠 X 算力点"的字样（提示词的"纯净充值"红线）。
+//     续费事实相反，各说各的才不会被读成同一件事，所以「POPOPX 徽章」那一分段也按这两条各成一组。
+//  2. **零赠送**：`PopopxCommerceCopy.noGiftBackStatement` 现在常驻**算力点那一页**的充值卡脚注
+//     （见 `PopopxCreditsStoreView`），这一页已经没有充值档可挂；全页没有任何"加赠 X 算力点"的字样
+//     （提示词的"纯净充值"红线）。
 //  3. **虚拟币不跨平台**：算力点只能在本 app 内消耗，不提供任何形式的外部转移
 //     （礼品卡是徽章券，不是算力点转账；红包是算力点，但只在双方会话内等额均分）。
 //
@@ -28,10 +39,10 @@
 //  （`PopopxRestoreOutcome`：`restored(Int)` / `nothingToRestore` / `cancelled`）。
 //  数字用 `%lld`（`String(format:)`），不写 `%d`： NSInteger/Int 的宽度在 32 位设备上会变。
 //
-//  ### 用算力点兑换徽章那条腿
-//  它是唯一一条"不经过 Apple"的获取路径（资金来源是此前已经付费兑换过的点数），
+//  ### 「用算力点兑换徽章」为什么留在这页
+//  它是唯一一条"不经过 Apple"的徽章获取路径（资金来源是此前已经付费兑换过的点数），
 //  因此必须走 `PopopxBadgeManager.activate(withCredits:)` 那唯一一处写 `.badgeRecord` 的入口，
-//  并且和它一起被门禁覆盖。本面板把它放在**次要操作**的位置：它是"花掉已有余额"的出口，
+//  并且和它一起被门禁覆盖。它放在**次要操作**那一格：它是"花掉已有余额"的出口，
 //  不是"新的收入"的入口，摆成主 CTA 会误导用户以为算力点可以凭空获得。
 //
 //  ⚠️ Xcode 工程集成：本文件必须人工拖入 POPOPX (iOS) target。红线禁止脚本修改 project.pbxproj。
@@ -42,6 +53,10 @@ import POPOPXChat
 // MARK: - 版面模型
 
 /// 付费墙的一个档位。刻意不带价格字段：价格属于运行时，档位属于设计。
+///
+/// 这里没有 `.credits` 那一族了（真机第 8 轮 · 任务三）：徽章页的版面模型如果还能装下一个
+/// 充值包，"这一页只卖徽章"就只是一句注释而不是一个类型约束。删掉 case 之后，
+/// 任何想把价目表搬回来的写法都会在 `switch` 上编译不过去。
 struct PopopxPaywallSection: Identifiable, Hashable {
     enum Kind: Hashable {
         case subscription(PopopxNodeBadgePeriod)
@@ -50,7 +65,6 @@ struct PopopxPaywallSection: Identifiable, Hashable {
         /// 续费文案、恢复语义、落账路径都不一样——用类型区分才会在漏写那一支时编译报错。
         case oneTimePass(PopopxNodeBadgePeriod)
         case giftCard(PopopxNodeBadgePeriod)
-        case credits(Int)
     }
 
     let kind: Kind
@@ -66,11 +80,10 @@ struct PopopxPaywallSection: Identifiable, Hashable {
         case let .subscription(period): period
         case let .oneTimePass(period): period
         case let .giftCard(period): period
-        case .credits: nil
         }
     }
 
-    /// 按钮动词按档位分：订阅是"点亮"，礼品是"买一张券"，充值是"购买"。
+    /// 按钮动词按档位分：订阅是"点亮"，通行证是"买一次时长"，礼品是"买一张券"。
     /// 三个动作对用户来说是三件不同的事，共用一个"立即购买"会把"给他人买"读成"给自己买"。
     /// 通行证那一格走本地化 key：它是一条**新的付款路径**，不能借用上面任何一句中文常量
     /// （那三处是这一页既有文案，收口到 key 需要一并动 16 本目录，超出本轮范围）。
@@ -79,14 +92,13 @@ struct PopopxPaywallSection: Identifiable, Hashable {
         case .subscription: "点亮"
         case .oneTimePass: PopopxCommerceCopy.passActionTitle
         case .giftCard: "购买礼品券"
-        case .credits: "购买"
         }
     }
 }
 
 /// 付费墙的**档位组**：一个组标题 + 它下面那几张卡。
 ///
-/// 自用 tab 分成两组，是因为那一页同时摆着两条付款路径，而它们的续费事实**相反**：
+/// 徽章那一分段分成两组，是因为那一屏同时摆着两条付款路径，而它们的续费事实**相反**：
 /// 订阅到点自动扣下一次，通行证付一次就结束。混在一张无标题的列表里，用户很容易把
 /// "按年点亮"和"365 天通行证"读成同一件事的两种写法，等到账单上出现第二次扣款才发现不是。
 /// 组标题只说这一件需要说清的事，卡面上的脚注（`renewalStatement` /
@@ -103,7 +115,7 @@ enum PopopxPaywallPlan {
     /// 分组视图的唯一来源。`sections(tab:)` 是它的摊平版本，留给"只关心有哪些档位"的读法。
     static func groups(tab: PopopxPaywallTab) -> [PopopxPaywallGroup] {
         switch tab {
-        case .myself:
+        case .badge:
             [
                 // 第一组：会到点自动扣钱的那两档。
                 PopopxPaywallGroup(id: "recurring",
@@ -162,31 +174,23 @@ enum PopopxPaywallPlan {
         groups(tab: tab).flatMap(\.sections)
     }
 
-    /// 充值档位永远排在订阅/礼品之后，跨 tab 不变 —— 它是"补充余额"，不是"选一种会员"。
-    /// 面额只写一次（函数的实参），标题由本地化格式串生成：行上显示的那句话和 `Kind` 里那个数字
-    /// 因此不可能各说各话。
-    static let creditPacks: [PopopxPaywallSection] = [
-        creditsPack(100, .credits100),
-        creditsPack(500, .credits500),
-        creditsPack(2_000, .credits2000)
-    ]
-
-    private static func creditsPack(_ amount: Int, _ sku: PopopxNodeBadgeSku) -> PopopxPaywallSection {
-        PopopxPaywallSection(kind: .credits(amount),
-                             title: String(format: PopopxCommerceCopy.creditsAmountFormat, amount),
-                             note: nil,
-                             badge: nil,
-                             sku: sku)
-    }
+    // 算力点现金包那张表原来就在 `PopopxPaywallPlan` 里（`creditPacks` / `creditsPack(_:_:)`）。
+    // 真机第 8 轮 · 任务三把它整组搬到算力点那一页，现在它的家是 `PopopxCreditPlan`
+    // （`PopopxBadgeCreditsModels.swift`）：徽章页的模型里再留一份充值档位，
+    // 就是下一次"两种商品混在同一屏"的起点。
 }
 
+/// 付费墙的两个分段。名字跟着商品走，不跟着"给谁"走：
+/// `.badge` 是给自己这台设备买徽章，`.giftCard` 是买一张送给别人的券。
+/// 原来那一个 case 叫 `myself`、标题是 "For myself"（「为自己」），在屏幕上既不说明卖什么、
+/// 也不说明买到之后归谁——真机第 8 轮 · 任务三把它连同充值档一起收掉了。
 enum PopopxPaywallTab: String, CaseIterable, Hashable {
-    case myself
+    case badge
     case giftCard
 
     var label: String {
         switch self {
-        case .myself: PopopxCommerceCopy.paywallSelfTab
+        case .badge: PopopxCommerceCopy.paywallBadgeTab
         case .giftCard: PopopxCommerceCopy.paywallGiftTab
         }
     }
@@ -203,7 +207,7 @@ struct PopopxBadgePaywallView: View {
     @State private var badge = PopopxBadgeManager.shared
     @State private var toast = PopopxToastModel()
 
-    @State private var tab: PopopxPaywallTab = .myself
+    @State private var tab: PopopxPaywallTab = .badge
     @State private var busySkuId: String?
     @State private var showsRedeem = false
     @State private var showsCreditExchange = false
@@ -251,8 +255,6 @@ struct PopopxBadgePaywallView: View {
                 }
 
                 benefitStrip
-
-                creditsSection
             }
             .padding(.horizontal, PopopxMetrics.gutter)
             .padding(.bottom, PopopxMetrics.spaceL)
@@ -341,7 +343,7 @@ struct PopopxBadgePaywallView: View {
         switch section.kind {
         case .subscription: PopopxCommerceCopy.renewalStatement
         case .oneTimePass: PopopxCommerceCopy.oneTimePurchaseStatement
-        case .giftCard, .credits: nil
+        case .giftCard: nil
         }
     }
 
@@ -406,40 +408,7 @@ struct PopopxBadgePaywallView: View {
         }
     }
 
-    // MARK: 充值
-
-    private var creditsSection: some View {
-        PopopxSectionCard(Copy.creditsTitle, footnote: PopopxCommerceCopy.noGiftBackStatement) {
-            VStack(spacing: PopopxMetrics.spaceXS) {
-                ForEach(PopopxPaywallPlan.creditPacks) { pack in
-                    HStack(spacing: PopopxMetrics.spaceS) {
-                        // 面额来自 `PopopxPaywallPlan` 的那张表，价格来自 StoreKit：
-                        // 这一行没有第三处可以写数字的地方，所以"行上写的"与"实际到账的"不可能分叉。
-                        Text(verbatim: pack.title)
-                            .font(PopopxType.emphasis)
-                            .foregroundStyle(PopopxPalette.label)
-                        Spacer(minLength: PopopxMetrics.spaceS)
-                        Button {
-                            Task { await buy(pack.sku) }
-                        } label: {
-                            HStack(spacing: PopopxMetrics.space2XS) {
-                                Text(verbatim: store.priceText(for: pack.sku, periodSuffix: false))
-                                Image(systemName: "chevron.right")
-                            }
-                            .font(PopopxType.secondary)
-                            .foregroundStyle(PopopxPalette.brand)
-                            .frame(minHeight: PopopxMetrics.minHitTarget)
-                        }
-                        .disabled(!store.isStoreReady || busySkuId != nil)
-                    }
-                    .padding(.vertical, PopopxMetrics.spaceXS)
-                    if pack.id != PopopxPaywallPlan.creditPacks.last?.id {
-                        Divider().overlay(PopopxPalette.separator)
-                    }
-                }
-            }
-        }
-    }
+    // MARK: 商店未就绪
 
     private var storeUnavailableNote: some View {
         HStack(spacing: PopopxMetrics.spaceXS) {
@@ -471,7 +440,10 @@ struct PopopxBadgePaywallView: View {
                     Task { await restore() }
                 }
                 .disabled(isRestoring)
-                Button(Copy.wallet) { showsWallet = true }
+                // 这一枚是本页通往「POPOPX 算力点」那一页的唯一入口，所以用商品全名而不是裸的
+                // "算力点"三个字：名字与那一页的标题逐字相同，用户才知道点下去会落到哪一屏。
+                // 现金价目表本身不在这一页（真机第 8 轮 · 任务三）。
+                Button(PopopxCommerceCopy.creditsName) { showsWallet = true }
                 Button(Copy.close) { dismiss() }
             }
             .font(PopopxType.caption)
@@ -566,14 +538,14 @@ private extension PopopxBadgePaywallView {
     enum Copy {
         static let working = "处理中…"
         static let close = "关闭"
-        static let wallet = "算力点"
         static let benefitsTitle = "点亮之后"
         static let benefitBadge = "顶栏点亮这枚专属徽章：它只在徽章有效期内出现，到期自动收回。"
         static let benefitStatusPanel = "徽章详情是本机的节点状态面板：档位、到期、对账摘要、本机计数，只读、不上传。"
         static let benefitCards = "徽章可以做成二维码礼品卡点对点转赠；算力点红包发给好友，对方在本机拆开。"
         static let benefitNoRead = "中继节点只搬运密文：它看不到会话内容，也拿不到联系人列表。"
         static let benefitNoAccount = "没有账号、没有中心账本：徽章、券、算力点全部存在这台设备的 Keychain 里。"
-        static let creditsTitle = PopopxCommerceCopy.creditsName
+        // 原来这里还有 `wallet = "算力点"` 与 `creditsTitle = creditsName` 两条，服务于充值卡；
+        // 充值整组搬走之后它们没有读者了（`Copy` 里留一句没人读的中文常量就是下一轮漏翻的来源）。
         static let storeUnavailable = "商店暂时读不到：卡片照旧显示为标价，恢复网络后可以购买。"
         static let pending = "等待 Apple 确认这笔购买，完成后徽章会自动点亮。"
         static let genericFailure = "这次没有完成。"
@@ -587,6 +559,9 @@ private extension PopopxBadgePaywallView {
             case let .giftCard(period):
                 "礼品券已生成 · \(period.days) 天"
             case let .credits(amount):
+                // 这一页已经没有充值档，所以这一支在当前版面下走不到；留着是因为 `switch`
+                // 必须对 `PopopxNodeBadgeSkuKind` 穷尽——真到账的那一句在算力点那一页
+                // （`PopopxCreditsStoreView.topUpCard`），它读的是本地化 key，不是这里。
                 "已到账 \(amount) 算力点"
             }
         }

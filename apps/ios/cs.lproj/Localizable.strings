@@ -5012,3 +5012,10 @@ server test failure */
 "You have already requested connection!\nRepeat connection request?" = "Už jste požádali o připojení!\nOpakovat žádost o připojení?";
 "Your new channel %@ is connected to %d of %d relays.\nIf you cancel, the channel will be deleted - you can create it again." = "Váš nový kanál %1$@ je připojen ke %2$d ze %3$d relé.\nPokud akci zrušíte, kanál bude smazán – můžete ho vytvořit znovu.";
 "server queue info: %@\n\nlast received msg: %@" = "informace o frontě serveru: %1$@\n\nnaposledy přijatá zpráva: %2$@";
+
+/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+"Back to messages" = "Zpět na zprávy";
+"POPOPX Badge" = "Odznak POPOPX";
+"Added %lld Compute Credits to your balance." = "Do vašeho zůstatku bylo přidáno %lld výpočetních bodů.";
+"Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple tento nákup stále potvrzuje. Výpočetní body se ve vašem zůstatku objeví, jakmile bude potvrzen.";
+"Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple platbu strhl, ale toto zařízení zatím nedokázalo body přidat do vašeho zůstatku. Přidají se, až bude možné znovu zapsat do zabezpečeného úložiště.";

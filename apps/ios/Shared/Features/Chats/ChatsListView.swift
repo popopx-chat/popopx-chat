@@ -34,8 +34,12 @@
 //  `PopopxMeshStateSource.state` 里同步查。刷新时机 = 保险丝、当前身份、邻居集合三者之一变化。
 //
 //  守的红线：不碰 project.pbxproj（本文件需人工拖入 POPOPX (iOS) target）；颜色/间距/字号/弹簧
-//  只取 PopopxTheme 的 token；不复用 `ChatListNavLink` / `ChatPreviewView`（旧主题），但打开会话
-//  用的仍是真实的 `ChatView` 与它原有的五个入参（Shared/Views/ChatList/ChatListView.swift:637）。
+//  只取 PopopxTheme 的 token；不复用 `ChatListNavLink` / `ChatPreviewView` 这两个**视图**（旧主题），
+//  但打开会话用的仍是真实的 `ChatView` 与它原有的五个入参（Shared/Views/ChatList/ChatListView.swift:637）。
+//
+//  会话行的左右滑动快捷操作（真机第 8 轮 · 任务七补回）：挂在这一行的 wrapper `PopopxChatRowSwipe` 上，
+//  按钮清单逐条对照上游 `ChatListNavLink.swift` 移植 —— 复用视图会连旧卡片一起带回来，所以移植的是
+//  清单与 API，画法走系统 `.swipeActions` + `Label`。
 //
 
 import SwiftUI
@@ -355,16 +359,17 @@ struct ChatsListView: View {
 
     // MARK: 行
 
+    /// 一行 = `PopopxChatRowSwipe`（卡片本身 + 左右滑动快捷操作）+ 这一行的行内几何。
+    ///
+    /// 行内边距、分隔线、行背景三句留在原处不动：滑动按钮挂在**行内容**上，改的是内容而不是行的几何，
+    /// `PopopxMetrics.gutter` 仍是唯一的 gutter 来源。为什么手势要下沉到 wrapper 而不是就地挂在
+    /// `Button` 上，见 `PopopxChatRowSwipe` 的类型注释。
     @ViewBuilder private func row(_ entry: PopopxChatEntry) -> some View {
-        let chat = entry.chat
-        Button {
-            open(chat)
-        } label: {
-            PopopxChatRow(chat: chat, channel: entry.channel, showsPreview: showChatPreviews)
-        }
-        .buttonStyle(PopopxPressButtonStyle(feedback: nil))
-        .disabled(!canOpen(chat))
-        .opacity(canOpen(chat) ? 1 : 0.5)
+        PopopxChatRowSwipe(
+            chat: entry.chat,
+            channel: entry.channel,
+            showsPreview: showChatPreviews
+        )
         .listRowInsets(EdgeInsets(
             top: PopopxMetrics.space2XS,
             leading: PopopxMetrics.gutter,
@@ -373,20 +378,6 @@ struct ChatsListView: View {
         ))
         .listRowSeparator(.hidden)
         .listRowBackground(Color.clear)
-    }
-
-    /// 会话能不能打开，照抄旧列表同一处判据（Shared/Views/ChatList/ChatListView.swift:568）。
-    private func canOpen(_ chat: Chat) -> Bool {
-        chatModel.chatRunning == true && !chatModel.deletedChats.contains(chat.chatInfo.id)
-    }
-
-    /// 点行只做既有约定那一件事：`ItemsModel.loadOpenChat` 先读消息，250ms 后写
-    /// `ChatModel.chatId`（ChatModel.swift:113-139），栈路径绑定随即把它翻成一页 —— 与通知
-    /// 点开走的是同一条路，本文件不再维护第二份"打开了哪条会话"的状态。
-    private func open(_ chat: Chat) {
-        guard canOpen(chat) else { return }
-        PopopxHaptics.impact(.light)
-        ItemsModel.shared.loadOpenChat(chat.chatInfo.id)
     }
 
     /// 目的地：id 从 `chatId` 现读，`PopopxChatRoomDestination` 再按 id 取会话。
@@ -835,6 +826,628 @@ struct ChatsListView: View {
     }
 }
 
+// MARK: - 会话行的滑动快捷操作
+
+/// 真机第 8 轮 · 任务七：把上一轮改版漏掉的左右滑动快捷操作**挂回来**。
+///
+/// 功能面是逐条对照 `Shared/Views/ChatList/ChatListNavLink.swift` 移植的，不是新设计：
+/// 每个 `chatType` 有哪几枚、顺序如何、点下去走哪个既有 API、要不要确认框，都与上游一致。
+///
+/// 为什么要有这一层 wrapper，而不是在 `ChatsListView.row(_:)` 里就地挂 `.swipeActions`：
+/// 滑动按钮里有几样东西需要**每行一份**的呈现状态 —— `deleteContactDialog` 要求
+/// `SomeAlert` / `SomeActionSheet` / `SomeSheet` 三个回调通道（Shared/Views/Chat/ChatInfoView.swift:1139），
+/// 「List」那一枚要把 `TagSheetRoot` 开在本行的 sheet 上，contactConnection 的「Name」同理。
+/// 挂在页面上就变成全列表共用一格状态，两行不同的确认框会互相顶掉；上游同样是把状态留在
+/// 行内容自己身上（`ChatListNavLink` 的 `@State alert/actionSheet/sheet`），这里同形。
+///
+/// 行内容仍然是 `Button`，不换 `NavigationLink`：`Tests iOS/Tests_iOS.swift:428-454` 命中这一行靠的是
+/// 行内 `staticTexts` 与 `PopopxChatRow` 上的 `popopx.row` 锚点，换控件会改这一行的 AX 形状；
+/// 而且打开会话只有 `ChatModel.chatId` 一条路（见文件头"栈的归属"），换成值推送会切断通知点开。
+///
+/// `allowsFullSwipe: false`：本 fork 的删除/清空一律走确认框（上游也不用 `role:`，见
+/// `ChatListNavLink.swift:385-401`），整滑只是把最边上一枚"摔"下去，对一件还需要确认的事没有意义，
+/// 还会和卡片圆角打架。这是相对上游（`allowsFullSwipe: true`）唯一的一处手势收窄。
+@MainActor private struct PopopxChatRowSwipe: View {
+    @EnvironmentObject private var chatModel: ChatModel
+    @ObservedObject var chat: Chat
+    let channel: PopopxRowChannel
+    let showsPreview: Bool
+
+    /// 「List」按钮的承载页要读它；注入方式与旧列表同一处（ChatListView.swift:185）一致。
+    @StateObject private var chatTagsModel = ChatTagsModel.shared
+
+    /// 三样通道 + 一格 sheet，全是本行自己的。
+    /// `alert` / `actionSheet` / `sheet` 是 `deleteContactDialog` 要求的三个回调通道
+    /// （Shared/Views/Chat/ChatInfoView.swift:1139）；「More」的动作表和第二级确认走同一对通道。
+    /// `sheet` 同时承载 `DeleteActiveContactDialog` 与「List」的 `TagSheetRoot` —— 两者本来就
+    /// 互斥（同一行同一刻只会有一张），合并成一条 `.sheet` 是为了不在同一个视图上叠两个呈现层。
+    @State private var alert: SomeAlert?
+    @State private var actionSheet: SomeActionSheet?
+    @State private var sheet: SomeSheet<AnyView>?
+    @State private var showContactConnectionInfo = false
+
+    /// 滑动按钮的五档颜色，全部取 `PopopxPalette` 已有的语义 token（主题文件是红线，不新增颜色）。
+    /// 上游的 `.orange` / `.yellow` / `.mint` 在本 fork 没有对应 token，按语义就近映射：
+    /// `primary`→`brand`、`green`→`success`、`red`→`danger`、`orange`(清空，不可撤回但不删实体)→`dangerInk`、
+    /// 无 tint 与 `yellow`/`mint`/`indigo`（次要或中性）→`neutral`。
+    private static let connect = PopopxPalette.brand
+    private static let favorite = PopopxPalette.success
+    private static let destructive = PopopxPalette.danger
+    private static let irreversible = PopopxPalette.dangerInk
+    private static let neutral = PopopxPalette.labelSecondary
+
+    var body: some View {
+        Group {
+            switch chat.chatInfo {
+            case let .direct(contact):
+                directRow(contact)
+            case let .group(groupInfo, _):
+                groupRow(groupInfo)
+            case .local:
+                noteFolderRow()
+            case let .contactRequest(cReq):
+                contactRequestRow(cReq)
+            case let .contactConnection(cConn):
+                contactConnectionRow(cConn)
+            case .invalidJSON:
+                // 读不懂的数据：上游这一行也没有滑动按钮，只有点开看原始 JSON
+                // （ChatListNavLink.swift:641-651），此处同形 —— 不给一枚点了什么都不知道的按钮。
+                rowCard
+            }
+        }
+        .alert(item: $alert) { $0.alert }
+        // 删除联系人的两级确认与「More」的动作表都是 ActionSheet —— 这是 `deleteContactDialog`
+        // 要求的接口形态，本 fork 的同一链路也是这么挂的（PopopxChatInfoView.swift:175）。
+        .actionSheet(item: $actionSheet) { $0.actionSheet }
+        // 一条 `.sheet` 同时承载 `DeleteActiveContactDialog`（第二级删除确认）与「List」的
+        // `TagSheetRoot`：这两张面板本来就互斥，叠两条 `.sheet` 只会多一个呈现层。
+        .sheet(item: $sheet) { someSheet in
+            someSheet.content
+                .presentationDetents([.fraction(someSheet.fraction)])
+        }
+    }
+
+    // MARK: 卡片与打开
+
+    /// 卡片本体与 tap 行为一行都没改：还是 `PopopxChatRow`，还是 `PopopxPressButtonStyle`，
+    /// 还是"点行只做既有约定那一件事"——`ItemsModel.loadOpenChat` 先读消息，250ms 后写
+    /// `ChatModel.chatId`（ChatModel.swift:113-139），栈路径绑定随即把它翻成一页；
+    /// 与通知点开走的是同一条路，本文件不维护第二份"打开了哪条会话"的状态。
+    private var rowCard: some View {
+        Button {
+            open()
+        } label: {
+            PopopxChatRow(chat: chat, channel: channel, showsPreview: showsPreview)
+        }
+        .buttonStyle(PopopxPressButtonStyle(feedback: nil))
+        .disabled(!openable)
+        .opacity(openable ? 1 : 0.5)
+    }
+
+    /// 会话能不能打开，判据照抄旧列表同一处（Shared/Views/ChatList/ChatListView.swift:568），
+    /// 从 `ChatsListView` 原样搬进来，一个条件都没动。
+    private var openable: Bool {
+        chatModel.chatRunning == true && !chatModel.deletedChats.contains(chat.chatInfo.id)
+    }
+
+    private func open() {
+        guard openable else { return }
+        PopopxHaptics.impact(.light)
+        ItemsModel.shared.loadOpenChat(chat.chatInfo.id)
+    }
+
+    // MARK: 按 chatType 的挂载表
+
+    /// 单聊。
+    ///
+    /// 联系人名片那一行不用特判：`searchedEntries()` 已把它连同 `chatDeleted` 一起摘掉
+    /// （本文件 :413 那一处 `!info.chatDeleted, !info.contactCard`），上游
+    /// `ChatListNavLink.swift:98-120` 那一支在这里没有对应物。
+    ///
+    /// 有等待确认的入呼时左侧三枚整组撤掉（上游 `:128` 的 `.if(!contact.nextAcceptContactRequest)`）：
+    /// 还没接受的联系没有"已读/置顶/静音"可说。
+    @ViewBuilder private func directRow(_ contact: Contact) -> some View {
+        rowCard
+            .if(!contact.nextAcceptContactRequest) { v in
+                v.swipeActions(edge: .leading, allowsFullSwipe: false) {
+                    markReadButton()
+                    toggleFavoriteButton()
+                    toggleNtfsButton()
+                }
+            }
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                if contact.nextAcceptContactRequest {
+                    if let contactRequestId = contact.contactRequestId {
+                        acceptContactRequestButton(contactRequestId, incognito: false)
+                        if !chatModel.addressShortLinkDataSet {
+                            acceptContactRequestButton(contactRequestId, incognito: true)
+                        }
+                        rejectContactRequestButton(contactRequestId)
+                    } else if let groupDirectInv = contact.groupDirectInv, !groupDirectInv.memberRemoved {
+                        // 群成员递过来的直连邀请：接受/拒绝走的是 `acceptMemberContactRequest` 那一对，
+                        // 与联系请求那一对不是同一条 API（ComposeView.swift:567-570 同一分岔）。
+                        acceptMemberContactRequestButton(contact)
+                        rejectMemberContactRequestButton(contact)
+                    } else {
+                        deleteContactButton(contact)
+                    }
+                } else {
+                    tagChatButton()
+                    if !chat.chatItems.isEmpty {
+                        clearChatButton()
+                    }
+                    deleteContactButton(contact)
+                }
+            }
+    }
+
+    /// 群组与频道：三档 `memberStatus` 各挂各的，与上游 `groupNavLink` 同一分岔。
+    @ViewBuilder private func groupRow(_ groupInfo: GroupInfo) -> some View {
+        switch groupInfo.membership.memberStatus {
+        case .memInvited:
+            rowCard
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    joinGroupButton(groupInfo)
+                    if groupInfo.canDelete {
+                        deleteGroupChatButton(groupInfo)
+                    }
+                }
+        case .memAccepted:
+            rowCard
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    tagChatButton()
+                    if groupInfo.membership.memberCurrentOrPending && !(groupInfo.useRelays && groupInfo.isOwner) {
+                        leaveGroupChatButton(groupInfo)
+                    }
+                    if groupInfo.canDelete {
+                        deleteGroupChatButton(groupInfo)
+                    }
+                }
+        default:
+            rowCard
+                .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                    markReadButton()
+                    toggleFavoriteButton()
+                    toggleNtfsButton()
+                }
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    groupTrailingButtons(groupInfo)
+                }
+        }
+    }
+
+    /// 已加入群组的右侧按钮表。计数逻辑逐句照抄上游 `ChatListNavLink.swift:268-298`：
+    /// 超过 3 枚时 iOS 只画得下 3 枚（Apple FB25316763），多出来的收进「More」动作表里。
+    @ViewBuilder private func groupTrailingButtons(_ groupInfo: GroupInfo) -> some View {
+        tagChatButton()
+        let showReportsButton = chat.chatStats.reportsCount > 0 && groupInfo.membership.memberRole >= .moderator
+        let showClearButton = !chat.chatItems.isEmpty
+        let showDeleteGroup = groupInfo.canDelete
+        let showLeaveGroup = groupInfo.membership.memberCurrentOrPending && !(groupInfo.useRelays && groupInfo.isOwner)
+        let totalNumberOfButtons = 1 + (showReportsButton ? 1 : 0) + (showClearButton ? 1 : 0)
+            + (showDeleteGroup ? 1 : 0) + (showLeaveGroup ? 1 : 0)
+
+        if showClearButton && totalNumberOfButtons <= 3 {
+            clearChatButton()
+        }
+        if showReportsButton && totalNumberOfButtons <= 3 {
+            archiveAllReportsButton()
+        }
+        if showLeaveGroup {
+            leaveGroupChatButton(groupInfo)
+        }
+        if showDeleteGroup && totalNumberOfButtons <= 3 {
+            deleteGroupChatButton(groupInfo)
+        } else if totalNumberOfButtons > 3 {
+            if showDeleteGroup && !groupInfo.membership.memberActive {
+                // 已经不在群里了：删除这一枚直接给，不再塞进「More」里等第二下。
+                deleteGroupChatButton(groupInfo)
+                moreOptionsButton(false, groupInfo)
+            } else {
+                moreOptionsButton(true, groupInfo)
+            }
+        }
+    }
+
+    /// 私密笔记目录：左侧只有「已读/未读」，右侧只有「清空」——上游同两处
+    /// （`ChatListNavLink.swift:311-318`）。置顶/静音对只给自己看的目录没有意义，没有频道也没有
+    /// 可撤的入呼，所以这两组按钮少，不是漏挂。
+    private func noteFolderRow() -> some View {
+        rowCard
+            .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                markReadButton()
+            }
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                if !chat.chatItems.isEmpty {
+                    clearNoteFolderButton()
+                }
+            }
+    }
+
+    /// 还没有接受的人：只有接受/隐身接受/拒绝。没有左侧 —— 还没建立的会话没有已读与静音。
+    private func contactRequestRow(_ cReq: UserContactRequest) -> some View {
+        rowCard.swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            acceptContactRequestButton(cReq.apiId, incognito: false)
+            if !chatModel.addressShortLinkDataSet {
+                acceptContactRequestButton(cReq.apiId, incognito: true)
+            }
+            rejectContactRequestButton(cReq.apiId)
+        }
+    }
+
+    /// 建连中：删除这条连接，外加打开它的详情（上游 `showContactConnectionInfo` 那一枚「Name」）。
+    /// sheet 挂在这一支而不是 `body` 上：只有这一类会话需要它，与上游 `:543` 同一位置。
+    private func contactConnectionRow(_ cConn: PendingContactConnection) -> some View {
+        rowCard
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                deleteContactConnectionButton(cConn)
+                contactConnectionNameButton()
+            }
+            .appSheet(isPresented: $showContactConnectionInfo) {
+                if case let .contactConnection(contactConnection) = chat.chatInfo {
+                    ContactConnectionInfo(contactConnection: contactConnection)
+                        .modifier(ThemedBackground(grouped: true))
+                }
+            }
+    }
+
+    // MARK: 已读 / 置顶 / 静音
+
+    /// 已读 / 未读。判定与 `PopopxUnreadMark` 同一口径（`chatStats.unreadCount` / `unreadChat`），
+    /// 所以徽章亮着未读时这一枚必定写「已读」，反之必定写「未读」，两处不会各说各话。
+    @ViewBuilder private func markReadButton() -> some View {
+        if chat.chatStats.unreadCount > 0 || chat.chatStats.unreadChat {
+            Button {
+                PopopxHaptics.selection()
+                Task { await markChatRead(ItemsModel.shared, chat) }
+            } label: {
+                Label(Copy.swipeRead, systemImage: "checkmark")
+            }
+            .tint(Self.connect)
+        } else {
+            Button {
+                PopopxHaptics.selection()
+                Task { await markChatUnread(chat) }
+            } label: {
+                Label(Copy.swipeUnread, systemImage: "circlebadge.fill")
+            }
+            .tint(Self.connect)
+        }
+    }
+
+    /// 置顶 == `favorite`（`apiSetChatSettings`，ChatView.swift:3460）。本 fork 的协议里没有
+    /// 「隐藏」这一档，所以只有开与关两枚，不发明第三种状态。
+    @ViewBuilder private func toggleFavoriteButton() -> some View {
+        if chat.chatInfo.chatSettings?.favorite == true {
+            Button {
+                PopopxHaptics.selection()
+                toggleChatFavorite(chat, favorite: false)
+            } label: {
+                Label(Copy.swipeUnfavorite, systemImage: "star.slash.fill")
+            }
+            .tint(Self.favorite)
+        } else {
+            Button {
+                PopopxHaptics.selection()
+                toggleChatFavorite(chat, favorite: true)
+            } label: {
+                Label(Copy.swipeFavorite, systemImage: "star.fill")
+            }
+            .tint(Self.favorite)
+        }
+    }
+
+    /// 静音。档位与文案都不在这里重写：`chatInfo.nextNtfMode` 给下一档（all→mentions/none、
+    /// mentions→none、none→all），`MsgFilter.text(mentions:)` 给"静音 / 全部静音 / 取消静音"三种说法，
+    /// `iconFilled` 给图标；没有下一档（读不懂的设置）时这一枚不出现，与上游一致。
+    @ViewBuilder private func toggleNtfsButton() -> some View {
+        if let nextMode = chat.chatInfo.nextNtfMode {
+            Button {
+                PopopxHaptics.selection()
+                toggleNotifications(chat, enableNtfs: nextMode)
+            } label: {
+                Label(nextMode.text(mentions: chat.chatInfo.hasMentions), systemImage: nextMode.iconFilled)
+            }
+            .tint(Self.neutral)
+        }
+    }
+
+    // MARK: 列表 / 清空 / 删除
+
+    /// 「列表」：把这枚会话归到哪个标签下，用的还是 app 原有的 `TagSheetRoot`（标签编辑器与列表都在里面）。
+    private func tagChatButton() -> some View {
+        Button {
+            PopopxHaptics.selection()
+            setTagChatSheet()
+        } label: {
+            Label(Copy.swipeList, systemImage: "tag.fill")
+        }
+        .tint(Self.neutral)
+    }
+
+    /// 分数高度照抄上游算法（`ChatListNavLink.swift:412-427`）：4 行留白 + 每枚标签 44pt，上限 0.62。
+    /// 屏高读宿主窗口而不是 `UIScreen.main`（iOS 16 起废弃）；拿不到就退回 0.62 这个上限本身。
+    private func setTagChatSheet() {
+        let reservedSpace: Double = 4 * 44
+        let tagsSpace = Double(max(chatTagsModel.userTags.count, 3)) * 44
+        let maxHeight: Double = 0.62
+        let screenHeight = Double(SceneDelegate.windowStatic?.bounds.height ?? 0)
+        let fraction = screenHeight > 0 ? min((reservedSpace + tagsSpace) / screenHeight, maxHeight) : maxHeight
+        sheet = SomeSheet(
+            content: {
+                AnyView(
+                    TagSheetRoot(chat: chat, editorAsRoot: chatTagsModel.userTags.isEmpty)
+                        .environmentObject(chatTagsModel)
+                )
+            },
+            id: "popopx.chatRow.listsSheet",
+            fraction: fraction
+        )
+    }
+
+    private func clearChatButton() -> some View {
+        Button {
+            PopopxHaptics.selection()
+            AlertManager.shared.showAlert(clearChatAlert())
+        } label: {
+            Label(Copy.swipeClear, systemImage: "gobackward")
+        }
+        .tint(Self.irreversible)
+    }
+
+    private func clearNoteFolderButton() -> some View {
+        Button {
+            PopopxHaptics.selection()
+            AlertManager.shared.showAlert(clearNoteFolderAlert())
+        } label: {
+            Label(Copy.swipeClear, systemImage: "gobackward")
+        }
+        .tint(Self.irreversible)
+    }
+
+    /// 删除联系人：两级确认，第二级是"保留会话/删除联系人 + 通知对方/不通知"那一屏。
+    /// 这条链路要求三个回调通道，所以下面三个 state 必须留在本行。
+    private func deleteContactButton(_ contact: Contact) -> some View {
+        Button {
+            PopopxHaptics.selection()
+            deleteContactDialog(
+                chat,
+                contact,
+                dismissToChatList: false,
+                showAlert: { alert = $0 },
+                showActionSheet: { actionSheet = $0 },
+                showSheetContent: { sheet = $0 }
+            )
+        } label: {
+            Label(Copy.swipeDelete, systemImage: "trash.fill")
+        }
+        .tint(Self.destructive)
+    }
+
+    private func deleteGroupChatButton(_ groupInfo: GroupInfo) -> some View {
+        Button {
+            PopopxHaptics.selection()
+            AlertManager.shared.showAlert(deleteGroupAlert(groupInfo))
+        } label: {
+            Label(Copy.swipeDelete, systemImage: "trash.fill")
+        }
+        .tint(Self.destructive)
+    }
+
+    private func leaveGroupChatButton(_ groupInfo: GroupInfo) -> some View {
+        Button {
+            PopopxHaptics.selection()
+            AlertManager.shared.showAlert(leaveGroupAlert(groupInfo))
+        } label: {
+            Label(Copy.swipeLeave, systemImage: "rectangle.portrait.and.arrow.right.fill")
+        }
+        .tint(Self.neutral)
+    }
+
+    /// 「加入」：invited 档的群与频道。隐身进来的那枚换面具图标，与上游同一判据。
+    private func joinGroupButton(_ groupInfo: GroupInfo) -> some View {
+        Button {
+            PopopxHaptics.selection()
+            joinGroup(groupInfo.groupId) {}
+        } label: {
+            Label(
+                Copy.swipeJoin,
+                systemImage: chat.chatInfo.incognito ? "theatermasks" : "ipad.and.arrow.forward"
+            )
+        }
+        .tint(Self.connect)
+    }
+
+    private func archiveAllReportsButton() -> some View {
+        Button {
+            PopopxHaptics.selection()
+            AlertManager.shared.showAlert(archiveAllReportsAlert())
+        } label: {
+            Label(Copy.swipeArchiveReports, systemImage: "archivebox")
+        }
+        .tint(Self.neutral)
+    }
+
+    /// 「更多」：超过 3 枚时收进动作表。表内容与上游 `moreOptionsButton`（:429-460）逐句同形。
+    private func moreOptionsButton(_ canShowGroupDelete: Bool, _ groupInfo: GroupInfo) -> some View {
+        Button {
+            PopopxHaptics.selection()
+            var buttons: [ActionSheet.Button] = [
+                .default(Text(Copy.swipeClear)) {
+                    AlertManager.shared.showAlert(clearChatAlert())
+                }
+            ]
+            if chat.chatStats.reportsCount > 0
+                && groupInfo.membership.memberRole >= .moderator && groupInfo.ready {
+                buttons.append(.default(Text(Copy.swipeArchiveReports)) {
+                    AlertManager.shared.showAlert(archiveAllReportsAlert())
+                })
+            }
+            if canShowGroupDelete, groupInfo.canDelete {
+                buttons.append(.destructive(Text(Copy.swipeDelete)) {
+                    AlertManager.shared.showAlert(deleteGroupAlert(groupInfo))
+                })
+            }
+            buttons.append(.cancel())
+            actionSheet = SomeActionSheet(
+                actionSheet: ActionSheet(
+                    title: Text(canShowGroupDelete ? Copy.swipeMoreDeleteTitle : Copy.swipeMoreTitle),
+                    buttons: buttons
+                ),
+                id: "popopx.chatRow.moreOptions"
+            )
+        } label: {
+            Label(Copy.swipeMore, systemImage: "ellipsis")
+        }
+        .tint(Self.neutral)
+    }
+
+    // MARK: 入呼与建连
+
+    private func acceptContactRequestButton(_ contactRequestId: Int64, incognito: Bool) -> some View {
+        Button {
+            PopopxHaptics.selection()
+            Task { await acceptContactRequest(incognito: incognito, contactRequestId: contactRequestId) }
+        } label: {
+            Label(
+                incognito ? Copy.swipeAcceptIncognito : Copy.swipeAccept,
+                systemImage: incognito ? "theatermasks.fill" : "checkmark"
+            )
+        }
+        .tint(Self.connect)
+    }
+
+    private func rejectContactRequestButton(_ contactRequestId: Int64) -> some View {
+        Button {
+            PopopxHaptics.selection()
+            AlertManager.shared.showAlert(rejectContactRequestAlert(contactRequestId))
+        } label: {
+            Label(Copy.swipeReject, systemImage: "multiply")
+        }
+        .tint(Self.destructive)
+    }
+
+    private func acceptMemberContactRequestButton(_ contact: Contact) -> some View {
+        Button {
+            PopopxHaptics.selection()
+            acceptMemberContactRequest(contact)
+        } label: {
+            Label(Copy.swipeAccept, systemImage: "checkmark")
+        }
+        .tint(Self.connect)
+    }
+
+    private func rejectMemberContactRequestButton(_ contact: Contact) -> some View {
+        Button {
+            PopopxHaptics.selection()
+            showRejectMemberContactRequestAlert(contact)
+        } label: {
+            Label(Copy.swipeReject, systemImage: "multiply")
+        }
+        .tint(Self.destructive)
+    }
+
+    private func deleteContactConnectionButton(_ contactConnection: PendingContactConnection) -> some View {
+        Button {
+            PopopxHaptics.selection()
+            AlertManager.shared.showAlert(deleteContactConnectionAlert(contactConnection))
+        } label: {
+            Label(Copy.swipeDelete, systemImage: "trash.fill")
+        }
+        .tint(Self.destructive)
+    }
+
+    private func contactConnectionNameButton() -> some View {
+        Button {
+            PopopxHaptics.selection()
+            showContactConnectionInfo = true
+        } label: {
+            Label(Copy.swipeName, systemImage: "pencil")
+        }
+        .tint(Self.connect)
+    }
+
+    // MARK: 确认框
+
+    // 五段确认框的英文原句逐字照抄上游 `ChatListNavLink.swift:560-632`：这些 Key 在 16 个语种目录里
+    // 已经有译文，重写一遍只会多出一组没人翻的键，让同一件事在两个界面说两种话。
+
+    private func clearChatAlert() -> Alert {
+        Alert(
+            title: Text("Clear conversation?"),
+            message: Text(chat.chatInfo.displayName + "\n\n")
+                + Text("All messages will be deleted - this cannot be undone! The messages will be deleted ONLY for you."),
+            primaryButton: .destructive(Text(Copy.swipeClear)) {
+                Task { await clearChat(chat) }
+            },
+            secondaryButton: .cancel()
+        )
+    }
+
+    private func clearNoteFolderAlert() -> Alert {
+        Alert(
+            title: Text("Clear private notes?"),
+            message: Text("All messages will be deleted - this cannot be undone!"),
+            primaryButton: .destructive(Text(Copy.swipeClear)) {
+                Task { await clearChat(chat) }
+            },
+            secondaryButton: .cancel()
+        )
+    }
+
+    private func deleteGroupAlert(_ groupInfo: GroupInfo) -> Alert {
+        let label: LocalizedStringKey = groupInfo.useRelays ? "Delete channel?" : groupInfo.businessChat == nil ? "Delete group?" : "Delete chat?"
+        return Alert(
+            title: Text(label),
+            message: Text(chat.chatInfo.displayName + "\n\n") + deleteGroupAlertMessage(groupInfo),
+            primaryButton: .destructive(Text(Copy.swipeDelete)) {
+                Task { await deleteChat(chat) }
+            },
+            secondaryButton: .cancel()
+        )
+    }
+
+    private func leaveGroupAlert(_ groupInfo: GroupInfo) -> Alert {
+        let titleLabel: LocalizedStringKey = groupInfo.useRelays ? "Leave channel?" : groupInfo.businessChat == nil ? "Leave group?" : "Leave chat?"
+        let messageLabel: LocalizedStringKey = (
+            groupInfo.useRelays
+            ? "You will stop receiving messages from this channel. Chat history will be preserved."
+            : groupInfo.businessChat == nil
+            ? "You will stop receiving messages from this group. Chat history will be preserved."
+            : "You will stop receiving messages from this chat. Chat history will be preserved."
+        )
+        return Alert(
+            title: Text(titleLabel),
+            message: Text(chat.chatInfo.displayName + "\n\n") + Text(messageLabel),
+            primaryButton: .destructive(Text(Copy.swipeLeave)) {
+                Task { await leaveGroup(groupInfo.groupId) }
+            },
+            secondaryButton: .cancel()
+        )
+    }
+
+    private func archiveAllReportsAlert() -> Alert {
+        Alert(
+            title: Text("Archive all reports?"),
+            message: Text("All reports will be archived for you."),
+            primaryButton: .destructive(Text("Archive")) {
+                Task { await archiveAllReportsForMe() }
+            },
+            secondaryButton: .cancel()
+        )
+    }
+
+    private func archiveAllReportsForMe() async {
+        do {
+            if case let .groupChatItemsDeleted(user, groupInfo, chatItemIDs, _, member) = try await apiArchiveReceivedReports(groupId: chat.chatInfo.apiId) {
+                await groupChatItemsDeleted(user, groupInfo, chatItemIDs, member)
+            }
+        } catch {
+            logger.error("archiveAllReportsForMe error: \(responseError(error))")
+        }
+    }
+}
+
 // MARK: - 通道徽章
 
 @MainActor private struct PopopxChannelBadge: View {
@@ -1090,6 +1703,34 @@ private enum Copy {
     static let serviceStarting = "加密服务正在启动，稍候即可打开会话。"
     static let serviceDisconnected = "加密服务已停止：可在「设置 → 聊天数据」启动，或直接重启应用；期间会话打不开。"
     static let chatGone = "这条会话已被删除，或还没加载完成。"
+
+    // 滑动快捷操作。这十七个 Key 全部沿用上游 `ChatListNavLink.swift` 的英文原句：
+    // 它们已经在 16 个语种的目录里（zh-Hans 里分别是「已读 / 未读 / 最喜欢 / 取消最喜欢 / 清除 /
+    // 删除 / 加入 / 离开 / 接受 / 接受隐身聊天 / 拒绝 / 列表 / 更多 / 存档举报 / 名称 /
+    // 清除群组？/ 清除或删除群组？」），本页不另起一套说法。
+    // 静音那一枚不在这里：它的三种说法（Mute / Mute all / Unmute）由 `MsgFilter.text(mentions:)`
+    // 自己给，重写一遍只会让聊天信息页与列表各说一套。
+    // ⚠️ 已知瑕疵，不在这轮修：`"Favorite"` / `"Unfav."` 这两个 Key 的 zh 译法是上游带进来的
+    // 「最喜欢」/「取消最喜欢」，这一枚按钮做的事是**置顶**，该翻成「置顶」/「取消置顶」。
+    // 换一个新 Key 只会更糟（没有译文的键在中文界面里直接露出英文原句），所以要改的是目录里这两行的
+    // 值，不是这里的键名 —— 而 `.lproj/Localizable.strings` 本轮是红线。
+    static let swipeRead = key("Read")
+    static let swipeUnread = key("Unread")
+    static let swipeFavorite = key("Favorite")
+    static let swipeUnfavorite = key("Unfav.")
+    static let swipeClear = key("Clear")
+    static let swipeDelete = key("Delete")
+    static let swipeJoin = key("Join")
+    static let swipeLeave = key("Leave")
+    static let swipeAccept = key("Accept")
+    static let swipeAcceptIncognito = key("Accept incognito")
+    static let swipeReject = key("Reject")
+    static let swipeList = key("List")
+    static let swipeMore = key("More")
+    static let swipeArchiveReports = key("Archive reports")
+    static let swipeName = key("Name")
+    static let swipeMoreTitle = key("Clear group?")
+    static let swipeMoreDeleteTitle = key("Clear or delete group?")
 
     static let unnamedIdentity = "未命名身份"
     static func identitySwitched(_ name: String) -> String { "已切换到身份 \(name)" }

@@ -7717,3 +7717,10 @@ alert title */
 
 /* POPOPX round 18 tier C (escaped-newline keys) */
 "Your new channel %@ is connected to %d of %d relays.\nIf you cancel, the channel will be deleted - you can create it again." = "Twój nowy kanał %1$@ jest połączony z %2$d z %3$d przekaźników.\nJeśli anulujesz, kanał zostanie usunięty – możesz go utworzyć ponownie.";
+
+/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+"Back to messages" = "Wróć do wiadomości";
+"POPOPX Badge" = "Odznaka POPOPX";
+"Added %lld Compute Credits to your balance." = "Dodano %lld punktów obliczeniowych do Twojego salda.";
+"Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple nadal potwierdza ten zakup. Punkty obliczeniowe pojawią się w Twoim saldzie, gdy zakup zostanie potwierdzony.";
+"Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple pobrał płatność, ale to urządzenie nie mogło jeszcze dodać punktów do Twojego salda. Zostaną one dodane przy następnym zapisie do bezpiecznego magazynu.";

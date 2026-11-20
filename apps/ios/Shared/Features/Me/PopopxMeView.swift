@@ -299,10 +299,12 @@ struct PopopxMeView: View {
             }
             .padding(.top, PopopxMetrics.spaceS)
             PopopxMeDivider()
-            // 无条件付费墙入口：整页只有这一行不看徽章状态就能打开购买面板，理由见上面 `badgeSheet`。
+            // 无条件入口：整页只有这一行不看徽章状态就能打开面板，理由见上面 `badgeSheet`。
+            // 真机第 8 轮拆页后它开的是**算力点中心**，不再是付费墙 —— 这一行的源文就是
+            // "Top up Compute Credits"，商品动线拆分后还把它送进卖徽章的那一屏，正是本轮要修的混淆。
             PopopxPickerRow(Copy.purchaseCredits, systemImage: "cart.fill", tint: .brand) {
                 PopopxHaptics.selection()
-                badgeSheet = .paywall
+                showsCreditsStore = true
             }
             .accessibilityIdentifier("popopx.me.paywall")
         }

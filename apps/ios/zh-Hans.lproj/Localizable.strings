@@ -8375,3 +8375,10 @@ alert title */
 "If you were charged but have no badge, this adds it. A subscription bought with this App Store account moves to this profile, and the device or profile that had it loses its badge at its next renewal." = "如果你已被扣款但没有看到徽章，点此补发。用这个 App Store 账号购买的订阅会转到当前身份，原先持有它的设备或身份会在下一次续费时失去徽章。";
 "Broadcast to #mesh" = "向 #mesh 广播";
 "Send over the offline mesh" = "通过离线组网发送";
+
+/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+"Back to messages" = "返回消息";
+"POPOPX Badge" = "POPOPX 徽章";
+"Added %lld Compute Credits to your balance." = "已向你的余额添加 %lld 算力点。";
+"Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple 仍在确认此购买。确认后，算力点会立即显示在你的余额中。";
+"Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple 已完成扣款，但此设备暂时无法将算力点加入你的余额。下一次能够写入安全存储时会自动到账。";

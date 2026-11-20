@@ -86,14 +86,10 @@ struct NetworkAndServers: View {
                             }
                         }
                     }
-
-                    NavigationLink {
-                        AdvancedNetworkSettings()
-                            .navigationTitle("Advanced settings")
-                            .modifier(ThemedBackground(grouped: true))
-                    } label: {
-                        Text("Advanced network settings")
-                    }
+                    // 真机第 8 轮 · 任务六（层级重排）：「Advanced network settings」这一行上提到设置页
+                    // 「网络与服务器」那张卡（Shared/Features/Settings/PopopxSettingsViews.swift 的
+                    // `networkCard`），原处删除。目的地与它的 `navigationTitle`/`ThemedBackground`
+                    // 一起搬走，本页因此不再引用 `AdvancedNetworkSettings`；这一页只剩服务器本身的行。
                 } header: {
                     Text("Messages & files")
                         .foregroundColor(theme.colors.secondary)
@@ -116,13 +112,9 @@ struct NetworkAndServers: View {
                     }
                 }
 
-                Section(header: Text("Network connection").foregroundColor(theme.colors.secondary)) {
-                    HStack {
-                        Text(m.networkInfo.networkType.text)
-                        Spacer()
-                        Image(systemName: "circle.fill").foregroundColor(m.networkInfo.online ? .green : .red)
-                    }
-                }
+                // 真机第 8 轮 · 任务六：这一段「Network connection」读数（类型 + 在线点）上提到设置页
+                // 「网络与服务器」那张卡，原处删除。它读的仍是同一份真值
+                // `ChatModel.networkInfo`（NetworkObserver.swift:34 每次路径变化写入），只是换了摆的位置。
             }
         }
         .task {

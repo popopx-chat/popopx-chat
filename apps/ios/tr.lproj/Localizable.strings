@@ -7655,3 +7655,10 @@ alert title */
 
 /* POPOPX round 18 tier C (escaped-newline keys) */
 "Your new channel %@ is connected to %d of %d relays.\nIf you cancel, the channel will be deleted - you can create it again." = "Yeni kanalın %1$@, %3$d aktarıcının %2$d tanesine bağlı.\nİptal edersen kanal silinir – yeniden oluşturabilirsin.";
+
+/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+"Back to messages" = "Mesajlara geri dön";
+"POPOPX Badge" = "POPOPX rozeti";
+"Added %lld Compute Credits to your balance." = "Bakiyenize %lld hesaplama kredisi eklendi.";
+"Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple bu satın almayı hâlâ doğruluyor. Hesaplama kredileri doğrulanır doğrulanmaz bakiyenizde görünecek.";
+"Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple ödemeyi aldı ancak bu cihaz kredileri henüz bakiyenize ekleyemedi. Güvenli depo bir sonraki yazılabildiğinde eklenecek.";

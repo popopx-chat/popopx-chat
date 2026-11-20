@@ -8,8 +8,15 @@
 //    那一屏全屏（本轮起它不再是"点左上角才去的一页"）。包内那份保留不动，全仓三个挂载点：
 //    这一栏的根、本页的 `.plaza` 路由、`PopopxAddFriendView.swift:121`（`SettingsView.swift:396`
 //    那句是注释，它自己的挂载早在 71001954f 摘掉了）。
-//  · `PopopxCabinView` = 根左上角那一枚胶囊唤起的满高抽屉，本地蓝牙状态的 app 侧重写版。
+//  · `PopopxCabinView` = 根顶栏**中间**那一枚胶囊唤起的满高抽屉，本地蓝牙状态的 app 侧重写版。
 //    抽屉里那一屏的东西一样没少：总闸、射频、频道三行、周边节点、设置中心、私聊与配对。
+//
+//  真机第 8 轮 · 任务一（根那一屏顶栏三段式 + 全屏沉浸）：`.topBarLeading` = 回「消息」栏的返回键
+//  （这一栏底部那四枚让开了，它是唯一出口，动作经宿主传进来的 `tabSelection` 绑定写 `MainTabView`
+//  的选中栏）；`.principal` = 原先站在左上角的旧厢语面板那枚青绿胶囊（周边节点雷达与离线群聊都在
+//  里面）；`.topBarTrailing` = 离线组网设置中心，位置与画法不动。抽屉与它推上去的每一页的顶栏
+//  一概不动。底栏那 49pt 的让开由根这一屏的内容自己声明 `.toolbar(.hidden, for: .tabBar)`，见
+//  `PopopxMeshPlazaRootView.body` 里那一段的两条理由。
 //
 //  三条数据来源，全是包里的真对象，本文件不写第二条传输路径：
 //  1. `PopopxMeshStateSource.shared.state` —— `radioState / peers / broadcasts / latestBroadcastAt`。
@@ -173,24 +180,31 @@ private struct PopopxCabinNode: Identifiable, Hashable {
 
 // MARK: - Tab 3 根（全屏广场 + 满高抽屉里的旧面板）
 
-/// 第四阶段 Tab 3「厢语」的落地页：一进来就是包内那一份全屏 `MeshPlazaView`，旧厢语面板收成
-/// 左上角一枚胶囊唤起的满高抽屉，离线组网设置中心仍从右上角那一枚开。类型写在本文件而不是新
-/// 文件（铁律：不脚本改 `project.pbxproj`），与 `PopopxCabinMeshSettingsSheet` 同一个办法。
+/// 第四阶段 Tab 3「厢语」的落地页：一进来就是包内那一份全屏 `MeshPlazaView`，旧厢语面板收成中间
+/// 那一枚胶囊唤起的满高抽屉，离线组网设置中心仍从右上角那一枚开，左上角是回「消息」的返回键。
+/// 类型写在本文件而不是新文件（铁律：不脚本改 `project.pbxproj`），与 `PopopxCabinMeshSettingsSheet`
+/// 同一个办法。
 ///
 /// 四条挂载口径：
-/// 1. 广场按"首页"那一档给两个新参数：`hidesTabBar: false` 让底部那四枚 Tab 在这一屏照常站着
-///    （这一屏是那一栏的根，不是推进去的一页），`keepsRunningWhenHidden: true` 让切栏不再清空
-///    广播历史 —— `PopopxMeshPlazaModel.stop()` 会清 `posts`（包内 `MeshPlazaView.swift:159-163`），
-///    本机喊出去的话不会因为按了「消息」就收回。
+/// 1. 广场按"首页"那一档给两个新参数：`hidesTabBar: false` 说清这一屏的角色是首页、不是推进去的一页
+///    （因此离开时不 `stop()`），`keepsRunningWhenHidden: true` 让切栏不再清空广播历史 ——
+///    `PopopxMeshPlazaModel.stop()` 会清 `posts`（包内 `MeshPlazaView.swift:159-163`），
+///    本机喊出去的话不会因为按了「消息」就收回。⚠️ 本轮起**底部那四枚仍然让开**，但不是这两个参数
+///    申请的：底栏的隐藏由本视图在根栈那一屏的内容上单独声明 `.toolbar(.hidden, for: .tabBar)`
+///    （见 `body` 里那一段），包内 `hidesTabBar` 只管"这一屏是不是推进去的一页"这一件事。
 /// 2. 模型由本视图 `@StateObject` 持有，再走 `MeshPlazaView(model:)`：那条便利 init 每次 body 重算
 ///    都会 new 一个 `PopopxMeshPlazaModel`，而 `@ObservedObject` 会跟着换成新那一份 —— 首页的 body
 ///    比推上去的一页重算得勤（开一次抽屉就是两次），换模型等于把时间线换成空的且再没人 `start()`。
 ///    对象身份要活下来只有 `@StateObject` 这一条路。三个依赖仍然逐字给 `PopopxMeshRuntime` 的真对象
 ///    （与 `.plaza` 路由、`PopopxAddFriendView.swift:121-125` 同一份），一个默认值都不走 —— 默认值是
 ///    `PopopxMeshEngine.shared`，总闸关着时也会被它把引擎与射频建出来（文件头那段红线）。
-/// 3. 不设标题：这一条栏两头各一枚胶囊（2 字 + 6 字），393pt（iPhone 15 Pro）上再加一枚居中标题就要
-///    开始截断。这一屏的名字由底栏「厢语」与列表段头 `#mesh` 说；`Copy.plazaTitle` 继续在 `.plaza`
-///    那一处用，两处不会是两屏不一样的东西。
+/// 3. 不设标题：这条栏三段各有一枚（返回键 + 中间 2 字 + 右边 6 字），393pt（iPhone 15 Pro）上再加
+///    一枚居中标题就要开始截断 —— 中间那一槽本轮就是标题的位置，站的是旧厢语面板那枚胶囊。宽度账
+///    逐笔写在 `cabinPanelEntry` 上面。这一屏的名字由底栏「厢语」与列表段头 `#mesh` 说；
+///    `Copy.plazaTitle` 继续在 `.plaza` 那一处用，两处不会是两屏不一样的东西。
+/// 4. 抽屉里那一页自己持有 `NavigationStack(path:)`（文件头决定 4），所以整块压在根栈外面：挂成根栈
+///    的一页要么两条导航条，要么让那一个文件里四处 `path.append` 全部落空 —— 私聊那一跳是发出离线
+///    建联邀请之后再推一页，动作 async，只有绑在它自己栈上的 `path` 在那之后还推得动。
 /// 4. 抽屉里那一页自己持有 `NavigationStack(path:)`（文件头决定 4），所以整块压在根栈外面：挂成根栈
 ///    的一页要么两条导航条，要么让那一个文件里四处 `path.append` 全部落空 —— 私聊那一跳是发出离线
 ///    建联邀请之后再推一页，动作 async，只有绑在它自己栈上的 `path` 在那之后还推得动。
@@ -199,6 +213,14 @@ struct PopopxMeshPlazaRootView: View {
     @ObservedObject private var meshRuntime: PopopxMeshRuntime
     @StateObject private var plazaModel: PopopxMeshPlazaModel
 
+    /// `MainTabView` 选中栏的绑定，由宿主在挂载点给（`MainTabView.swift` 那一栏）。
+    /// 顶栏全屏沉浸之后，这一栏底下没有任何横切导航，唯一出口就是左上角那枚返回键 —— 它要写的
+    /// 就是这一份。走 `@Binding` 而不是新造一个 `@Observable` 路由对象注进环境：`MainTabView` 的
+    /// `selection` 本来就是那一份唯一事实（决定 3 的 `onChange(of: chatModel.chatId)` 写的也是它），
+    /// 再包一层就是第二个持有者；而 init 必填 ⇒ 少挂一个宿主直接编译不过，比"点了不动"好查
+    /// （同 `PopopxSettingsNavTrack` 刻意不给默认值那条理由）。
+    @Binding private var tabSelection: PopopxTab
+
     /// 旧厢语面板那一张满高抽屉（默认档 = 整屏，盖住底部四枚）。
     @State private var showsCabinPanel = false
     /// 右上角那一枚按下去时先记一笔，等抽屉现身再交给抽屉里那一页呈现：同一次事务里连着摆两张表
@@ -206,7 +228,8 @@ struct PopopxMeshPlazaRootView: View {
     /// 本视图一份都不再算 —— 见 `init(opensMeshSettingsOnPresent:)`。
     @State private var opensSettingsOnPresent = false
 
-    @MainActor init() {
+    @MainActor init(tabSelection: Binding<PopopxTab>) {
+        _tabSelection = tabSelection
         let runtime = PopopxMeshRuntime.shared
         _meshRuntime = ObservedObject(wrappedValue: runtime)
         _plazaModel = StateObject(
@@ -228,10 +251,26 @@ struct PopopxMeshPlazaRootView: View {
             // 底与另两处挂载同一句（`PopopxCabinView` 的 `.plaza`、`PopopxAddFriendView.swift:127`）：
             // 广场自己不带背景，宿主给一次分组底，三屏才是同一块布。
             .modifier(ThemedBackground(grouped: true))
+            // 本轮（真机第 8 轮）：这一栏全屏沉浸 —— 底部那四枚在根这一屏让开，49pt 还给内容。
+            // 挂在根栈的这一屏内容上，而不是挂在 `MainTabView` 的 `TabView` 上，两条理由：
+            // ① 深度与真机验证过的 `ChatsListView.swift:411` 那一处一致（同一栏、同一栈、同一层内容）
+            //    —— 底栏的可见性由 `TabView` 读它**选中那一栏的内容子树**递上来的偏好，写在
+            //    `TabView` 自己那一层就在这份读取的外侧，是赌一个没验过的口径；
+            // ② 声明在内容这一层，"这一屏可见"就是它的有效期：切到别的栏时这一屏不再可见，偏好
+            //    自动收回，另外三栏那一条栏不会被这一栏带走。挂在 `TabView` 上就得自己按 `selection`
+            //    算一个值，那又会压到 `ChatsListView.swift:264/271/281/411` 那四处按页声明的 `.hidden`。
+            // `hidesTabBar: false` 保持不动：那两个参数说的是这一屏在包里的**角色**（首页 ≠ 推进去的
+            // 一页，切栏不得清空广播流），不是底栏开关；底栏这一格现在由宿主自己申请让开。两处不冲突
+            // —— 包内 `meshHallTabBarHidden(_:)` 的 `false` 那一档刻意什么都不声明，不写
+            // `.toolbar(.visible, for: .tabBar)`（`MeshPlazaView.swift:516-531`），正是为了不把宿主
+            // 这一句顶掉。可见性重载本身是 iOS 16 起，app 的地板是 17.0，不需要 gate。
+            .toolbar(.hidden, for: .tabBar)
             .toolbar {
-                // 两个入口只在这一条栏出现：工具条项属于声明它的那一层内容，抽屉与它推上去的每一页
-                // 有自己的条（口径同 `PopopxCabinView` 顶栏那两行注释）。
-                ToolbarItem(placement: .topBarLeading) { cabinPanelEntry }
+                // 三段式：左 = 返回「消息」，中 = 旧厢语面板（周边节点雷达与离线群聊都在那一屏里），
+                // 右 = 离线组网设置中心。工具条项仍然只属于声明它的那一层内容，抽屉与它推上去的每一页
+                // 有自己的条。宽度账见 `cabinPanelEntry` 上面那一段。
+                ToolbarItem(placement: .topBarLeading) { backToChatsEntry }
+                ToolbarItem(placement: .principal) { cabinPanelEntry }
                 ToolbarItem(placement: .topBarTrailing) { meshSettingsEntry }
             }
             .sheet(isPresented: $showsCabinPanel) {
@@ -248,11 +287,45 @@ struct PopopxMeshPlazaRootView: View {
         }
     }
 
-    // MARK: 顶栏两个入口
+    // MARK: 顶栏三个入口
 
-    /// 左上角：旧厢语面板。图标先行 + 面板的名字（就是这一栏的名字），与右上角那枚六字胶囊并排在
-    /// 393pt 上不截断 —— 主页那条栏同时放「发现」与「离线组网设置」是同一笔宽度账，两个字的
-    /// 「厢语」比「发现」还短一格。完整说法在 `.accessibilityHint` 里，VoiceOver 不必挤在那两个字上。
+    /// 左上角：回「消息」栏。这一栏全屏沉浸之后，屏幕底下没有任何横切导航，这一枚就是唯一的出口，
+    /// 所以它必须一直在、且一眼认得出。画法与抽屉的收起键同档（`cabinPanelCloseEntry`）：中性底、
+    /// 只有图标不带文字 —— 这条栏中间与右边那两枚已经把宽度占掉大半（账在下面那枚的注释里），
+    /// 再给返回键配一个字就是第四个截断点。`chevron.left` 是系统返回的方向词，VoiceOver 读
+    /// `.accessibilityLabel` 那一句，不读图标。
+    private var backToChatsEntry: some View {
+        Button {
+            PopopxHaptics.impact(.light)
+            tabSelection = .chats
+        } label: {
+            Image(systemName: "chevron.left")
+                .font(PopopxType.microTag)
+                .imageScale(.medium)
+                .foregroundStyle(PopopxPalette.meshInk)
+                .accessibilityHidden(true)
+                .padding(.horizontal, PopopxMetrics.spaceS)
+                .frame(minHeight: PopopxMetrics.minHitTarget)
+                .background(PopopxPalette.card, in: .rect(cornerRadius: PopopxMetrics.radiusControl))
+                .contentShape(.rect(cornerRadius: PopopxMetrics.radiusControl))
+        }
+        .buttonStyle(PopopxPressButtonStyle())
+        .accessibilityLabel(Text(Copy.backToMessages))
+        .accessibilityIdentifier("popopx.cabin.backToChats")
+    }
+
+    /// 中间（`.principal`）：旧厢语面板 —— 周边节点雷达与离线群聊都在那一屏里。原先站在左上角，
+    /// 本轮把左上角让给返回键，它挪到中间，青色与图标一个都不改（同一枚入口换位置不换身份）。
+    ///
+    /// 宽度账（iPhone 15 Pro 393pt，默认字号，导航条左右各留 16pt 边距 ⇒ 可用 ≈ 361pt）：
+    /// · 左：`chevron.left` 12pt 档约 11pt + 内边距 12×2 = **≈ 35pt**；
+    /// · 右：内边距 12×2 + 图标 ≈ 15 + 间距 4 + 圆点 8 + 间距 4 + 「Offline mesh settings」
+    ///   15pt（`.subheadline`）21 字符 ≈ 145 = **≈ 200pt**；
+    /// · 两头合计 ≈ 235pt，中间这条 `principal` 槽还剩 ≈ 126pt；
+    /// · 本枚：内边距 8×2 + 图标 ≈ 13 + 间距 4 + 「厢语」15pt 两字 ≈ 30 = **≈ 63pt**，富余一倍。
+    /// `.fixedSize()` 是让中间这一枚在挤的时候**自己缩**而不是被压断：它守住内在宽度，`lineLimit(1)`
+    /// 与 `minimumScaleFactor(0.85)` 再兜一层（大字号辅助功能档下先缩字，缩不动才轮到左右让位）。
+    /// 完整说法在 `.accessibilityHint` 里，VoiceOver 不必挤在那两个字上。
     private var cabinPanelEntry: some View {
         Button {
             PopopxHaptics.impact(.light)
@@ -269,10 +342,11 @@ struct PopopxMeshPlazaRootView: View {
                     .minimumScaleFactor(0.85)
             }
             .foregroundStyle(PopopxPalette.onMesh)
-            .padding(.horizontal, PopopxMetrics.spaceS)
+            .padding(.horizontal, PopopxMetrics.spaceXS)
             .frame(minHeight: PopopxMetrics.minHitTarget)
             .background(PopopxPalette.mesh, in: .rect(cornerRadius: PopopxMetrics.radiusControl))
             .contentShape(.rect(cornerRadius: PopopxMetrics.radiusControl))
+            .fixedSize()
         }
         .buttonStyle(PopopxPressButtonStyle())
         .accessibilityHint(Text(Copy.cabinPanelEntryHint))
@@ -1542,6 +1616,9 @@ private struct PopopxCabinHallView: View {
     let onRescan: () async -> Void
 
     @State private var draft = ""
+    /// 在途标记：`send()` 期间草稿仍留在框里（失败不吞字），所以按钮必须靠自己关门，
+    /// 而不是靠 `trimmedDraft` 变假 —— 后者在 await 之前那一帧就把点击丢掉了。
+    @State private var sending = false
     @State private var failureNote: String?
     /// 发现模式默认收着：大厅是说话的地方，看周边是另一件事，但右上角一键就能翻上来。
     @State private var showsDiscovery = false
@@ -1623,6 +1700,8 @@ private struct PopopxCabinHallView: View {
         // 本轮起大厅只从抽屉里推进去，抽屉本来就盖住整块底栏，这一句在那条栈里落不到东西上：
         // inert 而非有害（与包内 `meshHallTabBarHidden(_:)` 同一句判据），留着是因为这条规则
         // 声明在"推进去的那一层"才成立，摘掉它就等于允许下一个把大厅挂进根栈的人漏掉它。
+        // 真机第 8 轮之后这一句更是落不到东西上：根那一屏自己把底栏让开了，抽屉里这条栈头顶着的是
+        // 一块本来就没有底栏的区域。
         .toolbar(.hidden, for: .tabBar)
         .background(PopopxPalette.base)
         .toolbar {
@@ -1804,7 +1883,7 @@ private struct PopopxCabinHallView: View {
                 PopopxButton(Copy.broadcastSend, systemImage: "paperplane.fill", fullWidth: false) {
                     await send()
                 }
-                .disabled(!trimmedDraft)
+                .disabled(!trimmedDraft || sending)
             }
         }
         .padding(.horizontal, PopopxMetrics.gutter)
@@ -1834,16 +1913,22 @@ private struct PopopxCabinHallView: View {
         }
     }
 
-    /// 发送：清空草稿、交给 runtime 的 backend；失败只把一句话留在卡上（不吞、不重试、不假装成功）。
+    /// 发送：先广播，**成功之后**才清空草稿；失败时刚打的字留在框里，改一个字就能重发。
+    /// 顺序反过来会同时踩两个坑：清空在 await 之前 ⇒ `trimmedDraft` 同一帧变假，在途期间的
+    /// 点击被 `.disabled` 吞掉（连触觉都没有）；失败路径又会把用户的话销毁，而邻居那边
+    /// 本地广播气泡已经贴上去了（`appendLocalBroadcast`），屏幕上剩一条谁也没收到过的消息。
+    /// `sending` 是必须的：草稿现在会在途保留，`trimmedDraft` 就不再替我们关门。
     @MainActor private func send() async {
         let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { return }
-        draft = ""
+        guard !text.isEmpty, !sending else { return }
+        sending = true
+        defer { sending = false }
         let failure = await onBroadcast(text)
         if let failure {
             failureNote = Copy.broadcastWords(for: failure)
             PopopxHaptics.notice(.error)
         } else {
+            draft = ""
             failureNote = nil
             PopopxHaptics.notice(.success)
         }
@@ -2609,6 +2694,9 @@ private enum Copy {
     ///（`MainTabView.swift:222`，本轮没动它），英语用户从没见过 "cabin" 这个词；库内也早有把
     /// 「厢语」写进 Key 的先例（`厢语 offline mesh`、`厢语 Bluetooth Mesh relay`）。
     static let cabinPanelEntryHint = key("Opens the 厢语 panel: the master switch, the channels and the nearby nodes")
+    /// 顶栏左上角那枚返回键的 VoiceOver 说法（屏面上只有图标，一个字都不占宽度）。这一栏全屏沉浸之后
+    /// 它就是这一栏唯一的出口，所以这一句说的是去处，不是动作方向。
+    static let backToMessages = key("Back to messages")
     /// 与 `PopopxAddFriendView.swift:718` 同一个 Key：两个入口的标题因此必然是同一句。
     static let plazaTitle = key("Nearby mesh plaza")
     static let meshSettingsEntry = key("Offline mesh settings")

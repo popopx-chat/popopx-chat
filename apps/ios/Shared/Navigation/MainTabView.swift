@@ -139,13 +139,21 @@ struct MainTabView: View {
 
             // 厢语这一栏本轮起直接落在包内那一份全屏广场上：根是 `PopopxMeshPlazaRootView`
             // （`PopopxCabinView.swift`），它自己带根栈，壳这里仍然只放裸页面。旧厢语面板
-            // （`PopopxCabinView`）不再是这一栏的根，而是根左上角那一枚胶囊唤起的满高抽屉；
+            // （`PopopxCabinView`）不再是这一栏的根，而是根顶栏中间那一枚胶囊唤起的满高抽屉；
             // 抽屉里那一页继续自己持有 `NavigationStack(path:)`，理由没变，只是搬进了抽屉 ——
             // 它的私聊是"发出离线建联邀请之后再推一页"，动作是 async 的，只有绑在它自己栈上的
             // `path` 能在那之后推着走（`PopopxCabinView.swift:376` 那行 `NavigationStack(path: $path)`）；
             // 把它挂成根栈的一页要么两条导航条、要么那四处 `path.append` 全部落空，所以整块压在外面
             // 而不推进去。
-            PopopxMeshPlazaRootView()
+            // 真机第 8 轮 · 任务一：这一栏全屏沉浸（底栏那四枚在根那一屏让开，由它自己声明），
+            // 于是横切导航在这一栏只剩顶栏左上角那一枚返回键 —— 它写的就是下面这一份 `selection`。
+            // 这里给绑定而不是新造一个路由对象：`selection` 本来就是选中栏的唯一事实（决定 3 与
+            // 下面那条 `onChange(of: chatModel.chatId)` 写的都是它），再包一层 `@Observable` 就是
+            // 第二个持有者；而 init 少传一个参数编译不过，比"按了不动"好查（同 `PopopxSettingsNavTrack`
+            // 刻意不给默认值那条理由）。底栏的隐藏声明在它自己那一栏的内容里，不写在 `TabView` 上 ——
+            // 挂 `TabView` 就得按 `selection` 算一个值，那一句会盖到 `ChatsListView.swift:264/271/281/411`
+            // 那四处按页声明的 `.hidden` 上（前七轮真机走查认过的只有那四处这一种挂法）。
+            PopopxMeshPlazaRootView(tabSelection: $selection)
                 .tabItem { tabLabel(.cabin) }
                 .tag(PopopxTab.cabin)
 

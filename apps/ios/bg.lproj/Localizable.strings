@@ -5724,3 +5724,10 @@ server test failure */
 "Some servers failed the test:\n%@" = "Някои сървъри не издържаха теста:\n%@";
 "Your new channel %@ is connected to %d of %d relays.\nIf you cancel, the channel will be deleted - you can create it again." = "Вашият нов канал %1$@ е свързан с %2$d от %3$d релета.\nАко отмените, каналът ще бъде изтрит – можете да го създадете отново.";
 "server queue info: %@\n\nlast received msg: %@" = "информация за опашката на сървъра: %1$@\n\nпоследно получено съобщение: %2$@";
+
+/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+"Back to messages" = "Обратно към съобщенията";
+"POPOPX Badge" = "POPOPX значка";
+"Added %lld Compute Credits to your balance." = "Добавени %lld изчислителни точки към баланса ви.";
+"Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple все още потвърждава тази покупка. Изчислителните точки ще се появят в баланса ви, след като бъде потвърдена.";
+"Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple прие плащането, но това устройство все още не можа да добави точките към баланса ви. Те ще бъдат добавени при следващия възможен запис в защитеното хранилище.";

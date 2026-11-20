@@ -1,23 +1,39 @@
 //  PopopxCreditsStoreView.swift
 //
-//  【第六阶段 · 1】算力点中心：余额、用途表、流水。这一页一分钱都不收。
+//  【第六阶段 · 1】算力点中心：余额、现金包充值、用途表、流水。
 //
-//  ### 为什么这一页没有"充值"按钮
-//  它有两张进来的门：付费墙（`PopopxBadgePaywallView`，见它的 `showsWallet`）的次要操作，
-//  以及「我的 · 算力点中心」那一行。后一条下面并没有付费墙，所以"关掉这一页充值档就在下一层"
-//  这句话并不总成立——但这一页仍然不挂充值：在这里再挂一张付费墙会得到 sheet 套 sheet 的
-//  两层同价目表，两层的价格注释一旦改写就会分叉。
-//  无条件的那条路归「我的」那一行（`PopopxMeView` 的 `badgeSheet = .paywall`，它存在正是因为顶栏胶囊
-//  点亮之后就把点击交给徽章详情，再没有别的地方能打付费墙）。
-//  所以这一页只回答两个问题：**我有多少**、**这些点能花在哪、花过多少**。
+//  ### 这一页只有一种商品：POPOPX 算力点本身（真机第 8 轮 · 任务三）
+//  屏上是四件事——**余额**、**100 / 500 / 2000 三档现金包**、**点数能花在哪**、**流水**。
+//  徽章订阅、一次性通行证、礼品徽章券都不在这一页（它们归 `PopopxBadgePaywallView`，
+//  那一页反过来也不再画任何充值价目表）。在此之前两屏各自同时摆着"会员"和"点数"两种商品，
+//  用户在同一个列表里读就会买错：那是商业化的 P0，不是排版偏好。
+//  这一页保留的唯一"与徽章有关"的东西是**花已有余额**的那条路（用途表第一行与 footer 那枚
+//  `用算力点点亮徽章`，都开 `PopopxBadgeCreditExchangeSheet`）：它是这一页那一族消费场景的
+//  出口，不是一张卖徽章的卡片——它不收钱，只花用户已经付过一次的点数。
+//
+//  ### 为什么充值挂在这一页而不是上一级
+//  它有两张进来的门：「我的 · 算力点钱包」那一行，以及付费墙 footer 的 `creditsName` 按钮。
+//  搬过来之前"这里一分钱都不收"的理由是"从付费墙进来会在下一层再画一张同价目表，两层注释
+//  一旦改写就分叉"。现在现金包只在这一页出现，那一张同价目表的上一层根本不存在了，
+//  分叉的可能性也随之消失——所以点数购买直接落在这里，用户在一个屏里看到余额和价目表，
+//  买完立刻在同一屏看到余额变多，这条动线上没有第二张价目表可走错。
+//  落账走 `PopopxCreditsManager.apply(storeReceipt:)`：那是后台交付流用的**同一个**入口，
+//  面额、流水行、防重放（`entryId = receipt.digest`）与"先写账本、后 `finish`"的顺序全在那一处，
+//  这一页不另写一套加钱逻辑。
+//  无条件打徽章付费墙的那条路仍归「我的」那一行（`PopopxMeView` 的 `badgeSheet = .paywall`）。
+//  ⚠️ 同一页那一行 `purchaseCredits`（"Top up Compute Credits"「充值算力点」）现在仍然指向
+//  `.paywall`，而付费墙已经不卖现金包了——它应该改成开这一页（`showsCreditsStore`）。
+//  `PopopxMeView.swift` 与 `PopopxBadgeCreditExchangeSheet.swift`（"去充值"同一处毛病）
+//  都不在本轮的文件所有权里，留给持有者收口；本轮先保证**页面内部**不再有第二种商品。
 //
 //  ### 余额与流水必须各自承认自己的不可靠
 //  `PopopxCreditsWallet.needsReconcile` 由 `verifyLedgerConsistency()` 在余额与流水求和不一致时置真
 //  （流水上限 240 条，所以老账被丢弃不算不一致，见那里的注释）。这一页把这个状态显示出来，
 //  而不是显示一个"看起来正常"的数字：把不可信的余额静默花掉是更坏的结局。
 //
-//  ### 用途表的数字全部取自代码里已有的那一份
-//  600/4500 来自 `PopopxNodeBadgePeriod.creditsCost`，20 来自
+//  ### 用途表与充值表的数字全部取自代码里已有的那一份
+//  现金包的面额来自 `PopopxCreditPlan`（它由 `PopopxNodeBadgeSku.creditedAmount` 派生，
+//  也就是真正入账的那一个数）；600/4500 来自 `PopopxNodeBadgePeriod.creditsCost`，20 来自
 //  `PopopxCommerceLimits.extendedSecureWindowCost`，150 来自 `PopopxCosmetic.cost`，
 //  红包面额来自 `PopopxCommerceLimits.redPacketAmounts`。这一页不允许出现第四个"多少点"的字面量：
 //  表上的价格与真实扣款分叉是这类页面唯一致命的 bug。
@@ -43,12 +59,18 @@ struct PopopxCreditsStoreView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var credits = PopopxCreditsManager.shared
+    /// 现金包的价格与商品表。`@Observable` 的读侧就是这一页：拉到价格之前那一行显示
+    /// SKU 自带的 `fallbackPriceText`（App Store Connect 里的 face value），按钮同时禁用，
+    /// 于是"整页空白"和"按下去什么都没发生"两种失败都到不了用户手上（口径同付费墙）。
+    @State private var store = PopopxStoreKitManager.shared
     @State private var showsExchange = false
+    /// 正在走 StoreKit 的那一枚现金包。同一时刻只允许一笔，否则两笔的到账顺序无法向用户解释。
+    @State private var busySkuId: String?
     /// 待确认的那一档外观。弹窗的可见性由它派生（下面那个 Binding），所以不存在
     /// "弹窗还开着但已经没人被确认"的中间帧——和资料卡解锁那一处同一个形状。
     @State private var pendingCosmetic: PopopxCosmetic?
-    /// 上一次点数花费的结果，一句为止。它不叫"提示"也不自动消失：这一页是账本页，
-    /// 用户需要看见"刚刚那 150 点确实记上了"，而一句会自己没掉的话等于没说。
+    /// 上一次点数动作（充值或解锁外观）的结果，一句为止。它不叫"提示"也不自动消失：这一页是账本页，
+    /// 用户需要看见"刚刚那 150 点确实记上了"、"刚买的那 500 点确实到了"，而一句会自己没掉的话等于没说。
     @State private var spendNote: String?
 
     var body: some View {
@@ -68,7 +90,10 @@ struct PopopxCreditsStoreView: View {
                 Text(verbatim: Copy.unlockMessage(cosmetic: cosmetic, balance: credits.balance))
             }
         }
-        .task { credits.loadIfNeeded() }
+        .task {
+            credits.loadIfNeeded()
+            await store.loadProducts()
+        }
     }
 
     private var content: some View {
@@ -79,6 +104,8 @@ struct PopopxCreditsStoreView: View {
                 if credits.wallet.needsReconcile {
                     reconcileNote
                 }
+
+                topUpCard
 
                 usesCard
 
@@ -147,6 +174,98 @@ struct PopopxCreditsStoreView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(PopopxPalette.danger.opacity(0.12), in: .rect(cornerRadius: PopopxMetrics.radiusControl))
         .accessibilityElement(children: .combine)
+    }
+
+    // MARK: 充值（算力点现金包）
+
+    /// 三档现金包：100 / 500 / 2000。这一张卡是这一页唯一收钱的地方，而它卖的东西只有一种——
+    /// 算力点本身。档位表是 `PopopxCreditPlan`（面额由 SKU 的 `creditedAmount` 派生），
+    /// 价格由 StoreKit 给，所以"行上写的面额"与"真正入账的面额"之间没有第三处可以各说各话。
+    /// 脚注那句"绝不加赠"（`noGiftBackStatement`）原来常驻付费墙的充值档，整组搬过来之后它跟着搬。
+    private var topUpCard: some View {
+        PopopxSectionCard(PopopxCommerceCopy.creditsTopUpTitle,
+                          footnote: PopopxCommerceCopy.noGiftBackStatement) {
+            VStack(spacing: 0) {
+                if !store.isStoreReady {
+                    // 商店读不到：档位照画（面额是本模块的事实），价格位显示 SKU 自带的标价，
+                    // 按钮禁用。这一句复用 `PopopxCommerceCopy.errorStoreUnavailable`——
+                    // 16 本目录里已经有译文，不再新开一条源文。
+                    Text(PopopxCommerceCopy.errorStoreUnavailable)
+                        .font(PopopxType.caption)
+                        .foregroundStyle(PopopxPalette.labelSecondary)
+                        .padding(.bottom, PopopxMetrics.spaceXS)
+                }
+                ForEach(Array(PopopxCreditPlan.packs.enumerated()), id: \.element.id) { index, pack in
+                    if index > 0 { divider }
+                    packRow(pack)
+                }
+            }
+        }
+    }
+
+    private func packRow(_ pack: PopopxCreditPack) -> some View {
+        HStack(spacing: PopopxMetrics.spaceS) {
+            Text(verbatim: pack.title)
+                .font(PopopxType.emphasis)
+                .foregroundStyle(PopopxPalette.label)
+            Spacer(minLength: PopopxMetrics.spaceS)
+            Button {
+                Task { await buy(pack) }
+            } label: {
+                HStack(spacing: PopopxMetrics.space2XS) {
+                    if busySkuId == pack.sku.productId {
+                        ProgressView()
+                    } else {
+                        Text(verbatim: store.priceText(for: pack.sku, periodSuffix: false))
+                        Image(systemName: "chevron.right")
+                    }
+                }
+                .font(PopopxType.secondary)
+                .foregroundStyle(PopopxPalette.brand)
+                .frame(minHeight: PopopxMetrics.minHitTarget)
+            }
+            .disabled(!store.isStoreReady || busySkuId != nil)
+            .opacity(store.isStoreReady ? 1 : 0.5)
+            .accessibilityLabel(Text(verbatim: pack.title))
+            .accessibilityValue(Text(verbatim: store.priceText(for: pack.sku, periodSuffix: false)))
+        }
+        .padding(.vertical, PopopxMetrics.spaceXS)
+    }
+
+    /// 买一档现金包。**加钱不在这页写**：拿到收据后交给 `PopopxCreditsManager.apply(storeReceipt:)`——
+    /// 那是 StoreKit 后台交付流用的**同一个**入口，面额、流水行、防重放（`entryId = receipt.digest`）
+    /// 以及"先写账本、后 `finish`"的顺序全在那一处，这一页再写一套就是一个会和重投分叉的第二真相源。
+    /// 为什么前台这一笔要在这里直接调它：`PopopxStoreKitManager.purchase(_:)` 已经把交易 id 记进
+    /// "本次已结算"集合，随后 `Transaction.updates` 那一次投递会被去重挡掉——不在这里落账，
+    /// 用户看到的就是"钱付了、余额没动、什么都没有"，而下一层没有第二个人会来补。
+    private func buy(_ pack: PopopxCreditPack) async {
+        guard busySkuId == nil else { return }
+        busySkuId = pack.sku.productId
+        defer { busySkuId = nil }
+        let before = credits.balance
+        switch await store.purchase(pack.sku) {
+        case let .success(.purchased(receipt)):
+            await credits.apply(storeReceipt: receipt)
+            if credits.balance != before {
+                PopopxHaptics.notice(.success)
+                spendNote = String(format: PopopxCommerceCopy.creditsTopUpGrantedFormat, pack.amount)
+            } else {
+                // 付款成了、本机没写进去（Keychain 写失败，或余额已经顶到上限被挡下）。
+                // 这句话必须说出来而不是静默：交易没被 finish，下一次重投会把点数补上。
+                PopopxHaptics.notice(.error)
+                spendNote = PopopxCommerceCopy.creditsTopUpNotCredited
+            }
+        case .success(.pending):
+            // Ask to Buy / 家庭批准：钱还没扣。说"已到账"是假话，说"失败"也是假话。
+            spendNote = PopopxCommerceCopy.creditsTopUpPending
+        case .success(.cancelled):
+            // 取消不是错误：不震动、不标红，也不留一句"失败"在账本本页上。
+            break
+        case let .failure(error):
+            PopopxHaptics.notice(.error)
+            // 真话原样说出去（`PopopxBadgeCreditsError` 那一句本来就已经是本地化的、带差额的）。
+            spendNote = error.errorDescription ?? PopopxCommerceCopy.errorStoreUnavailable
+        }
     }
 
     // MARK: 用途表

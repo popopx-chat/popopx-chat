@@ -7664,3 +7664,10 @@ alert title */
 
 /* POPOPX round 18 tier C (escaped-newline keys) */
 "Your new channel %@ is connected to %d of %d relays.\nIf you cancel, the channel will be deleted - you can create it again." = "Ваш новий канал %1$@ під’єднано до %2$d з %3$d ретрансляторів.\nЯкщо скасуєте, канал буде видалено – ви зможете створити його знову.";
+
+/* POPOPX round 19 三 Tab 第 9 轮新增键 */
+"Back to messages" = "Повернутися до повідомлень";
+"POPOPX Badge" = "Значок POPOPX";
+"Added %lld Compute Credits to your balance." = "До вашого балансу додано %lld обчислювальних балів.";
+"Apple is still confirming this purchase. The Compute Credits appear in your balance as soon as it is confirmed." = "Apple ще підтверджує цю покупку. Обчислювальні бали з’являться у вашому балансі одразу після підтвердження.";
+"Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written." = "Apple отримав платіж, але цей пристрій поки не зміг додати бали до вашого балансу. Вони будуть зараховані під час наступного запису до захищеного сховища.";

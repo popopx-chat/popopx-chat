@@ -4049,6 +4049,15 @@ extension PopopxMessageRouter: @retroactive PopopxMeshRoutingObserving {
 /// its `overlay`: with the fuse off nothing is drawn, the 44 pt corner is not a hit target, and the
 /// three-tap gesture cannot arm. The package's `PopopxPanicWipeGate` still owns the gesture, the
 /// 1 秒三击的判定、确认弹窗和抹除的顺序 —— 这里只决定它存不存在。
+///
+/// `PopopxKeyboardObserver.isVisible` is the second half of that condition, and it is load-bearing.
+/// The overlay is the frontmost view of the whole app and `Color.clear` + a tap gesture CLAIMS its
+/// square; when the keyboard rises, the root's bottom-trailing corner rises with it and lands exactly
+/// on the composer's send button (`PopopxCabinView` 的「发射」、聊天室的发送键都在那一格里)。
+/// With the fuse on, the first tap of every send was being eaten by the wipe counter —— 真机报的
+/// 「厢语点发射没反应」「私密笔记点发送没反应」是同一个根因，两处都不是各自的 composer 坏了。
+/// 现在键盘抬起期间角上不接管点击，保险丝三击在键盘收起后的同一个角照常可用，
+/// 三击 Logo（顶栏与「我」页两处）任何时刻都不受影响。
 @MainActor
 struct PopopxMeshPanicWipeMount: ViewModifier {
     /// The corner's side, copied from 模块 7's own trigger so the hidden target is the size the
@@ -4056,14 +4065,36 @@ struct PopopxMeshPanicWipeMount: ViewModifier {
     static let hitTargetSide: CGFloat = 44
 
     @ObservedObject private var runtime = PopopxMeshRuntime.shared
+    @ObservedObject private var keyboard = PopopxKeyboardObserver.shared
 
     func body(content: Content) -> some View {
         content.overlay(alignment: .bottomTrailing) {
-            if runtime.isFuseOn {
+            if runtime.isFuseOn, !keyboard.isVisible {
                 PopopxPanicWipeGate(runtime.panicWipe) {
                     Color.clear.frame(width: Self.hitTargetSide, height: Self.hitTargetSide)
                 }
             }
         }
     }
+}
+
+/// 键盘在不在，用一个进程内的观察者回答；SwiftUI 没有这个环境值，而它必须能在一次布局内翻。
+/// 只观察 will-show/will-hide/did-hide 三条通知 —— 我们只需要"正被键盘占用"这个布尔量，
+/// 不需要高度，也不需要和任何视图的动画同步。
+@MainActor
+final class PopopxKeyboardObserver: ObservableObject {
+    static let shared = PopopxKeyboardObserver()
+
+    @Published private(set) var isVisible = false
+
+    private init() {
+        let center = NotificationCenter.default
+        center.addObserver(self, selector: #selector(shown), name: UIResponder.keyboardWillShowNotification, object: nil)
+        center.addObserver(self, selector: #selector(hidden), name: UIResponder.keyboardWillHideNotification, object: nil)
+        center.addObserver(self, selector: #selector(hidden), name: UIResponder.keyboardDidHideNotification, object: nil)
+    }
+
+    @objc private func shown() { isVisible = true }
+
+    @objc private func hidden() { isVisible = false }
 }
