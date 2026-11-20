@@ -8360,7 +8360,6 @@ alert title */
 "Unavailable while the fuse is closed" = "Non disponibile finché il fusibile è chiuso";
 "Three taps within one second arm it" = "Tre tocchi entro un secondo lo armano";
 "Three taps on this row within one second arm the wipe; the app's single confirmation dialog then asks you once. Cancelling voids it — nothing is ever erased silently. While the fuse is closed that dialog does not exist, so this row is disabled too." = "Tre tocchi su questa riga entro un secondo armano la cancellazione; poi l’unica finestra di conferma dell’app te lo chiede una volta. Annullare la rende nulla: niente viene mai cancellato in silenzio. Con il fusibile chiuso quella finestra non esiste, quindi anche questa riga è disattivata.";
-"Nearby mesh plaza" = "Piazza della rete offline nelle vicinanze";
 "Offline mesh settings" = "Impostazioni della rete offline";
 "The switch, the pairing policy, this device's mesh identity and the data it keeps, in one place." = "Interruttore, politica di accoppiamento, identità di rete di questo dispositivo e i dati che conserva, in un solo posto.";
 "Mesh switch and pairing" = "Interruttore di rete e accoppiamento";
@@ -8519,3 +8518,4 @@ alert title */
 "This square is local only: what is typed here floods the mesh and never leaves it." = "Questa piazza è solo locale: ciò che viene inviato qui inonda la mesh e non ne esce mai.";
 "Up to %lld members, and the name is not secret — the messages are." = "Fino a %lld membri; il nome non è segreto, i messaggi sì.";
 "\nCurrently: " = "\nOra: ";
+"Tap three times quickly to erase all offline mesh data" = "Tocca tre volte rapidamente per cancellare tutti i dati della mesh offline";

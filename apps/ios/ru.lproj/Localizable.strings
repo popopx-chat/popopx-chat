@@ -8236,7 +8236,6 @@ alert title */
 "Unavailable while the fuse is closed" = "Недоступно, пока предохранитель выключен";
 "Three taps within one second arm it" = "Три нажатия за секунду взводят стирание";
 "Three taps on this row within one second arm the wipe; the app's single confirmation dialog then asks you once. Cancelling voids it — nothing is ever erased silently. While the fuse is closed that dialog does not exist, so this row is disabled too." = "Три нажатия на эту строку за секунду взводят стирание; после этого единственное окно подтверждения в приложении спросит вас один раз. Отмена обнуляет взведение — молча ничего не стирается. Пока предохранитель выключен, этого окна не существует, поэтому и строка отключена.";
-"Nearby mesh plaza" = "Площадь офлайн-сети рядом";
 "Offline mesh settings" = "Настройки офлайн-сети";
 "The switch, the pairing policy, this device's mesh identity and the data it keeps, in one place." = "Выключатель, правило сопряжения, сетевой идентификатор этого устройства и хранимые им данные — в одном месте.";
 "Mesh switch and pairing" = "Выключатель сети и сопряжение";
@@ -8395,3 +8394,4 @@ alert title */
 "This square is local only: what is typed here floods the mesh and never leaves it." = "Эта площадь только локальная: написанное здесь рассылается по mesh и из неё не выходит.";
 "Up to %lld members, and the name is not secret — the messages are." = "До %lld участников; название не секрет, а сообщения — секрет.";
 "\nCurrently: " = "\nСейчас: ";
+"Tap three times quickly to erase all offline mesh data" = "Быстро нажмите трижды, чтобы стереть все данные автономной mesh-сети";

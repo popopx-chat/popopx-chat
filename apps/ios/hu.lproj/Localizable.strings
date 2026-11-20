@@ -8360,7 +8360,6 @@ alert title */
 "Unavailable while the fuse is closed" = "Nem érhető el, amíg a biztosíték levágott";
 "Three taps within one second arm it" = "Egy másodpercen belüli három érintés felfegyverzi";
 "Three taps on this row within one second arm the wipe; the app's single confirmation dialog then asks you once. Cancelling voids it — nothing is ever erased silently. While the fuse is closed that dialog does not exist, so this row is disabled too." = "Egy másodpercen belüli három érintés ezen a soron felfegyverzi a törlést; azután az alkalmazás egyetlen megerősítési párbeszédpanele kérdez egyszer. A mégse gomb hatálytalanítja – csendben soha semmi nem törlődik. Ha a biztosíték levágott, az a párbeszédpanel nem létezik, ezért ez a sor is le van tiltva.";
-"Nearby mesh plaza" = "Közeli offline hálózat tere";
 "Offline mesh settings" = "Offline hálózat beállításai";
 "The switch, the pairing policy, this device's mesh identity and the data it keeps, in one place." = "A kapcsoló, a párosítási szabály, az eszköz hálózati személyazonossága és az őrzött adatok — egy helyen.";
 "Mesh switch and pairing" = "Hálózati kapcsoló és párosítás";
@@ -8519,3 +8518,4 @@ alert title */
 "This square is local only: what is typed here floods the mesh and never leaves it." = "Ez a tér csak helyi: amit ide írunk, a mesh hálózatba ömlik és soha nem hagyja el.";
 "Up to %lld members, and the name is not secret — the messages are." = "Legfeljebb %lld tag; a név nem titok, az üzenetek azok.";
 "\nCurrently: " = "\nMost: ";
+"Tap three times quickly to erase all offline mesh data" = "Gyorsan háromszor koppintva törölheti az offline mesh hálózat összes adatát";

@@ -7283,7 +7283,6 @@ alert title */
 "Unavailable while the fuse is closed" = "Sigorta attığı sürece kullanılamaz";
 "Three taps within one second arm it" = "Bir saniye içinde üç dokunuş silmeyi hazırlar";
 "Three taps on this row within one second arm the wipe; the app's single confirmation dialog then asks you once. Cancelling voids it — nothing is ever erased silently. While the fuse is closed that dialog does not exist, so this row is disabled too." = "Bu satıra bir saniye içinde üç dokunuş silmeyi hazırlar; ardından uygulamanın tek onay penceresi size bir kez sorar. Vazgeçmek hazırlığı bozar — hiçbir şey sessizce silinmez. Sigorta attığında o pencere var olmadığı için bu satır da devre dışıdır.";
-"Nearby mesh plaza" = "Yakındaki çevrimdışı ağ meydanı";
 "Offline mesh settings" = "Çevrimdışı ağ ayarları";
 "The switch, the pairing policy, this device's mesh identity and the data it keeps, in one place." = "Anahtar, eşleştirme ilkesi, bu cihazın ağ kimliği ve sakladığı veriler — tek bir yerde.";
 "Mesh switch and pairing" = "Ağ anahtarı ve eşleştirme";
@@ -7442,3 +7441,4 @@ alert title */
 "This square is local only: what is typed here floods the mesh and never leaves it." = "Bu meydan yalnızca yereldir: buraya yazılan örgüde taşar ve ondan asla çıkmaz.";
 "Up to %lld members, and the name is not secret — the messages are." = "En çok %lld üye; ad sır değil, mesajlar sır.";
 "\nCurrently: " = "\nŞimdi: ";
+"Tap three times quickly to erase all offline mesh data" = "Çevrimdışı örgü verilerinin tümünü silmek için üç kez hızlıca dokunun";

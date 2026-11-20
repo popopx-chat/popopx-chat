@@ -322,9 +322,9 @@ public struct MeshPlazaView: View {
                             Text("No one within Bluetooth range has said anything yet.")
                             Text("This square is local only: what is typed here floods the mesh and never leaves it.")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                     } else {
                         ForEach(model.posts) { post in
                             bubble(post)
@@ -336,7 +336,7 @@ public struct MeshPlazaView: View {
                         Spacer()
                         Text(PopopxMeshReachEstimate.description(hops: model.posts.last?.hopCount ?? 0))
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -356,7 +356,7 @@ public struct MeshPlazaView: View {
             Spacer(minLength: 8)
             Text(MeshPlazaView.clock(post.timestamp))
                 .font(.caption2.monospacedDigit())
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
         }
         .padding(.vertical, 2)
     }
@@ -364,19 +364,19 @@ public struct MeshPlazaView: View {
     private var footer: some View {
         HStack(spacing: 10) {
             Image(systemName: model.radioState.isUsable ? "antenna.radiowaves.left.and.right" : "wifi.slash")
-                .foregroundColor(model.radioState.isUsable ? .orange : .gray)
+                .foregroundStyle(model.radioState.isUsable ? .orange : .gray)
             Text(
                 model.radioState.isUsable
                     ? "\(model.neighbourCount) neighbour(s) · broadcast radius \(model.scopeDescription)"
                     : PopopxMeshBannerModel.radioTitle(model.radioState)
             )
             .font(.caption)
-            .foregroundColor(.secondary)
+            .foregroundStyle(.secondary)
             Spacer()
             if let failure = model.lastFailure {
                 Text(MeshPlazaView.words(for: failure))
                     .font(.caption2)
-                    .foregroundColor(.orange)
+                    .foregroundStyle(.orange)
                     .lineLimit(2)
             }
         }
@@ -388,7 +388,7 @@ public struct MeshPlazaView: View {
         VStack(spacing: 8) {
             HStack(spacing: 8) {
                 Image(systemName: "person.text.rectangle")
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                 TextField("Local nickname", text: $model.nickname)
                     .textFieldStyle(.plain)
                 Button("Save") {

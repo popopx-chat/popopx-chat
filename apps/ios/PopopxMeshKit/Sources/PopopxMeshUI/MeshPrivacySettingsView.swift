@@ -334,7 +334,7 @@ public struct MeshPrivacySettingsView: View {
             Section {
                 if model.bindings.isEmpty {
                     Text("No identity bindings on this device.")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 } else {
                     ForEach(model.bindings) { binding in
                         bindingRow(binding)
@@ -388,7 +388,7 @@ public struct MeshPrivacySettingsView: View {
                     Text(verbatim: binding.nickname ?? String(binding.meshPublicKeyHex.prefix(16)))
                     Text(verbatim: binding.status)
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
                 Spacer()
                 Button("Forget") {
@@ -421,7 +421,7 @@ public struct MeshPrivacySettingsView: View {
                         Spacer()
                         Text(verbatim: PopopxMeshPrivateChatModel.peerLabel(binding.meshPublicKeyHex))
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -431,7 +431,7 @@ public struct MeshPrivacySettingsView: View {
     @ViewBuilder private var bindingFooter: some View {
         if let left = model.bindingsLeftAfterClear, left > 0 {
             Text(verbatim: "\(left) binding(s) could not be removed. Turn Bluetooth off and try again.")
-                .foregroundColor(.orange)
+                .foregroundStyle(.orange)
         } else {
             Text(
                 "A binding maps a Bluetooth key to a POPOPX contact. It lives in the Keychain and is never backed up. Clearing bindings does not delete any contact and does not touch your chat history."
@@ -475,7 +475,7 @@ private func settingsRow<Content: View>(
         Image(systemName: symbol)
             .frame(maxWidth: 24, maxHeight: 24, alignment: .center)
             .symbolRenderingMode(.monochrome)
-            .foregroundColor(.secondary)
+            .foregroundStyle(.secondary)
         content()
             .padding(.leading, 36)
     }

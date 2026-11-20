@@ -7298,7 +7298,6 @@ alert title */
 "Unavailable while the fuse is closed" = "Недоступно, доки запобіжник вимкнено";
 "Three taps within one second arm it" = "Три натискання за секунду взводять стирання";
 "Three taps on this row within one second arm the wipe; the app's single confirmation dialog then asks you once. Cancelling voids it — nothing is ever erased silently. While the fuse is closed that dialog does not exist, so this row is disabled too." = "Три натискання на цей рядок за секунду взводять стирання; після цього єдине вікно підтвердження в застосунку спитає вас один раз. Скасування анулює взведення — ніколи нічого не стирається мовчки. Доки запобіжник вимкнено, того вікна не існує, тому й цей рядок вимкнено.";
-"Nearby mesh plaza" = "Площа офлайн-мережі поруч";
 "Offline mesh settings" = "Налаштування офлайн-мережі";
 "The switch, the pairing policy, this device's mesh identity and the data it keeps, in one place." = "Вимикач, правило спряження, мережевий ідентифікатор цього пристрою та дані, які він зберігає, — у одному місці.";
 "Mesh switch and pairing" = "Вимикач мережі та спряження";
@@ -7457,3 +7456,4 @@ alert title */
 "This square is local only: what is typed here floods the mesh and never leaves it." = "Цей майдан лише локальний: написане тут розливається mesh-мережею і ніколи її не покидає.";
 "Up to %lld members, and the name is not secret — the messages are." = "До %lld учасників; назва не таємниця, а повідомлення — так.";
 "\nCurrently: " = "\nЗараз: ";
+"Tap three times quickly to erase all offline mesh data" = "Швидко торкніться тричі, щоб стерти всі дані офлайн mesh-мережі";

@@ -3994,7 +3994,6 @@ server test failure */
 "Unavailable while the fuse is closed" = "遮断中は利用できません";
 "Three taps within one second arm it" = "1 秒以内に 3 回タップすると待機状態になります";
 "Three taps on this row within one second arm the wipe; the app's single confirmation dialog then asks you once. Cancelling voids it — nothing is ever erased silently. While the fuse is closed that dialog does not exist, so this row is disabled too." = "この行を 1 秒以内に 3 回タップすると待機状態になり、その後はアプリで唯一の確認ダイアログが 1 度だけ尋ねます。キャンセルすると無効になり、黙って消することはありません。遮断中は確認ダイアログ自体が存在しないため、この行も無効になります。";
-"Nearby mesh plaza" = "近くのオフラインネットワーク広場";
 "Offline mesh settings" = "オフラインネットワークの設定";
 "The switch, the pairing policy, this device's mesh identity and the data it keeps, in one place." = "スイッチ、ペアリング方針、このマシンのネットワーク上の身元、そこに保存されるデータをひと所にまとめます。";
 "Mesh switch and pairing" = "ネットワークスイッチとペアリング";
@@ -4156,3 +4155,4 @@ server test failure */
 "This square is local only: what is typed here floods the mesh and never leaves it." = "この広場はローカルのみ：ここに入力した内容はメッシュにフラッドされ、外に出ることはありません。";
 "Up to %lld members, and the name is not secret — the messages are." = "最大 %lld 人。名前は秘密ではありませんが、メッセージは秘密です。";
 "\nCurrently: " = "\n現在：";
+"Tap three times quickly to erase all offline mesh data" = "素早く3回タップするとオフラインメッシュのデータを消去します";

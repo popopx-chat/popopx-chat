@@ -8148,7 +8148,6 @@ alert title */
 "Unavailable while the fuse is closed" = "熔断关闭时不可用";
 "Three taps within one second arm it" = "一秒内轻触三次才会布防";
 "Three taps on this row within one second arm the wipe; the app's single confirmation dialog then asks you once. Cancelling voids it — nothing is ever erased silently. While the fuse is closed that dialog does not exist, so this row is disabled too." = "一秒内连击三次这一行才会布防，布防后由全 app 唯一的确认弹窗问你一次；取消即作废，绝不静默抹除。熔断关闭时这道确认不存在，这一行也随之停用。";
-"Nearby mesh plaza" = "附近厢语广场";
 "Offline mesh settings" = "离线组网设置";
 "The switch, the pairing policy, this device's mesh identity and the data it keeps, in one place." = "开关、配对策略、本机组网身份与它保存的数据，集中在这里。";
 "Mesh switch and pairing" = "组网开关与配对";
@@ -8336,3 +8335,4 @@ alert title */
 "This square is local only: what is typed here floods the mesh and never leaves it." = "这个广场只在本机范围：这里发出去的内容只洪泛给同一张组网，永远不出这张网。";
 "Up to %lld members, and the name is not secret — the messages are." = "最多 %lld 名成员；群名不是秘密，消息才是。";
 "\nCurrently: " = "\n当前：";
+"Tap three times quickly to erase all offline mesh data" = "快速连点三次以抹掉全部离线组网数据";

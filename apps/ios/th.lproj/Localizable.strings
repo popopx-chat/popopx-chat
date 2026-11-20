@@ -3557,7 +3557,6 @@ server test failure */
 "Unavailable while the fuse is closed" = "ใช้ไม่ได้ขณะที่ฟิวส์ถูกตัด";
 "Three taps within one second arm it" = "แตะสามครั้งภายในหนึ่งวินาทีจะติดโหมดลบ";
 "Three taps on this row within one second arm the wipe; the app's single confirmation dialog then asks you once. Cancelling voids it — nothing is ever erased silently. While the fuse is closed that dialog does not exist, so this row is disabled too." = "การแตะแถวนี้สามครั้งภายในหนึ่งวินาทีจะติดโหมดลบ จากนั้นกล่องยืนยันเพียงกล่องเดียวของแอปจะถามคุณหนึ่งครั้ง การยกเลิกจะทำให้โมฆะ ไม่มีการลบใด ๆ เกิดขึ้นเงียบ ๆ ขณะที่ฟิวส์ถูกตัด กล่องยืนยันนั้นจะไม่มีอยู่ แถวนี้จึงถูกปิดไปด้วย";
-"Nearby mesh plaza" = "จัตุรัสเครือข่ายออฟไลน์ใกล้เคียง";
 "Offline mesh settings" = "การตั้งค่าเครือข่ายออฟไลน์";
 "The switch, the pairing policy, this device's mesh identity and the data it keeps, in one place." = "สวิตช์ นโยบายการจับคู่อุปกรณ์ ตัวตนในระบบเครือข่ายของเครื่องนี้ และข้อมูลที่เก็บไว้ รวมอยู่ในที่เดียว";
 "Mesh switch and pairing" = "สวิตช์เครือข่ายและการจับคู่อุปกรณ์";
@@ -3720,3 +3719,4 @@ server test failure */
 "This square is local only: what is typed here floods the mesh and never leaves it." = "จัตุรัสนี้เป็นเฉพาะในพื้นที่: สิ่งที่พิมพ์ที่นี่จะกระจายในเมชและไม่ออกจากเมช";
 "Up to %lld members, and the name is not secret — the messages are." = "สมาชิกไม่เกิน %lld คน ชื่อกลุ่มไม่ใช่ความลับ แต่ข้อความต่างหาก";
 "\nCurrently: " = "\nปัจจุบัน: ";
+"Tap three times quickly to erase all offline mesh data" = "แตะเร็ว ๆ สามครั้งเพื่อลบข้อมูลเมชออฟไลน์ทั้งหมด";

@@ -387,11 +387,11 @@ public struct PopopxMeshChannelBadge: View {
         HStack(spacing: 3) {
             Image(systemName: descriptor.symbolName)
                 .symbolRenderingMode(.monochrome)
-                .foregroundColor(PopopxMeshChannelBadge.color(of: descriptor.tone))
+                .foregroundStyle(PopopxMeshChannelBadge.color(of: descriptor.tone))
             if let accessory = descriptor.accessory {
                 Text(accessory)
                     .font(.caption2.monospacedDigit())
-                    .foregroundColor(PopopxMeshChannelBadge.color(of: descriptor.tone))
+                    .foregroundStyle(PopopxMeshChannelBadge.color(of: descriptor.tone))
             }
         }
         .accessibilityElement(children: .combine)
@@ -678,7 +678,7 @@ public struct PopopxMeshOfflineTimelineStrip: View {
                             if let nickname = row.senderNickname, !nickname.isEmpty {
                                 Text(nickname)
                                     .font(.caption2)
-                                    .foregroundColor(.secondary)
+                                    .foregroundStyle(.secondary)
                             }
                             Text(row.text)
                                 .font(.callout)
@@ -687,7 +687,7 @@ public struct PopopxMeshOfflineTimelineStrip: View {
                         Spacer(minLength: 8)
                         Text(PopopxMeshOfflineTimelineStrip.clock(row.timestamp))
                             .font(.caption2.monospacedDigit())
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)

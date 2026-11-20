@@ -387,45 +387,13 @@ struct SettingsView: View {
                     .foregroundColor(theme.colors.secondary)
             }
 
-            // 第二阶段 app 侧挂载：离线网格的入口。整段是新增的，上面每一个已有的行都没被改过；四行里除了
-            // 总开关全是"打开那一页"的链接，熔断关闭时它们不启动任何东西。开关的真值只有一个 key，
-            // `chat.popopx.mesh.enabled`：这一页经 `requestFuse` 让 kill switch 写它，包里的
-            // `MeshPrivacySettingsView` 用同名 `@AppStorage` 写它再推给同一个 kill switch，
-            // 所以不会出现"开关是关的但蓝牙还在跑"或者反过来。
-            Section(header: Text("Offline mesh").foregroundColor(theme.colors.secondary)) {
-                settingsRow("antenna.radiowaves.left.and.right", color: theme.colors.secondary) {
-                    Toggle("Enable offline Bluetooth mesh network", isOn: meshFuseBinding)
-                }
-                settingsRow("person.2.wave.2.fill", color: theme.colors.secondary) {
-                    Picker("Nearby pairing", selection: meshPairingPolicyBinding) {
-                        Text("Ask before pairing").tag(MeshPairingPolicy.manualConfirm)
-                        Text("Pair silently").tag(MeshPairingPolicy.autoSilent)
-                    }
-                    .pickerStyle(.menu)
-                }
-                NavigationLink {
-                    MeshPlazaView(
-                        outbound: meshRuntime.engineBackend,
-                        source: meshRuntime.stateSource,
-                        killSwitch: meshRuntime.killSwitch
-                    )
-                        .navigationTitle("Nearby mesh plaza")
-                        .modifier(ThemedBackground(grouped: true))
-                } label: {
-                    settingsRow("bubble.left.and.bubble.right.fill", color: theme.colors.secondary) { Text("Nearby mesh plaza") }
-                }
-                NavigationLink {
-                    MeshPrivacySettingsView(
-                        store: meshRuntime.mappingStore,
-                        pairing: meshRuntime.pairing,
-                        killSwitch: meshRuntime.killSwitch
-                    )
-                        .navigationTitle("Mesh privacy & pairings")
-                        .modifier(ThemedBackground(grouped: true))
-                } label: {
-                    settingsRow("lock.shield.fill", color: theme.colors.secondary) { Text("Mesh privacy & pairings") }
-                }
-            }
+            // 第二阶段 app 侧挂载的「离线组网」区块已在真机第 4 轮整块摘除（2026-11-20）：
+            // 总闸开关、配对策略、配对记录页入口三行与厢语右上角 `PopopxCabinMeshSettingsSheet` 说的是
+            // 同一批状态、写的也是同一个真值，两处并存等于给同一个开关做两套 UI —— 摘的是重复入口，
+            // 不是功能：熔断的唯一写入口仍是 `PopopxMeshRuntime.requestFuse(_:)`（kill switch 的镜像），
+            // 包里的 `MeshPrivacySettingsView` 用同名 UserDefaults key 写它，因此不会出现
+            // "开关是关的但蓝牙还在跑"或者反过来。广场页也从这里断开后仍有入口：
+            // `PopopxAddFriendView.swift:121`「更多方式 → 进入厢语」那一行仍挂 `MeshPlazaView`。
 
             Section(header: Text("Advanced settings").foregroundColor(theme.colors.secondary)) {
                 NavigationLink(value: ServersDestination.networkAndServers) {
@@ -618,30 +586,10 @@ struct SettingsView: View {
         return (icon, color)
     }
 
-    // MARK: 第二阶段 app 侧挂载 — 离线网格的两条绑定
-    //
-    // 这一页不自己存任何 mesh 状态：唯一的状态源是 app 侧的协调者，而它只是包里 kill switch 的镜像。
-    // 于是这一页的开关、`MeshPrivacySettingsView` 里那个 @AppStorage 开关、以及 plaza 改昵称时的重启，
-    // 写的都是同一个真值 —— 不会出现"开关是关的但蓝牙还在跑"或者反过来。
-
-    @ObservedObject private var meshRuntime = PopopxMeshRuntime.shared
-
-    /// 熔断只经由 `requestFuse` 翻转：那是唯一会带着 模块 1–7 一起启停的那条路。
-    private var meshFuseBinding: Binding<Bool> {
-        Binding(
-            get: { meshRuntime.isFuseOn },
-            set: { meshRuntime.requestFuse($0) }
-        )
-    }
-
-    /// 配对策略的真值在 模块 1 的 `IdentityMappingStore`（UserDefaults 的
-    /// `chat.popopx.mesh.pairingPolicy`），与隐私页里那个同名选择器共用一个值。
-    private var meshPairingPolicyBinding: Binding<MeshPairingPolicy> {
-        Binding(
-            get: { meshRuntime.pairingPolicy },
-            set: { meshRuntime.setPairingPolicy($0) }
-        )
-    }
+    // 第二阶段 app 侧挂载的两条 mesh 绑定随上面那个区块一起摘除（真机第 4 轮，2026-11-20）：
+    // 这一页不再持有任何 mesh 状态，也不再需要 `PopopxMeshRuntime.shared`。
+    // 总闸与配对策略的唯一入口在厢语右上角那张 Sheet（`PopopxCabinMeshSettingsSheet`），
+    // 它写的仍是同一个协调者的 `requestFuse(_:)` / `setPairingPolicy(_:)`，状态源没有变成两份。
 }
 
 func settingsRow<Content : View>(_ icon: String, color: Color/* = .secondary*/, content: @escaping () -> Content) -> some View {

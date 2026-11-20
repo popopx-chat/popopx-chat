@@ -775,22 +775,22 @@ public struct PopopxMeshPrivateChatView: View {
                 Image(systemName: model.peerIsInRange
                         ? "antenna.radiowaves.left.and.right"
                         : "wifi.slash")
-                    .foregroundColor(model.peerIsInRange ? .orange : .gray)
+                    .foregroundStyle(model.peerIsInRange ? .orange : .gray)
                 Text(verbatim: model.pairingStateDescription)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                 Spacer()
                 if let reach = model.peerReachDescription {
                     Text(verbatim: reach)
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .multilineTextAlignment(.trailing)
                 }
             }
             if !model.radioState.isUsable {
                 Text(verbatim: PopopxMeshBannerModel.radioTitle(model.radioState))
                     .font(.caption2)
-                    .foregroundColor(.orange)
+                    .foregroundStyle(.orange)
             }
         }
         .padding(.horizontal, 12)
@@ -813,7 +813,7 @@ public struct PopopxMeshPrivateChatView: View {
                     Spacer()
                     Text(verbatim: "\(model.messages.count) message(s)")
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
             }
         }
@@ -824,10 +824,10 @@ public struct PopopxMeshPrivateChatView: View {
             Text(LocalizedStringKey(state.title))
             Text(verbatim: state.detail)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .foregroundColor(.secondary)
+        .foregroundStyle(.secondary)
         .padding(.vertical, 4)
     }
 
@@ -847,18 +847,18 @@ public struct PopopxMeshPrivateChatView: View {
                        !nickname.isEmpty {
                         Text(verbatim: nickname)
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                     Text(verbatim: PopopxMeshPrivateChatModel.words(for: message.delivery))
                         .font(.caption2)
-                        .foregroundColor(message.deliveryIsFailure ? .orange : .secondary)
+                        .foregroundStyle(message.deliveryIsFailure ? .orange : .secondary)
                 }
             }
             .frame(maxWidth: .infinity, alignment: message.direction == .outgoing ? .trailing : .leading)
             Spacer(minLength: 8)
             Text(verbatim: MeshPlazaView.clock(message.timestamp))
                 .font(.caption2.monospacedDigit())
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
         }
         .padding(.vertical, 2)
     }
@@ -867,7 +867,7 @@ public struct PopopxMeshPrivateChatView: View {
         VStack(spacing: 8) {
             HStack(spacing: 8) {
                 Image(systemName: "person.text.rectangle")
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                 TextField("Local nickname", text: $model.nickname)
                     .textFieldStyle(.plain)
                 Button("Save") {
@@ -876,12 +876,12 @@ public struct PopopxMeshPrivateChatView: View {
                 Button("Revert") {
                     model.reloadNickname()
                 }
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
             }
             if let refusal = model.lastRefusal {
                 Text(verbatim: PopopxMeshPrivateChatModel.words(for: refusal))
                     .font(.caption2)
-                    .foregroundColor(.orange)
+                    .foregroundStyle(.orange)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .fixedSize(horizontal: false, vertical: true)
             }

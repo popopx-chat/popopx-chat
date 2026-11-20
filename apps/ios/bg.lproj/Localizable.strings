@@ -4949,7 +4949,6 @@ server test failure */
 "Unavailable while the fuse is closed" = "Недостъпно, докато предпазителят е изключил мрежата";
 "Three taps within one second arm it" = "Три докосвания в рамките на секунда подготвят изтриването";
 "Three taps on this row within one second arm the wipe; the app's single confirmation dialog then asks you once. Cancelling voids it — nothing is ever erased silently. While the fuse is closed that dialog does not exist, so this row is disabled too." = "Три докосвания на този ред в рамките на секунда подготвят изтриването; след това единственият диалог за потвърждение в приложението ви попита веднъж. Отказът го обезсилва — нищо никога не се изтрива мълчаливо. Докато предпазителят е изключил мрежата, този диалог не съществува, затова и този ред е недостъпен.";
-"Nearby mesh plaza" = "Площадът на офлайн мрежата наблизо";
 "Offline mesh settings" = "Настройки на офлайн мрежата";
 "The switch, the pairing policy, this device's mesh identity and the data it keeps, in one place." = "Превключвателят, правилото за сдваряване, самоличността в мрежата и данните на това устройство — на едно място.";
 "Mesh switch and pairing" = "Превключвател и сдваряване";
@@ -5109,3 +5108,4 @@ server test failure */
 "This square is local only: what is typed here floods the mesh and never leaves it." = "Този площад е само локален: написаното тук наводнява mesh мрежата и никога не я напуска.";
 "Up to %lld members, and the name is not secret — the messages are." = "До %lld члена; името не е тайна, съобщенията са.";
 "\nCurrently: " = "\nСега: ";
+"Tap three times quickly to erase all offline mesh data" = "Бързо докоснете три пъти, за да изтриете всички данни на офлайн mesh мрежата";

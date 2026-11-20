@@ -748,7 +748,7 @@ public struct PopopxPanicWipeGate<Content: View>: View {
                 _ = manager.tap()
             }
             .accessibilityLabel(Text("Panic wipe trigger"))
-            .accessibilityHint(Text(verbatim: "Tap three times quickly to erase all offline mesh data"))
+            .accessibilityHint(Text("Tap three times quickly to erase all offline mesh data"))
             .padding([.trailing, .bottom], 8)
     }
 

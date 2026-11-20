@@ -383,7 +383,7 @@ public struct ManualPairingBannerView: View {
             HStack(spacing: 12) {
                 Image(systemName: symbol(for: presentation.content))
                     .symbolRenderingMode(.monochrome)
-                    .foregroundColor(tint(for: presentation.content))
+                    .foregroundStyle(tint(for: presentation.content))
                     .frame(width: 24, height: 24, alignment: .center)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(LocalizedStringKey(presentation.title))
@@ -391,7 +391,7 @@ public struct ManualPairingBannerView: View {
                     if let detail = presentation.detail {
                         Text(verbatim: detail)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }

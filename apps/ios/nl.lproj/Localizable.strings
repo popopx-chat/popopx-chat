@@ -6977,7 +6977,6 @@ server test failure */
 "Unavailable while the fuse is closed" = "Niet beschikbaar zolang de zekering is doorgebrand";
 "Three taps within one second arm it" = "Drie tikken binnen één seconde wapenen het wissen";
 "Three taps on this row within one second arm the wipe; the app's single confirmation dialog then asks you once. Cancelling voids it — nothing is ever erased silently. While the fuse is closed that dialog does not exist, so this row is disabled too." = "Drie tikken op deze rij binnen één seconde wapenen het wissen; daarna vraagt het enige bevestigingsvenster van de app één keer. Annuleren maakt het ongeldig — er wordt nooit stilzwijgend gewist. Is de zekering doorgebrand, dan bestaat dat venster niet, en daarom is deze rij ook uitgeschakeld.";
-"Nearby mesh plaza" = "Plein van het offlinenetwerk in de buurt";
 "Offline mesh settings" = "Instellingen van het offlinenetwerk";
 "The switch, the pairing policy, this device's mesh identity and the data it keeps, in one place." = "Schakelaar, koppelbeleid, de netwerkidentiteit van dit apparaat en de gegevens die het bewaart — op één plek.";
 "Mesh switch and pairing" = "Netwerkschakelaar en koppelen";
@@ -7136,3 +7135,4 @@ server test failure */
 "This square is local only: what is typed here floods the mesh and never leaves it." = "Dit plein is alleen lokaal: wat hier wordt getypt stroomt door het meshnetwerk en verlaat het nooit.";
 "Up to %lld members, and the name is not secret — the messages are." = "Tot %lld leden; de naam is geen geheim, de berichten wel.";
 "\nCurrently: " = "\nNu: ";
+"Tap three times quickly to erase all offline mesh data" = "Driemaal snel tikken wist alle offline meshgegevens";

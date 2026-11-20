@@ -1371,6 +1371,17 @@ private struct PopopxCabinHallView: View {
             .padding(.horizontal, PopopxMetrics.gutter)
             .padding(.top, PopopxMetrics.spaceS)
             .padding(.bottom, PopopxMetrics.space2XL)
+            // 点消息流的空白处收起键盘：真机第 4 轮。`PopopxTextArea` 的 `@FocusState` 是控件私有的
+            // （红线文件不动），所以焦点不靠它自己释放，靠标准 responder 链 —— 仓库里那句
+            // `hideKeyboard()`（`AddGroupView.swift:234`）就是 `UIApplication.sendAction(resignFirstResponder)`，
+            // 主聊天页 `ChatView.swift:1094` 已经在真机上用它收键盘多年。
+            // 挂在 `.background` 而不是内容本身上：这一层只在命中的是空白时才赢，卡片、行、按钮
+            // 那些自己认领点击的控件一律不受影响（大厅昵称要能照常弹出操作菜单）。
+            .background(
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture { hideKeyboard() }
+            )
         }
         // 广播输入栏是"常驻底栏"，不是流里的一段内容：真机第 3 轮它跟着 VStack 排在滚动区里，
         // 键盘一抬就把输入框和「广播」按钮整个盖住，且没有任何收起路径。
@@ -1382,8 +1393,9 @@ private struct PopopxCabinHallView: View {
             }
         }
         // 拖动列表即收起键盘：这一页原来是整个厢语里唯一没挂这条的滚动区（主页面 :210 有）。
-        // 点空白收起做不了 —— `PopopxTextArea` 的 `@FocusState` 是控件私有（红线文件不能动），
-        // 而 `hideKeyboard()` 那条 UIKit 后门在上游注释里明确警告过与 `.focused` 同用会冻住。
+        // 点空白收起与它同行，见上面那块 `.background`：`hideKeyboard()` 走的是 UIKit 的
+        // resignFirstResponder 广播，不持有也不争抢 SwiftUI 的焦点绑定，所以那条"与 `.focused` 同用会冻住"
+        // 的上游警告在这里不适用 —— 这一页从头到尾没有第二份 `.focused`。
         .scrollDismissesKeyboard(.interactively)
         .background(PopopxPalette.base)
         .toolbar {
