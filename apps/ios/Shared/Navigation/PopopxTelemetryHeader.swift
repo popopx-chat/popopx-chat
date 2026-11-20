@@ -202,7 +202,10 @@ struct PopopxIdentitySwitcher: View {
     var body: some View {
         Picker(selection: $userId) {
             ForEach(identities) { user in
-                Text(verbatim: user.displayName).tag(Optional(user.userId))
+                Text(verbatim: user.displayName)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .tag(Optional(user.userId))
             }
         } label: {
             HStack(spacing: PopopxMetrics.spaceXS) {
@@ -252,11 +255,17 @@ struct PopopxStatusPill: View {
             Circle()
                 .fill(tint)
                 .frame(width: PopopxMetrics.spaceXS, height: PopopxMetrics.spaceXS)
+                // 顶栏被长昵称挤窄时，`frame(width:height:)` 只会夹到更小的提案，8×8 的圆点
+                // 于是被压成横向椭圆（真机第 3 轮：网络/蓝牙两枚的"外圈变形"）。
+                // `fixedSize` 只锁这一颗点，整簇仍按原规则让步 —— 见本文件顶栏那行
+                // 「中簇整体不 fixedSize」与 `PopopxDualStatusCapsule.body` 里的两条推论。
+                .fixedSize()
                 .opacity(dimmed ? 0.45 : 1)
                 .scaleEffect(dimmed ? 0.8 : 1)
             Image(systemName: symbol)
                 .font(PopopxType.microTag)
                 .symbolRenderingMode(.hierarchical)
+                .fixedSize()
             if !text.isEmpty {
                 Text(verbatim: text)
                     .font(PopopxType.secondary)

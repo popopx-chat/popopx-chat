@@ -40,7 +40,11 @@
 //  附近节点的雷达；Reduce Motion 下退化成静态环 + 数字跳数，一次循环动画都不启动（§5）。
 //
 //  顶栏与设置中心（离线组网入口收口，七个决定）：
-//  1. 左上角「附近厢语广场」= `path.append(.hall)`，进的是本页已有的 #厢语大厅，不新开第二份广场；
+//  1. 左上角「发现」= `path.append(.discovery)`，进的是本页新登记的 `PopopxCabinDiscoveryView`：一屏里
+//     给出周边节点雷达、本机已加入的离线群、已加密的 1:1 频道三张表。这一枚原先是"直达大厅"，
+//     真机第 3 轮改成发现列表（2026-11-20）。大厅不因此失去入口 —— 内容区「附近频道」卡片
+//     `channelsCard` 的第一行仍是 #厢语大厅，大厅右上角另外还留着同一份雷达（`discoveryEntry` 的开关态）。
+//     这里从不新开第二份广场，三张表读的都是本页 `refresh()` 已经拿到的那一份 `nodes` / `groups`。
 //  2. 右上角「离线组网设置」= `PopopxCabinMeshSettingsSheet`，三张卡依次是总闸与配对策略、节点身份与
 //     真实运行态、离线数据与清除。这四件事原先散在「我」页的离线组网分组与「全部设置」页的厢语卡片里，
 //     摘除时逐条等效搬来：`requestFuse(_:)` / `setPairingPolicy(_:)` / `verifiedActivitySnapshot()` /
@@ -77,6 +81,8 @@ import PopopxMeshUI
 private enum PopopxCabinRoute: Hashable {
     /// 「#厢语大厅」：完整广播流 + 广播输入 + 本机临时昵称。
     case hall
+    /// 「发现」：周边节点雷达 + 本机已加入的离线群 + 已加密的 1:1 频道，顶栏左上角的去处。
+    case discovery
     /// 本地加密频道：本机已与蓝牙邻居建立的 1:1 加密会话清单。
     case encryptedChannels
     /// 本地加密群聊（包内 `MeshGroupsView`）：群名 + 名单 + 32 字节群密钥只活在这些手机上，
@@ -180,8 +186,9 @@ struct PopopxCabinView: View {
     @State private var localKeyHex = ""
     @State private var bindingCount = 0
     @State private var queuedCount = 0
-    /// 本机持有的离线群数量，来自 `PopopxGroupStore` 的一次本地读；只给「离线群聊」那一行的数值格用。
-    @State private var groupCount = 0
+    /// 本机已加入的离线群，来自 `PopopxGroupStore` 的一次本地读。顶栏「发现」那一页的群表、
+    /// 「离线群聊」那一行的数值格，读的都是这一份；总闸关着时引擎从未存在，这里就是空表。
+    @State private var groups: [PopopxMeshGroup] = []
     /// 模块 4 亲口报的射频档位；nil = 这一次运行还没读到过任何读数（不替它猜一个"未知"显示）。
     @State private var monitorRadioState: PopopxBluetoothState?
 
@@ -213,7 +220,7 @@ struct PopopxCabinView: View {
             .toolbar {
                 // 左上角 = 附近厢语广场，右上角 = 离线组网设置中心。两个入口都只在这一栏出现：
                 // 工具条项属于声明它的这一层内容，推进大厅或私聊页就由那一页自己的条接管。
-                ToolbarItem(placement: .topBarLeading) { plazaEntry }
+                ToolbarItem(placement: .topBarLeading) { nearbyDiscoveryEntry }
                 ToolbarItem(placement: .topBarTrailing) { meshSettingsEntry }
             }
             .navigationDestination(for: PopopxCabinRoute.self) { route in
@@ -238,6 +245,26 @@ struct PopopxCabinView: View {
                         onRescan: { await refresh() }
                     )
                     .navigationTitle(Copy.hallRow)
+
+                case .discovery:
+                    // 顶栏左上角的去处。三个回调与主页面 `nearbyCard` 给的是同一份闭包，
+                    // 差别只在页面自己不带设置中心：开群走 `.groups`（同一个栈，不套模态）。
+                    PopopxCabinDiscoveryView(
+                        fuseOn: meshRuntime.isFuseOn,
+                        radioState: radioState,
+                        nodes: nodes,
+                        groups: groups,
+                        directPeerCount: directPeerCount,
+                        openingNodeID: openingNodeID,
+                        onOpenChat: { node in await openBluetoothChat(with: node) },
+                        onRescan: { await refresh() },
+                        onTurnOnFuse: {
+                            await meshRuntime.setFuse(true)
+                            await refresh()
+                        },
+                        onOpenGroups: { path.append(.groups) }
+                    )
+                    .navigationTitle(Copy.discoveryEntry)
 
                 case .encryptedChannels:
                     PopopxCabinChannelsView(
@@ -366,18 +393,20 @@ struct PopopxCabinView: View {
 
     // MARK: 顶栏两个入口
 
-    /// 「附近厢语广场」：直达本页的大厅（同一条洪泛流、同一个输入框），不新开第二份广场。
-    private var plazaEntry: some View {
+    /// 左上角「发现」：一屏给出周边节点、离线群与加密频道三张表（`PopopxCabinDiscoveryView`）。
+    /// 真机第 3 轮之前这一枚写的是"附近厢语广场"、按下去进大厅；大厅现在归内容区那一行，
+    /// 顶栏只负责"发现附近有什么"，两个入口因此不会互相顶掉。
+    private var nearbyDiscoveryEntry: some View {
         Button {
             PopopxHaptics.impact(.light)
-            path.append(.hall)
+            path.append(.discovery)
         } label: {
             HStack(spacing: PopopxMetrics.space2XS) {
-                Image(systemName: "dot.radiowaves.left.and.right")
+                Image(systemName: "radar")
                     .font(PopopxType.microTag)
                     .imageScale(.medium)
                     .accessibilityHidden(true)
-                Text(Copy.plazaEntry)
+                Text(Copy.discoveryEntry)
                     .font(PopopxType.meta)
                     .lineLimit(1)
                     .minimumScaleFactor(0.85)
@@ -389,8 +418,8 @@ struct PopopxCabinView: View {
             .contentShape(.rect(cornerRadius: PopopxMetrics.radiusControl))
         }
         .buttonStyle(PopopxPressButtonStyle())
-        .accessibilityHint(Text(verbatim: Copy.plazaHint))
-        .accessibilityIdentifier("popopx.cabin.plaza")
+        .accessibilityHint(Text(verbatim: Copy.discoveryHint))
+        .accessibilityIdentifier("popopx.cabin.discovery")
     }
 
     /// 「离线组网设置」：那颗点是运行态，不是装饰 —— 熔断关着就换成中性色，与设置中心第一张卡说的同一句话。
@@ -566,7 +595,7 @@ struct PopopxCabinView: View {
             // 说的就是既有的"总闸关闭"，不另造第三种说法。
             PopopxPickerRow(
                 Copy.groupsRow,
-                value: meshRuntime.isFuseOn ? Copy.groupsValue(groupCount) : Copy.fuseOffValue,
+                value: meshRuntime.isFuseOn ? Copy.groupsValue(groups.count) : Copy.fuseOffValue,
                 systemImage: "person.3.fill",
                 tint: .mesh
             ) {
@@ -625,7 +654,7 @@ struct PopopxCabinView: View {
             // 总闸关闭：不扫描、不广播、不中继，所以这一页也不许留任何「看起来还活着」的旧表。
             nodes = []
             pendingRequests = []
-            groupCount = 0
+            groups = []
             return
         }
         let radioOn = radio.isUsable
@@ -635,7 +664,7 @@ struct PopopxCabinView: View {
         let mappings = await meshRuntime.mappingStore.allMappings()
         // 群的数量来自 `PopopxGroupStore` 的一次本地读，不碰射频；引擎从未起来时后端直接答空表，
         // 于是这一格读到的 0 与"这台手机还没有群"是同一件事。
-        groupCount = await meshRuntime.engineBackend.meshGroups().count
+        groups = await meshRuntime.engineBackend.meshGroups()
 
         var pairingByHex: [String: MeshPairingState] = [:]
         pairingByHex.reserveCapacity(states.count)
@@ -1330,7 +1359,6 @@ private struct PopopxCabinHallView: View {
                 }
 
                 if fuseOn {
-                    composer
                     nicknameCard
                 } else {
                     PopopxSectionCard(Copy.fuseOffHeadline, footnote: Copy.fuseOffFootnote) {
@@ -1344,6 +1372,19 @@ private struct PopopxCabinHallView: View {
             .padding(.top, PopopxMetrics.spaceS)
             .padding(.bottom, PopopxMetrics.space2XL)
         }
+        // 广播输入栏是"常驻底栏"，不是流里的一段内容：真机第 3 轮它跟着 VStack 排在滚动区里，
+        // 键盘一抬就把输入框和「广播」按钮整个盖住，且没有任何收起路径。
+        // `.safeAreaInset(edge: .bottom)` 让系统把这一条算进安全区 —— 键盘弹起时底栏
+        // 正好悬在键盘上沿，滚动内容自动留出它的高度（iOS 15 起可用）。
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if fuseOn {
+                composer
+            }
+        }
+        // 拖动列表即收起键盘：这一页原来是整个厢语里唯一没挂这条的滚动区（主页面 :210 有）。
+        // 点空白收起做不了 —— `PopopxTextArea` 的 `@FocusState` 是控件私有（红线文件不能动），
+        // 而 `hideKeyboard()` 那条 UIKit 后门在上游注释里明确警告过与 `.focused` 同用会冻住。
+        .scrollDismissesKeyboard(.interactively)
         .background(PopopxPalette.base)
         .toolbar {
             // 工具条项跟着"声明它的那一层内容"走，所以主页面那两个入口不会跟到这一层来，这一枚也不会
@@ -1637,6 +1678,83 @@ private struct PopopxCabinChannelsView: View {
             }
             if index < list.count - 1 { rowSeparator }
         }
+    }
+
+    private var rowSeparator: some View {
+        Rectangle()
+            .fill(PopopxPalette.separator)
+            .frame(height: PopopxMetrics.divider)
+            .padding(.vertical, PopopxMetrics.spaceXS)
+    }
+}
+
+// MARK: - 发现（顶栏左上角的去处）
+
+/// 顶栏「发现」那一枚的目的地：周边节点雷达 + 本机已加入的离线群，两张表同一屏。
+///
+/// 为什么不写成"发现附近群组"：群只存在于成员手机上（`PopopxMeshGroupModel.swift:182` 那条口径），
+/// 没加入的群在本机连一行都不存在，协议里也没有"群公告"这一帧。所以"发现"这件事只发生在节点表上，
+/// 群组这一张说的是本机已有的群，创建与邀请归 `MeshGroupsView` 那一页 —— 标题因此不提"附近"两个字，
+/// 免得界面承诺一件协议做不到的事。
+///
+/// 雷达整块复用主页面的 `PopopxCabinNearbyCard`：同一份 `nodes`、同一套行、同一个开私聊回调，
+/// 两处不可能说不一样。频道不在这里再列一遍：节点行上的按钮开的就是那条 1:1 加密频道，
+/// 已建立的清单在 `PopopxCabinChannelsView` 里，这一页只负责"发现"。
+private struct PopopxCabinDiscoveryView: View {
+    let fuseOn: Bool
+    let radioState: PopopxBluetoothState
+    let nodes: [PopopxCabinNode]
+    let groups: [PopopxMeshGroup]
+    let directPeerCount: Int
+    let openingNodeID: String?
+    let onOpenChat: (PopopxCabinNode) async -> Void
+    let onRescan: () async -> Void
+    let onTurnOnFuse: () async -> Void
+    let onOpenGroups: () -> Void
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
+                PopopxCabinNearbyCard(
+                    nodes: nodes,
+                    fuseOn: fuseOn,
+                    radioState: radioState,
+                    directPeerCount: directPeerCount,
+                    openingNodeID: openingNodeID,
+                    onOpenChat: onOpenChat,
+                    onRescan: onRescan,
+                    onTurnOnFuse: onTurnOnFuse
+                )
+                groupsCard
+            }
+            .padding(.horizontal, PopopxMetrics.gutter)
+            .padding(.top, PopopxMetrics.spaceS)
+            .padding(.bottom, PopopxMetrics.space2XL)
+        }
+        .background(PopopxPalette.base)
+    }
+
+    private var groupsCard: some View {
+        PopopxSectionCard(Copy.groupsRow, footnote: Copy.discoveryGroupsFootnote(fuseOn)) {
+            ForEach(Array(groups.enumerated()), id: \.element.id) { index, group in
+                PopopxPickerRow(
+                    group.name,
+                    value: Copy.discoveryGroupValue(group.members.count),
+                    systemImage: "person.3.fill",
+                    tint: .mesh,
+                    action: onOpenGroups
+                )
+                rowSeparator
+            }
+            // 创建与邀请只在包里那一页：这一行是入口，不是第二份实现。
+            PopopxPickerRow(
+                Copy.discoveryCreateGroup,
+                systemImage: "plus.circle.fill",
+                tint: .mesh,
+                action: onOpenGroups
+            )
+        }
+        .accessibilityIdentifier("popopx.cabin.discovery.groups")
     }
 
     private var rowSeparator: some View {
@@ -2319,8 +2437,19 @@ private enum Copy {
         NSLocalizedString(value, comment: "POPOPX cabin offline mesh settings")
     }
 
-    static let plazaEntry = key("Nearby mesh plaza")
-    static let plazaHint = key("Opens the broadcast hall and the channels within Bluetooth reach")
+    /// 顶栏左上角那一枚。2026-11-20 真机第 3 轮起它进的是「发现」页，不再是大厅。
+    /// 旧的提示句（`Opens the broadcast hall...`）Swift 引用为 0，随本轮从 16 个目录里删掉；
+    /// 旧的标题句仍被「全部设置 → 离线组网」那两行使用，因此留着不动。
+    static let discoveryEntry = key("Discover")
+    static let discoveryEntryHint = key("Lists the devices within Bluetooth reach and the offline groups on this phone")
+    static let discoveryCreateGroup = key("Create or join an offline group")
+    static func discoveryGroupValue(_ members: Int) -> String { String(format: key("%lld member(s)"), members) }
+    /// 总闸关着时这一屏没有群可读（引擎从未存在），所以脚注跟着开关说实话，不写"永远为空"。
+    static func discoveryGroupsFootnote(_ fuseOn: Bool) -> String {
+        fuseOn
+            ? key("A group exists only on the phones that are in it. Nothing on this screen is announced to a server.")
+            : key("The fuse is closed, so this phone has not read its group store yet.")
+    }
     static let meshSettingsEntry = key("Offline mesh settings")
     static let meshRowOn = key("Fuse is open")
     static let meshRowFusedOff = key("Closed by the fuse")

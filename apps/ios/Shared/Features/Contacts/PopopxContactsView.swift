@@ -1030,6 +1030,10 @@ private struct PopopxMeshPairingRow: View {
 private struct PopopxGroupsPage: View {
     @EnvironmentObject private var chatModel: ChatModel
 
+    /// 右上角「创建加密群组」的去处：与「消息」栏右上角那条同一个页面、同一个目的地
+    /// （`ChatsListView` 的 `showsCreateGroup`），挂载方式照抄 `NewChatMenuButton.swift:89-93`。
+    @State private var showsCreateGroup = false
+
     private struct Row {
         let chat: Chat
         let isOwner: Bool
@@ -1056,6 +1060,25 @@ private struct PopopxGroupsPage: View {
         }
         .background(PopopxPalette.base)
         .navigationTitle(Copy.groupsTitle)
+        // 真机反馈：这一页只有"已有群组"，一个建群的入口都没有，要退回上一级去「消息」栏的 + 里找。
+        // 空态那一行原本也是这么说的（`groupsEmptyNote`），所以这一枚把那条路搬到眼前，
+        // 空态文案随之改成不再指路的说法。
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    PopopxHaptics.impact(.light)
+                    showsCreateGroup = true
+                } label: {
+                    Label(Copy.createGroupEntry, systemImage: "plus.circle.fill")
+                }
+                .accessibilityIdentifier("popopx.contacts.createGroup")
+            }
+        }
+        .navigationDestination(isPresented: $showsCreateGroup) {
+            PopopxCreateGroupView()
+                .navigationTitle(Copy.createGroupEntry)
+                .modifier(ThemedBackground(grouped: true))
+        }
     }
 
     @ViewBuilder private func rowsCard(_ rows: [Row]) -> some View {
@@ -1258,6 +1281,13 @@ private struct PopopxIdentityRow: View {
 
 /// 页面上每一句中文只在这里出现一次。
 private enum Copy {
+    /// 本轮（真机第 3 轮）新增的两句话走「英文原句即 Key」：`en.lproj` 按约定不写，
+    /// 读不到词条就回落 Key 本身，那就是英文。其余成员仍是 Phase 4 的中文直写，本轮不动。
+    private static func key(_ value: String) -> String {
+        NSLocalizedString(value, comment: "POPOPX contacts groups")
+    }
+
+    static let createGroupEntry = key("Create an encrypted group")
     static let pageTitle = "通讯录"
     static let searchPrompt = "搜索联系人或群组"
     static let done = "完成"
@@ -1342,7 +1372,9 @@ private enum Copy {
     static let groupsSectionFootnote = "频道与商家群不属于通讯录，只在各自的列表里出现。"
     static func memberCount(_ count: Int64) -> String { "\(count) 位成员" }
     static let groupsEmptyTitle = "还没有加密群组"
-    static let groupsEmptyNote = "在「消息」栏右上角的 + 里可以创建群组或加入公开群。"
+    /// 这一句原来指路到「消息」栏右上角的 + ；这一页自己长出创建入口后那句话就成了假路，
+    /// 所以随本轮改词，并借这次改词转成 Key（英文系统下原来会露出中文）。
+    static let groupsEmptyNote = key("Start one with the plus button in the top right corner.")
     static let groupsNoneTitle = "暂无"
     static let groupsNoneNote = "这一类里还没有群组。"
 

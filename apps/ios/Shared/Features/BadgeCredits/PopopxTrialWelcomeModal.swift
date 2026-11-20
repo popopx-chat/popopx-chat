@@ -28,6 +28,10 @@ import SwiftUI
 import POPOPXChat
 
 struct PopopxTrialWelcomeModal: View {
+    /// 出口「看徽章详情」的去向。宿主给了它就换到详情面板（`PopopxBadgeSheetHost` 那条 `.sheet(item:)`），
+    /// 没给就退回原来的只关闭 —— 真机第 3 轮的 P0 是这个按钮以前只有 `dismiss()`，点了像没反应。
+    var onOpenDetail: (() -> Void)? = nil
+
     @Environment(\.dismiss) private var dismiss
 
     @State private var badge = PopopxBadgeManager.shared
@@ -133,7 +137,11 @@ struct PopopxTrialWelcomeModal: View {
         if badge.record?.source == .pioneerTrial {
             // 已经在这台设备上领到过：本面板的角色只剩"说清它还在跑"，出口是详情。
             PopopxButton(Copy.openDetail, systemImage: "eye", role: .secondary) {
-                dismiss()
+                if let onOpenDetail {
+                    onOpenDetail()
+                } else {
+                    dismiss()
+                }
             }
         } else if badge.canClaimPioneerTrial {
             PopopxButton(Copy.claim(Self.trialDays), systemImage: "sparkles", isLoading: isClaiming) {

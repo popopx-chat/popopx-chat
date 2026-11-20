@@ -22,7 +22,7 @@
 //     已挂载的那道门呈现，本页不写第二个 alert。
 //  4. 这次重排只动"行住在哪个卡片里"，没有删掉任何一条既有路由：身份管理与主页名片码从行升格为
 //     名片头的整行热区与二维码微标，其余行全部落在上面四组之中。「充值算力点」仍然是一枚无条件
-//     入口（理由见下面 `showsPaywall` 那条注释）。2026-11-20 删掉的两行各有去处：「添加朋友」——
+//     入口（理由见下面 `badgeSheet` 那条注释）。2026-11-20 删掉的两行各有去处：「添加朋友」——
 //     消息栏右上角「+」挂着同一个 `PopopxAddFriendView`（ChatsListView.swift:260-262）；「离线组网」
 //     一行——厢语页设置中心，见决定 3。
 //     真机走查 三.1/三.4 又动了常用组：「通知」与「版本」两行删掉，各有去处（全部设置 → 通知，
@@ -75,10 +75,14 @@ struct PopopxMeView: View {
     /// 付费墙在这里必须有第二个开关，尽管胶囊已经挂过它：胶囊按状态分发，
     /// `.activeLit` 那一档把点击交给徽章详情，于是**已经点亮的人再也没有地方买点数**。
     /// 而算力点中心那一页按它自己的文件头不挂付费墙。所以这一行是唯一的无条件入口。
-    @State private var showsPaywall = false
-    /// 徽章三条出口里除付费墙外的两条，与顶栏胶囊一一对应：体验态开欢迎页、点亮态开详情。
-    @State private var showsBadgeDetail = false
-    @State private var showsTrialWelcome = false
+    ///
+    /// 三条出口（付费墙 / 体验说明 / 详情）收在一份 `PopopxBadgeSheet?` 里，与顶栏胶囊共用那个
+    /// 载体（`PopopxBadgeSheetHost`）：以前这里是三条并列的 `.sheet(isPresented:)`，
+    /// 体验弹窗点「看徽章详情」要在弹窗里再抬一张 sheet，系统直接丢掉，真机上就是"点了没反应"。
+    @State private var badgeSheet: PopopxBadgeSheet?
+    /// 名片卡右下角「添加新身份」那条快捷入口：走 push（本页就在 `NavigationStack(path:)` 里，
+    /// `MainTabView.swift:145`），不弹 sheet —— 与 `UserProfilesView.swift:112-114` 那条同一写法。
+    @State private var showsCreateIdentity = false
     /// 徽章运行时：`@Observable` 单例，与顶栏胶囊、徽章详情读同一份 `phase`，本页不分第二套状态。
     @State private var badge = PopopxBadgeManager.shared
     /// 本机未使用的礼品券张数。`PopopxP2PVoucherVault` 是 actor，只能在 `.task` 里 await 读，
@@ -135,20 +139,15 @@ struct PopopxMeView: View {
             PopopxGiftBadgeCardSheet()
                 .presentationDetents([.large])
         }
-        // 付费墙与算力点中心是两张平行的 Sheet，不是套娃：两边都能独立打开，
-        // 打开付费墙时它自己再挂「算力点中心」那一层（`PopopxBadgePaywallView.swift:168`）。
-        .sheet(isPresented: $showsPaywall) {
-            PopopxBadgePaywallView()
-                .presentationDetents([.large])
-        }
-        // 徽章另外两条出口，detents 照顶栏胶囊那两个开关原样给（PopopxBadgeCapsuleView.swift:218-227）。
-        .sheet(isPresented: $showsBadgeDetail) {
-            PopopxBadgeDetailSheet()
-                .presentationDetents([.medium, .large])
-        }
-        .sheet(isPresented: $showsTrialWelcome) {
-            PopopxTrialWelcomeModal()
-                .presentationDetents([.medium, .large])
+        // 徽章三条出口（付费墙 / 体验说明 / 详情）走顶栏胶囊那一个载体，detents 归载体。
+        // 付费墙与算力点中心仍是两张平行的 Sheet，不是套娃：算力点中心那一行独立开（上面
+        // `showsCreditsStore`），打开付费墙时它自己再挂「算力点中心」那一层
+        // （`PopopxBadgePaywallView.swift:168`）。
+        .popopxBadgeSheets($badgeSheet)
+        // 「添加新身份」快捷入口的目标页：`CreateProfile` 自带标题与主题背景（:118、:119），
+        // 这里只登记路由，不重复装饰。
+        .navigationDestination(isPresented: $showsCreateIdentity) {
+            CreateProfile()
         }
         .onChange(of: showsProfileQR) { _, opened in
             // 关掉名片码就重读一次档位：那张 Sheet 里的模式开关会改本机那份武装记录，
@@ -191,7 +190,8 @@ struct PopopxMeView: View {
                 onShowProfileQR: {
                     PopopxHaptics.impact(.light)
                     showsProfileQR = true
-                }
+                },
+                onAddIdentity: { showsCreateIdentity = true }
             )
         } else {
             emptyIdentityCard
@@ -267,10 +267,10 @@ struct PopopxMeView: View {
             }
             .accessibilityIdentifier("popopx.me.badge")
             PopopxMeDivider()
-            // 无条件付费墙入口：整页只有这一行不看徽章状态就能打开购买面板，理由见上面 `showsPaywall`。
+            // 无条件付费墙入口：整页只有这一行不看徽章状态就能打开购买面板，理由见上面 `badgeSheet`。
             PopopxPickerRow(Copy.purchaseCredits, systemImage: "cart.fill", tint: .brand) {
                 PopopxHaptics.selection()
-                showsPaywall = true
+                badgeSheet = .paywall
             }
             .accessibilityIdentifier("popopx.me.paywall")
         }
@@ -297,9 +297,9 @@ struct PopopxMeView: View {
     /// 而不是挂在"我以为的三态"上。胶囊将来加一档，这里就编译不过去。
     private func routeBadge() {
         switch badge.phase.capsuleState {
-        case .dormant: showsPaywall = true
-        case .trialPulsing: showsTrialWelcome = true
-        case .activeLit: showsBadgeDetail = true
+        case .dormant: badgeSheet = .paywall
+        case .trialPulsing: badgeSheet = .trial
+        case .activeLit: badgeSheet = .detail
         }
     }
 
@@ -576,6 +576,7 @@ private struct PopopxIdentityCard: View {
     private let onSwitch: (UserInfo) -> Void
     private let onCopyUserID: () async -> Void
     private let onShowProfileQR: () -> Void
+    private let onAddIdentity: () -> Void
 
     init(
         user: User,
@@ -585,7 +586,8 @@ private struct PopopxIdentityCard: View {
         busyUserID: Int64?,
         onSwitch: @escaping (UserInfo) -> Void,
         onCopyUserID: @escaping () async -> Void,
-        onShowProfileQR: @escaping () -> Void
+        onShowProfileQR: @escaping () -> Void,
+        onAddIdentity: @escaping () -> Void
     ) {
         self.user = user
         self.phase = phase
@@ -595,6 +597,7 @@ private struct PopopxIdentityCard: View {
         self.onSwitch = onSwitch
         self.onCopyUserID = onCopyUserID
         self.onShowProfileQR = onShowProfileQR
+        self.onAddIdentity = onAddIdentity
     }
 
     /// 边长不写裸数字：大头像 = spaceXL × 2（64pt），切换器里的小头像 = spaceXL。
@@ -614,7 +617,26 @@ private struct PopopxIdentityCard: View {
                 PopopxMeDivider()
                 switcher
             }
+            PopopxMeDivider()
+            addIdentityRow
         }
+    }
+
+    /// 「添加新身份」快捷入口，收在名片底部操作条的右端。真机反馈是这条路由太难找：原来要先推
+    /// 「身份管理」、再点「添加档案」两步（`UserProfilesView.swift:87-97`），这一枚把它压成一步。
+    /// 措辞复用既有词条 `Copy.createIdentity`（"Create a new identity"，16 个目录都已有译法），
+    /// 所以本轮不新增 Key。动作走宿主登记的 push：`CreateProfile` 是一张 Form，
+    /// 塞进 sheet 会丢返回手势，也与 `UserProfilesView.swift:112-114` 那条同一写法。
+    private var addIdentityRow: some View {
+        HStack(spacing: PopopxMetrics.spaceS) {
+            Spacer(minLength: PopopxMetrics.spaceXS)
+            PopopxButton(Copy.createIdentity, systemImage: "person.badge.plus", role: .secondary, fullWidth: false) {
+                PopopxHaptics.selection()
+                onAddIdentity()
+            }
+        }
+        .padding(.vertical, PopopxMetrics.space2XS)
+        .accessibilityIdentifier("popopx.me.addIdentity")
     }
 
     private var nameRow: some View {

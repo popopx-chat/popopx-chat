@@ -107,6 +107,10 @@ struct PopopxBadgeCapsule: View {
         .foregroundStyle(isLive ? chipInk : tint)
         // nil 而不是 0：`.frame(width: 0)` 会把休眠态那枚 `circle.dashed` 直接压没。
         .frame(width: isLive ? PopopxMetrics.spaceL : nil, height: isLive ? PopopxMetrics.spaceL : nil)
+        // 顶栏被长昵称挤窄时这个 frame 只会夹到更小的提案，实心色片连同下面的 `.circle` 底
+        // 会一起变成横椭圆（真机第 3 轮的"外圈变形"）。锁死这一枚正方，文字档该让路仍由
+        // `ViewThatFits` 决定，不改变顶栏的降级规则。
+        .fixedSize()
         .background(isLive ? chipFill : Color.clear, in: .circle)
     }
 
@@ -202,9 +206,7 @@ struct PopopxBadgeCapsuleView: View {
     var compact: Bool = false
 
     @State private var badge = PopopxBadgeManager.shared
-    @State private var showsTrial = false
-    @State private var showsDetail = false
-    @State private var showsPaywall = false
+    @State private var sheet: PopopxBadgeSheet?
 
     var body: some View {
         PopopxBadgeCapsule(
@@ -214,26 +216,60 @@ struct PopopxBadgeCapsuleView: View {
         ) {
             route()
         }
-        .sheet(isPresented: $showsTrial) {
-            PopopxTrialWelcomeModal()
-                .presentationDetents([.medium, .large])
-        }
-        .sheet(isPresented: $showsDetail) {
-            PopopxBadgeDetailSheet()
-                .presentationDetents([.medium, .large])
-        }
-        .sheet(isPresented: $showsPaywall) {
-            PopopxBadgePaywallView()
-                .presentationDetents([.large])
-        }
+        .popopxBadgeSheets($sheet)
     }
 
     private func route() {
         switch badge.phase.capsuleState {
-        case .dormant: showsPaywall = true
-        case .trialPulsing: showsTrial = true
-        case .activeLit: showsDetail = true
+        case .dormant: sheet = .paywall
+        case .trialPulsing: sheet = .trial
+        case .activeLit: sheet = .detail
         }
+    }
+}
+
+// MARK: - 三条出口的单一 sheet 载体
+
+/// 徽章的三条出口（付费墙 / 体验说明 / 详情）。
+///
+/// 以前这三张是挂在同一层上的三个 `.sheet(isPresented:)`：真机第 3 轮点「看徽章详情」没反应，
+/// 就是因为体验弹窗里那个按钮只能 `dismiss()` —— 在同一层再抬一张 sheet 属于 sheet 套 sheet，
+/// 系统会静默丢掉第二次呈现，界面看起来就是"点了没反应"。收成一个 `.sheet(item:)` 之后，
+/// 换面板只是改 `item`，sheet 不关不换、内容原地切到详情页。
+enum PopopxBadgeSheet: String, Identifiable {
+    case paywall
+    case trial
+    case detail
+
+    var id: String { rawValue }
+}
+
+/// 载体内容：`detents` 照原来那三张各档不动（付费墙和礼品卡一样吃 `.large`）。
+struct PopopxBadgeSheetHost: View {
+    @Binding var sheet: PopopxBadgeSheet?
+
+    var body: some View {
+        switch sheet {
+        case .paywall:
+            PopopxBadgePaywallView()
+                .presentationDetents([.large])
+        case .trial:
+            PopopxTrialWelcomeModal(onOpenDetail: { sheet = .detail })
+                .presentationDetents([.medium, .large])
+        case .detail:
+            PopopxBadgeDetailSheet()
+                .presentationDetents([.medium, .large])
+        case .none:
+            EmptyView()
+        }
+    }
+}
+
+extension View {
+    /// 把徽章三条出口挂到调用方：宿主只需要一份 `PopopxBadgeSheet?` 状态。
+    /// 参数不能叫 `sheet`——那会盖掉 `View.sheet(item:)` 本身，编译器只会说"这不是函数"。
+    func popopxBadgeSheets(_ badgeSheet: Binding<PopopxBadgeSheet?>) -> some View {
+        sheet(item: badgeSheet) { _ in PopopxBadgeSheetHost(sheet: badgeSheet) }
     }
 }
 

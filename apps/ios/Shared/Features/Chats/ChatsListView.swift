@@ -150,7 +150,9 @@ struct ChatsListView: View {
     /// 这一格只表"问过没有"；"这台设备领过没有"在 Keychain 的 `trialGuard` 里
     /// （`PopopxBadgeManager.canClaimPioneerTrial` 读的就是它），所以清掉这一格不会让人多领一次。
     @AppStorage(popopxTrialWelcomeAskedKey) private var trialWelcomeAsked = false
-    @State private var showsTrialWelcome = false
+    /// 徽章三条出口的载体状态（体验说明 / 详情 / 付费墙）；这一页只会自己抬 `.trial`，
+    /// 另外两档由弹窗里的出口切换（`PopopxBadgeSheetHost`）。
+    @State private var badgeSheet: PopopxBadgeSheet?
     /// 切换进行中的身份 id：`changeActiveUserAsync_` 会重载会话，二次进入只会把状态搅乱。
     @State private var switchingUserId: Int64?
     /// contactId → meshPublicKeyHex，一次 actor hop 读出来的整表。
@@ -263,10 +265,9 @@ struct ChatsListView: View {
         // 先锋体验徽章的告知弹窗。挂在这一页而不是 `POPOPXApp` 那一层：这里已经有会话栈，
         // sheet 才挂得住；`PopopxTrialWelcomeModal` 自己带"领取"按钮和失败原因，
         // 所以这一层只决定"要不要问这一次"，不替它领。
-        .sheet(isPresented: $showsTrialWelcome) {
-            PopopxTrialWelcomeModal()
-                .presentationDetents([.medium, .large])
-        }
+        // 三张徽章面板走同一个载体：弹窗里点「看徽章详情」要换到详情页，
+        // 换 `item` 就行，不必在这一层再挂第二条 sheet。
+        .popopxBadgeSheets($badgeSheet)
         .popopxToast(toast)
         .task { await startTelemetry() }
         .task { presentTrialWelcomeIfNeeded() }
@@ -489,7 +490,7 @@ struct ChatsListView: View {
         guard !trialWelcomeAsked else { return }
         guard PopopxBadgeManager.shared.canClaimPioneerTrial else { return }
         trialWelcomeAsked = true
-        showsTrialWelcome = true
+        badgeSheet = .trial
     }
 
     /// 顶栏只把选中的 userId 写回来，切换（api 层重载会话、重建整棵聊天视图树）归这里 ——
@@ -987,7 +988,9 @@ private enum Copy {
     static let filterOnline = "在线加密"
     static let filterMeshOffline = "厢语离线"
 
-    static let createGroupTitle = "发起群聊"
+    /// 与「通讯录 → 我的加密群组」右上角那一枚同一个目的地，因此共用同一个 Key：
+    /// 两处标题不可能再各说一句（`PopopxContactsView` 的 `createGroupEntry`）。
+    static let createGroupTitle = key("Create an encrypted group")
     static let scanTitle = "扫一扫"
 
     // 徽章：图标词汇表固定下来的三个符号（§6），一行只出现一枚。
