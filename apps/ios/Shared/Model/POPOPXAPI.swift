@@ -3596,7 +3596,7 @@ final class PopopxMeshChatEventFeed: PopopxChatEventFeeding, @unchecked Sendable
 /// Once it exists, forwarding is unconditional: the engine's own `start`/`stop` are idempotent, and a
 /// stopped-but-alive engine answers a send with its own `radioUnavailable`, which is the honest answer
 /// rather than this class's opinion.
-final class PopopxMeshEngineBackend: PopopxMeshSwitchable, PopopxMeshOutbound, PopopxMeshKeyBurning, @unchecked Sendable {
+final class PopopxMeshEngineBackend: PopopxMeshSwitchable, PopopxMeshOutbound, PopopxMeshKeyBurning, PopopxMeshGroupOutbound, @unchecked Sendable {
     private let lock = NSLock()
     private var engineExists = false
 
@@ -3641,6 +3641,66 @@ final class PopopxMeshEngineBackend: PopopxMeshSwitchable, PopopxMeshOutbound, P
     func burnMeshKeys() async {
         guard hasExisted() else { return }
         await PopopxMeshEngine.shared.burnMeshKeys()
+    }
+
+    // Group traffic rides the same rule as the rest of this class: the engine is never created by a
+    // read or a send, only by the fuse. A group whose engine was never brought up has no signing key
+    // and no roster to name, which is what the two `nil`/empty answers and `.signingIdentityUnavailable`
+    // say; nothing here invents a local fallback group, because a group that cannot be signed cannot
+    // ever be joined by a neighbour.
+
+    func createGroup(named name: String) async throws(PopopxMeshGroupError) -> PopopxMeshGroup {
+        guard hasExisted() else { throw .signingIdentityUnavailable }
+        return try await PopopxMeshEngine.shared.createGroup(named: name)
+    }
+
+    func meshGroups() async -> [PopopxMeshGroup] {
+        guard hasExisted() else { return [] }
+        return await PopopxMeshEngine.shared.meshGroups()
+    }
+
+    func meshGroupMembers(of groupID: Data) async -> [PopopxMeshGroupMember] {
+        guard hasExisted() else { return [] }
+        return await PopopxMeshEngine.shared.meshGroupMembers(of: groupID)
+    }
+
+    func invite(
+        peerMeshPublicKeyHex: String,
+        toGroupID groupID: Data
+    ) async throws(PopopxMeshGroupError) -> PopopxGroupDistribution {
+        guard hasExisted() else { throw .deliveryFailed(peerMeshPublicKeyHexes: [], failure: .radioUnavailable(.unknown)) }
+        return try await PopopxMeshEngine.shared.invite(
+            peerMeshPublicKeyHex: peerMeshPublicKeyHex,
+            toGroupID: groupID
+        )
+    }
+
+    func removeMeshGroupMember(
+        _ peerMeshPublicKeyHex: String,
+        fromGroupID groupID: Data
+    ) async throws(PopopxMeshGroupError) -> PopopxGroupDistribution {
+        guard hasExisted() else { throw .deliveryFailed(peerMeshPublicKeyHexes: [], failure: .radioUnavailable(.unknown)) }
+        return try await PopopxMeshEngine.shared.removeMeshGroupMember(
+            peerMeshPublicKeyHex,
+            fromGroupID: groupID
+        )
+    }
+
+    func sendGroupMessage(_ text: String, toGroupID groupID: Data) async throws(PopopxMeshGroupError) {
+        guard hasExisted() else { throw .deliveryFailed(peerMeshPublicKeyHexes: [], failure: .radioUnavailable(.unknown)) }
+        try await PopopxMeshEngine.shared.sendGroupMessage(text, toGroupID: groupID)
+    }
+
+    var localSigningPublicKeyHex: String? {
+        get async {
+            guard hasExisted() else { return nil }
+            return await PopopxMeshEngine.shared.localSigningPublicKeyHex
+        }
+    }
+
+    func invitableMeshPeers() async -> [String] {
+        guard hasExisted() else { return [] }
+        return await PopopxMeshEngine.shared.invitableMeshPeers()
     }
 
     private func markExisted() {

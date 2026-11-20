@@ -143,14 +143,23 @@ ChatListView
 [`AddChannelView`](../../Shared/Views/NewChat/AddChannelView.swift#L85) push a
 [`ServersDestination`](../../Shared/Views/UserSettings/NetworkAndServers/NetworkAndServers.swift#L217); the relay and
 message-server rows on the pages below push `ChatRelaySelection` / `ProtocolServerSelection`. The matching
-`navigationDestination(for:)` declarations live on the two stacks that host them -
-[`UserPickerSheetView`](../../Shared/Views/ChatList/ChatListView.swift#L115) (settings sheet) and
-[`NewChatSheet`](../../Shared/Views/NewChat/NewChatMenuButton.swift#L106) (new chat sheet) - and never on the page that
+`navigationDestination(for:)` declarations live on the stacks that host them -
+[`UserPickerSheetView`](../../Shared/Views/ChatList/ChatListView.swift#L120) (settings sheet),
+[`NewChatSheet`](../../Shared/Views/NewChat/NewChatMenuButton.swift#L106) (new chat sheet) and the Me tab's stack in
+[`MainTabView`](../../Shared/Navigation/MainTabView.swift#L152) - and never on the page that
 shows the rows: for one value type SwiftUI keeps only the registration nearest the stack root, so a per-page
 declaration is inert and the row tap navigates nowhere. Each of those stacks owns the `SaveableSettings` whose
 `servers` the destination closures bind ([ChatListView.swift#L83](../../Shared/Views/ChatList/ChatListView.swift#L83),
 [NewChatMenuButton.swift#L59](../../Shared/Views/NewChat/NewChatMenuButton.swift#L59)), so the two entry paths edit the
 same store.
+
+The POPOPX settings tree ([`PopopxSettingsView`](../../Shared/Features/Settings/PopopxSettingsViews.swift)) keeps that
+registration layout but does not use a `NavigationLink(value:)` for its own row. On device the row pushed by value
+redrew the settings page and only released the pending value on the next navigation event (back), identically whether
+the declarations lived on the settings page or on the stack root - the registration depth is not the variable. The row
+is a plain `Button` that appends the value to an explicit `NavigationStack(path:)` owned by the hosting stack
+([`PopopxSettingsNavTrack`](../../Shared/Navigation/MainTabView.swift#L106), injected by both live hosts), the same
+deterministic mechanism `ChatModel.chatId` uses to open a chat. Pages below it still push by value.
 
 ### Navigation Trigger
 

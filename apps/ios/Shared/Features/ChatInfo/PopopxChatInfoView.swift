@@ -1116,7 +1116,7 @@ private struct PopopxChatInfoAvatar: View {
     var body: some View {
         Group {
             if imageFromBase64(image) != nil {
-                // `color:` 与 PopopxMeView.swift:745 同一个值：`ProfileImage` 内部按
+                // `color:` 与 PopopxMeView.swift:895 同一个值：`ProfileImage` 内部按
                 // asAnotherColorFromSecondaryVariant 映射这张图在分组背景上的深浅。
                 ProfileImage(imageStr: image, size: side, color: Color(uiColor: .tertiarySystemGroupedBackground))
             } else {

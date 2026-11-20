@@ -12,13 +12,13 @@
 //  1. **触发源 B（聊天内手动）**：`ProfileSendModeSheet` 的 `onSend` 回调 → `send(_:to:)`
 //     （ProfileBuilderView.swift:818-836 交出 manifest，ComposeView 那一侧由 lead engineer 接线）。
 //  2. **触发源 A（扫码自动）**：连接事件总线 → `handleContactConnected(contactId:)`
-//     （现网点位 `Shared/Model/POPOPXAPI.swift:2640`-`:2665` 的 `case let .contactConnected(user, contact, _)`，
+//     （现网点位 `Shared/Model/POPOPXAPI.swift:2651`-`:2665` 的 `case let .contactConnected(user, contact, _)`，
 //     lead engineer 在那里加一行调用）。没有武装场景时这个函数第一个 `guard` 就返回，
 //     不留日志、不建 Task、不读盘 —— 一次扫码都不该发生的事，不能在每一次建连时都发生一遍。
 //
 //  ### 为什么 `scene=personal_profile` 不在 URI 里（已定裁定，一句话版）
 //  `apiAddContact` 铸出来的串归 Rust 核心，Swift 侧没有往邀请链接里追加查询键的先例
-//  （`POPOPXAPI.swift:1039` 交回 `CreatedConnLink`，`APITypes.swift:185` 只做前缀替换）；
+//  （`POPOPXAPI.swift:1050` 交回 `CreatedConnLink`，`APITypes.swift:185` 只做前缀替换）；
 //  `popopxChatLink()` 会把 `popopx:/` 前缀改写成 `https://popopx.chat/`；
 //  而离线那条 `PopopxOfflineBridge.forbiddenLinkCharacters`（:101）明令禁止 `$ \` " '`。
 //  所以这个标记只能是**本机武装元数据**，由已经在场的 `contactConnected` 事件消费 ——
@@ -26,7 +26,7 @@
 //
 //  ### 送达方式不是用户选的，是链路决定的
 //  `deliveryMode` 在草稿里恒为 `.fullMedia`（ProfileBuilderView.swift:22-24 那条裁定）。本文件在
-//  发送那一刻问现网的决策器（`PopopxComposerRouting`，`Shared/Features/ChatRoom/PopopxInputBar.swift:325`）：
+//  发送那一刻问现网的决策器（`PopopxComposerRouting`，`Shared/Features/ChatRoom/PopopxInputBar.swift:324`）：
 //  它说蓝牙是唯一通路时，才做 `.meshTextOnly` 降级并写 `omittedMediaCount`。自己数信号强度、
 //  自己判 `NWPathMonitor`、自己猜邻居，都会在模块 5 之外多出第二张判定表 —— 那张表漂移一次，
 //  界面上"下一条会走哪条通道"和真正走的那条就从此各说各话。
@@ -655,7 +655,7 @@ final class ProfileAutoSender {
 /// - `PopopxProximityFrame.maxWireBytes = 8_192`（`PopopxProximityEngine.swift:110`）是 PopopxMeshKit
 ///   里唯一公开的"一条载荷进核心之前能有多大"的上限。⚠️ 它写在**近场交换帧**的定义上，BLE 中继
 ///   那一条并没有公开的等价常量（`PopopxMeshEngine` 会按链路的 `usablePayloadBytes` 自动分片，
-///   PopopxMeshEngine.swift:446-:455）。这里是**借用**，不是"BLE 真有这个硬上限"。借的理由：
+///   PopopxMeshEngine.swift:501-:455）。这里是**借用**，不是"BLE 真有这个硬上限"。借的理由：
 ///   一份 6 KB 的清单 JSON 会被切成十几个 469 字节的分片，在 TTL 7 的洪泛里等于给自己制造一次
 ///   广播风暴，而名片的文字量本来用不到那个量级 —— 超了就该让用户删字，而不是让中继替他扛。
 /// - `fragmentSize = 469` / `maxMTU = 512`（`PopopxMeshConfig.swift:27`、`:29`）只用来把"这份名片

@@ -7,11 +7,11 @@
 //
 //  数据来源（本工程没有 `ChatModel.contacts`，也没有 `ChatModel.invitations`，全部从会话列表派生）：
 //  · 联系人 = `ChatModel.chats`（Shared/Model/ChatModel.swift:408）里 `.direct` 且
-//    `contact.active` 的会话，排除规则照抄 ChatListView.swift:655 的
+//    `contact.active` 的会话，排除规则照抄 ChatListView.swift:661 的
 //    `!chat.chatInfo.chatDeleted && !chat.chatInfo.contactCard`；
-//  · 群组 = `.group` 且 `businessChat == nil && !isChannel`（照抄 ChatListView.swift:1238 的 .groups 口径）；
-//  · 加密连接请求 = `chatType == .contactRequest`（ChatListView.swift:669），答复走
-//    `acceptContactRequest` / `rejectContactRequest`（Shared/Model/POPOPXAPI.swift:1809 / :1834）；
+//  · 群组 = `.group` 且 `businessChat == nil && !isChannel`（照抄 ChatListView.swift:1244 的 .groups 口径）；
+//  · 加密连接请求 = `chatType == .contactRequest`（ChatListView.swift:675），答复走
+//    `acceptContactRequest` / `rejectContactRequest`（Shared/Model/POPOPXAPI.swift:1551 / :1574）；
 //  · 厢语待确认配对 = `PopopxMeshRuntime.shared.bannerModel.requests`（PopopxMeshUI 里
 //    `PopopxMeshBannerModel` 每 2 秒从 `ManualPairingManager.pendingRequests()` 读一次真值）。
 //
@@ -44,7 +44,7 @@
 //  MainTabView 持有，卡片必须是 `NavigationLink(value:)`，而 `PopopxPickerRow` 只接受 action 闭包）；
 //  界面中文只在文件末尾的 `Copy` 里出现一次；没有 TODO，没有假数据。
 //
-//  ⚠️ 交给 MainTabView 的一处集成点：会话页由 `ChatModel.chatId` 驱动（旧 ChatListView.swift:204-211
+//  ⚠️ 交给 MainTabView 的一处集成点：会话页由 `ChatModel.chatId` 驱动（旧 ChatListView.swift:210-217
 //  用 `NavigationStack(path:)` 映射它），本文件按既有约定调 `ItemsModel.shared.loadOpenChat(_:)`
 //  打开会话；四栏壳的 `selection` 是私有 @State，通讯录这一栏无法把用户带到「消息」栏去。
 //  需要 MainTabView 补 `.onChange(of: chatModel.chatId) { _, id in if id != nil { selection = .chats } }`
@@ -373,7 +373,7 @@ struct PopopxContactsView: View {
         }
     }
 
-    /// 搜索命中口径照抄 ChatListView.swift:657-666：视图名 / 昵称 / 全名，大小写不敏感。
+    /// 搜索命中口径照抄 ChatListView.swift:663-672：视图名 / 昵称 / 全名，大小写不敏感。
     private func matchesSearch(_ chat: Chat) -> Bool {
         guard searching else { return true }
         let s = normalizedSearch
@@ -919,7 +919,7 @@ private struct PopopxContactRequestRow: View {
         return Copy.requestNote
     }
 
-    /// `acceptContactRequest` 自带 `inProgress` 绑定（POPOPXAPI.swift:1809），成功后
+    /// `acceptContactRequest` 自带 `inProgress` 绑定（POPOPXAPI.swift:1551），成功后
     /// `ChatModel` 会把这条请求换成联系人会话，本行随列表消失。
     @MainActor private func decide(incognito: Bool) async {
         guard chatModel.chatRunning == true else {

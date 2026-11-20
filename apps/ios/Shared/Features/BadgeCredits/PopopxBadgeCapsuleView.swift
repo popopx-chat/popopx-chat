@@ -17,7 +17,7 @@
 //
 //  ### 动效只在"真的有东西在变"时出现
 //  - 体验态呼吸：它是要被注意到的临时态，Reduce Motion 下彻底静止（判据同 `PopopxStatusPill.restart()`，
-//    `PopopxTelemetryHeader.swift:277-284`）；
+//    `PopopxTelemetryHeader.swift:281-288`）；
 //  - 点亮态旋转：只在**本机计数自增**那一次转满 360°（`onChange(of: rotationIndex)`），不做常驻自转 ——
 //    一个永远在转的图标在无障碍里等于噪音，而"轮换"本身是离散事件，转一次刚好对上一次事实。
 //
@@ -51,7 +51,7 @@ struct PopopxBadgeCapsule: View {
                 symbol
                 if !compact {
                     Text(verbatim: label)
-                        .font(PopopxType.secondary)
+                        .font(PopopxType.secondary.weight(isLive ? .semibold : .regular))
                         .lineLimit(1)
                         .layoutPriority(1)
                 }
@@ -60,11 +60,17 @@ struct PopopxBadgeCapsule: View {
             .padding(.horizontal, compact ? PopopxMetrics.spaceS : PopopxMetrics.spaceM)
             .frame(height: PopopxMetrics.space2XL)
             .frame(minWidth: compact ? PopopxMetrics.space2XL : 0)
-            .background(PopopxPalette.card, in: .capsule)
+            .background(isLive ? tint.opacity(0.10) : PopopxPalette.card, in: .capsule)
             .overlay {
-                Capsule().strokeBorder(tint.opacity(phase.capsuleState == .dormant ? 0.25 : 0.55),
-                                       lineWidth: PopopxMetrics.hairline)
+                // 描边分两档：休眠是 0.5pt 的灰边，两枚"活着"的档位是 1.5pt 的同色实边
+                // （`PopopxMetrics.stroke`）。宽度与不透明度一起分档，才够顶栏那条 48pt 高、
+                // 挤着五个元素的行里一眼分出"这枚有东西在跑"。
+                Capsule().strokeBorder(tint.opacity(isLive ? 0.85 : 0.25),
+                                       lineWidth: isLive ? PopopxMetrics.stroke : PopopxMetrics.hairline)
             }
+            // 微弱外发光：只给两档激活态，半径一格 `space2XS`。休眠不发光，
+            // 深色模式下这圈同色光晕正是"已点亮"的主要线索。
+            .shadow(color: isLive ? tint.opacity(0.35) : .clear, radius: PopopxMetrics.space2XS)
             .contentShape(.capsule)
         }
         .buttonStyle(.plain)
@@ -78,26 +84,34 @@ struct PopopxBadgeCapsule: View {
 
     // MARK: 呈现片段
 
+    /// 两档激活态把符号收进实心圆片：`mesh`+`onMesh`、`success`+`onSuccess` 是品牌档里
+    /// 唯一两组"亮底深墨"的配对（浅色下白字压在 `#00A896` 上只有 2.98:1，文件头记过这条实测），
+    /// 所以实心片上的墨色必须用这两组，不能沿用胶囊自身的 `*Ink`。
     @ViewBuilder private var symbol: some View {
-        switch phase.capsuleState {
-        case .trialPulsing:
-            Image(systemName: "sparkles")
-                .font(PopopxType.microTag)
-                .symbolRenderingMode(.hierarchical)
-                .opacity(breathing ? 0.45 : 1)
-                .scaleEffect(breathing ? 0.85 : 1)
-        case .activeLit:
-            Image(systemName: "arrow.triangle.2.circlepath")
-                .font(PopopxType.microTag)
-                .symbolRenderingMode(.hierarchical)
-                .rotationEffect(.degrees(spin))
-                .animation(.linear(duration: 0.9), value: spin)
-        case .dormant:
-            Image(systemName: "circle.dashed")
-                .font(PopopxType.microTag)
-                .symbolRenderingMode(.hierarchical)
+        Group {
+            switch phase.capsuleState {
+            case .trialPulsing:
+                Image(systemName: "sparkles")
+                    .opacity(breathing ? 0.45 : 1)
+                    .scaleEffect(breathing ? 0.85 : 1)
+            case .activeLit:
+                Image(systemName: "arrow.triangle.2.circlepath")
+                    .rotationEffect(.degrees(spin))
+                    .animation(.linear(duration: 0.9), value: spin)
+            case .dormant:
+                Image(systemName: "circle.dashed")
+            }
         }
+        .font(PopopxType.microTag)
+        .symbolRenderingMode(.hierarchical)
+        .foregroundStyle(isLive ? chipInk : tint)
+        // nil 而不是 0：`.frame(width: 0)` 会把休眠态那枚 `circle.dashed` 直接压没。
+        .frame(width: isLive ? PopopxMetrics.spaceL : nil, height: isLive ? PopopxMetrics.spaceL : nil)
+        .background(isLive ? chipFill : Color.clear, in: .circle)
     }
+
+    /// 休眠不是失败：不给危险色，只给中性墨（判据同文件头第三条）。
+    private var isLive: Bool { phase.capsuleState != .dormant }
 
     private var tint: Color {
         switch phase.capsuleState {
@@ -107,33 +121,53 @@ struct PopopxBadgeCapsule: View {
         }
     }
 
+    private var chipFill: Color {
+        switch phase.capsuleState {
+        case .trialPulsing: PopopxPalette.mesh
+        case .activeLit: PopopxPalette.success
+        case .dormant: Color.clear
+        }
+    }
+
+    private var chipInk: Color {
+        switch phase.capsuleState {
+        case .trialPulsing: PopopxPalette.onMesh
+        case .activeLit: PopopxPalette.onSuccess
+        case .dormant: PopopxPalette.labelSecondary
+        }
+    }
+
     /// 顶栏只放短句：体验态是时钟，点亮态是天数，休眠态说"免费节点"而不是"未激活"。
+    /// 2026-11-20 真机第 2 轮起走词条（源文即 Key，16 译本，口径同 `PopopxTelemetryCopy`）；
+    /// 顶栏在 393pt 上取的是只留符号那档，这两句只在宽屏出现，但 VoiceOver 与宽屏都必须能读。
     private var label: String {
         switch phase {
         case .dormant:
-            return "免费节点"
+            return PopopxBadgeCapsuleCopy.dormant
         case let .trial(expiresAt):
-            return "体验 \(PopopxBadgeCopy.remainingClock(expiresAt.timeIntervalSinceNow))"
+            return PopopxBadgeCapsuleCopy.trial(PopopxBadgeCapsuleCopy.clock(expiresAt.timeIntervalSinceNow))
         case let .active(_, expiresAt):
             // 向上取整：还剩 1 分钟不能说"0 天"，那读起来像已经到期。
-            let days = Int(ceil(max(0, expiresAt.timeIntervalSinceNow) / 86_400))
-            return "加密路由 · \(max(1, days)) 天"
+            let days = max(1, Int(ceil(max(0, expiresAt.timeIntervalSinceNow) / 86_400)))
+            return PopopxBadgeCapsuleCopy.active(PopopxBadgeCapsuleCopy.daysClock(days))
         }
     }
 
     private var accessibilityText: String {
         switch phase {
-        case .dormant: "POPOPX 隐私节点：当前使用免费公共节点"
-        case let .trial(expiresAt): "POPOPX 先锋节点体验：\(PopopxBadgeCopy.remainingClock(expiresAt.timeIntervalSinceNow))后到期"
-        case let .active(source, expiresAt): "POPOPX 动态隐私节点徽章已点亮：\(PopopxBadgeCopy.remaining(expiresAt: expiresAt, source: source))"
+        case .dormant: PopopxBadgeCapsuleCopy.a11yDormant
+        case let .trial(expiresAt):
+            PopopxBadgeCapsuleCopy.a11yTrial(PopopxBadgeCapsuleCopy.clock(expiresAt.timeIntervalSinceNow))
+        case let .active(_, expiresAt):
+            PopopxBadgeCapsuleCopy.a11yActive(PopopxBadgeCapsuleCopy.clock(expiresAt.timeIntervalSinceNow))
         }
     }
 
     private var hint: String {
         switch phase.capsuleState {
-        case .dormant: "轻点查看开启方式"
-        case .trialPulsing: "轻点查看体验说明"
-        case .activeLit: "轻点查看徽章详情"
+        case .dormant: PopopxBadgeCapsuleCopy.hintDormant
+        case .trialPulsing: PopopxBadgeCapsuleCopy.hintTrial
+        case .activeLit: PopopxBadgeCapsuleCopy.hintActive
         }
     }
 
@@ -234,4 +268,57 @@ struct PopopxBadgeCapsuleLight_Previews: PreviewProvider {
         PopopxBadgeCapsuleGallery()
             .preferredColorScheme(.light)
     }
+}
+
+// MARK: - 顶栏短句
+
+/// 顶栏这一枚胶囊的全部措辞。源文是英文原句，英文原句就是 Key（写法同 `PopopxTelemetryCopy`）：
+/// `en.lproj` 按约定不写，回落 Key 本身就是英文，16 个译本目录各写各的译法。
+///
+/// 2026-11-20 真机第 2 轮对"中文残留"的裁定是**只翻顶栏这一处**，所以这里只收顶栏会读到的
+/// 三句状态、三句 VoiceOver、三句提示和那个剩余时间；BadgeCredits 其余模块（扣点弹窗、详情页）
+/// 的中文 Copy 一律保持原样，`PopopxBadgeCopy.remainingClock` 也照旧服务详情页。
+private enum PopopxBadgeCapsuleCopy {
+    private static func key(_ value: String) -> String {
+        NSLocalizedString(value, comment: "POPOPX badge capsule")
+    }
+
+    static let dormant = key("Free node")
+    static func trial(_ left: String) -> String { String(format: key("Trial %@"), left) }
+    static func active(_ left: String) -> String { String(format: key("Encrypted routing · %@"), left) }
+
+    static let a11yDormant = key("POPOPX privacy node: free relay")
+    static func a11yTrial(_ left: String) -> String {
+        String(format: key("POPOPX pioneer node trial: %@ left"), left)
+    }
+    static func a11yActive(_ left: String) -> String {
+        String(format: key("POPOPX dynamic privacy node is lit: %@ left"), left)
+    }
+
+    static let hintDormant = key("Tap to see how to turn it on")
+    static let hintTrial = key("Tap to read what the trial includes")
+    static let hintActive = key("Tap to open badge details")
+
+    /// 顶栏的剩余时间只留两个最大单位，且每个组合都是一个完整 Key：`"3 d 2 h"` 这种两段拼接
+    /// 在 16 种语序里会翻车（俄语、匈牙利语会把它倒过来），所以宁可五句短句。
+    /// 单位写在词条里而不是代码里，译本可以自己的缩写规则为准。
+    static func clock(_ interval: TimeInterval) -> String {
+        let minutes = max(1, Int(ceil(max(0, interval) / 60)))
+        let days = minutes / 1_440
+        let hours = minutes % 1_440 / 60
+        let mins = minutes % 60
+        if days > 0 {
+            return hours > 0
+                ? String(format: key("%1$d d %2$d h"), days, hours)
+                : daysClock(days)
+        }
+        if hours > 0 {
+            return mins > 0
+                ? String(format: key("%1$d h %2$d min"), hours, mins)
+                : String(format: key("%d h"), hours)
+        }
+        return String(format: key("%d min"), mins)
+    }
+
+    static func daysClock(_ days: Int) -> String { String(format: key("%d d"), days) }
 }

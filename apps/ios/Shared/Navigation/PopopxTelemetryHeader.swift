@@ -13,8 +13,8 @@
 //  PopopxMaterial），此文件内没有任何裸色值或裸字号。
 //
 //  恐慌清除不重复实现：三击判定、确认弹窗与抹除顺序都在 `PopopxPanicWipeArming`
-//  （PopopxMeshKit/Sources/PopopxMeshUI/PanicWipeManager.swift:355）里，app 根部已经用
-//  `PopopxMeshPanicWipeMount`（Shared/Model/POPOPXAPI.swift:3953）挂载过一次。本文件的标记只是
+//  （PopopxMeshKit/Sources/PopopxMeshUI/PanicWipeManager.swift:357）里，app 根部已经用
+//  `PopopxMeshPanicWipeMount`（Shared/Model/POPOPXAPI.swift:4053）挂载过一次。本文件的标记只是
 //  **第二个入口**：把点击转发进同一台状态机，确认弹窗仍只由根部那一处呈现 —— 不会出现两个 alert
 //  抢同一次武装。
 //
@@ -48,11 +48,11 @@ enum PopopxHeaderSignal: Hashable {
 
     var label: String {
         switch self {
-        case .unknown: "状态未知"
-        case .online: "在线"
-        case let .degraded(reason): "在线 · \(reason)"
+        case .unknown: PopopxTelemetryCopy.unknown
+        case .online: PopopxTelemetryCopy.online
+        case let .degraded(reason): PopopxTelemetryCopy.onlineDegraded(reason)
         case let .meshOnly(note): note
-        case .offline: "离线"
+        case .offline: PopopxTelemetryCopy.offline
         }
     }
 
@@ -94,11 +94,13 @@ enum PopopxHeaderSignal: Hashable {
     /// - Parameter path: nil = 还没读到过任何一次 NWPath。
     static func resolve(proximityActive: Bool, directPeerCount: Int, path: PopopxNetworkPath?) -> PopopxHeaderSignal {
         if proximityActive {
-            return .meshOnly(note: directPeerCount > 0 ? "近场 · \(directPeerCount) 个节点" : "仅近场")
+            return .meshOnly(note: directPeerCount > 0
+                ? PopopxTelemetryCopy.nearby(directPeerCount)
+                : PopopxTelemetryCopy.nearbyOnly)
         }
         guard let path else { return .unknown }
         if !path.isConnected {
-            return directPeerCount > 0 ? .meshOnly(note: "离线 · \(directPeerCount) 个节点") : .offline
+            return directPeerCount > 0 ? .meshOnly(note: PopopxTelemetryCopy.meshOnly(directPeerCount)) : .offline
         }
         if path.isExpensive || path.isConstrained || path.interface == .cellular {
             return .degraded(reason: degradedReason(path))
@@ -107,11 +109,11 @@ enum PopopxHeaderSignal: Hashable {
     }
 
     private static func degradedReason(_ path: PopopxNetworkPath) -> String {
-        if path.isConstrained { return "低数据模式" }
+        if path.isConstrained { return PopopxTelemetryCopy.lowDataMode }
         switch path.interface {
-        case .cellular: return "蜂窝网络"
-        case .wifi: return "个人热点"
-        default: return "受限"
+        case .cellular: return PopopxTelemetryCopy.cellular
+        case .wifi: return PopopxTelemetryCopy.personalHotspot
+        default: return PopopxTelemetryCopy.restricted
         }
     }
 }
@@ -126,7 +128,7 @@ enum PopopxHeaderSignal: Hashable {
 @Observable
 final class PopopxTelemetryModel {
     /// 顶栏档位的全进程唯一实例。存在的理由只有一个：报告"近场在跑"的那一端（面对面页）和渲染顶栏的那一端
-    /// （消息页）不是同一个宿主 —— 消息页 `ChatsListView.swift:166` 渲染它，`PopopxProximityAddContactView`
+    /// （消息页）不是同一个宿主 —— 消息页 `ChatsListView.swift:178` 渲染它，`PopopxProximityAddContactView`
     /// 的 `begin()`/`finish()` 写它。给它单独再编一条总线才是多余，`resolve` 注释要的"持有两端的宿主"
     /// 因此就是这一个对象。`start()` 幂等（`pathStream == nil` 才订阅），所以重复挂载不会双订阅。
     static let shared = PopopxTelemetryModel()
@@ -224,12 +226,12 @@ struct PopopxIdentitySwitcher: View {
             .contentShape(.capsule)
         }
         .pickerStyle(.menu)
-        .accessibilityLabel("切换身份")
+        .accessibilityLabel(PopopxTelemetryCopy.switchIdentity)
         .accessibilityValue(currentName)
     }
 
     private var currentName: String {
-        identities.first { $0.userId == userId }?.displayName ?? "未选择"
+        identities.first { $0.userId == userId }?.displayName ?? PopopxTelemetryCopy.noIdentity
     }
 }
 
@@ -264,7 +266,9 @@ struct PopopxStatusPill: View {
         .foregroundStyle(tint)
         .padding(.horizontal, text.isEmpty ? 0 : PopopxMetrics.spaceM)
         .frame(height: PopopxMetrics.space2XL)
-        .frame(minWidth: text.isEmpty ? PopopxMetrics.space2XL : 0)
+        // 圆点档的最小宽度是 32 不是 48：这一枚不是按钮，宽度上不承载命中区，
+        // 高度 48 才是。顶栏第一行多出品牌标记之后，这 16pt 是"在线"那两个字能不能留下的差额。
+        .frame(minWidth: text.isEmpty ? PopopxMetrics.spaceXL : 0)
         .background(PopopxPalette.card, in: .capsule)
         .overlay {
             Capsule().strokeBorder(PopopxPalette.hairlineInner, lineWidth: PopopxMetrics.hairline)
@@ -303,7 +307,9 @@ struct PopopxDualStatusCapsule: View {
 
     var body: some View {
         // 三档：两端全文字 → 射频退回圆点 → 两端都退回圆点。降级靠换档，不靠截断中文。
-        // 实测 375pt 窄屏：身份胶囊右边 97、「+」左边 307，这一栏拿到 210pt 的可用宽度。
+        // 2026-11-20 顶栏并到第一行后重算过占有：全文字档 206、混合档 141、双圆点档 76，
+        // 而 393pt 留给这一簇的只有 76 那档（整行明细见 `PopopxTelemetryHeader` 文件头），
+        // 所以 iPhone 竖屏恒定停在双圆点 —— 这不是这三档白写，宽屏与 iPad 会升档。
         // 调用方不能再对它 `.fixedSize()`：那会把 proposal 变成 nil，三档永远停在最宽一档，
         // 溢出的 HStack 以中心对齐，于是两端同时被推出安全区（T0 就是先在这里红的）。
         ViewThatFits(in: .horizontal) {
@@ -316,29 +322,29 @@ struct PopopxDualStatusCapsule: View {
     private var networkPill: some View {
         PopopxStatusPill(symbol: network.symbol, text: network.label, tint: network.tint,
                          pulsing: network.isBreathing)
-            .accessibilityLabel("网络 \(network.label)")
+            .accessibilityLabel(PopopxTelemetryCopy.networkSpoken(network.label))
     }
 
     private var networkDot: some View {
         PopopxStatusPill(symbol: network.symbol, text: "", tint: network.tint,
                          pulsing: network.isBreathing)
-            .accessibilityLabel("网络 \(network.label)")
+            .accessibilityLabel(PopopxTelemetryCopy.networkSpoken(network.label))
     }
 
     private var bluetoothDot: some View {
         PopopxStatusPill(symbol: bluetooth.symbol, text: "", tint: bluetooth.tint)
-            .accessibilityLabel("蓝牙 \(bluetoothSpoken)")
+            .accessibilityLabel(PopopxTelemetryCopy.bluetoothSpoken(bluetoothSpoken))
     }
 
     /// 射频档位说人话。`unknown` 与 `resetting` 还不能下结论，所以不给危险色。
     static func words(for radio: PopopxBluetoothState) -> String {
         switch radio {
-        case .poweredOn: "蓝牙"
-        case .poweredOff: "蓝牙已关"
-        case .unauthorized: "蓝牙未授权"
-        case .unsupported: "本机不支持"
-        case .resetting: "蓝牙重置中"
-        case .unknown: "蓝牙未知"
+        case .poweredOn: PopopxTelemetryCopy.radioOn
+        case .poweredOff: PopopxTelemetryCopy.radioOff
+        case .unauthorized: PopopxTelemetryCopy.radioUnauthorized
+        case .unsupported: PopopxTelemetryCopy.radioUnsupported
+        case .resetting: PopopxTelemetryCopy.radioResetting
+        case .unknown: PopopxTelemetryCopy.radioUnknown
         }
     }
 }
@@ -376,20 +382,20 @@ struct PopopxPlusMenu: View {
 
     var body: some View {
         Menu {
-            Button("添加朋友", systemImage: "person.badge.plus") { onAddFriend?() }
+            Button(PopopxTelemetryCopy.addFriends, systemImage: "person.badge.plus") { onAddFriend?() }
                 .disabled(onAddFriend == nil)
-            Button("发起群聊或加密频道", systemImage: "person.3") { onStartGroupChat?() }
+            Button(PopopxTelemetryCopy.startGroup, systemImage: "person.3") { onStartGroupChat?() }
                 .disabled(onStartGroupChat == nil)
-            Button("扫一扫", systemImage: "qrcode.viewfinder") { onScan?() }
+            Button(PopopxTelemetryCopy.scan, systemImage: "qrcode.viewfinder") { onScan?() }
                 .disabled(onScan == nil)
             Divider()
             Button {
                 Task { await mint() }
             } label: {
                 if isMinting {
-                    Label("正在生成…", systemImage: "hourglass")
+                    Label(PopopxTelemetryCopy.minting, systemImage: "hourglass")
                 } else {
-                    Label("生成一次性连接链接", systemImage: "link")
+                    Label(PopopxTelemetryCopy.mintLink, systemImage: "link")
                 }
             }
             .disabled(isMinting)
@@ -401,16 +407,16 @@ struct PopopxPlusMenu: View {
                 .contentShape(.circle)
         }
         .menuIndicator(.hidden)
-        .accessibilityLabel("更多操作")
+        .accessibilityLabel(PopopxTelemetryCopy.moreActions)
         .sheet(isPresented: $showsInvite, onDismiss: { invite = nil }) {
             if let invite {
-                PopopxQRCardSheet(uri: invite.uri, identityName: "一次性连接链接")
+                PopopxQRCardSheet(uri: invite.uri, identityName: PopopxTelemetryCopy.oneTimeLink)
             }
         }
-        .alert("链接生成失败", isPresented: $showsFailure) {
-            Button("好", role: .cancel) {}
+        .alert(PopopxTelemetryCopy.mintFailedTitle, isPresented: $showsFailure) {
+            Button(PopopxTelemetryCopy.dismiss, role: .cancel) {}
         } message: {
-            Text("未建立连接：请检查网络或稍后重试。")
+            Text(PopopxTelemetryCopy.mintFailedBody)
         }
     }
 
@@ -449,19 +455,40 @@ struct PopopxPanicWipeTrigger: View {
             Image(PopopxBrandAsset.mark)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(width: PopopxMetrics.space2XL, height: PopopxMetrics.space2XL)
+                // 24 视觉 + 44 命中。上一版写的是 48 视觉套 44 命中：外层给 44，内层仍按 48 排版，
+                // 标记会左右各溢出 2pt 挤进行间距里，而这一行的行间距只有 4。
+                .frame(width: PopopxMetrics.spaceL, height: PopopxMetrics.spaceL)
                 .frame(width: PopopxMetrics.minHitTarget, height: PopopxMetrics.minHitTarget)
                 .contentShape(.rect)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("POPOPX")
-        .accessibilityHint("连点三次可清除本地近场数据")
+        .accessibilityHint(PopopxTelemetryCopy.panicHint)
     }
 }
 
 // MARK: - 三段式头部
 
 /// 顶部三段式导航。放在宿主的 `NavigationStack` 里（或任何工具栏位置）使用。
+///
+/// 2026-11-20 真机第 2 轮：这一条就是消息页的**第一行**（原先占一行的「消息」标题与
+/// `.searchable` 抽屉一起撤掉，见 `ChatsListView.swift` 的 `chrome`），所以宽度按 iPhone 15 Pro 的
+/// 393pt 逐件算过一遍，口径是"取各件的最小档，最长的身份名按 3 个汉字算"：
+/// 内边距 16×2 = 32，标记 44，身份 104（`headerIdentityMaxWidth` 120 是上限不是占有），
+/// 徽章 48（`compact` 档 = 12+24+12，符号片自己 24），双模胶囊 76（两枚圆点档 32 + 内间距 12），
+/// 「+」44，六处行间距 4×6 = 24，两处 `Spacer(minLength: 4)` = 8 —— **合计 380，留 13pt 余量**。
+///
+/// 三条推论，都是这一版刻意的设计而不是妥协：
+/// 1. 顶栏第一行**放不下任何一句状态文字**：带"在线"两个字要再 +65（445），徽章带文字要再 +96（476），
+///    393pt 都不够。所以状态一律走"符号 + 颜色 + 描边 + 光晕"四重线索，文字在点开的详情页里；
+///    宽屏（iPad／横屏）由 `ViewThatFits` 自动升回带字的档位，这条降级就是徽章那两档。
+/// 2. 唯一可压缩的是身份名（它有 `lineLimit(1)` + 尾部省略），所以 `.layoutPriority(1)` 只给「+」
+///    那一枚 44 的命中区，不给身份胶囊。上一版把优先级给身份，在 375pt 上整行溢出、两端同时被推出
+///    安全区（`PopopxDualStatusCapsule` 的注释记着 T0 那次同样的翻法）。
+/// 3. 行内间距从 `spaceS`(12) 降到 `space2XS`(4)、页边距从 `spaceL`(24) 收到 `gutter`(16)、
+///    两处 `Spacer` 的下限同步降到 4：这三笔一共腾出 76pt，正好抵掉新加的品牌标记那 52pt
+///    （同一口径算上一版无标记的那一行是 404：393 从来就不够，缺口当时被身份名的截断吃掉了，看不出来）。
+///    16 还恰好和下面筛选条的 `gutter` 对齐，第一行不再比列表内容缩进 8pt。
 struct PopopxTelemetryHeader: View {
     @Binding var currentUserId: Int64?
     var identities: [User] = []
@@ -474,28 +501,35 @@ struct PopopxTelemetryHeader: View {
     var onScan: (() -> Void)? = nil
 
     var body: some View {
-        HStack(spacing: PopopxMetrics.spaceS) {
+        HStack(spacing: PopopxMetrics.space2XS) {
+            // 紫色品牌标记 = 恐慌清除的第二入口。三击判定与确认弹窗都在状态机那一侧，
+            // 保险丝断开时它只是个图案（`PopopxPanicWipeTrigger.isArmed` 的判据）。
+            PopopxPanicWipeTrigger()
+                .accessibilityIdentifier("popopx.header.mark")
+            // 不给 `layoutPriority`：这一行里唯一该被压缩的就是身份名（`lineLimit(1)` + 尾部省略）。
+            // 优先级给了它会换来整行溢出、两端被推出安全区，见上面第 2 条推论。
             PopopxIdentitySwitcher(userId: $currentUserId, identities: identities)
                 .frame(maxWidth: PopopxMetrics.headerIdentityMaxWidth, alignment: .leading)
-                .layoutPriority(1)
                 .accessibilityIdentifier("popopx.header.identity")
-            Spacer(minLength: PopopxMetrics.spaceS)
-            // 徽章胶囊：算力点生态唯一常驻的入口，所以放在顶栏而不是"我的"页里。
-            // 用 `compact: true`——这一行已经有四段，窄屏（320pt）上中文那一段最先该省；
-            // 双模那枚自己有 `ViewThatFits` 的三档（下面那句注释），省字段的活儿交给它更合适。
-            PopopxBadgeCapsuleView(compact: true)
-                .fixedSize()
-                .accessibilityIdentifier("popopx.header.badge")
-            Spacer(minLength: PopopxMetrics.spaceS)
-            // 不 fixedSize：把剩余宽度真的报给它，ViewThatFits 的三档才有得选。
+            Spacer(minLength: PopopxMetrics.space2XS)
+            // 中簇整体不 fixedSize：把剩余宽度真的报给两枚胶囊，它们的档位才有得选。
+            // 徽章两档：带字那档要 144（短到"体验 3d 4h"也是），393pt 装不下，于是 iPhone 上恒定
+            // 退到只留符号的 48；iPad／横屏自动升回带字档。状态语义由实心色片 + 描边 + 光晕承载，
+            // 见 `PopopxBadgeCapsuleView` 文件头。
+            ViewThatFits(in: .horizontal) {
+                PopopxBadgeCapsuleView(compact: false)
+                PopopxBadgeCapsuleView(compact: true)
+            }
+            .accessibilityIdentifier("popopx.header.badge")
             PopopxDualStatusCapsule(network: signal, radio: radioState)
-            Spacer(minLength: PopopxMetrics.spaceS)
+            Spacer(minLength: PopopxMetrics.space2XS)
             PopopxPlusMenu(onAddFriend: onAddFriend, onStartGroupChat: onStartGroupChat, onScan: onScan)
                 .fixedSize()
                 .layoutPriority(1)
                 .accessibilityIdentifier("popopx.header.plus")
         }
-        .padding(.horizontal, PopopxMetrics.spaceL)
+        // 16 而不是 24：与下面筛选条的 `gutter` 对齐，同时把 8pt 还给状态那一簇。
+        .padding(.horizontal, PopopxMetrics.gutter)
         // 两枚胶囊自己要 48：原来按 44 夹，画出来只剩 34，点按热区跟着缩水。
         .frame(height: PopopxMetrics.space2XL)
         .background(PopopxMaterial.bar)
@@ -508,6 +542,65 @@ struct PopopxTelemetryHeader: View {
         guard let telemetry else { return radio }
         return telemetry.radioState
     }
+}
+
+// MARK: - 文案
+
+/// 顶栏的全部措辞。源文是英文原句，英文原句就是 Key（写法同 `PopopxCabinView.swift` 的 `key(_:)`）：
+/// `en.lproj` 按约定不写，读不到词条就回落 Key 本身，那正好是英文；16 个译本目录各写各的译法。
+///
+/// 2026-11-20 真机第 2 轮对"中文残留"的裁定是**只翻顶栏这一处**，所以本文件与
+/// `PopopxBadgeCapsuleView.swift` 里顶栏会用到的短句走词条，BadgeCredits 其余模块的中文 Copy 保持原样。
+///
+/// 带数字的句子一律只给一个占位符（`%@` 或 `%d`）；确实需要两个的写成 `%1$d … %2$d`。
+/// 16 种语序不同，靠出现顺序排参数会在某一语种里把"3 天 2 小时"念成"2 小时 3 天"。
+enum PopopxTelemetryCopy {
+    private static func key(_ value: String) -> String {
+        NSLocalizedString(value, comment: "POPOPX telemetry header")
+    }
+
+    private static func fmt(_ value: String, _ argument: CVarArg) -> String {
+        String(format: key(value), argument)
+    }
+
+    static let unknown = key("Status unknown")
+    static let online = key("Online")
+    static let offline = key("Offline")
+    static func onlineDegraded(_ reason: String) -> String { fmt("Online · %@", reason) }
+    static let lowDataMode = key("Low data mode")
+    static let cellular = key("Cellular")
+    static let personalHotspot = key("Personal hotspot")
+    static let restricted = key("Restricted")
+    static func nearby(_ nodes: Int) -> String { fmt("Nearby · %d nodes", nodes) }
+    static let nearbyOnly = key("Nearby only")
+    static func meshOnly(_ nodes: Int) -> String { fmt("Offline · %d nodes", nodes) }
+
+    static let radioOn = key("Bluetooth")
+    static let radioOff = key("Bluetooth off")
+    static let radioUnauthorized = key("Bluetooth not allowed")
+    static let radioUnsupported = key("Not supported here")
+    static let radioResetting = key("Bluetooth resetting")
+    static let radioUnknown = key("Bluetooth unknown")
+
+    static func networkSpoken(_ label: String) -> String { fmt("Network: %@", label) }
+    static func bluetoothSpoken(_ label: String) -> String { fmt("Bluetooth: %@", label) }
+
+    static let switchIdentity = key("Switch identity")
+    static let noIdentity = key("No identity selected")
+    static let panicHint = key("Tap three times to clear local nearby data")
+
+    static let addFriends = key("Add friends")
+    static let startGroup = key("Start a group chat or an encrypted channel")
+    static let scan = key("Scan")
+    static let minting = key("Generating…")
+    static let mintLink = key("Create a one-time connection link")
+    static let oneTimeLink = key("One-time connection link")
+    static let moreActions = key("More actions")
+    static let mintFailedTitle = key("The link could not be created")
+    static let mintFailedBody = key("Not connected: check the network or try again later.")
+    /// 复用既有词条：`"OK"` 在 17 个目录里都已经有译法，不再新造一句
+    /// （口径同 `PopopxCabinView.swift` 里直接 `NSLocalizedString("Cancel", …)` 的复用行）。
+    static let dismiss = NSLocalizedString("OK", comment: "Telemetry: dismissing the failed invite link")
 }
 
 // MARK: - Previews

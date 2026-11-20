@@ -23,10 +23,10 @@
 //     · `.routeViaMesh(message)` → 宿主做 `await PopopxMeshRuntime.shared.router.send(message)`
 //       （`PopopxMeshKit/…/Router/PopopxMessageRouter.swift:627`），返回的 `PopopxRoutedMessage`
 //       （:241）交给模块 7 的时间线；本条**自己不发**，也不碰 `router.start()`/`stop()`——那是保险丝的
-//       事（`Shared/Model/POPOPXAPI.swift:3758` 把 router 注册进 killSwitch）。
+//       事（`Shared/Model/POPOPXAPI.swift:3818` 把 router 注册进 killSwitch）。
 //     · `.hostShouldSend(reason)` → 宿主走原链路（`ComposeView.swift:1793 sendMessage(ttl:sign:)` →
 //       `:1723 sendMessageAsync` → `:1752 send(.text…)` → `:1931`/`:1940 send(_ msgs:)` →
-//       `apiSendMessages`（`POPOPXAPI.swift:577`）→ `processSendMessageCmd`（:582）→ `chatApiSendCmd`）。
+//       `apiSendMessages`（`POPOPXAPI.swift:588`）→ `processSendMessageCmd`（:593）→ `chatApiSendCmd`）。
 //  5. 键盘避让、safe area、`keyboardVisible` 归宿主：本条只画自己那一条，不读屏幕常量。
 //
 //  ── 为什么必须存在 `hostShouldSend` 这一支（TTL / sign 限制，红线级事实）────────────
@@ -34,7 +34,7 @@
 //  `messageId / contactId / text / sentAt` 四个字段，app 侧的实现把 `.text(request.text)` 组成
 //  `ComposedMessage` 后调 `apiSendMessages(type: .direct, id: contactId, …)` 并自己 `addChatItem`
 //  （`POPOPXAPI.swift:3467`-`:3480`）。所以路由一条直聊纯文本**不会分叉出第二条网线**；
-//  但那条腿上**没有 `ttl` 也没有 `sign`**（`apiSendMessages` 的这两个入参在 `POPOPXAPI.swift:577`），
+//  但那条腿上**没有 `ttl` 也没有 `sign`**（`apiSendMessages` 的这两个入参在 `POPOPXAPI.swift:588`），
 //  且只支持 `.direct` 的 contactId。于是"全部交给路由"会静默丢掉阅后即焚、签名、群组 scope、引用、
 //  附件、@提及与 live 消息。这个限制因此被写进判定表，而不是藏在视图代码里。
 //
@@ -127,7 +127,7 @@ struct PopopxComposerContext: Hashable {
 
 /// 一次批量读出来的网格事实。值类型，判定表只读它，视图不在渲染路径上 await 它。
 struct PopopxMeshEligibility: Equatable {
-    /// 厢语总闸（`PopopxMeshRuntime.isFuseOn`，`POPOPXAPI.swift:3640`）。
+    /// 厢语总闸（`PopopxMeshRuntime.isFuseOn`，`POPOPXAPI.swift:3740`）。
     var fuseOn = false
     /// 绑定表读完没有。没读完时任何通道结论都为时过早。
     var bindingLoaded = false
@@ -158,7 +158,7 @@ struct PopopxMeshEligibility: Equatable {
 
 /// 交回宿主的理由。每条都对应模块 5 的公网腿上真实缺的一个入参，或者一个真实的网格事实。
 enum PopopxHostSendReason: Hashable {
-    /// 阅后即焚：`apiSendMessages` 的 `ttl`（`POPOPXAPI.swift:577`）在 `PopopxSMPSendRequest` 里没有位置。
+    /// 阅后即焚：`apiSendMessages` 的 `ttl`（`POPOPXAPI.swift:588`）在 `PopopxSMPSendRequest` 里没有位置。
     case timedMessage(seconds: Int)
     /// 签名消息：同上，腿上没有 `sign`。
     case signedMessage
@@ -439,7 +439,7 @@ final class PopopxInputBarModel: ObservableObject {
     var resolver: (@MainActor (Int64?) async -> PopopxMeshEligibility)?
 
     /// 5 秒一跳，只为了把"邻居静默超窗"这件事自己褪下去；和消息列表页同一个节奏
-    /// （`Shared/Features/Chats/ChatsListView.swift:414`-`:421`）。
+    /// （`Shared/Features/Chats/ChatsListView.swift:452`-`:421`）。
     static let pollIntervalSeconds: Double = 5
 
     func refresh(contactId: Int64?) async {
@@ -593,8 +593,8 @@ struct PopopxInputBar: View {
     private static let maxComposerLines = 5
 
     /// `@MainActor` 是为了在 init 里取那两个 `@MainActor` 单例（`PopopxMeshRuntime.shared`
-    /// `POPOPXAPI.swift:3632`、`PopopxMeshStateSource.shared` `PopopxMeshStateSource.swift:158`）——
-    /// 和第四阶段那几页同一个写法（`Shared/Features/Chats/ChatsListView.swift:160`）。
+    /// `POPOPXAPI.swift:3732`、`PopopxMeshStateSource.shared` `PopopxMeshStateSource.swift:158`）——
+    /// 和第四阶段那几页同一个写法（`Shared/Features/Chats/ChatsListView.swift:163`）。
     @MainActor
     init(
         text: Binding<String>,

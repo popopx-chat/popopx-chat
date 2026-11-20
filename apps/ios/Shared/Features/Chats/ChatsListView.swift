@@ -10,7 +10,7 @@
 //  栈的归属（这里按**已落地的** `Shared/Navigation/MainTabView.swift` 来，而不是按任务书的假设）：
 //  MainTabView.swift:14-20 与 :76-79 明确决定"消息这一栏自己带 NavigationStack，其余三栏才由壳包"。
 //  理由是本工程把"打开会话"翻成"推送一页"的唯一一处，是 `ChatModel.chatId`
-//  （Shared/Model/ChatModel.swift:411）到栈路径的绑定（旧 ChatListView.swift:204-211）；
+//  （Shared/Model/ChatModel.swift:411）到栈路径的绑定（旧 ChatListView.swift:210-217）；
 //  而 `chatId` 的写入口是 `ItemsModel.loadOpenChat`（:113）/`loadOpenChatNoWait`（:139），
 //  调用方包括通知（Shared/Model/NtfManager.swift:81）、deep link／建连（Shared/Model/POPOPXAPI.swift:1091
 //  /:1825/:2182/:2849）、附件打开（ChatModel.swift:1303）与新建联系人。绑定一旦挪到壳里，
@@ -35,7 +35,7 @@
 //
 //  守的红线：不碰 project.pbxproj（本文件需人工拖入 POPOPX (iOS) target）；颜色/间距/字号/弹簧
 //  只取 PopopxTheme 的 token；不复用 `ChatListNavLink` / `ChatPreviewView`（旧主题），但打开会话
-//  用的仍是真实的 `ChatView` 与它原有的五个入参（Shared/Views/ChatList/ChatListView.swift:631）。
+//  用的仍是真实的 `ChatView` 与它原有的五个入参（Shared/Views/ChatList/ChatListView.swift:637）。
 //
 
 import SwiftUI
@@ -138,6 +138,9 @@ struct ChatsListView: View {
     @State private var toast = PopopxToastModel()
     @State private var filter: PopopxChatFilter = .all
     @State private var searchText = ""
+    /// 2026-11-20 真机第 2 轮裁定的「放大镜 + 可折叠搜索行」：默认收起，点开才占一行。
+    /// 收起时把 `searchText` 清掉，避免一个看不见却还在过滤列表的条件。
+    @State private var showsSearchRow = false
     /// 身份切换器只**写**这个值，真正的切换由下面的 `switchIdentity` 做（顶栏刻意不自己切）。
     @State private var currentUserId: Int64?
     @State private var showsAddFriend = false
@@ -183,7 +186,7 @@ struct ChatsListView: View {
     }
 
     /// `ChatModel.chatId`（Shared/Model/ChatModel.swift:411）→ 栈路径。形与语义照抄旧
-    /// ChatListView.swift:204-211：字段非空即压上一页，返回即写回 nil。路径元素用 `Bool`
+    /// ChatListView.swift:210-217：字段非空即压上一页，返回即写回 nil。路径元素用 `Bool`
     /// （旧代码同一个类型）：本页只需要"有没有打开的会话"这个信号，具体哪一条永远从 `chatId`
     /// 现读，因此不存在两份真值。
     private var chatPath: Binding<[Bool]> {
@@ -229,9 +232,11 @@ struct ChatsListView: View {
         .environment(\.defaultMinListRowHeight, PopopxMetrics.minHitTarget)
         .scrollContentBackground(.hidden)
         .background(PopopxPalette.base)
-        .navigationTitle(Copy.tabTitle)
-        .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: Copy.searchPrompt)
+        // 「消息」那一行大标题连同 `.searchable` 抽屉一起撤掉（真机第 2 轮第 1 项）：
+        // 系统标题栏整条隐藏，第一行改由 `chrome` 里的统一顶栏承担，搜索收进可折叠行。
+        // 隐藏只作用于栈的这一页 —— `PopopxChatRoomDestination` 自己声明标题栏可见，
+        // 返回按钮与页内导航不受影响。
+        .toolbar(.hidden, for: .navigationBar)
         .safeAreaInset(edge: .top, spacing: 0) { chrome }
         // 打开会话：目的地类型与旧的五个入参一字不改照抄（见 `PopopxChatRoomDestination`）。
         .navigationDestination(for: Bool.self) { _ in chatRoom() }
@@ -242,12 +247,15 @@ struct ChatsListView: View {
             PopopxCreateGroupView()
                 .navigationTitle(Copy.createGroupTitle)
                 .modifier(ThemedBackground(grouped: true))
+                // 新建对话框同样收起底栏（真机第 2 轮第 2 项，口径同 `chatRoom()`）。
+                .toolbar(.hidden, for: .tabBar)
         }
         .navigationDestination(isPresented: $showsScan) {
             NewChatView(selection: .connect, showQRCodeScanner: true)
                 .navigationTitle(Copy.scanTitle)
                 .modifier(ThemedBackground(grouped: true))
                 .navigationBarTitleDisplayMode(.inline)
+                .toolbar(.hidden, for: .tabBar)
         }
         .sheet(isPresented: $showsAddFriend) {
             PopopxAddFriendView()
@@ -284,15 +292,33 @@ struct ChatsListView: View {
                 onStartGroupChat: { showsCreateGroup = true },
                 onScan: { showsScan = true }
             )
-            PopopxChatFilterBar(
-                selection: $filter,
-                counts: counts(of: searchedEntries())
-            )
+            if showsSearchRow {
+                PopopxChatSearchRow(text: $searchText, onClose: closeSearchRow)
+                    .transition(.opacity)
+            } else {
+                PopopxChatFilterBar(
+                    selection: $filter,
+                    counts: counts(of: searchedEntries()),
+                    onSearch: { popopxToggleSearch(open: true) }
+                )
+            }
             Rectangle()
                 .fill(PopopxPalette.separator)
                 .frame(height: PopopxMetrics.divider)
         }
         .background(PopopxMaterial.bar)
+    }
+
+    /// 展开/收起搜索行。动画走品牌弹簧，Reduce Motion 由 `popopxAnimation` 那侧统一管。
+    private func popopxToggleSearch(open: Bool) {
+        withAnimation(PopopxSpring.snappy) { showsSearchRow = open }
+        PopopxHaptics.selection()
+    }
+
+    /// 收起一定要清条件：留着关键词，用户看到的是一条"莫名其妙少了几行"的列表。
+    private func closeSearchRow() {
+        searchText = ""
+        popopxToggleSearch(open: false)
     }
 
     // MARK: 行
@@ -317,7 +343,7 @@ struct ChatsListView: View {
         .listRowBackground(Color.clear)
     }
 
-    /// 会话能不能打开，照抄旧列表同一处判据（Shared/Views/ChatList/ChatListView.swift:562）。
+    /// 会话能不能打开，照抄旧列表同一处判据（Shared/Views/ChatList/ChatListView.swift:568）。
     private func canOpen(_ chat: Chat) -> Bool {
         chatModel.chatRunning == true && !chatModel.deletedChats.contains(chat.chatInfo.id)
     }
@@ -332,21 +358,33 @@ struct ChatsListView: View {
     }
 
     /// 目的地：id 从 `chatId` 现读，`PopopxChatRoomDestination` 再按 id 取会话。
+    /// 栈路径翻出来的那一页。两个分支都要挂到，所以包一层 `Group`：
+    /// "会话已经不在了"那一屏同样是对话框栈里的一页，底栏该收就得收。
     @ViewBuilder private func chatRoom() -> some View {
-        if let chatId = chatModel.chatId {
-            PopopxChatRoomDestination(chatId: chatId)
-        } else {
-            Text(Copy.chatGone)
-                .font(PopopxType.meta)
-                .foregroundStyle(PopopxPalette.labelSecondary)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(PopopxPalette.base)
+        Group {
+            if let chatId = chatModel.chatId {
+                PopopxChatRoomDestination(chatId: chatId)
+            } else {
+                Text(Copy.chatGone)
+                    .font(PopopxType.meta)
+                    .foregroundStyle(PopopxPalette.labelSecondary)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(PopopxPalette.base)
+            }
         }
+        // 真机第 2 轮第 2 项：进对话框就收起底部四栏。这一句挂在"被推入的那一页"上，
+        // 不是挂在列表上，所以返回时系统按作用域自己收回 —— 列表页底栏照旧四栏。
+        // 通讯录与厢语打开会话也走这里：它们都只写 `ChatModel.chatId`，
+        // 由 `MainTabView.swift:179` 把栏切到"消息"后由本页的栈呈现，全 app 只有这一个对话框出口。
+        .toolbar(.hidden, for: .tabBar)
+        // 顶栏那一行在列表页被整条隐藏（上面 `chatList`），对话框必须自己声明可见，
+        // 否则返回按钮和 ChatView 的标题栏一起没了。
+        .toolbar(.visible, for: .navigationBar)
     }
 
     // MARK: 数据
 
-    /// 与旧列表同一条排除规则（Shared/Views/ChatList/ChatListView.swift:655）。
+    /// 与旧列表同一条排除规则（Shared/Views/ChatList/ChatListView.swift:661）。
     private func searchedEntries() -> [PopopxChatEntry] {
         let query = searchText.trimmed.localizedLowercase
         var entries: [PopopxChatEntry] = []
@@ -474,7 +512,7 @@ struct ChatsListView: View {
         }
     }
 
-    /// 可切换的身份：与 UserPicker.swift:33-35（同 `PopopxMeView.swift:465-467`）一个口径 ——
+    /// 可切换的身份：与 UserPicker.swift:33-35（同 `PopopxMeView.swift:491-493`）一个口径 ——
     /// 加锁的身份（`user.hidden`，即有 `viewPwdHash`）不进切换器，因为这里传的是 `viewPwd: nil`，
     /// 带着 nil 去切加锁身份只会失败；加锁身份归「我」页的身份管理。
     /// 但当前身份必须在表里，否则顶栏会把自己的名字显示成"未选择"。顺序同 UserPicker
@@ -523,19 +561,41 @@ struct ChatsListView: View {
 @MainActor private struct PopopxChatFilterBar: View {
     @Binding var selection: PopopxChatFilter
     let counts: [PopopxChatFilter: Int]
+    /// 行尾钉住的搜索入口，nil 就不画。刻意不放进横向滚动区：它在整行最右，
+    /// 滚到任何一个筛选胶囊时都点得到（真机第 2 轮裁定「放大镜 + 可折叠搜索行」）。
+    var onSearch: (() -> Void)? = nil
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        // 横向滚动而不是换行：无障碍字号下三枚中文胶囊放不进一行，截断比滚动更糟。
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: PopopxMetrics.spaceXS) {
-                ForEach(PopopxChatFilter.allCases) { option in
-                    capsule(option)
+        // 横向滚动而不是换行：无障碍字号下三枚筛选胶囊放不进一行，截断比滚动更糟。
+        // 行尾那枚放大镜钉在滚动区外面：HStack 先把固定宽度的一端排好，ScrollView 吃剩下的，
+        // 所以把搜索入口包在这一层外面不会让整行的档位测量出错（顶栏那一簇就是被
+        // `ViewThatFits` 之外的 `.fixedSize()` 坑过，同一个教训）。
+        HStack(spacing: 0) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: PopopxMetrics.spaceXS) {
+                    ForEach(PopopxChatFilter.allCases) { option in
+                        capsule(option)
+                    }
                 }
+                .padding(.leading, PopopxMetrics.gutter)
+                .padding(.trailing, onSearch == nil ? PopopxMetrics.gutter : PopopxMetrics.spaceXS)
+                .padding(.vertical, PopopxMetrics.space2XS)
             }
-            .padding(.horizontal, PopopxMetrics.gutter)
-            .padding(.vertical, PopopxMetrics.space2XS)
+            if let onSearch {
+                Button(action: onSearch) {
+                    Image(systemName: "magnifyingglass")
+                        .font(PopopxType.secondary)
+                        .foregroundStyle(PopopxPalette.labelSecondary)
+                        .frame(width: PopopxMetrics.minHitTarget, height: PopopxMetrics.minHitTarget)
+                        .contentShape(.rect)
+                }
+                .buttonStyle(PopopxPressButtonStyle(feedback: nil))
+                .accessibilityLabel(Copy.searchOpen)
+                .accessibilityIdentifier("popopx.chats.searchToggle")
+                .padding(.trailing, PopopxMetrics.gutter - PopopxMetrics.space2XS)
+            }
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Copy.filterGroupLabel)
@@ -572,6 +632,64 @@ struct ChatsListView: View {
         .accessibilityLabel(option.title)
         .accessibilityValue(Copy.filterValue(count, hopCap: ChatsListView.maxMeshHops, isMesh: option == .meshOffline))
         .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}
+
+// MARK: - 可折叠搜索行
+
+/// 顶栏第 2 轮裁定的那一行：放大镜点开才出现，绑定同一个 `searchText`，
+/// 所以过滤逻辑（`searchedEntries()`）一行都没改，只是从 `.searchable` 抽屉搬进了页面自己的一行。
+/// 输入框不设圆角卡片以外的装饰：44pt 命中、`gutter` 对齐列表内容，收起条件在右侧。
+@MainActor private struct PopopxChatSearchRow: View {
+    @Binding var text: String
+    let onClose: () -> Void
+
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        HStack(spacing: PopopxMetrics.spaceXS) {
+            Image(systemName: "magnifyingglass")
+                .font(PopopxType.secondary)
+                .foregroundStyle(PopopxPalette.labelSecondary)
+            TextField(Copy.searchPrompt, text: $text)
+                .font(PopopxType.body)
+                .textFieldStyle(.plain)
+                .foregroundStyle(PopopxPalette.label)
+                .autocorrectionDisabled()
+                .submitLabel(.search)
+                .focused($focused)
+                .accessibilityLabel(Copy.searchPrompt)
+                .accessibilityIdentifier("popopx.chats.searchField")
+            if !text.isEmpty {
+                Button { text = "" } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(PopopxType.secondary)
+                        .foregroundStyle(PopopxPalette.labelHint)
+                        .frame(width: PopopxMetrics.minHitTarget, height: PopopxMetrics.minHitTarget)
+                        .contentShape(.rect)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Copy.searchClear)
+            }
+            Button(action: onClose) {
+                Text(Copy.searchClose)
+                    .font(PopopxType.emphasis)
+                    .foregroundStyle(PopopxPalette.brand)
+                    .frame(minHeight: PopopxMetrics.minHitTarget)
+                    .padding(.horizontal, PopopxMetrics.space2XS)
+                    .contentShape(.rect)
+            }
+            .buttonStyle(PopopxPressButtonStyle(feedback: nil))
+            .accessibilityIdentifier("popopx.chats.searchClose")
+        }
+        .padding(.horizontal, PopopxMetrics.spaceS)
+        .frame(minHeight: PopopxMetrics.minHitTarget)
+        .background(PopopxPalette.card, in: .rect(cornerRadius: PopopxMetrics.radiusControl))
+        .padding(.horizontal, PopopxMetrics.gutter)
+        .padding(.vertical, PopopxMetrics.space2XS)
+        // 展开即聚焦：这一步让"点开搜索"和"开始输入"合成一次操作，收起来时同步交还键盘。
+        .onAppear { focused = true }
+        .onDisappear { focused = false }
     }
 }
 
@@ -818,7 +936,7 @@ struct ChatsListView: View {
 
 // MARK: - 聊天室目的页
 
-/// 真实目的页：`ChatView` 与它的五个入参照抄 `Shared/Views/ChatList/ChatListView.swift:631`。
+/// 真实目的页：`ChatView` 与它的五个入参照抄 `Shared/Views/ChatList/ChatListView.swift:637`。
 /// 按 id 现取，会话在打开前被删掉时说实话，不给一个空壳聊天室。
 @MainActor private struct PopopxChatRoomDestination: View {
     @EnvironmentObject private var chatModel: ChatModel
@@ -854,8 +972,16 @@ private extension String {
 
 /// 用户可见的中文一律在这里声明一次（§2.5 第 3 条：原子控件库不内置文案，页面自己给）。
 private enum Copy {
-    static let tabTitle = "消息"
-    static let searchPrompt = "搜索会话名称"
+    /// 顶栏那一行的文案在 `PopopxTelemetryCopy`；这里只剩筛选条与本页 own 的短句。
+    /// 源文是英文原句、英文原句就是 Key（`en.lproj` 按约定不写），16 个译本目录各写译法。
+    static func key(_ value: String) -> String {
+        NSLocalizedString(value, comment: "POPOPX chat list")
+    }
+
+    static let searchPrompt = key("Search conversations")
+    static let searchOpen = key("Search")
+    static let searchClear = key("Clear the search text")
+    static let searchClose = key("Close search")
     static let filterGroupLabel = "会话通道过滤"
     static let filterAll = "全部"
     static let filterOnline = "在线加密"

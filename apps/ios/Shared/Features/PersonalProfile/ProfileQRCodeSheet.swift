@@ -26,19 +26,19 @@
 //  改写成 `https://popopx.chat//profile?…`（多出来的那一个斜杠就是它把 `popopx:/` 换成
 //  `https://popopx.chat/` 之后剩下的第二个 `/`），扫出来是一个本 app 路由不到的地址。所以本码承载
 //  `PopopxInviteLink.mintOneTime` 铸出的联系地址，主页由 `ProfileAutoSender` 在建连之后另发一条消息。
-//  传进去的那一枚已经是 `popopxChatLink` 处理过的形态（PopopxTelemetryHeader.swift:361），再过一次是恒等，
+//  传进去的那一枚已经是 `popopxChatLink` 处理过的形态（PopopxTelemetryHeader.swift:367），再过一次是恒等，
 //  这一点是这个复用能成立的前提，不是巧合。
 //
 //  ### 飞行模式下这张码能做什么、不能做什么（不假装有离线钩子）
 //  它仍然是一条真的 `/_connect` 邀请：`PopopxInviteLink.mintOneTime` 底下就是
-//  `apiAddContact(incognito:)`（POPOPXAPI.swift:1039），与模块 6 离线配对的第一步同一个命令
-//  （`PopopxMeshChatCore.createOfflineInvite`，POPOPXAPI.swift:3430-3434 交回的就是
+//  `apiAddContact(incognito:)`（POPOPXAPI.swift:1050），与模块 6 离线配对的第一步同一个命令
+//  （`PopopxMeshChatCore.createOfflineInvite`，POPOPXAPI.swift:3470-3474 交回的就是
 //  `CreatedConnLink.connFullLink`）。**但它不能把主页从蓝牙递过去**：厢语那一条的邀请串要
 //  `PopopxOfflineBridge.generateOfflineInviteLink(meshPublicKeyHex:incognito:)`
 //  （PopopxOfflineBridge.swift:138）里的**对方厢语公钥**，而一枚摆在屏幕上等人扫的静态码不可能预先
 //  知道来扫的是哪台设备（现网每一个调用点都从一次真实的近场会话里拿到那颗公钥：
 //  ManualPairingManager.swift:133/:151、PopopxProximityEngine.swift:638/:643）。桥本身也不对 app 层
-//  开放：它只在 `PopopxMeshRuntime` 的私有 init 里被建出来一次（POPOPXAPI.swift:3677）。
+//  开放：它只在 `PopopxMeshRuntime` 的私有 init 里被建出来一次（POPOPXAPI.swift:3777）。
 //  所以本卡片**不调用**离线桥，只在卡下把这一条如实写明；断网时主页发不出去由
 //  `ProfileAutoSender` 的降级分支（纯文字）负责，而不是靠这张码。
 //
@@ -70,7 +70,7 @@ struct ProfileQRCodeSheet: View {
     /// 预生成的二维码位图。存在的理由有两个：截图存档时必须有一张扫得开的码（`QRCode` 自己的
     /// `.task` 在 `makeScreenshot` 那条离屏渲染路径上不会跑），以及重铸之后不留旧码的残影。
     @State private var qrBitmap: UIImage?
-    /// 铸链的失败原因。`apiAddContact` 吞掉错误只返回 nil（POPOPXAPI.swift:1039），所以这一句
+    /// 铸链的失败原因。`apiAddContact` 吞掉错误只返回 nil（POPOPXAPI.swift:1050），所以这一句
     /// 只能由这里给；它同时是占位那一格里"重试"按钮存在的理由。
     @State private var mintFailure: String?
     @State private var isMinting = false
@@ -454,8 +454,8 @@ struct ProfileQRCodeSheet: View {
 
     /// 铸一条一次性连接链接。**不自己拼串**：`PopopxInviteLink.mintOneTime` 底下就是
     /// `apiAddContact(incognito:)` + `popopxChatUri(short:)` + `popopxChatLink`
-    /// （PopopxTelemetryHeader.swift:359-362），返回的已经是 `https://popopx.chat/…` 形态。
-    /// 失败时 `apiAddContact` 不抛只返回 nil（POPOPXAPI.swift:1039），所以这里必须给可见反馈。
+    /// （PopopxTelemetryHeader.swift:365-368），返回的已经是 `https://popopx.chat/…` 形态。
+    /// 失败时 `apiAddContact` 不抛只返回 nil（POPOPXAPI.swift:1050），所以这里必须给可见反馈。
     private func mint() async {
         guard !isMinting else { return }
         isMinting = true

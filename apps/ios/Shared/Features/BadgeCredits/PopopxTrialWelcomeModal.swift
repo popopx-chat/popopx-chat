@@ -5,7 +5,7 @@
 //  ### 这个面板只对一件事负责：把资格讲清楚，然后交出去
 //  领或不领的唯一判据是 `PopopxBadgeManager.canClaimPioneerTrial`（`record == nil` 且 Keychain 里没有
 //  `.trialGuard`）。没有资格时这里**不给一个只会报错的按钮**（本仓的既有规矩：能力未接线的入口一律禁用或
-//  整条不出现，同 `PopopxPlusMenu` 对三个闭包的处理，PopopxTelemetryHeader.swift:365-384），
+//  整条不出现，同 `PopopxPlusMenu` 对三个闭包的处理，PopopxTelemetryHeader.swift:373-390），
 //  而是把"为什么不能领"说出来。
 //
 //  ### 三行诚实边界

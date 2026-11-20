@@ -185,8 +185,9 @@ public struct PopopxPanicWipeSilentRecorder: PopopxPanicWipeRecording {
 // MARK: - Contracts with 模块 1 and 模块 2
 
 /// How the panic route destroys the mesh's own key material. `PopopxMeshEngine.destroyIdentity()`
-/// already regenerates the static key, drops every peer table and removes the Keychain item, so the
-/// conformance below is the whole binding — no core file is edited.
+/// already regenerates the static key, drops every peer table and removes the Keychain item, and
+/// `destroyGroupState()` takes 模块 8's half with it — every group key, the roster file and the
+/// Ed25519 signing key — the conformance below is the whole binding, and no core file is edited.
 public protocol PopopxMeshKeyBurning: Sendable {
     func burnMeshKeys() async
 }
@@ -194,6 +195,7 @@ public protocol PopopxMeshKeyBurning: Sendable {
 extension PopopxMeshEngine: PopopxMeshKeyBurning {
     public func burnMeshKeys() async {
         destroyIdentity()
+        await destroyGroupState()
     }
 }
 

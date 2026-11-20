@@ -17,9 +17,9 @@
 //     调用方包括通知（NtfManager.swift:81）、deep link／建连（POPOPXAPI.swift:1091、:1825、:2182、:2849）、
 //     附件打开（ChatModel.swift:1303）与新建联系人（CIMemberCreatedContactView.swift:29）。
 //     而把该字段翻成"推送一页"的地方全工程只有一处：旧 ChatListView 的栈路径绑定
-//     （ChatListView.swift:204-211）。这条绑定必须留在消息页内部，四栏壳才不会切断通知点开会话。
+//     （ChatListView.swift:210-217）。这条绑定必须留在消息页内部，四栏壳才不会切断通知点开会话。
 //     其余三栏里：通讯录与「我」只带行内 Sheet，由壳统一包 NavigationStack（:99、:111）；厢语
-//     2026-11-20 起自己持有 `NavigationStack(path:)`（PopopxCabinView.swift:180），壳这里只放裸页面
+//     2026-11-20 起自己持有 `NavigationStack(path:)`（PopopxCabinView.swift:198），壳这里只放裸页面
 //     （:107），因为它的广场频道页要靠自己的路径栈做程序化返回。
 //     「我 → 全部设置」那三个服务器子页的 `navigationDestination` 登记也挂在本栏的栈根（:119-127）：
 //     按值的链接只认承载它的那个栈，而设置页是从本页用目标闭包推进去的，闭包推进的页面自己写登记
@@ -81,6 +81,32 @@ enum PopopxTab: String, Hashable, CaseIterable {
     }
 }
 
+// MARK: - 「全部设置」那棵栈的路径
+
+/// 承载「全部设置」的那棵栈的路径持有者。两处宿主各 new 一份、互不共享：`MainTabView` 的「我」栏
+/// 与 `UserPickerSheetView`（「添加朋友」→ 切身份 → 设置）。`PopopxSettingsView` 用
+/// `@Environment(PopopxSettingsNavTrack.self)` 取用，**刻意不给默认值**：漏注入的宿主在开发期就崩，
+/// 比留一行"点了不动"的死行好查。
+///
+/// 类型写在本文件而不是新文件：铁律禁止脚本改 `project.pbxproj`，新类型一律内聚进已编译文件。
+///
+/// 存在理由 —— 2026-11-20 真机走查第 2 轮结论：**登记位置不是那根杠杆**。
+/// 「我 → 全部设置 → 中继与服务器」点下去只重画当前页、按返回才推入，两种写法都失败过：
+/// ① 登记写在「全部设置」自己（`8dea049d3` 之前）② 登记上移到栈根（`8dea049d3`）。症状逐字相同，
+/// 而 ProtocolServersView.swift:295-298 写明"同一类型只保留最靠近栈根的那份登记"，所以②才是正确位置。
+/// 坏的不是解析，是 `NavigationLink(value:)` 这一跳的**激活**：它把"往栈的路径写一个值"和"按值找登记"
+/// 绑在同一次点击里，点击一旦被行重建吃掉，值就留在待提交的事务里，下一次导航事件（返回）才冲出来。
+/// 修法是把这一跳换成消息栏那条真机验证过的轨道同款的确定性推送：栈根持有显式路径
+/// （`NavigationStack(path:)`），行体是普通 `Button`，点击只做一次状态赋值 —— 与
+/// `ChatsListView.swift:192-197` 拿 `chatModel.chatId` 推开会话是同一个机制。
+/// 再往下的四跳（yourServers / serverOperator / 协议服务器 / 聊天中继）仍是按值链接，由栈根那三个登记
+/// 解析，它们与 `NetworkAndServers` 同处一个栈，是这条轨道唯一的按值段。
+@MainActor
+@Observable
+final class PopopxSettingsNavTrack {
+    var path = NavigationPath()
+}
+
 // MARK: - 四栏壳
 
 @MainActor
@@ -92,6 +118,9 @@ struct MainTabView: View {
     /// 谁承载栈，谁就持有 `SaveableSettings`，`serversDestination` 的闭包绑的就是这一份。
     /// 页面自己在返回时问"要不要保存"（NetworkAndServers.swift:149），本文件不管保存。
     @StateObject private var meshServers = SaveableSettings()
+
+    /// 「我」栏那棵栈的路径：唯一一处按值轨道（服务器三页）由它承载，见 `PopopxSettingsNavTrack`。
+    @State private var meTrack = PopopxSettingsNavTrack()
 
     var body: some View {
         TabView(selection: $selection) {
@@ -108,19 +137,18 @@ struct MainTabView: View {
             .tag(PopopxTab.contacts)
 
             // 厢语自带推送栈：这一页的私聊是"发出离线建联邀请之后再推一页"，动作是 async 的，
-            // 只有绑定在自己栈上的 `path` 能在那之后推着走（`PopopxCabinView.swift:134`）。
+            // 只有绑定在自己栈上的 `path` 能在那之后推着走（`PopopxCabinView.swift:198`）。
             PopopxCabinView()
                 .tabItem { tabLabel(.cabin) }
                 .tag(PopopxTab.cabin)
 
-            NavigationStack {
+            NavigationStack(path: $meTrack.path) {
                 PopopxMeView()
-                    // 服务器三页的登记必须在栈根，不能由「全部设置」自己登记：那一页是「我」用
-                    // 目标闭包推进去的，而闭包推进的页面自己写的 `navigationDestination` 不生效
-                    // （口径同 NetworkAndServers.swift:214-216、spec/client/navigation.md
-                    // "Servers pages push by value, registered at the stack root"）。
-                    // 写在壳里，「我 → 全部设置 → 中继与服务器」这条新轨道就与
-                    // ChatListView.swift:115-123 那条旧轨道共用同一组三个类型、同一个函数。
+                    // 服务器三页的登记在栈根（口径同 NetworkAndServers.swift:214-216、
+                    // ProtocolServersView.swift:295-298：同一类型只保留最靠近栈根的那份），
+                    // 与 ChatListView.swift:120-128 那条旧轨道共用这三个类型、这三个函数。
+                    // 「全部设置 → 中继与服务器」这一跳不再是按值链接，而是
+                    // `Button { meTrack.path.append(.networkAndServers) }`，见 `PopopxSettingsNavTrack`。
                     .navigationDestination(for: ServersDestination.self) { destination in
                         serversDestination(destination, ss: meshServers, servers: $meshServers.servers)
                     }
@@ -131,6 +159,7 @@ struct MainTabView: View {
                         chatRelayDestination(selection, servers: $meshServers.servers)
                     }
             }
+            .environment(meTrack)
             .tabItem { tabLabel(.me) }
             .tag(PopopxTab.me)
         }

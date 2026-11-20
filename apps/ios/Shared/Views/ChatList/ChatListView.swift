@@ -82,10 +82,15 @@ struct UserPickerSheetView: View {
     @EnvironmentObject var chatModel: ChatModel
     @StateObject private var ss = SaveableSettings()
 
+    /// 「设置 → 中继与服务器」这一跳走显式路径，机制与「我」栏那一处相同
+    /// （`PopopxSettingsNavTrack`，Shared/Navigation/MainTabView.swift 文件内注释记了真机结论）。
+    /// 这一棵是本 Sheet 自己的栈，所以持有者自己 new 一份，不与「我」栏共享。
+    @State private var settingsTrack = PopopxSettingsNavTrack()
+
     @State private var loaded = false
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $settingsTrack.path) {
             ZStack {
                 if loaded, let currentUser = chatModel.currentUser {
                     switch sheet {
@@ -122,6 +127,7 @@ struct UserPickerSheetView: View {
                 chatRelayDestination(sel, servers: $ss.servers)
             }
         }
+        .environment(settingsTrack)
         .overlay {
             if let la = chatModel.laRequest {
                 LocalAuthView(authRequest: la)

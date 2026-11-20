@@ -61,7 +61,7 @@
 //  ### 绝不允许的事
 //  1. 不 `exit(0)`/`abort()`：进程必须活着，靠内存态遮罩挡住界面（任务红线 + App Store 4.2.x）。
 //     mesh 那一份现成的 `PopopxPanicWipeManager` 默认在末尾调用 `exit`，所以这里显式传
-//     `termination: nil`（该参数允许 nil，见 PanicWipeManager.swift:472 的注释），并在报告里
+//     `termination: nil`（该参数允许 nil，见 PanicWipeManager.swift:474 的注释），并在报告里
 //     承认"密钥已烧、进程仍活着"。
 //  2. 不 `print`/`logger` 任何口令、盐、派生值。日志只记阶段名。
 //  3. 传感器判据不通向这里（见模块一头注）。到这里的唯一一条路是键盘键入。
@@ -954,7 +954,7 @@ enum PopopxStorageWipe {
 /// mesh 身份的烧毁。
 ///
 /// 复用 `PopopxPanicWipeManager`，但**不能**用它默认的那一份：默认构造的
-/// `termination` 是 `Self.processExit`（PanicWipeManager.swift:435/482），会 `exit(0)`。
+/// `termination` 是 `Self.processExit`（PanicWipeManager.swift:437/482），会 `exit(0)`。
 /// 任务红线和 App Store 都不允许，所以这里显式注入 `termination: nil`；该管理器本来就
 /// 为这种宿主写明了行为——不退出，并在自己的报告里记下"进程仍活着"（:655-660）。
 /// 传 `includeApplicationDatabase: false`（默认值）：聊天库由 `PopopxStorageWipe` 自己按
@@ -1207,7 +1207,7 @@ final class PopopxDuressAuthManager {
 
     /// 上游那把"入口密码"与本模块的双密码锁是并列的两套前门：`authenticate(reason:)`
     /// （LocalAuthenticationUtils.swift:40）在 `privacyLocalAuthModeDefault == .passcode` 时
-    /// 把键盘挂成 `LocalAuthView`（ContentView.swift:97、ChatListView.swift:127），而
+    /// 把键盘挂成 `LocalAuthView`（ContentView.swift:97、ChatListView.swift:133），而
     /// `PopopxAppLockOverlayView` 是本模块自己的键盘。两把码不同 = 同一台设备开两次锁，
     /// 两把码相同 = 同一个码输两遍。启用/更换 POPOPX 进入密码时把前者迁掉，前端只留一个入口。
     ///

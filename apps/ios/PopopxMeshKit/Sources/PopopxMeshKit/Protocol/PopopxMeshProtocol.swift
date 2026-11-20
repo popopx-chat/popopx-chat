@@ -27,6 +27,18 @@ public enum PopopxMeshMessageType: UInt8, Sendable {
     case pairingRequest = 0x30
     case pairingAck = 0x31
     case deliveryAck = 0x32
+
+    // MARK: Private groups (0x40 and up are this package's own space)
+
+    /// Creator-signed group state — an invite, a key rotation, a removal. Directed, and the payload
+    /// is a Noise frame, so only the peer the session authenticated can read it. Bitchat carries the
+    /// same thing as NoisePayloadType 0x06/0x07; giving it its own mesh type is what lets a node
+    /// that is not the recipient still relay it.
+    case groupState = 0x40
+    /// Group traffic: flooded, outer layer deliberately unsigned (a relay never needs to know who
+    /// signed it, and signing the outer frame would make the flood dedupable only by sender), and
+    /// unreadable to every node that does not hold the group key. Bitchat's MessageType 0x25.
+    case groupMessage = 0x41
 }
 
 // MARK: - Peer identity on the wire

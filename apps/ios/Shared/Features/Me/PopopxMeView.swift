@@ -7,7 +7,7 @@
 //
 //  结构上的五条决定：
 //
-//  1. 页面自己不放 NavigationStack —— 栈由 Shared/Navigation/MainTabView.swift:111-128 统一包好，
+//  1. 页面自己不放 NavigationStack —— 栈由 Shared/Navigation/MainTabView.swift:145-164 统一包好，
 //     「中继与服务器」那三个值的 `navigationDestination` 也登记在那一层（值链接会被提到栈根，
 //     写在「全部设置」自己身上一行都不生效）。
 //     这里只往外推既有页面（`NavigationLink { 页面 }`，与 SettingsView.swift:405-424 同一种写法）。
@@ -23,8 +23,11 @@
 //  4. 这次重排只动"行住在哪个卡片里"，没有删掉任何一条既有路由：身份管理与主页名片码从行升格为
 //     名片头的整行热区与二维码微标，其余行全部落在上面四组之中。「充值算力点」仍然是一枚无条件
 //     入口（理由见下面 `showsPaywall` 那条注释）。2026-11-20 删掉的两行各有去处：「添加朋友」——
-//     消息栏右上角「+」挂着同一个 `PopopxAddFriendView`（ChatsListView.swift:252-254）；「离线组网」
+//     消息栏右上角「+」挂着同一个 `PopopxAddFriendView`（ChatsListView.swift:260-262）；「离线组网」
 //     一行——厢语页设置中心，见决定 3。
+//     真机走查 三.1/三.4 又动了常用组：「通知」与「版本」两行删掉，各有去处（全部设置 → 通知，
+//     与 `PopopxHelpView` 里的版本页）；「外观与图标」「显示语言」「帮助与关于」三行从「全部设置」
+//     那一二级页升上来。动的仍然只是"行住在哪个卡片里"，目的地一个都没新造，也没留第二个入口。
 //  5. 徽章那一行的三条出口不另立判据：它 switch 的是 `phase.capsuleState` 这个共享枚举本身，
 //     与顶栏胶囊 `PopopxBadgeCapsuleView.route()` 读同一份状态、同一套分支，将来加一档会在这里
 //     编译报错，而不是两处各说一套。
@@ -138,7 +141,7 @@ struct PopopxMeView: View {
             PopopxBadgePaywallView()
                 .presentationDetents([.large])
         }
-        // 徽章另外两条出口，detents 照顶栏胶囊那两个开关原样给（PopopxBadgeCapsuleView.swift:184-193）。
+        // 徽章另外两条出口，detents 照顶栏胶囊那两个开关原样给（PopopxBadgeCapsuleView.swift:218-227）。
         .sheet(isPresented: $showsBadgeDetail) {
             PopopxBadgeDetailSheet()
                 .presentationDetents([.medium, .large])
@@ -223,7 +226,7 @@ struct PopopxMeView: View {
     /// **名片码留下的武装记录压过已保存的主页**——扫码自动推送用的就是那一档
     ///（`ProfileAutoSender.handleContactConnected(contactId:)`，ProfileAutoSender.swift:241），
     /// 所以标签跟着它说，而不是说一份这次并不会发出去的档位。
-    /// 只认**还在有效期内**的那一份：`armingWindowSeconds` 一过它就推不出去了（ProfileAutoSender.swift:168 那一格会被清），
+    /// 只认**还在有效期内**的那一份：`armingWindowSeconds` 一过它就推不出去了（ProfileAutoSender.swift:161 那一格会被清），
     /// 把过期显示成一个档位只会让人去关一个已经不存在的开关。
     private func refreshProfileStatus() async {
         let armed = ProfileAutoSender.shared.armedProfileScene
@@ -364,14 +367,14 @@ struct PopopxMeView: View {
     private var generalEntries: some View {
         PopopxSectionCard(Copy.groupGeneral) {
             // 「添加朋友」这一行原先在这里，2026-11-20 删：消息栏右上角「+」已经挂着同一个
-            // `PopopxAddFriendView`（ChatsListView.swift:252-254），同一件事不该在两处各有一个入口。
+            // `PopopxAddFriendView`（ChatsListView.swift:260-262），同一件事不该在两处各有一个入口。
             if let user = chatModel.currentUser {
                 PopopxMeRowLink(
                     Copy.chatPreferences,
                     value: user.showNtfs ? Copy.notifyOn : Copy.notifyOff,
                     systemImage: "slider.horizontal.3"
                 ) {
-                    // 三个入参照 ChatListView.swift:95-98 的既有挂载点原样给。
+                    // 三个入参照 ChatListView.swift:100-103 的既有挂载点原样给。
                     PreferencesView(
                         profile: user.profile,
                         preferences: user.fullPreferences,
@@ -380,14 +383,36 @@ struct PopopxMeView: View {
                     .navigationTitle(Copy.chatPreferences)
                     .modifier(ThemedBackground(grouped: true))
                 }
-                // 分隔线跟着这一行走：没有 `currentUser` 时这一组的第一行就是通知，
+                // 分隔线跟着这一行走：没有 `currentUser` 时这一组的第一行就是外观，
                 // 卡片顶上不该先落一条孤线。
                 PopopxMeDivider()
             }
-            PopopxMeRowLink(Copy.notifications, systemImage: "bell") {
-                NotificationsView()
-                    .navigationTitle(Copy.notifications)
+            // 外观与显示语言从「全部设置」里升上来（真机走查 三.1/三.4）：设置树是二级页，
+            // 而换主题、换语言是打开 app 头几天就要做的事。行尾那两个值是 `PopopxSettingsValues`
+            // 现读的，本页不记第二份状态。
+            // 可用性与「全部设置」里那张卡原样一致：`AppearanceSettings` 仍要求会话在跑，
+            // 所以这一行仍然禁用 + 降透明度（口径同上面熔断那一行）。
+            PopopxMeRowLink(
+                Copy.appearanceRow,
+                value: PopopxSettingsValues.themeName,
+                systemImage: "sun.max"
+            ) {
+                AppearanceSettings()
+                    .navigationTitle(Copy.appearanceRow)
                     .modifier(ThemedBackground(grouped: true))
+            }
+            .disabled(chatModel.chatRunning != true)
+            .opacity(chatModel.chatRunning == true ? 1 : 0.45)
+            PopopxMeDivider()
+            // 语言页与帮助页都不需要会话在跑：一个开的是系统设置里本 app 的那一页，
+            // 一个读的是内置文书，所以两行既不 gating 也不禁用。
+            PopopxMeRowLink(
+                Copy.languageRow,
+                value: PopopxSettingsValues.languageName,
+                systemImage: "character.bubble"
+            ) {
+                PopopxDisplayLanguageView()
+                    .navigationTitle(Copy.languageRow)
             }
             PopopxMeDivider()
             PopopxMeRowLink(Copy.settings, systemImage: "gearshape.fill") {
@@ -398,10 +423,11 @@ struct PopopxMeView: View {
                 }
             }
             PopopxMeDivider()
-            PopopxMeRowLink(Copy.versionRow, value: appVersion, systemImage: "info.circle") {
-                VersionView()
-                    .navigationTitle(Copy.versionRow)
-                    .modifier(ThemedBackground(grouped: true))
+            // 「通知」与「版本」两行 2026-11 删：通知的唯一入口收在 常用 → 全部设置 → 通知，
+            // 版本随「帮助与关于」升格成真实页面（`PopopxHelpView`）的一行，两件事都不再有两处入口。
+            PopopxMeRowLink(Copy.helpRow, systemImage: "questionmark.circle") {
+                PopopxHelpView()
+                    .navigationTitle(Copy.helpRow)
             }
         }
     }
@@ -515,10 +541,10 @@ struct PopopxMeView: View {
 
     /// 只往既有的布防状态机里送一次轻触：`PopopxPanicWipeArming.tap` 自己判定"一秒内正好三次"。
     /// 确认弹窗是 `PopopxPanicWipeGate` 的职责，而它已经由 `PopopxMeshPanicWipeMount`
-    /// （POPOPXApp.swift:48 → POPOPXAPI.swift:3953-3970）挂在 app 根上、绑定同一个
+    /// （POPOPXApp.swift:48 → POPOPXAPI.swift:4013-4030）挂在 app 根上、绑定同一个
     /// `isAwaitingConfirmation`。所以这里绝不写第二个 alert：写了就有两道确认抢同一个状态机，
     /// 而铁律要的是一次、且只有那一次确认。熔断关闭时那道门根本不存在
-    /// （POPOPXAPI.swift:3962 的 `if runtime.isFuseOn`），所以这一行同时被禁用。
+    /// （POPOPXAPI.swift:4022 的 `if runtime.isFuseOn`），所以这一行同时被禁用。
     @MainActor private func armPanicWipe() {
         guard meshRuntime.isFuseOn else { return }
         PopopxHaptics.impact(.light)
@@ -1010,8 +1036,8 @@ private struct PopopxProfileHost: View {
 /// `NSLocalizedString`：**英文原句就是 Key**，与引导页、算力点生态同一套做法。
 /// 新词条写进 `bg/cs/de/es/fi/fr/hu/it/ja/nl/pl/ru/th/tr/uk/zh-Hans` 共 16 个译本目录，
 /// `en.lproj` 不写（读不到词条就回落 Key 本身，那就是英文）。
-/// 三个 Key 是刻意复用的既有词条 —— `"Settings"`、`"Notifications"`、
-/// `"SMP end-to-end encrypted"`：它们在 16 个目录里都已经有译法，且中文值正是本页要显示的那句。
+/// 两个 Key 是刻意复用的既有词条 —— `"Settings"`、`"SMP end-to-end encrypted"`：
+/// 它们在 16 个目录里都已经有译法，且中文值正是本页要显示的那句。
 private enum Copy {
     private static func key(_ value: String) -> String {
         NSLocalizedString(value, comment: "POPOPX Me tab")
@@ -1080,9 +1106,14 @@ private enum Copy {
     static let chatPreferences = key("Chat preferences for this identity")
     static let notifyOn = key("Notifications on")
     static let notifyOff = key("This identity is muted")
-    static let notifications = NSLocalizedString("Notifications", comment: "Me: reuses the existing all-catalog term")
     static let settings = NSLocalizedString("Settings", comment: "Me: reuses the existing all-catalog term")
-    static let versionRow = key("Version and updates")
+    // 「通知」那一行 2026-11 删：唯一入口收在 常用 → 全部设置 → 通知；「版本」那一行随
+    // `PopopxHelpView` 升格 —— 旧 Key `"Notifications"` 与 `"Version and updates"` 在本页不再有引用，
+    // 两个词条本身仍属于别的页面，译本不动。
+    /// 下面三行的值出自 `PopopxSettingsValues`（设置树那个文件里的共享读数），这里只管说法。
+    static let appearanceRow = key("Appearance and icons")
+    static let languageRow = key("Display language")
+    static let helpRow = key("Help and about")
 
     // 组 4 · 隐私与安全防线
     static let privacySettings = key("Privacy and security settings")

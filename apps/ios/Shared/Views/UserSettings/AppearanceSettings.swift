@@ -60,16 +60,10 @@ struct AppearanceSettings: View {
     var body: some View {
         VStack{
             List {
-                Section(String("Language")) {
-                    HStack {
-                        Text(currentLanguage)
-                        Spacer()
-                        Button("Change") {
-                            UIApplication.shared.open(appSettingsURL)
-                        }
-                    }
-                }
-
+                // 「Language」那一组 2026-11 删：按 app 的语言只有一个入口，
+                // 就是「我 → 常用 → 显示语言」（`PopopxDisplayLanguageView`，
+                // Shared/Features/Settings/PopopxSettingsViews.swift）。`appSettingsURL` 留着，
+                // 它不只这一处用。
                 Section("Chat list") {
                     Toggle("Reachable chat toolbar", isOn: $oneHandUI)
                     Picker("Toolbar opacity", selection: $toolbarMaterial) {
@@ -296,11 +290,6 @@ struct AppearanceSettings: View {
         } else {
             onTypeChange(type)
         }
-    }
-
-    private var currentLanguage: String {
-        let lang = Bundle.main.preferredLocalizations.first ?? "en"
-        return Locale.current.localizedString(forIdentifier: lang)?.localizedCapitalized ?? lang
     }
 
     private func updateAppIcon(image: String, icon: String?, tapped: Binding<Bool>) -> some View {

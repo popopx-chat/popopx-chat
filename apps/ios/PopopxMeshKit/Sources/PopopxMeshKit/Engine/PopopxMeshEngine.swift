@@ -67,6 +67,10 @@ public actor PopopxMeshEngine {
     private var recentPackets: PopopxMeshDeduplicator
     private var fragments: PopopxMeshFragmentAssembler
 
+    /// 模块 8: the private-group state machine. It does no I/O — this type is the only thing that
+    /// touches the radio, and the group layer is handed bytes that already arrived.
+    private let groups: PopopxGroupCoordinator
+
     private static let identityKeychainService = "chat.popopx.mesh.identity"
     private static let identityKeychainAccount = "noise-static-key"
     /// How far back a peer's nonce may move before a frame is called a replay.
@@ -77,12 +81,20 @@ public actor PopopxMeshEngine {
     /// before any handshake.
     public static let announcePublicKeyField = "pubkey"
     public static let announceNicknameField = "nickname"
+    /// The Ed25519 signing key, in the same dictionary. This is an added *key in the JSON*, not a
+    /// change to the packet or to the dictionary's shape: every reader here decodes `[String: String]`
+    /// and picks the fields it knows, so a build without 模块 8 keeps parsing our announce exactly as
+    /// before and simply does not learn our signing key. Bitchat's roster rows carry a signing key
+    /// sourced from the announce for the same reason (`GroupProtocol.swift:23`).
+    public static let announceSigningKeyField = "signpub"
 
     public init(
         config: PopopxMeshConfig = .default,
         transport: any PopopxBLETransporting = PopopxBLETransport(),
         hub: PopopxMeshEventHub = .shared,
-        secrets: any PopopxMeshSecretStoring = PopopxMeshKeychain.shared
+        secrets: any PopopxMeshSecretStoring = PopopxMeshKeychain.shared,
+        groupStore: PopopxGroupStore? = nil,
+        groupHub: PopopxMeshGroupEventHub = .shared
     ) {
         self.config = config
         self.transport = transport
@@ -94,6 +106,12 @@ public actor PopopxMeshEngine {
             maxInFlight: config.maxInFlightAssemblies
         )
         self.identity = PopopxMeshEngine.loadOrMakeIdentity(secrets: secrets)
+        self.groups = PopopxGroupCoordinator(
+            meshPublicKeyHex: identity.meshPublicKeyHex,
+            secrets: secrets,
+            store: groupStore,
+            hub: groupHub
+        )
     }
 
     // MARK: - Identity
@@ -123,6 +141,14 @@ public actor PopopxMeshEngine {
 
     public var localMeshPublicKeyHex: String { identity.meshPublicKeyHex }
 
+    /// Panic wipe (模块 7), the group half. `destroyIdentity()` cannot call this: it is synchronous
+    /// and app-facing, while burning group state is an actor hop, a Keychain `removeAll` and a file
+    /// removal. Kept separate so the app can burn the mesh identity alone (the existing 模块 7
+    /// contract) and add this to the same call site.
+    public func destroyGroupState() async {
+        await groups.destroyAll()
+    }
+
     /// Panic wipe (模块 7) calls this after it has cleared the mapping table: the static key leaves
     /// the Keychain and memory, and every session dies with it.
     public func destroyIdentity() {
@@ -142,6 +168,7 @@ public actor PopopxMeshEngine {
         guard !running else { return }
         running = true
         self.nickname = nickname
+        await groups.setLocalNickname(nickname ?? PopopxGroupCoordinator.defaultNickname)
         await transport.setDelegate(self)
         radioState = await transport.state
         await transport.start()
@@ -187,11 +214,28 @@ public actor PopopxMeshEngine {
     // MARK: - Outbound
 
     public func send(envelope: PopopxMeshEnvelope, to meshPublicKeyHex: String) async throws(PopopxMeshSendError) {
+        try await send(
+            plaintext: Self.encode(envelope),
+            as: .noiseEncrypted,
+            to: meshPublicKeyHex,
+            messageId: envelope.id
+        )
+    }
+
+    /// One plaintext, sealed in the Noise session with `meshPublicKeyHex` and put on the radio as
+    /// `type`. Both the chat envelope (`.noiseEncrypted`) and a group state blob (`.groupState`) go
+    /// through here, because the framing, the session bookkeeping and the TTL rule are the same and
+    /// the last thing either of them should do is drift apart in a second copy of this code.
+    private func send(
+        plaintext: Data,
+        as type: PopopxMeshMessageType,
+        to meshPublicKeyHex: String,
+        messageId: String
+    ) async throws(PopopxMeshSendError) {
         guard running else {
-            throw PopopxMeshSendError(messageId: envelope.id, failure: .radioUnavailable(radioState))
+            throw PopopxMeshSendError(messageId: messageId, failure: .radioUnavailable(radioState))
         }
-        var session = try await openSession(with: meshPublicKeyHex, messageId: envelope.id)
-        let plaintext = Self.encode(envelope)
+        var session = try await openSession(with: meshPublicKeyHex, messageId: messageId)
         let ciphertext: Data
         do {
             ciphertext = try session.encrypt(plaintext)
@@ -199,27 +243,32 @@ public actor PopopxMeshEngine {
             // The nonce space is spent, or the session was never keyed: drop it so the next send
             // re-handshakes rather than emitting frames this peer cannot read.
             peersByHex[meshPublicKeyHex]?.session = nil
-            throw PopopxMeshSendError(messageId: envelope.id, failure: .noSessionWithPeer)
+            throw PopopxMeshSendError(messageId: messageId, failure: .noSessionWithPeer)
         }
         // A session is a value: its counters only move if the used copy goes back.
         peersByHex[meshPublicKeyHex]?.session = session
         guard let peer = peersByHex[meshPublicKeyHex] else {
-            throw PopopxMeshSendError(messageId: envelope.id, failure: .noSessionWithPeer)
+            throw PopopxMeshSendError(messageId: messageId, failure: .noSessionWithPeer)
         }
         let packet = PopopxMeshPacket(
-            type: PopopxMeshMessageType.noiseEncrypted.rawValue,
+            type: type.rawValue,
             ttl: outboundTTL(broadcast: false),
             timestamp: PopopxMeshPacket.nowMillis,
             senderID: identity.peerID.bytes,
             recipientID: peer.peerID.bytes,
             payload: ciphertext
         )
-        await deliver(packet, messageId: envelope.id, peer: peer, origin: nil)
-        await BluetoothHealthMonitor.shared.recordOutbound(
-            messageId: envelope.id,
-            peerMeshPublicKeyHex: meshPublicKeyHex,
-            peerIDHex: peer.peerID.hex
-        )
+        await deliver(packet, messageId: messageId, peer: peer, origin: nil)
+        // 模块 4's ACK watchdog only ever sees envelope traffic: it tracks `PopopxMeshEnvelope.id`,
+        // and a group state blob is not an envelope. Saying so here rather than letting a group send
+        // look like it had an acknowledgement it would never receive.
+        if type == .noiseEncrypted {
+            await BluetoothHealthMonitor.shared.recordOutbound(
+                messageId: messageId,
+                peerMeshPublicKeyHex: meshPublicKeyHex,
+                peerIDHex: peer.peerID.hex
+            )
+        }
     }
 
     /// The local `#mesh` plaza: unencrypted, flooded, never acknowledged.
@@ -384,15 +433,20 @@ public actor PopopxMeshEngine {
     /// the packet arrived on, for a relay: a frame is never sent back the way it came. A peer with a
     /// live link of ours gets it there and only there; anything else is flooded and dedup keeps the
     /// loops out of it.
+    ///
+    /// The answer is "was any frame of this packet handed to CoreBluetooth", which is what the group
+    /// send path needs to report honestly: an envelope send has an ACK of its own and ignores this,
+    /// a group state blob has nothing else that can tell the caller it never left the device.
+    @discardableResult
     private func deliver(
         _ packet: PopopxMeshPacket,
         messageId: String,
         peer: PeerRecord?,
         origin: UUID?
-    ) async {
+    ) async -> Bool {
         guard running else {
             await publish(.sendFailed(messageId: messageId, peer: peer?.peerID, reason: .radioUnavailable(radioState)))
-            return
+            return false
         }
         let links = await transport.links
         var writable = links.filter { $0.canSend && $0.linkID != origin }
@@ -402,7 +456,7 @@ public actor PopopxMeshEngine {
         }
         guard !writable.isEmpty else {
             await publish(.sendFailed(messageId: messageId, peer: peer?.peerID, reason: .noLinkToPeer))
-            return
+            return false
         }
         guard let encoded = packet.encoded(padded: false) else {
             await publish(
@@ -412,7 +466,7 @@ public actor PopopxMeshEngine {
                     reason: .oversized(payloadBytes: packet.payload.count, limitBytes: Int(UInt16.max))
                 )
             )
-            return
+            return false
         }
         let frames = frames(of: packet, encoded: encoded, for: writable)
         var handedOff = false
@@ -433,11 +487,12 @@ public actor PopopxMeshEngine {
         }
         guard handedOff else {
             await publish(.sendFailed(messageId: messageId, peer: peer?.peerID, reason: .noLinkToPeer))
-            return
+            return false
         }
         // Remember it as soon as we transmit, so our own flood coming back is dropped, and only
         // after the fragments exist, so a failed send stays retryable.
         _ = await recentPackets.note(packetID: packet.packetID)
+        return true
     }
 
     /// One frame when the smallest link can take it, otherwise a fragment stream. The budget is the
@@ -505,6 +560,10 @@ public actor PopopxMeshEngine {
             break
         case .leave:
             await consumeLeave(packet)
+        case .groupState:
+            await consumeGroupState(packet, hopCount: hopCount, linkID: linkID)
+        case .groupMessage:
+            await consumeGroupMessage(packet, hopCount: hopCount)
         case .pairingRequest, .pairingAck, .deliveryAck:
             // These ride `.noiseEncrypted`; a bare one on the wire is not ours to trust.
             PopopxMeshLog.pairing.debug("🚫 unencrypted control frame type \(packet.type, privacy: .public) ignored")
@@ -821,6 +880,16 @@ public actor PopopxMeshEngine {
         touch(hopCount: hopCount, linkID: linkID, into: &record)
         peersByHex[meshHex] = record
         meshHexByPeerID[sender.hex] = meshHex
+        // 模块 8: the same key-by-key read the announce already does. A peer whose announce carries
+        // no `signpub` — an older build, or one that has not started its group layer — is simply not
+        // invitable into a group yet, and `invite` reports that rather than guessing a key.
+        if let signingHex = fields[Self.announceSigningKeyField] {
+            await groups.recordPeer(
+                meshPublicKeyHex: meshHex,
+                signingPublicKeyHex: signingHex,
+                nickname: fields[Self.announceNicknameField]
+            )
+        }
         await publish(.peerAppeared(record.peer))
     }
 
@@ -881,6 +950,155 @@ public actor PopopxMeshEngine {
         guard running else { return }
         let peer = packet.recipientPeerID.flatMap { meshHexByPeerID[$0.hex] }.flatMap { peersByHex[$0] }
         await deliver(forwarded, messageId: packet.packetID.popopxHex, peer: peer, origin: linkID)
+    }
+
+    // MARK: - Private groups (模块 8)
+
+    /// The group layer's outbound half. Everything here is a thin wrapper: the decisions — who to
+    /// believe, what a roster means, whether a message is ours to read — live in
+    /// `PopopxGroupCoordinator`, and this is the part that puts bytes on the radio and hands bytes
+    /// back to it.
+    public func createGroup(named name: String) async throws(PopopxMeshGroupError) -> PopopxMeshGroup {
+        try await groups.createGroup(named: name)
+    }
+
+    public func meshGroups() async -> [PopopxMeshGroup] {
+        await groups.groups()
+    }
+
+    public func meshGroupMembers(of groupID: Data) async -> [PopopxMeshGroupMember] {
+        await groups.members(of: groupID)
+    }
+
+    public var localSigningPublicKeyHex: String? {
+        get async { await groups.localSigningPublicKeyHex }
+    }
+
+    public func invitableMeshPeers() async -> [String] {
+        await groups.invitablePeers()
+    }
+
+    /// An invite: the coordinator rotates the key, advances the epoch, signs the roster and says who
+    /// gets which blob; this puts each blob in that peer's Noise session.
+    ///
+    /// A peer the radio could not take is reported in `.deliveryFailed` *after* the local rotation
+    /// has already happened. Undoing it is not on the table — the epoch would then move backwards
+    /// for everyone who did get the state — so the honest answer is the list of peers to retry.
+    public func invite(
+        peerMeshPublicKeyHex: String,
+        toGroupID groupID: Data
+    ) async throws(PopopxMeshGroupError) -> PopopxGroupDistribution {
+        try await distribute(await groups.invite(
+            peerMeshPublicKeyHex: peerMeshPublicKeyHex,
+            toGroupID: groupID
+        ))
+    }
+
+    public func removeMeshGroupMember(
+        _ peerMeshPublicKeyHex: String,
+        fromGroupID groupID: Data
+    ) async throws(PopopxMeshGroupError) -> PopopxGroupDistribution {
+        try await distribute(await groups.removeMember(
+            peerMeshPublicKeyHex,
+            fromGroupID: groupID
+        ))
+    }
+
+    private func distribute(
+        _ distribution: PopopxGroupDistribution
+    ) async throws(PopopxMeshGroupError) -> PopopxGroupDistribution {
+        guard running else {
+            throw PopopxMeshGroupError.deliveryFailed(
+                peerMeshPublicKeyHexes: distribution.recipients,
+                failure: .radioUnavailable(radioState)
+            )
+        }
+        var undelivered: [String] = []
+        var failure: PopopxMeshSendFailure?
+        for stateSend in distribution.sends {
+            do {
+                // One id per send, so a failure names the frame that failed rather than the blob.
+                try await send(
+                    plaintext: stateSend.payload,
+                    as: .groupState,
+                    to: stateSend.recipientMeshPublicKeyHex,
+                    messageId: "groupstate:\(distribution.group.idHex):\(stateSend.recipientMeshPublicKeyHex.prefix(8))"
+                )
+            } catch {
+                undelivered.append(stateSend.recipientMeshPublicKeyHex)
+                if failure == nil { failure = error.failure }
+            }
+        }
+        if let failure {
+            throw PopopxMeshGroupError.deliveryFailed(
+                peerMeshPublicKeyHexes: undelivered,
+                failure: failure
+            )
+        }
+        return distribution
+    }
+
+    /// Seals one message under the group's current epoch and floods it. `deliver` is the same path a
+    /// `#mesh` plaza post takes: broadcast TTL from the config, fragmentation if a link needs it,
+    /// and the flood window remembers the packet so our own echo is dropped.
+    public func sendGroupMessage(_ text: String, toGroupID groupID: Data) async throws(PopopxMeshGroupError) {
+        guard running else {
+            throw PopopxMeshGroupError.deliveryFailed(peerMeshPublicKeyHexes: [], failure: .radioUnavailable(radioState))
+        }
+        let (payload, message) = try await groups.sealMessage(text, toGroupID: groupID)
+        let packet = PopopxMeshPacket(
+            type: PopopxMeshMessageType.groupMessage.rawValue,
+            ttl: outboundTTL(broadcast: true),
+            timestamp: PopopxMeshPacket.nowMillis,
+            senderID: identity.peerID.bytes,
+            recipientID: nil,
+            payload: payload
+        )
+        let handedOff = await deliver(packet, messageId: message.id, peer: nil, origin: nil)
+        guard handedOff else {
+            // The message is in the local timeline already and the neighbours may still have heard
+            // nothing; the failure says which links were being considered, not that the text was lost.
+            throw PopopxMeshGroupError.deliveryFailed(peerMeshPublicKeyHexes: [], failure: .noLinkToPeer)
+        }
+    }
+
+    /// A directed, session-authenticated group state blob: an invite, a rotation, a removal notice.
+    /// The peer the handshake authenticated has to be the creator the state names, which is the
+    /// first check inside `applyState` and the reason this hands it the session's key and not the
+    /// header's.
+    private func consumeGroupState(_ packet: PopopxMeshPacket, hopCount: Int, linkID: UUID) async {
+        guard let sender = packet.senderPeerID,
+              let meshHex = meshHexByPeerID[sender.hex],
+              var session = peersByHex[meshHex]?.session else {
+            PopopxMeshLog.route.debug(
+                "🚫 group state with no session from \(packet.senderID.popopxHex.prefix(16), privacy: .public) dropped"
+            )
+            return
+        }
+        guard packet.recipientPeerID == identity.peerID else {
+            // Addressed to someone else: we are a hop in its delivery, and the relay already ran.
+            return
+        }
+        let blob: Data
+        do {
+            blob = try session.decrypt(packet.payload)
+        } catch {
+            PopopxMeshLog.noise.warning(
+                "🚫 group state frame from \(meshHex.prefix(8), privacy: .public) would not open: \(String(describing: error), privacy: .public)"
+            )
+            return
+        }
+        peersByHex[meshHex]?.session = session
+        touch(meshPublicKeyHex: meshHex, hopCount: hopCount, linkID: linkID)
+        _ = await groups.applyState(blob, fromMeshPublicKeyHex: meshHex)
+    }
+
+    /// The flooded half. A node without the group key answers nil here without logging more than a
+    /// debug line, and the packet has already been re-flooded by `relay` — that is the whole design:
+    /// everyone carries it, only members read it.
+    private func consumeGroupMessage(_ packet: PopopxMeshPacket, hopCount: Int) async {
+        guard packet.isBroadcast || packet.recipientPeerID == identity.peerID else { return }
+        _ = await groups.receiveMessage(packet.payload, hopCount: hopCount)
     }
 
     // MARK: - Peers
@@ -950,16 +1168,26 @@ public actor PopopxMeshEngine {
             timestamp: PopopxMeshPacket.nowMillis,
             senderID: identity.peerID.bytes,
             recipientID: nil,
-            payload: announcePayload()
+            payload: await announcePayload()
         )
         await deliver(packet, messageId: packet.packetID.popopxHex, peer: nil, origin: nil)
     }
 
-    /// Announce carries our public key and nickname in the clear, so a neighbour can bind our
-    /// 8-byte wire id to a POPOPX contact before either of us has a session.
-    private func announcePayload() -> Data {
+    /// Announce carries our public key, nickname and Ed25519 signing key in the clear, so a neighbour
+    /// can bind our 8-byte wire id to a POPOPX contact before either of us has a session, and so the
+    /// creator of a group can write a roster row for us at all — a signing key has to be reachable
+    /// from somewhere, and the only broadcast this protocol has is this one.
+    ///
+    /// Cost, stated plainly: a third long-term public key per node, visible to anyone in Bluetooth
+    /// range, which is one more value that can be used to recognise the same device across days.
+    /// Bitchat pays it for the same reason (`GroupProtocol.swift:23`), and unlike its announce the
+    /// field is additive inside a JSON dictionary, so a node that does not know 模块 8 ignores it.
+    private func announcePayload() async -> Data {
         var fields: [String: String] = [Self.announcePublicKeyField: identity.meshPublicKeyHex]
         if let nickname, !nickname.isEmpty { fields[Self.announceNicknameField] = nickname }
+        if let signingHex = await groups.localSigningPublicKeyHex, !signingHex.isEmpty {
+            fields[Self.announceSigningKeyField] = signingHex
+        }
         return (try? JSONEncoder().encode(fields)) ?? Data()
     }
 
@@ -984,6 +1212,8 @@ public actor PopopxMeshEngine {
 }
 
 extension PopopxMeshEngine: PopopxMeshOutbound {}
+
+extension PopopxMeshEngine: PopopxMeshGroupOutbound {}
 
 extension PopopxMeshEngine: PopopxBLETransportDelegate {
     public nonisolated func bleTransport(
