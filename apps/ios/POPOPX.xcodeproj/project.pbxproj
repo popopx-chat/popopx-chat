@@ -252,6 +252,13 @@
 		8B51158B30AD7BC200B15CFE /* PopopxProximityAddContactView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B51158730AD7BC200B15CFE /* PopopxProximityAddContactView.swift */; };
 		8B51158C30AD7BC200B15CFE /* PopopxAddFriendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B51158630AD7BC200B15CFE /* PopopxAddFriendView.swift */; };
 		8B51158D30AD7BC200B15CFE /* PopopxQRCardSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B51158830AD7BC200B15CFE /* PopopxQRCardSheet.swift */; };
+		8B60EF3F30B16EC60095E24A /* ServiceCardBubbleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60EF3D30B16EC60095E24A /* ServiceCardBubbleView.swift */; };
+		8B60EF4030B16EC60095E24A /* ChannelKeyManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60EF3830B16EC60095E24A /* ChannelKeyManagementView.swift */; };
+		8B60EF4130B16EC60095E24A /* PopopxH5Launcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60EF3C30B16EC60095E24A /* PopopxH5Launcher.swift */; };
+		8B60EF4230B16EC60095E24A /* ChannelKeyRotationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60EF3930B16EC60095E24A /* ChannelKeyRotationManager.swift */; };
+		8B60EF4330B16EC60095E24A /* PopopxEcoModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60EF3A30B16EC60095E24A /* PopopxEcoModels.swift */; };
+		8B60EF4430B16EC60095E24A /* BotMenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60EF3730B16EC60095E24A /* BotMenuBarView.swift */; };
+		8B60EF4530B16EC60095E24A /* PopopxEcoRouterAndDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60EF3B30B16EC60095E24A /* PopopxEcoRouterAndDeepLink.swift */; };
 		8B84792D30AE0DAE005E18B2 /* PopopxWeakDisplayLinkProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84792B30AE0DAE005E18B2 /* PopopxWeakDisplayLinkProxy.swift */; };
 		8B84792E30AE0DAE005E18B2 /* PopopxGlareDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84792630AE0DAE005E18B2 /* PopopxGlareDetector.swift */; };
 		8B84792F30AE0DAE005E18B2 /* PopopxSecureWindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84792A30AE0DAE005E18B2 /* PopopxSecureWindowManager.swift */; };
@@ -721,6 +728,13 @@
 		8B51158630AD7BC200B15CFE /* PopopxAddFriendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxAddFriendView.swift; sourceTree = "<group>"; };
 		8B51158730AD7BC200B15CFE /* PopopxProximityAddContactView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxProximityAddContactView.swift; sourceTree = "<group>"; };
 		8B51158830AD7BC200B15CFE /* PopopxQRCardSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxQRCardSheet.swift; sourceTree = "<group>"; };
+		8B60EF3730B16EC60095E24A /* BotMenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BotMenuBarView.swift; sourceTree = "<group>"; };
+		8B60EF3830B16EC60095E24A /* ChannelKeyManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelKeyManagementView.swift; sourceTree = "<group>"; };
+		8B60EF3930B16EC60095E24A /* ChannelKeyRotationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelKeyRotationManager.swift; sourceTree = "<group>"; };
+		8B60EF3A30B16EC60095E24A /* PopopxEcoModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxEcoModels.swift; sourceTree = "<group>"; };
+		8B60EF3B30B16EC60095E24A /* PopopxEcoRouterAndDeepLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxEcoRouterAndDeepLink.swift; sourceTree = "<group>"; };
+		8B60EF3C30B16EC60095E24A /* PopopxH5Launcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxH5Launcher.swift; sourceTree = "<group>"; };
+		8B60EF3D30B16EC60095E24A /* ServiceCardBubbleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceCardBubbleView.swift; sourceTree = "<group>"; };
 		8B84792330AE0DAE005E18B2 /* PopopxAntiDebug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxAntiDebug.swift; sourceTree = "<group>"; };
 		8B84792430AE0DAE005E18B2 /* PopopxAntiPhotoRenderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxAntiPhotoRenderView.swift; sourceTree = "<group>"; };
 		8B84792530AE0DAE005E18B2 /* PopopxCameraGuardEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopopxCameraGuardEngine.swift; sourceTree = "<group>"; };
@@ -1484,6 +1498,7 @@
 		8B51158A30AD7BC200B15CFE /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				8B60EF3E30B16EC60095E24A /* ServiceAccount */,
 				8B34642E30AEF48D00F92867 /* BadgeCredits */,
 				8B1B85A130AE9049005C5769 /* AntiTheftDuress */,
 				8B36F15230AE6E8600ABC182 /* PersonalProfile */,
@@ -1499,6 +1514,20 @@
 				8B84792C30AE0DAE005E18B2 /* SecureEphemeral */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		8B60EF3E30B16EC60095E24A /* ServiceAccount */ = {
+			isa = PBXGroup;
+			children = (
+				8B60EF3730B16EC60095E24A /* BotMenuBarView.swift */,
+				8B60EF3830B16EC60095E24A /* ChannelKeyManagementView.swift */,
+				8B60EF3930B16EC60095E24A /* ChannelKeyRotationManager.swift */,
+				8B60EF3A30B16EC60095E24A /* PopopxEcoModels.swift */,
+				8B60EF3B30B16EC60095E24A /* PopopxEcoRouterAndDeepLink.swift */,
+				8B60EF3C30B16EC60095E24A /* PopopxH5Launcher.swift */,
+				8B60EF3D30B16EC60095E24A /* ServiceCardBubbleView.swift */,
+			);
+			path = ServiceAccount;
 			sourceTree = "<group>";
 		};
 		8B84792C30AE0DAE005E18B2 /* SecureEphemeral */ = {
@@ -1983,6 +2012,13 @@
 				5C9CC7AD28C55D7800BEF955 /* DatabaseEncryptionView.swift in Sources */,
 				8C74C3EC2C1B92A900039E77 /* Theme.swift in Sources */,
 				5CE4407927ADB701007B033A /* EmojiItemView.swift in Sources */,
+				8B60EF3F30B16EC60095E24A /* ServiceCardBubbleView.swift in Sources */,
+				8B60EF4030B16EC60095E24A /* ChannelKeyManagementView.swift in Sources */,
+				8B60EF4130B16EC60095E24A /* PopopxH5Launcher.swift in Sources */,
+				8B60EF4230B16EC60095E24A /* ChannelKeyRotationManager.swift in Sources */,
+				8B60EF4330B16EC60095E24A /* PopopxEcoModels.swift in Sources */,
+				8B60EF4430B16EC60095E24A /* BotMenuBarView.swift in Sources */,
+				8B60EF4530B16EC60095E24A /* PopopxEcoRouterAndDeepLink.swift in Sources */,
 				8C7D949A2B88952700B7B9E1 /* MigrateToDevice.swift in Sources */,
 				5C3F1D562842B68D00EC8A82 /* IntegrityErrorItemView.swift in Sources */,
 				5C029EAA283942EA004A9677 /* CallController.swift in Sources */,

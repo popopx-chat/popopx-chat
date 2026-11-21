@@ -2792,6 +2792,13 @@ func processReceivedMsg(_ res: ChatEvent) async {
                         chatType: signalChatType, chatId: signalChatId, itemId: signalItemId,
                         memberId: signalMemberId, text: text
                     )
+                    // Mount point of the service-account ecosystem (`::POPOPX_ECO::`), hung **beside** the call above rather than as a
+                    // second subscription anywhere: one site still owns the `msgContent?.text` read and the hop onto the main actor, so
+                    // the two routers cannot disagree about the order they saw the same message in. They answer different markers, so a
+                    // given line is handled by at most one of them.
+                    PopopxEcoRouter.shared.observeIncoming(
+                        chatType: signalChatType, chatId: signalChatId, itemId: signalItemId, text: text
+                    )
                 }
             }
             if cItem.showNotification {

@@ -586,6 +586,23 @@ final class PopopxCreditsManager {
         return ownedCosmetics.contains(cosmetic)
     }
 
+    // MARK: scenario 7 · service-account card payment
+
+    /// The `pay_credits` leg of a service-account card. It mints **no** credential: the ledger entry it returns is the whole receipt,
+    /// and the caller puts `entry.id` into the `::CB::…:paid_<id>` callback.
+    ///
+    /// That id is a locally minted UUID (`debit`'s `entryId` default), not anything the server issued, so the callback names *this
+    /// device's record* rather than a transaction the far side can look up. The server can only match it on amount plus target, which is
+    /// why the note carries the target and why a replayed callback is refused by the card's own lockout rather than by this entry.
+    ///
+    /// The balance is checked here and not only by the caller: `debit` is the single place the wallet moves, and a caller that skipped
+    /// its own pre-check must still not be able to overdraw.
+    @discardableResult
+    func payForService(amount: Int, note: String) throws -> PopopxCreditsEntry {
+        loadIfNeeded()
+        return try debit(amount, kind: .servicePayment, note: note)
+    }
+
     // MARK: display
 
     /// The ledger is handed to the UI in reverse time order; no pagination — the cap is 240 entries.

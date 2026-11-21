@@ -202,6 +202,11 @@ enum PopopxBubbleBody: Hashable {
     /// to judge once from the same body text; if it detects nothing it stays `.text` — this tier carries no local state,
     /// the card reads from the keychain ledger itself, so `PopopxBubbleBody` remains `Hashable` and comparable.
     case commerce(PopopxCommerceContent)
+    /// A service-account card (`::POPOPX_ECO::` with `mode == create`). Same family as `.commerce`: the tier carries the manifest, the
+    /// card reads its own newest state from `PopopxEcoStore`, so `Hashable` survives and an in-place update repaints this row instead of
+    /// appending a second bubble. Frames that *mutate* this device (handshake, menu, key rotation, and a card **update**) never reach
+    /// this tier — `PopopxEcoMarker.isControlText` hides them through `PopopxSysMarker.isSignalText`.
+    case serviceCard(PopopxServiceCard)
 
     /// The body sentence VoiceOver should say. `.event` is routed by `PopopxMessageBubble.body` to `eventLine`,
     /// and gets no bubble fill — the predicate is written only in that one routing place.
@@ -222,6 +227,10 @@ enum PopopxBubbleBody: Hashable {
         // The wording lives on the card side (`PopopxCommerceCards.swift`); this only forwards: for the same red packet, what the bubble says
         // and the numbers written on the card must come from the same place, otherwise one side gets changed and the other forgotten.
         case let .commerce(content): content.spokenText
+        // The joiner follows `.media` above: a full-width comma is locale-neutral for VoiceOver and keeps the two bubble families
+        // speaking with the same cadence. The wording on the card itself lives in `ServiceCardBubbleView` (agent-written); this only
+        // says what the row *is* and what it's about, the same way `.profile` does.
+        case let .serviceCard(card): "\(PopopxEcoCopy.cardSpokenPrefix)，\(card.title)"
         }
     }
 }
@@ -345,7 +354,7 @@ struct PopopxMessageBubble: View {
         }
         .frame(maxWidth: item.maxWidth, alignment: item.side.alignment)
         switch item.content {
-        case .location, .secure, .profile, .commerce:
+        case .location, .secure, .profile, .commerce, .serviceCard:
             // Each of these cards contains one real button (open the map / tap to view / open the card / open and redeem).
             // `.combine` would merge the subtree's tap action
             // into the whole row, and VoiceOver could never open them again, so this is changed to `.contain`: the container stays, and the children
@@ -462,6 +471,13 @@ struct PopopxMessageBubble: View {
             case let .channel(payload):
                 PopopxChannelAccessBubble(payload: payload, context: commerceContext)
             }
+        case let .serviceCard(card):
+            // The service-account card reads its own newest state from `PopopxEcoStore` and routes action buttons through
+            // `PopopxEcoActionRunner`, so the bubble here is a thin shell that only hands the manifest and the chat's id to the view.
+            // `item.contactId` is the contact id for a direct chat and the group id for a group; the runner's `send` path
+            // resolves the contact from that id, and in a group it returns `.sendFailed` (the group id is not a contact id), which
+            // the view shows as a disabled button. That is the honest answer: a card in a group has no single contact to send to.
+            ServiceCardBubbleView(card: card, contactId: item.contactId ?? 0)
         }
     }
 
@@ -1006,6 +1022,12 @@ enum PopopxBubbleMount {
         if let location = PopopxLocationPayload.parse(from: mc.text) {
             return .location(location)
         }
+        // Service-account cards in a group/channel are content (the brief's DevOps-alert case is a channel broadcast), so the same
+        // family as `.commerce` applies here. `parseVisibleCard` only returns `mode == create` frames; an update is a control frame
+        // and `PopopxSysMarker.isSignalText` already hides it before this function runs.
+        if let card = PopopxEcoMarker.parseVisibleCard(in: mc.text) {
+            return .serviceCard(card)
+        }
         guard chat.chatInfo.chatType == .group, !chat.chatInfo.isChannel else { return nil }
         return PopopxCommerceContent.detect(in: mc.text).map(PopopxBubbleBody.commerce)
     }
@@ -1036,6 +1058,13 @@ enum PopopxBubbleMount {
             // would be read as links by the live app, and that line would forever be nothing but a signed string of plain text.
             if let commerce = PopopxCommerceContent.detect(in: mc.text) {
                 return .commerce(commerce)
+            }
+            // Service-account cards are the fifth family, and they must also outrank the three guards below for the same reason:
+            // the `::POPOPX_ECO::` line is a JSON blob whose `u` field may carry a URL that the live app's `formattedText` would
+            // turn into a link, and the whole line would then render as a plain-text URL instead of a card. `parseVisibleCard` only
+            // returns `mode == create` frames, so an update never reaches this tier (the store mutates the existing row in place).
+            if let card = PopopxEcoMarker.parseVisibleCard(in: mc.text) {
+                return .serviceCard(card)
             }
             // Rows with rich text/mentions/markdown go to the live app: the bubble only draws plain `Text`, so links and @ would no longer be tappable.
             guard ci.formattedText == nil, ci.mentions == nil, ci.markdownBlocks == nil else { return nil }
@@ -1068,7 +1097,7 @@ enum PopopxBubbleMount {
         let tucked: Bool
         switch content {
         case .withdrawn, .unavailable, .event: tucked = false
-        case .text, .media, .location, .secure, .profile, .commerce: tucked = tailVisible
+        case .text, .media, .location, .secure, .profile, .commerce, .serviceCard: tucked = tailVisible
         }
         // The secure slot has to be able to answer "which row to delete after it closes". Both ids are read off live-app objects verbatim only, never built, never guessed:
         // `chat.chatInfo.id` = `ChatInfo.id` (generated per case at ChatTypes.swift:2104-2112), `ci.id` = the message id.

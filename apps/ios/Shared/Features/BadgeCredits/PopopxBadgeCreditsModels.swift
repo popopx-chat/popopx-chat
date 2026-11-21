@@ -1159,8 +1159,13 @@ enum PopopxSysMarker {
     }
 
     /// The entry point of render suppression: a hit means the whole line never reaches a bubble, a preview, or being read aloud.
+    ///
+    /// It also answers for `::POPOPX_ECO::`, which is why the service-account module has no gates of its own: a second criterion in a
+    /// second place is how one of the three sites ends up showing a frame the other two hide. Only a frame that *mutates this device*
+    /// is suppressed here — a newly created service card is content the user must see, and `PopopxEcoMarker.isControlText` is what tells
+    /// those two apart (`PopopxEcoModels.swift`, `PopopxEcoFrame.isControlFrame`).
     static func isSignalText(_ text: String) -> Bool {
-        parse(wholeText: text) != nil
+        parse(wholeText: text) != nil || PopopxEcoMarker.isControlText(text)
     }
 }
 
@@ -1180,6 +1185,11 @@ enum PopopxCreditsEntryKind: String, Codable, CaseIterable, Identifiable, Sendab
     case redPacketReceived
     case redPacketRefund
     case channelSubscription
+    /// Paying a service account for something it sells through a card button (`pay_credits`): an appointment, a vote entry, an
+    /// outsourced job. A spend, and deliberately NOT `channelSubscription` — that leg mints a local ticket with an expiry, while this
+    /// one only produces a ledger entry whose id goes into the `::CB::…:paid_<id>` callback. Conflating them would either mint a
+    /// ticket nobody asked for or lose the receipt the callback names.
+    case servicePayment
     case profileUnlock
     case secureWindow
     case cosmetic
@@ -1192,7 +1202,7 @@ enum PopopxCreditsEntryKind: String, Codable, CaseIterable, Identifiable, Sendab
         switch self {
         case .storePurchase, .redPacketReceived, .adjustment: nil
         case .badgeExchange, .giftVoucherExchange, .creditGiftSent, .redPacketSent, .channelSubscription,
-             .profileUnlock, .secureWindow, .cosmetic: -1
+             .servicePayment, .profileUnlock, .secureWindow, .cosmetic: -1
         case .redPacketRefund, .creditGiftReceived: 1
         }
     }
@@ -1202,7 +1212,7 @@ enum PopopxCreditsEntryKind: String, Codable, CaseIterable, Identifiable, Sendab
         switch self {
         case .storePurchase, .redPacketReceived, .redPacketRefund, .creditGiftReceived: true
         case .badgeExchange, .giftVoucherExchange, .creditGiftSent, .redPacketSent, .channelSubscription,
-             .profileUnlock, .secureWindow, .cosmetic, .adjustment: false
+             .servicePayment, .profileUnlock, .secureWindow, .cosmetic, .adjustment: false
         }
     }
 }
