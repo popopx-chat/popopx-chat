@@ -8920,3 +8920,14 @@ server test failure */
 "Verified" = "Geverifieerd";
 "Waiting for a reply" = "Wachten op een antwoord";
 "Warn %d days before a key expires" = "Waarschuw %d dagen voordat een sleutel verloopt";
+"Service Accounts" = "Serviceaccounts";
+"No service accounts followed yet" = "Nog geen serviceaccounts gevolgd";
+"%d service accounts" = "%d serviceaccounts";
+"No service accounts yet" = "Nog geen serviceaccounts";
+"Service accounts you connect to through the POPOPX ecosystem will appear here, separate from your personal contacts." = "Serviceaccounts waarmee je verbinding maakt via het POPOPX-ecosysteem verschijnen hier, gescheiden van je persoonlijke contacten.";
+"Followed service accounts" = "Gevolgde serviceaccounts";
+"These are bots and services that completed the POPOPX ecosystem handshake. They are kept apart from your personal contacts." = "Dit zijn bots en diensten die de POPOPX-ecosysteem-handshake hebben voltooid. Ze worden apart gehouden van je persoonlijke contacten.";
+"Unfollow" = "Ontvolgen";
+"Unfollow this service account?" = "Dit serviceaccount ontvolgen?";
+"The conversation history will be removed and this service will no longer appear in your contacts. You can follow it again later." = "De gespreksgeschiedenis wordt verwijderd en deze service verschijnt niet meer in je contacten. Je kunt het later opnieuw volgen.";
+"Unfollowed" = "Ontvolgd";

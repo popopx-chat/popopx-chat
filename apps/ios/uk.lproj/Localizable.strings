@@ -9165,3 +9165,14 @@ alert title */
 "Follow this service account first, then open the link again." = "Спочатку підпишіться на цей сервісний акаунт, потім відкрийте посилання знову.";
 "Join this encrypted channel?" = "Приєднатися до цього зашифрованого каналу?";
 "The channel key stays on this device and is never sent to a relay." = "Ключ каналу залишається на цьому пристрої та ніколи не надсилається на реле.";
+"Service Accounts" = "Сервісні акаунти";
+"No service accounts followed yet" = "Немає підписок на сервісні акаунти";
+"%d service accounts" = "%d сервісних акаунтів";
+"No service accounts yet" = "Ще немає сервісних акаунтів";
+"Service accounts you connect to through the POPOPX ecosystem will appear here, separate from your personal contacts." = "Сервісні акаунти, підключені через екосистему POPOPX, відображатимуться тут окремо від особистих контактів.";
+"Followed service accounts" = "Відстежувані сервісні акаунти";
+"These are bots and services that completed the POPOPX ecosystem handshake. They are kept apart from your personal contacts." = "Це боти та сервіси, які пройшли рукостискання экосистеми POPOPX. Вони зберігаāться окремо від ваших особистих контактів.";
+"Unfollow" = "Відписатися";
+"Unfollow this service account?" = "Відписатися від цього сервісного акаунта?";
+"The conversation history will be removed and this service will no longer appear in your contacts. You can follow it again later." = "Історію розмов буде видалено, і цей сервіс більше не з'явиться у ваших контактах. Ви зможете підписатися знову пізніше.";
+"Unfollowed" = "Відписано";

@@ -90,6 +90,7 @@ private enum PopopxContactsRoute: Hashable {
     case newConnections
     case groups
     case channels
+    case serviceAccounts
     /// "Join channel": lands on the existing scan/paste-link page (the same page is already mounted in the + at the top right of the "Messages" tab,
     /// `ChatsListView.swift:270-275`). A channel link still goes through the app's existing `planAndConnect` →
     /// `apiConnectPlan` → `.groupLink` real path (`NewChatView.swift:1320`, `:1522`).
@@ -181,6 +182,8 @@ struct PopopxContactsView: View {
                     PopopxGroupsPage()
                 case .channels:
                     PopopxChannelsPage()
+                case .serviceAccounts:
+                    PopopxServiceAccountsPage()
                 case .joinChannel:
                     // The same page and the same mounting style as the "scan" item in the Messages tab's + menu (`ChatsListView.swift:270-275`),
                     // differing only in the title: this one is here to "join a channel with a link or a QR code", and the title must make both things clear.
@@ -315,6 +318,23 @@ struct PopopxContactsView: View {
 
                 PopopxRowSeparator(inset: 0)
 
+                // Card 3.5: service accounts I follow. Separated from ordinary contacts so the address book stays clean.
+                NavigationLink(value: PopopxContactsRoute.serviceAccounts) {
+                    PopopxFunctionRowLabel(
+                        title: Copy.serviceAccountsTitle,
+                        note: serviceAccountNote,
+                        systemImage: "briefcase.fill"
+                    ) {
+                        if serviceAccountCount > 0 {
+                            PopopxOnlineCountBadge(count: serviceAccountCount)
+                        }
+                    }
+                }
+                .buttonStyle(PopopxPressButtonStyle())
+                .accessibilityElement(children: .combine)
+
+                PopopxRowSeparator(inset: 0)
+
                 // Card 4: group by anonymous identity — a sheet, so an atomic control that takes an action closure can be used.
                 PopopxPickerRow(
                     Copy.identitiesTitle,
@@ -375,11 +395,14 @@ struct PopopxContactsView: View {
     private var meshPendingCount: Int { meshRuntime.isFuseOn ? meshBanner.requests.count : 0 }
 
     /// The unified definition of contacts + encrypted groups (the main list of Contacts).
+    /// Service accounts are excluded: they live in their own page (`PopopxServiceAccountsPage`).
     private var contactChats: [Chat] {
         chatModel.chats.filter { chat in
             guard !chat.chatInfo.chatDeleted, !chat.chatInfo.contactCard else { return false }
             switch chat.chatInfo {
             case let .direct(contact):
+                // Exclude service accounts from the ordinary contacts list
+                guard !PopopxEcoSessionStore.hasSession(for: contact.contactId) else { return false }
                 return contact.active && !contact.isContactCard
             case let .group(groupInfo, _):
                 return groupInfo.businessChat == nil && !groupInfo.isChannel
@@ -396,6 +419,19 @@ struct PopopxContactsView: View {
     /// Channels: the test shares the one `isPopopxChannel` with the channel page below, so the two places cannot say different things.
     private var channelChats: [Chat] {
         chatModel.chats.filter(isPopopxChannel)
+    }
+
+    /// Service accounts: direct contacts that completed the eco session handshake.
+    private var serviceAccountChats: [Chat] {
+        chatModel.chats.filter { chat in
+            guard !chat.chatInfo.chatDeleted, !chat.chatInfo.contactCard else { return false }
+            guard case let .direct(contact) = chat.chatInfo else { return false }
+            return contact.active && !contact.isContactCard && PopopxEcoSessionStore.hasSession(for: contact.contactId)
+        }
+    }
+
+    private var serviceAccountCount: Int {
+        serviceAccountChats.count
     }
 
     private var visibleChats: [Chat] {
@@ -455,6 +491,10 @@ struct PopopxContactsView: View {
 
     private var channelNote: String {
         channelChats.isEmpty ? Copy.channelsNoteEmpty : Copy.channelsNote(channelChats.count)
+    }
+
+    private var serviceAccountNote: String {
+        serviceAccountChats.isEmpty ? Copy.serviceAccountsNoteEmpty : Copy.serviceAccountsNote(serviceAccountCount)
     }
 
     private var identityValue: String {
@@ -1304,6 +1344,166 @@ private func isPopopxChannel(_ chat: Chat) -> Bool {
     }
 }
 
+// // MARK: - Service accounts page
+
+/// The dedicated list of service accounts — bots and services that completed the POPOPX eco handshake.
+/// Kept apart from ordinary contacts so the address book stays personal. The identification is the same
+/// `PopopxEcoSessionStore.hasSession(for:)` check the main tab uses to filter them out of `contactChats`.
+@MainActor private struct PopopxServiceAccountsPage: View {
+    @EnvironmentObject private var chatModel: ChatModel
+    @AppStorage(DEFAULT_PRIVACY_SHOW_CHAT_PREVIEWS) private var showChatPreviews = true
+
+    @State private var unfollowingChat: Chat?
+    @State private var toast = PopopxToastModel()
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
+                if serviceAccounts.isEmpty {
+                    PopopxSectionCard {
+                        PopopxEmptyRow(title: Copy.serviceAccountsEmptyTitle, note: Copy.serviceAccountsEmptyNote)
+                    }
+                } else {
+                    PopopxSectionCard(Copy.serviceAccountsSectionTitle, footnote: Copy.serviceAccountsSectionFootnote) {
+                        ForEach(serviceAccounts) { chat in
+                            PopopxServiceAccountRow(
+                                chat: chat,
+                                showsPreview: showChatPreviews,
+                                open: { ItemsModel.shared.loadOpenChat(chat.id) },
+                                unfollow: { unfollowingChat = chat }
+                            )
+                            if chat.id != serviceAccounts.last?.id {
+                                PopopxRowSeparator(inset: PopopxMetrics.minHitTarget + PopopxMetrics.spaceS)
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(.top, PopopxMetrics.spaceS)
+            .padding(.bottom, PopopxMetrics.space2XL)
+        }
+        .background(PopopxPalette.base)
+        .navigationTitle(Copy.serviceAccountsPageTitle)
+        .popopxToast(toast)
+        .alert(Copy.serviceAccountUnfollowConfirmTitle, isPresented: Binding(
+            get: { unfollowingChat != nil },
+            set: { if !$0 { unfollowingChat = nil } }
+        )) {
+            Button(Copy.serviceAccountUnfollowConfirmCancel, role: .cancel) {
+                unfollowingChat = nil
+            }
+            Button(Copy.serviceAccountUnfollowConfirmAction, role: .destructive) {
+                if let chat = unfollowingChat {
+                    let chatCopy = chat
+                    unfollowingChat = nil
+                    Task {
+                        await deleteChat(chatCopy)
+                        toast.show(Copy.serviceAccountUnfollowedToast, kind: .encrypted)
+                    }
+                }
+            }
+        } message: {
+            Text(Copy.serviceAccountUnfollowConfirmNote)
+        }
+    }
+
+    /// Service accounts: direct contacts that completed the eco session handshake.
+    /// Same definition as `PopopxContactsView.serviceAccountChats` — the two must never disagree.
+    private var serviceAccounts: [Chat] {
+        chatModel.chats.filter { chat in
+            guard !chat.chatInfo.chatDeleted, !chat.chatInfo.contactCard else { return false }
+            guard case let .direct(contact) = chat.chatInfo else { return false }
+            return contact.active && !contact.isContactCard && PopopxEcoSessionStore.hasSession(for: contact.contactId)
+        }
+    }
+}
+
+/// One service account row: briefcase symbol + name + last activity + unread badge.
+/// The layout mirrors `PopopxChannelRow` (same timestamp position, same unread badge shape),
+/// differing only in the leading icon — briefcase for "this is a service", antenna for "this is a broadcast channel".
+@MainActor private struct PopopxServiceAccountRow: View {
+    @ObservedObject var chat: Chat
+    let showsPreview: Bool
+    let open: () -> Void
+    let unfollow: () -> Void
+
+    var body: some View {
+        Button(action: open) {
+            HStack(spacing: PopopxMetrics.spaceS) {
+                PopopxAvatar(
+                    chat: chat,
+                    size: PopopxMetrics.minHitTarget,
+                    icon: "briefcase.fill"
+                )
+
+                VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
+                    HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.space2XS) {
+                        Image(systemName: "briefcase.fill")
+                            .font(PopopxType.microTag)
+                            .imageScale(.medium)
+                            .foregroundStyle(PopopxPalette.labelSecondary)
+                            .accessibilityHidden(true)
+                        Text(chat.chatInfo.chatViewName)
+                            .font(PopopxType.emphasis)
+                            .foregroundStyle(PopopxPalette.label)
+                            .lineLimit(1)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: PopopxMetrics.spaceXS)
+                        timestamp
+                    }
+
+                    if let activity {
+                        Text(activity)
+                            .font(PopopxType.caption)
+                            .foregroundStyle(PopopxPalette.labelSecondary)
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                unreadBadge
+            }
+            .padding(.vertical, PopopxMetrics.spaceS)
+            .frame(minHeight: PopopxMetrics.minHitTarget)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PopopxPressButtonStyle())
+        .accessibilityElement(children: .combine)
+        .contextMenu {
+            Button(role: .destructive, action: unfollow) {
+                Label(Copy.serviceAccountUnfollow, systemImage: "person.fill.minus")
+            }
+        }
+    }
+
+    private var timestamp: Text {
+        formatTimestampText(chat.chatItems.last?.meta.itemTs ?? chat.chatInfo.chatTs)
+            .font(PopopxType.metric)
+            .foregroundStyle(PopopxPalette.labelSecondary)
+    }
+
+    private var activity: String? {
+        guard showsPreview else { return nil }
+        guard let item = chat.chatItems.last else { return Copy.serviceAccountNoActivity }
+        let text = item.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        return text.isEmpty ? Copy.serviceAccountNoActivity : text
+    }
+
+    @ViewBuilder private var unreadBadge: some View {
+        let stats = chat.chatStats
+        if stats.unreadCount > 0 || stats.unreadChat {
+            unreadCountText(stats.unreadCount > 0 ? stats.unreadCount : 1)
+                .font(PopopxType.metricSmall)
+                .foregroundStyle(PopopxPalette.onBrand)
+                .padding(.horizontal, PopopxMetrics.spaceXS)
+                .frame(minWidth: PopopxMetrics.spaceXL, minHeight: PopopxMetrics.spaceXL)
+                .background(PopopxPalette.brand, in: .capsule)
+                .accessibilityLabel(Copy.unreadA11y(max(stats.unreadCount, 1)))
+        }
+    }
+}
+
 // // MARK: - Group-by-anonymous-identity sheet
 
 private struct PopopxIdentitySheet: View {
@@ -1588,6 +1788,23 @@ private enum Copy {
     /// and the remaining catalogues fall back to the English source sentence. The six newly coined sentences above are in no catalogue at all yet, waiting for a batch translation pass.
     static let joinChannelEntry = key("Join channel")
     static let joinChannelPageTitle = key("Paste link / Scan")
+
+    // // Service accounts page (separated from ordinary contacts — eco-handshaked bots and services)
+    static let serviceAccountsTitle = key("Service Accounts")
+    static let serviceAccountsNoteEmpty = key("No service accounts followed yet")
+    static func serviceAccountsNote(_ count: Int) -> String { fmt("%d service accounts", count) }
+    static let serviceAccountsPageTitle = key("Service Accounts")
+    static let serviceAccountsEmptyTitle = key("No service accounts yet")
+    static let serviceAccountsEmptyNote = key("Service accounts you connect to through the POPOPX ecosystem will appear here, separate from your personal contacts.")
+    static let serviceAccountsSectionTitle = key("Followed service accounts")
+    static let serviceAccountsSectionFootnote = key("These are bots and services that completed the POPOPX ecosystem handshake. They are kept apart from your personal contacts.")
+    static let serviceAccountUnfollow = key("Unfollow")
+    static let serviceAccountUnfollowConfirmTitle = key("Unfollow this service account?")
+    static let serviceAccountUnfollowConfirmNote = key("The conversation history will be removed and this service will no longer appear in your contacts. You can follow it again later.")
+    static let serviceAccountUnfollowConfirmAction = key("Unfollow")
+    static let serviceAccountUnfollowConfirmCancel = key("Keep")
+    static let serviceAccountUnfollowedToast = key("Unfollowed")
+    static let serviceAccountNoActivity = key("No messages yet")
 
     // // Identity sheet
     static let identityListTitle = key("Anonymous identities on this device")

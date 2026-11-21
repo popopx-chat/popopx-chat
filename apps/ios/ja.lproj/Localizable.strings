@@ -6432,3 +6432,14 @@ server test failure */
 "Verified" = "検証済み";
 "Waiting for a reply" = "返信を待っています";
 "Warn %d days before a key expires" = "キーの期限切れ %d 日前に警告";
+"Service Accounts" = "サービスアカウント";
+"No service accounts followed yet" = "フォロー中のサービスアカウントはありません";
+"%d service accounts" = "%d 件のサービスアカウント";
+"No service accounts yet" = "サービスアカウントはまだありません";
+"Service accounts you connect to through the POPOPX ecosystem will appear here, separate from your personal contacts." = "POPOPX エコシステムを通じて接続したサービスアカウントが、連絡先とは別に表示されます。";
+"Followed service accounts" = "フォロー中のサービスアカウント";
+"These are bots and services that completed the POPOPX ecosystem handshake. They are kept apart from your personal contacts." = "POPOPX エコシステムのハンドシェイクを完了したボットとサービスです。個人の連絡先とは分けて管理されます。";
+"Unfollow" = "フォロー解除";
+"Unfollow this service account?" = "このサービスアカウントのフォローを解除しますか？";
+"The conversation history will be removed and this service will no longer appear in your contacts. You can follow it again later." = "チャット履歴は削除され、このサービスは連絡先から消えます。後から再度フォローできます。";
+"Unfollowed" = "フォロー解除しました";

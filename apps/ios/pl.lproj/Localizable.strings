@@ -9218,3 +9218,14 @@ alert title */
 "Follow this service account first, then open the link again." = "Najpierw subskrybuj to konto serwisowe, a następnie otwórz link ponownie.";
 "Join this encrypted channel?" = "Dołączyć do tego zaszyfrowanego kanału?";
 "The channel key stays on this device and is never sent to a relay." = "Klucz kanału pozostaje na tym urządzeniu i nigdy nie jest wysyłany do przekaźnika.";
+"Service Accounts" = "Konta usługowe";
+"No service accounts followed yet" = "Brak obserwowanych kont usługowych";
+"%d service accounts" = "%d kont usługowych";
+"No service accounts yet" = "Brak kont usługowych";
+"Service accounts you connect to through the POPOPX ecosystem will appear here, separate from your personal contacts." = "Konta usługowe, z którymi się łączysz przez ekosystem POPOPX, pojawią się tutaj, oddzielnie od osobistych kontaktów.";
+"Followed service accounts" = "Obserwowane konta usługowe";
+"These are bots and services that completed the POPOPX ecosystem handshake. They are kept apart from your personal contacts." = "To boty i usługi, które ukończyły powitanie ekosystemu POPOPX. Są przechowywane oddzielnie od osobistych kontaktów.";
+"Unfollow" = "Przestań obserwować";
+"Unfollow this service account?" = "Przestać obserwować to konto usługowe?";
+"The conversation history will be removed and this service will no longer appear in your contacts. You can follow it again later." = "Historia rozmów zostanie usunięta, a ta usługa nie będzie już widoczna w kontaktach. Możesz ją ponownie zaobserwować później.";
+"Unfollowed" = "Przestano obserwować";

@@ -10040,3 +10040,14 @@ alert title */
 "This menu item is not available in an offline chat yet." = "Ez a menüelem még nem érhető el offline csevegésben.";
 "Waiting for a reply" = "Válaszra vár";
 "Warn %d days before a key expires" = "Figyelmeztetés %d nappal a kulcs lejárata előtt";
+"Service Accounts" = "Szolgáltatásfiókok";
+"No service accounts followed yet" = "Még nincsenek követett szolgáltatásfiókok";
+"%d service accounts" = "%d szolgáltatásfiók";
+"No service accounts yet" = "Még nincsenek szolgáltatásfiókok";
+"Service accounts you connect to through the POPOPX ecosystem will appear here, separate from your personal contacts." = "A POPOPX ökoszisztémán keresztül csatlakoztatott szolgáltatásfiókok itt jelennek meg, a személyes kapcsolatoktól elkülönítve.";
+"Followed service accounts" = "Követett szolgáltatásfiókok";
+"These are bots and services that completed the POPOPX ecosystem handshake. They are kept apart from your personal contacts." = "Ezek a POPOPX ökoszisztéma kézfogását befejezett botok és szolgáltatások. Személyes kapcsolataitól elkülönítve tároljuk őket.";
+"Unfollow" = "Követés megszüntetése";
+"Unfollow this service account?" = "Megszünteti ezen szolgáltatásfiók követését?";
+"The conversation history will be removed and this service will no longer appear in your contacts. You can follow it again later." = "A beszélgetés előzményei törlődnek, és ez a szolgáltatás már nem jelenik meg a kapcsolatai között. Később újra követheti.";
+"Unfollowed" = "Követés megszüntetve";

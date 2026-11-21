@@ -6068,3 +6068,14 @@ server test failure */
 "This menu item is not available in an offline chat yet." = "รายการเมนูนี้ยังไม่พร้อมใช้งานในแชทออฟไลน์";
 "Waiting for a reply" = "รอการตอบกลับ";
 "Warn %d days before a key expires" = "เตือน %d วันก่อนคีย์หมดอายุ";
+"Service Accounts" = "บัญชีบริการ";
+"No service accounts followed yet" = "ยังไม่ได้ติดตามบัญชีบริการใด";
+"%d service accounts" = "%d บัญชีบริการ";
+"No service accounts yet" = "ยังไม่มีบัญชีบริการ";
+"Service accounts you connect to through the POPOPX ecosystem will appear here, separate from your personal contacts." = "บัญชีบริการที่คุณเชื่อมต่อผ่านระบบนิเวศ POPOPX จะปรากฏที่นี่ แยกจากผู้ติดต่อส่วนตัวของคุณ";
+"Followed service accounts" = "บัญชีบริการที่ติดตาม";
+"These are bots and services that completed the POPOPX ecosystem handshake. They are kept apart from your personal contacts." = "เหล่านี้คือบอทและบริการที่ทำการจับมือกับระบบนิเวศ POPOPX เสร็จสิ้นแล้ว จะถูกแยกออกจากผู้ติดต่อส่วนตัวของคุณ";
+"Unfollow" = "เลิกติดตาม";
+"Unfollow this service account?" = "เลิกติดตามบัญชีบริการนี้?";
+"The conversation history will be removed and this service will no longer appear in your contacts. You can follow it again later." = "ประวัติการสนทนาจะถูกลบออก และบริการนี้จะไม่ปรากฏในผู้ติดต่อของคุณอีก คุณสามารถติดตามใหม่ได้ในภายหลัง";
+"Unfollowed" = "เลิกติดตามแล้ว";

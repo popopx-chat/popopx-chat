@@ -9155,3 +9155,14 @@ alert title */
 "This menu item is not available in an offline chat yet." = "Bu menü öğesi çevrimdışı sohbette henüz kullanılamaz.";
 "Waiting for a reply" = "Yanıt bekleniyor";
 "Warn %d days before a key expires" = "Anahtarın süresi dolmadan %d gün önce uyar";
+"Service Accounts" = "Hesaplar";
+"No service accounts followed yet" = "Henüz takip edilen hizmet hesabı yok";
+"%d service accounts" = "%d hizmet hesabı";
+"No service accounts yet" = "Henüz hizmet hesabı yok";
+"Service accounts you connect to through the POPOPX ecosystem will appear here, separate from your personal contacts." = "POPOPX ekosistemi üzerinden bağlandığınız hizmet hesapları burada, kişisel kişilerinizden ayrı olarak görünecektir.";
+"Followed service accounts" = "Takip edilen hizmet hesapları";
+"These are bots and services that completed the POPOPX ecosystem handshake. They are kept apart from your personal contacts." = "Bunlar POPOPX ekosistem el sıkışmasını tamamlayan botlar ve hizmetlerdir. Kişisel kişilerinizden ayrı tutulurlar.";
+"Unfollow" = "Takibi bırak";
+"Unfollow this service account?" = "Bu hizmet hesabını takipten bırak?";
+"The conversation history will be removed and this service will no longer appear in your contacts. You can follow it again later." = "Sohbet geçmişi silinecek ve bu hizmet artık kişilerinizde görünmeyecek. Daha sonra tekrar takip edebilirsiniz.";
+"Unfollowed" = "Takipten bırakıldı";

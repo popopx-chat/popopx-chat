@@ -9883,3 +9883,14 @@ alert title */
 "Verified" = "已验证";
 "Waiting for a reply" = "等待回复";
 "Warn %d days before a key expires" = "密钥过期前 %d 天警告";
+"Service Accounts" = "服务号";
+"No service accounts followed yet" = "尚未关注任何服务号";
+"%d service accounts" = "%d 个服务号";
+"No service accounts yet" = "暂无服务号";
+"Service accounts you connect to through the POPOPX ecosystem will appear here, separate from your personal contacts." = "你通过 POPOPX 生态连接的服务号会显示在这里，与个人联系人分开。";
+"Followed service accounts" = "已关注的服务号";
+"These are bots and services that completed the POPOPX ecosystem handshake. They are kept apart from your personal contacts." = "这些是已完成 POPOPX 生态握手的机器人和服务，与你的个人联系人分开管理。";
+"Unfollow" = "取消关注";
+"Unfollow this service account?" = "取消关注此服务号？";
+"The conversation history will be removed and this service will no longer appear in your contacts. You can follow it again later." = "聊天记录将被清除，此服务将不再出现在你的联系人中。你可以稍后重新关注。";
+"Unfollowed" = "已取消关注";

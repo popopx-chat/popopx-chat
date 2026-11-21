@@ -7230,3 +7230,14 @@ server test failure */
 "This menu item is not available in an offline chat yet." = "Този елемент от менюто все още не е наличен в офлайн чат.";
 "Waiting for a reply" = "Изчакване на отговор";
 "Warn %d days before a key expires" = "Предупреждение %d дни преди изтичане на ключ";
+"Service Accounts" = "Сервизни акаунти";
+"No service accounts followed yet" = "Няма следвани сервизни акаунти";
+"%d service accounts" = "%d сервизни акаунта";
+"No service accounts yet" = "Все още няма сервизни акаунти";
+"Service accounts you connect to through the POPOPX ecosystem will appear here, separate from your personal contacts." = "Сервизните акаунти, към които се свързвате чрез екосистемата POPOPX, ще се появят тук, отделно от личните ви контакти.";
+"Followed service accounts" = "Следвани сервизни акаунти";
+"These are bots and services that completed the POPOPX ecosystem handshake. They are kept apart from your personal contacts." = "Това са ботове и услуги, които са завършили ръкостискането на екосистемата POPOPX. Те се съхраняват отделно от личните ви контакти.";
+"Unfollow" = "Отследи";
+"Unfollow this service account?" = "Да се проследи ли този сервизен акаунт?";
+"The conversation history will be removed and this service will no longer appear in your contacts. You can follow it again later." = "Историята на разговорите ще бъде изтрита и тази услуга вече няма да се появява в контактите ви. Можете да я следвате отново по-късно.";
+"Unfollowed" = "Отследено";

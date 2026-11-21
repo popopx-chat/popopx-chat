@@ -10029,3 +10029,14 @@ alert title */
 "Verified" = "Überprüft";
 "Waiting for a reply" = "Warte auf eine Antwort";
 "Warn %d days before a key expires" = "%d Tage vor dem Ablauf eines Schlüssels warnen";
+"Service Accounts" = "Dienstkonten";
+"No service accounts followed yet" = "Noch keine Dienstkonten abonniert";
+"%d service accounts" = "%d Dienstkonten";
+"No service accounts yet" = "Noch keine Dienstkonten";
+"Service accounts you connect to through the POPOPX ecosystem will appear here, separate from your personal contacts." = "Dienstkonten, die du über das POPOPX-Ökosystem verbunden hast, erscheinen hier — getrennt von deinen persönlichen Kontakten.";
+"Followed service accounts" = "Abonnierte Dienstkonten";
+"These are bots and services that completed the POPOPX ecosystem handshake. They are kept apart from your personal contacts." = "Das sind Bots und Dienste, die den POPOPX-Ökosystem-Handshake abgeschlossen haben. Sie werden getrennt von deinen persönlichen Kontakten verwaltet.";
+"Unfollow" = "Entfolgen";
+"Unfollow this service account?" = "Dieses Dienstkonto entfolgen?";
+"The conversation history will be removed and this service will no longer appear in your contacts. You can follow it again later." = "Der Chatverlauf wird gelöscht und dieser Dienst erscheint nicht mehr in deinen Kontakten. Du kannst ihn später erneut abonnieren.";
+"Unfollowed" = "Entfolgt";

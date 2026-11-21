@@ -6523,3 +6523,14 @@ server test failure */
 "This menu item is not available in an offline chat yet." = "Tato položka nabídky zatím není v offline chatu dostupná.";
 "Waiting for a reply" = "Čekání na odpověď";
 "Warn %d days before a key expires" = "Upozornit %d dní před vypršením klíče";
+"Service Accounts" = "Servisní účty";
+"No service accounts followed yet" = "Zatím žádné sledované servisní účty";
+"%d service accounts" = "%d servisních účtů";
+"No service accounts yet" = "Zatím žádné servisní účty";
+"Service accounts you connect to through the POPOPX ecosystem will appear here, separate from your personal contacts." = "Servisní účty, ke kterým se připojujete přes ekosystém POPOPX, se zde zobrazí odděleně od osobních kontaktů.";
+"Followed service accounts" = "Sledované servisní účty";
+"These are bots and services that completed the POPOPX ecosystem handshake. They are kept apart from your personal contacts." = "Jsou to boti a služby, které dokončily handshake ekosystému POPOPX. Jsou uchovávány odděleně od osobních kontaktů.";
+"Unfollow" = "Přestat sledovat";
+"Unfollow this service account?" = "Přestat sledovat tento servisní účet?";
+"The conversation history will be removed and this service will no longer appear in your contacts. You can follow it again later." = "Historie konverzace bude smazána a tato služba se již nezobrazí v kontaktech. Můžete ji později znovu sledovat.";
+"Unfollowed" = "Přestáno sledovat";
