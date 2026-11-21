@@ -9,7 +9,7 @@
 > Every factual claim below is a measurement, not a memory: section 附录 lists the exact command that
 > reproduces it. If the code moves, re-run the commands before re-submitting.
 
-- 版本 / Version: 提交前基线 = `apps/ios/Shared/Features/BadgeCredits/`（17 个 Swift 文件、8 768 行，实测 `wc -l`；另有本文件与 `PopopxStoreKit.storekit`）
+- 版本 / Version: 提交前基线 = `apps/ios/Shared/Features/BadgeCredits/`（17 个 Swift 文件、10 812 行，2026-11-21 实测 `wc -l`：本轮 +157，此前这条记录停在 8 768 行、落后于其后已提交的几轮；另有本文件与 `PopopxStoreKit.storekit`）
 - 最后核对 / Last verified: 2026-11-19（本轮：口径收口 + `CHANNEL_SUB_ACK` 核销回执 + 频道卡片防冒充，门禁 `build/gate_bc5.log`（失败，见第 10 节）与 `gate_bc6.log`，读数见第 10 节）
 - 商店配置文件 / StoreKit config: `apps/ios/Shared/Features/BadgeCredits/PopopxStoreKit.storekit`
   （9 个产品：5 个消耗型 + 2 个自动续订订阅（同属一个订阅组 `3020000001`）
@@ -166,7 +166,7 @@ are granted." 是审核读的证据句，全 16 语种都有。
 频道页 `PopopxGroupChatInfoView.swift:270`（`subscriptionCard`，仅 `groupInfo.isChannel` 时出现）
 → 频道主/管理员那一格 `:276` 推进 `PopopxChannelThresholdView`（`PopopxChannelSubscriptionSheet.swift:341`；
    进不进这一格由 `popopxCanPublishChannelThreshold` 决定，见下）
-→ `sendChannelAccess`（`PopopxSilentSignalingRouter.swift:559`）把**一条可见的**门槛卡片
+→ `sendChannelAccess`（`PopopxSilentSignalingRouter.swift:563`）把**一条可见的**门槛卡片
 （`popopx://channel?p=&t=&e=&s=`，载荷 `PopopxBadgeCreditsModels.swift:969`）发进频道会话
 → 成员在气泡上点订阅（`PopopxCommerceCards.swift:514` 的 `PopopxChannelAccessBubble`）才真正走
 `subscribeToChannel` 扣点 → 票据写本机钥匙串，成员回到频道页那一格读到"有效至 …"（`:294`）
@@ -179,7 +179,7 @@ are granted." 是审核读的证据句，全 16 语种都有。
 **发布端判据只有一份**（本轮裁定"防冒充必做"里可以落地的部分）：
 `PopopxSilentSignalingRouter.swift:52` 的 `GroupInfo.popopxCanPublishChannelThreshold`
 = `isChannel && membership.memberRole >= .admin && membership.memberCurrent`，
-频道页那一格（`:274`）与 `sendChannelAccess` 的守卫（`:560`）读的是同一个计算属性，
+频道页那一格（`:274`）与 `sendChannelAccess` 的守卫（`:564`）读的是同一个计算属性，
 所以"能不能发布"不会出现两个答案。接收端的两道闸见第 9 节第 7 条。
 
 **②③④⑤ 都不经过 Apple**：它们花的是"此前已经通过 Apple 买过的余额"，不产生新的 IAP。
@@ -209,7 +209,7 @@ case 逐条在 :1085-1089、:1093、:1097、:1102-1105）：
 本文件第 9 节把它列为 deviation。**第七种 `CHANNEL_SUB_ACK` 是 2026-11-19 裁定点名的**
 （需求 :88"向频道同步已核销凭证回执"那一格，见第 8 节第 7 条的关闭记录）：成员扣点签票成功后，
 本机把 `::popopx_sys::CHANNEL_SUB_ACK::<chatInfoId>::<expiresAtMs>` 发回那条频道会话，
-载荷 `"chatInfoId::expiresAtMs"`（`PopopxSilentSignalingRouter.swift:573`）。
+载荷 `"chatInfoId::expiresAtMs"`（`PopopxSilentSignalingRouter.swift:577`）。
 群/频道这一支的放行判据也从"只有 REDPACKET_CLAIMED"改成了 enum 上的计算属性
 `acceptedInGroup`（:1111），两种回执 kinds 共用它，避免"两处各写一份白名单"。
 "用完即删"是裁定过的方案：Swift 层不渲染 + ACK 后删行 + 一次性连接整条删除（`.full(notify: false)`，:315、:351）。
@@ -220,7 +220,7 @@ case 逐条在 :1085-1089、:1093、:1097、:1102-1105）：
 （横幅在删行的 `Task` 之前**同步**发出，只靠删行赶不上）。
 收信旁路在 `POPOPXAPI.swift:2785-2796`。
 
-防双花：券/红包状态机在 `actor PopopxP2PVoucherVault`（`PopopxP2PVoucherVault.swift:59`）里，
+防双花：券/红包状态机在 `actor PopopxP2PVoucherVault`（`PopopxP2PVoucherVault.swift:63`）里，
 单写者、跨调用串行，兑换记录写在 `AfterFirstUnlockThisDeviceOnly` 的钥匙串条目上。
 
 **频道门槛卡片仍然不是静默信令，第七种才是。** 卡片走同一个 `send(text:)`（`apiSendMessages`，:456），因此
@@ -240,7 +240,7 @@ case 逐条在 :1085-1089、:1093、:1097、:1102-1105）：
 "动态 SMP 中继节点集群 / 加密中继路由 / dynamic SMP relay node cluster"，
 术语本身是一条 `NSLocalizedString`（`PopopxCommerceCopy.nodeClusterTerm`），改一处即可全语种生效。
 实测：`Shared/Features/BadgeCredits/` 下 17 个文件里，`VPN / 专网 / 代理 / proxy` 只出现在
-一条**代码注释**里 —— `PopopxBadgeCreditsModels.swift:1588` 的 `comment: "never VPN"`，那是防复发标记本身。
+一条**代码注释**里 —— `PopopxBadgeCreditsModels.swift:1597` 的 `comment: "never VPN"`，那是防复发标记本身。
 上一版记的第二处（付费墙里写明这条红线的文档注释）在 2026-11-20 的全库清扫里被改写为
 `encrypted-tunnel vocabulary`（`PopopxBadgePaywallView.swift:404`），不再含这些字面词，所以计数是 1 而不是 2。
 用户可见文本仍为 0 处。16 个翻译目录里同样各有一行 `/* never VPN */`（那是给译者的说明，不是译文），
@@ -279,7 +279,7 @@ link validator (`scripts/ios/localizations.py`), and `plutil -lint` reports all 
 `"Restore purchases"` 已被别的页面占用（zh-Hans 把 "For me" 译成"仅自己"、de 把 "History" 译成
 "Nachrichtenverlauf"），所以本特性用 `"For myself"` / `"Restore badge purchases"` 独立成条，
 并删掉了三条普查后无人引用的 key。分线判据原先写在 `PopopxCommerceCopy` 的文档注释里，现记在
-`PopopxBadgeCreditsModels.swift:1576-1583`：
+`PopopxBadgeCreditsModels.swift:1585-1592`：
 **涉钱、涉退款、涉合规 → 目录；其余功能内文案 → 各文件私有 `enum Copy`。**
 判据的后半句在 2026-11-20 被"全库硬编码中文显示串收口为英文原句 Key"这条裁定取代（门禁二 `5a4506b3c` +
 门禁三 `10326e9b9`）：`Shared/Features/BadgeCredits/` 现在 **CJK = 0 行**，私有 `Copy` 也改存英文原句，
@@ -305,7 +305,7 @@ link validator (`scripts/ios/localizations.py`), and `plutil -lint` reports all 
    There is no randomised reward anywhere in this feature.
 4. **"Do you keep transaction records on your servers?" — We have no server for this feature.**
    StoreKit receipts are read on-device to resolve entitlements; the badge/balance/ledger state is
-   written to the device Keychain only (`PopopxBadgeCreditsModels.swift:1394`,
+   written to the device Keychain only (`PopopxBadgeCreditsModels.swift:1403`,
    `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`). Consequence we disclose: a badge bought on
    one device is not carried to another by us — subscriptions are recovered through Apple's own
    restore, the credit balance is not a cloud balance.
@@ -558,10 +558,10 @@ link validator (`scripts/ios/localizations.py`), and `plutil -lint` reports all 
   载荷 `PopopxCreditGiftPayload` :730，字段名 `v/a/n/t/s` :733（`a` 是面额，徽章券同位置是 `p` 周期）。
   签名原文走 `canonical(kind: "credit_code" / "credit_grant" / "creditgift")` 一族，与徽章族**互斥**——
   一张徽章券的签名过不了算力点券的校验，反之也一样，这是"两种码不会互相冒领"的唯一保证。
-- 状态机全在 `actor PopopxP2PVoucherVault`（`PopopxP2PVoucherVault.swift:59`）：`mintCredit` :114、
-  `creditVouchers(state:)` :158、`authorizeCreditRedemption` :234、`signedCreditGrant` :290、`recordCredit` :341、
-  `creditGrant(voucherId:)` :348、`receivedCreditGrants()` :354。`unused → redeemed` 的翻转与回执写入在同一次
-  actor 调用里完成（`markRedeemed` :248），这是本机唯一的防双花闸；没有服务端核销，也没有第二道锁。
+- 状态机全在 `actor PopopxP2PVoucherVault`（`PopopxP2PVoucherVault.swift:63`）：`mintCredit` :126、
+  `creditVouchers(state:)` :170、`authorizeCreditRedemption` :293、`signedCreditGrant` :349、`recordCredit` :400、
+  `creditGrant(voucherId:)` :407、`receivedCreditGrants()` :413。`unused → redeemed` 的翻转与回执写入在同一次
+  actor 调用里完成（`markRedeemed` :307），这是本机唯一的防双花闸；没有服务端核销，也没有第二道锁。
 - 信令：`CREDIT_EXT_REDEEM_REQ` / `CREDIT_EXT_REDEEM_ACK` / `CREDIT_CHAT_REDEEM_REQ` / `CREDIT_CHAT_REDEEM_ACK`
   （Models :1102-1105）。这四个名字是**本轮需求正文点名**的，`BadgeCredits_prompt.md` 里没有出现过这四个串（实测 grep = 0），
   所以既不是实现自取、也不是上游遗留。发送侧 `startExternalCreditRedeem(code:)` :433、`redeemCreditInChat(_:contactId:)` :451、
@@ -575,13 +575,13 @@ link validator (`scripts/ios/localizations.py`), and `plutil -lint` reports all 
 
 ### 11.3 模块三 · 商店页对称
 
-- `PopopxCreditsStoreView` 顶部 `PopopxSegmentedControl` :154 两段（enum `PopopxCreditsStoreTab` :904-906，
-  标签为什么故意短写在 :902）；四张卡：充值 :235、买礼品卡 :332、余额转礼品卡 :425、卡包 :517。
-  **永久核销入口**：`.sheet(isPresented: $showsRedeem) { PopopxVoucherRedeemSheet() }` :122，入口行在 :886 置位，
+- `PopopxCreditsStoreView` 顶部 `PopopxSegmentedControl` :158 两段（enum `PopopxCreditsStoreTab` :945-947，
+  标签为什么故意短写在 :943）；四张卡：充值 :241、买礼品卡 :364、余额转礼品卡 :460、卡包 :555。
+  **永久核销入口**：`.sheet(isPresented: $showsRedeem) { PopopxVoucherRedeemSheet() }` :126，入口行在 :927 置位，
   不随余额、商品是否就绪或卡包是否为空而消失。
-- 卡面只有一份：`PopopxGiftCardPresenter`（`PopopxGiftBadgeCardSheet.swift:369`，数据体 `PopopxMintedGiftCard` :354）
+- 卡面只有一份：`PopopxGiftCardPresenter`（`PopopxGiftBadgeCardSheet.swift:381`，数据体 `PopopxMintedGiftCard` :366）
   同时服务两个家族，三处真差异（铸券函数、标题句、发进会话时签哪种载荷）都按 `isCreditVoucher` 分支；
-  理由写在 :364-368——再写一个 presenter 等于让两条 QR 路径在旋转、纠错级别、粘贴格式上各自漂移。
+  理由写在 :376-380——再写一个 presenter 等于让两条 QR 路径在旋转、纠错级别、粘贴格式上各自漂移。
 - 聊天入口：`PopopxPlusAction.creditsGiftCard`（`PopopxInputBar.swift:548`，标题 :564，图标 :580）→
   `ComposeView.swift:1389` 只在单聊联系人**且该会话可发送**（`contact != nil && sendMsgEnabled`）时可用 → :1471-1476 打开 `PopopxCreditsStoreView(contactId:)`（挂载 :739-744）；
   带 `contactId` 时页面直接落在礼品卡段，卡面多一枚"在本会话发送"的按钮，因此**不新建第二个选会话的抽屉**。
@@ -590,7 +590,7 @@ link validator (`scripts/ios/localizations.py`), and `plutil -lint` reports all 
 
 ### 11.4 本轮修掉的三处既存缺陷（都不是本轮新写的功能代码）
 
-1. `PopopxP2PVoucherVault.swift:160` 与 :173 两个家族过滤器**缺 `return`**：门禁日志只报了 `[#NoUsage]`
+1. `PopopxP2PVoucherVault.swift:172` 与 :185 两个家族过滤器**缺 `return`**：门禁日志只报了 `[#NoUsage]`
    （"结果未使用"）而没报硬错误，但 `swiftc -frontend -parse` 单独复现同一形状时是 "missing return"。
    后果是**卡包与徽章券列表都拿不到值**——界面照常渲染、列表恒空，属于"编译绿但功能死"那一类。补显式 `return` 后
    两条列表各自按家族返回（`creditVouchers` 只给 `isCreditVoucher` 为真的，`badgeVouchers` 取反）。
@@ -598,7 +598,7 @@ link validator (`scripts/ios/localizations.py`), and `plutil -lint` reports all 
    补 `break` 臂，保持"这三种之外由上面的分支处理"的原意，而不是把新 case 塞进去走文件选择器。
 3. **普查脚本自身的假绿**：`NSLocalizedString(` 与键字面量分处两行时，上一版同行正则看不见它，
    于是"0 缺键 ×16"是假的——有 5 条键 × 16 目录 = 80 行根本没写进去。补写后重测为 0 缺键。
-   其中一条 219 字符长句在源码里被拆成两段字面量（`PopopxBadgeCreditsModels.swift:1666-1667`），
+   其中一条 219 字符长句在源码里被拆成两段字面量（`PopopxBadgeCreditsModels.swift:1675-1676`），
    **普查必须把两段并起来查**：只取第一段的正则会报"16 本目录全缺"，而它其实 16/16 都在（附录给那条命令）。
 
 ### 11.5 本轮门禁读数
@@ -688,7 +688,7 @@ stat -f "%Sm %N" -t "%H:%M:%S" Shared/Features/BadgeCredits/*.swift | sort | tai
 grep -n "kSecAttrAccessible" Shared/Features/BadgeCredits/PopopxBadgeCreditsModels.swift
 # 术语红线：VPN/专网/代理/proxy 在用户可见文本里为 0
 # 本轮实测：全模块只有 1 处命中，且不是给用户看的字——
-#   PopopxBadgeCreditsModels.swift:1588 的 comment: "never VPN"（防复发标记本身）
+#   PopopxBadgeCreditsModels.swift:1597 的 comment: "never VPN"（防复发标记本身）
 #   （上一版记的第二处 PopopxBadgePaywallView.swift:381 已在门禁三改写为 encrypted-tunnel vocabulary，见 :404）
 grep -rn "VPN\|专网\|代理\|proxy\|Proxy" Shared/Features/BadgeCredits/
 # 用户可见字符串里再查一次：只查 NSLocalizedString 与 Copy 的赋值行，期望 0
@@ -789,7 +789,7 @@ PY
 grep -n "var isCreditVoucher\|var creditFaceValue\|static let prefixes\|enum PopopxCommerceSignalKind" Shared/Features/BadgeCredits/PopopxBadgeCreditsModels.swift
 # actor 状态机；以及两处"缺 return"的位置（没有 return 时列表恒空）
 grep -n "actor PopopxP2PVoucherVault\|func mintCredit\|func creditVouchers\|func badgeVouchers\|func authorizeCreditRedemption\|func markRedeemed" Shared/Features/BadgeCredits/PopopxP2PVoucherVault.swift
-sed -n '155,176p' Shared/Features/BadgeCredits/PopopxP2PVoucherVault.swift
+sed -n '167,188p' Shared/Features/BadgeCredits/PopopxP2PVoucherVault.swift
 # 隐形连接的收发与删连：8 处调用点 / 5 个不同函数
 grep -n "func startExternalCreditRedeem\|func redeemCreditInChat\|func mintCreditCode\|func sendCreditGiftCard\|func answerCreditRedeemRequest\|func applyCreditRedeemAcknowledgement" Shared/Features/BadgeCredits/PopopxSilentSignalingRouter.swift
 # 相机：停止顺序与两处调用点（识别成功 :518、页面消失 :436）

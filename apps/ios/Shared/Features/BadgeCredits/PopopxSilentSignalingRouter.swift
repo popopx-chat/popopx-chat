@@ -496,8 +496,10 @@ final class PopopxSilentSignalingRouter {
     }
 
     /// Sends a credit gift card into an existing conversation (a human line + a machine line).
-    func sendCreditGiftCard(_ payload: PopopxCreditGiftPayload, note: String, contactId: Int64) async -> Bool {
-        await send(text: PopopxCommerceCardText.messageText(creditGift: payload, note: note), to: .contact(contactId))
+    /// The message comes from the payload and from nowhere else: `note` is part of the signed bytes, so a second copy supplied by the
+    /// caller is a sentence that can disagree with the signature — the red packet send above already reads it off the payload, same shape.
+    func sendCreditGiftCard(_ payload: PopopxCreditGiftPayload, contactId: Int64) async -> Bool {
+        await send(text: PopopxCommerceCardText.messageText(creditGift: payload), to: .contact(contactId))
     }
 
     /// 16 random bytes. Swift's `SystemRandomNumberGenerator` on Apple platforms is seeded by
@@ -507,8 +509,10 @@ final class PopopxSilentSignalingRouter {
     }
 
     /// Sends a gift card (a human line + a machine line). This is the origin of the card rendered inside the bubble.
-    func sendGiftCard(_ payload: PopopxGiftCardPayload, note: String, contactId: Int64) async -> Bool {
-        await send(text: PopopxCommerceCardText.messageText(gift: payload, note: note), to: .contact(contactId))
+    /// Same rule as the credit twin above: the line the recipient reads is built from the message that was signed, never from a
+    /// second copy handed in alongside it.
+    func sendGiftCard(_ payload: PopopxGiftCardPayload, contactId: Int64) async -> Bool {
+        await send(text: PopopxCommerceCardText.messageText(gift: payload), to: .contact(contactId))
     }
 
     /// Sends a red packet. `PopopxCreditsManager.sendRedPacket` has already deducted the credits, so this only gets it out the door.
@@ -717,10 +721,10 @@ private enum PopopxSignalingCopy {
 /// so this only handles "the message that goes out": one line for people, one line for machines, separated by a newline,
 /// so the recipient can read it and `PopopxGiftCardPayload.parse(from:)` can also pull it apart token by token.
 enum PopopxCommerceCardText {
-    static func messageText(gift payload: PopopxGiftCardPayload, note: String) -> String {
-        let line = note.isEmpty
+    static func messageText(gift payload: PopopxGiftCardPayload) -> String {
+        let line = payload.note.isEmpty
             ? String(format: NSLocalizedString("🎁 [Gift badge] %lld days", comment: "outgoing gift card line"), payload.period.days)
-            : String(format: NSLocalizedString("🎁 [Gift badge] %1$lld days · %2$@", comment: "outgoing gift card line with note"), payload.period.days, note)
+            : String(format: NSLocalizedString("🎁 [Gift badge] %1$lld days · %2$@", comment: "outgoing gift card line with note"), payload.period.days, payload.note)
         return line + "\n" + payload.wireString
     }
 
@@ -734,10 +738,11 @@ enum PopopxCommerceCardText {
 
     /// The human line of a compute-credit gift card. The number is the card's face value, the same number the vault signed
     /// and the same number the recipient's wallet will add: three mouths, one figure.
-    static func messageText(creditGift payload: PopopxCreditGiftPayload, note: String) -> String {
-        let line = note.isEmpty
+    /// The message comes from the payload for the same reason: what the recipient reads and what the signature covers must be one text.
+    static func messageText(creditGift payload: PopopxCreditGiftPayload) -> String {
+        let line = payload.note.isEmpty
             ? String(format: NSLocalizedString("🎁 [Compute Credits gift card] %lld", comment: "outgoing credit gift card line"), payload.creditsAmount)
-            : String(format: NSLocalizedString("🎁 [Compute Credits gift card] %1$lld · %2$@", comment: "outgoing credit gift card line with note"), payload.creditsAmount, note)
+            : String(format: NSLocalizedString("🎁 [Compute Credits gift card] %1$lld · %2$@", comment: "outgoing credit gift card line with note"), payload.creditsAmount, payload.note)
         return line + "\n" + payload.wireString
     }
 

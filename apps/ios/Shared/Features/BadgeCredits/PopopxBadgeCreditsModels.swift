@@ -1358,6 +1358,15 @@ enum PopopxCommerceKeychainSlot: String, CaseIterable, Sendable {
     /// The credit twins of `grants`, and for the same reason it cannot share that slot: the two hold different types under the same
     /// voucher-id keys, so writing one table over the other would make a verified authorisation unreadable.
     case creditGrants = "popopx.commerce.credit-grants"
+    /// The gift message the giver typed for one card, keyed by voucher id.
+    ///
+    /// It is its own slot rather than a field of `PopopxNodeVoucher` on purpose: that row's encoding is the double-spend record, and
+    /// a free-text column cannot be added to it without a migration. Nor can the message ride on the stored redemption code: the
+    /// `PPX1-` / `PPXC1-` envelope has no message field, and only its digest is kept, so there is nothing to decode it back from.
+    /// A card minted before this slot existed has no note row, which is
+    /// exactly the state it is in today — nothing old has to be rewritten. Being a case of this enum also means `removeAll()` wipes it
+    /// together with the rest, so no gift message survives an emergency wipe.
+    case voucherNotes = "popopx.commerce.voucher-notes"
 }
 
 /// Keychain reads and writes.
@@ -1707,11 +1716,13 @@ enum PopopxCommerceCopy {
 
     // MARK: Sandbox purchases (only Debug builds can ever put these sentences on screen)
     //
-    // Why these exist: the StoreKit configuration file is only injected through Xcode's scheme (the `StoreKitConfigurationFileReference`
-    // of `POPOPX (iOS).xcscheme`). A package installed onto a real device with `xcrun devicectl device install app`
-    // and launched from the home-screen icon **does not carry** the configuration file, so `Product.products(for:)`
-    // hits the real/sandbox store instead — none of these 9 SKUs exists in App Store Connect, it returns an empty list,
-    // and every tier button on the paywall degrades to "this product is unavailable". To walk the commercial main path
+    // Why these exist: a StoreKit test configuration is only read when something **tells the process to read it** — Xcode's scheme does that through
+    // the `StoreKitConfigurationFileReference` of `POPOPX (iOS).xcscheme`. The `.storekit` file sits in the app's Resources build phase, so a package
+    // installed onto a real device with `xcrun devicectl device install app` carries the bytes, but nothing points at them. Launched from the
+    // home-screen icon `Product.products(for:)` hits the real/sandbox store instead. Measured on device: of the 12 SKUs this enum declares, the 5 newest ones
+    // (the two one-time passes and the three compute-credit gift cards) are not in App Store Connect yet, so they come back missing
+    // while the older seven still load — a button wired to a SKU that never loaded does nothing at all, and the tier that reads as
+    // "this product is unavailable" is the tier the user just paid attention to. To walk the commercial main path
     // "payment → lit up → written to Keychain → still there after restart" on a real device, a second entry point is needed.
     //
     // These sentences still go into the 16 catalogues and are not skipped because they "only appear in Debug": real-device screenshots get used as troubleshooting evidence,
@@ -1723,8 +1734,9 @@ enum PopopxCommerceCopy {
     // "Sandbox purchase", is the hardest kind of residue to explain in the next compliance enquiry.
     // The catalogues are unaffected: the keys of `.strings` are determined by the source strings themselves, and this repo's 16 catalogues are hand-written.
     #if DEBUG
-    /// **Reuses** an entry the catalogues already have: `"Sandbox purchase"` has a value in all 16 translations (zh-Hans "sandbox purchase"),
-    /// and a census found 0 references on this repo's Swift side before, so there is no conflict of "another page's translation decides how this sentence reads".
+    /// **Reuses** an entry the catalogues already have: `"Sandbox purchase"` has a value in 16 of the 17 catalogues (every one but `en.lproj`, empty by design;
+    /// zh-Hans carries its own four-character wording). One other Swift site already uses this key — `POPOPXChat/ChatTypes.swift:488`, the alert title of a
+    /// test purchase — and that is the same fact about the same kind of purchase, so no second translation is opened and no existing one is contradicted.
     /// Same source text and same semantics as the thing here: a test purchase that does not take real money. Therefore no new wording is opened.
     static let sandboxPurchaseAction = NSLocalizedString("Sandbox purchase", comment: "DEBUG-only paywall button shown when the store did not return this item")
     /// Sandbox delivery of a one-off pass. The day count is passed in by the caller from `PopopxNodeBadgePeriod.days`,

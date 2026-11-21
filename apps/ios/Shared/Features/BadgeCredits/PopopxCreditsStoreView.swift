@@ -94,6 +94,10 @@ struct PopopxCreditsStoreView: View {
     @State private var giftCards: [PopopxNodeVoucher] = []
     /// How many gift cards to mint in the pay-with-credits path. Capped by the badge page's same `quantityCap`, so one number governs both families.
     @State private var giftQuantity = 1
+    /// The message typed for the cards on this half of the page. One field serves both ways of getting a card — bought with Apple or cut from
+    /// the balance — and it is stored per voucher id the moment a card exists, so the wallet list below shows the same line on the second look.
+    /// A batch takes the one text on purpose: the sentence belongs to the purchase, and nothing here invents a different one per card.
+    @State private var giftNote = ""
     @State private var exchanging = false
     /// A card whose face is open: the code, the QR, copy / share. `PopopxGiftCardPresenter` is the badge page's own card face and serves
     /// both families, so this page presents the very same view rather than a second QR path that could drift.
@@ -168,6 +172,8 @@ struct PopopxCreditsStoreView: View {
 
                     usesCard
                 } else {
+                    giftNoteField
+
                     giftBuyCard
 
                     giftExchangeCard
@@ -323,6 +329,32 @@ struct PopopxCreditsStoreView: View {
 
     // // MARK: Gift segment · buying a credit gift card with Apple
 
+    /// The message that goes with a card made on this half of the page. One field, both ways of getting a card, because a text that
+    /// only existed under one of the two strips would be a card whose message depends on which button was pressed.
+    /// It reuses the badge gift sheet's own three keys — same label, same prompt, same 60-character hint — so the two pages say
+    /// one thing in all 16 catalogues instead of carrying two translations of the same idea.
+    private var giftNoteField: some View {
+        PopopxTextField(PopopxGiftBadgeCardSheet.Copy.noteTitle,
+                        prompt: PopopxGiftBadgeCardSheet.Copy.notePrompt,
+                        text: $giftNote)
+            .accessibilityHint(PopopxGiftBadgeCardSheet.Copy.noteHint)
+            .accessibilityIdentifier("popopx.credits.giftNote")
+    }
+
+    /// Attach the typed message to the cards that just appeared, then show the first one face-up: the same two steps the badge gift
+    /// sheet runs, so buying a credit card here ends on the card face (QR, grouped code, copy / share) and not on the price list
+    /// with one line of text under it. The wallet list is already refreshed by the caller before this runs.
+    /// Storing comes before opening: a poster that showed a message the Keychain never received is a message that disappears at the
+    /// next launch, and the card would then be re-shared with an empty `n=` field although the first recipient read a sentence.
+    /// A failed write is not announced here — the text still shows and still goes out now; what it costs is only the second look.
+    private func attachNoteAndOpen(_ cards: [PopopxNodeVoucher]) async {
+        guard let first = cards.first else { return }
+        if !giftNote.isEmpty {
+            await PopopxP2PVoucherVault.shared.recordNote(giftNote, forVoucherIds: cards.map(\.voucherId))
+        }
+        openCard = PopopxMintedGiftCard(voucher: first, note: giftNote)
+    }
+
     /// The three gift-card tiers. Same face values and the same list prices as the top-up tiers above — only the receiver differs,
     /// and the row says so in its footnote: **nothing lands on this balance**. That sentence is the whole reason this segment exists
     /// separately from `topUpCard`; a tier table that silently credits someone else would be the most expensive misreading on this page.
@@ -384,22 +416,25 @@ struct PopopxCreditsStoreView: View {
     }
 
     /// Buy one gift-card tier. **The verification is not the top-up's**: the balance does not move here, so `credits.balance != before`
-    /// would answer "not created" for every successful purchase. The card count in the vault is the only honest witness of this transaction.
+    /// would answer "not created" for every successful purchase. The honest witness is a voucher id the vault did not have a moment ago,
+    /// read back through `loadGiftCards()` — the ids, not their count, because the card that just appeared is also the card to open.
     /// Same book-first rule as `buy(_:)` above, and the same reason: `purchase(_:)` already marked this id as settled for the session,
     /// so the background `Transaction.updates` leg will not come, and if nothing happens here the payment has no second party to make it up.
     private func buyGift(_ pack: PopopxCreditPack, simulated: Bool = false) async {
         guard busySkuId == nil else { return }
         busySkuId = pack.sku.productId
         defer { busySkuId = nil }
-        let before = giftCards.count
+        let before = Set(giftCards.map(\.voucherId))
         let result = simulated ? await store.purchaseSimulated(pack.sku) : await store.purchase(pack.sku)
         switch result {
         case let .success(.purchased(receipt)):
             await credits.apply(storeReceipt: receipt)
             await loadGiftCards()
-            if giftCards.count > before {
+            let fresh = giftCards.filter { !before.contains($0.voucherId) }
+            if !fresh.isEmpty {
                 PopopxHaptics.notice(.success)
                 spendNote = PopopxCommerceCopy.creditsGiftCreated(pack.amount)
+                await attachNoteAndOpen(fresh)
             } else {
                 // Paid, and no card in the vault. The transaction was not finished, so `Transaction.unfinished` will mint it next launch.
                 PopopxHaptics.notice(.error)
@@ -484,7 +519,9 @@ struct PopopxCreditsStoreView: View {
     }
 
     /// Cut gift cards out of the balance. The debit, the refund-on-failed-mint and the ledger row all live in
-    /// `PopopxCreditsManager.exchangeCreditsForCreditVoucher(pack:quantity:)`; this page only reloads the vault list afterwards.
+    /// `PopopxCreditsManager.exchangeCreditsForCreditVoucher(pack:quantity:)`; this page only reloads the vault list afterwards
+    /// and then hands the minted rows to `attachNoteAndOpen`, so a batch bought here with credits behaves like the Apple one:
+    /// message stored for every card in it, and the first card face-up on the screen.
     /// A thrown error is passed on as its own sentence — `insufficientCredits` already carries both numbers, so nothing is appended here.
     private func exchange(_ pack: PopopxCreditPack) async {
         guard exchanging == false else { return }
@@ -492,11 +529,12 @@ struct PopopxCreditsStoreView: View {
         defer { exchanging = false }
         let before = giftCards.count
         do {
-            _ = try await credits.exchangeCreditsForCreditVoucher(pack: pack, quantity: giftQuantity)
+            let minted = try await credits.exchangeCreditsForCreditVoucher(pack: pack, quantity: giftQuantity)
             await loadGiftCards()
             if giftCards.count > before {
                 PopopxHaptics.notice(.success)
                 spendNote = PopopxCommerceCopy.creditsGiftFromBalanceCreated(giftQuantity, pack.amount)
+                await attachNoteAndOpen(minted)
             } else {
                 // The balance moved and no card appeared. Same class of incident as `creditsGiftNotCreated`, and it must be said out loud.
                 PopopxHaptics.notice(.error)
@@ -545,6 +583,9 @@ struct PopopxCreditsStoreView: View {
             }
             Spacer(minLength: PopopxMetrics.spaceS)
             Button {
+                // The message is deliberately not read here: this list holds the vault's rows, and the card face asks the vault for the
+                // text stored against this id (`PopopxGiftCardPresenter.resolveNote`). Handing over a value cached by this page would
+                // put a second source of truth on one sentence.
                 openCard = PopopxMintedGiftCard(voucher: voucher, note: "")
             } label: {
                 HStack(spacing: PopopxMetrics.space2XS) {

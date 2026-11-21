@@ -289,6 +289,11 @@ struct PopopxGiftBadgeCardSheet: View {
             let minted = try await credits.exchangeCreditsForVoucher(period: period, quantity: quantity)
             PopopxHaptics.notice(.success)
             await reloadVouchers()
+            // The whole batch carries the one message typed above, and it is stored for every id now: only the first card opens this
+            // sheet, so waiting for `resolveNote()` would leave the other rows with a message nobody ever wrote down.
+            if !note.isEmpty {
+                await PopopxP2PVoucherVault.shared.recordNote(note, forVoucherIds: minted.map(\.voucherId))
+            }
             if let first = minted.first {
                 card = PopopxMintedGiftCard(voucher: first, note: note)
             }
@@ -333,7 +338,14 @@ struct PopopxGiftBadgeCardSheet: View {
         failure = nil
         if await router.mintCode(for: voucher) != nil {
             PopopxHaptics.notice(.success)
-            card = PopopxMintedGiftCard(voucher: voucher, note: note)
+            // A voucher that already went out with a message keeps it: this row's code is being re-issued, and the text field above
+            // belongs to whatever the user is doing now, so letting it overwrite would rewrite what the other side already received.
+            // With nothing stored the typed text is the card's message, and it is written before the card face opens.
+            let stored = await PopopxP2PVoucherVault.shared.note(forVoucherId: voucher.voucherId)
+            if stored.isEmpty {
+                await PopopxP2PVoucherVault.shared.recordNote(note, forVoucherIds: [voucher.voucherId])
+            }
+            card = PopopxMintedGiftCard(voucher: voucher, note: stored.isEmpty ? note : stored)
             await reloadVouchers()
         } else {
             failure = PopopxBadgeCreditsError.connectionUnavailable.errorDescription
@@ -375,6 +387,12 @@ struct PopopxGiftCardPresenter: View {
     @State private var message: String?
     @State private var busySending = false
     @State private var toast = PopopxToastModel()
+    /// The message this card shows and signs, settled once at the top of `.task` by `resolveNote()`: the text the caller handed over
+    /// when it handed one over, otherwise the text the vault kept the last time this very card was opened.
+    /// It is a second value rather than a read-through of `card.note`: a caller that typed the text in its own sheet hands it over, while a card
+    /// reopened from the wallet list arrives with an empty one, and both the message line and the signed `n=` field would then drop a sentence
+    /// the giver had already sent with the card.
+    @State private var note = ""
 
     /// The two families cannot be minted by the same call: `mintCode` signs a `period` into a `PPX1-` envelope, `mintCreditCode` an amount into `PPXC1-`.
     /// Branching here rather than passing a flag down means a credit voucher can never be handed to the badge mint by forgetting an argument.
@@ -396,8 +414,8 @@ struct PopopxGiftCardPresenter: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                if !card.note.isEmpty {
-                    Text(verbatim: PopopxGiftCardPresenter.Copy.noteLine(card.note))
+                if !note.isEmpty {
+                    Text(verbatim: PopopxGiftCardPresenter.Copy.noteLine(note))
                         .font(PopopxType.caption)
                         .foregroundStyle(PopopxPalette.labelSecondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -410,7 +428,10 @@ struct PopopxGiftCardPresenter: View {
             actions
         }
         .popopxToast(toast)
-        .task { await mint() }
+        .task {
+            await resolveNote()
+            await mint()
+        }
     }
 
     /// The card face names the thing it holds, because the two families are named after different numbers: a badge says how long, a credit card says how much.
@@ -503,6 +524,25 @@ struct PopopxGiftCardPresenter: View {
         }
     }
 
+    /// Settle the card's message before the code is minted, in both directions, from the one table the vault keeps.
+    ///
+    /// Empty handover → read back: the wallet list hands over a voucher row and nothing else, so without this the reopened card
+    /// would show no message line and would sign an empty `n=` field into a link whose first send had the giver's sentence in it.
+    /// Non-empty handover → store first: the badge sheet's "Generate redemption code" and "buy" paths type the text in a field that
+    /// dies with the sheet, so a message that was only ever displayed would be unrecoverable at the next launch.
+    /// The store is best-effort here and does not fail the card: if secure storage is unavailable the message still shows and still
+    /// goes out — it just may have to be typed again, which is a smaller lie than a card face that refuses to open.
+    private func resolveNote() async {
+        guard note.isEmpty else { return }
+        let vault = PopopxP2PVoucherVault.shared
+        if card.note.isEmpty {
+            note = await vault.note(forVoucherId: card.voucher.voucherId)
+        } else {
+            note = card.note
+            await vault.recordNote(card.note, forVoucherIds: [card.voucher.voucherId])
+        }
+    }
+
     private func mint() async {
         guard code == nil else { return }
         let router = PopopxSilentSignalingRouter.shared
@@ -537,22 +577,22 @@ struct PopopxGiftCardPresenter: View {
             guard let creditsAmount = card.voucher.creditsAmount,
                   let payload = PopopxCreditGiftPayload.make(voucherId: card.voucher.voucherId,
                                                              creditsAmount: creditsAmount,
-                                                             note: card.note,
+                                                             note: note,
                                                              mintedAtMs: card.voucher.mintedAtMs) else {
                 message = PopopxGiftCardPresenter.Copy.signFailed
                 return
             }
-            delivered = await PopopxSilentSignalingRouter.shared.sendCreditGiftCard(payload, note: card.note, contactId: contactId)
+            delivered = await PopopxSilentSignalingRouter.shared.sendCreditGiftCard(payload, contactId: contactId)
         } else {
             guard let period = card.voucher.period,
                   let payload = PopopxGiftCardPayload.make(voucherId: card.voucher.voucherId,
                                                            period: period,
-                                                           note: card.note,
+                                                           note: note,
                                                            mintedAtMs: card.voucher.mintedAtMs) else {
                 message = PopopxGiftCardPresenter.Copy.signFailed
                 return
             }
-            delivered = await PopopxSilentSignalingRouter.shared.sendGiftCard(payload, note: card.note, contactId: contactId)
+            delivered = await PopopxSilentSignalingRouter.shared.sendGiftCard(payload, contactId: contactId)
         }
         if delivered {
             toast.show(PopopxGiftCardPresenter.Copy.sent, kind: .encrypted)

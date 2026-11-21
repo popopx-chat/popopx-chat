@@ -25,6 +25,10 @@
 //  The `PPX1-…` / `PPXC1-…` redemption code itself is never written to disk (only `codeDigest` is): that string is a "withdrawal credential",
 //  and one backup restore would turn every voucher that was never sent back into a withdrawable state.
 //  When a code has to be reproduced, `PopopxSilentSignalingRouter` remints it from the envelope parameters instead of relying on storing the original text.
+//  Two facts follow for the message the giver types: it is not a field of the redemption code at all (the code carries link, voucher id, value, time, nonce,
+//  key, signature), and the text that does carry it — the `popopx://gift` / `popopx://creditgift` card link — is only ever assembled at send time.
+//  So a card reopened from the wallet list has nothing left to read the message out of, and the message needs its own Keychain slot
+//  (`popopx.commerce.voucher-notes`), keyed by voucher id. The voucher rows keep the encoding they had before: the message sits next to the record, not in it.
 //
 //  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. A red line forbids scripts from modifying project.pbxproj.
 
@@ -66,6 +70,13 @@ actor PopopxP2PVoucherVault {
     /// The credit twin of `received`, kept in its own Keychain slot because the two tables hold different types under the same
     /// voucher-id keys — one dictionary written over the other would make a verified authorisation unreadable.
     private var receivedCredits: [String: PopopxCreditsGrant] = [:]
+    /// The message the giver typed for one card, keyed by voucher id. Its own slot, so this table's rows keep the byte-for-byte
+    /// encoding they had before it existed and nothing written earlier has to be converted.
+    /// Why the message needs a table at all: it is not a field of the redemption code, and neither that code text nor the card link
+    /// which does carry it is ever stored (only `codeDigest` — file header), so a reopened card has nothing else to read it from.
+    /// A card minted before this table existed simply has no row here, and an absent row reads as an empty message,
+    /// which is exactly what such a card shows today.
+    private var notes: [String: String] = [:]
     private var loaded = false
 
     private init() {}
@@ -78,6 +89,7 @@ actor PopopxP2PVoucherVault {
         issued = PopopxCommerceKeychain.decode([PopopxNodeVoucher].self, .vouchers) ?? []
         received = PopopxCommerceKeychain.decode([String: PopopxBadgeGrant].self, .grants) ?? [:]
         receivedCredits = PopopxCommerceKeychain.decode([String: PopopxCreditsGrant].self, .creditGrants) ?? [:]
+        notes = PopopxCommerceKeychain.decode([String: String].self, .voucherNotes) ?? [:]
     }
 
     // MARK: Minting vouchers
@@ -186,16 +198,63 @@ actor PopopxP2PVoucherVault {
         _ = PopopxCommerceKeychain.encode(issued, .vouchers)
     }
 
+    /// The giver's message for one card, or "" when nothing was stored. Every reader asks by the id of a row it already has,
+    /// so the two families share this one answer: a badge card and a compute-credit card are told apart by `isCreditVoucher`, not here.
+    func note(forVoucherId voucherId: String) -> String {
+        loadIfNeeded()
+        return notes[voucherId] ?? ""
+    }
+
+    /// Attach one message to a batch of freshly minted cards and persist it before returning: a message that only reached the UI
+    /// would be gone at the next launch while the cards it belongs to stayed, and the card the user re-shares would then read
+    /// "no message" although the giver paid for one — the same persist-first rule as `commit`.
+    ///
+    /// A batch takes one message on purpose (`quantity` cards cut from the balance, or several tiers bought at once): the text
+    /// belongs to the purchase, and nothing here guesses a different sentence per card.
+    /// Ids that have no row are skipped rather than written, so a table can never outlive the vouchers it describes and
+    /// grow keys no list will ever read — the notes table stays bounded by `maximumVouchers` through the rows, not on its own.
+    /// An empty message deletes the row instead of storing "", which keeps "the giver typed nothing" and "this card predates
+    /// the table" the same readable state.
+    @discardableResult
+    func recordNote(_ note: String, forVoucherIds voucherIds: [String]) -> Bool {
+        loadIfNeeded()
+        let clipped = String(note.unicodeScalars.prefix(PopopxCommerceLimits.maximumNoteCharacters))
+        let ids = Set(voucherIds.filter { id in issued.contains(where: { $0.voucherId == id }) })
+        guard !ids.isEmpty else { return false }
+        let rollback = notes
+        for id in ids {
+            if clipped.isEmpty { notes[id] = nil } else { notes[id] = clipped }
+        }
+        guard PopopxCommerceKeychain.encode(notes, .voucherNotes) else {
+            notes = rollback
+            return false
+        }
+        return true
+    }
+
     /// The giver actively voids a voucher that has not been sent out yet ("Delete" in the UI).
     /// A redeemed voucher **cannot** be deleted: that is an entitlement someone else paid for, and deleting the record would not make the other party's badge disappear,
     /// it would only leave reconciliation one row short.
+    /// The message goes with the row: leaving it behind would keep somebody's gift text in the Keychain under an id no list can ever reach again.
+    /// Both tables are written only after both in-memory changes succeeded, and either failure puts both back — half a delete persisted
+    /// is a card that came back with its message gone, or a message that outlived its card.
     func discard(voucherId: String) -> Bool {
         loadIfNeeded()
         guard let index = issued.firstIndex(where: { $0.voucherId == voucherId }), issued[index].state == .unused else {
             return false
         }
+        let rollbackVouchers = issued
+        let rollbackNotes = notes
         issued.remove(at: index)
-        return PopopxCommerceKeychain.encode(issued, .vouchers)
+        notes[voucherId] = nil
+        if PopopxCommerceKeychain.encode(issued, .vouchers), PopopxCommerceKeychain.encode(notes, .voucherNotes) {
+            return true
+        }
+        issued = rollbackVouchers
+        notes = rollbackNotes
+        _ = PopopxCommerceKeychain.encode(issued, .vouchers)
+        _ = PopopxCommerceKeychain.encode(notes, .voucherNotes)
+        return false
     }
 
     // MARK: Anti-double-spend arbitration
