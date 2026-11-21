@@ -47,6 +47,8 @@ final class PopopxCreditsManager {
     private(set) var pendingPackets: [PopopxPendingRedPacket] = []
     private(set) var channelTickets: [PopopxChannelSubscriptionTicket] = []
     private(set) var profileReceipts: [PopopxProfileUnlockReceipt] = []
+    /// Received channel payment txHash values for replay protection (owner's side). Capped at 1000 entries.
+    private(set) var receivedPaymentTxHashes: Set<String> = []
     private(set) var ownedCosmetics: Set<PopopxCosmetic> = []
     private(set) var lastReconcileAt: Date?
 
@@ -71,6 +73,7 @@ final class PopopxCreditsManager {
         pendingPackets = PopopxCommerceKeychain.decode([PopopxPendingRedPacket].self, .pendingPackets) ?? []
         channelTickets = PopopxCommerceKeychain.decode([PopopxChannelSubscriptionTicket].self, .channelTickets) ?? []
         profileReceipts = PopopxCommerceKeychain.decode([PopopxProfileUnlockReceipt].self, .profileReceipts) ?? []
+        receivedPaymentTxHashes = Set(PopopxCommerceKeychain.decode([String].self, .receivedPaymentTxHashes) ?? [])
         ownedCosmetics = Set(PopopxCommerceKeychain.decode([PopopxCosmetic].self, .cosmetics) ?? [])
         reconcileOnLoad()
     }
@@ -455,6 +458,38 @@ final class PopopxCreditsManager {
         savePackets()
     }
 
+    /// Channel owner receives a payment receipt: verify txHash uniqueness, credit the wallet, and record the hash.
+    /// Returns true if credited, false if duplicate or error.
+    func receiveChannelPayment(_ receipt: PopopxChannelPaymentReceipt) -> Bool {
+        loadIfNeeded()
+        // Replay protection: check if this txHash was already processed
+        guard !receivedPaymentTxHashes.contains(receipt.txHash) else {
+            log.info("credits: duplicate channel payment receipt txHash=\(receipt.txHash, privacy: .public)")
+            return false
+        }
+        // Credit the wallet
+        do {
+            _ = try credit(receipt.credits, kind: .servicePayment, note: PopopxCreditsCopy.channelPaymentReceived(receipt.credits, receipt.channelId), entryId: "channel_pay.\(receipt.txHash)")
+            // Record the txHash for replay protection
+            receivedPaymentTxHashes.insert(receipt.txHash)
+            // Cap the set at 1000 entries to prevent unbounded growth
+            if receivedPaymentTxHashes.count > 1000 {
+                let excess = receivedPaymentTxHashes.count - 1000
+                receivedPaymentTxHashes = Set(receivedPaymentTxHashes.dropFirst(excess))
+            }
+            saveReceivedPaymentTxHashes()
+            log.info("credits: channel payment received \(receipt.credits, privacy: .public) credits for channel \(receipt.channelId, privacy: .public)")
+            return true
+        } catch {
+            log.error("credits: failed to credit channel payment: \(error.localizedDescription, privacy: .public)")
+            return false
+        }
+    }
+
+    private func saveReceivedPaymentTxHashes() {
+        _ = PopopxCommerceKeychain.encode(Array(receivedPaymentTxHashes), .receivedPaymentTxHashes)
+    }
+
     /// Refund of an unclaimed-out red packet. Two triggers: **all shares claimed**, or the **grace period passed** (`claimGraceEndsAtMs`).
     /// The difference must be refunded, otherwise the sender is left with money forever hanging — the thing in this feature most likely to turn into a complaint.
     /// But it cannot be refunded before all shares are claimed: after a refund the group's remaining shares would still be claimed, and those points would have been paid by nobody.
@@ -634,6 +669,7 @@ private enum PopopxCreditsCopy {
     static func packetReceived(note: String) -> String { note.isEmpty ? NSLocalizedString("Received a compute-point red packet", comment: "POPOPX credits ledger") : String(format: NSLocalizedString("Received a red packet: %@", comment: "POPOPX credits ledger"), note) }
     static func packetRefund(_ amount: Int) -> String { String(format: NSLocalizedString("Red packet not fully claimed, %lld returned", comment: "POPOPX credits ledger"), amount) }
     static func channelSubscribed(_ title: String) -> String { String(format: NSLocalizedString("Subscribed to channel %@", comment: "POPOPX credits ledger"), title) }
+    static func channelPaymentReceived(_ amount: Int, _ channelId: Int64) -> String { String(format: NSLocalizedString("Received %lld compute points from channel %lld", comment: "POPOPX credits ledger"), amount, channelId) }
     static let profileUnlocked = NSLocalizedString("Unlocked a profile card", comment: "POPOPX credits ledger")
     static let secureWindow = NSLocalizedString("Extended the anti-peeping viewing window", comment: "POPOPX credits ledger")
     static func cosmetic(_ item: PopopxCosmetic) -> String { item.displayName }

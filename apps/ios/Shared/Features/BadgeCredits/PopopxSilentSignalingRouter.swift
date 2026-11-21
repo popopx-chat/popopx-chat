@@ -223,6 +223,19 @@ final class PopopxSilentSignalingRouter {
             // so "who redeemed it" cannot be determined at the Swift layer at all. This one log line is the only empirical trace.
             log.info("signaling: channel subscription receipt in chat \(chatId, privacy: .public)")
             _ = await deleteSignal(chatId: chatId, itemId: itemId)
+        case .channelPaymentReceipt:
+            // Channel owner receives payment receipt: parse, verify txHash uniqueness, credit wallet.
+            guard let receipt = PopopxChannelPaymentReceipt.parse(from: signal.payload) else {
+                log.error("signaling: malformed channel payment receipt")
+                _ = await deleteSignal(chatId: chatId, itemId: itemId)
+                return
+            }
+            if PopopxCreditsManager.shared.receiveChannelPayment(receipt) {
+                log.info("signaling: channel payment credited \(receipt.credits, privacy: .public) credits")
+            } else {
+                log.info("signaling: channel payment duplicate or failed")
+            }
+            _ = await deleteSignal(chatId: chatId, itemId: itemId)
         }
     }
 
@@ -584,6 +597,23 @@ final class PopopxSilentSignalingRouter {
         )
         if !delivered {
             log.info("signaling: channel subscription receipt not delivered — ticket stands")
+        }
+        return delivered
+    }
+
+    /// Send channel payment receipt to channel owner: member pays → owner credits.
+    /// The txHash provides replay protection on the owner's side.
+    func sendChannelPaymentReceipt(channelId: Int64, credits: Int, txHash: String, to target: PopopxCommerceTarget) async -> Bool {
+        let receipt = PopopxChannelPaymentReceipt(channelId: channelId, credits: credits, txHash: txHash, paidAtMs: Int64(Date().timeIntervalSince1970 * 1000))
+        let delivered = await send(
+            text: PopopxSysMarker.wireString(for: PopopxCommerceSignal(
+                kind: .channelPaymentReceipt,
+                payload: receipt.wireString
+            )),
+            to: target
+        )
+        if !delivered {
+            log.info("signaling: channel payment receipt not delivered — credits already deducted on payer side")
         }
         return delivered
     }

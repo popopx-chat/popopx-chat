@@ -1095,6 +1095,9 @@ enum PopopxCommerceSignalKind: String, CaseIterable, Sendable {
     /// because the conversation key itself looks like `#<local row number>` and only the trailing part is guaranteed to be a number.
     /// The name was fixed by a product ruling (round 2, item 2), and so was the field order: on this device, "which channel, which period expires".
     case channelSubscriptionAcknowledge = "CHANNEL_SUB_ACK"
+    /// Channel payment receipt: member pays → channel owner credits. Payload format: `{channelId}:{credits}:{txHash}`.
+    /// The txHash provides replay protection: the owner's wallet records it, and a second receipt with the same hash is ignored.
+    case channelPaymentReceipt = "CHANNEL_PAY_RCPT"
     /// The four compute-credit legs, named as the spec names them. They are **separate kinds** rather than a flag inside the badge payload
     /// because the ACK carries a different signed type (`PopopxCreditsGrant` instead of `PopopxBadgeGrant`): the kind is what tells the
     /// receiving side which JSON to decode, and one payload shape with an optional period would let a badge grant be applied as credits.
@@ -1109,7 +1112,7 @@ enum PopopxCommerceSignalKind: String, CaseIterable, Sendable {
     /// (the router's `observeIncoming` section). Red packet receipts and channel redemption receipts are recorded per packetId / conversation key,
     /// never through `awaitingAcks`, so they are safe in a group.
     var acceptedInGroup: Bool {
-        self == .redPacketClaimed || self == .channelSubscriptionAcknowledge
+        self == .redPacketClaimed || self == .channelSubscriptionAcknowledge || self == .channelPaymentReceipt
     }
 }
 
@@ -1123,7 +1126,7 @@ struct PopopxCommerceSignal: Hashable, Sendable {
         switch kind {
         case .externalRedeemRequest, .chatRedeemRequest, .creditExternalRedeemRequest, .creditChatRedeemRequest: true
         case .externalRedeemAcknowledge, .chatRedeemAcknowledge, .redPacketClaimed, .profileUnlocked,
-             .channelSubscriptionAcknowledge, .creditExternalRedeemAcknowledge, .creditChatRedeemAcknowledge: false
+             .channelSubscriptionAcknowledge, .channelPaymentReceipt, .creditExternalRedeemAcknowledge, .creditChatRedeemAcknowledge: false
         }
     }
 }
@@ -1303,6 +1306,35 @@ struct PopopxProfileUnlockReceipt: Codable, Hashable, Identifiable, Sendable {
     var id: String { transactionId }
 }
 
+/// Channel payment receipt: sent from member to channel owner when credits are consumed for subscription.
+/// The txHash provides replay protection on the owner's side.
+struct PopopxChannelPaymentReceipt: Codable, Hashable, Sendable {
+    let channelId: Int64
+    let credits: Int
+    let txHash: String
+    let paidAtMs: Int64
+
+    /// Parse from wire format: `{channelId}:{credits}:{txHash}`
+    static func parse(from payload: String) -> PopopxChannelPaymentReceipt? {
+        let parts = payload.split(separator: ":", maxSplits: 2)
+        guard parts.count == 3,
+              let channelId = Int64(parts[0]),
+              let credits = Int(parts[1]) else { return nil }
+        let txHash = String(parts[2])
+        return PopopxChannelPaymentReceipt(
+            channelId: channelId,
+            credits: credits,
+            txHash: txHash,
+            paidAtMs: Int64(Date().timeIntervalSince1970 * 1000)
+        )
+    }
+
+    /// Encode to wire format
+    var wireString: String {
+        "\(channelId):\(credits):\(txHash)"
+    }
+}
+
 /// High-tier appearance redemptions. Applied by local rendering, never uploaded and never verified, so all that is needed here is "when it was unlocked".
 enum PopopxCosmetic: String, Codable, CaseIterable, Identifiable, Sendable {
     case auroraShieldAvatarFrame
@@ -1357,6 +1389,7 @@ enum PopopxCommerceKeychainSlot: String, CaseIterable, Sendable {
     case pendingPackets = "popopx.commerce.pending-packets"
     case channelTickets = "popopx.commerce.channel-tickets"
     case profileReceipts = "popopx.commerce.profile-receipts"
+    case receivedPaymentTxHashes = "popopx.commerce.received-payment-txhashes"
     case cosmetics = "popopx.commerce.cosmetics"
     case ephemeralConnections = "popopx.commerce.ephemeral-connections"
     /// This device's install fingerprint (the second half of the trial badge's replay prevention). Its own slot, never shared with the temporary connection:

@@ -176,7 +176,7 @@ struct ServiceCardBubbleView: View {
     }
 
     private var cardIsInert: Bool {
-        !cardIsLive || issuerVerified == false
+        !cardIsLive
     }
 
     // MARK: Header
@@ -401,6 +401,9 @@ struct ServiceCardBubbleView: View {
     @ViewBuilder
     private func actionButton(_ action: PopopxEcoAction, card: PopopxServiceCard, fullWidth: Bool) -> some View {
         let isLocked = PopopxEcoStore.shared.isActionLocked(cardId: card.cardId, actionId: action.id)
+        // Security hardening: only payCredits actions require issuer verification
+        let requiresVerification = action.kind == .payCredits
+        let unverifiedPayBlocked = requiresVerification && issuerVerified == false
         let role = buttonRole(for: action.visual)
         Button {
             if action.requiresConfirmation {
@@ -409,22 +412,28 @@ struct ServiceCardBubbleView: View {
                 Task { @MainActor in await fire(action) }
             }
         } label: {
-            actionLabel(action, isLocked: isLocked)
+            actionLabel(action, isLocked: isLocked, showSecurityBadge: unverifiedPayBlocked)
         }
         .buttonStyle(PopopxPressButtonStyle(feedback: role == .destructive ? .medium : .light))
-        .disabled(isLocked || cardIsInert)
-        .opacity(isLocked || cardIsInert ? 0.45 : 1)
+        .disabled(isLocked || cardIsInert || unverifiedPayBlocked)
+        .opacity(isLocked || cardIsInert || unverifiedPayBlocked ? 0.45 : 1)
         .frame(maxWidth: fullWidth ? .infinity : nil, minHeight: PopopxMetrics.minHitTarget)
         .accessibilityLabel(Text(verbatim: action.title))
-        .accessibilityValue(Text(verbatim: actionAccessibilityValue(action: action, isLocked: isLocked)))
+        .accessibilityValue(Text(verbatim: actionAccessibilityValue(action: action, isLocked: isLocked, unverifiedPayBlocked: unverifiedPayBlocked)))
     }
 
     @ViewBuilder
-    private func actionLabel(_ action: PopopxEcoAction, isLocked: Bool) -> some View {
+    private func actionLabel(_ action: PopopxEcoAction, isLocked: Bool, showSecurityBadge: Bool) -> some View {
         HStack(spacing: PopopxMetrics.spaceXS) {
             if isLocked {
                 Image(systemName: "lock")
                     .font(PopopxType.meta)
+                    .accessibilityHidden(true)
+            }
+            if showSecurityBadge {
+                Image(systemName: "exclamationmark.shield")
+                    .font(PopopxType.meta)
+                    .foregroundStyle(PopopxPalette.dangerInk)
                     .accessibilityHidden(true)
             }
             Text(verbatim: action.title)
@@ -473,7 +482,8 @@ struct ServiceCardBubbleView: View {
         }
     }
 
-    private func actionAccessibilityValue(action: PopopxEcoAction, isLocked: Bool) -> String {
+    private func actionAccessibilityValue(action: PopopxEcoAction, isLocked: Bool, unverifiedPayBlocked: Bool) -> String {
+        if unverifiedPayBlocked { return PopopxEcoCopy.cardUnverifiedIssuer }
         if isLocked { return PopopxEcoCopy.cardWaiting }
         if action.kind == .payCredits, let amount = action.amount {
             return String(format: PopopxCommerceCopy.creditsAmountFormat, amount)
