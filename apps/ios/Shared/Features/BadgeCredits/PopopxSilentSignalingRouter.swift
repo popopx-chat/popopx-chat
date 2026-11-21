@@ -90,6 +90,10 @@ enum PopopxRedemptionOutcome: Hashable, Sendable {
     case initiated
     /// Already lit up (the ACK's signature verified, matching this device's initiation, and the badge written successfully).
     case redeemed(period: PopopxNodeBadgePeriod, expiresAtMs: Int64)
+    /// A compute-credit gift card landed. Separate case rather than a `redeemed` with a nil period, for the same reason the two envelopes are separate types:
+    /// the badge answer is a deadline (`expiresAtMs`) while the credit answer is a number that never expires, and one case carrying both would let a screen
+    /// print an expiry for credits or a period for a badge purely by forgetting a branch.
+    case redeemedCredits(amount: Int, grantedAtMs: Int64)
     /// A definite failure.
     case failed(PopopxBadgeCreditsError)
 
@@ -97,6 +101,7 @@ enum PopopxRedemptionOutcome: Hashable, Sendable {
         switch self {
         case .initiated: PopopxSignalingCopy.waitingForPeer
         case let .redeemed(period, _): PopopxSignalingCopy.redeemed(period.days)
+        case let .redeemedCredits(amount, _): PopopxSignalingCopy.redeemedCredits(amount)
         case let .failed(error): error.errorDescription ?? PopopxSignalingCopy.genericFailure
         }
     }
@@ -195,6 +200,10 @@ final class PopopxSilentSignalingRouter {
             await answerRedeemRequest(signal, chatId: chatId, itemId: itemId, wire: wire)
         case .externalRedeemAcknowledge, .chatRedeemAcknowledge:
             await applyRedeemAcknowledgement(signal, chatId: chatId, itemId: itemId)
+        case .creditExternalRedeemRequest, .creditChatRedeemRequest:
+            await answerCreditRedeemRequest(signal, chatId: chatId, itemId: itemId, wire: wire)
+        case .creditExternalRedeemAcknowledge, .creditChatRedeemAcknowledge:
+            await applyCreditRedeemAcknowledgement(signal, chatId: chatId, itemId: itemId)
         case .redPacketClaimed:
             // `memberId` exists only on group messages. direct passes nil: the replay prevention on that side already lives in the claimer's ledger
             // (the same packetId is credited only once); here on the sender's side it only records the share count.
@@ -245,6 +254,34 @@ final class PopopxSilentSignalingRouter {
         _ = await deleteSignal(chatId: chatId, itemId: itemId)
     }
 
+    /// The giver's side of a compute-credit gift card. Deliberately a second function rather than a flag on `answerRedeemRequest`:
+    /// the two families sign different grants (`PopopxBadgeGrant` vs `PopopxCreditsGrant`) over different canonical `kind` strings,
+    /// and one function doing both would have to re-derive "which vault table did I just flip" from a Bool instead of from the types.
+    private func answerCreditRedeemRequest(_ signal: PopopxCommerceSignal, chatId: Int64, itemId: Int64, wire: String) async {
+        guard signal.isRequest else { return }
+        // Same refusal as the badge leg: a voucher that is not this device's, or is already spent, gets no signature at all.
+        guard let grant = await PopopxP2PVoucherVault.shared.authorizeCreditRedemption(voucherId: signal.payload, codeDigestSource: wire) else {
+            log.info("signaling: credit redeem request rejected — unknown or already redeemed gift card")
+            _ = await deleteSignal(chatId: chatId, itemId: itemId)
+            return
+        }
+        guard let encoded = PopopxSilentSignalingRouter.encodedCreditGrant(grant) else {
+            // The card is already flipped to redeemed by the call above and the grant will not encode: a local-bug-level state,
+            // and answering "success" here would be worse than silence — the other side would credit an unsigned number.
+            log.error("signaling: credit grant could not be encoded")
+            return
+        }
+        let acknowledged = await send(
+            text: PopopxSysMarker.wireString(for: PopopxCommerceSignal(kind: .creditExternalRedeemAcknowledge, payload: encoded)),
+            to: .contact(chatId)
+        )
+        guard acknowledged else {
+            log.error("signaling: credit ACK could not be sent; gift card stays redeemed")
+            return
+        }
+        _ = await deleteSignal(chatId: chatId, itemId: itemId)
+    }
+
     // MARK: Recipient · applying the authorisation
 
     private func applyRedeemAcknowledgement(_ signal: PopopxCommerceSignal, chatId: Int64, itemId: Int64) async {
@@ -275,6 +312,42 @@ final class PopopxSilentSignalingRouter {
         if inflight.deletesContactAfterAck {
             // A one-time redemption connection: delete the whole thing, and send no notification either — the other side already has the ACK,
             // and one more "so-and-so deleted you" would just write this transaction back into both timelines.
+            _ = try? await apiDeleteContact(id: chatId, chatDeleteMode: .full(notify: false))
+        }
+    }
+
+    /// The recipient's side of a compute-credit gift card. The ordering is the badge leg's ordering and for the same reasons:
+    /// file the grant → credit the wallet (which flips the local replay record) → write the terminal state → delete the machine line →
+    /// only then drop the temporary connection.
+    private func applyCreditRedeemAcknowledgement(_ signal: PopopxCommerceSignal, chatId: Int64, itemId: Int64) async {
+        guard let grant = PopopxSilentSignalingRouter.decodedCreditGrant(signal.payload) else {
+            record(.failed(.codeMalformed), voucherId: nil)
+            return
+        }
+        guard let inflight = awaitingAcks[chatId], inflight.voucherId == grant.voucherId else {
+            log.info("signaling: credit acknowledgement for a redemption this device never requested")
+            return
+        }
+        awaitingAcks.removeValue(forKey: chatId)
+        guard await PopopxP2PVoucherVault.shared.recordCredit(grant) else {
+            record(.failed(.keychainUnavailable), voucherId: grant.voucherId)
+            return
+        }
+        do {
+            // `false` means this device already credited this exact voucher id once. That is the replay guard doing its job, not a failure:
+            // the number the giver signed cannot differ (a second signature over a different amount would not verify against the pinned key),
+            // so the honest answer to a repeated ACK is the same terminal state the first one produced.
+            if try PopopxCreditsManager.shared.creditGiftCard(grant: grant) {
+                log.info("signaling: credit gift card redeemed for \(grant.creditsAmount, privacy: .public) credits")
+            }
+            record(.redeemedCredits(amount: grant.creditsAmount, grantedAtMs: grant.grantedAtMs), voucherId: grant.voucherId)
+        } catch {
+            // Keep the wording the wallet already chose (the balance ceiling has its own sentence) instead of inventing one here.
+            record(.failed((error as? PopopxBadgeCreditsError) ?? .keychainUnavailable), voucherId: grant.voucherId)
+            return
+        }
+        _ = await deleteSignal(chatId: chatId, itemId: itemId)
+        if inflight.deletesContactAfterAck {
             _ = try? await apiDeleteContact(id: chatId, chatDeleteMode: .full(notify: false))
         }
     }
@@ -321,14 +394,16 @@ final class PopopxSilentSignalingRouter {
     /// a link can only be accepted once, and reusing the same one opens a double-spend window of "the second person scans while the first has not redeemed".
     /// So pressing "Regenerate" on the same voucher yields a new nonce and a new link, and the old code becomes void (`codeDigest` keeps only the newest copy).
     func mintCode(for voucher: PopopxNodeVoucher) async -> String? {
-        guard voucher.state == .unused else { return nil }
+        // A badge code signs a `period`, so a row without one has no business here: a compute-credit card is minted by
+        // `mintCreditCode(for:)`, and the two code families (`PPX1-` / `PPXC1-`) never cross.
+        guard voucher.state == .unused, let period = voucher.period else { return nil }
         guard let (link, _) = await apiAddContact(incognito: true) else { return nil }
         let publicKey = PopopxCommerceSignature.localPublicKeyBase64URL()
         guard !publicKey.isEmpty else { return nil }
         let seed = PopopxRedeemEnvelope(
             inviteLink: link.connFullLink,
             voucherId: voucher.voucherId,
-            period: voucher.period,
+            period: period,
             mintedAtMs: voucher.mintedAtMs,
             nonce: Self.nonce(),
             giverPublicKey: publicKey,
@@ -351,6 +426,78 @@ final class PopopxSilentSignalingRouter {
             PopopxCommerceSignature.shortDigest(code), forVoucherId: voucher.voucherId
         )
         return code
+    }
+
+    /// The recipient starts a one-time redemption with a `PPXC1-…` code. Mirror of `startExternalRedeem`, one step different on purpose:
+    /// the decode call names the family, so a badge code handed to this function fails as "malformed code" rather than being redeemed as a badge.
+    func startExternalCreditRedeem(code: String) async -> PopopxRedemptionOutcome {
+        loadIfNeeded()
+        guard let envelope = PopopxRedeemCode.decodeCredit(code) else { return .failed(.codeMalformed) }
+        guard envelope.isSignatureValid else { return .failed(.signalRejected) }
+        let connLink = CreatedConnLink(connFullLink: envelope.inviteLink, connShortLink: nil)
+        guard let (_, connection) = await apiConnect(incognito: true, connLink: connLink) else {
+            return .failed(.connectionUnavailable)
+        }
+        let wire = PopopxSysMarker.wireString(
+            for: PopopxCommerceSignal(kind: .creditExternalRedeemRequest, payload: envelope.voucherId)
+        )
+        pendingRequestsByConnection[connection.pccConnId] = PopopxPendingRedeem(voucherId: envelope.voucherId, signalWire: wire)
+        savePendingRequests()
+        record(.initiated, voucherId: envelope.voucherId)
+        return .initiated
+    }
+
+    /// An in-conversation compute-credit gift card: the contact already exists, so the REQ goes straight out and the contact is **not** deleted.
+    func redeemCreditInChat(_ payload: PopopxCreditGiftPayload, contactId: Int64) async -> PopopxRedemptionOutcome {
+        guard payload.isSignatureValid else { return .failed(.signalRejected) }
+        let wire = PopopxSysMarker.wireString(
+            for: PopopxCommerceSignal(kind: .creditChatRedeemRequest, payload: payload.voucherId)
+        )
+        guard await send(text: wire, to: .contact(contactId)) else { return .failed(.connectionUnavailable) }
+        awaitingAcks[contactId] = PopopxInflightRedeem(voucherId: payload.voucherId, deletesContactAfterAck: false)
+        record(.initiated, voucherId: payload.voucherId)
+        return .initiated
+    }
+
+    /// Mints a redeemable `PPXC1-…` code for one compute-credit gift card.
+    ///
+    /// Same cost structure as `mintCode`: every call opens a fresh one-time connection, because a link that two people can both present
+    /// would reopen the double-spend window the vault's serial check exists to close.
+    func mintCreditCode(for voucher: PopopxNodeVoucher) async -> String? {
+        // The credit envelope signs a `creditsAmount`, so a badge row (no amount) has no business here: `mintCode(for:)` is its path.
+        guard voucher.state == .unused, let creditsAmount = voucher.creditsAmount else { return nil }
+        guard let (link, _) = await apiAddContact(incognito: true) else { return nil }
+        let publicKey = PopopxCommerceSignature.localPublicKeyBase64URL()
+        guard !publicKey.isEmpty else { return nil }
+        let seed = PopopxCreditRedeemEnvelope(
+            inviteLink: link.connFullLink,
+            voucherId: voucher.voucherId,
+            creditsAmount: creditsAmount,
+            mintedAtMs: voucher.mintedAtMs,
+            nonce: Self.nonce(),
+            giverPublicKey: publicKey,
+            signature: ""
+        )
+        guard let signature = PopopxCommerceSignature.signatureBase64URL(for: seed.canonicalBytes) else { return nil }
+        let envelope = PopopxCreditRedeemEnvelope(
+            inviteLink: seed.inviteLink,
+            voucherId: seed.voucherId,
+            creditsAmount: seed.creditsAmount,
+            mintedAtMs: seed.mintedAtMs,
+            nonce: seed.nonce,
+            giverPublicKey: seed.giverPublicKey,
+            signature: signature
+        )
+        guard envelope.isSignatureValid, let code = PopopxRedeemCode.encode(envelope) else { return nil }
+        await PopopxP2PVoucherVault.shared.recordCodeDigest(
+            PopopxCommerceSignature.shortDigest(code), forVoucherId: voucher.voucherId
+        )
+        return code
+    }
+
+    /// Sends a credit gift card into an existing conversation (a human line + a machine line).
+    func sendCreditGiftCard(_ payload: PopopxCreditGiftPayload, note: String, contactId: Int64) async -> Bool {
+        await send(text: PopopxCommerceCardText.messageText(creditGift: payload, note: note), to: .contact(contactId))
     }
 
     /// 16 random bytes. Swift's `SystemRandomNumberGenerator` on Apple platforms is seeded by
@@ -524,6 +671,23 @@ final class PopopxSilentSignalingRouter {
         else { return nil }
         return grant
     }
+
+    static func encodedCreditGrant(_ grant: PopopxCreditsGrant) -> String? {
+        guard let data = try? JSONEncoder().encode(grant),
+              data.count <= PopopxCommerceLimits.maximumSignalPayloadCharacters else { return nil }
+        return data.popopxBase64URL
+    }
+
+    /// Decodes and verifies a credit grant in one step, like `decodedGrant`. The two types have disjoint key sets, so handing
+    /// a badge ACK to this function (or the reverse) lands on `nil` — the family is not inferred from what failed to parse.
+    static func decodedCreditGrant(_ payload: String) -> PopopxCreditsGrant? {
+        guard payload.count <= PopopxCommerceLimits.maximumSignalPayloadCharacters,
+              let data = Data(popopxBase64URL: payload),
+              let grant = try? JSONDecoder().decode(PopopxCreditsGrant.self, from: data),
+              grant.isSignatureValid
+        else { return nil }
+        return grant
+    }
 }
 
 // MARK: - Local state
@@ -545,6 +709,8 @@ private enum PopopxSignalingCopy {
     static let waitingForPeer = NSLocalizedString("Redeem request sent — waiting for the other side to confirm", comment: "signaling toast")
     static let genericFailure = NSLocalizedString("Redemption did not complete", comment: "signaling fallback")
     static func redeemed(_ days: Int) -> String { String(format: NSLocalizedString("Redeemed · badge lit for %lld days", comment: "signaling toast"), days) }
+    /// Credits are not "lit" — there is no deadline in this sentence, because a compute-credit gift card has none.
+    static func redeemedCredits(_ credits: Int) -> String { String(format: NSLocalizedString("Redeemed · %lld Compute Credits added", comment: "signaling toast"), credits) }
 }
 
 /// The human sentence inside the outbound text. The card itself is rendered in `PopopxCommerceCards.swift` (item 9),
@@ -564,6 +730,15 @@ enum PopopxCommerceCardText {
             ? String(format: NSLocalizedString("🧧 [Compute Credits packet] %1$lld · split equally into %2$lld shares", comment: "outgoing red packet line"), payload.amount, payload.recipients)
             : String(format: NSLocalizedString("🧧 [Compute Credits packet] %lld", comment: "outgoing red packet line"), payload.amount)
         return payload.note.isEmpty ? head + "\n" + payload.wireString : head + " · " + payload.note + "\n" + payload.wireString
+    }
+
+    /// The human line of a compute-credit gift card. The number is the card's face value, the same number the vault signed
+    /// and the same number the recipient's wallet will add: three mouths, one figure.
+    static func messageText(creditGift payload: PopopxCreditGiftPayload, note: String) -> String {
+        let line = note.isEmpty
+            ? String(format: NSLocalizedString("🎁 [Compute Credits gift card] %lld", comment: "outgoing credit gift card line"), payload.creditsAmount)
+            : String(format: NSLocalizedString("🎁 [Compute Credits gift card] %1$lld · %2$@", comment: "outgoing credit gift card line with note"), payload.creditsAmount, note)
+        return line + "\n" + payload.wireString
     }
 
     /// The plain-language line of the threshold card. The day count is taken straight from `channelTicketSeconds`, the same source as the duration

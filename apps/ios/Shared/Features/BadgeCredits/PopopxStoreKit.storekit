@@ -117,6 +117,51 @@
       "productID" : "com.popopx.credits.2000",
       "referenceName" : "POPOPX Compute Credits 2000",
       "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "1.99",
+      "familyShareable" : false,
+      "internalID" : "3010000006",
+      "localizations" : [
+        {
+          "description" : "A gift card worth exactly 100 compute credits, to send to another user. Redeemed in the recipient's own chat; it adds nothing to this device.",
+          "displayName" : "POPOPX Compute Credits Gift Card (100)",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.popopx.credits.gift.100",
+      "referenceName" : "POPOPX Compute Credits Gift Card 100",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "8.99",
+      "familyShareable" : false,
+      "internalID" : "3010000007",
+      "localizations" : [
+        {
+          "description" : "A gift card worth exactly 500 compute credits, to send to another user. Redeemed in the recipient's own chat; it adds nothing to this device.",
+          "displayName" : "POPOPX Compute Credits Gift Card (500)",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.popopx.credits.gift.500",
+      "referenceName" : "POPOPX Compute Credits Gift Card 500",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "29.99",
+      "familyShareable" : false,
+      "internalID" : "3010000008",
+      "localizations" : [
+        {
+          "description" : "A gift card worth exactly 2000 compute credits, to send to another user. Redeemed in the recipient's own chat; it adds nothing to this device.",
+          "displayName" : "POPOPX Compute Credits Gift Card (2000)",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.popopx.credits.gift.2000",
+      "referenceName" : "POPOPX Compute Credits Gift Card 2000",
+      "type" : "Consumable"
     }
   ],
   "settings" : {

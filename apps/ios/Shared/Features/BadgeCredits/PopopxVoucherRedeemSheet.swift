@@ -1,6 +1,6 @@
 //  PopopxVoucherRedeemSheet.swift
 //
-//  [Phase 5 · 6] Redeem panel: turns a `PPX1-…` string into one on-device connection setup + one wait for the peer's confirmation.
+//  [Phase 5 · 6] Redeem panel: turns a `PPX1-…` (badge) or `PPXC1-…` (compute credit) string into one on-device connection setup + one wait for the peer's confirmation.
 //
 //  ### Pressing "redeem" returns not a result but "initiated"
 //  `router.startExternalRedeem(code:)` does only three things: check the code, check the signature, create one incognito connection.
@@ -134,6 +134,8 @@ struct PopopxVoucherRedeemSheet: View {
                 .font(PopopxType.caption)
                 .foregroundStyle(PopopxPalette.labelSecondary)
                 .fixedSize(horizontal: false, vertical: true)
+            // The extra line is badge-only on purpose: a badge has a *deadline* the user cannot recompute from the days just added
+            // (it merges with the time already running), while the credit answer is one number and the balance sits on the store page behind this sheet.
             if case .redeemed = outcome, let description = badge.remainingDescription {
                 Text(verbatim: description)
                     .font(PopopxType.caption)
@@ -201,15 +203,21 @@ struct PopopxVoucherRedeemSheet: View {
     // // MARK: Actions
 
     private func submit() async {
-        let code = codeText.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Normalising here is load-bearing, not cosmetic: `decode` normalises internally, so a lowercase `ppxc1-` used to reach the badge leg
+        // and fail as "malformed". Routing on the prefix happens before either decoder, so the case fix has to come first.
+        let code = PopopxRedeemCode.normalized(codeText)
         guard !code.isEmpty, stage != .busy else { return }
         stage = .busy
-        let outcome = await router.startExternalRedeem(code: code)
+        // The prefix picks the leg, and only the leg: `decodeCredit` rejects a badge body and `decode` rejects a credit one,
+        // so a code of the wrong family is refused outright instead of being redeemed as the other kind.
+        let outcome = PopopxRedeemCode.prefix(of: code) == PopopxRedeemCode.creditPrefix
+            ? await router.startExternalCreditRedeem(code: code)
+            : await router.startExternalRedeem(code: code)
         stage = .initiated(outcome)
-        if case .failed = outcome {
-            PopopxHaptics.notice(.error)
-        } else if case .redeemed = outcome {
-            PopopxHaptics.notice(.success)
+        switch outcome {
+        case .failed: PopopxHaptics.notice(.error)
+        case .redeemed, .redeemedCredits: PopopxHaptics.notice(.success)
+        case .initiated: break
         }
     }
 
@@ -219,7 +227,7 @@ struct PopopxVoucherRedeemSheet: View {
             return
         }
         let normalized = PopopxRedeemCode.normalized(raw)
-        guard PopopxRedeemCode.decode(normalized) != nil else {
+        guard PopopxRedeemCode.decode(normalized) != nil || PopopxRedeemCode.decodeCredit(normalized) != nil else {
             // The clipboard does hold text, but it is not this version of the code: put the content in first (so the user can check it themselves),
             // then explain why it is not accepted, rather than throwing away what the user just pasted.
             codeText = normalized
@@ -235,7 +243,8 @@ struct PopopxVoucherRedeemSheet: View {
     private func symbol(for outcome: PopopxRedemptionOutcome) -> String {
         switch outcome {
         case .initiated: "hourglass"
-        case .redeemed: "checkmark.seal"
+        // Both success families take the same glyph: what differs between them is the sentence below it, not whether it landed.
+        case .redeemed, .redeemedCredits: "checkmark.seal"
         case .failed: "xmark.circle"
         }
     }
@@ -243,7 +252,7 @@ struct PopopxVoucherRedeemSheet: View {
     private func color(for outcome: PopopxRedemptionOutcome) -> Color {
         switch outcome {
         case .initiated: PopopxPalette.labelSecondary
-        case .redeemed: PopopxPalette.successInk
+        case .redeemed, .redeemedCredits: PopopxPalette.successInk
         case .failed: PopopxPalette.dangerInk
         }
     }
@@ -255,6 +264,8 @@ struct PopopxVoucherRedeemSheet: View {
             Copy.glossInitiated
         case let .redeemed(period, _):
             Copy.glossRedeemed(period.days)
+        case let .redeemedCredits(amount, _):
+            Copy.glossRedeemedCredits(amount)
         case let .failed(error):
             Copy.glossFailure(error)
         }
@@ -470,7 +481,7 @@ private final class PopopxQRScannerCoordinator: NSObject, AVCaptureMetadataOutpu
         built.beginConfiguration()
         built.addInput(input)
         built.addOutput(output)
-        // QR only: the redemption code is a long `PPX1-…` string, other symbologies have nothing to map to here, and recognising one more just adds a decoding path that can go wrong.
+        // QR only: a redemption code is a long base64url string printed under either prefix, other symbologies have nothing to map to here, and recognising one more just adds a decoding path that can go wrong.
         output.metadataObjectTypes = [.qr]
         output.setMetadataObjectsDelegate(self, queue: .main)
         built.commitConfiguration()
@@ -514,12 +525,12 @@ private final class PopopxQRScannerCoordinator: NSObject, AVCaptureMetadataOutpu
 
 private extension PopopxVoucherRedeemSheet {
     enum Copy {
-        static let title = NSLocalizedString("Redeem a badge voucher", comment: "")
-        static let subtitle = NSLocalizedString("With a redemption code, light up on this device the badge the other side gifted.", comment: "")
+        static let title = NSLocalizedString("Redeem a gift code", comment: "")
+        static let subtitle = NSLocalizedString("With a redemption code, receive on this device what the other side gifted.", comment: "")
         static let inputTitle = NSLocalizedString("Redemption code", comment: "")
-        static let inputFootnote = NSLocalizedString("A long string that starts with PPX1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails.", comment: "")
+        static let inputFootnote = NSLocalizedString("A long string that starts with PPX1- or PPXC1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails.", comment: "")
         static let codeLabel = NSLocalizedString("Redemption code", comment: "")
-        static let codePrompt = "PPX1-…"
+        static let codePrompt = "PPX1- / PPXC1-…"
         static let paste = NSLocalizedString("Paste", comment: "")
         static let scan = NSLocalizedString("Scan", comment: "")
         static let redeem = NSLocalizedString("Redeem", comment: "")
@@ -527,14 +538,17 @@ private extension PopopxVoucherRedeemSheet {
         static let howTitle = NSLocalizedString("What happens", comment: "")
         static let howOne = NSLocalizedString("This device first verifies the signature inside the code, then connects to the gifter's device and sends the redemption request.", comment: "")
         static let howTwo = NSLocalizedString("The other side confirms the voucher has not been redeemed yet, then signs an authorization and sends it back.", comment: "")
-        static let howThree = NSLocalizedString("Once that authorization checks out, the badge lights up on this device and the one-time connection is deleted.", comment: "")
+        static let howThree = NSLocalizedString("Once that authorization checks out, this device records the badge or the credits, and the one-time connection is deleted.", comment: "")
         static let boundariesTitle = NSLocalizedString("What this screen promises, and what it does not", comment: "")
         static let boundariesFootnote = NSLocalizedString("Only what this layer can actually deliver.", comment: "")
         static let boundaryOne = NSLocalizedString("Network needed: redeeming exchanges two messages with the gifter's device.", comment: "")
         static let boundaryTwo = NSLocalizedString("A voucher redeems once; submitting it again reports it as already redeemed.", comment: "")
-        static let boundaryThree = NSLocalizedString("On success the badge lights up automatically, even if this page has already been closed.", comment: "")
+        static let boundaryThree = NSLocalizedString("On success the badge or the credits land on this device even if this page has already been closed.", comment: "")
         static let glossInitiated = NSLocalizedString("The request is on its way. Wait for the gifter's device to confirm — you can close this page, and the capsule lights up by itself once it lands.", comment: "")
         static func glossRedeemed(_ days: Int) -> String { String(format: NSLocalizedString("Lit up %lld days, written into this device's badge record and merged with any remaining time.", comment: ""), days) }
+        /// The credit twin of the sentence above, phrased the same way because the two events are the same event on two families of card.
+        /// It says "do not expire" because that is the one difference a reader would otherwise assume carried over from a badge.
+        static func glossRedeemedCredits(_ credits: Int) -> String { String(format: NSLocalizedString("Added %lld Compute Credits, written into this device's credit balance; they do not expire.", comment: ""), credits) }
         static func glossFailure(_ error: PopopxBadgeCreditsError) -> String {
             switch error {
             case .codeMalformed: NSLocalizedString("This code cannot be decoded: it may be truncated, mistyped, or not from this version.", comment: "")
@@ -545,7 +559,7 @@ private extension PopopxVoucherRedeemSheet {
             }
         }
         static let clipboardEmpty = NSLocalizedString("The clipboard is empty.", comment: "")
-        static let clipboardNotCode = NSLocalizedString("The clipboard text does not look like a redemption code (it must start with PPX1-). It has been placed in the field — check it, then tap Redeem again.", comment: "")
+        static let clipboardNotCode = NSLocalizedString("The clipboard text does not look like a redemption code (it must start with PPX1- or PPXC1-). It has been placed in the field — check it, then tap Redeem again.", comment: "")
     }
 }
 

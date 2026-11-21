@@ -2,6 +2,11 @@
 " (can be copied)" = " (puede ser copiado)";
 
 /* No comment provided by engineer. */
+"A gift card adds nothing to your own balance. The credits belong to the device that redeems the code." = "Una tarjeta de regalo no suma nada a tu propio saldo. Los créditos son del dispositivo que canjea el código.";
+"Credits gift card" = "Tarjeta de regalo de créditos";
+"No gift cards yet. Buy one above, or create one from the credits you already have." = "Aún no hay tarjetas de regalo. Compra una arriba o crea una con los créditos que ya tienes.";
+"Paste this whole string where the app asks for a redemption code: the grouping is only for readability and spaces make no difference, but it is case-sensitive — paste or scan it, do not retype it character by character." = "Pega esta cadena completa donde la app pide un código de canje: la agrupación es solo para leerla mejor y los espacios no importan, pero distingue mayúsculas — pégala o escanéala, no la reescribas carácter por carácter.";
+"Your balance was reduced, but this device could not create the gift cards yet. They appear the next time the secure store can be written." = "Tu saldo se redujo, pero este dispositivo aún no pudo crear las tarjetas de regalo. Aparecerán la próxima vez que se pueda escribir en el almacén seguro.";
 "_italic_" = "\\_italic_";
 
 /* No comment provided by engineer. */
@@ -8684,7 +8689,6 @@ alert title */
 "A free channel needs no credits and leaves no ledger entries — just open it." = "Un canal gratuito no necesita créditos ni deja registros en la cuenta; solo ábrelo.";
 "A group has no profile on any server: it exists only on its members' devices. Set the name and the avatar first, then decide who to invite." = "Un grupo no tiene perfil en ningún servidor: solo existe en los dispositivos de sus miembros. Define primero el nombre y el avatar, y luego decide a quién invitar.";
 "A location message cannot be added while the draft is being rewritten, forwarded, recorded as a live message or already has an attachment." = "No se puede añadir un mensaje de ubicación mientras el borrador se reescribe, se reenvía, se graba como mensaje en directo o ya tiene un adjunto.";
-"A long string that starts with PPX1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails." = "Una cadena larga que empieza por PPX1-. Pégala; no la reescribas a mano: distingue mayúsculas y un solo carácter erróneo hace que falle la verificación.";
 "A mesh pairing request from a device in the same room appears here." = "Aquí aparece la solicitud de emparejamiento de malla de un dispositivo de la misma sala.";
 "A new random profile card joins the group, and the usual profile card of this device does not appear in the member list." = "Se une al grupo una tarjeta de perfil aleatoria nueva, y la tarjeta de perfil habitual de este dispositivo no aparece en la lista de miembros.";
 "A profile page is already open — close it first" = "Ya hay una página de perfil abierta; ciérrala primero";
@@ -9212,13 +9216,11 @@ alert title */
 "Offline messages go over the Bluetooth mesh relay, up to 7 hops." = "Los mensajes sin conexión van por el reenvío de la malla Bluetooth, hasta 7 saltos.";
 "Offline: POPOPX Bluetooth mesh" = "Sin conexión: malla Bluetooth POPOPX";
 "On" = "Activado";
-"On success the badge lights up automatically, even if this page has already been closed." = "Al tener éxito, la insignia se activa sola, aunque esta página ya se haya cerrado.";
 "On trial" = "En periodo de prueba";
 "On: the 10th wrong entry silently runs the exact same wipe and rebuild flow as the emergency erase passcode, and no warning appears on screen first." = "Activado: la décima entrada errónea ejecuta en silencio exactamente el mismo flujo de borrado y reconstrucción que la contraseña de borrado de emergencia, sin ningún aviso previo en pantalla.";
 "On: while a duress code exists, entering it takes the erasure path. Turning this off deletes the duress code record on the spot." = "Activado: mientras exista un código de coacción, escribirlo toma la vía del borrado. Al apagar esto se elimina el registro del código de coacción en el momento.";
 "Once claimed, this capsule grows in the top bar and keeps breathing for %lld days." = "Una vez reclamada, esta cápsula crece en la barra superior y sigue respirando durante %lld días.";
 "Once data is wiped by the duress code it cannot be recovered: no backup prompt, no undo, no recovery channel. The drill page will not let you try it once, and cannot." = "Cuando el código de coacción borra los datos no se pueden recuperar: sin aviso de copia de seguridad, sin deshacer, sin canal de recuperación. La página de simulacro no te deja probarlo ni una vez, y no puede.";
-"Once that authorization checks out, the badge lights up on this device and the one-time connection is deleted." = "En cuanto esa autorización se comprueba, la insignia se activa en este dispositivo y se elimina la conexión de un solo uso.";
 "Once they accept, this device checks that the voucher has not been redeemed yet and signs an authorization back." = "Cuando aceptan, este dispositivo comprueba que el vale aún no se ha canjeado y firma una autorización de vuelta.";
 "Once this panel is closed there is no way left on this device to show these 12 words again, unless next time you still pass the verification gate: type the current entry passcode correctly, or, while biometric quick unlock is on, let the machine recognise you. Please copy them onto paper right now: no screenshot, no typing them into any cloud note, and no relying on the system clipboard. For that reason this panel does not allow selecting the text, because a selection may end up in the clipboard, and the clipboard can be read by other apps and can sync to other devices through iCloud." = "Una vez que cierres este panel no queda ninguna manera en este dispositivo de volver a mostrar estas 12 palabras, salvo que la próxima vez sigas superando la verificación: escribe bien la contraseña de acceso actual o, si el desbloqueo rápido biométrico está activado, deja que la máquina te reconozca. Cópialas ahora en papel: sin captura de pantalla, sin escribirlas en ninguna nota en la nube y sin depender del portapapeles del sistema. Por eso este panel no permite seleccionar el texto, porque una selección puede acabar en el portapapeles, y el portapapeles lo pueden leer otras apps y puede sincronizarse con otros dispositivos mediante iCloud.";
 "One annual tier; renew any time before it expires" = "Un nivel anual; renuévalo en cualquier momento antes de que caduque";
@@ -9319,7 +9321,6 @@ alert title */
 "Recenter on current location" = "Centrar en la ubicación actual";
 "Reconciliation digest" = "Resumen de conciliación";
 "Red packets nobody finished claiming" = "Sobres rojos que nadie terminó de reclamar";
-"Redeem a badge voucher" = "Canjear un vale de insignia";
 "Redeem request sent — waiting for the other side to confirm" = "Solicitud de canje enviada — esperando que la otra parte confirme";
 "Redeem with Compute Credits · %1$lld vouchers · %2$lld days each · %3$lld credits" = "Canjear con créditos de cálculo · %1$lld vales · %2$lld días cada uno · %3$lld créditos";
 "Redeemed · badge lit for %lld days" = "Canjeado · insignia activa durante %lld días";
@@ -9494,7 +9495,6 @@ alert title */
 "The claim is kept in its own Keychain item on this device (readable only here, valid after the first unlock). No device identifier is uploaded." = "El reclamo se guarda en su propio elemento del llavero de este dispositivo (legible solo aquí, válido tras el primer desbloqueo). No se sube ningún identificador del dispositivo.";
 "The clipboard holds an addable link" = "El portapapeles contiene un enlace que se puede añadir";
 "The clipboard is empty." = "El portapapeles está vacío.";
-"The clipboard text does not look like a redemption code (it must start with PPX1-). It has been placed in the field — check it, then tap Redeem again." = "El texto del portapapeles no parece un código de canje (debe empezar por PPX1-). Se ha puesto en el campo — revísalo y toca Canjear de nuevo.";
 "The connection is still being made, please try again later." = "La conexión todavía se está estableciendo, inténtalo más tarde.";
 "The content is empty." = "El contenido está vacío.";
 "The core does not accept some of the characters in the group name. Fixing it removes them." = "El núcleo no acepta algunos caracteres del nombre del grupo. Corregirlo los elimina.";
@@ -9818,7 +9818,6 @@ alert title */
 "Why this prompt is not counted" = "Por qué este aviso no cuenta";
 "Wi-Fi access has been denied" = "Se ha denegado el acceso a la red Wi-Fi";
 "Wishing you prosperity" = "Te deseo prosperidad";
-"With a redemption code, light up on this device the badge the other side gifted." = "Con un código de canje, activa en este dispositivo la insignia que te regaló la otra parte.";
 "With this level on you accept two things: someone who has an unlocked phone and 10 chances may wipe your identities for you, and you may count to 10 in the dark yourself. The price of an accidental touch, a family member pressing around, a child playing with it, or typing your own mnemonic phrase wrong ten times in a row, is carried by this one deliberate tap." = "Con este nivel activado aceptas dos cosas: que alguien con un teléfono desbloqueado y 10 oportunidades pueda borrarte las identidades, y que tú mismo puedas contar hasta 10 en la oscuridad. El precio de un toque accidental, de un familiar que pulsa alrededor, de un niño jugando con él, o de escribir tu propia frase mnemónica mal diez veces seguidas, lo carga este único toque deliberado.";
 "Working…" = "Trabajando…";
 "Would not trigger a lock" = "No activaría un bloqueo";
@@ -9871,3 +9870,34 @@ alert title */
 "[Top-secret view-once] Open after biometrics" = "[Ultrasecreto: destrucción tras leer] Se abre tras la verificación biométrica";
 "[Top-secret security alert] %@; that top-secret message was destroyed in place." = "[Alerta de seguridad ultrasecreta] %@; ese mensaje ultrasecreto fue destruido en el mismo lugar.";
 "Neither Bluetooth nor the public network is available — %lld messages waiting to send" = "No hay Bluetooth ni red pública disponible — %lld mensajes pendientes de envío";
+"%lld Compute Credits added." = "%lld créditos de cálculo añadidos.";
+"%lld Compute Credits gift card" = "Tarjeta de regalo de %lld créditos de cálculo";
+"A Compute Credits gift card sent by the other person" = "Una tarjeta de regalo de créditos de cálculo enviada por la otra persona";
+"A long string that starts with PPX1- or PPXC1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails." = "Una cadena larga que empieza por PPX1- o PPXC1-. Pégala; no la reescribas a mano: distingue mayúsculas y un solo carácter erróneo hace que falle la verificación.";
+"Added %lld Compute Credits, written into this device's credit balance; they do not expire." = "Se han añadido %lld créditos de cálculo al saldo de este dispositivo; no caducan.";
+"Apple is still confirming this purchase. The gift card appears as soon as it is confirmed." = "Apple sigue confirmando esta compra. La tarjeta de regalo aparece en cuanto se confirme.";
+"Apple took the payment, but this device could not create the gift card yet. It is created the next time the secure store can be written." = "Apple recibió el pago, pero este dispositivo aún no pudo crear la tarjeta de regalo. Se creará la próxima vez que se pueda escribir en el almacén seguro.";
+"Buy gift card" = "Comprar tarjeta de regalo";
+"Compute Credits gift card" = "Tarjeta de regalo de créditos de cálculo";
+"Compute Credits gift card, %1$lld credits, message: %2$@. Tap to redeem." = "Tarjeta de regalo de créditos de cálculo, %1$lld créditos, mensaje: %2$@. Toca para canjear.";
+"Compute Credits gift card, %lld credits, tap to redeem." = "Tarjeta de regalo de créditos de cálculo, %lld créditos, toca para canjear.";
+"Compute Credits gift cards can only be redeemed in a one-to-one chat." = "Las tarjetas de regalo de créditos de cálculo solo se pueden canjear en un chat individual.";
+"Create %1$lld gift cards of %2$lld Compute Credits · %3$lld credits" = "Crear %1$lld tarjetas de regalo de %2$lld créditos de cálculo · %3$lld créditos";
+"Created %1$lld gift cards of %2$lld Compute Credits" = "Creadas %1$lld tarjetas de regalo de %2$lld créditos de cálculo";
+"Created %1$lld × %2$lld compute-point gift cards" = "Creadas %1$lld × %2$lld tarjetas de regalo de créditos de cálculo";
+"Gift Credits" = "Regalar créditos de cálculo";
+"Gift card created · %lld Compute Credits" = "Tarjeta de regalo creada · %lld créditos de cálculo";
+"Gift cards on this device" = "Tarjetas de regalo en este dispositivo";
+"On success the badge or the credits land on this device even if this page has already been closed." = "Al tener éxito, la insignia o los créditos quedan en este dispositivo, aunque esta página ya se haya cerrado.";
+"Once that authorization checks out, this device records the badge or the credits, and the one-time connection is deleted." = "En cuanto esa autorización se comprueba, este dispositivo registra la insignia o los créditos, y se elimina la conexión de un solo uso.";
+"Or pay with the credits you already have" = "O paga con los créditos que ya tienes";
+"Received %lld Compute Credits from a gift card." = "Recibidos %lld créditos de cálculo de una tarjeta de regalo.";
+"Received a compute-point gift card" = "Recibida una tarjeta de regalo de créditos de cálculo";
+"Recharge" = "Recargar";
+"Redeem a gift code" = "Canjear un código de regalo";
+"Redeemed · %lld Compute Credits added" = "Canjeado · %lld créditos de cálculo añadidos";
+"The clipboard text does not look like a redemption code (it must start with PPX1- or PPXC1-). It has been placed in the field — check it, then tap Redeem again." = "El texto del portapapeles no parece un código de canje (debe empezar por PPX1- o PPXC1-). Se ha puesto en el campo — revísalo y toca Canjear de nuevo.";
+"This Compute Credits gift card is no longer available." = "Esta tarjeta de regalo de créditos de cálculo ya no está disponible.";
+"With a redemption code, receive on this device what the other side gifted." = "Con un código de canje, recibe en este dispositivo lo que te regaló la otra parte.";
+"🎁 [Compute Credits gift card] %1$lld · %2$@" = "🎁 [Tarjeta de regalo de créditos de cálculo] %1$lld · %2$@";
+"🎁 [Compute Credits gift card] %lld" = "🎁 [Tarjeta de regalo de créditos de cálculo] %lld";

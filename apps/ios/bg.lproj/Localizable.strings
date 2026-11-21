@@ -2,6 +2,11 @@
 " (can be copied)" = " (може да се копира)";
 
 /* No comment provided by engineer. */
+"A gift card adds nothing to your own balance. The credits belong to the device that redeems the code." = "Подаръчната карта не добавя нищо към собствения ти баланс. Точките принадлежат на устройството, което регистрира кода.";
+"Credits gift card" = "Подаръчна карта с точки";
+"No gift cards yet. Buy one above, or create one from the credits you already have." = "Все още няма подаръчни карти. Купи такава отгоре или я създай от вече наличните точки.";
+"Paste this whole string where the app asks for a redemption code: the grouping is only for readability and spaces make no difference, but it is case-sensitive — paste or scan it, do not retype it character by character." = "Постави целия този низ там, където приложението иска код за ваучер: групирането е само за по-лесно четене, а интервалите нямат значение, но буквите се различават по регистър — постави го или го сканирай, не го преизписвай символ по символ.";
+"Your balance was reduced, but this device could not create the gift cards yet. They appear the next time the secure store can be written." = "Балансът ти беше намален, но това устройство все още не можа да създаде подаръчните карти. Те ще се появят при следващия успешен запис в защитеното хранилище.";
 "_italic_" = "\\_курсив_";
 
 /* No comment provided by engineer. */
@@ -5947,7 +5952,6 @@ server test failure */
 "A free channel needs no credits and leaves no ledger entries — just open it." = "Безплатният канал не изисква точки и не оставя записи в регистъра — просто го отвори.";
 "A group has no profile on any server: it exists only on its members' devices. Set the name and the avatar first, then decide who to invite." = "Групата няма профил на никой сървър: тя съществува само в устройствата на членовете си. Първо задай име и аватар, после реши кого да поканиш.";
 "A location message cannot be added while the draft is being rewritten, forwarded, recorded as a live message or already has an attachment." = "Съобщение с местоположение не може да се добави, докато черновата се презаписва, препраща, записва като съобщение на живо или вече има прикачен файл.";
-"A long string that starts with PPX1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails." = "Дълъг низ, започващ с PPX1-. Постави го; не го преизписвай на ръка: той различава главни и малки букви и един грешен символ означава, че проверката ще се провали.";
 "A mesh pairing request from a device in the same room appears here." = "Тук се появява заявка за mesh сдвояване от устройство в същата стая.";
 "A new random profile card joins the group, and the usual profile card of this device does not appear in the member list." = "В групата влиза нова произволна профилна карта, а обичайната профилна карта на това устройство не се показва в списъка с членове.";
 "A profile page is already open — close it first" = "Вече има отворена профилна страница — първо я затвори";
@@ -6475,13 +6479,11 @@ server test failure */
 "Offline messages go over the Bluetooth mesh relay, up to 7 hops." = "Офлайн съобщенията минават през Bluetooth mesh релето, до 7 прескока.";
 "Offline: POPOPX Bluetooth mesh" = "Офлайн: POPOPX Bluetooth mesh";
 "On" = "Включено";
-"On success the badge lights up automatically, even if this page has already been closed." = "При успех значката се активира автоматично, дори ако тази страница вече е затворена.";
 "On trial" = "В пробен период";
 "On: the 10th wrong entry silently runs the exact same wipe and rebuild flow as the emergency erase passcode, and no warning appears on screen first." = "Включено: при десетото грешно въвеждане тихо се изпълнява същият поток на изтриване и преизграждане като при кода за спешно изтриване, без предупреждение по екрана.";
 "On: while a duress code exists, entering it takes the erasure path. Turning this off deletes the duress code record on the spot." = "Включено: докато съществува код под принуда, неговото въвеждане поема пътя на изтриване. Изключването му изтрива на място записа на кода под принуда.";
 "Once claimed, this capsule grows in the top bar and keeps breathing for %lld days." = "След като бъде взета, тази капсула порасва в горната лента и продължава да диша %lld дни.";
 "Once data is wiped by the duress code it cannot be recovered: no backup prompt, no undo, no recovery channel. The drill page will not let you try it once, and cannot." = "След изтриването на данните от кода под принуда те не могат да бъдат възстановени: няма покана за архив, няма отмяна, няма канал за възстановяване. Страницата за упражнения няма да те пусне да го пробваш нито веднъж, и не може.";
-"Once that authorization checks out, the badge lights up on this device and the one-time connection is deleted." = "След като това оторизиране се провери, значката се активира на това устройство, а еднократната връзка се изтрива.";
 "Once they accept, this device checks that the voucher has not been redeemed yet and signs an authorization back." = "След като другият приеме, това устройство проверява дали ваучерът още не е изменен и връща подписана оторизация.";
 "Once this panel is closed there is no way left on this device to show these 12 words again, unless next time you still pass the verification gate: type the current entry passcode correctly, or, while biometric quick unlock is on, let the machine recognise you. Please copy them onto paper right now: no screenshot, no typing them into any cloud note, and no relying on the system clipboard. For that reason this panel does not allow selecting the text, because a selection may end up in the clipboard, and the clipboard can be read by other apps and can sync to other devices through iCloud." = "След като този панел се затвори, на това устройство не остава начин да се покажат отново тези 12 думи, освен ако следващия път пак минеш през вратата за проверка: въведи вярно текущия код за вход или, при включено бързо биометрично отключване, позволи на устройството да те разпознае. Моля, преписи ги на хартия точно сега: без екранна снимка, без въвеждане в облачна нота и без разчитане на системния клипборд. Затова този панел не позволява маркиране на текста — маркираното може да попадне в клипборда, а клипбордът се чете от други приложения и може да се синхронизира с други устройства през iCloud.";
 "One annual tier; renew any time before it expires" = "Една годишна степен; подновявай по всяко време преди изтичането";
@@ -6582,7 +6584,6 @@ server test failure */
 "Recenter on current location" = "Центрирай върху текущото местоположение";
 "Reconciliation digest" = "Обобщение на сверката";
 "Red packets nobody finished claiming" = "Червени кесии, които никой не довърши да тегли";
-"Redeem a badge voucher" = "Измени ваучер за значка";
 "Redeem request sent — waiting for the other side to confirm" = "Заявката за изменение е изпратена — чака се другата страна да потвърди";
 "Redeem with Compute Credits · %1$lld vouchers · %2$lld days each · %3$lld credits" = "Измени с изчислителни точки · %1$lld ваучера · по %2$lld дни · %3$lld точки";
 "Redeemed · badge lit for %lld days" = "Изменено · значката е активирана за %lld дни";
@@ -6757,7 +6758,6 @@ server test failure */
 "The claim is kept in its own Keychain item on this device (readable only here, valid after the first unlock). No device identifier is uploaded." = "Тегленето се пази в собствен запис в Keychain на това устройство (четимо само тук, валидно след първото отключване). Никакъв идентификатор на устройството не се качва.";
 "The clipboard holds an addable link" = "Клипбордът съдържа линк, който може да се добави";
 "The clipboard is empty." = "Клипбордът е празен.";
-"The clipboard text does not look like a redemption code (it must start with PPX1-). It has been placed in the field — check it, then tap Redeem again." = "Текстът в клипборда не изглежда като код за изменяне (трябва да започва с PPX1-). Той е поставен в полето — провери го, после докосни «Измени» отново.";
 "The connection is still being made, please try again later." = "Връзката все още се установява, моля, опитайте по-късно.";
 "The content is empty." = "Съдържанието е празно.";
 "The core does not accept some of the characters in the group name. Fixing it removes them." = "Ядрото не приема част от символите в името на групата. Оправянето ги премахва.";
@@ -7081,7 +7081,6 @@ server test failure */
 "Why this prompt is not counted" = "Защо тази покана не се брои";
 "Wi-Fi access has been denied" = "Достъпът до Wi-Fi е отказан";
 "Wishing you prosperity" = "Пожелание за изобилие";
-"With a redemption code, light up on this device the badge the other side gifted." = "С код за изменяне активирай на това устройство значката, която другият ти е подарил.";
 "With this level on you accept two things: someone who has an unlocked phone and 10 chances may wipe your identities for you, and you may count to 10 in the dark yourself. The price of an accidental touch, a family member pressing around, a child playing with it, or typing your own mnemonic phrase wrong ten times in a row, is carried by this one deliberate tap." = "При това ниво приемаш две неща: някой с отключен телефон и 10 опита може да изтрие идентичностите ти вместо теб, и ти сам може да броиш до 10 на тъмно. Цената за случайно докосване, за бутане от член на семейството, за дете, което си играе с телефона, или за десет поредни грешни въвеждания на собствената ти мнемонична фраза, се поема от едно-единствено съзнателно докосване.";
 "Working…" = "Работи…";
 "Would not trigger a lock" = "Не би задействало заключване";
@@ -7142,3 +7141,34 @@ server test failure */
 "[Top-secret view-once] Open after biometrics" = "[Строго поверително, еднократно] Отвори след биометрия";
 "[Top-secret security alert] %@; that top-secret message was destroyed in place." = "[Строго поверително: сигнал за сигурност] %@; това строго поверително съобщение беше унищожено на място.";
 "Neither Bluetooth nor the public network is available — %lld messages waiting to send" = "Няма нито Bluetooth, нито публична мрежа — %lld съобщения чакат за изпращане";
+"%lld Compute Credits added." = "Добавени %lld изчислителни точки.";
+"%lld Compute Credits gift card" = "Подаръчна карта с %lld изчислителни точки";
+"A Compute Credits gift card sent by the other person" = "Подаръчна карта с изчислителни точки, изпратена от другия";
+"A long string that starts with PPX1- or PPXC1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails." = "Дълъг низ, започващ с PPX1- или PPXC1-. Постави го; не го преизписвай на ръка: той различава главни и малки букви и един грешен символ означава, че проверката ще се провали.";
+"Added %lld Compute Credits, written into this device's credit balance; they do not expire." = "Добавени %lld изчислителни точки, записани в баланса на това устройство; те не изтичат.";
+"Apple is still confirming this purchase. The gift card appears as soon as it is confirmed." = "Apple все още потвърждава тази покупка. Подаръчната карта ще се появи, след като бъде потвърдена.";
+"Apple took the payment, but this device could not create the gift card yet. It is created the next time the secure store can be written." = "Apple прие плащането, но това устройство все още не можа да създаде подаръчната карта. Тя ще бъде създадена при следващия възможен запис в защитеното хранилище.";
+"Buy gift card" = "Купи подаръчна карта";
+"Compute Credits gift card" = "Подаръчна карта с изчислителни точки";
+"Compute Credits gift card, %1$lld credits, message: %2$@. Tap to redeem." = "Подаръчна карта с изчислителни точки, %1$lld точки, съобщение: %2$@. Докосни, за да я измениш.";
+"Compute Credits gift card, %lld credits, tap to redeem." = "Подаръчна карта с изчислителни точки, %lld точки, докосни за изменяне.";
+"Compute Credits gift cards can only be redeemed in a one-to-one chat." = "Подаръчните карти с изчислителни точки се изменят само в чат един на един.";
+"Create %1$lld gift cards of %2$lld Compute Credits · %3$lld credits" = "Създай %1$lld подаръчни карти, всяка по %2$lld изчислителни точки · %3$lld точки";
+"Created %1$lld gift cards of %2$lld Compute Credits" = "Създадени %1$lld подаръчни карти по %2$lld изчислителни точки";
+"Created %1$lld × %2$lld compute-point gift cards" = "Създадени %1$lld × %2$lld подаръчни карти с изчислителни точки";
+"Gift Credits" = "Подаръчни точки";
+"Gift card created · %lld Compute Credits" = "Създадена подаръчна карта · %lld изчислителни точки";
+"Gift cards on this device" = "Подаръчни карти на това устройство";
+"On success the badge or the credits land on this device even if this page has already been closed." = "При успех значката или точките попадат на това устройство, дори ако тази страница вече е затворена.";
+"Once that authorization checks out, this device records the badge or the credits, and the one-time connection is deleted." = "След като това оторизиране се провери, това устройство записва значката или точките, а еднократната връзка се изтрива.";
+"Or pay with the credits you already have" = "Или плати с точките, които вече имаш";
+"Received %lld Compute Credits from a gift card." = "Получени %lld изчислителни точки от подаръчна карта.";
+"Received a compute-point gift card" = "Получена подаръчна карта с изчислителни точки";
+"Recharge" = "Зареждане";
+"Redeem a gift code" = "Измени подаръчен код";
+"Redeemed · %lld Compute Credits added" = "Изменено · добавени %lld изчислителни точки";
+"The clipboard text does not look like a redemption code (it must start with PPX1- or PPXC1-). It has been placed in the field — check it, then tap Redeem again." = "Текстът в клипборда не изглежда като код за изменяне (трябва да започва с PPX1- или PPXC1-). Той е поставен в полето — провери го, после докосни «Измени» отново.";
+"This Compute Credits gift card is no longer available." = "Тази подаръчна карта с изчислителни точки вече не е налична.";
+"With a redemption code, receive on this device what the other side gifted." = "С код за изменяне получи на това устройство онова, което другият ти е подарил.";
+"🎁 [Compute Credits gift card] %1$lld · %2$@" = "🎁 [Подаръчна карта с изчислителни точки] %1$lld · %2$@";
+"🎁 [Compute Credits gift card] %lld" = "🎁 [Подаръчна карта с изчислителни точки] %lld";

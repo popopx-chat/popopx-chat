@@ -2,6 +2,11 @@
 " (can be copied)" = " (コピー可能)";
 
 /* No comment provided by engineer. */
+"A gift card adds nothing to your own balance. The credits belong to the device that redeems the code." = "ギフトカードはご自分の残高には加算されません。クレジットはコードを引き換えた端末に帰属します。";
+"Credits gift card" = "クレジットギフトカード";
+"No gift cards yet. Buy one above, or create one from the credits you already have." = "ギフトカードはまだありません。上で購入するか、お持ちのクレジットから作成できます。";
+"Paste this whole string where the app asks for a redemption code: the grouping is only for readability and spaces make no difference, but it is case-sensitive — paste or scan it, do not retype it character by character." = "この文字列をまるごと、アプリが引き換えコードを尋ねる場所に貼り付けてください。区切りは読みやすさのためだけで、空白は影響しませんが、大文字と小文字は区別されます。1 文字ずつ打ち直さず、貼り付けるかスキャンしてください。";
+"Your balance was reduced, but this device could not create the gift cards yet. They appear the next time the secure store can be written." = "残高は減りましたが、この端末ではギフトカードをまだ作成できませんでした。保護されたストレージに書き込めるようになった次回に表示されます。";
 "_italic_" = "\\_斜体_";
 
 /* No comment provided by engineer. */
@@ -5136,7 +5141,6 @@ server test failure */
 "A free channel needs no credits and leaves no ledger entries — just open it." = "無料チャンネルはクレジットも台帳の記録も不要です。開くだけです。";
 "A group has no profile on any server: it exists only on its members' devices. Set the name and the avatar first, then decide who to invite." = "グループのプロフィールはどのサーバーにも置かれず、メンバーのデバイスにのみ存在します。まず名前とアバターを設定し、その後で招待する相手を決めてください。";
 "A location message cannot be added while the draft is being rewritten, forwarded, recorded as a live message or already has an attachment." = "下書きの書き換え中、転送中、ライブメッセージとして記録中、またはすでに添付ファイルがある状態では、位置メッセージを追加できません。";
-"A long string that starts with PPX1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails." = "PPX1- で始まる長い文字列です。手で打ち直さず貼り付けてください。大文字と小文字が区別され、1 文字でも違うと検証に失敗します。";
 "A mesh pairing request from a device in the same room appears here." = "同じ部屋のデバイスからの Mesh ペアリング要求がここに表示されます。";
 "A new random profile card joins the group, and the usual profile card of this device does not appear in the member list." = "ランダムな新しいプロフィールカードがグループに参加し、このデバイスの通常のプロフィールカードはメンバー一覧には表示されません。";
 "A profile page is already open — close it first" = "プロフィールページがすでに開いています。まず閉じてください";
@@ -5664,13 +5668,11 @@ server test failure */
 "Offline messages go over the Bluetooth mesh relay, up to 7 hops." = "オフラインのメッセージは Bluetooth Mesh リレー経由で、最大 7 ホップまで届けられます。";
 "Offline: POPOPX Bluetooth mesh" = "オフライン：POPOPX Bluetooth Mesh";
 "On" = "オン";
-"On success the badge lights up automatically, even if this page has already been closed." = "成功すると、このページをすでに閉じていたとしてもバッジは自動的に点灯します。";
 "On trial" = "お試し中";
 "On: the 10th wrong entry silently runs the exact same wipe and rebuild flow as the emergency erase passcode, and no warning appears on screen first." = "オン：10 回目の誤入力で、緊急消去パスコードと同じ消去と再構築の流れが黙って実行され、事前に画面へ警告も出ません。";
 "On: while a duress code exists, entering it takes the erasure path. Turning this off deletes the duress code record on the spot." = "オン：強制用コードが存在するあいだ、それを入力すると消去の実行に進みます。オフにすると強制用コードの記録をその場で削除します。";
 "Once claimed, this capsule grows in the top bar and keeps breathing for %lld days." = "受け取ると、このカプセルはトップバーで膨らみ、%lld 日間呼吸のように動き続けます。";
 "Once data is wiped by the duress code it cannot be recovered: no backup prompt, no undo, no recovery channel. The drill page will not let you try it once, and cannot." = "強制用コードによるデータ消去は復元できません。バックアップの確認も元に戻す操作も復旧手段もなく、訓練ページで 1 回だけ試すこともできません。";
-"Once that authorization checks out, the badge lights up on this device and the one-time connection is deleted." = "その認証が通ると、このデバイスでバッジが点灯し、使い捨ての接続は削除されます。";
 "Once they accept, this device checks that the voucher has not been redeemed yet and signs an authorization back." = "相手が受け取ると、このデバイスで引換券がまだ引き換えられていないことを確認し、認可に署名して返します。";
 "Once this panel is closed there is no way left on this device to show these 12 words again, unless next time you still pass the verification gate: type the current entry passcode correctly, or, while biometric quick unlock is on, let the machine recognise you. Please copy them onto paper right now: no screenshot, no typing them into any cloud note, and no relying on the system clipboard. For that reason this panel does not allow selecting the text, because a selection may end up in the clipboard, and the clipboard can be read by other apps and can sync to other devices through iCloud." = "このパネルを閉じると、次回も認証の関門を通過しない限り、この 12 ワードを再表示する方法はこのデバイスには残りません。関門とは、現在の入場パスコードを正しく入力すること、または生体認証クイック解除がオンのときに身元を確認されることです。今すぐ紙に書き写してください。スクリーンショット、クラウドのメモへの入力、システムクリップボードへの依存は避けてください。このパネルがテキストの選択を許可しないのは、選択した内容がクリップボードに残る可能性があり、クリップボードは他のアプリから読めるうえ、iCloud 経由で他のデバイスに同期されるためです。";
 "One annual tier; renew any time before it expires" = "ティアは 1 種類のみ。期限切れ前ならいつでも更新できます";
@@ -5771,7 +5773,6 @@ server test failure */
 "Recenter on current location" = "現在地を中心に再配置";
 "Reconciliation digest" = "照合サマリー";
 "Red packets nobody finished claiming" = "誰も受け取り切れなかった紅包";
-"Redeem a badge voucher" = "バッジ引換券を引き換える";
 "Redeem request sent — waiting for the other side to confirm" = "引き換え要求を送信しました — 相手の確認を待っています";
 "Redeem with Compute Credits · %1$lld vouchers · %2$lld days each · %3$lld credits" = "計算クレジットで引き換え · 引換券 %1$lld 枚 · 各 %2$lld 日間 · %3$lld クレジット";
 "Redeemed · badge lit for %lld days" = "引き換え済み · バッジは %lld 日間点灯";
@@ -5946,7 +5947,6 @@ server test failure */
 "The claim is kept in its own Keychain item on this device (readable only here, valid after the first unlock). No device identifier is uploaded." = "受け取り情報はこのデバイスの独立したキーチェーン項目に保存されます。閲覧できるのはこのデバイスだけで、初回の解除後から有効になり、デバイスの識別子はアップロードしません。";
 "The clipboard holds an addable link" = "クリップボードに追加できるリンクがあります";
 "The clipboard is empty." = "クリップボードは空です。";
-"The clipboard text does not look like a redemption code (it must start with PPX1-). It has been placed in the field — check it, then tap Redeem again." = "クリップボードのテキストは引き換えコード（PPX1- で始まる必要があります）には見えません。フィールドに入れてあるので、確認してから「引き換える」をもう一度タップしてください。";
 "The connection is still being made, please try again later." = "接続を確立中です。あとでもう一度お試しください。";
 "The content is empty." = "内容が空です。";
 "The core does not accept some of the characters in the group name. Fixing it removes them." = "グループ名に、コアが受け付けない文字が混ざっています。修正するとそれらを取り除きます。";
@@ -6270,7 +6270,6 @@ server test failure */
 "Why this prompt is not counted" = "この確認を数えない理由";
 "Wi-Fi access has been denied" = "Wi-Fi へのアクセスが拒否されています";
 "Wishing you prosperity" = "ご繁栄をお祈りします";
-"With a redemption code, light up on this device the badge the other side gifted." = "引き換えコードを使うと、相手がプレゼントしたバッジをこのデバイスで点灯できます。";
 "With this level on you accept two things: someone who has an unlocked phone and 10 chances may wipe your identities for you, and you may count to 10 in the dark yourself. The price of an accidental touch, a family member pressing around, a child playing with it, or typing your own mnemonic phrase wrong ten times in a row, is carried by this one deliberate tap." = "このレベルをオンにするということは、次の 2 つを受け入れることです。ロック解除された端末を持つ人が 10 回試行すれば、あなたのアイデンティティを消去しかねないこと。そしてあなた自身が暗い中で 10 を数えかねないこと。誤って触る、家族が押す、子供が遊ぶ、復元フレーズを続けて 10 回間違える、こうした代償は、この 1 回の意図的なタップが引き受けます。";
 "Working…" = "実行しています…";
 "Would not trigger a lock" = "ロックのきっかけにならない";
@@ -6334,3 +6333,34 @@ server test failure */
 "[Top-secret view-once] Open after biometrics" = "[最高機密・閲覧後消滅] 生体認証後に閲覧できます";
 "[Top-secret security alert] %@; that top-secret message was destroyed in place." = "[最高機密のセキュリティ警告] %@; その最高機密メッセージはその場で破棄されました。";
 "Neither Bluetooth nor the public network is available — %lld messages waiting to send" = "Bluetooth も公衆ネットワークも利用できません — 送信待ちのメッセージ %lld 件";
+"%lld Compute Credits added." = "%lld 計算クレジットを追加しました。";
+"%lld Compute Credits gift card" = "%lld 計算クレジットのギフトカード";
+"A Compute Credits gift card sent by the other person" = "相手から送られた計算クレジットのギフトカード";
+"A long string that starts with PPX1- or PPXC1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails." = "PPX1- または PPXC1- で始まる長い文字列です。手で打ち直さず貼り付けてください。大文字と小文字が区別され、1 文字でも違うと検証に失敗します。";
+"Added %lld Compute Credits, written into this device's credit balance; they do not expire." = "%lld 計算クレジットを追加しました。このデバイスのクレジット残高に書き込まれており、有効期限はありません。";
+"Apple is still confirming this purchase. The gift card appears as soon as it is confirmed." = "Apple はこの購入をまだ確認しています。確認が完了すると、ギフトカードはすぐに表示されます。";
+"Apple took the payment, but this device could not create the gift card yet. It is created the next time the secure store can be written." = "Apple は支払いを受け取りましたが、このデバイスはまだギフトカードを作成できません。安全なストレージに書き込める次のタイミングで作成されます。";
+"Buy gift card" = "ギフトカードを購入";
+"Compute Credits gift card" = "計算クレジットのギフトカード";
+"Compute Credits gift card, %1$lld credits, message: %2$@. Tap to redeem." = "計算クレジットのギフトカード、%1$lld クレジット、メッセージ：%2$@。タップして引き換え。";
+"Compute Credits gift card, %lld credits, tap to redeem." = "計算クレジットのギフトカード、%lld クレジット、タップして引き換え。";
+"Compute Credits gift cards can only be redeemed in a one-to-one chat." = "計算クレジットのギフトカードは 1 対 1 のチャットでのみ引き換えできます。";
+"Create %1$lld gift cards of %2$lld Compute Credits · %3$lld credits" = "ギフトカードを作成 · %1$lld 枚 · 各 %2$lld 計算クレジット · %3$lld クレジット";
+"Created %1$lld gift cards of %2$lld Compute Credits" = "%2$lld 計算クレジットのギフトカードを %1$lld 枚作成";
+"Created %1$lld × %2$lld compute-point gift cards" = "計算クレジットのギフトカードを %1$lld 枚 × %2$lld クレジット分 作成";
+"Gift Credits" = "ギフト用クレジット";
+"Gift card created · %lld Compute Credits" = "ギフトカードを作成しました · %lld 計算クレジット";
+"Gift cards on this device" = "このデバイスのギフトカード";
+"On success the badge or the credits land on this device even if this page has already been closed." = "成功すれば、このページをすでに閉じていた後でも、バッジまたはクレジットはこのデバイスに届きます。";
+"Once that authorization checks out, this device records the badge or the credits, and the one-time connection is deleted." = "その認可が通ると、このデバイスがバッジまたはクレジットを記録し、使い捨ての接続は削除されます。";
+"Or pay with the credits you already have" = "または、すでにお持ちのクレジットで支払う";
+"Received %lld Compute Credits from a gift card." = "ギフトカードから %lld 計算クレジットを受け取りました。";
+"Received a compute-point gift card" = "計算クレジットのギフトカードを受け取り";
+"Recharge" = "チャージ";
+"Redeem a gift code" = "ギフトコードを引き換える";
+"Redeemed · %lld Compute Credits added" = "引き換え済み · %lld 計算クレジットを追加";
+"The clipboard text does not look like a redemption code (it must start with PPX1- or PPXC1-). It has been placed in the field — check it, then tap Redeem again." = "クリップボードのテキストは引き換えコード（PPX1- または PPXC1- で始まる必要があります）には見えません。フィールドに入れてあるので、確認してから「引き換える」をもう一度タップしてください。";
+"This Compute Credits gift card is no longer available." = "この計算クレジットのギフトカードは利用できません。";
+"With a redemption code, receive on this device what the other side gifted." = "引き換えコードを使うと、相手がプレゼントしたものをこのデバイスで受け取れます。";
+"🎁 [Compute Credits gift card] %1$lld · %2$@" = "🎁 [計算クレジットのギフトカード] %1$lld · %2$@";
+"🎁 [Compute Credits gift card] %lld" = "🎁 [計算クレジットのギフトカード] %lld";

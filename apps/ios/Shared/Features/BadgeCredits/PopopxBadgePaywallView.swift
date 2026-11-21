@@ -706,8 +706,8 @@ private extension PopopxBadgePaywallView {
                 String(format: PopopxCommerceCopy.passGrantedFormat, period.days)
             case let .giftCard(period):
                 String(format: NSLocalizedString("Gift voucher created · %lld days", comment: ""), period.days)
-            case let .credits(amount):
-                // This page has no top-up tier anymore, so this branch is unreachable under the current layout; it stays because the `switch`
+            case let .credits(amount), let .creditGiftCard(amount):
+                // Neither credit tier is sold on this page, so this branch is unreachable under the current layout; it stays because the `switch`
                 // must be exhaustive over `PopopxNodeBadgeSkuKind` — the sentence for a real credit lives on the compute-points page
                 // (`PopopxCreditsStoreView.topUpCard`), and it reads a localization key, not this one.
                 String(format: PopopxCommerceCopy.creditsTopUpGrantedFormat, amount)

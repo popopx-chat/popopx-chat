@@ -225,6 +225,17 @@ final class PopopxCreditsManager {
                 log.error("credits: gift voucher minting failed; leaving the transaction unfinished")
                 return
             }
+        case let .creditGiftCard(amount):
+            // The credit twin of the branch above: Apple collects the money, this end mints exactly one credit voucher,
+            // and **this device's balance never moves** — which is also why `clawBack` below cannot see this SKU family
+            // (it reads `creditedAmount`, and a gift card reports nil there). Nothing was added here, so a refund has nothing to take back;
+            // the voucher itself stays with whoever holds it, and revoking a redeemed card across devices would need a server this feature does not have.
+            do {
+                _ = try await PopopxP2PVoucherVault.shared.mintCredit(creditsAmount: amount, quantity: 1, source: .receipt(receipt))
+            } catch {
+                log.error("credits: credit gift card minting failed; leaving the transaction unfinished")
+                return
+            }
         case .subscription, .oneTimePass:
             // Subscriptions are lit up by `PopopxBadgeManager`'s delivery callback; one-off duration packs are lit up on the spot by the paywall side
             // (it goes through no voucher and moves no balance; this function should not touch it at all). Both attach to the same stream,
@@ -238,9 +249,12 @@ final class PopopxCreditsManager {
 
     /// Refund clawback: deduct that credited amount back out of the balance; if it cannot be fully recovered, deduct down to zero, and leave an `adjustment` entry.
     private func clawBack(_ receipt: PopopxStoreReceipt) async {
-        guard let sku = receipt.sku, let amount = sku.creditedAmount,
+        guard let amount = receipt.sku?.creditedAmount,
               ledger.contains(where: { $0.id == receipt.digest })
         else {
+            // A refunded **gift card** never entered this balance, so there is no number to take back — but the voucher its receipt minted
+            // may still be sitting here unused. See `recallMintedVouchers`.
+            await recallMintedVouchers(receipt)
             await PopopxStoreKitManager.shared.finish(receipt)
             return
         }
@@ -260,6 +274,20 @@ final class PopopxCreditsManager {
         )
         await PopopxStoreKitManager.shared.finish(receipt)
         log.info("credits: clawed back a refunded pack")
+    }
+
+    /// Takes back the voucher a refunded receipt minted, for **both** gift-card families (badge and compute credits).
+    /// Without this step a refund leaves the card on this device spendable, and "keep the card, get the money back" is a hole
+    /// the two families share. `PopopxP2PVoucherVault.discard` only ever removes an `unused` row, so a card somebody already
+    /// redeemed is left alone: taking an entitlement back across devices would need a server, and this feature has none —
+    /// the honest limit is stated in the vault header and repeated in the review notes.
+    private func recallMintedVouchers(_ receipt: PopopxStoreReceipt) async {
+        let minted = await PopopxP2PVoucherVault.shared.vouchers().filter { $0.transactionId == receipt.digest }
+        var recalled = 0
+        for voucher in minted {
+            if await PopopxP2PVoucherVault.shared.discard(voucherId: voucher.voucherId) { recalled += 1 }
+        }
+        if recalled > 0 { log.info("credits: a refunded gift card was recalled from this device") }
     }
 
     // MARK: scenario 1 · exchanging credits for a badge
@@ -294,8 +322,47 @@ final class PopopxCreditsManager {
         }
     }
 
-    // MARK: scenario 3 · credit red packets (fixed denominations, even split)
+    // MARK: scenario 2b · exchanging credits for a compute-credit gift card
 
+    /// The credit twin of `exchangeCreditsForVoucher`, at **1:1 face value**: a 500-credit gift card costs 500 credits, and the recipient
+    /// gets exactly 500. Any other ratio would make the gift card either a discount or a markup on the Apple price of the same
+    /// denomination, and "the same thing costs two amounts depending which page you are on" is the sentence Apple's 3.1.1 review is written to catch.
+    ///
+    /// It takes a `PopopxCreditPack` rather than an `Int` on purpose: the only values that can reach this function are the three gift-card
+    /// denominations, so there is no "free-typed amount" path left open for a future caller. That is the same 3.1.1 rule the red packets
+    /// obey with `PopopxCommerceLimits.redPacketAmounts`, enforced in the signature instead of in a runtime check that can be forgotten.
+    /// The mint happens only after the deduction, and a failed mint refunds it — the same order as the badge leg, for the same reason.
+    func exchangeCreditsForCreditVoucher(pack: PopopxCreditPack, quantity: Int) async throws -> [PopopxNodeVoucher] {
+        loadIfNeeded()
+        let amount = pack.amount
+        let total = amount * max(1, quantity)
+        let entry = try debit(total, kind: .creditGiftSent, note: PopopxCreditsCopy.creditVoucherExchange(amount: amount, quantity: quantity))
+        do {
+            return try await PopopxP2PVoucherVault.shared.mintCredit(creditsAmount: amount, quantity: quantity, source: .creditEntry(id: entry.id))
+        } catch {
+            _ = try? credit(total, kind: .adjustment, note: PopopxCreditsCopy.reversedExchange, entryId: "reverse.\(entry.id)")
+            throw error
+        }
+    }
+
+    // MARK: scenario 2c · receiving a compute-credit gift card
+
+    /// Crediting a redeemed credit gift card. The amount comes from the **verified `PopopxCreditsGrant`**, never from the card text,
+    /// so the number this function writes into the ledger is the giver's own signed statement.
+    ///
+    /// Returns false when this voucher has already been credited on this device. `markRedeemed` is the same replay ledger the badge
+    /// leg uses (keyed by voucherId, so the two families can never collide on an id), and the entry id is derived from the voucherId
+    /// as well: a 2,000-entry FIFO overflow in the replay list still cannot double-book a gift card.
+    @discardableResult
+    func creditGiftCard(grant: PopopxCreditsGrant) throws -> Bool {
+        loadIfNeeded()
+        guard !replay.hasRedeemed(voucherId: grant.voucherId) else { return false }
+        _ = try credit(grant.creditsAmount, kind: .creditGiftReceived, note: PopopxCreditsCopy.creditGiftReceived, entryId: "creditgift.\(grant.voucherId)")
+        markRedeemed(voucherId: grant.voucherId)
+        return true
+    }
+
+    // MARK: scenario 3 · credit red packets (fixed denominations, even split)
     /// Send a red packet: the full amount is deducted in one go, and it only truly lands on the other party's account share by share as they claim;
     /// this side keeps a `PopopxPendingRedPacket` for reconciliation and refunds.
     ///
@@ -542,6 +609,10 @@ private enum PopopxCreditsCopy {
     static let reversedExchange = NSLocalizedString("Exchange did not complete · returned automatically", comment: "POPOPX credits ledger")
     static func badgeExchange(_ period: PopopxNodeBadgePeriod) -> String { String(format: NSLocalizedString("Redeemed a %lld-day privacy node badge", comment: "POPOPX credits ledger"), period.days) }
     static func voucherExchange(period: PopopxNodeBadgePeriod, quantity: Int) -> String { String(format: NSLocalizedString("Redeemed %lld × %lld-day gift-card vouchers", comment: "POPOPX credits ledger"), quantity, period.days) }
+    /// The credit-card sibling of `voucherExchange`. Positional specifiers, so a language that naturally puts the face value before
+    /// the count can reorder the sentence without swapping which number lands where.
+    static func creditVoucherExchange(amount: Int, quantity: Int) -> String { String(format: NSLocalizedString("Created %1$lld × %2$lld compute-point gift cards", comment: "POPOPX credits ledger"), quantity, amount) }
+    static let creditGiftReceived = NSLocalizedString("Received a compute-point gift card", comment: "POPOPX credits ledger")
     static func packetSent(amount: Int, recipients: Int) -> String { String(format: NSLocalizedString("Sent a red packet of %lld compute points (%lld equal shares)", comment: "POPOPX credits ledger"), amount, recipients) }
     static func packetReceived(note: String) -> String { note.isEmpty ? NSLocalizedString("Received a compute-point red packet", comment: "POPOPX credits ledger") : String(format: NSLocalizedString("Received a red packet: %@", comment: "POPOPX credits ledger"), note) }
     static func packetRefund(_ amount: Int) -> String { String(format: NSLocalizedString("Red packet not fully claimed, %lld returned", comment: "POPOPX credits ledger"), amount) }

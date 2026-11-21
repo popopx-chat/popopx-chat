@@ -135,10 +135,15 @@ enum PopopxNodeBadgeSkuKind: Hashable, Sendable {
     case oneTimePass(PopopxNodeBadgePeriod)
     case giftCard(PopopxNodeBadgePeriod)
     case credits(Int)
+    /// A gift card holding Compute Credits: Apple collects the money, this end mints exactly one credit voucher of `amount`.
+    /// It is deliberately **not** the same tier as `.credits(Int)` — that one means "the money arrives in this device's wallet",
+    /// and `creditedAmount` is what the refund clawback and the ledger both key on. A gift card never touches this device's balance,
+    /// so letting the two share one case would make a refund deduct credits this device never received.
+    case creditGiftCard(Int)
 }
 
-/// The 9 in-app purchase products. `productId` is the only source of truth, and `PopopxStoreKit.storekit` and App Store Connect
-/// both have to match these 9 strings character for character.
+/// The 12 in-app purchase products. `productId` is the only source of truth, and `PopopxStoreKit.storekit` and App Store Connect
+/// both have to match these 12 strings character for character.
 enum PopopxNodeBadgeSku: String, CaseIterable, Identifiable, Sendable {
     case subscriptionAnnual
     case subscriptionMonthly
@@ -149,6 +154,9 @@ enum PopopxNodeBadgeSku: String, CaseIterable, Identifiable, Sendable {
     case credits100
     case credits500
     case credits2000
+    case creditsGift100
+    case creditsGift500
+    case creditsGift2000
 
     var id: String { rawValue }
 
@@ -163,6 +171,9 @@ enum PopopxNodeBadgeSku: String, CaseIterable, Identifiable, Sendable {
         case .credits100: "com.popopx.credits.100"
         case .credits500: "com.popopx.credits.500"
         case .credits2000: "com.popopx.credits.2000"
+        case .creditsGift100: "com.popopx.credits.gift.100"
+        case .creditsGift500: "com.popopx.credits.gift.500"
+        case .creditsGift2000: "com.popopx.credits.gift.2000"
         }
     }
 
@@ -183,13 +194,16 @@ enum PopopxNodeBadgeSku: String, CaseIterable, Identifiable, Sendable {
         case .credits100: .credits(100)
         case .credits500: .credits(500)
         case .credits2000: .credits(2_000)
+        case .creditsGift100: .creditGiftCard(100)
+        case .creditsGift500: .creditGiftCard(500)
+        case .creditsGift2000: .creditGiftCard(2_000)
         }
     }
 
     var badgePeriod: PopopxNodeBadgePeriod? {
         switch kind {
         case let .subscription(period), let .giftCard(period), let .oneTimePass(period): period
-        case .credits: nil
+        case .credits, .creditGiftCard: nil
         }
     }
 
@@ -202,6 +216,13 @@ enum PopopxNodeBadgeSku: String, CaseIterable, Identifiable, Sendable {
     /// the moment "gift XX compute credits" appears it trips both Apple's 3.1.1 parity rule and the domestic promotion terms.
     var creditedAmount: Int? {
         if case let .credits(amount) = kind { amount } else { nil }
+    }
+
+    /// The face value carried by a compute-credit **gift card**. Mirrors `creditedAmount` and is deliberately a separate question:
+    /// a gift card is minted into the voucher vault and never enters this device's wallet, so any caller that reads
+    /// `creditedAmount` to decide how much to credit (the refund clawback, the ledger note) must not pick up a gift card.
+    var giftCreditAmount: Int? {
+        if case let .creditGiftCard(amount) = kind { amount } else { nil }
     }
 
     var isSubscription: Bool {
@@ -217,9 +238,9 @@ enum PopopxNodeBadgeSku: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .subscriptionAnnual, .pass365Days, .giftAnnual: "$49.99"
         case .subscriptionMonthly, .pass30Days, .giftMonthly: "$6.99"
-        case .credits100: "$1.99"
-        case .credits500: "$8.99"
-        case .credits2000: "$29.99"
+        case .credits100, .creditsGift100: "$1.99"
+        case .credits500, .creditsGift500: "$8.99"
+        case .credits2000, .creditsGift2000: "$29.99"
         }
     }
 }
@@ -239,9 +260,10 @@ struct PopopxCreditPack: Identifiable, Hashable, Sendable {
     let sku: PopopxNodeBadgeSku
     let amount: Int
 
-    /// Only the amount the SKU itself reports is accepted: pass in something that is not a top-up pack and the tier cannot be built at all (rather than yielding a "0 credit" tier).
+    /// Only the amount the SKU itself reports is accepted: pass in something that is not a credit tier and the row cannot be built at all (rather than yielding a "0 credit" tier).
+    /// It reads both the top-up and the gift-card amount because one row table serves both pages; which SKU is offered **where** stays in `PopopxCreditPlan`.
     init?(sku: PopopxNodeBadgeSku) {
-        guard let amount = sku.creditedAmount else { return nil }
+        guard let amount = sku.creditedAmount ?? sku.giftCreditAmount else { return nil }
         self.sku = sku
         self.amount = amount
     }
@@ -258,6 +280,11 @@ enum PopopxCreditPlan {
     /// `compactMap` is not error tolerance: if the SKU ever changes category, this tier disappears from the page instead of drawing a fake number.
     static let packs: [PopopxCreditPack] =
         [PopopxNodeBadgeSku.credits100, .credits500, .credits2000].compactMap(PopopxCreditPack.init)
+
+    /// The three gift-card tiers. Same face values and the same prices as `packs` — the product differs only in who receives the credits,
+    /// and a gift card bought for someone else must not look like a discount on buying them for yourself.
+    static let giftPacks: [PopopxCreditPack] =
+        [PopopxNodeBadgeSku.creditsGift100, .creditsGift500, .creditsGift2000].compactMap(PopopxCreditPack.init)
 }
 
 // MARK: - Badge state
@@ -357,16 +384,23 @@ enum PopopxVoucherState: String, Codable, CaseIterable, Sendable {
     case consumed
 }
 
-/// A gift badge voucher minted locally. `jwsDigest` is the digest of the Apple receipt — the text itself is never stored,
+/// A transferable voucher minted locally — a gift badge **or** a compute-credit gift card, one table and one double-spend arbiter for both.
+/// `jwsDigest` is the digest of the Apple receipt — the text itself is never stored,
 /// because that string carries Apple ID linking information, and keeping it in the Keychain only moves the risk into your own backup.
 struct PopopxNodeVoucher: Codable, Hashable, Identifiable, Sendable {
     let voucherId: String
-    var period: PopopxNodeBadgePeriod
+    /// Set only for a badge voucher. Optional **because a credit voucher has no period at all** — and the optionality is what
+    /// stops a credit voucher from being turned into a badge code: every badge path has to unwrap it, and the unwrap fails there.
+    var period: PopopxNodeBadgePeriod?
+    /// Set only for a compute-credit gift card, and always to a pack face value (`PopopxCreditPlan.giftPacks`).
+    /// The two value fields are mutually exclusive by construction in the vault (`mint` fills one, `mintCredit` the other);
+    /// nothing infers the kind from `period == nil`, it is read from `isCreditVoucher` so a half-filled row cannot pose as either.
+    var creditsAmount: Int?
     var state: PopopxVoucherState
     let mintedAtMs: Int64
     let transactionId: String
     let jwsDigest: String
-    /// The digest of the redemption code (`PPX1-…`), for traceability that "this voucher was sent out"; the code itself is not stored.
+    /// The digest of the redemption code (`PPX1-…` or `PPXC1-…`), for traceability that "this voucher was sent out"; the code itself is not stored.
     var codeDigest: String?
     var redeemedAtMs: Int64?
     /// A field only the receiver has: the authorisation text the peer ACKed back. The sender keeps it nil.
@@ -375,6 +409,45 @@ struct PopopxNodeVoucher: Codable, Hashable, Identifiable, Sendable {
     var id: String { voucherId }
 
     var isRedeemable: Bool { state == .unused }
+
+    var isCreditVoucher: Bool { creditsAmount != nil }
+
+    /// The day count the **badge** screens print for this row.
+    /// `0` is unreachable there by construction: every one of those lists is fed by `PopopxP2PVoucherVault.badgeVouchers(state:)`,
+    /// which drops the credit rows. It still answers a number instead of trapping because a wrong figure in a voucher list is
+    /// correctable by the next refresh, while a crash inside `body` leaves the user holding a page that will not open at all.
+    /// Anything that *signs* or *spends* must unwrap `period` itself — see `PopopxP2PVoucherVault.authorizeRedemption`.
+    var badgeDays: Int { period?.days ?? 0 }
+
+    /// The face value the **credit** screens print for this row — the exact twin of `badgeDays` above, for the exact same reason.
+    /// `0` is unreachable: the only lists that reach a row view come from `PopopxP2PVoucherVault.creditVouchers(state:)`, which drops
+    /// the badge rows. Anything that *mints a code* or *signs a payload* unwraps `creditsAmount` itself, see `mintCreditCode`.
+    var creditFaceValue: Int { creditsAmount ?? 0 }
+}
+
+/// The letter of authorisation for a compute-credit gift card — the credit twin of `PopopxBadgeGrant`.
+///
+/// It is a separate type rather than a grant with an optional period because the two facts they attest are different:
+/// a badge grants `expiresAtMs` (a deadline computed from the giver's clock), credits grant a number and **never expire**.
+/// Carrying `expiresAtMs = 0` for credits would make "when does this expire" have two answers in one struct,
+/// and the signature covers the canonical bytes, so a reused type would also let a badge signature be replayed as a credit grant.
+struct PopopxCreditsGrant: Codable, Hashable, Sendable {
+    let voucherId: String
+    let creditsAmount: Int
+    let grantedAtMs: Int64
+    /// The x963 public key of the giver's local key (unpadded base64url).
+    let giverPublicKey: String
+    /// The ECDSA P-256 signature over `canonicalBytes` (DER, unpadded base64url).
+    let signature: String
+
+    /// `kind: "credit_grant"` is not interchangeable with `kind: "grant"` — a signature over one canonical form cannot verify as the other.
+    var canonicalBytes: Data {
+        PopopxCommerceSignature.canonical(kind: "credit_grant", parts: [voucherId, String(creditsAmount), String(grantedAtMs)])
+    }
+
+    var isSignatureValid: Bool {
+        PopopxCommerceSignature.verify(signatureBase64URL: signature, for: canonicalBytes, publicKeyBase64URL: giverPublicKey)
+    }
 }
 
 /// The voucher's letter of authorisation: signed locally by the giver, returned to the redeemer with the ACK, and the redeemer lights the badge from it and files it in the voucher wallet.
@@ -423,17 +496,67 @@ struct PopopxRedeemEnvelope: Codable, Hashable, Sendable {
     }
 }
 
-/// Codec for the `PPX1-…` redemption code.
+/// The credit twin of `PopopxRedeemEnvelope`: a one-time SMP connection link + a credit voucher's identity + the giver's public key.
+///
+/// It has **no `period` field**, which is the type-level half of "a `PPXC1-` code can never light a badge": the badge code path
+/// decodes into `PopopxRedeemEnvelope` and cannot build one from these bytes, and the canonical `kind` differs too, so a signature
+/// over one envelope never verifies as the other.
+struct PopopxCreditRedeemEnvelope: Codable, Hashable, Sendable {
+    /// A one-time connection link in `popopx:/…` form, minted the same way as the badge envelope's.
+    let inviteLink: String
+    let voucherId: String
+    let creditsAmount: Int
+    let mintedAtMs: Int64
+    /// 16 random bytes; tells two codes for the same voucher apart.
+    let nonce: String
+    /// The giver's public key (x963 base64url).
+    let giverPublicKey: String
+    /// The giver's signature over `canonicalBytes`.
+    let signature: String
+
+    var canonicalBytes: Data {
+        PopopxCommerceSignature.canonical(kind: "credit_code", parts: [voucherId, String(creditsAmount), String(mintedAtMs), nonce, inviteLink])
+    }
+
+    var isSignatureValid: Bool {
+        PopopxCommerceSignature.verify(signatureBase64URL: signature, for: canonicalBytes, publicKeyBase64URL: giverPublicKey)
+    }
+}
+
+/// Codec for both redemption code families: `PPX1-…` (badge) and `PPXC1-…` (compute credits).
 ///
 /// Why the code carries a checksum: `decode` verifies two bytes before parsing the JSON, so one mistyped character
 /// lands straight on "checksum failed" instead of "parsed some unreadable JSON" — the first can prompt the user to retry, the second can only report an internal error.
+///
+/// The two families share the framing (checksum ‖ sorted-key JSON, base64url) on purpose: it is the fragile part, and a fix
+/// applied to one and not the other is a code that stops decoding. What stays separate is the prefix and the envelope type,
+/// so the framing helper is private and nothing here is generic over "which family" — the caller names it.
 enum PopopxRedeemCode {
     static let prefix = "PPX1-"
+    /// The compute-credit prefix differs from the badge prefix at the third character, so `hasPrefix` on either can never
+    /// match a code of the other family; a mistyped `C` fails the checksum rather than silently crossing over.
+    static let creditPrefix = "PPXC1-"
+
+    /// Every prefix this codec recognises, used by `normalized` and `grouped` only. Adding a family means adding one string here.
+    static let prefixes = [prefix, creditPrefix]
 
     /// The group width used for split display (8 characters per group, 5 groups fit one screen exactly).
     static let displayGroupWidth = 8
 
-    static func encode(_ envelope: PopopxRedeemEnvelope) -> String? {
+    static func encode(_ envelope: PopopxRedeemEnvelope) -> String? { framed(envelope, prefix: prefix) }
+
+    static func encode(_ envelope: PopopxCreditRedeemEnvelope) -> String? { framed(envelope, prefix: creditPrefix) }
+
+    static func decode(_ code: String) -> PopopxRedeemEnvelope? { unframed(code, prefix: prefix, as: PopopxRedeemEnvelope.self) }
+
+    /// Named apart from `decode(_:)` on purpose: two overloads differing only in return type leave `if let envelope = decode(code)`
+    /// to the type checker, and a call site that stops compiling because an inference changed is a worse trade than one more name.
+    static func decodeCredit(_ code: String) -> PopopxCreditRedeemEnvelope? { unframed(code, prefix: creditPrefix, as: PopopxCreditRedeemEnvelope.self) }
+
+    /// Which family a (normalised) code belongs to, or nil when it is neither.
+    static func prefix(of code: String) -> String? { prefixes.first { code.hasPrefix($0) } }
+
+    private static func framed<E: Encodable>(_ envelope: E, prefix: String) -> String? {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]
         guard let body = try? encoder.encode(envelope), body.count <= 4_096 else { return nil }
@@ -443,7 +566,7 @@ enum PopopxRedeemCode {
         return prefix + payload.popopxBase64URL
     }
 
-    static func decode(_ code: String) -> PopopxRedeemEnvelope? {
+    private static func unframed<E: Decodable>(_ code: String, prefix: String, as type: E.Type) -> E? {
         let stripped = normalized(code)
         guard stripped.hasPrefix(prefix) else { return nil }
         let body = String(stripped.dropFirst(prefix.count))
@@ -452,7 +575,7 @@ enum PopopxRedeemCode {
         let checksum = payload.prefix(PopopxCommerceLimits.codeChecksumBytes)
         let json = payload.dropFirst(PopopxCommerceLimits.codeChecksumBytes)
         guard PopopxCommerceSignature.digest(json).starts(with: checksum) else { return nil }
-        return try? JSONDecoder().decode(PopopxRedeemEnvelope.self, from: Data(json))
+        return try? JSONDecoder().decode(type, from: Data(json))
     }
 
     /// Normalisation. It removes **only** whitespace and prefix case differences: the base64url alphabet itself contains `-`,
@@ -460,15 +583,17 @@ enum PopopxRedeemCode {
     static func normalized(_ raw: String) -> String {
         let stripped = raw.unicodeScalars.filter { !CharacterSet.whitespacesAndNewlines.contains($0) }
         var text = String(String.UnicodeScalarView(stripped))
-        if text.uppercased().hasPrefix("PPX1-") {
-            text = prefix + String(text.dropFirst(prefix.count))
+        // The two prefixes are case-insensitively distinct too, so at most one branch can fire.
+        for known in prefixes where text.uppercased().hasPrefix(known.uppercased()) {
+            text = known + String(text.dropFirst(known.count))
         }
         return text
     }
 
     /// The grouped form a human copies by hand (`PPX1-ABCD1234 EFGH…`).
     static func grouped(_ code: String) -> String {
-        let body = code.hasPrefix(prefix) ? String(code.dropFirst(prefix.count)) : code
+        let head = prefix(of: code)
+        let body = head.map { String(code.dropFirst($0.count)) } ?? code
         guard !body.isEmpty else { return code }
         var groups: [String] = []
         var rest = Substring(body)
@@ -477,7 +602,7 @@ enum PopopxRedeemCode {
             groups.append(String(rest.prefix(take)))
             rest = rest.dropFirst(take)
         }
-        return prefix + groups.joined(separator: " ")
+        return (head ?? "") + groups.joined(separator: " ")
     }
 
     /// The whole code copied for the user: prefix + ungrouped original text (grouping is only for the screen, a copy must paste directly).
@@ -495,7 +620,9 @@ struct PopopxGiftCardPayload: Codable, Hashable, Sendable {
     static let scheme = "popopx"
     static let host = "gift"
     static let fieldNames: Set<String> = ["v", "p", "n", "t", "s"]
-    static let maximumVoucherIdCharacters = 22
+    /// A voucher id is `UUID().uuidString.lowercased()` — 36 characters. The cap has to sit above that or every card
+    /// this module mints fails its own parser; it was 22 until 2026-11-21, which silently disabled the in-chat gift card.
+    static let maximumVoucherIdCharacters = 40
     static let maximumSignatureCharacters = 180
 
     let voucherId: String
@@ -591,6 +718,119 @@ struct PopopxGiftCardPayload: Codable, Hashable, Sendable {
     }
 }
 
+/// The payload of the compute-credit gift-card bubble — the credit twin of `PopopxGiftCardPayload`, on its **own host** `creditgift`.
+///
+/// A separate host rather than a field on `gift` because the two cards grant different things, and a recipient must be able to tell
+/// which one it is holding *before* it parses the value: one host with an optional amount would make "is this a badge or credits"
+/// a runtime question, and mis-answering it is a voucher redeemed against the wrong ledger.
+///
+/// The amount in this card is **display only**. What gets credited comes from the signed `PopopxCreditsGrant` in the ACK,
+/// which the giver's vault derives from its own stored voucher — so a hand-edited `a=` can lie about the face value on screen
+/// but cannot mint a single credit.
+struct PopopxCreditGiftPayload: Codable, Hashable, Sendable {
+    static let scheme = "popopx"
+    static let host = "creditgift"
+    static let fieldNames: Set<String> = ["v", "a", "n", "t", "s"]
+    static let maximumVoucherIdCharacters = 40
+    static let maximumAmountDigits = 6
+    static let maximumSignatureCharacters = 180
+
+    let voucherId: String
+    let creditsAmount: Int
+    let note: String
+    let mintedAtMs: Int64
+    let signature: String
+
+    var canonicalBytes: Data {
+        PopopxCommerceSignature.canonical(kind: "creditgift", parts: [voucherId, String(creditsAmount), String(mintedAtMs)]) + Data(note.utf8)
+    }
+
+    var isSignatureValid: Bool {
+        // Same limitation as the badge card: the card carries no public key, so only the giver can verify it. Authenticity for the recipient
+        // is the ACK's `PopopxCreditsGrant`, never this signature.
+        PopopxCommerceSignature.verifySelfIssued(signatureBase64URL: signature, for: canonicalBytes)
+    }
+
+    init(voucherId: String, creditsAmount: Int, note: String, mintedAtMs: Int64, signature: String) {
+        self.voucherId = voucherId
+        self.creditsAmount = creditsAmount
+        self.note = note
+        self.mintedAtMs = mintedAtMs
+        self.signature = signature
+    }
+
+    /// Mint: sign once, encode once. `kind: "creditgift"` differs from the badge card's `"gift"`, so neither card's signature can be replayed as the other's.
+    static func make(voucherId: String, creditsAmount: Int, note: String, mintedAtMs: Int64) -> PopopxCreditGiftPayload? {
+        guard creditsAmount > 0 else { return nil }
+        let trimmed = String(note.unicodeScalars.prefix(PopopxCommerceLimits.maximumNoteCharacters))
+        let body = PopopxCommerceSignature.canonical(kind: "creditgift", parts: [voucherId, String(creditsAmount), String(mintedAtMs)]) + Data(trimmed.utf8)
+        guard let signature = PopopxCommerceSignature.signatureBase64URL(for: body) else { return nil }
+        return PopopxCreditGiftPayload(voucherId: voucherId, creditsAmount: creditsAmount, note: trimmed, mintedAtMs: mintedAtMs, signature: signature)
+    }
+
+    var wireString: String {
+        let noteField = Data(note.utf8).popopxBase64URL
+        return "\(Self.scheme)://\(Self.host)?v=\(voucherId)&a=\(creditsAmount)&n=\(noteField)&t=\(mintedAtMs)&s=\(signature)"
+    }
+
+    static func parse(from text: String) -> PopopxCreditGiftPayload? {
+        for token in text.split(whereSeparator: \.isWhitespace).reversed() {
+            if let payload = parseToken(String(token)) { return payload }
+        }
+        return nil
+    }
+
+    static func parseToken(_ token: String) -> PopopxCreditGiftPayload? {
+        guard let components = URLComponents(string: token),
+              components.scheme == scheme,
+              components.host == host
+        else { return nil }
+        var fields: [String: String] = [:]
+        for pair in (components.percentEncodedQuery ?? "").split(separator: "&", omittingEmptySubsequences: true) {
+            let parts = pair.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
+            guard parts.count == 2 else { continue }
+            let key = String(parts[0])
+            guard fieldNames.contains(key), fields[key] == nil else { continue }
+            fields[key] = String(parts[1])
+        }
+        guard
+            let voucherId = fields["v"],
+            !voucherId.isEmpty,
+            voucherId.count <= maximumVoucherIdCharacters,
+            let rawAmount = fields["a"],
+            !rawAmount.isEmpty,
+            rawAmount.allSatisfy(\.isNumber),
+            rawAmount.count <= maximumAmountDigits,
+            let creditsAmount = Int(rawAmount),
+            creditsAmount > 0,
+            let rawTime = fields["t"],
+            rawTime.allSatisfy(\.isNumber),
+            !rawTime.isEmpty,
+            rawTime.count <= 15,
+            let mintedAtMs = Int64(rawTime),
+            let signature = fields["s"],
+            !signature.isEmpty,
+            signature.count <= maximumSignatureCharacters
+        else { return nil }
+        let noteField = fields["n"] ?? ""
+        let note: String
+        if noteField.isEmpty {
+            note = ""
+        } else if let data = Data(popopxBase64URL: noteField), let decoded = String(data: data, encoding: .utf8) {
+            note = String(decoded.unicodeScalars.prefix(PopopxCommerceLimits.maximumNoteCharacters))
+        } else {
+            return nil
+        }
+        return PopopxCreditGiftPayload(
+            voucherId: voucherId,
+            creditsAmount: creditsAmount,
+            note: note,
+            mintedAtMs: mintedAtMs,
+            signature: signature
+        )
+    }
+}
+
 /// The payload of the compute-credit red packet bubble. The spec lists the fields `id`/`amount`/`note`/`sig`; here there is exactly **one** extra `n` (share count):
 /// in an equal group-chat split the claiming side has to know how large its own share is, and only this card can show that field —
 /// without `n` you either make the recipient divide by the headcount itself (someone else can change that), or write the share count into `note` (that is user text, not an accounting entry).
@@ -599,7 +839,9 @@ struct PopopxRedPacketPayload: Codable, Hashable, Sendable {
     static let scheme = "popopx"
     static let host = "redpacket"
     static let fieldNames: Set<String> = ["id", "amount", "note", "sig", "n"]
-    static let maximumPacketIdCharacters = 32
+    /// Same class as `PopopxGiftCardPayload.maximumVoucherIdCharacters`: a packet id is the ledger entry id, a 36-character UUID string.
+    /// The previous 32 rejected every packet this module sent, on the sender's own screen as much as the recipient's.
+    static let maximumPacketIdCharacters = 40
     static let maximumAmountDigits = 6
     static let maximumRecipientsDigits = 3
     static let maximumSignatureCharacters = 180
@@ -853,6 +1095,14 @@ enum PopopxCommerceSignalKind: String, CaseIterable, Sendable {
     /// because the conversation key itself looks like `#<local row number>` and only the trailing part is guaranteed to be a number.
     /// The name was fixed by a product ruling (round 2, item 2), and so was the field order: on this device, "which channel, which period expires".
     case channelSubscriptionAcknowledge = "CHANNEL_SUB_ACK"
+    /// The four compute-credit legs, named as the spec names them. They are **separate kinds** rather than a flag inside the badge payload
+    /// because the ACK carries a different signed type (`PopopxCreditsGrant` instead of `PopopxBadgeGrant`): the kind is what tells the
+    /// receiving side which JSON to decode, and one payload shape with an optional period would let a badge grant be applied as credits.
+    /// The REQ payload is the voucherId; the ACK payload is the grant's base64url — the same shapes as the badge legs, one level over.
+    case creditExternalRedeemRequest = "CREDIT_EXT_REDEEM_REQ"
+    case creditExternalRedeemAcknowledge = "CREDIT_EXT_REDEEM_ACK"
+    case creditChatRedeemRequest = "CREDIT_CHAT_REDEEM_REQ"
+    case creditChatRedeemAcknowledge = "CREDIT_CHAT_REDEEM_ACK"
 
     /// Only these two signalling kinds may be picked up inside a group/channel. The reason for the criterion is not "signalling cannot be received in a group",
     /// but that `awaitingAcks` keeps its books per chatId: a redemption ACK from a third person in the group would settle somebody else's entry
@@ -871,9 +1121,9 @@ struct PopopxCommerceSignal: Hashable, Sendable {
 
     var isRequest: Bool {
         switch kind {
-        case .externalRedeemRequest, .chatRedeemRequest: true
+        case .externalRedeemRequest, .chatRedeemRequest, .creditExternalRedeemRequest, .creditChatRedeemRequest: true
         case .externalRedeemAcknowledge, .chatRedeemAcknowledge, .redPacketClaimed, .profileUnlocked,
-             .channelSubscriptionAcknowledge: false
+             .channelSubscriptionAcknowledge, .creditExternalRedeemAcknowledge, .creditChatRedeemAcknowledge: false
         }
     }
 }
@@ -921,6 +1171,11 @@ enum PopopxCreditsEntryKind: String, Codable, CaseIterable, Identifiable, Sendab
     case storePurchase
     case badgeExchange
     case giftVoucherExchange
+    /// Paying credits to mint a compute-credit gift card (the credit twin of `giftVoucherExchange`). A spend, and nothing in this module
+    /// ever reverses it: an unredeemed card keeps its credits off the balance until the peer redeems it, exactly as a badge voucher does.
+    case creditGiftSent
+    /// Receiving credits from someone else's gift card. Income, and the only credit leg this device can get without Apple collecting money here.
+    case creditGiftReceived
     case redPacketSent
     case redPacketReceived
     case redPacketRefund
@@ -936,17 +1191,18 @@ enum PopopxCreditsEntryKind: String, Codable, CaseIterable, Identifiable, Sendab
     var sign: Int? {
         switch self {
         case .storePurchase, .redPacketReceived, .adjustment: nil
-        case .badgeExchange, .giftVoucherExchange, .redPacketSent, .channelSubscription,
+        case .badgeExchange, .giftVoucherExchange, .creditGiftSent, .redPacketSent, .channelSubscription,
              .profileUnlock, .secureWindow, .cosmetic: -1
-        case .redPacketRefund: 1
+        case .redPacketRefund, .creditGiftReceived: 1
         }
     }
 
+    /// Listed case by case, with no `default`: a new ledger category has to be answered for here, the same way `sign` does.
     var isIncome: Bool {
         switch self {
-        case .storePurchase, .redPacketReceived, .redPacketRefund: true
-        case .adjustment: false
-        default: false
+        case .storePurchase, .redPacketReceived, .redPacketRefund, .creditGiftReceived: true
+        case .badgeExchange, .giftVoucherExchange, .creditGiftSent, .redPacketSent, .channelSubscription,
+             .profileUnlock, .secureWindow, .cosmetic, .adjustment: false
         }
     }
 }
@@ -1099,6 +1355,9 @@ enum PopopxCommerceKeychainSlot: String, CaseIterable, Sendable {
     /// The authorisation text (grant) whose signature the receiving side verified. Its own slot, not borrowing `profileReceipts`:
     /// that slot holds the receipts for unlocking profile cards, and having the redemption flow overwrite it would wipe somebody else's unlock credentials along with it.
     case grants = "popopx.commerce.grants"
+    /// The credit twins of `grants`, and for the same reason it cannot share that slot: the two hold different types under the same
+    /// voucher-id keys, so writing one table over the other would make a verified authorisation unreadable.
+    case creditGrants = "popopx.commerce.credit-grants"
 }
 
 /// Keychain reads and writes.
@@ -1268,6 +1527,9 @@ enum PopopxBadgeCreditsError: Error, LocalizedError, Hashable {
     case keychainUnavailable
     case insufficientCredits(balance: Int, required: Int)
     case voucherUnavailable
+    /// The credit twin of `voucherUnavailable`. Separate because the sentence a user reads must name the thing they hold:
+    /// "this gift badge is no longer available" shown over a compute-credit gift card sends them looking for a badge page that was never involved.
+    case creditVoucherUnavailable
     case voucherAlreadyRedeemed
     case codeMalformed
     case connectionUnavailable
@@ -1289,6 +1551,7 @@ enum PopopxBadgeCreditsError: Error, LocalizedError, Hashable {
         case let .insufficientCredits(balance, required):
             String(format: PopopxCommerceCopy.errorInsufficientCreditsFormat, required, balance)
         case .voucherUnavailable: PopopxCommerceCopy.errorVoucherUnavailable
+        case .creditVoucherUnavailable: PopopxCommerceCopy.errorCreditVoucherUnavailable
         case .voucherAlreadyRedeemed: PopopxCommerceCopy.errorVoucherAlreadyRedeemed
         case .codeMalformed: PopopxCommerceCopy.errorCodeMalformed
         case .connectionUnavailable: PopopxCommerceCopy.errorConnectionUnavailable
@@ -1371,6 +1634,66 @@ enum PopopxCommerceCopy {
     /// The payment completed but this device's ledger was not written (Keychain write failed, or the balance ceiling blocked it).
     /// This sentence must exist, otherwise "paid and nothing changed on screen" becomes the hardest incident in this family to reproduce and to explain.
     static let creditsTopUpNotCredited = NSLocalizedString("Apple took the payment, but this device could not add the credits to your balance yet. They are credited the next time the secure store can be written.", comment: "credits pack paid but not credited locally")
+
+    // MARK: Compute-credit gift cards (the "gift" half of the compute-credits page)
+    //
+    // A credit gift card is the credit twin of a badge gift card: Apple collects the money, this end mints exactly one transferable
+    // voucher, and **nothing lands on this device's balance**. That difference is why these sentences are separate from the top-up group
+    // above — a top-up sentence says "added to your balance", and over a gift card that would simply be false.
+    // Face values are the bare amounts (100 / 500 / 2_000) at the same list prices as the matching top-up packs, and no sentence here
+    // may promise bonus credits: `noGiftBackStatement` above is the compliance line both halves of the page share.
+    static let creditsRechargeTab = NSLocalizedString("Recharge", comment: "compute-credits page segment: buying credits for this device")
+    static let creditsGiftTab = NSLocalizedString("Gift Credits", comment: "compute-credits page segment: buying a credit gift card for someone else")
+    static let creditsGiftAction = NSLocalizedString("Buy gift card", comment: "compute-credit gift card tier button")
+    /// The mint result. It says "created", never "delivered": the card only becomes the other person's balance when they redeem it.
+    static func creditsGiftCreated(_ amount: Int) -> String {
+        String(format: NSLocalizedString("Gift card created · %lld Compute Credits", comment: "compute-credit gift card purchase result"), amount)
+    }
+    static let creditsGiftPending = NSLocalizedString("Apple is still confirming this purchase. The gift card appears as soon as it is confirmed.", comment: "compute-credit gift card purchase pending")
+    /// The payment completed but the voucher could not be minted (Keychain write failed, or the vault is full). Same reason for existing as `creditsTopUpNotCredited`.
+    static let creditsGiftNotCreated = NSLocalizedString("Apple took the payment, but this device could not create the gift card yet. It is created the next time the secure store can be written.", comment: "compute-credit gift card paid but not minted")
+    /// What the recipient sees after a successful redemption. The number comes from the **signed grant**, not from the card text.
+    static let creditsGiftReceivedFormat = NSLocalizedString("Received %lld Compute Credits from a gift card.", comment: "compute-credit gift card redeemed")
+    static let errorCreditVoucherUnavailable = NSLocalizedString("This Compute Credits gift card is no longer available.", comment: "error")
+    /// The card face title, and the QR poster's own heading. The amount comes from the voucher, so this can never disagree with the record.
+    static func creditsGiftCardTitle(_ amount: Int) -> String {
+        String(format: NSLocalizedString("%lld Compute Credits gift card", comment: "compute-credit gift card face title"), amount)
+    }
+    /// Credit twin of `PopopxGiftBadgeCardSheet`'s badge footnote, and it differs in exactly one load-bearing place: **case**.
+    /// The body of a `PPXC1-` code is base64url, which contains `-` and is case-sensitive, so "the case does not matter" would send users
+    /// to retype a string that then fails its signature check.
+    static let creditsGiftCodeFootnote = NSLocalizedString(
+        "Paste this whole string where the app asks for a redemption code: the grouping is only for readability and spaces make no difference, "
+        + "but it is case-sensitive — paste or scan it, do not retype it character by character.",
+        comment: "compute-credit gift card code footnote"
+    )
+    /// The gift tab's statement of who is credited. It must not read like a top-up sentence: the buyer's own balance never moves here.
+    static let creditsGiftPackFootnote = NSLocalizedString(
+        "A gift card adds nothing to your own balance. The credits belong to the device that redeems the code.",
+        comment: "compute-credit gift card tier footnote"
+    )
+    static let creditsGiftWalletTitle = NSLocalizedString("Gift cards on this device", comment: "compute-credit gift card inventory section")
+    static let creditsGiftWalletEmpty = NSLocalizedString(
+        "No gift cards yet. Buy one above, or create one from the credits you already have.",
+        comment: "compute-credit gift card inventory empty state"
+    )
+    /// The credit twin of the badge page's `credits` exchange section. Buying with Apple is not the only way a gift card exists,
+    /// and `PopopxCreditsManager.exchangeCreditsForCreditVoucher` otherwise has no caller at all.
+    static let creditsGiftFromBalanceTitle = NSLocalizedString("Or pay with the credits you already have", comment: "compute-credit gift card exchange section")
+    /// Three positional specifiers on purpose — quantity, face value, total cost — because the denomination list and the quantity are both
+    /// chosen by the user, and a button that reads a rounded "about" number is how a money mismatch starts.
+    static func creditsGiftFromBalance(_ quantity: Int, _ amount: Int, _ cost: Int) -> String {
+        String(format: NSLocalizedString("Create %1$lld gift cards of %2$lld Compute Credits · %3$lld credits", comment: "compute-credit gift card exchange button"), quantity, amount, cost)
+    }
+    static func creditsGiftFromBalanceCreated(_ quantity: Int, _ amount: Int) -> String {
+        String(format: NSLocalizedString("Created %1$lld gift cards of %2$lld Compute Credits", comment: "compute-credit gift card exchange result"), quantity, amount)
+    }
+    /// The debit cleared but the cards were not written. Same reason for existing as `creditsGiftNotCreated`, and the number is what
+    /// `reconcileNote` will keep showing until the vault can be written.
+    static let creditsGiftFromBalanceNotCreated = NSLocalizedString(
+        "Your balance was reduced, but this device could not create the gift cards yet. They appear the next time the secure store can be written.",
+        comment: "compute-credit gift card exchange failed after the debit"
+    )
     static let redPacketTitle = NSLocalizedString("Send Compute Credits", comment: "sheet title")
     /// Compliance statement: this sentence has to appear in all 17 languages; it is what the review reads.
     static let redPacketFixedAmountsStatement = NSLocalizedString("Only the fixed amounts listed here can be sent. Nowhere in this feature can you type a custom amount.", comment: "Apple 3.1.1 no random amounts")

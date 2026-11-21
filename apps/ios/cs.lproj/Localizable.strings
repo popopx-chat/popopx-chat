@@ -2,6 +2,11 @@
 " (can be copied)" = " (lze kopírovat)";
 
 /* No comment provided by engineer. */
+"A gift card adds nothing to your own balance. The credits belong to the device that redeems the code." = "Dárková karta nic nepřidá k vašemu vlastnímu zůstatku. Body patří zařízení, které kód uplatní.";
+"Credits gift card" = "Dárková karta na body";
+"No gift cards yet. Buy one above, or create one from the credits you already have." = "Zatím žádné dárkové karty. Kupte ji nahoře, nebo vytvořte z bodů, které už máte.";
+"Paste this whole string where the app asks for a redemption code: the grouping is only for readability and spaces make no difference, but it is case-sensitive — paste or scan it, do not retype it character by character." = "Vložte celý tento řetězec tam, kde aplikace žádá kód voucheru: dělení mezerami je jen pro čitelnost a mezery nic nemění, ale záleží na velikosti písmen — vložte ho nebo naskenujte, nepřepisujte znak po znaku.";
+"Your balance was reduced, but this device could not create the gift cards yet. They appear the next time the secure store can be written." = "Zůstatek byl snížen, ale toto zařízení zatím nedokázalo dárkové karty vytvořit. Objeví se při nejbližším zápisu do zabezpečeného úložiště.";
 "_italic_" = "\\_kurzíva_";
 
 /* No comment provided by engineer. */
@@ -5235,7 +5240,6 @@ server test failure */
 "A free channel needs no credits and leaves no ledger entries — just open it." = "Bezplatný kanál nepotřebuje body a nezanechává žádné záznamy v účetnictví — stačí ho otevřít.";
 "A group has no profile on any server: it exists only on its members' devices. Set the name and the avatar first, then decide who to invite." = "Skupina nemá profil na žádném serveru: existuje jen v zařízeních svých členů. Nastavte nejdřív název a avatar, pak se rozhodněte, koho pozvete.";
 "A location message cannot be added while the draft is being rewritten, forwarded, recorded as a live message or already has an attachment." = "Zprávu s polohou nelze přidat, zatímco se koncept přepisuje, přeposílá, nahrává jako živá zpráva nebo už obsahuje přílohu.";
-"A long string that starts with PPX1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails." = "Dlouhý řetězec začínající „PPX1-“. Vložte ho; nepřepisujte ho ručně: záleží na velikosti písmen a už jeden chybný znak znamená selhání ověření.";
 "A mesh pairing request from a device in the same room appears here." = "Žádost o mesh párování od zařízení ve stejné místnosti se objeví zde.";
 "A new random profile card joins the group, and the usual profile card of this device does not appear in the member list." = "Skupině se přidá nová náhodná profilová karta a běžná profilová karta tohoto zařízení se v seznamu členů neobjeví.";
 "A profile page is already open — close it first" = "Stránka profilu je už otevřená — nejdřív ji zavřete";
@@ -5763,13 +5767,11 @@ server test failure */
 "Offline messages go over the Bluetooth mesh relay, up to 7 hops." = "Offline zprávy jdou přes relé Bluetooth Mesh, až 7 skoků.";
 "Offline: POPOPX Bluetooth mesh" = "Offline: POPOPX Bluetooth mesh";
 "On" = "Zapnuto";
-"On success the badge lights up automatically, even if this page has already been closed." = "Při úspěchu se odznak aktivuje automaticky, i když jste stránku už zavřeli.";
 "On trial" = "Zkušební režim";
 "On: the 10th wrong entry silently runs the exact same wipe and rebuild flow as the emergency erase passcode, and no warning appears on screen first." = "Zapnuto: 10. chybné zadání potichu spustí úplně stejný proces vymazání a obnovení jako heslo nouzového vymazání a nejdřív se na obrazovce neobjeví žádné varování.";
 "On: while a duress code exists, entering it takes the erasure path. Turning this off deletes the duress code record on the spot." = "Zapnuto: dokud kód pod nátlakem existuje, jeho zadání jde cestou vymazání. Vypnutím se záznam kódu pod nátlakem smaže hned.";
 "Once claimed, this capsule grows in the top bar and keeps breathing for %lld days." = "Po převzetí se kapsule v horní liště zvětší a %lld dní se nadechuje.";
 "Once data is wiped by the duress code it cannot be recovered: no backup prompt, no undo, no recovery channel. The drill page will not let you try it once, and cannot." = "Až kód pod nátlakem data vymaže, nedají se obnovit: žádná výzva k záloze, žádný krok zpět, žádný obnovovací kanál. Stránka procvičení to nenechá vyzkoušet ani jednou — ani to nejde.";
-"Once that authorization checks out, the badge lights up on this device and the one-time connection is deleted." = "Až ověření autorizace projde, odznak se v tomto zařízení aktivuje a jednorázové spojení se smaže.";
 "Once they accept, this device checks that the voucher has not been redeemed yet and signs an authorization back." = "Až je druhá strana přijme, toto zařízení zkontroluje, že voucher ještě nebyl uplatněn, a pošle zpět podepsanou autorizaci.";
 "Once this panel is closed there is no way left on this device to show these 12 words again, unless next time you still pass the verification gate: type the current entry passcode correctly, or, while biometric quick unlock is on, let the machine recognise you. Please copy them onto paper right now: no screenshot, no typing them into any cloud note, and no relying on the system clipboard. For that reason this panel does not allow selecting the text, because a selection may end up in the clipboard, and the clipboard can be read by other apps and can sync to other devices through iCloud." = "Jakmile tento panel zavřete, v tomto zařízení už neexistuje způsob, jak těchto 12 slov zobrazit znovu — leda příště projdete ověřovací bránou: zadáte správně aktuální vstupní heslo, nebo při zapnutém rychlém odemčení biometrií necháte zařízení, ať vás rozpozná. Opište si je prosím hned teď na papír: žádné snímky obrazovky, žádné opisování do cloudové poznámky, žádné spoléhání na systémovou schránku. Panel proto neumožňuje text vybírat — výběr se může dostat do schránky, tu čtou jiné aplikace a přes iCloud se může synchronizovat do jiných zařízení.";
 "One annual tier; renew any time before it expires" = "Jedna roční úroveň; obnovit lze kdykoli před vypršením";
@@ -5870,7 +5872,6 @@ server test failure */
 "Recenter on current location" = "Zacentrovat na aktuální polohu";
 "Reconciliation digest" = "Souhrn zúčtování";
 "Red packets nobody finished claiming" = "Červené obálky, jejichž výběr nikdo nedokončil";
-"Redeem a badge voucher" = "Uplatnit voucher na odznak";
 "Redeem request sent — waiting for the other side to confirm" = "Žádost o uplatnění odeslána — čeká na potvrzení druhou stranou";
 "Redeem with Compute Credits · %1$lld vouchers · %2$lld days each · %3$lld credits" = "Uplatnit za výpočetní body · %1$lld voucherů · po %2$lld dnech · %3$lld bodů";
 "Redeemed · badge lit for %lld days" = "Uplatněno · odznak aktivován na %lld dní";
@@ -6045,7 +6046,6 @@ server test failure */
 "The claim is kept in its own Keychain item on this device (readable only here, valid after the first unlock). No device identifier is uploaded." = "Převzetí je uloženo jako vlastní položka Keychain v tomto zařízení (čitelná jen tady, platná po prvním odemčení). Identifikátor zařízení se nikam nenahrává.";
 "The clipboard holds an addable link" = "Schránka obsahuje přidatelný odkaz";
 "The clipboard is empty." = "Schránka je prázdná.";
-"The clipboard text does not look like a redemption code (it must start with PPX1-). It has been placed in the field — check it, then tap Redeem again." = "Text ve schránce nevypadá jako kód pro uplatnění (musí začínat na PPX1-). Byl vložen do pole — zkontrolujte ho a klepněte znovu na Uplatnit.";
 "The connection is still being made, please try again later." = "Spojení se ještě navazuje, zkuste to prosím později.";
 "The content is empty." = "Obsah je prázdný.";
 "The core does not accept some of the characters in the group name. Fixing it removes them." = "Jádro některé znaky názvu skupiny nepřijímá. Oprava je odstraní.";
@@ -6369,7 +6369,6 @@ server test failure */
 "Why this prompt is not counted" = "Proč se tato výzva nepočítá";
 "Wi-Fi access has been denied" = "Přístup k Wi-Fi byl odepřen";
 "Wishing you prosperity" = "Přeji hojnost";
-"With a redemption code, light up on this device the badge the other side gifted." = "Kódem pro uplatnění aktivujte v tomto zařízení odznak, který vám druhá strana nadělila.";
 "With this level on you accept two things: someone who has an unlocked phone and 10 chances may wipe your identities for you, and you may count to 10 in the dark yourself. The price of an accidental touch, a family member pressing around, a child playing with it, or typing your own mnemonic phrase wrong ten times in a row, is carried by this one deliberate tap." = "Při zapnuté této úrovni přijímáte dvě věci: že vám někdo s odemčeným telefonem a 10 pokusy může vymazat identity — a že do deseti můžete naslepo počítat i sami. Cenu za omylem zmáčknutí, člena rodiny, co si mačká, dětské hraní i vlastní obnovovací frázi špatně opsanou desátkrát za sebou, nese jedno jediné vědomé klepnutí.";
 "Working…" = "Pracuji…";
 "Would not trigger a lock" = "Nespustilo by uzamknutí";
@@ -6435,3 +6434,34 @@ server test failure */
 "[Top-secret view-once] Open after biometrics" = "[Přísně tajné, jednorázové] Otevřít po biometrickém ověření";
 "[Top-secret security alert] %@; that top-secret message was destroyed in place." = "[Přísně tajné: bezpečnostní výstraha] %@; tato přísně tajná zpráva byla zničena na místě.";
 "Neither Bluetooth nor the public network is available — %lld messages waiting to send" = "Ani Bluetooth, ani veřejná síť nejsou dostupné — %lld zpráv čeká na odeslání";
+"%lld Compute Credits added." = "Přidáno %lld výpočetních bodů.";
+"%lld Compute Credits gift card" = "Dárková karta na %lld výpočetních bodů";
+"A Compute Credits gift card sent by the other person" = "Dárková karta na výpočetní body, kterou poslal protějšek";
+"A long string that starts with PPX1- or PPXC1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails." = "Dlouhý řetězec začínající „PPX1-“ nebo „PPXC1-“. Vložte ho; nepřepisujte ho ručně: záleží na velikosti písmen a už jeden chybný znak znamená selhání ověření.";
+"Added %lld Compute Credits, written into this device's credit balance; they do not expire." = "Připsáno %lld výpočetních bodů do zůstatku tohoto zařízení; nikdy nevyprší.";
+"Apple is still confirming this purchase. The gift card appears as soon as it is confirmed." = "Apple tento nákup stále potvrzuje. Dárková karta se objeví, jakmile bude potvrzena.";
+"Apple took the payment, but this device could not create the gift card yet. It is created the next time the secure store can be written." = "Apple platbu strhl, ale toto zařízení zatím nedokázalo dárkovou kartu vytvořit. Vytvoří se, až bude možné znovu zapsat do zabezpečeného úložiště.";
+"Buy gift card" = "Koupit dárkovou kartu";
+"Compute Credits gift card" = "Dárková karta na výpočetní body";
+"Compute Credits gift card, %1$lld credits, message: %2$@. Tap to redeem." = "Dárková karta na výpočetní body, %1$lld bodů, vzkaz: %2$@. Klepnutím uplatníte.";
+"Compute Credits gift card, %lld credits, tap to redeem." = "Dárková karta na výpočetní body, %lld bodů, klepnutím uplatníte.";
+"Compute Credits gift cards can only be redeemed in a one-to-one chat." = "Dárkové karty na výpočetní body lze uplatnit jen v chatu 1:1.";
+"Create %1$lld gift cards of %2$lld Compute Credits · %3$lld credits" = "Vytvořit %1$lld dárkových karet po %2$lld výpočetních bodech · %3$lld bodů";
+"Created %1$lld gift cards of %2$lld Compute Credits" = "Vytvořeno %1$lld dárkových karet po %2$lld výpočetních bodech";
+"Created %1$lld × %2$lld compute-point gift cards" = "Vytvořeno %1$lld dárkových karet výpočetních bodů, každá po %2$lld bodech";
+"Gift Credits" = "Dárkové body";
+"Gift card created · %lld Compute Credits" = "Dárková karta vytvořena · %lld výpočetních bodů";
+"Gift cards on this device" = "Dárkové karty v tomto zařízení";
+"On success the badge or the credits land on this device even if this page has already been closed." = "Při úspěchu se odznak nebo body připíšou do tohoto zařízení, i když už jste tuto stránku zavřeli.";
+"Once that authorization checks out, this device records the badge or the credits, and the one-time connection is deleted." = "Až ověření autorizace projde, toto zařízení odznak nebo body zaznamená a jednorázové spojení se smaže.";
+"Or pay with the credits you already have" = "Nebo zaplatit body, které už máte";
+"Received %lld Compute Credits from a gift card." = "Přijato %lld výpočetních bodů z dárkové karty.";
+"Received a compute-point gift card" = "Přijata dárková karta výpočetních bodů";
+"Recharge" = "Nabití";
+"Redeem a gift code" = "Uplatnit dárkový kód";
+"Redeemed · %lld Compute Credits added" = "Uplatněno · přidáno %lld výpočetních bodů";
+"The clipboard text does not look like a redemption code (it must start with PPX1- or PPXC1-). It has been placed in the field — check it, then tap Redeem again." = "Text ve schránce nevypadá jako kód pro uplatnění (musí začínat na „PPX1-“ nebo „PPXC1-“). Byl vložen do pole — zkontrolujte ho a klepněte znovu na Uplatnit.";
+"This Compute Credits gift card is no longer available." = "Tato dárková karta na výpočetní body již není dostupná.";
+"With a redemption code, receive on this device what the other side gifted." = "Kódem pro uplatnění přijmete v tomto zařízení to, co vám druhá strana nadělila.";
+"🎁 [Compute Credits gift card] %1$lld · %2$@" = "🎁 [Dárková karta na výpočetní body] %1$lld · %2$@";
+"🎁 [Compute Credits gift card] %lld" = "🎁 [Dárková karta na výpočetní body] %lld";

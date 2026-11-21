@@ -399,7 +399,10 @@ struct PopopxMeView: View {
     }
 
     @MainActor private func refreshVoucherCount() async {
-        unusedVouchers = await PopopxP2PVoucherVault.shared.vouchers(state: .unused).count
+        // Badge cards only, and the reason is the menu above: this row's two actions are "send a gift badge" and "enter a code",
+        // so a number here has to mean the cards that row can actually act on. Compute-credit gift cards are inventoried on the
+        // Compute Credits page, which is the only place that can send one.
+        unusedVouchers = await PopopxP2PVoucherVault.shared.badgeVouchers(state: .unused).count
     }
 
     // MARK: Group 3 · frequently used

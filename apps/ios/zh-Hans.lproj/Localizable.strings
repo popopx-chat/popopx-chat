@@ -2,6 +2,11 @@
 " (can be copied)" = " （可复制）";
 
 /* No comment provided by engineer. */
+"A gift card adds nothing to your own balance. The credits belong to the device that redeems the code." = "礼品卡不会给你的余额增加任何点数。算力点归兑换该码的设备所有。";
+"Credits gift card" = "算力点礼品卡";
+"No gift cards yet. Buy one above, or create one from the credits you already have." = "还没有礼品卡。可以在上面购买，也可以用你已有的算力点生成。";
+"Paste this whole string where the app asks for a redemption code: the grouping is only for readability and spaces make no difference, but it is case-sensitive — paste or scan it, do not retype it character by character." = "把整串内容粘贴到 app 要求输入兑换码的地方：分组只是为了好读，空格不影响，但它区分大小写 —— 请粘贴或扫码，不要逐字符手输。";
+"Your balance was reduced, but this device could not create the gift cards yet. They appear the next time the secure store can be written." = "余额已经扣减，但这台设备暂时还没能生成礼品卡。下次能写入安全存储时它们就会出现。";
 "_italic_" = "\\_斜体_";
 
 /* No comment provided by engineer. */
@@ -8598,7 +8603,6 @@ alert title */
 "A free channel needs no credits and leaves no ledger entries — just open it." = "免费频道不需要点数，也不留账目记录 —— 直接加入即可。";
 "A group has no profile on any server: it exists only on its members' devices. Set the name and the avatar first, then decide who to invite." = "群组在任何服务器上都没有资料：它只存在于成员的本机里。先设置群名与头像，再决定邀请谁。";
 "A location message cannot be added while the draft is being rewritten, forwarded, recorded as a live message or already has an attachment." = "草稿正在改写、转发、录制为实时消息，或已带附件时，无法添加位置消息。";
-"A long string that starts with PPX1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails." = "以 PPX1- 的长字符串。请粘贴，不要手输：它区分大小写，错一个字符就验证失败。";
 "A mesh pairing request from a device in the same room appears here." = "同一房间内设备发来的 Mesh 配对请求会出现在这里。";
 "A new random profile card joins the group, and the usual profile card of this device does not appear in the member list." = "一张新的随机身份卡加入群组，本机的常用身份卡不会出现在成员列表里。";
 "A profile page is already open — close it first" = "已有一个资料页打开着 —— 请先关闭它";
@@ -9126,13 +9130,11 @@ alert title */
 "Offline messages go over the Bluetooth mesh relay, up to 7 hops." = "离线消息经蓝牙 Mesh 中继，最多 7 跳。";
 "Offline: POPOPX Bluetooth mesh" = "离线：POPOPX 蓝牙 Mesh";
 "On" = "开启";
-"On success the badge lights up automatically, even if this page has already been closed." = "成功后徽章会自动点亮，即使本页已经关闭。";
 "On trial" = "体验中";
 "On: the 10th wrong entry silently runs the exact same wipe and rebuild flow as the emergency erase passcode, and no warning appears on screen first." = "开启：第 10 次输错会静默执行与紧急抹除密码完全相同的抹除与重建流程，屏幕上不会先出现任何警告。";
 "On: while a duress code exists, entering it takes the erasure path. Turning this off deletes the duress code record on the spot." = "开启：只要存在胁迫密码，输入它就走抹除路径。关掉这一项会当场删除胁迫密码记录。";
 "Once claimed, this capsule grows in the top bar and keeps breathing for %lld days." = "领取后，这枚胶囊会出现在顶栏并持续呼吸 %lld 天。";
 "Once data is wiped by the duress code it cannot be recovered: no backup prompt, no undo, no recovery channel. The drill page will not let you try it once, and cannot." = "数据一旦被胁迫密码抹除就无法找回：没有备份提示、无法撤销、也没有恢复渠道。演练页不会让你试做一次，也做不到。";
-"Once that authorization checks out, the badge lights up on this device and the one-time connection is deleted." = "该授权核验通过后，徽章就在本机点亮，一次性连接同时被删除。";
 "Once they accept, this device checks that the voucher has not been redeemed yet and signs an authorization back." = "对方接受后，本机会确认这张兑换券尚未被兑换，然后签回一份授权。";
 "Once this panel is closed there is no way left on this device to show these 12 words again, unless next time you still pass the verification gate: type the current entry passcode correctly, or, while biometric quick unlock is on, let the machine recognise you. Please copy them onto paper right now: no screenshot, no typing them into any cloud note, and no relying on the system clipboard. For that reason this panel does not allow selecting the text, because a selection may end up in the clipboard, and the clipboard can be read by other apps and can sync to other devices through iCloud." = "这个面板一旦关掉，本机就再没有办法重新显示这 12 个词，除非下次仍通过验证闸门：正确输入当前入口密码，或在生物识别快速解锁开启时让机器认出你。请现在把它们抄到纸上：不要截屏，不要输进任何云端笔记，也不要依赖系统剪贴板。正因如此，这个面板不允许选中文本，因为选中内容可能进入剪贴板，而剪贴板会被其他 app 读取，还可能通过 iCloud 同步到其他设备。";
 "One annual tier; renew any time before it expires" = "一次一档年费；到期前可随时续";
@@ -9233,7 +9235,6 @@ alert title */
 "Recenter on current location" = "回到当前位置";
 "Reconciliation digest" = "对账摘要";
 "Red packets nobody finished claiming" = "没人领完的红包";
-"Redeem a badge voucher" = "兑换徽章兑换券";
 "Redeem request sent — waiting for the other side to confirm" = "兑换请求已发出 —— 等待对方确认";
 "Redeem with Compute Credits · %1$lld vouchers · %2$lld days each · %3$lld credits" = "用算力点兑换 · %1$lld 张券 · 每张 %2$lld 天 · %3$lld 点";
 "Redeemed · badge lit for %lld days" = "已兑换 · 徽章点亮 %lld 天";
@@ -9408,7 +9409,6 @@ alert title */
 "The claim is kept in its own Keychain item on this device (readable only here, valid after the first unlock). No device identifier is uploaded." = "领取记录保存在本机独立的钥匙串条目里（只在这里可读，首次解锁后生效）。不会上传任何设备标识。";
 "The clipboard holds an addable link" = "剪贴板里有一条可添加的链接";
 "The clipboard is empty." = "剪贴板是空的。";
-"The clipboard text does not look like a redemption code (it must start with PPX1-). It has been placed in the field — check it, then tap Redeem again." = "剪贴板里的文本不像兑换码（应以 PPX1- 开头）。已填入输入框 —— 请核对后再点一次「兑换」。";
 "The connection is still being made, please try again later." = "连接仍在建立中，请稍后再试。";
 "The content is empty." = "内容为空。";
 "The core does not accept some of the characters in the group name. Fixing it removes them." = "群名里有核心不接受的字符，修正时会将它们去掉。";
@@ -9732,7 +9732,6 @@ alert title */
 "Why this prompt is not counted" = "这道询问为什么不计数";
 "Wi-Fi access has been denied" = "Wi-Fi 访问已被拒绝";
 "Wishing you prosperity" = "恭喜发财";
-"With a redemption code, light up on this device the badge the other side gifted." = "凭兑换码，在本机点亮对方赠送的那枚徽章。";
 "With this level on you accept two things: someone who has an unlocked phone and 10 chances may wipe your identities for you, and you may count to 10 in the dark yourself. The price of an accidental touch, a family member pressing around, a child playing with it, or typing your own mnemonic phrase wrong ten times in a row, is carried by this one deliberate tap." = "开启这一档意味着你接受两件事：一个拿着已解锁手机、有 10 次机会的人，可能替你把身份抹了；而你自己也可能在黑暗里数到 10。误碰、家人乱按、小孩玩耍，或连续十次输错自己的助记词，这副代价都由这一次有意为之的轻触承担。";
 "Working…" = "处理中…";
 "Would not trigger a lock" = "不会触发锁定";
@@ -9785,3 +9784,34 @@ alert title */
 "[Top-secret view-once] Open after biometrics" = "[绝密阅后即焚] 生物识别后查看";
 "[Top-secret security alert] %@; that top-secret message was destroyed in place." = "[绝密安全告警] %@；该条绝密消息已就地销毁。";
 "Neither Bluetooth nor the public network is available — %lld messages waiting to send" = "蓝牙与公网均不可用，%lld 条消息待发送";
+"%lld Compute Credits added." = "%lld 算力点已到账。";
+"%lld Compute Credits gift card" = "%lld 算力点礼品卡";
+"A Compute Credits gift card sent by the other person" = "对方发来的一张算力点礼品卡";
+"A long string that starts with PPX1- or PPXC1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails." = "以 PPX1- 或 PPXC1- 开头的长字符串。请粘贴，不要手输：它区分大小写，错一个字符就验证失败。";
+"Added %lld Compute Credits, written into this device's credit balance; they do not expire." = "已添加 %lld 算力点，写入本机余额；不会过期。";
+"Apple is still confirming this purchase. The gift card appears as soon as it is confirmed." = "Apple 仍在确认此购买。确认后立即显示礼品卡。";
+"Apple took the payment, but this device could not create the gift card yet. It is created the next time the secure store can be written." = "Apple 已完成扣款，但本机暂时无法创建礼品卡。下一次能够写入安全存储时会自动创建。";
+"Buy gift card" = "购买礼品卡";
+"Compute Credits gift card" = "算力点礼品卡";
+"Compute Credits gift card, %1$lld credits, message: %2$@. Tap to redeem." = "算力点礼品卡，%1$lld 点，留言：%2$@。轻触兑换。";
+"Compute Credits gift card, %lld credits, tap to redeem." = "算力点礼品卡，%lld 点，轻触兑换。";
+"Compute Credits gift cards can only be redeemed in a one-to-one chat." = "算力点礼品卡只能在单聊里兑换。";
+"Create %1$lld gift cards of %2$lld Compute Credits · %3$lld credits" = "生成 %1$lld 张 %2$lld 算力点礼品卡 · %3$lld 点";
+"Created %1$lld gift cards of %2$lld Compute Credits" = "已生成 %1$lld 张 %2$lld 算力点礼品卡";
+"Created %1$lld × %2$lld compute-point gift cards" = "已生成 %1$lld × %2$lld 算力点礼品卡";
+"Gift Credits" = "送礼品卡";
+"Gift card created · %lld Compute Credits" = "礼品卡已生成 · %lld 算力点";
+"Gift cards on this device" = "本机礼品卡";
+"On success the badge or the credits land on this device even if this page has already been closed." = "成功后徽章或算力点会落到本机，即使本页已经关闭。";
+"Once that authorization checks out, this device records the badge or the credits, and the one-time connection is deleted." = "该授权核验通过后，本机就会记下徽章或算力点，一次性连接同时被删除。";
+"Or pay with the credits you already have" = "或用已有的算力点支付";
+"Received %lld Compute Credits from a gift card." = "已从礼品卡收到 %lld 算力点。";
+"Received a compute-point gift card" = "收到算力点礼品卡";
+"Recharge" = "充值";
+"Redeem a gift code" = "兑换礼品码";
+"Redeemed · %lld Compute Credits added" = "已兑换 · 入账 %lld 算力点";
+"The clipboard text does not look like a redemption code (it must start with PPX1- or PPXC1-). It has been placed in the field — check it, then tap Redeem again." = "剪贴板里的文本不像兑换码（应以 PPX1- 或 PPXC1- 开头）。已填入输入框 —— 请核对后再点一次「兑换」。";
+"This Compute Credits gift card is no longer available." = "这张算力点礼品卡已失效。";
+"With a redemption code, receive on this device what the other side gifted." = "凭兑换码，在本机领取对方赠送的礼品。";
+"🎁 [Compute Credits gift card] %1$lld · %2$@" = "🎁 [算力点礼品卡] %1$lld · %2$@";
+"🎁 [Compute Credits gift card] %lld" = "🎁 [算力点礼品卡] %lld";

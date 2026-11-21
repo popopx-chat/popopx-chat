@@ -207,7 +207,7 @@ struct PopopxGiftBadgeCardSheet: View {
     private func voucherRow(_ voucher: PopopxNodeVoucher) -> some View {
         HStack(spacing: PopopxMetrics.spaceS) {
             VStack(alignment: .leading, spacing: 0) {
-                Text(verbatim: PopopxGiftBadgeCardSheet.Copy.voucherTitle(voucher.period.days))
+                Text(verbatim: PopopxGiftBadgeCardSheet.Copy.voucherTitle(voucher.badgeDays))
                     .font(PopopxType.secondary)
                     .foregroundStyle(PopopxPalette.label)
                 Text(verbatim: PopopxCommerceFormat.date(voucher.mintedAtMs))
@@ -231,7 +231,7 @@ struct PopopxGiftBadgeCardSheet: View {
                 .frame(minHeight: PopopxMetrics.minHitTarget)
             }
             .disabled(busy != nil)
-            .accessibilityLabel(Text(verbatim: String(format: NSLocalizedString("%1$@ — %2$lld-day voucher", comment: "POPOPX gift badge sheet: generate button"), PopopxGiftBadgeCardSheet.Copy.generate, voucher.period.days)))
+            .accessibilityLabel(Text(verbatim: String(format: NSLocalizedString("%1$@ — %2$lld-day voucher", comment: "POPOPX gift badge sheet: generate button"), PopopxGiftBadgeCardSheet.Copy.generate, voucher.badgeDays)))
         }
         .padding(.vertical, PopopxMetrics.spaceXS)
     }
@@ -277,7 +277,7 @@ struct PopopxGiftBadgeCardSheet: View {
 
     private func reloadVouchers() async {
         let vault = PopopxP2PVoucherVault.shared
-        pendingVouchers = await vault.vouchers(state: .unused).filter { $0.period == period }
+        pendingVouchers = await vault.badgeVouchers(state: .unused).filter { $0.period == period }
     }
 
     private func mintWithCredits() async {
@@ -360,6 +360,12 @@ struct PopopxMintedGiftCard: Identifiable, Hashable {
 // // MARK: - Card face
 
 /// The presentation of one gift card: QR + grouped code + copy / share / (optionally) send in the conversation.
+///
+/// **One view serves both card families.** The face is the same object for a badge voucher and for a compute-credit voucher —
+/// one code, one QR, one set of exits — and the three places that genuinely differ (which mint function runs, which sentence titles the card,
+/// which payload a "send in this chat" signs) branch on `PopopxNodeVoucher.isCreditVoucher`, the same flag the vault filters its two lists by.
+/// Writing a second presenter would have meant two QR paths that can drift apart on rotation, error-correction level or the paste format,
+/// which are exactly the details nobody re-reads after the copy review.
 struct PopopxGiftCardPresenter: View {
     let card: PopopxMintedGiftCard
     let contactId: Int64?
@@ -370,9 +376,12 @@ struct PopopxGiftCardPresenter: View {
     @State private var busySending = false
     @State private var toast = PopopxToastModel()
 
+    /// The two families cannot be minted by the same call: `mintCode` signs a `period` into a `PPX1-` envelope, `mintCreditCode` an amount into `PPXC1-`.
+    /// Branching here rather than passing a flag down means a credit voucher can never be handed to the badge mint by forgetting an argument.
+    private var isCreditCard: Bool { card.voucher.isCreditVoucher }
+
     var body: some View {
-        PopopxSheetContainer(PopopxGiftCardPresenter.Copy.cardTitle(card.voucher.period.days),
-                             subtitle: PopopxGiftCardPresenter.Copy.subtitle(code != nil)) {
+        PopopxSheetContainer(cardTitle, subtitle: PopopxGiftCardPresenter.Copy.subtitle(code != nil)) {
             VStack(spacing: PopopxMetrics.spaceM) {
                 if let code {
                     cardFace(code: code)
@@ -402,6 +411,16 @@ struct PopopxGiftCardPresenter: View {
         }
         .popopxToast(toast)
         .task { await mint() }
+    }
+
+    /// The card face names the thing it holds, because the two families are named after different numbers: a badge says how long, a credit card says how much.
+    /// The optional **is** the family flag (`PopopxNodeVoucher.isCreditVoucher` is exactly `creditsAmount != nil`), so unwrapping here titles the card
+    /// from the same fact the vault filtered by — no `?? 0` fallback that could print a face value of zero.
+    private var cardTitle: String {
+        if let amount = card.voucher.creditsAmount {
+            return PopopxCommerceCopy.creditsGiftCardTitle(amount)
+        }
+        return PopopxGiftCardPresenter.Copy.cardTitle(card.voucher.badgeDays)
     }
 
     private func cardFace(code: String) -> some View {
@@ -447,7 +466,9 @@ struct PopopxGiftCardPresenter: View {
                 .foregroundStyle(PopopxPalette.label)
                 .textSelection(.enabled)
                 .fixedSize(horizontal: false, vertical: true)
-            Text(verbatim: PopopxGiftCardPresenter.Copy.codeFootnote)
+            Text(verbatim: isCreditCard
+                    ? PopopxCommerceCopy.creditsGiftCodeFootnote
+                    : PopopxGiftCardPresenter.Copy.codeFootnote)
                 .font(PopopxType.microTag)
                 .foregroundStyle(PopopxPalette.labelHint)
                 .fixedSize(horizontal: false, vertical: true)
@@ -484,7 +505,12 @@ struct PopopxGiftCardPresenter: View {
 
     private func mint() async {
         guard code == nil else { return }
-        let minted = await PopopxSilentSignalingRouter.shared.mintCode(for: card.voucher)
+        let router = PopopxSilentSignalingRouter.shared
+        // The family picks the mint, and each mint refuses a row of the other family on its own guard (`period` vs `creditsAmount`),
+        // so a wrong branch here yields "no code", never a code that redeems the wrong thing.
+        let minted = isCreditCard
+            ? await router.mintCreditCode(for: card.voucher)
+            : await router.mintCode(for: card.voucher)
         if let minted {
             code = minted
         } else {
@@ -503,14 +529,32 @@ struct PopopxGiftCardPresenter: View {
     private func sendToContact(_ contactId: Int64) async {
         busySending = true
         defer { busySending = false }
-        guard let payload = PopopxGiftCardPayload.make(voucherId: card.voucher.voucherId,
-                                                      period: card.voucher.period,
-                                                      note: card.note,
-                                                      mintedAtMs: card.voucher.mintedAtMs) else {
-            message = PopopxGiftCardPresenter.Copy.signFailed
-            return
+        // Each family signs its own value into its own payload: the credit one signs an amount, the badge one a period, and both makers
+        // refuse a row that does not carry theirs. The unwrap is the lock, not a nicety — it is what keeps a compute-credit card from
+        // ever being sent as a badge card, the same lock `mintCode`/`mintCreditCode` apply at the code side.
+        let delivered: Bool
+        if isCreditCard {
+            guard let creditsAmount = card.voucher.creditsAmount,
+                  let payload = PopopxCreditGiftPayload.make(voucherId: card.voucher.voucherId,
+                                                             creditsAmount: creditsAmount,
+                                                             note: card.note,
+                                                             mintedAtMs: card.voucher.mintedAtMs) else {
+                message = PopopxGiftCardPresenter.Copy.signFailed
+                return
+            }
+            delivered = await PopopxSilentSignalingRouter.shared.sendCreditGiftCard(payload, note: card.note, contactId: contactId)
+        } else {
+            guard let period = card.voucher.period,
+                  let payload = PopopxGiftCardPayload.make(voucherId: card.voucher.voucherId,
+                                                           period: period,
+                                                           note: card.note,
+                                                           mintedAtMs: card.voucher.mintedAtMs) else {
+                message = PopopxGiftCardPresenter.Copy.signFailed
+                return
+            }
+            delivered = await PopopxSilentSignalingRouter.shared.sendGiftCard(payload, note: card.note, contactId: contactId)
         }
-        if await PopopxSilentSignalingRouter.shared.sendGiftCard(payload, note: card.note, contactId: contactId) {
+        if delivered {
             toast.show(PopopxGiftCardPresenter.Copy.sent, kind: .encrypted)
             dismiss()
         } else {

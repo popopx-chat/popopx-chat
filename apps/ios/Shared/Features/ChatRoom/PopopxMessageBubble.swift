@@ -198,7 +198,7 @@ enum PopopxBubbleBody: Hashable {
     /// The **index payload** of an encrypted profile. Same family as `.location`/`.secure`: this tier carries a structured manifest rather than
     /// body text, rendered as a clickable business-card view (`ProfileCardBubbleView`). The image/text originals are ordinary attachment rows and do not enter this tier.
     case profile(PopopxProfilePayload)
-    /// A message of the compute-points ecosystem: a badge gift card or a red packet. The mount point uses `PopopxCommerceContent.detect(in:)`
+    /// A message of the compute-points ecosystem: a badge gift card, a credit gift card, a red packet or a channel gate card. The mount point uses `PopopxCommerceContent.detect(in:)`
     /// to judge once from the same body text; if it detects nothing it stays `.text` — this tier carries no local state,
     /// the card reads from the keychain ledger itself, so `PopopxBubbleBody` remains `Hashable` and comparable.
     case commerce(PopopxCommerceContent)
@@ -451,10 +451,12 @@ struct PopopxMessageBubble: View {
                                   channel: item.channel,
                                   createdAt: item.createdAt)
         case let .commerce(content):
-            // Same family: these two cards carry their own surfaces and do not consume `ink` (the opening section of `PopopxCommerceCards.swift` says why).
+            // Same family: these cards carry their own surfaces and do not consume `ink` (the opening section of `PopopxCommerceCards.swift` says why).
             switch content {
             case let .gift(payload):
                 PopopxGiftCardBubble(payload: payload, context: commerceContext)
+            case let .creditGift(payload):
+                PopopxCreditGiftBubble(payload: payload, context: commerceContext)
             case let .packet(payload):
                 PopopxRedPacketBubble(payload: payload, context: commerceContext)
             case let .channel(payload):
@@ -463,7 +465,7 @@ struct PopopxMessageBubble: View {
         }
     }
 
-    /// Fallback when the mount point gives no landing target: `target` and `chatId` both stay empty, so the three cards stop in the read-only slot.
+    /// Fallback when the mount point gives no landing target: `target` and `chatId` both stay empty, so the four cards stop in the read-only slot.
     /// Better one clickable button fewer than using a guessed chatId to reply a signal into another conversation or sign a credential there.
     private var commerceContext: PopopxCommerceCardContext {
         item.commerceContext ?? PopopxCommerceCardContext(target: nil, incoming: item.side == .received)

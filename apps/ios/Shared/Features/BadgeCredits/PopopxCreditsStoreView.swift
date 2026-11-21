@@ -1,6 +1,6 @@
 //  PopopxCreditsStoreView.swift
 //
-//  [Phase 6 · 1] Compute Credits hub: balance, cash-pack top-up, uses table, ledger.
+//  [Phase 6 · 1] Compute Credits hub: balance, cash-pack top-up, uses table, ledger — plus the gift-card segment (buy / mint / hold).
 //
 //  ### This page has exactly one product: POPOPX compute credits themselves (real-device round 8 · task 3)
 //  On screen are four things — **balance**, **the three cash-pack tiers 100 / 500 / 2000**, **where credits can be spent**, **the ledger**.
@@ -10,6 +10,17 @@
 //  The only "badge-related" thing this page keeps is the **spend an existing balance** path (the first row of the uses table and the footer's
 //  `light up a badge with compute credits`, both open `PopopxBadgeCreditExchangeSheet`): it is the exit for that family of spending scenarios on this page,
 //  not a card that sells badges — it takes no money, it only spends credits the user has already paid for once.
+//
+//  ### Two segments, still one product
+//  `PopopxCreditsStoreTab` splits the page by **who receives the credits**, not by product: `Recharge` puts them on this device,
+//  `Gift Credits` cuts the same three denominations into transferable cards. The tiers, the face values and the list prices are the same
+//  table on both sides (`PopopxCreditPlan.packs` / `.giftPacks`), so the "one page, one product" rule above is untouched — what moved is the
+//  sentence that says where the money goes, which is precisely the sentence that must never be shared between the two halves.
+//  The gift half is kept off the badge paywall for the same reason the cash packs were: the paywall page owns badge time, this page owns credits.
+//  The two halves differ in their witness of "did my purchase land": a top-up is verified by the balance moving, a gift card by a new row
+//  in `PopopxP2PVoucherVault` (its money never touches the balance), so each has its own `buy` and they are not interchangeable.
+//  The footer carries the code door (`enter a code or scan`) permanently, outside the segments: a code in hand does not care which half
+//  of the page was on screen, and the same door has always sat in the paywall footer with the same word on it.
 //
 //  ### Why top-up hangs on this page rather than one level up
 //  It has two doors in: the "Me · compute credits wallet" row, and the paywall footer's `creditsName` button.
@@ -46,7 +57,7 @@
 //  An already-unlocked row is no longer a button: pressing it again only yields "you already own this", the most useless feedback in that family.
 //
 //  ### Ledger rows only read the note that was stored in
-//  `PopopxCreditsEntry.note` is the Chinese sentence written at the moment of the debit/credit (`PopopxCreditsCopy`),
+//  `PopopxCreditsEntry.note` is the localised sentence written at the moment of the debit/credit (`PopopxCreditsCopy`),
 //  so this page needs no second "category → copy" mapping; `kind.sign` gives the direction, `kind.isIncome` the colour,
 //  and both are defined in that one place only.
 //
@@ -56,6 +67,12 @@ import SwiftUI
 import POPOPXChat
 
 struct PopopxCreditsStoreView: View {
+    /// Set when the page is opened **from a conversation** (the "+" panel's `creditsGiftCard` cell). It changes exactly two things:
+    /// the page opens on the gift segment rather than the recharge one, and the card face grown from the wallet list draws its
+    /// "send in this conversation" button. Nothing else here reads it — the balance, the ledger and the price tables belong to this device
+    /// no matter who opened the page, and a chat must not be able to change what a top-up costs.
+    var contactId: Int64? = nil
+
     @Environment(\.dismiss) private var dismiss
 
     @State private var credits = PopopxCreditsManager.shared
@@ -64,14 +81,36 @@ struct PopopxCreditsStoreView: View {
     /// so neither the "whole page blank" nor the "pressed and nothing happened" failure reaches the user (same standard as the paywall).
     @State private var store = PopopxStoreKitManager.shared
     @State private var showsExchange = false
+    /// The permanent "I have a code" door. It sits in the footer rather than inside a segment because a code in hand does not
+    /// care which half of the page the user was reading, and because the badge paywall's footer has always had this same door —
+    /// two pages, one word for it (`paywallRedeemEntry`), so the review sees one entry pattern instead of two.
+    @State private var showsRedeem = false
     /// The cash pack currently going through StoreKit. Only one at a time is allowed, otherwise the arrival order of two cannot be explained to the user.
     @State private var busySkuId: String?
+    /// Which half of the page is on screen: buying credits for this device, or buying a gift card for somebody else.
+    @State private var tab: PopopxCreditsStoreTab = .recharge
+    /// Unused credit gift cards held in this device's vault. Read from `PopopxP2PVoucherVault`, which is the only place that knows
+    /// whether a card still exists — a locally cached "count" would be a second source of truth for a thing the user can spend elsewhere.
+    @State private var giftCards: [PopopxNodeVoucher] = []
+    /// How many gift cards to mint in the pay-with-credits path. Capped by the badge page's same `quantityCap`, so one number governs both families.
+    @State private var giftQuantity = 1
+    @State private var exchanging = false
+    /// A card whose face is open: the code, the QR, copy / share. `PopopxGiftCardPresenter` is the badge page's own card face and serves
+    /// both families, so this page presents the very same view rather than a second QR path that could drift.
+    @State private var openCard: PopopxMintedGiftCard?
     /// The cosmetic tier awaiting confirmation. The dialog's visibility derives from it (the Binding below), so there is no
     /// "dialog still open but nobody is being confirmed" intermediate frame — same shape as the profile-card unlock elsewhere.
     @State private var pendingCosmetic: PopopxCosmetic?
     /// The result of the last credit action (top-up or cosmetic unlock), one sentence only. It is not called a "toast" and it does not auto-dismiss: this page is a ledger page,
     /// the user needs to see "those 150 credits really were booked" and "the 500 credits just bought really did arrive", and a sentence that removes itself equals no sentence at all.
     @State private var spendNote: String?
+
+    /// The explicit init exists for one line of behaviour: coming in from a conversation, the segment the user lands on is the one they came for.
+    /// `@State` stays the right storage for it — the page owns the choice afterwards, and tapping back to `Recharge` mid-gift is legitimate.
+    init(contactId: Int64? = nil) {
+        self.contactId = contactId
+        _tab = State(initialValue: contactId == nil ? .recharge : .gift)
+    }
 
     var body: some View {
         PopopxSheetContainer(Copy.title, subtitle: PopopxCommerceCopy.nodeClusterTerm) {
@@ -80,6 +119,12 @@ struct PopopxCreditsStoreView: View {
             footer
         }
         .sheet(isPresented: $showsExchange) { PopopxBadgeCreditExchangeSheet() }
+        .sheet(isPresented: $showsRedeem) { PopopxVoucherRedeemSheet() }
+        .sheet(item: $openCard) { minted in
+            // The badge page's own card face, unchanged. `contactId` is nil whenever this page was opened from "Me", and the presenter
+            // draws no "send in this conversation" button in that case — the copy / share exits stay, so nothing depends on the chat.
+            PopopxGiftCardPresenter(card: minted, contactId: contactId)
+        }
         .alert(Copy.unlockTitle, isPresented: unlockPrompt) {
             if let cosmetic = pendingCosmetic {
                 Button(Copy.unlockConfirm(cosmetic)) { purchase(cosmetic) }
@@ -93,6 +138,7 @@ struct PopopxCreditsStoreView: View {
         .task {
             credits.loadIfNeeded()
             await store.loadProducts()
+            await loadGiftCards()
         }
     }
 
@@ -105,34 +151,38 @@ struct PopopxCreditsStoreView: View {
                     reconcileNote
                 }
 
-                topUpCard
+                PopopxSegmentedControl(
+                    PopopxCreditsStoreTab.allCases.map { .init(selection: $0, title: $0.label) },
+                    title: { $0.label },
+                    selection: $tab
+                )
 
-                usesCard
+                #if DEBUG
+                if showsSandboxStrip {
+                    sandboxStrip()
+                }
+                #endif
+
+                if tab == .recharge {
+                    topUpCard
+
+                    usesCard
+                } else {
+                    giftBuyCard
+
+                    giftExchangeCard
+
+                    giftWalletCard
+                }
 
                 if let spendNote {
                     spendLine(spendNote)
                 }
 
-                pendingCard
+                if tab == .recharge {
+                    pendingCard
 
-                PopopxSectionCard(Copy.ledgerTitle, footnote: Copy.ledgerFootnote) {
-                    VStack(spacing: 0) {
-                        let entries = credits.recentEntries
-                        if entries.isEmpty {
-                            Text(verbatim: Copy.ledgerEmpty)
-                                .font(PopopxType.caption)
-                                .foregroundStyle(PopopxPalette.labelHint)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.vertical, PopopxMetrics.spaceS)
-                        } else {
-                            ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
-                                ledgerRow(entry)
-                                if index < entries.count - 1 {
-                                    Divider().overlay(PopopxPalette.separator)
-                                }
-                            }
-                        }
-                    }
+                    ledgerCard
                 }
             }
             .padding(.horizontal, PopopxMetrics.gutter)
@@ -238,12 +288,15 @@ struct PopopxCreditsStoreView: View {
     /// Why this foreground transaction has to call it directly here: `PopopxStoreKitManager.purchase(_:)` has already recorded the transaction id into
     /// the "already settled this session" set, so the later `Transaction.updates` delivery is blocked by dedup — not booking here
     /// leaves the user seeing "money paid, balance unchanged, nothing at all", and one level down there is no second party who will come and make it up.
-    private func buy(_ pack: PopopxCreditPack) async {
+    private func buy(_ pack: PopopxCreditPack, simulated: Bool = false) async {
         guard busySkuId == nil else { return }
         busySkuId = pack.sku.productId
         defer { busySkuId = nil }
         let before = credits.balance
-        switch await store.purchase(pack.sku) {
+        // The two purchases differ only in who answers: StoreKit itself, or this module's simulated ledger. Everything after the
+        // result — booking, verifying, phrasing — is deliberately the same code, so a sandbox walk cannot pass on a path the real one lacks.
+        let result = simulated ? await store.purchaseSimulated(pack.sku) : await store.purchase(pack.sku)
+        switch result {
         case let .success(.purchased(receipt)):
             await credits.apply(storeReceipt: receipt)
             if credits.balance != before {
@@ -267,6 +320,357 @@ struct PopopxCreditsStoreView: View {
             spendNote = error.errorDescription ?? PopopxCommerceCopy.errorStoreUnavailable
         }
     }
+
+    // // MARK: Gift segment · buying a credit gift card with Apple
+
+    /// The three gift-card tiers. Same face values and the same list prices as the top-up tiers above — only the receiver differs,
+    /// and the row says so in its footnote: **nothing lands on this balance**. That sentence is the whole reason this segment exists
+    /// separately from `topUpCard`; a tier table that silently credits someone else would be the most expensive misreading on this page.
+    /// Booking goes through the same `PopopxCreditsManager.apply(storeReceipt:)` entry, which for a `.creditGiftCard` receipt mints
+    /// exactly one voucher into the vault instead of adding to the balance — the two outcomes are chosen by the SKU's own `kind`,
+    /// so this page cannot turn a gift into a top-up by forgetting an argument.
+    private var giftBuyCard: some View {
+        PopopxSectionCard(PopopxCommerceCopy.creditsGiftAction,
+                          footnote: PopopxCommerceCopy.creditsGiftPackFootnote) {
+            VStack(spacing: 0) {
+                if !store.isStoreReady {
+                    Text(PopopxCommerceCopy.errorStoreUnavailable)
+                        .font(PopopxType.caption)
+                        .foregroundStyle(PopopxPalette.labelSecondary)
+                        .padding(.bottom, PopopxMetrics.spaceXS)
+                }
+                ForEach(Array(PopopxCreditPlan.giftPacks.enumerated()), id: \.element.id) { index, pack in
+                    if index > 0 { divider }
+                    giftPackRow(pack)
+                }
+            }
+        }
+    }
+
+    /// A gift row carries the price in the title column and the action word in the button, which is the opposite of a top-up row:
+    /// there, the button *is* the price. A gift is not "spend X to get X" for the person tapping it, so the button has to say who it is for.
+    private func giftPackRow(_ pack: PopopxCreditPack) -> some View {
+        HStack(spacing: PopopxMetrics.spaceS) {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(verbatim: pack.title)
+                    .font(PopopxType.emphasis)
+                    .foregroundStyle(PopopxPalette.label)
+                Text(verbatim: store.priceText(for: pack.sku, periodSuffix: false))
+                    .font(PopopxType.microTag)
+                    .foregroundStyle(PopopxPalette.labelHint)
+            }
+            Spacer(minLength: PopopxMetrics.spaceS)
+            Button {
+                Task { await buyGift(pack) }
+            } label: {
+                HStack(spacing: PopopxMetrics.space2XS) {
+                    if busySkuId == pack.sku.productId {
+                        ProgressView()
+                    } else {
+                        Text(verbatim: PopopxCommerceCopy.creditsGiftAction)
+                        Image(systemName: "chevron.right")
+                    }
+                }
+                .font(PopopxType.secondary)
+                .foregroundStyle(PopopxPalette.brand)
+                .frame(minHeight: PopopxMetrics.minHitTarget)
+            }
+            .disabled(!store.isStoreReady || busySkuId != nil)
+            .opacity(store.isStoreReady ? 1 : 0.5)
+            .accessibilityLabel(Text(verbatim: pack.title))
+            .accessibilityValue(Text(verbatim: store.priceText(for: pack.sku, periodSuffix: false)))
+        }
+        .padding(.vertical, PopopxMetrics.spaceXS)
+    }
+
+    /// Buy one gift-card tier. **The verification is not the top-up's**: the balance does not move here, so `credits.balance != before`
+    /// would answer "not created" for every successful purchase. The card count in the vault is the only honest witness of this transaction.
+    /// Same book-first rule as `buy(_:)` above, and the same reason: `purchase(_:)` already marked this id as settled for the session,
+    /// so the background `Transaction.updates` leg will not come, and if nothing happens here the payment has no second party to make it up.
+    private func buyGift(_ pack: PopopxCreditPack, simulated: Bool = false) async {
+        guard busySkuId == nil else { return }
+        busySkuId = pack.sku.productId
+        defer { busySkuId = nil }
+        let before = giftCards.count
+        let result = simulated ? await store.purchaseSimulated(pack.sku) : await store.purchase(pack.sku)
+        switch result {
+        case let .success(.purchased(receipt)):
+            await credits.apply(storeReceipt: receipt)
+            await loadGiftCards()
+            if giftCards.count > before {
+                PopopxHaptics.notice(.success)
+                spendNote = PopopxCommerceCopy.creditsGiftCreated(pack.amount)
+            } else {
+                // Paid, and no card in the vault. The transaction was not finished, so `Transaction.unfinished` will mint it next launch.
+                PopopxHaptics.notice(.error)
+                spendNote = PopopxCommerceCopy.creditsGiftNotCreated
+            }
+        case .success(.pending):
+            spendNote = PopopxCommerceCopy.creditsGiftPending
+        case .success(.cancelled):
+            break
+        case let .failure(error):
+            PopopxHaptics.notice(.error)
+            spendNote = error.errorDescription ?? PopopxCommerceCopy.errorStoreUnavailable
+        }
+    }
+
+    // // MARK: Gift segment · minting a card from the balance
+
+    /// The credit twin of the badge gift sheet's "two sources, one wallet": a card can be bought with Apple **or** cut from credits
+    /// already paid for. Without this section `exchangeCreditsForCreditVoucher` has no caller at all, and with it the user who already
+    /// holds 2,000 credits does not have to pay Apple a second time to hand part of them to somebody else.
+    /// The three denominations are drawn from `PopopxCreditPlan.giftPacks`, which is the same table the Apple rows above use, so a
+    /// card's face value cannot be anything that is not also purchasable — there is no free-typed amount anywhere in this family.
+    private var giftExchangeCard: some View {
+        PopopxSectionCard(PopopxCommerceCopy.creditsGiftFromBalanceTitle,
+                          footnote: PopopxCommerceCopy.noGiftBackStatement) {
+            VStack(spacing: 0) {
+                HStack(spacing: PopopxMetrics.spaceS) {
+                    Text(PopopxGiftBadgeCardSheet.Copy.quantityTitle)
+                        .font(PopopxType.secondary)
+                        .foregroundStyle(PopopxPalette.label)
+                    Spacer()
+                    Stepper(value: $giftQuantity, in: 1...PopopxGiftBadgeCardSheet.quantityCap) {
+                        Text(verbatim: "\(giftQuantity)")
+                            .font(PopopxType.metric)
+                            .foregroundStyle(PopopxPalette.label)
+                            .frame(minWidth: PopopxMetrics.spaceL, alignment: .trailing)
+                    }
+                    .labelsHidden()
+                    .accessibilityLabel(PopopxGiftBadgeCardSheet.Copy.quantityTitle)
+                }
+                .padding(.vertical, PopopxMetrics.spaceXS)
+                Divider().overlay(PopopxPalette.separator)
+                ForEach(Array(PopopxCreditPlan.giftPacks.enumerated()), id: \.element.id) { index, pack in
+                    if index > 0 { divider }
+                    giftExchangeRow(pack)
+                }
+            }
+        }
+    }
+
+    private func giftExchangeRow(_ pack: PopopxCreditPack) -> some View {
+        let cost = pack.amount * giftQuantity
+        return HStack(spacing: PopopxMetrics.spaceS) {
+            Text(verbatim: pack.title)
+                .font(PopopxType.emphasis)
+                .foregroundStyle(PopopxPalette.label)
+            Spacer(minLength: PopopxMetrics.spaceS)
+            Button {
+                Task { await exchange(pack) }
+            } label: {
+                HStack(spacing: PopopxMetrics.space2XS) {
+                    if exchanging {
+                        ProgressView()
+                    } else {
+                        Text(verbatim: PopopxCommerceCopy.creditsGiftFromBalance(giftQuantity, pack.amount, cost))
+                        Image(systemName: "chevron.right")
+                    }
+                }
+                .font(PopopxType.secondary)
+                .foregroundStyle(PopopxPalette.brand)
+                .multilineTextAlignment(.trailing)
+                .frame(minHeight: PopopxMetrics.minHitTarget)
+            }
+            // Refusing by disabling, not by an error sentence: the shortfall is already readable in the balance line above,
+            // and a button that only ever answers "not enough credits" is the same anti-pattern as the already-owned cosmetic row.
+            .disabled(credits.balance < cost || exchanging)
+            .opacity(credits.balance < cost ? 0.5 : 1)
+            .accessibilityLabel(Text(verbatim: pack.title))
+            .accessibilityValue(Text(verbatim: PopopxCommerceCopy.creditsGiftFromBalance(giftQuantity, pack.amount, cost)))
+        }
+        .padding(.vertical, PopopxMetrics.spaceXS)
+    }
+
+    /// Cut gift cards out of the balance. The debit, the refund-on-failed-mint and the ledger row all live in
+    /// `PopopxCreditsManager.exchangeCreditsForCreditVoucher(pack:quantity:)`; this page only reloads the vault list afterwards.
+    /// A thrown error is passed on as its own sentence — `insufficientCredits` already carries both numbers, so nothing is appended here.
+    private func exchange(_ pack: PopopxCreditPack) async {
+        guard exchanging == false else { return }
+        exchanging = true
+        defer { exchanging = false }
+        let before = giftCards.count
+        do {
+            _ = try await credits.exchangeCreditsForCreditVoucher(pack: pack, quantity: giftQuantity)
+            await loadGiftCards()
+            if giftCards.count > before {
+                PopopxHaptics.notice(.success)
+                spendNote = PopopxCommerceCopy.creditsGiftFromBalanceCreated(giftQuantity, pack.amount)
+            } else {
+                // The balance moved and no card appeared. Same class of incident as `creditsGiftNotCreated`, and it must be said out loud.
+                PopopxHaptics.notice(.error)
+                spendNote = PopopxCommerceCopy.creditsGiftFromBalanceNotCreated
+            }
+        } catch {
+            PopopxHaptics.notice(.error)
+            spendNote = error.localizedDescription
+        }
+    }
+
+    // // MARK: Gift segment · the cards this device holds
+
+    /// Unused credit gift cards. This list is the vault's, not a copy: `creditVouchers(state:)` filters by the family flag, so a badge
+    /// voucher can never appear here and a credit card never appears in the badge page's list.
+    /// A card is spent (its code minted) only when the user opens it, and minting is idempotent — reopening the same card yields the same
+    /// code, so a second look costs nothing and cannot hand out a second voucher.
+    private var giftWalletCard: some View {
+        PopopxSectionCard(PopopxCommerceCopy.creditsGiftWalletTitle) {
+            VStack(spacing: 0) {
+                if giftCards.isEmpty {
+                    Text(verbatim: PopopxCommerceCopy.creditsGiftWalletEmpty)
+                        .font(PopopxType.caption)
+                        .foregroundStyle(PopopxPalette.labelHint)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, PopopxMetrics.spaceS)
+                } else {
+                    ForEach(Array(giftCards.enumerated()), id: \.element.voucherId) { index, voucher in
+                        if index > 0 { divider }
+                        giftWalletRow(voucher)
+                    }
+                }
+            }
+        }
+    }
+
+    private func giftWalletRow(_ voucher: PopopxNodeVoucher) -> some View {
+        HStack(spacing: PopopxMetrics.spaceS) {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(verbatim: PopopxCommerceCopy.creditsGiftCardTitle(voucher.creditFaceValue))
+                    .font(PopopxType.secondary)
+                    .foregroundStyle(PopopxPalette.label)
+                Text(verbatim: PopopxCommerceFormat.date(voucher.mintedAtMs))
+                    .font(PopopxType.microTag)
+                    .foregroundStyle(PopopxPalette.labelHint)
+            }
+            Spacer(minLength: PopopxMetrics.spaceS)
+            Button {
+                openCard = PopopxMintedGiftCard(voucher: voucher, note: "")
+            } label: {
+                HStack(spacing: PopopxMetrics.space2XS) {
+                    Text(verbatim: PopopxGiftBadgeCardSheet.Copy.generate)
+                    Image(systemName: "chevron.right")
+                }
+                .font(PopopxType.secondary)
+                .foregroundStyle(PopopxPalette.brand)
+                .frame(minHeight: PopopxMetrics.minHitTarget)
+            }
+            .accessibilityLabel(Text(verbatim: PopopxGiftBadgeCardSheet.Copy.generate))
+            .accessibilityValue(Text(verbatim: PopopxCommerceCopy.creditsGiftCardTitle(voucher.creditsAmount ?? 0)))
+        }
+        .padding(.vertical, PopopxMetrics.spaceXS)
+    }
+
+    private func loadGiftCards() async {
+        giftCards = await PopopxP2PVoucherVault.shared.creditVouchers(state: .unused)
+    }
+
+    // // MARK: Sandbox purchase (only Debug builds compile this whole section)
+
+    #if DEBUG
+    /// Why a credits page needs the paywall's sandbox leg too: the `.storekit` configuration is injected only by Xcode's scheme, so a Debug
+    /// build installed with `devicectl` receives no products, `isStoreReady` stays false, and every button on this page is disabled.
+    /// On the top-up half that only means "cannot buy here"; on the gift half it means the whole family is unwalkable — a card that cannot be
+    /// purchased never reaches the vault, never grows a code face, and therefore can never be sent into a chat or redeemed.
+    ///
+    /// It is its own strip rather than a second button inside each tier row, so the production rows stay byte-for-byte the reviewed ones:
+    /// debug screenshots circulate as review evidence, and a solid capsule that reads like the purchase button would be a commercial incident.
+    private var showsSandboxStrip: Bool {
+        sandboxOffers().contains { store.isMissingFromStore($0.pack.sku) }
+    }
+
+    /// Both halves of the page, tagged with the outcome path each offer must verify: a top-up is witnessed by the balance moving,
+    /// a gift card by a new vault row. Asking the store for the same product through the wrong witness is how a sandbox walk reports
+    /// "not created" for a purchase that worked.
+    private func sandboxOffers() -> [SandboxOffer] {
+        PopopxCreditPlan.packs.map { SandboxOffer(pack: $0, gift: false) }
+            + PopopxCreditPlan.giftPacks.map { SandboxOffer(pack: $0, gift: true) }
+    }
+
+    private func sandboxStrip() -> some View {
+        let offers = sandboxOffers().filter { store.isMissingFromStore($0.pack.sku) }
+        return VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
+            HStack(alignment: .top, spacing: PopopxMetrics.spaceXS) {
+                Image(systemName: "hammer.fill")
+                    .font(PopopxType.secondary)
+                    .foregroundStyle(PopopxPalette.meshInk)
+                Text(PopopxCommerceCopy.sandboxPaywallNote)
+                    .font(PopopxType.caption)
+                    .foregroundStyle(PopopxPalette.labelSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            // Verbatim troubleshooting line, no catalogue, selectable: pasting "3/12 loaded · missing: …" into a ticket beats restating "temporarily unavailable".
+            Text(verbatim: storeDiagnostics)
+                .font(PopopxType.metricSmall)
+                .foregroundStyle(PopopxPalette.labelHint)
+                .textSelection(.enabled)
+                .accessibilityHidden(true)
+            ForEach(offers) { offer in
+                sandboxRow(offer)
+            }
+        }
+        .padding(PopopxMetrics.spaceS)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(PopopxPalette.card, in: .rect(cornerRadius: PopopxMetrics.radiusControl))
+        .overlay {
+            RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl)
+                .strokeBorder(PopopxPalette.meshInk.opacity(0.55), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
+        }
+    }
+
+    private var storeDiagnostics: String {
+        if let error = store.lastLoadError { return "load error: \(error)" }
+        var line = "\(store.products.count)/\(PopopxNodeBadgeSku.productIds.count) loaded"
+        let missing = store.missingProductIDs
+        if !missing.isEmpty { line += " · missing: \(missing.joined(separator: ", "))" }
+        return line
+    }
+
+    private func sandboxRow(_ offer: SandboxOffer) -> some View {
+        Button {
+            Task {
+                // Which leg runs is a branch, not a ternary over two `await`s: the two outcomes are verified by different witnesses,
+                // and the difference must stay visible to whoever reads this in a year.
+                if offer.gift {
+                    await buyGift(offer.pack, simulated: true)
+                } else {
+                    await buy(offer.pack, simulated: true)
+                }
+            }
+        } label: {
+            HStack(spacing: PopopxMetrics.spaceS) {
+                Image(systemName: "hammer.fill")
+                Text(verbatim: "\(PopopxCommerceCopy.sandboxPurchaseAction) · \(offer.pack.title)")
+                Spacer(minLength: PopopxMetrics.spaceS)
+                if busySkuId == offer.pack.sku.productId {
+                    ProgressView().controlSize(.small)
+                }
+            }
+            .font(PopopxType.microTag)
+            .foregroundStyle(PopopxPalette.onBrand)
+            .padding(.horizontal, PopopxMetrics.spaceS)
+            .frame(height: PopopxMetrics.minHitTarget)
+            .frame(maxWidth: .infinity)
+            .overlay {
+                RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl)
+                    .strokeBorder(PopopxPalette.onBrand.opacity(0.55), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
+            }
+            .contentShape(.rect(cornerRadius: PopopxMetrics.radiusControl))
+        }
+        .buttonStyle(.plain)
+        .disabled(busySkuId != nil)
+        .accessibilityLabel(Text(verbatim: "\(PopopxCommerceCopy.sandboxPurchaseAction) \(offer.pack.title)"))
+        .accessibilityIdentifier("popopx.credits.sandbox.\(offer.pack.sku.rawValue)")
+    }
+
+    /// Which witness a simulated purchase has to check afterwards. `gift` is not inferred from the SKU at the call site because both halves
+    /// of the page can offer the same face value; it travels with the offer that produced the row.
+    private struct SandboxOffer: Identifiable {
+        let pack: PopopxCreditPack
+        let gift: Bool
+        var id: String { pack.id }
+    }
+    #endif
 
     // // MARK: Uses table
 
@@ -411,6 +815,31 @@ struct PopopxCreditsStoreView: View {
 
     // // MARK: Ledger
 
+    /// The ledger stays on the recharge segment only. A gift-card purchase does not move this device's balance, and the rows it does
+    /// write (`.creditGiftSent`) describe a deduction from a wallet the gift segment is not about — reading them next to the gift tiers
+    /// invites exactly the "did I just pay twice?" question the two-segment split exists to remove.
+    private var ledgerCard: some View {
+        PopopxSectionCard(Copy.ledgerTitle, footnote: Copy.ledgerFootnote) {
+            VStack(spacing: 0) {
+                let entries = credits.recentEntries
+                if entries.isEmpty {
+                    Text(verbatim: Copy.ledgerEmpty)
+                        .font(PopopxType.caption)
+                        .foregroundStyle(PopopxPalette.labelHint)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, PopopxMetrics.spaceS)
+                } else {
+                    ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
+                        ledgerRow(entry)
+                        if index < entries.count - 1 {
+                            Divider().overlay(PopopxPalette.separator)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private func ledgerRow(_ entry: PopopxCreditsEntry) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.spaceS) {
             VStack(alignment: .leading, spacing: 0) {
@@ -449,10 +878,37 @@ struct PopopxCreditsStoreView: View {
 
     private var footer: some View {
         VStack(spacing: PopopxMetrics.spaceXS) {
-            PopopxButton(Copy.exchange, systemImage: "sparkles", role: .secondary) {
-                showsExchange = true
+            HStack(spacing: PopopxMetrics.spaceS) {
+                // The code door, and it is outside the segments: whoever is holding a `PPXC1-` string should not have to know
+                // which half of this page sells the thing it redeems into. Same word as the paywall's footer button.
+                PopopxButton(PopopxCommerceCopy.paywallRedeemEntry, systemImage: "qrcode.viewfinder",
+                             role: .secondary, fullWidth: true) {
+                    showsRedeem = true
+                }
+                PopopxButton(Copy.exchange, systemImage: "sparkles", role: .secondary, fullWidth: true) {
+                    showsExchange = true
+                }
             }
             PopopxButton(Copy.close, role: .ghost) { dismiss() }
+        }
+    }
+}
+
+// // MARK: - Segments
+
+/// The two halves of the compute-credits page. `PopopxPaywallTab`'s twin, and the split is by **who receives the value**, which is the
+/// only distinction a user can act on here: the tiers, the prices and the face values are identical on both sides.
+///
+/// The labels are deliberately short — `PopopxSegmentedControl` puts the pills on one line, and a long product name in a pill gets
+/// truncated or squeezes its neighbour (the round-10 top-bar lesson). The full product name stays in the page title and the card headers.
+enum PopopxCreditsStoreTab: String, CaseIterable, Hashable {
+    case recharge
+    case gift
+
+    var label: String {
+        switch self {
+        case .recharge: PopopxCommerceCopy.creditsRechargeTab
+        case .gift: PopopxCommerceCopy.creditsGiftTab
         }
     }
 }

@@ -2,6 +2,11 @@
 " (can be copied)" = " (kan gekopieerd worden)";
 
 /* No comment provided by engineer. */
+"A gift card adds nothing to your own balance. The credits belong to the device that redeems the code." = "Een cadeaubon voegt niets toe aan je eigen saldo. De punten behoren tot het apparaat dat de code inwisselt.";
+"Credits gift card" = "Cadeaubon met rekenpunten";
+"No gift cards yet. Buy one above, or create one from the credits you already have." = "Nog geen cadeaubons. Koop er hierboven een, of maak er een aan van de punten die je al hebt.";
+"Paste this whole string where the app asks for a redemption code: the grouping is only for readability and spaces make no difference, but it is case-sensitive — paste or scan it, do not retype it character by character." = "Plak deze hele tekenreeks waar de app om een inwisselcode vraagt: de groepering is alleen voor de leesbaarheid en spaties maken niets uit, maar het is hoofdlettergevoelig — plak of scan, typ niet elk teken over.";
+"Your balance was reduced, but this device could not create the gift cards yet. They appear the next time the secure store can be written." = "Je saldo is verlaagd, maar dit apparaat kon de cadeaubons nog niet aanmaken. Ze verschijnen zodra de beveiligde opslag weer beschreven kan worden.";
 "_italic_" = "\\_cursief_";
 
 /* No comment provided by engineer. */
@@ -7631,7 +7636,6 @@ server test failure */
 "A free channel needs no credits and leaves no ledger entries — just open it." = "Een gratis kanaal heeft geen punten nodig en laat geen boekhoudregels achter — gewoon openen.";
 "A group has no profile on any server: it exists only on its members' devices. Set the name and the avatar first, then decide who to invite." = "Een groep heeft op geen enkele server een profiel: de groep bestaat alleen op de apparaten van de leden. Stel eerst de naam en de avatar in en kies dan wie je uitnodigt.";
 "A location message cannot be added while the draft is being rewritten, forwarded, recorded as a live message or already has an attachment." = "Een locatiebericht kan niet worden toegevoegd terwijl het concept wordt herschreven, wordt doorgestuurd, als livebericht wordt opgenomen of al een bijlage heeft.";
-"A long string that starts with PPX1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails." = "Een lange tekenreeks die begint met PPX1-. Plak deze, type hem niet met de hand over: hij is hoofdlettergevoelig en één fout teken laat de verificatie mislukken.";
 "A mesh pairing request from a device in the same room appears here." = "Een mesh-koppelingsverzoek van een apparaat in dezelfde ruimte verschijnt hier.";
 "A new random profile card joins the group, and the usual profile card of this device does not appear in the member list." = "Een nieuwe willekeurige profielkaart komt in de groep, en de gewone profielkaart van dit apparaat verschijnt niet in de ledenlijst.";
 "A profile page is already open — close it first" = "Er is al een profielpagina geopend — sluit die eerst";
@@ -8159,13 +8163,11 @@ server test failure */
 "Offline messages go over the Bluetooth mesh relay, up to 7 hops." = "Offline berichten gaan via de Bluetooth Mesh-relais, tot 7 hops.";
 "Offline: POPOPX Bluetooth mesh" = "Offline: POPOPX Bluetooth mesh";
 "On" = "Aan";
-"On success the badge lights up automatically, even if this page has already been closed." = "Bij succes wordt de badge automatisch actief, zelfs als dit scherm al gesloten is.";
 "On trial" = "In proefperiode";
 "On: the 10th wrong entry silently runs the exact same wipe and rebuild flow as the emergency erase passcode, and no warning appears on screen first." = "Aan: de 10e onjuiste invoer voert stipt dezelfde wis- en herbouwweg uit als de code voor noodwissen, zonder vooraf waarschuwing op scherm.";
 "On: while a duress code exists, entering it takes the erasure path. Turning this off deletes the duress code record on the spot." = "Aan: zolang er een dwangcode bestaat, voert die invoeren het wis-pad in. Dit uitzetten verwijdert het dwangcoderecord meteen.";
 "Once claimed, this capsule grows in the top bar and keeps breathing for %lld days." = "Na claimen groeit deze capsule in de balk bovenaan en blijft hij %lld dagen ademen.";
 "Once data is wiped by the duress code it cannot be recovered: no backup prompt, no undo, no recovery channel. The drill page will not let you try it once, and cannot." = "Eenmaal gewist door de dwangcode is niets te herstellen: geen back-upvraag, geen ongedaan maken, geen herstelkanaal. De oefenpagina laat je het niet één keer proberen, en kan dat ook niet.";
-"Once that authorization checks out, the badge lights up on this device and the one-time connection is deleted." = "Zodra die verificatie klopt, wordt de badge op dit apparaat actief en wordt de eenmalige verbinding verwijderd.";
 "Once they accept, this device checks that the voucher has not been redeemed yet and signs an authorization back." = "Zodra ze accepteren, controleert dit apparaat of de voucher nog niet is ingewisseld en tekent een goedkeuring terug.";
 "Once this panel is closed there is no way left on this device to show these 12 words again, unless next time you still pass the verification gate: type the current entry passcode correctly, or, while biometric quick unlock is on, let the machine recognise you. Please copy them onto paper right now: no screenshot, no typing them into any cloud note, and no relying on the system clipboard. For that reason this panel does not allow selecting the text, because a selection may end up in the clipboard, and the clipboard can be read by other apps and can sync to other devices through iCloud." = "Zodra dit paneel dicht is, zijn deze 12 woorden op dit apparaat nooit opnieuw te tonen, tenzij je de volgende keer weer het verificatiehek passeert: toets de huidige toegangscode correct in of laat het apparaat je herkennen zolang de biometrische snelle ontgrendeling aan staat. Noteer ze nu op papier: geen screenshot, niet in een cloudnotitie typen en niet op het systeemklembord vertrouwen. Daarom kun je in dit paneel geen tekst selecteren — een selectie kan op het klembord terechtkomen, en het klembord kan door andere apps worden gelezen en via iCloud naar andere apparaten synchroniseren.";
 "One annual tier; renew any time before it expires" = "Eén jaarlijkse rang; verleng elk moment vóór het verlopen";
@@ -8266,7 +8268,6 @@ server test failure */
 "Recenter on current location" = "Opnieuw centreren op huidige locatie";
 "Reconciliation digest" = "Aflijnsummatie";
 "Red packets nobody finished claiming" = "Rode enveloppen die niemand afmaakte";
-"Redeem a badge voucher" = "Badgevoucher inwisselen";
 "Redeem request sent — waiting for the other side to confirm" = "Inwisselverzoek verstuurd — wachten op bevestiging van de andere kant";
 "Redeem with Compute Credits · %1$lld vouchers · %2$lld days each · %3$lld credits" = "Inwisselen met rekenpunten · %1$lld vouchers · %2$lld dagen elk · %3$lld punten";
 "Redeemed · badge lit for %lld days" = "Ingewisseld · badge actief voor %lld dagen";
@@ -8441,7 +8442,6 @@ server test failure */
 "The claim is kept in its own Keychain item on this device (readable only here, valid after the first unlock). No device identifier is uploaded." = "De claim staat in een eigen Sleutelhanger-item op dit apparaat (alleen hier leesbaar, geldig na de eerste ontgrendeling). Er wordt geen apparaatkenner geüpload.";
 "The clipboard holds an addable link" = "Het klembord bevat een toevoegbare link";
 "The clipboard is empty." = "Het klembord is leeg.";
-"The clipboard text does not look like a redemption code (it must start with PPX1-). It has been placed in the field — check it, then tap Redeem again." = "De klembordtekst lijkt geen inwisselcode (hij moet met PPX1- beginnen). Hij is in het veld gezet — controleer hem en tik nogmaals op Inwisselen.";
 "The connection is still being made, please try again later." = "De verbinding wordt nog opgezet, probeer het later opnieuw.";
 "The content is empty." = "De inhoud is leeg.";
 "The core does not accept some of the characters in the group name. Fixing it removes them." = "De kern aanvaardt niet alle karakters in de groepsnaam. Bij opschonen worden ze verwijderd.";
@@ -8765,7 +8765,6 @@ server test failure */
 "Why this prompt is not counted" = "Waarom deze vraag niet meetelt";
 "Wi-Fi access has been denied" = "Wi-Fi-toegang is geweigerd";
 "Wishing you prosperity" = "Voorspoed gewenst";
-"With a redemption code, light up on this device the badge the other side gifted." = "Licht met een inwisselcode op dit apparaat de badge op die de andere kant je schonk.";
 "With this level on you accept two things: someone who has an unlocked phone and 10 chances may wipe your identities for you, and you may count to 10 in the dark yourself. The price of an accidental touch, a family member pressing around, a child playing with it, or typing your own mnemonic phrase wrong ten times in a row, is carried by this one deliberate tap." = "Met dit niveau aan accepteer je twee dingen: iemand met een ontgrendelde telefoon en 10 kansen kan jouw identiteiten voor je wissen, en jij zelf kunt in het donker tot 10 tellen. De prijs van een per ongeluk aangeraakt scherm, een familielid dat ergens op drukt, een kind dat ermee speelt, of tien keer je eigen mnemonische zin fout typen, wordt gedragen door deze ene bewuste tik.";
 "Working…" = "Bezig…";
 "Would not trigger a lock" = "Zou geen vergrendeling triggeren";
@@ -8821,3 +8820,34 @@ server test failure */
 "[Top-secret view-once] Open after biometrics" = "[Topgeheim: vernietigen na lezen] Openen na biometrische verificatie";
 "[Top-secret security alert] %@; that top-secret message was destroyed in place." = "[Beveiligingsmelding topgeheim] %@; dat topgeheime bericht is ter plekke vernietigd.";
 "Neither Bluetooth nor the public network is available — %lld messages waiting to send" = "Noch Bluetooth noch het openbare netwerk is beschikbaar — %lld berichten wachten op verzending";
+"%lld Compute Credits added." = "%lld rekenpunten toegevoegd.";
+"%lld Compute Credits gift card" = "Cadeaubon van %lld rekenpunten";
+"A Compute Credits gift card sent by the other person" = "Een cadeaubon met rekenpunten die de andere persoon je stuurde";
+"A long string that starts with PPX1- or PPXC1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails." = "Een lange tekenreeks die begint met PPX1- of PPXC1-. Plak deze, type hem niet met de hand over: hij is hoofdlettergevoelig en één fout teken laat de verificatie mislukken.";
+"Added %lld Compute Credits, written into this device's credit balance; they do not expire." = "Er zijn %lld rekenpunten toegevoegd en in het saldo rekenpunten van dit apparaat geschreven; ze verlopen niet.";
+"Apple is still confirming this purchase. The gift card appears as soon as it is confirmed." = "Apple bevestigt deze aankoop nog. De cadeaubon verschijnt zodra ze is bevestigd.";
+"Apple took the payment, but this device could not create the gift card yet. It is created the next time the secure store can be written." = "Apple heeft de betaling ontvangen, maar dit apparaat kon de cadeaubon nog niet aanmaken. Hij wordt aangemaakt zodra de beveiligde opslag weer beschreven kan worden.";
+"Buy gift card" = "Cadeaubon kopen";
+"Compute Credits gift card" = "Cadeaubon met rekenpunten";
+"Compute Credits gift card, %1$lld credits, message: %2$@. Tap to redeem." = "Cadeaubon met rekenpunten, %1$lld punten, bericht: %2$@. Tik om in te wisselen.";
+"Compute Credits gift card, %lld credits, tap to redeem." = "Cadeaubon met rekenpunten, %lld punten, tik om in te wisselen.";
+"Compute Credits gift cards can only be redeemed in a one-to-one chat." = "Cadeaubonnen met rekenpunten kunnen alleen in een één-op-éénchat worden ingewisseld.";
+"Create %1$lld gift cards of %2$lld Compute Credits · %3$lld credits" = "Cadeaubonnen aanmaken · %1$lld stuks · %2$lld rekenpunten elk · %3$lld punten";
+"Created %1$lld gift cards of %2$lld Compute Credits" = "%1$lld cadeaubonnen van %2$lld rekenpunten aangemaakt";
+"Created %1$lld × %2$lld compute-point gift cards" = "%1$lld cadeaubonnen, elk van %2$lld rekenpunten, aangemaakt";
+"Gift Credits" = "Cadeaubon met rekenpunten";
+"Gift card created · %lld Compute Credits" = "Cadeaubon aangemaakt · %lld rekenpunten";
+"Gift cards on this device" = "Cadeaubonnen op dit apparaat";
+"On success the badge or the credits land on this device even if this page has already been closed." = "Bij succes komen de badge of de rekenpunten op dit apparaat, zelfs als je deze pagina al hebt gesloten.";
+"Once that authorization checks out, this device records the badge or the credits, and the one-time connection is deleted." = "Zodra die goedkeuring klopt, legt dit apparaat de badge of de rekenpunten vast, en de eenmalige verbinding wordt verwijderd.";
+"Or pay with the credits you already have" = "Of betaal met de rekenpunten die je al hebt";
+"Received %lld Compute Credits from a gift card." = "Je hebt %lld rekenpunten van een cadeaubon ontvangen.";
+"Received a compute-point gift card" = "Cadeaubon met rekenpunten ontvangen";
+"Recharge" = "Opwaarderen";
+"Redeem a gift code" = "Cadeaucode inwisselen";
+"Redeemed · %lld Compute Credits added" = "Ingewisseld · %lld rekenpunten toegevoegd";
+"The clipboard text does not look like a redemption code (it must start with PPX1- or PPXC1-). It has been placed in the field — check it, then tap Redeem again." = "De klembordtekst lijkt geen inwisselcode (hij moet met PPX1- of PPXC1- beginnen). Hij is in het veld gezet — controleer hem en tik nogmaals op Inwisselen.";
+"This Compute Credits gift card is no longer available." = "Deze cadeaubon met rekenpunten is niet meer beschikbaar.";
+"With a redemption code, receive on this device what the other side gifted." = "Ontvang met een inwisselcode op dit apparaat wat de andere kant je schonk.";
+"🎁 [Compute Credits gift card] %1$lld · %2$@" = "🎁 [Cadeaubon met rekenpunten] %1$lld · %2$@";
+"🎁 [Compute Credits gift card] %lld" = "🎁 [Cadeaubon met rekenpunten] %lld";

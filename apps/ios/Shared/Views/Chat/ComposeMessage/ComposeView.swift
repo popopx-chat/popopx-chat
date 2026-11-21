@@ -410,6 +410,9 @@ struct ComposeView: View {
     @State private var packetDestination: PopopxPacketDestination?
     @State private var showGiftCardSheet = false
     @State private var giftCardContactId: Int64?
+    /// The compute-credit gift card cell. It shares `giftCardContactId` with the badge card: both snapshots are taken in the same press
+    /// handler, both mean "the contact this draft is addressed to", and sheets cannot overlap, so one value cannot be read by two panels.
+    @State private var showCreditsGiftSheet = false
 
     @State private var audioRecorder: AudioRecorder?
     @State private var voiceMessageRecordingTime: TimeInterval?
@@ -731,6 +734,12 @@ struct ComposeView: View {
             // Minting the code, sending the card and sending the signalling also all happen inside the panel (it holds its own `PopopxSilentSignalingRouter`).
             // `contactId` is optional: the panel uses it to decide whether to draw the "Send to contact" button.
             PopopxGiftBadgeCardSheet(contactId: giftCardContactId)
+                .presentationDetents([.large])
+        }
+        .sheet(isPresented: $showCreditsGiftSheet, onDismiss: { giftCardContactId = nil }) {
+            // The compute-credit twin of the sheet above, and it reuses the credits page rather than adding a picker: with a `contactId`
+            // the page opens on its gift segment, and the card face it presents grows the "send in this conversation" button.
+            PopopxCreditsStoreView(contactId: giftCardContactId)
                 .presentationDetents([.large])
         }
         .onChange(of: chosenMedia) { _, selected in
@@ -1377,7 +1386,7 @@ struct ComposeView: View {
             case .redPacket: popopxPacketDestination != nil && chat.chatInfo.sendMsgEnabled
             // The gift card's redemption receipt has only one destination, `PopopxCommerceTarget.contact` (the router has no group branch),
             // so this cell appears only in one-to-one chats; in a group, if you want the badge, have the peer copy their code over to the other side, or go straight to Me - Redemption code.
-            case .giftCard: chat.chatInfo.contact != nil && chat.chatInfo.sendMsgEnabled
+            case .giftCard, .creditsGiftCard: chat.chatInfo.contact != nil && chat.chatInfo.sendMsgEnabled
             case .photo, .camera, .file, .location, .secure, .personalProfile: true
             }
         }
@@ -1459,6 +1468,12 @@ struct ComposeView: View {
             guard let contactId = chat.chatInfo.contact?.contactId else { return }
             giftCardContactId = contactId
             showGiftCardSheet = true
+        case .creditsGiftCard:
+            // Same snapshot rule as the badge card above: the credits page opens on its gift segment, and the card face it presents
+            // decides whether to draw "send in this conversation" from this id alone.
+            guard let contactId = chat.chatInfo.contact?.contactId else { return }
+            giftCardContactId = contactId
+            showCreditsGiftSheet = true
         case .photo, .camera, .file:
             if im.secondaryIMFilter == nil, !chat.chatInfo.featureEnabled(.files) {
                 AlertManager.shared.showAlertMsg(
@@ -1473,7 +1488,7 @@ struct ComposeView: View {
                 // These cells are unreachable in the `.photo/.camera/.file` branch: the outer switch has already split them off.
                 // Writing `break` instead of deleting them keeps this switch exhaustive - when a new cell is added
                 // this fails to compile, which reminds you that both places need changing.
-                case .location, .secure, .personalProfile, .redPacket, .giftCard: break
+                case .location, .secure, .personalProfile, .redPacket, .giftCard, .creditsGiftCard: break
                 }
             }
         }

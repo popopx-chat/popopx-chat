@@ -2,6 +2,11 @@
 " (can be copied)" = " (สามารถคัดลอกได้)";
 
 /* No comment provided by engineer. */
+"A gift card adds nothing to your own balance. The credits belong to the device that redeems the code." = "บัตรของขวัญไม่เพิ่มอะไรเข้ายอดเครดิตของคุณเอง เครดิตจะเป็นของอุปกรณ์ที่แลกโค้ด";
+"Credits gift card" = "บัตรของขวัญเครดิต";
+"No gift cards yet. Buy one above, or create one from the credits you already have." = "ยังไม่มีบัตรของขวัญ ซื้อได้จากด้านบน หรือสร้างจากเครดิตที่คุณมีอยู่แล้ว";
+"Paste this whole string where the app asks for a redemption code: the grouping is only for readability and spaces make no difference, but it is case-sensitive — paste or scan it, do not retype it character by character." = "นำสตริงนี้ทั้งอันไปวางในที่ที่แอปขอให้กรอกโค้ดแลกของขวัญ การแบ่งกลุ่มอักขระมีไว้ให้อ่านง่ายเท่านั้น ช่องว่างไม่มีผลต่างกัน แต่ตัวพิมพ์เล็กใหญ่มีผล — วางหรือสแกน อย่าพิมพ์เองทีละตัว";
+"Your balance was reduced, but this device could not create the gift cards yet. They appear the next time the secure store can be written." = "ยอดของคุณถูกหักแล้ว แต่อุปกรณ์นี้ยังไม่สามารถสร้างบัตรของขวัญได้ บัตรจะปรากฏในการเขียนครั้งถัดไปที่คลังปลอดภัยยอมให้เขียน";
 "_italic_" = "\\_ตัวเอียง_";
 
 /* No comment provided by engineer. */
@@ -4778,7 +4783,6 @@ server test failure */
 "A free channel needs no credits and leaves no ledger entries — just open it." = "ช่องฟรีไม่ต้องใช้เครดิตและไม่ทิ้งรายการไว้ในบัญชี เปิดได้เลย";
 "A group has no profile on any server: it exists only on its members' devices. Set the name and the avatar first, then decide who to invite." = "กลุ่มไม่มีโปรไฟล์บนเซิร์ฟเวอร์ใด มีอยู่เฉพาะบนอุปกรณ์ของสมาชิกเท่านั้น ตั้งชื่อและอวตารก่อน แล้วจึงตัดสินใจว่าจะเชิญใคร";
 "A location message cannot be added while the draft is being rewritten, forwarded, recorded as a live message or already has an attachment." = "เพิ่มข้อความตำแหน่งไม่ได้ระหว่างที่กำลังเขียนร่างใหม่ ส่งต่อ บันทึกเป็นข้อความสด หรือมีไฟล์แนบอยู่แล้ว";
-"A long string that starts with PPX1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails." = "สตริงยาวที่ขึ้นต้นด้วย PPX1- ให้วางห้ามพิมพ์เอง เพราะตัวพิมพ์เล็กใหญ่มีผล ผิดหนึ่งตัวหมายถึงตรวจสอบไม่ผ่าน";
 "A mesh pairing request from a device in the same room appears here." = "คำขอจับคู่ Mesh จากอุปกรณ์ในห้องเดียวกันจะมาแสดงที่นี่";
 "A new random profile card joins the group, and the usual profile card of this device does not appear in the member list." = "บัตรโปรไฟล์สุ่มใบใหม่เข้าร่วมกลุ่ม และบัตรโปรไฟล์ปกติของเครื่องนี้จะไม่แสดงในรายการสมาชิก";
 "A profile page is already open — close it first" = "มีหน้าโปรไฟล์เปิดอยู่แล้ว — ปิดก่อน";
@@ -5306,13 +5310,11 @@ server test failure */
 "Offline messages go over the Bluetooth mesh relay, up to 7 hops." = "ข้อความออฟไลน์ไปผ่านรีเลย์ Mesh Bluetooth ได้สูงสุด 7 ฮอป";
 "Offline: POPOPX Bluetooth mesh" = "ออฟไลน์: Mesh Bluetooth POPOPX";
 "On" = "เปิด";
-"On success the badge lights up automatically, even if this page has already been closed." = "เมื่อสำเร็จ ป้ายจะเปิดใช่อัตโนมัติแม้ปิดหน้านี้ไปแล้ว";
 "On trial" = "กำลังทดลองใช้";
 "On: the 10th wrong entry silently runs the exact same wipe and rebuild flow as the emergency erase passcode, and no warning appears on screen first." = "เปิด: ตราบใดที่มีรหัสเมื่อถูกบังคับ การกรอกรหัสนั้นจะเข้าสู่เส้นทางลบข้อมูล ปิดข้อนี้เมื่อใดก็ลบบันทึกรหัสเมื่อถูกบังคับทันที";
 "On: while a duress code exists, entering it takes the erasure path. Turning this off deletes the duress code record on the spot." = "เปิด: ตราบใดที่มีรหัสเมื่อถูกบังคับ การกรอกรหัส ذلكจะเข้าสู่เส้นทางลบข้อมูล ปิดข้อนี้เมื่อใดก็ลบบันทึกรหัสเมื่อถูกบังคับทันที";
 "Once claimed, this capsule grows in the top bar and keeps breathing for %lld days." = "เมื่อรับแล้ว แคปซูลนี้จะแสดงบนแถบด้านบนและหายใจต่ออีก %lld วัน";
 "Once data is wiped by the duress code it cannot be recovered: no backup prompt, no undo, no recovery channel. The drill page will not let you try it once, and cannot." = "เมื่อข้อมูลถูกลบด้วยรหัสเมื่อถูกบังคับแล้วจะกู้คืนไม่ได้ ไม่มีคำถามเรื่องข้อมูลสำรอง ไม่มีย้อนกลับ ไม่มีช่องกู้คืน หน้าซ้อมจะไม่ยอมให้คุณลองแม้ครั้งเดียว และทำไม่ได้ด้วย";
-"Once that authorization checks out, the badge lights up on this device and the one-time connection is deleted." = "เมื่อสิทธิ์นั้นผ่านการตรวจสอบ ป้ายจะเปิดใช้บนเครื่องนี้ และการเชื่อมต่อใช้ครั้งเดียวจะถูกลบ";
 "Once they accept, this device checks that the voucher has not been redeemed yet and signs an authorization back." = "เมื่อผู้รับรับแล้ว เครื่องนี้จะตรวจสอบว่าคูปองยังไม่เคยถูกแลก แล้วเซ็นสิทธิ์ตอบกลับไป";
 "Once this panel is closed there is no way left on this device to show these 12 words again, unless next time you still pass the verification gate: type the current entry passcode correctly, or, while biometric quick unlock is on, let the machine recognise you. Please copy them onto paper right now: no screenshot, no typing them into any cloud note, and no relying on the system clipboard. For that reason this panel does not allow selecting the text, because a selection may end up in the clipboard, and the clipboard can be read by other apps and can sync to other devices through iCloud." = "เมื่อปิดแผงนี้แล้ว จะไม่มีทางใดบนเครื่องนี้แสดงคำ 12 คำนี้อีก นอกจากครั้งหน้าคุณยังผ่านประตูการตรวจสอบ: กรอกรหัสผ่านเข้าปัจจุบันให้ถูกต้อง หรือหากเปิดปลดล็อกด่วนด้วยชีวมิติไว้ก็ให้เครื่องจดจำคุณ โปรดคัดลอกลงกระดาษเดี๋ยวนี้ ห้ามถ่ายภาพหน้าจอ ห้ามพิมพ์ลงในโน้ตคลาวด์ใด และห้ามพึ่งคลิปบอร์ดของระบบ ด้วยเหตุนี้แผงนี้จึงไม่อนุญาตให้เลือกข้อความ เพราะการเลือกอาจไปอยู่ในคลิปบอร์ด และคลิปบอร์ดถูกแอปอื่นอ่านได้และซิงก์ไปเครื่องอื่นผ่าน iCloud ได้";
 "One annual tier; renew any time before it expires" = "ระดับรายปีหนึ่งระดับ ต่ออายุได้ทุกเวลาก่อนหมดอายุ";
@@ -5413,7 +5415,6 @@ server test failure */
 "Recenter on current location" = "กลับมาจุดศูนย์กลางที่ตำแหน่งปัจจุบัน";
 "Reconciliation digest" = "สรุปการปรับปรุงยอด";
 "Red packets nobody finished claiming" = "อั่งเปาที่ไม่มีใครรับจนครบ";
-"Redeem a badge voucher" = "แลกคูปองป้าย";
 "Redeem request sent — waiting for the other side to confirm" = "ส่งคำขอแลกแล้ว — รออีกฝ่ายยืนยัน";
 "Redeem with Compute Credits · %1$lld vouchers · %2$lld days each · %3$lld credits" = "แลกด้วยเครดิตการประมวลผล · คูปอง %1$lld ใบ · ใบละ %2$lld วัน · %3$lld เครดิต";
 "Redeemed · badge lit for %lld days" = "แลกแล้ว · ป้ายเปิดใช้ %lld วัน";
@@ -5588,7 +5589,6 @@ server test failure */
 "The claim is kept in its own Keychain item on this device (readable only here, valid after the first unlock). No device identifier is uploaded." = "สิทธิ์ที่รับไว้เก็บเป็นรายการ Keychain ของตัวเองบนเครื่องนี้ (อ่านได้ที่นี่เท่านั้น มีผลหลังปลดล็อกครั้งแรก) ไม่ได้อัปโหลดตัวระบุเครื่องใด";
 "The clipboard holds an addable link" = "คลิปบอร์ดมีลิงก์ที่เพิ่มได้";
 "The clipboard is empty." = "คลิปบอร์ดว่างเปล่า";
-"The clipboard text does not look like a redemption code (it must start with PPX1-). It has been placed in the field — check it, then tap Redeem again." = "ข้อความในคลิปบอร์ดไม่เหมือนโค้ดแลกรหัส (ต้องขึ้นต้นด้วย PPX1-) ได้วางลงในช่องแล้ว ตรวจสอบแล้วแตะ แลกรหัส อีกครั้ง";
 "The connection is still being made, please try again later." = "กำลังสร้างการเชื่อมต่อ โปรดลองอีกครั้งภายหลัง";
 "The content is empty." = "เนื้อหาว่างเปล่า";
 "The core does not accept some of the characters in the group name. Fixing it removes them." = "แกนแอปไม่รับอักขระบางตัวในชื่อกลุ่ม การแก้ไขจะลบอักขระเหล่านั้นออก";
@@ -5912,7 +5912,6 @@ server test failure */
 "Why this prompt is not counted" = "ทำไมการถามนี้ไม่ถูกนับ";
 "Wi-Fi access has been denied" = "การเข้าถึง Wi-Fi ถูกปฏิเสธ";
 "Wishing you prosperity" = "ขออวยพรให้รุ่งเรือง";
-"With a redemption code, light up on this device the badge the other side gifted." = "ใช้โค้ดแลกรหัสเปิดใช้ป้ายที่อีกฝ่ายมอบให้ บนเครื่องนี้";
 "With this level on you accept two things: someone who has an unlocked phone and 10 chances may wipe your identities for you, and you may count to 10 in the dark yourself. The price of an accidental touch, a family member pressing around, a child playing with it, or typing your own mnemonic phrase wrong ten times in a row, is carried by this one deliberate tap." = "เมื่อเปิดระดับนี้ คุณยอมรับสองอย่าง: คนที่มีเครื่องปลดล็อกอยู่แล้วกับ 10 โอกาสอาจลบตัวตนของคุณได้ และคุณเองก็นับถึง 10 ในที่มืดได้ ผลของการเผลอแตะ คนในบ้านกดเล่น เด็กเล่นเครื่อง หรือพิมพ์วลีช่วยจำผิดสิบครั้งติดกัน จะรับภาระไว้ด้วยการแตะอย่างมีสติครั้งเดียวนี้";
 "Working…" = "กำลังทำงาน…";
 "Would not trigger a lock" = "จะยังไม่ทำให้ล็อก";
@@ -5979,3 +5978,34 @@ server test failure */
 "[Top-secret view-once] Open after biometrics" = "[ลับที่สุด ทำลายหลังอ่าน] ดูได้หลังยืนยันชีวมิติ";
 "[Top-secret security alert] %@; that top-secret message was destroyed in place." = "[แจ้งเตือนความปลอดภัยลับที่สุด] %@; ข้อความลับที่สุดนั้นถูกทำลายทิ้ง ณ ที่นั้นแล้ว";
 "Neither Bluetooth nor the public network is available — %lld messages waiting to send" = "ไม่มีทั้ง Bluetooth และเครือข่ายสาธารณะ — ข้อความรอส่ง %lld รายการ";
+"%lld Compute Credits added." = "เพิ่มเครดิตการประมวลผล %lld แล้ว";
+"%lld Compute Credits gift card" = "บัตรของขวัญเครดิตการประมวลผล %lld";
+"A Compute Credits gift card sent by the other person" = "บัตรของขวัญเครดิตการประมวลผลที่อีกฝ่ายส่งมา";
+"A long string that starts with PPX1- or PPXC1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails." = "สตริงยาวที่ขึ้นต้นด้วย PPX1- หรือ PPXC1- ให้วางห้ามพิมพ์เอง เพราะตัวพิมพ์เล็กใหญ่มีผล ผิดหนึ่งตัวหมายถึงตรวจสอบไม่ผ่าน";
+"Added %lld Compute Credits, written into this device's credit balance; they do not expire." = "เพิ่มเครดิตการประมวลผล %lld ลงในยอดเครดิตของเครื่องนี้แล้ว ไม่มีวันหมดอายุ";
+"Apple is still confirming this purchase. The gift card appears as soon as it is confirmed." = "Apple ยังกำลังยืนยันการซื้อนี้ บัตรของขวัญจะแสดงทันทีที่ยืนยันเสร็จ";
+"Apple took the payment, but this device could not create the gift card yet. It is created the next time the secure store can be written." = "Apple รับการชำระแล้ว แต่เครื่องนี้ยังสร้างบัตรของขวัญไม่ได้ จะสร้างในการเขียนคลังปลอดภัยครั้งถัดไป";
+"Buy gift card" = "ซื้อบัตรของขวัญ";
+"Compute Credits gift card" = "บัตรของขวัญเครดิตการประมวลผล";
+"Compute Credits gift card, %1$lld credits, message: %2$@. Tap to redeem." = "บัตรของขวัญเครดิตการประมวลผล %1$lld เครดิต ข้อความ: %2$@ แตะเพื่อแลกรหัส";
+"Compute Credits gift card, %lld credits, tap to redeem." = "บัตรของขวัญเครดิตการประมวลผล %lld เครดิต แตะเพื่อแลกรหัส";
+"Compute Credits gift cards can only be redeemed in a one-to-one chat." = "บัตรของขวัญเครดิตการประมวลผลแลกได้เฉพาะในแชทตัวต่อตัวเท่านั้น";
+"Create %1$lld gift cards of %2$lld Compute Credits · %3$lld credits" = "สร้างบัตรของขวัญ %1$lld ใบ ใบละเครดิตการประมวลผล %2$lld · %3$lld เครดิต";
+"Created %1$lld gift cards of %2$lld Compute Credits" = "สร้างบัตรของขวัญ %1$lld ใบ ใบละเครดิตการประมวลผล %2$lld แล้ว";
+"Created %1$lld × %2$lld compute-point gift cards" = "สร้างบัตรของขวัญเครดิตการประมวลผล %1$lld ใบ × ใบละ %2$lld";
+"Gift Credits" = "มอบเครดิตเป็นของขวัญ";
+"Gift card created · %lld Compute Credits" = "สร้างบัตรของขวัญแล้ว · เครดิตการประมวลผล %lld";
+"Gift cards on this device" = "บัตรของขวัญบนเครื่องนี้";
+"On success the badge or the credits land on this device even if this page has already been closed." = "เมื่อสำเร็จ ป้ายหรือเครดิตจะมาอยู่บนเครื่องนี้แม้ปิดหน้านี้ไปแล้ว";
+"Once that authorization checks out, this device records the badge or the credits, and the one-time connection is deleted." = "เมื่อสิทธิ์นั้นผ่านการตรวจสอบ เครื่องนี้จะบันทึกป้ายหรือเครดิตไว้ และการเชื่อมต่อใช้ครั้งเดียวจะถูกลบ";
+"Or pay with the credits you already have" = "หรือจ่ายด้วยเครดิตที่มีอยู่แล้ว";
+"Received %lld Compute Credits from a gift card." = "ได้รับเครดิตการประมวลผล %lld จากบัตรของขวัญแล้ว";
+"Received a compute-point gift card" = "ได้รับบัตรของขวัญเครดิตการประมวลผลแล้ว";
+"Recharge" = "เติมเครดิต";
+"Redeem a gift code" = "แลกโค้ดของขวัญ";
+"Redeemed · %lld Compute Credits added" = "แลกแล้ว · เพิ่มเครดิตการประมวลผล %lld";
+"The clipboard text does not look like a redemption code (it must start with PPX1- or PPXC1-). It has been placed in the field — check it, then tap Redeem again." = "ข้อความในคลิปบอร์ดไม่เหมือนโค้ดแลกรหัส (ต้องขึ้นต้นด้วย PPX1- หรือ PPXC1-) ได้วางลงในช่องแล้ว ตรวจสอบแล้วแตะ แลกรหัส อีกครั้ง";
+"This Compute Credits gift card is no longer available." = "บัตรของขวัญเครดิตการประมวลผลนี้ไม่พร้อมใช้งานอีกต่อไป";
+"With a redemption code, receive on this device what the other side gifted." = "ใช้โค้ดแลกรหัสรับสิ่งที่อีกฝ่ายมอบให้ไว้บนเครื่องนี้";
+"🎁 [Compute Credits gift card] %1$lld · %2$@" = "🎁 [บัตรของขวัญเครดิตการประมวลผล] %1$lld · %2$@";
+"🎁 [Compute Credits gift card] %lld" = "🎁 [บัตรของขวัญเครดิตการประมวลผล] %lld";

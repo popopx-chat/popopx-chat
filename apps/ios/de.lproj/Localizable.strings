@@ -2,6 +2,11 @@
 " (can be copied)" = " (kann kopiert werden)";
 
 /* No comment provided by engineer. */
+"A gift card adds nothing to your own balance. The credits belong to the device that redeems the code." = "Eine Geschenkkarte erhöht dein eigenes Guthaben nicht. Die Punkte gehören dem Gerät, das den Code einlöst.";
+"Credits gift card" = "Geschenkkarte für Rechenpunkte";
+"No gift cards yet. Buy one above, or create one from the credits you already have." = "Noch keine Geschenkkarten. Kaufe oben eine oder erstelle eine aus den Punkten, die du bereits hast.";
+"Paste this whole string where the app asks for a redemption code: the grouping is only for readability and spaces make no difference, but it is case-sensitive — paste or scan it, do not retype it character by character." = "Füge diese gesamte Zeichenkette dort ein, wo die App nach einem Einlösungscode fragt: die Gruppierung dient nur der Lesbarkeit, Leerzeichen sind egal, aber sie unterscheidet Groß- und Kleinschreibung — einfügen oder scannen, nicht Zeichen für Zeichen abtippen.";
+"Your balance was reduced, but this device could not create the gift cards yet. They appear the next time the secure store can be written." = "Dein Guthaben wurde reduziert, aber dieses Gerät konnte die Geschenkkarten noch nicht erstellen. Sie erscheinen beim nächsten Schreiben in den sicheren Speicher.";
 "_italic_" = "\\_kursiv_";
 
 /* No comment provided by engineer. */
@@ -8743,7 +8748,6 @@ alert title */
 "A free channel needs no credits and leaves no ledger entries — just open it." = "Ein kostenloser Kanal braucht keine Punkte und hinterlässt keine Kontobuch-Einträge — einfach öffnen.";
 "A group has no profile on any server: it exists only on its members' devices. Set the name and the avatar first, then decide who to invite." = "Eine Gruppe hat auf keinem Server ein Profil: Sie existiert nur auf den Geräten ihrer Mitglieder. Lege zuerst Name und Bild fest, dann entscheide, wen du einlädst.";
 "A location message cannot be added while the draft is being rewritten, forwarded, recorded as a live message or already has an attachment." = "Eine Ortungsnachricht lässt sich nicht hinzufügen, während der Entwurf umgeschrieben oder weitergeleitet wird, als Live-Nachricht aufgenommen ist oder bereits einen Anhang hat.";
-"A long string that starts with PPX1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails." = "Eine lange Zeichenkette, die mit PPX1- beginnt. Füge sie ein; tippe sie nicht per Hand ab: Sie unterscheidet Groß- und Kleinschreibung, und ein falsches Zeichen lässt die Überprüfung scheitern.";
 "A mesh pairing request from a device in the same room appears here." = "Eine Mesh-Kopplungsanfrage von einem Gerät im selben Raum erscheint hier.";
 "A new random profile card joins the group, and the usual profile card of this device does not appear in the member list." = "Eine neue zufällige Profilkarte kommt in die Gruppe, und die übliche Profilkarte dieses Geräts erscheint nicht in der Mitgliederliste.";
 "A profile page is already open — close it first" = "Es ist bereits eine Profilseite geöffnet — zuerst schließen";
@@ -9271,13 +9275,11 @@ alert title */
 "Offline messages go over the Bluetooth mesh relay, up to 7 hops." = "Offline-Nachrichten gehen über das Bluetooth-Mesh-Relay, bis zu 7 Hops.";
 "Offline: POPOPX Bluetooth mesh" = "Offline: POPOPX-Bluetooth-Mesh";
 "On" = "An";
-"On success the badge lights up automatically, even if this page has already been closed." = "Bei Erfolg aktiviert sich das Abzeichen automatisch, auch wenn diese Seite schon geschlossen ist.";
 "On trial" = "Im Test";
 "On: the 10th wrong entry silently runs the exact same wipe and rebuild flow as the emergency erase passcode, and no warning appears on screen first." = "An: beim 10. falschen Eingabelauf läuft lautlos genau derselbe Lösch-und-Neuaufbau-Ablauf wie beim Passwort zum Notfall-Löschen, und vorher erscheint keine Warnung auf dem Bildschirm.";
 "On: while a duress code exists, entering it takes the erasure path. Turning this off deletes the duress code record on the spot." = "An: Solange ein Notszenario-Code existiert, führt seine Eingabe den Löschungspfad. Das Abschalten löscht den Notszenario-Code-Eintrag sofort.";
 "Once claimed, this capsule grows in the top bar and keeps breathing for %lld days." = "Ist sie einmal abgeholt, wächst diese Kapsel in der oberen Leiste und atmet %lld Tage lang weiter.";
 "Once data is wiped by the duress code it cannot be recovered: no backup prompt, no undo, no recovery channel. The drill page will not let you try it once, and cannot." = "Sind Daten per Notszenario-Code gelöscht, sind sie nicht wiederherzustellen: kein Sicherungs-Hinweis, kein Rückgängig, kein Wiederherstellungsweg. Die Übungsseite lässt dich davon kein einziges Mal probieren — und kann es nicht.";
-"Once that authorization checks out, the badge lights up on this device and the one-time connection is deleted." = "Ist jene Genehmigung geprüft, leuchtet das Abzeichen auf diesem Gerät auf, und die einmalige Verbindung wird gelöscht.";
 "Once they accept, this device checks that the voucher has not been redeemed yet and signs an authorization back." = "Sobald die Person annimmt, prüft dieses Gerät, dass der Gutschein noch nicht eingelöst ist, und schickt eine signierte Genehmigung zurück.";
 "Once this panel is closed there is no way left on this device to show these 12 words again, unless next time you still pass the verification gate: type the current entry passcode correctly, or, while biometric quick unlock is on, let the machine recognise you. Please copy them onto paper right now: no screenshot, no typing them into any cloud note, and no relying on the system clipboard. For that reason this panel does not allow selecting the text, because a selection may end up in the clipboard, and the clipboard can be read by other apps and can sync to other devices through iCloud." = "Nach dem Schließen dieses Panels gibt es auf diesem Gerät keinen Weg mehr, diese 12 Wörter noch einmal zu zeigen — außer du bestehst beim nächsten Mal wieder das Verifizierungstor: gib das aktuelle Zugangs-Passwort richtig ein, oder lass bei eingeschalteter Bio-Schnellentsperre das Gerät dich erkennen. Bitte schreibe sie jetzt auf Papier: kein Screenshot, kein Abtippen in eine Cloud-Notiz, und verlasse dich nicht auf die System-Zwischenablage. Deshalb erlaubt dieses Panel keine Textauswahl, denn eine Auswahl könnte in die Zwischenablage gelangen, und die können andere Apps lesen und über iCloud auf andere Geräte syncen.";
 "One annual tier; renew any time before it expires" = "Eine Jahresstufe; verlängere jederzeit vor dem Ablauf";
@@ -9378,7 +9380,6 @@ alert title */
 "Recenter on current location" = "Auf aktuellen Standort zentrieren";
 "Reconciliation digest" = "Abrechnungs-Verdichtung";
 "Red packets nobody finished claiming" = "Rote Kuverts, die niemand abgeholt hat";
-"Redeem a badge voucher" = "Einen Abzeichengutschein einlösen";
 "Redeem request sent — waiting for the other side to confirm" = "Einlöseaufforderung gesendet — warte auf die Bestätigung der anderen Seite";
 "Redeem with Compute Credits · %1$lld vouchers · %2$lld days each · %3$lld credits" = "Mit Rechenpunkten einlösen · %1$lld Gutscheine · je %2$lld Tage · %3$lld Punkte";
 "Redeemed · badge lit for %lld days" = "Eingelöst · Abzeichen für %lld Tage aktiviert";
@@ -9553,7 +9554,6 @@ alert title */
 "The claim is kept in its own Keychain item on this device (readable only here, valid after the first unlock). No device identifier is uploaded." = "Der Anspruch liegt in einem eigenen Schlüsselbund-Eintrag auf diesem Gerät (nur hier lesbar, gültig nach der ersten Entsperrung). Es wird keine Gerätekennung hochgeladen.";
 "The clipboard holds an addable link" = "Die Zwischenablage hält einen einfügbaren Link bereit";
 "The clipboard is empty." = "Die Zwischenablage ist leer.";
-"The clipboard text does not look like a redemption code (it must start with PPX1-). It has been placed in the field — check it, then tap Redeem again." = "Der Text in der Zwischenablage sieht nicht nach einem Einlösungscode aus (er muss mit PPX1- beginnen). Er wurde ins Feld gelegt — prüfe ihn und tippe dann erneut auf Einlösen.";
 "The connection is still being made, please try again later." = "Die Verbindung wird noch aufgebaut, bitte versuche es später erneut.";
 "The content is empty." = "Der Inhalt ist leer.";
 "The core does not accept some of the characters in the group name. Fixing it removes them." = "Der Kern akzeptiert nicht jedes Zeichen im Gruppennamen; beim Beheben werden sie entfernt.";
@@ -9877,7 +9877,6 @@ alert title */
 "Why this prompt is not counted" = "Warum diese Abfrage nicht zählt";
 "Wi-Fi access has been denied" = "Auf das WLAN wurde kein Zugriff gewährt";
 "Wishing you prosperity" = "Wünsche dir Wohlstand";
-"With a redemption code, light up on this device the badge the other side gifted." = "Hole mit einem Einlösungscode auf diesem Gerät das Abzeichen, das die andere Person dir geschenkt hat.";
 "With this level on you accept two things: someone who has an unlocked phone and 10 chances may wipe your identities for you, and you may count to 10 in the dark yourself. The price of an accidental touch, a family member pressing around, a child playing with it, or typing your own mnemonic phrase wrong ten times in a row, is carried by this one deliberate tap." = "Mit dieser Stufe nimmst du zwei Dinge hin: dass jemand mit einem entsperrten Telefon und 10 Chancen deine Identitäten für dich löschen kann, und dass du im Dunkeln selbst bis 10 zählen könntest. Der Preis für eine versehentliche Berührung, ein Familienmitglied, das herumdrückt, ein Kind, das damit spielt, oder die eigene Wiederherstellungsphrase zehnmal falsch einzutippen, trägt dieser eine bewusste Tipp.";
 "Working…" = "Arbeitet…";
 "Would not trigger a lock" = "Würde kein Sperren auslösen";
@@ -9930,3 +9929,34 @@ alert title */
 "[Top-secret view-once] Open after biometrics" = "[Streng geheim: nach dem Lesen vernichten] Öffnen nach biometrischer Überprüfung";
 "[Top-secret security alert] %@; that top-secret message was destroyed in place." = "[Streng geheime Sicherheitswarnung] %@; diese streng geheime Nachricht wurde vor Ort vernichtet.";
 "Neither Bluetooth nor the public network is available — %lld messages waiting to send" = "Weder Bluetooth noch das öffentliche Netz ist verfügbar — %lld Nachrichten warten auf den Versand";
+"%lld Compute Credits added." = "%lld Rechenpunkte gutgeschrieben.";
+"%lld Compute Credits gift card" = "Geschenkkarte mit %lld Rechenpunkten";
+"A Compute Credits gift card sent by the other person" = "Eine Geschenkkarte mit Rechenpunkten, die dir die andere Person geschickt hat";
+"A long string that starts with PPX1- or PPXC1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails." = "Eine lange Zeichenkette, die mit PPX1- oder PPXC1- beginnt. Füge sie ein; tippe sie nicht per Hand ab: Sie unterscheidet Groß- und Kleinschreibung, und ein falsches Zeichen lässt die Überprüfung scheitern.";
+"Added %lld Compute Credits, written into this device's credit balance; they do not expire." = "%lld Rechenpunkte wurden dem Guthaben dieses Geräts gutgeschrieben; sie verfallen nicht.";
+"Apple is still confirming this purchase. The gift card appears as soon as it is confirmed." = "Apple bestätigt diesen Kauf noch. Die Geschenkkarte erscheint, sobald sie bestätigt ist.";
+"Apple took the payment, but this device could not create the gift card yet. It is created the next time the secure store can be written." = "Apple hat die Zahlung erhalten, aber dieses Gerät konnte die Geschenkkarte noch nicht erstellen. Sie wird erstellt, wenn der sichere Speicher wieder beschrieben werden kann.";
+"Buy gift card" = "Geschenkkarte kaufen";
+"Compute Credits gift card" = "Geschenkkarte mit Rechenpunkten";
+"Compute Credits gift card, %1$lld credits, message: %2$@. Tap to redeem." = "Geschenkkarte mit Rechenpunkten, %1$lld Punkte, Nachricht: %2$@. Zum Einlösen tippen.";
+"Compute Credits gift card, %lld credits, tap to redeem." = "Geschenkkarte mit Rechenpunkten, %lld Punkte, zum Einlösen tippen.";
+"Compute Credits gift cards can only be redeemed in a one-to-one chat." = "Geschenkkarten mit Rechenpunkten lassen sich nur in einem 1-zu-1-Chat einlösen.";
+"Create %1$lld gift cards of %2$lld Compute Credits · %3$lld credits" = "%1$lld Geschenkkarten mit je %2$lld Rechenpunkten erstellen · %3$lld Punkte";
+"Created %1$lld gift cards of %2$lld Compute Credits" = "%1$lld Geschenkkarten mit je %2$lld Rechenpunkten erstellt";
+"Created %1$lld × %2$lld compute-point gift cards" = "%1$lld × %2$lld Rechenpunkte-Geschenkkarten erstellt";
+"Gift Credits" = "Rechenpunkte verschenken";
+"Gift card created · %lld Compute Credits" = "Geschenkkarte erstellt · %lld Rechenpunkte";
+"Gift cards on this device" = "Geschenkkarten auf diesem Gerät";
+"On success the badge or the credits land on this device even if this page has already been closed." = "Bei Erfolg landen das Abzeichen oder die Punkte auf diesem Gerät, auch wenn diese Seite schon geschlossen ist.";
+"Once that authorization checks out, this device records the badge or the credits, and the one-time connection is deleted." = "Ist jene Genehmigung geprüft, erfasst dieses Gerät das Abzeichen oder die Punkte, und die einmalige Verbindung wird gelöscht.";
+"Or pay with the credits you already have" = "Oder bezahle mit den Punkten, die du schon hast";
+"Received %lld Compute Credits from a gift card." = "%lld Rechenpunkte aus einer Geschenkkarte erhalten.";
+"Received a compute-point gift card" = "Rechenpunkte-Geschenkkarte erhalten";
+"Recharge" = "Aufladen";
+"Redeem a gift code" = "Einen Geschenkcode einlösen";
+"Redeemed · %lld Compute Credits added" = "Eingelöst · %lld Rechenpunkte hinzugefügt";
+"The clipboard text does not look like a redemption code (it must start with PPX1- or PPXC1-). It has been placed in the field — check it, then tap Redeem again." = "Der Text in der Zwischenablage sieht nicht nach einem Einlösungscode aus (er muss mit PPX1- oder PPXC1- beginnen). Er wurde ins Feld gelegt — prüfe ihn und tippe dann erneut auf Einlösen.";
+"This Compute Credits gift card is no longer available." = "Diese Geschenkkarte mit Rechenpunkten ist nicht mehr verfügbar.";
+"With a redemption code, receive on this device what the other side gifted." = "Hole mit einem Einlösungscode auf diesem Gerät ab, was die andere Seite geschenkt hat.";
+"🎁 [Compute Credits gift card] %1$lld · %2$@" = "🎁 [Geschenkkarte mit Rechenpunkten] %1$lld · %2$@";
+"🎁 [Compute Credits gift card] %lld" = "🎁 [Geschenkkarte mit Rechenpunkten] %lld";

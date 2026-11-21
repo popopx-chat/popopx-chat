@@ -1,6 +1,11 @@
 //  PopopxP2PVoucherVault.swift
 //
 //  The local vault for gift-card vouchers + the anti-double-spend arbiter.
+//  It holds **two families in one table**: badge vouchers (worth `period`) and compute-credit gift cards (worth `creditsAmount`).
+//  One table is a deliberate choice, not a shortcut: the double-spend defence is "one actor, one flip per voucher", and a second vault
+//  would be a second copy of the persist-first/rollback/undo logic — the part that must not ever disagree between the two families.
+//  What stays separate is the value field, the grant type, the Keychain grant slot and the redemption-code prefix, so no code path
+//  can read a credit voucher as a badge or the other way round.
 //
 //  ### Why an actor rather than a MainActor class
 //  Flipping one voucher's state from `unused` to `redeemed` must be **serial and completed before the grant is returned**,
@@ -17,7 +22,7 @@
 //  This sentence is at the same time the answer in the review documentation to "why double-spend is prevented without a server".
 //
 //  ### What does not go into the Keychain
-//  The `PPX1-…` redemption code itself is never written to disk (only `codeDigest` is): that string is a "withdrawal credential",
+//  The `PPX1-…` / `PPXC1-…` redemption code itself is never written to disk (only `codeDigest` is): that string is a "withdrawal credential",
 //  and one backup restore would turn every voucher that was never sent back into a withdrawable state.
 //  When a code has to be reproduced, `PopopxSilentSignalingRouter` remints it from the envelope parameters instead of relying on storing the original text.
 //
@@ -27,11 +32,11 @@ import Foundation
 
 // MARK: - Origin
 
-/// The origin of a voucher. It decides which identifier reconciliation uses, not how much the voucher is worth — the face value is decided only by `period`.
+/// The origin of a voucher. It decides which identifier reconciliation uses, not how much the voucher is worth — the face value is decided only by `period` or `creditsAmount`.
 enum PopopxVoucherSource: Hashable, Sendable {
-    /// Minted from a signature-verified StoreKit gift-card receipt.
+    /// Minted from a signature-verified StoreKit receipt (a badge gift card or a compute-credit gift card).
     case receipt(PopopxStoreReceipt)
-    /// Minted from a credits ledger entry whose deduction succeeded (`giftVoucherExchange`).
+    /// Minted from a credits ledger entry whose deduction succeeded (`giftVoucherExchange` / `creditGiftSent`).
     case creditEntry(id: String)
 
     var transactionId: String {
@@ -58,6 +63,9 @@ actor PopopxP2PVoucherVault {
     /// Receiving side: the grant text brought back inside the ACK. The key is voucherId and the value is written only after a successful redemption,
     /// then one copy is kept for reconciliation after it has been handed to `PopopxBadgeManager.activate(grant:)`.
     private var received: [String: PopopxBadgeGrant] = [:]
+    /// The credit twin of `received`, kept in its own Keychain slot because the two tables hold different types under the same
+    /// voucher-id keys — one dictionary written over the other would make a verified authorisation unreadable.
+    private var receivedCredits: [String: PopopxCreditsGrant] = [:]
     private var loaded = false
 
     private init() {}
@@ -69,6 +77,7 @@ actor PopopxP2PVoucherVault {
         loaded = true
         issued = PopopxCommerceKeychain.decode([PopopxNodeVoucher].self, .vouchers) ?? []
         received = PopopxCommerceKeychain.decode([String: PopopxBadgeGrant].self, .grants) ?? [:]
+        receivedCredits = PopopxCommerceKeychain.decode([String: PopopxCreditsGrant].self, .creditGrants) ?? [:]
     }
 
     // MARK: Minting vouchers
@@ -78,33 +87,63 @@ actor PopopxP2PVoucherVault {
     /// and "writing 50,000 random numbers into a password string". Exceeding the quantity must go through several receipts, not by raising the cap.
     func mint(period: PopopxNodeBadgePeriod, quantity: Int, source: PopopxVoucherSource) throws -> [PopopxNodeVoucher] {
         loadIfNeeded()
-        guard quantity >= 1, quantity <= PopopxCommerceLimits.maximumVouchers else {
-            throw PopopxBadgeCreditsError.voucherUnavailable
-        }
-        guard issued.count + quantity <= PopopxCommerceLimits.maximumVouchers else {
-            throw PopopxBadgeCreditsError.voucherUnavailable
-        }
-        let nowMs = Int64(Date().timeIntervalSince1970 * 1_000)
-        var minted: [PopopxNodeVoucher] = []
-        minted.reserveCapacity(quantity)
-        for _ in 0..<quantity {
-            minted.append(
-                PopopxNodeVoucher(
-                    voucherId: UUID().uuidString.lowercased(),
-                    period: period,
-                    state: .unused,
-                    mintedAtMs: nowMs,
-                    transactionId: source.transactionId,
-                    jwsDigest: source.jwsDigest,
-                    codeDigest: nil,
-                    redeemedAtMs: nil,
-                    grantBase64URL: nil
-                )
+        let nowMs = try preparedBatch(quantity: quantity, unavailable: .voucherUnavailable)
+        let minted = (0 ..< quantity).map { _ in
+            PopopxNodeVoucher(
+                voucherId: Self.newVoucherId(),
+                period: period,
+                creditsAmount: nil,
+                state: .unused,
+                mintedAtMs: nowMs,
+                transactionId: source.transactionId,
+                jwsDigest: source.jwsDigest,
+                codeDigest: nil,
+                redeemedAtMs: nil,
+                grantBase64URL: nil
             )
         }
+        return try commit(minted, unavailable: .voucherUnavailable)
+    }
+
+    /// Mint `quantity` compute-credit gift cards. Same batching, same persist-first rule, and the same arbiter as a badge voucher —
+    /// which is the point: one voucher id can only ever be flipped once no matter which family it belongs to, so a code cannot be
+    /// redeemed twice by trying it first as a badge and then as credits.
+    ///
+    /// `creditsAmount` is a pack face value (`PopopxCreditPlan.giftPacks`), never a number typed by a user: a freely typed amount
+    /// would turn a gift card into a money-transfer instrument, which is exactly the 3.1.1 line the red packet feature stays under.
+    func mintCredit(creditsAmount: Int, quantity: Int, source: PopopxVoucherSource) throws -> [PopopxNodeVoucher] {
+        loadIfNeeded()
+        guard creditsAmount > 0 else { throw PopopxBadgeCreditsError.creditVoucherUnavailable }
+        let nowMs = try preparedBatch(quantity: quantity, unavailable: .creditVoucherUnavailable)
+        let minted = (0 ..< quantity).map { _ in
+            PopopxNodeVoucher(
+                voucherId: Self.newVoucherId(),
+                period: nil,
+                creditsAmount: creditsAmount,
+                state: .unused,
+                mintedAtMs: nowMs,
+                transactionId: source.transactionId,
+                jwsDigest: source.jwsDigest,
+                codeDigest: nil,
+                redeemedAtMs: nil,
+                grantBase64URL: nil
+            )
+        }
+        return try commit(minted, unavailable: .creditVoucherUnavailable)
+    }
+
+    /// The batch gates both mints share, returning the mint timestamp.
+    private func preparedBatch(quantity: Int, unavailable: PopopxBadgeCreditsError) throws -> Int64 {
+        guard quantity >= 1, quantity <= PopopxCommerceLimits.maximumVouchers else { throw unavailable }
+        guard issued.count + quantity <= PopopxCommerceLimits.maximumVouchers else { throw unavailable }
+        return Int64(Date().timeIntervalSince1970 * 1_000)
+    }
+
+    /// Append rows to the table and persist them. Persist first, then return the code: if a voucher returned to the UI was never
+    /// written into the Keychain, the user would see it gone the next time they enter this panel,
+    /// while that voucher's StoreKit receipt has already been finished — this is the exact shape of "paid and received nothing".
+    private func commit(_ minted: [PopopxNodeVoucher], unavailable: PopopxBadgeCreditsError) throws -> [PopopxNodeVoucher] {
         issued.append(contentsOf: minted)
-        // Persist first, then return the code: if a voucher returned to the UI was never written into the Keychain, the user would see it gone the next time they enter this panel,
-        // while that voucher's StoreKit receipt has already been finished — this is the exact shape of "paid and received nothing".
         guard PopopxCommerceKeychain.encode(issued, .vouchers) else {
             issued.removeAll(where: { minted.contains($0) })
             throw PopopxBadgeCreditsError.keychainUnavailable
@@ -112,10 +151,26 @@ actor PopopxP2PVoucherVault {
         return minted
     }
 
+    private static func newVoucherId() -> String { UUID().uuidString.lowercased() }
+
+    /// The unused vouchers of one family. Both mints write one table, so a list that shows only credits (or only badges) has to ask
+    /// by family — filtering by `state` alone would offer a credit card to the badge gift sheet and vice versa.
+    func creditVouchers(state: PopopxVoucherState? = nil) -> [PopopxNodeVoucher] {
+        loadIfNeeded()
+        return issued.filter { $0.isCreditVoucher && (state == nil || $0.state == state) }
+    }
+
     func vouchers(state: PopopxVoucherState? = nil) -> [PopopxNodeVoucher] {
         loadIfNeeded()
-        guard let state else { return issued }
-        return issued.filter { $0.state == state }
+        if let state { return issued.filter { $0.state == state } }
+        return issued
+    }
+
+    /// Badge vouchers only — the entry point every badge call site uses, so "which rows may become a `PPX1-` code"
+    /// is answered in one place instead of at each `.filter { $0.period != nil }`.
+    func badgeVouchers(state: PopopxVoucherState? = nil) -> [PopopxNodeVoucher] {
+        loadIfNeeded()
+        return issued.filter { !$0.isCreditVoucher && (state == nil || $0.state == state) }
     }
 
     func voucher(voucherId: String) -> PopopxNodeVoucher? {
@@ -145,7 +200,8 @@ actor PopopxP2PVoucherVault {
 
     // MARK: Anti-double-spend arbitration
 
-    /// The only redemption entry point. Returns the grant or nil **synchronously**, because an actor's reentrancy points are only at `await`,
+    /// The badge redemption entry point — one of the two, and the only place a badge voucher's state may ever be flipped.
+    /// Returns the grant or nil **synchronously**, because an actor's reentrancy points are only at `await`,
     /// and this function never awaits — checking the state, flipping the state, persisting and signing all complete inside one isolated execution.
     ///
     /// `codeDigestSource` is supplied by the caller: a one-time-link redemption passes "the nonce in the code + the invite link",
@@ -156,18 +212,40 @@ actor PopopxP2PVoucherVault {
     func authorizeRedemption(voucherId: String, codeDigestSource: String) -> PopopxBadgeGrant? {
         loadIfNeeded()
         guard let index = issued.firstIndex(where: { $0.voucherId == voucherId }),
-              issued[index].state == .unused
+              issued[index].state == .unused,
+              // A credit voucher has no period, so it cannot be authorised as a badge — the guard is the second lock,
+              // the first being that a `PPXC1-` code never decodes into a `PopopxRedeemEnvelope` at all.
+              let period = issued[index].period
         else { return nil }
         let nowMs = Int64(Date().timeIntervalSince1970 * 1_000)
-        let period = issued[index].period
         // This line computes "now + N days" on the **giver's** machine; what it enters is the signed payload, and its meaning is "how many days this voucher promises"
         // (`PopopxCommerceSignature.canonical` signs `expiresAtMs` along with it, so the payload cannot be changed).
         // The recipient does **not** use it as their own expiry time: `PopopxBadgeManager.activate(grant:)` takes
         // `grant.period` and recomputes `max(this device's current expiry, now) + days` on the recipient's side —
         // otherwise a voucher sitting in the chat for three days would leave the recipient three days short, and their remaining period would be overwritten by this voucher's date.
         let expiresAtMs = nowMs + Int64(period.days * 86_400) * 1_000
-        // Flip the state to redeemed and persist it first, then sign and return. In the reverse order
-        // a failed write would leave behind a voucher that is "already granted but still unused" — that is what a double spend really is.
+        guard markRedeemed(index: index, nowMs: nowMs, codeDigestSource: codeDigestSource) else { return nil }
+        return grant(voucherId: voucherId, period: period, grantedAtMs: nowMs, expiresAtMs: expiresAtMs)
+    }
+
+    /// The credit twin of `authorizeRedemption`, and the same single non-suspending actor turn: check, flip, persist, sign.
+    /// There is no expiry field at all — Compute Credits do not expire, and inventing `expiresAtMs = 0` here would give
+    /// "when does this run out" a second answer for the one family that has none.
+    func authorizeCreditRedemption(voucherId: String, codeDigestSource: String) -> PopopxCreditsGrant? {
+        loadIfNeeded()
+        guard let index = issued.firstIndex(where: { $0.voucherId == voucherId }),
+              issued[index].state == .unused,
+              let amount = issued[index].creditsAmount
+        else { return nil }
+        let nowMs = Int64(Date().timeIntervalSince1970 * 1_000)
+        guard markRedeemed(index: index, nowMs: nowMs, codeDigestSource: codeDigestSource) else { return nil }
+        return signedCreditGrant(voucherId: voucherId, creditsAmount: amount, grantedAtMs: nowMs)
+    }
+
+    /// Flip one row to `redeemed` and persist it before anything is signed. In the reverse order
+    /// a failed write would leave behind a voucher that is "already granted but still unused" — that is what a double spend really is.
+    /// Returns false when the row was reverted, meaning the caller must hand back nil.
+    private func markRedeemed(index: Int, nowMs: Int64, codeDigestSource: String) -> Bool {
         issued[index].state = .redeemed
         issued[index].redeemedAtMs = nowMs
         issued[index].codeDigest = PopopxCommerceSignature.shortDigest(codeDigestSource)
@@ -176,9 +254,9 @@ actor PopopxP2PVoucherVault {
             // than that they hold a grant the local record no longer acknowledges.
             issued[index].state = .unused
             issued[index].redeemedAtMs = nil
-            return nil
+            return false
         }
-        return grant(voucherId: voucherId, period: period, grantedAtMs: nowMs, expiresAtMs: expiresAtMs)
+        return true
     }
 
     /// The grant text: the canonical string of `grant` contains only four fields (voucher id / period / issued at / expires at),
@@ -202,6 +280,27 @@ actor PopopxP2PVoucherVault {
             period: period,
             grantedAtMs: grantedAtMs,
             expiresAtMs: expiresAtMs,
+            giverPublicKey: publicKey,
+            signature: signature
+        )
+    }
+
+    /// The credit twin of `grant(...)`: three fields (voucher id / amount / issued at), and `kind: "credit_grant"` so a signature
+    /// taken over a badge grant can never verify as one over credits. The same empty-public-key rule applies.
+    private func signedCreditGrant(voucherId: String, creditsAmount: Int, grantedAtMs: Int64) -> PopopxCreditsGrant? {
+        let publicKey = PopopxCommerceSignature.localPublicKeyBase64URL()
+        guard !publicKey.isEmpty,
+              let signature = PopopxCommerceSignature.signatureBase64URL(
+                  for: PopopxCommerceSignature.canonical(
+                      kind: "credit_grant",
+                      parts: [voucherId, String(creditsAmount), String(grantedAtMs)]
+                  )
+              )
+        else { return nil }
+        return PopopxCreditsGrant(
+            voucherId: voucherId,
+            creditsAmount: creditsAmount,
+            grantedAtMs: grantedAtMs,
             giverPublicKey: publicKey,
             signature: signature
         )
@@ -234,5 +333,26 @@ actor PopopxP2PVoucherVault {
     func sourceOfBadge(voucherId: String) -> (period: PopopxNodeBadgePeriod, grantedAt: Date)? {
         guard let grant = received[voucherId] else { return nil }
         return (grant.period, Date(timeIntervalSince1970: Double(grant.grantedAtMs) / 1_000))
+    }
+
+    /// Storing a credit grant: verify first, then write, same rule as `record(_:)` — a forged grant that gets into the local record
+    /// would let the later crediting add balance nobody paid for, and this time the thing at stake is the number itself.
+    @discardableResult
+    func recordCredit(_ grant: PopopxCreditsGrant) -> Bool {
+        loadIfNeeded()
+        guard grant.isSignatureValid else { return false }
+        receivedCredits[grant.voucherId] = grant
+        return PopopxCommerceKeychain.encode(receivedCredits, .creditGrants)
+    }
+
+    func creditGrant(voucherId: String) -> PopopxCreditsGrant? {
+        loadIfNeeded()
+        return receivedCredits[voucherId]
+    }
+
+    /// All valid credit grants on the receiving side, for the reconciliation list.
+    func receivedCreditGrants() -> [PopopxCreditsGrant] {
+        loadIfNeeded()
+        return receivedCredits.values.sorted { $0.grantedAtMs > $1.grantedAtMs }
     }
 }

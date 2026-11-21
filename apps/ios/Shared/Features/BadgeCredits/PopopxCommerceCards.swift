@@ -60,14 +60,16 @@ struct PopopxCommerceCardContext: Hashable {
 /// Which card a text message should render as inside the conversation flow.
 enum PopopxCommerceContent: Hashable {
     case gift(PopopxGiftCardPayload)
+    case creditGift(PopopxCreditGiftPayload)
     case packet(PopopxRedPacketPayload)
     case channel(PopopxChannelAccessPayload)
 
-    /// One decision used for bubble routing: if it resembles none of the three, return nil and let the message take the plain-text branch.
-    /// The order has nothing to do with correctness (the three hosts differ from each other); the channel comes last because it looks least like 'a card you tap'.
+    /// One decision used for bubble routing: if it resembles none of these, return nil and let the message take the plain-text branch.
+    /// The order has nothing to do with correctness (every host differs from each other, so at most one parse can succeed); the channel comes last because it looks least like 'a card you tap'.
     static func detect(in text: String) -> PopopxCommerceContent? {
         if let packet = PopopxRedPacketPayload.parse(from: text) { return .packet(packet) }
         if let gift = PopopxGiftCardPayload.parse(from: text) { return .gift(gift) }
+        if let creditGift = PopopxCreditGiftPayload.parse(from: text) { return .creditGift(creditGift) }
         if let channel = PopopxChannelAccessPayload.parse(from: text) { return .channel(channel) }
         return nil
     }
@@ -81,6 +83,10 @@ enum PopopxCommerceContent: Hashable {
             payload.note.isEmpty
                 ? String(format: NSLocalizedString("Badge gift card, %lld days, tap to redeem.", comment: "POPOPX commerce VoiceOver"), payload.period.days)
                 : String(format: NSLocalizedString("Badge gift card, %1$lld days, message: %2$@. Tap to redeem.", comment: "POPOPX commerce VoiceOver"), payload.period.days, payload.note)
+        case let .creditGift(payload):
+            payload.note.isEmpty
+                ? String(format: NSLocalizedString("Compute Credits gift card, %lld credits, tap to redeem.", comment: "POPOPX commerce VoiceOver"), payload.creditsAmount)
+                : String(format: NSLocalizedString("Compute Credits gift card, %1$lld credits, message: %2$@. Tap to redeem.", comment: "POPOPX commerce VoiceOver"), payload.creditsAmount, payload.note)
         case let .packet(payload):
             payload.recipients > 1
                 ? String(format: NSLocalizedString("Compute Credits red packet, %1$lld credits split %2$lld ways. Tap to open.", comment: "POPOPX commerce VoiceOver"), payload.amount, payload.recipients)
@@ -216,7 +222,10 @@ struct PopopxGiftCardBubble: View {
                                    ink: PopopxPalette.successInk)
         case let .some(.failed(error)):
             PopopxCommerceCardNote(systemImage: "xmark.seal", text: gloss(error), ink: PopopxPalette.dangerInk)
-        case .some(.initiated), .none:
+        // `.redeemedCredits` shares the "still offers the button" branch rather than printing a success line: outcomes are keyed by voucher id,
+        // and a voucher id belongs to exactly one family, so a credit outcome landing on a badge card means the table is confused —
+        // and a button the vault will refuse is a smaller lie than this card claiming somebody else's number.
+        case .some(.initiated), .some(.redeemedCredits), .none:
             PopopxButton(opening ? Copy.sending : Copy.redeem,
                          systemImage: opening ? nil : "key.fill",
                          role: .secondary,
@@ -250,6 +259,111 @@ struct PopopxGiftCardBubble: View {
         case .connectionUnavailable: Copy.glossUnreachable
         case .voucherAlreadyRedeemed: Copy.glossAlready
         case .signalRejected: Copy.rejected
+        default: error.errorDescription ?? Copy.glossGeneric
+        }
+    }
+}
+
+// MARK: - Compute-credit gift card
+
+/// A compute-credit gift card received in a conversation. Same shape as `PopopxGiftCardBubble` on purpose — the two families differ in what they
+/// hand over (a number vs a deadline) and in nothing else, so one screenful read the other way round would be a design bug, not a difference.
+struct PopopxCreditGiftBubble: View {
+    let payload: PopopxCreditGiftPayload
+    let context: PopopxCommerceCardContext
+
+    @State private var credits = PopopxCreditsManager.shared
+    @State private var router = PopopxSilentSignalingRouter.shared
+    @State private var opening = false
+    @State private var immediate: PopopxRedemptionOutcome?
+
+    var body: some View {
+        PopopxCommerceCardSurface {
+            PopopxCommerceCardHeader(
+                systemImage: "giftcard.fill",
+                title: Copy.creditTitle,
+                caption: payload.note.isEmpty ? Copy.creditCaption : Copy.note(payload.note),
+                ink: PopopxPalette.meshInk
+            )
+            amountLine
+            Divider().overlay(PopopxPalette.separator)
+            state
+        }
+        .onAppear { credits.loadIfNeeded() }
+    }
+
+    /// The face value, printed with the same formatter the red packet and the ledger use, so "100 Compute Credits" is one sentence in this app and not three.
+    private var amountLine: some View {
+        Text(verbatim: String(format: PopopxCommerceCopy.creditsAmountFormat, payload.creditsAmount))
+            .font(PopopxType.metric)
+            .foregroundStyle(PopopxPalette.label)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    @ViewBuilder private var state: some View {
+        if !payload.isSignatureValid {
+            PopopxCommerceCardNote(systemImage: "xmark.seal", text: Copy.rejected, ink: PopopxPalette.dangerInk)
+        } else if credits.hasRedeemed(voucherId: payload.voucherId) {
+            PopopxCommerceCardNote(systemImage: "checkmark.seal.fill", text: Copy.redeemedHere, ink: PopopxPalette.successInk)
+        } else if !context.incoming {
+            PopopxCommerceCardNote(systemImage: "arrow.up.right", text: Copy.sentByYou, ink: PopopxPalette.labelSecondary)
+        } else {
+            switch context.target {
+            case .none:
+                PopopxCommerceCardNote(systemImage: "eye", text: Copy.readOnly, ink: PopopxPalette.labelSecondary)
+            case .some(.group):
+                PopopxCommerceCardNote(systemImage: "person.2", text: Copy.creditGroupUnsupported, ink: PopopxPalette.labelSecondary)
+            case .some(.contact):
+                awaitingOrAction
+            }
+        }
+    }
+
+    @ViewBuilder private var awaitingOrAction: some View {
+        switch resolvedOutcome {
+        case .some(.redeemedCredits(let amount, _)):
+            PopopxCommerceCardNote(systemImage: "checkmark.seal.fill",
+                                   text: Copy.creditRedeemed(amount),
+                                   ink: PopopxPalette.successInk)
+        case let .some(.failed(error)):
+            PopopxCommerceCardNote(systemImage: "xmark.seal", text: gloss(error), ink: PopopxPalette.dangerInk)
+        // A badge outcome on a credit card is the same impossible pairing as the reverse case in `PopopxGiftCardBubble`: the button stays,
+        // and the vault remains the only thing that decides whether a second redemption can happen.
+        case .some(.redeemed), .some(.initiated), .none:
+            PopopxButton(opening ? Copy.sending : Copy.redeem,
+                         systemImage: opening ? nil : "key.fill",
+                         role: .secondary,
+                         fullWidth: true,
+                         isLoading: opening) {
+                await redeem()
+            }
+        }
+    }
+
+    private var resolvedOutcome: PopopxRedemptionOutcome? {
+        immediate ?? router.outcomesByVoucher[payload.voucherId]
+    }
+
+    private func redeem() async {
+        guard case let .contact(contactId) = context.target else { return }
+        opening = true
+        immediate = nil
+        let outcome = await router.redeemCreditInChat(payload, contactId: contactId)
+        if case .initiated = outcome {
+            PopopxHaptics.notice(.warning)
+        } else {
+            immediate = outcome
+            PopopxHaptics.notice(.error)
+        }
+        opening = false
+    }
+
+    private func gloss(_ error: PopopxBadgeCreditsError) -> String {
+        switch error {
+        case .connectionUnavailable: Copy.glossUnreachable
+        case .voucherAlreadyRedeemed: Copy.glossAlready
+        case .signalRejected: Copy.rejected
+        case .creditVoucherUnavailable: PopopxCommerceCopy.errorCreditVoucherUnavailable
         default: error.errorDescription ?? Copy.glossGeneric
         }
     }
@@ -501,6 +615,14 @@ private enum Copy {
     static let glossUnreachable = NSLocalizedString("Cannot reach the other device: the link may already have expired.", comment: "POPOPX commerce card")
     static let glossAlready = NSLocalizedString("This voucher has already been redeemed.", comment: "POPOPX commerce card")
     static let glossGeneric = NSLocalizedString("This did not complete; you can try again later.", comment: "POPOPX commerce card")
+
+    // compute-credit gift card. The sentences that name the thing the user holds are their own; every sentence that only states a state
+    // ("already redeemed on this device", "cannot reach the other device") is reused from the gift card above, because a near-duplicate
+    // source sentence in one shared table buys nothing and costs one more translation to keep in step.
+    static let creditTitle = NSLocalizedString("Compute Credits gift card", comment: "POPOPX credit gift card bubble")
+    static let creditCaption = NSLocalizedString("A Compute Credits gift card sent by the other person", comment: "POPOPX credit gift card bubble")
+    static func creditRedeemed(_ credits: Int) -> String { String(format: NSLocalizedString("%lld Compute Credits added.", comment: "POPOPX credit gift card bubble"), credits) }
+    static let creditGroupUnsupported = NSLocalizedString("Compute Credits gift cards can only be redeemed in a one-to-one chat.", comment: "POPOPX credit gift card bubble")
 
     // red packet
     static let open = NSLocalizedString("Open the packet", comment: "POPOPX red packet button")

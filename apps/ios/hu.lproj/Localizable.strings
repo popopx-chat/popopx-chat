@@ -2,6 +2,11 @@
 " (can be copied)" = " (másolható)";
 
 /* No comment provided by engineer. */
+"A gift card adds nothing to your own balance. The credits belong to the device that redeems the code." = "Az ajándékutalvány semmit nem ad hozzá a saját egyenlegedhez. A kredit azt az eszközt illeti, amelyik beváltja a kódot.";
+"Credits gift card" = "Számítási kredit ajándékutalvány";
+"No gift cards yet. Buy one above, or create one from the credits you already have." = "Még nincs ajándékutalványod. Vegyél egyet felül, vagy hozz létre egyet a már meglévő kreditjeidből.";
+"Paste this whole string where the app asks for a redemption code: the grouping is only for readability and spaces make no difference, but it is case-sensitive — paste or scan it, do not retype it character by character." = "Illeszd be ezt a teljes karakterláncot ott, ahol az alkalmazás váltókódot kér: a csoportosítás csak az olvashatóságnak szól és a szóközök nem számítanak, de kis-nagybetű-érzékeny – illeszd be vagy olvasd be, ne írjad át karakterről karakterre.";
+"Your balance was reduced, but this device could not create the gift cards yet. They appear the next time the secure store can be written." = "Az egyenleged csökkent, de ez az eszköz még nem tudta létrehozni az ajándékutalványokat. Akkor jelennek meg, amikor a biztonságos tár újra írható.";
 "_italic_" = "\\_dőlt_";
 
 /* No comment provided by engineer. */
@@ -8767,7 +8772,6 @@ alert title */
 "A free channel needs no credits and leaves no ledger entries — just open it." = "Az ingyenes csatornának nem kell kredit, és nem hagy bejegyzést a naplóban – csak nyisd meg.";
 "A group has no profile on any server: it exists only on its members' devices. Set the name and the avatar first, then decide who to invite." = "A csoportnak nincs profilja egyetlen szerveren sem: csak a tagok eszközein létezik. Előbb a nevet és az avatart állítsd be, aztán döntsd el, kit hívsz meg.";
 "A location message cannot be added while the draft is being rewritten, forwarded, recorded as a live message or already has an attachment." = "Helyzetüzenet nem adható hozzá, amíg a puffer újrafogalmazás alatt áll, továbbítás alatt van, élő üzenetként rögzül, vagy már van csatolmánya.";
-"A long string that starts with PPX1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails." = "Hosszú karakterlánc, PPX1- kezdetű. Illeszd be, ne írjad át kézzel: kis-nagybetű-érzékeny, és egyetlen hibás karakter sikertelen ellenőrzést jelent.";
 "A mesh pairing request from a device in the same room appears here." = "Itt jelenik meg az ugyanabban a helyiségben lévő eszköz Mesh-párosítási kérelme.";
 "A new random profile card joins the group, and the usual profile card of this device does not appear in the member list." = "Egy új, véletlenszerű profilkártya lép a csoportba, és az eszköz szokásos profilkártyája nem jelenik meg a taglistában.";
 "A profile page is already open — close it first" = "Már nyitva van egy profiloldal – előbb zárd be";
@@ -9294,13 +9298,11 @@ alert title */
 "Offline messages go over the Bluetooth mesh relay, up to 7 hops." = "Az offline üzenetek a Bluetooth Mesh átjátszón mennek, legfeljebb 7 ugrásnyit.";
 "Offline: POPOPX Bluetooth mesh" = "Offline: POPOPX Bluetooth Mesh";
 "On" = "Be";
-"On success the badge lights up automatically, even if this page has already been closed." = "Sikernél a jelvény automatikusan aktiválódik, akkor is, ha ez az oldal már be van zárva.";
 "On trial" = "Próbaidőszakon";
 "On: the 10th wrong entry silently runs the exact same wipe and rebuild flow as the emergency erase passcode, and no warning appears on screen first." = "Be: a 10. hibás bevitel csendben ugyanazt a törlési és újjáépítési folyamatot futtatja le, mint a vésztörlési kód, és előtte a képernyőn nincs figyelmeztetés.";
 "On: while a duress code exists, entering it takes the erasure path. Turning this off deletes the duress code record on the spot." = "Be: amíg létezik kényszer kód, annak beírása a törlési utat járja be. Kikapcsolása a kényszer kód naplóját helyben törli.";
 "Once claimed, this capsule grows in the top bar and keeps breathing for %lld days." = "Az igényelt kapszula a felső sávban nő, és %lld napig pulzál.";
 "Once data is wiped by the duress code it cannot be recovered: no backup prompt, no undo, no recovery channel. The drill page will not let you try it once, and cannot." = "Ha a kényszer kód törli az adatokat, azok visszahozhatatlanok: nincs mentés felhívás, nincs visszavonás, nincs helyreállítási csatorna. A gyakorló oldal egyszer sem engedi kipróbálni, és nem is tudja.";
-"Once that authorization checks out, the badge lights up on this device and the one-time connection is deleted." = "Amint a jogosultság ellenőrzése rendben van, a jelvény aktiválódik ezen az eszközön, és az egyszeri kapcsolat törlődik.";
 "Once they accept, this device checks that the voucher has not been redeemed yet and signs an authorization back." = "Az elfogadásuk után ez az eszköz ellenőrzi, hogy az utalvány nincs-e már beváltva, és visszaír egy jogosultság-aláírást.";
 "Once this panel is closed there is no way left on this device to show these 12 words again, unless next time you still pass the verification gate: type the current entry passcode correctly, or, while biometric quick unlock is on, let the machine recognise you. Please copy them onto paper right now: no screenshot, no typing them into any cloud note, and no relying on the system clipboard. For that reason this panel does not allow selecting the text, because a selection may end up in the clipboard, and the clipboard can be read by other apps and can sync to other devices through iCloud." = "Ha ezt a panelt bezárod, ezen az eszközön többé nem jelenítheted meg újra ezt a 12 szót, hacsak legközelebb sem mész át az ellenőrzési kapun: írd be helyesen a jelenlegi belépési kódot, vagy – ha a biometrikus gyors feloldás be van kapcsolva – hadd ismerjen fel az eszköz. Kérjük, most írd át őket papírra: ne képernyőképpel, ne valamelyik felhős jegyzetbe gépelve, és ne a rendszer vágólapjára támaszkodva. Ezért a panel nem teszi lehetővé a szöveg kijelölését, mert a kijelölés felkerülhet a vágolapra, a vágólapot pedig más alkalmazások is elolvashatják, és iCloud-on keresztül másik eszközre is szinkronizálódhat.";
 "One annual tier; renew any time before it expires" = "Egy éves szint; megújítás bármikor a lejárat előtt";
@@ -9401,7 +9403,6 @@ alert title */
 "Recenter on current location" = "Központosítás a jelenlegi helyzetre";
 "Reconciliation digest" = "Elszámolási kivonat";
 "Red packets nobody finished claiming" = "Piros borítékok, amelyek igénylését senki nem fejezte be";
-"Redeem a badge voucher" = "Jelvényutalvány beváltása";
 "Redeem request sent — waiting for the other side to confirm" = "Beváltási kérelem elküldve – a másik fél megerősítésére vár";
 "Redeem with Compute Credits · %1$lld vouchers · %2$lld days each · %3$lld credits" = "Beváltás számítási kredittel · %1$lld utalvány · egyenként %2$lld nap · %3$lld kredit";
 "Redeemed · badge lit for %lld days" = "Beváltva · a jelvény %lld napra aktiválva";
@@ -9576,7 +9577,6 @@ alert title */
 "The claim is kept in its own Keychain item on this device (readable only here, valid after the first unlock). No device identifier is uploaded." = "Az igénylést az eszköz saját Kulcscsomó bejegyzésében tároljuk (csak itt olvasható, az első feloldás után érvényes). Eszköz-azonosítót nem töltünk fel.";
 "The clipboard holds an addable link" = "A vágólap hozzáadható hivatkozást tart";
 "The clipboard is empty." = "A vágólap üres.";
-"The clipboard text does not look like a redemption code (it must start with PPX1-). It has been placed in the field — check it, then tap Redeem again." = "A vágólapon lévő szöveg nem beváltó kódnak tűnik (PPX1- kezdetűnek kell lennie). Behelyeztük a mezőbe – ellenőrizd, aztán koppints újra a Beváltás gombra.";
 "The connection is still being made, please try again later." = "A kapcsolat még létrehozás alatt áll; próbáld később újra.";
 "The content is empty." = "A tartalom üres.";
 "The core does not accept some of the characters in the group name. Fixing it removes them." = "A mag nem fogad el néhány karaktert a csoport nevéből. A javítás eltávolítja őket.";
@@ -9900,7 +9900,6 @@ alert title */
 "Why this prompt is not counted" = "Miért nem számít bele ez a kérés";
 "Wi-Fi access has been denied" = "A Wi-Fi hozzáférés letiltva";
 "Wishing you prosperity" = "Jó szerencsét és bőséget";
-"With a redemption code, light up on this device the badge the other side gifted." = "Egy beváltó kóddal a másik fél által ajándékozott jelvényt aktiválod ezen az eszközön.";
 "With this level on you accept two things: someone who has an unlocked phone and 10 chances may wipe your identities for you, and you may count to 10 in the dark yourself. The price of an accidental touch, a family member pressing around, a child playing with it, or typing your own mnemonic phrase wrong ten times in a row, is carried by this one deliberate tap." = "Ha ez a szint be van kapcsolva, két dolgot fogadsz el: valaki, akinek feloldott telefonja van és tíz esélye, törölheti a személyazonosságaid, és te magad is tízszer egymás után elírhatod. Egy véletlen érintés, egy családtag matatása, egy gyerek játéka vagy a saját visszaállító kifejezésed tíz egymás utáni elírásának ára egyetlen, szándékos koppintásban fizetődik.";
 "Working…" = "Dolgozás…";
 "Would not trigger a lock" = "Nem váltott ki zárolást";
@@ -9953,3 +9952,34 @@ alert title */
 "[Top-secret view-once] Open after biometrics" = "[Szigorúan titkos, olvasás után megsemmisülő] Megtekinthető biometrikus ellenőrzés után";
 "[Top-secret security alert] %@; that top-secret message was destroyed in place." = "[Szigorúan titkos biztonsági riasztás] %@; az a szigorúan titkos üzenet a helyszínen megsemmisült.";
 "Neither Bluetooth nor the public network is available — %lld messages waiting to send" = "Sem a Bluetooth, sem a nyilvános hálózat nem érhető el — %lld üzenet vár küldésre";
+"%lld Compute Credits added." = "%lld számítási kredit jóváírva.";
+"%lld Compute Credits gift card" = "%lld számítási kredit értékű ajándékutalvány";
+"A Compute Credits gift card sent by the other person" = "A másik fél által küldött számítási kredit ajándékutalvány";
+"A long string that starts with PPX1- or PPXC1-. Paste it; do not retype it by hand: it is case-sensitive and one wrong character means verification fails." = "Hosszú karakterlánc, PPX1- vagy PPXC1- kezdetű. Illeszd be, ne írjad át kézzel: kis-nagybetű-érzékeny, és egyetlen hibás karakter sikertelen ellenőrzést jelent.";
+"Added %lld Compute Credits, written into this device's credit balance; they do not expire." = "%lld számítási kredit jóváírva az eszköz kredit-egyenlegére; nem járnak le.";
+"Apple is still confirming this purchase. The gift card appears as soon as it is confirmed." = "Az Apple még erősíti ezt a vásárlást. Az ajándékutalvány a megerősítés után rögtön megjelenik.";
+"Apple took the payment, but this device could not create the gift card yet. It is created the next time the secure store can be written." = "Az Apple megkapta a fizetést, de ez az eszköz egyelőre nem tudta létrehozni az ajándékutalványt. A következő alkalommal jön létre, amikor a biztonságos tár írható.";
+"Buy gift card" = "Ajándékutalvány vásárlása";
+"Compute Credits gift card" = "Számítási kredit ajándékutalvány";
+"Compute Credits gift card, %1$lld credits, message: %2$@. Tap to redeem." = "Számítási kredit ajándékutalvány, %1$lld kredit, üzenet: %2$@. Koppints a beváltáshoz.";
+"Compute Credits gift card, %lld credits, tap to redeem." = "Számítási kredit ajándékutalvány, %lld kredit, koppints a beváltáshoz.";
+"Compute Credits gift cards can only be redeemed in a one-to-one chat." = "A számítási kredit ajándékutalványokat csak egy az egyben csevegésben lehet beváltani.";
+"Create %1$lld gift cards of %2$lld Compute Credits · %3$lld credits" = "Hozz létre %1$lld ajándékutalványt, egyenként %2$lld számítási kredit · %3$lld kredit";
+"Created %1$lld gift cards of %2$lld Compute Credits" = "Létrehozva %1$lld ajándékutalvány, egyenként %2$lld számítási kredit";
+"Created %1$lld × %2$lld compute-point gift cards" = "Létrehozva %1$lld × %2$lld számítási kredit ajándékutalvány";
+"Gift Credits" = "Kreditek ajándékozása";
+"Gift card created · %lld Compute Credits" = "Ajándékutalvány létrehozva · %lld számítási kredit";
+"Gift cards on this device" = "Ajándékutalványok ezen az eszközön";
+"On success the badge or the credits land on this device even if this page has already been closed." = "Sikernél ezen az eszközön aktiválódik a jelvény, illetve jóváíródnak a kreditek, akkor is, ha ez az oldal már be van zárva.";
+"Once that authorization checks out, this device records the badge or the credits, and the one-time connection is deleted." = "Amint a jogosultság ellenőrzése rendben van, ez az eszköz rögzíti a jelvényt vagy a krediteket, és az egyszeri kapcsolat törlődik.";
+"Or pay with the credits you already have" = "Vagy fizess a már meglévő kreditekkel";
+"Received %lld Compute Credits from a gift card." = "%lld számítási kredit érkezett ajándékutalványból.";
+"Received a compute-point gift card" = "Számítási kredit ajándékutalvány érkezett";
+"Recharge" = "Feltöltés";
+"Redeem a gift code" = "Ajándékkód beváltása";
+"Redeemed · %lld Compute Credits added" = "Beváltva · %lld számítási kredit jóváírva";
+"The clipboard text does not look like a redemption code (it must start with PPX1- or PPXC1-). It has been placed in the field — check it, then tap Redeem again." = "A vágólapon lévő szöveg nem beváltó kódnak tűnik (PPX1- vagy PPXC1- kezdetűnek kell lennie). Behelyeztük a mezőbe – ellenőrizd, aztán koppints újra a Beváltás gombra.";
+"This Compute Credits gift card is no longer available." = "Ez a számítási kredit ajándékutalvány már nem érhető el.";
+"With a redemption code, receive on this device what the other side gifted." = "Egy beváltó kóddal megkapod ezen az eszközön, amit a másik fél ajándékozott.";
+"🎁 [Compute Credits gift card] %1$lld · %2$@" = "🎁 [Számítási kredit ajándékutalvány] %1$lld · %2$@";
+"🎁 [Compute Credits gift card] %lld" = "🎁 [Számítási kredit ajándékutalvány] %lld";

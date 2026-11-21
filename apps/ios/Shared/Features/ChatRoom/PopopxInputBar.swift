@@ -538,6 +538,14 @@ enum PopopxPlusAction: String, CaseIterable, Identifiable {
     /// **Only direct chats should show this cell** - the gift card's redemption receipt travels over the direct-chat connection, and groups and channels have no matching destination,
     /// so the host filters it out with `plusActions` instead of putting up a button that can only report an error (see that parameter in init).
     case giftCard
+    /// Compute-credit gift card: pressing it closes the panel and the host presents `PopopxCreditsStoreView(contactId:)` on its gift segment,
+    /// where the user picks one of the cards this device holds and the card face grows a "send in this conversation" button.
+    /// **Direct chats only**, for the same reason as `.giftCard`: the credit redemption receipt travels over the direct-chat connection,
+    /// and a group has no destination for it.
+    ///
+    /// It opens the credits page instead of a dedicated picker on purpose: the unused-card list, the mint and the code face all already
+    /// live there, and a second picker would be a second place that has to keep agreeing with `PopopxP2PVoucherVault` about which cards exist.
+    case creditsGiftCard
 
     var id: String { rawValue }
 
@@ -553,6 +561,7 @@ enum PopopxPlusAction: String, CaseIterable, Identifiable {
         case .personalProfile: return "Profile page"
         case .redPacket: return "Red packet"
         case .giftCard: return "Gift card"
+        case .creditsGiftCard: return "Credits gift card"
         }
     }
 
@@ -566,6 +575,9 @@ enum PopopxPlusAction: String, CaseIterable, Identifiable {
         case .personalProfile: return "person.text.rectangle.fill"
         case .redPacket: return "gift"
         case .giftCard: return "giftcard.fill"
+        // The outline twin of the badge card's filled glyph: two gift cards, one family filled and one outlined, so the panel
+        // reads as "the same kind of thing, two kinds of value" without inventing a third metaphor.
+        case .creditsGiftCard: return "giftcard"
         }
     }
 }

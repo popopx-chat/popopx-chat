@@ -169,7 +169,7 @@ final class PopopxStoreKitManager {
         case .subscription(.annual): PopopxCommerceCopy.pricePerYear
         case .subscription(.monthly): PopopxCommerceCopy.pricePerMonth
         // Passes get no period suffix: they are not "monthly/yearly", that statement is made by the non-renewing declaration on the tier.
-        case .oneTimePass, .giftCard, .credits: nil
+        case .oneTimePass, .giftCard, .credits, .creditGiftCard: nil
         }
     }
 
@@ -281,7 +281,7 @@ final class PopopxStoreKitManager {
         let transactionId = Self.simulatedTransactionPrefix | UInt64.random(in: 0 ..< Self.simulatedTransactionPrefix)
         let expiresAtMs: Int64? = switch sku.kind {
         case let .subscription(period): mintedAtMs + Int64(period.days) * 86_400_000
-        case .oneTimePass, .giftCard, .credits: nil
+        case .oneTimePass, .giftCard, .credits, .creditGiftCard: nil
         }
         let receipt = PopopxStoreReceipt(
             transactionId: transactionId,
@@ -523,10 +523,12 @@ final class PopopxStoreKitManager {
             guard let sku = receipt.sku else { continue }
             switch sku.kind {
             case .subscription: subscriptionReceipts.append(receipt)
-            case .giftCard: giftReceipts.append(receipt)
+            // Both gift-card families mint a *card*, and this leg is their only repair for "Apple charged, the process died before the vault wrote":
+            // a consumable leaves both sequences the moment it is booked and finished, so a card already in hand cannot be minted twice here.
+            case .giftCard, .creditGiftCard: giftReceipts.append(receipt)
             // One-off duration packs (non-renewing subscriptions) do not enter the restore flow: Apple never makes a "restore non-renewing" promise,
             // and the duration it lit is already in this device's badge record; redelivering it once would give away a second block of duration.
-            case .oneTimePass, .credits: break   // Consumable credit top-ups work the same way; see the note above.
+            case .oneTimePass, .credits: break   // A credit top-up is a wallet number, not an item: `apply` books and finishes it in one step, and it is spent as soon as it lands, so there is nothing here to hand back.
             }
         }
         for receipt in subscriptionReceipts + giftReceipts { await notifyDeliveries(receipt) }

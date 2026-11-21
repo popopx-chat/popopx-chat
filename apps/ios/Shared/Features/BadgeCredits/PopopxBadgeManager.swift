@@ -248,7 +248,7 @@ final class PopopxBadgeManager {
             }
         case let .oneTimePass(period):
             await applyPass(receipt, period: period)
-        case .giftCard, .credits:
+        case .giftCard, .credits, .creditGiftCard:
             return
         }
     }
