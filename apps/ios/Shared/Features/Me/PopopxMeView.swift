@@ -158,7 +158,7 @@ struct PopopxMeView: View {
         // The badge's three exits (paywall / trial explanation / details) go through the top bar capsule's one carrier, and the detents belong to the carrier.
         // The paywall and the compute-credits center remain two parallel Sheets, not nesting: the compute-credits center row opens independently (above
         // `showsCreditsStore`), and when the paywall is open it attaches the "compute-credits center" layer itself.
-        // （`PopopxBadgePaywallView.swift:226`）。
+        // （`PopopxBadgePaywallView.swift:247`）。
         .popopxBadgeSheets($badgeSheet)
         // The destination page of the "add a new identity" shortcut: `CreateProfile` carries its own title and themed background
         // (`Shared/Views/Onboarding/CreateProfile.swift:121`, `:122`), so nothing is decorated twice here;

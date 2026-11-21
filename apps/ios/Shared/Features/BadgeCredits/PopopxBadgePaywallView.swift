@@ -45,16 +45,22 @@
 //  and be covered by the gate together with it. It sits in the **secondary action** slot: it is the exit for "spending an existing balance",
 //  not the entry for "new revenue", and presenting it as the main CTA would mislead users into thinking compute points can be gained out of thin air.
 //
-//  ### The sandbox purchase slot (exists only in Debug builds)
+//  ### The Debug settlement (no second button anywhere on this screen)
 //  The `.storekit` configuration file is injected only through Xcode's scheme; a package installed onto a real device with `xcrun devicectl device install app`
-//  and launched from the home screen does not carry it, so `Product.products(for:)` hits the real store and none of the 9 SKUs
-//  can be fetched, which makes every CTA on this screen dead (`.disabled(!store.isStoreReady)`),
-//  and the only tappable one just says "this product is temporarily unavailable (…)". To walk the commercial main path on a real device — pay → light up → land in Keychain →
-//  still present after a restart — there must be a second entry: `sandboxRow`'s dashed button →
-//  `PopopxStoreKitManager.purchaseSimulated(_:)` mints a receipt locally → the **same** `settle` →
-//  the same `grantPass → PopopxBadgeManager.activate`. The whole block is wrapped in `#if DEBUG`,
-//  so in the Release archive these symbols do not exist at all (only `Debug.xcconfig` has `SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG`).
-//  The production CTA's criterion and semantics are unchanged to the letter: the sandbox is an extra path, not a dead button made live.
+//  and launched from the home screen does not carry it, so `Product.products(for:)` hits the real store. Measured on device: 7 of the 12 SKUs
+//  `PopopxNodeBadgeSku` declares come back, the 5 newest ones (the two one-time passes and the three credit gift cards) do not exist in App Store Connect yet,
+//  and their tiers answered the main CTA with "this product is temporarily unavailable (…)".
+//  To walk the commercial main path on a real device — pay → light up → land in Keychain → still present after a restart —
+//  **the tier's own buy button** goes through `PopopxStoreKitManager.purchase(_:)`, which under `#if DEBUG` settles a SKU the store does not
+//  carry by `purchaseSimulated(_:)`: a locally minted receipt → the **same** `settle` → the same `grantPass → PopopxBadgeManager.activate`.
+//  There was once a dashed "Sandbox purchase" button under each card; it is deleted on purpose, because a side button means the tested tap
+//  and the shipped tap are two different pieces of code. The whole block is wrapped in `#if DEBUG`,
+//  so in the Release archive these symbols do not exist at all (only `Debug.xcconfig` has `SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG`)
+//  and `.productNotFound` is the answer again.
+//  What Release and Debug share character for character: the tier copy, the price line, the CTA's own slot and label, and the whole booking path
+//  after the result comes back. Two things differ, both by one line: `canPurchase` lets the button through in Debug even when the store answered
+//  nothing, and the toast says "this charge was not real" — read from the minted receipt (`PopopxStoreReceipt.isSimulatedSettlement`),
+//  never volunteered by the caller.
 //
 //  ⚠️ Xcode project integration: this file must be dragged into the POPOPX (iOS) target by hand. The red line forbids scripts from modifying project.pbxproj.
 
@@ -252,7 +258,8 @@ struct PopopxBadgePaywallView: View {
                     selection: $tab
                 )
 
-                if !store.isStoreReady {
+                if !canPurchase {
+                    // The same rule as the CTA's: this sentence and a live buy button must not appear together.
                     storeUnavailableNote
                 }
 
@@ -292,6 +299,17 @@ struct PopopxBadgePaywallView: View {
         }
         .padding(.top, PopopxMetrics.spaceXS)
         .accessibilityAddTraits(.isHeader)
+    }
+
+    /// Whether a tier's buy button may be tapped. Release asks the store, and an unloaded store greys the CTA out — that is the honest answer.
+    /// Debug additionally accepts "the store has nothing, but `purchase(_:)` can still settle it locally": a build installed without a
+    /// `.storekit` configuration would otherwise disable exactly the buttons that still have a working path behind them.
+    /// Turning the settlement off with the environment variable puts the button back under the same rule as Release, which is the point of the switch.
+    private var canPurchase: Bool {
+        #if DEBUG
+        if PopopxStoreKitManager.simulatedSettlementEnabled { return true }
+        #endif
+        return store.isStoreReady
     }
 
     private func tierCard(_ section: PopopxPaywallSection) -> some View {
@@ -336,8 +354,8 @@ struct PopopxBadgePaywallView: View {
                         .frame(height: PopopxMetrics.minHitTarget)
                         .background(PopopxPalette.card, in: .capsule)
                 }
-                .disabled(!store.isStoreReady || busySkuId != nil)
-                .opacity(store.isStoreReady ? 1 : 0.5)
+                .disabled(!canPurchase || busySkuId != nil)
+                .opacity(canPurchase ? 1 : 0.5)
                 .accessibilityLabel(Text(verbatim: "\(section.actionTitle) \(section.title)"))
             }
 
@@ -347,10 +365,6 @@ struct PopopxBadgePaywallView: View {
                     .foregroundStyle(PopopxPalette.onBrand.opacity(0.80))
                     .fixedSize(horizontal: false, vertical: true)
             }
-
-            #if DEBUG
-            sandboxRow(section)
-            #endif
         }
         .padding(PopopxMetrics.spaceM)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -442,13 +456,18 @@ struct PopopxBadgePaywallView: View {
         .background(PopopxPalette.separator.opacity(0.5), in: .rect(cornerRadius: PopopxMetrics.radiusControl))
     }
 
-    // MARK: Sandbox purchase (only Debug builds compile this whole section)
+    // MARK: Debug settlement note (only Debug builds compile this whole section)
 
     #if DEBUG
-    /// The explanation line at the top. Its criterion and the tier's button use **the same function** (`isMissingFromStore`),
-    /// so an inconsistent middle state like "the line says there is a sandbox but the card has no button" cannot appear.
+    /// The explanation line at the top, drawn when at least one tier of the segment on screen has no product.
+    /// It is a **note, not an entry point**: since `purchase(_:)` took over the local settlement there is nothing extra to tap here,
+    /// and the sentence exists so that the tap the user already makes is not read as an Apple transaction.
     /// Judged over the current segment's tiers: this line appears if any item in either family failed to come back — it explains "why the products cannot be read",
     /// which is independent of which particular item; explaining item by item would turn this segment into a log dump.
+    /// The CTA's own enablement does **not** read this (`canPurchase` answers that), and the two are deliberately out of step for one moment:
+    /// while the first product load is still in flight the button is already live in Debug and the note is not yet on screen.
+    /// Tying the button to the note would put the tap behind a label; tying the label to the button would hide the explanation exactly when
+    /// the store is slowest to answer, which is the case the sentence exists for.
     private var showsSandboxStrip: Bool {
         PopopxPaywallPlan.sections(tab: tab).contains { store.isMissingFromStore($0.sku) }
     }
@@ -482,8 +501,9 @@ struct PopopxBadgePaywallView: View {
     }
 
     /// The conclusion of this product load, spread verbatim on screen. The three causes must be tellable apart face to face on a real device:
-    /// `0/9 loaded` = the store gave nothing for the whole batch (no configuration file attached, offline), `7/9 · missing: …pass.30d, …pass.365d`
-    /// = only the non-renewing family failed to come back (product type / ASC configuration problem), `load error: …` = Apple threw an error.
+    /// `0/12 loaded` = the store gave nothing for the whole batch (no configuration file attached, offline), `7/12 · missing: …pass.30d, …pass.365d`
+    /// = only some families failed to come back (those identifiers do not exist in ASC yet), `load error: …` = Apple threw an error.
+    /// The denominator is read from `PopopxNodeBadgeSku.productIds`, so adding a SKU cannot leave this line claiming a different total than the app asked for.
     /// Troubleshooting from `missingProductIDs` alone (that one log line) needs Console, which is unrealistic on a real device.
     private var storeDiagnostics: String {
         if let error = store.lastLoadError { return "load error: \(error)" }
@@ -491,47 +511,6 @@ struct PopopxBadgePaywallView: View {
         let missing = store.missingProductIDs
         if !missing.isEmpty { line += " · missing: \(missing.joined(separator: ", "))" }
         return line
-    }
-
-    /// The sandbox exit on the tier card: drawn only when the store failed to give **this one** product, and always one slot below the production CTA.
-    ///
-    /// The production button's usability criterion (`!store.isStoreReady || busySkuId != nil`) is not changed by one word —
-    /// the sandbox is "an extra second path", not "a dead button made live". The latter would make the same gesture on Debug and Release
-    /// point at two different things, and that is exactly the kind of divergence hardest to reproduce on a real device.
-    ///
-    /// The dashed outline + hammer icon is deliberate visual separation: real-device screenshots get used as review evidence,
-    /// and a solid capsule that looks the same as "light up" would here be a commercial incident.
-    @ViewBuilder
-    private func sandboxRow(_ section: PopopxPaywallSection) -> some View {
-        if store.isMissingFromStore(section.sku) {
-            Button {
-                Task { await buySandboxed(section.sku) }
-            } label: {
-                HStack(spacing: PopopxMetrics.space2XS) {
-                    Image(systemName: "hammer.fill")
-                    Text(PopopxCommerceCopy.sandboxPurchaseAction)
-                    if busySkuId == section.sku.productId {
-                        ProgressView().controlSize(.small)
-                    }
-                }
-                .font(PopopxType.microTag)
-                .foregroundStyle(PopopxPalette.onBrand)
-                .padding(.horizontal, PopopxMetrics.spaceS)
-                .frame(height: PopopxMetrics.minHitTarget)
-                .frame(maxWidth: .infinity)
-                .overlay {
-                    RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl)
-                        .strokeBorder(PopopxPalette.onBrand.opacity(0.55), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
-                }
-                .contentShape(.rect(cornerRadius: PopopxMetrics.radiusControl))
-            }
-            .buttonStyle(.plain)
-            .disabled(busySkuId != nil)
-            .accessibilityLabel(Text(verbatim: "\(PopopxCommerceCopy.sandboxPurchaseAction) \(section.title)"))
-            // The XCUITest landing point. The whole sandbox path compiles only in Debug, so the Release archive does not contain this slot at all,
-            // and a test script asserting on it can therefore run only on debug builds — which is exactly the wanted effect.
-            .accessibilityIdentifier("popopx.badge.paywall.sandbox.\(section.sku.rawValue)")
-        }
     }
     #endif
 
@@ -568,37 +547,26 @@ struct PopopxBadgePaywallView: View {
 
     // MARK: Actions
 
+    /// The tier's one and only buy path, in Debug and in Release alike: hand the SKU to `PopopxStoreKitManager.purchase(_:)` and settle whatever comes back.
+    /// This page asks nothing about whether the store carries that product — who answers (Apple, or the Debug local settlement) is the manager's decision.
+    /// There used to be a second entry point here for the sandbox; it is gone on purpose, because a side button means the tap tested on a device
+    /// is not the tap that ships.
     private func buy(_ sku: PopopxNodeBadgeSku) async {
         guard busySkuId == nil else { return }
         busySkuId = sku.productId
         defer { busySkuId = nil }
         let result = await store.purchase(sku)
-        await settle(result, for: sku, simulated: false)
+        await settle(result, for: sku)
     }
 
-    #if DEBUG
-    /// The entry for the sandbox button. Its difference from `buy` is **only in the step that obtains the receipt** (`purchaseSimulated` mints one locally),
-    /// and once the receipt is in hand it goes through the same `settle`: the pass is still lit by `grantPass → PopopxBadgeManager.activate`,
-    /// it still writes the same Keychain slot, still the same single haptic and the same toast slot.
+    /// The on-screen close-off of one purchase (a real one, or the Debug settlement of a SKU the store does not carry).
     ///
-    /// Deliberately no second "sandbox accounting" written here: once there are two sets, what was tested on the device is no longer the set that ships.
-    private func buySandboxed(_ sku: PopopxNodeBadgeSku) async {
-        guard busySkuId == nil else { return }
-        busySkuId = sku.productId
-        defer { busySkuId = nil }
-        let result = await store.purchaseSimulated(sku)
-        await settle(result, for: sku, simulated: true)
-    }
-    #endif
-
-    /// The on-screen close-off of one purchase (a real one, or the Debug sandbox one).
-    ///
-    /// `simulated` changes exactly one thing: how the credit line is said — "this charge was not real" is a fact that must be spoken,
-    /// and letting a tester read a local simulation on a real device as an Apple transaction is worse than reading nothing at all.
+    /// How the credit line is said is read from the **receipt** (`isSimulatedSettlement`), not from an argument: "this charge was not real"
+    /// is a money fact, and a fact that depends on every caller volunteering it correctly is one that goes missing at the first call site added in a hurry.
+    /// Letting a tester read a local simulation on a real device as an Apple transaction is worse than reading nothing at all.
     /// The three steps of accounting, haptic, and jumping to the gift queue after success are the same code for both sources.
     private func settle(_ result: Result<PopopxStorePurchaseOutcome, PopopxBadgeCreditsError>,
-                        for sku: PopopxNodeBadgeSku,
-                        simulated: Bool) async {
+                        for sku: PopopxNodeBadgeSku) async {
         switch result {
         case let .success(.purchased(receipt)):
             // The one-time duration pack **must be lit on this transaction's return path, in the moment**. The criterion is this family's delivery path itself:
@@ -613,7 +581,7 @@ struct PopopxBadgePaywallView: View {
             }
             PopopxHaptics.notice(.success)
             #if DEBUG
-            if simulated {
+            if receipt.isSimulatedSettlement {
                 toast.show(Copy.sandboxPurchased(sku), kind: .encrypted)
             } else {
                 toast.show(Copy.purchased(sku), kind: .encrypted)

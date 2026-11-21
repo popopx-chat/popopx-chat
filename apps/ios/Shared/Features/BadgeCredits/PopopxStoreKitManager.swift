@@ -42,6 +42,18 @@ struct PopopxStoreReceipt: Hashable, Sendable {
     var sku: PopopxNodeBadgeSku? { PopopxNodeBadgeSku.sku(for: productId) }
 
     var digest: String { PopopxCommerceSignature.shortDigest(jwsRepresentation) }
+
+    #if DEBUG
+    /// The mark every locally minted receipt carries at its head. One definition, because the two ends of it — minting and judging —
+    /// disagreeing is how a test purchase starts reporting itself as an Apple one.
+    static let simulatedReceiptPrefix = "POPOPX-SANDBOX|"
+
+    /// Whether this receipt was minted on this device instead of handed over by Apple, read **from the receipt itself**.
+    /// A caller does not volunteer it: since the buy button took over the Debug settlement, by the time the result comes back
+    /// the page no longer knows which end answered, and "this charge was not real" is a money fact that cannot depend on
+    /// remembering to pass a flag. The transaction id's top nibble (`0xF`) says the same thing; this is the readable version.
+    var isSimulatedSettlement: Bool { jwsRepresentation.hasPrefix(Self.simulatedReceiptPrefix) }
+    #endif
 }
 
 /// The result of one `purchase` call. `.pending` is Ask to Buy or a family-purchase approval still waiting,
@@ -192,10 +204,21 @@ final class PopopxStoreKitManager {
             let loadBroke = productsLoadFailed || lastLoadError != nil
             let missing = self.missingProductIDs.joined(separator: " ")
             log.error("storekit: purchase refused for \(sku.productId, privacy: .public); loadBroke=\(loadBroke, privacy: .public) lastLoadError=\(self.lastLoadError ?? "none", privacy: .public) missing=[\(missing, privacy: .public)]")
-            // This rejection is not a dead end in Debug builds: before ever getting `.productNotFound` the paywall already
-            // shows the sandbox button according to `isMissingFromStore(_:)` (see the "Sandbox purchases" section below).
-            // This place deliberately does **not** auto-downgrade into a sandbox settlement — the real CTA must point at the same thing in Debug and Release,
-            // otherwise only someone reading the code would know about "tapped buy, but in fact paid nothing".
+            #if DEBUG
+            // Debug only, and it answers the **same tap** the user already made: rather than refusing and waiting for a second,
+            // Debug-only button to appear, the buy button itself settles locally. The reason is the one this line used to argue the other way with:
+            // a side button leaves the tier's real CTA on a path the tester never walks, so what passes on the device is not the code that ships.
+            // The safety of that reversal rests on three things, all kept here:
+            // **one**, the gate is compile-time `#if DEBUG` plus the runtime opt-out below, so a Release archive cannot reach this line;
+            // **two**, it only takes over the "Apple gave no product" case; anything that can go wrong later — the purchase sheet failing,
+            // a receipt that will not verify — is still reported by `purchaseResolved` as itself, unfaked and undiverted;
+            // **three**, "no money was actually charged" does not depend on the caller volunteering it — the locally minted receipt carries that itself
+            // (see `PopopxStoreReceipt.isSimulatedSettlement`), and the page says it in its own words.
+            if Self.simulatedSettlementEnabled {
+                log.notice("storekit: DEBUG settlement for \(sku.productId, privacy: .public) instead of a refusal; loadBroke=\(loadBroke, privacy: .public)")
+                return await purchaseSimulated(sku)
+            }
+            #endif
             return .failure(loadBroke ? .storeUnavailable : .productNotFound(sku.productId))
         }
         return await purchaseResolved(reloaded)
@@ -235,24 +258,43 @@ final class PopopxStoreKitManager {
     /// "this one was minted on this device, it does not exist on Apple's side at all", instead of having to reverse-engineer a digest to classify it.
     private static let simulatedTransactionPrefix: UInt64 = 0xF000_0000_0000_0000
 
+    /// Whether a Debug build may settle a SKU the store does not carry (`purchase(_:)` takes the local leg, and the pages
+    /// put the explanation on screen). Default is **on**, and the only way to turn it off is to launch with the
+    /// `POPOPX_DISABLE_SANDBOX_SETTLEMENT` environment variable set — a runtime switch rather than a code edit because the thing
+    /// worth reproducing is exactly the shape a device shows when nobody is watching: no local settlement, and then the real
+    /// `.productNotFound` sentence, the one that used to be all a tester got.
+    ///
+    /// A `static var` rather than a `let`: `ProcessInfo.environment` is only meaningful once the process has started, and a `let`
+    /// of a global-actor-isolated type initialises lazily anyway — saying it out loud is cheaper than letting whoever reads this guess.
+    static var simulatedSettlementEnabled: Bool {
+        ProcessInfo.processInfo.environment["POPOPX_DISABLE_SANDBOX_SETTLEMENT"] == nil
+    }
+
     /// "The store really does not have this item" and "we have not asked the store yet" are two different things; confusing them costs the paywall
-    /// a flash of the sandbox button on entry, gone 0.3 seconds later.
+    /// a flash of the sandbox note on entry, gone 0.3 seconds later.
     ///
     /// `lastLoadError != nil` also counts as "asked": `lastLoadAt` is only assigned on the **success** branch, so
     /// the "whole batch threw" shape (common on a real device with no configuration file attached: the store just answers with an internal Store error)
-    /// would never show the button if only `lastLoadAt` were trusted, and that is exactly the moment it is needed most.
+    /// would never show that note if only `lastLoadAt` were trusted, and that is exactly the moment it is needed most.
+    /// Since the buy button took over the local settlement, this function has one job left: deciding whether those two sentences belong on screen.
+    /// It is deliberately **not** the criterion for whether a tap is settled locally — that answer lives in `purchase(_:)`, and a page
+    /// that judged it too would put the same branch in two places that can disagree.
     func isMissingFromStore(_ sku: PopopxNodeBadgeSku) -> Bool {
         guard !isLoadingProducts else { return false }
         guard lastLoadAt != nil || lastLoadError != nil else { return false }
         return product(for: sku) == nil
     }
 
-    /// The second purchase path in Debug builds: **mint a receipt on this device**, and the booking code is not one line longer.
+    /// The Debug settlement behind the buy button: **mint a receipt on this device**, and the booking code is not one line longer.
     ///
     /// Why it exists (a disease measured on a real device, not hypothetical): the `.storekit` configuration file is only injected at launch
     /// by the Xcode scheme; the package installed onto a device with `xcrun devicectl device install app` does not carry it,
-    /// so `Product.products(for:)` hits the real/sandbox store and none of the 9 SKUs comes back,
-    /// and every button on the paywall and the compute-credit page is dead — the whole commercial main path cannot be tested one step further on a real device.
+    /// so `Product.products(for:)` hits the real store and answers for the seven SKUs App Store Connect knows about, while the five
+    /// newest ones (the two one-time passes and the three credit gift cards) come back missing and their tiers were dead buttons —
+    /// the whole commercial main path cannot be tested one step further on a real device.
+    ///
+    /// `purchase(_:)` calls this for the missing case; a caller should not pick it directly, because a page that offers it as its own
+    /// button tests a path the shipped build does not contain.
     ///
     /// Aligned with the real path item by item (that is the entire reason this function exists, and any deviation must be written above it):
     /// - **Same receipt shape**: exactly the same field semantics as `receipt(of:)`. `expiresAtMs` also follows the same family of rules —
@@ -287,7 +329,7 @@ final class PopopxStoreKitManager {
             transactionId: transactionId,
             originalTransactionId: transactionId,
             productId: sku.productId,
-            jwsRepresentation: "POPOPX-SANDBOX|\(sku.productId)|\(nonce)|\(mintedAtMs)",
+            jwsRepresentation: "\(PopopxStoreReceipt.simulatedReceiptPrefix)\(sku.productId)|\(nonce)|\(mintedAtMs)",
             purchasedAtMs: mintedAtMs,
             expiresAtMs: expiresAtMs,
             isRevoked: false

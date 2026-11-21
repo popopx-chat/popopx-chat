@@ -77,7 +77,7 @@ Node Badge** and an in-app virtual currency, **Compute Credits**.
 | 原先写进的收益点 | 代码现状（为什么不能写） | 撤走的位置 |
 |---|---|---|
 | 高并发中继路由优先调度 | **0 处实现**。全特性没有任何"按优先级选路/调度"的代码路径，客户端也不向中继声明优先级 | 本文件可粘贴块（本节上一版）；`grep -rln '调度\|priorit\|schedul' Shared/Features/BadgeCredits/ \| wc -l` = **0** |
-| 节点池每日动态轮换防关联 | **只有本地计数**。`PopopxCommerceLimits.nodeRotationSeconds = 15`（`PopopxBadgeCreditsModels.swift:73`）只是胶囊转圈与本机计数的**最小间隔**，真正的判定每 30 秒心跳最多一次（`PopopxBadgeManager.swift:108`），不发任何请求、不改任何中继地址 | `PopopxTrialWelcomeModal.swift:201`（原句"…中继地址定期轮换"→ 现为"节点状态面板"那一句）、`PopopxBadgePaywallView.swift`（原 `benefitRotation` 那条 bullet **整条删除**，收益清单现为 5 条 :410-414）、`PopopxBadgeDetailSheet.swift`（"遥测"→"节点状态面板"、"间隔"格改为 `≥ 15 秒`） |
+| 节点池每日动态轮换防关联 | **只有本地计数**。`PopopxCommerceLimits.nodeRotationSeconds = 15`（`PopopxBadgeCreditsModels.swift:73`）只是胶囊转圈与本机计数的**最小间隔**，真正的判定每 30 秒心跳最多一次（`PopopxBadgeManager.swift:108`），不发任何请求、不改任何中继地址 | `PopopxTrialWelcomeModal.swift:201`（原句"…中继地址定期轮换"→ 现为"节点状态面板"那一句）、`PopopxBadgePaywallView.swift`（原 `benefitRotation` 那条 bullet **整条删除**，收益清单现为 5 条 :424-428）、`PopopxBadgeDetailSheet.swift`（"遥测"→"节点状态面板"、"间隔"格改为 `≥ 15 秒`） |
 | 单文件最大 1GB 的加密传输配额 | **1GB 是无条件的既有上限，不是买来的**。`getMaxFileSize(.xftp:)` 无徽章时返回 `MAX_FILE_SIZE_XFTP = 1_073_741_824`；真正抬高上限的是既存的另一套 `LocalBadge`（supporter 2GB / legend 5GB），与本徽章无关 | 商店短句与本节可粘贴块都不提 1GB（`POPOPXChat/FileUtils.swift:31,365-375`） |
 
 撤完之后，**用户可见文本**里 `轮换 / 优先调度 / 1GB` 三个词是 0 处（附录第一条命令实测：排除注释行后 grep 无命中）。
@@ -122,7 +122,7 @@ and everything else in the list is a consumable. Five of those consumables are *
 that the owner then sends to another user, and the recipient redeems it inside their own chat — the
 purchase price is the same as the identical self-use product, and no gift card grants anything to the
 buyer's own balance. Restore Purchases calls StoreKit's `AppStore.sync()`
-(`PopopxStoreKitManager.swift:512`) — we do not implement our own restore or refund flow, and the
+(`PopopxStoreKitManager.swift:554`) — we do not implement our own restore or refund flow, and the
 in-app UI sends users to App Store settings to manage or cancel.
 
 **【内部 · 3.1.2(c) 披露】** 自动续订说明全文走 `NSLocalizedString("Payment will be charged to your Apple
@@ -242,7 +242,7 @@ case 逐条在 :1085-1089、:1093、:1097、:1102-1105）：
 实测：`Shared/Features/BadgeCredits/` 下 17 个文件里，`VPN / 专网 / 代理 / proxy` 只出现在
 一条**代码注释**里 —— `PopopxBadgeCreditsModels.swift:1597` 的 `comment: "never VPN"`，那是防复发标记本身。
 上一版记的第二处（付费墙里写明这条红线的文档注释）在 2026-11-20 的全库清扫里被改写为
-`encrypted-tunnel vocabulary`（`PopopxBadgePaywallView.swift:404`），不再含这些字面词，所以计数是 1 而不是 2。
+`encrypted-tunnel vocabulary`（`PopopxBadgePaywallView.swift:418`），不再含这些字面词，所以计数是 1 而不是 2。
 用户可见文本仍为 0 处。16 个翻译目录里同样各有一行 `/* never VPN */`（那是给译者的说明，不是译文），
 **译文值 0 处**含这些词；目录里其余的 "proxy/VPN" 命中全部在本特性之外的既存条目
 （例如 onion 主机的连接设置）。这一点很重要：如果产品描述里出现"隐藏你的网络活动"，3.1.4（硬件/网络功能）
@@ -252,7 +252,7 @@ case 逐条在 :1085-1089、:1093、:1097、:1102-1105）：
 "节点状态面板 / Node Status Panel"。落点四处；2026-11-20 门禁二/门禁三之后这四处都是英文原句 key（`key("…")` → 进 16 个目录），
 不再是"功能内中文常量、不走 `.lproj`"：
 `PopopxBadgeDetailSheet.swift:288`（面板标题本身）、`:289`（脚注）、`PopopxTrialWelcomeModal.swift:209`、
-`PopopxBadgePaywallView.swift:691`（收益条目那句 `Copy.benefitStatusPanel`，调用点 :411，措辞红线注释在 :404）。复算与例外：
+`PopopxBadgePaywallView.swift:659`（收益条目那句 `Copy.benefitStatusPanel`，调用点 :425，措辞红线注释在 :418）。复算与例外：
 - `遥测` 在**本特性 17 个 Swift 文件**里 = 0 处；目录侧本轮复算有 **1 处**命中：
   `zh-Hans.lproj/Localizable.strings:8036` 的一条译文值（键句 `This build bundles no analytics or crash-reporting SDK
   and no telemetry collector…`，属本特性之外的既存隐私声明条目）。"全部 Swift 与 `.strings` = 0 处"这句上一版是假的，
@@ -689,7 +689,7 @@ grep -n "kSecAttrAccessible" Shared/Features/BadgeCredits/PopopxBadgeCreditsMode
 # 术语红线：VPN/专网/代理/proxy 在用户可见文本里为 0
 # 本轮实测：全模块只有 1 处命中，且不是给用户看的字——
 #   PopopxBadgeCreditsModels.swift:1597 的 comment: "never VPN"（防复发标记本身）
-#   （上一版记的第二处 PopopxBadgePaywallView.swift:381 已在门禁三改写为 encrypted-tunnel vocabulary，见 :404）
+#   （上一版记的第二处 PopopxBadgePaywallView.swift:381 已在门禁三改写为 encrypted-tunnel vocabulary，见 :418）
 grep -rn "VPN\|专网\|代理\|proxy\|Proxy" Shared/Features/BadgeCredits/
 # 用户可见字符串里再查一次：只查 NSLocalizedString 与 Copy 的赋值行，期望 0
 grep -rn 'NSLocalizedString("[^"]*\(VPN\|代理\|proxy\)' Shared/Features/BadgeCredits/ ; \

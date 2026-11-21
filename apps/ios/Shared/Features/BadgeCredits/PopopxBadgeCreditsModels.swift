@@ -1714,16 +1714,18 @@ enum PopopxCommerceCopy {
     static let channelSubscriptionPeriodFormat = NSLocalizedString("Each purchase is valid for %lld days.", comment: "channel subscription period")
     static let channelSubscriptionStackFormat = NSLocalizedString("Subscribing again adds %lld days to the time you already have.", comment: "renewal is cumulative, money promise")
 
-    // MARK: Sandbox purchases (only Debug builds can ever put these sentences on screen)
+    // MARK: Debug settlement (only Debug builds can ever put these sentences on screen)
     //
     // Why these exist: a StoreKit test configuration is only read when something **tells the process to read it** — Xcode's scheme does that through
     // the `StoreKitConfigurationFileReference` of `POPOPX (iOS).xcscheme`. The `.storekit` file sits in the app's Resources build phase, so a package
     // installed onto a real device with `xcrun devicectl device install app` carries the bytes, but nothing points at them. Launched from the
-    // home-screen icon `Product.products(for:)` hits the real/sandbox store instead. Measured on device: of the 12 SKUs this enum declares, the 5 newest ones
+    // home-screen icon `Product.products(for:)` hits the real store instead. Measured on device: of the 12 SKUs this enum declares, the 5 newest ones
     // (the two one-time passes and the three compute-credit gift cards) are not in App Store Connect yet, so they come back missing
-    // while the older seven still load — a button wired to a SKU that never loaded does nothing at all, and the tier that reads as
-    // "this product is unavailable" is the tier the user just paid attention to. To walk the commercial main path
-    // "payment → lit up → written to Keychain → still there after restart" on a real device, a second entry point is needed.
+    // while the older seven still load — the tier that reads as "this product is unavailable" is the tier the user just paid attention to,
+    // and the tier that reads as a price with a dead button is worse.
+    // The answer is that `PopopxStoreKitManager.purchase(_:)` itself settles such a SKU locally in Debug, so **the buy button on the tier** walks
+    // the commercial main path "payment → lit up → written to Keychain → still there after restart"; there is deliberately no second, Debug-only
+    // button anywhere (there was: a dashed "Sandbox purchase" row under each card, deleted because a side button tests a path Release does not contain).
     //
     // These sentences still go into the 16 catalogues and are not skipped because they "only appear in Debug": real-device screenshots get used as troubleshooting evidence,
     // and a card showing untranslated English is harder to explain than no card at all; while "this charge never really took money" is **a factual statement about money**,
@@ -1733,19 +1735,18 @@ enum PopopxCommerceCopy {
     // it should not even keep the wording that "a sandbox path exists" — a sentence lying in the binary that nobody can ever trigger,
     // "Sandbox purchase", is the hardest kind of residue to explain in the next compliance enquiry.
     // The catalogues are unaffected: the keys of `.strings` are determined by the source strings themselves, and this repo's 16 catalogues are hand-written.
+    // That is also why dropping the "Sandbox purchase" action label above moved no catalogue line — `POPOPXChat/ChatTypes.swift:488` asks for that same
+    // source text for the same fact about the same kind of purchase, and is the only reason those 16 entries are not residue either.
     #if DEBUG
-    /// **Reuses** an entry the catalogues already have: `"Sandbox purchase"` has a value in 16 of the 17 catalogues (every one but `en.lproj`, empty by design;
-    /// zh-Hans carries its own four-character wording). One other Swift site already uses this key — `POPOPXChat/ChatTypes.swift:488`, the alert title of a
-    /// test purchase — and that is the same fact about the same kind of purchase, so no second translation is opened and no existing one is contradicted.
-    /// Same source text and same semantics as the thing here: a test purchase that does not take real money. Therefore no new wording is opened.
-    static let sandboxPurchaseAction = NSLocalizedString("Sandbox purchase", comment: "DEBUG-only paywall button shown when the store did not return this item")
-    /// Sandbox delivery of a one-off pass. The day count is passed in by the caller from `PopopxNodeBadgePeriod.days`,
+    /// Debug delivery of a one-off pass. The day count is passed in by the caller from `PopopxNodeBadgePeriod.days`,
     /// the same source as the real delivery sentence (`passGrantedFormat`), so 30/365 is not written a second time.
     static let sandboxPassGrantedFormat = NSLocalizedString("Sandbox purchase: the badge was lit for %lld more days on this device. No payment was taken.", comment: "DEBUG-only purchase result")
-    /// Sandbox delivery for the remaining tiers (auto-renewing subscriptions, gift vouchers). Those two families do not deliver "days" on the real path,
-    /// so this promises no concrete entitlement at all and only says "a test purchase was recorded on this device, no money charged".
+    /// Debug delivery for the remaining tiers (auto-renewing subscriptions, gift vouchers, compute-credit packs). Those families do not deliver "days"
+    /// on the real path, so this promises no concrete entitlement at all and only says "a test purchase was recorded on this device, no money charged".
     static let sandboxPurchaseGranted = NSLocalizedString("Sandbox purchase recorded on this device. No payment was taken by Apple.", comment: "DEBUG-only purchase result")
-    /// The explanatory line at the top of the paywall: why a second button exists, and that it is the same crediting code as a real purchase.
+    /// The note at the top of a price screen: why a product line did not come back, and that the button above it now settles on the device.
+    /// It speaks only the condition ("the store did not return every item here"), never a button of its own — the sentence has to stay true
+    /// now that the tier's own CTA is the sandbox entry, and it would be a lie if it pointed at a second control.
     static let sandboxPaywallNote = NSLocalizedString("This build is not running with a StoreKit configuration, so the App Store did not return every item here. A sandbox purchase is minted on this device and runs the same delivery code as a real purchase. No payment is taken.", comment: "DEBUG-only paywall note")
     #endif
 

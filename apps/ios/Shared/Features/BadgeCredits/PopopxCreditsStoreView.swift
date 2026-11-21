@@ -234,6 +234,17 @@ struct PopopxCreditsStoreView: View {
 
     // // MARK: Top-up (compute-credit cash packs)
 
+    /// Whether the two purchase tiers may be tapped, and whether the "store is not available" line belongs on screen.
+    /// Release asks the store; Debug additionally accepts "the store has nothing, but `purchase(_:)` can still settle it locally" —
+    /// a Debug build installed without a `.storekit` configuration would otherwise disable exactly the buttons that still have a working path behind them.
+    /// The same rule drives both the button and that sentence, so the page can never show "unavailable" over a live buy button.
+    private var canPurchase: Bool {
+        #if DEBUG
+        if PopopxStoreKitManager.simulatedSettlementEnabled { return true }
+        #endif
+        return store.isStoreReady
+    }
+
     /// Three cash-pack tiers: 100 / 500 / 2000. This card is the only place on the page that takes money, and it sells exactly one thing —
     /// compute credits themselves. The tier table is `PopopxCreditPlan` (face value derived from the SKU's `creditedAmount`),
     /// and prices come from StoreKit, so between "the face value written on the row" and "the face value actually booked" there is no third place that can say something different.
@@ -242,9 +253,11 @@ struct PopopxCreditsStoreView: View {
         PopopxSectionCard(PopopxCommerceCopy.creditsTopUpTitle,
                           footnote: PopopxCommerceCopy.noGiftBackStatement) {
             VStack(spacing: 0) {
-                if !store.isStoreReady {
+                if !canPurchase {
                     // Store unreadable: the tiers are still drawn (face value is this module's fact), the price slot shows the SKU's own listed price,
-                    // and the button is disabled. This sentence reuses `PopopxCommerceCopy.errorStoreUnavailable` —
+                    // and the button is disabled. The same `canPurchase` decides both, so this sentence can never sit above a live buy button —
+                    // in Debug, where the local settlement is armed, neither the sentence nor the grey state appears.
+                    // This sentence reuses `PopopxCommerceCopy.errorStoreUnavailable` —
                     // the 16 catalogues already have a translation for it, so no new source string is started.
                     Text(PopopxCommerceCopy.errorStoreUnavailable)
                         .font(PopopxType.caption)
@@ -280,8 +293,8 @@ struct PopopxCreditsStoreView: View {
                 .foregroundStyle(PopopxPalette.brand)
                 .frame(minHeight: PopopxMetrics.minHitTarget)
             }
-            .disabled(!store.isStoreReady || busySkuId != nil)
-            .opacity(store.isStoreReady ? 1 : 0.5)
+            .disabled(!canPurchase || busySkuId != nil)
+            .opacity(canPurchase ? 1 : 0.5)
             .accessibilityLabel(Text(verbatim: pack.title))
             .accessibilityValue(Text(verbatim: store.priceText(for: pack.sku, periodSuffix: false)))
         }
@@ -294,20 +307,20 @@ struct PopopxCreditsStoreView: View {
     /// Why this foreground transaction has to call it directly here: `PopopxStoreKitManager.purchase(_:)` has already recorded the transaction id into
     /// the "already settled this session" set, so the later `Transaction.updates` delivery is blocked by dedup — not booking here
     /// leaves the user seeing "money paid, balance unchanged, nothing at all", and one level down there is no second party who will come and make it up.
-    private func buy(_ pack: PopopxCreditPack, simulated: Bool = false) async {
+    private func buy(_ pack: PopopxCreditPack) async {
         guard busySkuId == nil else { return }
         busySkuId = pack.sku.productId
         defer { busySkuId = nil }
         let before = credits.balance
-        // The two purchases differ only in who answers: StoreKit itself, or this module's simulated ledger. Everything after the
-        // result — booking, verifying, phrasing — is deliberately the same code, so a sandbox walk cannot pass on a path the real one lacks.
-        let result = simulated ? await store.purchaseSimulated(pack.sku) : await store.purchase(pack.sku)
+        // One call for both worlds: `purchase(_:)` asks Apple when the store carries the SKU and, in Debug only, settles it locally when it does not.
+        // Everything after the result — booking, verifying, phrasing — is the same code either way, so a sandbox walk cannot pass on a path the real one lacks.
+        let result = await store.purchase(pack.sku)
         switch result {
         case let .success(.purchased(receipt)):
             await credits.apply(storeReceipt: receipt)
             if credits.balance != before {
                 PopopxHaptics.notice(.success)
-                spendNote = String(format: PopopxCommerceCopy.creditsTopUpGrantedFormat, pack.amount)
+                spendNote = withSettlementNote(String(format: PopopxCommerceCopy.creditsTopUpGrantedFormat, pack.amount), receipt: receipt)
             } else {
                 // Payment succeeded but nothing was written on this device (Keychain write failed, or the balance was already at the cap and got blocked).
                 // This must be said out loud rather than left silent: the transaction was not finished, and the next re-delivery will add the credits.
@@ -325,6 +338,23 @@ struct PopopxCreditsStoreView: View {
             // The truth is said as it is (the `PopopxBadgeCreditsError` sentence already was localised and already carries the shortfall).
             spendNote = error.errorDescription ?? PopopxCommerceCopy.errorStoreUnavailable
         }
+    }
+
+    /// A result line that has to say when the charge was not real.
+    ///
+    /// The money fact rides the **receipt**, not a page-top note: the note only appears once a product load has answered
+    /// (`isMissingFromStore`), while this line is on screen at the moment the entitlement appears. It is also the reason the Debug settlement
+    /// needs no button of its own — a second button was one way to say "not a real purchase", and this sentence says it wherever the
+    /// real-looking result line appears.
+    ///
+    /// Compiles to a passthrough in Release: no receipt Apple handed over can carry the mark, and the mark's own definition is Debug-only.
+    private func withSettlementNote(_ text: String?, receipt: PopopxStoreReceipt) -> String? {
+        #if DEBUG
+        if receipt.isSimulatedSettlement, let text {
+            return "\(text) · \(PopopxCommerceCopy.sandboxPurchaseGranted)"
+        }
+        #endif
+        return text
     }
 
     // // MARK: Gift segment · buying a credit gift card with Apple
@@ -365,7 +395,7 @@ struct PopopxCreditsStoreView: View {
         PopopxSectionCard(PopopxCommerceCopy.creditsGiftAction,
                           footnote: PopopxCommerceCopy.creditsGiftPackFootnote) {
             VStack(spacing: 0) {
-                if !store.isStoreReady {
+                if !canPurchase {
                     Text(PopopxCommerceCopy.errorStoreUnavailable)
                         .font(PopopxType.caption)
                         .foregroundStyle(PopopxPalette.labelSecondary)
@@ -407,8 +437,8 @@ struct PopopxCreditsStoreView: View {
                 .foregroundStyle(PopopxPalette.brand)
                 .frame(minHeight: PopopxMetrics.minHitTarget)
             }
-            .disabled(!store.isStoreReady || busySkuId != nil)
-            .opacity(store.isStoreReady ? 1 : 0.5)
+            .disabled(!canPurchase || busySkuId != nil)
+            .opacity(canPurchase ? 1 : 0.5)
             .accessibilityLabel(Text(verbatim: pack.title))
             .accessibilityValue(Text(verbatim: store.priceText(for: pack.sku, periodSuffix: false)))
         }
@@ -420,12 +450,12 @@ struct PopopxCreditsStoreView: View {
     /// read back through `loadGiftCards()` — the ids, not their count, because the card that just appeared is also the card to open.
     /// Same book-first rule as `buy(_:)` above, and the same reason: `purchase(_:)` already marked this id as settled for the session,
     /// so the background `Transaction.updates` leg will not come, and if nothing happens here the payment has no second party to make it up.
-    private func buyGift(_ pack: PopopxCreditPack, simulated: Bool = false) async {
+    private func buyGift(_ pack: PopopxCreditPack) async {
         guard busySkuId == nil else { return }
         busySkuId = pack.sku.productId
         defer { busySkuId = nil }
         let before = Set(giftCards.map(\.voucherId))
-        let result = simulated ? await store.purchaseSimulated(pack.sku) : await store.purchase(pack.sku)
+        let result = await store.purchase(pack.sku)
         switch result {
         case let .success(.purchased(receipt)):
             await credits.apply(storeReceipt: receipt)
@@ -433,7 +463,7 @@ struct PopopxCreditsStoreView: View {
             let fresh = giftCards.filter { !before.contains($0.voucherId) }
             if !fresh.isEmpty {
                 PopopxHaptics.notice(.success)
-                spendNote = PopopxCommerceCopy.creditsGiftCreated(pack.amount)
+                spendNote = withSettlementNote(PopopxCommerceCopy.creditsGiftCreated(pack.amount), receipt: receipt)
                 await attachNoteAndOpen(fresh)
             } else {
                 // Paid, and no card in the vault. The transaction was not finished, so `Transaction.unfinished` will mint it next launch.
@@ -606,31 +636,23 @@ struct PopopxCreditsStoreView: View {
         giftCards = await PopopxP2PVoucherVault.shared.creditVouchers(state: .unused)
     }
 
-    // // MARK: Sandbox purchase (only Debug builds compile this whole section)
+    // // MARK: Debug settlement note (only Debug builds compile this whole section)
 
     #if DEBUG
-    /// Why a credits page needs the paywall's sandbox leg too: the `.storekit` configuration is injected only by Xcode's scheme, so a Debug
-    /// build installed with `devicectl` receives no products, `isStoreReady` stays false, and every button on this page is disabled.
-    /// On the top-up half that only means "cannot buy here"; on the gift half it means the whole family is unwalkable — a card that cannot be
-    /// purchased never reaches the vault, never grows a code face, and therefore can never be sent into a chat or redeemed.
+    /// Why this page shows the paywall's Debug note too: the `.storekit` configuration is injected only by Xcode's scheme, so a Debug build
+    /// installed with `devicectl` receives the products App Store Connect carries and nothing else. On the top-up half that used to mean
+    /// "cannot buy here"; on the gift half it meant the whole family was unwalkable — a card that cannot be purchased never reaches the vault,
+    /// never grows a code face, and therefore can never be sent into a chat or redeemed.
     ///
-    /// It is its own strip rather than a second button inside each tier row, so the production rows stay byte-for-byte the reviewed ones:
-    /// debug screenshots circulate as review evidence, and a solid capsule that reads like the purchase button would be a commercial incident.
+    /// The walk now runs on the tiers' own buttons (`purchase(_:)` settles a missing SKU locally in Debug), so this strip carries no button at all:
+    /// it says why a tap may settle on the device, and prints the load verdict verbatim.
+    /// Kept as one strip rather than a line inside each row so the reviewed rows stay byte-for-byte what Release draws.
     private var showsSandboxStrip: Bool {
-        sandboxOffers().contains { store.isMissingFromStore($0.pack.sku) }
-    }
-
-    /// Both halves of the page, tagged with the outcome path each offer must verify: a top-up is witnessed by the balance moving,
-    /// a gift card by a new vault row. Asking the store for the same product through the wrong witness is how a sandbox walk reports
-    /// "not created" for a purchase that worked.
-    private func sandboxOffers() -> [SandboxOffer] {
-        PopopxCreditPlan.packs.map { SandboxOffer(pack: $0, gift: false) }
-            + PopopxCreditPlan.giftPacks.map { SandboxOffer(pack: $0, gift: true) }
+        (PopopxCreditPlan.packs + PopopxCreditPlan.giftPacks).contains { store.isMissingFromStore($0.sku) }
     }
 
     private func sandboxStrip() -> some View {
-        let offers = sandboxOffers().filter { store.isMissingFromStore($0.pack.sku) }
-        return VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
+        VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
             HStack(alignment: .top, spacing: PopopxMetrics.spaceXS) {
                 Image(systemName: "hammer.fill")
                     .font(PopopxType.secondary)
@@ -646,9 +668,6 @@ struct PopopxCreditsStoreView: View {
                 .foregroundStyle(PopopxPalette.labelHint)
                 .textSelection(.enabled)
                 .accessibilityHidden(true)
-            ForEach(offers) { offer in
-                sandboxRow(offer)
-            }
         }
         .padding(PopopxMetrics.spaceS)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -665,51 +684,6 @@ struct PopopxCreditsStoreView: View {
         let missing = store.missingProductIDs
         if !missing.isEmpty { line += " · missing: \(missing.joined(separator: ", "))" }
         return line
-    }
-
-    private func sandboxRow(_ offer: SandboxOffer) -> some View {
-        Button {
-            Task {
-                // Which leg runs is a branch, not a ternary over two `await`s: the two outcomes are verified by different witnesses,
-                // and the difference must stay visible to whoever reads this in a year.
-                if offer.gift {
-                    await buyGift(offer.pack, simulated: true)
-                } else {
-                    await buy(offer.pack, simulated: true)
-                }
-            }
-        } label: {
-            HStack(spacing: PopopxMetrics.spaceS) {
-                Image(systemName: "hammer.fill")
-                Text(verbatim: "\(PopopxCommerceCopy.sandboxPurchaseAction) · \(offer.pack.title)")
-                Spacer(minLength: PopopxMetrics.spaceS)
-                if busySkuId == offer.pack.sku.productId {
-                    ProgressView().controlSize(.small)
-                }
-            }
-            .font(PopopxType.microTag)
-            .foregroundStyle(PopopxPalette.onBrand)
-            .padding(.horizontal, PopopxMetrics.spaceS)
-            .frame(height: PopopxMetrics.minHitTarget)
-            .frame(maxWidth: .infinity)
-            .overlay {
-                RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl)
-                    .strokeBorder(PopopxPalette.onBrand.opacity(0.55), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
-            }
-            .contentShape(.rect(cornerRadius: PopopxMetrics.radiusControl))
-        }
-        .buttonStyle(.plain)
-        .disabled(busySkuId != nil)
-        .accessibilityLabel(Text(verbatim: "\(PopopxCommerceCopy.sandboxPurchaseAction) \(offer.pack.title)"))
-        .accessibilityIdentifier("popopx.credits.sandbox.\(offer.pack.sku.rawValue)")
-    }
-
-    /// Which witness a simulated purchase has to check afterwards. `gift` is not inferred from the SKU at the call site because both halves
-    /// of the page can offer the same face value; it travels with the offer that produced the row.
-    private struct SandboxOffer: Identifiable {
-        let pack: PopopxCreditPack
-        let gift: Bool
-        var id: String { pack.id }
     }
     #endif
 
