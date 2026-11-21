@@ -105,16 +105,16 @@ private final class FakeMeshTransport: PopopxBLETransporting, @unchecked Sendabl
     func disconnect(_ linkID: UUID) async {}
 }
 
-/// Counts what a group hub published, for the assertions that are about silence: a keyless relay must
-/// publish nothing at all.
+/// Counts what a group hub published, for the assertions about silence: a keyless relay publishes
+/// nothing. `watch` subscribes before returning, so nothing is published into a gap left by the task.
 private final class GroupEventLog: @unchecked Sendable {
     private let lock = TestMutex()
     private var events: [PopopxMeshGroupEvent] = []
     private var task: Task<Void, Never>?
 
-    func watch(_ hub: PopopxMeshGroupEventHub) {
+    func watch(_ hub: PopopxMeshGroupEventHub) async {
+        let stream = await hub.subscribe()
         task = Task { [weak self] in
-            let stream = await hub.subscribe()
             for await event in stream {
                 guard let self else { return }
                 self.lock.withLock { self.events.append(event) }
@@ -545,7 +545,7 @@ func stateThatDoesNotNameUsIsRefused() async throws {
     #expect(await outsider.store.allGroups().isEmpty)
     // Refusing to store it is not refusing to carry it: this node is the relay in the next test.
     let log = GroupEventLog()
-    log.watch(outsider.hub)
+    await log.watch(outsider.hub)
     defer { log.stop() }
     let (payload, _) = try await creator.coordinator.sealMessage("relayed", toGroupID: group.id)
     #expect(await outsider.coordinator.receiveMessage(payload, hopCount: 4) == nil)
@@ -631,7 +631,7 @@ func reFloodedMessageIsDeduped() async throws {
     defer { creator.cleanUp(); member.cleanUp() }
 
     let log = GroupEventLog()
-    log.watch(member.hub)
+    await log.watch(member.hub)
     defer { log.stop() }
 
     let group = try await creator.coordinator.createGroup(named: "Flood")
@@ -706,7 +706,7 @@ func keylessNodeRelaysTheFlood() async throws {
         groupHub: relayHub
     )
     let log = GroupEventLog()
-    log.watch(relayHub)
+    await log.watch(relayHub)
     defer { log.stop() }
 
     await speaker.start(nickname: "Speaker")
