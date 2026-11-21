@@ -10,9 +10,13 @@
 //     needs any map capability, only the two Doubles and their outward text form.
 //  2. `Map` / `CLLocationManager` appear in one file only, PopopxLocationPickerSheet.swift,
 //     so one fewer import is one fewer entry point that can be misused.
-//  3. Encoding and decoding are pure string arithmetic and can be verified apart from the UI and the system frameworks (the 31 round-trip
-//     and rejection cases run by compiling this file on macOS: Chinese text, `&`, `#`, `=`, quotes, spaces, emoji, newlines and place names that look like payloads all
-//     come back unchanged; invite links, out-of-range/`nan`/`inf` coordinates, missing coordinates, illegal UTF-8 escapes and stray hosts are all rejected).
+//  3. Encoding and decoding are pure string arithmetic and can be verified apart from the UI and the system frameworks. The cases are committed:
+//     `PopopxLocationPayloadTests` in POPOPX Snapshots/SnapshotTests.swift - 24 test methods, 56 assertion macros on 49 lines, the round-trip case running over 19 field-value pairs.
+//     That file is the project's only unit-test bundle (`com.apple.product-type.bundle.unit-test`, `TEST_HOST = POPOPX.app`), and
+//     `@testable import POPOPX` at its top reaches this type; `Tests iOS` is a UI-test bundle and cannot see it. Run them with:
+//     `xcodebuild test -project POPOPX.xcodeproj -scheme "POPOPX (iOS)" -destination 'platform=iOS Simulator,id=<udid>' -only-testing:'POPOPX Snapshots/PopopxLocationPayloadTests' CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=-` -- the flags of spec/client/testing.md section 4.
+//     Chinese text, `&`, `#`, `=`, quotes, spaces, emoji, newlines and place names that look like payloads all come back unchanged; invite links,
+//     out-of-range/`nan`/`inf` coordinates, missing coordinates, illegal UTF-8 escapes and stray hosts are all rejected.
 //  4. This file lives in `Shared/Features/ChatInfo/` and was dragged into the `POPOPX (iOS)` target by hand (`.pbxproj`
 //     with zero script changes). Drag one file fewer in and it is the whole project that reports the error, not just "a file is missing".
 //  5. Namespace: `popopx:/` and `popopx://` are the prefixes of invite links (PopopxOfflineBridge.swift:91,
@@ -196,8 +200,6 @@ enum PopopxLocationError: Error {
     case locationUnavailable
     /// The user refused or has not decided yet: only When In Use is requested, Always is never asked for (`location-prompt.md:35`).
     case permissionDenied
-    /// The request was cancelled, or `CLLocationManager` ended updates on its own.
-    case cancelled
     /// The system returned `kCLErrorDenied` (geofencing permission denied).
     case regionDenied
 }

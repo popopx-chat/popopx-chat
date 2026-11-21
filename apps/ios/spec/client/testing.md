@@ -50,19 +50,33 @@ It prints `** BUILD SUCCEEDED **` **without compiling either test bundle**. A pa
 - run `xcodebuild build-for-testing` (or `test`) with the flags in section 3, and
 - `grep` the test directories for call sites of every initializer whose signature moved.
 
-Neither step reaches `POPOPX Snapshots` either: the `POPOPX (iOS)` scheme's test action contains only `Tests iOS` -- `SnapshotTests` appears 0 times in a full `xcodebuild test` log for that scheme (measured across three runs). **A CLI compile of that bundle is not reachable in this workspace**, and the reason is worth knowing before you spend an hour on it: `-target` forces every generated package project to use `<project>/build` as `SYMROOT`, and the Yams checkout ships a *read-only file* literally named `build`, so the build dies at
+**A CLI compile and run of this bundle is reachable.** The older note that the `POPOPX (iOS)` scheme's test action "contains only `Tests iOS`", with `SnapshotTests` appearing 0 times in a full test log, is withdrawn: it is contradicted by the file itself and by the run below. `POPOPX (iOS).xcscheme` carries two `TestableReference` entries -- lines 31-40 (`BlueprintName = "Tests iOS"`, line 37) and lines 41-50 (`BlueprintName = "POPOPX Snapshots"`, line 47) of
+`POPOPX.xcodeproj/xcshareddata/xcschemes/POPOPX (iOS).xcscheme`, and re-derive that with
+`grep -n 'TestableReference\|BlueprintName' "POPOPX.xcodeproj/xcshareddata/xcschemes/POPOPX (iOS).xcscheme"`. So section 4's flags plus one `-only-testing` naming the
+bundle type-check, install and run it:
+
+```sh
+xcodebuild test -project POPOPX.xcodeproj -scheme "POPOPX (iOS)" \
+  -destination 'platform=iOS Simulator,id=<udid>' -derivedDataPath build/DerivedData \
+  -only-testing:'POPOPX Snapshots/PopopxLocationPayloadTests' \
+  CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=-
+```
+
+Measured 2026-11-21 on the tree that committed `PopopxLocationPayloadTests`: `** TEST SUCCEEDED **` with, verbatim, `Executed 24 tests, with 0 failures (0 unexpected) in 0.013 (0.021) seconds`. A run that reports
+per-method results is itself the proof the bundle was compiled and hosted -- an *incremental* rerun prints no `SwiftCompile` line for `SnapshotTests.swift`, so `touch` the file
+(or point `-derivedDataPath` somewhere fresh) when the log has to show the compile invocation.
+
+What is still **not** reachable is the `-target 'POPOPX Snapshots'` route: `-target` forces every generated package project to use `<project>/build` as `SYMROOT`, and the Yams checkout ships a *read-only file* literally named `build`, so the build dies at
 
 ```
 error: File exists but is not a directory: .../SourcePackages/checkouts/Yams/build/Release-iphonesimulator
 ```
 
-`BUILD_DIR=` does not propagate to the package projects and `SYMROOT=` additionally corrupts the index-store flags (`failed creating index directory '-I…'`); `-derivedDataPath` is refused unless `-scheme` is passed, and no scheme builds this bundle. So gate it by hand -- reconcile every moved initializer against the *declaration order* of the struct's stored properties at both call sites:
+`BUILD_DIR=` does not propagate to the package projects and `SYMROOT=` additionally corrupts the index-store flags (`failed creating index directory '-I…'`); `-derivedDataPath` is refused unless `-scheme` is passed. So when a signature moves, the cheap pre-check is still to reconcile it against the *declaration order* of the struct's stored properties at both call sites:
 
 ```sh
 grep -rn "ChatItemWithMenu(" "POPOPX Snapshots/" Shared/   # Swift orders arguments by declaration
 ```
-
-Xcode's GUI (or a scheme that lists the bundle in its build action) remains the only way to type-check `POPOPX Snapshots`.
 
 ## 3. Code signing: the app group gate
 

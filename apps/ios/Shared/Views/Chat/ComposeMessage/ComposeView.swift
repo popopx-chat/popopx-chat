@@ -1204,6 +1204,31 @@ struct ComposeView: View {
                 .padding(.trailing, 3)
                 .if(showCommands) { v in v.padding(.leading, 3) }
         }
+        if chat.chatInfo.contact?.profile.peerType != .bot {
+            locationButton()
+                .padding(.trailing, 3)
+        }
+    }
+
+    /// The entry for the input bar that did **not** enter the reshaped form (groups, channels, command-menu conversations, contacts awaiting acceptance).
+    ///
+    /// It only opens the same `PopopxLocationPickerSheet` as the 1:1 `+` panel: the send chain `popopxSendLocation` reads `chat.chatInfo.contact?.contactId`, and
+    /// in a group it is nil, which lands in `.outsideDirectContact` and therefore in `.hostShouldSend`, i.e. `popopxSendPlainViaSMP` - that function takes
+    /// `chatType` / `apiId` / `groupChatScope()` / `sendAsGroup` itself, so it does not need the 1:1 conditions at all.
+    /// **Here it is only the entry that was missing, never the sending capability.**
+    ///
+    /// Hidden for a bot peer, which is the paperclip's own first condition (`peerType != .bot`): a bot cannot receive a location message, and in another client the card is only one line of plain text.
+    private func locationButton() -> some View {
+        Button {
+            showLocationPicker = true
+        } label: {
+            Image(systemName: "location.fill")
+                .resizable()
+        }
+        .disabled(!chat.chatInfo.sendMsgEnabled)
+        .frame(width: 25, height: 25)
+        .tint(theme.colors.primary)
+        .accessibilityLabel(Text("Location"))
     }
 
     private func commandsButton() -> some View {
@@ -1248,7 +1273,7 @@ struct ComposeView: View {
     //
     //  The approach matches B5's bubbles exactly: whatever the new component can express fully is reskinned, and what it cannot express stays wholesale in the old view tree,
     //  with both sides sharing the same set of host state (`composeState`, `chosenMedia`, `audioRecorder`, `showCommandsMenu`).
-    //  The old chain's `attachmentAndCommandsButtons()` and `sendMessageView()` are untouched,
+    //  The old chain's `sendMessageView()` is untouched; in `attachmentAndCommandsButtons()` only `locationButton()` was added, and it shares one sheet and one send path with the new bar.
     //  and so are the quote bar `contextItemView()` and the attachment preview bar `previewView()` - they were above the input bar to begin with.
 
     /// Three boundaries define the reskin scope, and all of them are **functional** boundaries, not aesthetic ones:

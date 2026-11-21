@@ -140,7 +140,7 @@ Routes each `ChatItem` to the appropriate renderer based on its `CIContent` type
 ### Redesigned bubble mount (B5)
 
 The routing above is unchanged. What changed is who *draws* the row:
-`chatItemWithMenu` ([ChatView.swift#L2308](../../Shared/Views/Chat/ChatView.swift#L2308)) asks [`PopopxBubbleMount.body(of:chat:)`](../../Shared/Features/ChatRoom/PopopxMessageBubble.swift#L930) first and only takes the row over when it returns a
+`chatItemWithMenu` ([ChatView.swift#L2308](../../Shared/Views/Chat/ChatView.swift#L2308)) asks [`PopopxBubbleMount.body(of:chat:)`](../../Shared/Features/ChatRoom/PopopxMessageBubble.swift#L962) first and only takes the row over when it returns a
 body; otherwise the whole row keeps going through `ChatItemView` → `ChatItemContentView`,
 controls included.
 
@@ -159,7 +159,13 @@ or a meta flag the bubble cannot draw. `PopopxBubbleBody` has 5 cases and no med
 control, link card or reply strip, so collapsing those into `.media(name:detail:)` would silently
 delete working UI.
 
-Transport badge: [`PopopxBubbleTransportResolver`](../../Shared/Features/ChatRoom/PopopxMessageBubble.swift#L733) maps message keys to `.smp` / `.mesh` / `.meshRelay` / `.pending`
+The non-direct side is not left wholesale: [`groupBody()`](../../Shared/Features/ChatRoom/PopopxMessageBubble.swift#L999) runs for every
+chat that is not `.direct` and returns a body for exactly two families of plain text rows — a [`PopopxLocationPayload`](../../Shared/Features/ChatInfo/PopopxLocation.swift#L45)
+card (any chat, channels included) and a voucher / red packet ([`PopopxCommerceContent`](../../Shared/Features/BadgeCredits/PopopxCommerceCards.swift#L61),
+groups only, gated by `!isChannel`). The location tier deliberately covers channels: opening that card sends nothing back into the chat, its two actions being
+`MKMapItem.openInMaps` and one pasteboard write, whereas opening a voucher posts a receipt — in a channel that would broadcast to every subscriber.
+
+Transport badge: [`PopopxBubbleTransportResolver`](../../Shared/Features/ChatRoom/PopopxMessageBubble.swift#L763) maps message keys to `.smp` / `.mesh` / `.meshRelay` / `.pending`
 from a chat-scoped table rebuilt at [ChatView.swift#L126](../../Shared/Views/Chat/ChatView.swift#L126) and filled at [ChatView.swift#L138](../../Shared/Views/Chat/ChatView.swift#L138) from `PopopxMeshRuntime`; a
 message with no mesh record keeps the SMP look.
 

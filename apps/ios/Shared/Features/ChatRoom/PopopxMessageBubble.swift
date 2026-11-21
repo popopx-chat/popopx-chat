@@ -958,10 +958,10 @@ enum PopopxBubbleMount {
     /// so extending to groups/channels only takes removing this one guard - left for a separate later round, because it means re-checking the sender
     /// that `eventItemViewText` splices in.
     ///
-    /// The only exception is the gift card and the red packet in groups (`groupCommerceBody` below); that boundary is written at that place.
+    /// The exceptions are the three rows of `groupBody` below (the location card, the gift card, the red packet); that boundary is written at that place.
     static func body(of ci: ChatItem, chat: Chat) -> PopopxBubbleBody? {
         guard !ci.isLiveDummy, !ci.localNote else { return nil }
-        guard chat.chatInfo.chatType == .direct else { return groupCommerceBody(ci, chat: chat) }
+        guard chat.chatInfo.chatType == .direct else { return groupBody(ci, chat: chat) }
         let isChannel = chat.chatInfo.isChannel
         switch ci.content {
         case let .sndMsgContent(mc), let .rcvMsgContent(mc):
@@ -985,22 +985,28 @@ enum PopopxBubbleMount {
         }
     }
 
-    /// The only takeover on the group-chat side: just the gift card and red packet bodies; everything else still goes back to the live app's `ChatItemView`.
+    /// The only takeover on the group-chat side: the location card, plus the gift card and red packet bodies; everything else still goes back to the live app's `ChatItemView`.
     ///
     /// Why the takeover is needed: the red packet body is `popopx://redpacket?id=...&n=...&sig=...`, and handing that to the live app means reading a
-    /// signature verbatim to the user, while the person sending the packet already @-mentioned everyone in the group to open it.
-    /// Why only these two: taking over the whole row would draw the avatar and the member name away with it (the ruling above);
+    /// signature verbatim to the user, while the person sending the packet already @-mentioned everyone in the group to open it. The same is true of
+    /// `popopx://loc`: in a group it would degrade into one line of plain text with a link, exactly the failure mode described in `msgBody`.
+    /// Why only these three: taking over the whole row would draw the avatar and the member name away with it (the ruling above);
     /// the member name branch is restored in `item` by `author: ci.memberDisplayName` from the same live-app source, the avatar cannot be restored.
-    /// Channels (`isChannel`) are not in this branch: a channel in the underlying chat app is also a group, but opening one here would send a receipt back into this chat,
-    /// which becomes a broadcast to all subscribers - per the prompt a red packet only does targeted-single or split-across-group, there is no channel tier.
-    private static func groupCommerceBody(_ ci: ChatItem, chat: Chat) -> PopopxBubbleBody? {
-        guard chat.chatInfo.chatType == .group, !chat.chatInfo.isChannel else { return nil }
+    /// The location card is the only tier here that also covers channels (`isChannel`): a channel in the underlying chat app is also a group, and opening a
+    /// voucher or a red packet would send a receipt back into this chat, which becomes a broadcast to all subscribers - per the prompt a red packet only does
+    /// targeted-single or split-across-group, there is no channel tier. **Opening a location card sends nothing at all**: its two actions are
+    /// `MKMapItem.openInMaps` and one write to the pasteboard (`PopopxLocationCardBubble`), so it never touches the receiving chat.
+    private static func groupBody(_ ci: ChatItem, chat: Chat) -> PopopxBubbleBody? {
         let mc: MsgContent
         switch ci.content {
         case let .sndMsgContent(m), let .rcvMsgContent(m): mc = m
         default: return nil
         }
         guard case .text = mc else { return nil }
+        if let location = PopopxLocationPayload.parse(from: mc.text) {
+            return .location(location)
+        }
+        guard chat.chatInfo.chatType == .group, !chat.chatInfo.isChannel else { return nil }
         return PopopxCommerceContent.detect(in: mc.text).map(PopopxBubbleBody.commerce)
     }
 

@@ -1070,3 +1070,252 @@ private final class SnapshotFixtures {
         ], terminal: terminal)
     }
 }
+
+
+// MARK: - PopopxLocationPayload
+
+/// Encoding and decoding of the location payload, run against the type the app actually ships.
+///
+/// **Why this file**: `Tests iOS` is `com.apple.product-type.bundle.ui-testing` (it drives `XCUIApplication`, so it cannot see
+/// an internal app type at all), and `POPOPX Snapshots` is the one target in the project that is
+/// `com.apple.product-type.bundle.unit-test` with `TEST_HOST`/`BUNDLE_LOADER` pointing at `POPOPX.app` - which is exactly what
+/// `@testable import POPOPX` at the top of this file needs. Adding a new test file would mean a `.pbxproj` entry, and that is a
+/// red line, so the cases land here, in the file the project already mounts.
+///
+/// Nothing below touches MapKit, CoreLocation or a view: `wireString` escapes every field through the `.alphanumerics`
+/// allowlist, so both directions are pure string arithmetic. Run it with
+/// `xcodebuild test -scheme "POPOPX (iOS)" -only-testing:"POPOPX Snapshots/PopopxLocationPayloadTests"`.
+final class PopopxLocationPayloadTests: XCTestCase {
+
+    /// The two directions of one payload have to agree, on the wire line and on the whole two-line message.
+    private func assertRoundTrip(
+        _ payload: PopopxLocationPayload,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        XCTAssertEqual(PopopxLocationPayload.parse(from: payload.wireString),
+                       payload as PopopxLocationPayload?,
+                       "wire: \(payload.wireString)",
+                       file: file, line: line)
+        XCTAssertEqual(PopopxLocationPayload.parse(from: payload.messageContent),
+                       payload as PopopxLocationPayload?,
+                       "message: \(payload.messageContent)",
+                       file: file, line: line)
+    }
+
+    // MARK: Encoding
+
+    func testEncodeFixedSixDigitsLatitudeFirst() throws {
+        XCTAssertEqual(
+            PopopxLocationPayload(latitude: 22.543096, longitude: 114.057865).wireString,
+            "popopx://loc?lat=22.543096&lon=114.057865"
+        )
+    }
+
+    func testEncodePadsShorterPrecisionAndKeepsTheSign() throws {
+        XCTAssertEqual(
+            PopopxLocationPayload(latitude: 22.5, longitude: -114.125, name: "Home").wireString,
+            "popopx://loc?lat=22.500000&lon=-114.125000&name=Home"
+        )
+    }
+
+    func testEncodeFieldOrderIsLatLonNameAddr() throws {
+        XCTAssertEqual(
+            PopopxLocationPayload(latitude: 1, longitude: 2, name: "n", address: "a").wireString,
+            "popopx://loc?lat=1.000000&lon=2.000000&name=n&addr=a"
+        )
+    }
+
+    func testCoordinateStringAndKeyShareTheWiresSpelling() throws {
+        let payload = PopopxLocationPayload(latitude: 22.543096, longitude: 114.057865)
+        XCTAssertEqual(payload.coordinateString, "(22.543096, 114.057865)")
+        XCTAssertEqual(payload.coordinateKey, "22.543096,114.057865")
+        XCTAssertTrue(payload.wireString.contains("lat=22.543096"), payload.wireString)
+        XCTAssertTrue(payload.wireString.contains("lon=114.057865"), payload.wireString)
+    }
+
+    func testWhitespaceOnlyFieldsBecomeNil() throws {
+        let payload = PopopxLocationPayload(latitude: 0, longitude: 0, name: "  \n\t ", address: " x ")
+        XCTAssertNil(payload.name)
+        XCTAssertEqual(payload.address, "x")
+        XCTAssertEqual(payload.wireString, "popopx://loc?lat=0.000000&lon=0.000000&addr=x")
+    }
+
+    func testDisplayNameFallsBackToCoordinates() throws {
+        XCTAssertEqual(PopopxLocationPayload(latitude: 0, longitude: 0).displayName, "(0.000000, 0.000000)")
+        XCTAssertEqual(PopopxLocationPayload(latitude: 0, longitude: 0, name: "Café").displayName, "Café")
+    }
+
+    func testMessageContentIsExactlyTwoLines() throws {
+        let payload = PopopxLocationPayload(latitude: 22.543096, longitude: 114.057865, name: "Shop")
+        let lines = payload.messageContent.split(separator: "\n", omittingEmptySubsequences: false)
+        XCTAssertEqual(lines.count, 2)
+        XCTAssertEqual(lines.last, Substring(payload.wireString))
+        XCTAssertTrue(lines.first!.hasPrefix("📍"))
+        XCTAssertTrue(lines.first!.contains("Shop"))
+        XCTAssertTrue(lines.first!.contains(payload.coordinateString))
+    }
+
+    func testNewlinesInsideAPlaceNameCannotStretchTheMessage() throws {
+        let payload = PopopxLocationPayload(latitude: 1, longitude: 2, name: "Home\n  Road", address: "Block\t7\nAnnex")
+        XCTAssertEqual(payload.name, "Home Road")
+        XCTAssertEqual(payload.address, "Block 7 Annex")
+        XCTAssertEqual(payload.messageContent.split(separator: "\n", omittingEmptySubsequences: false).count, 2)
+        assertRoundTrip(payload)
+    }
+
+    // MARK: Round trip
+
+    func testRoundTripOfFieldValuesThatCouldBreakTheEncoding() throws {
+        let cases: [(name: String?, address: String?)] = [
+            ("Shenzhen North Railway Station", nil),
+            ("深圳北站", "深圳市南山区"),
+            ("Tom & Jerry", nil),
+            ("Block #7", nil),
+            ("a=b", nil),
+            ("+7 380", nil),
+            ("He said \"here\"", nil),
+            ("Home / Work", nil),
+            ("%", nil),
+            ("a?b", nil),
+            ("10% off", "25% Street & 5th Ave"),
+            ("🏠", nil),
+            ("Café ⌘", nil),
+            ("Münchner Straße 14", "Bruder Str. 14, 10797 Berlin"),
+            ("popopx://loc?lat=0&lon=0", nil),
+            ("📍 marked", nil),
+            ("", nil),
+            (nil, "Only an address"),
+            (nil, nil)
+        ]
+        for pair in cases {
+            assertRoundTrip(PopopxLocationPayload(latitude: 48.858370, longitude: 2.294481,
+                                                  name: pair.name, address: pair.address))
+        }
+    }
+
+    func testRoundTripOfRangeLimits() throws {
+        for coordinate in [(90.0, 180.0), (-90.0, -180.0), (0.0, 0.0), (89.999999, -179.999999)] {
+            let payload = PopopxLocationPayload(latitude: coordinate.0, longitude: coordinate.1, name: "Edge")
+            assertRoundTrip(payload)
+        }
+    }
+
+    func testSixDigitsIsTheContractsPrecisionSoAFinerInputRounds() throws {
+        // `%.6f` rounds 89.9999999 up to 90.000000: still inside the range, still a valid payload.
+        let payload = PopopxLocationPayload(latitude: 89.9999999, longitude: -179.9999999)
+        XCTAssertEqual(payload.wireString, "popopx://loc?lat=90.000000&lon=-180.000000")
+        let decoded = try XCTUnwrap(PopopxLocationPayload.parse(from: payload.wireString))
+        XCTAssertEqual(decoded.latitude, 90.0)
+        XCTAssertEqual(decoded.longitude, -180.0)
+    }
+
+    func testRecognizesThePayloadEmbeddedInASentence() throws {
+        let payload = PopopxLocationPayload(latitude: 48.858370, longitude: 2.294481, name: "Tour Eiffel")
+        let wire = payload.wireString
+        for text in ["\(wire)", "meet me at \(wire) tonight", "note\n\(wire)\nthanks", "  \(wire)   "] {
+            XCTAssertEqual(PopopxLocationPayload.parse(from: text), payload as PopopxLocationPayload?, text)
+        }
+    }
+
+    func testSeveralCandidatesTakeTheLastOne() throws {
+        let decoded = try XCTUnwrap(
+            PopopxLocationPayload.parse(from: "popopx://loc?lat=1&lon=2 name popopx://loc?lat=3&lon=4")
+        )
+        XCTAssertEqual(decoded.latitude, 3)
+        XCTAssertEqual(decoded.longitude, 4)
+    }
+
+    func testTheMachineLineWinsEvenWhenTheReadableLineCarriesACoordinate() throws {
+        let payload = PopopxLocationPayload(latitude: 52.52, longitude: 13.405, name: "popopx://loc?lat=0&lon=0")
+        let decoded = try XCTUnwrap(PopopxLocationPayload.parse(from: payload.messageContent))
+        XCTAssertEqual(decoded.latitude, 52.52, "taking the first candidate would report the coordinates hidden in the place name")
+        XCTAssertEqual(decoded.longitude, 13.405)
+        XCTAssertEqual(decoded.name, payload.name)
+    }
+
+    func testVoucherLineDoesNotHideTheLocationPayload() throws {
+        let payload = PopopxLocationPayload(latitude: 52.52, longitude: 13.405, name: "Shop")
+        let text = payload.messageContent + "\npopopx://voucher?id=v1&n=2&sig=ab"
+        XCTAssertEqual(PopopxLocationPayload.parse(from: text), payload as PopopxLocationPayload?, text)
+    }
+
+    // MARK: Rejection
+
+    func testRejectsOutOfRangeCoordinates() throws {
+        let queries = ["lat=91&lon=0", "lat=-91&lon=0", "lat=0&lon=181", "lat=0&lon=-181",
+                       "lat=90.000001&lon=0", "lat=0&lon=180.000001", "lat=1e9&lon=0", "lat=0&lon=1e9",
+                       "lat=+91&lon=0"]
+        for query in queries {
+            XCTAssertNil(PopopxLocationPayload.parse(from: "popopx://loc?\(query)"), query)
+        }
+    }
+
+    func testRejectsNonFiniteCoordinates() throws {
+        let queries = ["lat=nan&lon=0", "lat=0&lon=nan", "lat=NaN&lon=0", "lat=inf&lon=0", "lat=-inf&lon=0",
+                       "lat=0&lon=inf", "lat=infinity&lon=0", "lat=1e999&lon=0", "lat=-1e999&lon=0"]
+        for query in queries {
+            XCTAssertNil(PopopxLocationPayload.parse(from: "popopx://loc?\(query)"), query)
+        }
+    }
+
+    func testRejectsMissingOrUnparsableCoordinates() throws {
+        let queries = ["lon=0", "lat=0", "lat=0&lon=", "lat=&lon=0", "lat", "lat=abc&lon=0", "lat=0&lon=x",
+                       "addr=Somewhere"]
+        for query in queries {
+            XCTAssertNil(PopopxLocationPayload.parse(from: "popopx://loc?\(query)"), query)
+        }
+        XCTAssertNil(PopopxLocationPayload.parse(from: "popopx://loc"), "no query at all")
+        XCTAssertNil(PopopxLocationPayload.parse(from: "popopx://loc?"), "empty query")
+    }
+
+    func testRejectsForeignSchemeAndHost() throws {
+        let tokens = ["popox://loc?lat=0&lon=0", "https://loc?lat=0&lon=0", "http://popopx/loc",
+                      "popopx://location?lat=0&lon=0", "popopx://locx?lat=0&lon=0", "popopx://loc2?lat=0&lon=0",
+                      "popopx:/loc?lat=0&lon=0", "popopx://sec?lat=0&lon=0", "popopx://voucher?lat=0&lon=0"]
+        for token in tokens {
+            XCTAssertNil(PopopxLocationPayload.parse(from: token), token)
+        }
+    }
+
+    func testIgnoresPlainAndEmptyText() throws {
+        XCTAssertNil(PopopxLocationPayload.parse(from: ""))
+        XCTAssertNil(PopopxLocationPayload.parse(from: "   \n\t "))
+        XCTAssertNil(PopopxLocationPayload.parse(from: "no location here"))
+        XCTAssertNil(PopopxLocationPayload.parse(from: "📍 [Location] Shenzhen (22.543096, 114.057865)"))
+    }
+
+    func testStrayKeysAreDroppedAndThePayloadStaysValid() throws {
+        let decoded = try XCTUnwrap(
+            PopopxLocationPayload.parse(from: "popopx://loc?lat=1&lon=2&sig=abc&token=xyz&name=n")
+        )
+        XCTAssertEqual(decoded.latitude, 1)
+        XCTAssertEqual(decoded.longitude, 2)
+        XCTAssertEqual(decoded.name, "n")
+        XCTAssertNil(decoded.address)
+    }
+
+    func testEncodedKeyNamesCannotBypassTheWhitelist() throws {
+        // `na%6De` decodes to `name`, but the whitelist compares the raw encoded bytes, so it never gets in.
+        let decoded = try XCTUnwrap(
+            PopopxLocationPayload.parse(from: "popopx://loc?lat=1&lon=2&na%6De=bypass")
+        )
+        XCTAssertNil(decoded.name)
+    }
+
+    func testRejectsSyntacticallyLegalButInvalidUtf8Escapes() throws {
+        let queries = ["lat=0&lon=0&name=%C0%80", "lat=0&lon=0&name=%FF", "lat=0&lon=0&addr=%C0%80",
+                       "lat=0&lon=0&name=abc%FFdef", "lat=0&lon=0&name=%ED%A0%80"]
+        for query in queries {
+            XCTAssertNil(PopopxLocationPayload.parse(from: "popopx://loc?\(query)"), query)
+        }
+    }
+
+    func testAMalformedEscapeIsRepairedByUrlComponentsNotFatal() throws {
+        // Documented in the header of PopopxLocation.swift: `%zz` comes back as the literal text, so the payload stays valid.
+        let decoded = try XCTUnwrap(
+            PopopxLocationPayload.parse(from: "popopx://loc?lat=1&lon=2&name=%zz")
+        )
+        XCTAssertEqual(decoded.name, "%zz")
+    }
+}
