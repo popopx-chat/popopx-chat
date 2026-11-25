@@ -524,12 +524,6 @@ private val versionDescriptions: List<VersionDescription> = listOf(
         descrId = MR.strings.v5_3_encrypt_local_files_descr
       ),
       VersionFeature.FeatureDescription(
-        icon = MR.images.ic_search,
-        titleId = MR.strings.v5_3_discover_join_groups,
-        descrId = MR.strings.v5_3_discover_join_groups_descr,
-        link = "popopx:/contact#/?v=1-4&smp=smp%3A%2F%2Fu2dS9sG8nMNURyZwqASV4yROM28Er0luVTx5X1CsMrU%3D%40smp4.simplex.im%2FeXSPwqTkKyDO3px4fLf1wx3MvPdjdLW3%23%2F%3Fv%3D1-2%26dh%3DMCowBQYDK2VuAyEAaiv6MkMH44L2TcYrt_CsX3ZvM11WgbMEUn0hkIKTOho%253D%26srv%3Do5vmywmrnaxalvz6wi3zicyftgio6psuvyniis6gco6bp6ekl4cqj4id.onion"
-      ),
-      VersionFeature.FeatureDescription(
         icon = MR.images.ic_theater_comedy,
         titleId = MR.strings.v5_3_simpler_incognito_mode,
         descrId = MR.strings.v5_3_simpler_incognito_mode_descr
@@ -583,12 +577,6 @@ private val versionDescriptions: List<VersionDescription> = listOf(
         icon = MR.images.ic_link,
         titleId = MR.strings.v5_5_simpler_connect_ui,
         descrId = MR.strings.v5_5_simpler_connect_ui_descr
-      ),
-      VersionFeature.FeatureDescription(
-        icon = MR.images.ic_forum,
-        titleId = MR.strings.v5_5_join_group_conversation,
-        descrId = MR.strings.v5_5_join_group_conversation_descr,
-        link = "popopx:/contact#/?v=1-4&smp=smp%3A%2F%2Fu2dS9sG8nMNURyZwqASV4yROM28Er0luVTx5X1CsMrU%3D%40smp4.simplex.im%2FeXSPwqTkKyDO3px4fLf1wx3MvPdjdLW3%23%2F%3Fv%3D1-2%26dh%3DMCowBQYDK2VuAyEAaiv6MkMH44L2TcYrt_CsX3ZvM11WgbMEUn0hkIKTOho%253D%26srv%3Do5vmywmrnaxalvz6wi3zicyftgio6psuvyniis6gco6bp6ekl4cqj4id.onion"
       ),
       VersionFeature.FeatureDescription(
         icon = MR.images.ic_battery_3_bar,
