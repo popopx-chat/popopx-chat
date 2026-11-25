@@ -55,12 +55,21 @@
 - **Census, stated as a scope.** The gate prints **1396** in a working tree and **1358** over tracked files;
   the repo-wide raw scan is **1941 lines / 513 files**. The gap is fully itemised, with the commands, in
   `FORK.md` § “How the brand census is measured” and summarised in `AGPL-COMPLIANCE.md` § 2.
+- **The desktop test mirror moved with it.** `commonTest/kotlin/chat/popopx/app/BadgePageUrlTest.kt`
+  asserted both URLs end with upstream's `#/tier?app=…` **fragment**, which the query form cannot satisfy.
+  It now asserts the query ending *and* that no `#` survives — `endsWith("?app=true")` alone would still be
+  true of the fragment form, so the fragment test is the load-bearing half. CI found what a compile check
+  cannot: `:common:desktopTest` on `a90dbbaf9` reported **256 tests completed, 2 failed**, exactly these
+  two. After the mirror moved, the same suite on this machine reports 256 tests, 0 failures, 0 errors,
+  5 skipped, with `BadgePageUrlTest` 2/2.
 - **Verification.** `./scripts/ci/check-brand-clean.sh` exit 0 and `./scripts/ci/check-smp-links.sh` exit 0;
+  the gate's coverage total is **1358** on a clean checkout — measured three ways (`git grep`, a throwaway
+  `git worktree` at this tip, and the CI `Brand compliance` job log) — and 1396 in a working tree.
   `xcodebuild build -scheme "POPOPX (iOS)" -destination generic/platform=iOS` → `** BUILD SUCCEEDED **`,
   0 `error:` and 0 `warning:` in the log, with `strings` on the linked binary reading 0
-  `node.popopx.chat` and 0 `badges.simplex.chat`; `./gradlew :common:compileKotlinDesktop` → `BUILD
-  SUCCESSFUL in 1m 25s`, the only warning in the touched files being the pre-existing
-  `LocalClipboardManager` deprecation at `WhatsNewView.kt:1010`.
+  `node.popopx.chat` and 0 `badges.simplex.chat`, and CI's `macos-latest (iOS)` job green;
+  `./gradlew --no-daemon :common:compileKotlinDesktop` → `BUILD SUCCESSFUL in 1m 25s`, the only warning in
+  a touched file being the pre-existing `LocalClipboardManager` deprecation at `WhatsNewView.kt:1010`.
 
 ## v1.2.0 — 2026-11-24
 
