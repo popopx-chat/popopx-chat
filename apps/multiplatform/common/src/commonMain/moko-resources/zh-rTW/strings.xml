@@ -1419,10 +1419,8 @@
     <string name="v5_8_message_delivery">改進訊息傳送</string>
     <string name="app_check_for_updates_button_install">安裝更新</string>
     <string name="v6_0_private_routing_descr">它保護你的 IP 位址和連線。</string>
-    <string name="v5_5_join_group_conversation">加入群組對話</string>
     <string name="remote_host_error_bad_version"><![CDATA[不支援行動裝置 <b>%s</b> 的版本。請檢察兩台裝置安裝的是否版本相同]]></string>
     <string name="v5_7_network_descr">更可靠的網路連接</string>
-    <string name="v5_3_discover_join_groups">發現和加入群組</string>
     <string name="devices">裝置</string>
     <string name="new_mobile_device">新行動裝置</string>
     <string name="migrate_from_device_error_saving_settings">保存設定出錯</string>
@@ -1469,7 +1467,6 @@
     <string name="error_creating_member_contact">建立聯絡人時出錯</string>
     <string name="v5_2_disappear_one_message">移除一條訊息</string>
     <string name="v5_2_fix_encryption">保持連接</string>
-    <string name="v5_3_discover_join_groups_descr">- 連接到目錄服務（BETA）！ \n- 發送回執（最多20名成員）。 \n- 更快，更穩定。</string>
     <string name="v5_4_link_mobile_desktop">連接行動端和桌面端應用程式！ 🔗</string>
     <string name="v5_5_message_delivery">改進訊息傳送</string>
     <string name="delivery_receipts_are_disabled">已關閉送達回執！</string>
@@ -1683,7 +1680,6 @@
     <string name="profile_update_event_removed_picture">刪除了資料圖片</string>
     <string name="one_hand_ui">單手模式的應用程式工具列</string>
     <string name="v6_0_reachable_chat_toolbar">單手模式的聊天工具列</string>
-    <string name="v5_5_join_group_conversation_descr">最近歷史和改進的目錄機器人。</string>
     <string name="network_option_protocol_timeout_per_kb">每 KB 協議超時</string>
     <string name="v5_8_private_routing_descr">保護你的真實 IP 地址，以不讓你的聯絡人所選擇的訊息中繼看到它。 \n在*網路和伺服器*設定中啟用。</string>
     <string name="you_can_change_it_later">隨機密碼以明文形式儲存在設定中。 \n你可以稍後更改。</string>

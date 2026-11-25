@@ -1300,7 +1300,6 @@
     <string name="v5_3_new_interface_languages">6つの新しいインターフェース言語</string>
     <string name="v5_3_encrypt_local_files_descr">アプリは新しいローカルファイル（ビデオを除く）を暗号化します。</string>
     <string name="compose_send_direct_message_to_connect">ダイレクトメッセージを送信して接続する</string>
-    <string name="v5_3_discover_join_groups">グループを見つけて参加する</string>
     <string name="v5_3_simpler_incognito_mode">シークレットモードの簡素化</string>
     <string name="v5_3_new_interface_languages_descr">アラビア語、ブルガリア語、フィンランド語、ヘブライ語、タイ語、ウクライナ語 - ユーザーとWeblateに感謝します。</string>
     <string name="v5_3_new_desktop_app_descr">デスクトップアプリで新しいプロファイルを作成します。 💻</string>
@@ -1452,7 +1451,6 @@
     <string name="unblock_member_confirmation">ブロック解除</string>
     <string name="to_preserve_privacy_popopx_has_background_service_instead_of_push_notifications_it_uses_a_few_pc_battery"><![CDATA[プライバシーを守るためアプリはプッシュ通知の代わりに<b>POPOPXバックグラウンドサービス</b>を備えています。- この機能は1日に数パーセントのバッテリーを消費します。]]></string>
     <string name="v5_4_more_things_descr">- オプションで削除された連絡先を通知します。 \n- プロフィール名に空白を含めることが可能になりました。 \n- その他にも！</string>
-    <string name="v5_3_discover_join_groups_descr">- ディレクトリサービスに接続（ベータ）！ \n- 配信通知（最大20名）。 \n- より速くより安定しました。</string>
     <string name="tap_to_scan">タップしてスキャン</string>
     <string name="connect_plan_you_have_already_requested_connection_via_this_address">このアドレスでの接続はすでに要求済です！</string>
     <string name="terminal_always_visible">新規ウィンドウでコンソールを表示</string>
@@ -1566,7 +1564,6 @@
     <string name="block_for_all">全てをブロック</string>
     <string name="block_for_all_question">このメンバーをブロックしますか？</string>
     <string name="member_info_member_blocked">ブロック中</string>
-    <string name="v5_5_join_group_conversation">グループ会話への参加</string>
     <string name="call_service_notification_audio_call">音声通話</string>
     <string name="call_service_notification_video_call">ビデオ通話</string>
     <string name="blocked_by_admin_item_description">管理者によりブロック済</string>
@@ -1590,7 +1587,6 @@
     <string name="clear_note_folder_question">プライベートノートを消しますか？</string>
     <string name="v5_5_new_interface_languages">ハンガリー語、トルコ語</string>
     <string name="v5_5_message_delivery_descr">バッテリー使用量低減</string>
-    <string name="v5_5_join_group_conversation_descr">最近のメッセージ履歴送信機能追加とディレクトリボットの改善が行われました。</string>
     <string name="migrate_to_device_downloading_details">リンクの詳細をダウンロード中</string>
     <string name="migrate_to_device_downloading_archive">アーカイブをダウンロード中</string>
     <string name="error_creating_message">メッセージ作成エラー</string>

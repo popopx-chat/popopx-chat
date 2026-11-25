@@ -303,7 +303,6 @@
     <string name="icon_descr_call_connecting">Đang kết nối cuộc gọi</string>
     <string name="desktop_connection_terminated">Kết nối đã bị ngắt</string>
     <string name="connecting_to_desktop">Đang kết nối tới máy tính</string>
-    <string name="v5_3_discover_join_groups_descr">- kết nối tới dịch vụ thư mục (BETA)! \n- đánh dấu đã nhận (tối đa 20 thành viên). \n- nhanh hơn và ổn định hơn.</string>
     <string name="remote_ctrl_was_disconnected_title">Kết nối đã bị ngắt</string>
     <string name="remote_host_error_bad_state"><![CDATA[Kết nối tới điện thoại <b>%s</b> đang ở trong tình trạng không tốt]]></string>
     <string name="connect_to_desktop">Kết nối tới máy tính</string>
@@ -558,7 +557,6 @@
     <string name="ttl_months">%d tháng</string>
     <string name="ttl_m">%dm</string>
     <string name="network_smp_proxy_mode_never_description">KHÔNG sử dụng định tuyến riêng tư.</string>
-    <string name="v5_3_discover_join_groups">Khám phá và tham gia nhóm</string>
     <string name="ttl_mth">%dmth</string>
     <string name="disable_sending_recent_history">Không gửi lịch sử đến các thành viên mới.</string>
     <string name="la_minutes">%d phút</string>
@@ -1018,7 +1016,6 @@
     <string name="v5_7_new_interface_languages">UI tiếng Litva</string>
     <string name="settings_section_title_messages">Tin nhắn và tệp</string>
     <string name="message_deletion_prohibited_in_chat">Việc xóa tin nhắn mà không thể phục hồi là bị cấm.</string>
-    <string name="v5_5_join_group_conversation">Tham gia vào các cuộc trò chuyện nhóm</string>
     <string name="email_invite_subject">Hãy trò chuyện trên POPOPX Chat</string>
     <string name="italic_text">in nghiêng</string>
     <string name="onboarding_notifications_mode_subtitle">Nó ảnh hưởng đến pin như thế nào</string>
@@ -1451,7 +1448,6 @@
     <string name="color_received_message">Đã nhận tin nhắn</string>
     <string name="receiving_via">Đang nhận qua</string>
     <string name="feature_received_prohibited">đã nhận, bị cấm</string>
-    <string name="v5_5_join_group_conversation_descr">Lịch sử gần đây và đã cải thiện bot thư mục.</string>
     <string name="receiving_files_not_yet_supported">Việc nhận tệp vẫn chưa được hỗ trợ</string>
     <string name="color_received_quote">Đã nhận lời đáp</string>
     <string name="switch_receiving_address_desc">Địa chỉ nhận sẽ được đổi sang một máy chủ khác. Việc thay đổi địa chỉ sẽ hoàn thành sau khi người gửi hoạt động.</string>

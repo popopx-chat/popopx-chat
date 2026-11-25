@@ -228,7 +228,6 @@
     <string name="receipts_section_contacts">Partnerek</string>
     <string name="connection_error">Kapcsolódási hiba</string>
     <string name="alert_title_contact_connection_pending">A partnere még nem kapcsolódott!</string>
-    <string name="v5_3_discover_join_groups_descr">- kapcsolódás a könyvtárszolgáltatáshoz (béta)!\n- kézbesítési jelentések (legfeljebb 20 tagig).\n- gyorsabb és stabilabb.</string>
     <string name="contribute">Közreműködés</string>
     <string name="group_member_status_intro_invitation">kapcsolódás (bemutatkozó meghívó)</string>
     <string name="create_popopx_address">POPOPX-cím létrehozása</string>
@@ -378,7 +377,6 @@
     <string name="ttl_h">%dó</string>
     <string name="ttl_w">%dhét</string>
     <string name="discover_on_network">Felfedezés helyi hálózaton keresztül</string>
-    <string name="v5_3_discover_join_groups">Csoportok felfedezése és csatlakozás</string>
     <string name="moderated_items_description">%2$s %1$d üzenetet moderált</string>
     <string name="disappearing_message">Eltűnő üzenet</string>
     <string name="dont_show_again">Ne jelenjen meg újra</string>
@@ -1510,14 +1508,12 @@
     <string name="share_text_created_at">Létrehozva: %s</string>
     <string name="clear_note_folder_warning">Az összes üzenet törölve lesz – ez a művelet nem vonható vissza!</string>
     <string name="v5_5_message_delivery">Továbbfejlesztett üzenetkézbesítés</string>
-    <string name="v5_5_join_group_conversation">Csatlakozás a csoportbeszélgetésekhez</string>
     <string name="v5_5_simpler_connect_ui">Hivatkozás beillesztése a kapcsolódáshoz!</string>
     <string name="v5_5_private_notes">Privát jegyzetek</string>
     <string name="v5_5_simpler_connect_ui_descr">A keresősáv elfogadja a meghívási hivatkozásokat.</string>
     <string name="v5_5_private_notes_descr">Titkosított fájlokkal és médiatartalmakkal.</string>
     <string name="v5_5_message_delivery_descr">Csökkentett akkumulátor-használattal.</string>
     <string name="v5_5_new_interface_languages">Magyar és török kezelőfelület</string>
-    <string name="v5_5_join_group_conversation_descr">A közelmúlt eseményei és továbbfejlesztett könyvtárbot.</string>
     <string name="rcv_group_event_member_unblocked">feloldotta %s letiltását</string>
     <string name="snd_group_event_member_unblocked">Ön feloldotta %s letiltását</string>
     <string name="member_info_member_blocked">letiltva</string>

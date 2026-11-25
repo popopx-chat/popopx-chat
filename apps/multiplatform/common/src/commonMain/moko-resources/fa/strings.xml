@@ -1462,7 +1462,6 @@
     <string name="v5_1_self_destruct_passcode_descr">تمام اطلاعات وقتی وارد می‌شوند پاک می‌شوند.</string>
     <string name="v5_1_custom_themes_descr">سفارشی کردن و اشتراک‌گذاری تم‌های رنگ.</string>
     <string name="v5_1_custom_themes">تم‌های سفارشی</string>
-    <string name="v5_3_discover_join_groups_descr">- اتصال به سرویس فهرست راهنما (آزمایشی)! \n- رسیدهای تحویل (تا ۲۰ دقیقه). \n- سریع‌تر و پایداری بیشتر.</string>
     <string name="v5_4_better_groups">گروه‌های بهتر</string>
     <string name="v5_6_quantum_resistant_encryption_descr">فعال کردن در چت‌های مستقیم (آزمایشی)!</string>
     <string name="unlink_desktop_question">اتصال با کامپیوتر قطع شود؟</string>
@@ -1474,7 +1473,6 @@
     <string name="migrate_from_device_check_connection_and_try_again">اتصال اینترنت خود را بررسی و دوباره امتحان کنید</string>
     <string name="v5_3_new_desktop_app">برنامه کامپیوتر جدید</string>
     <string name="v5_4_link_mobile_desktop">وصل کردن برنامه‌های موبایل و کامپیوتر! 🔗</string>
-    <string name="v5_3_discover_join_groups">یافتن و پیوستن به گروه‌ها</string>
     <string name="v5_4_incognito_groups_descr">ایجاد یک گروه با استفاده از یک پروفایل تصادفی.</string>
     <string name="v5_6_app_data_migration">جابه‌جایی اطلاعات برنامه</string>
     <string name="open_on_mobile_and_scan_qr_code"><![CDATA[<i>استفاده از کامپیوتر</i> را در برنامه موبایل باز و کد QR را اسکن کنید.]]></string>
@@ -1672,9 +1670,7 @@
     <string name="v5_4_incognito_groups">گروه‌های ناشناس</string>
     <string name="v5_3_simpler_incognito_mode">حالت ناشناس ساده‌شده</string>
     <string name="v5_3_simpler_incognito_mode_descr">تغییر حالت ناشناس هنگام اتصال.</string>
-    <string name="v5_5_join_group_conversation">پیوستن به مکالمات گروه</string>
     <string name="v5_5_simpler_connect_ui">جهت اتصال لینک را الصاق کنید!</string>
-    <string name="v5_5_join_group_conversation_descr">تاریخچه اخیر و روبات فهرست راهنمای بهبود یافته.</string>
     <string name="v5_5_simpler_connect_ui_descr">نوار جستجو لینک‌های دعوت را قبول می‌کند.</string>
     <string name="v5_5_message_delivery_descr">با استفاده باتری کاهش یافته.</string>
     <string name="custom_time_unit_seconds">ثانیه</string>

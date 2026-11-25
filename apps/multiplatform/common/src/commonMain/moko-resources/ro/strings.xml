@@ -837,7 +837,6 @@
     <string name="v4_3_improved_server_configuration">Configurație îmbunătățită a serverului</string>
     <string name="v4_6_group_welcome_message">Mesaj de bun venit pentru grup</string>
     <string name="v4_6_reduced_battery_usage">Reducerea suplimentară a consumului de baterie</string>
-    <string name="v5_5_join_group_conversation">Alătură-te conversațiilor de grup</string>
     <string name="v5_5_message_delivery">Livrarea mesajelor îmbunătățită</string>
     <string name="v5_7_new_interface_languages">Interfață lituaniană</string>
     <string name="v5_8_chat_themes_descr">Fă-ți conversațiile să arate diferit!</string>
@@ -1412,7 +1411,6 @@
     <string name="v4_6_group_moderation_descr">Acum administratorii pot:\n- șterge mesajele membrilor.\n- dezactiva membrii (rol de observator)</string>
     <string name="v5_1_message_reactions">Reacții la mesaje</string>
     <string name="v5_0_large_files_support_descr">Rapid și fără așteptare până când expeditorul este online!</string>
-    <string name="v5_3_discover_join_groups">Descoperă și alătură-te grupurilor</string>
     <string name="v5_2_disappear_one_message_descr">Chiar și atunci când este dezactivat în conversație.</string>
     <string name="v5_2_more_things_descr">- livrare mai stabilă a mesajelor.\n- grupuri mai bune.\n- și multe altele!</string>
     <string name="v5_2_disappear_one_message">Fă un mesaj să dispară</string>
@@ -1733,7 +1731,6 @@
     <string name="reject_pending_member_button">Respinge</string>
     <string name="reject_pending_member_alert_title">Respingeți membrul?</string>
     <string name="v4_4_live_messages_desc">Destinatarii văd actualizările pe măsură ce le tastați.</string>
-    <string name="v5_5_join_group_conversation_descr">Istoric recent și bot de directoare îmbunătățit.</string>
     <string name="v6_3_set_message_expiration_in_chats">Setează expirarea mesajelor în conversații.</string>
     <string name="sending_delivery_receipts_will_be_enabled">Trimiterea confirmărilor de livrare va fi activată pentru toate contactele.</string>
     <string name="sending_delivery_receipts_will_be_enabled_all_profiles">Trimiterea confirmărilor de livrare va fi activată pentru toate contactele din toate profilurile de conversații vizibile.</string>
@@ -2207,7 +2204,6 @@
     <string name="operator_conditions_will_be_accepted_on">Condițiile vor fi acceptate pe: %s.</string>
     <string name="operator_added_xftp_servers">Servere media și de fișiere adăugate</string>
     <string name="appearance_bars_blur_radius">Estompare</string>
-    <string name="v5_3_discover_join_groups_descr">- conectare la serviciul de directoare (BETA)!\n- confirmări de livrare (până la 20 de membri).\n- mai rapid și mai stabil.</string>
     <string name="v6_0_your_contacts_descr">Arhivează contactele pentru a conversa mai târziu.</string>
     <string name="connect_plan_you_are_already_connecting_to_vName"><![CDATA[Vă conectați deja la <b>%1$s</b>.]]></string>
     <string name="non_content_uri_alert_text">Ai partajat o cale de fișier nevalidă. Raportează problema dezvoltatorilor aplicației.</string>

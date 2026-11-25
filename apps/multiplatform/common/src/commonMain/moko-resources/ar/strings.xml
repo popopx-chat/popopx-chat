@@ -1297,10 +1297,8 @@
     <string name="v5_3_new_desktop_app">تطبيق سطح المكتب الجديد!</string>
     <string name="v5_3_new_interface_languages">6 لغات واجهة جديدة</string>
     <string name="v5_3_encrypt_local_files_descr">يُعمِّي الملفات المحلية الجديدة (باستثناء مقاطع الفيديو).</string>
-    <string name="v5_3_discover_join_groups">اكتشاف والانضمام إلى المجموعات</string>
     <string name="v5_3_new_interface_languages_descr">العربية والبلغارية والفنلندية والعبرية والتايلاندية والأوكرانية - شكرًا للمستخدمين و Weblate.</string>
     <string name="v5_3_new_desktop_app_descr">إنشاء ملف تعريف جديد في تطبيق سطح المكتب. 💻</string>
-    <string name="v5_3_discover_join_groups_descr">- الاتصال بخدمة الدليل (تجريبي)!\n- إيصالات التسليم (ما يصل إلى 20 عضوا).\n- أسرع وأكثر استقرارًا.</string>
     <string name="rcv_group_event_open_chat">افتح</string>
     <string name="error_creating_member_contact">حدث خطأ أثناء إنشاء جهة اتصال للعضو</string>
     <string name="compose_send_direct_message_to_connect">أرسل رسالة مباشرة للاتصال</string>
@@ -1505,7 +1503,6 @@
     <string name="profile_update_event_contact_name_changed">تغيّر جهة الاتصال %1$s إلى %2$s</string>
     <string name="possible_slow_function_desc">يستغرق تنفيذ الوظيفة وقتًا طويلاً جدًا: %1$d ثانية: %2$s</string>
     <string name="v5_5_private_notes">ملاحظات خاصة</string>
-    <string name="v5_5_join_group_conversation">انضم إلى المحادثات الجماعية</string>
     <string name="v5_5_simpler_connect_ui_descr">يقبل شريط البحث روابط الدعوة.</string>
     <string name="v5_5_message_delivery">تحسّن تسليم الرسائل</string>
     <string name="v5_5_message_delivery_descr">مع انخفاض استخدام البطارية.</string>
@@ -1513,7 +1510,6 @@
     <string name="info_row_created_at">أُنشئ في</string>
     <string name="v5_5_new_interface_languages">واجهة المستخدم المجرية والتركية</string>
     <string name="v5_5_simpler_connect_ui">الصق الرابط للاتصال!</string>
-    <string name="v5_5_join_group_conversation_descr">التاريخ الحديث وبوت الدليل المحسن.</string>
     <string name="v5_5_private_notes_descr">مع الملفات والوسائط المُعمّاة.</string>
     <string name="error_creating_message">حدث خطأ أثناء إنشاء الرسالة</string>
     <string name="error_deleting_note_folder">حدث خطأ أثناء حذف الملاحظات الخاصة</string>

@@ -1368,7 +1368,6 @@
     <string name="v5_3_new_interface_languages">6 новых языков интерфейса</string>
     <string name="v5_3_encrypt_local_files_descr">Приложение шифрует новые локальные файлы (кроме видео).</string>
     <string name="you_can_change_it_later">Случайный пароль хранится в настройках как открытый текст. \nВы можете изменить его позже.</string>
-    <string name="v5_3_discover_join_groups">Найдите и вступите в группы</string>
     <string name="database_encryption_will_be_updated_in_settings">Пароль шифрования базы данных будет обновлён и сохранён в настройках.</string>
     <string name="remove_passphrase_from_settings">Удалить пароль из настроек?</string>
     <string name="use_random_passphrase">Использовать случайный пароль</string>
@@ -1381,7 +1380,6 @@
     <string name="v5_3_new_desktop_app_descr">Создайте новый профиль в приложении для компьютера. 💻</string>
     <string name="passphrase_will_be_saved_in_settings">Пароль будет сохранён в настройках как простой текст после того, как вы его измените или перезапустите приложение.</string>
     <string name="v5_3_simpler_incognito_mode_descr">Установите режим Инкогнито при соединении.</string>
-    <string name="v5_3_discover_join_groups_descr">- соединиться с каталогом групп (BETA)! \n- отчёты о доставке (до 20 членов группы). \n- быстрее и стабильнее.</string>
     <string name="settings_is_storing_in_clear_text">Пароль хранится в настройках, как открытый текст.</string>
     <string name="rcv_group_event_open_chat">Открыть</string>
     <string name="error_creating_member_contact">Ошибка при создании контакта</string>
@@ -1514,10 +1512,8 @@
     <string name="no_connected_mobile">Нет подключённых мобильных</string>
     <string name="add_contact_tab">Добавить контакт</string>
     <string name="v5_5_private_notes">Личные заметки</string>
-    <string name="v5_5_join_group_conversation">Присоединяйтесь к разговорам в группах</string>
     <string name="v5_5_simpler_connect_ui">Вставьте ссылку, чтобы соединиться!</string>
     <string name="v5_5_simpler_connect_ui_descr">Поле поиска поддерживает ссылки-приглашения.</string>
-    <string name="v5_5_join_group_conversation_descr">История сообщений и улучшенный каталог групп.</string>
     <string name="remote_host_error_inactive"><![CDATA[Мобильный <b>%s</b> неактивен]]></string>
     <string name="remote_ctrl_error_timeout">Превышено максимальное время соединения с компьютером</string>
     <string name="remote_ctrl_error_disconnected">Компьютер отсоединён</string>

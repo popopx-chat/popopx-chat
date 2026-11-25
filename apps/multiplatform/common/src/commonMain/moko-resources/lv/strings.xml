@@ -2200,8 +2200,6 @@
     <string name="v5_3_new_desktop_app_descr">Izmantojiet jauno un uzlaboto darbvirsmas lietotni.</string>
     <string name="v5_3_encrypt_local_files">Šifrēt vietējās failus</string>
     <string name="v5_3_encrypt_local_files_descr">Aizsargājiet savus failus ar šifrēšanu.</string>
-    <string name="v5_3_discover_join_groups">Atklājiet grupas</string>
-    <string name="v5_3_discover_join_groups_descr">Pievienojieties interesantām grupām.</string>
     <string name="v5_3_simpler_incognito_mode">Vienkāršāks inkognito režīms</string>
     <string name="v5_3_simpler_incognito_mode_descr">Izmantojiet inkognito režīmu vieglāk.</string>
     <string name="v5_3_new_interface_languages_descr">Jaunas saskarnes valodas</string>
@@ -2218,8 +2216,6 @@
     <string name="v5_5_private_notes_descr">Saglabājiet savas piezīmes drošībā.</string>
     <string name="v5_5_simpler_connect_ui">Vienkāršāka savienojuma saskarne</string>
     <string name="v5_5_simpler_connect_ui_descr">Izmantojiet savienojuma saskarni vieglāk.</string>
-    <string name="v5_5_join_group_conversation">Pievienoties grupas sarunai</string>
-    <string name="v5_5_join_group_conversation_descr">Pievienojieties grupas sarunai.</string>
     <string name="v5_5_message_delivery">Piegāde</string>
     <string name="v5_5_message_delivery_descr">Ziņu piegāde.</string>
     <string name="v5_5_new_interface_languages">Jaunas saskarnes valodas</string>

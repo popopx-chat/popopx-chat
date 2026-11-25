@@ -156,12 +156,6 @@ private fun GroupPreferencesLayout(
       applyPrefs(preferences.copy(popopxLinks = RoleGroupPreference(enable = enable, role)))
     }
   }
-  @Composable fun ReportsPreference() {
-    val enableReports = remember(preferences) { mutableStateOf(preferences.reports.enable) }
-    FeatureSection(GroupFeature.Reports, enableReports, null, groupInfo, preferences, onTTLUpdated, disabled = true) { enable, _ -> // enable reports in 7.0 once directory support added
-      applyPrefs(preferences.copy(reports = GroupPreference(enable = enable)))
-    }
-  }
   @Composable fun HistoryPreference() {
     val enableHistory = remember(preferences) { mutableStateOf(preferences.history.enable) }
     FeatureSection(GroupFeature.History, enableHistory, null, groupInfo, preferences, onTTLUpdated) { enable, _ ->
@@ -213,8 +207,6 @@ private fun GroupPreferencesLayout(
       FilesPreference()
       SectionDividerSpaced()
       PopopxLinksPreference()
-      SectionDividerSpaced()
-      ReportsPreference()
       SectionDividerSpaced()
       HistoryPreference()
       SectionDividerSpaced()

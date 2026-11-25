@@ -1298,12 +1298,10 @@
     <string name="v5_3_new_desktop_app">Nieuwe desktop app!</string>
     <string name="v5_3_new_interface_languages">6 nieuwe interfacetalen</string>
     <string name="v5_3_encrypt_local_files_descr">App versleutelt nieuwe lokale bestanden (behalve video\'s)</string>
-    <string name="v5_3_discover_join_groups">Ontdek en sluit je aan bij groepen</string>
     <string name="v5_3_simpler_incognito_mode">Vereenvoudigde incognitomodus</string>
     <string name="v5_3_new_interface_languages_descr">Arabisch, Bulgaars, Fins, Hebreeuws, Thais en Oekraïens - dankzij de gebruikers en Weblate.</string>
     <string name="v5_3_new_desktop_app_descr">Maak een nieuw profiel in de desktop-app. 💻</string>
     <string name="v5_3_simpler_incognito_mode_descr">Schakel incognito in tijdens het verbinden.</string>
-    <string name="v5_3_discover_join_groups_descr">- maak verbinding met de directoryservice (BETA)! \n- ontvangst bevestiging (tot 20 leden). \n- sneller en stabieler.</string>
     <string name="rcv_group_event_open_chat">Open</string>
     <string name="error_creating_member_contact">Fout bij aanmaken contact</string>
     <string name="compose_send_direct_message_to_connect">Stuur een direct bericht om verbinding te maken</string>
@@ -1498,14 +1496,12 @@
     <string name="remote_ctrl_error_timeout">Time-out bereikt tijdens het verbinden met de desktop</string>
     <string name="group_member_status_unknown">onbekende status</string>
     <string name="v5_5_message_delivery">Verbeterde berichtbezorging</string>
-    <string name="v5_5_join_group_conversation">Neem deel aan groepsgesprekken</string>
     <string name="v5_5_simpler_connect_ui">Plak een link om te verbinden!</string>
     <string name="v5_5_private_notes">Privé notities</string>
     <string name="clear_note_folder_warning">Alle berichten worden verwijderd. Dit kan niet ongedaan worden gemaakt!</string>
     <string name="info_row_created_at">Gemaakt op</string>
     <string name="error_creating_message">Fout bij het maken van een bericht</string>
     <string name="v5_5_new_interface_languages">Hongaarse en Turkse gebruikersinterface</string>
-    <string name="v5_5_join_group_conversation_descr">Recente geschiedenis en verbeterde directory-bot.</string>
     <string name="note_folder_local_display_name">Privé notities</string>
     <string name="share_text_created_at">Gemaakt op: %s</string>
     <string name="profile_update_event_member_name_changed">lid %1$s gewijzigd in %2$s</string>

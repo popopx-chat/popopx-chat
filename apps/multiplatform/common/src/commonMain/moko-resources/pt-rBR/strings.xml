@@ -1267,7 +1267,6 @@
     <string name="v5_5_private_notes_descr">Com arquivos criptografados e mídia.</string>
     <string name="v5_5_simpler_connect_ui">Colar o link para conectar!</string>
     <string name="v5_5_simpler_connect_ui_descr">A barra de pesquisa aceita links de convite.</string>
-    <string name="v5_5_join_group_conversation">Participe de conversas em grupo</string>
     <string name="not_compatible">Não compatível!</string>
     <string name="invalid_qr_code">QR Code inválido</string>
     <string name="correct_name_to">Corrigir nome para %s?</string>
@@ -1360,7 +1359,6 @@
     <string name="receipts_groups_override_enabled">O envio de confirmações está ativado para %d grupos</string>
     <string name="start_chat_question">Iniciar o chat?</string>
     <string name="recent_history_is_not_sent_to_new_members">Histórico não é enviado para novos membros.</string>
-    <string name="v5_3_discover_join_groups">Descubra e participe de grupos</string>
     <string name="refresh_qr_code">Recarregar</string>
     <string name="remote_host_error_bad_version"><![CDATA[O dispositivo móvel <b>%s</b> tem uma versão não suportada. Por favor, certifique-se de usar a mesma versão em ambos os dispositivos]]></string>
     <string name="failed_to_create_user_invalid_title">Nome de exibição inválido!</string>
@@ -1403,9 +1401,7 @@
     <string name="unblock_for_all_question">Desbloquear membro para todos?</string>
     <string name="create_group_button">Criar grupo</string>
     <string name="v5_3_encrypt_local_files_descr">O aplicativo criptografa novos arquivos locais (exceto vídeos).</string>
-    <string name="v5_3_discover_join_groups_descr">- conecte-se ao serviço de diretório (BETA)! \n- recibos de entrega (até 20 membros). \n- mais rápido e mais estável.</string>
     <string name="v5_5_message_delivery">Entrega de mensagens aprimorada</string>
-    <string name="v5_5_join_group_conversation_descr">Histórico recente e bot de diretório aprimorado.</string>
     <string name="v5_2_message_delivery_receipts_descr">O segundo tick que perdemos! ✅</string>
     <string name="v5_5_message_delivery_descr">Com uso de bateria reduzido.</string>
     <string name="connected_to_mobile">Conectado ao dispositivo móvel</string>

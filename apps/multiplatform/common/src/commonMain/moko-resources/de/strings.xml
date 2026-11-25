@@ -1385,12 +1385,10 @@
     <string name="v5_3_new_interface_languages">6 neue Sprachen für die Bedienoberfläche</string>
     <string name="v5_3_encrypt_local_files_descr">Neue lokale Dateien (außer Video-Dateien) werden von der App verschlüsselt.</string>
     <string name="compose_send_direct_message_to_connect">Eine Direktnachricht zum Verbinden senden</string>
-    <string name="v5_3_discover_join_groups">Gruppen entdecken und ihnen beitreten</string>
     <string name="v5_3_simpler_incognito_mode">Vereinfachter Inkognito-Modus</string>
     <string name="v5_3_new_interface_languages_descr">Arabisch, Bulgarisch, Finnisch, Hebräisch, Thailändisch und Ukrainisch - Dank der Nutzer und Weblate.</string>
     <string name="v5_3_new_desktop_app_descr">Erstellen eines neuen Profils in der Desktop-App. 💻</string>
     <string name="v5_3_simpler_incognito_mode_descr">Inkognito beim Verbinden einschalten.</string>
-    <string name="v5_3_discover_join_groups_descr">- Verbindung mit dem Directory-Service (BETA)!\n- Empfangsbestätigungen (für bis zu 20 Mitglieder).\n- Schneller und stabiler.</string>
     <string name="member_contact_send_direct_message">Zum Verbinden senden</string>
     <string name="rcv_group_event_member_created_contact">Angefragte Verbindung</string>
     <string name="expand_verb">Erweitern</string>
@@ -1593,7 +1591,6 @@
     <string name="saved_message_title">Gespeicherte Nachricht</string>
     <string name="v5_5_simpler_connect_ui">Zum Verbinden den Link einfügen!</string>
     <string name="v5_5_message_delivery_descr">Mit reduziertem Akkuverbrauch.</string>
-    <string name="v5_5_join_group_conversation_descr">Aktueller Nachrichtenverlauf und verbesserter Gruppenverzeichnis-Bot.</string>
     <string name="v5_5_simpler_connect_ui_descr">In der Suchleiste werden nun auch Einladungslinks angenommen.</string>
     <string name="unblock_for_all">Für Alle freigeben</string>
     <string name="unblock_for_all_question">Mitglied für Alle freigeben?</string>
@@ -1608,7 +1605,6 @@
     <string name="error_creating_message">Fehler beim Erstellen der Nachricht</string>
     <string name="error_deleting_note_folder">Fehler beim Löschen der privaten Notizen</string>
     <string name="v5_5_message_delivery">Verbesserte Zustellung von Nachrichten</string>
-    <string name="v5_5_join_group_conversation">Gruppenunterhaltungen beitreten</string>
     <string name="v5_5_new_interface_languages">Ungarische und türkische Bedienoberfläche</string>
     <string name="profile_update_event_contact_name_changed">Der Kontaktname wurde von %1$s auf %2$s geändert</string>
     <string name="profile_update_event_member_name_changed">Der Mitgliedsname von %1$s wurde auf %2$s geändert</string>

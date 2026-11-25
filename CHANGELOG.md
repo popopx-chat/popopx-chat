@@ -14,6 +14,74 @@
 > `PopopxOfflineBridge.swift` 1. That replaces the 2026-11-16 figure of "4 occurrences in 4 files, none of
 > them code": the old app-link scheme is now parsed in Swift, so the surplus is load-bearing, not residue.
 
+## Unreleased — the Android manifest stops registering upstream, and the pin gets its immutable tag back, 2026-11-25
+
+- **`popopx-pin-8` restores an immutable pin.** The dependency is pinned by commit, and since its `master` was
+  history-re-inited that commit (`0c9141f92b788a954a495ce8604966f2af5ef9ef`) has been resolvable only as the
+  *branch tip* — `git ls-remote origin` in `../popopxmq` returned `HEAD`, `refs/heads/master` and
+  `refs/tags/v1.0.0`, and none of `popopx-pin-1`…`-7` (they are local tags there; `13df615d` = local `pin-7`
+  lives only on `backup-full-history`, and neither commit is an ancestor of the other). A tag was cut on
+  `0c9141f9` and pushed: `refs/tags/popopx-pin-8` → tag object `21416dfd`, which peels
+  (`popopx-pin-8^{}`) to the pinned commit. **No file in either repository changed**, so
+  `scripts/nix/sha256map.nix:2` still describes the same tree; its `1rrg2405…` was *not* re-derived in this
+  pass (generator: `nix-prefetch-git --fetch-submodules`, per `scripts/nix/update-sha256.awk`).
+  `cabal.project:24` keeps the bare SHA rather than the tag name, which is the form both holders already
+  carried — switching it to the tag would change the fetch, not just the label.
+- **`AndroidManifest.xml` no longer registers anything upstream** (`-17/+1`): the 15 `smpN.simplex.im`
+  `android:host` rows in the `autoVerify` filter and `<data android:scheme="simplexchat" />` are gone, leaving
+  `popopx:` / `popopxchat:` and our own hosts (`popopx.chat`, `smp1`–`smp8.popopx.im`, `relay1.popopx.im`).
+  The count that has to go with this: `grep -rnI -i simplex apps/multiplatform/android | wc -l` → **0**
+  (was 17, all in this one file). No POPOPX Android artifact was ever published, so no `simplexchat:/` link
+  issued by this fork is out there to answer for, and `autoVerify` now fetches `assetlinks.json` only from
+  hosts we operate — previously it asked upstream's relays about domains that can lapse to a third party.
+- **`legacyAppLinkScheme` was checked, not removed** (`ChatListView.kt:827`). It is the only other
+  `simplexchat` holder in Kotlin (`isAppLink` at `:833`), and `AppLinksTest.kt:26
+  acceptsTheLinkSpelledWithTheInheritedScheme` asserts the desktop argument path still accepts that spelling —
+  deleting the constant would fail the gate this batch is measured by. Android can no longer receive the
+  scheme (nothing registers it); iOS and desktop still do, so the recognition stays and the comment now says
+  which platform dropped it and when.
+- **Side effect worth recording, measured the same day**: with the upstream rows gone the `autoVerify` filter
+  names only hosts this project operates, so host-side verification became answerable for — `curl -s
+  --noproxy '*' -o /dev/null -w '%{http_code}' https://$h/.well-known/assetlinks.json`, one pass each,
+  returned **200 for `smp1`, `smp2`, `smp4`–`smp8.popopx.im` and `relay1.popopx.im`**, **`000` for
+  `smp3.popopx.im`** (no connection; these probes flap, so this is one sample, not a verdict), and **404 for
+  `popopx.chat`**. The last one is pre-existing and unrelated to this commit, but it is the reason the
+  `popopx.chat` row cannot claim Android app-link verification — publishing that file is a host-side step.
+- **Three user-visible stale translations** — the brand pass renamed the keys and Weblate left the values:
+  `fi/strings.xml:806` `TUE SIMPLEX CHATia` → `TUE POPOPX Chatia` (partitive kept), `el/strings.xml:854`
+  `Ενεργοποίηση SImpleX Lock` → `Ενεργοποίηση POPOPX Lock`, `el/strings.xml:2151` `SImpleX` → `POPOPX`.
+  These render in FI/EL builds; they passed the gate because `check-brand-clean.sh` exempts
+  `commonMain/moko-resources/` at directory level (line 103).
+- **The retired directory service is out of the KMP resources too**: 4 `WhatsNew` keys —
+  `v5_3_discover_join_groups(_descr)` and `v5_5_join_group_conversation(_descr)` — deleted whole, **120 lines
+  across 32 locale files**, key counts 32/29/31/28 measured before the cut. Zero references in `*.kt`,
+  `*.swift` or `*.hs` (checked before deleting), the sibling key `v5_3_new_desktop_app` was left as the
+  must-be-true control, and all 41 `strings.xml` still parse. The two *title* keys went with the two
+  `_descr` keys the ruling named: they advertise the same removed feature and are equally unreferenced.
+- **`GroupPreferences.kt` `-8`**: the permanently-disabled `ReportsPreference()` row and its call site are
+  removed, taking the `// enable reports in 7.0 once directory support added` comment with them. Held on
+  purpose: the `GroupFeature.Reports` wire value, its mapping at `ChatModel.kt:2721`, and the report action at
+  `ChatItemView.kt:499` — that last one is live UI, driven by the group's server-set feature, and only the
+  locked admin row was dead.
+- **Dated corrections, not rewrites**, went into `FORK.md` (three places: the pin paragraph of item 16, the
+  rebuild-order item, and the ship-route item) and into the 2026-11-17 `CHANGELOG.md` bullet that says
+  `cabal.project:24` *fetches* `13df615d…`. Each records the 2026-11-25 measurement and points here; the
+  dated sentences around them are left alone.
+- **Acceptance, measured on 2026-11-25.** `check-brand-clean.sh` passed, and `grep -rnI -i simplex
+  apps/multiplatform/android | wc -l` → **0**: no case, no file of that module holds the word any more. The
+  batch accounts for **20 counted lines** — 17 in the manifest, 3 in the translations. The gate's tree total
+  at this commit is **1378**, read with the record itself inside it: a sentence in these two files
+  that names the counted word adds a line to the census it reports, so the recipe is the number's only
+  definition and it has to be re-measured after the prose lands. `check-smp-links.sh` passed.
+  `:common:desktopTest` passed: **BUILD SUCCESSFUL in 5m 7s, exit 0**, read from
+  `common/build/test-results/desktopTest/*.xml` rather than the console — **30 classes, 256 tests, 0 failures,
+  0 errors, 5 skipped**, which is the same count the pre-change run of the same morning produced, so no test
+  changed its mind about anything (`AppLinkSchemeTest` 59, `AppLinksTest` 10, `SingleInstanceTest` 21).
+  One environment note: that task configures `:android` too (`settings.gradle.kts:21`), and `local.properties`
+  is gitignored and was absent, so the first attempt failed with *SDK location not found* before compiling
+  anything. Passing `ANDROID_HOME=~/Library/Android/sdk` in the launcher fixed it without adding an untracked
+  file to the repository — the failure never touched the tree.
+
 ## Unreleased — the badge link loses its upstream host and the What's New page its retired directory entries, 2026-11-25
 
 - **iOS: `badgePageUrl` is now the technical display site.** `apps/ios/Shared/Views/Badges/BadgeStore.swift:36`
@@ -2855,7 +2923,10 @@ reaches our broker and times out. A mirror matches its own digests, so `check-pi
   smp4–smp19, no smp13) is still named by this file — a host dropped from that list silently makes every
   short link already issued on it unresolvable.
 - **XFTP is defined here now** (`popopxXFTPServers`), because what this fork builds against does not contain
-  these servers: `cabal.project:24` fetches `popopxmq` at tag `13df615df789…` (= `popopx-pin-7`), and the
+  these servers: `cabal.project:24` fetches `popopxmq` at tag `13df615df789…` (= `popopx-pin-7`; **re-measured
+  2026-11-25 — the pin moved twice since, and reads `0c9141f92b78…` = `popopx-pin-8` now, published that day,
+  while `popopx-pin-7` is no longer resolvable from the dependency's remote at all. See the 2026-11-23
+  entry above; this sentence records the fetch as measured then**), and the
   source cabal actually fetched — `dist-newstyle/src/popopxmq-*/src/Popopx/FileTransfer/Client/Presets.hs`,
   both copies — names `xftp1`–`xftp6.simplex.im` and no `popopx.im` host
   (`find dist-newstyle/src -path '*FileTransfer/Client/Presets.hs' | xargs grep -c xftp1.popopx.im` → 0).

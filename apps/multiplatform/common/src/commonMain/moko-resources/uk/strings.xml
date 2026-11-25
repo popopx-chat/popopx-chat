@@ -1310,7 +1310,6 @@
     <string name="video_decoding_exception_desc">Неможливо декодувати відео. Спробуйте інше відео або зв\'яжіться з розробниками.</string>
     <string name="rcv_group_event_1_member_connected">%s підключився</string>
     <string name="rcv_group_and_other_events">і ще %d подій</string>
-    <string name="v5_3_discover_join_groups">Відкривайте та приєднуйтесь до груп</string>
     <string name="connect_plan_connect_via_link">Підключитися за допомогою посилання?</string>
     <string name="database_encryption_will_be_updated_in_settings">Ключова фраза шифрування бази даних буде оновлена і збережена в налаштуваннях.</string>
     <string name="connect_plan_already_joining_the_group">Вже приєднано до групи!</string>
@@ -1355,7 +1354,6 @@
     <string name="connect_plan_this_is_your_link_for_group_vName"><![CDATA[Це ваше посилання для групи <b>%1$s</b>!]]></string>
     <string name="unblock_member_confirmation">Розблокувати</string>
     <string name="non_content_uri_alert_title">Неправильний шлях до файлу</string>
-    <string name="v5_3_discover_join_groups_descr">- підключайтесь до служби каталогів (BETA)! \n- квитанції про доставку (до 20 учасників). \n- швидше та надійніше.</string>
     <string name="settings_is_storing_in_clear_text">Ключова фраза зберігається в налаштуваннях як звичайний текст.</string>
     <string name="connect_plan_you_have_already_requested_connection_via_this_address">Ви вже подали запит на підключення за цією адресою!</string>
     <string name="member_contact_send_direct_message">відправити для підключення</string>
@@ -1428,7 +1426,6 @@
     <string name="v5_5_message_delivery_descr">З меншим споживанням заряду акумулятора.</string>
     <string name="agent_critical_error_title">Критична помилка</string>
     <string name="v5_5_message_delivery">Покращено доставку повідомлень</string>
-    <string name="v5_5_join_group_conversation">Приєднатися до групових розмов</string>
     <string name="v5_5_simpler_connect_ui">Вставте посилання, щоб приєднатися!</string>
     <string name="note_folder_local_display_name">Приватні нотатки</string>
     <string name="retry_verb">Повторити</string>
@@ -1510,7 +1507,6 @@
     <string name="welcome_message_is_too_long">Привітання занадто довге</string>
     <string name="recent_history_is_not_sent_to_new_members">Історія не надсилається новим учасникам.</string>
     <string name="v5_5_new_interface_languages">Угорська та турецька мови інтерфейсу</string>
-    <string name="v5_5_join_group_conversation_descr">Нещодавня історія повідомлень та покращений бот каталогу.</string>
     <string name="remote_ctrl_was_disconnected_title">З\'єднання перервано</string>
     <string name="remote_ctrl_error_bad_version">Версія програми на комп\'ютері не підтримується. Будь ласка, встановіть однакову версію на обидва пристрої.</string>
     <string name="random_port">Випадковий</string>

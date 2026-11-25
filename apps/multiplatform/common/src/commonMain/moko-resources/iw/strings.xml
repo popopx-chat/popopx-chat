@@ -1291,7 +1291,6 @@
     <string name="v5_3_encrypt_local_files_descr">האפליקציה מצפינה קבצים מקומיים חדשים (למעט סרטונים).</string>
     <string name="you_can_change_it_later">ביטוי סיסמה אקראי מאוחסן בהגדרות כטקסט רגיל.\nאתה יכול לשנות את זה מאוחר יותר.</string>
     <string name="compose_send_direct_message_to_connect">שלח הודעה ישירה כדי להתחבר</string>
-    <string name="v5_3_discover_join_groups">גלה והצטרף לקבוצות</string>
     <string name="database_encryption_will_be_updated_in_settings">ביטוי הסיסמה להצפנת מסד הנתונים יעודכן ויישמר בהגדרות.</string>
     <string name="remove_passphrase_from_settings">להסיר את ביטוי הסיסמה מההגדרות?</string>
     <string name="use_random_passphrase">השתמש בביטוי סיסמה אקראי</string>
@@ -1304,7 +1303,6 @@
     <string name="v5_3_new_desktop_app_descr">צור פרופיל חדש באפליקציית שולחן העבודה. 💻</string>
     <string name="passphrase_will_be_saved_in_settings">ביטוי הסיסמה יישמר בהגדרות כטקסט רגיל לאחר שתשנה אותו או תפעיל מחדש את האפליקציה.</string>
     <string name="v5_3_simpler_incognito_mode_descr">החלף מצב זהות נסתרת בעת חיבור.</string>
-    <string name="v5_3_discover_join_groups_descr">- התחבר לשירות ספריות (ביטא)! \n- קבלות משלוח (עד 20 חברים). \n- מהיר ויציב יותר.</string>
     <string name="settings_is_storing_in_clear_text">ביטוי הסיסמה מאוחסן בהגדרות כטקסט רגיל.</string>
     <string name="member_contact_send_direct_message">שלח הודעה ישירה</string>
     <string name="rcv_group_event_member_created_contact">מחובר ישירות</string>
@@ -1342,7 +1340,6 @@
     <string name="v5_4_incognito_groups">קבוצות חשאיות</string>
     <string name="v5_4_link_mobile_desktop">קשר בין האפליקציות במכשיר הנייד והמחשב השולחני! 🔗</string>
     <string name="v5_5_simpler_connect_ui">הדבק קישור כדי להתחבר!</string>
-    <string name="v5_5_join_group_conversation_descr">היסטוריה אחרונה ובוט משופר.</string>
     <string name="v5_4_link_mobile_desktop_descr">דרך פרוטוקול מאובטח עמיד בפני מחשוב קוונטי</string>
     <string name="linked_mobiles">מכשירי נייד מקושרים</string>
     <string name="migrate_to_device_chat_migrated">הצ׳אט הועבר!</string>
@@ -1431,7 +1428,6 @@
     <string name="member_info_member_blocked">חסום</string>
     <string name="error_blocking_member_for_all">שגיאה בחסימת משתתף לכולם</string>
     <string name="v5_5_simpler_connect_ui_descr">שורת החיפוש מקבלת קישורי הזמנה.</string>
-    <string name="v5_5_join_group_conversation">הצטרף לשיחות קבוצתיות</string>
     <string name="v5_5_message_delivery">שיפור במסירת הודעות</string>
     <string name="remote_ctrl_error_inactive">מחשב שולחני לא פעיל</string>
     <string name="connect_plan_connect_via_link">להתחבר דרך קישור?</string>

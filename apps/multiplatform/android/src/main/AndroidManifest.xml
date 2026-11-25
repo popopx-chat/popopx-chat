@@ -74,7 +74,7 @@
 
         <data android:scheme="popopx" />
       </intent-filter>
-      <!-- open popopxchat:/ app URI; simplexchat:/ stays for the links issued before the move -->
+      <!-- open popopxchat:/ app URI -->
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
 
@@ -82,7 +82,6 @@
         <category android:name="android.intent.category.BROWSABLE" />
 
         <data android:scheme="popopxchat" />
-        <data android:scheme="simplexchat" />
       </intent-filter>
       <intent-filter android:autoVerify="true">
         <action android:name="android.intent.action.VIEW" />
@@ -93,21 +92,6 @@
         <data android:scheme="http" />
         <data android:scheme="https" />
         <data android:host="popopx.chat" />
-        <data android:host="smp4.simplex.im" />
-        <data android:host="smp5.simplex.im" />
-        <data android:host="smp6.simplex.im" />
-        <data android:host="smp7.simplex.im" /> <!-- TODO remove -->
-        <data android:host="smp8.simplex.im" />
-        <data android:host="smp9.simplex.im" />
-        <data android:host="smp10.simplex.im" />
-        <data android:host="smp11.simplex.im" />
-        <data android:host="smp12.simplex.im" />
-        <data android:host="smp14.simplex.im" />
-        <data android:host="smp15.simplex.im" />
-        <data android:host="smp16.simplex.im" />
-        <data android:host="smp17.simplex.im" />
-        <data android:host="smp18.simplex.im" />
-        <data android:host="smp19.simplex.im" />
         <data android:host="smp1.popopx.im" />
         <data android:host="smp2.popopx.im" />
         <data android:host="smp3.popopx.im" />

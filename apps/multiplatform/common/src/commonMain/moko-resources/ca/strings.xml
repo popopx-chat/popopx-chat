@@ -442,7 +442,6 @@
     <string name="disable_sending_recent_history">No envieu l\'historial als nous membres.</string>
     <string name="v4_4_disappearing_messages">Missatges que desapareixen</string>
     <string name="v4_5_multiple_chat_profiles_descr">Diferents noms, avatars i aïllament del transport.</string>
-    <string name="v5_3_discover_join_groups">Descobreix i uneix-te a grups</string>
     <string name="v6_0_delete_many_messages_descr">Suprimir fins a 20 missatges alhora.</string>
     <string name="custom_time_unit_days">dies</string>
     <string name="v6_1_delete_many_messages_descr">Suprimeix o modera fins a 200 missatges.</string>
@@ -864,7 +863,6 @@
     <string name="callstatus_connecting">trucada en connexió…</string>
     <string name="migrate_from_device_creating_archive_link">Creant un enllaç a l\'arxiu</string>
     <string name="connecting_to_desktop">Connectant amb l\'ordinador</string>
-    <string name="v5_3_discover_join_groups_descr">- Connexió al servei de directoris (BETA)!\n- Confirmacions de lliurament (fins a 20 membres).\n- Més ràpid i més estable.</string>
     <string name="receipts_contacts_enable_for_all">Habilita per a tothom</string>
     <string name="profile_update_event_contact_name_changed">el contacte %1$s ha canviat a %2$s</string>
     <string name="chat_preferences_contact_allows">El contacte permet</string>
@@ -2026,8 +2024,6 @@
     <string name="v5_2_message_delivery_receipts_descr">La doble comprovació que ens mancava! ✅</string>
     <string name="v5_2_fix_encryption">Manté les vostres connexions</string>
     <string name="v5_2_disappear_one_message">Fer desaparèixer un missatge</string>
-    <string name="v5_5_join_group_conversation">Unir-se a converses de grup</string>
-    <string name="v5_5_join_group_conversation_descr">Historial recent i bot de directori millorat.</string>
     <string name="v6_1_better_calls_descr">Canvia l\'àudio i el vídeo durant la trucada.</string>
     <string name="v6_1_switch_chat_profile_descr">Canvia el perfil de xat per a invitacions d\'un sol ús.</string>
     <string name="you_can_enable_delivery_receipts_later">Podeu activar-ho més tard mitjançant Configuració</string>

@@ -1276,7 +1276,6 @@
     <string name="muted_when_inactive">Aktif değilken susturuldu!</string>
     <string name="rcv_group_and_other_events">ve %d diğer etkinlikler</string>
     <string name="network_session_mode_transport_isolation">Ulaşım izolazyonu</string>
-    <string name="v5_3_discover_join_groups">Keşfet ve gruplara katıl</string>
     <string name="v5_4_incognito_groups">Gizli gruplar</string>
     <string name="user_unmute">Susturmayı kaldır</string>
     <string name="share_text_sent_at">%s de gönderildi</string>
@@ -1444,7 +1443,6 @@
     <string name="smp_servers_use_server">Sunucu kullan</string>
     <string name="share_text_received_at">Alınma tarihi: %s</string>
     <string name="add_contact_tab">Kişi Ekle</string>
-    <string name="v5_3_discover_join_groups_descr">- dizin hizmetine bağlan \n(BETADA!) \n- çoklu mesaj gönderme \n(20 kişiye kadar). \n- daha hızlı ve daha stabil.</string>
     <string name="tap_to_scan">Taramak için tıkla</string>
     <string name="keep_invitation_link">Tut</string>
     <string name="lock_after">Sonra kilitle</string>
@@ -1495,10 +1493,8 @@
     <string name="remote_host_disconnected_from"><![CDATA[Telefon bağlantısı <b>%s</b> şu nedenle kesildi: %s]]></string>
     <string name="remote_ctrl_disconnected_with_reason">Nedeniyle birlikte bağlantı kesildi: %s</string>
     <string name="v5_5_private_notes_descr">Şifrelenmiş dosyalar ve medya ile birlikte.</string>
-    <string name="v5_5_join_group_conversation">Grup sohbetlerine katıl</string>
     <string name="v5_5_simpler_connect_ui">Bağlanmak için bağlantıyı yapıştır!</string>
     <string name="remote_ctrl_error_timeout">Masaüstüne bağlanırken zaman aşımına ulaşıldı</string>
-    <string name="v5_5_join_group_conversation_descr">Yakın tarih ve geliştirilmiş dizin botu.</string>
     <string name="v5_5_simpler_connect_ui_descr">Arama çubuğu davet bağlantılarını kabul eder.</string>
     <string name="member_info_member_blocked">engellendi</string>
     <string name="block_for_all_question">Üye herkes için engellensin mi?</string>

@@ -977,7 +977,6 @@
     <string name="connecting_to_desktop">데스크톱에 연결 중</string>
     <string name="connect_plan_connect_to_yourself">자신과 연결하겠습니까?</string>
     <string name="migrate_to_device_chat_migrated">채팅이 이전되었습니다!</string>
-    <string name="v5_3_discover_join_groups_descr">- 디렉터리 서비스(베타)에 연결하세요!\n- 전송 알림(최대 20명).\n- 더 빠르고 안정적입니다.</string>
     <string name="migrate_from_device_cancel_migration">이전 취소</string>
     <string name="migrate_from_device_confirm_you_remember_passphrase">이전하려는 데이터베이스의 암호를 기억하고 있는지 확인합니다.</string>
     <string name="app_check_for_updates_beta">베타</string>
@@ -1081,7 +1080,6 @@
     <string name="snd_conn_event_ratchet_sync_required">%s 의 암호화 재협상 필요</string>
     <string name="snd_conn_event_ratchet_sync_allowed">%s 의 암호화 재협상 허용</string>
     <string name="error_blocking_member_for_all">멤버 블록 오류</string>
-    <string name="v5_3_discover_join_groups">그룹 검색 및 참여하기</string>
     <string name="v5_4_better_groups_descr">더 빠른 참여와 더 안정적인 메시지.</string>
     <string name="delivery_receipts_title">전송 알림!</string>
     <string name="enable_receipts_all">활성화</string>
@@ -1364,7 +1362,6 @@
     <string name="v4_5_italian_interface">이탈리아어 인터페이스</string>
     <string name="connect_plan_join_your_group">그룹에 참여하시겠습니까?</string>
     <string name="thousand_abbreviation">k</string>
-    <string name="v5_5_join_group_conversation">그룹 대화에 참여</string>
     <string name="this_device_version"><![CDATA[<i>(이 기기 v%s)</i>]]></string>
     <string name="failed_to_create_user_invalid_title">잘못된 표시 이름입니다!</string>
     <string name="non_content_uri_alert_title">잘못된 파일 경로</string>

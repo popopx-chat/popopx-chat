@@ -1298,12 +1298,10 @@
     <string name="v5_3_new_desktop_app">Nowa aplikacja desktopowa!</string>
     <string name="v5_3_new_interface_languages">6 nowych języków interfejsu</string>
     <string name="v5_3_encrypt_local_files_descr">Aplikacja szyfruje nowe lokalne pliki (bez filmów).</string>
-    <string name="v5_3_discover_join_groups">Odkrywaj i dołączaj do grup</string>
     <string name="v5_3_simpler_incognito_mode">Uproszczony tryb incognito</string>
     <string name="v5_3_new_interface_languages_descr">Arabski, bułgarski, fiński, hebrajski, tajski i ukraiński - dzięki użytkownikom i Weblate.</string>
     <string name="v5_3_new_desktop_app_descr">Utwórz nowy profil w aplikacji desktopowej. 💻</string>
     <string name="v5_3_simpler_incognito_mode_descr">Przełącz incognito przy połączeniu.</string>
-    <string name="v5_3_discover_join_groups_descr">- połącz się z usługą katalogową (BETA)!\n- potwierdzenia dostaw (do 20 członków).\n- szybszy i stabilniejszy.</string>
     <string name="rcv_group_event_open_chat">Otwórz</string>
     <string name="error_creating_member_contact">Błąd tworzenia kontaktu członka</string>
     <string name="compose_send_direct_message_to_connect">Wyślij wiadomość bezpośrednią aby połączyć</string>
@@ -1493,7 +1491,6 @@
     <string name="v5_5_simpler_connect_ui">Wklej link, aby połączyć!</string>
     <string name="v5_5_private_notes_descr">Z zaszyfrowanymi plikami i multimediami.</string>
     <string name="v5_5_simpler_connect_ui_descr">Pasek wyszukiwania akceptuje linki zaproszenia.</string>
-    <string name="v5_5_join_group_conversation_descr">Ostatnia historia i ulepszony bot adresowy.</string>
     <string name="agent_critical_error_title">Krytyczny błąd</string>
     <string name="agent_critical_error_desc">Proszę zgłosić to do deweloperów: \n%s \n \nZalecane jest zrestartowanie aplikacji.</string>
     <string name="agent_internal_error_desc">Proszę zgłosić to do deweloperów: \n%s</string>
@@ -1505,7 +1502,6 @@
     <string name="block_for_all">Zablokuj dla wszystkich</string>
     <string name="chat_is_stopped_you_should_transfer_database">Czat został zatrzymany. Jeśli korzystałeś już z tej bazy danych na innym urządzeniu, powinieneś przenieść ją z powrotem przed rozpoczęciem czatu.</string>
     <string name="agent_internal_error_title">Wewnętrzny błąd</string>
-    <string name="v5_5_join_group_conversation">Dołącz do grupowej rozmowy</string>
     <string name="share_text_created_at">Utworzony o: %s</string>
     <string name="remote_ctrl_error_bad_version">Komputer ma niewspieraną wersję. Proszę upewnić się, że używasz tych samych wersji na obu urządzeniach</string>
     <string name="blocked_by_admin_items_description">%d wiadomości zablokowanych przez admina</string>

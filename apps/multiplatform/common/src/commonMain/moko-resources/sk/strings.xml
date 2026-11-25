@@ -884,7 +884,6 @@
     <string name="remote_ctrl_disconnected_with_reason">Odpojené z dôvodu: %s</string>
     <string name="disconnect_remote_hosts">Odpojiť mobily</string>
     <string name="multicast_discoverable_via_local_network">Objaviteľné cez lokálnu sieť</string>
-    <string name="v5_3_discover_join_groups">Objavte a pripojte sa ku skupinám</string>
     <string name="discover_on_network">Objavte cez lokálnu sieť</string>
     <string name="ttl_m">%dm</string>
     <string name="group_new_support_messages">%d správ</string>
@@ -977,7 +976,6 @@
     <string name="v5_8_message_delivery">Vylepšené doručovanie správ</string>
     <string name="v5_7_call_sounds">Zvuky v hovore</string>
     <string name="v5_4_incognito_groups">Inkognito skupiny</string>
-    <string name="v5_5_join_group_conversation">Pripojiť sa ku skupinovej konverzácii</string>
     <string name="v5_2_disappear_one_message">Nechať jednu správu zmiznúť</string>
     <string name="v5_8_chat_themes_descr">Upravte si svoje chaty, aby vyzerali inak!</string>
     <string name="v5_1_message_reactions">Reakcie na správy</string>

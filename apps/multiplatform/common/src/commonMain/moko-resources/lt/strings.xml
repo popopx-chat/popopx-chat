@@ -648,7 +648,6 @@
     <string name="network_settings_title">Tinklo nustatymai</string>
     <string name="rcv_group_event_member_left">išėjo</string>
     <string name="v4_5_reduced_battery_usage_descr">Daugiau patobulinimų jau greitai!</string>
-    <string name="v5_5_join_group_conversation">Prisijunkite prie pokalbių grupėse</string>
     <string name="connect_plan_open_group">Atverti grupę</string>
     <string name="invite_friends">Pakviesti draugus</string>
     <string name="only_you_can_make_calls">Tik jūs galite skambinti.</string>
@@ -964,7 +963,6 @@
     <string name="desktop_app_version_is_incompatible">Darbastalio programėlės versija %s nėra suderinama su šia programėle.</string>
     <string name="group_member_role_author">autorius</string>
     <string name="send_receipts_disabled_alert_title">Kvitai yra išjungti</string>
-    <string name="v5_3_discover_join_groups_descr">- prisijunkite prie katalogo tarnybos (BETA)! \n- pristatymo kvitai (iki 20 narių). \n- greičiau ir stabiliau.</string>
     <string name="moderated_items_description">%1$d žinutė buvo moderuota %2$s</string>
     <string name="found_desktop">Rastas darbastalis</string>
     <string name="store_passphrase_securely">Prašome saugoti slaptafrazę saugiai, jūs NEGALĖSITE jos pakeisti, jei ją prarasite.</string>
@@ -1252,7 +1250,6 @@
     <string name="receipts_groups_disable_keep_overrides">Išjungti (palikti grupių nepaisymus)</string>
     <string name="invite_prohibited_description">Bandote pakviesti kontaktą, su kuriuo bendrinote inkognito profilį, į grupę, kurioje naudojate savo pagrindinį profilį</string>
     <string name="v4_5_multiple_chat_profiles_descr">Skirtingi vardai, avatarai ir transporto izoliacija.</string>
-    <string name="v5_3_discover_join_groups">Atraskite ir prisijunkite prie grupių</string>
     <string name="disconnect_remote_host">Atsijungti</string>
     <string name="ttl_w">%dsav.</string>
     <string name="connect__your_profile_will_be_shared">Jūsų profilis %1$s bus bendrinamas.</string>
@@ -1359,7 +1356,6 @@
     <string name="unblock_for_all">Atblokuoti visiems</string>
     <string name="connect_via_member_address_alert_desc">Prisijungimo užklausa bus išsiųsta šiam grupės nariui.</string>
     <string name="v4_5_reduced_battery_usage">Sumažintas baterijos naudojimas</string>
-    <string name="v5_5_join_group_conversation_descr">Naujausia istorija ir patobulintas katalogo botas.</string>
     <string name="sending_delivery_receipts_will_be_enabled">Pristatymo kvitų siuntimas bus įjungtas visiems kontaktams.</string>
     <string name="sending_delivery_receipts_will_be_enabled_all_profiles">Pristatymo kvitų siuntimas bus įjungtas visiems kontaktams visuose matomuose pokalbių profiliuose.</string>
     <string name="linked_desktops">Susieti darbastaliai</string>

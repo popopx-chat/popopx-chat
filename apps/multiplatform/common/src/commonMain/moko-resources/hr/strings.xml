@@ -618,7 +618,6 @@
     <string name="reset_single_color">Obnoviti boju</string>
     <string name="chat_theme_apply_to_light_mode">Svetlosni režim</string>
     <string name="chat_theme_apply_to_dark_mode">Tamni režim</string>
-    <string name="v5_5_join_group_conversation">Pristupiti grupnoj konverzaciji</string>
     <string name="desktop_address">Adresa računara</string>
     <string name="connect_plan_join_your_group">Pristupiti Vašoj grupi?</string>
     <string name="service_notifications_disabled">Trenutna obaveštenja su onemogućena!</string>
@@ -1000,7 +999,6 @@
     <string name="cant_call_contact_deleted_alert_text">Kontakt je odstranjen.</string>
     <string name="v5_1_japanese_portuguese_interface">Japanski i Portugalski UI</string>
     <string name="v5_1_self_destruct_passcode">Pin kod za samouništenje</string>
-    <string name="v5_3_discover_join_groups">Pronađite i pristupite grupama</string>
     <string name="for_me_only">Odstraniti za mene</string>
     <string name="image_decoding_exception_title">Greška u dekodiranju</string>
     <string name="icon_descr_server_status_disconnected">Prekinuta veza</string>

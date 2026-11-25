@@ -569,7 +569,6 @@
     <string name="remote_host_was_disconnected_title">Η σύνδεση διακόπηκε</string>
     <string name="remote_ctrl_was_disconnected_title">Η σύνδεση διακόπηκε</string>
     <string name="remote_ctrl_error_bad_state">Η σύνδεση με τον υπολογιστή βρίσκεται σε κακή κατάσταση</string>
-    <string name="v5_3_discover_join_groups_descr">- σύνδεση με υπηρεσία καταλόγου (δοκιμαστικό)!\n- επιβεβαιώσεις παράδοσης (εώς 20 μέλη).\n- γρηγορότερα και πιο σταθερά.</string>
     <string name="v6_0_connect_faster_descr">Συνδέσου με τους φίλους σου πιο γρήγορα.</string>
     <string name="profile_update_event_contact_name_changed">η επαφή %1$s άλλαξε σε %2$s</string>
     <string name="icon_descr_contact_checked">Η επαφή ελέγχθηκε</string>
@@ -780,7 +779,6 @@
     <string name="remote_ctrl_disconnected_with_reason">Αποσυνδεδεμένος με το λόγο: %s</string>
     <string name="disconnect_remote_hosts">Αποσύνδεση τηλεφώνων</string>
     <string name="multicast_discoverable_via_local_network">Ανιχνεύσιμο μέσω τοπικού δικτύου</string>
-    <string name="v5_3_discover_join_groups">Ανακάλυψε και συνδέσου σε ομάδες</string>
     <string name="discover_on_network">Ανακάλυψη μέσω τοπικού δικτύου</string>
     <string name="display_name_cannot_contain_whitespace">Το εμφανιζόμενο όνομα δεν μπορεί να περιέχει κενά.</string>
     <string name="ttl_m">%dμ</string>
@@ -851,7 +849,7 @@
     <string name="receipts_groups_title_enable">Ενεργοποίηση αναφορών παράδοσης για τις ομάδες;</string>
     <string name="enable_self_destruct">Ενεργοποίηση αυτοκαταστροφής</string>
     <string name="enabled_self_destruct_passcode">Ενεργοποίηση κωδικού αυτοκαταστροφής</string>
-    <string name="auth_enable_popopx_lock">Ενεργοποίηση SImpleX Lock</string>
+    <string name="auth_enable_popopx_lock">Ενεργοποίηση POPOPX Lock</string>
     <string name="network_option_enable_tcp_keep_alive">Ενεργοποίηση TCP keep-alive</string>
     <string name="encrypt_database">Κρυπτογράφηση</string>
     <string name="encrypt_database_question">Κρυπτογράφηση βάσης δεδομένων;</string>
@@ -1081,7 +1079,6 @@
     <string name="group_preview_join_as">Συμμετοχή ως %s</string>
     <string name="compose_view_join_group">Συμμετοχή στην ομάδα</string>
     <string name="join_group_question">Συμμετοχή στην ομάδα;</string>
-    <string name="v5_5_join_group_conversation">Συμμετοχή στις συνομιλίες της ομάδας</string>
     <string name="join_group_incognito_button">Ανώνυμη συμμετοχή</string>
     <string name="joining_group">Συμμετοχή στη ομάδα</string>
     <string name="connect_plan_join_your_group">Θέλεις να συμμετάσχεις στην ομάδα σου;</string>
@@ -1864,7 +1861,6 @@
     <string name="stop_rcv_file__message">Η λήψη αρχείων θα διακοπεί.</string>
     <string name="popopx_service_notification_text">Λήψη μηνυμάτων…</string>
     <string name="receiving_via">Λήψη μέσω</string>
-    <string name="v5_5_join_group_conversation_descr">Πρόσφατο ιστορικό και βελτιωμένο μποτ καταλόγου.</string>
     <string name="recipients_can_not_see_who_message_from">Ο/Οι παραλήπτης/ες δεν μπορούν να δουν από ποιον προέρχεται αυτό το μήνυμα.</string>
     <string name="v4_4_live_messages_desc">Οι παραλήπτες βλέπουν τις ενημερώσεις καθώς τις πληκτρολογείς.</string>
     <string name="reconnect">Επανασύνδεση</string>
@@ -2148,7 +2144,7 @@
     <string name="show_slow_api_calls">Εμφάνιση αργών κλήσεων API</string>
     <string name="settings_shutdown">Απενεργοποίηση</string>
     <string name="shutdown_alert_question">Απενεργοποίηση;</string>
-    <string name="theme_popopx">SImpleX</string>
+    <string name="theme_popopx">POPOPX</string>
     <string name="popopx_address">POPOPX διεύθυνση</string>
     <string name="icon_descr_address">Διεύθυνση POPOPX</string>
     <string name="popopx_address_and_1_time_links_are_safe_to_share">Η διεύθυνση POPOPX και οι σύνδεσμοι 1-χρήσης είναι ασφαλές να διαμοιράζονται μέσω οποιασδήποτε εφαρμογής ανταλλαγής μηνυμάτων.</string>

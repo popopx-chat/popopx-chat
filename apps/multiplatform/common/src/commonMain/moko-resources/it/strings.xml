@@ -1300,12 +1300,10 @@
     <string name="v5_3_new_desktop_app">Nuova app desktop!</string>
     <string name="v5_3_new_interface_languages">6 nuove lingue dell\'interfaccia</string>
     <string name="v5_3_encrypt_local_files_descr">L\'app cripta i nuovi file locali (eccetto i video).</string>
-    <string name="v5_3_discover_join_groups">Scopri ed unisciti ai gruppi</string>
     <string name="v5_3_simpler_incognito_mode">Modalità incognito semplificata</string>
     <string name="v5_3_new_interface_languages_descr">Arabo, bulgaro, finlandese, ebraico, tailandese e ucraino - grazie agli utenti e a Weblate.</string>
     <string name="v5_3_new_desktop_app_descr">Crea un nuovo profilo nell\'app desktop. 💻</string>
     <string name="v5_3_simpler_incognito_mode_descr">Attiva/disattiva l\'incognito quando ti colleghi.</string>
-    <string name="v5_3_discover_join_groups_descr">- connessione al servizio directory (BETA)! \n- ricevute di consegna (fino a 20 membri). \n- più veloce e più stabile.</string>
     <string name="rcv_group_event_open_chat">Apri</string>
     <string name="error_creating_member_contact">Errore di creazione del contatto</string>
     <string name="compose_send_direct_message_to_connect">Invia messaggio diretto per connetterti</string>
@@ -1501,14 +1499,12 @@
     <string name="developer_options_section">Opzioni sviluppatore</string>
     <string name="v5_5_private_notes">Note private</string>
     <string name="v5_5_new_interface_languages">Interfaccia in ungherese e turco</string>
-    <string name="v5_5_join_group_conversation_descr">Cronologia recente e bot della directory migliorato.</string>
     <string name="info_row_created_at">Creato il</string>
     <string name="clear_note_folder_warning">Tutti i messaggi verranno eliminati, non è reversibile!</string>
     <string name="share_text_created_at">Creato il: %s</string>
     <string name="error_creating_message">Errore di creazione del messaggio</string>
     <string name="error_deleting_note_folder">Errore di eliminazione delle note private</string>
     <string name="v5_5_message_delivery">Consegna dei messaggi migliorata</string>
-    <string name="v5_5_join_group_conversation">Entra in conversazioni di gruppo</string>
     <string name="profile_update_event_member_name_changed">il membro %1$s è diventato %2$s</string>
     <string name="v5_5_simpler_connect_ui">Incolla un link per connettere!</string>
     <string name="profile_update_event_removed_address">indirizzo di contatto rimosso</string>

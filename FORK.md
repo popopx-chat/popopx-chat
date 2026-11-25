@@ -460,6 +460,15 @@ each was meant to become. That pass also repaired a compile break this fork ship
     the dependency itself. What did **not** follow the pin is the built half — the archives measured in
     the next sentences were installed through pin-4 (mtimes 2026-11-13, two days before pin-5 exists),
     and pin-6 and pin-7 both moved the store's UDF name, which is the drift that shows there.
+    **Re-measured 2026-11-25, and the pin moved once more after this item was written:** `cabal.project:24`
+    with `scripts/nix/sha256map.nix:2` read `0c9141f92b788a954a495ce8604966f2af5ef9ef`, tagged
+    `popopx-pin-8`. The dependency's `master` was history-re-inited underneath the pin chain, so
+    `popopx-pin-1`…`-7` are now *local-only* tags there — `git ls-remote origin` returns `HEAD`,
+    `refs/heads/master` and `refs/tags/v1.0.0` and no pin tag — and the `13df615d` this paragraph calls the
+    pin is reachable only from that clone's local `backup-full-history` branch, not an ancestor of
+    `0c9141f9` in either direction. `0c9141f9` resolved because it is the branch tip, which is mutable, so
+    `popopx-pin-8` was cut on it and pushed 2026-11-25. The bump itself is the 2026-11-23 entry of
+    `CHANGELOG.md`.
     CI is a different story, told below, because the
     test that is red there does not read the pin at all. Measured on the two installed
     slices, `apps/ios/Libraries/ios/libHSpopopx-chat-7.1.2.0-2pJp6QhAZjZInPLhny3S4B-ghc9.6.3.a` and
@@ -523,7 +532,9 @@ each was meant to become. That pass also repaired a compile break this fork ship
     `src/Popopx/Messaging/Agent/Store/SQLite/Migrations/M20261117_xor_udf_rename.hs` that pin-7 deletes
     36 minutes later in favour of renaming it in place and dropping the old SQL name entirely. Pin-6's
     own push run `44027639184` concluded `failure` before pin-7 landed, and a pin to pin-6 would record a
-    migration its successor removes. What is still outstanding is the second half of the order — rebuild
+    migration its successor removes. **Re-measured 2026-11-25: it moved a third time**, onto
+    `0c9141f9…` = `popopx-pin-8`, and none of `popopx-pin-1`…`-7` is on the remote any more (the dependency's
+    master re-init dropped them), so only this third pin is resolvable from GitHub. What is still outstanding is the second half of the order — rebuild
     everything that reads the pin: the two installed iOS slices named above, the `-libs` bundle and the
     desktop artifacts CI publishes — and clear both
     `dist-newstyle` directories named above on any machine with a warm cache, which is what turns "I
@@ -1215,7 +1226,10 @@ yet. Before any build of this fork is distributed:
     and 16 of them under `src`, and the installed archives do not stay current — see item 16 for what each of the
     three reads and why `git status` cannot see any of it. Ordering constraint: that pin is resolvable from
     GitHub only once the dependency commit and tag are pushed, so **our pin-bump commit must not land
-    upstream before theirs**. Two holders of upstream's `3C:52:C4:FD:…:AD:85` are **held**:
+    upstream before theirs**. **Re-measured 2026-11-25: discharged for the pin carried now** —
+    `cabal.project:24` reads `0c9141f9…` = `popopx-pin-8`, whose tag object `21416dfd` is published on the
+    dependency's origin and peels to that commit, while `popopx-pin-7` named above is not resolvable there.
+    Two holders of upstream's `3C:52:C4:FD:…:AD:85` are **held**:
     `scripts/ci/android/release-apk.sh:10` and `scripts/popopx-chat-reproduce-builds-android.sh:4` verify
     *upstream's* APK, so for them that digest is the correct value.
     iOS push, by contrast, is already clean: `appName`/`TOPIC` name our

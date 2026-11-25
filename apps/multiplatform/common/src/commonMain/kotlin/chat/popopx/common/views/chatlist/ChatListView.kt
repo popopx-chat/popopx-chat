@@ -823,7 +823,8 @@ fun connectIfOpenedViaUri(rhId: Long?, uri: String, chatModel: ChatModel) {
 // the app's own scheme, for every link that is not a connection link, which stays on popopx:
 internal const val appLinkScheme = "popopxchat"
 // a link issued before the scheme moved still arrives with this spelling, and is still an app link:
-// the platforms that may have installed builds register both, so both must be recognised
+// iOS and desktop still register it, Android unregistered it on 2026-11-25, and the desktop argument
+// path is tested for it (AppLinksTest.acceptsTheLinkSpelledWithTheInheritedScheme), so it stays recognised
 internal const val legacyAppLinkScheme = "simplexchat"
 internal const val connectionLinkScheme = "popopx"
 private const val badgeLinkPath = "/badge/code/"

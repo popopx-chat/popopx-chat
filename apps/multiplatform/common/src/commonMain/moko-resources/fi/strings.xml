@@ -803,7 +803,7 @@
     <string name="relay_server_protects_ip">Välityspalvelin suojaa IP-osoitteesi, mutta se voi tarkkailla puhelun kestoa.</string>
     <string name="open_popopx_chat_to_accept_call">Avaa POPOPX Chat hyväksyäksesi puhelun</string>
     <string name="status_no_e2e_encryption">ei e2e-salausta</string>
-    <string name="settings_section_title_support">TUE SIMPLEX CHATia</string>
+    <string name="settings_section_title_support">TUE POPOPX Chatia</string>
     <string name="settings_section_title_messages">Viestit ja tiedostot</string>
     <string name="share_address">Jaa osoite</string>
     <string name="users_delete_data_only">Vain paikalliset profiilitiedot</string>
@@ -1293,7 +1293,6 @@
     <string name="rcv_group_event_open_chat">Avaa</string>
     <string name="v5_3_new_desktop_app">Uusi työpöytäsovellus!</string>
     <string name="v5_3_new_interface_languages">6 uutta käyttöliittymän kieltä</string>
-    <string name="v5_3_discover_join_groups">Löydä ryhmiä ja liity niihin</string>
     <string name="v5_3_new_desktop_app_descr">Luo uusi profiili työpöytäsovelluksessa. 💻</string>
     <string name="invalid_file_link">Virheellinen linkki</string>
     <string name="invalid_qr_code">Virheellinen QR-koodi</string>

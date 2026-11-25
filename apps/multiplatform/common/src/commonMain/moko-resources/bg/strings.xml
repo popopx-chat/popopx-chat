@@ -1295,12 +1295,10 @@
     <string name="v5_3_new_desktop_app">Ново настолно приложение!</string>
     <string name="v5_3_new_interface_languages">6 нови езика на интерфейса</string>
     <string name="v5_3_encrypt_local_files_descr">Приложението криптира нови локални файлове (с изключение на видеоклипове).</string>
-    <string name="v5_3_discover_join_groups">Открийте и се присъединете към групи</string>
     <string name="v5_3_simpler_incognito_mode">Опростен режим инкогнито</string>
     <string name="v5_3_new_interface_languages_descr">Арабски, български, финландски, иврит, тайландски и украински - благодарение на потребителите и Weblate.</string>
     <string name="v5_3_new_desktop_app_descr">Създайте нов профил в настолното приложение. 💻</string>
     <string name="v5_3_simpler_incognito_mode_descr">Избор на инкогнито при свързване.</string>
-    <string name="v5_3_discover_join_groups_descr">- свържете се с директория за услуги (БЕТА)! \n- потвърждениe за доставка (до 20 члена). \n- по-бързо и по-стабилно.</string>
     <string name="rcv_group_event_open_chat">Отвори</string>
     <string name="error_creating_member_contact">Грешка при създаване на контакт с член</string>
     <string name="compose_send_direct_message_to_connect">Изпрати лично съобщение за свързване</string>
@@ -1520,9 +1518,7 @@
     <string name="member_info_member_blocked">блокиран</string>
     <string name="error_blocking_member_for_all">Грешка при блокиране на член за всички</string>
     <string name="v5_5_simpler_connect_ui_descr">Лентата за търсене приема линк за връзка.</string>
-    <string name="v5_5_join_group_conversation">Присъединяване към групи</string>
     <string name="v5_5_new_interface_languages">Унгарски и турски потребителски интерфейс</string>
-    <string name="v5_5_join_group_conversation_descr">Скорошна история и подобрен бот за директорията за групи.</string>
     <string name="profile_update_event_member_name_changed">името на члена %1$s е променено на %2$s</string>
     <string name="profile_update_event_contact_name_changed">името на контакта %1$s е променено на %2$s</string>
     <string name="profile_update_event_removed_picture">премахната профилна снимка</string>

@@ -644,7 +644,6 @@
     <string name="v5_1_custom_themes_descr">Kustomisasi dan bagikan warna tema.</string>
     <string name="v5_2_fix_encryption_descr">Perbaiki enkripsi setelah memulihkan cadangan.</string>
     <string name="v5_3_new_interface_languages_descr">Bahasa Arab, Bulgaria, Finlandia, Ibrani, Thailand, dan Ukraina - terima kasih kepada pengguna dan Weblate.</string>
-    <string name="v5_5_join_group_conversation">Gabung ke percakapan grup</string>
     <string name="v5_5_simpler_connect_ui_descr">Bilah pencarian menerima tautan undangan.</string>
     <string name="v5_7_forward">Teruskan dan simpan pesan</string>
     <string name="v5_6_picture_in_picture_calls">Panggilan gambar-dalam-gambar</string>
@@ -851,7 +850,6 @@
     <string name="integrity_msg_duplicate">gandakan pesan</string>
     <string name="integrity_msg_bad_hash">hash pesan buruk</string>
     <string name="start_chat_question">Mulai obrolan?</string>
-    <string name="v5_3_discover_join_groups">Jelajah dan gabung ke grup</string>
     <string name="v5_8_private_routing">Perutean pesan pribadi 🚀</string>
     <string name="v5_8_private_routing_descr">Lindungi alamat IP Anda dari relai pesan yang dipilih oleh kontak Anda.\nAktifkan di pengaturan *Jaringan &amp; server*.</string>
     <string name="paste_link">Tempel tautan</string>
@@ -879,7 +877,6 @@
     <string name="permissions_grant">Berikan izin untuk melakukan panggilan</string>
     <string name="audio_call_no_encryption">panggilan suara (tidak dienkripsi e2e)</string>
     <string name="v5_1_custom_themes">Tema kustom</string>
-    <string name="v5_3_discover_join_groups_descr">- terhubung ke layanan direktori (BETA)!\n- tanda terima pengiriman (hingga 20 anggota).\n- lebih cepat dan stabil.</string>
     <string name="v5_3_simpler_incognito_mode">Mode samaran sederhana</string>
     <string name="migrate_to_device_apply_onion">Terapkan</string>
     <string name="reconnect">Hubung ulang</string>
@@ -1044,7 +1041,6 @@
     <string name="v5_7_call_sounds">Suara panggilan masuk</string>
     <string name="v5_7_call_sounds_descr">Saat menghubungkan panggilan suara dan video.</string>
     <string name="v5_5_simpler_connect_ui">Tempel tautan untuk terhubung!</string>
-    <string name="v5_5_join_group_conversation_descr">Riwayat terkini dan peningkatan bot direktori.</string>
     <string name="v5_6_quantum_resistant_encryption_descr">Aktifkan dalam obrolan pribadi (BETA)!</string>
     <string name="v5_6_app_data_migration_descr">Pindah ke perangkat lain melalui kode QR.</string>
     <string name="v6_0_delete_many_messages_descr">Hapus hingga 20 pesan sekaligus.</string>
