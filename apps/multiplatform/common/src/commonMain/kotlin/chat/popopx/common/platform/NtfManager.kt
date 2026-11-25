@@ -1,6 +1,7 @@
 package chat.popopx.common.platform
 
 import chat.popopx.common.AppLock
+import chat.popopx.common.eco.popopxEcoSuppressesText
 import chat.popopx.common.model.*
 import chat.popopx.common.views.call.RcvCallInvitation
 import chat.popopx.common.views.chatlist.acceptContactRequest
@@ -37,6 +38,10 @@ abstract class NtfManager {
   )
 
   fun notifyMessageReceived(rhId: Long?, user: UserLike, cInfo: ChatInfo, cItem: ChatItem) {
+    // The banner fires synchronously, before this device's row deletion, so it is the only moment a machine
+    // line could ever reach the user's screen — and waking them for it would announce the ecosystem the line
+    // is meant to be invisible to (NtfManager.swift:258).
+    if (popopxEcoSuppressesText(cItem.content.msgContent?.text)) return
     if (
       cItem.showNotification &&
       cInfo.ntfsEnabled(cItem) &&

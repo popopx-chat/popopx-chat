@@ -74,6 +74,10 @@ object ConnectProgressManager {
 
   val showConnectProgress: String? get() =
     if (connectProgressByTimeout.value) connectInProgress.value else null
+
+  // Read by the eco deep-link handler to tell an abandoned connection from a succeeded one; `showConnectProgress`
+  // is gated on a 1s timer and would report "idle" for a connection that started in the last second.
+  val isInProgress: Boolean get() = connectInProgress.value != null
 }
 
 val connectProgressManager = ConnectProgressManager

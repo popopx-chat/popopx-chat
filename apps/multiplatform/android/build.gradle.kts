@@ -89,6 +89,10 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            // bcprov-jdk18on and jspecify both ship this multi-release OSGi descriptor, and the resource merger
+            // refuses the duplicate rather than picking one. The file is module metadata, read by no Android
+            // runtime path, so dropping it from the apk loses nothing that the signed jars do not already carry.
+            excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
         }
         jniLibs.useLegacyPackaging = rootProject.extra["compression.level"] as Int != 0
     }

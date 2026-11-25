@@ -32,6 +32,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import chat.popopx.common.AppLock
 import chat.popopx.common.BuildConfigCommon
+import chat.popopx.common.eco.popopxEcoOpenLink
 import chat.popopx.common.model.*
 import chat.popopx.common.model.ChatController.appPrefs
 import chat.popopx.common.model.ChatController.stopRemoteHostAndReloadHosts
@@ -812,6 +813,9 @@ fun connectIfOpenedViaUri(rhId: Long?, uri: String, chatModel: ChatModel) {
     // branched on the scheme before the connection dispatch, which an app link must never reach
     // an app link must not tear down a redemption in flight
     if (!isBadgeLinkIssuing()) openAppLink(rhId, uri)
+  } else if (popopxEcoOpenLink(rhId, uri)) {
+    // an eco link carries a payload beside its address, so it owns its own connection:
+    // the generic branch below would plan the address and silently lose the payload
   } else {
     withBGApi {
       chatModel.appOpenUrlConnecting.value = true
@@ -950,6 +954,13 @@ private fun ChatListSearchBar(listState: LazyListState, searchText: MutableState
 }
 
 private fun connect(link: String, searchChatFilteredByPopopxLink: MutableState<Set<String>>, cleanup: (() -> Unit)?) {
+  // A pasted eco link is this module's, not the connection flow's: the same reason as in connectIfOpenedViaUri,
+  // reached here because the search bar is the other way a `popopx://service?…` address enters the app. The
+  // view still owns its own search field, so the caller's cleanup runs whatever happens to the link.
+  if (popopxEcoOpenLink(chatModel.remoteHostId(), link)) {
+    cleanup?.invoke()
+    return
+  }
   withBGApi {
     planAndConnect(
       chatModel.remoteHostId(),

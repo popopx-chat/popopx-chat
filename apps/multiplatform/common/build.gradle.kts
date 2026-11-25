@@ -72,6 +72,11 @@ kotlin {
         implementation("com.godaddy.android.colorpicker:compose-color-picker-jvm:0.7.0")
         // Link Previews
         implementation("org.jsoup:jsoup:1.17.2")
+        // Cryptography used by the service-account channel envelope, the H5 launcher
+        // and the badge/credits ledger. The lightweight API is used directly (no JCA
+        // provider lookup) because ChaCha20-Poly1305 and Ed25519 need API 30/31+ when
+        // taken from the platform, and this module still ships for API 26.
+        api("org.bouncycastle:bcprov-jdk18on:1.79")
         // Resources
         api("dev.icerock.moko:resources:0.27.1")
         api("dev.icerock.moko:resources-compose:0.27.1")

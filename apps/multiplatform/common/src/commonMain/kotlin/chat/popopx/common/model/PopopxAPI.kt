@@ -21,6 +21,8 @@ import chat.popopx.common.model.ChatController.getNetCfg
 import chat.popopx.common.model.ChatController.setNetCfg
 import chat.popopx.common.model.ChatModel.changingActiveUserMutex
 import chat.popopx.common.model.GroupFeature.Files
+import chat.popopx.common.eco.PopopxEcoRuntime
+import chat.popopx.common.eco.popopxEcoObserveIncoming
 import chat.popopx.common.model.MsgContent.MCUnknown
 import chat.popopx.common.model.SMPProxyFallback.AllowProtected
 import chat.popopx.common.model.SMPProxyMode.Always
@@ -2982,6 +2984,14 @@ object ChatController {
           }
         }
         if (r.contact.directOrUsed) {
+          // Mount point 1 of the silent signalling router: the REQ a redeem code stored under this
+          // connection id can only go out once the peer has actually accepted, which is precisely what this
+          // event says. The router ignores the call when no pending REQ names this connection, so an ordinary
+          // new contact costs one map lookup.
+          val connectionId = r.contact.activeConn?.connId
+          if (connectionId != null) {
+            withBGApi { PopopxEcoRuntime.signaling.contactConnected(connectionId, r.contact.contactId) }
+          }
           ntfManager.notifyContactConnected(r.user, r.contact)
         }
       }
@@ -3089,6 +3099,22 @@ object ChatController {
                 || (mc is MsgContent.MCVoice && file.fileSize <= MAX_VOICE_SIZE_AUTO_RCV && file.fileStatus !is CIFileStatus.RcvAccepted))
           ) {
             receiveFile(rhId, r.user, file.fileId, auto = true)
+          }
+          // Mount point of the two machine-line protocols — the invisible badge signalling and the
+          // service-account ecosystem — as one block beside the other, so a single read of the text and a
+          // single hop onto the serialized dispatcher order the two the same way for every message. They
+          // answer different markers, so a given line belongs to at most one of them.
+          if (active(r.user)) {
+            val machineText = (mc as? MsgContent.MCText)?.text
+            if (!machineText.isNullOrEmpty()) {
+              popopxEcoObserveIncoming(
+                cInfo.chatType,
+                cInfo.apiId,
+                cItem.id,
+                (cItem.chatDir as? CIDirection.GroupRcv)?.groupMember?.groupMemberId,
+                machineText,
+              )
+            }
           }
           ntfManager.notifyMessageReceived(rhId, r.user, cInfo, cItem)
         }

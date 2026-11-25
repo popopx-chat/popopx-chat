@@ -22,6 +22,7 @@ import com.popopxchat.popopx.model.NtfManager
 import com.popopxchat.popopx.model.NtfManager.AcceptCallAction
 import com.popopxchat.popopx.views.call.CallActivity
 import chat.popopx.common.helpers.*
+import chat.popopx.common.commerce.popopxInstallCommerceLedger
 import chat.popopx.common.model.*
 import chat.popopx.common.model.ChatController.appPrefs
 import chat.popopx.common.platform.*
@@ -395,6 +396,9 @@ class PopopxApp: Application(), LifecycleEventObserver {
 
       override val androidIsPlayStoreBuild: Boolean get() = BuildConfig.PLAY_STORE
     }
+    // eco, discover and the channel rotation each ask for a wallet through their own seam and all of them default to
+    // "there is none"; this is where the single ledger is handed to all three. See PopopxCommerceMount.kt.
+    popopxInstallCommerceLedger()
   }
 
   // Make sure that receivers enabled state is in actual state (same as in prefs)

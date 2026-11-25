@@ -29,6 +29,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
+import chat.popopx.common.eco.PopopxEcoStore
+import chat.popopx.common.eco.popopxEcoSuppressesText
+import chat.popopx.common.views.eco.PopopxEcoMenuBar
+import chat.popopx.common.views.eco.renderableEcoMenu
 import chat.popopx.common.model.*
 import chat.popopx.common.model.CIDirection.GroupRcv
 import chat.popopx.common.model.ChatController.appPrefs
@@ -316,6 +320,20 @@ fun ChatView(
                       fontSize = 14.sp,
                       color = MaterialTheme.colors.secondary
                     )
+                  }
+                  // The service account's two-level menu, mounted above the composer it belongs to, and only
+                  // where one exists: a human contact's chat must not grow a service row. The pure read is
+                  // deliberate — `liveMenu` loads and writes the card map, which is a state write during
+                  // composition, and a menu is not restored from disk anyway.
+                  //
+                  // Deviation from iOS, stated: iOS lowers its bar while the keyboard is up
+                  // (BotMenuBarView.swift:53-54). Here the bar rides above the composer instead, because the
+                  // keyboard-visible state the bar would need is private to ComposeView.
+                  val ecoContactId = (chatInfo as? ChatInfo.Direct)?.contact?.contactId
+                  val ecoMenu = if (appPlatform.isAndroid && ecoContactId != null) renderableEcoMenu(PopopxEcoStore.shared.peekMenu(ecoContactId)) else null
+                  if (ecoContactId != null && ecoMenu != null) {
+                    val ecoFocusManager = LocalFocusManager.current
+                    PopopxEcoMenuBar(ecoContactId, onHideKeyboard = { ecoFocusManager.clearFocus() })
                   }
                   ComposeView(
                     rhId = remoteHostId.value, chatModel, chatsCtx, Chat(remoteHostId = chatRh, chatInfo = chatInfo, chatItems = emptyList()), composeState, showCommandsMenu, attachmentOption,
@@ -2280,7 +2298,13 @@ fun BoxScope.ChatItemsList(
       if (itemSeparation.date != null) {
         DateSeparator(itemSeparation.date)
       }
-      ChatItemView(cItem, range, itemSeparation, previousItemSeparationLargeGap)
+      // The row gate, not the bubble gate, as on iOS (ChatView.swift:2326-2332): a machine line must not be
+      // long-pressable either, and the bubble is not even asked for terminal layouts or group rows. The row
+      // deletion is what removes it for good; this covers the instant before it lands and the row it leaves
+      // behind when the deletion fails.
+      if (!popopxEcoSuppressesText(cItem.content.msgContent?.text)) {
+        ChatItemView(cItem, range, itemSeparation, previousItemSeparationLargeGap)
+      }
     }
   }
 

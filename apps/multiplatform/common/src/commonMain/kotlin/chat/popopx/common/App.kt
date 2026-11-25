@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import chat.popopx.common.views.usersettings.SetDeliveryReceiptsView
+import chat.popopx.common.commerce.popopxInstallCommerceLedger
 import chat.popopx.common.model.*
 import chat.popopx.common.model.ChatController.appPrefs
 import chat.popopx.common.platform.*
@@ -30,8 +31,10 @@ import chat.popopx.common.views.call.*
 import chat.popopx.common.views.chat.ChatView
 import chat.popopx.common.views.chatlist.*
 import chat.popopx.common.views.database.DatabaseErrorView
+import chat.popopx.common.views.eco.PopopxEcoHosts
 import chat.popopx.common.views.helpers.*
 import chat.popopx.common.views.helpers.ModalManager.Companion.fromEndToStartTransition
+import chat.popopx.common.views.tabs.PopopxTabScaffold
 import chat.popopx.common.views.helpers.ModalManager.Companion.fromStartToEndTransition
 import chat.popopx.common.views.localauth.VerticalDivider
 import chat.popopx.common.views.newchat.*
@@ -329,7 +332,7 @@ fun AndroidScreen(userPickerState: MutableStateFlow<AnimatedViewState>) {
           translationX = -minOf(offset.value.dp, maxWidth).toPx()
         }
     ) {
-      StartPartOfScreen(userPickerState)
+      PopopxTabScaffold(userPickerState)
     }
     val scope = rememberCoroutineScope()
     val onComposed: suspend (chatId: String?) -> Unit = { chatId ->
@@ -362,6 +365,13 @@ fun AndroidScreen(userPickerState: MutableStateFlow<AnimatedViewState>) {
         ChatView(chatsCtx = chatModel.chatsContext, currentChatId, onComposed = onComposed)
       }
     }
+    // The wallet is owned by the commerce layer, which neither eco nor discover may import, so the seam is
+    // collapsed here at the entry rather than at the site that asks for money. Without this call every
+    // `pay_credits` button on Android answers LEDGER.
+    LaunchedEffect(Unit) { popopxInstallCommerceLedger() }
+    // Draws nothing itself: it turns the two one-shot requests the eco module raises — a signed service page
+    // and a channel-key page — into screens. See views/eco/PopopxEcoHosts.kt for why the shell owns them.
+    PopopxEcoHosts()
   }
 }
 

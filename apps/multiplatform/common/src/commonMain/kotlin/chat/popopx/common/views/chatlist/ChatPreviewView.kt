@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.*
 import androidx.compose.ui.unit.*
+import chat.popopx.common.eco.popopxEcoSuppressesText
 import chat.popopx.common.ui.theme.*
 import chat.popopx.common.views.helpers.*
 import chat.popopx.common.model.*
@@ -226,6 +227,9 @@ fun ChatPreviewView(
   fun chatPreviewText() {
     val previewText = chatPreviewInfoText()
     val ci = chat.chatItems.lastOrNull()
+    // A machine line is very often the last message of its conversation, and until this device deletes the row
+    // the list is the only place it could be read — iOS returns an empty preview here (ChatPreviewView.swift:305).
+    if (popopxEcoSuppressesText(ci?.content?.msgContent?.text)) return
     if (chatModelDraftChatId == chat.id && chatModelDraft != null) {
       val sp20 = with(LocalDensity.current) { 20.sp.toDp() }
       val (text: CharSequence, inlineTextContent) = remember(chatModelDraft) { chatModelDraft.message.text to messageDraft(chatModelDraft, sp20) }

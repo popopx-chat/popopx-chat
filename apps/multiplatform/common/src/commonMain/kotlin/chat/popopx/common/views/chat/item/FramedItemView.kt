@@ -18,10 +18,16 @@ import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
+import chat.popopx.common.eco.PopopxEcoMarker
 import chat.popopx.common.model.*
 import chat.popopx.common.platform.*
 import chat.popopx.common.ui.theme.*
+import chat.popopx.common.signal.PopopxSignalTarget
 import chat.popopx.common.views.chat.*
+import chat.popopx.common.views.commerce.PopopxCommerceCard
+import chat.popopx.common.views.commerce.PopopxCommerceCardContext
+import chat.popopx.common.views.commerce.PopopxCommerceContent
+import chat.popopx.common.views.eco.PopopxEcoCardView
 import chat.popopx.common.views.helpers.*
 import chat.popopx.common.views.chatlist.openChat
 import chat.popopx.common.views.newchat.planAndConnect
@@ -505,6 +511,54 @@ fun CIMarkdownText(
   val selection = setupItemSelection(LocalSelectionManager.current, LocalItemContext.current.selectionIndex, ci.meta.isLive == true, bases)
   val terminal = LocalTerminalLayout.current
 
+  // A service-account card replaces the line that carried it, the way iOS's bubble has one branch per item
+  // (PopopxMessageBubble.swift:474-480): what the user reads is the store's newest state of the card, not the
+  // text of this one frame. The caption the peer put beside the frame therefore goes undrawn — iOS drops it
+  // too, and drawing half of a machine line is how a stale order number ends up on screen.
+  //
+  // `chatInfo.apiId` is the contact id for a direct chat and the group id for a group, which reproduces
+  // iOS's answer for a group card rather than inventing a third: the sender resolves a contact, finds none,
+  // and the button reports it could not be completed. A card in a group has no single contact to send to.
+  val ecoCard = if (appPlatform.isAndroid && !ci.chatDir.sent && (chatInfo is ChatInfo.Direct || chatInfo is ChatInfo.Group))
+    remember(text) { PopopxEcoMarker.parseVisibleCard(text) } else null
+
+  // The commerce card, and the two mount-order differences it has to reproduce (PopopxMessageBubble.swift):
+  // `msgBody` — reachable only for a direct chat, see the guard at :980 — puts commerce at :1059, BEFORE
+  // `serviceCard` at :1066; `groupBody` puts `serviceCard` first (:1028) and commerce behind
+  // `guard chatType == .group, !isChannel` (:1031). The channel exclusion is iOS's stated reason, not a
+  // rendering preference: opening a voucher or a packet replies into the receiving chat, and in a channel that
+  // reply is a broadcast to every subscriber (:1011-1014).
+  //
+  // Unlike the service card this is NOT restricted to received lines — iOS renders the sender's own copy too,
+  // with the "this is the one you sent" state, which is what stops a giver from tapping their own voucher.
+  val isChannel = (chatInfo as? ChatInfo.Group)?.groupInfo?.isChannel == true
+  val commerce = if (appPlatform.isAndroid && !isChannel && (chatInfo is ChatInfo.Direct || chatInfo is ChatInfo.Group))
+    remember(text) { PopopxCommerceContent.detect(text) } else null
+  val commerceFirst = commerce != null && (chatInfo is ChatInfo.Direct || ecoCard == null)
+
+  if (commerceFirst) {
+    PopopxCommerceCard(
+      commerce!!,
+      PopopxCommerceCardContext(
+        // `chatInfo.id` is iOS's `chat.chatId` — the same "#5"/"@2" string the core gives both apps — and it is
+        // the key the ticket is stored under, so the empty-string hole iOS closes cannot open here.
+        target = when (chatInfo) {
+          is ChatInfo.Direct -> PopopxSignalTarget.Contact(chatInfo.apiId)
+          is ChatInfo.Group -> PopopxSignalTarget.Group(chatInfo.apiId)
+          else -> null
+        },
+        incoming = !ci.chatDir.sent,
+        chatId = chatInfo.id,
+        chatTitle = chatInfo.displayName,
+        // Carried verbatim as iOS carries `groupInfo?.isChannel == true` (:1137). It is false at every site this
+        // mount can reach, because the gate above excludes channels — which is iOS's behaviour too, since
+        // `groupBody` returns before `detect` when `isChannel` holds. The field is passed, not invented.
+        isChannel = isChannel,
+      ),
+    )
+  } else if (ecoCard != null) {
+    PopopxEcoCardView(ecoCard, chatInfo.apiId)
+  } else {
   Box(
     Modifier
       .padding(
@@ -527,6 +581,7 @@ fun CIMarkdownText(
       blockLayout = true,
       cardColor = if (ci.chatDir.sent) MaterialTheme.appColors.sentQuote else MaterialTheme.appColors.receivedQuote
     )
+  }
   }
 }
 
