@@ -1,0 +1,120 @@
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TupleSections #-}
+
+import ChatClient
+import ChatTests
+import ChatTests.DBUtils
+import ChatTests.Utils (xdescribe'')
+import Control.Logger.Simple
+import Data.Time.Clock.System
+import ImageTests
+import JSONTests
+import MarkdownTests
+import MemberRelationsTests
+import MessageBatching
+import ProtocolTests
+import OperatorTests
+import RandomServers
+import RemoteTests
+import Test.Hspec hiding (it)
+#if !MIN_VERSION_hspec(2,10,10)
+import Test.Hspec.Core.Spec (sequential)
+#endif
+import UnliftIO.Temporary (withTempDirectory)
+import ValidNames
+import ViewTests
+#if defined(dbPostgres)
+import Control.Exception (bracket_, finally)
+import PostgresSchemaDump
+import Popopx.Chat.Store.Postgres.Migrations (migrations)
+import Popopx.Messaging.Agent.Store.Postgres.Util (createDBAndUserIfNotExists, dropDatabaseAndUser)
+#else
+import APIDocs
+import ChatTests.Names (chatNamesTests)
+import qualified Popopx.Messaging.TMap as TM
+import MobileTests
+import SchemaDump
+import WebRTCTests
+#endif
+
+main :: IO ()
+main = do
+  setLogLevel LogError
+#if !defined(dbPostgres)
+  chatQueryStats <- TM.emptyIO
+  agentQueryStats <- TM.emptyIO
+#endif
+  portBases <- newPortBases
+  withTestDB . withTmpFiles . withGlobalLogging logCfg . hspec . parallel
+    $ do
+#if defined(dbPostgres)
+      sequential $
+        describe "Postgres schema dump" $
+          postgresSchemaDumpTest
+            migrations
+            schemaDumpDBOpts
+            "src/Popopx/Chat/Store/Postgres/Migrations/chat_schema.sql"
+#else
+      sequential $ describe "Schema dump" schemaDumpTest
+#if MIN_VERSION_base(4,18,0)
+      sequential $ describe "Bot API docs" apiDocsTest
+#endif
+      around tmpBracket $ describe "WebRTC encryption" webRTCTests
+#endif
+      -- An hspec title is a selector: scripts/ci/run-tests.sh turns each line of a pull request's
+      -- `ci-tests` block into one -m argument (upstream's docs/CONTRIBUTING.md:91 at simplex-chat@db0768c21),
+      -- so renaming one breaks instructions already written, even though no file in this repository pins a
+      -- title.
+      describe "POPOPX chat markdown" markdownTests
+      describe "JSON Tests" jsonTests
+      describe "Member relations" memberRelationsTests
+      describe "POPOPX chat view" viewTests
+      describe "POPOPX chat protocol" protocolTests
+      describe "Valid names" validNameTests
+      describe "Message batching" batchingTests
+      describe "Operators" operatorTests
+      describe "Random servers" randomServersTests
+      describe "Image resize" imageTests
+#if !defined(dbPostgres)
+      around (tmpTestBracket chatQueryStats agentQueryStats portBases) $ describe "names tests" chatNamesTests
+#endif
+#if defined(dbPostgres)
+      around (testBracket portBases)
+#else
+      around (testBracket chatQueryStats agentQueryStats portBases)
+#endif
+        $ do
+#if !defined(dbPostgres)
+          describe "Mobile API Tests" mobileTests
+#endif
+          describe "POPOPX chat client" chatTests
+          describe "Remote session" remoteTests
+#if !defined(dbPostgres)
+          sequential $ xdescribe'' "Save query plans" saveQueryPlans
+#endif
+  where
+#if defined(dbPostgres)
+    withTestDB =
+      bracket_
+        (dropDatabaseAndUser testDBConnectInfo >> createDBAndUserIfNotExists testDBConnectInfo)
+        (dropDatabaseAndUser testDBConnectInfo)
+    testBracket portBases test =
+      withPortBase portBases $ \portBase -> tmpBracket $ \tmpPath -> do
+        let ps = TestParams {tmpPath, portBase, printOutput = False}
+        withSmpServer ps (test ps) `finally` dropTestSchemas ps
+#else
+    withTestDB = id
+    testBracket chatQueryStats agentQueryStats portBases test =
+      tmpTestBracket chatQueryStats agentQueryStats portBases $ \ps -> withSmpServer ps $ test ps
+    tmpTestBracket chatQueryStats agentQueryStats portBases test =
+      withPortBase portBases $ \portBase -> tmpBracket $ \tmpPath -> test TestParams {tmpPath, portBase, chatQueryStats, agentQueryStats, printOutput = False}
+#endif
+    tmpBracket test = do
+      t <- getSystemTime
+      let ts = show (systemSeconds t) <> show (systemNanoseconds t)
+      withTempDirectory "tests/tmp" ts test
+
+logCfg :: LogConfig
+logCfg = LogConfig {lc_file = Nothing, lc_stderr = True}

@@ -1,0 +1,85 @@
+name: Reproduce latest release
+
+on:
+  workflow_dispatch
+
+# Two dispatches overlap only if one is still building, and each run is hours of Docker builds.
+# Queued rather than cancelled: a run killed mid-build verifies nothing and leaves no report.
+concurrency:
+  group: reproduce-latest-release
+  cancel-in-progress: false
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get latest release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Authenticated on purpose: an anonymous call from a runner's shared IP is rate limited,
+          # and an empty body here reads as "nothing published" and silently skips the whole run.
+          RESPONSE="$(curl --proto '=https' \
+                           --tlsv1.2 \
+                           -sS -L \
+                           -H "Authorization: Bearer ${GH_TOKEN}" \
+                           -w '\n%{http_code}' \
+                           'https://api.github.com/repos/popopx-chat/popopx-chat/releases/latest')" || :
+          STATUS="${RESPONSE##*$'\n'}"
+          BODY="${RESPONSE%$'\n'*}"
+          if [ "${STATUS}" = "404" ]; then
+            # 404 is the only answer that legitimately means no release has been published from this
+            # repository yet, so there is nothing to verify.
+            echo "No published release to reproduce - skipping."
+            echo "REPRODUCE_SKIPPED=true" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          if [ "${STATUS}" != "200" ]; then
+            echo "releases/latest answered ${STATUS} - not treating that as 'nothing to reproduce'." >&2
+            exit 1
+          fi
+          TAG="$(printf '%s' "${BODY}" | grep -i "tag_name" | head -1 | awk -F \" '{print $4}')" || :
+          if [ -z "${TAG}" ]; then
+            echo "releases/latest answered 200 without a tag_name." >&2
+            exit 1
+          fi
+          echo "TAG=${TAG}" >> "$GITHUB_ENV"
+
+      - name: Checkout code
+        if: env.REPRODUCE_SKIPPED != 'true'
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.TAG }}
+
+      # Otherwise we run out of disk space with Docker build
+      - name: Free disk space
+        if: env.REPRODUCE_SKIPPED != 'true'
+        shell: bash
+        run: ./scripts/ci/linux_util_free_space.sh
+      - name: Execute reproduce script
+        if: env.REPRODUCE_SKIPPED != 'true'
+        run: |
+          ${GITHUB_WORKSPACE}/scripts/popopx-chat-reproduce-builds.sh "$TAG" || :
+
+      - name: Check if build has been reproduced
+        if: env.REPRODUCE_SKIPPED != 'true'
+        env:
+          url: ${{ secrets.STATUS_POPOPX_WEBHOOK_URL }}
+          user: ${{ secrets.STATUS_POPOPX_WEBHOOK_USER }}
+          pass: ${{ secrets.STATUS_POPOPX_WEBHOOK_PASS }}
+        run: |
+          # The script names its own output directory, so read it from there instead of repeating the literal.
+          REPO_NAME="$(sed -n 's/^repo_name="\([^"]*\)".*/\1/p' "${GITHUB_WORKSPACE}/scripts/popopx-chat-reproduce-builds.sh" | head -1)"
+          if [ -f "${GITHUB_WORKSPACE}/${TAG}-${REPO_NAME}/_sha256sums" ]; then
+            exit 0
+          else
+            # These three secrets are not configured on this repository, so a failed reproduction is reported
+            # by this step going red and not by a notification.
+            curl --proto '=https' --tlsv1.2 -sSf \
+              -u "${user}:${pass}" \
+              -H 'Content-Type: application/json' \
+              -d '{"title": "👾 GitHub: Runner", "description": "⛔️ '"$TAG"' did not reproduce."}' \
+              "$url"
+            exit 1
+          fi

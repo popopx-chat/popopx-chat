@@ -1,0 +1,16 @@
+name: Question
+description: Ask your question
+title: "[Q]: "
+labels: ["question", "triage"]
+body:
+- type: markdown
+  attributes:
+    value: |
+      Generally, we encourage you to ask questions in our [support chat](https://smp1.popopx.im/a#1O5lho1_iImkDlxXzEr4aqUIcVzWBqsdYENws9uPLxQ?c=f2X5hAgHZW9-SVkhMou0sUFg3AHUi2pE3kSw46AiGjY), but you can do it anyway :)
+- type: textarea
+  attributes:
+    label: Question
+    description: Please ask your question in plain english.
+    placeholder: Is POPOPX - chat?
+  validations:
+    required: true

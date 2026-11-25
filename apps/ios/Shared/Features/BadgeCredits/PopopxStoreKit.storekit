@@ -1,0 +1,308 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "PPXNODEBADGE01",
+  "nonRenewingSubscriptions" : [
+    {
+      "displayPrice" : "6.99",
+      "familyShareable" : false,
+      "internalID" : "3030000001",
+      "localizations" : [
+        {
+          "description" : "Node badge lit for 30 days from purchase. One-time purchase: it never renews automatically and no further payment is taken.",
+          "displayName" : "POPOPX Node Badge Pass (30 Days)",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.popopx.badge.node.pass.30d",
+      "referenceName" : "POPOPX Node Badge Pass (30 Days)",
+      "type" : "NonRenewingSubscription"
+    },
+    {
+      "displayPrice" : "49.99",
+      "familyShareable" : false,
+      "internalID" : "3030000002",
+      "localizations" : [
+        {
+          "description" : "Node badge lit for 365 days from purchase. One-time purchase: it never renews automatically and no further payment is taken.",
+          "displayName" : "POPOPX Node Badge Pass (1 Year)",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.popopx.badge.node.pass.365d",
+      "referenceName" : "POPOPX Node Badge Pass (365 Days)",
+      "type" : "NonRenewingSubscription"
+    }
+  ],
+  "products" : [
+    {
+      "displayPrice" : "49.99",
+      "familyShareable" : false,
+      "internalID" : "3010000001",
+      "localizations" : [
+        {
+          "description" : "A one-year node badge to gift to another user. Redeemed in the recipient's own chat; it is not a credit transfer.",
+          "displayName" : "POPOPX Node Badge Gift Card (1 Year)",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.popopx.gift.node.annual",
+      "referenceName" : "POPOPX Node Badge Gift Card (Annual)",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "6.99",
+      "familyShareable" : false,
+      "internalID" : "3010000002",
+      "localizations" : [
+        {
+          "description" : "A 30-day node badge to gift to another user. Redeemed in the recipient's own chat; it is not a credit transfer.",
+          "displayName" : "POPOPX Node Badge Gift Card (30 Days)",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.popopx.gift.node.monthly",
+      "referenceName" : "POPOPX Node Badge Gift Card (Monthly)",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "1.99",
+      "familyShareable" : false,
+      "internalID" : "3010000003",
+      "localizations" : [
+        {
+          "description" : "Adds exactly 100 compute credits to this device. No bonus, no top-up of any other balance.",
+          "displayName" : "POPOPX Compute Credits 100",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.popopx.credits.100",
+      "referenceName" : "POPOPX Compute Credits 100",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "8.99",
+      "familyShareable" : false,
+      "internalID" : "3010000004",
+      "localizations" : [
+        {
+          "description" : "Adds exactly 500 compute credits to this device. No bonus, no top-up of any other balance.",
+          "displayName" : "POPOPX Compute Credits 500",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.popopx.credits.500",
+      "referenceName" : "POPOPX Compute Credits 500",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "29.99",
+      "familyShareable" : false,
+      "internalID" : "3010000005",
+      "localizations" : [
+        {
+          "description" : "Adds exactly 2000 compute credits to this device. No bonus, no top-up of any other balance.",
+          "displayName" : "POPOPX Compute Credits 2000",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.popopx.credits.2000",
+      "referenceName" : "POPOPX Compute Credits 2000",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "69.99",
+      "familyShareable" : false,
+      "internalID" : "3010000009",
+      "localizations" : [
+        {
+          "description" : "Adds exactly 5000 compute credits to this device. No bonus, no top-up of any other balance.",
+          "displayName" : "POPOPX Compute Credits 5000",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.popopx.credits.5000",
+      "referenceName" : "POPOPX Compute Credits 5000",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "1.99",
+      "familyShareable" : false,
+      "internalID" : "3010000006",
+      "localizations" : [
+        {
+          "description" : "A gift card worth exactly 100 compute credits, to send to another user. Redeemed in the recipient's own chat; it adds nothing to this device.",
+          "displayName" : "POPOPX Compute Credits Gift Card (100)",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.popopx.credits.gift.100",
+      "referenceName" : "POPOPX Compute Credits Gift Card 100",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "8.99",
+      "familyShareable" : false,
+      "internalID" : "3010000007",
+      "localizations" : [
+        {
+          "description" : "A gift card worth exactly 500 compute credits, to send to another user. Redeemed in the recipient's own chat; it adds nothing to this device.",
+          "displayName" : "POPOPX Compute Credits Gift Card (500)",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.popopx.credits.gift.500",
+      "referenceName" : "POPOPX Compute Credits Gift Card 500",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "29.99",
+      "familyShareable" : false,
+      "internalID" : "3010000008",
+      "localizations" : [
+        {
+          "description" : "A gift card worth exactly 2000 compute credits, to send to another user. Redeemed in the recipient's own chat; it adds nothing to this device.",
+          "displayName" : "POPOPX Compute Credits Gift Card (2000)",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.popopx.credits.gift.2000",
+      "referenceName" : "POPOPX Compute Credits Gift Card 2000",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "",
+    "_developerTeamID" : "",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 0,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "3020000001",
+      "localizations" : [
+
+      ],
+      "name" : "POPOPX Dynamic Privacy Node Badge",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "49.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "3020000011",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Node badge, renews yearly. Auto-renews until cancelled; cancel any time in Apple subscription settings.",
+              "displayName" : "POPOPX Node Badge (1 Year)",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.popopx.badge.node.annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "POPOPX Node Badge (Annual)",
+          "subscriptionGroupID" : "3020000001",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "6.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "3020000012",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Node badge, renews monthly. Auto-renews until cancelled; cancel any time in Apple subscription settings.",
+              "displayName" : "POPOPX Node Badge (30 Days)",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.popopx.badge.node.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "POPOPX Node Badge (Monthly)",
+          "subscriptionGroupID" : "3020000001",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

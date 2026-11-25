@@ -1,0 +1,59 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+.DS_Store
+
+# Haskell
+dist
+dist-*
+cabal-dev
+*.o
+*.hi
+*.hie
+*.chi
+*.chs.h
+*.dyn_o
+*.dyn_hi
+.hpc
+.hsenv
+.cabal-sandbox/
+cabal.sandbox.config
+*.prof
+*.aux
+*.hp
+*.eventlog
+.stack-work/
+cabal.project.local
+cabal.project.local~
+.HTF/
+.ghc.environment.*
+stack.yaml.lock
+
+# Chat database
+*.db
+*.db.bak
+
+# Temporary test files
+tests/tmp
+tests/tmp*
+logs/
+
+*.devcontainer
+result
+apps/android/app/release
+apps/multiplatform/.kotlin/sessions
+# anywhere in the tree: this file holds a real BTCPay api_key and webhook_secret
+badge_service.ini
+
+# local virtualenv created by scripts/setup_pretrained_coreml.py
+.venv_coreml/
+
+# SwiftPM build output for the macOS Tor package (regenerable; measured 158M on 2026-11-23)
+apps/macos/PopopxTorKit/.build/

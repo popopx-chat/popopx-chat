@@ -1,0 +1,98 @@
+## User settings
+xcuserdata/
+
+## Obj-C/Swift specific
+*.hmap
+
+## App packaging
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+#
+# Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
+# Packages/
+# Package.pins
+# Package.resolved
+# *.xcodeproj
+#
+# Xcode automatically generates this directory with a .xcworkspacedata file and xcuserdata
+# hence it is not needed unless you have added a package configuration file to your project
+# .swiftpm
+
+.build/
+
+# CocoaPods
+#
+# We recommend against adding the Pods directory to your .gitignore. However
+# you should judge for yourself, the pros and cons are mentioned at:
+# https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-the-pods-directory-into-source-control
+#
+# Pods/
+#
+# Add this line if you want to avoid checking in source code from the Xcode workspace
+# *.xcworkspace
+
+# Carthage
+#
+# Add this line if you want to avoid checking in source code from Carthage dependencies.
+# Carthage/Checkouts
+
+Carthage/Build/
+
+# Accio dependency management
+Dependencies/
+.accio/
+
+# fastlane
+#
+# It is recommended to not store the screenshots in the git repo.
+# Instead, use fastlane to re-generate the screenshots whenever they are needed.
+# For more information about the recommended setup visit:
+# https://docs.fastlane.tools/best-practices/source-control/#source-control
+
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Code Injection
+#
+# After new code Injection tools there's a generated folder /iOSInjectionProject
+# https://github.com/johnno1962/injectionforxcode
+
+iOSInjectionProject/
+
+Libraries/
+
+Shared/MyPlayground.playground/*
+
+testpush.sh
+
+# Local build config and generated assets
+Local.xcconfig
+build/
+Shared/POPOPXAssets.xcassets/*.imageset
+
+# 绝密防窥模型的导出产物：AGPL 权重的构建结果，由 scripts/setup_pretrained_coreml.py 现生成，
+# 不进仓库（脚本第 390 行写的就是这个口径）。Resources/ 是脚本默认输出目录，
+# Shared/Features/SecureEphemeral/ 那份是 Xcode 拖入时按 "Copy items if needed" 复制的副本。
+Resources/SecureEphemeral/
+Shared/Features/SecureEphemeral/*.mlpackage
+
+# 一次性 prompt / 交稿草稿（2026-11-21 裁定）：留在磁盘上继续写，但严禁进公共仓库。
+# 逐条列名，不用 *.md —— Docs/、spec/、Shared/ 里的 markdown 是要版本化的。
+# 带 【】 和全角冒号的那三个用通配符收尾，因为它们的名字本身就是散文，不适合当键写死。
+BadgeCredits_prompt.md
+ProfileReaderView.md
+disvcove_notes.md
+location-prompt.md
+office_service_web_1.md
+safe_prompt.md
+safe_prompt_2.md
+service_office.md
+zip_prompt.md
+*【审核可粘贴】*
+*【内部】*
+本文件有两类内容*

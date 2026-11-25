@@ -1,0 +1,20 @@
+/* Bundle name */
+"CFBundleName" = "POPOPX";
+
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "POPOPX 需要相機存取權限以掃描 QR 碼來連線其他使用者並進行視訊通話。";
+
+/* Privacy - Face ID Usage Description */
+"NSFaceIDUsageDescription" = "POPOPX 使用 Face ID 進行本機身份驗證";
+
+/* Privacy - Local Network Usage Description */
+"NSLocalNetworkUsageDescription" = "POPOPX 使用本地網路存取，允許透過同一網路上的桌面應用程式使用聊天設定檔。";
+
+/* Privacy - Microphone Usage Description */
+"NSMicrophoneUsageDescription" = "POPOPX 需要麥克風存取權限以進行語音和視訊通話，以及錄製語音訊息。";
+
+/* Privacy - Photo Library Additions Usage Description */
+"NSPhotoLibraryAddUsageDescription" = "POPOPX 需要存取照片圖庫以儲存已拍攝和接收的媒體";
+
+/* Privacy - Location When In Use Usage Description */
+"NSLocationWhenInUseUsageDescription" = "在聊天中分享您的位置或自訂地圖座標。位置資料僅透過端到端加密通道傳輸。";

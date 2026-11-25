@@ -1,0 +1,65 @@
+//
+//  VersionView.swift
+//  POPOPXChat
+//
+//  Created by Evgeny on 22/01/2023.
+//  Copyright © 2023 SimpleX Chat. All rights reserved.
+//  Modifications Copyright © 2026 POPOPX Chat.
+//
+
+import SwiftUI
+import POPOPXChat
+
+struct VersionView: View {
+    @State var versionInfo: CoreVersionInfo?
+
+    var body: some View {
+        VersionLayout(appVersion: appVersion, appBuild: appBuild, versionInfo: versionInfo)
+            .onAppear {
+                do {
+                    versionInfo = try apiGetVersion()
+                } catch let error {
+                    logger.error("apiGetVersion error: \(responseError(error))")
+                }
+            }
+    }
+}
+
+struct VersionLayout: View {
+    @EnvironmentObject var theme: AppTheme
+    let appVersion: String?
+    let appBuild: String?
+    let versionInfo: CoreVersionInfo?
+
+    var body: some View {
+        List {
+            Section {
+                Text("App version: v\(appVersion ?? "?")")
+                Text("App build: \(appBuild ?? "?")")
+                if let info = versionInfo {
+                    Text("Core version: v\(info.version)")
+                    if let v = try? AttributedString(markdown: "popopxmq: v\(info.popopxmqVersion) ([\(info.popopxmqCommit.prefix(7))](https://github.com/popopx-chat/popopxmq/commit/\(info.popopxmqCommit)))") {
+                        Text(v)
+                    }
+                }
+            }
+
+            Section {
+                NavigationLink {
+                    DeveloperView()
+                        .navigationTitle("Developer")
+                        .modifier(ThemedBackground(grouped: true))
+                } label: {
+                    Text("Developer")
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}
+
+struct VersionView_Previews: PreviewProvider {
+    static var previews: some View {
+        VersionLayout(appVersion: "7.1", appBuild: "363", versionInfo: CoreVersionInfo(version: "7.1.0.14", popopxmqVersion: "7.1.0.14", popopxmqCommit: "c0c416daf052eb0215ae432ae665522a7c96c0a6"))
+    }
+}

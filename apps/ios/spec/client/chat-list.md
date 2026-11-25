@@ -1,0 +1,337 @@
+# POPOPX Chat iOS -- Chat List Module
+
+> Technical specification for the conversation list, filtering, search, swipe actions, and user picker.
+>
+> Related specs: [Chat View](chat-view.md) | [Navigation](navigation.md) | [State Management](../state.md) | [README](../README.md)
+> Related product: [Chat List View](../../product/views/chat-list.md)
+
+**Source:** [`ChatListView.swift`](../../Shared/Views/ChatList/ChatListView.swift)
+
+---
+
+## Table of Contents
+
+1. [Overview](#1-overview)
+2. [ChatListView](#2-chatlistview)
+3. [ChatPreviewView](#3-chatpreviewview)
+4. [ChatListNavLink](#4-chatlistnavlink)
+5. [Filtering & Tags](#5-filtering--tags)
+6. [Search](#6-search)
+7. [Swipe Actions](#7-swipe-actions)
+8. [UserPicker](#8-userpicker)
+9. [Floating Action Button](#9-floating-action-button)
+10. [Chat List Banners](#10-chat-list-banners)
+
+---
+
+## 1. Overview
+
+The chat list is the main screen of the app, displaying all conversations for the current user. It provides:
+
+- Conversation previews with unread badges
+- Filter tabs (All, Unread, Favorites, Groups, Contacts, Business, user-defined tags)
+- Search across chat names and message content
+- Swipe actions for quick operations
+- User profile switcher
+- Floating action button for new conversations
+
+```
+ChatListView
+├── Navigation Bar
+│   ├── User avatar (tap → UserPicker)
+│   └── Filter tabs (TagListView)
+├── Search bar (on pull-down or tap)
+├── Chat List (List/LazyVStack)
+│   └── ChatListNavLink (per conversation)
+│       └── ChatPreviewView
+│           ├── Avatar
+│           ├── Chat name + last message preview
+│           ├── Timestamp
+│           └── Unread badge
+├── FAB (New Chat button)
+└── Pending connection cards
+```
+
+---
+
+## 2. [`ChatListView`](../../Shared/Views/ChatList/ChatListView.swift#L164-L698) {#2-chatlistview}
+
+**File**: `Shared/Views/ChatList/ChatListView.swift`
+
+The root list view. Key responsibilities:
+
+### Data Source
+- Reads `ChatModel.shared.chats` (all conversations)
+- Applies active filter from `ChatTagsModel.shared.activeFilter`
+- Applies search query filtering via [`filteredChats()`](../../Shared/Views/ChatList/ChatListView.swift#L652)
+- Sorts by last activity (most recent first), with pinned chats at top
+
+### Layout
+- Uses SwiftUI `List` with `ForEach` over filtered chats
+- Each row is a `ChatListNavLink` wrapping a `ChatPreviewView`
+- Pull-to-refresh triggers `updateChats()` API call
+- Empty state: `ChatHelp` view with getting-started guidance
+
+### Connection Cards
+- Pending contact connections (`ChatInfo.contactConnection`) shown as cards
+- Contact requests (`ChatInfo.contactRequest`) shown with accept/reject UI via `ContactRequestView`
+
+### Key Functions
+
+| Function | Line | Description |
+|----------|------|-------------|
+| [`body`](../../Shared/Views/ChatList/ChatListView.swift#L194) | 194 | Main view body |
+| [`filteredChats()`](../../Shared/Views/ChatList/ChatListView.swift#L652) | 648 | Applies active filter and search to chat list |
+| [`searchString()`](../../Shared/Views/ChatList/ChatListView.swift#L695) | 691 | Normalizes search text for comparison |
+| [`unreadBadge()`](../../Shared/Views/ChatList/ChatListView.swift#L626) | 622 | Renders unread count circle badge |
+| [`stopAudioPlayer()`](../../Shared/Views/ChatList/ChatListView.swift#L646) | 642 | Stops any playing voice message |
+
+---
+
+## 3. [`ChatPreviewView`](../../Shared/Views/ChatList/ChatPreviewView.swift#L14-L507) {#3-chatpreviewview}
+
+**File**: `Shared/Views/ChatList/ChatPreviewView.swift`
+
+Renders a single row in the chat list. Shows:
+
+| Element | Source | Description |
+|---------|--------|-------------|
+| Avatar | `chatInfo.image` | Profile image or default icon |
+| Chat name | `chatInfo.displayName` | Contact name, group name, or connection label |
+| Last message | `chat.chatItems.last` | Preview text of most recent message |
+| Timestamp | `chat.chatItems.last?.timestampText` | Relative time of last message |
+| Unread badge | `chat.chatStats.unreadCount` | Circular badge with unread count |
+| Mute icon | `chatInfo.chatSettings?.enableNtfs` | Bell-slash icon if notifications muted |
+| Pin icon | -- | Pin indicator for pinned chats |
+| Incognito icon | Contact.contactConnIncognito | Incognito mode indicator |
+| Delivery status | Last sent item's `meta.itemStatus` | Check marks for delivery confirmation |
+
+### Preview Text Rendering
+- Text messages: first line of message content
+- Images: camera icon + caption (if any)
+- Files: paperclip icon + filename
+- Voice: microphone icon + duration
+- Calls: phone icon + call status
+- Group events: system event description
+- Encrypted/deleted: placeholder text
+
+---
+
+## 4. [`ChatListNavLink`](../../Shared/Views/ChatList/ChatListNavLink.swift#L45-L663) {#4-chatlistnavlink}
+
+**File**: `Shared/Views/ChatList/ChatListNavLink.swift`
+
+Wraps `ChatPreviewView` in a navigation link with tap and swipe behavior:
+
+### Tap Behavior
+- Direct chat: navigates to `ChatView` via `ItemsModel.loadOpenChat(chatId)` -- [`contactNavLink()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L96)
+- Group chat: navigates to `ChatView` -- [`groupNavLink()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L218)
+- Contact request: shows `ContactRequestView` with accept/reject -- [`contactRequestNavLink()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L490)
+- Contact connection: shows `ContactConnectionInfo` -- [`contactConnectionNavLink()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L525)
+- Notes folder: navigates to `ChatView` -- [`noteFolderNavLink()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L303)
+
+### Navigation
+- Uses `NavigationLink` (iOS 15) or programmatic navigation (iOS 16+)
+- Sets `ChatModel.chatId` to trigger navigation
+- `ItemsModel.loadOpenChat()` loads messages with a 250ms navigation delay for smooth animation
+
+### Channel Adaptations in ChatListNavLink
+
+When `groupInfo.useRelays == true`:
+
+| Change | Behavior |
+|--------|----------|
+| Swipe "Leave" | Hidden when `useRelays && isOwner` |
+| Context menu "Leave" | Hidden under same condition |
+| `deleteGroupAlert` label | "Delete channel?" |
+| `leaveGroupAlert` title | "Leave channel?" |
+| `leaveGroupAlert` message | "You will stop receiving messages from this channel. Chat history will be preserved." |
+
+### ServerSettings
+
+`ServerSettings` struct (defined in `ChatListView.swift`) includes `serverWarnings: [UserServersWarning]` field, initialized to `[]`. This field stores validation warnings from `validateServers` and is consumed by NetworkAndServers views.
+
+---
+
+## 5. Filtering & Tags
+
+### Filter Tabs ([`TagListView`](../../Shared/Views/ChatList/TagListView.swift#L56))
+
+**File**: `Shared/Views/ChatList/TagListView.swift`
+
+Horizontal scrolling tab bar below the navigation bar. Tabs:
+
+| Tab | Filter | Shows |
+|-----|--------|-------|
+| All | `nil` | All conversations |
+| Unread | `.unread` | Conversations with unread messages |
+| Favorites | `.presetTag(.favorites)` | Favorited conversations |
+| Groups | `.presetTag(.groups)` | Group conversations |
+| Contacts | `.presetTag(.contacts)` | Direct conversations |
+| Business | `.presetTag(.business)` | Business conversations |
+| Group Reports | `.presetTag(.groupReports)` | Groups with pending reports |
+| User tags | `.userTag(ChatTag)` | User-defined custom tags |
+
+Filter matching is handled by [`presetTagMatchesChat()`](../../Shared/Views/ChatList/ChatListView.swift#L1226) and the in-view [`TagsView`](../../Shared/Views/ChatList/ChatListView.swift#L1025) struct.
+
+### The lists sheet
+
+[`TagSheetRoot`](../../Shared/Views/ChatList/TagListView.swift#L32) is the root of every lists sheet: it owns the
+`NavigationStack`, its `NavigationPath` and the one `navigationDestination(for:)` registration for
+[`TagEditorRoute`](../../Shared/Views/ChatList/TagListView.swift#L14), because the sheet is presented outside the app's
+navigation stack and only the declaration nearest the stack root resolves a pushed value
+([Navigation](navigation.md#servers-pages-push-by-value-registered-at-the-stack-root)). Three hosts present it:
+[`setTagChatSheet()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L412) from a row's Tag action (and opens the
+editor as the root while the user has no lists), the `TagsView` tab long-press
+([ChatListView.swift#L1085](../../Shared/Views/ChatList/ChatListView.swift#L1085)), and the "Add list" button, which
+passes `editorAsRoot: true` ([ChatListView.swift#L1099](../../Shared/Views/ChatList/ChatListView.swift#L1099)).
+
+A row tap or a leading-swipe Edit pushes `.edit(tagId:emoji:name:)`, which names no chat: editing a list's definition
+is independent of the chat the sheet was opened from. "Create list" is a `NavigationLink(value: .create)`, and
+`.create` does carry the chat, so a new list is added to that chat in the same step.
+
+### ChatTagsModel State
+
+Filtering state is managed by [`ChatTagsModel`](../../Shared/Model/ChatModel.swift#L185):
+
+```swift
+class ChatTagsModel: ObservableObject {
+    @Published var userTags: [ChatTag] = []
+    @Published var activeFilter: ActiveFilter? = nil
+    @Published var presetTags: [PresetTag: Int] = [:]   // count per preset tag
+    @Published var unreadTags: [Int64: Int] = [:]        // unread count per user tag
+}
+```
+
+- `presetTags` counts are updated whenever `chats` changes via [`updateChatTags()`](../../Shared/Model/ChatModel.swift#L193)
+- Tags with zero matching chats are auto-hidden
+- Active filter is auto-cleared when its tag has no matching chats
+
+### Supporting Types
+
+| Type | File | Line | Description |
+|------|------|------|-------------|
+| [`PresetTag`](../../Shared/Views/ChatList/ChatListView.swift#L37) | ChatListView.swift | 37 | Enum of built-in filter categories |
+| [`ActiveFilter`](../../Shared/Views/ChatList/ChatListView.swift#L54) | ChatListView.swift | 54 | Enum wrapping preset, user-tag, or unread filter |
+| [`setActiveFilter()`](../../Shared/Views/ChatList/ChatListView.swift#L1205) | ChatListView.swift | 1201 | Applies a filter and persists selection |
+
+### Tag Management Commands
+- `apiCreateChatTag(tag: ChatTagData)` -- create tag
+- `apiSetChatTags(type:, id:, tagIds:)` -- assign tags to a chat
+- `apiDeleteChatTag(tagId:)` -- delete tag
+- `apiUpdateChatTag(tagId:, tagData:)` -- rename tag
+- `apiReorderChatTags(tagIds:)` -- reorder tags
+
+---
+
+## 6. Search
+
+Search is available via pull-down gesture or search button in the navigation bar.
+
+**Search bar UI:** [`ChatListSearchBar`](../../Shared/Views/ChatList/ChatListView.swift#L759)
+
+### Filtering Logic
+- Filters `ChatModel.chats` by matching search text against:
+  - `chatInfo.displayName` (contact/group name)
+  - `chatInfo.localAlias` (local alias)
+  - `chatInfo.fullName` (full name)
+- For deeper message content search, uses `apiGetChat(chatId:, search:)` parameter
+- Core logic in [`filteredChats()`](../../Shared/Views/ChatList/ChatListView.swift#L652) and [`searchString()`](../../Shared/Views/ChatList/ChatListView.swift#L695)
+
+### Search Results
+- Matching chats are displayed in the same list format
+- Results update as the user types (debounced)
+- Clearing search restores the full filtered list
+
+---
+
+## 7. Swipe Actions
+
+`ChatListNavLink` provides swipe actions on each row:
+
+### Leading Swipe (left-to-right)
+
+| Action | Icon | Handler | Line | API | Condition |
+|--------|------|---------|------|-----|-----------|
+| Pin / Unpin | pin | [`toggleFavoriteButton()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L354) | 354 | `apiSetChatSettings` (favorite) | Always |
+| Read / Unread | envelope | [`markReadButton()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L334) | 334 | `apiChatRead` / `apiChatUnread` | Always |
+
+### Trailing Swipe (right-to-left)
+
+| Action | Icon | Handler | Line | API | Condition |
+|--------|------|---------|------|-----|-----------|
+| Mute / Unmute | bell.slash | [`toggleNtfsButton()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L373) | 373 | `apiSetChatSettings` (enableNtfs) | Always |
+| Clear | trash | [`clearChatButton()`](../../Shared/Views/ChatList/ChatListNavLink.swift#L394) | 394 | `apiClearChat` | Has messages |
+| Delete | trash.fill | -- | -- | `apiDeleteChat` | Not active chat |
+| Tag | tag | -- | -- | `apiSetChatTags` | Always |
+
+---
+
+## 8. [`UserPicker`](../../Shared/Views/ChatList/UserPicker.swift#L11-L176) {#8-userpicker}
+
+**File**: `Shared/Views/ChatList/UserPicker.swift`
+
+Triggered by tapping the user avatar in the navigation bar. Presented as a sheet with:
+
+| Section | Contents |
+|---------|----------|
+| User list | All non-hidden users with unread counts |
+| Active user | Highlighted with checkmark |
+| Actions | Settings, Your POPOPX address, User profiles |
+
+### User Switching
+- Tapping a different user calls `apiSetActiveUser(userId:)`
+- Triggers `apiGetChats` for the new user
+- `ChatModel.currentUser` updates, causing full UI refresh
+- Hidden users are not shown (require password entry via settings)
+
+---
+
+## 9. Floating Action Button
+
+The FAB (floating action button) in the bottom-right corner opens the new chat flow:
+
+- Tap: opens `NewChatView` sheet for creating a new contact connection or group
+- Shows options: Create link, Scan QR code, Paste link, Create group
+
+---
+
+## 10. Chat List Banners {#10-chat-list-banners}
+
+**Files**: [`ChatListView.swift`](../../Shared/Views/ChatList/ChatListView.swift) (the chain), [`SupportPOPOPXBanner.swift`](../../Shared/Views/Badges/SupportPOPOPXBanner.swift) (the pitch card and the shared chrome)
+
+The list has a single banner slot, filled by an `if`/`else if` chain in priority order: the badge alert banner, then the supporter pitch. The badge alert banner shows `bannerBadgeAlert`, the current profile's alert when its kind has a banner (support ended, renewal failed, subscription ended, payment problem, subscription cancelled, renewal soon; not prepaid ending or a kind from a newer core), and one `switch` over the kind at the banner site picks its title, subtitle and warning colour; its X leads to the same remind-later or dismiss alert for every kind. The renewal-failed subtitle is `renewalFailure`: the reason in `BadgeModel`'s `badgeState.issueError` (`BadgeIssueFailure.text`), or "Your badge could not be renewed." when the state carries none, as after an alert that arrives without a new state; the payment-problem subtitle is "The store could not charge your payment method.", not `issueError`, which in billing retry is a failed renewal request rather than the payment's reason. Each banner records itself in `ChatModel.chatListBanner` (`.badgeAlert`, `.badgePitch`) in its `onAppear`, and the pitch's condition starts with `chatModel.bannerSlotFree(for:)` — true only while nothing else was shown this app session — so dismissing a banner never puts another in its place until restart. The alerts have no such check: an alert takes the slot whenever present, and once shown it holds it. The pitch also requires `noShownBadge`, false until `BadgeModel` holds the current user's state, so it cannot take the slot from a supporter whose badge loads a moment later.
+
+### Dismissal
+
+| Default | Set by | Effect |
+|---------|--------|--------|
+| `DEFAULT_SUPPORTER_BANNER_TAPPED` | tapping the supporter pitch | the pitch's dismiss X appears from then on |
+| `DEFAULT_SUPPORTER_BANNER_SHOWN` | the pitch's dismiss X, through its "You can support POPOPX later in Settings." alert, and a successful code redemption | hides the pitch |
+
+The badge alert banner always offers the X; only the pitch waits to be tapped once, so a user who has not looked at it cannot dismiss it unseen.
+
+Both are in `hintDefaults`, so "Reset all hints" in the developer settings restores the banner.
+
+### Shared card chrome
+
+`BannerCard` (a `ViewModifier`: paddings, minimum height scaled by Dynamic Type, gradient background, rounded corners) and `BannerDismissButton` are declared in [`SupportPOPOPXBanner.swift`](../../Shared/Views/Badges/SupportPOPOPXBanner.swift#L95), where the supporter pitch uses them, so both banners share one chrome. The gradient reuses `OnboardingCardView.gradientPoints`, `lightStops` and `darkStops`.
+
+---
+
+## Source Files
+
+| File | Path | Key struct | Line |
+|------|------|------------|------|
+| Chat list view | [`ChatListView.swift`](../../Shared/Views/ChatList/ChatListView.swift) | `ChatListView` | [164](../../Shared/Views/ChatList/ChatListView.swift#L164) |
+| Chat preview row | [`ChatPreviewView.swift`](../../Shared/Views/ChatList/ChatPreviewView.swift) | `ChatPreviewView` | [14](../../Shared/Views/ChatList/ChatPreviewView.swift#L14) |
+| Navigation link wrapper | [`ChatListNavLink.swift`](../../Shared/Views/ChatList/ChatListNavLink.swift) | `ChatListNavLink` | [45](../../Shared/Views/ChatList/ChatListNavLink.swift#L45) |
+| Tag filter tabs | [`TagListView.swift`](../../Shared/Views/ChatList/TagListView.swift) | `TagListView` | [56](../../Shared/Views/ChatList/TagListView.swift#L56) |
+| User picker sheet | [`UserPicker.swift`](../../Shared/Views/ChatList/UserPicker.swift) | `UserPicker` | [11](../../Shared/Views/ChatList/UserPicker.swift#L11) |
+| Getting started help | [`ChatHelp.swift`](../../Shared/Views/ChatList/ChatHelp.swift) | | |
+| Contact request view | [`ContactRequestView.swift`](../../Shared/Views/ChatList/ContactRequestView.swift) | | |
+| Contact connection info | [`ContactConnectionInfo.swift`](../../Shared/Views/ChatList/ContactConnectionInfo.swift) | | |
+| Contact connection view | [`ContactConnectionView.swift`](../../Shared/Views/ChatList/ContactConnectionView.swift) | | |
+| Server summary | [`ServersSummaryView.swift`](../../Shared/Views/ChatList/ServersSummaryView.swift) | | |
+| One-hand UI card | [`OneHandUICard.swift`](../../Shared/Views/ChatList/OneHandUICard.swift) | | |
+| Supporter banner | [`SupportPOPOPXBanner.swift`](../../Shared/Views/Badges/SupportPOPOPXBanner.swift) | `SupportPOPOPXBanner` | [12](../../Shared/Views/Badges/SupportPOPOPXBanner.swift#L12) |

@@ -1,0 +1,125 @@
+POPOPX Chat — notice file
+=========================
+
+This product includes software derived from the SimpleX Chat project
+(https://github.com/simplex-chat/simplex-chat), which is licensed under the GNU
+Affero General Public License version 3 (see LICENSE).
+
+Retained attribution, unchanged in this fork:
+
+  copyright:      2020-22 simplex.chat
+  author:         simplex.chat
+  maintainer:     chat@simplex.chat
+    -- from popopx-chat.cabal, kept verbatim
+
+  Copyright (C) 2026 SimpleX Chat Ltd. All rights reserved.
+    -- from assets/ASSETS_LICENSE.md and its two mirrors, kept verbatim
+
+Third-party licence texts, shipped with this fork:
+
+  licences/third-party/haskell/<package-version>/   139 files
+  licences/third-party/apps/<library>/                10 files
+    -- the licence texts upstream collected for the Haskell dependency set (139
+    packages) and for the bundled native libraries (webrtc, mozjpeg, libspng,
+    miniz, sqlcipher, vlc, stb_image_resize, compact-icc-profiles; 10 entries).
+    149 files, 4633 lines, 241774 bytes,
+    taken byte-for-byte from the import commit db0768c21 and re-installed here on
+    2026-11-15 after the docs/ tree that carried them was deleted. They are the
+    notices AGPL-3.0 §4 forbids removing, and they still describe what this fork
+    builds: the cabal dependency set is unchanged from db0768c21, verified by
+    comparing every non-blank line of simplex-chat.cabal with popopx-chat.cabal
+    after restoring the brand words - the only three that differ are the upstream
+    homepage, author and copyright fields, kept upstream deliberately.
+
+Embedded Tor daemon - a licence carried by the build, not by this file:
+
+  tor, installed by scripts/macos/build_macos_dmg.sh as Contents/Helpers/tor
+
+    The binary is never committed. The script requires both POPOPX_TOR_URL and
+    POPOPX_TOR_SHA256, verifies the digest of the downloaded asset before
+    anything downloaded is unpacked or executed, and takes out of it the file
+    named tor. The version a user receives is the version that build pinned, so
+    no licence text for it is written here: measured 2026-11-23 this repository
+    holds no tor binary or source (git ls-files | grep -cE '(^|/)tor$' = 0) and
+    none was installed on the machine that wrote this notice (command -v tor
+    returns nothing).
+
+    What travels with the artifact is the asset's own notice. The script reads
+    the LICENSE (or LICENSE.TXT, LICENCE, COPYING) out of the same verified
+    archive and installs it at Contents/Resources/licences/tor/LICENSE before
+    the bundle is signed. When the archive carries no licence file, an ad-hoc
+    local build is warned and a Developer ID build stops: a BSD-style licence
+    binds whoever redistributes to reproduce the copyright notice, the
+    conditions and the disclaimer, and a DMG that shipped the binary without
+    them would not. POPOPX_TOR_LICENSE names the licence text of the version
+    being embedded when the asset itself has none. Both paths - licence
+    installed, licence refused - were executed on 2026-11-23 against a synthetic
+    archive with xcodebuild, codesign and hdiutil stubbed.
+
+    The Tor Project publishes tor under a 3-clause BSD licence, with separate
+    terms for parts of its own source tree. That is upstream's statement about
+    upstream's bytes; the licence of the bytes in a given DMG is the file that
+    came with the archive they were taken from. It is not retyped here, because
+    a licence written from memory is not the licence of a binary.
+
+    No pluggable-transport plugin (obfs4proxy, snowflake-proxy) is embedded: the
+    script installs exactly one helper, so no notice is owed here for those, and
+    PopopxTorKit refuses a bridge line whose transport needs one instead of
+    starting a daemon that cannot use it.
+
+This repository is a modified, non-official fork. It was imported at commit
+db0768c21 (2026-11-11) and has been changed since; the nature and scope of the
+modifications, including what was deliberately left unchanged, is described in
+FORK.md.
+
+The application graphics (illustrations, icons, visual designs and test-snapshot
+screenshots) split in two, and the line is drawn by the bytes. What this fork drew
+is part of the AGPL grant from 2026-11-16: AGPL-3.0-only, or at the recipient's
+option CC0-1.0. What is byte-identical to upstream's is not part of any grant this
+fork can give; the brand-bearing sets were replaced with this fork's own artwork
+during 2026-11-13 and 2026-11-15, and what is still upstream's is listed in
+ASSETS_LICENSE-POPOPX.md and stays under assets/ASSETS_LICENSE.md.
+
+"SimpleX", "SimpleX Chat" and the associated logos are trademarks of SimpleX Chat
+Ltd. This fork uses the name POPOPX for that reason; no affiliation, sponsorship
+or endorsement is implied.
+
+POPOPX-side notices, one per right this fork holds:
+
+  "POPOPX", "POPOPX Chat", the POPOPX wordmark and logo and the popopx.chat domain
+    are trademarks of the POPOPX Chat project. They are unregistered; the rights
+    asserted are those that attach to an unregistered mark. Policy:
+    TRADEMARK-POPOPX.md
+
+  Copyright (C) 2026 POPOPX.
+    -- only the graphic assets whose bytes this fork wrote: the iOS marks and app
+    icons, the Android launcher and status-bar icons, this repository's own
+    snapshot renders, and every image that differs from the imported tree or has
+    no counterpart in it. Provenance is the bytes, compared with the blob at the
+    same path in db0768c21, or at upstream's name for that path where this fork
+    renamed it. Measured 2026-11-16 with the recipe in ASSETS_LICENSE-POPOPX.md: of 1565
+    tracked image files, 918 are ours (563 differing from the file at the corresponding
+    upstream path, 355 with no counterpart there) and 647 are still byte-identical to
+    SimpleX Chat Ltd's - those are NOT claimed here, they stay under
+    assets/ASSETS_LICENSE.md with upstream as their owner, and a file that merely sits
+    under a popopx-* package directory is one of them. An earlier revision of this notice
+    read "1527 tracked, 837 ours, 690 upstream's"; that was the same-path-only comparison
+    taken before the last artwork commits, and it is the count ASSETS_LICENSE-POPOPX.md
+    replaced. The 918 are licensed on the same terms as the code - AGPL-3.0-only, or, at
+    the recipient's option, CC0-1.0. Licence: ASSETS_LICENSE-POPOPX.md
+    Until 2026-11-16 this block read "Copyright (C) 2026 POPOPX. All rights
+    reserved." and said these files were not part of the AGPL grant and "may not
+    be redistributed in another project's distribution, modified or unmodified,
+    without prior written permission". That position is withdrawn: a work conveyed
+    as a whole under AGPL-3.0 cannot carry one part of itself that forbids
+    redistribution - section 10 calls that a further restriction, and section 12
+    does not let us keep it by disclosing it. Nothing changed for the 647: they are
+    upstream's, this fork cannot licence them, and a fork still may not carry them.
+
+A downstream fork of this repository carries both sets of obligations: POPOPX's,
+above, and SimpleX Chat Ltd's, which are kept verbatim in the files named in the
+first half of this notice. Since 2026-11-16 the two are not the same kind of
+obligation. POPOPX's artwork may be taken under AGPL-3.0 or CC0-1.0, so what still
+binds a fork of this fork is the names (TRADEMARK-POPOPX.md, outside any copyright
+licence) and SimpleX Chat Ltd's artwork, which no term in this repository can
+licence away from upstream.

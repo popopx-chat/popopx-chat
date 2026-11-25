@@ -1,0 +1,74 @@
+//
+//  BadgesView.swift
+//  POPOPX (iOS)
+//
+//  Created by spaced4ndy on 11.09.2026.
+//  Copyright © 2026 SimpleX Chat. All rights reserved.
+//  Modifications Copyright © 2026 POPOPX Chat.
+//
+
+import SwiftUI
+import POPOPXChat
+
+struct BadgesView: View {
+    @EnvironmentObject var chatModel: ChatModel
+    @ObservedObject private var badgeModel = BadgeModel.shared
+    @ObservedObject private var store = BadgeStore.shared
+    var showsAsSheet: Bool = false
+
+    private var shownBadge: BadgeState? {
+        currentShownBadge()
+    }
+
+    var body: some View {
+        Group {
+            if let badgeState = shownBadge {
+                BadgesYourBadgeView(badgeState: badgeState, showsAsSheet: showsAsSheet)
+                    .transition(.opacity)
+            } else if let purchaseState = store.purchaseState(chatModel.currentUser?.userId) {
+                // holds the purchase screens' slot, so a consumable cannot be bought twice
+                BadgesPurchaseStateView(title: purchaseState.title, message: purchaseState.message, failure: store.creditError(chatModel.currentUser?.userId), showsAsSheet: showsAsSheet)
+                    .transition(.opacity)
+            } else if store.checkingPurchases {
+                BadgesPurchaseStateView(title: "Checking your purchases", showsAsSheet: showsAsSheet)
+                    .transition(.opacity)
+            } else {
+                BadgesSupportPopopxView(showsAsSheet: showsAsSheet)
+                    .transition(.opacity)
+            }
+        }
+        .animation(.default, value: shownBadge != nil)
+        .animation(.default, value: store.purchaseState(chatModel.currentUser?.userId))
+        .animation(.default, value: store.checkingPurchases)
+        .onAppear { badgesViewShown = true }
+        .onDisappear { badgesViewShown = false }
+    }
+}
+
+private(set) var badgesViewShown = false
+
+var supportPOPOPXAlertAction: UIAlertAction {
+    UIAlertAction(title: NSLocalizedString("Support POPOPX", comment: "alert button"), style: .default) { _ in
+        openBadgesView()
+    }
+}
+
+func openBadgesView() {
+    showAppSheet {
+        NavigationStack {
+            PopopxBadgePaywallView()
+                .modifier(ThemedBackground())
+        }
+    }
+}
+
+func currentShownBadge() -> BadgeState? {
+    guard BadgeModel.shared.userId == ChatModel.shared.currentUser?.userId else { return nil }
+    if let badgeState = BadgeModel.shared.badgeState, badgeState.shown { return badgeState }
+    return nil
+}
+
+// false until the badge state is loaded for the current profile, so a supporter is never pitched to
+func noShownBadge() -> Bool {
+    BadgeModel.shared.badgeState?.shown != true && BadgeModel.shared.userId == ChatModel.shared.currentUser?.userId
+}
