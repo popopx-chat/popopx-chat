@@ -7,7 +7,8 @@
 # (/a#..., /g#..., /r#...) and key parameters (?c=...). A bare https://popopx.im or http://popopx.im
 # URL has no A record and will fail to resolve, breaking deep links and contact connections.
 #
-# This script scans src/, apps/ and .github/ for violations and exits 1 if any are found.
+# This script scans src/, apps/, .github/ and the root documents for violations and exits 1 if any
+# are found.
 # Legitimate uses (domain suffix matching like ".popopx.im", configuration arrays like
 # serverDomains = ["popopx.im"], and comments/documentation) are excluded.
 
@@ -34,11 +35,46 @@ done
 # Directories to scan
 SCAN_DIRS=("src" "apps" ".github")
 
+# Root documents, scanned by name: they sit outside SCAN_DIRS, and README.md/PRIVACY.md carry the
+# published addresses, so the no-bare-domain rule has to cover them too.
+SCAN_FILES=("README.md" "PRIVACY.md" "PRIVACY-POPOPX.md")
+
 # Temporary file for violations
 VIOLATIONS=$(mktemp)
 trap 'rm -f "$VIOLATIONS"' EXIT
 
 violation_count=0
+
+check_file() {
+  local file="$1"
+
+  # Search for bare popopx.im URLs (https://popopx.im or http://popopx.im not followed by subdomain)
+  # Pattern matches: https://popopx.im or http://popopx.im at end of string or followed by / or ? or #
+  # but NOT followed by a subdomain pattern like smp1., relay1., xftp1., ntf1., stun1., etc.
+  if grep -nE 'https?://popopx\.im(/|\?|#|$)' "$file" > /dev/null 2>&1; then
+    # Found a potential violation - extract the lines
+    while IFS=: read -r line_num line_content; do
+      # Skip if it's in a comment explaining the rule
+      if [[ "$line_content" == *"bare popopx.im"* ]] || \
+         [[ "$line_content" == *"naked popopx.im"* ]] || \
+         [[ "$line_content" == *"domain suffix"* ]]; then
+        continue
+      fi
+
+      # Skip if it's a legitimate configuration value (serverDomains, admittedHostnameSuffixes, etc.)
+      if [[ "$line_content" == *'serverDomains'* ]] || \
+         [[ "$line_content" == *'admittedHostnameSuffixes'* ]] || \
+         [[ "$line_content" == *'domains:'* ]] || \
+         [[ "$line_content" == *'presetDomains'* ]]; then
+        continue
+      fi
+
+      # This is a violation
+      echo "$file:$line_num:$line_content" >> "$VIOLATIONS"
+      violation_count=$((violation_count + 1))
+    done < <(grep -nE 'https?://popopx\.im(/|\?|#|$)' "$file" 2>/dev/null || true)
+  fi
+}
 
 for dir in "${SCAN_DIRS[@]}"; do
   if [ ! -d "$dir" ]; then
@@ -56,33 +92,14 @@ for dir in "${SCAN_DIRS[@]}"; do
       continue
     fi
 
-    # Search for bare popopx.im URLs (https://popopx.im or http://popopx.im not followed by subdomain)
-    # Pattern matches: https://popopx.im or http://popopx.im at end of string or followed by / or ? or #
-    # but NOT followed by a subdomain pattern like smp1., relay1., xftp1., ntf1., stun1., etc.
-    if grep -nE 'https?://popopx\.im(/|\?|#|$)' "$file" > /dev/null 2>&1; then
-      # Found a potential violation - extract the lines
-      while IFS=: read -r line_num line_content; do
-        # Skip if it's in a comment explaining the rule
-        if [[ "$line_content" == *"bare popopx.im"* ]] || \
-           [[ "$line_content" == *"naked popopx.im"* ]] || \
-           [[ "$line_content" == *"domain suffix"* ]]; then
-          continue
-        fi
-
-        # Skip if it's a legitimate configuration value (serverDomains, admittedHostnameSuffixes, etc.)
-        if [[ "$line_content" == *'serverDomains'* ]] || \
-           [[ "$line_content" == *'admittedHostnameSuffixes'* ]] || \
-           [[ "$line_content" == *'domains:'* ]] || \
-           [[ "$line_content" == *'presetDomains'* ]]; then
-          continue
-        fi
-
-        # This is a violation
-        echo "$file:$line_num:$line_content" >> "$VIOLATIONS"
-        violation_count=$((violation_count + 1))
-      done < <(grep -nE 'https?://popopx\.im(/|\?|#|$)' "$file" 2>/dev/null || true)
-    fi
+    check_file "$file"
   done < <(find "$dir" -type f \( "${FIND_ARGS[@]}" \) -print0 2>/dev/null)
+done
+
+for file in "${SCAN_FILES[@]}"; do
+  if [ -f "$file" ]; then
+    check_file "$file"
+  fi
 done
 
 # Report results
