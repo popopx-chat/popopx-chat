@@ -342,7 +342,7 @@ struct UsageConditionsView: View {
 
     @ViewBuilder private func conditionsDiffButton(_ font: Font? = nil) -> some View {
         let commit = ChatModel.shared.conditions.currentConditions.conditionsCommit
-        if let commitUrl = URL(string: "https://github.com/simplex-chat/simplex-chat/commit/\(commit)") {
+        if let commitUrl = URL(string: "https://github.com/popopx-chat/popopx-chat/commit/\(commit)") {
             ExternalLink(destination: commitUrl) {
                 HStack {
                     Text("Open changes")

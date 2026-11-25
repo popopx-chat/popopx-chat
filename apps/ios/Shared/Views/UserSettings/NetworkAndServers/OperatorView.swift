@@ -407,7 +407,7 @@ struct ConditionsTextView: View {
                             .fill(Color(uiColor: .secondarySystemGroupedBackground))
                     )
             } else {
-                let conditionsLink = "https://github.com/simplex-chat/simplex-chat/blob/\(usageConditions.conditionsCommit)/PRIVACY.md"
+                let conditionsLink = "https://github.com/popopx-chat/popopx-chat/blob/\(usageConditions.conditionsCommit)/PRIVACY.md"
                 conditionsLinkView(conditionsLink)
             }
         } else if failedToLoad {
@@ -578,12 +578,12 @@ struct SingleOperatorUsageConditionsView: View {
 
 func conditionsLinkButton() -> some View {
     let commit = ChatModel.shared.conditions.currentConditions.conditionsCommit
-    let mdUrl = URL(string: "https://github.com/simplex-chat/simplex-chat/blob/\(commit)/PRIVACY.md") ?? popopxPrivacyURL
+    let mdUrl = URL(string: "https://github.com/popopx-chat/popopx-chat/blob/\(commit)/PRIVACY.md") ?? popopxPrivacyURL
     return Menu {
         ExternalLink(destination: mdUrl) {
             Label("Open conditions", systemImage: "doc")
         }
-        if let commitUrl = URL(string: "https://github.com/simplex-chat/simplex-chat/commit/\(commit)") {
+        if let commitUrl = URL(string: "https://github.com/popopx-chat/popopx-chat/commit/\(commit)") {
             ExternalLink(destination: commitUrl) {
                 Label("Open changes", systemImage: "ellipsis")
             }

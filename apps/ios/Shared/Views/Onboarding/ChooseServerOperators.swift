@@ -12,8 +12,9 @@ import SwiftUI
 import LocalAuthentication
 import POPOPXChat
 
-// The privacy statement POPOPX shows in its consent flows. Single place to edit; the site serves it.
-let popopxPrivacyURL = URL(string: "https://popopx.chat/privacy")!
+// The privacy statement POPOPX shows in its consent flows. Single place to edit; it is the policy file
+// in this repository, which is where the text is published - the site serves no /privacy page.
+let popopxPrivacyURL = URL(string: "https://github.com/popopx-chat/popopx-chat/blob/master/PRIVACY.md")!
 let conditionsURL = popopxPrivacyURL
 
 struct OnboardingButtonStyle: ButtonStyle {
