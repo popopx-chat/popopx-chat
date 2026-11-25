@@ -27,7 +27,6 @@ grep -rnI -i "simplex" \
   --exclude="PRIVACY.md" --exclude="PRIVACY-POPOPX.md" \
   --exclude="TRADEMARK.md" --exclude="TRADEMARK-POPOPX.md" \
   --exclude="AGPL-COMPLIANCE.md" \
-  --exclude="NODE-PACKAGES-POPOPX.md" \
   --exclude="check-brand-clean.sh" \
   . 2>/dev/null | \
 grep -v '\.strings:' | \

@@ -2052,8 +2052,13 @@ under `/.well-known/`.
 Ruled 2026-11-13 as use-first-and-record; the gap is written up in `FORK.md`.
 The npm and PyPI names in the committed manifests are upstream's on purpose: `packages_release.py
 test-names` rewrites them, with `npm:` aliases for the cross-package dependencies, from the
-repository variables `NPM_SCOPE` and `PYPI_PROJECT` at publish time — see
-[`NODE-PACKAGES-POPOPX.md`](./NODE-PACKAGES-POPOPX.md). Environment variables that third
+repository variables `NPM_SCOPE` and `PYPI_PROJECT` at publish time. The write-up of that method,
+`NODE-PACKAGES-POPOPX.md`, is **not in this repository**: the 2026-11-25 history re-initialization
+carried neither that file nor `scripts/ci/packages_release.py`, and nothing in `.github` or `scripts`
+calls either name, so these sentences are the surviving record. The last blobs are readable from the
+pre-restart objects — `git show b9b44beb3:NODE-PACKAGES-POPOPX.md` (6,573 B) and `git show
+db0768c21:scripts/ci/packages_release.py` (43,815 B); `git ls-files` for either path returns nothing.
+Environment variables that third
 party tooling may set are read under both spellings (`SIMPLEX_ASSETS`/`POPOPX_ASSETS`,
 `SIMPLEX_LIBS_DIR`, `SIMPLEX_ADDON_PATH`).
 

@@ -1028,7 +1028,13 @@ yet. Before any build of this fork is distributed:
   repository variables `NPM_SCOPE` and `PYPI_PROJECT`. Setting those two variables — plus an
   `@popopx-chat` npm org, a `popopx-chat` PyPI project and a `popopx-chat-libs` repository — is the
   fix; hand-editing the manifests would break `unreleased_pins()` and `check-pins` instead.
-  Full method: [`NODE-PACKAGES-POPOPX.md`](./NODE-PACKAGES-POPOPX.md).
+  The file that recorded the full method, `NODE-PACKAGES-POPOPX.md`, was **not retained** in the
+  2026-11-25 history re-initialization, and neither was `scripts/ci/packages_release.py` itself —
+  `git ls-files` lists no match for either path, and no workflow in `.github/workflows` runs a
+  publish lane, so nothing in this tree executes that renaming today. This item is therefore the
+  whole record of the mechanism here; the last states of both files are recoverable from the
+  pre-restart objects (`git show b9b44beb3:NODE-PACKAGES-POPOPX.md`, `git show
+  db0768c21:scripts/ci/packages_release.py`) if the method ever has to be rebuilt.
 - **Link claims are inert, for several independent reasons.** All of them must clear in the same change. The
   count used to be three; the list grew as the items below were measured, and the certificate reason was
   retired on 2026-11-13.
