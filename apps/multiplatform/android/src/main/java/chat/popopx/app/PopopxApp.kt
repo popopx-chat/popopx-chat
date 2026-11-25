@@ -22,6 +22,9 @@ import com.popopxchat.popopx.model.NtfManager
 import com.popopxchat.popopx.model.NtfManager.AcceptCallAction
 import com.popopxchat.popopx.views.call.CallActivity
 import chat.popopx.common.helpers.*
+import chat.popopx.common.cfgsec.PopopxServerConfigForeground
+import chat.popopx.common.cfgsec.PopopxServerConfigSignalHandler
+import chat.popopx.common.media.PopopxIncomingFileUnpacker
 import chat.popopx.common.commerce.popopxInstallCommerceLedger
 import chat.popopx.common.model.*
 import chat.popopx.common.model.ChatController.appPrefs
@@ -98,6 +101,9 @@ class PopopxApp: Application(), LifecycleEventObserver {
       when (event) {
         Lifecycle.Event.ON_START -> {
           isAppOnForeground = true
+          // The cluster handler's own copy of the same fact: a probe window that expires while the app is not
+          // visible leaves the staged frame alone rather than judging it, and that test has to read this process.
+          PopopxServerConfigForeground.active = true
           if (chatModel.chatRunning.value == true) {
             withContext(Dispatchers.Main) {
               kotlin.runCatching {
@@ -121,6 +127,12 @@ class PopopxApp: Application(), LifecycleEventObserver {
         }
         Lifecycle.Event.ON_RESUME -> {
           isAppOnForeground = true
+          PopopxServerConfigForeground.active = true
+          // iOS promotes from `onChange(of: scenePhase) == .active` (MainTabView.swift:233-239): a frame that
+          // arrived while the app was backgrounded waited out its install window, and coming back to the
+          // foreground is the first moment it can be applied *and* watched. The call returns immediately when
+          // nothing is staged, so this is a no-op for the ordinary resume.
+          if (chatModel.currentUser.value != null) PopopxServerConfigSignalHandler.shared.promoteStagedIfNeeded()
           if (chatModel.controller.appPrefs.onboardingStage.get() == OnboardingStage.OnboardingComplete && chatModel.currentUser.value != null) {
             PopopxService.showBackgroundServiceNoticeIfNeeded()
           }
@@ -139,7 +151,18 @@ class PopopxApp: Application(), LifecycleEventObserver {
             PopopxService.start()
           }
         }
-        else -> isAppOnForeground = false
+        Lifecycle.Event.ON_STOP -> {
+          isAppOnForeground = false
+          PopopxServerConfigForeground.active = false
+          // iOS purges on `didEnterBackgroundNotification`; ON_STOP is the same moment here, and it lands inside
+          // [withLongRunningApi] so deleting scratch never runs on the main thread. The engine rebuilds both
+          // directories on the next send.
+          PopopxIncomingFileUnpacker.purgeTemporaryDirectories()
+        }
+        else -> {
+          isAppOnForeground = false
+          PopopxServerConfigForeground.active = false
+        }
       }
     }
   }

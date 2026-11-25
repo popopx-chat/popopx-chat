@@ -27,6 +27,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.*
+import chat.popopx.common.media.*
 import chat.popopx.common.model.*
 import chat.popopx.common.model.ChatModel.controller
 import chat.popopx.common.model.ChatModel.filesToDelete
@@ -875,16 +876,21 @@ fun ComposeView(
         }
         is ComposePreview.MediaPreview -> {
           // TODO batch send: batch media previews
+          // The ceiling is a property of the conversation the bytes are going to, which for an inline reply is
+          // `toChat` rather than the chat the composer is attached to.
+          val members = popopxGroupMemberCount(toChat)
           preview.content.forEachIndexed { index, it ->
             val file = when (it) {
               is UploadContent.SimpleImage ->
-                if (remoteHost == null) saveImage(it.uri)
+                if (remoteHost == null) popopxOutgoingFile(it.uri, cs.maxFileSize, members, "IMG") { saveImage(it.uri) }
                 else desktopSaveImageInTmp(it.uri)
               is UploadContent.AnimatedImage ->
+                // Never re-encoded: an animated file is passed through whole by the engine, exactly as on iOS, so
+                // there is nothing for this branch to gain and a GIF would lose its frames.
                 if (remoteHost == null) saveAnimImage(it.uri)
                 else CryptoFile.desktopPlain(it.uri)
               is UploadContent.Video ->
-                if (remoteHost == null) saveFileFromUri(it.uri, cs.maxFileSize, hiddenFileNamePrefix = "video")
+                if (remoteHost == null) popopxOutgoingFile(it.uri, cs.maxFileSize, members, "video") { saveFileFromUri(it.uri, cs.maxFileSize, hiddenFileNamePrefix = "video") }
                 else CryptoFile.desktopPlain(it.uri)
             }
             if (file != null) {
@@ -933,7 +939,9 @@ fun ComposeView(
         }
         is ComposePreview.FilePreview -> {
           val file = if (remoteHost == null) {
-            saveFileFromUri(preview.uri, cs.maxFileSize)
+            popopxOutgoingFile(preview.uri, cs.maxFileSize, popopxGroupMemberCount(toChat), null) {
+              saveFileFromUri(preview.uri, cs.maxFileSize)
+            }
           } else {
             CryptoFile.desktopPlain(preview.uri)
           }
@@ -1191,6 +1199,11 @@ fun ComposeView(
 
   @Composable
   fun previewView() {
+    // Android only: the engine runs inside the send, just before the bytes are handed to the core, so without this
+    // the user taps send and nothing appears to happen for the length of a re-encode.
+    if (appPlatform.isAndroid && PopopxOutgoingMediaInterceptor.shared.isProcessing) {
+      PopopxMediaProcessingCapsule(PopopxOutgoingMediaInterceptor.shared.statusText)
+    }
     when (val preview = composeState.value.preview) {
       ComposePreview.NoPreview -> {}
       is ComposePreview.CLinkPreview -> ComposeLinkView(

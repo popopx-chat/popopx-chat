@@ -32,6 +32,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import chat.popopx.common.AppLock
 import chat.popopx.common.BuildConfigCommon
+import chat.popopx.common.cfgsec.popopxServerConfigHiddenChat
 import chat.popopx.common.eco.popopxEcoOpenLink
 import chat.popopx.common.model.*
 import chat.popopx.common.model.ChatController.appPrefs
@@ -1609,15 +1610,21 @@ fun filteredChats(
   chats: List<Chat>,
   activeFilter: ActiveFilter? = null,
 ): List<Chat> {
+  // The official configuration conversations never enter this list, whichever branch builds it. iOS states the
+  // exclusion once for the same reason: its Messages list and its search results are both produced by
+  // `searchedEntries` (ChatsListView.swift:494-501), so a rule that lives in only one of the two branches would
+  // leak the conversation through the other. The predicate answers false before it reads anything on desktop,
+  // where no such conversation can exist.
+  val visible = chats.filterNot(::popopxServerConfigHiddenChat)
   val linkChatIds = searchChatFilteredByPopopxLink.value
   return if (linkChatIds.isNotEmpty()) {
-    chats.filter { it.id in linkChatIds }
+    visible.filter { it.id in linkChatIds }
   } else {
     val s = if (searchShowingPopopxLink.value) "" else searchText.trim().lowercase()
     if (s.isEmpty())
-      chats.filter { chat -> chat.id == chatModel.chatId.value || (!chat.chatInfo.chatDeleted && !chat.chatInfo.contactCard && filtered(chat, activeFilter)) }
+      visible.filter { chat -> chat.id == chatModel.chatId.value || (!chat.chatInfo.chatDeleted && !chat.chatInfo.contactCard && filtered(chat, activeFilter)) }
     else {
-      chats.filter { chat ->
+      visible.filter { chat ->
         chat.id == chatModel.chatId.value ||
           when (val cInfo = chat.chatInfo) {
             is ChatInfo.Direct -> !cInfo.contact.chatDeleted && !chat.chatInfo.contactCard && cInfo.anyNameContains(s)

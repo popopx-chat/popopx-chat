@@ -737,6 +737,11 @@ fun PopopxLockView(
         }
       }
     }
+    // Android-only: the duress keypad is mounted nowhere else, and a section that configures a screen desktop cannot
+    // show would be a control with no effect there.
+    if (appPlatform.isAndroid) {
+      PopopxDuressSettingsSection()
+    }
     SectionBottomSpacer()
   }
 }

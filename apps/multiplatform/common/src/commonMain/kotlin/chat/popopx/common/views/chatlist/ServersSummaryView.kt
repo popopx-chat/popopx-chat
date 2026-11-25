@@ -744,6 +744,12 @@ fun ModalData.ServersSummaryView(rh: RemoteHostInfo?, serversSummary: MutableSta
         hostDevice(rh?.remoteHostId),
         bottomPadding = bottomPadding
       )
+      // Android-only, and read-only. The signed roster needs one place where its state can be *seen* rather than
+      // inferred, and this is the screen that already lists servers; nothing here alerts, which is the property iOS
+      // keeps for the whole update path.
+      if (appPlatform.isAndroid) {
+        PopopxServerConfigStatusRow()
+      }
       if (serversSummary.value == null) {
         Box(
           modifier = Modifier

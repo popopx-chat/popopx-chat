@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import chat.popopx.common.duress.PopopxDuressAuthManager
 import chat.popopx.common.model.*
 import chat.popopx.common.model.ChatController.appPrefs
 import chat.popopx.common.platform.*
 import chat.popopx.common.views.helpers.*
 import chat.popopx.common.views.localauth.SetAppPasscodeView
+import chat.popopx.common.views.localauth.showDuressLockScreen
 import chat.popopx.common.views.usersettings.*
 import chat.popopx.res.*
 import kotlinx.coroutines.*
@@ -146,40 +148,61 @@ object AppLock {
       CoroutineScope(Dispatchers.Default).launch {
         delay(50)
         withContext(Dispatchers.Main) {
-          authenticate(
-            if (m.controller.appPrefs.laMode.get() == LAMode.SYSTEM)
-              generalGetString(MR.strings.auth_unlock)
-            else
-              generalGetString(MR.strings.la_enter_app_passcode),
-            if (m.controller.appPrefs.laMode.get() == LAMode.SYSTEM)
-              generalGetString(MR.strings.auth_log_in_using_credential)
-            else
-              generalGetString(MR.strings.auth_unlock),
-            selfDestruct = true,
-            oneTime = false,
-            completed = { laResult ->
-              when (laResult) {
-                LAResult.Success ->
-                  userAuthorized.value = true
-                is LAResult.Failed -> { /* Can be called multiple times on every failure */ }
-                is LAResult.Error -> {
-                  laFailed.value = true
-                  if (m.controller.appPrefs.laMode.get() == LAMode.PASSCODE) {
-                    laFailedAlert()
-                  }
-                }
-                is LAResult.Unavailable -> {
-                  userAuthorized.value = true
-                  m.showAuthScreen.value = false
-                  m.controller.appPrefs.performLA.set(false)
-                  laUnavailableTurningOffAlert()
-                }
-              }
-            }
-          )
+          // Ruling 3: once this device has a duress entry code, the keypad *is* the front door. Desktop composes
+          // neither branch, and an Android device with no duress code still runs the shipped flow unchanged.
+          if (appPlatform.isAndroid && PopopxDuressAuthManager.shared.normalConfigured) {
+            showDuressLockScreen(
+              onUnlocked = { userAuthorized.value = true },
+              onDismiss = { runLocalAuthenticate(m) },
+            )
+          } else {
+            runLocalAuthenticate(m)
+          }
         }
       }
     }
+  }
+
+  /**
+   * The shipped authentication entry, reached either directly or when the duress keypad finds that its record has
+   * been removed while the screen was up.
+   *
+   * Extracted rather than duplicated: the duress path bypasses this call on purpose — on Android the upstream entry
+   * is `BIOMETRIC_STRONG or DEVICE_CREDENTIAL` (LocalAuthentication.android.kt), and a device credential can unlock
+   * the app without ever asking for a code, which would put a second front door in front of the duress design.
+   */
+  private fun runLocalAuthenticate(m: ChatModel) {
+    authenticate(
+      if (m.controller.appPrefs.laMode.get() == LAMode.SYSTEM)
+        generalGetString(MR.strings.auth_unlock)
+      else
+        generalGetString(MR.strings.la_enter_app_passcode),
+      if (m.controller.appPrefs.laMode.get() == LAMode.SYSTEM)
+        generalGetString(MR.strings.auth_log_in_using_credential)
+      else
+        generalGetString(MR.strings.auth_unlock),
+      selfDestruct = true,
+      oneTime = false,
+      completed = { laResult ->
+        when (laResult) {
+          LAResult.Success ->
+            userAuthorized.value = true
+          is LAResult.Failed -> { /* Can be called multiple times on every failure */ }
+          is LAResult.Error -> {
+            laFailed.value = true
+            if (m.controller.appPrefs.laMode.get() == LAMode.PASSCODE) {
+              laFailedAlert()
+            }
+          }
+          is LAResult.Unavailable -> {
+            userAuthorized.value = true
+            m.showAuthScreen.value = false
+            m.controller.appPrefs.performLA.set(false)
+            laUnavailableTurningOffAlert()
+          }
+        }
+      }
+    )
   }
 
   fun setPerformLA(on: Boolean) {

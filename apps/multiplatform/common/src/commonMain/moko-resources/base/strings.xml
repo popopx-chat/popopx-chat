@@ -3435,4 +3435,75 @@
   <string name="commerce_channel_issuer_mismatch">The signing key does not match the publisher recorded on this device from your last payment: either someone forwarded this card, or the channel owner changed devices.</string>
   <string name="commerce_channel_price_rejected">This threshold is outside the allowed range (from 1 to the maximum; free needs no published threshold).</string>
   <string name="commerce_channel_read_only">Read only here: this entry could not be matched to the channel it is in, so credits have to be charged in that channel.</string>
+  <!-- POPOPX local media engine: wording mirrors PopopxMediaEngineCopy on iOS, key for key. -->
+  <string name="media_processing_status">Compressing &amp; stripping metadata locally...</string>
+  <string name="media_oversized_blocked">This file is still too large after compression. Use an encrypted link instead.</string>
+  <string name="media_unpack_failed">The attachment could not be unpacked on this device.</string>
+  <!-- POPOPX duress lock screen: wording mirrors PopopxLockCopy in PopopxAppLockOverlayView.swift, key for key.
+       The biometric sentence names a fingerprint or a face instead of Face ID/Touch ID, and the cooldown footnote
+       omits the mnemonic phrase because this phase does not mount one; both are named in the commit body. -->
+  <string name="duress_lock_locked_title">Locked</string>
+  <string name="duress_lock_disabled_title">Disabled</string>
+  <string name="duress_lock_prompt">Enter your unlock passcode</string>
+  <string name="duress_lock_unlocking">Unlocking…</string>
+  <string name="duress_lock_wrong">Wrong passcode, please enter it again</string>
+  <string name="duress_lock_send">Confirm</string>
+  <string name="duress_lock_keypad">Numeric passcode keypad</string>
+  <string name="duress_lock_delete">Delete the last digit</string>
+  <string name="duress_lock_biometric">Unlock with a fingerprint or face</string>
+  <string name="duress_lock_digits_complete">All %1$d digits entered</string>
+  <string name="duress_lock_digits_progress">%1$d of %2$d digits entered</string>
+  <string name="duress_lock_disabled_format">POPOPX is disabled. Try again in %1$s.</string>
+  <string name="duress_lock_disabled_footnote">During this cooldown the keypad and biometric unlock are both refused.</string>
+  <string name="duress_lockout_hours_minutes">%1$dh %2$dmin</string>
+  <string name="duress_lockout_hours">%1$dh</string>
+  <string name="duress_lockout_minutes_seconds">%1$dmin %2$ds</string>
+  <string name="duress_lockout_minutes">%1$dmin</string>
+  <string name="duress_lockout_seconds">%1$ds</string>
+  <string name="panic_wipe_title">Erase the data on this device?</string>
+  <string name="panic_wipe_body">This will stop what POPOPX is sending, clear the session keys, overwrite the temporary files this app wrote and close the app. Your chat history stays on the device. It cannot be undone.</string>
+  <string name="panic_wipe_erase">Erase now</string>
+  <!-- POPOPX duress settings: the section is Android-only, so these slots appear on one platform by design. -->
+  <string name="duress_settings_title">Panic protection</string>
+  <string name="duress_settings_status_none">No entry code is set on this device</string>
+  <string name="duress_settings_status_entry_only">An entry code is set; there is no duress code</string>
+  <string name="duress_settings_status_both">An entry code and a duress code are both set</string>
+  <string name="duress_settings_set_entry">Set the entry code</string>
+  <string name="duress_settings_change_entry">Change the entry code</string>
+  <string name="duress_settings_set_duress">Set the duress code</string>
+  <string name="duress_settings_change_duress">Change the duress code</string>
+  <string name="duress_settings_duress_switch">The duress code wipes the app</string>
+  <string name="duress_settings_biometrics">Allow biometric unlock</string>
+  <string name="duress_settings_ten_strike">Erase everything after ten wrong codes</string>
+  <string name="duress_settings_ten_strike_note">Until the tenth attempt nothing is deleted: a wrong code only costs a longer wait. The tenth destroys the local database and every key this app holds, and it cannot be undone.</string>
+  <string name="duress_settings_remove">Remove the codes</string>
+  <string name="duress_settings_remove_confirm">This deletes the entry code and the duress code. The app goes back to asking for whatever lock is set under Chat lock, and nothing is erased from the device.</string>
+  <string name="duress_settings_entry_note">Six digits. This is the code you type to open the app.</string>
+  <string name="duress_settings_duress_note">Six digits, different from the entry code. Typing it opens the app to an empty profile and erases the keys, without any warning on screen.</string>
+  <string name="duress_settings_migration_note">The app still has its own passcode. Setting the entry code removes it, so there is only ever one code asked for at the front door.</string>
+  <string name="duress_settings_saving">Saving…</string>
+  <string name="duress_setup_pin_field">New 6-digit code</string>
+  <string name="duress_setup_confirm_field">Re-enter the code</string>
+  <string name="duress_setup_current_field">Current entry code</string>
+  <string name="duress_setup_native_field">Current app passcode</string>
+  <string name="duress_setup_self_destruct_field">Current self-destruct code</string>
+  <string name="duress_setup_save">Save</string>
+  <string name="duress_error_malformed_pin">The code must be six digits, entered the same way twice.</string>
+  <string name="duress_error_pins_must_differ">The duress code must be different from the entry code.</string>
+  <string name="duress_error_normal_required">Set the entry code before the duress code.</string>
+  <string name="duress_error_entry_required">Enter the current entry code.</string>
+  <string name="duress_error_entry_incorrect">That is not the current entry code.</string>
+  <string name="duress_error_native_passcode_required">The app has a passcode: enter it so it can be replaced by the new code.</string>
+  <string name="duress_error_native_passcode_incorrect">That is not the app passcode.</string>
+  <string name="duress_error_self_destruct_required">A self-destruct code is set: enter it so it can be removed too.</string>
+  <string name="duress_error_self_destruct_incorrect">That is not the self-destruct code.</string>
+  <string name="duress_error_write_failed">The code could not be stored. Nothing was changed.</string>
+  <string name="duress_error_biometric_denied">Biometric unlock is refused while the app is cooling down.</string>
+  <!-- POPOPX signed server-cluster status: one read-only line, Android-only, inside the servers summary. -->
+  <string name="server_config_status_none">No signed cluster configuration has been applied on this device</string>
+  <string name="server_config_status">Signed cluster: %1$s · key %2$s · generation %3$d · %4$d addresses taken from it</string>
+  <string name="server_config_status_pending">waiting for the servers to answer</string>
+  <string name="server_config_status_verified">verified</string>
+  <string name="server_config_status_rolled_back">rolled back</string>
+  <string name="server_config_status_never">no configuration received yet</string>
 </resources>

@@ -1,5 +1,7 @@
 package chat.popopx.common.eco
 
+import chat.popopx.common.cfgsec.PopopxServerConfigSignalHandler
+import chat.popopx.common.cfgsec.PopopxServerConfigWire
 import chat.popopx.common.model.ChatType
 import chat.popopx.common.platform.appPlatform
 import chat.popopx.common.signal.PopopxRenderSuppression
@@ -11,9 +13,9 @@ import chat.popopx.common.views.helpers.ModalManager
 import chat.popopx.common.views.helpers.withBGApi
 import chat.popopx.common.views.newchat.planAndConnect
 
-// The host side of the two machine-line routers: the singletons, the inbound mount, and the link mount.
+// The host side of the machine-line protocols: the singletons, the inbound mount, and the link mount.
 // Everything above this file is platform-free arithmetic; everything here touches ChatModel, SMP and the
-// navigation stack, which is why it is a seam rather than part of the router.
+// navigation stack, which is why it is a seam rather than part of a router.
 //
 // Mounted only on Android. Desktop has never had the service-account ecosystem, and the desktop app's
 // behaviour — and therefore its 376 snapshot baselines — must not move as a side effect of this port.
@@ -45,13 +47,15 @@ object PopopxEcoRuntime {
 }
 
 /**
- * Mount point of both machine-line protocols on one received line, hung beside each other exactly as iOS
+ * Mount point of the three machine-line protocols on one received line, hung beside each other exactly as iOS
  * hangs them in the same block (POPOPXAPI.swift:2775-2796): one site owns the text read and the hop onto the
- * serialized dispatcher, so the two routers cannot disagree about the order they saw the same message in.
- * They answer different markers, so a given line is handled by at most one of them.
+ * serialized dispatcher, so the three observers cannot disagree about the order they saw the same message in.
+ * They answer different markers — the signalling marker, the eco control frame and uplink, and
+ * `::popopx_sys::SERVER_CFG_V1::` — so a given line is handled by at most one of them.
  *
- * The third observer iOS has here — the signed server-cluster update — is deliberately not mounted: those
- * chats are hidden from the interface on iOS as of 2026-11-24, and Android has no receiving UI for them.
+ * The signed cluster update is dispatched here rather than from the chat view because the alternative — a
+ * second read of the same line at the render site — is what lets the two disagree about a message that arrives
+ * while the app is scrolling.
  */
 fun popopxEcoObserveIncoming(chatType: ChatType, chatId: Long, itemId: Long, memberId: Long?, text: String) {
   if (!appPlatform.isAndroid) return
@@ -61,23 +65,29 @@ fun popopxEcoObserveIncoming(chatType: ChatType, chatId: Long, itemId: Long, mem
     else -> PopopxSignalChatKind.OTHER
   }
   withBGApi {
-    PopopxEcoRuntime.signaling.observeIncoming(kind, chatId, itemId, text, memberId)
+    PopopxSilentSignalingRouter.shared.observeIncoming(kind, chatId, itemId, text, memberId)
     PopopxEcoRuntime.router.observeIncoming(chatType, chatId, itemId, text)
+    PopopxServerConfigSignalHandler.shared.observeIncoming(chatType, chatId, itemId, text)
   }
 }
 
 /**
  * The one suppression criterion the three render sites consult — the conversation row, the chat-list preview
  * and the notification banner — composed exactly as iOS composes it (`PopopxSysMarker.isSignalText`,
- * PopopxBadgeCreditsModels.swift:1201-1204): this package's signalling marker, the eco control frame, and the
- * eco uplink lines. One site carrying all terms is the only shape that cannot drift, which is why the UI
- * never asks the two packages separately.
+ * PopopxBadgeCreditsModels.swift:1201-1204): this package's signalling marker, the eco control frame, the eco
+ * uplink lines, and the signed server-cluster pair. One site carrying all four terms is the only shape that
+ * cannot drift, which is why the UI never asks the packages separately.
  *
- * iOS ORs a fourth term, the signed server-cluster frame; it is not ported because Android has no receiver
- * for it and the frame is not sent from this app.
+ * The cluster frame is its own test rather than another signalling kind for the reason iOS states: the kind
+ * parser refuses any payload over `maximumSignalPayloadCharacters`, and a multi-hostname cluster frame with its
+ * signature is larger than that ceiling — a kind that will not parse is not a kind, so the frame would arrive as
+ * an ordinary message, which is precisely the line this mechanism must never show.
+ * [PopopxServerConfigWire.isControlText] judges the same prefix-and-whitespace shape without those two limits,
+ * and **without** consulting the signature: an unsigned, malformed, empty or over-long frame is hidden exactly
+ * like a valid one, since it is deleted on arrival either way.
  */
 private val popopxEcoSuppression: PopopxRenderSuppression = popopxSysSignalSuppression {
-  PopopxEcoMarker.isControlText(it) || PopopxEcoUplink.isUplinkText(it)
+  PopopxEcoMarker.isControlText(it) || PopopxEcoUplink.isUplinkText(it) || PopopxServerConfigWire.isControlText(it)
 }
 
 /**

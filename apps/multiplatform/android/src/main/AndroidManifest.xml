@@ -21,6 +21,14 @@
   <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
   <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
+  <!-- The duress keypad's optional biometric shortcut. Declared rather than inherited from the androidx.biometric
+       aar, so the requirement is visible where the app's own permissions are read. The feature line below is the
+       safety half: a phone without a biometric sensor must still be able to install POPOPX, because the keypad
+       works there and biometric unlock simply is not offered. -->
+  <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+  <uses-feature android:name="android.hardware.fingerprint" android:required="false" />
+  <uses-feature android:name="android.hardware.biometrics.face" android:required="false" />
+
   <!-- Requirements that allows to specify foreground service types -->
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />

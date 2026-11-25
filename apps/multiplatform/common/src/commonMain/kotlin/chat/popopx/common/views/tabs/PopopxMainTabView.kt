@@ -23,6 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import chat.popopx.common.AppLock
 import chat.popopx.common.StartPartOfScreen
+import chat.popopx.common.cfgsec.PopopxOfficialConfigLinks
+import chat.popopx.common.cfgsec.PopopxServerConfigSignalHandler
+import chat.popopx.common.cfgsec.popopxServerConfigHiddenChat
 import chat.popopx.common.eco.PopopxEcoSessionStore
 import chat.popopx.common.model.*
 import chat.popopx.common.platform.*
@@ -32,12 +35,14 @@ import chat.popopx.common.views.contacts.ContactListNavLinkView
 import chat.popopx.common.views.helpers.AnimatedViewState
 import chat.popopx.common.views.helpers.LocalAppBarHandler
 import chat.popopx.common.views.helpers.rememberAppBarHandler
+import chat.popopx.common.views.helpers.withBGApi
 import chat.popopx.common.views.usersettings.SettingsView
 import chat.popopx.res.*
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -81,6 +86,23 @@ fun PopopxTabScaffold(userPickerState: MutableStateFlow<AnimatedViewState>) {
     snapshotFlow { chatModel.chatId.value }
       .distinctUntilChanged()
       .collect { chatId -> if (chatId != null) selected.value = PopopxTab.CHATS.ordinal }
+  }
+
+  // The launch seam for the signed cluster configuration, at the same place iOS puts it
+  // (MainTabView.swift:240-262): reaching the tab bar is what proves both halves of the precondition — a
+  // profile exists, and the controller has started far enough to answer a request. Keying on the user id is
+  // what covers iOS's two separate hooks at once: the first composition is its `onAppear`, and a second profile
+  // made inside a running process never passes through `onAppear` but does change this key.
+  //
+  // `promoteStagedIfNeeded` settles an interrupted probe before it looks at the staged frame, so one call
+  // covers both halves of the launch path, and it returns immediately when nothing is staged. The seeding delay
+  // is not decoration: a subscription issued into the middle of launch is one whose failure has no dialog left
+  // to explain it, and `seedOfficialSubscriptions` is silent by design.
+  val userId = chatModel.currentUser.value?.userId
+  LaunchedEffect(userId) {
+    withBGApi { PopopxServerConfigSignalHandler.shared.promoteStagedIfNeeded() }
+    delay(PopopxOfficialConfigLinks.SEEDING_DELAY_MILLIS)
+    withBGApi { PopopxServerConfigSignalHandler.shared.seedOfficialSubscriptions() }
   }
 
   Column(Modifier.fillMaxSize()) {
@@ -139,18 +161,13 @@ private fun PopopxContactsTabView() {
 }
 
 /**
- * `PopopxContactsView.contactChats` (PopopxContactsView.swift:397-417), field for field: no deleted
- * chat, no contact card, an active direct contact that is not itself a card and is not a service
- * account, or a group that is neither a business chat nor a channel.
- *
- * One term is absent because Android has no counterpart: iOS also drops the ids of
- * `PopopxServerConfigStore.systemConfigChatIds(for:)`, the official-configuration chats it hides
- * from every surface. This app never mounts that receiver (PopopxEcoMount.kt), so there is nothing
- * here to hide, and the filter would be a predicate over an empty set.
+ * `PopopxContactsView.contactChats` (PopopxContactsView.swift:397-417), field for field: not a deleted chat, not
+ * a contact card, not one of the official configuration conversations, then an active direct contact that is not
+ * itself a card and is not a service account, or a group that is neither a business chat nor a channel.
  */
 private fun popopxContactChat(chat: Chat): Boolean {
   val info = chat.chatInfo
-  if (info.chatDeleted || info.contactCard) return false
+  if (info.chatDeleted || info.contactCard || popopxServerConfigHiddenChat(chat)) return false
   return when (info) {
     is ChatInfo.Direct -> info.contact.active
       && !info.contact.isContactCard
