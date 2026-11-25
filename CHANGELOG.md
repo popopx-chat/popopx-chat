@@ -14,6 +14,54 @@
 > `PopopxOfflineBridge.swift` 1. That replaces the 2026-11-16 figure of "4 occurrences in 4 files, none of
 > them code": the old app-link scheme is now parsed in Swift, so the surplus is load-bearing, not residue.
 
+## Unreleased — the badge link loses its upstream host and the What's New page its retired directory entries, 2026-11-25
+
+- **iOS: `badgePageUrl` is now the technical display site.** `apps/ios/Shared/Views/Badges/BadgeStore.swift:36`
+  read upstream's `https://badges.simplex.chat/…`; it now reads `https://popopx.chat`. The two buttons that
+  follow it (`BadgesSupportPopopxView.swift:131` "Buy in browser", shown only when
+  `badgeBrowserAllowed` says the storefront is the US, and `:140` "Choose your badge", the non-App-Store
+  branch) therefore reach no payment page: in-app badge purchase is StoreKit (`badgeProductIds`,
+  `PopopxStoreKitManager.swift`) and a link that could land on external token payment is the App Store
+  §3.1.1 exposure this removes. A badge-portal URL was tried here first and never committed, so nothing
+  shipped that pointed at it.
+- **Desktop and Android keep the portal form.** `BadgeStore.kt:53-55` moved from `badges.simplex.chat` to
+  `https://popopx.chat?app=true` / `?app=desktop`. The flag is a query parameter here, which is the whole
+  difference from upstream's `#/tier?app=` fragment: a fragment never reaches the host, a query does.
+- **Measured on the host side, same day** (`curl --noproxy '*'`): `https://popopx.chat`, `?app=true` and
+  `?app=desktop` each answer `200` with the same 125,159-byte page; `popopx.chat/badge` answers `404`;
+  `node.popopx.chat/badge` answers `200` but serves the Mac Node SPA, whose bundle contains no `/badge`
+  route and reads no `app` parameter. So the links reach our own host and not a checkout — the badge
+  storefront is still to be deployed. `git grep -In 'badges\.simplex\.chat'` now reads 0 in code and
+  resources.
+- **What's New no longer advertises the directory service.** The two entries that pointed at it were
+  deleted: iOS `apps/ios/Shared/Views/Onboarding/WhatsNewView.swift` (the v5.3 "Discover and join groups"
+  and v5.5 "Join group conversations" blocks) and desktop
+  `apps/multiplatform/common/src/commonMain/kotlin/chat/popopx/common/views/onboarding/WhatsNewView.kt`
+  (the matching `FeatureDescription` blocks). iOS keys a localization on its English literal, so 28 key and
+  value lines carrying the upstream directory address went out of the 15 shipped `.lproj` catalogs in the
+  same commit; each catalog still passes `plutil -lint`. The four now-unreferenced moko keys were left
+  where they are (0 code readers), because deleting a resource across 28-32 locale files is its own ruling.
+- **No snapshot baseline moved.** The rendered What's New page is the *last* entry of the array
+  (`@State currentVersion = versionDescriptions.count - 1`), and both deletions were mid-array, so neither
+  the page nor its neighbour label can change; no baseline file is named for this view. The CI `ios-sim`
+  snapshot job is the empirical check.
+- **The brand gate gained two extensions.** `*.pbxproj` and `*.entitlements` joined
+  `scripts/ci/check-brand-clean.sh`'s `--include` list, in both its greps. The premise that they match
+  nothing was wrong — they hit 11 and 2 lines — so each got a path-anchored exemption instead of an edit:
+  the `NSHumanReadableCopyright` and `SimpleX-{NSE,SE}` bundle ids and the WebRTC `repositoryURL` in
+  `project.pbxproj`, and the `applinks:*.simplex.im` associated-domain entries. `project.pbxproj` was not
+  touched, verified by sha256 before and after the builds. The includes are live, not decorative: a planted
+  `probe.entitlements` and a planted `Probe.xcodeproj/project.pbxproj` each made the gate exit 1.
+- **Census, stated as a scope.** The gate prints **1396** in a working tree and **1358** over tracked files;
+  the repo-wide raw scan is **1941 lines / 513 files**. The gap is fully itemised, with the commands, in
+  `FORK.md` § “How the brand census is measured” and summarised in `AGPL-COMPLIANCE.md` § 2.
+- **Verification.** `./scripts/ci/check-brand-clean.sh` exit 0 and `./scripts/ci/check-smp-links.sh` exit 0;
+  `xcodebuild build -scheme "POPOPX (iOS)" -destination generic/platform=iOS` → `** BUILD SUCCEEDED **`,
+  0 `error:` and 0 `warning:` in the log, with `strings` on the linked binary reading 0
+  `node.popopx.chat` and 0 `badges.simplex.chat`; `./gradlew :common:compileKotlinDesktop` → `BUILD
+  SUCCESSFUL in 1m 25s`, the only warning in the touched files being the pre-existing
+  `LocalClipboardManager` deprecation at `WhatsNewView.kt:1010`.
+
 ## v1.2.0 — 2026-11-24
 
 **POPOPX adopts independent product versioning,脱离上游 7.1.x 编号体系。**

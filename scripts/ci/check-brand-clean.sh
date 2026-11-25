@@ -20,6 +20,7 @@ grep -rnI -i "simplex" \
   --include="*.yml" --include="*.yaml" --include="*.json" --include="*.md" \
   --include="*.toml" --include="*.xml" --include="*.plist" --include="*.nix" \
   --include="*.cabal" --include="*.css" --include="*.html" --include="*.gradle.kts" \
+  --include="*.pbxproj" --include="*.entitlements" \
   --exclude-dir=.git --exclude-dir=.venv_coreml --exclude-dir=dist-newstyle \
   --exclude-dir=node_modules --exclude-dir=DerivedData --exclude-dir=.build \
   --exclude-dir=_build --exclude-dir=bots --exclude-dir=licences \
@@ -111,7 +112,9 @@ grep -vE '^\./apps/multiplatform/common/src/commonMain/kotlin/chat/popopx/common
 grep -vE '^\./apps/multiplatform/common/src/desktopTest/kotlin/chat/popopx/app/ServerOperatorsWireTest\.kt:' | \
 grep -vE '^\./apps/multiplatform/product/.*\.md:' | \
 grep -vE '^\./apps/ios/Shared/Model/AppAPITypes\.swift:.*case simplex|\.simplex:|operatorTag: \.simplex' | \
-grep -vE '^\./apps/multiplatform/common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI\.kt:.*SIMPLEX|simplex\.im' \
+grep -vE '^\./apps/multiplatform/common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI\.kt:.*SIMPLEX|simplex\.im' | \
+grep -vE '^\./apps/ios/POPOPX\.xcodeproj/project\.pbxproj:[0-9]+:.*(INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © [0-9]{4} SimpleX Chat|PRODUCT_BUNDLE_IDENTIFIER = "com\.popopxchat\.popopx\.SimpleX-(NSE|SE)"|repositoryURL = "https://github\.com/simplex-chat/)' | \
+grep -vE '^\./apps/ios/POPOPX \(iOS\)\.entitlements:[0-9]+:.*<string>applinks:\*\.simplex\.im' \
 > /tmp/brand-violations.txt || true
 
 violations=$(wc -l < /tmp/brand-violations.txt | tr -d ' ')
@@ -132,9 +135,11 @@ else
     --include="*.yml" --include="*.yaml" --include="*.json" --include="*.md" \
     --include="*.toml" --include="*.xml" --include="*.plist" --include="*.nix" \
     --include="*.cabal" --include="*.css" --include="*.html" --include="*.gradle.kts" \
+    --include="*.pbxproj" --include="*.entitlements" \
     --exclude-dir=.git --exclude-dir=.venv_coreml --exclude-dir=dist-newstyle \
     --exclude-dir=node_modules --exclude-dir=DerivedData --exclude-dir=.build \
     --exclude-dir=_build --exclude-dir=bots --exclude-dir=licences \
+    --exclude="check-brand-clean.sh" \
     . 2>/dev/null | wc -l | tr -d ' ')
   echo "✅ Brand compliance check passed."
   echo "   ($total total 'simplex' references found, all covered by exclusion patterns)"

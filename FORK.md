@@ -739,6 +739,47 @@ each was meant to become. That pass also repaired a compile break this fork ship
 - **The domains** (`simplex.chat`, `simplex.im`) and the associated-domains / universal-link
   entries, until POPOPX owns and operates its own.
 
+### How the brand census is measured
+
+Every count of "what is left" is a property of a command, not of the repository, so the command belongs
+with the number. `scripts/ci/check-brand-clean.sh` is that command; it runs in CI as the job
+`check-brand-clean` and all four build jobs list it in `needs`. It contains **two** greps over the same
+scope, and only one of them is the headline:
+
+- The **violations** grep covers 22 extensions (`*.hs`, `*.swift`, `*.kt`, `*.java`, `*.ts`, `*.js`,
+  `*.py`, `*.sh`, `*.yml`, `*.yaml`, `*.json`, `*.md`, `*.toml`, `*.xml`, `*.plist`, `*.nix`, `*.cabal`,
+  `*.css`, `*.html`, `*.gradle.kts`, plus `*.pbxproj` and `*.entitlements` added 2026-11-25), skips 9
+  directories, excludes 8 named files by `--exclude` (one of them, `TRADEMARK.md`, no longer exists in the
+  tree), and pipes what survives through **85** `grep -v` exemption filters, each of which is the record of
+  one accepted residue and why it stays. This is the one that has to print zero.
+- The **printed total** — “*N* total 'simplex' references found, all covered by exclusion patterns” — comes
+  from a second, unfiltered grep over the same extension and directory scope. It still counts the eight
+  excluded record files, so it is a coverage figure, not a count of exemptions.
+
+Measured on 2026-11-25: the script prints **1396** in this working tree, of which **1358** are in tracked
+files — 1358 is what a clean checkout reports, and the 38-line difference is `grep -r` walking ignored
+output (`packages/popopx-chat-webrtc/dist`, Gradle and Xcode build directories, `tests/tmp`). 387 files are
+scanned to produce it. The repo-wide figure is bigger, which is the reason this section exists:
+`git grep -In -i simplex | wc -l` reads **1941** lines across **513** files, and all 583 lines of difference
+are accounted for. 506 of them are file types the gate deliberately does not read — `.xliff` 366 and
+`.strings` 103 (the iOS translation catalogs and the export format the localization scripts use), 12 files
+with no extension, `.sol` 6, `.txt` 5, `.h` 4, `.desktop` 4, `.c` 3, `.m` 2, `.resolved` 1 — 21 sit inside
+its excluded directories (`licences/`, `bots/`, `dist-newstyle/`, build trees), and the last 56 are the gate
+script's own exemption patterns, which `git grep` reads and its total grep excludes by name. Of the 1358
+in-scope lines, 529 are the excluded records themselves (`CHANGELOG.md` 321, `FORK.md` 155,
+`AGPL-COMPLIANCE.md` 41, `PRIVACY-POPOPX.md` 6, `TRADEMARK-POPOPX.md` 5, `PRIVACY.md` 1, `LICENSE` 0), so
+829 lines reach the filter chain.
+
+Two consequences: the `.strings` catalogs, where shipped iOS copy actually lives, are **outside** the gate's
+scope entirely and are covered by the snapshot and localization checks instead; and a number quoted from a
+working tree is not a CI number. Re-derive:
+
+```bash
+./scripts/ci/check-brand-clean.sh          # violations, then the printed coverage total
+git grep -In -i simplex | wc -l            # 1941 lines
+git grep -Il -i simplex | wc -l            # 513 files
+```
+
 ## Trademarks and artwork — outside the AGPL grant, and inside it
 
 Clause-by-clause compliance record, including what the asset licence blocks before a release:
@@ -1318,7 +1359,8 @@ stands up the equivalent POPOPX service, together with its keys. **That change l
 rows on 2026-11-23** — the notification-servers preset and the ICE/STUN/TURN defaults moved to this
 fork's own `popopx.im` dual-stack cluster (`CHANGELOG.md`) — and they are kept below because the
 host-and-key coupling, not the hostname, is what makes them fail silently. The badge contact, the badge
-service and the directory rows are still upstream-operated.
+service and the directory rows are still upstream-operated; the badge *purchase links* left that group on
+2026-11-25 and are described by their own row below.
 
 | what it is | where | failure if the host moved alone |
 | --- | --- | --- |
@@ -1327,7 +1369,7 @@ service and the directory rows are still upstream-operated.
 | which stored relays count as "presets" | `src/Popopx/Chat.hs:102` `presetDomains = [".simplex.im"]` — `.simplexonflux.com` went with the deleted Flux operator, and `.popopx.im` is **deliberately absent**: adding it would force our port-less preset rows onto 443, where this cluster serves the web site, not SMP (see `CHANGELOG.md`) | **silent**: keyed on the host suffix, so renamed relays stop matching any stored row |
 | shared directory listing | the page that read it, `website/src/js/directory.jsc:1` (`/data/`, filter at `:149`), was deleted with `website/` on 2026-11-13; the server half is `apps/popopx-directory-service` and its `src/Directory/Listing.hs:93-96` still records the pair | **silent-empty**: the fetch fails and the page shows no results |
 | badge embed allow-list | `apps/popopx-badge-service/web/src/embed.ts:56`, inside `trustedHost` (`:46-57`) | **silent**: the widget refuses an origin outside `simplex.chat`/`.simplex.chat` and renders blank |
-| badge purchase deep links | `apps/multiplatform/common/src/commonMain/kotlin/chat/popopx/common/views/badges/BadgeStore.kt:53-54` | **visible**: leaves the app into `badges.simplex.chat` — an upstream-branded page under a POPOPX label |
+| badge purchase links | iOS `apps/ios/Shared/Views/Badges/BadgeStore.swift:36`, desktop/Android `apps/multiplatform/common/src/commonMain/kotlin/chat/popopx/common/views/badges/BadgeStore.kt:53-55` | **visible**: left `badges.simplex.chat` on 2026-11-25 for this fork's own site. iOS opens `https://popopx.chat` and reaches no payment page at all — badge purchase in the App Store build is StoreKit (`badgeProductIds` in the same file, `PopopxStoreKitManager.swift`), and a browser-out link to a page that can offer external token payment is exactly the §3.1.1 exposure this removes. Desktop and Android keep the return-hint form (`?app=true` / `?app=desktop`). Measured 2026-11-25 with `curl --noproxy '*'`: `https://popopx.chat` and both `?app=` forms answer `200` (the same 125,159-byte page). What is **not** there yet is a checkout: `popopx.chat/badge` answers `404`, and `node.popopx.chat/badge` serves the Mac Node SPA, whose bundle contains no `/badge` route and never reads `app=` — so every one of these links lands on the site, not on a purchase |
 | ICE/STUN/TURN defaults | `packages/popopx-chat-webrtc/src/call.ts:355` — one entry, `stun:stun1.popopx.im:5349`. Upstream's `turns:turn.simplex.im` line, which carried a username and a literal credential in a public repository, is deleted here along with this fork's own TURN secret; the clients' bundled defaults (`WebRTCClient.swift`, `WebRTC.swift`, `WebRTC.kt`) were changed in the same commit. A `turns` entry can still arrive through the signed-config channel, where the credential is a `cid` reference resolved server-side | **visible**: calls that need a relayed candidate fail; a STUN-only default still connects host-direct and srflx. Used only when the user configured none (`AppSettings.hs:45` `webrtcICEServers`) |
 
 One entry in that list is not a host+key pair and could be fixed without any infrastructure, so it was:

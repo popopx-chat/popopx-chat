@@ -124,6 +124,20 @@ The three groups listed in the ruling are **names**, and AGPL-3.0 imposes nothin
   counterpart), so these were our pictures under upstream's filenames — a naming problem, not §3's licence
   problem.
 
+**Measurement scope, added 2026-11-25.** Every count in this section is an occurrence census over named
+paths (`git grep`), and it is *not* the number the brand gate prints. The gate,
+`scripts/ci/check-brand-clean.sh`, reads 22 file extensions across 387 scanned files and prints a coverage
+total; the repo-wide raw scan is larger. Measured the same day: **1941** lines in **513** files repo-wide,
+of which **1358** fall inside the gate's extension and directory scope (the script prints **1396** in a
+working tree — the extra 38 lines are ignored build output, which `grep -r` but not `git grep` walks), and
+**529** of the 1358 are the record files this document and `FORK.md` and `CHANGELOG.md` are, which the gate
+excludes from its violations grep while its total grep still counts them. The 583-line gap between raw and
+gate scope is not hidden residue: 506 lines are in file types the gate does not read — `.xliff` 366 and
+`.strings` 103 above all, the iOS localization catalogs, which sit outside the gate and are checked by the
+snapshot and localization runs instead — 21 are inside its excluded directories, and 56 are the gate
+script's own exemption patterns. The full breakdown, and
+the commands that reproduce each figure, are in `FORK.md` § “How the brand census is measured”.
+
 **Conclusion for ruling 6:** the AGPL-compliance action on this residue is *none*. It stays under
 branding rulings, where the wire-audit gate decides whether a rename is safe.
 
