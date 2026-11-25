@@ -30,10 +30,10 @@ let badgeProductIds: [String] = BadgeLevel.allCases.flatMap { level in
     BadgePeriod.allCases.map { badgeProductId(level, $0) }
 }
 
-// the page's app flag rides in the fragment, which never reaches the service
-let badgePageUrl = "https://badges.simplex.chat/#/tier?app=true"
-// the dev deployment, for testing store purchases: swap with the line above
-// let badgePageUrl = "https://smp7.simplex.im/#/tier?app=true"
+// The technical display site, reachable from the badge screens. Purchases in the iOS app go
+// through StoreKit, so this link deliberately stops short of any payment page: the badge
+// portal with its external payment stays on the desktop and Android tiers only.
+let badgePageUrl = "https://popopx.chat"
 
 // where the store allows a link out to the badge page: the US for now, a set expected to widen.
 // An unknown storefront does not count, as this decides whether the store sees a link out of the app.

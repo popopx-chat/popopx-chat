@@ -48,13 +48,11 @@ val badgeProductIds: Set<String> = badgeStoreProductIds.map { it.productId }.toS
 // neither, as the service acknowledges it when it credits it, and Play refunds it if it never does
 val badgeOneTimeProductIds: Set<String> = badgeStoreProductIds.filter { it.basePlanId == null }.map { it.productId }.toSet()
 
-// the page's app flag rides in the fragment, which never reaches the service
+// POPOPX's own site. The app flag is a query parameter here, so unlike upstream's
+// `#/tier?app=…` fragment it does reach the host.
 fun badgePageUrl(linkReturns: Boolean): String =
-  if (linkReturns) "https://badges.simplex.chat/#/tier?app=true"
-  else "https://badges.simplex.chat/#/tier?app=desktop"
-// the dev deployment, for testing store purchases: swap with the two lines above
-// if (linkReturns) "https://smp7.simplex.im/#/tier?app=true"
-// else "https://smp7.simplex.im/#/tier?app=desktop"
+  if (linkReturns) "https://popopx.chat?app=true"
+  else "https://popopx.chat?app=desktop"
 
 // where the store allows a link out to the badge page: the US for now, a set expected to widen.
 // An unknown country does not count, as this decides whether the store sees a link out of the app.
