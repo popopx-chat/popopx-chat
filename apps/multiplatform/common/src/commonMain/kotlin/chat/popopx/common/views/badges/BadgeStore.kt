@@ -48,11 +48,29 @@ val badgeProductIds: Set<String> = badgeStoreProductIds.map { it.productId }.toS
 // neither, as the service acknowledges it when it credits it, and Play refunds it if it never does
 val badgeOneTimeProductIds: Set<String> = badgeStoreProductIds.filter { it.basePlanId == null }.map { it.productId }.toSet()
 
-// POPOPX's own site. The app flag is a query parameter here, so unlike upstream's
-// `#/tier?app=…` fragment it does reach the host.
+// POPOPX's own site, the one place its address is spelled. The app flag is a query parameter, so
+// unlike upstream's `#/tier?app=…` fragment it does reach the host.
+const val badgeSiteUrl = "https://popopx.chat"
+
 fun badgePageUrl(linkReturns: Boolean): String =
-  if (linkReturns) "https://popopx.chat?app=true"
-  else "https://popopx.chat?app=desktop"
+  if (linkReturns) "$badgeSiteUrl?app=true"
+  else "$badgeSiteUrl?app=desktop"
+
+// The payment exit of the Android build that has no Play Billing lane. It is the site page until the
+// bot exists: replacing this single line with a payment address also switches the button label, and
+// any scheme works because the value is opened as it stands.
+const val ANDROID_FOSS_PAYMENT_URL = badgeSiteUrl
+
+// Whether the configured foss exit has moved past the site page.
+fun fossPaymentIsCheckout(): Boolean = ANDROID_FOSS_PAYMENT_URL != badgeSiteUrl
+
+// Only the Android build without Play Billing takes the payment exit. Desktop is excluded here, and
+// iOS never compiles this file, so neither can follow the exit when it changes.
+fun androidFossPaymentLane(): Boolean = appPlatform.isAndroid && !platform.androidHasPlatformStore
+
+// `androidFoss` is a parameter so the branch is testable on the desktop target that runs the suite.
+fun badgePaymentUrl(linkReturns: Boolean, androidFoss: Boolean = androidFossPaymentLane()): String =
+  if (androidFoss) ANDROID_FOSS_PAYMENT_URL else badgePageUrl(linkReturns)
 
 // where the store allows a link out to the badge page: the US for now, a set expected to widen.
 // An unknown country does not count, as this decides whether the store sees a link out of the app.

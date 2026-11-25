@@ -150,13 +150,14 @@ private fun BuyInBrowserTextButton() {
 @Composable
 private fun BuyInBrowserButton(modalManager: ModalManager, unwindToDepth: Int) {
   val uriHandler = LocalUriHandler.current
+  val foss = androidFossPaymentLane()
   OnboardingActionButton(
     modifier = if (appPlatform.isAndroid) Modifier.padding(horizontal = DEFAULT_ONBOARDING_HORIZONTAL_PADDING).fillMaxWidth() else Modifier.widthIn(min = 300.dp),
-    labelId = MR.strings.badges_buy_in_browser,
+    labelId = if (foss && fossPaymentIsCheckout()) MR.strings.badges_pay_with_tokens else MR.strings.badges_buy_in_browser,
     onboarding = null,
     onclick = {
       val linkReturns = appLinkSchemeRegistered()
-      uriHandler.openUriCatching(badgePageUrl(linkReturns))
+      uriHandler.openUriCatching(badgePaymentUrl(linkReturns, foss))
       // with no scheme to bring the code back, the code is pasted into this screen, opened beside the browser
       if (!linkReturns && !modalManager.hasModalOpen(ModalViewId.BADGE_REDEEM_CODE)) {
         modalManager.showModal(id = ModalViewId.BADGE_REDEEM_CODE) { BadgesRedeemCodeView(modalManager, unwindToDepth) }

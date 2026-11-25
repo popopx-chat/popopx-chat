@@ -3215,6 +3215,7 @@
   <string name="badges_waiting_for_approval_body">Nothing has been charged.</string>
   <string name="badges_checking_purchases_title">Checking your purchases</string>
   <string name="badges_buy_in_browser">Buy in browser</string>
+  <string name="badges_pay_with_tokens">Pay with BTC or USDT</string>
   <string name="badges_redeem_code_title">Redeem code</string>
   <string name="badges_link_confirm_title">Add badge to your profile?</string>
   <string name="badges_link_confirm_profile">The badge will be added to the profile %1$s.</string>
