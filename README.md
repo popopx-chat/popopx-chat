@@ -164,9 +164,15 @@ Measured 2026-11-25 with `dig` and an HTTP status probe. All four resolve to `43
 | Portal | `https://mp.popopx.chat/` | Service accounts and channel ecosystem |
 | Bot Studio | `https://bot.popopx.chat/` | Running your own bots against a server you control |
 
-`https://popopx.chat/security/`, `https://popopx.chat/privacy`, `https://popopx.chat/terms` and every
-`/docs/…` path answer **404** today: that content was removed from the site, so **the policies are the
-files in this repository**, not pages. `popopx.chat` publishes **no MX record** (measured the same day).
+The site does not host policy pages; since 2026-11-25 it **redirects** them into this repository
+(measured with `curl -o /dev/null -w '%{http_code} -> %{redirect_url}' https://popopx.chat<path>`,
+direct egress — `curl --noproxy '*'` — because the local proxy drops some of these hosts):
+`/privacy`, `/privacy/`, `/security` and `/security/` all answer **301 →
+`https://github.com/popopx-chat/popopx-chat/blob/master/PRIVACY.md`**. `/terms` and `/terms/` answer
+**301 → `https://github.com/`**, which serves no terms text: the license is this repository's own
+[`LICENSE`](./LICENSE), and the policies are the files in this tree, not pages. `/node`, `/docs/simplex.html`,
+`/docs/upstream-disclaimer.html` and every other `/docs/…` path still answer **404**, and `popopx.chat`
+publishes **no MX record** (measured the same day).
 
 ### Official POPOPX addresses
 
@@ -276,7 +282,7 @@ again:
 - **POPOPX (this fork).** The POPOPX and POPOPX Chat name, the wordmark, the logo and the icons derived
   from it, and the `popopx.chat` domain are not licensed to anyone by this document and are subject to
   [TRADEMARK-POPOPX](./TRADEMARK-POPOPX.md). The artwork this fork created is licensed, not reserved:
-  [ASSETS_LICENSE-POPOPX](./ASSETS_LICENSE-POPOPX.md). It licenses only what this fork drew — it cannot
+  [ASSETS_LICENSE](./ASSETS_LICENSE.md). It licenses only what this fork drew — it cannot
   and does not release the upstream-identical files listed there.
 
 **If you fork this repository and distribute it, rebrand.** You keep every right AGPLv3 gives you over

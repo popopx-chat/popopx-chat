@@ -6,6 +6,12 @@ paths whose name contains "simplex") has to be dealt with as AGPL-3.0 actually r
 that reading, clause by clause, with the evidence in this checkout. It is a working compliance record,
 not legal advice.
 
+> **File consolidated 2026-11-25.** This record was `AGPL-COMPLIANCE-POPOPX.md` until that date; the
+> suffix-less name is now the only one, and `ASSETS_LICENSE.md` moved the same way. The dated
+> re-measurements below stay exactly as they were taken; where they name `POPOPX-REBRAND-PLAN.md` (which
+> entered the index as `73f453f6b`) they describe a file deleted on 2026-11-25, so that path is part of
+> the record, not a pointer to chase.
+
 > **Re-measured 2026-11-13**, because those four figures are claims about this tree and the tree moved
 > since (`docs/ website/ blog/ plans/` left in `9996634ee`, the libs asset family moved in `3591a7eba`):
 > `simplexChatCore` **32 occurrences / 15 files**, `simplex-chat-nodejs` **23** (of which 4 are the
@@ -53,14 +59,14 @@ The three groups listed in the ruling are **names**, and AGPL-3.0 imposes nothin
   `src/Popopx/Chat/Core.hs` and 11 across its 8 callers (the CLI `Terminal.hs` / `Terminal/Main.hs`, the
   server `apps/popopx-chat/Server.hs` and the four service/bot entries) — 1 call in
   `tests/Bots/BroadcastTests.hs`, 1 sentence in `apps/popopx-badge-service/web/README.md`, and 4 lines
-  recording this split in this file and in `CHANGELOG-POPOPX.md`. Renaming an exported library identifier
+  recording this split in this file and in `CHANGELOG.md`. Renaming an exported library identifier
   changes the API for anything importing `Popopx.Chat.Core` from this fork, so it was kept out of the
   scripting commit and given its own pass
   with `cabal build` over the library and all eight executables as the gate. AGPL neither requires nor
   forbids either move.
 
   **That pass ran on 2026-11-15 (ruling A+D 执行)**: after it, the only mentions of the old spelling left in
-  the tree were 6, in these two record files (4 here, 2 in `CHANGELOG-POPOPX.md`) - no code, resource or
+  the tree were 6, in these two record files (4 here, 2 in `CHANGELOG.md`) - no code, resource or
   script reads `simplexChatCore`, and raising that count again is a documentation act rather than a missed reader.
   `popopxChatCore` is **33 occurrences / 16 files**: 13 of them the JSON field (`scripts/ci/test_packages_release.py` 9, `scripts/ci/packages_release.py` 3, `package.json` 1) and 15
   the Haskell identifiers this pass moved (9 files), the rest being the test call, the badge-service README
@@ -162,7 +168,7 @@ A rebranded fork is a modified work. Therefore:
      `extra-extra-extra-large`, filenames unchanged. Re-measured 2026-11-15: **374** PNGs are there (two left with the crowdfunding
      views), **130 byte-identical** to upstream's, 242 differing, 2 with no counterpart under any name. The
      clause this entry used to end with — "an unchanged PNG is not a copied one, they were all written by this
-     repo's run" — is **withdrawn**. It was the argument `NOTICE` and `ASSETS_LICENSE-POPOPX.md` used to claim
+     repo's run" — is **withdrawn**. It was the argument `NOTICE` and `ASSETS_LICENSE.md` used to claim
      files that no downstream user can tell apart from upstream's by any test they can run, which is exactly
      the over-claim ruling AGPL-2 exists to remove: those 130 are upstream's for licence purposes, the 244
      are ours.
@@ -183,7 +189,7 @@ A rebranded fork is a modified work. Therefore:
      `apps/multiplatform/common/src/commonMain/moko-resources/images/**` held the last upstream-drawn
      artwork that compiles into the desktop and Android apps — `decentralized` + `decentralized_light`
      @1x–@4x, `privacy` + `shield` @1x–@4x, the 6 `wallpaper_*@4x` tiles and the 3 `badge_*.svg`. Measured
-     with the recipe in `ASSETS_LICENSE-POPOPX.md`: 29 non-`ic_*` files were upstream's before, **0 after**.
+     with the recipe in `ASSETS_LICENSE.md`: 29 non-`ic_*` files were upstream's before, **0 after**.
      Names, pixel sizes, the `*_light` = `logoDarkMode` mapping (`PopopxAPI.kt:4783`) and the badges'
      intrinsic 300x399 are unchanged; the palette is sampled from the iOS app icon and the geometry is the
      iOS set's, so one named picture is one picture on both platforms. Vector masters:
@@ -198,7 +204,7 @@ A rebranded fork is a modified work. Therefore:
      `b6a3ee009` at the same names and intrinsic sizes; the heart keeps the measured colour `#E72E31` and was
      matched on apparent size (bbox 196x194 / 26838 opaque px against upstream's 200x198 / 26443), and the
      bars are drawn nested so N bars is an element-wise prefix of N+1, which is what the dim-4/lit-N overlay
-     needs. The three named holds are recorded with their reasons in `ASSETS_LICENSE-POPOPX.md`.
+     needs. The three named holds are recorded with their reasons in `ASSETS_LICENSE.md`.
    - ~~`website/src/img/**` (the wordmark images, screenshots, illustrations, `SimpleXExplainedLottie.json`)
      and the 93 tracked files under `assets/**`, if this fork's website ships them~~ **closed 2026-11-13,
      both halves**: `website/` left the fork in `9996634ee`, so its images are not shipped by anything here;
@@ -217,7 +223,7 @@ documentation: `assets/multiplatform/resources/MR/images/**` (80 rasters, 40 nam
 the app by `-Ppopopx.assets.dir=../../assets`, which every desktop/Android build and CI job passes
 (`desktop-linux.yml:251,277`, `build.yml:1649`, `android-emu.yml:276`, `scripts/{desktop,android}/*`), so
 upstream's illustrations compile into a POPOPX-branded app. They are being redrawn from POPOPX masters;
-the 40 logical images behind the 80 replaced rasters are listed in `ASSETS_LICENSE-POPOPX.md`, which also records
+the 40 logical images behind the 80 replaced rasters are listed in `ASSETS_LICENSE.md`, which also records
 that the file *names* stay (they are compiled `MR.images.*` resource identifiers) while the bytes change.
 The companion directory `apps/multiplatform/common/src/commonMain/resources/assets/default/MR/images/**`
 (42 vectors) needs nothing: measured, every one of them is a 24x24 empty placeholder
@@ -232,12 +238,12 @@ property is absent — upstream's artwork was never in that directory, only its 
 - Whether POPOPX may *ask permission* for the artwork (the licence allows use "with prior written
   permission from SimpleX Chat Ltd") — a business decision, not a code one. **Narrowed 2026-11-16:**
   this item was written while this fork's own artwork was held under the same restrictive terms, so it
-  covered both sides. It no longer covers ours — `ASSETS_LICENSE-POPOPX.md` §"The grant" releases it
+  covered both sides. It no longer covers ours — `ASSETS_LICENSE.md` §"The grant" releases it
   outright, and there is nothing left for us to license by permission. It is still live for the files
   measured byte-identical to upstream's, whose licence is SimpleX Chat Ltd's to interpret.
 - ~~`docs/TRADEMARK.md` is upstream's policy; the fork's own trademark position is not written yet.~~
   **Written 2026-11-13**: `TRADEMARK-POPOPX.md` (marks, asserted as unregistered/common-law) and
-  `ASSETS_LICENSE-POPOPX.md` ~~(the artwork this fork created, proprietary, no redistribution without
+  `ASSETS_LICENSE.md` ~~(the artwork this fork created, proprietary, no redistribution without
   written permission)~~ — **corrected 2026-11-16**: that parenthetical described the file as it read on
   the day it was written, and the ruling it recorded is withdrawn. The same file now licenses the
   artwork this fork created under **AGPL-3.0-only, or at the recipient's option CC0-1.0**, because a

@@ -24,9 +24,9 @@ grep -rnI -i "simplex" \
   --exclude-dir=node_modules --exclude-dir=DerivedData --exclude-dir=.build \
   --exclude-dir=_build --exclude-dir=bots --exclude-dir=licences \
   --exclude="LICENSE" --exclude="FORK.md" --exclude="CHANGELOG.md" \
-  --exclude="CHANGELOG-POPOPX.md" --exclude="PRIVACY.md" --exclude="PRIVACY-POPOPX.md" \
+  --exclude="PRIVACY.md" --exclude="PRIVACY-POPOPX.md" \
   --exclude="TRADEMARK.md" --exclude="TRADEMARK-POPOPX.md" \
-  --exclude="AGPL-COMPLIANCE.md" --exclude="AGPL-COMPLIANCE-POPOPX.md" \
+  --exclude="AGPL-COMPLIANCE.md" \
   --exclude="NODE-PACKAGES-POPOPX.md" \
   --exclude="check-brand-clean.sh" \
   . 2>/dev/null | \
@@ -81,8 +81,6 @@ grep -vE '^\./scripts/desktop/build-lib-.*\.sh:.*lib:simplex-chat' | \
 grep -vE '^\./scripts/ios/(download-libs|export-localizations|import-localizations)' | \
 grep -vE '^\./scripts/ios/(localizations|test_localizations)\.py:' | \
 grep -vE '^\./scripts/ci/preset-domain-invariant\.py:' | \
-grep -vE '^\./POPOPX-REBRAND-PLAN\.md:' | \
-grep -vE '^\./ASSETS_LICENSE-POPOPX\.md:' | \
 grep -vE '^\./apps/ios/(spec|Docs|safe_prompt.*\.md|product/views|POPOPX\.xcodeproj/xcuserdata)' | \
 grep -vE '^\./apps/multiplatform/spec/' | \
 grep -vE '\.xcschememanagement\.plist:' | \

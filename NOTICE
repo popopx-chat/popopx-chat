@@ -78,7 +78,7 @@ is part of the AGPL grant from 2026-11-16: AGPL-3.0-only, or at the recipient's
 option CC0-1.0. What is byte-identical to upstream's is not part of any grant this
 fork can give; the brand-bearing sets were replaced with this fork's own artwork
 during 2026-11-13 and 2026-11-15, and what is still upstream's is listed in
-ASSETS_LICENSE-POPOPX.md and stays under assets/ASSETS_LICENSE.md.
+ASSETS_LICENSE.md and stays under assets/ASSETS_LICENSE.md.
 
 "SimpleX", "SimpleX Chat" and the associated logos are trademarks of SimpleX Chat
 Ltd. This fork uses the name POPOPX for that reason; no affiliation, sponsorship
@@ -97,16 +97,16 @@ POPOPX-side notices, one per right this fork holds:
     snapshot renders, and every image that differs from the imported tree or has
     no counterpart in it. Provenance is the bytes, compared with the blob at the
     same path in db0768c21, or at upstream's name for that path where this fork
-    renamed it. Measured 2026-11-16 with the recipe in ASSETS_LICENSE-POPOPX.md: of 1565
+    renamed it. Measured 2026-11-16 with the recipe in ASSETS_LICENSE.md: of 1565
     tracked image files, 918 are ours (563 differing from the file at the corresponding
     upstream path, 355 with no counterpart there) and 647 are still byte-identical to
     SimpleX Chat Ltd's - those are NOT claimed here, they stay under
     assets/ASSETS_LICENSE.md with upstream as their owner, and a file that merely sits
     under a popopx-* package directory is one of them. An earlier revision of this notice
     read "1527 tracked, 837 ours, 690 upstream's"; that was the same-path-only comparison
-    taken before the last artwork commits, and it is the count ASSETS_LICENSE-POPOPX.md
+    taken before the last artwork commits, and it is the count ASSETS_LICENSE.md
     replaced. The 918 are licensed on the same terms as the code - AGPL-3.0-only, or, at
-    the recipient's option, CC0-1.0. Licence: ASSETS_LICENSE-POPOPX.md
+    the recipient's option, CC0-1.0. Licence: ASSETS_LICENSE.md
     Until 2026-11-16 this block read "Copyright (C) 2026 POPOPX. All rights
     reserved." and said these files were not part of the AGPL grant and "may not
     be redistributed in another project's distribution, modified or unmodified,

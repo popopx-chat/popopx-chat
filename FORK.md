@@ -3,6 +3,12 @@
 > This file is the "prominent notice of modification" required by
 > [AGPL-3.0 §5c](./LICENSE) and AGPL-3.0 §7 attribution note. It is not part of the
 > AGPL text and does not modify it.
+>
+> **Files consolidated 2026-11-25.** `POPOPX-REBRAND-PLAN.md` was deleted, `CHANGELOG-POPOPX.md` became
+> [`CHANGELOG.md`](./CHANGELOG.md), and `ASSETS_LICENSE-POPOPX.md` / `AGPL-COMPLIANCE-POPOPX.md` became
+> [`ASSETS_LICENSE.md`](./ASSETS_LICENSE.md) and [`AGPL-COMPLIANCE.md`](./AGPL-COMPLIANCE.md). Dated
+> sentences below that name an old path record the tree as it stood on their own date; they are not live
+> pointers. The one figure that has since moved is re-measured in `CHANGELOG.md`'s header.
 
 **POPOPX Chat is a non-official, modified fork of SimpleX Chat.** It is not affiliated with,
 sponsored by, or endorsed by SimpleX Chat Ltd.
@@ -178,8 +184,8 @@ summary:
     product documentation, announcements, roadmap notes and the simplex.chat site front-end. None of it
     describes POPOPX, and the fork's own notices already disclaimed it. The one fork-authored file that
     lived inside them, `docs/TRADEMARK-POPOPX.md`, was moved out first and is now `TRADEMARK-POPOPX.md`
-    at the root; every citation of it in `NOTICE`, `README.md`, `AGPL-COMPLIANCE-POPOPX.md` and
-    `ASSETS_LICENSE-POPOPX.md` follows. `assets/` was deliberately NOT removed with them: it is a gradle
+    at the root; every citation of it in `NOTICE`, `README.md`, `AGPL-COMPLIANCE.md` and
+    `ASSETS_LICENSE.md` follows. `assets/` was deliberately NOT removed with them: it is a gradle
     build input (`-Ppopopx.assets.dir`, verified by `verifyPopopxAssets`), so deleting it would change
     the artwork compiled into the Android and desktop apps rather than trim prose.
 
@@ -306,7 +312,7 @@ each was meant to become. That pass also repaired a compile break this fork ship
     `for c in f2a262472 5932bccee bb6a7c4ca a77fe94dd 57b8a0bb3; do git show $c -U0 --format='' | grep '^-'; done | grep -o 'SimpleX link' | wc -l`
     reads **59**. The residue is smaller than 64 − 59 because three of those five were this fork's own record
     quoting the phrase to explain the ruling: `git grep -o 'SimpleX link' a77fe94dd` lists 5, and the same
-    command with `':!CHANGELOG-POPOPX.md'` added leaves the 2 that are genuinely held — `CHANGELOG.md:205` and
+    command with `':!CHANGELOG.md'` added leaves the 2 that are genuinely held — `CHANGELOG.md:205` and
     `scripts/flatpak/com.popopxchat.popopx.metainfo.xml:344`, both upstream release notes this fork does not
     author (today the whole family reads 10 in 4 files, 8 of them records quoting it). The five commits:
     `f2a262472` the
@@ -357,7 +363,7 @@ each was meant to become. That pass also repaired a compile break this fork ship
     function name in `popopxmq`.
 
 15. **This fork's own artwork was relicensed; the names and upstream's art were not** (2026-11-16) —
-    `ASSETS_LICENSE-POPOPX.md` now licenses the images whose bytes this fork wrote under
+    `ASSETS_LICENSE.md` now licenses the images whose bytes this fork wrote under
     **AGPL-3.0-only, or at the recipient's option CC0-1.0**, and the 双轨制 ruling it
     replaced — code free, brand *and artwork* proprietary, on the Firefox/WordPress/SimpleX model — is
     withdrawn. The reason is not generosity, it is that the old position could not be held: a fork
@@ -377,10 +383,10 @@ each was meant to become. That pass also repaired a compile break this fork ship
     so the standing advice that a fork must not carry them is unchanged. What *is* changed is the second
     half of that advice: a fork is still compelled to rebrand, still cannot carry upstream's drawings,
     and is no longer compelled by this repository's copyright to redraw ours. Updated in the same pass,
-    each carrying the date and what it used to say: `ASSETS_LICENSE-POPOPX.md` (the grant itself, first),
+    each carrying the date and what it used to say: `ASSETS_LICENSE.md` (the grant itself, first),
     `NOTICE`, `README.md` (top blockquote and §License), `TRADEMARK-POPOPX.md`,
-    `AGPL-COMPLIANCE-POPOPX.md` §4 as a dated correction rather than a deletion, this file's
-    §"Trademarks and artwork", `branding/source-svg/README.md` and `CHANGELOG-POPOPX.md`.
+    `AGPL-COMPLIANCE.md` §4 as a dated correction rather than a deletion, this file's
+    §"Trademarks and artwork", `branding/source-svg/README.md` and `CHANGELOG.md`.
 
 16. **The dependency's branded key-derivation labels were reverted, and the dependency then reverted
     that revert; a labelled build is a build that does not talk to the network** (2026-11-17; the brand is
@@ -623,21 +629,21 @@ each was meant to become. That pass also repaired a compile break this fork ship
   and `git grep -c 'Copyright (C) 2026 SimpleX Chat Ltd'` reads one in each), and so are the company-name
   references in the privacy, licence and legal texts — that count is a command:
   `git grep -o 'SimpleX Chat Ltd' -- PRIVACY.md PRIVACY-POPOPX.md LICENSE NOTICE TRADEMARK-POPOPX.md
-  AGPL-COMPLIANCE-POPOPX.md ASSETS_LICENSE-POPOPX.md assets/ASSETS_LICENSE.md | wc -l` reads **58** (41 of
+  AGPL-COMPLIANCE.md ASSETS_LICENSE.md assets/ASSETS_LICENSE.md | wc -l` reads **58** (41 of
   them in `PRIVACY.md`, and 0 in `LICENSE`, which names the licence rather than the licensee), and
   repo-wide **134**; the "~78" first printed here does not reproduce under either. AGPL-3.0 §7 requires the
   retention (and §4 forbids removing it). It used to add "this codebase carries no
   per-file copyright headers, so there is nothing else to preserve" - that is false, and since 2026-11-15 the
   headers are preserved: `git grep -l 'Modifications Copyright © 2026 POPOPX Chat' | wc -l` reads **299** on
   tip `012ec8373` — 222 Swift, 69 `.strings`, 4 `.h`, 2 `.m`, and 2 `.md` that are records quoting the line
-  (`AGPL-COMPLIANCE-POPOPX.md` and this file), which is why this item printed 297 (222+69+4+2) and why a
+  (`AGPL-COMPLIANCE.md` and this file), which is why this item printed 297 (222+69+4+2) and why a
   recount taken after reading this sentence runs higher. All 299 also carry upstream's holder line above the
   POPOPX one (`Copyright © <year> SimpleX Chat. All rights reserved.`), which is what the rule preserves. The
   user-visible copyright strings are 62 `NSHumanReadableCopyright` keys in `.strings` and 32 in the `.xliff`
   catalogs — `git grep -o 'NSHumanReadableCopyright' -- '*.strings' '*.xliff' | wc -l` reads **94** here and
   read 94 at `e3652ffc5` too, so the "116 (62 `.strings`, 54 catalog entries)" this item printed does not
   reproduce and the stable facts are the 62 files and the rule: those strings stay POPOPX on purpose, because
-  that string names the bundle we ship. See `AGPL-COMPLIANCE-POPOPX.md` §5.
+  that string names the bundle we ship. See `AGPL-COMPLIANCE.md` §5.
 - **Upstream GitHub URLs**, and the dependency references that are not ours to claim — *this bullet
   describes the state before 2026-11-13: the `docs/**`, `plans/**`, `blog/**` and `website/**` paths named
   below were removed by item 10 above, so what remains of this class is the `CHANGELOG.md` /
@@ -707,12 +713,12 @@ each was meant to become. That pass also repaired a compile break this fork ship
   format as understood on the public network, upstream social accounts. An identifier that
   names something belonging to upstream keeps upstream's name, or it stops resolving.
   Measured again on 2026-11-16 for the last two spelling families, with the measuring command in the
-  sentence: `git grep -l 'simplex:/' -- ':!FORK.md' ':!CHANGELOG-POPOPX.md'` reads **four** files and four
+  sentence: `git grep -l 'simplex:/' -- ':!FORK.md' ':!CHANGELOG.md'` reads **four** files and four
   occurrences - `POPOPX-REBRAND-PLAN.md` (the question asked *about* it),
   `CHANGELOG.md`, `PRIVACY.md` (upstream's sentence about replacing the initial part of an old
   link) and `.github/ISSUE_TEMPLATE/question.yml`, where it sits inside a working upstream
   invitation URL; none of the four is code, which is why the hold reads as complete. The same command with no
-  exclusions reads 13 occurrences in 6 tracked files - the surplus is this file and `CHANGELOG-POPOPX.md`
+  exclusions reads 13 occurrences in 6 tracked files - the surplus is this file and `CHANGELOG.md`
   spelling the old prefix inside the rulings that keep it, and this sentence quotes it again, so a recount
   taken after reading it runs higher than 13. Take the exclusion form as the answer to "where does it still
   survive", and the bare form as the answer to "how much of the tree is record". And `@directory.simplex` (17 occurrences across the MCP package's `PLAN.md`,
@@ -736,13 +742,13 @@ each was meant to become. That pass also repaired a compile break this fork ship
 ## Trademarks and artwork — outside the AGPL grant, and inside it
 
 Clause-by-clause compliance record, including what the asset licence blocks before a release:
-[`AGPL-COMPLIANCE-POPOPX.md`](./AGPL-COMPLIANCE-POPOPX.md).
+[`AGPL-COMPLIANCE.md`](./AGPL-COMPLIANCE.md).
 
 Two things in this repository are **not** licensed to you by anything here, and a text substitution
 does not change that: the **names**, in both projects, because a trade mark is not conveyed by a
 copyright licence, and **upstream's artwork**, because this fork never held it to grant. What this fork
 drew is a third thing, and since 2026-11-16 it is inside the grant — AGPL-3.0-only, or CC0-1.0 at the
-recipient's option, per [`ASSETS_LICENSE-POPOPX.md`](./ASSETS_LICENSE-POPOPX.md) and item 15 above.
+recipient's option, per [`ASSETS_LICENSE.md`](./ASSETS_LICENSE.md) and item 15 above.
 
 - **Trademarks.** "SimpleX", "SimpleX Chat" and the associated logos are trademarks of
   SimpleX Chat Ltd; see [their `docs/TRADEMARK.md`](https://github.com/simplex-chat/simplex-chat/blob/stable/docs/TRADEMARK.md)
@@ -757,7 +763,7 @@ recipient's option, per [`ASSETS_LICENSE-POPOPX.md`](./ASSETS_LICENSE-POPOPX.md)
   moko build-input illustrations, and (2026-11-13) the last upstream files in the iOS catalog: the
   crowdfunding badges, the chat wallpapers, `privacy` and `shield`. Any regenerated snapshot
   baselines are POPOPX Chat work product. What remains of upstream's artwork is documentation and
-  website imagery, measured in [`ASSETS_LICENSE-POPOPX.md`](./ASSETS_LICENSE-POPOPX.md).
+  website imagery, measured in [`ASSETS_LICENSE.md`](./ASSETS_LICENSE.md).
   The redraw was compelled by upstream's licence, and that compulsion is unchanged; what changed on
   2026-11-16 is our half of the result, now licensed (AGPL-3.0-only, or CC0-1.0 at your option). So a
   fork is no longer required by this repository's copyright to draw its own pictures — it is still
@@ -767,10 +773,13 @@ recipient's option, per [`ASSETS_LICENSE-POPOPX.md`](./ASSETS_LICENSE-POPOPX.md)
 
 This fork is published by **POPOPX**, contact **chat@popopx.chat** — see
 [`PRIVACY-POPOPX.md`](./PRIVACY-POPOPX.md). The two documents that exist because the fork needs its
-own statements are [`PRIVACY-POPOPX.md`](./PRIVACY-POPOPX.md) (this fork's privacy statement,
-upstream's [`PRIVACY.md`](./PRIVACY.md) untouched) and
-[`CHANGELOG-POPOPX.md`](./CHANGELOG-POPOPX.md) (this fork's release record, upstream's
-[`CHANGELOG.md`](./CHANGELOG.md) untouched).
+own statements are [`PRIVACY-POPOPX.md`](./PRIVACY-POPOPX.md) (the companion record: who operates
+what, and the measurement behind each claim) and [`PRIVACY.md`](./PRIVACY.md), which since 2026-11-25
+is **POPOPX's own** policy rather than upstream's text — that rewrite is `9e1ab7c80`, and the file it
+replaced is `git show 056aff908:PRIVACY.md`. The release record is
+[`CHANGELOG.md`](./CHANGELOG.md): this fork's history, which on 2026-11-25 was renamed from
+`CHANGELOG-POPOPX.md` and replaced upstream's file of that name
+(`git show 056aff908:CHANGELOG.md`).
 
 What remains below is not an undecided attribution — it is infrastructure this fork does not have
 yet. Before any build of this fork is distributed:
@@ -813,7 +822,7 @@ yet. Before any build of this fork is distributed:
   **deleted** (the element has no label slot, so a store renders upstream's channel as "donate to POPOPX"),
   the donation section keeps upstream's own text and wallets under a heading that names them as theirs, and
   the F-Droid, TestFlight, downloads, release, Reddit and Mastodon badges were removed - see
-  `CHANGELOG-POPOPX.md`, "The front page stops recruiting, funding or identifying for SimpleX Chat Ltd".
+  `CHANGELOG.md`, "The front page stops recruiting, funding or identifying for SimpleX Chat Ltd".
   Still upstream's on purpose: the flatpak release-tag links, and any link whose target only exists in
   upstream's history. The three holders that pass measured but did not touch - because it grepped badge
   strings instead of the class - are executed now: `README.md`'s "We publish our updates and releases via:"
@@ -841,7 +850,7 @@ yet. Before any build of this fork is distributed:
   SimpleX Chat Ltd's uptime, no-third-party-access and no-IP-logging claims as this fork's own. Each
   now says whose infrastructure it is and routes POPOPX questions to the issue tracker. Gates, each
   excluding the two records that quote the strings they count - a record otherwise measures itself:
-  `git grep -n 'POPOPX Messaging Protocol' -- . ':!FORK.md' ':!CHANGELOG-POPOPX.md'` → 0 (the protocol's name is upstream's),
+  `git grep -n 'POPOPX Messaging Protocol' -- . ':!FORK.md' ':!CHANGELOG.md'` → 0 (the protocol's name is upstream's),
   `git grep -n 'our servers' -- apps/multiplatform/desktop scripts/flatpak fastlane` → 0,
   `git grep -n '99\.9\|never provided or have been requested\|do not log IP' -- README.md` → 0.
   What remains held is the four `HOLD (task #66)` contact entries above, which move only when POPOPX
@@ -862,7 +871,7 @@ yet. Before any build of this fork is distributed:
   tags on 2026-11-16 (tip `012ec8373`), and `packages_release.py:608` (`libs_repository()`) asks that same
   repository by default, so the 404 this
   sentence described is closed at the host. What 404ed was the **name**: `3591a7eba` renamed the asset keys —
-  `git grep -o 'popopx-chat-libs-\|popopx-chat-nodejs-' -- ':!FORK.md' ':!CHANGELOG-POPOPX.md' ':!POPOPX-REBRAND-PLAN.md' | wc -l`
+  `git grep -o 'popopx-chat-libs-\|popopx-chat-nodejs-' -- ':!FORK.md' ':!CHANGELOG.md'  | wc -l`
   reads **52** occurrences in 12 files today (44 when first written; the set grew with the mirrors, and this
   paragraph quotes the prefix, so a recount taken after reading it runs higher) —
   `packages_release.py:103-108`+`:118`, the two fetchers `_native.py:92-96`/`libs.ts:68,72`, both pin
@@ -1105,12 +1114,12 @@ yet. Before any build of this fork is distributed:
     Measured on tip `012ec8373` (2026-11-16), `git grep -o 'PDBA6XRBQT' | wc -l` reads **17** occurrences in 7
     files — but this paragraph quotes the string it counts, so a recount taken after reading it runs higher.
     The code side is a command of its own,
-    `git grep -o 'PDBA6XRBQT' -- ':!FORK.md' ':!CHANGELOG-POPOPX.md' ':!POPOPX-REBRAND-PLAN.md' | wc -l`: **6**
+    `git grep -o 'PDBA6XRBQT' -- ':!FORK.md' ':!CHANGELOG.md'  | wc -l`: **6**
     occurrences in 4 files — `KeyChain.swift:14` (the
     keychain access group), `project.pbxproj:2137` and `:2201` (`DEVELOPMENT_TEAM`),
     `build-desktop-mac.sh:8,10` and `sign-libs-mac.sh:6` (both defaulting to it, both overridable by
     `APPLE_POPOPX_NOTARIZATION_TEAM_ID`) — and the other 11 are the three records naming it (6 lines here,
-    3 in `CHANGELOG-POPOPX.md`, 2 in `POPOPX-REBRAND-PLAN.md`). In the dependency it is 3 files: the AASA,
+    3 in `CHANGELOG-POPOPX.md` (now `CHANGELOG.md`), 2 in `POPOPX-REBRAND-PLAN.md` (deleted 2026-11-25)). In the dependency it is 3 files: the AASA,
     `src/Popopx/Messaging/Notifications/Server/Push/APNS.hs:215` (`appTeamId`) and
     `Push/testpush.sh:3` (`TEAM_ID`). The earlier "three places across two files" counted this tree alone, at
     a moment when its own AASA copy was still in it. All of them must agree with whatever certificate actually
@@ -1229,12 +1238,12 @@ yet. Before any build of this fork is distributed:
   links, the transport-isolation description's inline link, the badges "read more in our blog" row and 39
   flatpak release URLs. Three of the four that remained were ruled on 2026-11-14 and moved, so **one**
   occurrence is left in code and resources, plus the prose of the two records that describe this decision
-  (`CHANGELOG-POPOPX.md`, this file):
+  (`CHANGELOG.md`, this file):
   - the metainfo `<screenshots><image>` — ruled **keep** on 2026-11-14 (「它是图片不是链接，不删掉」); it is an
     image reference, not a link, and deleting it would leave AppStream's only screenshot empty;
   - **A5 `contentModerationPostLink` — ruled and executed as a repoint to upstream's live article.** The value
     is one URL, and its set is a command: on tip `012ec8373` (2026-11-16)
-    `git grep -o 'contentModerationPostLink' -- ':!FORK.md' ':!CHANGELOG-POPOPX.md' ':!POPOPX-REBRAND-PLAN.md'`
+    `git grep -o 'contentModerationPostLink' -- ':!FORK.md' ':!CHANGELOG.md' `
     reads **11** occurrences in 6 files, and those 11 are exactly 2 declarations, 2 imports, 7 reads (this
     bullet previously described "a paired value with 8 readers"; re-measured). The unexcluded recount is 15 in
     8 files — the surplus is the records, and this sentence names the symbol again, so read it after measuring,
@@ -1265,7 +1274,7 @@ yet. Before any build of this fork is distributed:
 - **`popopx.chat/docs` is a ruled hold (2026-11-14: 「先不动，保留」).** The 31 holders this pass counted stay
   although measured 2026-11-14 all 13 distinct `popopx.chat/docs…` paths answer 404 (13/13, no timeouts):
   8 are fixtures in `scripts/ios/test_localizations.py`, 3 each in `PRIVACY-POPOPX.md` and
-  `CHANGELOG-POPOPX.md`, 4 in the directory service pair (2 in `Directory/Service.hs`, 2 in its
+  `CHANGELOG.md`, 4 in the directory service pair (2 in `Directory/Service.hs`, 2 in its
   `tests/Bots/DirectoryTests.hs` mirror) and 1 each in `FORK.md`, `bots/README.md`, the metainfo
   `<url type="translate">` and the ten in-app help views that carry the same link in iOS and Kotlin
   (`AddContactLearnMore`, `UserAddressLearnMore`, `RTCServers`, `IncognitoView`/`IncognitoHelp`,
@@ -1289,7 +1298,7 @@ yet. Before any build of this fork is distributed:
   path data on another grid form) — Google's geometry, so attributed rather than redrawn — 42 empty 24x24
   placeholder vectors that carry no drawing, 186 of the 210 desktop snapshot baselines, 130 of the 374 iOS
   renders (renders of scenes that carry no brand artwork are indistinguishable from upstream's, so they are not
-  claimed — see `ASSETS_LICENSE-POPOPX.md` §"What is NOT ours"), GitHub's octocat in `ic_github.svg` and 8
+  claimed — see `ASSETS_LICENSE.md` §"What is NOT ours"), GitHub's octocat in `ic_github.svg` and 8
   third-party/Apple files in the iOS catalog, the 13 `packages/**` images whose only change is their directory
   name, and 10 fixtures and audit logos. The documentation and website imagery left with `docs/` and
   `website/`, so nothing here ships it.
@@ -1301,7 +1310,7 @@ sends a user. They are held as upstream wrote them, because renaming one only ch
 request says it belongs to* — the service itself does not move. Each row moves in the change that
 stands up the equivalent POPOPX service, together with its keys. **That change landed for two of these
 rows on 2026-11-23** — the notification-servers preset and the ICE/STUN/TURN defaults moved to this
-fork's own `popopx.im` dual-stack cluster (`CHANGELOG-POPOPX.md`) — and they are kept below because the
+fork's own `popopx.im` dual-stack cluster (`CHANGELOG.md`) — and they are kept below because the
 host-and-key coupling, not the hostname, is what makes them fail silently. The badge contact, the badge
 service and the directory rows are still upstream-operated.
 
@@ -1309,7 +1318,7 @@ service and the directory rows are still upstream-operated.
 | --- | --- | --- |
 | badge service contact (an SMP relay + its key, in one address) | `src/Popopx/Chat.hs:73` | **silent**: TLS fingerprint mismatch, retried forever |
 | notification servers preset (`ntf://<key>@ntf1/2/3.popopx.im,…onion:5226` — this fork's own cluster since 2026-11-23, keys supplied by the operator) | `src/Popopx/Chat/Library/Commands.hs:166-168` | **silent**: same class. This was the one upstream preset still enabled in the client until it moved — the SMP/XFTP presets in `Chat.hs` were emptied, these were not. Kept populated on purpose: the list is a plain `[NtfServer]` (`Controller.hs:275`, and nothing downstream forces `NonEmpty` — in the dependency, `popopxmq:src/Popopx/Messaging/Agent/NtfSubSupervisor.hs:591` `getNtfServer` returns `Nothing` for the empty list at its `:595`, and the call site `popopxmq:src/Popopx/Messaging/Agent.hs:3273` then fails token registration with `PROHIBITED` at `:3284`), so emptying it would be implementable but only costs push, exactly like the relays cost messaging. It moves with them |
-| which stored relays count as "presets" | `src/Popopx/Chat.hs:102` `presetDomains = [".simplex.im"]` — `.simplexonflux.com` went with the deleted Flux operator, and `.popopx.im` is **deliberately absent**: adding it would force our port-less preset rows onto 443, where this cluster serves the web site, not SMP (see `CHANGELOG-POPOPX.md`) | **silent**: keyed on the host suffix, so renamed relays stop matching any stored row |
+| which stored relays count as "presets" | `src/Popopx/Chat.hs:102` `presetDomains = [".simplex.im"]` — `.simplexonflux.com` went with the deleted Flux operator, and `.popopx.im` is **deliberately absent**: adding it would force our port-less preset rows onto 443, where this cluster serves the web site, not SMP (see `CHANGELOG.md`) | **silent**: keyed on the host suffix, so renamed relays stop matching any stored row |
 | shared directory listing | the page that read it, `website/src/js/directory.jsc:1` (`/data/`, filter at `:149`), was deleted with `website/` on 2026-11-13; the server half is `apps/popopx-directory-service` and its `src/Directory/Listing.hs:93-96` still records the pair | **silent-empty**: the fetch fails and the page shows no results |
 | badge embed allow-list | `apps/popopx-badge-service/web/src/embed.ts:56`, inside `trustedHost` (`:46-57`) | **silent**: the widget refuses an origin outside `simplex.chat`/`.simplex.chat` and renders blank |
 | badge purchase deep links | `apps/multiplatform/common/src/commonMain/kotlin/chat/popopx/common/views/badges/BadgeStore.kt:53-54` | **visible**: leaves the app into `badges.simplex.chat` — an upstream-branded page under a POPOPX label |

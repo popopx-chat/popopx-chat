@@ -1,7 +1,7 @@
 # POPOPX artwork sources
 
 Vector masters for the artwork this fork owns. Everything rendered from here is
-licensed by `../../ASSETS_LICENSE-POPOPX.md` under **AGPL-3.0-only, or, at the
+licensed by `../../ASSETS_LICENSE.md` under **AGPL-3.0-only, or, at the
 recipient's option, CC0-1.0** (the grant is dated 2026-11-16; before that this file
 was proprietary). The names in these drawings are not part of it — those are
 `../../TRADEMARK-POPOPX.md`. The generated rasters next to it in

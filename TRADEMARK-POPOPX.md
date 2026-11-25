@@ -9,7 +9,7 @@ This policy is about the marks. It is not about the code: the source in this rep
 under [AGPL-3.0](LICENSE), and no sentence here adds a condition on running, studying, modifying
 or redistributing the source code. AGPL-3.0 does not grant a trademark licence, and this document is
 the reason a downstream fork has to rebrand. It used to be the reason it had to redraw as well: since
-2026-11-16 [ASSETS_LICENSE-POPOPX.md](ASSETS_LICENSE-POPOPX.md) licenses the artwork this fork created
+2026-11-16 [ASSETS_LICENSE.md](ASSETS_LICENSE.md) licenses the artwork this fork created
 under AGPL-3.0-only, or CC0-1.0 at the recipient's option, so a fork may take those drawings; the
 upstream-identical files listed in that same document are SimpleX Chat Ltd's and a fork still may not
 carry them. Neither grant licenses a mark: you may copy these bytes, and you may not present them as
@@ -25,7 +25,7 @@ our product, our endorsement, or our application.
   branding of the software doing the describing.
 - **Publications.** Articles, blogs, videos, talks and presentations about POPOPX Chat or the POPOPX
   network. Screenshots that contain artwork this fork drew need no permission from us —
-  [ASSETS_LICENSE-POPOPX.md](ASSETS_LICENSE-POPOPX.md) licenses it under AGPL-3.0-only or CC0-1.0 at
+  [ASSETS_LICENSE.md](ASSETS_LICENSE.md) licenses it under AGPL-3.0-only or CC0-1.0 at
   your option. A screenshot or icon that is byte-identical to upstream's is a different matter: those
   files are SimpleX Chat Ltd's, and the permission is theirs to give.
 - **Unofficial communities and events**, labelled "Unofficial".
@@ -59,7 +59,7 @@ This repository is a fork of SimpleX Chat, so a fork of this fork inherits two o
 | | owner | document |
 |---|---|---|
 | POPOPX marks | POPOPX | this file |
-| POPOPX-owned artwork — AGPL-3.0-only, or CC0-1.0 at your option; no mark licence | POPOPX | [ASSETS_LICENSE-POPOPX.md](ASSETS_LICENSE-POPOPX.md) |
+| POPOPX-owned artwork — AGPL-3.0-only, or CC0-1.0 at your option; no mark licence | POPOPX | [ASSETS_LICENSE.md](ASSETS_LICENSE.md) |
 | "SimpleX", "SimpleX Chat", the SimpleX logos | SimpleX Chat Ltd | [TRADEMARK.md](https://github.com/simplex-chat/simplex-chat/blob/stable/docs/TRADEMARK.md) — upstream's policy, unchanged; `docs/` is not part of this fork, so it is cited where it lives |
 | SimpleX artwork | SimpleX Chat Ltd | [assets/ASSETS_LICENSE.md](assets/ASSETS_LICENSE.md) |
 | source code | the authors | [LICENSE](LICENSE) (AGPL-3.0) |

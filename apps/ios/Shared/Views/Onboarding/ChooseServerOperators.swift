@@ -13,7 +13,8 @@ import LocalAuthentication
 import POPOPXChat
 
 // The privacy statement POPOPX shows in its consent flows. Single place to edit; it is the policy file
-// in this repository, which is where the text is published - the site serves no /privacy page.
+// in this repository, which is the canonical text: https://popopx.chat/privacy answers 301 to this same
+// document (measured 2026-11-25), so the site address and this URL are one statement, not two.
 let popopxPrivacyURL = URL(string: "https://github.com/popopx-chat/popopx-chat/blob/master/PRIVACY.md")!
 let conditionsURL = popopxPrivacyURL
 

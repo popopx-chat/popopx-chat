@@ -39,13 +39,15 @@ contact graph.
 
 ## Infrastructure measurements
 
-Re-measurable with the commands in the right-hand column; recorded 2026-11-25.
+Re-measurable with the commands in the right-hand column; recorded 2026-11-25 and **re-measured the same
+day** after the site's redirect rules were added (the earlier reading of this row said the policy paths
+answered `404`; that is superseded below, and the `404`s that remain are the ones that still hold).
 
 | Claim | Measurement |
 |---|---|
 | `popopx.chat` and the three portal hosts resolve | `dig +short A popopx.chat node.popopx.chat mp.popopx.chat bot.popopx.chat` → `43.129.40.33` for all four |
 | The sites answer | `curl -o /dev/null -w '%{http_code}'` → `200` at each site root; `https://node.popopx.chat/badge` → `200` |
-| Policy pages are **not** on the web site | `https://popopx.chat/security/`, `/security`, `/privacy`, `/terms`, `/node`, `/docs/simplex.html`, `/docs/upstream-disclaimer.html`, `/.well-known/security.txt` → **404**. The policies are the files in this repository |
+| Policy pages are **redirects into this repository**, not site content | `curl -s -o /dev/null --noproxy '*' -w '%{http_code} -> %{redirect_url}' https://popopx.chat<path>` measured 2026-11-25: `/privacy`, `/privacy/`, `/security`, `/security/` → **301 → `https://github.com/popopx-chat/popopx-chat/blob/master/PRIVACY.md`**; `/terms`, `/terms/` → **301 → `https://github.com/`** (the GitHub front page — no terms text is served anywhere, so the license is this repository's `LICENSE`); `/node`, `/docs/simplex.html`, `/docs/upstream-disclaimer.html`, `/docs`, `/.well-known/security.txt` → **404**. The policies are the files in this repository |
 | No mail is accepted for the domain | `dig +short MX popopx.chat` → empty, while the domain resolves and the site answers `200` |
 | "Dual-stack" means public host + onion, not IPv6 | `dig +short AAAA popopx.chat smp1.popopx.im` → empty for every host; the `.onion` half of each address is the second channel (`Presets.hs:69-76,91-93,115`, `Commands.hs:164-169`) |
 | The relay hosts are separate machines | `dig +short A smp1.popopx.im` → `43.156.118.222`, `relay1.popopx.im` → `43.156.154.228` |
