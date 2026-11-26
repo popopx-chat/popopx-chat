@@ -3485,9 +3485,12 @@ chatVersionRange' = do
 {-# INLINE chatVersionRange' #-}
 
 -- POPOPX official support contact — the dedicated POPOPX Official Support service account.
-adminContactReq :: ConnReqContact
-adminContactReq =
-  either error id $ strDecode "https://smp1.popopx.im/a#1O5lho1_iImkDlxXzEr4aqUIcVzWBqsdYENws9uPLxQ?c=f2X5hAgHZW9-SVkhMou0sUFg3AHUi2pE3kSw46AiGjY"
+-- The published address is a SHORT contact link (`/a` = `CCTContact`, `?c=` = the server certificate
+-- hash, popopxmq Agent/Protocol `AConnShortLink`), a different encoding from `ConnReqContact`
+-- (`/contact#/?v=<range>&smp=<queue>`), so it cannot decode as one. Forcing it raised inside the
+-- store on every inbound address request (Subscriber.hs), which is why this is total.
+adminContactReq :: Maybe ConnReqContact
+adminContactReq = either (const Nothing) Just $ strDecode "https://smp1.popopx.im/a#1O5lho1_iImkDlxXzEr4aqUIcVzWBqsdYENws9uPLxQ?c=f2X5hAgHZW9-SVkhMou0sUFg3AHUi2pE3kSw46AiGjY"
 
 contactCReqHash :: ConnReqContact -> ConnReqUriHash
 contactCReqHash (CRContactUri crData _) = ConnReqUriHash . C.sha256Hash . strEncode $ CRContactUri crData Nothing
@@ -3502,7 +3505,7 @@ adminContactProfile =
       shortDescr = Just "Send questions about POPOPX Chat app and your suggestions",
       description = Nothing,
       image = Just popopxChatImage,
-      contactLink = Just $ CLFull adminContactReq,
+      contactLink = fmap CLFull adminContactReq,
       peerType = Nothing,
       preferences = Nothing,
       badge = Nothing,

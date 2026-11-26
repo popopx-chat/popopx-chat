@@ -1496,7 +1496,7 @@ processAgentMessageConn cxt user@User {userId} entity gks_ corrId agentConnId ag
             Nothing -> do
               let UserContactLink {connLinkContact = CCLink connReq _, shortLinkDataSet, addressSettings} = ucl
                   AddressSettings {autoAccept, chatLayout} = addressSettings
-                  isAdminContact = sameConnReqContact connReq adminContactReq
+                  isAdminContact = maybe False (sameConnReqContact connReq) adminContactReq
               gVar <- asks random
               withStore (\db -> createOrUpdateContactRequest db gVar cxt user uclId ucl isAdminContact invId chatVRange (Just reqHeader) p xContactId_ welcomeMsgId_ requestMsg_ reqPQSup rejectionSupported) >>= \case
                 RSAcceptedRequest _ucr re -> case re of
