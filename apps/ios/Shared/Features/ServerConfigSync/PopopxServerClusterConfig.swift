@@ -115,12 +115,12 @@ enum PopopxServerConfigLimits {
     /// app declares for universal links (`POPOPX (iOS).entitlements`), and `.popopx.im` is also what the
     /// shipped factory preset dials — `serverDomains = ["popopx.im"]` and the preset SMP rows in
     /// `src/Popopx/Chat/Operators/Presets.hs`, whose fingerprints are byte-for-byte the ones the
-    /// operator's roster carries. `.simplex.im` is kept for the hosts that preset held before this fork
-    /// moved onto its own cluster: those rows stay in `allPresetServers`, so a signed document naming one
-    /// of them is naming a server this installation can already be pointed at. `.onion` is admitted by
-    /// TLD rather than by suffix: its addresses are content-derived and change whenever a server is
-    /// rebuilt.
-    static let admittedHostnameSuffixes = [".popopx.chat", ".popopx.im", ".simplex.im"]
+    /// operator's roster carries. `.simplex.im` was admitted while this fork's preset still offered the
+    /// hosts upstream had used; `allPresetServers` now names popopx.im hosts only, so no server this
+    /// installation dials matches that suffix any more, and an admission rule nobody can reach is only
+    /// more ground a leaked signing key can claim. `.onion` is admitted by TLD rather than by suffix:
+    /// its addresses are content-derived and change whenever a server is rebuilt.
+    static let admittedHostnameSuffixes = [".popopx.chat", ".popopx.im"]
     static let onionSuffix = ".onion"
 
     /// ICE transport schemes, and the two that need credentials to be worth using.

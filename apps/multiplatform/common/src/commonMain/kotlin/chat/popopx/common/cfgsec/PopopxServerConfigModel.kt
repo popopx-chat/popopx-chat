@@ -59,8 +59,12 @@ object PopopxServerConfigLimits {
 
   const val MAX_ROLLOUT_PERCENT: Long = 100
 
-  /** Hosts this device will dial on the operator's instruction. */
-  val ADMITTED_HOSTNAME_SUFFIXES: List<String> = listOf(".popopx.chat", ".popopx.im", ".simplex.im")
+  /**
+   * Hosts this device will dial on the operator's instruction. The set is the factory preset's own
+   * domains: `serverDomains = ["popopx.im"]` plus the site the app links to. Keep it equal to
+   * `PopopxServerConfigLimits.admittedHostnameSuffixes` on iOS.
+   */
+  val ADMITTED_HOSTNAME_SUFFIXES: List<String> = listOf(".popopx.chat", ".popopx.im")
   const val ONION_SUFFIX: String = ".onion"
 
   val ICE_SCHEMES: List<String> = listOf("stun", "stuns", "turn", "turns")

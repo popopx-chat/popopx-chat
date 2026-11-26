@@ -9,8 +9,6 @@
 		<string>applinks:popopx.chat</string>
 		<string>applinks:www.popopx.chat</string>
 		<string>applinks:popopx.chat?mode=developer</string>
-		<string>applinks:*.simplex.im</string>
-		<string>applinks:*.simplex.im?mode=developer</string>
 		<string>applinks:*.popopx.im</string>
 		<string>applinks:*.popopx.im?mode=developer</string>
 	</array>

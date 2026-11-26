@@ -249,10 +249,11 @@ case 逐条在 :1092-1096、:1100、:1104、:1107、:1112-1115、:1125）：
   其载荷声称什么，一律死在 `.signatureNotVerifying`；必须落在 `popopx|popx_srv_cfg_v1|` 这个域前缀上
   （前像 = 域前缀 + 压缩段 base64url 的 ASCII，不含 `POPOPXCFG1-`、不含点、不含签名）；
   必须在有效期内（**有效期上限 30 天**：`exp - iat ≤ 2_592_000`，旧口径写的 400 天是错的）；
-  主机名必须命中白名单：`.onion` 主机，或 `popopx.chat` / `popopx.im` / `simplex.im` 后缀。
-  本轮加入 `simplex.im` 的理由：出厂预设的 6 台 SMP 本来就 Dial `*.simplex.im` 且与 `cluster.json`
-  的 entry 逐字符同名同指纹（`Presets.hs:25 serverDomains = ["simplex.im"]`），白名单因此**没有新增任何信任**，
-  它只限制泄露签名钥的爆炸半径；不加这一条，对齐后的第一帧就吃 `.entryHostUnadmitted`，覆盖率永久为 0。
+  主机名必须命中白名单：`.onion` 主机，或 `popopx.chat` / `popopx.im` 后缀。
+  白名单与本机真正会拨号的名单严格相等：`Presets.hs:24 serverDomains = ["popopx.im"]`，出厂预设里的
+  SMP / xftp / ntf / relay 行全部落在这两个域内，所以它**不新增任何信任**，只限制泄露签名钥的爆炸半径。
+  早期版本还允许 `*.simplex.im`（那时上游主机仍在出厂预设里）；预设清空后这一条已随 iOS、Android、
+  生成器三处同步删除——本机没有任何服务器会命中一条允许后缀时，它只剩风险。
   **白名单只覆盖本机真正会拨号的名单**（smp / xftp / ntf / relay）。`ice` 名单里的 TURN 主机只做形状校验：
   生成端对它不施加任何域名规则（`models.py:266-365`），而它自己发布的 cluster 里那条 TURN 写的是
   `turn.example.net`（`cluster.json:59`）——若在这里也查白名单，每一帧真帧都会因一个本机根本不会联系的

@@ -38,11 +38,11 @@
 //         --key ~/popopx-server-config/server-config-signing-key.pem \
 //         --seq 7 \
 //         --expires-epoch "$(date -v+7d +%s)" \
-//         --smp '<43-char-fingerprint>@smp8.simplex.im' \
-//         --smp '<43-char-fingerprint>@smp9.simplex.im,<32-char-onion>.onion \
-//         --xftp '<fingerprint>@xftp1.simplex.im' \
-//         --ntf  '<fingerprint>@ntf3.simplex.im' \
-//         --relay 'relay.simplex.im@<43-char-key>' \
+//         --smp '<43-char-fingerprint>@smp7.popopx.im' \
+//         --smp '<43-char-fingerprint>@smp8.popopx.im,<32-char-onion>.onion \
+//         --xftp '<fingerprint>@xftp1.popopx.im' \
+//         --ntf  '<fingerprint>@ntf3.popopx.im' \
+//         --relay 'relay1.popopx.im@<43-char-key>' \
 //         --ice  'turns@turn.example.net:443,tcp,<expiryEpoch>:<user>,<base64 credential>,<credentialExpiry>' \
 //              // an ICE host is not domain-checked: the generator applies no admission rule to `ice`, and its
 //              // own cluster publishes a TURN host outside the domains this device dials servers in
@@ -80,7 +80,7 @@ let encodingTag = "z9"
 let maximumInflatedBytes = 65_536
 let maximumValiditySeconds = 30 * 24 * 60 * 60
 let maximumCounterValue = 9_007_199_254_740_992
-let admittedSuffixes = [".popopx.chat", ".popopx.im", ".simplex.im"]
+let admittedSuffixes = [".popopx.chat", ".popopx.im"]
 let base64URLAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
 let hexAlphabet = "0123456789abcdef"
 let iceSchemes = ["stun", "stuns", "turn", "turns"]
