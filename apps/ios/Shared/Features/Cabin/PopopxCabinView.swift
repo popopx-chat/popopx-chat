@@ -436,14 +436,11 @@ struct PopopxMeshPlazaRootView: View {
                 switch route {
                 case .nearbyGroups:
                     // Verbatim identical to the drawer's `.groups` site (the registration of `PopopxCabinRoute.groups` in this file):
-                    // the same `MeshGroupsView`, the same three real dependencies, the same title Key. Two entries cannot produce
-                    // two different screens. The three dependencies must not go through defaults: the default is `PopopxMeshEngine.shared`,
-                    // which would build out the engine and the radio even while the master switch is closed (red line).
-                    MeshGroupsView(
-                        outbound: meshRuntime.engineBackend,
-                        source: meshRuntime.stateSource,
-                        hub: PopopxMeshGroupEventHub.shared
-                    )
+                    // the same `MeshGroupsView`, the same single model, the same title Key. Two entries cannot produce
+                    // two different screens. The model comes from the runtime rather than being built here because this
+                    // closure is a `navigationDestination` builder — building a model in it makes the parent's body recompute
+                    // throw away the list and the subscription every couple of seconds.
+                    MeshGroupsView(model: meshRuntime.groupsModel, keepsRunningWhenHidden: true)
                     .navigationTitle(Copy.groupsRow)
 
                 case .privacyRecords:
@@ -843,14 +840,12 @@ struct PopopxCabinView: View {
                     .navigationTitle(Copy.encryptedChannelsRow)
 
                 case .groups:
-                    // The package's one and only offline group-chat surface (groups with a creator signature + group messages). All three dependencies given as real objects: the default is
-                    // `PopopxMeshEngine.shared`, which would be built out even while the master switch is closed, and the red line does not allow it. `engineBackend`
-                    // answers "no signing identity" when the engine never started, and then this page only shows an empty list without conjuring a group into existence.
-                    MeshGroupsView(
-                        outbound: meshRuntime.engineBackend,
-                        source: meshRuntime.stateSource,
-                        hub: PopopxMeshGroupEventHub.shared
-                    )
+                    // The package's one and only offline group-chat surface (groups with a creator signature + group messages),
+                    // on the runtime's single model: the underlying dependencies are the real objects (`engineBackend`,
+                    // `stateSource`), never the defaults — `PopopxMeshEngine.shared` would be built out even while the master
+                    // switch is closed, and the red line does not allow it. `engineBackend` answers "no signing identity" when
+                    // the engine never started, and then this page only shows an empty list without conjuring a group into existence.
+                    MeshGroupsView(model: meshRuntime.groupsModel, keepsRunningWhenHidden: true)
                     .navigationTitle(Copy.groupsRow)
 
                 case let .privateChat(peerMeshPublicKeyHex):

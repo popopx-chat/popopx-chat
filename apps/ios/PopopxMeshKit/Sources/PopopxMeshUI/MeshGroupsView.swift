@@ -36,7 +36,7 @@ import SwiftUI
 /// It holds the send side as `any PopopxMeshGroupOutbound` for the same reason the plaza holds
 /// `any PopopxMeshOutbound`: a test drives it with a fake and never touches a radio.
 @MainActor
-public final class PopopxMeshGroupsModel: ObservableObject {
+public final class PopopxMeshGroupsModel: ObservableObject, PopopxMeshSwitchable {
     /// A group message is one flooded packet. The engine's fragmentation still applies, but a thread
     /// that carries a novel is not a thread.
     public static let maxMessageCharacters = 512
@@ -149,6 +149,23 @@ public final class PopopxMeshGroupsModel: ObservableObject {
         radioTask?.cancel()
         radioTask = nil
         messages = []
+    }
+
+    // MARK: Fuse component
+
+    /// The fuse starts and stops this mirror like any other interface component.
+    ///
+    /// This is what makes 「蓝牙开关重连后群组列表仍在」 true rather than lucky: a model that mounted while
+    /// the switch was off read an empty store, and nothing re-reads that store until the switch moves —
+    /// the group events belong to the engine, which was not running. Turning on reloads instead of only
+    /// subscribing, so a group created in an earlier session comes back without the pane being reopened.
+    public func meshSwitchDidTurnOn(nickname: String?) async {
+        start()
+        await reload()
+    }
+
+    public func meshSwitchDidTurnOff() async {
+        stop()
     }
 
     /// Pulls the current truth from the Kit. Called on appear and after every mutation, because a
@@ -311,18 +328,20 @@ public final class PopopxMeshGroupsModel: ObservableObject {
 @MainActor
 public struct MeshGroupsView: View {
     @ObservedObject private var model: PopopxMeshGroupsModel
+    /// Whether leaving this pane takes the mirror down. The Cabin's home page passes `true`, matching
+    /// the plaza: the fuse owns this model's life, not the pane.
+    private let keepsRunningWhenHidden: Bool
 
-    public init(model: PopopxMeshGroupsModel) {
+    /// The host holds the model, and holds exactly one of it.
+    ///
+    /// The initialiser that took `outbound`/`source`/`hub` and built the model here is gone on purpose:
+    /// a view made inside a `navigationDestination` builder is rebuilt on every parent recompute, and a
+    /// rebuilt model comes back with `groups = []` and `radioState = .unknown` that nothing ever
+    /// `start()`s, because `.onAppear` does not re-fire for a view whose structural identity did not
+    /// change. A host that has not decided where its one model lives now fails to compile.
+    public init(model: PopopxMeshGroupsModel, keepsRunningWhenHidden: Bool = false) {
         self.model = model
-    }
-
-    /// The one-line mount for a host with the engine and the fuse already running.
-    public init(
-        outbound: any PopopxMeshGroupOutbound = PopopxMeshEngine.shared,
-        source: PopopxMeshStateSource = .shared,
-        hub: PopopxMeshGroupEventHub = .shared
-    ) {
-        self.init(model: PopopxMeshGroupsModel(outbound: outbound, source: source, hub: hub))
+        self.keepsRunningWhenHidden = keepsRunningWhenHidden
     }
 
     public var body: some View {
@@ -334,7 +353,7 @@ public struct MeshGroupsView: View {
             }
         }
         .onAppear { model.start() }
-        .onDisappear { model.stop() }
+        .onDisappear { if !keepsRunningWhenHidden { model.stop() } }
     }
 
     // MARK: List pane

@@ -376,6 +376,214 @@ actor PopopxMeshFakeOutbound: PopopxMeshOutbound {
     var sentBroadcasts: [String] { broadcasts }
 }
 
+// MARK: - Group doubles
+
+/// In-memory Keychain, one per test device: a group's epoch key and its signing identity live here, so
+/// no UI test reads or writes the device's real items.
+///
+/// Shared `service\0account` namespace, exactly as `PopopxMeshKeychain` keys its items, because a fake
+/// that flattened the two into one dictionary would let a group key answer a signing-identity read.
+final class PopopxMeshFakeSecrets: PopopxMeshSecretStoring, @unchecked Sendable {
+    private let lock = NSLock()
+    private var items: [String: Data] = [:]
+
+    private static func entry(_ service: String, _ account: String) -> String {
+        service + "\u{1}" + account
+    }
+
+    func data(service: String, account: String) throws -> Data? {
+        lock.lock()
+        defer { lock.unlock() }
+        return items[Self.entry(service, account)]
+    }
+
+    func set(_ data: Data, service: String, account: String) throws {
+        lock.lock()
+        defer { lock.unlock() }
+        items[Self.entry(service, account)] = data
+    }
+
+    func remove(service: String, account: String) throws {
+        lock.lock()
+        defer { lock.unlock() }
+        items[Self.entry(service, account)] = nil
+    }
+
+    func removeAll(service: String) throws {
+        lock.lock()
+        defer { lock.unlock() }
+        for stored in items.keys where stored.hasPrefix(service + "\u{1}") {
+            items[stored] = nil
+        }
+    }
+
+    func heldCount(service: String) -> Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return items.keys.filter { $0.hasPrefix(service + "\u{1}") }.count
+    }
+}
+
+/// The group send side as the interface sees it: the real coordinator and the real store over a
+/// temporary directory and a test Keychain, and no radio.
+///
+/// Not a stub list on purpose. 缺陷 1's standard is that a created group SURVIVES, and that is only a
+/// claim about persistence if the layer under the model really persists — a fake that returned an array
+/// it was handed would let the test assert the fake. `groupReads` counts the reads instead of hiding
+/// them, which is how a test tells 「读一次并留住」 apart from 「每次 body 重算都重读」.
+actor PopopxMeshFakeGroupOutbound: PopopxMeshGroupOutbound {
+    private let coordinator: PopopxGroupCoordinator
+    private let journal: PopopxMeshJournal
+    private(set) var groupReads = 0
+    private(set) var sentTexts: [String] = []
+    /// Set to make the Kit refuse, so a failure copy can be reached without a radio.
+    private(set) var refusal: PopopxMeshGroupError?
+
+    init(coordinator: PopopxGroupCoordinator, journal: PopopxMeshJournal) {
+        self.coordinator = coordinator
+        self.journal = journal
+    }
+
+    var localSigningPublicKeyHex: String? {
+        get async { await coordinator.localSigningPublicKeyHex }
+    }
+
+    func meshGroups() async -> [PopopxMeshGroup] {
+        groupReads += 1
+        journal.record("read-groups")
+        return await coordinator.groups()
+    }
+
+    func meshGroupMembers(of groupID: Data) async -> [PopopxMeshGroupMember] {
+        await coordinator.members(of: groupID)
+    }
+
+    func createGroup(named name: String) async throws(PopopxMeshGroupError) -> PopopxMeshGroup {
+        if let refusal { throw refusal }
+        return try await coordinator.createGroup(named: name)
+    }
+
+    func invite(
+        peerMeshPublicKeyHex: String,
+        toGroupID groupID: Data
+    ) async throws(PopopxMeshGroupError) -> PopopxGroupDistribution {
+        if let refusal { throw refusal }
+        return try await coordinator.invite(peerMeshPublicKeyHex: peerMeshPublicKeyHex, toGroupID: groupID)
+    }
+
+    func removeMeshGroupMember(
+        _ peerMeshPublicKeyHex: String,
+        fromGroupID groupID: Data
+    ) async throws(PopopxMeshGroupError) -> PopopxGroupDistribution {
+        if let refusal { throw refusal }
+        return try await coordinator.removeMember(peerMeshPublicKeyHex, fromGroupID: groupID)
+    }
+
+    func sendGroupMessage(_ text: String, toGroupID groupID: Data) async throws(PopopxMeshGroupError) {
+        if let refusal { throw refusal }
+        // The coordinator publishes the local copy on the device's own group hub, so the model sees the
+        // bubble the same way it sees a neighbour's: through the stream, not through a return value.
+        _ = try await coordinator.sealMessage(text, toGroupID: groupID)
+        sentTexts.append(text)
+    }
+
+    func invitableMeshPeers() async -> [String] {
+        await coordinator.invitablePeers()
+    }
+
+    /// Arms a refusal, so the model's failure copy can be reached without a radio or a broken Keychain.
+    func setRefusal(_ failure: PopopxMeshGroupError?) {
+        refusal = failure
+    }
+
+    var recordedReads: Int { groupReads }
+    var recordedSends: [String] { sentTexts }
+}
+
+/// One test device's group stack, built the way the app builds its own — engine backend, state source
+/// and hub replaced by the test's copies, the store and coordinator left real.
+struct PopopxMeshGroupDevice {
+    let secrets: PopopxMeshFakeSecrets
+    let directory: PopopxMeshTestDirectory
+    let groupHub: PopopxMeshGroupEventHub
+    let store: PopopxGroupStore
+    let coordinator: PopopxGroupCoordinator
+    let outbound: PopopxMeshFakeGroupOutbound
+    let meshPublicKeyHex: String
+
+    private init(
+        secrets: PopopxMeshFakeSecrets,
+        directory: PopopxMeshTestDirectory,
+        groupHub: PopopxMeshGroupEventHub,
+        store: PopopxGroupStore,
+        coordinator: PopopxGroupCoordinator,
+        outbound: PopopxMeshFakeGroupOutbound,
+        meshPublicKeyHex: String
+    ) {
+        self.secrets = secrets
+        self.directory = directory
+        self.groupHub = groupHub
+        self.store = store
+        self.coordinator = coordinator
+        self.outbound = outbound
+        self.meshPublicKeyHex = meshPublicKeyHex
+    }
+
+    /// A device that has never run: its own temporary directory, its own Keychain, its own hub.
+    static func make(journal: PopopxMeshJournal, label: String = "device") throws -> PopopxMeshGroupDevice {
+        let secrets = PopopxMeshFakeSecrets()
+        let directory = try PopopxMeshTestDirectory(label: label)
+        return Self.build(
+            journal: journal,
+            secrets: secrets,
+            directory: directory,
+            groupHub: PopopxMeshGroupEventHub(),
+            meshPublicKeyHex: PopopxMeshIdentity.generate().meshPublicKeyHex
+        )
+    }
+
+    /// The same directory and the same Keychain behind a new stack: what the app holds when it is
+    /// relaunched, because a fresh `PopopxGroupStore` has loaded nothing until it is read.
+    func relaunched(journal: PopopxMeshJournal) -> PopopxMeshGroupDevice {
+        Self.build(
+            journal: journal,
+            secrets: secrets,
+            directory: directory,
+            groupHub: groupHub,
+            meshPublicKeyHex: meshPublicKeyHex
+        )
+    }
+
+    private static func build(
+        journal: PopopxMeshJournal,
+        secrets: PopopxMeshFakeSecrets,
+        directory: PopopxMeshTestDirectory,
+        groupHub: PopopxMeshGroupEventHub,
+        meshPublicKeyHex: String
+    ) -> PopopxMeshGroupDevice {
+        let store = PopopxGroupStore(secrets: secrets, directory: directory.url)
+        let coordinator = PopopxGroupCoordinator(
+            meshPublicKeyHex: meshPublicKeyHex,
+            secrets: secrets,
+            store: store,
+            hub: groupHub
+        )
+        return PopopxMeshGroupDevice(
+            secrets: secrets,
+            directory: directory,
+            groupHub: groupHub,
+            store: store,
+            coordinator: coordinator,
+            outbound: PopopxMeshFakeGroupOutbound(coordinator: coordinator, journal: journal),
+            meshPublicKeyHex: meshPublicKeyHex
+        )
+    }
+
+    func remove() {
+        directory.remove()
+    }
+}
+
 // MARK: - Waiting
 
 /// Waits for a condition the module drives asynchronously (a pump task, a Combine assignment).

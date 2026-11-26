@@ -3760,6 +3760,9 @@ final class PopopxMeshRuntime: ObservableObject {
     let killSwitch: PopopxMeshKillSwitch
     let bannerModel: PopopxMeshBannerModel
     let timelineModel: PopopxMeshTimelineModel
+    /// The app's one group mirror. Both group mount sites take this; a second instance would be a
+    /// second hub subscription and a second copy of a list that only the store can answer for.
+    let groupsModel: PopopxMeshGroupsModel
     let panicWipe: PopopxPanicWipeManager
 
     private var fuseMirror: AnyCancellable?
@@ -3803,13 +3806,19 @@ final class PopopxMeshRuntime: ObservableObject {
             source: stateSource
         )
         let timelineModel = PopopxMeshTimelineModel(source: stateSource, routing: router)
+        // The one group mirror, held here rather than built by the view. `MeshGroupsView` used to take
+        // `outbound`/`source`/`hub` and construct its own model inside the mount site, which is a
+        // `navigationDestination` builder: the Cabin recomputes its body every 2 seconds, so every
+        // recompute swapped in a model with an empty list and no subscription, and `.onAppear` never
+        // re-fired to start it. A created group therefore flashed on screen and vanished.
+        let groupsModel = PopopxMeshGroupsModel(outbound: backend, source: stateSource, hub: .shared)
         // The promise of the red line "zero database modifications" (POPOPX_MESH_PROMPT.md clause I.5) is visible here: `applicationDatabaseURL` is left nil,
         // so the SQLCipher chat database path is never handed to this manager, and not even its size is ever read.
         let panicWipe = PopopxPanicWipeManager(
             radio: [backend, healthMonitor, pairing],
             keys: backend,
             mapping: store,
-            inMemoryMirrors: [stateSource, bannerModel, timelineModel],
+            inMemoryMirrors: [stateSource, bannerModel, timelineModel, groupsModel],
             meshDirectory: PopopxMeshPaths.meshDirectory(),
             applicationDatabaseURL: nil,
             termination: PopopxPanicWipeManager.processExit,
@@ -3833,6 +3842,7 @@ final class PopopxMeshRuntime: ObservableObject {
         self.killSwitch = killSwitch
         self.bannerModel = bannerModel
         self.timelineModel = timelineModel
+        self.groupsModel = groupsModel
         self.panicWipe = panicWipe
         self.isFuseOn = killSwitch.persistedIsEnabled
 
@@ -3861,13 +3871,17 @@ final class PopopxMeshRuntime: ObservableObject {
             )
         }
 
-        // The three host-built components join the fuse. `register` does NOT start them — the kill
+        // The host-built components join the fuse. `register` does NOT start them — the kill
         // switch only starts a newcomer when the switch is already on, which is the case that would
         // otherwise leave them running behind an off switch.
         await killSwitch.register(PopopxMeshSwitchedComponent(name: "meshRouter", role: .radio, component: router))
         await killSwitch.register(PopopxMeshSwitchedComponent(name: "chatEventObserver", role: .interface, component: eventObserver))
         await killSwitch.register(PopopxMeshSwitchedComponent(name: "pairingBanner", role: .interface, component: bannerModel))
         await killSwitch.register(PopopxMeshSwitchedComponent(name: "meshTimeline", role: .interface, component: timelineModel))
+        // The groups mirror is on the fuse for the same reason the plaza is: the store can only be read
+        // while the engine exists, so a mirror mounted while the switch was off must be re-read when it
+        // moves, not left showing an empty list until the pane is reopened.
+        await killSwitch.register(PopopxMeshSwitchedComponent(name: "meshGroups", role: .interface, component: groupsModel))
 
         pairingPolicy = await mappingStore.pairingPolicy
         await killSwitch.restoreOnLaunch()
