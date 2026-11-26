@@ -3763,6 +3763,10 @@ final class PopopxMeshRuntime: ObservableObject {
     /// The app's one group mirror. Both group mount sites take this; a second instance would be a
     /// second hub subscription and a second copy of a list that only the store can answer for.
     let groupsModel: PopopxMeshGroupsModel
+    /// The app's one plaza mirror, for the same reason as `groupsModel`: the pushed plaza pages mount
+    /// inside a destination builder, and a model built there is rebuilt — empty and never started — on
+    /// every recompute of the hosting body.
+    let plazaModel: PopopxMeshPlazaModel
     let panicWipe: PopopxPanicWipeManager
 
     private var fuseMirror: AnyCancellable?
@@ -3812,13 +3816,24 @@ final class PopopxMeshRuntime: ObservableObject {
         // recompute swapped in a model with an empty list and no subscription, and `.onAppear` never
         // re-fired to start it. A created group therefore flashed on screen and vanished.
         let groupsModel = PopopxMeshGroupsModel(outbound: backend, source: stateSource, hub: .shared)
+        // The one plaza mirror, for exactly the reason above: the two pushed entries (`PopopxCabinRoute.plaza`
+        // and `PopopxAddFriendRoute.meshPlaza`) mount `MeshPlazaView` inside a `navigationDestination`
+        // builder through the convenience init, so every recompute of the hosting body — the Cabin's own
+        // 2-second tick, or a keystroke in the Add Friend link field — replaced the model with a fresh one
+        // that `.onAppear` never started again. That page then showed an empty square it could never
+        // fill, while the same screen on Tab 3 (held by `@StateObject`) worked.
+        let plazaModel = PopopxMeshPlazaModel(
+            outbound: backend,
+            source: stateSource,
+            nicknameApplier: killSwitch
+        )
         // The promise of the red line "zero database modifications" (POPOPX_MESH_PROMPT.md clause I.5) is visible here: `applicationDatabaseURL` is left nil,
         // so the SQLCipher chat database path is never handed to this manager, and not even its size is ever read.
         let panicWipe = PopopxPanicWipeManager(
             radio: [backend, healthMonitor, pairing],
             keys: backend,
             mapping: store,
-            inMemoryMirrors: [stateSource, bannerModel, timelineModel, groupsModel],
+            inMemoryMirrors: [stateSource, bannerModel, timelineModel, groupsModel, plazaModel],
             meshDirectory: PopopxMeshPaths.meshDirectory(),
             applicationDatabaseURL: nil,
             termination: PopopxPanicWipeManager.processExit,
@@ -3843,6 +3858,7 @@ final class PopopxMeshRuntime: ObservableObject {
         self.bannerModel = bannerModel
         self.timelineModel = timelineModel
         self.groupsModel = groupsModel
+        self.plazaModel = plazaModel
         self.panicWipe = panicWipe
         self.isFuseOn = killSwitch.persistedIsEnabled
 
@@ -3882,6 +3898,10 @@ final class PopopxMeshRuntime: ObservableObject {
         // while the engine exists, so a mirror mounted while the switch was off must be re-read when it
         // moves, not left showing an empty list until the pane is reopened.
         await killSwitch.register(PopopxMeshSwitchedComponent(name: "meshGroups", role: .interface, component: groupsModel))
+        // Same treatment for the plaza mirror now that one instance serves all three mount sites: with the
+        // switch off there is no flood to read, and a timeline that keeps the neighbours it heard before
+        // the switch moved is claiming a reach this device no longer has.
+        await killSwitch.register(PopopxMeshSwitchedComponent(name: "meshPlaza", role: .interface, component: plazaModel))
 
         pairingPolicy = await mappingStore.pairingPolicy
         await killSwitch.restoreOnLaunch()

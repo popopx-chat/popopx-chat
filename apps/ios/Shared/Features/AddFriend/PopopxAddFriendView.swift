@@ -88,6 +88,20 @@ struct PopopxAddFriendView: View {
         _meshRuntime = ObservedObject(wrappedValue: PopopxMeshRuntime.shared)
     }
 
+    /// This page's half of the plaza author menu: its own toast and its own stack. Nothing else to update —
+    /// the page shows no mesh table, the plaza re-reads the mirror, and the receipt for an invitation is
+    /// the toast the core already shows, which is also what the "Add friend" flows above show for a link.
+    @MainActor private var authorHost: PopopxCabinAuthor.Host {
+        PopopxCabinAuthor.Host(
+            runtime: meshRuntime,
+            toast: toast,
+            pushChat: { path.append(.privateChat(peerMeshPublicKeyHex: $0)) },
+            refresh: {},
+            beginOpening: {},
+            endOpening: {}
+        )
+    }
+
     var body: some View {
         NavigationStack(path: $path) {
             ScrollView {
@@ -119,15 +133,25 @@ struct PopopxAddFriendView: View {
             .navigationDestination(for: PopopxAddFriendRoute.self) { route in
                 switch route {
                 case .meshPlaza:
-                    // The mounting copies that line in SettingsView: all three objects come from the runtime, and the page itself, when the fuse
+                    // The mounting copies that line in `PopopxCabinRoute.plaza`: the same single plaza model
+                    // from the runtime, the same author menu, the same background. All three objects come
+                    // from the runtime, and the page itself, when the fuse
                     // is closed, renders the 'closed' state, so this row is always tappable.
                     MeshPlazaView(
-                        outbound: meshRuntime.engineBackend,
-                        source: meshRuntime.stateSource,
-                        killSwitch: meshRuntime.killSwitch
+                        model: meshRuntime.plazaModel,
+                        keepsRunningWhenHidden: true,
+                        authorActions: PopopxCabinAuthor.plazaActions(host: authorHost)
                     )
                     .navigationTitle(Copy.plazaNavigationTitle)
                     .modifier(ThemedBackground(grouped: true))
+
+                case let .privateChat(peerMeshPublicKeyHex):
+                    // Same mount helper the Cabin drawer and the Cabin home tab push, so the page reached
+                    // from "Add friend" cannot be a fourth variant of it.
+                    PopopxCabinAuthor.privateChatView(
+                        peerMeshPublicKeyHex: peerMeshPublicKeyHex,
+                        runtime: meshRuntime
+                    )
                 }
             }
             .toolbar {
@@ -286,6 +310,8 @@ struct PopopxAddFriendView: View {
 
 private enum PopopxAddFriendRoute: Hashable {
     case meshPlaza
+    /// Where a plaza author action lands: the package's 1:1 offline private chat for that peer's key.
+    case privateChat(peerMeshPublicKeyHex: String)
 }
 
 // MARK: - Header

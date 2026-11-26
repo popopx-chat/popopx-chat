@@ -31,6 +31,13 @@ public struct PopopxMeshPlazaPost: Identifiable, Hashable, Sendable {
         case local
         /// A neighbour, by the name it announced, or by its 8-byte wire id when it announced none.
         case neighbour(nickname: String?, peerIDHex: String)
+
+        /// Whether this row is this device talking to itself. A host that injects author actions uses it
+        /// to keep the menu off the local rows: there is nobody to reach.
+        public var isLocal: Bool {
+            if case .local = self { return true }
+            return false
+        }
     }
 
     public let id: String
@@ -39,26 +46,77 @@ public struct PopopxMeshPlazaPost: Identifiable, Hashable, Sendable {
     public let author: Author
     /// How many hops the flood had taken when this device heard it; 0 for our own post.
     public let hopCount: Int
+    /// The sender's mesh public key, when the frame carried one. This is the value a host needs to
+    /// answer "message that person": the 8-byte wire id in `Author` cannot open a session. Nil for a
+    /// local post and for a sender the mesh has heard but not yet resolved.
+    public let meshPublicKeyHex: String?
 
     public init(
         id: String,
         text: String,
         timestamp: Date,
         author: Author,
-        hopCount: Int
+        hopCount: Int,
+        meshPublicKeyHex: String? = nil
     ) {
         self.id = id
         self.text = text
         self.timestamp = timestamp
         self.author = author
         self.hopCount = hopCount
+        self.meshPublicKeyHex = meshPublicKeyHex
     }
 
     public var displayName: String {
         switch author {
-        case .local: "You"
-        case let .neighbour(nickname, peerIDHex): nickname?.isEmpty == false ? nickname! : peerIDHex
+        case .local: return "You"
+        case let .neighbour(nickname, peerIDHex):
+            // An announced name that is only whitespace is not a name. The nickname store already
+            // treats blank as absence on our own side; a neighbour's blank cannot render as a gap.
+            if let nickname {
+                let trimmed = nickname.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !trimmed.isEmpty { return trimmed }
+            }
+            // A row with no wire id has no author this screen can name. It used to be labelled with the
+            // message's own id, which made two posts by the same stranger read as two different people;
+            // it is now named the way the plaza names any nameless peer.
+            return peerIDHex.isEmpty ? PopopxMeshNicknameStore.defaultNickname : peerIDHex
         }
+    }
+}
+
+/// Something a host is willing to do with the author of a plaza post — open the offline 1:1, send a
+/// face-to-face friend request.
+///
+/// The package cannot navigate the host's stack, so the host hands the work in and the plaza only ever
+/// calls it. `isAvailable` is answered per post rather than once for the screen, because the usual reason
+/// an item cannot run is *this* sender's missing public key, and that is a fact about the row.
+///
+/// Not `@MainActor`, and that is a compiler ruling rather than a style choice: the plaza renders these in
+/// a `ForEach`, which needs `Identifiable`, and a main-actor type cannot satisfy that nonisolated
+/// requirement. The plaza only ever calls an action from its own main-actor body, so a host that touches
+/// stored state from `perform` hops to the main actor itself.
+public struct PopopxMeshPlazaAuthorAction: Identifiable {
+    public let title: String
+    public let isAvailable: (PopopxMeshPlazaPost) -> Bool
+    /// Said above the greyed items when an action cannot run for this row. A disabled control with no
+    /// reason reads as a broken button; the app's own hall menu has said the reason since it was written,
+    /// and a host that injects actions must be able to say it too.
+    public let unavailableReason: String?
+    public let perform: (PopopxMeshPlazaPost) -> Void
+
+    public var id: String { title }
+
+    public init(
+        title: String,
+        isAvailable: @escaping (PopopxMeshPlazaPost) -> Bool = { _ in true },
+        unavailableReason: String? = nil,
+        perform: @escaping (PopopxMeshPlazaPost) -> Void
+    ) {
+        self.title = title
+        self.isAvailable = isAvailable
+        self.unavailableReason = unavailableReason
+        self.perform = perform
     }
 }
 
@@ -89,7 +147,7 @@ public enum PopopxMeshReachEstimate {
 /// The plaza's own state: the local broadcast timeline, the draft, the nickname, and whether the
 /// radio can carry anything at all.
 @MainActor
-public final class PopopxMeshPlazaModel: ObservableObject {
+public final class PopopxMeshPlazaModel: ObservableObject, PopopxMeshSwitchable {
     /// A plaza post is a flood; the same cap as the state mirror keeps one screen bounded.
     public static let maxDraftCharacters = 512
 
@@ -213,7 +271,9 @@ public final class PopopxMeshPlazaModel: ObservableObject {
         rebuildPosts(from: state.broadcasts)
     }
 
-    private func rebuildPosts(from messages: [PopopxMeshTimelineMessage]) {
+    /// Internal rather than private for the same reason `deduped` is: a test drives the reduction with
+    /// hand-built messages and never touches a radio.
+    func rebuildPosts(from messages: [PopopxMeshTimelineMessage]) {
         var next: [PopopxMeshPlazaPost] = []
         next.reserveCapacity(messages.count + localPosts.count)
         for message in messages where !message.isControlSignal {
@@ -223,10 +283,11 @@ public final class PopopxMeshPlazaModel: ObservableObject {
                     text: message.text,
                     timestamp: message.timestamp,
                     author: .neighbour(
-                    nickname: message.senderNickname,
-                    peerIDHex: message.senderPeerIDHex ?? message.messageID
-                ),
-                    hopCount: message.channel.hopCount ?? 0
+                        nickname: message.senderNickname,
+                        peerIDHex: message.senderPeerIDHex ?? ""
+                    ),
+                    hopCount: message.channel.hopCount ?? 0,
+                    meshPublicKeyHex: message.senderMeshPublicKeyHex
                 )
             )
         }
@@ -266,6 +327,20 @@ public final class PopopxMeshPlazaModel: ObservableObject {
             return $0.id < $1.id
         }
     }
+
+    // MARK: Fuse component
+
+    /// The fuse owns this mirror the way it owns the group one, and for the same reason: a plaza that
+    /// only ever started from `.onAppear` outlives nobody's decision to stop, so a closed switch left a
+    /// timeline of "neighbours" on screen that this device could no longer reach. `stop()` clears `posts`,
+    /// which is the honest reading of a mesh that is off.
+    public func meshSwitchDidTurnOn(nickname: String?) async {
+        start()
+    }
+
+    public func meshSwitchDidTurnOff() async {
+        stop()
+    }
 }
 
 /// Applying a nickname is the kill switch's job; the plaza names it through this so the two do not
@@ -296,6 +371,11 @@ public struct MeshPlazaView: View {
     /// tapped another tab would be a lie about a flood that is still on the air.
     private let keepsRunningWhenHidden: Bool
 
+    /// What a tap on an author's name offers. Empty by default, and the default is the whole point: the
+    /// name then renders as the same plain `Text` it always was, so a host that has not decided what its
+    /// plaza can do sees exactly the screen it saw before.
+    private let authorActions: [PopopxMeshPlazaAuthorAction]
+
     /// The only cursor on this screen. The plaza lives in a module that deliberately does not import
     /// UIKit (`PopopxProximityEngine.swift:321` states the rule), so dismissing the keyboard here goes
     /// through SwiftUI's own focus binding: clearing this resigns both fields. That is also the only
@@ -315,14 +395,17 @@ public struct MeshPlazaView: View {
     ///   - hidesTabBar: pass `false` when this screen is a home tab, so the four bottom tabs stay.
     ///   - keepsRunningWhenHidden: pass `true` for the same reason — a tab switch is not leaving the
     ///     mesh, and `stop()` would empty the timeline the person was just reading.
+    ///   - authorActions: what tapping a sender's name offers. Leave it empty for the read-only square.
     public init(
         model: PopopxMeshPlazaModel,
         hidesTabBar: Bool = true,
-        keepsRunningWhenHidden: Bool = false
+        keepsRunningWhenHidden: Bool = false,
+        authorActions: [PopopxMeshPlazaAuthorAction] = []
     ) {
         self.model = model
         self.hidesTabBar = hidesTabBar
         self.keepsRunningWhenHidden = keepsRunningWhenHidden
+        self.authorActions = authorActions
     }
 
     /// The one-line mount for a host that has an engine and a fuse at hand. The two role flags
@@ -332,7 +415,8 @@ public struct MeshPlazaView: View {
         source: PopopxMeshStateSource = .shared,
         killSwitch: PopopxMeshKillSwitch = .shared,
         hidesTabBar: Bool = true,
-        keepsRunningWhenHidden: Bool = false
+        keepsRunningWhenHidden: Bool = false,
+        authorActions: [PopopxMeshPlazaAuthorAction] = []
     ) {
         self.init(
             model: PopopxMeshPlazaModel(
@@ -341,7 +425,8 @@ public struct MeshPlazaView: View {
                 nicknameApplier: killSwitch
             ),
             hidesTabBar: hidesTabBar,
-            keepsRunningWhenHidden: keepsRunningWhenHidden
+            keepsRunningWhenHidden: keepsRunningWhenHidden,
+            authorActions: authorActions
         )
     }
 
@@ -401,9 +486,9 @@ public struct MeshPlazaView: View {
             // gaps between rows hit-testable too — a List is transparent to taps where it draws nothing.
             .contentShape(Rectangle())
             // `simultaneousGesture` is the right tool here and the wrong one on the app-side hall:
-            // nothing inside this list claims a tap (posts are text; the composer and nickname Save
-            // button live below the divider), whereas the hall's speaker name is a `Menu` and a
-            // simultaneous tap would close the keyboard underneath an opening menu.
+            // nothing inside this list claims a tap for itself in a way that needs the tap kept — posts
+            // are text, the composer and the nickname Save button live below the divider, and the author
+            // `Menu` a host may inject opens from the name, not from the blank space the gesture answers.
             .simultaneousGesture(TapGesture().onEnded { focusedField = nil })
             .meshScrollDismissesKeyboard()
         }
@@ -412,8 +497,7 @@ public struct MeshPlazaView: View {
         HStack(alignment: .firstTextBaseline) {
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
-                    Text(post.displayName)
-                        .font(.caption.weight(.semibold))
+                    authorLabel(post)
                     PopopxMeshChannelBadge(channel: .offlineMesh(hopCount: post.hopCount))
                 }
                 Text(post.text)
@@ -425,6 +509,46 @@ public struct MeshPlazaView: View {
                 .foregroundStyle(.secondary)
         }
         .padding(.vertical, 2)
+    }
+
+    /// The author's name, as a menu when the host has said what a tap means and as plain text when it
+    /// has not. The label is the same `Text` with the same font in both branches, so giving a host an
+    /// action does not restyle the timeline.
+    ///
+    /// A post this device wrote is never a menu: answering oneself is not an action, and the host's
+    /// refusal (no key of mine to address) would only confuse.
+    @ViewBuilder
+    private func authorLabel(_ post: PopopxMeshPlazaPost) -> some View {
+        if authorActions.isEmpty || post.author.isLocal {
+            Text(post.displayName)
+                .font(.caption.weight(.semibold))
+        } else {
+            Menu {
+                // The reason goes above the items, not into a toast after a dead tap: the app-side hall
+                // has spelled it out in the menu since the menu existed.
+                if let reason = reasonForUnavailability(post) {
+                    Text(reason)
+                }
+                ForEach(authorActions) { action in
+                    Button(action.title) { action.perform(post) }
+                        .disabled(!action.isAvailable(post))
+                }
+            } label: {
+                Text(post.displayName)
+                    .font(.caption.weight(.semibold))
+            }
+            // Without this the menu grows to the row's full width and swallows the tap that used to
+            // dismiss the keyboard, so the name is only as wide as the name.
+            .fixedSize()
+        }
+    }
+
+    /// The first unavailable action's reason for this row, or nil when every action can run.
+    private func reasonForUnavailability(_ post: PopopxMeshPlazaPost) -> String? {
+        for action in authorActions where !action.isAvailable(post) {
+            if let reason = action.unavailableReason { return reason }
+        }
+        return nil
     }
 
     private var footer: some View {

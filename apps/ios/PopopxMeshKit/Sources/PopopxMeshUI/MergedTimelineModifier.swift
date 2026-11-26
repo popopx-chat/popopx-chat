@@ -81,6 +81,10 @@ public struct PopopxMeshTimelineMessage: Identifiable, Hashable, Sendable {
     /// The sender's 8-byte wire id, for the window in which a flood has been heard but a handshake
     /// has not yet resolved the public key. nil for the app's own stream.
     public let senderPeerIDHex: String?
+    /// The sender's mesh public key, when the frame carried one. `senderPeerIDHex` cannot address a
+    /// peer — no session can be assembled to a wire id alone — so this is the only value a row can be
+    /// tapped *with*. nil for the app's own stream and for a sender the mesh has not resolved yet.
+    public let senderMeshPublicKeyHex: String?
 
     public var id: String { messageID }
 
@@ -92,7 +96,8 @@ public struct PopopxMeshTimelineMessage: Identifiable, Hashable, Sendable {
         channel: PopopxMeshTimelineChannel,
         isControlSignal: Bool = false,
         senderNickname: String? = nil,
-        senderPeerIDHex: String? = nil
+        senderPeerIDHex: String? = nil,
+        senderMeshPublicKeyHex: String? = nil
     ) {
         self.messageID = messageID
         self.timestamp = timestamp
@@ -102,6 +107,7 @@ public struct PopopxMeshTimelineMessage: Identifiable, Hashable, Sendable {
         self.isControlSignal = isControlSignal
         self.senderNickname = senderNickname
         self.senderPeerIDHex = senderPeerIDHex
+        self.senderMeshPublicKeyHex = senderMeshPublicKeyHex
     }
 
     /// A row the app already renders: SMP, by definition, because that is the only path its own
@@ -159,6 +165,10 @@ public struct PopopxMeshTimelineMessage: Identifiable, Hashable, Sendable {
         self.channel = .offlineMesh(hopCount: inbound.hopCount)
         self.senderNickname = senderNickname
         self.senderPeerIDHex = inbound.sender.hex
+        // The frame's own key, not a lookup: the engine fills `senderMeshPublicKey` from the peer table
+        // when it has one (`PopopxMeshEngine.swift:906`), so a row either carries an addressable sender
+        // or says plainly that it does not.
+        self.senderMeshPublicKeyHex = inbound.senderMeshPublicKey?.popopxHex
         switch inbound.body {
         case let .text(text):
             self.text = text

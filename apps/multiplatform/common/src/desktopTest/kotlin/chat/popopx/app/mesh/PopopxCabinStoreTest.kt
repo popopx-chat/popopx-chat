@@ -8,10 +8,12 @@ import chat.popopx.common.mesh.PopopxMeshInbound
 import chat.popopx.common.mesh.PopopxMeshPeer
 import chat.popopx.common.mesh.PopopxMeshPeerID
 import chat.popopx.common.mesh.PopopxMeshSendFailure
+import chat.popopx.common.mesh.meshHex
 import chat.popopx.common.views.cabin.PopopxCabinStore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -39,10 +41,11 @@ class PopopxCabinStoreTest {
     seed: Int,
     text: String,
     broadcast: Boolean,
+    meshKey: ByteArray? = null,
   ): PopopxMeshInbound = PopopxMeshInbound(
     messageId = id,
     sender = peerID(seed),
-    senderMeshPublicKey = null,
+    senderMeshPublicKey = meshKey,
     recipient = if (broadcast) null else peerID(0x7F),
     hopCount = 1,
     isBroadcast = broadcast,
@@ -88,6 +91,33 @@ class PopopxCabinStoreTest {
     )
     store.ingest(PopopxMeshEvent.Inbound(control))
     assertEquals(1, store.broadcasts.value.size)
+  }
+
+  @Test
+  fun aNeighbourIsHeardAndAnsweredInTheSameThread() {
+    val store = PopopxCabinStore(PopopxMeshEventHub())
+    val key = ByteArray(32) { (it + 1).toByte() }
+    val keyHex = key.meshHex()
+
+    // The bug this pins: an inbound was filed under the 8-byte wire id while the composer filed the reply
+    // under the public key, so one conversation had two map entries and the 1:1 panel — which reads only
+    // the key it selected — showed one direction and an empty thread for the other.
+    store.ingest(PopopxMeshEvent.Inbound(inbound("d1", 0x22, "from the peer", broadcast = false, meshKey = key)))
+    store.noteLocalPrivate("to the peer", keyHex, "p1", failed = false)
+
+    assertEquals(1, store.privateThreads.value.size)
+    assertEquals(listOf("from the peer", "to the peer"), store.privateThreads.value.getValue(keyHex).map { it.text })
+    // The row carries the address a tap needs, because `send()` takes the public key and not the wire id.
+    assertEquals(keyHex, store.privateThreads.value.getValue(keyHex).first().meshPublicKeyHex)
+    assertNull(store.privateThreads.value.getValue(keyHex).last().meshPublicKeyHex)
+
+    // The control: a sender whose key the mesh never learned is still listed, under the only identity
+    // there is, and does not fold into the keyed thread of a different neighbour.
+    store.ingest(PopopxMeshEvent.Inbound(inbound("d2", 0x33, "no key yet", broadcast = false)))
+    assertEquals(2, store.privateThreads.value.size)
+    val byWireId = store.privateThreads.value.getValue(peerID(0x33).hex)
+    assertEquals(listOf("no key yet"), byWireId.map { it.text })
+    assertNull(byWireId.single().meshPublicKeyHex)
   }
 
   @Test

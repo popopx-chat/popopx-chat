@@ -69,8 +69,15 @@ class PopopxCabinPost(
   val mine: Boolean,
   val hopCount: Int,
   val failed: Boolean = false,
+  /**
+   * The sender's mesh public key, when the mesh has one. This, not [author], is what a private send is
+   * addressed with, so it is the value a tap on the author needs: [author] is the 8-byte wire id and
+   * `send()` cannot take it.
+   */
+  val meshPublicKeyHex: String? = null,
 ) {
-  fun asFailed(): PopopxCabinPost = PopopxCabinPost(id, text, atMillis, author, mine, hopCount, true)
+  fun asFailed(): PopopxCabinPost =
+    PopopxCabinPost(id, text, atMillis, author, mine, hopCount, true, meshPublicKeyHex)
 
   companion object {
     /** Control and binary bodies are not text and stay out of a text timeline, as they do on iOS. */
@@ -83,6 +90,7 @@ class PopopxCabinPost(
         author = inbound.sender.hex,
         mine = false,
         hopCount = inbound.hopCount,
+        meshPublicKeyHex = inbound.senderMeshPublicKey?.meshHex(),
       )
     }
   }
@@ -171,7 +179,13 @@ class PopopxCabinStore(
         if (event.inbound.isBroadcast) {
           broadcasts.value = append(post, broadcasts.value)
         } else {
-          val key = event.inbound.sender.hex
+          // One thread per peer, keyed the way the peer is addressed everywhere else on this screen: the
+          // mesh public key, which is what `selected` holds and what `send()` takes. Keying an inbound by
+          // the 8-byte wire id instead put the received half of a conversation in a different map entry
+          // from the sent half, so the 1:1 panel showed only one direction — and showed nothing at all for
+          // a peer announced by key. The wire id remains the fallback for a sender whose key is unknown,
+          // which is the only state where there is no key to have used.
+          val key = event.inbound.senderMeshPublicKey?.meshHex() ?: event.inbound.sender.hex
           privateThreads.value = privateThreads.value + (key to append(post, privateThreads.value[key].orEmpty()))
         }
       }
@@ -256,6 +270,23 @@ fun PopopxCabinView() {
   val chatDraft = rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue("")) }
   val selected = rememberSaveable { mutableStateOf<String?>(null) }
   val failure = remember { mutableStateOf<PopopxMeshSendFailure?>(null) }
+  // Why a tap on an author did nothing. Said in the one place this screen explains a refusal, because a
+  // silent non-response reads as a broken button.
+  val unanswered = remember { mutableStateOf<String?>(null) }
+  val noKeyWords = stringResource(MR.strings.cabin_author_no_key)
+
+  // A tap on a sender opens the 1:1 panel for that sender — the same `selected` the node list sets, so
+  // there is one thread, one composer and one send path rather than a second one bolted to the timeline.
+  val selectAuthor: (PopopxCabinPost) -> Unit = { post ->
+    val key = post.meshPublicKeyHex
+    if (key == null) {
+      unanswered.value = noKeyWords
+    } else {
+      selected.value = key
+      failure.value = null
+      unanswered.value = null
+    }
+  }
 
   // The mirror and the fuse, not the view, own the mesh: entering the tab starts the pump and restores the
   // persisted switch, and leaving the tab stops neither. Only the switch (or a panic wipe) tears the radio down.
@@ -287,6 +318,7 @@ fun PopopxCabinView() {
           PopopxCabinPeerRow(peer, selected.value == peer.meshPublicKey?.meshHex()) {
             selected.value = peer.meshPublicKey?.meshHex()
             failure.value = null
+            unanswered.value = null
           }
         }
       }
@@ -297,7 +329,7 @@ fun PopopxCabinView() {
       if (posts.isEmpty()) {
         Text(stringResource(MR.strings.cabin_broadcast_empty), color = MaterialTheme.colors.secondary, fontSize = 13.sp)
       } else {
-        posts.forEach { post -> PopopxCabinPostRow(post) }
+        posts.forEach { post -> PopopxCabinPostRow(post, cabinAuthorLabel(post, peers), selectAuthor) }
       }
       Spacer(Modifier.height(DEFAULT_PADDING_HALF))
       PopopxCabinComposer(
@@ -330,7 +362,7 @@ fun PopopxCabinView() {
         if (thread.isEmpty()) {
           Text(stringResource(MR.strings.cabin_chat_empty), color = MaterialTheme.colors.secondary, fontSize = 13.sp)
         } else {
-          thread.forEach { post -> PopopxCabinPostRow(post) }
+          thread.forEach { post -> PopopxCabinPostRow(post, cabinAuthorLabel(post, peers), selectAuthor) }
         }
         PopopxCabinComposer(
           value = chatDraft,
@@ -350,10 +382,11 @@ fun PopopxCabinView() {
         }
       }
 
-      failure.value?.let {
+      val refusal = failure.value?.let { cabinFailureWords(it) } ?: unanswered.value
+      if (refusal != null) {
         Spacer(Modifier.height(DEFAULT_PADDING_HALF))
         Text(
-          cabinFailureWords(it),
+          refusal,
           color = MaterialTheme.colors.error,
           fontSize = 12.sp,
           maxLines = 2,
@@ -504,8 +537,34 @@ private fun PopopxCabinPeerRow(peer: PopopxMeshPeer, isSelected: Boolean, onSele
   }
 }
 
+/**
+ * `PopopxCabinNode.label` — announce nickname, then the public-key abbreviation, then the 8-byte wire id.
+ * Read at render time rather than stamped onto the row, because the nickname of a sender arrives AFTER that
+ * sender's first broadcast: a label frozen at ingest would show hex for a neighbour the mesh has since
+ * heard named.
+ */
 @Composable
-private fun PopopxCabinPostRow(post: PopopxCabinPost) {
+private fun cabinAuthorLabel(post: PopopxCabinPost, peers: List<PopopxMeshPeer>): String {
+  val key = post.meshPublicKeyHex
+  val known = peers.firstOrNull {
+    if (key != null) it.meshPublicKey?.meshHex() == key else it.peerID.hex == post.author
+  }
+  val nickname = known?.nickname?.trim()
+  if (!nickname.isNullOrEmpty()) return nickname
+  if (key != null) return cabinAbbreviate(key)
+  return post.author.take(8)
+}
+
+/** `PopopxMeshBannerModel.shorten`, via `PopopxCabinLabel.abbreviate`: past 16 characters, 16 and an ellipsis. */
+private fun cabinAbbreviate(hex: String): String =
+  if (hex.length > 16) hex.substring(0, 16) + "…" else hex
+
+@Composable
+private fun PopopxCabinPostRow(
+  post: PopopxCabinPost,
+  label: String,
+  onAuthor: (PopopxCabinPost) -> Unit,
+) {
   Column(
     Modifier
       .fillMaxWidth()
@@ -513,11 +572,21 @@ private fun PopopxCabinPostRow(post: PopopxCabinPost) {
   ) {
     Row(Modifier.fillMaxWidth()) {
       Text(
-        if (post.mine) stringResource(MR.strings.cabin_you) else post.author.take(12),
+        if (post.mine) stringResource(MR.strings.cabin_you) else label,
         fontSize = 12.sp,
         fontWeight = FontWeight.Medium,
         color = MaterialTheme.colors.secondary,
-        modifier = Modifier.weight(1f),
+        // The name is the affordance, as it is on iOS, and it stays tappable when the key is missing so
+        // the screen can say why nothing happened instead of appearing dead.
+        modifier = if (post.mine) {
+          Modifier.weight(1f)
+        } else {
+          Modifier
+            .weight(1f)
+            .clip(RoundedCornerShape(6.dp))
+            .clickable { onAuthor(post) }
+            .padding(horizontal = 4.dp, vertical = 2.dp)
+        },
       )
       if (post.failed) {
         Text(stringResource(MR.strings.cabin_failed), fontSize = 11.sp, color = MaterialTheme.colors.error)

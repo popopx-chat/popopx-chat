@@ -3568,6 +3568,7 @@
   <string name="cabin_fail_ttl_exhausted">TTL exhausted</string>
   <string name="cabin_fail_oversized">Too long for one frame: %1$d bytes, limit %2$d</string>
   <string name="cabin_fail_no_session">No session with peer</string>
+  <string name="cabin_author_no_key">No public key for this sender yet — it can be heard, not answered</string>
   <!-- The on-device copilot: the whisper bar above the composer, its two opt-ins, the confirm card.
        Nothing here promises a network round trip, and no value carries a recipient: the bar reports on
        the phone and writes to the calendar only after the confirm tap. -->

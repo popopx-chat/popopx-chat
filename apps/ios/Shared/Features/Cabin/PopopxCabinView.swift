@@ -173,13 +173,10 @@ private struct PopopxCabinNode: Identifiable, Hashable {
     var id: String { peerIDHex }
 
     /// How the name is taken, matching the package's private-chat page: announce nickname → public-key abbreviation → the 8-byte line id prefix.
+    /// The order lives in `PopopxCabinAuthor.label`, because the plaza's rows need the same spelling from
+    /// different fields and two spellings of one peer is how two screens start disagreeing about who is who.
     var label: String {
-        if let nickname {
-            let clean = nickname.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !clean.isEmpty { return clean }
-        }
-        if let meshPublicKeyHex { return PopopxCabinLabel.abbreviate(meshPublicKeyHex) }
-        return String(peerIDHex.prefix(8))
+        PopopxCabinAuthor.label(nickname: nickname, meshPublicKeyHex: meshPublicKeyHex, peerIDHex: peerIDHex)
     }
 
     /// Whether a private chat can be opened: without a public key no session can be assembled, and `SYS_POPOPX_*` frames would have nowhere to go.
@@ -310,15 +307,199 @@ private enum PopopxCabinNodeFold {
     }
 }
 
-/// The two hops on the root stack: the top-left "Groups" capsule → nearby Bluetooth Mesh groups; the "pairing records" row in the settings centre →
-/// the package's pairing-records and offline-binding page.
+// MARK: - One speaker, two offline paths
+
+/// What tapping a speaker's name does, written once.
+///
+/// Two screens offer it: the drawer's hall (`PopopxCabinHallView.authorControl`) and the package's plaza,
+/// which cannot navigate the app's stack and so takes the actions from its host. This file's own comment
+/// above `sendFriendRequest(to:)` states the rule that makes the extraction necessary: module 3's
+/// `initiatePairing(with:incognito:)` is the only thing in the repo that can make an offline friendship
+/// exist, and a second copy of everything wrapped around it — the fuse refusal, the missing-key refusal,
+/// the receipts — is how two screens end up saying two different things about one peer. The host supplies
+/// its stack, its toast and its spinner; nothing outside this enum decides anything.
+@MainActor
+enum PopopxCabinAuthor {
+    /// Everything a host contributes besides the peer it was tapped on.
+    struct Host {
+        let runtime: PopopxMeshRuntime
+        let toast: PopopxToastModel
+        /// Push the package's private-chat page for a key this enum has just accepted. It has to be the
+        /// host's own `path`: a `navigationDestination` registered on a stack this view does not hold
+        /// pushes nothing, which is exactly the bug 2026-11-20's note at the top of this file records.
+        let pushChat: (String) -> Void
+        /// Re-read whatever the host derived from the pairing state, after the action lands. The drawer
+        /// folds its node table here; a screen with no table of its own says so and passes nothing to do.
+        let refresh: () async -> Void
+        /// The host's "this row is working" marker, set once the guards have passed and cleared when the
+        /// action returns. The drawer closes over the row id it was tapped from; the plaza renders no
+        /// spinner on an author name, so it passes a pair that does nothing.
+        let beginOpening: () -> Void
+        let endOpening: () -> Void
+    }
+
+    /// One action in flight for the whole device, keyed by the public key it was asked for. Carried over
+    /// from the drawer, which guarded on `openingNodeID == nil` before either body could run:
+    /// `initiatePairing` refuses a peer it has already *paired* with, but not a second call for a peer
+    /// still waiting for its first receipt, so a double tap floods twice and writes the binding twice.
+    private static var openingHex: String?
+
+    /// The drawer's node rows and the plaza's rows spell one peer the same way, because both call this:
+    /// announced nickname → the public key abbreviated by the package's own rule → the 8-byte wire id's
+    /// prefix. `nonisolated` so `PopopxCabinNode.label` can forward here without a hop.
+    nonisolated static func label(nickname: String?, meshPublicKeyHex: String?, peerIDHex: String) -> String {
+        if let nickname {
+            let clean = nickname.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !clean.isEmpty { return clean }
+        }
+        if let meshPublicKeyHex { return PopopxCabinLabel.abbreviate(meshPublicKeyHex) }
+        return String(peerIDHex.prefix(8))
+    }
+
+    /// The full meaning of "tap to start Bluetooth private chat directly": first send one offline
+    /// connection invitation through module 3 (the only action that can make a Noise private session
+    /// exist), then push the package's private-chat page onto the stack. Every failure is spoken out in a
+    /// plain sentence; only the two cases "this public key still cannot be parsed" and "the invitation
+    /// link itself is not valid" do not enter the private-chat page — that page would hold nothing
+    /// besides the failure notice.
+    static func openChat(hex: String?, label: String, host: Host) async {
+        guard let key = await accepted(hex: hex, label: label, host: host) else { return }
+        defer { finish(host: host) }
+
+        // Asked live rather than from a folded row: the plaza has no fold of its own, and a peer paired
+        // since the last reading still must not be sent a second invitation.
+        let pairingState = await host.runtime.pairing.state(for: key)
+        if case .paired = pairingState {
+            // Module 3 has already proven the pairing: do not resend an invitation (`initiatePairing`
+            // throws `.alreadyPaired` for an already-paired peer), go straight into the session.
+            host.pushChat(key)
+            return
+        }
+
+        var refusedWithoutSession = false
+        do {
+            _ = try await host.runtime.pairing.initiatePairing(with: key, incognito: false)
+            PopopxHaptics.notice(.success)
+            host.toast.show(Copy.pairingSentToast(label), kind: .mesh)
+        } catch let pairingError {
+            PopopxHaptics.notice(.error)
+            host.toast.show(Copy.pairingWords(for: pairingError, label: label), kind: .danger)
+            switch pairingError {
+            case .peerKeyRejected, .inviteLinkRejected:
+                refusedWithoutSession = true
+            case .alreadyPaired, .declinedRecently, .requestUnknown, .requestSuperseded,
+                 .sendFailed, .offlineBridge, .mappingStoreFailed:
+                // The session is still worth opening: the private-chat page re-reads the binding and the
+                // pairing evidence itself, and spells out one by one why nothing can be sent.
+                break
+            }
+        }
+        await host.refresh()
+        guard !refusedWithoutSession else { return }
+        host.pushChat(key)
+    }
+
+    /// The second exit when a speaker's name is tapped: send only one offline connection invitation,
+    /// without pushing the private-chat page onto the stack.
+    static func sendFriendRequest(hex: String?, label: String, host: Host) async {
+        guard let key = await accepted(hex: hex, label: label, host: host) else { return }
+        defer { finish(host: host) }
+        do {
+            _ = try await host.runtime.pairing.initiatePairing(with: key, incognito: false)
+            PopopxHaptics.notice(.success)
+            host.toast.show(Copy.pairingSentToast(label), kind: .mesh)
+        } catch let pairingError {
+            PopopxHaptics.notice(.error)
+            host.toast.show(Copy.pairingWords(for: pairingError, label: label), kind: .danger)
+        }
+        await host.refresh()
+    }
+
+    /// The plaza's author menu, using this file's existing three entries for its copy: the two titles and
+    /// the reason both are greyed. No new sentence, so the two screens cannot drift apart.
+    static func plazaActions(host: Host) -> [PopopxMeshPlazaAuthorAction] {
+        [
+            PopopxMeshPlazaAuthorAction(
+                title: Copy.authorChat,
+                isAvailable: { $0.meshPublicKeyHex != nil },
+                unavailableReason: Copy.authorNoKey
+            ) { post in
+                Task { await openChat(hex: post.meshPublicKeyHex, label: plazaLabel(post), host: host) }
+            },
+            PopopxMeshPlazaAuthorAction(
+                title: Copy.authorPair,
+                isAvailable: { $0.meshPublicKeyHex != nil },
+                unavailableReason: Copy.authorNoKey
+            ) { post in
+                Task { await sendFriendRequest(hex: post.meshPublicKeyHex, label: plazaLabel(post), host: host) }
+            },
+        ]
+    }
+
+    /// The package's one and only 1:1 offline private-chat surface, mounted from a runtime. Every host
+    /// that pushes it goes through here, because three entry points written out three times are three
+    /// chances to disagree about one page. All four dependencies are the runtime's real objects and not
+    /// one default value: the defaults are `PopopxMeshEngine.shared` / `PopopxMeshKillSwitch.shared`,
+    /// which would build the engine and the radio out on a machine whose master switch is closed (the red
+    /// line in this file's header).
+    @MainActor @ViewBuilder static func privateChatView(
+        peerMeshPublicKeyHex: String,
+        runtime: PopopxMeshRuntime
+    ) -> some View {
+        PopopxMeshPrivateChatView(
+            peerMeshPublicKeyHex: peerMeshPublicKeyHex,
+            outbound: runtime.engineBackend,
+            source: runtime.stateSource,
+            store: runtime.mappingStore,
+            killSwitch: runtime.killSwitch
+        )
+        .navigationTitle(Copy.privateChatTitle)
+    }
+
+    /// A plaza row's name in this app's words, from the fields the row actually carries, through the one
+    /// spelling above.
+    private static func plazaLabel(_ post: PopopxMeshPlazaPost) -> String {
+        guard case let .neighbour(nickname, peerIDHex) = post.author else { return post.displayName }
+        return label(nickname: nickname, meshPublicKeyHex: post.meshPublicKeyHex, peerIDHex: peerIDHex)
+    }
+
+    /// The two refusals every author action shares, in the order the drawer has stated them since it was
+    /// written: the fuse first (nothing goes out at all), then the key (this peer cannot be addressed).
+    /// Returns the key to work with, or nil when the action was refused and the reason already spoken.
+    private static func accepted(hex: String?, label: String, host: Host) async -> String? {
+        guard host.runtime.isFuseOn else {
+            PopopxHaptics.notice(.warning)
+            host.toast.show(Copy.fuseOffToast, kind: .danger)
+            return nil
+        }
+        guard let hex else {
+            PopopxHaptics.notice(.warning)
+            host.toast.show(Copy.noKeyToast(label), kind: .danger)
+            return nil
+        }
+        guard openingHex == nil else { return nil }
+        openingHex = hex
+        host.beginOpening()
+        return hex
+    }
+
+    private static func finish(host: Host) {
+        openingHex = nil
+        host.endOpening()
+    }
+}
+
+/// The three hops on the root stack: the top-left "Groups" capsule → nearby Bluetooth Mesh groups; the
+/// "pairing records" row in the settings centre → the package's pairing-records and offline-binding page;
+/// and a tap on a plaza speaker's name → the package's 1:1 private chat for that peer's public key.
 ///
 /// Deliberately does not reuse `PopopxCabinRoute`: the page inside the drawer must keep holding its own `path` (see criterion 4 of the view below —
 /// the private-chat hop pushes a page after the offline connection invitation has been sent, the action is async, and only a path bound to its own stack can still push after that).
-/// The root stack registers only these two cells it actually goes to, and does not drag in the semantics of the drawer's five cases.
+/// The root stack registers only these cells it actually goes to, and does not drag in the semantics of the drawer's five cases.
 private enum PopopxMeshPlazaRoute: Hashable {
     case nearbyGroups
     case privacyRecords
+    case privateChat(peerMeshPublicKeyHex: String)
 }
 
 // MARK: - Tab 3 root (full-screen plaza + the old panel inside a full-height drawer)
@@ -336,11 +517,15 @@ private enum PopopxMeshPlazaRoute: Hashable {
 ///    so what this device shouted out is not retracted just because someone tapped "Chat". ⚠️ From this round **the bottom four capsules still give way**, but not because these two parameters
 ///    requested it: hiding the bottom bar is declared by this view separately, on the root stack's screen content, with `.toolbar(.hidden, for: .tabBar)`
 ///    (see that section in `body`), and the package's `hidesTabBar` handles only the one question "is this screen a pushed page".
-/// 2. The model is held by this view's `@StateObject`, then passed through `MeshPlazaView(model:)`: that convenience init would, on every body recompute,
-///    new a `PopopxMeshPlazaModel`, and `@ObservedObject` follows by switching to the new one — the home page's body
+/// 2. The model is the runtime's one plaza mirror, passed through `MeshPlazaView(model:)`: that convenience
+///    init would, on every body recompute, new a `PopopxMeshPlazaModel`, and `@ObservedObject` follows by
+///    switching to the new one — the home page's body
 ///    recomputes more often than a pushed page does (opening the drawer once is twice), and swapping the model means the timeline becomes empty and nobody ever `start()`s it again.
-///    For the object identity to survive there is only the `@StateObject` route. The three dependencies are still given verbatim as `PopopxMeshRuntime`'s real objects
-///    (the same set as the `.plaza` route and `PopopxAddFriendView.swift:121-125`), and not one default value is used — the default value is
+///    `@StateObject` alone fixed only **this** screen: the two pushed plazas (`PopopxCabinRoute.plaza` and
+///    `PopopxAddFriendRoute.meshPlaza`) kept building their own inside a `navigationDestination` builder and
+///    had the same empty-square failure. One instance on `PopopxMeshRuntime` is what makes all three hold,
+///    and it is on the fuse with them. The three dependencies are still given verbatim as
+///    `PopopxMeshRuntime`'s real objects, and not one default value is used anywhere — the default value is
 ///    `PopopxMeshEngine.shared`, which would build out the engine and the radio even while the master switch is closed (the red line in the file header).
 /// 3. No title is set: this bar's four slots are already standing full (two in the top-left + the teal capsule in the middle + one on the right), and on 393pt (iPhone 15
 ///    Pro) stacking a centred title on top of that is where truncation begins — the middle slot is this round's title position, occupied by the old Cabin panel's capsule.
@@ -352,7 +537,6 @@ private enum PopopxMeshPlazaRoute: Hashable {
 @MainActor
 struct PopopxMeshPlazaRootView: View {
     @ObservedObject private var meshRuntime: PopopxMeshRuntime
-    @StateObject private var plazaModel: PopopxMeshPlazaModel
 
     /// The binding of `MainTabView`'s selected tab, given by the host at the mount point (that tab in `MainTabView.swift`).
     /// After the top bar went full-screen immersive there is no cross-cutting navigation beneath this tab at all, and the only exit is the top-left back key — what it has to write
@@ -388,23 +572,31 @@ struct PopopxMeshPlazaRootView: View {
 
     @MainActor init(tabSelection: Binding<PopopxTab>) {
         _tabSelection = tabSelection
-        let runtime = PopopxMeshRuntime.shared
-        _meshRuntime = ObservedObject(wrappedValue: runtime)
-        _plazaModel = StateObject(
-            wrappedValue: PopopxMeshPlazaModel(
-                outbound: runtime.engineBackend,
-                source: runtime.stateSource,
-                nicknameApplier: runtime.killSwitch
-            )
+        _meshRuntime = ObservedObject(wrappedValue: PopopxMeshRuntime.shared)
+    }
+
+    /// This screen's half of the author menu. It owns the toast (the same model `.popopxToast` is
+    /// attached to below) and the root stack's `path`, and has nothing to refresh: the plaza re-reads the
+    /// mirror by itself, and the settings centre re-reads for as long as that sheet is on screen — an
+    /// action taken from the plaza therefore cannot leave a stale reading anywhere on this tab.
+    @MainActor private var authorHost: PopopxCabinAuthor.Host {
+        PopopxCabinAuthor.Host(
+            runtime: meshRuntime,
+            toast: meshSettingsToast,
+            pushChat: { rootPath.append(.privateChat(peerMeshPublicKeyHex: $0)) },
+            refresh: {},
+            beginOpening: {},
+            endOpening: {}
         )
     }
 
     var body: some View {
         NavigationStack(path: $rootPath) {
             MeshPlazaView(
-                model: plazaModel,
+                model: meshRuntime.plazaModel,
                 hidesTabBar: false,
-                keepsRunningWhenHidden: true
+                keepsRunningWhenHidden: true,
+                authorActions: PopopxCabinAuthor.plazaActions(host: authorHost)
             )
             // The bottom matches the other two mount sites with the same sentence (`PopopxCabinView`'s `.plaza`, `PopopxAddFriendView.swift:127`):
             // the plaza carries no background of its own, so the host gives the grouped background once, and only then are the three screens the same piece of cloth.
@@ -454,6 +646,15 @@ struct PopopxMeshPlazaRootView: View {
                     )
                     .navigationTitle(Copy.privacyRecordsRow)
                     .modifier(ThemedBackground(grouped: true))
+
+                case let .privateChat(peerMeshPublicKeyHex):
+                    // Where a plaza author action lands. The same mount helper the drawer's own
+                    // `.privateChat` uses, so the page pushed from the home tab and the page pushed from
+                    // the drawer cannot be two different screens.
+                    PopopxCabinAuthor.privateChatView(
+                        peerMeshPublicKeyHex: peerMeshPublicKeyHex,
+                        runtime: meshRuntime
+                    )
                 }
             }
             .popopxToast(meshSettingsToast)
@@ -815,15 +1016,16 @@ struct PopopxCabinView: View {
                 case .plaza:
                     // The top-left destination when the page stands alone (the drawer tier no longer gives it a loop back; see `leadingBarEntry`),
                     // kept because `PopopxCabinRoute.plaza` and this registration are one unit. This whole block is verbatim identical to
-                    // `PopopxAddFriendView.swift:118-128`: the same `MeshPlazaView`, the same three
-                    // dependencies all given as runtime's real objects (not one default value), the same title Key, the same
-                    // `ThemedBackground(grouped: true)`; the two parameters use their defaults, so this screen still behaves in the "pushed page"
-                    // tier (hide the four Tab capsules, clear on leaving). The two entries therefore cannot produce two different screens
+                    // `PopopxAddFriendView.swift:118-128`: the same `MeshPlazaView`, the same single plaza
+                    // model taken from the runtime (never built here — see criterion 2 above `PopopxMeshPlazaRootView`), the same author menu, the same title Key,
+                    // the same `ThemedBackground(grouped: true)`. `hidesTabBar` keeps its default because this screen **is** a pushed page; `keepsRunningWhenHidden: true`
+                    // is not a per-screen choice any more, since the model is shared with the home tab and leaving this page must not
+                    // empty the timeline that tab is showing. The two entries therefore cannot produce two different screens
                     // — that is exactly what device round 5 demanded.
                     MeshPlazaView(
-                        outbound: meshRuntime.engineBackend,
-                        source: meshRuntime.stateSource,
-                        killSwitch: meshRuntime.killSwitch
+                        model: meshRuntime.plazaModel,
+                        keepsRunningWhenHidden: true,
+                        authorActions: PopopxCabinAuthor.plazaActions(host: authorHost())
                     )
                     .navigationTitle(Copy.plazaTitle)
                     .modifier(ThemedBackground(grouped: true))
@@ -849,16 +1051,13 @@ struct PopopxCabinView: View {
                     .navigationTitle(Copy.groupsRow)
 
                 case let .privateChat(peerMeshPublicKeyHex):
-                    // The package's one and only 1:1 offline private-chat surface. All four dependencies given as real objects, not one default value: the defaults are
-                    // `PopopxMeshEngine.shared` / `PopopxMeshKillSwitch.shared`, which would be built out even while the master switch is closed.
-                    PopopxMeshPrivateChatView(
+                    // The package's one and only 1:1 offline private-chat surface, through the one mount
+                    // helper (its comment states why no dependency may take its default value). Same page
+                    // the plaza's author action lands on from the home tab.
+                    PopopxCabinAuthor.privateChatView(
                         peerMeshPublicKeyHex: peerMeshPublicKeyHex,
-                        outbound: meshRuntime.engineBackend,
-                        source: meshRuntime.stateSource,
-                        store: meshRuntime.mappingStore,
-                        killSwitch: meshRuntime.killSwitch
+                        runtime: meshRuntime
                     )
-                    .navigationTitle(Copy.privateChatTitle)
                 }
             }
             .sheet(isPresented: $showsPairingRequests) {
@@ -1178,75 +1377,32 @@ struct PopopxCabinView: View {
 
     // MARK: - Actions
 
-    /// The full meaning of "tap to start Bluetooth private chat directly": first send one offline connection invitation through module 3 (the only action that can make a Noise private
-    /// session exist), then push the package's private-chat page onto the stack. Every failure is spoken out in a plain Chinese sentence; only the two cases "this public key
-    /// still cannot be parsed" and "the invitation link itself is not valid" do not enter the private-chat page — that page would hold nothing besides the failure notice.
+    /// Where a node row's or a hall bubble's tap lands. The deciding itself lives in `PopopxCabinAuthor`,
+    /// written once for this drawer and for the plaza's injected menu; what stays here is only what belongs
+    /// to this screen — the row that shows progress, and the stack this page pushes onto.
     @MainActor private func openBluetoothChat(with node: PopopxCabinNode) async {
-        guard meshRuntime.isFuseOn else {
-            PopopxHaptics.notice(.warning)
-            toast.show(Copy.fuseOffToast, kind: .danger)
-            return
-        }
-        guard let hex = node.meshPublicKeyHex else {
-            PopopxHaptics.notice(.warning)
-            toast.show(Copy.noKeyToast(node.label), kind: .danger)
-            return
-        }
-        guard openingNodeID == nil else { return }
-        openingNodeID = node.id
-        defer { openingNodeID = nil }
-
-        if node.isPaired {
-            // Module 3 has already proven the pairing: do not resend an invitation (`initiatePairing` throws `.alreadyPaired` for an already-paired peer), go straight into the session.
-            path.append(.privateChat(peerMeshPublicKeyHex: hex))
-            return
-        }
-
-        var refusedWithoutSession = false
-        do {
-            _ = try await meshRuntime.pairing.initiatePairing(with: hex, incognito: false)
-            PopopxHaptics.notice(.success)
-            toast.show(Copy.pairingSentToast(node.label), kind: .mesh)
-        } catch let pairingError {
-            PopopxHaptics.notice(.error)
-            toast.show(Copy.pairingWords(for: pairingError, label: node.label), kind: .danger)
-            switch pairingError {
-            case .peerKeyRejected, .inviteLinkRejected:
-                refusedWithoutSession = true
-            case .alreadyPaired, .declinedRecently, .requestUnknown, .requestSuperseded,
-                 .sendFailed, .offlineBridge, .mappingStoreFailed:
-                // The session is still worth opening: the private-chat page re-reads the binding and the pairing evidence itself, and spells out one by one why nothing can be sent.
-                break
-            }
-        }
-        await refresh()
-        guard !refusedWithoutSession else { return }
-        path.append(.privateChat(peerMeshPublicKeyHex: hex))
+        await PopopxCabinAuthor.openChat(hex: node.meshPublicKeyHex, label: node.label, host: authorHost(row: node.id))
     }
 
-    /// The second exit when a speaker's name is tapped in the hall: send only one offline connection invitation, without pushing the private-chat page onto the stack. It still calls module 3's one and only
-    /// `initiatePairing(with:incognito:)` — repo-wide this is the only path that can make an offline friendship exist, so here
-    /// there is no second "add friend" implementation; the failure receipts of both paths are also the same batch of entries, so two places cannot say two different things.
+    /// The second exit of the same tap: send one offline connection invitation without pushing the
+    /// private-chat page. Same core, same receipts, so the two cannot say two different things about
+    /// one peer.
     @MainActor private func sendFriendRequest(to node: PopopxCabinNode) async {
-        guard meshRuntime.isFuseOn else {
-            PopopxHaptics.notice(.warning)
-            toast.show(Copy.fuseOffToast, kind: .danger)
-            return
-        }
-        guard let hex = node.meshPublicKeyHex else {
-            PopopxHaptics.notice(.warning)
-            toast.show(Copy.noKeyToast(node.label), kind: .danger)
-            return
-        }
-        do {
-            _ = try await meshRuntime.pairing.initiatePairing(with: hex, incognito: false)
-            PopopxHaptics.notice(.success)
-            toast.show(Copy.pairingSentToast(node.label), kind: .mesh)
-        } catch let pairingError {
-            PopopxHaptics.notice(.error)
-            toast.show(Copy.pairingWords(for: pairingError, label: node.label), kind: .danger)
-        }
-        await refresh()
+        await PopopxCabinAuthor.sendFriendRequest(hex: node.meshPublicKeyHex, label: node.label, host: authorHost(row: node.id))
+    }
+
+    /// This screen's half of the author host. `row` is the node table id the tap came from, which is what
+    /// the row's own progress marker is keyed by; a plaza row has no node-table identity to light, so those
+    /// mounts pass nil and only the shared in-flight guard applies.
+    @MainActor private func authorHost(row: String? = nil) -> PopopxCabinAuthor.Host {
+        PopopxCabinAuthor.Host(
+            runtime: meshRuntime,
+            toast: toast,
+            pushChat: { path.append(.privateChat(peerMeshPublicKeyHex: $0)) },
+            refresh: { await self.refresh() },
+            beginOpening: { openingNodeID = row },
+            endOpening: { openingNodeID = nil }
+        )
     }
 
     /// The hall's send. The semantics are copied verbatim from `PopopxMeshPlazaModel.broadcastDraft()`: truncate to the limit first,
