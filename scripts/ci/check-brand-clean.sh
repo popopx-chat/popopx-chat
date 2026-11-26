@@ -11,10 +11,21 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
+# The violation list is this script's only scratch file. A fixed name in /tmp collides between two runs
+# on one machine, and a file left there by an earlier run is read back as this run's findings, so it is a
+# mktemp with a trap that also covers the error path below.
+violations_file=$(mktemp "${TMPDIR:-/tmp}/popopx-brand-violations.XXXXXX")
+trap 'rm -f "$violations_file"' EXIT
+
 # Single-pass grep for 'simplex' (case-insensitive) across all source files,
 # then filter out B-class (legal) and C-class (compatibility) exceptions.
 
-grep -rnI -i "simplex" \
+# `|| true` used to sit at the end of this pipeline, which swallowed a broken gate as happily as a clean
+# tree. grep's status is a result, not a crash - 1 means "this stage selected nothing", which is exactly
+# what a clean tree looks like at the end of a chain of `grep -v`s - so only 1 is tolerated, and the code
+# after the pipeline decides whether a larger one is worth a message.
+pipeline_rc=0
+{ grep -rnI -i "simplex" \
   --include="*.hs" --include="*.swift" --include="*.kt" --include="*.java" \
   --include="*.ts" --include="*.js" --include="*.py" --include="*.sh" \
   --include="*.yml" --include="*.yaml" --include="*.json" --include="*.md" \
@@ -113,18 +124,22 @@ grep -vE '^\./apps/multiplatform/product/.*\.md:' | \
 grep -vE '^\./apps/ios/Shared/Model/AppAPITypes\.swift:.*case simplex|\.simplex:|operatorTag: \.simplex' | \
 grep -vE '^\./apps/multiplatform/common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI\.kt:.*SIMPLEX|simplex\.im' | \
 grep -vE '^\./apps/ios/POPOPX\.xcodeproj/project\.pbxproj:[0-9]+:.*(INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © [0-9]{4} SimpleX Chat|PRODUCT_BUNDLE_IDENTIFIER = "com\.popopxchat\.popopx\.SimpleX-(NSE|SE)"|repositoryURL = "https://github\.com/simplex-chat/)' \
-> /tmp/brand-violations.txt || true
+> "$violations_file"; } || pipeline_rc=$?
 
-violations=$(wc -l < /tmp/brand-violations.txt | tr -d ' ')
+if [ "$pipeline_rc" -gt 1 ]; then
+  echo "❌ Brand check could not complete: the scan exited $pipeline_rc, so its result is unknown." >&2
+  exit "$pipeline_rc"
+fi
+
+violations=$(wc -l < "$violations_file" | tr -d ' ')
 
 if [ "$violations" -gt 0 ]; then
   echo "❌ BRAND COMPLIANCE FAILED: $violations violation(s) found"
   echo ""
   echo "Violations:"
-  cat /tmp/brand-violations.txt
+  cat "$violations_file"
   echo ""
   echo "Please rename them to 'popopx' or update exclusion patterns in this script."
-  rm -f /tmp/brand-violations.txt
   exit 1
 else
   total=$(grep -rnI -i "simplex" \
@@ -141,6 +156,5 @@ else
     . 2>/dev/null | wc -l | tr -d ' ')
   echo "✅ Brand compliance check passed."
   echo "   ($total total 'simplex' references found, all covered by exclusion patterns)"
-  rm -f /tmp/brand-violations.txt
   exit 0
 fi

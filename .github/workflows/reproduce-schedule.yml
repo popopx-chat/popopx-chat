@@ -11,6 +11,9 @@ concurrency:
 
 jobs:
   reproduce:
+    # Line 6 says what a run costs - hours of Docker builds - so this is a runaway guard, not a budget:
+    # without a job timeout the default is 360 minutes, and a hung build looks like a slow one.
+    timeout-minutes: 300
     runs-on: ubuntu-latest
     steps:
       - name: Get latest release

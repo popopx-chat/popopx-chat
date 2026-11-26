@@ -18,7 +18,8 @@ permissions:
 
 concurrency:
   group: ios-sim-${{ github.ref }}
-  cancel-in-progress: true
+  # See android-emu.yml: dispatch-only, so cancelling discards a run somebody explicitly asked for.
+  cancel-in-progress: false
 
 env:
   GHC_VER: 9.6.3
@@ -239,7 +240,7 @@ jobs:
           name: ios-sim-smoke-test
           path: ${{ runner.temp }}/smoke-test
           retention-days: 3
-          if-no-files-found: warn
+          if-no-files-found: error
 
       - name: Upload backend logs
         if: ${{ !cancelled() && env.START_BACKEND == 'true' }}
@@ -250,7 +251,7 @@ jobs:
             ${{ runner.temp }}/backend/*.log
             ${{ runner.temp }}/backend/seed.md
           retention-days: 3
-          if-no-files-found: warn
+          if-no-files-found: error
 
   # The app-sim-claude environment's branch rule decides which branches may use the token.
   claude:
@@ -349,7 +350,7 @@ jobs:
           name: ios-sim-claude-test
           path: ${{ runner.temp }}/claude-test
           retention-days: 14
-          if-no-files-found: warn
+          if-no-files-found: error
 
       - name: Upload backend logs
         if: ${{ !cancelled() && steps.backend.outcome != 'skipped' }}
@@ -360,4 +361,4 @@ jobs:
             ${{ runner.temp }}/backend/*.log
             ${{ runner.temp }}/backend/seed.md
           retention-days: 3
-          if-no-files-found: warn
+          if-no-files-found: error

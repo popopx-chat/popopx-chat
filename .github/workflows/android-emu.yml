@@ -26,7 +26,9 @@ permissions:
 
 concurrency:
   group: android-emu-${{ github.ref }}
-  cancel-in-progress: true
+  # A dispatched run is the only way to reach these suites, and a run cancelled half-way verifies nothing and
+  # leaves no report - the reason reproduce-schedule.yml:7 already gives for the same setting.
+  cancel-in-progress: false
 
 env:
   GHC_VER: 9.6.3
@@ -325,7 +327,7 @@ jobs:
           name: android-smoke-test
           path: ${{ runner.temp }}/smoke-test
           retention-days: 3
-          if-no-files-found: warn
+          if-no-files-found: error
 
       - name: Upload backend logs
         if: ${{ !cancelled() && steps.backend.outcome != 'skipped' }}
@@ -334,7 +336,7 @@ jobs:
           name: android-backend-logs
           path: ${{ runner.temp }}/backend/*.log
           retention-days: 3
-          if-no-files-found: warn
+          if-no-files-found: error
 
   # Claude Code repeats the smoke test with the ui helper. Each run spends the Claude subscription's usage
   # limits, so it runs only when asked for. The app-sim-claude environment's branch rule decides which branches
@@ -446,7 +448,7 @@ jobs:
             ${{ runner.temp }}/claude-transcript.jsonl.guard.log
             ${{ runner.temp }}/claude-usage.json
           retention-days: 7
-          if-no-files-found: warn
+          if-no-files-found: error
 
       - name: Upload backend logs
         if: ${{ !cancelled() && steps.backend.outcome != 'skipped' }}
@@ -455,11 +457,19 @@ jobs:
           name: android-claude-backend-logs
           path: ${{ runner.temp }}/backend/*.log
           retention-days: 3
-          if-no-files-found: warn
+          if-no-files-found: error
 
   # the latest release's onboarding, to tell a branch's own failure from the runner's
   release:
     name: released app in the emulator
+    # What a green run here proves is narrower than the job name suggests, so it is written down rather than
+    # left to the reader: release-apk.sh downloads the *published* asset under its pre-rebrand file name and
+    # requires the signer digest that asset already carries. The run therefore exercises the emulator canary
+    # against an already-shipped APK - it says nothing about the commit being dispatched, and it can never
+    # fail for a bug we just introduced.
+    # Not disabled: the input is default false (see `plan`), so this leg only runs when an operator asks for
+    # it, and a comparison against the live release is the one thing this repository cannot get elsewhere
+    # while no release asset is produced from our own signing key.
     needs: plan
     if: needs.plan.outputs.run-release == 'true'
     runs-on: ubuntu-24.04
@@ -496,4 +506,4 @@ jobs:
           name: android-release-smoke-test
           path: ${{ runner.temp }}/smoke-test
           retention-days: 3
-          if-no-files-found: warn
+          if-no-files-found: error

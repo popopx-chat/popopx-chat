@@ -72,6 +72,7 @@ jobs:
 #      https://stackoverflow.com/a/77549656
 
   variables:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     outputs:
       GHC_VER: 9.6.3
@@ -89,6 +90,7 @@ jobs:
 # On pull requests and other pushes, this job will always complete.
 
   maybe-release:
+    timeout-minutes: 30
     # The repository's default workflow token is read-only (actions/permissions/workflow = read).
     # Create release below runs on that token, so without this grant it answers 403 Resource not
     # accessible by integration - measured on popopxmq run 43575140034, the same inherited step -
@@ -163,6 +165,7 @@ jobs:
 
   check-smp-links:
     name: "SMP link compliance"
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - name: Clone project
@@ -175,6 +178,7 @@ jobs:
 
   check-brand-clean:
     name: "Brand compliance"
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - name: Clone project
@@ -185,12 +189,20 @@ jobs:
           chmod 755 scripts/ci/check-brand-clean.sh
           ./scripts/ci/check-brand-clean.sh
 
+      # The second launch of the app throws when an offered SMP host falls outside
+      # `operatorPopopxChat.serverDomains` (the chain is in the script's docstring). Nothing else in CI
+      # covers it, and the script went silently vacuous once over a renamed definition — it now exits 1
+      # on an empty census, so a pass here is a count, not a missing grep.
+      - name: Check the server preset domain invariant
+        run: python3 scripts/ci/preset-domain-invariant.py HEAD
+
 # =========================
 #        Linux Build
 # =========================
 
   build-linux:
-    name: "ubuntu-${{ matrix.os }}-${{ matrix.arch }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
+    name: "build-linux: ubuntu-${{ matrix.os }}-${{ matrix.arch }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
+    timeout-minutes: 300
     needs: [maybe-release, variables, check-smp-links, check-brand-clean]
     if: needs.maybe-release.outputs.haskell == 'true' || (needs.maybe-release.outputs.reduced == 'true' && needs.maybe-release.outputs.kotlin == 'true')
     runs-on: ${{ matrix.runner }}
@@ -202,7 +214,7 @@ jobs:
       source_hashes: dist-newstyle/sources.sha256
     concurrency: &linux-concurrency
       group: ${{ github.workflow }}-${{ github.ref }}-linux-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.ghc }}
-      cancel-in-progress: ${{ github.event_name != 'push' }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     strategy:
       fail-fast: false
       matrix:
@@ -588,7 +600,8 @@ jobs:
           key: ${{ steps.keys.outputs.dist }}-O0-${{ env.branch }}-${{ github.sha }}
 
   build-linux-full:
-    name: "ubuntu-${{ matrix.os }}-${{ matrix.arch }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
+    name: "build-linux-full: ubuntu-${{ matrix.os }}-${{ matrix.arch }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
+    timeout-minutes: 300
     needs: [maybe-release, variables]
     if: needs.maybe-release.outputs.reduced != 'true' && (needs.maybe-release.outputs.haskell == 'true' || needs.maybe-release.outputs.kotlin == 'true')
     runs-on: ${{ matrix.runner }}
@@ -614,7 +627,8 @@ jobs:
     steps: *linux-steps
 
   build-linux-push:
-    name: "ubuntu-${{ matrix.os }}-${{ matrix.arch }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
+    name: "build-linux-push: ubuntu-${{ matrix.os }}-${{ matrix.arch }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
+    timeout-minutes: 300
     needs: [maybe-release, variables]
     if: needs.maybe-release.outputs.reduced != 'true' && github.event_name == 'push'
     runs-on: ${{ matrix.runner }}
@@ -649,7 +663,8 @@ jobs:
     steps: *linux-steps
 
   build-linux-ghc8:
-    name: "ubuntu-${{ matrix.os }}-${{ matrix.arch }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
+    name: "build-linux-ghc8: ubuntu-${{ matrix.os }}-${{ matrix.arch }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
+    timeout-minutes: 300
     needs: [maybe-release, variables]
     if: ${{ needs.maybe-release.outputs.reduced != 'true' && needs.maybe-release.outputs.haskell == 'true' && !(github.ref == 'refs/heads/stable' || startsWith(github.ref, 'refs/tags/v')) }}
     runs-on: ${{ matrix.runner }}
@@ -682,7 +697,8 @@ jobs:
 # =========================
 
   build-macos:
-    name: "${{ matrix.os }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
+    name: "build-macos: ${{ matrix.os }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
+    timeout-minutes: 300
     needs: [maybe-release, variables, check-smp-links, check-brand-clean]
     if: needs.maybe-release.outputs.reduced != 'true' && needs.maybe-release.outputs.haskell == 'true'
     # Upload CLI and Upload Desktop attach to the app release through prepare-release, which is
@@ -985,13 +1001,14 @@ jobs:
           key: ${{ steps.keys.outputs.dist }}-O0-${{ env.branch }}-${{ github.sha }}
 
   build-ios:
-    name: "macos-latest (iOS)"
+    name: "build-ios: macos-latest (iOS)"
+    timeout-minutes: 150
     needs: [maybe-release, check-smp-links, check-brand-clean]
     if: needs.maybe-release.outputs.ios == 'true'
     runs-on: macos-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-ios
-      cancel-in-progress: ${{ github.event_name != 'push' }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
@@ -1003,6 +1020,39 @@ jobs:
       - name: Check the previews listed in the snapshot tests
         shell: bash
         run: python3 "apps/ios/POPOPX Snapshots/check-previews.py"
+
+      # The mesh module's two SwiftPM test targets had never been executed anywhere: no workflow in this
+      # repository contained `swift test` or `xcodebuild test`, so every commit to them was merged on the
+      # strength of a compile. They build for macOS, which is why this is here and not in a Linux job.
+      #
+      # 335 of the 379 tests run. The 44 that do not are the ones that call PopopxMeshFileStore.write,
+      # which passes `.completeFileProtection` (PopopxMeshStorage.swift:112): macOS has no per-file
+      # protection classes, so every directory on the volume rejects it with EPERM - measured at 4/4
+      # probe sites (temporaryDirectory, ~/Documents, ~/Library/Containers, /Users/Shared) with
+      # FileVault on, and reproduced as 20 failing tests at 3daec259e before this job existed. They are
+      # skipped by name, not deleted: renaming or adding a storage-writing test stops the skip matching
+      # and turns this step red, which is the loud direction. The alternative that would run them - an
+      # iOS-simulator test lane - needs a scheme configured for the test action, and the package schemes
+      # generated from POPOPX.xcodeproj are not ("Scheme PopopxMeshKit is not currently configured for
+      # the test action"), so it is a project-file change and not this job's to make.
+      - name: Run the mesh package tests
+        timeout-minutes: 20
+        shell: bash
+        run: |
+          SKIP='PopopxMeshGroupTests|PopopxMeshPendingForwardTests'
+          SKIP="$SKIP|queuePersistsAcrossRouters|pairingSurvivesRelaunchWithEmptyQueue"
+          SKIP="$SKIP|PopopxMeshNicknameStoreTests|PopopxMeshGroupsModelTests"
+          SKIP="$SKIP|nicknameRoundTrip|nicknameIsTheSameFileThePlazaUses"
+          SKIP="$SKIP|nicknameChangeRestartsWithNewName"
+          out=$(swift test --package-path apps/ios/PopopxMeshKit --skip "$SKIP" 2>&1) || { echo "$out"; exit 1; }
+          echo "$out"
+          total=$(echo "$out" | sed -n 's/.*Test run with \([0-9]*\) tests.*/\1/p' | paste -sd+ - | bc)
+          # A gate whose regex matched nothing would still exit 0 and report two green runs - the same
+          # class of false green as the hspec short-circuit; 335 is what this suite measures today, and
+          # 300 is the floor that says the tests were selected at all.
+          total=${total:-0}
+          [ "$total" -ge 300 ] || { echo "only $total mesh tests ran, expected 335"; exit 1; }
+          echo "mesh package tests: $total executed, all passing"
 
       - name: Build iOS app
         timeout-minutes: 60
@@ -1030,7 +1080,8 @@ jobs:
 # =========================
 
   build-windows:
-    name: "${{ matrix.os }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
+    name: "build-windows: ${{ matrix.os }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
+    timeout-minutes: 300
     needs: [maybe-release, variables, check-smp-links, check-brand-clean]
     if: needs.maybe-release.outputs.reduced != 'true' && needs.maybe-release.outputs.haskell == 'true'
     # Upload CLI and Upload Desktop attach to the app release through prepare-release, which is
@@ -1275,6 +1326,7 @@ jobs:
 
   release-hashes:
     name: "Add asset hashes to release notes"
+    timeout-minutes: 30
     needs: [build-linux, build-macos, build-windows]
     if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
