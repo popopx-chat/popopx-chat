@@ -3506,4 +3506,48 @@
   <string name="server_config_status_verified">verified</string>
   <string name="server_config_status_rolled_back">rolled back</string>
   <string name="server_config_status_never">no configuration received yet</string>
+  <!-- POPOPX Cabin: the offline Bluetooth mesh. Android-only tab; the radio lines are the English literals of
+       PopopxMeshBannerModel.radioTitle and the failure lines those of MeshPlazaView.words(for:), copied case for
+       case so both platforms name one state one way. -->
+  <string name="cabin_title">Cabin</string>
+  <string name="cabin_switch">Offline Bluetooth mesh</string>
+  <string name="cabin_switch_note">When this is off the app uses no Bluetooth at all: no scanning, no advertising, no links, and the mesh key is not in use.</string>
+  <string name="cabin_switch_on">On</string>
+  <string name="cabin_switch_off">Off</string>
+  <string name="cabin_switch_busy">Changing…</string>
+  <string name="cabin_fuse_on">Offline mesh is running</string>
+  <string name="cabin_fuse_off">Offline mesh is off</string>
+  <string name="cabin_fuse_stopped">Offline mesh stopped</string>
+  <string name="cabin_fuse_starting">Starting the offline mesh…</string>
+  <string name="cabin_fuse_stopping">Stopping the offline mesh…</string>
+  <string name="cabin_radio_off">Bluetooth is off</string>
+  <string name="cabin_radio_unauthorized">Bluetooth access not granted</string>
+  <string name="cabin_radio_resetting">Bluetooth is resetting</string>
+  <string name="cabin_radio_unsupported">This device has no Bluetooth mesh</string>
+  <string name="cabin_radio_unavailable">Bluetooth unavailable</string>
+  <string name="cabin_neighbours">%1$d neighbour(s)</string>
+  <string name="cabin_reach">broadcast radius %1$d hop(s) · ≈%2$s</string>
+  <string name="cabin_nodes_heading">Nearby nodes</string>
+  <string name="cabin_nodes_empty">No node heard yet</string>
+  <string name="cabin_nodes_none">Nothing in range — the mesh has not named a node</string>
+  <string name="cabin_nodes_summary">%1$d direct link(s), %2$d relayed</string>
+  <string name="cabin_link_direct">Direct link</string>
+  <string name="cabin_link_relayed">Via a relay</string>
+  <string name="cabin_hops">%1$d hop(s)</string>
+  <string name="cabin_broadcast_heading">Offline channel</string>
+  <string name="cabin_broadcast_empty">No offline message received</string>
+  <string name="cabin_broadcast_placeholder">Say something to nodes in range</string>
+  <string name="cabin_broadcast_send">Broadcast</string>
+  <string name="cabin_chat_heading">Offline 1:1</string>
+  <string name="cabin_chat_none">Select a node to message it directly</string>
+  <string name="cabin_chat_empty">Nothing exchanged with this node yet</string>
+  <string name="cabin_chat_placeholder">Encrypted, offline only</string>
+  <string name="cabin_chat_send">Send</string>
+  <string name="cabin_you">You</string>
+  <string name="cabin_failed">Not delivered</string>
+  <string name="cabin_fail_no_link">No link — nothing in range</string>
+  <string name="cabin_fail_link_dropped">Link dropped</string>
+  <string name="cabin_fail_ttl_exhausted">TTL exhausted</string>
+  <string name="cabin_fail_oversized">Too long for one frame: %1$d bytes, limit %2$d</string>
+  <string name="cabin_fail_no_session">No session with peer</string>
 </resources>

@@ -29,6 +29,19 @@
   <uses-feature android:name="android.hardware.fingerprint" android:required="false" />
   <uses-feature android:name="android.hardware.biometrics.face" android:required="false" />
 
+  <!-- The offline Bluetooth mesh. The three runtime permissions are what API 31+ asks for; below 31 the same
+       BLE scan is gated on location, which is why ACCESS_FINE_LOCATION is declared with a ceiling of 30 rather
+       than in the open — the mesh stops asking for it on a device where the platform no longer requires it, and
+       nothing else in this app reads a location. `neverForLocation` is deliberately NOT claimed: the mesh's
+       reason for existing is to learn which devices are nearby, which is exactly what the flag denies.
+       The feature is optional, because a device with no BLE must still install and run POPOPX with the mesh
+       switch off, and reports "This device has no Bluetooth mesh" rather than a missing app. -->
+  <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+  <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+  <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30" />
+  <uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
+
   <!-- Requirements that allows to specify foreground service types -->
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />

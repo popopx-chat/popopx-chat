@@ -30,6 +30,7 @@ import chat.popopx.common.eco.PopopxEcoSessionStore
 import chat.popopx.common.model.*
 import chat.popopx.common.platform.*
 import chat.popopx.common.ui.theme.DEFAULT_PADDING
+import chat.popopx.common.views.cabin.PopopxCabinView
 import chat.popopx.common.views.chatlist.unreadCountStr
 import chat.popopx.common.views.contacts.ContactListNavLinkView
 import chat.popopx.common.views.helpers.AnimatedViewState
@@ -51,10 +52,12 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 // `appPlatform.isAndroid` (App.kt:166), so the desktop tree — and with it the 376 snapshot
 // baselines — is untouched by construction rather than by a second gate here.
 //
-// iOS has five tabs; the third (Cabin, the offline mesh plaza) is a later phase by ruling, so this
-// bar carries Chats / Contacts / Discover / Me in the iOS order. No "service accounts" tab is
-// invented: on iOS the eco service accounts are a page inside the Contacts feature, not a tab, and
-// their conversations stay in the chat list.
+// iOS has five tabs and this bar now carries all five in the iOS order: Chats / Contacts / Cabin /
+// Discover / Me. Cabin is the offline Bluetooth mesh plaza and is shown on Android only —
+// `PopopxTab.entries` is filtered by `appPlatform.isAndroid` where the bar is built — so a desktop
+// composition sees the same four tabs, in the same positions, as before this tab existed. No "service
+// accounts" tab is invented: on iOS the eco service accounts are a page inside the Contacts feature, not
+// a tab, and their conversations stay in the chat list.
 //
 // The three structural decisions of the source file port as follows:
 // 1. the conversation stays presented by the Chats page's own tree — here that is the existing
@@ -68,6 +71,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 enum class PopopxTab(val title: StringResource, val icon: ImageResource) {
   CHATS(MR.strings.main_tab_messages, MR.images.ic_chat_bubble),
   CONTACTS(MR.strings.main_tab_contacts, MR.images.ic_group),
+  CABIN(MR.strings.cabin_title, MR.images.ic_bluetooth),
   DISCOVER(MR.strings.main_tab_discover, MR.images.ic_travel_explore),
   ME(MR.strings.main_tab_me, MR.images.ic_account_circle_filled),
   ;
@@ -110,6 +114,7 @@ fun PopopxTabScaffold(userPickerState: MutableStateFlow<AnimatedViewState>) {
       when (tab) {
         PopopxTab.CHATS -> StartPartOfScreen(userPickerState)
         PopopxTab.CONTACTS -> WithAppBar { PopopxContactsTabView() }
+        PopopxTab.CABIN -> WithAppBar { PopopxCabinView() }
         PopopxTab.DISCOVER -> WithAppBar { PopopxDiscoverTabView() }
         PopopxTab.ME -> WithAppBar { SettingsView(chatModel, AppLock::setPerformLA, close = { }) }
       }
@@ -188,7 +193,9 @@ private fun PopopxTabBar(selected: PopopxTab, onSelect: (PopopxTab) -> Unit) {
   ) {
     Column {
       Row(Modifier.fillMaxWidth()) {
-        PopopxTab.entries.forEach { tab ->
+        // The tab the red line keeps off every other platform, filtered where the bar is built rather than
+        // inside the page: an entry that renders nothing would still take a slot in the row.
+        PopopxTab.entries.filter { it != PopopxTab.CABIN || appPlatform.isAndroid }.forEach { tab ->
           PopopxTabBarItem(tab, tab == selected, if (tab == PopopxTab.CHATS) unread else 0, onSelect)
         }
       }
