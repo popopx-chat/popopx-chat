@@ -109,6 +109,11 @@ public enum PopopxMeshSendFailure: Hashable, Sendable {
     case oversized(payloadBytes: Int, limitBytes: Int)
     case noSessionWithPeer
     case radioUnavailable(PopopxBluetoothState)
+    /// Not a loss: the mesh is up and the radio is usable, and this device's own send is held in
+    /// `PopopxMeshPendingForwardQueue` for the next link that can carry it. `queued` is how many are
+    /// waiting, because the honest answer to "did my message go?" is a number the UI can show rather
+    /// than a retry the user cannot see.
+    case pendingForward(queued: Int)
 }
 
 public enum PopopxMeshEvent: Sendable {

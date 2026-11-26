@@ -2913,7 +2913,7 @@ private enum Copy {
         }
     }
 
-    /// The six flooding failure states, exhausting `PopopxMeshSendFailure` (the package's `MeshPlazaView.words(for:)` is internal,
+    /// The seven flooding failure states, exhausting `PopopxMeshSendFailure` (the package's `MeshPlazaView.words(for:)` is internal,
     /// and this place cannot reach it, but it still states the same batch of facts).
     static func broadcastWords(for failure: PopopxMeshSendFailure) -> String {
         switch failure {
@@ -2923,6 +2923,10 @@ private enum Copy {
         case let .oversized(payloadBytes, limitBytes):
             return String(format: key("Over the single-frame limit (%1$lld > %2$lld bytes), so this content was not sent in fragments."), payloadBytes, limitBytes)
         case .noSessionWithPeer: return key("There is no encrypted session with this device yet, so the private message cannot go out")
+        case let .pendingForward(queued):
+            // The one case that is not a loss. The mesh is up and the radio is usable; what is missing
+            // is a neighbour, and the queue will hand it to the first link that opens.
+            return String(format: key("Nobody inside reach could carry this yet — %lld message(s) are held for the next Bluetooth link"), queued)
         case let .radioUnavailable(state): return String(format: key("The radio is not usable: %@"), radioWords(state))
         }
     }

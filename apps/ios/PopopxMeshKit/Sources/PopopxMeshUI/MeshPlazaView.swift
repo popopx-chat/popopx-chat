@@ -622,6 +622,7 @@ public struct MeshPlazaView: View {
             "Too long for one frame (\(payloadBytes) > \(limitBytes))"
         case .noSessionWithPeer: "No session with peer"
         case let .radioUnavailable(state): PopopxMeshBannerModel.radioTitle(state)
+        case let .pendingForward(queued): "Nobody in range to carry it yet — held for forwarding (\(queued))"
         }
     }
 }

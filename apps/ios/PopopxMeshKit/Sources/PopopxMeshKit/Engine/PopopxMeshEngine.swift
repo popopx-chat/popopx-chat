@@ -69,6 +69,10 @@ public actor PopopxMeshEngine {
 
     private var recentPackets: PopopxMeshDeduplicator
     private var fragments: PopopxMeshFragmentAssembler
+    /// This device's own floods that met no writable link. Held here rather than in the UI so the
+    /// moment a link opens is the moment they go out, and so `stop()` can empty them with everything
+    /// else.
+    private var pendingForward: PopopxMeshPendingForwardQueue
 
     /// module 8: the private-group state machine. It does no I/O — this type is the only thing that
     /// touches the radio, and the group layer is handed bytes that already arrived.
@@ -108,6 +112,7 @@ public actor PopopxMeshEngine {
             lifetime: config.fragmentLifetime,
             maxInFlight: config.maxInFlightAssemblies
         )
+        self.pendingForward = PopopxMeshPendingForwardQueue()
         self.identity = PopopxMeshEngine.loadOrMakeIdentity(secrets: secrets)
         self.groups = PopopxGroupCoordinator(
             meshPublicKeyHex: identity.meshPublicKeyHex,
@@ -201,6 +206,7 @@ public actor PopopxMeshEngine {
         responders.removeAll()
         settleAllHandshakeWaiters()
         recentPackets = PopopxMeshDeduplicator(config: config)
+        pendingForward.removeAll()
         fragments = PopopxMeshFragmentAssembler(
             lifetime: config.fragmentLifetime,
             maxInFlight: config.maxInFlightAssemblies
@@ -275,6 +281,9 @@ public actor PopopxMeshEngine {
     }
 
     /// The local `#mesh` plaza: unencrypted, flooded, never acknowledged.
+    ///
+    /// A flood with no link is held for the next one rather than lost, and says so: the plaza has no
+    /// queue of its own, so this is the only place that can tell the user their post went nowhere *yet*.
     public func sendBroadcast(text: String) async throws(PopopxMeshSendError) {
         guard running else {
             throw PopopxMeshSendError(messageId: identity.peerID.hex, failure: .radioUnavailable(radioState))
@@ -287,7 +296,14 @@ public actor PopopxMeshEngine {
             recipientID: nil,
             payload: Data(text.utf8)
         )
-        await deliver(packet, messageId: packet.packetID.popopxHex, peer: nil, origin: nil)
+        let messageID = packet.packetID.popopxHex
+        switch await deliver(packet, messageId: messageID, peer: nil, origin: nil, queueWhenBlocked: true) {
+        case .handedOff: break
+        case .queued:
+            throw PopopxMeshSendError(messageId: messageID, failure: .pendingForward(queued: pendingForward.count))
+        case let .refused(failure):
+            throw PopopxMeshSendError(messageId: messageID, failure: failure)
+        }
     }
 
     /// Asks a peer to identify itself again. The reply refreshes its reachability, so a ping is how
@@ -432,24 +448,37 @@ public actor PopopxMeshEngine {
 
     // MARK: - Delivery
 
+    /// What one call to `deliver` did with the packet.
+    private enum Delivery {
+        /// At least one frame reached the transport.
+        case handedOff
+        /// No link could take it, so it waits in `pendingForward` for the next link that can.
+        case queued
+        /// It is gone: refused before the radio could be blamed on it.
+        case refused(PopopxMeshSendFailure)
+    }
+
     /// Puts one packet on the radio, fragmented if a link cannot take it whole. `origin` is the link
     /// the packet arrived on, for a relay: a frame is never sent back the way it came. A peer with a
     /// live link of ours gets it there and only there; anything else is flooded and dedup keeps the
     /// loops out of it.
     ///
-    /// The answer is "was any frame of this packet handed to CoreBluetooth", which is what the group
-    /// send path needs to report honestly: an envelope send has an ACK of its own and ignores this,
-    /// a group state blob has nothing else that can tell the caller it never left the device.
+    /// The answer distinguishes "no frame reached the transport" from "nothing could be tried": the
+    /// group send path needs to report honestly either way, and `queueWhenBlocked` decides which of
+    /// the two a caller that is about to give up the packet deserves. A relay never passes it —
+    /// buffering other people's traffic is a different service, and one this mesh does not offer.
     @discardableResult
     private func deliver(
         _ packet: PopopxMeshPacket,
         messageId: String,
         peer: PeerRecord?,
-        origin: UUID?
-    ) async -> Bool {
+        origin: UUID?,
+        queueWhenBlocked: Bool = false
+    ) async -> Delivery {
         guard running else {
-            await publish(.sendFailed(messageId: messageId, peer: peer?.peerID, reason: .radioUnavailable(radioState)))
-            return false
+            let failure = PopopxMeshSendFailure.radioUnavailable(radioState)
+            await publish(.sendFailed(messageId: messageId, peer: peer?.peerID, reason: failure))
+            return .refused(failure)
         }
         let links = await transport.links
         var writable = links.filter { $0.canSend && $0.linkID != origin }
@@ -458,18 +487,36 @@ public actor PopopxMeshEngine {
             if !direct.isEmpty { writable = direct }
         }
         guard !writable.isEmpty else {
-            await publish(.sendFailed(messageId: messageId, peer: peer?.peerID, reason: .noLinkToPeer))
-            return false
+            if queueWhenBlocked && radioState.isUsable
+                && pendingForward.enqueue(
+                    PopopxMeshPendingForward(
+                        packet: packet,
+                        messageID: messageId,
+                        peerMeshPublicKeyHex: peer?.meshPublicKeyHex
+                    )
+                ) {
+                // Nothing is published: a queued flood is not a failed one, and the clock the merged
+                // timeline draws for `sendFailed` would then have no flush that knows to clear it. The
+                // caller reports 「待转发」 from this return value instead.
+                return .queued
+            }
+            // A radio that is off is not "nothing in range": it is the one case the user can act on, and
+            // the banner already has words for it. Nothing is queued for it either — an off radio has no
+            // next link to wait for.
+            let failure: PopopxMeshSendFailure =
+                radioState.isUsable ? .noLinkToPeer : .radioUnavailable(radioState)
+            await publish(.sendFailed(messageId: messageId, peer: peer?.peerID, reason: failure))
+            return .refused(failure)
         }
         guard let encoded = packet.encoded(padded: false) else {
-            await publish(
-                .sendFailed(
-                    messageId: messageId,
-                    peer: peer?.peerID,
-                    reason: .oversized(payloadBytes: packet.payload.count, limitBytes: Int(UInt16.max))
-                )
+            let failure = PopopxMeshSendFailure.oversized(
+                payloadBytes: packet.payload.count,
+                limitBytes: Int(UInt16.max)
             )
-            return false
+            await publish(
+                .sendFailed(messageId: messageId, peer: peer?.peerID, reason: failure)
+            )
+            return .refused(failure)
         }
         let frames = frames(of: packet, encoded: encoded, for: writable)
         var handedOff = false
@@ -490,12 +537,12 @@ public actor PopopxMeshEngine {
         }
         guard handedOff else {
             await publish(.sendFailed(messageId: messageId, peer: peer?.peerID, reason: .noLinkToPeer))
-            return false
+            return .refused(.noLinkToPeer)
         }
         // Remember it as soon as we transmit, so our own flood coming back is dropped, and only
         // after the fragments exist, so a failed send stays retryable.
         _ = await recentPackets.note(packetID: packet.packetID)
-        return true
+        return .handedOff
     }
 
     /// One frame when the smallest link can take it, otherwise a fragment stream. The budget is the
@@ -1057,11 +1104,18 @@ public actor PopopxMeshEngine {
             recipientID: nil,
             payload: payload
         )
-        let handedOff = await deliver(packet, messageId: message.id, peer: nil, origin: nil)
-        guard handedOff else {
-            // The message is in the local timeline already, with the `.sendFailed` marker `deliver` published.
-            // A broadcast names no peer, so this payload is empty by construction: `.noLinkToPeer` is the whole diagnosis.
-            throw PopopxMeshGroupError.deliveryFailed(peerMeshPublicKeyHexes: [], failure: .noLinkToPeer)
+        let delivery = await deliver(packet, messageId: message.id, peer: nil, origin: nil, queueWhenBlocked: true)
+        switch delivery {
+        case .handedOff: break
+        case .queued:
+            // The message is in the local timeline already and the queue holds it: a broadcast names no
+            // peer, so the depth is the whole diagnosis, and it is not the failure the caller used to get.
+            throw PopopxMeshGroupError.deliveryFailed(
+                peerMeshPublicKeyHexes: [],
+                failure: .pendingForward(queued: pendingForward.count)
+            )
+        case let .refused(failure):
+            throw PopopxMeshGroupError.deliveryFailed(peerMeshPublicKeyHexes: [], failure: failure)
         }
     }
 
@@ -1272,6 +1326,10 @@ extension PopopxMeshEngine: PopopxBLETransportDelegate {
         meshHexByPeerID.removeAll()
         meshHexByLink.removeAll()
         responders.removeAll()
+        // Held sends go with the sessions: a radio that has gone off cannot be blamed later for a
+        // message the user was told was waiting, and a queue that outlives the switch is mesh state
+        // the fuse rule says must not exist.
+        pendingForward.removeAll()
         settleAllHandshakeWaiters()
     }
 
@@ -1283,10 +1341,37 @@ extension PopopxMeshEngine: PopopxBLETransportDelegate {
     }
 
     private func linkWritable(_ link: PopopxBLELink) async {
+        // First, because everything below needs a peer already bound to this link and a link that has
+        // just opened has bound nobody: a send held for want of a link is what names it.
+        await flushPendingForwards()
         guard let meshHex = meshHexByLink[link.linkID] else { return }
         touch(meshPublicKeyHex: meshHex, hopCount: 0, linkID: link.linkID)
         guard let peer = peersByHex[meshHex] else { return }
         await publish(.peerAppeared(peer.peer))
+    }
+
+    /// Re-offers this device's held sends to the links that exist now.
+    ///
+    /// Drained first rather than iterated: a flush that finds nothing writable again puts its entries
+    /// back into an empty queue instead of racing the list it is walking, and one newly writable link
+    /// gets one pass rather than one pass per link. Order is kept oldest first, so what the user sent
+    /// first is what a neighbour hears first.
+    private func flushPendingForwards() async {
+        guard !pendingForward.isEmpty else { return }
+        let held = pendingForward.drain()
+        PopopxMeshLog.route.notice(
+            "🍃 re-offering \(held.count, privacy: .public) held send(s) to a writable link"
+        )
+        for entry in held {
+            let peer = entry.peerMeshPublicKeyHex.flatMap { peersByHex[$0] }
+            _ = await deliver(
+                entry.packet,
+                messageId: entry.messageID,
+                peer: peer,
+                origin: nil,
+                queueWhenBlocked: true
+            )
+        }
     }
 
     private func linkClosed(_ linkID: UUID, error: (any Error)?) async {

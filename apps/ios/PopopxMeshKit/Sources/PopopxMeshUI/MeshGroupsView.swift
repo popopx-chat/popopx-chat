@@ -217,9 +217,17 @@ public final class PopopxMeshGroupsModel: ObservableObject, PopopxMeshSwitchable
 
     /// Seals and floods one message. A refusal from the radio does not remove the bubble: the text is
     /// in the thread because it was sealed into it, and neighbours may still hear a later re-flood.
+    ///
+    /// A draft with nothing in it is not a send. A draft with something in it and no group to send it
+    /// to is: that state used to be swallowed, which is how a send that looked pressed but did nothing
+    /// got called "offline" — it says so now, in the one sentence that fits.
     public func sendDraft() async {
         let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty, let groupID = selectedGroupID else { return }
+        guard !text.isEmpty else { return }
+        guard let groupID = selectedGroupID else {
+            lastFailure = .groupNotFound(groupIDHex: "")
+            return
+        }
         let trimmed = String(text.prefix(Self.maxMessageCharacters))
         draft = ""
         await perform { try await self.outbound.sendGroupMessage(trimmed, toGroupID: groupID) }
@@ -315,10 +323,16 @@ public final class PopopxMeshGroupsModel: ObservableObject, PopopxMeshSwitchable
         case .rosterWouldBeEmpty: key("Someone has to be left in the group")
         case .notMember: key("You are not in this group")
         case let .storageFailed(reason): fmt("Could not store the group: %@", reason)
-        case let .deliveryFailed(peers, sendFailure):
-            fmt("Not sent — %@ (%lld peer(s))", MeshPlazaView.words(for: sendFailure), peers.count)
+        case let .deliveryFailed(peers, sendFailure): deliveryWords(peers: peers, sendFailure)
         case let .rejected(reason): fmt("Group state refused: %@", reason.rawValue)
         }
+    }
+
+    /// A send the mesh is holding is not a send the mesh refused, and "Not sent — … (0 peer(s))" would
+    /// say the wrong one. The plaza already has the sentence; only the framing differs.
+    private static func deliveryWords(peers: [String], _ sendFailure: PopopxMeshSendFailure) -> String {
+        if case .pendingForward = sendFailure { return MeshPlazaView.words(for: sendFailure) }
+        return fmt("Not sent — %@ (%lld peer(s))", MeshPlazaView.words(for: sendFailure), peers.count)
     }
 }
 
