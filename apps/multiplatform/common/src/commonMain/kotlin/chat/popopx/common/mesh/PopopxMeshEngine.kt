@@ -111,7 +111,15 @@ class PopopxMeshEngine(
   private var fragments = PopopxMeshFragmentAssembler(
     lifetime = config.fragmentLifetime,
     maxInFlight = config.maxInFlightAssemblies,
+    maxReassembledBytes = config.maxReassembledBytes,
   )
+
+  /**
+   * Retransmit counts for frames the stack refused outright, keyed by packet id. Only a refusal is
+   * retried: a frame that was handed over may have landed, and nothing on Android waits for the
+   * acknowledgement that would tell us otherwise (module 4 is held in this port).
+   */
+  private val retransmits = HashMap<String, Int>()
 
   // MARK: - Identity
 
@@ -199,7 +207,9 @@ class PopopxMeshEngine(
       fragments = PopopxMeshFragmentAssembler(
         lifetime = config.fragmentLifetime,
         maxInFlight = config.maxInFlightAssemblies,
+        maxReassembledBytes = config.maxReassembledBytes,
       )
+      retransmits.clear()
       radioState = PopopxBluetoothState.UNKNOWN
     }
   }
@@ -430,6 +440,20 @@ class PopopxMeshEngine(
         )
         return false
       }
+    // A payload past the ceiling a receiving node is allowed to hold for one stream is deleted at the far
+    // end without a word: the fragment table refuses it and the sender hears nothing, so the only place
+    // this node can still say so is on the way out. A relayed copy is not ours to judge — we are not the
+    // node that has to reassemble it.
+    if (origin == null && packet.payload.size > config.maxReassembledBytes) {
+      publish(
+        PopopxMeshEvent.SendFailed(
+          messageId,
+          peer?.peerID,
+          PopopxMeshSendFailure.Oversized(packet.payload.size, config.maxReassembledBytes),
+        )
+      )
+      return false
+    }
     val frames = framesOf(packet, encoded, writable)
     var handedOff = false
     for (frame in frames) {
@@ -513,7 +537,13 @@ class PopopxMeshEngine(
     val packet = PopopxMeshPacket.decode(data) ?: return
     if (packet.senderID.size != PopopxMeshPeerID.BYTE_COUNT) return
     if (packet.senderPeerID == identityValue.peerID) return
-    if (!recentPackets.note(packet.packetID)) return
+    // The id is claimed, not remembered: taking it up-front put the packet in the flood window before
+    // this node knew whether it could do anything with it, and the retransmission that would have
+    // finished the job — the sibling fragment of a stream with a hole in it, the copy that arrives after
+    // the handshake it was waiting on — carries the same bytes, so it was eaten for the rest of the
+    // window. A claim holds for the short window instead, and only a packet this node actually used or
+    // forwarded is promoted to the flood memory.
+    if (!recentPackets.claim(packet.packetID)) return
 
     val hopCount = maxOf(0, config.ttlDefault - packet.ttl)
     val sender = packet.senderPeerID
@@ -521,30 +551,57 @@ class PopopxMeshEngine(
       val meshHex = meshHexByPeerID[sender.hex]
       if (meshHex != null) touch(meshHex, hopCount, linkID)
     }
+    var used = false
     val isForUs = packet.isBroadcast || packet.recipientPeerID == identityValue.peerID
-    if (isForUs) consume(packet, hopCount, linkID)
-    relay(packet, linkID)
+    if (isForUs) used = consume(packet, hopCount, linkID)
+    val forwarded = relay(packet, linkID)
+    if (used || forwarded) recentPackets.confirm(packet.packetID)
   }
 
-  private suspend fun consume(packet: PopopxMeshPacket, hopCount: Int, linkID: String) {
-    when (packet.decodedType) {
-      PopopxMeshMessageType.NOISE_HANDSHAKE -> consumeHandshake(packet, hopCount, linkID)
+  /**
+   * true when this node did something with the packet: showed it, applied it, or answered it. false means
+   * the same bytes are worth another look, which is what the claim's short window buys. A branch that has
+   * nothing to retry — an unknown frame type, an announce that will parse the same way every time —
+   * reports true, because repeating the work is not a second chance at delivery, it is a second copy of
+   * the same failure.
+   */
+  private suspend fun consume(packet: PopopxMeshPacket, hopCount: Int, linkID: String): Boolean {
+    return when (packet.decodedType) {
+      // A handshake that was refused is refused on its bytes, not on this node's timing: we either have
+      // the state it continues from or we tore it down and the peer must start a fresh exchange, which
+      // arrives as different bytes under a different id.
+      PopopxMeshMessageType.NOISE_HANDSHAKE -> {
+        consumeHandshake(packet, hopCount, linkID)
+        true
+      }
       PopopxMeshMessageType.NOISE_ENCRYPTED -> consumeEncrypted(packet, hopCount, linkID)
       PopopxMeshMessageType.FRAGMENT -> consumeFragment(packet, hopCount, linkID)
-      PopopxMeshMessageType.ANNOUNCE -> consumeAnnounce(packet, hopCount, linkID)
-      PopopxMeshMessageType.MESSAGE -> consumeBroadcastMessage(packet, hopCount)
-      PopopxMeshMessageType.PING -> consumePing(packet)
-      PopopxMeshMessageType.PONG -> Unit
-      PopopxMeshMessageType.LEAVE -> consumeLeave(packet)
+      PopopxMeshMessageType.ANNOUNCE -> {
+        consumeAnnounce(packet, hopCount, linkID)
+        true
+      }
+      PopopxMeshMessageType.MESSAGE -> {
+        consumeBroadcastMessage(packet, hopCount)
+        true
+      }
+      PopopxMeshMessageType.PING -> {
+        consumePing(packet)
+        true
+      }
+      PopopxMeshMessageType.PONG -> true
+      PopopxMeshMessageType.LEAVE -> {
+        consumeLeave(packet)
+        true
+      }
       // The group layer is not mounted in this phase: a group frame is still relayed by `relay`, which is
-      // the whole point of it being its own packet type, and we simply cannot read it.
-      PopopxMeshMessageType.GROUP_STATE, PopopxMeshMessageType.GROUP_MESSAGE -> Unit
+      // the whole point of it being its own packet type, and we simply cannot read it. Nothing to retry.
+      PopopxMeshMessageType.GROUP_STATE, PopopxMeshMessageType.GROUP_MESSAGE -> true
       // These ride `.noiseEncrypted`; a bare one on the wire is not ours to trust.
       PopopxMeshMessageType.PAIRING_REQUEST,
       PopopxMeshMessageType.PAIRING_ACK,
       PopopxMeshMessageType.DELIVERY_ACK,
-      -> Unit
-      null -> Unit
+      -> true
+      null -> true
     }
   }
 
@@ -672,28 +729,34 @@ class PopopxMeshEngine(
     recentPackets.note(packet.packetID)
   }
 
-  private suspend fun consumeEncrypted(packet: PopopxMeshPacket, hopCount: Int, linkID: String) {
-    val sender = packet.senderPeerID ?: return
-    val meshHex = meshHexByPeerID[sender.hex] ?: return
-    val session = peersByHex[meshHex]?.session ?: return
+  private suspend fun consumeEncrypted(packet: PopopxMeshPacket, hopCount: Int, linkID: String): Boolean {
+    val sender = packet.senderPeerID
+    val meshHex = sender?.let { meshHexByPeerID[it.hex] }
+    val session = meshHex?.let { peersByHex[it]?.session }
+    if (sender == null || meshHex == null || session == null) {
+      // Retryable, and this is the case the mesh loses messages on: a private frame sent while the
+      // handshake was still in flight. The bytes are fine — this node just cannot read them *yet*, and
+      // the copy that arrives after the session exists is the one that lands.
+      return false
+    }
     if (packet.recipientPeerID != identityValue.peerID) {
       // Directed at someone else: nothing may credit a neighbour for traffic that was not ours, and we
       // cannot read it anyway.
-      return
+      return true
     }
     val plaintext = try {
       session.decrypt(packet.payload)
     } catch (e: Throwable) {
       // A replay or a tampered frame. The session's window is untouched, because marking a counter the
       // peer did not actually spend would lock out the real message that follows.
-      return
+      return true
     }
     touch(meshHex, hopCount, linkID)
-    val envelope = PopopxMeshEnvelope.decode(plaintext) ?: return
+    val envelope = PopopxMeshEnvelope.decode(plaintext) ?: return true
     val body = when (envelope.kind) {
       PopopxMeshEnvelope.Kind.TEXT -> PopopxMeshBody.Text(envelope.body)
       PopopxMeshEnvelope.Kind.CONTROL -> {
-        val frame = PopopxMeshControlFrame.of(envelope.body) ?: return
+        val frame = PopopxMeshControlFrame.of(envelope.body) ?: return true
         PopopxMeshBody.Control(frame)
       }
     }
@@ -712,8 +775,9 @@ class PopopxMeshEngine(
       )
     )
     // Everything we can read and that is not itself an acknowledgement gets acknowledged.
-    if (body is PopopxMeshBody.Control && body.frame is PopopxMeshControlFrame.DeliveryAck) return
+    if (body is PopopxMeshBody.Control && body.frame is PopopxMeshControlFrame.DeliveryAck) return true
     acknowledge(envelope.id, meshHex)
+    return true
   }
 
   /** `BLE_ACK:<messageId>`, back over the same session the message came in on. */
@@ -734,15 +798,35 @@ class PopopxMeshEngine(
     deliver(packet, packet.packetID.meshHex(), record, null)
   }
 
-  private suspend fun consumeFragment(packet: PopopxMeshPacket, hopCount: Int, linkID: String) {
-    if (!packet.isBroadcast && packet.recipientPeerID != identityValue.peerID) return
-    val outcome = fragments.append(packet, nowMillis()) as? PopopxMeshAssemblerOutcome.Complete ?: return
+  private suspend fun consumeFragment(packet: PopopxMeshPacket, hopCount: Int, linkID: String): Boolean {
+    if (!packet.isBroadcast && packet.recipientPeerID != identityValue.peerID) return true
+    val appended = fragments.append(packet, nowMillis())
+    if (appended == null || appended is PopopxMeshAssemblerOutcome.Stored) {
+      // `null` is not a fragment at all, which the type dispatch above already decided, and `Stored`
+      // means the stream gained this piece. Neither is a hole a retransmission could fill: the pieces
+      // still missing are separate packets with separate ids.
+      return true
+    }
+    if (appended is PopopxMeshAssemblerOutcome.Rejected) {
+      return when (appended.reason) {
+        is PopopxMeshFragmentRejection.TooManyInFlight,
+        is PopopxMeshFragmentRejection.Expired,
+        -> {
+          // Both are about when the piece arrived rather than what it holds: the table may have room by
+          // the next copy, and a piece that opened a stream past its lifetime starts a clean one.
+          // Refusing to look at them again is how a long message disappears.
+          false
+        }
+        else -> true
+      }
+    }
+    val outcome = appended as PopopxMeshAssemblerOutcome.Complete
     if (outcome.originalType == PopopxMeshMessageType.FRAGMENT.wireValue ||
       outcome.originalType == PopopxMeshMessageType.NOISE_HANDSHAKE.wireValue
     ) {
       // A stream that reassembles into another fragment, or into a handshake we would feed to the cipher,
       // is a wrapper loop. A node cannot name our handshake messages for us.
-      return
+      return true
     }
     // The fragmenter repeats the sender, recipient, timestamp, TTL and signature on every piece, so the
     // finished payload needs no second frame to become a packet.
@@ -756,9 +840,12 @@ class PopopxMeshEngine(
       payload = outcome.data,
       signature = packet.signature,
     )
-    if (inner.senderPeerID == identityValue.peerID) return
-    if (!recentPackets.note(inner.packetID)) return
-    consume(inner, hopCount, linkID)
+    if (inner.senderPeerID == identityValue.peerID) return true
+    // The finished packet is a different id from every piece that carried it, and this one is remembered
+    // the moment it exists: the stream is complete, so a second copy of any piece can only duplicate a
+    // message this node has already run.
+    if (!recentPackets.note(inner.packetID)) return true
+    return consume(inner, hopCount, linkID)
   }
 
   private suspend fun consumeAnnounce(packet: PopopxMeshPacket, hopCount: Int, linkID: String) {
@@ -859,11 +946,11 @@ class PopopxMeshEngine(
    * The flood: TTL hops, never back out of the ingress link, never twice the same packet, and jittered so
    * that two neighbours that heard the frame at once do not collide on the link.
    */
-  private suspend fun relay(packet: PopopxMeshPacket, incoming: String) {
+  private suspend fun relay(packet: PopopxMeshPacket, incoming: String): Boolean {
     if (packet.ttl <= 1) {
       // A frame that dies at our door is not a delivery failure of ours: the health layer owns that verdict
       // for traffic we sent, and this traffic belongs to someone else.
-      return
+      return false
     }
     val forwarded = PopopxMeshPacket(
       version = packet.version,
@@ -877,9 +964,9 @@ class PopopxMeshEngine(
     )
     val delaySeconds = relayDelay()
     if (delaySeconds > 0.0) delay((delaySeconds * 1000).toLong())
-    if (!runningFlag) return
+    if (!runningFlag) return false
     val peer = packet.recipientPeerID?.let { meshHexByPeerID[it.hex] }?.let { peersByHex[it] }
-    deliver(forwarded, packet.packetID.meshHex(), peer, incoming)
+    return deliver(forwarded, packet.packetID.meshHex(), peer, incoming)
   }
 
   // MARK: - Peers
@@ -996,17 +1083,41 @@ class PopopxMeshEngine(
   override fun didFailToSend(data: ByteArray, toLinkID: String, error: Exception?) {
     scope.launch {
       val packet = PopopxMeshPacket.decode(data) ?: return@launch
-      val peer = packet.recipientPeerID ?: return@launch
+      // No recipient means a broadcast, and a broadcast the stack refused is just as much a lost frame.
+      // The guard that returned here is why the plaza showed a message as sent that never left.
+      val peer = packet.recipientPeerID
       val reason: PopopxMeshSendFailure = when {
         !radioState.isUsable -> PopopxMeshSendFailure.RadioUnavailable(radioState)
         error is PopopxBLETransportError -> PopopxMeshSendFailure.LinkDropped
         else -> PopopxMeshSendFailure.NoLinkToPeer
       }
       publish(PopopxMeshEvent.SendFailed(packet.packetID.meshHex(), peer, reason))
-      if (reason is PopopxMeshSendFailure.LinkDropped) {
+      if (reason is PopopxMeshSendFailure.LinkDropped && peer != null) {
         meshHexByPeerID[peer.hex]?.let { peersByHex[it]?.session = null }
       }
+      retransmit(packet, peer)
     }
+  }
+
+  /**
+   * One more attempt at a frame the radio refused outright. This is not an acknowledgement watchdog —
+   * module 4 is not mounted in this port, and a frame that was handed over may have landed, so nothing
+   * here is re-sent on a silence. A refusal is different evidence: the bytes never left this node, which
+   * is the only condition under which trying again cannot show the peer the message twice.
+   *
+   * The backoff is one connection interval rather than a round trip: what refuses a write is a full
+   * GATT queue, and that drains as soon as the stack takes the pending one.
+   */
+  private suspend fun retransmit(packet: PopopxMeshPacket, peerID: PopopxMeshPeerID?) {
+    if (!runningFlag || config.meshDeliveryRetries <= 0) return
+    val key = packet.packetID.meshHex()
+    val spent = retransmits[key] ?: 0
+    if (spent >= config.meshDeliveryRetries) return
+    retransmits[key] = spent + 1
+    delay(RETRANSMIT_BACKOFF_MILLIS)
+    if (!runningFlag) return
+    val peer = peerID?.let { meshHexByPeerID[it.hex] }?.let { peersByHex[it] }
+    deliver(packet, key, peer, null)
   }
 
   private suspend fun radioChanged(state: PopopxBluetoothState) {
@@ -1044,6 +1155,9 @@ class PopopxMeshEngine(
 
     /** How far back a peer's nonce may move before a frame is called a replay. */
     private val NOISE_REPLAY_WINDOW = PopopxNoiseSession.DEFAULT_REPLAY_WINDOW
+
+    /** One connection interval, not one round trip: see [retransmit]. */
+    private const val RETRANSMIT_BACKOFF_MILLIS = 250L
 
     private const val PROTOCOL_VERSION = 1
     private const val U_SHORT_MAX = 65_535

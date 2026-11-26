@@ -10,8 +10,14 @@
 //  long one holds message ids for minutes, so a message that arrives twice — over two links, or
 //  from the router after the radio already delivered it — is shown to the user once.
 //
-//  Both are bounded twice over, by age and by count, because each bound fails on its own: a TTL
-//  alone lets a peer spray new ids and grow the table without limit, and a count alone lets a
+//  The packet window is joined by a third, shorter one: an id this node claimed but could not use.
+//  A refused packet must not sit in the flood window for 30 seconds, because the retransmission
+//  that would have completed it is the same bytes, and a mesh that eats its own retries cannot be
+//  asked to deliver anything. It must not be forgotten either, or every hop of an undecryptable
+//  flood repeats the work of failing it.
+//
+//  All three are bounded twice over, by age and by count, because each bound fails on its own: a
+//  TTL alone lets a peer spray new ids and grow the tables without limit, and a count alone lets a
 //  peer keep one id alive forever by re-sending it.
 //
 
@@ -23,14 +29,17 @@ public struct PopopxMeshDedupStats: Sendable, Equatable {
     public let recentCount: Int
     /// Ids in the message window.
     public let messageCount: Int
-    /// Times a `note` call found the id already there, i.e. how much flooding this node has
-    /// suppressed. Counted on `note` only: `contains` is a question, `note` is a decision.
+    /// Ids held only because this node could not use them — the retryable ones.
+    public let refusalCount: Int
+    /// Times a `note` or `claim` call found the id already there, i.e. how much flooding this node
+    /// has suppressed. Counted on the deciding calls only: `contains` is a question.
     public let hits: Int
 
-    public init(recentCount: Int, messageCount: Int, hits: Int) {
+    public init(recentCount: Int, messageCount: Int, hits: Int, refusalCount: Int = 0) {
         self.recentCount = recentCount
         self.messageCount = messageCount
         self.hits = hits
+        self.refusalCount = refusalCount
     }
 }
 
@@ -45,16 +54,21 @@ public actor PopopxMeshDeduplicator {
 
     private let recentWindow: TimeInterval
     private let recentMaxCount: Int
+    private let refusalWindow: TimeInterval
+    private let refusalMaxCount: Int
     private let messageWindow: TimeInterval
     private let messageMaxCount: Int
 
     private var packets = Window()
+    private var refused = Window()
     private var messages = Window()
     private var hits = 0
 
     public init(config: PopopxMeshConfig = .default) {
         self.recentWindow = max(0, config.recentPacketWindow)
         self.recentMaxCount = max(1, config.recentPacketMaxCount)
+        self.refusalWindow = max(0, config.refusalPacketWindow)
+        self.refusalMaxCount = max(1, config.refusalPacketMaxCount)
         self.messageWindow = max(0, config.messageDedupMaxAge)
         self.messageMaxCount = max(1, config.messageDedupMaxCount)
     }
@@ -63,22 +77,42 @@ public actor PopopxMeshDeduplicator {
 
     /// true the first time an id is seen — the caller may put it on the radio. false means it is a
     /// repeat and the caller must drop it.
-    public func note(packetID: Data) -> Bool {
-        guard !packetID.isEmpty, packetID.count <= Self.maxKeyBytes else {
-            PopopxMeshLog.route.log("mesh dedup: packet id unusable as a key, not remembered")
-            return true
-        }
-        let now = Date()
+    /// `now` is a parameter, like `prune`'s, so a test can move the clock past a window instead of
+    /// waiting for it; production callers leave it alone.
+    public func note(packetID: Data, now: Date = Date()) -> Bool {
+        guard usable(packetID) else { return true }
         packets.removeExpired(before: now.addingTimeInterval(-recentWindow))
         if packets.contains(packetID) {
             hits += 1
             return false
         }
-        packets.insert(packetID, at: now)
-        while packets.count > recentMaxCount {
-            guard packets.removeOldest() else { break }
-        }
+        insert(packetID, at: now, into: &packets, cap: recentMaxCount)
         return true
+    }
+
+    /// Take the packet for this node alone, for as long as the short window: the caller is about to
+    /// decide whether it can use it, and two copies of one flood must not both make that decision.
+    /// false means the id is already held by either window.
+    public func claim(packetID: Data, now: Date = Date()) -> Bool {
+        guard usable(packetID) else { return true }
+        packets.removeExpired(before: now.addingTimeInterval(-recentWindow))
+        refused.removeExpired(before: now.addingTimeInterval(-refusalWindow))
+        if packets.contains(packetID) || refused.contains(packetID) {
+            hits += 1
+            return false
+        }
+        insert(packetID, at: now, into: &refused, cap: refusalMaxCount)
+        return true
+    }
+
+    /// The packet was consumed or forwarded: move its id from the retryable hold into the flood
+    /// window, which is what stops the rest of that flood from being worked on again.
+    public func confirm(packetID: Data, now: Date = Date()) {
+        guard usable(packetID) else { return }
+        refused.remove(packetID)
+        packets.removeExpired(before: now.addingTimeInterval(-recentWindow))
+        guard !packets.contains(packetID) else { return }
+        insert(packetID, at: now, into: &packets, cap: recentMaxCount)
     }
 
     /// Whether we would relay it, without saying that we looked. Also expires the front of the
@@ -87,6 +121,22 @@ public actor PopopxMeshDeduplicator {
         let now = Date()
         packets.removeExpired(before: now.addingTimeInterval(-recentWindow))
         return packets.contains(packetID)
+    }
+
+    private func usable(_ packetID: Data) -> Bool {
+        guard !packetID.isEmpty, packetID.count <= Self.maxKeyBytes else {
+            PopopxMeshLog.route.log("mesh dedup: packet id unusable as a key, not remembered")
+            return false
+        }
+        return true
+    }
+
+    /// Insert plus the count bound, which every writer needs and each used to spell out.
+    private func insert(_ id: Data, at date: Date, into window: inout Window, cap: Int) {
+        window.insert(id, at: date)
+        while window.count > cap {
+            guard window.removeOldest() else { break }
+        }
     }
 
     // MARK: Message level
@@ -139,11 +189,17 @@ public actor PopopxMeshDeduplicator {
     /// a test can move the clock instead of waiting for it.
     public func prune(now: Date) {
         packets.removeExpired(before: now.addingTimeInterval(-recentWindow))
+        refused.removeExpired(before: now.addingTimeInterval(-refusalWindow))
         messages.removeExpired(before: now.addingTimeInterval(-messageWindow))
     }
 
     public var stats: PopopxMeshDedupStats {
-        PopopxMeshDedupStats(recentCount: packets.count, messageCount: messages.count, hits: hits)
+        PopopxMeshDedupStats(
+            recentCount: packets.count,
+            messageCount: messages.count,
+            hits: hits,
+            refusalCount: refused.count
+        )
     }
 
     // MARK: - Window
@@ -184,6 +240,14 @@ public actor PopopxMeshDeduplicator {
             head += 1
             compact()
             return true
+        }
+
+        @discardableResult
+        mutating func remove(_ id: Data) -> Bool {
+            // The queue keeps the dead key and `oldest()` walks past it, which is why removing a
+            // middle entry costs nothing: compacting the array per confirm would make the flood
+            // path O(n) to hand one id from one window to the other.
+            stamps.removeValue(forKey: id) != nil
         }
 
         @discardableResult

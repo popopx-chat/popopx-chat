@@ -31,6 +31,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.ParcelUuid
+import android.os.SystemClock
 import chat.popopx.common.platform.AppContextProvider
 import java.lang.ref.WeakReference
 import java.util.TreeMap
@@ -54,7 +55,10 @@ import java.util.UUID
  * - `connect(linkID:)` is fire-and-forget because the contract returns Unit; iOS' continuation existed
  *   only for its `async` signature. The table's pending-handshake flag still records the attempt.
  * - No `canSendWriteWithoutResponse`: one ATT write may be outstanding per link, so the gate closes on
- *   every accepted write and `onCharacteristicWrite` is what reopens it (see [writeAsCentral]).
+ *   every accepted write and `onCharacteristicWrite` is what reopens it (see [writeAsCentral]). That
+ *   callback is a request to the vendor stack, not a guarantee, so [writeWatchdog] reopens a gate that
+ *   was never answered — the one place this transport cannot stay a faithful port of iOS' logic, because
+ *   CoreBluetooth does answer.
  */
 private class PopopxBLETransportAndroid(
   private val context: Context?,
@@ -93,12 +97,19 @@ private class PopopxBLETransportAndroid(
   private var scanRunning = false
   private var advertisingRequested = false
   private val connectDeadlines = HashMap<String, Runnable>()
+  /**
+   * Frames the radio took and never answered. `onCharacteristicWrite` is the only thing that reopens a
+   * central link's write gate, and on the stacks that drop it when a peer vanishes the link would
+   * otherwise hold its whole queue shut for the rest of the connection.
+   */
+  private val writeWatchdog = PopopxBLEWriteWatchdog(millisOf(config.bleAckTimeout))
   private val preparedWrites = HashMap<String, TreeMap<Int, ByteArray>>()
 
   private var radioThread: HandlerThread? = null
   private var radioHandler: Handler? = null
   private var scanDuty: Runnable? = null
   private var maintenance: Runnable? = null
+  private var writeTick: Runnable? = null
   private var adapterReceiver: BroadcastReceiver? = null
 
   private val delegate: PopopxBLETransportDelegate? get() = delegateRef?.get()
@@ -217,6 +228,9 @@ private class PopopxBLETransportAndroid(
 
   private fun dropAllLinks(error: Exception?) {
     for (outcome in links.closeAll()) reportDropped(outcome, error)
+    // Every link above was reported as closed, so nothing is owed to a timer anymore.
+    writeWatchdog.clear()
+    armWriteTick()
     preparedWrites.clear()
   }
 
@@ -252,6 +266,9 @@ private class PopopxBLETransportAndroid(
     maintenance = null
     for (deadline in connectDeadlines.values) handler?.removeCallbacks(deadline)
     connectDeadlines.clear()
+    writeTick?.let { handler?.removeCallbacks(it) }
+    writeTick = null
+    writeWatchdog.clear()
   }
 
   // MARK: - Duty cycle and maintenance
@@ -437,10 +454,65 @@ private class PopopxBLETransportAndroid(
     connectDeadlines.remove(linkID)?.let { radioHandler?.removeCallbacks(it) }
   }
 
+  /**
+   * Monotonic, because a frame is waited for by elapsed time and an NTP correction would move the
+   * deadline without moving the radio. Only the ledger's arithmetic reads it, and `desktopTest` injects
+   * its own clock into that arithmetic instead.
+   */
+  private fun nowMillis(): Long = SystemClock.elapsedRealtime()
+
+  /**
+   * One timer for every owed frame, re-armed from the soonest deadline. A stalled write is answered
+   * within a tick of its own timeout instead of one `postDelayed` per frame, and a transport with
+   * nothing owed holds no timer at all.
+   *
+   * The reopened gate is what unsticks the frames queued behind the stalled one; the frame itself goes
+   * back at the head rather than being failed, because a write the peer never received is only lost once
+   * it has been offered again. [PopopxBLEWriteWatchdog] keeps the stall count across the re-`track` the
+   * drain below triggers, which is how a frame that is never answered is given up on rather than
+   * repeated for as long as the link lasts.
+   */
+  private fun armWriteTick() {
+    val due = writeWatchdog.nextDueAt()
+    if (due == null) {
+      writeTick?.let { radioHandler?.removeCallbacks(it) }
+      writeTick = null
+      return
+    }
+    writeTick?.let { radioHandler?.removeCallbacks(it) }
+    handler().postDelayed(stepWriteTick, maxOf(0L, due - nowMillis()))
+    writeTick = stepWriteTick
+  }
+
+  private val stepWriteTick = Runnable { synchronized(lock) { tickWriteDeadlines() } }
+
+  private fun tickWriteDeadlines() {
+    writeTick = null
+    if (!wantsToRun) return
+    val now = nowMillis()
+    for (stalled in writeWatchdog.expired(now)) {
+      if (links.link(stalled.linkID) == null) continue
+      if (stalled.gaveUp) {
+        // Three unanswered offers means the peer is gone rather than slow. Reported with the same reason
+        // a refused write uses, because the contract has one failure for "the radio did not take this".
+        if (stalled.owed) {
+          links.abandonFrame(stalled.linkID)
+          fail(stalled.frame, stalled.linkID, PopopxBLETransportError.WriteQueueFull(stalled.linkID))
+        }
+      } else if (stalled.owed && !links.returnFrame(stalled.frame, stalled.linkID)) {
+        fail(stalled.frame, stalled.linkID, PopopxBLETransportError.WriteQueueFull(stalled.linkID))
+      }
+      makeLinkWritable(stalled.linkID)
+      drain(stalled.linkID)
+    }
+    armWriteTick()
+  }
+
   // MARK: - Link events
 
   private fun closeLink(linkID: String, error: Exception?) {
     cancelConnectDeadline(linkID)
+    writeWatchdog.forget(linkID)
     val handle = clientHandles.remove(linkID)
     if (handle != null) {
       writeTargets.remove(linkID)
@@ -480,6 +552,10 @@ private class PopopxBLETransportAndroid(
       return false
     }
     links.setCanSend(false, linkID)
+    // The gate is shut from here, and only `onCharacteristicWrite` opens it. Watched, because on the
+    // stacks that drop that callback when a peer vanishes the link would park its whole queue.
+    writeWatchdog.track(linkID, frame, nowMillis())
+    armWriteTick()
     return true
   }
 
@@ -532,6 +608,10 @@ private class PopopxBLETransportAndroid(
       // buffer one frame at a time.
       if (!links.returnFrame(frame, linkID)) fail(frame, linkID, PopopxBLETransportError.WriteQueueFull(linkID))
       links.setCanSend(false, linkID)
+      // The bytes are back in the queue, so this stall is only the gate: watched so a central that stops
+      // reading — and never sends us the callback — cannot hold that link's queue shut indefinitely.
+      writeWatchdog.track(linkID, frame, nowMillis(), owedByRadio = false)
+      armWriteTick()
     }
     return true
   }
@@ -885,6 +965,7 @@ private class PopopxBLETransportAndroid(
           // Android reports a status per notification but never says which bytes it belonged to, so a failed
           // one cannot be handed back to its sender the way iOS can refuse a frame up front. The gate opens
           // either way; a peer that stopped reading is closed by its own disconnect.
+          writeWatchdog.settle(linkID)
           makeLinkWritable(linkID)
           drain(linkID)
         }

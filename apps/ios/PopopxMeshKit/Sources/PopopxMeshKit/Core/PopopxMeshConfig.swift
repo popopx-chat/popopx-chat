@@ -34,6 +34,11 @@ public struct PopopxMeshConfig: Sendable {
     public var fragmentLifetime: TimeInterval = 30
     /// bleMaxInFlightAssemblies
     public var maxInFlightAssemblies: Int = 128
+    /// The largest payload a receiving node will hold for one stream, so the sender can refuse a
+    /// message the mesh would silently delete. Bitchat never sends a fragment stream this big; a
+    /// POPOPX mesh frame is `noiseTransportOverhead` heavier than a plaintext one, so the ceiling is
+    /// a property of this mesh rather of the reference implementation.
+    public var maxReassembledBytes: Int = 2048
     /// bleFragmentRelayMinDelayMs / bleFragmentRelayMaxDelayMs — jitter before a relay re-floods.
     public var relayMinDelay: TimeInterval = 0.008
     public var relayMaxDelay: TimeInterval = 0.025
@@ -44,6 +49,13 @@ public struct PopopxMeshConfig: Sendable {
     /// while a flood is in flight.
     public var recentPacketWindow: TimeInterval = 30
     public var recentPacketMaxCount: Int = 100
+    /// How long an id stays held when this node could do nothing with the packet. The flood window
+    /// must not be the only memory, or the retransmission that would have completed a fragment
+    /// stream is eaten by the first copy's failure; it must not be nothing, or one undecryptable
+    /// frame is decrypted on every hop of every echo. Two seconds is comfortably inside one BLE_ACK
+    /// round and comfortably outside the sub-second echo a relay produces.
+    public var refusalPacketWindow: TimeInterval = 2
+    public var refusalPacketMaxCount: Int = 512
     /// messageDedupMaxAgeSeconds / messageDedupMaxCount — the longer memory for whole messages.
     public var messageDedupMaxAge: TimeInterval = 300
     public var messageDedupMaxCount: Int = 1000
@@ -68,6 +80,11 @@ public struct PopopxMeshConfig: Sendable {
     public var peerReachabilityTimeout: TimeInterval = 15
     /// Module 4: an outbound Bluetooth message with no BLE_ACK this late goes to the router.
     public var bleAckTimeout: TimeInterval = 5
+    /// Module 5: before that same id is handed to SMP, the mesh is allowed to try it again. A BLE
+    /// write is only "handed to CoreBluetooth", so the commonest reason a private message never
+    /// lands is a link that was still negotiating when the frame was attempted — and a second
+    /// attempt five seconds later is a link that has finished.
+    public var meshDeliveryRetries: Int = 2
     /// Module 5: how long to wait for an SMP server ACK before Bluetooth is considered in parallel.
     public var smpAckTimeout: TimeInterval = 3
 

@@ -22,7 +22,7 @@ internal class PopopxMeshConfigVectorTest {
   fun configLiteralsMatchIOS() {
     val config = PopopxMeshConfig.default
     val rows = V.rows("config")
-    assertEquals(28, rows.size, "one row per field of PopopxMeshConfig.default")
+    assertEquals(32, rows.size, "one row per field of PopopxMeshConfig.default")
     for ((label, value) in rows) {
       val ours =
         when (label) {
@@ -34,10 +34,13 @@ internal class PopopxMeshConfigVectorTest {
           "config.maxMTU" -> config.maxMTU
           "config.fragmentLifetime" -> config.fragmentLifetime
           "config.maxInFlightAssemblies" -> config.maxInFlightAssemblies
+          "config.maxReassembledBytes" -> config.maxReassembledBytes
           "config.relayMinDelay" -> config.relayMinDelay
           "config.relayMaxDelay" -> config.relayMaxDelay
           "config.recentPacketWindow" -> config.recentPacketWindow
           "config.recentPacketMaxCount" -> config.recentPacketMaxCount
+          "config.refusalPacketWindow" -> config.refusalPacketWindow
+          "config.refusalPacketMaxCount" -> config.refusalPacketMaxCount
           "config.messageDedupMaxAge" -> config.messageDedupMaxAge
           "config.messageDedupMaxCount" -> config.messageDedupMaxCount
           "config.scanOnDuration" -> config.scanOnDuration
@@ -48,6 +51,7 @@ internal class PopopxMeshConfigVectorTest {
           "config.maintenanceInterval" -> config.maintenanceInterval
           "config.peerReachabilityTimeout" -> config.peerReachabilityTimeout
           "config.bleAckTimeout" -> config.bleAckTimeout
+          "config.meshDeliveryRetries" -> config.meshDeliveryRetries
           "config.smpAckTimeout" -> config.smpAckTimeout
           "config.serviceUUID" -> config.serviceUUID
           "config.characteristicUUID" -> config.characteristicUUID
@@ -69,7 +73,7 @@ internal class PopopxMeshConfigVectorTest {
    */
   @Test
   fun freezeIsTheOneTheseSuitesWereWrittenAgainst() {
-    assertEquals(601, PopopxMeshSwiftVectors.ROW_COUNT)
+    assertEquals(605, PopopxMeshSwiftVectors.ROW_COUNT)
     assertEquals(
       listOf(
         "noise",
@@ -114,7 +118,7 @@ internal class PopopxMeshConfigVectorTest {
         "control" to 7,
         "fragment" to 28,
         "gcs" to 20,
-        "config" to 28,
+        "config" to 32,
       )
     assertEquals(PopopxMeshSwiftVectors.SECTION_NAMES.toSet(), counts.keys, "one count per section")
     for ((section, count) in counts) {
@@ -125,7 +129,7 @@ internal class PopopxMeshConfigVectorTest {
         "every $section label is namespaced with one of $prefixes",
       )
     }
-    assertEquals(601, counts.values.sum(), "the sections add up to the total")
+    assertEquals(605, counts.values.sum(), "the sections add up to the total")
     assertEquals(46, V.rows("envelopeDecode").count { it.first.endsWith(".in") }, "46 decode probes")
     assertEquals(14, V.rows("pad").chunked(6).size, "thirteen buckets plus the unpad counterexamples")
     assertEquals(7, V.rows("envelope").chunked(9).size, "seven envelopes")

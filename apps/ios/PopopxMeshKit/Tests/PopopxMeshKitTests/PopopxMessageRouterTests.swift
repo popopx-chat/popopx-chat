@@ -447,6 +447,16 @@ func bindAsContact(
     #expect(moved == 1)
 }
 
+/// The routing rules with the Bluetooth retry switched off. Each test below about a failure reaching the
+/// public network is really about the *re-route*; with the retry live the router asks the radio a couple
+/// of times first, so these pin that knob off rather than count retries they never set out to prove.
+/// `PopopxMeshRetransmitTests` covers the retry itself.
+func noBLERetryConfig() -> PopopxMeshConfig {
+    var config = PopopxMeshConfig.default
+    config.meshDeliveryRetries = 0
+    return config
+}
+
 /// Module 4's failure value: no BLE_ACK inside `bleAckTimeout`.
 func meshFailure(messageId: String, peerHex: String? = nil) -> PopopxBluetoothDeliveryFailure {
     PopopxBluetoothDeliveryFailure(
@@ -657,7 +667,7 @@ struct PopopxMessageRouterTests {
         let hex = meshTestHex("cc01")
         try await bindAsContact(store, hex: hex, tempConnId: 701, contactId: 99)
         // Offline at send time, so the mesh is the first channel; the failure arrives afterwards.
-        let (router, parts) = await makeRouterParts(store: store, online: false, reachable: [hex], ackInTime: true)
+        let (router, parts) = await makeRouterParts(store: store, online: false, reachable: [hex], ackInTime: true, config: noBLERetryConfig())
         defer { parts.openLatches() }
 
         let routed = await router.send(
@@ -685,7 +695,7 @@ struct PopopxMessageRouterTests {
         let store = try sandbox.makeStore()
         let hex = meshTestHex("cc02")
         try await bindAsContact(store, hex: hex, tempConnId: 702, contactId: 100)
-        let (router, parts) = await makeRouterParts(store: store, online: false, reachable: [hex], heldACK: true)
+        let (router, parts) = await makeRouterParts(store: store, online: false, reachable: [hex], heldACK: true, config: noBLERetryConfig())
         defer { parts.openLatches() }
 
         _ = await router.send(
@@ -721,7 +731,7 @@ struct PopopxMessageRouterTests {
         let store = try sandbox.makeStore()
         let hex = meshTestHex("cc04")
         try await bindAsContact(store, hex: hex, tempConnId: 704, contactId: 101)
-        let (router, parts) = await makeRouterParts(store: store, online: false, reachable: [hex])
+        let (router, parts) = await makeRouterParts(store: store, online: false, reachable: [hex], config: noBLERetryConfig())
         defer { parts.openLatches() }
 
         _ = await router.send(PopopxOutboundMessage(messageId: "id-park", target: .contactId(101), text: "offline"))
@@ -744,7 +754,7 @@ struct PopopxMessageRouterTests {
         let store = try sandbox.makeStore()
         let hex = meshTestHex("cc05")
         try await bindAsContact(store, hex: hex, tempConnId: 705, contactId: 102)
-        let (router, parts) = await makeRouterParts(store: store, online: false, reachable: [hex], ackInTime: true)
+        let (router, parts) = await makeRouterParts(store: store, online: false, reachable: [hex], ackInTime: true, config: noBLERetryConfig())
         defer { parts.openLatches() }
 
         await router.start()
@@ -769,7 +779,7 @@ struct PopopxMessageRouterTests {
         let store = try sandbox.makeStore()
         let hex = meshTestHex("cc06")
         try await bindAsContact(store, hex: hex, tempConnId: 706, contactId: 103)
-        let (router, parts) = await makeRouterParts(store: store, online: false, reachable: [hex], ackInTime: true)
+        let (router, parts) = await makeRouterParts(store: store, online: false, reachable: [hex], ackInTime: true, config: noBLERetryConfig())
         defer { parts.openLatches() }
 
         _ = await router.send(

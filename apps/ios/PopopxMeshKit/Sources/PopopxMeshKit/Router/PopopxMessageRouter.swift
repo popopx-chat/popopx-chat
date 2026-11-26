@@ -476,6 +476,10 @@ public actor PopopxMessageRouter {
         var sentOverMesh = false
         var reroutedOverSMP = false
         var queued = false
+        /// Mesh attempts already spent waiting on a `BLE_ACK` that never came. Private to this router
+        /// and never persisted: a retry is a radio decision, and a queue file that survived a
+        /// relaunch holding a retry count would promise a re-send nobody armed a deadline for.
+        var bleRetries = 0
     }
 
     /// One flush that landed in the host's own database: the id this router minted, and the row id the
@@ -718,6 +722,42 @@ public actor PopopxMessageRouter {
         }
         if attempt.peerMeshPublicKeyHex == nil { attempt.peerMeshPublicKeyHex = peerMeshKey }
         attempts[messageId] = attempt
+
+        // Module 4's deadline says the peer did not answer. It does not say the frame was never
+        // sent, and it cannot: handing a frame to CoreBluetooth is not delivering it. So before this
+        // id is handed to SMP — which needs a network, a bound contact, and a second copy of a
+        // message the mesh may still be carrying — the same envelope goes back on the radio, up to
+        // `meshDeliveryRetries` times. The id is never replaced, for the reason the SMP path below
+        // already gives: a new id would show the message twice.
+        //
+        // Two conditions make a retry worth starting. Our own radio has to be up: module 4 reports
+        // `.radioUnavailable` when it is not, and a retry into a dead radio spends budget and cannot
+        // land. And the peer has to still be on the mesh list, because the commonest reason a frame
+        // never gets an ACK is a link that was still negotiating when it was attempted — which is a
+        // link that exists a few seconds later, provided the neighbour is still being heard of.
+        if attempt.bleRetries < config.meshDeliveryRetries,
+           let peerKey = attempt.peerMeshPublicKeyHex,
+           await health.radioState.isUsable,
+           await health.isPeerReachable(publicKey: peerKey, timeout: config.peerReachabilityTimeout) {
+            attempt.bleRetries += 1
+            attempts[messageId] = attempt
+            if let outcome = await sendOverMesh(
+                messageId: messageId,
+                text: attempt.text,
+                peerMeshPublicKeyHex: peerKey
+            ) {
+                let spent = attempt.bleRetries
+                let ceiling = config.meshDeliveryRetries
+                PopopxMeshLog.route.notice(
+                    "🔁 mesh retry \(spent, privacy: .public)/\(ceiling, privacy: .public) id=\(messageId.prefix(8), privacy: .public)"
+                )
+                publishStatus(for: outcome)
+                return outcome
+            }
+            // The radio refused the frame outright rather than losing it: no ACK deadline was armed,
+            // so waiting another five seconds for one would be waiting for nothing. Fall through with
+            // the attempt spent.
+        }
 
         let binding = await resolveBinding(for: attempt.target)
         var contactId = binding.contactId

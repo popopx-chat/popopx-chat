@@ -110,7 +110,8 @@ public actor PopopxMeshEngine {
         self.recentPackets = PopopxMeshDeduplicator(config: config)
         self.fragments = PopopxMeshFragmentAssembler(
             lifetime: config.fragmentLifetime,
-            maxInFlight: config.maxInFlightAssemblies
+            maxInFlight: config.maxInFlightAssemblies,
+            maxReassembledBytes: config.maxReassembledBytes
         )
         self.pendingForward = PopopxMeshPendingForwardQueue()
         self.identity = PopopxMeshEngine.loadOrMakeIdentity(secrets: secrets)
@@ -518,6 +519,18 @@ public actor PopopxMeshEngine {
             )
             return .refused(failure)
         }
+        // A payload past the ceiling a receiving node is allowed to hold for one stream is deleted at
+        // the far end without a word: the fragment table refuses it and the sender hears nothing, so
+        // the only place this node can still say so is on the way out. A relayed copy is not ours to
+        // judge — we are not the node that has to reassemble it.
+        if origin == nil, packet.payload.count > config.maxReassembledBytes {
+            let failure = PopopxMeshSendFailure.oversized(
+                payloadBytes: packet.payload.count,
+                limitBytes: config.maxReassembledBytes
+            )
+            await publish(.sendFailed(messageId: messageId, peer: peer?.peerID, reason: failure))
+            return .refused(failure)
+        }
         let frames = frames(of: packet, encoded: encoded, for: writable)
         var handedOff = false
         for frame in frames {
@@ -580,45 +593,71 @@ public actor PopopxMeshEngine {
         }
         guard packet.senderID.count == PopopxMeshPeerID.byteCount else { return }
         if packet.senderPeerID == identity.peerID { return }
-        guard await recentPackets.note(packetID: packet.packetID) else { return }
+        // The id is claimed, not remembered: taking it up-front put the packet in the flood window
+        // before this node knew whether it could do anything with it, and the retransmission that
+        // would have finished the job — the sibling fragment of a stream with a hole in it, the copy
+        // that arrives after the handshake it was waiting on — carries the same bytes, so it was
+        // eaten for the rest of the window. A claim holds for the short window instead, and only a
+        // packet this node actually used or forwarded is promoted to the flood memory.
+        guard await recentPackets.claim(packetID: packet.packetID) else { return }
 
         let hopCount = max(0, Int(config.ttlDefault) - Int(packet.ttl))
         if let sender = packet.senderPeerID, let meshHex = meshHexByPeerID[sender.hex] {
             touch(meshPublicKeyHex: meshHex, hopCount: hopCount, linkID: linkID)
         }
 
-        let isForUs = packet.isBroadcast || packet.recipientPeerID == identity.peerID
-        if isForUs { await consume(packet, hopCount: hopCount, linkID: linkID) }
-        await relay(packet, incoming: linkID)
+        var used = false
+        if packet.isBroadcast || packet.recipientPeerID == identity.peerID {
+            used = await consume(packet, hopCount: hopCount, linkID: linkID)
+        }
+        let forwarded = await relay(packet, incoming: linkID)
+        if used || forwarded {
+            await recentPackets.confirm(packetID: packet.packetID)
+        }
     }
 
-    private func consume(_ packet: PopopxMeshPacket, hopCount: Int, linkID: UUID) async {
+    /// true when this node did something with the packet: showed it, applied it, or answered it.
+    /// false means the same bytes are worth another look, which is what the claim's short window
+    /// buys. A branch that has nothing to retry — an unknown frame type, an announce that will
+    /// parse the same way every time — reports true, because repeating the work is not a second
+    /// chance at delivery, it is a second copy of the same failure.
+    private func consume(_ packet: PopopxMeshPacket, hopCount: Int, linkID: UUID) async -> Bool {
         switch packet.decodedType {
         case .noiseHandshake:
+            // A handshake that was refused is refused on its bytes, not on this node's timing: we
+            // either have the state it continues from or we tore it down and the peer must start a
+            // fresh exchange, which arrives as different bytes under a different id.
             await consumeHandshake(packet, hopCount: hopCount, linkID: linkID)
+            return true
         case .noiseEncrypted:
-            await consumeEncrypted(packet, hopCount: hopCount, linkID: linkID)
+            return await consumeEncrypted(packet, hopCount: hopCount, linkID: linkID)
         case .fragment:
-            await consumeFragment(packet, hopCount: hopCount, linkID: linkID)
+            return await consumeFragment(packet, hopCount: hopCount, linkID: linkID)
         case .announce:
             await consumeAnnounce(packet, hopCount: hopCount, linkID: linkID)
+            return true
         case .message:
             await consumeBroadcastMessage(packet, hopCount: hopCount)
+            return true
         case .ping:
             await consumePing(packet)
+            return true
         case .pong:
-            break
+            return true
         case .leave:
             await consumeLeave(packet)
+            return true
         case .groupState:
-            await consumeGroupState(packet, hopCount: hopCount, linkID: linkID)
+            return await consumeGroupState(packet, hopCount: hopCount, linkID: linkID)
         case .groupMessage:
-            await consumeGroupMessage(packet, hopCount: hopCount)
+            return await consumeGroupMessage(packet, hopCount: hopCount)
         case .pairingRequest, .pairingAck, .deliveryAck:
             // These ride `.noiseEncrypted`; a bare one on the wire is not ours to trust.
             PopopxMeshLog.pairing.debug("🚫 unencrypted control frame type \(packet.type, privacy: .public) ignored")
+            return true
         default:
             PopopxMeshLog.route.debug("🤷 frame type \(packet.type, privacy: .public) not in this mesh")
+            return true
         }
     }
 
@@ -787,17 +826,20 @@ public actor PopopxMeshEngine {
         _ = await recentPackets.note(packetID: packet.packetID)
     }
 
-    private func consumeEncrypted(_ packet: PopopxMeshPacket, hopCount: Int, linkID: UUID) async {
+    private func consumeEncrypted(_ packet: PopopxMeshPacket, hopCount: Int, linkID: UUID) async -> Bool {
         guard let sender = packet.senderPeerID,
               let meshHex = meshHexByPeerID[sender.hex],
               var session = peersByHex[meshHex]?.session else {
             PopopxMeshLog.noise.debug("🚫 encrypted frame with no session from \(packet.senderID.popopxHex.prefix(16), privacy: .public)")
-            return
+            // Retryable, and this is the case the mesh loses messages on: a private frame sent while
+            // the handshake was still in flight. The bytes are fine — this node just cannot read them
+            // *yet*, and the copy that arrives after the session exists is the one that lands.
+            return false
         }
         guard packet.recipientPeerID == identity.peerID else {
             // Directed at someone else: module 4 must not credit a neighbour for traffic that was not
             // ours, and we cannot read it anyway.
-            return
+            return true
         }
         let plaintext: Data
         do {
@@ -806,7 +848,10 @@ public actor PopopxMeshEngine {
             PopopxMeshLog.noise.warning(
                 "🚫 replay or tampering from \(meshHex.prefix(8), privacy: .public): \(String(describing: error), privacy: .public)"
             )
-            return
+            // The session is real and this frame did not open against it. A retransmit of the same
+            // ciphertext fails the same way, and a replay of a spent nonce must not be rewarded with
+            // a second look.
+            return true
         }
         // A session is a value: the receiver's counter and replay window only move if the copy that
         // just decrypted goes back, or the next frame would be checked against a stale window.
@@ -814,7 +859,7 @@ public actor PopopxMeshEngine {
         touch(meshPublicKeyHex: meshHex, hopCount: hopCount, linkID: linkID)
         guard let envelope = Self.decodeEnvelope(plaintext) else {
             PopopxMeshLog.route.debug("🗑 undecodable envelope from \(meshHex.prefix(8), privacy: .public)")
-            return
+            return true
         }
         let body: PopopxMeshBody
         switch envelope.kind {
@@ -823,7 +868,7 @@ public actor PopopxMeshEngine {
         case .control:
             guard let frame = PopopxMeshControlFrame(envelope.body) else {
                 PopopxMeshLog.pairing.debug("🚫 unknown control frame from \(meshHex.prefix(8), privacy: .public)")
-                return
+                return true
             }
             body = .control(frame)
         }
@@ -843,8 +888,9 @@ public actor PopopxMeshEngine {
         )
         // Everything we can read and that is not itself an acknowledgement gets acknowledged:
         // module 4's 5-second guard is waiting on exactly this reply.
-        if case let .control(frame) = body, case .deliveryAck = frame { return }
+        if case let .control(frame) = body, case .deliveryAck = frame { return true }
         await acknowledge(messageId: envelope.id, to: meshHex)
+        return true
     }
 
     /// `BLE_ACK:<messageId>`, back over the same session the message came in on.
@@ -877,31 +923,52 @@ public actor PopopxMeshEngine {
         await deliver(packet, messageId: packet.packetID.popopxHex, peer: record, origin: nil)
     }
 
-    private func consumeFragment(_ packet: PopopxMeshPacket, hopCount: Int, linkID: UUID) async {
-        guard packet.isBroadcast || packet.recipientPeerID == identity.peerID else { return }
-        guard case .complete(_, let originalType, let payload)? = await fragments.append(packet) else { return }
-        guard originalType != PopopxMeshMessageType.fragment.rawValue,
-              originalType != PopopxMeshMessageType.noiseHandshake.rawValue else {
-            // A stream that reassembles into another fragment, or into a handshake we would feed to
-            // the cipher, is a wrapper loop. A node cannot name our handshake messages for us.
-            PopopxMeshLog.route.debug("🚫 fragment stream reassembles to type \(originalType, privacy: .public)")
-            return
+    private func consumeFragment(_ packet: PopopxMeshPacket, hopCount: Int, linkID: UUID) async -> Bool {
+        guard packet.isBroadcast || packet.recipientPeerID == identity.peerID else { return true }
+        switch await fragments.append(packet) {
+        case nil, .stored:
+            // `nil` is not a fragment at all, which the type dispatch above already decided, and
+            // `.stored` means the stream gained this piece. Neither is a hole a retransmission could
+            // fill: the pieces still missing are separate packets with separate ids.
+            return true
+        case let .rejected(reason):
+            PopopxMeshLog.route.warning("🧩 fragment stream refused: \(String(describing: reason), privacy: .public)")
+            switch reason {
+            case .malformedHeader, .oversized:
+                return true
+            case .tooManyInFlight, .expired:
+                // Both are about when the piece arrived rather than what it holds: the table may have
+                // room by the next copy, and a piece that opened a stream past its lifetime starts a
+                // clean one. Refusing to look at them again is how a long message disappears.
+                return false
+            }
+        case let .complete(_, originalType, payload):
+            guard originalType != PopopxMeshMessageType.fragment.rawValue,
+                  originalType != PopopxMeshMessageType.noiseHandshake.rawValue else {
+                // A stream that reassembles into another fragment, or into a handshake we would feed to
+                // the cipher, is a wrapper loop. A node cannot name our handshake messages for us.
+                PopopxMeshLog.route.debug("🚫 fragment stream reassembles to type \(originalType, privacy: .public)")
+                return true
+            }
+            // The fragmenter repeats the sender, recipient, timestamp, TTL and signature on every piece,
+            // so the finished payload needs no second frame to become a packet.
+            let inner = PopopxMeshPacket(
+                type: originalType,
+                ttl: packet.ttl,
+                timestamp: packet.timestamp,
+                senderID: packet.senderID,
+                recipientID: packet.recipientID,
+                payload: payload,
+                signature: packet.signature,
+                version: packet.version
+            )
+            guard inner.senderPeerID != identity.peerID else { return true }
+            // The finished packet is a different id from every piece that carried it, and this one is
+            // remembered the moment it exists: the stream is complete, so a second copy of any piece
+            // can only duplicate a message this node has already run.
+            guard await recentPackets.note(packetID: inner.packetID) else { return true }
+            return await consume(inner, hopCount: hopCount, linkID: linkID)
         }
-        // The fragmenter repeats the sender, recipient, timestamp, TTL and signature on every piece,
-        // so the finished payload needs no second frame to become a packet.
-        let inner = PopopxMeshPacket(
-            type: originalType,
-            ttl: packet.ttl,
-            timestamp: packet.timestamp,
-            senderID: packet.senderID,
-            recipientID: packet.recipientID,
-            payload: payload,
-            signature: packet.signature,
-            version: packet.version
-        )
-        guard inner.senderPeerID != identity.peerID else { return }
-        guard await recentPackets.note(packetID: inner.packetID) else { return }
-        await consume(inner, hopCount: hopCount, linkID: linkID)
     }
 
     private func consumeAnnounce(_ packet: PopopxMeshPacket, hopCount: Int, linkID: UUID) async {
@@ -984,22 +1051,26 @@ public actor PopopxMeshEngine {
 
     /// The flood: TTL 7 hops, never back out of the ingress link, never twice the same packet, and
     /// jittered so that two neighbours that heard the frame at once do not collide on the link.
-    private func relay(_ packet: PopopxMeshPacket, incoming linkID: UUID) async {
+    private func relay(_ packet: PopopxMeshPacket, incoming linkID: UUID) async -> Bool {
         guard packet.ttl > 1 else {
             // A frame that dies at our door is not a delivery failure of ours: module 4 owns that
             // verdict for traffic we sent, and this traffic belongs to someone else.
             PopopxMeshLog.route.debug(
                 "⏳ ttl spent, \(packet.decodedType.map { String($0.rawValue) } ?? "?", privacy: .public) not forwarded"
             )
-            return
+            return false
         }
         var forwarded = packet
         forwarded.ttl = packet.ttl - 1
         let delay = TimeInterval.random(in: config.relayMinDelay...config.relayMaxDelay)
         try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-        guard running else { return }
+        guard running else { return false }
         let peer = packet.recipientPeerID.flatMap { meshHexByPeerID[$0.hex] }.flatMap { peersByHex[$0] }
-        await deliver(forwarded, messageId: packet.packetID.popopxHex, peer: peer, origin: linkID)
+        let outcome = await deliver(forwarded, messageId: packet.packetID.popopxHex, peer: peer, origin: linkID)
+        // "Forwarded" is what the flood window is asked to remember, and a queued relay copy is one:
+        // the packet is on this node's hook and will leave on the next writable link.
+        if case .refused = outcome { return false }
+        return true
     }
 
     // MARK: - Private groups (module 8)
@@ -1123,18 +1194,20 @@ public actor PopopxMeshEngine {
     /// The peer the handshake authenticated has to be the creator the state names, which is the
     /// first check inside `applyState` and the reason this hands it the session's key and not the
     /// header's.
-    private func consumeGroupState(_ packet: PopopxMeshPacket, hopCount: Int, linkID: UUID) async {
+    private func consumeGroupState(_ packet: PopopxMeshPacket, hopCount: Int, linkID: UUID) async -> Bool {
         guard let sender = packet.senderPeerID,
               let meshHex = meshHexByPeerID[sender.hex],
               var session = peersByHex[meshHex]?.session else {
             PopopxMeshLog.route.debug(
                 "🚫 group state with no session from \(packet.senderID.popopxHex.prefix(16), privacy: .public) dropped"
             )
-            return
+            // The invite is addressed to us and signed by the creator; the session that proves it is
+            // simply not open yet. An invite whose copy is eaten here is a peer that never joins.
+            return false
         }
         guard packet.recipientPeerID == identity.peerID else {
             // Addressed to someone else: we are a hop in its delivery, and the relay already ran.
-            return
+            return true
         }
         let blob: Data
         do {
@@ -1143,19 +1216,30 @@ public actor PopopxMeshEngine {
             PopopxMeshLog.noise.warning(
                 "🚫 group state frame from \(meshHex.prefix(8), privacy: .public) would not open: \(String(describing: error), privacy: .public)"
             )
-            return
+            return true
         }
         peersByHex[meshHex]?.session = session
         touch(meshPublicKeyHex: meshHex, hopCount: hopCount, linkID: linkID)
-        _ = await groups.applyState(blob, fromMeshPublicKeyHex: meshHex)
+        let outcome = await groups.applyState(blob, fromMeshPublicKeyHex: meshHex)
+        if case .refused(let reason, _) = outcome {
+            PopopxMeshLog.store.warning(
+                "🚫 group state refused: \(String(describing: reason), privacy: .public)"
+            )
+        }
+        return true
     }
 
     /// The flooded half. A node without the group key answers nil here without logging more than a
     /// debug line, and the packet has already been re-flooded by `relay` — that is the whole design:
     /// everyone carries it, only members read it.
-    private func consumeGroupMessage(_ packet: PopopxMeshPacket, hopCount: Int) async {
-        guard packet.isBroadcast || packet.recipientPeerID == identity.peerID else { return }
-        _ = await groups.receiveMessage(packet.payload, hopCount: hopCount)
+    private func consumeGroupMessage(_ packet: PopopxMeshPacket, hopCount: Int) async -> Bool {
+        guard packet.isBroadcast || packet.recipientPeerID == identity.peerID else { return true }
+        // nil covers "not our group", "not this epoch", and "already shown". The first two are the
+        // mesh's own race — the state that makes a peer a member is a separate packet that may well
+        // be one hop behind the message — so a message this node could not read stays retryable.
+        // The third costs one re-parse per refusal window and still shows the user one bubble.
+        let shown = await groups.receiveMessage(packet.payload, hopCount: hopCount)
+        return shown != nil
     }
 
     // MARK: - Peers
@@ -1390,7 +1474,11 @@ extension PopopxMeshEngine: PopopxBLETransportDelegate {
     }
 
     private func writeFailed(_ data: Data, linkID: UUID, error: (any Error)?) async {
-        guard let packet = PopopxMeshPacket.decode(data), let peer = packet.recipientPeerID else { return }
+        // A broadcast has no recipient to name, and it used to be the case that nothing was reported
+        // at all for one: the grey clock icon a user waits on stayed grey forever with no event behind
+        // it. The peer is nil in that report, which is the truth rather than a substitute for it.
+        guard let packet = PopopxMeshPacket.decode(data) else { return }
+        let peer = packet.recipientPeerID
         let reason: PopopxMeshSendFailure
         if !radioState.isUsable {
             reason = .radioUnavailable(radioState)
@@ -1400,7 +1488,7 @@ extension PopopxMeshEngine: PopopxBLETransportDelegate {
             reason = .noLinkToPeer
         }
         await publish(.sendFailed(messageId: packet.packetID.popopxHex, peer: peer, reason: reason))
-        if case .linkDropped = reason, let meshHex = meshHexByPeerID[peer.hex] {
+        if case .linkDropped = reason, let meshHex = peer.flatMap({ meshHexByPeerID[$0.hex] }) {
             peersByHex[meshHex]?.session = nil
         }
     }

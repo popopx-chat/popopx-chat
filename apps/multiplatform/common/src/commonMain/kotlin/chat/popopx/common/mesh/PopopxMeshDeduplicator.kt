@@ -1,7 +1,7 @@
 package chat.popopx.common.mesh
 
 /**
- * Two memories with two jobs — a port of
+ * Three memories with three jobs — a port of
  * `apps/ios/PopopxMeshKit/Sources/PopopxMeshKit/Route/PopopxMeshDeduplicator.swift`.
  *
  * The short one holds packet ids for the seconds a flood is in the air, and is what stops a relay from
@@ -9,9 +9,15 @@ package chat.popopx.common.mesh
  * message that arrived twice — over two links, or from the router after the radio already delivered it —
  * is shown to the user once.
  *
- * Both are bounded twice over, by age and by count, because each bound fails on its own: a TTL alone lets
- * a peer spray new ids and grow the table without limit, and a count alone lets a peer keep one id alive
- * forever by re-sending it.
+ * The packet window is joined by a third, shorter one: an id this node claimed but could not use. A
+ * refused packet must not sit in the flood window for 30 seconds, because the retransmission that would
+ * have completed it is the same bytes, and a mesh that eats its own retries cannot be asked to deliver
+ * anything. It must not be forgotten either, or every hop of an undecryptable flood repeats the work of
+ * failing it.
+ *
+ * All three are bounded twice over, by age and by count, because each bound fails on its own: a TTL alone
+ * lets a peer spray new ids and grow the table without limit, and a count alone lets a peer keep one id
+ * alive forever by re-sending it.
  *
  * iOS is an actor; [Synchronized] is the same serialisation, kept per call because nothing here blocks.
  * [now] is injectable so the ageing paths are testable without waiting for a clock.
@@ -22,10 +28,13 @@ class PopopxMeshDeduplicator(
 ) {
   private val recentWindowMillis: Long = millisOf(maxOf(0.0, config.recentPacketWindow))
   private val recentMaxCount: Int = maxOf(1, config.recentPacketMaxCount)
+  private val refusalWindowMillis: Long = millisOf(maxOf(0.0, config.refusalPacketWindow))
+  private val refusalMaxCount: Int = maxOf(1, config.refusalPacketMaxCount)
   private val messageWindowMillis: Long = millisOf(maxOf(0.0, config.messageDedupMaxAge))
   private val messageMaxCount: Int = maxOf(1, config.messageDedupMaxCount)
 
   private val packets = Window()
+  private val refused = Window()
   private val messages = Window()
   private var hits = 0
 
@@ -50,11 +59,51 @@ class PopopxMeshDeduplicator(
       hits += 1
       return false
     }
-    packets.insert(key, timestamp)
-    while (packets.count > recentMaxCount) {
-      if (!packets.removeOldest()) break
-    }
+    insert(key, timestamp, target = packets, cap = recentMaxCount)
     return true
+  }
+
+  /** Insert plus the count bound, which every writer needs and each used to spell out. */
+  private fun insert(id: String, at: Long, target: Window, cap: Int) {
+    target.insert(id, at)
+    while (target.count > cap) {
+      if (!target.removeOldest()) break
+    }
+  }
+
+  /**
+   * Take the packet for this node alone, for as long as the short window: the caller is about to decide
+   * whether it can use it, and two copies of one flood must not both make that decision. false means the
+   * id is already held by either window.
+   */
+  @Synchronized
+  fun claim(packetID: ByteArray): Boolean {
+    if (packetID.isEmpty() || packetID.size > MAX_KEY_BYTES) return true
+    val timestamp = now()
+    val key = packetID.meshHex()
+    packets.removeExpired(timestamp - recentWindowMillis)
+    refused.removeExpired(timestamp - refusalWindowMillis)
+    if (packets.contains(key) || refused.contains(key)) {
+      hits += 1
+      return false
+    }
+    insert(key, timestamp, target = refused, cap = refusalMaxCount)
+    return true
+  }
+
+  /**
+   * The packet was consumed or forwarded: move its id from the retryable hold into the flood window,
+   * which is what stops the rest of that flood from being worked on again.
+   */
+  @Synchronized
+  fun confirm(packetID: ByteArray) {
+    if (packetID.isEmpty() || packetID.size > MAX_KEY_BYTES) return
+    val timestamp = now()
+    val key = packetID.meshHex()
+    refused.remove(key)
+    packets.removeExpired(timestamp - recentWindowMillis)
+    if (packets.contains(key)) return
+    insert(key, timestamp, target = packets, cap = recentMaxCount)
   }
 
   /**
@@ -127,11 +176,17 @@ class PopopxMeshDeduplicator(
   @Synchronized
   fun prune(nowMillis: Long) {
     packets.removeExpired(nowMillis - recentWindowMillis)
+    refused.removeExpired(nowMillis - refusalWindowMillis)
     messages.removeExpired(nowMillis - messageWindowMillis)
   }
 
   val stats: PopopxMeshDedupStats
-    @Synchronized get() = PopopxMeshDedupStats(recentCount = packets.count, messageCount = messages.count, hits = hits)
+    @Synchronized get() = PopopxMeshDedupStats(
+      recentCount = packets.count,
+      messageCount = messages.count,
+      hits = hits,
+      refusalCount = refused.count,
+    )
 
   // MARK: - Window
 
@@ -168,6 +223,13 @@ class PopopxMeshDeduplicator(
       }
       return null
     }
+
+    /**
+     * The queue keeps the dead key and [oldest] walks past it, which is why removing a middle entry costs
+     * nothing: compacting the array per confirm would make the flood path O(n) to hand one id from one
+     * window to the other.
+     */
+    fun remove(id: String): Boolean = stamps.remove(id) != null
 
     fun removeOldest(): Boolean {
       val (id, _) = oldest() ?: return false
@@ -220,9 +282,11 @@ class PopopxMeshDedupStats(
   val recentCount: Int,
   /** Ids in the message window. */
   val messageCount: Int,
+  /** Ids held only because this node could not use them — the retryable ones. */
+  val refusalCount: Int = 0,
   /**
-   * Times a `note` call found the id already there. Counted on [note] only: [contains] is a question,
-   * [note] is a decision.
+   * Times a `note` or `claim` call found the id already there, i.e. how much flooding this node has
+   * suppressed. Counted on the deciding calls only: [contains] is a question.
    */
   val hits: Int,
 ) {
@@ -230,9 +294,11 @@ class PopopxMeshDedupStats(
     other is PopopxMeshDedupStats &&
       other.recentCount == recentCount &&
       other.messageCount == messageCount &&
+      other.refusalCount == refusalCount &&
       other.hits == hits
 
-  override fun hashCode(): Int = 31 * (31 * recentCount + messageCount) + hits
+  override fun hashCode(): Int = 31 * (31 * (31 * recentCount + messageCount) + refusalCount) + hits
 
-  override fun toString(): String = "PopopxMeshDedupStats(recentCount=$recentCount, messageCount=$messageCount, hits=$hits)"
+  override fun toString(): String =
+    "PopopxMeshDedupStats(recentCount=$recentCount, messageCount=$messageCount, refusalCount=$refusalCount, hits=$hits)"
 }
