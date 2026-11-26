@@ -96,8 +96,13 @@ or renamed `cactus.h` is caught here, not by a device link.
 
 `needle3.cact` must reach the app bundle for the engine to read it with zero network
 download. The clean way is a versioned file reference modelled on an existing one —
-`sounds` at `:497` is a *folder* reference, so copy the shape of a plain resource instead,
-as `GoogleService-Info.plist` and the `.xcassets` entries do:
+`sounds` at `:497` is a *folder* reference, so it is not the model for one file. The real precedent is
+`PopopxStoreKit.storekit`, which has exactly one entry in each of the four places and sits in the same
+resources phase: `:229` (PBXBuildFile), `:717` (PBXFileReference), `:1503` (group child), `:1978`
+(member of the app target's Resources phase). Measured 2026-11-26, this file contains no
+`GoogleService-Info.plist` at all and no plain `lastKnownFileType = file;` entry — the storekit's
+`text` is the only plain-file spelling here, and the `.xcassets` references at `:550`/`:845`/`:846` are
+`folder.assetcatalog`, neither of which is a usable model for a 35 MB binary:
 
 ```
 		AA00000100000000000000C1 /* needle3.cact in Resources */ = {isa = PBXBuildFile; fileRef = AA00000100000000000000C0 /* needle3.cact */; };
@@ -112,8 +117,10 @@ identifiers are placeholders — Xcode will mint real ones if the paste is done 
 GUI, which is the safer route; hand-editing requires two unique 24-character hex ids.
 
 Put the file where the group's `path` resolves. The simplest group to hang it on is the
-one that already contains `sounds` (`:1120`), whose `path` makes those entries resolve
-under `apps/ios`, so copy the weights to `apps/ios/needle3.cact` first:
+main group that already contains `sounds` (`:1120`): it carries no `path` of its own
+(`:1114`–`:1135` declare only `sourceTree = "<group>"`), so its children resolve against
+the project directory, which is why `path = sounds` at `:497` finds `apps/ios/sounds`.
+Copy the weights to `apps/ios/needle3.cact` first:
 
 ```
 cp apps/multiplatform/common/src/commonMain/resources/assets/needle3.cact apps/ios/needle3.cact
