@@ -13,6 +13,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 
 // The store behind the Android latency badge. PopopxRelaySelectorTest.kt proves the decisions; this
 // file proves the two things that only matter once the decisions are shared between screens: nobody
@@ -114,6 +115,10 @@ class PopopxRelayLatencyTest {
     val partial = async { store.refresh(hosts.take(2), probingAllowed = true, transport = gate) }
     gate.entered.await()
     val full = async { store.refresh(hosts, probingAllowed = true, transport = gate) }
+    // The round only closes when the gate opens, so the newcomer is proved to be mid-flight by running
+    // it to the point where it has already looked at inFlight. Without this it queues behind the test
+    // body and may arrive after letGo(), by which time the round has finished and joining is impossible.
+    yield()
     gate.letGo()
     partial.await()
     full.await()
