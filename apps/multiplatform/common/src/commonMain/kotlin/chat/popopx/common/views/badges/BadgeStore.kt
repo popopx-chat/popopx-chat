@@ -3,6 +3,8 @@ package chat.popopx.common.views.badges
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
+import chat.popopx.common.invite.looksLikePopopxInviteLink
+import chat.popopx.common.invite.popopxInviteLinkURI
 import chat.popopx.common.model.*
 import chat.popopx.common.model.ChatController.appPrefs
 import chat.popopx.common.platform.*
@@ -56,10 +58,25 @@ fun badgePageUrl(linkReturns: Boolean): String =
   if (linkReturns) "$badgeSiteUrl?app=true"
   else "$badgeSiteUrl?app=desktop"
 
-// The payment exit of the Android build that has no Play Billing lane. It is the site page until the
-// bot exists: replacing this single line with a payment address also switches the button label, and
-// any scheme works because the value is opened as it stands.
-const val ANDROID_FOSS_PAYMENT_URL = badgeSiteUrl
+// The payment bot's contact address, sealed as an /i/v1/ share. Sealing is what lets the app name a
+// relay-issued address without naming the relay: the host travels inside the envelope, so it appears
+// in no string resource, no link preview and no source grep. planAndConnect opens it back at the
+// single funnel, so the core is handed an ordinary contact address and connects in-app.
+//
+// Minted offline with a fixed nonce so one build always prints one link (nonce "popopxbill01"; the
+// recipe and the byte-identical re-derivation are in PopopxBillBotTest). The derivation key is a
+// format key, published in PopopxOpaqueInviteCodec, so this buys no secrecy and must not be described
+// as an encrypted or private payment link — only as a link that does not show its relay.
+const val ANDROID_FOSS_PAYMENT_URL =
+  "https://popopx.chat/i/v1/cG9wb3B4YmlsbDAxY8V1L0YZOnxbCCrCWkjrAL7aXigDVhbAN7JBdRBy94qjjHNmgwiEu6pjjEpYcuoXuIteZ5AJGOYE_OCTDw8CNRV_IHdcPaqadGuXwNPogvj56C_G8qpGhQeWDu7NaPpEJa4tcB6q7LbYoaS1XP9K3z4dim85gAIelZWh9W-e1eUphA"
+
+// Whether the configured exit is one of our sealed shares. Only then may the tap go to the in-app
+// funnel: a checkout page, or a plain address typed in by hand, is still something to open as it stands.
+fun fossPaymentIsOpaqueBotLink(): Boolean = looksLikePopopxInviteLink(ANDROID_FOSS_PAYMENT_URL)
+
+// The address the sealed exit carries, opened by the same codec the funnel uses. null is "this is not a
+// readable share", which is also the answer for a damaged one — so callers fall back rather than guess.
+fun fossPaymentContactURI(): String? = popopxInviteLinkURI(ANDROID_FOSS_PAYMENT_URL)
 
 // Whether the configured foss exit has moved past the site page.
 fun fossPaymentIsCheckout(): Boolean = ANDROID_FOSS_PAYMENT_URL != badgeSiteUrl

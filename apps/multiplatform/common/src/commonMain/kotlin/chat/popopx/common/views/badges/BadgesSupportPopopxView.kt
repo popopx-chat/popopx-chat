@@ -26,6 +26,7 @@ import chat.popopx.common.views.helpers.*
 import chat.popopx.common.views.newchat.darkStops
 import chat.popopx.common.views.newchat.gradientPoints
 import chat.popopx.common.views.newchat.lightStops
+import chat.popopx.common.views.newchat.planAndConnect
 import chat.popopx.common.views.onboarding.HowItWorks
 import chat.popopx.common.views.onboarding.OnboardingActionButton
 import chat.popopx.common.views.onboarding.TextButtonBelowOnboardingButton
@@ -157,7 +158,20 @@ private fun BuyInBrowserButton(modalManager: ModalManager, unwindToDepth: Int) {
     onboarding = null,
     onclick = {
       val linkReturns = appLinkSchemeRegistered()
-      uriHandler.openUriCatching(badgePaymentUrl(linkReturns, foss))
+      if (foss && fossPaymentIsOpaqueBotLink()) {
+        // A contact address, not a page. The sealed share goes to the funnel that pasted, scanned and
+        // tapped links already meet, which opens it and plans the connection; nothing is handed to an
+        // intent resolver, so no browser and no assetlinks verification stands between the tap and the bot.
+        withBGApi {
+          planAndConnect(
+            chatModel.remoteHostId(),
+            ANDROID_FOSS_PAYMENT_URL,
+            close = { ModalManager.closeAllModalsEverywhere() },
+          )
+        }
+      } else {
+        uriHandler.openUriCatching(badgePaymentUrl(linkReturns, foss))
+      }
       // with no scheme to bring the code back, the code is pasted into this screen, opened beside the browser
       if (!linkReturns && !modalManager.hasModalOpen(ModalViewId.BADGE_REDEEM_CODE)) {
         modalManager.showModal(id = ModalViewId.BADGE_REDEEM_CODE) { BadgesRedeemCodeView(modalManager, unwindToDepth) }
