@@ -38,6 +38,18 @@ final class TestMutex: @unchecked Sendable {
     }
 }
 
+/// A `defer` body may not `await` on the toolchain the iOS CI job builds with, so async teardown that
+/// still has to run when an expectation throws goes through this instead of a `defer`.
+func withTeardown(_ body: () async throws -> Void, teardown: () async -> Void) async throws {
+    do {
+        try await body()
+    } catch {
+        await teardown()
+        throw error
+    }
+    await teardown()
+}
+
 /// "Not yet" as a value a test can hold. `wait()` parks until `openNow()`, and `openNow()` is
 /// synchronous so a test can put it in `defer` and never leave a continuation parked at the end.
 final class Latch: @unchecked Sendable {
@@ -921,14 +933,17 @@ struct PopopxMessageRouterTests {
         let (router, parts) = await makeRouterParts(store: store, online: false, reachable: [], ackInTime: true)
         defer { parts.openLatches() }
         await router.start()
-        defer { await router.stop() }
 
-        _ = await router.send(PopopxOutboundMessage(messageId: "id-edge", target: .contactId(114), text: "the network is back"))
-        #expect(await router.pendingMessageCount == 1)
+        try await withTeardown {
+            _ = await router.send(PopopxOutboundMessage(messageId: "id-edge", target: .contactId(114), text: "the network is back"))
+            #expect(await router.pendingMessageCount == 1)
 
-        await parts.network.setConnected(true)
-        try await settled { await router.pendingMessageCount == 0 }
-        #expect(await parts.core.sentMessageIds == ["id-edge"], "NWPathMonitor's restore edge flushes on its own")
+            await parts.network.setConnected(true)
+            try await settled { await router.pendingMessageCount == 0 }
+            #expect(await parts.core.sentMessageIds == ["id-edge"], "NWPathMonitor's restore edge flushes on its own")
+        } teardown: {
+            await router.stop()
+        }
     }
 
     @Test("a failing flush puts the message back with its original queuedAt and text")
@@ -1068,9 +1083,12 @@ struct PopopxMessageRouterTests {
         let (second, secondParts) = await makeRouterParts(store: store, online: true, reachable: [], queueURL: queueURL)
         defer { secondParts.openLatches() }
         await second.start()
-        defer { await second.stop() }
-        #expect(await second.pendingMessageCount == 0)
-        #expect(await second.recordedFlushedAppChatItemIDs() == ["id-keep": 90_003])
+        try await withTeardown {
+            #expect(await second.pendingMessageCount == 0)
+            #expect(await second.recordedFlushedAppChatItemIDs() == ["id-keep": 90_003])
+        } teardown: {
+            await second.stop()
+        }
     }
 
     @Test("the pairing list is capped and drops the oldest flush")

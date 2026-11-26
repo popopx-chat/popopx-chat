@@ -294,43 +294,44 @@ func fragmentHoleIsFilledByALaterCopy() async throws {
         // A second link so the flood the listener re-serves is not what this test is measuring.
         nickname: "Listener", config: config, links: [listenerIngress, shortLink(mtu: 180)]
     )
-    defer {
+    let ingress = listenerIngress.linkID
+
+    try await withTeardown {
+        try await speaker.sendBroadcast(text: text)
+        let fragmented = await retransmitUntil { speakerTransport.fragmentCount >= 2 }
+        #expect(fragmented, "a payload longer than the link's budget goes on the air as fragments")
+        let total = speakerTransport.fragmentCount
+        let byIndex = speakerTransport.fragmentsByIndex
+
+        // Every piece but the middle one: a hole is what a retransmission exists to fill.
+        for index in 0..<total where index != 1 {
+            guard let frame = byIndex[index] else { continue }
+            listener.bleTransport(listenerTransport, didReceive: frame, from: ingress)
+        }
+        let early = await retransmitUntil(timeout: 1) { !listenerLog.broadcastTexts.isEmpty }
+        #expect(!early, "an incomplete stream is held, never delivered as a partial message")
+
+        guard let missing = byIndex[1] else {
+            throw RetransmitHarnessFailure("fragment index 1 never left the speaker")
+        }
+        listener.bleTransport(listenerTransport, didReceive: missing, from: ingress)
+        let landed = await retransmitUntil { listenerLog.broadcastTexts == [text] }
+        #expect(landed, "the pieces do not have to arrive in delivery order for the stream to complete")
+
+        // The whole run again — the echo a relay produces. One copy reaches the user.
+        for index in 0..<total {
+            guard let frame = byIndex[index] else { continue }
+            listener.bleTransport(listenerTransport, didReceive: frame, from: ingress)
+        }
+        let doubled = await retransmitUntil(timeout: 1) { listenerLog.broadcastTexts.count > 1 }
+        #expect(!doubled)
+        #expect(listenerLog.broadcastTexts == [text])
+    } teardown: {
         try? FileManager.default.removeItem(at: speakerDir)
         try? FileManager.default.removeItem(at: listenerDir)
         await listener.stop()
         await speaker.stop()
     }
-    let ingress = listenerIngress.linkID
-
-    try await speaker.sendBroadcast(text: text)
-    let fragmented = await retransmitUntil { speakerTransport.fragmentCount >= 2 }
-    #expect(fragmented, "a payload longer than the link's budget goes on the air as fragments")
-    let total = speakerTransport.fragmentCount
-    let byIndex = speakerTransport.fragmentsByIndex
-
-    // Every piece but the middle one: a hole is what a retransmission exists to fill.
-    for index in 0..<total where index != 1 {
-        guard let frame = byIndex[index] else { continue }
-        listener.bleTransport(listenerTransport, didReceive: frame, from: ingress)
-    }
-    let early = await retransmitUntil(timeout: 1) { !listenerLog.broadcastTexts.isEmpty }
-    #expect(!early, "an incomplete stream is held, never delivered as a partial message")
-
-    guard let missing = byIndex[1] else {
-        throw RetransmitHarnessFailure("fragment index 1 never left the speaker")
-    }
-    listener.bleTransport(listenerTransport, didReceive: missing, from: ingress)
-    let landed = await retransmitUntil { listenerLog.broadcastTexts == [text] }
-    #expect(landed, "the pieces do not have to arrive in delivery order for the stream to complete")
-
-    // The whole run again — the echo a relay produces. One copy reaches the user.
-    for index in 0..<total {
-        guard let frame = byIndex[index] else { continue }
-        listener.bleTransport(listenerTransport, didReceive: frame, from: ingress)
-    }
-    let doubled = await retransmitUntil(timeout: 1) { listenerLog.broadcastTexts.count > 1 }
-    #expect(!doubled)
-    #expect(listenerLog.broadcastTexts == [text])
 }
 
 @Test("a fragment stream past the receiver's ceiling is refused, and the mesh keeps working afterwards")
@@ -348,38 +349,39 @@ func oversizedStreamIsRefusedWithoutWedgingTheReceiver() async throws {
     let (listener, listenerTransport, listenerLog, listenerDir) = try await makeRetransmitNode(
         nickname: "Listener", config: listenerConfig, links: [listenerIngress]
     )
-    defer {
+    let ingress = listenerIngress.linkID
+
+    try await withTeardown {
+        try await speaker.sendBroadcast(text: String(repeating: "q", count: 1000))
+        let fragmented = await retransmitUntil { speakerTransport.fragmentCount >= 2 }
+        #expect(fragmented)
+        let oversizedRun = speakerTransport.frames.filter {
+            PopopxMeshPacket.decode($0)?.decodedType == .fragment
+        }
+        for frame in oversizedRun {
+            listener.bleTransport(listenerTransport, didReceive: frame, from: ingress)
+        }
+        let published = await retransmitUntil(timeout: 1) { !listenerLog.broadcastTexts.isEmpty }
+        #expect(!published, "nothing is shown from a stream this node was never going to hold")
+
+        // And the refusal released the slot instead of pinning it, which is what a drip of one fragment per
+        // window would otherwise cost the node.
+        try await speaker.sendBroadcast(text: "still here")
+        let shortRun = speakerTransport.packets(of: .message)
+        #expect(shortRun.count == 1, "a ten-byte post is one frame: the listener's ceiling is the only difference")
+        guard let frame = speakerTransport.frames.last,
+              PopopxMeshPacket.decode(frame)?.decodedType == .message else {
+            throw RetransmitHarnessFailure("the speaker's short post left no message frame")
+        }
+        listener.bleTransport(listenerTransport, didReceive: frame, from: ingress)
+        let recovered = await retransmitUntil { listenerLog.broadcastTexts == ["still here"] }
+        #expect(recovered, "a refused stream must not cost the node its ability to receive the next one")
+    } teardown: {
         try? FileManager.default.removeItem(at: speakerDir)
         try? FileManager.default.removeItem(at: listenerDir)
         await listener.stop()
         await speaker.stop()
     }
-    let ingress = listenerIngress.linkID
-
-    try await speaker.sendBroadcast(text: String(repeating: "q", count: 1000))
-    let fragmented = await retransmitUntil { speakerTransport.fragmentCount >= 2 }
-    #expect(fragmented)
-    let oversizedRun = speakerTransport.frames.filter {
-        PopopxMeshPacket.decode($0)?.decodedType == .fragment
-    }
-    for frame in oversizedRun {
-        listener.bleTransport(listenerTransport, didReceive: frame, from: ingress)
-    }
-    let published = await retransmitUntil(timeout: 1) { !listenerLog.broadcastTexts.isEmpty }
-    #expect(!published, "nothing is shown from a stream this node was never going to hold")
-
-    // And the refusal released the slot instead of pinning it, which is what a drip of one fragment per
-    // window would otherwise cost the node.
-    try await speaker.sendBroadcast(text: "still here")
-    let shortRun = speakerTransport.packets(of: .message)
-    #expect(shortRun.count == 1, "a ten-byte post is one frame: the listener's ceiling is the only difference")
-    guard let frame = speakerTransport.frames.last,
-          PopopxMeshPacket.decode(frame)?.decodedType == .message else {
-        throw RetransmitHarnessFailure("the speaker's short post left no message frame")
-    }
-    listener.bleTransport(listenerTransport, didReceive: frame, from: ingress)
-    let recovered = await retransmitUntil { listenerLog.broadcastTexts == ["still here"] }
-    #expect(recovered, "a refused stream must not cost the node its ability to receive the next one")
 }
 
 @Test("a broadcast larger than the mesh's own reassembly ceiling is refused at the sender, not lost at the far end")
@@ -388,29 +390,29 @@ func oversizedBroadcastIsRefusedLocally() async throws {
     let (speaker, speakerTransport, speakerLog, speakerDir) = try await makeRetransmitNode(
         nickname: "Speaker", config: config, links: [shortLink()]
     )
-    defer {
+    try await withTeardown {
+        let text = String(repeating: "x", count: config.maxReassembledBytes + 1)
+        await #expect(throws: PopopxMeshSendError.self) {
+            try await speaker.sendBroadcast(text: text)
+        }
+        let published = await retransmitUntil { !speakerLog.failures.isEmpty }
+        guard published, let failure = speakerLog.failures.first else {
+            throw RetransmitHarnessFailure("the local oversized pre-check published no failure")
+        }
+        #expect(failure.peer == nil, "a broadcast names no recipient, and nil is the truth rather than a substitute")
+        guard case let .oversized(payloadBytes, limitBytes) = failure.reason else {
+            throw RetransmitHarnessFailure("expected an oversized refusal, got \(failure.reason)")
+        }
+        #expect(limitBytes == config.maxReassembledBytes)
+        #expect(payloadBytes > limitBytes)
+        #expect(
+            speakerTransport.packets(of: .message).isEmpty,
+            "refusing on the way out means no fragment run was put on the air at all"
+        )
+    } teardown: {
         try? FileManager.default.removeItem(at: speakerDir)
         await speaker.stop()
     }
-
-    let text = String(repeating: "x", count: config.maxReassembledBytes + 1)
-    await #expect(throws: PopopxMeshSendError.self) {
-        try await speaker.sendBroadcast(text: text)
-    }
-    let published = await retransmitUntil { !speakerLog.failures.isEmpty }
-    guard published, let failure = speakerLog.failures.first else {
-        throw RetransmitHarnessFailure("the local oversized pre-check published no failure")
-    }
-    #expect(failure.peer == nil, "a broadcast names no recipient, and nil is the truth rather than a substitute")
-    guard case let .oversized(payloadBytes, limitBytes) = failure.reason else {
-        throw RetransmitHarnessFailure("expected an oversized refusal, got \(failure.reason)")
-    }
-    #expect(limitBytes == config.maxReassembledBytes)
-    #expect(payloadBytes > limitBytes)
-    #expect(
-        speakerTransport.packets(of: .message).isEmpty,
-        "refusing on the way out means no fragment run was put on the air at all"
-    )
 }
 
 @Test("a write the radio refused is reported, with no peer attached")
@@ -420,23 +422,23 @@ func broadcastWriteFailureIsReported() async throws {
     let (speaker, speakerTransport, speakerLog, speakerDir) = try await makeRetransmitNode(
         nickname: "Speaker", config: config, links: [link]
     )
-    defer {
+    try await withTeardown {
+        try await speaker.sendBroadcast(text: "the write never landed")
+        let frame = try #require(speakerTransport.frames.first)
+        let packet = try #require(PopopxMeshPacket.decode(frame))
+        #expect(packet.recipientPeerID == nil, "this is the broadcast case the old guard returned on")
+        let before = speakerLog.failures.count
+
+        speaker.bleTransport(speakerTransport, didFailToSend: frame, to: link.linkID, error: nil)
+        let reported = await retransmitUntil { speakerLog.failures.count > before }
+        #expect(reported, "a frame CoreBluetooth refused used to be reported for a directed packet only")
+        let failure = try #require(speakerLog.failures.last)
+        #expect(failure.messageId == packet.packetID.popopxHex, "module 4 arms its guard on this same id")
+        #expect(failure.peer == nil)
+    } teardown: {
         try? FileManager.default.removeItem(at: speakerDir)
         await speaker.stop()
     }
-
-    try await speaker.sendBroadcast(text: "the write never landed")
-    let frame = try #require(speakerTransport.frames.first)
-    let packet = try #require(PopopxMeshPacket.decode(frame))
-    #expect(packet.recipientPeerID == nil, "this is the broadcast case the old guard returned on")
-    let before = speakerLog.failures.count
-
-    speaker.bleTransport(speakerTransport, didFailToSend: frame, to: link.linkID, error: nil)
-    let reported = await retransmitUntil { speakerLog.failures.count > before }
-    #expect(reported, "a frame CoreBluetooth refused used to be reported for a directed packet only")
-    let failure = try #require(speakerLog.failures.last)
-    #expect(failure.messageId == packet.packetID.popopxHex, "module 4 arms its guard on this same id")
-    #expect(failure.peer == nil)
 }
 
 // MARK: - The router's retry budget
