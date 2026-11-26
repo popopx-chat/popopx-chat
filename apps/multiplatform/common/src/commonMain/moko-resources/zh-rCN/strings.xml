@@ -2669,6 +2669,9 @@
     <string name="group_members_can_send_popopx_links_channel">订阅者可发送 POPOPX 链接。</string>
     <string name="group_members_can_send_voice_channel">订阅者可发送语音消息。</string>
     <string name="onboarding_first_network">首个您拥有\n您的联系人和群的网络。</string>
+    <string name="brand_positioning">隐私优先的智能连接平台</string>
+    <string name="brand_slogan">自由连接 · 私密沟通 · 智能协作</string>
+    <string name="brand_mission">POPOPX 不只是提供连接工具，而是建立一个让人、AI、Agent、设备和服务能够安全连接、自由协作的开放生态。</string>
     <string name="recent_history_is_sent_to_new_members_channel">已向新订阅者发送了最多 100 条最近的消息。</string>
     <string name="why_popopx_is_built">为何打造 POPOPX。</string>
     <string name="onboarding_your_network">您的网络</string>

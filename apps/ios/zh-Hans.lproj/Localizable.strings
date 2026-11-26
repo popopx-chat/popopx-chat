@@ -7971,6 +7971,11 @@ alert title */
 "Create encrypted identity" = "创建加密身份";
 "Restore from encrypted backup" = "从加密备份恢复";
 
+/* Onboarding: page 1 brand architecture (the claim line itself stays English in every locale) */
+"Privacy-First Intelligent Connection Platform" = "隐私优先的智能连接平台";
+"Connect Freely · Communicate Privately · Collaborate Intelligently" = "自由连接 · 私密沟通 · 智能协作";
+"POPOPX does not merely provide connection tools — it builds an open ecosystem where people, AI, agents, devices, and services connect securely and collaborate freely." = "POPOPX 不只是提供连接工具，而是建立一个让人、AI、Agent、设备和服务能够安全连接、自由协作的开放生态。";
+
 /* Onboarding: page 2 identity */
 "Create your first anonymous identity" = "创建你的首个匿名身份";
 "Identity, keys, POPOPX Compute Credits and your profile card are encrypted on this device only. Servers cannot see them." = "身份、密钥、POPOPX 算力点与个人主页只加密存放在本机，服务器完全不可见。";

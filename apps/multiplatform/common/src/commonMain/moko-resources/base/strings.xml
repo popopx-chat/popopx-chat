@@ -1335,6 +1335,10 @@
   <string name="onboarding_be_free">Be free\nin your network</string>
   <string name="onboarding_private_and_secure">Private and secure messaging.</string>
   <string name="onboarding_first_network">The first network where you own\nyour contacts and groups.</string>
+  <!-- Brand architecture; the claim line itself is a non-localized constant, see PopopxBrand.kt -->
+  <string name="brand_positioning">Privacy-First Intelligent Connection Platform</string>
+  <string name="brand_slogan">Connect Freely · Communicate Privately · Collaborate Intelligently</string>
+  <string name="brand_mission">POPOPX does not merely provide connection tools — it builds an open ecosystem where people, AI, agents, devices, and services connect securely and collaborate freely.</string>
   <string name="get_started">Get started</string>
   <string name="why_popopx_is_built">Why POPOPX is built.</string>
   <string name="onboarding_your_profile">Your profile</string>

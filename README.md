@@ -1,14 +1,51 @@
-# POPOPX Chat
+English | [简体中文](./README.zh-Hans.md)
 
-**POPOPX Chat** is an AGPL-3.0-only, permissionless messenger with **no global user identity**: no phone
-number, no email address, no account to register, and nothing that binds your contacts to a directory
-that anybody operates. Messages travel over unidirectional queues on relays that are configured to
-store no profile and see no conversation.
+# POPOPX
+
+### **Connect Everything.**
+
+**Connect Freely · Communicate Privately · Collaborate Intelligently**
+
+*Privacy-First Intelligent Connection Platform*
+
+> POPOPX does not merely provide connection tools — it builds an open ecosystem where people, AI, agents,
+> devices, and services connect securely and collaborate freely.
+
+**POPOPX Chat** is this platform's messenger: an AGPL-3.0-only, permissionless messenger with **no global
+user identity**: no phone number, no email address, no account to register, and nothing that binds your
+contacts to a directory that anybody operates. Messages travel over unidirectional queues on relays that
+are configured to store no profile and see no conversation.
+
+## Four core capabilities
+
+- **No global user identity.** An address is a link to a queue on a relay, not a row in a table — nothing
+  to register and no directory anyone operates. [Identity model](#identity-model).
+- **Post-quantum hybrid encryption by default.** Every ratchet step combines `sntrup761` with X25519.
+  [Core technology](#core-technology).
+- **Self-hostable, local-first.** Every server the app presets is replaceable in Settings, and the
+  binaries you would run are the same ones this cluster runs. [Self-hosting](#self-hosting).
+- **One open ecosystem.** Chat, Bot Studio, Service Suite and Mac Node — the portals below are how people,
+  AI, agents, devices and services reach each other.
+
+## The four official portals
+
+| Portal | Address | Role |
+|---|---|---|
+| POPOPX | `https://popopx.chat/` | project home: this platform, this repository, the policies |
+| Bot Studio | `https://bot.popopx.chat/` | running your own bots against a server you control |
+| Service Suite | `https://mp.popopx.chat/` | service accounts and the channel ecosystem |
+| Mac Node | `https://node.popopx.chat/` | self-hosting the server cluster on your own Mac |
+
+This table assigns roles only. The reachability and DNS measurements behind these four addresses are the
+record that gets re-measured — see [Public sites](#public-sites).
+
+## Upstream attribution
 
 This project is **derived from [SimpleX Chat](https://github.com/simplex-chat/simplex-chat)** and is
 **independently operated by POPOPX** — a different distributor, its own infrastructure, its own
 release and support channel. The protocol, the cryptography and the core implementation are upstream's
-work; [NOTICE](./NOTICE) lists the attribution that must stay in any build.
+work; [NOTICE](./NOTICE) lists the attribution that must stay in any build, and [FORK.md](./FORK.md)
+records every change this fork made on top of it.
 
 Versions shipped from this repository: the iOS client is **1.2.0 (build 100)**
 (`MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` in `apps/ios/POPOPX.xcodeproj/project.pbxproj`), the

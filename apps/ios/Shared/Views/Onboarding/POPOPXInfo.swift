@@ -41,6 +41,7 @@ struct POPOPXInfo: View {
                         .padding(.top, compact ? PopopxMetrics.spaceL : PopopxMetrics.spaceXL)
                     headlines
                     pills
+                    missionStatement
                     featureCard
                 }
                 .padding(.bottom, PopopxMetrics.spaceM)
@@ -100,19 +101,41 @@ struct POPOPXInfo: View {
 
     private var headlines: some View {
         VStack(alignment: .center, spacing: PopopxMetrics.spaceXS) {
+            Text(verbatim: PopopxBrandCopy.claim)
+                .font(PopopxType.microTag)
+                .foregroundStyle(PopopxPalette.brand)
             Text(PopopxOnboardingCopy.heroTitle)
                 .font(PopopxType.display)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(PopopxPalette.label)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(PopopxOnboardingCopy.brandPositioning)
+                .font(PopopxType.meta)
+                .multilineTextAlignment(.center)
+                .foregroundStyle(PopopxPalette.labelSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             Text(PopopxOnboardingCopy.heroNote)
                 .font(PopopxType.secondary)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(PopopxPalette.labelSecondary)
                 .fixedSize(horizontal: false, vertical: true)
+            Text(PopopxOnboardingCopy.brandSlogan)
+                .font(PopopxType.caption)
+                .multilineTextAlignment(.center)
+                .foregroundStyle(PopopxPalette.brand)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, PopopxMetrics.gutter)
         .accessibilityElement(children: .combine)
+    }
+
+    private var missionStatement: some View {
+        Text(PopopxOnboardingCopy.brandMission)
+            .font(PopopxType.secondary)
+            .multilineTextAlignment(.center)
+            .foregroundStyle(PopopxPalette.labelSecondary)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, PopopxMetrics.gutter)
     }
 
     private var pills: some View {

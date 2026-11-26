@@ -37,7 +37,7 @@ SCAN_DIRS=("src" "apps" ".github")
 
 # Root documents, scanned by name: they sit outside SCAN_DIRS, and README.md/PRIVACY.md carry the
 # published addresses, so the no-bare-domain rule has to cover them too.
-SCAN_FILES=("README.md" "PRIVACY.md" "PRIVACY-POPOPX.md")
+SCAN_FILES=("README.md" "README.zh-Hans.md" "PRIVACY.md" "PRIVACY-POPOPX.md")
 
 # Temporary file for violations
 VIOLATIONS=$(mktemp)

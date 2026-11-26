@@ -57,6 +57,16 @@ enum OnboardingStage: String, Identifiable {
     public var id: Self { self }
 }
 
+// MARK: - Brand claim (locale-free by design)
+
+/// The core claim is the one line that is deliberately **not** a localization key: every POPOPX portal renders the same
+/// English sentence in every locale (a translated slogan stops being the slogan), and views take it through
+/// `Text(verbatim:)` so no catalog can drift away from the portals. The four layers are specified in README.md.
+/// It lives here rather than in its own file because the app target lists sources explicitly in `project.pbxproj`.
+enum PopopxBrandCopy {
+    static let claim = "Connect Everything."
+}
+
 // MARK: - Shared onboarding copy (the localization Keys entered in the first phase)
 
 /// All user-visible copy of the four screens resolves here: the atomic controls such as `PopopxButton` / `PopopxSectionCard` /
@@ -78,6 +88,11 @@ enum PopopxOnboardingCopy {
     static let pillSMP = key("SMP end-to-end encrypted")
     static let pillMesh = key("Cabin Bluetooth Mesh relay")
     static let givesYou = key("What POPOPX gives you")
+    static let brandPositioning = key("Privacy-First Intelligent Connection Platform")
+    static let brandSlogan = key("Connect Freely · Communicate Privately · Collaborate Intelligently")
+    static let brandMission = key(
+        "POPOPX does not merely provide connection tools — it builds an open ecosystem where people, AI, agents, devices, and services connect securely and collaborate freely."
+    )
     static let noUserIDsTitle = key("No user IDs")
     static let noUserIDsNote = key(
         "No phone number, no email, no global public key. Nothing links your contacts to each other, and each anonymous identity stays separate."

@@ -76,12 +76,16 @@ private fun POPOPXInfoDesktop(chatModel: ChatModel) {
         }
         Spacer(Modifier.fillMaxHeight().weight(1f))
         Column(Modifier.widthIn(max = 600.dp).align(Alignment.CenterHorizontally), horizontalAlignment = Alignment.CenterHorizontally) {
+          Text(PopopxBrand.CLAIM, style = MaterialTheme.typography.body2, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colors.primary, textAlign = TextAlign.Center, modifier = Modifier.padding(bottom = DEFAULT_PADDING_HALF))
           Box(Modifier.align(Alignment.CenterHorizontally)) {
             AppBarTitle(stringResource(MR.strings.onboarding_be_free), bottomPadding = DEFAULT_PADDING, withPadding = false, overrideTitleColor = MaterialTheme.colors.onBackground, textAlign = TextAlign.Center, lineHeight = 42.sp)
           }
+          Text(stringResource(MR.strings.brand_positioning), style = MaterialTheme.typography.body2, fontWeight = FontWeight.Medium, color = MaterialTheme.colors.secondary, textAlign = TextAlign.Center, modifier = Modifier.padding(top = DEFAULT_PADDING_HALF))
           Text(stringResource(MR.strings.onboarding_private_and_secure), style = MaterialTheme.typography.h3, fontWeight = FontWeight.Medium, color = MaterialTheme.colors.secondary, lineHeight = 25.sp, textAlign = TextAlign.Center)
           Spacer(Modifier.height(DEFAULT_PADDING_HALF))
           ReadableText(MR.strings.onboarding_first_network, TextAlign.Center, padding = PaddingValues(), style = MaterialTheme.typography.body2.copy(color = MaterialTheme.colors.secondary))
+          Text(stringResource(MR.strings.brand_slogan), style = MaterialTheme.typography.body2, fontWeight = FontWeight.Medium, color = MaterialTheme.colors.primary, textAlign = TextAlign.Center, modifier = Modifier.padding(top = DEFAULT_PADDING_HALF))
+          ReadableText(MR.strings.brand_mission, TextAlign.Center, padding = PaddingValues(top = DEFAULT_PADDING), style = MaterialTheme.typography.body2.copy(color = MaterialTheme.colors.secondary))
         }
         Spacer(Modifier.fillMaxHeight().weight(1f))
         Column(Modifier.widthIn(max = 1000.dp).align(Alignment.CenterHorizontally), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -124,11 +128,27 @@ fun POPOPXInfoLayout(
     content = {
       Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
+          PopopxBrand.CLAIM,
+          style = MaterialTheme.typography.body2,
+          fontWeight = FontWeight.SemiBold,
+          color = MaterialTheme.colors.primary,
+          textAlign = TextAlign.Center,
+          modifier = Modifier.padding(bottom = DEFAULT_PADDING_HALF)
+        )
+        Text(
           stringResource(MR.strings.onboarding_be_free),
           style = MaterialTheme.typography.h1,
           fontWeight = FontWeight.Bold,
           textAlign = TextAlign.Center,
           lineHeight = 42.sp,
+          modifier = Modifier.padding(top = DEFAULT_PADDING_HALF)
+        )
+        Text(
+          stringResource(MR.strings.brand_positioning),
+          style = MaterialTheme.typography.body2,
+          fontWeight = FontWeight.Medium,
+          color = MaterialTheme.colors.secondary,
+          textAlign = TextAlign.Center,
           modifier = Modifier.padding(top = DEFAULT_PADDING_HALF)
         )
         Text(
@@ -147,6 +167,21 @@ fun POPOPXInfoLayout(
           textAlign = TextAlign.Center,
           lineHeight = 20.sp,
           modifier = Modifier.padding(top = DEFAULT_PADDING_HALF)
+        )
+        Text(
+          stringResource(MR.strings.brand_slogan),
+          style = MaterialTheme.typography.body2,
+          fontWeight = FontWeight.Medium,
+          color = MaterialTheme.colors.primary,
+          textAlign = TextAlign.Center,
+          modifier = Modifier.padding(top = DEFAULT_PADDING_HALF)
+        )
+        Text(
+          stringResource(MR.strings.brand_mission),
+          style = MaterialTheme.typography.body2,
+          color = MaterialTheme.colors.secondary,
+          textAlign = TextAlign.Center,
+          modifier = Modifier.padding(top = DEFAULT_PADDING)
         )
       }
     },
