@@ -23,6 +23,10 @@ import kotlinx.coroutines.launch
 fun POPOPXCreatedLinkQRCode(
   connLink: CreatedConnLink,
   short: Boolean,
+  // When set, the code encodes this instead of the link's own URI: the sealed /i/v1/ form the screen
+  // prints as text right above it. A QR that disagrees with the text beside it is worse than either one
+  // alone.
+  encodedURI: String? = null,
   modifier: Modifier = Modifier,
   padding: PaddingValues = PaddingValues(horizontal = DEFAULT_PADDING * 2f, vertical = DEFAULT_PADDING_HALF),
   tintColor: Color = Color(0xff062d56),
@@ -30,7 +34,10 @@ fun POPOPXCreatedLinkQRCode(
   onShare: (() -> Unit)? = null,
 ) {
   QRCode(
-    connLink.popopxChatUri(short),
+    // `small` shrinks the modules and raises the error level: right for a short link, wrong for a
+    // sealed one, which is longer than the address it hides. The two are mutually exclusive here - a
+    // short link is never sealed, because it already names no server.
+    encodedURI ?: connLink.popopxChatUri(short),
     small = short && connLink.connShortLink != null,
     modifier,
     padding,

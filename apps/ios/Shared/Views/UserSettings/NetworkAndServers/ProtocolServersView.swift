@@ -10,8 +10,25 @@
 
 import SwiftUI
 import POPOPXChat
+import PopopxMeshKit
 
 private let howToUrl = URL(string: "https://popopx.chat/docs/server.html")!
+
+/// Whether a direct latency probe may be sent at all.
+///
+/// The app's SOCKS5/Tor proxy is opened inside the agent, so an app-layer socket does not traverse it:
+/// probing while the proxy (or onion host addressing) is on would reveal the public address the proxy
+/// exists to hide. Ruled 2026-11-26 — the probe is paused, not routed, and the badge says 不可测.
+/// The expression is the one `ServersSummaryView.swift:416` already uses for the same fact.
+private func relayProbingAllowed() -> Bool {
+    networkUseOnionHostsGroupDefault.get() == .no
+        && groupDefaults.string(forKey: GROUP_DEFAULT_NETWORK_SOCKS_PROXY) == nil
+}
+
+/// The enabled, non-deleted SMP hosts of one operator group, in the agent's own order.
+private func enabledSMPhosts(_ servers: [UserServer]) -> [String] {
+    servers.filter { $0.enabled && !$0.deleted }.compactMap { parseServerAddress($0.server)?.hostnames.first }
+}
 
 struct YourServersView: View {
     @Environment(\.dismiss) var dismiss: DismissAction
@@ -27,6 +44,8 @@ struct YourServersView: View {
     @State private var newChatRelayNavLinkActive = false
     @State private var showScanProtoServer = false
     @State private var testing = false
+    @State private var latencyProbes: [String: PopopxRelayProbe] = [:]
+    @State private var latencyProbing = false
 
     var body: some View {
         yourServersView()
@@ -82,7 +101,12 @@ struct YourServersView: View {
                             ProtocolServerViewLink(
                                 duplicateHosts: duplicateHosts,
                                 server: srv,
-                                serverProtocol: .smp
+                                serverProtocol: .smp,
+                                latency: relayLatency(
+                                    forServer: srv.wrappedValue.server,
+                                    probes: latencyProbes,
+                                    enabled: srv.wrappedValue.enabled
+                                )
                             )
                         } else {
                             EmptyView()
@@ -162,6 +186,11 @@ struct YourServersView: View {
                     chatRelays: $userServers[operatorIndex].chatRelays,
                     testing: $testing
                 )
+                RelayLatencyControls(
+                    hosts: enabledSMPhosts(userServers[operatorIndex].smpServers),
+                    probes: $latencyProbes,
+                    probing: $latencyProbing
+                )
                 howToButton()
             }
         }
@@ -217,6 +246,9 @@ struct ProtocolServerViewLink: View {
     var duplicateHosts: Set<String>
     @Binding var server: UserServer
     var serverProtocol: ServerProtocol
+    /// nil for xftp rows and for servers that are switched off: a disabled relay has no business
+    /// showing a number, and an untested one would be confused with a broken one.
+    var latency: RelayLatency? = nil
 
     var body: some View {
         NavigationLink(value: ProtocolServerSelection(serverId: server.id, serverProtocol: serverProtocol)) {
@@ -246,6 +278,7 @@ struct ProtocolServerViewLink: View {
                 } else {
                     v.foregroundColor(theme.colors.secondary)
                 }
+                if let latency { RelayLatencyBadge(latency: latency) }
             }
         }
     }
@@ -470,6 +503,119 @@ struct TestServersButton: View {
             }
         }
         return fs
+    }
+}
+
+// MARK: - Relay latency
+
+/// What one SMP row says about latency: the verdict, and the millisecond reading when there is one.
+/// Both come from the same fresh probe, so a row cannot show a green pill beside a stale figure.
+struct RelayLatency: Hashable {
+    var badge: PopopxRelayBadge
+    var ms: Int?
+}
+
+func relayLatency(forServer server: String, probes: [String: PopopxRelayProbe], enabled: Bool) -> RelayLatency? {
+    guard enabled else { return nil }
+    let host = serverHostname(server)
+    let now = PopopxRelaySelector.nowMs()
+    let allowed = relayProbingAllowed()
+    let current = PopopxRelaySelector.fresh(probes, nowMs: now)[host]
+    return RelayLatency(
+        badge: PopopxRelaySelector.badge(host: host, probes: probes, nowMs: now, probingAllowed: allowed),
+        ms: allowed ? current?.latencyMs : nil
+    )
+}
+
+struct RelayLatencyBadge: View {
+    var latency: RelayLatency
+
+    var body: some View {
+        Text(label)
+            .font(.caption2)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(color.opacity(0.16), in: Capsule())
+            .foregroundColor(color)
+            .accessibilityLabel(Text(LocalizedStringKey(latency.badge.labelKey)))
+    }
+
+    /// A measured row shows the number, which is what the user is comparing; the colour carries the
+    /// verdict. An unmeasured or refused row has no number, so it says why.
+    private var label: LocalizedStringKey {
+        switch latency.badge {
+        case .fast, .acceptable, .slow:
+            if let ms = latency.ms { return LocalizedStringKey("\(ms) ms") }
+            return LocalizedStringKey(latency.badge.labelKey)
+        case .unreachable, .unknown, .unavailable:
+            return LocalizedStringKey(latency.badge.labelKey)
+        }
+    }
+
+    private var color: Color {
+        switch latency.badge {
+        case .fast: return .green
+        case .acceptable: return .yellow
+        case .slow, .unreachable: return .red
+        case .unknown, .unavailable: return .secondary
+        }
+    }
+}
+
+/// 「立即重新测速」. The measurement itself lives in `PopopxMeshKit`, so the Android and iOS clients
+/// rank on the same rules; this view only decides when to ask and what to say.
+struct RelayLatencyControls: View {
+    @EnvironmentObject var theme: AppTheme
+    var hosts: [String]
+    @Binding var probes: [String: PopopxRelayProbe]
+    @Binding var probing: Bool
+
+    private var probingAllowed: Bool { relayProbingAllowed() }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Button("Test relay latency now") {
+                    Task { await refresh(force: true) }
+                }
+                .disabled(!probingAllowed || probing || hosts.isEmpty)
+                Spacer()
+                if probing {
+                    ProgressView()
+                }
+            }
+            Text(footnote)
+                .foregroundColor(theme.colors.secondary)
+        }
+        .task(id: hosts) {
+            await refresh(force: false)
+        }
+    }
+
+    /// Disclosure, not decoration: the probe opens a connection, and the sentence says both that it
+    /// carries nothing and that a proxy makes it unsafe to run at all.
+    private var footnote: LocalizedStringKey {
+        if !probingAllowed {
+            return "Latency cannot be measured while a proxy or onion addresses are on — a direct test would disclose your public address."
+        }
+        if hosts.isEmpty {
+            return "No enabled message servers to measure."
+        }
+        return "Each test opens one TLS connection to a server you already use and carries no account, device or queue information. Results are kept for 10 minutes."
+    }
+
+    private func refresh(force: Bool) async {
+        guard probingAllowed, !hosts.isEmpty else { return }
+        await MainActor.run { probing = true }
+        let round = await PopopxRelayLatency.shared.refresh(
+            hosts: hosts,
+            probingAllowed: true,
+            force: force
+        )
+        await MainActor.run {
+            probes = round
+            probing = false
+        }
     }
 }
 

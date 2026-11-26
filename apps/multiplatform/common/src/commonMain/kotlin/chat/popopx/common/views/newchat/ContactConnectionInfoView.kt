@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
+import chat.popopx.common.invite.PopopxInviteShareForm
 import chat.popopx.common.model.*
 import chat.popopx.common.ui.theme.*
 import chat.popopx.common.views.chat.LocalAliasEditor
@@ -134,13 +135,17 @@ private fun ContactConnectionInfoLayout(
 
     if (connLink != null && connLink.connFullLink.isNotEmpty() && contactConnection.initiated) {
       Spacer(Modifier.height(DEFAULT_PADDING))
+      // The one link this screen encodes, shares and reveals behind a fold. Sealed unless the address
+      // already names no server, and memoised by address so the code and the share sheet agree.
+      val shareForm = PopopxInviteShareForm.make(connLink, showShortLink.value)
       SectionViewWithButton(
         stringResource(MR.strings.one_time_link),
         titleButton = if (connLink.connShortLink == null) null else {{ ToggleShortLinkButton(showShortLink) }}
       ) {
-        POPOPXCreatedLinkQRCode(connLink, short = showShortLink.value)
+        POPOPXCreatedLinkQRCode(connLink, short = showShortLink.value, encodedURI = shareForm.display)
         incognitoEnabled()
-        ShareLinkButton(connLink.popopxChatUri(short = showShortLink.value))
+        ShareLinkButton(shareForm.display)
+        PopopxOriginalLinkFold(shareForm)
         OneTimeLinkLearnMoreButton(learnMore)
       }
     } else {

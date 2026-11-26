@@ -405,6 +405,9 @@ struct PopopxDualStatusCapsule: View {
 /// One-time connection link.
 struct PopopxMintedInvite: Hashable {
     let uri: String
+    /// The same invitation with the server address visible, or nil when `uri` never hid one (a short
+    /// link). The card only offers the fold when this is set, so the plain path stays exactly as wide.
+    var original: String?
 }
 
 /// Creates the one-time connection link.
@@ -415,7 +418,10 @@ enum PopopxInviteLink {
     /// - Returns: nil = the connection failed (`apiAddContact` swallows its own errors and returns nil instead of throwing). Callers must give visible feedback and must never fake a link.
     static func mintOneTime(incognito: Bool) async -> PopopxMintedInvite? {
         guard let (link, _) = await apiAddContact(incognito: incognito) else { return nil }
-        return PopopxMintedInvite(uri: popopxChatLink(link.popopxChatUri(short: true)))
+        // A freshly minted invitation has no short link yet, so what comes back names the SMP server
+        // that holds the queue. Sealing it here covers the card, the QR and the share sheet at once.
+        let form = PopopxInviteShareForm.make(from: link, short: true)
+        return PopopxMintedInvite(uri: form.display, original: form.sealed ? form.original : nil)
     }
 }
 
@@ -464,7 +470,7 @@ struct PopopxPlusMenu: View {
         .accessibilityLabel(PopopxTelemetryCopy.moreActions)
         .sheet(isPresented: $showsInvite, onDismiss: { invite = nil }) {
             if let invite {
-                PopopxQRCardSheet(uri: invite.uri, identityName: PopopxTelemetryCopy.oneTimeLink)
+                PopopxQRCardSheet(uri: invite.uri, identityName: PopopxTelemetryCopy.oneTimeLink, originalURI: invite.original)
             }
         }
         .alert(PopopxTelemetryCopy.mintFailedTitle, isPresented: $showsFailure) {

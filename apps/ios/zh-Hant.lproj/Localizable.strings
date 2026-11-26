@@ -10187,3 +10187,15 @@ alert title */
 "Calls are set to always use a relay, but no relay is available to this app, so no call can connect. Turn off \"Force calls through a relay\" in call settings." = "通話已設為始終使用中繼，但本應用沒有可用的中繼，因此任何通話都無法接通。請在通話設定中關閉「強制通話走中繼」。";
 "The call could not find a direct path, which usually means one of the two networks blocks peer-to-peer connections. No relay is configured for this build, so there is nothing to fall back on." = "通話找不到直連路徑，這通常意味著雙方的某個網路阻擋了點對點連線。此建置未設定中繼，因此沒有可退路。";
 "peer-to-peer (server reflexive)" = "點對點（伺服器反射位址）";
+"Not measured" = "未測速";
+"Fast" = "極速";
+"Acceptable" = "一般";
+"Slow" = "偏慢";
+"Not measurable with a proxy on" = "開啟代理時無法測速";
+"Test relay latency now" = "立即重新測速";
+"No enabled message servers to measure." = "沒有已啟用的訊息服務器可供測速。";
+"Latency cannot be measured while a proxy or onion addresses are on — a direct test would disclose your public address." = "開啟代理或使用洋蔥位址時無法測速——直連測試會洩露你的公網位址。";
+"Each test opens one TLS connection to a server you already use and carries no account, device or queue information. Results are kept for 10 minutes." = "每次測速只會向某個你已在使用的服務器建立一次 TLS 連線，不攜帶任何帳號、裝置或佇列訊息；結果保留 10 分鐘。";
+"Show the original server link" = "顯示原始服務器鏈接";
+"Hide the original server link" = "隱藏原始服務器鏈接";
+"This is the same invitation with the server address visible. The shareable link above hides it; neither form is encrypted, so treat either as public." = "這是同一份邀請，但顯示了服務器地址。上方的可分享鏈接會隱藏它；兩種形式均未加密，請一律視為公開資訊。";

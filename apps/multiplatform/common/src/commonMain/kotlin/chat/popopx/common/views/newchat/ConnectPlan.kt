@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.compose.stringResource
+import chat.popopx.common.invite.popopxConnectURI
 import chat.popopx.common.model.*
 import chat.popopx.common.platform.*
 import chat.popopx.common.views.chat.subscriberCountStr
@@ -23,14 +24,22 @@ enum class ConnectionLinkType {
 
 suspend fun planAndConnect(
   rhId: Long?,
-  shortOrFullLink: String,
+  receivedLink: String,
   linkOwnerSig: LinkOwnerSig? = null,
   close: (() -> Unit)?,
   cleanup: (() -> Unit)? = null,
   filterKnownContact: ((Contact) -> Unit)? = null,
   filterKnownGroup: ((GroupInfo) -> Unit)? = null,
 ): CompletableDeferred<Boolean> {
-  when (val target = strConnectTarget(shortOrFullLink.trim())) {
+  // A /i/v1/ share carries its connection address sealed inside the link, so the envelope is opened
+  // before anything below looks at it: the classifier, the plan request and the core all speak the
+  // plain address. Unwrapped here rather than at each entry point on purpose - pasted, scanned, tapped
+  // and universal-link invites then behave identically, instead of one route working and another
+  // reporting the same link as invalid. A share of that shape which will not open is passed through
+  // unchanged, because this app cannot tell its own damaged link from a stranger's URL and has no
+  // business claiming which it got; the plan below fails the way it fails for any other non-link.
+  val shortOrFullLink = popopxConnectURI(receivedLink.trim())
+  when (val target = strConnectTarget(shortOrFullLink)) {
     is ConnectTarget.Link -> {
       if (target.linkType == PopopxLinkType.relay) {
         AlertManager.privacySensitive.showAlertMsg(

@@ -10187,3 +10187,15 @@ alert title */
 "Calls are set to always use a relay, but no relay is available to this app, so no call can connect. Turn off \"Force calls through a relay\" in call settings." = "通话已设为始终使用中继，但本应用没有可用的中继，因此任何通话都无法接通。请在通话设置中关闭“强制通话走中继”。";
 "The call could not find a direct path, which usually means one of the two networks blocks peer-to-peer connections. No relay is configured for this build, so there is nothing to fall back on." = "通话找不到直连路径，这通常意味着双方的某个网络阻止了点对点连接。此构建未配置中继，因此没有可退路。";
 "peer-to-peer (server reflexive)" = "点对点（服务器反射地址）";
+"Not measured" = "未测速";
+"Fast" = "极速";
+"Acceptable" = "一般";
+"Slow" = "偏慢";
+"Not measurable with a proxy on" = "开启代理时无法测速";
+"Test relay latency now" = "立即重新测速";
+"No enabled message servers to measure." = "没有已启用的消息服务器可供测速。";
+"Latency cannot be measured while a proxy or onion addresses are on — a direct test would disclose your public address." = "开启代理或使用洋葱地址时无法测速——直连测试会暴露你的公网地址。";
+"Each test opens one TLS connection to a server you already use and carries no account, device or queue information. Results are kept for 10 minutes." = "每次测速只会向某个你已在使用的服务器建立一次 TLS 连接，不携带任何账号、设备或队列信息；结果保留 10 分钟。";
+"Show the original server link" = "显示原始服务器链接";
+"Hide the original server link" = "隐藏原始服务器链接";
+"This is the same invitation with the server address visible. The shareable link above hides it; neither form is encrypted, so treat either as public." = "这是同一份邀请，但显示了服务器地址。上方的可分享链接会隐藏它；两种形式均未加密，请一律视为公开信息。";

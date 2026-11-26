@@ -969,6 +969,9 @@
   <string name="paste_link">Paste link</string>
   <string name="one_time_link">One-time invitation link</string>
   <string name="one_time_link_short">1-time link</string>
+  <string name="invite_show_original_link">Show the original server link</string>
+  <string name="invite_hide_original_link">Hide the original server link</string>
+  <string name="invite_original_link_note">This is the same invitation with the server address visible. The shareable link above hides it; neither form is encrypted, so treat either as public.</string>
   <string name="popopx_address">POPOPX address</string>
   <string name="verify_popopx_name_action">Verify name</string>
   <string name="verify_popopx_names">Verify POPOPX names</string>
@@ -1044,6 +1047,17 @@
   <string name="smp_servers_add">Add server</string>
   <string name="smp_servers_test_server">Test server</string>
   <string name="smp_servers_test_servers">Test servers</string>
+  <string name="relay_latency_fast">Fast</string>
+  <string name="relay_latency_acceptable">Acceptable</string>
+  <string name="relay_latency_slow">Slow</string>
+  <string name="relay_latency_unreachable">Unreachable</string>
+  <string name="relay_latency_unknown">Not measured</string>
+  <string name="relay_latency_unavailable">Not measurable with a proxy on</string>
+  <string name="relay_latency_ms">%d ms</string>
+  <string name="relay_latency_test_now">Test relay latency now</string>
+  <string name="relay_latency_probe_explained">Each test opens one TLS connection to a server you already use and carries no account, device or queue information. Results are kept for 10 minutes.</string>
+  <string name="relay_latency_paused_by_proxy">Relay latency is not measured while a proxy or onion addressing is on.</string>
+  <string name="relay_latency_no_servers">No enabled message servers to measure.</string>
   <string name="smp_servers_save">Save servers</string>
   <string name="smp_servers_test_failed">Server test failed!</string>
   <string name="smp_servers_test_some_failed">Some servers failed the test:</string>

@@ -13,6 +13,7 @@ import POPOPXChat
 import CodeScanner
 import AVFoundation
 import POPOPXChat
+import PopopxMeshKit
 
 struct SomeAlert: Identifiable {
     var alert: Alert
@@ -262,6 +263,7 @@ private struct InviteView: View {
         List {
             Section(header: sectionHeader) {
                 shareLinkView()
+                PopopxOriginalLinkFold(form: shareForm)
             }
             .listRowInsets(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 10))
 
@@ -331,9 +333,15 @@ private struct InviteView: View {
         }
     }
 
+    /// The link the user is shown, shares and prints as a QR: the `/i/v1/` code when the address can be
+    /// sealed. Cached by address, so the three of them agree.
+    private var shareForm: PopopxInviteShareForm {
+        PopopxInviteShareForm.make(from: connLinkInvitation, short: showShortLink)
+    }
+
     private func shareLinkView() -> some View {
         HStack(spacing: 8) {
-            let link = connLinkInvitation.popopxChatUri(short: showShortLink)
+            let link = shareForm.display
             linkTextView(link)
             Button {
                 showShareSheet(items: [link])
@@ -349,8 +357,8 @@ private struct InviteView: View {
 
     private func qrCodeView() -> some View {
         Section {
-            POPOPXCreatedLinkQRCode(link: connLinkInvitation, short: $showShortLink, onShare: setInvitationUsed)
-                .id("popopx-qrcode-view-for-\(connLinkInvitation.popopxChatUri(short: showShortLink))")
+            POPOPXCreatedLinkQRCode(link: connLinkInvitation, short: $showShortLink, encodedURI: shareForm.display, onShare: setInvitationUsed)
+                .id("popopx-qrcode-view-for-\(shareForm.display)")
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -649,18 +657,26 @@ private struct ConnectView: View {
             ZStack(alignment: .trailing) {
                 Button {
                     if let str = UIPasteboard.general.string {
-                        switch strConnectTarget(str.trimmingCharacters(in: .whitespaces)) {
-                        case let .link(text, _, _):
-                            pastedLink = text
+                        let pasted = str.trimmingCharacters(in: .whitespaces)
+                        // Same order as the scanner: the sealed form is tried before the classifier,
+                        // which only knows the plain shapes, and `planAndConnect` opens the envelope.
+                        if PopopxOpaqueInviteCodec.looksLikeOpaqueLink(pasted) {
+                            pastedLink = pasted
                             connect(pastedLink)
-                        case let .name(text, _):
-                            pastedLink = text
-                            connect(pastedLink)
-                        case .none:
-                            alert = .newChatSomeAlert(alert: SomeAlert(
-                                alert: mkAlert(title: "Invalid link", message: "The text you pasted is not a POPOPX link."),
-                                id: "pasteLinkView: code is not a POPOPX link"
-                            ))
+                        } else {
+                            switch strConnectTarget(pasted) {
+                            case let .link(text, _, _):
+                                pastedLink = text
+                                connect(pastedLink)
+                            case let .name(text, _):
+                                pastedLink = text
+                                connect(pastedLink)
+                            case .none:
+                                alert = .newChatSomeAlert(alert: SomeAlert(
+                                    alert: mkAlert(title: "Invalid link", message: "The text you pasted is not a POPOPX link."),
+                                    id: "pasteLinkView: code is not a POPOPX link"
+                                ))
+                            }
                         }
                     }
                 } label: {
@@ -686,7 +702,9 @@ private struct ConnectView: View {
         switch resp {
         case let .success(r):
             let link = r.string
-            if strIsPopopxLink(r.string) {
+            // Asked before the classifier: `parsePOPOPXMarkdown` recognises the plain link shapes, and
+            // an `/i/v1/` code is a valid invite precisely because its address is not readable here.
+            if strIsPopopxLink(r.string) || PopopxOpaqueInviteCodec.looksLikeOpaqueLink(r.string) {
                 connect(link)
             } else {
                 alert = .newChatSomeAlert(alert: SomeAlert(
@@ -822,6 +840,109 @@ func linkTextView(_ link: String) -> some View {
         .lineLimit(1)
         .font(.caption)
         .truncationMode(.middle)
+}
+
+// MARK: - Opaque invite share form
+
+/// What an invitation is shared as: the published `/i/v1/` code, with the original server address
+/// reachable behind a fold.
+///
+/// The code exists to stop the share itself from naming which SMP server holds the queue — the plain
+/// invitation link carries `smpN.popopx.im` in its host. It is obfuscation, not confidentiality: the
+/// format key is published, so nothing here may be described to the user as "encrypted".
+struct PopopxInviteShareForm: Hashable {
+    /// The sealed link, or nil when the plaintext names no server (a short link) or when the address is
+    /// one the servers would refuse (scheme, size).
+    var opaque: String?
+    /// What this build showed before the code existed: the short link when one is selected, else the
+    /// full address. Still the fallback, so an unsealable link is shared rather than lost.
+    var fallback: String
+    /// The full address, host included — the thing the fold reveals.
+    var original: String
+
+    var display: String { opaque ?? fallback }
+    var sealed: Bool { opaque != nil }
+
+    static func make(from link: CreatedConnLink, short: Bool) -> PopopxInviteShareForm {
+        // Decided by what the plaintext names, not by which screen asks. A short link is a pointer on
+        // the app domain and carries no server, so sealing it would buy no privacy and take away the
+        // short form the user selected; the full address always names its SMP host, so it is sealed.
+        // `popopxChatUri` rewrites the full link but not the short one, so both forms go through
+        // `popopxChatLink` here: a shared value must be tappable by whoever receives it.
+        let original = popopxChatLink(link.popopxChatUri(short: false))
+        let hostFree = short && link.connShortLink != nil
+        return PopopxInviteShareForm(
+            opaque: hostFree ? nil : PopopxInviteSealCache.link(forURI: original),
+            fallback: popopxChatLink(link.popopxChatUri(short: short)),
+            original: original
+        )
+    }
+}
+
+/// Memoised seals, keyed by the address they carry.
+///
+/// Each code embeds a fresh nonce, so sealing on every render would hand the text, the QR and the
+/// share sheet three different links for one invitation — and the QR would change underneath a user
+/// who is midway through screenshotting it. A cache keyed on the URI is what makes "one invitation,
+/// one code" true without storing anything on the view.
+///
+/// Locked rather than `@MainActor`: the mint that needs a seal happens in async code that is not
+/// main-actor isolated, and annotating the cache to the main actor would push that isolation through
+/// every caller for no safety the lock does not already give.
+enum PopopxInviteSealCache {
+    private static let lock = NSLock()
+    nonisolated(unsafe) private static var seals: [String: String?] = [:]
+
+    static func link(forURI uri: String) -> String? {
+        lock.lock()
+        defer { lock.unlock() }
+        if let cached = seals[uri] { return cached }
+        // Bounded on purpose: an app session mints few links, but the cache is keyed by URI and lives
+        // as long as the process does.
+        if seals.count > 50 { seals.removeAll() }
+        let sealed = PopopxOpaqueInviteCodec.link(forURI: uri)
+        seals[uri] = sealed
+        return sealed
+    }
+}
+
+/// The 「显示原始 smp:// 协议链接」 fold. Revealing the original is opt-in: some users verify a link by
+/// its host, and a recipient on a build without this codec needs the plain form.
+struct PopopxOriginalLinkFold: View {
+    @EnvironmentObject var theme: AppTheme
+    var form: PopopxInviteShareForm
+    @State private var showingOriginal = false
+
+    var body: some View {
+        if form.sealed {
+            VStack(alignment: .leading, spacing: 4) {
+                Button {
+                    showingOriginal.toggle()
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(showingOriginal ? "Hide the original server link" : "Show the original server link")
+                        Image(systemName: showingOriginal ? "chevron.up" : "chevron.down")
+                    }
+                    .font(.caption)
+                    .foregroundColor(theme.colors.secondary)
+                }
+                if showingOriginal {
+                    HStack(spacing: 8) {
+                        linkTextView(form.original)
+                        Button {
+                            UIPasteboard.general.string = form.original
+                        } label: {
+                            Image(systemName: "doc.on.doc")
+                        }
+                    }
+                    Text("This is the same invitation with the server address visible. The shareable link above hides it; neither form is encrypted, so treat either as public.")
+                        .font(.caption)
+                        .foregroundColor(theme.colors.secondary)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
 }
 
 struct InfoSheetButton<Content: View>: View {
@@ -1326,7 +1447,27 @@ func planAndConnect(
     filterKnownContact: ((Contact) -> Void)? = nil,
     filterKnownGroup: ((GroupInfo) -> Void)? = nil
 ) {
-    switch strConnectTarget(shortOrFullLink) {
+    // A `/i/v1/` share carries its connection address sealed inside the link, so the envelope has to
+    // be opened before anything below looks at it: the classifier, the plan request and the core all
+    // speak the plain address. Unwrapped here rather than at each entry point on purpose — pasted,
+    // scanned, tapped and universal-link invites then behave identically, instead of one route working
+    // and another reporting the same link as invalid.
+    let plainLink: String
+    if PopopxOpaqueInviteCodec.looksLikeOpaqueLink(shortOrFullLink) {
+        guard let opened = PopopxOpaqueInviteCodec.uriIfOpaqueLink(shortOrFullLink),
+              PopopxOpaqueInviteCodec.isConnectableOpened(opened) else {
+            cleanup?()
+            showAlert(
+                NSLocalizedString("Invite link", comment: "alert title"),
+                message: NSLocalizedString("This invite link could not be read — it may have been damaged when it was copied or sent. Ask for a new one.", comment: "alert message")
+            )
+            return
+        }
+        plainLink = opened
+    } else {
+        plainLink = shortOrFullLink
+    }
+    switch strConnectTarget(plainLink) {
     case let .link(_, linkType, _):
         if linkType == .relay {
             showAlert(
@@ -1350,7 +1491,7 @@ func planAndConnect(
 
     func connectTask(_ inProgress: BoxedValue<Bool>) {
         Task {
-            let result = await apiConnectPlan(connLink: shortOrFullLink, linkOwnerSig: linkOwnerSig, inProgress: inProgress)
+            let result = await apiConnectPlan(connLink: plainLink, linkOwnerSig: linkOwnerSig, inProgress: inProgress)
             await MainActor.run {
                 ConnectProgressManager.shared.stopConnectProgress()
             }

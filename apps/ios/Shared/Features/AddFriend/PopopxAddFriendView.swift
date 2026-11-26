@@ -47,6 +47,9 @@ private enum PopopxAddFriendLink: Hashable {
         let link = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !link.isEmpty else { return .unknown }
         if PopopxOfflineBridge.normalizedInviteLink(link) != nil { return .offline }
+        // The published share form is online by definition: its address is sealed, so this function
+        // cannot see a mesh invite inside it even when one is there. `planAndConnect` opens it.
+        if PopopxOpaqueInviteCodec.looksLikeOpaqueLink(link) { return .online }
         if onlinePrefixes.contains(where: { link.hasPrefix($0) }) { return .online }
         return .unknown
     }
@@ -160,7 +163,7 @@ struct PopopxAddFriendView: View {
         }
         .sheet(isPresented: $showsQRCard, onDismiss: { qrInvite = nil }) {
             if let invite = qrInvite {
-                PopopxQRCardSheet(uri: invite.uri, identityName: identityName)
+                PopopxQRCardSheet(uri: invite.uri, identityName: identityName, originalURI: invite.original)
             }
         }
         .onAppear { refreshClipboard() }

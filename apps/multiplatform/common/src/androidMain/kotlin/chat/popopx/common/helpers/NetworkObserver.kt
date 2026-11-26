@@ -6,6 +6,7 @@ import androidx.core.content.getSystemService
 import chat.popopx.common.model.ChatModel.controller
 import chat.popopx.common.model.UserNetworkInfo
 import chat.popopx.common.model.UserNetworkType
+import chat.popopx.common.network.PopopxRelayLatency
 import chat.popopx.common.platform.*
 import chat.popopx.common.views.helpers.withBGApi
 import kotlinx.coroutines.Job
@@ -60,8 +61,45 @@ class NetworkObserver {
       online = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED),
     )
     if (prevInfo != info) {
+      val prev = prevInfo
       prevInfo = info
       setNetworkInfo(info)
+      // A round measured over Wi-Fi says nothing about cellular, so an interface change voids the
+      // cache rather than letting 你的服务器 rank on a route that no longer exists.
+      if (prev != null && prev.networkType != info.networkType) {
+        PopopxRelayLatency.shared.invalidate()
+      }
+      reconnectOnPathChange(prev, info)
+    }
+  }
+
+  /** Reconnect the SMP/XFTP connections on an edge the agent cannot see for itself.
+   *
+   * What [setNetworkInfo] delivers is `apiSetNetworkInfo`, which in the core writes a TVar behind
+   * `userOfflineDelay` and reconnects nothing (the same `Agent.hs:741-751` the iOS twin cites).
+   * `reconnect_all_servers` (Agent.hs:753-757) is the command that redials, so without it a device
+   * moving Wi-Fi -> cellular waits for the ordinary retry timer while the UI already shows a network.
+   *
+   * Skipped for the first reading — a starting app connects by itself — and for a transition to
+   * offline, where there is nothing to reconnect to.
+   */
+  private fun reconnectOnPathChange(prev: UserNetworkInfo?, info: UserNetworkInfo) {
+    if (prev == null || !info.online) return
+    if (prev.online && prev.networkType == info.networkType) return
+    // The interface is up before the route works; redialling on the same callback turn usually fails,
+    // and the 3s loss debounce above is why an offline edge is left to its own timing.
+    withBGApi {
+      delay(RECONNECT_SETTLE_MS)
+      if (prevInfo != info) return@withBGApi
+      if (controller.hasChatCtrl()) {
+        try {
+          controller.reconnectAllServers(null)
+        } catch (e: Exception) {
+          // A failed redial is not worth an alert: the ordinary retry timer still runs. It is worth a
+          // log line, because "it did not reconnect" is the question asked of every switch report.
+          Log.e(TAG, "reconnectOnPathChange failed: ${e.stackTraceToString()}")
+        }
+      }
     }
   }
 
@@ -101,5 +139,9 @@ class NetworkObserver {
 
   companion object {
     val shared = NetworkObserver()
+
+    /** How long to let a new path settle before redialling. Mirrors `reconnectSettle` in the iOS
+     * NetworkObserver; a reconnect fired on the callback turn itself races the route into coming up. */
+    private const val RECONNECT_SETTLE_MS = 300L
   }
 }

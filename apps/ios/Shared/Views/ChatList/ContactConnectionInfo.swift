@@ -64,10 +64,15 @@ struct ContactConnectionInfo: View {
 
                     if contactConnection.initiated,
                        let connLinkInv = contactConnection.connLinkInv {
-                        POPOPXCreatedLinkQRCode(link: connLinkInv, short: $showShortLink)
-                            .id("popopx-invitation-qrcode-\(connLinkInv.popopxChatUri(short: showShortLink))")
+                        // A one-time invitation: the code is spent once it is accepted, so a link that
+                        // only lives as long as the invitation costs nothing to rotate and gains the
+                        // server address staying off the QR.
+                        let form = PopopxInviteShareForm.make(from: connLinkInv, short: showShortLink)
+                        POPOPXCreatedLinkQRCode(link: connLinkInv, short: $showShortLink, encodedURI: form.display)
+                            .id("popopx-invitation-qrcode-\(form.display)")
+                        PopopxOriginalLinkFold(form: form)
                         incognitoEnabled()
-                        shareLinkButton(connLinkInv, short: showShortLink)
+                        shareLinkButton(form)
                         oneTimeLinkLearnMoreButton()
                     } else {
                         incognitoEnabled()
@@ -171,9 +176,9 @@ struct ContactConnectionInfo: View {
     }
 }
 
-private func shareLinkButton(_ connLinkInvitation: CreatedConnLink, short: Bool) -> some View {
+private func shareLinkButton(_ form: PopopxInviteShareForm) -> some View {
     Button {
-        showShareSheet(items: [connLinkInvitation.popopxChatUri(short: short)])
+        showShareSheet(items: [form.display])
     } label: {
         Label("Share 1-time link", systemImage: "square.and.arrow.up")
     }

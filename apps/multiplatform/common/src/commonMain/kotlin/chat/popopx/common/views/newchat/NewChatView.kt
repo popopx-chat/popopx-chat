@@ -42,6 +42,9 @@ import chat.popopx.common.views.chat.topPaddingToContent
 import chat.popopx.common.views.helpers.*
 import chat.popopx.common.views.usersettings.*
 import chat.popopx.common.BuildConfigCommon
+import chat.popopx.common.invite.PopopxInviteShareForm
+import chat.popopx.common.invite.looksLikePopopxInviteLink
+import chat.popopx.common.invite.popopxInviteLinkURI
 import chat.popopx.res.*
 import kotlinx.coroutines.*
 
@@ -467,6 +470,9 @@ fun ActiveProfilePicker(
 @Composable
 private fun InviteView(rhId: Long?, connLinkInvitation: CreatedConnLink, contactConnection: MutableState<PendingContactConnection?>, onboarding: Boolean = false) {
   val showShortLink = remember { mutableStateOf(true) }
+  // The single form this screen prints, encodes as a QR and shares. Computed per composition and cheap
+  // to compute: the seal behind it is memoised by address, so text, code and share sheet carry one link.
+  val shareForm = PopopxInviteShareForm.make(connLinkInvitation, showShortLink.value)
 
   if (BuildConfigCommon.POPOPX_ASSETS) {
     Image(
@@ -489,16 +495,18 @@ private fun InviteView(rhId: Long?, connLinkInvitation: CreatedConnLink, contact
       Modifier.fillMaxWidth().padding(horizontal = DEFAULT_PADDING, vertical = DEFAULT_PADDING_HALF),
       style = MaterialTheme.typography.body1
     )
-    LinkTextView(connLinkInvitation.popopxChatUri(short = showShortLink.value), true)
+    LinkTextView(shareForm.display, true)
+    PopopxOriginalLinkFold(shareForm)
     Text(
       stringResource(MR.strings.onboarding_or_show_qr_code),
       Modifier.fillMaxWidth().padding(horizontal = DEFAULT_PADDING, vertical = DEFAULT_PADDING_HALF),
       style = MaterialTheme.typography.body1
     )
-    POPOPXCreatedLinkQRCode(connLinkInvitation, short = showShortLink.value, onShare = { chatModel.markShowingInvitationUsed() })
+    POPOPXCreatedLinkQRCode(connLinkInvitation, short = showShortLink.value, encodedURI = shareForm.display, onShare = { chatModel.markShowingInvitationUsed() })
   } else {
     SectionView(stringResource(MR.strings.share_this_1_time_link), headerBottomPadding = 5.dp) {
-      LinkTextView(connLinkInvitation.popopxChatUri(short = showShortLink.value), true)
+      LinkTextView(shareForm.display, true)
+      PopopxOriginalLinkFold(shareForm)
     }
 
     Spacer(Modifier.height(DEFAULT_PADDING))
@@ -507,7 +515,7 @@ private fun InviteView(rhId: Long?, connLinkInvitation: CreatedConnLink, contact
       stringResource(MR.strings.or_show_this_qr_code).uppercase(),
       titleButton = if (connLinkInvitation.connShortLink != null) {{ ToggleShortLinkButton(showShortLink) }} else null
     ) {
-      POPOPXCreatedLinkQRCode(connLinkInvitation, short = showShortLink.value, onShare = { chatModel.markShowingInvitationUsed() })
+      POPOPXCreatedLinkQRCode(connLinkInvitation, short = showShortLink.value, encodedURI = shareForm.display, onShare = { chatModel.markShowingInvitationUsed() })
     }
   }
 
@@ -765,6 +773,55 @@ fun LinkTextView(link: String, share: Boolean) {
   }
 }
 
+/** The "show the original server link" fold: the plain address, host included, behind an opt-in.
+ *
+ * It renders only for a link that was actually sealed, so a short link - and an address the codec
+ * refuses - leaves the screen exactly as it was. Revealing the original is opt-in because some users
+ * verify a link by its host, and because a recipient on a build without this codec needs the plain form.
+ * The copy names it an "original server link" and never an encrypted one: v1 hides the host from
+ * previews, screenshots and forwards, it does not protect the invitation from someone who reads it.
+ */
+@Composable
+fun PopopxOriginalLinkFold(form: PopopxInviteShareForm) {
+  if (!form.isSealed) return
+  val showingOriginal = remember { mutableStateOf(false) }
+  Column(Modifier.fillMaxWidth()) {
+    Row(
+      Modifier
+        .fillMaxWidth()
+        .clickable { showingOriginal.value = !showingOriginal.value }
+        .padding(horizontal = DEFAULT_PADDING, vertical = DEFAULT_PADDING_HALF),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Text(
+        stringResource(if (showingOriginal.value) MR.strings.invite_hide_original_link else MR.strings.invite_show_original_link),
+        style = MaterialTheme.typography.body2,
+        fontSize = 14.sp,
+        color = MaterialTheme.colors.secondary
+      )
+      Spacer(Modifier.width(4.dp))
+      Icon(
+        painterResource(if (showingOriginal.value) MR.images.ic_chevron_up else MR.images.ic_chevron_down),
+        null,
+        tint = MaterialTheme.colors.secondary,
+        modifier = Modifier.size(16.dp)
+      )
+    }
+    if (showingOriginal.value) {
+      LinkTextView(form.original, true)
+      Text(
+        stringResource(MR.strings.invite_original_link_note),
+        Modifier
+          .fillMaxWidth()
+          .padding(horizontal = DEFAULT_PADDING, vertical = DEFAULT_PADDING_HALF),
+        style = MaterialTheme.typography.body2,
+        fontSize = 12.sp,
+        color = MaterialTheme.colors.secondary
+      )
+    }
+  }
+}
+
 private fun filteredProfiles(users: List<User>, searchTextOrPassword: String): List<User> {
   val s = searchTextOrPassword.trim()
   val lower = s.lowercase()
@@ -822,6 +879,17 @@ private fun createInvitation(
 }
 
 fun strIsPopopxLink(str: String): Boolean {
+  // Asked before the classifier, which only knows the plain shapes: an /i/v1/ share is an invitation
+  // precisely because its address is not readable here. A share of that shape which will not open is
+  // not an invitation this app can vouch for, so it is answered as any other unrecognised text is.
+  if (looksLikePopopxInviteLink(str)) {
+    val opened = popopxInviteLinkURI(str) ?: return false
+    return markdownSinglePopopxLink(opened)
+  }
+  return markdownSinglePopopxLink(str)
+}
+
+private fun markdownSinglePopopxLink(str: String): Boolean {
   val parsedMd = parseToMarkdown(str)
   return parsedMd != null && parsedMd.size == 1 && parsedMd[0].format is Format.PopopxLink
 }
@@ -832,6 +900,16 @@ sealed class ConnectTarget {
 }
 
 fun strConnectTarget(str: String): ConnectTarget? {
+  // Classified from the address the envelope carries, but handed back as the string the user received:
+  // a screen that shows what was pasted keeps showing the sealed form, and planAndConnect opens the
+  // envelope again at the single funnel, which is where pasted, scanned and tapped links meet.
+  if (!looksLikePopopxInviteLink(str)) return markdownConnectTarget(str)
+  val opened = popopxInviteLinkURI(str) ?: return null
+  val target = markdownConnectTarget(opened) as? ConnectTarget.Link ?: return null
+  return ConnectTarget.Link(str, target.linkType, target.linkText)
+}
+
+private fun markdownConnectTarget(str: String): ConnectTarget? {
   val parsedMd = parseToMarkdown(str) ?: return null
   val links = parsedMd.filter { it.format?.isPopopxLink ?: false }
   if (links.size == 1) {

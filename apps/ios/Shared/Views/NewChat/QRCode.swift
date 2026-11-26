@@ -27,10 +27,19 @@ struct MutableQRCode: View {
 struct POPOPXCreatedLinkQRCode: View {
     let link: CreatedConnLink
     @Binding var short: Bool
+    /// When set, the code encodes this instead of the link's own URI: the sealed `/i/v1/` form the
+    /// screen prints as text right above it. A QR that disagrees with the text beside it is worse than
+    /// either one alone.
+    var encodedURI: String? = nil
     var onShare: (() -> Void)? = nil
 
     var body: some View {
-        QRCode(uri: link.popopxChatUri(short: short), small: short && link.connShortLink != nil, onShare: onShare)
+        // `small` shrinks the modules and raises the error level: right for a short link, wrong for a
+        // sealed one, which is longer than the address it hides. The two are mutually exclusive here —
+        // a short link is never sealed, because it already names no server.
+        QRCode(uri: encodedURI ?? link.popopxChatUri(short: short),
+               small: short && link.connShortLink != nil,
+               onShare: onShare)
     }
 }
 

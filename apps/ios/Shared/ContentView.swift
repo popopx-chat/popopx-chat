@@ -491,6 +491,15 @@ struct ContentView: View {
                     NSLocalizedString("Relay address", comment: "alert title"),
                     message: NSLocalizedString("This is a chat relay address, it cannot be used to connect.", comment: "alert message")
                 )
+            } else if path.hasPrefix("/i/v1/") {
+                // The published share form. Handed on as a URL: `planAndConnect` is the one place that
+                // opens the envelope, so a universal link and a pasted code cannot drift apart. The
+                // exact-equality branch below cannot cover it — the code is variable-length.
+                planAndConnect(
+                    url.absoluteString,
+                    theme: theme,
+                    dismiss: false
+                )
             } else if (path == "/contact" || path == "/invitation" || path == "/a" || path == "/c" || path == "/g" || path == "/i") {
                 path.removeFirst()
                 let link = url.absoluteString.replacingOccurrences(of: "///\(path)", with: "/\(path)")

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import chat.popopx.common.model.ServerAddress.Companion.parseServerAddress
 import chat.popopx.common.views.helpers.*
 import chat.popopx.common.model.*
+import chat.popopx.common.network.PopopxRelayProbe
 import chat.popopx.common.platform.*
 import chat.popopx.common.views.usersettings.SettingsActionItem
 import chat.popopx.res.*
@@ -37,6 +38,11 @@ fun ModalData.YourServersView(
   rhId: Long?
 ) {
   val testing = remember { mutableStateOf(false) }
+  // The last relay latency round, held here so every SMP row and the re-test row read one answer
+  // rather than each starting a probe. PopopxRelayLatency keeps at most one round in flight, so two
+  // screens opened at once cannot double-probe the same relays.
+  val latencyProbes = remember { stateGetOrPut("latencyProbes") { emptyMap<String, PopopxRelayProbe>() } }
+  val latencyProbing = remember { stateGetOrPut("latencyProbing") { false } }
   val currentUser = remember { chatModel.currentUser }.value
   val scope = rememberCoroutineScope()
 
@@ -61,7 +67,9 @@ fun ModalData.YourServersView(
         },
         currentUser,
         rhId,
-        testing
+        testing,
+        latencyProbes,
+        latencyProbing
       )
     }
 
@@ -81,7 +89,9 @@ fun YourServersViewLayout(
   navigateToProtocolView: (Int, UserServer, ServerProtocol) -> Unit,
   currentUser: User?,
   rhId: Long?,
-  testing: MutableState<Boolean>
+  testing: MutableState<Boolean>,
+  latencyProbes: MutableState<Map<String, PopopxRelayProbe>>,
+  latencyProbing: MutableState<Boolean>
 ) {
   val duplicateHosts = findDuplicateHosts(serverErrors.value)
 
@@ -108,7 +118,8 @@ fun YourServersViewLayout(
             ProtocolServerViewLink(
               srv = server,
               serverProtocol = ServerProtocol.SMP,
-              duplicateHosts = duplicateHosts
+              duplicateHosts = duplicateHosts,
+              probes = latencyProbes.value
             )
           }
         }
@@ -227,6 +238,12 @@ fun YourServersViewLayout(
         }
       )
 
+      RelayLatencyRow(
+        smpServers = userServers.value[operatorIndex].smpServers,
+        probes = latencyProbes,
+        probing = latencyProbing
+      )
+
       HowToButton()
     }
     SectionBottomSpacer()
@@ -313,7 +330,15 @@ fun showAddServerDialog(
 }
 
 @Composable
-fun ProtocolServerViewLink(serverProtocol: ServerProtocol, srv: UserServer, duplicateHosts: Set<String>) {
+fun ProtocolServerViewLink(
+  serverProtocol: ServerProtocol,
+  srv: UserServer,
+  duplicateHosts: Set<String>,
+  // null = this screen has no latency view for the row (the operator screens, xftp). An empty map is
+  // different: it means there are no readings, which is what a closed proxy gate looks like, and the
+  // row must still say 不可测 rather than say nothing.
+  probes: Map<String, PopopxRelayProbe>? = null
+) {
   val address = parseServerAddress(srv.server)
   when {
     address == null || !address.valid || address.serverProtocol != serverProtocol || address.hostnames.any { it in duplicateHosts } -> InvalidServer()
@@ -326,6 +351,15 @@ fun ProtocolServerViewLink(serverProtocol: ServerProtocol, srv: UserServer, dupl
     Text(text, color = MaterialTheme.colors.onBackground, maxLines = 1)
   } else {
     Text(text, maxLines = 1, color = MaterialTheme.colors.secondary)
+  }
+  // Only SMP rows carry a latency badge: the probe is defined on the SMP relay, and an xftp or relay
+  // row showing a green pill would be a reading measured somewhere else.
+  if (serverProtocol == ServerProtocol.SMP && probes != null) {
+    val latency = relayLatency(srv.server, probes, enabled = srv.enabled, probingAllowed = relayLatencyProbingAllowed())
+    if (latency != null) {
+      Spacer(Modifier.padding(horizontal = 4.dp))
+      RelayLatencyBadge(latency)
+    }
   }
 }
 

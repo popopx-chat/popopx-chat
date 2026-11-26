@@ -43,16 +43,24 @@ struct PopopxQRCardSheet: View {
 
     private let uri: String
     private let identityName: String
+    /// Set only when `uri` hides a server address; nil leaves the card exactly as wide as it was.
+    private let originalURI: String?
 
-    init(uri: String, identityName: String) {
+    @State private var showingOriginal = false
+
+    init(uri: String, identityName: String, originalURI: String? = nil) {
         self.uri = uri
         self.identityName = identityName
+        self.originalURI = originalURI
     }
 
     var body: some View {
         PopopxSheetContainer(Copy.sheetTitle, subtitle: Copy.sheetSubtitle) {
             closeButton
             passCard
+            if let originalURI {
+                originalFold(originalURI)
+            }
             securityNote
         } footer: {
             actionRow
@@ -188,6 +196,36 @@ struct PopopxQRCardSheet: View {
 
     // MARK: - Note and actions
 
+    /// The 「显示原始链接」 disclosure, in this card's own tokens.
+    ///
+    /// It is not the settings screen's `PopopxOriginalLinkFold` on purpose: that view reads an
+    /// `AppTheme` environment object, and this sheet is presented from surfaces that do not guarantee one,
+    /// which is a crash rather than a style difference.
+    @ViewBuilder private func originalFold(_ original: String) -> some View {
+        VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
+            Button {
+                showingOriginal.toggle()
+            } label: {
+                HStack(spacing: PopopxMetrics.spaceXS) {
+                    Text(showingOriginal ? Copy.hideOriginal : Copy.showOriginal)
+                    Image(systemName: showingOriginal ? "chevron.up" : "chevron.down")
+                }
+                .font(PopopxType.caption)
+                .foregroundStyle(PopopxPalette.labelSecondary)
+            }
+            if showingOriginal {
+                Text(original)
+                    .font(PopopxType.microTag)
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Text(Copy.originalNote)
+                    .font(PopopxType.microTag)
+                    .foregroundStyle(PopopxPalette.labelSecondary)
+            }
+        }
+        .padding(.horizontal, PopopxMetrics.gutter)
+    }
+
     private var securityNote: some View {
         HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.spaceXS) {
             Image(systemName: "lock.shield.fill")
@@ -271,6 +309,10 @@ private enum Copy {
     static let copy = NSLocalizedString("Copy link", comment: "")
     static let copiedToast = NSLocalizedString("Copied to clipboard", comment: "")
     static let securityNote = NSLocalizedString("This link only sets up a one-time encrypted connection — anyone who gets it can start a connection with you, so do not publish it.", comment: "")
+    /// Same literals as the settings fold, so one translation serves both surfaces.
+    static let showOriginal = NSLocalizedString("Show the original server link", comment: "")
+    static let hideOriginal = NSLocalizedString("Hide the original server link", comment: "")
+    static let originalNote = NSLocalizedString("This is the same invitation with the server address visible. The shareable link above hides it; neither form is encrypted, so treat either as public.", comment: "")
     static let qrAccessibilityLabel = NSLocalizedString("Encrypted card QR code", comment: "")
 }
 
