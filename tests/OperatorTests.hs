@@ -36,22 +36,23 @@ operatorTests = describe "managing server operators" $ do
 
 validateServersTest :: Spec
 validateServersTest = describe "validate user servers" $ do
-  -- popopxChatRelays is empty (this fork presets no chat relays), so every fixture built from the
-  -- shipped presets also carries USWNoChatRelays; it is a report-only warning, see Commands.hs
-  -- CRUserServersValidation.
-  it "should pass valid user servers" $ validateUserServers [valid] [] `shouldBe` ([], [USWNoChatRelays Nothing])
+  -- popopxChatRelays presets relay1.popopx.im (see Operators/Presets.hs), so a fixture built from the
+  -- shipped presets already carries an enabled chat relay and yields no USWNoChatRelays. The warning
+  -- reappears wherever the relay is gone: removed explicitly (invalidNoChatRelays) or disabled along
+  -- with its operator (invalidDisabledOp), because the relay belongs to that operator.
+  it "should pass valid user servers" $ validateUserServers [valid] [] `shouldBe` ([], [])
   it "should fail without servers" $ do
-    validateUserServers [invalidNoServers] [] `shouldBe` ([USENoServers aSMP Nothing], [USWNoChatRelays Nothing, USWNoNamesServers Nothing])
-    validateUserServers [invalidDisabled] [] `shouldBe` ([USENoServers aSMP Nothing], [USWNoChatRelays Nothing, USWNoNamesServers Nothing])
+    validateUserServers [invalidNoServers] [] `shouldBe` ([USENoServers aSMP Nothing], [USWNoNamesServers Nothing])
+    validateUserServers [invalidDisabled] [] `shouldBe` ([USENoServers aSMP Nothing], [USWNoNamesServers Nothing])
     validateUserServers [invalidDisabledOp] [] `shouldBe` ([USENoServers aSMP Nothing, USENoServers aXFTP Nothing], [USWNoChatRelays Nothing, USWNoNamesServers Nothing])
   it "should fail without servers with storage role" $ do
-    validateUserServers [invalidNoStorage] [] `shouldBe` ([USEStorageMissing aSMP Nothing], [USWNoChatRelays Nothing])
+    validateUserServers [invalidNoStorage] [] `shouldBe` ([USEStorageMissing aSMP Nothing], [])
   it "should fail with duplicate host" $ do
     validateUserServers [invalidDuplicateSrv] []
       `shouldBe` ( [ USEDuplicateServer aSMP "smp://f2X5hAgHZW9-SVkhMou0sUFg3AHUi2pE3kSw46AiGjY=@smp1.popopx.im,quheabd5hdghpztkw53fho6fki722npoytgvkutnbh3gtpgrlna5ukad.onion" "smp1.popopx.im",
                      USEDuplicateServer aSMP "smp://abcd@smp1.popopx.im" "smp1.popopx.im"
                    ],
-                   [USWNoChatRelays Nothing]
+                   []
                  )
   it "should warn without chat relays" $
     validateUserServers [invalidNoChatRelays] [] `shouldBe` ([], [USWNoChatRelays Nothing])
@@ -266,7 +267,8 @@ invalidDuplicateSrv =
 invalidNoChatRelays :: UpdatedUserOperatorServers
 invalidNoChatRelays = (valid :: UpdatedUserOperatorServers) {chatRelays = []}
 
--- popopxChatRelays is empty (Operators/Presets.hs), so both fixtures carry their own pair.
+-- `chatRelays` is replaced wholesale below, so both fixtures carry their own pair no matter what
+-- Operators/Presets.hs presets.
 duplicateChatRelayName :: UpdatedUserOperatorServers
 duplicateChatRelayName =
   (valid :: UpdatedUserOperatorServers)

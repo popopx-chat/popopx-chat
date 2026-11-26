@@ -10819,7 +10819,7 @@ testChannelLinkDataOtherChannel ps =
         cath <## ""
         cath <## "Connection link is invalid, possibly it was created in a previous version."
         cath <## "Please ask your contact to check /version and update if needed."
-        cath <## "To update run: curl -o- https://raw.githubusercontent.com/simplex-chat/simplex-chat/master/install.sh | bash"
+        cath <## "To update run: curl -o- https://raw.githubusercontent.com/popopx-chat/popopx-chat/master/install.sh | bash"
 
 testChannelUpdatePrefsSigned :: HasCallStack => TestParams -> IO ()
 testChannelUpdatePrefsSigned ps =

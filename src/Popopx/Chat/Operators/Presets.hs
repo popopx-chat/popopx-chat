@@ -97,15 +97,16 @@ popopxXFTPServers =
 -- eight SMP (`smp1..8`, port-less), one chat relay (`relay1`, `:5227`), three file and three
 -- notification relays. It is not offered to new users as an SMP server - a chat relay is a different
 -- transport - so its address appears only in chatRelaySMPServers below.
--- Presetting the relay itself needs its short link contact `https://<host>/r#<LinkKey>`, and that key is
--- minted by the relay process when the link is created - it is in neither repository - so this stays
--- empty until the link is supplied.
+-- Presetting the relay itself needs its short link contact `https://<host>/r#<LinkKey>`; that key is
+-- minted by the relay process when the link is created - it is in neither repository - so the value
+-- below is the published one. Its `?c=` is the relay's server identity (popopxmq `ProtocolServer.keyHash`,
+-- the CA fingerprint) and must stay equal to the key before `@` in `chatRelaySMPServers` below.
 popopxChatRelays :: [NewUserChatRelay]
 popopxChatRelays =
   [ presetChatRelay True (mkRelayProfile "POPOPX Relay 1" Nothing) ["popopx.im"] (either error id $ strDecode "https://relay1.popopx.im/r#glhT18ZtqaIxY-IELvM79Vv0nMA7NKPrDisWzuDnOKE?p=5227&c=04Mm3i26SSyFmrSe6h8NSXZ7bIGsUAVyQ7o6abUJbLw")
   ]
 
--- The relay's SMP address belongs in allPresetServers even while popopxChatRelays above is empty,
+-- The relay's SMP address belongs in allPresetServers as well as in popopxChatRelays above,
 -- because it is what makes a link already published on that host resolvable: a short link carries the
 -- host and the contact key only, and `restoreShortLink` fills in the server key and port from this list
 -- alone (popopxmq Agent/Protocol `findPresetServer` compares the FIRST host, so the public host is

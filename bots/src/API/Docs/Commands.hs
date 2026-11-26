@@ -246,7 +246,7 @@ cliCommands =
     "ClearContact",
     "ClearGroup",
     "ClearNoteFolder",
-    "ConnectSimplex",
+    "ConnectPopopx",
     "ContactInfo",
     "ContactQueueInfo",
     "CreateGroupLink",
