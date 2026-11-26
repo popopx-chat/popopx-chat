@@ -24,6 +24,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import chat.popopx.common.copilot.PopopxEcoAssistantHost
+import chat.popopx.common.copilot.showPopopxEcoAssistantSheet
 import chat.popopx.common.discover.PopopxDiscoverCatalog
 import chat.popopx.common.discover.PopopxDiscoverCopy
 import chat.popopx.common.discover.PopopxDiscoverFilter
@@ -71,6 +73,7 @@ fun PopopxDiscoverTabView() {
       items(shelves, key = { it.id }) { shelf ->
         PopopxDiscoverShelf(shelf.section, shelf.services)
       }
+      item { PopopxDiscoverAssistantRow() }
       item { PopopxDiscoverNodeRow(binding) }
       item { Spacer(Modifier.height(DEFAULT_PADDING)) }
     }
@@ -261,6 +264,40 @@ private fun SheetDone(close: () -> Unit) {
     fontSize = 14.sp,
     modifier = Modifier.clickable { close() }.padding(vertical = 8.dp)
   )
+}
+
+@Composable
+private fun PopopxDiscoverAssistantRow() {
+  // 「发现 → 我的私人助理」. Shown only where a copilot glue was installed, so the entry never leads to
+  // a sheet that cannot answer: on a platform without calendar access the assistant does not exist, and
+  // an absent row is honest where a dead one would not be.
+  if (!PopopxEcoAssistantHost.available) return
+  SectionItemView({ showPopopxEcoAssistantSheet() }) {
+    Box(
+      contentAlignment = Alignment.Center,
+      modifier = Modifier
+        .size(40.dp)
+        .clip(RoundedCornerShape(10.dp))
+        .background(MaterialTheme.colors.background)
+    ) {
+      Text(
+        stringResource(MR.strings.discover_private_assistant).take(1),
+        fontSize = 16.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colors.primary
+      )
+    }
+    Spacer(Modifier.width(12.dp))
+    Column(Modifier.weight(1f)) {
+      Text(stringResource(MR.strings.discover_private_assistant), style = MaterialTheme.typography.body1, maxLines = 1)
+      Text(
+        stringResource(MR.strings.copilot_local_only_note),
+        style = MaterialTheme.typography.body2,
+        color = MaterialTheme.colors.secondary,
+        maxLines = 2
+      )
+    }
+  }
 }
 
 @Composable

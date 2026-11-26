@@ -26,6 +26,8 @@ import chat.popopx.common.cfgsec.PopopxServerConfigForeground
 import chat.popopx.common.cfgsec.PopopxServerConfigSignalHandler
 import chat.popopx.common.media.PopopxIncomingFileUnpacker
 import chat.popopx.common.commerce.popopxInstallCommerceLedger
+import chat.popopx.common.copilot.installPopopxEcoCopilot
+import chat.popopx.common.copilot.popopxEcoEnteredBackground
 import chat.popopx.common.model.*
 import chat.popopx.common.model.ChatController.appPrefs
 import chat.popopx.common.platform.*
@@ -92,6 +94,10 @@ class PopopxApp: Application(), LifecycleEventObserver {
     } else if (DatabaseUtils.ksAppPassword.get() == null || DatabaseUtils.ksSelfDestructPassword.get() == null) {
       initChatControllerOnStart()
     }
+    // The on-device copilot reaches CalendarContract through the same kind of install seam the commerce
+    // ledger uses: commonMain holds the UI and the turn machine, and this is where the Android calendar
+    // and its runtime-permission prompt are handed to it. See PopopxEcoGlue.android.kt.
+    installPopopxEcoCopilot(this)
     ProcessLifecycleOwner.get().lifecycle.addObserver(this@PopopxApp)
   }
 
@@ -158,6 +164,9 @@ class PopopxApp: Application(), LifecycleEventObserver {
           // [withLongRunningApi] so deleting scratch never runs on the main thread. The engine rebuilds both
           // directories on the next send.
           PopopxIncomingFileUnpacker.purgeTemporaryDirectories()
+          // 「离开会话或退到后台即释放模型」: the copilot drops its loaded weights and expires every
+          // outstanding confirm card, so coming back cannot write against a calendar changed elsewhere.
+          popopxEcoEnteredBackground()
         }
         else -> {
           isAppOnForeground = false

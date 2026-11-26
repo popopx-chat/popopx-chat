@@ -48,6 +48,13 @@
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
+  <!-- The on-device copilot's calendar tool. Both are runtime permissions, so the assistant asks when it is
+       first used rather than at install, and it degrades to "no calendar access" when denied. Nothing here
+       uploads: the read feeds PopopxCalendarPrivacy, which keeps only busy/free minute ranges, and a write
+       happens only after the confirm card is tapped. -->
+  <uses-permission android:name="android.permission.READ_CALENDAR" />
+  <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+
   <!-- Allows to query app name and icon that can open specific file type -->
   <queries>
     <intent>

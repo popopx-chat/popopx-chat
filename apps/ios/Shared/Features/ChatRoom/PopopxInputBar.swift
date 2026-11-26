@@ -80,7 +80,9 @@
 //
 
 import Combine
+import EventKit
 import SwiftUI
+import UIKit
 import POPOPXChat
 import PopopxMeshKit
 import PopopxMeshUI
@@ -595,6 +597,9 @@ struct PopopxInputBar: View {
     @StateObject private var model: PopopxInputBarModel
     @ObservedObject private var runtime: PopopxMeshRuntime
     @ObservedObject private var meshState: PopopxMeshStateSource
+    /// The on-device assistant. Held as an observed singleton, the same way this bar already holds the two
+    /// mesh singletons, because the confirm gate has to outlive a recomposition of the composer.
+    @ObservedObject private var copilot: PopopxCopilotModel
 
     private let context: PopopxComposerContext
     private let ttlSeconds: Int?
@@ -611,6 +616,10 @@ struct PopopxInputBar: View {
     /// (the gift card only holds in direct chats). Deliberately not built as "draw it, then show a hint when it is pressed": one cell fewer is just one entry point fewer,
     /// whereas a cell whose tap buys nothing but a "not possible here" is tricking the user into pressing it.
     private let plusActions: [PopopxPlusAction]
+    /// The assistant's read-only view of the thread, fed to `PopopxCopilotModel` in a task rather than in
+    /// the view tree, because setting observed state while SwiftUI is computing a body is the one thing
+    /// this file must not do.
+    private let copilotContext: [String]
 
     @State private var showsPlusPanel = false
     @State private var showsEmojiTray = false
@@ -636,12 +645,21 @@ struct PopopxInputBar: View {
         onPlusTap: @escaping (PopopxPlusAction) -> Void = { _ in },
         onTTLChange: @escaping (Int?) -> Void = { _ in },
         onSecureTTLChange: @escaping (Int?) -> Void = { _ in },
-        plusActions: [PopopxPlusAction] = PopopxPlusAction.allCases
+        plusActions: [PopopxPlusAction] = PopopxPlusAction.allCases,
+        /// The thread's most recent messages, for a summon turn's five-message context window. The composer
+        /// does not own the timeline, so the host hands them over when it has them; the default is empty,
+        /// which is the `.off` observer's own answer and needs no special case anywhere downstream.
+        ///
+        /// Copied, never moved: `PopopxInputBarModel` does not see this value and no path from it reaches
+        /// `onSend`, so the messages the assistant reads cannot become a message the assistant writes.
+        copilotContext: [String] = []
     ) {
         _text = text
         _model = StateObject(wrappedValue: PopopxInputBarModel())
         _runtime = ObservedObject(wrappedValue: PopopxMeshRuntime.shared)
         _meshState = ObservedObject(wrappedValue: PopopxMeshStateSource.shared)
+        _copilot = ObservedObject(wrappedValue: PopopxCopilotModel.shared)
+        self.copilotContext = copilotContext
         self.context = context
         self.ttlSeconds = ttlSeconds
         self.secureTTLSeconds = secureTTLSeconds
@@ -660,6 +678,12 @@ struct PopopxInputBar: View {
         VStack(spacing: PopopxMetrics.space2XS) {
             channelStrip
             inputRow
+            // The whisper bar is a sibling of the composer, not part of it: it reads `text` and writes
+            // nothing to it, and it has no send closure in scope, so a token typed for the assistant can
+            // only ever reach the assistant.
+            if copilot.showsBar(for: text) {
+                PopopxWhisperBar(model: copilot, draft: text, sessionId: String(context.contactId ?? 0))
+            }
             if showsEmojiTray { emojiTray }
             if showsPlusPanel { plusPanel }
         }
@@ -676,7 +700,10 @@ struct PopopxInputBar: View {
         .popopxAnimation(PopopxSpring.snappy, value: showsEmojiTray, reduceMotion: reduceMotion)
         .popopxAnimation(PopopxSpring.fluid, value: channel, reduceMotion: reduceMotion)
         // Read once when the session opens; when the master switch flips this pair of tasks is restarted (`refresh` itself first clears the old verdict to unread).
-        .task(id: context.contactId) { await model.refresh(contactId: context.contactId) }
+        .task(id: context.contactId) {
+            copilot.noteHistory(copilotContext)
+            await model.refresh(contactId: context.contactId)
+        }
         .task(id: runtime.isFuseOn) { await model.poll(contactId: context.contactId) }
     }
 
@@ -1129,6 +1156,742 @@ private struct PopopxBarKey: View {
         .buttonStyle(PopopxPressButtonStyle(feedback: .light))
         .accessibilityLabel(label)
         .accessibilityAddTraits(active ? .isSelected : [])
+    }
+}
+
+// MARK: - Copilot
+
+// The calendar half of the on-device assistant. The engine, the grammar, the confirm gate and the `.ics`
+// writer are in `Shared/Features/Discover/DiscoverCatalogModels.swift` (its `// MARK: - Copilot` section);
+// this file holds only what needs EventKit and only the UI, because this is the view that already owns
+// the composer and is already mounted on the conversation screen (`Shared/Views/Chat/ChatView.swift:237`).
+//
+// Two facts here are worth stating before the code, because both are easy to break by accident:
+//
+// **The time base is local civil minutes, not UTC.** `PopopxEcoFacts` builds `now` from local epoch
+// seconds, `PopopxEcoDateTime.epochMinutes` is built from a *local* calendar date, and the planner
+// compares a proposal against the busy set. So `EKEvent.startDate` — an absolute instant — must be
+// shifted by `TimeZone`'s offset **at that event's own date** before it becomes minutes. Reading
+// `timeIntervalSince1970 / 60` straight would put every busy slot hours away from every proposal, and
+// 「查空闲」 would answer confidently and wrongly. The Kotlin doc comment on `PopopxEcoBusySlot` says
+// "UTC"; the type cannot be used that way, because `conflicts(events:start:)` subtracts one from the
+// other. Local is what the arithmetic requires, and it is what is implemented on both platforms.
+//
+// **Nothing but numbers leaves `PopopxEventKitCalendar.busySlots`.** The raw events are a local in that
+// function and the return type is `[PopopxEcoBusySlot]`, which has no field that can hold a word. The
+// protocol's `rawEvents` exists for parity with the shared Kotlin design, where the sanitizer is the
+// choke point, and the *view layer never calls it* — see `PopopxCopilotModel`, which only ever asks for
+// slots. The single title the assistant is allowed to show is the one the user just typed, carried in
+// `PopopxEcoProposal.create(title:)` from the message, never read back off the store.
+
+/// Copilot strings. English keys, with the Chinese values in `zh-Hans.lproj/Localizable.strings`, which
+/// is how this app localizes (`ios/LOCALIZATION.md`). The 「确认写入日历」/「取消」/
+/// 「本机助理实时协助中 · 数据不出设备」 wording the feature is specified in lives there.
+enum PopopxCopilotCopy {
+    static let entryTitle = NSLocalizedString("My personal assistant", comment: "copilot discover entry")
+    static let entrySubtitle = NSLocalizedString("Reads your own calendar on this device. Books nothing without your tap.", comment: "copilot discover entry footnote")
+    static let sheetTitle = NSLocalizedString("Personal assistant", comment: "copilot assistant sheet title")
+
+    /// The green line. One sentence, because it is making one claim: this is local, and it is live.
+    static let liveIndicator = NSLocalizedString("On-device assistant · live assistance · data never leaves this device", comment: "copilot live indicator")
+    static let turnOff = NSLocalizedString("Turn off", comment: "copilot one-tap off")
+
+    static let confirmWrite = NSLocalizedString("Confirm and write to calendar", comment: "copilot confirm card primary action")
+    static let dismissProposal = NSLocalizedString("Cancel", comment: "copilot confirm card secondary action")
+
+    static let whisperFootnote = NSLocalizedString("Whispered to the assistant only. Nothing here is sent to the other side.", comment: "copilot whisper bar footnote")
+    static let askPrompt = NSLocalizedString("Ask about your day", comment: "copilot whisper field prompt")
+    static let realAskPrompt = NSLocalizedString("What should the assistant do?", comment: "copilot assistant field prompt")
+
+    /// The five slash tokens. **Never localized** — they are matched verbatim by `PopopxEcoCommand.parse`,
+    /// the same way `PopopxNodeServiceId.nodeDisplayName` is a wire literal.
+    static let slashTokens = "/查空闲 /约时间 /改时间 /取消日程 /总结文件"
+
+    static let summonHint = NSLocalizedString("Start with @助理, or use one of the commands above.", comment: "copilot hint")
+    static let permissionTitle = NSLocalizedString("Allow calendar access", comment: "copilot permission button")
+    static let permissionDenied = NSLocalizedString("Calendar access is off, so the assistant can still read your message but cannot see your day.", comment: "copilot permission footnote")
+    static let realtimeToggle = NSLocalizedString("Assist in this conversation", comment: "copilot realtime toggle")
+    static let written = NSLocalizedString("Written to your calendar", comment: "copilot confirmation toast")
+    static let notWritten = NSLocalizedString("Nothing was written", comment: "copilot refusal toast")
+    static let expired = NSLocalizedString("That proposal expired before you confirmed it.", comment: "copilot expired card")
+    static let conflictFootnote = NSLocalizedString("It lands inside something already booked.", comment: "copilot conflict footnote")
+    static let copyICS = NSLocalizedString("Copy the .ics for this", comment: "copilot ics export")
+    static let engineNote = NSLocalizedString("Deterministic on-device grammar. The bundled model is not used.", comment: "copilot engine note")
+
+    static func dispatched(_ reason: String) -> String {
+        String(format: NSLocalizedString("Mac Node: %@", comment: "copilot dispatch result"), reason)
+    }
+}
+
+/// EventKit behind the privacy boundary — the iOS `PopopxEcoCalendarAccess`.
+@MainActor
+final class PopopxEventKitCalendar: PopopxEcoCalendarAccess {
+    private let store = EKEventStore()
+
+    // MARK: Time base
+
+    /// An absolute instant as local civil minutes since 1970-01-01, using the offset in force *on that
+    /// date* so a window that crosses a DST change still lines up with `PopopxEcoFacts`.
+    private func localEpochMinutes(_ instant: Date) -> Int64 {
+        let shifted = instant.timeIntervalSince1970 + Double(TimeZone.current.secondsFromGMT(for: instant))
+        return popopxEcoFloorDiv(Int64(shifted), 60)
+    }
+
+    /// The inverse. One refinement pass, because the offset needed to convert depends on the instant being
+    /// produced: guess with the offset at `now`, then re-read the offset at that guess. Two DST edges per
+    /// year are the worst case and a minute of ambiguity there is not worth a third pass.
+    private func date(fromLocalEpochMinutes minutes: Int64) -> Date {
+        let rough = Double(minutes * 60) - Double(TimeZone.current.secondsFromGMT())
+        let guess = Date(timeIntervalSince1970: rough)
+        let refined = Double(minutes * 60) - Double(TimeZone.current.secondsFromGMT(for: guess))
+        return Date(timeIntervalSince1970: refined)
+    }
+
+    // MARK: Reading
+
+    /// The raw rows of the window. Titles, locations and notes exist only here and in `busySlots`, and
+    /// this type is the only place in the app that reads them. Attendees are not read at all: `EKEvent`
+    /// exposes them as `EKParticipant` objects whose only identifying strings are a name and a URL, and
+    /// a free/busy answer needs neither, so the field stays empty rather than holding a value that could
+    /// be printed. This also matches the Android projection, which omits the Attendees table entirely.
+    func rawEvents(windowStartEpochMinutes: Int64, windowEndEpochMinutes: Int64) async -> [PopopxRawCalendarEvent] {
+        guard permissionsGranted() else { return [] }
+        return fetchEvents(windowStartEpochMinutes: windowStartEpochMinutes, windowEndEpochMinutes: windowEndEpochMinutes)
+            .filter { $0.status != .canceled }
+            .map { event in
+                PopopxRawCalendarEvent(
+                    startEpochMinutes: localEpochMinutes(event.startDate),
+                    endEpochMinutes: localEpochMinutes(event.endDate),
+                    title: event.title ?? "",
+                    location: event.location ?? "",
+                    attendees: [],
+                    notes: event.notes ?? ""
+                )
+            }
+    }
+
+    /// The function the view layer actually calls: numbers in, numbers out, and the raw list dies with the
+    /// scope. The events are an argument expression that is never named, which is what makes the
+    /// desensitisation structural rather than a convention.
+    func busySlots(windowStartEpochMinutes: Int64, windowEndEpochMinutes: Int64) async -> [PopopxEcoBusySlot] {
+        PopopxCalendarPrivacy.busySlots(
+            events: await rawEvents(windowStartEpochMinutes: windowStartEpochMinutes, windowEndEpochMinutes: windowEndEpochMinutes),
+            windowStart: windowStartEpochMinutes,
+            windowEnd: windowEndEpochMinutes
+        )
+    }
+
+    func freeSlots(windowStartEpochMinutes: Int64, windowEndEpochMinutes: Int64, preferences: PopopxTimePreferences = .defaults) async -> [PopopxEcoBusySlot] {
+        PopopxCalendarPrivacy.freeSlots(
+            events: await rawEvents(windowStartEpochMinutes: windowStartEpochMinutes, windowEndEpochMinutes: windowEndEpochMinutes),
+            windowStart: windowStartEpochMinutes,
+            windowEnd: windowEndEpochMinutes,
+            preferences: preferences
+        )
+    }
+
+    private func fetchEvents(windowStartEpochMinutes: Int64, windowEndEpochMinutes: Int64) -> [EKEvent] {
+        guard permissionsGranted() else { return [] }
+        let start = date(fromLocalEpochMinutes: windowStartEpochMinutes)
+        let end = date(fromLocalEpochMinutes: windowEndEpochMinutes)
+        guard end > start else { return [] }
+        return store.events(matching: store.predicateForEvents(withStart: start, end: end, calendars: nil))
+    }
+
+    /// The store id of the event the user's words point at. Ids are the only handle a write may use, so an
+    /// unresolved reference means no card rather than a write against the wrong event.
+    func resolveEventId(words: String, windowStartEpochMinutes: Int64, windowEndEpochMinutes: Int64) async -> String? {
+        let needle = words.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !needle.isEmpty else { return nil }
+        let candidates = fetchEvents(windowStartEpochMinutes: windowStartEpochMinutes, windowEndEpochMinutes: windowEndEpochMinutes)
+            .filter { $0.status != .canceled }
+        // Matched against the title only, and the title is dropped again on the way out: the caller keeps
+        // an id, never a word.
+        guard let hit = candidates.first(where: { ($0.title ?? "").lowercased().contains(needle) }) else { return nil }
+        guard let identifier = hit.eventIdentifier, !identifier.isEmpty else { return nil }
+        return identifier
+    }
+
+    // MARK: Writing
+
+    /// Applies a confirmed change. Every path here is reached only from `PopopxEcoConfirmGate.confirm`, so
+    /// the tap is what makes the difference between a card and an event.
+    func apply(_ write: PopopxCalendarWrite) async -> Bool {
+        guard permissionsGranted() else { return false }
+        switch write {
+        case let .insert(title, startEpochMinutes, endEpochMinutes):
+            guard let target = store.defaultCalendarForNewEvents else { return false }
+            let event = EKEvent(eventStore: store)
+            event.title = title
+            event.startDate = date(fromLocalEpochMinutes: startEpochMinutes)
+            event.endDate = date(fromLocalEpochMinutes: max(endEpochMinutes, startEpochMinutes + 1))
+            event.calendar = target
+            return (try? store.save(event, span: .thisEvent)) != nil
+
+        case let .update(eventId, newStartEpochMinutes, durationMinutes):
+            guard let event = store.event(withIdentifier: eventId) else { return false }
+            let length = max(1, durationMinutes)
+            event.startDate = date(fromLocalEpochMinutes: newStartEpochMinutes)
+            event.endDate = date(fromLocalEpochMinutes: newStartEpochMinutes + Int64(length))
+            return (try? store.save(event, span: .thisEvent)) != nil
+
+        case let .delete(eventId):
+            guard let event = store.event(withIdentifier: eventId) else { return false }
+            return (try? store.remove(event, span: .thisEvent)) != nil
+        }
+    }
+
+    // MARK: Permission
+
+    /// Whether EventKit will answer at all, right now.
+    ///
+    /// `authorizationStatus(for:)` is a class method (`EKEventStore.h:52`, `+ authorizationStatusForEntityType:`),
+    /// so it is called on the type; going through the store instance is the one spelling that does not compile.
+    /// That declaration carries no deprecation attribute in the iOS 27.2 SDK, which is why this line is silent —
+    /// the deprecated API in this file is `requestAccessToEntityType:completion:`, and it stays behind
+    /// `POPPX_EVENTKIT_LEGACY_ACCESS` below.
+    func permissionsGranted() -> Bool {
+        let status = EKEventStore.authorizationStatus(for: .event)
+        return status == .fullAccess || status == .writeOnly
+    }
+
+    /// Asks for full access. iOS 17 is this target's floor (`IPHONEOS_DEPLOYMENT_TARGET = 17.0`), so
+    /// `requestFullAccessToEvents` needs no `#available` branch — and adding the old
+    /// `requestAccess(to:)` fallback as a runtime branch would not merely be dead code, it would fail the
+    /// build's zero-warning rule, because that call is deprecated at this deployment target. It is
+    /// therefore kept behind a compile-time switch that is off, so the fallback can be turned on only
+    /// alongside a deliberate lowering of the target.
+    func requestPermissions() async -> Bool {
+        #if POPPX_EVENTKIT_LEGACY_ACCESS
+        let legacy = await withCheckedContinuation { (box: CheckedContinuation<Bool, Never>) in
+            store.requestAccess(to: .event) { granted, _ in box.resume(returning: granted) }
+        }
+        return legacy
+        #else
+        return await withCheckedContinuation { (box: CheckedContinuation<Bool, Never>) in
+            store.requestFullAccessToEvents { granted, _ in box.resume(returning: granted) }
+        }
+        #endif
+    }
+}
+
+// ---------------------------------------------------------------- The coordinator
+
+/// The single object the composer and the assistant sheet both hold, and the only place in the app that
+/// knows the calendar, the gate and the Mac Node transport at once.
+///
+/// `PopopxEcoAssistant` is deliberately *not* a `ObservableObject`: it is shared with the Kotlin design as
+/// behaviour and must stay free of UI concerns. This type is the seam — it publishes what the gate already
+/// knows, and owns the one thing the shared design cannot express: which OS notifications the feature
+/// subscribes to.
+///
+/// There is exactly one notification, `UIApplication.didEnterBackgroundNotification`, and its handler does
+/// two things: drop the loaded weights, and expire every outstanding card. **There is no foreground
+/// handler, and that is the point.** Kotlin's `enteredBackground()` releases the engine but leaves the
+/// observer mode alone unless it was `.realtimeSession`; re-loading weights or re-opening a live assist on
+/// `willEnterForegroundNotification` would silently undo a choice the user made with their finger. The
+/// absence of the second subscription is the enforcement, so this comment is the only place the rule is
+/// written down twice.
+@MainActor
+final class PopopxCopilotModel: ObservableObject {
+    static let shared = PopopxCopilotModel()
+
+    /// The last turn's sentence, or nil. Shown in the whisper bar, never in the conversation.
+    @Published private(set) var answer: String?
+    /// Cards waiting for a tap, newest last.
+    @Published private(set) var pending: [PopopxEcoConfirmGate.Pending] = []
+    /// What the last action produced when it was not a card — a write that failed, a dispatch refused.
+    @Published private(set) var footnote: String?
+    @Published private(set) var observer: PopopxEcoObserverMode = .off
+    @Published private(set) var showsLiveIndicator = false
+    @Published private(set) var calendarGranted = false
+    @Published private(set) var isWorking = false
+
+    let calendar = PopopxEventKitCalendar()
+    private let assistant = PopopxEcoAssistant.shared
+    private let dispatcher: PopopxEcoMacNodeDispatcher
+    /// The busy set as of the last turn or the last write. Numbers only — `PopopxEcoBusySlot` has no field
+    /// that can hold a word — and it exists so a card can repeat the planner's own warning without a second
+    /// EventKit query per render.
+    private var busySnapshot: [PopopxEcoBusySlot] = []
+    /// The thread's last messages, for a summon turn's context window. Set by the host view, read by
+    /// `ask`, and never persisted anywhere.
+    private var history: [String] = []
+
+    private init() {
+        calendarGranted = calendar.permissionsGranted()
+        dispatcher = PopopxEcoMacNodeDispatcher(
+            pairedServices: {
+                // The services the user actually activated on this device. Read from the manager's own
+                // list, so an engine name that appears in a model reply is not enough to reach a contact.
+                DiscoverSubscriptionManager.shared.subscriptions.map(\.serviceId)
+            },
+            send: { command in
+                guard let contactId = DiscoverSubscriptionManager.shared.nodeContactId else { return false }
+                return await PopopxSilentSignalingRouter.shared.sendNodeCommand(command, toContactId: contactId)
+            }
+        )
+        // Released when the app leaves the foreground; nothing is re-established when it comes back. The
+        // observer stays registered for the life of the process, which is also the life of this singleton,
+        // so there is no token left to remove and no `deinit` to write.
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.didEnterBackgroundNotification,
+            object: nil,
+            queue: .main
+        ) { _ in
+            Task { @MainActor in PopopxCopilotModel.shared.enteredBackground() }
+        }
+    }
+
+    // MARK: Whether the bar shows
+
+    /// The draft-only test the composer asks before drawing anything. Pure read: `PopopxInputBar.body` calls
+    /// it while SwiftUI is computing the view tree, so it may not touch `@Published` state.
+    func whispers(to draft: String) -> Bool {
+        PopopxEcoCommand.isSummon(draft) || PopopxEcoCommand.parse(draft) != nil
+    }
+
+    /// The bar is up while the user is addressing the assistant, or while there is something of the
+    /// assistant's still on screen. Once a card is answered or dismissed and the draft carries no token,
+    /// the whole bar goes away — it is not a persistent panel that can be left open by accident.
+    func showsBar(for draft: String) -> Bool {
+        whispers(to: draft) || !pending.isEmpty || showsLiveIndicator || answer != nil
+    }
+
+    // MARK: Turns
+
+    /// Hosts hand over the thread so a summon can read five messages of it. Nothing here reaches the peer:
+    /// the history is an in-memory array on a MainActor object and it is replaced, not appended, per turn.
+    func noteHistory(_ messages: [String]) {
+        history = messages.suffix(PopopxEcoAssistantState.contextWindow)
+    }
+
+    /// One whisper. `text` is the draft the user typed into the private bar, and `sessionId` is the
+    /// conversation it was typed in — used only as the key of the summon, never as a destination.
+    func ask(_ text: String, sessionId: String = "") async {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        // 「@助理」 is the summon: it authorizes this turn to read the five messages before it, and chooses
+        // no tool. It is set before the turn so the context window the engine sees is the one the token
+        // asked for; a plain message leaves the observer exactly as it was.
+        if PopopxEcoCommand.isSummon(trimmed) { assistant.observe(sessionId: sessionId, mode: .summonLastMessages) }
+        isWorking = true
+        footnote = nil
+        let reply = await assistant.onMessage(trimmed, history: history, calendar: calendar)
+        isWorking = false
+        answer = reply.text
+        pending = assistant.pendingProposals
+        observer = assistant.state.observer
+        showsLiveIndicator = assistant.liveIndicatorVisible
+        calendarGranted = calendar.permissionsGranted()
+        await refreshBusy()
+        for task in reply.computeTasks { footnote = await dispatch(task) }
+    }
+
+    func confirm(_ item: PopopxEcoConfirmGate.Pending) async {
+        // The gate removes the card as it returns the write, so a second tap on the same card finds
+        // nothing and writes nothing; the refresh below is what stops the first tap's card staying up.
+        pending = []
+        let written = await assistant.confirm(id: item.id, calendar: calendar)
+        footnote = written ? PopopxCopilotCopy.written : PopopxCopilotCopy.notWritten
+        if written { PopopxHaptics.notice(.success) } else { PopopxHaptics.impact(.light) }
+        await refreshBusy()
+        pending = assistant.pendingProposals
+        calendarGranted = calendar.permissionsGranted()
+    }
+
+    func dismiss(_ item: PopopxEcoConfirmGate.Pending) {
+        assistant.dismiss(id: item.id)
+        pending = assistant.pendingProposals
+    }
+
+    /// The one-tap off on the green indicator. Turning real-time assist off is the only direction this
+    /// exposes; turning it on is a deliberate switch in the sheet, so the indicator can never be a toggle
+    /// that re-enables listening behind the user's back.
+    func turnOff() {
+        assistant.observe(sessionId: "", mode: .off)
+        observer = assistant.state.observer
+        showsLiveIndicator = assistant.liveIndicatorVisible
+        pending = assistant.pendingProposals
+    }
+
+    func setRealtime(_ on: Bool, sessionId: String) {
+        assistant.observe(sessionId: sessionId, mode: on ? .realtimeSession : .off)
+        observer = assistant.state.observer
+        showsLiveIndicator = assistant.liveIndicatorVisible
+    }
+
+    func askPermission() async {
+        calendarGranted = await assistant.requestPermissions(calendar)
+    }
+
+    /// A confirmed proposal as `.ics`, so what was booked is readable as text outside the app. Rendered
+    /// from the proposal the user tapped, never from a store lookup, which is what keeps a title the
+    /// assistant wrote from becoming a title the assistant read.
+    func ics(for item: PopopxEcoConfirmGate.Pending) -> String {
+        PopopxEcoICS.calendar(item.proposal, stampEpochMinutes: PopopxEcoFacts.now().now.epochMinutes)
+    }
+
+    /// The card's second line: the interval the proposal would land inside, from the snapshot the last turn
+    /// took. nil means the card shows no warning, not that the calendar is empty.
+    func collision(for item: PopopxEcoConfirmGate.Pending) -> PopopxEcoBusySlot? {
+        item.proposal.collision(in: busySnapshot)
+    }
+
+    // MARK: Internals
+
+    private func refreshBusy() async {
+        let facts = PopopxEcoFacts.now()
+        let from = facts.now.epochMinutes
+        busySnapshot = await calendar.busySlots(
+            windowStartEpochMinutes: from,
+            windowEndEpochMinutes: from + Int64(facts.defaultWindowHours) * PopopxTimePreferences.dayMinutes
+        )
+    }
+
+    private func dispatch(_ task: PopopxEcoCall) async -> String {
+        switch await dispatcher.dispatch(task) {
+        case .queued: PopopxCopilotCopy.dispatched("queued")
+        case .rejected(let reason): PopopxCopilotCopy.dispatched(reason)
+        }
+    }
+
+    private func enteredBackground() {
+        // Say it out loud: a card that vanishes because the app was backgrounded must not look like a card
+        // the user somehow lost.
+        if !pending.isEmpty { footnote = PopopxCopilotCopy.expired }
+        assistant.enteredBackground()
+        answer = nil
+        pending = assistant.pendingProposals
+        observer = assistant.state.observer
+        showsLiveIndicator = assistant.liveIndicatorVisible
+        busySnapshot = []
+        history = []
+    }
+}
+
+// ---------------------------------------------------------------- The whisper bar
+
+/// The private strip under the composer. It has no send path: there is no `onSend`, no composer binding,
+/// and no reference to `PopopxInputBarModel` anywhere in this type, so "the whisper bar must never send a
+/// message to the peer" is a property of the code rather than a behaviour it tries to remember.
+private struct PopopxWhisperBar: View {
+    @ObservedObject var model: PopopxCopilotModel
+    /// The draft, read-only, so a summon token typed into the real composer is what raises this bar.
+    var draft: String
+    /// Which conversation the bar is sitting under, handed to `ask` as the summon's key. It is a `String`
+    /// derived from `contactId` and there is no code path in this type that resolves it back into one.
+    var sessionId: String
+
+    @State private var whisper = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
+            if model.showsLiveIndicator {
+                PopopxCopilotLiveIndicator(model: model)
+            }
+
+            HStack(spacing: PopopxMetrics.spaceXS) {
+                Image(systemName: "sparkles")
+                    .font(PopopxType.sectionHeader)
+                    .foregroundStyle(PopopxPalette.labelSecondary)
+                    .accessibilityHidden(true)
+
+                TextField(PopopxCopilotCopy.askPrompt, text: $whisper)
+                    .font(PopopxType.body)
+                    .textFieldStyle(.plain)
+                    .submitLabel(.send)
+                    .onSubmit { send() }
+                    .disabled(model.isWorking)
+
+                Button(action: send) {
+                    Image(systemName: model.isWorking ? "hourglass" : "arrow.up.circle.fill")
+                        .font(PopopxType.sectionHeader)
+                        .foregroundStyle(PopopxPalette.label)
+                        .frame(width: PopopxMetrics.minHitTarget, height: PopopxMetrics.minHitTarget)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(PopopxPressButtonStyle(feedback: .light))
+                .accessibilityLabel(PopopxCopilotCopy.askPrompt)
+                .disabled(model.isWorking || whisper.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+
+            if let answer = model.answer {
+                Text(answer)
+                    .font(PopopxType.secondary)
+                    .foregroundStyle(PopopxPalette.labelSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            ForEach(model.pending) { item in
+                PopopxCopilotConfirmCard(item: item, model: model)
+            }
+
+            // The five tokens are the other way in, shown only while there is nothing to read yet, so a
+            // turn that already answered does not have the manual printed over it. Never localized: the
+            // tokens are matched verbatim by `PopopxEcoCommand.parse`.
+            if model.answer == nil && model.pending.isEmpty {
+                Text(PopopxCopilotCopy.slashTokens)
+                    .font(PopopxType.caption)
+                    .foregroundStyle(PopopxPalette.labelHint)
+                Text(PopopxCopilotCopy.summonHint)
+                    .font(PopopxType.caption)
+                    .foregroundStyle(PopopxPalette.labelHint)
+            }
+
+            if let footnote = model.footnote {
+                Text(footnote)
+                    .font(PopopxType.caption)
+                    .foregroundStyle(PopopxPalette.labelHint)
+            }
+
+            // The claim the whole feature rests on, printed where the user is about to type.
+            Text(PopopxCopilotCopy.whisperFootnote)
+                .font(PopopxType.caption)
+                .foregroundStyle(PopopxPalette.labelHint)
+        }
+        .padding(.horizontal, PopopxMetrics.spaceS)
+        .padding(.vertical, PopopxMetrics.spaceXS)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(PopopxPalette.cardHigh, in: .rect(cornerRadius: PopopxMetrics.radiusControl, style: .continuous))
+        .transition(.opacity.combined(with: .move(edge: .bottom)))
+        // A token typed into the real composer is the other way in; here it is moved over, not copied, so
+        // the peer never sees it and the draft does not keep the private text.
+        .onChange(of: draft) { _, next in
+            guard model.whispers(to: next), !next.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+            whisper = next
+        }
+    }
+
+    private func send() {
+        let text = whisper.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+        whisper = ""
+        PopopxHaptics.impact(.light)
+        Task { await model.ask(text, sessionId: sessionId) }
+    }
+}
+
+/// The card the tap happens on. 「确认写入日历」 is the only thing in this feature that can produce an
+/// event, and it produces one exactly once: `PopopxEcoConfirmGate.confirm` removes the proposal before it
+/// returns the write.
+private struct PopopxCopilotConfirmCard: View {
+    let item: PopopxEcoConfirmGate.Pending
+    @ObservedObject var model: PopopxCopilotModel
+    @State private var copied = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
+            Text(item.proposal.description)
+                .font(PopopxType.emphasis)
+                .foregroundStyle(PopopxPalette.label)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if !item.proposal.whenText.isEmpty {
+                Text(item.proposal.whenText)
+                    .font(PopopxType.meta)
+                    .foregroundStyle(PopopxPalette.labelSecondary)
+            }
+
+            if let collision = model.collision(for: item) {
+                // Two lines rather than one interpolated string: `Text`/`Label` overload between
+                // `LocalizedStringKey` and `String`, and an interpolation is resolved as a *key*, which
+                // would send an already-localized sentence back through the table.
+                Label(PopopxCopilotCopy.conflictFootnote, systemImage: "exclamationmark.triangle.fill")
+                    .font(PopopxType.caption)
+                    .foregroundStyle(PopopxPalette.dangerInk)
+                Text(spanText(collision))
+                    .font(PopopxType.caption)
+                    .foregroundStyle(PopopxPalette.dangerInk)
+            }
+
+            if !model.calendarGranted {
+                Button(PopopxCopilotCopy.permissionTitle) {
+                    Task { await model.askPermission() }
+                }
+                .font(PopopxType.secondary)
+                .buttonStyle(PopopxPressButtonStyle(feedback: .light))
+            }
+
+            HStack(spacing: PopopxMetrics.spaceXS) {
+                Button {
+                    Task { await model.confirm(item) }
+                } label: {
+                    Text(PopopxCopilotCopy.confirmWrite)
+                        .font(PopopxType.emphasis)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, PopopxMetrics.spaceXS)
+                }
+                .buttonStyle(PopopxPressButtonStyle(feedback: .medium))
+                .disabled(!model.calendarGranted)
+
+                Button {
+                    model.dismiss(item)
+                } label: {
+                    Text(PopopxCopilotCopy.dismissProposal)
+                        .font(PopopxType.secondary)
+                        .padding(.vertical, PopopxMetrics.spaceXS)
+                }
+                .buttonStyle(PopopxPressButtonStyle(feedback: .light))
+            }
+
+            Button {
+                UIPasteboard.general.string = model.ics(for: item)
+                copied = true
+            } label: {
+                Text(copied ? PopopxCopilotCopy.written : PopopxCopilotCopy.copyICS)
+                    .font(PopopxType.caption)
+                    .foregroundStyle(PopopxPalette.labelHint)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(PopopxMetrics.spaceS)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(PopopxPalette.card, in: .rect(cornerRadius: PopopxMetrics.radiusControl, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl, style: .continuous)
+                .strokeBorder(PopopxPalette.hairlineInner, lineWidth: PopopxMetrics.hairline)
+        )
+    }
+
+    /// The colliding interval as one plain `String`, so `Text` takes the non-localizing overload and the
+    /// two already-localized times cannot be re-read as a format key.
+    private func spanText(_ slot: PopopxEcoBusySlot) -> String {
+        let range = slot.toLocalRange
+        return "\(range.start.isoLocal()) – \(range.end.isoLocal())"
+    }
+}
+
+/// 「本机助理实时协助中 · 数据不出设备」, with the off button next to it rather than three taps away.
+private struct PopopxCopilotLiveIndicator: View {
+    @ObservedObject var model: PopopxCopilotModel
+
+    var body: some View {
+        HStack(spacing: PopopxMetrics.spaceXS) {
+            Circle()
+                .fill(PopopxPalette.successInk)
+                .frame(width: 8, height: 8)
+                .accessibilityHidden(true)
+
+            Text(PopopxCopilotCopy.liveIndicator)
+                .font(PopopxType.caption)
+                .foregroundStyle(PopopxPalette.labelSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Spacer(minLength: PopopxMetrics.spaceXS)
+
+            Button(PopopxCopilotCopy.turnOff) { model.turnOff() }
+                .font(PopopxType.caption)
+                .buttonStyle(PopopxPressButtonStyle(feedback: .light))
+        }
+        .padding(.horizontal, PopopxMetrics.spaceS)
+        .padding(.vertical, PopopxMetrics.spaceXS)
+        .background(PopopxPalette.success, in: .rect(cornerRadius: PopopxMetrics.radiusChip, style: .continuous))
+    }
+}
+
+/// 「发现 → 我的私人助理」. The full-screen version of the whisper bar: the same model, the same gate, and
+/// the only place the real-time assist can be switched on.
+struct PopopxCopilotAssistantView: View {
+    @ObservedObject private var model: PopopxCopilotModel
+    @Environment(\.dismiss) private var dismissEnvironment
+
+    @State private var prompt = ""
+    @State private var realtime = false
+
+    @MainActor
+    init(model: PopopxCopilotModel? = nil) {
+        // `nil` rather than `.shared` as the default: a default argument is evaluated in the caller's
+        // (nonisolated) context, so naming the main-actor singleton there is a concurrency error. Resolved
+        // inside the initializer, which is main-actor like the singleton.
+        let model = model ?? .shared
+        _model = ObservedObject(wrappedValue: model)
+        _realtime = State(initialValue: model.observer == .realtimeSession)
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    if model.showsLiveIndicator { PopopxCopilotLiveIndicator(model: model) }
+
+                    Toggle(PopopxCopilotCopy.realtimeToggle, isOn: $realtime)
+                        .font(PopopxType.body)
+                        .onChange(of: realtime) { _, on in model.setRealtime(on, sessionId: "discover") }
+
+                    Toggle(PopopxCopilotCopy.permissionTitle, isOn: permissionBinding)
+                        .font(PopopxType.body)
+
+                    Text(PopopxCopilotCopy.engineNote)
+                        .font(PopopxType.caption)
+                        .foregroundStyle(PopopxPalette.labelHint)
+                } footer: {
+                    Text(model.calendarGranted ? PopopxCopilotCopy.whisperFootnote : PopopxCopilotCopy.permissionDenied)
+                }
+
+                Section(PopopxCopilotCopy.sheetTitle) {
+                    VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
+                        TextField(PopopxCopilotCopy.realAskPrompt, text: $prompt)
+                            .font(PopopxType.body)
+                            .textFieldStyle(.plain)
+                            .submitLabel(.send)
+                            .onSubmit { ask() }
+
+                        Text(PopopxCopilotCopy.slashTokens)
+                            .font(PopopxType.caption)
+                            .foregroundStyle(PopopxPalette.labelHint)
+
+                        Button(PopopxCopilotCopy.askPrompt, action: ask)
+                            .font(PopopxType.emphasis)
+                            .buttonStyle(PopopxPressButtonStyle(feedback: .medium))
+                            .disabled(model.isWorking || prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
+
+                    if let answer = model.answer {
+                        Text(answer)
+                            .font(PopopxType.secondary)
+                            .foregroundStyle(PopopxPalette.labelSecondary)
+                    }
+
+                    ForEach(model.pending) { item in
+                        PopopxCopilotConfirmCard(item: item, model: model)
+                    }
+
+                    if let footnote = model.footnote {
+                        Text(footnote)
+                            .font(PopopxType.caption)
+                            .foregroundStyle(PopopxPalette.labelHint)
+                    }
+                }
+            }
+            .navigationTitle(PopopxCopilotCopy.entryTitle)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(PopopxCopilotCopy.dismissProposal) { dismissEnvironment() }
+                }
+            }
+            .scrollDismissesKeyboard(.interactively)
+        }
+    }
+
+    /// A toggle whose only setter is the system dialog. Switching it off sends the user to Settings, because
+    /// an app may not revoke a grant it did not make, and a toggle that silently stayed on would be worse.
+    private var permissionBinding: Binding<Bool> {
+        Binding(
+            get: { model.calendarGranted },
+            set: { granted in
+                guard !granted else { Task { await model.askPermission() }; return }
+                dismissEnvironment()
+            }
+        )
+    }
+
+    private func ask() {
+        let text = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+        prompt = ""
+        Task { await model.ask(text) }
     }
 }
 

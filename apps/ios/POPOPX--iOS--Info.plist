@@ -60,6 +60,16 @@
 	</array>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>POPOPX uses Bluetooth to discover nearby POPOPX devices and exchange messages offline when there is no internet connection.</string>
+	<!-- The on-device assistant. It reads this device's calendar to answer 「查空闲」 and writes to it
+	     only from a card the user taps. Nothing here is uploaded: the assistant runs on this phone, so
+	     the sentence has to be true about the phone, not about a service. Full access is the key
+	     `requestFullAccessToEvents` (iOS 17) reads; `NSCalendarsUsageDescription` is the older key and
+	     stays because the write-only path still consults it, and a missing string here is a crash at
+	     prompt time rather than a degraded feature. -->
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>POPOPX reads your calendar on this device so your assistant can tell when you are free, and writes an event only after you tap "Confirm and write to calendar". Titles, locations and attendees are used to compute free slots and are then discarded; nothing leaves this device.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>POPOPX reads your calendar on this device so your assistant can tell when you are free, and writes an event only after you tap "Confirm and write to calendar". Nothing leaves this device.</string>
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>en</string>

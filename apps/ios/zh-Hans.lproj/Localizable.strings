@@ -10136,3 +10136,41 @@ alert title */
 "The attachment could not be unpacked on this device." = "这台设备无法解压该附件。";
 /* POPOPX local media compression */
 "Saved %@ on this device" = "本机已节省 %@";
+/* copilot discover entry */
+"My personal assistant" = "我的私人助理";
+/* copilot discover entry footnote */
+"Reads your own calendar on this device. Books nothing without your tap." = "只读本机上的日历；不经你点按，不会安排任何事项。";
+/* copilot assistant sheet title */
+"Personal assistant" = "私人助理";
+/* copilot live indicator */
+"On-device assistant · live assistance · data never leaves this device" = "本机助理实时协助中 · 数据不出设备";
+/* copilot confirm card primary action */
+"Confirm and write to calendar" = "确认写入日历";
+/* copilot whisper bar footnote */
+"Whispered to the assistant only. Nothing here is sent to the other side." = "只说给助理听。这里的内容不会发给对方。";
+/* copilot whisper field prompt */
+"Ask about your day" = "问问你的日程";
+/* copilot assistant field prompt */
+"What should the assistant do?" = "要让助理做什么？";
+/* copilot hint */
+"Start with @助理, or use one of the commands above." = "以 @助理 开头，或使用上面的任一命令。";
+/* copilot permission button */
+"Allow calendar access" = "允许访问日历";
+/* copilot permission footnote */
+"Calendar access is off, so the assistant can still read your message but cannot see your day." = "日历访问已关闭，助理仍能读到你在输入的内容，但看不到你的日程。";
+/* copilot realtime toggle */
+"Assist in this conversation" = "在本次会话中实时协助";
+/* copilot confirmation toast */
+"Written to your calendar" = "已写入你的日历";
+/* copilot refusal toast */
+"Nothing was written" = "未写入任何内容";
+/* copilot expired card */
+"That proposal expired before you confirmed it." = "该方案在你确认之前已过期。";
+/* copilot conflict footnote */
+"It lands inside something already booked." = "它与已安排的事项时间重叠。";
+/* copilot ics export */
+"Copy the .ics for this" = "复制此项的 .ics";
+/* copilot engine note */
+"Deterministic on-device grammar. The bundled model is not used." = "本机确定性语法解析，未使用内置模型。";
+/* copilot dispatch result */
+"Mac Node: %@" = "Mac 节点：%@";

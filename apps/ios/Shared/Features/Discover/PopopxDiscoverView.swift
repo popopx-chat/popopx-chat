@@ -32,6 +32,7 @@ struct PopopxDiscoverView: View {
     @State private var search = ""
     @State private var detailService: PopopxNodeServiceId?
     @State private var showsPairing = false
+    @State private var showsAssistant = false
     @FocusState private var searchFocused: Bool
 
     private let columns = [
@@ -44,6 +45,8 @@ struct PopopxDiscoverView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
                     PopopxDiscoverBanner { showsPairing = true }
+
+                    PopopxDiscoverAssistantEntry { showsAssistant = true }
 
                     PopopxDiscoverSearchField(text: $search, focused: $searchFocused)
 
@@ -83,6 +86,9 @@ struct PopopxDiscoverView: View {
         }
         .sheet(isPresented: $showsPairing) {
             MacNodePairingSheet()
+        }
+        .sheet(isPresented: $showsAssistant) {
+            PopopxCopilotAssistantView()
         }
         .onAppear {
             credits.loadIfNeeded()
@@ -185,6 +191,75 @@ struct PopopxDiscoverBanner: View {
         if binding.contactId == nil { return DiscoverCopy.bannerNeedsChat }
         return isConnected ? DiscoverCopy.bannerReady : DiscoverCopy.nodeIdle
     }
+}
+
+// MARK: - Assistant entry
+
+/// 「发现 → 我的私人助理」: the one door into the on-device assistant from outside a conversation.
+///
+/// It sits directly under the node banner rather than inside a shelf because it is not a service. The
+/// ten shelf tiles are things the user pays credits to run on a Mac; this is a thing that runs on the
+/// phone, reads the phone's own calendar, and costs nothing — putting it in a shelf would tell the user
+/// it bills like the others.
+///
+/// A button, for the same reason the banner is one: the row's only job is to open the sheet, and a row
+/// that only reports state would leave the settings inside it unreachable from here.
+struct PopopxDiscoverAssistantEntry: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @ObservedObject private var copilot: PopopxCopilotModel
+
+    private let action: () -> Void
+
+    @MainActor
+    init(action: @escaping () -> Void) {
+        _copilot = ObservedObject(wrappedValue: PopopxCopilotModel.shared)
+        self.action = action
+    }
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: PopopxMetrics.spaceS) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 22, weight: .regular))
+                    .foregroundStyle(tint)
+                    .frame(width: 38, height: 38)
+                    .background(tint.opacity(0.12), in: .rect(cornerRadius: PopopxMetrics.radiusControl))
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(PopopxCopilotCopy.entryTitle)
+                        .font(PopopxType.emphasis)
+                        .foregroundStyle(PopopxPalette.label)
+                        .lineLimit(1)
+                    Text(copilot.showsLiveIndicator ? PopopxCopilotCopy.liveIndicator : PopopxCopilotCopy.entrySubtitle)
+                        .font(PopopxType.caption)
+                        .foregroundStyle(copilot.showsLiveIndicator ? PopopxPalette.successInk : PopopxPalette.labelSecondary)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer(minLength: PopopxMetrics.spaceXS)
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(PopopxPalette.labelHint)
+            }
+            .padding(PopopxMetrics.spaceS)
+            .background(PopopxPalette.card, in: .rect(cornerRadius: PopopxMetrics.radiusCard))
+            .overlay(
+                RoundedRectangle(cornerRadius: PopopxMetrics.radiusCard)
+                    .strokeBorder(PopopxPalette.hairlineInner, lineWidth: PopopxMetrics.hairline)
+            )
+            .popopxCardElevation(colorScheme: colorScheme)
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+        .padding(.horizontal, PopopxMetrics.gutter)
+    }
+
+    /// Green only while the real-time assist is genuinely on, which is the state the row would be lying
+    /// about if it were a permanent brand color.
+    private var tint: Color { copilot.showsLiveIndicator ? PopopxPalette.successInk : PopopxPalette.brand }
 }
 
 // MARK: - Search

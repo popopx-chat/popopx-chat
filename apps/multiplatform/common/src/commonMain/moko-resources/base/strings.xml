@@ -3554,4 +3554,27 @@
   <string name="cabin_fail_ttl_exhausted">TTL exhausted</string>
   <string name="cabin_fail_oversized">Too long for one frame: %1$d bytes, limit %2$d</string>
   <string name="cabin_fail_no_session">No session with peer</string>
+  <!-- The on-device copilot: the whisper bar above the composer, its two opt-ins, the confirm card.
+       Nothing here promises a network round trip, and no value carries a recipient: the bar reports on
+       the phone and writes to the calendar only after the confirm tap. -->
+  <string name="discover_private_assistant">My private assistant</string>
+  <string name="copilot_local_only_note">On this phone · never sent</string>
+  <string name="copilot_bar_placeholder">Ask the on-device assistant</string>
+  <string name="copilot_ask">Ask</string>
+  <string name="copilot_working">Thinking</string>
+  <string name="copilot_live_on">On-device assist is live for this chat · data never leaves the device</string>
+  <string name="copilot_live_off">Let the assistant follow this chat</string>
+  <string name="copilot_live_tap_stop">Tap to stop. Nothing is sent to your contact.</string>
+  <string name="copilot_summon_hint">Type @助理 or a slash command to use the last 5 messages once</string>
+  <string name="copilot_turn_off_now">Stop listening now</string>
+  <string name="copilot_confirm_title">Nothing is written until you confirm</string>
+  <string name="copilot_confirm_write">Confirm and write to calendar</string>
+  <string name="copilot_cancel">Cancel</string>
+  <string name="copilot_sheet_title">My private assistant</string>
+  <string name="copilot_sheet_note">Runs on this phone only. No network, no peer, and it never sends a message for you.</string>
+  <string name="copilot_sheet_done">Done</string>
+  <string name="copilot_permission_title">Calendar access is off</string>
+  <string name="copilot_permission_body">Reading busy slots and writing a confirmed event both need the calendar permission.</string>
+  <string name="copilot_permission_action">Allow</string>
+  <string name="copilot_permission_settings">Open app settings</string>
 </resources>

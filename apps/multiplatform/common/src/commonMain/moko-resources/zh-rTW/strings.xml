@@ -2968,4 +2968,24 @@
     <string name="v7_1_channels_descr">新增審核員並簽署每則訊息。</string>
     <string name="v7_1_flat_layout">扁平版面和 Markdown 語法</string>
     <string name="v7_1_flat_layout_descr">在「外觀」設定中啟用。</string>
+    <string name="discover_private_assistant">我的私人助理</string>
+    <string name="copilot_local_only_note">僅在本機 · 不會外傳</string>
+    <string name="copilot_bar_placeholder">問本機助理</string>
+    <string name="copilot_ask">處理</string>
+    <string name="copilot_working">正在思考</string>
+    <string name="copilot_live_on">本機助理即時協助中 · 資料不離開裝置</string>
+    <string name="copilot_live_off">讓助理即時協助本會話</string>
+    <string name="copilot_live_tap_stop">點擊即可停止。不會向對方傳送任何內容。</string>
+    <string name="copilot_summon_hint">輸入 @助理 或斜線命令，本次可使用最近 5 則上下文</string>
+    <string name="copilot_turn_off_now">立即停止監聽</string>
+    <string name="copilot_confirm_title">未經確認不會寫入任何行程</string>
+    <string name="copilot_confirm_write">確認寫入日曆</string>
+    <string name="copilot_cancel">取消</string>
+    <string name="copilot_sheet_title">我的私人助理</string>
+    <string name="copilot_sheet_note">只在本機運作：不聯網、不傳給對方，也不會替你發訊息。</string>
+    <string name="copilot_sheet_done">完成</string>
+    <string name="copilot_permission_title">尚未授予日曆權限</string>
+    <string name="copilot_permission_body">查詢空閒時段與寫入已確認的行程都需要日曆權限。</string>
+    <string name="copilot_permission_action">允許</string>
+    <string name="copilot_permission_settings">開啟應用程式設定</string>
 </resources>

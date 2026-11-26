@@ -45,13 +45,21 @@ trap 'rm -f "$VIOLATIONS"' EXIT
 
 violation_count=0
 
+# One pattern, shared by the probe and the extraction below. Two copies of it drift, and a probe that
+# matches more than the extractor lists reports a violation with no line to show for it.
+BARE_DOMAIN_RE='https?://popopx\.im(/|\?|#|["'"'"'`;)< ]|$)'
+
 check_file() {
   local file="$1"
 
-  # Search for bare popopx.im URLs (https://popopx.im or http://popopx.im not followed by subdomain)
-  # Pattern matches: https://popopx.im or http://popopx.im at end of string or followed by / or ? or #
-  # but NOT followed by a subdomain pattern like smp1., relay1., xftp1., ntf1., stun1., etc.
-  if grep -nE 'https?://popopx\.im(/|\?|#|$)' "$file" > /dev/null 2>&1; then
+  # Search for a bare popopx.im URL: the domain with no subdomain in front of it. A bare popopx.im
+  # name has no A record, so any contact or deep link built on it fails to resolve. What marks the
+  # bare popopx.im form is what comes after the domain: end of line, a path, a query, a fragment, or
+  # one of the characters a quoted literal, a list item or a prose sentence puts right there - a
+  # double quote, an apostrophe, a backtick, a semicolon, a closing paren, an angle bracket or a
+  # space. The punctuation cases are why the class is not only "/ ? #": in code the URL sits inside a
+  # string literal, so a domain followed by a quote is the commonest way to write the broken address.
+  if grep -nE "$BARE_DOMAIN_RE" "$file" > /dev/null 2>&1; then
     # Found a potential violation - extract the lines
     while IFS=: read -r line_num line_content; do
       # Skip if it's in a comment explaining the rule
@@ -72,7 +80,7 @@ check_file() {
       # This is a violation
       echo "$file:$line_num:$line_content" >> "$VIOLATIONS"
       violation_count=$((violation_count + 1))
-    done < <(grep -nE 'https?://popopx\.im(/|\?|#|$)' "$file" 2>/dev/null || true)
+    done < <(grep -nE "$BARE_DOMAIN_RE" "$file" 2>/dev/null || true)
   fi
 }
 

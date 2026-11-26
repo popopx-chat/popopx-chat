@@ -18,11 +18,12 @@ Retained attribution, unchanged in this fork:
 Third-party licence texts, shipped with this fork:
 
   licences/third-party/haskell/<package-version>/   139 files
-  licences/third-party/apps/<library>/                10 files
+  licences/third-party/apps/<library>/                11 files
     -- the licence texts upstream collected for the Haskell dependency set (139
     packages) and for the bundled native libraries (webrtc, mozjpeg, libspng,
-    miniz, sqlcipher, vlc, stb_image_resize, compact-icc-profiles; 10 entries).
-    149 files, 4633 lines, 241774 bytes,
+    miniz, sqlcipher, vlc, stb_image_resize, compact-icc-profiles, cactus;
+    11 entries).
+    150 files, 4833 lines, 253132 bytes,
     taken byte-for-byte from the import commit db0768c21 and re-installed here on
     2026-11-15 after the docs/ tree that carried them was deleted. They are the
     notices AGPL-3.0 §4 forbids removing, and they still describe what this fork
@@ -30,6 +31,63 @@ Third-party licence texts, shipped with this fork:
     comparing every non-blank line of simplex-chat.cabal with popopx-chat.cabal
     after restoring the brand words - the only three that differ are the upstream
     homepage, author and copyright fields, kept upstream deliberately.
+
+Bundled on-device inference: Cactus Needle 3 - licence carried in the repository,
+not only in this file:
+
+  needle3.cact, apps/multiplatform/common/src/commonMain/resources/assets/needle3.cact
+  cactus.h, apps/multiplatform/common/src/commonMain/cpp/cactus/android-arm64/cactus.h
+  cactus.h, apps/ios/Vendor/cactus/cactus.h
+
+    The model weights and the runtime that reads them are both published by Cactus
+    Compute under the Apache License 2.0 - the model card states it for the weights
+    "including the prebuilt runtime binaries" - and the text is shipped at
+    licences/third-party/apps/cactus/LICENSE. The weights are a byte-for-byte copy of
+    the file that release published, re-verified on 2026-11-26 before this line was
+    written; nothing was re-encoded or re-quantised.
+
+    Measured digests, and the recipe that reproduces them:
+
+      needle3.cact (bundled)             35335380 bytes  c9d915eca282ed42d1a09b143b592adb4cc6744ffe2d294adf5cfc5548170c38
+      cactus.h (both copies)                 1721 bytes  9be7eb25b1d89180495d04a0d2c27053f282dac85add50cacc48d73302819d9d
+
+    Re-measure with `shasum -a 256 <path>`; sizes with `wc -c <path>`. The weights and
+    the per-platform runtime archives come from huggingface.co/Cactus-Compute/needle3
+    and huggingface.co/Cactus-Compute/cactus (release/4.1.4).
+
+    The runtime archives are NOT committed. Three of them sit in this working copy -
+      apps/multiplatform/common/src/commonMain/cpp/cactus/android-arm64/libcactus.a
+                                      2898160 bytes  67dbd7b856a3e9d8b0fbb68f0c59592e7572cf859238ba7f3074f74b6fa9a5da
+      apps/ios/Vendor/cactus/ios/libcactus.a
+                                      2013112 bytes  18fab404a7ffefcea860af9aaeb39ee46b37800ddf2be82a72290ad8427ea3d4
+      apps/ios/Vendor/cactus/sim/libcactus.a
+                                      2070496 bytes  5b6cfc4c7280026541f84c93ce64d57ebd292abd2ea6f38f850ef53bb3b9f206
+    - and they are handled the way this repository already handles prebuilt native
+    libraries: apps/ios/.gitignore:67 ignores apps/ios/Libraries/ for the same reason.
+    A restored copy is verifiable against the digests above, and nothing in the build
+    reads them today.
+
+    What runs today is not the engine. The shipped assistant answers with the
+    deterministic parser in
+    apps/multiplatform/common/src/commonMain/kotlin/chat/popopx/common/copilot/, and
+    the measured reason is recorded there: the published base weights routed 1 of the
+    6 calendar intents this feature defines and produced no usable Chinese output. So
+    on Android the shim is staged but not wired -
+    apps/multiplatform/common/src/commonMain/cpp/android/cactus/CMakeLists.txt exists
+    and names the archive above, but adding that directory to the app's
+    externalNativeBuild would take a build.gradle.kts change this fork does not make,
+    and NEEDLE_CACTUS_ENABLED is false; on iOS the archive is not linked at all,
+    because that step needs entries in
+    apps/ios/POPOPX.xcodeproj/project.pbxproj, which this fork does not edit by
+    hand. The weights are in the repository, and on Android they are in the artifact:
+    the foss apk carries assets/needle3.cact at 35335380 bytes, its entry CRC matches
+    its bytes, and its sha256 read back out of the apk is the digest above. On iOS they
+    are not in the .app yet - measured 2026-11-26, zero *.cact files in the built
+    product - because shipping a resource needs an entry in that same project file; the
+    paste is in apps/ios/Vendor/cactus/README.md. They are bundled regardless, because
+    they are what the verified load path reads the moment the engine is switched on, and
+    PopopxNeedleAssets refuses to hand the engine a file whose digest is not the one
+    above.
 
 Embedded Tor daemon - a licence carried by the build, not by this file:
 

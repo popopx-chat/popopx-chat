@@ -27,6 +27,8 @@ import dev.icerock.moko.resources.compose.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.*
+import chat.popopx.common.copilot.PopopxEcoAssistantState
+import chat.popopx.common.copilot.PopopxEcoWhisperBar
 import chat.popopx.common.media.*
 import chat.popopx.common.model.*
 import chat.popopx.common.model.ChatModel.controller
@@ -1862,13 +1864,24 @@ fun ComposeView(
           groupDirectInv = chat.chatInfo.contact.groupDirectInv
         )
       } else {
-        Row(Modifier.padding(end = 8.dp), verticalAlignment = Alignment.Bottom) {
-          ComposeActionButtons()
-          val broadcastPlaceholder = (chat.chatInfo as? ChatInfo.Group)?.groupInfo?.let { gi ->
-            if (gi.useRelays && gi.membership.memberRole >= GroupMemberRole.Owner && chat.chatInfo.groupChatScope() == null) generalGetString(MR.strings.compose_view_broadcast)
-            else null
+        Column(Modifier.fillMaxWidth()) {
+          // The Private Whisper Bar. It is given a local state key, the draft as a value and a reader for
+          // recent text — no chat, no recipient, nothing it could send with. On a platform that installed
+          // no copilot glue it renders nothing, so this line is inert everywhere but Android.
+          PopopxEcoWhisperBar(
+            sessionKey = if (rhId == null) chat.id else "$rhId:${chat.id}",
+            draftText = composeState.value.message.text,
+            history = { chatsCtx.chatItems.value.takeLast(PopopxEcoAssistantState.CONTEXT_WINDOW).map { it.text } },
+          )
+          Divider()
+          Row(Modifier.padding(end = 8.dp), verticalAlignment = Alignment.Bottom) {
+            ComposeActionButtons()
+            val broadcastPlaceholder = (chat.chatInfo as? ChatInfo.Group)?.groupInfo?.let { gi ->
+              if (gi.useRelays && gi.membership.memberRole >= GroupMemberRole.Owner && chat.chatInfo.groupChatScope() == null) generalGetString(MR.strings.compose_view_broadcast)
+              else null
+            }
+            SendMsgView_(disableSendButton = disableSendButton, placeholder = broadcastPlaceholder)
           }
-          SendMsgView_(disableSendButton = disableSendButton, placeholder = broadcastPlaceholder)
         }
       }
     }

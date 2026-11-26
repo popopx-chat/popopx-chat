@@ -57,3 +57,8 @@ badge_service.ini
 
 # SwiftPM build output for the macOS Tor package (regenerable; measured 158M on 2026-11-23)
 apps/macos/PopopxTorKit/.build/
+
+# Vendored Cactus runtime archives (android-arm64, ios, ios-sim). Fetched from the URLs in
+# apps/ios/Vendor/cactus/README.md and checkable against the digests in NOTICE; never committed,
+# the same handling as the prebuilt Haskell archives under apps/ios/Libraries/.
+libcactus.a

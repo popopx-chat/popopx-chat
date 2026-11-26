@@ -3004,4 +3004,24 @@
     <string name="v7_1_channels_descr">添加协管并签署每条消息。</string>
     <string name="v7_1_flat_layout">扁平布局和 Markdown</string>
     <string name="v7_1_flat_layout_descr">在外观设置中启用。</string>
+    <string name="discover_private_assistant">我的私人助理</string>
+    <string name="copilot_local_only_note">仅在本机 · 不会外传</string>
+    <string name="copilot_bar_placeholder">问本机助理</string>
+    <string name="copilot_ask">处理</string>
+    <string name="copilot_working">正在思考</string>
+    <string name="copilot_live_on">本机助理实时协助中 · 数据不出设备</string>
+    <string name="copilot_live_off">让助理实时协助本会话</string>
+    <string name="copilot_live_tap_stop">点击即可停止。不会向对方发送任何内容。</string>
+    <string name="copilot_summon_hint">输入 @助理 或斜杠命令，本次可使用最近 5 条上下文</string>
+    <string name="copilot_turn_off_now">立即停止监听</string>
+    <string name="copilot_confirm_title">未经确认不会写入任何日程</string>
+    <string name="copilot_confirm_write">确认写入日历</string>
+    <string name="copilot_cancel">取消</string>
+    <string name="copilot_sheet_title">我的私人助理</string>
+    <string name="copilot_sheet_note">只在本机运行：不联网、不发给对方，也不会替你发消息。</string>
+    <string name="copilot_sheet_done">完成</string>
+    <string name="copilot_permission_title">尚未授予日历权限</string>
+    <string name="copilot_permission_body">查询空闲时段与写入已确认的日程都需要日历权限。</string>
+    <string name="copilot_permission_action">允许</string>
+    <string name="copilot_permission_settings">打开应用设置</string>
 </resources>
