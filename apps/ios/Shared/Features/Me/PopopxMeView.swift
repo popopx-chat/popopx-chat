@@ -515,6 +515,7 @@ struct PopopxMeView: View {
         VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
             panicWipeRow
             Text(Copy.panicNote)
+            Text(Copy.panicScope)
                 .font(PopopxType.caption)
                 .foregroundStyle(PopopxPalette.labelSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -1205,6 +1206,10 @@ private enum Copy {
     static let panicDisabled = key("Unavailable while the fuse is closed")
     static let panicRowHint = key("Three taps within one second arm it")
     static let panicNote = key("Three taps on this row within one second arm the wipe; the app's single confirmation dialog then asks you once. Cancelling voids it — nothing is ever erased silently. While the fuse is closed that dialog does not exist, so this row is disabled too.")
+    /// The scope, stated where the row can be read without arming it. This row and the self-destruct
+    /// code are the two erase paths in the app and they delete different things; until now only the
+    /// dialog said so, and only about what is removed, never about what survives.
+    static let panicScope = key("It clears this device's offline mesh identity, keys and records plus the app's temporary media copies, then closes the app. Chats, contacts and files stay — the self-destruct passcode is the one that deletes them.")
 }
 
 // MARK: - Previews

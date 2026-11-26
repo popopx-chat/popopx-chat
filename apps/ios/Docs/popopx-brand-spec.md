@@ -37,7 +37,7 @@ Token 实现：`apps/ios/Shared/Theme/PopopxTheme.swift`。
 | 传输层 | `PopopxBLETransport.stop()` — `BLE/PopopxBLETransport.swift:134` → `shutDown()` `:256`，其中 **真实调用** `centralManager?.stopScan()` `:262`、`cancelPeripheralConnection(_:)` `:263`、`peripheralManager?.stopAdvertising()` `:266`，随后 `dropAllLinks` 与两个 delegate 摘除 `:275-276` |
 | 恢复 | `start()` `:130` → `begin()` → `bringRadioUp()` `:238`（scan 周期 + 广播 + maintenance 全部幂等重挂）；任一 manager 先回 `.poweredOn` 时由 `resumeRadioIfReady()` `:251` 补齐另一半 |
 | 引擎层 | `PopopxMeshEngine.start(nickname:)` `Engine/PopopxMeshEngine.swift:144`、`stop()` `:164`、`isRunning` `:185`、`bluetoothState` `:188` |
-| App 侧句柄 | `PopopxMeshEngineBackend.meshSwitchDidTurnOff()` / `meshSwitchDidTurnOn(nickname:)` — `Shared/Model/POPOPXAPI.swift:3563` 与 `:3564`（协议 `PopopxMeshSwitchable` 定义在 `Sources/PopopxMeshUI/PopopxMeshKillSwitch.swift:43`）；实例挂在 `PopopxMeshRuntime.shared.engineBackend` |
+| App 侧句柄 | `PopopxMeshEngineBackend.meshSwitchDidTurnOff()` / `meshSwitchDidTurnOn(nickname:)` — `Shared/Model/POPOPXAPI.swift:3614` 与 `:3607`（协议 `PopopxMeshSwitchable` 定义在 `Sources/PopopxMeshUI/PopopxMeshKillSwitch.swift:43`）；实例挂在 `PopopxMeshRuntime.shared.engineBackend` |
 
 > 结论：Phase 3 的"挂起/恢复"必须走 `engineBackend`（或包内 `PopopxMeshEngine`）的 **stop/start**，不得只翻布尔位；上表已证明 stop 路径真的落到 CoreBluetooth。
 
@@ -51,13 +51,13 @@ Token 实现：`apps/ios/Shared/Theme/PopopxTheme.swift`。
 | 统一流状态 | `PopopxMeshStateSource.shared.observeState() -> AsyncStream<PopopxMeshStreamState>` — `Sources/PopopxMeshUI/PopopxMeshStateSource.swift:222`；`PopopxMeshStreamState` 含 `radioState/peers/privateMessages/broadcasts/awaitingRelayMessageIDs` `:24-40` |
 | 路由发送 | `PopopxMessageRouter.send(_:)` `:630`、`sendText(_:toContactId:)` `:685` — `Router/PopopxMessageRouter.swift` |
 | 手动建联横幅 | `PopopxMeshBannerModel`（`start()` `:164`、`approve()` `:204`、`decline()` `:216`）与 `ManualPairingBannerView(model:)` `:371` — `Sources/PopopxMeshUI/ManualPairingBannerView.swift` |
-| 紧急自毁 | `PopopxPanicWipeManager.execute(includeApplicationDatabase:)` `:531`；三击手势组件 `PopopxPanicWipeGate(_:)` `:705` — `Sources/PopopxMeshUI/PanicWipeManager.swift` |
+| 紧急自毁 | `PopopxPanicWipeManager.execute(includeApplicationDatabase:)` `:549`；三击手势组件 `PopopxPanicWipeGate(_:)` `:722`；确认弹窗第二句（数据边界）取 `PopopxPanicWipeManager.confirmationBoundary` `:454` — `Sources/PopopxMeshUI/PanicWipeManager.swift` |
 | 频道角标语义（现状） | `PopopxMeshBadgeDescriptor.Tone = .blue/.orange/.grey`，图标 `shield.lefthalf.filled` / `antenna.radiowaves.left.and.right` / `clock` — `Sources/PopopxMeshUI/MergedTimelineModifier.swift:345-410` |
 
 **App 侧集成层（同模块，internal，UI 可直接用）**
 
-- `PopopxMeshRuntime.shared`（`@MainActor ObservableObject`）持有全部句柄：`core / eventFeed / engineBackend / mappingStore / bridge / pairing / router / eventObserver / stateSource / healthMonitor / killSwitch / bannerModel / timelineModel / panicWipe`（字段声明 `:3641-3653`）— `Shared/Model/POPOPXAPI.swift:3631`；观察项 `isFuseOn` `:3634`、`pairingPolicy` `:3638`。
-- 已挂载点：`Shared/POPOPXApp.swift:48`（`.modifier(PopopxMeshPanicWipeMount())`，struct 本体在 `POPOPXAPI.swift:3953`）与 `:49`（`.task { await PopopxMeshRuntime.shared.bootstrap() }`）；`Shared/Views/Chat/ChatView.swift:114-127`（`.popopxMergedTimeline` / `.popopxMeshBanner`，两条分支各一次）；`Shared/Views/UserSettings/SettingsView.swift:407`（`MeshPlazaView(`，经 NavigationLink 进入）。
+- `PopopxMeshRuntime.shared`（`@MainActor ObservableObject`）持有全部句柄：`core / eventFeed / engineBackend / mappingStore / bridge / pairing / router / eventObserver / stateSource / healthMonitor / killSwitch / bannerModel / timelineModel / panicWipe`（字段声明 `:3750-3763`）— `Shared/Model/POPOPXAPI.swift:3735`；观察项 `isFuseOn` `:3744`、`pairingPolicy` `:3748`。
+- 已挂载点：`Shared/POPOPXApp.swift:156`（`.modifier(PopopxMeshPanicWipeMount())`，struct 本体在 `POPOPXAPI.swift:4071`）与 `:157`（`.task { await PopopxMeshRuntime.shared.bootstrap() }`，`bootstrap()` 在 `:158`）；`Shared/Views/Chat/ChatView.swift:161-177`（`.popopxMergedTimeline` / `.popopxMeshBanner`，两条分支各一次）；包内 `MeshPlazaView(` 现有三处宿主，SettingsView 那处已迁走：`Shared/Features/Cabin/PopopxCabinView.swift:404`（Cabin tab 根，自建 `NavigationStack` `:403`，走 `model:` 注入）与 `:826`（`.plaza` 目的地）、`Shared/Features/AddFriend/PopopxAddFriendView.swift:121`（`PopopxAddFriendRoute.meshPlaza` 目的地）。
 - 包内 UI 目前用 `.foregroundColor` + `.blue/.orange/.gray`（系统色），且 `PopopxMeshChannelBadge.color(of:)` 是 internal static，主工程无法覆写 → **Phase 5 的频道配色改法**：在主工程侧用 public 的 `PopopxMeshBadgeDescriptor` 自建 `PopopxChannelBadge`（紫锁 / 青绿波纹+跳数 / 灰时钟），不改包内路由与 BLE 代码。
 
 ### 0.2 apps/ios 工程与视图路径
@@ -87,9 +87,9 @@ Token 实现：`apps/ios/Shared/Theme/PopopxTheme.swift`。
 
 | 引用名 | 用途 | 现有调用点 |
 |---|---|---|
-| `popopx_app_icon` | 方形品牌标（通知图标、身份胶囊） | `Shared/Model/AppAPITypes.swift:1798`、`Views/Call/CallController.swift:32` |
-| `logo` | 横版字标（浅色面） | `AppAPITypes.swift:1799`、`Views/Onboarding/POPOPXInfo.swift:25` |
-| `logo-light` | 横版字标（深色面） | `AppAPITypes.swift:1801` |
+| `popopx_app_icon` | 方形品牌标（通知图标、身份胶囊） | `Shared/Model/AppAPITypes.swift:1793`（`operatorsInfo`）与 `:1893`（`dummyOperatorInfo`）、`Views/Call/CallController.swift:32` |
+| `logo` | 横版字标（浅色面） | `AppAPITypes.swift:1794`、`Views/Onboarding/POPOPXInfo.swift:92` |
+| `logo-light` | 横版字标（深色面） | `AppAPITypes.swift:1796` |
 | `vertical_logo` | 竖版组合标（空态/引导） | `Views/Chat/ChatItem/MsgContentView.swift:353` |
 | `icon-light` / `icon-dark` | 头像占位与 AppIcon 切换 | `Views/NewChat/QRCode.swift:82`、`UserSettings/AppearanceSettings.swift:205/221` |
 
@@ -255,7 +255,7 @@ NON-TEXT UI components (target 3.0:1)
 
 1. **射频互斥不是"调用了 stopScan"，而是可复核的静默快照。** 链路：`PopopxMeshRuntime.shared.killSwitch.setEnabled(false)` → `PopopxMeshEngine.stop()`（`Engine/PopopxMeshEngine.swift:164`）→ `PopopxBLETransport.shutDown()` → `centralManager?.stopScan()`（`BLE/PopopxBLETransport.swift:262`）与 `peripheralManager?.stopAdvertising()`（`:266`）。弹层用 `verifiedActivitySnapshot().isRadioQuiet` 把结果写回 UI（`radioYielded`），挂起失败就显示失败，不假装已让路。恢复只按进入页面时记录的 `fuse.isEnabled` 原样回滚。
 2. **单向发包仲裁**：字典序小的一方发送邀请帧、大的一方静默接收并写入 `IdentityMappingStore` 完成加友 + 绑定。两处对 `ui-prompt.md` 字面要求的偏差（已在文件头注释里记录）：显示名相同时（双方默认都是 `mesh user`）回退到 mesh 公钥的字典序；`.handshake` 帧由双方各发一次，因为发起方需要对方的 mesh 公钥才能绑定。
-3. **panic wipe 只有一个状态机**：顶栏 Logo 连点只是第二个入口，复用 `PopopxPanicWipeArming`（`PopopxMeshUI/PanicWipeManager.swift:358`）与已挂载的 `PopopxMeshPanicWipeMount`（`Shared/Model/POPOPXAPI.swift:3953`），不新建第二套 arming/弹窗，避免两个弹窗抢同一次触发。
+3. **panic wipe 只有一个状态机**：顶栏 Logo 连点只是第二个入口，复用 `PopopxPanicWipeArming`（`PopopxMeshUI/PanicWipeManager.swift:360`）与已挂载的 `PopopxMeshPanicWipeMount`（`Shared/Model/POPOPXAPI.swift:4071`），不新建第二套 arming/弹窗，避免两个弹窗抢同一次触发。
 4. **跨模块符号一律 `public`**：App 侧只能看到包导出的类型；`PopopxProximityEngine` 的 `@Published` 状态全部经引擎暴露，视图不复制状态（`@StateObject` 持 sheet model、`@ObservedObject` 持引擎，因为只有引擎发布变化）。
 
 ---

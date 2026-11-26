@@ -68,7 +68,7 @@ struct PopopxSettingsView: View {
     /// After device round 6 II.2 this tree keeps only the call toggle: the screen-blur and de-tracking toggles, together with that 'Privacy and security' card,
     /// were merged into the 'Me' tab's privacy and security defence (`securityEntries` in `PopopxMeView.swift`; the two keys themselves are unchanged).
     /// The same batch of keys as CallSettings.swift:15/31.
-    @AppStorage(DEFAULT_WEBRTC_POLICY_RELAY) private var webrtcPolicyRelay = true
+    @AppStorage(DEFAULT_WEBRTC_POLICY_RELAY) private var webrtcPolicyRelay = false // matches the registered default in SettingsView.swift:111
 
     /// Externally only two forms are recognised: `PopopxSettingsView()` and `PopopxSettingsView(versionText:)`.
     /// The explicit init is written so that the `@State`/wrapped properties can stay private.

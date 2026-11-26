@@ -108,7 +108,7 @@ let appDefaults: [String: Any] = [
     DEFAULT_LA_LOCK_DELAY: 30,
     DEFAULT_LA_SELF_DESTRUCT: false,
     DEFAULT_NOTIFICATION_ALERT_SHOWN: false,
-    DEFAULT_WEBRTC_POLICY_RELAY: true,
+    DEFAULT_WEBRTC_POLICY_RELAY: false, // P2P first; relay-only predates this app having TURN credentials. See `Copy.relayCallsNoteOff`.
     DEFAULT_CALL_KIT_CALLS_IN_RECENTS: false,
     DEFAULT_PRIVACY_ACCEPT_IMAGES: true,
     DEFAULT_PRIVACY_LINK_PREVIEWS: true,

@@ -2369,7 +2369,7 @@ struct AppSettings: Codable, Equatable {
             privacyMediaBlurRadius: 0,
             notificationMode: AppSettingsNotificationMode.instant,
             notificationPreviewMode: NotificationPreviewMode.message,
-            webrtcPolicyRelay: true,
+            webrtcPolicyRelay: false, // must equal the registered default (SettingsView.swift:111): `prepareForExport()` diffs against this value, so a mismatch puts an explicit setting into every payload the core and a migrating device receive
             webrtcICEServers: [],
             confirmRemoteSessions: false,
             connectRemoteViaMulticast: true,

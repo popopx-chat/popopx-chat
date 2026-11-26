@@ -5,8 +5,14 @@
 //  The third tab: the Mac node banner and the three-shelf bento plaza of the ten official
 //  service accounts.
 //
-//  Two layout facts worth keeping next to the code that depends on them:
+//  Three layout facts worth keeping next to the code that depends on them:
 //
+//  * The navigation stack belongs to the host. `MainTabView` already wraps this view in its
+//    `NavigationStack`, so the body starts at the `ScrollView` and the title, display mode and
+//    `.refreshable` attach there — the same shape `PopopxContactsView` uses. A second stack
+//    inside this view stacked two nav bars on top of each other, which is why Discover was the
+//    only tab of the five that did it: Chats (`ChatsListView`) and Cabin (`PopopxCabinView`)
+//    build their own stack and the shell leaves them alone, Contacts and Me let the shell own it.
 //  * The plaza deliberately does **not** use `PopopxSectionCard` for the shelves. That atom
 //    is a single-column grouped list, and its `VStack(spacing: 0)` row stack is the right
 //    shape for settings and the wrong shape for six cards a user scans for an icon. The
@@ -41,46 +47,44 @@ struct PopopxDiscoverView: View {
     ]
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
-                    PopopxDiscoverBanner { showsPairing = true }
+        ScrollView {
+            VStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
+                PopopxDiscoverBanner { showsPairing = true }
 
-                    PopopxDiscoverAssistantEntry { showsAssistant = true }
+                PopopxDiscoverAssistantEntry { showsAssistant = true }
 
-                    PopopxDiscoverSearchField(text: $search, focused: $searchFocused)
+                PopopxDiscoverSearchField(text: $search, focused: $searchFocused)
 
-                    PopopxDiscoverFilterBar(selection: $filter, counts: data.activeCountByFilter)
+                PopopxDiscoverFilterBar(selection: $filter, counts: data.activeCountByFilter)
 
-                    if visibleSections.isEmpty {
-                        PopopxDiscoverEmptyState(searching: !search.trimmingCharacters(in: .whitespaces).isEmpty)
-                            .padding(.top, PopopxMetrics.spaceXL)
-                    } else {
-                        ForEach(visibleSections) { shelf in
-                            PopopxDiscoverShelf(
-                                section: shelf.section,
-                                services: shelf.services,
-                                columns: columns
-                            ) { service in
-                                detailService = service
-                            }
+                if visibleSections.isEmpty {
+                    PopopxDiscoverEmptyState(searching: !search.trimmingCharacters(in: .whitespaces).isEmpty)
+                        .padding(.top, PopopxMetrics.spaceXL)
+                } else {
+                    ForEach(visibleSections) { shelf in
+                        PopopxDiscoverShelf(
+                            section: shelf.section,
+                            services: shelf.services,
+                            columns: columns
+                        ) { service in
+                            detailService = service
                         }
-                        Text(DiscoverCopy.serviceSectionFooter)
-                            .font(PopopxType.caption)
-                            .foregroundStyle(PopopxPalette.labelHint)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .padding(.horizontal, PopopxMetrics.gutter)
-                            .padding(.top, PopopxMetrics.space2XS)
                     }
+                    Text(DiscoverCopy.serviceSectionFooter)
+                        .font(PopopxType.caption)
+                        .foregroundStyle(PopopxPalette.labelHint)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, PopopxMetrics.gutter)
+                        .padding(.top, PopopxMetrics.space2XS)
                 }
-                .padding(.bottom, PopopxMetrics.spaceXL)
             }
-            .background(PopopxPalette.base)
-            .navigationTitle(DiscoverCopy.plazaTitle)
-            .navigationBarTitleDisplayMode(.large)
-            .toolbarTitleDisplayMode(.large)
-            .refreshable { data.sweep() }
+            .padding(.bottom, PopopxMetrics.spaceXL)
         }
+        .background(PopopxPalette.base)
+        .navigationTitle(DiscoverCopy.plazaTitle)
+        .navigationBarTitleDisplayMode(.large)
+        .toolbarTitleDisplayMode(.large)
+        .refreshable { data.sweep() }
         .sheet(item: $detailService) { service in
             DiscoverServiceDetailSheet(serviceId: service)
         }

@@ -345,7 +345,7 @@ case 逐条在 :1092-1096、:1100、:1104、:1107、:1112-1115、:1125）：
 `PopopxBadgeDetailSheet.swift:288`（面板标题本身）、`:289`（脚注）、`PopopxTrialWelcomeModal.swift:209`、
 `PopopxBadgePaywallView.swift:659`（收益条目那句 `Copy.benefitStatusPanel`，调用点 :425，措辞红线注释在 :418）。复算与例外：
 - `遥测` 在**本特性 17 个 Swift 文件**里 = 0 处；目录侧本轮复算有 **1 处**命中：
-  `zh-Hans.lproj/Localizable.strings:8036` 的一条译文值（键句 `This build bundles no analytics or crash-reporting SDK
+  `zh-Hans.lproj/Localizable.strings:8039` 的一条译文值（键句 `This build bundles no analytics or crash-reporting SDK
   and no telemetry collector…`，属本特性之外的既存隐私声明条目）。"全部 Swift 与 `.strings` = 0 处"这句上一版是假的，
   现按实测改写；`en.lproj` 与其它 15 本目录 0 命中。
 - `Docs/popopx-brand-spec.md` 原有 2 处（`:44` 小节标题、`:279` 字号表"顶栏遥测数字"）已按用户
@@ -545,7 +545,7 @@ link validator (`scripts/ios/localizations.py`), and `plutil -lint` reports all 
      真机还需要验一件事：频道主的帖子在现网到底落到 `.channelRcv` 还是 `.groupRcv` 那一支
      （如果落到 `.groupRcv`，将来可以从那里读出 `memberRole`，闸 2 就能升级成真正的发送者身份闸）。
 8. **红包的群聊入口按裁定关闭。** 需求要求点对点红包，未规定群聊；实现里 `PopopxSendRedPacketSheet`
-   有 `.group` 那一档，但宿主侧 `ComposeView.swift:1507` 的 `popopxPacketDestination` **只认单聊联系人**，
+   有 `.group` 那一档，但宿主侧 `ComposeView.swift:1543` 的 `popopxPacketDestination` **只认单聊联系人**，
    所以群聊里的"+"菜单不出现这一格（判据只有一份，`popopxPlusActions` 读同一个可选值，
    不存在第二处开关会把它放回来）。
    原因写在 `:1402` 的注释里：零服务端意味着群里并发拆包没有互斥，最坏情况是同一笔点数字面上被多记几次到账。

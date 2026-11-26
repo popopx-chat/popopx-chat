@@ -118,12 +118,25 @@ Two things this section must not oversell:
 
 ### Media leaves with its metadata stripped
 
-On iOS, images, video, PDF and documents are re-encoded locally before they are attached, and the
-metadata dictionaries are dropped (`apps/ios/Shared/Features/MediaCompression/PopopxMediaEngine.swift:378-379`
-for JPEG, `:425` sets `writer.metadata = []` for video). The interceptor that calls it is wired into the
-compose view (`Shared/Views/Chat/ComposeMessage/ComposeView.swift:2033-2037,2317`). Voice messages
-currently bypass that path (`:2312-2315`), and Android has no equivalent; if media compression is
-switched off in settings, files are passed through untouched.
+On iOS, images, video and PDF are re-encoded locally before they are attached, and the metadata
+dictionaries are dropped (`apps/ios/Shared/Features/MediaCompression/PopopxMediaEngine.swift:385` for
+the image destination, `:440` sets `writer.metadata = []` for video; PDF pages are redrawn without page
+info). Documents are wrapped in an LZFSE container instead, which shrinks the file and changes nothing
+inside it — so the preview calls that case "Compressed" and never "Metadata removed". A rewritten file is
+sent even when it came out *larger* than the original: the size fuse that used to discard a larger
+product is gone, and what it discarded was the cleaned copy, leaving the GPS-tagged original on the wire.
+
+The interceptor runs as each item is picked (`Shared/Views/Chat/ComposeMessage/ComposeView.swift:778`,
+`:830`) and the send reuses that result rather than processing a second time (`:2047`, `:2407`, `:2445`).
+Every attachment then carries a badge stating its own outcome; the rule that chooses the wording is
+`PopopxMediaStatusResolver` (`apps/ios/PopopxMeshKit/Sources/PopopxMeshKit/Media/PopopxMediaStatus.swift`),
+covered by `apps/ios/PopopxMeshKit/Tests/PopopxMeshKitTests/PopopxMediaStatusTests.swift`.
+
+Voice messages still bypass it (`:2442`), animated GIFs are excluded by the classifier, and a file picked
+in the Files app is copied as it arrived — all three read "Sent unchanged". With media compression
+switched off the engine rewrites nothing, but a still image still passes through the app's own image
+encode on the way out, which is why its badge says "Re-encoded before sending" rather than naming the
+engine. Android and desktop have no equivalent.
 
 ### The node badge, bought inside the app
 
@@ -154,24 +167,32 @@ Two distinct features, because they destroy different things:
   database password (`apps/ios/POPOPXChat/FileUtils.swift:143-163`), removes the app/duress/mnemonic
   keychain items, and then rebuilds a fresh profile. An alternate strategy (`:998-1053`) keeps one
   chosen profile and deletes the others **including their server queues**.
-- **Panic wipe** (red row in `PopopxMeView.swift:514-537`, or a triple-tap of the brand mark) is the
+- **Panic wipe** (red row in `PopopxMeView.swift:514-538`, or a triple-tap of the brand mark) is the
   mesh's two-pass overwrite. In the iOS app it is constructed with `applicationDatabaseURL: nil`
-  (`Shared/Model/POPOPXAPI.swift:3808-3816`), so it clears mesh keys, radio state and mesh records —
-  **not** the chat database. Enable whichever one matches what you actually need gone.
+  (`Shared/Model/POPOPXAPI.swift:3808-3821`), so it clears mesh keys, radio state and mesh records and —
+  because the host hands it `PopopxMediaWipeRecorder` — the two plaintext media caches under the
+  container's temporary directory, then ends the process. It does **not** delete the chat database, and
+  there is no deferred variant: the confirmation either runs it now or the wipe does not happen.
+  Enable whichever one matches what you actually need gone.
 
 ### Calls
 
 Voice and video calls run over WebRTC with the local rendering and signaling in this repository. The
 ICE configuration that ships is STUN-only: `stun:stun1.popopx.im:5349`
 (`apps/ios/Shared/Views/Call/WebRTCClient.swift:93`, `packages/popopx-chat-webrtc/src/call.ts:355`).
-The parser accepts `turn:` / `turns:` entries and a signed configuration can deliver them, but **POPOPX
-operates no TURN server**, so a call between two peers behind restrictive NATs may fail to connect;
-self-hosting a TURN and adding it to your ICE configuration is the current answer.
+POPOPX also operates a TURN relay at `turn1.popopx.im:5349`, but no credential for it lives in this
+repository: iOS reads `POPOPX_TURN_USERNAME` / `POPOPX_TURN_CREDENTIAL` from its `Info.plist`, whose
+values come from the git-ignored `apps/ios/Local.xcconfig`, and the app deliberately falls back to
+STUN-only rather than offering a relay it cannot authenticate
+(`apps/ios/Shared/Views/Call/WebRTCClient.swift:113-130`). iOS prefers a direct path and uses the relay
+only when one is configured and needed; the parser has always accepted `turn:` / `turns:` entries, so a
+server you add in settings — or a self-hosted TURN — is used the same way
+(`Shared/Views/Call/WebRTC.swift:469-487`).
 
 ## The infrastructure
 
 Fifteen relay endpoints, each written as a public host **and** a paired V3 onion address in the same
-entry, plus one STUN host:
+entry, plus one STUN host and one TURN host:
 
 | Role | Hosts | Port | Source |
 |---|---|---|---|
@@ -179,7 +200,8 @@ entry, plus one STUN host:
 | Chat relay | `relay1.popopx.im` | 5227 | `Operators/Presets.hs:105,115` |
 | XFTP file transfer | `xftp1`, `xftp6`, `xftp8.popopx.im` | 8443 | `Operators/Presets.hs:91-93` |
 | NTF push notification | `ntf1..3.popopx.im` | 5226 | `Library/Commands.hs:164-169` |
-| STUN | `stun1.popopx.im` | 5349 | `Shared/Views/Call/WebRTC.swift:465` |
+| STUN | `stun1.popopx.im` | 5349 | `Shared/Views/Call/WebRTC.swift:469` |
+| TURN | `turn1.popopx.im` | 5349 | `apps/ios/Shared/Views/Call/WebRTCClient.swift:98` — host only; the credentials are injected at build time and are not in this repository |
 
 The ports are load-bearing, not cosmetic: a port-less SMP address is dialled on the native port (5223),
 while a port-less XFTP address would be dialled on 443 — and 443 on this cluster is the web server, not

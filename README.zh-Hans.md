@@ -109,11 +109,22 @@ serverDomains = ["popopx.im"], conditionsAcceptance = CARequired Nothing
 
 ### 媒体文件剥离元数据后才离开设备
 
-在 iOS 上，图片、视频、PDF 与文档在附加之前会在本地重新编码，元数据字典被丢弃
-（JPEG 见 `apps/ios/Shared/Features/MediaCompression/PopopxMediaEngine.swift:378-379`，
-视频对应 `:425` 的 `writer.metadata = []`）。调用它的拦截器接进了 compose view
-（`Shared/Views/Chat/ComposeMessage/ComposeView.swift:2033-2037,2317`）。语音消息目前绕开了这条路径
-（`:2312-2315`），Android 也没有等价实现；如果设置中关闭了媒体压缩，文件会被原样传出。
+在 iOS 上，图片、视频和 PDF 在附加之前会在本机重新编码，元数据字典被丢弃（图片见
+`apps/ios/Shared/Features/MediaCompression/PopopxMediaEngine.swift:385`，视频对应 `:440` 的
+`writer.metadata = []`，PDF 逐页重绘且不带页面信息）。文档则改用 LZFSE 容器封装——它只缩小文件，
+不改动文件内容，所以预览里这种情况标注为「已压缩」，绝不写成「已清除元数据」。重新编码后的文件即便
+比原文件更大也照样发出：那条「产物变大就丢弃」的保险丝已拆除，它过去丢弃的是清洗过的副本，把仍带
+位置信息的原件发了出去。
+
+拦截器在每一项被选取时就运行一次（`Shared/Views/Chat/ComposeMessage/ComposeView.swift:778`、`:830`），
+发送时复用这次结果，不会再处理一遍（`:2047`、`:2407`、`:2445`）。每个附件因此都带一枚徽标，说明它自己
+的实际处理结果；选词规则在 `PopopxMediaStatusResolver`
+（`apps/ios/PopopxMeshKit/Sources/PopopxMeshKit/Media/PopopxMediaStatus.swift`），由
+`apps/ios/PopopxMeshKit/Tests/PopopxMeshKitTests/PopopxMediaStatusTests.swift` 覆盖。
+
+语音消息仍然绕开它（`:2442`），动图 GIF 被分类器排除，在「文件」里选取的文档按原样复制——这三类都显示
+「按原样发送」。关闭媒体压缩后引擎不改写任何文件，但静态图片在发出时仍会经过应用自身的图片编码，所以
+它的徽标写「发送前已重新编码」，不署引擎名。Android 与桌面端没有等价实现。
 
 ### 在应用内购买的 node badge
 
@@ -141,21 +152,28 @@ POPOPX 商店服务：代码自己就这么写——*"要把一项 entitlement �
   mesh 身份、删除数据库、备份、导出、壁纸与存储的数据库口令
   （`apps/ios/POPOPXChat/FileUtils.swift:143-163`），移除 app/胁迫/助记词三类 Keychain 条目，然后重建一个
   全新的 profile。另一种策略（`:998-1053`）保留你选定的一个 profile，删除其余的**包括它们的服务器队列**。
-- **恐慌擦除**（`PopopxMeView.swift:514-537` 中的红色行，或三连点品牌标记）是 mesh 的两遍覆写。在 iOS 应用
-  里它以 `applicationDatabaseURL: nil` 构造（`Shared/Model/POPOPXAPI.swift:3808-3816`），因此它清除的是
-  mesh 密钥、无线电状态与 mesh 记录——**不是**聊天数据库。请启用与你真正需要消失的东西相匹配的那一个。
+- **恐慌擦除**（`PopopxMeView.swift:514-538` 中的红色行，或三连点品牌标记）是 mesh 的两遍覆写。在 iOS 应用
+  里它以 `applicationDatabaseURL: nil` 构造（`Shared/Model/POPOPXAPI.swift:3808-3821`），因此它清除的是
+  mesh 密钥、无线电状态与 mesh 记录；又因为宿主给了它 `PopopxMediaWipeRecorder`，容器临时目录下的两份
+  媒体明文缓存也会一并清掉，最后结束进程。它**不会**删除聊天数据库，也没有“下次启动再擦”这种延后分支：
+  确认后立即执行，否则就不发生。请启用与你真正需要消失的东西相匹配的那一个。
 
 ### 通话
 
 语音与视频通话跑在 WebRTC 上，本地渲染与信令都在本仓库。随包发布的 ICE 配置是纯 STUN：
 `stun:stun1.popopx.im:5349`（`apps/ios/Shared/Views/Call/WebRTCClient.swift:93`，
-`packages/popopx-chat-webrtc/src/call.ts:355`）。解析器接受 `turn:` / `turns:` 条目，签名配置也能下发它们，
-但 **POPOPX 不运营任何 TURN 服务器**，因此位于严格 NAT 之后的两个对端之间的通话可能无法建立连接；
-目前的答案是自己部署一个 TURN 并把它加进你的 ICE 配置。
+`packages/popopx-chat-webrtc/src/call.ts:355`）。POPOPX 另外运营一个 TURN 中继
+`turn1.popopx.im:5349`，但它的凭据不在本仓库里：iOS 从 `Info.plist` 读取
+`POPOPX_TURN_USERNAME` / `POPOPX_TURN_CREDENTIAL`，这两个值来自被 git 忽略的 `apps/ios/Local.xcconfig`；
+缺少该文件时应用宁可退回纯 STUN，也不会挂出一个无法认证的中继
+（`apps/ios/Shared/Views/Call/WebRTCClient.swift:113-130`）。iOS 优先走直连路径，只有在配置了中继且直连
+失败时才用它；解析器一直都接受 `turn:` / `turns:` 条目，所以你在设置里自己添加的服务器——或者自建
+TURN——会以同样的方式生效（`Shared/Views/Call/WebRTC.swift:469-487`）。
 
 ## 基础设施
 
-十五个中继端点，每一个都在同一条记录里写成公网主机**加**配对的 V3 onion 地址，另加一个 STUN 主机：
+十五个中继端点，每一个都在同一条记录里写成公网主机**加**配对的 V3 onion 地址，另加一个 STUN 主机和一个
+TURN 主机：
 
 | 角色 | 主机 | 端口 | 来源 |
 |---|---|---|---|
@@ -163,7 +181,7 @@ POPOPX 商店服务：代码自己就这么写——*"要把一项 entitlement �
 | 聊天中继 | `relay1.popopx.im` | 5227 | `Operators/Presets.hs:105,115` |
 | XFTP 文件传输 | `xftp1`、`xftp6`、`xftp8.popopx.im` | 8443 | `Operators/Presets.hs:91-93` |
 | NTF 推送通知 | `ntf1..3.popopx.im` | 5226 | `Library/Commands.hs:164-169` |
-| STUN | `stun1.popopx.im` | 5349 | `Shared/Views/Call/WebRTC.swift:465` |
+| STUN | `stun1.popopx.im` | 5349 | `Shared/Views/Call/WebRTC.swift:469` |
 
 这些端口是承重结构，不是装饰：不带端口的 SMP 地址拨向原生端口（5223），而不带端口的 XFTP 地址会被拨向
 443——而这个集群上的 443 是 web 服务器，不是文件传输服务。`.popopx.im` 不出现在 `presetDomains` 里正是

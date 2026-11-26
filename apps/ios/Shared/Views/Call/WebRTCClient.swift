@@ -93,9 +93,56 @@ final class WebRTCClient: NSObject, RTCVideoViewDelegate, RTCFrameEncryptorDeleg
         WebRTC.RTCIceServer(urlStrings: ["stun:stun1.popopx.im:5349"]),
     ]
 
+    /// The relay endpoint a call may fall back to. Host and port are disclosed in `PRIVACY.md` (§ Calls);
+    /// the credentials are not in this file, and not in the repository.
+    static let turnHost = "turn1.popopx.im"
+    static let turnPort = 5349
+
+    /// Read back from the built `Info.plist`, whose values come from `$(POPOPX_TURN_USERNAME)` /
+    /// `$(POPOPX_TURN_CREDENTIAL)` in `apps/ios/Local.xcconfig` — the git-ignored file that
+    /// `Debug.xcconfig:2` and `Release.xcconfig:1` already include. A clone, and CI, has no values.
+    static let turnUsernameKey = "POPOPX_TURN_USERNAME"
+    static let turnCredentialKey = "POPOPX_TURN_CREDENTIAL"
+
+    /// TURN servers from the build configuration, or nil when this binary carries no credentials.
+    ///
+    /// A half-configured relay is worse than none: under `iceTransportPolicy = .relay` a TURN server
+    /// that cannot authenticate ends the call. A build made without `Local.xcconfig` arrives as two
+    /// empty strings (measured on a clean build), and a variable that fails to expand at all arrives as
+    /// the literal `$(POPOPX_TURN_USERNAME)` — either way it authenticates as garbage. So both values have
+    /// to be present, non-empty and expanded, and an entry is never built from a missing credential.
+    private func injectedTurnIceServers() -> [WebRTC.RTCIceServer]? {
+        guard let username = infoPlistSecret(Self.turnUsernameKey),
+              let credential = infoPlistSecret(Self.turnCredentialKey) else { return nil }
+        // Endpoints only in `urls`: native WebRTC does not accept `user:password@host` inside an ICE URL,
+        // the way `parseRTCIceServer` (`WebRTC.swift:469`) splits a hand-entered server. The transport is
+        // named explicitly because 5349 is the only port this deployment listens on for both.
+        let relay = WebRTC.RTCIceServer(
+            urlStrings: [
+                "turn:\(Self.turnHost):\(Self.turnPort)?transport=tcp",
+                "turns:\(Self.turnHost):\(Self.turnPort)?transport=tcp",
+            ],
+            username: username,
+            credential: credential
+        )
+        // The STUN floor is kept, otherwise a relay-bearing build could never see the peer's real address
+        // and every call would pay the relay's latency.
+        return defaultIceServers + [relay]
+    }
+
+    private func infoPlistSecret(_ key: String) -> String? {
+        guard let value = Bundle.main.object(forInfoDictionaryKey: key) as? String else { return nil }
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, !trimmed.hasPrefix("$(") else { return nil }
+        return trimmed
+    }
+
     // Spec: spec/services/calls.md#initializeCall
     func initializeCall(_ iceServers: [WebRTC.RTCIceServer]?, _ mediaType: CallMediaType, _ aesKey: String?, _ relay: Bool?) -> Call {
-        let connection = createPeerConnection(iceServers ?? getWebRTCIceServers() ?? defaultIceServers, relay)
+        // The order is the priority: the servers the peer offers, then the ones entered in settings, then
+        // the relay this build was configured with, then STUN. A manually set server must outrank the
+        // injected one, or the setting could not override what ships.
+        let connection = createPeerConnection(iceServers ?? getWebRTCIceServers() ?? injectedTurnIceServers() ?? defaultIceServers, relay)
         connection.delegate = self
         let device = notConnectedCall?.device ?? .front
         var localCamera: RTCVideoCapturer? = nil
@@ -924,7 +971,12 @@ extension WebRTCClient: RTCPeerConnectionDelegate {
                 stopReconnecting()
                 activeCall?.wasConnected = true
                 sendConnectedEvent(connection)
-            case .disconnected, .failed: endCall()
+            // The user-facing reason for a failure is given by ActiveCallView, which sees this same
+            // event before the teardown; `.disconnected` shares this branch because an ordinary
+            // hang-up arrives that way too, and only the notice distinguishes them.
+            case .disconnected, .failed:
+                if newState == .failed { logger.error("WebRTCClient: ICE connection failed") }
+                endCall()
             default: ()
             }
         }

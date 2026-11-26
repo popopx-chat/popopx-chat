@@ -72,7 +72,7 @@ end to end, metadata is the exposure, and the mitigations are the ones in sectio
 - **iOS file-level protection** (`FileProtectionType.complete`, which makes a file undecryptable while
   the device is locked) is applied to: the server-configuration store
   (`Shared/Features/ServerConfigSync/PopopxServerConfigStore.swift:458-459,503-505`), compressed outgoing
-  media (`MediaCompression/PopopxMediaEngine.swift:334,341,904`), the personal profile store
+  media (`MediaCompression/PopopxMediaEngine.swift:349,356,919`), the personal profile store
   (`PersonalProfile/ProfileStorageManager.swift:204-214`), the decoy profile
   (`AntiTheftDuress/PopopxDecoyProfileGenerator.swift:378-381`) and the mesh store
   (`PopopxMeshKit/.../Core/PopopxMeshStorage.swift:112`).
@@ -88,8 +88,10 @@ end to end, metadata is the exposure, and the mitigations are the ones in sectio
   directories, wallpapers and the stored database password, removes the app/duress/mnemonic/lockout
   keychain items, and then builds a fresh profile (`AntiTheftDuress/PopopxDuressAuthManager.swift:831-905`,
   `POPOPXChat/FileUtils.swift:143-163`). The alternate strategy keeps one chosen profile and deletes the
-  others including their **server queues**. The mesh panic wipe is a different tool and clears mesh keys
-  and records, not the chat database.
+  others including their **server queues**. The mesh panic wipe is a different tool: it clears the mesh
+  keys, the mesh records and the temporary media copies this app kept unpacked or recompressed, then
+  closes the app. It does not delete the chat database, so your chats, contacts and received files stay
+  on the device.
 
 ## 4. Push notifications, precisely
 
@@ -124,14 +126,38 @@ choice you still have to make.
 
 ## 6. Calls
 
-Calls are WebRTC. The ICE configuration that ships is STUN-only — `stun:stun1.popopx.im:5349`
-(`Shared/Views/Call/WebRTCClient.swift:93`, `packages/popopx-chat-webrtc/src/call.ts:355`) — and POPOPX
-**operates no TURN server**, so media flows peer to peer whenever the network allows it, which is the
-privacy-favouring default; the cost is that some symmetric-NAT pairs cannot connect at all. Two
-disclosures follow from that design: a STUN request tells `stun1.popopx.im` your public address, and
+Calls are WebRTC. Every client that ships a bundled ICE list presets one entry, STUN only:
+`stun:stun1.popopx.im:5349` (`apps/ios/Shared/Views/Call/WebRTCClient.swift:92-94`,
+`packages/popopx-chat-webrtc/src/call.ts:355`,
+`apps/multiplatform/common/src/commonMain/resources/assets/www/call.js:70`).
+
+A relay exists and POPOPX operates it — `turn1.popopx.im:5349` — but its credentials are **not in this
+repository**, and no build made from this source tree reaches it unless someone supplies them. iOS reads
+`POPOPX_TURN_USERNAME` / `POPOPX_TURN_CREDENTIAL` from its `Info.plist`
+(`apps/ios/POPOPX--iOS--Info.plist`), and those values come from `apps/ios/Local.xcconfig` — a file this
+repository ignores (`apps/ios/.gitignore:74`), optionally included by `Debug.xcconfig` and
+`Release.xcconfig`. The resolver refuses to build a TURN entry from a missing, empty or unexpanded `$(…)`
+value rather than offer a relay that cannot authenticate (`WebRTCClient.swift:113-130`), so a clone —
+including every CI build — is STUN-only. Servers you enter yourself outrank the injected relay
+(`WebRTCClient.swift:144`), and the parser has always accepted `turn:` / `turns:`
+(`Shared/Views/Call/WebRTC.swift:469-487`).
+
+Routing on iOS is **peer-to-peer first**: the transport policy is `.all` unless you turn on "Force calls
+through a relay" (`Shared/Views/UserSettings/SettingsView.swift:111`, applied at
+`WebRTCClient.swift:208`). That toggle trades one observer for another: with the default the peer can see
+your IP address, with it on the relay sees both endpoints' addresses plus the timing and volume of the
+call. **The other clients do not share this default yet** — the core's `defaultAppSettings`
+(`src/Popopx/Chat/AppSettings.hs:96`) and Android's stored preference
+(`apps/multiplatform/common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI.kt:122`) both still
+select relay-only, which alongside a STUN-only preset means a call that cannot go direct simply fails.
+
+Some disclosure applies to every route: a STUN request tells `stun1.popopx.im` your public address, and
 ICE candidates exchange your private and public addresses **with the peer** — a party you chose to talk
-to, not a third party. A self-hosted deployment can add `turn:` entries via signed configuration; the
-parser already accepts them (`Shared/Views/Call/WebRTC.swift:465-476`).
+to, not a third party. A relay forwards packets and never holds the media keys: media is encrypted between
+the peers, and where both sides negotiated the per-call key each frame is encrypted before it reaches the
+transport (`WebRTCClient.swift:163-173`), which is what the call screen reports as
+"e2e encrypted" (`Shared/Views/Call/WebRTC.swift:54-63`). There is no conference service in this product:
+nothing mixes, records or stores call media.
 
 ## 7. Purchases and the node badge
 

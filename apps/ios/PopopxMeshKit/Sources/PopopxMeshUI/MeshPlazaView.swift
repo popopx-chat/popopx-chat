@@ -522,13 +522,22 @@ extension View {
     /// anyway, and a second, positive claim from this screen would be one more thing for a pushed
     /// page to have to overturn. Nothing in the module asks for the visible form, and it stays that
     /// way on purpose.
+    ///
+    /// The `#if` is not decoration: `ToolbarPlacement.tabBar` is declared `@available(macOS,
+    /// unavailable)`, so an `#available` check cannot reach it — the line has to disappear from the
+    /// macOS build for `swift test` (which compiles this target for the host) to get as far as a test.
+    /// On iOS nothing changes: same availability guard, same modifier, same fallback.
     @ViewBuilder func meshHallTabBarHidden(_ hides: Bool = true) -> some View {
         if hides {
-            if #available(iOS 16.0, macOS 13.0, *) {
+            #if os(iOS)
+            if #available(iOS 16.0, *) {
                 self.toolbar(.hidden, for: .tabBar)
             } else {
                 self
             }
+            #else
+            self
+            #endif
         } else {
             self
         }

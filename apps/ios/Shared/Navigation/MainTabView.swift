@@ -15,18 +15,19 @@
 //
 //  Three structural decisions:
 //
-//  1. **The Chats tab carries its own NavigationStack; the other three tabs are wrapped by this file.**
+//  1. **Chats and Cabin carry their own NavigationStack; Contacts, Discover and Me are wrapped by this file.**
 //     The field that opens a conversation is `ChatModel.chatId` (ChatModel.swift:411), and the unified entry point that writes it is
 //     `ItemsModel.loadOpenChat(_:)` (ChatModel.swift:113, write point :120) and `loadOpenChatNoWait` (:139/:148),
 //     with callers including notifications (NtfManager.swift:81), deep link / connection setup (POPOPXAPI.swift:1091, :1825, :2182, :2849),
 //     opening attachments (ChatModel.swift:1303) and creating a new contact (CIMemberCreatedContactView.swift:29).
 //     And the only place in the whole project that turns that field into pushing one page is the old ChatListView's stack-path binding
-//     (ChatListView.swift:210-217). That binding must stay inside the Chats page, or the four-tab shell would cut off opening a conversation from a notification.
-//     Of the other three tabs: Contacts and Me carry only inline Sheets and are wrapped uniformly by the shell's NavigationStack (:134, :152); Cabin
-//     has held its own `NavigationStack(path:)` since 2026-11-20, and from this round the root of that tab is `PopopxMeshPlazaRootView`
-//     (with its own root stack, landing on the full-screen plaza inside the package, `PopopxCabinView.swift:218`), and the old panel became its full-height drawer,
-//     so the shell here still hosts only the bare page (:148): the `path` that async push binds to belongs to the page inside the drawer itself.
-//     The `navigationDestination` registrations for the three server sub-pages of Me / All settings are also mounted at this tab's stack root (:159-165):
+//     (ChatListView.swift:210-217). That binding must stay inside the Chats page, or the shell would cut off opening a conversation from a notification.
+//     Of the five tabs: Contacts (:150), Discover (:179) and Me (:185) are wrapped by the shell's NavigationStack, the first and the last
+//     carrying only inline Sheets, Discover because its service tiles open detail sheets that need a bar to present from. Chats (:145) and Cabin
+//     hold their own `NavigationStack(path:)` — Cabin has since 2026-11-20, and from this round the root of that tab is `PopopxMeshPlazaRootView`
+//     (with its own root stack, landing on the full-screen plaza inside the package, `PopopxCabinView.swift:353`), and the old panel became its full-height drawer,
+//     so the shell here still hosts only the bare page (:172): the `path` that async push binds to belongs to the page inside the drawer itself.
+//     The `navigationDestination` registrations for the three server sub-pages of Me / All settings are also mounted at this tab's stack root (:192-198):
 //     a value-based link only recognises the stack that carries it, and the settings page is pushed from this page through a destination closure, so a closure-pushed page writing its own registration
 //     does not take effect by a single line, which is the root cause of Relay servers merely redrawing All settings when tapped.
 //
@@ -157,10 +158,10 @@ struct MainTabView: View {
             // (`PopopxCabinView`) is no longer the root of this tab; it is now the full-height drawer summoned by the capsule in the middle of the root top bar,
             // and the page inside the drawer keeps holding its own `NavigationStack(path:)` for unchanged reasons, it merely moved into the drawer:
             // its private chat pushes one more page after sending an offline connection invitation, the action is async, and only the
-            // `path` bound to its own stack can keep pushing after that (the `NavigationStack(path: $path)` line at `PopopxCabinView.swift:507`);
+            // `path` bound to its own stack can keep pushing after that (the `NavigationStack(path: $path)` line at `PopopxCabinView.swift:774`);
             // Mounting it as a page of the root stack would give either two navigation bars or all four `path.append` calls landing nowhere, so the whole block is pressed in from outside
             // rather than pushed into it.
-            // Real device round 8, task one: this tab is full-screen immersive (the four bottom-bar items step aside on the root screen, declared by the tab itself),
+            // Real device round 8, task one: this tab is full-screen immersive (the five bottom-bar items step aside on the root screen, declared by the tab itself),
             // so the only cross-cutting navigation left in this tab is the Back button in the top-left corner of the top bar, and what it writes is the very `selection` below.
             // A binding is passed here rather than a newly minted routing object: `selection` is already the single source of truth for the selected tab (decision 3 and
             // the `onChange(of: chatModel.chatId)` below both write it), and wrapping one more layer in `@Observable` would create
@@ -172,8 +173,9 @@ struct MainTabView: View {
                 .tabItem { tabLabel(.cabin) }
                 .tag(PopopxTab.cabin)
 
-            // Discover: its own stack, because a service tile opens a detail sheet over a plaza that is
-            // itself a root page; the sheet needs a bar to be presented from.
+            // Discover: the shell's stack is the only stack this tab has. A service tile opens a detail sheet
+            // over a plaza that is itself a root page, so the sheet needs the bar this wrapper provides;
+            // `PopopxDiscoverView` therefore starts at its `ScrollView` and attaches its title to this stack.
             NavigationStack {
                 PopopxDiscoverView()
             }

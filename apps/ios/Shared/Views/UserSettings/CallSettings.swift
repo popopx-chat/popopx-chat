@@ -12,7 +12,7 @@ import POPOPXChat
 
 struct CallSettings: View {
     @EnvironmentObject var theme: AppTheme
-    @AppStorage(DEFAULT_WEBRTC_POLICY_RELAY) private var webrtcPolicyRelay = true
+    @AppStorage(DEFAULT_WEBRTC_POLICY_RELAY) private var webrtcPolicyRelay = false // matches the registered default in SettingsView.swift:111
     @AppStorage(GROUP_DEFAULT_CALL_KIT_ENABLED, store: groupDefaults) private var callKitEnabled = true
     @AppStorage(DEFAULT_CALL_KIT_CALLS_IN_RECENTS) private var callKitCallsInRecents = false
     private let allowChangingCallsHistory = false

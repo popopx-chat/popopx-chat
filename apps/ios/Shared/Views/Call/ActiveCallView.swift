@@ -26,6 +26,8 @@ struct ActiveCallView: View {
     @State var prevColorScheme: ColorScheme = .dark
     @State var pipShown = false
     @State var wasConnected = false
+    /// A failing connection reports `failed` more than once while the view is going away.
+    @State private var iceFailureNotified = false
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -110,6 +112,28 @@ struct ActiveCallView: View {
                 await m.callCommand.setClient(client)
             }
         }
+    }
+
+    /// ICE failure has two very different causes, and the useful sentence is the one that names which:
+    /// a network that hides both addresses needs a relay, while a relay-only policy pointed at nothing
+    /// needs a settings change. "Call failed" alone leaves the user with nothing to act on.
+    @MainActor private func showIceFailureNotice(_ client: WebRTCClient) {
+        let config = client.activeCall?.connection.configuration
+        let relayOffered = config?.iceServers.contains { server in
+            server.urlStrings.contains { $0.hasPrefix("turn:") || $0.hasPrefix("turns:") }
+        } ?? false
+        let message: String
+        if relayOffered {
+            message = NSLocalizedString("The connection to this contact could not be established, not even through the relay. Try again; if it keeps failing, the problem is on one of the two networks.", comment: "call failure")
+        } else if config?.iceTransportPolicy == .relay {
+            message = NSLocalizedString("Calls are set to always use a relay, but no relay is available to this app, so no call can connect. Turn off \"Force calls through a relay\" in call settings.", comment: "call failure")
+        } else {
+            message = NSLocalizedString("The call could not find a direct path, which usually means one of the two networks blocks peer-to-peer connections. No relay is configured for this build, so there is nothing to fall back on.", comment: "call failure")
+        }
+        AlertManager.shared.showAlert(Alert(
+            title: Text(verbatim: NSLocalizedString("Call could not connect", comment: "call failure")),
+            message: Text(verbatim: message)
+        ))
     }
 
     @MainActor
@@ -199,6 +223,17 @@ struct ActiveCallView: View {
                     }
                     m.activeCall = nil
                     m.activeCallViewIsCollapsed = false
+                }
+                if state.connectionState == "failed" || state.iceConnectionState == "failed" {
+                    // `endCall()` follows this same event (WebRTCClient.swift:973), so without a notice
+                    // here the call view just vanishes. The reason matters to the user, and it is
+                    // recoverable here: this build may carry no relay credentials, in which case only a
+                    // direct path was ever possible.
+                    // "disconnected" is deliberately not reported — an ordinary hang-up reports it too.
+                    if !iceFailureNotified {
+                        iceFailureNotified = true
+                        showIceFailureNotice(client)
+                    }
                 }
                 // "reconnecting" is not a core call status
                 if state.connectionState != "reconnecting" {

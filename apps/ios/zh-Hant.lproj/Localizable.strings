@@ -8151,6 +8151,7 @@ alert title */
 "Unavailable while the fuse is closed" = "熔斷關閉時不可用";
 "Three taps within one second arm it" = "一秒內輕觸三次才會佈防";
 "Three taps on this row within one second arm the wipe; the app's single confirmation dialog then asks you once. Cancelling voids it — nothing is ever erased silently. While the fuse is closed that dialog does not exist, so this row is disabled too." = "一秒內連擊三次這一行才會佈防，佈防後由全 app 唯一的確認彈窗問你一次；取消即作廢，絕不靜默抹除。熔斷關閉時這道確認不存在，這一行也隨之停用。";
+"It clears this device's offline mesh identity, keys and records plus the app's temporary media copies, then closes the app. Chats, contacts and files stay — the self-destruct passcode is the one that deletes them." = "它清除的是本機離線組網身分、金鑰與記錄，外加 app 的臨時媒體副本，然後關閉 app。聊天、聯繫人和檔案都會保留——會刪除它們的是自毀密碼，不是這一項。";
 "Offline mesh settings" = "離線組網設置";
 "The switch, the pairing policy, this device's mesh identity and the data it keeps, in one place." = "開關、配對策略、本機組網身分與它保存的數據，集中在這裏。";
 "Mesh switch and pairing" = "組網開關與配對";
@@ -8313,6 +8314,7 @@ alert title */
 "Enable offline Bluetooth mesh network" = "開啓離線藍牙組網";
 "Erase now" = "立即抹掉";
 "Erase offline mesh data?" = "抹掉離線組網數據？";
+"Chats, contacts and received files stay on this device. This is not the self-destruct passcode: that one deletes them." = "聊天、聯繫人和已收到的檔案都留在本機。這不是自毀密碼——那一項才會刪除它們。";
 "Forget" = "解除綁定";
 "Handshake" = "握手";
 "Local nickname" = "本機暱稱";
@@ -10115,7 +10117,12 @@ alert title */
 /* POPOPX local media compression */
 "Local media compression" = "本機媒體壓縮";
 /* POPOPX local media compression */
-"Attachments are shrunk and stripped of camera and location metadata on this device before they are encrypted. Nothing is uploaded for processing." = "附件會在本裝置上縮小並清除相機與位置中繼資料，之後才加密。不會上傳任何內容以進行處理。";
+"Images, video and PDFs are re-encoded on this device before they are encrypted, which discards camera and location metadata. Other attachments, including animated GIFs and anything picked in the Files app, are sent as they are — each attachment in the compose preview says which case it is. Nothing is uploaded for processing." = "附件會在本機上重新編碼後才加密，這個過程會清除相機與位置中繼資料。其他附件，包括動畫 GIF 和從「檔案」中選取的檔案，會按原樣傳送——檢視附件預覽時，每一項都會標明實際的處理方式。不會上傳任何內容以進行處理。";
+"Metadata removed" = "已清除中繼資料";
+"Re-encoded before sending" = "傳送前已重新編碼";
+"Compressed" = "已壓縮";
+"Sent unchanged" = "按原樣傳送";
+"Blocked: over the large-group limit" = "已封鎖：超過大群上限";
 /* POPOPX local media compression */
 "Large-group data saver" = "大群省流量";
 /* POPOPX local media compression */
@@ -10127,7 +10134,7 @@ alert title */
 /* POPOPX local media compression */
 "Standard HD" = "標準高清";
 /* POPOPX local media compression */
-"Compressing & stripping metadata locally..." = "正在本機壓縮並清除中繼資料……";
+"Preparing attachments locally…" = "正在本機處理附件……";
 /* POPOPX local media compression */
 "This file is still too large after compression. Use an encrypted link instead." = "這個檔案壓縮後仍然過大。請改用加密連結。";
 /* POPOPX local media compression */
@@ -10174,3 +10181,9 @@ alert title */
 "Deterministic on-device grammar. The bundled model is not used." = "本機確定性語法解析，未使用內建模型。";
 /* copilot dispatch result */
 "Mac Node: %@" = "Mac 節點：%@";
+/* WebRTC call routing status (ActiveCallView.swift, WebRTC.swift) */
+"Call could not connect" = "通話無法建立";
+"The connection to this contact could not be established, not even through the relay. Try again; if it keeps failing, the problem is on one of the two networks." = "無法與此聯絡人建立連線，即使通過中繼也失敗。請重試；如果一直失敗，問題出在雙方的網路之一。";
+"Calls are set to always use a relay, but no relay is available to this app, so no call can connect. Turn off \"Force calls through a relay\" in call settings." = "通話已設為始終使用中繼，但本應用沒有可用的中繼，因此任何通話都無法接通。請在通話設定中關閉「強制通話走中繼」。";
+"The call could not find a direct path, which usually means one of the two networks blocks peer-to-peer connections. No relay is configured for this build, so there is nothing to fall back on." = "通話找不到直連路徑，這通常意味著雙方的某個網路阻擋了點對點連線。此建置未設定中繼，因此沒有可退路。";
+"peer-to-peer (server reflexive)" = "點對點（伺服器反射位址）";

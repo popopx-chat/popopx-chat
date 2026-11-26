@@ -446,6 +446,14 @@ public final class PopopxPanicWipeManager: ObservableObject {
     /// `execute(includeApplicationDatabase:)` with `true` itself, knowing the path.
     public static let interfaceOptInToDatabaseErase = false
 
+    /// The other half of what the user consents to: what this wipe leaves alone. Kept as one literal
+    /// so a test can hold its wording, and localized through the app's string table exactly as the
+    /// alert title is (measured: `"Erase offline mesh data?"` is authored here and translated in
+    /// `apps/ios/*.lproj/Localizable.strings`). It answers the confusion this feature causes — the
+    /// self-destruct code really does delete the chats, and only one of the two said so on screen.
+    public static let confirmationBoundary =
+        "Chats, contacts and received files stay on this device. This is not the self-destruct passcode: that one deletes them."
+
     @Published public private(set) var lastReport: PopopxPanicWipeReport?
 
     @Published public private(set) var isWiping = false
@@ -461,6 +469,10 @@ public final class PopopxPanicWipeManager: ObservableObject {
     private let applicationDatabaseURL: URL?
     private let termination: (@Sendable (Int32) -> Void)?
     private let recorder: any PopopxPanicWipeRecording
+    /// What the host deletes on the same path but outside these steps, in the words the user reads.
+    /// The recorder is the hook those deletions run through, so without this the confirm sentence
+    /// would understate the wipe: an effect the app really performs and the user was never told about.
+    private let hostDisclosedEffects: [String]
 
     /// - Parameters:
     ///   - radio: whatever holds a Bluetooth manager open — the fuse's components (engine, health
@@ -476,6 +488,8 @@ public final class PopopxPanicWipeManager: ObservableObject {
     ///     property of how the manager was built, not of a flag flipped late.
     ///   - termination: `Self.processExit` in the app; `nil` (or a recorder) in tests, where killing
     ///     the process would kill the runner.
+    ///   - hostDisclosedEffects: the things a host deletes through `recorder`, phrased for the confirm
+    ///     sentence. Empty default, so a host that deletes nothing beyond these steps says nothing more.
     public init(
         radio: [any PopopxMeshSwitchable] = [PopopxMeshEngine.shared, BluetoothHealthMonitor.shared],
         keys: any PopopxMeshKeyBurning = PopopxMeshEngine.shared,
@@ -486,6 +500,7 @@ public final class PopopxPanicWipeManager: ObservableObject {
         applicationDatabaseURL: URL? = nil,
         termination: (@Sendable (Int32) -> Void)? = PopopxPanicWipeManager.processExit,
         recorder: any PopopxPanicWipeRecording = PopopxPanicWipeSilentRecorder(),
+        hostDisclosedEffects: [String] = [],
         arming: PopopxPanicWipeArming = PopopxPanicWipeArming()
     ) {
         self.radio = radio
@@ -497,6 +512,7 @@ public final class PopopxPanicWipeManager: ObservableObject {
         self.applicationDatabaseURL = applicationDatabaseURL
         self.termination = termination
         self.recorder = recorder
+        self.hostDisclosedEffects = hostDisclosedEffects
         self.arming = arming
     }
 
@@ -577,6 +593,9 @@ public final class PopopxPanicWipeManager: ObservableObject {
         if includeApplicationDatabase {
             phrases.append(PopopxPanicWipeStep.overwriteApplicationDatabase.words)
         }
+        // Ahead of the exit, because that is the last thing the user still controls: a deletion that
+        // runs while this process is alive is a deletion the sentence has to name.
+        phrases.append(contentsOf: hostDisclosedEffects)
         phrases.append(PopopxPanicWipeStep.terminate.words)
         return "This will " + phrases.joined(separator: ", ") + ". It cannot be undone."
     }
@@ -734,7 +753,14 @@ public struct PopopxPanicWipeGate<Content: View>: View {
                     }
                 }
             } message: { watched in
-                Text(verbatim: watched.confirmationMessage())
+                // Two sentences, and they do different jobs: the first is built from the steps that
+                // actually run (so it cannot drift from them), the second names what survives, which
+                // no step can speak for. The first stays `verbatim:` because it is assembled from
+                // per-step fragments shared with the Kotlin twin; the second is a table key.
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(verbatim: watched.confirmationMessage())
+                    Text(LocalizedStringKey(PopopxPanicWipeManager.confirmationBoundary))
+                }
             }
     }
 

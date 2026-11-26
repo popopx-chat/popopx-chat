@@ -266,6 +266,58 @@ struct PopopxPanicWipeTests {
         #expect(opted.contains("overwrite the chat database"))
     }
 
+    /// The reason `hostDisclosedEffects` exists: the app's own recorder deletes the two plaintext media
+    /// caches on every callback, and no step in this package knows about it. A wipe that quietly removed
+    /// more than the sentence promised would be the one defect this feature cannot have.
+    @Test("A host that deletes past the steps says so, in order, in the same sentence")
+    func hostDisclosedEffectsAreNamed() {
+        let journal = PopopxMeshJournal()
+        let quiet = PopopxPanicWipeManager(
+            radio: [PopopxMeshFakeComponent(name: "engine", journal: journal)],
+            keys: PopopxMeshFakeKeyBurner(journal: journal),
+            mapping: PopopxMeshFakeMappingEraser(journal: journal),
+            inMemoryMirrors: [],
+            meshDirectory: FileManager.default.temporaryDirectory,
+            applicationDatabaseURL: nil,
+            termination: { _ in }
+        )
+        // The default says nothing extra: an empty disclosure must not invent an effect.
+        #expect(quiet.confirmationMessage().contains("media") == false)
+
+        let loud = PopopxPanicWipeManager(
+            radio: [PopopxMeshFakeComponent(name: "engine", journal: journal)],
+            keys: PopopxMeshFakeKeyBurner(journal: journal),
+            mapping: PopopxMeshFakeMappingEraser(journal: journal),
+            inMemoryMirrors: [],
+            meshDirectory: FileManager.default.temporaryDirectory,
+            applicationDatabaseURL: nil,
+            termination: { _ in },
+            hostDisclosedEffects: ["clear the app's temporary media copies"]
+        )
+        let plain = loud.confirmationMessage()
+        #expect(plain.contains("clear the app's temporary media copies"))
+        #expect(plain.contains("chat database") == false)
+        guard let effect = plain.range(of: "temporary media copies"),
+              let exit = plain.range(of: "close the app")
+        else {
+            Issue.record("the sentence lost one of the two clauses it orders: \(plain)")
+            return
+        }
+        #expect(effect.lowerBound < exit.lowerBound)
+    }
+
+    /// The survivor half of the consent text. It is a table key, so the wording is pinned here rather
+    /// than by a translated file the package cannot read.
+    @Test("The boundary sentence names what survives without overstating the wipe")
+    func boundaryCopy() {
+        let boundary = PopopxPanicWipeManager.confirmationBoundary
+        #expect(boundary.contains("Chats, contacts and received files stay"))
+        #expect(boundary.contains("self-destruct passcode"))
+        #expect(boundary.contains("all data") == false)
+        #expect(boundary.contains("everything") == false)
+        #expect(boundary.contains("chat database") == false)
+    }
+
     @Test("Three taps inside the window arm the sheet; a fourth disarms it")
     func armingGesture() throws {
         let arming = PopopxPanicWipeArming()

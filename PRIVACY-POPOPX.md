@@ -19,7 +19,7 @@ privacy contact: **chat@popopx.chat**.
 | XFTP files `xftp1/xftp6/xftp8.popopx.im:8443` | POPOPX | `Presets.hs:91-93` |
 | Notifications `ntf1..3.popopx.im:5226` | POPOPX | `src/Popopx/Chat/Library/Commands.hs:164-169` |
 | STUN `stun1.popopx.im:5349` | POPOPX | `apps/ios/Shared/Views/Call/WebRTCClient.swift:93` |
-| TURN | **does not exist** — no TURN host is shipped or configured anywhere in this repository | the ICE parser accepts `turn:`/`turns:` (`Shared/Views/Call/WebRTC.swift:465-476`) but only STUN is preset |
+| TURN `turn1.popopx.im:5349` | POPOPX | the host is a build-time constant (`apps/ios/Shared/Views/Call/WebRTCClient.swift:98`); the credentials are injected at build time from `apps/ios/Local.xcconfig`, which this repository ignores, so **no credential is shipped here** and a build without that file resolves to STUN only (`WebRTCClient.swift:113-130`) — the ICE parser has always accepted `turn:`/`turns:` (`Shared/Views/Call/WebRTC.swift:469-487`) |
 | Apple App Store, APNs, StoreKit 2 | Apple | platform services, outside this fork's control |
 | Google Play | Google | distribution only — Android has no Firebase/FCM in the message path |
 

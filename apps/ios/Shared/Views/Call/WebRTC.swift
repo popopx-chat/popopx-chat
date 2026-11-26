@@ -426,14 +426,17 @@ struct ConnectionInfo: Codable, Equatable {
     var text: LocalizedStringKey {
         let local = localCandidate?.candidateType
         let remote = remoteCandidate?.candidateType
-        if local == .host && remote == .host {
-            return "peer-to-peer"
-        } else if local == .relay && remote == .relay {
+        // One relayed side is enough for that relay to carry the call, so it is decided first. host, srflx
+        // and prflx are all direct paths — the reflexive types differ only in how the address was learned.
+        if local == .relay || remote == .relay {
             return "via relay"
-        } else {
-            let unknown = NSLocalizedString("unknown", comment: "connection info")
-            return "\(local?.rawValue ?? unknown) / \(remote?.rawValue ?? unknown)"
+        } else if local == .host && remote == .host {
+            return "peer-to-peer"
+        } else if local != nil && remote != nil {
+            return "peer-to-peer (server reflexive)"
         }
+        let unknown = NSLocalizedString("unknown", comment: "connection info")
+        return "\(local?.rawValue ?? unknown) / \(remote?.rawValue ?? unknown)"
     }
 }
 

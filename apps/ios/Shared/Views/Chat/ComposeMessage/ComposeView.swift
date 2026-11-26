@@ -401,6 +401,10 @@ struct ComposeView: View {
     /// The local media engine, observed by the composer so the processing strip
     /// appears while an attachment is being shrunk.
     @State private var popopxMediaInterceptor = PopopxOutgoingMediaInterceptor.shared
+    /// What the engine produced for each picked file, keyed by the URL the picker handed over. The
+    /// composer reads it twice: once to label the preview, and once at send time so that the bytes
+    /// leaving the device are the same ones the label describes.
+    @State private var popopxPreparedMedia: [URL: PopopxOutgoingAttachment] = [:]
     @State private var showLocationPicker = false
     /// The this-send confirmation form shown after pressing "Personal profile" in the "+" panel (mode + duration apply to this one send only).
     @State private var showProfileSendSheet = false
@@ -774,7 +778,15 @@ struct ComposeView: View {
         .onChange(of: chosenMedia) { _, selected in
             Task {
                 var media: [(String, UploadContent)] = []
+                var prepared: [URL: PopopxOutgoingAttachment] = [:]
+                let memberCount = popopxAttachmentMemberCount
                 for content in selected {
+                    // Prepared as it is picked, not when the send button is pressed: the badge under the
+                    // preview has to describe the file that will actually go out, and there is no
+                    // honest version of a caption written before the engine has run.
+                    if let url = popopxAttachmentURL(content) {
+                        prepared[url] = await popopxMediaInterceptor.prepareOne(url, groupMemberCount: memberCount)
+                    }
                     if let img = await content.imagePreview() {
                         media.append((img, content))
                         await MainActor.run {
@@ -786,6 +798,10 @@ struct ComposeView: View {
                     await MainActor.run {
                         composeState = composeState.copy(preview: .noPreview)
                     }
+                }
+                await MainActor.run {
+                    popopxDropPreparedMedia(replacing: prepared)
+                    popopxPreparedMedia = prepared
                 }
             }
         }
@@ -805,6 +821,14 @@ struct ComposeView: View {
                     if let fileSize = fileSize,
                         fileSize <= maxFileSize {
                         composeState = composeState.copy(preview: .filePreview(fileName: fileURL.lastPathComponent, file: fileURL))
+                        // Prepared at the moment of picking, in the background, so the file row can say
+                        // what was actually done to it before the send is pressed. The send reuses this
+                        // result instead of running the engine a second time.
+                        Task {
+                            let memberCount = popopxAttachmentMemberCount
+                            let prepared = await popopxMediaInterceptor.prepareOne(fileURL, groupMemberCount: memberCount)
+                            await MainActor.run { popopxPreparedMedia[fileURL] = prepared }
+                        }
                     } else {
                         showLargeFileAlert(Int64(fileSize ?? 0), incognito: sendIncognito, senderProfile: sendProfile)
                     }
@@ -2016,10 +2040,10 @@ struct ComposeView: View {
         return chatModel.groupMembers.count + 1
     }
 
-    /// Runs the local engine over the attachment branches that still carry a file
-    /// URL, before the core is asked to encrypt anything. An image that exists only
-    /// as a `UIImage` keeps its existing path, and an engine failure leaves the
-    /// attachment untouched rather than dropping the send.
+    /// Rewrites the attachment branches that carry a file URL to the local copy the engine produced,
+    /// before the core is asked to encrypt anything. An image that exists only as a `UIImage` keeps its
+    /// existing path, and an engine failure leaves the attachment untouched rather than dropping the
+    /// send. The results prepared at pick time are reused, not recomputed.
     private func popopxCompressedUploads(_ items: [(String, UploadContent?)]) async -> [(String, UploadContent?)] {
         let memberCount = popopxAttachmentMemberCount
         var prepared: [(String, UploadContent?)] = []
@@ -2031,16 +2055,97 @@ struct ComposeView: View {
             }
             switch content {
             case let .imageFile(image, url):
-                let result = await popopxMediaInterceptor.prepareOne(url, groupMemberCount: memberCount)
+                let result = await popopxPreparedAttachment(url, memberCount: memberCount)
                 prepared.append((item.0, .imageFile(image: image, url: result.url)))
             case let .video(image, url, duration):
-                let result = await popopxMediaInterceptor.prepareOne(url, groupMemberCount: memberCount)
+                let result = await popopxPreparedAttachment(url, memberCount: memberCount)
                 prepared.append((item.0, .video(image: image, url: result.url, duration: duration)))
             default:
                 prepared.append(item)
             }
         }
         return prepared
+    }
+
+    /// The file a picked item carries, for the two kinds the engine can rewrite. A `UIImage`-only
+    /// attachment has no file to hand over, and an animated GIF is excluded by the engine itself.
+    private func popopxAttachmentURL(_ content: UploadContent) -> URL? {
+        switch content {
+        case let .imageFile(_, url): url
+        case let .video(_, url, _): url
+        default: nil
+        }
+    }
+
+    /// Cache first. The engine already ran over this file when it was picked; running it again would
+    /// create a second plaintext copy and let the badge describe a different file from the one sent. A
+    /// miss — a draft restored from disk — prepares it here and records the result.
+    private func popopxPreparedAttachment(_ url: URL, memberCount: Int) async -> PopopxOutgoingAttachment {
+        if let cached = popopxPreparedMedia[url] { return cached }
+        let prepared = await popopxMediaInterceptor.prepareOne(url, groupMemberCount: memberCount)
+        await MainActor.run { popopxPreparedMedia[url] = prepared }
+        return prepared
+    }
+
+    /// The caption under the preview. Items the engine has not finished with contribute nothing, so the
+    /// row is never ahead of the truth; the processing capsule already covers that moment.
+    private func popopxMediaStatus(for content: UploadContent) -> PopopxMediaStatus? {
+        switch content {
+        case .simpleImage:
+            // No file to compress, but `mediaContent` below encodes the image through ImageIO on the
+            // way out, which discards the metadata dictionaries.
+            .reencoded
+        case .animatedImage:
+            PopopxMediaStatusResolver.resolve(kind: .animatedImage, engineRan: false, compressed: false, blocked: false)
+        case let .imageFile(_, url), let .video(_, url, _):
+            popopxPreparedMedia[url]?.popopxStatus
+        }
+    }
+
+    private func popopxMediaStatus(file url: URL) -> PopopxMediaStatus? {
+        popopxPreparedMedia[url]?.popopxStatus
+    }
+
+    /// One pill when the batch shares an outcome — four identical pills would read as decoration, not
+    /// as evidence — and one per item when it does not, in the order the thumbnails are drawn.
+    @ViewBuilder private func popopxMediaStatusRow(_ contents: [UploadContent]) -> some View {
+        let statuses = contents.compactMap { popopxMediaStatus(for: $0) }
+        if let only = statuses.first, Set(statuses).count == 1 {
+            PopopxMediaStatusBadge(status: only)
+                .padding(.horizontal, PopopxMetrics.gutter)
+                .padding(.bottom, PopopxMetrics.space2XS)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        } else if statuses.count > 1 {
+            HStack(spacing: PopopxMetrics.space2XS) {
+                ForEach(Array(statuses.enumerated()), id: \.offset) { _, status in
+                    PopopxMediaStatusBadge(status: status)
+                }
+            }
+            .padding(.horizontal, PopopxMetrics.gutter)
+            .padding(.bottom, PopopxMetrics.space2XS)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    /// A refusal, if this batch holds one. The composer treats `blocked` as a stop, never as a warning.
+    private func popopxBlockedAttachment(in contents: [UploadContent]) -> PopopxOutgoingAttachment? {
+        for content in contents {
+            guard let url = popopxAttachmentURL(content), let prepared = popopxPreparedMedia[url], prepared.blocked
+            else { continue }
+            return prepared
+        }
+        return nil
+    }
+
+    /// The engine's copies live in the temporary media directory. Anything prepared and then taken back
+    /// by the user is deleted here, because a plaintext duplicate of a file the sender rejected should
+    /// not wait for the next panic wipe or the next purge to disappear.
+    private func popopxDropPreparedMedia(replacing next: [URL: PopopxOutgoingAttachment]) {
+        guard !composeState.inProgress else { return }
+        let kept = Set(next.values.map(\.url))
+        for attachment in popopxPreparedMedia.values where attachment.compressed && !kept.contains(attachment.url) {
+            removeFile(attachment.url)
+        }
     }
 
     // Spec: spec/client/compose.md#sendLiveMessage
@@ -2126,8 +2231,11 @@ struct ComposeView: View {
                 cancelImage: {
                     composeState = composeState.copy(preview: .noPreview)
                     chosenMedia = []
+                    popopxDropPreparedMedia(replacing: [:])
+                    popopxPreparedMedia = [:]
                 },
                 cancelEnabled: !composeState.editing && !composeState.inProgress)
+            popopxMediaStatusRow(media.compactMap { $0.1 })
             Divider()
         case let .voicePreview(recordingFileName, _):
             ComposeVoiceView(
@@ -2142,13 +2250,21 @@ struct ComposeView: View {
                 stopPlayback: $stopPlayback
             )
             Divider()
-        case let .filePreview(fileName, _):
+        case let .filePreview(fileName, file):
             ComposeFileView(
                 fileName: fileName,
                 cancelFile: {
                     composeState = composeState.copy(preview: .noPreview)
+                    popopxDropPreparedMedia(replacing: [:])
+                    popopxPreparedMedia = [:]
                 },
                 cancelEnabled: !composeState.editing && !composeState.inProgress)
+            if let status = popopxMediaStatus(file: file) {
+                PopopxMediaStatusBadge(status: status)
+                    .padding(.horizontal, PopopxMetrics.gutter)
+                    .padding(.bottom, PopopxMetrics.space2XS)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
             Divider()
         }
     }
@@ -2288,6 +2404,17 @@ struct ComposeView: View {
                 // a batch does not start going out while a later item is still being
                 // shrunk. The engine hands back the source URL when it cannot help.
                 let uploads = await popopxCompressedUploads(media)
+                if popopxBlockedAttachment(in: media.compactMap { $0.1 }) != nil {
+                    // The large-group ceiling refuses part of the batch, so the whole message stops: a
+                    // half-sent album is the one outcome the composer must not produce, and the text and
+                    // the picked media stay in place, exactly as they do for a refused file.
+                    await MainActor.run {
+                        composeState.inProgress = false
+                        showAlert(NSLocalizedString("Large file!", comment: "file alert title"),
+                                  message: PopopxOutgoingMediaInterceptor.shared.blockedMessage)
+                    }
+                    return nil
+                }
                 let last = uploads.count - 1
                 var msgs: [ComposedMessage] = []
                 if last >= 0 {
@@ -2314,7 +2441,7 @@ struct ComposeView: View {
                 let file = voiceCryptoFile(recordingFileName)
                 sent = await send(.voice(text: msgText, duration: duration), quoted: quoted, file: file, ttl: ttl, mentions: mentions, sign: sign)
             case let .filePreview(_, file):
-                let prepared = await popopxMediaInterceptor.prepareOne(file, groupMemberCount: popopxAttachmentMemberCount)
+                let prepared = await popopxPreparedAttachment(file, memberCount: popopxAttachmentMemberCount)
                 if prepared.blocked {
                     // Nothing is sent, so the composer must not be cleared: only the
                     // in-progress flag set by `sending()` is released, which leaves the
@@ -2328,6 +2455,10 @@ struct ComposeView: View {
                 }
                 if let savedFile = saveFileFromURL(prepared.url) {
                     sent = await send(.file(msgText), quoted: quoted, file: savedFile, live: live, ttl: ttl, mentions: mentions, sign: sign)
+                    // `saveFileFromURL` copies into the app's own file store, so the engine's plaintext
+                    // intermediate has no reason to outlive this call. A refused or untouched file keeps
+                    // its URL — that one is the user's, and the existing cleanup owns it.
+                    if prepared.compressed { removeFile(prepared.url) }
                 }
             }
         }
@@ -2639,6 +2770,7 @@ struct ComposeView: View {
             resetLinkPreview()
         }
         chosenMedia = []
+        popopxPreparedMedia = [:]
         audioRecorder = nil
         voiceMessageRecordingTime = nil
         startingRecording = false

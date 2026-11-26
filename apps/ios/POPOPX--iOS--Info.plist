@@ -110,5 +110,15 @@
 	</array>
 	<key>UIDesignRequiresCompatibility</key>
 	<true/>
+	<!-- WebRTC relay credentials, injected at build time. The values come from POPOPX_TURN_USERNAME and
+	     POPOPX_TURN_CREDENTIAL in apps/ios/Local.xcconfig — a git-ignored file, included by Debug.xcconfig
+	     and Release.xcconfig — so this repository carries the references and no secret. Without that file
+	     the two values stay the literal "$(…)" text, and injectedTurnIceServers() in
+	     Shared/Views/Call/WebRTCClient.swift refuses to build a credential-less TURN entry: the call then
+	     has STUN only. Disclosed in PRIVACY.md (§ Calls). -->
+	<key>POPOPX_TURN_USERNAME</key>
+	<string>$(POPOPX_TURN_USERNAME)</string>
+	<key>POPOPX_TURN_CREDENTIAL</key>
+	<string>$(POPOPX_TURN_CREDENTIAL)</string>
 </dict>
 </plist>

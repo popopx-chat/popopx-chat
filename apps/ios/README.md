@@ -106,6 +106,23 @@ When source images change, regenerate resized images (requires ImageMagick):
 cd path/to/assets && ./resize.sh
 ```
 
+## ICE Credentials (optional)
+
+The relay host and port are compiled in (`Shared/Views/Call/WebRTCClient.swift:98-99`); the credentials are not in
+this repository. `POPOPX--iOS--Info.plist` reads two build variables, so a machine that holds them adds them to the
+same gitignored `Local.xcconfig`:
+
+```
+POPOPX_TURN_USERNAME = <username>
+POPOPX_TURN_CREDENTIAL = <credential>
+```
+
+Without those two lines the build expands both `Info.plist` entries to empty strings — measured on a clean build —
+and the resolver treats a missing, empty or still-unexpanded `$(…` value as absent
+(`Shared/Views/Call/WebRTCClient.swift:113-137`), so the app falls back to the STUN-only list.
+That is the state of every clone, and of CI. A server entered in the app's own call settings outranks the injected
+relay. These are static, build-wide secrets: whoever ships a build owns rotating them with the relay operator.
+
 ## Background Capabilities
 
 Configured in Info.plist:

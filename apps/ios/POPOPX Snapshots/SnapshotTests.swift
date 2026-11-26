@@ -2048,10 +2048,11 @@ final class PopopxServerConfigTests: XCTestCase {
     func testTheIceListIsKeptWholeAndNotDialed() throws {
         // Ruling B, recorded rather than smoothed over: an entry parses completely and is kept on the payload,
         // and deliberately no call path reads it in this round. The hardcoded relay it would replace is
-        // `WebRTCClient.swift:92-96`, whose long-lived credential sits in the repository in plaintext, and the
-        // value chain at `WebRTCClient.swift:100` is `iceServers ?? getWebRTCIceServers() ?? defaultIceServers`
-        // — so a list that only partly parsed would not fail there, it would fall back. That is why every leg
-        // above refuses instead of defaulting.
+        // `WebRTCClient.swift:92-94`, which presets STUN only, and the value chain at
+        // `WebRTCClient.swift:144`: `iceServers ?? getWebRTCIceServers() ?? injectedTurnIceServers() ??
+        // defaultIceServers`. The injected relay is built only from credentials that arrive through the
+        // git-ignored `Local.xcconfig`, never from this repository, so a missing one falls back to STUN.
+        // That is why every leg above refuses instead of defaulting.
         let entry = try XCTUnwrap(frame(iceBody(iceEntry(("t", "\"turns\""), ("p", "443"), ("tr", "\"tcp\"")))).payload.iceServers.first)
         XCTAssertEqual(entry.credential, Cfg.credential, "the credential is carried intact or the entry is refused")
         XCTAssertEqual(entry.username, "\(Cfg.iat):abcd")

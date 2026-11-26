@@ -13,6 +13,7 @@
 // original file is returned so the user's message still goes out.
 
 import Foundation
+import PopopxMeshKit
 import SwiftUI
 import UIKit
 
@@ -25,13 +26,19 @@ struct PopopxOutgoingAttachment: Sendable, Equatable {
     let originalBytes: Int64
     let finalBytes: Int64
     let compressed: Bool
+    /// Kept with a URL even when refused, so the caller can report on it; a blocked attachment must
+    /// never be handed to the core.
     let blocked: Bool
+    /// Whether the engine was consulted at all. `kind` cannot carry this meaning: with the engine off
+    /// the pipeline reports `.passthrough`, which is the same value `identify` gives an unrecognised
+    /// file, and those two deserve different labels — one is a switched-off feature, the other a
+    /// document that was never going to be re-encoded.
+    let engineRan: Bool
 
     var savedBytes: Int64 { compressed ? max(0, originalBytes - finalBytes) : 0 }
 
-    /// A blocked attachment keeps its URL so the caller can still report on it,
-    /// but the caller must not hand it to the core.
-    static func passthrough(_ url: URL, kind: PopopxAttachmentKind, bytes: Int64, blocked: Bool) -> PopopxOutgoingAttachment {
+    /// A file the pipeline did not touch: either the engine is off, or nothing was produced.
+    static func passthrough(_ url: URL, kind: PopopxAttachmentKind, bytes: Int64, blocked: Bool, engineRan: Bool) -> PopopxOutgoingAttachment {
         PopopxOutgoingAttachment(
             url: url,
             displayName: url.lastPathComponent,
@@ -39,7 +46,8 @@ struct PopopxOutgoingAttachment: Sendable, Equatable {
             originalBytes: bytes,
             finalBytes: bytes,
             compressed: false,
-            blocked: blocked
+            blocked: blocked,
+            engineRan: engineRan
         )
     }
 }
@@ -53,7 +61,81 @@ struct PopopxOutgoingBatch: Sendable {
     var isEmpty: Bool { attachments.isEmpty }
 }
 
+// MARK: - What may be claimed about an attachment
+
+extension PopopxOutgoingAttachment {
+    /// The label the compose preview is allowed to show. The rule that chooses it lives in
+    /// `PopopxMeshKit`'s `PopopxMediaStatusResolver`, which is the part of this pipeline that a unit
+    /// test can reach; this hands it the four facts the engine already reports.
+    var popopxStatus: PopopxMediaStatus {
+        PopopxMediaStatusResolver.resolve(
+            kind: popopxResolverKind,
+            engineRan: engineRan,
+            compressed: compressed,
+            blocked: blocked
+        )
+    }
+
+    private var popopxResolverKind: PopopxMediaStatusResolver.Kind {
+        switch kind {
+        case .image: .image
+        case .animatedImage: .animatedImage
+        case .video: .video
+        case .pdf: .pdf
+        case .document: .document
+        case .passthrough: .unknown
+        }
+    }
+}
+
+/// The outcome pill under a compose preview. Same visual weight as the incoming file's unpacked badge,
+/// and the same rule: it names what the pipeline actually did, never what the settings imply.
+struct PopopxMediaStatusBadge: View {
+    let status: PopopxMediaStatus
+
+    var body: some View {
+        HStack(spacing: PopopxMetrics.space2XS) {
+            Image(systemName: symbol)
+                .font(.system(size: 8, weight: .semibold))
+            Text(PopopxMediaEngineCopy.key(status.labelKey))
+                .font(.system(size: 9, weight: .medium))
+        }
+        .foregroundStyle(ink)
+        .padding(.horizontal, PopopxMetrics.spaceXS)
+        .padding(.vertical, 2)
+        .background(fill.opacity(0.12), in: Capsule())
+        .accessibilityIdentifier("popopx.media.statusBadge")
+    }
+
+    private var symbol: String {
+        switch status {
+        case .metadataRemoved: "location.slash"
+        case .reencoded: "arrow.2.squarepath"
+        case .compressed: "shippingbox"
+        case .sentUnchanged: "doc"
+        case .blocked: "exclamationmark.triangle"
+        }
+    }
+
+    private var ink: Color {
+        switch status {
+        case .blocked: PopopxPalette.dangerInk
+        case .sentUnchanged: PopopxPalette.labelSecondary
+        default: PopopxPalette.meshInk
+        }
+    }
+
+    private var fill: Color {
+        switch status {
+        case .blocked: PopopxPalette.danger
+        case .sentUnchanged: Color.secondary
+        default: PopopxPalette.mesh
+        }
+    }
+}
+
 // MARK: - Interceptor
+
 
 @MainActor
 @Observable
@@ -93,7 +175,10 @@ final class PopopxOutgoingMediaInterceptor {
         let settings = PopopxMediaCompressionSettings.shared
         let bytes = PopopxMediaEngineCore.fileSize(of: url)
         guard settings.isEngineEnabled else {
-            return .passthrough(url, kind: .passthrough, bytes: bytes, blocked: false)
+            // Classified even though nothing is processed, because the compose badge still has to be
+            // true: a still image goes through the app's own image encode at upload time whether or not
+            // this engine is on, and a video or a document does not.
+            return .passthrough(url, kind: await PopopxMediaEngineCore.identify(url), bytes: bytes, blocked: false, engineRan: false)
         }
         let result = await PopopxMediaEngine.shared.process(url: url, preset: settings.imageQualityPreset)
         let blocked = settings.appliesToGroup(memberCount: groupMemberCount)
@@ -113,7 +198,8 @@ final class PopopxOutgoingMediaInterceptor {
             originalBytes: result.originalBytes,
             finalBytes: result.finalBytes,
             compressed: result.compressed,
-            blocked: blocked
+            blocked: blocked,
+            engineRan: true
         )
     }
 

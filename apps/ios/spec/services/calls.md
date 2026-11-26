@@ -111,22 +111,22 @@ Manages the WebRTC peer connection, media streams, and data channels.
 
 | Operation | Description | Line |
 |-----------|-------------|------|
-| [`initializeCall`](../../Shared/Views/Call/WebRTCClient.swift#L99) | Sets up peer connection, tracks, encryption | L93 |
-| [`createPeerConnection`](../../Shared/Views/Call/WebRTCClient.swift#L145) | Creates and configures RTCPeerConnection | L139 |
-| [`sendCallCommand`](../../Shared/Views/Call/WebRTCClient.swift#L182) | Dispatches WCallCommand (offer/answer/ICE) | L176 |
-| [`addIceCandidates`](../../Shared/Views/Call/WebRTCClient.swift#L171) | `peerConnection.add(RTCIceCandidate)` | L165 |
-| [`getInitialIceCandidates`](../../Shared/Views/Call/WebRTCClient.swift#L295) | Collects initial ICE candidates | L285 |
-| [`sendIceCandidates`](../../Shared/Views/Call/WebRTCClient.swift#L410) | Sends gathered ICE candidates | L409 |
-| [`startReconnecting`](../../Shared/Views/Call/WebRTCClient.swift#L314) | Reports "reconnecting", starts reconnection timeout and, for the party that sent the initial offer, periodic ICE restarts | L313 |
-| [`restartIce`](../../Shared/Views/Call/WebRTCClient.swift#L340) | Creates ICE restart offer and sends it with candidates in `.ice(iceCandidates:session:)` | L339 |
-| [`receiveRestartSession`](../../Shared/Views/Call/WebRTCClient.swift#L351) | Applies ICE restart offer (and sends the answer) or answer received in `.ice` command | L350 |
-| [`enableMedia`](../../Shared/Views/Call/WebRTCClient.swift#L470) | Enable/disable audio or video track | L365 |
-| [`setupLocalTracks`](../../Shared/Views/Call/WebRTCClient.swift#L528) | Creates audio/video tracks and adds to connection | L423 |
-| [`startCaptureLocalVideo`](../../Shared/Views/Call/WebRTCClient.swift#L708) | Front/back camera toggle and capture start | L581 |
-| [`endCall`](../../Shared/Views/Call/WebRTCClient.swift#L772) | Tears down connection and tracks | L645 |
-| [`setupEncryptionForLocalTracks`](../../Shared/Views/Call/WebRTCClient.swift#L623) | Sets up frame encryption for local media tracks | L503 |
+| [`initializeCall`](../../Shared/Views/Call/WebRTCClient.swift#L140) | Sets up peer connection, tracks, encryption | L93 |
+| [`createPeerConnection`](../../Shared/Views/Call/WebRTCClient.swift#L189) | Creates and configures RTCPeerConnection | L139 |
+| [`sendCallCommand`](../../Shared/Views/Call/WebRTCClient.swift#L226) | Dispatches WCallCommand (offer/answer/ICE) | L176 |
+| [`addIceCandidates`](../../Shared/Views/Call/WebRTCClient.swift#L215) | `peerConnection.add(RTCIceCandidate)` | L165 |
+| [`getInitialIceCandidates`](../../Shared/Views/Call/WebRTCClient.swift#L339) | Collects initial ICE candidates | L285 |
+| [`sendIceCandidates`](../../Shared/Views/Call/WebRTCClient.swift#L454) | Sends gathered ICE candidates | L409 |
+| [`startReconnecting`](../../Shared/Views/Call/WebRTCClient.swift#L358) | Reports "reconnecting", starts reconnection timeout and, for the party that sent the initial offer, periodic ICE restarts | L313 |
+| [`restartIce`](../../Shared/Views/Call/WebRTCClient.swift#L384) | Creates ICE restart offer and sends it with candidates in `.ice(iceCandidates:session:)` | L339 |
+| [`receiveRestartSession`](../../Shared/Views/Call/WebRTCClient.swift#L395) | Applies ICE restart offer (and sends the answer) or answer received in `.ice` command | L350 |
+| [`enableMedia`](../../Shared/Views/Call/WebRTCClient.swift#L514) | Enable/disable audio or video track | L365 |
+| [`setupLocalTracks`](../../Shared/Views/Call/WebRTCClient.swift#L572) | Creates audio/video tracks and adds to connection | L423 |
+| [`startCaptureLocalVideo`](../../Shared/Views/Call/WebRTCClient.swift#L752) | Front/back camera toggle and capture start | L581 |
+| [`endCall`](../../Shared/Views/Call/WebRTCClient.swift#L816) | Tears down connection and tracks | L645 |
+| [`setupEncryptionForLocalTracks`](../../Shared/Views/Call/WebRTCClient.swift#L667) | Sets up frame encryption for local media tracks | L503 |
 
-### [Additional Encryption](../../Shared/Views/Call/WebRTCClient.swift#L513-L546)
+### [Additional Encryption](../../Shared/Views/Call/WebRTCClient.swift#L691-L717)
 
 Beyond WebRTC's built-in SRTP encryption, SimpleX adds an extra encryption layer:
 - A shared key from the E2E SMP channel is used
@@ -262,9 +262,9 @@ static func useCallKit() -> Bool { !isInChina && callKitEnabledGroupDefault.get(
 
 ---
 
-## [7. Audio Routing](../../Shared/Views/Call/WebRTCClient.swift#L907-L1005)
+## [7. Audio Routing](../../Shared/Views/Call/WebRTCClient.swift#L1081-L1203)
 
-### [AVAudioSession Management](../../Shared/Views/Call/WebRTCClient.swift#L907-L950)
+### [AVAudioSession Management](../../Shared/Views/Call/WebRTCClient.swift#L1081-L1135)
 
 Audio routing is managed through `AVAudioSession`:
 - **Receiver**: Default for audio-only calls (ear speaker)
@@ -344,7 +344,7 @@ Stored in `ChatModel.activeCall`:
 
 ---
 
-## [9. ActiveCallView](../../Shared/Views/Call/ActiveCallView.swift#L16-L285)
+## [9. ActiveCallView](../../Shared/Views/Call/ActiveCallView.swift#L17-L335)
 
 **File**: `Shared/Views/Call/ActiveCallView.swift`
 
@@ -357,18 +357,18 @@ Full-screen call UI when `ChatModel.showCallView == true`:
 - Control buttons: mute, camera toggle, speaker toggle, camera flip, end call
 - Minimize button (collapses to banner)
 
-### [ActiveCallOverlay](../../Shared/Views/Call/ActiveCallView.swift#L303-L537)
+### [ActiveCallOverlay](../../Shared/Views/Call/ActiveCallView.swift#L338-L567)
 
 | Control | Method | Line |
 |---------|--------|------|
-| Audio call info | [`audioCallInfoView`](../../Shared/Views/Call/ActiveCallView.swift#L372) | L357 |
-| Video call info | [`videoCallInfoView`](../../Shared/Views/Call/ActiveCallView.swift#L392) | L377 |
-| End call | [`endCallButton`](../../Shared/Views/Call/ActiveCallView.swift#L422) | L407 |
-| Mute toggle | [`toggleMicButton`](../../Shared/Views/Call/ActiveCallView.swift#L433) | L418 |
-| Audio device | [`audioDeviceButton`](../../Shared/Views/Call/ActiveCallView.swift#L443) | L428 |
-| Speaker toggle | [`toggleSpeakerButton`](../../Shared/Views/Call/ActiveCallView.swift#L467) | L452 |
-| Camera toggle | [`toggleCameraButton`](../../Shared/Views/Call/ActiveCallView.swift#L479) | L464 |
-| Flip camera | [`flipCameraButton`](../../Shared/Views/Call/ActiveCallView.swift#L490) | L475 |
+| Audio call info | [`audioCallInfoView`](../../Shared/Views/Call/ActiveCallView.swift#L407) | L357 |
+| Video call info | [`videoCallInfoView`](../../Shared/Views/Call/ActiveCallView.swift#L427) | L377 |
+| End call | [`endCallButton`](../../Shared/Views/Call/ActiveCallView.swift#L457) | L407 |
+| Mute toggle | [`toggleMicButton`](../../Shared/Views/Call/ActiveCallView.swift#L468) | L418 |
+| Audio device | [`audioDeviceButton`](../../Shared/Views/Call/ActiveCallView.swift#L478) | L428 |
+| Speaker toggle | [`toggleSpeakerButton`](../../Shared/Views/Call/ActiveCallView.swift#L502) | L452 |
+| Camera toggle | [`toggleCameraButton`](../../Shared/Views/Call/ActiveCallView.swift#L514) | L464 |
+| Flip camera | [`flipCameraButton`](../../Shared/Views/Call/ActiveCallView.swift#L525) | L475 |
 
 ### PiP (Picture-in-Picture)
 

@@ -3813,7 +3813,11 @@ final class PopopxMeshRuntime: ObservableObject {
             meshDirectory: PopopxMeshPaths.meshDirectory(),
             applicationDatabaseURL: nil,
             termination: PopopxPanicWipeManager.processExit,
-            recorder: PopopxMediaWipeRecorder()
+            // The recorder is not only an observer: it purges the two plaintext media caches
+            // (`<tmp>/popopx/popopx_media` and `…/popopx_unpacked`) on every callback, so the confirm
+            // sentence has to say so. `PopopxMediaWipeRecorder.panicWipeDidStart` is where that runs.
+            recorder: PopopxMediaWipeRecorder(),
+            hostDisclosedEffects: ["clear the app's temporary media copies"]
         )
 
         self.core = core

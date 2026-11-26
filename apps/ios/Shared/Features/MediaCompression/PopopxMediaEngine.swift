@@ -54,7 +54,15 @@ enum PopopxMediaEngineCopy {
         NSLocalizedString(value, comment: "POPOPX local compression")
     }
 
-    static func processingStatus() -> String { key("Compressing & stripping metadata locally...") }
+    // The compose preview's per-attachment labels are deliberately absent from this list: they are
+    // produced by `PopopxMediaStatus.labelKey` in the SwiftPM package, so the sentence and the rule
+    // that picks it are covered by the same test. The app resolves them through `key(_:)`.
+
+    // Not "compressing & stripping metadata": the engine skips animated GIF, voice notes and anything
+    // picked through the Files app, so that sentence was a false claim for three real paths. The capsule
+    // below only says work is in progress; the truth about *what* was done to a given attachment is the
+    // per-item badge, whose string is derived from the engine's own result.
+    static func processingStatus() -> String { key("Preparing attachments locally…") }
     static func unpackedBadge() -> String { key("Unpacked locally") }
     static func oversizedBlocked() -> String {
         key("This file is still too large after compression. Use an encrypted link instead.")
@@ -62,7 +70,7 @@ enum PopopxMediaEngineCopy {
     static func unpackFailed() -> String { key("The attachment could not be unpacked on this device.") }
     static func settingsTitle() -> String { key("Local media compression") }
     static func settingsFootnote() -> String {
-        key("Attachments are shrunk and stripped of camera and location metadata on this device before they are encrypted. Nothing is uploaded for processing.")
+        key("Images, video and PDFs are re-encoded on this device before they are encrypted, which discards camera and location metadata. Other attachments, including animated GIFs and anything picked in the Files app, are sent as they are — each attachment in the compose preview says which case it is. Nothing is uploaded for processing.")
     }
     static func strictGroupToggle() -> String { key("Large-group data saver") }
     static func strictGroupNote() -> String {
@@ -141,8 +149,9 @@ struct PopopxCompressedAttachment: Sendable, Equatable {
 
     var savedBytes: Int64 { compressed ? max(0, originalBytes - finalBytes) : 0 }
 
-    /// A file the fuse rejected, or one that is not compressible, keeps its
-    /// original URL so the caller hands it over untouched.
+    /// What the pipeline hands back when it produced nothing: a file the document container refused to
+    /// shrink, one the engine could not decode or write, or a kind it deliberately skips (animated GIF,
+    /// anything unrecognised). `url` is the original, so the caller attaches it untouched.
     static func unchanged(_ url: URL, kind: PopopxAttachmentKind, bytes: Int64) -> PopopxCompressedAttachment {
         PopopxCompressedAttachment(url: url, kind: kind, originalBytes: bytes, finalBytes: bytes, compressed: false)
     }
@@ -294,7 +303,13 @@ enum PopopxMediaEngineCore {
             return .unchanged(source, kind: kind, bytes: bytes)
         }
         let finalBytes = fileSize(of: output)
-        guard finalBytes > 0, finalBytes < bytes else {
+        // An empty product is the only failure that may fall back to the original. The size fuse that
+        // used to sit here decided privacy by byte count: a small photo re-encoded without EXIF can come
+        // out larger than the JPEG it replaced, and the old guard then threw the clean file away and
+        // sent the original — with its GPS and camera metadata intact. `savedBytes` already clamps a
+        // growth to zero, and `.document` keeps its own reduction fuse inside `documentResult`, because
+        // there the whole point of the container is that it shrinks.
+        guard finalBytes > 0 else {
             try? FileManager.default.removeItem(at: output)
             return .unchanged(source, kind: kind, bytes: bytes)
         }
