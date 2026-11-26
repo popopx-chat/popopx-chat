@@ -28,12 +28,24 @@ on:
       - ".github/workflows/build.yml"
       - ".github/actions/**"
     types: [opened, synchronize, reopened, ready_for_review]
+  # The legs a master push deliberately skips (build-macos, build-windows, build-linux-full,
+  # build-linux-push, build-linux-ghc8) were only ever reachable on a tag push - which is the one
+  # moment none of them may fail for the first time. This is the sweep that finds the breakage while
+  # it is still cheap. Weekly rather than nightly: the macOS pool they queue on is the same pool that
+  # capacity-cancelled build-ios six runs in a row, and a nightly macOS pair competes with every push
+  # for it.
+  schedule:
+    - cron: '45 4 * * 1'
   workflow_dispatch:
     inputs:
       tests:
-        description: "hspec match patterns, one per line; / runs all tests, empty runs none"
+        description: "hspec match patterns, one per line; empty runs the whole suite"
         type: string
         default: ""
+      run_all:
+        description: "also run the legs a push skips: macOS, Windows, full/push/ghc8 matrices"
+        type: boolean
+        default: false
       base:
         description: the branch that the changes are compared with
         type: string
@@ -102,6 +114,11 @@ jobs:
       haskell: ${{ steps.changes.outputs.haskell }}
       kotlin: ${{ steps.changes.outputs.kotlin }}
       ios: ${{ steps.changes.outputs.ios }}
+      # `full` is the one switch that opens the legs `reduced` keeps shut. It is deliberately not
+      # derived from `reduced`: that expression is read in ten places, including the Kotlin-only leg
+      # selection (build-linux `if:` and `matrix.kotlin`) and the "Free disk space" step, so widening
+      # it would re-shuffle jobs that have nothing to do with a full sweep.
+      full: ${{ steps.changes.outputs.full }}
       reduced: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == true || (github.event_name == 'push' && github.ref_type == 'branch' && github.repository != 'simplex-chat/simplex-chat') }}
     steps:
       - name: Reject a manual run on a tag
@@ -120,8 +137,20 @@ jobs:
         shell: bash
         env:
           BASE_BRANCH: ${{ inputs.base }}
+          RUN_ALL: ${{ inputs.run_all }}
           GH_TOKEN: ${{ github.token }}
         run: |
+          # `full` is the switch that says "run the legs a normal push skips". A scheduled sweep always
+          # means that. A manual run means it only with the run_all switch, and run_all also has to
+          # force the change flags: a dispatch on master compares HEAD against its own merge base, so
+          # every flag comes out false and the sweep would report every leg skipped while building
+          # nothing - the same green-that-ran-nothing W1 removed from the test step.
+          full=false
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
+            full=true
+          elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ "$RUN_ALL" = "true" ]; then
+            full=true
+          fi
           case "$GITHUB_EVENT_NAME" in
             pull_request)
               base="HEAD^1"
@@ -131,15 +160,18 @@ jobs:
               git fetch -q --depth=1 origin "$base"
               ;;
             *)
-              { echo "haskell=true"; echo "kotlin=true"; echo "ios=true"; } >> "$GITHUB_OUTPUT"
+              { echo "haskell=true"; echo "kotlin=true"; echo "ios=true"; echo "full=$full"; } >> "$GITHUB_OUTPUT"
               exit 0
               ;;
           esac
           has_changes() { ! git diff --quiet "$base" HEAD -- "$@" >/dev/null 2>&1; }
           hs=false; has_changes src apps/popopx-chat tests bots/src popopx-chat.cabal cabal.project Dockerfile* scripts .github && hs=true
           kt=false; has_changes apps/multiplatform Dockerfile* .github && kt=true
-          io=false; has_changes apps/ios scripts/ci/ios-stub-libs.sh scripts/ci/ios-stub-mlpackage.sh && io=true
-          { echo "haskell=$hs"; echo "kotlin=$kt"; echo "ios=$io"; } >> "$GITHUB_OUTPUT"
+          # PopopxTorKit is listed here because the job that tests it is this one; without the path, a
+          # Tor-only change would set none of the three flags and its 85 tests would never run.
+          io=false; has_changes apps/ios apps/macos/PopopxTorKit scripts/ci/ios-stub-libs.sh scripts/ci/ios-stub-mlpackage.sh && io=true
+          if [ "$full" = "true" ]; then hs=true; kt=true; io=true; fi
+          { echo "haskell=$hs"; echo "kotlin=$kt"; echo "ios=$io"; echo "full=$full"; } >> "$GITHUB_OUTPUT"
 
       - name: Create release
         if: startsWith(github.ref, 'refs/tags/v')
@@ -534,7 +566,6 @@ jobs:
         timeout-minutes: 120
         shell: bash
         env:
-          REDUCED: ${{ needs.maybe-release.outputs.reduced }}
           TESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.tests || '' }}
           PR_BODY: ${{ github.event.pull_request.draft == true && github.event.pull_request.body || '' }}
           ATTEMPTS: ${{ (github.ref == 'refs/heads/stable' || startsWith(github.ref, 'refs/tags/v')) && 3 || 1 }}
@@ -603,7 +634,7 @@ jobs:
     name: "build-linux-full: ubuntu-${{ matrix.os }}-${{ matrix.arch }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
     timeout-minutes: 300
     needs: [maybe-release, variables]
-    if: needs.maybe-release.outputs.reduced != 'true' && (needs.maybe-release.outputs.haskell == 'true' || needs.maybe-release.outputs.kotlin == 'true')
+    if: (needs.maybe-release.outputs.reduced != 'true' || needs.maybe-release.outputs.full == 'true') && (needs.maybe-release.outputs.haskell == 'true' || needs.maybe-release.outputs.kotlin == 'true')
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: write
@@ -630,7 +661,10 @@ jobs:
     name: "build-linux-push: ubuntu-${{ matrix.os }}-${{ matrix.arch }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
     timeout-minutes: 300
     needs: [maybe-release, variables]
-    if: needs.maybe-release.outputs.reduced != 'true' && github.event_name == 'push'
+    # The aarch64 lane. Its ordinary gate stays "a real push", because that is the only moment the
+    # registry cache is worth writing; a manual run_all or the weekly sweep may still run it, and neither
+    # writes anything - the docker step's cache-to is non-empty only on a push to master.
+    if: (needs.maybe-release.outputs.reduced != 'true' && github.event_name == 'push') || needs.maybe-release.outputs.full == 'true'
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: write
@@ -666,7 +700,7 @@ jobs:
     name: "build-linux-ghc8: ubuntu-${{ matrix.os }}-${{ matrix.arch }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
     timeout-minutes: 300
     needs: [maybe-release, variables]
-    if: ${{ needs.maybe-release.outputs.reduced != 'true' && needs.maybe-release.outputs.haskell == 'true' && !(github.ref == 'refs/heads/stable' || startsWith(github.ref, 'refs/tags/v')) }}
+    if: ${{ (needs.maybe-release.outputs.reduced != 'true' || needs.maybe-release.outputs.full == 'true') && needs.maybe-release.outputs.haskell == 'true' && !(github.ref == 'refs/heads/stable' || startsWith(github.ref, 'refs/tags/v')) }}
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: write
@@ -700,7 +734,10 @@ jobs:
     name: "build-macos: ${{ matrix.os }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
     timeout-minutes: 300
     needs: [maybe-release, variables, check-smp-links, check-brand-clean]
-    if: needs.maybe-release.outputs.reduced != 'true' && needs.maybe-release.outputs.haskell == 'true'
+    # Nothing in this leg ever ran on this fork: it needs reduced=false, which only a tag push gives.
+    # run_all and the weekly sweep open it, and every publishing step inside stays tag-gated, so a
+    # non-release run builds and tests without touching a release.
+    if: (needs.maybe-release.outputs.reduced != 'true' || needs.maybe-release.outputs.full == 'true') && needs.maybe-release.outputs.haskell == 'true'
     # Upload CLI and Upload Desktop attach to the app release through prepare-release, which is
     # given the job token; the default read-only token cannot write a release.
     permissions:
@@ -1054,6 +1091,25 @@ jobs:
           [ "$total" -ge 300 ] || { echo "only $total mesh tests ran, expected 335"; exit 1; }
           echo "mesh package tests: $total executed, all passing"
 
+      # apps/macos/PopopxTorKit - the macOS client's embedded Tor engine - had never been tested in CI
+      # either, and this is the only macOS job that runs on a branch push. It is deliberately not a
+      # build-macos step: that leg waits for a tag, and 85 unit tests should not.
+      #
+      # XCTest, not Swift Testing: `@Test` appears nowhere in this package, so the mesh step's
+      # "Test run with N tests" parse would read zero. XCTest prints an "Executed N tests" line per class
+      # and the 'All tests' total, so the maximum is the total - and a run that selected nothing prints
+      # "Executed 0 tests" and still exits 0, which is exactly the vacuous pass this guard exists for.
+      - name: Run the Tor routing kit tests
+        timeout-minutes: 20
+        shell: bash
+        run: |
+          out=$(swift test --package-path apps/macos/PopopxTorKit 2>&1) || { echo "$out"; exit 1; }
+          echo "$out"
+          total=$(echo "$out" | sed -n 's/.*Executed \([0-9]*\) tests, with.*/\1/p' | sort -n | tail -n 1)
+          total=${total:-0}
+          [ "$total" -ge 80 ] || { echo "only $total TorKit tests ran, expected 85"; exit 1; }
+          echo "PopopxTorKit tests: $total executed, all passing"
+
       - name: Build iOS app
         timeout-minutes: 60
         shell: bash
@@ -1083,7 +1139,10 @@ jobs:
     name: "build-windows: ${{ matrix.os }} (CLI,Desktop), GHC: ${{ matrix.ghc }}"
     timeout-minutes: 300
     needs: [maybe-release, variables, check-smp-links, check-brand-clean]
-    if: needs.maybe-release.outputs.reduced != 'true' && needs.maybe-release.outputs.haskell == 'true'
+    # Same shape as build-macos: opened by run_all or the weekly sweep, and the msi/upload steps stay
+    # tag-gated. Unlike build-macos this leg has no "Run tests" step at all, so a green run here proves
+    # the CLI compiles and links - not that the suite passes on Windows.
+    if: (needs.maybe-release.outputs.reduced != 'true' || needs.maybe-release.outputs.full == 'true') && needs.maybe-release.outputs.haskell == 'true'
     # Upload CLI and Upload Desktop attach to the app release through prepare-release, which is
     # given the job token; the default read-only token cannot write a release.
     permissions:
@@ -1323,6 +1382,10 @@ jobs:
 # reads the release body, edits it and writes it back - with 16 jobs in parallel it lost 2 of the
 # 16 lines on v7.1.2-popopx.1. GitHub records a digest for every uploaded asset, so the hashes
 # need no download and no lock. !cancelled() so a partial release still lists what it does have.
+#
+# This is the one job the run_all switch deliberately does NOT open: it looks the release up by
+# GITHUB_REF_NAME, so off a tag the first call 404s and the job can only ever be red. Its reach is
+# therefore the tag itself - re-running the tag push's jobs is how a release note gets repaired.
 
   release-hashes:
     name: "Add asset hashes to release notes"

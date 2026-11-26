@@ -15,8 +15,8 @@ while read -r p; do
   if [ -n "$p" ]; then args+=(-m "$p"); fi
 done <<< "${TESTS:-}"
 # hspec's `--fail-on=empty` fails the run when every spec item was filtered out, which is the whole
-# point of a selector: without it, a `-m` pattern that matches nothing exits 0. On this fork
-# `REDUCED` (build.yml:103) is true for every branch push, and the short-circuit this replaces
+# point of a selector: without it, a `-m` pattern that matches nothing exits 0. On this fork the
+# `reduced` output of maybe-release is true for every branch push, and the short-circuit this replaces
 # printed "No tests selected" and exited 0 — so master was green while hspec ran zero examples.
 args+=(--fail-on=empty)
 
