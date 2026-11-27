@@ -651,6 +651,21 @@ final class PopopxSilentSignalingRouter {
         return delivered
     }
 
+    /// Sends one **verbatim** node signal — a receipt the node minted itself and handed to us in a
+    /// card (`approve=` / `snooze=`).
+    ///
+    /// Deliberately not `sendNodeCommand`: that path rebuilds `::popopx_sys::NODE_CMD::<service>::
+    /// <action>::<json>` out of structured fields, and this payload's exact bytes are the value the
+    /// node HMACed. Re-encoding it here would let a key order or an escaping difference turn a valid
+    /// receipt into a rejection the user cannot explain. What this adds over a bare `send` is only
+    /// what every other control signal already gets: the same SMP path, the same suppression, and a
+    /// Bool that means "SMP took it" and nothing more.
+    func sendNodeText(_ text: String, toContactId contactId: Int64) async -> Bool {
+        let delivered = await send(text: text, to: .contact(contactId))
+        if !delivered { log.info("signaling: verbatim node signal not delivered") }
+        return delivered
+    }
+
     // MARK: Send / receive primitives
 
     /// One SMP text message. The call shape follows `ProfileAutoSender.sendViaSMP`

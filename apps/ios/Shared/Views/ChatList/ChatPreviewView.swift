@@ -9,6 +9,7 @@
 
 import SwiftUI
 import POPOPXChat
+import PopopxMeshKit
 
 // Spec: spec/client/chat-list.md#ChatPreviewView
 struct ChatPreviewView: View {
@@ -304,6 +305,18 @@ struct ChatPreviewView: View {
         // visible moment. The test, the row gate and the notification gate share `PopopxSysMarker` (which requires whole-string equality), so no extra parsing rule is added here.
         if PopopxSysMarker.isSignalText(cItem.content.msgContent?.text ?? "") {
             return (Text(""), false)
+        }
+        // The Mac node's two deliveries say what they did rather than what they are made of: the signed
+        // artifact has no row on the chat page to point at, and an update card's first line is a wire
+        // marker with a single-use receipt inside it. Both tests are the same ones the row gate and the
+        // notification gate use, so the three cannot disagree about which conversation this is.
+        if DiscoverSubscriptionManager.shared.nodeArtifactRow(chat.chatInfo, cItem) {
+            return (Text(NSLocalizedString("Mac discover content updated", comment: "chat list preview")), false)
+        }
+        if let notice = PopopxNodeUpdateWire.parseVisibleCard(in: cItem.content.msgContent?.text ?? "") {
+            return (Text(String.localizedStringWithFormat(
+                NSLocalizedString("Mac has version %@ available", comment: "chat list preview"), notice.version
+            )), false)
         }
         let (itemText, itemFormattedText) = chatItemPreviewText(cItem)
         let r = messageText(itemText, itemFormattedText, markdownBlocks: itemFormattedText == nil ? nil : cItem.markdownBlocks, sender: cItem.meta.showGroupAsSender ? nil : cItem.memberDisplayName, preview: true, mentions: cItem.mentions, userMemberId: chat.chatInfo.groupInfo?.membership.memberId, showSecrets: nil, backgroundColor: UIColor(theme.colors.background), prefix: prefix())

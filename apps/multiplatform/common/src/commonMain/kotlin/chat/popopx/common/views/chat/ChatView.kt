@@ -30,7 +30,7 @@ import androidx.compose.ui.text.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import chat.popopx.common.eco.PopopxEcoStore
-import chat.popopx.common.eco.popopxEcoSuppressesText
+import chat.popopx.common.eco.popopxEcoSuppressesItem
 import chat.popopx.common.views.eco.PopopxEcoMenuBar
 import chat.popopx.common.views.eco.renderableEcoMenu
 import chat.popopx.common.model.*
@@ -2301,8 +2301,9 @@ fun BoxScope.ChatItemsList(
       // The row gate, not the bubble gate, as on iOS (ChatView.swift:2326-2332): a machine line must not be
       // long-pressable either, and the bubble is not even asked for terminal layouts or group rows. The row
       // deletion is what removes it for good; this covers the instant before it lands and the row it leaves
-      // behind when the deletion fails.
-      if (!popopxEcoSuppressesText(cItem.content.msgContent?.text)) {
+      // behind when the deletion fails. The item-level form also hides the Mac Node's `feed.json` row, whose
+      // `msgContent?.text` is null and therefore invisible to a text-only predicate.
+      if (!popopxEcoSuppressesItem(chatInfo, cItem)) {
         ChatItemView(cItem, range, itemSeparation, previousItemSeparationLargeGap)
       }
     }

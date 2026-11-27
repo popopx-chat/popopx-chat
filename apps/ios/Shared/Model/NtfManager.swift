@@ -251,11 +251,17 @@ class NtfManager: NSObject, UNUserNotificationCenterDelegate, ObservableObject {
     }
 
     // Spec: spec/services/notifications.md#notifyMessageReceived
+    @MainActor
     func notifyMessageReceived(_ user: any UserLike, _ cInfo: ChatInfo, _ cItem: ChatItem) {
         logger.debug("NtfManager.notifyMessageReceived")
         // Silent signalling in the compute-points economy must not wake the user: this line is never rendered in the session anyway, and the
         // notification goes out before this device deletes the row, so the banner is the only moment it can ever be seen. The test shares `PopopxSysMarker` with the rendering layer (whole-string equality).
         if PopopxSysMarker.isSignalText(cItem.content.msgContent?.text ?? "") { return }
+        // The Mac node's two deliveries, for the reason at `DiscoverSubscriptionManager.suppressesNotification`: the artifact is already
+        // in the Discover data source and the card is answered in the session. This is a main-actor method now because answering
+        // "is this the bonded Mac's file" needs the binding, and both call sites already did main-actor work for this row before
+        // notifying, so the banner cannot overtake the row it belongs to.
+        if DiscoverSubscriptionManager.shared.suppressesNotification(cInfo, cItem) { return }
         if cInfo.ntfsEnabled(chatItem: cItem) {
             addNotification(createMessageReceivedNtf(user, cInfo, cItem, 0))
         }

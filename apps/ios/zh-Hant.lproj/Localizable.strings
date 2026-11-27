@@ -10199,3 +10199,23 @@ alert title */
 "Show the original server link" = "顯示原始服務器鏈接";
 "Hide the original server link" = "隱藏原始服務器鏈接";
 "This is the same invitation with the server address visible. The shareable link above hides it; neither form is encrypted, so treat either as public." = "這是同一份邀請，但顯示了服務器地址。上方的可分享鏈接會隱藏它；兩種形式均未加密，請一律視為公開資訊。";
+
+/* mac node discover feed + update card (DiscoverSubscriptionManager, PopopxNodeUpdateCard, PopopxDiscoverNodeFeed, ChatPreviewView) */
+"Mac update available" = "Mac 有可用更新";
+"Update now" = "立即更新";
+"You asked to be reminded later" = "你已選擇稍後提醒";
+"Sending the update command to your Mac…" = "正在將更新指令傳送到你的 Mac…";
+"Sending the reminder choice to your Mac…" = "正在將稍後提醒的選擇傳送到你的 Mac…";
+"This device could not reach your Mac. Nothing was installed." = "此裝置無法連線到你的 Mac，未安裝任何內容。";
+"This notice is not from a Mac bonded to this phone" = "這則通知並非來自與本機綁定的 Mac";
+"Version %@ is ready to install on your Mac" = "%@ 版本已可在你的 Mac 上安裝";
+"Build %@" = "建置 %@";
+"Released %@" = "發布於 %@";
+"Package digest %@" = "安裝套件摘要 %@";
+"%d new features" = "%d 項新增功能";
+"From your Mac" = "來自你的 Mac";
+"Updated %@" = "更新於 %@";
+"Published by this Mac and checked against its signing key. Nothing here is ranked, recommended or sent anywhere." = "由這台 Mac 發布，並已用它的簽名金鑰校驗。這裡的內容不排序、不推薦，也不會傳送到任何地方。";
+"A feed arrived under a signing key other than the one this phone stored for your Mac, so it was not shown. Re-pair the Mac to accept the new key." = "收到一份使用其他簽名金鑰的內容，與本機為你的 Mac 記錄的金鑰不一致，因此未予顯示。請重新配對這台 Mac 以接受新金鑰。";
+"Mac discover content updated" = "Mac 探索內容已更新";
+"Mac has version %@ available" = "你的 Mac 有 %@ 版本可更新";

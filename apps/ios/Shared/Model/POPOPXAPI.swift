@@ -2766,6 +2766,25 @@ func processReceivedMsg(_ res: ChatEvent) async {
                     await receiveFile(user: user, fileId: file.fileId, auto: true)
                 }
             }
+            // The signed content the bonded Mac publishes (`popopx.discover.feed.v1`, delivered as a
+            // `feed.json` file beside its readable card). Nothing else in this app downloads a file
+            // the user did not ask for, and this stays inside that exception only because the sender
+            // is one conversation this device deliberately attached and the payload is signed:
+            // `popopxNodeFeedArtifact` is the whole predicate, and it is deliberately not merged into
+            // `autoReceiveFile()` above, which is the *media* privacy switch
+            // (`privacyAcceptImagesGroupDefault`) and must keep answering to that switch alone.
+            if let artifact = popopxNodeFeedArtifact(cInfo, cItem) {
+                let fileId = artifact.fileId
+                let chatId = cInfo.apiId
+                Task { @MainActor in
+                    // The second half of the predicate, on the actor that owns the binding. Checking
+                    // it here rather than trusting the value test means an unattached or unpaired
+                    // contact costs this Task and nothing else — the file stays an ordinary attachment
+                    // the user can still tap.
+                    guard DiscoverSubscriptionManager.shared.nodeFeedSenderBound(contactId: chatId) else { return }
+                    await receiveFile(user: user, fileId: fileId, auto: true)
+                }
+            }
             // Mount point 2 of the badge redemption signaling: whether this line is a `::popopx_sys::` payload.
             // The bypass is the same as the previous one, and there is only one test (`PopopxSysMarker.parse` requires whole-string equality, see
             // the section at `Shared/Features/BadgeCredits/PopopxBadgeCreditsModels.swift:830`),
@@ -2799,7 +2818,7 @@ func processReceivedMsg(_ res: ChatEvent) async {
                 }
             }
             if cItem.showNotification {
-                NtfManager.shared.notifyMessageReceived(user, cInfo, cItem)
+                await NtfManager.shared.notifyMessageReceived(user, cInfo, cItem)
             }
         }
     case let .chatItemsStatusesUpdated(user, chatItems):
@@ -3031,6 +3050,12 @@ func processReceivedMsg(_ res: ChatEvent) async {
         await chatItemSimpleUpdate(user, aChatItem)
         if active(user), let file = aChatItem.chatItem.file, m.receivedFileToOpen(file) {
             await MainActor.run { m.openReceivedFile(file) }
+        }
+        // The feed the auto-receive above asked for. `receivedFileToOpen` cannot fire here anyway —
+        // that switch is media-only — but the predicate is written apart on purpose: nothing may
+        // present a node artifact in a share sheet, and this call is the only thing that reads it.
+        if active(user), popopxNodeFeedArtifact(aChatItem) != nil {
+            await MainActor.run { ingestPopopxNodeFeed(aChatItem) }
         }
     case let .rcvFileSndCancelled(user, aChatItem, _):
         await chatItemSimpleUpdate(user, aChatItem)
@@ -3295,7 +3320,7 @@ func chatItemSimpleUpdate(_ user: any UserLike, _ aChatItem: AChatItem) async {
     if active(user) {
         if await MainActor.run(body: { m.upsertChatItem(cInfo, cItem) }) {
             if cItem.showNotification {
-                NtfManager.shared.notifyMessageReceived(user, cInfo, cItem)
+                await NtfManager.shared.notifyMessageReceived(user, cInfo, cItem)
             }
         }
     }
@@ -4140,4 +4165,81 @@ final class PopopxKeyboardObserver: ObservableObject {
     @objc private func shown() { isVisible = true }
 
     @objc private func hidden() { isVisible = false }
+}
+
+// MARK: - Mac node artifact intake
+//
+// The three functions that turn a delivered `feed.json` into Discover content. They live here, in the
+// file that owns the event stream, rather than in the Discover module, because the decisions they make
+// are about *this chat item*: which conversation it came from, whether its bytes are on this device
+// yet, and where they are once they are. What the bytes mean is entirely the wire layer's business.
+
+/// The value-only half of the auto-receive gate, answered before anything is asked of the main actor:
+/// a direct chat, an XFTP file still waiting for its bytes, and the name and size a node publishes.
+///
+/// Deliberately not folded into `ChatItem.autoReceiveFile()`: that function *is* the media privacy
+/// switch (`privacyAcceptImagesGroupDefault`) and has to keep answering to it alone. A node artifact is
+/// not media, and asking the user to allow automatic image receipt in order to see the content their
+/// own Mac publishes would be the wrong consent in both directions.
+///
+/// `fromBoundNode` is fixed to true here because this function cannot read the binding: the sender's
+/// identity is the other half of the question, checked on the main actor by
+/// `DiscoverSubscriptionManager.nodeFeedSenderBound`, and the call site requires both.
+private func popopxNodeFeedArtifact(_ cInfo: ChatInfo, _ cItem: ChatItem) -> CIFile? {
+    guard cInfo.chatType == .direct, let file = cItem.file,
+          file.fileStatus == .rcvInvitation, file.fileProtocol == .xftp else { return nil }
+    return PopopxNodeFeedWire.shouldAutoReceive(
+        fileName: file.fileName, byteCount: file.fileSize, alreadyReceived: false, fromBoundNode: true
+    ) ? file : nil
+}
+
+/// The same question after XFTP wrote the bytes. Asked again rather than trusted from the first
+/// answer, because a completion can also belong to a file the user opened themselves, and this is the
+/// only place that decides whether *these* bytes go into the Discover data source.
+private func popopxNodeFeedArtifact(_ aChatItem: AChatItem) -> CIFile? {
+    guard aChatItem.chatInfo.chatType == .direct, let file = aChatItem.chatItem.file,
+          file.fileProtocol == .xftp, file.fileStatus == .rcvComplete,
+          file.loaded,
+          PopopxNodeFeedWire.isArtifact(fileName: file.fileName, byteCount: file.fileSize)
+    else { return nil }
+    return file
+}
+
+/// Reads, verifies and stores one delivered feed, then deletes every byte of it this device kept.
+///
+/// The path is built the way the rest of the app builds it — from the file source the core recorded,
+/// not from a name this function invented — and the plaintext, if the transport encrypted it, lands in
+/// the temp directory and is removed on **every** exit, including the early ones. Nothing here
+/// presents the file to the user: a share sheet for a document nobody asked to open is exactly what
+/// the silent path is supposed to avoid, so the only outcome is what Discover shows afterwards.
+@MainActor
+private func ingestPopopxNodeFeed(_ aChatItem: AChatItem) {
+    guard let file = popopxNodeFeedArtifact(aChatItem), let stored = file.fileSource else { return }
+    let sourceURL = getAppFilePath(stored.filePath)
+    let tempURL = getTempFilesDirectory().appendingPathComponent(stored.filePath)
+    let encrypted = stored.cryptoArgs != nil
+    defer {
+        // The decrypted copy first, then the encrypted one: an artifact this device fetched for itself
+        // has no reason to sit on disk afterwards, the signed content is now in the data source, and
+        // the chat row keeps its file source so a later re-sync can still deliver it again.
+        if encrypted { removeFile(tempURL) }
+        cleanupFile(aChatItem)
+    }
+    let plainURL: URL
+    if let cryptoArgs = stored.cryptoArgs {
+        do {
+            try decryptCryptoFile(fromPath: sourceURL.path, cryptoArgs: cryptoArgs, toPath: tempURL.path)
+        } catch {
+            logger.error("node feed: the delivered file could not be decrypted")
+            return
+        }
+        plainURL = tempURL
+    } else {
+        plainURL = sourceURL
+    }
+    guard let data = try? Data(contentsOf: plainURL, options: [.uncached]) else {
+        logger.error("node feed: the delivered file could not be read")
+        return
+    }
+    _ = DiscoverSubscriptionManager.shared.ingest(feedData: data)
 }

@@ -3388,6 +3388,37 @@
   <string name="discover_paste_placeholder">Paste the code</string>
   <string name="discover_pairing_window">The credential is valid for 15 minutes from when the Mac printed it.</string>
   <string name="discover_bonded_format">Bonded to %1$s.</string>
+  <!-- Mac Node feed + upgrade card. The English values are the same source strings the iOS app localizes
+       (DiscoverCatalogModels.swift `DiscoverCopy`, ServiceCardBubbleView `NodeUpdateCopy`), so one
+       translation effort covers both, and the placeholder style is Android\'s positional `%1$s`. -->
+  <string name="discover_node_feed_title">From your Mac</string>
+  <string name="discover_node_feed_footer">Published by this Mac and checked against its signing key. Nothing here is ranked, recommended or sent anywhere.</string>
+  <string name="discover_node_feed_key_changed">A feed arrived under a signing key other than the one this phone stored for your Mac, so it was not shown. Re-pair the Mac to accept the new key.</string>
+  <string name="discover_node_feed_updated">Updated %1$s</string>
+  <string name="discover_node_chat_picker_title">Which conversation is this Mac?</string>
+  <string name="discover_node_chat_picker_hint">The node answers on one contact. Until you pick it, this phone cannot send the Mac anything.</string>
+  <string name="discover_node_chat_picker_none">No matching contact</string>
+  <string name="discover_node_chat_picker_confirm">Use this conversation</string>
+  <string name="discover_node_chat_picker_selected">Selected</string>
+  <string name="discover_node_probe_sending">Asking your Mac to confirm…</string>
+  <string name="discover_node_probe_confirmed">Your Mac confirmed this conversation.</string>
+  <!-- Same English value as iOS's `DiscoverCopy.sendFailed`, so one translation covers both apps. -->
+  <string name="discover_node_probe_failed">This Mac is not reachable right now</string>
+  <!-- The card title reuses `app_check_for_updates_update_available` ("Update available: %s"); the "Mac node"
+       eyebrow above it is what says whose update this is, so no near-duplicate string is added here. -->
+  <string name="node_update_build_format">Build %1$s</string>
+  <string name="node_update_released_format">Released %1$s</string>
+  <string name="node_update_digest_format">Package digest %1$s</string>
+  <string name="node_update_features_format">%1$d new features</string>
+  <string name="node_update_now">Update now</string>
+  <string name="node_update_sending_install">Sending the update command to your Mac…</string>
+  <string name="node_update_sending_snooze">Sending the reminder choice to your Mac…</string>
+  <string name="node_update_approved">Command sent to your Mac</string>
+  <string name="node_update_snoozed">You asked to be reminded later</string>
+  <string name="node_update_failed">This device could not reach your Mac. Nothing was installed.</string>
+  <string name="node_update_unbonded">This notice is not from a Mac bonded to this phone</string>
+  <string name="node_update_chat_preview">Mac has version %1$s available</string>
+  <string name="node_feed_chat_preview">Mac discover content updated</string>
   <string name="eco_menu_label">Service menu</string>
   <string name="eco_menu_collapse">Hide the service menu</string>
   <string name="eco_menu_unavailable">This menu item is not available in an offline chat yet.</string>

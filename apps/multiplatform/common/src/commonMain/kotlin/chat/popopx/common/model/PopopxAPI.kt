@@ -23,6 +23,9 @@ import chat.popopx.common.model.ChatModel.changingActiveUserMutex
 import chat.popopx.common.model.GroupFeature.Files
 import chat.popopx.common.eco.PopopxEcoRuntime
 import chat.popopx.common.eco.popopxEcoObserveIncoming
+import chat.popopx.common.eco.popopxNodeArtifact
+import chat.popopx.common.eco.popopxNodeIngestArtifact
+import chat.popopx.common.eco.popopxNodeShouldAutoReceive
 import chat.popopx.common.model.MsgContent.MCUnknown
 import chat.popopx.common.model.SMPProxyFallback.AllowProtected
 import chat.popopx.common.model.SMPProxyMode.Always
@@ -3100,6 +3103,14 @@ object ChatController {
           ) {
             receiveFile(rhId, r.user, file.fileId, auto = true)
           }
+          // The Mac Node's signed feed artifact, immediately beside the media consent above and deliberately
+          // NOT inside it: `privacyAcceptImages` is a "don't download my photos" preference, and routing a
+          // machine payload through it would make that switch also silence the user's own bonded Mac.
+          // The predicate is identity-plus-name-plus-size, so this only ever fires for `feed.json` from the
+          // contact this device paired to (`PopopxEcoMount.kt`).
+          if (file != null && popopxNodeShouldAutoReceive(cInfo, cItem)) {
+            receiveFile(rhId, r.user, file.fileId, auto = true)
+          }
           // Mount point of the two machine-line protocols — the invisible badge signalling and the
           // service-account ecosystem — as one block beside the other, so a single read of the text and a
           // single hop onto the serialized dispatcher order the two the same way for every message. They
@@ -3408,8 +3419,17 @@ object ChatController {
         }
       is CR.RcvFileStart ->
         chatItemSimpleUpdate(rhId, r.user, r.chatItem)
-      is CR.RcvFileComplete ->
+      is CR.RcvFileComplete -> {
         chatItemSimpleUpdate(rhId, r.user, r.chatItem)
+        // The node artifact is read and deleted here, on the background dispatcher the helper itself chooses:
+        // the bytes exist only long enough to verify. The CHAT ROW stays — hidden by `popopxEcoSuppressesItem`
+        // — because deleting a row that is still in the transfer lifecycle races the `/freceive` and can leave
+        // a dangling transfer; the same deviation is recorded on the iOS side.
+        val received = r.chatItem.chatItem
+        if (popopxNodeArtifact(r.chatItem.chatInfo, received)) {
+          popopxNodeIngestArtifact(getLoadedFileSource(received.file))
+        }
+      }
       is CR.RcvFileSndCancelled -> {
         chatItemSimpleUpdate(rhId, r.user, r.chatItem)
         cleanupFile(r.chatItem)

@@ -997,6 +997,27 @@ func receiveMessages() async {
     }
 }
 
+/// The two deliveries a bonded Mac makes into an ordinary conversation, recognised well enough to keep
+/// out of a banner.
+///
+/// The literals are **copies** of `PopopxNodeFeedWire.artifactFileName` and `PopopxNodeUpdateWire.marker`
+/// (PopopxMeshKit). This target links POPOPXChat.framework and nothing else, and the framework does not
+/// link the package either, so importing it here would mean editing `project.pbxproj` -- which this app
+/// does not touch for a feature. The copy costs one thing and one thing only: an extension cannot
+/// verify a signature or read the bond, so it decides by marker and file name alone.
+///
+/// What that costs nobody: the artifact's bytes are already ingested and deleted by the app, and an
+/// update card is answered inside the session, so a banner for either would be a leak of wire text,
+/// not a notice the user needs. A stranger who renames their own file `feed.json` hides their own
+/// message from a banner here and still gets a visible row in the app, where the gate demands the bond.
+private let nodeUpdateMarker = "::POPOPX_UPD::"
+private let nodeFeedArtifactName = "feed.json"
+
+private func nodeContentHidden(_ cItem: ChatItem) -> Bool {
+    if let file = cItem.file, file.fileName == nodeFeedArtifactName { return true }
+    return cItem.content.msgContent?.text.contains(nodeUpdateMarker) ?? false
+}
+
 func chatRecvMsg() async -> APIResult<NSEChatEvent>? {
     await withCheckedContinuation { cont in
         let resp: APIResult<NSEChatEvent>? = recvPOPOPXMsg()
@@ -1032,7 +1053,9 @@ func receivedMsgNtf(_ res: NSEChatEvent) async -> (String, NSENotificationData)?
             if let file = cItem.autoReceiveFile() {
                 cItem = autoReceiveFile(file) ?? cItem
             }
-            let ntf: NSENotificationData = (cInfo.ntfsEnabled(chatItem: cItem) && cItem.showNotification) ? .messageReceived(user, cInfo, cItem) : .noNtf
+            // See `nodeContentHidden` below: the extension says nothing for a Mac node artifact or an
+            // update card, so the raw marker line and its single-use receipt never reach a lock screen.
+            let ntf: NSENotificationData = (!nodeContentHidden(cItem) && cInfo.ntfsEnabled(chatItem: cItem) && cItem.showNotification) ? .messageReceived(user, cInfo, cItem) : .noNtf
             let chatIdOrMemberId = if case let .group(groupInfo, _) = cInfo, let memberId = cItem.meta.forwardedByMember ?? cItem.chatDir.groupMemberId {
                 groupMemberEntityId(groupInfo.groupId, memberId)
             } else {

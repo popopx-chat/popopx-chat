@@ -340,6 +340,26 @@ class PopopxSilentSignalingRouter(
     )
 
   /**
+   * Verbatim delivery of a command string the NODE authored, for the one payload class this app may not
+   * rebuild: the `::popopx_sys::NODE_CMD::updates::approve::{"rcp":…}` / `…snooze::…` receipts inside an
+   * `::POPOPX_UPD::v1` card. `sendNodeCommand` above takes the three-part payload and writes the marker
+   * itself; feeding it an already-complete wire string would produce a doubled marker, and the host's parser
+   * would read serviceId `""` and drop it.
+   *
+   * The receipt is single-use and minted node-side (`UpdateCenter.swift:219-228`: an HMAC this device cannot
+   * compute), so byte-for-byte echo is the whole requirement — hence this method takes a `String` and not a
+   * model. Same non-live, no-TTL shape as every other control frame; the row is left visible-invisible by the
+   * same `isSignalText` whole-string gate that hid it inbound, so no deletion is issued here.
+   */
+  suspend fun sendNodeText(text: String, contactId: Long): Boolean =
+    transport.send(
+      contactId,
+      isGroup = false,
+      text,
+      live = PopopxSignalLimits.SIGNAL_IS_NEVER_LIVE,
+    )
+
+  /**
    * The bond-time pairing probe.
    *
    * DIVERGENCE, ported as measured rather than as documented (task item 6): the requirement names

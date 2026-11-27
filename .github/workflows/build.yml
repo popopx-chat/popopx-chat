@@ -986,7 +986,11 @@ jobs:
         env:
           TESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.tests || '' }}
           PR_BODY: ${{ github.event.pull_request.draft == true && github.event.pull_request.body || '' }}
-          ATTEMPTS: ${{ (github.ref == 'refs/heads/stable' || startsWith(github.ref, 'refs/tags/v')) && 3 || 1 }}
+          # Two tries on a branch push, because the cross-instance notification-order cases flake here;
+          # three on the release channel, as before. This is only sound now that "Schema dump verify and
+          # overwrite schema dump" dumps to tests/tmp instead of rewriting the tracked chat_schema.sql -
+          # otherwise attempt 2 compares the fixture against attempt 1's own output and passes on drift.
+          ATTEMPTS: ${{ (github.ref == 'refs/heads/stable' || startsWith(github.ref, 'refs/tags/v')) && 3 || 2 }}
           # The command is `cabal test`, not the suite binary, so every hspec token has to travel as
           # --test-option=TOKEN before scripts/ci/run-tests.sh can hand it to the suite.
           TEST_OPT_PREFIX: --test-option=
@@ -1056,7 +1060,9 @@ jobs:
       # repository contained `swift test` or `xcodebuild test`, so every commit to them was merged on the
       # strength of a compile. They build for macOS, which is why this is here and not in a Linux job.
       #
-      # 335 of the 379 tests run. The 44 that do not are the ones that call PopopxMeshFileStore.write,
+      # 368 of the 412 tests run (measured 2026-11-27, after the 33 Node wire cases landed; both totals
+      # come from summing the Swift-Testing "Test run with N tests" lines, since the XCTest bridge lines
+      # below them all read 0). The 44 that do not are the ones that call PopopxMeshFileStore.write,
       # which passes `.completeFileProtection` (PopopxMeshStorage.swift:112): macOS has no per-file
       # protection classes, so every directory on the volume rejects it with EPERM - measured at 4/4
       # probe sites (temporaryDirectory, ~/Documents, ~/Library/Containers, /Users/Shared) with
@@ -1079,7 +1085,7 @@ jobs:
           echo "$out"
           total=$(echo "$out" | sed -n 's/.*Test run with \([0-9]*\) tests.*/\1/p' | paste -sd+ - | bc)
           # A gate whose regex matched nothing would still exit 0 and report two green runs - the same
-          # class of false green as the hspec short-circuit; 335 is what this suite measures today, and
+          # class of false green as the hspec short-circuit; 368 is what this suite measures today, and
           # 300 is the floor that says the tests were selected at all.
           total=${total:-0}
           [ "$total" -ge 300 ] || { echo "only $total mesh tests ran, expected 335"; exit 1; }

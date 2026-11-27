@@ -1451,6 +1451,13 @@ enum PopopxCommerceKeychainSlot: String, CaseIterable, Sendable {
     case discoverSubscriptions = "popopx.commerce.discover-subscriptions"
     case discoverNodeBinding = "popopx.commerce.discover-node-binding"
     case discoverInbox = "popopx.commerce.discover-inbox"
+    /// The content the bonded Mac published, together with the key it verified under, and the one
+    /// answer per version that keeps an update card from being tapped twice. Their own slots, and
+    /// still cases of this enum: being one is what makes the emergency wipe erase them, and the
+    /// feed is exactly the kind of thing a duress wipe is for — headlines this device read from a
+    /// machine that is no longer with the user.
+    case discoverFeed = "popopx.commerce.discover-feed"
+    case discoverUpdateDecisions = "popopx.commerce.discover-update-decisions"
 }
 
 /// Keychain reads and writes.

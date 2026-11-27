@@ -28,7 +28,8 @@ import Popopx.Messaging.Agent.Store.Interface
 import qualified Popopx.Messaging.Agent.Store.SQLite.Migrations as Migrations
 import Popopx.Messaging.Agent.Store.Shared (Migration (..), MigrationConfig (..), MigrationConfirmation (..), MigrationsToRun (..), toDownMigration)
 import Popopx.Messaging.Util (ifM, tshow, whenM)
-import System.Directory (doesFileExist, removeFile)
+import System.Directory (doesFileExist, getTemporaryDirectory, removeFile)
+import System.FilePath ((</>))
 import System.Process (readCreateProcess, shell)
 import Test.Hspec
 
@@ -53,6 +54,11 @@ appAgentQueryPlans = "src/Popopx/Chat/Store/SQLite/Migrations/agent_query_plans.
 testSchema :: FilePath
 testSchema = "tests/tmp/test_agent_schema.sql"
 
+-- The chat schema dump lands here rather than on appSchema: a tracked file that this example rewrites
+-- makes a retry in the same job compare the fixture against the previous attempt's own output.
+testChatSchema :: FilePath
+testChatSchema = "tests/tmp/test_chat_schema.sql"
+
 schemaDumpTest :: Spec
 schemaDumpTest = do
   it "verify and overwrite schema dump" testVerifySchemaDump
@@ -65,7 +71,20 @@ testVerifySchemaDump = do
   savedSchema <- ifM (doesFileExist appSchema) (readFile appSchema) (pure "")
   savedSchema `deepseq` pure ()
   void $ createChatStore (DBOpts testDB chatDBFunctions "" False True TQOff) (MigrationConfig MCError Nothing)
-  getSchema testDB appSchema `shouldReturn` savedSchema
+  dumpedSchema <- getSchema testDB testChatSchema
+  unless (dumpedSchema == savedSchema) $ do
+    -- tests/tmp is cleared when the suite exits (ChatClient.withTmpFiles), so the dump is copied
+    -- somewhere the command below can still reach after a red run.
+    accepted <- (</> "popopx_chat_schema.dump.sql") <$> getTemporaryDirectory
+    writeFile accepted dumpedSchema
+    putStrLn $
+      unlines
+        [ ""
+        , "The schema dump does not match " <> appSchema <> "."
+        , "Dump of this run: " <> accepted <> " (" <> testChatSchema <> " is cleared when the suite exits)."
+        , "To accept it: cp " <> accepted <> " " <> appSchema
+        ]
+  dumpedSchema `shouldBe` savedSchema
   removeFile testDB
 
 testVerifyLintFKeyIndexes :: IO ()

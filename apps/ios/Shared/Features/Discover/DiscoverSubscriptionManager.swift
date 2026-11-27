@@ -29,6 +29,8 @@
 //
 
 import Foundation
+import POPOPXChat
+import PopopxMeshKit
 import UserNotifications
 import os
 
@@ -152,6 +154,21 @@ enum PopopxDiscoverServiceStatus: Hashable, Sendable {
 
 // MARK: - Manager
 
+/// What storing one delivered feed envelope decided. `unbonded` is the app-side half of the same
+/// chain the wire layer runs: an envelope can be perfectly signed and the sender still not be a Mac
+/// this phone agreed to listen to.
+enum PopopxNodeFeedIngest: Equatable, Sendable {
+    case stored(itemCount: Int)
+    case refused(PopopxNodeFeedWire.Refusal)
+    case unbonded
+}
+
+/// The one answer a user may give one published version, kept so the card cannot be tapped twice.
+enum PopopxNodeUpdateDecision: String, Codable, Equatable, Sendable {
+    case approved
+    case snoozed
+}
+
 @MainActor
 @Observable
 final class DiscoverSubscriptionManager {
@@ -163,6 +180,16 @@ final class DiscoverSubscriptionManager {
     /// the same Keychain slot as the subscriptions: a result card that vanishes on
     /// backgrounding would leave the user with no proof the Mac ever ran the job.
     private(set) var inbox: [String: [PopopxNodeResultCard]] = [:]
+    /// The content the bonded Mac published, kept exactly as its signed envelope delivered it.
+    ///
+    /// This is a cache of somebody else's signed statement, not a record this device can vouch for on
+    /// its own, so it carries the key it verified under: a relaunch then cannot present content that
+    /// was never checked, and an emergency wipe takes it with the binding it belongs to
+    /// (`PopopxCommerceKeychain.removeAll()` iterates `allCases`).
+    private(set) var feed: PopopxNodeFeedSnapshot?
+    /// One entry per version the user already answered, so a card that is re-read from the chat
+    /// history cannot offer "Update now" a second time and send a second one-time receipt.
+    private(set) var updateDecisions: [String: PopopxNodeUpdateDecision] = [:]
     private(set) var lastSweepAt: Date?
     /// Set by the sweep so the UI can say "the credits ran out" without re-deriving it from
     /// a balance and an expiry on every row.
@@ -184,6 +211,8 @@ final class DiscoverSubscriptionManager {
         subscriptions = PopopxCommerceKeychain.decode([PopopxDiscoverSubscription].self, .discoverSubscriptions) ?? []
         binding = PopopxCommerceKeychain.decode(PopopxMacNodeBinding.self, .discoverNodeBinding)
         inbox = PopopxCommerceKeychain.decode([String: [PopopxNodeResultCard]].self, .discoverInbox) ?? [:]
+        feed = PopopxCommerceKeychain.decode(PopopxNodeFeedSnapshot.self, .discoverFeed)
+        updateDecisions = PopopxCommerceKeychain.decode([String: PopopxNodeUpdateDecision].self, .discoverUpdateDecisions) ?? [:]
         refreshNotificationAuthorization()
     }
 
@@ -471,6 +500,161 @@ final class DiscoverSubscriptionManager {
         return inbox[serviceId.rawValue] ?? []
     }
 
+    // MARK: Node feed
+
+    /// Whether this contact **is** the bonded Mac — the conversation the user attached to it.
+    ///
+    /// `handshakeConfirmed` is deliberately *not* part of this test, although the pairing UI sets it
+    /// and the plaza reads it as "connected": it records that a command this phone sent was taken by
+    /// SMP, which says nothing about who may send content, and a node that publishes a feed before the
+    /// user ever opens the plaza would otherwise have its first feed dropped with no reason anywhere.
+    /// The strictness that matters is elsewhere — the envelope is signed, that key is pinned on first
+    /// success, and the bytes only ever come from this one contact.
+    func nodeFeedSenderBound(contactId: Int64) -> Bool {
+        loadIfNeeded()
+        return binding?.contactId == contactId
+    }
+
+    /// Whether the delivered bytes of one row are the bonded Mac's feed artifact.
+    ///
+    /// Three surfaces ask this and must not disagree: the row gate on the chat page, the conversation
+    /// list preview, and the notification path. The **bond** is part of the answer, not just the file
+    /// name — a predicate on `feed.json` alone would let any contact make one of their own messages
+    /// disappear from this device by naming it that.
+    func nodeArtifactRow(_ cInfo: ChatInfo, _ cItem: ChatItem) -> Bool {
+        guard cInfo.chatType == .direct, let file = cItem.file,
+              file.fileProtocol == .xftp,
+              PopopxNodeFeedWire.isArtifact(fileName: file.fileName, byteCount: file.fileSize)
+        else { return false }
+        return nodeFeedSenderBound(contactId: cInfo.apiId)
+    }
+
+    /// Whether one row may not become a banner.
+    ///
+    /// The artifact's content is already in the Discover data source by the time its transfer
+    /// completes, and an update card is answered from inside the session, so a banner for either adds
+    /// nothing but the raw marker line. Deliberately kept separate from `PopopxSysMarker.isSignalText`:
+    /// that predicate also drives the row gate, and a card has to stay renderable, so folding these in
+    /// would delete the very message the user is meant to answer.
+    func suppressesNotification(_ cInfo: ChatInfo, _ cItem: ChatItem) -> Bool {
+        if nodeArtifactRow(cInfo, cItem) { return true }
+        guard cInfo.chatType == .direct else { return false }
+        return PopopxNodeUpdateWire.isUpdateCard(cItem.content.msgContent?.text ?? "")
+    }
+
+    /// The rows the bonded Mac published, in the order its envelope signed them.
+    ///
+    /// Nothing in the app may edit these: the digest that verified is the digest of the row as
+    /// written (`PopopxNodeFeedWire.canonicalItemBody`), so a local rewrite would turn stored
+    /// content into content no key ever signed, and the next feed would be compared against that.
+    var feedItems: [PopopxNodeFeedItem] { feed?.items ?? [] }
+
+    /// The key the stored feed verified under — nil until the first envelope is accepted.
+    var pinnedFeedPublicKey: String? { feed?.publicKey }
+
+    /// Set when an envelope arrived under a key other than the pinned one. Persisted and surfaced,
+    /// because the refusal repeats on every later feed: without a reason the panel is just wrong,
+    /// quietly, forever.
+    var feedKeyChangedAtMs: Int64? { feed?.keyChangedAtMs }
+
+    /// The `generatedAt` of the stored snapshot — the node's own clock, not this device's.
+    var feedGeneratedAt: String? { feed?.generatedAt }
+
+    /// Folds one delivered `feed.json` into the data source.
+    ///
+    /// Silent by contract: every rejection leaves the stored snapshot as it was, and neither a
+    /// success nor a refusal posts a notification. This is the node republishing content the user
+    /// opted into by pairing, not a message addressed to the user. The caller deletes the bytes
+    /// either way; only the signature survives.
+    ///
+    /// The bond is re-checked here rather than trusted from the call site: the envelope declares its
+    /// own key, so with no conversation the user opened, any key at all verifies against itself.
+    @discardableResult
+    func ingest(feedData: Data, now: Date = Date()) -> PopopxNodeFeedIngest {
+        loadIfNeeded()
+        guard binding?.contactId != nil else {
+            log.warning("discover: node feed ignored — no bonded Mac is attached to a conversation")
+            return .unbonded
+        }
+        switch PopopxNodeFeedWire.ingest(feedData, into: feed, now: now) {
+        case let .stored(snapshot):
+            feed = snapshot
+            saveFeed()
+            log.info("discover: stored node feed, \(snapshot.items.count, privacy: .public) items")
+            return .stored(itemCount: snapshot.items.count)
+        case let .refused(reason, state):
+            // A refusal writes only when the wire layer stamped a key change into the old snapshot.
+            if let state, state != feed {
+                feed = state
+                saveFeed()
+            }
+            log.warning("discover: node feed refused: \(reason.rawValue, privacy: .public)")
+            return .refused(reason)
+        }
+    }
+
+    private func saveFeed() {
+        if let feed {
+            _ = PopopxCommerceKeychain.encode(feed, .discoverFeed)
+        } else {
+            _ = PopopxCommerceKeychain.remove(.discoverFeed)
+        }
+    }
+
+    // MARK: Update decisions
+
+    /// The answer this device already sent for one version, if any. A card reads this to render
+    /// itself spent: the receipt the node minted is single-use, so a second `approve=` would be a
+    /// second install decision the user did not make.
+    func updateDecision(forVersion version: String) -> PopopxNodeUpdateDecision? {
+        loadIfNeeded()
+        return updateDecisions[version]
+    }
+
+    /// Records the tap that is about to go out, not the delivery that may never come back — SMP
+    /// will not tell this device whether the Mac accepted the receipt, and a card that flipped back
+    /// to "Update now" after a failed send invites exactly the duplicate the receipt forbids.
+    @discardableResult
+    func recordUpdateDecision(_ decision: PopopxNodeUpdateDecision, version: String) -> Bool {
+        loadIfNeeded()
+        guard updateDecisions[version] == nil else { return false }
+        updateDecisions[version] = decision
+        saveUpdateDecisions()
+        return true
+    }
+
+    /// Answers one update notice, once.
+    ///
+    /// The command goes out exactly as the node wrote it — no re-encoding, see
+    /// `PopopxSilentSignalingRouter.sendNodeText`. The decision is recorded *before* the send so a
+    /// second tap while SMP is being asked finds the guard and does nothing; if SMP refuses, the
+    /// record is removed again, because a card that can never be tapped again would leave the
+    /// version unanswerable. What makes that removal safe is the node's own rule: the receipt is
+    /// single-use there, so a command that left this device and only *reported* failure is refused as
+    /// a replay rather than installing anything twice.
+    func answerUpdate(_ decision: PopopxNodeUpdateDecision, notice: PopopxNodeUpdateWire.Notice) async -> Bool {
+        loadIfNeeded()
+        guard updateDecisions[notice.version] == nil, let contactId = nodeContactId else { return false }
+        recordUpdateDecision(decision, version: notice.version)
+        let delivered = await PopopxSilentSignalingRouter.shared.sendNodeText(
+            decision == .approved ? notice.approveCommand : notice.snoozeCommand,
+            toContactId: contactId
+        )
+        if !delivered {
+            updateDecisions[notice.version] = nil
+            saveUpdateDecisions()
+        }
+        return delivered
+    }
+
+    private func saveUpdateDecisions() {
+        if updateDecisions.isEmpty {
+            _ = PopopxCommerceKeychain.remove(.discoverUpdateDecisions)
+        } else {
+            _ = PopopxCommerceKeychain.encode(updateDecisions, .discoverUpdateDecisions)
+        }
+    }
+
     // MARK: Node command path
 
     /// The contact the node answers on, when this device knows it.
@@ -556,7 +740,11 @@ final class DiscoverSubscriptionManager {
     func unbind() {
         loadIfNeeded()
         binding = nil
+        // The feed is content that machine published under its own key; leaving it behind a deleted
+        // bond would keep showing somebody's headlines with nothing left to verify them against.
+        feed = nil
         saveBinding()
+        saveFeed()
     }
 
     /// Clears everything this module owns — called by the commerce emergency wipe through
@@ -567,8 +755,12 @@ final class DiscoverSubscriptionManager {
         inbox = [:]
         binding = nil
         servicesAwaitingBalance = []
+        feed = nil
+        updateDecisions = [:]
         save()
         saveBinding()
+        saveFeed()
+        saveUpdateDecisions()
     }
 }
 

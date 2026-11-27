@@ -18,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -32,10 +34,15 @@ import chat.popopx.common.discover.PopopxDiscoverFilter
 import chat.popopx.common.discover.PopopxDiscoverSection
 import chat.popopx.common.discover.PopopxMacNodeBinding
 import chat.popopx.common.discover.PopopxNodeConsole
+import chat.popopx.common.discover.PopopxNodeFeedItem
+import chat.popopx.common.discover.PopopxNodeFeedSnapshot
 import chat.popopx.common.discover.PopopxNodeServiceId
 import chat.popopx.common.discover.PopopxPairingAccept
 import chat.popopx.common.discover.PopopxSubscriptionEngine
+import chat.popopx.common.model.ChatInfo
+import chat.popopx.common.platform.chatModel
 import chat.popopx.common.platform.ColumnWithScrollBar
+import chat.popopx.common.signal.PopopxSilentSignalingRouter
 import chat.popopx.common.ui.theme.DEFAULT_PADDING
 import chat.popopx.common.ui.theme.DEFAULT_PADDING_HALF
 import chat.popopx.common.views.helpers.AppBarTitle
@@ -43,6 +50,7 @@ import chat.popopx.common.views.helpers.DefaultBasicTextField
 import chat.popopx.common.views.helpers.ModalManager
 import chat.popopx.res.*
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.launch
 
 // The Discover tab: the local edge-service shelf. Ported from
 // apps/ios/Shared/Features/Discover/PopopxDiscoverView.swift and DiscoverServiceDetailSheet.swift,
@@ -65,11 +73,13 @@ fun PopopxDiscoverTabView() {
   val searchText = rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue("")) }
   val shelves = PopopxDiscoverCatalog.visibleSections(filter, searchText.value.text)
   val binding = PopopxSubscriptionEngine.shared.binding
+  val nodeFeed = PopopxSubscriptionEngine.shared.nodeFeed
 
   Column(Modifier.fillMaxSize()) {
     PopopxDiscoverSearchField(searchText)
     PopopxDiscoverFilterChips(filter) { index -> filterIndex.value = index }
     LazyColumn(Modifier.fillMaxWidth().weight(1f)) {
+      item { PopopxNodeFeedSection(nodeFeed) }
       items(shelves, key = { it.id }) { shelf ->
         PopopxDiscoverShelf(shelf.section, shelf.services)
       }
@@ -400,8 +410,215 @@ private fun PopopxNodePairingSheet(close: () -> Unit) {
           color = MaterialTheme.colors.primary
         )
       }
+      // Ruling ③: the bond is half of it. `PopopxSubscriptionEngine` can store a node and still have
+      // `contactId = null`, which makes every protocol that ANSWERS the node — the feed's TOFU gate, the
+      // upgrade card's two buttons — refuse quietly forever. iOS asks "which conversation is this Mac?"
+      // (MacNodePairingSheet.swift:401-413); this asks the same question in the same sheet.
+      engine.binding?.let { PopopxNodeContactPicker(it) }
       Spacer(Modifier.height(DEFAULT_PADDING))
       SheetDone(close)
     }
   }
+}
+
+/**
+ * The second half of bonding: naming the conversation the Mac answers on.
+ *
+ * The list is the app's own contact chats, unfiltered by name — iOS does the same and states the reason
+ * (MacNodePairingSheet.swift:405-413): the chat is whatever the user called the machine, and a search box
+ * here would imply the app knows which one it is. Nothing may guess either; a wrong guess sends control
+ * signals into a person's private thread, which is why [PopopxSubscriptionEngine.attach] is only ever
+ * reached from this tap.
+ */
+@Composable
+private fun PopopxNodeContactPicker(binding: PopopxMacNodeBinding) {
+  val engine = PopopxSubscriptionEngine.shared
+  val scope = rememberCoroutineScope()
+  // Read live off the engine instead of using the `binding` argument: `attach` writes through to the store, and
+  // a copy taken when this sheet was composed would keep showing the OLD conversation as the chosen one after
+  // the user picks another. Only the probe line needs local state, because it is this tap's outcome.
+  val attachedId = engine.nodeContactId
+  var probe by remember(binding.nodeId) {
+    mutableStateOf(if (binding.handshakeConfirmed) NodeProbeState.CONFIRMED else NodeProbeState.IDLE)
+  }
+
+  SheetHeading(stringResource(MR.strings.discover_node_chat_picker_title))
+  Text(
+    stringResource(MR.strings.discover_node_chat_picker_hint),
+    fontSize = 12.sp,
+    color = MaterialTheme.colors.secondary
+  )
+  when (probe) {
+    NodeProbeState.IDLE -> {}
+    NodeProbeState.SENDING -> Text(
+      stringResource(MR.strings.discover_node_probe_sending),
+      fontSize = 12.sp,
+      color = MaterialTheme.colors.secondary,
+      modifier = Modifier.padding(top = 4.dp)
+    )
+    NodeProbeState.CONFIRMED -> Text(
+      stringResource(MR.strings.discover_node_probe_confirmed),
+      fontSize = 12.sp,
+      color = MaterialTheme.colors.primary,
+      modifier = Modifier.padding(top = 4.dp)
+    )
+    NodeProbeState.FAILED -> Text(
+      stringResource(MR.strings.discover_node_probe_failed),
+      fontSize = 12.sp,
+      color = MaterialTheme.colors.error,
+      modifier = Modifier.padding(top = 4.dp)
+    )
+  }
+
+  val contacts = popopxNodePickableContacts()
+  if (contacts.isEmpty()) {
+    Text(
+      stringResource(MR.strings.discover_node_chat_picker_none),
+      fontSize = 13.sp,
+      color = MaterialTheme.colors.secondary,
+      modifier = Modifier.padding(top = DEFAULT_PADDING_HALF)
+    )
+  }
+  contacts.forEach { contact ->
+    SectionItemView({
+      engine.attach(contact.contactId, contact.displayName)
+      probe = NodeProbeState.SENDING
+      // The probe IS the handshake: `sendPairingProbe` emits the same `edge_compute_mesh::status` pairing
+      // line the engine's `sendHandshake` documents, and only a delivered one may confirm the binding —
+      // otherwise the sheet would carry a confirmation the node never saw.
+      scope.launch {
+        val delivered = PopopxSilentSignalingRouter.shared.sendPairingProbe(contact.contactId)
+        if (delivered) engine.confirmHandshake()
+        probe = if (delivered) NodeProbeState.CONFIRMED else NodeProbeState.FAILED
+      }
+    }) {
+      Column(Modifier.weight(1f)) {
+        Text(contact.displayName, style = MaterialTheme.typography.body1, maxLines = 1)
+        Text(
+          stringResource(MR.strings.discover_node_chat_picker_confirm),
+          fontSize = 12.sp,
+          color = MaterialTheme.colors.primary
+        )
+      }
+      if (contact.contactId == attachedId) {
+        Text(
+          stringResource(MR.strings.discover_node_chat_picker_selected),
+          fontSize = 12.sp,
+          color = MaterialTheme.colors.primary
+        )
+      }
+    }
+  }
+}
+
+private enum class NodeProbeState { IDLE, SENDING, CONFIRMED, FAILED }
+
+private class PopopxNodePickableContact(val contactId: Long, val displayName: String)
+
+/**
+ * iOS's `contacts` (MacNodePairingSheet.swift:405-413): direct chats whose contact is still active and whose
+ * chat has not been deleted, because a command sent into a deleted chat goes nowhere, which is the whole
+ * point of attaching.
+ */
+private fun popopxNodePickableContacts(): List<PopopxNodePickableContact> =
+  chatModel.chats.value.mapNotNull { chat ->
+    val info = chat.chatInfo
+    if (info !is ChatInfo.Direct || !info.contact.active || info.chatDeleted) return@mapNotNull null
+    PopopxNodePickableContact(info.apiId, info.displayName)
+  }
+
+/**
+ * 「发现 → 来自你的 Mac」 — the signed content a bonded Mac published, already decoded and verified by
+ * `PopopxNodeFeedWire` before it was stored.
+ *
+ * It is not a shelf: a shelf is a service credits are spent to run, and these rows are the user's own
+ * machine's content. Among the tiles they would read as something that bills.
+ *
+ * The rows show the envelope's bytes. Each item's seven fields are covered by a digest and a signature, so
+ * rewriting or trimming one here would put on screen something no key attests to; only the header's own
+ * timestamp is reformatted, and that is display, not content.
+ *
+ * Like `binding` above, this reads the engine directly instead of observing it, so a feed that arrives while
+ * the tab is open shows on the tab's next recomposition.
+ */
+@Composable
+private fun PopopxNodeFeedSection(snapshot: PopopxNodeFeedSnapshot?) {
+  val items = snapshot?.items.orEmpty()
+  val keyChanged = snapshot?.keyChangedAtMs != null
+  if (items.isEmpty() && !keyChanged) return
+  val uriHandler = LocalUriHandler.current
+
+  Column(Modifier.fillMaxWidth().padding(horizontal = DEFAULT_PADDING)) {
+    Row(
+      Modifier.fillMaxWidth().padding(top = DEFAULT_PADDING, bottom = DEFAULT_PADDING_HALF),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Text(
+        stringResource(MR.strings.discover_node_feed_title),
+        style = MaterialTheme.typography.h3,
+        modifier = Modifier.weight(1f)
+      )
+      val generatedAt = snapshot?.generatedAt.orEmpty().substringBefore('T')
+      if (generatedAt.isNotEmpty()) {
+        Text(
+          stringResource(MR.strings.discover_node_feed_updated).format(generatedAt),
+          fontSize = 12.sp,
+          color = MaterialTheme.colors.secondary
+        )
+      }
+    }
+    if (keyChanged) {
+      // The one refusal that is not silent: content that stopped updating looks exactly like content that
+      // did not change, so the panel says the key no longer matches rather than holding a stale list.
+      Text(
+        stringResource(MR.strings.discover_node_feed_key_changed),
+        fontSize = 12.sp,
+        color = MaterialTheme.colors.error,
+        modifier = Modifier.padding(bottom = DEFAULT_PADDING_HALF)
+      )
+    }
+    items.forEach { item -> PopopxNodeFeedRow(item, uriHandler) }
+    Text(
+      stringResource(MR.strings.discover_node_feed_footer),
+      fontSize = 12.sp,
+      color = MaterialTheme.colors.secondary,
+      modifier = Modifier.padding(top = DEFAULT_PADDING_HALF, bottom = DEFAULT_PADDING)
+    )
+  }
+}
+
+@Composable
+private fun PopopxNodeFeedRow(item: PopopxNodeFeedItem, uriHandler: UriHandler) {
+  // Only a web address becomes a tap target. The producer allows a local path in this same field
+  // (`PopopxNodeFeedItem.link`), and turning that into a tap would have this app open a file the user never
+  // saw, so anything else renders as text.
+  val target = popopxNodeFeedTarget(item.link)
+  Column(
+    Modifier
+      .fillMaxWidth()
+      .padding(bottom = DEFAULT_PADDING_HALF)
+      .clip(RoundedCornerShape(10.dp))
+      .background(MaterialTheme.colors.background)
+      .let { if (target != null) it.clickable { uriHandler.openUri(target) } else it }
+      .padding(horizontal = 12.dp, vertical = 8.dp),
+    verticalArrangement = Arrangement.spacedBy(2.dp)
+  ) {
+    Text(item.title, style = MaterialTheme.typography.body2)
+    if (item.summary.isNotEmpty()) {
+      Text(item.summary, fontSize = 12.sp, color = MaterialTheme.colors.secondary, maxLines = 3)
+    }
+    Text(
+      listOf(item.sourceLabel.ifEmpty { item.source }, item.timestamp)
+        .filter { it.isNotEmpty() }
+        .joinToString(" · "),
+      fontSize = 11.sp,
+      color = MaterialTheme.colors.secondary,
+      maxLines = 1
+    )
+  }
+}
+
+private fun popopxNodeFeedTarget(link: String): String? {
+  val scheme = link.substringBefore("://", "").lowercase()
+  return if (scheme == "http" || scheme == "https") link else null
 }

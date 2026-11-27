@@ -28,6 +28,8 @@ import chat.popopx.common.views.commerce.PopopxCommerceCard
 import chat.popopx.common.views.commerce.PopopxCommerceCardContext
 import chat.popopx.common.views.commerce.PopopxCommerceContent
 import chat.popopx.common.views.eco.PopopxEcoCardView
+import chat.popopx.common.views.eco.PopopxNodeUpdateCardView
+import chat.popopx.common.discover.PopopxNodeUpdateWire
 import chat.popopx.common.views.helpers.*
 import chat.popopx.common.views.chatlist.openChat
 import chat.popopx.common.views.newchat.planAndConnect
@@ -536,6 +538,13 @@ fun CIMarkdownText(
     remember(text) { PopopxCommerceContent.detect(text) } else null
   val commerceFirst = commerce != null && (chatInfo is ChatInfo.Direct || ecoCard == null)
 
+  // The Mac Node's upgrade notice, mounted the same way and in the same place as the service card: the card
+  // replaces the line, because what the user must act on is the version and the two answers, not the marker.
+  // Direct chats only, and received lines only — `chatInfo.apiId` is the contact the receipt has to go back to,
+  // and a group has no single contact to answer for (same guard and same reason as `ecoCard` above).
+  val updateCard = if (appPlatform.isAndroid && !ci.chatDir.sent && chatInfo is ChatInfo.Direct)
+    remember(text) { PopopxNodeUpdateWire.parseVisibleCard(text) } else null
+
   if (commerceFirst) {
     PopopxCommerceCard(
       commerce!!,
@@ -558,6 +567,8 @@ fun CIMarkdownText(
     )
   } else if (ecoCard != null) {
     PopopxEcoCardView(ecoCard, chatInfo.apiId)
+  } else if (updateCard != null) {
+    PopopxNodeUpdateCardView(updateCard, (chatInfo as? ChatInfo.Direct)?.apiId)
   } else {
   Box(
     Modifier

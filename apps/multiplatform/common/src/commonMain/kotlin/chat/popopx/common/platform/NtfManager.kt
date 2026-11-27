@@ -2,6 +2,7 @@ package chat.popopx.common.platform
 
 import chat.popopx.common.AppLock
 import chat.popopx.common.eco.popopxEcoSuppressesText
+import chat.popopx.common.eco.popopxNodeUpdatesNotifications
 import chat.popopx.common.model.*
 import chat.popopx.common.views.call.RcvCallInvitation
 import chat.popopx.common.views.chatlist.acceptContactRequest
@@ -41,7 +42,12 @@ abstract class NtfManager {
     // The banner fires synchronously, before this device's row deletion, so it is the only moment a machine
     // line could ever reach the user's screen — and waking them for it would announce the ecosystem the line
     // is meant to be invisible to (NtfManager.swift:258).
-    if (popopxEcoSuppressesText(cItem.content.msgContent?.text)) return
+    //
+    // Two questions, asked together: the hidden machine lines, and the Mac Node's two deliveries. The upgrade
+    // card is NOT hidden from the conversation — it is the one machine message the user must see — but it
+    // must not wake them either, because the card itself is the reminder (deviation from a single combined
+    // predicate, and the same choice iOS makes at NtfManager.swift:258).
+    if (popopxEcoSuppressesText(cItem.content.msgContent?.text) || popopxNodeUpdatesNotifications(cInfo, cItem)) return
     if (
       cItem.showNotification &&
       cInfo.ntfsEnabled(cItem) &&

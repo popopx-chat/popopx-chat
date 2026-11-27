@@ -820,6 +820,23 @@ enum DiscoverCopy {
         comment: "discover section footer"
     )
 
+    // The signed feed a bonded Mac publishes. These strings describe content the user's own machine
+    // collected: the section says where it came from and that nothing was ranked, because "From your
+    // Mac" sitting above a list of links otherwise looks exactly like the recommender surfaces this
+    // tab claims not to have (`highlightNoTracking`).
+    static let nodeFeedTitle = NSLocalizedString("From your Mac", comment: "discover node feed section")
+    static let nodeFeedFooter = NSLocalizedString(
+        "Published by this Mac and checked against its signing key. Nothing here is ranked, recommended or sent anywhere.",
+        comment: "discover node feed section"
+    )
+    static let nodeFeedKeyChanged = NSLocalizedString(
+        "A feed arrived under a signing key other than the one this phone stored for your Mac, so it was not shown. Re-pair the Mac to accept the new key.",
+        comment: "discover node feed warning"
+    )
+    static func nodeFeedUpdated(_ date: Date) -> String {
+        String(format: NSLocalizedString("Updated %@", comment: "discover node feed section"), dateFormatter.string(from: date))
+    }
+
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium

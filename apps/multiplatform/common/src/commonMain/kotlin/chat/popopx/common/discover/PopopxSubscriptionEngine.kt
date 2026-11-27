@@ -10,6 +10,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 
 /**
  * The 30-day cycle engine, its persistence and its one-time notices
@@ -91,6 +92,13 @@ class PopopxSubscriptionEngine(
   private var bindingRecord: PopopxMacNodeBinding? = null
   private val inboxRows: LinkedHashMap<String, MutableList<PopopxNodeResultCard>> = LinkedHashMap()
   /**
+   * The last feed this device ACCEPTED, or null = the panel's default content. Doubles as the TOFU pin:
+   * [PopopxNodeFeedWire.ingest] reads `current.publicKey`, so pinning happens by storing the first verified
+   * envelope and nothing else, and a rotated key can only ever be refused.
+   */
+  private var feedSnapshotRecord: PopopxNodeFeedSnapshot? = null
+
+  /**
    * MEASURED: session-only on iOS too (:169, and `loadIfNeeded` never decodes it) — the set is
    * what makes an expired row read as `awaitingBalance` instead of plain `expired` until the app
    * is relaunched. It is deliberately NOT persisted, so a restart re-derives it from silence.
@@ -122,6 +130,14 @@ class PopopxSubscriptionEngine(
       return bindingRecord?.contactId
     }
 
+  /** `pinnedFeedPublicKey` + `feedItems` (DiscoverSubscriptionManager.swift): one slot holds both, because a
+   * feed without the key that signed it cannot be re-verified after a restart. */
+  val nodeFeed: PopopxNodeFeedSnapshot?
+    get() {
+      loadIfNeeded()
+      return feedSnapshotRecord
+    }
+
   val servicesAwaitingBalance: Set<PopopxNodeServiceId>
     get() {
       loadIfNeeded()
@@ -137,6 +153,7 @@ class PopopxSubscriptionEngine(
     subscriptionRows = readSubscriptionRows()
     bindingRecord = readBinding()
     readInboxInto(inboxRows)
+    feedSnapshotRecord = readFeed()
   }
 
   /**
@@ -495,10 +512,17 @@ class PopopxSubscriptionEngine(
     saveBinding()
   }
 
-  /** `unbind()` (:556-560): forgets the node, keeps subscriptions, inbox and credits untouched. */
+  /**
+   * `unbind()` (:556-560): forgets the node, keeps subscriptions, inbox and credits untouched. The
+   * FEED goes with the node, unlike the inbox: an inbox row is the user's own proof that a service ran, while
+   * a feed is content only that node's key can vouch for, and leaving it on screen after unbinding would say
+   * "your Mac" to a Mac this device no longer trusts. Also unpins the TOFU key, so a later re-pairing re-pins.
+   */
   fun unbind() {
     loadIfNeeded()
     bindingRecord = null
+    feedSnapshotRecord = null
+    writeFeed()
     saveBinding()
   }
 
@@ -512,10 +536,13 @@ class PopopxSubscriptionEngine(
     subscriptionRows = ArrayList()
     inboxRows.clear()
     bindingRecord = null
+    feedSnapshotRecord = null
     awaitingBalance.clear()
     loaded = true
     save()
     saveBinding()
+    writeFeed()
+    defaults.remove(PopopxDiscoverStore.KEY_UPDATE_DECISIONS)
   }
 
   // MARK: Node command path
@@ -564,6 +591,66 @@ class PopopxSubscriptionEngine(
     return delivered
   }
 
+  // MARK: Discover feed ingest
+
+  /**
+   * The one place a `feed.json` becomes stored state. Every decision — structure, per-item digest, per-item
+   * signature, envelope signature, TOFU key, strict recency, the 60-row ceiling — is
+   * [PopopxNodeFeedWire.ingest]'s and is tested there against the pinned vectors; this method only adds the
+   * persistence half and the rule that a REFUSAL CAN STILL WRITE.
+   *
+   * That rule is not sloppiness: on a key mismatch the returned state carries `keyChangedAtMs`, and dropping
+   * that write would lose the one fact the panel needs in order to tell the user its content stopped updating
+   * instead of quietly showing a week-old feed as if it were live.
+   */
+  fun ingestNodeFeed(data: ByteArray, now: Long = nowMs()): PopopxNodeFeedApply {
+    loadIfNeeded()
+    val apply = PopopxNodeFeedWire.ingest(data, feedSnapshotRecord, now)
+    when (apply) {
+      is PopopxNodeFeedApply.Stored -> {
+        feedSnapshotRecord = apply.snapshot
+        writeFeed()
+      }
+      is PopopxNodeFeedApply.Refused -> {
+        // Identity compares by value, so this guard is about not re-writing an untouched snapshot.
+        val warned = apply.state
+        if (warned != null && warned != feedSnapshotRecord && warned.keyChangedAtMs != null) {
+          feedSnapshotRecord = warned
+          writeFeed()
+        }
+      }
+    }
+    val outcome = when (apply) {
+      is PopopxNodeFeedApply.Stored -> "stored"
+      is PopopxNodeFeedApply.Refused -> "refused: ${apply.reason}"
+    }
+    logger("discover: feed ingest $outcome")
+    return apply
+  }
+
+  // MARK: Update card decisions
+
+  /**
+   * Which answer this device already sent for one `::POPOPX_UPD::v1` receipt, or null.
+   *
+   * [receiptKey] is a digest of the node's own single-use HMAC command, not of the version: re-answering a
+   * spent receipt would not install anything twice, it would ask the node to make a second decision it has
+   * already made, and a card that silently re-sends is worse than one that looks inert.
+   *
+   * One blob, not one settings key per receipt, because the emergency wipe has to be able to empty it: with
+   * prefix keys there is no index to clear and `eraseLocalState` would leave the answers behind while iOS's
+   * `PopopxCommerceKeychain.remove(.discoverUpdateDecisions)` removes the same record outright. A torn blob
+   * reads as "nothing answered", which lets a card send once — the node still refuses a spent receipt, so
+   * losing this record costs a message, not an install.
+   */
+  fun nodeUpdateDecision(receiptKey: String): String? = readUpdateDecisions()[receiptKey]
+
+  fun recordNodeUpdateDecision(receiptKey: String, decision: PopopxNodeUpdateDecision) {
+    val decisions = readUpdateDecisions()
+    decisions[receiptKey] = decision.rawValue
+    writeUpdateDecisions(decisions)
+  }
+
   // MARK: Storage plumbing
 
   private fun subscriptionText(): String =
@@ -609,6 +696,46 @@ class PopopxSubscriptionEngine(
     }
     defaults.putString(PopopxDiscoverStore.KEY_INBOX, JsonObject(members).toString())
   }
+
+  /**
+   * Plain settings, not the keystore, for the same reason the inbox is: this is display data the node signed,
+   * already public to anyone holding the phone, and the 60-row ceiling exists partly to keep it inside what one
+   * settings write can carry. A torn or hand-edited blob reads as "no feed", which is the panel's default.
+   */
+  private fun readFeed(): PopopxNodeFeedSnapshot? {
+    val text = defaults.getStringOrNull(PopopxDiscoverStore.KEY_FEED) ?: return null
+    return PopopxNodeFeedSnapshot.fromJson(popopxJsonDecode(text))
+  }
+
+  private fun writeFeed() {
+    val snapshot = feedSnapshotRecord
+    if (snapshot == null) {
+      defaults.remove(PopopxDiscoverStore.KEY_FEED)
+    } else {
+      defaults.putString(PopopxDiscoverStore.KEY_FEED, PopopxNodeFeedSnapshot.toJson(snapshot).toString())
+    }
+  }
+
+  private fun readUpdateDecisions(): MutableMap<String, String> {
+    val text = defaults.getStringOrNull(PopopxDiscoverStore.KEY_UPDATE_DECISIONS) ?: return mutableMapOf()
+    val obj = popopxJsonDecode(text) as? JsonObject ?: return mutableMapOf()
+    val decisions = mutableMapOf<String, String>()
+    for ((key, element) in obj) {
+      val value = (element as? JsonPrimitive)?.contentOrNull ?: continue
+      if (PopopxNodeUpdateDecision.from(value) != null) decisions[key] = value
+    }
+    return decisions
+  }
+
+  private fun writeUpdateDecisions(decisions: Map<String, String>) {
+    if (decisions.isEmpty()) {
+      defaults.remove(PopopxDiscoverStore.KEY_UPDATE_DECISIONS)
+      return
+    }
+    val members = LinkedHashMap<String, JsonElement>(decisions.size)
+    decisions.forEach { (key, value) -> members[key] = JsonPrimitive(value) }
+    defaults.putString(PopopxDiscoverStore.KEY_UPDATE_DECISIONS, JsonObject(members).toString())
+  }
 }
 
 /** Where this module's data rests on the device. Account names mirror iOS's Keychain slots (:26-29, `PopopxCommerceKeychainItem`). */
@@ -621,6 +748,16 @@ object PopopxDiscoverStore {
 
   /** plain settings: the whole inbox as one JSON object (class KDoc explains the split). */
   const val KEY_INBOX = "popopx.discover.inbox"
+
+  /** plain settings: the last accepted `feed.json`, with the key that signed it (see [readFeed]). */
+  const val KEY_FEED = "popopx.discover.feed.items"
+
+  /**
+   * plain settings, one JSON object of `receipt digest -> approved|snoozed`: the `::POPOPX_UPD::v1` cards'
+   * local memory that a single-use receipt was already echoed. One blob rather than one key per receipt so
+   * `eraseLocalState` can remove all of it, which is what iOS's Keychain slot makes possible there.
+   */
+  const val KEY_UPDATE_DECISIONS = "popopx.discover.node.update.decisions"
 }
 
 /**

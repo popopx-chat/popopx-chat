@@ -28,6 +28,7 @@
 //
 
 import SwiftUI
+import PopopxMeshKit
 
 // MARK: - Plaza
 
@@ -52,6 +53,10 @@ struct PopopxDiscoverView: View {
                 PopopxDiscoverBanner { showsPairing = true }
 
                 PopopxDiscoverAssistantEntry { showsAssistant = true }
+
+                // Between the assistant entry and the catalogue for the same reason the assistant is
+                // where it is: this is the user's own content, not one of the paid services below.
+                PopopxDiscoverNodeFeed()
 
                 PopopxDiscoverSearchField(text: $search, focused: $searchFocused)
 
@@ -194,6 +199,117 @@ struct PopopxDiscoverBanner: View {
         guard let binding else { return DiscoverCopy.pairingIntro }
         if binding.contactId == nil { return DiscoverCopy.bannerNeedsChat }
         return isConnected ? DiscoverCopy.bannerReady : DiscoverCopy.nodeIdle
+    }
+}
+
+// MARK: - Node feed
+
+/// 「发现 → 来自你的 Mac」: the signed content a bonded Mac publishes beside its result cards.
+///
+/// It is deliberately **not** a shelf. A shelf is a service the user spends credits to run; these rows
+/// are content the user's own machine already collected and signed. Among the tiles they would read as
+/// something that bills, and the plaza's whole point is that it does not track or recommend
+/// (`DiscoverCopy.highlightNoTracking`).
+///
+/// The rows render as the envelope delivered them. `PopopxNodeFeedWire` verified a digest over exactly
+/// these seven fields, so rewriting or trimming them here would put bytes on screen that no key covers;
+/// only the header's own timestamp is reformatted, and that is display, not content.
+struct PopopxDiscoverNodeFeed: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var data = DiscoverSubscriptionManager.shared
+
+    var body: some View {
+        let items = data.feedItems
+        if items.isEmpty && data.feedKeyChangedAtMs == nil {
+            // No feed and no refusal on record: the plaza stays exactly as it looked before a Mac ever
+            // bonded. An empty "From your Mac" heading would be the section promising content it has none of.
+            EmptyView()
+        } else {
+            VStack(alignment: .leading, spacing: PopopxMetrics.spaceS) {
+                HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.spaceXS) {
+                    Image(systemName: PopopxMacNodeVisual.symbol)
+                        .font(PopopxType.meta)
+                        .foregroundStyle(PopopxPalette.meshInk)
+                        .accessibilityHidden(true)
+                    Text(DiscoverCopy.nodeFeedTitle)
+                        .font(PopopxType.sectionHeader)
+                        .foregroundStyle(PopopxPalette.label)
+                    Spacer(minLength: PopopxMetrics.spaceXS)
+                    if let generatedAt = data.feed?.generatedAtDate {
+                        Text(DiscoverCopy.nodeFeedUpdated(generatedAt))
+                            .font(PopopxType.caption)
+                            .foregroundStyle(PopopxPalette.labelSecondary)
+                            .accessibilityHidden(true)
+                    }
+                }
+                if data.feedKeyChangedAtMs != nil {
+                    HStack(alignment: .top, spacing: PopopxMetrics.space2XS) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(PopopxType.caption)
+                        Text(DiscoverCopy.nodeFeedKeyChanged)
+                            .font(PopopxType.caption)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .foregroundStyle(PopopxPalette.dangerInk)
+                }
+                VStack(alignment: .leading, spacing: PopopxMetrics.spaceS) {
+                    ForEach(items, id: \.id) { item in
+                        row(item)
+                    }
+                }
+                .padding(PopopxMetrics.spaceS)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(PopopxPalette.card, in: .rect(cornerRadius: PopopxMetrics.radiusCard))
+                .overlay(
+                    RoundedRectangle(cornerRadius: PopopxMetrics.radiusCard)
+                        .strokeBorder(PopopxPalette.hairlineInner, lineWidth: PopopxMetrics.hairline)
+                )
+                .popopxCardElevation(colorScheme: colorScheme)
+                Text(DiscoverCopy.nodeFeedFooter)
+                    .font(PopopxType.caption)
+                    .foregroundStyle(PopopxPalette.labelHint)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, PopopxMetrics.gutter)
+        }
+    }
+
+    @ViewBuilder
+    private func row(_ item: PopopxNodeFeedItem) -> some View {
+        let content = VStack(alignment: .leading, spacing: 2) {
+            Text(verbatim: item.title)
+                .font(PopopxType.meta)
+                .foregroundStyle(PopopxPalette.label)
+                .fixedSize(horizontal: false, vertical: true)
+            if !item.summary.isEmpty {
+                Text(verbatim: item.summary)
+                    .font(PopopxType.caption)
+                    .foregroundStyle(PopopxPalette.labelSecondary)
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            HStack(spacing: PopopxMetrics.space2XS) {
+                Text(verbatim: item.sourceLabel.isEmpty ? item.source : item.sourceLabel)
+                    .font(PopopxType.microTag)
+                    .foregroundStyle(PopopxPalette.meshInk)
+                    .lineLimit(1)
+                Text(verbatim: item.timestamp)
+                    .font(PopopxType.metricSmall)
+                    .foregroundStyle(PopopxPalette.labelHint)
+                    .lineLimit(1)
+            }
+        }
+        // Only a web address becomes a target. The producer states the reason (`PopopxNodeFeedItem.link`):
+        // a local path on the Mac travels in the same field, and turning that into a tap would be this
+        // app opening something the user never saw.
+        if let url = URL(string: item.link), let scheme = url.scheme?.lowercased(),
+           scheme == "https" || scheme == "http" {
+            Link(destination: url) { content }
+                .buttonStyle(PopopxPressButtonStyle(feedback: .light))
+        } else {
+            content
+                .accessibilityElement(children: .combine)
+        }
     }
 }
 

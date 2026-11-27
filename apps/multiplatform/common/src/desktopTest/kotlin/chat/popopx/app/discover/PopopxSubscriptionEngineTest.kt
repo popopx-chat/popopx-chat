@@ -10,6 +10,7 @@ import chat.popopx.common.discover.PopopxNodeCommand
 import chat.popopx.common.discover.PopopxNodeMenuAction
 import chat.popopx.common.discover.PopopxNodePairing
 import chat.popopx.common.discover.PopopxNodeServiceId
+import chat.popopx.common.discover.PopopxNodeUpdateDecision
 import chat.popopx.common.discover.PopopxSubscriptionEngine
 import chat.popopx.common.eco.PopopxEcoSecrets
 import kotlin.test.Test
@@ -357,6 +358,9 @@ class PopopxSubscriptionEngineTest {
     h.engine.stop(PopopxNodeServiceId.ShadowCos)
     assertNull(h.engine.subscriptionFor(PopopxNodeServiceId.ShadowCos))
     assertEquals(1, h.engine.resultsFor(PopopxNodeServiceId.SoloAutopilot).size, "a cancelled service keeps the results the Mac produced (:309-310)")
+    // The upgrade card's one-shot answer, recorded before the wipe asks about it (:631-648).
+    h.engine.recordNodeUpdateDecision("receipt-digest-a", PopopxNodeUpdateDecision.APPROVED)
+    assertEquals("approved", h.engine.nodeUpdateDecision("receipt-digest-a"))
 
     h.engine.eraseLocalState()
     assertNull(h.engine.binding)
@@ -365,6 +369,10 @@ class PopopxSubscriptionEngineTest {
     assertNull(after.engine.binding)
     assertTrue(after.engine.subscriptions.isEmpty())
     assertTrue(after.engine.resultsFor(PopopxNodeServiceId.SoloAutopilot).isEmpty())
+    assertNull(
+      after.engine.nodeUpdateDecision("receipt-digest-a"),
+      "the receipt record is one blob so the wipe can empty it, which is what iOS's Keychain slot buys there"
+    )
   }
 
   @Test

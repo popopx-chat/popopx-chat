@@ -25,6 +25,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.*
 import androidx.compose.ui.unit.*
 import chat.popopx.common.eco.popopxEcoSuppressesText
+import chat.popopx.common.eco.popopxNodeArtifact
+import chat.popopx.common.discover.PopopxNodeUpdateWire
 import chat.popopx.common.ui.theme.*
 import chat.popopx.common.views.helpers.*
 import chat.popopx.common.model.*
@@ -230,6 +232,23 @@ fun ChatPreviewView(
     // A machine line is very often the last message of its conversation, and until this device deletes the row
     // the list is the only place it could be read — iOS returns an empty preview here (ChatPreviewView.swift:305).
     if (popopxEcoSuppressesText(ci?.content?.msgContent?.text)) return
+    // The Mac node's two deliveries describe themselves rather than read out their bytes, mirroring iOS's
+    // `chatItemPreview` (ChatPreviewView.swift:307-317): the signed artifact has no visible row to point at,
+    // and an update card's first line is a wire marker with a single-use receipt inside it. The same two
+    // predicates the row gate and the notification gate ask, so the three cannot disagree about which
+    // conversation this is.
+    if (ci != null && appPlatform.isAndroid) {
+      val notice = (ci.content.msgContent as? MsgContent.MCText)?.text?.let { PopopxNodeUpdateWire.parseVisibleCard(it) }
+      val previewColor = if (isInDarkTheme()) MessagePreviewDark else MessagePreviewLight
+      if (notice != null) {
+        Text(String.format(generalGetString(MR.strings.node_update_chat_preview), notice.version), color = previewColor)
+        return
+      }
+      if (popopxNodeArtifact(chat.chatInfo, ci)) {
+        Text(generalGetString(MR.strings.node_feed_chat_preview), color = previewColor)
+        return
+      }
+    }
     if (chatModelDraftChatId == chat.id && chatModelDraft != null) {
       val sp20 = with(LocalDensity.current) { 20.sp.toDp() }
       val (text: CharSequence, inlineTextContent) = remember(chatModelDraft) { chatModelDraft.message.text to messageDraft(chatModelDraft, sp20) }

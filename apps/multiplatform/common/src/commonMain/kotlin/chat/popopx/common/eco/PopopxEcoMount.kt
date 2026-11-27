@@ -2,8 +2,19 @@ package chat.popopx.common.eco
 
 import chat.popopx.common.cfgsec.PopopxServerConfigSignalHandler
 import chat.popopx.common.cfgsec.PopopxServerConfigWire
+import chat.popopx.common.discover.PopopxNodeFeedWire
+import chat.popopx.common.discover.PopopxNodeUpdateWire
+import chat.popopx.common.discover.PopopxSubscriptionEngine
+import chat.popopx.common.model.CIFileStatus
+import chat.popopx.common.model.ChatInfo
+import chat.popopx.common.model.ChatItem
 import chat.popopx.common.model.ChatType
+import chat.popopx.common.model.CryptoFile
+import chat.popopx.common.model.FileProtocol
+import chat.popopx.common.model.MsgContent
+import chat.popopx.common.model.readCryptoFile
 import chat.popopx.common.platform.appPlatform
+import chat.popopx.common.platform.getAppFilePath
 import chat.popopx.common.signal.PopopxRenderSuppression
 import chat.popopx.common.signal.PopopxSignalChatKind
 import chat.popopx.common.signal.PopopxSilentSignalingRouter
@@ -12,6 +23,7 @@ import chat.popopx.common.views.chatlist.openDirectChat
 import chat.popopx.common.views.helpers.ModalManager
 import chat.popopx.common.views.helpers.withBGApi
 import chat.popopx.common.views.newchat.planAndConnect
+import java.io.File
 
 // The host side of the machine-line protocols: the singletons, the inbound mount, and the link mount.
 // Everything above this file is platform-free arithmetic; everything here touches ChatModel, SMP and the
@@ -96,6 +108,109 @@ private val popopxEcoSuppression: PopopxRenderSuppression = popopxSysSignalSuppr
  */
 fun popopxEcoSuppressesText(text: String?): Boolean =
   appPlatform.isAndroid && text != null && popopxEcoSuppression.suppresses(text)
+
+/**
+ * The row-level form of the same question, and the one the three render sites ask (the conversation row, the
+ * chat-list preview, the notification banner). It adds the Mac Node's `feed.json` file row, which
+ * [popopxEcoSuppressesText] structurally cannot see: a file item's `msgContent?.text` is null, so a text-only
+ * predicate leaves the artifact — marker, signature blobs and all — sitting in the conversation.
+ *
+ * The `::POPOPX_UPD::v1` card is deliberately NOT in here, on both platforms: the row gate in
+ * `ChatView`/`FramedItemView` blanks what it matches, and the card has to be *drawn*. Its suppression is
+ * notification-only, which is why [popopxNodeUpdatesNotifications] is a separate question.
+ */
+fun popopxEcoSuppressesItem(cInfo: ChatInfo?, cItem: ChatItem): Boolean {
+  if (!appPlatform.isAndroid) return false
+  val text = cItem.content.msgContent?.text
+  return (text != null && popopxEcoSuppression.suppresses(text)) || popopxNodeArtifact(cInfo, cItem)
+}
+
+/** Whether a banner must be skipped for a machine line: the hidden-row set, plus the update card. */
+fun popopxNodeUpdatesNotifications(cInfo: ChatInfo?, cItem: ChatItem): Boolean =
+  appPlatform.isAndroid && (popopxNodeUpdateCard(cItem) != null || popopxNodeArtifact(cInfo, cItem))
+
+/**
+ * The received card text of an `::POPOPX_UPD::v1` upgrade notice, or null. Kept separate from the parse so
+ * the notification path and the render path read the same predicate from the same item shape and cannot
+ * disagree about which messages are cards.
+ */
+fun popopxNodeUpdateCard(cItem: ChatItem): PopopxNodeUpdateWire.Notice? {
+  val text = (cItem.content.msgContent as? MsgContent.MCText)?.text ?: return null
+  return PopopxNodeUpdateWire.parseVisibleCard(text)
+}
+
+/**
+ * Is this the signed feed artifact of the Mac this device bonded to? Identity, not filename, decides it: a
+ * stranger can send a file called `feed.json` with a perfectly valid signature under their own key, and the
+ * TOFU pin would happily have nothing to compare it against if the mount accepted it.
+ *
+ * `handshakeConfirmed` is NOT asked, on either platform (deviation from the plan's first draft, recorded in
+ * the report): the bond is what the user agreed to, and a node that sends its feed before the probe lands is
+ * still that node.
+ */
+fun popopxNodeArtifact(cInfo: ChatInfo?, cItem: ChatItem): Boolean {
+  if (!appPlatform.isAndroid) return false
+  val file = cItem.file ?: return false
+  if (cItem.content.msgContent !is MsgContent.MCFile) return false
+  if (file.fileProtocol != FileProtocol.XFTP) return false
+  return nodeContactIdOf(cInfo) != null && PopopxNodeFeedWire.isArtifact(file.fileName, file.fileSize)
+}
+
+/** The contact id of the bonded Mac Node, when this chat IS that contact; null for everything else. */
+fun nodeContactIdOf(cInfo: ChatInfo?): Long? {
+  if (!appPlatform.isAndroid) return null
+  val contactId = (cInfo as? ChatInfo.Direct)?.apiId ?: return null
+  return if (PopopxSubscriptionEngine.shared.nodeContactId == contactId) contactId else null
+}
+
+/**
+ * The narrow auto-receive decision for a node artifact, next to the media decision in
+ * `PopopxAPI.processNewChatItems`. Separate on purpose: `privacyAcceptImages` is a *media* consent, and
+ * routing a signed machine payload through it would make "don't download photos" also mean "don't take my
+ * Mac's updates", which is not what either app's setting says.
+ */
+fun popopxNodeShouldAutoReceive(cInfo: ChatInfo?, cItem: ChatItem): Boolean {
+  if (!appPlatform.isAndroid) return false
+  val file = cItem.file ?: return false
+  if (cItem.content.msgContent !is MsgContent.MCFile) return false
+  if (file.fileProtocol != FileProtocol.XFTP) return false
+  return PopopxNodeFeedWire.shouldAutoReceive(
+    fileName = file.fileName,
+    byteCount = file.fileSize,
+    // `RcvInvitation` is the only state a download has not already been asked for: accepted, transferring,
+    // complete or cancelled all mean something else already took this file.
+    alreadyReceived = file.fileStatus !is CIFileStatus.RcvInvitation,
+    fromBoundNode = nodeContactIdOf(cInfo) != null,
+  )
+}
+
+/**
+ * Hand the downloaded artifact to the store, then delete it. Background dispatcher, because reading a file,
+ * decrypting it and running four Ed25519 verifications must not happen on the render thread; a refusal is
+ * silent by design — the panel keeps its previous content, which is the "default content preserved" half of
+ * the requirement.
+ *
+ * The bytes go whether the feed verified or not: an unverified copy on disk is the worse failure, and the
+ * row that carried it is hidden, so nothing can offer to save it later. Deleting here rather than at the
+ * caller is not tidiness — the read is asynchronous, and a caller-side delete races it.
+ */
+fun popopxNodeIngestArtifact(source: CryptoFile?) {
+  if (!appPlatform.isAndroid || source == null) return
+  withBGApi {
+    val path = if (source.isAbsolutePath) source.filePath else getAppFilePath(source.filePath)
+    val bytes = try {
+      val args = source.cryptoArgs
+      if (args != null) readCryptoFile(path, args) else File(path).readBytes()
+    } catch (_: Exception) {
+      null
+    }
+    if (bytes != null) PopopxSubscriptionEngine.shared.ingestNodeFeed(bytes)
+    try {
+      File(path).delete()
+    } catch (_: Exception) {
+    }
+  }
+}
 
 /**
  * The app's eco deep-link entry, for both `popopx://service?uri=…&ref=…` and `popopx://sso?uri=…&session=…`.

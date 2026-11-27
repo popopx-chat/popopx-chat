@@ -39,6 +39,7 @@
 //
 
 import SwiftUI
+import PopopxMeshKit
 
 // MARK: - Public entry point
 
@@ -674,5 +675,239 @@ extension View {
     func serviceCardAccessibilityLabel(_ spoken: String) -> some View {
         accessibilityElement(children: .ignore)
             .accessibilityLabel(Text(verbatim: spoken))
+    }
+}
+
+// MARK: - Mac node update card
+
+/// The answer sheet for one `::POPOPX_UPD::v1` notice from a bonded Mac, mounted by
+/// `PopopxBubbleBody.nodeUpdate`. Sits in this file because it is the same family as the card above:
+/// a manifest carried by a message, buttons that send a signal, and a state line that says what the
+/// last tap did.
+///
+/// Three things this view may not do, and the shape of it follows from them:
+/// - **It may not invent a command.** `approve=` / `snooze=` carry a receipt the node minted
+///   (`UpdateCenter.swift:219-228`); the button hands the notice's own strings to
+///   `DiscoverSubscriptionManager.answerUpdate`, which sends them verbatim through
+///   `PopopxSilentSignalingRouter.sendNodeText`. Nothing here re-encodes them.
+/// - **It may not be answered twice.** That receipt is single-use node-side, so the decision is
+///   recorded *before* the send and the buttons read that record: after one tap the card is spent, and
+///   a card re-read from chat history is spent too.
+/// - **It may not send somewhere else.** The reply goes to the bonded node's own contact, not to the
+///   conversation the row happens to sit in; with no bond there is nowhere to answer, so the card
+///   renders inert and says so instead of offering buttons that would fail.
+struct PopopxNodeUpdateCard: View {
+    let notice: PopopxNodeUpdateWire.Notice
+
+    @State private var subscriptions = DiscoverSubscriptionManager.shared
+    /// Set for the length of one send, so the status line can tell "the user tapped" apart from
+    /// "SMP carried it" — the record exists either way, and only the send result is still unknown.
+    @State private var sending: PopopxNodeUpdateDecision?
+    @State private var sendFailed = false
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        let state = status()
+        VStack(alignment: .leading, spacing: PopopxMetrics.spaceS) {
+            VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
+                // The badge is the eco card's header idiom above (icon chip + title, firstTextBaseline),
+                // reused so a node notice and a service-account card read as the same kind of thing:
+                // something arriving from a named counterparty that the user is being asked about.
+                HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.spaceS) {
+                    Image(systemName: "desktopcomputer")
+                        .font(PopopxType.emphasis)
+                        .foregroundStyle(PopopxIconTint.mesh.ink)
+                        .frame(width: PopopxMetrics.spaceXL, height: PopopxMetrics.spaceXL)
+                        .background(PopopxIconTint.mesh.fill, in: .rect(cornerRadius: PopopxMetrics.radiusChip))
+                        .accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
+                        Text(PopopxNodeUpdateCopy.eyebrow)
+                            .font(PopopxType.microTag)
+                            .foregroundStyle(PopopxPalette.meshInk)
+                        Text(PopopxNodeUpdateCopy.readyTitle(notice.version))
+                            .font(PopopxType.emphasis)
+                            .foregroundStyle(PopopxPalette.label)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: PopopxMetrics.spaceS)
+                }
+                if let meta = PopopxNodeUpdateCopy.metaLine(notice) {
+                    Text(verbatim: meta)
+                        .font(PopopxType.caption)
+                        .foregroundStyle(PopopxPalette.labelSecondary)
+                        .textSelection(.enabled)
+                }
+                if !notice.summaryLines.isEmpty {
+                    VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
+                        ForEach(notice.summaryLines, id: \.self) { line in
+                            Text(verbatim: "\(PopopxNodeUpdateCopy.bullet) \(line)")
+                                .font(PopopxType.secondary)
+                                .foregroundStyle(PopopxPalette.label)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+            }
+            .serviceCardAccessibilityLabel(PopopxNodeUpdateCopy.spoken(notice: notice, state: state.text))
+            line(state)
+            if state.offersActions {
+                HStack(spacing: PopopxMetrics.spaceXS) {
+                    button(PopopxNodeUpdateCopy.updateNow, decision: .approved, filled: true)
+                    button(PopopxNodeUpdateCopy.remindLater, decision: .snoozed, filled: false)
+                }
+            }
+        }
+        .padding(PopopxMetrics.spaceM)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(PopopxPalette.card, in: .rect(cornerRadius: PopopxMetrics.radiusCard))
+        // The mesh teal hairline is this app's "comes from your own hardware" colour (§1 palette),
+        // which is exactly the claim the card makes and the only thing separating it from a stranger's text.
+        .overlay(
+            RoundedRectangle(cornerRadius: PopopxMetrics.radiusCard)
+                .strokeBorder(PopopxPalette.meshInk.opacity(0.35), lineWidth: PopopxMetrics.divider)
+        )
+        .popopxCardElevation(colorScheme: colorScheme)
+        .popopxAnimation(PopopxSpring.fluid, value: notice.version, reduceMotion: reduceMotion)
+        .accessibilityElement(children: .contain)
+    }
+
+    // MARK: State
+
+    /// One place decides what the card may offer, so the sentence below the content block and the
+    /// buttons cannot disagree about whether this notice is still answerable.
+    private struct Status {
+        let text: String?
+        let symbol: String?
+        let ink: Color
+        let offersActions: Bool
+    }
+
+    private func status() -> Status {
+        guard subscriptions.nodeContactId != nil else {
+            return Status(text: PopopxNodeUpdateCopy.unbondedLine, symbol: "exclamationmark.shield",
+                          ink: PopopxPalette.dangerInk, offersActions: false)
+        }
+        if let sending {
+            return Status(text: sending == .approved ? PopopxNodeUpdateCopy.sendingApprovalLine
+                                                     : PopopxNodeUpdateCopy.sendingSnoozeLine,
+                          symbol: "arrow.up.circle", ink: PopopxPalette.labelSecondary, offersActions: false)
+        }
+        if sendFailed {
+            return Status(text: PopopxNodeUpdateCopy.failedLine, symbol: "exclamationmark.triangle",
+                          ink: PopopxPalette.dangerInk, offersActions: true)
+        }
+        switch subscriptions.updateDecision(forVersion: notice.version) {
+        case .approved:
+            return Status(text: PopopxNodeUpdateCopy.approvedLine, symbol: "checkmark.circle.fill",
+                          ink: PopopxPalette.successInk, offersActions: false)
+        case .snoozed:
+            return Status(text: PopopxNodeUpdateCopy.snoozedLine, symbol: "clock",
+                          ink: PopopxPalette.labelSecondary, offersActions: false)
+        case nil:
+            return Status(text: nil, symbol: nil, ink: PopopxPalette.labelSecondary, offersActions: true)
+        }
+    }
+
+    @ViewBuilder
+    private func line(_ state: Status) -> some View {
+        if let text = state.text, let symbol = state.symbol {
+            // Spoken inside the content block's label (`state.text` is passed to it), so the row does
+            // not say the same fact twice.
+            HStack(spacing: PopopxMetrics.space2XS) {
+                Image(systemName: symbol)
+                    .font(PopopxType.caption)
+                Text(verbatim: text)
+                    .font(PopopxType.caption)
+            }
+            .foregroundStyle(state.ink)
+            .accessibilityHidden(true)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    // MARK: Actions
+
+    private func button(_ title: String, decision: PopopxNodeUpdateDecision, filled: Bool) -> some View {
+        Button {
+            answer(decision)
+        } label: {
+            Text(verbatim: title)
+                .font(PopopxType.emphasis)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+                .padding(.horizontal, PopopxMetrics.spaceM)
+                .padding(.vertical, PopopxMetrics.spaceS)
+                .frame(maxWidth: .infinity, minHeight: PopopxMetrics.minHitTarget)
+                .background(filled ? PopopxPalette.brand : PopopxPalette.card,
+                            in: .rect(cornerRadius: PopopxMetrics.radiusControl))
+                .overlay {
+                    if !filled {
+                        RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl)
+                            .strokeBorder(PopopxPalette.labelHint, lineWidth: PopopxMetrics.divider)
+                    }
+                }
+                .foregroundStyle(filled ? PopopxPalette.onBrand : PopopxPalette.label)
+                .contentShape(RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl))
+        }
+        .buttonStyle(PopopxPressButtonStyle(feedback: filled ? .medium : .light))
+        .accessibilityLabel(Text(verbatim: title))
+    }
+
+    private func answer(_ decision: PopopxNodeUpdateDecision) {
+        sending = decision
+        sendFailed = false
+        Task { @MainActor in
+            let delivered = await subscriptions.answerUpdate(decision, notice: notice)
+            sending = nil
+            sendFailed = !delivered
+        }
+    }
+}
+
+/// Wording for the node update card, kept beside the view so the sentence VoiceOver says and the
+/// labels on screen come from one table (the reason `PopopxBubbleBody.spokenText` forwards here).
+enum PopopxNodeUpdateCopy {
+    /// The node's own bullet (`PopopxMacNodeApp.swift:865`), restated because the wire layer's copy is
+    /// internal to the package and the summary lines arrive without it.
+    static let bullet = "·"
+
+    static var eyebrow: String { NSLocalizedString("Mac node", comment: "node update card") }
+    static var updateNow: String { NSLocalizedString("Update now", comment: "node update card") }
+    static var remindLater: String { NSLocalizedString("Remind me later", comment: "node update card") }
+    static var spokenPrefix: String { NSLocalizedString("Mac update available", comment: "node update card") }
+    static var approvedLine: String { NSLocalizedString("Command sent to your Mac", comment: "node update card") }
+    static var snoozedLine: String { NSLocalizedString("You asked to be reminded later", comment: "node update card") }
+    static var sendingApprovalLine: String { NSLocalizedString("Sending the update command to your Mac…", comment: "node update card") }
+    static var sendingSnoozeLine: String { NSLocalizedString("Sending the reminder choice to your Mac…", comment: "node update card") }
+    static var failedLine: String { NSLocalizedString("This device could not reach your Mac. Nothing was installed.", comment: "node update card") }
+    static var unbondedLine: String { NSLocalizedString("This notice is not from a Mac bonded to this phone", comment: "node update card") }
+
+    static func readyTitle(_ version: String) -> String {
+        String(format: NSLocalizedString("Version %@ is ready to install on your Mac", comment: "node update card"), version)
+    }
+
+    static func metaLine(_ notice: PopopxNodeUpdateWire.Notice) -> String? {
+        var parts: [String] = []
+        if let build = notice.build {
+            parts.append(String(format: NSLocalizedString("Build %@", comment: "node update card"), build))
+        }
+        if let releasedAt = notice.releasedAt {
+            parts.append(String(format: NSLocalizedString("Released %@", comment: "node update card"), releasedAt))
+        }
+        if let shortSha = notice.shortSha {
+            parts.append(String(format: NSLocalizedString("Package digest %@", comment: "node update card"), shortSha))
+        }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
+    static func spoken(notice: PopopxNodeUpdateWire.Notice, state: String?) -> String {
+        var pieces = [spokenPrefix, readyTitle(notice.version)]
+        if let meta = metaLine(notice) { pieces.append(meta) }
+        if notice.hasSummary {
+            pieces.append(String(format: NSLocalizedString("%d new features", comment: "node update card"), notice.summaryLines.count))
+        }
+        if let state { pieces.append(state) }
+        return pieces.joined(separator: "，")
     }
 }

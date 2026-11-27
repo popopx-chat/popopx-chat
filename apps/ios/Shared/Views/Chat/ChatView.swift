@@ -2323,9 +2323,15 @@ struct ChatView: View {
         ///
         /// Why it mounts at the row layer rather than the bubble layer: the bubble is only asked when `!terminal` and not a group/channel,
         /// so terminal layout and signaling rows in groups bypass it, and the live `ChatItemView` reads the signature out loud directly.
+        ///
+        /// The second test hides the signed `feed.json` the bonded Mac delivers. Unlike a signal it is **not** deleted: the row still
+        /// carries the transfer, and deleting a file row while `/freceive` is in flight is how you turn a recoverable download into a
+        /// dangling transfer. The bytes are removed once the feed verifies (`ingestPopopxNodeFeed` -> `cleanupFile`); the row stays in
+        /// the database and out of the user's way.
         @ViewBuilder
         func chatItemWithMenu(_ ci: ChatItem, _ range: ClosedRange<Int>?, _ maxWidth: CGFloat, _ itemSeparation: ItemSeparation) -> some View {
-            if PopopxSysMarker.isSignalText(ci.content.msgContent?.text ?? "") {
+            if PopopxSysMarker.isSignalText(ci.content.msgContent?.text ?? "")
+                || DiscoverSubscriptionManager.shared.nodeArtifactRow(chat.chatInfo, ci) {
                 Color.clear.frame(height: 0)
             } else {
                 chatItemBody(ci, range, maxWidth, itemSeparation)
