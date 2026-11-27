@@ -122,7 +122,9 @@ struct CreatePOPOPXAddress: View {
 
     private func shareQRCodeButton(_ userAddress: UserContactLink) -> some View {
         Button {
-            showShareSheet(items: [popopxChatLink(userAddress.connLinkContact.popopxChatUri(short: false))])
+            // The QR above encodes the sealed code (the view's default), so the share sheet carries
+            // the same string; the plain address names the SMP host.
+            showShareSheet(items: [PopopxInviteShareForm.make(from: userAddress.connLinkContact, short: false).display])
         } label: {
             Label("Share", systemImage: "square.and.arrow.up")
         }
@@ -183,10 +185,12 @@ struct SendAddressMailView: View {
     var userAddress: UserContactLink
 
     var body: some View {
+        // Sealed like every other share of this address: an email naming the SMP host is the same
+        // leak as a QR that does.
         let messageBody = String(format: NSLocalizedString("""
             <p>Hi!</p>
             <p><a href="%@">Connect to me via POPOPX Chat</a></p>
-            """, comment: "email text"), popopxChatLink(userAddress.connLinkContact.popopxChatUri(short: false)))
+            """, comment: "email text"), PopopxInviteShareForm.make(from: userAddress.connLinkContact, short: false).display)
         MailView(
             isShowing: self.$showMailView,
             result: $mailViewResult,

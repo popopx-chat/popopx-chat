@@ -114,9 +114,12 @@ struct GroupChatInfoView: View {
                             if groupInfo.isOwner && groupLink != nil {
                                 channelLinkButton()
                             } else if let link = groupInfo.groupProfile.publicGroup?.groupLink {
-                                POPOPXLinkQRCode(uri: link)
+                                // The public channel link names its SMP host; the QR and the share
+                                // both carry the sealed code.
+                                let sharedLink = popopxSharedLink(link)
+                                POPOPXLinkQRCode(uri: sharedLink)
                                 Button {
-                                    showShareSheet(items: [popopxChatLink(link)])
+                                    showShareSheet(items: [sharedLink])
                                 } label: {
                                     Label("Share link", systemImage: "square.and.arrow.up")
                                 }

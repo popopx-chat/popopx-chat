@@ -1160,7 +1160,9 @@ struct ChatView: View {
             if let (label, connLink) = chatAddress() {
                 v.contextMenu {
                     Button {
-                        let shareItems: [Any] = [connLink]
+                        // The prepared/contact address names its SMP host; the share carries the
+                        // sealed code, matching the invitation screens.
+                        let shareItems: [Any] = [popopxSharedLink(connLink)]
                         showShareSheet(items: shareItems)
                     } label: {
                         Label(label, systemImage: "square.and.arrow.up")

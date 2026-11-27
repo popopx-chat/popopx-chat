@@ -775,8 +775,9 @@ fun LinkTextView(link: String, share: Boolean) {
 
 /** The "show the original server link" fold: the plain address, host included, behind an opt-in.
  *
- * It renders only for a link that was actually sealed, so a short link - and an address the codec
- * refuses - leaves the screen exactly as it was. Revealing the original is opt-in because some users
+ * It renders only for a link that was actually sealed, so an address the codec refuses leaves the
+ * screen exactly as it was; every form a core hands out - full and short alike - is sealed, so both
+ * get the fold. Revealing the original is opt-in because some users
  * verify a link by its host, and because a recipient on a build without this codec needs the plain form.
  * The copy names it an "original server link" and never an encrypted one: v1 hides the host from
  * previews, screenshots and forwards, it does not protect the invitation from someone who reads it.

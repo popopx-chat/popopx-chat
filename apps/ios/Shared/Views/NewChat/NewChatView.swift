@@ -844,37 +844,18 @@ func linkTextView(_ link: String) -> some View {
 
 // MARK: - Opaque invite share form
 
-/// What an invitation is shared as: the published `/i/v1/` code, with the original server address
-/// reachable behind a fold.
-///
-/// The code exists to stop the share itself from naming which SMP server holds the queue — the plain
-/// invitation link carries `smpN.popopx.im` in its host. It is obfuscation, not confidentiality: the
-/// format key is published, so nothing here may be described to the user as "encrypted".
-struct PopopxInviteShareForm: Hashable {
-    /// The sealed link, or nil when the plaintext names no server (a short link) or when the address is
-    /// one the servers would refuse (scheme, size).
-    var opaque: String?
-    /// What this build showed before the code existed: the short link when one is selected, else the
-    /// full address. Still the fallback, so an unsealable link is shared rather than lost.
-    var fallback: String
-    /// The full address, host included — the thing the fold reveals.
-    var original: String
+/// The app-side face of the kit's share formatter (`PopopxMeshKit/Invite/PopopxInviteShare.swift`,
+/// where the sealing rule and its tests live). This module contributes the two things the kit cannot
+/// know: the core's `CreatedConnLink` and the memoising seal cache.
+typealias PopopxInviteShareForm = PopopxInviteShare
 
-    var display: String { opaque ?? fallback }
-    var sealed: Bool { opaque != nil }
-
-    static func make(from link: CreatedConnLink, short: Bool) -> PopopxInviteShareForm {
-        // Decided by what the plaintext names, not by which screen asks. A short link is a pointer on
-        // the app domain and carries no server, so sealing it would buy no privacy and take away the
-        // short form the user selected; the full address always names its SMP host, so it is sealed.
-        // `popopxChatUri` rewrites the full link but not the short one, so both forms go through
-        // `popopxChatLink` here: a shared value must be tappable by whoever receives it.
-        let original = popopxChatLink(link.popopxChatUri(short: false))
-        let hostFree = short && link.connShortLink != nil
-        return PopopxInviteShareForm(
-            opaque: hostFree ? nil : PopopxInviteSealCache.link(forURI: original),
-            fallback: popopxChatLink(link.popopxChatUri(short: short)),
-            original: original
+extension PopopxInviteShare {
+    static func make(from link: CreatedConnLink, short: Bool) -> PopopxInviteShare {
+        make(
+            fullLink: link.connFullLink,
+            shortLink: link.connShortLink,
+            short: short,
+            seal: PopopxInviteSealCache.link(forURI:)
         )
     }
 }

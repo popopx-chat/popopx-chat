@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import chat.popopx.common.model.*
+import chat.popopx.common.invite.popopxSharedLink
 import chat.popopx.common.model.ChatModel.controller
 import chat.popopx.common.ui.theme.*
 import chat.popopx.common.views.chat.*
@@ -575,9 +576,12 @@ fun GroupMemberInfoLayout(
 
     if (member.contactLink != null) {
       SectionView(stringResource(MR.strings.address_section_title)) {
-        POPOPXLinkQRCode(member.contactLink)
+        // The QR and the share carry the sealed code: a member address names its SMP host in
+        // plaintext.
+        val sharedLink = popopxSharedLink(member.contactLink)
+        POPOPXLinkQRCode(sharedLink)
         val clipboard = LocalClipboardManager.current
-        ShareAddressButton { clipboard.shareText(popopxChatLink(member.contactLink)) }
+        ShareAddressButton { clipboard.shareText(sharedLink) }
         if (contactId != null) {
           if (knownDirectChat(contactId) == null && !groupInfo.fullGroupPreferences.directMessages.on(groupInfo.membership)) {
             ConnectViaAddressButton(onClick = { connectViaAddress(member.contactLink) })

@@ -8,18 +8,19 @@ import chat.popopx.common.model.popopxChatLink
  * be sealed, with the original server address reachable behind a fold. Port of `PopopxInviteShareForm`
  * in apps/ios/Shared/Views/NewChat/NewChatView.swift.
  *
- * The code exists to stop the share itself from naming which SMP server holds the queue - the plain
- * invitation link carries `smpN.popopx.im` in its host. It is obfuscation, not confidentiality: the
- * format key is published, so nothing here may be described to the user as encrypted or private.
+ * The code exists to stop the share itself from naming which SMP server holds the queue - every form a
+ * core hands out carries its SMP host in plaintext: the full link names it in the host or in `smp=`,
+ * and the "short" form (`popopx:/...?h=<host>&p=<port>&c=<hash>`, or the `https://<host>/...` spelling)
+ * names it in the query or authority. It is obfuscation, not confidentiality: the format key is
+ * published, so nothing here may be described to the user as encrypted or private.
  */
 data class PopopxInviteShareForm(
-  /** The sealed link, or null when the plaintext names no server (a short link) or when the address is
-   * one the servers would refuse (scheme, size). */
+  /** The sealed link, or null when the codec refuses the address (scheme, size). */
   val opaque: String?,
-  /** What this build showed before the code existed: the short link when one is selected, else the
-   * full address. Still the fallback, so an unsealable link is shared rather than lost. */
+  /** The plain form of what this share carries. Shown only when sealing failed, so an unsealable link
+   * is shared rather than lost. */
   val fallback: String,
-  /** The full address, host included - the thing the fold reveals. */
+  /** The plain address, host included - the thing the fold reveals. */
   val original: String,
 ) {
   /** The one string a screen prints as text, encodes as a QR and hands to the share sheet. */
@@ -31,20 +32,31 @@ data class PopopxInviteShareForm(
 
   companion object {
     fun make(link: CreatedConnLink, short: Boolean): PopopxInviteShareForm {
-      // Decided by what the plaintext names, not by which screen asks. A short link is a pointer on
-      // the app domain and carries no server, so sealing it would buy no privacy and take away the
-      // short form the user selected; the full address always names its SMP host, so it is sealed.
-      // popopxChatUri rewrites the full link but not the short one, so both forms go through
-      // popopxChatLink here: a shared value must be tappable by whoever receives it.
-      val original = popopxChatLink(link.popopxChatUri(short = false))
-      val hostFree = short && link.connShortLink != null
+      // Sealing is decided by the address that is actually being shared, and it is not optional: a
+      // short link is not host-free (its `?h=` names the server), so the user's choice selects which
+      // address is sealed, never whether it is sealed. popopxChatUri rewrites the full link but not
+      // the short one, so both forms go through popopxChatLink here: a shared value must be tappable
+      // by whoever receives it.
+      val full = popopxChatLink(link.popopxChatUri(short = false))
+      val chosen = popopxChatLink(link.popopxChatUri(short = short))
       return PopopxInviteShareForm(
-        opaque = if (hostFree) null else PopopxInviteSealCache.linkFor(original),
-        fallback = popopxChatLink(link.popopxChatUri(short = short)),
-        original = original,
+        opaque = PopopxInviteSealCache.linkFor(chosen),
+        fallback = chosen,
+        original = chosen,
       )
     }
   }
+}
+
+/** The one form to show, print and share for a stored connection address: the sealed `/i/v1/` code
+ * when the address can be sealed, unchanged when it already is one of those codes (handing a share
+ * back to a formatter must not mint a different link), and the plain address when the codec refuses
+ * it. Not for migration file links or relay addresses, which are not connection addresses and are
+ * consumed in their plain form by other parsers. */
+fun popopxSharedLink(uri: String): String {
+  val plain = popopxChatLink(uri)
+  if (PopopxOpaqueInviteCodec.looksLikeOpaqueLink(plain)) return plain
+  return PopopxInviteSealCache.linkFor(plain) ?: plain
 }
 
 /**

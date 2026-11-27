@@ -536,14 +536,16 @@ struct PopopxChatInfoView: View {
 
     private func addressCard(_ contactLink: String) -> some View {
         PopopxSectionCard(Copy.groupAddress, footnote: Copy.addressFootnote(contact.displayName)) {
+            // One sealed string for the QR and the share: the stored address names its SMP host.
+            let sharedLink = popopxSharedLink(contactLink)
             VStack(spacing: PopopxMetrics.spaceS) {
-                POPOPXLinkQRCode(uri: contactLink)
+                POPOPXLinkQRCode(uri: sharedLink)
                     .aspectRatio(1, contentMode: .fit)
                     .padding(PopopxMetrics.spaceM)
                     .frame(maxWidth: PopopxMetrics.space2XL * 5)
 
                 PopopxButton(Copy.shareAddress, systemImage: "square.and.arrow.up", role: .secondary) {
-                    showShareSheet(items: [popopxChatLink(contactLink)])
+                    showShareSheet(items: [sharedLink])
                 }
             }
             .frame(maxWidth: .infinity)

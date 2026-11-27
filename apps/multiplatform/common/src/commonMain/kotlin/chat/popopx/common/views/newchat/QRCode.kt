@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.compose.stringResource
 import boofcv.alg.drawing.FiducialImageEngine
 import boofcv.alg.fiducial.qrcode.*
+import chat.popopx.common.invite.PopopxInviteShareForm
 import chat.popopx.common.model.*
 import chat.popopx.common.platform.*
 import chat.popopx.common.ui.theme.*
@@ -33,12 +34,14 @@ fun POPOPXCreatedLinkQRCode(
   withLogo: Boolean = true,
   onShare: (() -> Unit)? = null,
 ) {
+  // A screen that passes no encodedURI still gets a share: this view is only ever handed connection
+  // addresses, so the default is the sealed form of the selected link. `small` is decided by the
+  // string actually encoded - the sealed code is longer than the address it hides, so the compact,
+  // error-level-M rendering is wrong for it even when the user picked the short link.
+  val uri = encodedURI ?: PopopxInviteShareForm.make(connLink, short).display
   QRCode(
-    // `small` shrinks the modules and raises the error level: right for a short link, wrong for a
-    // sealed one, which is longer than the address it hides. The two are mutually exclusive here - a
-    // short link is never sealed, because it already names no server.
-    encodedURI ?: connLink.popopxChatUri(short),
-    small = short && connLink.connShortLink != null,
+    uri,
+    small = uri.length < 200,
     modifier,
     padding,
     tintColor,

@@ -248,7 +248,9 @@ struct UserAddressView: View {
     @ViewBuilder private func onboardingAddressView(_ userAddress: UserContactLink) -> some View {
         Section {
             HStack(spacing: 8) {
-                let link = userAddress.connLinkContact.popopxChatUri(short: showShortLink)
+                // The printed line and the share beside it carry the sealed code, not the address:
+                // both forms of it name the SMP host in plaintext.
+                let link = PopopxInviteShareForm.make(from: userAddress.connLinkContact, short: showShortLink).display
                 linkTextView(link)
                 Button { showShareSheet(items: [link]) } label: {
                     Image(systemName: "square.and.arrow.up")

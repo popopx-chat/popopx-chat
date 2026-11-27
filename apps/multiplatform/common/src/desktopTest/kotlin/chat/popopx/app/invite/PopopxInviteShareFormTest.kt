@@ -5,6 +5,7 @@ import chat.popopx.common.invite.PopopxOpaqueInviteCodec
 import chat.popopx.common.invite.looksLikePopopxInviteLink
 import chat.popopx.common.invite.popopxConnectURI
 import chat.popopx.common.invite.popopxInviteLinkURI
+import chat.popopx.common.invite.popopxSharedLink
 import chat.popopx.common.model.CreatedConnLink
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -17,15 +18,22 @@ import org.bouncycastle.crypto.params.ParametersWithIV
 
 // The app-layer invite link: which share a screen shows, and what a received string turns into before
 // the core sees it. Every expectation here is a spelled-out literal, because the rules being pinned are
-// rules about particular strings - "a short link is never sealed" is only proved if the test names the
-// short link, the published prefix and the original address it must not equal.
+// rules about particular strings - "a short link is sealed too" is only proved if the test names the
+// short link, the server host it carries and the original address it must not equal.
 
-/** A full invitation address: it names the SMP host, which is the whole reason the code exists. */
+/** A full invitation address: it names the SMP host in its `smp=` parameter. */
 private const val FULL =
   "https://popopx.chat/invitation#/?v=2&smp=smp%3A%2F%2F8yH7w55jipblnSA3Fk5l2T3BHFXTzZFvbX1CrsiDhBc%40smp7.popopx.im%2FAbCdEfGh0123456789IJKL&x3dh=MDEyMzQ1Njc4OQ%3D%3D"
 
-/** The same invitation as the app publishes it on its own domain: no server host in it. */
+/** The app-domain pointer form, with no server in it. */
 private const val SHORT = "https://popopx.chat/i#A1b2C3d4E5f6G7h8I9j0"
+
+/** What the core actually mints as a "short" link: the SMP host moved into the query, not removed. */
+private const val SHORT_WITH_HOST = "popopx:/i#A1b2C3d4E5f6G7h8I9j0?h=smp1.popopx.im&p=5223&c=Zm9vYmFyYmF6"
+
+/** The tappable spelling of [SHORT_WITH_HOST], which is what a share carries before sealing. */
+private const val SHORT_WITH_HOST_TAPPABLE =
+  "https://popopx.chat/i#A1b2C3d4E5f6G7h8I9j0?h=smp1.popopx.im&p=5223&c=Zm9vYmFyYmF6"
 
 /** The one published invite form this build mints. */
 private const val OPAQUE_PREFIX = "https://popopx.chat/i/v1/"
@@ -33,6 +41,14 @@ private const val OPAQUE_PREFIX = "https://popopx.chat/i/v1/"
 private val invitation = CreatedConnLink(FULL, SHORT)
 
 class PopopxInviteShareFormTest {
+
+  /** Every literal a share must never carry, taken from the address it was made from. Full hostnames
+   * only: a 4-letter fragment can occur inside the base64 ciphertext by chance, a hostname cannot. */
+  private fun assertNoServerNamed(text: String) {
+    assertTrue(!text.contains("smp1.popopx.im"), "a share named its server: $text")
+    assertTrue(!text.contains("smp7.popopx.im"), "a share named its server: $text")
+    assertTrue(!text.contains("popopx.im"), "a share named its server: $text")
+  }
 
   /** Seals an arbitrary payload with the format key, so a test can hand the opener an envelope that
    * authenticates but is not a connection address. */
@@ -49,14 +65,15 @@ class PopopxInviteShareFormTest {
   }
 
   @Test
-  fun shortLinkIsNeverSealed() {
+  fun shortLinkIsSealedTooBecauseItsQueryNamesTheServer() {
     val form = PopopxInviteShareForm.make(invitation, short = true)
-    assertNull(form.opaque, "a short link already names no server, so sealing it buys nothing")
-    assertTrue(!form.isSealed, "the fold must not appear for a link that hides nothing")
-    assertEquals("https://popopx.chat/i#A1b2C3d4E5f6G7h8I9j0", form.display)
-    assertTrue(!form.display.startsWith(OPAQUE_PREFIX))
+    assertTrue(form.isSealed, "a short link still names its SMP host in ?h=")
+    val display = checkNotNull(form.opaque)
+    assertTrue(display.startsWith(OPAQUE_PREFIX), "displayed $display")
+    assertNoServerNamed(display)
+    assertEquals(SHORT, PopopxOpaqueInviteCodec.uriFromLink(display))
     assertEquals(SHORT, form.fallback)
-    assertEquals(FULL, form.original)
+    assertEquals(SHORT, form.original)
   }
 
   @Test
@@ -93,10 +110,45 @@ class PopopxInviteShareFormTest {
     assertEquals(FULL, form.original)
     assertNotEquals(form.original, form.display)
     assertEquals(form.original, popopxConnectURI(form.display))
-    // A short link hides nothing, so there is nothing to unwrap and nothing for the fold to reveal.
+    // A short link is sealed by the same rule, so its fold reveals the short form, host included.
     val shortForm = PopopxInviteShareForm.make(invitation, short = true)
-    assertTrue(!shortForm.isSealed)
+    assertTrue(shortForm.isSealed)
+    assertEquals(SHORT, shortForm.original)
+    assertNotEquals(SHORT, shortForm.display)
     assertEquals(SHORT, popopxConnectURI(shortForm.display))
+  }
+
+  @Test
+  fun noShareEverNamesTheServerOfTheAddressItCarries() {
+    for (short in listOf(false, true)) {
+      val form = PopopxInviteShareForm.make(invitation, short = short)
+      assertTrue(form.display.startsWith(OPAQUE_PREFIX), "displayed ${form.display}")
+      assertNoServerNamed(form.display)
+    }
+    // A real core short link keeps its host in ?h=, so it falls under the same rule and opens back to
+    // the exact tappable address it was made from.
+    val hosted = PopopxInviteShareForm.make(CreatedConnLink(FULL, SHORT_WITH_HOST), short = true)
+    assertTrue(hosted.isSealed)
+    val display = checkNotNull(hosted.opaque)
+    assertNoServerNamed(display)
+    assertEquals(SHORT_WITH_HOST_TAPPABLE, PopopxOpaqueInviteCodec.uriFromLink(display))
+    assertEquals(SHORT_WITH_HOST_TAPPABLE, hosted.original)
+  }
+
+  @Test
+  fun sharedLinkHelperSealsPlainAddressesAndNeverResealsACode() {
+    val sealed = checkNotNull(PopopxInviteShareForm.make(invitation, short = false).opaque)
+    assertEquals(sealed, popopxSharedLink(sealed))
+    val fromShort = popopxSharedLink(SHORT_WITH_HOST)
+    assertTrue(fromShort.startsWith(OPAQUE_PREFIX), "displayed $fromShort")
+    assertNoServerNamed(fromShort)
+    assertEquals(SHORT_WITH_HOST_TAPPABLE, PopopxOpaqueInviteCodec.uriFromLink(fromShort))
+    val fromFull = popopxSharedLink(FULL)
+    assertNoServerNamed(fromFull)
+    assertEquals(FULL, PopopxOpaqueInviteCodec.uriFromLink(fromFull))
+    // Content the codec refuses is returned unchanged: a relay address is not a connection address.
+    val relay = "smp://8yH7w55jipblnSA3Fk5l2T3BHFXTzZF@smp7.popopx.im/A1b2C3d4"
+    assertEquals(relay, popopxSharedLink(relay))
   }
 
   @Test

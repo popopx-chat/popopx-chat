@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import chat.popopx.common.model.*
+import chat.popopx.common.invite.popopxSharedLink
 import chat.popopx.common.model.ChatController.appPrefs
 import chat.popopx.common.model.ChatModel.controller
 import chat.popopx.common.ui.theme.*
@@ -635,9 +636,11 @@ fun ChatInfoLayout(
 
     if (contact.contactLink != null) {
       SectionView(stringResource(MR.strings.address_section_title)) {
-        POPOPXLinkQRCode(contact.contactLink)
+        // One sealed string for the QR and the share: the stored address names its SMP host.
+        val sharedLink = popopxSharedLink(contact.contactLink)
+        POPOPXLinkQRCode(sharedLink)
         val clipboard = LocalClipboardManager.current
-        ShareAddressButton { clipboard.shareText(popopxChatLink(contact.contactLink)) }
+        ShareAddressButton { clipboard.shareText(sharedLink) }
       }
       SectionTextFooter(stringResource(MR.strings.you_can_share_this_address_with_your_contacts).format(contact.displayName))
       SectionDividerSpaced()

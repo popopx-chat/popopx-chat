@@ -11,6 +11,7 @@
 import SwiftUI
 import CoreImage.CIFilterBuiltins
 import POPOPXChat
+import PopopxMeshKit
 
 struct MutableQRCode: View {
     @Binding var uri: String
@@ -34,13 +35,23 @@ struct POPOPXCreatedLinkQRCode: View {
     var onShare: (() -> Void)? = nil
 
     var body: some View {
-        // `small` shrinks the modules and raises the error level: right for a short link, wrong for a
-        // sealed one, which is longer than the address it hides. The two are mutually exclusive here —
-        // a short link is never sealed, because it already names no server.
-        QRCode(uri: encodedURI ?? link.popopxChatUri(short: short),
-               small: short && link.connShortLink != nil,
-               onShare: onShare)
+        // A screen that passes no `encodedURI` still gets a share: this view is only ever handed
+        // connection addresses, so the default is the sealed form of the selected link. `small` is
+        // decided by the string actually encoded: the sealed code is longer than the address it
+        // hides, so the compact, error-level-M rendering is wrong for it even when the user picked
+        // the short link.
+        let uri = encodedURI ?? PopopxInviteShareForm.make(from: link, short: short).display
+        QRCode(uri: uri, small: uri.count < 200, onShare: onShare)
     }
+}
+
+/// The one form a screen should print, encode and share for a stored connection address: the sealed
+/// `/i/v1/` code when the address can be sealed, unchanged when it already is one of those codes
+/// (handing a share back to a formatter must not mint a different link), and the plain address when
+/// the codec refuses it. Migration file links and relay addresses are not connection addresses and
+/// must not be passed here — they are consumed in their plain form by other parsers.
+func popopxSharedLink(_ uri: String) -> String {
+    PopopxInviteShare.sharedLink(forURI: uri, seal: PopopxInviteSealCache.link(forURI:))
 }
 
 struct POPOPXLinkQRCode: View {

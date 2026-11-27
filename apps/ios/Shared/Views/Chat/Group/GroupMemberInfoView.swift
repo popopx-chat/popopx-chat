@@ -152,9 +152,12 @@ struct GroupMemberInfoView: View {
 
                     if let contactLink = member.contactLink {
                         Section {
-                            POPOPXLinkQRCode(uri: contactLink)
+                            // The QR and the share carry the sealed code: a member address names
+                            // its SMP host in plaintext.
+                            let sharedLink = popopxSharedLink(contactLink)
+                            POPOPXLinkQRCode(uri: sharedLink)
                             Button {
-                                showShareSheet(items: [popopxChatLink(contactLink)])
+                                showShareSheet(items: [sharedLink])
                             } label: {
                                 Label("Share address", systemImage: "square.and.arrow.up")
                             }

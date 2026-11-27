@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import chat.popopx.common.model.*
+import chat.popopx.common.invite.popopxSharedLink
 import chat.popopx.common.model.ChatController.appPrefs
 import chat.popopx.common.ui.theme.*
 import chat.popopx.common.views.helpers.*
@@ -1276,11 +1277,13 @@ private fun ChannelWebPageButton(groupInfo: GroupInfo, onClick: () -> Unit) {
 @Composable
 private fun ChannelLinkQRCodeSection(groupLink: String) {
   val clipboard = LocalClipboardManager.current
+  // The public channel link names its SMP host; the QR and the share both carry the sealed code.
+  val sharedLink = popopxSharedLink(groupLink)
   Box(Modifier.padding(vertical = DEFAULT_PADDING_HALF)) {
-    POPOPXLinkQRCode(connReq = groupLink)
+    POPOPXLinkQRCode(connReq = sharedLink)
   }
   SectionItemView({
-    clipboard.shareText(popopxChatLink(groupLink))
+    clipboard.shareText(sharedLink)
   }) {
     Icon(painterResource(MR.images.ic_share), null, tint = MaterialTheme.colors.primary)
     Spacer(Modifier.width(8.dp))

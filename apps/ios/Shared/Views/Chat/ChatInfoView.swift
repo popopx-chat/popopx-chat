@@ -220,9 +220,12 @@ struct ChatInfoView: View {
 
                     if let contactLink = contact.contactLink {
                         Section {
-                            POPOPXLinkQRCode(uri: contactLink)
+                            // One sealed string for the QR and the share sheet: the stored address
+                            // names its SMP host.
+                            let sharedLink = popopxSharedLink(contactLink)
+                            POPOPXLinkQRCode(uri: sharedLink)
                             Button {
-                                showShareSheet(items: [popopxChatLink(contactLink)])
+                                showShareSheet(items: [sharedLink])
                             } label: {
                                 Label("Share address", systemImage: "square.and.arrow.up")
                             }

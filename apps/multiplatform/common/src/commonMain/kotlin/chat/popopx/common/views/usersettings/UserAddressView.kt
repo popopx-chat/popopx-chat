@@ -25,6 +25,7 @@ import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import androidx.compose.ui.unit.dp
 import chat.popopx.common.model.*
+import chat.popopx.common.invite.PopopxInviteShareForm
 import chat.popopx.common.ui.theme.*
 import chat.popopx.common.views.helpers.*
 import chat.popopx.common.model.ChatModel
@@ -138,9 +139,12 @@ fun UserAddressView(
       },
       share = ::share,
       sendEmail = { userAddress ->
+        // The email names the address, so it names the SMP host unless it carries the sealed code.
         uriHandler.sendEmail(
           generalGetString(MR.strings.email_invite_subject),
-          generalGetString(MR.strings.email_invite_body).format(popopxChatLink(userAddress.connLinkContact.connFullLink)) // TODO [short links] replace with short link
+          generalGetString(MR.strings.email_invite_body).format(
+            PopopxInviteShareForm.make(userAddress.connLinkContact, short = false).display
+          )
         )
       },
       setProfileAddress = ::setProfileAddress,
@@ -210,7 +214,9 @@ private fun addShortLink(
     if (userAddress != null) {
       chatModel.userAddress.value = userAddress
       if (shareOnCompletion) {
-        share(userAddress.connLinkContact.popopxChatUri(short = true))
+        // Both forms of a core address name their SMP host (the full link in smp=, the short one in
+        // ?h=), so the auto-share after minting carries the sealed code, not the address.
+        share(PopopxInviteShareForm.make(userAddress.connLinkContact, short = true).display)
       }
     }
     progressIndicator.value = false
@@ -329,7 +335,9 @@ private fun UserAddressLayout(
             Modifier.fillMaxWidth().padding(horizontal = DEFAULT_PADDING, vertical = DEFAULT_PADDING_HALF),
             style = MaterialTheme.typography.body1
           )
-          LinkTextView(userAddress.connLinkContact.popopxChatUri(short = showShortLink.value), true)
+          // The printed line and the copy/share icons beside it carry the sealed code, not the
+          // address: both forms of it name the SMP host in plaintext.
+          LinkTextView(PopopxInviteShareForm.make(userAddress.connLinkContact, short = showShortLink.value).display, true)
           Text(
             stringResource(MR.strings.onboarding_or_use_qr_code),
             Modifier.fillMaxWidth().padding(horizontal = DEFAULT_PADDING, vertical = DEFAULT_PADDING_HALF),
@@ -350,9 +358,9 @@ private fun UserAddressLayout(
             }
             ShareAddressButton {
               if (userAddress.shouldBeUpgraded) {
-                showAddShortLinkAlert { share(userAddress.connLinkContact.popopxChatUri(short = showShortLink.value)) }
+                showAddShortLinkAlert { share(PopopxInviteShareForm.make(userAddress.connLinkContact, short = showShortLink.value).display) }
               } else {
-                share(userAddress.connLinkContact.popopxChatUri(short = showShortLink.value))
+                share(PopopxInviteShareForm.make(userAddress.connLinkContact, short = showShortLink.value).display)
               }
             }
             ShareViaChatButton {

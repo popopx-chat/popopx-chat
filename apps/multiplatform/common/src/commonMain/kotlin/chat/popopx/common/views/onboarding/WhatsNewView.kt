@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import chat.popopx.common.model.ChatController.appPrefs
 import chat.popopx.common.model.ChatModel
 import chat.popopx.common.model.*
+import chat.popopx.common.invite.PopopxInviteShareForm
 import chat.popopx.common.model.ChatController.setConditionsNotified
 import chat.popopx.common.model.ServerOperator.Companion.dummyOperatorInfo
 import chat.popopx.common.platform.*
@@ -1061,7 +1062,8 @@ fun CreateUpdateAddressShortLinkView(modalManager: ModalManager) {
               interactionSource = remember { MutableInteractionSource() },
               indication = null
             ) {
-              share(addr.connLinkContact.popopxChatUri(short = true))
+              // The share carries the sealed code: both forms of the address name their SMP host.
+              share(PopopxInviteShareForm.make(addr.connLinkContact, short = true).display)
             }
         )
       }

@@ -1621,7 +1621,9 @@ extension PopopxAddress {
     }
 
     func shareAddress(short: Bool) {
-        showShareSheet(items: [popopxChatLink(connLinkContact.popopxChatUri(short: short))])
+        // Both forms of a core address name their SMP host (the full link in `smp=`, the short one
+        // in `?h=`), so the shared item is the sealed `/i/v1/` code, not the address.
+        showShareSheet(items: [PopopxInviteShareForm.make(from: connLinkContact, short: short).display])
     }
 }
 

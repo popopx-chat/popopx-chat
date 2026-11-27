@@ -19,6 +19,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import chat.popopx.common.model.*
+import chat.popopx.common.invite.PopopxInviteShareForm
 import chat.popopx.common.platform.*
 import chat.popopx.common.ui.theme.*
 import chat.popopx.common.views.helpers.*
@@ -63,7 +64,9 @@ fun GroupLinkView(
         groupLinkMemberRole.value = link.acceptMemberRole
         onGroupLinkUpdated?.invoke(link)
         if (shareOnCompletion) {
-          clipboard.shareText(link.connLinkContact.popopxChatUri(short = true))
+          // The auto-share after minting carries the sealed code: both forms of the link name
+          // their SMP host in plaintext.
+          clipboard.shareText(PopopxInviteShareForm.make(link.connLinkContact, short = true).display)
         }
       }
       creatingLink = false
@@ -254,10 +257,10 @@ fun GroupLinkLayout(
             click = {
               if (!isChannel && groupLink.shouldBeUpgraded) {
                 showAddShortLinkAlert {
-                  clipboard.shareText(groupLink.connLinkContact.popopxChatUri(short = showShortLink.value))
+                  clipboard.shareText(PopopxInviteShareForm.make(groupLink.connLinkContact, short = showShortLink.value).display)
                 }
               } else {
-                clipboard.shareText(groupLink.connLinkContact.popopxChatUri(short = showShortLink.value))
+                clipboard.shareText(PopopxInviteShareForm.make(groupLink.connLinkContact, short = showShortLink.value).display)
               }
             },
             iconColor = MaterialTheme.colors.primary,
