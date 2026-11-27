@@ -14,6 +14,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import chat.popopx.common.model.*
+import chat.popopx.common.platform.appPlatform
 import chat.popopx.common.platform.appPreferences
 import chat.popopx.common.ui.theme.isInDarkTheme
 import chat.popopx.common.views.helpers.AutoMirroredIcon
@@ -51,13 +53,18 @@ fun CIMetaView(
   showViaProxy: Boolean,
   lineHeightColor: Color = metaColor,
 ) {
-  val timeStyle = LocalTextStyle.current.merge(chatTextStyle(12.sp, lineHeightColor))
+  // iOS draws the bubble footer in `caption2 mono` (PopopxType, 11pt): the timestamp is a metric, so the
+  // Android bubble uses the same size and a monospaced face while the desktop tree keeps its 12sp row.
+  val metaTimeSize = if (appPlatform.isAndroid) 11.sp else 12.sp
+  val timeStyle = LocalTextStyle.current.merge(chatTextStyle(metaTimeSize, lineHeightColor)).copy(
+    fontFamily = if (appPlatform.isAndroid) FontFamily.Monospace else FontFamily.Default
+  )
   Row(Modifier.padding(start = 3.dp), verticalAlignment = Alignment.CenterVertically) {
     if (chatItem.isDeletedContent) {
       Text(
         chatItem.timestampText,
         color = metaColor,
-        fontSize = 12.sp,
+        fontSize = metaTimeSize,
         modifier = Modifier.padding(start = 3.dp),
         style = timeStyle
       )
@@ -138,7 +145,14 @@ private fun CIMetaText(
 
   if (showTimestamp) {
     Spacer(Modifier.width(4.dp))
-    Text(meta.timestampText, color = color, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, style = timeStyle)
+    Text(
+      meta.timestampText,
+      color = color,
+      fontSize = if (appPlatform.isAndroid) 11.sp else 12.sp,
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+      style = timeStyle
+    )
   }
 }
 

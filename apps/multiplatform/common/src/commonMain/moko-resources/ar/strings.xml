@@ -3100,6 +3100,12 @@
     <string name="discover_node_probe_sending">جارٍ مطالبة Mac بالتأكيد…</string>
     <string name="discover_node_probe_confirmed">أكّد Mac هذه المحادثة.</string>
     <string name="discover_node_probe_failed">لا يمكن الوصول إلى هذا Mac الآن</string>
+    <string name="discover_banner_no_node">لا عقدة Mac مرتبطة</string>
+    <string name="discover_banner_connected_format">%1$s · الحوسبة المحلية متصلة</string>
+    <string name="discover_banner_idle">مرتبطة، لكنها لا تستجيب</string>
+    <string name="discover_banner_needs_chat">مرتبطة، لكن لم تُرفق أي محادثة بعد</string>
+    <string name="discover_banner_ready">جاهزة لأزرار القائمة أدناه</string>
+    <string name="node_update_ready_format">الإصدار %1$s جاهز للتثبيت على Mac الخاص بك</string>
     <string name="node_update_build_format">البناء %1$s</string>
     <string name="node_update_released_format">صدر في %1$s</string>
     <string name="node_update_digest_format">بصمة الحزمة %1$s</string>

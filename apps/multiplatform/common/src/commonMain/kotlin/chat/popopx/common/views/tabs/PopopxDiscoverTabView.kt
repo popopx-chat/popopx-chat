@@ -1,6 +1,7 @@
 package chat.popopx.common.views.tabs
 
 import SectionItemView
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -10,7 +11,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -26,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import chat.popopx.common.copilot.PopopxEcoAssistantHost
@@ -42,14 +46,25 @@ import chat.popopx.common.discover.PopopxNodeServiceId
 import chat.popopx.common.discover.PopopxPairingAccept
 import chat.popopx.common.discover.PopopxSubscriptionEngine
 import chat.popopx.common.model.ChatInfo
+import chat.popopx.common.platform.appPlatform
 import chat.popopx.common.platform.chatModel
 import chat.popopx.common.platform.ColumnWithScrollBar
 import chat.popopx.common.signal.PopopxSilentSignalingRouter
 import chat.popopx.common.ui.theme.DEFAULT_PADDING
 import chat.popopx.common.ui.theme.DEFAULT_PADDING_HALF
+import chat.popopx.common.ui.theme.PopopxBrand
+import chat.popopx.common.ui.theme.PopopxHairlineInner
+import chat.popopx.common.ui.theme.PopopxLabelHint
+import chat.popopx.common.ui.theme.PopopxMeshInk
+import chat.popopx.common.ui.theme.PopopxRadiusCard
+import chat.popopx.common.ui.theme.PopopxRadiusControl
+import chat.popopx.common.ui.theme.isInDarkTheme
+import chat.popopx.common.ui.theme.sectionCardColor
 import chat.popopx.common.views.helpers.AppBarTitle
+import chat.popopx.common.views.helpers.AutoMirroredIcon
 import chat.popopx.common.views.helpers.DefaultBasicTextField
 import chat.popopx.common.views.helpers.ModalManager
+import chat.popopx.common.views.helpers.generalGetString
 import chat.popopx.common.views.newchat.PopopxCardActionButton
 import chat.popopx.common.views.newchat.QRCodeScanner
 import chat.popopx.res.*
@@ -330,6 +345,13 @@ private fun PopopxDiscoverAssistantRow() {
 
 @Composable
 private fun PopopxDiscoverNodeRow(binding: PopopxMacNodeBinding?) {
+  // `PopopxDiscoverBanner` (PopopxDiscoverView.swift:129-203): one tappable card, because the only next
+  // action a status row can offer is the bonding sheet, and making the user hunt for a separate link is
+  // what that banner exists to avoid. Desktop keeps the plain text row so its layout stays unchanged.
+  if (appPlatform.isAndroid) {
+    PopopxDiscoverNodeBanner(binding)
+    return
+  }
   Column(Modifier.fillMaxWidth().padding(horizontal = DEFAULT_PADDING, vertical = DEFAULT_PADDING)) {
     if (binding == null) {
       Text(stringResource(MR.strings.discover_node_heading), style = MaterialTheme.typography.body1)
@@ -357,6 +379,85 @@ private fun PopopxDiscoverNodeRow(binding: PopopxMacNodeBinding?) {
       color = MaterialTheme.colors.primary,
       modifier = Modifier.clickable { showNodePairingSheet() }.padding(top = 8.dp)
     )
+  }
+}
+
+/**
+ * The iOS node banner rebuilt on Android tokens: a `radiusCard` card on the page, a `radiusControl`
+ * icon chip tinted at 12%, an emphasis headline, a two-line caption and a trailing chevron in
+ * `labelHint`. The tint is the whole status: `meshInk` once the node answered, brand while bonded
+ * but unanswered, `labelHint` before any bonding — the same three states and the same strings as
+ * `DiscoverCopy` on iOS.
+ */
+@Composable
+private fun PopopxDiscoverNodeBanner(binding: PopopxMacNodeBinding?) {
+  val connected = binding?.handshakeConfirmed == true && binding?.contactId != null
+  val tint = when {
+    connected -> PopopxMeshInk
+    binding == null -> PopopxLabelHint
+    else -> PopopxBrand
+  }
+  val label = binding?.let {
+    it.deviceLabel.ifEmpty {
+      it.contactDisplayName?.takeIf { name -> name.isNotEmpty() }
+        ?: generalGetString(MR.strings.discover_node_heading)
+    }
+  }
+  val headline = when {
+    binding == null -> stringResource(MR.strings.discover_banner_no_node)
+    connected -> String.format(generalGetString(MR.strings.discover_banner_connected_format), label)
+    else -> label.orEmpty()
+  }
+  val subline = when {
+    binding == null -> stringResource(MR.strings.discover_pairing_intro)
+    binding.contactId == null -> stringResource(MR.strings.discover_banner_needs_chat)
+    connected -> stringResource(MR.strings.discover_banner_ready)
+    else -> stringResource(MR.strings.discover_banner_idle)
+  }
+  Surface(
+    Modifier
+      .fillMaxWidth()
+      .padding(horizontal = 16.dp)
+      .padding(top = 4.dp),
+    shape = RoundedCornerShape(PopopxRadiusCard),
+    color = sectionCardColor(),
+    border = BorderStroke(0.5.dp, PopopxHairlineInner),
+    elevation = if (isInDarkTheme()) 0.dp else 1.dp,
+  ) {
+    Row(
+      Modifier.fillMaxWidth().clickable { showNodePairingSheet() }.padding(8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+      Box(
+        Modifier
+          .size(38.dp)
+          .clip(RoundedCornerShape(PopopxRadiusControl))
+          .background(tint.copy(alpha = 0.12f)),
+        contentAlignment = Alignment.Center
+      ) {
+        Icon(painterResource(MR.images.ic_desktop), null, Modifier.size(22.dp), tint = tint)
+      }
+      Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(
+          headline,
+          fontSize = 17.sp,
+          fontWeight = FontWeight.SemiBold,
+          color = MaterialTheme.colors.onBackground,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis
+        )
+        Text(
+          subline,
+          fontSize = 13.sp,
+          color = MaterialTheme.colors.secondary,
+          maxLines = 2,
+          overflow = TextOverflow.Ellipsis
+        )
+      }
+      Spacer(Modifier.width(4.dp))
+      AutoMirroredIcon(painterResource(MR.images.ic_chevron_right), null, Modifier.size(12.dp), tint = PopopxLabelHint)
+    }
   }
 }
 

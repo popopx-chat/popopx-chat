@@ -3406,8 +3406,16 @@
   <string name="discover_node_probe_confirmed">Your Mac confirmed this conversation.</string>
   <!-- Same English value as iOS's `DiscoverCopy.sendFailed`, so one translation covers both apps. -->
   <string name="discover_node_probe_failed">This Mac is not reachable right now</string>
-  <!-- The card title reuses `app_check_for_updates_update_available` ("Update available: %s"); the "Mac node"
-       eyebrow above it is what says whose update this is, so no near-duplicate string is added here. -->
+  <!-- The Discover banner (`PopopxDiscoverBanner`, PopopxDiscoverView.swift:181-202): the headline names the
+       bonding state, the subline says what the banner can do next. English values match iOS `DiscoverCopy`. -->
+  <string name="discover_banner_no_node">No Mac node bonded</string>
+  <string name="discover_banner_connected_format">%1$s · local compute online</string>
+  <string name="discover_banner_idle">Bonded, not responding</string>
+  <string name="discover_banner_needs_chat">Bonded, but no conversation is attached yet</string>
+  <string name="discover_banner_ready">Ready for the menu buttons below</string>
+  <!-- The card title is iOS `PopopxNodeUpdateCopy.readyTitle` ("Version %@ is ready to install on your Mac");
+       the "Mac node" eyebrow above it says whose update this is. -->
+  <string name="node_update_ready_format">Version %1$s is ready to install on your Mac</string>
   <string name="node_update_build_format">Build %1$s</string>
   <string name="node_update_released_format">Released %1$s</string>
   <string name="node_update_digest_format">Package digest %1$s</string>

@@ -42,6 +42,8 @@ import SectionItemView
 import chat.popopx.common.views.helpers.*
 import chat.popopx.common.platform.*
 import chat.popopx.common.views.call.Call
+import chat.popopx.common.views.localauth.PopopxPanicWipeConfirm
+import chat.popopx.common.views.localauth.PopopxPanicWipeUiState
 import chat.popopx.common.views.chat.item.*
 import chat.popopx.common.views.chat.topPaddingToContent
 import chat.popopx.common.views.badges.*
@@ -240,6 +242,9 @@ private fun ToolbarSegment(
 @Composable
 fun ChatListView(chatModel: ChatModel, userPickerState: MutableStateFlow<AnimatedViewState>, setPerformLA: (Boolean) -> Unit, stopped: Boolean) {
   val oneHandUI = remember { appPrefs.oneHandUI.state }
+  // The header's brand mark is iOS's second entry point into the panic wipe; the confirmation sheet it
+  // arms is mounted below, over the list, because the Me page's copy is not on screen here.
+  val panicWipe = remember { PopopxPanicWipeUiState() }
 
   LaunchedEffect(Unit) {
     if (noticesShown) return@LaunchedEffect
@@ -284,6 +289,7 @@ fun ChatListView(chatModel: ChatModel, userPickerState: MutableStateFlow<Animate
           listState,
           stopped,
           setPerformLA,
+          panicWipe,
         )
       }
     } else {
@@ -294,11 +300,15 @@ fun ChatListView(chatModel: ChatModel, userPickerState: MutableStateFlow<Animate
           listState,
           stopped,
           setPerformLA,
+          panicWipe,
         )
       }
       if (!appPlatform.isAndroid && searchText.value.text.isEmpty() && !chatModel.desktopNoUserNoRemote && chatModel.chatRunning.value == true) {
         NewChatSheetFloatingButton(oneHandUI, stopped)
       }
+    }
+    if (appPlatform.isAndroid) {
+      PopopxPanicWipeConfirm(panicWipe)
     }
   }
 
@@ -557,7 +567,7 @@ private fun ConnectButton(text: String, onClick: () -> Unit) {
 }
 
 @Composable
-private fun ChatListToolbar(userPickerState: MutableStateFlow<AnimatedViewState>, listState: LazyListState, stopped: Boolean, setPerformLA: (Boolean) -> Unit) {
+private fun ChatListToolbar(userPickerState: MutableStateFlow<AnimatedViewState>, listState: LazyListState, stopped: Boolean, setPerformLA: (Boolean) -> Unit, panicWipe: PopopxPanicWipeUiState) {
   val serversSummary: MutableState<PresentedServersSummary?> = remember { mutableStateOf(null) }
   val barButtons = arrayListOf<@Composable RowScope.() -> Unit>()
   val updatingProgress = remember { chatModel.updatingProgress }.value
@@ -683,8 +693,34 @@ private fun ChatListToolbar(userPickerState: MutableStateFlow<AnimatedViewState>
     ) { ServersSummaryView(chatModel.currentRemoteHost.value, serversSummary) }
   }
   if (appPlatform.isAndroid) {
+    val androidIdentity: @Composable RowScope.() -> Unit = {
+      if (chatModel.users.isEmpty() && !chatModel.desktopNoUserNoRemote) {
+        NavigationButtonMenu {
+          ModalManager.start.showModalCloseable(cardScreen = true) { close ->
+            SettingsView(chatModel, setPerformLA, close)
+          }
+        }
+      } else {
+        PopopxIdentityCapsule(chatModel.currentUser.value?.displayName) {
+          userPickerState.value = AnimatedViewState.VISIBLE
+        }
+      }
+    }
+    val openNewChat = { option: NewChatOption, scanner: Boolean ->
+      {
+        ModalManager.start.showModalCloseable(endButtons = { AddContactLearnMoreButton() }) { _ ->
+          NewChatView(
+            chatModel.currentRemoteHost.value,
+            option,
+            showQRCodeScanner = scanner,
+            close = { ModalManager.start.closeModals() }
+          )
+        }
+      }
+    }
     PopopxMessagesHeader(
-      navigationButton = navigationButton,
+      identity = androidIdentity,
+      panicWipe = panicWipe,
       statusBadge = {
         if (!shouldShowOnboarding()) {
           SubscriptionStatusIndicator(click = showServersSummary)
@@ -692,7 +728,19 @@ private fun ChatListToolbar(userPickerState: MutableStateFlow<AnimatedViewState>
       },
       buttons = barButtons,
       showNewChat = !stopped,
-      onNewChat = { showNewChatSheet(oneHandUI) },
+      onAddFriend = openNewChat(NewChatOption.CONNECT, false),
+      onStartGroupChat = {
+        ModalManager.start.showCustomModal { close ->
+          AddGroupView(chatModel, chatModel.currentRemoteHost.value, close) { ModalManager.start.closeModals() }
+        }
+      },
+      onCreateChannel = {
+        ModalManager.start.showCustomModal { close ->
+          AddChannelView(chatModel, chatModel.currentRemoteHost.value, close) { ModalManager.start.closeModals() }
+        }
+      },
+      onScan = openNewChat(NewChatOption.CONNECT, true),
+      onMintLink = openNewChat(NewChatOption.INVITE, false),
     )
   } else {
     DefaultAppBar(
@@ -876,13 +924,30 @@ private fun openAppLink(rhId: Long?, uri: String) {
 @Composable
 private fun ChatListSearchBar(listState: LazyListState, searchText: MutableState<TextFieldValue>, searchShowingPopopxLink: MutableState<Boolean>, searchChatFilteredByPopopxLink: MutableState<Set<String>>, connectNameCandidate: MutableState<String?>) {
   Box {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+    // `PopopxChatSearchRow` (ChatsListView.swift:934-985): a card on the page, radius 12, minimum 44 high,
+    // 16pt outer margins and 12pt inner padding. Desktop keeps its full-bleed row so the snapshot baseline
+    // and the window layout are unchanged.
+    val androidCard = appPlatform.isAndroid
+    Row(
+      verticalAlignment = Alignment.CenterVertically,
+      modifier = Modifier
+        .fillMaxWidth()
+        .then(
+          if (androidCard) Modifier
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colors.surface)
+            .heightIn(min = 44.dp)
+            .padding(horizontal = 12.dp)
+          else Modifier
+        )
+    ) {
       val focusRequester = remember { FocusRequester() }
       var focused by remember { mutableStateOf(false) }
       Icon(
         painterResource(MR.images.ic_search),
         contentDescription = null,
-        Modifier.padding(start = DEFAULT_PADDING, end = DEFAULT_PADDING_HALF).size(22.dp * fontSizeSqrtMultiplier),
+        Modifier.padding(start = if (androidCard) 0.dp else DEFAULT_PADDING, end = DEFAULT_PADDING_HALF).size(if (androidCard) 16.dp else 22.dp * fontSizeSqrtMultiplier),
         tint = MaterialTheme.colors.secondary
       )
       SearchTextField(

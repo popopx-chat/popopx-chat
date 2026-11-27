@@ -3100,6 +3100,12 @@
     <string name="discover_node_probe_sending">Mac에 확인을 요청하는 중…</string>
     <string name="discover_node_probe_confirmed">Mac이 이 대화를 확인했어요.</string>
     <string name="discover_node_probe_failed">지금은 이 Mac에 연결할 수 없어요</string>
+    <string name="discover_banner_no_node">연결된 Mac 노드 없음</string>
+    <string name="discover_banner_connected_format">%1$s · 로컬 컴퓨팅 온라인</string>
+    <string name="discover_banner_idle">연결됨, 응답 없음</string>
+    <string name="discover_banner_needs_chat">연결되었지만 아직 대화가 연결되지 않았어요</string>
+    <string name="discover_banner_ready">아래 메뉴 버튼을 사용할 수 있어요</string>
+    <string name="node_update_ready_format">%1$s 버전을 Mac에 설치할 준비가 되었어요</string>
     <string name="node_update_build_format">빌드 %1$s</string>
     <string name="node_update_released_format">출시일 %1$s</string>
     <string name="node_update_digest_format">패키지 다이제스트 %1$s</string>

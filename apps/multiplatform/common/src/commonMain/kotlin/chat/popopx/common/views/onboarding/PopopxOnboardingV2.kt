@@ -1,10 +1,13 @@
 package chat.popopx.common.views.onboarding
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,14 +17,21 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import chat.popopx.common.ui.theme.*
@@ -129,14 +139,36 @@ fun PopopxOnboardingHeader(step: Int, steps: Int, stage: String, title: String, 
     }
     Row(Modifier.fillMaxWidth().padding(top = PopopxOnboardingSpaceXS), horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpace2XS)) {
       repeat(steps) { index ->
-        Box(
-          Modifier
-            .weight(1f)
-            .height(4.dp)
-            .background(if (index < step) PopopxBrand else PopopxSeparator, CircleShape)
-        )
+        PopopxOnboardingTrackSegment(filled = index < step)
       }
     }
+  }
+}
+
+/** One third of the progress track: a separator rail that the brand fill stretches into as the step advances. */
+@Composable
+private fun RowScope.PopopxOnboardingTrackSegment(filled: Boolean) {
+  val fill by animateFloatAsState(
+    targetValue = if (filled) 1f else 0f,
+    animationSpec = PopopxFluidSpring,
+    label = "onboarding-track-fill"
+  )
+  val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+  Box(
+    Modifier
+      .weight(1f)
+      .height(PopopxOnboardingSpace2XS)
+      .background(PopopxSeparator, CircleShape)
+  ) {
+    Box(
+      Modifier
+        .fillMaxSize()
+        .graphicsLayer {
+          scaleX = fill
+          transformOrigin = TransformOrigin(if (rtl) 1f else 0f, 0.5f)
+        }
+        .background(PopopxBrand, CircleShape)
+    )
   }
 }
 
@@ -152,13 +184,31 @@ fun PopopxOnboardingHairline() {
   )
 }
 
-/** The rounded coloured icon badge at the head of a row: solid tint fill, contrasting ink. */
+/** The rounded coloured icon badge at the head of a row: a tint gradient, a 0.5dp light rim and a soft halo. */
 @Composable
 fun PopopxOnboardingIconBadge(icon: ImageResource, tint: PopopxOnboardingTint) {
+  val fill = tint.fill()
+  val shape = RoundedCornerShape(PopopxOnboardingRadiusChip)
   Box(
     Modifier
       .size(32.dp)
-      .background(tint.fill(), RoundedCornerShape(PopopxOnboardingRadiusChip)),
+      .drawBehind {
+        val radius = size.minDimension * 0.85f
+        drawCircle(
+          brush = Brush.radialGradient(
+            colors = listOf(fill.copy(alpha = 0.28f), fill.copy(alpha = 0f)),
+            center = center,
+            radius = radius
+          ),
+          radius = radius
+        )
+      }
+      .background(Brush.linearGradient(listOf(lerp(fill, Color.White, 0.16f), fill)), shape)
+      .border(
+        PopopxOnboardingHairlineWidth,
+        Color.White.copy(alpha = if (isInDarkTheme()) 0.18f else 0.30f),
+        shape
+      ),
     contentAlignment = Alignment.Center
   ) {
     Icon(painterResource(icon), null, Modifier.size(18.dp), tint = tint.ink())
@@ -217,6 +267,16 @@ fun PopopxOnboardingSectionCard(
 }
 
 @Composable
+private fun popopxPressScale(interactionSource: MutableInteractionSource): Float {
+  val pressed by interactionSource.collectIsPressedAsState()
+  return animateFloatAsState(
+    targetValue = if (pressed) PopopxPressScale else 1f,
+    animationSpec = PopopxSnappySpring,
+    label = "onboarding-press-scale"
+  ).value
+}
+
+@Composable
 fun PopopxOnboardingPrimaryButton(
   text: String,
   icon: ImageResource? = null,
@@ -225,13 +285,24 @@ fun PopopxOnboardingPrimaryButton(
   mirrorIcon: Boolean = false,
   action: () -> Unit,
 ) {
+  val interactionSource = remember { MutableInteractionSource() }
+  val pressScale = popopxPressScale(interactionSource)
   Surface(
     shape = RoundedCornerShape(PopopxOnboardingRadiusControl),
     color = PopopxBrand.copy(alpha = if (enabled) 1f else 0.45f),
     modifier = Modifier
       .fillMaxWidth()
       .heightIn(min = PopopxOnboardingMinHitTarget)
-      .clickable(enabled = enabled && !loading, onClick = action)
+      .graphicsLayer {
+        scaleX = pressScale
+        scaleY = pressScale
+      }
+      .clickable(
+        interactionSource = interactionSource,
+        indication = LocalIndication.current,
+        enabled = enabled && !loading,
+        onClick = action
+      )
   ) {
     Box(
       Modifier.padding(horizontal = PopopxOnboardingSpaceM, vertical = PopopxOnboardingSpaceS),
@@ -259,11 +330,21 @@ fun PopopxOnboardingGhostButton(
   mirrorIcon: Boolean = false,
   action: () -> Unit,
 ) {
+  val interactionSource = remember { MutableInteractionSource() }
+  val pressScale = popopxPressScale(interactionSource)
   Row(
     Modifier
       .fillMaxWidth()
       .heightIn(min = PopopxOnboardingMinHitTarget)
-      .clickable(onClick = action)
+      .graphicsLayer {
+        scaleX = pressScale
+        scaleY = pressScale
+      }
+      .clickable(
+        interactionSource = interactionSource,
+        indication = LocalIndication.current,
+        onClick = action
+      )
       .padding(horizontal = PopopxOnboardingSpaceM, vertical = PopopxOnboardingSpaceS),
     horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceXS, Alignment.CenterHorizontally),
     verticalAlignment = Alignment.CenterVertically
@@ -385,6 +466,8 @@ fun PopopxOnboardingSecondaryButton(
   icon: ImageResource? = null,
   action: () -> Unit,
 ) {
+  val interactionSource = remember { MutableInteractionSource() }
+  val pressScale = popopxPressScale(interactionSource)
   Surface(
     shape = RoundedCornerShape(PopopxOnboardingRadiusControl),
     color = sectionCardColor(),
@@ -392,7 +475,15 @@ fun PopopxOnboardingSecondaryButton(
     modifier = Modifier
       .fillMaxWidth()
       .heightIn(min = PopopxOnboardingMinHitTarget)
-      .clickable(onClick = action)
+      .graphicsLayer {
+        scaleX = pressScale
+        scaleY = pressScale
+      }
+      .clickable(
+        interactionSource = interactionSource,
+        indication = LocalIndication.current,
+        onClick = action
+      )
   ) {
     Row(
       Modifier.padding(horizontal = PopopxOnboardingSpaceM, vertical = PopopxOnboardingSpaceS),

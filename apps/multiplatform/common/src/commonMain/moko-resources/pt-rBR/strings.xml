@@ -3100,6 +3100,12 @@
     <string name="discover_node_probe_sending">Pedindo ao seu Mac para confirmar…</string>
     <string name="discover_node_probe_confirmed">Seu Mac confirmou esta conversa.</string>
     <string name="discover_node_probe_failed">Não é possível alcançar este Mac agora</string>
+    <string name="discover_banner_no_node">Nenhum nó Mac vinculado</string>
+    <string name="discover_banner_connected_format">%1$s · computação local on-line</string>
+    <string name="discover_banner_idle">Vinculado, sem resposta</string>
+    <string name="discover_banner_needs_chat">Vinculado, mas nenhuma conversa foi anexada ainda</string>
+    <string name="discover_banner_ready">Pronto para os botões do menu abaixo</string>
+    <string name="node_update_ready_format">A versão %1$s está pronta para instalar no seu Mac</string>
     <string name="node_update_build_format">Compilação %1$s</string>
     <string name="node_update_released_format">Lançado em %1$s</string>
     <string name="node_update_digest_format">Hash do pacote %1$s</string>

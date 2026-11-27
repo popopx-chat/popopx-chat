@@ -1227,7 +1227,10 @@ fun chatItemTailEnabled(): Boolean = remember { appPreferences.chatItemTail.stat
 
 @Composable
 fun chatItemTailRendered(chatItem: ChatItem, tailVisible: Boolean, revealed: Boolean): Boolean =
-  shapeStyle(chatItem, chatItemTailEnabled(), tailVisible, revealed).let { it is ShapeStyle.Bubble && it.tailVisible }
+  // Android draws the iOS 16/4 bubble (see `androidBubbleClip`): there is no protruding tail to reserve
+  // space for, so every caller's tail padding and the ±9dp row offset collapse to zero on that surface.
+  !appPlatform.isAndroid &&
+    shapeStyle(chatItem, chatItemTailEnabled(), tailVisible, revealed).let { it is ShapeStyle.Bubble && it.tailVisible }
 
 @Composable
 fun Modifier.chatItemOffset(cItem: ChatItem, tailVisible: Boolean, inverted: Boolean = false, revealed: Boolean): Modifier {
@@ -1241,8 +1244,10 @@ fun Modifier.chatItemOffset(cItem: ChatItem, tailVisible: Boolean, inverted: Boo
 @Composable
 fun Modifier.clipChatItem(chatItem: ChatItem? = null, tailVisible: Boolean = false, revealed: Boolean = false): Modifier {
   val chatItemRoundness = remember { appPreferences.chatItemRoundness.state }
-  val style = shapeStyle(chatItem, chatItemTailEnabled(), tailVisible, revealed)
   val cornerRoundness = chatItemRoundness.value.coerceIn(0f, 1f)
+  if (appPlatform.isAndroid) return androidBubbleClip(chatItem, tailVisible, revealed, cornerRoundness)
+
+  val style = shapeStyle(chatItem, chatItemTailEnabled(), tailVisible, revealed)
 
   return when (style) {
     is ShapeStyle.Bubble -> {
@@ -1261,6 +1266,42 @@ fun Modifier.clipChatItem(chatItem: ChatItem? = null, tailVisible: Boolean = fal
       }
     }
     // RoundRect hit-tests correctly — no bug here, keep the antialiased Modifier.clip.
+    is ShapeStyle.RoundRect -> this.clip(RoundedCornerShape(style.radius * cornerRoundness))
+  }
+}
+
+/**
+ * The Android bubble is the iOS one (`PopopxBubbleTail`, PopopxMessageBubble.swift:151-176): all four corners
+ * are a `PopopxRadiusCard` card and only the corner on the sender's side of the newest row of a run is
+ * tightened to `PopopxRadiusBubbleTuck` — iOS stopped drawing the protruding tail when the bubble took over
+ * the row, so Android matches the tuck and the two surfaces can be compared corner for corner.
+ *
+ * The tuck follows the same predicate as the iOS mount: `tailVisible` (the row's large gap) and only for
+ * content rows — a withdrawn/unavailable sentence keeps four equal corners. It is drawn through
+ * `drawWithCache` like the desktop bubble branch so tall messages keep their long-press hit-test.
+ */
+@Composable
+private fun Modifier.androidBubbleClip(chatItem: ChatItem?, tailVisible: Boolean, revealed: Boolean, cornerRoundness: Float): Modifier {
+  val style = shapeStyleWithTail(chatItem, tailEnabled = chatItemTailEnabled(), tailVisible, revealed)
+  return when (style) {
+    is ShapeStyle.Bubble -> {
+      val sent = chatItem?.chatDir?.sent == true
+      val tucked = tailVisible && chatItem?.content?.msgContent != null
+      val shape = RoundedCornerShape(
+        topStart = if (tucked && !sent) PopopxRadiusBubbleTuck else PopopxRadiusCard,
+        topEnd = if (tucked && sent) PopopxRadiusBubbleTuck else PopopxRadiusCard,
+        bottomStart = PopopxRadiusCard,
+        bottomEnd = PopopxRadiusCard,
+      )
+      this.drawWithCache {
+        val path = Path().apply {
+          addOutline(shape.createOutline(size, layoutDirection, this@drawWithCache))
+        }
+        onDrawWithContent {
+          clipPath(path) { this@onDrawWithContent.drawContent() }
+        }
+      }
+    }
     is ShapeStyle.RoundRect -> this.clip(RoundedCornerShape(style.radius * cornerRoundness))
   }
 }

@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -68,6 +69,9 @@ internal fun PopopxPassCard(
   Column(
     modifier
       .fillMaxWidth()
+      // `popopxCardElevation` (PopopxTheme.swift:226-233): a 3pt blur one point down, light mode only.
+      // Compose's shadow is the closest portable equivalent; dark mode stays flat, as on iOS.
+      .shadow(if (isInDarkTheme()) 0.dp else 2.dp, shape)
       .clip(shape)
       .background(MaterialTheme.colors.onBackground)
       .border(0.5.dp, PopopxHairlineInner, shape)
@@ -154,12 +158,13 @@ internal fun PopopxPassQRPlate(uri: String) {
   }
 }
 
-/** The lock line under the card. iOS draws it with the same two tokens on both sheets. */
+/** The lock line under the card. iOS draws it with the same two tokens on both sheets — including the
+ * `lock.shield.fill` badge, which this app's icon set carries as a plain shield. */
 @Composable
 internal fun PopopxCardSecurityNote(text: String) {
   Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
     Icon(
-      painterResource(MR.images.ic_lock),
+      painterResource(MR.images.ic_shield),
       contentDescription = null,
       modifier = Modifier.padding(top = 2.dp).size(14.dp),
       tint = PopopxBrand

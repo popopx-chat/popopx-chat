@@ -90,8 +90,8 @@ fun ChatPreviewView(
       cInfo.chatViewName,
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
-      style = MaterialTheme.typography.h3,
-      fontWeight = FontWeight.Bold,
+      style = if (appPlatform.isAndroid) MaterialTheme.typography.h3.copy(fontSize = 17.sp) else MaterialTheme.typography.h3,
+      fontWeight = if (appPlatform.isAndroid) FontWeight.SemiBold else FontWeight.Bold,
       color = color
     )
   }
@@ -431,7 +431,7 @@ fun ChatPreviewView(
           chatPreviewImageOverlayIcon()
         }
       }
-      Spacer(Modifier.width(8.dp))
+      Spacer(Modifier.width(if (appPlatform.isAndroid) 12.dp else 8.dp))
       Column(Modifier.weight(1f)) {
         Row {
           Box(Modifier.weight(1f)) {
@@ -517,8 +517,15 @@ fun ChatPreviewView(
                   }
                 } else {
                   UnreadBadge(
-                    text = if (n > 0) unreadCountStr(n) else "",
-                    backgroundColor = if (disabled || showNtfsIcon) MaterialTheme.colors.secondary else MaterialTheme.colors.primaryVariant,
+                    text = if (appPlatform.isAndroid) {
+                      if (n > 99) "99+" else if (n > 0) "$n" else ""
+                    } else {
+                      if (n > 0) unreadCountStr(n) else ""
+                    },
+                    backgroundColor = if (appPlatform.isAndroid) MaterialTheme.colors.onBackground
+                      else if (disabled || showNtfsIcon) MaterialTheme.colors.secondary
+                      else MaterialTheme.colors.primaryVariant,
+                    textColor = if (appPlatform.isAndroid) MaterialTheme.colors.background else Color.White,
                     yOffset = 3.dp
                   )
                 }
@@ -615,11 +622,12 @@ private fun groupInvitationPreviewText(currentUserProfileDisplayName: String?, g
 fun UnreadBadge(
   text: String,
   backgroundColor: Color,
-  yOffset: Dp? = null
+  yOffset: Dp? = null,
+  textColor: Color = Color.White,
 ) {
   Text(
     text,
-    color = Color.White,
+    color = textColor,
     fontSize = 10.sp,
     style = TextStyle(textAlign = TextAlign.Center),
     modifier = Modifier

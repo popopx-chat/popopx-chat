@@ -5,12 +5,18 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Divider
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -22,6 +28,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import chat.popopx.common.mesh.PopopxBluetoothState
@@ -33,8 +40,12 @@ import chat.popopx.common.platform.windowWidth
 import chat.popopx.common.ui.theme.PopopxBrand
 import chat.popopx.common.ui.theme.PopopxHairlineInner
 import chat.popopx.common.ui.theme.PopopxMeshInk
+import chat.popopx.common.ui.theme.PopopxSeparator
+import chat.popopx.common.ui.theme.isInDarkTheme
 import chat.popopx.common.views.helpers.AppBarHeight
 import chat.popopx.common.views.helpers.fontSizeSqrtMultiplier
+import chat.popopx.common.views.helpers.generalGetString
+import chat.popopx.common.views.localauth.PopopxPanicWipeUiState
 import chat.popopx.res.*
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
@@ -42,10 +53,11 @@ import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.delay
 
 // The Android port of iOS `PopopxTelemetryHeader` (apps/ios/Shared/Navigation/PopopxTelemetryHeader.swift):
-// left identity entry, the network + Bluetooth status cluster in the middle, the badge/subscription entry and
-// the page actions on the right. The chat title moved into that centre slot's place and is not drawn here —
-// iOS hides its navigation bar entirely and lets this header be the first row, and the brief asks for the
-// same three-part bar. The title's tap-to-scroll-to-bottom affordance is therefore desktop-only now.
+// brand mark (panic entry), identity capsule, the network + Bluetooth status cluster in the middle, the
+// subscription entry and the plus menu, in the same order and with the same 4dp gaps and 16dp margins.
+// The chat title moved into that centre slot's place and is not drawn here — iOS hides its navigation bar
+// entirely and lets this header be the first row, and the brief asks for the same three-part bar. The
+// title's tap-to-scroll-to-bottom affordance is therefore desktop-only now.
 //
 // The header is mounted only from `ChatListToolbar` under `appPlatform.isAndroid`, and ChatListView selects
 // the top layout on the same platform, so the desktop tree (and its snapshot baselines) is untouched.
@@ -58,13 +70,24 @@ private val PopopxStatusIconSize = 16.dp
 private val PopopxStatusPillSize = 32.dp
 private val PopopxStatusPillHeight = 48.dp
 
+private val PopopxHeaderGap = 4.dp
+private val PopopxHeaderHitTarget = 44.dp
+private val PopopxIdentityHeight = 48.dp
+private val PopopxIdentityMaxWidth = 115.dp
+private val PopopxIdentityNameMaxWidth = 46.dp
+
 @Composable
 internal fun PopopxMessagesHeader(
-  navigationButton: @Composable RowScope.() -> Unit,
+  identity: @Composable RowScope.() -> Unit,
+  panicWipe: PopopxPanicWipeUiState?,
   statusBadge: @Composable () -> Unit,
   buttons: List<@Composable RowScope.() -> Unit>,
   showNewChat: Boolean,
-  onNewChat: () -> Unit,
+  onAddFriend: () -> Unit,
+  onStartGroupChat: () -> Unit,
+  onCreateChannel: () -> Unit,
+  onScan: () -> Unit,
+  onMintLink: () -> Unit,
 ) {
   Row(
     Modifier
@@ -73,31 +96,164 @@ internal fun PopopxMessagesHeader(
       .statusBarsPadding()
       .padding(horizontal = 16.dp)
       .height(AppBarHeight * fontSizeSqrtMultiplier),
-    verticalAlignment = Alignment.CenterVertically
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(PopopxHeaderGap)
   ) {
-    navigationButton()
-    Spacer(Modifier.weight(1f))
-    PopopxMessagesStatusCluster()
+    PopopxBrandMark(panicWipe)
+    identity()
     Spacer(Modifier.weight(1f))
     statusBadge()
+    PopopxMessagesStatusCluster()
+    Spacer(Modifier.weight(1f))
     buttons.forEach { it() }
     if (showNewChat) {
-      IconButton(onClick = onNewChat) {
-        Box(
-          contentAlignment = Alignment.Center,
-          modifier = Modifier
-            .background(MaterialTheme.colors.primary, shape = CircleShape)
-            .size(33.dp * fontSizeSqrtMultiplier)
-        ) {
-          Icon(
-            painterResource(MR.images.ic_add),
-            stringResource(MR.strings.add_contact_or_create_group),
-            Modifier.size(18.dp),
-            tint = Color.White
-          )
-        }
+      PopopxPlusMenu(
+        onAddFriend = onAddFriend,
+        onStartGroupChat = onStartGroupChat,
+        onCreateChannel = onCreateChannel,
+        onScan = onScan,
+        onMintLink = onMintLink,
+      )
+    }
+  }
+}
+
+/**
+ * `PopopxPanicWipeTrigger` (:504-528): a 24dp brand mark inside a 44dp hit target. Three taps arm the
+ * panic wipe only while the mesh fuse is on — with the fuse off there is no confirmation surface to
+ * back out of, so arming would be a state with no exit (the same rule iOS states in the header comment).
+ */
+@Composable
+private fun PopopxBrandMark(panicWipe: PopopxPanicWipeUiState?) {
+  val fuseOn by remember { PopopxMeshKillSwitch.shared.isEnabled }.collectAsState()
+  Box(
+    Modifier
+      .size(PopopxHeaderHitTarget)
+      .clip(CircleShape)
+      .clickable(
+        interactionSource = remember { MutableInteractionSource() },
+        indication = LocalIndication.current
+      ) {
+        if (fuseOn) panicWipe?.tap()
+      },
+    contentAlignment = Alignment.Center
+  ) {
+    Icon(
+      painterResource(if (isInDarkTheme()) MR.images.ic_popopx_tray_light else MR.images.ic_popopx),
+      "POPOPX",
+      Modifier.size(24.dp),
+      tint = PopopxBrand
+    )
+  }
+}
+
+/**
+ * `PopopxIdentitySwitcher` (:203-254): person glyph, the active profile's display name truncated at its
+ * own 46dp cap, and a chevron. The capsule stays ≤115dp wide, is 48dp high, and sits on the card
+ * material with the inner hairline, so it reads as the same object as the two status pills beside it.
+ */
+@Composable
+internal fun PopopxIdentityCapsule(name: String?, onClick: () -> Unit) {
+  val label = generalGetString(MR.strings.your_chat_profiles)
+  Row(
+    Modifier
+      .height(PopopxIdentityHeight)
+      .widthIn(max = PopopxIdentityMaxWidth)
+      .clip(CircleShape)
+      .background(MaterialTheme.colors.surface, CircleShape)
+      .border(0.5.dp, PopopxHairlineInner, CircleShape)
+      .clickable(
+        interactionSource = remember { MutableInteractionSource() },
+        indication = LocalIndication.current,
+        onClickLabel = label,
+        onClick = onClick
+      )
+      .padding(horizontal = 16.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Icon(painterResource(MR.images.ic_account_circle), null, Modifier.size(16.dp), tint = MaterialTheme.colors.onBackground)
+    Text(
+      name ?: label,
+      fontSize = 16.sp,
+      color = MaterialTheme.colors.onBackground,
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+      modifier = Modifier.widthIn(max = PopopxIdentityNameMaxWidth)
+    )
+    Icon(
+      painterResource(MR.images.ic_chevron_down),
+      null,
+      Modifier.size(12.dp),
+      tint = MaterialTheme.colors.onBackground.copy(alpha = 0.7f)
+    )
+  }
+}
+
+/**
+ * `PopopxPlusMenu` (:430-495): a plain 44dp plus (label ink, no filled chip) opening the same five
+ * entries — add friends, group, public channel, scan, separator, one-time link. The host passes the
+ * destinations, so the entry stays a control rather than a second navigation tree.
+ */
+@Composable
+private fun PopopxPlusMenu(
+  onAddFriend: () -> Unit,
+  onStartGroupChat: () -> Unit,
+  onCreateChannel: () -> Unit,
+  onScan: () -> Unit,
+  onMintLink: () -> Unit,
+) {
+  var expanded by remember { mutableStateOf(false) }
+  Box {
+    Box(
+      Modifier
+        .size(PopopxHeaderHitTarget)
+        .clip(CircleShape)
+        .clickable(
+          interactionSource = remember { MutableInteractionSource() },
+          indication = LocalIndication.current
+        ) { expanded = true },
+      contentAlignment = Alignment.Center
+    ) {
+      Icon(
+        painterResource(MR.images.ic_add),
+        stringResource(MR.strings.icon_descr_more_button),
+        Modifier.size(18.dp),
+        tint = MaterialTheme.colors.onBackground
+      )
+    }
+    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+      PopopxPlusMenuItem(MR.images.ic_person_add, stringResource(MR.strings.button_add_friends)) {
+        expanded = false
+        onAddFriend()
+      }
+      PopopxPlusMenuItem(MR.images.ic_group, stringResource(MR.strings.create_group_button)) {
+        expanded = false
+        onStartGroupChat()
+      }
+      PopopxPlusMenuItem(MR.images.ic_bigtop_updates, stringResource(MR.strings.create_channel_button)) {
+        expanded = false
+        onCreateChannel()
+      }
+      PopopxPlusMenuItem(MR.images.ic_qr_code_scanner, stringResource(MR.strings.scan_QR_code)) {
+        expanded = false
+        onScan()
+      }
+      Divider(Modifier.padding(vertical = 4.dp), color = PopopxSeparator)
+      PopopxPlusMenuItem(MR.images.ic_link, stringResource(MR.strings.create_1_time_link)) {
+        expanded = false
+        onMintLink()
       }
     }
+  }
+}
+
+@Composable
+private fun PopopxPlusMenuItem(icon: ImageResource, text: String, action: () -> Unit) {
+  DropdownMenuItem(onClick = action) {
+    Icon(painterResource(icon), null, Modifier.size(18.dp), tint = MaterialTheme.colors.onBackground)
+    Spacer(Modifier.width(12.dp))
+    Text(text, fontSize = 16.sp, color = MaterialTheme.colors.onBackground)
   }
 }
 

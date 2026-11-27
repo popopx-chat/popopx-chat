@@ -14,7 +14,7 @@ import chat.popopx.common.ui.theme.PopopxHairlineInner
 import chat.popopx.common.views.helpers.*
 
 // The row is a card, as on iOS (`PopopxChatRow` in ChatsListView.swift: card radius 16, 0.5 hairline,
-// padding 16, gutter/space2XS insets): a rounded surface on the page instead of a full-bleed row with a
+// padding 12, gutter/space2XS insets): a rounded surface on the page instead of a full-bleed row with a
 // divider under it. Long-press opens the existing dropdown menu; swipe actions have no Android port yet.
 @Composable
 actual fun ChatListNavLinkLayout(
@@ -41,7 +41,7 @@ actual fun ChatListNavLinkLayout(
         .fillMaxWidth()
         .background(MaterialTheme.colors.surface, shape)
         .border(0.5.dp, PopopxHairlineInner, shape)
-        .padding(16.dp),
+        .padding(12.dp),
       verticalAlignment = Alignment.Top
     ) {
       chatLinkPreview()
