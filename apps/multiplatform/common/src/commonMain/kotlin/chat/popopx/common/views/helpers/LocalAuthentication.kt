@@ -38,6 +38,9 @@ expect fun authenticate(
   completed: (LAResult) -> Unit
 )
 
+/** The device-side check behind the launch-protection row (iOS `LAContext().canEvaluatePolicy`). */
+expect fun isLocalAuthAvailable(): Boolean
+
 fun authenticateWithPasscode(
   promptTitle: String,
   promptSubtitle: String,

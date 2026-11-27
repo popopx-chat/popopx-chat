@@ -426,7 +426,7 @@ fun ChatPreviewView(
   Box(contentAlignment = Alignment.Center) {
     Row {
       Box(contentAlignment = Alignment.BottomEnd) {
-        ChatInfoImage(cInfo, size = 72.dp * fontSizeSqrtMultiplier)
+        ChatInfoImage(cInfo, size = if (appPlatform.isAndroid) 48.dp else 72.dp * fontSizeSqrtMultiplier)
         Box(Modifier.padding(end = 6.sp.toDp(), bottom = 6.sp.toDp())) {
           chatPreviewImageOverlayIcon()
         }

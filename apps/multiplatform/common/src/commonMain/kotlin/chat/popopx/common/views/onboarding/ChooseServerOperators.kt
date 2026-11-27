@@ -289,7 +289,11 @@ private fun SetOperatorsButton(enabled: Boolean, close: () -> Unit) {
   )
 }
 
-private fun acceptConditions(selectedOperatorIds: Set<Long>) {
+internal fun acceptConditions(
+  selectedOperatorIds: Set<Long>,
+  onComplete: () -> Unit = ::completeOnboarding,
+  onError: () -> Unit = {},
+) {
   withBGApi {
     val conditionsId = chatModel.conditions.value.currentConditions.conditionsId
     val r = chatController.acceptConditions(chatModel.remoteHostId(), conditionsId = conditionsId, operatorIds = selectedOperatorIds.toList())
@@ -300,11 +304,15 @@ private fun acceptConditions(selectedOperatorIds: Set<Long>) {
         val r2 = chatController.setServerOperators(rh = chatModel.remoteHostId(), operators = enabledOps)
         if (r2 != null) {
           chatModel.conditions.value = r2
-          completeOnboarding()
+          onComplete()
+        } else {
+          onError()
         }
       } else {
-        completeOnboarding()
+        onComplete()
       }
+    } else {
+      onError()
     }
   }
 }

@@ -76,7 +76,7 @@ private fun POPOPXInfoDesktop(chatModel: ChatModel) {
         }
         Spacer(Modifier.fillMaxHeight().weight(1f))
         Column(Modifier.widthIn(max = 600.dp).align(Alignment.CenterHorizontally), horizontalAlignment = Alignment.CenterHorizontally) {
-          Text(PopopxBrand.CLAIM, style = MaterialTheme.typography.body2, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colors.primary, textAlign = TextAlign.Center, modifier = Modifier.padding(bottom = DEFAULT_PADDING_HALF))
+          Text(PopopxBrandCopy.CLAIM, style = MaterialTheme.typography.body2, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colors.primary, textAlign = TextAlign.Center, modifier = Modifier.padding(bottom = DEFAULT_PADDING_HALF))
           Box(Modifier.align(Alignment.CenterHorizontally)) {
             AppBarTitle(stringResource(MR.strings.onboarding_be_free), bottomPadding = DEFAULT_PADDING, withPadding = false, overrideTitleColor = MaterialTheme.colors.onBackground, textAlign = TextAlign.Center, lineHeight = 42.sp)
           }
@@ -128,7 +128,7 @@ fun POPOPXInfoLayout(
     content = {
       Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-          PopopxBrand.CLAIM,
+          PopopxBrandCopy.CLAIM,
           style = MaterialTheme.typography.body2,
           fontWeight = FontWeight.SemiBold,
           color = MaterialTheme.colors.primary,

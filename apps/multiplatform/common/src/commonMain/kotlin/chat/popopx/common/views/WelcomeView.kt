@@ -46,6 +46,7 @@ import chat.popopx.common.views.usersettings.DeleteImageButton
 import chat.popopx.common.views.usersettings.EditImageButton
 import chat.popopx.common.views.usersettings.SettingsActionItem
 import chat.popopx.res.*
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -386,10 +387,16 @@ fun createProfileInProfiles(chatModel: ChatModel, displayName: String, shortDesc
   }
 }
 
-fun createProfileOnboarding(chatModel: ChatModel, displayName: String, close: () -> Unit) {
+fun createProfileOnboarding(
+  chatModel: ChatModel,
+  displayName: String,
+  close: () -> Unit,
+  shortDescr: String? = null,
+  image: String? = null
+): Job =
   withBGApi {
     chatModel.currentUser.value = chatModel.controller.apiCreateActiveUser(
-      null, Profile(displayName.trim(), "", null, null)
+      null, Profile(displayName.trim(), "", shortDescr, null, image = image)
     ) ?: return@withBGApi
     chatModel.localUserCreated.value = true
     // new users don't need the local file encryption indicator (all files are encrypted); existing users keep it on
@@ -409,7 +416,6 @@ fun createProfileOnboarding(chatModel: ChatModel, displayName: String, close: ()
       close()
     }
   }
-}
 
 @Composable
 fun ProfileNameField(name: MutableState<String>, placeholder: String = "", isValid: (String) -> Boolean = { true }, focusRequester: FocusRequester? = null) {

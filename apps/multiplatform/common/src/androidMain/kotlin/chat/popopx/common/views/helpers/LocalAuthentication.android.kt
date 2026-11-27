@@ -6,6 +6,7 @@ import androidx.biometric.BiometricManager.Authenticators.*
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
+import chat.popopx.common.platform.androidAppContext
 import chat.popopx.common.platform.mainActivity
 import chat.popopx.common.views.usersettings.LAMode
 
@@ -31,6 +32,15 @@ actual fun authenticate(
       authenticateWithPasscode(promptTitle, promptSubtitle, selfDestruct, oneTime, completed)
     }
   }
+}
+
+actual fun isLocalAuthAvailable(): Boolean {
+  val authenticators = when {
+    SDK_INT in 28..29 -> BIOMETRIC_WEAK or DEVICE_CREDENTIAL
+    SDK_INT > 29 -> BIOMETRIC_STRONG or DEVICE_CREDENTIAL
+    else -> return false
+  }
+  return BiometricManager.from(androidAppContext).canAuthenticate(authenticators) == BiometricManager.BIOMETRIC_SUCCESS
 }
 
 private fun authenticateWithBiometricManager(

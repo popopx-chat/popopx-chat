@@ -190,14 +190,14 @@ fun MainScreen() {
           ) { state ->
             when (state) {
               OnboardingStage.OnboardingComplete -> {}
-              OnboardingStage.Step1_POPOPXInfo -> POPOPXInfo(chatModel, onboarding = true)
-              OnboardingStage.Step2_CreateProfile -> CreateFirstProfile(chatModel) {}
+              OnboardingStage.Step1_POPOPXInfo -> PopopxOnboardingWelcome(chatModel)
+              OnboardingStage.Step2_CreateProfile -> PopopxOnboardingCreateProfile(chatModel) {}
               OnboardingStage.LinkAMobile -> LinkAMobile()
               OnboardingStage.Step2_5_SetupDatabasePassphrase -> SetupDatabasePassphrase(chatModel)
               OnboardingStage.Step3_ChooseServerOperators,
               OnboardingStage.Step3_CreatePOPOPXAddress,
-              OnboardingStage.Step4_SetNotificationsMode -> YourNetworkView(chatModel)
-              OnboardingStage.Step4_NetworkCommitments -> OnboardingConditionsView(chatModel)
+              OnboardingStage.Step4_SetNotificationsMode -> PopopxOnboardingNetwork(chatModel)
+              OnboardingStage.Step4_NetworkCommitments -> PopopxOnboardingCommitments(chatModel)
             }
           }
         }

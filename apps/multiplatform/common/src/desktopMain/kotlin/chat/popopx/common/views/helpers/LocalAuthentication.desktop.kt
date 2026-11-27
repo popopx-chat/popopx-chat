@@ -15,3 +15,5 @@ actual fun authenticate(
     else -> {}
   }
 }
+
+actual fun isLocalAuthAvailable(): Boolean = false
