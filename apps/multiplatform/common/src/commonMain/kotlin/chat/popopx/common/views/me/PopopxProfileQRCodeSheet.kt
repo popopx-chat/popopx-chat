@@ -2,6 +2,7 @@ package chat.popopx.common.views.me
 
 import SectionBottomSpacer
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import chat.popopx.common.invite.PopopxInviteShareForm
 import chat.popopx.common.model.*
 import chat.popopx.common.platform.ColumnWithScrollBar
@@ -84,8 +84,8 @@ fun PopopxProfileQRCodeSheet(close: () -> Unit) {
   ColumnWithScrollBar {
     AppBarTitle(stringResource(MR.strings.profile_qr_sheet_title))
     Column(
-      Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp)
+      Modifier.fillMaxWidth().padding(horizontal = PopopxSpace.m),
+      verticalArrangement = Arrangement.spacedBy(PopopxSpace.m)
     ) {
       PopopxPassCard(identityName) {
         val display = form.value?.display
@@ -120,47 +120,56 @@ fun showPopopxProfileQRCodeSheet() {
  * speak two different sentences, so a failure never reads as "wait a moment". */
 @Composable
 private fun ProfileQRPlateMinting() {
-  val shape = RoundedCornerShape(12.dp)
+  val shape = RoundedCornerShape(PopopxRadiusControl)
   Column(
     Modifier
       .fillMaxWidth()
       .clip(shape)
-      .background(MaterialTheme.colors.surface)
+      .background(PopopxSurface)
+      .border(PopopxSize.hairline, PopopxHairlineStrong, shape)
       .heightIn(min = 220.dp),
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Center
   ) {
     CircularProgressIndicator(color = PopopxBrand)
-    Spacer(Modifier.height(12.dp))
-    Text(stringResource(MR.strings.profile_qr_minting), fontSize = 13.sp, color = MaterialTheme.colors.secondary)
+    Spacer(Modifier.height(PopopxSpace.s))
+    Text(
+      stringResource(MR.strings.profile_qr_minting),
+      style = PopopxTypeScale.subheadline,
+      color = MaterialTheme.colors.secondary
+    )
   }
 }
 
 @Composable
 private fun ProfileQRPlateFailure(onRetry: () -> Unit) {
-  val shape = RoundedCornerShape(12.dp)
+  val shape = RoundedCornerShape(PopopxRadiusControl)
   Column(
     Modifier
       .fillMaxWidth()
       .clip(shape)
-      .background(MaterialTheme.colors.surface)
+      .background(PopopxSurface)
+      .border(PopopxSize.hairline, PopopxHairlineStrong, shape)
       .heightIn(min = 220.dp)
-      .padding(16.dp),
+      .padding(PopopxSpace.m),
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Center
   ) {
     Text(
       stringResource(MR.strings.profile_qr_mint_failed),
-      fontSize = 13.sp,
+      style = PopopxTypeScale.subheadline,
       color = PopopxDangerFill,
       textAlign = TextAlign.Center
     )
-    Spacer(Modifier.height(12.dp))
+    Spacer(Modifier.height(PopopxSpace.s))
     Text(
       stringResource(MR.strings.profile_qr_retry),
-      fontSize = 17.sp,
+      style = PopopxTypeScale.headline,
       color = PopopxBrand,
-      modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { onRetry() }.padding(8.dp)
+      modifier = Modifier
+        .clip(RoundedCornerShape(PopopxRadiusControl))
+        .clickable { onRetry() }
+        .padding(PopopxSpace.xs)
     )
   }
 }

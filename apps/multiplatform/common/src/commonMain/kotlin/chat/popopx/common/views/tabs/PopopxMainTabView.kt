@@ -1,11 +1,10 @@
 package chat.popopx.common.views.tabs
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -15,8 +14,10 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -29,8 +30,16 @@ import chat.popopx.common.cfgsec.popopxServerConfigHiddenChat
 import chat.popopx.common.eco.PopopxEcoSessionStore
 import chat.popopx.common.model.*
 import chat.popopx.common.platform.*
+import chat.popopx.common.ui.components.PopopxBadge
 import chat.popopx.common.ui.theme.DEFAULT_PADDING
-import chat.popopx.common.ui.theme.isInDarkTheme
+import chat.popopx.common.ui.theme.PopopxBrand
+import chat.popopx.common.ui.theme.PopopxCanvas
+import chat.popopx.common.ui.theme.PopopxElevation
+import chat.popopx.common.ui.theme.PopopxRadiusSheet
+import chat.popopx.common.ui.theme.PopopxSize
+import chat.popopx.common.ui.theme.PopopxSpace
+import chat.popopx.common.ui.theme.PopopxSurface
+import chat.popopx.common.ui.theme.PopopxTypeScale
 import chat.popopx.common.views.cabin.PopopxCabinView
 import chat.popopx.common.views.chatlist.unreadCountStr
 import chat.popopx.common.views.contacts.ContactListNavLinkView
@@ -115,7 +124,7 @@ fun PopopxTabScaffold(userPickerState: MutableStateFlow<AnimatedViewState>) {
     withBGApi { PopopxServerConfigSignalHandler.shared.seedOfficialSubscriptions() }
   }
 
-  Column(Modifier.fillMaxSize()) {
+  Column(Modifier.fillMaxSize().background(PopopxCanvas)) {
     Box(Modifier.weight(1f)) {
       when (tab) {
         PopopxTab.CHATS -> StartPartOfScreen(userPickerState)
@@ -188,13 +197,6 @@ private fun popopxContactChat(chat: Chat): Boolean {
   }
 }
 
-// The bar's selected tint is the popopx brand navy the product's QR codes already carry
-// (views/newchat/QRCode.kt), not MaterialTheme.colors.primary: that token is the per-chat accent the
-// user can override in Appearance, and a bar that changes colour with a chat theme stops identifying
-// the app. The dark-mode value is the same hue lifted for the dark surface — #062D56 on it is 1.3:1.
-private val PopopxTabTintLight = Color(0xFF062D56)
-private val PopopxTabTintDark = Color(0xFF7FB0E8)
-
 /**
  * `ChatModel.totalUnreadCountForAllUsers()` (ChatModel.swift:1191-1210), field for field: each
  * conversation contributes what its own notification setting says it contributes (`enableNtfs` all →
@@ -227,11 +229,11 @@ private fun PopopxTabBar(selected: PopopxTab, onSelect: (PopopxTab) -> Unit) {
     Surface(
       modifier = Modifier
         .fillMaxWidth()
-        .padding(start = 12.dp, end = 12.dp, top = 4.dp),
-      shape = RoundedCornerShape(20.dp),
-      color = MaterialTheme.colors.surface,
+        .padding(start = PopopxSpace.s, end = PopopxSpace.s, top = PopopxSpace.xxs),
+      shape = RoundedCornerShape(PopopxRadiusSheet),
+      color = PopopxSurface,
       contentColor = MaterialTheme.colors.onSurface,
-      elevation = 12.dp
+      elevation = PopopxElevation.bar
     ) {
       Row(Modifier.fillMaxWidth()) {
         // The tab the red line keeps off every other platform, filtered where the bar is built rather than
@@ -241,45 +243,40 @@ private fun PopopxTabBar(selected: PopopxTab, onSelect: (PopopxTab) -> Unit) {
         }
       }
     }
-    Spacer(Modifier.height(8.dp))
+    Spacer(Modifier.height(PopopxSpace.xs))
     Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
   }
 }
 
 @Composable
 private fun RowScope.PopopxTabBarItem(tab: PopopxTab, isSelected: Boolean, unread: Int, onSelect: (PopopxTab) -> Unit) {
-  val tint = if (isSelected) {
-    if (isInDarkTheme()) PopopxTabTintDark else PopopxTabTintLight
-  } else {
-    MaterialTheme.colors.secondary
-  }
+  val tint = if (isSelected) PopopxBrand else MaterialTheme.colors.secondary
+  val haptics = LocalHapticFeedback.current
   Column(
     Modifier
       .weight(1f)
-      .clickable(onClickLabel = stringResource(tab.title)) { onSelect(tab) }
-      .padding(top = 8.dp, bottom = 6.dp),
+      .selectable(
+        selected = isSelected,
+        role = Role.Tab,
+        onClick = {
+          if (!isSelected) haptics.performHapticFeedback(HapticFeedbackType.VirtualKey)
+          onSelect(tab)
+        }
+      )
+      .padding(top = PopopxSpace.xs, bottom = 6.dp),
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
     Box(contentAlignment = Alignment.TopEnd) {
-      Icon(painterResource(tab.icon), null, Modifier.size(24.dp), tint = tint)
+      Icon(painterResource(tab.icon), null, Modifier.size(PopopxSize.iconXl), tint = tint)
       if (unread > 0) {
         val offset = with(LocalDensity.current) { (4.sp).toDp() }
-        Text(
-          unreadCountStr(unread),
-          color = Color.White,
-          fontSize = 10.sp,
-          maxLines = 1,
-          modifier = Modifier
-            .offset(x = offset, y = -offset)
-            .background(MaterialTheme.colors.error, shape = CircleShape)
-            .padding(horizontal = 4.dp, vertical = 1.dp)
-        )
+        PopopxBadge(unreadCountStr(unread), Modifier.offset(x = offset, y = -offset))
       }
     }
     Spacer(Modifier.height(3.dp))
     Text(
       stringResource(tab.title),
-      fontSize = 10.sp,
+      style = PopopxTypeScale.micro,
       fontWeight = FontWeight.Medium,
       color = tint,
       maxLines = 1,

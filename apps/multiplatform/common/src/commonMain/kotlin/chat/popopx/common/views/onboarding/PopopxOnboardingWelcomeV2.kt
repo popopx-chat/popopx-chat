@@ -10,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -49,9 +48,9 @@ fun PopopxOnboardingWelcome(chatModel: ChatModel) {
             Modifier.weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally
           ) {
-            val sectionSpacing = if (compact) PopopxOnboardingSpaceM else PopopxOnboardingSpaceL
+            val sectionSpacing = if (compact) PopopxSpace.m else PopopxSpace.l
             Column(
-              Modifier.fillMaxWidth().padding(bottom = PopopxOnboardingSpaceM),
+              Modifier.fillMaxWidth().padding(bottom = PopopxSpace.m),
               horizontalAlignment = Alignment.CenterHorizontally,
               verticalArrangement = Arrangement.spacedBy(sectionSpacing)
             ) {
@@ -60,11 +59,10 @@ fun PopopxOnboardingWelcome(chatModel: ChatModel) {
               WelcomePills()
               Text(
                 stringResource(MR.strings.brand_mission),
-                fontSize = 15.sp,
-                lineHeight = 20.sp,
+                style = PopopxTypeScale.callout,
                 color = popopxOnboardingSecondary(),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = PopopxOnboardingGutter)
+                modifier = Modifier.padding(horizontal = PopopxSpace.m)
               )
               WelcomeFeatureCard()
             }
@@ -92,8 +90,8 @@ private fun WelcomeHero(compact: Boolean) {
   Box(
     Modifier
       .fillMaxWidth()
-      .padding(top = if (compact) PopopxOnboardingSpaceL else 32.dp)
-      .padding(horizontal = PopopxOnboardingGutter),
+      .padding(top = if (compact) PopopxSpace.l else PopopxSpace.xl)
+      .padding(horizontal = PopopxSpace.m),
     contentAlignment = Alignment.Center
   ) {
     Box(
@@ -118,11 +116,16 @@ private fun WelcomeHero(compact: Boolean) {
 @Composable
 private fun WelcomeHeadlines() {
   Column(
-    Modifier.padding(horizontal = PopopxOnboardingGutter),
+    Modifier.padding(horizontal = PopopxSpace.m),
     horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceXS)
+    verticalArrangement = Arrangement.spacedBy(PopopxSpace.xs)
   ) {
-    Text(PopopxBrandCopy.CLAIM, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = PopopxBrand, textAlign = TextAlign.Center)
+    Text(
+      PopopxBrandCopy.CLAIM,
+      style = PopopxTypeScale.caption.copy(fontWeight = FontWeight.SemiBold),
+      color = PopopxBrand,
+      textAlign = TextAlign.Center
+    )
     Text(
       stringResource(MR.strings.onboarding_v2_hero_title),
       fontSize = 33.5.sp,
@@ -133,21 +136,19 @@ private fun WelcomeHeadlines() {
     )
     Text(
       stringResource(MR.strings.brand_positioning),
-      fontSize = 15.sp,
+      style = PopopxTypeScale.callout,
       color = popopxOnboardingSecondary(),
       textAlign = TextAlign.Center
     )
     Text(
       stringResource(MR.strings.onboarding_v2_hero_note),
-      fontSize = 15.sp,
-      lineHeight = 20.sp,
+      style = PopopxTypeScale.callout,
       color = popopxOnboardingSecondary(),
       textAlign = TextAlign.Center
     )
     Text(
       stringResource(MR.strings.brand_slogan),
-      fontSize = 13.sp,
-      lineHeight = 17.sp,
+      style = PopopxTypeScale.subheadline,
       color = PopopxBrand,
       textAlign = TextAlign.Center
     )
@@ -157,8 +158,8 @@ private fun WelcomeHeadlines() {
 @Composable
 private fun WelcomePills() {
   Row(
-    Modifier.fillMaxWidth().padding(horizontal = PopopxOnboardingGutter),
-    horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceXS),
+    Modifier.fillMaxWidth().padding(horizontal = PopopxSpace.m),
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.xs),
     verticalAlignment = Alignment.Top
   ) {
     Box(Modifier.weight(1f)) {
@@ -209,8 +210,8 @@ private fun WelcomeFeatureCard() {
 
 @Composable
 private fun WelcomeActions(chatModel: ChatModel) {
-  Column(Modifier.fillMaxWidth().background(MaterialTheme.colors.background)) {
-    Divider(color = PopopxSeparator, thickness = PopopxOnboardingHairlineWidth)
+  Column(Modifier.fillMaxWidth().background(PopopxCanvas)) {
+    Divider(color = PopopxSeparator, thickness = PopopxSize.hairline)
     PopopxOnboardingBottomBar {
       PopopxOnboardingPrimaryButton(
         stringResource(MR.strings.onboarding_v2_create_identity),

@@ -1,6 +1,5 @@
 package chat.popopx.common.views.cabin
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,37 +7,39 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import chat.popopx.common.mesh.PopopxBluetoothState
 import chat.popopx.common.mesh.PopopxMeshConfig
 import chat.popopx.common.mesh.PopopxMeshPeer
 import chat.popopx.common.mesh.meshHex
+import chat.popopx.common.ui.theme.PopopxAlpha
 import chat.popopx.common.ui.theme.PopopxBrand
-import chat.popopx.common.ui.theme.PopopxHairlineInner
+import chat.popopx.common.ui.theme.PopopxFieldSurface
 import chat.popopx.common.ui.theme.PopopxMesh
 import chat.popopx.common.ui.theme.PopopxMeshInk
 import chat.popopx.common.ui.theme.PopopxOnBrand
 import chat.popopx.common.ui.theme.PopopxOnMesh
-import chat.popopx.common.ui.theme.isInDarkTheme
-import chat.popopx.common.ui.theme.sectionCardColor
-import chat.popopx.common.views.helpers.AutoMirroredIcon
+import chat.popopx.common.ui.theme.PopopxRadiusChip
+import chat.popopx.common.ui.theme.PopopxRadiusControl
+import chat.popopx.common.ui.theme.PopopxSize
+import chat.popopx.common.ui.theme.PopopxSpace
+import chat.popopx.common.ui.theme.PopopxSurface
+import chat.popopx.common.ui.theme.PopopxTypeScale
 import chat.popopx.common.views.helpers.DefaultBasicTextField
 import chat.popopx.res.*
-import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import java.text.SimpleDateFormat
@@ -46,121 +47,10 @@ import java.util.Date
 import java.util.Locale
 import kotlin.math.max
 
-// The atoms every Cabin screen shares, modelled on the iOS `PopopxSectionCard` + `PopopxCabinNode`
-// reading of the same page. Kept in their own file because the root page, the hall and the settings
-// centre (this program's C2–C4) all draw with them, and two copies of a card would be two places to
-// disagree about one screen.
-
-internal val cabinCardRadius = 16.dp
-internal val cabinIconSide = 32.dp
-internal val cabinSecondaryAlpha = 0.62f
-internal val cabinLabelHintAlpha = 0.35f
-private val cabinSeparatorAlpha = 0.08f
-
-@Composable
-internal fun CabinSectionCard(
-  title: String? = null,
-  footnote: String? = null,
-  content: @Composable ColumnScope.() -> Unit,
-) {
-  Column(Modifier.fillMaxWidth()) {
-    if (title != null) {
-      Text(
-        title,
-        fontSize = 17.sp,
-        fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
-      )
-    }
-    Surface(
-      Modifier.fillMaxWidth(),
-      shape = RoundedCornerShape(cabinCardRadius),
-      color = sectionCardColor(),
-      border = BorderStroke(0.5.dp, PopopxHairlineInner),
-      elevation = if (isInDarkTheme()) 0.dp else 1.dp,
-    ) {
-      Column(Modifier.padding(16.dp), content = content)
-    }
-    if (footnote != null) {
-      Text(
-        footnote,
-        fontSize = 13.sp,
-        color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
-        modifier = Modifier.padding(start = 4.dp, top = 8.dp)
-      )
-    }
-  }
-}
-
-@Composable
-internal fun CabinDivider() {
-  Box(
-    Modifier
-      .fillMaxWidth()
-      .padding(vertical = 8.dp)
-      .height(1.dp)
-      .background(MaterialTheme.colors.onSurface.copy(alpha = cabinSeparatorAlpha))
-  )
-}
-
-@Composable
-internal fun CabinIconBadge(icon: ImageResource, tint: Color) {
-  Box(
-    Modifier
-      .size(cabinIconSide)
-      .background(tint.copy(alpha = 0.12f), RoundedCornerShape(8.dp)),
-    contentAlignment = Alignment.Center
-  ) {
-    Icon(painterResource(icon), null, Modifier.size(18.dp), tint = tint)
-  }
-}
-
-@Composable
-internal fun CabinPrimaryButton(
-  text: String,
-  icon: ImageResource? = null,
-  enabled: Boolean = true,
-  modifier: Modifier = Modifier,
-  action: () -> Unit,
-) {
-  Surface(
-    shape = RoundedCornerShape(12.dp),
-    color = PopopxBrand.copy(alpha = if (enabled) 1f else 0.5f),
-    modifier = modifier.heightIn(min = 44.dp).clickable(enabled = enabled, onClick = action)
-  ) {
-    CabinButtonInk(text, icon, PopopxOnBrand)
-  }
-}
-
-@Composable
-internal fun CabinSecondaryButton(
-  text: String,
-  icon: ImageResource? = null,
-  enabled: Boolean = true,
-  modifier: Modifier = Modifier,
-  action: () -> Unit,
-) {
-  Surface(
-    shape = RoundedCornerShape(12.dp),
-    color = sectionCardColor(),
-    border = BorderStroke(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.18f)),
-    modifier = modifier.heightIn(min = 44.dp).clickable(enabled = enabled, onClick = action)
-  ) {
-    CabinButtonInk(text, icon, PopopxBrand.copy(alpha = if (enabled) 1f else 0.5f))
-  }
-}
-
-@Composable
-private fun CabinButtonInk(text: String, icon: ImageResource?, ink: Color) {
-  Row(
-    Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
-  ) {
-    if (icon != null) Icon(painterResource(icon), null, Modifier.size(18.dp), tint = ink)
-    Text(text, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = ink)
-  }
-}
+// The feature-specific atoms every Cabin screen shares, modelled on the iOS `Copy` / `PopopxCabinClock`
+// / `PopopxCabinAuthor` readings of the same page. The generic card, divider, badge, button and picker
+// row are the design-system atoms (`PopopxSection`, `PopopxDivider`, `PopopxIconBadge`,
+// `PopopxPrimaryButton`, `PopopxSecondaryButton`, `PopopxPickerRow`) and are not restated here.
 
 /** The six radio states, exhausting [PopopxBluetoothState] in iOS' `Copy.radioWords` wording. */
 @Composable
@@ -235,54 +125,6 @@ internal fun cabinClock(atMillis: Long): String =
   SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(atMillis))
 
 /**
- * `PopopxPickerRow` of the iOS design system, in the shape the Cabin pages use: icon badge, label, the
- * value on the trailing side and a disclosure chevron that mirrors under RTL. A disabled row keeps its
- * value readable — it names an absent capability, it is not a control pretending to be one.
- */
-@Composable
-internal fun CabinPickerRow(
-  label: String,
-  value: String,
-  icon: ImageResource,
-  enabled: Boolean = true,
-  onClick: () -> Unit,
-) {
-  Row(
-    Modifier
-      .fillMaxWidth()
-      .heightIn(min = 44.dp)
-      .clickable(enabled = enabled, onClick = onClick)
-      .padding(vertical = 6.dp),
-    verticalAlignment = Alignment.CenterVertically,
-  ) {
-    CabinIconBadge(icon, if (enabled) PopopxMesh else MaterialTheme.colors.onSurface.copy(alpha = cabinLabelHintAlpha))
-    Spacer(Modifier.width(12.dp))
-    Text(
-      label,
-      fontSize = 16.sp,
-      fontWeight = FontWeight.SemiBold,
-      color = MaterialTheme.colors.onSurface.copy(alpha = if (enabled) 1f else cabinSecondaryAlpha),
-      modifier = Modifier.weight(1f),
-    )
-    Spacer(Modifier.width(8.dp))
-    Text(
-      value,
-      fontSize = 13.sp,
-      color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
-      maxLines = 1,
-      overflow = TextOverflow.Ellipsis,
-    )
-    Spacer(Modifier.width(6.dp))
-    AutoMirroredIcon(
-      painterResource(MR.images.ic_chevron_right),
-      null,
-      Modifier.size(18.dp),
-      tint = MaterialTheme.colors.onSurface.copy(alpha = cabinLabelHintAlpha),
-    )
-  }
-}
-
-/**
  * The hop capsule of a node row and of a hall bubble: the number is always there, and 0 hops is spelled
  * "0 hops · direct" rather than dropped (`Copy.hopsWords`).
  */
@@ -290,11 +132,11 @@ internal fun CabinPickerRow(
 internal fun CabinHopBadge(hops: Int) {
   Text(
     cabinHopWords(hops),
-    fontSize = 11.sp,
+    style = PopopxTypeScale.metricSmall,
     color = PopopxOnMesh,
     modifier = Modifier
-      .background(PopopxMesh, RoundedCornerShape(8.dp))
-      .padding(horizontal = 4.dp, vertical = 2.dp),
+      .background(PopopxMesh, RoundedCornerShape(PopopxRadiusChip))
+      .padding(horizontal = PopopxSpace.xxs, vertical = 2.dp),
   )
 }
 
@@ -311,36 +153,49 @@ internal fun CabinSendRow(
   enabled: Boolean,
   onSubmit: () -> Unit,
 ) {
+  val haptics = LocalHapticFeedback.current
   Row(
     Modifier.fillMaxWidth(),
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.xs),
   ) {
     DefaultBasicTextField(
       modifier = Modifier
         .weight(1f)
-        .background(MaterialTheme.colors.surface, RoundedCornerShape(12.dp))
-        .heightIn(min = 44.dp)
-        .padding(horizontal = 12.dp, vertical = 10.dp)
+        .background(PopopxFieldSurface, RoundedCornerShape(PopopxRadiusControl))
+        .heightIn(min = PopopxSize.control)
+        .padding(horizontal = PopopxSpace.s, vertical = 10.dp)
         .semantics { contentDescription = fieldLabel },
       state = value,
-      placeholder = { Text(placeholder, color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha), fontSize = 14.sp) },
+      placeholder = {
+        Text(
+          placeholder,
+          style = PopopxTypeScale.subheadline,
+          color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
+        )
+      },
       keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
       onValueChange = { value.value = it },
     )
-    Surface(
-      shape = RoundedCornerShape(12.dp),
-      color = if (enabled) PopopxBrand else MaterialTheme.colors.onSurface.copy(alpha = 0.08f),
+    Box(
+      Modifier
+        .heightIn(min = PopopxSize.control)
+        .clip(RoundedCornerShape(PopopxRadiusControl))
+        .background(if (enabled) PopopxBrand else MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.press))
+        .clickable(
+          enabled = enabled,
+          onClick = {
+            haptics.performHapticFeedback(HapticFeedbackType.VirtualKey)
+            onSubmit()
+          },
+        )
+        .padding(horizontal = PopopxSpace.m, vertical = 13.dp),
+      contentAlignment = Alignment.Center,
     ) {
       Text(
         action,
-        fontSize = 15.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = if (enabled) PopopxOnBrand else MaterialTheme.colors.onSurface.copy(alpha = cabinLabelHintAlpha),
-        modifier = Modifier
-          .heightIn(min = 44.dp)
-          .clickable(enabled = enabled, onClick = onSubmit)
-          .padding(horizontal = 16.dp, vertical = 13.dp),
+        style = PopopxTypeScale.callout.copy(fontWeight = FontWeight.SemiBold),
+        color = if (enabled) PopopxOnBrand else MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.hint),
       )
     }
   }
@@ -355,26 +210,26 @@ internal fun CabinDiscoveryChip(on: Boolean, onClick: () -> Unit) {
   val state = stringResource(if (on) MR.strings.cabin_turned_on else MR.strings.cabin_turned_off)
   Row(
     Modifier
-      .heightIn(min = 44.dp)
+      .heightIn(min = PopopxSize.control)
       .background(
-        if (on) PopopxMesh else sectionCardColor(),
-        RoundedCornerShape(12.dp),
+        if (on) PopopxMesh else PopopxSurface,
+        RoundedCornerShape(PopopxRadiusControl),
       )
       .clickable(onClick = onClick)
-      .padding(horizontal = 12.dp)
+      .padding(horizontal = PopopxSpace.s)
       .semantics { contentDescription = hint },
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(4.dp),
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.xxs),
   ) {
     Icon(
       painterResource(MR.images.ic_explore),
       null,
-      Modifier.size(16.dp),
+      Modifier.size(PopopxSize.iconM),
       tint = if (on) PopopxOnMesh else PopopxMeshInk,
     )
     Text(
       stringResource(MR.strings.cabin_discovery_mode) + " · " + state,
-      fontSize = 13.sp,
+      style = PopopxTypeScale.subheadline,
       maxLines = 1,
       color = if (on) PopopxOnMesh else PopopxMeshInk,
     )

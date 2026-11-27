@@ -1,7 +1,6 @@
 package chat.popopx.common.views.me
 
 import SectionBottomSpacer
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,13 +14,11 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import chat.popopx.common.AppLock
 import chat.popopx.common.commerce.PopopxP2PVoucherVault
 import chat.popopx.common.commerce.PopopxVoucherState
@@ -32,6 +29,12 @@ import chat.popopx.common.platform.ColumnWithScrollBar
 import chat.popopx.common.platform.chatModel
 import chat.popopx.common.platform.ColumnWithScrollBarNoAppBar
 import chat.popopx.common.platform.showToast
+import chat.popopx.common.ui.components.PopopxDivider
+import chat.popopx.common.ui.components.PopopxPickerRow
+import chat.popopx.common.ui.components.PopopxPrimaryButton
+import chat.popopx.common.ui.components.PopopxSecondaryButton
+import chat.popopx.common.ui.components.PopopxSection
+import chat.popopx.common.ui.components.PopopxToggleRow
 import chat.popopx.common.ui.theme.*
 import chat.popopx.common.views.CreateProfile
 import chat.popopx.common.views.badges.BadgesRedeemCodeView
@@ -50,7 +53,6 @@ import chat.popopx.common.views.usersettings.UserProfileView
 import chat.popopx.common.views.usersettings.UserProfilesView
 import chat.popopx.common.views.usersettings.doWithAuth
 import chat.popopx.res.*
-import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.datetime.Clock
@@ -72,16 +74,6 @@ import kotlin.math.max
 // The two iOS push pages (`UserProfilesView`, `PrivacySettings`, `PopopxHelpView`) exist here as
 // modals already, so the row actions mount those same modals instead of inventing Android pages.
 
-private val meCardRadius = 16.dp
-private val meIconSide = 32.dp
-private val meChevronSide = 14.dp
-
-// iOS `PopopxPalette` equivalents that are not in the shared theme yet. Kept file-private: they are
-// this page's reading of the iOS palette, not a second theme.
-private val labelHintAlpha = 0.35f
-private val secondaryAlpha = 0.62f
-private val separatorAlpha = 0.08f
-
 @Composable
 fun PopopxMeView() {
   val user = remember { chatModel.currentUser }.value
@@ -94,9 +86,9 @@ fun PopopxMeView() {
       Column(
         Modifier
           .statusBarsPadding()
-          .padding(horizontal = 16.dp)
-          .padding(top = 24.dp, bottom = 48.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+          .padding(horizontal = PopopxSpace.m)
+          .padding(top = PopopxSpace.l, bottom = PopopxSpace.xxl),
+        verticalArrangement = Arrangement.spacedBy(PopopxSpace.l)
       ) {
         if (user == null) {
           MeEmptyIdentityCard()
@@ -125,36 +117,35 @@ private fun MeIdentityCard(user: User) {
   val lockedCount = chatModel.users.count { it.user.hidden }
   var busyUserId by remember { mutableStateOf<Long?>(null) }
 
-  MeSectionCard(footnote = meFootnote(others.size, lockedCount)) {
+  PopopxSection(footnote = meFootnote(others.size, lockedCount)) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
       Row(
         Modifier
           .weight(1f)
-          .heightIn(min = 44.dp)
+          .heightIn(min = PopopxSize.control)
           .clickable { showManageIdentities() }
-          .padding(vertical = 4.dp),
+          .padding(vertical = PopopxSpace.xxs),
         verticalAlignment = Alignment.CenterVertically
       ) {
         ProfileImage(64.dp, user.profile.image, color = MaterialTheme.colors.secondaryVariant)
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(PopopxSpace.s))
         Column(Modifier.weight(1f)) {
           Text(
             user.displayName,
-            fontSize = 17.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = PopopxTypeScale.headline,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
           )
           if (user.fullName.isNotEmpty() && user.fullName != user.displayName) {
             Text(
               user.fullName,
-              fontSize = 13.sp,
-              color = MaterialTheme.colors.onSurface.copy(alpha = secondaryAlpha),
+              style = PopopxTypeScale.subheadline,
+              color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
               maxLines = 1,
               overflow = TextOverflow.Ellipsis
             )
           }
-          Spacer(Modifier.height(4.dp))
+          Spacer(Modifier.height(PopopxSpace.xxs))
           MeStatusCapsule()
         }
       }
@@ -162,7 +153,7 @@ private fun MeIdentityCard(user: User) {
       // only lets the outer one win, and then this button would never open.
       Box(
         Modifier
-          .size(44.dp)
+          .size(PopopxSize.control)
           .clickable { showProfileQR() },
         contentAlignment = Alignment.Center
       ) {
@@ -171,43 +162,49 @@ private fun MeIdentityCard(user: User) {
       AutoMirroredIcon(
         painterResource(MR.images.ic_chevron_right),
         null,
-        Modifier.size(meChevronSide),
-        tint = MaterialTheme.colors.onSurface.copy(alpha = labelHintAlpha)
+        Modifier.size(PopopxSize.iconS),
+        tint = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.hint)
       )
     }
-    MeDivider()
-    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+    PopopxDivider()
+    Row(
+      Modifier.fillMaxWidth().padding(vertical = PopopxSpace.xxs),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
       Text(
         stringResource(MR.strings.me_identity_number),
-        fontSize = 13.sp,
-        color = MaterialTheme.colors.onSurface.copy(alpha = secondaryAlpha)
+        style = PopopxTypeScale.subheadline,
+        color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary)
       )
-      Spacer(Modifier.width(8.dp))
-      Text("${user.userId}", fontSize = 13.sp)
+      Spacer(Modifier.width(PopopxSpace.xs))
+      Text("${user.userId}", style = PopopxTypeScale.metric)
       Spacer(Modifier.weight(1f))
       Text(
         stringResource(MR.strings.me_copy_number),
-        fontSize = 15.sp,
+        style = PopopxTypeScale.callout,
         fontWeight = FontWeight.SemiBold,
         color = PopopxBrand,
         modifier = Modifier
-          .heightIn(min = 44.dp)
+          .heightIn(min = PopopxSize.control)
           .clickable {
             clipboard.setText(AnnotatedString("${user.userId}"))
             showToast(generalGetString(MR.strings.me_identity_number_copied))
           }
-          .padding(vertical = 12.dp)
+          .padding(vertical = PopopxSpace.s)
       )
     }
     if (others.isNotEmpty()) {
-      MeDivider()
-      Column(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+      PopopxDivider()
+      Column(Modifier.fillMaxWidth().padding(vertical = PopopxSpace.xxs)) {
         Text(
           stringResource(MR.strings.me_other_identities),
-          fontSize = 13.sp,
-          color = MaterialTheme.colors.onSurface.copy(alpha = secondaryAlpha)
+          style = PopopxTypeScale.subheadline,
+          color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary)
         )
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp), contentPadding = PaddingValues(vertical = 8.dp)) {
+        LazyRow(
+          horizontalArrangement = Arrangement.spacedBy(PopopxSpace.s),
+          contentPadding = PaddingValues(vertical = PopopxSpace.xs)
+        ) {
           items(others, key = { it.user.userId }) { info ->
             MeIdentityChip(
               info = info,
@@ -230,18 +227,19 @@ private fun MeIdentityCard(user: User) {
         }
       }
     }
-    MeDivider()
-    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-      Spacer(Modifier.weight(1f))
-      MeSecondaryButton(stringResource(MR.strings.me_create_identity)) {
+    PopopxDivider()
+    PopopxSecondaryButton(
+      stringResource(MR.strings.me_create_identity),
+      onClick = {
         doWithAuth(
           generalGetString(MR.strings.auth_open_chat_profiles),
           generalGetString(MR.strings.auth_log_in_using_credential)
         ) {
           ModalManager.start.showModalCloseable(cardScreen = true) { close -> CreateProfile(chatModel, close) }
         }
-      }
-    }
+      },
+      modifier = Modifier.padding(vertical = PopopxSpace.xxs)
+    )
   }
 }
 
@@ -255,33 +253,35 @@ private fun meFootnote(others: Int, locked: Int): String? =
 
 @Composable
 private fun MeEmptyIdentityCard() {
-  MeSectionCard(footnote = stringResource(MR.strings.me_empty_footnote)) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+  PopopxSection(footnote = stringResource(MR.strings.me_empty_footnote)) {
+    Row(Modifier.fillMaxWidth().padding(vertical = PopopxSpace.xxs)) {
       ProfileImage(32.dp, null, color = MaterialTheme.colors.secondaryVariant)
-      Spacer(Modifier.width(12.dp))
+      Spacer(Modifier.width(PopopxSpace.s))
       Column(Modifier.weight(1f)) {
-        Text(stringResource(MR.strings.me_empty_title), fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(4.dp))
+        Text(stringResource(MR.strings.me_empty_title), style = PopopxTypeScale.headline)
+        Spacer(Modifier.height(PopopxSpace.xxs))
         Text(
           stringResource(MR.strings.me_empty_note),
-          fontSize = 13.sp,
-          color = MaterialTheme.colors.onSurface.copy(alpha = secondaryAlpha)
+          style = PopopxTypeScale.subheadline,
+          color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary)
         )
       }
     }
-    MeDivider()
-    MePickerRow(
-      title = stringResource(MR.strings.me_create_identity),
+    PopopxDivider()
+    PopopxPickerRow(
+      label = stringResource(MR.strings.me_create_identity),
+      value = null,
       icon = MR.images.ic_manage_accounts,
       tint = PopopxBrand,
-    ) {
-      doWithAuth(
-        generalGetString(MR.strings.auth_open_chat_profiles),
-        generalGetString(MR.strings.auth_log_in_using_credential)
-      ) {
-        ModalManager.start.showModalCloseable(cardScreen = true) { close -> CreateProfile(chatModel, close) }
+      onClick = {
+        doWithAuth(
+          generalGetString(MR.strings.auth_open_chat_profiles),
+          generalGetString(MR.strings.auth_log_in_using_credential)
+        ) {
+          ModalManager.start.showModalCloseable(cardScreen = true) { close -> CreateProfile(chatModel, close) }
+        }
       }
-    }
+    )
   }
 }
 
@@ -289,15 +289,15 @@ private fun MeEmptyIdentityCard() {
 private fun MeStatusCapsule() {
   val badge = currentShownBadge()
   val lit = badge != null && badge.paidThrough > Clock.System.now()
-  val tint = if (lit) PopopxSuccess else MaterialTheme.colors.onSurface.copy(alpha = secondaryAlpha)
+  val tint = if (lit) PopopxSuccess else MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary)
   Row(
     Modifier
       .heightIn(min = 22.dp)
-      .background(PopopxBrand.copy(alpha = 0.10f), CircleShape)
-      .border(0.5.dp, tint.copy(alpha = 0.35f), CircleShape)
-      .padding(horizontal = 10.dp, vertical = 4.dp),
+      .background(PopopxBrand.copy(alpha = PopopxAlpha.wash), CircleShape)
+      .border(PopopxSize.hairline, tint.copy(alpha = PopopxAlpha.hint), CircleShape)
+      .padding(horizontal = 10.dp, vertical = PopopxSpace.xxs),
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(4.dp)
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.xxs)
   ) {
     val encrypted = stringResource(MR.strings.me_smp_encrypted)
     val badgeWords =
@@ -306,7 +306,7 @@ private fun MeStatusCapsule() {
     Icon(painterResource(MR.images.ic_lock_filled), null, Modifier.size(10.dp), tint = tint)
     Text(
       "$encrypted · $badgeWords",
-      fontSize = 11.sp,
+      style = PopopxTypeScale.overline,
       color = tint,
       maxLines = 1,
       overflow = TextOverflow.Ellipsis
@@ -316,11 +316,12 @@ private fun MeStatusCapsule() {
 
 @Composable
 private fun MeIdentityChip(info: UserInfo, busy: Boolean, blocked: Boolean, action: () -> Unit) {
+  val shape = RoundedCornerShape(PopopxRadiusControl)
   Row(
     Modifier
-      .heightIn(min = 44.dp)
-      .background(MaterialTheme.colors.onSurface.copy(alpha = separatorAlpha), RoundedCornerShape(12.dp))
-      .border(0.5.dp, PopopxHairlineInner, RoundedCornerShape(12.dp))
+      .heightIn(min = PopopxSize.control)
+      .background(PopopxFieldSurface, shape)
+      .border(PopopxSize.hairline, PopopxHairlineStrong, shape)
       .clickable(enabled = !busy && !blocked, onClick = action)
       .padding(horizontal = 10.dp),
     verticalAlignment = Alignment.CenterVertically,
@@ -331,14 +332,14 @@ private fun MeIdentityChip(info: UserInfo, busy: Boolean, blocked: Boolean, acti
     } else {
       ProfileImage(32.dp, info.user.profile.image, color = MaterialTheme.colors.secondaryVariant)
     }
-    Text(info.user.displayName, fontSize = 15.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    Text(info.user.displayName, style = PopopxTypeScale.callout, maxLines = 1, overflow = TextOverflow.Ellipsis)
     if (info.unreadCount > 0) {
       Box(
         Modifier
           .background(PopopxBrand, CircleShape)
           .padding(horizontal = 6.dp, vertical = 1.dp)
       ) {
-        Text(unreadCountStr(info.unreadCount), fontSize = 11.sp, color = PopopxOnBrand)
+        Text(unreadCountStr(info.unreadCount), style = PopopxTypeScale.metricSmall, color = PopopxOnBrand)
       }
     }
   }
@@ -389,21 +390,21 @@ private fun MeAssetsCard() {
     if (active) stringResource(MR.strings.me_badge_running).format(meDaysLeft(badge!!))
     else stringResource(MR.strings.me_badge_dormant)
 
-  MeSectionCard(title = stringResource(MR.strings.me_group_assets), footnote = stringResource(MR.strings.me_badge_footnote)) {
-    MePickerRow(
-      title = stringResource(MR.strings.me_badge_row),
+  PopopxSection(
+    title = stringResource(MR.strings.me_group_assets),
+    footnote = stringResource(MR.strings.me_badge_footnote)
+  ) {
+    PopopxPickerRow(
+      label = stringResource(MR.strings.me_badge_row),
       value = value,
       icon = MR.images.ic_shield,
-      tint = if (active) PopopxSuccess else MaterialTheme.colors.onSurface.copy(alpha = secondaryAlpha),
-    ) {
+      tint = if (active) PopopxSuccess else MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
+      onClick = { showBadges() }
+    )
+    Spacer(Modifier.height(PopopxSpace.xs))
+    PopopxPrimaryButton(stringResource(if (active) MR.strings.me_badge_renew else MR.strings.me_badge_buy), onClick = {
       showBadges()
-    }
-    Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-      Spacer(Modifier.weight(1f))
-      MePrimaryButton(stringResource(if (active) MR.strings.me_badge_renew else MR.strings.me_badge_buy)) {
-        showBadges()
-      }
-    }
+    })
   }
 }
 
@@ -423,39 +424,44 @@ private fun MeSpaceCard(startModalCount: Int) {
   val voucherCount = remember(startModalCount) {
     PopopxP2PVoucherVault.shared.badgeVouchers(PopopxVoucherState.UNUSED).count()
   }
-  MeSectionCard(title = stringResource(MR.strings.me_group_space)) {
-    MePickerRow(
-      title = stringResource(MR.strings.me_my_profile),
+  PopopxSection(title = stringResource(MR.strings.me_group_space)) {
+    PopopxPickerRow(
+      label = stringResource(MR.strings.me_my_profile),
+      value = null,
       icon = MR.images.ic_person,
       tint = PopopxBrand,
-    ) {
-      ModalManager.start.showCustomModal { close -> UserProfileView(chatModel, close) }
-    }
-    MeDivider()
+      onClick = {
+        ModalManager.start.showCustomModal { close -> UserProfileView(chatModel, close) }
+      }
+    )
+    PopopxDivider()
     val user = remember { chatModel.currentUser }.value
-    MePickerRow(
-      title = stringResource(MR.strings.your_popopx_contact_address),
+    PopopxPickerRow(
+      label = stringResource(MR.strings.your_popopx_contact_address),
+      value = null,
       icon = MR.images.ic_qr_code,
       tint = PopopxBrand,
-    ) {
-      if (user != null) {
-        ModalManager.start.showCustomModal { close ->
-          UserAddressView(chatModel, shareViaProfile = user.addressShared, close = close)
+      onClick = {
+        if (user != null) {
+          ModalManager.start.showCustomModal { close ->
+            UserAddressView(chatModel, shareViaProfile = user.addressShared, close = close)
+          }
         }
       }
-    }
-    MeDivider()
-    MePickerRow(
-      title = stringResource(MR.strings.badges_redeem_code_button),
+    )
+    PopopxDivider()
+    PopopxPickerRow(
+      label = stringResource(MR.strings.badges_redeem_code_button),
       value = if (voucherCount > 0) stringResource(MR.strings.me_vouchers_available).format(voucherCount) else null,
       icon = MR.images.ic_redeem,
       tint = PopopxBrand,
-    ) {
-      val depth = ModalManager.start.openModalCount()
-      ModalManager.start.showModal(id = ModalViewId.BADGE_REDEEM_CODE) {
-        BadgesRedeemCodeView(ModalManager.start, depth)
+      onClick = {
+        val depth = ModalManager.start.openModalCount()
+        ModalManager.start.showModal(id = ModalViewId.BADGE_REDEEM_CODE) {
+          BadgesRedeemCodeView(ModalManager.start, depth)
+        }
       }
-    }
+    )
   }
 }
 
@@ -463,16 +469,18 @@ private fun MeSpaceCard(startModalCount: Int) {
 
 @Composable
 private fun MeGeneralCard() {
-  MeSectionCard(title = stringResource(MR.strings.me_group_general)) {
-    MePickerRow(
-      title = stringResource(MR.strings.me_settings),
+  PopopxSection(title = stringResource(MR.strings.me_group_general)) {
+    PopopxPickerRow(
+      label = stringResource(MR.strings.me_settings),
+      value = null,
       icon = MR.images.ic_settings,
       tint = PopopxBrand,
-    ) {
-      ModalManager.start.showModalCloseable(cardScreen = true) { close ->
-        SettingsView(chatModel, AppLock::setPerformLA, close)
+      onClick = {
+        ModalManager.start.showModalCloseable(cardScreen = true) { close ->
+          SettingsView(chatModel, AppLock::setPerformLA, close)
+        }
       }
-    }
+    )
   }
 }
 
@@ -491,57 +499,64 @@ private fun MeSecurityCard(panic: PopopxPanicWipeUiState, fuseOn: Boolean, start
   // Compose snapshot, so this counter is what makes the row's own value line honest.
   var tapSignal by remember { mutableStateOf(0) }
 
-  MeSectionCard(title = stringResource(MR.strings.me_group_security)) {
-    MePickerRow(
-      title = stringResource(MR.strings.me_privacy_settings),
+  PopopxSection(title = stringResource(MR.strings.me_group_security)) {
+    PopopxPickerRow(
+      label = stringResource(MR.strings.me_privacy_settings),
+      value = null,
       icon = MR.images.ic_lock,
       tint = PopopxBrand,
-    ) {
-      ModalManager.start.showModal(settings = true, cardScreen = true) {
-        PrivacySettingsView(
-          chatModel,
-          { modalView -> { ModalManager.start.showModal(settings = true, cardScreen = true) { modalView(chatModel) } } },
-          AppLock::setPerformLA
-        )
+      onClick = {
+        ModalManager.start.showModal(settings = true, cardScreen = true) {
+          PrivacySettingsView(
+            chatModel,
+            { modalView -> { ModalManager.start.showModal(settings = true, cardScreen = true) { modalView(chatModel) } } },
+            AppLock::setPerformLA
+          )
+        }
       }
-    }
-    MeDivider()
-    MeToggleRow(
+    )
+    PopopxDivider()
+    PopopxToggleRow(
       title = stringResource(MR.strings.protect_app_screen),
+      checked = protectScreen,
       note = stringResource(MR.strings.me_protect_note),
       icon = MR.images.ic_lock,
-      checked = protectScreen,
-    ) {
-      appPrefs.privacyProtectScreen.set(it)
-      protectScreen = it
-    }
-    MeDivider()
-    MeToggleRow(
+      tint = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
+      onCheckedChange = {
+        appPrefs.privacyProtectScreen.set(it)
+        protectScreen = it
+      }
+    )
+    PopopxDivider()
+    PopopxToggleRow(
       title = stringResource(MR.strings.sanitize_links_toggle),
+      checked = sanitizeLinks,
       note = stringResource(MR.strings.me_sanitize_note),
       icon = MR.images.ic_link,
-      checked = sanitizeLinks,
-    ) {
-      appPrefs.privacySanitizeLinks.set(it)
-      sanitizeLinks = it
-    }
-    MeDivider()
-    MePickerRow(
-      title = stringResource(MR.strings.me_anti_theft),
+      tint = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
+      onCheckedChange = {
+        appPrefs.privacySanitizeLinks.set(it)
+        sanitizeLinks = it
+      }
+    )
+    PopopxDivider()
+    PopopxPickerRow(
+      label = stringResource(MR.strings.me_anti_theft),
       value = stringResource(if (antiTheftOn) MR.strings.me_turned_on else MR.strings.me_turned_off),
       icon = MR.images.ic_shield,
       tint = PopopxBrand,
-    ) {
-      ModalManager.start.showModal(settings = true, cardScreen = true) {
-        ColumnWithScrollBar {
-          AppBarTitle(stringResource(MR.strings.duress_settings_title))
-          PopopxDuressSettingsSection()
-          SectionBottomSpacer()
+      onClick = {
+        ModalManager.start.showModal(settings = true, cardScreen = true) {
+          ColumnWithScrollBar {
+            AppBarTitle(stringResource(MR.strings.duress_settings_title))
+            PopopxDuressSettingsSection()
+            SectionBottomSpacer()
+          }
         }
       }
-    }
-    MeDivider()
-    Column(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+    )
+    PopopxDivider()
+    Column(Modifier.fillMaxWidth().padding(vertical = PopopxSpace.xxs)) {
       val panicValue = when {
         panic.isConfirming.value -> stringResource(MR.strings.me_panic_awaiting)
         !fuseOn -> stringResource(MR.strings.me_panic_disabled)
@@ -549,30 +564,31 @@ private fun MeSecurityCard(panic: PopopxPanicWipeUiState, fuseOn: Boolean, start
           stringResource(MR.strings.me_panic_taps).format(panic.arming.tapCount)
         else -> stringResource(MR.strings.me_panic_ready)
       }
-      MePickerRow(
-        title = stringResource(MR.strings.me_panic_row),
+      PopopxPickerRow(
+        label = stringResource(MR.strings.me_panic_row),
         value = panicValue,
         icon = MR.images.ic_warning_filled,
         tint = PopopxDangerFill,
         enabled = fuseOn,
-      ) {
-        if (fuseOn) {
-          panic.tap()
-          tapSignal++
+        onClick = {
+          if (fuseOn) {
+            panic.tap()
+            tapSignal++
+          }
         }
-      }
+      )
       Text(
         stringResource(MR.strings.me_panic_note),
-        fontSize = 12.sp,
-        color = MaterialTheme.colors.onSurface.copy(alpha = secondaryAlpha),
-        modifier = Modifier.padding(horizontal = 4.dp)
+        style = PopopxTypeScale.caption,
+        color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
+        modifier = Modifier.padding(horizontal = PopopxSpace.xxs)
       )
-      Spacer(Modifier.height(4.dp))
+      Spacer(Modifier.height(PopopxSpace.xxs))
       Text(
         stringResource(MR.strings.me_panic_scope),
-        fontSize = 11.sp,
-        color = MaterialTheme.colors.onSurface.copy(alpha = secondaryAlpha),
-        modifier = Modifier.padding(horizontal = 4.dp)
+        style = PopopxTypeScale.overline,
+        color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
+        modifier = Modifier.padding(horizontal = PopopxSpace.xxs)
       )
     }
   }
@@ -582,188 +598,21 @@ private fun MeSecurityCard(panic: PopopxPanicWipeUiState, fuseOn: Boolean, start
 
 @Composable
 private fun MeHelpCard() {
-  MeSectionCard {
-    MePickerRow(
-      title = stringResource(MR.strings.me_help_row),
+  PopopxSection {
+    PopopxPickerRow(
+      label = stringResource(MR.strings.me_help_row),
+      value = null,
       icon = MR.images.ic_help,
-      tint = MaterialTheme.colors.onSurface.copy(alpha = secondaryAlpha),
-    ) {
-      ModalManager.start.showModal(cardScreen = true) {
-        HelpAndSupportView(
-          chatModel,
-          { modalView -> { ModalManager.start.showModal { modalView(chatModel) } } },
-          { modalView -> { ModalManager.start.showCustomModal { close -> modalView(chatModel, close) } } }
-        )
+      tint = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
+      onClick = {
+        ModalManager.start.showModal(cardScreen = true) {
+          HelpAndSupportView(
+            chatModel,
+            { modalView -> { ModalManager.start.showModal { modalView(chatModel) } } },
+            { modalView -> { ModalManager.start.showCustomModal { close -> modalView(chatModel, close) } } }
+          )
+        }
       }
-    }
-  }
-}
-
-// MARK: - atoms (the Android reading of PopopxSectionCard / PopopxPickerRow / PopopxToggleRow)
-
-@Composable
-private fun MeSectionCard(
-  title: String? = null,
-  footnote: String? = null,
-  content: @Composable ColumnScope.() -> Unit,
-) {
-  Column(Modifier.fillMaxWidth()) {
-    if (title != null) {
-      Text(
-        title,
-        fontSize = 17.sp,
-        fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
-      )
-    }
-    Surface(
-      Modifier.fillMaxWidth(),
-      shape = RoundedCornerShape(meCardRadius),
-      color = sectionCardColor(),
-      border = BorderStroke(0.5.dp, PopopxHairlineInner),
-      elevation = if (isInDarkTheme()) 0.dp else 1.dp,
-    ) {
-      Column(Modifier.padding(16.dp), content = content)
-    }
-    if (footnote != null) {
-      Text(
-        footnote,
-        fontSize = 13.sp,
-        color = MaterialTheme.colors.onSurface.copy(alpha = secondaryAlpha),
-        modifier = Modifier.padding(start = 4.dp, top = 8.dp)
-      )
-    }
-  }
-}
-
-@Composable
-private fun MeDivider() {
-  Box(
-    Modifier
-      .fillMaxWidth()
-      .padding(vertical = 8.dp)
-      .height(1.dp)
-      .background(MaterialTheme.colors.onSurface.copy(alpha = separatorAlpha))
-  )
-}
-
-@Composable
-private fun MeIconBadge(icon: ImageResource, tint: Color) {
-  Box(
-    Modifier
-      .size(meIconSide)
-      .background(tint.copy(alpha = 0.12f), RoundedCornerShape(8.dp)),
-    contentAlignment = Alignment.Center
-  ) {
-    Icon(painterResource(icon), null, Modifier.size(18.dp), tint = tint)
-  }
-}
-
-@Composable
-private fun MePickerRow(
-  title: String,
-  value: String? = null,
-  icon: ImageResource,
-  tint: Color,
-  enabled: Boolean = true,
-  action: () -> Unit,
-) {
-  Row(
-    Modifier
-      .fillMaxWidth()
-      .heightIn(min = 44.dp)
-      .clickable(enabled = enabled, onClick = action)
-      .padding(vertical = 8.dp),
-    verticalAlignment = Alignment.CenterVertically
-  ) {
-    MeIconBadge(icon, tint)
-    Spacer(Modifier.width(12.dp))
-    Text(
-      title,
-      fontSize = 17.sp,
-      color = MaterialTheme.colors.onSurface.copy(alpha = if (enabled) 1f else 0.45f),
-      modifier = Modifier.weight(1f)
     )
-    if (value != null) {
-      Spacer(Modifier.width(12.dp))
-      Text(
-        value,
-        fontSize = 15.sp,
-        color = MaterialTheme.colors.onSurface.copy(alpha = if (enabled) secondaryAlpha else 0.35f),
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis
-      )
-    }
-    Spacer(Modifier.width(8.dp))
-    AutoMirroredIcon(
-      painterResource(MR.images.ic_chevron_right),
-      null,
-      Modifier.size(meChevronSide),
-      tint = MaterialTheme.colors.onSurface.copy(alpha = labelHintAlpha)
-    )
-  }
-}
-
-@Composable
-private fun MeToggleRow(
-  title: String,
-  note: String,
-  icon: ImageResource,
-  checked: Boolean,
-  onCheckedChange: (Boolean) -> Unit,
-) {
-  Row(
-    Modifier.fillMaxWidth().heightIn(min = 44.dp).padding(vertical = 8.dp),
-    verticalAlignment = Alignment.CenterVertically
-  ) {
-    MeIconBadge(icon, MaterialTheme.colors.onSurface.copy(alpha = secondaryAlpha))
-    Spacer(Modifier.width(12.dp))
-    Column(Modifier.weight(1f)) {
-      Text(title, fontSize = 17.sp)
-      Spacer(Modifier.height(2.dp))
-      Text(
-        note,
-        fontSize = 13.sp,
-        color = MaterialTheme.colors.onSurface.copy(alpha = secondaryAlpha)
-      )
-    }
-    Spacer(Modifier.width(12.dp))
-    Switch(
-      checked = checked,
-      onCheckedChange = onCheckedChange,
-      colors = SwitchDefaults.colors(
-        checkedThumbColor = Color.White,
-        checkedTrackColor = PopopxBrand,
-        uncheckedThumbColor = Color.White,
-        uncheckedTrackColor = MaterialTheme.colors.onSurface.copy(alpha = 0.18f),
-      )
-    )
-  }
-}
-
-@Composable
-private fun MePrimaryButton(text: String, action: () -> Unit) {
-  Surface(
-    shape = RoundedCornerShape(12.dp),
-    color = PopopxBrand,
-    modifier = Modifier.heightIn(min = 44.dp).clickable(onClick = action)
-  ) {
-    Box(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), contentAlignment = Alignment.Center) {
-      Text(text, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = PopopxOnBrand)
-    }
-  }
-}
-
-@Composable
-private fun MeSecondaryButton(text: String, action: () -> Unit) {
-  Surface(
-    shape = RoundedCornerShape(12.dp),
-    color = sectionCardColor(),
-    border = BorderStroke(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.18f)),
-    modifier = Modifier.heightIn(min = 44.dp).clickable(onClick = action)
-  ) {
-    Box(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), contentAlignment = Alignment.Center) {
-      Text(text, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = PopopxBrand)
-    }
   }
 }

@@ -1,7 +1,6 @@
 package chat.popopx.common.views.onboarding
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,10 +14,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import chat.popopx.common.mesh.PopopxMeshKillSwitch
 import chat.popopx.common.model.ChatController.appPrefs
 import chat.popopx.common.model.ChatModel
@@ -72,10 +69,10 @@ fun PopopxOnboardingNetwork(chatModel: ChatModel) {
             Column(
               Modifier
                 .fillMaxWidth()
-                .padding(horizontal = PopopxOnboardingGutter)
-                .padding(top = PopopxOnboardingSpaceS)
-                .padding(bottom = PopopxOnboardingSpaceM),
-              verticalArrangement = Arrangement.spacedBy(if (compact) PopopxOnboardingSpaceS else PopopxOnboardingSpaceL)
+                .padding(horizontal = PopopxSpace.m)
+                .padding(top = PopopxSpace.s)
+                .padding(bottom = PopopxSpace.m),
+              verticalArrangement = Arrangement.spacedBy(if (compact) PopopxSpace.s else PopopxSpace.l)
             ) {
               PopopxOnboardingHeader(
                 step = 2,
@@ -148,7 +145,7 @@ fun PopopxOnboardingNetwork(chatModel: ChatModel) {
               }
             }
           }
-          Divider(color = PopopxSeparator, thickness = PopopxOnboardingHairlineWidth)
+          Divider(color = PopopxSeparator, thickness = PopopxSize.hairline)
           PopopxOnboardingBottomBar {
             PopopxOnboardingPrimaryButton(
               text = stringResource(MR.strings.onboarding_v2_continue),
@@ -179,23 +176,22 @@ private fun RelayPickerRow(selected: Int, total: Int, onOpen: () -> Unit) {
     Modifier
       .fillMaxWidth()
       .clickable(onClick = onOpen)
-      .padding(vertical = PopopxOnboardingSpaceXS),
-    horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceS),
+      .padding(vertical = PopopxSpace.xs),
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.s),
     verticalAlignment = Alignment.CenterVertically
   ) {
     PopopxOnboardingIconBadge(MR.images.ic_dns, PopopxOnboardingTint.NEUTRAL)
     Text(
       stringResource(MR.strings.onboarding_v2_relay_nodes),
-      fontSize = 17.sp,
-      fontWeight = FontWeight.SemiBold,
+      style = PopopxTypeScale.headline,
       color = popopxOnboardingLabel(),
       modifier = Modifier.weight(1f)
     )
-    Text("$selected / $total", fontSize = 15.sp, color = popopxOnboardingSecondary())
+    Text("$selected / $total", style = PopopxTypeScale.callout, color = popopxOnboardingSecondary())
     AutoMirroredIcon(
       painterResource(MR.images.ic_chevron_right),
       null,
-      Modifier.size(18.dp),
+      Modifier.size(PopopxSize.iconL),
       tint = popopxOnboardingLabelHint()
     )
   }
@@ -208,23 +204,22 @@ private fun RelayReadyRow(host: String?, compact: Boolean, onOpen: () -> Unit) {
     Modifier
       .fillMaxWidth()
       .clickable(onClick = onOpen)
-      .padding(vertical = if (compact) PopopxOnboardingSpaceXS else PopopxOnboardingSpaceS),
-    horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceS),
+      .padding(vertical = if (compact) PopopxSpace.xs else PopopxSpace.s),
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.s),
     verticalAlignment = Alignment.CenterVertically
   ) {
     PopopxOnboardingIconBadge(MR.images.ic_dns, PopopxOnboardingTint.BRAND)
-    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(PopopxOnboardingSpace2XS)) {
+    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(PopopxSpace.xxs)) {
       Text(
         stringResource(MR.strings.onboarding_v2_relay_ready_title),
-        fontSize = 17.sp,
-        fontWeight = FontWeight.SemiBold,
+        style = PopopxTypeScale.headline,
         color = popopxOnboardingLabel()
       )
       if (host != null) {
-        Text(host, fontSize = 13.sp, color = popopxOnboardingSecondary(), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(host, style = PopopxTypeScale.subheadline, color = popopxOnboardingSecondary(), maxLines = 1, overflow = TextOverflow.Ellipsis)
       }
     }
-    Spacer(Modifier.width(PopopxOnboardingSpaceXS))
+    Spacer(Modifier.width(PopopxSpace.xs))
     PopopxOnboardingChip(stringResource(MR.strings.onboarding_v2_relay_auto_routing))
   }
 }
@@ -233,8 +228,8 @@ private fun RelayReadyRow(host: String?, compact: Boolean, onOpen: () -> Unit) {
 @Composable
 private fun RelayLogos(operators: List<ServerOperator>, selectedIds: Set<Long>) {
   Row(
-    Modifier.fillMaxWidth().padding(vertical = PopopxOnboardingSpace2XS),
-    horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceXS),
+    Modifier.fillMaxWidth().padding(vertical = PopopxSpace.xxs),
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.xs),
     verticalAlignment = Alignment.CenterVertically
   ) {
     operators.forEach { op ->
@@ -242,8 +237,8 @@ private fun RelayLogos(operators: List<ServerOperator>, selectedIds: Set<Long>) 
         painterResource(op.logo),
         null,
         Modifier
-          .size(PopopxOnboardingSpaceL)
-          .clip(RoundedCornerShape(PopopxOnboardingRadiusChip)),
+          .size(PopopxSpace.l)
+          .clip(RoundedCornerShape(PopopxRadiusChip)),
         contentScale = ContentScale.Fit,
         colorFilter = if (selectedIds.contains(op.operatorId)) null else ColorFilter.colorMatrix(
           ColorMatrix().apply { setToSaturation(0f) }

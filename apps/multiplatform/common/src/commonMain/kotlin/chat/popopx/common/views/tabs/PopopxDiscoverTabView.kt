@@ -24,14 +24,11 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import chat.popopx.common.copilot.PopopxEcoAssistantHost
 import chat.popopx.common.copilot.showPopopxEcoAssistantSheet
 import chat.popopx.common.discover.PopopxDiscoverCatalog
@@ -50,16 +47,23 @@ import chat.popopx.common.platform.appPlatform
 import chat.popopx.common.platform.chatModel
 import chat.popopx.common.platform.ColumnWithScrollBar
 import chat.popopx.common.signal.PopopxSilentSignalingRouter
-import chat.popopx.common.ui.theme.DEFAULT_PADDING
-import chat.popopx.common.ui.theme.DEFAULT_PADDING_HALF
+import chat.popopx.common.ui.components.PopopxCard
+import chat.popopx.common.ui.components.PopopxChip
+import chat.popopx.common.ui.components.PopopxDivider
+import chat.popopx.common.ui.theme.PopopxAlpha
 import chat.popopx.common.ui.theme.PopopxBrand
-import chat.popopx.common.ui.theme.PopopxHairlineInner
+import chat.popopx.common.ui.theme.PopopxElevation
+import chat.popopx.common.ui.theme.PopopxFieldSurface
+import chat.popopx.common.ui.theme.PopopxHairlineStrong
 import chat.popopx.common.ui.theme.PopopxLabelHint
 import chat.popopx.common.ui.theme.PopopxMeshInk
-import chat.popopx.common.ui.theme.PopopxRadiusCard
+import chat.popopx.common.ui.theme.PopopxRadiusChip
 import chat.popopx.common.ui.theme.PopopxRadiusControl
+import chat.popopx.common.ui.theme.PopopxSize
+import chat.popopx.common.ui.theme.PopopxSpace
+import chat.popopx.common.ui.theme.PopopxSurface
+import chat.popopx.common.ui.theme.PopopxTypeScale
 import chat.popopx.common.ui.theme.isInDarkTheme
-import chat.popopx.common.ui.theme.sectionCardColor
 import chat.popopx.common.views.helpers.AppBarTitle
 import chat.popopx.common.views.helpers.AutoMirroredIcon
 import chat.popopx.common.views.helpers.DefaultBasicTextField
@@ -109,30 +113,40 @@ fun PopopxDiscoverTabView() {
       }
       item { PopopxDiscoverAssistantRow() }
       item { PopopxDiscoverNodeRow(binding) }
-      item { Spacer(Modifier.height(DEFAULT_PADDING)) }
+      item { Spacer(Modifier.height(PopopxSpace.m)) }
     }
   }
 }
 
 @Composable
 private fun PopopxDiscoverSearchField(searchText: MutableState<TextFieldValue>) {
-  DefaultBasicTextField(
+  Surface(
     modifier = Modifier
       .fillMaxWidth()
-      .padding(horizontal = DEFAULT_PADDING, vertical = DEFAULT_PADDING_HALF)
-      .background(MaterialTheme.colors.background, shape = RoundedCornerShape(12.dp))
-      .padding(horizontal = 12.dp, vertical = 10.dp),
-    state = searchText,
-    placeholder = {
-      Text(
-        stringResource(MR.strings.discover_search_services),
-        color = MaterialTheme.colors.secondary,
-        fontSize = MaterialTheme.typography.body1.fontSize
-      )
-    },
-    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-    onValueChange = { searchText.value = it },
-  )
+      .padding(horizontal = PopopxSpace.gutter, vertical = PopopxSpace.xs),
+    shape = RoundedCornerShape(PopopxRadiusControl),
+    color = PopopxFieldSurface,
+    border = BorderStroke(PopopxSize.hairline, PopopxHairlineStrong),
+  ) {
+    DefaultBasicTextField(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = PopopxSpace.s, vertical = PopopxSpace.xs),
+      state = searchText,
+      leadingIcon = {
+        Icon(painterResource(MR.images.ic_search), null, Modifier.size(PopopxSize.iconM), tint = PopopxLabelHint)
+      },
+      placeholder = {
+        Text(
+          stringResource(MR.strings.discover_search_services),
+          style = PopopxTypeScale.body,
+          color = PopopxLabelHint
+        )
+      },
+      keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+      onValueChange = { searchText.value = it },
+    )
+  }
 }
 
 @Composable
@@ -141,20 +155,14 @@ private fun PopopxDiscoverFilterChips(selected: PopopxDiscoverFilter, onSelect: 
     Modifier
       .fillMaxWidth()
       .horizontalScroll(rememberScrollState())
-      .padding(horizontal = DEFAULT_PADDING, vertical = DEFAULT_PADDING_HALF),
-    horizontalArrangement = Arrangement.spacedBy(8.dp)
+      .padding(horizontal = PopopxSpace.gutter, vertical = PopopxSpace.xxs),
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.xs)
   ) {
     PopopxDiscoverFilter.entries.forEach { filter ->
-      val active = filter == selected
-      Text(
-        filter.title,
-        fontSize = 13.sp,
-        color = if (active) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onBackground,
-        modifier = Modifier
-          .clip(RoundedCornerShape(14.dp))
-          .background(if (active) MaterialTheme.colors.primary else MaterialTheme.colors.background)
-          .clickable { onSelect(PopopxDiscoverFilter.entries.indexOf(filter)) }
-          .padding(horizontal = 12.dp, vertical = 6.dp)
+      PopopxChip(
+        text = filter.title,
+        selected = filter == selected,
+        onClick = { onSelect(PopopxDiscoverFilter.entries.indexOf(filter)) }
       )
     }
   }
@@ -162,11 +170,12 @@ private fun PopopxDiscoverFilterChips(selected: PopopxDiscoverFilter, onSelect: 
 
 @Composable
 private fun PopopxDiscoverShelf(section: PopopxDiscoverSection, services: List<PopopxNodeServiceId>) {
-  Column(Modifier.fillMaxWidth().padding(horizontal = DEFAULT_PADDING)) {
+  Column(Modifier.fillMaxWidth().padding(horizontal = PopopxSpace.gutter)) {
     Text(
       section.title,
-      style = MaterialTheme.typography.h3,
-      modifier = Modifier.padding(top = DEFAULT_PADDING, bottom = DEFAULT_PADDING_HALF)
+      style = PopopxTypeScale.headline,
+      color = MaterialTheme.colors.onBackground,
+      modifier = Modifier.padding(top = PopopxSpace.m, bottom = PopopxSpace.xs)
     )
     services.forEach { service ->
       PopopxDiscoverTile(service)
@@ -176,39 +185,51 @@ private fun PopopxDiscoverShelf(section: PopopxDiscoverSection, services: List<P
 
 @Composable
 private fun PopopxDiscoverTile(service: PopopxNodeServiceId) {
-  SectionItemView({ showServiceDetail(service) }) {
-    // No glyph: iOS picks these tiles by an SF Symbol name, and the moko drawable set has no
-    // equivalent for nine of the ten. A monogram of the plaza name is the honest placeholder until
-    // the visual pass, rather than a mapping that would silently rename what a service is.
-    Box(
-      contentAlignment = Alignment.Center,
-      modifier = Modifier
-        .size(40.dp)
-        .clip(RoundedCornerShape(10.dp))
-        .background(MaterialTheme.colors.background)
+  Surface(
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(vertical = PopopxSpace.xxs),
+    shape = RoundedCornerShape(PopopxRadiusControl),
+    color = PopopxSurface,
+    border = BorderStroke(PopopxSize.hairline, PopopxHairlineStrong),
+    elevation = if (isInDarkTheme()) 0.dp else PopopxElevation.card,
+  ) {
+    SectionItemView(
+      { showServiceDetail(service) },
+      padding = PaddingValues(horizontal = PopopxSpace.s, vertical = PopopxSpace.s)
     ) {
-      Text(
-        service.title.take(1),
-        fontSize = 16.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colors.primary
-      )
-    }
-    Spacer(Modifier.width(12.dp))
-    Column(Modifier.weight(1f)) {
-      Text(service.title, style = MaterialTheme.typography.body1, maxLines = 1)
-      Text(
-        service.tagline,
-        style = MaterialTheme.typography.body2,
-        color = MaterialTheme.colors.secondary,
-        maxLines = 2
-      )
-      Text(
-        service.cycleCost.priceLabel,
-        fontSize = 12.sp,
-        color = MaterialTheme.colors.primary,
-        modifier = Modifier.padding(top = 2.dp)
-      )
+      // No glyph: iOS picks these tiles by an SF Symbol name, and the moko drawable set has no
+      // equivalent for nine of the ten. A monogram of the plaza name is the honest placeholder until
+      // the visual pass, rather than a mapping that would silently rename what a service is.
+      Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+          .size(40.dp)
+          .clip(RoundedCornerShape(PopopxRadiusChip))
+          .background(PopopxBrand.copy(alpha = PopopxAlpha.wash))
+      ) {
+        Text(
+          service.title.take(1),
+          style = PopopxTypeScale.headline,
+          color = PopopxBrand
+        )
+      }
+      Spacer(Modifier.width(PopopxSpace.s))
+      Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(service.title, style = PopopxTypeScale.headline, color = MaterialTheme.colors.onBackground, maxLines = 1)
+        Text(
+          service.tagline,
+          style = PopopxTypeScale.callout,
+          color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary),
+          maxLines = 2
+        )
+        Text(
+          service.cycleCost.priceLabel,
+          style = PopopxTypeScale.caption,
+          color = PopopxBrand,
+          modifier = Modifier.padding(top = 2.dp)
+        )
+      }
     }
   }
 }
@@ -224,17 +245,26 @@ private fun PopopxDiscoverServiceSheet(service: PopopxNodeServiceId, close: () -
   val clipboard = LocalClipboardManager.current
   ColumnWithScrollBar {
     AppBarTitle(service.title)
-    Column(Modifier.padding(horizontal = DEFAULT_PADDING)) {
-      Text(service.tagline, style = MaterialTheme.typography.body1)
-      Spacer(Modifier.height(DEFAULT_PADDING_HALF))
-      Text(service.cycleCost.priceLabel, fontSize = 13.sp, color = MaterialTheme.colors.primary)
+    Column(Modifier.padding(horizontal = PopopxSpace.gutter)) {
+      Text(service.tagline, style = PopopxTypeScale.callout, color = MaterialTheme.colors.onBackground)
+      Spacer(Modifier.height(PopopxSpace.xs))
+      Text(service.cycleCost.priceLabel, style = PopopxTypeScale.subheadline, color = PopopxBrand)
 
       SheetHeading(stringResource(MR.strings.discover_highlights))
       service.highlights.forEach { highlight ->
         Row(Modifier.padding(vertical = 2.dp)) {
-          Text("•", color = MaterialTheme.colors.secondary, fontSize = 13.sp)
-          Spacer(Modifier.width(8.dp))
-          Text(highlight, style = MaterialTheme.typography.body2, modifier = Modifier.weight(1f))
+          Text(
+            "•",
+            style = PopopxTypeScale.subheadline,
+            color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary)
+          )
+          Spacer(Modifier.width(PopopxSpace.xs))
+          Text(
+            highlight,
+            style = PopopxTypeScale.callout,
+            color = MaterialTheme.colors.onBackground,
+            modifier = Modifier.weight(1f)
+          )
         }
       }
 
@@ -244,47 +274,65 @@ private fun PopopxDiscoverServiceSheet(service: PopopxNodeServiceId, close: () -
           Modifier.fillMaxWidth().padding(vertical = 4.dp),
           verticalAlignment = Alignment.CenterVertically
         ) {
-          Text(action.title, style = MaterialTheme.typography.body2, modifier = Modifier.weight(1f))
+          Text(
+            action.title,
+            style = PopopxTypeScale.callout,
+            color = MaterialTheme.colors.onBackground,
+            modifier = Modifier.weight(1f)
+          )
           Text(
             "${service.rawValue} · ${action.action}",
-            style = TextStyle(textDirection = TextDirection.Ltr),
-            fontSize = 11.sp,
-            color = MaterialTheme.colors.secondary,
+            style = PopopxTypeScale.codeSmall,
+            color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary),
             maxLines = 1
           )
         }
       }
       Text(
         stringResource(MR.strings.discover_menu_hint),
-        fontSize = 12.sp,
-        color = MaterialTheme.colors.secondary,
-        modifier = Modifier.padding(top = 4.dp, bottom = DEFAULT_PADDING)
+        style = PopopxTypeScale.caption,
+        color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary),
+        modifier = Modifier.padding(top = PopopxSpace.xxs, bottom = PopopxSpace.m)
       )
 
       SheetHeading(stringResource(MR.strings.discover_bridge_title))
-      SectionItemView({ clipboard.setText(AnnotatedString(PopopxNodeConsole.copyText())) }) {
-        Column(Modifier.weight(1f)) {
-          Text(stringResource(MR.strings.discover_bridge_address), fontSize = 12.sp, color = MaterialTheme.colors.secondary)
-          Text(
-            PopopxNodeConsole.consoleDisplayUrl(),
-            style = MaterialTheme.typography.body2.copy(textDirection = TextDirection.Ltr)
-          )
+      Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(PopopxRadiusControl),
+        color = PopopxSurface,
+        border = BorderStroke(PopopxSize.hairline, PopopxHairlineStrong),
+      ) {
+        SectionItemView(
+          { clipboard.setText(AnnotatedString(PopopxNodeConsole.copyText())) },
+          padding = PaddingValues(horizontal = PopopxSpace.s, vertical = PopopxSpace.xs)
+        ) {
+          Column(Modifier.weight(1f)) {
+            Text(
+              stringResource(MR.strings.discover_bridge_address),
+              style = PopopxTypeScale.caption,
+              color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary)
+            )
+            Text(
+              PopopxNodeConsole.consoleDisplayUrl(),
+              style = PopopxTypeScale.code,
+              color = MaterialTheme.colors.onBackground
+            )
+          }
+          Text(stringResource(MR.strings.copy_verb), style = PopopxTypeScale.subheadline, color = PopopxBrand)
         }
-        Text(stringResource(MR.strings.copy_verb), fontSize = 13.sp, color = MaterialTheme.colors.primary)
       }
       Text(
         PopopxNodeConsole.tokenContractText(),
-        style = TextStyle(textDirection = TextDirection.Ltr),
-        fontSize = 12.sp,
-        color = MaterialTheme.colors.secondary
+        style = PopopxTypeScale.codeSmall,
+        color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary)
       )
       Text(
         PopopxNodeConsole.LOCAL_ONLY_NOTE,
-        fontSize = 12.sp,
-        color = MaterialTheme.colors.secondary,
-        modifier = Modifier.padding(top = 4.dp)
+        style = PopopxTypeScale.caption,
+        color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary),
+        modifier = Modifier.padding(top = PopopxSpace.xxs)
       )
-      Spacer(Modifier.height(DEFAULT_PADDING))
+      Spacer(Modifier.height(PopopxSpace.m))
       SheetDone(close)
     }
   }
@@ -294,8 +342,9 @@ private fun PopopxDiscoverServiceSheet(service: PopopxNodeServiceId, close: () -
 private fun SheetHeading(text: String) {
   Text(
     text,
-    style = MaterialTheme.typography.h4,
-    modifier = Modifier.padding(top = DEFAULT_PADDING, bottom = DEFAULT_PADDING_HALF)
+    style = PopopxTypeScale.headline,
+    color = MaterialTheme.colors.onBackground,
+    modifier = Modifier.padding(top = PopopxSpace.m, bottom = PopopxSpace.xs)
   )
 }
 
@@ -303,9 +352,10 @@ private fun SheetHeading(text: String) {
 private fun SheetDone(close: () -> Unit) {
   Text(
     stringResource(MR.strings.ok),
-    color = MaterialTheme.colors.primary,
-    fontSize = 14.sp,
-    modifier = Modifier.clickable { close() }.padding(vertical = 8.dp)
+    style = PopopxTypeScale.callout,
+    fontWeight = FontWeight.SemiBold,
+    color = PopopxBrand,
+    modifier = Modifier.clickable { close() }.padding(vertical = PopopxSpace.xs)
   )
 }
 
@@ -315,30 +365,45 @@ private fun PopopxDiscoverAssistantRow() {
   // a sheet that cannot answer: on a platform without calendar access the assistant does not exist, and
   // an absent row is honest where a dead one would not be.
   if (!PopopxEcoAssistantHost.available) return
-  SectionItemView({ showPopopxEcoAssistantSheet() }) {
-    Box(
-      contentAlignment = Alignment.Center,
-      modifier = Modifier
-        .size(40.dp)
-        .clip(RoundedCornerShape(10.dp))
-        .background(MaterialTheme.colors.background)
+  PopopxCard(
+    modifier = Modifier.padding(horizontal = PopopxSpace.gutter, vertical = PopopxSpace.xs),
+    contentPadding = PaddingValues(0.dp),
+  ) {
+    Row(
+      Modifier
+        .fillMaxWidth()
+        .clickable { showPopopxEcoAssistantSheet() }
+        .padding(PopopxSpace.s),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(PopopxSpace.s)
     ) {
-      Text(
-        stringResource(MR.strings.discover_private_assistant).take(1),
-        fontSize = 16.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colors.primary
-      )
-    }
-    Spacer(Modifier.width(12.dp))
-    Column(Modifier.weight(1f)) {
-      Text(stringResource(MR.strings.discover_private_assistant), style = MaterialTheme.typography.body1, maxLines = 1)
-      Text(
-        stringResource(MR.strings.copilot_local_only_note),
-        style = MaterialTheme.typography.body2,
-        color = MaterialTheme.colors.secondary,
-        maxLines = 2
-      )
+      Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+          .size(38.dp)
+          .clip(RoundedCornerShape(PopopxRadiusControl))
+          .background(PopopxBrand.copy(alpha = PopopxAlpha.wash))
+      ) {
+        Text(
+          stringResource(MR.strings.discover_private_assistant).take(1),
+          style = PopopxTypeScale.headline,
+          color = PopopxBrand
+        )
+      }
+      Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(
+          stringResource(MR.strings.discover_private_assistant),
+          style = PopopxTypeScale.headline,
+          color = MaterialTheme.colors.onBackground,
+          maxLines = 1
+        )
+        Text(
+          stringResource(MR.strings.copilot_local_only_note),
+          style = PopopxTypeScale.subheadline,
+          color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary),
+          maxLines = 2
+        )
+      }
     }
   }
 }
@@ -352,32 +417,39 @@ private fun PopopxDiscoverNodeRow(binding: PopopxMacNodeBinding?) {
     PopopxDiscoverNodeBanner(binding)
     return
   }
-  Column(Modifier.fillMaxWidth().padding(horizontal = DEFAULT_PADDING, vertical = DEFAULT_PADDING)) {
+  Column(Modifier.fillMaxWidth().padding(horizontal = PopopxSpace.gutter, vertical = PopopxSpace.m)) {
     if (binding == null) {
-      Text(stringResource(MR.strings.discover_node_heading), style = MaterialTheme.typography.body1)
+      Text(
+        stringResource(MR.strings.discover_node_heading),
+        style = PopopxTypeScale.headline,
+        color = MaterialTheme.colors.onBackground
+      )
       Text(
         PopopxDiscoverCopy.NO_NODE_BONDED_NOTICE,
-        fontSize = 12.sp,
-        color = MaterialTheme.colors.secondary,
+        style = PopopxTypeScale.caption,
+        color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary),
         modifier = Modifier.padding(top = 2.dp)
       )
     } else {
+      val hasDeviceLabel = binding.deviceLabel.isNotEmpty()
       Text(
-        binding.deviceLabel.ifEmpty { binding.nodeId },
-        style = MaterialTheme.typography.body1
+        if (hasDeviceLabel) binding.deviceLabel else binding.nodeId,
+        style = if (hasDeviceLabel) PopopxTypeScale.headline else PopopxTypeScale.code,
+        color = MaterialTheme.colors.onBackground
       )
       Text(
         binding.offerFingerprint,
-        fontSize = 12.sp,
-        color = MaterialTheme.colors.secondary,
+        style = PopopxTypeScale.codeSmall,
+        color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary),
         modifier = Modifier.padding(top = 2.dp)
       )
     }
     Text(
       stringResource(MR.strings.discover_bond_action),
-      fontSize = 14.sp,
-      color = MaterialTheme.colors.primary,
-      modifier = Modifier.clickable { showNodePairingSheet() }.padding(top = 8.dp)
+      style = PopopxTypeScale.callout,
+      fontWeight = FontWeight.SemiBold,
+      color = PopopxBrand,
+      modifier = Modifier.clickable { showNodePairingSheet() }.padding(top = PopopxSpace.xs)
     )
   }
 }
@@ -414,26 +486,25 @@ private fun PopopxDiscoverNodeBanner(binding: PopopxMacNodeBinding?) {
     connected -> stringResource(MR.strings.discover_banner_ready)
     else -> stringResource(MR.strings.discover_banner_idle)
   }
-  Surface(
-    Modifier
-      .fillMaxWidth()
-      .padding(horizontal = 16.dp)
-      .padding(top = 4.dp),
-    shape = RoundedCornerShape(PopopxRadiusCard),
-    color = sectionCardColor(),
-    border = BorderStroke(0.5.dp, PopopxHairlineInner),
-    elevation = if (isInDarkTheme()) 0.dp else 1.dp,
+  PopopxCard(
+    modifier = Modifier
+      .padding(horizontal = PopopxSpace.gutter)
+      .padding(top = PopopxSpace.xxs),
+    contentPadding = PaddingValues(0.dp),
   ) {
     Row(
-      Modifier.fillMaxWidth().clickable { showNodePairingSheet() }.padding(8.dp),
+      Modifier
+        .fillMaxWidth()
+        .clickable { showNodePairingSheet() }
+        .padding(PopopxSpace.s),
       verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(8.dp)
+      horizontalArrangement = Arrangement.spacedBy(PopopxSpace.xs)
     ) {
       Box(
         Modifier
           .size(38.dp)
           .clip(RoundedCornerShape(PopopxRadiusControl))
-          .background(tint.copy(alpha = 0.12f)),
+          .background(tint.copy(alpha = PopopxAlpha.wash)),
         contentAlignment = Alignment.Center
       ) {
         Icon(painterResource(MR.images.ic_desktop), null, Modifier.size(22.dp), tint = tint)
@@ -441,22 +512,21 @@ private fun PopopxDiscoverNodeBanner(binding: PopopxMacNodeBinding?) {
       Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(
           headline,
-          fontSize = 17.sp,
-          fontWeight = FontWeight.SemiBold,
+          style = PopopxTypeScale.headline,
           color = MaterialTheme.colors.onBackground,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis
         )
         Text(
           subline,
-          fontSize = 13.sp,
-          color = MaterialTheme.colors.secondary,
+          style = PopopxTypeScale.subheadline,
+          color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary),
           maxLines = 2,
           overflow = TextOverflow.Ellipsis
         )
       }
-      Spacer(Modifier.width(4.dp))
-      AutoMirroredIcon(painterResource(MR.images.ic_chevron_right), null, Modifier.size(12.dp), tint = PopopxLabelHint)
+      Spacer(Modifier.width(PopopxSpace.xxs))
+      AutoMirroredIcon(painterResource(MR.images.ic_chevron_right), null, Modifier.size(PopopxSize.iconXs), tint = PopopxLabelHint)
     }
   }
 }
@@ -484,7 +554,7 @@ private fun PopopxNodePairingSheet(close: () -> Unit) {
 
   ColumnWithScrollBar {
     AppBarTitle(stringResource(if (scanning) MR.strings.discover_pairing_scan else MR.strings.discover_pairing_title))
-    Column(Modifier.padding(horizontal = DEFAULT_PADDING)) {
+    Column(Modifier.padding(horizontal = PopopxSpace.gutter)) {
       if (scanning) {
         // The shared camera from the connect screen. Recognition hands the string to the same
         // `acceptPastedCode` verdict below — a scan grants no shortcut into the pairing state.
@@ -494,8 +564,12 @@ private fun PopopxNodePairingSheet(close: () -> Unit) {
           true
         }
       } else {
-        Text(stringResource(MR.strings.discover_pairing_intro), style = MaterialTheme.typography.body2)
-        Spacer(Modifier.height(DEFAULT_PADDING_HALF))
+        Text(
+          stringResource(MR.strings.discover_pairing_intro),
+          style = PopopxTypeScale.callout,
+          color = MaterialTheme.colors.onBackground
+        )
+        Spacer(Modifier.height(PopopxSpace.xs))
         PopopxCardActionButton(
           stringResource(MR.strings.discover_pairing_scan),
           painterResource(MR.images.ic_qr_code_scanner),
@@ -505,7 +579,7 @@ private fun PopopxNodePairingSheet(close: () -> Unit) {
           scannerEnabled.value = true
           scanning = true
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(PopopxSpace.xs))
         PopopxCardActionButton(
           stringResource(MR.strings.discover_pairing_paste),
           painterResource(MR.images.ic_content_paste),
@@ -513,59 +587,67 @@ private fun PopopxNodePairingSheet(close: () -> Unit) {
           Modifier.fillMaxWidth()
         ) { pasteFieldShown = true }
         if (pasteFieldShown || code.value.text.isNotEmpty()) {
-          Spacer(Modifier.height(DEFAULT_PADDING_HALF))
-          DefaultBasicTextField(
-            modifier = Modifier
-              .fillMaxWidth()
-              .background(MaterialTheme.colors.background, shape = RoundedCornerShape(12.dp))
-              .padding(horizontal = 12.dp, vertical = 10.dp),
-            state = code,
-            textStyle = TextStyle(textDirection = TextDirection.Ltr),
-            placeholder = {
-              Text(
-                stringResource(MR.strings.discover_paste_placeholder),
-                color = MaterialTheme.colors.secondary,
-                fontSize = MaterialTheme.typography.body1.fontSize
-              )
-            },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            onValueChange = { code.value = it },
-          )
+          Spacer(Modifier.height(PopopxSpace.xs))
+          Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(PopopxRadiusControl),
+            color = PopopxFieldSurface,
+            border = BorderStroke(PopopxSize.hairline, PopopxHairlineStrong),
+          ) {
+            DefaultBasicTextField(
+              modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = PopopxSpace.s, vertical = PopopxSpace.xs),
+              state = code,
+              textStyle = PopopxTypeScale.code,
+              placeholder = {
+                Text(
+                  stringResource(MR.strings.discover_paste_placeholder),
+                  style = PopopxTypeScale.body,
+                  color = PopopxLabelHint
+                )
+              },
+              keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+              onValueChange = { code.value = it },
+            )
+          }
         }
         when (val result = verdict) {
           is PopopxPairingAccept.Pending -> {
             Text(
               result.offer.nodeId,
-              style = MaterialTheme.typography.body2.copy(textDirection = TextDirection.Ltr),
-              modifier = Modifier.padding(top = DEFAULT_PADDING_HALF)
+              style = PopopxTypeScale.code,
+              color = MaterialTheme.colors.onBackground,
+              modifier = Modifier.padding(top = PopopxSpace.xs)
             )
             Text(
               stringResource(MR.strings.discover_pairing_window),
-              fontSize = 12.sp,
-              color = MaterialTheme.colors.secondary
+              style = PopopxTypeScale.caption,
+              color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary)
             )
             Text(
               stringResource(MR.strings.discover_bond_action),
-              fontSize = 14.sp,
-              color = MaterialTheme.colors.primary,
+              style = PopopxTypeScale.callout,
+              fontWeight = FontWeight.SemiBold,
+              color = PopopxBrand,
               modifier = Modifier
                 .clickable { bondedTo = if (engine.bond(result.offer)) result.offer.nodeId else null }
-                .padding(top = 8.dp, bottom = 8.dp)
+                .padding(top = PopopxSpace.xs, bottom = PopopxSpace.xs)
             )
           }
           is PopopxPairingAccept.Rejected -> Text(
             PopopxDiscoverCopy.GENERIC_PAIRING_NOTICE,
-            fontSize = 13.sp,
+            style = PopopxTypeScale.subheadline,
             color = MaterialTheme.colors.error,
-            modifier = Modifier.padding(top = DEFAULT_PADDING_HALF)
+            modifier = Modifier.padding(top = PopopxSpace.xs)
           )
           else -> {}
         }
         bondedTo?.let { nodeId ->
           Text(
             stringResource(MR.strings.discover_bonded_format).format(nodeId),
-            fontSize = 13.sp,
-            color = MaterialTheme.colors.primary
+            style = PopopxTypeScale.subheadline,
+            color = PopopxBrand
           )
         }
         // Ruling ③: the bond is half of it. `PopopxSubscriptionEngine` can store a node and still have
@@ -574,7 +656,7 @@ private fun PopopxNodePairingSheet(close: () -> Unit) {
         // (MacNodePairingSheet.swift:401-413); this asks the same question in the same sheet.
         engine.binding?.let { PopopxNodeContactPicker(it) }
       }
-      Spacer(Modifier.height(DEFAULT_PADDING))
+      Spacer(Modifier.height(PopopxSpace.m))
       SheetDone(close)
     }
   }
@@ -604,28 +686,28 @@ private fun PopopxNodeContactPicker(binding: PopopxMacNodeBinding) {
   SheetHeading(stringResource(MR.strings.discover_node_chat_picker_title))
   Text(
     stringResource(MR.strings.discover_node_chat_picker_hint),
-    fontSize = 12.sp,
-    color = MaterialTheme.colors.secondary
+    style = PopopxTypeScale.caption,
+    color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary)
   )
   when (probe) {
     NodeProbeState.IDLE -> {}
     NodeProbeState.SENDING -> Text(
       stringResource(MR.strings.discover_node_probe_sending),
-      fontSize = 12.sp,
-      color = MaterialTheme.colors.secondary,
-      modifier = Modifier.padding(top = 4.dp)
+      style = PopopxTypeScale.caption,
+      color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary),
+      modifier = Modifier.padding(top = PopopxSpace.xxs)
     )
     NodeProbeState.CONFIRMED -> Text(
       stringResource(MR.strings.discover_node_probe_confirmed),
-      fontSize = 12.sp,
-      color = MaterialTheme.colors.primary,
-      modifier = Modifier.padding(top = 4.dp)
+      style = PopopxTypeScale.caption,
+      color = PopopxBrand,
+      modifier = Modifier.padding(top = PopopxSpace.xxs)
     )
     NodeProbeState.FAILED -> Text(
       stringResource(MR.strings.discover_node_probe_failed),
-      fontSize = 12.sp,
+      style = PopopxTypeScale.caption,
       color = MaterialTheme.colors.error,
-      modifier = Modifier.padding(top = 4.dp)
+      modifier = Modifier.padding(top = PopopxSpace.xxs)
     )
   }
 
@@ -633,38 +715,51 @@ private fun PopopxNodeContactPicker(binding: PopopxMacNodeBinding) {
   if (contacts.isEmpty()) {
     Text(
       stringResource(MR.strings.discover_node_chat_picker_none),
-      fontSize = 13.sp,
-      color = MaterialTheme.colors.secondary,
-      modifier = Modifier.padding(top = DEFAULT_PADDING_HALF)
+      style = PopopxTypeScale.subheadline,
+      color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary),
+      modifier = Modifier.padding(top = PopopxSpace.xs)
     )
   }
-  contacts.forEach { contact ->
-    SectionItemView({
-      engine.attach(contact.contactId, contact.displayName)
-      probe = NodeProbeState.SENDING
-      // The probe IS the handshake: `sendPairingProbe` emits the same `edge_compute_mesh::status` pairing
-      // line the engine's `sendHandshake` documents, and only a delivered one may confirm the binding —
-      // otherwise the sheet would carry a confirmation the node never saw.
-      scope.launch {
-        val delivered = PopopxSilentSignalingRouter.shared.sendPairingProbe(contact.contactId)
-        if (delivered) engine.confirmHandshake()
-        probe = if (delivered) NodeProbeState.CONFIRMED else NodeProbeState.FAILED
-      }
-    }) {
-      Column(Modifier.weight(1f)) {
-        Text(contact.displayName, style = MaterialTheme.typography.body1, maxLines = 1)
-        Text(
-          stringResource(MR.strings.discover_node_chat_picker_confirm),
-          fontSize = 12.sp,
-          color = MaterialTheme.colors.primary
-        )
-      }
-      if (contact.contactId == attachedId) {
-        Text(
-          stringResource(MR.strings.discover_node_chat_picker_selected),
-          fontSize = 12.sp,
-          color = MaterialTheme.colors.primary
-        )
+  if (contacts.isNotEmpty()) {
+    PopopxCard(contentPadding = PaddingValues(vertical = PopopxSpace.xxs)) {
+      contacts.forEachIndexed { index, contact ->
+        if (index > 0) PopopxDivider()
+        SectionItemView(
+          {
+            engine.attach(contact.contactId, contact.displayName)
+            probe = NodeProbeState.SENDING
+            // The probe IS the handshake: `sendPairingProbe` emits the same `edge_compute_mesh::status` pairing
+            // line the engine's `sendHandshake` documents, and only a delivered one may confirm the binding —
+            // otherwise the sheet would carry a confirmation the node never saw.
+            scope.launch {
+              val delivered = PopopxSilentSignalingRouter.shared.sendPairingProbe(contact.contactId)
+              if (delivered) engine.confirmHandshake()
+              probe = if (delivered) NodeProbeState.CONFIRMED else NodeProbeState.FAILED
+            }
+          },
+          padding = PaddingValues(horizontal = PopopxSpace.s, vertical = PopopxSpace.xs)
+        ) {
+          Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+              contact.displayName,
+              style = PopopxTypeScale.headline,
+              color = MaterialTheme.colors.onBackground,
+              maxLines = 1
+            )
+            Text(
+              stringResource(MR.strings.discover_node_chat_picker_confirm),
+              style = PopopxTypeScale.caption,
+              color = PopopxBrand
+            )
+          }
+          if (contact.contactId == attachedId) {
+            Text(
+              stringResource(MR.strings.discover_node_chat_picker_selected),
+              style = PopopxTypeScale.caption,
+              color = PopopxBrand
+            )
+          }
+        }
       }
     }
   }
@@ -707,22 +802,23 @@ private fun PopopxNodeFeedSection(snapshot: PopopxNodeFeedSnapshot?) {
   if (items.isEmpty() && !keyChanged) return
   val uriHandler = LocalUriHandler.current
 
-  Column(Modifier.fillMaxWidth().padding(horizontal = DEFAULT_PADDING)) {
+  Column(Modifier.fillMaxWidth().padding(horizontal = PopopxSpace.gutter)) {
     Row(
-      Modifier.fillMaxWidth().padding(top = DEFAULT_PADDING, bottom = DEFAULT_PADDING_HALF),
+      Modifier.fillMaxWidth().padding(top = PopopxSpace.m, bottom = PopopxSpace.xs),
       verticalAlignment = Alignment.CenterVertically
     ) {
       Text(
         stringResource(MR.strings.discover_node_feed_title),
-        style = MaterialTheme.typography.h3,
+        style = PopopxTypeScale.headline,
+        color = MaterialTheme.colors.onBackground,
         modifier = Modifier.weight(1f)
       )
       val generatedAt = snapshot?.generatedAt.orEmpty().substringBefore('T')
       if (generatedAt.isNotEmpty()) {
         Text(
           stringResource(MR.strings.discover_node_feed_updated).format(generatedAt),
-          fontSize = 12.sp,
-          color = MaterialTheme.colors.secondary
+          style = PopopxTypeScale.caption,
+          color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary)
         )
       }
     }
@@ -731,17 +827,17 @@ private fun PopopxNodeFeedSection(snapshot: PopopxNodeFeedSnapshot?) {
       // did not change, so the panel says the key no longer matches rather than holding a stale list.
       Text(
         stringResource(MR.strings.discover_node_feed_key_changed),
-        fontSize = 12.sp,
+        style = PopopxTypeScale.caption,
         color = MaterialTheme.colors.error,
-        modifier = Modifier.padding(bottom = DEFAULT_PADDING_HALF)
+        modifier = Modifier.padding(bottom = PopopxSpace.xs)
       )
     }
     items.forEach { item -> PopopxNodeFeedRow(item, uriHandler) }
     Text(
       stringResource(MR.strings.discover_node_feed_footer),
-      fontSize = 12.sp,
-      color = MaterialTheme.colors.secondary,
-      modifier = Modifier.padding(top = DEFAULT_PADDING_HALF, bottom = DEFAULT_PADDING)
+      style = PopopxTypeScale.caption,
+      color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary),
+      modifier = Modifier.padding(top = PopopxSpace.xs, bottom = PopopxSpace.m)
     )
   }
 }
@@ -752,28 +848,39 @@ private fun PopopxNodeFeedRow(item: PopopxNodeFeedItem, uriHandler: UriHandler) 
   // (`PopopxNodeFeedItem.link`), and turning that into a tap would have this app open a file the user never
   // saw, so anything else renders as text.
   val target = popopxNodeFeedTarget(item.link)
-  Column(
-    Modifier
+  Surface(
+    modifier = Modifier
       .fillMaxWidth()
-      .padding(bottom = DEFAULT_PADDING_HALF)
-      .clip(RoundedCornerShape(10.dp))
-      .background(MaterialTheme.colors.background)
-      .let { if (target != null) it.clickable { uriHandler.openUri(target) } else it }
-      .padding(horizontal = 12.dp, vertical = 8.dp),
-    verticalArrangement = Arrangement.spacedBy(2.dp)
+      .padding(bottom = PopopxSpace.xs),
+    shape = RoundedCornerShape(PopopxRadiusControl),
+    color = PopopxSurface,
+    border = BorderStroke(PopopxSize.hairline, PopopxHairlineStrong),
   ) {
-    Text(item.title, style = MaterialTheme.typography.body2)
-    if (item.summary.isNotEmpty()) {
-      Text(item.summary, fontSize = 12.sp, color = MaterialTheme.colors.secondary, maxLines = 3)
+    Column(
+      Modifier
+        .fillMaxWidth()
+        .let { if (target != null) it.clickable { uriHandler.openUri(target) } else it }
+        .padding(horizontal = PopopxSpace.s, vertical = PopopxSpace.xs),
+      verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+      Text(item.title, style = PopopxTypeScale.callout, color = MaterialTheme.colors.onBackground)
+      if (item.summary.isNotEmpty()) {
+        Text(
+          item.summary,
+          style = PopopxTypeScale.caption,
+          color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary),
+          maxLines = 3
+        )
+      }
+      Text(
+        listOf(item.sourceLabel.ifEmpty { item.source }, item.timestamp)
+          .filter { it.isNotEmpty() }
+          .joinToString(" · "),
+        style = PopopxTypeScale.metricSmall,
+        color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary),
+        maxLines = 1
+      )
     }
-    Text(
-      listOf(item.sourceLabel.ifEmpty { item.source }, item.timestamp)
-        .filter { it.isNotEmpty() }
-        .joinToString(" · "),
-      fontSize = 11.sp,
-      color = MaterialTheme.colors.secondary,
-      maxLines = 1
-    )
   }
 }
 

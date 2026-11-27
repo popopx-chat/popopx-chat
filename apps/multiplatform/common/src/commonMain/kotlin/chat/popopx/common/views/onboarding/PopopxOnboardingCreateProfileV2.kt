@@ -15,10 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import chat.popopx.common.model.ChatController.appPrefs
 import chat.popopx.common.model.ChatModel
 import chat.popopx.common.platform.*
@@ -91,7 +88,7 @@ fun PopopxOnboardingCreateProfile(chatModel: ChatModel, close: () -> Unit) {
                 MigrateToDeviceView { closeModal() }
               }
             },
-            modifier = Modifier.padding(end = 8.dp)
+            modifier = Modifier.padding(end = PopopxSpace.xs)
           ) {
             Icon(painterResource(MR.images.ic_download), null, Modifier.size(22.dp), tint = MaterialTheme.colors.primary)
           }
@@ -108,8 +105,8 @@ fun PopopxOnboardingCreateProfile(chatModel: ChatModel, close: () -> Unit) {
           horizontalAlignment = Alignment.Start
         ) {
           Column(
-            Modifier.fillMaxWidth().padding(horizontal = PopopxOnboardingGutter).padding(top = PopopxOnboardingSpaceM).padding(bottom = 48.dp),
-            verticalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceL)
+            Modifier.fillMaxWidth().padding(horizontal = PopopxSpace.m).padding(top = PopopxSpace.m).padding(bottom = PopopxSpace.xxl),
+            verticalArrangement = Arrangement.spacedBy(PopopxSpace.l)
           ) {
             PopopxOnboardingHeader(
               step = 1,
@@ -134,26 +131,24 @@ fun PopopxOnboardingCreateProfile(chatModel: ChatModel, close: () -> Unit) {
               )
               if (trimmedName.isNotEmpty() && trimmedName != suggestedName) {
                 Row(
-                  Modifier.fillMaxWidth().padding(top = PopopxOnboardingSpaceXS),
-                  horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceS),
+                  Modifier.fillMaxWidth().padding(top = PopopxSpace.xs),
+                  horizontalArrangement = Arrangement.spacedBy(PopopxSpace.s),
                   verticalAlignment = Alignment.CenterVertically
                 ) {
                   PopopxOnboardingIconBadge(MR.images.ic_error_filled, PopopxOnboardingTint.DANGER)
                   Text(
                     stringResource(MR.strings.onboarding_v2_name_invalid_hint),
-                    fontSize = 13.sp,
-                    color = PopopxDangerFill,
-                    lineHeight = 17.sp
+                    style = PopopxTypeScale.subheadline,
+                    color = PopopxDangerFill
                   )
                   Spacer(Modifier.weight(1f))
                 }
               } else if (trimmedName.isEmpty()) {
                 Text(
                   stringResource(MR.strings.onboarding_v2_name_required),
-                  fontSize = 13.sp,
+                  style = PopopxTypeScale.subheadline,
                   color = popopxOnboardingSecondary(),
-                  lineHeight = 17.sp,
-                  modifier = Modifier.padding(top = PopopxOnboardingSpaceXS)
+                  modifier = Modifier.padding(top = PopopxSpace.xs)
                 )
               }
 
@@ -166,14 +161,14 @@ fun PopopxOnboardingCreateProfile(chatModel: ChatModel, close: () -> Unit) {
               )
               if (note.value.isNotEmpty()) {
                 Row(
-                  Modifier.fillMaxWidth().padding(top = PopopxOnboardingSpaceXS),
-                  horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceXS),
+                  Modifier.fillMaxWidth().padding(top = PopopxSpace.xs),
+                  horizontalArrangement = Arrangement.spacedBy(PopopxSpace.xs),
                   verticalAlignment = Alignment.CenterVertically
                 ) {
                   Spacer(Modifier.weight(1f))
                   Text(
                     "${chatJsonLength(note.value)} / $MAX_BIO_LENGTH_BYTES",
-                    fontSize = 11.sp,
+                    style = PopopxTypeScale.metricSmall,
                     color = if (noteFitsLimit) popopxOnboardingLabelHint() else PopopxDangerFill
                   )
                 }
@@ -224,7 +219,7 @@ private fun popopxAvatarTints(): List<Color> = listOf(
   PopopxMesh,
   PopopxSuccess,
   PopopxDangerFill,
-  MaterialTheme.colors.onBackground.copy(alpha = 0.62f)
+  MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary)
 )
 
 @Composable
@@ -236,7 +231,7 @@ private fun ProfileAvatarRow(
 ) {
   Row(
     Modifier.fillMaxWidth(),
-    horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceM),
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.m),
     verticalAlignment = Alignment.CenterVertically
   ) {
     Box(
@@ -262,43 +257,40 @@ private fun ProfileAvatarRow(
           .align(Alignment.BottomEnd)
           .size(32.dp)
           .background(PopopxBrand, CircleShape)
-          .border(PopopxOnboardingDividerWidth, MaterialTheme.colors.background, CircleShape),
+          .border(PopopxSize.stroke, PopopxCanvas, CircleShape),
         contentAlignment = Alignment.Center
       ) {
-        Icon(painterResource(MR.images.ic_photo_camera), null, Modifier.size(18.dp), tint = PopopxOnBrand)
+        Icon(painterResource(MR.images.ic_photo_camera), null, Modifier.size(PopopxSize.iconL), tint = PopopxOnBrand)
       }
     }
     Column(
       Modifier.weight(1f),
-      verticalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceXS)
+      verticalArrangement = Arrangement.spacedBy(PopopxSpace.xs)
     ) {
       Text(
         stringResource(MR.strings.onboarding_v2_profile_photo),
-        fontSize = 17.sp,
-        fontWeight = FontWeight.SemiBold,
+        style = PopopxTypeScale.headline,
         color = popopxOnboardingLabel()
       )
       Text(
         stringResource(MR.strings.onboarding_v2_tap_to_choose_photo),
-        fontSize = 13.sp,
-        color = popopxOnboardingSecondary(),
-        lineHeight = 17.sp
+        style = PopopxTypeScale.subheadline,
+        color = popopxOnboardingSecondary()
       )
       Row(
         Modifier
-          .heightIn(min = PopopxOnboardingMinHitTarget)
-          .background(sectionCardColor(), RoundedCornerShape(PopopxOnboardingRadiusControl))
-          .border(PopopxOnboardingDividerWidth, popopxOnboardingLabelHint(), RoundedCornerShape(PopopxOnboardingRadiusControl))
+          .heightIn(min = PopopxSize.control)
+          .background(sectionCardColor(), RoundedCornerShape(PopopxRadiusControl))
+          .border(PopopxSize.stroke, popopxOnboardingLabelHint(), RoundedCornerShape(PopopxRadiusControl))
           .clickable(onClick = onNewAvatar)
-          .padding(horizontal = PopopxOnboardingSpaceM, vertical = PopopxOnboardingSpaceS),
-        horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceXS),
+          .padding(horizontal = PopopxSpace.m, vertical = PopopxSpace.s),
+        horizontalArrangement = Arrangement.spacedBy(PopopxSpace.xs),
         verticalAlignment = Alignment.CenterVertically
       ) {
-        Icon(painterResource(MR.images.ic_palette), null, Modifier.size(18.dp), tint = popopxOnboardingLabel())
+        Icon(painterResource(MR.images.ic_palette), null, Modifier.size(PopopxSize.iconL), tint = popopxOnboardingLabel())
         Text(
           stringResource(MR.strings.onboarding_v2_new_avatar),
-          fontSize = 17.sp,
-          fontWeight = FontWeight.SemiBold,
+          style = PopopxTypeScale.headline,
           color = popopxOnboardingLabel()
         )
       }

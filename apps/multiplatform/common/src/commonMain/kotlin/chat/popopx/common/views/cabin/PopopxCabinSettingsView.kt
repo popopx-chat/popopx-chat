@@ -8,8 +8,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.material.Switch
-import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,12 +19,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import chat.popopx.common.mesh.PopopxBluetoothState
 import chat.popopx.common.mesh.PopopxMeshConfig
 import chat.popopx.common.mesh.PopopxMeshEventHub
@@ -39,8 +33,18 @@ import chat.popopx.common.platform.ColumnWithScrollBar
 import chat.popopx.common.platform.platform
 import chat.popopx.common.platform.showToast
 import chat.popopx.common.platform.tmpDir
+import chat.popopx.common.ui.components.PopopxDivider
+import chat.popopx.common.ui.components.PopopxIconBadge
+import chat.popopx.common.ui.components.PopopxPickerRow
+import chat.popopx.common.ui.components.PopopxSecondaryButton
+import chat.popopx.common.ui.components.PopopxSection
+import chat.popopx.common.ui.components.PopopxSwitch
+import chat.popopx.common.ui.theme.PopopxAlpha
 import chat.popopx.common.ui.theme.PopopxMesh
 import chat.popopx.common.ui.theme.PopopxMeshInk
+import chat.popopx.common.ui.theme.PopopxRadiusControl
+import chat.popopx.common.ui.theme.PopopxSize
+import chat.popopx.common.ui.theme.PopopxTypeScale
 import chat.popopx.common.views.helpers.AlertManager
 import chat.popopx.common.views.helpers.AppBarTitle
 import chat.popopx.common.views.helpers.ModalManager
@@ -117,106 +121,99 @@ private fun PopopxCabinSettingsView(close: () -> Unit) {
     ) {
       Text(
         stringResource(MR.strings.cabin_settings_subtitle),
-        fontSize = 13.sp,
-        color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+        style = PopopxTypeScale.subheadline,
+        color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
       )
 
-      CabinSectionCard(
+      PopopxSection(
         title = stringResource(MR.strings.cabin_settings_card_switch),
         footnote = stringResource(MR.strings.cabin_settings_switch_footnote),
       ) {
         Row(
-          Modifier.fillMaxWidth().heightIn(min = 44.dp).padding(vertical = 8.dp),
+          Modifier.fillMaxWidth().heightIn(min = PopopxSize.control).padding(vertical = 8.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
           Column(Modifier.weight(1f)) {
-            Text(stringResource(MR.strings.cabin_switch), fontSize = 17.sp)
+            Text(stringResource(MR.strings.cabin_switch), style = PopopxTypeScale.headline)
             Spacer(Modifier.height(2.dp))
             Text(
               stringResource(if (enabled) MR.strings.cabin_fuse_note_on else MR.strings.cabin_fuse_note_off),
-              fontSize = 13.sp,
-              color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+              style = PopopxTypeScale.subheadline,
+              color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
             )
           }
           Spacer(Modifier.width(12.dp))
-          Switch(
+          PopopxSwitch(
             checked = enabled,
             onCheckedChange = { next -> uiScope.launch { fuse.setEnabled(next) } },
             enabled = !busy,
-            colors = SwitchDefaults.colors(
-              checkedThumbColor = Color.White,
-              checkedTrackColor = PopopxMesh,
-              uncheckedThumbColor = Color.White,
-              uncheckedTrackColor = MaterialTheme.colors.onSurface.copy(alpha = 0.18f),
-            )
           )
         }
-        CabinDivider()
+        PopopxDivider()
         Row(
-          Modifier.fillMaxWidth().heightIn(min = 44.dp).padding(vertical = 8.dp),
+          Modifier.fillMaxWidth().heightIn(min = PopopxSize.control).padding(vertical = 8.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
           Text(
             stringResource(MR.strings.cabin_settings_pairing),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = PopopxTypeScale.body.copy(fontWeight = FontWeight.SemiBold),
             modifier = Modifier.weight(1f),
           )
           Spacer(Modifier.width(8.dp))
           Text(
             stringResource(MR.strings.cabin_settings_fact_absent),
-            fontSize = 13.sp,
-            color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+            style = PopopxTypeScale.subheadline,
+            color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
           )
         }
         Text(
           stringResource(MR.strings.cabin_settings_pairing_absent),
-          fontSize = 13.sp,
-          color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+          style = PopopxTypeScale.subheadline,
+          color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
         )
-        CabinDivider()
-        CabinPickerRow(
+        PopopxDivider()
+        PopopxPickerRow(
           label = stringResource(MR.strings.cabin_settings_privacy_row),
           value = stringResource(MR.strings.cabin_settings_fact_absent),
           icon = MR.images.ic_shield,
           enabled = false,
           onClick = {},
+          tint = PopopxMesh,
         )
       }
 
-      CabinSectionCard(
+      PopopxSection(
         title = stringResource(MR.strings.cabin_settings_card_identity),
         footnote = stringResource(MR.strings.cabin_settings_key_footnote),
       ) {
         Column(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-          Text(stringResource(MR.strings.cabin_settings_key_row), fontSize = 16.sp)
+          Text(stringResource(MR.strings.cabin_settings_key_row), style = PopopxTypeScale.body)
           Spacer(Modifier.height(4.dp))
           SelectionContainer {
             Text(
               if (localKeyHex.isEmpty()) stringResource(MR.strings.cabin_settings_key_absent) else localKeyHex,
-              fontSize = 13.sp,
-              style = TextStyle(textDirection = TextDirection.Ltr),
+              style = PopopxTypeScale.metric,
               color = if (localKeyHex.isEmpty()) {
-                MaterialTheme.colors.onSurface.copy(alpha = cabinLabelHintAlpha)
+                MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.hint)
               } else {
-                MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha)
+                MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary)
               },
             )
           }
         }
-        CabinDivider()
+        PopopxDivider()
         CabinFactRow(stringResource(MR.strings.cabin_settings_binding_row), stringResource(MR.strings.cabin_settings_fact_absent))
         CabinFactRow(stringResource(MR.strings.cabin_settings_queue_row), stringResource(MR.strings.cabin_settings_fact_absent))
         CabinFactRow(stringResource(MR.strings.cabin_settings_in_reach_row), "${inReach.size} / ${nodes.size}")
         CabinFactRow(stringResource(MR.strings.cabin_settings_relay_row), "$relayedCount")
         CabinFactRow(stringResource(MR.strings.cabin_settings_farthest_row), "$farthestHop / $relayHopCap")
-        CabinDivider()
+        PopopxDivider()
         CabinRadioDiagnosisRow(radio)
-        CabinDivider()
+        PopopxDivider()
         CabinVerificationBlock(phase, fuse)
       }
 
-      CabinSectionCard(
+      PopopxSection(
         title = stringResource(MR.strings.cabin_settings_card_danger),
         footnote = stringResource(MR.strings.cabin_settings_wipe_detail),
       ) {
@@ -240,10 +237,10 @@ private fun PopopxCabinSettingsView(close: () -> Unit) {
         }
       }
 
-      CabinSecondaryButton(
-        stringResource(MR.strings.cabin_close),
+      PopopxSecondaryButton(
+        text = stringResource(MR.strings.cabin_close),
         modifier = Modifier.fillMaxWidth(),
-        action = close,
+        onClick = close,
       )
     }
   }
@@ -287,13 +284,12 @@ private fun CabinFactRow(title: String, value: String) {
     Modifier.fillMaxWidth().padding(vertical = 4.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    Text(title, fontSize = 15.sp, modifier = Modifier.weight(1f))
+    Text(title, style = PopopxTypeScale.callout, modifier = Modifier.weight(1f))
     Spacer(Modifier.width(8.dp))
     Text(
       value,
-      fontSize = 13.sp,
-      style = TextStyle(textDirection = TextDirection.Ltr),
-      color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+      style = PopopxTypeScale.metric,
+      color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
     )
   }
 }
@@ -309,16 +305,15 @@ private fun CabinRadioDiagnosisRow(radio: PopopxBluetoothState) {
     Modifier.fillMaxWidth().padding(vertical = 8.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    CabinIconBadge(
+    PopopxIconBadge(
       if (needsSettings) MR.images.ic_wifi_off else MR.images.ic_wifi_tethering,
-      if (needsSettings) MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha) else PopopxMesh,
+      if (needsSettings) MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary) else PopopxMesh,
     )
     Spacer(Modifier.width(12.dp))
     Column(Modifier.weight(1f)) {
       Text(
         stringResource(MR.strings.cabin_settings_radio_row),
-        fontSize = 16.sp,
-        fontWeight = FontWeight.SemiBold,
+        style = PopopxTypeScale.body.copy(fontWeight = FontWeight.SemiBold),
       )
       Spacer(Modifier.height(2.dp))
       Text(
@@ -331,8 +326,8 @@ private fun CabinRadioDiagnosisRow(radio: PopopxBluetoothState) {
             PopopxBluetoothState.RESETTING, PopopxBluetoothState.UNSUPPORTED -> MR.strings.cabin_settings_radio_quiet
           }
         ),
-        fontSize = 13.sp,
-        color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+        style = PopopxTypeScale.subheadline,
+        color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
       )
     }
     Spacer(Modifier.width(8.dp))
@@ -341,8 +336,8 @@ private fun CabinRadioDiagnosisRow(radio: PopopxBluetoothState) {
     } else {
       Text(
         cabinRadioWords(radio),
-        fontSize = 13.sp,
-        color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+        style = PopopxTypeScale.subheadline,
+        color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
         modifier = Modifier.widthIn(max = 120.dp),
       )
     }
@@ -353,13 +348,12 @@ private fun CabinRadioDiagnosisRow(radio: PopopxBluetoothState) {
 private fun OpenSettingsButton() {
   Surface(
     shape = RoundedCornerShape(10.dp),
-    color = MaterialTheme.colors.onSurface.copy(alpha = 0.08f),
-    modifier = Modifier.heightIn(min = 44.dp).clickable { platform.androidOpenAppSettings() },
+    color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.press),
+    modifier = Modifier.heightIn(min = PopopxSize.control).clickable { platform.androidOpenAppSettings() },
   ) {
     Text(
       stringResource(MR.strings.cabin_settings_open_settings),
-      fontSize = 13.sp,
-      fontWeight = FontWeight.SemiBold,
+      style = PopopxTypeScale.subheadline.copy(fontWeight = FontWeight.SemiBold),
       color = PopopxMeshInk,
       modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
     )
@@ -386,22 +380,21 @@ private fun CabinVerificationBlock(phase: PopopxMeshFusePhase, fuse: PopopxMeshK
   Column(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
     Text(
       stringResource(MR.strings.cabin_settings_verify_headline),
-      fontSize = 16.sp,
-      fontWeight = FontWeight.SemiBold,
+      style = PopopxTypeScale.body.copy(fontWeight = FontWeight.SemiBold),
     )
     Spacer(Modifier.height(2.dp))
     Text(
       phaseWord +
         stringResource(MR.strings.cabin_settings_verify_subscribers, subscribers) +
         if (mismatch) stringResource(MR.strings.cabin_settings_verify_mismatch) else "",
-      fontSize = 13.sp,
-      color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+      style = PopopxTypeScale.subheadline,
+      color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
     )
     Spacer(Modifier.height(2.dp))
     Text(
       stringResource(MR.strings.cabin_settings_verify_live),
-      fontSize = 13.sp,
-      color = MaterialTheme.colors.onSurface.copy(alpha = cabinLabelHintAlpha),
+      style = PopopxTypeScale.subheadline,
+      color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.hint),
     )
   }
 }
@@ -410,18 +403,22 @@ private fun CabinVerificationBlock(phase: PopopxMeshFusePhase, fuse: PopopxMeshK
 private fun CabinDangerButton(text: String, action: () -> Unit) {
   val danger = MaterialTheme.colors.error
   Surface(
-    shape = RoundedCornerShape(12.dp),
+    shape = RoundedCornerShape(PopopxRadiusControl),
     color = danger.copy(alpha = 0.10f),
-    border = BorderStroke(1.dp, danger.copy(alpha = 0.35f)),
-    modifier = Modifier.fillMaxWidth().heightIn(min = 44.dp).clickable(onClick = action),
+    border = BorderStroke(PopopxSize.stroke, danger.copy(alpha = 0.35f)),
+    modifier = Modifier.fillMaxWidth().heightIn(min = PopopxSize.control).clickable(onClick = action),
   ) {
     Row(
       Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      Icon(painterResource(MR.images.ic_delete_forever_filled), null, Modifier.size(18.dp), tint = danger)
-      Text(text, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = danger)
+      Icon(painterResource(MR.images.ic_delete_forever_filled), null, Modifier.size(PopopxSize.iconL), tint = danger)
+      Text(
+        text,
+        style = PopopxTypeScale.headline,
+        color = danger,
+      )
     }
   }
 }

@@ -1,18 +1,14 @@
 package chat.popopx.common.views.chatlist
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import chat.popopx.common.ui.theme.PopopxHairlineInner
+import chat.popopx.common.ui.components.PopopxCard
+import chat.popopx.common.ui.theme.PopopxSpace
+import chat.popopx.common.ui.theme.PopopxTypeScale
 import chat.popopx.res.*
 import dev.icerock.moko.resources.compose.stringResource
 
@@ -25,16 +21,9 @@ import dev.icerock.moko.resources.compose.stringResource
 internal fun PopopxChatsEmptyState(searching: Boolean, query: String) {
   val title = if (searching) stringResource(MR.strings.chats_empty_search_title) else stringResource(MR.strings.chats_empty_none_title)
   val detail = if (searching) stringResource(MR.strings.chats_empty_search_detail, query) else stringResource(MR.strings.chats_empty_none_detail)
-  Column(
-    Modifier
-      .fillMaxWidth()
-      .clip(RoundedCornerShape(16.dp))
-      .background(MaterialTheme.colors.surface)
-      .border(0.5.dp, PopopxHairlineInner, RoundedCornerShape(16.dp))
-      .padding(16.dp),
-    verticalArrangement = Arrangement.spacedBy(4.dp)
-  ) {
-    Text(title, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colors.onBackground)
-    Text(detail, fontSize = 13.sp, color = MaterialTheme.colors.secondary, lineHeight = 18.sp)
+  PopopxCard {
+    Text(title, style = PopopxTypeScale.headline, color = MaterialTheme.colors.onBackground)
+    Spacer(Modifier.height(PopopxSpace.xxs))
+    Text(detail, style = PopopxTypeScale.subheadline, color = MaterialTheme.colors.secondary)
   }
 }

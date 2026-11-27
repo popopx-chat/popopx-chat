@@ -14,13 +14,11 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import chat.popopx.common.AppLock
 import chat.popopx.common.model.ChatController.appPrefs
 import chat.popopx.common.model.ChatModel
@@ -90,10 +88,10 @@ fun PopopxOnboardingCommitments(chatModel: ChatModel) {
             Column(
               Modifier
                 .fillMaxWidth()
-                .padding(horizontal = PopopxOnboardingGutter)
-                .padding(top = PopopxOnboardingSpaceS)
-                .padding(bottom = PopopxOnboardingSpaceM),
-              verticalArrangement = Arrangement.spacedBy(if (compact) PopopxOnboardingSpaceS else PopopxOnboardingSpaceL)
+                .padding(horizontal = PopopxSpace.m)
+                .padding(top = PopopxSpace.s)
+                .padding(bottom = PopopxSpace.m),
+              verticalArrangement = Arrangement.spacedBy(if (compact) PopopxSpace.s else PopopxSpace.l)
             ) {
               PopopxOnboardingHeader(
                 step = 3,
@@ -138,7 +136,7 @@ fun PopopxOnboardingCommitments(chatModel: ChatModel) {
                 title = stringResource(MR.strings.onboarding_v2_legal_card),
                 footnote = stringResource(MR.strings.onboarding_v2_legal_readable_offline)
               ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceXS)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(PopopxSpace.xs)) {
                   LegalCapsule(
                     title = stringResource(MR.strings.onboarding_v2_privacy_policy),
                     icon = MR.images.ic_shield,
@@ -155,26 +153,24 @@ fun PopopxOnboardingCommitments(chatModel: ChatModel) {
                   agreed = agreed,
                   onToggle = { agreed = !agreed },
                   onOpenLegal = openLegal,
-                  modifier = Modifier.padding(top = if (compact) PopopxOnboardingSpace2XS else PopopxOnboardingSpaceXS)
+                  modifier = Modifier.padding(top = if (compact) PopopxSpace.xxs else PopopxSpace.xs)
                 )
               }
             }
           }
-          Divider(color = PopopxSeparator, thickness = PopopxOnboardingHairlineWidth)
+          Divider(color = PopopxSeparator, thickness = PopopxSize.hairline)
           PopopxOnboardingBottomBar {
             if (!commitmentsMet) {
               Text(
                 stringResource(MR.strings.onboarding_v2_commitments_required),
-                fontSize = 13.sp,
-                color = popopxOnboardingSecondary(),
-                lineHeight = 17.sp
+                style = PopopxTypeScale.subheadline,
+                color = popopxOnboardingSecondary()
               )
             } else if (!agreed) {
               Text(
                 stringResource(MR.strings.onboarding_v2_legal_required),
-                fontSize = 13.sp,
-                color = popopxOnboardingSecondary(),
-                lineHeight = 17.sp
+                style = PopopxTypeScale.subheadline,
+                color = popopxOnboardingSecondary()
               )
             }
             PopopxOnboardingPrimaryButton(
@@ -235,32 +231,31 @@ private fun CommitmentRow(title: String, checked: Boolean, compact: Boolean, onT
   Row(
     Modifier
       .fillMaxWidth()
-      .padding(vertical = if (compact) PopopxOnboardingSpace2XS else PopopxOnboardingSpaceXS)
+      .padding(vertical = if (compact) PopopxSpace.xxs else PopopxSpace.xs)
       .background(
-        if (checked) PopopxBrand.copy(alpha = 0.08f) else androidx.compose.ui.graphics.Color.Transparent,
-        RoundedCornerShape(PopopxOnboardingRadiusControl)
+        if (checked) PopopxBrand.copy(alpha = 0.08f) else Color.Transparent,
+        RoundedCornerShape(PopopxRadiusControl)
       )
       .border(
-        if (checked) PopopxOnboardingDividerWidth else PopopxOnboardingHairlineWidth,
+        if (checked) PopopxSize.stroke else PopopxSize.hairline,
         if (checked) PopopxBrand else PopopxHairlineInner,
-        RoundedCornerShape(PopopxOnboardingRadiusControl)
+        RoundedCornerShape(PopopxRadiusControl)
       )
       .clickable(onClick = onToggle)
       .padding(
-        horizontal = PopopxOnboardingSpaceXS,
-        vertical = if (compact) PopopxOnboardingSpace2XS else PopopxOnboardingSpaceS
+        horizontal = PopopxSpace.xs,
+        vertical = if (compact) PopopxSpace.xxs else PopopxSpace.s
       ),
-    horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceS),
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.s),
     verticalAlignment = Alignment.Top
   ) {
     Text(
       title,
-      fontSize = 17.sp,
-      fontWeight = FontWeight.SemiBold,
+      style = PopopxTypeScale.headline,
       color = if (checked) PopopxBrand else popopxOnboardingLabel(),
       modifier = Modifier.weight(1f)
     )
-    Spacer(Modifier.width(PopopxOnboardingSpaceXS))
+    Spacer(Modifier.width(PopopxSpace.xs))
     PopopxOnboardingCheckSquare(checked)
   }
 }
@@ -275,16 +270,16 @@ private fun LegalCapsule(
 ) {
   Row(
     modifier
-      .heightIn(min = PopopxOnboardingMinHitTarget)
+      .heightIn(min = PopopxSize.control)
       .background(PopopxBrand.copy(alpha = 0.10f), CircleShape)
-      .border(PopopxOnboardingHairlineWidth, PopopxBrand.copy(alpha = 0.35f), CircleShape)
+      .border(PopopxSize.hairline, PopopxBrand.copy(alpha = PopopxAlpha.hint), CircleShape)
       .clickable(onClick = onOpen)
-      .padding(horizontal = PopopxOnboardingSpaceS, vertical = PopopxOnboardingSpaceXS),
-    horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpace2XS),
+      .padding(horizontal = PopopxSpace.s, vertical = PopopxSpace.xs),
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.xxs),
     verticalAlignment = Alignment.CenterVertically
   ) {
-    Icon(painterResource(icon), null, Modifier.size(14.dp), tint = PopopxBrand)
-    Text(title, fontSize = 13.sp, color = popopxOnboardingLabel(), lineHeight = 17.sp)
+    Icon(painterResource(icon), null, Modifier.size(PopopxSize.iconS), tint = PopopxBrand)
+    Text(title, style = PopopxTypeScale.subheadline, color = popopxOnboardingLabel())
   }
 }
 
@@ -317,8 +312,8 @@ private fun AgreementRow(
     modifier
       .fillMaxWidth()
       .clickable(onClick = onToggle)
-      .padding(vertical = PopopxOnboardingSpaceXS),
-    horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceS),
+      .padding(vertical = PopopxSpace.xs),
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.s),
     verticalAlignment = Alignment.Top
   ) {
     Box(Modifier.padding(top = 2.dp)) {
@@ -326,7 +321,7 @@ private fun AgreementRow(
     }
     ClickableText(
       text = annotated,
-      style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = label, lineHeight = 22.sp),
+      style = PopopxTypeScale.headline.copy(color = label),
       onClick = { offset ->
         val annotation = annotated.getStringAnnotations("doc", offset, offset).firstOrNull()
         when (annotation?.item) {
@@ -373,41 +368,38 @@ fun PopopxOnboardingLegalModal(document: PopopxLegalDocument, close: () -> Unit)
         Column(
           Modifier
             .fillMaxWidth()
-            .padding(horizontal = PopopxOnboardingGutter)
-            .padding(top = PopopxOnboardingSpaceM, bottom = PopopxOnboardingSpaceM),
-          verticalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceM)
+            .padding(horizontal = PopopxSpace.m)
+            .padding(top = PopopxSpace.m, bottom = PopopxSpace.m),
+          verticalArrangement = Arrangement.spacedBy(PopopxSpace.m)
         ) {
-          Column(verticalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceXS)) {
-            Text(title, fontSize = 22.sp, fontWeight = FontWeight.SemiBold, color = popopxOnboardingLabel(), lineHeight = 28.sp)
+          Column(verticalArrangement = Arrangement.spacedBy(PopopxSpace.xs)) {
+            Text(title, style = PopopxTypeScale.title2, color = popopxOnboardingLabel())
             Text(
               stringResource(MR.strings.onboarding_v2_legal_effective),
-              fontSize = 15.sp,
-              color = popopxOnboardingSecondary(),
-              lineHeight = 20.sp
+              style = PopopxTypeScale.callout,
+              color = popopxOnboardingSecondary()
             )
           }
           sections.forEach { (sectionTitle, sectionBody) ->
-            Column(verticalArrangement = Arrangement.spacedBy(PopopxOnboardingSpace2XS)) {
-              Text(stringResource(sectionTitle), fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = popopxOnboardingLabel())
+            Column(verticalArrangement = Arrangement.spacedBy(PopopxSpace.xxs)) {
+              Text(stringResource(sectionTitle), style = PopopxTypeScale.headline, color = popopxOnboardingLabel())
               Text(
                 stringResource(sectionBody),
-                fontSize = 17.sp,
-                color = popopxOnboardingSecondary(),
-                lineHeight = 22.sp
+                style = PopopxTypeScale.headline.copy(fontWeight = FontWeight.Normal),
+                color = popopxOnboardingSecondary()
               )
             }
           }
           PopopxOnboardingHairline()
           Text(
             stringResource(MR.strings.onboarding_v2_legal_published),
-            fontSize = 13.sp,
-            color = popopxOnboardingSecondary(),
-            lineHeight = 17.sp
+            style = PopopxTypeScale.subheadline,
+            color = popopxOnboardingSecondary()
           )
         }
       }
-      Divider(color = PopopxSeparator, thickness = PopopxOnboardingHairlineWidth)
-      Column(Modifier.padding(horizontal = PopopxOnboardingGutter).padding(vertical = PopopxOnboardingSpaceM)) {
+      Divider(color = PopopxSeparator, thickness = PopopxSize.hairline)
+      Column(Modifier.padding(horizontal = PopopxSpace.m).padding(vertical = PopopxSpace.m)) {
         PopopxOnboardingSecondaryButton(
           text = stringResource(MR.strings.onboarding_v2_read_and_close),
           icon = MR.images.ic_check,

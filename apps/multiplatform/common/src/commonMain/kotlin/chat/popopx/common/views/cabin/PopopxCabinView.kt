@@ -15,8 +15,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Switch
-import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,14 +25,12 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import chat.popopx.common.mesh.PopopxBluetoothState
 import chat.popopx.common.mesh.PopopxMeshBody
 import chat.popopx.common.mesh.PopopxMeshConfig
@@ -49,11 +45,23 @@ import chat.popopx.common.mesh.PopopxMeshPeer
 import chat.popopx.common.mesh.PopopxMeshSendFailure
 import chat.popopx.common.mesh.meshHex
 import chat.popopx.common.platform.ColumnWithScrollBar
-import chat.popopx.common.ui.theme.PopopxBrand
+import chat.popopx.common.ui.components.PopopxDivider
+import chat.popopx.common.ui.components.PopopxIconBadge
+import chat.popopx.common.ui.components.PopopxPickerRow
+import chat.popopx.common.ui.components.PopopxPrimaryButton
+import chat.popopx.common.ui.components.PopopxSecondaryButton
+import chat.popopx.common.ui.components.PopopxSection
+import chat.popopx.common.ui.components.PopopxSwitch
+import chat.popopx.common.ui.theme.PopopxAlpha
+import chat.popopx.common.ui.theme.PopopxDuration
 import chat.popopx.common.ui.theme.PopopxMesh
 import chat.popopx.common.ui.theme.PopopxMeshInk
 import chat.popopx.common.ui.theme.PopopxOnMesh
-import chat.popopx.common.ui.theme.sectionCardColor
+import chat.popopx.common.ui.theme.PopopxRadiusControl
+import chat.popopx.common.ui.theme.PopopxSize
+import chat.popopx.common.ui.theme.PopopxSurface
+import chat.popopx.common.ui.theme.PopopxTypeScale
+import chat.popopx.common.ui.theme.popopxReducedMotion
 import chat.popopx.common.views.helpers.AppBarTitle
 import chat.popopx.res.*
 import dev.icerock.moko.resources.compose.painterResource
@@ -86,9 +94,9 @@ import kotlin.math.sin
 // - the nickname is ported now (`PopopxMeshNicknameStore` + `PopopxMeshKillSwitch.setNickname`), so the
 //   engine advertises whatever the hall's nickname card last saved.
 //
-// Reduce Motion: iOS stops the radar pulse when the system asks. Android has no shared
-// reduce-motion reading in this tree, so the pulse follows the platform animator scale — with
-// animations switched off it snaps to its end state instead of looping.
+// Reduce Motion: iOS stops the radar pulse when the system asks. The radar reads the same gate here
+// (`popopxReducedMotion`) and, when it is set, draws its travelling ring at a fixed radius instead of
+// looping a transition.
 
 /** One line of a Cabin timeline. */
 class PopopxCabinPost(
@@ -421,20 +429,19 @@ private fun CabinHeader(enabled: Boolean) {
     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
       Text(
         stringResource(MR.strings.cabin_page_title),
-        fontSize = 22.sp,
-        fontWeight = FontWeight.SemiBold,
+        style = PopopxTypeScale.title2,
       )
       Text(
         stringResource(MR.strings.cabin_page_explainer, relayHopCap, broadcastTTL),
-        fontSize = 13.sp,
-        color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+        style = PopopxTypeScale.subheadline,
+        color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
       )
     }
     Spacer(Modifier.width(12.dp))
     Row(
       Modifier
-        .heightIn(min = 44.dp)
-        .background(sectionCardColor(), RoundedCornerShape(12.dp))
+        .heightIn(min = PopopxSize.control)
+        .background(PopopxSurface, RoundedCornerShape(PopopxRadiusControl))
         .clickable { showPopopxCabinSettings() }
         .padding(horizontal = 10.dp)
         .semantics {
@@ -449,11 +456,11 @@ private fun CabinHeader(enabled: Boolean) {
         Modifier
           .size(6.dp)
           .background(
-            if (enabled) PopopxMesh else MaterialTheme.colors.onSurface.copy(alpha = cabinLabelHintAlpha),
+            if (enabled) PopopxMesh else MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.hint),
             CircleShape,
           )
       )
-      Text(stringResource(MR.strings.cabin_settings_capsule), fontSize = 13.sp, maxLines = 1)
+      Text(stringResource(MR.strings.cabin_settings_capsule), style = PopopxTypeScale.subheadline, maxLines = 1)
     }
   }
 }
@@ -473,11 +480,11 @@ private fun PopopxCabinChannelsCard(
   onHall: () -> Unit,
   onEncryptedChannels: () -> Unit,
 ) {
-  CabinSectionCard(
+  PopopxSection(
     title = stringResource(MR.strings.cabin_channels_title),
     footnote = stringResource(MR.strings.cabin_channels_footnote),
   ) {
-    CabinPickerRow(
+    PopopxPickerRow(
       label = stringResource(MR.strings.cabin_hall_row),
       value = when {
         !enabled -> stringResource(MR.strings.cabin_fuse_off_value)
@@ -486,9 +493,10 @@ private fun PopopxCabinChannelsCard(
       },
       icon = MR.images.ic_forum,
       onClick = onHall,
+      tint = PopopxMesh,
     )
-    CabinDivider()
-    CabinPickerRow(
+    PopopxDivider()
+    PopopxPickerRow(
       label = stringResource(MR.strings.cabin_channels_row),
       value = if (!enabled) {
         stringResource(MR.strings.cabin_fuse_off_value)
@@ -497,14 +505,16 @@ private fun PopopxCabinChannelsCard(
       },
       icon = MR.images.ic_lock_filled,
       onClick = onEncryptedChannels,
+      tint = PopopxMesh,
     )
-    CabinDivider()
-    CabinPickerRow(
+    PopopxDivider()
+    PopopxPickerRow(
       label = stringResource(MR.strings.cabin_groups_row),
       value = stringResource(MR.strings.cabin_groups_absent),
       icon = MR.images.ic_group_filled,
       enabled = false,
       onClick = {},
+      tint = PopopxMesh,
     )
   }
 }
@@ -527,7 +537,7 @@ private fun PopopxCabinStatusCard(
 ) {
   val busy = phase == PopopxMeshFusePhase.STARTING || phase == PopopxMeshFusePhase.STOPPING
   val windowSeconds = PopopxMeshConfig.default.peerReachabilityTimeout.toInt()
-  CabinSectionCard(
+  PopopxSection(
     title = stringResource(MR.strings.cabin_status_title),
     footnote = if (enabled) {
       stringResource(MR.strings.cabin_status_footnote, windowSeconds)
@@ -536,48 +546,45 @@ private fun PopopxCabinStatusCard(
     },
   ) {
     Row(
-      Modifier.fillMaxWidth().heightIn(min = 44.dp).padding(vertical = 8.dp),
+      Modifier.fillMaxWidth().heightIn(min = PopopxSize.control).padding(vertical = 8.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
       Column(Modifier.weight(1f)) {
-        Text(stringResource(MR.strings.cabin_switch), fontSize = 17.sp)
+        Text(stringResource(MR.strings.cabin_switch), style = PopopxTypeScale.headline)
         Spacer(Modifier.height(2.dp))
         Text(
           if (enabled) stringResource(MR.strings.cabin_fuse_note_on) else stringResource(MR.strings.cabin_fuse_note_off),
-          fontSize = 13.sp,
-          color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+          style = PopopxTypeScale.subheadline,
+          color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
         )
       }
       Spacer(Modifier.width(12.dp))
-      Switch(
+      PopopxSwitch(
         checked = enabled,
         onCheckedChange = onToggle,
         enabled = !busy,
-        colors = SwitchDefaults.colors(
-          checkedThumbColor = Color.White,
-          checkedTrackColor = PopopxBrand,
-          uncheckedThumbColor = Color.White,
-          uncheckedTrackColor = MaterialTheme.colors.onSurface.copy(alpha = 0.18f),
-        )
       )
     }
-    CabinDivider()
+    PopopxDivider()
     Row(
       Modifier.fillMaxWidth().padding(vertical = 8.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      CabinIconBadge(
+      PopopxIconBadge(
         if (radio.isUsable) MR.images.ic_wifi_tethering else MR.images.ic_wifi_off,
-        if (radio.isUsable) PopopxMeshInk else MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+        if (radio.isUsable) PopopxMeshInk else MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
       )
       Spacer(Modifier.width(12.dp))
       Column(Modifier.weight(1f)) {
-        Text(cabinRadioWords(radio), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        Text(
+          cabinRadioWords(radio),
+          style = PopopxTypeScale.body.copy(fontWeight = FontWeight.SemiBold),
+        )
         Spacer(Modifier.height(2.dp))
         Text(
           radioFootnote(enabled, latestBroadcastAt, nowMillis),
-          fontSize = 13.sp,
-          color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+          style = PopopxTypeScale.subheadline,
+          color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
         )
       }
     }
@@ -628,7 +635,7 @@ internal fun PopopxCabinNearbyCard(
       cabinReachRadius(broadcastTTL),
     )
   }
-  CabinSectionCard(
+  PopopxSection(
     title = stringResource(MR.strings.cabin_nearby_title, hopCap),
     footnote = footnote,
   ) {
@@ -642,8 +649,8 @@ internal fun PopopxCabinNearbyCard(
     if (visible.size > RADAR_MARKER_LIMIT) {
       Text(
         stringResource(MR.strings.cabin_radar_overflow, visible.size, RADAR_MARKER_LIMIT),
-        fontSize = 13.sp,
-        color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+        style = PopopxTypeScale.subheadline,
+        color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
       )
@@ -651,11 +658,11 @@ internal fun PopopxCabinNearbyCard(
       Spacer(Modifier.height(16.dp))
     }
     when {
-      !enabled -> CabinPrimaryButton(
-        stringResource(MR.strings.cabin_fuse_turn_on),
-        MR.images.ic_wifi_tethering,
+      !enabled -> PopopxPrimaryButton(
+        text = stringResource(MR.strings.cabin_fuse_turn_on),
+        icon = MR.images.ic_wifi_tethering,
         modifier = Modifier.fillMaxWidth(),
-        action = onTurnOnFuse,
+        onClick = onTurnOnFuse,
       )
       visible.isEmpty() -> {
         Text(
@@ -664,15 +671,15 @@ internal fun PopopxCabinNearbyCard(
           } else {
             cabinRadioWords(radio)
           },
-          fontSize = 13.sp,
-          color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+          style = PopopxTypeScale.subheadline,
+          color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
         )
         Spacer(Modifier.height(8.dp))
-        CabinSecondaryButton(
-          stringResource(MR.strings.cabin_nearby_rescan),
-          MR.images.ic_refresh,
+        PopopxSecondaryButton(
+          text = stringResource(MR.strings.cabin_nearby_rescan),
+          icon = MR.images.ic_refresh,
           modifier = Modifier.fillMaxWidth(),
-          action = onRescan,
+          onClick = onRescan,
         )
       }
       else -> visible.forEachIndexed { index, peer ->
@@ -682,7 +689,7 @@ internal fun PopopxCabinNearbyCard(
           nowMillis = nowMillis,
           onOpenChat = { onOpenChat(peer) },
         )
-        if (index < visible.size - 1) CabinDivider()
+        if (index < visible.size - 1) PopopxDivider()
       }
     }
   }
@@ -691,13 +698,17 @@ internal fun PopopxCabinNearbyCard(
 /** The radar draws at most this many dots on one screen; the extras are still listed in full in the rows below. */
 private const val RADAR_MARKER_LIMIT = 12
 
+/** The pulse radius the reduced-motion radar holds: mid-travel, so the ring is visible and still. */
+private const val STATIC_RADAR_PULSE = 0.5f
+
 private val radarSide = 144.dp
 private val radarDotSide = 20.dp
 
 /**
  * The concentric radar of nearby nodes. The static part is rings + hop numbers; the moving ring is one
- * teal pulse travelling outward. Position uses only two real numbers: radius = hops / ceiling, angle = the
- * index spread evenly around the circle. There is no fake data.
+ * teal pulse travelling outward, held still when the system asks for reduced motion. Position uses only
+ * two real numbers: radius = hops / ceiling, angle = the index spread evenly around the circle. There is
+ * no fake data.
  */
 @Composable
 private fun PopopxCabinRadar(
@@ -708,18 +719,24 @@ private fun PopopxCabinRadar(
   nowMillis: Long,
 ) {
   val mesh = PopopxMesh
+  val reduced = popopxReducedMotion()
   val shown = peers.take(markerLimit)
   val onlineCount = peers.count { cabinIsReachable(it, nowMillis) }
   val label = stringResource(MR.strings.cabin_radar_label, onlineCount, peers.size)
-  val transition = rememberInfiniteTransition()
-  val pulse by transition.animateFloat(
-    initialValue = 0f,
-    targetValue = 1f,
-    animationSpec = infiniteRepeatable(
-      animation = tween(durationMillis = 2_200, easing = LinearOutSlowInEasing),
-      repeatMode = RepeatMode.Restart,
-    ),
-  )
+  val pulse by if (reduced) {
+    remember { mutableStateOf(STATIC_RADAR_PULSE) }
+  } else {
+    val transition = rememberInfiniteTransition(label = "popopx-cabin-radar")
+    transition.animateFloat(
+      initialValue = 0f,
+      targetValue = 1f,
+      animationSpec = infiniteRepeatable(
+        animation = tween(durationMillis = PopopxDuration.radar, easing = LinearOutSlowInEasing),
+        repeatMode = RepeatMode.Restart,
+      ),
+      label = "popopx-cabin-radar-pulse",
+    )
+  }
   Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
     Box(
       Modifier
@@ -770,21 +787,25 @@ private fun PopopxCabinRadar(
               if (online) {
                 Modifier
               } else {
-                Modifier.border(1.5.dp, MaterialTheme.colors.onSurface.copy(alpha = cabinLabelHintAlpha), CircleShape)
+                Modifier.border(
+                  PopopxSize.focusRing,
+                  MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.hint),
+                  CircleShape,
+                )
               }
             ),
           contentAlignment = Alignment.Center,
         ) {
           Text(
             peer.hopCount.toString(),
-            fontSize = 11.sp,
-            color = if (online) PopopxOnMesh else MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+            style = PopopxTypeScale.metricSmall,
+            color = if (online) PopopxOnMesh else MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
           )
         }
       }
       // The centre is this device: the mesh ink carries "this device is itself in the mesh".
       Box(
-        Modifier.size(28.dp).background(PopopxMeshInk.copy(alpha = 0.16f), CircleShape),
+        Modifier.size(28.dp).background(PopopxMeshInk.copy(alpha = PopopxAlpha.washStrong), CircleShape),
         contentAlignment = Alignment.Center,
       ) {
         Icon(
@@ -828,8 +849,8 @@ internal fun PopopxCabinNodeRow(
         Modifier
           .fillMaxSize()
           .border(
-            1.5.dp,
-            if (reachable) PopopxMesh else MaterialTheme.colors.onSurface.copy(alpha = cabinLabelHintAlpha),
+            PopopxSize.focusRing,
+            if (reachable) PopopxMesh else MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.hint),
             CircleShape,
           )
       )
@@ -837,20 +858,22 @@ internal fun PopopxCabinNodeRow(
     }
     Spacer(Modifier.width(12.dp))
     Column(Modifier.weight(1f)) {
+      val fallback = peer.nickname.isNullOrBlank()
       Text(
         label,
-        fontSize = 16.sp,
-        fontWeight = FontWeight.SemiBold,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         // A fallback label is a machine value (a key or wire-id prefix) and keeps its LTR order under RTL.
-        style = if (peer.nickname.isNullOrBlank()) TextStyle(textDirection = TextDirection.Ltr) else TextStyle.Default,
+        style = PopopxTypeScale.body.copy(
+          fontWeight = FontWeight.SemiBold,
+          textDirection = if (fallback) TextDirection.Ltr else TextDirection.Content,
+        ),
       )
       Spacer(Modifier.height(2.dp))
       Text(
         parts.joinToString(" · "),
-        fontSize = 13.sp,
-        color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+        style = PopopxTypeScale.subheadline,
+        color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
       )
     }
     Spacer(Modifier.width(8.dp))

@@ -1,13 +1,10 @@
 package chat.popopx.common.views.onboarding
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,38 +23,24 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import chat.popopx.common.ui.components.PopopxDivider
+import chat.popopx.common.ui.components.PopopxGhostButton
+import chat.popopx.common.ui.components.PopopxPrimaryButton
+import chat.popopx.common.ui.components.PopopxSecondaryButton
+import chat.popopx.common.ui.components.PopopxSection
+import chat.popopx.common.ui.components.PopopxSwitch
 import chat.popopx.common.ui.theme.*
-import chat.popopx.common.views.helpers.AutoMirroredIcon
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
 
 // The Android reading of the iOS onboarding atoms (apps/ios/Shared/Views/Onboarding/OnboardingView.swift,
-// PopopxControls.swift): the same 4/8/12/16/24 metrics, 8/12/16 corner radii, 0.5/1/1.5 stroke set and
-// PopopxPalette tokens. Shared by the four onboarding screens only, so desktop keeps its own layout.
-
-val PopopxOnboardingGutter = 16.dp
-val PopopxOnboardingSpace2XS = 4.dp
-val PopopxOnboardingSpaceXS = 8.dp
-val PopopxOnboardingSpaceS = 12.dp
-val PopopxOnboardingSpaceM = 16.dp
-val PopopxOnboardingSpaceL = 24.dp
-val PopopxOnboardingRadiusChip = 8.dp
-val PopopxOnboardingRadiusControl = 12.dp
-val PopopxOnboardingRadiusCard = 16.dp
-val PopopxOnboardingHairlineWidth = 0.5.dp
-val PopopxOnboardingDividerWidth = 1.dp
-val PopopxOnboardingMinHitTarget = 44.dp
-
-private const val POPOPX_ONBOARDING_SECONDARY_ALPHA = 0.62f
-private const val POPOPX_ONBOARDING_LABEL_HINT_ALPHA = 0.35f
+// PopopxControls.swift). Shared by the four onboarding screens only, so desktop keeps its own layout.
 
 /** `PopopxIconTint`: the fill/ink pair a solid badge is painted with. */
 enum class PopopxOnboardingTint {
@@ -86,10 +69,10 @@ enum class PopopxOnboardingTint {
 fun popopxOnboardingLabel() = MaterialTheme.colors.onBackground
 
 @Composable
-fun popopxOnboardingSecondary() = MaterialTheme.colors.onBackground.copy(alpha = POPOPX_ONBOARDING_SECONDARY_ALPHA)
+fun popopxOnboardingSecondary() = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary)
 
 @Composable
-fun popopxOnboardingLabelHint() = MaterialTheme.colors.onBackground.copy(alpha = POPOPX_ONBOARDING_LABEL_HINT_ALPHA)
+fun popopxOnboardingLabelHint() = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.hint)
 
 @Composable
 private fun popopxOnboardingChipBackground() =
@@ -98,25 +81,24 @@ private fun popopxOnboardingChipBackground() =
 /** The `step / steps` capsule, stage label, title, note and the multi-segment progress track shared by screens 2, 3 and 4. */
 @Composable
 fun PopopxOnboardingHeader(step: Int, steps: Int, stage: String, title: String, note: String? = null) {
-  Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceXS)) {
+  Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(PopopxSpace.xs)) {
     Row(
       Modifier
-        .background(popopxOnboardingChipBackground(), RoundedCornerShape(PopopxOnboardingRadiusChip))
-        .border(PopopxOnboardingHairlineWidth, PopopxHairlineInner, RoundedCornerShape(PopopxOnboardingRadiusChip))
-        .padding(horizontal = PopopxOnboardingSpaceXS, vertical = PopopxOnboardingSpace2XS),
+        .background(popopxOnboardingChipBackground(), RoundedCornerShape(PopopxRadiusChip))
+        .border(PopopxSize.hairline, PopopxHairlineInner, RoundedCornerShape(PopopxRadiusChip))
+        .padding(horizontal = PopopxSpace.xs, vertical = PopopxSpace.xxs),
       verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceXS)
+      horizontalArrangement = Arrangement.spacedBy(PopopxSpace.xs)
     ) {
       Text(
         "$step / $steps",
-        fontSize = 11.sp,
-        fontFamily = FontFamily.Monospace,
+        style = PopopxTypeScale.codeSmall,
         color = PopopxBrand
       )
-      Box(Modifier.width(PopopxOnboardingHairlineWidth).height(12.dp).background(PopopxSeparator))
+      Box(Modifier.width(PopopxSize.hairline).height(12.dp).background(PopopxSeparator))
       Text(
         stage,
-        fontSize = 12.sp,
+        style = PopopxTypeScale.caption,
         color = popopxOnboardingSecondary(),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis
@@ -124,20 +106,17 @@ fun PopopxOnboardingHeader(step: Int, steps: Int, stage: String, title: String, 
     }
     Text(
       title,
-      fontSize = 22.sp,
-      fontWeight = FontWeight.SemiBold,
-      color = popopxOnboardingLabel(),
-      lineHeight = 28.sp
+      style = PopopxTypeScale.title2,
+      color = popopxOnboardingLabel()
     )
     if (note != null) {
       Text(
         note,
-        fontSize = 15.sp,
-        color = popopxOnboardingSecondary(),
-        lineHeight = 20.sp
+        style = PopopxTypeScale.callout,
+        color = popopxOnboardingSecondary()
       )
     }
-    Row(Modifier.fillMaxWidth().padding(top = PopopxOnboardingSpaceXS), horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpace2XS)) {
+    Row(Modifier.fillMaxWidth().padding(top = PopopxSpace.xs), horizontalArrangement = Arrangement.spacedBy(PopopxSpace.xxs)) {
       repeat(steps) { index ->
         PopopxOnboardingTrackSegment(filled = index < step)
       }
@@ -157,7 +136,7 @@ private fun RowScope.PopopxOnboardingTrackSegment(filled: Boolean) {
   Box(
     Modifier
       .weight(1f)
-      .height(PopopxOnboardingSpace2XS)
+      .height(PopopxSpace.xxs)
       .background(PopopxSeparator, CircleShape)
   ) {
     Box(
@@ -175,28 +154,22 @@ private fun RowScope.PopopxOnboardingTrackSegment(filled: Boolean) {
 /** 0.5dp hairline with the 8dp vertical breathing room the iOS atom carries. */
 @Composable
 fun PopopxOnboardingHairline() {
-  Box(
-    Modifier
-      .fillMaxWidth()
-      .padding(vertical = PopopxOnboardingSpaceXS)
-      .height(PopopxOnboardingHairlineWidth)
-      .background(PopopxSeparator)
-  )
+  PopopxDivider()
 }
 
-/** The rounded coloured icon badge at the head of a row: a tint gradient, a 0.5dp light rim and a soft halo. */
+/** The rounded coloured icon badge at the head of a row: a tint gradient, a 0.5dp rim and a soft halo. */
 @Composable
 fun PopopxOnboardingIconBadge(icon: ImageResource, tint: PopopxOnboardingTint) {
   val fill = tint.fill()
-  val shape = RoundedCornerShape(PopopxOnboardingRadiusChip)
+  val shape = RoundedCornerShape(PopopxRadiusChip)
   Box(
     Modifier
-      .size(32.dp)
+      .size(PopopxSize.iconBadge)
       .drawBehind {
         val radius = size.minDimension * 0.85f
         drawCircle(
           brush = Brush.radialGradient(
-            colors = listOf(fill.copy(alpha = 0.28f), fill.copy(alpha = 0f)),
+            colors = listOf(fill.copy(alpha = PopopxAlpha.wash), fill.copy(alpha = 0f)),
             center = center,
             radius = radius
           ),
@@ -204,14 +177,10 @@ fun PopopxOnboardingIconBadge(icon: ImageResource, tint: PopopxOnboardingTint) {
         )
       }
       .background(Brush.linearGradient(listOf(lerp(fill, Color.White, 0.16f), fill)), shape)
-      .border(
-        PopopxOnboardingHairlineWidth,
-        Color.White.copy(alpha = if (isInDarkTheme()) 0.18f else 0.30f),
-        shape
-      ),
+      .border(PopopxSize.hairline, PopopxHairlineInner, shape),
     contentAlignment = Alignment.Center
   ) {
-    Icon(painterResource(icon), null, Modifier.size(18.dp), tint = tint.ink())
+    Icon(painterResource(icon), null, Modifier.size(PopopxSize.iconL), tint = tint.ink())
   }
 }
 
@@ -220,11 +189,11 @@ fun PopopxOnboardingIconBadge(icon: ImageResource, tint: PopopxOnboardingTint) {
 fun PopopxOnboardingChip(text: String) {
   Text(
     text,
-    fontSize = 12.sp,
+    style = PopopxTypeScale.caption,
     color = PopopxBrand,
     modifier = Modifier
-      .background(PopopxBrand.copy(alpha = 0.14f), RoundedCornerShape(PopopxOnboardingRadiusChip))
-      .padding(horizontal = PopopxOnboardingSpace2XS, vertical = PopopxOnboardingSpace2XS)
+      .background(PopopxBrand.copy(alpha = PopopxAlpha.washStrong), RoundedCornerShape(PopopxRadiusChip))
+      .padding(horizontal = PopopxSpace.xxs, vertical = PopopxSpace.xxs)
   )
 }
 
@@ -235,45 +204,12 @@ fun PopopxOnboardingSectionCard(
   footnote: String? = null,
   content: @Composable ColumnScope.() -> Unit,
 ) {
-  Column(Modifier.fillMaxWidth().padding(horizontal = PopopxOnboardingGutter)) {
-    if (title != null) {
-      Text(
-        title,
-        fontSize = 17.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = popopxOnboardingLabel(),
-        modifier = Modifier.padding(start = PopopxOnboardingSpace2XS, bottom = PopopxOnboardingSpaceXS)
-      )
-    }
-    Surface(
-      Modifier.fillMaxWidth(),
-      shape = RoundedCornerShape(PopopxOnboardingRadiusCard),
-      color = sectionCardColor(),
-      border = BorderStroke(PopopxOnboardingHairlineWidth, PopopxHairlineInner),
-      elevation = if (isInDarkTheme()) 0.dp else 1.dp,
-    ) {
-      Column(Modifier.padding(PopopxOnboardingSpaceM), content = content)
-    }
-    if (footnote != null) {
-      Text(
-        footnote,
-        fontSize = 13.sp,
-        color = popopxOnboardingSecondary(),
-        lineHeight = 17.sp,
-        modifier = Modifier.padding(start = PopopxOnboardingSpace2XS, top = PopopxOnboardingSpaceXS)
-      )
-    }
-  }
-}
-
-@Composable
-private fun popopxPressScale(interactionSource: MutableInteractionSource): Float {
-  val pressed by interactionSource.collectIsPressedAsState()
-  return animateFloatAsState(
-    targetValue = if (pressed) PopopxPressScale else 1f,
-    animationSpec = PopopxSnappySpring,
-    label = "onboarding-press-scale"
-  ).value
+  PopopxSection(
+    title = title,
+    footnote = footnote,
+    modifier = Modifier.padding(horizontal = PopopxSpace.m),
+    content = content
+  )
 }
 
 @Composable
@@ -285,42 +221,14 @@ fun PopopxOnboardingPrimaryButton(
   mirrorIcon: Boolean = false,
   action: () -> Unit,
 ) {
-  val interactionSource = remember { MutableInteractionSource() }
-  val pressScale = popopxPressScale(interactionSource)
-  Surface(
-    shape = RoundedCornerShape(PopopxOnboardingRadiusControl),
-    color = PopopxBrand.copy(alpha = if (enabled) 1f else 0.45f),
-    modifier = Modifier
-      .fillMaxWidth()
-      .heightIn(min = PopopxOnboardingMinHitTarget)
-      .graphicsLayer {
-        scaleX = pressScale
-        scaleY = pressScale
-      }
-      .clickable(
-        interactionSource = interactionSource,
-        indication = LocalIndication.current,
-        enabled = enabled && !loading,
-        onClick = action
-      )
-  ) {
-    Box(
-      Modifier.padding(horizontal = PopopxOnboardingSpaceM, vertical = PopopxOnboardingSpaceS),
-      contentAlignment = Alignment.Center
-    ) {
-      if (loading) {
-        CircularProgressIndicator(Modifier.size(18.dp), color = PopopxOnBrand, strokeWidth = 2.dp)
-      } else {
-        Row(horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceXS), verticalAlignment = Alignment.CenterVertically) {
-          if (icon != null) {
-            if (mirrorIcon) AutoMirroredIcon(painterResource(icon), null, Modifier.size(18.dp), tint = PopopxOnBrand)
-            else Icon(painterResource(icon), null, Modifier.size(18.dp), tint = PopopxOnBrand)
-          }
-          Text(text, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = PopopxOnBrand)
-        }
-      }
-    }
-  }
+  PopopxPrimaryButton(
+    text = text,
+    onClick = action,
+    icon = icon,
+    enabled = enabled,
+    loading = loading,
+    mirrorIcon = mirrorIcon
+  )
 }
 
 @Composable
@@ -330,31 +238,12 @@ fun PopopxOnboardingGhostButton(
   mirrorIcon: Boolean = false,
   action: () -> Unit,
 ) {
-  val interactionSource = remember { MutableInteractionSource() }
-  val pressScale = popopxPressScale(interactionSource)
-  Row(
-    Modifier
-      .fillMaxWidth()
-      .heightIn(min = PopopxOnboardingMinHitTarget)
-      .graphicsLayer {
-        scaleX = pressScale
-        scaleY = pressScale
-      }
-      .clickable(
-        interactionSource = interactionSource,
-        indication = LocalIndication.current,
-        onClick = action
-      )
-      .padding(horizontal = PopopxOnboardingSpaceM, vertical = PopopxOnboardingSpaceS),
-    horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceXS, Alignment.CenterHorizontally),
-    verticalAlignment = Alignment.CenterVertically
-  ) {
-    if (icon != null) {
-      if (mirrorIcon) AutoMirroredIcon(painterResource(icon), null, Modifier.size(18.dp), tint = PopopxBrand)
-      else Icon(painterResource(icon), null, Modifier.size(18.dp), tint = PopopxBrand)
-    }
-    Text(text, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = PopopxBrand)
-  }
+  PopopxGhostButton(
+    text = text,
+    onClick = action,
+    icon = icon,
+    mirrorIcon = mirrorIcon
+  )
 }
 
 /** The opaque bottom action bar: content scrolls underneath, a single hairline marks the top edge. */
@@ -363,10 +252,10 @@ fun PopopxOnboardingBottomBar(content: @Composable ColumnScope.() -> Unit) {
   Column(
     Modifier
       .fillMaxWidth()
-      .background(MaterialTheme.colors.background)
-      .padding(horizontal = PopopxOnboardingGutter)
-      .padding(top = PopopxOnboardingSpaceXS, bottom = PopopxOnboardingSpaceXS),
-    verticalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceS),
+      .background(PopopxCanvas)
+      .padding(horizontal = PopopxSpace.m)
+      .padding(top = PopopxSpace.xs, bottom = PopopxSpace.xs),
+    verticalArrangement = Arrangement.spacedBy(PopopxSpace.s),
     content = content
   )
 }
@@ -375,14 +264,14 @@ fun PopopxOnboardingBottomBar(content: @Composable ColumnScope.() -> Unit) {
 @Composable
 fun PopopxOnboardingFeatureRow(icon: ImageResource, tint: PopopxOnboardingTint, title: String, note: String) {
   Row(
-    Modifier.fillMaxWidth().padding(vertical = PopopxOnboardingSpace2XS),
-    horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceS),
+    Modifier.fillMaxWidth().padding(vertical = PopopxSpace.xxs),
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.s),
     verticalAlignment = Alignment.Top
   ) {
     PopopxOnboardingIconBadge(icon, tint)
-    Column(verticalArrangement = Arrangement.spacedBy(PopopxOnboardingSpace2XS)) {
-      Text(title, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = popopxOnboardingLabel())
-      Text(note, fontSize = 13.sp, color = popopxOnboardingSecondary(), lineHeight = 17.sp)
+    Column(verticalArrangement = Arrangement.spacedBy(PopopxSpace.xxs)) {
+      Text(title, style = PopopxTypeScale.headline, color = popopxOnboardingLabel())
+      Text(note, style = PopopxTypeScale.subheadline, color = popopxOnboardingSecondary())
     }
   }
 }
@@ -393,19 +282,21 @@ fun PopopxOnboardingModePill(icon: ImageResource, tint: PopopxOnboardingTint, la
   Row(
     Modifier
       .fillMaxWidth()
-      .background(popopxOnboardingChipBackground(), RoundedCornerShape(PopopxOnboardingRadiusControl))
-      .border(PopopxOnboardingHairlineWidth, PopopxHairlineInner, RoundedCornerShape(PopopxOnboardingRadiusControl))
-      .padding(PopopxOnboardingSpace2XS),
-    horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpace2XS),
+      .background(popopxOnboardingChipBackground(), RoundedCornerShape(PopopxRadiusControl))
+      .border(PopopxSize.hairline, PopopxHairlineInner, RoundedCornerShape(PopopxRadiusControl))
+      .padding(PopopxSpace.xxs),
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.xxs),
     verticalAlignment = Alignment.CenterVertically
   ) {
     Box(
-      Modifier.size(32.dp).background(tint.fill().copy(alpha = 0.14f), RoundedCornerShape(PopopxOnboardingRadiusChip)),
+      Modifier
+        .size(PopopxSize.iconBadge)
+        .background(tint.fill().copy(alpha = PopopxAlpha.washStrong), RoundedCornerShape(PopopxRadiusChip)),
       contentAlignment = Alignment.Center
     ) {
-      Icon(painterResource(icon), null, Modifier.size(18.dp), tint = tint.fill())
+      Icon(painterResource(icon), null, Modifier.size(PopopxSize.iconL), tint = tint.fill())
     }
-    Text(label, fontSize = 12.sp, color = popopxOnboardingLabel(), lineHeight = 15.sp, modifier = Modifier.weight(1f))
+    Text(label, style = PopopxTypeScale.caption, color = popopxOnboardingLabel(), modifier = Modifier.weight(1f))
   }
 }
 
@@ -422,31 +313,37 @@ fun PopopxOnboardingTextField(
   Row(
     modifier
       .fillMaxWidth()
-      .heightIn(min = PopopxOnboardingMinHitTarget)
-      .background(sectionCardColor(), RoundedCornerShape(PopopxOnboardingRadiusControl))
+      .heightIn(min = PopopxSize.control)
+      .background(sectionCardColor(), RoundedCornerShape(PopopxRadiusControl))
       .border(
-        if (focused) 1.5.dp else 1.dp,
+        if (focused) PopopxSize.focusRing else PopopxSize.stroke,
         if (focused) PopopxBrand else popopxOnboardingLabelHint(),
-        RoundedCornerShape(PopopxOnboardingRadiusControl)
+        RoundedCornerShape(PopopxRadiusControl)
       )
-      .padding(horizontal = PopopxOnboardingSpaceS),
-    horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceXS),
+      .padding(horizontal = PopopxSpace.s),
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.xs),
     verticalAlignment = Alignment.CenterVertically
   ) {
     Icon(
       painterResource(icon),
       null,
-      Modifier.size(24.dp),
+      Modifier.size(PopopxSize.iconXl),
       tint = if (focused) PopopxBrand else popopxOnboardingSecondary()
     )
     Box(Modifier.weight(1f)) {
       if (value.value.isEmpty()) {
-        Text(prompt, fontSize = 16.sp, color = popopxOnboardingSecondary(), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(
+          prompt,
+          style = PopopxTypeScale.body,
+          color = popopxOnboardingSecondary(),
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis
+        )
       }
       BasicTextField(
         value = value.value,
         onValueChange = { value.value = it },
-        textStyle = TextStyle(fontSize = 16.sp, color = popopxOnboardingLabel()),
+        textStyle = PopopxTypeScale.body.copy(color = popopxOnboardingLabel()),
         singleLine = true,
         cursorBrush = SolidColor(PopopxBrand),
         keyboardOptions = KeyboardOptions.Default,
@@ -459,41 +356,18 @@ fun PopopxOnboardingTextField(
   }
 }
 
-/** `PopopxButton(role: .secondary)`: card fill, label ink, a 1dp label-hint border. */
+/** `PopopxButton(role: .secondary)`: the shared secondary button, one press contract for every page. */
 @Composable
 fun PopopxOnboardingSecondaryButton(
   text: String,
   icon: ImageResource? = null,
   action: () -> Unit,
 ) {
-  val interactionSource = remember { MutableInteractionSource() }
-  val pressScale = popopxPressScale(interactionSource)
-  Surface(
-    shape = RoundedCornerShape(PopopxOnboardingRadiusControl),
-    color = sectionCardColor(),
-    border = BorderStroke(1.dp, popopxOnboardingLabelHint()),
-    modifier = Modifier
-      .fillMaxWidth()
-      .heightIn(min = PopopxOnboardingMinHitTarget)
-      .graphicsLayer {
-        scaleX = pressScale
-        scaleY = pressScale
-      }
-      .clickable(
-        interactionSource = interactionSource,
-        indication = LocalIndication.current,
-        onClick = action
-      )
-  ) {
-    Row(
-      Modifier.padding(horizontal = PopopxOnboardingSpaceM, vertical = PopopxOnboardingSpaceS),
-      horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceXS, Alignment.CenterHorizontally),
-      verticalAlignment = Alignment.CenterVertically
-    ) {
-      if (icon != null) Icon(painterResource(icon), null, Modifier.size(18.dp), tint = popopxOnboardingLabel())
-      Text(text, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = popopxOnboardingLabel())
-    }
-  }
+  PopopxSecondaryButton(
+    text = text,
+    onClick = action,
+    icon = icon
+  )
 }
 
 /** `PopopxToggleRow`: whole-row switch, 32dp badge, semibold title + caption note. */
@@ -510,28 +384,22 @@ fun PopopxOnboardingToggleRow(
   Row(
     Modifier
       .fillMaxWidth()
-      .heightIn(min = PopopxOnboardingMinHitTarget)
+      .heightIn(min = PopopxSize.control)
       .clickable(enabled = enabled) { onCheckedChange(!checked) }
-      .padding(vertical = PopopxOnboardingSpaceXS),
-    horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceS),
+      .padding(vertical = PopopxSpace.xs),
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.s),
     verticalAlignment = Alignment.CenterVertically
   ) {
     PopopxOnboardingIconBadge(icon, tint)
-    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(PopopxOnboardingSpace2XS)) {
-      Text(title, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = popopxOnboardingLabel())
-      Text(note, fontSize = 13.sp, color = popopxOnboardingSecondary(), lineHeight = 17.sp)
+    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(PopopxSpace.xxs)) {
+      Text(title, style = PopopxTypeScale.headline, color = popopxOnboardingLabel())
+      Text(note, style = PopopxTypeScale.subheadline, color = popopxOnboardingSecondary())
     }
-    Spacer(Modifier.width(PopopxOnboardingSpaceXS))
-    Switch(
+    Spacer(Modifier.width(PopopxSpace.xs))
+    PopopxSwitch(
       checked = checked,
       onCheckedChange = { if (enabled) onCheckedChange(it) },
-      enabled = enabled,
-      colors = SwitchDefaults.colors(
-        checkedThumbColor = Color.White,
-        checkedTrackColor = PopopxBrand,
-        uncheckedThumbColor = Color.White,
-        uncheckedTrackColor = MaterialTheme.colors.onBackground.copy(alpha = 0.18f),
-      )
+      enabled = enabled
     )
   }
 }
@@ -551,31 +419,30 @@ fun PopopxOnboardingModeRow(
       .fillMaxWidth()
       .background(
         if (selected) PopopxBrand.copy(alpha = 0.08f) else Color.Transparent,
-        RoundedCornerShape(PopopxOnboardingRadiusControl)
+        RoundedCornerShape(PopopxRadiusControl)
       )
       .border(
-        if (selected) 1.5.dp else PopopxOnboardingHairlineWidth,
+        if (selected) 1.5.dp else PopopxSize.hairline,
         if (selected) PopopxBrand else PopopxHairlineInner,
-        RoundedCornerShape(PopopxOnboardingRadiusControl)
+        RoundedCornerShape(PopopxRadiusControl)
       )
       .clickable(onClick = onClick)
       .padding(
-        horizontal = PopopxOnboardingSpaceXS,
-        vertical = if (compact) PopopxOnboardingSpace2XS else PopopxOnboardingSpaceS
+        horizontal = PopopxSpace.xs,
+        vertical = if (compact) PopopxSpace.xxs else PopopxSpace.s
       ),
-    horizontalArrangement = Arrangement.spacedBy(PopopxOnboardingSpaceS),
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.s),
     verticalAlignment = Alignment.CenterVertically
   ) {
-    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(PopopxOnboardingSpace2XS)) {
+    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(PopopxSpace.xxs)) {
       Text(
         title,
-        fontSize = 17.sp,
-        fontWeight = FontWeight.SemiBold,
+        style = PopopxTypeScale.headline,
         color = if (selected) PopopxBrand else popopxOnboardingLabel()
       )
-      Text(note, fontSize = 13.sp, color = popopxOnboardingSecondary(), lineHeight = 17.sp)
+      Text(note, style = PopopxTypeScale.subheadline, color = popopxOnboardingSecondary())
     }
-    Spacer(Modifier.width(PopopxOnboardingSpaceXS))
+    Spacer(Modifier.width(PopopxSpace.xs))
     if (selected) PopopxOnboardingChip(chipText)
     Box(Modifier.size(16.dp), contentAlignment = Alignment.Center) {
       Box(
@@ -596,11 +463,11 @@ fun PopopxOnboardingCheckSquare(checked: Boolean) {
   Box(
     Modifier
       .size(16.dp)
-      .background(if (checked) PopopxBrand else Color.Transparent, RoundedCornerShape(PopopxOnboardingRadiusChip))
+      .background(if (checked) PopopxBrand else Color.Transparent, RoundedCornerShape(PopopxRadiusChip))
       .border(
         1.5.dp,
         if (checked) Color.Transparent else popopxOnboardingLabelHint(),
-        RoundedCornerShape(PopopxOnboardingRadiusChip)
+        RoundedCornerShape(PopopxRadiusChip)
       ),
     contentAlignment = Alignment.Center
   ) {

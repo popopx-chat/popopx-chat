@@ -1,10 +1,5 @@
 package chat.popopx.common.views.chatlist
 
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,7 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -24,23 +18,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import chat.popopx.common.mesh.PopopxBluetoothState
 import chat.popopx.common.mesh.PopopxMeshKillSwitch
 import chat.popopx.common.model.UserNetworkInfo
 import chat.popopx.common.model.UserNetworkType
 import chat.popopx.common.platform.chatModel
 import chat.popopx.common.platform.windowWidth
+import chat.popopx.common.ui.components.PopopxStatusPill
 import chat.popopx.common.ui.theme.PopopxBrand
-import chat.popopx.common.ui.theme.PopopxHairlineInner
+import chat.popopx.common.ui.theme.PopopxCanvas
+import chat.popopx.common.ui.theme.PopopxHairlineStrong
+import chat.popopx.common.ui.theme.PopopxLabelHint
 import chat.popopx.common.ui.theme.PopopxMeshInk
 import chat.popopx.common.ui.theme.PopopxSeparator
+import chat.popopx.common.ui.theme.PopopxSize
+import chat.popopx.common.ui.theme.PopopxSpace
+import chat.popopx.common.ui.theme.PopopxSurface
+import chat.popopx.common.ui.theme.PopopxTypeScale
 import chat.popopx.common.ui.theme.isInDarkTheme
 import chat.popopx.common.views.helpers.AppBarHeight
 import chat.popopx.common.views.helpers.fontSizeSqrtMultiplier
@@ -65,14 +63,6 @@ import kotlinx.coroutines.delay
 /** The cluster steps up to labels only where iOS steps up too: iPhone portrait keeps both dots, wide screens don't. */
 private val POPOPX_STATUS_LABEL_MIN_WIDTH = 600.dp
 
-private val PopopxStatusDotSize = 8.dp
-private val PopopxStatusIconSize = 16.dp
-private val PopopxStatusPillSize = 32.dp
-private val PopopxStatusPillHeight = 48.dp
-
-private val PopopxHeaderGap = 4.dp
-private val PopopxHeaderHitTarget = 44.dp
-private val PopopxIdentityHeight = 48.dp
 private val PopopxIdentityMaxWidth = 115.dp
 private val PopopxIdentityNameMaxWidth = 46.dp
 
@@ -92,12 +82,12 @@ internal fun PopopxMessagesHeader(
   Row(
     Modifier
       .fillMaxWidth()
-      .background(MaterialTheme.colors.background)
+      .background(PopopxCanvas)
       .statusBarsPadding()
-      .padding(horizontal = 16.dp)
+      .padding(horizontal = PopopxSpace.m)
       .height(AppBarHeight * fontSizeSqrtMultiplier),
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(PopopxHeaderGap)
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.xxs)
   ) {
     PopopxBrandMark(panicWipe)
     identity()
@@ -128,7 +118,7 @@ private fun PopopxBrandMark(panicWipe: PopopxPanicWipeUiState?) {
   val fuseOn by remember { PopopxMeshKillSwitch.shared.isEnabled }.collectAsState()
   Box(
     Modifier
-      .size(PopopxHeaderHitTarget)
+      .size(PopopxSize.control)
       .clip(CircleShape)
       .clickable(
         interactionSource = remember { MutableInteractionSource() },
@@ -157,25 +147,25 @@ internal fun PopopxIdentityCapsule(name: String?, onClick: () -> Unit) {
   val label = generalGetString(MR.strings.your_chat_profiles)
   Row(
     Modifier
-      .height(PopopxIdentityHeight)
+      .height(PopopxSize.hitTarget)
       .widthIn(max = PopopxIdentityMaxWidth)
       .clip(CircleShape)
-      .background(MaterialTheme.colors.surface, CircleShape)
-      .border(0.5.dp, PopopxHairlineInner, CircleShape)
+      .background(PopopxSurface, CircleShape)
+      .border(PopopxSize.hairline, PopopxHairlineStrong, CircleShape)
       .clickable(
         interactionSource = remember { MutableInteractionSource() },
         indication = LocalIndication.current,
         onClickLabel = label,
         onClick = onClick
       )
-      .padding(horizontal = 16.dp),
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
+      .padding(horizontal = PopopxSpace.m),
+    horizontalArrangement = Arrangement.spacedBy(PopopxSpace.xs),
     verticalAlignment = Alignment.CenterVertically
   ) {
-    Icon(painterResource(MR.images.ic_account_circle), null, Modifier.size(16.dp), tint = MaterialTheme.colors.onBackground)
+    Icon(painterResource(MR.images.ic_account_circle), null, Modifier.size(PopopxSize.iconM), tint = MaterialTheme.colors.onBackground)
     Text(
       name ?: label,
-      fontSize = 16.sp,
+      style = PopopxTypeScale.body,
       color = MaterialTheme.colors.onBackground,
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
@@ -184,8 +174,8 @@ internal fun PopopxIdentityCapsule(name: String?, onClick: () -> Unit) {
     Icon(
       painterResource(MR.images.ic_chevron_down),
       null,
-      Modifier.size(12.dp),
-      tint = MaterialTheme.colors.onBackground.copy(alpha = 0.7f)
+      Modifier.size(PopopxSize.iconXs),
+      tint = PopopxLabelHint
     )
   }
 }
@@ -204,21 +194,25 @@ private fun PopopxPlusMenu(
   onMintLink: () -> Unit,
 ) {
   var expanded by remember { mutableStateOf(false) }
+  val haptics = LocalHapticFeedback.current
   Box {
     Box(
       Modifier
-        .size(PopopxHeaderHitTarget)
+        .size(PopopxSize.control)
         .clip(CircleShape)
         .clickable(
           interactionSource = remember { MutableInteractionSource() },
           indication = LocalIndication.current
-        ) { expanded = true },
+        ) {
+          haptics.performHapticFeedback(HapticFeedbackType.VirtualKey)
+          expanded = true
+        },
       contentAlignment = Alignment.Center
     ) {
       Icon(
         painterResource(MR.images.ic_add),
         stringResource(MR.strings.icon_descr_more_button),
-        Modifier.size(18.dp),
+        Modifier.size(PopopxSize.iconL),
         tint = MaterialTheme.colors.onBackground
       )
     }
@@ -251,9 +245,9 @@ private fun PopopxPlusMenu(
 @Composable
 private fun PopopxPlusMenuItem(icon: ImageResource, text: String, action: () -> Unit) {
   DropdownMenuItem(onClick = action) {
-    Icon(painterResource(icon), null, Modifier.size(18.dp), tint = MaterialTheme.colors.onBackground)
-    Spacer(Modifier.width(12.dp))
-    Text(text, fontSize = 16.sp, color = MaterialTheme.colors.onBackground)
+    Icon(painterResource(icon), null, Modifier.size(PopopxSize.iconL), tint = MaterialTheme.colors.onBackground)
+    Spacer(Modifier.width(PopopxSpace.s))
+    Text(text, style = PopopxTypeScale.body, color = MaterialTheme.colors.onBackground)
   }
 }
 
@@ -267,7 +261,7 @@ private fun PopopxPlusMenuItem(icon: ImageResource, text: String, action: () -> 
 private fun PopopxMessagesStatusCluster() {
   val status = rememberPopopxMessagesStatus()
   val labelled = windowWidth() >= POPOPX_STATUS_LABEL_MIN_WIDTH
-  Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+  Row(horizontalArrangement = Arrangement.spacedBy(PopopxSpace.xs), verticalAlignment = Alignment.CenterVertically) {
     val network = popopxNetworkPill(status.network, labelled)
     PopopxStatusPill(
       icon = network.icon,
@@ -286,61 +280,11 @@ private fun PopopxMessagesStatusCluster() {
   }
 }
 
-@Composable
-private fun PopopxStatusPill(
-  icon: ImageResource,
-  tint: Color,
-  text: String?,
-  spoken: String,
-  breathing: Boolean = false,
-) {
-  val dim by if (breathing) {
-    val transition = rememberInfiniteTransition()
-    transition.animateFloat(
-      initialValue = 1f,
-      targetValue = 0.45f,
-      animationSpec = infiniteRepeatable(tween(1100), RepeatMode.Reverse)
-    )
-  } else {
-    remember { mutableStateOf(1f) }
-  }
-  val shape = if (text == null) CircleShape else androidx.compose.foundation.shape.RoundedCornerShape(24.dp)
-  Row(
-    modifier = Modifier
-      .height(PopopxStatusPillHeight)
-      .then(if (text == null) Modifier.size(PopopxStatusPillSize) else Modifier)
-      .clip(shape)
-      .background(MaterialTheme.colors.surface, shape)
-      .border(0.5.dp, PopopxHairlineInner, shape)
-      .then(if (text == null) Modifier else Modifier.padding(horizontal = 16.dp))
-      .clearAndSetSemantics { contentDescription = spoken },
-    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
-    verticalAlignment = Alignment.CenterVertically
-  ) {
-    Box(
-      Modifier
-        .size(PopopxStatusDotSize)
-        .graphicsLayer { alpha = dim; scaleX = 0.8f + 0.2f * dim; scaleY = 0.8f + 0.2f * dim }
-        .background(tint, CircleShape)
-    )
-    Icon(painterResource(icon), null, Modifier.size(PopopxStatusIconSize), tint = tint)
-    if (text != null) {
-      Text(
-        text,
-        fontSize = 13.sp,
-        fontWeight = FontWeight.Medium,
-        color = tint,
-        maxLines = 1
-      )
-    }
-  }
-}
-
 private data class PopopxNetworkPill(val icon: ImageResource, val tint: Color, val text: String, val breathing: Boolean)
 
 @Composable
 private fun popopxNetworkPill(tier: PopopxNetworkTier, labelled: Boolean): PopopxNetworkPill = when (tier) {
-  PopopxNetworkTier.Unknown -> PopopxNetworkPill(MR.images.ic_wifi, MaterialTheme.colors.onBackground.copy(alpha = 0.45f), stringResource(MR.strings.status_unknown), false)
+  PopopxNetworkTier.Unknown -> PopopxNetworkPill(MR.images.ic_wifi, PopopxLabelHint, stringResource(MR.strings.status_unknown), false)
   PopopxNetworkTier.Online -> PopopxNetworkPill(MR.images.ic_wifi, PopopxBrand, stringResource(MR.strings.status_online), false)
   is PopopxNetworkTier.Degraded -> PopopxNetworkPill(MR.images.ic_wifi, PopopxBrand, stringResource(MR.strings.status_online_degraded, tier.reason), false)
   is PopopxNetworkTier.MeshOnly -> PopopxNetworkPill(MR.images.ic_wifi_tethering, PopopxMeshInk, stringResource(MR.strings.status_mesh_nodes, tier.nodes), true)
@@ -359,7 +303,7 @@ private fun popopxRadioPill(state: PopopxBluetoothState): PopopxRadioPill {
     PopopxBluetoothState.RESETTING -> stringResource(MR.strings.status_bluetooth_resetting)
     PopopxBluetoothState.UNKNOWN -> stringResource(MR.strings.status_bluetooth_unknown)
   }
-  val tint = if (state.isUsable) PopopxMeshInk else MaterialTheme.colors.onBackground.copy(alpha = 0.45f)
+  val tint = if (state.isUsable) PopopxMeshInk else PopopxLabelHint
   val icon = if (state.isUsable) MR.images.ic_wifi_tethering else MR.images.ic_bluetooth
   return PopopxRadioPill(icon, tint, text)
 }

@@ -1075,7 +1075,7 @@ enum class ScrollDirection {
 @Composable
 fun BoxScope.StatusBarBackground() {
   if (appPlatform.isAndroid) {
-    val bg = if (LocalCardScreen.current) canvasColorForCurrentTheme() else MaterialTheme.colors.background
+    val bg = if (LocalCardScreen.current) canvasColorForCurrentTheme() else PopopxCanvas
     Box(Modifier.fillMaxWidth().windowInsetsTopHeight(WindowInsets.statusBars).background(bg.copy(0.88f)))
   }
 }
@@ -1085,14 +1085,14 @@ fun BoxScope.NavigationBarBackground(appBarOnBottom: Boolean = false, mixedColor
   if (appPlatform.isAndroid) {
     val barPadding = WindowInsets.navigationBars.asPaddingValues()
     val paddingBottom = barPadding.calculateBottomPadding()
-    val color = if (mixedColor) MaterialTheme.colors.background.mixWith(MaterialTheme.colors.onBackground, 0.97f) else MaterialTheme.colors.background
+    val color = if (mixedColor) PopopxCanvas.mixWith(MaterialTheme.colors.onBackground, 0.97f) else PopopxCanvas
     val finalColor = color.copy(if (noAlpha) 1f else if (appBarOnBottom) remember { appPrefs.inAppBarsAlpha.state }.value else 0.6f)
     Box(Modifier.align(Alignment.BottomStart).height(paddingBottom).fillMaxWidth().background(finalColor))
   }
 }
 
 @Composable
-fun BoxScope.NavigationBarBackground(modifier: Modifier, color: Color = MaterialTheme.colors.background) {
+fun BoxScope.NavigationBarBackground(modifier: Modifier, color: Color = PopopxCanvas) {
   val keyboardState = getKeyboardState()
   if (appPlatform.isAndroid && keyboardState.value == KeyboardState.Closed) {
     val barPadding = WindowInsets.navigationBars.asPaddingValues()
@@ -1171,7 +1171,7 @@ private fun BoxScope.ChatList(searchText: MutableState<TextFieldValue>, listStat
             }
             IntOffset(0, y)
           }
-          .background(MaterialTheme.colors.background)
+          .background(if (appPlatform.isAndroid) PopopxCanvas else MaterialTheme.colors.background)
         ) {
         if (!topBarLayout) {
           Column(Modifier.consumeWindowInsets(WindowInsets.navigationBars).consumeWindowInsets(PaddingValues(bottom = AppBarHeight))) {

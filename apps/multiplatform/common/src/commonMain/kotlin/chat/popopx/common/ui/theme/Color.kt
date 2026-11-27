@@ -56,3 +56,36 @@ val PopopxOnDanger: Color @Composable get() = Color(0xFFFFFFFF)
 val PopopxSuccess: Color @Composable get() = if (isInDarkTheme()) Color(0xFF30D158) else Color(0xFF34C759)
 val PopopxOnSuccess: Color @Composable get() = Color(0xFFFFFFFF)
 val PopopxHairlineInner: Color @Composable get() = MaterialTheme.colors.onSurface.copy(alpha = 0.10f)
+
+// The Android surface ladder. These are overlay tokens, not palette edits: the Material palettes and
+// ThemeManager stay untouched, so the desktop tree keeps its baselines. LIGHT is the iOS system cold
+// gray canvas with pure-white floating cards; DARK/BLACK is the OLED ladder (black canvas, #1C1C1E
+// card, #2C2C2E raised, #38383B hairline); POPOPX keeps its existing navy surfaces.
+val PopopxCanvas: Color @Composable get() = when (CurrentColors.value.base) {
+  DefaultTheme.LIGHT -> Color(0xFFF2F2F7)
+  DefaultTheme.POPOPX -> MaterialTheme.colors.background
+  else -> Color(0xFF000000)
+}
+
+val PopopxSurface: Color @Composable get() = when (CurrentColors.value.base) {
+  DefaultTheme.LIGHT -> Color.White
+  DefaultTheme.POPOPX -> sectionCardColor()
+  else -> Color(0xFF1C1C1E)
+}
+
+val PopopxSurfaceRaised: Color @Composable get() = when (CurrentColors.value.base) {
+  DefaultTheme.LIGHT -> Color.White
+  DefaultTheme.POPOPX -> MaterialTheme.appColors.primaryVariant2
+  else -> Color(0xFF2C2C2E)
+}
+
+val PopopxFieldSurface: Color @Composable get() = when (CurrentColors.value.base) {
+  DefaultTheme.LIGHT -> Color(0xFFF2F2F7)
+  DefaultTheme.POPOPX -> MaterialTheme.colors.surface
+  else -> Color(0xFF2C2C2E)
+}
+
+val PopopxHairlineStrong: Color @Composable get() =
+  if (isInDarkTheme()) Color(0xFF38383B) else MaterialTheme.colors.onSurface.copy(alpha = 0.16f)
+
+val PopopxScrim: Color @Composable get() = Color.Black.copy(alpha = if (isInDarkTheme()) 0.55f else 0.28f)

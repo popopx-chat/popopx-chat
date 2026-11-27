@@ -16,3 +16,5 @@ val PopopxRadiusCard = 16.dp
 val PopopxRadiusControl = 12.dp
 val PopopxRadiusChip = 8.dp
 val PopopxRadiusBubbleTuck = 4.dp
+val PopopxRadiusSheet = 20.dp
+val PopopxRadiusAvatar = 8.dp

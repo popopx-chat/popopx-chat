@@ -22,12 +22,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import chat.popopx.common.mesh.PopopxMeshKillSwitch
 import chat.popopx.common.mesh.PopopxMeshNicknameStore
 import chat.popopx.common.mesh.PopopxMeshPeer
@@ -36,7 +33,16 @@ import chat.popopx.common.mesh.PopopxMeshSendFailure
 import chat.popopx.common.mesh.meshHex
 import chat.popopx.common.platform.ColumnWithScrollBar
 import chat.popopx.common.platform.showToast
+import chat.popopx.common.ui.components.PopopxDivider
+import chat.popopx.common.ui.components.PopopxPrimaryButton
+import chat.popopx.common.ui.components.PopopxSecondaryButton
+import chat.popopx.common.ui.components.PopopxSection
+import chat.popopx.common.ui.theme.PopopxAlpha
+import chat.popopx.common.ui.theme.PopopxFieldSurface
 import chat.popopx.common.ui.theme.PopopxMeshInk
+import chat.popopx.common.ui.theme.PopopxRadiusControl
+import chat.popopx.common.ui.theme.PopopxSize
+import chat.popopx.common.ui.theme.PopopxTypeScale
 import chat.popopx.common.views.helpers.AppBarTitle
 import chat.popopx.common.views.helpers.DefaultBasicTextField
 import chat.popopx.common.views.helpers.ModalManager
@@ -148,7 +154,7 @@ private fun PopopxCabinHallView(showsDiscovery: MutableState<Boolean>) {
           )
         }
 
-        CabinSectionCard(
+        PopopxSection(
           title = stringResource(MR.strings.cabin_hall_channel, posts.size),
           footnote = stringResource(MR.strings.cabin_hall_footnote),
         ) {
@@ -156,7 +162,7 @@ private fun PopopxCabinHallView(showsDiscovery: MutableState<Boolean>) {
         }
 
         if (enabled) {
-          CabinSectionCard(
+          PopopxSection(
             title = stringResource(MR.strings.cabin_nickname_title),
             footnote = stringResource(
               MR.strings.cabin_nickname_footnote,
@@ -172,31 +178,43 @@ private fun PopopxCabinHallView(showsDiscovery: MutableState<Boolean>) {
               DefaultBasicTextField(
                 modifier = Modifier
                   .weight(1f)
-                  .background(MaterialTheme.colors.surface, RoundedCornerShape(12.dp))
-                  .heightIn(min = 44.dp)
+                  .background(PopopxFieldSurface, RoundedCornerShape(PopopxRadiusControl))
+                  .heightIn(min = PopopxSize.control)
                   .padding(horizontal = 12.dp, vertical = 10.dp),
                 state = nicknameDraft,
-                placeholder = { Text(stringResource(MR.strings.cabin_nickname_prompt), fontSize = 14.sp, color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha)) },
+                placeholder = {
+                  Text(
+                    stringResource(MR.strings.cabin_nickname_prompt),
+                    style = PopopxTypeScale.calloutSmall,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
+                  )
+                },
                 onValueChange = { nicknameDraft.value = it },
               )
-              CabinSecondaryButton(stringResource(MR.strings.cabin_nickname_save)) {
-                uiScope.launch {
-                  fuse.setNickname(nicknameDraft.value.text)
-                  showToast(generalGetString(MR.strings.cabin_nickname_saved_toast))
-                }
-              }
+              // The shared button fills its width; inside this row it keeps the intrinsic one.
+              PopopxSecondaryButton(
+                text = stringResource(MR.strings.cabin_nickname_save),
+                modifier = Modifier.width(IntrinsicSize.Max),
+                onClick = {
+                  uiScope.launch {
+                    fuse.setNickname(nicknameDraft.value.text)
+                    showToast(generalGetString(MR.strings.cabin_nickname_saved_toast))
+                  }
+                },
+              )
             }
           }
         } else {
-          CabinSectionCard(
+          PopopxSection(
             title = stringResource(MR.strings.cabin_fuse_off_headline),
             footnote = stringResource(MR.strings.cabin_fuse_off_footnote),
           ) {
-            CabinPrimaryButton(
-              stringResource(MR.strings.cabin_fuse_turn_on),
-              MR.images.ic_wifi_tethering,
+            PopopxPrimaryButton(
+              text = stringResource(MR.strings.cabin_fuse_turn_on),
+              icon = MR.images.ic_wifi_tethering,
               modifier = Modifier.fillMaxWidth(),
-            ) { uiScope.launch { fuse.setEnabled(true) } }
+              onClick = { uiScope.launch { fuse.setEnabled(true) } },
+            )
           }
         }
       }
@@ -213,15 +231,19 @@ private fun PopopxCabinHallView(showsDiscovery: MutableState<Boolean>) {
         if (!radio.isUsable) {
           Text(
             stringResource(MR.strings.cabin_composer_radio_off),
-            fontSize = 13.sp,
-            color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+            style = PopopxTypeScale.subheadline,
+            color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
           )
         }
         val note = failure?.let { cabinFailureWords(it) }
         when {
-          note != null -> Text(note, fontSize = 13.sp, color = MaterialTheme.colors.error)
+          note != null -> Text(note, style = PopopxTypeScale.subheadline, color = MaterialTheme.colors.error)
           draft.value.text.length > CABIN_MAX_DRAFT_CHARACTERS ->
-            Text("${draft.value.text.length} / $CABIN_MAX_DRAFT_CHARACTERS", fontSize = 13.sp, color = MaterialTheme.colors.error)
+            Text(
+              "${draft.value.text.length} / $CABIN_MAX_DRAFT_CHARACTERS",
+              style = PopopxTypeScale.subheadline,
+              color = MaterialTheme.colors.error,
+            )
         }
         CabinSendRow(
           value = draft,
@@ -247,13 +269,13 @@ private fun HallFeed(posts: List<PopopxCabinPost>, peers: List<PopopxMeshPeer>) 
     Column(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
       Text(
         stringResource(MR.strings.cabin_hall_empty_headline),
-        fontSize = 13.sp,
-        color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+        style = PopopxTypeScale.subheadline,
+        color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
       )
       Text(
         stringResource(MR.strings.cabin_hall_empty_detail),
-        fontSize = 12.sp,
-        color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+        style = PopopxTypeScale.caption,
+        color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
       )
     }
     return
@@ -261,7 +283,7 @@ private fun HallFeed(posts: List<PopopxCabinPost>, peers: List<PopopxMeshPeer>) 
   val shown = posts.takeLast(60)
   shown.forEachIndexed { index, post ->
     HallBubble(post, peers)
-    if (index < shown.size - 1) HallRowSeparator()
+    if (index < shown.size - 1) PopopxDivider()
   }
 }
 
@@ -286,29 +308,32 @@ private fun HallBubble(post: PopopxCabinPost, peers: List<PopopxMeshPeer>) {
           // sentence instead of a dead button.
           Text(
             name,
-            fontSize = 13.sp,
-            color = if (post.mine) MaterialTheme.colors.onSurface else MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
-            style = if (!post.mine && known?.nickname.isNullOrBlank()) TextStyle(textDirection = TextDirection.Ltr) else TextStyle.Default,
+            style = if (!post.mine && known?.nickname.isNullOrBlank()) {
+              PopopxTypeScale.subheadline.copy(textDirection = TextDirection.Ltr)
+            } else {
+              PopopxTypeScale.subheadline
+            },
+            color = if (post.mine) MaterialTheme.colors.onSurface else MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
           )
         } else {
           HallAuthorMenu(name) { showPopopxCabinPrivateChat(key) }
         }
         if (!post.mine) CabinHopBadge(post.hopCount)
         if (post.failed) {
-          Text(stringResource(MR.strings.cabin_failed), fontSize = 11.sp, color = MaterialTheme.colors.error)
+          Text(stringResource(MR.strings.cabin_failed), style = PopopxTypeScale.overline, color = MaterialTheme.colors.error)
         }
       }
       Text(
         post.text,
-        fontSize = 15.sp,
+        style = PopopxTypeScale.callout,
         modifier = Modifier.semantics { contentDescription = bubbleWords },
       )
     }
     Spacer(Modifier.width(12.dp))
     Text(
       cabinClock(post.atMillis),
-      fontSize = 11.sp,
-      color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+      style = PopopxTypeScale.metricSmall,
+      color = MaterialTheme.colors.onSurface.copy(alpha = PopopxAlpha.secondary),
     )
   }
 }
@@ -321,10 +346,10 @@ private fun HallAuthorMenu(name: String, onOpenChat: () -> Unit) {
   Box {
     Text(
       name,
-      fontSize = 13.sp,
+      style = PopopxTypeScale.subheadline,
       color = PopopxMeshInk,
       modifier = Modifier
-        .heightIn(min = 44.dp)
+        .heightIn(min = PopopxSize.control)
         .clickable { expanded = true }
         .padding(horizontal = 4.dp, vertical = 12.dp)
         .semantics { contentDescription = hint },
@@ -334,19 +359,8 @@ private fun HallAuthorMenu(name: String, onOpenChat: () -> Unit) {
         expanded = false
         onOpenChat()
       }) {
-        Text(stringResource(MR.strings.cabin_author_chat), fontSize = 14.sp)
+        Text(stringResource(MR.strings.cabin_author_chat), style = PopopxTypeScale.calloutSmall)
       }
     }
   }
-}
-
-@Composable
-private fun HallRowSeparator() {
-  Box(
-    Modifier
-      .fillMaxWidth()
-      .padding(vertical = 8.dp)
-      .height(1.dp)
-      .background(MaterialTheme.colors.onSurface.copy(alpha = 0.08f))
-  )
 }
